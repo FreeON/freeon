@@ -22,9 +22,10 @@ MODULE ParseExtraCoords
      ! Angstroems and Degrees
      !
      TYPE(FileNames)             :: Nams
+     TYPE(Options)               :: Opts
      TYPE(Geometries)            :: Geos
      TYPE(GeomOpt)               :: GOpt
-     CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname
+     CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname,chGEO
      TYPE(INTC)                  :: IntC_Extra
      CHARACTER(LEN=5)            :: CHAR
      INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum,NConstr
@@ -34,7 +35,7 @@ MODULE ParseExtraCoords
      TYPE(DBL_RNK2)              :: XYZ 
      TYPE(INT_VECT)              :: CConstrain
      TYPE(CRDS)                  :: GMLoc
-     TYPE(Options)               :: Opts
+     INTEGER                     :: HDFFileID,LastGeom
      !
      CALL OpenASCII(Nams%IFile,Inp)
      !
@@ -43,10 +44,15 @@ MODULE ParseExtraCoords
      CALL New(CConstrain,NatmsLoc)
      !
      IF(Opts%Guess==GUESS_EQ_RESTART) THEN
-       ! reparse for values of constraints which have not been stored
-       ! in CRDS or which might have been modified
-       CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,GMLoc)
-       CALL ToAtomicUnits(GMLoc)
+       HDFFileID=OpenHDF(Nams%RFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                     "Clone #"//TRIM(IntToChar(1)))
+         LastGeom=Opts%RestartState%I(3)
+         chGEO=IntToChar(LastGeom)
+         CALL Get(GMLoc,chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+     ! CALL ToAtomicUnits(GMLoc)
        XYZ%D=GMLoc%AbCarts%D
        CConstrain%I=GMLoc%CConstrain%I
        CALL Delete(GMLoc)
