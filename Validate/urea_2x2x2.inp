@@ -8,17 +8,16 @@ Multiplicity=1
 
 Clones=1
 
-MPIInvoke="mpirun"
-MPIProcessors=16
-MPIProcFlag="-np"
-MPISpatialProc=16
-MPIMachineFlag="--nper"
-MPIMachineFile="2"
+MPIInvoke="prun"
+MPIProcessors=32
+MPIProcFlag="-n"
+MPISpatialProc=32
+M#PIMachineFlag="--nper"
+M#PIMachineFile="2"
 
 Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
-DebugAll=(MaxDebug,MaxGeOp)
-Guess=Restart 
-HDFFile=/scratch/nemeth/urea_2x2x2_880.hdf
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+Guess=SuperPos
 SCFMethod=(TC2)
 BasisSets=(3-21G-SPLIT)
 ModelChem=(HF)
