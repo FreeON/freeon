@@ -114,7 +114,7 @@ MODULE ParseInput
 !------------------------------------------------------------------------------------
 !        Check for a restart; link old HDF5 to new one if restarting
 !
-         CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(InpFile,Inp,OldFileQ_O=.TRUE.)
          IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
             Ctrl%Rest=.TRUE.
             IF(OptCharQ(Inp,RESTART_INFO,OldInfo))THEN
