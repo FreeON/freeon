@@ -40,7 +40,7 @@ MODULE Indexing
       FUNCTION LBegin(L)
          INTEGER, INTENT(IN) :: L
          INTEGER :: LBegin
-         LBegin=(L*(L+1)*(L+2))/6+1
+         LBegin=(L*(L+1)*(L+2))/6+1         
       END FUNCTION LBegin
 
       FUNCTION LEnd(L)
@@ -52,7 +52,7 @@ MODULE Indexing
       FUNCTION LMNDex(L,M,N)
          INTEGER, INTENT(IN) :: L,M,N
          INTEGER :: LMNDex
-         LMNDex=LBegin(L+M+N)+N*(2*(L+M+N)-N+3)/2+M 
+         LMNDex=LBegin(L+M+N)+N*(2*(L+M+N)-N+3)/2+M
       END FUNCTION LMNDex
 
       FUNCTION MatIndx(I,J,N)
@@ -61,14 +61,14 @@ MODULE Indexing
          MatIndx=I+(J-1)*N
       END FUNCTION MatIndx
 
-      FUNCTION IBloDex(BS,Istate,Nstate)
+      FUNCTION CFBlokDex(BS,Istate,Nstate)
         TYPE(BSET)    :: BS
-        INTEGER       :: I,IBloDex,Istate,Nstate
-        IBloDex = 0
+        INTEGER       :: I,CFBlokDex,Istate,Nstate
+        CFBlokDex = 0
         DO I=1,Istate-1
-           IBloDex = IBloDex+(BS%LStop%I(I,Nstate)-BS%LStrt%I(I,Nstate)+1)
+           CFBlokDex = CFBlokDex+(BS%LStop%I(I,Nstate)-BS%LStrt%I(I,Nstate)+1)
         ENDDO
-      END FUNCTION IBloDex
+      END FUNCTION CFBlokDex
 
       SUBROUTINE BSetIndx(BS)
          TYPE(BSET) :: BS

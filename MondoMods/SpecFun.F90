@@ -8,7 +8,6 @@
 MODULE SpecFun
    USE DerivedTypes
    IMPLICIT NONE
-   INTEGER :: I
    INCLUDE 'MMA/Functions/Erf.Inc'
    INCLUDE 'MMA/Functions/Exp.Inc'
    CONTAINS

@@ -17,31 +17,31 @@ MODULE BasisSetParameters
         'at','rn','fr','ra','ac','th','pa','u ','np','pu','am','cm','bk', &
         'cf','es','fm','md','no','lr','ky'/)
    CHARACTER(LEN=BASESET_CHR_LEN), &
-     DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/ &
-                'sto-2g          ' , 'STO-2G          ',   &
-                'sto-3g          ' , 'STO-3G          ',   &
-                'sto-6g          ' , 'STO-6G          ',   &
-                '3-21g           ' , '3-21G           ',   &
-                '3-21gsp         ' , '3-21GSP         ',   &
-                '3-21g*          ' , '3-21Gs          ',   &
-                '4-22gsp         ' , '4-22GSP         ',   &
-                '6-31g           ' , '6-31G           ',   &
-                '6-31g*          ' , '6-31Gs          ',   &
-                '6-31g**         ' , '6-31Gss         ',   &
-                '6-31++g**       ' , '6-31ppGss       ',   &
-                '6-311g**        ' , '6-311Gss        ',   &
-                'mini            ' , 'MINI            ',   &
-                'midi            ' , 'MIDI            ',   &
-                'dunninghay_sv   ' , 'DunningHay_SV   ',   &
-                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &
-                'dunning_dz      ' , 'Dunning_DZ      ',   &
-                'dunning_dzp     ' , 'Dunning_DZP     ',   &
-                'dunning_tz      ' , 'Dunning_TZ      ',   &
-                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &
-                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &
-                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &
-                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &
-                'wtbs            ' , 'WTBS            '    &
+     DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/        &
+                'sto-2g          ' , 'STO-2G          ',   &  ! 1
+                'sto-3g          ' , 'STO-3G          ',   &  ! 2
+                'sto-6g          ' , 'STO-6G          ',   &  ! 3
+                '3-21g           ' , '3-21G           ',   &  ! 4
+                '3-21gsp         ' , '3-21GSP         ',   &  ! 5 
+                '3-21g*          ' , '3-21Gs          ',   &  ! 6
+                '4-22gsp         ' , '4-22GSP         ',   &  ! 7
+                '6-31g           ' , '6-31G           ',   &  ! 8
+                '6-31g*          ' , '6-31Gs          ',   &  ! 9
+                '6-31g**         ' , '6-31Gss         ',   &  ! 10
+                '6-31++g**       ' , '6-31ppGss       ',   &  ! 11
+                '6-311g**        ' , '6-311Gss        ',   &  ! 12
+                'mini            ' , 'MINI            ',   &  ! 13
+                'midi            ' , 'MIDI            ',   &  ! 14
+                'dunninghay_sv   ' , 'DunningHay_SV   ',   &  ! 15
+                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &  ! 16
+                'dunning_dz      ' , 'Dunning_DZ      ',   &  ! 17
+                'dunning_dzp     ' , 'Dunning_DZP     ',   &  ! 18
+                'dunning_tz      ' , 'Dunning_TZ      ',   &  ! 19
+                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &  ! 20
+                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &  ! 21
+                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 22
+                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 23
+                'wtbs            ' , 'WTBS            '    &  ! 24
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &

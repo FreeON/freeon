@@ -165,24 +165,3 @@ MODULE Order
 
 
 END MODULE
-!len=20;  dim=3;
-!ix=1; iy=6; iz=0;
-!l[1]=IntegerDigits[ix,2,len];
-!l[2]=IntegerDigits[iy,2,len];
-!l[3]=IntegerDigits[iz,2,len];
-!n=Table[0,{i,dim*len}];
-!Print[" Lx = ",lx];
-!Print[" Ly = ",ly];
-!Print[" Lz = ",lz];
-!k=len;
-!Do[
-!	     Do[ 	 		
-!		             n[[i-j+1]]=l[dim-j+1][[k]];		
-!    				(*    
-!      Print[" k  = ",k," ndex = ",i-j+1,", dim-j+1 = ",dim-j+1," l = ",
-!        l[dim-j+1][[k]]];*)
-!      		,{j,1,dim}];
-!	    k=k-1;
-!	,{i,dim*len,1,-dim}];
-!Print[" N = ",n];
-!Print[" Key = ",FromDigits[n,2]];

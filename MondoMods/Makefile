@@ -9,6 +9,9 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
+EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions \
+                -I$(MONDO_HOME)/MondoMods/MMA/Functionals
+#
 MModObjs =    GlobalScalars.o                                         \
               GlobalCharacters.o                                      \
               DerivedTypes.o                                          \
@@ -27,18 +30,18 @@ MModObjs =    GlobalScalars.o                                         \
               Order.o Order77.o Random.o                              \
               PrettyPrint.o                                           \
               McMurch.o                                               \
-              Thresholding.o                                          \
               LinAlg.o LinAlg77.o MatFunk.o SMWrap.o                  \
               SpecFun.o                                               \
+              Thresholding.o                                          \
               Functionals.o                                           \
               PBC.o AtomPairs.o                                       \
               BoundingBox.o BraKetBloks.o                             \
               Macros.o                                                \
               HDF5Wrap.o
 #
+all:	Mods DGEMM SM 
 #
-#
-all:	 Mods  DGEMM  SM
+small:	Mods
 #
 clean:	CMods CDGEMM CSM
 #
@@ -60,6 +63,7 @@ CMods:
 #
 DGEMM:	
 	$(MAKE) -C $(MONDO_DGEMMS)
+#
 CDGEMM:	
 	$(MAKE) -i -C $(MONDO_DGEMMS) clean
 	rm -f $(MONDO_HOME)/MondoMods/DGEMMs
@@ -75,7 +79,7 @@ SM:	$(SMTestObjs)
 CSM:	
 	rm -f $(SMTestObjs)
 	rm -f ./SMTest
-#
+#---------------------------------------------------------------------------------------------
 #       DEPENDENCIES
 #
 AtomPairs.o:		Thresholding.o PBC.o BoundingBox.o \
@@ -93,7 +97,17 @@ Clock.o: 		MondoMPI.o DerivedTypes.o
 #
 DerivedTypes.o: 	GlobalCharacters.o GlobalScalars.o 
 #
-Functionals.o: 		Parse.o ProcessControl.o DerivedTypes.o 
+Functionals.o: 		Parse.o ProcessControl.o DerivedTypes.o \
+                        MMA/Functionals/B88x.Inc  \
+                        MMA/Functionals/LYPc.Inc  \
+                        MMA/Functionals/PBEx.Inc  \
+                        MMA/Functionals/PW91x.Inc \
+                        MMA/Functionals/VWN3c.Inc \
+                        MMA/Functionals/XAx.Inc   \
+                        MMA/Functionals/PBEc.Inc  \
+                        MMA/Functionals/PW91c.Inc \
+                        MMA/Functionals/SDx.Inc   \
+                        MMA/Functionals/VWN5c.Inc                                        
 #
 GlobalCharacters.o: 	GlobalScalars.o 
 #
@@ -155,5 +169,5 @@ SpecFun.o: 		MMA/Functions/Exp.Inc MMA/Functions/Erf.Inc \
 			DerivedTypes.o 
 #
 Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
-			DerivedTypes.o 
+			DerivedTypes.o InOut.o SpecFun.o
 #------------------------------------------------------------------------------

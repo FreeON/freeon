@@ -37,9 +37,11 @@ MODULE MatFunk
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
       INTEGER                                   :: I,INFO      
-      REAL(DOUBLE), PARAMETER                   :: ZeroTol=1.D-8
+      REAL(DOUBLE), PARAMETER                   :: EigenThreshold=1.D-8
       REAL(DOUBLE), EXTERNAL                    :: Funk
+!----------------------------------------------------------------------------
       BLKVECT%D(1:N,1:N)=A(1:N,1:N)
+
       CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
       IF(INFO/=SUCCEED) &
          CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))  
@@ -48,7 +50,7 @@ MODULE MatFunk
 !
       BLKMAT1%D=Zero
       DO I=1,N
-         IF(BLKVALS%D(I)<1.D-8)THEN
+         IF(ABS(BLKVALS%D(I))<EigenThreshold)THEN
             BLKMAT1%D(I,I)=Zero
          ELSE
             BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))

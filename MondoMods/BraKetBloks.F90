@@ -6,45 +6,131 @@ MODULE BraKetBloks
 !--------------------------------------------------------------
 ! Global Objects
 !--------------------------------------------------------------
-  TYPE(DBL_VECT)              :: AuxRfun
-  TYPE(DBL_RNK3)              :: Rfun
-  TYPE(DBL_VECT)              :: HGKet
-  TYPE(DBL_RNK3)              :: HGBra
+  TYPE(DBL_RNK3)  :: HGBra 
+  TYPE(DBL_VECT)  :: HGKet
+  TYPE(DBL_VECT)  :: PhFactor
+  TYPE(DBL_VECT)  :: AuxRfun
+  TYPE(DBL_RNK3)  :: Rfun
   CONTAINS
 !--------------------------------------------------------------
-! Setup and Allocate the Global Objects 
-!--------------------------------------------------------------
-  SUBROUTINE NewBlock(KA,KB,NBFA,NBFB,BS)
-    TYPE(BSET)           :: BS
-    INTEGER              :: KA,KB,NBFA,NBFB
-    INTEGER              :: MaxLMN,MaxL,MaxL2,MaxLA,MaxLB,CFA,CFB
+! Allocate global space for computation of BraKet coefficients
+! and their corresponding integral estimates
 !
-    MaxL = 0
-    DO CFA=1,BS%NCFnc%I(KA)                      
-       MaxLA=BS%ASymm%I(2,CFA,KA) 
-       DO CFB=1,BS%NCFnc%I(KB)                   
-          MaxLB=BS%ASymm%I(2,CFB,KB)
-          MaxL = MAX(MaxL,MaxLA+MaxLB)
-       ENDDO
+  SUBROUTINE NewBraKetBlok(BS)
+    TYPE(BSET) :: BS
+    INTEGER    :: K,NBF,MaxL,MaxL2,MaxBF
+!   Find the bigest 
+    MaxBF=0
+    DO K=1,BS%NKind
+       NBF=BS%BFKnd%I(K)
+       MaxBF=MAX(MaxBF,NBF)
     ENDDO
-    MaxL2  = 2*MaxL+2
-    MaxLMN = LHGTF(MaxL)
-!
+!   Max L on a product function
+    MaxL=2*BS%NAsym
+    MaxLMN=LHGTF(MaxL)
+!   Max L for a two electron integral
+    MaxL2=2*(MaxL+1)
+!   Allocate space for computing integral estimates
     CALL New(AuxRfun,MaxL2,-1)
     CALL New(Rfun,(/MaxL2,MaxL2,MaxL2/),(/-1,-1,-1/))
+!   Allocate space for BraKet contraction
     CALL New(HGKet,MaxLMN)
-    CALL New(HGBra,(/MaxLMN,NBFA,NBFB/))
-!
-  END SUBROUTINE NewBlock
+    CALL New(HGBra,(/MaxLMN,MaxBF,MaxBF/))
+!   Allocate and set intermediate phase factor
+    CALL New(PhFactor,MaxL,0)
+    DO L=0,MaxL; PhFactor%D(L)=(-One)**L; ENDDO
+  END SUBROUTINE NewBraKetBlok
 !--------------------------------------------------------------
 ! Delete the Global Objects 
 !--------------------------------------------------------------
-  SUBROUTINE DeleteBlock()
+  SUBROUTINE DeleteBraKetBlok()
     CALL Delete(AuxRfun)
     CALL Delete(Rfun)
     CALL Delete(HGKet)
     CALL Delete(HGBra)
-  END SUBROUTINE DeleteBlock
+    CALL Delete(PhFactor)
+  END SUBROUTINE DeleteBraKetBlok
+!--------------------------------------------------------------
+! Generate The Primative
+!--------------------------------------------------------------
+  SUBROUTINE SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD,Print_O,Phase_O)
+    INTEGER                  :: CFA,PFA,KA,CFB,PFB,KB
+    INTEGER                  :: LMNA,LA,MA,NA,LMNB,LB,MB,NB
+    INTEGER                  :: IA,IB,LAB,MAB,NAB,LMN
+    INTEGER                  :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB
+    REAL(DOUBLE)             :: ExpAB,Ex,Exy,Exyz,CA,CB
+    TYPE(BSET)               :: BS
+    TYPE(DBL_RNK4)           :: MD
+    LOGICAL, OPTIONAL        :: Phase_O,Print_O
+!
+    HGBra%D = Zero
+    IndexA  = CFBlokDex(BS,CFA,KA)
+    IndexB  = CFBlokDex(BS,CFB,KB)
+    StartLA = BS%LStrt%I(CFA,KA)        
+    StopLA  = BS%LStop%I(CFA,KA)
+    StartLB = BS%LStrt%I(CFB,KB)        
+    StopLB  = BS%LStop%I(CFB,KB)
+!
+    IF(PRESENT(Phase_O))THEN
+       IA = IndexA
+       DO LMNA=StartLA,StopLA
+          IA=IA+1
+          IB=IndexB
+          LA=BS%LxDex%I(LMNA)
+          MA=BS%LyDex%I(LMNA) 
+          NA=BS%LzDex%I(LMNA)
+          CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
+          DO LMNB=StartLB,StopLB
+             IB=IB+1
+             LB=BS%LxDex%I(LMNB)
+             MB=BS%LyDex%I(LMNB)
+             NB=BS%LzDex%I(LMNB)
+             CAB = CA*BS%CCoef%D(LMNB,PFB,CFB,KB)
+             DO LAB=0,LA+LB
+                Ex = CAB*MD%D(1,LA,LB,LAB)
+                DO MAB=0,MA+MB
+                   Exy = Ex*MD%D(2,MA,MB,MAB)
+                   DO NAB=0,NA+NB
+                      LMN = LMNdex(LAB,MAB,NAB)
+                      Exyz = Exy*MD%D(3,NA,NB,NAB)*PhFactor%D(LAB+MAB+NAB)
+                      HGBra%D(LMN,IA,IB) = HGBra%D(LMN,IA,IB)+Exyz
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ELSE
+       IA = IndexA
+       DO LMNA=StartLA,StopLA
+          IA=IA+1
+          IB=IndexB
+          LA=BS%LxDex%I(LMNA)
+          MA=BS%LyDex%I(LMNA) 
+          NA=BS%LzDex%I(LMNA)
+          CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+          DO LMNB=StartLB,StopLB
+             IB=IB+1
+             LB=BS%LxDex%I(LMNB)
+             MB=BS%LyDex%I(LMNB)
+             NB=BS%LzDex%I(LMNB)
+             CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
+             DO LAB=0,LA+LB
+                DO MAB=0,MA+MB
+                   DO NAB=0,NA+NB
+                      LMN = LMNdex(LAB,MAB,NAB)
+                      HGBra%D(LMN,IA,IB)=HGBra%D(LMN,IA,IB)   &
+                                        +CA*CB*ExpAB          &
+                                        *MD%D(1,LA,LB,LAB)    &
+                                        *MD%D(2,MA,MB,MAB)    &
+                                        *MD%D(3,NA,NB,NAB)
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDIF
+!
+  END SUBROUTINE SetBraBlok
 !--------------------------------------------------------------
 ! Generate The Estimate
 !--------------------------------------------------------------
@@ -116,54 +202,5 @@ MODULE BraKetBloks
     ENDDO
 !
   END SUBROUTINE GenerateRfun
-!--------------------------------------------------------------
-! Generate The Primative
-!--------------------------------------------------------------
-  SUBROUTINE GetPrimative(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)
-    INTEGER                  :: CFA,PFA,KA,CFB,PFB,KB
-    INTEGER                  :: LMNA,LA,MA,NA,LMNB,LB,MB,NB
-    INTEGER                  :: IA,IB,LAB,MAB,NAB,LMN
-    INTEGER                  :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB
-    REAL(DOUBLE)             :: ExpAB,Ex,Exy,Exyz,CA,CAB
-    TYPE(BSET)               :: BS
-    TYPE(DBL_RNK4)           :: MD
-!
-    HGBra%D = Zero
-    IndexA  = IBloDex(BS,CFA,KA)
-    IndexB  = IBloDex(BS,CFB,KB)
-    StartLA = BS%LStrt%I(CFA,KA)        
-    StopLA  = BS%LStop%I(CFA,KA)
-    StartLB = BS%LStrt%I(CFB,KB)        
-    StopLB  = BS%LStop%I(CFB,KB)
-!
-    IA = IndexA
-    DO LMNA=StartLA,StopLA
-       IA=IA+1
-       IB=IndexB
-       LA=BS%LxDex%I(LMNA)
-       MA=BS%LyDex%I(LMNA) 
-       NA=BS%LzDex%I(LMNA)
-       CA=ExpAB*BS%CCoef%D(LMNA,PFA,CFA,KA)
-       DO LMNB=StartLB,StopLB
-          IB=IB+1
-          LB=BS%LxDex%I(LMNB)
-          MB=BS%LyDex%I(LMNB)
-          NB=BS%LzDex%I(LMNB)
-          CAB = CA*BS%CCoef%D(LMNB,PFB,CFB,KB)
-          DO LAB=0,LA+LB
-             Ex = CAB*MD%D(1,LA,LB,LAB)
-             DO MAB=0,MA+MB
-                Exy = Ex*MD%D(2,MA,MB,MAB)
-                DO NAB=0,NA+NB
-                   LMN = LMNdex(LAB,MAB,NAB)
-                   Exyz = Exy*MD%D(3,NA,NB,NAB)
-                   HGBra%D(LMN,IA,IB) = HGBra%D(LMN,IA,IB)+Exyz
-                ENDDO
-             ENDDO
-          ENDDO
-       ENDDO
-    ENDDO
-!
-  END SUBROUTINE GetPrimative
 !
 END MODULE BraKetBloks

@@ -834,7 +834,7 @@ SetAttributes[FortranAssign,HoldFirst];
 
 Options[FortranAssign]:= {
 (*
-AssignBreak->{If[#>72,72,#]&[-1+Options[$Output,PageWidth][[1,2]]],
+AssignBreak->{If[#>132,132,#]&[-1+Options[$Output,PageWidth][[1,2]]],
   "\n     &  "}, AssignCase->Default, AssignEnd->"",
   *)
 
@@ -1395,7 +1395,7 @@ CommonAssign[lhs_,expr_,form_,eqstr_,acase_,aend_,tvar_,atofile_,
 (* Output results to a file. *)
 
     If[atofile=!="",
-      outchan = OpenWrite[atofile,FormatType->OutputForm];
+      outchan = OpenWrite[atofile,FormatType->OutputForm]; 
       Write[outchan, strings //ColumnForm];
       Close[outchan] ];
 

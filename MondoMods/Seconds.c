@@ -14,19 +14,29 @@
 #include <sys/times.h>
 double cpu_seconds_(void)
 {
+ double CPS=1.0/CLOCKS_PER_SEC;
  double CLOCKS=clock();
- double CPS=CLOCKS_PER_SEC;
- return CLOCKS/CPS;
+ return CLOCKS*CPS;
 }
-double cpu_seconds(void){return cpu_seconds_();}
-double cpu_seconds__(void){return cpu_seconds_();}
 
+double cpu_seconds__(void)
+{
+ double CPS=1.0/CLOCKS_PER_SEC;
+ double CLOCKS=clock();
+ return CLOCKS*CPS;
+}
 double wall_seconds_(void)
 {
  struct tms tbuff;
+ double CTK=1.0/CLK_TCK;
  double WALL=times(&tbuff);
- double CTK=CLK_TCK;
- return WALL/CTK;
+ return WALL*CTK;
 }
-double wall_seconds(void){return wall_seconds_();}
-double wall_seconds__(void){return wall_seconds_();}
+
+double wall_seconds__(void)
+{
+ struct tms tbuff;
+ double CTK=1.0/CLK_TCK;
+ double WALL=times(&tbuff);
+ return WALL*CTK;
+}

@@ -60,7 +60,9 @@ MODULE PrettyPrint
          ELSEIF(Enter)THEN
             WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//Day//' @ '//HMS//'>>'
          ELSE
-            WRITE(Out,'(A)')'>>'//TRIM(Mssg)//' '//Day//' @ '//HMS//'<<'
+            WRITE(Out,'(A)')' - - - - - - - - done '//Day//' @ '//HMS//' - - - - - - - - '
+!            WRITE(Out,22)
+!            22 FORMAT(72('-'))
          ENDIF
          CLOSE(UNIT=Out,STATUS='KEEP')
       END SUBROUTINE TimeStamp
@@ -399,7 +401,6 @@ MODULE PrettyPrint
                                  EXPONENT(GM%Carts%D(K,I)),K=1,3)
               ENDDO
               WRITE(Out,41)FRACTION(GM%ENucN),EXPONENT(GM%ENucN)
-              WRITE(Out,43)
            ELSE
               DO I=1,GM%NAtms
                  WRITE(Out,52)I,Ats(GM%AtNum%I(I)),(GM%Carts%D(K,I),K=1,3)
@@ -702,12 +703,10 @@ MODULE PrettyPrint
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,or,Ell,LenKet
     REAL(DOUBLE)                         :: Chk
-    CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
     IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
     Chk=Zero
 !   
-    IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
-!
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
@@ -754,62 +753,73 @@ MODULE PrettyPrint
     CHARACTER(LEN=*)                 :: Name   
     CHARACTER(LEN=*),OPTIONAL        :: FileName_O
     INTEGER,OPTIONAL                 :: Unit_O
-    INTEGER                          :: OutU
+    INTEGER                          :: PU
     INTEGER                          :: L,M,N,LMN,NPrim,iadd,jadd,zq,iq,oq,or,Ell,LenKet
+    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
 !   
+    RETURN
+!    PrintFlags%Rho=DEBUG_DENSITY
     IF(PrintFlags%Rho/=DEBUG_DENSITY)RETURN
 !
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in PPrint_HGRho')
     ENDIF
-    IF(PRESENT(Unit_O)) THEN
-       OutU=Unit_O
-    ELSE
-       OutU=Out
-    ENDIF
-    IF(PRESENT(FileName_O) .AND. OutU /= 6) THEN
-       CALL OpenASCII(FileName_O,OutU)
-    ELSEIF(OutU /= 6) THEN
-       CALL OpenASCII(OutFile,OutU)
-    ENDIF
 !
+    PU=OpenPU(Unit_O=Unit_O)
+!
+!    PrintFlags%Fmt=DEBUG_MMASTYLE
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE) THEN
        NPrim=0
-       DO zq=1,A%NExpt
+       WRITE(PU,*)'ClearAll[Rho];'
+       WRITE(PU,*)'Rho[R_List]:=Module[{zeta,zs,Q,RQ,ExpRQ,Lx,Ly,Lz,RhoSum},'
+       WRITE(PU,*)'RhoSum=0;'
+       DO zq=1,A%NExpt-1
           oq=A%OffQ%I(zq)
           or=A%OffR%I(zq)
-          Ell    = A%Lndx%I(zq) 
-          LenKet = LHGTF(Ell)
+          Ell=A%Lndx%I(zq) 
+          LenKet=LHGTF(Ell)
+          Strng=Squish('zeta='//DblToMMAChar(A%Expt%D(zq))//';')
+          WRITE(PU,*)TRIM(Strng)
+          WRITE(PU,*)'zs=Sqrt[zeta];'
           IF(A%NQ%I(zq).NE.0) THEN
              DO iq=1,A%NQ%I(zq)
                 NPrim=NPrim+1
                 iadd=oq+iq
                 jadd=or+(iq-1)*LenKet
-                WRITE(OutU,10) NPrim,FRACTION(A%Expt%D(zq)),EXPONENT(A%Expt%D(zq))
-                WRITE(OutU,11) Nprim,Ell
-                WRITE(OutU,12) NPrim,FRACTION(A%Qx%D(iadd)),EXPONENT(A%Qx%D(iadd)), &
-                                     FRACTION(A%Qx%D(iadd)),EXPONENT(A%Qy%D(iadd)), &
-                                     FRACTION(A%Qz%D(iadd)),EXPONENT(A%Qz%D(iadd)) 
+                Strng=Squish('Q={'//DblToMMAChar(A%Qx%D(iadd))   &
+                             //','//DblToMMAChar(A%Qy%D(iadd))   &  
+                             //','//DblToMMAChar(A%Qz%D(iadd))//'};')
+                WRITE(PU,*)TRIM(Strng)
+                WRITE(PU,*)'RQ=R-Q;'
+                WRITE(PU,*)'ExpRQ=Exp[-zeta*RQ.RQ];'
+                Strng='Do[Lx[l]=zs^l*HermiteH[l,zs*RQ[[1]]];'//Rtrn &
+                   //'    Ly[l]=zs^l*HermiteH[l,zs*RQ[[2]]];'//Rtrn &
+                   //'    Lz[l]=zs^l*HermiteH[l,zs*RQ[[3]]];'//Rtrn &
+                   //',{l,0,'//TRIM(IntToChar(Ell))//'}]; '
+                WRITE(PU,*)TRIM(Strng)
                 DO L=0,Ell
-                   DO M=0,Ell-L
-                      DO N=0,Ell-L-M
-                         LMN=LMNDex(L,M,N)+jadd
-                         WRITE(OutU,14) NPrim,L,M,N,FRACTION(A%Co%D(LMN)),EXPONENT(A%Co%D(LMN))
-                      ENDDO
-                   ENDDO
+                DO M=0,Ell-L
+                DO N=0,Ell-L-M
+                   LMN=LMNDex(L,M,N)+jadd
+                   Strng=Squish('RhoSum=RhoSum+Lx['//IntToChar(L)//']*Ly['//IntToChar(M)//']*Lz['//IntToChar(N)//']' &
+                              //'*ExpRQ*'//DblToMMAChar(A%Co%D(LMN))//';')
+                   WRITE(PU,*)TRIM(Strng)                    
+
+                ENDDO
+                ENDDO
                 ENDDO
              ENDDO
           ENDIF
        ENDDO
-       WRITE(OutU,15) NPrim
+       WRITE(PU,*)'RhoSum];'
     ELSE
        NPrim=0
-       WRITE(OutU,30) Name
-       WRITE(OutU,31)
-       WRITE(OutU,32) A%NExpt
-       WRITE(OutU,33) A%NDist
-       WRITE(OutU,34) A%NCoef
-       WRITE(OutU,31)
+       WRITE(PU,30) Name
+       WRITE(PU,31)
+       WRITE(PU,32) A%NExpt
+       WRITE(PU,33) A%NDist
+       WRITE(PU,34) A%NCoef
+       WRITE(PU,31)
        IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
           DO zq=1,A%NExpt
              oq=A%OffQ%I(zq)
@@ -821,28 +831,28 @@ MODULE PrettyPrint
                    NPrim=NPrim+1
                    iadd=oq+iq
                    jadd=or+(iq-1)*LenKet
-                   WRITE(OutU,20) NPrim,Ell,A%Expt%D(zq)
+                   WRITE(PU,20) NPrim,Ell,A%Expt%D(zq)
                    IF(AllocQ(A%AllocRE)) THEN
-                      WRITE(OutU,26) A%Est%D(iadd)
+                      WRITE(PU,26) A%Est%D(iadd)
                    ENDIF
-                   WRITE(OutU,21) A%Qx%D(iadd),A%Qy%D(iadd),A%Qz%D(iadd)
-                   WRITE(OutU,22)
+                   WRITE(PU,21) A%Qx%D(iadd),A%Qy%D(iadd),A%Qz%D(iadd)
+                   WRITE(PU,22)
                    DO L=0,Ell
                       DO M=0,Ell-L
                          DO N=0,Ell-L-M
                             LMN=LMNDex(L,M,N)+jadd
-                            WRITE(OutU,24) L,M,N
-                            WRITE(OutU,25) A%Co%D(LMN)
+                            WRITE(PU,24) L,M,N
+                            WRITE(PU,25) A%Co%D(LMN)
                          ENDDO
                       ENDDO
                    ENDDO
-                   WRITE(OutU,31)
+                   WRITE(PU,31)
                 ENDDO
              ENDIF
           ENDDO
        ENDIF
     ENDIF
-    CLOSE(OutU)
+    CLOSE(PU)
     RETURN
 !
 10  FORMAT(' zeta[',I4,']=SetPrecision[',F19.16,'*2^(' ,I4, ')},50];')
@@ -955,16 +965,19 @@ MODULE PrettyPrint
 #endif
      END SUBROUTINE Elapsed_TIME
      
-     FUNCTION ProcessName(Proc) RESULT (Tag)
-        CHARACTER(LEN=*), OPTIONAL :: Proc
+     FUNCTION ProcessName(Proc,Misc_O) RESULT (Tag)
+        CHARACTER(LEN=*)           :: Proc
+        CHARACTER(LEN=*), OPTIONAL :: Misc_O
         CHARACTER(LEN=20)          :: Tag
         CHARACTER(LEN=16)          :: Name
-        CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "          
-        IF(PRESENT(Proc))THEN
-           Name=ADJUSTL(TRIM(Proc))
+        CHARACTER(LEN=3 ),PARAMETER:: Colon =","
+        CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
+        IF(PRESENT(Misc_O))THEN
+           Name=TRIM(ADJUSTL(Proc))//Colon//TRIM(Misc_O)
            Tag=Name//Colons
         ELSE
-           Tag=""
+           Name=ADJUSTL(TRIM(Proc))
+           Tag=Name//Colons
         ENDIF
      END FUNCTION ProcessName                 
 !
@@ -1093,7 +1106,7 @@ MODULE PrettyPrint
      FUNCTION MFlops(Flops,Sec)
         REAL(DOUBLE), INTENT(IN) :: Flops,Sec
         INTEGER                  :: MFlops
-        IF(Sec==Zero.OR.Flops==Zero)THEN
+        IF(Sec<=Zero.OR.Flops<=Zero)THEN
            MFlops=0
         ELSE
            MFlops=INT(Flops*1.0D-6/Sec)         

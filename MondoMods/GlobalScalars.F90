@@ -45,10 +45,11 @@ MODULE GlobalScalars
 !---------------------------------------------------------------------------------------  
 !  Other numbers
 !
-   INTEGER,      PARAMETER :: BIG_INT      =2**30               ! bigest integer*4
-   REAL(DOUBLE), PARAMETER :: Half         =One/Two             ! 0.5
-   REAL(DOUBLE), PARAMETER :: ThreeHalf    =Three/Two           ! 1.5
-   REAL(DOUBLE), PARAMETER :: FiveHalf     =Five/Two            ! 2.5
+   INTEGER,      PARAMETER :: BIG_INT      =2**28               ! bigest integer*4
+   REAL(DOUBLE), PARAMETER :: Half         =One/Two             ! 1/2
+   REAL(DOUBLE), PARAMETER :: ThreeHalves  =Three/Two           ! 3/2
+   REAL(DOUBLE), PARAMETER :: FiveHalves   =Five/Two            ! 5/2
+   REAL(DOUBLE), PARAMETER :: FiveFourths  =Five/Four           ! 5/4
    REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0 ! Angstronms -> AU
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 

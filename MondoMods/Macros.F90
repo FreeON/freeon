@@ -44,8 +44,7 @@ MODULE Macros
          CHARACTER(LEN=*),INTENT(IN)          :: Prog
          CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Sub
          LOGICAL,OPTIONAL                     :: Serial_O
-         INTEGER                              :: I,NExpt
-         TYPE(DBL_VECT)                       :: Expts
+         INTEGER                              :: I
 #ifdef PARALLEL
          LOGICAL                              :: Serial
          INTEGER                              :: ChkNPrc
@@ -106,15 +105,8 @@ MODULE Macros
 !        Load global value for max block size
          MaxBlkSize=0
          DO I=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)); ENDDO
-         CALL Get(Thresholds,Tag_O=CurBase)
-!        Get the Exponents and Angular Symmetries
-         CALL Get(NExpt,'nexpt',Tag_O=CurBase)
-         CALL New(Expts,NExpt)
-         CALL Get(Expts,'dexpt',Tag_O=CurBase)
 !        Load global thresholding values
-         MinExponent = Expts%D(1) ! /Four ??CJ??
-         CALL SetAtomPairThresh(Thresholds%Dist)
-         CALL SetPrimPairThresh(Thresholds%Dist)
+         CALL SetThresholds(CurBase)
 #ifdef PARALLEL
          IF(InParallel)THEN
             CALL New(OffSt,NPrc-1,0)

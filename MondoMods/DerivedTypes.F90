@@ -188,7 +188,7 @@ MODULE DerivedTypes
       INTEGER          :: NKind   !-- Number of atomic kinds (nuclear species)
       INTEGER          :: NCtrt   !-- Max number of contracted functions in a kind
       INTEGER          :: NPrim   !-- Max number of primitives in a contraction
-      INTEGER          :: NASym   !-- Max value of angular symmetry (s=0, p=1, ... )
+      INTEGER          :: NASym   !-- Max value of angular symmetry (s=0, p=1, ... ) on a BF
       INTEGER          :: LMNLen  !-- Max basis function length 
       TYPE(INT_VECT)   :: Kinds   !-- Atomic kinds or species (Z numbers)
       TYPE(INT_VECT)   :: NCFnc   !-- Number of contracted functions per kind
@@ -287,16 +287,10 @@ MODULE DerivedTypes
 ! Primative Atom Pair Type
 !
   TYPE PrimPair
-!----------------------------------------------
-!    Primative Pair Info
-!
-     INTEGER                        :: Ell
+     INTEGER                        :: Ell  
      REAL(DOUBLE)                   :: Z
      REAL(DOUBLE),DIMENSION(3)      :: P
-     REAL(DOUBLE),DIMENSION(MaxLen) :: Bra
-!----------------------------------------------
-!    Bounding Box Info
-!
+     REAL(DOUBLE),DIMENSION(MaxLen) :: Ket
      REAL(DOUBLE)                   :: Extent
      TYPE(BBox)                     :: Box
   ENDTYPE PrimPair

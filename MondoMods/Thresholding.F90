@@ -13,7 +13,7 @@ MODULE Thresholding
   USE GlobalScalars
   USE GlobalCharacters
   USE GlobalObjects
-!  USE BoundingBox
+  USE InOut
 !-------------------------------------------------  
 !  Primary thresholds
 !
@@ -26,6 +26,27 @@ MODULE Thresholding
   REAL(DOUBLE), SAVE  :: PrimPairDistanceThreshold  ! Prim pairs
   REAL(DOUBLE), SAVE  :: PenetratDistanceThreshold  ! Penetration threshold
   CONTAINS
+!------------------------------------------------------------------------------
+!    Set and load global threholding parameters
+!
+     SUBROUTINE SetThresholds(CurBase)
+         INTEGER          :: NExpt
+         TYPE(DBL_VECT)   :: Expts
+         CHARACTER(LEN=*) :: CurBase
+!        Get the primary thresholds
+         CALL Get(Thresholds,Tag_O=CurBase)
+!        Get distribution exponents
+         CALL Get(NExpt,'nexpt',Tag_O=CurBase)
+         CALL New(Expts,NExpt)
+         CALL Get(Expts,'dexpt',Tag_O=CurBase)
+!        Xi_Min=Zeta*Zeta/(Zeta+Zeta)=Zeta_Min/2
+         MinExponent=Half*Expts%D(1)
+         CALL Delete(Expts)
+!        Set Atom-Atom thresholds
+         CALL SetAtomPairThresh(Thresholds%Dist)
+!        Set Prim-Prim thresholds
+         CALL SetPrimPairThresh(Thresholds%Dist)
+     END SUBROUTINE SetThresholds
 !------------------------------------------------------------------------------
 !    Set the Atom Pair Distance Threshhold: Zeta_Min*|A-B|^2 > -Log(Tau)
 !
@@ -66,9 +87,12 @@ MODULE Thresholding
 !
 !    Amp*Exp[-Zeta*Extent^2] > Tau  
 !
-     SUBROUTINE SetPenetrationThresh(Tau)
-        REAL(DOUBLE),INTENT(IN) :: Tau
+     SUBROUTINE SetPenetrationThresh(Tau,ExpSwitch_O)
+        REAL(DOUBLE),         INTENT(IN) :: Tau
+        REAL(DOUBLE),OPTIONAL,INTENT(IN) :: ExpSwitch_O
         PenetratDistanceThreshold=-LOG(Tau)
+        IF(PRESENT(ExpSwitch_O)) &
+           PenetratDistanceThreshold=MIN(PenetratDistanceThreshold,ExpSwitch_O)
      END SUBROUTINE SetPenetrationThresh
 !
      FUNCTION GaussianExtent(Zeta,Amp)
@@ -76,5 +100,4 @@ MODULE Thresholding
         REAL(DOUBLE)            :: GaussianExtent
         GaussianExtent=SQRT(MAX(1.D-10,PenetratDistanceThreshold+Amp)/Zeta)
      END FUNCTION GaussianExtent
-!
 END MODULE

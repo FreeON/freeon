@@ -470,7 +470,7 @@ MODULE Parse
 !     Convert an integer into a character string
 !
       FUNCTION IntToChar(I)
-         INTEGER, INTENT(IN)             :: I
+         INTEGER  :: I
          CHARACTER(LEN=INTERNAL_INT_LEN) :: IntToChar
          WRITE(UNIT=IntToChar,FMT=INTERNAL_INT_FMT)I
          IntToChar=ADJUSTL(IntToChar)
@@ -507,10 +507,18 @@ MODULE Parse
 !
       FUNCTION DblToShrtChar(D)
          REAL(DOUBLE),INTENT(IN)         :: D
-         CHARACTER(LEN=7) :: DblToShrtChar
-         WRITE(UNIT=DblToShrtChar,FMT='(D7.2)')D
+         CHARACTER(LEN=8) :: DblToShrtChar
+         WRITE(UNIT=DblToShrtChar,FMT='(D8.2)')D
          DblToShrtChar=ADJUSTL(DblToShrtChar)
      END FUNCTION DblToShrtChar
+
+     FUNCTION DblToMMAChar(D)
+         REAL(DOUBLE),INTENT(IN)         :: D
+         CHARACTER(LEN=30) :: DblToMMAChar
+         DblToMMAChar=TRIM(FltToChar(FRACTION(D))) &
+            //'*2^('//TRIM(IntToChar(EXPONENT(D)))//')'
+     END FUNCTION DblToMMAChar
+! 
       FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O)
          CHARACTER(LEN=*),         INTENT(IN) :: PostFix 
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Name_O
