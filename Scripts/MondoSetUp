@@ -5,6 +5,10 @@ cat $MONDO_HOME/README
 #
 chmod u+x  $MONDO_HOME/Scripts/*
 #
+# Eric likes this one
+#
+setenv MONDO_ID $$
+#
 # expand user's path
 #
 setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_HOME}/Exec
@@ -71,11 +75,15 @@ else if ( "$PLATFORM" == "IntelLinux.PG" ) then
 #
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
 #
+     setenv NO_STOP_MESSAGE
+#
 else if ( "$PLATFORM" == "IntelLinux.ABSOFT" ) then
 #
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.ABSOFT
 #
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
+     ulimit -s 8*1024*1024
 #
 else if ( "$PLATFORM" == "AMDLinux.PG" ) then
 #
@@ -83,7 +91,7 @@ else if ( "$PLATFORM" == "AMDLinux.PG" ) then
 #
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
 #
-else if ( "$PLATFORM" == "IBMAIX.XLF" ) then
+else if ( "$PLATFORM" == "IBMAIX.XLF" ) then 
 #
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IBMAIX.XLF
 #
