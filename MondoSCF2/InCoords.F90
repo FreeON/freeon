@@ -1487,6 +1487,7 @@ CONTAINS
      LOGICAL              :: DoSelect
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Crit,Alph1,Alph2,Sum,PIHalf
+     REAL(DOUBLE)                :: Sum1,Sum2
      INTEGER,DIMENSION(1:4)      :: Atoms
      !    
      PIHalf=PI*Half
@@ -1517,15 +1518,17 @@ CONTAINS
        Atoms=0 
        DO J1=1,N1
          JJ1=Top12%I(I1,J1+1)
+         CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
+                   Value_O=Alph1)
+         Sum1=ABS(Alph1-PIHalf)/DBLE(Top12%I(JJ1,1)+1)
          DO J2=1,N2
            JJ2=Top12%I(I2,J2+1)
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
            IF(DoSelect) THEN
-             CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
-                       Value_O=Alph1)
              CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
                        Value_O=Alph2)
-             Sum=ABS(Alph1-PIHalf)+ABS(Alph2-PiHalf)
+             Sum2=ABS(Alph2-PiHalf)/DBLE(Top12%I(JJ2,1)+1)
+             Sum=Sum1+Sum2
              IF(Sum<Crit) THEN
                Crit=Sum
                Atoms=(/JJ1,I1,I2,JJ2/)

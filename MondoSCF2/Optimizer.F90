@@ -742,6 +742,10 @@ CONTAINS
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<3) THEN
+      !CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+      !              IntCs,AtNum,iGEO,XYZ)
+      !CALL CutOffDispl(Displ%D,IntCs)
+      !CALL RedundancyOff(Displ%D,SCRPath,Print)
          CALL PrepBiSect(iGEO,iCLONE,XYZ,AtNum,GOpt%Constr, &
              GOpt%CoordCtrl,GOpt%TrfCtrl,Refresh,SCRPath, &
              HFileIn,IntCs,NIntC,Print,Displ)
@@ -1654,8 +1658,9 @@ CONTAINS
        CALL New(Displ,NIntC) 
      ENDIF
      !
-     DStre=0.15D0
-     DAngle=5.D0/180.D0*PI
+     DStre=0.010D0
+     DAngle=Zero
+    !DAngle=1.D0/180.D0*PI
      IF(iGEO==1) IPhase=-1
      IF(iGEO==2) IPhase= 1
      !
@@ -1668,7 +1673,6 @@ CONTAINS
          Displ%D(I)=Zero
        ENDIF
      ENDDO
-write(*,*) iGEO,' Displ%D= ',Displ%D
      !      
      CALL Delete(XYZAux)
      CALL CloseHDFGroup(HDF_CurrentID) 
