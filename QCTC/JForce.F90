@@ -204,29 +204,36 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
-! The Dipole Contribution to the Lattice Forces
-  IF(GMLoc%PBC%Dimen > 0) THEN
-     DivCV   = DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
-     DO I=1,3
-        DO J=1,3
-           IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
-              LatFrc_J%D(I,J) = LatFrc_J%D(I,J)  -  E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
-           ENDIF
+  !
+#ifdef PARALLEL
+  IF(MyID.EQ.ROOT) THEN
+#endif
+     ! The Dipole Contribution to the Lattice Forces
+     IF(GMLoc%PBC%Dimen > 0) THEN
+        DivCV   = DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
+        DO I=1,3
+           DO J=1,3
+              IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
+                 LatFrc_J%D(I,J) = LatFrc_J%D(I,J)  -  E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
+              ENDIF
+           ENDDO
         ENDDO
-     ENDDO
-  ENDIF
-! Farfield Contribution to the Inner Box Sum
-  IF(GMLoc%PBC%Dimen > 0) THEN
-     DO I=1,3
-        DO J=1,3
-           IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
-              DO K=0,LSP(MaxEll)
-                 LatFrc_J%D(I,J) = LatFrc_J%D(I,J) - Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
-              ENDDO
-           ENDIF
+     ENDIF
+     ! Farfield Contribution to the Inner Box Sum
+     IF(GMLoc%PBC%Dimen > 0) THEN
+        DO I=1,3
+           DO J=1,3
+              IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
+                 DO K=0,LSP(MaxEll)
+                    LatFrc_J%D(I,J) = LatFrc_J%D(I,J) - Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
+                 ENDDO
+              ENDIF
+           ENDDO
         ENDDO
-     ENDDO
+     ENDIF
+#ifdef PARALLEL
   ENDIF
+#endif
 !
 ! Print Out the Lattice Forces
 !
