@@ -1,4 +1,4 @@
-\begin{thebibliography}{54}
+\begin{thebibliography}{56}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -236,7 +236,7 @@
   representations}} (\bibinfo{year}{2005}), \bibinfo{note}{submitted to the
   Journal of Chemical Physics}.
 
-\bibitem[{\citenamefont{Lee and Colwell}(1994)}]{Lee_1994}
+\bibitem[{\citenamefont{Lee and Colwell}(1994)}]{ALee94}
 \bibinfo{author}{\bibfnamefont{A.~M.} \bibnamefont{Lee}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{S.~M.} \bibnamefont{Colwell}},
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{101}},
@@ -319,15 +319,32 @@
   \bibinfo{journal}{Chem. Phys. Lett.} \textbf{\bibinfo{volume}{370}},
   \bibinfo{pages}{99} (\bibinfo{year}{2003}).
 
+\bibitem[{\citenamefont{Goedecker and Teter}(1995)}]{SGoedecker95b}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Goedecker}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Teter}},
+  \bibinfo{journal}{Phys. Rev.B} \textbf{\bibinfo{volume}{51}},
+  \bibinfo{pages}{9455} (\bibinfo{year}{1995}).
+
+\bibitem[{\citenamefont{Liang} \emph{et~al.}(2003)\citenamefont{Liang,
+  Saravanan, Shao, Baer, Bell, and Head-Gordon}}]{WLiang03}
+\bibinfo{author}{\bibfnamefont{W.~Z.} \bibnamefont{Liang}},
+  \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{Saravanan}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Shao}},
+  \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Baer}},
+  \bibinfo{author}{\bibfnamefont{A.~T.} \bibnamefont{Bell}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
+  \bibinfo{journal}{J.\ Chem.\ Phys.} \textbf{\bibinfo{volume}{119}},
+  \bibinfo{pages}{4117} (\bibinfo{year}{2003}).
+
 \bibitem[{\citenamefont{Liang} \emph{et~al.}(2004)\citenamefont{Liang, Baer,
   Saravanan, Shao, Bell, and Head-Gordon}}]{WLiang04}
-\bibinfo{author}{\bibfnamefont{W.~Z.} \bibnamefont{Liang}},
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Liang}},
   \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Baer}},
   \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{Saravanan}},
   \bibinfo{author}{\bibfnamefont{Y.~H.} \bibnamefont{Shao}},
-  \bibinfo{author}{\bibfnamefont{A.~T.} \bibnamefont{Bell}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Bell}}, \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
-  \bibinfo{journal}{J. Comp. Phys.} \textbf{\bibinfo{volume}{194}},
+  \bibinfo{journal}{J.\ Comp.\ Phys.} \textbf{\bibinfo{volume}{194}},
   \bibinfo{pages}{575} (\bibinfo{year}{2004}).
 
 \bibitem[{\citenamefont{Voter} \emph{et~al.}(1996)\citenamefont{Voter, Kress,
