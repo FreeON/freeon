@@ -195,7 +195,7 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
               DO J=1,LenKet
                 IKD=iDKet+(J-1)*DB%MAXC
                 IndexB=ABS(DB%DisBuf%D(IKD+1))
-!                IF (IndexA>=IndexB) THEN     ! Symmetry of the K matrix THIS IS WRONG?
+!                IF (IndexA>=IndexB) THEN     ! Symmetry of the K matrix
                   SchK=DB%DisBuf%D(IKD+10)
 !                  IF (SchK<=Test) EXIT       ! ONX skipout
                   ISL=ISL+1
@@ -213,15 +213,13 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                           DB%DisBuf%D(IBD),DB%PrmBuf%D(IBP),IB%W1%D(1),    &
                           DB,IB,SB)
 
-                CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                &
+                CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,             &
                           Drv%VLOC%I(Drv%is),                              &
                           Drv%VLOC%I(Drv%is+Drv%nr),IB,                    &
                           IB%W2%D(1),IB%W1%D(1))
 
-
                 CALL ContractG(ISL,CBra,CKet,IS%NVRR,IB%CB%D,IB%CK%D,IB%W1%D, &
                                IB%W2%D,DB%PrmBuf%D(IBP),DB,SB,GD)
-
 
                 DO IKet=1,GD%LG2
                   NT=GD%GDrv2%I(1,IKet)
@@ -230,12 +228,8 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                   N3=ISL*(GD%GDrv2%I(4,IKet)-1)+1
                   N4=GD%GDrv2%I(5,IKet)
 
-     write(*,*) "Ket=",nt,n1,n2,n3,n4
-
                   CALL HrrKet(IB%W1%D(N3),DB%DisBuf%D,ISL,    &
                               SB%SLDis%I,N1,N1,N2,NT)
-
-
 !
 !   CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
 !   CALL HRRKetGrad(IB%W1%D(N3),DB%DisBuf%D,ISL,SB%SLDis%I,N1,NT)
@@ -249,7 +243,7 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                   N3=ISL*(GD%GDrv3%I(4,IBra)-1)+1
                   N4=GD%GDrv3%I(5,IBra)
 
-     write(*,*) "Bra=",nt,n1,n2,n3,n4
+!     write(*,*) "Bra=",nt,n1,n2,n3,n4
 
                   CALL HrrBra(IB%W1%D(N3),IB%W2%D(N3),ACx,ACy,ACz,ISL,N1,N4,N2,NT)
 !     call halt('enough')

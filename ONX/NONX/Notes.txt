@@ -1,0 +1,6 @@
+1. There is a problem with the array sizes in GetIntSpace.F90.
+The SpaceV array appears to be messed up in at least the SpaceV(9) 
+possition. This is used in ContractG.F90 for the 4th array index of 
+the uncontracted integrals. 
+
+

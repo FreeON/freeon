@@ -17,7 +17,6 @@
 
     IF (I3.EQ.0) THEN
       DO I=1,N
-        write(*,*) i,i2,w(i,i2)
         SW(I,I1)=W(I,I2)
       END DO
     ELSE IF (I4.EQ.1) THEN

@@ -48,13 +48,8 @@
     DO IC=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB) 
       FAx=Dabcd*W(I,IC,IA,ID,IB,1)
-
-    write(*,*) "Dabcd= ",Dabcd
-    write(*,*) "W=",W(I,IC,IA,ID,IB,1)
-!    call halt('enough')
-
       FAy=Dabcd*W(I,IC,IA,ID,IB,2)
       FAz=Dabcd*W(I,IC,IA,ID,IB,3)
       FCx=Dabcd*W(I,IC,IA,ID,IB,4)
