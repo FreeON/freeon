@@ -67,10 +67,9 @@ Quantum chemical methods that  employ Gaussian Type Atomic Orbitals (GTAOs)
 offer a number of advantages in materials science.  First, because they are local basis functions, it is possible 
 to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two
 electron integrals involving GTAOs are analytic, enabling the rapid evaluation of expectation values involving 
-complicated operators often involved in response properties 
-\cite{FHarris66,LMcmurchie78,FHarris83,JHead89}.
-The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
-offering a wide range of electric and magnetic molecular response properties.   
+complicated operators often involved in response properties \cite{}.
+%The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
+%offering a wide range of electric and magnetic molecular response properties.   
 The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
 approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{JLaerdahl97,IGrant00} 
 and Dirac-Kohn-Sham \cite{TYanai01} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
@@ -89,7 +88,7 @@ With periodic linear scaling quantum chemical algorithms, it is possible to begi
 methods developed for small molecule chemistry and large scale problems in the solid state.  Together with the 
 results presented here, $ {\cal O}(N)$ methods for solving the Self-Consistent-Field equations 
 %\cite{} 
-and linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04B}, it is now possible
+and linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04b}, it is now possible
 to perform condensed phase  HF/DFT calculations on systems larger than 500 atoms with a single processor.
 In addition, with the advent of linear scaling density matrix perturbation theory \cite{ANiklasson04,VWeber04},
 well developed quantum chemical methods for the analytic computation of response properties may be brought
@@ -302,16 +301,16 @@ the constant $K=1.09$ and
 \end{cases}
 \end{equation}
 
-
-For HiCu, the overlap extent $R^{\rm o}_q$ is used, beyond which numerical evaluation of the 
-distribution $\rho_q$ yields an accumulation less than $\tau_{\rm \scriptscriptstyle ov}$;
+The overlap extent $R^{\rm o}_q$ is the value beyond which numerical evaluation of the 
+distribution $\rho_q$ yields a value less than $\tau$;
 \begin{equation}
-C_q e^{ -\widetilde \zeta_q (R^{\rm o} _q)^2 }  = \tau_{\rm \scriptscriptstyle ov} .
+C_q e^{ -\widetilde \zeta_q (R^{\rm o} _q)^2 }  = \tau . \label{OverlapExtent}
 \end{equation}
 For QCTC,  errors in the electrostatic potential due to penetration errors must be considered.
 For this purpose, the penetration extent $R^{\rm p}_q$ is introduced, satisfying the equation 
 \begin{equation}
-C_q \int \left[ \left(\pi/{\widetilde \zeta_q} \right)^{3/2} 
+\label{PotentialExtent}
+C_q \int \left[ \left(\pi/{\widetilde \zeta_q} \right)^{3/2}  
 \delta({ r})  - e^{ -\widetilde \zeta_q {r}^2 } \right] \left|{ r}-{ R^{\rm p}_q} \right|^{-1} {\rm d} r = \tau .
 \end{equation}
 
@@ -543,19 +542,18 @@ it is of course more appropriate to employ a sphere-AABB test.  In both cases, o
 between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor when using these tests.
 
 \begin{table}
-\caption{Comparison of {\sc CRYSTAL} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
-8-511/8-631G/BLYP level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
-$N_{\rm at}=2$ and 8 are  are given in Ref.~[\onlinecite{PBCCoordinates}].}
+\caption{Comparison of {\sc CRYSTAL98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
+RBLYP/8-511/8-631G level of theory.  }
 \label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (au)  & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}      & $2^f$  &  -622.39101   & -311.19551  \\
-{\sc CRYSTAL}     & $2^f$  &  -622.39114    & -311.19557    \\
+{\sc CRYSTAL98}     & $2^f$  &  -622.39114    & -311.19557    \\
 {\sc MondoSCF}      & $8^g$  &  -2490.0016   & -311.25020  \\
-{\sc CRYSTAL}     & $8^g$  &  -2490.0013   & -311.25016   \\
+{\sc CRYSTAL98}     & $8^g$  &  -2490.0013   & -311.25016   \\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic
@@ -563,13 +561,13 @@ $ ^g$Cubic
 \end{table}
 
 \begin{table}
-\caption{Convergence of the $\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc CRYSTAL} for NaCl at the STO-3G/LDA level
-         of theory at a {\tt TIGHT} accuracy level.}\label{NaClGammaPt}
+\caption{Convergence of the $\Gamma$-point super-cell approximation for NaCl, computed with {\sc MondoSCF} 
+         at the RLDA/STO-3G level of theory.}
+\label{NaClGammaPt}
 \center{
 \begin{tabular}{lcll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}  & 2$^f$    &   -610.97536  & -305.48768   \\
                 & 8$^g$    &  -2444.3584   & -305.54480   \\
@@ -579,11 +577,11 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  & -39109.912    & -305.54618   \\
                 & 216$^g$  & -65997.977    & -305.54619   \\ 
 \hline
-{\sc CRYSTAL}$^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
+{\sc CRYSTAL98}$^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ $k$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
 \end{tabular}}
 \end{table}
 
@@ -591,15 +589,13 @@ $ ^g$Cubic  \\
 \newpage
 
 \begin{table}
-\caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc CRYSTAL} for MgO at the 8-61G/8-51G/BLYP
-         level of theory at a {\tt TIGHT} accuracy level. The lattice coordinates for 
-	 $N_{\rm at}=2$ and 8 are from Ref.~[\onlinecite{PBCCoordinates}].}
+\caption{Convergence of the$\Gamma$-point super-cell approximation for MgO, computed with {\sc MondoSCF} 
+          at the RBLYP/8-61G/8-51G level of theory.}
 \label{MgOGammaPt}
 \center{
 \begin{tabular}{lrll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}  & 2$^f$    &  -275.09097  & -137.54548  \\
                 & 8$^g$    &  -1101.7295  & -137.71618  \\
@@ -609,18 +605,17 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  &  -17630.430  & -137.73774  \\
                 & 216$^g$  &  -29751.352  & -137.73774  \\ 
 \hline
-{\sc CRYSTAL }$^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
+{\sc CRYSTAL98}$^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ $k$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
 \end{tabular}}
 \end{table}
 
 \begin{table}
-\caption{Convergence of the $\Gamma$-point super-cell approximation for Diamond, 
-         computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\tt GOOD} accuracy level. The  
-         lattice coordinates for $N_{\rm at}=8$ are from Ref.~[\onlinecite{PBCCoordinates}].}
+\caption{Convergence of the $\Gamma$-point super-cell approximation for diamond, 
+         computed with {\sc MondoSCF} at the RBLYP/6-21G* level of theory.}
 \label{DiamondGammaPt}
 \center{
 \begin{tabular}{rll}
@@ -640,8 +635,9 @@ $ ^g$Cubic  \\
 \end{tabular}}
 \end{table}
 
+\section{Results}
 
-\section{Implementation}\label{implement}
+\subsection{Implementation}\label{implement}
 
 All developments were implemented in a serial version of {\sc MondoSCF} v1.0$\alpha$9 \cite{MondoSCF}, a suite of 
 linear scaling Quantum Chemistry code.  The code was compiled using the Portland 
@@ -649,13 +645,30 @@ Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} o
 Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
 
+Thresholds controling the cost to accuracy ratio of HiCu and QCTC
+are set by the accuracy levels {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT},
+which have been empirically chosen to deliver 4-5, 6-7 and 8-9 digits,  respectively,
+of relative accuracy in the energy.  Values of these thresholds are listed in Appendix A of Ref.~[\onlinecite{CTymczak04b}].
+The unmodified two-electron threshold $\tau_{\rm \scriptscriptstyle 2E}$ sets the 
+overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}) and the penetration extent $R^p_q$ in Eq.~(\ref{PotentialExtent}),
+both of which control the PAC.  As explained in Ref.~\cite{CTymczak04c}, the threshold $\tau_{\rm \scriptscriptstyle MAC}$
+controling the MAC is set as $\tau_{\rm \scriptscriptstyle MAC}=10^2 \tau_{\rm \scriptscriptstyle 2E}$.  
+The HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ likewise sets two sub-thresholds.  The
+overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}), defining accuracy of the density on the grid, is set using 
+$10^{-1} \tau_{\rm \scriptscriptstyle HICU}$ ($\tau_\rho$ in Ref.~[\onlinecite{MChallacombe00A}]). The
+target relative error defining accuracy of the HiCu grid is just $\tau_{\rm \scriptscriptstyle HICU}$ 
+($\tau_r$ in Ref.~[\onlinecite{MChallacombe00A}]).  
+%It should be pointed out that of all the thresholding schemes,
+%those govererining HiCu are the loosest, generally delivering just 4, 6 and 8 digits of accuracy with 
+%{\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.  
+
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
 highly optimized by symbolic manipulation and factorization, using real arithmetic and expansions through
 7'th order in the calculation of ${\bf J}^{\rm In}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
-Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
-matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.  
-All calculations were performed with $C_1$ (no) symmetry.
+Eigensolution of the self-consistent-field equations has been used throughout, with the cooresponding
+matrix and distribution thresholds given Appendix A of Ref.~[\onlinecite{CTymczak04b}].
+All calculations were performed with $C_1$ (no) symmetry, and all results are reported in atomic units.
 %
 % Figure 4
 %
@@ -668,7 +681,7 @@ cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.}
 \label{ErrrorPFF}
 \end{figure}
 
-\section{Validation}\label{validate}
+\subsection{Validation}\label{validate}
 
 The ability of our implementation to reproduce true Ewald summation is shown in 
 Fig.~4 for a periodic system of 64 classical water molecules.
@@ -679,71 +692,57 @@ the summation proceeds from the smallest to the largest terms.
 The use of Cartesian Gaussian basis sets in many cases allows direct numerical 
 comparison of different programs, at least to within the approximations, grids, etc 
 peculiar to a code. Here, we make connection with the preeminent Gaussian orbital 
-program for periodic calculations, {\sc CRYSTAL98}.  Calculations have been carried 
-out largely with basis sets optimized for the 
-condensed phase\cite{CRYSTALLib}, which tend to have less diffuse valence orbitals.  
-Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparison with {\sc CRYSTAL98} for 
-NaCl and MgO obtained with the {\sc MondoSCF} {\tt TIGHT} precision level 
-%\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
-%a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
-%a $10^{-6}$ convergence in the maximum element of the density matrix.}
-%({\bf IS THIS RIGHT CJ?? OR IS IT VERYTIGHT??})
-delivering a relative precision of 8-9 digits in the converged total energy.  
+program for periodic calculations, {\sc CRYSTAL98} \cite{Crystal98}.  Calculations have been carried 
+out largely with basis sets optimized for the condensed phase\cite{CRYSTALLib}, which tend to 
+have less diffuse valence functions.  Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparison 
+with {\sc CRYSTAL98} for NaCl and MgO obtained with the {\sc MondoSCF} {\tt TIGHT} precision level. 
 For the {\sc CRYSTAL98} calculations, we used the following threshold parameters: 
-{\tt TOLDENS=10}, {\tt TOLPOT=10}, {\tt TOLGRID= 15} and {\tt BASIS=4}.   
-The {\tt BASIS} parameter determines the auxiliary functions used to fit the exchange-correlation potential
-in {\sc CRYSTAL98}, an approximation not used by {\sc MondoSCF}.  
-%
+{\tt TOLDENS=10}, {\tt TOLPOT=10}, {\tt TOLGRID=15} and {\tt BASIS=4}.   The {\tt BASIS} parameter determines 
+the auxiliary functions used to fit the exchange-correlation potential 
 
 In Table~\ref{NaCl8511}, comparison is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
-for the sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for the chlorine and BLYP functional \cite{DFT_LYP:88,BLYP:88}.
-%
-Next, in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
-is demonstrated for NaCl with the STO-3G basis set and the local density approximation
-%\cite{}.
-%
-And in Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
-to the {\sc CRYSTAL98} $k$-space result is demonstrated for the 8-61G\cite{CBS:861G:MgO} basis set for the Magnesium, 
-the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the BLYP functional.
-%
-Finally, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
-diamond, using the {\sc MondoSCF} {\tt GOOD} precision (targeting 6 digits), the BLYP functional and the
-6-21G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc CRYSTAL98} 
-employs 5-$d$ and 7-$f$, we were not able to make a direct comparison.
+for sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for chlorine and using the restricted BLYP functional \cite{DFT_LYP:88,BLYP:88}.
+Next, in Table~\ref{NaClGammaPt}, convergence of the supercell $\Gamma$-point approximation 
+is demonstrated for NaCl with the STO-3G basis set and the restricted local density approximation.
+Then, in Table~\ref{MgOGammaPt}, convergence of the supercell $\Gamma$-point approximation
+to the  $\bf k$-space integration result is demonstrated for MgO, using the 8-61G\cite{CBS:861G:MgO} basis set for magnesium,
+the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the restricted BLYP functional.
+The primitive lattice coordinates for these systems are given in Ref.~[\onlinecite{PBCCoordinates}].
 
-\section{Scaling}\label{scale}
+Finally, in Table~\ref{DiamondGammaPt}, convergence of the supercell $\Gamma$-point approximation is shown for
+diamond at the {\tt GOOD} accuracy level,  using the restricted BLYP functional and the
+6-21G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc CRYSTAL98} 
+employs 5-$d$ and 7-$f$, we were not able to make a direct comparison for this basis set.
+
+\subsection{Scaling and accuracy}\label{scale}
 %
 % Figure 5
 %
 \begin{figure}
 \includegraphics{Timing_Diamond_512_log.ps} 
-\caption{Computational complexity for the ${\bf J}$ and ${\bf K}_{\rm xc}$ matrix builds
-of cubic diamond at the 6-21G*/BLYP level of theory using a {\tt GOOD} (6 digit) level of precision}
+\caption{Computational complexity of the ${\bf J}$ and ${\bf K}_{\rm xc}$ matrix builds for 
+cubic diamond at the RBLYP/6-21G* level of theory at the {\tt GOOD} accuracy level.}
 \label{Scaling_Matrix_Build}
 \end{figure}
-
 %
 % Figure 6
 %
 \begin{figure}
 \includegraphics{ErrorVsNumber_Diamond512.ps}
-\caption{Relative error with system size for 6-21G*/BLYP diamond targeting a precision 
-of 6 digits in the total energy.}
+\caption{Relative error with system size for RBLYP/6-21G* diamond at the {\tt GOOD} accuracy level.}
 \label{ErrorPerN} 
 \end{figure}
 
-Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
-${\bf J}$ and ${\bf K}_{\rm xc}$
-builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\tt GOOD} level of
-accuracy, targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
+Demonstrating linear scaling at the outset,  Fig.~5 shows the CPU time for ${\bf J}$ and ${\bf K}_{\rm xc}$
+builds with  RBLYP/6-21G* diamond at its standard density.  These timings correspond to a {\tt GOOD} level of accuracy, 
+targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
-of calculations with all thresholds reduced by an order of magnitude.
-For these calculations, the largest source of error is the numerical integration performed by HiCu, as the QCTC 
-thresholds are significantly more conservative. 
+of calculations with all thresholds reduced by one order of magnitude.  For these calculations, the largest 
+source of error is the numerical integration performed by HiCu, as the QCTC thresholds are significantly more conservative. 
 
 \section{Conclusions}\label{conclude}
 
-We have shown a systematic and efficient approach for incorporating periodic 
+We presented a systematic and efficient approach for incorporating periodic 
 boundary conditions into the linear scaling quantum chemistry code {\sc MondoSCF}.
 %
 For the one electron matrices we achieved this by a re-summation
@@ -813,19 +812,18 @@ where
 {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
 \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
-and \( \beta  \) is a parameter which controls the convergence, and $\Gamma(n,r)$ is the
-incomplete gamma function \cite{GArfken01}.
+and \( \beta  \) is a parameter which controls the convergence.
 This allows the lattice sum to be partitioned into rapidly convergent
 real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$ as
 %
 %
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{{\rm out}}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
 \nonumber\\
- & = & \sum _{\mathbf{R}'\in V_{{\rm out}}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & = & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\,  {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
- & + & \sum _{\mathbf{R}'\in V_{{\rm out}}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & + & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\, 
 {\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
@@ -833,11 +831,11 @@ real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$
 \end{eqnarray}
 which we can then partition into a real and reciprocal space summation 
 \begin{eqnarray}
-{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{{\rm out}}}\, \widetilde{P}_{l}^{m}
+{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
  \mathbf{R}\right| \right) 
 \nonumber\\
-&-&\sum _{\mathbf{R}'\in V_{\rm in}}\widetilde{P}_{l}^{m}\left( \cos 
+&-&\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
 \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| 
 \right) 
 \nonumber\\
@@ -849,7 +847,7 @@ which we can then partition into a real and reciprocal space summation
 \nonumber\\
 \label{C4}
 \end{eqnarray}
-With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \)
+With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
 the periodic multipole interaction tensor can be computed. The only
 potential problem is the computation of the incomplete gamma functions.
 Previous approaches attempted to compute this function by the upward
@@ -883,7 +881,7 @@ where
 \begin{equation}
 \label{SN}
 S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
-\right) ^{\frac{1}{{\rm max}(n,1)}}
+\right) ^{\frac{1}{max(n,1)}}
 \end{equation}
 Which are tabulated beforehand. We find that this version of the gamma
 function is both easy to program and numerically very precise, even
@@ -892,9 +890,9 @@ We can also compute the \( {\cal M} \) tensor in one and two dimensions.
 The \( {\cal M} \) tensor in one dimension can be computed analytically
 %
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
 \nonumber\\
-& = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
+& = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
 \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
 \nonumber\\
 \label{C7a0}
@@ -927,11 +925,11 @@ non-periodic direction goes to infinity,
 
 \begin{eqnarray}
 {\cal M}^{m}_{l} 
- & = & \sum _{{\mathbf{R}'}\in V_{{\rm out}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
+ & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
 \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
 \mathbf{R}\right| \right) 
 \nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{\rm in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
 \mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
  & + & {\cal C}_2 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }
@@ -946,48 +944,14 @@ non-periodic direction goes to infinity,
 %
 where,
 \begin{eqnarray}
-{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
+{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
 \nonumber\\
-{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
+{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }
 \label{C10p}
 \end{eqnarray}
-and \( A_{UC} \) is the area of the unit cell along the non-periodic
+and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
-
-
-\section{Thresholds}\label{Thresholds}
-
-There are four thresholds that control the numerical precision of the linear scaling algorithms
-in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
-described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ 
-({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
-the distribution threshold  $\tau_{\rm \scriptscriptstyle DIST}$ described in Section \ref{datastruct},
-and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
-Ref.~[\onlinecite{MChallacombe00A}]).  The threshold $\tau_{\rm \scriptscriptstyle 2E}$ also controls accuracy of the
-Coulomb matrix as discussed in Section \ref{datastruct}, where   $\tau_{\rm \scriptscriptstyle 2E}=
-\tau_{\rm \scriptscriptstyle PAC}=\tau_{\rm \scriptscriptstyle MAC}$.
-These thresholds, listed in Table~\ref{Table:AccurLevels},  have been 
-calibrated over a wide range of systems to yield a minimum of  4, 6 and 8 digits of relative accuracy in the total 
-energy with {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.    Typically however, one additional digit is achieved for 
-models that contain Hartree-Fock exchange.
-
-\begin{table}[h]
-\caption{Accuracy goals and corresponding thresholds that control precision of the {\sc MondoSCF} linear scaling algorithms.}
-\label{Table:AccurLevels}
-\center{
-\begin{tabular}{lllll}
-\toprule
-Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & 
-$\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
-\colrule
-{\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
-{\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
-{\tt TIGHT}     & $10^{-6}$ & $10^{-10}$ & $10^{-12}$ & $10^{-7}$ \\
-\botrule
-\end{tabular}}
-\end{table}
-
 
 %\section{Coordinates of Validation Suite}\label{FracCoords}
 %
