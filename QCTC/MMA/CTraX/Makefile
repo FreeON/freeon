@@ -27,8 +27,14 @@
 #------------------------------------------------------------------------------
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	
+all:	mma move
+
+mma:
 	math<CTraX.m
+
+move:	
+	mv *.F90 ../../LibQCTC/
+	mv *.Inc ../../LibQCTC/
 #
 clean:
 	rm -f $(REMOVEALL)

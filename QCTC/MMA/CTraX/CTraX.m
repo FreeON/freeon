@@ -65,6 +65,8 @@ WC[String_]:=WriteString[FileName,"!     ",String,"\n"];
 
 (* LOAD MODULE FOR WRITING EXPLICIT SOURCE FOR COMPUTATION OF IRREGULAR HARMONICS *)
 
+bkbreak=7;
+
 <<IrRegular.m; 
 <<Contract.m;
 
@@ -81,6 +83,26 @@ WS["END SELECT"]
 Close[FileName];
 Print[" Closed ",FileName];
 
+Do[
+Do[
+   LCode=100*LHG+LSP;
+   If[LHG+LSP>bkbreak, 
+      FileName=StringJoin["CTraX",ToString[LCode],".F90"]; 
+      Print[" Openned ",FileName];
+      OpenWrite[FileName];
+      WS[StringJoin["SUBROUTINE CTraX",ToString[LCode],"(Q)"]];
+      WS[           "   USE PoleNodeType"];
+      WS[           "   USE PoleGlobals"];
+      WS[           "   USE ERIGlobals"];
+      WS[           "   TYPE(PoleNode) :: Q"];
+      Contract[FileName,LHG,LSP];
+      WS[StringJoin["END SUBROUTINE CTraX",ToString[LCode]]];
+      Close[FileName];
+      Print[" Closed ",FileName];
+    ];
+,{LSP,0,SPEll}]
+,{LHG,0,HGEll}];
+
 FileName="CTraX.Inc"; 
 Print[" Openned ",FileName];
 OpenWrite[FileName];
@@ -88,7 +110,11 @@ WS["SELECT CASE(LCode)"]
 Do[Do[
       ldx=ToString[LHG*100+LSP];
       WS[StringJoin["CASE(",ldx,")"]];
-      Contract[FileName,LHG,LSP];
+      If[LHG+LSP<=bkbreak,
+         Contract[FileName,LHG,LSP];  
+        ,
+         WS[StringJoin["   CALL CTraX",ldx,"(Q)"]];
+        ];
 ,{LSP,0,SPEll}]
 ,{LHG,0,HGEll}];
 WS["END SELECT"]

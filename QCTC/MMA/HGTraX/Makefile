@@ -27,7 +27,13 @@
 #------------------------------------------------------------------------------
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	
+all:	mma move
+#
+move:	
+	mv *.F90 ../../LibQCTC/
+	mv *.Inc ../../LibQCTC/
+#
+mma:
 	math<MD3TRR.m
 #
 clean:

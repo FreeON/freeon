@@ -64,3 +64,44 @@ Gammas[LTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt},
                            ,{L,0,LTot}];
                         ]
 ]
+
+
+
+
+
+
+
+(*
+
+FStr[L_]:=Module[{LSt},
+                 LSt=ToString[L];
+                 StringJoin["(F",LSt,"_0(J)+T*(F",LSt,"_1(J)+T*(F",LSt,"_2(J)+T*(F",LSt,"_3(J)+T*F",LSt,"_4(J)))))"]];
+
+Gammas[LTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt},
+                      If[LTot==0,WS[StringJoin["  AuxR(0)=Upq*",FStr[0]]]];
+                      If[LTot==1,
+                         WS[StringJoin["  AuxR(0)=Upq*",FStr[0]]];
+                         WS[StringJoin["  AuxR(1)=-Two*Omega*Upq*",FStr[1]]];
+                        ];
+                      If[LTot>1,
+                         LSt=ToString[LTot];
+                         WS["  o1=Upq"];
+                         WS["  o2=-Two*Omega"];
+                         WS["  ET=EXP(-T)"];
+                         WS["  TwoT=Two*T"];
+                         WS[StringJoin["  AuxR(",LSt,")=",FStr[LTot]]];
+                         Do[GSt=ToString[L-1];
+                            GSt1=ToString[L];
+                            GFlt=FF[1/(2 *(L-1)+1)];
+                            WS[StringJoin["  AuxR(",GSt,")=",GFlt,"*(TwoT*AuxR(",GSt1,")+ET)"]];
+                           ,{L,LTot,2,-1}];
+                         WS["  AuxR(0)=TwoT*AuxR(1)+ET"];
+                         Do[GSt=ToString[L];
+                            WS[StringJoin["  AuxR(",GSt,")=o1*AuxR(",GSt,")"]];
+                            If[L<LTot,WS[StringJoin["  o1=o2*o1"]]];
+                           ,{L,0,LTot}];
+                        ]
+]
+
+
+*)

@@ -77,7 +77,9 @@ WC[String_]:=WriteString[FileName,"!     ",String,"\n"];
 
 (* WRITE CODE FOR AUXILIARY INTEGEGRALS AND 3 TERM RECURENCE RELATIONS *)
 
-FileName="HGTraX.Inc"; 
+bkbreak=7;
+
+FileName="AuxInt.Inc"; 
 Print[" Openned ",FileName];
 OpenWrite[FileName];
 
@@ -88,22 +90,71 @@ Do[
    ldx=ToString[l];
    WS[StringJoin["CASE(",ldx,")"]];
    Gammas[l];   
-   ThreeTermRR[l];
+   If[l<bkbreak,
+      ThreeTermRR[l];
+      ,
+      WS[StringJoin["  CALL AuxInt",ToString[l],"(PQx,PQy,PQz)"]];
+   ]; 
   ,{l,0,2*HGEll-1}]
 WS["END SELECT"]
+Close[FileName];
+Print[" Closed ",FileName];
+
+Do[
+   If[l>=bkbreak,
+      ldx=ToString[l];   
+      FileName=StringJoin["AuxInt",ToString[l],".F90"];
+      Print[" Openned ",FileName];
+      OpenWrite[FileName];
+      WS[StringJoin["SUBROUTINE AuxInt",ToString[ldx],"(PQx,PQy,PQz)"]];
+      WS[StringJoin["  USE ERIGlobals"]];
+      WS[StringJoin["  REAL(DOUBLE) :: PQx,PQy,PQz"]];
+      ThreeTermRR[l];
+      WS[StringJoin["END SUBROUTINE AuxInt",ToString[ldx]]];
+      Close[FileName];
+      Print[" Closed ",FileName];
+   ];   
+  ,{l,0,2*HGEll-1}]
 
 (* WRITE CODE FOR HG KET CONTRACTION *)
 
+FileName="HGTraX.Inc"; 
+Print[" Openned ",FileName];
+OpenWrite[FileName];
 WS["SELECT CASE(LCode)"]
 Do[
    Do[
       lcode=lbra*100+lket;
       ldx=ToString[lcode];
       WS[StringJoin["CASE(",ldx,")"]];
-      HGContract[lbra,lket];
+      If[lket+lbra>=bkbreak,
+         WS[StringJoin["  CALL HGTraX",ToString[lcode],"(PQx,PQy,PQz,Q)"]];
+         ,
+          HGContract[lbra,lket];
+        ];
      ,{lket,0,HGEll-1}];
   ,{lbra,0,HGEll}];
 WS["END SELECT"]
-
 Close[FileName];
 Print[" Closed ",FileName];
+
+Do[
+   Do[
+      lcode=lbra*100+lket;
+      ldx=ToString[lcode];
+      If[lket+lbra>=bkbreak,
+         FileName=StringJoin["HGTraX",ldx,".F90"];
+         Print[" Openned ",FileName];
+         OpenWrite[FileName];
+         WS[StringJoin["SUBROUTINE HGTraX",ldx,"(PQx,PQy,PQz,Q)"]];
+         WS["  USE ERIGlobals"];
+         WS["  USE PoleNodeType"];
+         WS["  TYPE(PoleNode) :: Q"];
+         WS["  REAL(DOUBLE) :: PQx,PQy,PQz"];
+         HGContract[lbra,lket];
+         WS[StringJoin["END SUBROUTINE HGTraX",ldx]];
+         Close[FileName];
+         Print[" Closed ",FileName];
+        ];
+     ,{lket,0,HGEll-1}];
+  ,{lbra,0,HGEll}];
