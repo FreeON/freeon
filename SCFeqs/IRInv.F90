@@ -35,7 +35,7 @@ PROGRAM IRInv
   TYPE(AtomPair)                 :: Pair 
   TYPE(DBL_VECT)                 :: Values,Work
   TYPE(DBL_RNK2)                 :: SBlk,InvSBlk,Vectors
-  INTEGER                        :: I,J,K,AtA,AtB,NN,P,R,Sbeg,Send,   &
+  INTEGER                        :: I,J,K,AtA,AtB,NN,P,R,Sbeg,  &
                                     NA,NB,NANBmax,LWork,Info
   REAL(DOUBLE)                   :: F2N,Beta,Factor,OneOvF2N,Error,Error_old     
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
