@@ -36,47 +36,51 @@ CONTAINS
     ENDIF
     DO I=GBeg,GEnd
        CALL ToAtomicUnits(G%Clone(I))
-#ifdef PERIODIC
        CALL PeriodicXLate(G%Clone(I))
-#endif
     ENDDO
   END SUBROUTINE MassageCoordinates
-  !============================================================================
-  ! RESCALE VALUES IF ORIGINALLY IN ANGSTROMS
-  !============================================================================
+!============================================================================
+! RESCALE VALUES IF ORIGINALLY IN ANGSTROMS
+!============================================================================
   SUBROUTINE ToAtomicUnits(G)
     TYPE(CRDS) :: G
-    IF(G%InAU)RETURN
+    IF(G%InAU) RETURN
     G%InAU=.TRUE.
-    G%Carts%D=AngstromsToAU*G%Carts%D               
-    G%AbCarts%D=AngstromsToAU*G%AbCarts%D               
-#ifdef PERIODIC
-    G%PBC%BoxShape=AngstromsToAU*G%PBC%BoxShape
-    G%PBC%InvBoxSh=G%PBC%InvBoxSh/AngstromsToAU
-    G%PBC%CellVolume=G%PBC%CellVolume*AngstromsToAU**G%PBC%Dimen
-    G%PBC%CellCenter=G%PBC%CellCenter*AngstromsToAU
-    G%PBC%DipoleFac=G%PBC%DipoleFac/AngstromsToAU**G%PBC%Dimen
-    G%PBC%QupoleFac=G%PBC%QupoleFac/AngstromsToAU**G%PBC%Dimen
-#endif
+    G%Carts%D    = AngstromsToAU*G%Carts%D               
+    G%AbCarts%D  = AngstromsToAU*G%AbCarts%D      
+    G%Velocity%D = AngstromsToAU*G%Velocity%D    
+!   
+    G%PBC%CellCenter%D = G%PBC%CellCenter%D*AngstromsToAU
+    G%PBC%BoxShape%D   = AngstromsToAU*G%PBC%BoxShape%D
+    G%PBC%InvBoxSh%D   = G%PBC%InvBoxSh%D/AngstromsToAU
+    G%PBC%CellVolume   = G%PBC%CellVolume*AngstromsToAU**G%PBC%Dimen
+    G%PBC%DipoleFAC    = G%PBC%DipoleFAC/(AngstromsToAU**G%PBC%Dimen)
+    G%PBC%QupoleFAC    = G%PBC%QupoleFAC/(AngstromsToAU**G%PBC%Dimen)
+!
   END SUBROUTINE ToAtomicUnits
-  !============================================================================
-  ! 
-  !============================================================================
+!============================================================================
+! 
+!============================================================================
   SUBROUTINE PeriodicXLate(G)
     TYPE(CRDS)                  :: G
     REAL(DOUBLE),DIMENSION(1:3) :: CMVec
     INTEGER                     :: I
-    !-------------------------------------------------------------------------!
-    CMVec(:)=Zero
-    DO I=1,G%NAtms
-       CMVec(:)=CMVec(:)+G%BoxCarts%D(:,I)
-    ENDDO
-    CMVec(:)=Half-CMVec(:)/DBLE(G%NAtms)
-    G%PBC%TransVec(:)=FracToAtom(G,CMVec(:))
-    DO I=1,3
-       IF(.NOT.G%PBC%AutoW(I))G%PBC%TransVec(I)=Zero
-    ENDDO
-    CALL Translate(G,G%PBC%TransVec)
+!-------------------------------------------------------------------------!
+    IF(G%PBC%Translate) THEN
+       CMVec(:)=Zero
+       DO I=1,G%NAtms
+          CMVec(:)=CMVec(:)+G%BoxCarts%D(:,I)
+       ENDDO
+       CMVec(:)=Half-CMVec(:)/DBLE(G%NAtms)
+       G%PBC%TransVec%D(:)=FracToAtom(G,CMVec(:))
+       DO I=1,3
+          IF(G%PBC%AutoW%I(I)==0) G%PBC%TransVec%D(I)=Zero
+       ENDDO
+       CALL Translate(G,G%PBC%TransVec%D)
+    ELSE
+       G%PBC%TransVec%D(:)=Zero
+    ENDIF
+!
   END SUBROUTINE PeriodicXLate
 END MODULE Massage
 
