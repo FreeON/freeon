@@ -112,8 +112,8 @@ MODULE ParallelHiCu
           WRITE(*,*) 'NVol = ',NVol, ',  NPrc = ',NPrc
           STOP 'ERROR: LineLoc.dat -- NVol is not equal to NPrc!'
         ENDIF
-        READ(54,*) LCoor%D(1:3,1)
-        READ(54,*) RCoor%D(1:3,1)
+        ! READ(54,*) LCoor%D(1:3,1)
+        ! READ(54,*) RCoor%D(1:3,1)
 
         !! LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
         !! RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
@@ -908,7 +908,9 @@ MODULE ParallelHiCu
     REAL(DOUBLE)::StartTm,EndTm,TotTm,AllLeavesTm
     REAL(DOUBLE),PARAMETER::TauBeg=1.0D-5,TauEnd=1.0D-4
     REAL(DOUBLE) :: lnTauBeg,lnTauEnd,lnTauH,lnTau
-    TYPE(DBL_VECT) :: TauArr
+    TYPE(DBL_VECT) :: TauArr,ETRootArr
+    TYPE(INT_VECT) :: ETDirArr
+    INTEGER :: RootNum,RootIndex
     
 
     StartTm = MPI_Wtime()
@@ -982,10 +984,10 @@ MODULE ParallelHiCu
       ENDIF
 #endif
   
-      OPEN(unit=54,FILE='LineLoc.dat',form='formatted',status='unknown')
-      WRITE(54,*) NVol
-      WRITE(54,*) RepLCoor%D(1:3,1)
-      WRITE(54,*) RepRCoor%D(1:3,1)
+      RootNum = Power2(SmallN)-1
+      CALL New(ETRootArr,RootNum)
+      CALL New(ETDirArr,RootNum)
+      RootIndex = 0
       DO Stage = 1, SmallN
         !! WRITE(*,*) 'Stage = ',Stage
         DO PIndex = 1, Power2(Stage-1)
@@ -1004,7 +1006,9 @@ MODULE ParallelHiCu
               DirInt = I
             ENDIF
           ENDDO
-          WRITE(54,*) DirInt
+          ! WRITE(54,*) DirInt
+          RootIndex = RootIndex + 1
+          ETDirArr%I(RootIndex) = DirInt
   
           OrigLeafTm = RepLeavesTm%D(PIndex)
           x0 = RepLCoor%D(DirInt,PIndex)
@@ -1039,7 +1043,8 @@ MODULE ParallelHiCu
             IF(ABS(f2) < RootTau .OR. ABS(f2-oldf2) < 1.0D-5) THEN
               ! RepRCoor%D(1:3,PIndex) has been defined
               WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
-              WRITE(54,*) x2
+              ! WRITE(54,*) x2
+              ETRootArr%D(RootIndex) = x2
               RepLCoor%D(DirInt,CIndex) = x2
               RepLeavesTm%D(PIndex) = LeavesTmInside
               RepLeavesTm%D(CIndex) = OrigLeafTm - LeavesTmInside
@@ -1075,7 +1080,8 @@ MODULE ParallelHiCu
             f2 = LeavesTmInside*1.0D0/(OrigLeafTm*1.0D0)-0.5D0
             IF(ABS(f2) < TauArr%D(Stage)) THEN
               !! WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
-              WRITE(54,*) x2
+              ! WRITE(54,*) x2
+              ETRootArr%D(RootIndex) = x2
               RepLCoor%D(DirInt,CIndex) = x2
               RepLeavesTm%D(PIndex) = LeavesTmInside
               RepLeavesTm%D(CIndex) = OrigLeafTm - LeavesTmInside
@@ -1094,14 +1100,28 @@ MODULE ParallelHiCu
 
         ENDDO
       ENDDO
+      IF(RootIndex /= RootNum) THEN
+        WRITE(*,*) 'RootIndex = ',RootIndex, ', RootNum = ',RootNum
+        STOP 'RootIndex not equal to RootNum'
+      ENDIF
+      OPEN(unit=54,FILE='LineLoc.dat',form='formatted',status='unknown')
+      WRITE(54,*) NVol
+      ! WRITE(54,*) RepLCoor%D(1:3,1)
+      ! WRITE(54,*) RepRCoor%D(1:3,1)
+      DO I = 1, RootNum
+        WRITE(54,*) ETDirArr%I(I)
+        WRITE(54,*) ETRootArr%D(I)
+      ENDDO
+
       CLOSE(54)
       
-      OPEN(unit=53,FILE='LeafTmInVol.dat',form='formatted',status='unknown')
-      DO I = 1, NVol
-        WRITE(53,*) I, RepLeavesTm%D(I)
-      ENDDO
-      CLOSE(53)
-      !! ask all processors to quit now!
+      !! OPEN(unit=53,FILE='LeafTmInVol.dat',form='formatted',status='unknown')
+      !! DO I = 1, NVol
+      !!   WRITE(53,*) I, RepLeavesTm%D(I)
+      !! ENDDO
+      !! CLOSE(53)
+
+      ! ask all processors to quit now!
       BoxPoint(1:6) = 0.0D0
       CALL MPI_BCast(BoxPoint(1),6,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
   
