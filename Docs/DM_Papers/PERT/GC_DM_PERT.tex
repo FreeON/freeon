@@ -1,9 +1,8 @@
-%\documentclass[prl,aps,eqsecnum,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\documentstyle[twocolumn,prl,aps]{revtex}
-%\documentstyle[preprint,aps]{revtex}
+\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
-\draft
-\tighten
+%\documentclass[prl,aps,eqsecnum,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentstyle[twocolumn,prl,aps]{revtex}
+%\documentstyle[preprint,aps]{revtex}
 
 \begin{document}
 
@@ -14,22 +13,25 @@
 \address{Theoretical Division, Los Alamos National Laboratory,
 Los Alamos, NM 87545, USA}
 
-\date{\today}
-\maketitle
-
-\footnotetext{Preprint LA-UR 03-6452}
-
 \begin{abstract}
-{\small \bf A highly efficient quantum perturbation theory 
-that avoids using wavefunction or Green's function formalism is introduced.
-The method achieves quadratically convergent recursions that yield
-the response of the density matrix upon variation of the Hamiltonian. 
-The technique allows treatment of embedded quantum subsystems with a 
-computational cost scaling linearly with the size of the perturbed 
-region, ${\cal O}(N_{\rm pert.})$, and as ${\cal O}(1)$ with the total 
-system size. It also allows direct computation of the density matrix response 
-functions to any order with linear scaling effort.  Energy expressions to 
-4th order based on only first and second order density matrix response are given.}
+An efficient quantum perturbation theory of the grand canonical density matrix 
+is introduced, which avoids invoking the formalism of wavefunctions or the Green's function.  
+In computation of the density matrix response to variation of the Hamiltonian,
+the recursive method admits the use of linear scaling technologies and achieves
+quadratic convergence.  Also, the treatment of embedded quantum subsystems with the new 
+technique involves only an ${\cal O}(1)$ cost with total system size.   
+%The technique allows treatment of embedded quantum subsystems 
+%with a computational cost scaling linearly with the size of the perturbed 
+%region, ${\cal O}(N_{\rm pert.})$, and as ${\cal O}(1)$ with the total 
+%system size.   
+Density matrix analogues of  Wigner's  rule are presented up to fourth order,
+which in general allows the computation of response properties through order $2 n+1$ 
+via  $n^{\rm th}$ order response functions.
+The simplicity of the method allows high order perturbation expansions to be carried
+out, as demonstrated with an example involving $10^{\rm th}$ order expansion. 
+%It also allows direct computation of the density matrix response 
+%functions to any order with linear scaling effort.  Energy expressions to 
+%4th order based on only first and second order density matrix response are given.
 \\
 
 \keywords{density matrix, perturbation theory, purification, sign matrix,
@@ -37,34 +39,31 @@ linear scaling, electronic structure, spectral projection, density-functional th
 %\pacs{02.70.-c, 71.15.-m, 71.15.Dx}
 \end{abstract}
 
-In electronic structure 
-theory, significant effort has been devoted to the development of
-methods with the computational cost scaling linearly with system size 
-\cite{Goedecker_RMP_99,Wu02}. The ability to perform accurate calculations
-with reduced-complexity ${\cal O}(N)$ scaling is an important breakthrough 
-that opens a variety of new possibilities in materials science, 
-chemistry and biology. So far most attention has been focused on 
-the ground state electronic energy. However, an important key problem
-that has been given little attention is the computation of materials 
-response properties such as polarizabilities, chemical shielding, Raman 
-intensities, or the magnetic susceptibility.
-Of great interest is also to combine efficient ${\cal O}(N)$ theory with 
-quantum embedding \cite{Pantelides78,Haydock80,Inglesfield81}, where the computational 
-complexity scales linearly with the size of a locally perturbed region
-${\cal O}(N_{\rm pert.})$ and therefore as ${\cal O}(1)$ with the total 
-system size. This would make it possible to efficiently analyze various
-quantum subsystems or impurities, for example in nano devices or large 
-protein molecules, but without a complete recalculation 
-of the entire system. 
+\date{\today}
 
-In this letter, we introduce a general and surprisingly simple 
-${\cal O}(N_{\rm pert.})$ approach to quantum perturbation theory.
-The method makes it possible to study embedded quantum subsystems
-and response functions to any order, within linear scaling effort.
-The approach is based on recently developed spectral projection schemes
+\maketitle
+
+\footnotetext{Preprint LA-UR 03-6452}
+
+The ability to extend accurate electronic structure calculations to larger and larger systems 
+is an increasingly important capability in areas of materials science, chemistry and biology
+that employ simulation.  This capability is being fueled largely through new reduced-complexity 
+algorithms that scale only as ${\cal O}(N)$, where $N$ is the system size \cite{Goedecker_RMP_99,Wu02}.  
+So far most attention has been focused on $N$-scaling methods for computing the ground state electronic energy. 
+However, an important problem that has been given little attention is the ${\cal O}(N)$ computation of static 
+response properties, which include the polarizability, NMR chemical shielding, Raman intensities, vibrational 
+frequencies and the magnetic susceptibility. Also of great interest is extending ${\cal O}(N)$ electronic
+structure theory to quantum embedding \cite{Pantelides78,Haydock80,Inglesfield81}, where the computational 
+complexity scales linearly with the size of a locally perturbed region ${\cal O}(N_{\rm pert.})$ and therefore 
+as ${\cal O}(1)$ when $N \gg N_{\rm pert}$.  Embedding of this sort would make it possible to efficiently sample 
+various quantum subsystems, for example surface chemistries or the catalytic domains of proteins, without 
+recalculation of the entire system. 
+
+In this letter, we introduce a general and simple ${\cal O}(N_{\rm pert.})$ approach to quantum perturbation theory.
+The method makes it possible to study embedded quantum subsystems and response functions to any order, with linear 
+scaling effort. The approach is based on recently developed spectral projection schemes
 for purification of the density matrix, replacing the conventional
-eigenvalue problem in tight-binding or self-consistent Hartree-Fock 
-and Kohn-Sham theory
+eigenvalue problem in tight-binding or self-consistent Hartree-Fock and Kohn-Sham theory
 \cite{McWeeny60,Clinton69,Palser98,Holas01,NiklassonWLT,NiklassonSP2,NiklassonSP4,NiklassonIP}.
 
 The perturbation theory is based on the density matrix and avoids using the more 
@@ -74,7 +73,7 @@ proposed by McWeeny \cite{McWeeny_PRT}. The present work
 is likewise related to the recent work of Bowler and Gillan \cite{Bowler02},
 who developed a functionally constrained density matrix minimization scheme for embedding.
 However, our approach to computation of the density matrix response is quite different from 
-previous methods of solutions for the coupled-perturbed self-consistent-field equations.  
+previous methods of solution for the coupled-perturbed self-consistent-field equations.  
 In contrast to previous methods that pose solution implicitly through coupled equations 
 \cite{Frisch,Dupuis,Ochsenfeld,Larsen}, the new method provides explicit construction of the 
 derivative density matrix through recursion.  
@@ -376,7 +375,7 @@ and J.\ Wills are gratefully acknowledged.
 
 \begin{references}
 
-\bibitem[\dagger]{address} Corresponding author: amn@lanl.gov
+%\bibitem[\dagger]{address} Corresponding author: amn@lanl.gov
 
 \bibitem{Goedecker_RMP_99} S. Goedecker,
 Rev.\ Mod.\ Phys. {\bf 71}, 1085 (1999).

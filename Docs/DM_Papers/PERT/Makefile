@@ -1,8 +1,8 @@
 all:	latex dvi
 
 latex:
-	latex GC_DM_PRT.tex
-	latex GC_DM_PRT.tex
+	latex GC_DM_PERT.tex
+	latex GC_DM_PERT.tex
 
 new: 	clean links dvi
 
@@ -18,10 +18,10 @@ links:
 	ln -s ../../RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -o prl.ps GC_DM_PRT
+	dvips -o prl.ps GC_DM_PERT
 
 dvi:	latex
-	xdvi -s 2 GC_DM_PRT
+	xdvi -s 2 GC_DM_PERT
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
