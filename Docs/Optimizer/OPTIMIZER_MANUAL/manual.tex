@@ -238,6 +238,16 @@ Fully flexible parameters should be marked with a negative number.
 These options can arbitrarily be combined with all other options 
 available for geometry optimization.
 
+\subsection{Explicit lattice parameters}
+Crystal-lattice optimizations are carried out in the default procedure 
+without any explicite internal coordinates for lattice parameters.
+It is however possible to get the lattice parameters explicitely
+involved into the crystal optimization by adding the option
+\begin{itemize}
+\item[{\tt ExplLatt}] 
+\end{itemize}
+into the {\tt Grad} line.
+
 \subsection{Recognition of weak bonds}
 Weak bonds, such as the Van der Waals bonds can be recognized difficultly,
 because it is not clear in what situation they should be used and in what 
