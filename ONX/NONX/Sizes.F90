@@ -37,3 +37,23 @@
       CALL Halt(' Illegal Ind in iT')
     END IF
   END FUNCTION iT
+
+  FUNCTION LTotal(I)
+    USE InOut
+    IMPLICIT NONE
+    INTEGER, INTENT(IN)  :: I
+    INTEGER              :: LTotal
+    INTEGER,PARAMETER    :: Lang(21) = (/ 0,            &
+                                          1,1,          &
+                                          2,2,2,        &
+                                          3,3,3,3,      &
+                                          4,4,4,4,4,    &
+                                          5,5,5,5,5,5   /)
+    IF (I<=21.AND.I>0) THEN
+      LTotal = Lang(I)
+    ELSE
+      WRITE(*,*) ' iType = ',I
+      CALL Halt('Illegal iType in Ltotal')
+    END IF
+  END FUNCTION LTotal
+
