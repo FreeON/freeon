@@ -2470,13 +2470,13 @@ CONTAINS
          CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
                               GCoordCtrl,Print,SCRPath,.TRUE.)
          CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-         IF(IStep>=4.AND..NOT.DoDeloc) THEN
-           VectIntAux%D=VectIntReq%D-IntCs%Value
-           CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
-           CALL MapAngleDispl(IntCs,VectIntAux%D) 
-           VectIntReq%D=IntCs%Value+VectIntAux%D
-           CALL MapBackAngle(IntCs,VectIntReq%D) 
-         ENDIF
+        !IF(IStep>=4.AND..NOT.DoDeloc) THEN
+        !  VectIntAux%D=VectIntReq%D-IntCs%Value
+        !  CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
+        !  CALL MapAngleDispl(IntCs,VectIntAux%D) 
+        !  VectIntReq%D=IntCs%Value+VectIntAux%D
+        !  CALL MapBackAngle(IntCs,VectIntReq%D) 
+        !ENDIF
        ENDIF
        !
        ! Calculate difference between required and actual internals
