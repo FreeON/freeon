@@ -106,6 +106,7 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     REAL(DOUBLE), EXTERNAL     :: DDOT
+    REAL(DOUBLE),EXTERNAL      :: MondoTimer
     !-------------------------------------------------------------------
     !
     integer :: isize,i
@@ -179,7 +180,7 @@ CONTAINS
           AtD = U%L
           !write(*,*) 'AtC=',AtC,'AtD=',AtD,'MyID',MyID
           ! Set Time.
-          TmBeg = MPI_WTIME()
+          TmBeg = MondoTimer()
 #else
        DO ci=D%RowPt%I(AtC),D%RowPt%I(AtC+1)-1 ! Run over AtD
           AtD=D%ColPt%I(ci)
@@ -467,7 +468,7 @@ CONTAINS
           !
 #ifdef ONX2_PARALLEL
           ! Set Time.
-          TmEnd = MPI_WTIME()
+          TmEnd = MondoTimer()
           !Add Time.
           U%Part = U%Part+TmEnd-TmBeg
           U => U%Next

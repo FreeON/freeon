@@ -57,6 +57,7 @@ PROGRAM GONX2
   REAL(DOUBLE)                   :: Time1,Time2
   REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
+  REAL(DOUBLE),EXTERNAL          :: MondoTimer
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArr
 #ifdef ONX2_PARALLEL
@@ -126,9 +127,9 @@ PROGRAM GONX2
   ! Normalize the density matrix
   !
 #ifdef ONX2_PARALLEL
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL TrnMatBlk(BSc,GMc,DFMcd)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
   CALL TrnMatBlk(BSc,GMc,D)
@@ -140,14 +141,14 @@ PROGRAM GONX2
   ! Allocate the list(s) and get the buffer sizes.
   !WRITE(*,*) 'allocate List'
 #ifdef ONX2_PARALLEL
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL Get_Essential_RowCol(DFMcd,CPt,CNbr,CMin,CMax,DPt,DNbr,DMin,DMax)
   !write(*,*) 'CMin',CMin,'CMax',CMax,'MyID',MyID
   !write(*,*) 'DMin',DMin,'DMax',DMax,'MyID',MyID
   !
   CALL AllocList(ListC,CMin,CMax)
   CALL AllocList(ListD,DMin,DMax)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
   CALL AllocList(ListC,1,NAtoms)
@@ -160,12 +161,12 @@ PROGRAM GONX2
   ! Make the distribution list(s).
   !WRITE(*,*) 'make List'
 #ifdef ONX2_PARALLEL
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL MakeGList(ListC,GMc,BSc,CS_OUT,CPt,CNbr,APt,ANbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
   CALL MakeGList(ListD,GMc,BSc,CS_OUT,DPt,DNbr,BPt,BNbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
   CALL MakeGList(ListC,GMc,BSc,CS_OUT)
@@ -193,9 +194,9 @@ PROGRAM GONX2
   !
 #ifdef ONX2_PARALLEL
   CALL GetDab(DFMab,APt,ANbr,BPt,BNbr,Args)
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL TrnMatBlk(BSc,GMc,DFMab)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
   TmTM = TmTM+Time2-Time1
 #endif
   !
@@ -203,9 +204,9 @@ PROGRAM GONX2
   ! Compute Exchange Forces.
   !WRITE(*,*) 'DKx'
 #ifdef ONX2_PARALLEL
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
   CALL ComputDK(D,GradX,BoxX,ListC,ListC,OffArr,GMc,BSc,CS_OUT)
@@ -218,10 +219,10 @@ PROGRAM GONX2
   ! Free up some space. Deallocate the list(s).
   !WRITE(*,*) 'deallocate List'
 #ifdef ONX2_PARALLEL
-  Time1 = MPI_WTIME()
+  Time1 = MondoTimer()
   CALL DeAllocList(ListC)
   CALL DeAllocList(ListD)
-  Time2 = MPI_WTIME()
+  Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
   CALL DeAllocList(ListC)
