@@ -1,3 +1,64 @@
+2002-07-05 17:03  mchalla
+
+	* HiCu/CubeTree.F90: Added a new, possibly better MAXSPLIT that
+	follows the max gradient when the cube aspect ratio isn't too bad. 
+	Chee Kwan, you should try this with your parallel stuff and see if
+	its ok!
+
+2002-07-05 16:57  mchalla
+
+	* MondoSCF/: DrvSCFs.F90, ParseInput.F90, SCFLocals.F90: Loosened
+	up HiCu thresholds and energy convergence criteria somewhat. 
+	Convergence seems better now.  Still needs mucho testing.
+
+2002-07-05 16:46  mchalla
+
+	* Dynamo/definitions.F90: Changed kind(8) to kind(0.D0) to be more
+	portable.  Silly Dynamo developers...
+
+2002-07-05 16:44  mchalla
+
+	* Includes/: CompilerSpecifics.IntelLinux.NAG,
+	CompilerSpecifics.IntelLinux.PG: Turned off -DMMECH as the default.
+
+2002-07-05 16:43  mchalla
+
+	* MondoMods/BraBloks.F90, MondoMods/Thresholding.F90,
+	QCTC/BlokTrPdJ.F90, QCTC/JGen.F90: New, rigorous extent0 is now the
+	only extent.  Gave it a pretty thorough testing.  Seems very
+	stable.  Turned POTENTIAL_O=TRUE on in all QCTC routines.
+
+2002-07-05 16:41  mchalla
+
+	* MondoMods/DErf.F: New DERF
+
+2002-07-05 16:40  mchalla
+
+	* MondoMods/: FTest.F90, Makefile, SpecFun.F90,
+	MMA/LookUpTables/Erf.Inc, MMA/LookUpTables/ErrorFunction.Inc,
+	MMA/LookUpTables/Exp.Inc, MMA/LookUpTables/F0.Inc,
+	MMA/LookUpTables/F1.Inc, MMA/LookUpTables/F10.Inc,
+	MMA/LookUpTables/F11.Inc, MMA/LookUpTables/F2.Inc,
+	MMA/LookUpTables/F3.Inc, MMA/LookUpTables/F4.Inc,
+	MMA/LookUpTables/F5.Inc, MMA/LookUpTables/F6.Inc,
+	MMA/LookUpTables/F7.Inc, MMA/LookUpTables/F8.Inc,
+	MMA/LookUpTables/F9.Inc, MMA/LookUpTables/GammaAssymptotics.Inc,
+	MMA/LookUpTables/GammaDimensions.Inc,
+	MMA/LookUpTables/GammaFunctions.m, MMA/LookUpTables/GammaGrid.Inc,
+	MMA/LookUpTables/InvExponential.m, MMA/LookUpTables/InverseExp.Inc:
+	Updated special function tables to be more accurate.  Replaced DERF
+	with a more portable DERF bandited from internet (used only to
+	check mondo ERF tables).
+
+2002-06-27 12:26  mchalla
+
+	* Docs/DSAndErrorEstimates/: DSEE.tex, compile: New paper in
+	progress on data structures and error estimates.
+
+2002-06-26 13:35  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-06-26 13:13  mchalla
 
 	* MondoMods/Thresholding.F90: Further improved Extent0.
