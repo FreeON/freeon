@@ -267,40 +267,36 @@ MODULE DerivedTypes
   TYPE DBuf
      INTEGER          :: Alloc   !-- Allocation key
      INTEGER          :: NShells
-     INTEGER          :: NTypes
-     INTEGER          :: NCnts
      INTEGER          :: NPrim
      INTEGER          :: MInfo
      INTEGER          :: MAXDis
      INTEGER          :: MAXPrm
-     INTEGER          :: MAXD
-     INTEGER          :: MAXC
-     INTEGER          :: MAXT
-     INTEGER          :: MAXP
+     INTEGER          :: MAXD    !-- Max dist in a l/c set: TBufC,TBufP
+     INTEGER          :: MAXT    !-- Max angular symmetry types: TCode,TCPop
+     INTEGER          :: MAXK    !-- Max contraction types: CCode,TCPop
+     INTEGER          :: MAXC    !-- Contracted data set size: TBufC
+     INTEGER          :: MAXP    !-- Primitive data set size: TBufP
      INTEGER          :: LenCC
      INTEGER          :: LenTC
      TYPE(INT_VECT)   :: TCode   !-- Angular symmetry types
      TYPE(INT_VECT)   :: CCode   !-- Contraction lengths
      TYPE(INT_RNK2)   :: TCPop   !-- Is this TCode and CCode populated?
-     TYPE(INT_RNK2)   :: BufN
-     TYPE(INT_RNK3)   :: BufT
      TYPE(DBL_RNK2)   :: TBufC   !-- Temp. contracted dis. buffer for 2-e estimates
      TYPE(DBL_RNK3)   :: TBufP   !-- Temp. primitive dis. buffer for 2-e estimates
-     TYPE(DBL_RNK3)   :: SchT
      TYPE(INT_RNK4)   :: DisPtr  !-- Pointers to locations in DisBuf and PrmBuf
      TYPE(DBL_VECT)   :: DisBuf  !-- Contracted dis. buffer for 2-e computation
      TYPE(DBL_VECT)   :: PrmBuf  !-- Primitive dis. buffer for 2-e computation
   END TYPE DBuf
 !-------------------------------------------------------------------------------------
-!  ONX ML info
+!  ONX SL info
 !
-  TYPE DML
+  TYPE DSL
      INTEGER          :: Alloc   !-- Allocation key
-     INTEGER          :: MAXML   !-- Maximum size of the ML buffers
-     TYPE(INT_VECT)   :: MLDis   !-- Pointer to distribution info
-     TYPE(INT_VECT)   :: MLPrm   !-- Pointer to primitive info
-     TYPE(INT_VECT)   :: MLKey   !-- Basis set offset key (for 2-e symmetry)
-  END TYPE DML
+     INTEGER          :: MAXSL   !-- Maximum size of the SL buffer
+     TYPE(INT_VECT)   :: SLDis   !-- Pointer to distribution info
+     TYPE(INT_VECT)   :: SLPrm   !-- Pointer to primitive info
+     TYPE(INT_VECT)   :: SLKey   !-- Basis set offset key (for 2-e symmetry)
+  END TYPE DSL
 !-------------------------------------------------------------------------------------
 !  ONX integral buffers
 !
@@ -310,12 +306,15 @@ MODULE DerivedTypes
      INTEGER          :: MAXI    !-- Size of W1 and W2
      INTEGER          :: Mesh    !-- Number of mesh point is the Gamma and Exp tables
      INTEGER          :: Lval    !-- Angular symmetry of Gamma table in memory
+     INTEGER          :: MAXL    !-- Max L in the Gamma tables
+     INTEGER          :: MaxInts !-- Maximum number of two-e in a vector loop
      REAL(DOUBLE)     :: Switch  !-- Multipole switch for the Gamma tables
      REAL(DOUBLE)     :: Grid    !-- Grid spacing in the Gamma and Exp tables
-     REAL(DOUBLE)     :: FAsymp  !-- Multipole asymptotics for current gamma
-     TYPE(DBL_VECT)   :: W1
-     TYPE(DBL_VECT)   :: W2
-     TYPE(DBL_RNK2)   :: CD
+     TYPE(DBL_VECT)   :: GammaA  !-- Multipole asymptotics for the gamma tables
+     TYPE(DBL_VECT)   :: W1      !-- Two-e scratch space
+     TYPE(DBL_VECT)   :: W2      !-- Two-e scratch space
+     TYPE(DBL_RNK2)   :: CB      !-- Bra contraction coefficients
+     TYPE(DBL_RNK3)   :: CK      !-- Ket contraction coefficients
      TYPE(DBL_RNK2)   :: WR
      TYPE(DBL_RNK2)   :: WZ
      TYPE(DBL_RNK2)   :: GT      !-- The current Gamma function table
