@@ -38,7 +38,7 @@ into our existing  quantum chemical tree-code within the linear scaling {\bf Mon
 %  
 We then illustrate, with several example systems,  how these modifications improves both the 
 accuracy and efficiency of our quantum chemical tree code, where we have achieve orders of 
-magnitude reduction of thecomputational cost.
+magnitude reduction of the computational cost.
 %
 \end{abstract}
 
@@ -100,12 +100,12 @@ This problem is easily rectified by our new bounded error estimate.
 %
 %
 
-In the next section we first review the multipole expansion specifically to sperical multipoles [ref]. 
+In the next section we first review the multipole expansion specifically to spherical multipoles [ref]. 
 %
 We then briefly review the multipole tree-code algorithm,and we then show how the efficiency of 
 the multipole tree-code code is controlled by the efficiency of the error estimates. 
 %
-We then briefly outline the derivation of our exact error bound and how it can be easilly implemented 
+We then briefly outline the derivation of our exact error bound and how it can be easily implemented 
 into existing codes which use the multipole expansion.
 %
 In the final section we illustrate how this exact error bound improves dramatically the efficiency 
@@ -116,26 +116,27 @@ of di-polar water.
 \section{The Multipole Expansion}
 
 Consider figure {\ref{figure:MultInBox}}, where we have depicted $N$ distributions inside the bounded 
-region $\Sigma$, and a interacting reference distribution $a$. 
+region $\Sigma$, and a interacting reference distribution, $a$. 
 %
 Here we are defining {\it distribution} as a confined area of charge, be it
-a point charge or local function, such as a gussian.  
+a point charge or local function, such as a Gaussian.  
 %
 %Let us also consider the long range interaction to be electrostatic in nature.
 %
 A simple, but computationally expensive, method to calculated the 
 interaction of distribution $a$ with all the distributions in the region $\Sigma$ is,
 \begin{eqnarray}
-V[\mathbf{R}_{a},\mathbf{R}_{box}] =
-\sum_{i=1}^{N} \frac{q_{a} \, q_{i}}{|\mathbf{R}_{a}-\mathbf{R}_{i}|}
+V[\mathbf{R}_{a},\mathbf{R}_{\Sigma}] =
+\sum_{i=1}^{N} \frac{\Delta_{a} \, \Delta_{i}}{|\mathbf{R}_{a}-\mathbf{R}_{i}|}
 \end{eqnarray}
 %
-However, this scales with the number of distributions in the box, leading to quadratic scaling for 
+However, as mentioned above, this scales with the number of distributions in the box, 
+leading to quadratic scaling for 
 the total interaction energy of $N$ distributions. 
 %
 One solution to this poor scaling would be to calculate the multipoles (here we use 
 spherical multipoles) of the set of distributions in the region $\Sigma$ at some center (in the 
-figure depicted by the red crosshairs), and then interact the reference distribution $a$ with the 
+figure depicted by the red cross hairs), and then interact the reference distribution $a$ with the 
 multipoles via
 %
 \begin{eqnarray}
@@ -168,8 +169,10 @@ In equation (\ref{MultI}) we have made use of the exact expansion [ref],
 given that $|\mathbf{R}-\mathbf{R'}| > |\mathbf{P}-\mathbf{Q}|$.
 
 %
-In tree code calculations ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ is usually of a particular angular 
-momentum type, $l_0$, such that the sum over $L$ is removed, and the value of $L'$ are usually fixed at 
+In our illustrative example, the  multipole tree code,  calculations ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ 
+are usually of a particular angular momentum type, $l_0$, such that the sum over $L$ can be removed.
+%
+And also, the value of $L'$ are usually fixed at 
 some maximum value, $L'=L_{max}$.
 %
 However, fixing the value of $L'$ creates the problem of how to control the accuracy of the calculation 
@@ -181,7 +184,7 @@ controlling our error.
 %
 \begin{figure}
 \caption{A set of $N$ distributions in a region $\Sigma$ and the interacting distribution $a$.
-And we define ${\bf d}_{max}$ as the maximum distance of the distrubutions from the regions center.}
+And we define ${\bf d}_{max}$ as the maximum distance of the distributions from the regions center.}
 {\centering \includegraphics {MultInBox.ps} \par} 
 \label{figure:MultInBox} 
 \end{figure}
@@ -270,13 +273,13 @@ M_{l_{0}+l'}^{m+m'}
 %
 which are the multipoles that are not summed in equation (\ref{MultI}) 
 (This is the same as equation (\ref{B7}) in Appendix A). What we then make use of is the
-Us{\"o}ld operator,
+Uns{\"o}ld operator,
 \begin{equation}
 {\cal O}_{l}\left[ \left| \mathbf{R}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!
 \left| {\cal O}_{l}^{m}
 \left[ \mathbf{R}\right] \right|^{2}}
 \end{equation}
-Which we will refer to as the Us{\"o}ld weight of the distributions in the region $\Sigma$. 
+Which we will refer to as the Uns{\"o}ld weight of the distributions in the region $\Sigma$. 
 Using this definition allows us to rewrite the error bound as,
 %
 %
@@ -337,14 +340,14 @@ Making the assumption that $L=L'=L_{max}$ we can write the fast multipole error 
 \end{eqnarray}
 where $|{\bf d}_{max}| = |{\bf d}_{max}^{\Sigma_1}|+|{\bf d}_{max}^{\Sigma_2}|$ and 
 ${\bf R}_{\Sigma_1}$ and ${\bf R}_{\Sigma_2}$ are the centers of, 
-${\bf d}_{max}^{\Sigma_1}$ and ${\bf d}_{max}^{\Sigma_2}$ are maxium distance of 
+${\bf d}_{max}^{\Sigma_1}$ and ${\bf d}_{max}^{\Sigma_2}$ are maximum distance of 
 the distributions from the centers, and
 ${\cal C}_{\Sigma_1}$ and ${\cal C}_{\Sigma_2}$ asymptotic Uns{\"o}ld weight of the distributions within 
 region $\Sigma_1$ and region $\Sigma_2$.
 
 \section{RESULTS}
 
-\subsection{Illustration of the Error Bound}
+\subsection{Illustration of the Exact Error Bound}
 
 Figure \ref{figure:MultipoleErrorWaterC512} is a contour plot of the logarithm of the binned error for a 
 classical di-polar water system of 512 molecule per unit cell 125 nearest neighbor cells for decreasing 
@@ -503,8 +506,9 @@ multipole basis
 {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\nonumber\\
 \end{eqnarray}
 %
-Let us now assume that the primitive distribution \( \rho _{1} \)
-is of a single angular momentum type and expanded about its center, 
+
+\medskip\noindent{\bf MTC Error:} Let us now assume that the primitive 
+distribution \( \rho _{1} \) is of a single angular momentum type and expanded about its center, 
 %
 \begin{equation}
 \label{B5}
@@ -549,6 +553,7 @@ Let us define for the Uns{\"o}ld operator
 \left| P_{l}^{m}
 (\mathbf{P})\right| ^{2}} \nonumber\\
 &=& \left| \mathbf{P}\right| ^{l}\geq 0
+\label{B8}
 \end{eqnarray}
 %
 and similarly the Uns{\"o}ld weights
@@ -568,7 +573,7 @@ Let us rewrite the bounded error estimate as
  \qquad\qquad\qquad\nonumber\\
 {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}
 [{\mathbf{P}-\mathbf{Q}}]\, 
-{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\bigg| 
+{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\bigg| \nonumber\\
 \label{B10}
 \end{eqnarray}
 %
@@ -615,6 +620,7 @@ to simplify
 \end{eqnarray}
 %
 Now, let use the triangle inequality 
+%
 \[
 \left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| 
 \qquad \qquad \]
@@ -624,19 +630,26 @@ Now, let use the triangle inequality
 \left| b_{n'}\right| ^{2}}
 \end{equation}
 to get
-\[
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
-\qquad 
-\qquad \qquad \qquad \qquad \]
+%
+%
+%
+\begin{eqnarray}
+&& \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty } \nonumber\\
+&& \qquad\bigg[ \sum _{m}^{l_0}  \sum _{m'}^{l'}
+\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)! (l'+m')!(l'-m')!} 
+\nonumber\\
+&& 
+\qquad\sum_{m''}^{l_0} (l_{0}+m'')!(l_{0}-m'')!\left| {\cal O}_{l_{0}}^{m''}\right|^{2} \nonumber\\
+&& 
+\qquad\sum_{m'''}^{l'} (l'+m''')!(l'-m''')!\left| {\cal O}_{l'}^{m'''}\right| ^{2} \bigg]^{\frac{1}{2}}
+\frac{1}
+{\left|\mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}\nonumber
+\end{eqnarray}
 \begin{equation}
 \label{B16}
-\frac{\sqrt{\sum ^{l_{0}}_{m''=-l_{0}}\sum _{m'''=-l'}^{l'}(l_{0}+m'')!(l_{0}-m'')!\left| 
-{\cal O}_{l_{0}}^{m''}\right|
- ^{2}\: (l'+m''')!(l'-m''')!\left| {\cal O}_{l'}^{m'''}\right| ^{2}}}{\left| \mathbf{P}-\mathbf{Q}
-\right| ^{l'+l_{0}+1}}
 \end{equation}
-Which we can rewrite very compactly as 
+%
+Which we can rewrite very compactly, using equation (\ref{B8}), as 
 \begin{equation}
 \label{B17}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}
@@ -647,9 +660,9 @@ Which we can rewrite very compactly as
 \end{equation}
 where
 \begin{equation}
+N\left[ l,l'\right] =\sqrt{\sum _{m,m'}^{l_{0},l'}\frac{\left[ (l_{0}+l'-(m+m'))!
+\right] ^{2}}{(l_{0}+m)!(l_{0}-m)! (l'+m')!(l'-m')!}}
 \label{B18}
-N\left[ l,l'\right] =\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!
-\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
 \end{equation}
 However, we still have to eliminate the infinite sum over \( l' \)
 within our error expression. Let us consider the limit of
@@ -665,6 +678,7 @@ weights.
 \rho \left( \mathbf{r}\right) =\sum _{i}c_{i}\, \delta \left( \mathbf{r}-\mathbf{r}_{i}\right) 
 \end{equation}
  then for the multipoles
+%
 \begin{equation}
 \label{B21}
 {\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, 
@@ -673,20 +687,22 @@ weights.
 \widehat{O}_{l}^{m}\left[ 
 \mathbf{r}_{i}-\mathbf{P}\right] 
 \end{equation}
-and for the Uns{\"o}ld weights\begin{eqnarray*}
+%
+and for the Uns{\"o}ld weights
+%
+\begin{eqnarray}
 {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ] & = & \sqrt{\sum _{m}(l-m)!(l+m)!\left| 
 {\cal O}_{l}^{m}\left[ 
-\rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}\\
+\rho ;\left| \mathbf{P}\right| \right] \right| ^{2}} \nonumber\\
  & = & \sqrt{\sum _{m}(l-m)!(l+m)!\left| \sum _{i}c_{i}\, \widehat{O}_{l}^{m}\left[ 
 \mathbf{r}_{i}-\mathbf{P}
-\right] \right| ^{2}}
-\end{eqnarray*}
-\begin{equation}
+\right] \right| ^{2}} \nonumber\\
 \label{B22}
-\; 
-\end{equation}
+\end{eqnarray}
+%
 which we can rewrite using the addition theorem of angular momentum
 as (ref)
+%
 \begin{equation}
 \label{B23}
 {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{ij}c_{i}\, c_{j}^{*}\, \left| 
@@ -705,34 +721,43 @@ which allows us to take the limit
 where \( \left| \mathbf{d}_{max}\right|  \)is the maximum distance
 of a distribution to the contraction center \( \left| \mathbf{P}\right|  \).
 Let us rewrite equation (\ref{B17}) as 
-\begin{equation}
-\label{B25}
+%
+\begin{eqnarray}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left|
  \mathbf{P}\right| 
-\right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{N\left[ 
+\right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}} 
+\qquad\qquad\qquad\qquad\nonumber\\
+\sum _{l=0}^{\infty }\frac{N\left[ 
 l_{0},l+L'+1\right]
  {\cal O}_{l+L'+1}\left[ \rho _{1};\left| \mathbf{Q}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}
-\right| ^{l}}
-\end{equation}
+\right| ^{l}} \nonumber\\
+\label{B25}
+\end{eqnarray}
+%
 Analyzing the behavior of \( N\left[ l,l'\right]  \) for large \( l' \)
 we find that
-\begin{equation}
+%
+\begin{eqnarray}
+N\left[ l,l'\right] && \leq \alpha _{l}\frac{\left( \left( 1+l'\right) 
+\left( 2+l'\right) \ldots \left( l+l'\right)\right) }{l!}\nonumber\\
+&&=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
 \label{B26}
-N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots 
-\left( l+l'\right)
- \right) }{l!}=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
-\end{equation}
-where \( \alpha _{l}\leq \sqrt{2} \). Using equation (\ref{B26})
-this can be written as
-\begin{equation}
-\label{B27}
+\end{eqnarray}
+%
+where \( \alpha _{l}\leq \sqrt{2} \). Using equation (\ref{B26}), equation(\ref{B25})
+can be written as
+%
+\begin{eqnarray}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
-\mathbf{P}\right| 
-\right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{n\left[ 
+\mathbf{P}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}
+\qquad\qquad\qquad\qquad\nonumber\\
+\sum _{l=0}^{\infty }\frac{n\left[ 
 l_{0},l+L'+1\right] 
 {\cal O}_{l+L'+1}\left[ \rho _{1};\left| \mathbf{Q}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}
-\right| ^{l}}
-\end{equation}
+\right| ^{l}} \nonumber\\
+\label{B27}
+\end{eqnarray}
+%
 What remains is to determine the upper bound to \( {\cal O}_{l}\left[ \rho _{1};\left| 
 \mathbf{Q}\right| \right]  \).
 Analyzing equation (\ref{B23}) we can show that
@@ -740,35 +765,43 @@ Analyzing equation (\ref{B23}) we can show that
 \label{B28}
 {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\leq C_{\rho }\left| \mathbf{d}_{max}\right| ^{l}
 \end{equation}
-Where \( C_{\rho } \) can be determined from\begin{equation}
-\label{B28B}
-C_{\rho }\equiv \max_{l=L+1} \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| 
+Where \( C_{\rho } \) can be determined from
+%
+\begin{equation}
+C_{\rho }\equiv \max_{l=L+1}^{\infty} \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| 
 \mathbf{d}_{max}\right|
  ^{l}}\right) 
+\label{B28B}
 \end{equation}
+%
 Using equation (\ref{B28}) the bounded error estimate can be rewritten as
-\begin{equation}
-\label{B29}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) && \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
 \mathbf{P}\right|
  \right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}
-\right| ^{l_{0}+L'+2}}
-\sum _{l=0}^{\infty }\frac{n\left[ l_{0},l+L'+1\right] \left| \mathbf{d}_{max}\right| ^{l}}{
+\right| ^{l_{0}+L'+2}} \nonumber\\
+&& \qquad\sum _{l=0}^{\infty }\frac{n\left[ l_{0},l+L'+1\right] \left| \mathbf{d}_{max}\right| ^{l}}{
 \left| \mathbf{P}-
 \mathbf{Q}\right| ^{l}}
-\end{equation}
-This can then be summed to
-\begin{equation}
-\label{B29B}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
+\label{B29}
+\end{eqnarray}
+%
+This can then be summed to the Hyper-geometric Function [ref]
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) && \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
 \mathbf{P}\right| 
 \right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}
 \right| ^{l_{0}+L'+2}}n
-\left[ l_{0},L'+1\right] \, _{2}F_{1}\left[ 1,\, l_{0}+L'+2,\, L'+2;\, \frac{\left| 
+\left[ l_{0},L'+1\right]\nonumber\\
+&& \qquad { _{2}}F_{1}\left[ 1,\, l_{0}+L'+2,\, L'+2;\, \frac{\left| 
 \mathbf{d}_{max}\right| }
-{\left| \mathbf{P}-\mathbf{Q}\right| }\right] 
-\end{equation}
-To leading order, this can be simplified to
+{\left| \mathbf{P}-\mathbf{Q}\right| }\right]\nonumber\\
+\label{B29B}
+\end{eqnarray}
+%
+Which, to leading order can be simplified to
 \begin{equation}
 \label{B30}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
@@ -781,58 +814,63 @@ To leading order, this can be simplified to
 \end{equation}
 which bounds equation (\ref{B29B}).
 
+\medskip\noindent{\bf FMM Error:}
 We can also derive an bounded error estimate FMM methods. In the case of FMM methods, equation (\ref{B5}) 
 does not apply, therefore our equations have to be modified. Starting with equation (\ref{B2}) we can 
-show that the error can be written as
-\begin{equation}
-\varepsilon_{FMM}  \leq  
+show that the error bound can be written as
+%
+\begin{eqnarray}
+\varepsilon_{FMM}  && \leq  
 {\frac{1}{2}}\sum_{l=0}^{\infty} \sum _{l'=0}^{\infty }
 \frac{{\cal O}_{l}[\rho _{1};\left|
 \mathbf{P}\right| ]\: N\left[ l,l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}
 {\left| 
-\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}
--{\frac{1}{2}}\sum_{l=0}^{L} \sum _{l'=0}^{L'}
+\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}} \nonumber\\
+&&-{\frac{1}{2}}\sum_{l=0}^{L} \sum _{l'=0}^{L'}
 \frac{{\cal O}_{l}[\rho _{1};\left|
 \mathbf{P}\right| ]\: N\left[ l,l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}
 {\left| 
-\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}
+\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}} \nonumber\\
 \label{B40}
-\end{equation}
+\end{eqnarray}
+%
 Using equations (\ref{B26}) and (\ref{B28B}) we can rewrite this as
-\begin{equation}
-\varepsilon_{FMM}  \leq 
-{\frac{C_{\rho_1} C_{\rho_2}}{2}} \left[
+\begin{eqnarray}
+\varepsilon_{FMM}  && \leq 
+{\frac{C_{\rho_1} C_{\rho_2}}{2}} \bigg[
 \sum_{l=0}^{\infty} \sum _{l'=0}^{\infty }
 {\frac{\left| \mathbf{d} \right|^{l} n[l,l'] \left| \mathbf{d'} \right|^{l'}}
-{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}}
--\sum _{l=0}^{L}\sum_{l'=0}^{L'}
+{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}} \nonumber\\
+&& \qquad\qquad\qquad-\sum _{l=0}^{L}\sum_{l'=0}^{L'}
 {\frac{\left| \mathbf{d} \right|^{l} n[l,l'] \left| \mathbf{d'} \right|^{l'}}
-{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}} \right]
+{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}} \bigg]\nonumber\\
 \label{B41}
-\end{equation}
-where
-\begin{equation}
-C_{\rho }  \equiv   \max_{l=0}^{\infty} \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}
-{\left| \mathbf{d}_{max}\right|^{l}}\right) 
-\label{B42}
-\end{equation}
+\end{eqnarray}
+%where
+%\begin{equation}
+%C_{\rho }  \equiv   \max_{l=0}^{\infty} \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}
+%{\left| \mathbf{d}_{max}\right|^{l}}\right) 
+%\label{B42}
+%\end{equation}
 This can be summed to get
-\begin{equation}
-\varepsilon_{FMM}  \leq 
-{\frac{C_{\rho_1} C_{\rho_2}}{2}} \left[
+%
+\begin{eqnarray}
+\varepsilon_{FMM} && \leq 
+{\frac{C_{\rho_1} C_{\rho_2}}{2}} \bigg[ 
 \frac{1}{\left|\left|\mathbf{P}-\mathbf{Q}\right|-\left| \mathbf{d} \right|-\left| \mathbf{d'} 
-\right| \right|}
--\sum _{l=0}^{L}\sum_{l'=0}^{L'}
+\right| \right|} \nonumber\\
+&&\qquad\qquad\qquad-\sum _{l=0}^{L}\sum_{l'=0}^{L'}
 {\frac{\left| \mathbf{d} \right|^{l} n[l,l'] \left| \mathbf{d'} \right|^{l'}}
-{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}} \right]
+{\left|\mathbf{P}-\mathbf{Q}\right| ^{l+l'+1}}} \bigg] \nonumber\\
 \label{B43}
-\end{equation}
-For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particularly simple form
+\end{eqnarray}
+%
+For the case where $L=L'$ this has a particularly simple form
 \begin{equation}
 \varepsilon_{FMM}  \leq \frac{1}{2}
-\frac{ C_{\rho_1} C_{\rho_2} \left| 2 \mathbf{d} \right|^{L+1}}
+\frac{ C_{\rho_1} C_{\rho_2} \left| |\mathbf{d}|+|\mathbf{d'}| \right|^{L+1}}
 {\left|\mathbf{P}-\mathbf{Q}\right|^{L+1}
-\left|\left|\mathbf{P}-\mathbf{Q}\right|-\left| 2 \mathbf{d} \right|\right|}
+\left|\left|\mathbf{P}-\mathbf{Q}\right|-\left||\mathbf{d}|+|\mathbf{d'}|  \right|\right|}
 \label{B44}
 \end{equation}
 \eject
