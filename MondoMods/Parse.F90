@@ -317,7 +317,9 @@ MODULE Parse
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: TmpLine
          CHARACTER(LEN=2)               :: At      
          INTEGER                        :: J,L,N,K1,K2
-         REAL(DOUBLE), DIMENSION(3)     :: Carts
+         REAL(DOUBLE), DIMENSION(:)     :: Carts
+!
+         Carts=Zero
          TmpLine=Line
          CALL LowCase(TmpLine)
          J=SCAN(TmpLine,Lower)
@@ -325,14 +327,17 @@ MODULE Parse
          At=TmpLine(J:J+1)
          J=J+2
          L=LEN(Line)   
-         DO N=1,3
+         DO N=1,6
             K1=J-1+SCAN(Line(J:L),Numbers)
             K2=K1-2+SCAN(Line(K1:L),' ')            
             Carts(N)=CharToDbl(TRIM(Line(K1:K2)))
             J=K2+1
-         ENDDO    
+            IF(J .GE. L) EXIT
+         ENDDO 
+!   
       END SUBROUTINE LineToGeom
-
+!------------------------------------------------------------------
+!
       SUBROUTINE LineToDbls(Line,N,Dbls)
          INTEGER,                   INTENT(IN)  :: N
          CHARACTER(LEN=*),          INTENT(IN)  :: Line
