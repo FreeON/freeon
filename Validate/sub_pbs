@@ -1,7 +1,7 @@
 rm -f $1.pbs
 echo "#!/bin/tcsh "                                   >  $1.pbs
 echo "#PBS -joe  -N  $1"                              >> $1.pbs
-echo "#PBS -l nodes=$2:gigabit"                       >> $1.pbs
+#echo "#PBS -l nodes=$2:gigabit"                       >> $1.pbs
 echo "cd $PWD"                                        >> $1.pbs
 echo "$MONDO_EXEC/MondoSCF  $1.inp $1.out $1.log"     >> $1.pbs
 echo "rm $MONDO_SCRATCH/$1* "                         >> $1.pbs
