@@ -126,7 +126,7 @@ PROGRAM SForce
   ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
-  TotFrcComp = 3*NAtomsa3
+  TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
   CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
