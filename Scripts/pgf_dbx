@@ -1,15 +1,12 @@
-#!/bin/sh
-pgdbg $MONDO_HOME/Exec/$1  -I$MONDO_HOME/ONX \
-                           -I$MONDO_HOME/MondoMods \
-                           -I$MONDO_HOME/MondoSCF \
-                           -I$MONDO_HOME/OneE \
-                           -I$MONDO_HOME/SolveSCF \
-                           -I$MONDO_HOME/Sparse/Blocked \
-                           -I$MONDO_HOME/MondoMisc/Char \
-                           -I$MONDO_HOME/MondoMisc/IO   \
-                           -I$MONDO_HOME/MondoMisc/Invok2 \
-                           -I$MONDO_HOME/MondoMisc/MPI \
-                           -I$MONDO_HOME/MondoMisc/Mem \
-                           -I$MONDO_HOME/MondoMisc/Misc \
-                           -I$MONDO_HOME/MondoMisc/Order \
-                       $2
+#!/bin/tcsh
+pgdbg $MONDO_EXEC/$1  -I$MONDO_HOME/MondoMods   \
+                      -I$MONDO_HOME/MondoSCF    \
+                      -I$MONDO_HOME/OneE        \
+                      -I$MONDO_HOME/QCTC        \
+                      -I$MONDO_HOME/HiCu        \
+                      -I$MONDO_HOME/ONX/NONX    \
+                      -I$MONDO_HOME/QuNew       \
+                      -I$MONDO_HOME/SCFeqs      \
+                      -I$MONDO_HOME/XForm       \
+                      -I$MONDO_HOME/VisDX       \
+                   $2

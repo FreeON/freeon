@@ -1,6 +1,0 @@
-#!/bin/sh
-pedb $MONDO_HOME/Exec/$1 -rmpool 0
-                      -I$MONDO_HOME/MondoMods \
-                      -I$MONDO_HOME/MondoSCF \
-                      -I$MONDO_HOME/OneE
-                     
