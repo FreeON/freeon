@@ -1674,10 +1674,12 @@ CONTAINS
      LOGICAL          :: DoBackTrack,DoLineS
      LOGICAL,OPTIONAL :: DoLineS_O
      REAL(DOUBLE)     :: EOld,ENew,MeanDist,FactN,FactO,Fact,MaxDist
+     REAL(DOUBLE)     :: BackTrackFact
      TYPE(DBL_VECT)   :: DistVect1,DistVect2
      TYPE(DBL_RNK2)   :: RefXYZ1
      TYPE(LOG_VECT)   :: NeedBackTr
      !
+     BackTrackFact=1.D0
      AccL=C%Opts%AccuracyLevels(iBAS)
      IF(.NOT.C%GOpt%GConvCrit%DoLattStep) THEN
        C%GOpt%GConvCrit%DoLattStep=.TRUE.
@@ -1695,7 +1697,7 @@ CONTAINS
                    "Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Get(EOld,'gm_etot'      ,Tag_O=ChGEO)
        ENew=C%Geos%Clone(iCLONE)%ETotal
-       NeedBackTr%L(iCLONE)=((ENew-EOld)/ABS(EOld)>10.D0*ETol(AccL))
+       NeedBackTr%L(iCLONE)=((ENew-EOld)/ABS(EOld)>BackTrackFact*ETol(AccL))
        CALL CloseHDFGroup(HDF_CurrentID)
      ENDDO
      CALL CloseHDF(HDFFileID)
@@ -1773,7 +1775,7 @@ CONTAINS
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
          !
-         DoBackTrack=((ENew-EOld)/ABS(EOld)>10.D0*ETol(AccL))
+         DoBackTrack=((ENew-EOld)/ABS(EOld)>BackTrackFact*ETol(AccL))
          !
          IF(iBStep>1.OR.DoBackTrack) THEN  
              CALL OPENAscii(OutFile,Out)
