@@ -11,6 +11,7 @@ MODULE Optimizer
   USE PunchHDF
   USE GlobalScalars
   USE HessianMod
+  USE SetXYZ
   IMPLICIT NONE
 CONTAINS
   !=====================================================================================
@@ -88,6 +89,9 @@ CONTAINS
            C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
          ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+    ENDDO
+    DO iCLONE=1,C%Geos%Clones
+      CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
     ENDDO
   END SUBROUTINE SteepD
   !=====================================================================================
@@ -172,7 +176,7 @@ CONTAINS
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D &
-                                      -StepLength*C%Geos%Clone(iCLONE)%Vects%D
+                                      -StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
           DO iCLONE=1,C%Geos%Clones
@@ -191,6 +195,9 @@ CONTAINS
        ! Compute a new energy
        CALL SCF(iBAS,iGEO+1,C)
     ENDDO
+    DO iCLONE=1,C%Geos%Clones
+      CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+    ENDDO
     ! Clean up
     CALL Delete(GradMax)
     CALL Delete(GradRMS)
@@ -202,10 +209,11 @@ CONTAINS
     TYPE(FileNames)        :: N
     TYPE(Geometries)       :: G
     TYPE(BasisSets)        :: B
-    TYPE(DBL_RNK2)         :: A,AInvM,Carts
+    TYPE(DBL_RNK2)         :: A,AInvM,Carts,XYZAux
     TYPE(DBL_VECT)         :: V,DIISCo,GradI,GradJ
     REAL(DOUBLE)           :: DIISError,CoNo,Ratio,AMax
-    INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K,Info
+    INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS
+    INTEGER                :: iATS,I,J,K,Info
     INTEGER,     PARAMETER :: MaxCoef=8
     REAL(DOUBLE),PARAMETER :: MaxCoNo=1D5
     !----------------------------------------------------------------------------------!
@@ -217,6 +225,7 @@ CONTAINS
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL New(GradI,G%Clone(iCLONE)%NAtms*3)
        CALL New(GradJ,G%Clone(iCLONE)%NAtms*3)
+       CALL New(XYZAux,(/3,G%Clone(iCLONE)%NAtms/))
 1      DIISError=Zero
        ! How far back we will go 
        mGEO=MAX(1,cGEO-nDIIS+2)
@@ -228,10 +237,12 @@ CONTAINS
        CALL New(V,nDIIS)
        DO I=1,nDIIS-1
           iDIIS=mGEO+I-1
-          CALL Get(GradI,'grade',Tag_O=IntToChar(iDIIS))
+          CALL Get(XYZAux,'gradients',Tag_O=IntToChar(iDIIS))
+          CALL CartRNK2ToCartRNK1(GradI%D,XYZAux%D)
           jDIIS=iDIIS
           DO J=I,nDIIS-1
-             CALL Get(GradJ,'grade',Tag_O=IntToChar(jDIIS))
+             CALL Get(XYZAux,'gradients',Tag_O=IntToChar(jDIIS))
+             CALL CartRNK2ToCartRNK1(GradJ%D,XYZAux%D)
              ! The A matrix
              A%D(I,J)=DOT_PRODUCT(GradI%D,GradJ%D)
              A%D(J,I)=A%D(I,J)
@@ -246,7 +257,8 @@ CONTAINS
        V%D(nDIIS)=One
        AInvM%D=Zero
        ! Solve the inverse least squares problem
-       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInvM%D,CoNo_O=CoNo,Unit_O=6)
+       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInvM%D,CoNo_O=CoNo, &
+                        Unit_O=6,PosDefMat_O=.FALSE.)
        CALL DGEMV('N',nDIIS,nDIIS,One,AInvM%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
        ! Here is the DIIS error (resdiual)       
        DIISError=MAX(DIISError,ABS(DIISCo%D(nDIIS)))
@@ -276,9 +288,10 @@ CONTAINS
           CALL Delete(Carts)
        ELSE
           ! Stalled, freshen things up with a steepest descent move
-          G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Vects%D          
+          G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Gradients%D          
        ENDIF
        ! Clean up a bit 
+       CALL Delete(XYZAux)
        CALL Delete(GradI)
        CALL Delete(GradJ)
        CALL Delete(V)
@@ -315,12 +328,12 @@ CONTAINS
        MAXGrad=MAX(MAXGrad,C%Geos%Clone(iCLONE)%GradMax)
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
-    ! Take some steps, more conservative if we are doing NEB ...
+!   Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
        StepLength=75D-2       
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
-          C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
+          C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
        ENDDO
        ! Archive geometries
        CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -349,7 +362,7 @@ CONTAINS
           StepLength=StepLength/Two
           ! Step the absolute positions
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
+             C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
           ENDDO
           ! Archive geometries
           CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -482,7 +495,7 @@ CONTAINS
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
        !
-       ! Archive displaced geometries 
+       ! Archive displaced geometries and modified (Lagrange) grads
        !
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
@@ -1085,7 +1098,7 @@ CONTAINS
          AtNum%D(NatmsLoc)=Geos%Clone(iCLONE)%AtNum%D(I)
          XYZ%D(1:2,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(1:2,I)
          XYZ%D(3,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(3,I)+Sum
-         Vects%D(3,NatmsLoc)=Geos%Clone(iCLONE)%Vects%D(3,I)
+         Vects%D(3,NatmsLoc)=Geos%Clone(iCLONE)%Gradients%D(3,I)
        ENDDO
      ENDDO
      !
@@ -1138,7 +1151,7 @@ CONTAINS
        IF(GMLoc%CConstrain%I(I)/=2) THEN
          NatmsNew=NatmsNew+1
          XYZNew%D(1:3,NatmsNew)=GMLoc%Displ%D(1:3,I)
-         GradNew%D(1:3,NatmsNew)=GMLoc%Vects%D(1:3,I)
+         GradNew%D(1:3,NatmsNew)=GMLoc%Gradients%D(1:3,I)
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
@@ -1161,21 +1174,9 @@ CONTAINS
        IF(GMLoc%CConstrain%I(I)/=2) THEN
          NatmsNew=NatmsNew+1
          GMLoc%Displ%D(1:3,I)=XYZNew%D(1:3,NatmsNew)
-         GMLoc%Vects%D(1:3,I)=GradNew%D(1:3,NatmsNew)
+         GMLoc%Gradients%D(1:3,I)=GradNew%D(1:3,NatmsNew)
        ENDIF
      ENDDO
-     !
-     ! Put modified (Energy->Lagrangian) gradients into HDF 
-     !
-     HDFFileID=OpenHDF(Nams%HFile)
-     HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-                   "Clone #"//TRIM(IntToChar(iCLONE)))
-       CALL New(CartGrad,3*GMLoc%Natms)
-       CALL CartRNK2ToCartRNK1(CartGrad%D,GMLoc%Vects%D)
-       CALL Put(CartGrad,'GradE',Tag_O=IntToChar(iGEO))
-       CALL Delete(CartGrad)
-     CALL CloseHDFGroup(HDF_CurrentID)
-     CALL CloseHDF(HDFFileID)
      !
      CALL Delete(XYZNew)
      CALL Delete(AtNumNew)

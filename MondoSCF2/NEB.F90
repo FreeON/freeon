@@ -24,8 +24,7 @@ MODULE NEB
   SAVE
   PRIVATE
   PUBLIC :: NEBInit,NEBForce
-CONTAINS
-
+  CONTAINS
   !===============================================================================
   ! Initialize the NEB by generating an linear interpolation between intial
   ! and final states. 
@@ -158,19 +157,19 @@ CONTAINS
 !GH       write(*,*)'Normal'
 !GH       write(*,'(3F13.5)') (N(:,j),j=1,G%Clone(0)%NAtms)
 !GH       write(*,*)'In Force'
-!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
 
        ! Project out the force along the tangent, unless this is the
        ! climbing image, for which the force along the tangent is inverted
-       FProj=SUM(G%Clone(I)%Vects%D*N)
+       FProj=SUM(G%Clone(I)%Gradients%D*N)
 !GH       write(*,*)'Prj Force'
        IF(O%NEBClimb.AND.I==UMaxI)THEN
 !GH          write(*,*)'Climbing Image',I
-          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D-2.0*N*FProj
+          G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D-2.0*N*FProj
        ELSE
-          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D-N*FProj
+          G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D-N*FProj
        ENDIF
-!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
 
        ! Add spring forces along the band (if we are not the climbing image)
        Rm=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D)**2))
@@ -179,11 +178,11 @@ CONTAINS
        IF(O%NEBClimb.AND.I==UMaxI)THEN
           ! Do nothing (no springs for the climbing image)
        ELSE
-          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D+O%NEBSpring*N*(Rp-Rm)
+          G%Clone(I)%Gradients%D=G%Clone(I)%Gradients%D+O%NEBSpring*N*(Rp-Rm)
        ENDIF
 
 !GH       write(*,*)'Out Force'
-!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
        ! Write distance, energies and forces
        Dist=Dist+Rm
        write(*,'(A,I5,3F13.5)') 'NEB: ',I,Dist,G%Clone(I)%ETotal,FProj

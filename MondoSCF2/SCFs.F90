@@ -1,10 +1,8 @@
 MODULE SCFs
   USE Parse
   USE InOut
-
   USE LinAlg 
   USE GlobalObjects
-
   USE SCFKeys
   USE Overlay
   USE SCFKeys
@@ -14,6 +12,7 @@ MODULE SCFs
   USE Functionals
   USE ControlStructures
   USE NEB
+  USE SetXYZ 
   IMPLICIT NONE 
   INTEGER HDFFileID,H5GroupID
 CONTAINS
@@ -117,28 +116,19 @@ CONTAINS
     TYPE(State)        :: S
     TYPE(Geometries)   :: G
     TYPE(Parallel)     :: M
-
     TYPE(BasisSets)    :: B
-
-    TYPE(DBL_VECT)     :: GradE
     INTEGER            :: cBAS,cGEO,K,J,iATS,iCLONE
     CHARACTER(LEN=DCL) :: chGEO    
-    TYPE(DBL_RNK2)     :: Tmp
+    REAL(DOUBLE)       :: GradVal
     !----------------------------------------------------------------------------!
     ! Initialize the force vector in HDF, clone by clone
     chGEO=IntToChar(cGEO)
-    CALL New(GradE,G%Clone(1)%NAtms*3)
-    HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       GradE%D=BIG_DBL
-       ! Put the initialized forces back ...
-       CALL Put(GradE,'GradE',Tag_O=chGEO)
-       ! ... and close the group
-       CALL CloseHDFGroup(HDF_CurrentID)
-       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       G%Clone(iCLONE)%Gradients%D=BIG_DBL
+       G%Clone(iCLONE)%GradRMS=&
+            SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
     ENDDO
-    CALL CloseHDF(HDFFileID)
+    CALL GeomArchive(cBAS,cGEO,N,B,G)
     ! Now evaluate the forces
     S%Action='ForceEvaluation'
     ! The non-orthogonal response    
@@ -161,92 +151,56 @@ CONTAINS
     IF(HasDFT(O%Models(cBas))) THEN
        CALL Invoke('XCForce',N,S,M)
     ENDIF
-    ! Load forces and Lattice Forces
-    CALL New(Tmp,(/3,3/))
+!
+!   Constraint the Gradients
+!
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       CALL Get(GradE,'GradE',Tag_O=chGEO)
-       K=0
-       G%Clone(iCLONE)%Vects%D=Zero
-       IF(O%Coordinates==GRAD_INTS_OPT) THEN
+       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+       IF(O%Coordinates/=GRAD_INTS_OPT) THEN
          DO iATS=1,G%Clone(iCLONE)%NAtms
-           DO J=1,3;K=K+1
-             G%Clone(iCLONE)%Vects%D(J,iATS)=GradE%D(K)
-           ENDDO
-         ENDDO
-       ELSE
-         DO iATS=1,G%Clone(iCLONE)%NAtms
-            IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-               DO J=1,3;K=K+1
-                  G%Clone(iCLONE)%Vects%D(J,iATS)=GradE%D(K)
-               ENDDO
-            ELSE
-               K=K+3
+            IF(G%Clone(iCLONE)%CConstrain%I(iATS)/=0)THEN
+               G%Clone(iCLONE)%Gradients%D(:,iATS)=Zero
             ENDIF
          ENDDO
        ENDIF
-       ! Get the lattice forces and Save to the clones
-       G%Clone(iCLONE)%PBC%LatFrc=Zero
-       CALL Get(Tmp,'LatFrc_S',Tag_O=chGEO)
-       G%Clone(iCLONE)%PBC%LatFrc=G%Clone(iCLONE)%PBC%LatFrc+Tmp%D
-       CALL Get(Tmp,'LatFrc_T',Tag_O=chGEO)
-       G%Clone(iCLONE)%PBC%LatFrc=G%Clone(iCLONE)%PBC%LatFrc+Tmp%D
-       CALL Get(Tmp,'LatFrc_J',Tag_O=chGEO)
-       G%Clone(iCLONE)%PBC%LatFrc=G%Clone(iCLONE)%PBC%LatFrc+Tmp%D
-       IF(HasDFT(O%Models(cBas))) THEN
-          CALL Get(Tmp,'LatFrc_XC',Tag_O=chGEO)
-          G%Clone(iCLONE)%PBC%LatFrc=G%Clone(iCLONE)%PBC%LatFrc+Tmp%D
-       ENDIF
-       IF(HasHF(O%Models(cBas)))THEN
-          CALL Get(Tmp,'LatFrc_X',Tag_O=chGEO)
-          G%Clone(iCLONE)%PBC%LatFrc=G%Clone(iCLONE)%PBC%LatFrc+Tmp%D
-       ENDIF
-       ! Close the group
+!      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
-       ! Print the Forces and BoxForces if O%Grad==GRAD_ONE_FORCE
+!      Print the Forces and BoxForces if O%Grad==GRAD_ONE_FORCE
        IF(O%Grad==GRAD_ONE_FORCE) THEN
           CALL Print_Force(G%Clone(iCLONE))
-!          CALL Print_Force(G%Clone(iCLONE),Unit_O=6)
        ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
-    ! NEB force projections
+!   NEB force projections
     IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
        CALL NEBForce(G,O)
     ENDIF
-    ! Zero forces on contrained atoms and compute stats with projected forces
+!   Zero forces on constrained atoms and compute stats with projected forces
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       K=0
-       GradE%D=Zero
        G%Clone(iCLONE)%GradMax=Zero
        G%Clone(iCLONE)%GradRMS=Zero
        DO iATS=1,G%Clone(iCLONE)%NAtms
           IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             DO J=1,3;K=K+1
-                GradE%D(K)=G%Clone(iCLONE)%Vects%D(J,iATS)
-                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradE%D(K)**2
-                G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradE%D(K)))
+             DO J=1,3
+                GradVal=G%Clone(iCLONE)%Gradients%D(J,iATS)
+                G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
+                G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
              ENDDO
-          ELSE
-             K=K+3
           ENDIF
        ENDDO
        ! Put the zeroed forces back ...
-       CALL Put(GradE,'GradE',Tag_O=chGEO)
        ! ... and close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
     ENDDO
     ! Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
-    ! .. and clean up 
-    CALL Delete(Tmp)
-    CALL Delete(GradE)
   END SUBROUTINE Force
   !===============================================================================
   ! BUILD A HGTF DENSITY BY HOOK OR BY CROOK
@@ -523,7 +477,7 @@ CONTAINS
     TYPE(Geometries) :: G
     TYPE(BasisSets)  :: B
     TYPE(Parallel)   :: M
-    TYPE(DBL_VECT)   :: GradE
+    TYPE(DBL_RNK2)   :: GradAux1,GradAux2
     INTEGER          :: cBAS,cGEO,J,iATS,iCLONE
     CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
     TYPE(BCSR),DIMENSION(G%Clones)   :: P
@@ -540,7 +494,8 @@ CONTAINS
     chSCF=IntToChar(S%Current%I(1)+1)
     CALL New(BSiz,G%Clone(1)%NAtms)
     CALL New(OffS,G%Clone(1)%NAtms)
-    CALL New(GradE,G%Clone(1)%NAtms*3)
+    CALL New(GradAux1,(/3,G%Clone(1)%NAtms/))
+    CALL New(GradAux2,(/3,G%Clone(1)%NAtms/))
     DO iCLONE=1,G%Clones
        ! Load globals 
        NAToms=G%Clone(1)%NAtms
@@ -625,9 +580,10 @@ CONTAINS
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       CALL Get(GradE,'GradE',Tag_O=chGEO)
-       GradE%D=GradE%D+FX(iCLONE,:)
-       CALL Put(GradE,'GradE',Tag_O=chGEO)
+       CALL Get(GradAux1,'gradients',Tag_O=chGEO)
+       CALL CartRNK1ToCartRNK2(FX(iCLONE,:),GradAux2%D)
+       GradAux1%D=GradAux1%D+GradAux2%D     
+       CALL Put(GradAux1,'gradients',Tag_O=chGEO)
        ! Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
@@ -637,7 +593,8 @@ CONTAINS
        CALL Delete(GTmp(iCLONE))
        CALL Delete(P(iCLONE))
     ENDDO
-    CALL Delete(GradE)
+    CALL Delete(GradAux1)
+    CALL Delete(GradAux2)
     CALL Delete(BSiz)
     CALL Delete(OffS)
     CALL Delete(K)

@@ -497,6 +497,7 @@ CONTAINS
      IMPLICIT NONE
      INTEGER :: NIntC,NIntC2,I,J,K,L,NatmsLoc,IntCoo
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE)                :: Value
      TYPE(INTC) :: IntCs
      TYPE(BMATR):: B
      REAL(DOUBLE)  :: LinCrit,TorsLinCrit
@@ -542,8 +543,17 @@ CONTAINS
          L=IntCs%Atoms(IntCoo,4) !!! Def plane
          CALL OutP(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),&
            B%B(IntCoo,1:12))
-        !write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
-        ! B%B(IntCoo,1:12)*AngstromsToAu
+       ! write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
+       !  B%B(IntCoo,1:12)*AngstromsToAu
+       ! CALL TORS(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,L), &
+       !   XYZ(1:3,K),TorsLinCrit,IntCs%Active(IntCoo), &
+       !   BB_O=B%B(IntCoo,1:12))
+       ! CALL OutP2(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L), &
+       !            IntCs%Active(IntCoo),BB_O=B%B(IntCoo,1:12), &
+       !            Value_O=Value)
+       ! write(*,*) 'value= ',value 
+       ! write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
+       !  B%B(IntCoo,1:12)*AngstromsToAu
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
          B%IB(IntCoo,1:4)=IntCs%Atoms(IntCoo,1:4)
@@ -771,6 +781,70 @@ CONTAINS
      1020 format(/,2x,'<!> warning: wag of a non-planar system at internal',/,15x,'coordinate no.',i5,':')
      !
    END SUBROUTINE OutP
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE OutP2(XI,XJ,XK,XL,Active,BB_O,Value_O)
+     !
+     !  i is the end atom (atom wagged with respect to j-k-l plane).
+     !  j is the apex atom (Atoms i, k and l are attached to j).
+     !  k and l are the anchor Atoms (Define the j-k-l plane).
+     !
+     REAL(DOUBLE),DIMENSION(1:3)           :: XI,XJ,XK,XL
+     REAL(DOUBLE),DIMENSION(1:12),OPTIONAL :: BB_O
+     REAL(DOUBLE),OPTIONAL                 :: Value_O
+     REAL(DOUBLE),DIMENSION(1:3)           :: VIJ,VKJ,VLJ
+     REAL(DOUBLE)                          :: RIJ,RKJ,RLJ,Tol,Sum
+     REAL(DOUBLE),DIMENSION(1:3)           :: WKL,WLI,WIK
+     REAL(DOUBLE)                          :: RWKL,RWLI,RWIK
+     LOGICAL                               :: Active
+     !
+     Tol=1.D-3
+     IF(PRESENT(BB_O)) BB_O=Zero
+     IF(PRESENT(Value_O)) Value_O=Zero
+     !
+     VIJ=XI-XJ 
+     VKJ=XK-XJ
+     VLJ=XL-XJ
+     RIJ=SQRT(DOT_PRODUCT(VIJ,VIJ))
+     RKJ=SQRT(DOT_PRODUCT(VKJ,VKJ))
+     RLJ=SQRT(DOT_PRODUCT(VLJ,VLJ))
+     IF(RIJ<Tol.OR.RKJ<Tol.OR.RLJ<Tol) THEN
+       Active=.FALSE.
+       RETURN
+     ENDIF
+     VIJ=VIJ/RIJ
+     VKJ=VKJ/RKJ
+     VLJ=VLJ/RLJ
+     !
+     CALL CROSS_PRODUCT(VKJ,VLJ,WKL)
+     CALL CROSS_PRODUCT(VLJ,VIJ,WLI)
+     CALL CROSS_PRODUCT(VIJ,VKJ,WIK)
+     RWKL=SQRT(DOT_PRODUCT(WKL,WKL))
+     RWLI=SQRT(DOT_PRODUCT(WLI,WLI))
+     RWIK=SQRT(DOT_PRODUCT(WIK,WIK))
+     IF(RWKL<Tol) THEN
+       Active=.FALSE.
+       RETURN
+     ENDIF
+   ! WKL=WKL/RWKL
+   ! WLI=WLI/RWLI
+   ! WIK=WIK/RWIK
+     !
+     IF(PRESENT(Value_O)) THEN
+       Sum=DOT_PRODUCT(WKL,VIJ)
+write(*,*) 'sum= ',sum
+       IF(ABS(Sum)>One-1.D-7) Sum=SIGN(One-1.D-7,Sum)
+       Value_O=PI-ACOS(Sum)
+     ENDIF
+     !
+     IF(PRESENT(BB_O)) THEN
+       BB_O(1:3)=WKL
+       BB_O(4:6)=-(WKL+WLI+WIK)
+       BB_O(7:9)=WLI
+       BB_O(10:12)=WIK
+     ENDIF
+   END SUBROUTINE OutP2
 !
 !----------------------------------------------------------------------
 !
@@ -2171,13 +2245,13 @@ CONTAINS
      ! First, calculate maximum Cartesian 
      ! extension of the elementary cell
      !
-     DX=GMLoc%PBC%BoxShape(1,1)
-     DY=GMLoc%PBC%BoxShape(1,2)
-     DZ=GMLoc%PBC%BoxShape(1,3)
+     DX=GMLoc%PBC%BoxShape%D(1,1)
+     DY=GMLoc%PBC%BoxShape%D(1,2)
+     DZ=GMLoc%PBC%BoxShape%D(1,3)
      DO I=2,3
-       DX=MAX(DX,GMLoc%PBC%BoxShape(I,1))
-       DY=MAX(DY,GMLoc%PBC%BoxShape(I,2))
-       DZ=MAX(DZ,GMLoc%PBC%BoxShape(I,3))
+       DX=MAX(DX,GMLoc%PBC%BoxShape%D(I,1))
+       DY=MAX(DY,GMLoc%PBC%BoxShape%D(I,2))
+       DZ=MAX(DZ,GMLoc%PBC%BoxShape%D(I,3))
      ENDDO
      MaxCart=DX
      MaxCart=MAX(MaxCart,DY) 
@@ -2227,14 +2301,14 @@ CONTAINS
      DO IC=-NZ,NZ
        IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
        DO I=1,GMLoc%Natms
-         XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape(1,1)+&
-               IB*GMLoc%PBC%BoxShape(2,1)+IC*GMLoc%PBC%BoxShape(3,1)
+         XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape%D(1,1)+&
+               IB*GMLoc%PBC%BoxShape%D(2,1)+IC*GMLoc%PBC%BoxShape%D(3,1)
                 IF(XTrans<-LJCutOff .OR. XTrans>DX+LJCutOff) CYCLE
-         YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape(1,2)+&
-               IB*GMLoc%PBC%BoxShape(2,2)+IC*GMLoc%PBC%BoxShape(3,2)
+         YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape%D(1,2)+&
+               IB*GMLoc%PBC%BoxShape%D(2,2)+IC*GMLoc%PBC%BoxShape%D(3,2)
                 IF(YTrans<-LJCutOff .OR. YTrans>DY+LJCutOff) CYCLE
-         ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape(1,3)+&
-               IB*GMLoc%PBC%BoxShape(2,3)+IC*GMLoc%PBC%BoxShape(3,3)
+         ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape%D(1,3)+&
+               IB*GMLoc%PBC%BoxShape%D(2,3)+IC*GMLoc%PBC%BoxShape%D(3,3)
                 IF(ZTrans<-LJCutOff .OR. ZTrans>DZ+LJCutOff) CYCLE
          II=II+1
          XYZLJCell2%D(1,II)=XTrans
@@ -3008,64 +3082,6 @@ CONTAINS
    END SUBROUTINE MapAngleDispl
 !
 !--------------------------------------------------------------------
-!
-   SUBROUTINE CartRNK1ToCartRNK2(VectCart,ActCarts,Add_O)
-     REAL(DOUBLE),DIMENSION(:)   :: VectCart
-     REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
-     INTEGER :: I,J,NatmsLoc
-     LOGICAL,OPTIONAL :: Add_O
-     !
-     NatmsLoc=SIZE(ActCarts,2)
-     IF(PRESENT(Add_O)) THEN
-       IF(Add_O) THEN
-         DO I=1,NatmsLoc 
-           J=3*(I-1)
-           ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
-           ActCarts(2,I)=ActCarts(2,I)+VectCart(J+2)
-           ActCarts(3,I)=ActCarts(3,I)+VectCart(J+3)
-         ENDDO
-       ENDIF
-     ELSE
-       DO I=1,NatmsLoc 
-         J=3*(I-1)
-         ActCarts(1,I)=VectCart(J+1)
-         ActCarts(2,I)=VectCart(J+2)
-         ActCarts(3,I)=VectCart(J+3)
-       ENDDO
-     ENDIF
-   END SUBROUTINE CartRNK1ToCartRNK2
-!
-!---------------------------------------------------------------
-!
-   SUBROUTINE CartRNK2ToCartRNK1(VectCart,ActCarts,Add_O)
-     !
-     REAL(DOUBLE),DIMENSION(:)   :: VectCart
-     REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
-     INTEGER :: I,J,NatmsLoc
-     LOGICAL,OPTIONAL :: Add_O
-     !
-     NatmsLoc=SIZE(ActCarts,2)
-     !
-     IF(PRESENT(Add_O)) THEN
-       IF(Add_O) THEN
-         DO I=1,NatmsLoc 
-           J=3*(I-1)
-           VectCart(J+1)=VectCart(J+1)+ActCarts(1,I)
-           VectCart(J+2)=VectCart(J+2)+ActCarts(2,I)
-           VectCart(J+3)=VectCart(J+3)+ActCarts(3,I)
-         ENDDO
-       ENDIF
-     ELSE
-       DO I=1,NatmsLoc 
-         J=3*(I-1)
-         VectCart(J+1)=ActCarts(1,I)
-         VectCart(J+2)=ActCarts(2,I)
-         VectCart(J+3)=ActCarts(3,I)
-       ENDDO
-     ENDIF
-   END SUBROUTINE CartRNK2ToCartRNK1
-!
-!----------------------------------------------------------------------
 !
    SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,HBondCenter, &
                             CtrlCoord,SCRPath,LongRangeTag)
