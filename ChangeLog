@@ -1,3 +1,27 @@
+2005-02-07 13:37  nemeth
+
+	* MondoSCF2/SCFs.F90: Numerical lattice force stuff commented out.
+
+2005-02-07 12:06  nemeth
+
+	* MondoSCF2/QUICCA.F90: Filtering of data points is activated. This
+	leaves Baker's test results unchanged while it helps in larger
+	molecules and crystals.
+
+2005-02-07 10:32  tymczak
+
+	* MondoSCF2/SCFs.F90: Fixed the Paralellec bug in getting the
+	lattice force
+
+2005-02-03 17:13  nemeth
+
+	* MondoSCF2/QUICCA.F90: Reordering routine modified but it is
+	commented out and not used.
+
+2005-02-03 15:06  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-02-03 13:57  tymczak
 
 	* QCTC/JGen.F90: Turned off te wrapping inorder to fix the lattice
@@ -25,6 +49,11 @@
 	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: Energy total
 	derivatives added. This improves convergence when tight accuracy is
 	required.
+
+2005-01-28 19:07  nemeth
+
+	* Docs/Optimizer/OPTIMIZER_MANUAL/: README, manual.pdf, manual.tex:
+	A manual for the QUICCA optimizer added.
 
 2005-01-27 18:37  nemeth
 
