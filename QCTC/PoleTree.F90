@@ -14,7 +14,7 @@ MODULE PoleTree
    IMPLICIT NONE
 !----------------------------------------------------------------------------------
 !  Globals
-   TYPE(PoleNode), POINTER               :: PoleRoot  ! Root of the pole tree 
+   TYPE(PoleNode), POINTER               :: PoleRoot ! Root of the pole tree 
    INTEGER                               :: PoleNodes
    INTEGER                               :: RhoLevel
    INTEGER                               :: CurrentTier
@@ -50,8 +50,8 @@ MODULE PoleTree
            CALL MakePoleTree(PoleRoot) 
         ENDDO
 !       Reset Ell of PoleRoot
-        PoleRoot%Ell=SPEll
-!        CALL Print_PoleNode(PoleRoot,'Root')
+        PoleRoot%Ell     = SPEll
+!
       END SUBROUTINE RhoToPoleTree
 !=====================================================================================
 !
@@ -82,12 +82,11 @@ MODULE PoleTree
 !     
 !=================================================================================
       RECURSIVE SUBROUTINE MakePoleTree(P)
-         TYPE(PoleNode)                   :: P
-         TYPE(PoleNode),POINTER           :: LeftQ,RightQ
-         INTEGER                          :: K
-         REAL(DOUBLE)                     :: RightDist,LeftDist
-         REAL(DOUBLE),PARAMETER           :: SPEllPlus2=SPEll+2
-         REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/SPEllPlus2
+         TYPE(PoleNode)                        :: P
+         TYPE(PoleNode),POINTER                :: LeftQ,RightQ
+         INTEGER                               :: I,J,K,L,LL,LM
+         REAL(DOUBLE)                          :: MaxUnsold,PMax
+         REAL(DOUBLE)                          :: M1,M2,M3,CQ,Del
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
             P%C=Zero
@@ -108,31 +107,53 @@ MODULE PoleTree
             ENDDO
             P%Box%Half(:)  = Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
             P%Box%Center(:)= Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
-!           Compute new nodes DBox
-            DO K=1,3
-               P%DBox%BndBox(K,1)=MIN(LeftQ%DBox%BndBox(K,1),RightQ%DBox%BndBox(K,1))
-               P%DBox%BndBox(K,2)=MAX(LeftQ%DBox%BndBox(K,2),RightQ%DBox%BndBox(K,2))
-            ENDDO
-            P%DBox%Half(:)  = Half*(P%DBox%BndBox(:,2)-P%DBox%BndBox(:,1))
-            P%DBox%Center(:)= Half*(P%DBox%BndBox(:,2)+P%DBox%BndBox(:,1))
-!           Compute DMax
+!           Compute DMax2
             P%DMax2 = Zero
-            DO K=1,3
-               P%DMax2 = P%DMax2+(P%DBox%Center(K)-P%DBox%BndBox(K,2))**2
+            DO I=P%Bdex,P%Edex
+               J=Qdex(I)
+               PMax = (Rho%Qx%D(J)-P%Box%Center(1))**2+(Rho%Qy%D(J)-P%Box%Center(2))**2+(Rho%Qz%D(J)-P%Box%Center(3))**2
+               P%DMax2=MAX(P%DMax2,PMax)
             ENDDO
 !           Compute Zeta
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
-!-----------------------------------------------------------------------------
-!           Translate Left and Right with SPEll+1
-!           Translate LeftQ-> P
-            CALL XLate(LeftQ,P)
-!           Translate RightQ-> P
-            CALL XLate(RightQ,P)
-!           Reset Ell of Right and Left nodes if not leafs
-            IF(.NOT.LeftQ%Leaf)   LeftQ%Ell=SPell
-            IF(.NOT.RightQ%Leaf) RightQ%Ell=SPell
-!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength=Unsold1(0,SPEll+1,P%C,P%S)**UnsoldExp
+!           Set the Ells and the Strengths
+            IF(SQRT(P%DMax2) < 1.D-12) THEN
+!              Reset Ell of Right and Left nodes if not leafs
+               IF(.NOT.LeftQ%Leaf) THEN
+                  LeftQ%Ell     = MIN(MAX(LeftQ%Descend%Ell,LeftQ%Descend%Travrse%Ell),SPEll)
+               ENDIF
+               IF(.NOT.RightQ%Leaf) THEN 
+                  RightQ%Ell    = MIN(MAX(RightQ%Descend%Ell,RightQ%Descend%Travrse%Ell),SPEll)
+               ENDIF
+!              Accumulate the Multipoles in P
+               DO LM=0,LSP(LeftQ%Ell)
+                  P%C(LM) = LeftQ%C(LM)
+                  P%S(LM) = LeftQ%S(LM)
+               ENDDO
+               DO LM=0,LSP(RightQ%Ell)
+                  P%C(LM) = P%C(LM)+RightQ%C(LM)
+                  P%S(LM) = P%S(LM)+RightQ%S(LM)
+               ENDDO
+!              Compute the multipole strength  MAX{[O^P_(L+1)]^(2/(2+L))}
+               P%Strength=Zero
+            ELSE
+!              Translate the Nodes
+!              Translate LeftQ-> P
+               CALL XLate(LeftQ,P)
+!              Translate RightQ-> P
+               CALL XLate(RightQ,P)
+!              Reset Ell of Right and Left nodes if not leafs
+               IF(.NOT.LeftQ%Leaf)  LeftQ%Ell  = SPEll
+               IF(.NOT.RightQ%Leaf) RightQ%Ell = SPEll
+!              Compute the multipole strength MAX{[O^P_(L+1)]^(2/(2+L))}
+               CQ=Zero
+               DO L=SPEll+1,SPEll+MaxUEll
+                  CQ = MAX(CQ,Unsold0(L,P%C,P%S)/(P%DMax2**(Half*DBLE(L))))
+               ENDDO
+               MaxUnsold  = CQ*(P%DMax2**(Half*DBLE(SPEll+1)))
+               P%Strength = MaxUnsold**(Two/DBLE(SPEll+2))
+!
+            ENDIF
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -157,19 +178,12 @@ MODULE PoleTree
          KQ=Qdex(B)
          Node%Zeta=Zeta(KQ)
 !        Reset leaf nodes ell to min value: its untranslated!
-         Node%Ell=Ldex(KQ)
+         Node%Ell     = Ldex(KQ)
 !        Set and inflate this nodes BBox
          Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
          Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
          Node%Box%BndBox(3,:)=Rho%Qz%D(KQ)
          Node%Box=ExpandBox(Node%Box,Ext(KQ))
-!        Set this nodes DBBox
-         Node%DBox%BndBox(1,:)=Rho%Qx%D(KQ)
-         Node%DBox%BndBox(2,:)=Rho%Qy%D(KQ)
-         Node%DBox%BndBox(3,:)=Rho%Qz%D(KQ)
-         Node%DBox%Half(:)    =Zero
-         Node%DBox%Center(:)  =Node%DBox%BndBox(:,1)     
-         Node%DMax2           =Zero
 !        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
          ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
@@ -190,7 +204,7 @@ MODULE PoleTree
          Node%Leaf=.False.
          Node%Box%Tier=Level
          Node%Box%Number=PoleNodes
-         Node%Ell=SPEll+1
+         Node%Ell=SPEll+MaxUEll
          MaxTier=MAX(MaxTier,Level)
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
@@ -223,8 +237,15 @@ MODULE PoleTree
          B=Node%Bdex
          E=Node%Edex
          N=E-B+1
-!        Orthogonal direction
+!        SPlit in the Largest Direction direction
+         MaxBox=Zero
          ISplit=Mod(Node%Box%Tier,3)+1
+         DO I=1,3
+            IF(MaxBox > Node%Box%Half(I)) THEN
+               MaxBox = Node%Box%Half(I)
+               ISplit = I
+            ENDIF
+         ENDDO
          IF(ISplit==1)THEN
             DO I=B,E
                J=J+1;K=Qdex(I)
