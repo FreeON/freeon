@@ -1,10 +1,12 @@
-SUBROUTINE MemInit(DB,IB,BSc,BSp)
+SUBROUTINE MemInit(DB,IB,Drv,BSc,BSp)
   USE InOut
   USE ONXMemory
   IMPLICIT NONE
   TYPE(DBuf),INTENT(INOUT) :: DB
   TYPE(IBuf),INTENT(INOUT) :: IB
+  TYPE(IDrv),INTENT(INOUT) :: Drv
   TYPE(BSet),INTENT(IN)    :: BSc,BSp
+  write(*,*) "In MemInit: ErrorCode=",ErrorCode
   IF (ErrorCode==eInit) THEN
     DB%MAXD    = 100
     DB%MAXC    = 10
@@ -15,18 +17,17 @@ SUBROUTINE MemInit(DB,IB,BSc,BSp)
     DB%NCnts   = 20   !  fix this
     IB%MAXI    = 1000
     IB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
-    IB%LngCC   = 60000
-    CALL VRRLng(IB%LngVRR,IB%LngLoc)
+    Drv%LngCC  = 60000
+    CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
     CALL New(DB)
     CALL New(IB)
-    CALL CCDriver(IB%CDrv%I(1),IB%LngDrv)
-    CALL VRRDriver(IB%VLOC%I(1),IB%SLOC%I(1,1),IB%LngVRR,IB%LngLoc)
+    CALL New(Drv)
+    CALL CCDriver(Drv%CDrv%I(1),Drv%LngDrv)
+    CALL VRRDriver(Drv%VLOC%I(1),Drv%SLOC%I(1,1),Drv%LngVRR,Drv%LngLoc)
   ELSEIF (ErrorCode==eMAXI) THEN
     CALL Delete(IB)
     IB%MAXI = IB%MAXI * 5
     CALL New(IB)
-    CALL CCDriver(IB%CDrv%I(1),IB%LngDrv)
-    CALL VRRDriver(IB%VLOC%I(1),IB%SLOC%I(1,1),IB%LngVRR,IB%LngLoc)
   ELSEIF (ErrorCode==eMAXD) THEN
     CALL Delete(DB)
     DB%MAXD = DB%MAXD * 2

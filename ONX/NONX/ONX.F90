@@ -34,6 +34,7 @@ PROGRAM ONX
   TYPE(ARGMT)         :: Args
   TYPE(DBuf)          :: DB
   TYPE(IBuf)          :: IB
+  TYPE(IDrv)          :: Drv
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
 !--------------------------------------------------------------------------------
@@ -59,23 +60,18 @@ PROGRAM ONX
   CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
   CALL Get(OffS,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-
   CALL Get(D,TrixFile('D',Args,0)) !InFile,'.D')
   CALL TrnMatBlk(BSp,GMp,D)
-
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
   CALL Get(OffS,'atoff',Tag_O=CurBase)
   CALL Get(NBasF,'nbasf',Tag_O=CurBase)
 !--------------------------------------------------------------------------------
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
-  write(*,*) "RangeOfDensity"
   CALL RangeOfDensity(D,NameBuf)
-
-  DO WHILE (ErrorCode/=0) 
-    CALL MemInit(DB,IB,BSc,BSp)
-    write(*,*) "DisOrder"
-    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf) 
+  DO WHILE (ErrorCode/=eAOK) 
+    CALL MemInit(DB,IB,Drv,BSc,BSp)
+    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf) 
   END DO
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 

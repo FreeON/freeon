@@ -1,4 +1,4 @@
-SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf)  
+SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)  
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -14,6 +14,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf)
   TYPE(CRDS),INTENT(IN)    :: GMc,GMp
   TYPE(DBuf)               :: DB
   TYPE(IBuf)               :: IB
+  TYPE(IDrv)               :: Drv
   TYPE(INT_VECT)           :: NameBuf
 !--------------------------------------------------------------------------------
 ! Temporary buffers to hold the distribution data
@@ -186,30 +187,30 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf)
           NInts=NLOCD3*NLOCD3
           I0=iT(MIN(IType,KType),MAX(IType,KType))
           I1=11*I0-10
-          iCP=IB%CDrv%I(I1)
-          iCL=IB%CDrv%I(iCP)
+          iCP=Drv%CDrv%I(I1)
+          iCL=Drv%CDrv%I(iCP)
 
           IF (KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
             ErrorCode=eMAXI
             GO TO 1000
           ENDIF
 
-          CALL RGen1C(2*LDis,iBf,KonAC,IB%WK,IB%CD%D(1,1),IB%WR,IB%WZ, &
+          CALL RGen1C(2*LDis,iBf,KonAC,IB%CD%D(1,1),IB%WR,IB%WZ, &
                       IB%W1%D(1),TBufP,TBufC)
-          CALL VRRs(LDis,LDis,id,is,nr,ns,IB%SLOC)
-          CALL VRRl(KonAC*KonAC,NVRR,nr,ns,IB%VLOC%I(is),IB%VLOC%I(is+nr), &
-                    IB%W2%D(1),IB%W1%D(1),IB%WR%D(1,1,1),IB%WZ%D(1,1,1))
-
-          CALL Contract(1,KonAC,KonAC,NVRR,iCL,IB%CDrv%I(iCP+1), &
+          CALL VRRs(LDis,LDis,id,is,nr,ns,Drv%SLOC)
+          CALL VRRl(KonAC*KonAC,NVRR,nr,ns,Drv%VLOC%I(is),Drv%VLOC%I(is+nr), &
+                    IB%W2%D(1),IB%W1%D(1),IB%WR%D(1,1),IB%WZ%D(1,1))
+          CALL Contract(1,KonAC,KonAC,NVRR,iCL,Drv%CDrv%I(iCP+1), &
                         IB%CD%D(1,1),IB%CD%D(1,1),IB%W1%D(1),IB%W2%D(1))
-
           IF(LDis.NE.0) THEN
-            CALL HRRKetOld(IB%W1%D(1),TBufC%D(1,iBf),1,MLDis%I(1),NLOCD2,DB%MAXC,IKType)
-            CALL HRRBraOld(IB%W1%D(1),IB%W2%D(1),x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
-            rInt = AbsMax(NInts,IB%W2)
+            CALL HRRKet(IB%W1%D(1),TBufC%D(1,iBf),1,MLDis%I(1),NLOCD2,DB%MAXC,IKType)
+            CALL HRRBra(IB%W1%D(1),IB%W2%D(1),x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
+            rInt = DSQRT(AbsMax(NInts,IB%W2))
           ELSE
-            rInt = AbsMax(NInts,IB%W1)
+            rInt = DSQRT(AbsMax(NInts,IB%W1))
           ENDIF
+
+          write(*,*) "NONX: rInt = ",rint
 
           IF(rInt>Thresholds%Dist) THEN 
             iBf=iBf+1
@@ -270,7 +271,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf)
 #endif
   END DO ! Atc
 
-  ErrorCode=0
+  ErrorCode=eAOK
 1000 CONTINUE
   CALL Delete(MLDis)
   CALL Delete(TBufP)

@@ -9,14 +9,14 @@ SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
   REAL(DOUBLE), INTENT(IN)   :: CK(N,KKet,3)
   REAL(DOUBLE), INTENT(OUT)  :: C(N,NVRR)
   REAL(DOUBLE), INTENT(IN)   :: U(N,KBra,KKet,NVRR)
-  INTEGER                    :: I,J,K,iC,iP,iQ,iU,IDrv
+  INTEGER                    :: I,J,K,L,iC,iP,iQ,iU
 
   IF (KBra==1.AND.KKet==1) THEN
-    DO IDrv=1,LngDrv
-      iC  = CDrv(1,IDrv)
-      iP  = CDrv(2,IDrv)
-      iQ  = CDrv(3,IDrv)
-      iU  = CDrv(4,IDrv)
+    DO L=1,LngDrv
+      iC  = CDrv(1,L)
+      iP  = CDrv(2,L)
+      iQ  = CDrv(3,L)
+      iU  = CDrv(4,L)
       IF (iP==0.AND.iQ==0) THEN
         DO I=1,N
           C(I,iC) = U(I,1,1,iU)
@@ -34,13 +34,13 @@ SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
           C(I,iC) = U(I,1,1,iU)*CB(1,iP)*CK(I,1,iQ)
         END DO
       END IF
-    END DO ! IDrv
+    END DO ! L
   ELSE
-  DO IDrv=1,LngDrv
-    iC  = CDrv(1,IDrv)
-    iP  = CDrv(2,IDrv)
-    iQ  = CDrv(3,IDrv)
-    iU  = CDrv(4,IDrv)
+  DO L=1,LngDrv
+    iC  = CDrv(1,L)
+    iP  = CDrv(2,L)
+    iQ  = CDrv(3,L)
+    iU  = CDrv(4,L)
     DO I=1,N
       C(I,iC)=0.0D0
     END DO
