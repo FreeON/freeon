@@ -176,7 +176,8 @@ CONTAINS
           S%Previous%I=O%RestartState%I
           S%Action%C(1)=SCF_RESTART
        ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
-          S%Action%C(1)=SCF_PROJECTION
+!          S%Action%C(1)=SCF_PROJECTION
+          S%Action%C(1)=SCF_EXTRAPOLATE
        ELSEIF(cSCF==0.AND.cBAS/=pBAS)THEN
           S%Action%C(1)=SCF_BASISSETSWITCH
           S%Previous%I(1)=S%Previous%I(1)+1
