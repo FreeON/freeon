@@ -163,27 +163,12 @@ technique, its successful application may require many intricate modifications \
 Recent reviews and comparisons of these algorithms and their technical details can be found in 
 {\bf Refs.~\onlinecite{HSchlegel03,VBakken02}}.
 
-{\bf It is also possible to update the Hessian directly in the internal 
-coordinate representation of the Hessian. However this does not 
-allow for the on-the-fly redefinition of the internal coordinate system,
-which is important for large biomolecules, unless
-transformation back to the Cartesian representation happens. 
-For this reason we do not consider the updates of internal coordinate 
-Hessians further here.
+{\bf It is also possible to update the internal coordinate
+Hessian, however this does not allow for the on-the-fly redefinition
+of the internal coordinates, that is important for large molecules.
 
-Quasi-Newton methods of geometry optimization have certainly been
-improved by a lot through recent developments 
-\cite{ATurner99,XPrat-Resina02,SBilleter00,JNocedal80}. However, the lack of
-linear scaling Cartesian/internal coordinate-transformations
-remained an obstacle to extend the use of
-geometry optimizers that use exclusively internal coordinates
-to arbitrarily large molecules.
-Now, that this bottleneck has been overcome
-\cite{BPaizs98,KNemeth00,BPaizs00,KNemeth01}  
-an unprecedented opportunity appears to develop
-simple and efficient internal coordinate
-algorithms for the optimization of large molecules;
-such as the one we are presenting in this paper. 
+Important recent developments of quasi-Newton methods can be found in
+Refs.~\onlinecite{ATurner99,XPrat-Resina02,SBilleter00,JNocedal80}.
 }
 
 \section{A New Concept} \label{concept}
@@ -254,7 +239,7 @@ weighting of the curve fit and also admits the accumulation of anharmonic inform
 %the weighted fit is an advanced subject beyond the scope of this work. 
 {\bf Augmenting
 QUICCA with explicite anharmonic terms which derive from 
-a higher than linear fit of the gradient-coordinate pairs may lead 
+a higher than linear fit of the energy gradients may lead 
 to the loss of the the important smoothing effect of 
 the weighted fit. Thus, even though this extension of QUICCA 
 can be considered, it is an advanced subject beyond the scope of this work. 
@@ -280,24 +265,10 @@ displacement (or gradient) vectors, to define
 the iterative subspace. Then, a good-quality, 
 $n_{fit}\times n_{fit}$ dimensional 
 Hessian matrix is built up in this
-subspace, by numerical derivation. 
-This numerical derivation costs at most  
-${\cal{O}}(n_{fit})$ extra force evaluations,
-but cheaper techniques, based on the already available forces
-can also be considered. Then, using this numerical Hessian matrix,
-a Newton-Raphson or a Rational Function Optimization step 
-is carried out in the iterative subspace. 
-
-ABNR is clearly a very demanding technique since it needs only gradient
-information and it preserves linear scaling operation count within the 
-optimizer. It can also give an account on second order information,
-though a more accurate Hessian-build in the iterative subspace
-costs extra force evaluations. 
-To the best of our knowledge ABNR has not been used in internal
-coordinate representation for large molecules yet. However, this is just a
-technical difficulty that can be solved by the recently developed
-linear scaling coordinate transformations 
-\cite{BPaizs98,KNemeth00,BPaizs00,KNemeth01}.
+subspace, by numerical derivation or Hessian-update.
+Using this numerical Hessian matrix,
+ABNR carries out a Newton-Raphson or a Rational Function Optimization 
+\cite{ABanerji85} step in the iterative subspace. 
 
 Both QUICCA and GDIIS aim on geometry optimization in the iterative
 subspace without building any numerical Hessian matrices, as opposed to
@@ -307,71 +278,40 @@ In GDIIS, simple relaxation steps are generated along an
 abstract optimization coordinate, using an external optimizer.
 These simple relaxation structures
 are promoted along the abstract optimization coordinate by extrapolating
-or interpolating the error associated with them.
-One can imagine a series of scalar numbers, accounting for errors, 
-along this abstract coordinate that may fit a function. Instead
-of fitting that function (that may be multidimensional), 
-GDIIS just takes the inverses
-of the error estimates, normalizes them to one and uses them
-to linearcombine the endpoints of the simple relaxation steps
-(at which no energy or gradient evaluation took place).
-The error is usually computed as the norm of the gradient at
-each structure where gradient is available.
-GDIIS does not give any account on the curvature of the
-gradient at the extrema, thus it fails to characterize
-the type of the extrema it converges to. Numerically
-too small or too large error estimates lead to bad 
-extrapolation/interpolation steps. In the vicinity 
-of an inflexion point GDIIS oscillates due to
-increasing (or decreasing) error at both sides of the shoulder.
-Defining the error as 
-the scalar product of simple relaxation steps and local gradients 
-may cure most of these problems, but it needs a reliable 
-(and efficient) external optimizer. 
-Refs.~\onlinecite{FEckert97} and 
-\onlinecite{OFarkas02} present such approaches. To the best of
-our knowledge, these papers represent the latest state of GDIIS.
-In Ref.~\onlinecite{FEckert97} by Eckert, Pulay and Werner, 
-GDIIS is embedded into the framework of 
-a Rational Function Optimization (RFO) technique and thus enjoyes 
-RFO's controlled convergence. 
-In Ref.~\onlinecite{OFarkas02} by Farkas and Schlegel,
-a simple relaxation step is assigned to control convergence of GDIIS.
-Simple relaxation steps are provided by RFO, in both references.
-Thus, our understanding of GDIIS is, that it needs a sophisticated 
-external optimizer,
-such as RFO, to work well; while this is not the case for QUICCA.
+or interpolating the error associated with them. The extrapolation
+is done without any fitting, just by weighting and summing-up
+different structures.
+Since the error is usually defined as the norm of the gradient,
+GDIIS cannot account for the curvature of the potential energy surface.
+As a consequence, GDIIS oscillates in the vicinity of 
+inflexion-points and fails to distinguish between minima and 
+saddle points. Furthermore, the extrapolation/interpolation 
+process is very sensitive to numerical errors in the error estimates.
+The most recent GDIIS algorithms cure these problems by 
+augmenting GDIIS into the Rational Function Optimization scheme
+\cite{FEckert97} or by comparing the GDIIS steps to reference steps
+taken again from a reliable external optimizer \cite{OFarkas02}.
 
-As opposed to GDIIS, QUICCA does not need simple relaxation
-steps, produced by any external optimizer. Furthermore,
-at points of the abstract optimization coordinate, not only
-error estimates are set up, but also the corresponding 
-(multidimensional) projections of the gradient vector. Thus,
-each structure along this abstract optimization coordinate
-has a gradient information and an error estimate. Following
-this, QUICCA fits a (multidimensional) polynomial to the
-gradient, along the optimization coordinate. 
-Due to this (multidimensional) fitting of the gradient, 
-second (and higher) order energy derivatives are accounted
-for along the whole optimization coordinate, that helps
-to identify the type of local extrema, avoids slow-down close
-to inflexion points and problems caused by too large or too small
-error estimates. As opposed to GDIIS, QUICCA optimizes the gradient
-and not the gradient-norm.
-The location of the extrema can be identified
-by (multidimensional) root-finding along the fitted curves,
-instead of extrapolating structures that are contaminated by
-the quality of the external optimizer.
+As opposed to GDIIS, QUICCA needs neither simple relaxation
+steps nor external optimizer. Since QUICCA accounts
+for the gradient instead of the gradient norm, it has the capability
+to distinguish between minima, saddles and inflexion points.
+This is due to the weighted curve-fit, that can be applied in any
+kind of coordinate system exhibiting
+reasonably small vibrational coupling. The curve fit avoids 
+numerical problems associated with error estimates in GDIIS,
+and it also averages noise coming from vibrational coupling.
 
-The closest relative of QUICCA is probably the string method from the
+A close relative of QUICCA is the string method from the
 field of reaction-path finding \cite{EWeinan02,BPeters04}
-and other similar reaction path finders \cite{CGonzalez90}, that
+and other similar algorithms \cite{CGonzalez90} that
 apply curve (spline) fitting of the gradient along the arc of 
 a reaction path. 
 
 Finally, QUICCA can also be considered as a (multidimensional) 
-gradient-based line search method, that searches in directions
-that are assumed to exhibit small vibrational coupling.
+gradient-based line search method, that explores the potential energy
+surface in directions
+exhibiting reasonably small vibrational coupling.
 }
 
 \section{Implementation}\label{implementation}
@@ -403,19 +343,10 @@ increases the number of internal coordinates and the redundancy of the coordinat
 the final merged topology matrix is determined directly from primary topology matrices rather 
 than the merged ones at previous cycles.
 
-{\bf The merging of the bonding schemes guaranties the convergence
+{\bf The merging of the primary bonding schemes guaranties the convergence
 of the gradient transformation of an older Cartesian gradient vector
-at a more recent geometry. 
-According to our experience, the exclusive 
-use of the internal coordinates of the most recent geometry
-may lead to slow convergence or divergence of the gradient transformation
-at older geometries.
-The merged coordinate set also allows for more balanced geometry changes
-in internal coordinate directions which have been deleted from the
-most recent connectivity scheme. The merged primary topology matrices
-have the advantage not to contain irrelevant information from optimization
-steps, which are not considered in the coordinate transformations and in the
-curve fits any more.
+at a more recent geometry while it forgets about information from 
+irrelevant steps.
 }
 
 Based on the topology matrix of the merged bonding network, all other primitive 
@@ -756,7 +687,7 @@ but because it achieves stability through smoothing effects derived from the wei
 \commentoutA{
 
 \begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{snap3.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{kinasepicture.eps}}
 \caption{
 The structure of a 263 atom Protein Kinase A fragment used
 to test the QUICCA optimizer.}\label{kinasepicture} 
@@ -839,9 +770,8 @@ the last optimization step was smaller than
 $4\times10^{-3}$ au. These convergence is tighter then the one that has been
 applied in the plasminogen optimization of Schlegel {\it et.al.} 
 \cite{HSchlegel00}, but looser than the usual Baker's criteria.
-We are not yet sure about how appropriate convergence criteria should be
-set up for large molecules. Convergence criteria for the optimization of large
-molecules should be the subject of further investigation.
+We leave the choice of convergence criteria for large molecules 
+to be subject of further research.
 }
 %a maximum predicted displacement less than $4\times10^{-3}$ au.
 The number of internal coordinates, generated for this structure was 1280 at convergence.  Figure~\ref{logn-logde} 
@@ -1049,14 +979,14 @@ Figure 1, N{\'e}meth and Challacombe \\[1.cm]
 
 \begin{center}
 Figure 2, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{snap.eps2}}
+\resizebox*{5in}{!}{\includegraphics{kinasepicture.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 3, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{R263logdata2.eps}}
+\resizebox*{5in}{!}{\includegraphics{curve2_1.eps}}
 \end{center}
 
 \clearpage
