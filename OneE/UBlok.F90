@@ -23,7 +23,7 @@ MODULE ECPBlock
   !---------------------------------------------------------------------
   ! PARAMETERS FOR RADIAL INTEGRATION 
     INTEGER,PARAMETER                         :: NPts=32
-    INTEGER,PARAMETER                         :: Infty=10
+    INTEGER,PARAMETER                         :: Infty=20
     INTEGER                                   :: IPts,IWts
     REAL(DOUBLE),PARAMETER                    :: Tau=1D-18
     REAL(DOUBLE)                              :: Discriminator
