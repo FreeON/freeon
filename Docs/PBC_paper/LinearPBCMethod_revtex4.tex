@@ -47,31 +47,37 @@ phases will be demonstrated.
 \maketitle
 
 \section{INTRODUCTION}
-In recent years several successful methods for the simulating molecular or 
-condensed matter systems at the atomic level have been developed
-\cite{Metropolis49,Alder59,Slater51,Hohenberg64}
-These methods all attempt to solve for the electronic structure via
+In recent years several successful methods for the calculating the electronic structure of
+molecular or condensed matter systems have been developed,
+for example Hatree-Fock \cite{Slater51,Roothaan51}, Density Functional theory 
+\cite{Hohenberg64,KohnSham65} or Configuration interaction \cite{Choudhury79}. 
+All these methods attempt to solve for the electronic structure via
 the many-body quantum problem to within some consistent approximation scheme.
-several examples include Hatree-Fock \cite{Slater51,Roothaan51}, Density Functional theory 
-\cite{Hohenberg64,KohnSham65} and Configuration interaction \cite{Choudhury79}. 
 For complex molecular or condensed matter 
 system, where chemical reactions are of central importance, these electronic structure
 method are essential. Unfortunately, most electronic structure quantum chemistry codes
-scale very poorly with system size, ($O(N^3)$), which severely limits the systems 
+scale very poorly with system size due to the need to diagonalize the Hamiltonian,
+which scales $O(N^3)$ 
+\cite{???}.
+%
+% Should cite standard comercial code like ``Gaussian''. (Ha)
+%
+This severely limits the systems sizes 
 that these codes can address. Therefore, it has become increasing important for
 the development of quantum chemistry codes which scale linearly with increasing 
 system size, and several quantum chemistry codes of this type are in 
 development 
 \cite{Goedecker94,Challacombe96,Canning96,Briggs96,Hernandex96,Scuseria99,ANiklasson02}. 
 However, for reasons of simplicity most of these quantum 
-chemistry codes have yet to incorporate Periodic boundary conditions, but many
-technically important systems can only be addressed within a condensed environment,
+chemistry codes have yet to incorporate periodic boundary conditions.
+Unfortunately many
+technically important systems can only be addressed within a condensed phase environment,
 where surface effects have been removed \cite{Allen90}. Therefore, the inclusion of 
-periodic boundary conditions into an existing linear scaling quantum chemistry
+periodic boundary conditions into existing linear scaling quantum chemistry
 codes is essential. 
 
-We have implemented Periodic boundary conditions into the linear scaling
-Quantum Chemistry code \textbf{MondoSCF} 
+We have implemented periodic boundary conditions into the linear scaling
+quantum chemistry code \textbf{MondoSCF} 
 \cite{Challacombe96,Challacombe97,Challacombe99}.
 For the one electron matrix this has been achieved by a re-summation
 over periodic cell images, which because of locality leads to an efficient
@@ -90,7 +96,7 @@ data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects
 \cite{Bentley79}. All \textbf{MondoSCF} calculations are done at the gamma-point.
 This is because the main focus of the \textbf{MondoSCF} linear scaling quantum chemistry
-code is large systems, where k-space integrations become unnessary for insulators 
+code is large systems, where for insulators k-space integrations become unnecessary 
 \cite{Nunes94}.
 
 
@@ -101,8 +107,10 @@ Gaussian code \textbf{Crystal98} \cite{Crystal98}. Next we demonstrate that
 the code achieves {\it true} linear scaling for the dense periodic diamond system 
 up to 512 atoms in the unit cell.
 %
+% Example system
+%
 To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
-of the diamond (100) surface.
+of the Silicon (111) surface with a step.
 %
 Finally we give some conclusion concerning the accuracy and utility of \textbf{MondoSCF}
 and future research directions.
@@ -114,7 +122,7 @@ particle equation
 \begin{equation}
 H \phi_{i}({\bf r})  = \epsilon_i \phi_{i}({\bf r})
 \end{equation}
-where the effective halmiltonian is
+where the effective Hamiltonian is
 \begin{equation}
 H = -{\nabla}^{2}+ V_{ext}({\bf r}) + J[\rho({\bf r})] + K_{xc}[\rho({\bf r})]
 \end{equation}
@@ -123,13 +131,13 @@ and
  \rho({\bf r}) = \sum_{i=1}^{N_{el}} | \phi_{i}({\bf r}) |^2
 \end{equation}
 \begin{equation}
- J[\rho({\bf r})] = \int d{\bf r'} {\rho({\bf r}) \over |{\bf r}-{\bf r'}|}
+ J[\rho({\bf r})] = \int d{\bf r'} {\rho({\bf r}) \over |{\bf r}-{\bf r'}|},
 \end{equation}
-and the exchange correaltion potential can be calculated from several approximated 
+and the exchange correlation potential can be calculated from several approximate
 functionals
 \cite{Becke92,Hertwig97,Bauschlicher95,Adamo00}. In what follows we will 
-discuse the calculation of each of the terms in the hamiltonian 
-and how they are calculated in the non-orthogonal gaussian basis
+discuss the calculation of each of the terms in the Hamiltonian 
+and how they are calculated in the non-orthogonal Gaussian basis
 with the inclusion of periodic boundary conditions.
 
 \section{One-Electron Matrices}
@@ -209,8 +217,8 @@ T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\,
 \phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
 \end{equation}
 
-Both the $S_{ab}$ and $T_{ab}$ matrix elements are calculated very effiently
-with this method, aymtotically costing the same as non-periodic phase calculations
+Both the $S_{ab}$ and $T_{ab}$ matrix elements are calculated very efficiently
+with this method, asymptotically costing the same as non-periodic phase calculations
 within the code.
 
 \section{The Two-Electron matrices}
@@ -220,7 +228,7 @@ within the code.
 
 In order to calculate the coulomb matrix efficiently, we transform
 the two-electron Coulomb integrals into integrals over all space with
-local distributions via Periodic Loacalization transformation  and equations (\ref{rho_pbc})
+local distributions via Periodic Localization transformation  and equations (\ref{rho_pbc})
 and (\ref{rho_pbc_ab}), 
 
 \begin{equation}
@@ -356,7 +364,7 @@ J_{ab}^{PFF} &=& \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{out}}\, \int _{V_{\infty 
 &=& \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, 
 \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
 \nonumber\\
- & & \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]
+& &\left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]
 \, M_{l+l'}^{m+m'}[\mathbf{R}]\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
 \nonumber\\
 & &\label{Jpff_2} 
@@ -381,7 +389,7 @@ J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l
 %
 For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
 summation. 
-In refference 14 
+In reference 14 
 %\cite{PFFTensorMake} 
 we describe an efficient method which allows
 us to calculate these conditional summations. The only task remaining
@@ -395,7 +403,7 @@ we can approximate  the error bound  as
 \end{equation}
 where we are assuming a distribution of unit weight, and \( \mathbf{R}_{max} \) 
 is the distance to the nearest cell in the sum in equation (\ref{ScriptM}). In figure 
-\ref{figure:ErrorPFF} we show the the relative error in the periodic far field energy vers
+\ref{figure:ErrorPFF} we show the the relative error in the periodic far field energy verses
 expansion order $L$ for 27 and 125 inner box sums for a 64 water molecule system. 
 
 In the next section we describe the corrections to the Coulomb matrix
@@ -414,8 +422,8 @@ potential,$\Phi _{ss}$ and the Ewald potential, $\Phi _{Ew}$ is \cite{Redlack72}
 {\left( \mathbf{r}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3V}Q
 \label{EW_pot}
 \end{equation}
-where $V$ is the volume of the simulation cell, $R_0$ is a arbitrary refference point in the cell, 
-${\bf D}$ is the dipole moment and $Q$ is the quadripole moment.
+where $V$ is the volume of the simulation cell, $R_0$ is a arbitrary reference point in the cell, 
+${\bf D}$ is the dipole moment and $Q$ is the quadrupole moment.
 In terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
 the corrections
 \begin{eqnarray}
@@ -495,14 +503,14 @@ energy for Sodium Chloride as compared to results obtained from \textbf{Crystal9
 We test this system in two different cell geometries, one cubic and
 the other orthorhombic. Also we use two different basis sets , STO-3G
 and the \textbf{Crystal98} basis set 8-511G, and two different theory levels, 
-SlaterDirac and B3LYP. We obtain excellent agreement with \textbf{Crystal98} to the accuracy
+Slater-Dirac and B3LYP. We obtain excellent agreement with \textbf{Crystal98} to the accuracy
 of there results, however, \textbf{MondoSCF} is capable of obtaining
 very precise results, beyond the capacity of \textbf{Crystal98} because
 we do not use fitting functions in the calculations of the Coulomb
 or the exchange-correlation energies. Also,in Table \ref{table:ComToCrystal98_1}
-we show the convergence of the energy per atom of a Sodium Cloride
+we show the convergence of the energy per atom of a Sodium Chloride
 test system for increasing system size. This shows convergence with
-system size, and is akin to k-space integration, and also has excelent agreement
+system size, and is akin to k-space integration, and also has excellent agreement
 with \textbf{Crystal98} results in which we do k-space integration. 
 
 
@@ -514,10 +522,10 @@ Because of the high degree of Ionic bounding in this system, \textbf{Crystal98}
 does substantially better then for sodium Chloride. This allows for
 a much closer scrutiny of the energies then for the previous system.
 Again, we obtain excellent agreement with \textbf{Crystal98} for two
-different basis sets anf theory levels to within the accuracy of these
+different basis sets and theory levels to within the accuracy of these
 results.Also,in Table \ref{table:ComToCrystal98_2}
-we show the convergence of the energy per atom of a Mgnesium Oxide
-test system for increasing system size and we also has excelent agreement
+we show the convergence of the energy per atom of a Magnesium Oxide
+test system for increasing system size and we also has excellent agreement
 with \textbf{Crystal98} results in which we do k-space integration.
 
 
@@ -525,11 +533,11 @@ with \textbf{Crystal98} results in which we do k-space integration.
 
 Table \ref{table:ComToCrystal98_3} shows our results for the total
 energy for Diamond as compared to results obtained from \textbf{Crystal98}.
-Agian we obtain excellent agreement to within the accuracy of the
+Again we obtain excellent agreement to within the accuracy of the
 \textbf{Crystal98} results.
 Also,in Table \ref{table:ComToCrystal98_2}
 we show the convergence of the energy per atom of the Diamond
-test system for increasing system size and we again have excelent agreement
+test system for increasing system size and we again have excellent agreement
 with \textbf{Crystal98} results in which we do k-space integration.
 
 \section{Scaling}
@@ -540,13 +548,15 @@ of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
 matrix builds for the \textbf{Crystal98} basis set 6-21G* \cite{C98Basis}
 at a {\it good} accuracy. Even in this very dense periodic system for a medium 
 basis set with d-functions, linear scaling for the matrix build commences very 
-early. We also show in figure \ref{figure:EnergyperNandError} the energy per atom and 
-the relative errror in the total energy. Agian we see the convergence of the total energy
+early. We also show in figure \ref{figure:EnergyperNandError}(a) the energy per atom and 
+(b) the relative error in the total energy. Again we see the convergence of the total energy
 as a function of increasing system size, which is akin to k-space integration. We also
 see that our relative error is very well controlled within the \textbf{MondoSCF} quantum
 chemistry code, even up to 512 carbon atoms.
 
 \section{Big, Cool Example System}
+
+
 
 
 \section{CONCLUSIONS}
@@ -590,9 +600,9 @@ in preparation of this manuscript.
 %
 \begin{table}
 \caption{\label{table:ComToCrystal98_1} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Sodium Chloride test system. The \textbf{MondoSCF} calcuations where done to
-the accuracy of the quoted digets. All calculations where done at the Gamma point
-for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
+Sodium Chloride test system. The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
  
@@ -686,9 +696,9 @@ STO-3G/LDA\,\,&
 %
 \begin{table}
 \caption{\label{table:ComToCrystal98_2} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Magnesium Oxide test system.   The \textbf{MondoSCF} calcuations where done to
-the accuracy of the quoted digets. All calculations where done at the Gamma point
-for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
+Magnesium Oxide test system.   The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-61G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
 
@@ -782,9 +792,9 @@ M-SCF&
 %
 \begin{table}
 \caption{\label{table:ComToCrystal98_3} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Diamond test system.  The \textbf{MondoSCF} calcuations where done to
-the accuracy of the quoted digets. All calculations where done at the Gamma point
-for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(2,2,2)$.
+Diamond test system.  The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(2,2,2)$.
 The \textbf{Crystal98} 8-21G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
 
@@ -847,7 +857,7 @@ M-SCF&
 \begin{figure}
 
 \caption{\label{figure:SimCell} Simulation cell and its brava lattice vectors. Also
-shown is the HiCu cube in which we do the exchange-correlation intergrals}
+shown is the HiCu cube in which we do the exchange-correlation integrals}
 {\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure}
 %
@@ -879,9 +889,9 @@ inner cell sums for \protect\( 64\protect \) molecules of water in a periodic ce
 \caption{\label{figure:Scaling_Matrix_Build} Scaling Results for the matrix
 builds \protect\( J_{QCTC}\protect \) and \protect\( K_{xc}\protect \)
 for the dense diamond periodic system up to 512 atoms using the
-Crysral98 basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite{Becke92}}
+{\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite{Becke92}}
 
-{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
+{\centering \includegraphics{Timing_Diamond_512_log.ps} \par} 
 \end{figure}
 %
 %
@@ -889,11 +899,11 @@ Crysral98 basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite
 \begin{figure}
 
 \caption{\label{figure:EnergyperNandError} Energy per carbon atom for the dense diamond
-periodic system up to 512 atoms using the Crysral98 basis set 6-21G* \cite{C98Basis} and the 
-density functional BLYP \cite{Becke92}. Also shown on the right axis is the relative errors
-in the total energy}
+periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the 
+density functional BLYP \cite{Becke92} (a). Also, the relative errors in the total energy vs. 
+number of carbon atoms (b)}
 
-{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
+{\centering \includegraphics{EnergyVsNumber_Diamond512.ps} \par} 
 \end{figure}
 %
 %
@@ -901,7 +911,7 @@ in the total energy}
 \begin{figure}
 
 \caption{\label{figure:Dense64diamond} Iso-surface plot of the (111) surface reconstruction 
-of a 512 atom diamond system using the  Crysral98 basis set 6-21G* \cite{C98Basis} and the 
+of a 512 atom diamond system using the  {\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the 
 density functional BLYP \cite{Becke92} }
 
 {\centering \includegraphics{Timing_sto3g_321g.ps} \par}
