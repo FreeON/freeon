@@ -44,6 +44,8 @@ PROGRAM JForce
   TYPE(INT_VECT)               :: GlobalQMNum
   TYPE(INT_VECT)               :: AtmMark    
   TYPE(CRDS)                   :: GMLocMM,GMLoc
+#else
+  TYPE(CRDS)                   :: GMLoc
 #endif
 !-------------------------------------------------------------------------------- 
 ! Start up macro
