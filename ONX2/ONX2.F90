@@ -1,5 +1,10 @@
 PROGRAM ONX2
   !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -14,7 +19,7 @@ PROGRAM ONX2
   USE ONXParameters
   USE ONXInit   , ONLY: InitK
   USE ONXCtrSclg, ONLY: TrnMatBlk
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE ONXRng    , ONLY: RangeOfExchangeFASTMAT
   USE ONXFillOut, ONLY: FillOutFASTMAT
 #else
@@ -22,7 +27,7 @@ PROGRAM ONX2
   USE ONXFillOut, ONLY: FillOutBCSR
 #endif
 
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   !USE ONXGet    , ONLY: Get_Essential_RowCol
   USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
   USE MondoMPI
@@ -36,7 +41,7 @@ PROGRAM ONX2
   !
   IMPLICIT NONE
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   TYPE(FASTMAT),POINTER          :: KxFastMat
   TYPE(FASTMAT),POINTER          :: DFastMat
   TYPE(DBCSR)                    :: D
@@ -66,7 +71,7 @@ PROGRAM ONX2
   TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
 
 !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
@@ -137,7 +142,7 @@ PROGRAM ONX2
 !!$#endif
 !!$  !ELSE
 !!$  CASE DEFAULT
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
      CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,0),'ONXPart',Args)
 #else
      CALL Get(D,TrixFile('D',Args,0))
@@ -146,28 +151,28 @@ PROGRAM ONX2
 !!$  END SELECT
   !
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   CALL TrnMatBlk(BSp,GMp,DFastMat)
 #else
   CALL TrnMatBlk(BSp,GMp,D       )
 #endif
   !
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
   WRITE(*,*) 'WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2'
   !
   !
   !WRITE(*,*) 'allocate List'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL AllocList(ListC,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
-  CALL AllocList(ListD,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
+  !CALL AllocList(ListC,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
+  !CALL AllocList(ListD,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL AllocList(ListC,NAtoms)
+  CALL AllocList(ListC,1,NAtoms)
   CALL GetBufferSize(GMc,BSc)
   CALL CPU_TIME(Time2)
 #endif
@@ -176,7 +181,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Make the distribution list(s).
   !WRITE(*,*) 'make List'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
   CALL MakeList(ListC,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
   CALL MakeList(ListD,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
@@ -193,7 +198,7 @@ PROGRAM ONX2
   !
 #ifdef ONX2_DBUG
   WRITE(*,*) 'Print List'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   CALL PrintList(ListC)
   CALL PrintList(ListD)
 #else
@@ -205,7 +210,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
   CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFastMat)
   time2 = MPI_WTIME()
@@ -219,7 +224,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   CALL New_FASTMAT(KxFastMat,0,(/0,0/))
 #else
   !write(*,*) 'ONXRange',ONXRange
@@ -231,7 +236,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Compute Exchange matrix.
   !WRITE(*,*) 'Compute Kx'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
   CALL ComputK(DFastMat,KxFastMat,ListC,ListD,GMc,BSc,CS_OUT)
   Time2 = MPI_WTIME()
@@ -246,7 +251,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
   !WRITE(*,*) 'deallocate List'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
   CALL DeAllocList(ListC)
   CALL DeAllocList(ListD)
@@ -260,7 +265,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   ! 
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
   CALL FillOutFastMat(BSc,GMc,KxFastMat)
   time2 = MPI_WTIME()
@@ -273,7 +278,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   ! Normilization.
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   time1 = MPI_WTIME()
   CALL TrnMatBlk(BSc,GMc,KxFastMat)
   time2 = MPI_WTIME()
@@ -287,7 +292,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   ! Redistribute partition informations.
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   CALL PDrv_Finalize(DFastMat,CollectInPar_O=.TRUE.)
   CALL Delete_FastMat1(DFastMat)
 #else
@@ -297,7 +302,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   !
   ! End Total Timing
   !TmEndKT = MPI_WTIME()
@@ -322,7 +327,7 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   !
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
@@ -353,7 +358,7 @@ PROGRAM ONX2
 
 
 
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   !
   IF(MyID.EQ.ROOT) THEN
      ! Imbalance stuff.

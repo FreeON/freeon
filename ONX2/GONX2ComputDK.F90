@@ -16,6 +16,10 @@ MODULE GONX2ComputDK
 !H
 !H---------------------------------------------------------------------------------
   !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
 #ifdef GONX2_DBUG
 #define GONX2_INFO
 #endif
@@ -28,7 +32,7 @@ MODULE GONX2ComputDK
   USE InvExp
   USE ONXParameters
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
 #endif
@@ -52,7 +56,11 @@ MODULE GONX2ComputDK
 CONTAINS
   !
   !
+#ifdef ONX2_PARALLEL
+  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,GM,BS,CS_OUT)
+#else
   SUBROUTINE ComputDK(D,GradX,ListC,ListD,GM,BS,CS_OUT)
+#endif
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ComputDK(D,GradX,ListC,ListD,GM,BS,CS_OUT)
 !H
@@ -66,7 +74,13 @@ CONTAINS
     ! GradX = Dcd*(ac(R)|bd(R'))'*Dab
     !
     !-------------------------------------------------------------------
+#ifdef ONX2_PARALLEL
+    TYPE(FASTMAT)              , POINTER       :: DFMcd,DFMab
+    TYPE(FASTMAT)              , POINTER       :: P,Q
+    TYPE(SRST   )              , POINTER       :: U,V
+#else
     TYPE(BCSR)                 , INTENT(INout) :: D
+#endif
     TYPE(DBL_RNK2)             , INTENT(INOUT) :: GradX
     TYPE(CList2) , DIMENSION(:), POINTER       :: ListC,ListD
     TYPE(CRDS)                 , INTENT(IN   ) :: GM
@@ -78,27 +92,36 @@ CONTAINS
     INTEGER                    :: AtA,AtB,AtC,AtD,KA,KB,KC,KD,CFA,CFB,CFC,CFD
     INTEGER                    :: ci,iPtrD,iPtrD2,iPtrK,NBFC,NBFD,NBFA,NBFB
     INTEGER                    :: CFAC,CFBD
+    INTEGER                    :: NCFncA,NCFncB,NCFncC,NCFncD
     INTEGER                    :: Off,Ind,LocNInt,IntType
-    INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx,SumInt
+    INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx
+#ifdef ONX2_PARALLEL
+    REAL(DOUBLE)               :: TmBeg,TmEnd
+#endif
     REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB,TmpGradD
     REAL(DOUBLE)               :: Dcd,Dab,NInts
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
     REAL(DOUBLE) , DIMENSION(   MaxFuncPerAtmBlk**2) :: Work
-    TYPE(AtomPrG), DIMENSION(  MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
+    TYPE(AtomPrG), DIMENSION(   MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
+    REAL(DOUBLE), DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
+    !REAL(DOUBLE), DIMENSION(100) :: DMcd,DMab
     !-------------------------------------------------------------------
-    TYPE(ONX2OffSt) :: OffSet
-    TYPE(INT_VECT ) :: BColIdx
+    TYPE(ONX2OffSt)            :: OffSet
+    TYPE(INT_VECT )            :: BColIdx
     !-------------------------------------------------------------------
-    REAL(DOUBLE), EXTERNAL :: DGetAbsMax
-    REAL(DOUBLE), EXTERNAL :: DDOT
+    REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
+    REAL(DOUBLE), EXTERNAL     :: DDOT
     !-------------------------------------------------------------------
-    integer :: iint ,isize,i,iii,jjj
-
-    real(double), dimension(100) :: DMcd,DMab
-
     !
+    integer :: isize,i
+    !
+    !
+    ! Initialize.
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
+#ifdef ONX2_PARALLEL
+    NULLIFY(P,Q,U,V)
+#endif
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -120,15 +143,23 @@ CONTAINS
     !
     CALL New(BColIdx,Natoms)
     !
-    SumInt=0.0D0
-    iint=0
-    !
     LocNInt=0
     NInts=0.0D0
     !
+#ifdef ONX2_PARALLEL
+    P => DFMcd%Next ! Run over AtC.
+    DO                               
+       IF(.NOT.ASSOCIATED(P)) EXIT   
+       AtC = P%Row                   
+       !write(*,*) 'AtC=',AtC,'MyID',MyID
+#else
     DO AtC=1,NAtoms ! Run over AtC.
+#endif
+       !
        KC=GM%AtTyp%I(AtC)
        NBFC=BS%BfKnd%I(KC)
+       NCFncC=BS%NCFnc%I(KC)
+       !
        ACAtmInfo%Atm2X=GM%Carts%D(1,AtC)
        ACAtmInfo%Atm2Y=GM%Carts%D(2,AtC)
        ACAtmInfo%Atm2Z=GM%Carts%D(3,AtC)
@@ -137,26 +168,53 @@ CONTAINS
        ! Get AtA List.
        AtAListTmp=>ListC(AtC)%GoList
        !
+#ifdef ONX2_PARALLEL
+       U => P%RowRoot ! Run over AtD
+       DO
+          IF(.NOT.ASSOCIATED(U)) EXIT
+          IF(U%L.NE.U%R) THEN
+             U => U%Next
+             CYCLE
+          ENDIF
+          AtD = U%L
+          !write(*,*) 'AtC=',AtC,'AtD=',AtD,'MyID',MyID
+          ! Set Time.
+          TmBeg = MPI_WTIME()
+#else
        DO ci=D%RowPt%I(AtC),D%RowPt%I(AtC+1)-1 ! Run over AtD
           AtD=D%ColPt%I(ci)
           iPtrD=D%BlkPt%I(ci)
+#endif
+          !
           KD=GM%AtTyp%I(AtD)
           NBFD=BS%BfKnd%I(KD)
+          NCFncD=BS%NCFnc%I(KD)
+          !
           BDAtmInfo%Atm2X=GM%Carts%D(1,AtD)
           BDAtmInfo%Atm2Y=GM%Carts%D(2,AtD)
           BDAtmInfo%Atm2Z=GM%Carts%D(3,AtD)
           BDAtmInfo%K2=KD
           !
           ! Get max of the block density matrix.
+#ifdef ONX2_PARALLEL
+          Dcd=DGetAbsMax(NBFC*NBFD,U%MTrix(1,1))
+          !write(*,*) 'Dcd',Dcd,'AtC=',AtC,'AtD=',AtD,'MyID',MyID
+#else
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
+#endif
           !
-          !>> test test test test test test test test test test test
-          !CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),&
-          !     &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
-          !     &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
-          !     &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
-          !<< test test test test test test test test test test test
-
+#ifdef ONX2_PARALLEL
+          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,DMcd(1),    &
+               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
+               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
+               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+#else
+          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),&
+               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
+               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
+               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+#endif
+          !
 #ifdef GONX2_DBUG
           WRITE(*,*) 'Max(Dcd)=',Dcd
 #endif
@@ -166,22 +224,39 @@ CONTAINS
           !
           AtAList=>AtAListTmp
           !
-          DO ! Run over AtA
+          RnOvA: DO ! Run over AtA
              AtA=AtAList%Atom
+#ifdef ONX2_PARALLEL
+             !if(myid==0)write(*,*) '+++++++++++++++++++++++++++++++++++++++++++++++'
+             !if(myid==0)write(*,*)'AtA in list',AtA,ASSOCIATED(Q)
+             !if(myid==1)write(*,*)'Q%Row<AtA',Q%Row,'<',AtA
+             ! May change that to FindFASTMATRow
+             Q => DFMab%Next
+             DO
+                IF(.NOT.ASSOCIATED(Q)) EXIT RnOvA
+                IF(Q%Row.EQ.AtA) EXIT
+                IF(Q%Row.GT.AtA) THEN
+                   IF(.NOT.ASSOCIATED(AtAList%AtmNext)) EXIT RnOvA
+                   AtAList=>AtAList%AtmNext
+                   CYCLE RnOvA
+                ENDIF
+                Q => Q%Next
+             ENDDO
+             !if(myid==0)write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'MyID',MyID
+#endif
+             !
              KA=GM%AtTyp%I(AtA)
              NBFA=BS%BfKnd%I(KA)
+             NCFncA=BS%NCFnc%I(KA)
              !
-             !ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1),ThresholdTwoE)
              ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
                & )
 #else
                & *(-1d0))
 #endif
-             IF(ACAtmInfo%NCell.EQ.0) THEN
-                EXIT
-             ENDIF
-             !
+             !write(*,*) 'ACAtmInfo%NCell',ACAtmInfo%NCell
+             IF(ACAtmInfo%NCell.EQ.0) EXIT RnOvA
              !
              ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
              ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
@@ -197,27 +272,61 @@ CONTAINS
              !
              AtBList=>AtBListTmp
              !
+#ifndef ONX2_PARALLEL
              CALL GetColIdx(AtA,D,BColIdx)
+#endif
              !
-             DO ! Run over AtB
+             !#ifdef ONX2_PARALLEL   !I may not need
+             !V => Q%RowRoot         !I may not need
+             !#endif                 !I may not need
+             !
+             RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
                 KB=GM%AtTyp%I(AtB)
                 NBFB=BS%BfKnd%I(KB)
+                NCFncB=BS%NCFnc%I(KB)
+                !
+#ifdef ONX2_PARALLEL
+                !if(myid==1)write(*,*) '+++++++++++++++++++++++++++++++++++++++++++++++'
+                ! May change that to FindFASTMATCol
+                V => Q%RowRoot
+                DO
+                   IF(.NOT.ASSOCIATED(V)) EXIT RnOvB !use the binary tree would be better.
+                   IF(V%L.NE.V%R) THEN
+                      V => V%Next
+                      CYCLE
+                   ENDIF
+                   !
+                   IF(V%L.EQ.AtB) EXIT
+                   IF(V%L.GT.AtB) THEN
+                      IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
+                      AtBList=>AtBList%AtmNext
+                      CYCLE RnOvB
+                   ENDIF
+                   V => V%Next
+                ENDDO
+                !if(myid==1)
+                !write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'AtB',AtB,'MyID',MyID
+#else
                 Ind=BColIdx%I(AtB)
                 IF(Ind.GT.0) THEN ! Skip out if no density matrix element.
                    iPtrD2 = D%BlkPt%I(Ind)
+#endif
                    !
                    ! Get max of the block density matrix.
+#ifdef ONX2_PARALLEL
+                   Dab=DGetAbsMax(NBFA*NBFB,V%MTrix(1,1))
+#else
                    Dab=DGetAbsMax(NBFA*NBFB,D%MTrix%D(iPtrD2))
+#endif
+                   !
                    BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1)*Dab*Dcd*Half,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
 #else
                    & *(-1d0))
 #endif
-                   IF(BDAtmInfo%NCell.EQ.0) THEN
-                      EXIT
-                   ENDIF
+                   IF(BDAtmInfo%NCell.EQ.0) EXIT RnOvB
                    !
                    BDAtmInfo%Atm1X=GM%Carts%D(1,AtB)
                    BDAtmInfo%Atm1Y=GM%Carts%D(2,AtB)
@@ -227,15 +336,18 @@ CONTAINS
                    BDAtmInfo%Atm12X=BDAtmInfo%Atm1X-BDAtmInfo%Atm2X
                    BDAtmInfo%Atm12Y=BDAtmInfo%Atm1Y-BDAtmInfo%Atm2Y
                    BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
-
-
-          !>> test test test test test test test test test test test
-          !CALL GetAbsDenBlk(D%MTrix%D(iPtrD2),NBFA,NBFB,DMab(1),&
-          !     &            BS%NCFnc%I(KA),BS%NCFnc%I(KB),     &
-          !     &            BS%LStrt%I(1,KA),BS%LStop%I(1,KA), &
-          !     &            BS%LStrt%I(1,KB),BS%LStop%I(1,KB)  )
-          !<< test test test test test test test test test test test
-
+                   !
+#ifdef ONX2_PARALLEL
+                   CALL GetAbsDenBlk(V%MTrix(1,1),NBFA,NBFB,DMab(1),     &
+                        &            BS%NCFnc%I(KA),BS%NCFnc%I(KB),      &
+                        &            BS%LStrt%I(1,KA),BS%LStop%I(1,KA),  &
+                        &            BS%LStrt%I(1,KB),BS%LStop%I(1,KB)   )
+#else
+                   CALL GetAbsDenBlk(D%MTrix%D(iPtrD2),NBFA,NBFB,DMab(1),&
+                        &            BS%NCFnc%I(KA),BS%NCFnc%I(KB),      &
+                        &            BS%LStrt%I(1,KA),BS%LStop%I(1,KA),  &
+                        &            BS%LStrt%I(1,KB),BS%LStop%I(1,KB)   )
+#endif
                    !
                    ! Get atom pair for BD.
                    CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
@@ -249,39 +361,39 @@ CONTAINS
                    DO ACR=1,ACAtmInfo%NCell
 !!!!!!!!!!!!!!!!!!!!
                    OffSet%A=1
-                   DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
+                   DO CFA=1,NCFncA ! Run over blkfunc on A
                       OffSet%C=1
-                      DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
+                      DO CFC=1,NCFncC ! Run over blkfunc on C
                          CFAC=CFAC+1
                          CFBD=0                         
 !!!!!!!!!!!!!!!!!!!!!!!!!!
                          DO BDR=1,BDAtmInfo%NCell
 !!!!!!!!!!!!!!!!!!!!!!!!!!
                          OffSet%B=1
-                         DO CFB=1,BS%NCFnc%I(KB) ! Run over blkfunc on B
+                         DO CFB=1,NCFncB ! Run over blkfunc on B
                             OffSet%D=1
-                            DO CFD=1,BS%NCFnc%I(KD) ! Run over blkfunc on D
+                            DO CFD=1,NCFncD ! Run over blkfunc on D
                                CFBD=CFBD+1
-
-                               !if(DMcd((CFD-1)*BS%NCFnc%I(KC)+CFC)>Dcd) stop
-                               !if(DMab((CFB-1)*BS%NCFnc%I(KA)+CFA)>Dab) stop
-
-                              !IF(DMcd((CFD-1)*BS%NCFnc%I(KC)+CFC)*DMcd((CFB-1)*BS%NCFnc%I(KA)+CFA)*Half* &
-                              !     & AtAList%SqrtInt(1)*AtBList%SqrtInt(1)<Thresholds%TwoE) then
-                                  !write(*,*) 'Int smaller', &
-                                  !     & DMcd((CFD-1)*BS%NCFnc%I(KC)+CFC)* &
-                                  !     & DMcd((CFB-1)*BS%NCFnc%I(KA)+CFA)*Half* &
-                                  !     & AtAList%SqrtInt(1)*AtBList%SqrtInt(1)
-                                  !cycle
-                               !endif
                                !
-                               ! Compute integral type.
-                               IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
+                               !if(DMcd((CFC-1)*NCFncD+CFD)>Dcd) stop
+                               !if(DMab((CFA-1)*NCFncB+CFB)>Dab) stop
                                !
-                               ! The integral interface.
-                               INCLUDE 'DERIInterface.Inc'
+#ifdef GTRESH
+                               IF(DMcd((CFC-1)*NCFncD+CFD)*DMab((CFA-1)*NCFncB+CFB)*Half* &
+                                    & AtAList%SqrtInt(1)*AtBList%SqrtInt(1)>Thresholds%TwoE) THEN
+#endif
+                                  !
+                                  ! Compute integral type.
+                                  IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
+                                  !
+                                  ! The integral interface.
+                                  INCLUDE 'DERIInterface.Inc'
+                                  !
+                                  NInts=NInts+DBLE(LocNInt)
+#ifdef GTRESH
+                               ENDIF
+#endif
                                !
-                               NInts=NInts+DBLE(LocNInt)
                                OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                             ENDDO ! End blkfunc on D
                             OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
@@ -300,58 +412,96 @@ CONTAINS
                    ! Compute the exchange-forces.
                    DO IXYZ=1,3
                       !
+                      !-----------------------------------------------------
                       ! AtA
                       Indx=(IXYZ-1)*NIntBlk+1
+                      !
+#ifdef ONX2_PARALLEL
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradA=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+#else
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
                            &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
                            &     Work(1),1)
                       TmpGradA=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+#endif
                       GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+TmpGradA
                       !
+                      !-----------------------------------------------------
                       ! AtC
                       Indx=(3+IXYZ-1)*NIntBlk+1
+#ifdef ONX2_PARALLEL
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradC=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+#else
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
                            &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
                            &     Work(1),1)
                       TmpGradC=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+#endif
                       GradX%D(IXYZ,AtC)=GradX%D(IXYZ,AtC)+TmpGradC
                       !
+                      !-----------------------------------------------------
                       ! AtB
                       Indx=(6+IXYZ-1)*NIntBlk+1
+#ifdef ONX2_PARALLEL
+                      CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+                           &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,    &
+                           &     Work(1),1)
+                      TmpGradB=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+#else
                       CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
                            &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
                            &     Work(1),1)
                       TmpGradB=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+#endif
                       GradX%D(IXYZ,AtB)=GradX%D(IXYZ,AtB)+TmpGradB
                       !
+                      !-----------------------------------------------------
                       ! AtD
-                      !Indx=(9+IXYZ-1)*NIntBlk+1
-                      !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(Indx), &
-                      !     &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
-                      !     &     Work(1),1)
-                      !TmpGradD=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                      !GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)+TmpGradD
                       GradX%D(IXYZ,AtD)=GradX%D(IXYZ,AtD)-(TmpGradA+TmpGradC+TmpGradB)
+                      !
                    ENDDO
                    !
+#ifndef ONX2_PARALLEL
                 ENDIF ! Skip out if no density matrix element.
+#endif
                 !
-                IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT
+                IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
                 AtBList=>AtBList%AtmNext
-             ENDDO ! End AtB
+                !
+             ENDDO RnOvB ! End AtB
              !
-             IF(.NOT.ASSOCIATED(AtAList%AtmNext)) EXIT
+             IF(.NOT.ASSOCIATED(AtAList%AtmNext)) EXIT RnOvA
              AtAList=>AtAList%AtmNext
-          ENDDO ! End AtA
+             !
+          ENDDO RnOvA ! End AtA
+          !
+#ifdef ONX2_PARALLEL
+          ! Set Time.
+          TmEnd = MPI_WTIME()
+          !Add Time.
+          U%Part = U%Part+TmEnd-TmBeg
+          U => U%Next
+#endif
           !
        ENDDO ! End AtD
+       !
+#ifdef ONX2_PARALLEL
+       P => P%Next
+#endif
        !
     ENDDO ! End AtC
     !
     CALL Delete(BColIdx)
     !
-    write(*,100) NInts,12D0*DBLE(MaxNon0-1)**2,NInts/(12D0*DBLE(MaxNon0-1)**2)*100D0
-100 format(' NInts=',F15.1,' NIntTot=',F15.1,' Ratio=',F6.2,'%')
+    WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2, &
+         &       NInts/(12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2)*100D0
+100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputDK
   !
@@ -555,36 +705,8 @@ CONTAINS
   END SUBROUTINE GetColIdx
   !
   !
-
-
-  SUBROUTINE GetAbsDenBlk(D,NR,NC,DM,NFR,NFC,IRB,IRE,ICB,ICE)
-    IMPLICIT NONE
-    INTEGER NR,NC,NFR,NFC
-    INTEGER IRB(NFR),IRE(NFR),ICB(NFC),ICE(NFC)
-    REAL*8 D(NR,NC),DM(NFR,NFC)
-    INTEGER INFC,INFR,I,J,IRB1,ICB1,STDR,STDC
-    REAL*8 TMP
-    ICB1=0
-    DO INFC=1,NFC
-       IRB1=0
-       STDC=ICE(INFC)-ICB(INFC)+1
-       DO INFR=1,NFR
-          STDR=IRE(INFR)-IRB(INFR)+1
-          TMP=0.0D0
-          DO J=ICB1+1,ICB1+STDC
-             DO I=IRB1+1,IRB1+STDR
-                TMP=MAX(TMP,ABS(D(I,J)))
-             ENDDO
-          ENDDO
-          DM(INFR,INFC)=TMP
-          IRB1=IRB1+STDR
-       ENDDO
-       ICB1=ICB1+STDC
-    ENDDO
-  END SUBROUTINE GetAbsDenBlk
-  !
-  !
 END MODULE GONX2ComputDK
+
 
 
 

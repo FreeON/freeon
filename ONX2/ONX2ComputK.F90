@@ -16,6 +16,10 @@ MODULE ONX2ComputK
 !H
 !H---------------------------------------------------------------------------------
   !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
 !#define ONX2_DBUG
 #ifdef ONX2_DBUG
 #define ONX2_INFO
@@ -28,7 +32,7 @@ MODULE ONX2ComputK
   USE InvExp
   USE ONXParameters
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
 #endif
@@ -64,7 +68,7 @@ CONTAINS
     ! Kab = Dcd*(ac(R)|bd(R'))
     !
     !-------------------------------------------------------------------
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     TYPE(fastmat)              , POINTER       :: D
     TYPE(fastmat)              , POINTER       :: Kx
     TYPE(FASTMAT)              , POINTER       :: P
@@ -144,7 +148,7 @@ CONTAINS
     LocNInt=0
     NInts=0.0d0
     !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     P => D%Next                              ! Loop over atom C
     DO                               
        IF(.NOT.ASSOCIATED(P)) EXIT   
@@ -162,7 +166,7 @@ CONTAINS
        ! Get AtA List.
        AtAListTmp=>ListC(AtC)%GoList
        !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
        U => P%RowRoot ! Run over AtD
        DO                                
           IF(.NOT.ASSOCIATED(U)) EXIT    
@@ -186,7 +190,7 @@ CONTAINS
           BDAtmInfo%K2=KD
           !
           ! Get max of the block density matrix.
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
           Dcd=DGetAbsMax(NBFC*NBFD,U%MTrix(1,1))
 #else
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
@@ -233,7 +237,7 @@ CONTAINS
 !!$             ENDIF
              !
              ! Find the row in Kx.
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
              Q => FindFastMatRow_1(Kx,AtA)
 #endif
              !
@@ -358,7 +362,7 @@ CONTAINS
 #endif
                    !
                    ! Get address for Kx and digest the block of integral.
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
                    V => InsertSRSTNode(Q%RowRoot,AtB)
                    IF(.NOT.ASSOCIATED(V%MTrix)) THEN
                       ALLOCATE(V%MTrix(NBFA,NBFB),STAT=MemStatus)
@@ -393,7 +397,7 @@ CONTAINS
              AtAList=>AtAList%AtmNext
           ENDDO ! End AtA
           !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
           ! Set Time.
           TmEnd = MPI_WTIME()
           !Add Time.
@@ -402,13 +406,13 @@ CONTAINS
 #endif
        ENDDO ! End AtD
        !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
        P => P%Next
 #endif
     ENDDO ! End AtC
     !
 #ifdef ONX2_INFO
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     IF(MyID.EQ.ROOT) THEN
 #endif
        WRITE(*,*) '-------------------------------------'
@@ -416,7 +420,7 @@ CONTAINS
        WRITE(*,'(A,F22.1)') ' Nbr ERI  =',NInts
        WRITE(*,'(A,I4)') ' Max Prim =',INT(SQRT(DBLE(MaxCont)))
        WRITE(*,*) '-------------------------------------'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     ENDIF
 #endif
 #endif

@@ -12,6 +12,11 @@ MODULE ONXInit
 !H  Comments:
 !H
 !H---------------------------------------------------------------------------------
+  !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -124,7 +129,7 @@ CONTAINS
   END SUBROUTINE InitSubInd
   !
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   SUBROUTINE InitBfnInd(DB,BS,GM,RCPtr,RCNbr,LBfnInd_O)
 #else
   SUBROUTINE InitBfnInd(DB,BS,GM,BfnInd)
@@ -136,7 +141,7 @@ CONTAINS
 !H  
 !H--------------------------------------------------------------------------------- 
     IMPLICIT NONE
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     TYPE(INT_VECT), INTENT(INOUT), OPTIONAL :: LBfnInd_O
     TYPE(INT_VECT), INTENT(INOUT) :: RCPtr
     INTEGER       , INTENT(IN   ) :: RCNbr
@@ -150,7 +155,7 @@ CONTAINS
     INTEGER                       :: AtA,ShellA,KA,CFA
     !
     ShellA=0
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     IF(PRESENT(LBfnInd_O)) THEN
        DO iRC = 1,RCNbr
           AtA = RCPtr%I(iRC)    

@@ -15,6 +15,10 @@ MODULE ONXGet
 !H
 !H---------------------------------------------------------------------------------
   !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -30,7 +34,7 @@ MODULE ONXGet
   PUBLIC :: GetIntSpace
   PUBLIC :: GetAdrB
   PUBLIC :: GetSubBlk
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   PUBLIC :: Get_Essential_RowCol
 #endif
   !
@@ -265,13 +269,13 @@ CONTAINS
   END SUBROUTINE GetSubBlk
   !
   !
-#ifdef PARALLEL
-  SUBROUTINE Get_Essential_RowCol(A,RowPt,NRow,ColPt,NCol)
+#ifdef ONX2_PARALLEL
+  SUBROUTINE Get_Essential_RowCol(A,RowPt,NRow,RowMin,RowMax,ColPt,NCol,ColMin,ColMax)
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(FASTMAT ), POINTER       :: A
     TYPE(INT_VECT), INTENT(INOUT) :: RowPt,ColPt
-    INTEGER       , INTENT(  OUT) :: NRow,NCol
+    INTEGER       , INTENT(  OUT) :: NRow,NCol,RowMin,RowMax,ColMin,ColMax
     !-------------------------------------------------------------------
     TYPE(FASTMAT ), POINTER       :: P
     TYPE(SRST    ), POINTER       :: U
@@ -317,13 +321,21 @@ CONTAINS
     ! Fill them.
     Row = 1
     Col = 1
+    RowMin=0
+    RowMax=0
+    ColMin=0
+    ColMax=0
     DO AtA = 1,NAtoms
        IF(TmpRowPt%I(AtA).EQ.1) THEN
           RowPt%I(Row) = AtA
+          IF(RowMin.EQ.0) RowMin=AtA
+          RowMax=AtA
           Row = Row+1
        ENDIF
        IF(TmpColPt%I(AtA).EQ.1) THEN
           ColPt%I(Col) = AtA
+          IF(ColMin.EQ.0) ColMin=AtA
+          ColMax=AtA
           Col = Col+1
        ENDIF
     ENDDO

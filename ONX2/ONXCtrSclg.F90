@@ -14,6 +14,11 @@ MODULE ONXCtrSclg
 !H Comments:
 !H  - TrnMatBlk_DBCSR must be keeped, needed for Density matrix.
 !H---------------------------------------------------------------------------------
+  !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
   USE DerivedTypes
   USE GlobalCharacters
   USE GlobalScalars
@@ -22,7 +27,7 @@ MODULE ONXCtrSclg
   USE MemMan
   USE PrettyPrint
   USE ONXParameters
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE FastMatrices
 #endif
   IMPLICIT NONE
@@ -35,7 +40,7 @@ MODULE ONXCtrSclg
 ! PRIVATE DECLARATIONS
 !--------------------------------------------------------------------------------- 
   PRIVATE :: TrnMatBlk_BCSR
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   PRIVATE :: TrnMatBlk_DBCSR
   PRIVATE :: TrnMatBlk_FASTMAT
 #endif
@@ -46,7 +51,7 @@ MODULE ONXCtrSclg
 !--------------------------------------------------------------------------------- 
   INTERFACE TrnMatBlk
      MODULE PROCEDURE TrnMatBlk_BCSR
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
      MODULE PROCEDURE TrnMatBlk_DBCSR
      MODULE PROCEDURE TrnMatBlk_FASTMAT
 #endif
@@ -54,7 +59,7 @@ MODULE ONXCtrSclg
 !
 CONTAINS
 !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   SUBROUTINE TrnMatBlk_DBCSR(BS,GM,A)
 !H--------------------------------------------------------------------------------- 
 !H SUBROUTINE TrnMatBlk_DBCSR(BS,GM,A)
@@ -111,6 +116,7 @@ CONTAINS
              KB   = GM%AtTyp%I(Col)
              NBFB = BS%BfKnd%I(KB)
              N2=NBFA*NBFB
+             !if(myid==1)write(*,*) 'Row',Row,'Col',Col
              CALL TrnSubBlk(BS,KA,KB,NBFA,NBFB,U%MTrix)
           ENDIF
           U => U%Next

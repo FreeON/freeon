@@ -13,11 +13,16 @@ MODULE ONXFillOut
 !H Comments:
 !H
 !H---------------------------------------------------------------------------------
+  !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE ONXParameters
   USE ONXGet
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE FastMatrices
   USE MondoMPI
 #endif
@@ -28,7 +33,7 @@ MODULE ONXFillOut
 ! PUBLIC DECLARATIONS
 !--------------------------------------------------------------------------------- 
   PUBLIC  :: FillOutBCSR
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   PUBLIC  :: FillOutFASTMAT
 #endif
   !
@@ -53,7 +58,7 @@ CONTAINS
     INTEGER                  :: AtB,KB,NBFB
     INTEGER                  :: iPnt1,iPnt2,ci,Ind
 !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     IF (MyID==ROOT) THEN
 #endif
     DO AtA=1,NAtoms
@@ -75,13 +80,13 @@ CONTAINS
           END IF
        END DO
     END DO
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     END IF
 #endif
   END SUBROUTINE FillOutBCSR
   !
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   SUBROUTINE FillOutFASTMAT(BS,GM,KFastMat)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE FillOutDBCSR(BS,GM,KFastMat)

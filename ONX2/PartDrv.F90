@@ -44,7 +44,12 @@ MODULE PartDrv
 ! x There are problems now with NAtoms ~ NPrc with 1D part., should 
 !   do some tests with that, if <= 0 then use Beg and End, + WARNING.
 !----------------------------------------------------------------------------------
-#ifdef PARALLEL
+  !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
+#ifdef ONX2_PARALLEL
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -105,9 +110,10 @@ MODULE PartDrv
   !
 CONTAINS
   !
-  SUBROUTINE PDrv_Initialize(AFastMat,Name,PartN,Args,PartS_O,FirstPartS_O,PFix_O,CheckPoint_O)
+  SUBROUTINE PDrv_Initialize(AFastMat,Name,PartN,Args,PartS_O,FirstPartS_O,WhenPartS_O,PFix_O,CheckPoint_O)
 !H---------------------------------------------------------------------------------
-!H SUBROUTINE PDrv_Initialize(AFastMat,Name,PartN,Args,PartS_O,FirstPartS_O,PFix_O,CheckPoint_O)
+!H SUBROUTINE PDrv_Initialize(AFastMat,Name,PartN,Args,PartS_O,FirstPartS_O,
+!H                            WhenPartS_O,PFix_O,CheckPoint_O)
 !H
 !H---------------------------------------------------------------------------------
     USE Parse
@@ -118,11 +124,11 @@ CONTAINS
     TYPE(ARGMT  )             , INTENT(IN) :: Args
     CHARACTER(LEN=*)          , INTENT(IN) :: Name,PartN
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: PFix_O
-    CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: FirstPartS_O,PartS_O
+    CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: FirstPartS_O,PartS_O,WhenPartS_O
     LOGICAL,          OPTIONAL, INTENT(IN) :: CheckPoint_O
     !-------------------------------------------------------------------
     TYPE(DBCSR  )                          :: A
-    CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS
+    CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS,WhenPartS
     INTEGER                                :: Cycl,Basis,Geom
     !-------------------------------------------------------------------
     !
@@ -134,14 +140,25 @@ CONTAINS
     ! Open Input File
     CALL OpenASCII(InpFile,Inp)  
     !
+    ! When do we need to do the partition?
+    WhenPartS='SCF'
+    IF(PRESENT(WhenPartS_O)) WhenPartS=WhenPartS_O
+    !
     ! Initialize semi-global variables.
-    IF(OptKeyQ(Inp,'Guess','Core')) THEN
-       !We use a Core Guess.
-       IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
-    ELSE
-       !We do not use a Core Guess.
-       IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
-    ENDIF
+    SELECT CASE(WhenPartS)
+    CASE('SCF')
+       IF(OptKeyQ(Inp,'Guess','Core')) THEN
+          !We use a Core Guess.
+          IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
+       ELSE
+          !We do not use a Core Guess.
+          IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+       ENDIF
+    CASE('GEO')
+       IsFirst = Geom.LE.1
+    CASE DEFAULT
+       CALL Halt('PartDrv: Does not regonize when to do the Partition <'//TRIM(WhenPartS)//'>.')
+    END SELECT
     !
 #ifdef PARTDRV_DBUG
     IF(MYID.EQ.ROOT) THEN
@@ -271,14 +288,14 @@ CONTAINS
     CHARACTER(LEN=*),           INTENT(IN   ) :: Name,ParType
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN   ) :: PFix_O
     TYPE(BCSR)                                :: B
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     TYPE(FASTMAT), POINTER                    :: BFastMat
     TYPE(INT_VECT)                            :: PrcDist
     LOGICAL                                   :: InParTemp
     INTEGER                                   :: NBlks,NNon0
 #endif
     !-------------------------------------------------------------------------------
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     IF(PRESENT(Checkpoint_O))THEN
        InParTemp=InParallel
        ! We must turn off the parallel broadcast at this point
@@ -290,7 +307,7 @@ CONTAINS
     ! Get the B matrix from disc.
     CALL Get_BCSR(B,Name,PFix_O,CheckPoint_O)
     !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     ! Do partition on Root.
     IF(MyID==0) THEN
        NBlks = B%NBlks

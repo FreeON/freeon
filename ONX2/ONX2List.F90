@@ -16,6 +16,10 @@ MODULE ONX2List
 !H
 !H---------------------------------------------------------------------------------
   !
+#ifndef PARALLEL
+#undef ONX2_PARALLEL
+#endif
+  !
 !#define ONX2_DBUG
 #ifdef ONX2_DBUG
 #define ONX2_INFO
@@ -29,7 +33,7 @@ MODULE ONX2List
   USE InvExp
   USE ONXParameters
   !
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
 #endif
@@ -95,7 +99,7 @@ CONTAINS
           STOP 'Incrase the size of C'
        ENDIF
     enddo
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
 !    write(*,*) 'size C=',isize**4
@@ -104,7 +108,7 @@ CONTAINS
     NULLIFY(AtAList,NodeA)
     NInts=0.0d0
     !
-!#ifdef PARALLEL
+!#ifdef ONX2_PARALLEL
     ! TODO TODO TODO TODO TODO TODO TODO TODO
 !#else
     DO AtC=1,NAtoms ! Run over AtC
@@ -224,14 +228,14 @@ CONTAINS
     ENDDO ! End AtC
     !
 #ifdef ONX2_INFO
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) THEN
 #endif
     WRITE(*,*) '-------------------------------------'
     WRITE(*,*) 'MakeList Statistic.'
     WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
     WRITE(*,*) '-------------------------------------'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
   ENDIF
 #endif
 #endif
@@ -239,7 +243,11 @@ CONTAINS
   END SUBROUTINE MakeList
   !
   !
+#ifdef ONX2_PARALLEL
+  SUBROUTINE MakeGList(List,GM,BS,CS_OUT,Ptr1,Nbr1,Ptr2,Nbr2)
+#else
   SUBROUTINE MakeGList(List,GM,BS,CS_OUT)
+#endif
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE MakeGList(List,GM,BS,CS_OUT)
 !H  Does the thresholding based on the ERIs.
@@ -256,7 +264,7 @@ CONTAINS
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
-    REAL(DOUBLE)                         :: RInt,AC2,NInts
+    REAL(DOUBLE)                         :: RInt,AC2,NInts,ThresholdDistance
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(CS_OUT%NCells) :: RIntCell
     INTEGER      , DIMENSION(CS_OUT%NCells) :: IndxCell
@@ -266,31 +274,49 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
-    REAL(DOUBLE), PARAMETER :: ThresholdIntegral=-1.0D-15
-    REAL(DOUBLE) :: ThresholdDistance  !, PARAMETER :: ThresholdDistance=1.0D+99
-    !-------------------------------------------------------------------
+#ifdef ONX2_PARALLEL
+    TYPE(INT_VECT), INTENT(IN ) :: Ptr1
+    INTEGER       , INTENT(IN ) :: Nbr1
+    TYPE(INT_VECT), INTENT(OUT) :: Ptr2
+    INTEGER       , INTENT(OUT) :: Nbr2
+    TYPE(INT_VECT)              :: Tmp2
+    INTEGER                     :: iC,Idx2
+#endif
     !
-    integer :: isize,NIntBlk
-    !Simple check
+    integer :: isize
+    !
+    !Simple check Simple check Simple check Simple check Simple check Simple check
     isize=0
     do i=1,natoms
        isize=MAX(isize,BS%BfKnd%I(GM%AtTyp%I(i)))
        IF((BS%BfKnd%I(GM%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
           write(*,*) 'size',(BS%BfKnd%I(GM%AtTyp%I(i)))**4
-          STOP 'Incrase the size of C'
+          write(*,*) 'MaxShelPerAtmBlk',MaxShelPerAtmBlk
+          write(*,*) 'SIZE(ACAtmPair)=',MaxShelPerAtmBlk**2*CS_OUT%NCells
+          write(*,*) 'SIZE(C)',12*MaxFuncPerAtmBlk**4
+          STOP 'In MakeGList: Incrase the size of C'
        ENDIF
     enddo
+    !Simple check Simple check Simple check Simple check Simple check Simple check
     !
     !
     NULLIFY(AtAList,NodeA)
     NInts=0.0D0
+    !
+#ifdef ONX2_PARALLEL
+    CALL New(Tmp2,NAtoms)
+    CALL INT_VECT_EQ_INT_SCLR(NAtoms,Tmp2%I(1),0)
+#endif
+    !
+    !
     ThresholdDistance=-10.d0*DLOG(Thresholds%Dist)
     !
-!#ifdef PARALLEL
-    ! TODO TODO TODO TODO TODO TODO TODO TODO
-!#else
+#ifdef ONX2_PARALLEL
+    DO iC = 1,Nbr1
+       AtC = Ptr1%I(iC)
+#else
     DO AtC=1,NAtoms ! Run over AtC
-!#endif
+#endif
        !
        KC=GM%AtTyp%I(AtC)
        NBFC=BS%BfKnd%I(KC)
@@ -318,7 +344,7 @@ CONTAINS
           AC2=(ACAtmInfo%Atm12X)**2+(ACAtmInfo%Atm12Y)**2+(ACAtmInfo%Atm12Z)**2
           !
           ! Cycle if needed.
-#ifdef GTHRES
+#ifdef GTRESH
           IF(AC2.GT.ThresholdDistance) CYCLE
 #endif
           !
@@ -336,7 +362,7 @@ CONTAINS
                   & (ACAtmInfo%Atm12Z-CS_OUT%CellCarts%D(3,iCell))**2
              !
              ! Cycle if needed.
-#ifdef GTHRES
+#ifdef GTRESH
              IF(AC2.GT.ThresholdDistance) CYCLE
 #endif
              !
@@ -363,10 +389,8 @@ CONTAINS
                 CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
                 !
                 ! The integral interface.
-                !write(*,*) 'In'
                 INCLUDE 'ERIListInterface.Inc'
                 !INCLUDE 'DERIListInterface.Inc'
-                !write(*,*) 'Out'
                 !
                 RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
                 !
@@ -384,7 +408,7 @@ CONTAINS
 #endif
              !
              ! Keep the cell if needed.
-#ifdef GTHRES
+#ifdef GTRESH
              IF(RInt.GT.Thresholds%TwoE) THEN
 #endif
                 NCell=NCell+1
@@ -393,9 +417,9 @@ CONTAINS
                 IndxCell(NCell)=iCell
                 !write(*,'(A,I3,A,I3,A,I3,A,E25.15,A,I3)') &
                 !    & 'AtA',AtA,' AtC',AtC,' NCell',NCell,' RInt',RInt,' iCell',iCell
-#ifdef GTHRES
-             !ELSE
-             !   write(*,*) 'Int smaller that treshold'
+#ifdef GTRESH
+             ELSE
+             !   write(*,*) 'Int smaller that treshold',RInt,Thresholds%TwoE
              ENDIF
 #endif
              !
@@ -409,6 +433,14 @@ CONTAINS
           NULLIFY(NodeA%AtmNext)
           NodeA%Atom=AtA
           NodeA%NCell=NCell
+          !
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+#ifdef ONX2_PARALLEL
+          Tmp2%I(AtA)=1
+#endif
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+          ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
           !
           ! Order the Cell list.
           IF(CS_OUT%NCells.GT.0) CALL QuickSortDis(RIntCell(1),IndxCell(1),NCell,-2)
@@ -430,15 +462,33 @@ CONTAINS
        !
     ENDDO ! End AtC
     !
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+#ifdef ONX2_PARALLEL
+    Nbr2=SUM(Tmp2%I)
+    CALL New(Ptr2,Nbr2)
+    CALL INT_VECT_EQ_INT_SCLR(Nbr2,Ptr2%I(1),0)
+    Idx2=1
+    DO AtA=1,NAtoms
+       IF(Tmp2%I(AtA).EQ.1) THEN
+          Ptr2%I(Idx2)=AtA
+          Idx2=Idx2+1
+       ENDIF
+    ENDDO
+    CALL Delete(Tmp2)
+#endif
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL    
+    !
 #ifdef GONX2_INFO
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     IF(MyID.EQ.ROOT) THEN
 #endif
        WRITE(*,*) '-------------------------------------'
        WRITE(*,*) 'MakeList Statistic.'
        WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
        WRITE(*,*) '-------------------------------------'
-#ifdef PARALLEL
+#ifdef ONX2_PARALLEL
     ENDIF
 #endif
 #endif
@@ -776,21 +826,21 @@ CONTAINS
   END SUBROUTINE InsertNode
   !
   !
-  SUBROUTINE AllocList(List,LSize)
+  SUBROUTINE AllocList(List,IdxMin,IdxMax)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE AllocList(List,LSize)
 !H
 !H---------------------------------------------------------------------------------
     !
     TYPE(CList2), DIMENSION(:), POINTER    :: List
-    INTEGER                   , INTENT(IN) :: LSize
+    INTEGER                   , INTENT(IN) :: IdxMin,IdxMax
     !-------------------------------------------------------------------
     INTEGER                                :: I
     !-------------------------------------------------------------------
     !
-    ALLOCATE(List(LSize))
+    ALLOCATE(List(IdxMin:IdxMax))
     !
-    DO I=1,LSize
+    DO I=IdxMin,IdxMax
        NULLIFY(List(I)%GoList)
     ENDDO
     !
@@ -806,14 +856,15 @@ CONTAINS
     TYPE(CList2), DIMENSION(:), POINTER :: List
     !-------------------------------------------------------------------
     TYPE(ANode2)              , POINTER :: ListA,ListATmp
-    INTEGER                             :: LSize,I
+    INTEGER                             :: I,IdxMin,IdxMax
     !-------------------------------------------------------------------
     !
     NULLIFY(ListA,ListATmp)
     !
-    LSize=SIZE(List)
+    IdxMin=LBOUND(List,DIM=1)
+    IdxMax=UBOUND(List,DIM=1)
     !
-    DO I=1,LSize
+    DO I=IdxMin,IdxMax
        !
        ListA=>List(I)%GoList
        !
@@ -852,32 +903,49 @@ CONTAINS
     TYPE(CList2), DIMENSION(:), POINTER :: List
     !-------------------------------------------------------------------
     TYPE(ANode2)              , POINTER :: ListA,ListATmp
-    INTEGER                             :: LSize,I,J
+    INTEGER                             :: IdxMin,IdxMax,I,J
+    INTEGER                             :: iPrc,IErr
     !-------------------------------------------------------------------
     !
     NULLIFY(ListA,ListATmp)
     !
-    LSize=SIZE(List)
+    IdxMin=LBOUND(List,DIM=1)
+    IdxMax=UBOUND(List,DIM=1)
     !
-    DO I=1,LSize
+#ifdef ONX2_PARALLEL
+    DO iPrc=0,NPrc-1
+       CALL MPI_Barrier(MONDO_COMM,IErr)
+       IF(MyId.NE.iPrc) CYCLE
+#endif
        !
-       ListA=>List(I)%GoList
-       !
-       DO
-          IF(.NOT.ASSOCIATED(ListA)) EXIT
+       DO I=IdxMin,IdxMax
           !
-          WRITE(*,'(A,I4,A,I4)') 'AtC',I,', AtA',ListA%Atom
-          IF(.NOT.ASSOCIATED(ListA%CellIdx).OR. &
-               & .NOT.ASSOCIATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
-          DO J=1,SIZE(ListA%CellIdx)
-             WRITE(*,'(A,I4,A,E22.15)') 'CellIdx=',ListA%CellIdx(J),' SqrtInt=',ListA%SqrtInt(J)
+          ListA=>List(I)%GoList
+          !
+          DO
+             IF(.NOT.ASSOCIATED(ListA)) EXIT
+             !
+#ifdef ONX2_PARALLEL
+             WRITE(*,'(3(A,I4))') 'AtC',I,', AtA',ListA%Atom,' MyID',MyID
+#else
+             WRITE(*,'(2(A,I4))') 'AtC',I,', AtA',ListA%Atom
+#endif
+             IF(.NOT.ASSOCIATED(ListA%CellIdx).OR. &
+                  & .NOT.ASSOCIATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
+             DO J=1,SIZE(ListA%CellIdx,DIM=1)
+                WRITE(*,'(A,I4,A,E22.15)') 'CellIdx=',ListA%CellIdx(J),' SqrtInt=',ListA%SqrtInt(J)
+             ENDDO
+             !
+             ListA=>ListA%AtmNext
+             !
           ENDDO
-          !
-          ListA=>ListA%AtmNext
           !
        ENDDO
        !
+#ifdef ONX2_PARALLEL
+       WRITE(*,*)
     ENDDO
+#endif
     !
   END SUBROUTINE PrintList
   !

@@ -29,21 +29,21 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-CPPMISC = #-DGTRESH
+CPPMISC = -DONX2_PARALLEL -DGTRESH
 
 EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE 
 
 all: ONX2 GONX2
 
 Objects = QuickSortDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
-	   ONXFillOut.o Stats.o ONXRng.o \
-	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
-	   IntSSSS.o ONX2ComputK.o ONX2List.o ONX2.o
+	  ONXFillOut.o Stats.o ONXRng.o \
+	  ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
+	  IntSSSS.o ONX2ComputK.o ONX2List.o ONX2.o
 #
-GObjects = QuickSortDis.o ONXParameters.o  ONXGet.o \
+GObjects = QuickSortDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	   IntSSSS.o GONX2ComputDK.o ONX2List.o GONX2.o
-#dInt1111.o
+#
 ReleaseFiles= 
 #$(LAPACK)
 Libs =  $(F90_LIBRARIES) -lTwoE $(LAPACK)
@@ -57,9 +57,6 @@ GONX2:	$(GObjects)
 	mv GONX2 $(MONDO_EXEC)/GONX
 #
 release:purge $(ReleaseFiles)
-	rm -f HRR.tar
-	rm -f Notes.txt
-	rm -f README
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
