@@ -39,14 +39,9 @@ MODULE PFFT
       TensorC = Zero
       TensorS = Zero
       IF(Dimen==0) RETURN
-!
-!      WRITE(*,*) 'GETTING TENSOR'
       CALL GetTensor(MaxL,HaveTensor)
-!
       IF(.NOT. HaveTensor) THEN
-!         WRITE(*,*) 'MAKING  TENSOR'
          CALL MakePFFT(MaxL,Rmin)
-!         WRITE(*,*) 'SAVEING TENSOR'
          CALL PutTensor(MaxL)
       ENDIF
 !
@@ -66,7 +61,7 @@ MODULE PFFT
       IF(GM%AutoW(1)) AWX = '1'
       IF(GM%AutoW(2)) AWY = '1'      
       IF(GM%AutoW(3)) AWZ = '1'
-      FileName= TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
                 "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
                 "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
                 "_LM"   // TRIM(IntToChar(MaxL)) //                  &
@@ -99,7 +94,7 @@ MODULE PFFT
       IF(GM%AutoW(1)) AWX = '1'
       IF(GM%AutoW(2)) AWY = '1'      
       IF(GM%AutoW(3)) AWZ = '1'
-      FileName= TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+      FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
                 "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
                 "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
                 "_LM"   // TRIM(IntToChar(MaxL)) //                  &
