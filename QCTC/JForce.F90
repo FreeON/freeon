@@ -309,7 +309,10 @@ PROGRAM JForce
      A2=3*AtA
      GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
+#ifdef NLATTFORCE
+#else
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+#endif
   CALL Put(GMLoc,Tag_O=CurGeom)
 !
   CALL Delete(BS)
