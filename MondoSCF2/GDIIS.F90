@@ -1649,7 +1649,7 @@ CONTAINS
      IF(NDim<=4) Range=2.D0*Range
      CALL CtrlDispl2(Def,FitVal,Range,LastX,LastY)
      IStart=MAX(NDim-4,1)
-     CALL PrtFits(VectX(IStart:NDim),VectY(IStart:NDim),Path,A,B,C,FitVal,PredGrad,Def)
+    !CALL PrtFits(VectX(IStart:NDim),VectY(IStart:NDim),Path,A,B,C,FitVal,PredGrad,Def)
    END SUBROUTINE QuadraticFit
 !
 !---------------------------------------------------------------------
