@@ -3,6 +3,7 @@
 !--------------------------------------------------
 MODULE COMMON_DEBUG
    USE DerivedTypes
+   USE GlobalCharacters
    IMPLICIT NONE
    INTEGER :: JPrc,FFrom
    REAL(DOUBLE) :: T1
@@ -3002,14 +3003,12 @@ MODULE LinAlg
                                                 IStrtA,IStopA
 !
          TYPE(INT_VECT)            :: Stat
-         CHARACTER(LEN=3)          :: CurGeom
 !
 !----------------------------------------------------------------------------------
 
 !
         CALL New(Stat,3)
         CALL Get(Stat,'current')
-        CurGeom=TRIM(IntToChar(Stat%I(3)))
 !
         CALL Get(GM,Tag_O=CurGeom)
 !
