@@ -25,6 +25,21 @@ MODULE Parse
  99      CALL Halt(' Key not found in input : '//TRIM(Key))
       END SUBROUTINE Align
 !======================================================================
+!     Align file pointer one a lowercase-line past a character key
+!======================================================================
+      SUBROUTINE AlignLowCase(Key,Unit)     
+         CHARACTER(LEN=*)               :: Key
+         INTEGER                        :: Unit
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+         REWIND(UNIT=Unit)
+         DO 
+            READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+            Call LowCase(Line)
+            IF(INDEX(Line,Key)/=0)RETURN
+         ENDDO
+ 99      CALL Halt(' Key not found in input : '//TRIM(Key))
+      END SUBROUTINE AlignLowCase
+!======================================================================
 !     Align file pointer one line past a character key
 !======================================================================
       FUNCTION FindKey(Key,Unit)     
