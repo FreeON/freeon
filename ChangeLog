@@ -1,3 +1,22 @@
+2004-04-01 11:03  tymczak
+
+	* MondoSCF2/: ParseOptions.F90, SCFs.F90: Fixed Bugs
+
+2004-04-01 04:54  vweber
+
+	* Docs/DM_Papers/PERT_2/perturbedprojector.tex: Corrected sign
+	errors in eq 2.
+
+2004-03-31 19:33  mchalla
+
+	* ChangeLog: [no log message]
+
+2004-03-31 19:33  mchalla
+
+	* MondoMods/McMurch.F90: Removed subroutines with excess tabbing,
+	that were beyond 132 columns.  CJ: PLEASE CHANGE THE TABBING BACK,
+	AND ADD BACK THE SUBROUTINES.
+
 2004-03-31 16:07  tymczak
 
 	* MondoSCF2/SCFs.F90, SCFeqs/ODA.F90: [no log message]
