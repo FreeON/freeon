@@ -31,7 +31,7 @@ PROGRAM SDMM
                                     B,C,D,StepL,Discrim,SqDis,Root1, &
                                     Root2,Ar1,Ar2,Ar,DeltaN,u,v,w,TrP1,TrP2,TrP3, &
                                     OldDeltaN,OldDeltaP,DeltaP,TrP,Fact,Denom,&
-                                    Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,   &
+                                    Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,MinDeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
                                     OldDeltaEQ,OldDeltaPQ,OldDeltaE
   REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D0
@@ -261,6 +261,7 @@ PROGRAM SDMM
    OldE=1.D20
    OldDeltaN=1.D20
    OldDeltaP=1.D20
+   MinDeltaPQ=1.D20
    NPur=0
    FixedUVW=.FALSE.
    DO J=0,40
@@ -311,6 +312,7 @@ PROGRAM SDMM
 #endif     
       DeltaE=ABS(OldE-NewE)
       DeltaPQ=ABS(DeltaP-OldDeltaP)/DeltaP
+      MinDeltaPQ=MIN(DeltaPQ,MinDeltaPQ)
       DeltaNQ=ABS(DeltaN-OldDeltaN)/DeltaN
       DeltaEQ=ABS((NewE-OldE)/NewE)
 !-----------------------------------------------------------------------------
@@ -320,35 +322,28 @@ PROGRAM SDMM
       IF(DeltaEQ<Thresholds%ETol*1.D1.AND.NPur>3)THEN
          CALL OpenASCII(OutFile,Out)
 !        Check for non-decreasing /P
-!         IF(DeltaP>OldDeltaP.AND.DeltaPQ<1.D-1)THEN
+!         WRITE(*,*)' DeltaPQ = ',DeltaPQ
+         IF(DeltaP>OldDeltaP.AND.MinDeltaPQ<1.D-1)THEN
 !             WRITE(*,*)' DeltaP = ',DeltaP
 !             WRITE(*,*)' OldDP  = ',OldDeltaP
 !             WRITE(*,*)' SDMM EXIT 0 '
-!             WRITE(Out,*)' SDMM EXIT 0 '
-!             ToExit=.TRUE.
-!             EXIT
-!          ENDIF
+             ToExit=.TRUE.
+          ENDIF
 !         Check for low digit rebound in the energy
           IF(NewE-OldE>Zero)THEN
 !             WRITE(*,*)' SDMM EXIT 1 '
-!             WRITE(Out,*)' SDMM EXIT 1 '
              ToExit=.TRUE.
-!             EXIT
           ENDIF
 !         Check for density matrix stall out 
           IF(DeltaPQ<1.D-3)THEN
 !             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
-!             WRITE(Out,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
              ToExit=.TRUE.
-!             EXIT
           ENDIF
 !         Check for exceeding target accuracies
           IF(DeltaEQ<Thresholds%ETol*1.D-2.AND. &
              DeltaP<Thresholds%DTol*5.D-2)THEN
              ToExit=.TRUE.
 !             WRITE(*,*)' SDMM EXIT 4 ',DeltaEQ,DeltaP
-!             WRITE(Out,*)' SDMM EXIT 4 '
-!             EXIT
           ENDIF
           CLOSE(Out)
       ENDIF
