@@ -1,0 +1,563 @@
+(***********************************************************************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used on any computer system with Mathematica 4.0,
+MathReader 4.0, or any compatible application. The data for the notebook 
+starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do one of 
+the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing the 
+word CacheID, otherwise Mathematica-compatible applications may try to 
+use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+***********************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     23946,        482]*)
+(*NotebookOutlinePosition[     24587,        505]*)
+(*  CellTagsIndexPosition[     24543,        501]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[{
+    \(\(zab = za + zb;\)\), "\[IndentingNewLine]", 
+    \(\(A = {ax, ay, az};\)\), "\[IndentingNewLine]", 
+    \(\(B = {bx, by, bz};\)\), "\[IndentingNewLine]", 
+    \(\(R = {x, y, z};\)\), "\[IndentingNewLine]", 
+    \(\(P = \((za\ A + zb\ B)\)/zab;\)\), "\[IndentingNewLine]", 
+    \(\(PA = P - A;\)\), "\[IndentingNewLine]", 
+    \(\(PB = P - B;\)\), "\[IndentingNewLine]", 
+    \(\(RP = R - P;\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(test = {ax \[Rule] 
+            Random[Real, {\(-5\), 
+                5}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ ay \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ az \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ bx \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ by \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ bz \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ x \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ y \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ z \[Rule] 
+            Random[Real, {\(-1\), 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ za \[Rule] 
+            Random[Real, {1/10, 
+                1}], \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ zb \[Rule] 
+            Random[Real, {1/10, 1}]\[IndentingNewLine]};\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(test\)], "Input"],
+
+Cell[BoxData[
+    \({ax \[Rule] \(-4.080293495744143`\), ay \[Rule] 0.29265591650394995`, 
+      az \[Rule] 0.20853987706485033`, bx \[Rule] \(-0.4483067876800584`\), 
+      by \[Rule] 0.0944890114593151`, bz \[Rule] 0.779468391149797`, 
+      x \[Rule] 0.39049786043836643`, y \[Rule] 0.6539766257535966`, 
+      z \[Rule] 0.9926693666756681`, za \[Rule] 0.3739137651965424`, 
+      zb \[Rule] 0.6775959399388778`}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(test = {ax \[Rule] 0, ay \[Rule] 0, 
+          az \[Rule] \(-1.8897\), \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ bx \
+\[Rule] 0, by \[Rule] 0, 
+          bz \[Rule] 
+            1.8897, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ za \[Rule] 1, 
+          zb \[Rule] 1, x \[Rule] 1, y \[Rule] 1/2, 
+          z \[Rule] 1/3};\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(ClearAll[e];\)\), "\[IndentingNewLine]", 
+    \(\(e[m_, 0, 0, 0] := 
+        Exp[\(-za\)*
+            zb/\((zab)\)\ \((A - 
+                    B)\)[\([m]\)]^2];\)\), "\[IndentingNewLine]", 
+    \(\(e[m_, i_, j_, n_] := 
+        0 /; \((TrueQ[n > i + j] || 
+              TrueQ[n < 0])\);\)\), "\[IndentingNewLine]", 
+    \(\(e[m_, i_, j_, 
+          n_] := \((e[m, i - 1, j, n - 1]/\((2\ zab)\) + 
+              PA[\([m]\)]*e[m, i - 1, j, n] + \((n + 1)\)*
+                e[m, i - 1, j, n + 1])\) /; 
+          TrueQ[j \[Equal] 0];\)\), "\[IndentingNewLine]", 
+    \(\(e[m_, i_, j_, 
+          n_] := \((e[m, i, j - 1, n - 1]/\((2\ zab)\) + 
+              PB[\([m]\)]*e[m, i, j - 1, n] + \((n + 1)\)*
+                e[m, i, j - 1, n + 1])\) /; 
+          TrueQ[j > 0];\)\[IndentingNewLine]\), "\[IndentingNewLine]", 
+    \(\(f[m_, i_, j_, n_] := 
+        2\ za\ e[m, i + 1, j, n] - 
+          i*e[m, i - 1, j, 
+              n];\)\[IndentingNewLine]\[IndentingNewLine]\)}], "Input"],
+
+Cell[BoxData[
+    \(\(CartDist[p_, q_, r_, s_, t_, 
+          u_] := \((x - ax)\)^p\ \((y - ay)\)^q\ \((z - az)\)^
+            r\ Exp[\(-za\)\ \((\((x - ax)\)^2 + \((y - ay)\)^2 + \((z - 
+                        az)\)^2)\)]*\ \ \ \ \ \ \ \ \ \ \ \ \
+\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \((x - bx)\)^s\ \((y - by)\)^t\ \((z - bz)\)^
+            u\ Exp[\(-zb\)\ \((\((x - bx)\)^2 + \((y - by)\)^2 + \((z - 
+                        bz)\)^2)\)];\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(lambda[m_, L_] := 
+        zab^\((L/2)\)\ \ HermiteH[L, 
+            Sqrt[zab]\ RP[\([m]\)]]\ Exp[\(-zab\)\ RP[\([m]\)]^2];\)\
+\[IndentingNewLine]\), "\[IndentingNewLine]", 
+    \(\(MDExp[p_, q_, r_, s_, t_, u_] := 
+        Sum[lambda[3, n]\ e[3, r, u, 
+              n]*\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ Sum[
+              lambda[2, m]\ e[2, q, t, 
+                  m]*\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Sum[
+                  lambda[1, l]\ e[1, p, s, 
+                      l]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, 
+                    p + s}]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {m, 0, 
+                q + t}]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {n, 0, 
+            r + u}];\)\[IndentingNewLine]\), "\[IndentingNewLine]", 
+    \(\(dMDdAx2[p_, q_, r_, s_, t_, u_] := 
+        Sum[lambda[3, n]\ e[3, r, u, 
+              n]*\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ Sum[
+              lambda[2, m]\ e[2, q, t, 
+                  m]*\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Sum[
+                  lambda[1, l]\ f[1, p, s, 
+                      l]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, 
+                    p + s + 
+                      1}]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {m, 0, 
+                q + t}]\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {n, 0, 
+            r + u}];\)\[IndentingNewLine]\), "\[IndentingNewLine]", 
+    \(\(dMDdAx[p_, q_, r_, s_, t_, u_] := 
+        Module[{Tmp}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ BCo[l, m, n] = 
+                  e[3, r, u, n]\ \ e[2, q, t, m]\ \ f[1, p, s, 
+                      l]; \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Print["\<l = \>", 
+                  l, "\< m = \>", m, "\<  n = \>", n, "\< CoX = \>", 
+                  BCo[l, m, n] /. 
+                    test];\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s + 1}], {m, 0, q + t}], {n, 0, 
+              r + u}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp = 
+            0; \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \(Tmp = Tmp + BCo[l, m, n]\ \ lambda[1, l] 
+                        lambda[2, m]\ lambda[3, 
+                          n];\)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s + 1}], {m, 0, 
+                q + t}], {n, 0, 
+              r + u}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp];\)\), "\
+\[IndentingNewLine]", 
+    \(\(dMDdAy[p_, q_, r_, s_, t_, u_] := 
+        Module[{Tmp}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ BCo[l, m, n] = 
+                  e[3, r, u, n]\ \ f[2, q, t, m]\ \ e[1, p, s, 
+                      l]; \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Print["\<l = \>", 
+                  l, "\< m = \>", m, "\<  n = \>", n, "\< CoY = \>", 
+                  BCo[l, m, n] /. 
+                    test];\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s}], {m, 0, q + t + 1}], {n, 0, 
+              r + u}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp = 
+            0; \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \(Tmp = Tmp + \ BCo[l, m, n]\ \ lambda[1, l] 
+                        lambda[2, m]\ lambda[3, 
+                          n];\)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s}], {m, 0, 
+                q + t + 1}], {n, 0, 
+              r + u}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp\ \ ];\)\), "\
+\[IndentingNewLine]", 
+    \(\(dMDdAz[p_, q_, r_, s_, t_, u_] := 
+        Module[{Tmp}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ BCo[l, m, n] = 
+                  f[3, r, u, n]\ \ e[2, q, t, m]\ \ e[1, p, s, 
+                      l]; \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Print["\<l = \>", 
+                  l, "\< m = \>", m, "\<  n = \>", n, "\< CoZ = \>", 
+                  BCo[l, m, n] /. 
+                    test];\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s}], {m, 0, q + t}], {n, 0, 
+              r + u + 1}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp = 
+            0; \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \(Tmp = Tmp + \ BCo[l, m, n]\ \ lambda[1, l] 
+                        lambda[2, m]\ lambda[3, 
+                          n];\)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, p + s}], {m, 0, q + t}], {n, 
+              0, r + u + 
+                1}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp];\)\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(f[3, 0, 0, 1] /. test\)], "Input"],
+
+Cell[BoxData[
+    \(0.5`\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\[IndentingNewLine]p = 0; \ q = 0; \ r = 0;\), "\[IndentingNewLine]", 
+    \(s = 0; \ t = 0; \ u = 0;\), "\[IndentingNewLine]", 
+    \(\(Print[
+        CartDist[p, q, r, s, t, u] /. test];\)\), "\[IndentingNewLine]", 
+    \(\(Print[MDExp[p, q, r, s, t, u] /. test];\)\), "\[IndentingNewLine]", 
+    \(\(dDistdAx = 
+        D[CartDist[p, q, r, s, t, u], ax];\)\), "\[IndentingNewLine]", 
+    \(\(dDistdAy = 
+        D[CartDist[p, q, r, s, t, u], ay];\)\), "\[IndentingNewLine]", 
+    \(\(dDistdAz = 
+        D[CartDist[p, q, r, s, t, u], az];\)\), "\[IndentingNewLine]", 
+    \(\(Print["\<dDistdAx = \>", 
+        dDistdAx /. test];\)\), "\[IndentingNewLine]", 
+    \(\(Print["\<dDistdAy = \>", 
+        dDistdAy /. test];\)\), "\[IndentingNewLine]", 
+    \(\(Print["\<dDistdAz = \>", 
+        dDistdAz /. test];\)\), "\[IndentingNewLine]", 
+    \(\(Print[dMDdAx[p, q, r, s, t, u] /. test];\)\), "\[IndentingNewLine]", 
+    \(Print[dMDdAy[p, q, r, s, t, u] /. test]; 
+    Print[dMDdAz[p, q, r, s, t, u] /. test];\)}], "Input"],
+
+Cell[BoxData[
+    \(0.18046183431767923`\)], "Print"],
+
+Cell[BoxData[
+    \(0.18046183431767918`\)], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("dDistdAx = "\[InvisibleSpace]0.08414213486896112`\),
+      SequenceForm[ "dDistdAx = ", 0.084142134868961119],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("dDistdAy = "\[InvisibleSpace]0.04207106743448056`\),
+      SequenceForm[ "dDistdAy = ", 0.042071067434480559],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("dDistdAz = "\[InvisibleSpace]\(-0.13095601397222212`\
+\)\),
+      SequenceForm[ "dDistdAz = ", -0.13095601397222212],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoX = "\[InvisibleSpace]0\),
+      SequenceForm[ "l = ", 0, " m = ", 0, "  n = ", 0, " CoX = ", 0],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]1\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoX = "\[InvisibleSpace]0.5`\),
+      SequenceForm[ "l = ", 1, " m = ", 0, "  n = ", 0, " CoX = ", 0.5],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \(0.08414213486896109`\)], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoY = "\[InvisibleSpace]0\),
+      SequenceForm[ "l = ", 0, " m = ", 0, "  n = ", 0, " CoY = ", 0],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]1\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoY = "\[InvisibleSpace]0.5`\),
+      SequenceForm[ "l = ", 0, " m = ", 1, "  n = ", 0, " CoY = ", 0.5],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \(0.042071067434480545`\)], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoZ = "\[InvisibleSpace]0.`\),
+      SequenceForm[ "l = ", 0, " m = ", 0, "  n = ", 0, " CoZ = ", 0.0],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]1\[InvisibleSpace]" CoZ = "\[InvisibleSpace]0.5`\),
+      SequenceForm[ "l = ", 0, " m = ", 0, "  n = ", 1, " CoZ = ", 0.5],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \(\(-0.1309560139722221`\)\)], "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(dSdAz[p_, q_, r_, s_, t_, u_] := 
+        Module[{Tmp}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ov = 
+            N[\((Pi/2)\)^\((3/
+                    2)\)]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ BCo[l, m, n] = 
+                  f[3, r, u, n]\ \ e[2, q, t, m]\ \ e[1, p, s, 
+                      l]; \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Print["\<l = \>", 
+                  l, "\< m = \>", m, "\<  n = \>", n, "\< CoZ = \>", 
+                  BCo[l, m, n] /. 
+                    test];\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, 0}], {m, 0, 0}], {n, 0, 
+              1}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp = 
+            0; \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Do[
+            Do[Do[\ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \(Tmp = Tmp + \ BCo[l, m, 
+                          n]\ \ ov;\)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ , {l, 0, 0}], {m, 0, 0}], {n, 0, 
+              0}]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Tmp];\)\), "\
+\[IndentingNewLine]", 
+    \(dSdAz[0, 0, 0, 0, 0, 0] /. test\)}], "Input"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]0\[InvisibleSpace]" CoZ = \
+"\[InvisibleSpace]0.0007912218355665508`\),
+      SequenceForm[ 
+      "l = ", 0, " m = ", 0, "  n = ", 0, " CoZ = ", 0.00079122183556655078],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("l = "\[InvisibleSpace]0\[InvisibleSpace]" m = "\
+\[InvisibleSpace]0\[InvisibleSpace]"  n = \
+"\[InvisibleSpace]1\[InvisibleSpace]" CoZ = "\[InvisibleSpace]0\),
+      SequenceForm[ "l = ", 0, " m = ", 0, "  n = ", 1, " CoZ = ", 0],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    \(0.001557679411338962`\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(%/2\)], "Input"],
+
+Cell[BoxData[
+    \(0.0029435467836072364`\)], "Output"]
+}, Open  ]]
+},
+FrontEndVersion->"4.0 for X",
+ScreenRectangle->{{0, 1024}, {0, 768}},
+WindowSize->{972, 600},
+WindowMargins->{{Automatic, -21}, {Automatic, -25}}
+]
+
+
+(***********************************************************************
+Cached data follows.  If you edit this Notebook file directly, not using
+Mathematica, you must remove the line containing CacheID at the top of 
+the file.  The cache data will then be recreated when you save this file 
+from within Mathematica.
+***********************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1717, 49, 428, 8, 139, "Input"],
+Cell[2148, 59, 1218, 22, 203, "Input"],
+
+Cell[CellGroupData[{
+Cell[3391, 85, 37, 1, 27, "Input"],
+Cell[3431, 88, 429, 6, 43, "Output"]
+}, Open  ]],
+Cell[3875, 97, 352, 7, 59, "Input"],
+Cell[4230, 106, 1008, 22, 155, "Input"],
+Cell[5241, 130, 583, 9, 43, "Input"],
+Cell[5827, 141, 10514, 158, 747, "Input"],
+
+Cell[CellGroupData[{
+Cell[16366, 303, 54, 1, 27, "Input"],
+Cell[16423, 306, 38, 1, 27, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[16498, 312, 1046, 20, 235, "Input"],
+Cell[17547, 334, 53, 1, 23, "Print"],
+Cell[17603, 337, 53, 1, 23, "Print"],
+Cell[17659, 340, 183, 3, 23, "Print"],
+Cell[17845, 345, 183, 3, 23, "Print"],
+Cell[18031, 350, 190, 4, 23, "Print"],
+Cell[18224, 356, 303, 5, 23, "Print"],
+Cell[18530, 363, 308, 5, 23, "Print"],
+Cell[18841, 370, 53, 1, 23, "Print"],
+Cell[18897, 373, 303, 5, 23, "Print"],
+Cell[19203, 380, 308, 5, 23, "Print"],
+Cell[19514, 387, 54, 1, 23, "Print"],
+Cell[19571, 390, 307, 5, 23, "Print"],
+Cell[19881, 397, 308, 5, 23, "Print"],
+Cell[20192, 404, 57, 1, 23, "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[20286, 410, 2791, 41, 203, "Input"],
+Cell[23080, 453, 354, 7, 23, "Print"],
+Cell[23437, 462, 303, 5, 23, "Print"],
+Cell[23743, 469, 55, 1, 27, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[23835, 475, 36, 1, 27, "Input"],
+Cell[23874, 478, 56, 1, 27, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+
+
+
+(***********************************************************************
+End of Mathematica Notebook file.
+***********************************************************************)
+
