@@ -56,7 +56,7 @@
 
 %\preprint{APS/123-QED}
 
-\title{MATT, ANDERS AND I KNOW THAT YOU HAVE A NICE HUGE BIG SCREEN THEN THINK ABOUT US!\\
+\title{MATT: ANDERS AND I KNOW THAT YOU HAVE A NICE HUGE BIG SCREEN THEN THINK ABOUT US!\\
 The linear scaling self-consistent perturbed projection method for high order response}
 %\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
 
@@ -170,7 +170,8 @@ densities are demonstrated.
  an algorithm for derivatives up to third order in the density matrix.
  Thereafter, we derive a density matrix analogy to Wigner's 2n+1
  rule for nonorthogonal representations. We also briefly discuss the
- self consistent acceleration technique by Weber and Daul \cite{Weber_2003} . In the next section,
+ self consistent acceleration technique by Weber and Daul \cite{Weber_2003}. 
+ In the next section,
  we first show the saturation of the hyperpolarizabilities up to fourth order
  for a series of 1D chain of water molecules. Thereafter, we demonstrate
  linear scaling computation of the higher order electric response properties
@@ -380,12 +381,13 @@ The Wigner's 2n+1 rule was given in cite{...}, here we will present
 a generalization to the non orthogonal case for mixed derivatives 
 up to fourth order....
 
-
-
+The third order energy correction is given in an othogonal representation
+by
 \begin{equation}
   E^{abc}=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)
 \end{equation}
-
+where $P(a,b,c)$ stands for the permutation operator such that all
+permutations of $a$, $b$ and $c$ are made.
 
 %\begin{equation}
 %\begin{split}
@@ -428,14 +430,21 @@ up to fourth order....
 %\end{split}
 %\end{equation}
 %OR A LITTLE BIT SHORTER
+A similar epression can be derived for the fourth order
 \begin{equation}
   \begin{split}
     E^{abcd}=&\frac{1}{24}P(a,b,c,d) \\
     &\Tr([\D^{ab},\D^0] \D^c \F^d + \\ 
-    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd}))
+    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd})).
   \end{split}
 \end{equation}
-
+ This relation may seem to be very expansive to compute. After further
+inspections, we see that the correction along the same direction e.g. $E^{aaaa}$,
+the relation reduces to only one term (9 matrix multipilcations 
+{\bf CAN BE REDUCED WITH THE TRACE}).
+In the worst case where all the directions are different e.g. $E^{aabc}$, the
+relation (ref{}) simplifies to only 12 terms (108 matrix multiplications 
+{\bf CAN BE REDUCED WITH THE TRACE}).
 \begin{equation}
   \alpha_{ab}=-2\Tr[D^a\mu_b]
 \end{equation}
