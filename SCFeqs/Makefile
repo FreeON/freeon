@@ -31,7 +31,7 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 CPPMISC=#-DWORK_ON_DEGENERACY #-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA 
 #
-BlkAInvObjs = BlokAInv.o  
+BlkAInvObjs = BlokAInv.o  DenMatMethods.o
 LowdinOObjs = LowdinO.o 
 #
 ODA_Objs   = ODA.o DenMatMethods.o

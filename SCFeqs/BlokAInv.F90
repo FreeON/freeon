@@ -6,6 +6,7 @@
     USE DerivedTypes
     USE GlobalScalars
     USE GlobalCharacters
+    USE DenMatMethods
     USE InOut
     USE PrettyPrint
     USE MemMan
@@ -53,6 +54,9 @@
     CALL Get(BS,Tag_O=CurBase)
     CALL Get(GM,Tag_O=CurGeom)
     TEST_AINV=.TRUE.
+
+    CALL SussTrix('AINVThreshold',Prog)
+
 #ifdef SPATIAL_THRESHOLDING
     IF(GM%Ordrd==SFC_HILBERT.OR.GM%Ordrd==SFC_PEANO)THEN
        CALL OpenASCII(InpFile,Inp)
