@@ -834,28 +834,28 @@ MODULE PrettyPrint
 !---------------------------------------------------------------------------------------   
 !       Compute the Diagonal Block Error
         BlockError=Zero
-        DO AtA=1,A%NAtms
-           DO P = A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
-              AtB = A%ColPt%I(P)
-              R   = A%BlkPt%I(P)
-              IF(AtA == A%NAtms .AND. AtB == A%NAtms) THEN
-                 RN = A%NNon0
-              ELSE
-                 RN = A%BlkPt%I(P+1)-1
-              ENDIF
-              IF(AtA == AtB) THEN 
-                 NA = SQRT(DBLE(RN-R+1))
-                 DO I = 1,NA
-                    DO J=1,NA
-                       K1 = (J-1)+NA*(I-1)
-                       K2 = (I-1)+NA*(J-1)
-                       BlockError = BlockError + (A%MTrix%D(R+K1)-A%MTrix%D(R+K2))**2
-                    ENDDO
-                 ENDDO
-              ENDIF
-           ENDDO
-        ENDDO
-        BlockError = SQRT(BlockError/DBLE(A%NAtms))
+!!$        DO AtA=1,A%NAtms
+!!$           DO P = A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
+!!$              AtB = A%ColPt%I(P)
+!!$              R   = A%BlkPt%I(P)
+!!$              IF(AtA == A%NAtms .AND. AtB == A%NAtms) THEN
+!!$                 RN = A%NNon0
+!!$              ELSE
+!!$                 RN = A%BlkPt%I(P+1)-1
+!!$              ENDIF
+!!$              IF(AtA == AtB) THEN 
+!!$                 NA = SQRT(DBLE(RN-R+1))
+!!$                 DO I = 1,NA
+!!$                    DO J=1,NA
+!!$                       K1 = (J-1)+NA*(I-1)
+!!$                       K2 = (I-1)+NA*(J-1)
+!!$                       BlockError = BlockError + (A%MTrix%D(R+K1)-A%MTrix%D(R+K2))**2
+!!$                    ENDDO
+!!$                 ENDDO
+!!$              ENDIF
+!!$           ENDDO
+!!$        ENDDO
+!!$        BlockError = SQRT(BlockError/DBLE(A%NAtms))
 #endif
 !
 #ifdef PARALLEL
