@@ -31,75 +31,75 @@ p2:	ph pq
 #       LIBRARIES
 #
 mm:	
-	make -C MondoMods
+	$(MAKE) -C MondoMods
 #
 cmm:	
-	make -i -C MondoMods clean
+	$(MAKE) -i -C MondoMods clean
 #
 pmm:	
-	make -i -C MondoMods purge
+	$(MAKE) -i -C MondoMods purge
 #
 #       FRONT END
 #
 s:	
-	make -C MondoSCF
+	$(MAKE) -C MondoSCF
 #
 cs:	
-	make -i -C MondoSCF clean
+	$(MAKE) -i -C MondoSCF clean
 #
 #       GENERATION OF ORTHOGONALIZATION MATRICES
 #
 x:	
-	make -C XForm
+	$(MAKE) -C XForm
 #
 cx:	
-	make -i -C XForm clean
+	$(MAKE) -i -C XForm clean
 #
 #       SOLVING THE SELF-CONSISTENT-FIELD EQUATIONS
 #
 e:	
-	make -C SCFeqs
+	$(MAKE) -C SCFeqs
 #
 ce:	
-	make -i -C SCFeqs clean
+	$(MAKE) -i -C SCFeqs clean
 #
 #       ONE ELECTRON ROUTINES
 #
 1:
-	make -C OneE
+	$(MAKE) -C OneE
 #
 c1:	
-	make -i -C OneE clean
+	$(MAKE) -i -C OneE clean
 #
 #       ORDER N EXCHANGE
 #
 o:	
-	make -C ONX
+	$(MAKE) -C ONX
 #
 co:	
-	make -i -C ONX clean 
+	$(MAKE) -i -C ONX clean 
 #
 #       QUANTUM CHEMICAL TREE CODE
 #
 q:	
-	make -C QCTC
+	$(MAKE) -C QCTC
 #
 cq:	
-	make -C QCTC clean
+	$(MAKE) -C QCTC clean
 #
 pq:	
-	make -C QCTC purge
+	$(MAKE) -C QCTC purge
 #
 #       HIERARCHICAL CUBATURE
 #
 h:	
-	make -C HiCu
+	$(MAKE) -C HiCu
 #
 ch:	
-	make -i -C HiCu clean
+	$(MAKE) -i -C HiCu clean
 #
 ph:	
-	make -i -C HiCu purge
+	$(MAKE) -i -C HiCu purge
 #
 #       CLEAN EXECUTABLES
 #
@@ -109,7 +109,7 @@ CExec:
 #       PURGE CURRENT WORK DIRECTORY
 #
 PWrk:	
-	make -i -C $(MONDO_WORK) clean
+	$(MAKE) -i -C $(MONDO_WORK) clean
 #
 #       PURGE SCRATCH DIRECTORY
 #
@@ -128,7 +128,7 @@ PScr:
 	rm  -rf $(MONDO_SCRATCH)/*.Kxc
 	rm  -rf $(MONDO_SCRATCH)/*
 #
-#       MAKE A RECURSIVELY GZIPED, DATE-TAGGED TARBALL 
+#       A RECURSIVELY GZIPED, DATE-TAGGED TARBALL 
 #   
 backup:	purge
 	cd $(MONDO_HOME)/.. ;\

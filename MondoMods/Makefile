@@ -59,9 +59,9 @@ CMods:
 	ls -l
 #
 DGEMM:	
-	make -C $(MONDO_DGEMMS)
+	$(MAKE) -C $(MONDO_DGEMMS)
 CDGEMM:	
-	make -i -C $(MONDO_DGEMMS) clean
+	$(MAKE) -i -C $(MONDO_DGEMMS) clean
 	rm -f $(MONDO_HOME)/MondoMods/DGEMMs
 #
 SMTestObjs=  SMTest.o 
