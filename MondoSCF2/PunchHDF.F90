@@ -136,6 +136,7 @@ CONTAINS
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
+       G%Clone(iCLONE)%Confg=cGEO
        ! Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
        ! Make sure everything is wrapped correctly
@@ -173,13 +174,14 @@ CONTAINS
        Radius = Rad_O
        CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
     ELSE
-!!$       Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
+!       Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
        CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)
     ENDIF
     CALL Sort_CellSet(C)
     C%Radius = SQRT(C%CellCarts%D(1,1)**2+C%CellCarts%D(2,1)**2+C%CellCarts%D(3,1)**2)
-!
+    WRITE(*,*)' C%Radius = ',C%Radius
+    WRITE(*,*)' C%NCells = ',C%NCells
   END SUBROUTINE SetLatticeVectors
 !==============================================================================
 !

@@ -41,6 +41,8 @@ CONTAINS
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
+    ! Print the starting coordinates and energy
+    CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
     ! Follow the gradient down hill
     iBAS=C%Sets%NBSets
     DO iGEO=1,C%Opts%NSteps
@@ -87,6 +89,7 @@ CONTAINS
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
+    
     ! Space for accumulating convergence statistics
     CALL New(GradMax,C%Opts%NSteps)
     CALL New(GradRMS,C%Opts%NSteps)
@@ -213,7 +216,6 @@ CONTAINS
           ! Sometimes ya just gota have a goto
           GOTO 1
        ELSEIF(nDIIS>2)THEN
-          write(*,*)' gdiis co = ',diisco%d
           ! Extrapolate
           iDIIS=1
           G%Clone(iCLONE)%AbCarts%D=Zero
@@ -227,7 +229,6 @@ CONTAINS
           ENDDO
           CALL Delete(Carts)
        ELSE
-          WRITE(*,*)' STEEPEST DESCENTS ! '
           ! Stalled, freshen things up with a steepest descent move
           G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Vects%D          
        ENDIF
@@ -269,7 +270,7 @@ CONTAINS
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
     ! Take some steps 
-    StepLength=1D1
+    StepLength=2D0
     DO iSTEP=1,MaxSTEP
        StepLength=StepLength/Two
        ! Step the absolute positions

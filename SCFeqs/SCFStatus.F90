@@ -37,9 +37,9 @@ PROGRAM SCFStatus
    CALL New(Tmp2)
 !---------------------------------------------
 !  Get the density matrix 
-   IF(SCFActn=='BasisSetSwitch')THEN 
-!     If switching the density matrix use i+1 density matrix
-!     its all that is available
+   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN 
+      ! If switching the density matrix or using a previous one from 
+      ! restart use i+1 density matrix--its all that is available
       CALL Get(P,TrixFile('D',Args,1))
    ELSE
       CALL Get(P,TrixFile('D',Args,0))
@@ -151,7 +151,7 @@ PROGRAM SCFStatus
 !--------------------------------------------------------
 !  Find the largest block of the delta density matrix
 !  Allows for checking between extrapolated or projected DMs
-   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='NumForceEvaluation')THEN
+   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart'.OR.SCFActn=='NumForceEvaluation')THEN
       DMax=Max(P)
    ELSE
       CALL Get(Tmp1,TrixFile('D',Args,0))
@@ -248,6 +248,10 @@ PROGRAM SCFStatus
                                      //TRIM(CurGeom)//']') 
       IF(SCFActn=='BasisSetSwitch')THEN
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
+                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
+
+      ELSEIF(SCFActn=='Restart')THEN
+         SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
 #ifdef MMech

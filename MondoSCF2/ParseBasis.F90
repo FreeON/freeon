@@ -287,32 +287,6 @@ CONTAINS
     CALL Delete(AuxCoef)
   END SUBROUTINE ReNormalizePrimitives
 
-  SUBROUTINE BlockBuild(G,B,BS,OS)
-    TYPE(CRDS)      :: G
-    TYPE(BSET)      :: B         
-    TYPE(INT_VECT)  :: BS,OS
-    INTEGER         :: NA,NK,NC,Stride
-    !-------------------------------------------------------------------------------------!
-    B%NBasF=0
-    ! Off set starts at 1
-    OS%I(1)=1      
-    DO NA=1,G%NAtms
-       ! Block size is total number of basis functions per atom 
-       BS%I(NA)=0
-       NK=G%AtTyp%I(NA)
-       ! Go over contracted functions
-       DO NC=1,B%NCFnc%I(NK)
-          ! Add in size of each contraction
-          Stride=B%LStop%I(NC,NK)-B%LStrt%I(NC,NK)+1
-          BS%I(NA)=BS%I(NA)+Stride
-          ! Oh yeah, accumulate basis function counter too...
-          B%NBasF=B%NBasF+Stride
-       ENDDO
-       ! Off set counter from block sizes
-       IF(NA.GE.2)OS%I(NA)=OS%I(NA-1)+BS%I(NA-1)         
-    ENDDO
-  END SUBROUTINE BlockBuild
-
   SUBROUTINE ParseBasisNames(B)
     TYPE(BasisSets) :: B
     INTEGER                               :: I,ILoc

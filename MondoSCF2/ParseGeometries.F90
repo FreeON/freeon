@@ -2,6 +2,7 @@ MODULE ParseGeometries
   USE Parse
   USE InOut
   USE OptionKeys
+  USE PrettyPrint
   USE DynamicsKeys
   USE GeometryKeys
   USE PrettyPrint
@@ -132,6 +133,8 @@ CONTAINS
        DO J=1,105
           IF(At==Ats(J))THEN
              G%AtNum%D(N)=J
+             G%AtNam%C(N)=Ats(J)
+             G%AtMMTyp%C(N)='UNK' 
              G%AtMss%D(N)=AtsMss(J)
              EXIT
           ENDIF

@@ -28,6 +28,7 @@ PROGRAM P2Use
   TYPE(BCSR)  & 
 #endif
                                 :: S,P,X,T0,T1,T2
+  TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
        DeltaP,OldDeltaP,DensityDev
@@ -52,7 +53,24 @@ PROGRAM P2Use
      CALL CloseHDF(HDFFileID)
      ! Open old group and HDF
      OldFileID=OpenHDF(Restart)
+     HDF_CurrentID=OpenHDF(Restart)
+     ! Get old basis set stuff
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     ! Open the old group
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get the old basis set and geometry for indexing the DM
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
+     ! Compute a new sparse matrix blocking scheme for the old BS
+     CALL BlockBuild(GM,BS,BSiz,OffS)
+#ifdef PARALLEL
+     CALL BCast(BSiz)
+     CALL BCast(OffS)
+#endif
      ! Find the current density matrix
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
      ! Close it up 

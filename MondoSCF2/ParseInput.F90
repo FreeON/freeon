@@ -31,7 +31,7 @@ CONTAINS
     ! Parse geometry or get from restart HDF 
     CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
     ! Parse periodic info
-    CALL LoadPeriodic(C%Nams,C%Geos,C%PBCs)
+    CALL LoadPeriodic(C%Nams,C%Opts,C%Geos,C%PBCs)
     ! Massage coodrinates, switch to AUs etc 
     CALL MassageCoordinates(C%Opts,C%Geos,C%PBCs)
     ! Load basis sets  

@@ -3,19 +3,24 @@ MODULE ParsePeriodic
   USE InOut
   USE AtomPairs 
   USE PrettyPrint
+  USE OptionKeys
   USE PeriodicKeys
   USE ControlStructures
 CONTAINS
 !=========================================================================
 !
 !=========================================================================
-  SUBROUTINE LoadPeriodic(N,G,P)
+  SUBROUTINE LoadPeriodic(N,O,G,P)
     TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
     TYPE(Geometries) :: G
     TYPE(Periodics)  :: P
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I
 !-----------------------------------------------------------------------!
+    ! If we are restarting, just use values read from HDF ...
+    IF(O%Guess==GUESS_EQ_RESTART)RETURN
+    ! ... otherwise do some parsing
     CALL OpenASCII(N%IFile,Inp)
     CALL LoadPeriodicOptions(PBC)
     CALL LoadLattice(PBC)
@@ -57,7 +62,8 @@ CONTAINS
           ENDDO
        ENDIF
        IF(NTot .NE. 3) THEN
-          CALL MondoHalt(PRSE_ERROR,'PBC = (?,?,?): Three Logicals must be Specified')
+          PBC%AutoW(:)=.TRUE.
+!          CALL MondoHalt(PRSE_ERROR,'PBC = (?,?,?): Three Logicals must be Specified')
        ENDIF
     ELSE
        PBC%AutoW(:) = .FALSE.
@@ -270,10 +276,10 @@ CONTAINS
     IF(G%PBC%InAtomCrd)THEN
        CALL WrapAtoms(G)
     ELSE
-! These are the two fractional coordinate arrays ... 
+       ! These are the two fractional coordinate arrays ... 
        G%BoxCarts%D=G%AbCarts%D
        G%AbBoxCarts%D=G%AbCarts%D
-! ... and here are the two Cartesian coordinate arrays
+       ! ... and here are the two Cartesian coordinate arrays
        DO I=1,G%NAtms
           G%Carts%D(:,I)=FracToAtom(G,G%BoxCarts%D(:,I))
           G%AbCarts%D(:,I)=FracToAtom(G,G%AbBoxCarts%D(:,I))          
