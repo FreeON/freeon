@@ -117,7 +117,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
       ENDIF
 #endif
-        IF(DensityDev<1.D-4)GOTO 999
+        IF(DensityDev<1.D-5)GOTO 999
      ENDDO
      CALL Warn('In P2Use, failed to converge McWeeny purification.'//RTRN    &
               //'   Still missing '//TRIM(DblToShrtChar(DensityDev))//' electrons.'//RTRN &
