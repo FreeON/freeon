@@ -2098,7 +2098,7 @@ MODULE LinAlg
                   NEXT=BRowPt(J)
                   MN=MI*NJ
                   MN1=MN-1
-                  CALL XPoseSqMat(MI,NJ,AMTrix(P),BMTrix(Q))
+                  CALL XPoseSqMat(MI,NJ,AMTrix(P:P+MN1),BMTrix(Q:Q+MN1))
                   BBlkPt(NEXT)=Q
                   BColPt(NEXT)=I
                   BRowPt(J)=NEXT+1
