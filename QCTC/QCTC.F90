@@ -151,7 +151,7 @@ PROGRAM QCTC
 #endif
      ! Put J to disk
      IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-        CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(4)),Args,0))
+        CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(3)),Args,0))
      ELSE
         CALL Put(T1,TrixFile('J',Args,0))
      ENDIF
@@ -192,9 +192,9 @@ PROGRAM QCTC
 ! Printing
 !  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-     CALL PChkSum(T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-     CALL Plot(   T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL PChkSum(T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'J'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
   ELSE
      CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
