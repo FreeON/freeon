@@ -10,25 +10,25 @@ MODULE Functionals
       MODULE PROCEDURE ExcOnTheGrid_ClSh
    END INTERFACE
 !  Parsing keys for <Options.Model=>
-   CHARACTER(LEN=9),  PARAMETER :: MODEL_OPTION='ModelChem'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_OPTION='ModelChem'
 !  Exchange only
-   CHARACTER(LEN=2),  PARAMETER :: MODEL_ExactX       ='HF'
-   CHARACTER(LEN=11), PARAMETER :: MODEL_SD           ='SlaterDirac'
-   CHARACTER(LEN=6),  PARAMETER :: MODEL_XA           ='XAlpha'
-   CHARACTER(LEN=4),  PARAMETER :: MODEL_B88x         ='B88x'
-   CHARACTER(LEN=4),  PARAMETER :: MODEL_PBEx         ='PBEx'
-   CHARACTER(LEN=5),  PARAMETER :: MODEL_PW91x        ='PW91x'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_ExactX       ='HF'
+   CHARACTER(LEN=*), PARAMETER :: MODEL_SD           ='SlaterDirac'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_XA           ='XAlpha'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B88x         ='B88x'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PBEx         ='PBEx'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91x        ='PW91x'
 !  Pure exchange-correlation functionals
-   CHARACTER(LEN=6),  PARAMETER :: MODEL_VWN3xc       ='VWN3xc'
-   CHARACTER(LEN=6),  PARAMETER :: MODEL_VWN5xc       ='VWN5xc'
-   CHARACTER(LEN=6),  PARAMETER :: MODEL_PW91xc       ='PW91xc'
-   CHARACTER(LEN=6),  PARAMETER :: MODEL_BLYPxc       ='BLYPxc'
-   CHARACTER(LEN=5),  PARAMETER :: MODEL_PBExc        ='PBExc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN3xc       ='VWN3xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_VWN5xc       ='VWN5xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PW91xc       ='PW91xc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_BLYPxc       ='BLYPxc'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_PBExc        ='PBExc'
 !  Hybrid exchange-correlation functionals
-   CHARACTER(LEN=10),  PARAMETER :: MODEL_B3LYP_VWN3xc='B3LYP/VWN3'
-   CHARACTER(LEN=10),  PARAMETER :: MODEL_B3LYP_VWN5xc='B3LYP/VWN5'
-   CHARACTER(LEN=10),  PARAMETER :: MODEL_B3LYP_PW91xc='B3LYP/PW91'
-   CHARACTER(LEN=4),   PARAMETER :: MODEL_PBE0xc      ='PBE0'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN3xc='B3LYP/VWN3'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_VWN5xc='B3LYP/VWN5'
+   CHARACTER(LEN=*),  PARAMETER :: MODEL_B3LYP_PW91xc='B3LYP/PW91'
+   CHARACTER(LEN=*),   PARAMETER :: MODEL_PBE0xc      ='PBE0'
 !-----------------------------------------------------------------------------------------------------
 !  Numerical keys for model chemistries
    INTEGER, PARAMETER :: EXACT_EXCHANGE   =03045805 ! Use exact Hartree-Fock exchange

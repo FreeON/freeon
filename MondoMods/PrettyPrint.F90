@@ -41,7 +41,7 @@ MODULE PrettyPrint
 
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
-   CHARACTER(LEN=13),PARAMETER    :: CheckEq=' CheckSum  = '
+   CHARACTER(LEN=*),PARAMETER    :: CheckEq=' CheckSum  = '
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
