@@ -1,3 +1,158 @@
+2004-02-15 14:16  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_h2o3D_6-31G_6-31Gss_G_T_t.eps,
+	Beta_h2o3D_6-31G_6-31Gss_G_T_t.eps,
+	Gamma_h2o3D_6-31G_6-31Gss_G_T_t.eps, Makefile,
+	Mix_h2o3D_6-31G_6-31Gss_G_T_t.eps, DATA/H2O_BETA/All.par,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.dat,
+	DATA/H2O_BETA/Beta_h2o3D_6-31Gss_G_T.dat, DATA/H2O_BETA/t_b.m,
+	DATA/H2O_GAMMA/All.par,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31G_6-31Gss_G_T.dat,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31Gss_G_T.dat, DATA/H2O_GAMMA/t_g.m,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.arg,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31G_6-31Gss_G_T.arg: [no log message]
+
+2004-02-14 00:41  nemeth
+
+	* Docs/Optimizer/PRL/: 1_6_6_Data.eps, CURVE1.tar, GFS_PRL.tex,
+	curve1.eps, curve3.eps, mondo_new.bib, Makefile, curve2.eps,
+	prl.ps: A couple of files for the first optimizer paper.
+
+2004-02-13 20:47  vweber
+
+	* Docs/DM_Papers/PERT_3/: Response3.tex, DATA/H2O_ALPHA/All.par,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31G_6-31Gss_G_T.dat,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31G_G_T_fit.dat,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31Gss_G_T_fit.dat,
+	DATA/H2O_ALPHA/t_a.m, DATA/H2O_BETA/All.par,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.dat,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_G_T.dat,
+	DATA/H2O_BETA/Beta_h2o3D_6-31Gss_G_T.dat, DATA/H2O_BETA/t_b.m,
+	DATA/H2O_MIX/All.par, DATA/H2O_MIX/Mix_h2o3D_6-31G_T.arg,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.dat,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.pdf,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T_fit.dat,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T_fit2.dat, DATA/H2O_GAMMA/All.par,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31G_6-31Gss_G_T.dat,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31G_G_T.dat,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31Gss_G_T.dat, DATA/H2O_GAMMA/t_g.m:
+	[no log message]
+
+2004-02-13 13:49  vweber
+
+	* Docs/DM_Papers/PERT_3/DATA/H2O_1D/: All.par, Alpha_All.agr,
+	Alpha_All.dat, Alpha_All.ps, Beta_All.agr, Beta_All.dat,
+	Beta_All.ps, Gamma_All.agr, Gamma_All.dat, Gamma_All.ps: [no log
+	message]
+
+2004-02-13 13:41  vweber
+
+	* MondoMods/FastMat.F90: Fixed a bug in Set_FASTMAT_EQ_BCSR and
+	Set_DFASTMAT_EQ_DBCSR.
+
+2004-02-13 12:07  vweber
+
+	* ONX/NONX/: ONX.F90, PartDrv.F90: Check for 0 partition.
+
+2004-02-12 23:30  vweber
+
+	* SCFeqs/: CPSCFStatus.F90, DenMatResponse.F90, FBuild.F90,
+	TC2Response.F90: Minor changes.
+
+2004-02-12 21:07  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: New update of the paper.
+
+2004-02-11 23:20  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_All.eps, Beta_All.eps,
+	Gamma_All.eps, Response3.tex: [no log message]
+
+2004-02-11 21:06  mchalla
+
+	* MondoSCF2/SCFs.F90: maybe overcomes zero of dmaxb.  really need
+	to figure out why dmaxb is zero sometimes...
+
+2004-02-11 20:41  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, Makefile, ONX2.F90,
+	ONX2ComputK.F90, ONX2DataType.F90, ONX2F77.F, ONX2List.F90,
+	ONXCtrSclg.F90, ONXFillOut.F90, ONXGet.F90, ONXInit.F90,
+	ONXRng.F90, PartDrv.F90: Added parallel ...A BUG NEST...
+
+2004-02-11 13:53  nemeth
+
+	* MondoSCF2/SCFs.F90: Changed the invoke from GONX2 to GONX, works
+	better now....[SV]
+
+2004-02-11 10:14  mchalla
+
+	* TwoE/: Makefile, Int6633.F90: [no log message]
+
+2004-02-10 18:25  nemeth
+
+	* MondoMods/GlobalScalars.F90: Table for statistical Q-test added.
+
+2004-02-10 18:24  nemeth
+
+	* MondoSCF2/Optimizer.F90: Setting back the convergence criterion
+	of the geometry optimization to the accuracy level.
+
+2004-02-10 18:21  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Hessian.F90, InCoords.F90, Optimizer.F90,
+	ParseGeomOpt.F90: A new version of the geometry optimizer, which
+	optimizes Baker's test set in 194 steps, using HF/STO-3G forces.
+
+2004-02-10 11:38  mchalla
+
+	* TwoE/: ERIInclude.Inc, Gradients.m, Int1111.F90, Int3111.F90,
+	Int3131.F90, Int3311.F90, Int3331.F90, Int3333.F90, Int6111.F90,
+	Int6131.F90, Int6133.F90, Int6161.F90, Int6311.F90, Int6331.F90,
+	Int6333.F90, Int6361.F90, Int6363.F90, Int6611.F90, Int6631.F90,
+	Int6633.F90, Int6661.F90, Int6663.F90, Int6666.F90, Integrals.m,
+	dERIInclude.Inc, dInt6111.F90, dInt6131.F90, dInt6133.F90,
+	dInt6161.F90, dInt6311.F90, dInt6331.F90, dInt6333.F90,
+	dInt6361.F90, dInt6363.F90, dInt6611.F90, dInt6631.F90,
+	dInt6633.F90, dInt6661.F90, dInt6663.F90, dInt6666.F90: Adding in
+	integrals code for d-functions!
+
+2004-02-09 14:24  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.tex,
+	Timing_Diamond_ONX.dat: [no log message]
+
+2004-02-09 14:16  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-02-09 13:38  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-02-09 10:46  tymczak
+
+	* Docs/PBC_Exchange/: Diamond_En_vs_V.ps, Diamond_En_vs_a.ps,
+	pIce_En_vs_a.ps: [no log message]
+
+2004-02-09 10:18  tymczak
+
+	* Docs/PBC_Exchange/: Timing_pIce.dat, Timing_pIce_ONX_2.ps: [no
+	log message]
+
+2004-02-09 09:42  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-02-09 09:17  tymczak
+
+	* Docs/PBC_Exchange/pIce_En_vs_a.ps: [no log message]
+
+2004-02-08 06:45  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-02-08 06:42  mchalla
 
 	* ONX2/: GONX2.F90, Makefile: Added in scaling of exchange forces
