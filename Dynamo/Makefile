@@ -36,14 +36,14 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
 DynamoObjs = dynamo.o definitions.o constants.o files.o io_units.o status.o \
         atoms.o sequence.o symmetry.o elements.o parsing.o \
         string.o pdb_io.o mm_system.o connectivity.o sort.o mm_file_data.o\
-        mm_file_io.o mm_terms.o coordinate_io.o constraint.o energy_covalent.o \
-        linear_algebra.o energy_nb_full.o
+        mm_file_io.o mm_terms.o coordinate_io.o constraint.o  \
+        linear_algebra.o 
 #
 DynamoRel = dynamo.x definitions.x constants.x files.x io_units.x status.x \
         atoms.x sequence.x symmetry.x  elements.x parsing.x\
         string.o pdb_io.x mm_system.x connectivity.x sort.x mm_file_data.x\
-        mm_file_io.x mm_terms.x coordinate_io.x constraint.x energy_covalent.x \
-        linear_algebra.x energy_nb_full.x
+        mm_file_io.x mm_terms.x coordinate_io.x constraint.x  \
+        linear_algebra.x 
 #
 small:	Dynamo
 #
@@ -73,8 +73,8 @@ CDynamo:
 dynamo.o: definitions.o constants.o files.o io_units.o status.o \
         atoms.o sequence.o symmetry.o elements.o parsing.o \
         string.o pdb_io.o mm_system.o connectivity.o sort.o mm_file_data.o\
-        mm_file_io.o mm_terms.o coordinate_io.o constraint.o energy_covalent.o \
-        linear_algebra.o energy_nb_full.o
+        mm_file_io.o mm_terms.o coordinate_io.o constraint.o  \
+        linear_algebra.o 
 constants.o: definitions.o
 elements.o: definitions.o
 files.o: io_units.o definitions.o
@@ -94,6 +94,4 @@ mm_terms.o: definitions.o io_units.o atoms.o
 coordinate_io.o: constants.o definitions.o  elements.o files.o io_units.o parsing.o status.o atoms.o sequence.o symmetry.o 
 constraint.o: constants.o definitions.o files.o io_units.o linear_algebra.o status.o atoms.o
 linear_algebra.o: definitions.o
-energy_covalent.o: definitions.o status.o mm_terms.o atoms.o
-energy_nb_full.o: constants.o definitions.o io_units.o status.o atoms.o mm_terms.o symmetry.o
 #------------------------------------------------------------------------------
