@@ -25,11 +25,11 @@ PROGRAM JForce
   IMPLICIT NONE
 
 #ifdef PARALLEL
-  TYPE(BCSR)                     :: P
-  TYPE(DBL_VECT)      :: TotJFrc
-  INTEGER :: IErr,TotFrcComp,MyAtomNum,TotAtomNum
-  REAL(DOUBLE) :: JFrcBegTm,JFrcEndTm,JFrcTm
-  TYPE(DBL_VECT) :: TmJFrcArr
+  TYPE(BCSR)                   :: P
+  TYPE(DBL_VECT)               :: TotJFrc
+  INTEGER                      :: IErr,TotFrcComp,MyAtomNum,TotAtomNum
+  REAL(DOUBLE)                 :: JFrcBegTm,JFrcEndTm,JFrcTm
+  TYPE(DBL_VECT)               :: TmJFrcArr
 #else
   TYPE(BCSR)                   :: P
 #endif
