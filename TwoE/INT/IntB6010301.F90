@@ -176,8 +176,7 @@
             CALL CNTRCT6131(VRR,HRR)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (d,0|p,s)^(0) 
-      CALL KetHRR31(10,HRR) 
+      ! No need to generate (d,0|p,s)^(0) 
       ! Generating (d,s|p,s)^(0) 
       DO L=1,1
          DO K=2,4

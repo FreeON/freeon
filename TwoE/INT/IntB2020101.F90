@@ -130,8 +130,7 @@
             CALL CNTRCT2211(VRR,HRR)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (sp,0|s,s)^(0) 
-      CALL KetHRR11(18,HRR) 
+      ! No need to generate (sp,0|s,s)^(0) 
       ! Generating (sp,sp|s,s)^(0) 
       DO L=1,1
          DO K=1,1
@@ -146,9 +145,17 @@
       REAL(DOUBLE)  :: VRR(10,1,0:2)
       REAL(DOUBLE)  :: HRR(18,1,1)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
+      HRR(11,1,1)=HRR(11,1,1)+SpSpB*VRR(1,1,0)
+      HRR(15,1,1)=HRR(15,1,1)+SpFnB*VRR(1,1,0)
       HRR(2,1,1)=HRR(2,1,1)+VRR(2,1,0)
+      HRR(12,1,1)=HRR(12,1,1)+FnSpB*VRR(2,1,0)
+      HRR(16,1,1)=HRR(16,1,1)+SpFnB*VRR(2,1,0)
       HRR(3,1,1)=HRR(3,1,1)+VRR(3,1,0)
+      HRR(13,1,1)=HRR(13,1,1)+FnSpB*VRR(3,1,0)
+      HRR(17,1,1)=HRR(17,1,1)+SpFnB*VRR(3,1,0)
       HRR(4,1,1)=HRR(4,1,1)+VRR(4,1,0)
+      HRR(14,1,1)=HRR(14,1,1)+FnSpB*VRR(4,1,0)
+      HRR(18,1,1)=HRR(18,1,1)+SpFnB*VRR(4,1,0)
       HRR(5,1,1)=HRR(5,1,1)+VRR(5,1,0)
       HRR(6,1,1)=HRR(6,1,1)+VRR(6,1,0)
       HRR(7,1,1)=HRR(7,1,1)+VRR(7,1,0)

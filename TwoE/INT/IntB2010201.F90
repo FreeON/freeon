@@ -156,6 +156,7 @@
       REAL(DOUBLE)  :: VRR(4,4,0:2)
       REAL(DOUBLE)  :: HRR(5,5,1)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
+      HRR(5,5,1)=HRR(5,5,1)+SpFnB*SpFnK*VRR(1,1,0)
       HRR(5,1,1)=HRR(5,1,1)+SpFnB*VRR(1,1,0)
       HRR(1,5,1)=HRR(1,5,1)+SpFnK*VRR(1,1,0)
       HRR(1,2,1)=HRR(1,2,1)+VRR(1,2,0)
