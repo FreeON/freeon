@@ -48,10 +48,10 @@ CONTAINS
 !
 !===============================================================================
   SUBROUTINE SCF(cBAS,cGEO,C)
-    TYPE(Controls)    :: C
-    TYPE(DBL_RNK2)    :: ETot,DMax,DIIS
-    INTEGER,PARAMETER :: MaxSCFs=256
-    INTEGER           :: cBAS,cGEO,iSCF
+    TYPE(Controls)       :: C
+    TYPE(DBL_RNK2),SAVE  :: ETot,DMax,DIIS
+    INTEGER,PARAMETER    :: MaxSCFs=256
+    INTEGER              :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
     CALL New(C%Stat%Action,1)
     ! Determine if there was a geomety or Basis Set Change
@@ -59,14 +59,17 @@ CONTAINS
     ! Compute one-electron matrices   
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
+    WRITE(*,*)' ALLOCATING '
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
+    WRITE(*,*)' DONE ALLOCATING '
     DO iSCF=0,MaxSCFs
        ! Do an SCF cycle
        IF(SCFCycle(iSCF,cBAS,cGEO, &
             C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,DIIS))THEN
           ! Free memory
+
           CALL Delete(ETot)
           CALL Delete(DMax)
           CALL Delete(DIIS)
