@@ -153,7 +153,11 @@ MODULE RhoTools
        Rho%Qx%D(Iq)    = GM%Carts%D(1,AtA)
        Rho%Qy%D(Iq)    = GM%Carts%D(2,AtA)
        Rho%Qz%D(Iq)    = GM%Carts%D(3,AtA)
-       Rho%Co%D(Ir)    =-GM%AtNum%D(AtA)*DDelta
+       IF(GM%AtNum%D(AtA) < 105.D0) THEN
+          Rho%Co%D(Ir)    =-GM%AtNum%D(AtA)*DDelta
+       ELSE
+          Rho%Co%D(Ir)    = Zero
+       ENDIF
     ENDDO
     CALL Delete_HGRho_new(RhoTmp)
 !

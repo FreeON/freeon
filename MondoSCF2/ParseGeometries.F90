@@ -129,13 +129,17 @@ CONTAINS
     ENDDO
 #endif
   END SUBROUTINE LoadCoordinates
-
+!
+!
+!
   FUNCTION GTag(State) RESULT(Tag)
     TYPE(INT_VECT)   :: State
     CHARACTER(LEN=4) :: Tag
     Tag=IntToChar(State%I(3))
   END FUNCTION GTag
-
+!
+!
+!
   SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G)
     CHARACTER(LEN=*)          :: BeginDelimiter,EndDelimiter
     TYPE(CRDS)                :: G
@@ -144,8 +148,8 @@ CONTAINS
     INTEGER                   :: J,N
     CHARACTER(LEN=2)          :: At
     CHARACTER(LEN=DCL)        :: Line,LineLowCase    
-    !------------------------------------------------------------------------!
-    ! Determine the number of atoms in this block
+!------------------------------------------------------------------------!
+!   Determine the number of atoms in this block
     N=0
     CALL Align(BeginDelimiter,Inp)
     DO 
@@ -157,7 +161,7 @@ CONTAINS
     G%NAtms=N
     N=0
     CALL New(G) ! Allocate a geometry
-    ! Parse the coordinates
+!   Parse the coordinates
     CALL Align(BeginDelimiter,Inp)
     DO 
        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -179,8 +183,8 @@ CONTAINS
           ENDIF
        ENDIF
        CALL Delete(C)
-       ! Find the atom number (elements >105 are ghost functions) 
-       DO J=1,105
+!      Find the atom number (elements >= 105 are ghost functions) 
+       DO J=1,107
           IF(At==Ats(J))THEN
              G%AtNum%D(N)=J
              G%AtNam%C(N)=Ats(J)
@@ -229,7 +233,9 @@ CONTAINS
     ! Calculate the electronic coordinates
     G%NElec=0
     DO I=1,G%NAtms
-       G%NElec=G%NElec+G%AtNum%D(I)
+       IF(G%AtNum%D(i) < 105.D0) THEN
+          G%NElec=G%NElec+G%AtNum%D(I)
+       ENDIF
     ENDDO
     G%NElec=G%NElec-G%TotCh
     NUnPEl=G%Multp-1
