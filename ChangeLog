@@ -1,3 +1,22 @@
+2003-08-28 16:17  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex, Regions.eps,
+	Regions.sxd: Latest changes to the PBC paper.  New PFF picture.
+
+2003-08-27 19:43  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90: In Optimizer, the
+	preparation of the first three data points for the BiSect scheme is
+	based now solely on +- displacements of the stretches of the input
+	structure. This works well for rigid molecules. Angle displacements
+	are no more used, they screw up rigid molecules by a lot. In
+	InCoords the selection criterion of torsions changed, now involves
+	topological information as well, not only angles as before.
+
+2003-08-27 18:12  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-08-27 17:10  nemeth
 
 	* MondoSCF2/InCoords.F90: Filter added to the recognition of the
