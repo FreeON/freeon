@@ -118,6 +118,12 @@ PROGRAM ParaMakeRho
      CALL NewBraBlok(BS)  
      CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
 
+#ifdef PERIODIC
+!    Get the Outer Cell Set
+     CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+     CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif
+
      !--------------------------------------------------------------
      ! Main loops: First pass calculates the size.
      !             Second pass calculates the density
@@ -139,9 +145,20 @@ PROGRAM ParaMakeRho
         DO P = Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-
+#ifdef PERIODIC
+              B = Pair%B
+              DO NC = 1,CS_OUT%NCells
+                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
+                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                      + (Pair%A(2)-Pair%B(2))**2 &
+                      + (Pair%A(3)-Pair%B(3))**2
+                 IF(TestAtomPair(Pair)) THEN
+                    CALL PrimCount(BS,Pair,Rho)
+                 ENDIF
+              ENDDO
+#else
               CALL PrimCount(BS,Pair,Rho)
-
+#endif
            ENDIF
         ENDDO
      ENDDO
@@ -172,15 +189,31 @@ PROGRAM ParaMakeRho
            AtB = Dmat%ColPt%I(P)
            R   = Dmat%BlkPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN 
-
+#ifdef PERIODIC
+              B = Pair%B
+              DO NC = 1,CS_OUT%NCells
+                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
+                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                      + (Pair%A(2)-Pair%B(2))**2 &
+                      + (Pair%A(3)-Pair%B(3))**2
+                 IF(TestAtomPair(Pair)) THEN
+                    NN = Pair%NA*Pair%NB
+                    CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+                 ENDIF
+              ENDDO
+#else
               NN = Pair%NA*Pair%NB
               CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
-
+#endif
            ENDIF
         ENDDO
      ENDDO
      ! Add in the density for the nuclear centers
      IF(SCFActn/='InkFok') CALL AddNukes(GM,Rho)
+
+#if defined(PERIODIC) && defined(WRAPDIST)
+  CALL Fold_Rho(GM,Rho)
+#endif
 
 
   ! Prune negligible distributions from the electronic density
