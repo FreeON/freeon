@@ -79,6 +79,7 @@ purge:	clean
 	rm -f $(REMOVESRCE)
 	rm -f *.out
 	rm -f *.log
+	rm -f *.geo
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
