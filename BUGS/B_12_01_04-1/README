@@ -1,0 +1,11 @@
+Sever problem with SCF convergence on a simple system.
+This is a polyethilene molecule.
+HF/3-21G could not converge with the default SCF convergence algorithm.
+The initial STO-2G phase converged well, but the forthcoming 3-21G 
+did not, at all.
+Starting from 3-21G did not converge either. 
+
+For such a simple saturated alkane SCF convergence suld be 
+absolutely smooth in any basis.
+K.N. 12/01/04.
+------------------------------------------------------------------
