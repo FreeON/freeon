@@ -1079,7 +1079,7 @@ CONTAINS
      INTEGER                     :: IStart
      TYPE(DBL_VECT)              :: RMSErr,VectX,VectY,VectAux
      INTEGER                     :: MaxDeg,NS
-     TYPE(DBL_VECT)              :: Work,VectFit1
+     TYPE(DBL_VECT)              :: Work1,Work2,VectFit1
      TYPE(INT_VECT)              :: IWork
      REAL(DOUBLE),DIMENSION(:,:) :: Range  
      REAL(DOUBLE)                :: Conv
@@ -1097,7 +1097,8 @@ CONTAINS
      !
      MaxDeg=3
      NS=MaxDeg+1
-     CALL New(Work,4*NDim*NS+2*NS*NS)
+     CALL New(Work1,NDim)
+     CALL New(Work2,4*NDim*NS+2*NS*NS)
      CALL New(IWork,NDim)
      !
      DO I=1,NIntC
@@ -1129,7 +1130,7 @@ CONTAINS
     ! warning! do not do reordering back to intcgrads/values
     ! that can mess up the relationship of Cartesians/INTC-s
     ! as predicted displacement refers to last Cartesian set
-         CALL QTest(VectX%D,VectY%D,RMSErr%D,Work%D,IWork%I,NDim,IStart)
+         CALL QTest(VectX%D,VectY%D,RMSErr%D,Work2%D,IWork%I,NDim,IStart)
          Range(I,1)=MINVAL(VectX%D(IStart:NDim))
          Range(I,2)=MAXVAL(VectX%D(IStart:NDim))
        ELSE
@@ -1140,7 +1141,7 @@ CONTAINS
        !
        VectAux%D=ABC(I,:)
        CALL BasicFit(VectX%D(IStart:NDim),VectY%D(IStart:NDim), &
-                     RMSErr%D(IStart:NDim),Work%D,EPS,Chi2V, &
+                     RMSErr%D(IStart:NDim),Work1%D,Work2%D,EPS,Chi2V, &
                      VectAux%D,NDeg,NDim-IStart+1)
        ABC(I,:)=VectAux%D
        NDegs(I)=NDeg   
@@ -1151,7 +1152,8 @@ CONTAINS
      CALL Delete(RMSErr)
      CALL Delete(VectX)
      CALL Delete(VectY)
-     CALL Delete(Work)
+     CALL Delete(Work1)
+     CALL Delete(Work2)
      CALL Delete(IWork)
    END SUBROUTINE LQFit
 !
@@ -1281,12 +1283,12 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE BasicFit(VectX,VectY,RMSErr,Work,EPS,Chi2V, &
+   SUBROUTINE BasicFit(VectX,VectY,RMSErr,Work1,Work2,EPS,Chi2V, &
                        Params,NDeg,NDim)  
      ! arrays for output 
      INTEGER       :: MaxDeg,NDeg,NDim,I,II,J
      REAL(DOUBLE)  :: VectX(:),VectY(:),RMSErr(:)
-     REAL(DOUBLE)  :: Params(:),Work(:)
+     REAL(DOUBLE)  :: Params(:),Work1(:),Work2(:)
      REAL(DOUBLE)  :: X0,Y0,EPS,Chi2V,MinY,MaxY,NegW
      INTEGER       :: I1,I2,I3,I4,I5,I6,I7,I8,I9,IStart
      LOGICAL       :: DoQFit
@@ -1295,8 +1297,8 @@ CONTAINS
      MaxDeg=MAX(MIN(NDim-2,MaxDeg),1)
      !
      Params=Zero
-     CALL Chi2Fit(VectX,VectY,RMSErr,Work(1:NDim), &
-                  Work(NDim+1:),MaxDeg,NDeg,Params,Chi2V,EPS,DoQFit)
+     CALL Chi2Fit(VectX,VectY,RMSErr,Work1, &
+                  Work2,MaxDeg,NDeg,Params,Chi2V,EPS,DoQFit)
    END SUBROUTINE BasicFit
 !
 !---------------------------------------------------------------------
