@@ -1082,6 +1082,7 @@ CONTAINS
                 CALL Get(PBC%PFFMaxLay ,'PFFMaxLay' ,Tag_O=Tag_O)
                 CALL Get(PBC%PFFOvRide ,'PFFOvRide' ,Tag_O=Tag_O)
                 CALL Get(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
+                CALL Get(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
                 CALL Get(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
                 CALL Get(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
                 CALL Get(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
@@ -1108,6 +1109,7 @@ CONTAINS
                 CALL Put(PBC%PFFMaxLay ,'PFFMaxLay' ,Tag_O=Tag_O)
                 CALL Put(PBC%PFFOvRide ,'PFFOvRide' ,Tag_O=Tag_O)
                 CALL Put(PBC%AtomW     ,'AtomWrap'  ,Tag_O=Tag_O)
+                CALL Put(PBC%SuperCell ,'SuperCell' ,Tag_O=Tag_O)
                 CALL Put(PBC%InVecForm ,'VectorForm',Tag_O=Tag_O)
                 CALL Put(PBC%InAtomCrd ,'AtomicCrd' ,Tag_O=Tag_O)
                 CALL Put(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
@@ -2246,6 +2248,9 @@ CONTAINS
       CALL Put(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
       CALL Put(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
       CALL Put(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
+      CALL Put(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
+      CALL Put(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
+      CALL Put(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
     ENDIF
   END SUBROUTINE Put_BondD
 !
@@ -2262,6 +2267,9 @@ CONTAINS
       CALL Get(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
       CALL Get(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
       CALL Get(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
+      CALL Get(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
+      CALL Get(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
+      CALL Get(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
     ENDIF
   END SUBROUTINE Get_BondD
 !
