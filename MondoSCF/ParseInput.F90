@@ -207,7 +207,7 @@ MODULE ParseInPut
          ' Matt Challacombe, Eric Schwegler, C.J. Tymczak,      ',A1,    &
          ' Chee Kwan Gan, Karoly Nemeth and Anders Niklasson    ',A1,    &
          ' Los Alamos National Laboratory (LA-CC 01-2)          ',A1,    & 
-         ' Copywrite 2001, University of California.            ',A1)
+         ' Copyright 2001, University of California.            ',A1)
 !        Write information on host, platform, etc
          Mssg='Compiled for '//TRIM(MONDO_PLAT)//', executing on '//TRIM(MONDO_HOST) &
            //Rtrn//' a '//TRIM(MONDO_MACH)//' machine'//' running '//TRIM(MONDO_SYST) &
@@ -765,7 +765,6 @@ MODULE ParseInPut
             ENDIF
             CALL Translate(GM,GM%PBC%TransVec)
             CALL WrapAtoms(GM)
-!
 #else
 !           Convert to AU
             IF(.NOT.GM%InAU) THEN
@@ -2744,38 +2743,6 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
       CHARACTER(LEN=6) :: CurG
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,AuxChar
 !
-!     CALL OpenASCII(OutFile,Out)
-!     CALL OpenASCII(InpFile,Inp)
-!
-!-----------------------------------------------
-!
-!         CurG=TRIM(IntToChar(Ctrl%Current(3)))
-!     CALL OpenHDF(InfFile)
-!         IF(HasMM()) THEN
-!           CALL Get(GMLoc,Tag_O='GM_MM'//CurG)
-!         ELSE
-!           CALL Get(GMLoc,Tag_O=CurG)
-!         ENDIF
-!     CALL CloseHDF()
-!
-! Check, whether Periodic option is on
-!
-         AuxChar=PBOUNDRY
-         Call LowCase(AuxChar)
-         REWIND(UNIT=Inp)
-         DO 
-           READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-           LineLowCase = Line
-           Call LowCase(LineLowCase)
-           IF(INDEX(TRIM(LineLowCase),TRIM(AuxChar))/=0) GO TO 2
-         ENDDO
-      1  CONTINUE
-         PBC_On=.FALSE. 
-         CALL Put(PBC_On,'PBCOn')
-         RETURN
-      2  CONTINUE
-         PBC_On=.TRUE. 
-         CALL Put(PBC_On,'PBCOn')
 !
 !----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <PERIODIC> keys
@@ -2877,13 +2844,35 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
             GMLoc%PBC%Translate = .FALSE.
             GMLoc%PBC%Trans_COM = .FALSE.
          ENDIF
-!-------------------------------------------------------------
+!--------------------------------------------------------------------
 !        IntPut permability
 !
          IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
             GMLoc%PBC%Epsilon = 1.D32
          ENDIF
 !---------------------------------------------------------------------------- 
+!
+! Check, whether Periodic option is on
+!
+         AuxChar=PBOUNDRY
+         Call LowCase(AuxChar)
+         REWIND(UNIT=Inp)
+         DO 
+           READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+           LineLowCase = Line
+           Call LowCase(LineLowCase)
+           IF(INDEX(TRIM(LineLowCase),TRIM(AuxChar))/=0) GO TO 2
+         ENDDO
+      1  CONTINUE
+         PBC_On=.FALSE. 
+         CALL Put(PBC_On,'PBCOn')
+!        RETURN
+         GO TO 3
+      2  CONTINUE
+         PBC_On=.TRUE. 
+         CALL Put(PBC_On,'PBCOn')
+      3  CONTINUE
+!-------------------------------------------------------------
 !        Parse <PERIODIC> for Lattice Vectors
 !
          CALL ParsePeriodic_MONDO(Ctrl,GMLoc)
