@@ -577,7 +577,9 @@ CONTAINS
      ! Calculate simple relaxation (SR) step from an inverse Hessian
      !
      CALL NewDispl(GOpt,Displ,NCart,NIntC)
-     CALL SRStep(GOpt,XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print) 
+     CALL SRStep(GOpt%GOptStat,GOpt%Constr,GOpt%TrfCtrl,GOpt%CoordCtrl,&
+                 GOpt%Hessian,GOpt%Optimizer,GOpt%GrdTrf, &
+                 XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print) 
      !
      ! Calculate new geometry 
      !
@@ -602,52 +604,55 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SRStep(GOpt,XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print)
+   SUBROUTINE SRStep(GStat,GConstr,GTrfCtrl, &
+                     GCoordCtrl,GHessian,GType,GGrdTrf, &
+                     XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print)
      !
      ! Simple Relaxation step
      !
-     TYPE(GeomOpt)                  :: GOpt 
+     TYPE(GOptStat)                 :: GStat
+     TYPE(Constr)                   :: GConstr
+     TYPE(TrfCtrl)                  :: GTrfCtrl
+     TYPE(CoordCtrl)                :: GCoordCtrl
+     TYPE(Hessian)                  :: GHessian
+     INTEGER                        :: GType
+     TYPE(GrdTrf)                   :: GGrdTrf
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)      :: AtNum
      TYPE(DBL_VECT)                 :: Displ
-     REAL(DOUBLE)                   :: MaxGrad,RMSGrad,MaxCGrad
-     INTEGER                        :: IMaxGradNoConstr
-     REAL(DOUBLE)                   :: MaxGradNoConstr
-     REAL(DOUBLE)                   :: RMSGradNoConstr,Sum
+     REAL(DOUBLE)                   :: Sum
      TYPE(DBL_VECT)                 :: IntGrad,Grad,CartGrad
      TYPE(INTC)                     :: IntCs
-     INTEGER                        :: I,J,NDim,IMaxGrad,IMaxCGrad
+     INTEGER                        :: I,J,NDim
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
-     LOGICAL                        :: DoInternals
      CHARACTER(LEN=*)               :: SCRPath 
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     DoInternals=GOpt%TrfCtrl%DoInternals
-     IF(DoInternals) THEN
+     IF(GTrfCtrl%DoInternals) THEN
        NIntC=SIZE(IntCs%Def)
      ELSE
        NIntC=0
      ENDIF
        NDim =SIZE(Displ%D)
-     IF(NIntC/=NDim.AND.DoInternals) &
+     IF(NIntC/=NDim.AND.GTrfCtrl%DoInternals) &
          CALL Halt('Dimensionality error in SRStep')
      !
      CALL New(Grad,NDim)
      CALL New(CartGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      !
-     CALL GetCGradMax(GOpt%Constr,CartGrad%D,NCart, &
-                      IntCs,IMaxCGrad,MaxCGrad)
+     CALL GetCGradMax(GConstr,CartGrad%D,NCart, &
+                      IntCs,GStat%IMaxCGrad,GStat%MaxCGrad)
      !
      ! If requested, compute internal coord. gradients
      !
-     IF(DoInternals) THEN
+     IF(GTrfCtrl%DoInternals) THEN
        NIntC=SIZE(IntCs%Def)
        IF(NIntC/=NDim) CALL Halt('Dimension error in SRStep')
        CALL New(IntGrad,NDim)
        CALL CartToInternal(XYZ,IntCs,CartGrad%D,IntGrad%D,&
-        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
+         GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
        Grad%D=IntGrad%D
        CALL Delete(IntGrad)
      ELSE
@@ -657,64 +662,54 @@ CONTAINS
      !
      ! Check for gradient-convergence
      !
-     IMaxGrad=1
-     MaxGrad=ABS(Grad%D(1))
+     GStat%IMaxGrad=1
+     GStat%MaxGrad=ABS(Grad%D(1))
      DO I=2,NDim
        Sum=ABS(Grad%D(I))
-       IF(Sum>MaxGrad) THEN
-         IMaxGrad=I
-          MaxGrad=Sum
+       IF(Sum>GStat%MaxGrad) THEN
+         GStat%IMaxGrad=I
+          GStat%MaxGrad=Sum
        ENDIF
      ENDDO
-     RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
+     GStat%RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
      !
      ! Check for gradient-convergence in the presence of constraints
      !
-     MaxGradNoConstr=Zero
-     RMSGradNoConstr=Zero
+     GStat%MaxGradNoConstr=Zero
+     GStat%RMSGradNoConstr=Zero
      J=0
      DO I=1,NIntC
        IF(.NOT.IntCs%Constraint(I)) THEN
          J=J+1
          Sum=ABS(Grad%D(I))
-         IF(MaxGradNoConstr<Sum) THEN
-           IMaxGradNoConstr=I
-           MaxGradNoConstr=Sum
+         IF(GStat%MaxGradNoConstr<Sum) THEN
+           GStat%IMaxGradNoConstr=I
+           GStat%MaxGradNoConstr=Sum
          ENDIF
-         RMSGradNoConstr=RMSGradNoConstr+Sum*Sum
+         GStat%RMSGradNoConstr=GStat%RMSGradNoConstr+Sum*Sum
        ENDIF
      ENDDO
-     IF(J/=0) RMSGradNoConstr=SQRT(RMSGradNoConstr)/DBLE(J)
+     IF(J/=0) GStat%RMSGradNoConstr=SQRT(GStat%RMSGradNoConstr)/DBLE(J)
      !
      ! Use Hessian matrix to calculate step
      !
-     SELECT CASE(GOpt%Optimizer)
+     SELECT CASE(GType)
      CASE(GRAD_STPDESC_OPT) 
-       CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
+       CALL SteepestDesc(GCoordCtrl,GHessian, &
                          Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
-       CALL DiagonalHess(GOpt%CoordCtrl,GOpt%Hessian, &
+       CALL DiagonalHess(GCoordCtrl,GHessian, &
                          Grad,Displ,IntCs,XYZ)
-     ! CALL DiagHessRFO(GOpt,Grad,Displ,IntCs,XYZ)
-     ! CALL RedundancyOff(GOpt,Displ%D)
      END SELECT
      !
      ! Set constraints on the displacements
      !
-     CALL SetConstraint(IntCs,XYZ,Displ,GOpt%CoordCtrl%LinCrit, &
-       GOpt%Constr%NConstr,GOpt%TrfCtrl%DoInternals)
+     CALL SetConstraint(IntCs,XYZ,Displ,GCoordCtrl%LinCrit, &
+       GConstr%NConstr,GTrfCtrl%DoInternals)
      !
      ! Tidy up
      !
      CALL Delete(Grad)
-     GOpt%GOptStat%IMaxCGrad=IMaxCGrad
-     GOpt%GOptStat%MaxCGrad=MaxCGrad
-     GOpt%GOptStat%MaxGrad=MaxGrad
-     GOpt%GOptStat%MaxGradNoConstr=MaxGradNoConstr
-     GOpt%GOptStat%IMaxGrad=IMaxGrad
-     GOpt%GOptStat%RMSGrad=RMSGrad
-     GOpt%GOptStat%RMSGradNoConstr=RMSGradNoConstr
-     GOpt%GOptStat%IMaxGradNoConstr=IMaxGradNoConstr
    END SUBROUTINE SRStep
 !
 !-------------------------------------------------------
