@@ -33,9 +33,9 @@ PROGRAM SDMM
                                     OldDeltaN,OldDeltaP,DeltaP,TrP,Fact,Denom,&
                                     Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,MinDeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
-                                    OldDeltaEQ,OldDeltaPQ,OldDeltaE
-  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D1
-  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit,MinPQCount
+                                    OldDeltaEQ,OldDeltaPQ,OldDeltaE,MxCom
+  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D2
+  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit,MinPQCount,PcntPNon0
   LOGICAL                        :: Present,FixedUVW,ToExit
   CHARACTER(LEN=2)               :: Cycl,NxtC
   CHARACTER(LEN=20)              :: ItAnounce
@@ -47,7 +47,6 @@ PROGRAM SDMM
   CALL StartUp(Args,Prog)
   Cycl=IntToChar(Args%I%I(1))
   NxtC=IntToChar(Args%I%I(1)+1)
-
 #ifdef PARALLEL
 !-----------------------------------------------------------------------
 ! Repartion based on previous matrices structure
@@ -95,7 +94,7 @@ PROGRAM SDMM
   OnExit=0
   OldPoint=BIG_DBL
   OldE=Zero
-  DO ICG=0,12
+  DO ICG=0,11
      NCG=NCG+1
 !
 #ifdef PARALLEL
@@ -105,8 +104,9 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !    LINE MINIMIZATION: compute coeficients
 !
-!    Can do these more cheaply
+!    Can do these more cheaply, use loose thresholding 
      Thresholds%Trix=ThreshAmp*Thresholds%Trix
+!
 #ifdef PARALLEL
      CALL Multiply(H,G,T1)
      B=-Trace(T1)                         ! B=-Tr{H.G}=6*Tr{H.(I-P).P.F}
@@ -149,6 +149,8 @@ PROGRAM SDMM
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
+!       Reset thresholding before exit
+        Thresholds%Trix=Thresholds%Trix/ThreshAmp
         EXIT
      ELSEIF(d==Zero)THEN
         StepL=-Half*B/C
@@ -162,6 +164,8 @@ PROGRAM SDMM
            WRITE(*  ,*)'Warning: Complex solution in SDMM Line Minimization '
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
+!          Reset thresholding before exit
+           Thresholds%Trix=Thresholds%Trix/ThreshAmp
            EXIT
         ENDIF
         SqDis=DSQRT(Discrim)
@@ -188,11 +192,17 @@ PROGRAM SDMM
         CALL Multiply(T1,StepL)         ! T1=StepL*H[0]
         CALL Add(T1,Fract)              ! P[n+1,1]=(N_El/2*N_BasF)*I+StepL[0]*H[0]        
      ELSE       
-        CALL Multiply(H,StepL)          ! H=StepL*H 
+        CALL Multiply(H,StepL/Two)      ! H=StepL*H 
+!       Symmetrization to keep [P,F] small 
+        CALL XPose(H,T2)
+        CALL Add(H,T2,T3)
+        CALL SetEq(H,T3)
         CALL Add(H,P,T1)                ! T1=P[N+1,I+1]=P[N+1,I]+StepL[I]*H[I]   
         CALL Multiply(H,One/StepL)      ! H=H/StepL 
      ENDIF
-     CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
+!        CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
+     CALL SetEq(P,T1)  ! re-engineer to avoid copy
+     PcntPNon0=1D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF)        
 !-----------------------------------------------------------------------------
 !    COMPUTE CONVERGENCE STATS
 !
@@ -207,6 +217,12 @@ PROGRAM SDMM
 !
      CALL Multiply(P,F,T2)              ! T2=P.F    
      CALL Filter(T3,T2)                 ! T3=Filter[P.F]
+
+!    Add symetrization step to maintain small [F,P]
+     CALL XPose(T3,T1)
+     CALL Multiply(T1,-One)
+     CALL ADD(T3,T1,T2)
+     MxCom=MAX(T2)
 !
      OldE=NewE
      NewE=Trace(T3)                     ! Tr{P.F}
@@ -215,8 +231,9 @@ PROGRAM SDMM
 !
      IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
         Mssg=ProcessName(Prog,'CG '//TRIM(IntToChar(NCG))) &
-           //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))      &
-           //', c = '//TRIM(DblToShrtChar(c))
+           //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))       &
+           //', %Non0= '//TRIM(IntToChar(PcntPNon0)) &
+           //', MAX[P,F]= '//TRIM(DblToShrtChar(MxCom))    
         WRITE(*,*)TRIM(Mssg)
         CALL OpenASCII(OutFile,Out)
         CALL PrintProtectL(Out)
@@ -225,20 +242,16 @@ PROGRAM SDMM
         CLOSE(UNIT=Out,STATUS='KEEP')
      ENDIF
 !-----------------------------------------------------------------------------
-!    CHECK FOR MINIMIZATION CONVERGENCE
-!
-!    Ditching exit criteria. Logic not robust enough...
+!    CHECK MINIMIZATION CONVERGENCE
 !
 !    Detect convergence inflection
-!     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)) &
-!        .AND.NCG/=1.AND.OnExit==0)THEN
+     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)) &
+        .AND.NCG/=1.AND.OnExit==0)THEN
 !       Do a few more cycles for good measure
-!        OnExit=NCG+3
-!     ENDIF
+        OnExit=NCG+3
+     ENDIF
 !     IF(OnExit==NCG)EXIT
-!     OldPoint=FixedPoint
-!    Detect convergence non-minimification 
-!     IF(NCG>5.AND.ABS(OldE)>ABS(NewE))EXIT
+     OldPoint=FixedPoint
 !-----------------------------------------------------------------------------
 !    GRADIENT EVALUATION
 !
@@ -257,6 +270,7 @@ PROGRAM SDMM
      CALL Multiply(H,Gamma)                ! H=Gamma*H[i]
      CALL Add(G,H,T1)                      ! T1=G[i+1]+Gamma*H[i]
      CALL Filter(H,T1)                     ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
+!     CALL SetEq(H,T1)                     ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
    ENDDO
 !-----------------------------------------------------------------------------
 !  Tidy up a bit ...
@@ -283,9 +297,11 @@ PROGRAM SDMM
    DO J=0,40
       NPur=NPur+1
       CALL Multiply(P,P,T1) 
-      CALL Filter(P2,T1)    
+      CALL SetEq(P2,T1)    ! need to re-engineer without the seteq
+!      CALL Filter(P2,T1)    
       CALL Multiply(P2,P,T1) 
-      CALL Filter(P3,T1)    
+      CALL SetEq(P3,T1)    ! need to re-engineer without the seteq
+!      CALL Filter(P3,T1)    
       TrP1=Trace(p)
       TrP2=Trace(p2)
       TrP3=Trace(P3)
@@ -305,13 +321,16 @@ PROGRAM SDMM
          v=(One+c)/c     
          w=-One/c
       ENDIF
-!     P[J+1] = u*P[J] + v*P[J].P[J] + w*P[J].P[J].P[J]
+!------------------------------------------------------------------------------
+!     ASSEMBLE PURIFIED P
+!
       CALL Multiply(P ,u)
       CALL Multiply(P2,v)
       CALL Multiply(P3,w)
       CALL Add(P,P2,T1)
-      CALL Add(T1,P3,P2)
-      CALL Filter(P,P2)
+      CALL Add(T1,P3,P2)     !     P[J+1] = u*P[J] + v*P[J].P[J] + w*P[J].P[J].P[J]
+      CALL Filter(P,P2)      !     P=Filter[P[N+1,I+1]]
+      PcntPNon0=1D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF)        
 !-----------------------------------------------------------------------------
 !     COMPUTE PURIFICATION STATS
 !
@@ -319,7 +338,8 @@ PROGRAM SDMM
       CALL Multiply(T2,-One)  
       CALL Add(T2,P,T1)                          ! T1=P[J+1]-P[J]
       DeltaP=ABS(Max(T1)+1.D-20)                 ! DeltaP=MAX(P[J+1]-P[J])
-      DeltaN=ABS(TrP-DBLE(NEl))+1.D-20           ! DeltaN=Tr{P}-N_El
+      DeltaPQ=ABS(DeltaP-OldDeltaP)/DeltaP
+
 #ifdef PARALLEL
       CALL Multiply(P,F,T1)
       NewE=Trace(T1)                             ! E=Tr{P.F}
@@ -327,46 +347,25 @@ PROGRAM SDMM
       NewE=Trace(P,F)
 #endif     
       DeltaE=ABS(OldE-NewE)
-      DeltaPQ=ABS(DeltaP-OldDeltaP)/DeltaP
-      MinDeltaPQ=MIN(DeltaPQ,MinDeltaPQ)
-      DeltaNQ=ABS(DeltaN-OldDeltaN)/DeltaN
       DeltaEQ=ABS((NewE-OldE)/NewE)
 !-----------------------------------------------------------------------------
-!     CHECK CONVERGENCE
+!     PURIFICATION CONVERGENCE CHECK 
+!
       ToExit=.FALSE.
 !     Test when in the asymptotic regime
-!      IF(DeltaEQ<Thresholds%ETol*1.D1.AND.
-IF(NPur>6)THEN
+      IF(NPur>6)THEN
          CALL OpenASCII(OutFile,Out)
-!         WRITE(*,*)' DeltaPQ = ',DeltaPQ
-!         WRITE(*,*)' MinDeltaPQ = ',MinDeltaPQ
-         IF(DeltaP<60.D0*Thresholds%Trix)THEN
-!            WRITE(*,*)' DeltaP = ',DeltaP,60.D0*Thresholds%Trix
+         IF(DeltaP<20.D0*Thresholds%Trix.AND.DeltaEQ<1.D-6)THEN
 !            Check for non-decreasing /P
              IF(DeltaP>OldDeltaP)THEN
-!                WRITE(*,*)' DeltaP = ',DeltaP
-!                WRITE(*,*)' OldDP  = ',OldDeltaP
-                WRITE(*,*)' SDMM EXIT 0 '
                 ToExit=.TRUE.
               ENDIF
-!             Check for low digit rebound in the energy
-!              IF(NewE-OldE>Zero)THEN
-!                 WRITE(*,*)' SDMM EXIT 1 '
-!                 ToExit=.TRUE.
-!              ENDIF
          ENDIF
-!         Check for density matrix stall out 
-          IF(DeltaPQ<1.D-3)THEN
-             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
-             ToExit=.TRUE.
-          ENDIF
-!         Check for exceeding target accuracies
-!          IF(DeltaEQ<Thresholds%ETol*1.D-2.AND. &
-!             DeltaP<Thresholds%DTol*1.D-2)THEN
-!             ToExit=.TRUE.
-!             WRITE(*,*)' SDMM EXIT 4 ',DeltaEQ,DeltaP
-!          ENDIF
-          CLOSE(Out)
+!        Check for density matrix stall out 
+         IF(DeltaPQ<1.D-3)THEN
+            ToExit=.TRUE.
+         ENDIF
+         CLOSE(Out)
       ENDIF
 !     Updtate previous cycle values
       OldE=NewE
@@ -386,7 +385,8 @@ IF(NPur>6)THEN
             CALL PrintProtectL(Out)
             Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
                //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))               &
-               //', c = '//TRIM(DblToShrtChar(c))                      &
+               //', %Non0= '//TRIM(IntToChar(PcntPNon0))         &
+!               //', c = '//TRIM(DblToShrtChar(c))                      &
                //', MAX(/P) = '//TRIM(DblToShrtChar(DeltaP)) 
             WRITE(*,*)TRIM(Mssg)
             WRITE(Out,*)TRIM(Mssg)
