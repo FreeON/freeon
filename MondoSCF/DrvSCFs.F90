@@ -74,23 +74,25 @@ MODULE DrvSCFs
 !
       IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1.AND. &
          Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
-         IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
+
+         ! Density projection is now the default guess for new geometries
+
+!         IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
 !           Projection of density matrix between geometries
             CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
                                    //TRIM(PrvGeom)//' to configuration# ' &
                                    //TRIM(CurGeom)//'.')
 !           Create density from last SCF 
             CtrlVect=SetCtrlVect(Ctrl,'Project')
-         ELSEIF(Ctrl%Extrap==EXTRAP_GEOM_INTRP)THEN
+!         ELSEIF(Ctrl%Extrap==EXTRAP_GEOM_INTRP)THEN
 !           Extrapolation of density matrix between geometries
-            CALL LogSCF(Ctrl%Current,'Geometry extrapolation from configuration #' &
-                                   //TRIM(PrvGeom)//' to configuration# ' &
-                                   //TRIM(CurGeom)//'.')
+!            CALL LogSCF(Ctrl%Current,'Geometry extrapolation from configuration #' &
+!                                   //TRIM(PrvGeom)//' to configuration# ' &
+!                                   //TRIM(CurGeom)//'.')
 !           Create density from last SCFs DM (ICyc+1)
-
-            Ctrl%Previous(1)=Ctrl%Previous(1)+1
-            CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
-         ENDIF
+!            Ctrl%Previous(1)=Ctrl%Previous(1)+1
+!            CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
+!         ENDIF
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
          CALL CleanScratch(Ctrl,'CleanLastGeom')

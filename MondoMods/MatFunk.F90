@@ -68,6 +68,7 @@ MODULE MatFunk
       ENDIF
 !
       BLKVECT%D(1:N,1:N)=A(1:N,1:N)
+      !CALL PPrint(A,'A',Unit_O=6)
 !
       CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
       IF(INFO/=SUCCEED) &
@@ -124,5 +125,11 @@ MODULE MatFunk
       REAL(DOUBLE) :: SqRtA
       SqRtA=SQRT(A)
    END FUNCTION SqRoot
+
+   FUNCTION InvSqRt(A) RESULT(InvSqRtA)
+      REAL(DOUBLE), INTENT(IN)  :: A
+      REAL(DOUBLE) :: InvSqRtA
+      InvSqRtA=One/SQRT(A)
+   END FUNCTION InvSqRt
 !
 END MODULE MatFunk
