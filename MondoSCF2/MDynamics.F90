@@ -12,7 +12,7 @@ MODULE MDynamics
   USE SetXYZ
   USE DynamicsKeys
   IMPLICIT NONE
-  TYPE(DBL_VECT)      :: MDTime,MDKin,MDEpot,MDEtot,MDTemp
+  TYPE(DBL_VECT)      :: MDTime,MDKin,MDEpot,MDEtot,MDTemp,MDTave
   TYPE(DBL_RNK2)      :: MDLinP
   CONTAINS
 !--------------------------------------------------------------
@@ -34,7 +34,17 @@ MODULE MDynamics
     CALL New(MDEpot ,C%Geos%Clones)
     CALL New(MDETot ,C%Geos%Clones)
     CALL New(MDTemp ,C%Geos%Clones)
+    CALL New(MDTave ,C%Geos%Clones)
     CALL New(MDLinP ,(/3,C%Geos%Clones/))
+!
+    MDTime%D = Zero
+    MDKin%D  = Zero
+    MDEpot%D = Zero
+    MDETot%D = Zero
+    MDTemp%D = Zero
+    MDTave%D = Zero
+    MDLinP%D = Zero
+!
 !   Initial Guess     
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
 !      Init the Time
@@ -65,8 +75,6 @@ MODULE MDynamics
 !      Give an intial Maxwell Boltzman Temp
        IF(C%Dyns%Initial_Temp) THEN
           CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
-       ELSE
-          CALL ResetMomentum(C,Zero,Zero,Zero)
        ENDIF
 !      Init the Time
        MDTime%D(:) = Zero
@@ -86,10 +94,11 @@ MODULE MDynamics
           CALL SCF(iBAS,iGEO,C)
        ENDDO
     ENDIF
+!   Initialize MD
     iBAS=C%Sets%NBSets
-!   Store the Last P matrix
     CALL RenameDensityMatrix(C,iREMOVE)
-!   Do MD    
+    CALL OutputMD(C,0)
+!   Do MD
     DO iGEO = 1,C%Dyns%MDMaxSteps
 !      Calculate the Force
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
@@ -114,15 +123,21 @@ MODULE MDynamics
        IF(C%Dyns%Parallel_Rep) THEN
           CALL Halt('Parallel Replicate MD Not Implimented')
        ENDIF
+!      Generate Output
+       CALL OutputMD(C,iGEO)
 !      Theomstates
        IF(C%Dyns%Temp_Scaling) THEN
           IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
-             WRITE(*,*) 'Rescaling Temperature'
-             CALL RescaleTemp(C,C%Dyns%TargetTemp)
+             WRITE(*,*) 'Rescaling Temperature' 
+             DO iCLONE=1,C%Geos%Clones
+                IF(.TRUE.) THEN
+                   CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTemp%D(iCLONE),C%Dyns%TargetTemp)
+                ELSE
+                   CALL RescaleVelocity(C%Geos%Clone(iCLONE),MDTave%D(iCLONE),C%Dyns%TargetTemp)
+                ENDIF
+             ENDDO
           ENDIF   
        ENDIF
-!      Generate Output
-       CALL OutputMD(C,iGEO)
 !      Refresh the Time
        HDFFileID=OpenHDF(C%Nams%HFile)
        DO iCLONE=1,C%Geos%Clones
@@ -141,6 +156,51 @@ MODULE MDynamics
     ENDDO
   END SUBROUTINE MD
 !--------------------------------------------------------------
+! Set an initial Temperature
+!--------------------------------------------------------------
+  SUBROUTINE SetTempMaxBoltDist(C,Temp0)
+    TYPE(Controls)        :: C
+!    TYPE(DBL_VECT)        :: Temp0
+    REAL(DOUBLE)          :: Temp0
+    REAL(DOUBLE)          :: Temp,Kin,Mass,TVel,VX,VY,VZ
+    INTEGER               :: iCLONE,iATS,I,J,Jmax
+!
+    Jmax = 20
+    DO iCLONE=1,C%Geos%Clones
+       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             Mass  = C%Geos%Clone(iCLONE)%AtMss%D(iATS) 
+             TVel  = SQRT(Three*Temp0*KelvinToHartrees/Mass)
+             VX = Zero
+             VY = Zero
+             VZ = Zero
+             DO J=1,Jmax
+                VX = VX+TVel*Random((/-One,One/))
+                VY = VY+TVel*Random((/-One,One/))
+                VZ = VZ+TVel*Random((/-One,One/))
+             ENDDO
+             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = VX
+             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = VY
+             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = VZ
+          ENDIF
+       ENDDO
+       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
+       CALL CalculateMDKin(C%Geos%Clone(iCLONE),Kin,Temp)
+       CALL RescaleVelocity(C%Geos%Clone(iCLONE),Temp,Temp0)
+       CALL CalculateMDKin(C%Geos%Clone(iCLONE),Kin,Temp)
+!
+       MDKin%D(iCLONE)  = Kin
+       MDTemp%D(iCLONE) = Temp
+       MDTave%D(iCLONE) = Temp
+       MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+       MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+!
+       C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Carts%D
+!
+    ENDDO
+!
+  END SUBROUTINE SetTempMaxBoltDist
+!--------------------------------------------------------------
 ! The Velocity Verlet Algorithmn : NVE
 !--------------------------------------------------------------
   SUBROUTINE MDVerlet_NVE(C,iGEO)
@@ -157,54 +217,117 @@ MODULE MDynamics
 !   Clone Loop
     DO iCLONE=1,C%Geos%Clones
 !      Move The Atoms
-       nATOMS=0
-       MDKin%D(iCLONE)      = Zero
-       MDLinP%D(1:3,iCLONE) = Zero
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
              nATOMS = nATOMS+1
              Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-             Pos(1:3)  =  C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)
+             Pos(1:3)  =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
              Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
              Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
 !            Velocity: v(t) = v(t-dT/2(t)*dT/2
              Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
-!            Calculate EKin
-             MDKin%D(iCLONE) = MDKin%D(iCLONE) + Half*Mass*(Vel(1)**2+Vel(2)**2+Vel(3)**2)
-!            Calculate Linear Momentum
-             MDLinP%D(1:3,iCLONE) = MDLinP%D(1:3,iCLONE)+Vel(1:3)*Mass
 !            Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
              Pos(1:3) = Pos(1:3) + Vel(1:3)*dT + Acc(1:3)*dTSq2
 !            Velocity: v(t+dT/2= v(t) + a(t)*dT/2
              Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
 !            Update
-             C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)  = Pos(1:3) 
+             C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)    = Pos(1:3) 
              C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
           ENDIF
        ENDDO
-!
+!      Reset the Momentum to Zero    
+       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
+!      Calculate Kinectic and  Temp
+       CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
+       MDTave%D(iCLONE) = (DBLE(iGEO)/DBLE(iGEO+1))*MDTave%D(iCLONE) &
+                         +(       One/DBLE(iGEO+1))*MDTemp%D(iCLONE)
+!      Store Potential and Total Energy
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
-       MDEtot%D(iCLONE) = MDEpot%D(iCLONE)+MDKin%D(iCLONE)
-       MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(nATOMS)*HartreesToKelvin
+       MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
 !
-       IF(.TRUE.) THEN
-          CALL OpenASCII("EnergiesMD.dat",99)
-          WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-          CLOSE(99)
-!
-!!$          CALL OpenASCII("PositionMD.dat",99)
-!!$          Pos(1:3) = C%Geos%Clone(iCLONE)%AbCarts%D(1:3,1)-C%Geos%Clone(iCLONE)%AbCarts%D(1:3,2)
-!!$          Dist =  SQRT(Pos(1)**2+Pos(2)**2+Pos(3)**2)
-!!$          WRITE(99,'(F10.4,1x,F18.12)') MDTime%D(iCLONE),Dist
-!!$          CLOSE(99) 
-!
-          WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
-       ENDIF
-!
-       CALL ResetMomentum(C,Zero,Zero,Zero)
+       C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Carts%D
 !
     ENDDO
+!
+    IF(.TRUE.) THEN
+       CALL OpenASCII("EnergiesMD.dat",99)
+       WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(1),MDKin%D(1),MDEpot%D(1),MDEtot%D(1)
+       WRITE(*,*) "Time = ",MDTime%D(1)," Temperature = ",MDTemp%D(1),' Ave Temp = ',MDTave%D(1)
+    ENDIF
+!
   END SUBROUTINE MDVerlet_NVE
+!--------------------------------------------------------------
+! Reset the Velocities so that PX=PX0,PY=PY0,PZ=PZ0
+!--------------------------------------------------------------
+  SUBROUTINE ResetMomentum(GM,PX0,PY0,PZ0)
+    TYPE(CRDS)            :: GM
+    REAL(DOUBLE)          :: Mass,PX,PY,PZ,PX0,PY0,PZ0
+    INTEGER               :: iATS,nATOMS
+!   Calculate Linear Momentum
+    PX = Zero
+    PY = Zero
+    PZ = Zero
+    nATOMS = 0
+    DO iATS=1,GM%NAtms
+       IF(GM%CConstrain%I(iATS)==0)THEN
+          nATOMS = nATOMS + 1
+          Mass = GM%AtMss%D(iATS)
+          PX  = PX + Mass*GM%Velocity%D(1,iATS)
+          PY  = PY + Mass*GM%Velocity%D(2,iATS)
+          PZ  = PZ + Mass*GM%Velocity%D(3,iATS)
+       ENDIF
+    ENDDO
+!   Reset Linear Momentum
+    DO iATS=1,GM%NAtms
+       IF(GM%CConstrain%I(iATS)==0)THEN
+          Mass = GM%AtMss%D(iATS)
+          GM%Velocity%D(1,iATS) = GM%Velocity%D(1,iATS)-(PX-PX0)/(nATOMS*Mass)
+          GM%Velocity%D(2,iATS) = GM%Velocity%D(2,iATS)-(PY-PY0)/(nATOMS*Mass)
+          GM%Velocity%D(3,iATS) = GM%Velocity%D(3,iATS)-(PZ-PZ0)/(nATOMS*Mass)
+       ENDIF
+    ENDDO
+!
+  END SUBROUTINE ResetMomentum
+!--------------------------------------------------------------
+! Rescale the Velocities to Temp
+!--------------------------------------------------------------
+  SUBROUTINE RescaleVelocity(GM,Temp,Temp0)
+    TYPE(CRDS)            :: GM
+    REAL(DOUBLE)          :: Temp,Temp0,Scale
+    INTEGER               :: iATS
+!  
+    Scale = SQRT(Temp0/Temp)
+    DO iATS=1,GM%NAtms
+       IF(GM%CConstrain%I(iATS)==0)THEN
+          GM%Velocity%D(1,iATS) = Scale*GM%Velocity%D(1,iATS)
+          GM%Velocity%D(2,iATS) = Scale*GM%Velocity%D(2,iATS)
+          GM%Velocity%D(3,iATS) = Scale*GM%Velocity%D(3,iATS)
+       ENDIF
+    ENDDO
+!
+  END SUBROUTINE RescaleVelocity
+!--------------------------------------------------------------
+! Calcualte the Temperature
+!--------------------------------------------------------------
+  SUBROUTINE CalculateMDKin(GM,Kin,Temp)
+    TYPE(CRDS)            :: GM
+    REAL(DOUBLE)          :: Kin,Temp,Mass
+    INTEGER               :: iATS
+!
+    Kin    = Zero
+    nATOMS = 0
+    DO iATS=1,GM%NAtms
+       IF(GM%CConstrain%I(iATS)==0)THEN
+          nATOMS = nATOMS + 1
+          Mass = GM%AtMss%D(iATS)
+          Kin  = Kin + Half*GM%AtMss%D(iATS)*(GM%Velocity%D(1,iATS)**2  &
+                                             +GM%Velocity%D(2,iATS)**2  &
+                                             +GM%Velocity%D(3,iATS)**2)
+       ENDIF
+    ENDDO
+    Temp = (Two/Three)*(Kin/DBLE(nATOMS))*HartreesToKelvin
+!   
+  END SUBROUTINE CalculateMDKin
 !--------------------------------------------------------------
 ! The Verlet Algorithmn : NVT
 !--------------------------------------------------------------
@@ -249,7 +372,7 @@ MODULE MDynamics
        File = TRIM(C%Nams%SCF_NAME)//"_Clone#"//TRIM(IntToChar(iCLONE))//".MDO"
        CALL OpenASCII(File,Out)
 !      Add Header
-       IF(iGEO==1) THEN
+       IF(iGEO==0) THEN
           Line = "##########################################################################"
           WRITE(Out,97) Line
           Line = "# MD Clone No. = "//TRIM(IntToChar(iCLONE))
@@ -415,107 +538,6 @@ MODULE MDynamics
 98  FORMAT(a18,F16.10)
 99  FORMAT(a3,6(1x,F14.8))
   END SUBROUTINE OutputMD
-!--------------------------------------------------------------
-! Set an initial Temperature
-!--------------------------------------------------------------
-  SUBROUTINE SetTempMaxBoltDist(C,Temp)
-    TYPE(Controls)        :: C
-    REAL(DOUBLE)          :: Temp,Mass,TVel,VX,VY,VZ
-    INTEGER               :: iCLONE,iATS,I,J,Jmax
-!
-    Jmax = 20
-    DO iCLONE=1,C%Geos%Clones
-       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             Mass  =  C%Geos%Clone(iCLONE)%AtMss%D(iATS) 
-             TVel  = SQRT(Three*Temp*KelvinToHartrees/Mass)
-             VX = Zero
-             VY = Zero
-             VZ = Zero
-             DO J=1,Jmax
-                VX = VX+TVel*Random((/-One,One/))
-                VY = VY+TVel*Random((/-One,One/))
-                VZ = VZ+TVel*Random((/-One,One/))
-             ENDDO
-             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = VX
-             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = VY
-             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = VZ
-          ENDIF
-       ENDDO
-    ENDDO
-    CALL ResetMomentum(C,Zero,Zero,Zero)
-    CALL RescaleTemp(C,Temp)
-!
-  END SUBROUTINE SetTempMaxBoltDist
-!--------------------------------------------------------------
-! Reset the Velocities so that PX=PX0,PY=PY0,PZ=PZ0
-!--------------------------------------------------------------
-  SUBROUTINE ResetMomentum(C,PX0,PY0,PZ0)
-    TYPE(Controls)        :: C
-    REAL(DOUBLE)          :: Mass,PX,PY,PZ,PX0,PY0,PZ0
-    INTEGER               :: iCLONE,iATS,nATOMS
-!
-    DO iCLONE=1,C%Geos%Clones
-!      Calculate Linear Momentum
-       PX = Zero
-       PY = Zero
-       PZ = Zero
-       nATOMS = 0
-       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             nATOMS = nATOMS + 1
-             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-             PX  = PX + Mass*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
-             PY  = PY + Mass*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
-             PZ  = PZ + Mass*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
-          ENDIF
-       ENDDO
-!      Reset Linear Momentum
-       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)-(PX-PX0)/(nATOMS*Mass)
-             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)-(PY-PY0)/(nATOMS*Mass)
-             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)-(PZ-PZ0)/(nATOMS*Mass)
-          ENDIF
-       ENDDO
-    ENDDO
-
-  END SUBROUTINE ResetMomentum
-!--------------------------------------------------------------
-! Rescale the Velocities to Temp
-!--------------------------------------------------------------
-  SUBROUTINE RescaleTemp(C,Temp)
-    TYPE(Controls)        :: C
-    REAL(DOUBLE)          :: Temp,Mass,Temp0,SUMV,VX,VY,VZ,Scale
-    INTEGER               :: iCLONE,iATS,I,J,Jmax,nATOMS
-!  
-    DO iCLONE=1,C%Geos%Clones
-!      Determine the Temp
-       SUMV = Zero
-       nATOMS = 0
-       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             nATOMS = nATOMS + 1
-             Mass = C%Geos%Clone(iCLONE)%AtMss%D(iATS)
-             VX = C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) 
-             VY = C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) 
-             VZ = C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) 
-             SUMV = SUMV+Half*Mass*(VX**2+VY**2+VZ**2)
-          ENDIF
-       ENDDO
-       Temp0 =  (Two/Three)*SUMV/DBLE(nATOMS)*HartreesToKelvin
-       Scale = SQRT(Temp/Temp0)
-       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             C%Geos%Clone(iCLONE)%Velocity%D(1,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(1,iATS)
-             C%Geos%Clone(iCLONE)%Velocity%D(2,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(2,iATS)
-             C%Geos%Clone(iCLONE)%Velocity%D(3,iATS) = Scale*C%Geos%Clone(iCLONE)%Velocity%D(3,iATS)
-          ENDIF
-       ENDDO
-!
-    ENDDO
-  END SUBROUTINE RescaleTemp
 !--------------------------------------------------------------
 ! Rename the Last Density Matrix, Remove old ones
 !--------------------------------------------------------------
