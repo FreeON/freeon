@@ -33,7 +33,7 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      Memory=MIN(GDIISCtrl%MaxMem,iGEO)
-     CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
+   ! CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
      !
      ! Get GDIIS memory
      !
@@ -61,6 +61,7 @@ CONTAINS
    SUBROUTINE CartFit(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl,Path,iGEO)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl
+     TYPE(DBL_VECT)              :: LastStruct,LastGrad
      TYPE(DBL_RNK2)              :: DXValues,DXGrads,DXVects
      TYPE(DBL_VECT)              :: CartVect
      INTEGER                     :: Print,I,J,NCart,NMem,NDim,iGEO
@@ -71,24 +72,25 @@ CONTAINS
      CHARACTER(LEN=DCL)          :: Path2
      REAL(DOUBLE)                :: X
      !
-     CALL CollectDXVects(RefStruct,RefGrad,SRStruct,SRDispl,DXVects)
-     CALL CollectDXProjection(RefStruct,RefGrad,SRStruct,SRDispl, &
-                              DXVects%D,DXGrads,DXValues)
-     !
      NCart=SIZE(RefStruct,1)
      NMem=SIZE(RefStruct,2)
+     CALL New(LastStruct,NCart)
+     CALL New(LastGrad,NCart)
+     LastStruct%D=RefStruct(:,NMem)
+     LastGrad%D=RefGrad(:,NMem)
+     !
+     CALL CollectDXVects(RefStruct,LastStruct%D,DXVects)
      NDim=SIZE(DXVects%D,2)
+!!!! CALL CollectDXProjection(XYZ,RefStruct,RefGrad,LastStruct%D, &
+!!!!                          LastGrad%D,DXVects%D,DXGrads,DXValues)
+     !
      CALL New(LWeightT,(/NDim,NMem/))
      DO I=1,NMem
-      !X=Zero
-      !DO J=1,NDim
-      !  X=X+DXGrads%D(J,I)**2
-      !ENDDO
-      !X=One/(X+1.D-10)
-      !DO J=1,NDim ; LWeightT%D(J,I)=X ; ENDDO
-       DO J=1,NDim
-         LWeightT%D(J,I)=DXGrads%D(J,I)**2
+       X=Zero
+       DO J=1,NCart
+         X=X+RefGrad(J,I)**2
        ENDDO
+       DO J=1,NDim ; LWeightT%D(J,I)=X ; ENDDO
      ENDDO
      CALL New(CartVect,NCart)
      CALL New(NDegsT,NDim)
@@ -110,12 +112,17 @@ CONTAINS
      !
      DO J=1,NCart ; CartVect%D(J)=SRStruct(J,NMem) ; ENDDO
      DO I=1,NDim
-       DO J=1,NCart
-         CartVect%D(J)=CartVect%D(J)+IntCsT%PredVal%D(I)*DXVects%D(J,I)
-       ENDDO
+       IF(RangeT%D(I,1)<IntCsT%PredVal%D(I).AND. &
+          RangeT%D(I,2)>IntCsT%PredVal%D(I)) THEN
+         DO J=1,NCart
+           CartVect%D(J)=CartVect%D(J)+IntCsT%PredVal%D(I)*DXVects%D(J,I)
+         ENDDO
+       ENDIF
      ENDDO
      CALL CartRNK1ToCartRNK2(CartVect%D,XYZ)
      !
+     CALL Delete(LastGrad)
+     CALL Delete(LastStruct)
      CALL Delete(CartVect)
      CALL Delete(IntCsT)
      CALL Delete(RangeT)
@@ -126,6 +133,137 @@ CONTAINS
      CALL Delete(DXGrads)
      CALL Delete(DXVects)
    END SUBROUTINE CartFit
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE ModeFit(IntCs,IntCGrads,IntCValues,RefPoints,PBC,GOpt, &
+                      PredVals,PWDPath,SCRPath,XYZ,NCart,iGEO,Print)
+     TYPE(INTC)                  :: IntCs,IntCsT
+     REAL(DOUBLE),DIMENSION(:,:) :: IntCGrads,IntCValues,XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: PredVals,RefPoints
+     TYPE(PBCInfo)               :: PBC
+     CHARACTER(LEN=*)            :: PWDPath,SCRPath
+     CHARACTER(LEN=DCL)          :: Path2
+     INTEGER                     :: iGEO,NMem,NDim,I,J,Print
+     INTEGER                     :: NCart,NatmsLoc
+     TYPE(DBL_VECT)              :: LastIntCVals,LastIntcGrads
+     TYPE(DBL_RNK2)              :: DXVects,DXValues,DXGrads,DelocVals
+     TYPE(DBL_RNK2)              :: RangeT,ABCT,LWeightT
+     TYPE(INT_VECT)              :: NDegsT
+     REAL(DOUBLE)                :: X
+     TYPE(GeomOpt)               :: GOpt
+     !
+     NMem=SIZE(IntCGrads,2)
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     CALL New(LastIntCVals,IntCs%N)
+     CALL New(LastIntCGrads,IntCs%N)
+     CALL INTCValue(IntCs,XYZ,PBC,GOpt%CoordCtrl%LinCrit, &
+                    GOpt%CoordCtrl%TorsLinCrit)
+     LastIntCVals%D=IntCs%Value%D
+     CALL SetBackToRefs(LastIntCVals%D,IntCs,RefPoints)
+     LastIntCGrads%D=Zero
+    !LastIntCVals%D=IntCValues(:,NMem)
+    !LastIntCGrads%D=IntCGrads(:,NMem)
+     !
+     CALL New(DelocVals,(/NCart,NMem/))
+     CALL CollectDelocs(DelocVals%D,IntCValues,LastIntCVals%D,IntCs, &
+                        XYZ,PBC,GOpt%TrfCtrl,GOpt%CoordCtrl,SCRPath,Print)
+     CALL CollectDXVects(IntCValues,LastIntCVals%D, &
+                         DXVects,Delocs_O=DelocVals%D)
+    !CALL CollectDXVects(IntCValues,LastIntCVals%D,DXVects)
+     CALL Delete(DelocVals)
+     !
+     NDim=SIZE(DXVects%D,2)
+     CALL CollectDXProjection(XYZ,IntCs,GOpt,SCRPath,Print, &
+                              IntCValues,IntCGrads,LastIntCVals%D,&
+                             LastIntCGrads%D,DXVects%D,DXGrads,DXValues)
+     CALL New(LWeightT,(/NDim,NMem/))
+     !
+     DO I=1,NMem
+       X=Zero
+       DO J=1,IntCs%N
+         X=X+IntCGrads(J,I)**2
+       ENDDO
+       DO J=1,NDim ; LWeightT%D(J,I)=X ; ENDDO
+     ENDDO
+     CALL New(NDegsT,NDim)
+     CALL New(IntCsT,NDim)
+     IntCsT%Active%L=.TRUE.
+     CALL New(RangeT,(/NDim,2/))
+     CALL New(ABCT,(/NDim,4/))
+     ABCT%D(:,:)=Zero
+     Path2=TRIM(PWDPath)//'_M_'//TRIM(IntToChar(iGEO))
+     !
+     CALL LQFit(DXValues%D,DXGrads%D,LWeightT%D,IntCsT,ABCT%D, &
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
+     CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
+                    NDegsT%I,Path2,RangeT%D)
+     CALL CtlrCartRange(IntCsT,RangeT%D)
+     CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
+     !
+     ! Now, compose the new geometry
+     !
+     DO J=1,IntCs%N ; PredVals(J)=LastIntCVals%D(J) ; ENDDO
+     DO I=1,NDim
+      !IF(RangeT%D(I,1)<IntCsT%PredVal%D(I).AND. &
+      !   RangeT%D(I,2)>IntCsT%PredVal%D(I)) THEN
+         DO J=1,IntCs%N
+           PredVals(J)=PredVals(J)+IntCsT%PredVal%D(I)*DXVects%D(J,I)
+         ENDDO
+      !ENDIF
+     ENDDO
+     !
+     CALL Delete(IntCsT)
+     CALL Delete(RangeT)
+     CALL Delete(ABCT)
+     CALL Delete(NDegsT)
+     CALL Delete(LWeightT)
+     CALL Delete(DXValues)
+     CALL Delete(DXGrads)
+     CALL Delete(DXVects)
+     CALL Delete(LastIntCVals)
+     CALL Delete(LastIntCGrads)
+   END SUBROUTINE ModeFit
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CollectDelocs(DelocVals,IntCValues,LastIntCVals,IntCs, &
+                            XYZ,PBC,GTrfCtrl,GCoordCtrl,SCRPath,Print)
+     TYPE(INTC)                  :: IntCs
+     REAL(DOUBLE),DIMENSION(:,:) :: DelocVals,XYZ,IntCValues
+     REAL(DOUBLE),DIMENSION(:)   :: LastIntCVals
+     CHARACTER(LEN=*)            :: SCRPath
+     TYPE(CoordCtrl)             :: GCoordCtrl
+     TYPE(TrfCtrl)               :: GTrfCtrl
+     INTEGER                     :: I,J,NMem,NCart,Print
+     TYPE(INT_VECT)              :: ISpB,JSpB
+     TYPE(DBL_VECT)              :: ASpB,CartVect,IntCDispl
+     TYPE(Cholesky)              :: CholData
+     TYPE(PBCInfo)               :: PBC
+     !
+     CALL RefreshBMatInfo(IntCs,XYZ,PBC,GTrfCtrl,GCoordCtrl,Print,SCRPath,.TRUE.)
+     CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
+     !
+     NMem=SIZE(DelocVals,2)
+     NCart=SIZE(DelocVals,1)
+     CALL New(IntCDispl,IntCs%N)
+     CALL New(CartVect,NCart)
+     !
+     DO I=1,NMem
+       DO J=1,IntCs%N ; IntCDispl%D(J)=IntCValues(J,I)-LastIntCVals(J) ; ENDDO
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntCDispl%D,CartVect%D,Trp_O=.TRUE.)
+       CALL GcInvIter(CartVect%D,ISpB,JSpB,ASpB,CholData,IntCs%N) 
+       DO J=1,NCart ; DelocVals(J,I)=CartVect%D(J) ; ENDDO
+     ENDDO
+     !
+     CALL Delete(CartVect)
+     CALL Delete(IntCDispl)
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(CholData)
+   END SUBROUTINE CollectDelocs
 !
 !-------------------------------------------------------------------
 !
@@ -148,12 +286,21 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CollectDXProjection(RefStruct,RefGrad,SRStruct,SRDispl, &
-                                  DXVects,DXGrads,DXValues)
-     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl,DXVects
+   SUBROUTINE CollectDXProjection(XYZ,IntCsX,GOpt,SCRPath,Print, &
+                                  RefStruct,RefGrad,LastStruct, &
+                                  LastGrad,DXVects,DXGrads,DXValues)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,DXVects,XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: LastStruct,LastGrad
      TYPE(DBL_RNK2)              :: DXValues,DXGrads
+     INTEGER                     :: Print
      INTEGER                     :: II,I,J,NCart,NMem,NDim
      REAL(DOUBLE)                :: G,X
+     TYPE(INT_VECT)              :: ISpB,JSpB
+     TYPE(DBL_VECT)              :: ASpB
+     TYPE(Cholesky)              :: CholData
+     TYPE(INTC)                  :: IntCsX
+     TYPE(GeomOpt)               :: GOpt
+     CHARACTER(LEN=*)            :: SCRPath
      !
      NCart=SIZE(RefStruct,1)
      NMem=SIZE(RefStruct,2)
@@ -161,16 +308,23 @@ CONTAINS
      CALL New(DXGrads,(/NDim,NMem/))
      CALL New(DXValues,(/NDim,NMem/))
      !
+!!! this routines should be used calculate proper overlaps
+  !  CALL RefreshBMatInfo(IntCsX,XYZ,PBC,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+  !                       Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+  !  CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
+  !  CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1,IntA2, &
+  !                 NCart,IntCsX%N) 
+     !
      ! Project Grads and distance of most recent structure to each previous 
      ! structures onto the selected axis system
      !
      DO II=1,NMem
        DO I=1,NDim
          G=Zero
-         DO J=1,NCart ; G=G+DXVects(J,I)*RefGrad(J,II) ; ENDDO  
          X=Zero
          DO J=1,NCart 
-           X=X+DXVects(J,I)*(RefStruct(J,II)-SRStruct(J,NMem)) 
+           G=G+DXVects(J,I)*(RefGrad(J,II)-LastGrad(J)) 
+           X=X+DXVects(J,I)*(RefStruct(J,II)-LastStruct(J)) 
          ENDDO  
          DXGrads%D(I,II)=G
          DXValues%D(I,II)=X
@@ -180,13 +334,15 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CollectDXVects(RefStruct,RefGrad,SRStruct,SRDispl,DXVects)
-     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl
+   SUBROUTINE CollectDXVects(RefStruct,LastStruct,DXVects,Delocs_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct
+     REAL(DOUBLE),DIMENSION(:)   :: LastStruct
      TYPE(DBL_RNK2)              :: DXVects
-     INTEGER                     :: I,J,NMem,NCart,INFO,NDim
+     INTEGER                     :: I,J,NMem,NCart,INFO,NDim,NCart2
      TYPE(DBL_RNK2)              :: ScaledD,Overlap,UMat
-     TYPE(DBL_VECT)              :: CartVect
+     TYPE(DBL_VECT)              :: CartVect,ScaleFact
      REAL(DOUBLE)                :: Fact,Crit
+     REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: Delocs_O
      !
      NMem=SIZE(RefStruct,2)
      NCart=SIZE(RefStruct,1)
@@ -194,17 +350,28 @@ CONTAINS
      CALL New(CartVect,NCart) 
      CALL New(ScaledD,(/NCart,NMem/)) 
      CALL New(Overlap,(/NMem,NMem/))
-     !
-     ! Scale input vectors
+     CALL New(ScaleFact,NMem)
      !
      DO I=1,NMem
-       DO J=1,NCart;CartVect%D(J)=RefStruct(J,I)-SRStruct(J,NMem);ENDDO
-       Fact=DOT_PRODUCT(CartVect%D,CartVect%D)
-       Fact=One/SQRT(Fact)
-       DO J=1,NCart ; ScaledD%D(J,I)=CartVect%D(J)*Fact ; ENDDO
+       DO J=1,NCart; CartVect%D(J)=RefStruct(J,I)-LastStruct(J) ;ENDDO
+       DO J=1,NCart ; ScaledD%D(J,I)=CartVect%D(J) ; ENDDO
      ENDDO 
      !
-     CALL DGEMM_TNc(NMem,NCart,NMem,One,Zero,ScaledD%D,ScaledD%D,Overlap%D)
+     IF(PRESENT(Delocs_O)) THEN
+       NCart2=SIZE(Delocs_O,1)
+       CALL DGEMM_TNc(NMem,NCart2,NMem,One,Zero,Delocs_O,Delocs_O,Overlap%D)
+     ELSE
+       CALL DGEMM_TNc(NMem,NCart,NMem,One,Zero,ScaledD%D,ScaledD%D,Overlap%D)
+     ENDIF
+     !
+     DO I=1,NMem
+       ScaleFact%D(I)=One/(Overlap%D(I,I)+1.D-10)
+     ENDDO
+     DO I=1,NMem
+       DO J=1,NMem
+         Overlap%D(I,J)=Overlap%D(I,J)*ScaleFact%D(I)*ScaleFact%D(J)
+       ENDDO
+     ENDDO
      !
      CALL SetDSYEVWork(NMem)
        BLKVECT%D=Overlap%D
@@ -217,7 +384,6 @@ CONTAINS
        DO I=1,NMem 
          IF(ABS(BLKVALS%D(I))>Crit) NDim=NDim+1
        ENDDO
-       Overlap%D=BLKVECT%D
        !
        CALL New(UMat,(/NMem,NDim/)) 
        CALL New(DXVects,(/NCart,NDim/)) 
@@ -226,27 +392,33 @@ CONTAINS
          IF(ABS(BLKVALS%D(I))>Crit) THEN
            NDim=NDim+1
            DO J=1,NMem
-             UMat%D(J,NDim)=Overlap%D(J,I)
+             UMat%D(J,NDim)=BLKVECT%D(J,I)/SQRT(BLKVALS%D(I))*ScaleFact%D(J)
            ENDDO
          ENDIF
        ENDDO 
-     CALL UnSetDSYEVWork()
-     CALL Delete(Overlap)
      !
      ! Now, generate orthogonal directions
      !
      CALL DGEMM_NNc(NCart,NMem,NDim,One,Zero,ScaledD%D,Umat%D,DXVects%D)
-     DO I=1,NDim
-       Fact=Zero
-       DO J=1,NCart ; Fact=Fact+DXVects%D(J,I)**2 ; ENDDO
-       Fact=One/SQRT(Fact)
-       DO J=1,NCart ; DXVects%D(J,I)=Fact*DXVects%D(J,I) ; ENDDO
-     ENDDO
+     !
+     CALL UnSetDSYEVWork()
+     CALL Delete(Overlap)
      CALL Delete(UMat)
      CALL Delete(ScaledD)
      CALL Delete(CartVect)
-     !
+     CALL Delete(ScaleFact)
    END SUBROUTINE CollectDXVects
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CurviLinOverlap(ScaledD,XYZ,Overlap,IntCs,SCRPath) 
+     REAL(DOUBLE),DIMENSION(:,:) :: ScaledD,XYZ,Overlap
+     TYPE(INTC)                  :: IntCs
+     CHARACTER(LEN=*)            :: SCRPath
+     INTEGER                     :: NMem,I,J
+     !
+     
+   END SUBROUTINE CurviLinOverlap
 !
 !-------------------------------------------------------------------
 !
@@ -478,7 +650,7 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE CollectINTCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
-                              IntCs,GOpt,SCRPath,Print)
+                              IntCs,PBC,GOpt,SCRPath,Print)
      REAL(DOUBLE),DIMENSION(:,:)  :: RefStruct,RefGrad
      TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
      TYPE(DBL_VECT)               :: VectC,VectI,VectCG,VectX
@@ -486,6 +658,7 @@ CONTAINS
      TYPE(INTC)                   :: IntCs
      TYPE(GeomOpt)                :: GOpt 
      CHARACTER(LEN=*)             :: SCRPath
+     TYPE(PBCInfo)                :: PBC
      !
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectINTCPast')
@@ -510,12 +683,12 @@ CONTAINS
          VectCG%D(J)=RefGrad(J,I)
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
-       CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
+       CALL RefreshBMatInfo(IntCs,XYZAux%D,PBC,GOpt%TrfCtrl, &
                           GOpt%CoordCtrl,Print,SCRPath,.TRUE.)
        CALL CartToInternal(XYZAux%D,IntCs,VectCG%D,VectI%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        IntCGrads%D(:,I)=VectI%D
-       CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
+       CALL INTCValue(IntCs,XYZAux%D,PBC,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value%D
      ENDDO
@@ -1249,8 +1422,8 @@ CONTAINS
      J=NDim-ILeft+1
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
-       IF(Q>0.9999D0) THEN
-      !IF(Q>0.95D0) THEN
+      !IF(Q>0.9999D0) THEN
+       IF(Q>0.99D0) THEN
          IStart=I+1
          EXIT
        ENDIF
@@ -1672,6 +1845,51 @@ CONTAINS
      ! Check gradients of translation and rotation
      !
    END SUBROUTINE GrdConvrgd
+!
+!----------------------------------------------------------------------------
+!
+   SUBROUTINE GcInvIter(CartVect,ISpB,JSpB,ASpB,CholData,NIntC) 
+     REAL(DOUBLE),DIMENSION(:) :: CartVect
+     TYPE(INT_VECT)            :: ISpB,JSpB
+     TYPE(DBL_VECT)            :: ASpB,CartVect2,cartVect3,CartVect4,IntVect2
+     TYPE(Cholesky)            :: CholData
+     INTEGER                   :: I,J,NIntC,NCart,MaxIter
+     REAL(DOUBLE)              :: Fact,Tol 
+     CHARACTER(LEN=DCL)        :: Messg
+     !
+     MaxIter=20
+     Tol=1.D-8
+     NCart=SIZE(CartVect)
+     CALL New(CartVect2,NCart)
+     CALL New(CartVect3,NCart)
+     CALL New(CartVect4,NCart)
+     CALL New(IntVect2,NIntC)
+     !
+     Cartvect2%D=Zero
+     DO I=1,MaxIter
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntVect2%D,CartVect2%D)
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntVect2%D,CartVect3%D,Trp_O=.TRUE.)
+       CartVect3%D=CartVect-CartVect3%D
+       CALL CALC_GcInvCartV(CholData,CartVect3%D,CartVect4%D) 
+       CartVect2%D=Cartvect2%D+CartVect4%D 
+       Fact=DOT_PRODUCT(CartVect4%D,CartVect4%D)
+       Fact=SQRT(Fact/DBLE(NCart))
+       IF(Fact<Tol) EXIT
+     ENDDO 
+     IF(Fact>Tol) THEN
+       Messg='WARNING! '// &
+             'Gc V = V0 has not been solved exactly , Fact= '// &
+              TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol))
+       WRITE(*,*) Messg
+       WRITE(Out,*) Messg
+     ENDIF
+     CartVect=CartVect2%D
+     !
+     CALL Delete(CartVect4)
+     CALL Delete(CartVect3)
+     CALL Delete(CartVect2)
+     CALL Delete(Intvect2)
+   END SUBROUTINE GcInvIter
 !
 !----------------------------------------------------------------------------
 !
