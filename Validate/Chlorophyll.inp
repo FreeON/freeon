@@ -3,16 +3,27 @@
 <EndTitle>
 
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
+
 DebugAll=(MinDebug,CheckSums)
-Guess=SuperPos
+
 DIISDamp=0.05
+
+Guess=SuperPos
 SCFMethod=(TC2,TRS4)
 BasisSets=(STO-2G,3-21G)
 ModelChem=(HF,B3LYP/VWN3)
 Accuracy =(Loose,Good)
-Geometry =(InAngstroms,NoOrder)
+
+MPIInvoke="mpirun"
+MPIProcessors=8
+MPIProcFlag="-np"
+MPISpatialProc=8
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginGeometry>

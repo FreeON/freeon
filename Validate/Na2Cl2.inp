@@ -24,6 +24,13 @@ BasisSets=(User1,User1,User1)
 ModelChem=(HF,HF,B3LYP/VWN3)
 Accuracy =(Loose,Good,Good)
 
+MPIInvoke="mpirun"
+MPIProcessors=2
+MPIProcFlag="-np"
+MPISpatialProc=2
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginGeometry>

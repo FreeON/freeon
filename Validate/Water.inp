@@ -26,6 +26,13 @@ Accuracy =(Loose,Good)
 
 Grad=(Optimize,NoGDIIS,PrimInt,NoBackTr,DiagHess)
 
+MPIInvoke="mpirun"
+MPIProcessors=2
+MPIProcFlag="-np"
+MPISpatialProc=2
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginGeometry>

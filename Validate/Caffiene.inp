@@ -2,16 +2,27 @@
               ** Caffine **
 <EndTitle>
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
+
 DebugAll=(MinDebug,CheckSums)
-Guess=SuperPos
+
 Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
+
+Guess=SuperPos
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
 ModelChem=(HF,BLYPxc)
 Accuracy=(Loose,Loose)
-Geometry=(InAngstroms,NoOrder)
+
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginGeometry>

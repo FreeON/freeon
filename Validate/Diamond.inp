@@ -27,6 +27,13 @@ Accuracy =(Loose,Good)
 PBC=(T,T,T)
 Periodic=(FracCoord)
 
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginPeriodic>

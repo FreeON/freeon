@@ -51,20 +51,35 @@ big:
 	m Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
 	m Vancomycin.inp   Vancomycin.out;   Vancomycin.log
 #
-#       Submit validation suite to pbs queing system 
+#       Submit serial validation suite to pbs queing system 
 #
 pbs:
 	chmod u+x sub_pbs
-	./sub_pbs Water
-	./sub_pbs NH3
-	./sub_pbs Biotin
-	./sub_pbs Diamond
-	./sub_pbs Na2Cl2
-	./sub_pbs MgO
-	./sub_pbs Caffiene
-	./sub_pbs BetaCarotene
-	./sub_pbs Chlorophyll
-	./sub_pbs Vancomycin
+	./sub_pbs Water        1
+	./sub_pbs NH3          1
+	./sub_pbs Biotin       1
+	./sub_pbs Diamond      1
+	./sub_pbs Na2Cl2       1
+	./sub_pbs MgO          1
+	./sub_pbs Caffiene     1
+	./sub_pbs BetaCarotene 1
+	./sub_pbs Chlorophyll  1
+	./sub_pbs Vancomycin   1
+#
+#       Submit parallel validation suite to pbs queing system 
+#
+pbs_parallel:
+	chmod u+x sub_pbs
+	./sub_pbs Water        2
+	./sub_pbs NH3          3
+	./sub_pbs Biotin       4
+	./sub_pbs Diamond      4
+	./sub_pbs Na2Cl2       2
+	./sub_pbs MgO          2
+	./sub_pbs Caffiene     4
+	./sub_pbs BetaCarotene 8
+	./sub_pbs Chlorophyll  8
+	./sub_pbs Vancomycin   8
 #
 release:  purge 
 	rm -rf BALA-PERIODIC

@@ -26,6 +26,13 @@ BasisSets=(STO-2G)
 ModelChem=(PBExc)
 Accuracy =(Good)
 
+MPIInvoke="mpirun"
+MPIProcessors=3
+MPIProcFlag="-np"
+MPISpatialProc=1
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginReactants>
