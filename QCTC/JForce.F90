@@ -93,12 +93,8 @@ PROGRAM JForce
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
-  CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
-#ifdef PARALLEL_CLONES  
+  CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
   CALL Get(RhoPoles)
-#else
-  CALL Get(RhoPoles,NxtCycl)
-#endif
 #endif   
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
