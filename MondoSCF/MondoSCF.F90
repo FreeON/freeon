@@ -38,15 +38,19 @@ WRITE(*,*)' INITed '
 ! Initialize
   CALL Init(PerfMon)
   CALL Init(MemStats)
-! Parse input
-  CALL ParseInp(Ctrl)
-#ifdef MMech
-  MechFlag=Ctrl%Mechanics
-#endif
 !
-! Set up the SCF or MM
+! initialize Ctrl%Current before parsing!
+!
   Ctrl%Current=(/0,1,1/)
   Ctrl%Previous=(/0,1,1/)
+!
+! Parse input
+  CALL ParseInp(Ctrl)  
+  CALL OpenHDF(InfFile)
+#ifdef MMech
+   Call InitMMech()
+#endif
+!
 #ifdef MMech
   IF(HasQM())THEN
 #endif
@@ -54,85 +58,38 @@ WRITE(*,*)' INITed '
 #ifdef MMech
   ENDIF
 #endif
-  CALL SetGlobalCtrlIndecies(Ctrl)           
 ! Decide about forces
+!
   SELECT CASE(Ctrl%Grad)
-  CASE(GRAD_ONE_FORCE)
-!    Loop first over basis sets 
-     DO ISet=1,Ctrl%NSet
-        Ctrl%Current=(/0,ISet,1/)
-        CALL OneSCF(Ctrl)
-     ENDDO
-!    Calculate the Force (last basis set)
-     CALL Forces(Ctrl)
-!    Go over additional geometries at last basis set
-     IF(Ctrl%NGeom>1)THEN
-        DO IGeo=2,Ctrl%NGeom
-           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
-           CALL OneSCF(Ctrl)
-           CALL Forces(Ctrl)
-        ENDDO
-     ENDIF
+  CASE(GRAD_ONE_FORCE) 
+     CALL CALC_GRAD_ONE_FORCE(Ctrl) 
   CASE(GRAD_MD)
-     CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
+     CALL CALC_GRAD_MD(Ctrl)
   CASE(GRAD_QNEW_OPT)
-     DO ISet=1,Ctrl%NSet
-!       Optimize geometry for each basis set
-        Ctrl%Current=(/0,ISet,CGeo/)
-        CALL GeOp(Ctrl)
-     ENDDO
+     CALL CALC_GRAD_QNEW_OPT(Ctrl)
   CASE(GRAD_QNEW_ONE_OPT)
-!    Loop first over basis sets.
-     DO ISet=1,Ctrl%NSet-1
-        Ctrl%Current(2)=ISet
-        CALL OneSCF(Ctrl)
-     ENDDO
-!    Optimize geometry only in last basis set
-     Ctrl%Current=(/0,Ctrl%NSet,CGeo/)
-     CALL GeOp(Ctrl)
+     CALL CALC_GRAD_QNEW_ONE_OPT(Ctrl)
   CASE(GRAD_TS_SEARCH)
-     CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
-!
+     CALL CALC_TS_SEARCH(Ctrl)
   CASE(GRAD_NO_GRAD) !!!!! Energy only calculation
-!
-#ifdef MMech
-   If(HasQM()) Then
-#endif
-     DO ISet=1,Ctrl%NSet
-        Ctrl%Current=(/0,ISet,1/)
-#ifdef MMech
-! Ooopss... KN forgot to add an ifdef here.  Also, should get hidden in OneSCF probably
-        IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
-#endif
-        CALL OneSCF(Ctrl)
-     ENDDO
-     IF(Ctrl%NGeom>1)THEN
-!       Go over additional geometries at last basis set
-        DO IGeo=2,Ctrl%NGeom
-           Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
-#ifdef MMech
-! Ooopss... KN forgot to add an ifdef here.  Also, should get hidden in OneSCF probably
-           IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms
-#endif
-           CALL OneSCF(Ctrl)
-        ENDDO
-     ENDIF
-#ifdef MMech
-   EndIf
-#endif
-!
-!    Loop first over basis sets 
-#ifdef MMech
-   If(MMOnly()) Then
-     Ctrl%Current(2)=1
-     CALL MM_ENERG(Ctrl)
-   ENDIF
-#endif
+     CALL CALC_GRAD_NO_GRAD(Ctrl)
   END SELECT
+!
+#ifdef MMech
+  IF(HasQM().AND.Ctrl%PopAnalysis(1:8)==OPT_MULLIKEN) THEN
+#else
+  IF(Ctrl%PopAnalysis(1:8)==OPT_MULLIKEN) THEN
+#endif
+    CALL Mulliken_Analysis(Ctrl)
+  ENDIF
+!
+  CALL CloseHDF()
+!
 #if defined(PARALLEL) && defined(MPI2)
   ENDIF
   CALL FiniMPI()
 #endif
-  CALL TimeStamp('Succesfull MondoSCF run',.FALSE.)   
-
-END PROGRAM MondoSCF
+!--------------------------------------------------------
+  CALL TimeStamp('Successful MondoSCF run',.FALSE.)   
+!--------------------------------------------------------
+  END PROGRAM MondoSCF
