@@ -2,7 +2,6 @@
 !    WRT TO NUCLEAR COORDINATES
 !    Author: Matt Challacombe
 !==============================================================================
-!
 PROGRAM JForce
   USE DerivedTypes
   USE GlobalScalars
@@ -159,9 +158,9 @@ PROGRAM JForce
      F_nlm = dNukE(GMLoc,AtA)
      JFrc%D(A1:A2)= Two*F_nlm(1:3)
 !    Store Inner Nuc Lattice Forces
-     LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + F_nlm(7:9)
-     LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + F_nlm(10:12)
-     LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + F_nlm(13:15)
+     LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
+     LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
+     LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + F_nlm(13:15)
 !    Outer Nuc Lattice Forces
      nlm        = AtomToFrac(GMLoc,GMLoc%Carts%D(:,AtA))
      LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GMLoc,nlm,F_nlm(1:3))
@@ -186,9 +185,9 @@ PROGRAM JForce
                     JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
                  ENDIF
 !                Store Inner J Lattice Forces
-                 LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + Two*F_nlm(7:9)
-                 LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + Two*F_nlm(10:12)
-                 LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + Two*F_nlm(13:15)
+                 LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
+                 LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
+                 LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
 !                Outer Lattice J Forces
                  nlm        = AtomToFrac(GMLoc,Pair%A) 
                  LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3))
@@ -201,9 +200,12 @@ PROGRAM JForce
      ENDDO
   ENDDO
 ! Dipole Correction
-  DO I=1,3
-     LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
-  ENDDO  
+  IF(GMLoc%PBC%Dimen>0) THEN
+     DO I=1,3
+        LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
+     ENDDO
+  ENDIF
+   LatFrc_J%D = Zero
 #ifdef PARALLEL
   JFrcEndTm = MondoTimer()
   JFrcTm = JFrcEndTm-JFrcBegTm
@@ -211,6 +213,19 @@ PROGRAM JForce
 #ifdef MMech
   ENDIF
 #endif
+!
+! Print The Forces and Lattice Forces
+!
+!!$  WRITE(*,*) 'JForce'
+!!$  DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     WRITE(*,*) JFrc%D(A1:A2)
+!!$  ENDDO
+!!$  WRITE(*,*) 'LatFrc_J'
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
+!!$  ENDDO
 !--------------------------------------------------------------------------------
 ! Print The JForce
 !  CALL Print_Force(GMLoc,JFrc,'dJ/dR in au ')
@@ -311,6 +326,7 @@ PROGRAM JForce
      GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
 #ifdef NLATTFORCE
+  WRITE(*,*) 'JForce: Not Putting Lattice Force to Disk'
 #else
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
 #endif
