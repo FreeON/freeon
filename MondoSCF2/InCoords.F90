@@ -1008,8 +1008,8 @@ CONTAINS
        CALL Delete(Top13)
      ELSE
        !
-       CALL ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
-                           HBondMark,BondIJ,BondLength)
+      !CALL ShortestHBonds(NatmsLoc,AtNum,NBond,SCRPath, &
+      !                    HBondMark,BondIJ,BondLength)
      ENDIF
      !
      ! Now define bond angles and torsions
@@ -1197,7 +1197,7 @@ CONTAINS
      CALL New(HBondMarkAux,NBond)
      HBondMarkAux%I=0
      !
-     HBondMax=2.25D0*AngstromsToAu ! in Au 
+     HBondMax=2.60D0*AngstromsToAu ! in Au 
      !
      IF(IntSet==2) THEN
        CALL ReadINT_RNK2(Top_Excl,TRIM(SCRPath)//'TOP_Excl',I,J)

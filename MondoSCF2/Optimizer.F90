@@ -645,7 +645,7 @@ CONTAINS
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult,iCLONE, &
                   LagrMult,LagrDispl,IntCs,iGEO,SCRPath,PWDPath, &
-                  Print,HFileIn) 
+                  Print,HFileIn,Refresh) 
      ELSE
        WRITE(*,200) iCLONE
        WRITE(Out,200) iCLONE
@@ -685,7 +685,7 @@ CONTAINS
 !
    SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult,iCLONE, &
                     LagrMult,LagrDispl,IntCs,IGEO,SCRPath,PWDPath, &
-                    Print,HFileIn)
+                    Print,HFileIn,Refresh)
      !
      ! Simple Relaxation step
      !
@@ -696,7 +696,7 @@ CONTAINS
      TYPE(DBL_VECT)                 :: Displ
      TYPE(DBL_VECT)                 :: IntGrad,Grad
      TYPE(INTC)                     :: IntCs
-     INTEGER                        :: I,J,NDim,iGEO,iCLONE
+     INTEGER                        :: I,J,NDim,iGEO,iCLONE,Refresh
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
      CHARACTER(LEN=*)               :: SCRPath,HFileIn,PWDPath 
      !
@@ -735,21 +735,26 @@ CONTAINS
        CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
                          Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
-      !IF(iGEO<3) THEN
        ! CALL RescaleGrad(Grad%D,Print)
-         CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-                       IntCs,AtNum,iGEO,XYZ)
-         CALL CutOffDispl(Displ%D,IntCs)
-         CALL RedundancyOff(Displ%D,SCRPath,Print)
-      !ELSE
-      !  CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
-      !    GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
-      !    HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
-      !    Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
-      !    PWD_O=PWDPath)
-      !  CALL CutOffDispl(Displ%D,IntCs)
-      !ENDIF
+       CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+                     IntCs,AtNum,iGEO,XYZ)
+       CALL CutOffDispl(Displ%D,IntCs)
+       CALL RedundancyOff(Displ%D,SCRPath,Print)
+     CASE(GRAD_BiSect_OPT) 
+       IF(iGEO<3) THEN
+         CALL PrepBiSect(iGEO,iCLONE,XYZ,AtNum,GOpt%Constr, &
+             GOpt%CoordCtrl,GOpt%TrfCtrl,Refresh,SCRPath, &
+             HFileIn,IntCs,NIntC,Print,Displ)
+       ELSE
+         CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
+           GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
+           HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
+           Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
+           PWD_O=PWDPath)
+         !CALL CutOffDispl(Displ%D,IntCs)
+       ENDIF
      END SELECT
+     CALL Delete(Grad)
      !
      ! Set constraints on the displacements
      !
@@ -758,7 +763,6 @@ CONTAINS
          GOpt%CoordCtrl%LinCrit,GOpt%Constr%NConstr, &
          GOpt%TrfCtrl%DoInternals)
      ENDIF
-     CALL Delete(Grad)
      !
      ! Add Cartesian or internal coord. displacements 
      ! to current structure
@@ -1607,6 +1611,69 @@ CONTAINS
        ENDIF
      ENDDO
    END SUBROUTINE CutOffDispl
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE PrepBiSect(iGEO,iCLONE,XYZ,AtNum,GConstr,GCoordCtrl,&
+                         GTrfCtrl,Refresh,SCRPath,HFileIn,IntCs, &
+                         NIntC,Print,Displ)
+     INTEGER          :: iGEO,iCLONE,NatmsLoc,NIntC,Refresh
+     INTEGER          :: I,IPhase,Print
+     CHARACTER(LEN=*) :: HFileIn,SCRPath
+     REAL(DOUBLE)     :: DStre,DAngle
+     TYPE(Constr)     :: GConstr
+     TYPE(CoordCtrl)  :: GCoordCtrl
+     TYPE(TrfCtrl)    :: GTrfCtrl
+     TYPE(INTC)       :: IntCs
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ  
+     TYPE(DBL_VECT)   :: Displ 
+     TYPE(DBL_RNK2)   :: XYZAux
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     CALL New(XYZAux,(/3,NatmsLoc/))
+     HDFFileID=OpenHDF(HFileIn)
+     HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+        "Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     IF(iGEO==1) THEN
+       Displ%D=Zero
+       XYZAux%D=XYZ
+       CALL Put(XYZAux,'IniGeom',Tag_O=TRIM(IntToChar(iCLONE)))
+     ELSE
+       CALL Get(XYZAux,'IniGeom',Tag_O=TRIM(IntToChar(iCLONE)))
+       XYZ=XYZAux%D
+       CALL Delete(IntCs) 
+       CALL Delete(Displ) 
+       CALL GetIntCs(XYZ,AtNum,IntCs,NIntC,Refresh,SCRPath,&
+                     GCoordCtrl,GConstr)
+       CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl, &
+                     GCoordCtrl,Print,SCRPath,.TRUE.)
+       IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
+         'optimizer did not find any internal coordinates.')
+       CALL New(Displ,NIntC) 
+     ENDIF
+     !
+     DStre=0.15D0
+     DAngle=5.D0/180.D0*PI
+     IF(iGEO==1) IPhase=-1
+     IF(iGEO==2) IPhase= 1
+     !
+     DO I=1,NIntC
+       IF(IntCs%Def(I)=='STRE') THEN
+         Displ%D(I)=DStre*DBLE(IPhase**I)
+       ELSE IF(HasAngle(IntCs%Def(I))) THEN
+         Displ%D(I)=DAngle*DBLE(IPhase**I)
+       ELSE
+         Displ%D(I)=Zero
+       ENDIF
+     ENDDO
+write(*,*) iGEO,' Displ%D= ',Displ%D
+     !      
+     CALL Delete(XYZAux)
+     CALL CloseHDFGroup(HDF_CurrentID) 
+     CALL CloseHDF(HDFFileID)
+   END SUBROUTINE PrepBiSect
 !
 !-------------------------------------------------------------------
 !

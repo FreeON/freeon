@@ -8,6 +8,7 @@ MODULE GeomOptKeys
    CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW        ='QuNew'
    CHARACTER(LEN=7),  PARAMETER :: OPT_StpDesc      ='StpDesc'
    CHARACTER(LEN=8),  PARAMETER :: OPT_DiagHess     ='DiagHess'
+   CHARACTER(LEN=6),  PARAMETER :: OPT_BiSect       ='BiSect'
    CHARACTER(LEN=8),  PARAMETER :: OPT_CartDIIS     ='CartDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_IntDIIS      ='IntDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
@@ -22,6 +23,7 @@ MODULE GeomOptKeys
    INTEGER, PARAMETER           :: GRAD_STPDESC_OPT = 3876123 
 !  Optimizer type is set to Diagonal Hessian 
    INTEGER, PARAMETER           :: GRAD_DIAGHESS_OPT = 8942901 
+   INTEGER, PARAMETER           :: GRAD_BISECT_OPT   = 8942902 
 !--------------------------------------------------------------------------------------
 !
     CHARACTER(LEN=9),  PARAMETER :: COORDTYPE='CoordType'

@@ -26,6 +26,8 @@ MODULE ParseGeomOpt
        GOpt%Optimizer=GRAD_StpDesc_OPT
      ELSEIF(OptKeyQ(Inp,GRADIENTS,OPT_DiagHess))THEN
        GOpt%Optimizer=GRAD_DiagHess_OPT
+     ELSEIF(OptKeyQ(Inp,GRADIENTS,OPT_BiSect))THEN
+       GOpt%Optimizer=GRAD_BiSect_OPT
      ELSE
        GOpt%Optimizer=GRAD_DiagHess_OPT !default
      ENDIF
