@@ -33,7 +33,7 @@ CPPMISC = -DEXPLICIT_SOURCE
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I./LibQCTC/
 #
-QCTCLibs=$(F90_LIBRARIES) $(LAPACK) -lQCTC 
+QCTCLibs=$(F90_LIBRARIES) -lQCTC $(LAPACK) 
 #
 CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o    \
            PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o 
