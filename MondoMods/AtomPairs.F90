@@ -31,45 +31,30 @@ CONTAINS
 !-------------------------------------------------------------------------------
   FUNCTION SetAtomPair(GM,BS,I,J,Pair)
     LOGICAL                   :: SetAtomPair
-    INTEGER                   :: I,J,K,N1,N2,N3,M1,M2,M3,IC,IF
+    INTEGER                   :: I,J,K
     TYPE(AtomPair)            :: Pair
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
 #ifdef PERIODIC
-    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
-!
-    NRgn = 0
-    DO K=1,3;IF(GM%PBC%AutoW(K)) NRgn(K) = 1;ENDDO
-!
-    Pair%AB2 = 1.D16
-    DO N1 = -NRgn(1),NRgn(1)
-       DO N2 = -NRgn(2),NRgn(2)
-          DO N3 = -NRgn(3),NRgn(3)
-             VecF   = (/DBLE(N1),DBLE(N2),DBLE(N3)/)
-             VecA   = ABS(FracToAtom(GM,VecF)+GM%Carts%D(:,I)-GM%Carts%D(:,J))
-             Pair%AB2 = MIN(Pair%AB2,VecA(1)**2+VecA(2)**2+VecA(3)**2)
-          ENDDO
-       ENDDO
-    ENDDO
+    Pair%AB2 = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
 #else
     Pair%AB2 = (GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
              + (GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
              + (GM%Carts%D(3,I)-GM%Carts%D(3,J))**2 
 #endif
-    SetAtomPair=TestAtomPair(Pair)
-    IF(SetAtomPair) THEN
-       Pair%A(:) = GM%Carts%D(:,I) 
-       Pair%B(:) = GM%Carts%D(:,J) 
-       Pair%KA   = GM%AtTyp%I(I)
-       Pair%KB   = GM%AtTyp%I(J)
-       Pair%NA   = BS%BFKnd%I(Pair%KA)
-       Pair%NB   = BS%BFKnd%I(Pair%KB)
-    ENDIF
+    Pair%KA   = GM%AtTyp%I(I)
+    Pair%KB   = GM%AtTyp%I(J)
+    Pair%NA   = BS%BFKnd%I(Pair%KA)
+    Pair%NB   = BS%BFKnd%I(Pair%KB)
+    Pair%A(:) = GM%Carts%D(:,I) 
+    Pair%B(:) = GM%Carts%D(:,J) 
     IF(I==J) THEN 
        Pair%SameAtom = .TRUE.
     ELSE
        Pair%SameAtom = .FALSE.
     ENDIF
+!
+    SetAtomPair=TestAtomPair(Pair)
 !
   END FUNCTION SetAtomPair
 !-------------------------------------------------------------------------------
@@ -194,8 +179,14 @@ CONTAINS
     TYPE(CRDS)                     :: GM
     INTEGER,OPTIONAL               :: ExtraEll_O
     INTEGER                        :: I,ExtraEll       
-    REAL(DOUBLE)                   :: Radd,BoxExtent
+    REAL(DOUBLE)                   :: Radd,BoxExtent,Coef
     REAL(DOUBLE),DIMENSION(3,3)    :: ABC
+!
+    IF(GM%PBC%Dimen == 0) THEN
+       CALL New_CellSet(CS_Grid,1,3)
+       CS_Grid%CellCarts%D = Zero
+       RETURN
+    ENDIF
 !
     IF(Present(ExtraEll_O)) THEN
        ExtraEll = ExtraEll_O
@@ -213,7 +204,8 @@ CONTAINS
        ENDIF
     ENDDO
 !
-    BoxExtent=AtomPairExtent(MinRadialAngSym+ExtraEll,Two*MinRadialExponent,Thresholds%Dist)
+    Coef = One
+    BoxExtent=AtomPairExtent(MaxRadialAngSym+ExtraEll,Two*MinRadialExponent,Thresholds%Dist,Coef)
     CALL New_CellSet_Sphere(CS_Grid,GM%PBC%AutoW,GM%PBC%BoxShape,Radd+BoxExtent)
 !
   END SUBROUTINE SetGridCell
@@ -226,7 +218,7 @@ CONTAINS
     INTEGER,OPTIONAL               :: ExtraEll_O
     INTEGER                        :: I,J,K,Ell,NC1,NC2,Icount,ExtraEll
     REAL(DOUBLE)                   :: Radius,Radd,A0,B0,C0,AtmExtent,BoxExtent
-    REAL(DOUBLE)                   :: ZetaA,ZetaB,ZA,ZB,Xi,Zeta,R12,R22
+    REAL(DOUBLE)                   :: ZetaA,ZetaB,ZA,ZB,Xi,Zeta,R12,R22,Coef
     REAL(DOUBLE),DIMENSION(3)      :: R1,R2
     REAL(DOUBLE),DIMENSION(3,3)    :: ABC
 !
@@ -254,8 +246,9 @@ CONTAINS
 !
     Zeta = ZetaA+ZetaB
     Xi   = ZetaA*ZetaB/Zeta
-    AtmExtent = AtomPairExtent(Ell+ExtraEll,Xi,Thresholds%Dist)
-    BoxExtent = AtomPairExtent(Ell+ExtraEll,Zeta,Thresholds%Dist)
+    Coef = One
+    AtmExtent = AtomPairExtent(Ell+ExtraEll,Xi,Thresholds%Dist,Coef)
+    BoxExtent = AtomPairExtent(Ell+ExtraEll,Zeta,Thresholds%Dist,Coef)
     ZA = ZetaA/Zeta
     ZB = ZetaB/Zeta
 !
@@ -306,10 +299,6 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
-!
-!    WRITE(*,*) 'CS_Grid%NCell = ',CS_Grid%NCells
-!    WRITE(*,*) 'CSTemp%NCell  = ',CSTemp%NCells,CSTemp%NCells**2
-!    WRITE(*,*) 'CS_Kxc%NCell  = ',CS_Kxc%NCells
 !
   END SUBROUTINE SetKxcCell
 !-------------------------------------------------------------------------------
@@ -471,6 +460,35 @@ CONTAINS
     InAtomBox = InFracBox(GM,VecF)
 
   END FUNCTION InAtomBox
+!-------------------------------------------------------------------------------
+! Calculate the Minmiun Image Distance Between Atoms I and J 
+!-------------------------------------------------------------------------------
+  FUNCTION MinImageDist(GM,Carts1,Carts2)
+    TYPE(CRDS)                :: GM
+    INTEGER                   :: K,N1,N2,N3
+    REAL(DOUBLE)              :: MinImageDist
+    INTEGER,DIMENSION(3)      :: NRgn
+    REAL(DOUBLE),DIMENSION(3) :: Carts1,Carts2
+    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
+!  
+    NRgn = 0
+    DO K=1,3
+       IF(GM%PBC%AutoW(K)) NRgn(K) = 1
+    ENDDO
+!
+    MinImageDist = 1.D16
+    DO N1 = -NRgn(1),NRgn(1)
+       DO N2 = -NRgn(2),NRgn(2)
+          DO N3 = -NRgn(3),NRgn(3)
+             VecF         = (/DBLE(N1),DBLE(N2),DBLE(N3)/)
+             VecA         = FracToAtom(GM,VecF)+Carts1-Carts2
+             MinImageDist = MIN(MinImageDist,VecA(1)**2+VecA(2)**2+VecA(3)**2)
+          ENDDO
+       ENDDO
+    ENDDO
+
+  END FUNCTION MinImageDist
+!
 #endif
 !
 END MODULE AtomPairs
