@@ -32,7 +32,8 @@ PROGRAM MakeU
   TYPE(CRDS)                 :: GM
   TYPE(DBL_RNK4)             :: MD
   TYPE(ARGMT)                :: Args
-  INTEGER                    :: P,R,AtA,AtB,NN                         
+  REAL(DOUBLE)               :: Cx,Cy,Cz
+  INTEGER                    :: P,R,AtA,AtB,AtC,KC,NN                         
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeU'
   !--------------------------------------- 
   ! Start up macro
@@ -70,7 +71,16 @@ PROGRAM MakeU
                       + (Pair%A(2)-Pair%B(2))**2 &
                       + (Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
-                    U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlock(BS,GM,Pair)
+                    ! Go over ECP centers
+                    DO AtC=1,NAtoms
+                       KC=GM%AtTyp%I(AtC)
+                       IF(BS%NTyp1PF%I(KC)>0)THEN
+                          Cx=GM%Carts%D(1,AtC) 
+                          Cy=GM%Carts%D(2,AtC) 
+                          Cz=GM%Carts%D(3,AtC) 
+                          U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlock(BS,Pair,KC,Cx,Cy,Cz)
+                       ENDIF
+                    ENDDO
                  ENDIF
               ENDDO
 #else

@@ -45,7 +45,7 @@ ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x \
                TForce.x MakeM.x MBlok.x
 #
-all: 	 MakeM MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce 
+all: 	 MakeM MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce UForce 
 #
 MakeM:	 $(ObjsM)
 	 $(LD) $(LDFLAGS) MakeM $(ObjsM) $(F90_LIBRARIES)
@@ -78,6 +78,10 @@ SForce: $(ObjSF)
 TForce:	$(ObjTF)
 	$(LD) $(LDFLAGS) TForce $(ObjTF) $(F90_LIBRARIES)
 	mv TForce $(MONDO_EXEC)/TForce
+#
+UForce:	UForce.o
+	$(LD) $(LDFLAGS) UForce UForce.o UBlok.o $(F90_LIBRARIES)
+	mv UForce $(MONDO_EXEC)/UForce
 #
 release:clean $(ReleaseFiles) 
 #
