@@ -1288,6 +1288,11 @@ CONTAINS
      Hess%LinB = 0.20D0
      Hess%OutP = 0.10D0 
      Hess%Tors = 0.10D0 
+     Hess%VDWStre  = 0.50D0 
+     Hess%VDWBend  = 0.20D0 
+     Hess%VDWLinB  = 0.20D0 
+     Hess%VDWOutP  = 0.10D0 
+     Hess%VDWTors  = 0.10D0 
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
@@ -1339,8 +1344,8 @@ CONTAINS
      TYPE(GConvCrit) :: GConv
      !
      GT%MaxIt_GrdTrf = 10 
-     GT%GrdTrfCrit   = 0.1D0*GConv%Grad
-    !GT%GrdTrfCrit   = 1.D-7
+    !GT%GrdTrfCrit   = 0.1D0*GConv%Grad
+     GT%GrdTrfCrit   = 1.D-7
      GT%MaxGradDiff  = 5.D+2      
    END SUBROUTINE SetGrdTrf
 !
@@ -1903,6 +1908,7 @@ CONTAINS
      CHARACTER(LEN=*)              :: Char
      TYPE(INT_VECT)                :: ITop,JTop
      TYPE(DBL_VECT)                :: ATop
+     LOGICAL                       :: DoVDW
      !
      NIntC=SIZE(IntCs%Def)
      NatmsLoc=SIZE(XYZ,2)
@@ -1915,8 +1921,9 @@ CONTAINS
        IF(.NOT.IntCs%Active(I)) THEN
          DHess(I)=Zero
        ELSE 
+         DoVDW=(I<CoordC%NCov)
          CALL CalcHess(DHess(I),Char,IntCs%Def(I),Hess,AtNum, &
-                       XYZ,IntCs%Atoms(I,1:4),ITop,JTop,ATop)
+                       XYZ,IntCs%Atoms(I,1:4),ITop,JTop,ATop,DoVDW)
        ENDIF
      ENDDO
      !
@@ -1953,7 +1960,8 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CalcHess(DHess,Char,Type,Hess,AtNum,XYZ,Atoms,ITop,JTop,ATop)
+   SUBROUTINE CalcHess(DHess,Char,Type,Hess,AtNum,XYZ, &
+                       Atoms,ITop,JTop,ATop,DoVDW)
      REAL(DOUBLE)                :: DHess
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
@@ -1965,49 +1973,59 @@ CONTAINS
      INTEGER                     :: I1Row,I2Row,I3Row,I4Row  
      REAL(DOUBLE)                :: R12,R23,R34
      REAL(DOUBLE)                :: Rho12,Rho23,Rho34
+     LOGICAL                     :: DoVDW
      !
-     IF(Char=='ThreeVals') THEN
-       IF(Type(1:4)=='STRE') DHess=Hess%Stre
-       IF(Type(1:4)=='BEND') DHess=Hess%Bend
-       IF(Type(1:4)=='LINB') DHess=Hess%LinB
-       IF(Type(1:4)=='OUTP') DHess=Hess%OutP
-       IF(Type(1:4)=='TORS') DHess=Hess%Tors
-       IF(Type(1:4)=='CART') DHess=Hess%Stre
-     ELSE IF(Char=='Lindh') THEN
-       I1Row=PeriodicRow(INT(AtNum(Atoms(1))))
-       I2Row=PeriodicRow(INT(AtNum(Atoms(2))))
-       I3Row=PeriodicRow(INT(AtNum(Atoms(3))))
-       I4Row=PeriodicRow(INT(AtNum(Atoms(4))))
-       IF(Atoms(2)/=0) THEN
-         R12=GetR(XYZ,Atoms(1),Atoms(2),ITop,JTop,ATop) 
-         Rho12=EXP(Lindh_Alpha(I1Row,I2Row)*(Lindh_R(I1Row,I2Row)**2-R12**2))
-       ENDIF
-       IF(Atoms(3)/=0) THEN
-         R23=GetR(XYZ,Atoms(2),Atoms(3),ITop,JTop,ATop) 
-         Rho23=EXP(Lindh_Alpha(I2Row,I3Row)*(Lindh_R(I2Row,I3Row)**2-R23**2))
-       ENDIF
-       IF(Atoms(4)/=0) THEN
-         IF(Type=='OUTP') THEN
-           R34=GetR(XYZ,Atoms(2),Atoms(4),ITop,JTop,ATop) 
-           Rho34=EXP(Lindh_Alpha(I2Row,I4Row)*(Lindh_R(I2Row,I4Row)**2-R34**2))
-         ELSE
-           R34=GetR(XYZ,Atoms(3),Atoms(4),ITop,JTop,ATop) 
-           Rho34=EXP(Lindh_Alpha(I3Row,I4Row)*(Lindh_R(I3Row,I4Row)**2-R34**2))
+     IF(Type(1:4)=='CART') THEN
+       DHess=Hess%VDWStre
+     ELSE IF(DoVDW) THEN
+       IF(Type(1:4)=='STRE') DHess=Hess%VDWStre
+       IF(Type(1:4)=='BEND') DHess=Hess%VDWBend
+       IF(Type(1:4)=='LINB') DHess=Hess%VDWLinB
+       IF(Type(1:4)=='OUTP') DHess=Hess%VDWOutP
+       IF(Type(1:4)=='TORS') DHess=Hess%VDWTors
+     ELSE
+       IF(Char=='ThreeVals') THEN
+         IF(Type(1:4)=='STRE') DHess=Hess%Stre
+         IF(Type(1:4)=='BEND') DHess=Hess%Bend
+         IF(Type(1:4)=='LINB') DHess=Hess%LinB
+         IF(Type(1:4)=='OUTP') DHess=Hess%OutP
+         IF(Type(1:4)=='TORS') DHess=Hess%Tors
+       ELSE IF(Char=='Lindh') THEN
+         I1Row=PeriodicRow(INT(AtNum(Atoms(1))))
+         I2Row=PeriodicRow(INT(AtNum(Atoms(2))))
+         I3Row=PeriodicRow(INT(AtNum(Atoms(3))))
+         I4Row=PeriodicRow(INT(AtNum(Atoms(4))))
+         IF(Atoms(2)/=0) THEN
+           R12=GetR(XYZ,Atoms(1),Atoms(2),ITop,JTop,ATop) 
+           Rho12=EXP(Lindh_Alpha(I1Row,I2Row)*(Lindh_R(I1Row,I2Row)**2-R12**2))
          ENDIF
-       ENDIF
-       DHess=One
-       IF(Type(1:4)=='STRE') THEN
-         DHess=Lindh_K(1)*Rho12
-       ELSE IF(Type(1:4)=='BEND') THEN
-         DHess=Lindh_K(2)*Rho12*Rho23
-       ELSE IF(Type(1:4)=='LINB') THEN
-         DHess=Lindh_K(2)*Rho12*Rho23
-       ELSE IF(Type(1:4)=='OUTP') THEN
-         DHess=Lindh_K(3)*Rho12*Rho23*Rho34
-       ELSE IF(Type(1:4)=='TORS') THEN
-         DHess=Lindh_K(3)*Rho12*Rho23*Rho34
-       ELSE IF(Type(1:4)=='CART') THEN
-         DHess=Lindh_K(1)*Rho12
+         IF(Atoms(3)/=0) THEN
+           R23=GetR(XYZ,Atoms(2),Atoms(3),ITop,JTop,ATop) 
+           Rho23=EXP(Lindh_Alpha(I2Row,I3Row)*(Lindh_R(I2Row,I3Row)**2-R23**2))
+         ENDIF
+         IF(Atoms(4)/=0) THEN
+           IF(Type=='OUTP') THEN
+             R34=GetR(XYZ,Atoms(2),Atoms(4),ITop,JTop,ATop) 
+             Rho34=EXP(Lindh_Alpha(I2Row,I4Row)*(Lindh_R(I2Row,I4Row)**2-R34**2))
+           ELSE
+             R34=GetR(XYZ,Atoms(3),Atoms(4),ITop,JTop,ATop) 
+             Rho34=EXP(Lindh_Alpha(I3Row,I4Row)*(Lindh_R(I3Row,I4Row)**2-R34**2))
+           ENDIF
+         ENDIF
+         DHess=One
+         IF(Type(1:4)=='STRE') THEN
+           DHess=Lindh_K(1)*Rho12
+         ELSE IF(Type(1:4)=='BEND') THEN
+           DHess=Lindh_K(2)*Rho12*Rho23
+         ELSE IF(Type(1:4)=='LINB') THEN
+           DHess=Lindh_K(2)*Rho12*Rho23
+         ELSE IF(Type(1:4)=='OUTP') THEN
+           DHess=Lindh_K(3)*Rho12*Rho23*Rho34
+         ELSE IF(Type(1:4)=='TORS') THEN
+           DHess=Lindh_K(3)*Rho12*Rho23*Rho34
+         ELSE IF(Type(1:4)=='CART') THEN
+           DHess=Lindh_K(1)*Rho12
+         ENDIF
        ENDIF
      ENDIF
      DHess=One/DHess

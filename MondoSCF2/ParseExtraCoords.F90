@@ -260,6 +260,10 @@ MODULE ParseExtraCoords
         CALL ReNumbIntC(IntC_Extra,CConstrain%I) 
      !ENDDO
      !
+     ! Add FCType label
+     !
+     IntC_Extra%FCType(:)='E'
+     !
      ! Redefine size of Lagrangian arrays and save IntC_Extra to disk 
      !
      DO iCLONE=1,Geos%Clones
