@@ -245,6 +245,7 @@ PROGRAM P2Use
      CALL SetEq(P,P0)
      ! Purify 
      IF(MaxDS > 1.D-10) THEN
+        Qstep=0
         DO I=1,20
            IF(I <= 2) THEN
               CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
@@ -257,6 +258,7 @@ PROGRAM P2Use
                     CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
                  ENDIF
               ELSE
+                 Qstep = Qstep+1
                  IF(Norm_Error > Zero) THEN
                     CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
                     CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
@@ -286,11 +288,14 @@ PROGRAM P2Use
 #endif
            IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
            IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) EXIT
+           IF(Qstep > 4) EXIT
         ENDDO
         IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) THEN
+           CALL Warn("Using Old Density Matrix: Norm Error to Large")
            CALL Filter(P,P0)
         ENDIF
      ELSE
+        CALL Warn("Using Old Density Matrix: MaxDS too small")
         CALL Filter(P,P0)
      ENDIF
      ! Save back to be sure.
