@@ -1,0 +1,56 @@
+<BeginTitle>
+ MONDO:
+Frequencies= 2171.0366 4142.8791 4392.9252
+               Q               ln(Q)
+  Elec     1.00000E+00       0.000000
+  Trans    3.00540E+06      14.915920
+  Rot      9.59594E+01       4.563926
+  Vib      1.00003E+00       0.000028
+  Tot      2.88404E+08      19.479874
+              E         H         G         CV        CP        S
+           KJ/Mol    KJ/Mol    KJ/Mol    J/MolK    J/MolK    J/MolK
+  Elec      0.000     0.000     0.000     0.000     0.000     0.000
+  Trans     3.718     6.197   -36.976    12.472    20.786   144.805
+  Rot       3.718     3.718   -11.314    12.472    12.472    50.419
+  Vib      64.042    64.042    64.041     0.026     0.026     0.003
+  Tot      71.479    73.958    15.751    24.969    33.284   195.227
+
+
+ GAMESS:
+ FREQUENCY:      2170.05     4139.84     4390.92
+               Q               LN Q
+ ELEC.     1.00000E+00       0.000000
+ TRANS.    3.00431E+06      14.915558
+ ROT.      9.59495E+01       4.563822
+ VIB.      1.00003E+00       0.000028
+ TOT.      2.88270E+08      19.479409
+              E         H         G         CV        CP        S
+           KJ/MOL    KJ/MOL    KJ/MOL   J/MOL-K   J/MOL-K   J/MOL-K
+ ELEC.      0.000     0.000     0.000     0.000     0.000     0.000
+ TRANS.     3.718     6.197   -36.975    12.472    20.786   144.800
+ ROT.       3.718     3.718   -11.313    12.472    12.472    50.417
+ VIB.      64.006    64.006    64.005     0.026     0.026     0.003
+ TOTAL     71.443    73.922    15.717    24.969    33.283   195.220
+
+<EndTitle>
+
+<BeginOptions>
+Grad=(NumFreq)
+Charge=0
+Multiplicity=1
+Clones=1
+DebugAll=(MinDebug)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(verytight)
+Geometry=(InAngstroms,NoOrder)
+SCFConvergence=(DIIS)
+<EndOptions>
+
+<BeginGeometry>
+ o   0.95309668               0.00000000               0.63925771
+ h   0.00278150               0.00000000               0.91468038
+ h   0.84735582               0.00000000              -0.34449809
+<EndGeometry>
