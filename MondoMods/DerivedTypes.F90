@@ -337,21 +337,15 @@ MODULE DerivedTypes
      INTEGER          :: Alloc   !-- Allocation key
      INTEGER          :: NPrim
      INTEGER          :: MAXI    !-- Size of W1 and W2
-     INTEGER          :: Mesh    !-- Number of mesh point is the Gamma and Exp tables
      INTEGER          :: Lval    !-- Angular symmetry of Gamma table in memory
      INTEGER          :: MAXL    !-- Max L in the Gamma tables
      INTEGER          :: MaxInts !-- Maximum number of two-e in a vector loop
-     REAL(DOUBLE)     :: Switch  !-- Multipole switch for the Gamma tables
-     REAL(DOUBLE)     :: Grid    !-- Grid spacing in the Gamma and Exp tables
-     TYPE(DBL_VECT)   :: GammaA  !-- Multipole asymptotics for the gamma tables
      TYPE(DBL_VECT)   :: W1      !-- Two-e scratch space
      TYPE(DBL_VECT)   :: W2      !-- Two-e scratch space
      TYPE(DBL_RNK2)   :: CB      !-- Bra contraction coefficients
      TYPE(DBL_RNK3)   :: CK      !-- Ket contraction coefficients
      TYPE(DBL_RNK2)   :: WR
      TYPE(DBL_RNK2)   :: WZ
-     TYPE(DBL_RNK2)   :: GT      !-- The current Gamma function table
-     TYPE(DBL_RNK2)   :: ET      !-- The Exp function table
   END TYPE IBuf
 !-------------------------------------------------------------------------------------
 !  ONX integral drivers

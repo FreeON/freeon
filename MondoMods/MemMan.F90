@@ -425,15 +425,10 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          CALL New(A%W1,A%MAXI)
          CALL New(A%W2,A%MAXI)
-         CALL New(A%GammaA,A%MAXL+1)
          CALL New(A%CB,(/A%NPrim*A%NPrim,3/))
          CALL New(A%CK,(/A%MaxInts,A%NPrim*A%NPrim,3/))
-!         CALL New(A%WR,(/12,A%MaxInts*A%NPrim**4/))
-!         CALL New(A%WZ,(/5,A%MaxInts*A%NPrim**4/))
          CALL New(A%WR,(/A%MaxInts*A%NPrim**4,12/))
          CALL New(A%WZ,(/A%MaxInts*A%NPrim**4,5/))
-         CALL New(A%GT,(/3,A%Mesh/),(/0,0/))
-         CALL New(A%ET,(/3,A%Mesh/),(/0,0/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_IBuf
 !----------------------------------------------------------------------------
@@ -728,15 +723,12 @@ MODULE MemMan
 !
       SUBROUTINE Delete_IBuf(A)
          TYPE(IBuf),INTENT(INOUT)       :: A
-         CALL Delete(A%GammaA)
          CALL Delete(A%W1)
          CALL Delete(A%W2)
          CALL Delete(A%CB)
          CALL Delete(A%CK)
          CALL Delete(A%WR)
          CALL Delete(A%WZ)
-         CALL Delete(A%GT)
-         CALL Delete(A%ET)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_IBuf
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
