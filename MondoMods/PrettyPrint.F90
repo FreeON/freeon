@@ -354,76 +354,98 @@ MODULE PrettyPrint
    1007 FORMAT(60('='))
      END SUBROUTINE Print_BSET 
 !----------------------------------------------------------------PRINT COORDINATES
-     SUBROUTINE Print_CRDS(GM)
+     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O)
         TYPE(CRDS) :: GM         
-        INTEGER :: I,K
+        INTEGER :: K
         LOGICAL :: Opened
-        CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
+        INTEGER                              :: I,PU
+        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+        REAL(DOUBLE)                         :: AA
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
 !          
-          INQUIRE(FILE=OutFile,OPENED=Opened)
-          IF(.NOT.Opened) &
-              CALL OpenASCII(OutFile,Out)
-           IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              WRITE(Out,*)LeftParenStar
-              WRITE(Out,43)
+          PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
+          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              WRITE(PU,*)LeftParenStar
+              WRITE(PU,43)
            ELSE
-              WRITE(Out,44)
+              WRITE(PU,44)
            ENDIF
            Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
-           WRITE(Out,*)TRIM(Mssg)           
-           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+           IF(GM%ETotal/=BIG_DBL)THEN
+              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal)) 
+              WRITE(PU,*)TRIM(Mssg)
+              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradRMS)) 
+              WRITE(PU,*)TRIM(Mssg)
+              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradMax)) 
+              WRITE(PU,*)TRIM(Mssg)
+!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%ETotal))//';' 
+!              WRITE(PU,*)TRIM(Mssg)
+!              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradRMS))//';' 
+!              WRITE(PU,*)TRIM(Mssg)
+!              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradMax))//';' 
+!              WRITE(PU,*)TRIM(Mssg)
+           ENDIF
+           IF(PrintGeom_O=='XYZ')THEN
+               AA=One/AngstromsToAU
+               DO I=1,GM%NAtms
+                 Mssg=Ats(GM%AtNum%I(I))                    &
+                 //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA) &
+                 //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA) &
+                 //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA) 
+                 WRITE(PU,*)TRIM(Mssg)
+              ENDDO
+           ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               IF(GM%InAU)THEN
-                 WRITE(Out,45)
+                 WRITE(PU,45)
               ELSE
-                 WRITE(Out,46)
+                 WRITE(PU,46)
               ENDIF
               IF(GM%Ordrd==SFC_HILBERT)THEN
-                 WRITE(Out,17)
+                 WRITE(PU,17)
               ELSEIF(GM%Ordrd==SFC_PEANO)THEN
-                 WRITE(Out,27)
+                 WRITE(PU,27)
               ELSEIF(GM%Ordrd==SFC_RANDOM)THEN
-                 WRITE(Out,47)
+                 WRITE(PU,47)
               ELSE
-                 WRITE(Out,37)
+                 WRITE(PU,37)
               ENDIF
-              WRITE(Out,49)
-           ENDIF
-           IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              WRITE(Out,*)RightParenStar
+              WRITE(PU,49)
+           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+              WRITE(PU,*)RightParenStar
               DO I=1,GM%NAtms
-                 WRITE(Out,54)I,GM%AtNum%I(I)
+                 WRITE(PU,54)I,GM%AtNum%I(I)
               ENDDO
               DO I=1,GM%NAtms
-                 WRITE(Out,53)I,(FRACTION(GM%Carts%D(K,I)), &
+                 WRITE(PU,53)I,(FRACTION(GM%Carts%D(K,I)), &
                                  EXPONENT(GM%Carts%D(K,I)),K=1,3)
               ENDDO
-              WRITE(Out,41)FRACTION(GM%ENucN),EXPONENT(GM%ENucN)
            ELSE
               DO I=1,GM%NAtms
-                 WRITE(Out,52)I,Ats(GM%AtNum%I(I)),(GM%Carts%D(K,I),K=1,3)
+                 WRITE(PU,52)I,Ats(GM%AtNum%I(I)),(GM%Carts%D(K,I),K=1,3)
               ENDDO
-              WRITE(Out,42) GM%ENucN
-              WRITE(Out,444)GM%NElec
-              WRITE(Out,43) 
+!              WRITE(PU,42) GM%ENucN
+              WRITE(PU,444)GM%NElec
+              WRITE(PU,43) 
 #ifdef PERIODIC
-              WRITE(Out,55)
-              WRITE(Out,56) GM%AutoW(1),GM%AutoW(2),GM%AutoW(3)
-              WRITE(Out,57) GM%TransVec%D(1),GM%TransVec%D(2),GM%TransVec%D(3)
-              WRITE(Out,58)  
-              WRITE(Out,59) GM%BoxShape%D(1,1),GM%BoxShape%D(2,1),GM%BoxShape%D(3,1)
-              WRITE(Out,60) GM%BoxShape%D(1,2),GM%BoxShape%D(2,2),GM%BoxShape%D(3,2)
-              WRITE(Out,61) GM%BoxShape%D(1,3),GM%BoxShape%D(2,3),GM%BoxShape%D(3,3)
-              WRITE(Out,62)  
+              WRITE(PU,55)
+              WRITE(PU,56) GM%AutoW(1),GM%AutoW(2),GM%AutoW(3)
+              WRITE(PU,57) GM%TransVec%D(1),GM%TransVec%D(2),GM%TransVec%D(3)
+              WRITE(PU,58)  
+              WRITE(PU,59) GM%BoxShape%D(1,1),GM%BoxShape%D(2,1),GM%BoxShape%D(3,1)
+              WRITE(PU,60) GM%BoxShape%D(1,2),GM%BoxShape%D(2,2),GM%BoxShape%D(3,2)
+              WRITE(PU,61) GM%BoxShape%D(1,3),GM%BoxShape%D(2,3),GM%BoxShape%D(3,3)
+              WRITE(PU,62)  
               DO I=1,GM%NAtms
-                 WRITE(Out,63) I, Ats(GM%AtNum%I(I)),(GM%BoxCarts%D(K,I),K=1,3)
+                 WRITE(PU,63) I, Ats(GM%AtNum%I(I)),(GM%BoxCarts%D(K,I),K=1,3)
               ENDDO
-              WRITE(Out,43)
+              WRITE(PU,43)
 #endif
            ENDIF
-           IF(.NOT.Opened)CLOSE(Out)
+           CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
 #endif
@@ -469,7 +491,7 @@ MODULE PrettyPrint
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O                
        
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
-       IF(PrintFlags%Mat/=DEBUG_MATRICES)RETURN        
+       IF(PrintFlags%Mat/=DEBUG_MATRICES.AND.(.NOT.PRESENT(Unit_O)))RETURN        
 #ifdef PARALLEL 
         IF(MyId==ROOT)THEN
 #endif
@@ -767,8 +789,6 @@ MODULE PrettyPrint
 !
     PU=OpenPU(Unit_O=Unit_O)
 !
-!    PrintFlags%Fmt=DEBUG_MMASTYLE
-!
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE) THEN
        NPrim=0
        WRITE(PU,*)'ClearAll[Rho];'
@@ -812,8 +832,7 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        WRITE(PU,*)'RhoSum];'
-    ENDIF
-    IF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM) THEN 
+    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM) THEN 
        NPrim=0
        WRITE(PU,30) Name
        WRITE(PU,31)
