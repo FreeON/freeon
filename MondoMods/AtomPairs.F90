@@ -452,18 +452,18 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
     REAL(DOUBLE),DIMENSION(3)   :: AB
     INTEGER,DIMENSION(3)        :: AutoW
-    INTEGER                     :: I,J
+    INTEGER                     :: I,J,D
 !
-    J=0
+    D=0
     DO I=1,3
-       J = J + AutoW(I)
+       D = D + AutoW(I)
     ENDDO
 !
-    IF(J==1) THEN
+    IF(D==1) THEN
        IF(AutoW(1)==1) CellVolume=BoxShape(1,1)
        IF(AutoW(2)==1) CellVolume=BoxShape(2,2)
        IF(AutoW(3)==1) CellVolume=BoxShape(3,3)
-    ELSEIF(J==2) THEN
+    ELSEIF(D==2) THEN
        IF(AutoW(1)==0) THEN
           CellVolume = BoxShape(2,2)*BoxShape(3,3)-BoxShape(3,2)*BoxShape(2,3)
        ENDIF  
@@ -473,12 +473,64 @@ CONTAINS
        IF(AutoW(3)==0) THEN
           CellVolume = BoxShape(1,1)*BoxShape(2,2)-BoxShape(1,2)*BoxShape(2,1)
        ENDIF  
-    ELSE
+    ELSEIF(D==3) THEN
        CALL CROSS_PRODUCT(BoxShape(:,1),BoxShape(:,2),AB)
-       CellVolume = ABS(DOT_PRODUCT(AB,BoxShape(:,3)))
+       CellVolume = DOT_PRODUCT(AB,BoxShape(:,3))
     ENDIF
 !
   END FUNCTION CellVolume
+!-------------------------------------------------------------------------------
+  FUNCTION DivCellVolume(BoxShape,AutoW) RESULT(DivCV)
+    REAL(DOUBLE),DIMENSION(3,3) :: BoxShape,DivCV,Temp
+    INTEGER,DIMENSION(3)        :: AutoW
+    REAL(DOUBLE)                :: Phase
+    INTEGER                     :: I,J,D
+!
+    D=0
+    DO I=1,3
+       D = D + AutoW(I)
+    ENDDO
+!
+    DivCV = Zero
+    IF(D==1) THEN
+       IF(AutoW(1)==1) DivCV(1,1) = One
+       IF(AutoW(2)==1) DivCV(2,2) = One
+       IF(AutoW(3)==1) DivCV(3,3) = One
+    ELSEIF(D==2) THEN
+       IF(AutoW(1)==0) THEN
+          DivCV(2,2) =  BoxShape(3,3)
+          DivCV(2,3) = -BoxShape(3,2)
+          DivCV(3,2) = -BoxShape(2,3)
+          DivCV(3,3) =  BoxShape(2,2)
+       ENDIF
+       IF(AutoW(2)==0) THEN
+          DivCV(1,1) =  BoxShape(3,3)
+          DivCV(1,3) = -BoxShape(3,1)
+          DivCV(3,1) = -BoxShape(1,3)
+          DivCV(3,3) =  BoxShape(1,1)
+       ENDIF
+       IF(AutoW(3)==0) THEN
+          DivCV(1,1) =  BoxShape(2,2)
+          DivCV(1,2) = -BoxShape(2,1)
+          DivCV(2,1) = -BoxShape(1,2)
+          DivCV(2,2) =  BoxShape(1,1)
+       ENDIF
+    ELSEIF(D==3) THEN
+       DO I=1,3
+          DO J=1,3
+             Temp = BoxShape
+             Temp(:,J) = Zero
+             Temp(I,J) = One
+             DivCV(I,J) = CellVolume(Temp,AutoW)             
+          ENDDO
+       ENDDO
+    ENDIF
+!
+    Phase = CellVolume(BoxShape,AutoW)/ABS(CellVolume(BoxShape,AutoW))
+    DivCV = Phase*DivCV
+!
+  END FUNCTION DivCellVolume
+
 !--------------------------------------------------------------------------------
   SUBROUTINE BoxParsToCart(Vec,BoxShape)
     REAL(DOUBLE),DIMENSION(6)   :: Vec
