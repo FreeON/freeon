@@ -989,7 +989,7 @@ MODULE FastMatrices
           IF(Col == C%R) THEN
              N = BSiz%I(Col)
              Op = Op + M*N
-             Max_FASTMAT = MAX(Max_FASTMAT,DDOT(M*N,C%MTrix(1,1),1,C%MTrix(1,1),1))
+             Max_FASTMAT = MAX(Max_FASTMAT,SQRT(DDOT(M*N,C%MTrix(1,1),1,C%MTrix(1,1),1)))
           ENDIF
           C => C%Next 
        ENDDO
