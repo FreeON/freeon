@@ -1390,7 +1390,7 @@ CONTAINS
        IF(AllocQ(G%Clone(iCLONE)%IntCs%Alloc)) THEN
          CALL Delete(G%Clone(iCLONE)%IntCs)
        ENDIF
-       G%Clone(iCLONE)%IntCs%N=IntCPerAtom*G%Clone(iCLONE)%Natms   
+       G%Clone(iCLONE)%IntCs%N=IntCMax
        CALL New(G%Clone(iCLONE)%IntCs,G%Clone(iCLONE)%IntCs%N)
        G%Clone(iCLONE)%IntCs%Def%C='BLANK'
      ENDDO
