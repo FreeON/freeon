@@ -350,10 +350,11 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE IShow1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M)
+   SUBROUTINE IShow1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M,N1_O,M1_O)
      INTEGER,DIMENSION(:)   :: GcSRowPt,GcSColPt
      INTEGER,DIMENSION(:)   :: GcSMTrix
      INTEGER                :: I,J,N,NDim,K,L,M
+     INTEGER,OPTIONAL       :: N1_O,M1_O
      TYPE(INT_RNK2)         :: Aux
      CHARACTER(LEN=*)       :: Char
      !
@@ -368,15 +369,36 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE Show1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M)
+   SUBROUTINE Show1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M,N1_O,M1_O)
      INTEGER,DIMENSION(:)   :: GcSRowPt,GcSColPt
      REAL(DOUBLE),DIMENSION(:) :: GcSMTrix
-     INTEGER        :: I,J,N,NDim,K,L,M
-     TYPE(DBL_RNK2) :: Aux
+     INTEGER        :: I,J,N,NDim,K,L,M,II,JJ
+     INTEGER,OPTIONAL       :: N1_O,M1_O
+     TYPE(DBL_RNK2) :: Aux,Aux2
      CHARACTER(LEN=*) :: Char
      !
      CALL Sp1x1ToFull(GcSRowPt,GcSColPt,GcSMTrix,N,M,Aux)
-     CALL PPrint(Aux,Char,Unit_O=6)
+     IF(PRESENT(N1_O).AND.PRESENT(M1_O)) THEN
+       CALL New(Aux2,(/N-N1_O+1,M-M1_O+1/))
+       II=0
+       DO I=N1_O,N
+         II=II+1
+         JJ=0
+         DO J=M1_O,M
+           JJ=JJ+1
+           Aux2%D(II,JJ)=Aux%D(I,J)
+         ENDDO
+       ENDDO
+       CALL PPrint(Aux2,Char,Unit_O=6)
+       CALL Delete(Aux2)
+     ELSE
+     ! CALL PPrint(Aux,Char,Unit_O=6)
+       WRITE(*,*) TRIM(Char)
+       DO I=1,N
+         WRITE(*,123) (Aux%D(I,J),J=1,M) 
+       ENDDO
+       123 FORMAT(20F6.3)
+     ENDIF
      CALL Delete(Aux)
    END SUBROUTINE Show1x1
 !
@@ -1213,6 +1235,90 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
+   SUBROUTINE CholXMatrXChol(CholData,IB,JB,BN,N,IX,JX,XN)
+     ! 
+     ! X= (D^-1/2)*(U^-T)*B*(U^-1)*(D^-1/2) (E.g. for preconditioning)
+     ! B,X: NxN matrix
+     ! UT : NxN upper triangle, with unit diagonals (diags not stored)! 
+     ! 
+     TYPE(Cholesky) :: CholData
+     TYPE(INT_VECT) :: IB,JB,IX,JX,IX2,JX2
+     TYPE(DBL_VECT) :: BN,XN,X2N
+     INTEGER        :: N,NC,I,J
+     TYPE(DBL_VECT) :: Diag12
+     !
+     CALL Halt('This routine is under development, effect scaling matrices CholData%GcScale%D should be added')
+     NC=N
+     CALL New(Diag12,N)
+     DO I=1,N ; Diag12%D(I)=SQRT(ABS(CholData%ChDiag%D(I))) ; ENDDO
+     !
+     CALL Perm1x1(CholData%Perm%I,IB%I,JB%I,BN%D)
+     !
+     CALL MatrXUInv(CholData%ChRowPt%I,CholData%ChColPt%I, &
+                    CholData%ChFact%D, &
+                    IB%I,JB%I,BN%D,IX2,JX2,X2N,N,NC) 
+     !
+     CALL MatrXD(IX2%I,JX2%I,X2N%D,Diag12%D,N,NC)
+     !
+     CALL UTInvXMatr(CholData%ChRowPt%I,CholData%ChColPt%I, &
+                     CholData%ChFact%D, &
+                     IX2%I,JX2%I,X2N%D,IX,JX,XN,N,NC) 
+     CALL DxMatr(Diag12%D,IX%I,JX%I,XN%D,N,NC)
+     !
+     CALL Delete(IX2) ; CALL Delete(JX2) ; CALL Delete(X2N)
+     CALL Delete(Diag12) 
+     !
+     CALL Perm1x1(CholData%IPerm%I,IX%I,JX%I,XN%D)
+     !
+   END SUBROUTINE CholXMatrXChol
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE InvMatXMatr(CholData,IB,JB,BN,IX,JX,XN,N,NC,Thresh)
+     !
+     ! X=(U^-1* D^-1 * U^-T) B
+     ! B,X: NxNC matrix
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     !
+     TYPE(Cholesky)            :: CholData
+     INTEGER,DIMENSION(:)      :: IB,JB
+     REAL(DOUBLE),DIMENSION(:) :: BN
+     TYPE(INT_VECT)            :: IX,JX,IX1,JX1,IBc,JBc
+     TYPE(DBL_VECT)            :: XN,XN1,BNc
+     INTEGER                   :: N,NC,NZ
+     REAL(DOUBLE)              :: Thresh
+     !
+     NZ=IB(N+1)-1
+     CALL New(IBc,N+1)
+     CALL New(JBc,NZ)
+     CALL New(BNc,NZ)
+     IBc%I(1:N+1)=IB(1:N+1) ; JBc%I(1:NZ)=JB(1:NZ) ; BNc%D(1:NZ)=BN(1:NZ)
+     !
+     CALL PermRow(IBc%I,JBc%I,BNc%D,CholData%Perm%I,N,NC)
+     CALL ScaleRow(IBc%I,JBc%I,BNc%D,CholData%GcScale%D)
+     CALL UTInvXMatr(CholData%ChRowPt%I,CholData%ChColPt%I, &
+                     CholData%ChFact%D, &
+                     IBc%I,JBc%I,BNc%D,IX1,JX1,XN1,N,NC)
+     CALL Delete(IBc)
+     CALL Delete(JBc)
+     CALL Delete(BNc)
+     !
+     CALL DxMatr(CholData%ChDiag%D,IX1%I,JX1%I,XN1%D,N,NC)
+     !
+     CALL UInvXMatr(CholData%ChRowPt%I,CholData%ChColPt%I, &
+                    CholData%ChFact%D, &
+                    IX1%I,JX1%I,XN1%D,IX,JX,XN,N,NC)
+     CALL Delete(IX1)
+     CALL Delete(JX1)
+     CALL Delete(XN1)
+     CALL ScaleRow(IX%I,JX%I,XN%D,CholData%GcScale%D)
+     CALL PermRow(IX%I,JX%I,XN%D,CholData%IPerm%I,N,NC)
+     CALL ThreshMatr(IX,JX,XN,Thresh)
+     !
+   END SUBROUTINE InvMatXMatr
+!
+!--------------------------------------------------------------------
+!
    SUBROUTINE MatrXUInv(IU,JU,UN,IB,JB,BN,IX,JX,XN,N,NC)
      !
      ! X=B * U^-1 
@@ -1249,6 +1355,34 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
+   SUBROUTINE UInvXMatr(IU,JU,UN,IB,JB,BN,IX,JX,XN,N,NC)
+     INTEGER,DIMENSION(:)      :: IU,JU,IB,JB
+     REAL(DOUBLE),DIMENSION(:) :: UN,BN
+     TYPE(INT_VECT)            :: IX,JX,IX2,JX2,IUT,JUT
+     TYPE(DBL_VECT)            :: XN,UNT
+     INTEGER                   :: N,NC,NZU,NZB,NZX
+     !
+     ! X=UT^-1 * B
+     ! B,X: NxNC matrix
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     !
+     NZX=((IB(N+1)-1)+(IU(N+1)-1))*4 !!! this is an estimate of the numb. of nonzeros in X
+     CALL New(IX,N+1)
+     CALL New(JX2,NZX)
+     CALL UInvXMatrSymb(IU,JU,IB,JB,N,NC,IX%I,JX2%I)
+     !
+     NZX=IX%I(N+1)-1
+     CALL New(JX,NZX)
+     CALL New(XN,NZX)
+     JX%I(1:NZX)=JX2%I(1:NZX)
+     CALL Delete(JX2)
+     !
+     CALL UInvXMatrNum(IU,JU,UN,IB,JB,BN,IX%I,JX%I,N,NC,XN%D)
+     !
+   END SUBROUTINE UInvXMatr
+!
+!--------------------------------------------------------------------
+!
    SUBROUTINE UTInvXMatr(IU,JU,UN,IB,JB,BN,IX,JX,XN,N,NC)
      INTEGER,DIMENSION(:)      :: IU,JU,IB,JB
      REAL(DOUBLE),DIMENSION(:) :: UN,BN
@@ -1269,7 +1403,7 @@ CONTAINS
      !
      CALL TransPose1x1(IU,JU,UN,N,N,IUT%I,JUT%I,UNT%D,'full')
      !
-     NZX=NZB*10 !!! this is an estimate of the numb. of nonzeros in X
+     NZX=((IB(N+1)-1)+(IU(N+1)-1))*4 !!! this is an estimate of the numb. of nonzeros in X
      CALL New(IX,N+1)
      CALL New(JX2,NZX)
      CALL UTInvXMatrSymb(IUT%I,JUT%I,IB,JB,N,NC,IX%I,JX2%I)
@@ -1382,6 +1516,123 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
+   SUBROUTINE UInvXMatrSymb(IU,JU,IB,JB,N,NC,IX,JX)
+     INTEGER :: IU(:),JU(:),IB(:),JB(:),N,NC,IX(:),JX(:)
+     INTEGER :: IBA,IBB,JP,I,JJ,J,IUA,IUB,IXA,IXB,KP,K,NZMax
+     INTEGER :: IStart
+     TYPE(INT_VECT) :: IP
+     !
+     ! X=U^-1 * B
+     ! B,X: NxNC matrix
+     ! U : NxN lower triangle, with unit diagonals (diags not stored)! 
+     !
+     CALL New(IP,NC)
+     NZMax=SIZE(JX)
+     IP%I(:)=0
+     JP=NZMax
+     IX(N+1)=NZMax+1
+     DO I=N,1,-1  ! reversing the order
+       IBA=IB(I)   ! reverse order
+       IBB=IB(I+1)-1  
+       IF(IBB<IBA) GO TO 30
+       DO JJ=IBA,IBB
+         J=JB(JJ)
+         IP%I(J)=I  ! initialize elements of IP
+         JX(JP)=J   ! all elements of B contribute to X
+         JP=JP-1    ! count back for sure nonzeros of X
+       ENDDO     
+       30 CONTINUE 
+       IUA=IU(I)      ! row of U starts here
+       IUB=IU(I+1)-1  ! ends here
+       IF(IUB<IUA) GO TO 60
+       DO JJ=IUA,IUB
+         J=JU(JJ)   ! in the Jth colmn of U there is a non-zero
+         IXA=IX(J)  ! scan the Jth row of the solution (J<I for sure)
+         IXB=IX(J+1)-1
+         IF(IXB<IXA) CYCLE    
+         DO KP=IXA,IXB
+           K=JX(KP)
+           IF(IP%I(K)==I) CYCLE   
+           IP%I(K)=I
+           JX(JP)=K
+           JP=JP-1
+         ENDDO       
+       ENDDO         
+       60 CONTINUE
+       IX(I)=JP+1
+     ENDDO         
+     CALL Delete(IP)
+     !
+     ! Now, pull back numbering, so that IX(1)=1
+     !
+     IStart=IX(1)
+     J=IStart-1
+     DO I=1,N+1 
+       IX(I)=IX(I)-J
+     ENDDO
+     JJ=0
+     DO I=IStart,NZMax
+       JJ=JJ+1
+       JX(JJ)=JX(I)
+     ENDDO
+   END SUBROUTINE UInvXMatrSymb
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE UInvXMatrNum(IU,JU,UN,IB,JB,BN,IX,JX,N,NC,XN)
+     INTEGER        :: IU(:),JU(:),IB(:),JB(:),IX(:),JX(:),N,NC
+     REAL(DOUBLE)   :: UN(:),BN(:),XN(:)
+     REAL(DOUBLE)   :: A
+     TYPE(DBL_VECT) :: X
+     INTEGER        :: I,IH,IXA,IXB,IP,IBA,IBB,IUA,IUB,JP,J,IXC,IXD,KP,K
+     !
+     ! X=U^-1 * B
+     ! B,X: NxNC matrix
+     ! U : NxN upper triangle, with unit diagonals (diags not stored)! 
+     !
+     CALL New(X,NC)
+     !
+     DO I=N,1,-1
+       IH=I+1
+       IXA=IX(I)
+       IXB=IX(IH)-1
+       IF(IXB<IXA) CYCLE     
+       DO IP=IXA,IXB
+         X%D(JX(IP))=Zero ! zero expanded accumulator for actual row of X
+       ENDDO
+       IBA=IB(I)
+       IBB=IB(IH)-1
+       IF(IBB<IBA) GO TO 30
+       DO IP=IBA,IBB
+         X%D(JB(IP))=BN(IP) ! Put contribution of B into X
+       ENDDO
+       30 CONTINUE 
+       !
+       IUA=IU(I)
+       IUB=IU(IH)-1
+       IF(IUB<IUA) GO TO 60
+       DO JP=IUA,IUB
+         J=JU(JP)   
+         IXC=IX(J)
+         IXD=IX(J+1)-1
+         IF(IXD<IXC) CYCLE      
+         A=UN(JP)
+         DO KP=IXC,IXD  ! scan the Jth row of the solution
+           K=JX(KP)
+           X%D(K)=X%D(K)-A*XN(KP)
+         ENDDO
+       ENDDO       
+       60 CONTINUE
+       !
+       DO IP=IXA,IXB
+         XN(IP)=X%D(JX(IP))
+       ENDDO
+     ENDDO
+     CALL Delete(X)
+   END SUBROUTINE UInvXMatrNum
+!
+!--------------------------------------------------------------------
+!
    SUBROUTINE CHKGcInv(B,CholData,IUtr,JUtr,AUtr,IUtrT,JUtrT,AUtrT)
      TYPE(BMATR)    :: B
      TYPE(Cholesky) :: CholData
@@ -1459,7 +1710,7 @@ CONTAINS
      INTEGER                   :: I,J,JJ,K,N,NC
      !
      ! A=A*D
-     ! A : NxNC matrix 
+     ! A : NCxN matrix 
      ! D : NCxNC
      !
      DO I=1,N
@@ -1469,6 +1720,32 @@ CONTAINS
        ENDDO 
      ENDDO
    END SUBROUTINE MatrXD
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE CholFactGi(ISpB,JSpB,ASpB,NCart,NIntC, &
+                       CholData,Print2,Shift_O)
+     TYPE(Cholesky)        :: CholData
+     TYPE(INT_VECT)        :: ISpB,JSpB
+     TYPE(DBL_VECT)        :: ASpB
+     TYPE(INT_VECT)        :: ISpBt,JSpBt
+     TYPE(DBL_VECT)        :: ASpBt
+     INTEGER               :: NZ,NCart,NIntC
+     REAL(DOUBLE),OPTIONAL :: Shift_O
+     LOGICAL               :: Print2
+     ! 
+     NZ=SIZE(JSpB%I)
+     CALL New(ISpBt,NCart+1)
+     CALL New(JSpBt,NZ)
+     CALL New(ASpBt,NZ)
+     CALL TransPose1x1(ISpB%I,JSpB%I,ASpB%D,NIntC,NCart, &
+                       ISpBt%I,JSpBt%I,ASpBt%D,'full')
+     CALL CholFact(ISpBt,JSpBt,ASpBt,NIntC,NCart, &
+                   CholData,Print2,Shift_O=Shift_O)
+     CALL Delete(ISpBt)
+     CALL Delete(JSpBt)
+     CALL Delete(ASpBt)
+   END SUBROUTINE CholFactGi
 !
 !----------------------------------------------------------------
 !
@@ -1526,7 +1803,7 @@ CONTAINS
    SUBROUTINE TestChFact(ChDiag,ChRowPt,ChColPt,ChFact)
      TYPE(INT_VECT) :: ChRowPt,ChColPt
      TYPE(DBL_VECT) :: ChDiag,ChFact   
-     INTEGER :: I,J,K,L,NDim
+     INTEGER        :: I,J,K,L,NDim
      TYPE(DBL_RNK2) :: Aux,Aux2,Aux3
      REAL(DOUBLE)   :: Sum
      !
@@ -1545,12 +1822,25 @@ CONTAINS
        ENDDO
      ENDDO
      !
-     CALL PPrint(Aux,'Cholesky factor',unit_o=6)
+    !CALL PPrint(Aux,'Cholesky factor',unit_o=6)
+     WRITE(*,*) 'Cholesky factors'
+     DO I=1,NDim
+       WRITE(*,123) (Aux%D(I,J),J=1,NDim) 
+     ENDDO
      CALL DGEMM_NNc(NDim,NDim,NDim,One,Zero,Aux3%D,Aux%D, &
                          Aux2%D)
+WRITE(*,*) 'aux2'
+DO I=1,NDim
+  WRITE(*,123) (Aux2%D(I,J),J=1,NDim) 
+ENDDO
      CALL DGEMM_TNc(NDim,NDim,NDim,One,Zero,Aux%D,Aux2%D, &
                          Aux3%D)
-     CALL PPrint(Aux3,'check Cholesky factors',unit_o=6)
+    !CALL PPrint(Aux3,'check Cholesky factors',unit_o=6)
+     WRITE(*,*) 'check Cholesky factors'
+     DO I=1,NDim
+       WRITE(*,123) (Aux3%D(I,J),J=1,NDim) 
+     ENDDO
+     123 FORMAT(20F6.3)
      !
      CALL Delete(Aux)
      CALL Delete(Aux2)
@@ -1623,23 +1913,17 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE ScaleRow(IA,JA,AN,Scale,N,M)
+   SUBROUTINE ScaleRow(IA,JA,AN,Scale)
      INTEGER,DIMENSION(:)      :: IA,JA
      REAL(DOUBLE),DIMENSION(:) :: AN,Scale
-     INTEGER                   :: N,M,NZ
-     TYPE(INT_VECT)            :: IAT,JAT
-     TYPE(DBL_VECT)            :: ANT
+     INTEGER                   :: I,J,K,JJ,N
      !
-     NZ=SIZE(JA)
-     CALL New(IAT,M+1)
-     CALL New(JAT,NZ)
-     CALL New(ANT,NZ)
-     CALL TransPose1x1(IA,JA,AN,N,M,IAT%I,JAT%I,ANT%D,'full')
-     CALL ScaleCol(IAT%I,JAT%I,ANT%D,Scale)
-     CALL TransPose1x1(IAT%I,JAT%I,ANT%D,M,N,IA,JA,AN,'full')
-     CALL Delete(IAT)
-     CALL Delete(JAT)
-     CALL Delete(ANT)
+     N=SIZE(IA)-1
+     DO I=1,N
+       DO J=IA(I),IA(I+1)-1
+         AN(J)=Scale(I)*AN(J)
+       ENDDO
+     ENDDO
    END SUBROUTINE ScaleRow
 !
 !--------------------------------------------------------------------

@@ -824,6 +824,7 @@ MODULE SetXYZ
 !
         A%IB%I =B%IB%I
         A%B%D  =B%B%D
+        A%BLI%I =B%BLI%I
         A%BL%D =B%BL%D
       END SUBROUTINE  Set_BMATR_EQ_BMATR
 !

@@ -414,9 +414,9 @@ CONTAINS
     !
     ! this routine rebuilds PBC data based on PBC%BoxShape
     !
-    A=PBC%BoxShape%D(1,1:3)
-    B=PBC%BoxShape%D(2,1:3)
-    C=PBC%BoxShape%D(3,1:3)
+    A=PBC%BoxShape%D(1:3,1)
+    B=PBC%BoxShape%D(1:3,2)
+    C=PBC%BoxShape%D(1:3,3)
     CALL CROSS_PRODUCT(A,B,VectAux)
     PBC%CellVolume=ABS(DOT_PRODUCT(VectAux,C))
     !
@@ -550,5 +550,61 @@ CONTAINS
 !
   END FUNCTION InverseMatrix
 !
+!----------------------------------------------------------------
+!
+   SUBROUTINE ConvertToXYZRef(XYZ,RefXYZ,PBCDim,BoxShape_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
+     REAL(DOUBLE),DIMENSION(3)   :: VectA,VectB,VectC,VectAux
+     REAL(DOUBLE),DIMENSION(3,27):: TrPos
+     REAL(DOUBLE),DIMENSION(27)  :: Dist 
+     REAL(DOUBLE)                :: Dist0,DistCrit
+     INTEGER                     :: PBCDim,NA,NB,NC
+     INTEGER                     :: NatmsLoc,I,J,III,IA,IB,IC,ICrit
+     REAL(DOUBLE),DIMENSION(3,3),OPTIONAL :: BoxShape_O
+     !
+     IF(PBCDim==0) RETURN
+     IF(PRESENT(BoxShape_O)) THEN
+       NatmsLoc=SIZE(XYZ,2)
+       DO I=1,3
+         VectA(I)=BoxShape_O(I,1)
+         VectB(I)=BoxShape_O(I,2)
+         VectC(I)=BoxShape_O(I,3)
+       ENDDO
+     ELSE
+       NatmsLoc=SIZE(XYZ,2)-3
+       DO I=1,3
+         VectA(I)=XYZ(I,NatmsLoc+1)
+         VectB(I)=XYZ(I,NatmsLoc+2)
+         VectC(I)=XYZ(I,NatmsLoc+3)
+       ENDDO
+     ENDIF
+     !
+     NA=0 ; NB=0 ; NC=0
+     IF(PBCDim>0) NA=1
+     IF(PBCDim>1) NB=1
+     IF(PBCDim>2) NC=1
+     VectAux=VectA+VectB+VectC
+     Dist0=DOT_PRODUCT(VectAux,VectAux)
+     DO I=1,NatmsLoc
+       III=0
+       DistCrit=Dist0
+       DO IA=-NA,NA   
+         DO IB=-NB,NB   
+           DO IC=-NC,NC   
+             III=III+1
+             TrPos(1:3,III)=XYZ(1:3,I)+IA*VectA+IB*VectB+IC*VectC
+             VectAux=TrPos(1:3,III)-RefXYZ(1:3,I)
+             Dist(III)=DOT_PRODUCT(VectAux,VectAux)
+             IF(Dist(III)<DistCrit) THEN
+               ICrit=III
+               DistCrit=Dist(III)
+             ENDIF
+           ENDDO
+         ENDDO
+       ENDDO
+       XYZ(1:3,I)=TrPos(1:3,ICrit) 
+     ENDDO
+     !
+   END SUBROUTINE ConvertToXYZRef
 END MODULE AtomPairs
 

@@ -129,6 +129,19 @@ MODULE DerivedTypes
 #endif
    END TYPE                                      
 !
+!--------------------------------------------------------------------
+!
+   TYPE CHR10_VECT
+      INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
+#ifdef POINTERS_IN_DERIVED_TYPES
+      CHARACTER(LEN=10), &
+                   POINTER,DIMENSION(:) :: C      !-- Vector of strings
+#else
+      CHARACTER(LEN=10), &
+                   ALLOCATABLE,DIMENSION(:) :: C      !-- Vector of strings
+#endif
+   END TYPE                                      
+!
 !----------------------------------------------------------------------
 !
    TYPE LOG_VECT
@@ -263,7 +276,7 @@ MODULE DerivedTypes
      INTEGER        :: N
      TYPE(INT_RNK2) :: IJ
      TYPE(DBL_VECT) :: Length
-     TYPE(CHR_VECT) :: Type
+     TYPE(CHR10_VECT) :: Type
      TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
      TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
      TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
@@ -283,7 +296,7 @@ MODULE DerivedTypes
    TYPE INTC
      INTEGER        :: Alloc     !-- Allocation key
      INTEGER        :: N 
-     TYPE(CHR_VECT) :: Def 
+     TYPE(CHR10_VECT) :: Def 
      TYPE(INT_RNK2) :: Atoms
      TYPE(INT_RNK2) :: Cells
      TYPE(DBL_VECT) :: Value
@@ -324,8 +337,8 @@ MODULE DerivedTypes
       INTEGER          :: Nkind     !-- Number of atom kinds or types
       TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
-      TYPE(CHR_VECT)   :: AtNam     !-- Atomname
-      TYPE(CHR_VECT)   :: AtMMTyp   !-- Molecular Mechanics atomtype
+      TYPE(CHR10_VECT) :: AtNam     !-- Atomname
+      TYPE(CHR10_VECT) :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom 
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
@@ -611,7 +624,7 @@ MODULE DerivedTypes
      INTEGER        :: Alloc     !-- Allocation key
      INTEGER        :: N
      TYPE(INT_RNK2) :: IJKL
-     TYPE(CHR_VECT) :: Type 
+     TYPE(CHR10_VECT) :: Type 
    END TYPE OUTPDATA
 !
 !----------------------------------------------------------------------
@@ -620,7 +633,7 @@ MODULE DerivedTypes
      INTEGER        :: Alloc     !-- Allocation key
      INTEGER        :: N
      TYPE(INT_RNK2) :: IJK
-     TYPE(CHR_VECT) :: Type 
+     TYPE(CHR10_VECT) :: Type 
    END TYPE ANGLEDATA
 !
 !----------------------------------------------------------------------
