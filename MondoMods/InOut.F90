@@ -1,5 +1,5 @@
 !    GENERIC IO ROUTINES FOR MONDOSCF TYPES
-!    Author: Matt Challacombe
+!    Author: Matt Challacombe and CK Gan
 !----------------------------------------------------------
 MODULE InOut
    USE DerivedTypes
@@ -77,16 +77,23 @@ MODULE InOut
          ENDIF
 #endif  
       END SUBROUTINE InitHDF
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+
+!=================================================================
 !    Open a HDF file
-! 
+!================================================================= 
       SUBROUTINE OpenHDF(FileName)
          CHARACTER(LEN=*),INTENT(IN) :: FileName
          INTEGER                     :: NC,STATUS
+
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
             NC=StringLen(FileName)
+
+
+
             FileID=HDF5OpenFile(NC,Char2Ints(NC,FileName))
             IF(FileID==FAIL) &
             CALL Halt(' Failed to open the HDF file' &
@@ -95,6 +102,8 @@ MODULE InOut
          ENDIF
 #endif  
       END SUBROUTINE OpenHDF
+
+
 !-----------------------------------------------------------------------
 !
 !----------------------------------------------------------------------- 
@@ -225,16 +234,20 @@ MODULE InOut
                       //'Meta%Status   = '//TRIM(IntToChar(Meta%Status))
       END FUNCTION MetaChar
 !-----------------------------------------------------------------------
-! 
-!----------------------------------------------------------------------
+
+!=====================================================================
       FUNCTION StringLen(String)
          CHARACTER(LEN=*),INTENT(IN) :: String
          INTEGER                     :: StringLen
          StringLen=LEN(TRIM(String))
       END FUNCTION StringLen
-!-----------------------------------------------------------------------
-! 
-!-----------------------------------------------------------------------
+!---------------------------------------------------------------------
+
+ 
+!=====================================================================
+
+
+
       FUNCTION Char2Ints(NC,String)
          CHARACTER(LEN=*),INTENT(IN)          :: String
          INTEGER,         INTENT(IN)          :: NC 
@@ -306,7 +319,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
                        SIZE(A%I,1),.FALSE.)
@@ -314,6 +327,7 @@ MODULE InOut
           CALL ReadIntegerVector(Meta,A%I)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_INT_VECT
@@ -326,7 +340,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
                        SIZE(A%I,1)*SIZE(A%I,2),.FALSE.)
@@ -334,6 +348,7 @@ MODULE InOut
           CALL ReadIntegerVector(Meta,A%I)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK2
@@ -346,7 +361,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
                        SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3), &
@@ -355,6 +370,7 @@ MODULE InOut
           CALL ReadIntegerVector(Meta,A%I)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK3
@@ -367,7 +383,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,             &
                        SIZE(A%I,1)*SIZE(A%I,2)*SIZE(A%I,3)*SIZE(A%I,4), &
@@ -376,6 +392,7 @@ MODULE InOut
           CALL ReadIntegerVector(Meta,A%I)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK4
@@ -406,7 +423,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
                        SIZE(A%D,1),.FALSE.)
@@ -414,6 +431,7 @@ MODULE InOut
           CALL ReadDoubleVector(Meta,A%D)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_DBL_VECT
@@ -424,7 +442,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
                        SIZE(A%D,1)*SIZE(A%D,2),.FALSE.)
@@ -432,6 +450,7 @@ MODULE InOut
           CALL ReadDoubleVector(Meta,A%D)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK2
@@ -442,7 +461,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE, &
                        SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3),  &
@@ -451,6 +470,7 @@ MODULE InOut
           CALL ReadDoubleVector(Meta,A%D)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK3
@@ -461,7 +481,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,            &
                        SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4), &
@@ -470,6 +490,7 @@ MODULE InOut
           CALL ReadDoubleVector(Meta,A%D)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK4
@@ -480,7 +501,7 @@ MODULE InOut
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
-       IF(MyId==ROOT) &
+       IF(MyId==ROOT) THEN
 #endif 
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,            &
                        SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)*SIZE(A%D,4)  &
@@ -489,6 +510,7 @@ MODULE InOut
           CALL ReadDoubleVector(Meta,A%D)
           CALL CloseData(Meta)
 #ifdef PARALLEL 
+       ENDIF
        IF(InParallel)CALL BCast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK6
@@ -1257,14 +1279,9 @@ MODULE InOut
 !     Get thresholds 
 !
       SUBROUTINE Get_TOLS(NGLCT,Tag_O)
+         IMPLICIT NONE
          TYPE(TOLS),              INTENT(OUT) :: NGLCT
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-!        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Tag
-!        IF(PRESENT(Tag_O))THEN
-!           Tag='_'//TRIM(Tag_O)
-!        ELSE
-!           Tag=''
-!        ENDIF 
          CALL Get(NGLCT%Cube,'cubeneglect',Tag_O=Tag_O)
          CALL Get(NGLCT%Trix,'trixneglect',Tag_O=Tag_O)
          CALL Get(NGLCT%Dist,'distneglect',Tag_O=Tag_O)
@@ -1272,13 +1289,16 @@ MODULE InOut
          CALL Get(NGLCT%ETol,'enregyneglect',Tag_O=Tag_O)
          CALL Get(NGLCT%DTol,'densityneglect',Tag_O=Tag_O)
       END SUBROUTINE Get_TOLS
+
 !--------------------------------------------------------------------
 !     Get arguments from the command line
 !
       SUBROUTINE Get_ARGMT(A)
 #ifdef NAG
          USE F90_UNIX
+         IMPLICIT NONE
 #else
+         IMPLICIT NONE
          INTEGER,EXTERNAL               :: IARGC
 #endif
          TYPE(ARGMT),INTENT(OUT)        :: A
@@ -1329,7 +1349,7 @@ MODULE InOut
          ENDIF
          IF(InParallel)THEN
             CALL BCast(A%I)
-            CALL BCast_CHR_VECT(A%C) ! Stupid PGI compiler ...
+            CALL BCast_CHR_VECT(A%C) 
          ENDIF
 #endif
       END SUBROUTINE Get_ARGMT
@@ -1408,13 +1428,17 @@ MODULE InOut
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_HGRho.')
   END SUBROUTINE Put_HGRho
+
+
+
+
 !------------------------------------------------------------------
 !     Open an ASCII file   
 ! 
-      SUBROUTINE OpenASCII(FileName,Unit,NewFile_O,Rewind_O)
+      SUBROUTINE OpenASCII(FileName,Unit,NewFile_O,OldFileQ_O,Rewind_O)
          CHARACTER(LEN=*), INTENT(IN) :: FileName
          INTEGER,          INTENT(IN) :: Unit
-         LOGICAL, OPTIONAL,INTENT(IN) :: NewFile_O,Rewind_O
+         LOGICAL, OPTIONAL,INTENT(IN) :: NewFile_O,OldFileQ_O,Rewind_O
          INTEGER                      :: IOS
          LOGICAL                      :: Opened, Exists
 !------------------------------------------------------------------
@@ -1422,6 +1446,10 @@ MODULE InOut
 !
          INQUIRE(FILE=FileName,OPENED=Opened, &
                  EXIST=Exists,ERR=11,IOSTAT=IOS)
+         IF(PRESENT(OldFileQ_O))THEN
+             IF(OldFileQ_O.AND.(.NOT.Exists)) &
+                CALL HALT(' File '//TRIM(FileName)//' does not exist! ')
+          ENDIF
 !------------------------------------------------------------------
 !        Open a new file
 !
