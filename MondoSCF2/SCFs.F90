@@ -59,11 +59,9 @@ CONTAINS
     ! Compute one-electron matrices   
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
-    WRITE(*,*)' ALLOCATING '
     CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
-    WRITE(*,*)' DONE ALLOCATING '
     DO iSCF=0,MaxSCFs
        ! Do an SCF cycle
        IF(SCFCycle(iSCF,cBAS,cGEO, &
@@ -369,13 +367,15 @@ CONTAINS
           DoDIIS=.FALSE.
           DoODA =.FALSE.
        ENDIF
-        
+!        
        ETest=ETol(O%AccuracyLevels(cBAS))
        DTest=DTol(O%AccuracyLevels(cBAS))
-       IF(cSCF==0)THEN
+!*******
+       IF(cSCF<1)THEN
           ConvergedQ=NOT_CONVERGE!.FALSE.
           RETURN
        ENDIF
+!*******
        ! Accumulate current statistics
        chGEO=IntToChar(iGEO)
        HDFFileID=OpenHDF(N%HFile)
@@ -818,6 +818,7 @@ CONTAINS
     ENDIF
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
        CALL Invoke('LowdinO',N,S,M)
+!       CALL Invoke('IRInv',N,S,M)
     ELSE
        CALL Invoke('AInv',N,S,M)
     ENDIF
@@ -886,6 +887,7 @@ CONTAINS
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!      Get Forces
        CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        IF(O%Coordinates/=GRAD_INTS_OPT) THEN
          DO iATS=1,G%Clone(iCLONE)%NAtms
@@ -1082,7 +1084,20 @@ CONTAINS
     CALL Delete(OffS)
     CALL Delete(K)
   END SUBROUTINE NXForce
+!===============================================================================
+! Clean the Scratch
+!===============================================================================
+  SUBROUTINE CleanScratch(C,iGEO)
+    TYPE(Controls)                 :: C
+    INTEGER                        :: iGEO
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: RemoveFile,chGEO
+!    
+    chGEO = IntToChar(iGEO)
+    RemoveFile=TRIM(C%Nams%M_SCRATCH)//'*_Geom#'//TRIM(chGEO)//"_*.*"         
+    CALL SYSTEM('/bin/rm -f  '//RemoveFile)
 !
+  END SUBROUTINE CleanScratch
+!===============================================================================
   SUBROUTINE NTHessian(cBAS,cGEO,N,G,B,S,M)
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
@@ -1206,7 +1221,7 @@ CONTAINS
     CALL Delete(BSiz)
     CALL Delete(OffS)
   END SUBROUTINE NTHessian
-
+!======================================================================================
 END MODULE SCFs
 
 
