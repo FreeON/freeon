@@ -47,8 +47,8 @@ phases will be demonstrated.
 \section{INTRODUCTION}
 In recent years several successful methods for the calculating the electronic structure of
 molecular or condensed matter systems have been developed,
-for example Hatree-Fock \cite{Slater51,Roothaan51}, Density Functional theory 
-\cite{Hohenberg64,KohnSham65} or Configuration interaction \cite{Choudhury79}. 
+for example Hatree-Fock \cite{slater,CRoothaan51}, Density Functional theory 
+\cite{hohen,KohnSham65} or Configuration interaction \cite{Choudhury79}. 
 All these methods attempt to solve for the electronic structure via
 the many-body quantum problem to within some consistent approximation scheme.
 For complex molecular or condensed matter 
@@ -56,7 +56,6 @@ system, where chemical reactions are of central importance, these electronic str
 method are essential. Unfortunately, most electronic structure quantum chemistry codes
 scale very poorly with system size due to the need to diagonalize the Hamiltonian,
 which scales $O(N^3)$ 
-\cite{???}.
 %
 % Should cite standard comercial code like ``Gaussian''. (Ha)
 %
@@ -65,7 +64,7 @@ that these codes can address. Therefore, it has become increasing important for
 the development of quantum chemistry codes which scale linearly with increasing 
 system size, and several quantum chemistry codes of this type are in 
 development 
-\cite{Goedecker94,Challacombe96,Canning96,Briggs96,Hernandex96,Scuseria99,ANiklasson02}. 
+\cite{Goedecker94,Challacombe96,Canning96,Briggs96,EHernandez96,Scuseria99,ANiklasson02B}. 
 However, for reasons of simplicity most of these quantum 
 chemistry codes have yet to incorporate periodic boundary conditions.
 Unfortunately many
@@ -86,7 +85,7 @@ Coulomb field \cite{White94,Challacombe97b}. This yields a spherically
 summed boundary condition that is easily transformed into the Ewald boundary
 condition \cite{Redlack72,Redlack75}. In order to achieve linear
 scaling of the local Coulomb field, a Quantum Chemical Tree Code (QCTC)
-is used \cite{Warren93,Warren95,Salmon94,Challacombe96A}. For the calculations of the 
+is used \cite{WarSal93,WarSal95,Salmon:93,Challacombe96A}. For the calculations of the 
 local exchange-correlation matrix, a Hierarchical Cubature (HiCu), pure 
 Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
@@ -133,7 +132,7 @@ and
 \end{equation}
 and the exchange correlation potential can be calculated from several approximate
 functionals
-\cite{Becke92,Hertwig97,Bauschlicher95,Adamo00}. In what follows we will 
+\cite{Becke93,Hertwig97,Bauschlicher95,Adamo00}. In what follows we will 
 discuss the calculation of each of the terms in the Hamiltonian 
 and how they are calculated in the non-orthogonal Gaussian basis
 with the inclusion of periodic boundary conditions.
@@ -283,7 +282,7 @@ discuss the calculation of each terms.
 \subsubsection{The Quantum Chemical Tree Code: The direct Coulomb matrix}
 
 In-order to achieve linear scaling, we use a quantum chemical tree
-code \cite{Warren93,Warren95,Salmon94,Challacombe96A} to compute the integrals in equation (\ref{Jqctc}).
+code \cite{WarSal93,WarSal95,Salmon:93,Challacombe96A} to compute the integrals in equation (\ref{Jqctc}).
 This requires that we replace the integrals in equation (\ref{Jqctc})
 with the approximate spherical multipole expansion to order \( L \)
 and \( L' \),
@@ -545,15 +544,12 @@ of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
 matrix builds for the \textbf{Crystal98} basis set 6-21G* \cite{C98Basis}
 at a {\it good} accuracy. Even in this very dense periodic system for a medium 
 basis set with d-functions, linear scaling for the matrix build commences very 
-early. We also show in figure \ref{figure:EnergyperNandError}(a) the energy per atom and 
-(b) the relative error in the total energy. Again we see the convergence of the total energy
+early. We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
+in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
+Again we see the convergence of the total energy
 as a function of increasing system size, which is akin to k-space integration. We also
 see that our relative error is very well controlled within the \textbf{MondoSCF} quantum
 chemistry code, even up to 512 carbon atoms.
-
-\section{The Diamond (111) surface with a step}
-
-
 
 
 \section{CONCLUSIONS}
@@ -600,9 +596,8 @@ We would like to acknowledge Tommy Sewell and Ed Kober for there advise
 and support. We would also like to thank Anders Niklasson for his help
 in preparation of this manuscript. 
 
-%\bibliographystyle{plain}
-%\bibliography{GaussianPapers}
-\bibliographystyle{apsrmp} \bibliography{mondo}
+\bibliographystyle{apsrmp} 
+\bibliography{mondo}
 
 
 \appendix
@@ -780,7 +775,7 @@ Sodium Chloride test system. The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
-functional \cite{Becke92}.}
+functional \cite{Becke93}.}
 \label{table:ComToCrystal98_1}
  
 \begin{tabular}{clcll}
@@ -877,7 +872,7 @@ Magnesium Oxide test system.   The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-61G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
-functional \cite{Becke92}.}
+functional \cite{Becke93}.}
 \label{table:ComToCrystal98_2}
 
 \begin{tabular}{clcll}
@@ -974,7 +969,7 @@ Diamond test system.  The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(2,2,2)$.
 The \textbf{Crystal98} 8-21G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
-functional \cite{Becke92}.}
+functional \cite{Becke93}.}
 \label{table:ComToCrystal98_3}
 
 \begin{tabular}{clcll}
@@ -1068,7 +1063,7 @@ inner cell sums for \protect\( 64\protect \) molecules of water in a periodic ce
 \caption{\label{figure:Scaling_Matrix_Build} Scaling Results for the matrix
 builds \protect\( J_{QCTC}\protect \) and \protect\( K_{xc}\protect \)
 for the dense diamond periodic system up to 512 atoms using the
-{\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite{Becke92}}
+{\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite{Becke93}}
 
 {\centering \includegraphics{Timing_Diamond_512_log.ps} \par} 
 \end{figure}
@@ -1077,10 +1072,9 @@ for the dense diamond periodic system up to 512 atoms using the
 %
 \begin{figure}
 
-\caption{\label{figure:EnergyperNandError} Energy per carbon atom for the dense diamond
+\caption{\label{figure:EnergyPerN} Energy per carbon atom for the dense diamond
 periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the 
-density functional BLYP \cite{Becke92} (a). Also, the relative errors in the total energy vs. 
-number of carbon atoms (b)}
+density functional BLYP \cite{Becke93}}
 
 {\centering \includegraphics{EnergyVsNumber_Diamond512.ps} \par} 
 \end{figure}
@@ -1089,15 +1083,13 @@ number of carbon atoms (b)}
 %
 \begin{figure}
 
-\caption{\label{figure:Dense64diamond} Iso-surface plot of the (111) surface reconstruction 
-of a 512 atom diamond system using the  {\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the 
-density functional BLYP \cite{Becke92} }
+\caption{\label{figure:ErrorPerN} Relative Error per carbon atom for the dense diamond
+periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis} and the 
+density functional BLYP \cite{Becke93}}
 
-{\centering \includegraphics{Timing_sto3g_321g.ps} \par}
+{\centering \includegraphics{ErrorVsNumber_Diamond512.ps} \par} 
 \end{figure}
-%
-%
-%
+
 
 
 \end{document}

@@ -10,10 +10,10 @@ new: 	clean links figs bib ps
 bib:	
 	latex LinearPBCMethod_revtex4.tex
 	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex
-	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex	
-	latex LinearPBCMethod_revtex4.tex	
+#	latex LinearPBCMethod_revtex4.tex
+#	bibtex LinearPBCMethod_revtex4
+#	latex LinearPBCMethod_revtex4.tex	
+#	latex LinearPBCMethod_revtex4.tex	
 
 links:
 	ln -s ../Bib/mondo.bib ./mondo.bib 
@@ -26,10 +26,6 @@ links:
 	ln -s ../RevTex/11pt.rtx ./11pt.rtx
 	ln -s ../RevTex/12pt.rtx ./12pt.rtx
 
-figs:
-	make -C XE_FIGS
-	make -C WATER_FIGS
-	make -C FULL_FIGS
 
 ps:
 	dvips -o LinearPBCMethod_revtex4.ps LinearPBCMethod_revtex4
