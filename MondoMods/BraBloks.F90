@@ -125,7 +125,7 @@ MODULE BraBloks
           DO LMNB=StartLB,StopLB
              IB=IB+1
              DO K=1,3
-                CALL DBL_VECT_EQ_DBL_SCLR(L,dHGBra%D(1:Len,IA,IB,K),Zero)
+                CALL DBL_VECT_EQ_DBL_SCLR(Len,dHGBra%D(1:Len,IA,IB,K),Zero)
              ENDDO
           ENDDO
        ENDDO
