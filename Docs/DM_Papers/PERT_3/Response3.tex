@@ -129,7 +129,7 @@ has remained the case, until the advent of reduced complexity algorithms over th
 last decade \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. In the 
 best case, these reduced complexity algorithms scale only linearly with system size, $N$, 
 allowing simulation capabilities to keep pace with hardware improvements.
-These linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
+Linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
 non-metallic systems,  manifested in the approximate exponential decay of density matrix elements 
 with atom-atom separation through the effective use of sparse matrix methods. For small systems,
 linear scaling methods may be inefficient due to overhead.  However, for large, complex systems
@@ -155,7 +155,7 @@ In addition to the formal scaling of these conventional methods, they do not adm
 of quantum locality through the effective use of sparse matrix algebra.  
 More recently, schemes with the potential for reduced complexity have been been put forward.
 Ochsenfeld and Head-Gordon proposed a scheme based on the Li-Nunes-Vanderbilt 
-density matrix minimization \cite{Ochsenfeld97}.  Later, Larsen {\em et al.} \cite{HLarsen01a} 
+density matrix functional \cite{Ochsenfeld97}.  Later, Larsen {\em et al.} \cite{HLarsen01a} 
 proposed iterative solution of the CPSCF equations involving equations derived from 
 unitary operations and approximations to the matrix exponential.    In both of these approaches, 
 a linear system of equations containing commutation relations is obtained, which {\em implicitly}
@@ -200,7 +200,7 @@ We show the saturation of hyperpolarizabilities up to  fourth order (i.e. up to 
 second hyperpolarizability $\gamma$) for a series water chains.
 We also  demonstrate linear scaling complexity for the solution of the higher order CPSCF
 equations and an approximate exponential decay in elements of higher order response functions
-for 3D water clusters.  Finally, we discuss these results and present our conclusions. 
+for three-dimensional water clusters.  Finally, we discuss these results and present our conclusions. 
 
 \section{The Coupled Perturbed Self-Consistent-Field Equations}
 
@@ -328,7 +328,7 @@ $D^{a\ldots}$ manifest an approximate exponential decay with atom-atom separatio
 similar to the decay properties of $D^0$. 
 
 While the expansions above are given explicitly for Hartree-Fock Theory, similar expressions 
-hold also for Kohn-Sham and hybrid HF/DFT,  which involve variation of the  exchange-correlation 
+hold also for Kohn-Sham and hybrid HF/DFT,  which involve variation of the exchange-correlation 
 matrix $V_{xc}^{a\ldots}(D^0,D^a,\ldots)$ \cite{ALee94,PSalek02}.
 
 \subsection{Conditions for self-consistency}\label{SelfConsistency}
@@ -411,8 +411,9 @@ obtained directly through variation of the occupied subspace projector,
     \frac{\partial^n}{\partial\E^{a}\cdots}\theta(\tilde{\mu}I-
     \F_r(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
-which is accomplished via the Niklasson and Challacombe density matrix 
-perturbation theory \cite{ANiklasson04}.  
+which is accomplished via Perturbed Projection, a subset of the Niklasson and 
+Challacombe density matrix perturbation theory \cite{ANiklasson04} 
+that cooresponds to solution of the CPSCF equations.
 
 After a few CPSCF cycles, the approach to self-consistency may be accelerated with 
 Weber and Daul's DDIIS algorithm \cite{VWeber03}, 
@@ -425,10 +426,10 @@ relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The appli
 DDIIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
 %vw>>>>
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
-appropriate to compute response properties.   
-%In general, we can use the expectation value 
-%In the case of electric polarizabilities, we can use the expectation value 
-For ``simple'' perturbation, we can use the expectation value 
+appropriate to compute response properties.   In general, we can obtain an expectation value for properties that is 
+linear in the response functions through direct, order by order expansion of Eq.~(\ref{totalE}).  In the
+case of polarization, and other ``simple'' properties that involve a one-electron perturbation $h^{(1)}$, 
+expresions for the expectation value reduce to  
 \begin{equation}
 %E^{ab\ldots c}\equiv
 %\frac{\partial^n E_{\rm tot}}{\partial \mathcal{E}^a\partial\mathcal{E}^b\cdots\partial\mathcal{E}^c}
@@ -436,22 +437,18 @@ For ``simple'' perturbation, we can use the expectation value
 % = 2 Tr(D^{ab\ldots}\mu_c), \label{Np1Rule}
 E^{(\gamma+1)} = 2 Tr(D^{(\gamma)} h^{(1)}), \label{Np1Rule}
 \end{equation}
-where in the case of polarization, $h^{(1)}$ is the dipole moment matrix and 
-the (hyper)polarizabilities are given by Eqs.~\ref{pol}(a-c).
-%$\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
-%$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$.
-%vw<<<<
-Alternatively, it is possible to construct density matrix analogues of 
-Wigner's $2 n+1$ rule, which allows the evaluation of response properties up to order $2 n+1$ from response 
-functions of order $n$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
-the energy.
+consistent with Eqs.~\ref{pol}(a-c) for the (hyper)polarizabilities.
+
+%Alternatively, it is possible to construct density matrix analogues of Wigner's $2 n+1$ rule, 
+%which allows the evaluation of response properties up to order $2 n+1$ from response 
+%functions of order $n$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in the energy.
 
 \subsection{Perturbed Projection}\label{ResponseFunctions}
 
 Although a number of analytic, asymptotically discontinuous representations exist for the Heaviside 
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv}) 
-is problematic. Polynomial expansion of the step function is a alternative choice, but demands a very high 
-order and can be costly.  Specifically, polynomial expansion of $\theta$ with a $p$'th order polynomial 
+is problematic. Polynomial expansion of the step function is a alternative choice \cite{SGoedecker95b}, but 
+demands a very high order and can be costly.  Specifically, polynomial expansion of $\theta$ with a $p$'th order polynomial 
 incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang03,WLiang04}.  Polynomial expansion techniques,
 such as those based on the the Chebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
 which are high order ripples in the approximate $\theta$ due to incompleteness.
@@ -470,8 +467,8 @@ density matrix derivatives are implicitly defined as solutions to equations of S
 Sufficient to compute fourth order properties using the $2 n+1$ rule presented in Section \ref{Wigner2Np1}, 
 Perturbed Projection is outlined in the following for computation of the second order response function.  
 The Perturbed Projection sequence is started with the  $\X^{a\ldots}_{0}$, which are 
-prepared from the Fockians $\F^0$, $\F^a$, and $\F^{ab}$ by  compressing their spectrum into the domain of 
-convergence \cite{ANiklasson02A} using
+prepared from the Fockian $\F^0$ and its derivatives $\F^a$ and $\F^{ab}$ by  mapping their spectrum 
+into the domain of convergence \cite{ANiklasson02A} using
 \begin{equation}
     \X^0_{0}=\frac{\F_{max}I-\F^0}{\F_{max}-\F_{min}} 
 \end{equation}
@@ -576,21 +573,15 @@ A working equation is then obtained through the associated Euler-Lagrange equati
 \subsection{Density matrix formulation of Wigner's $2n+1$ rule }\label{Wigner2Np1}
 
 Wigner's $2n+1$ rule, traditionally predicated on derivatives of the wavefunction,
-yields order $2n+1$ in the energy response from $n$-th order 
-derivatives \cite{SKarna91,SEpstein74}. 
+yields order $2n+1$ in the energy response from $n$-th order derivatives \cite{SKarna91,SEpstein74}.   
 A density matrix analogue of Wigner's $2n+1$ rule for a single perturbation parameter
-was given to third order by McWeeny \cite{RMcWeeny62} and up to fourth order by 
-Niklasson and Challacombe \cite{ANiklasson04} in the orthogonal representation.  
+was given to third order by McWeeny \cite{RMcWeeny62}, suitable also for one-electron perturbations,
+and up to to fourth order by Niklasson and Challacombe \cite{ANiklasson04} in the orthogonal representation,
+suitable for perturbation by a constant.  
 
-%vw>>>
-%For completeness, we present non-orthogonal generalizations up to fourth order, 
-%which may require less memory due to the less dense structure of non-orthogonal 
-%matrix intermediates. The new formulation includes mixed perturbations and 
-%accounts for self-consistency.
-In the frame of electric polarizabilities, we present non-orthogonal $2n+1$ rule 
-up to fourth order. The new formulation includes mixed perturbations and 
-accounts for self-consistency.
-%vw<<<
+In the framework of electric polarizabilities, we present non-orthogonal $2n+1$ rules 
+up to fourth order, which generalize to other one-electron perturbations.
+This new formulation includes mixed perturbations and accounts for self-consistency.
 
 The first and second order energy corrections to electric perturbations 
 are well known, corresponding simply to expectation
@@ -831,8 +822,8 @@ programs \cite{MondoSCF}.  The construction of the Fockian and derivative Fockia
 out using the linear scaling QCTC method for computation of the Coulomb matrix \cite{MChallacombe97,CTymczak04a} and the
 ONX algorithm \cite{ESchwegler97,CTymczak04b} for computation of the Hartree-Fock exchange matrix. 
 The CPSCF equations were solved, at each order, in an entirely orthogonal representation.
-The properties were evaluated using the $n+1$ rule Eq.~(\ref{Np1Rule}) and the $2n+1$ rule with 
-the non-orthogonal formulae given by Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
+Properties were evaluated using both the $n+1$ rule, given by Eq.~(\ref{Np1Rule}),  and the $2n+1$ rule, given by 
+the non-orthogonal formulae in Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
 Two different levels of numerical 
 accuracy have been used, {\tt GOOD} and {\tt TIGHT}.   Thresholds that define the {\tt GOOD} 
 accuracy level include a matrix threshold $\tau=10^{-5}$, as well as other numerical thresholds 
@@ -902,8 +893,11 @@ more sparse, as $\X^{abc}_i\X^{0}_i$ or $\X^{ab}_i\X^{c}_i$.   Likewise, $N$-sca
 70 to 90 water molecules for construction of the Hartree-Fock exchange contribution.  In this case, 
 the approximate decay of the density matrix still leads to linear scaling through ordered skip out lists,
 as described in Ref.~[\onlinecite{ESchwegler97}].  In both cases, the increase in response function magnitude
-is equivalent to tightening numerical thresholds, which increases the cost and delays the onset of linear
-scaling. 
+increases the cost and delays the onset of linear scaling.   Likewise, the onset of linear scaling for more  
+delocalized, systems such as polyacetylene can be expected to occur later than for well localized systems such 
+as the water chains.  This behavior is a desirable result of numerical thresholding;  as the system becomes more 
+delocalized, due to a narrowing gap or an increase in response order, the approximate matrices fill in to 
+maintain a fixed accuracy\cite{ANiklasson03}.  
 
 In tables \ref{tab:Alpha_1D_Values}-\ref{tab:Gamma_1D_Values} we find that 
 a reduction of the drop tolerance by one order of magnitude leads to an increase in precision by
