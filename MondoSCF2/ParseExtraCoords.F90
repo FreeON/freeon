@@ -478,7 +478,7 @@ MODULE ParseExtraCoords
      !
      DO I=1,NIntC
        Atoms(1:4)=IntCs%Atoms%I(I,1:4)
-       Cells(1:12)=IntCs%Atoms%I(I,1:12)
+       Cells(1:12)=IntCs%Cells%I(I,1:12)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          IF(Atoms(1)>Atoms(2)) THEN
            DO J=1,2 ; IntCs%Atoms%I(I,J)=Atoms(3-J) ; ENDDO
@@ -503,7 +503,6 @@ MODULE ParseExtraCoords
            ENDDO
          ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
-          Atoms(1:4)=IntCs%Atoms%I(I,1:4)
           IF(Atoms(1)>Atoms(4)) THEN
             DO J=1,4 ; IntCs%Atoms%I(I,J)=Atoms(5-J) ; ENDDO
             DO J=1,4 
@@ -515,7 +514,6 @@ MODULE ParseExtraCoords
             ENDDO
           ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
-          Atoms(1:4)=IntCs%Atoms%I(I,1:4)
           IF(Atoms(3)>Atoms(4)) THEN
             IntCs%Atoms%I(I,3)=Atoms(4)
             IntCs%Atoms%I(I,4)=Atoms(3)
