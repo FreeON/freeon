@@ -611,12 +611,6 @@ MODULE ParseInPut
 !        Open inPut file for parsing
          CALL OpenASCII(InpFile,Inp)
 !----------------------------------------------------------------------------
-! Parse for periodic options and lattice vectors
-!
-#ifdef PERIODIC
-         CALL ParsePeriodic(Ctrl,GM)
-#endif
-!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> keys 
 !
          GM%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
@@ -663,6 +657,12 @@ MODULE ParseInPut
          ELSE
             Ctrl%Vis=VIS_DX_NO_VIS
          ENDIF
+!----------------------------------------------------------------------------
+! Parse for periodic options and lattice vectors
+!
+#ifdef PERIODIC
+         CALL ParsePeriodic(Ctrl,GM)
+#endif
 !----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> format
 !
@@ -1103,7 +1103,7 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !       Convert the lattice and translate vectors to AU 
 !
-        IF(.NOT.GM%InAU) THEN 
+        IF(.NOT. GM%InAU) THEN 
            GM%PBC%BoxShape = GM%PBC%BoxShape*AngstromsToAU
            GM%PBC%TransVec = GM%PBC%TransVec*AngstromsToAU
         ENDIF
@@ -2854,6 +2854,18 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
 !
          IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
             GMLoc%PBC%Epsilon = 1.D32
+         ENDIF
+!-------------------------------------------------------------
+!        IntPut Maxium Ell
+!
+         IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
+            GMLoc%PBC%PFFMaxEll=16
+         ENDIF
+!-------------------------------------------------------------
+!        IntPut The Number of Box Layers
+!
+         IF(.NOT. OptIntQ(Inp,PFFMXLAY,GMLoc%PBC%PFFMaxLay)) THEN
+            GMLoc%PBC%PFFMaxLay=0
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
