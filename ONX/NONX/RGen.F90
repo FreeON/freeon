@@ -3,6 +3,8 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
   USE GlobalScalars
   USE ONXParameters
   USE PrettyPrint
+  USE InvExp
+  USE GammaFunctions
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
@@ -107,21 +109,15 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
         IB%WZ%D(Ind, 4) = Eta*r1xZpE
         IB%WZ%D(Ind, 5) = Half*r1xZpE
 
-
-
-
         PQx=Px-Qx
         PQy=Py-Qy
         PQz=Pz-Qz
         T=(PQx*PQx+PQy*PQy+PQz*PQz)*Eta*Zeta*r1xZpE
-
-        IF (T<IB%Switch) THEN
-          M=INT(T*IB%Grid)
-          T2=T*T
-          T3=T2*T
+        IF (T<Gamma_Switch)THEN 
           TwoT=2.0D0*T
-          GR(LTot)=IB%GT%D(0,M)+T*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
-          EX      =IB%ET%D(0,M)+T*IB%ET%D(1,M)+T2*IB%ET%D(2,M)+T3*IB%ET%D(3,M)
+          GR(LTot)=GammaF(LTot,T) 
+          EX      =EXP(-T)
+!          EX      =EXPInv(T)
           DO IG=Ltot-1,0,-1
             GR(IG)=(TwoT*GR(IG+1)+EX)/FLOAT(IG*2+1)
           END DO

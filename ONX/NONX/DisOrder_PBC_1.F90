@@ -8,6 +8,10 @@ MODULE DOrder
    USE Stats
    IMPLICIT NONE
    REAL(DOUBLE),DIMENSION(3) :: PBC_h,PBC_g
+!  Local buffers allocated in MemInit outside of periodic loops
+   TYPE(DBL_RNK3)         :: SchT 
+   TYPE(INT_RNK3)         :: BufT
+   TYPE(INT_RNK2)         :: BufN
    CONTAINS 
       SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
 !--------------------------------------------------------------------------------
@@ -24,9 +28,6 @@ MODULE DOrder
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  TYPE(DBL_RNK3)         :: SchT
-  TYPE(INT_RNK3)         :: BufT
-  TYPE(INT_RNK2)         :: BufN
   REAL(DOUBLE)           :: Test,VSAC
   REAL(DOUBLE)           :: Ax,Ay,Az,Cx,Cy,Cz,ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
@@ -45,15 +46,22 @@ MODULE DOrder
 ! Function calls
 !--------------------------------------------------------------------------------
   INTEGER                :: NFinal,iT
-
-  CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
-  CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-  CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+  EXTERNAL               INT_VECT_EQ_INT_SCLR
 
   DB%LenCC=0
   DB%LenTC=0
-  DB%TcPop%I=0
-  DB%DisPtr%I=0
+
+! The following zeroing of DB%DisPtr%I and DB%TcPop%I 
+! is is really expensive for periodic systems.  Unfortunate that 
+! ComputeK depends critically on these being carefully zeroed.
+!
+!  DB%TcPop%I=0  
+!  DB%DisPtr%I=0 <- This one really costs
+   N=SIZE(DB%TcPop%I,1)*SIZE(DB%TcPop%I,2)
+   CALL INT_VECT_EQ_INT_SCLR(N,DB%TcPop%I(1,1),0)
+   N=SIZE(DB%DisPtr%I,1)*SIZE(DB%DisPtr%I,2)* &
+     SIZE(DB%DisPtr%I,3)*SIZE(DB%DisPtr%I,4)
+   CALL INT_VECT_EQ_INT_SCLR(N,DB%DisPtr%I(1,1,1,1),0)
 
   iDis=1
   iPrm=1
@@ -75,8 +83,11 @@ MODULE DOrder
       KType=MaxLC*(MaxLC+1)/2+MinLC+1
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
+      ! Another expensive zeroing...
+      N=SIZE(BufN%I,1)*SIZE(BufN%I,2)
+      CALL INT_VECT_EQ_INT_SCLR(N,BufN%I(1,1),0)
+!      BufN%I=0
 
-      BufN%I=0
       iBf=1 
       IndexA=0  
 
@@ -211,15 +222,16 @@ MODULE DOrder
             GOTO 9000
           ENDIF
 
-          CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
-                      IB%W1%D,DB%TBufP,DB%TBufC)
+          ! Beware copy in copy out...
+          CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D(1,1),IB%WR,IB%WZ, &
+                      IB%W1%D(1),DB%TBufP,DB%TBufC)
           CALL VRRs(LDis,LDis,Drv)
           CALL VRRl(KonAC*KonAC,IS%NVRR,Drv%nr,Drv%ns,                  &
                     Drv%VLOC%I(Drv%is),                                 &
                     Drv%VLOC%I(Drv%is+Drv%nr),IB,                       &
-                    IB%W2%D,IB%W1%D)
+                    IB%W2%D(1),IB%W1%D(1))
           CALL Contract(1,KonAC,KonAC,IS%NVRR,iCL,Drv%CDrv%I(iCP+1),    &
-                        IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
+                        IB%CB%D(1,1),IB%CB%D,IB%W1%D(1),IB%W2%D(1))
 
           IF(LDis.NE.0) THEN
             CALL HRRKet(IB%W1%D,DB%TBufC%D(1,iBf),1,SB%SLDis%I,IS%NB1,  &
@@ -314,9 +326,6 @@ MODULE DOrder
   END DO ! Atc
   ErrorCode=eAOK
   9000 CONTINUE
-  CALL Delete(BufN)
-  CALL Delete(BufT)
-  CALL Delete(SchT)
 
 END SUBROUTINE DisOrder
 END MODULE DOrder 

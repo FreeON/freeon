@@ -15,6 +15,7 @@ PROGRAM ONX
   USE ContractionScaling
   USE MatFilter
   USE InitExchangeMatrix
+  USE GetTables
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -46,7 +47,7 @@ PROGRAM ONX
   TYPE(INT_RNK2)      :: SubInd
   TYPE(INT_RNK2)      :: BfnInd
 !--------------------------------------------------------------------------------
-! Large buffers to hold the sorted distribution and multipole data.
+! Large buffers to hold the sorted distribution and multipole data.f
 !--------------------------------------------------------------------------------
   TYPE(DBL_VECT)         :: PrmBuf,DisBuf,CBuf,SBuf
   TYPE(DBL_RNK2)         :: VecBuf
@@ -55,7 +56,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
-  INTEGER                :: iSwitch
+  INTEGER                :: iSwitch,ErrorCodeTmp
 #ifdef PERIODIC
   INTEGER                :: NC1,NC2
 #endif
@@ -91,6 +92,7 @@ PROGRAM ONX
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   CALL New(NameBuf,NAtoms)
+
 #ifdef PERIODIC
 ! Calculate the number of cells
   CALL SetCellNumber(GMc)
@@ -115,20 +117,26 @@ PROGRAM ONX
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB1,BSp,GMp)
-#ifdef PERIODIC
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB2,BSp,GMp)
-#endif
 
      PBC_h=Zero
      PBC_g=Zero
-1000 DO WHILE (ErrorCode/=eAOK) 
+1000 CONTINUE 
+!    Have to bump both buffers 1 and 2, otherwise if buffer2 is to
+!    small, buffer 1 gets bumped infinately untill you run out of memory!
+     ErrorCodeTmp=ErrorCode
+     DO WHILE (ErrorCode/=eAOK) 
         CALL MemInit(DB1,IB,SB,Drv,BSc,BSp)
-        CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
+        CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)        
      ENDDO
-     ErrorCode=eInit
-#ifdef PERIODIC
-     CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
-#endif
+     ErrorCode=ErrorCodeTmp
+     DO WHILE (ErrorCode/=eAOK) 
+        CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
+        CALL DisOrder(BSc,GMc,BSp,GMp,DB2,IB,SB,Drv,NameBuf)        
+     ENDDO
+
+!     ErrorCode=eInit
+!     CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
 ! that there is *always* enough space allocated for the exchange matrix. 
@@ -141,7 +149,6 @@ PROGRAM ONX
   CALL New(SubInd,(/3,NBasF/))
   CALL InitK(BSc,GMc,K,NameBuf)
   CALL InitSubInd(BSc,GMc,SubInd)
-
 !
 #ifdef PERIODIC
 ! Periodic double sum over R and Rprime
@@ -210,7 +217,7 @@ PROGRAM ONX
   CALL Put(K,TrixFile('K',Args,0))
   CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
-  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']',Unit_O=6)
+!  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']',Unit_O=6)
 !  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
 !--------------------------------------------------------------------------------
 ! Clean up...

@@ -32,12 +32,11 @@ include $(MONDO_HOME)/Includes/RemoveAll
 all: NONX XForce
 
 Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
-           InitExchangeMatrix.o Sizes.o Stats.o MemInit_PBC_1.o \
-           DisOrder_PBC_1.o \
-           ONX_PBC_1.o Contract.o HRRBra.o HRRKet.o \
+           InitExchangeMatrix.o Sizes.o Stats.o DisOrder_PBC_1.o MemInit_PBC_1.o \
+           Contract.o HRRBra.o HRRKet.o \
            VRRl.o RGen1C.o CCDriver.o VRRDriver.o \
            RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
-           RangeOfExchange.o Tables.o GetTables.o \
+           RangeOfExchange.o Tables.o GetTables.o ONX_PBC_1.o \
            GetSubBlk.o XPose.o InitSubInd.o \
            RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o \
            ComputeKe_PBC_1.o ComputeKg_PBC_1.o GetIntCode.o GetIntSpace.o
