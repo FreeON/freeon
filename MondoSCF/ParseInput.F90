@@ -80,7 +80,6 @@ MODULE ParseInPut
 !
          CALL ParseThresholds(Ctrl)
 !
-!
       CALL CloseHDF()
 !
       END SUBROUTINE ParseInp
@@ -570,9 +569,11 @@ MODULE ParseInPut
             CALL CloseHDF()
             CALL OpenHDF(InfFile)
             CALL Put(GM,Tag_O="1")
-            CALL CloseHDF() 
+!           CALL CloseHDF() 
             NAtoms=GM%NAtms
             CALL Delete(GM)
+            CLOSE(Inp,STATUS='KEEP')
+            CLOSE(Out,STATUS='KEEP')
             RETURN
          ENDIF
 !----------------------------------------------------------------------------
@@ -2031,12 +2032,12 @@ MODULE ParseInPut
 110   FORMAT(I7,2X,A8,3F30.16)
 120   FORMAT(I7,2X,A8,3F12.6)
 !
-! Zero GrdMM (initial gradients) for the case MMOnly
+! Zero GrdMM (initial gradients) for the case HasMM 
 !
-      IF(MMonly().AND.Ctrl%Current(3)==1) THEN
+      IF(HasMM().AND.Ctrl%Current(3)==1) THEN
         CALL New(GrdMM,3*GM_MM%Natms)
         GrdMM%D(:)=Zero
-          CALL Put(GrdMM,'GradE',Tag_O=CurG)
+          CALL Put(GrdMM,'GradEMM',Tag_O=CurGeom)
         CALL Delete(GrdMM)
       ENDIF
 !
@@ -2751,5 +2752,7 @@ END SUBROUTINE ParsePeriodic
         CLOSE(Out,STATUS='KEEP')
 !
       END SUBROUTINE ParseAcc
+!
+!---------------------------------------------------------------------
 !
 END MODULE
