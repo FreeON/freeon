@@ -107,7 +107,7 @@ MODULE dXCBlok
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
-                MaxAmp=PNorm*SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
+                MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
 !---------------------------------------------------------------------------
 !               Evaluate this primitives Ket contribution to Kxc_ab
                 Ket=Zero
