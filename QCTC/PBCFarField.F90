@@ -215,9 +215,9 @@ MODULE PBCFarField
 #ifdef PARALLEL
   IF(MyID==ROOT) THEN
 #endif
-      Unit=OpenPU(Unit_O=Unit_O)
       Layers = SQRT(CS_IN%CellCarts%D(1,1)**2+CS_IN%CellCarts%D(2,1)**2+CS_IN%CellCarts%D(3,1)**2)/MaxBoxDim(GMLoc)
       IF(GMLoc%PBC%Dimen > 0) THEN
+         Unit=OpenPU(Unit_O=Unit_O)
          IF(PrintFlags%Key > DEBUG_MINIMUM) THEN
             Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics')   &
                  //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
@@ -317,11 +317,12 @@ MODULE PBCFarField
       PFFTau = 100*TauMAC
       ML1    = FFELL+1
       Radius=CS_IN%Radius-BDist
-      IF(BDist > Radius) THEN
+!      IF(BDist > Radius) THEN
+
          WRITE(*,*)' CS_IN%Radius = ',CS_IN%Radius,' BDist = ',BDist
 
-         CALL Halt('BDist Greater Then Radius increase PFFMaxLay')
-      ENDIF
+!         CALL Halt('BDist Greater Then Radius increase PFFMaxLay')
+!      ENDIF
       CQ=Zero
       OL2 = Unsold1(HGEll+1,FFELL,RhoC%D,RhoS%D)
       DO L=0,FFELL-1
