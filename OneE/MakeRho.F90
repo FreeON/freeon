@@ -223,19 +223,18 @@ PROGRAM MakeRho
   CALL Fold_Rho(GM,Rho)
 #endif
 !------------------------------------------------------------
-!  Remove distribution which du not contibute to the density
+!  Remove distribution which do not contibute significantly to the density
 !
-  DistThresh =  Thresholds%Dist
-  CALL Prune_Rho(DistThresh,Rho,Rho2) 
-  CALL Integrate_HGRho(Rho)
+  CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
+  CALL Integrate_HGRho(Rho2)
 !------------------------------------------------------------
 ! Put Rho to disk
 ! 
-  CALL Put_HGRho(Rho,'Rho',Args,0)
+  CALL Put_HGRho(Rho2,'Rho',Args,0)
 !------------------------------------------------------------
 ! Printing
 !
-  CALL PChkSum(Rho,'Rho',Prog)
+  CALL PChkSum(Rho2,'Rho',Prog)
 !  PrintFlags%Fmt=DEBUG_MMASTYLE
 !  CALL PPrint(Rho,'Rho',Unit_O=6)
 !  CALL PPrint(Rho2,'Rho2',Unit_O=6)
