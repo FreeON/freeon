@@ -40,6 +40,20 @@ diagonal Hessian.
 option turns on GDIIS. The use of Cartesian coordinates based 
 GDIIS is not recommended.
 \end{itemize}
+
+\subsection{Minimization vs Stationary points}
+\begin{itemize}
+\item[{\tt DoGradNorm}] :
+\end{itemize}
+The option {\tt DoGradNorm} when placed in the {\tt Grad} line
+will result in finding the nearest stationary point close to the
+input structure, independent from the type of the stationary point
+(minimum or saddle point). This is due to the fact that
+{\tt DoGradNorm} forces the optimization of the gradient norm
+while the default QUICCA optimizes the gradient curve so that 
+the gradient curve will have a positiv derivative at the location of the
+optimized structure. This requirement on the slope of the gradient
+curve is omitted when {\tt DoGradNorm} is used.
  
 \subsection{Constraints}
 
@@ -142,6 +156,19 @@ Note that if the above definitions of internal coordinates are entered
 without any constraint value (the last number) then they will be used as 
 a flexible internal coordinate during the optimization.
 
+In case of crystal optimizations internal coordinates bridging different
+cells can also be defined, similarly to the molecular case, but
+in addition the cell indices of atoms must be given.
+For example
+\\
+{\tt TORS 72 89 31 21 CELL 0 0 0  1 0 0  1 0 1  1 1 1  95.7}
+\\
+defines a TORS coordinate whose 1st atom is in the central cell,
+the 2nd atom is in the [1 0 0] cell, the 3rd in the [1 0 1] and
+the 4th in the [1 1 1] cell. And this coordinate is constrained to
+be 95.7 degrees. Leaving out 95.7 from the end, the coordinate will be
+flexible during the optimization.
+
 \subsubsection{Constraining individual Cartesian components}
 Individual components of the Cartesian coordinates can be constrained 
 exactly the same way as internal coordinates, by using the labels
@@ -150,6 +177,8 @@ CARTX, CARTY, CARTZ. Eg.
 CARTX 34 1145.98
 \\
 will constrain the X component of the atom 34 to 1145.98 angstroems.
+In case of crystal optimizations, the corresponding fractional
+coordinate will be fixed.
 
 \subsection{Recognition of weak bonds}
 Weak bonds, such as the Van der Waals bonds can be recognized difficultly,
@@ -170,7 +199,7 @@ the full length of tabulated atomic Van der Waals radii to be applied.
 The default VDW radii values are smaller to avoid the formation of an unnecessarily dense connectivity network.
 
 \subsection{Stepsize control}
-The options "MaxStre" and "MaxBend" allow external control over the maximum
+The options "MaxStre" and "MaxAngle" allow external control over the maximum
 stepsize during an internal coordinate optimization.
 Eg.
 \\
@@ -179,7 +208,7 @@ Eg.
 sets the maximum allowed stepsize to 0.1 angstroems on stretches,
 while
 \\
-{\tt MaxBend=5.0}
+{\tt MaxAngle=5.0}
 \\
 sets the maximum allowed stepsize on BEND, TORS, OUTP and LINB-s of the 
 molecule to 5.0 degrees.
