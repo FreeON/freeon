@@ -2737,9 +2737,9 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
 !
 #ifdef PERIODIC
 SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
-      TYPE(CRDS)                 :: GMLoc
-      TYPE(SCFControls)          :: Ctrl
-      CHARACTER(LEN=6) :: CurG
+      TYPE(CRDS)                      :: GMLoc
+      TYPE(SCFControls)               :: Ctrl
+      CHARACTER(LEN=6)                :: CurG
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,AuxChar
 !
 !
@@ -2848,6 +2848,12 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
 !
          IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
             GMLoc%PBC%Epsilon = 1.D32
+         ENDIF
+!-------------------------------------------------------------
+!        IntPut Maxium Ell
+!
+         IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
+            GMLoc%PBC%PFFMaxEll=16
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
