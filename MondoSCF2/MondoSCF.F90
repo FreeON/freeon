@@ -32,9 +32,11 @@ PROGRAM MondoSCF
 !    Place holder for whatever
      CALL Descender(C)
   CASE(GRAD_DO_DYNAMICS)
-     CALL SinglePoints(C)
-     CALL Force(C%Sets%NBSets,1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)   
+     CALL Halt('MD Not Implimented')
 !    CALL MDMove(C)
+  CASE(GRAD_DO_SCAN)
+     CALL Halt('SCAN Not Implimented')
+!     CALL ScanGeom(C)
   CASE(GRAD_ONE_FORCE)
      CALL SinglePoints(C)
      CALL Force(C%Sets%NBSets,1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)   
