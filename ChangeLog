@@ -1,3 +1,67 @@
+2004-09-14 18:58  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, PunchHDF.F90: A new
+	version of the optimizer, a few bugs fixed, concerning lattice
+	forces lower triangle zeroed, rotation of the lattice and
+	passing-in latest constraint projected forces into CollectIntCPast.
+
+2004-09-14 17:24  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-09-14 17:18  tymczak
+
+	* MondoSCF2/SCFs.F90: Set down QCTC threshold
+
+2004-09-14 17:01  tymczak
+
+	* MondoMods/: AtomPairs.F90, PBC.F90: [no log message]
+
+2004-09-14 13:33  tymczak
+
+	* MondoMods/AtomPairs.F90: Added a Derivative of the Volume wrt
+	lattice constants
+	
+	CJ
+
+2004-09-14 10:36  tymczak
+
+	* MondoSCF2/ParsePeriodic.F90: The Subroutine CellVolume no longe
+	takes the ABS() of the Result, this must be done around the
+	subroutine call I need the correct sign inorder to take the
+	deriviative of the volume correctly
+	
+	Div[CellVolume]/m_ij = (a x b . c) / Abs( a x b . c) * Div[a x b .
+	c] / m_ij
+	
+	CJ
+
+2004-09-13 16:44  tymczak
+
+	* MondoMods/AtomPairs.F90: Fixed a Bug in the Volume Calculation
+	for Two-Dim
+
+2004-09-13 13:35  mchalla
+
+	* OneE/: UBlok.F90, UForce.F90: small fix, involving undefined
+	forces when outside threshold.
+
+2004-09-11 13:41  nemeth
+
+	* MondoSCF2/InCoords.F90: A memory bug fixed.
+
+2004-09-10 18:41  nemeth
+
+	* MondoSCF2/InCoords.F90: A 'quantum bug' has been fixed.
+
+2004-09-10 15:26  mchalla
+
+	* SCFeqs/P2Use.F90: A better suggestion now on restart fatality.
+
+2004-09-10 13:27  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-09-10 13:16  mchalla
 
 	* SCFeqs/P2Use.F90: May have fixed one of the restart bugs.  WTF
@@ -1058,7 +1122,8 @@
 
 	* HiCu/CubeTree.F90, HiCu/ParaHiCu.F90, HiCu/XCForce.F90,
 	MondoMods/FastMat.F90, MondoMods/TimerWrapper.C, QCTC/JForce.F90,
-	QCTC/JGen.F90, QCTC/QCTC.F90: MondoTimer interface.
+	QCTC/JGen.F90, QCTC/QCTC.F90, ONX/NONX/ONX.F90,
+	ONX/NONX/ONXComptK.F90: MondoTimer interface.
 
 2004-07-29 11:07  tymczak
 
@@ -1415,7 +1480,7 @@
 
 2004-07-09 14:03  ckgan
 
-	* MondoSCF2/PunchHDF.F90: Fix ONX MD restart.
+	* MondoSCF2/PunchHDF.F90, ONX/NONX/PartDrv.F90: Fix ONX MD restart.
 
 2004-07-09 12:45  tymczak
 
@@ -2730,6 +2795,10 @@
 
 	* MondoSCF2/ParseGeometries.F90: Reparseing of Geometry Works
 
+2004-04-15 13:06  tymczak
+
+	* ONX/NONX/ONX.F90: New SCFActn
+
 2004-04-15 13:05  tymczak
 
 	* MondoSCF2/OptionKeys.F90: New Options
@@ -3142,6 +3211,10 @@
 
 	* QCTC/: Makefile, ParaQ.F90: Module for parallel QCTC included.
 
+2004-03-18 14:26  tymczak
+
+	* ONX/VRR/Int1111.F90: [no log message]
+
 2004-03-18 12:13  nemeth
 
 	* MondoSCF2/: GDIIS.F90, Hessian.F90, InCoords.F90, Optimizer.F90,
@@ -3424,6 +3497,10 @@
 	* MondoMods/FastMat.F90: Fixed a bug in Set_FASTMAT_EQ_BCSR and
 	Set_DFASTMAT_EQ_DBCSR.
 
+2004-02-13 12:07  vweber
+
+	* ONX/NONX/: ONX.F90, PartDrv.F90: Check for 0 partition.
+
 2004-02-12 23:30  vweber
 
 	* SCFeqs/: CPSCFStatus.F90, DenMatResponse.F90, FBuild.F90,
@@ -3566,6 +3643,10 @@
 	Mix_h2o3D_6-31G_6-31Gss_G_T_t.eps, Response3.bib, Response3.tex:
 	The new paper.
 
+2004-02-01 15:56  vweber
+
+	* ONX/NONX/ONX.F90: Rm DJ tresholding.
+
 2004-02-01 15:54  vweber
 
 	* SCFeqs/CPSCFStatus.F90: Added parallel for 2n+1 rule.
@@ -3680,6 +3761,10 @@
 	* MondoSCF2/SCFs.F90: Hopefully fixed restarts.  Again.  Energy
 	should be strictly decreasing now.
 
+2004-01-23 13:55  tymczak
+
+	* ONX/NONX/ONX.F90: [no log message]
+
 2004-01-23 13:36  tymczak
 
 	* MondoMods/PrettyPrint.F90: Redid some of the Print_Force
@@ -3762,9 +3847,9 @@
 
 	* ChangeLog: [no log message]
 
-2004-01-18 01:11  vweber
+2004-01-18 01:10  vweber
 
-	* QCTC/QCTC.F90: 3 order
+	* ONX/NONX/ONX.F90, QCTC/QCTC.F90: 3 order
 
 2004-01-18 01:04  vweber
 
@@ -4136,6 +4221,17 @@
 2003-12-18 16:05  vweber
 
 	* Makefile: Added t and o2
+
+2003-12-18 11:35  vweber
+
+	* ONX/VRR/: Int1121.F90, Int1122.F90, Int1161.F90, Int1162.F90,
+	Int1166.F90, Int2111.F90, Int2121.F90, Int2122.F90, Int2161.F90,
+	Int2162.F90, Int2166.F90, Int2211.F90, Int2221.F90, Int2222.F90,
+	Int2261.F90, Int2262.F90, Int2266.F90, Int6111.F90, Int6121.F90,
+	Int6122.F90, Int6161.F90, Int6162.F90, Int6166.F90, Int6211.F90,
+	Int6221.F90, Int6222.F90, Int6261.F90, Int6262.F90, Int6266.F90,
+	Int6611.F90, Int6621.F90, Int6622.F90, Int6661.F90, Int6662.F90,
+	Int6666.F90, VRR.tar: CJ, it should work for periodic...
 
 2003-12-17 11:22  mchalla
 
@@ -4931,6 +5027,10 @@
 
 	* ChangeLog: [no log message]
 
+2003-09-15 20:35  mchalla
+
+	* ONX/Makefile: No remove of drivers.
+
 2003-09-15 16:43  vweber
 
 	* SCFeqs/CPSCFStatus.F90: Improved printing.
@@ -4957,9 +5057,9 @@
 
 	* Includes/Suffixes: [no log message]
 
-2003-09-15 10:35  mchalla
+2003-09-15 10:32  mchalla
 
-	* Makefile: [no log message]
+	* ONX/Makefile, Makefile: [no log message]
 
 2003-09-15 10:25  mchalla
 
@@ -4978,6 +5078,14 @@
 
 	* Validate/Makefile: [no log message]
 
+2003-09-15 07:28  mchalla
+
+	* ONX/MakeTables/: MAIN.C, Makefile: [no log message]
+
+2003-09-15 07:23  mchalla
+
+	* ONX/: VRR/Makefile, Makefile: [no log message]
+
 2003-09-15 07:17  mchalla
 
 	* Makefile: [no log message]
@@ -4989,6 +5097,18 @@
 2003-09-15 06:59  mchalla
 
 	* Includes/ALPHA_RELEASE: [no log message]
+
+2003-09-15 06:12  mchalla
+
+	* ONX/NONX/Makefile: updated for release
+
+2003-09-15 06:10  mchalla
+
+	* ONX/NONX/: ComputeKg_GAS.F90, DisOrder_GAS.F90, GetIntCode.F90,
+	LSearch.F, PutSubBlk.F90, XPose.F, ComputeKe_GAS.F90, DisOrder.F90,
+	Fillout.F90, HRRKetGrad.F, ONX_GAS.F90, Scatter.F90, BSearch.F,
+	Digest.F90, DisOrder_PBC_2.F90, HRRBraGrad.F, MemInit_GAS.F90,
+	RangeOfExchange.F90: obsolete
 
 2003-09-15 00:13  nemeth
 
@@ -5171,6 +5291,15 @@
 	Water64.inp, h2o32.inp, h2o64.inp, sub_pbs, validation_opls:
 	intermediate clean.
 
+2003-09-08 23:29  vweber
+
+	* ONX/NONX/ONX.F90: Removed old comments and fixed some serial
+	printing problems.
+
+2003-09-08 17:50  vweber
+
+	* ONX/NONX/ONX.F90: Change INFO printing
+
 2003-09-08 14:55  vweber
 
 	* SCFeqs/: CPSCFStatus.F90, DDIIS.F90, TC2Response.F90: Minor
@@ -5265,10 +5394,11 @@
 
 	* Docs/Bib/mondo.bib: Nerw Enetries
 
-2003-09-03 13:43  vweber
+2003-09-03 13:42  vweber
 
-	* QCTC/QCTC.F90, OneE/MakeM.F90, OneE/MakeRho.F90,
-	OneE/ParaMakeRho.F90: Added stuff for linear response.
+	* ONX/NONX/ONX.F90, QCTC/QCTC.F90, OneE/MakeM.F90,
+	OneE/MakeRho.F90, OneE/ParaMakeRho.F90: Added stuff for linear
+	response.
 
 2003-09-03 13:41  vweber
 
@@ -5582,6 +5712,11 @@
 	molecule calculations, but leads to unnecessarily long SCFs for NEB
 	calculations.
 
+2003-08-19 13:49  vweber
+
+	* ONX/NONX/ONX.F90: Reduced the number of list build to 1 for gaz
+	phase/serial calculations.
+
 2003-08-19 12:42  tymczak
 
 	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: [no log
@@ -5609,6 +5744,11 @@
 
 	* Makefile: 
 	pn and cn targets removed in purge.
+
+2003-08-15 17:08  vweber
+
+	* ONX/NONX/PartDrv.F90: Fix the problem with guess=Core for
+	parallel calculations.
 
 2003-08-15 15:32  mchalla
 
@@ -5662,6 +5802,10 @@
 
 	* OneE/UBlok.F90: Extended the dynamic grid to an "infinity" of 20,
 	from 10.
+
+2003-08-14 21:02  vweber
+
+	* ONX/NONX/PartDrv.F90: Added some debuging stuff.
 
 2003-08-14 20:59  vweber
 
@@ -5754,9 +5898,10 @@
 2003-08-13 14:40  tymczak
 
 	* MondoSCF2/ControlStructures.F90, MondoSCF2/ParseMMech.F90,
-	MondoSCF2/SCFs.F90, OneE/MakeM.F90, OneE/MakeS.F90, OneE/MakeT.F90,
-	OneE/MakeU.F90, OneE/ParaMakeRho.F90, OneE/RhoTools.F90,
-	OneE/SForce.F90, OneE/TForce.F90: removed PERIODIC flag
+	MondoSCF2/SCFs.F90, ONX/NONX/DisOrder_PBC_2.F90, OneE/MakeM.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/MakeU.F90,
+	OneE/ParaMakeRho.F90, OneE/RhoTools.F90, OneE/SForce.F90,
+	OneE/TForce.F90: removed PERIODIC flag
 
 2003-08-13 14:33  tymczak
 
@@ -5914,6 +6059,10 @@
 	* Docs/PBC_paper/: LinearPBCMethod.tex, LinearPBCMethod_revtex4.ps,
 	LinearPBCMethod_revtex4.tex, Makefile: Matts latest changes.
 
+2003-08-07 16:29  tymczak
+
+	* ONX/NONX/ONX.F90: Remove CSTemp
+
 2003-08-07 15:23  tymczak
 
 	* MondoMods/AtomPairs.F90: Proprogated Changes in PBCInfo and CRDS
@@ -5990,6 +6139,20 @@
 	* MondoSCF2/GDIIS.F90: Gradients are now store in CRDS and a
 	DBLE_RNK2
 
+2003-08-07 14:24  tymczak
+
+	* ONX/: VRR/Int1111.F90, VRR/Int1121.F90, VRR/Int1122.F90,
+	VRR/Int1161.F90, VRR/Int1162.F90, VRR/Int1166.F90, VRR/Int2111.F90,
+	VRR/Int2121.F90, VRR/Int2122.F90, VRR/Int2161.F90, VRR/Int2162.F90,
+	VRR/Int2166.F90, VRR/Int2211.F90, VRR/Int2221.F90, VRR/Int2222.F90,
+	VRR/Int2261.F90, VRR/Int2262.F90, VRR/Int2266.F90, VRR/Int6111.F90,
+	VRR/Int6121.F90, VRR/Int6122.F90, VRR/Int6161.F90, VRR/Int6162.F90,
+	VRR/Int6166.F90, VRR/Int6211.F90, VRR/Int6221.F90, VRR/Int6222.F90,
+	VRR/Int6261.F90, VRR/Int6262.F90, VRR/Int6266.F90, VRR/Int6611.F90,
+	VRR/Int6621.F90, VRR/Int6622.F90, VRR/Int6661.F90, VRR/Int6662.F90,
+	VRR/Int6666.F90, VRR/VRR.tar, NONX/ONXRGen.F90: Changes in PBCInfo
+	and CRDS
+
 2003-08-07 14:20  vweber
 
 	* MondoMods/FastMat.F90: Some modifications to FlattenAllRows1,
@@ -6031,6 +6194,11 @@
 	
 	Hacked the includes to correspond more closely with those for the
 	AMD build.
+
+2003-08-05 20:18  vweber
+
+	* ONX/NONX/ONX.F90: Added IF constructs in the cell loops to reduce
+	the number of lists build for periodic.
 
 2003-08-05 14:18  nemeth
 
@@ -6075,6 +6243,21 @@
 
 	* BasisSets/WTBS.bas: Add some basis sets til Mo.
 
+2003-08-01 17:55  vweber
+
+	* ONX/NONX/Makefile: Remove and add some objects for ONX.
+
+2003-08-01 17:54  vweber
+
+	* ONX/NONX/: ONX.F90, ONXComptK.F90, ONXDOrder.F90, ONXFillOut.F90,
+	ONXGet.F90, ONXInLoop.F90, ONXInit.F90, ONXMemInit.F90, ONXRng.F90:
+	Remove old commented codes.
+
+2003-08-01 17:53  vweber
+
+	* ONX/NONX/ONXCtrSclg.F90: Module contains TrnMatBlk's subroutine
+	and FacNrm.
+
 2003-08-01 16:02  vweber
 
 	* MondoSCF2/SCFs.F90: Removed some bugs in NXForce.
@@ -6086,6 +6269,10 @@
 2003-08-01 15:40  vweber
 
 	* OneE/: MBlok.F90, MakeM.F90: One E dipole moment integral
+
+2003-08-01 15:34  vweber
+
+	* ONX/Makefile: Some modifs in /ONX/Makefile.
 
 2003-08-01 15:32  mchalla
 
@@ -6176,6 +6363,19 @@
 	0.5 au caused oscillations in the optimizations. See distorted CO2
 	optimizations with 'tight'.
 
+2003-07-25 15:44  schwegle
+
+	* ONX/GDrivers/: G1.202x101.ascii, G1.202x201.ascii,
+	G2.202x202.ascii, G3.202x202.ascii, G4.101x101.ascii,
+	G4.101x202.ascii, G4.201x202.ascii, G4.202x201.ascii,
+	G4.202x202.ascii: Modified driver files. There are still some index
+	problems here, but most of the problems have been fixed... This is
+	still very much a work in progress.
+
+2003-07-25 15:08  schwegle
+
+	* ONX/Drivers/README: Some descriptions of the driver file format.
+
 2003-07-24 16:33  ckgan
 
 	* Docs/PETN_paper/: Makefile, petn.tex: [no log message]
@@ -6265,6 +6465,10 @@
 	* MondoMods/: AtomPairs.F90, BraBloks.F90, DerivedTypes.F90,
 	GlobalScalars.F90, InOut.F90, Macros.F90, MemMan.F90, PBC.F90,
 	PrettyPrint.F90, SetEq.F90: Removed PERIODIC Flag
+
+2003-07-15 14:11  tymczak
+
+	* ONX/NONX/ONX.F90: removed the periodic flag
 
 2003-07-15 14:10  tymczak
 
@@ -6464,6 +6668,12 @@
 	* MondoMods/: DerivedTypes.F90, GlobalScalars.F90, InOut.F90,
 	MemMan.F90, PrettyPrint.F90: New changes in support of ECPs.
 
+2003-06-17 17:06  schwegle
+
+	* ONX/VRR/VRR-Maker.tar: This tar file contains the programs that
+	are used to generate and manipulate the VRRxx files that are needed
+	for the ONX integral code.
+
 2003-06-16 12:09  ckgan
 
 	* Docs/Bib/mondo.bib: more petn references.
@@ -6515,6 +6725,24 @@
 2003-06-12 17:15  vweber
 
 	* MondoSCF2/PrintParsed.F90: [no log message]
+
+2003-06-12 16:57  vweber
+
+	* ONX/NONX/: Makefile_GAS_1, Makefile_PBC_1: silly makefiles
+
+2003-06-12 16:56  vweber
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKe_PBC_1.F90, ComputeKg.F90,
+	ComputeKg_PBC_1.F90, ContractG.F90, ContractionScaling.F90,
+	Digest.F90, DigestGradient.F90, DisOrder.F90, DisOrder_PBC_1.F90,
+	Fillout.F90, GetAdr.F90, HrrKet.F90, InitExchangeMatrix.F90,
+	InitSubInd.F90, Makefile, MatFilter.F90, MemInit.F90,
+	MemInit_PBC_1.F90, ONX.F90, ONXComptK.F90, ONXDOrder.F90,
+	ONXFillOut.F90, ONXGet.F90, ONXHrr.F90, ONXInLoop.F90, ONXInit.F90,
+	ONXMemInit.F90, ONXPut.F90, ONXRGen.F90, ONXRng.F90, ONXVrr.F90,
+	ONX_PBC_1.F90, PartDrv.F90, RGen.F90, RangeOfDensity.F90,
+	RangeOfExchange.F90, Scatter.F90: 
+	The Vman's glorious entry into Mondo-dom!
 
 2003-06-12 08:30  tymczak
 
@@ -6619,6 +6847,21 @@
 	* MondoSCF2/SCFs.F90: 
 	Remove debug printing
 
+2003-06-02 15:33  tymczak
+
+	* ONX/NONX/ONX_GAS.F90: [no log message]
+
+2003-06-02 15:32  tymczak
+
+	* ONX/NONX/: ComputeKe_GAS.F90, ComputeKg_GAS.F90,
+	DisOrder_GAS.F90, MemInit_GAS.F90: The Old Gas Onx
+
+2003-06-02 15:31  tymczak
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, DisOrder.F90, Makefile,
+	Makefile_PBC_1, MemInit.F90, ONX.F90: 
+	Removed the _PBC file stuff
+
 2003-06-02 15:26  tymczak
 
 	* Validate/: MgO.inp, MgO.ref: NEW Validation and Refference file
@@ -6643,6 +6886,28 @@
 
 	* BasisSets/Crystal98.bas: 
 	Fixed Bug
+
+2003-06-02 09:52  tymczak
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int1122.F90, Int1161.F90,
+	Int1162.F90, Int1166.F90, Int2111.F90, Int2121.F90, Int2122.F90,
+	Int2161.F90, Int2162.F90, Int2166.F90, Int2211.F90, Int2221.F90,
+	Int2222.F90, Int2261.F90, Int2262.F90, Int2266.F90, Int6111.F90,
+	Int6121.F90, Int6122.F90, Int6161.F90, Int6162.F90, Int6166.F90,
+	Int6211.F90, Int6221.F90, Int6222.F90, Int6261.F90, Int6262.F90,
+	Int6266.F90, Int6611.F90, Int6621.F90, Int6622.F90, Int6661.F90,
+	Int6662.F90, Int6666.F90: All new Integrals with periodics included
+
+2003-06-02 09:51  tymczak
+
+	* ONX/VRR/VRR.tar: Generate the New Explicit code with periodics
+	included
+
+2003-06-02 09:50  tymczak
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	DisOrder_PBC_1.F90, Makefile_GAS_1, Makefile_PBC_1,
+	MemInit_PBC_1.F90, ONX_PBC_1.F90, RGen.F90: Periodic ONX changes
 
 2003-05-30 15:29  tymczak
 
@@ -6722,6 +6987,10 @@
 
 	* OneE/MMA/: Omega1Gen.m, PseudopotentialTypeOne.nb: Notebooks and
 	MMA code to generate type one angular integrals for ECPs.
+
+2003-05-20 10:38  schwegle
+
+	* ONX/GDrivers/Notes.txt: Things left to fix.
 
 2003-05-19 14:32  tymczak
 
@@ -6860,6 +7129,11 @@
 	value, in order to avoid their effect in the calculation of
 	internal coordinate gradients.
 
+2003-05-09 18:13  schwegle
+
+	* ONX/NONX/Notes.txt: Whats left to fix for the gradients. Almost
+	there.
+
 2003-05-09 16:09  mchalla
 
 	* SCFeqs/MMA/SCFDev/: SCF_STO-2G_Water.nb, STO-2G_Water.in: Added
@@ -6883,6 +7157,23 @@
 	coeffs calculation. In case of constraints constrained components
 	are zerod, but only within and for GDIIS, when internal coord
 	optimizer is used.
+
+2003-05-08 17:55  schwegle
+
+	* ONX/NONX/Notes.txt: Things left to do for gradients.
+
+2003-05-08 17:55  schwegle
+
+	* ONX/GDrivers/: G1.101x101.ascii, G1.101x201.ascii,
+	G1.101x202.ascii, G1.201x101.ascii, G1.201x201.ascii,
+	G1.201x202.ascii, G1.202x101.ascii, G1.202x201.ascii,
+	G1.202x202.ascii: New driver gradient contraction files that are
+	consistent with the onx integral code.
+
+2003-05-08 12:08  schwegle
+
+	* ONX/NONX/Notes.txt: What needs to be done to get the gradients
+	working.
 
 2003-05-07 12:01  nemeth
 
@@ -6911,6 +7202,11 @@
 	* OneE/: MakeRho.F90, ParaMakeRho.F90: Fix to allow restart with
 	new geometry and old DM.
 
+2003-05-05 19:23  mchalla
+
+	* ONX/NONX/: ONX.F90, ONX_PBC_1.F90:  fix to allow restarts with
+	changed geometry, old DM.
+
 2003-05-05 17:36  tymczak
 
 	* Docs/PBC_paper/: EnergyVsNumber_Diamond512.ps,
@@ -6931,6 +7227,29 @@
 	out-of-plane coordinates are set to the 'real' out-of-plane values
 	now, instead of the value which refers to the corresponding
 	torsion.
+
+2003-05-05 12:14  schwegle
+
+	* ONX/GDrivers/: G2.101x101.ascii, G2.101x201.ascii,
+	G2.101x202.ascii, G2.201x101.ascii, G2.201x201.ascii,
+	G2.201x202.ascii, G2.202x101.ascii, G2.202x201.ascii,
+	G2.202x202.ascii, G3.101x201.ascii, G3.101x202.ascii,
+	G3.201x101.ascii, G3.201x201.ascii, G3.201x202.ascii,
+	G3.202x101.ascii, G3.202x201.ascii, G3.202x202.ascii, Notes.txt:
+	Changed the format of the driver files. Should now support s and sp
+	type basis functions.
+
+2003-05-05 12:13  schwegle
+
+	* ONX/NONX/: ComputeXForce.F90, ContractG.F90, DigestGradient.F90,
+	GetGradient.F90, Notes.txt: More debuging of the gradient code.
+	There is an indexing bug in GetIntSpace.F90.  Also added a notes
+	file.
+
+2003-05-05 10:27  schwegle
+
+	* ONX/GDrivers/: DriverMaker.F, DriverMaker.f, MAIN.C, MAIN.c: Just
+	some name changes
 
 2003-05-05 10:20  nemeth
 
@@ -7020,6 +7339,18 @@
 	optimizer. Rearchivation for GDIIS, compatibility at restart
 	between different types of optimizers and 'eradication' of 'go
 	to'-s from the intc optimizer.
+
+2003-04-28 14:57  schwegle
+
+	* ONX/GDrivers/: G2.101x101.ascii, G2.101x201.ascii,
+	G3.101x101.ascii, GCMaker.C: Some changes to get the gradients
+	working.
+
+2003-04-28 10:40  schwegle
+
+	* ONX/NONX/: ComputeXForce.F90, ContractG.F90, DigestGradient.F90,
+	GDLoader.C, GetGradient.F90, HrrKet.F90: First attempt at getting
+	the onx forces working. This is not working yet.
 
 2003-04-25 13:41  tymczak
 
@@ -7341,6 +7672,18 @@
 	* BasisSets/C_C98.bas: This is a carbon 6-21G* basis set from Mike
 	Towlers page, optimized for diamond.
 
+2003-03-06 15:10  schwegle
+
+	* ONX/NONX/: HrrBra.F90, HrrKet.F90:	Includes new classes for
+	the gradient code
+
+2003-03-06 15:08  schwegle
+
+	* ONX/NONX/: ComputeKg.F90, ComputeXForce.F90, DisOrderGrad.F90,
+	GradONX.F90, HRR.tar, HrrKet.F90, Makefile: Added new integral
+	classes to support the onx gradient code.  This is the program used
+	to generate HrrBra.F90 and HrrKet.F90.
+
 2003-03-06 11:04  mchalla
 
 	* SCFeqs/DIIS.F90: Fixed extrapolation to use computed rather than
@@ -7370,6 +7713,11 @@
 
 	* MondoSCF2/: Optimizer.F90, PunchHDF.F90, SCFs.F90: Changes needed
 	to eliminate LineLoc.dat in ParaHiCu.F90.
+
+2003-03-03 16:34  schwegle
+
+	* ONX/GDrivers/Notes.txt: List of things to do to get gradients
+	working...
 
 2003-03-03 16:34  schwegle
 
@@ -7500,6 +7848,20 @@
 2003-02-13 13:19  mchalla
 
 	* MondoMods/InOut.F90: Added IO for constraints!!
+
+2003-02-12 17:16  schwegle
+
+	* ONX/GDrivers/DriverMaker.f: This routine is used to generate G*
+	driver files. I have updated it so that it *should* work with the
+	current HrrKet.F90 and HrrBra.F90 routines used in ONX. This is
+	very much untested and even if it does work, you need to do a lot
+	of cut and paste stuff to generate the driver files.
+
+2003-02-12 17:03  schwegle
+
+	* ONX/NONX/: HRR.tar, HrrBra.F90, HrrKet.F90: Added new integral
+	types to support the gradient code. The gradient code is still
+	broken, this is part one of the fix...
 
 2003-02-04 17:10  mchalla
 
@@ -7727,6 +8089,17 @@
 
 	* Includes/CompilerSpecifics.AMDLinux.PG: Remove WRAPDIST
 
+2003-01-29 17:34  schwegle
+
+	* ONX/GDrivers/README: Just gave a couple more details on the
+	filenames.
+
+2003-01-29 17:24  schwegle
+
+	* ONX/GDrivers/README: This README file has been added to give some
+	clues as to what all these driver files are used for. I will add
+	more details later to describe how each file was generated.
+
 2003-01-29 11:12  tymczak
 
 	* Includes/CompilerSpecifics.AMDLinux.PG: [no log message]
@@ -7753,7 +8126,9 @@
 	* MondoSCF2/Massage.F90, MondoSCF2/ParseGeometries.F90,
 	MondoSCF2/ParseOptions.F90, MondoSCF2/PunchHDF.F90,
 	MondoSCF2/SCFs.F90, OneE/MakeRho.F90, SCFeqs/DenMatMethods.F90,
-	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90: [no log message]
+	SCFeqs/P2Use.F90, SCFeqs/RHeqs.F90, ONX/NONX/ComputeKe_PBC_1.F90,
+	ONX/NONX/ComputeKg_PBC_1.F90, ONX/NONX/ONX.F90,
+	ONX/NONX/ONX_PBC_1.F90: [no log message]
 
 2003-01-28 12:43  mchalla
 
@@ -7922,6 +8297,11 @@
 
 	* Includes/Suffixes: Now includes CPP directives in C compiler
 	flags.
+
+2003-01-14 12:57  mchalla
+
+	* ONX/NONX/ONX_PBC_1.F90: Changed to support the new front end. 
+	Currently untested!!!
 
 2003-01-14 12:56  mchalla
 
@@ -8157,6 +8537,10 @@
 	This is to avoid binary output in *.out when lots of procs are
 	used.
 
+2002-12-12 11:58  tymczak
+
+	* ONX/NONX/Makefile_GAS_1: Backup of the Makefile for Gas Phase
+
 2002-12-12 11:44  ckgan
 
 	* MondoMods/InOut.F90: OnAll_O=.TRUE. for BcastBCSR. Needed for the
@@ -8217,6 +8601,16 @@
 
 	* OneE/: MakeRho.F90, MakeS.F90, ParaMakeRho.F90: New workings of
 	HDF.
+
+2002-12-11 16:30  mchalla
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKe_PBC_1.F90, ComputeKg.F90,
+	ComputeKg_PBC_1.F90, ContractionScaling.F90, DisOrder.F90,
+	DisOrderGrad.F90, DisOrder_PBC_1.F90, Fillout.F90,
+	InitExchangeMatrix.F90, MatFilter.F90, ONX.F90, ONX_PBC_1.F90,
+	RangeOfDensity.F90, RangeOfExchange.F90: New HDF use age to comply
+	with cloning.  Also, put PARALLEL_ONX to allow running ONX in
+	parallel.
 
 2002-12-11 16:28  mchalla
 
@@ -8319,6 +8713,12 @@
 	ParseGeometries.F90, ParseInput.F90, ParseMMech.F90,
 	ParseOptions.F90, ParsePeriodic.F90, PeriodicKeys.F90,
 	PrintParsed.F90, core: First stab at front end re-write.
+
+2002-11-30 08:20  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKe_PBC_1.F90, MemInit_PBC_1.F90:
+	Added some subroutine calls to make the new integral code work with
+	the periodic version.
 
 2002-11-28 14:50  mchalla
 
@@ -8430,10 +8830,47 @@
 	* MondoMods/MondoMPI.F90: Move PImbalance from MondoMPI.F90 to
 	PrettyPrint.F90.
 
+2002-11-25 18:10  schwegle
+
+	* ONX/VRR/VRR.tar: 
+	This tar ball contains the code that generates all of the explicit
+	VRR code (Int????.F90). The VRR?? data files are generated by a
+	different set of rouotines that I will check in later.
+
 2002-11-25 17:52  ckgan
 
 	* HiCu/: HiCu.F90, ParaHiCu.F90, XCForce.F90: Imbalances are
 	calculated using PImbalance() to achieve uniformity.
+
+2002-11-25 17:13  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, GetIntCode.F90: Updated driver routines
+	to take advantage of the new explicit VRR integral code.
+
+2002-11-25 17:12  schwegle
+
+	* ONX/VRR/: Int1121.F90, Int1121.Inc, Int1122.F90, Int1122.Inc,
+	Int1161.F90, Int1161.Inc, Int1162.F90, Int1162.Inc, Int1166.F90,
+	Int1166.Inc, Int2111.F90, Int2111.Inc, Int2121.F90, Int2121.Inc,
+	Int2122.F90, Int2122.Inc, Int2161.F90, Int2161.Inc, Int2162.F90,
+	Int2162.Inc, Int2166.F90, Int2166.Inc, Int2211.F90, Int2211.Inc,
+	Int2221.F90, Int2221.Inc, Int2222.F90, Int2222.Inc, Int2261.F90,
+	Int2261.Inc, Int2262.F90, Int2262.Inc, Int2266.F90, Int2266.Inc,
+	Int6111.F90, Int6111.Inc, Int6121.F90, Int6121.Inc, Int6122.F90,
+	Int6122.Inc, Int6161.F90, Int6161.Inc, Int6162.F90, Int6162.Inc,
+	Int6166.F90, Int6166.Inc, Int6211.F90, Int6211.Inc, Int6221.F90,
+	Int6221.Inc, Int6222.F90, Int6222.Inc, Int6261.F90, Int6261.Inc,
+	Int6262.F90, Int6262.Inc, Int6266.F90, Int6266.Inc, Int6611.F90,
+	Int6611.Inc, Int6621.F90, Int6621.Inc, Int6622.F90, Int6622.Inc,
+	Int6661.F90, Int6661.Inc, Int6662.F90, Int6662.Inc, Int6666.F90,
+	Int6666.Inc, Makefile, RGen1.Inc, RGen2.Inc, RGen3.Inc, RGen4.Inc,
+	RGen5.Inc, RGen6.Inc, RGen7.Inc, RGen8.Inc: 
+	This is a major rewrite of the VRR integral code for ONX. All 2-e
+	integrals with L<=8 are now explicit. I will check in the code to
+	generate these files later. This new code should be about 2 to 3
+	times faster for 6-31G** than the code this is replacing. It looks
+	like everything is working fine but check all results carefully for
+	bugs, this is a major change.
 
 2002-11-25 15:57  ckgan
 
@@ -8460,6 +8897,22 @@
 	* QCTC/BlokTrPdJ.F90: HGToSP(Prim%Zeta,1,...) is used rather than
 	HGToSP(Prim,...). This change is made to allow gas phase (i.e.
 	non-periodic) compilation of QCTC.
+
+2002-11-22 11:53  schwegle
+
+	* ONX/NONX/HRR.tar: 
+	This tar file contains the generator code for HrrBra.F90 and
+	HrrKet.F90
+
+2002-11-22 10:28  schwegle
+
+	* ONX/NONX/: HRRBra.F, HRRKet.F, HrrBra.F90, HrrKet.F90, Makefile,
+	Makefile_PBC_1, MemInit.F90: 
+	Replaced HRRBra.F and HRRKet.F with HrrBra.F90 and HrrKet.F90. 
+	These routines are for the HRR step in the 2-e evaluation. They now
+	go up to f-type functions and are generated by a F77 routine that I
+	will check in later. Also updated the Makefiles and increased the
+	default memory use in MemInit.F90.
 
 2002-11-21 17:24  mchalla
 
@@ -8637,6 +9090,14 @@
 
 	* ChangeLog: [no log message]
 
+2002-11-08 22:50  schwegle
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	Makefile_PBC_1, ONX_PBC_1.F90: I forgot to make a couple of changes
+	to the periodic version of the code to get rid of the obsolete ONX
+	gamma function table code. Note that this periodic version should
+	work fine when periodics are on or off.
+
 2002-11-08 20:00  mchalla
 
 	* OneE/MakeRho.F90: Fixed problem with reading in cell sets on
@@ -8717,10 +9178,41 @@
 
 	* OneE/ParaMakeRho.F90: Parallel Periodic HiCu checkin I.
 
+2002-11-06 11:05  schwegle
+
+	* ONX/Makefile: Don't need to compile the code in the MakeTables
+	directory anymore.  This was for the obsolete ONX gamma function
+	tables. Eventually this directory should be removed.
+
+2002-11-06 11:03  schwegle
+
+	* ONX/NONX/: GetTables.F90, Makefile, MemInit.F90,
+	MemInit_PBC_1.F90, Tables.C: Removing all of the obsolete ONX gamma
+	function table routines.
+
 2002-11-06 11:01  schwegle
 
 	* MondoMods/: DerivedTypes.F90, MemMan.F90: Cleaned up IBuf so that
 	all of the obsolete ONX gamma function table info has been removed.
+
+2002-11-06 10:17  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, ComputeXForce.F90,
+	Makefile, RGen.F90: Changed the general integral code to get rid of
+	old gamma function assymptotic parameters. Now everything should be
+	using the specfun values. Also got rid of the call in computekg and
+	computeke that were loading in the older obsolete gamma function
+	tables.
+
+2002-11-06 09:55  schwegle
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int1122.F90, Int1161.F90,
+	Int1162.F90, Int1166.F90, Int2111.F90, Int2121.F90, Int2122.F90,
+	Int2161.F90, Int2162.F90, Int2211.F90, Int2221.F90, Int2222.F90,
+	Int2261.F90, Int6111.F90, Int6121.F90, Int6122.F90, Int6161.F90,
+	Int6211.F90, Int6221.F90, Int6611.F90: Changed all of the
+	assymptotic gamma function values to the standard ones that are
+	used by specfun.
 
 2002-11-05 17:46  nemeth
 
@@ -8933,6 +9425,10 @@
 
 	* MondoMods/: FastMat.F90, InOut.F90: parallel HiCu checkin I:
 	FastMat.F90 replaced, minor change in InOut.F90
+
+2002-10-26 01:40  mchalla
+
+	* ONX/NONX/ComputeKg_PBC_1.F90: Turned off some write statements.
 
 2002-10-25 10:22  mchalla
 
@@ -9545,13 +10041,25 @@
 
 	* Validate/Test.F90: Minor problem with parsing.
 
+2002-09-29 21:46  mchalla
+
+	* ONX/Makefile: [no log message]
+
 2002-09-29 21:00  mchalla
 
 	* MondoMods/Makefile: [no log message]
 
 2002-09-29 20:42  mchalla
 
+	* ONX/Makefile: more release stuff.
+
+2002-09-29 20:42  mchalla
+
 	* Makefile: more release stuff
+
+2002-09-29 20:36  mchalla
+
+	* ONX/Makefile: updated for release.
 
 2002-09-29 20:09  mchalla
 
@@ -9601,6 +10109,16 @@
 	* Docs/HiCu/taxol/: first_sca.dat, ideal.dat, second_sca.dat,
 	taxol_good_div1.eps: taxol scaling results added.
 
+2002-09-27 14:59  schwegle
+
+	* ONX/VRR/: Int2162.F90, Int2222.F90, Int2261.F90, Int6122.F90,
+	Int6221.F90: Includes explicit code for all 2-e's where L<=4
+
+2002-09-27 14:59  schwegle
+
+	* ONX/NONX/GetIntCode.F90: All 2-e's with L<=4 are done now with
+	explicit code.
+
 2002-09-26 15:22  mchalla
 
 	* Docs/DM_Papers/TS4/WATER_FIGS/: PM_BadGuess.epsi, PM_BadGuess.nb,
@@ -9608,6 +10126,19 @@
 	PM_Values_BadGuess, PM_Values_GoodGuess, TS4.nb, TS4_BadGuess.epsi,
 	TS4_BadGuess.nb, TS4_Values_BadGuess, Untitled-1.nb: New files and
 	plots showing migration of eigenvalues with iteration count.
+
+2002-09-26 10:09  schwegle
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	GetIntCode.F90: Update to use more of the explicit integral code.
+	All 2-e ints with L<=3 should be done with explicit code.
+
+2002-09-26 10:08  schwegle
+
+	* ONX/VRR/: Int1162.F90, Int2122.F90, Int2161.F90, Int2221.F90,
+	Int6121.F90, Int6211.F90: Added more explicit code to handle the
+	pur p (not sp) type basis functions. Everything for L<=3 is done
+	and seems to be working fine.
 
 2002-09-26 08:59  mchalla
 
@@ -9891,7 +10422,8 @@
 	* Includes/CompilerSpecifics.AMDLinux.PG,
 	Includes/CompilerSpecifics.AlphaLinux.COMPAQ,
 	Includes/CompilerSpecifics.IntelLinux.PG, VisDX/Makefile,
-	HiCu/Makefile, MondoMods/Makefile, OneE/Makefile,
+	HiCu/Makefile, MondoMods/Makefile, ONX/NONX/Makefile,
+	ONX/VRR/Makefile, OneE/Makefile,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/Makefile,
 	PHiPAC/runs/TBird/PHiPAC_dgemm/src/Makefile, QCTC/Makefile,
 	SCFeqs/Makefile: Changed makefiles and specifics files to use only
@@ -10329,7 +10861,8 @@
 
 2002-06-14 13:53  mchalla
 
-	* QCTC/QCTC.F90: Removed onerous print statment.
+	* ONX/NONX/MemInit_PBC_1.F90, QCTC/QCTC.F90: Removed onerous print
+	statment.
 
 2002-06-14 12:26  mchalla
 
@@ -10340,6 +10873,10 @@
 	* MondoMods/: MMA/LookUpTables/GammaAssymptotics.Inc,
 	MMA/LookUpTables/GammaFunctions.m, SpecFun.F90: Added assymptotic
 	constants to allow entire domain.
+
+2002-06-14 12:25  mchalla
+
+	* ONX/VRR/Int1111.F90: Fixed indexing bug.
 
 2002-06-12 21:06  nemeth
 
@@ -10376,6 +10913,12 @@
 
 	* MondoMods/Macros.F90: Startup changed to include thresholding for
 	MM.
+
+2002-06-11 16:50  mchalla
+
+	* ONX/NONX/Makefile: Accedentally checked in the PBC_1 makefile as
+	Makefile.  Here is the onld one back.  We need to merge PBC_1 and
+	plain ONX soon.
 
 2002-06-11 13:31  nemeth
 
@@ -10418,20 +10961,47 @@
 
 	* ChangeLog: New ChangeLog!
 
+2002-06-08 09:56  mchalla
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	DisOrder_PBC_1.F90, Makefile_PBC_1, MemInit_PBC_1.F90,
+	ONX_PBC_1.F90, RGen.F90: Performance tuned PBC ONX.  Replaced
+	expensive inner loop initializations such as x%i=0 with calls to
+	unrolled seteq77 routines.  Really no need to do use these
+	constructs in DB--should change the logic to avoid these inits
+	altoghether.  Also eliminated calls to function table loads, and
+	some copy in copy out issues related to pointer memory being passed
+	in DisOrder.  We should also work on inproving the interfaces to
+	avoid this problem (pass the object or just pass the first element
+	or use entirely allocatable memory).  -MC
+
 2002-06-08 09:33  mchalla
 
-	* MondoMods/: SpecFun.F90, MMA/LookUpTables/GammaGrid.Inc: Changed
-	Gammafunctions and exp tables to have the same switch=30.  This
-	will give worse accuracy for high ell, and should eventually be
-	redone.  For now though, allows new SpecFun tables to be used in
-	VRR and elswhere.  This modification to PBC ONX works for MgO, and
-	will allow exp table lookup to	be avoided. -MC
+	* MondoMods/SpecFun.F90, MondoMods/MMA/LookUpTables/GammaGrid.Inc,
+	ONX/VRR/Int1111.F90, ONX/VRR/Int1121.F90, ONX/VRR/Int1122.F90,
+	ONX/VRR/Int1161.F90, ONX/VRR/Int1162.F90, ONX/VRR/Int1166.F90,
+	ONX/VRR/Int2111.F90, ONX/VRR/Int2121.F90, ONX/VRR/Int2122.F90,
+	ONX/VRR/Int2161.F90, ONX/VRR/Int2162.F90, ONX/VRR/Int2211.F90,
+	ONX/VRR/Int2221.F90, ONX/VRR/Int2222.F90, ONX/VRR/Int2261.F90,
+	ONX/VRR/Int6111.F90, ONX/VRR/Int6121.F90, ONX/VRR/Int6122.F90,
+	ONX/VRR/Int6161.F90, ONX/VRR/Int6211.F90, ONX/VRR/Int6221.F90,
+	ONX/VRR/Int6611.F90: Changed Gammafunctions and exp tables to have
+	the same switch=30.  This will give worse accuracy for high ell,
+	and should eventually be redone.  For now though, allows new
+	SpecFun tables to be used in VRR and elswhere.	This modification
+	to PBC ONX works for MgO, and will allow exp table lookup to  be
+	avoided. -MC
 
 2002-06-07 21:45  mchalla
 
 	* OneE/MakeS.F90: Set MakeS back to previous.  Wanted to get in new
 	FastMat stuff, even though its still buggy (before another hard
 	computer crash...)
+
+2002-06-07 15:39  nemeth
+
+	* ONX/NONX/ONX_PBC_1.F90: Periodic preprocessing option is added to
+	two places to protect 'db2'.
 
 2002-06-07 13:42  nemeth
 
@@ -10639,6 +11209,32 @@
 
 	* OneE/MakeRho.F90: Removed the Periodic Wrapping, causes problems
 
+2002-04-08 09:20  schwegle
+
+	* ONX/NONX/: DisOrder_PBC_1.F90, Makefile, Makefile_PBC_1,
+	ONX_PBC_1.F90: Update for the PBC version of ONX. To compile the
+	PBC version use the Makefile_PBC_1 file. This version of PBC ONX
+	should be the same as CJs notes:
+	
+	First, the Integral IS:
+	
+	K_{ab} = Sum_{c,d} Sum_{h,g,n} Int dr dr' Phi_a(r) Phi_c(r+h)
+	|r-r'| ^-1 P_{cd}[n] Phi_b(r'+g) Phi_d(r'+h+n)
+	
+	In our Case
+	
+	P_ab[n] = P_ab[0] delta_{n,0}
+	
+	Then
+	
+	K_{ab} = Sum_{c,d} Sum_{h,g} Int dr dr' Phi_a(r) Phi_c(r+h) |r-r'|
+	^-1 P_{cd}[0] Phi_b(r'+g) Phi_d(r'+h)
+	
+	This is not yet implemented in the general integral code so
+	d-functions and p-only (not sp) functions will not work with
+	periodics. For the MgO test input at sto-2g, loose, and HF, it
+	should give a total energy of -263.06001511.
+
 2002-03-10 13:47  mchalla
 
 	* MondoMods/GlobalScalars.F90: Replaced 1/HUGE with TINY.  This
@@ -10657,6 +11253,13 @@
 2002-03-05 13:52  mchalla
 
 	* ChangeLog: [no log message]
+
+2002-03-05 13:51  mchalla
+
+	* ONX/NONX/ONX.F90: Changed get of GMp to CurBasis in case of a
+	non-restart.  This was a serious, serious bug when switching
+	geomtries.  As an asside, we should only use a previous geometry
+	with a NON-extrapolated DM on RESTART.
 
 2002-02-28 14:27  mchalla
 
@@ -10790,6 +11393,18 @@
 	undefined variable UniP.  Added support for Line[AB]--Box
 	thresholding.  This is usefull for avoiding pair-box overlap in the
 	double sums encountered in periodic HiCu.
+
+2002-02-06 10:02  mchalla
+
+	* ONX/NONX/DisOrder_PBC_2.F90: Alternative approach to PBCs, based
+	on including PBC loop in building distribution lists.  Doesn't seem
+	to work either.  Main difficulty lies in indexing, I believe.
+
+2002-02-05 15:49  mchalla
+
+	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
+	DisOrder_PBC_1.F90, MemInit_PBC_1.F90, ONX_PBC_1.F90: First attempt
+	at adding PBCs to ONX.	So far, doesn't work.  Will try again!
 
 2002-02-04 21:38  ckgan
 
@@ -10938,6 +11553,22 @@
 
 	* MondoMods/LinAlg.F90: A trivial bug in SetToI is fixed.
 
+2002-01-23 09:48  schwegle
+
+	* ONX/NONX/ComputeKe.F90: Fixed a bug in the computation of the 2-e
+	scratch space memory allocation. The explicit code should use a lot
+	less memory. Before this was causing ONX to resart in the middle of
+	the calculation to allocate more memory (long run times).
+
+2002-01-18 18:27  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, MemInit.F90: Increased
+	the size of the initial 2-e buffer space. For big systems this was
+	too small and was causing onx to compute half the exchange matrix
+	then restart with a larger buffer space... Also changed the way
+	arrays are passed in ComputeKe.F90 and ComputeKg.F90. This should
+	fix the copy in/out problem in the alpha-linux version of the code.
+
 2002-01-14 15:08  mchalla
 
 	* SCFeqs/: DIIS.F90, FBuild.F90, P2Use.F90, SCFStatus.F90: Cleaned
@@ -10951,6 +11582,20 @@
 	OneE/MakeRho.F90, OneE/MakeT.F90: 
 	Cleaned things up somewhat so code runs through with 2 proc.  Have
 	not yet tried with SDMM.  Should not impact serial code at all.
+
+2002-01-09 18:17  schwegle
+
+	* ONX/VRR/: Int1162.F90, Int2122.F90, Int2161.F90, Int2162.F90,
+	Int2221.F90, Int2222.F90, Int2261.F90, Int6121.F90, Int6122.F90,
+	Int6161.F90, Int6211.F90, Int6221.F90, Int6611.F90, Makefile: Added
+	more explicit integral code. This should cover everything up to L=4
+	except for integrals that involve p (not sp) basis functions. I
+	will add in the p stuff later.
+
+2002-01-09 18:14  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, GetIntCode.F90: Added more explicit
+	integral code. This should cover everything up to L = 4.
 
 2002-01-08 12:31  mchalla
 
@@ -11004,6 +11649,13 @@
 	* MondoMods/MemMan.F90: Made a change to the IBuf def to reorder
 	the indexes in WR and WZ.
 
+2001-12-14 17:24  schwegle
+
+	* ONX/NONX/: ComputeKg.F90, DisOrder.F90, Makefile, README,
+	RGen.F90, RGen1C.F90, VRRl.F90, vrrl.F: Converted vrrl.F to
+	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
+	This needs a change in MemMan.F90 in MondoMods.
+
 2001-12-14 15:33  mchalla
 
 	* ChangeLog: [no log message]
@@ -11036,6 +11688,13 @@
 	-------------------------------------------------------------------
 	---
 
+2001-12-11 17:16  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, Digest.F90,
+	DisOrder.F90, GetIntSpace.F90, HRRKet.F, Makefile, MemInit.F90,
+	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
+	with the array dimensions in the 2-e code.
+
 2001-12-10 11:57  mchalla
 
 	* ChangeLog: [no log message]
@@ -11051,7 +11710,8 @@
 	MondoMods/DerivedTypes.F90, MondoMods/InOut.F90,
 	MondoMods/Macros.F90, MondoMods/PBC.F90,
 	MondoMods/Thresholding.F90, OneE/BlokTrPdT.F90, OneE/BlokTrWdS.F90,
-	OneE/MakeRho.F90, OneE/SBlok.F90, OneE/TBlok.F90, SCFeqs/SDMM.F90,
+	OneE/MakeRho.F90, OneE/SBlok.F90, OneE/TBlok.F90,
+	ONX/NONX/DisOrder.F90, ONX/NONX/DisOrderGrad.F90, SCFeqs/SDMM.F90,
 	QCTC/BlokTrPdJ.F90, QCTC/JGen.F90: Changed back to pre 2001-11-26
 	to eliminate periodic instabilities and feature bloat.
 
@@ -11063,19 +11723,24 @@
 
 	* MondoMods/Thresholding.F90: Fixed an Allocate Bug
 
-2001-12-05 15:11  tymczak
+2001-12-05 15:12  tymczak
 
-	* OneE/: BlokTrWdS.F90, BlokTrPdT.F90: New TestPrimPair()
+	* OneE/BlokTrPdT.F90: New TestPrimPair()
 
 2001-12-05 15:11  tymczak
 
 	* OneE/MakeRho.F90: SetThresholds(PrvBase) ->
 	SetThresholds(PrvBase,Prog)
 
-2001-12-05 15:08  tymczak
+2001-12-05 15:09  tymczak
 
-	* OneE/SBlok.F90, QCTC/JGen.F90, QCTC/BlokTrPdJ.F90,
-	OneE/TBlok.F90: New TestPrimPair()
+	* QCTC/JGen.F90, QCTC/BlokTrPdJ.F90, OneE/TBlok.F90,
+	OneE/BlokTrWdS.F90: New TestPrimPair()
+
+2001-12-05 15:05  tymczak
+
+	* ONX/NONX/DisOrder.F90, ONX/NONX/DisOrderGrad.F90, OneE/SBlok.F90:
+	New TestPrimPair()
 
 2001-12-05 15:04  tymczak
 
@@ -11236,6 +11901,10 @@
 
 	* MondoMods/MPIInclude.F90: [no log message]
 
+2001-11-19 08:14  mchalla
+
+	* ONX/Makefile: Now removes Drivers/*.binary on purge
+
 2001-11-19 08:11  mchalla
 
 	* Scripts/cpq_dbx: compaq dbxer
@@ -11265,6 +11934,10 @@
 	CompilerSpecifics.IntelLinux.PG, Ell.m: No longer given even token
 	support.
 
+2001-11-19 07:57  mchalla
+
+	* ONX/Makefile: Added purge for NONX
+
 2001-11-19 07:54  mchalla
 
 	* Scripts/: aix_dbx, aix_pedb, nag_dbx, pgf_dbx, sgi_dbx: [no log
@@ -11281,7 +11954,8 @@
 
 2001-11-19 07:28  mchalla
 
-	* OneE/MakeRho.F90: Reconfigured to allow restarts.
+	* OneE/MakeRho.F90, ONX/NONX/ONX.F90: Reconfigured to allow
+	restarts.
 
 2001-11-15 17:00  mchalla
 
@@ -11334,6 +12008,10 @@
 	* OneE/MakeRho.F90, QCTC/QCTC.F90, SCFeqs/FBuild.F90: [no log
 	message]
 
+2001-11-07 23:22  mchalla
+
+	* ONX/NONX/Makefile: Added purge feature to Makefile.
+
 2001-11-07 23:18  mchalla
 
 	* QCTC/: Makefile, QCTC.F90: [no log message]
@@ -11346,6 +12024,10 @@
 2001-11-07 23:11  mchalla
 
 	* README: [no log message]
+
+2001-11-07 23:11  mchalla
+
+	* ONX/NONX/ONX.F90: Added logic for incremental K builds.
 
 2001-11-07 23:09  mchalla
 
@@ -11415,6 +12097,10 @@
 2001-11-02 13:06  mchalla
 
 	* Makefile: [no log message]
+
+2001-11-02 12:49  mchalla
+
+	* ONX/NONX/GradONX.F90: Gets the right density matrix now (SCF+1).
 
 2001-11-02 12:37  mchalla
 
@@ -11489,6 +12175,15 @@
 	* OneE/MakeRho.F90: Redid the Periodics and Added the Calculation
 	of the Multipoles to MakeRho
 
+2001-11-01 09:59  schwegle
+
+	* ONX/VRR/: Int1166.F90, Makefile: Adding more int code.
+
+2001-11-01 09:58  schwegle
+
+	* ONX/NONX/: GetIntCode.F90, MemInit.F90: Anouther fix to the
+	integral code
+
 2001-11-01 09:58  tymczak
 
 	* QCTC/Globals.F90: Added RhoPoles, the multipoles of Rho to
@@ -11523,6 +12218,27 @@
 
 	* VisDX/PotMapRho.F90: Redid Periodics
 
+2001-10-30 12:58  schwegle
+
+	* ONX/VRR/: Int1161.F90, Int2121.F90, Int6111.F90, Int6611.F90,
+	Makefile: Explicit code works up to L=2
+
+2001-10-30 12:49  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, GetIntCode.F90: Explicit code ok up to
+	L=2 CVS
+	-------------------------------------------------------------------
+	---
+
+2001-10-29 09:12  schwegle
+
+	* ONX/NONX/GetIntCode.F90: Should be a stable version for matrices.
+
+2001-10-29 09:03  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, GetIntCode.F90,
+	Makefile: Should be a stable verrsion for matrices.
+
 2001-10-29 08:48  mchalla
 
 	* README, Makefile: [no log message]
@@ -11530,6 +12246,21 @@
 2001-10-29 08:46  mchalla
 
 	* Makefile: Removed ONX from release.
+
+2001-10-29 08:42  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, ComputeXForce.F90,
+	ContractG.F90, Digest.F90, DigestGradient.F90, DisOrder.F90,
+	DisOrderGrad.F90, GetGradient.F90, GradONX.F90, HRRBra.F,
+	HRRKetGrad.F, Sizes.F90, VRRs.F90: [no log message]
+
+2001-10-29 08:32  mchalla
+
+	* ONX/Makefile: Fixed release mechanism.
+
+2001-10-29 08:29  mchalla
+
+	* ONX/NONX/Makefile: Added release funtion.
 
 2001-10-29 08:05  mchalla
 
@@ -11590,6 +12321,14 @@
 
 	* Validate/: BetaCarotene.inp, Makefile, SiF4.inp: [no log message]
 
+2001-10-28 09:08  mchalla
+
+	* ONX/NONX/ONX.F90: Fixed printing of checksums etc.
+
+2001-10-28 09:00  mchalla
+
+	* ONX/NONX/ONX.F90: [no log message]
+
 2001-10-28 08:15  mchalla
 
 	* Validate/BetaCarotene.inp, Validate/Biotin.inp,
@@ -11597,6 +12336,12 @@
 	Validate/Urea.inp, Validate/Vancomycin.inp, Validate/Water.inp,
 	SCFeqs/SDMM.F90, MondoMods/ParsingConstants.F90,
 	MondoMods/PrettyPrint.F90: [no log message]
+
+2001-10-27 11:29  schwegle
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int1122.F90, Int2111.F90,
+	Int2121.F90, Int2211.F90, Makefile: Added more explicit integral
+	code. Int2121.F90 is messed up for pure p (not sp) basis functions.
 
 2001-10-26 16:54  mchalla
 
@@ -11716,10 +12461,11 @@
 	MondoMods/MatFunk.F90, MondoMods/Parse.F90,
 	MondoMods/ParsingConstants.F90, MondoMods/PrettyPrint.F90,
 	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/SForce.F90,
-	OneE/TForce.F90, SCFeqs/DIIS.F90, SCFeqs/Makefile,
-	SCFeqs/P2Use.F90, SCFeqs/SCFStatus.F90, SCFeqs/SDMM.F90,
-	VisDX/Makefile, Scripts/MondoSetUp, Scripts/mondo, QCTC/JForce.F90,
-	QCTC/Makefile, QCTC/QCTC.F90: [no log message]
+	OneE/TForce.F90, ONX/NONX/GradONX.F90, ONX/NONX/Makefile,
+	SCFeqs/DIIS.F90, SCFeqs/Makefile, SCFeqs/P2Use.F90,
+	SCFeqs/SCFStatus.F90, SCFeqs/SDMM.F90, VisDX/Makefile,
+	Scripts/MondoSetUp, Scripts/mondo, QCTC/JForce.F90, QCTC/Makefile,
+	QCTC/QCTC.F90: [no log message]
 
 2001-10-19 16:46  mchalla
 
@@ -11734,6 +12480,11 @@
 	damping for first (0'th->1'st) cycle transition, which should
 	prevent problematic overshooting that occurs on basis set
 	switching.
+
+2001-10-18 14:00  mchalla
+
+	* ONX/NONX/GradONX.F90: Changed to get DM from CCyc+1, which is
+	presumably more converged.
 
 2001-10-18 13:48  mchalla
 
@@ -11774,6 +12525,13 @@
 	density matrix produced, rather than the one preceeding the last
 	fock build.
 
+2001-10-18 13:22  mchalla
+
+	* ONX/NONX/: Makefile, ONX.F90: Changed make file so it removes ONX
+	from Exec.  Also, changed control structure on SCFActn so it reads
+	in the correct density matrix, avoiding the front end from doing a
+	system call to copy matrices.
+
 2001-10-17 15:30  ckgan
 
 	* Scripts/mondo: changed sh to csh, more arguments added.
@@ -11802,6 +12560,11 @@
 2001-10-16 14:28  mchalla
 
 	* OneE/MakeRho.F90: Got rid of all that iSwitch sillyness...
+
+2001-10-16 14:27  mchalla
+
+	* ONX/NONX/ONX.F90: Removed all the iswitch stuff.  Just check for
+	DeltaD.  Default is D.
 
 2001-10-16 14:26  mchalla
 
@@ -11873,6 +12636,11 @@
 2001-10-11 15:16  mchalla
 
 	* OneE/MakeT.F90: Turned filter back on.
+
+2001-10-11 15:14  mchalla
+
+	* ONX/NONX/: GradONX.F90, ONX.F90: Turned filter back on, changed
+	from SCFName to ScrName
 
 2001-10-11 14:56  mchalla
 
@@ -12011,6 +12779,18 @@
 	* OneE/SForce.F90, OneE/TForce.F90, QCTC/JForce.F90,
 	HiCu/XCForce.F90: turned of force printing
 
+2001-09-24 16:29  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, RGen.F90: Added explcit
+	2-e code for integrals that involve a single sp function.  This
+	update most likely will break for integrals with p (like 6-31G**)
+	functions...
+
+2001-09-24 16:27  schwegle
+
+	* ONX/VRR/: Int1111.F90, Int1121.F90, Int2111.F90, Makefile: Added
+	explicit 2-e code for 2-e ints that have a single p function.
+
 2001-09-22 17:38  mchalla
 
 	* Validate/: Makefile, sub_pbs, BetaCarotene.inp, Caffiene.inp,
@@ -12029,11 +12809,36 @@
 	* Validate/: Caffiene.inp, Chlorophyll.inp, Urea.inp,
 	Vancomycin.inp, sub_pbs: [no log message]
 
+2001-09-21 14:29  schwegle
+
+	* ONX/VRR/Int1111.F90: Removed some USE statements that are not
+	needed.
+
+2001-09-21 14:28  schwegle
+
+	* ONX/Makefile: Correct compiler order, do not change...
+
 2001-09-21 12:42  mchalla
 
 	* Validate/: BetaCarotene.inp, Biotin.inp, Chlorophyll.inp,
 	SiF4.inp, Urea.inp, Vancomycin.inp, Makefile, sub_pbs,
 	SiliconTetraFluride.inp: [no log message]
+
+2001-09-21 11:33  schwegle
+
+	* ONX/NONX/: ComputeK.F90, ComputeKe.F90, ComputeKg.F90, Makefile,
+	ONX.F90: Started adding explicit two-electron integral code. So far
+	only s-type functions have been included. Now links with the
+	libVRR.a library.
+
+2001-09-21 11:25  schwegle
+
+	* ONX/Makefile: Added VRR to the make list.
+
+2001-09-21 11:20  schwegle
+
+	* ONX/VRR/: Int1111.F90, Makefile: New explicit integral code for
+	use in NONX.  So far this only includes s-type functions...
 
 2001-09-21 11:05  mchalla
 
@@ -12153,6 +12958,14 @@
 	* HiCu/Thresholds.F90: Tunned TauRho.  Made quite a large
 	improvement!
 
+2001-08-29 15:06  schwegle
+
+	* ONX/NONX/: ComputeK.F90, DisOrder.F90, HRRBra.F, MemInit.F90,
+	ONX.F90, README, RangeOfExchange.F90: Fixed d-function bug in
+	integral code and bug in the dynamic memory allocation scheme.
+	Should give 9 digit agreement with 6-31G** HF on the urea test
+	input.
+
 2001-08-27 11:32  tymczak
 
 	* QCTC/TreeWalk.F90: Cange to -> IF(Q%Zeta==NuclearExpnt .AND.
@@ -12262,6 +13075,29 @@
 	checksumming to force routines.  Also removed copy in copy out from
 	block trace routines.  Removed some printing.
 
+2001-08-20 05:00  mchalla
+
+	* ONX/: Makefile, MakeTables/Convert.F, MakeTables/ConvertE.F,
+	MakeTables/ConvertG0.F, MakeTables/ConvertG1.F,
+	MakeTables/ConvertG10.F, MakeTables/ConvertG11.F,
+	MakeTables/ConvertG12.F, MakeTables/ConvertG2.F,
+	MakeTables/ConvertG3.F, MakeTables/ConvertG4.F,
+	MakeTables/ConvertG5.F, MakeTables/ConvertG6.F,
+	MakeTables/ConvertG7.F, MakeTables/ConvertG8.F,
+	MakeTables/ConvertG9.F, NONX/DigestGradient.F90, NONX/DisOrder.F90,
+	NONX/DisOrderGrad.F90, NONX/GetGradient.F90, NONX/GradONX.F90,
+	NONX/HRRBraGrad.F, NONX/ONX.F90, NONX/RGen.F90, NONX/RGen1C.F90,
+	NONX/VRRs.F90: Added checksumming and IO to GradONX, modified code
+	to compile under NAG with implicit none enforced.  This included
+	DFLOAT->DBLE, moving array bounds declerations above the arrays,
+	and changing INTENT(IN) to INTENT(INOUT) in cases where the
+	variable occured on the left hand side of an equals sign.
+
+2001-08-20 04:57  mchalla
+
+	* ONX/GDrivers/: GCMaker.C, GCMaker.c: Changed .c to .C to avoid
+	being purged.
+
 2001-08-20 04:54  mchalla
 
 	* QCTC/: BlokTrPdJ.F90, JForce.F90, MondoPoles.F90, PoleTree.F90,
@@ -12298,6 +13134,50 @@
 
 	* MondoMods/: BraBloks.F90, SMTest.F90: [no log message]
 
+2001-08-17 18:39  schwegle
+
+	* ONX/Makefile: Added the MakeTables dir
+
+2001-08-17 18:38  schwegle
+
+	* ONX/MakeTables/: ADump.C, EDump.C, GCMaker.C, GDump.C,
+	GetGammaTable.C, HDump.C, MAIN.C: Trying to convert c to C?
+
+2001-08-17 18:37  schwegle
+
+	* ONX/MakeTables/: ADump.c, EDump.c, GCMaker.c, GDump.c,
+	GetGammaTable.c, HDump.c, MAIN.c: Trying to change c to C?
+
+2001-08-17 18:36  schwegle
+
+	* ONX/MakeTables/: GCMaker.c, MakeGD.F, Makefile: New maketable
+	code
+
+2001-08-17 18:17  schwegle
+
+	* ONX/Makefile: Addede
+
+2001-08-17 18:13  schwegle
+
+	* ONX/GDrivers/: G1.101x101.ascii, G1.101x201.ascii,
+	G1.101x202.ascii, G1.201x101.ascii, G1.201x201.ascii,
+	G1.201x202.ascii, G1.202x101.ascii, G1.202x201.ascii,
+	G1.202x202.ascii, G2.101x101.ascii, G2.101x201.ascii,
+	G2.101x202.ascii, G2.201x101.ascii, G2.201x201.ascii,
+	G2.201x202.ascii, G2.202x101.ascii, G2.202x201.ascii,
+	G2.202x202.ascii, G3.101x101.ascii, G3.101x201.ascii,
+	G3.101x202.ascii, G3.201x101.ascii, G3.201x201.ascii,
+	G3.201x202.ascii, G3.202x101.ascii, G3.202x201.ascii,
+	G3.202x202.ascii, G4.101x101.ascii, G4.101x201.ascii,
+	G4.101x202.ascii, G4.201x101.ascii, G4.201x201.ascii,
+	G4.201x202.ascii, G4.202x101.ascii, G4.202x201.ascii,
+	G4.202x202.ascii, G5.101x101.ascii, G5.101x201.ascii,
+	G5.101x202.ascii, G5.201x101.ascii, G5.201x201.ascii,
+	G5.201x202.ascii, G5.202x101.ascii, G5.202x201.ascii,
+	G5.202x202.ascii, GCMaker.c, MAIN.c, MakeGD.F, Makefile: These are
+	the integral driver files for doing an onx gradient calculation. 
+	Includes indexing to do gradients of s and p type integrals.
+
 2001-08-17 18:10  schwegle
 
 	* MondoMods/MemMan.F90: Added several subroutines for onx. ERS
@@ -12305,6 +13185,17 @@
 2001-08-17 18:10  schwegle
 
 	* MondoMods/DerivedTypes.F90: Added several entries for onx. ERS
+
+2001-08-17 18:08  schwegle
+
+	* ONX/NONX/: ComputeK.F90, ComputeXForce.F90, ContractG.F90,
+	DigestGradient.F90, DisOrder.F90, DisOrderGrad.F90, GDLoader.C,
+	GDrivers.F90, GetGradient.F90, GradONX.F90, HRRBraGrad.F,
+	HRRKetGrad.F, InitExchangeMatrix.F90, InitSubInd.F90, LSearch.F,
+	Makefile, MemInit.F90, ONX.F90, ONXParameters.F90, RGen.F90,
+	vrrl.F: First version with the gradient code. Warning, there are
+	many bugs in the gradient code. This is still very much a work in
+	progress. At least it should compile...
 
 2001-08-15 18:27  mchalla
 
@@ -12572,6 +13463,10 @@
 	* Includes/CompilerSpecifics.AMDLinux.PG: Turned on athlon flags,
 	01->02.
 
+2001-06-29 15:27  mchalla
+
+	* ONX/Makefile: Removed extra old directories.
+
 2001-06-29 15:25  mchalla
 
 	* MondoMods/Makefile: fixed.
@@ -12592,6 +13487,31 @@
 2001-06-29 14:57  mchalla
 
 	* Makefile: New Makefile!
+
+2001-06-29 14:05  mchalla
+
+	* ONX/Makefile: Now targeting only NONX.  Deletes old ONX
+	directories when making a release.
+
+2001-06-29 14:03  mchalla
+
+	* ONX/NONX/Makefile: fixed.
+
+2001-06-29 14:02  mchalla
+
+	* ONX/NONX/Makefile: Makefile now supports make release capability.
+
+2001-06-29 13:55  mchalla
+
+	* ONX/NONX/Makefile: Makefile that supprots make release.
+
+2001-06-29 13:51  mchalla
+
+	* ONX/NONX/: CCDriver.C, Tables.C, VRRDriver.C: Now in big C flavor
+
+2001-06-29 13:51  mchalla
+
+	* ONX/NONX/: CCDriver.c, Tables.c, VRRDriver.c: Switched to big C.
 
 2001-06-29 13:28  mchalla
 
@@ -13382,9 +14302,49 @@
 
 	* Makefile: Added info for QuNew
 
+2001-03-10 11:34  schwegle
+
+	* ONX/MakeTables/: ADump.c, Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, Makefile: New binary gamma table format for
+	NONX
+
 2001-03-10 11:33  schwegle
 
 	* MondoMods/: DerivedTypes.F90, MemMan.F90: Small changes for NONX
+
+2001-03-10 11:33  schwegle
+
+	* ONX/NONX/: ComputeK.F90, Contract.F90, Digest.F90, DisOrder.F90,
+	Fillout.F90, GetAdr.F90, HRRKet.F, InitExchangeMatrix.F90,
+	LSearch.F, Makefile, MemInit.F90, ONX.F90, ONXParameters.F90,
+	README, RGen.F90, RangeOfDensity.F90, SkipOut.F, XPose.F, vrrl.F:
+	New version of ONX that appears to work. Uses much less memory than
+	previous versions and is in most cases able to reallocate memory on
+	the fly. This version does not have multipoles or all of the
+	explicit integral code yet. The only known problem is that the 2-e
+	scratch spaces W1 and W2 can potentially go out of bounds. Some
+	simple logic statements will be added to fix this in the next
+	version. As it is now, this code is a little bit slower than PONX.
+	Once the explicit integral code is moved over this version should
+	be the fastest ONX version.
+
+2001-03-03 13:03  schwegle
+
+	* ONX/NONX/: ComputeK.F90, Contract.F90, Digest.F90, DisOrder.F90,
+	GetAdr.F90, GetTables.F90, HRRKet.F, Makefile, MemInit.F90,
+	ONX.F90, ONXMemory.F90, PutDis.F90, PutSubBlk.F90, README,
+	RGen.F90, RGen1C.F90, Scatter.F90, Tables.c: Everything seems to be
+	in place and more less working.  Time to compare the integrals and
+	K matrices with PONX.
+
+2001-02-24 12:29  schwegle
+
+	* ONX/NONX/: BSearch.F, ComputeK.F90, DisOrder.F90, GetSubBlk.F,
+	LSearch.F, Makefile, README, SkipOut.F: Fixed some pointer bugs in
+	DisOrder. ComputeK is all set up now to find the skipout points and
+	compute integrals...
 
 2001-02-05 13:55  salazarm
 
@@ -13467,10 +14427,36 @@
 	* QCTC/MMA/PAC/: Makefile, PACFunctions.m: penetration
 	acceptability functions
 
+2001-01-17 09:21  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GammaHeader.c, GammaTable.c,
+	GetTables.F90, Makefile, Sizes.F90, Tables.c: Working on ComputeK,
+	there is a bug in the distribution lists. Somethig goes out of
+	bounds.
+
+2001-01-17 08:26  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GetGammaTable.F90: Moved into single
+	GetTable module
+
+2001-01-15 16:49  schwegle
+
+	* ONX/MakeTables/: Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, HDump.c, Makefile: Reordered the gamma
+	function tables to go with the new ONX f90 code.
+
 2001-01-15 16:47  schwegle
 
 	* MondoMods/: DerivedTypes.F90, MemMan.F90: Modified the ONX data
 	types -Eric
+
+2001-01-15 16:47  schwegle
+
+	* ONX/NONX/: ComputeK.F90, GammaHeader.c, GammaTable.c,
+	GetGammaTable.F90, Makefile, MemInit.F90, ONX.F90: Now loads in the
+	gamma function tables on the fly.
 
 2001-01-15 14:25  schwegle
 
@@ -13481,6 +14467,16 @@
 	in for now.
 	
 	-Eric
+
+2001-01-15 14:14  schwegle
+
+	* ONX/NONX/: DisOrder.F90, HRRBra.F, HRRKet.F, Makefile,
+	MemInit.F90, ONX.F90, ONXMemory.F90, PutDis.F90, QuickSortDis.F,
+	README, RangeOfExchange.F90, Stats.F90, VRRs.F90: New version of
+	onx. At this point it should compute the swartz ineq. and put the
+	distributions into buffers. All the the distribution buffers are
+	dynamic so that if it runs out of memory it can in almost all cases
+	recover.
 
 2001-01-10 18:13  tymczak
 
@@ -13653,9 +14649,31 @@
 	VMD/OLD/VMD44.f: Removed QCTC!	To be replaced with the real
 	QCTC...
 
+2000-12-20 09:55  schwegle
+
+	* ONX/NONX/contract.F: contract.F has been F90'ed and is now called
+	Contract.F90
+
+2000-12-20 09:53  schwegle
+
+	* ONX/NONX/: HRRBra.F, HRRKet.F: New versions (basically a name
+	change) of the HRR files. These originally were called hrrbra_old.F
+	and hrrket_old.F. The plan is to get rid of the explict versions
+	for now (hrrbra.F and hrrket.F).
+
+2000-12-20 09:50  schwegle
+
+	* ONX/NONX/: Contract.F90, DisOrder.F90, MemInit.F90, ONX.F90,
+	ONXMemory.F90, RGen1C.F90, hrrbra_old.F, hrrket_old.F: Renamed some
+	of the HRR files.
+
 2000-12-12 13:56  mchalla
 
 	* HiCu/Makefile: Makefile shouldn't allow deletion of General*.Inc
+
+2000-12-12 13:34  mchalla
+
+	* ONX/PONX/pmonx.inc: Bumped up buffers some more...
 
 2000-12-12 12:22  mchalla
 
@@ -13664,6 +14682,11 @@
 2000-12-12 12:19  mchalla
 
 	* MondoMods/Parse.F90: Lengthend DblToMedmChar
+
+2000-12-12 12:16  mchalla
+
+	* ONX/PONX/pmonx.inc: Doubled buffer sizes to allow calculations on
+	Si and Zn.
 
 2000-12-12 12:15  mchalla
 
@@ -13689,6 +14712,36 @@
 	* SCFeqs/SDMM.F90: The McWeeny purification scheme has been
 	replaced by the Parser-Manopolis purification.	Works robustly now
 	without loss of electrons.
+
+2000-12-11 10:57  schwegle
+
+	* ONX/NONX/: DisOrder.F90, MemInit.F90, ONX.F90, ONXMemory.F90:
+	First version of putting the distribution and integral buffers into
+	their own data sets.
+
+2000-12-11 08:52  schwegle
+
+	* ONX/Drivers/: VRRDriver.ascii, VRRLoc.ascii: New VRR driver files
+	that include all of the lower angular symmetry types.
+
+2000-12-11 08:38  schwegle
+
+	* ONX/NONX/: CCDriver.c, Contract.F90, ContractionScaling.F90,
+	DisOrder.F90, InitExchangeMatrix.F90, Makefile, MatFilter.F90,
+	MemInit.F90, ONX.F90, ONXMemory.F90, ONXParameters.F90, README,
+	RGen1C.F90, RangeOfDensity.F90, Sizes.F90, Stats.F90, VRRDriver.c,
+	VRRs.F90, contract.F, hrrbra_old.F, hrrket_old.F, vrrl.F: First
+	version of NONX. Looks like it does distribution thresholding
+	right.
+
+2000-12-11 08:36  schwegle
+
+	* ONX/NONX/: CCDriver.c, ContractionScaling.F90, DisOrder.F90,
+	DisOrder.f.original, GetBigInt.F, IDmn.F, InitExchangeMatrix.F90,
+	Makefile, MatFilter.F90, NFinal.F, ONX.F90, ONXBuf.F90,
+	ONXParameters.F90, README, RGen1C.F90, VRRDriver.c, contract.F,
+	hrrbra_old.F, hrrket_old.F, iT.F, vrrl.F: Cleaning up the NONX
+	stuff
 
 2000-12-05 17:32  tymczak
 
@@ -13811,6 +14864,16 @@
 
 	* OneE/MakeRho.F90: Put in a call to NewBraKetBlok.
 
+2000-12-01 09:34  schwegle
+
+	* ONX/PONX/: CalcK.F, ONXBuf.F90: Increased the fixed distribution
+	buffers in ONXBuf so that the large hydrogen calculation will work.
+	These sort of problems will be eliminated in the next version of
+	onx.
+	
+	Also turned on the multipole code in CalcK. The multipoles have not
+	really been tested very much, but they appear to work for now.
+
 2000-11-28 14:07  mchalla
 
 	* SCFeqs/SDMM.F90: Fixed typo
@@ -13888,6 +14951,16 @@
 2000-11-28 10:03  mchalla
 
 	* Scripts/: MondoSetUp, nag_dbx: very minor changes
+
+2000-11-28 10:02  mchalla
+
+	* ONX/: MakeTables/Makefile, PONX/Makefile, PONX/ONXLoop.F90:	-
+	MakeTables/Makefile: Added EXTRA_INCLUDES to specify
+	MondoMods/MMA/Functions
+	  - PONX/ONXLoop:  Added "USE SpecFun" and changed "TE=ErrorFC(T)"
+	to "TE=ERFC(T)",
+	    where ERFC is defined in SpecFun.
+	  - PONX/Makefile: Removed $(LAPACK)
 
 2000-11-28 09:56  mchalla
 
@@ -13979,14 +15052,168 @@
 	only
 	    -O1 untill we try v3.2 (which still has bugs).
 
+2000-11-11 10:16  schwegle
+
+	* ONX/NONX/VRRDriver.c: [no log message]
+
+2000-11-07 09:51  schwegle
+
+	* ONX/NONX/: DisOrder.F90, Makefile, README, RGen1C.F, RGen1C.F90,
+	iT.F: Worked on RGen1C, converted it from F77 to F90, needs to be
+	tested.  Call to RGen1C in DisOrder.F90 needs to be updated.
+
+2000-11-06 12:06  schwegle
+
+	* ONX/PONX/: AddDis.F, ONXBuf.F90: Fixed an array bounds error. Was
+	passing the wroung array bounds for some temporary arrays that are
+	used in AddDis.F
+
+2000-11-06 09:28  schwegle
+
+	* ONX/NONX/: CCDriver.c, ContractionScaling.F90, DisOrder.F90,
+	DisOrder.f.original, GetBigInt.F, IDmn.F, InitExchangeMatrix.F90,
+	MatFilter.F90, NFinal.F, ONX.F90, ONXBuf.F90, ONXParameters.F90,
+	README, RGen1C.F, VRRDriver.c, contract.F, hrrbra_old.F,
+	hrrket_old.F, iT.F, vrrl.F: New version of ONX that combines all
+	versions of ONX (ONX, SONX, MASONX, ect) into one code.
+
+2000-11-04 11:24  schwegle
+
+	* ONX/Makefile: Main makefile for ONX versions
+
 2000-11-04 11:14  schwegle
 
 	* Makefile: I (ERS) added ONX to the make all option
+
+2000-11-04 11:11  schwegle
+
+	* ONX/PONX/CalcK.F: [no log message]
 
 2000-11-02 10:04  schwegle
 
 	* README: Major reordering of ONX. Compiles and runs, but is still
 	messed up. Do not use this version yet.
+
+2000-11-02 09:51  schwegle
+
+	* ONX/Drivers/: CDriver.ascii, VRRDriver.ascii, VRRLoc.ascii: [no
+	log message]
+
+2000-11-02 09:49  schwegle
+
+	* ONX/PONX/: CCDriver.c, VRRDriver.c: Changed path to the driver
+	files.
+
+2000-11-02 09:48  schwegle
+
+	* ONX/PONX/Makefile: Changed the executable name from PONX to ONX
+
+2000-11-02 09:36  schwegle
+
+	* ONX/: PONXMults/ContKet0x0.inc, PONXMults/ContKet0x1.inc,
+	PONXMults/ContKet0x2.inc, PONXMults/ContKet0x3.inc,
+	PONXMults/ContKet0x4.inc, PONXMults/ContKet1x0.inc,
+	PONXMults/ContKet1x1.inc, PONXMults/ContKet1x2.inc,
+	PONXMults/ContKet1x3.inc, PONXMults/ContKet1x4.inc,
+	PONXMults/ContKet2x0.inc, PONXMults/ContKet2x1.inc,
+	PONXMults/ContKet2x2.inc, PONXMults/ContKet2x3.inc,
+	PONXMults/ContKet2x4.inc, PONXMults/ContKet3x0.inc,
+	PONXMults/ContKet3x1.inc, PONXMults/ContKet3x2.inc,
+	PONXMults/ContKet3x3.inc, PONXMults/ContKet3x4.inc,
+	PONXMults/ContKet4x0.inc, PONXMults/ContKet4x1.inc,
+	PONXMults/ContKet4x2.inc, PONXMults/ContKet4x3.inc,
+	PONXMults/ContKet4x4.inc, PONXMults/Interact0x0.inc,
+	PONXMults/Interact0x1.inc, PONXMults/Interact0x2.inc,
+	PONXMults/Interact0x3.inc, PONXMults/Interact0x4.inc,
+	PONXMults/Interact1x0.inc, PONXMults/Interact1x1.inc,
+	PONXMults/Interact1x2.inc, PONXMults/Interact1x3.inc,
+	PONXMults/Interact1x4.inc, PONXMults/Interact2x0.inc,
+	PONXMults/Interact2x1.inc, PONXMults/Interact2x2.inc,
+	PONXMults/Interact2x3.inc, PONXMults/Interact2x4.inc,
+	PONXMults/Interact3x0.inc, PONXMults/Interact3x1.inc,
+	PONXMults/Interact3x2.inc, PONXMults/Interact3x3.inc,
+	PONXMults/Interact3x4.inc, PONXMults/Interact4x0.inc,
+	PONXMults/Interact4x1.inc, PONXMults/Interact4x2.inc,
+	PONXMults/Interact4x3.inc, PONXMults/Interact4x4.inc,
+	PONXMults/Makefile, PONXMults/bkonx.inc, PONXMults/md0x0.F,
+	PONXMults/md0x1.F, PONXMults/md0x2.F, PONXMults/md0x3.F,
+	PONXMults/md0x4.F, PONXMults/md1x0.F, PONXMults/md1x1.F,
+	PONXMults/md1x2.F, PONXMults/md1x3.F, PONXMults/md1x4.F,
+	PONXMults/md2x0.F, PONXMults/md2x1.F, PONXMults/md2x2.F,
+	PONXMults/md2x3.F, PONXMults/md2x4.F, PONXMults/md3x0.F,
+	PONXMults/md3x1.F, PONXMults/md3x2.F, PONXMults/md3x3.F,
+	PONXMults/md3x4.F, PONXMults/md4x0.F, PONXMults/md4x1.F,
+	PONXMults/md4x2.F, PONXMults/md4x3.F, PONXMults/md4x4.F,
+	PONXMults/ms0x0.F, PONXMults/ms0x1.F, PONXMults/ms0x2.F,
+	PONXMults/ms0x3.F, PONXMults/ms0x4.F, PONXMults/ms1x0.F,
+	PONXMults/ms1x1.F, PONXMults/ms1x2.F, PONXMults/ms1x3.F,
+	PONXMults/ms1x4.F, PONXMults/ms2x0.F, PONXMults/ms2x1.F,
+	PONXMults/ms2x2.F, PONXMults/ms2x3.F, PONXMults/ms2x4.F,
+	PONXMults/ms3x0.F, PONXMults/ms3x1.F, PONXMults/ms3x2.F,
+	PONXMults/ms3x3.F, PONXMults/ms3x4.F, PONXMults/ms4x0.F,
+	PONXMults/ms4x1.F, PONXMults/ms4x2.F, PONXMults/ms4x3.F,
+	PONXMults/ms4x4.F, PONXMults/pmonx.inc, MakeTables/Convert.F,
+	MakeTables/ConvertE.F, MakeTables/ConvertG0.F,
+	MakeTables/ConvertG1.F, MakeTables/ConvertG10.F,
+	MakeTables/ConvertG11.F, MakeTables/ConvertG12.F,
+	MakeTables/ConvertG2.F, MakeTables/ConvertG3.F,
+	MakeTables/ConvertG4.F, MakeTables/ConvertG5.F,
+	MakeTables/ConvertG6.F, MakeTables/ConvertG7.F,
+	MakeTables/ConvertG8.F, MakeTables/ConvertG9.F, MakeTables/EDump.c,
+	MakeTables/GDump.c, MakeTables/GetGammaTable.c, MakeTables/MAIN.c,
+	MakeTables/Makefile: [no log message]
+
+2000-11-02 09:35  schwegle
+
+	* ONX/PONX/: MondoHalt.F, ONXBuf.F90, ONXLoop.F90: Added
+	thresholding module and fixed indexing bug in ONXLoop changed
+	mondohalt to just stop.
+
+2000-11-02 08:43  schwegle
+
+	* ONX/PONX/: AddDis.F, BSearch.F, BuffTbl.F, CCDriver.c, CalcK.F,
+	ContractionScaling.F90, ErrorF.F, Exponential.inc, Fillout.F90,
+	Gamma_0.inc, Gamma_1.inc, Gamma_2.inc, Gamma_3.inc, Gamma_4.inc,
+	Gamma_5.inc, Gamma_6.inc, Gamma_7.inc, Gamma_8.inc, Gamma_A.inc,
+	Gamma_Defs.inc, GatherK.F90, GetID.c, GetSubBlk.F,
+	InitExchangeMatrix.F90, IntegralSelect.inc, LSearch.F, LineEnd.F,
+	MAIN.c, MMML.F, Makefile, MatFilter.F90, MinMax.F90, Misc.F,
+	MondoHalt.F, MultipoleSelect.inc, ONX.F90, ONXBuf.F90, ONXLoop.F90,
+	ONXParameters.F90, ONXSch.F, ONXSch.F.hold, OpenAppend.F,
+	Order.F90, ParallelIO.F90, RLoader.F, RangeOfDensity.F90,
+	RangeOfExchange.F90, VRRDriver.c, XPose.F, bkonx.inc,
+	bkonx_F90.inc, contract.F, digest.F, getadr.F, hgtftosp.F,
+	hrrbra.F, hrrbra_old.F, hrrket.F, hrrket_old.F, mstats.inc,
+	onx1111.F, onx1121.F, onx1122.F, onx1161.F, onx1162.F, onx1166.F,
+	onx2111.F, onx2121.F, onx2122.F, onx2161.F, onx2162.F, onx2211.F,
+	onx2221.F, onx2222.F, onx2261.F, onx6111.F, onx6121.F, onx6122.F,
+	onx6161.F, onx6211.F, onx6221.F, onx6611.F, onxio.c, onxsch.F,
+	onxsort2.F, pmonx.inc, putsubblk.F, skipout.F, tgen0.F, tgen1t2.F,
+	tgen3t4.F, tgen5t6.F, tgen7t8.F, vrrl.F, vrrs.F: Initial version of
+	ONX with a F90 front end.
+
+2000-11-02 08:36  schwegle
+
+	* ONX/: AddDis.F, BSearch.F, BuffTbl.F, CCDriver.c, CalcK.F,
+	ContractionScaling.F90, ErrorF.F, Exponential.inc, Fillout.F90,
+	Gamma_0.inc, Gamma_1.inc, Gamma_2.inc, Gamma_3.inc, Gamma_4.inc,
+	Gamma_5.inc, Gamma_6.inc, Gamma_7.inc, Gamma_8.inc, Gamma_A.inc,
+	Gamma_Defs.inc, GatherK.F90, GetID.c, GetSubBlk.F,
+	InitExchangeMatrix.F90, IntegralSelect.inc, KonK2L.F, LSearch.F,
+	LineEnd.F, Loader.F90, MAIN.c, MMML.F, Makefile, MatFilter.F90,
+	MinMax.F90, Misc.F, MondoHalt.F, MultipoleSelect.inc, ONX.F90,
+	ONXBuf.F90, ONXHalt.F90, ONXLoop.F90, ONXParameters.F90, ONXSch.F,
+	ONXSch.F.hold, OpenAppend.F, RLoader.F, RangeOfDensity.F90,
+	RangeOfExchange.F90, VRRDriver.c, XPose.F, bkonx.inc,
+	bkonx_F90.inc, contract.F, digest.F, getadr.F, hgtftosp.F,
+	hrrbra.F, hrrbra_old.F, hrrket.F, hrrket_old.F, mstats.inc,
+	onx1111.F, onx1121.F, onx1122.F, onx1161.F, onx1162.F, onx1166.F,
+	onx2111.F, onx2121.F, onx2122.F, onx2161.F, onx2162.F, onx2211.F,
+	onx2221.F, onx2222.F, onx2261.F, onx6111.F, onx6121.F, onx6122.F,
+	onx6161.F, onx6211.F, onx6221.F, onx6611.F, onxio.c, onxsch.F,
+	onxsort2.F, pmonx.inc, putsubblk.F, skipout.F, tgen0.F, tgen1t2.F,
+	tgen3t4.F, tgen5t6.F, tgen7t8.F, tmp, vrrg.F, vrrl.F, vrrs.F,
+	Order.F90, ParallelIO.F90: [no log message]
 
 2000-11-01 12:57  mchalla
 
@@ -14114,13 +15341,40 @@
 	MondoMods/MMA/Functionals/newton.mf,
 	MondoMods/MMA/Functionals/rksub.mf,
 	MondoMods/MMA/Functionals/sub.mf, OneE/GradS.F90,
-	OneE/GradSBlok.F90, OneE/GradT.F90, OneE/GradTBlok.F90,
-	OneE/MakeRho.F90, OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile,
-	OneE/RhoBlok.F90, OneE/SBlok.F90, OneE/TBlok.F90,
-	PHiPAC/runs/P3/L0_search, PHiPAC/runs/P3/L1_search,
-	PHiPAC/runs/P3/L2_search, PHiPAC/runs/P3/LOG,
-	PHiPAC/runs/P3/compiler_options, PHiPAC/runs/P3/machine_specs,
-	PHiPAC/runs/P3/my.matrixsizes_file, PHiPAC/runs/P3/sample_run.sh,
+	OneE/GradSBlok.F90, OneE/GradT.F90, ONX/AddDis.F, ONX/BSearch.F,
+	ONX/BuffTbl.F, ONX/CCDriver.c, ONX/CalcK.F,
+	ONX/ContractionScaling.F90, ONX/ErrorF.F, ONX/Exponential.inc,
+	ONX/Fillout.F90, ONX/Gamma_0.inc, ONX/Gamma_1.inc, ONX/Gamma_2.inc,
+	ONX/Gamma_3.inc, ONX/Gamma_4.inc, ONX/Gamma_5.inc, ONX/Gamma_6.inc,
+	ONX/Gamma_7.inc, ONX/Gamma_8.inc, ONX/Gamma_A.inc,
+	ONX/Gamma_Defs.inc, ONX/GatherK.F90, ONX/GetID.c, ONX/GetSubBlk.F,
+	ONX/InitExchangeMatrix.F90, ONX/IntegralSelect.inc, ONX/KonK2L.F,
+	ONX/LSearch.F, ONX/LineEnd.F, ONX/Loader.F90, ONX/MAIN.c,
+	ONX/MMML.F, ONX/Makefile, ONX/MatFilter.F90, ONX/MinMax.F90,
+	ONX/Misc.F, ONX/MondoHalt.F, ONX/MultipoleSelect.inc, ONX/ONX.F90,
+	ONX/bkonx.inc, ONX/bkonx_F90.inc, ONX/contract.F, ONX/digest.F,
+	ONX/getadr.F, ONX/hgtftosp.F, ONX/hrrbra.F, ONX/hrrbra_old.F,
+	ONX/hrrket.F, ONX/hrrket_old.F, ONX/mstats.inc, ONX/onx1111.F,
+	ONX/onx1121.F, OneE/GradTBlok.F90, OneE/MakeRho.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/RhoBlok.F90,
+	OneE/SBlok.F90, OneE/TBlok.F90, ONX/ONXBuf.F90, ONX/ONXHalt.F90,
+	ONX/ONXLoop.F90, ONX/ONXParameters.F90, ONX/ONXSch.F,
+	ONX/ONXSch.F.hold, ONX/OpenAppend.F, ONX/Order.F90,
+	ONX/ParallelIO.F90, ONX/RLoader.F, ONX/RangeOfDensity.F90,
+	ONX/RangeOfExchange.F90, ONX/VRRDriver.c, ONX/XPose.F,
+	ONX/onx1122.F, ONX/onx1161.F, ONX/onx1162.F, ONX/onx1166.F,
+	ONX/onx2111.F, ONX/onx2121.F, ONX/onx2122.F, ONX/onx2161.F,
+	ONX/onx2162.F, ONX/onx2211.F, ONX/onx2221.F, ONX/onx2222.F,
+	ONX/onx2261.F, ONX/onx6111.F, ONX/onx6121.F, ONX/onx6122.F,
+	ONX/onx6161.F, ONX/onx6211.F, ONX/onx6221.F, ONX/onx6611.F,
+	ONX/onxio.c, ONX/onxsch.F, ONX/onxsort2.F, ONX/pmonx.inc,
+	ONX/putsubblk.F, ONX/skipout.F, ONX/tgen0.F, ONX/tgen1t2.F,
+	ONX/tgen3t4.F, ONX/tgen5t6.F, ONX/tgen7t8.F, ONX/tmp, ONX/vrrg.F,
+	ONX/vrrl.F, ONX/vrrs.F, PHiPAC/runs/P3/L0_search,
+	PHiPAC/runs/P3/L1_search, PHiPAC/runs/P3/L2_search,
+	PHiPAC/runs/P3/LOG, PHiPAC/runs/P3/compiler_options,
+	PHiPAC/runs/P3/machine_specs, PHiPAC/runs/P3/my.matrixsizes_file,
+	PHiPAC/runs/P3/sample_run.sh,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/Makefile,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_1.c,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_c.c,
@@ -14245,13 +15499,40 @@
 	MondoMods/MMA/Functionals/newton.mf,
 	MondoMods/MMA/Functionals/rksub.mf,
 	MondoMods/MMA/Functionals/sub.mf, OneE/GradS.F90,
-	OneE/GradSBlok.F90, OneE/GradT.F90, OneE/GradTBlok.F90,
-	OneE/MakeRho.F90, OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile,
-	OneE/RhoBlok.F90, OneE/SBlok.F90, OneE/TBlok.F90,
-	PHiPAC/runs/P3/L0_search, PHiPAC/runs/P3/L1_search,
-	PHiPAC/runs/P3/L2_search, PHiPAC/runs/P3/LOG,
-	PHiPAC/runs/P3/compiler_options, PHiPAC/runs/P3/machine_specs,
-	PHiPAC/runs/P3/my.matrixsizes_file, PHiPAC/runs/P3/sample_run.sh,
+	OneE/GradSBlok.F90, OneE/GradT.F90, ONX/AddDis.F, ONX/BSearch.F,
+	ONX/BuffTbl.F, ONX/CCDriver.c, ONX/CalcK.F,
+	ONX/ContractionScaling.F90, ONX/ErrorF.F, ONX/Exponential.inc,
+	ONX/Fillout.F90, ONX/Gamma_0.inc, ONX/Gamma_1.inc, ONX/Gamma_2.inc,
+	ONX/Gamma_3.inc, ONX/Gamma_4.inc, ONX/Gamma_5.inc, ONX/Gamma_6.inc,
+	ONX/Gamma_7.inc, ONX/Gamma_8.inc, ONX/Gamma_A.inc,
+	ONX/Gamma_Defs.inc, ONX/GatherK.F90, ONX/GetID.c, ONX/GetSubBlk.F,
+	ONX/InitExchangeMatrix.F90, ONX/IntegralSelect.inc, ONX/KonK2L.F,
+	ONX/LSearch.F, ONX/LineEnd.F, ONX/Loader.F90, ONX/MAIN.c,
+	ONX/MMML.F, ONX/Makefile, ONX/MatFilter.F90, ONX/MinMax.F90,
+	ONX/Misc.F, ONX/MondoHalt.F, ONX/MultipoleSelect.inc, ONX/ONX.F90,
+	ONX/bkonx.inc, ONX/bkonx_F90.inc, ONX/contract.F, ONX/digest.F,
+	ONX/getadr.F, ONX/hgtftosp.F, ONX/hrrbra.F, ONX/hrrbra_old.F,
+	ONX/hrrket.F, ONX/hrrket_old.F, ONX/mstats.inc, ONX/onx1111.F,
+	ONX/onx1121.F, OneE/GradTBlok.F90, OneE/MakeRho.F90,
+	OneE/MakeS.F90, OneE/MakeT.F90, OneE/Makefile, OneE/RhoBlok.F90,
+	OneE/SBlok.F90, OneE/TBlok.F90, ONX/ONXBuf.F90, ONX/ONXHalt.F90,
+	ONX/ONXLoop.F90, ONX/ONXParameters.F90, ONX/ONXSch.F,
+	ONX/ONXSch.F.hold, ONX/OpenAppend.F, ONX/Order.F90,
+	ONX/ParallelIO.F90, ONX/RLoader.F, ONX/RangeOfDensity.F90,
+	ONX/RangeOfExchange.F90, ONX/VRRDriver.c, ONX/XPose.F,
+	ONX/onx1122.F, ONX/onx1161.F, ONX/onx1162.F, ONX/onx1166.F,
+	ONX/onx2111.F, ONX/onx2121.F, ONX/onx2122.F, ONX/onx2161.F,
+	ONX/onx2162.F, ONX/onx2211.F, ONX/onx2221.F, ONX/onx2222.F,
+	ONX/onx2261.F, ONX/onx6111.F, ONX/onx6121.F, ONX/onx6122.F,
+	ONX/onx6161.F, ONX/onx6211.F, ONX/onx6221.F, ONX/onx6611.F,
+	ONX/onxio.c, ONX/onxsch.F, ONX/onxsort2.F, ONX/pmonx.inc,
+	ONX/putsubblk.F, ONX/skipout.F, ONX/tgen0.F, ONX/tgen1t2.F,
+	ONX/tgen3t4.F, ONX/tgen5t6.F, ONX/tgen7t8.F, ONX/tmp, ONX/vrrg.F,
+	ONX/vrrl.F, ONX/vrrs.F, PHiPAC/runs/P3/L0_search,
+	PHiPAC/runs/P3/L1_search, PHiPAC/runs/P3/L2_search,
+	PHiPAC/runs/P3/LOG, PHiPAC/runs/P3/compiler_options,
+	PHiPAC/runs/P3/machine_specs, PHiPAC/runs/P3/my.matrixsizes_file,
+	PHiPAC/runs/P3/sample_run.sh,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/Makefile,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_1.c,
 	PHiPAC/runs/P3/PHiPAC_dgemm/src/mm_double_NN_c.c,
