@@ -23,52 +23,63 @@ MODULE DrvFrcs
 !========================================================================================
 !
 !========================================================================================
-    SUBROUTINE Forces(Ctrl)
-      TYPE(SCFControls)  :: Ctrl
-      INTEGER            :: ICyc,IGeo,IBas,AtA,A1
-      TYPE(CRDS)         :: GM
-      TYPE(DBL_VECT)     :: Frc
-      CHARACTER(LEN=50)  :: ForceFile
-!
-      ICyc=Ctrl%Current(1)
+    SUBROUTINE Forces(Ctrl,FileName_O,Unit_O)
+      TYPE(SCFControls)           :: Ctrl
+      CHARACTER(LEN=DCL),OPTIONAL :: FileName_O
+      INTEGER,OPTIONAL            :: Unit_O
+      INTEGER                     :: ICyc,IGeo,IBas,AtA,A1,PU
+      LOGICAL                     :: Print
+      TYPE(INT_VECT)              :: AtNum
+      TYPE(DBL_VECT)              :: Frc
+!----------------------------------------------------------------------------------------
+!     Calculate analytic gradients piece by piece
       IBas=Ctrl%Current(2)
       IGeo=Ctrl%Current(3)
       CtrlVect=SetCtrlVect(Ctrl,'Force')
-!
-      CALL OpenHDF(InfFile)
-      CALL Get(GM,Tag_O=IntToChar(IGeo))
-      CALL CloseHDF()
-!---------------------------------------------------
-!     Calculate analytic gradients
+!     The non-orthongonal response    
       CALL Invoke('SForce',CtrlVect)
+!     Kinetic energy piece
       CALL Invoke('TForce',CtrlVect)
+!     Coulomb part
       CALL Invoke('JForce',CtrlVect)
-      IF(HasDFT(Ctrl%Model(Ctrl%Current(2)))) &
-         CALL Invoke('XCForce',CtrlVect)       
-      IF(HasHF(Ctrl%Model(Ctrl%Current(2))))THEN
-         CALL Invoke('XForce', CtrlVect)       
+!     Exact Hartree-Fock exchange component
+      IF(HasHF(Ctrl%Model(IBas)))CALL Invoke('XForce', CtrlVect)       
+!     DFT exchange corrleation term
+      IF(HasDFT(Ctrl%Model(IBas)))CALL Invoke('XCForce',CtrlVect)       
+!---------------------------------------------------
+      IF(PRESENT(Unit_O).OR.PRESENT(FileName_O))THEN
+         Print=.TRUE.
+      ELSE
+         Print=.FALSE.
       ENDIF
-!
-!     Output the Forces
-!      
-      CALL New(Frc,3*NAtoms)
-      CALL OpenHDF(InfFile)
-      CALL Get(Frc,'GradE',Tag_O=IntToChar(IGeo))
-      CALL CloseHDF()
-!
-      ForceFile   = 'Force_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
-      OPEN(UNIT=30,FILE=ForceFile,POSITION='APPEND',STATUS='UNKNOWN')
-      WRITE(30,12) IGeo
-      DO AtA = 1,NAtoms
-         A1 = 3*(AtA-1)+1
-         WRITE(30,11) AtA,GM%Carts%D(:,AtA),Frc%D(A1:A1+2)
-      ENDDO
-      CLOSE(30)
-      CALL Delete(Frc)
-!
-11    FORMAT('ATOM#',I6,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12)
-12    FORMAT('Geometry #',I6)
-!
+      IF(Print)THEN
+!        Get the current forces and atomic numbers 
+         CALL OpenHDF(InfFile)
+         CALL New(Frc,3*NAtoms)
+         CALL New(AtNum,NAtoms)
+         CALL Get(AtNum,'atomicnumbers',Tag_O=IntToChar(IGeo))
+         CALL Get(Frc,'GradE',Tag_O=IntToChar(IGeo))
+         CALL CloseHDF()
+!        Print the gradients
+         PU=OpenPU(FileName_O,Unit_O)
+         WRITE(PU,33)
+         WRITE(PU,*)'     Nuclear gradients for geometry #'//TRIM(IntToChar(IGeo))//Rtrn
+         WRITE(PU,34)
+         WRITE(PU,33) 
+         DO AtA = 1,NAtoms
+            A1 = 3*(AtA-1)+1
+            WRITE(PU,35) AtA,AtNum%I(AtA),Frc%D(A1:A1+2)
+         ENDDO
+         WRITE(PU,33) 
+         CALL ClosePU(PU)
+!        Tidy
+         CALL Delete(AtNum)
+         CALL Delete(Frc)
+      ENDIF
+   33 FORMAT(54('-'))
+   34 FORMAT('  Atom      Z                Forces (au) ')
+   35 FORMAT(' ',I4,'     ',I3,3(2X,F11.8))
+!---------------------------------------------------
     END SUBROUTINE Forces
 !========================================================================================
 !
