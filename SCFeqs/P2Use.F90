@@ -131,6 +131,10 @@ PROGRAM P2Use
      CALL Delete(Tmp2)
   ! Restarting without Geometry of BasisSet Change
   CASE('Restart')
+     CALL New(P)
+     CALL New(S)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
      ! Close Current Group
      CALL CloseHDFGroup(H5GroupID)
      CALL CloseHDF(HDFFileID)
@@ -147,6 +151,11 @@ PROGRAM P2Use
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      ! Get the old AO-DM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+     WRITE(*,*) 'Trace(P) = ',Trace(P)
+     ! Purify P
+     CALL Get(S,TrixFile('S',Args))
+     CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+     CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
      ! IO for the non-orthogonal P 
      CALL Put(P,TrixFile('D',Args,0))
      CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
@@ -159,8 +168,12 @@ PROGRAM P2Use
      HDFFileID=OpenHDF(H5File)
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
+     ! Clean Up
      CALL Delete(P)
-  ! Restarting with BasisSet Change
+     CALL Delete(S)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
+  !  Restarting with BasisSet Change
   CASE('RestartBasisSwitch')
      ! Close Current Group
      CALL CloseHDFGroup(H5GroupID)
@@ -256,7 +269,6 @@ PROGRAM P2Use
         CALL DMPProj(iGEO,DMPOrder,P,P0,Tmp1,Tmp2)
 !
      ENDIF
-
      ! Compute dS
      CALL Multiply(S1,-One)
      CALL Add(S1,S0,dS)
