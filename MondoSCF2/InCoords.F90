@@ -1187,15 +1187,7 @@ CONTAINS
      !
      ! Get B matrix and Bt*B inverse
      !
-     IF(CtrlTrf%DoClssTrf) THEN
-       CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-     ELSE
-       CALL GetBMatInfo(TRIM(SCRPath)//'Mix',ISpB,JSpB,ASpB,CholData, &
-                        IPerm1_O=IPerm1,IPerm2_O=IPerm2)
-       CALL ModifyGrad(VectCart,IPerm1%I,IPerm2%I,CtrlTrf)
-       CALL Delete(IPerm1)
-       CALL Delete(IPerm2)
-     ENDIF
+     CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      CALL New(VectCartAux,NCart)
      CALL New(VectCartAux2,NCart)
@@ -1302,22 +1294,21 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE InternalToCart(XYZ,IntCs,VectInt,Print, &
-       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,AtNum_O,DoDeloc_O)
-     REAL(DOUBLE),DIMENSION(:,:)        :: XYZ
-     REAL(DOUBLE),DIMENSION(:)          :: VectInt
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: AtNum_O
-     LOGICAL,OPTIONAL                   :: DoDeloc_O
-     LOGICAL                            :: DoDeloc
+   SUBROUTINE InternalToCart(XYZ,IntCs,PredVals,RefPoints,Print, &
+       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,MixMat_O)
+     REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
+     REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: MixMat_O
+     REAL(DOUBLE),DIMENSION(:)            :: PredVals,RefPoints
      TYPE(DBL_VECT)            :: VectCart
      TYPE(DBL_VECT)            :: VectCartAux,VectIntAux
-     TYPE(DBL_VECT)            :: VectCartAux2
-     TYPE(DBL_VECT)            :: VectIntReq,IntCValSt
+     TYPE(DBL_VECT)            :: VectCartAux2,VectIntAux2,IntCDispl
+     TYPE(DBL_VECT)            :: VectIntReq
+     TYPE(DBL_VECT)            :: ValSt
      TYPE(DBL_RNK2)            :: ActCarts
      REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld
-     REAL(DOUBLE)              :: Sum,ConstrMax,ConstrRMS
+     REAL(DOUBLE)              :: Sum,ConstrMax,ConstrRMS,Fact,Crit
      REAL(DOUBLE)              :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
-     INTEGER                   :: NCart,I,IStep,J
+     INTEGER                   :: NCart,I,IStep,J,NT
      INTEGER                   :: NIntC,NConstr,IRep,RepMax
      INTEGER                   :: NatmsLoc,NCartConstr
      TYPE(INTC)                :: IntCs
@@ -1331,24 +1322,18 @@ CONTAINS
      TYPE(TrfCtrl)             :: GTrfCtrl
      TYPE(CoordCtrl)           :: GCoordCtrl
      CHARACTER(LEN=*)          :: SCRPath
-     LOGICAL                   :: DoClssTrf,Print2,DoRepeat
+     LOGICAL                   :: Print2,DoRepeat
      INTEGER                   :: Print
-     TYPE(INT_VECT)            :: ISpBD,JSpBD
-     TYPE(DBL_VECT)            :: ASpBD
-     TYPE(DBL_RNK2)            :: UMatr
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
      NIntC=SIZE(IntCs%Def%C)
-     Print2=(Print>=DEBUG_GEOP_MAX)
-     DoClssTrf=.TRUE.
-     DoRepeat=.FALSE.
-     RepMax=5
-     IF(PRESENT(DoDeloc_O)) THEN
-       DoDeloc=DoDeloc_O
-     ELSE
-       DoDeloc=.FALSE.
+     NT=SIZE(PredVals)
+     IF(.NOT.PRESENT(MixMat_O).AND.NT/=NIntC) THEN
+       CALL Halt('MixMat missing from the CALL of InternalToCart.')
      ENDIF
+     DoRepeat=.FALSE.
+     RepMax=10
      !
      ! Auxiliary arrays
      !
@@ -1356,52 +1341,42 @@ CONTAINS
      CALL New(VectCart,NCart)
      CALL New(VectCartAux,NCart)
      CALL New(VectCartAux2,NCart)
-     CALL New(VectIntAux,NIntC)
-     CALL New(VectIntReq,NIntC)
-     CALL New(IntCValSt,NIntC)
-     VectIntReq%D=VectInt
+     CALL New(IntCDispl,NIntC)
+     CALL New(VectIntAux,NT)
+     CALL New(VectIntAux2,NT)
+     CALL New(VectIntReq,NT)
+     CALL New(ValSt,NT)
+     !
+     VectIntReq%D=PredVals
      CALL INTCValue(IntCs,XYZ, &
                     GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-     IntCValSt%D=IntCs%Value%D
+     CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+     !
+     IF(PRESENT(MixMat_O)) THEN
+       CALL DGEMM_TNc(NT,NIntC,1,One,Zero, &
+                      MixMat_O,IntCs%Value%D,ValSt%D)
+     ELSE
+       CALL SetBackToRefs(VectIntReq%D,IntCs,RefPoints)
+       ValSt%D=IntCs%Value%D
+       !
+       IntCDispl%D=VectIntReq%D-ValSt%D
+       CALL CutOffDispl(IntCDispl%D,IntCs, &
+                      GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
+       VectIntReq%D=ValSt%D+IntCDispl%D
+       CALL SetBackToRefs(VectIntReq%D,IntCs,RefPoints)
+     ENDIF
      !
      ! Repeat until convergence
      !
      DO IRep=1,RepMax
        RefreshB=.TRUE.
        RefreshAct=.TRUE.
+       DoRepeat=.FALSE.
        !
-       IF(DoRepeat) THEN
-         VectIntAux%D=VectIntReq%D-IntCValSt%D  
-         CALL MapAngleDispl(IntCs,VectIntAux%D)
-         CALL CutOffDispl(VectIntAux%D,IntCs, &
-                     GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle,Fact_O=Half)
-         VectIntReq%D=IntCValSt%D+VectIntAux%D
-       ENDIF
+       ! initialization of new Cartesians
        !
-       ! The required new value of internal coordinates
-       !
-       IF(DoDeloc) THEN
-         CALL ReadBMATR(ISpBD,JSpBD,ASpBD,TRIM(SCRPath)//'UMatr', &
-                        UMatr_O=UMatr)
-         CALL DelocP(VectIntReq%D,ISpBD,JSpBD,ASpBD,UMatr)
-       ELSE
-         CALL MapBackAngle(IntCs,VectIntReq%D) 
-       ENDIF
-       !
-       !initialization of new Cartesians
-       !
-      !IF(DoClssTrf) THEN
-         ActCarts%D=XYZ
-         CALL CartRNK2ToCartRNK1(VectCart%D,ActCarts%D)
-      !ELSE
-      !  CALL CartRNK2ToCartRNK1(VectCart%D,XYZ)
-      !  CALL TranslToAt1(VectCart%D,GTrfCtrl%ThreeAt)
-      !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt2ToX)
-      !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt3ToXY)
-      !  !transform Cartesian constraints!
-      !  CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-      !  CALL ReSetConstr(IntCs,ActCarts%D)
-      !ENDIF
+       ActCarts%D=XYZ
+       CALL CartRNK2ToCartRNK1(VectCart%D,ActCarts%D)
        !
        ! Internal --> Cartesian transformation
        !
@@ -1417,15 +1392,20 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(AtNum_O)) THEN
-        !  CALL PrtXYZ(Atnum_O,ActCarts%D,'backtrf',&
-        !              'Step='//TRIM(IntToChar(IStep)))
-        !ENDIF
          !
          ! Get B and refresh values of internal coords
          !
          CALL INTCValue(IntCs,ActCarts%D, &
                         GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+         !
+         IF(PRESENT(MixMat_O)) THEN
+           CALL DGEMM_TNc(NT,NIntC,1,One,Zero, &
+                          MixMat_O,IntCs%Value%D,VectIntAux2%D)
+         ELSE
+           VectIntAux2%D=IntCs%Value%D
+         ENDIF
+         !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
                                 GCoordCtrl,Print,SCRPath,.TRUE.)
@@ -1434,9 +1414,15 @@ CONTAINS
          !
          ! Calculate difference between required and actual internals
          !
-         VectIntAux%D=VectIntReq%D-IntCs%Value%D
-         IF(DoDeloc) CALL DelocP(VectIntAux%D,ISpBD,JSpBD,ASpBD,UMatr)
-         CALL MapAngleDispl(IntCs,VectIntAux%D) 
+         VectIntAux%D=VectIntReq%D-VectIntAux2%D
+         IF(PRESENT(MixMat_O)) THEN
+           CALL DGEMM_NNc(NIntC,NT,1,One,Zero, &
+                          MixMat_O,VectIntAux%D,IntCDispl%D)
+         ELSE
+           IntCDispl%D=VectIntAux%D
+         ENDIF
+         !
+         CALL MapAngleDispl(IntCs,IntCDispl%D) 
          !
          ! Check convergence on constraints
          !
@@ -1449,7 +1435,7 @@ CONTAINS
          ! 
          ! Bt*[phi_r-phi_a]
          !
-         CALL CALC_BxVect(ISpB,JSpB,ASpB,VectIntAux%D, &
+         CALL CALC_BxVect(ISpB,JSpB,ASpB,IntCDispl%D, &
                           VectCartAux%D,Trp_O=.TRUE.)
          !
          ! GcInv*Bt*[phi_r-phi_a]
@@ -1458,12 +1444,10 @@ CONTAINS
          !
          ! Project out rotations and translations 
          !
-         IF(DoClssTrf) THEN 
-           IF(GTrfCtrl%DoTranslOff) &
-             CALL TranslsOff(VectCartAux2%D,Print2)
-           IF(GTrfCtrl%DoRotOff) &
-             CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
-         ENDIF
+         IF(GTrfCtrl%DoTranslOff) &
+           CALL TranslsOff(VectCartAux2%D,Print2)
+         IF(GTrfCtrl%DoRotOff) &
+           CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
          !
          ! Check convergence
          !
@@ -1481,7 +1465,7 @@ CONTAINS
          !
          ! Modify Cartesians
          !
-         CALL SetCartConstr(VectCart%D,VectCartAux2%D, &
+         CALL SetFixedCartesians(VectCart%D,VectCartAux2%D, &
                             IntCs,GConstr%NCartConstr)
          VectCart%D=VectCart%D+VectCartAux2%D
          CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
@@ -1514,10 +1498,14 @@ CONTAINS
              WRITE(*,*) 'Rescaling and Repeating back-transformation'
              WRITE(Out,*) 'Rescaling and Repeating back-transformation'
            ENDIF
-           DoRepeat=.TRUE.
            IF(IRep==RepMax) THEN
-             CALL Halt('Iterative backtransformation did not converge')
+             CALL Halt('Iterative backtransformation has not converged.')
            ENDIF
+           !
+           VectIntAux%D=VectIntReq%D-ValSt%D  
+           CALL MapAngleDispl(IntCs,VectIntAux%D)
+           VectIntReq%D=ValSt%D+0.50D0*VectIntAux%D
+           DoRepeat=.TRUE.
            CYCLE
          ENDIF
          IF(Print>=DEBUG_GEOP_MIN) THEN
@@ -1530,20 +1518,28 @@ CONTAINS
        ELSE
          CALL INTCValue(IntCs,ActCarts%D, &
                         GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-         VectIntAux%D=IntCValSt%D-IntCs%Value%D
-         CALL MapAngleDispl(IntCs,VectIntAux%D) 
+         CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+         IntCDispl%D=IntCs%Value%D-ValSt%D
+         CALL MapAngleDispl(IntCs,IntCDispl%D) 
          IF(IRep<RepMax) THEN
-           IF(ABS(MAXVAL(VectIntAux%D))>GCoordCtrl%MaxAngle.OR. &
-              ABS(MINVAL(VectIntAux%D))>GCoordCtrl%MaxStre) THEN
-             DoRepeat=.TRUE.
+           ! check for misdirected displacements due to redundancy
+         ! CALL CheckRedundancy(IntCs,IntCDispl%D,VectIntReq%D, &
+         !                      ValSt%D,IntCs%Value%D,DoRepeat)
+           IF(DoRepeat) THEN
              CYCLE
            ENDIF
-         ENDIF
+           !
+           ! check for the size of the displacement
+           CALL CheckBigStep(IntCs,DoRepeat,GCoordCtrl%MaxStre, &
+                   GCoordCtrl%MaxAngle,VectIntReq%D,ValSt%D,IntCDispl%D)
+           IF(DoRepeat) THEN
+             CYCLE
+           ENDIF
+         ENDIF 
          WRITE(*,220) IStep
          WRITE(Out,220) IStep
          EXIT
        ENDIF
-       !
      ENDDO !!! Repeat
      !
      180  FORMAT('Stop Coord Back-Trf, max. number of Iterations exceeded!')
@@ -1553,33 +1549,82 @@ CONTAINS
      !
      ! Fill new Cartesians into XYZ  
      !
-    !IF(.NOT.DoClssTrf) THEN
-    !  CALL CartRNK2ToCartRNK1(VectCart%D,ActCarts%D)
-    !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt3ToXY,Rev_O=.TRUE.)
-    !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt2ToX,Rev_O=.TRUE.)
-    !  CALL TranslToAt1(VectCart%D,GTrfCtrl%ThreeAt, &
-    !                   Vect_O=-GTrfCtrl%TranslAt1)
-    !  CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-    !  CALL ReSetConstr(IntCs,ActCarts%D)
-    !ENDIF
      XYZ=ActCarts%D
      !
      ! Tidy up
      !
-     CALL Delete(IntCValSt)
+     CALL Delete(IntCDispl)
+     CALL Delete(ValSt)
      CALL Delete(VectIntReq)
      CALL Delete(VectIntAux)
+     CALL Delete(VectIntAux2)
      CALL Delete(VectCartAux2)
      CALL Delete(VectCartAux)
      CALL Delete(VectCart)
      CALL Delete(ActCarts)
-     IF(DoDeloc) THEN
-       CALL Delete(ISpBD)
-       CALL Delete(JSpBD)
-       CALL Delete(ASpBD)
-       CALL Delete(UMatr)
-     ENDIF
    END SUBROUTINE InternalToCart
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE CheckBigStep(IntCs,DoRepeat,MaxStre,MaxAngle,VectIntReq, &
+                           ValSt,IntCDispl)
+     TYPE(INTC)                :: IntCs
+     REAL(DOUBLE),DIMENSION(:) :: VectIntReq,ValSt,IntCDispl
+     REAL(DOUBLE)              :: MaxStre,MaxAngle,Crit
+     LOGICAL                   :: DoRepeat
+     INTEGER                   :: I
+     !
+     DO I=1,IntCs%N
+       IF(.NOT.IntCs%Active%L(I)) CYCLE
+       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+         Crit=1.01D0*MaxStre
+       ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN
+         Crit=1.01D0*MaxStre
+       ELSE
+         Crit=1.01D0*MaxAngle
+       ENDIF
+       IF(ABS(IntCDispl(I))>Crit) THEN
+         VectIntReq(I)=ValSt(I)+ &
+                         0.50D0*(VectIntReq(I)-ValSt(I))
+         DoRepeat=.TRUE.
+       ENDIF
+     ENDDO
+   END SUBROUTINE CheckBigStep
+!
+!-----------------------------------------------------------------------
+!
+   SUBROUTINE CheckRedundancy(IntCs,IntCDispl,VectIntReq, &
+                              ValSt,Value,DoRepeat)
+     TYPE(INTC)                :: IntCs
+     REAL(DOUBLE),DIMENSION(:) :: IntCDispl,VectIntReq,ValSt,Value
+     LOGICAL                   :: DoRepeat
+     INTEGER                   :: I,NIntC
+     REAL(DOUBLE)              :: Fact
+     !
+     DO I=1,IntCs%N
+       Fact=ABS(IntCDispl(I))/ABS(VectIntReq(I)-ValSt(I))
+       IF(Fact>10.D0.AND.ABS(IntCDispl(I))>3.D-4) THEN
+      !IF(Fact>2.D0) THEN
+         VectIntReq=ValSt+0.90D0*(VectIntReq-ValSt)
+         DoRepeat=.TRUE.
+         EXIT
+       ENDIF
+     ENDDO
+   END SUBROUTINE CheckRedundancy
+!
+!----------------------------------------------------------
+!
+   SUBROUTINE SetConstraints(IntCs,PredValue)
+     TYPE(INTC)                :: IntCs
+     REAL(DOUBLE),DIMENSION(:) :: PredValue
+     INTEGER                   :: I,J
+     !
+     DO I=1,IntCs%N
+       IF(IntCs%Constraint%L(I)) THEN
+         PredValue(I)=IntCs%ConstrValue%D(I)
+       ENDIF
+     ENDDO
+   END SUBROUTINE SetConstraints
 !
 !----------------------------------------------------------
 !
@@ -2052,54 +2097,6 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE SetConstraint(IntCs,XYZ,Displ,LinCrit,TorslinCrit, &
-                            NConstr,DoInternals)
-     TYPE(INTC)     :: IntCs
-     INTEGER        :: I,J,NIntC,LastIntcGeom,NDim,JJ,NConstr
-     TYPE(DBL_VECT) :: Displ
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ  
-     REAL(DOUBLE)   :: LinCrit,TorsLinCrit
-     LOGICAL        :: DoInternals
-     !
-     IF(NConstr==0)RETURN
-     IF(AllocQ(IntCs%Alloc)) THEN
-       NIntC=SIZE(IntCs%Def%C)
-     ELSE
-       NIntC=0
-     ENDIF
-     NDim=SIZE(Displ%D)
-     IF(NDim/=NIntC.AND.DoInternals) &
-         Call Halt('Dimensionality error in SetConstraint')
-     !
-     ! Get values of constraints 
-     !
-     IF(DoInternals) THEN
-       CALL INTCValue(IntCs,XYZ,LinCrit,TorsLinCrit)
-       DO I=1,NIntC
-         IF(IntCs%Constraint%L(I)) THEN
-           Displ%D(I)=IntCs%ConstrValue%D(I)-IntCs%Value%D(I)
-           !write(*,100) i,IntCs%ConstrValue%D(I),&
-           !IntCs%Value%D(I),Displ%D(I)
-           !100 format('int= ',i4,3F12.6)
-         ENDIF
-       ENDDO	
-     ELSE
-       DO I=1,NIntC
-         IF(IntCs%Constraint%L(I)) THEN
-           IF(IntCs%Def%C(I)(1:4)/='CART') CALL Halt('Internal '// &
-              'coord constraints in Cartesian optimization')
-             J=IntCs%Atoms%I(I,1)
-           IF(IntCs%Def%C(I)(1:5)/='CARTX') JJ=(J-1)*3+1
-           IF(IntCs%Def%C(I)(1:5)/='CARTY') JJ=(J-1)*3+2
-           IF(IntCs%Def%C(I)(1:5)/='CARTZ') JJ=(J-1)*3+3
-           Displ%D(JJ)=IntCs%ConstrValue%D(I)-IntCs%Value%D(I)
-         ENDIF
-       ENDDO	
-     ENDIF
-   END SUBROUTINE SetConstraint
-!
-!-------------------------------------------------------
-!
    SUBROUTINE ConstrConv(IntCs,IntDiff,ConstrMax,ConstrRMS)
      TYPE(INTC) :: IntCs
      REAL(DOUBLE),DIMENSION(:) :: IntDiff
@@ -2124,7 +2121,7 @@ CONTAINS
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE SetCartConstr(Carts,CartDispl,IntCs,NConstr)
+   SUBROUTINE SetFixedCartesians(Carts,CartDispl,IntCs,NConstr)
      REAL(DOUBLE),DIMENSION(:) :: CartDispl,Carts
      INTEGER                   :: I,J,JJ,NIntC,NConstr
      TYPE(INTC)                :: IntCs
@@ -2150,7 +2147,7 @@ CONTAINS
          ENDIF
        ENDDO
      ENDIF      
-   END SUBROUTINE SetCartConstr
+   END SUBROUTINE SetFixedCartesians
 !
 !---------------------------------------------------------------
 !
@@ -3689,24 +3686,6 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ReSetConstr(IntCs,XYZ)
-     TYPE(INTC)                  ::  IntCs
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     INTEGER                     :: I,J,NIntC
-     !
-     NIntC=SIZE(IntCs%Def%C)
-     DO I=1,NIntC
-       IF(IntCs%Constraint%L(I)) THEN
-         J=IntCs%Atoms%I(I,1)
-         IF(IntCs%Def%C(I)(1:5)=='CARTX') IntCs%ConstrValue%D(I)=XYZ(1,J)
-         IF(IntCs%Def%C(I)(1:5)=='CARTY') IntCs%ConstrValue%D(I)=XYZ(2,J)
-         IF(IntCs%Def%C(I)(1:5)=='CARTZ') IntCs%ConstrValue%D(I)=XYZ(3,J)
-       ENDIF 
-     ENDDO
-   END SUBROUTINE ReSetConstr
-!
-!------------------------------------------------------------------
-!
    SUBROUTINE ThreeConstr(IntCs,Top12,NatmsLoc,At1,At2,At3)
      TYPE(INTC)     :: IntCs
      INTEGER        :: At1,At2,At3,I,J,NIntC,II,JMax,NatmsLoc
@@ -4209,15 +4188,21 @@ CONTAINS
      TYPE(DBL_VECT)   :: ASpB
      TYPE(INT_VECT)   :: IGc,JGc
      TYPE(DBL_VECT)   :: AGc
-     INTEGER          :: NCart,INFO,I,J
-     TYPE(DBL_RNK2)   :: FullGc,UMatr,Aux1,Aux2
+     INTEGER          :: NCart,INFO,I,J,NIntC,NZ
+     TYPE(DBL_RNK2)   :: FullB,SQFullGc,FullGc,UMatr,Aux1,Aux2
      REAL(DOUBLE)     :: Fact
      !
-     CALL New(UMatr,(/NCart,NCart-6/))
-     !
      CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
-     CALL GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
-     CALL Sp1x1ToFull(IGc%I,JGc%I,AGc%D,NCart,NCart,FullGc)
+     NIntC=Size(ISpB%I)-1
+     !
+     CALL New(UMatr,(/NIntC,NCart/))
+     CALL Sp1x1ToFull(ISpB%I,JSpB%I,ASpB%D,NIntC,NCart,FullB)
+     call pprint(FullB,'FullB',Unit_O=6)
+     CALL New(FullGc,(/NCart,NCart/))
+     CALL New(SQFullGc,(/NCart,NCart/))
+     CALL DGEMM_TNc(NCart,NIntC,NCart,One,Zero,FullB%D,&
+                    FullB%D,FullGc%D)
+     call pprint(FullGc,'FullGc',Unit_O=6)
      !
      CALL SetDSYEVWork(NCart)
        BLKVECT%D=FullGc%D
@@ -4226,35 +4211,40 @@ CONTAINS
        IF(INFO/=SUCCEED) &
        CALL Halt('DSYEV hosed in BuildUMatr. INFO='&
                   //TRIM(IntToChar(INFO)))
-       DO I=7,NCart
-         Fact=One/SQRT(BLKVALS%D(I))
-         DO J=1,NCart ; UMatr%D(J,I-6)=BLKVECT%D(J,I)*Fact ; ENDDO
+       NZ=0
+       SQFullGc%D=Zero
+       DO I=1,NCart
+         IF(BLKVALS%D(I)>1.D-7) THEN
+           Fact=SQRT(BLKVALS%D(I))
+           Fact=One/SQRT(BLKVALS%D(I))
+           NZ=NZ+1
+           DO J=1,NCart ; SQFullGc%D(J,NZ)=BLKVECT%D(J,I)*Fact ; ENDDO
+         ELSE
+           Fact=Zero
+         ENDIF
        ENDDO     
+     call pprint(SQFullGc,'SQFullGc',Unit_O=6)
      CALL UnSetDSYEVWork()
+     CALL DGEMM_NNc(NIntC,NCart,NCart,One,Zero,FullB%D,&
+                    SQFullGc%D,UMatr%D)
      !
-   ! call pprint(UMatr,'UMatr',Unit_O=6)
-   ! CALL New(Aux1,(/NCart-6,NCart/))
-   ! CALL New(Aux2,(/NCart-6,NCart-6/))
-   ! !     CALL PPrint(SpB,'SpB2',Unit_O=6)
-   ! CALL DGEMM_TNc(NCart-6,NCart,NCart,One,Zero,UMatr%D,&
-   !                FullGc%D,Aux1%D)
-   ! CALL DGEMM_NNc(NCart-6,NCart,NCart-6,One,Zero,Aux1%D, &
-   !                UMatr%D,Aux2%D)
-   ! call pprint(Aux2,'Unit Matr?',Unit_O=6)
-   ! CALL Delete(Aux1)
-   ! CALL Delete(Aux2)
+     call pprint(UMatr,'UMatr',Unit_O=6)
+     CALL New(Aux1,(/NCart,NCart/))
+     CALL DGEMM_TNc(NCart,NIntC,NCart,One,Zero,UMatr%D,&
+                    Umatr%D,Aux1%D)
+     call pprint(Aux1,'Unit Matr?',Unit_O=6)
+     CALL Delete(Aux1)
      !
      CALL WriteBMATR(ISpB,JSpB,ASpB, &
                      TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
      !
+     CALL Delete(SQFullGc)
      CALL Delete(FullGc)
+     CALL Delete(FullB)
      CALL Delete(UMatr)
      CALL Delete(ISpB)
      CALL Delete(JSpB)
      CALL Delete(ASpB)
-     CALL Delete(IGc)
-     CALL Delete(JGc)
-     CALL Delete(AGc)
    END SUBROUTINE BuildUMatr
 !
 !------------------------------------------------------------------
@@ -4357,13 +4347,12 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE ReorderI(VectX,IWork)
+   SUBROUTINE ReorderI(VectX,IWork,NDim)
      REAL(DOUBLE),DIMENSION(:) :: VectX
      INTEGER     ,DIMENSION(:) :: IWork
      REAL(DOUBLE)              :: X1,X2
      INTEGER                   :: I,J,NDim,I1,I2
      ! order set by increasing x
-     NDim=SIZE(VectX)
      DO I=1,NDim ; IWork(I)=I ; ENDDO
      DO I=1,NDim-1
        DO J=1,NDim-I
@@ -5615,17 +5604,38 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE CtrlRange(Displ,Range,NDim)
-     REAL(DOUBLE) :: Displ,Range,StepMax
+     REAL(DOUBLE) :: Displ,Range(:),StepMax
      INTEGER      :: NDim
      !
    ! IF(NDim<=3) THEN
    !   StepMax=2.D0*Range
    !  !StepMax=Range
    ! ELSE 
-       StepMax=Range
+       StepMax=Range(2)
    ! ENDIF
      IF(ABS(Displ)>StepMax) Displ=SIGN(StepMax,Displ)
    END SUBROUTINE CtrlRange
+!
+!-------------------------------------------------------------------
+! 
+   SUBROUTINE SetBackToRefs(IntCValues,IntCs,RefPoints)
+     REAL(DOUBLE),DIMENSION(:)   :: IntCValues
+     REAL(DOUBLE),DIMENSION(:)   :: RefPoints
+     TYPE(INTC)                  :: IntCs
+     INTEGER                     :: NIntC,I,J
+     REAL(DOUBLE)                :: Center
+     !
+     NIntC=SIZE(IntCValues,1)
+     DO I=1,NIntC
+       IF(IntCs%Def%C(I)(1:4)=='LINB'.OR. &
+          IntCs%Def%C(I)(1:4)=='OUTP'.OR. &
+          IntCs%Def%C(I)(1:4)=='TORS') THEN
+          Center=RefPoints(I)
+          CALL PAngle1(Center,IntCValues(I))
+       ENDIF
+     ENDDO
+     !
+   END SUBROUTINE SetBackToRefs
 !
 !-------------------------------------------------------------------
 ! 
