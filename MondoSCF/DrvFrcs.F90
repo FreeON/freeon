@@ -84,6 +84,7 @@ MODULE DrvFrcs
 !========================================================================================
     SUBROUTINE GeOp(Ctrl)
        TYPE(SCFControls)         :: Ctrl
+       TYPE(CRDS)                :: GM
        INTEGER                   :: JGeo,KS
        REAL(DOUBLE)              :: RMSGrad,MaxGrad
        REAL(DOUBLE),DIMENSION(3) :: PrevState,CrntState
@@ -96,6 +97,14 @@ MODULE DrvFrcs
        ENDIF
 !      Compute starting energy
        CALL OneSCF(Ctrl)
+!      Print first configuration
+       CALL OpenHDF(Ctrl%Info)
+       CALL Get(GM,CurGeom)
+       CALL Get(GM%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+       GM%Confg=CGeo
+       CALL PPrint(GM,GeoFile,Geo,'XYZ')
+       CALL Delete(GM)
+       CALL CloseHDF()
 !      Evaluate starting forces
        CALL Forces(Ctrl)
 !      First Hessian update
