@@ -1208,18 +1208,19 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE PrepCells(XYZ,AtNum,PBCDim,XYZBig,AtNumRepl, &
-                        Cells,CellEq,IEq,Dir_O)
+                        Cells,CellEq,IEq,Dir_O,NDim_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(INT_VECT)              :: IEq,AtNumRepl
      INTEGER,DIMENSION(:)        :: AtNum
      TYPE(INT_RNK2)              :: Cells
      TYPE(INT_RNK3)              :: CellEq
-     INTEGER                     :: NDim
+     INTEGER                     :: NDim,NA1,NB1,NC1
      REAL(DOUBLE)                :: XTrans,YTrans,ZTrans
      INTEGER                     :: NatmsLoc,I,J,II,NA,NB,NC
      INTEGER                     :: NCells,IA,IB,IC,PBCDim
      TYPE(DBL_RNK2)              :: XYZBig
      CHARACTER(LEN=1),OPTIONAL   :: Dir_O
+     INTEGER,OPTIONAL            :: NDim_O
      !
      NatmsLoc=SIZE(XYZ,2)-3 ! last 3 row are PBC data
      !
@@ -1253,8 +1254,22 @@ CONTAINS
          NA=0 ; NB=0 ; NC=1
        ENDIF
      ENDIF
+     NA1=-NA
+     NB1=-NB
+     NC1=-NC
+     IF(PRESENT(NDim_O)) THEN
+       IF(NDim_O<0) THEN
+         NA1=0 
+         NB1=0 
+         NC1=0 
+       ELSE
+         NA1=-NDim_O
+         NB1=-NDim_O
+         NC1=-NDim_O
+       ENDIF
+     ENDIF
      !
-     NCells=(2*NA+1)*(2*NB+1)*(2*NC+1)
+     NCells=(NA-NA1+1)*(NB-NB1+1)*(NC-NC1+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
      Cells%I=0
      CALL New(IEq,NCells*NatmsLoc)
@@ -1274,9 +1289,9 @@ CONTAINS
        AtNumRepl%I(II)=AtNum(I) 
      ENDDO
      !
-     DO IA=-NA,NA
-       DO IB=-NB,NB
-         DO IC=-NC,NC
+     DO IA=NA1,NA
+       DO IB=NB1,NB
+         DO IC=NC1,NC
            IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
            CellEq%I(IA,IB,IC)=II+1
            DO I=1,NatmsLoc
@@ -1390,6 +1405,7 @@ CONTAINS
      !
      DO I=1,NIntCs
        IF(.NOT.IntCs%Active%L(I)) THEN
+      !IF(.NOT.IntCs%Active%L(I).AND..NOT.IntCs%Constraint%L(I)) THEN
          IntCs%Value%D(I)=Zero 
          CYCLE
        ENDIF
@@ -1723,6 +1739,7 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
+!CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
@@ -1981,7 +1998,7 @@ CONTAINS
          IF(I==3) Dir='C'
          IF(I==4) Dir='T'
          CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl, &
-                        AtNumRepl,Cells,CellEq,IEq,Dir_O=Dir)
+                        AtNumRepl,Cells,CellEq,IEq,Dir_O=Dir,NDim_O=-1)
          IF(PrtLVect) THEN
            CALL PrtXYZ(AtNumRepl%I,XYZRepl%D,TRIM(PWDPath)//Dir//'Back.xyz',&
                        Title,XYZL_O=XYZ)
@@ -2217,6 +2234,11 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE)                :: Fact,Norm
      !
+     !
+     !The lines below refer to a situation, where 
+     ! all coordinates of the lattice vectors are allowed to change
+     ! while still maintaining a no-rotation framework 
+     !
      ! only space of rotations is in P, space of constraints is not
      CALL GetPBCProj(Carts,PBCDim,P)
      CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
@@ -2234,6 +2256,12 @@ CONTAINS
 100  FORMAT('PRot= ',F7.3,'%')
      !
      DCarts=DCarts2 
+     !
+     ! In the standard version A is along X, B in XY, C general
+     ! thus projection of rotation is very simple
+     !
+     DCarts(2:3)=Zero
+     DCarts(6)=Zero
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
@@ -3251,6 +3279,7 @@ B%BL%D=Zero
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(9,9) :: P   
      REAL(DOUBLE),DIMENSION(9)   :: Vect1,Vect2
+     REAL(DOUBLE)                :: Trace
      TYPE(INTC)                  :: IntCs
      TYPE(BMATR)                 :: B
      INTEGER                     :: I,J,PBCDim
@@ -3263,6 +3292,12 @@ B%BL%D=Zero
          Vect1(1:9)=B%BL%D(I,1:9)
          CALL DGEMM_NNc(9,9,1,One,Zero,P,Vect1,Vect2)
          B%BL%D(I,1:9)=Vect2(1:9)
+         !
+         ! Treatment for lattice rotation here:
+         ! Observe that A is along X, B is in XY plane, C is general 
+         !
+         B%BL%D(I,2:3)=Zero
+         B%BL%D(I,6)=Zero
        ENDIF 
      ENDDO
    END SUBROUTINE CleanBLConstr
@@ -3309,6 +3344,7 @@ B%BL%D=Zero
      INTEGER                     :: NZ,N,NZP
      INTEGER,OPTIONAL            :: NZP_O
      TYPE(DBL_RNK2)              :: AL,BL
+     REAL(DOUBLE)                :: Trace   
      REAL(DOUBLE),DIMENSION(9,9) :: P,PRot  
      REAL(DOUBLE),DIMENSION(9)   :: AuxBL
      !
@@ -3324,6 +3360,11 @@ B%BL%D=Zero
            L=K+2
            AuxBL(K:L)=XYZ(1:3,NatmsLoc-3+I)
          ENDDO
+         !
+         ! Let's restrict this routine to the projection of 
+         ! lattice-vector constraints, and do not do any
+         ! lattice-rotation treatment here
+         !
          CALL GetPBCProj(AuxBL,PBCDim,PRot)
          PRot=-PRot
          DO I=1,9 ; PRot(I,I)=One+PRot(I,I) ; ENDDO

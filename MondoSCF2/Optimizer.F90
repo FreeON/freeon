@@ -568,6 +568,11 @@ CONTAINS
        IF(iGEO>iGEOst) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
+     ! !
+     ! ! Project out constraints and put them onto disk
+     ! !
+     ! CALL ProjectConstr(C%Geos)
+     ! CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
        ! Loop over all clones and modify geometries.
        !
@@ -656,7 +661,7 @@ CONTAINS
      TYPE(ATOMBONDS)             :: AtmB
      REAL(DOUBLE)                :: ETot
      INTEGER,DIMENSION(:)        :: Convgd
-     INTEGER                     :: NCart,K
+     INTEGER                     :: NCart,K,I,J
      INTEGER                     :: NatmsLoc,iGEO,iCLONE
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: IntOld,CartGrad,Carts
@@ -688,6 +693,14 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoRotOff) &
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
      CALL Delete(Carts)
+     !
+!write(*,*) 'after rotoff cartgrad = '
+!write(out,*) 'after rotoff cartgrad = '
+!do j=1,natmsloc
+!i=(j-1)*3
+!write(*,*) cartgrad%d(i+1:i+3)
+!write(out,*) cartgrad%d(i+1:i+3)
+!enddo
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
@@ -827,6 +840,13 @@ CONTAINS
      !
      CALL CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,NDim,iGEO,iCLONE)
+     !
+     ! Substitute last set of cart grads, as it may contain
+     ! information (projection) that is not yet put onto disk
+     !
+     DO J=1,NCart
+       RefGrad%D(J,NDim)=CartGrad(J)
+     ENDDO
      !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
@@ -1216,6 +1236,7 @@ CONTAINS
      ! Now, cut out that part of the molecule, which is 
      ! not rigidly fixed and pass it in to the optimizer
      !
+     CALL OpenASCII(OutFile,Out)
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) NatmsNew=NatmsNew+1
@@ -1226,6 +1247,18 @@ CONTAINS
      CALL New(GradNew,(/3,NatmsNew/))
      CALL New(RefXYZ,(/3,NatmsNew/))
      ! fill atomic data
+!write(*,*) 'GMLoc%Gradients%D = '
+!write(out,*) 'GMLoc%Gradients%D = '
+!do j=1,GMLoc%Natms
+!write(*,*) GMLoc%Gradients%D(1:3,j)
+!write(out,*) GMLoc%Gradients%D(1:3,j)
+!enddo
+!write(*,*) 'GMLoc%PBC%LatFrc%D = '
+!write(out,*) 'GMLoc%PBC%LatFrc%D = '
+!do j=1,3
+!write(*,*) GMLoc%PBC%LatFrc%D(J,1:3)
+!write(out,*) GMLoc%PBC%LatFrc%D(J,1:3)
+!enddo
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) THEN
@@ -1240,17 +1273,20 @@ write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
-         RefXYZ%D(1:3,NatmsNew+K)=Zero
+         RefXYZ%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
 GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
+     ! ensure proper orientation of (numerical) forces
+     GradNew%D(2:3,NatmsNew+1)=Zero
+     GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
      !
      !--------------------------------------------
-     CALL OpenASCII(OutFile,Out)
+     !
        CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D,GMLoc%IntCs, &
                        GradNew%D,GMLoc%Bond,GMLoc%AtmB,Convgd, &
                        GMLoc%Etotal,GMLoc%PBC%Dimen,iGEO,iCLONE, &
@@ -1841,6 +1877,16 @@ GradNew%D(J,NatmsNew+K)=Zero
        ENDIF
      ENDDO
    END SUBROUTINE PrepBiSect
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE ProjectConstr(G)
+     TYPE(Geometries)   :: G
+     INTEGER            :: iCLONE
+     !
+     DO iCLONE=1,G%Clones 
+     ENDDO
+   END SUBROUTINE ProjectConstr
 !
 !-------------------------------------------------------------------
 !
