@@ -20,7 +20,7 @@ alias gw    'cd ${MONDO_WORK};           ls -l; pwd'
 alias gsc   'cd ${MONDO_SCRATCH};        ls -l; pwd'
 alias gi    'cd ${MONDO_HOME}/Includes;  ls -l; pwd'
 alias gmm   'cd ${MONDO_HOME}/MondoMods; ls -l; pwd'
-alias gs    'cd ${MONDO_HOME}/MondoSCF;  ls -l; pwd'
+alias gs    'cd ${MONDO_HOME}/MondoSCF2;  ls -l; pwd'
 alias ge    'cd ${MONDO_HOME}/SCFeqs;    ls -l; pwd'
 alias gh    'cd ${MONDO_HOME}/HiCu;      ls -l; pwd'
 alias gq    'cd ${MONDO_HOME}/QCTC;      ls -l; pwd'
@@ -63,7 +63,7 @@ else if ( "$MONDO_PLAT" == "AlphaLinux.Compaq" ) then
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/Alpha/PHiPAC_dgemm/src 
 else if ( "$MONDO_PLAT" == "True64.COMPAQ" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.True64.COMPAQ
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/Alpha/PHiPAC_dgemm/src 
 endif
 
 
