@@ -314,7 +314,7 @@ Cartesian positions are recovered, $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
 is determined exactly as for isolated molecules \cite{EWilson55}. Thus,
 the derivation of $B'^{(000)}$ is completed.
 
-\subsection{The effective $B$ matrix of the entire crystal}
+\subsection{The effective $A$ matrix of the central cell}
 
 Let us represent the displacements of the Cartesian
 positions of the entire crystal, $\delta X$ in a more
@@ -345,37 +345,57 @@ the displacements of the atoms in a cell are represented by
 a $3N+9$ dimensional vector.
 
 The $B$ matrix in the new representation, $B'$ can be written
-as the direct-sum of $B'^{(klm)}$ matrices:
+as the direct-sum of $B'^{(klm)(k'l'm')}$ matrices:
 \begin{equation}
-B' = \oplus_{k,l,m=-\infty}^{\infty} B'^{(klm)} ,
+B' = \oplus_{k,l,m,k',l',m'=-\infty}^{\infty} B'^{(klm)(k'l'm')} ,
 \end{equation}
-where $B'^{(klm)}$ is defined by 
+where the cell indices $(klm)$ refer to the internal coordinate
+cell, while $(k'l'm')$ refers to the Cartesian cell.
+$B'$ should be such, that for any $\delta X'$ displacement vector
+the corresponding $\delta \phi^{(klm)}$ internal coordinate
+displacements will be the same for any $(klm)$ internal coordinate
+cell.
+In order to satisfy this condition, the offdiagonal $(klm)/=(k'l'm')$
+elements of $B'$ must be set to zero:
+\begin{equation} \label{kronecker}
+B'^{(klm)(k'l'm')} = \delta_{kk'} \delta_{ll'} \delta_{mm'} B'^{(klm)} ,
+\end{equation}
+with $\delta_{kk'}$, $\delta_{ll'}$ and $\delta_{mm'}$
+being the Kronecker-delta and
+$B'^{(klm)}$ must be defined similarly as in Eqn. \ref{latsum2}:
 \begin{equation} \label{latsum4}
 B'^{(klm)}_{i} =
 [\oplus_{j=1}^{4}
 B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
 ] \oplus B^{(klm)(A)}_{i} \oplus B^{(klm)(B)}_{i} 
-\oplus B^{(klm)(C)}_{i} ,
+\oplus B^{(klm)(C)}_{i} .
 \end{equation}
-similarly to Eqn. \ref{latsum2}. Note, that each
-$B'^{(klm)}$ matrix has a part, 
-$B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
-that is independent of the lattice vectors and whose
-columns do not contribute to the translation 
-of the cell, but may contribute to the rotation of the
-atoms in the cell. This part is the same for each $(klm)$ cell
-and acts on the translation-free part of the displacement,
-$\delta X^{(000)}$. The matrix $B^{(klm)(A)}$ 
-does depend on the lattice vectors and is defined as
+Furthermore, to satisfy the above condition, 
+the matrix $B^{(klm)(A)}$ must take the form
 \begin{equation} \label{matba}
-B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)}
+B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)} .
 \end{equation}
-Similar definitions are valid for $B^{(klm)(B)}$ and
-$B^{(klm)(C)}$.
+Similar definitions must hold for $B^{(klm)(B)}$ and
+$B^{(klm)(C)}$. 
 
-\subsection{The effective $A$ matrix of the entire crystal}
+The advantage of the new $B'$ representation over $B$ is the fact
+that $B'$ is block-diagonal in terms of the $(klm)(k'l'm')$
+cell-index pairs, while $B$ is not. The block-diagonal representation
+of $B'$ easily allowes for the calculation of the generalized
+inverse of $B'$, that is called $A'$, while the old representation,
+$B$, does not posess this advantage. Clearly, $A'$ can be calculated
+by a block-wise inversion of $B'$, while this block-wise inversion
+cannot be used to $B$.
 
+Even tough previous derivations by Kudin {\it et.al} \cite{KKudin01} 
+end up in practically the same
+result for the effective $B$ matrix ($B'^{(000)}$) 
+(in a different derivation process),
+we have found it important to justify the use of
+$A'^{(000)}$, the generalized inverse of $B'^{(000)}$, as
+the effective $A$ matrix of the crystal.
 
+\section{Implementation}
 \bibliography{../../Bib/mondo_new}
 \end{document}
 
