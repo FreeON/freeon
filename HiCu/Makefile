@@ -45,7 +45,7 @@ VR:	$(VObjs)
 	rm -rf VRho VRho.o VRho.f90
 
 CVR:	
-	rm -rf *.Inc
+	rm -rf Explicit*.Inc
 
 CubeTree.o:	Grid.o                      \
 		GeneralLeafPopulation.Inc   \
