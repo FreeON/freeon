@@ -1,0 +1,27 @@
+
+1. change the onx int looping structure so that for a given 
+batch of integrals ACx ACy ACz is held constant. This is the 
+last step needed to make hrrbra and hrrket the same in sonx 
+and onx.    DONE
+
+
+2. fix the vrr c code, it does not correctly determine the 
+length of the buffers that it is supposed to read in from 
+disk. Just a simple syntax fix.   DONE
+
+
+3. In the process of testing DisOrder. So far s-type ints have 
+been checked and seem to work.   DONE
+
+4. >s functions do not work. it looks like vrrl is going out 
+of bounds somewhere and messing things up when you try and 
+deallocate memory at the end of DisOrder.  
+
+  the problem is in vrrdriver. the file sizes are messed up!
+
+   DONE
+
+5. Changed the distribution code in hrrket and hrrbra to match 
+the sonx style. This is a better way to do it because you can 
+use standard math operations to find out which one should be raised
+in vrr.  DONE

@@ -1,0 +1,39 @@
+  FUNCTION NFinal(IType)
+    USE InOut
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)  :: IType
+    INTEGER             :: NFinal
+    INTEGER, PARAMETER  :: NT=28
+    INTEGER, PARAMETER  :: T2Size(NT) = (/ 1,                  &
+                                           4, 3,               &
+                                          10, 9, 6,            &
+                                          20,19,16,10,         &
+                                          35,34,31,25,15,      &
+                                          56,55,52,46,36,21,   &
+                                          84,83,80,74,64,49,28 /)
+    IF (IType>0.AND.IType<=NT) THEN
+      NFinal=T2Size(IType)
+    ELSE
+      CALL Halt(' Illegal IType in NFinal')
+    END IF
+  END FUNCTION NFinal
+
+  FUNCTION iT(I,J)
+    USE InOut
+    IMPLICIT NONE
+    INTEGER,INTENT(IN)  :: I,J
+    INTEGER             :: iT,Ind
+    INTEGER, PARAMETER  :: NT=6
+    INTEGER, PARAMETER  :: iTD(NT*NT) = (/ 1, 0, 0, 0, 0, 0,  &
+                                           2, 3, 0, 0, 0, 0,  &
+                                           4, 5, 6, 0, 0, 0,  &
+                                           0, 0, 0, 0, 0, 0,  &
+                                           0, 0, 0, 0, 0, 0,  &
+                                           7, 8, 9, 0, 0, 10  /)
+    Ind=I+(J-1)*NT
+    IF (Ind>0.AND.Ind<=NT*NT) THEN
+      iT=iTD(Ind)
+    ELSE
+      CALL Halt(' Illegal Ind in iT')
+    END IF
+  END FUNCTION iT
