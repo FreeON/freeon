@@ -793,9 +793,12 @@ WRITE(*,*)' C = ',C
 #endif
 !-------------------------------------------------------------------------------
 !     Estimate spectral bounds 
-      IF(MyId==ROOT) &
-        CALL SpectralBounds(F,Fmin,Fmax)
-
+#ifdef DM_PARALLEL
+      IF(MyId==ROOT) CALL SpectralBounds(F,Fmin,Fmax)
+#else
+      CALL SpectralBounds(F,Fmin,Fmax)
+#endif
+#ifdef DM_PARALLEL
       CALL BCast(FMin)
       CALL BCast(FMax)
 
