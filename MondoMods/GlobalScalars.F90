@@ -145,7 +145,7 @@ MODULE GlobalScalars
    REAL(DOUBLE),DIMENSION(1:120) :: SLRadii
    DATA SLRadii(  1) /0.25D0/
    DATA SLRadii(  3: 9) /1.45D0, 1.05D0, 0.85D0, 0.70D0, 0.65D0, 0.60D0, 0.5D0 /
-   DATA SLRadii( 11: 17) /1.8D0, 1.5D0, 1.25D0, 1.1D0, 1.0D0, 1.0D0, 1.0D0/
+   DATA SLRadii( 11: 17) /1.8D0, 1.50D0, 1.25D0, 1.1D0, 1.0D0, 1.0D0, 1.0D0/
    DATA SLRadii( 19: 35) /2.2D0, 1.8D0, 1.6D0, 1.4D0, 1.35D0, 1.4D0, 1.4D0, &
                           1.4D0, 1.35D0, 1.35D0, 1.35D0, 1.35D0, 1.30D0, 1.25D0, &
                           1.15D0, 1.15D0, 1.15D0/
@@ -189,8 +189,8 @@ MODULE GlobalScalars
    DATA Lindh_R(2,1:3) /2.1000D0, 2.8700D0, 3.4000D0/
    DATA Lindh_R(3,1:3) /2.5300D0, 3.4000D0, 3.4000D0/
 !these are the elements considered for H-bridges
-   INTEGER,DIMENSION(7)  :: HBondList
-   DATA HBondList(1:7) /5,7,8,9,17,35,53/
+   INTEGER,DIMENSION(10)  :: HBondList
+   DATA HBondList(1:10) /5,7,8,9,15,16,34,17,35,53/
 !
 ! SCF global arrays 
 !

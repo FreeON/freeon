@@ -1235,6 +1235,7 @@ CONTAINS
        CALL SpectrShift_1x1(IGc,JGc,AGc,1.D-4) 
      ELSE
        CALL CompleteDiag_1x1(IGc,JGc,AGc,ThreeAt) 
+       CALL SpectrShift_1x1(IGc,JGc,AGc,1.D-4) 
      ENDIF
        NZGc=IGc%I(NCart+1)-1
      !
