@@ -135,12 +135,12 @@ MODULE BlokTrPdJ
                 IF(PExtent>Zero .AND. DP2 > Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
-!                  WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
-!                   CALL AtomCyclic(GMLoc,Prim%P) 
 !                  Initialize
-                   HGKet_L(:,:)  = Zero
-                   SPKetC_L(:,:) = Zero
-                   SPKetS_L(:,:) = Zero
+                   SPLenEll=LSP(Prim%Ell)
+                   HGLenEll=LHGTF(Prim%Ell)
+                   HGKet_L(1:HGLenEll,1:3) = Zero
+                   SPKetC_L(0:SPLenEll,1:3) = Zero
+                   SPKetS_L(0:SPLenEll,1:3) = Zero
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells 
@@ -243,7 +243,7 @@ MODULE BlokTrPdJ
                          ENDDO
                       ENDDO
                    ENDIF
-!                  Inner Sum J Box Forces: Included PFF contribution
+!                  Inner Sum J Box Forces
                    IA = IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
@@ -259,7 +259,7 @@ MODULE BlokTrPdJ
                             CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                             DO I=1,3
                                KI = K + 3*(I+1)
-                               IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN
+                               IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN 
                                   DO LMN=1,HGLenEll
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet_L(LMN,I)
                                   ENDDO
@@ -325,8 +325,8 @@ MODULE BlokTrPdJ
        SPKetC_L(:,:) = Zero
        SPKetS_L(:,:) = Zero
 !      KlumsyBl
-       SPLenEll=LSP(1)
-       HGLenEll=LHGTF(1)
+       SPLenEll=LSP(Prim%Ell)
+       HGLenEll=LHGTF(Prim%Ell)
        PTmp=GMLoc%Carts%D(:,At)
        DO NC=1,CS_IN%NCells
 !         Set atomic "primitive"
@@ -379,7 +379,9 @@ MODULE BlokTrPdJ
                 ENDDO
              ENDIF
           ENDDO
-       ENDDO    
+       ENDDO  
 !
      END FUNCTION dNukE
 END MODULE BlokTrPdJ
+
+
