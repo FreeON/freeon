@@ -16,24 +16,24 @@ MODULE DrvSCFs
   USE LinAlg
   IMPLICIT NONE 
   CONTAINS
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
      SUBROUTINE OneSCF(Ctrl,Sum_O)
         TYPE(SCFControls)  :: Ctrl
         INTEGER            :: J
         INTEGER            :: ISCF,ICyc
         LOGICAL,OPTIONAL   :: Sum_O
         LOGICAL            :: Summry
-!
+
         IF(PRESENT(Sum_O))THEN
            Summry=Sum_O
         ELSE
            Summry=.TRUE.
         ENDIF
-!
+
 !       Do QM Calc on the SCF/DFT level
-!
+
         DO ICyc=0,MaxSCFs
            Ctrl%Current(1)=ICyc
            CALL SetGlobalCtrlIndecies(Ctrl)
@@ -53,25 +53,25 @@ MODULE DrvSCFs
                                   //TRIM(IntToChar(MaxSCFs))   &
                                   //' SCF iterations.')
     END SUBROUTINE OneSCF
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE SCFCycle(Ctrl)
       TYPE(SCFControls)     :: Ctrl
-!------------------------------------------------------
+!-------------------------------------------------------------------------------
       CALL DensityBuild(Ctrl)
       CALL FockBuild(Ctrl)
       CALL SolveSCF(Ctrl)
       CALL CleanScratch(Ctrl)
     END SUBROUTINE SCFCycle
-!==========================================================================
+!===============================================================================
 !   Build a density by hook or by crook
-!==========================================================================
+!===============================================================================
     SUBROUTINE DensityBuild(Ctrl)
       TYPE(SCFControls)    :: Ctrl
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
-!---------------------------------------------------------------------------------------
-!
+!-------------------------------------------------------------------------------
+
       IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
 !	  .AND.Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
          ! Density projection is now the default guess for new geometries
@@ -144,15 +144,15 @@ MODULE DrvSCFs
 #endif
       ENDIF
     END SUBROUTINE DensityBuild
-!==========================================================================
+!===============================================================================
 !   Build a Fock matrix with extrapolation of the 
 !   orthongoal Fock matrix using Pulay DIIS.
-!==========================================================================
+!===============================================================================
     SUBROUTINE FockBuild(Ctrl)
       TYPE(SCFControls)  :: Ctrl
       INTEGER            :: Modl
       LOGICAL            :: DoDIIs
-!-----------------------------------------------------------
+!-------------------------------------------------------------------------------
       IF(Ctrl%InkFok)THEN
          CALL LogSCF(Current,'Building an incremental Fock matrix')
       ELSE
@@ -160,7 +160,7 @@ MODULE DrvSCFs
       ENDIF
       DoDIIS=CCyc>0
       Modl=Ctrl%Model(CBas)
-      CALL Invoke('QCTC',CtrlVect)
+      CALL Invoke('QCTC',CtrlVect,MPIRun_O=.TRUE.)
       IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect,MPIRun_O=.TRUE.)
       IF(HasHF(Modl)) CALL Invoke('ONX',CtrlVect)
       CALL Invoke('FBuild',CtrlVect,MPIRun_O=.TRUE.)
@@ -169,12 +169,12 @@ MODULE DrvSCFs
       IF(CtrlVect(2)=='BasisSetSwitch') &  
          CALL CleanScratch(Ctrl,'CleanLastBase')
     END SUBROUTINE FockBuild
-!==========================================================================
+!===============================================================================
 !   Solve the SCF equations 
-!==========================================================================
+!===============================================================================
     SUBROUTINE SolveSCF(Ctrl)
       TYPE(SCFControls)  :: Ctrl
-!-----------------------------------------------------------
+!-------------------------------------------------------------------------------
       IF(Ctrl%Method(CBas)==RH_R_SCF)THEN
          CALL LogSCF(Current,'Solving SCF equations with Roothann-Hall')
          CALL Invoke('RHeqs',CtrlVect)
@@ -196,16 +196,16 @@ MODULE DrvSCFs
       ELSE
          CALL MondoHalt(99,'No Method Chosen')
       ENDIF
-!
+
       CALL Invoke('SCFstats',CtrlVect,MPIRun_O=.TRUE.)                                     
     END SUBROUTINE SolveSCF
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE OneEMats(Ctrl)
       TYPE(SCFControls)             :: Ctrl
       INTEGER                       :: ISet,I
-!
+
 #ifdef PERIODIC
       CALL LogSCF(Current,'Peridic Far-Field Tensor',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
@@ -220,11 +220,11 @@ MODULE DrvSCFs
          CALL Invoke('AInv',CtrlVect)
       ENDIF
       CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
-!
+
     END SUBROUTINE OneEMats
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE VisDX(Ctrl)
       TYPE(SCFControls)             :: Ctrl
       IF(Ctrl%Vis/=VIS_DX_RHOPOT)RETURN
@@ -234,9 +234,9 @@ MODULE DrvSCFs
       CALL Invoke('MakeRho',CtrlVect)
       CALL Invoke('VisDX',CtrlVect)
     END SUBROUTINE VisDX
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE LogSCF(Stats,Mssg,Banner_O)
       INTEGER,DIMENSION(3),INTENT(IN) :: Stats
       CHARACTER(LEN=*), INTENT(IN)    :: Mssg
@@ -257,15 +257,15 @@ MODULE DrvSCFs
       Mssg2='  '//TRIM(Mssg)
       CALL Logger(Mssg2)
     END SUBROUTINE LogSCF
-!========================================================================================
+!===============================================================================
 !   Clean the Scratch Directory
-!========================================================================================
+!===============================================================================
     SUBROUTINE CleanScratch(Ctrl,Action_O)
       TYPE(SCFControls)              :: Ctrl
       CHARACTER(LEN=*), OPTIONAL     :: Action_O
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Action,RemCur,RemPrv,RemoveFile
       INTEGER                        :: Modl
-!---------------------------------------------------------------------------------------      
+!-------------------------------------------------------------------------------      
       IF(PRESENT(Action_O))THEN
          Action=Action_O
       ELSE
@@ -356,9 +356,9 @@ MODULE DrvSCFs
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
-!========================================================================================
-!
-!========================================================================================
+!===============================================================================
+
+!===============================================================================
       FUNCTION ConvergedQ(Ctrl)
          TYPE(SCFControls) :: Ctrl
          LOGICAL           :: ConvergedQ
@@ -368,10 +368,10 @@ MODULE DrvSCFs
                               ETest,DTest
          TYPE(INT_VECT)    :: Stat
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          ConvergedQ=.FALSE.
          IF(CCyc==0)RETURN
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Mark the current status
          CALL New(Stat,3)
          Stat%I=Ctrl%Current
@@ -401,7 +401,7 @@ MODULE DrvSCFs
          ETotQ=dETot/ABS(ETotB)
          DMaxQ=dDMax/ABS(DMaxB+1.D-50)
          DIISQ=dDIIS/ABS(DIISB+1.D-50)
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Check for convergence
          ETest=ETol(Ctrl%AccL(CBas))
          DTest=DTol(Ctrl%AccL(CBas))
@@ -479,13 +479,13 @@ MODULE DrvSCFs
          Ctrl%NCyc(CBas)=CCyc
          Ctrl%Stats(CCyc,:)=(/ETotB,ETotQ,dDMax,DIISB,dETot/)
       END FUNCTION ConvergedQ
-!
+
       SUBROUTINE SCFSummry(Ctrl)
          TYPE(SCFControls) :: Ctrl
          TYPE(CRDS)        :: GM 
          INTEGER           :: I,K,IBas,ICyc,IGeo,NCyc,Mthd,BTyp
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
 
 !        Simplify notation
@@ -532,45 +532,45 @@ MODULE DrvSCFs
          ENDIF
       10 FORMAT(72('-'))
       11 FORMAT(72('='))
-!
+
       21 FORMAT(' Ab initio ')
       22 FORMAT('  Config         <E_SCF>       Cycles      DeltaD ')
       23 FORMAT(1x,I5,2x,F20.8,5x,I2,7x,D10.4)
-!
+
       40 FORMAT('SCF  ',2x,'Ink',7x,'Total ',12x,'Delta',7x,'Max    ',5x,'DIIS   ')
       41 FORMAT('Cycle',2x,'Fok',7x,'Energy',12x,'E_Tot',7x,'Delta P',5x,'Error  ')
       42 FORMAT(1x,I2,',   ',L2,', ',F20.8,4(', ',D10.4))
-!
+
       END SUBROUTINE SCFSummry
-!
-!-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 #ifdef MMech
-!
+
       SUBROUTINE   MM_CoulombEnergy(Ctrl)
       IMPLICIT NONE
       TYPE(SCFControls)  :: Ctrl
       TYPE(INT_VECT)     :: Stat
       LOGICAL            :: CalcMMForce
-!
+
       IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
         CalcMMForce=.FALSE.
       ELSE
         CalcMMForce=.TRUE.
       ENDIF
-!
+
 !compute the nuclear energy over the charge distribution given by
 ! MM charges        
-!
+
        CALL New(Stat,3)
        Stat%I=Ctrl%Current
        CALL Put(Stat,'current')
        Call Delete(Stat)
-!
+
 #ifdef PERIODIC
        CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
        CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
 #endif
-!
+
        IF(CalcMMForce) THEN
          CtrlVect=SetCtrlVect(Ctrl,'ForceEvaluation')
          CALL Invoke('MakeRho',CtrlVect)
@@ -581,10 +581,10 @@ MODULE DrvSCFs
          CALL Invoke('MakeRho',CtrlVect)
          CALL Invoke('QCTC',CtrlVect)
        ENDIF
-!
+
       END SUBROUTINE MM_CoulombEnergy
 #endif
-!-------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef MMech
 
    SUBROUTINE MM_ENERG(Ctrl)
@@ -599,48 +599,48 @@ MODULE DrvSCFs
    TYPE(DBL_VECT)     :: GrdToT,GrdAux,GrdToTInt
    INTEGER :: I,J,I1,I2,MMNatms
    LOGICAL            :: CalcMMForce
-!
+
       Call InitMMech()
-!
+
       CONVF=1000.D0*JtoHartree/C_Avogadro
       CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
       LJCutOff=10.D0 !!! in Angstroms
 !     CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
-!
+
       IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
         CalcMMForce=.FALSE.
       ELSE
         CalcMMForce=.TRUE.
       ENDIF
-!
+
 ! Load MM data
-!
+
       CALL GET(GMLoc,'GM_MM'//CurGeom)
       MMNatms=GMLoc%Natms
-!
+
 ! Initialize and Zero GrdMM for the case MMOnly
 ! (this initial gradient gets read by jforce later)
-!
+
       IF(MMonly()) THEN
         CALL New(GrdAux,3*MMNatms)
         GrdAux%D(:)=Zero
           CALL Put(GrdAux,'GradE',Tag_O=CurGeom)
         CALL Delete(GrdAux)
       ENDIF
-!
+
 ! GM_MM must be on HDF before CoulombEnergy is called
-!
+
 ! MM CoulombEnergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
-!
+
       IF(MMOnly()) Then
         CALL MM_CoulombEnergy(Ctrl)
         CALL GET(MM_COUL,'MM_COUL',Tag_O=CurGeom)
         MM_COUL=MM_COUL/CONVF
       ENDIF
-!
+
 ! Do MM Covalent terms
-!
+
       EBond=Zero
       EAngle=Zero
       ETorsion=Zero
@@ -648,16 +648,16 @@ MODULE DrvSCFs
       ELJ=Zero
       E_LJ_EXCL=Zero
       E_C_EXCL=Zero
-!
+
 ! Convert coordinates into Angstroms
-!
+
       GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
 #ifdef PERIODIC
       GMLoc%PBC%BoxShape=GMLoc%PBC%BoxShape/AngstromsToAU
       GMLoc%AbCarts%D=GMLoc%AbCarts%D/AngstromsToAU
       GMLoc%AbBoxCarts%D=GMLoc%AbBoxCarts%D/AngstromsToAU
 #endif
-!
+
       IF(CalcMMForce) THEN
         CALL New(GrdMM,(/3,MMNatms/))
         GrdMM%D(:,:)=Zero
@@ -689,9 +689,9 @@ MODULE DrvSCFs
       GMLoc%AbBoxCarts%D=AngstromsToAU*GMLoc%AbBoxCarts%D
 #endif
       IF(CalcMMForce) THEN
-!
+
 ! Convert MM _gradients_ into atomic units and add the rest of forces
-!
+
       CALL New(GrdTot,3*MMNatms)
       CALL Get(GrdTot,'GradE',Tag_O=CurGeom)
 ! 
@@ -700,24 +700,24 @@ MODULE DrvSCFs
         I2=I1+2   
         GrdTot%D(I1:I2)=GrdTot%D(I1:I2)+KJPerMolPerAngstToHPerBohr*GrdMM%D(1:3,I)
       ENDDO
-!
+
       CALL Put(GrdTot,'GradE',Tag_O=CurGeom)
-!
+
 ! print forces in KJ/mol/A or H/Bohr
-!
+
       CALL Print_Force(GMLoc,GrdTot,'GrdTot in au ')
       GrdTot%D(:)=GrdTot%D(:)/KJPerMolPerAngstToHPerBohr
       CALL Print_Force(GMLoc,GrdTot,'GrdTot in KJ/mol/A')
       GrdTot%D(:)=GrdTot%D(:)*KJPerMolPerAngstToHPerBohr
-!
+
       CALL Delete(GMLoc)
       CALL Delete(GrdTot)
       CALL Delete(GrdMM)
-!
+
     ENDIF
-!
+
     CALL OpenASCII(OutFile,Out)
-!
+
       WRITE(OUT,*) 'MM Energies in KJ/mol:'
       WRITE(OUT,*) 'EBond= ',EBond
       WRITE(OUT,*) 'EAngle= ',EAngle
@@ -733,9 +733,9 @@ MODULE DrvSCFs
       ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
       WRITE(OUT,*) 'E_Total= ',ETOTMM
     ENDIF
-!
+
 ! convert covalent energies into atomic unit
-!
+
     EBond=EBond*CONVF
     EAngle=EAngle*CONVF
     ETorsion=ETorsion*CONVF
@@ -744,7 +744,7 @@ MODULE DrvSCFs
     MM_COUL=MM_COUL*CONVF
     E_LJ_EXCL=E_LJ_EXCL*CONVF
     E_C_EXCL=E_C_EXCL*CONVF
-!
+
       WRITE(OUT,*) 
       WRITE(OUT,*) 'MM Energies in atomic unit:'
       WRITE(OUT,*) 'EBond= ',EBond
@@ -762,9 +762,9 @@ MODULE DrvSCFs
       WRITE(OUT,*) 'E_Total= ',ETOTMM
       CALL Put(ETOTMM,'ETot',StatsToChar(Ctrl%Current))
     ENDIF
-!
+
     CLOSE(UNIT=Out,STATUS='KEEP')
-!
+
       CALL PUT(EBond,'MM_EBond',Tag_O=CurGeom)
       CALL PUT(EAngle,'MM_EAngle',Tag_O=CurGeom)
       CALL PUT(ETorsion,'MM_ETorsion',Tag_O=CurGeom)
@@ -772,11 +772,11 @@ MODULE DrvSCFs
       CALL PUT(ELJ,'MM_ELJ',Tag_O=CurGeom)
       CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=CurGeom)
       CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
-!
+
 END SUBROUTINE MM_ENERG
 #endif
-!-----------------------------------------------------
-!
+!-------------------------------------------------------------------------------
+
    SUBROUTINE Mulliken_Analysis(Ctrl)
      IMPLICIT NONE
      TYPE(Scfcontrols) :: Ctrl
@@ -786,36 +786,36 @@ END SUBROUTINE MM_ENERG
      TYPE(DBL_VECT)    :: Population,NuclCharge
      REAL(DOUBLE)      :: SUMM
      TYPE(ARGMT)       :: Args
-!
+
      CALL Get(Args)
      CALL SetGlobalCtrlIndecies(Ctrl)
-!
+
 ! Get basis set info
-!
+
      CALL Get(BS,Tag_O=CurBase)
-!
+
 ! Get BSiz and OffS
-!
+
      NBasF=BS%NBasF
      PrintFlags%Mat=DEBUG_MATRICES
      CALL New(BSiz,natoms)
      CALL New(OffS,natoms)
      CALL Get(BSiz,'atsiz',Tag_O=CurBase)
      CALL Get(OffS,'atoff',Tag_O=CurBase)
-!
+
 ! Get P and S matrices from HDF
-!
+
      CALL Get(Smat,TrixFile('S',Args,Stats_O=Current))
      CALL Get(Pmat,TrixFile('D',Args,1,Stats_O=Current))
-!
+
 ! Calc. population
-!
+
      CALL New(Tmat)
      CALL Multiply(Pmat,Smat,Tmat)
-!
+
      CALL New(Population,Tmat%Natms)
      Population%D(:)=Zero
-!
+
      DO I=1,Tmat%Natms
 	   S=BSiz%I(I)
        DO J=Tmat%RowPt%I(I),Tmat%RowPt%I(I+1)-1
@@ -834,21 +834,21 @@ END SUBROUTINE MM_ENERG
 	 ENDIF
        ENDDO 
      ENDDO 
-!
+
 ! For RHF, Population must be multiplied by two
-!
+
      Population%D=Two*Population%D
-!
+
 ! Get nuclear charges
-!
+
      CALL New(NuclCharge,Natoms)
      CALL Get(NuclCharge,'atomicnumbers',Tag_O=CurGeom)
-!
+
 ! Write Mulliken charges into output file and 
 ! save them into HDF
-!
+
      CALL OpenASCII(OutFile,Out)
-!
+
        WRITE(OUT,*)
        WRITE(OUT,*) 'Mulliken charges: '
        WRITE(OUT,100) SUM(NuclCharge%D-Population%D)
@@ -858,11 +858,11 @@ END SUBROUTINE MM_ENERG
 	 WRITE(OUT,200) I,NuclCharge%D(I)-Population%D(I)
 200  FORMAT(I6,F10.3)
        ENDDO
-!
+
      CALL Put(Population,'Population',Tag_O='#Geom_'//TRIM(CurGeom)//'_#Base_'//CurBase//'_#Cycle'//CurCycl)
-!
+
      CLOSE(Out)
-!
+
      CALL Delete(NuclCharge)
      CALL Delete(OffS)
      CALL Delete(BSiz)
@@ -871,10 +871,10 @@ END SUBROUTINE MM_ENERG
      CALL Delete(Smat)
      CALL Delete(Pmat)
      CALL Delete(BS)
-!
+
    END SUBROUTINE Mulliken_Analysis
-!
-!-----------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 END MODULE
 
 
