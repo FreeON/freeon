@@ -1,7 +1,7 @@
 rm *.inp
 ls *.inp
 
-gunzip XYZ/*
+gunzip XYZ/*.gz
 
 cat template_inp     >  h2o_10.inp
 cat XYZ/h2o_10.xyz   >> h2o_10.inp
@@ -52,4 +52,4 @@ cat template_inp     >  h2o_350.inp
 cat XYZ/h2o_350.xyz  >> h2o_350.inp
 cat end_inp          >> h2o_350.inp
 
-gzip XYZ/*
+gzip XYZ/*.xyz

@@ -1,0 +1,1175 @@
+HEADER    HYBRID PROTEIN                          23-APR-93   1CIS      1CIS   2
+COMPND    HYBRID PROTEIN FORMED FROM CHYMOTRYPSIN INHIBITOR-2 (CI-2)    1CIS   3
+COMPND   2 FROM (HORDEUM VULGARE) AND (SUBTILISIN CARLSBERG)            1CIS   4
+COMPND   3 (NMR, 15 STRUCTURES)                                         1CIS   5
+SOURCE    BARLEY (HORDEUM VULGARE, HIPROLY STRAIN) AND (BACILLUS        1CIS   6
+SOURCE   2 LICHENIFORMIS) RECOMBINANT FORM EXPRESSED IN                 1CIS   7
+SOURCE   3 (ESCHERICHIA COLI)                                           1CIS   8
+EXPDTA    NMR                                                           1CIS   9
+AUTHOR    P.OSMARK,P.SORENSEN,F.M.POULSEN                               1CIS  10
+REVDAT   1   31-OCT-93 1CIS    0                                        1CIS  11
+JRNL        AUTH   P.OSMARK,P.SORENSEN,F.M.POULSEN                      1CIS  12
+JRNL        TITL   CONTEXT DEPENDENCE OF PROTEIN SECONDARY STRUCTURE    1CIS  13
+JRNL        TITL 2 FORMATION. THE THREE-DIMENSIONAL STRUCTURE AND       1CIS  14
+JRNL        TITL 3 STABILITY OF A HYBRID BETWEEN CHYMOTRYPSIN           1CIS  15
+JRNL        TITL 4 INHIBITOR 2 AND HELIX E FROM SUBTILISIN CARLSBERG    1CIS  16
+JRNL        REF    TO BE PUBLISHED                                      1CIS  17
+JRNL        REFN                                                   353  1CIS  18
+REMARK   1                                                              1CIS  19
+REMARK   1 REFERENCE 1                                                  1CIS  20
+REMARK   1  AUTH   S.LUDVIGSEN,H.SHEN,M.KJAER,J.C.MADSEN,F.M.POULSEN    1CIS  21
+REMARK   1  TITL   REFINEMENT OF THE THREE-DIMENSIONAL SOLUTION         1CIS  22
+REMARK   1  TITL 2 STRUCTURE OF BARLEY SERINE PROTEINASE INHIBITOR 2    1CIS  23
+REMARK   1  TITL 3 AND COMPARISON WITH THE STRUCTURES IN CRYSTALS       1CIS  24
+REMARK   1  REF    J.MOL.BIOL.                   V. 222   621 1991      1CIS  25
+REMARK   1  REFN   ASTM JMOBAK  UK ISSN 0022-2836                  070  1CIS  26
+REMARK   1 REFERENCE 2                                                  1CIS  27
+REMARK   1  AUTH   W.BODE,E.PAPAMOKOS,D.MUSIL                           1CIS  28
+REMARK   1  TITL   THE HIGH-RESOLUTION X-RAY CRYSTAL STRUCTURE OF THE   1CIS  29
+REMARK   1  TITL 2 COMPLEX FORMED BETWEEN SUBTILISIN CARLSBERG AND      1CIS  30
+REMARK   1  TITL 3 EGLIN C, AN ELASTASE INHIBITOR FROM THE LEECH        1CIS  31
+REMARK   1  TITL 4 HIRUDO MEDICINALIS: STRUCTURAL ANALYSIS, SUBTILISIN  1CIS  32
+REMARK   1  TITL 5 STRUCTURE AND INTERFACE GEOMETRY                     1CIS  33
+REMARK   1  REF    EUR.J.BIOCHEM.                V. 166   673 1987      1CIS  34
+REMARK   1  REFN   ASTM EJBCAI  IX ISSN 0014-2956                  262  1CIS  35
+REMARK   2                                                              1CIS  36
+REMARK   2 RESOLUTION. NOT APPLICABLE.  SEE REMARK 4.                   1CIS  37
+REMARK   3                                                              1CIS  38
+REMARK   3 REFINEMENT. THE METHOD USED TO DETERMINE AND REFINE THE      1CIS  39
+REMARK   3  STRUCTURE IS A HYBRID METHOD USING DISTANCE GEOMETRY,       1CIS  40
+REMARK   3  SIMULATED ANNEALING, AND RESTRAINED MOLECULAR DYNAMICS.     1CIS  41
+REMARK   3  DISTANCE GEOMETRY WAS PERFORMED USING *DIANA* VERSION 2.0   1CIS  42
+REMARK   3  (P. GUNTERT, W. BRAUN, K. WUTHRICH, J.MOL.BIOL., V. 217,    1CIS  43
+REMARK   3  P. 517, 1991).  SIMULATED ANNEALING AND MOLECULAR DYNAMICS  1CIS  44
+REMARK   3  WAS PERFORMED USING THE PROGRAM *X-PLOR* V. 3.0 (A. T.      1CIS  45
+REMARK   3  BRUNGER, THE X-PLOR SOFTWARE, YALE UNIVERSITY, 1992).       1CIS  46
+REMARK   4                                                              1CIS  47
+REMARK   4 THESE COORDINATES WERE GENERATED FROM SOLUTION NMR DATA.     1CIS  48
+REMARK   4 PROTEIN DATA BANK CONVENTIONS REQUIRE THAT *CRYST1* AND      1CIS  49
+REMARK   4 *SCALE* RECORDS BE INCLUDED, BUT THE VALUES ON THESE         1CIS  50
+REMARK   4 RECORDS ARE MEANINGLESS.                                     1CIS  51
+REMARK   5                                                              1CIS  52
+REMARK   5 THE INPUT DATA CONSISTED OF                                  1CIS  53
+REMARK   5   893 NOE-DERIVED INTERPROTON DISTANCE RESTRAINTS            1CIS  54
+REMARK   5   57 PHI RESTRAINTS DERIVED FROM MEASUREMENTS OF COUPLING    1CIS  55
+REMARK   5         CONSTANTS                                            1CIS  56
+REMARK   5   25 CHI 1 AND 2 CHI 2 ANGLE RESTRAINTS DERIVED FROM A       1CIS  57
+REMARK   5         COMBINATION OF NOE AND COUPLING CONSTANT             1CIS  58
+REMARK   5         MEASUREMENTS                                         1CIS  59
+REMARK   6                                                              1CIS  60
+REMARK   6 THIS STRUCTURE CONTAINS A BIFURCATED SHEET.  THIS IS         1CIS  61
+REMARK   6 REPRESENTED BY TWO SHEETS ON *SHEET* RECORDS BELOW.          1CIS  62
+REMARK   6 STRANDS 3 AND 4 OF SHEET S1A ARE IDENTICAL TO STRANDS 3 AND  1CIS  63
+REMARK   6 4 OF SHEET S2A.                                              1CIS  64
+SEQRES   1     66  MET LYS THR GLU TRP PRO GLU LEU VAL GLY LYS SER VAL  1CIS  65
+SEQRES   2     66  GLU GLU ALA LYS LYS VAL ILE LEU GLN ASP LYS PRO GLU  1CIS  66
+SEQRES   3     66  ALA GLN ILE ILE VAL LEU GLU LYS GLN ALA VAL ASP ASN  1CIS  67
+SEQRES   4     66  ALA TYR ALA GLU TYR ARG ILE ASP ARG VAL ARG LEU ALA  1CIS  68
+SEQRES   5     66  VAL ASP LYS LEU ASP ASN ILE ALA GLN VAL PRO ARG VAL  1CIS  69
+SEQRES   6     66  GLY                                                  1CIS  70
+HELIX    1  H1 SER     31  LYS     43  1                                1CIS  71
+SHEET    1 S1A 4 THR    22  PRO    25  0                                1CIS  72
+SHEET    2 S1A 4 PRO    82  VAL    84 -1  O  PRO    82   N  TRP    24   1CIS  73
+SHEET    3 S1A 4 ASP    66  VAL    72 -1  N  ARG    69   O  ARG    83   1CIS  74
+SHEET    4 S1A 4 GLN    47  LEU    51  1  O  ILE    49   N  LEU    70   1CIS  75
+SHEET    1 S1B 4 GLY    29  SER    31  0                                1CIS  76
+SHEET    2 S1B 4 ASN    77  GLN    80 -1  N  ILE    78   O  LYS    30   1CIS  77
+SHEET    3 S1B 4 ASP    66  ASP    73 -1  N  ASP    73   O  ASN    77   1CIS  78
+SHEET    4 S1B 4 GLN    47  LEU    51  1  O  ILE    49   N  LEU    70   1CIS  79
+TURN     1  T1 TRP    24  LEU    27                                     1CIS  80
+TURN     2  T2 PRO    25  VAL    28                                     1CIS  81
+TURN     3  T3 LEU    27  LYS    30                                     1CIS  82
+TURN     4  T4 LYS    43  ALA    46                                     1CIS  83
+TURN     5  T5 ARG    64  ARG    67                                     1CIS  84
+CRYST1    1.000    1.000    1.000  90.00  90.00  90.00 P 1           1  1CIS  85
+ORIGX1      1.000000  0.000000  0.000000        0.00000                 1CIS  86
+ORIGX2      0.000000  1.000000  0.000000        0.00000                 1CIS  87
+ORIGX3      0.000000  0.000000  1.000000        0.00000                 1CIS  88
+SCALE1      1.000000  0.000000  0.000000        0.00000                 1CIS  89
+SCALE2      0.000000  1.000000  0.000000        0.00000                 1CIS  90
+SCALE3      0.000000  0.000000  1.000000        0.00000                 1CIS  91
+MODEL        1                                                          1CIS  92
+ATOM      1  N   MET    20       3.119  -3.043   0.441  1.00  0.97      1CIS  93
+ATOM      2  CA  MET    20       4.554  -3.020   0.014  1.00  0.62      1CIS  94
+ATOM      3  C   MET    20       4.961  -1.543  -0.116  1.00  0.55      1CIS  95
+ATOM      4  O   MET    20       4.179  -0.695   0.264  0.00  0.59      1CIS  96
+ATOM      5  CB  MET    20       4.695  -3.773  -1.348  0.00  0.38      1CIS  97
+ATOM      6  CG  MET    20       4.319  -5.268  -1.163  0.00  0.40      1CIS  98
+ATOM      7  SD  MET    20       2.688  -5.649  -0.470  0.00  0.75      1CIS  99
+ATOM      8  CE  MET    20       1.952  -6.459  -1.914  0.00  0.93      1CIS 100
+ATOM      9 1H   MET    20       2.781  -2.057   0.546  0.00  1.49      1CIS 101
+ATOM     10 2H   MET    20       2.566  -3.526  -0.295  0.00  1.75      1CIS 102
+ATOM     11 3H   MET    20       3.004  -3.548   1.343  0.00  0.98      1CIS 103
+ATOM     12  HA  MET    20       5.177  -3.468   0.776  0.00  0.74      1CIS 104
+ATOM     13 1HB  MET    20       4.083  -3.326  -2.120  0.00  0.67      1CIS 105
+ATOM     14 2HB  MET    20       5.725  -3.730  -1.685  0.00  0.18      1CIS 106
+ATOM     15 1HG  MET    20       4.387  -5.738  -2.139  0.00  0.55      1CIS 107
+ATOM     16 2HG  MET    20       5.066  -5.752  -0.543  0.00  0.50      1CIS 108
+ATOM     17 1HE  MET    20       2.012  -5.811  -2.778  0.00  1.02      1CIS 109
+ATOM     18 2HE  MET    20       2.453  -7.398  -2.104  0.00  1.68      1CIS 110
+ATOM     19 3HE  MET    20       0.909  -6.658  -1.704  0.00  1.73      1CIS 111
+ATOM     20  N   LYS    21       6.125  -1.274  -0.637  1.00  0.48      1CIS 112
+ATOM     21  CA  LYS    21       6.606   0.138  -0.798  1.00  0.42      1CIS 113
+ATOM     22  C   LYS    21       6.506   0.686  -2.215  1.00  0.28      1CIS 114
+ATOM     23  O   LYS    21       6.542  -0.021  -3.200  0.00  0.26      1CIS 115
+ATOM     24  CB  LYS    21       8.048   0.129  -0.313  0.00  0.52      1CIS 116
+ATOM     25  CG  LYS    21       8.365   1.273   0.642  0.00  0.58      1CIS 117
+ATOM     26  CD  LYS    21       9.506   0.770   1.587  0.00  0.87      1CIS 118
+ATOM     27  CE  LYS    21      10.686   0.078   0.849  0.00  0.63      1CIS 119
+ATOM     28  NZ  LYS    21      11.193   1.092  -0.083  0.00  1.84      1CIS 120
+ATOM     29  H   LYS    21       6.711  -2.003  -0.930  0.00  0.49      1CIS 121
+ATOM     30  HA  LYS    21       6.021   0.831  -0.209  0.00  0.49      1CIS 122
+ATOM     31 1HB  LYS    21       8.239  -0.816   0.173  0.00  0.88      1CIS 123
+ATOM     32 2HB  LYS    21       8.704   0.194  -1.178  0.00  0.64      1CIS 124
+ATOM     33 1HG  LYS    21       8.639   2.171   0.109  0.00  0.52      1CIS 125
+ATOM     34 2HG  LYS    21       7.503   1.505   1.254  0.00  1.10      1CIS 126
+ATOM     35 1HD  LYS    21       9.895   1.633   2.106  0.00  1.24      1CIS 127
+ATOM     36 2HD  LYS    21       9.087   0.099   2.317  0.00  1.34      1CIS 128
+ATOM     37 1HE  LYS    21      11.465  -0.218   1.541  0.00  1.46      1CIS 129
+ATOM     38 2HE  LYS    21      10.389  -0.798   0.274  0.00  1.53      1CIS 130
+ATOM     39 1HZ  LYS    21      10.640   1.965  -0.024  0.00  2.67      1CIS 131
+ATOM     40 2HZ  LYS    21      12.162   1.387   0.139  0.00  2.22      1CIS 132
+ATOM     41 3HZ  LYS    21      11.127   0.752  -1.062  0.00  2.32      1CIS 133
+ATOM     42  N   THR    22       6.376   1.979  -2.190  1.00  0.31      1CIS 134
+ATOM     43  CA  THR    22       6.259   2.825  -3.417  1.00  0.40      1CIS 135
+ATOM     44  C   THR    22       7.306   3.933  -3.407  1.00  0.31      1CIS 136
+ATOM     45  O   THR    22       7.452   4.645  -4.380  0.00  0.30      1CIS 137
+ATOM     46  CB  THR    22       4.887   3.464  -3.482  0.00  0.67      1CIS 138
+ATOM     47  OG1 THR    22       4.743   3.989  -2.175  0.00  0.74      1CIS 139
+ATOM     48  CG2 THR    22       3.832   2.387  -3.496  0.00  0.74      1CIS 140
+ATOM     49  H   THR    22       6.340   2.425  -1.317  0.00  0.37      1CIS 141
+ATOM     50  HA  THR    22       6.425   2.186  -4.266  0.00  0.44      1CIS 142
+ATOM     51  HB  THR    22       4.780   4.231  -4.241  0.00  0.77      1CIS 143
+ATOM     52  HG1 THR    22       4.532   4.930  -2.201  0.00  0.85      1CIS 144
+ATOM     53 1HG2 THR    22       3.950   1.775  -2.604  0.00  0.46      1CIS 145
+ATOM     54 2HG2 THR    22       2.852   2.837  -3.495  0.00  1.14      1CIS 146
+ATOM     55 3HG2 THR    22       3.947   1.759  -4.366  0.00  1.53      1CIS 147
+ATOM     56  N   GLU    23       7.988   4.051  -2.293  1.00  0.26      1CIS 148
+ATOM     57  CA  GLU    23       9.073   5.086  -2.125  1.00  0.18      1CIS 149
+ATOM     58  C   GLU    23      10.325   4.384  -1.584  1.00  0.14      1CIS 150
+ATOM     59  O   GLU    23      10.197   3.514  -0.738  0.00  0.17      1CIS 151
+ATOM     60  CB  GLU    23       8.679   6.169  -1.100  0.00  0.26      1CIS 152
+ATOM     61  CG  GLU    23       7.361   6.864  -1.535  0.00  0.35      1CIS 153
+ATOM     62  CD  GLU    23       7.157   8.216  -0.865  0.00  0.23      1CIS 154
+ATOM     63  OE1 GLU    23       8.130   8.950  -0.827  0.00  1.03      1CIS 155
+ATOM     64  OE2 GLU    23       6.032   8.456  -0.457  0.00  1.21      1CIS 156
+ATOM     65  H   GLU    23       7.781   3.440  -1.550  0.00  0.31      1CIS 157
+ATOM     66  HA  GLU    23       9.315   5.506  -3.093  0.00  0.07      1CIS 158
+ATOM     67 1HB  GLU    23       8.553   5.714  -0.125  0.00  0.38      1CIS 159
+ATOM     68 2HB  GLU    23       9.481   6.898  -1.040  0.00  0.19      1CIS 160
+ATOM     69 1HG  GLU    23       7.325   7.009  -2.601  0.00  0.50      1CIS 161
+ATOM     70 2HG  GLU    23       6.534   6.232  -1.255  0.00  0.50      1CIS 162
+ATOM     71  N   TRP    24      11.496   4.749  -2.039  1.00  0.11      1CIS 163
+ATOM     72  CA  TRP    24      12.721   4.059  -1.509  1.00  0.11      1CIS 164
+ATOM     73  C   TRP    24      13.823   4.903  -0.858  1.00  0.15      1CIS 165
+ATOM     74  O   TRP    24      14.979   4.846  -1.250  0.00  0.16      1CIS 166
+ATOM     75  CB  TRP    24      13.277   3.260  -2.671  0.00  0.10      1CIS 167
+ATOM     76  CG  TRP    24      12.366   2.094  -2.956  0.00  0.08      1CIS 168
+ATOM     77  CD1 TRP    24      12.548   0.873  -2.417  0.00  0.05      1CIS 169
+ATOM     78  CD2 TRP    24      11.254   2.109  -3.712  0.00  0.09      1CIS 170
+ATOM     79  NE1 TRP    24      11.509   0.207  -2.880  0.00  0.05      1CIS 171
+ATOM     80  CE2 TRP    24      10.681   0.867  -3.662  0.00  0.06      1CIS 172
+ATOM     81  CE3 TRP    24      10.664   3.105  -4.464  0.00  0.13      1CIS 173
+ATOM     82  CZ2 TRP    24       9.534   0.597  -4.341  0.00  0.07      1CIS 174
+ATOM     83  CZ3 TRP    24       9.492   2.835  -5.161  0.00  0.14      1CIS 175
+ATOM     84  CH2 TRP    24       8.935   1.575  -5.089  0.00  0.11      1CIS 176
+ATOM     85  H   TRP    24      11.560   5.450  -2.725  0.00  0.11      1CIS 177
+ATOM     86  HA  TRP    24      12.425   3.377  -0.735  0.00  0.12      1CIS 178
+ATOM     87 1HB  TRP    24      13.362   3.867  -3.543  0.00  0.12      1CIS 179
+ATOM     88 2HB  TRP    24      14.241   2.890  -2.373  0.00  0.08      1CIS 180
+ATOM     89  HD1 TRP    24      13.354   0.541  -1.776  0.00  0.05      1CIS 181
+ATOM     90  HE1 TRP    24      11.331  -0.740  -2.664  0.00  0.06      1CIS 182
+ATOM     91  HE3 TRP    24      11.147   4.073  -4.492  0.00  0.16      1CIS 183
+ATOM     92  HZ2 TRP    24       9.109  -0.389  -4.288  0.00  0.06      1CIS 184
+ATOM     93  HZ3 TRP    24       8.999   3.586  -5.764  0.00  0.17      1CIS 185
+ATOM     94  HH2 TRP    24       8.021   1.340  -5.605  0.00  0.13      1CIS 186
+ATOM     95  N   PRO    25      13.470   5.665   0.148  1.00  0.29      1CIS 187
+ATOM     96  CA  PRO    25      14.478   6.509   0.847  1.00  0.47      1CIS 188
+ATOM     97  C   PRO    25      15.697   5.712   1.358  1.00  0.50      1CIS 189
+ATOM     98  O   PRO    25      16.734   6.274   1.639  0.00  0.85      1CIS 190
+ATOM     99  CB  PRO    25      13.640   7.216   1.946  0.00  0.78      1CIS 191
+ATOM    100  CG  PRO    25      12.448   6.239   2.162  0.00  0.60      1CIS 192
+ATOM    101  CD  PRO    25      12.106   5.776   0.737  0.00  0.34      1CIS 193
+ATOM    102  HA  PRO    25      14.862   7.206   0.135  0.00  0.55      1CIS 194
+ATOM    103 1HB  PRO    25      14.210   7.363   2.853  0.00  0.99      1CIS 195
+ATOM    104 2HB  PRO    25      13.298   8.175   1.582  0.00  0.95      1CIS 196
+ATOM    105 1HG  PRO    25      12.735   5.390   2.768  0.00  0.63      1CIS 197
+ATOM    106 2HG  PRO    25      11.608   6.748   2.615  0.00  0.68      1CIS 198
+ATOM    107 1HD  PRO    25      11.619   4.812   0.767  0.00  0.21      1CIS 199
+ATOM    108 2HD  PRO    25      11.503   6.467   0.171  0.00  0.43      1CIS 200
+ATOM    109  N   GLU    26      15.539   4.420   1.446  1.00  0.57      1CIS 201
+ATOM    110  CA  GLU    26      16.586   3.489   1.916  1.00  0.86      1CIS 202
+ATOM    111  C   GLU    26      17.716   3.322   0.900  1.00  0.86      1CIS 203
+ATOM    112  O   GLU    26      18.849   3.047   1.247  0.00  1.14      1CIS 204
+ATOM    113  CB  GLU    26      16.052   2.125   2.109  0.00  1.10      1CIS 205
+ATOM    114  CG  GLU    26      14.637   2.121   2.610  0.00  1.43      1CIS 206
+ATOM    115  CD  GLU    26      13.632   2.135   1.458  0.00  2.25      1CIS 207
+ATOM    116  OE1 GLU    26      13.886   1.441   0.489  0.00  2.17      1CIS 208
+ATOM    117  OE2 GLU    26      12.640   2.824   1.556  0.00  3.15      1CIS 209
+ATOM    118  H   GLU    26      14.702   4.003   1.196  0.00  0.74      1CIS 210
+ATOM    119  HA  GLU    26      16.915   3.836   2.871  0.00  1.09      1CIS 211
+ATOM    120 1HB  GLU    26      16.025   1.713   1.118  0.00  1.84      1CIS 212
+ATOM    121 2HB  GLU    26      16.706   1.531   2.730  0.00  2.23      1CIS 213
+ATOM    122 1HG  GLU    26      14.453   1.234   3.183  0.00  1.62      1CIS 214
+ATOM    123 2HG  GLU    26      14.521   3.012   3.198  0.00  2.19      1CIS 215
+ATOM    124  N   LEU    27      17.357   3.492  -0.342  1.00  0.54      1CIS 216
+ATOM    125  CA  LEU    27      18.309   3.355  -1.468  1.00  0.51      1CIS 217
+ATOM    126  C   LEU    27      19.197   4.562  -1.656  1.00  0.49      1CIS 218
+ATOM    127  O   LEU    27      20.298   4.418  -2.141  0.00  0.67      1CIS 219
+ATOM    128  CB  LEU    27      17.455   3.073  -2.715  0.00  0.64      1CIS 220
+ATOM    129  CG  LEU    27      16.629   1.778  -2.525  0.00  0.22      1CIS 221
+ATOM    130  CD1 LEU    27      15.715   1.547  -3.763  0.00  0.55      1CIS 222
+ATOM    131  CD2 LEU    27      17.646   0.615  -2.485  0.00  0.82      1CIS 223
+ATOM    132  H   LEU    27      16.430   3.723  -0.568  0.00  0.36      1CIS 224
+ATOM    133  HA  LEU    27      18.976   2.532  -1.266  0.00  0.48      1CIS 225
+ATOM    134 1HB  LEU    27      16.784   3.903  -2.899  0.00  0.94      1CIS 226
+ATOM    135 2HB  LEU    27      18.096   2.947  -3.576  0.00  1.08      1CIS 227
+ATOM    136  HG  LEU    27      16.050   1.794  -1.592  0.00  0.26      1CIS 228
+ATOM    137 1HD1 LEU    27      15.114   2.404  -4.014  0.00  0.76      1CIS 229
+ATOM    138 2HD1 LEU    27      16.298   1.348  -4.630  0.00  1.17      1CIS 230
+ATOM    139 3HD1 LEU    27      15.071   0.699  -3.589  0.00  1.66      1CIS 231
+ATOM    140 1HD2 LEU    27      18.320   0.617  -3.330  0.00  1.24      1CIS 232
+ATOM    141 2HD2 LEU    27      18.238   0.651  -1.584  0.00  1.77      1CIS 233
+ATOM    142 3HD2 LEU    27      17.104  -0.310  -2.484  0.00  0.94      1CIS 234
+ATOM    143  N   VAL    28      18.735   5.717  -1.298  1.00  0.48      1CIS 235
+ATOM    144  CA  VAL    28      19.584   6.929  -1.463  1.00  0.44      1CIS 236
+ATOM    145  C   VAL    28      21.025   6.599  -0.967  1.00  0.43      1CIS 237
+ATOM    146  O   VAL    28      21.196   6.099   0.131  0.00  0.44      1CIS 238
+ATOM    147  CB  VAL    28      18.943   8.054  -0.632  0.00  0.31      1CIS 239
+ATOM    148  CG1 VAL    28      19.643   9.364  -0.962  0.00  0.40      1CIS 240
+ATOM    149  CG2 VAL    28      17.430   8.180  -0.933  0.00  0.24      1CIS 241
+ATOM    150  H   VAL    28      17.839   5.790  -0.921  0.00  0.66      1CIS 242
+ATOM    151  HA  VAL    28      19.631   7.104  -2.534  0.00  0.50      1CIS 243
+ATOM    152  HB  VAL    28      19.070   7.812   0.416  0.00  0.24      1CIS 244
+ATOM    153 1HG1 VAL    28      20.706   9.274  -0.782  0.00  1.09      1CIS 245
+ATOM    154 2HG1 VAL    28      19.507   9.598  -2.007  0.00  1.00      1CIS 246
+ATOM    155 3HG1 VAL    28      19.246  10.171  -0.362  0.00  1.48      1CIS 247
+ATOM    156 1HG2 VAL    28      17.273   8.330  -1.987  0.00  0.90      1CIS 248
+ATOM    157 2HG2 VAL    28      16.902   7.285  -0.645  0.00  0.81      1CIS 249
+ATOM    158 3HG2 VAL    28      16.994   9.005  -0.386  0.00  1.15      1CIS 250
+ATOM    159  N   GLY    29      22.009   6.875  -1.771  1.00  0.41      1CIS 251
+ATOM    160  CA  GLY    29      23.437   6.581  -1.394  1.00  0.41      1CIS 252
+ATOM    161  C   GLY    29      23.866   5.155  -1.803  1.00  0.43      1CIS 253
+ATOM    162  O   GLY    29      24.987   4.757  -1.547  0.00  0.51      1CIS 254
+ATOM    163  H   GLY    29      21.794   7.298  -2.627  0.00  0.39      1CIS 255
+ATOM    164 1HA  GLY    29      24.081   7.273  -1.910  0.00  0.41      1CIS 256
+ATOM    165 2HA  GLY    29      23.573   6.690  -0.329  0.00  0.42      1CIS 257
+ATOM    166  N   LYS    30      22.968   4.425  -2.414  1.00  0.38      1CIS 258
+ATOM    167  CA  LYS    30      23.268   3.010  -2.866  1.00  0.39      1CIS 259
+ATOM    168  C   LYS    30      23.351   2.863  -4.399  1.00  0.27      1CIS 260
+ATOM    169  O   LYS    30      23.228   3.862  -5.070  0.00  0.32      1CIS 261
+ATOM    170  CB  LYS    30      22.173   2.109  -2.311  0.00  0.48      1CIS 262
+ATOM    171  CG  LYS    30      22.221   2.193  -0.791  0.00  0.65      1CIS 263
+ATOM    172  CD  LYS    30      21.338   1.069  -0.225  0.00  0.98      1CIS 264
+ATOM    173  CE  LYS    30      21.457   1.054   1.285  0.00  1.22      1CIS 265
+ATOM    174  NZ  LYS    30      21.073   2.402   1.815  0.00  3.27      1CIS 266
+ATOM    175  H   LYS    30      22.070   4.802  -2.569  0.00  0.36      1CIS 267
+ATOM    176  HA  LYS    30      24.206   2.681  -2.439  0.00  0.42      1CIS 268
+ATOM    177 1HB  LYS    30      21.202   2.399  -2.683  0.00  0.44      1CIS 269
+ATOM    178 2HB  LYS    30      22.358   1.096  -2.619  0.00  0.52      1CIS 270
+ATOM    179 1HG  LYS    30      23.247   2.115  -0.452  0.00  1.32      1CIS 271
+ATOM    180 2HG  LYS    30      21.830   3.165  -0.521  0.00  1.66      1CIS 272
+ATOM    181 1HD  LYS    30      20.307   1.191  -0.510  0.00  2.41      1CIS 273
+ATOM    182 2HD  LYS    30      21.661   0.114  -0.622  0.00  1.65      1CIS 274
+ATOM    183 1HE  LYS    30      20.835   0.273   1.713  0.00  1.57      1CIS 275
+ATOM    184 2HE  LYS    30      22.500   0.847   1.507  0.00  1.49      1CIS 276
+ATOM    185 1HZ  LYS    30      20.830   3.033   1.015  0.00  3.50      1CIS 277
+ATOM    186 2HZ  LYS    30      20.166   2.362   2.332  0.00  3.85      1CIS 278
+ATOM    187 3HZ  LYS    30      21.805   2.827   2.419  0.00  4.31      1CIS 279
+ATOM    188  N   SER    31      23.521   1.663  -4.921  1.00  0.20      1CIS 280
+ATOM    189  CA  SER    31      23.614   1.518  -6.426  1.00  0.18      1CIS 281
+ATOM    190  C   SER    31      22.223   1.468  -7.063  1.00  0.19      1CIS 282
+ATOM    191  O   SER    31      21.249   1.019  -6.483  0.00  0.31      1CIS 283
+ATOM    192  CB  SER    31      24.372   0.208  -6.820  0.00  0.24      1CIS 284
+ATOM    193  OG  SER    31      23.463  -0.880  -6.639  0.00  0.25      1CIS 285
+ATOM    194  H   SER    31      23.566   0.873  -4.341  0.00  0.27      1CIS 286
+ATOM    195  HA  SER    31      24.157   2.356  -6.843  0.00  0.10      1CIS 287
+ATOM    196 1HB  SER    31      24.675   0.257  -7.860  0.00  0.21      1CIS 288
+ATOM    197 2HB  SER    31      25.250   0.070  -6.203  0.00  0.39      1CIS 289
+ATOM    198  HG  SER    31      23.729  -1.406  -5.871  0.00  0.46      1CIS 290
+ATOM    199  N   VAL    32      22.149   1.943  -8.270  1.00  0.08      1CIS 291
+ATOM    200  CA  VAL    32      20.831   1.929  -8.944  1.00  0.07      1CIS 292
+ATOM    201  C   VAL    32      20.386   0.505  -9.236  1.00  0.07      1CIS 293
+ATOM    202  O   VAL    32      19.254   0.178  -8.980  0.00  0.09      1CIS 294
+ATOM    203  CB  VAL    32      20.966   2.792 -10.218  0.00  0.06      1CIS 295
+ATOM    204  CG1 VAL    32      21.813   2.112 -11.305  0.00  0.10      1CIS 296
+ATOM    205  CG2 VAL    32      19.563   3.085 -10.735  0.00  0.07      1CIS 297
+ATOM    206  H   VAL    32      22.926   2.316  -8.735  0.00  0.13      1CIS 298
+ATOM    207  HA  VAL    32      20.114   2.340  -8.261  0.00  0.08      1CIS 299
+ATOM    208  HB  VAL    32      21.438   3.725  -9.942  0.00  0.03      1CIS 300
+ATOM    209 1HG1 VAL    32      22.796   1.869 -10.928  0.00  0.31      1CIS 301
+ATOM    210 2HG1 VAL    32      21.348   1.209 -11.665  0.00  0.52      1CIS 302
+ATOM    211 3HG1 VAL    32      21.950   2.782 -12.141  0.00  0.45      1CIS 303
+ATOM    212 1HG2 VAL    32      19.046   2.161 -10.941  0.00  0.55      1CIS 304
+ATOM    213 2HG2 VAL    32      19.050   3.619  -9.945  0.00  0.64      1CIS 305
+ATOM    214 3HG2 VAL    32      19.583   3.693 -11.629  0.00  0.63      1CIS 306
+ATOM    215  N   GLU    33      21.238  -0.330  -9.754  1.00  0.11      1CIS 307
+ATOM    216  CA  GLU    33      20.807  -1.724 -10.034  1.00  0.08      1CIS 308
+ATOM    217  C   GLU    33      20.312  -2.366  -8.733  1.00  0.04      1CIS 309
+ATOM    218  O   GLU    33      19.320  -3.071  -8.750  0.00  0.10      1CIS 310
+ATOM    219  CB  GLU    33      22.030  -2.415 -10.689  0.00  0.15      1CIS 311
+ATOM    220  CG  GLU    33      22.417  -1.583 -11.982  0.00  0.30      1CIS 312
+ATOM    221  CD  GLU    33      21.232  -1.308 -12.926  0.00  0.55      1CIS 313
+ATOM    222  OE1 GLU    33      20.241  -2.023 -12.927  0.00  0.94      1CIS 314
+ATOM    223  OE2 GLU    33      21.363  -0.339 -13.652  0.00  1.51      1CIS 315
+ATOM    224  H   GLU    33      22.151  -0.067  -9.968  0.00  0.18      1CIS 316
+ATOM    225  HA  GLU    33      19.950  -1.671 -10.678  0.00  0.07      1CIS 317
+ATOM    226 1HB  GLU    33      22.863  -2.426  -9.999  0.00  0.23      1CIS 318
+ATOM    227 2HB  GLU    33      21.791  -3.431 -10.970  0.00  0.10      1CIS 319
+ATOM    228 1HG  GLU    33      22.866  -0.635 -11.726  0.00  0.57      1CIS 320
+ATOM    229 2HG  GLU    33      23.145  -2.131 -12.563  0.00  0.30      1CIS 321
+ATOM    230  N   GLU    34      20.978  -2.137  -7.630  1.00  0.05      1CIS 322
+ATOM    231  CA  GLU    34      20.498  -2.733  -6.344  1.00  0.05      1CIS 323
+ATOM    232  C   GLU    34      19.117  -2.085  -6.095  1.00  0.08      1CIS 324
+ATOM    233  O   GLU    34      18.145  -2.757  -5.808  0.00  0.13      1CIS 325
+ATOM    234  CB  GLU    34      21.475  -2.358  -5.269  0.00  0.04      1CIS 326
+ATOM    235  CG  GLU    34      20.957  -2.865  -3.897  0.00  0.83      1CIS 327
+ATOM    236  CD  GLU    34      21.109  -1.759  -2.847  0.00  1.92      1CIS 328
+ATOM    237  OE1 GLU    34      22.169  -1.140  -2.845  0.00  1.93      1CIS 329
+ATOM    238  OE2 GLU    34      20.148  -1.600  -2.103  0.00  3.01      1CIS 330
+ATOM    239  H   GLU    34      21.793  -1.586  -7.600  0.00  0.10      1CIS 331
+ATOM    240  HA  GLU    34      20.359  -3.798  -6.434  0.00  0.09      1CIS 332
+ATOM    241 1HB  GLU    34      22.430  -2.817  -5.472  0.00  0.57      1CIS 333
+ATOM    242 2HB  GLU    34      21.616  -1.279  -5.263  0.00  0.63      1CIS 334
+ATOM    243 1HG  GLU    34      19.915  -3.153  -3.923  0.00  1.55      1CIS 335
+ATOM    244 2HG  GLU    34      21.541  -3.706  -3.558  0.00  0.77      1CIS 336
+ATOM    245  N   ALA    35      19.062  -0.781  -6.193  1.00  0.07      1CIS 337
+ATOM    246  CA  ALA    35      17.782  -0.061  -5.989  1.00  0.08      1CIS 338
+ATOM    247  C   ALA    35      16.701  -0.782  -6.766  1.00  0.12      1CIS 339
+ATOM    248  O   ALA    35      15.659  -1.081  -6.233  0.00  0.17      1CIS 340
+ATOM    249  CB  ALA    35      17.940   1.380  -6.494  0.00  0.13      1CIS 341
+ATOM    250  H   ALA    35      19.862  -0.253  -6.390  0.00  0.07      1CIS 342
+ATOM    251  HA  ALA    35      17.532  -0.172  -4.948  0.00  0.06      1CIS 343
+ATOM    252 1HB  ALA    35      18.739   1.848  -5.943  0.00  0.88      1CIS 344
+ATOM    253 2HB  ALA    35      18.190   1.397  -7.541  0.00  1.10      1CIS 345
+ATOM    254 3HB  ALA    35      17.037   1.957  -6.372  0.00  1.08      1CIS 346
+ATOM    255  N   LYS    36      16.988  -1.036  -8.009  1.00  0.10      1CIS 347
+ATOM    256  CA  LYS    36      16.015  -1.746  -8.873  1.00  0.16      1CIS 348
+ATOM    257  C   LYS    36      15.696  -3.042  -8.136  1.00  0.19      1CIS 349
+ATOM    258  O   LYS    36      14.543  -3.294  -7.895  0.00  0.19      1CIS 350
+ATOM    259  CB  LYS    36      16.681  -1.991 -10.250  0.00  0.25      1CIS 351
+ATOM    260  CG  LYS    36      17.009  -0.654 -10.934  0.00  0.12      1CIS 352
+ATOM    261  CD  LYS    36      17.188  -0.954 -12.426  0.00  0.22      1CIS 353
+ATOM    262  CE  LYS    36      17.756   0.249 -13.173  0.00  0.25      1CIS 354
+ATOM    263  NZ  LYS    36      18.769  -0.229 -14.165  0.00  0.66      1CIS 355
+ATOM    264  H   LYS    36      17.858  -0.752  -8.352  0.00  0.04      1CIS 356
+ATOM    265  HA  LYS    36      15.085  -1.180  -8.900  0.00  0.17      1CIS 357
+ATOM    266 1HB  LYS    36      17.647  -2.469 -10.113  0.00  0.34      1CIS 358
+ATOM    267 2HB  LYS    36      16.064  -2.618 -10.883  0.00  0.35      1CIS 359
+ATOM    268 1HG  LYS    36      16.247   0.075 -10.730  0.00  0.08      1CIS 360
+ATOM    269 2HG  LYS    36      17.942  -0.275 -10.562  0.00  0.19      1CIS 361
+ATOM    270 1HD  LYS    36      17.806  -1.831 -12.552  0.00  0.24      1CIS 362
+ATOM    271 2HD  LYS    36      16.195  -1.162 -12.802  0.00  0.24      1CIS 363
+ATOM    272 1HE  LYS    36      16.964   0.786 -13.687  0.00  0.40      1CIS 364
+ATOM    273 2HE  LYS    36      18.228   0.931 -12.475  0.00  0.18      1CIS 365
+ATOM    274 1HZ  LYS    36      19.002  -1.243 -14.028  0.00  1.40      1CIS 366
+ATOM    275 2HZ  LYS    36      18.493  -0.054 -15.148  0.00  1.09      1CIS 367
+ATOM    276 3HZ  LYS    36      19.696   0.223 -13.976  0.00  1.15      1CIS 368
+ATOM    277  N   LYS    37      16.662  -3.841  -7.782  1.00  0.23      1CIS 369
+ATOM    278  CA  LYS    37      16.343  -5.108  -7.045  1.00  0.30      1CIS 370
+ATOM    279  C   LYS    37      15.356  -4.839  -5.866  1.00  0.27      1CIS 371
+ATOM    280  O   LYS    37      14.367  -5.528  -5.703  0.00  0.26      1CIS 372
+ATOM    281  CB  LYS    37      17.684  -5.695  -6.552  0.00  0.39      1CIS 373
+ATOM    282  CG  LYS    37      18.509  -6.149  -7.778  0.00  1.13      1CIS 374
+ATOM    283  CD  LYS    37      19.974  -6.537  -7.401  0.00  1.25      1CIS 375
+ATOM    284  CE  LYS    37      20.057  -7.412  -6.152  0.00  0.75      1CIS 376
+ATOM    285  NZ  LYS    37      21.505  -7.716  -5.901  0.00  2.02      1CIS 377
+ATOM    286  H   LYS    37      17.586  -3.606  -7.995  0.00  0.23      1CIS 378
+ATOM    287  HA  LYS    37      15.840  -5.755  -7.744  0.00  0.34      1CIS 379
+ATOM    288 1HB  LYS    37      18.243  -4.940  -6.024  0.00  1.27      1CIS 380
+ATOM    289 2HB  LYS    37      17.497  -6.526  -5.887  0.00  1.40      1CIS 381
+ATOM    290 1HG  LYS    37      18.004  -6.956  -8.291  0.00  2.05      1CIS 382
+ATOM    291 2HG  LYS    37      18.563  -5.310  -8.468  0.00  2.00      1CIS 383
+ATOM    292 1HD  LYS    37      20.415  -7.041  -8.249  0.00  1.88      1CIS 384
+ATOM    293 2HD  LYS    37      20.536  -5.632  -7.238  0.00  1.64      1CIS 385
+ATOM    294 1HE  LYS    37      19.637  -6.890  -5.297  0.00  1.33      1CIS 386
+ATOM    295 2HE  LYS    37      19.501  -8.331  -6.305  0.00  0.46      1CIS 387
+ATOM    296 1HZ  LYS    37      22.100  -7.319  -6.662  0.00  2.82      1CIS 388
+ATOM    297 2HZ  LYS    37      21.797  -7.269  -5.003  0.00  2.13      1CIS 389
+ATOM    298 3HZ  LYS    37      21.672  -8.743  -5.854  0.00  2.45      1CIS 390
+ATOM    299  N   VAL    38      15.647  -3.840  -5.079  1.00  0.28      1CIS 391
+ATOM    300  CA  VAL    38      14.760  -3.494  -3.920  1.00  0.26      1CIS 392
+ATOM    301  C   VAL    38      13.382  -3.138  -4.466  1.00  0.14      1CIS 393
+ATOM    302  O   VAL    38      12.377  -3.719  -4.113  0.00  0.13      1CIS 394
+ATOM    303  CB  VAL    38      15.439  -2.326  -3.192  0.00  0.26      1CIS 395
+ATOM    304  CG1 VAL    38      14.487  -1.676  -2.215  0.00  0.25      1CIS 396
+ATOM    305  CG2 VAL    38      16.656  -2.880  -2.428  0.00  0.33      1CIS 397
+ATOM    306  H   VAL    38      16.460  -3.315  -5.268  0.00  0.32      1CIS 398
+ATOM    307  HA  VAL    38      14.610  -4.338  -3.259  0.00  0.34      1CIS 399
+ATOM    308  HB  VAL    38      15.772  -1.595  -3.915  0.00  0.23      1CIS 400
+ATOM    309 1HG1 VAL    38      14.130  -2.372  -1.469  0.00  0.93      1CIS 401
+ATOM    310 2HG1 VAL    38      14.976  -0.844  -1.724  0.00  0.94      1CIS 402
+ATOM    311 3HG1 VAL    38      13.640  -1.296  -2.766  0.00  0.98      1CIS 403
+ATOM    312 1HG2 VAL    38      16.370  -3.659  -1.739  0.00  1.25      1CIS 404
+ATOM    313 2HG2 VAL    38      17.352  -3.281  -3.150  0.00  0.68      1CIS 405
+ATOM    314 3HG2 VAL    38      17.177  -2.118  -1.871  0.00  1.03      1CIS 406
+ATOM    315  N   ILE    39      13.352  -2.185  -5.342  1.00  0.10      1CIS 407
+ATOM    316  CA  ILE    39      12.070  -1.748  -5.948  1.00  0.05      1CIS 408
+ATOM    317  C   ILE    39      11.331  -2.978  -6.450  1.00  0.06      1CIS 409
+ATOM    318  O   ILE    39      10.150  -3.077  -6.218  0.00  0.09      1CIS 410
+ATOM    319  CB  ILE    39      12.494  -0.743  -6.994  0.00  0.09      1CIS 411
+ATOM    320  CG1 ILE    39      12.938   0.461  -6.092  0.00  0.08      1CIS 412
+ATOM    321  CG2 ILE    39      11.265  -0.328  -7.821  0.00  0.10      1CIS 413
+ATOM    322  CD1 ILE    39      13.854   1.451  -6.752  0.00  0.11      1CIS 414
+ATOM    323  H   ILE    39      14.184  -1.752  -5.629  0.00  0.13      1CIS 415
+ATOM    324  HA  ILE    39      11.461  -1.286  -5.183  0.00  0.10      1CIS 416
+ATOM    325  HB  ILE    39      13.305  -1.135  -7.590  0.00  0.11      1CIS 417
+ATOM    326 1HG1 ILE    39      12.048   0.992  -5.797  0.00  0.11      1CIS 418
+ATOM    327 2HG1 ILE    39      13.419   0.114  -5.184  0.00  0.06      1CIS 419
+ATOM    328 1HG2 ILE    39      10.755  -1.159  -8.310  0.00  1.24      1CIS 420
+ATOM    329 2HG2 ILE    39      10.552   0.143  -7.161  0.00  1.13      1CIS 421
+ATOM    330 3HG2 ILE    39      11.582   0.386  -8.584  0.00  1.09      1CIS 422
+ATOM    331 1HD1 ILE    39      13.399   1.901  -7.624  0.00  0.93      1CIS 423
+ATOM    332 2HD1 ILE    39      14.055   2.187  -5.984  0.00  0.89      1CIS 424
+ATOM    333 3HD1 ILE    39      14.777   0.960  -7.015  0.00  1.06      1CIS 425
+ATOM    334  N   LEU    40      11.985  -3.880  -7.120  1.00  0.06      1CIS 426
+ATOM    335  CA  LEU    40      11.251  -5.090  -7.582  1.00  0.07      1CIS 427
+ATOM    336  C   LEU    40      10.813  -5.860  -6.316  1.00  0.07      1CIS 428
+ATOM    337  O   LEU    40       9.699  -6.327  -6.269  0.00  0.07      1CIS 429
+ATOM    338  CB  LEU    40      12.199  -5.932  -8.466  0.00  0.08      1CIS 430
+ATOM    339  CG  LEU    40      12.556  -5.162  -9.745  0.00  0.08      1CIS 431
+ATOM    340  CD1 LEU    40      13.357  -6.103 -10.635  0.00  0.09      1CIS 432
+ATOM    341  CD2 LEU    40      11.297  -4.761 -10.508  0.00  0.13      1CIS 433
+ATOM    342  H   LEU    40      12.934  -3.744  -7.316  0.00  0.07      1CIS 434
+ATOM    343  HA  LEU    40      10.341  -4.799  -8.088  0.00  0.06      1CIS 435
+ATOM    344 1HB  LEU    40      13.127  -6.119  -7.937  0.00  0.08      1CIS 436
+ATOM    345 2HB  LEU    40      11.741  -6.879  -8.719  0.00  0.10      1CIS 437
+ATOM    346  HG  LEU    40      13.147  -4.288  -9.503  0.00  0.05      1CIS 438
+ATOM    347 1HD1 LEU    40      12.785  -6.986 -10.880  0.00  1.24      1CIS 439
+ATOM    348 2HD1 LEU    40      13.624  -5.596 -11.548  0.00  1.15      1CIS 440
+ATOM    349 3HD1 LEU    40      14.258  -6.400 -10.124  0.00  1.32      1CIS 441
+ATOM    350 1HD2 LEU    40      10.668  -4.130  -9.900  0.00  1.15      1CIS 442
+ATOM    351 2HD2 LEU    40      11.568  -4.204 -11.393  0.00  1.21      1CIS 443
+ATOM    352 3HD2 LEU    40      10.742  -5.640 -10.796  0.00  1.39      1CIS 444
+ATOM    353  N   GLN    41      11.659  -5.992  -5.333  1.00  0.10      1CIS 445
+ATOM    354  CA  GLN    41      11.286  -6.724  -4.079  1.00  0.15      1CIS 446
+ATOM    355  C   GLN    41       9.916  -6.235  -3.581  1.00  0.16      1CIS 447
+ATOM    356  O   GLN    41       9.042  -7.005  -3.243  0.00  0.18      1CIS 448
+ATOM    357  CB  GLN    41      12.398  -6.476  -2.999  0.00  0.23      1CIS 449
+ATOM    358  CG  GLN    41      11.976  -5.464  -1.844  0.00  2.17      1CIS 450
+ATOM    359  CD  GLN    41      13.080  -5.130  -0.869  0.00  2.40      1CIS 451
+ATOM    360  OE1 GLN    41      12.910  -4.347   0.033  0.00  4.16      1CIS 452
+ATOM    361  NE2 GLN    41      14.243  -5.671  -0.976  0.00  0.74      1CIS 453
+ATOM    362  H   GLN    41      12.548  -5.602  -5.422  0.00  0.10      1CIS 454
+ATOM    363  HA  GLN    41      11.208  -7.767  -4.329  0.00  0.13      1CIS 455
+ATOM    364 1HB  GLN    41      12.688  -7.429  -2.583  0.00  1.27      1CIS 456
+ATOM    365 2HB  GLN    41      13.234  -6.050  -3.526  0.00  1.22      1CIS 457
+ATOM    366 1HG  GLN    41      11.714  -4.505  -2.249  0.00  3.01      1CIS 458
+ATOM    367 2HG  GLN    41      11.136  -5.827  -1.271  0.00  3.04      1CIS 459
+ATOM    368 1HE2 GLN    41      14.922  -5.412  -0.324  0.00  0.98      1CIS 460
+ATOM    369 2HE2 GLN    41      14.417  -6.309  -1.694  0.00  0.77      1CIS 461
+ATOM    370  N   ASP    42       9.818  -4.942  -3.565  1.00  0.15      1CIS 462
+ATOM    371  CA  ASP    42       8.608  -4.224  -3.126  1.00  0.17      1CIS 463
+ATOM    372  C   ASP    42       7.449  -4.324  -4.107  1.00  0.16      1CIS 464
+ATOM    373  O   ASP    42       6.351  -4.736  -3.787  0.00  0.17      1CIS 465
+ATOM    374  CB  ASP    42       9.065  -2.781  -2.925  0.00  0.19      1CIS 466
+ATOM    375  CG  ASP    42       9.763  -2.598  -1.605  0.00  0.15      1CIS 467
+ATOM    376  OD1 ASP    42       9.096  -2.847  -0.618  0.00  0.72      1CIS 468
+ATOM    377  OD2 ASP    42      10.906  -2.202  -1.688  0.00  0.86      1CIS 469
+ATOM    378  H   ASP    42      10.600  -4.422  -3.856  0.00  0.12      1CIS 470
+ATOM    379  HA  ASP    42       8.278  -4.649  -2.188  0.00  0.19      1CIS 471
+ATOM    380 1HB  ASP    42       9.771  -2.537  -3.703  0.00  0.25      1CIS 472
+ATOM    381 2HB  ASP    42       8.272  -2.078  -2.986  0.00  0.20      1CIS 473
+ATOM    382  N   LYS    43       7.772  -3.928  -5.293  1.00  0.17      1CIS 474
+ATOM    383  CA  LYS    43       6.841  -3.900  -6.435  1.00  0.18      1CIS 475
+ATOM    384  C   LYS    43       7.380  -4.769  -7.605  1.00  0.19      1CIS 476
+ATOM    385  O   LYS    43       7.849  -4.252  -8.596  0.00  0.26      1CIS 477
+ATOM    386  CB  LYS    43       6.741  -2.401  -6.678  0.00  0.18      1CIS 478
+ATOM    387  CG  LYS    43       5.672  -2.111  -7.725  0.00  0.19      1CIS 479
+ATOM    388  CD  LYS    43       5.528  -0.568  -7.923  0.00  0.24      1CIS 480
+ATOM    389  CE  LYS    43       5.229  -0.195  -9.380  0.00  0.46      1CIS 481
+ATOM    390  NZ  LYS    43       4.370  -1.234  -9.986  0.00  0.91      1CIS 482
+ATOM    391  H   LYS    43       8.690  -3.633  -5.458  0.00  0.19      1CIS 483
+ATOM    392  HA  LYS    43       5.878  -4.285  -6.140  0.00  0.18      1CIS 484
+ATOM    393 1HB  LYS    43       6.580  -1.916  -5.721  0.00  0.15      1CIS 485
+ATOM    394 2HB  LYS    43       7.705  -2.071  -7.044  0.00  0.21      1CIS 486
+ATOM    395 1HG  LYS    43       5.931  -2.617  -8.646  0.00  0.24      1CIS 487
+ATOM    396 2HG  LYS    43       4.727  -2.510  -7.378  0.00  0.20      1CIS 488
+ATOM    397 1HD  LYS    43       4.739  -0.176  -7.292  0.00  0.40      1CIS 489
+ATOM    398 2HD  LYS    43       6.451  -0.081  -7.647  0.00  0.07      1CIS 490
+ATOM    399 1HE  LYS    43       4.727   0.759  -9.457  0.00  0.49      1CIS 491
+ATOM    400 2HE  LYS    43       6.156  -0.118  -9.931  0.00  0.92      1CIS 492
+ATOM    401 1HZ  LYS    43       4.249  -2.085  -9.388  0.00  1.24      1CIS 493
+ATOM    402 2HZ  LYS    43       3.410  -0.892 -10.146  0.00  1.29      1CIS 494
+ATOM    403 3HZ  LYS    43       4.785  -1.633 -10.865  0.00  1.64      1CIS 495
+ATOM    404  N   PRO    44       7.299  -6.075  -7.468  1.00  0.16      1CIS 496
+ATOM    405  CA  PRO    44       7.941  -7.058  -8.403  1.00  0.19      1CIS 497
+ATOM    406  C   PRO    44       7.833  -6.722  -9.883  1.00  0.28      1CIS 498
+ATOM    407  O   PRO    44       8.793  -6.802 -10.619  0.00  0.41      1CIS 499
+ATOM    408  CB  PRO    44       7.280  -8.382  -8.002  0.00  0.19      1CIS 500
+ATOM    409  CG  PRO    44       7.147  -8.195  -6.477  0.00  0.19      1CIS 501
+ATOM    410  CD  PRO    44       6.569  -6.776  -6.378  0.00  0.18      1CIS 502
+ATOM    411  HA  PRO    44       8.998  -7.108  -8.192  0.00  0.29      1CIS 503
+ATOM    412 1HB  PRO    44       6.316  -8.508  -8.472  0.00  0.17      1CIS 504
+ATOM    413 2HB  PRO    44       7.919  -9.216  -8.250  0.00  0.22      1CIS 505
+ATOM    414 1HG  PRO    44       6.483  -8.920  -6.035  0.00  0.27      1CIS 506
+ATOM    415 2HG  PRO    44       8.114  -8.238  -5.992  0.00  0.18      1CIS 507
+ATOM    416 1HD  PRO    44       5.509  -6.739  -6.581  0.00  0.20      1CIS 508
+ATOM    417 2HD  PRO    44       6.804  -6.326  -5.427  0.00  0.23      1CIS 509
+ATOM    418  N   GLU    45       6.650  -6.355 -10.268  1.00  0.43      1CIS 510
+ATOM    419  CA  GLU    45       6.346  -5.990 -11.664  1.00  0.65      1CIS 511
+ATOM    420  C   GLU    45       6.791  -4.575 -12.092  1.00  0.66      1CIS 512
+ATOM    421  O   GLU    45       6.708  -4.244 -13.257  0.00  1.01      1CIS 513
+ATOM    422  CB  GLU    45       4.809  -6.239 -11.765  0.00  0.88      1CIS 514
+ATOM    423  CG  GLU    45       3.904  -5.705 -10.539  0.00  0.24      1CIS 515
+ATOM    424  CD  GLU    45       4.024  -4.224 -10.189  0.00  1.63      1CIS 516
+ATOM    425  OE1 GLU    45       4.596  -3.493 -10.962  0.00  2.38      1CIS 517
+ATOM    426  OE2 GLU    45       3.536  -3.821  -9.147  0.00  2.44      1CIS 518
+ATOM    427  H   GLU    45       5.909  -6.318  -9.637  0.00  0.52      1CIS 519
+ATOM    428  HA  GLU    45       6.863  -6.675 -12.319  0.00  0.76      1CIS 520
+ATOM    429 1HB  GLU    45       4.427  -5.891 -12.715  0.00  1.64      1CIS 521
+ATOM    430 2HB  GLU    45       4.733  -7.310 -11.706  0.00  1.61      1CIS 522
+ATOM    431 1HG  GLU    45       2.870  -5.859 -10.809  0.00  1.01      1CIS 523
+ATOM    432 2HG  GLU    45       4.076  -6.270  -9.639  0.00  0.99      1CIS 524
+ATOM    433  N   ALA    46       7.257  -3.787 -11.167  1.00  0.35      1CIS 525
+ATOM    434  CA  ALA    46       7.697  -2.405 -11.486  1.00  0.37      1CIS 526
+ATOM    435  C   ALA    46       8.556  -2.103 -12.734  1.00  0.30      1CIS 527
+ATOM    436  O   ALA    46       9.504  -2.778 -13.100  0.00  0.39      1CIS 528
+ATOM    437  CB  ALA    46       8.419  -1.856 -10.212  0.00  0.29      1CIS 529
+ATOM    438  H   ALA    46       7.319  -4.112 -10.250  0.00  0.22      1CIS 530
+ATOM    439  HA  ALA    46       6.782  -1.872 -11.652  0.00  0.48      1CIS 531
+ATOM    440 1HB  ALA    46       9.246  -2.493  -9.942  0.00  1.32      1CIS 532
+ATOM    441 2HB  ALA    46       8.791  -0.854 -10.363  0.00  1.25      1CIS 533
+ATOM    442 3HB  ALA    46       7.750  -1.848  -9.369  0.00  1.36      1CIS 534
+ATOM    443  N   GLN    47       8.155  -1.016 -13.338  1.00  0.14      1CIS 535
+ATOM    444  CA  GLN    47       8.830  -0.503 -14.561  1.00  0.16      1CIS 536
+ATOM    445  C   GLN    47       9.789   0.458 -13.883  1.00  0.24      1CIS 537
+ATOM    446  O   GLN    47       9.438   1.552 -13.484  0.00  0.40      1CIS 538
+ATOM    447  CB  GLN    47       7.983   0.385 -15.485  0.00  0.60      1CIS 539
+ATOM    448  CG  GLN    47       6.653  -0.179 -15.912  0.00  0.35      1CIS 540
+ATOM    449  CD  GLN    47       6.065   0.849 -16.914  0.00  0.60      1CIS 541
+ATOM    450  OE1 GLN    47       5.694   1.972 -16.629  0.00  1.48      1CIS 542
+ATOM    451  NE2 GLN    47       5.969   0.519 -18.153  0.00  1.03      1CIS 543
+ATOM    452  H   GLN    47       7.388  -0.540 -12.966  0.00  0.14      1CIS 544
+ATOM    453  HA  GLN    47       9.357  -1.299 -15.070  0.00  0.20      1CIS 545
+ATOM    454 1HB  GLN    47       7.778   1.320 -14.996  0.00  1.34      1CIS 546
+ATOM    455 2HB  GLN    47       8.584   0.600 -16.359  0.00  1.41      1CIS 547
+ATOM    456 1HG  GLN    47       6.824  -1.134 -16.382  0.00  0.91      1CIS 548
+ATOM    457 2HG  GLN    47       6.001  -0.289 -15.060  0.00  0.97      1CIS 549
+ATOM    458 1HE2 GLN    47       5.610   1.181 -18.770  0.00  1.08      1CIS 550
+ATOM    459 2HE2 GLN    47       6.250  -0.368 -18.449  0.00  1.74      1CIS 551
+ATOM    460  N   ILE    48      10.999   0.035 -13.757  1.00  0.35      1CIS 552
+ATOM    461  CA  ILE    48      12.036   0.882 -13.099  1.00  0.36      1CIS 553
+ATOM    462  C   ILE    48      12.711   1.758 -14.176  1.00  0.35      1CIS 554
+ATOM    463  O   ILE    48      13.458   1.302 -15.017  0.00  0.37      1CIS 555
+ATOM    464  CB  ILE    48      13.074  -0.020 -12.440  0.00  0.43      1CIS 556
+ATOM    465  CG1 ILE    48      12.506  -1.387 -11.939  0.00  0.84      1CIS 557
+ATOM    466  CG2 ILE    48      13.634   0.803 -11.228  0.00  0.30      1CIS 558
+ATOM    467  CD1 ILE    48      11.740  -1.256 -10.657  0.00  0.91      1CIS 559
+ATOM    468  H   ILE    48      11.213  -0.851 -14.103  0.00  0.50      1CIS 560
+ATOM    469  HA  ILE    48      11.571   1.525 -12.364  0.00  0.37      1CIS 561
+ATOM    470  HB  ILE    48      13.807  -0.252 -13.195  0.00  0.47      1CIS 562
+ATOM    471 1HG1 ILE    48      11.830  -1.824 -12.660  0.00  2.01      1CIS 563
+ATOM    472 2HG1 ILE    48      13.324  -2.080 -11.798  0.00  1.55      1CIS 564
+ATOM    473 1HG2 ILE    48      14.077   1.726 -11.573  0.00  0.91      1CIS 565
+ATOM    474 2HG2 ILE    48      12.874   1.039 -10.478  0.00  0.90      1CIS 566
+ATOM    475 3HG2 ILE    48      14.377   0.209 -10.737  0.00  1.26      1CIS 567
+ATOM    476 1HD1 ILE    48      10.934  -0.542 -10.763  0.00  2.15      1CIS 568
+ATOM    477 2HD1 ILE    48      11.327  -2.210 -10.374  0.00  1.33      1CIS 569
+ATOM    478 3HD1 ILE    48      12.424  -0.945  -9.885  0.00  0.94      1CIS 570
+ATOM    479  N   ILE    49      12.420   3.015 -14.087  1.00  0.35      1CIS 571
+ATOM    480  CA  ILE    49      12.925   4.087 -15.014  1.00  0.37      1CIS 572
+ATOM    481  C   ILE    49      14.021   4.964 -14.372  1.00  0.36      1CIS 573
+ATOM    482  O   ILE    49      14.107   4.976 -13.171  0.00  0.38      1CIS 574
+ATOM    483  CB  ILE    49      11.702   4.886 -15.365  0.00  0.40      1CIS 575
+ATOM    484  CG1 ILE    49      10.730   3.908 -16.082  0.00  0.32      1CIS 576
+ATOM    485  CG2 ILE    49      12.059   6.220 -16.068  0.00  0.51      1CIS 577
+ATOM    486  CD1 ILE    49       9.878   4.585 -17.105  0.00  0.49      1CIS 578
+ATOM    487  H   ILE    49      11.831   3.281 -13.354  0.00  0.34      1CIS 579
+ATOM    488  HA  ILE    49      13.255   3.672 -15.956  0.00  0.40      1CIS 580
+ATOM    489  HB  ILE    49      11.224   5.136 -14.430  0.00  0.40      1CIS 581
+ATOM    490 1HG1 ILE    49      11.287   3.130 -16.592  0.00  0.52      1CIS 582
+ATOM    491 2HG1 ILE    49      10.110   3.414 -15.342  0.00  0.18      1CIS 583
+ATOM    492 1HG2 ILE    49      12.618   6.049 -16.977  0.00  1.65      1CIS 584
+ATOM    493 2HG2 ILE    49      11.168   6.778 -16.307  0.00  1.03      1CIS 585
+ATOM    494 3HG2 ILE    49      12.657   6.812 -15.377  0.00  0.90      1CIS 586
+ATOM    495 1HD1 ILE    49       9.373   5.464 -16.730  0.00  0.61      1CIS 587
+ATOM    496 2HD1 ILE    49      10.539   4.864 -17.911  0.00  1.50      1CIS 588
+ATOM    497 3HD1 ILE    49       9.148   3.847 -17.427  0.00  1.53      1CIS 589
+ATOM    498  N   VAL    50      14.828   5.682 -15.125  1.00  0.35      1CIS 590
+ATOM    499  CA  VAL    50      15.909   6.557 -14.558  1.00  0.37      1CIS 591
+ATOM    500  C   VAL    50      15.998   8.033 -15.090  1.00  0.40      1CIS 592
+ATOM    501  O   VAL    50      15.789   8.292 -16.258  0.00  0.39      1CIS 593
+ATOM    502  CB  VAL    50      17.277   5.861 -14.806  0.00  0.37      1CIS 594
+ATOM    503  CG1 VAL    50      18.390   6.603 -14.064  0.00  0.43      1CIS 595
+ATOM    504  CG2 VAL    50      17.258   4.421 -14.278  0.00  0.35      1CIS 596
+ATOM    505  H   VAL    50      14.752   5.659 -16.079  0.00  0.38      1CIS 597
+ATOM    506  HA  VAL    50      15.719   6.602 -13.520  0.00  0.37      1CIS 598
+ATOM    507  HB  VAL    50      17.466   5.859 -15.871  0.00  0.34      1CIS 599
+ATOM    508 1HG1 VAL    50      18.156   6.609 -13.011  0.00  0.73      1CIS 600
+ATOM    509 2HG1 VAL    50      19.338   6.102 -14.202  0.00  1.07      1CIS 601
+ATOM    510 3HG1 VAL    50      18.499   7.626 -14.396  0.00  1.42      1CIS 602
+ATOM    511 1HG2 VAL    50      16.474   3.871 -14.783  0.00  0.65      1CIS 603
+ATOM    512 2HG2 VAL    50      18.209   3.940 -14.458  0.00  1.10      1CIS 604
+ATOM    513 3HG2 VAL    50      17.054   4.409 -13.220  0.00  0.87      1CIS 605
+ATOM    514  N   LEU    51      16.303   8.938 -14.189  1.00  0.43      1CIS 606
+ATOM    515  CA  LEU    51      16.469  10.420 -14.406  1.00  0.42      1CIS 607
+ATOM    516  C   LEU    51      17.412  10.866 -13.244  1.00  0.19      1CIS 608
+ATOM    517  O   LEU    51      18.120  10.051 -12.681  0.00  0.25      1CIS 609
+ATOM    518  CB  LEU    51      15.100  11.148 -14.263  0.00  0.51      1CIS 610
+ATOM    519  CG  LEU    51      14.608  11.027 -12.790  0.00  0.44      1CIS 611
+ATOM    520  CD1 LEU    51      13.653  12.172 -12.439  0.00  0.56      1CIS 612
+ATOM    521  CD2 LEU    51      13.856   9.746 -12.605  0.00  0.76      1CIS 613
+ATOM    522  H   LEU    51      16.434   8.652 -13.259  0.00  0.44      1CIS 614
+ATOM    523  HA  LEU    51      16.946  10.614 -15.356  0.00  0.55      1CIS 615
+ATOM    524 1HB  LEU    51      15.202  12.187 -14.540  0.00  0.49      1CIS 616
+ATOM    525 2HB  LEU    51      14.386  10.688 -14.929  0.00  0.72      1CIS 617
+ATOM    526  HG  LEU    51      15.425  10.968 -12.086  0.00  0.31      1CIS 618
+ATOM    527 1HD1 LEU    51      14.141  13.130 -12.560  0.00  0.93      1CIS 619
+ATOM    528 2HD1 LEU    51      12.765  12.148 -13.054  0.00  1.76      1CIS 620
+ATOM    529 3HD1 LEU    51      13.375  12.066 -11.398  0.00  1.03      1CIS 621
+ATOM    530 1HD2 LEU    51      14.498   8.912 -12.824  0.00  1.59      1CIS 622
+ATOM    531 2HD2 LEU    51      13.577   9.678 -11.564  0.00  0.24      1CIS 623
+ATOM    532 3HD2 LEU    51      12.989   9.722 -13.246  0.00  1.43      1CIS 624
+ATOM    533  N   GLU    52      17.407  12.122 -12.888  1.00  0.31      1CIS 625
+ATOM    534  CA  GLU    52      18.290  12.569 -11.760  1.00  0.57      1CIS 626
+ATOM    535  C   GLU    52      17.378  12.816 -10.519  1.00  0.62      1CIS 627
+ATOM    536  O   GLU    52      16.249  12.384 -10.525  0.00  0.79      1CIS 628
+ATOM    537  CB  GLU    52      18.991  13.852 -12.130  0.00  0.85      1CIS 629
+ATOM    538  CG  GLU    52      19.902  13.727 -13.381  0.00  1.03      1CIS 630
+ATOM    539  CD  GLU    52      20.875  14.910 -13.463  0.00  1.87      1CIS 631
+ATOM    540  OE1 GLU    52      20.604  15.896 -12.797  0.00  2.29      1CIS 632
+ATOM    541  OE2 GLU    52      21.841  14.760 -14.188  0.00  2.47      1CIS 633
+ATOM    542  H   GLU    52      16.827  12.751 -13.357  0.00  0.41      1CIS 634
+ATOM    543  HA  GLU    52      19.018  11.808 -11.514  0.00  0.70      1CIS 635
+ATOM    544 1HB  GLU    52      18.262  14.630 -12.302  0.00  0.74      1CIS 636
+ATOM    545 2HB  GLU    52      19.639  14.126 -11.314  0.00  1.16      1CIS 637
+ATOM    546 1HG  GLU    52      20.484  12.819 -13.319  0.00  1.29      1CIS 638
+ATOM    547 2HG  GLU    52      19.320  13.709 -14.290  0.00  0.81      1CIS 639
+ATOM    548  N   LYS    53      17.904  13.481  -9.519  1.00  0.95      1CIS 640
+ATOM    549  CA  LYS    53      17.204  13.831  -8.223  1.00  1.13      1CIS 641
+ATOM    550  C   LYS    53      15.655  14.085  -8.235  1.00  1.23      1CIS 642
+ATOM    551  O   LYS    53      14.884  13.682  -9.081  0.00  1.24      1CIS 643
+ATOM    552  CB  LYS    53      17.998  15.075  -7.647  0.00  1.36      1CIS 644
+ATOM    553  CG  LYS    53      17.386  16.477  -8.023  0.00  1.25      1CIS 645
+ATOM    554  CD  LYS    53      18.247  17.268  -9.040  0.00  1.46      1CIS 646
+ATOM    555  CE  LYS    53      18.292  16.556 -10.378  0.00  2.91      1CIS 647
+ATOM    556  NZ  LYS    53      18.841  17.516 -11.379  0.00  3.66      1CIS 648
+ATOM    557  H   LYS    53      18.829  13.754  -9.637  0.00  1.22      1CIS 649
+ATOM    558  HA  LYS    53      17.367  13.054  -7.500  0.00  1.16      1CIS 650
+ATOM    559 1HB  LYS    53      18.036  14.983  -6.569  0.00  2.41      1CIS 651
+ATOM    560 2HB  LYS    53      19.027  15.028  -7.985  0.00  1.47      1CIS 652
+ATOM    561 1HG  LYS    53      16.376  16.394  -8.401  0.00  1.93      1CIS 653
+ATOM    562 2HG  LYS    53      17.316  17.056  -7.112  0.00  1.65      1CIS 654
+ATOM    563 1HD  LYS    53      17.834  18.260  -9.163  0.00  2.33      1CIS 655
+ATOM    564 2HD  LYS    53      19.253  17.361  -8.655  0.00  0.57      1CIS 656
+ATOM    565 1HE  LYS    53      18.967  15.718 -10.288  0.00  2.85      1CIS 657
+ATOM    566 2HE  LYS    53      17.324  16.184 -10.680  0.00  4.10      1CIS 658
+ATOM    567 1HZ  LYS    53      19.149  18.386 -10.906  0.00  3.56      1CIS 659
+ATOM    568 2HZ  LYS    53      19.660  17.080 -11.864  0.00  3.80      1CIS 660
+ATOM    569 3HZ  LYS    53      18.124  17.753 -12.096  0.00  4.49      1CIS 661
+ATOM    570  N   GLN    54      15.157  14.781  -7.255  1.00  1.42      1CIS 662
+ATOM    571  CA  GLN    54      13.671  15.058  -7.224  1.00  1.56      1CIS 663
+ATOM    572  C   GLN    54      13.333  16.278  -8.147  1.00  1.55      1CIS 664
+ATOM    573  O   GLN    54      12.670  17.237  -7.811  0.00  1.83      1CIS 665
+ATOM    574  CB  GLN    54      13.318  15.273  -5.714  0.00  1.99      1CIS 666
+ATOM    575  CG  GLN    54      13.614  13.909  -4.992  0.00  3.23      1CIS 667
+ATOM    576  CD  GLN    54      13.519  13.908  -3.453  0.00  3.93      1CIS 668
+ATOM    577  OE1 GLN    54      13.844  12.917  -2.832  0.00  4.70      1CIS 669
+ATOM    578  NE2 GLN    54      13.106  14.943  -2.785  0.00  3.81      1CIS 670
+ATOM    579  H   GLN    54      15.764  15.099  -6.561  0.00  1.48      1CIS 671
+ATOM    580  HA  GLN    54      13.129  14.202  -7.604  0.00  1.38      1CIS 672
+ATOM    581 1HB  GLN    54      13.904  16.079  -5.297  0.00  1.84      1CIS 673
+ATOM    582 2HB  GLN    54      12.270  15.526  -5.632  0.00  2.05      1CIS 674
+ATOM    583 1HG  GLN    54      12.927  13.155  -5.347  0.00  3.92      1CIS 675
+ATOM    584 2HG  GLN    54      14.605  13.586  -5.255  0.00  3.29      1CIS 676
+ATOM    585 1HE2 GLN    54      13.055  14.887  -1.807  0.00  4.35      1CIS 677
+ATOM    586 2HE2 GLN    54      12.850  15.766  -3.248  0.00  3.24      1CIS 678
+ATOM    587  N   ALA    55      13.852  16.148  -9.344  1.00  1.28      1CIS 679
+ATOM    588  CA  ALA    55      13.706  17.141 -10.443  1.00  1.32      1CIS 680
+ATOM    589  C   ALA    55      12.746  16.572 -11.506  1.00  0.90      1CIS 681
+ATOM    590  O   ALA    55      13.166  16.068 -12.532  0.00  0.76      1CIS 682
+ATOM    591  CB  ALA    55      15.099  17.402 -11.037  0.00  1.64      1CIS 683
+ATOM    592  H   ALA    55      14.367  15.336  -9.524  0.00  1.10      1CIS 684
+ATOM    593  HA  ALA    55      13.281  18.063 -10.059  0.00  1.57      1CIS 685
+ATOM    594 1HB  ALA    55      15.752  17.795 -10.276  0.00  2.77      1CIS 686
+ATOM    595 2HB  ALA    55      15.476  16.474 -11.448  0.00  1.37      1CIS 687
+ATOM    596 3HB  ALA    55      15.012  18.120 -11.842  0.00  1.63      1CIS 688
+ATOM    597  N   VAL    56      11.490  16.647 -11.190  1.00  1.09      1CIS 689
+ATOM    598  CA  VAL    56      10.443  16.151 -12.118  1.00  0.73      1CIS 690
+ATOM    599  C   VAL    56       9.509  17.333 -12.359  1.00  0.94      1CIS 691
+ATOM    600  O   VAL    56       8.718  17.705 -11.516  0.00  1.72      1CIS 692
+ATOM    601  CB  VAL    56       9.636  15.005 -11.510  0.00  1.18      1CIS 693
+ATOM    602  CG1 VAL    56       8.649  14.607 -12.635  0.00  1.04      1CIS 694
+ATOM    603  CG2 VAL    56      10.567  13.807 -11.200  0.00  2.17      1CIS 695
+ATOM    604  H   VAL    56      11.227  17.037 -10.333  0.00  1.54      1CIS 696
+ATOM    605  HA  VAL    56      10.890  15.849 -13.054  0.00  0.52      1CIS 697
+ATOM    606  HB  VAL    56       9.119  15.354 -10.625  0.00  1.96      1CIS 698
+ATOM    607 1HG1 VAL    56       9.197  14.317 -13.522  0.00  1.36      1CIS 699
+ATOM    608 2HG1 VAL    56       8.016  13.791 -12.322  0.00  1.98      1CIS 700
+ATOM    609 3HG1 VAL    56       8.018  15.445 -12.905  0.00  1.31      1CIS 701
+ATOM    610 1HG2 VAL    56      11.345  14.101 -10.511  0.00  3.12      1CIS 702
+ATOM    611 2HG2 VAL    56      10.006  12.992 -10.769  0.00  2.65      1CIS 703
+ATOM    612 3HG2 VAL    56      11.031  13.468 -12.113  0.00  2.09      1CIS 704
+ATOM    613  N   ASP    57       9.658  17.866 -13.524  1.00  0.81      1CIS 705
+ATOM    614  CA  ASP    57       8.867  19.037 -13.999  1.00  1.47      1CIS 706
+ATOM    615  C   ASP    57       8.059  18.724 -15.250  1.00  1.63      1CIS 707
+ATOM    616  O   ASP    57       6.849  18.668 -15.313  0.00  1.95      1CIS 708
+ATOM    617  CB  ASP    57       9.931  20.188 -14.164  0.00  2.00      1CIS 709
+ATOM    618  CG  ASP    57      11.306  19.608 -14.480  0.00  2.09      1CIS 710
+ATOM    619  OD1 ASP    57      11.517  19.457 -15.666  0.00  2.77      1CIS 711
+ATOM    620  OD2 ASP    57      12.025  19.340 -13.532  0.00  2.32      1CIS 712
+ATOM    621  H   ASP    57      10.338  17.463 -14.095  0.00  0.82      1CIS 713
+ATOM    622  HA  ASP    57       8.159  19.314 -13.300  0.00  1.65      1CIS 714
+ATOM    623 1HB  ASP    57       9.664  20.881 -14.947  0.00  2.69      1CIS 715
+ATOM    624 2HB  ASP    57      10.027  20.729 -13.236  0.00  2.20      1CIS 716
+ATOM    625  N   ASN    58       8.865  18.522 -16.211  1.00  2.24      1CIS 717
+ATOM    626  CA  ASN    58       8.458  18.176 -17.616  1.00  2.90      1CIS 718
+ATOM    627  C   ASN    58       7.872  16.731 -17.745  1.00  2.13      1CIS 719
+ATOM    628  O   ASN    58       8.362  15.889 -18.475  0.00  3.20      1CIS 720
+ATOM    629  CB  ASN    58       9.737  18.393 -18.490  0.00  4.22      1CIS 721
+ATOM    630  CG  ASN    58      10.956  17.627 -17.964  0.00  4.84      1CIS 722
+ATOM    631  OD1 ASN    58      12.039  17.735 -18.485  0.00  6.31      1CIS 723
+ATOM    632  ND2 ASN    58      10.899  16.832 -16.950  0.00  4.01      1CIS 724
+ATOM    633  H   ASN    58       9.766  18.651 -15.850  0.00  2.57      1CIS 725
+ATOM    634  HA  ASN    58       7.688  18.866 -17.932  0.00  3.37      1CIS 726
+ATOM    635 1HB  ASN    58       9.567  18.081 -19.509  0.00  4.61      1CIS 727
+ATOM    636 2HB  ASN    58      10.007  19.438 -18.490  0.00  4.62      1CIS 728
+ATOM    637 1HD2 ASN    58      11.742  16.418 -16.683  0.00  4.60      1CIS 729
+ATOM    638 2HD2 ASN    58      10.056  16.669 -16.492  0.00  3.06      1CIS 730
+ATOM    639  N   ALA    59       6.810  16.489 -17.015  1.00  0.64      1CIS 731
+ATOM    640  CA  ALA    59       6.141  15.147 -17.032  1.00  1.14      1CIS 732
+ATOM    641  C   ALA    59       4.844  15.009 -17.878  1.00  0.87      1CIS 733
+ATOM    642  O   ALA    59       4.259  15.943 -18.381  0.00  1.21      1CIS 734
+ATOM    643  CB  ALA    59       5.851  14.772 -15.551  0.00  2.60      1CIS 735
+ATOM    644  H   ALA    59       6.456  17.209 -16.447  0.00  0.73      1CIS 736
+ATOM    645  HA  ALA    59       6.846  14.434 -17.432  0.00  2.12      1CIS 737
+ATOM    646 1HB  ALA    59       6.781  14.752 -15.002  0.00  2.85      1CIS 738
+ATOM    647 2HB  ALA    59       5.213  15.529 -15.111  0.00  2.76      1CIS 739
+ATOM    648 3HB  ALA    59       5.362  13.810 -15.456  0.00  3.77      1CIS 740
+ATOM    649  N   TYR    60       4.482  13.768 -17.967  1.00  1.34      1CIS 741
+ATOM    650  CA  TYR    60       3.304  13.215 -18.679  1.00  1.90      1CIS 742
+ATOM    651  C   TYR    60       2.095  13.032 -17.713  1.00  1.73      1CIS 743
+ATOM    652  O   TYR    60       2.211  13.348 -16.546  0.00  1.20      1CIS 744
+ATOM    653  CB  TYR    60       3.874  11.915 -19.272  0.00  2.58      1CIS 745
+ATOM    654  CG  TYR    60       4.696  11.120 -18.221  0.00  2.02      1CIS 746
+ATOM    655  CD1 TYR    60       4.256  10.954 -16.919  0.00  2.24      1CIS 747
+ATOM    656  CD2 TYR    60       5.929  10.586 -18.573  0.00  1.92      1CIS 748
+ATOM    657  CE1 TYR    60       5.029  10.282 -16.007  0.00  1.88      1CIS 749
+ATOM    658  CE2 TYR    60       6.697   9.907 -17.641  0.00  1.46      1CIS 750
+ATOM    659  CZ  TYR    60       6.235   9.765 -16.363  0.00  1.01      1CIS 751
+ATOM    660  OH  TYR    60       6.987   9.094 -15.432  0.00  0.62      1CIS 752
+ATOM    661  H   TYR    60       5.040  13.099 -17.538  0.00  1.65      1CIS 753
+ATOM    662  HA  TYR    60       3.008  13.909 -19.456  0.00  2.17      1CIS 754
+ATOM    663 1HB  TYR    60       3.145  11.291 -19.759  0.00  3.35      1CIS 755
+ATOM    664 2HB  TYR    60       4.599  12.279 -19.976  0.00  2.83      1CIS 756
+ATOM    665  HD1 TYR    60       3.299  11.337 -16.599  0.00  3.02      1CIS 757
+ATOM    666  HD2 TYR    60       6.291  10.705 -19.587  0.00  2.61      1CIS 758
+ATOM    667  HE1 TYR    60       4.698  10.161 -14.992  0.00  2.53      1CIS 759
+ATOM    668  HE2 TYR    60       7.660   9.475 -17.897  0.00  1.97      1CIS 760
+ATOM    669  HH  TYR    60       7.694   9.727 -15.250  0.00  0.78      1CIS 761
+ATOM    670  N   ALA    61       0.999  12.524 -18.221  1.00  2.40      1CIS 762
+ATOM    671  CA  ALA    61      -0.246  12.299 -17.397  1.00  2.44      1CIS 763
+ATOM    672  C   ALA    61      -0.146  11.723 -15.935  1.00  1.80      1CIS 764
+ATOM    673  O   ALA    61       0.910  11.578 -15.351  0.00  1.19      1CIS 765
+ATOM    674  CB  ALA    61      -1.157  11.401 -18.271  0.00  3.25      1CIS 766
+ATOM    675  H   ALA    61       0.990  12.291 -19.172  0.00  2.97      1CIS 767
+ATOM    676  HA  ALA    61      -0.710  13.268 -17.287  0.00  2.60      1CIS 768
+ATOM    677 1HB  ALA    61      -0.663  10.466 -18.501  0.00  2.96      1CIS 769
+ATOM    678 2HB  ALA    61      -2.095  11.182 -17.783  0.00  3.62      1CIS 770
+ATOM    679 3HB  ALA    61      -1.380  11.908 -19.197  0.00  3.94      1CIS 771
+ATOM    680  N   GLU    62      -1.310  11.410 -15.413  1.00  2.08      1CIS 772
+ATOM    681  CA  GLU    62      -1.521  10.848 -14.027  1.00  1.75      1CIS 773
+ATOM    682  C   GLU    62      -0.507   9.782 -13.545  1.00  1.15      1CIS 774
+ATOM    683  O   GLU    62       0.169   9.180 -14.354  0.00  1.28      1CIS 775
+ATOM    684  CB  GLU    62      -2.972  10.269 -13.993  0.00  2.18      1CIS 776
+ATOM    685  CG  GLU    62      -3.744  10.895 -12.792  0.00  3.64      1CIS 777
+ATOM    686  CD  GLU    62      -3.031  10.580 -11.488  0.00  4.70      1CIS 778
+ATOM    687  OE1 GLU    62      -3.105   9.438 -11.075  0.00  5.01      1CIS 779
+ATOM    688  OE2 GLU    62      -2.420  11.504 -10.985  0.00  5.48      1CIS 780
+ATOM    689  H   GLU    62      -2.096  11.553 -15.967  0.00  2.60      1CIS 781
+ATOM    690  HA  GLU    62      -1.445  11.671 -13.330  0.00  1.79      1CIS 782
+ATOM    691 1HB  GLU    62      -3.513  10.476 -14.906  0.00  2.21      1CIS 783
+ATOM    692 2HB  GLU    62      -2.933   9.193 -13.873  0.00  2.37      1CIS 784
+ATOM    693 1HG  GLU    62      -3.819  11.969 -12.896  0.00  3.70      1CIS 785
+ATOM    694 2HG  GLU    62      -4.738  10.482 -12.724  0.00  4.49      1CIS 786
+ATOM    695  N   TYR    63      -0.466   9.593 -12.244  1.00  0.73      1CIS 787
+ATOM    696  CA  TYR    63       0.446   8.625 -11.522  1.00  0.27      1CIS 788
+ATOM    697  C   TYR    63       0.691   7.223 -12.152  1.00  0.43      1CIS 789
+ATOM    698  O   TYR    63      -0.056   6.752 -12.985  0.00  0.87      1CIS 790
+ATOM    699  CB  TYR    63      -0.140   8.481 -10.102  0.00  0.33      1CIS 791
+ATOM    700  CG  TYR    63       0.714   7.604  -9.161  0.00  0.75      1CIS 792
+ATOM    701  CD1 TYR    63       1.798   8.107  -8.462  0.00  1.89      1CIS 793
+ATOM    702  CD2 TYR    63       0.381   6.274  -8.997  0.00  0.57      1CIS 794
+ATOM    703  CE1 TYR    63       2.521   7.281  -7.612  0.00  2.41      1CIS 795
+ATOM    704  CE2 TYR    63       1.107   5.456  -8.149  0.00  0.85      1CIS 796
+ATOM    705  CZ  TYR    63       2.177   5.967  -7.455  0.00  1.80      1CIS 797
+ATOM    706  OH  TYR    63       2.913   5.204  -6.577  0.00  2.36      1CIS 798
+ATOM    707  H   TYR    63      -1.086  10.134 -11.708  0.00  0.93      1CIS 799
+ATOM    708  HA  TYR    63       1.399   9.109 -11.420  0.00  0.60      1CIS 800
+ATOM    709 1HB  TYR    63      -0.265   9.454  -9.650  0.00  0.42      1CIS 801
+ATOM    710 2HB  TYR    63      -1.125   8.041 -10.176  0.00  0.78      1CIS 802
+ATOM    711  HD1 TYR    63       2.088   9.142  -8.582  0.00  2.43      1CIS 803
+ATOM    712  HD2 TYR    63      -0.461   5.871  -9.542  0.00  1.17      1CIS 804
+ATOM    713  HE1 TYR    63       3.377   7.651  -7.067  0.00  3.34      1CIS 805
+ATOM    714  HE2 TYR    63       0.843   4.412  -8.043  0.00  0.85      1CIS 806
+ATOM    715  HH  TYR    63       2.736   5.535  -5.688  0.00  2.41      1CIS 807
+ATOM    716  N   ARG    64       1.759   6.609 -11.685  1.00  0.89      1CIS 808
+ATOM    717  CA  ARG    64       2.171   5.262 -12.173  1.00  1.25      1CIS 809
+ATOM    718  C   ARG    64       2.436   4.163 -11.117  1.00  1.07      1CIS 810
+ATOM    719  O   ARG    64       3.565   3.803 -10.852  0.00  1.23      1CIS 811
+ATOM    720  CB  ARG    64       3.442   5.431 -13.024  0.00  1.90      1CIS 812
+ATOM    721  CG  ARG    64       3.243   6.241 -14.333  0.00  2.16      1CIS 813
+ATOM    722  CD  ARG    64       4.072   7.534 -14.262  0.00  3.31      1CIS 814
+ATOM    723  NE  ARG    64       3.417   8.248 -13.146  0.00  4.43      1CIS 815
+ATOM    724  CZ  ARG    64       3.125   9.485 -13.155  0.00  5.68      1CIS 816
+ATOM    725  NH1 ARG    64       2.448   9.893 -14.145  0.00  5.46      1CIS 817
+ATOM    726  NH2 ARG    64       3.509  10.227 -12.196  0.00  7.14      1CIS 818
+ATOM    727  H   ARG    64       2.294   7.033 -10.992  0.00  1.26      1CIS 819
+ATOM    728  HA  ARG    64       1.380   4.872 -12.803  0.00  1.23      1CIS 820
+ATOM    729 1HB  ARG    64       4.274   5.763 -12.421  0.00  2.16      1CIS 821
+ATOM    730 2HB  ARG    64       3.671   4.440 -13.309  0.00  1.98      1CIS 822
+ATOM    731 1HG  ARG    64       3.522   5.621 -15.174  0.00  2.71      1CIS 823
+ATOM    732 2HG  ARG    64       2.189   6.480 -14.444  0.00  1.35      1CIS 824
+ATOM    733 1HD  ARG    64       5.117   7.407 -14.001  0.00  4.25      1CIS 825
+ATOM    734 2HD  ARG    64       3.993   8.079 -15.196  0.00  2.81      1CIS 826
+ATOM    735  HE  ARG    64       3.193   7.703 -12.373  0.00  4.32      1CIS 827
+ATOM    736 1HH1 ARG    64       2.160   9.146 -14.741  0.00  4.25      1CIS 828
+ATOM    737 2HH1 ARG    64       2.170  10.828 -14.371  0.00  6.39      1CIS 829
+ATOM    738 1HH2 ARG    64       4.020   9.868 -11.405  0.00  7.32      1CIS 830
+ATOM    739 2HH2 ARG    64       3.274  11.192 -12.256  0.00  8.11      1CIS 831
+ATOM    740  N   ILE    65       1.408   3.629 -10.524  1.00  0.78      1CIS 832
+ATOM    741  CA  ILE    65       1.572   2.543  -9.487  1.00  0.62      1CIS 833
+ATOM    742  C   ILE    65       2.213   1.216 -10.039  1.00  0.41      1CIS 834
+ATOM    743  O   ILE    65       2.314   0.198  -9.381  0.00  0.64      1CIS 835
+ATOM    744  CB  ILE    65       0.176   2.248  -8.864  0.00  0.63      1CIS 836
+ATOM    745  CG1 ILE    65       0.234   1.132  -7.803  0.00  0.55      1CIS 837
+ATOM    746  CG2 ILE    65      -0.770   2.047  -9.978  0.00  0.68      1CIS 838
+ATOM    747  CD1 ILE    65      -0.810   1.452  -6.720  0.00  0.94      1CIS 839
+ATOM    748  H   ILE    65       0.538   3.968 -10.775  0.00  0.71      1CIS 840
+ATOM    749  HA  ILE    65       2.183   2.945  -8.726  0.00  0.75      1CIS 841
+ATOM    750  HB  ILE    65      -0.272   3.101  -8.395  0.00  0.63      1CIS 842
+ATOM    751 1HG1 ILE    65       0.059   0.166  -8.258  0.00  0.55      1CIS 843
+ATOM    752 2HG1 ILE    65       1.218   1.121  -7.353  0.00  0.53      1CIS 844
+ATOM    753 1HG2 ILE    65      -0.360   1.362 -10.711  0.00  0.86      1CIS 845
+ATOM    754 2HG2 ILE    65      -1.741   1.740  -9.631  0.00  0.98      1CIS 846
+ATOM    755 3HG2 ILE    65      -0.829   3.047 -10.380  0.00  1.35      1CIS 847
+ATOM    756 1HD1 ILE    65      -0.573   2.432  -6.318  0.00  1.90      1CIS 848
+ATOM    757 2HD1 ILE    65      -1.801   1.477  -7.150  0.00  0.57      1CIS 849
+ATOM    758 3HD1 ILE    65      -0.775   0.710  -5.932  0.00  1.49      1CIS 850
+ATOM    759  N   ASP    66       2.631   1.337 -11.263  1.00  0.43      1CIS 851
+ATOM    760  CA  ASP    66       3.295   0.352 -12.172  1.00  0.11      1CIS 852
+ATOM    761  C   ASP    66       4.818   0.580 -12.296  1.00  0.21      1CIS 853
+ATOM    762  O   ASP    66       5.640  -0.302 -12.200  0.00  0.32      1CIS 854
+ATOM    763  CB  ASP    66       2.666   0.512 -13.541  0.00  0.65      1CIS 855
+ATOM    764  CG  ASP    66       2.544   2.007 -13.862  0.00  1.51      1CIS 856
+ATOM    765  OD1 ASP    66       1.548   2.551 -13.418  0.00  1.99      1CIS 857
+ATOM    766  OD2 ASP    66       3.447   2.521 -14.494  0.00  2.05      1CIS 858
+ATOM    767  H   ASP    66       2.482   2.208 -11.671  0.00  0.80      1CIS 859
+ATOM    768  HA  ASP    66       3.128  -0.651 -11.830  0.00  0.31      1CIS 860
+ATOM    769 1HB  ASP    66       3.319   0.034 -14.259  0.00  0.39      1CIS 861
+ATOM    770 2HB  ASP    66       1.686   0.069 -13.577  0.00  1.00      1CIS 862
+ATOM    771  N   ARG    67       5.104   1.826 -12.500  1.00  0.29      1CIS 863
+ATOM    772  CA  ARG    67       6.483   2.389 -12.684  1.00  0.33      1CIS 864
+ATOM    773  C   ARG    67       7.067   3.037 -11.431  1.00  0.20      1CIS 865
+ATOM    774  O   ARG    67       6.345   3.400 -10.532  0.00  0.12      1CIS 866
+ATOM    775  CB  ARG    67       6.375   3.409 -13.837  0.00  0.43      1CIS 867
+ATOM    776  CG  ARG    67       7.487   4.464 -13.790  0.00  1.37      1CIS 868
+ATOM    777  CD  ARG    67       7.575   5.208 -15.081  0.00  1.27      1CIS 869
+ATOM    778  NE  ARG    67       6.209   5.683 -15.428  0.00  0.56      1CIS 870
+ATOM    779  CZ  ARG    67       5.859   5.803 -16.650  0.00  1.22      1CIS 871
+ATOM    780  NH1 ARG    67       5.510   4.749 -17.288  0.00  2.07      1CIS 872
+ATOM    781  NH2 ARG    67       5.899   6.990 -17.105  0.00  1.80      1CIS 873
+ATOM    782  H   ARG    67       4.326   2.429 -12.521  0.00  0.30      1CIS 874
+ATOM    783  HA  ARG    67       7.184   1.674 -13.087  0.00  0.35      1CIS 875
+ATOM    784 1HB  ARG    67       6.422   2.871 -14.766  0.00  1.45      1CIS 876
+ATOM    785 2HB  ARG    67       5.427   3.905 -13.795  0.00  0.75      1CIS 877
+ATOM    786 1HG  ARG    67       7.256   5.192 -13.024  0.00  1.91      1CIS 878
+ATOM    787 2HG  ARG    67       8.448   4.015 -13.588  0.00  2.24      1CIS 879
+ATOM    788 1HD  ARG    67       8.279   6.034 -15.006  0.00  1.54      1CIS 880
+ATOM    789 2HD  ARG    67       7.897   4.493 -15.823  0.00  1.75      1CIS 881
+ATOM    790  HE  ARG    67       5.565   5.885 -14.713  0.00  0.26      1CIS 882
+ATOM    791 1HH1 ARG    67       5.534   3.870 -16.791  0.00  2.35      1CIS 883
+ATOM    792 2HH1 ARG    67       5.228   4.774 -18.240  0.00  2.78      1CIS 884
+ATOM    793 1HH2 ARG    67       6.239   7.700 -16.479  0.00  2.16      1CIS 885
+ATOM    794 2HH2 ARG    67       5.616   7.209 -18.029  0.00  2.30      1CIS 886
+ATOM    795  N   VAL    68       8.373   3.112 -11.455  1.00  0.23      1CIS 887
+ATOM    796  CA  VAL    68       9.191   3.727 -10.364  1.00  0.21      1CIS 888
+ATOM    797  C   VAL    68      10.233   4.495 -11.165  1.00  0.25      1CIS 889
+ATOM    798  O   VAL    68      10.807   3.908 -12.053  0.00  0.29      1CIS 890
+ATOM    799  CB  VAL    68       9.855   2.631  -9.485  0.00  0.18      1CIS 891
+ATOM    800  CG1 VAL    68      10.695   3.370  -8.377  0.00  0.13      1CIS 892
+ATOM    801  CG2 VAL    68       8.738   1.791  -8.804  0.00  0.18      1CIS 893
+ATOM    802  H   VAL    68       8.829   2.730 -12.244  0.00  0.28      1CIS 894
+ATOM    803  HA  VAL    68       8.615   4.431  -9.805  0.00  0.23      1CIS 895
+ATOM    804  HB  VAL    68      10.494   1.982 -10.070  0.00  0.21      1CIS 896
+ATOM    805 1HG1 VAL    68      10.067   4.043  -7.806  0.00  0.53      1CIS 897
+ATOM    806 2HG1 VAL    68      11.133   2.655  -7.691  0.00  0.62      1CIS 898
+ATOM    807 3HG1 VAL    68      11.492   3.966  -8.807  0.00  0.70      1CIS 899
+ATOM    808 1HG2 VAL    68       8.021   1.428  -9.523  0.00  0.64      1CIS 900
+ATOM    809 2HG2 VAL    68       9.147   0.946  -8.287  0.00  0.74      1CIS 901
+ATOM    810 3HG2 VAL    68       8.219   2.382  -8.069  0.00  0.47      1CIS 902
+ATOM    811  N   ARG    69      10.483   5.740 -10.905  1.00  0.37      1CIS 903
+ATOM    812  CA  ARG    69      11.520   6.447 -11.726  1.00  0.56      1CIS 904
+ATOM    813  C   ARG    69      12.674   6.444 -10.750  1.00  0.48      1CIS 905
+ATOM    814  O   ARG    69      12.470   6.420  -9.547  0.00  0.49      1CIS 906
+ATOM    815  CB  ARG    69      11.099   7.873 -12.048  0.00  0.80      1CIS 907
+ATOM    816  CG  ARG    69       9.663   7.915 -12.612  0.00  0.49      1CIS 908
+ATOM    817  CD  ARG    69       9.147   9.285 -12.279  0.00  0.65      1CIS 909
+ATOM    818  NE  ARG    69       9.113   9.288 -10.785  0.00  2.51      1CIS 910
+ATOM    819  CZ  ARG    69       8.033   9.225 -10.092  0.00  4.10      1CIS 911
+ATOM    820  NH1 ARG    69       7.683   8.083  -9.694  0.00  5.46      1CIS 912
+ATOM    821  NH2 ARG    69       7.357  10.266  -9.811  0.00  4.47      1CIS 913
+ATOM    822  H   ARG    69       9.996   6.161 -10.170  0.00  0.41      1CIS 914
+ATOM    823  HA  ARG    69      11.808   5.881 -12.598  0.00  0.61      1CIS 915
+ATOM    824 1HB  ARG    69      11.250   8.499 -11.187  0.00  1.15      1CIS 916
+ATOM    825 2HB  ARG    69      11.718   8.280 -12.832  0.00  1.45      1CIS 917
+ATOM    826 1HG  ARG    69       9.679   7.786 -13.685  0.00  0.66      1CIS 918
+ATOM    827 2HG  ARG    69       9.018   7.166 -12.179  0.00  0.65      1CIS 919
+ATOM    828 1HD  ARG    69       9.899   9.990 -12.633  0.00  0.99      1CIS 920
+ATOM    829 2HD  ARG    69       8.172   9.483 -12.706  0.00  1.65      1CIS 921
+ATOM    830  HE  ARG    69       9.963   9.331 -10.289  0.00  2.68      1CIS 922
+ATOM    831 1HH1 ARG    69       8.228   7.273  -9.920  0.00  5.40      1CIS 923
+ATOM    832 2HH1 ARG    69       6.857   7.982  -9.145  0.00  6.70      1CIS 924
+ATOM    833 1HH2 ARG    69       7.653  11.162 -10.130  0.00  3.79      1CIS 925
+ATOM    834 2HH2 ARG    69       6.516  10.140  -9.259  0.00  5.71      1CIS 926
+ATOM    835  N   LEU    70      13.843   6.493 -11.281  1.00  0.43      1CIS 927
+ATOM    836  CA  LEU    70      15.016   6.465 -10.367  1.00  0.41      1CIS 928
+ATOM    837  C   LEU    70      15.821   7.719 -10.535  1.00  0.40      1CIS 929
+ATOM    838  O   LEU    70      16.218   8.075 -11.623  0.00  0.47      1CIS 930
+ATOM    839  CB  LEU    70      15.839   5.175 -10.693  0.00  0.35      1CIS 931
+ATOM    840  CG  LEU    70      15.715   4.248  -9.452  0.00  0.26      1CIS 932
+ATOM    841  CD1 LEU    70      16.146   2.798  -9.703  0.00  0.14      1CIS 933
+ATOM    842  CD2 LEU    70      16.675   4.797  -8.436  0.00  0.26      1CIS 934
+ATOM    843  H   LEU    70      13.868   6.558 -12.261  0.00  0.42      1CIS 935
+ATOM    844  HA  LEU    70      14.699   6.428  -9.343  0.00  0.39      1CIS 936
+ATOM    845 1HB  LEU    70      15.590   4.706 -11.620  0.00  0.37      1CIS 937
+ATOM    846 2HB  LEU    70      16.863   5.489 -10.785  0.00  0.33      1CIS 938
+ATOM    847  HG  LEU    70      14.690   4.219  -9.109  0.00  0.30      1CIS 939
+ATOM    848 1HD1 LEU    70      15.581   2.360 -10.501  0.00  0.95      1CIS 940
+ATOM    849 2HD1 LEU    70      17.188   2.698  -9.943  0.00  0.83      1CIS 941
+ATOM    850 3HD1 LEU    70      15.955   2.212  -8.810  0.00  0.79      1CIS 942
+ATOM    851 1HD2 LEU    70      16.469   5.819  -8.181  0.00  1.07      1CIS 943
+ATOM    852 2HD2 LEU    70      16.682   4.208  -7.532  0.00  0.74      1CIS 944
+ATOM    853 3HD2 LEU    70      17.643   4.769  -8.903  0.00  1.18      1CIS 945
+ATOM    854  N   ALA    71      16.034   8.353  -9.422  1.00  0.32      1CIS 946
+ATOM    855  CA  ALA    71      16.805   9.615  -9.391  1.00  0.23      1CIS 947
+ATOM    856  C   ALA    71      18.263   9.257  -8.998  1.00  0.21      1CIS 948
+ATOM    857  O   ALA    71      18.603   9.220  -7.827  0.00  0.20      1CIS 949
+ATOM    858  CB  ALA    71      16.110  10.510  -8.362  0.00  0.17      1CIS 950
+ATOM    859  H   ALA    71      15.673   7.990  -8.589  0.00  0.36      1CIS 951
+ATOM    860  HA  ALA    71      16.741  10.063 -10.386  0.00  0.23      1CIS 952
+ATOM    861 1HB  ALA    71      16.090  10.037  -7.391  0.00  0.86      1CIS 953
+ATOM    862 2HB  ALA    71      16.655  11.430  -8.274  0.00  0.91      1CIS 954
+ATOM    863 3HB  ALA    71      15.102  10.726  -8.694  0.00  1.03      1CIS 955
+ATOM    864  N   VAL    72      19.081   9.020  -9.986  1.00  0.21      1CIS 956
+ATOM    865  CA  VAL    72      20.525   8.648  -9.729  1.00  0.15      1CIS 957
+ATOM    866  C   VAL    72      21.566   9.725 -10.047  1.00  0.24      1CIS 958
+ATOM    867  O   VAL    72      21.297  10.717 -10.696  0.00  0.41      1CIS 959
+ATOM    868  CB  VAL    72      20.939   7.427 -10.564  0.00  0.15      1CIS 960
+ATOM    869  CG1 VAL    72      20.166   6.218 -10.160  0.00  0.21      1CIS 961
+ATOM    870  CG2 VAL    72      20.620   7.682 -12.005  0.00  0.24      1CIS 962
+ATOM    871  H   VAL    72      18.747   9.097 -10.906  0.00  0.24      1CIS 963
+ATOM    872  HA  VAL    72      20.628   8.369  -8.692  0.00  0.16      1CIS 964
+ATOM    873  HB  VAL    72      22.001   7.231 -10.463  0.00  0.12      1CIS 965
+ATOM    874 1HG1 VAL    72      19.108   6.407 -10.273  0.00  0.96      1CIS 966
+ATOM    875 2HG1 VAL    72      20.479   5.400 -10.786  0.00  1.10      1CIS 967
+ATOM    876 3HG1 VAL    72      20.386   5.996  -9.135  0.00  0.71      1CIS 968
+ATOM    877 1HG2 VAL    72      21.118   8.567 -12.371  0.00  1.40      1CIS 969
+ATOM    878 2HG2 VAL    72      20.920   6.821 -12.583  0.00  1.42      1CIS 970
+ATOM    879 3HG2 VAL    72      19.549   7.805 -12.089  0.00  1.01      1CIS 971
+ATOM    880  N   ASP    73      22.747   9.460  -9.571  1.00  0.36      1CIS 972
+ATOM    881  CA  ASP    73      23.882  10.392  -9.789  1.00  0.67      1CIS 973
+ATOM    882  C   ASP    73      24.813   9.890 -10.898  1.00  0.85      1CIS 974
+ATOM    883  O   ASP    73      24.619   8.867 -11.527  0.00  1.30      1CIS 975
+ATOM    884  CB  ASP    73      24.612  10.549  -8.435  0.00  0.78      1CIS 976
+ATOM    885  CG  ASP    73      24.714   9.210  -7.716  0.00  1.37      1CIS 977
+ATOM    886  OD1 ASP    73      25.609   8.458  -8.064  0.00  1.24      1CIS 978
+ATOM    887  OD2 ASP    73      23.872   9.014  -6.860  0.00  2.50      1CIS 979
+ATOM    888  H   ASP    73      22.860   8.629  -9.054  0.00  0.39      1CIS 980
+ATOM    889  HA  ASP    73      23.499  11.354 -10.095  0.00  0.73      1CIS 981
+ATOM    890 1HB  ASP    73      25.620  10.902  -8.568  0.00  1.35      1CIS 982
+ATOM    891 2HB  ASP    73      24.095  11.252  -7.805  0.00  0.31      1CIS 983
+ATOM    892  N   LYS    74      25.847  10.649 -11.097  1.00  0.53      1CIS 984
+ATOM    893  CA  LYS    74      26.828  10.304 -12.145  1.00  0.61      1CIS 985
+ATOM    894  C   LYS    74      27.516   8.958 -11.926  1.00  0.59      1CIS 986
+ATOM    895  O   LYS    74      28.278   8.509 -12.757  0.00  0.69      1CIS 987
+ATOM    896  CB  LYS    74      27.827  11.488 -12.196  0.00  0.65      1CIS 988
+ATOM    897  CG  LYS    74      27.067  12.848 -12.433  0.00  0.21      1CIS 989
+ATOM    898  CD  LYS    74      26.020  12.697 -13.592  0.00  1.73      1CIS 990
+ATOM    899  CE  LYS    74      25.419  14.034 -14.014  0.00  2.18      1CIS 991
+ATOM    900  NZ  LYS    74      24.335  13.744 -15.012  0.00  3.53      1CIS 992
+ATOM    901  H   LYS    74      25.997  11.442 -10.557  0.00  0.26      1CIS 993
+ATOM    902  HA  LYS    74      26.285  10.223 -13.063  0.00  0.61      1CIS 994
+ATOM    903 1HB  LYS    74      28.355  11.527 -11.249  0.00  0.82      1CIS 995
+ATOM    904 2HB  LYS    74      28.552  11.323 -12.985  0.00  0.91      1CIS 996
+ATOM    905 1HG  LYS    74      26.566  13.156 -11.524  0.00  0.97      1CIS 997
+ATOM    906 2HG  LYS    74      27.801  13.606 -12.674  0.00  1.18      1CIS 998
+ATOM    907 1HD  LYS    74      26.491  12.232 -14.446  0.00  2.56      1CIS 999
+ATOM    908 2HD  LYS    74      25.214  12.062 -13.254  0.00  2.28      1CIS1000
+ATOM    909 1HE  LYS    74      25.003  14.546 -13.152  0.00  1.96      1CIS1001
+ATOM    910 2HE  LYS    74      26.183  14.663 -14.457  0.00  2.26      1CIS1002
+ATOM    911 1HZ  LYS    74      24.188  12.718 -15.102  0.00  3.98      1CIS1003
+ATOM    912 2HZ  LYS    74      23.428  14.150 -14.694  0.00  3.55      1CIS1004
+ATOM    913 3HZ  LYS    74      24.535  14.150 -15.946  0.00  4.33      1CIS1005
+ATOM    914  N   LEU    75      27.226   8.351 -10.816  1.00  0.52      1CIS1006
+ATOM    915  CA  LEU    75      27.844   7.041 -10.506  1.00  0.49      1CIS1007
+ATOM    916  C   LEU    75      26.697   6.055 -10.320  1.00  0.40      1CIS1008
+ATOM    917  O   LEU    75      26.688   5.271  -9.398  0.00  0.46      1CIS1009
+ATOM    918  CB  LEU    75      28.629   7.262  -9.247  0.00  0.58      1CIS1010
+ATOM    919  CG  LEU    75      29.418   8.567  -9.241  0.00  0.57      1CIS1011
+ATOM    920  CD1 LEU    75      29.931   8.704  -7.823  0.00  0.72      1CIS1012
+ATOM    921  CD2 LEU    75      30.540   8.519 -10.271  0.00  0.32      1CIS1013
+ATOM    922  H   LEU    75      26.606   8.724 -10.151  0.00  0.56      1CIS1014
+ATOM    923  HA  LEU    75      28.438   6.679 -11.332  0.00  0.46      1CIS1015
+ATOM    924 1HB  LEU    75      27.882   7.408  -8.497  0.00  0.70      1CIS1016
+ATOM    925 2HB  LEU    75      29.238   6.404  -9.003  0.00  0.57      1CIS1017
+ATOM    926  HG  LEU    75      28.766   9.399  -9.461  0.00  0.68      1CIS1018
+ATOM    927 1HD1 LEU    75      30.545   7.857  -7.558  0.00  1.62      1CIS1019
+ATOM    928 2HD1 LEU    75      30.483   9.622  -7.700  0.00  0.63      1CIS1020
+ATOM    929 3HD1 LEU    75      29.063   8.718  -7.174  0.00  1.25      1CIS1021
+ATOM    930 1HD2 LEU    75      31.218   7.702 -10.079  0.00  1.46      1CIS1022
+ATOM    931 2HD2 LEU    75      30.095   8.383 -11.249  0.00  1.09      1CIS1023
+ATOM    932 3HD2 LEU    75      31.083   9.451 -10.268  0.00  1.31      1CIS1024
+ATOM    933  N   ASP    76      25.760   6.144 -11.221  1.00  0.32      1CIS1025
+ATOM    934  CA  ASP    76      24.555   5.263 -11.208  1.00  0.29      1CIS1026
+ATOM    935  C   ASP    76      24.127   4.750  -9.807  1.00  0.32      1CIS1027
+ATOM    936  O   ASP    76      23.758   3.607  -9.613  0.00  0.34      1CIS1028
+ATOM    937  CB  ASP    76      24.856   4.092 -12.215  0.00  0.27      1CIS1029
+ATOM    938  CG  ASP    76      26.349   3.882 -12.469  0.00  0.28      1CIS1030
+ATOM    939  OD1 ASP    76      27.025   3.529 -11.522  0.00  0.54      1CIS1031
+ATOM    940  OD2 ASP    76      26.739   4.094 -13.606  0.00  1.03      1CIS1032
+ATOM    941  H   ASP    76      25.878   6.818 -11.916  0.00  0.31      1CIS1033
+ATOM    942  HA  ASP    76      23.714   5.813 -11.595  0.00  0.27      1CIS1034
+ATOM    943 1HB  ASP    76      24.460   3.179 -11.802  0.00  0.36      1CIS1035
+ATOM    944 2HB  ASP    76      24.388   4.278 -13.164  0.00  0.24      1CIS1036
+ATOM    945  N   ASN    77      24.193   5.649  -8.854  1.00  0.32      1CIS1037
+ATOM    946  CA  ASN    77      23.796   5.332  -7.442  1.00  0.33      1CIS1038
+ATOM    947  C   ASN    77      22.531   6.152  -7.261  1.00  0.39      1CIS1039
+ATOM    948  O   ASN    77      22.254   7.015  -8.066  0.00  0.66      1CIS1040
+ATOM    949  CB  ASN    77      24.798   5.835  -6.392  0.00  0.27      1CIS1041
+ATOM    950  CG  ASN    77      26.161   5.254  -6.569  0.00  1.42      1CIS1042
+ATOM    951  OD1 ASN    77      26.463   4.108  -6.301  0.00  2.81      1CIS1043
+ATOM    952  ND2 ASN    77      27.026   6.077  -7.032  0.00  0.97      1CIS1044
+ATOM    953  H   ASN    77      24.521   6.550  -9.071  0.00  0.33      1CIS1045
+ATOM    954  HA  ASN    77      23.553   4.286  -7.334  0.00  0.32      1CIS1046
+ATOM    955 1HB  ASN    77      24.874   6.906  -6.434  0.00  0.87      1CIS1047
+ATOM    956 2HB  ASN    77      24.494   5.584  -5.394  0.00  1.07      1CIS1048
+ATOM    957 1HD2 ASN    77      27.947   5.787  -7.168  0.00  1.75      1CIS1049
+ATOM    958 2HD2 ASN    77      26.735   6.992  -7.248  0.00  0.37      1CIS1050
+ATOM    959  N   ILE    78      21.815   5.880  -6.223  1.00  0.15      1CIS1051
+ATOM    960  CA  ILE    78      20.560   6.621  -5.960  1.00  0.14      1CIS1052
+ATOM    961  C   ILE    78      20.901   7.895  -5.291  1.00  0.20      1CIS1053
+ATOM    962  O   ILE    78      21.263   7.950  -4.139  0.00  0.17      1CIS1054
+ATOM    963  CB  ILE    78      19.647   5.711  -5.090  0.00  0.10      1CIS1055
+ATOM    964  CG1 ILE    78      19.408   4.354  -5.768  0.00  0.08      1CIS1056
+ATOM    965  CG2 ILE    78      18.285   6.403  -4.886  0.00  0.10      1CIS1057
+ATOM    966  CD1 ILE    78      19.363   4.590  -7.259  0.00  0.08      1CIS1058
+ATOM    967  H   ILE    78      22.135   5.176  -5.623  0.00  0.17      1CIS1059
+ATOM    968  HA  ILE    78      20.087   6.921  -6.897  0.00  0.16      1CIS1060
+ATOM    969  HB  ILE    78      20.141   5.542  -4.145  0.00  0.08      1CIS1061
+ATOM    970 1HG1 ILE    78      20.219   3.680  -5.520  0.00  0.11      1CIS1062
+ATOM    971 2HG1 ILE    78      18.485   3.909  -5.433  0.00  0.09      1CIS1063
+ATOM    972 1HG2 ILE    78      17.803   6.654  -5.824  0.00  0.68      1CIS1064
+ATOM    973 2HG2 ILE    78      17.588   5.805  -4.310  0.00  0.57      1CIS1065
+ATOM    974 3HG2 ILE    78      18.461   7.322  -4.348  0.00  0.61      1CIS1066
+ATOM    975 1HD1 ILE    78      18.751   5.465  -7.416  0.00  1.01      1CIS1067
+ATOM    976 2HD1 ILE    78      20.342   4.826  -7.639  0.00  0.83      1CIS1068
+ATOM    977 3HD1 ILE    78      18.967   3.758  -7.815  0.00  0.96      1CIS1069
+ATOM    978  N   ALA    79      20.731   8.921  -6.057  1.00  0.24      1CIS1070
+ATOM    979  CA  ALA    79      21.035  10.266  -5.544  1.00  0.28      1CIS1071
+ATOM    980  C   ALA    79      19.872  10.643  -4.630  1.00  0.27      1CIS1072
+ATOM    981  O   ALA    79      20.093  11.220  -3.587  0.00  0.36      1CIS1073
+ATOM    982  CB  ALA    79      21.173  11.150  -6.782  0.00  0.26      1CIS1074
+ATOM    983  H   ALA    79      20.401   8.809  -6.973  0.00  0.22      1CIS1075
+ATOM    984  HA  ALA    79      21.952  10.236  -4.969  0.00  0.35      1CIS1076
+ATOM    985 1HB  ALA    79      20.269  11.113  -7.373  0.00  1.13      1CIS1077
+ATOM    986 2HB  ALA    79      21.391  12.175  -6.525  0.00  0.97      1CIS1078
+ATOM    987 3HB  ALA    79      21.978  10.759  -7.387  0.00  1.38      1CIS1079
+ATOM    988  N   GLN    80      18.672  10.313  -5.018  1.00  0.18      1CIS1080
+ATOM    989  CA  GLN    80      17.500  10.672  -4.126  1.00  0.22      1CIS1081
+ATOM    990  C   GLN    80      16.460   9.578  -3.916  1.00  0.20      1CIS1082
+ATOM    991  O   GLN    80      16.636   8.462  -4.342  0.00  0.44      1CIS1083
+ATOM    992  CB  GLN    80      16.784  11.930  -4.672  0.00  0.26      1CIS1084
+ATOM    993  CG  GLN    80      16.729  13.056  -3.544  0.00  0.38      1CIS1085
+ATOM    994  CD  GLN    80      18.009  13.869  -3.315  0.00  2.02      1CIS1086
+ATOM    995  OE1 GLN    80      18.035  14.823  -2.570  0.00  2.36      1CIS1087
+ATOM    996  NE2 GLN    80      19.099  13.551  -3.922  0.00  3.28      1CIS1088
+ATOM    997  H   GLN    80      18.592   9.820  -5.878  0.00  0.13      1CIS1089
+ATOM    998  HA  GLN    80      17.888  10.914  -3.155  0.00  0.30      1CIS1090
+ATOM    999 1HB  GLN    80      17.355  12.272  -5.514  0.00  0.18      1CIS1091
+ATOM   1000 2HB  GLN    80      15.781  11.703  -5.010  0.00  0.28      1CIS1092
+ATOM   1001 1HG  GLN    80      15.976  13.783  -3.775  0.00  1.18      1CIS1093
+ATOM   1002 2HG  GLN    80      16.444  12.608  -2.596  0.00  0.97      1CIS1094
+ATOM   1003 1HE2 GLN    80      19.885  14.104  -3.754  0.00  4.32      1CIS1095
+ATOM   1004 2HE2 GLN    80      19.135  12.779  -4.522  0.00  3.28      1CIS1096
+ATOM   1005  N   VAL    81      15.379   9.911  -3.264  1.00  0.23      1CIS1097
+ATOM   1006  CA  VAL    81      14.306   8.891  -3.013  1.00  0.26      1CIS1098
+ATOM   1007  C   VAL    81      13.667   8.590  -4.373  1.00  0.34      1CIS1099
+ATOM   1008  O   VAL    81      13.027   9.471  -4.917  0.00  0.50      1CIS1100
+ATOM   1009  CB  VAL    81      13.243   9.479  -2.054  0.00  0.38      1CIS1101
+ATOM   1010  CG1 VAL    81      12.164   8.395  -1.716  0.00  0.46      1CIS1102
+ATOM   1011  CG2 VAL    81      13.936   9.999  -0.773  0.00  0.41      1CIS1103
+ATOM   1012  H   VAL    81      15.247  10.830  -2.947  0.00  0.43      1CIS1104
+ATOM   1013  HA  VAL    81      14.736   7.989  -2.607  0.00  0.22      1CIS1105
+ATOM   1014  HB  VAL    81      12.766  10.325  -2.539  0.00  0.43      1CIS1106
+ATOM   1015 1HG1 VAL    81      12.632   7.546  -1.246  0.00  0.51      1CIS1107
+ATOM   1016 2HG1 VAL    81      11.419   8.803  -1.045  0.00  0.77      1CIS1108
+ATOM   1017 3HG1 VAL    81      11.662   8.065  -2.614  0.00  1.19      1CIS1109
+ATOM   1018 1HG2 VAL    81      14.483   9.219  -0.269  0.00  1.02      1CIS1110
+ATOM   1019 2HG2 VAL    81      14.637  10.788  -1.034  0.00  1.34      1CIS1111
+ATOM   1020 3HG2 VAL    81      13.201  10.413  -0.096  0.00  1.53      1CIS1112
+ATOM   1021  N   PRO    82      13.819   7.407  -4.926  1.00  0.27      1CIS1113
+ATOM   1022  CA  PRO    82      13.144   7.092  -6.214  1.00  0.30      1CIS1114
+ATOM   1023  C   PRO    82      11.700   6.732  -5.758  1.00  0.30      1CIS1115
+ATOM   1024  O   PRO    82      11.524   6.166  -4.692  0.00  0.35      1CIS1116
+ATOM   1025  CB  PRO    82      14.056   5.986  -6.733  0.00  0.26      1CIS1117
+ATOM   1026  CG  PRO    82      14.328   5.150  -5.492  0.00  0.22      1CIS1118
+ATOM   1027  CD  PRO    82      14.610   6.243  -4.415  0.00  0.17      1CIS1119
+ATOM   1028  HA  PRO    82      13.123   7.955  -6.866  0.00  0.34      1CIS1120
+ATOM   1029 1HB  PRO    82      13.589   5.426  -7.533  0.00  0.26      1CIS1121
+ATOM   1030 2HB  PRO    82      14.996   6.423  -7.043  0.00  0.27      1CIS1122
+ATOM   1031 1HG  PRO    82      13.448   4.565  -5.281  0.00  0.27      1CIS1123
+ATOM   1032 2HG  PRO    82      15.181   4.502  -5.647  0.00  0.23      1CIS1124
+ATOM   1033 1HD  PRO    82      14.275   5.950  -3.438  0.00  0.17      1CIS1125
+ATOM   1034 2HD  PRO    82      15.644   6.484  -4.353  0.00  0.10      1CIS1126
+ATOM   1035  N   ARG    83      10.717   7.063  -6.545  1.00  0.26      1CIS1127
+ATOM   1036  CA  ARG    83       9.299   6.772  -6.180  1.00  0.25      1CIS1128
+ATOM   1037  C   ARG    83       8.544   6.110  -7.329  1.00  0.28      1CIS1129
+ATOM   1038  O   ARG    83       8.889   6.328  -8.477  0.00  0.34      1CIS1130
+ATOM   1039  CB  ARG    83       8.594   8.099  -5.821  0.00  0.25      1CIS1131
+ATOM   1040  CG  ARG    83       9.521   8.952  -4.940  0.00  0.63      1CIS1132
+ATOM   1041  CD  ARG    83       8.779   9.515  -3.750  0.00  0.72      1CIS1133
+ATOM   1042  NE  ARG    83       7.568  10.320  -4.167  0.00  1.19      1CIS1134
+ATOM   1043  CZ  ARG    83       6.419  10.003  -3.701  0.00  2.08      1CIS1135
+ATOM   1044  NH1 ARG    83       5.485   9.625  -4.482  0.00  3.58      1CIS1136
+ATOM   1045  NH2 ARG    83       6.287  10.074  -2.448  0.00  1.73      1CIS1137
+ATOM   1046  H   ARG    83      10.894   7.494  -7.392  0.00  0.24      1CIS1138
+ATOM   1047  HA  ARG    83       9.283   6.137  -5.309  0.00  0.26      1CIS1139
+ATOM   1048 1HB  ARG    83       8.345   8.643  -6.723  0.00  0.54      1CIS1140
+ATOM   1049 2HB  ARG    83       7.677   7.865  -5.299  0.00  0.13      1CIS1141
+ATOM   1050 1HG  ARG    83      10.288   8.306  -4.538  0.00  1.18      1CIS1142
+ATOM   1051 2HG  ARG    83       9.993   9.738  -5.514  0.00  1.10      1CIS1143
+ATOM   1052 1HD  ARG    83       8.490   8.650  -3.167  0.00  2.15      1CIS1144
+ATOM   1053 2HD  ARG    83       9.454  10.113  -3.150  0.00  2.01      1CIS1145
+ATOM   1054  HE  ARG    83       7.645  11.083  -4.777  0.00  2.24      1CIS1146
+ATOM   1055 1HH1 ARG    83       5.645   9.556  -5.466  0.00  3.98      1CIS1147
+ATOM   1056 2HH1 ARG    83       4.602   9.396  -4.085  0.00  4.40      1CIS1148
+ATOM   1057 1HH2 ARG    83       7.090  10.357  -1.917  0.00  0.99      1CIS1149
+ATOM   1058 2HH2 ARG    83       5.458   9.854  -1.937  0.00  2.60      1CIS1150
+ATOM   1059  N   VAL    84       7.548   5.334  -7.006  1.00  0.40      1CIS1151
+ATOM   1060  CA  VAL    84       6.717   4.637  -8.048  1.00  0.42      1CIS1152
+ATOM   1061  C   VAL    84       6.310   5.647  -9.118  1.00  0.52      1CIS1153
+ATOM   1062  O   VAL    84       6.887   5.794 -10.184  0.00  0.97      1CIS1154
+ATOM   1063  CB  VAL    84       5.519   4.041  -7.308  0.00  0.36      1CIS1155
+ATOM   1064  CG1 VAL    84       4.467   3.580  -8.249  0.00  0.24      1CIS1156
+ATOM   1065  CG2 VAL    84       5.912   2.793  -6.647  0.00  0.40      1CIS1157
+ATOM   1066  H   VAL    84       7.378   5.216  -6.045  0.00  0.52      1CIS1158
+ATOM   1067  HA  VAL    84       7.278   3.878  -8.533  0.00  0.42      1CIS1159
+ATOM   1068  HB  VAL    84       5.129   4.734  -6.573  0.00  0.44      1CIS1160
+ATOM   1069 1HG1 VAL    84       4.856   2.854  -8.942  0.00  1.28      1CIS1161
+ATOM   1070 2HG1 VAL    84       3.698   3.124  -7.651  0.00  1.06      1CIS1162
+ATOM   1071 3HG1 VAL    84       4.056   4.416  -8.786  0.00  1.38      1CIS1163
+ATOM   1072 1HG2 VAL    84       6.719   3.015  -5.979  0.00  1.11      1CIS1164
+ATOM   1073 2HG2 VAL    84       5.038   2.436  -6.118  0.00  1.04      1CIS1165
+ATOM   1074 3HG2 VAL    84       6.227   2.068  -7.376  0.00  1.62      1CIS1166
+ATOM   1075  N   GLY    85       5.295   6.355  -8.750  1.00  0.33      1CIS1167
+ATOM   1076  CA  GLY    85       4.729   7.413  -9.629  1.00  0.48      1CIS1168
+ATOM   1077  C   GLY    85       5.015   8.768  -8.996  1.00  1.25      1CIS1169
+ATOM   1078  O   GLY    85       5.597   8.817  -7.914  0.00  2.44      1CIS1170
+ATOM   1079  OXT GLY    85       4.640   9.695  -9.678  0.00  1.27      1CIS1171
+ATOM   1080  H   GLY    85       4.909   6.148  -7.874  0.00  0.50      1CIS1172
+ATOM   1081 1HA  GLY    85       5.198   7.377 -10.602  0.00  0.88      1CIS1173
+ATOM   1082 2HA  GLY    85       3.666   7.276  -9.723  0.00  0.08      1CIS1174
+TER    1083      GLY    85                                              1CIS1175
+ENDMDL                                                                  1CIS1176
