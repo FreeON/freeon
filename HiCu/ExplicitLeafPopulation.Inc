@@ -11,7 +11,8 @@
           LLambdaX(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          LLambdaX(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          LLambdaX(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        W=SqZ*UQx
        Sgn=One; IF(W<0.0D0)Sgn=-One
@@ -20,7 +21,8 @@
           ULambdaX(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          ULambdaX(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          ULambdaX(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        LQy=Box%BndBox(2,1)-Node%Qy
        UQy=Box%BndBox(2,2)-Node%Qy
@@ -31,7 +33,8 @@
           LLambdaY(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          LLambdaY(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          LLambdaY(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        W=SqZ*UQy
        Sgn=One; IF(W<0.0D0)Sgn=-One
@@ -40,7 +43,8 @@
           ULambdaY(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          ULambdaY(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          ULambdaY(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        LQz=Box%BndBox(3,1)-Node%Qz
        UQz=Box%BndBox(3,2)-Node%Qz
@@ -51,7 +55,8 @@
           LLambdaZ(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          LLambdaZ(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          LLambdaZ(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        W=SqZ*UQz
        Sgn=One; IF(W<0.0D0)Sgn=-One
@@ -60,7 +65,8 @@
           ULambdaZ(0)=-CoFact*Sgn
        ELSE
           J=AINT(X*Erf_Grid)
-          ULambdaZ(0)=-CoFact*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+          ULambdaZ(0)=-CoFact*Sgn   &
+             *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
        ENDIF
        LQ2=LQx*LQx+LQy*LQy+LQz*LQz
        UQ2=UQx*UQx+UQy*UQy+UQz*UQz

@@ -25,15 +25,15 @@ PROGRAM XCForce
   TYPE(DBL_VECT)              :: XCFrc,Frc
   TYPE(AtomPair)              :: Pair
   REAL(DOUBLE)                :: Electrons,XCFrcChk
-  INTEGER                     :: AtA,AtB,MA,A1,A2,JP,Q
+  INTEGER                     :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q
   CHARACTER(LEN=3)            :: SCFCycle
   CHARACTER(LEN=15),PARAMETER :: Prog='XCForce        '
   CHARACTER(LEN=15),PARAMETER :: Sub1='XCForce.RhoTree' 
   CHARACTER(LEN=15),PARAMETER :: Sub2='XCForce.GridGen' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
 #ifdef PERIODIC        
-      INTEGER                  :: NCA,NCB
-      REAL(DOUBLE)             :: Ax,Ay,Az,Bx,By,Bz
+  INTEGER                     :: NCA,NCB
+  REAL(DOUBLE),DIMENSION(3)   :: A,B
 #endif     
 !---------------------------------------------------------------------------------------
 ! Macro the start up
@@ -57,7 +57,6 @@ PROGRAM XCForce
   CALL DeleteRhoTree(RhoRoot)
 ! More allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-  CALL New(Frc,3*NAtoms)
   CALL New(XCFrc,3*NAtoms)
   CALL Get(P,TrixFile('D',Args,1))
 !----------------------------------------------------------------------
@@ -72,50 +71,53 @@ PROGRAM XCForce
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
+           NB=BSiz%I(AtB)
+           MN1=MA*NB-1
 #ifdef PERIODIC
-           Ax = Pair%A(1)
-           Ay = Pair%A(2)
-           Az = Pair%A(3)
-           Bx = Pair%B(1)
-           By = Pair%B(2)           
-           Bz = Pair%B(3)
-           DO NCA = 1,CS%NCells
-              Pair%A(1) = Ax+CS%CellCarts%D(1,NCA)
-              Pair%A(2) = Ay+CS%CellCarts%D(2,NCA)
-              Pair%A(3) = Az+CS%CellCarts%D(3,NCA)
-              DO NCB = 1,CS%NCells
-                 Pair%B(1) = Bx+CS%CellCarts%D(1,NCB)
-                 Pair%B(2) = By+CS%CellCarts%D(2,NCB)
-                 Pair%B(3) = Bz+CS%CellCarts%D(3,NCB)
-                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+           A=Pair%A
+           B=Pair%B
+           DO NCA=1,CS%NCells
+              Pair%A=A+CS%CellCarts%D(:,NCA)
+              DO NCB=1,CS%NCells
+                 Pair%B=B+CS%CellCarts%D(:,NCB)
+                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
+                         +(Pair%A(2)-Pair%B(2))**2 &
+                         +(Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
-                    XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:))
+                    XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
                  ENDIF
               ENDDO
            ENDDO
 #else
-           XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:))
+           XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
 #endif
         ENDIF
      ENDDO
   ENDDO
-!---------------------------------------------------------------
-! Update forces
-  CALL PPrint(XCFrc,'XCFrce',Unit_O=6)
-  CALL PPrint(XCFrc,'XCFrce')
+!--------------------------------------------------------------------------------
+! Do some checksumming, resumming and IO 
+!--------------------------------------------------------------------------------
+  CALL PChkSum(XCFrc,'XCForce')  
+! for tmp debuging ...
+  CALL PPrint(XCFrc,'XCForce',Unit_O=6)
+  CALL PPrint(XCFrc,'XCForce')
+! Sum in contribution to total force
+  CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+XCFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
-!  XCFrcChk=SQRT(DOT_PRODUCT(XCFrc%D,XCFrc%D))
-!  WRITE(*,*)' XCFrcChk = ',XCFrcChk
-!---------------------------------------------------------------
+  CALL PChkSum(Frc,'GradE')  
+! for tmp debuging ...
+  CALL PPrint(Frc,'Total Force',Unit_O=6)
+  CALL PPrint(Frc,'Total Force')
+!--------------------------------------------------------------------------------
 ! Tidy up
+!--------------------------------------------------------------------------------
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(P)
   CALL Delete(Frc)
   CALL Delete(XCFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
-! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM XCForce
