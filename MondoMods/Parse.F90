@@ -701,5 +701,138 @@ MODULE Parse
             ENDIF
          ENDDO
      END FUNCTION Squish
+  !
+  !
+  LOGICAL FUNCTION ChrCkkIfInt(Chr)
+!H---------------------------------------------------------------------------------
+!H LOGICAL FUNCTION ChrCkkIfInt(Chr)
+!H  Check if <Chr> is formed only with integers.
+!H---------------------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    CHARACTER(LEN=*), INTENT(IN) :: Chr
+    !-------------------------------------------------------------------
+    INTEGER                      :: I
+    !-------------------------------------------------------------------
+    ChrCkkIfInt=.FALSE.
+    DO I=1,LEN(TRIM(Chr))
+       IF(IACHAR(Chr(I:I)).LT.IACHAR('0').OR.IACHAR(Chr(I:I)).GT.IACHAR('9')) RETURN
+    ENDDO
+    ChrCkkIfInt=.TRUE.
+  END FUNCTION ChrCkkIfInt
+  !
+  !
+  LOGICAL FUNCTION OptGetKeyArg(Unit,Key,Arg)
+!H---------------------------------------------------------------------------------
+!H LOGICAL FUNCTION OptGetKeyArg(Unit,Key,Arg)
+!H  This function look for a given Key in the unit Unit and gives back an array
+!H  of char with the arguments.
+!H                 e.g. Key=(aaaa,bbbb,cccc,1111,0101sss,aa_bbb) or
+!H                      Key=(1a1a1a)                             or
+!H                      Key=abcd_efg
+!H---------------------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    INTEGER         , INTENT(IN   ) :: Unit
+    CHARACTER(LEN=*), INTENT(IN   ) :: Key
+    TYPE(CHR_VECT)  , INTENT(INOUT) :: Arg
+    !-------------------------------------------------------------------
+    INTEGER                         :: NDim,ISTAT,Indx,IndxL,IndxR,iDim
+    CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineTmp
+    !-------------------------------------------------------------------
+    !
+    ! Initialize.
+    OptGetKeyArg=.FALSE.
+    IF(AllocQ(Arg%Alloc)) CALL Delete(Arg)
+    REWIND(Unit)
+    !
+    ! Let,s go.
+    DO
+       !
+       ! Read a line from inputfile.
+       READ(Unit,DEFAULT_CHR_FMT,IOSTAT=ISTAT) Line
+       !write(*,*) 'ISTAT',ISTAT
+       IF(ISTAT.NE.0) EXIT
+       !write(*,*) 'Line<'//trim(line)//'>'
+       CALL LowCase(Line)
+       IF(INDEX(Line,Key).EQ.0) CYCLE
+       !
+       ! We have found the Key.
+       OptGetKeyArg=.TRUE.
+       Line=TRIM(Line)
+       !
+       ! Find the number of comma.
+       LineTmp=Line
+       NDim=0
+       DO
+          Indx=INDEX(LineTmp,',')
+          lineTmp=TRIM(lineTmp(Indx+1:))
+          IF(Indx.EQ.0) EXIT
+          NDim=NDim+1
+       ENDDO
+       NDim=NDim+1
+       !
+       ! Allocate the Arg array.
+       CALL New(Arg,NDim)
+       !
+       ! Find the equal.
+       Indx=INDEX(Line,'=')
+       IF(Indx.EQ.0) CALL Halt('Could not find an = then looking for the Key=<'//TRIM(Key)//'>')
+       Line=Line(Indx+1:)
+       !
+       ! Find parenthesis.
+       IndxL=SCAN(Line,'('     )
+       IndxR=SCAN(Line,')',BACK=.TRUE.)
+       !
+       ! Check for unbalanced parenthesis.
+       IF(IndxL.EQ.0.AND.NDim .GT.1) &
+            & CALL Halt('Unbalenced left parenthesis then looking for the Key=<' //TRIM(Key)//'>')
+       IF(IndxR.EQ.0.AND.NDim .GT.1) &
+            & CALL Halt('Unbalenced right parenthesis then looking for the Key=<'//TRIM(Key)//'>')
+       IF(IndxR.NE.0.AND.IndxL.EQ.0) &
+            & CALL Halt('Unbalenced left parenthesis then looking for the Key=<' //TRIM(Key)//'>')
+       IF(IndxL.NE.0.AND.IndxR.EQ.0) &
+            & CALL Halt('Unbalenced right parenthesis then looking for the Key=<'//TRIM(Key)//'>')
+       !
+       ! Remove the parenthesis.
+       IF(IndxR.EQ.0) THEN
+          Line=Line(IndxL+1:)
+       ELSE
+          Line=Line(IndxL+1:IndxR-1)
+       ENDIF
+       !
+       ! Get the arguments.
+       DO iDim=1,NDim
+          IF(iDim.LT.NDim) THEN
+             IndxR=SCAN(Line,',')
+             Arg%C(iDim)=TRIM(Line(1:IndxR-1))
+             Line=Line(IndxR+1:)
+          ELSE
+             Arg%C(iDim)=TRIM(Line(1:))
+          ENDIF
+          !
+          ! Check for missing arguments.
+          IF(LEN(TRIM(Arg%C(iDim))).EQ.0) &
+               & CALL Halt('Miss an argument at the position '//IntToChar(iDim) &
+               &           //' then looking for the Key=<' //TRIM(Key)//'>')
+       ENDDO
+       !
+       ! Look for duplicate Key.
+       READ(Unit,DEFAULT_CHR_FMT,IOSTAT=ISTAT) Line
+       IF(ISTAT.NE.0) EXIT
+       CALL LowCase(Line)
+       IF(INDEX(Line,Key).EQ.0) THEN
+          CYCLE
+       ELSE
+          !
+          ! There is another Key!
+          OptGetKeyArg=.FALSE.
+          CALL Halt('There are duplicate Key then looking for the Key=<' //TRIM(Key)//'>')
+       ENDIF
+    ENDDO
+    !
+  END FUNCTION OptGetKeyArg
+  !
+  !
 END MODULE
 
