@@ -362,10 +362,6 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
       TYPE(PBCInfo)    :: PBCDispl  !-- Displaced Periodic Information
 !     Internal coordinates related arrays
-      TYPE(INTC)       :: IntCs
-      TYPE(BONDDATA)   :: Bond
-      TYPE(ATOMBONDS)  :: AtmB
-      TYPE(PBCFits)    :: PBCFit    !-- Points used for Lattice fit 
       LOGICAL          :: LatticeOnly
       INTEGER          :: AltCount   
    END TYPE 
@@ -610,19 +606,10 @@ MODULE DerivedTypes
 !
 !----------------------------------------------------------------------
 !
-   TYPE TOPOLOGY
-     INTEGER        :: Alloc     !-- Allocation key
-     INTEGER        :: NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov
-     INTEGER        :: N12Tot,N13Tot,N14Tot,NExTot
-     TYPE(INT_RNK2) :: Cov12 
-     TYPE(INT_RNK2) :: Cov13 
-     TYPE(INT_RNK2) :: Cov14 
-     TYPE(INT_RNK2) :: CovExcl
-     TYPE(INT_RNK2) :: Tot12 
-     TYPE(INT_RNK2) :: Tot13 
-     TYPE(INT_RNK2) :: Tot14 
-     TYPE(INT_RNK2) :: TotExcl
-   END TYPE TOPOLOGY
+   TYPE TOPMATS
+     TYPE(INT_VECT) :: ITot12,JTot12
+     TYPE(INT_VECT) :: IExcl,JExcl
+   END TYPE TOPMATS
 !
 !----------------------------------------------------------------------
 !

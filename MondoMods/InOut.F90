@@ -1160,10 +1160,6 @@ CONTAINS
                 CALL Get(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
                 CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
-                CALL Get(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
-                CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
-                CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
-                CALL Get(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
                 CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
                 CALL Get(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
               END SUBROUTINE Get_CRDS
@@ -1202,10 +1198,6 @@ CONTAINS
                 CALL Put(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
                 CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
-                CALL Put(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
-                CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
-                CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
-                CALL Put(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
                 CALL Put(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
                 CALL Put(GM%AltCount  ,'AltCount'     ,Tag_O=Tag_O)
               END SUBROUTINE Put_CRDS

@@ -321,27 +321,21 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE SymbOrder(IA,JA) 
+   SUBROUTINE SymbOrder(IA,JA,N,M) 
      INTEGER,DIMENSION(:) :: IA,JA
-     TYPE(DBL_VECT) :: AN,ANT
      TYPE(INT_VECT) :: IAT1,JAT1,IAT2,JAT2
      INTEGER :: I,J,K,L,M,N,NZ
-     N=SIZE(IA)-1
+     REAL(DOUBLE)   :: Aux1(2),Aux2(2)
      NZ=IA(N+1)-1
      !
-     CALL New(AN,NZ)
-     CALL New(ANT,NZ)
-     CALL New(IAT1,N+1)
+     CALL New(IAT1,M+1)
      CALL New(JAT1,NZ)
-     CALL TransPose1x1(IA,JA,AN%D,N,M,IAT1%I,JAT1%I,ANT%D,'full')
+     CALL TransPose1x1(IA,JA,Aux1,N,M,IAT1%I,JAT1%I,Aux2,'symb')
      CALL New(IAT2,N+1)
      CALL New(JAT2,NZ)
-     CALL TransPose1x1(IAT1%I,JAT1%I,AN%D,N,M,&
-         IAT2%I,JAT2%I,ANT%D,'full')
+     CALL TransPose1x1(IAT1%I,JAT1%I,Aux1,M,N,IAT2%I,JAT2%I,Aux2,'symb')
      IA(1:N+1)=IAT2%I
      JA(1:NZ)=JAT2%I
-     CALL Delete(AN)
-     CALL Delete(ANT)
      CALL Delete(IAT1)
      CALL Delete(JAT1)
      CALL Delete(IAT2)
@@ -684,6 +678,52 @@ CONTAINS
      70 K=K-1
      IF(K.GT.0) GO TO 50 
    END SUBROUTINE CholFactSolve      
+!
+!-----------------------------------------------------------------
+!
+   SUBROUTINE Symmetrize1x1(IA,JA,A_O)
+     TYPE(INT_VECT)                     :: IA,JA
+     TYPE(DBL_VECT),OPTIONAL            :: A_O
+     REAL(DOUBLE)                       :: Aux1(2),Aux2(2)
+     TYPE(INT_VECT)                     :: ITr,JTr
+     TYPE(DBL_VECT)                     :: ATr
+     TYPE(INT_VECT)                     :: IC,JC  
+     TYPE(DBL_VECT)                     :: CN  
+     INTEGER                            :: N,NZ
+     !
+     N=SIZE(IA%I)-1
+     NZ=SIZE(JA%I)
+     CALL New(ITr,N+1)
+     CALL New(JTr,NZ)
+     IF(PRESENT(A_O)) THEN
+       CALL New(ATr,NZ)
+       CALL TransPose1x1(IA%I,JA%I,A_O%D,N,N,ITr%I,JTr%I,ATr%D,'full')
+       CALL AddMat_1x1(IA%I,JA%I,A_O%D,ITr%I,JTr%I,ATr%D,IC,JC,CN,N,N,SymbOnly_O=.FALSE.)
+     ELSE
+       CALL TransPose1x1(IA%I,JA%I,Aux1,N,N,ITr%I,JTr%I,Aux2,'symb')
+       CALL AddMat_1x1(IA%I,JA%I,Aux1,ITr%I,JTr%I,Aux2,IC,JC,CN,N,N,SymbOnly_O=.TRUE.)
+     ENDIF
+     CALL Delete(IA) 
+     CALL Delete(JA) 
+     CALL New(IA,SIZE(IC%I))
+     CALL New(JA,SIZE(JC%I))
+     CALL SetEq(IA,IC)
+     CALL SetEq(JA,JC)
+     IF(PRESENT(A_O)) THEN
+       CALL Delete(A_O)
+       CALL New(A_O,SIZE(CN%D))
+       CALL SetEq(A_O,CN)
+     ENDIF
+     CALL Delete(ITr)
+     CALL Delete(JTr)
+     CALL Delete(IC)
+     CALL Delete(JC)
+     IF(PRESENT(A_O)) THEN
+       CALL Delete(A_O)
+       CALL Delete(ATr)
+       CALL Delete(CN)
+     ENDIF
+   END SUBROUTINE Symmetrize1x1
 !
 !-----------------------------------------------------------------
 !

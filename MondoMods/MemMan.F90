@@ -19,7 +19,7 @@ MODULE MemMan
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
                        New_INTC,     New_BMATR,    &
-                       New_Chol,     New_TOPOLOGY, &
+                       New_Chol,                   &
                        New_IntCBox,  New_ANGLEDATA,&
                        New_OUTPDATA, New_Sp1x1,    &
                        New_BCSR,     New_BSET,     &
@@ -44,7 +44,7 @@ MODULE MemMan
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
                        Delete_INTC,     Delete_BMATR,    &
-                       Delete_Chol,     Delete_TOPOLOGY, &
+                       Delete_Chol,                      &
                        Delete_IntCBox,  Delete_ANGLEDATA,&
                        Delete_OUTPDATA, Delete_Sp1x1,    &
                        Delete_BCSR,     Delete_BSET,     &
@@ -387,50 +387,6 @@ MODULE MemMan
 !
 !-----------------------------------------------------
 !
-      SUBROUTINE New_TOPOLOGY(A,NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov, &
-                              N12Tot,N13Tot,N14Tot,NExTot)
-        TYPE(TOPOLOGY) :: A
-        INTEGER        :: NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov
-        INTEGER        :: N12Tot,N13Tot,N14Tot,NExTot
-        !
-        A%NatmsLoc=NatmsLoc
-        A%N12Cov=N12Cov
-        A%N13Cov=N13Cov
-        A%N14Cov=N14Cov
-        A%NExCov=NExCov
-        A%N12Tot=N12Tot
-        A%N13Tot=N13Tot
-        A%N14Tot=N14Tot
-        A%NExTot=NExTot
-        CALL New(A%Cov12,(/NatmsLoc,N12Cov+1/))
-        CALL New(A%Cov13,(/NatmsLoc,N13Cov+1/))
-        CALL New(A%Cov14,(/NatmsLoc,N14Cov+1/))
-        CALL New(A%CovExcl,(/NatmsLoc,NExCov+1/))
-        CALL New(A%Tot12,(/NatmsLoc,N12Tot+1/))
-        CALL New(A%Tot13,(/NatmsLoc,N13Tot+1/))
-        CALL New(A%Tot14,(/NatmsLoc,N14Tot+1/))
-        CALL New(A%TotExcl,(/NatmsLoc,NExTot+1/))
-        A%Alloc=ALLOCATED_TRUE
-      END SUBROUTINE New_TOPOLOGY
-!
-!-----------------------------------------------------
-!
-      SUBROUTINE Delete_TOPOLOGY(A)
-        TYPE(TOPOLOGY) :: A
-        !
-        CALL Delete(A%Cov12)
-        CALL Delete(A%Cov13)
-        CALL Delete(A%Cov14)
-        CALL Delete(A%CovExcl)
-        CALL Delete(A%Tot12)
-        CALL Delete(A%Tot13)
-        CALL Delete(A%Tot14)
-        CALL Delete(A%TotExcl)
-        A%Alloc=ALLOCATED_FALSE
-      END SUBROUTINE Delete_TOPOLOGY
-!
-!-----------------------------------------------------
-!
       SUBROUTINE New_ATOMBONDS(A,NatmsLoc,MaxBonds)
         TYPE(ATOMBONDS) :: A
         INTEGER         :: NatmsLoc,MaxBonds
@@ -594,10 +550,6 @@ MODULE MemMan
          CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl)
-         CALL New(A%IntCs,0)
-         CALL New(A%AtmB,0,0)
-         CALL New(A%Bond,0)
-         CALL New(A%PBCFit,LattMaxMem)
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -999,10 +951,6 @@ MODULE MemMan
          CALL Delete(A%AbCarts)
          CALL Delete(A%Displ)
          CALL Delete(A%PBCDispl)
-         CALL Delete(A%IntCs)
-         CALL Delete(A%Bond)
-         CALL Delete(A%AtmB)
-         CALL Delete(A%PBCFit)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
