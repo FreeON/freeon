@@ -319,7 +319,7 @@ MODULE Parse
          At=TmpLine(J:J+1)
          J=J+2
          L=LEN(Line)   
-         DO N=1,6
+         DO N=1,SIZE(Carts)
             K1=J-1+SCAN(Line(J:L),Numbers)
             K2=K1-2+SCAN(Line(K1:L),' ')            
             Carts(N)=CharToDbl(TRIM(Line(K1:K2)))

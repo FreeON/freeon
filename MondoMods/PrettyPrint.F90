@@ -383,7 +383,8 @@ MODULE PrettyPrint
 !              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradMax))//';' 
 !              WRITE(PU,*)TRIM(Mssg)
            ENDIF
-           IF(PrintGeom_O=='XYZ')THEN
+           IF(PRESENT(PrintGeom_O))THEN
+              IF(PrintGeom_O=='XYZ')THEN
                AA=One/AngstromsToAU
                DO I=1,GM%NAtms
                  Mssg=Ats(GM%AtNum%I(I))                    &
@@ -392,6 +393,7 @@ MODULE PrettyPrint
                  //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA) 
                  WRITE(PU,*)TRIM(Mssg)
               ENDDO
+              ENDIF
            ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               IF(GM%InAU)THEN
                  WRITE(PU,45)
