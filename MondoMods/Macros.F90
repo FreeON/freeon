@@ -365,7 +365,17 @@ CONTAINS
        ELSE
           A%Mat=DEBUG_NONE
        ENDIF
-
+!
+       IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM) .OR. &
+          OptKeyQ(Inp,TRIM(Prog)  ,DBG_PRT_MM)) THEN
+          A%MM=DEBUG_MM
+       ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_FRC) .OR. &
+              OptKeyQ(Inp,TRIM(Prog)  ,DBG_PRT_FRC)) THEN
+          A%MM=DEBUG_FRC
+       ELSE
+          A%MM=DEBUG_NONE
+       ENDIF
+!
        IF(OptKeyQ(Inp,TRIM(Prog),  DBG_CHKSUMS).OR. &
             OptKeyQ(Inp,GLOBAL_DEBUG,DBG_CHKSUMS))THEN
           A%Chk=DEBUG_CHKSUMS
