@@ -1368,6 +1368,7 @@ CONTAINS
      Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
      !
      IF(Convgd(iCLONE)/=1) THEN
+       CALL OPENAscii(OutFile,Out)
        IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
            iGEO,Print,SCRPath,InitGDIIS)
@@ -1378,6 +1379,7 @@ CONTAINS
          ENDIF
          200 FORMAT('No Geometric DIIS is beeing done in this step.')
        ENDIF
+       CLOSE(Out,STATUS='KEEP')
      ENDIF
    END SUBROUTINE MixGeoms
 !
