@@ -22,7 +22,7 @@ MOD_POSTFIX   = mod
 # Fortran Compilers, options and include files
 #
 F90          = fort  
-#F90_OPTIMIZE = -tune host -O5 -math_library fast    
+F90_OPTIMIZE = -tune host -O5 -math_library fast    
 #F90_DEBUG    = -O0 -g2 -C -check_bounds -check bounds -check overflow -assume gfullpath 
 #F_LIST       = -V -source_listing
 #F_PROF       = -pg 
