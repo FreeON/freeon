@@ -59,12 +59,13 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: JToHartree=2.29371276D17          ! Joul -> Hartree
    REAL(DOUBLE), PARAMETER :: C_Avogadro=6.02214199D23          ! Avogadro const 
    REAL(DOUBLE), PARAMETER :: e2PerAngstroemToKJPerMol=1389.3548461690 ! e2/A -> KJ/mol
-   REAL(DOUBLE), PARAMETER :: KJPerMolPerAngstToHPerBohr=.0002015529 ! KJ/mol/Angstroem -> Hartree/Bohr
+   REAL(DOUBLE), PARAMETER :: KJPerMolPerAngstToHPerBohr=.00020155297074504836D0 ! KJ/mol/Angstroem -> Hartree/Bohr
    REAL(DOUBLE), PARAMETER :: HToJoule=4.3597482D-18 ! Hartree -> Joule 
 !#endif
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
    REAL(DOUBLE), PARAMETER :: SMALL_DBL    =TINY(One)           ! smallest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 
+   REAL(DOUBLE), PARAMETER :: LinCrit =1.D0  ! criterium for linearity of an angle in degree
 !-------------------------------------------------------------------------------
 !  Status keys
 !
@@ -168,5 +169,14 @@ MODULE GlobalScalars
                          1.550,1.550,1.550,1.550,1.550,&
                          1.550,1.550,1.550,1.550,1.550,&
                          1.550,1.550,1.550,1.550,1.550/ 
+!
+! SCF global arrays 
+!
+   INTEGER,DIMENSION(3),SAVE :: Current
+   INTEGER,DIMENSION(3),SAVE :: Previous
+!
+! Whether Periodic Boundary Condition is On
+!
+   LOGICAL :: PBC_On
 !
 END MODULE GlobalScalars
