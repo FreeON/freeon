@@ -445,7 +445,7 @@ CONTAINS
        CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),&
                   A,B,CritFlat,GradCrit,Def_O=IntCs%Def(I))
        CALL CtrlDispl(IntCs%Def(I),A,B,PredGrad%D(I),FitVal%D(I),&
-                      VectX%D,VectY%D,CritFlat)
+                      VectX%D,VectY%D,CritFlat,GradCrit)
      ! CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
      !              A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
@@ -852,35 +852,35 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CtrlDispl(Def,A,B,PredGrad,FitVal,VectX,VectY,CritFlat)
+   SUBROUTINE CtrlDispl(Def,A,B,PredGrad,FitVal,VectX,VectY, &
+                        CritFlat,GradCrit)
      CHARACTER(LEN=*)          :: Def
-     REAL(DOUBLE)              :: PredGrad,FitVal,A,B,LastVal,CritFlat
-     REAL(DOUBLE)              :: MaxStep,DeltaMax,Delta,SinAlp2,B2
-     REAL(DOUBLE)              :: FitValOld,Conv
+     REAL(DOUBLE)              :: PredGrad,FitVal,A,B,LastVal
+     REAL(DOUBLE)              :: GradCrit,CritFlat
+     REAL(DOUBLE)              :: MaxStep,DeltaMax,Delta
+     REAL(DOUBLE)              :: Conv,MaxY,MinY,MaxX,MinX
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
      INTEGER                   :: I,J,NDim
      !
      Conv=PI/180.D0
      NDim=SIZE(VectX)
-     FitValOld=FitVal
-     B2=B*B
-     SinAlp2=B2/(One+B2)
      LastVal=VectX(NDim)
+     MinX=MINVAL(VectX)
+     MaxX=MAXVAL(VectX)
+    !MinY=MINVAL(VectY)
+    !MaxY=MAXVAL(VectY)
      !
      IF(Def(1:4)=='STRE') THEN
        DeltaMax=0.15D0             
-   ! ELSE IF(Def(1:4)=='OUTP') THEN
-   !   DeltaMax=5.0D0*Conv
      ELSE IF(HasAngle(Def)) THEN
        DeltaMax=7.D0*Conv
      ENDIF
-   ! MaxStep=DeltaMax*(One+SQRT(SinAlp2))
-     MaxStep=DeltaMax
+     MaxStep=MIN(DeltaMax,ABS(MaxX-MinX))
      Delta=FitVal-LastVal
      IF(ABS(Delta)>MaxStep) THEN
        FitVal=LastVal+SIGN(MaxStep,Delta)
-   ! ELSE IF(ABS(B)<CritFlat) THEN
-   !   FitVal=LastVal+SIGN(MaxStep,VectX(NDim)-VectX(Ndim-1))
+     ELSE IF(ABS(B)<CritFlat) THEN
+       FitVal=LastVal+SIGN(MaxStep,VectX(NDim)-VectX(1))
      ENDIF
    END SUBROUTINE CtrlDispl
 !
@@ -1249,12 +1249,12 @@ CONTAINS
        RETURN
      ENDIF
      !
-     MaxY=MAXVAL(VectY)
-     MinY=MINVAL(VectY)
-     IF(ABS(MaxY)<0.5D0*GradCrit.AND.ABS(MinY)<0.5D0*GradCrit) THEN
-       FitVal=SUM(VectX)/DBLE(NMem)
-       PredGrad=Zero
-     ENDIF
+   ! MaxY=MAXVAL(VectY)
+   ! MinY=MINVAL(VectY)
+   ! IF(ABS(MaxY)<0.5D0*GradCrit.AND.ABS(MinY)<0.5D0*GradCrit) THEN
+   !   FitVal=SUM(VectX)/DBLE(NMem)
+   !   PredGrad=Zero
+   ! ENDIF
      !
      X1=VectX(NMem) ; G1=VectY(NMem) 
      DO I=NMem-1,1,-1
