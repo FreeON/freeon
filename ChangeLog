@@ -1,3 +1,240 @@
+2002-10-11 10:09  mchalla
+
+	* MondoMods/InOut.F90: Checked in Valery Weber's bug fix of
+	INT32->DOUBLE in DBL_SCALAR.  Good job Valery!
+
+2002-10-10 17:08  tymczak
+
+	* QCTC/PBCFarField.F90: Fixed Bug
+
+2002-10-10 17:00  tymczak
+
+	* Validate/Makefile: Fixed Bug
+
+2002-10-10 16:45  tymczak
+
+	* Validate/MgO.inp: Magnesium Oxide in a rhombic cell
+
+2002-10-10 16:44  tymczak
+
+	* Validate/Makefile: Added MgO to test cases
+
+2002-10-10 16:44  tymczak
+
+	* QCTC/PBCFarField.F90: New estimates of Inner Box Size and can now
+	read in MaxEll
+
+2002-10-10 16:43  tymczak
+
+	* QCTC/PoleTree.F90: The New way of doing DMax2
+
+2002-10-10 16:42  tymczak
+
+	* QCTC/Thresholds.F90: Set MAC and PAC one magnitude lower for now
+
+2002-10-10 16:41  tymczak
+
+	* QCTC/MondoPoles.F90: Added DBox which exactly boxes the
+	distibution centers	  Formula for calculating DMax2      
+	Unsold0: Original	Unsold1: Calculates Unsold0 from 0 to L    
+	  Unsold2: Calculates Unsold0 from Llow to Lhig
+
+2002-10-10 16:38  tymczak
+
+	* QCTC/JGen.F90: Added Ditribution Wrapping
+
+2002-10-10 16:37  tymczak
+
+	* QCTC/BlokTrPdJ.F90: Added Distribution Wrapping
+
+2002-10-10 16:36  tymczak
+
+	* OneE/MakeRho.F90: Added wrapping of distributions
+
+2002-10-10 16:35  tymczak
+
+	* MondoMods/AtomPairs.F90: Changed the AtomWrap
+
+2002-10-10 16:34  tymczak
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Turned on the PERIODIC
+	and WRAPDIST flags
+
+2002-10-10 16:07  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: :w
+
+2002-10-10 16:02  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	
+	k
+
+2002-10-10 11:41  anders
+
+	* Docs/DM_Papers/TS4/: TP_Fig_F_G_large.eps, TP_Fig_F_G_small.eps,
+	TS4.tex: New Updated version of the TS4 paper.
+
+2002-10-09 22:25  nemeth
+
+	* MondoSCF/ParseInput.F90: copyright...
+
+2002-10-07 23:08  nemeth
+
+	* Validate/MgO-PERIODIC/MM/: MgO-PERIODIC.crd, MgO-PERIODIC.inp,
+	MgO.seq, spec2.opls, EWALD/ews8MgOcubic.f, EWALD/fort.22: [no log
+	message]
+
+2002-10-07 22:21  nemeth
+
+	* Validate/BALA-PERIODIC/MM/EWALD/fort.22: [no log message]
+
+2002-10-07 22:18  nemeth
+
+	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
+	bALA_000-periodic.inp, bALA_000.seq, spec2.opls,
+	EWALD/ews8BALA-highp.f: [no log message]
+
+2002-10-07 22:10  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-07 21:55  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-10-07 17:35  nemeth
+
+	* MondoMods/Macros.F90: [no log message]
+
+2002-10-07 14:58  ckgan
+
+	* Docs/Bib/mondo.bib: more references added.
+
+2002-10-07 12:42  nemeth
+
+	* MondoMods/InCoords.F90: I do not get, why this was not accepted
+	before, I repeat cvs commit on it.
+
+2002-10-05 01:27  nemeth
+
+	* VisDX/PotMapRho.F90: GM-> GMLoc
+
+2002-10-04 18:38  nemeth
+
+	* QCTC/QCTC.F90: Making PBC available for MM.
+
+2002-10-04 18:35  nemeth
+
+	* QCTC/PBCFarField.F90: 
+	More GM->GMLoc .
+
+2002-10-04 18:34  nemeth
+
+	* QCTC/: NukE.F90, PFFTensor.F90: [no log message]
+
+2002-10-04 18:31  nemeth
+
+	* QCTC/: JForce.F90, JGen.F90: [no log message]
+
+2002-10-04 18:28  nemeth
+
+	* QCTC/BlokTrPdJ.F90: Turning GM things into GMLoc, to fit both Qm
+	and MM.
+
+2002-10-04 18:26  nemeth
+
+	* OneE/: MakeRho.F90, RhoTools.F90: [no log message]
+
+2002-10-04 18:22  nemeth
+
+	* MondoSCF/SCFLocals.F90: [no log message]
+
+2002-10-04 18:20  nemeth
+
+	* MondoSCF/ParseInput.F90: Parsing for PBC has been reorganized, to
+	fit both QM and MM.
+
+2002-10-04 18:18  nemeth
+
+	* MondoSCF/: DrvSCFs.F90, Makefile, ParsingKeys.F90: [no log
+	message]
+
+2002-10-04 18:18  nemeth
+
+	* MondoSCF/DrvFrcs.F90: Things related to optimizer development are
+	added.
+
+2002-10-04 18:12  nemeth
+
+	* MondoMods/SetEq.F90: B matrix related stuff added.
+
+2002-10-04 18:11  nemeth
+
+	* MondoMods/Makefile: InCoords added to Makefile.
+
+2002-10-04 18:09  nemeth
+
+	* MondoMods/: InCoords.F90, Macros.F90: [no log message]
+
+2002-10-04 18:02  nemeth
+
+	* MondoMods/GlobalScalars.F90: Same comment as to
+	GlobalCharacters.F90 before.
+
+2002-10-04 18:01  nemeth
+
+	* MondoMods/GlobalCharacters.F90: Some SCF related arrays are put
+	to here now. Maybe they would be better placed only into Macros.
+	Previously they have been defined at two places, in Macros and
+	SCFlocals, and that caused problems. Current solution works, but
+	breaks somewhat the philosophy.
+
+2002-10-04 17:57  nemeth
+
+	* MondoMods/AInv.F90: Modification allows AINV running on matrices
+	having a larger number of blocks in a row (Natoms) then the
+	physical number of atoms (also Natoms).
+
+2002-10-04 17:53  nemeth
+
+	* Dynamo/dynamo.F90: [no log message]
+
+2002-10-04 17:41  nemeth
+
+	* Makefile: Dynamo options added again.
+
+2002-10-03 22:33  ckgan
+
+	* Docs/Bib/mondo.bib: duplications of articles deleted.
+
+2002-10-03 17:03  ckgan
+
+	* Docs/Bib/mondo.bib: bibtex file updated.
+
+2002-10-03 12:04  ckgan
+
+	* Docs/Bib/mondo.bib: a few articles are included in the bibtex
+	file.
+
+2002-10-01 08:01  mchalla
+
+	* Validate/: BetaCarotene.ref, Biotin.ref, Caffiene.ref,
+	Chlorophyll.ref, SiF4.ref, Urea.ref, Vancomycin.ref, Water.ref:
+	Consistent now with timings removed.
+
+2002-09-30 13:22  mchalla
+
+	* MondoMods/Macros.F90: Still more for the release.
+
+2002-09-30 13:13  mchalla
+
+	* Validate/Test.F90: [no log message]
+
+2002-09-30 11:01  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-09-30 11:00  mchalla
 
 	* Includes/ALPHA_RELEASE, Includes/CompilerSpecifics.AMDLinux.PG,
