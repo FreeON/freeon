@@ -9,7 +9,6 @@ latex:
 new: 	clean links dvi
 
 links:
-	ln -s ../../Bib/mondo_new.bib ./mondo_new.bib 
 	ln -s /n/srv3/nemeth/MONDO/Docs/RevTex/revtex4.cls ./revtex4.cls
 	ln -s ../../RevTex/apsrev.bst  ./apsrev.bst
 	ln -s ../../RevTex/apsrmp.bst  ./apsrmp.bst
@@ -27,4 +26,4 @@ dvi:	latex
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
-	rm -rf mondo_new.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
+	rm -rf revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
