@@ -157,25 +157,30 @@ CONTAINS
              ! Initialize some cell variables.
              RInt=0.0d0
              !
-             DO CFAC=1,BS%NCFnc%I(KA)*BS%NCFnc%I(KC) ! Run over blkfunc on A,C
-                !
-                ! Compute integral type.
-                IntType=ACAtmPair(CFAC)%SP%IntType
-                !
-                CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFA*NBFC*NBFC,C(1),0.0d0) !I need less zeroing!
-                !
-                ! The integral interface.
-                INCLUDE 'ERIListInterface.Inc'
-                !
-                RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
-                !
+             CFAC=0
+             DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
+                DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
+                   !
+                   CFAC=CFAC+1
+                   !
+                   ! Compute integral type.
+                   IntType=ACAtmPair(CFAC)%SP%IntType
+                   !
+                   CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFA*NBFC*NBFC,C(1),0.0d0) !I need less zeroing!
+                   !
+                   ! The integral interface.
+                   INCLUDE 'ERIListInterface.Inc'
+                   !
+                   RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
+                   !
 #ifdef ONX2_DBUG
-                WRITE(*,'(2(A,E22.15),2(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
-                     &    ' LocNInt',LocNInt,' IntType',IntType
+                   WRITE(*,'(2(A,E22.15),2(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
+                        &    ' LocNInt',LocNInt,' IntType',IntType
 #endif
-                !
-                NInts=NInts+DBLE(LocNInt)
-             ENDDO ! End over blkfunc on A,C
+                   !
+                   NInts=NInts+DBLE(LocNInt)
+                ENDDO ! End over blkfunc on C
+             ENDDO ! End over blkfunc on A
              !
 #ifdef ONX2_DBUG
              WRITE(*,'(A,E22.15,4I4)') ' MaxInt =',RInt,AtA,AtC,AtA,AtC
@@ -187,6 +192,15 @@ CONTAINS
                 NCell=NCell+1
                 RIntCell(NCell)=RInt
                 IndxCell(NCell)=iCell
+                !
+                !G2G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+                !NFPair=NFPai+1
+                !RInt(NFPair)=RInt
+                !Indx(3*(NFPair-1)+1)=CFC
+                !Indx(3*(NFPair-1)+2)=CFA
+                !Indx(3*(NFPair-1)+3)=iCell
+                !G2G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+                !
                 !write(*,'(A,I3,A,I3,A,I3,A,E25.15,A,I3)') &
                 !    & 'AtA',AtA,' AtC',AtC,' NCell',NCell,' RInt',RInt,' iCell',iCell
              ENDIF
@@ -195,25 +209,45 @@ CONTAINS
           !
           ! Check if no cell.
           IF(NCell.EQ.0) CYCLE
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+          !IF(NFPair.EQ.0) CYCLE
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
           !
           ! Allocate a new node.
           ALLOCATE(NodeA)
           NULLIFY(NodeA%AtmNext)
           NodeA%Atom=AtA
           NodeA%NCell=NCell
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+          !NodeA%NFPair=NFPair
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
           !
           ! Order the Cell list.
           IF(CS_OUT%NCells.GT.0) CALL QuickSortDis(RIntCell(1),IndxCell(1),NCell,-2)
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+          !CALL QuickSortDis(RInt(1),Indx(1),NFPair,-2)
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
           !
           ! Allocate the Cell array.
           ALLOCATE(NodeA%CellIdx(NCell))
           ALLOCATE(NodeA%SqrtInt(NCell))
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+          !ALLOCATE(NodeA%Indx(NFPair))
+          !ALLOCATE(NodeA%RInt(NFPair))
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
           !
           ! Copy the arrays.
           DO I=1,NCell
              NodeA%SqrtInt(I)=RIntCell(I)
              NodeA%CellIdx(I)=IndxCell(I)
           ENDDO
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
+          !DO I=1,NFPair
+          !   NodeA%RInt(I)=RInt(I)
+          !   NodeA%Idnx(I)=Indx(I)
+          !   CALL DCOPY(dim,PrimPair(1,posi(I)),...) !G3
+          !ENDDO
+          !G2G2G2G2G2G2G2G2G2G2G2G2G2G2
           !
           ! Insert the new node (at the right place).
           CALL InsertNode(List(AtC)%GoList,NodeA)
@@ -250,41 +284,42 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(CList2) , DIMENSION(:), POINTER :: List
+    TYPE(CList3) , DIMENSION(:), POINTER :: List
     TYPE(CRDS)                           :: GM
     TYPE(BSET)                           :: BS
     TYPE(CellSet)                        :: CS_OUT
+#ifdef ONX2_PARALLEL
+    TYPE(INT_VECT)              :: Ptr1
+    TYPE(INT_VECT)              :: Ptr2
+    INTEGER       , INTENT(IN ) :: Nbr1
+    INTEGER       , INTENT(OUT) :: Nbr2
+#endif
     !-------------------------------------------------------------------
-    TYPE(ANode2) , POINTER               :: NodeA
+    TYPE(ANode3) , POINTER               :: NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
-    INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
+    INTEGER                              :: NFPair,I,IntType,LocNInt,NBFA,NBFC
     INTEGER                              :: iErr
-    REAL(DOUBLE)                         :: RInt,AC2,NInts,ThresholdDistance
+    REAL(DOUBLE)                         :: Dum,AC2,NInts,ThresholdDistance
+#ifdef ONX2_PARALLEL
+    TYPE(INT_VECT)              :: Tmp2
+    INTEGER                     :: iC,Idx2
+#endif
     !-------------------------------------------------------------------
-    REAL(DOUBLE) , DIMENSION(CS_OUT%NCells) :: RIntCell
-    INTEGER      , DIMENSION(CS_OUT%NCells) :: IndxCell
+    REAL(DOUBLE) , DIMENSION(  CS_OUT%NCells*BS%NCtrt**2) :: RInt
+    INTEGER      , DIMENSION(3*CS_OUT%NCells*BS%NCtrt**2) :: Indx
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
     TYPE(AtomPr) , DIMENSION(:), ALLOCATABLE :: ACAtmPair
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
-#ifdef ONX2_PARALLEL
-    TYPE(INT_VECT)              :: Ptr1
-    TYPE(INT_VECT)              :: Ptr2
-    INTEGER       , INTENT(IN ) :: Nbr1
-    INTEGER       , INTENT(OUT) :: Nbr2
-    TYPE(INT_VECT)              :: Tmp2
-    INTEGER                     :: iC,Idx2
-#endif
     !
-    integer :: isize
+    integer :: isize,idum
     !
     ! Allocate arrays.
     ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
-    IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem. File <' &
-                  & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem.')
     !
     !Simple check Simple check Simple check Simple check Simple check Simple check
     isize=0
@@ -301,6 +336,7 @@ CONTAINS
     !Simple check Simple check Simple check Simple check Simple check Simple check
     !
     !
+    idum=0
     NULLIFY(NodeA)
     NInts=0.0D0
     !
@@ -341,19 +377,8 @@ CONTAINS
           ACAtmInfo%Atm12Y=ACAtmInfo%Atm1Y-ACAtmInfo%Atm2Y
           ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
           !
-          ! Check the interatomic distance in the working box.
-          AC2=(ACAtmInfo%Atm12X)**2+(ACAtmInfo%Atm12Y)**2+(ACAtmInfo%Atm12Z)**2
-          !
-          ! Cycle if needed.
-#ifdef GTRESH
-          IF(AC2.GT.ThresholdDistance) CYCLE
-#endif
-          !
-          ! Set the range for range of exchange.
-          DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
-          !
           ! Initialize some cell variables.
-          NCell=0
+          NFPair=0
           !
           DO iCell=1,CS_OUT%NCells ! Run over R
              !
@@ -361,6 +386,9 @@ CONTAINS
              AC2 =  (ACAtmInfo%Atm12X-CS_OUT%CellCarts%D(1,iCell))**2+ &
                   & (ACAtmInfo%Atm12Y-CS_OUT%CellCarts%D(2,iCell))**2+ &
                   & (ACAtmInfo%Atm12Z-CS_OUT%CellCarts%D(3,iCell))**2
+             !
+             ! Set the range for range of exchange.
+             DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
              !
              ! Cycle if needed.
 #ifdef GTRESH
@@ -371,68 +399,62 @@ CONTAINS
              CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
              !CALL GetAtomPairG_(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
              !
-             ! Initialize some cell variables.
-             RInt=0.0D0
-             !
              CFAC=0
              DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
-             DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
-                !
-                CFAC=CFAC+1
-                !
-                ! Compute integral type.
-                IntType=ACAtmPair(CFAC)%SP%IntType
-                !
-                LocNInt=(BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1)**2* &
-                     &  (BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1)**2
-                !
-                CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
-                !
-                ! The integral interface.
-                INCLUDE 'ERIListInterface.Inc'
-                !INCLUDE 'DERIListInterface.Inc'
-                !
-                RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
-                !
+                DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
+                   !
+                   CFAC=CFAC+1
+                   idum=idum+ACAtmPair(CFAC)%SP%L
+                   !
+                   ! Compute integral type.
+                   IntType=ACAtmPair(CFAC)%SP%IntType
+                   !
+                   LocNInt=(BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1)**2* &
+                        &  (BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1)**2
+                   !
+                   CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
+                   !
+                   ! The integral interface.
+                   INCLUDE 'ERIListInterface.Inc'
+                   !INCLUDE 'DERIListInterface.Inc'
+                   !
+                   Dum=DGetAbsMax(LocNInt,C(1))
+                   !
 #ifdef GONX2_DBUG
-                WRITE(*,'(2(A,E22.15),4(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
-                     & ' LocNInt',LocNInt,' IntType',IntType,' CFC',CFC,' CFA',CFA
+                   WRITE(*,'(A,E22.15,6(A,I6))') 'Dum',Dum, &
+                        & ' LocNInt',LocNInt,' IntType',IntType,' CFC',CFC,' CFA',CFA,' AtA',AtA,' AtC',AtC
 #endif
-                !
-                NInts=NInts+DBLE(LocNInt)
-             ENDDO ! End over blkfunc on A
+                   !
+                   ! Keep the cell if needed.
+#ifdef GTRESH
+                IF(Dum.GT.Thresholds%TwoE) THEN
+#endif
+                   NFPair=NFPair+1
+                   RInt(NFPair)=Dum
+                   Indx(3*(NFPair-1)+1)=CFA
+                   Indx(3*(NFPair-1)+2)=CFC
+                   Indx(3*(NFPair-1)+3)=iCell
+                   !
+#ifdef GTRESH
+                ELSE
+                   !write(*,*) 'Int smaller that treshold',Dum,Thresholds%TwoE
+                ENDIF
+#endif
+                   !
+                   NInts=NInts+DBLE(LocNInt)
+                ENDDO ! End over blkfunc on A
              ENDDO ! End over blkfunc on C
-             !
-#ifdef GONX2_DBUG
-             WRITE(*,'(A,E22.15,4I4)') ' MaxInt =',RInt,AtA,AtC,AtA,AtC
-#endif
-             !
-             ! Keep the cell if needed.
-#ifdef GTRESH
-             IF(RInt.GT.Thresholds%TwoE) THEN
-#endif
-                NCell=NCell+1
-                RInt=DSQRT(RInt)
-                RIntCell(NCell)=RInt
-                IndxCell(NCell)=iCell
-                !write(*,'(A,I3,A,I3,A,I3,A,E25.15,A,I3)') &
-                !    & 'AtA',AtA,' AtC',AtC,' NCell',NCell,' RInt',RInt,' iCell',iCell
-#ifdef GTRESH
-             ELSE
-             !   write(*,*) 'Int smaller that treshold',RInt,Thresholds%TwoE
-             ENDIF
-#endif
              !
           ENDDO ! End R
           !
-          ! Check if no cell.
-          IF(NCell.EQ.0) CYCLE
+          ! Check if no function pair.
+          IF(NFPair.EQ.0) CYCLE
           !
           ! Allocate a new node.
           ALLOCATE(NodeA)
           NULLIFY(NodeA%AtmNext)
           NodeA%Atom=AtA
-          NodeA%NCell=NCell
+          NodeA%NFPair=NFPair
           !
           ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
           ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
@@ -443,20 +465,22 @@ CONTAINS
           ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
           !
           ! Order the Cell list.
-          IF(CS_OUT%NCells.GT.0) CALL QuickSortDis(RIntCell(1),IndxCell(1),NCell,-2)
+          CALL QSDis(RInt(1),Indx(1),NFPair,-2)
           !
           ! Allocate the Cell array.
-          ALLOCATE(NodeA%CellIdx(NCell))
-          ALLOCATE(NodeA%SqrtInt(NCell))
+          ALLOCATE(NodeA%Indx(3,NFPair),NodeA%RInt(NFPair),STAT=iErr)
+          IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem.')
           !
           ! Copy the arrays.
-          DO I=1,NCell
-             NodeA%SqrtInt(I)=RIntCell(I)
-             NodeA%CellIdx(I)=IndxCell(I)
+          DO I=1,NFPair
+             NodeA%RInt(I)=RInt(I)
+             NodeA%Indx(1,I)=Indx(3*(I-1)+1)
+             NodeA%Indx(2,I)=Indx(3*(I-1)+2)
+             NodeA%Indx(3,I)=Indx(3*(I-1)+3)
           ENDDO
           !
           ! Insert the new node (at the right place).
-          CALL InsertNode(List(AtC)%GoList,NodeA)
+          CALL InsertNode3(List(AtC)%GoList,NodeA)
           !
        ENDDO ! End AtA
        !
@@ -478,12 +502,12 @@ CONTAINS
     CALL Delete(Tmp2)
 #endif
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
-    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL    
+    ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
+    write(*,*) 'Number of primitive pairs ',idum
     !
     ! DeAllocate arrays.
     DEALLOCATE(ACAtmPair,STAT=iErr)
-    IF(iErr.NE.0) CALL Halt('In MakeGList: DeAllocation problem. File <' &
-                  & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    IF(iErr.NE.0) CALL Halt('In MakeGList: DeAllocation problem.')
     !
 #ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
@@ -562,7 +586,7 @@ CONTAINS
                 Expt=Z1+Z2
                 InvExpt=1.0d0/Expt
                 XiR12=Z2*Z1*InvExpt*R12
-
+                !
 !                IF(TestPrimPair(Z2*Z1*InvExpt,R12)) THEN
                 IF(XiR12<PrimPairDistanceThreshold) THEN
                    JJ=JJ+1
@@ -836,6 +860,60 @@ CONTAINS
   END SUBROUTINE InsertNode
   !
   !
+  SUBROUTINE InsertNode3(BegPtr,NewPtr)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE InsertNode(BegPtr,NewPtr)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(ANode3), POINTER :: BegPtr,NewPtr
+    !-------------------------------------------------------------------
+    TYPE(ANode3), POINTER :: TmpPtr
+    !-------------------------------------------------------------------
+    !
+    NULLIFY(TmpPtr)
+    !
+    ! Check if Beg is null, then insert node and exit.
+    IF(.NOT.ASSOCIATED(BegPtr)) THEN
+       BegPtr=>NewPtr
+       NULLIFY(NewPtr)
+       RETURN
+    ENDIF
+    !
+    ! Check if the first element in the list is smaller
+    ! than the ones in the new node.
+    IF(BegPtr%RInt(1).LE.NewPtr%RInt(1)) THEN
+       NewPtr%AtmNext=>BegPtr
+       BegPtr=>NewPtr       
+       NULLIFY(NewPtr)
+       RETURN
+    ENDIF
+    !
+    ! General search.
+    TmpPtr=>BegPtr
+    DO
+       ! We are at the end.
+       IF(.NOT.ASSOCIATED(TmpPtr%AtmNext)) THEN
+          TmpPtr%AtmNext=>NewPtr
+          NULLIFY(NewPtr)
+          EXIT
+       ENDIF
+       !
+       IF(TmpPtr%AtmNext%RInt(1).LE.NewPtr%RInt(1)) THEN
+          NewPtr%AtmNext=>TmpPtr%AtmNext
+          TmpPtr%AtmNext=>NewPtr
+          NULLIFY(NewPtr)
+          EXIT
+       ENDIF
+       TmpPtr=>TmpPtr%AtmNext
+       !
+    ENDDO
+    !
+  END SUBROUTINE InsertNode3
+  !
+  !
   SUBROUTINE AllocList(List,IdxMin,IdxMax)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE AllocList(List,LSize)
@@ -910,6 +988,80 @@ CONTAINS
   END SUBROUTINE DeAllocList
   !
   !
+  SUBROUTINE AllocList3(List,IdxMin,IdxMax)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE AllocList(List,LSize)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    TYPE(CList3), DIMENSION(:), POINTER    :: List
+    INTEGER                   , INTENT(IN) :: IdxMin,IdxMax
+    !-------------------------------------------------------------------
+    INTEGER                                :: I
+    !-------------------------------------------------------------------
+    !
+    ALLOCATE(List(IdxMin:IdxMax))
+    !
+    DO I=IdxMin,IdxMax
+       NULLIFY(List(I)%GoList)
+    ENDDO
+    !
+  END SUBROUTINE AllocList3
+  !
+  !
+  SUBROUTINE DeAllocList3(List)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE DeAllocList(List)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    TYPE(CList3), DIMENSION(:), POINTER :: List
+    !-------------------------------------------------------------------
+    TYPE(ANode3)              , POINTER :: ListA,ListATmp
+    INTEGER                             :: I,IdxMin,IdxMax
+    !-------------------------------------------------------------------
+    !
+    NULLIFY(ListA,ListATmp)
+    !
+    IdxMin=LBOUND(List,DIM=1)
+    IdxMax=UBOUND(List,DIM=1)
+    !
+    DO I=IdxMin,IdxMax
+       !
+       ListA=>List(I)%GoList
+       !
+       DO
+          IF(.NOT.ASSOCIATED(ListA)) EXIT
+          !
+#ifdef POINTERS_IN_DERIVED_TYPES
+          IF(.NOT.ASSOCIATED(ListA%Indx).OR. &
+               & .NOT.ASSOCIATED(ListA%RInt)) STOP 'Array not allocate for the list.'
+          !
+          IF(ASSOCIATED(ListA%Indx)) DEALLOCATE(ListA%Indx)
+          IF(ASSOCIATED(ListA%RInt)) DEALLOCATE(ListA%RInt)
+#else
+          IF(.NOT.ALLOCATED(ListA%Indx).OR. &
+               & .NOT.ALLOCATED(ListA%RInt)) STOP 'Array not allocate for the list.'
+          !
+          IF(ALLOCATED(ListA%Indx)) DEALLOCATE(ListA%Indx)
+          IF(ALLOCATED(ListA%RInt)) DEALLOCATE(ListA%RInt)
+#endif
+          !
+          ListATmp=>ListA
+          ListA=>ListA%AtmNext
+          !
+          DEALLOCATE(ListATmp)
+          !
+       ENDDO
+       NULLIFY(List(I)%GoList)
+       !
+    ENDDO
+    !
+    DEALLOCATE(List)
+    !
+  END SUBROUTINE DeAllocList3
+  !
+  !
   SUBROUTINE PrintList(List)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE PrintList(List)
@@ -973,6 +1125,72 @@ CONTAINS
 #endif
     !
   END SUBROUTINE PrintList
+  !
+  !
+  SUBROUTINE PrintList3(List)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE PrintList(List)
+!H
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(CList3), DIMENSION(:), POINTER :: List
+    !-------------------------------------------------------------------
+    TYPE(ANode3)              , POINTER :: ListA
+    INTEGER                             :: IdxMin,IdxMax,I,J
+    INTEGER                             :: iPrc,IErr
+    !-------------------------------------------------------------------
+    !
+    NULLIFY(ListA)
+    !
+    IdxMin=LBOUND(List,DIM=1)
+    IdxMax=UBOUND(List,DIM=1)
+    !
+#ifdef ONX2_PARALLEL
+    DO iPrc=0,NPrc-1
+       CALL MPI_Barrier(MONDO_COMM,IErr)
+       IF(MyId.NE.iPrc) CYCLE
+#endif
+       !
+       DO I=IdxMin,IdxMax
+          !
+          ListA=>List(I)%GoList
+          !
+          DO
+             IF(.NOT.ASSOCIATED(ListA)) EXIT
+             !
+#ifdef ONX2_PARALLEL
+             WRITE(*,'(4(A,I4))') 'AtC',I,', AtA',ListA%Atom,', NFPair',ListA%NFPair,' MyID',MyID
+#else
+             WRITE(*,'(3(A,I4))') 'AtC',I,', AtA',ListA%Atom,', NFPair',ListA%NFPair
+#endif
+             !
+#ifdef POINTERS_IN_DERIVED_TYPES
+             IF(.NOT.ASSOCIATED(ListA%Indx).OR. &
+                  & .NOT.ASSOCIATED(ListA%RInt)) STOP 'Array not allocate for the list.'
+#else
+             IF(.NOT.ALLOCATED(ListA%Indx).OR. &
+                  & .NOT.ALLOCATED(ListA%RInt)) STOP 'Array not allocate for the list.'
+#endif
+             !
+             DO J=1,SIZE(ListA%Indx,DIM=2)
+                WRITE(*,'(3(1X,A,I4),A,E22.15)') 'CFA=',ListA%Indx(1,J),'CFC=',ListA%Indx(2,J), &
+                     &                     'Cell=',ListA%Indx(3,J),' RInt=',ListA%RInt(J)
+             ENDDO
+             !
+             ListA=>ListA%AtmNext
+             !
+          ENDDO
+          !
+       ENDDO
+       !
+#ifdef ONX2_PARALLEL
+       WRITE(*,*)
+    ENDDO
+#endif
+    !
+  END SUBROUTINE PrintList3
   !
   !
   SUBROUTINE PrintMatrix(V,M,N,IOpt,IOut_O,SHFTM_O,SHFTN_O,TEXT_O)

@@ -29,6 +29,23 @@ MODULE ONX2DataType
      TYPE(ANode2), POINTER :: AtmNext
   END TYPE ANode2
   !
+  TYPE ANode3
+     INTEGER :: Atom
+     INTEGER :: NFPair
+#ifdef POINTERS_IN_DERIVED_TYPES
+     INTEGER     , DIMENSION(:,:), POINTER :: Indx
+     REAL(DOUBLE), DIMENSION(:  ), POINTER :: RInt
+#else
+     INTEGER     , DIMENSION(:,:), ALLOCATABLE :: Indx
+     REAL(DOUBLE), DIMENSION(:  ), ALLOCATABLE :: RInt
+#endif
+     TYPE(ANode3), POINTER :: AtmNext
+  END TYPE ANode3
+  !
+  TYPE CList3
+     TYPE(ANode3), POINTER :: GoList
+  END TYPE CList3
+  !
   TYPE CList2
      TYPE(ANode2), POINTER :: GoList
   END TYPE CList2

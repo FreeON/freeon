@@ -57,9 +57,9 @@ CONTAINS
   !
   !
 #ifdef ONX2_PARALLEL
-  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,GM,BS,CS_OUT)
+  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GM,BS,CS_OUT)
 #else
-  SUBROUTINE ComputDK(D,GradX,ListC,ListD,GM,BS,CS_OUT)
+  SUBROUTINE ComputDK(D,GradX,BoxX,ListC,ListD,OffArr,GM,BS,CS_OUT)
 #endif
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ComputDK(D,GradX,ListC,ListD,GM,BS,CS_OUT)
@@ -75,37 +75,37 @@ CONTAINS
     !
     !-------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-    TYPE(FASTMAT)              , POINTER       :: DFMcd,DFMab
-    TYPE(FASTMAT)              , POINTER       :: P,Q
-    TYPE(SRST   )              , POINTER       :: U,V
+    TYPE(FASTMAT)              , POINTER :: DFMcd,DFMab
+    TYPE(FASTMAT)              , POINTER :: P,Q
+    TYPE(SRST   )              , POINTER :: U,V
 #else
-    TYPE(BCSR)                 , INTENT(INout) :: D
+    TYPE(BCSR)                           :: D
 #endif
-    TYPE(DBL_RNK2)             , INTENT(INOUT) :: GradX
-    TYPE(CList2) , DIMENSION(:), POINTER       :: ListC,ListD
-    TYPE(CRDS)                 , INTENT(IN   ) :: GM
-    TYPE(BSET)                 , INTENT(IN   ) :: BS
-    TYPE(CellSet)              , INTENT(IN   ) :: CS_OUT
+    TYPE(DBL_RNK2)                       :: GradX,BoxX
+    TYPE(INT_RNK2)                       :: OffArr
+    TYPE(CList3) , DIMENSION(:), POINTER :: ListC,ListD
+    TYPE(CRDS)                           :: GM
+    TYPE(BSET)                           :: BS
+    TYPE(CellSet)                        :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode2), POINTER      :: AtAListTmp,AtAList,AtBListTmp,AtBList
+    TYPE(ANode3), POINTER      :: AtAListTmp,AtAList,AtBListTmp,AtBList
     TYPE(AtomInfo)             :: ACAtmInfo,BDAtmInfo
     INTEGER                    :: AtA,AtB,AtC,AtD,KA,KB,KC,KD,CFA,CFB,CFC,CFD
     INTEGER                    :: ci,iPtrD,iPtrD2,iPtrK,NBFC,NBFD,NBFA,NBFB
     INTEGER                    :: CFAC,CFBD,iErr
     INTEGER                    :: NCFncA,NCFncB,NCFncC,NCFncD
     INTEGER                    :: Off,Ind,LocNInt,IntType
-    INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx
+    INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx,iFAC,iFBD
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE)               :: TmBeg,TmEnd
 #endif
     REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB,TmpGradD
     REAL(DOUBLE)               :: Dcd,Dab,NInts
     !-------------------------------------------------------------------
-    REAL(DOUBLE) , DIMENSION(   MaxFuncPerAtmBlk**2) :: Work
-    REAL(DOUBLE) , DIMENSION(   MaxShelPerAtmBlk**2) :: DMcd,DMab
-    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
-    !TYPE(AtomPrG), DIMENSION(   MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
-    TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair
+    REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2) :: Work
+    REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
+    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C  ,C_
+    TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair !size=MaxShelPerAtmBlk**2*CS_OUT%NCells
     !-------------------------------------------------------------------
     TYPE(ONX2OffSt)            :: OffSet
     TYPE(INT_VECT )            :: BColIdx
@@ -125,8 +125,7 @@ CONTAINS
     ! Allocate arrays.
     ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells), &
          &   BDAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
-    IF(iErr.NE.0) CALL Halt('In ComputDK: Allocation problem. File <' &
-         & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    IF(iErr.NE.0) CALL Halt('In ComputDK: Allocation problem.')
     !
     !
     !Simple check Simple check Simple check Simple check
@@ -146,7 +145,6 @@ CONTAINS
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
     !write(*,*) 'CS_OUT%CellCarts=',CS_OUT%CellCarts%D(2,1:CS_OUT%NCells)
     !Simple check Simple check Simple check Simple check
-    !call Print_BCSR(D,'Density matrix',Unit_O=6)
     !
     CALL New(BColIdx,NAtoms)
     !
@@ -256,13 +254,12 @@ CONTAINS
              NBFA=BS%BfKnd%I(KA)
              NCFncA=BS%NCFnc%I(KA)
              !
-             ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1)*Dcd,Thresholds%TwoE &
+             ACAtmInfo%NCell=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
-               & )
+             & )
 #else
-               & *(-1d0))
+             & *(-1d0))
 #endif
-             !write(*,*) 'ACAtmInfo%NCell',ACAtmInfo%NCell
              IF(ACAtmInfo%NCell.EQ.0) EXIT RnOvA
              !
              ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
@@ -322,7 +319,7 @@ CONTAINS
                    Dab=DGetAbsMax(NBFA*NBFB,D%MTrix%D(iPtrD2))
 #endif
                    !
-                   BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1)*Dab*Dcd*Half,Thresholds%TwoE &
+                   BDAtmInfo%NCell=GetNonNFPair(AtBList,AtAList%RInt(1)*Dab*Dcd*Half,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
 #else
@@ -357,59 +354,48 @@ CONTAINS
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0D0)
-                   !
-                   CFAC=0
-!!!!!!!!!!!!!!!!!!!!
-                   DO ACR=1,ACAtmInfo%NCell
-!!!!!!!!!!!!!!!!!!!!
-                   OffSet%A=1
-                   DO CFA=1,NCFncA ! Run over blkfunc on A
-                      OffSet%C=1
-                      DO CFC=1,NCFncC ! Run over blkfunc on C
-                         CFAC=CFAC+1
-                         CFBD=0                         
-!!!!!!!!!!!!!!!!!!!!!!!!!!
-                         DO BDR=1,BDAtmInfo%NCell
-!!!!!!!!!!!!!!!!!!!!!!!!!!
-                         OffSet%B=1
-                         DO CFB=1,NCFncB ! Run over blkfunc on B
-                            OffSet%D=1
-                            DO CFD=1,NCFncD ! Run over blkfunc on D
-                               CFBD=CFBD+1
-                               !
-                               !if(DMcd((CFC-1)*NCFncD+CFD)>Dcd) stop
-                               !if(DMab((CFA-1)*NCFncB+CFB)>Dab) stop
-                               !
+                   !StressStressStressStressStressStressStress
+                   !C_=0.0d0
+                   !StressStressStressStressStressStressStress
+                   DO iFAC=1,ACAtmInfo%NCell
 #ifdef GTRESH
-                               IF(DMcd((CFC-1)*NCFncD+CFD)*DMab((CFA-1)*NCFncB+CFB)*Half* &
-                                    & AtAList%SqrtInt(ACR)*AtBList%SqrtInt(BDR)>Thresholds%TwoE) THEN
+                      IF(Dcd*Dab*Half*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT
 #endif
-                                  !
-                                  ! Compute integral type.
-                                  IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
-                                  !
-                                  ! The integral interface.
-                                  INCLUDE 'DERIInterface.Inc'
-                                  !
-                                  NInts=NInts+DBLE(LocNInt)
+                      CFA=AtAList%Indx(1,iFAC)
+                      CFC=AtAList%Indx(2,iFAC)
+                      OffSet%A=OffArr%I(CFA,KA)
+                      OffSet%C=OffArr%I(CFC,KC)
+                      !
+                      DO iFBD=1,BDAtmInfo%NCell 
+                         CFB=AtBList%Indx(1,iFBD)
+                         CFD=AtBList%Indx(2,iFBD)
 #ifdef GTRESH
-                               ENDIF
+                         IF(DMcd((CFC-1)*NCFncD+CFD)*DMab((CFA-1)*NCFncB+CFB)*Half* &
+                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
 #endif
-                               !
-                               OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
-                            ENDDO ! End blkfunc on D
-                            OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
-                         ENDDO ! End blkfunc on B
-!!!!!!!!!!!!!!!!!!!!!!!!!!
-                         ENDDO
-!!!!!!!!!!!!!!!!!!!!!!!!!!
-                         OffSet%C=OffSet%C+BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
-                      ENDDO ! End blkfunc on C
-                      OffSet%A=OffSet%A+BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
-                   ENDDO ! End blkfunc on A
-!!!!!!!!!!!!!!!!!!!!!!!!!!
+                            OffSet%B=OffArr%I(CFB,KB)
+                            OffSet%D=OffArr%I(CFD,KD)
+                            !
+                            ! Compute integral type.
+                            IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+                            !
+                            ! The integral interface.
+                            INCLUDE 'DERIInterface.Inc'
+                            !
+                            NInts=NInts+DBLE(LocNInt)
+#ifdef GTRESH
+                         ENDIF
+#endif
+                         !
+                      ENDDO
                    ENDDO
-!!!!!!!!!!!!!!!!!!!!!!!!!!
+                   !
+                   !StressStressStressStressStressStress
+                   !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C_(1), &
+                   !     &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
+                   !     &     Work(1),1)
+                   !BoxX%D(1,1)=BoxX%D(1,1)-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                   !StressStressStressStressStressStress
                    !
                    ! Compute the exchange-forces.
                    DO IXYZ=1,3
@@ -503,8 +489,7 @@ CONTAINS
     !
     ! DeAllocate arrays.
     DEALLOCATE(ACAtmPair,BDAtmPair,STAT=iErr)
-    IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem. File <' &
-         & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem.')
     !
     !
     WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2, &
@@ -523,15 +508,15 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(AtomInfo)               :: AtmInfo
-    TYPE(ANode2  ), POINTER      :: List
-    TYPE(AtomPrG ), DIMENSION(:) :: AtmPair
+    TYPE(ANode3)  , POINTER      :: List
+    TYPE(AtomPrG) , DIMENSION(:) :: AtmPair
     TYPE(BSET)                   :: BS
     TYPE(CellSet)                :: CS_OUT
     !-------------------------------------------------------------------
-    INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell,Cell
+    INTEGER      :: CF1,CF2,I1,I2,II,JJ,IJ,iCell,Cell
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
     INTEGER      :: StopL1,StartL1,StopL2,StartL2
-    INTEGER      :: ISwitch1,ISwitch2
+    INTEGER      :: ISwitch1,ISwitch2,iNFPair
     REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ
     LOGICAL      :: Switch
     !-------------------------------------------------------------------
@@ -541,152 +526,148 @@ CONTAINS
     AtmPair(:)%SP%IntType=BIG_INT
 #endif
     !
-    CF12=0
-    DO iCell=1,AtmInfo%NCell
-       Cell=List%CellIdx(iCell)
+    DO iNFPair=1,AtmInfo%NCell
+       CF1 =List%Indx(1,iNFPair) !A,B
+       CF2 =List%Indx(2,iNFPair) !C,D
+       Cell=List%Indx(3,iNFPair)
        RX=CS_OUT%CellCarts%D(1,Cell)
        RY=CS_OUT%CellCarts%D(2,Cell)
        RZ=CS_OUT%CellCarts%D(3,Cell)
        !
-       ! AtmInfo must be related to the atoms in the working cell ONLY. 
+       ! AtmInfo must be related to the atoms in the working cell ONLY.
        ! Then we add the PBC's to have the right interatomic distance.
        R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
        !
-       DO CF1=1,BS%NCFnc%I(AtmInfo%K1)
-          MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
-          MaxL1=BS%ASymm%I(2,CF1,AtmInfo%K1)
-          Type1=MaxL1*(MaxL1+1)/2+MinL1+1
-          StartL1=BS%LStrt%I(CF1,AtmInfo%K1)
-          StopL1=BS%LStop%I(CF1,AtmInfo%K1)
-
-          if(Type1==2) stop 'SP shell not yet supported.'
-
-          DO CF2=1,BS%NCFnc%I(AtmInfo%K2)
-             CF12=CF12+1
-             !
-             MinL2=BS%ASymm%I(1,CF2,AtmInfo%K2)
-             MaxL2=BS%ASymm%I(2,CF2,AtmInfo%K2)
-             Type2=MaxL2*(MaxL2+1)/2+MinL2+1
-             StartL2=BS%LStrt%I(CF2,AtmInfo%K2)
-             StopL2=BS%LStop%I(CF2,AtmInfo%K2)
-             !
-             AtmPair(CF12)%SP%IntType=Type1*100+Type2
-             !
-             ! .NOT.(Do we need to switch the centers?)
-             Switch=Type1.GE.Type2
-             !
-             IF(Switch) THEN
-                ISwitch1=6
-                ISwitch2=7
-             ELSE
-                ISwitch1=7
-                ISwitch2=6
-             ENDIF
-             !
-             II=0
-             !
-             ! We assume the primitives are ordered (exponants in decressing order).
-             DO I1=BS%NPFnc%I(CF1,AtmInfo%K1),1,-1
-                Z1=BS%Expnt%D(I1,CF1,AtmInfo%K1)
-                JJ=0
+       MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
+       MaxL1=BS%ASymm%I(2,CF1,AtmInfo%K1)
+       Type1=MaxL1*(MaxL1+1)/2+MinL1+1
+       StartL1=BS%LStrt%I(CF1,AtmInfo%K1)
+       StopL1=BS%LStop%I(CF1,AtmInfo%K1)
+       !
+       if(Type1==2) stop 'SP shell not yet supported.'
+       !
+       MinL2=BS%ASymm%I(1,CF2,AtmInfo%K2)
+       MaxL2=BS%ASymm%I(2,CF2,AtmInfo%K2)
+       Type2=MaxL2*(MaxL2+1)/2+MinL2+1
+       StartL2=BS%LStrt%I(CF2,AtmInfo%K2)
+       StopL2=BS%LStop%I(CF2,AtmInfo%K2)
+       !
+       if(Type2==2) stop 'SP shell not yet supported.'
+       !
+       AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
+       !
+       ! .NOT.(Do we need to switch the centers?)
+       Switch=Type1.GE.Type2
+       !
+       IF(Switch) THEN
+          ISwitch1=6
+          ISwitch2=7
+       ELSE
+          ISwitch1=7
+          ISwitch2=6
+       ENDIF
+       !
+       II=0
+       !
+       ! We assume the primitives are ordered (exponants in decressing order).
+       DO I1=BS%NPFnc%I(CF1,AtmInfo%K1),1,-1
+          Z1=BS%Expnt%D(I1,CF1,AtmInfo%K1)
+          JJ=0
+          !
+          ! We assume the primitives are ordered (exponants in decressing order).
+          DO I2=BS%NPFnc%I(CF2,AtmInfo%K2),1,-1
+             Z2=BS%Expnt%D(I2,CF2,AtmInfo%K2)
+             Expt=Z1+Z2
+             InvExpt=1.0d0/Expt
+             XiR12=Z2*Z1*InvExpt*R12
+             IF(XiR12<PrimPairDistanceThreshold) THEN
+                JJ=JJ+1
+                IJ=JJ+II
+                AtmPair(iNFPair)%SP%Cst(1,IJ)=Expt
                 !
-                ! We assume the primitives are ordered (exponants in decressing order).
-                DO I2=BS%NPFnc%I(CF2,AtmInfo%K2),1,-1
-                   Z2=BS%Expnt%D(I2,CF2,AtmInfo%K2)
-                   Expt=Z1+Z2
-                   InvExpt=1.0d0/Expt
-                   XiR12=Z2*Z1*InvExpt*R12
-                   IF(XiR12<PrimPairDistanceThreshold) THEN
-                      JJ=JJ+1
-                      IJ=JJ+II
-                      AtmPair(CF12)%SP%Cst(1,IJ)=Expt
-                      !
-                      ! AtmInfo must be related to the atoms in the working cell ONLY. 
-                      ! Then we add the PBC's to have the right atomic position.
-                      AtmPair(CF12)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
-                      AtmPair(CF12)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
-                      AtmPair(CF12)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
-                      AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
-                      !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
-                           &                     BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
-                           &                     BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-                      !
-                      AtmPair(CF12)%SP%Cst(ISwitch1,IJ)=2.0d0*Z1!->ISwitch1=6,7
-                      AtmPair(CF12)%SP%Cst(ISwitch2,IJ)=2.0d0*Z2!->ISwitch2=7,6
-                      !
-                      ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-                      ! Here I need to add the correction factor for SP shell.
-                      ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-                   ELSE
-                      ! We can skipp out the loop because the primitives are ordered.
-                      EXIT
-                   ENDIF
-                ENDDO
-                ! We can skipp out the loop if we did not get any significant primitives.
-                IF(JJ.EQ.0) EXIT
-                II=II+JJ
-             ENDDO
-             !
-             AtmPair(CF12)%SP%L=II
-             !
-             ! We reorder the atomic positions if Type2 > Type1.
-             ! Needed for the integral evaluations.
-             IF(Switch) THEN
-                AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
-                AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
-                AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z
-                !
-                ! AtmInfo must be related to the atoms in the working cell ONLY. 
+                ! AtmInfo must be related to the atoms in the working cell ONLY.
                 ! Then we add the PBC's to have the right atomic position.
-                AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm2X+RX
-                AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm2Y+RY
-                AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm2Z+RZ
-             ELSE
+                AtmPair(iNFPair)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
+                AtmPair(iNFPair)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
+                AtmPair(iNFPair)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
+                AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
+                     !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
+                     &                     BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
+                     &                     BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                 !
-                ! AtmInfo must be related to the atoms in the working cell ONLY. 
-                ! Then we add the PBC's to have the right atomic position.
-                AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm2X+RX
-                AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm2Y+RY
-                AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm2Z+RZ
-                AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm1X
-                AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm1Y
-                AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm1Z
+                AtmPair(iNFPair)%SP%Cst(ISwitch1,IJ)=2.0d0*Z1!->ISwitch1=6,7
+                AtmPair(iNFPair)%SP%Cst(ISwitch2,IJ)=2.0d0*Z2!->ISwitch2=7,6
+                !
+                ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+                ! Here I need to add the correction factor for SP shell.
+                ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+             ELSE
+                ! We can skipp out the loop because the primitives are ordered.
+                EXIT
              ENDIF
-             !
-#ifdef GONX2_DBUG
-             WRITE(*,'(3(A,I3),A,I5)') 'Type1',Type1,' Type2',Type2, &
-                  &                    ' IntType',AtmPair(CF12)%SP%IntType
-#endif
-             !
           ENDDO
+          ! We can skipp out the loop if we did not get any significant primitives.
+          IF(JJ.EQ.0) EXIT
+          II=II+JJ
        ENDDO
-    ENDDO ! NCell
+       !
+       AtmPair(iNFPair)%SP%L=II
+       !
+       ! We reorder the atomic positions if Type2 > Type1.
+       ! Needed for the integral evaluations.
+       IF(Switch) THEN
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z
+          !
+          ! AtmInfo must be related to the atoms in the working cell ONLY.
+          ! Then we add the PBC's to have the right atomic position.
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2X=AtmInfo%Atm2X+RX
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2Y=AtmInfo%Atm2Y+RY
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2Z=AtmInfo%Atm2Z+RZ
+       ELSE
+          !
+          ! AtmInfo must be related to the atoms in the working cell ONLY.
+          ! Then we add the PBC's to have the right atomic position.
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1X=AtmInfo%Atm2X+RX
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1Y=AtmInfo%Atm2Y+RY
+          AtmPair(iNFPair)%SP%AtmInfo%Atm1Z=AtmInfo%Atm2Z+RZ
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2X=AtmInfo%Atm1X
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2Y=AtmInfo%Atm1Y
+          AtmPair(iNFPair)%SP%AtmInfo%Atm2Z=AtmInfo%Atm1Z
+       ENDIF
+       !
+#ifdef GONX2_DBUG
+       WRITE(*,'(3(A,I3),A,I5)') 'Type1',Type1,' Type2',Type2, &
+            &                    ' IntType',AtmPair(iNFPair)%SP%IntType
+#endif
+    ENDDO
     !
   END SUBROUTINE GetAtomPairG
   !
   !
-  INTEGER FUNCTION GetNonNeglCell(List,DFac,Trsh)
+  INTEGER FUNCTION GetNonNFPair(List,DFac,Trsh)
 !H---------------------------------------------------------------------------------
-!H INTEGER FUNCTION GetNonNeglCell(List,DFac,Trsh)
+!H INTEGER FUNCTION GetNonNFPair(List,DFac,Trsh)
 !H
 !H---------------------------------------------------------------------------------
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(ANode2), POINTER    :: List
+    TYPE(ANode3), POINTER    :: List
     REAL(DOUBLE), INTENT(IN) :: DFac,Trsh
     !-------------------------------------------------------------------
     INTEGER                  :: I
     !-------------------------------------------------------------------
     !
-    GetNonNeglCell=0
+    GetNonNFPair=0
     !
-    DO I=1,List%NCell
-       IF(List%SqrtInt(I)*DFac.LE.Trsh) EXIT
-       GetNonNeglCell=GetNonNeglCell+1
+    DO I=1,List%NFPair
+       IF(List%RInt(I)*DFac.LE.Trsh) EXIT
+       GetNonNFPair=GetNonNFPair+1
     ENDDO
     !
-  END FUNCTION GetNonNeglCell
+  END FUNCTION GetNonNFPair
   !
   !
   SUBROUTINE GetColIdx(At,D,ColIdx)

@@ -34,6 +34,7 @@ MODULE ONXGet
   PUBLIC :: GetIntSpace
   PUBLIC :: GetAdrB
   PUBLIC :: GetSubBlk
+  PUBLIC :: GetOffArr
 #ifdef ONX2_PARALLEL
   PUBLIC :: Get_Essential_RowCol
 #endif
@@ -267,6 +268,25 @@ CONTAINS
     ENDDO
     RETURN
   END SUBROUTINE GetSubBlk
+  !
+  !
+  SUBROUTINE GetOffArr(OffArr,BS)
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(INT_RNK2) :: OffArr
+    TYPE(BSET)     :: BS
+    !-------------------------------------------------------------------
+    INTEGER        :: K,I,Off
+    !-------------------------------------------------------------------
+    OffArr%I=BIG_INT
+    DO K=1,BS%NKind
+       Off=1
+       DO I=1,BS%NCFnc%I(K)
+          OffArr%I(I,K)=Off
+          Off=Off+BS%LStop%I(I,K)-BS%LStrt%I(I,K)+1
+       ENDDO
+    ENDDO
+  END SUBROUTINE GetOffArr
   !
   !
 #ifdef ONX2_PARALLEL

@@ -17,14 +17,17 @@ PROGRAM GONX2
   !
   USE ONX2DataType
   USE ONXCtrSclg   , ONLY: TrnMatBlk
-  USE ONX2List     , ONLY: AllocList,DeAllocList,MakeGList,PrintList
+  USE ONX2List     , ONLY: AllocList3,DeAllocList3,MakeGList,PrintList3
   USE GONX2ComputDK, ONLY: ComputDK
+
   !
 #ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
-  USE ONXGet       , ONLY: Get_Essential_RowCol
+  USE ONXGet       , ONLY: Get_Essential_RowCol,GetOffArr
   USE PartDrv      , ONLY: PDrv_Initialize,PDrv_Finalize
+#else
+  USE ONXGet       , ONLY: GetOffArr
 #endif
   !
   IMPLICIT NONE
@@ -34,8 +37,8 @@ PROGRAM GONX2
 #else
   TYPE(BCSR)                     :: D
 #endif
-  TYPE(BSET)                     :: BSc,BSp
-  TYPE(CRDS)                     :: GMc,GMp
+  TYPE(BSET)                     :: BS
+  TYPE(CRDS)                     :: GM
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: Stat
 !--------------------------------------------------------------------------------
@@ -43,7 +46,7 @@ PROGRAM GONX2
   TYPE(DBL_RNK2)                 :: GradTmp
   TYPE(INT_VECT)                 :: APt,BPt,CPt,DPt
 #endif
-  TYPE(DBL_RNK2)                 :: GradX,GradAux
+  TYPE(DBL_RNK2)                 :: GradX,GradAux,BoxX
   TYPE(DBL_VECT)                 :: GTmp
   REAL(DOUBLE)                   :: KScale
 !--------------------------------------------------------------------------------
@@ -52,13 +55,14 @@ PROGRAM GONX2
   INTEGER                        :: CMin,CMax,DMin,DMax,IErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
 #endif
-  INTEGER                        :: OldFileID,I
+  INTEGER                        :: OldFileID,I,K,Off
   REAL(DOUBLE)                   :: Time1,Time2
   REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
 !--------------------------------------------------------------------------------
-  TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
+  TYPE(INT_RNK2) :: OffArr
+  TYPE(CList3), DIMENSION(:), POINTER :: ListC,ListD
 !--------------------------------------------------------------------------------
   !
 #ifdef ONX2_PARALLEL
@@ -66,45 +70,13 @@ PROGRAM GONX2
 #else
   CALL StartUp(Args,Prog)
 #endif
-  InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
-  IF(SCFActn=='Restart')THEN
-     ! Close current group and HDF
-     CALL CloseHDFGroup(H5GroupID)
-     CALL CloseHDF(HDFFileID)
-     ! Open old group and HDF
-     HDF_CurrentID=OpenHDF(Restart)
-     OldFileID=HDF_CurrentID
-     CALL New(Stat,3)
-     CALL Get(Stat,'current_state')
-     PrvCycl=TRIM(IntToChar(Stat%I(1)))
-     PrvBase=TRIM(IntToChar(Stat%I(2)))
-     PrvGeom=TRIM(IntToChar(Stat%I(3)))
-     HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
-     CALL Get(BSp,Tag_O=PrvBase)
-     ! Get the previous geometry, ASSUMING that 
-     ! we are not extrapolating the DM
-     CALL Get(GMp,Tag_O=CurGeom)
-     CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
-     CALL Get(OffS ,'atoff',Tag_O=PrvBase)
-     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-     ! Close the old hdf up 
-     CALL CloseHDFGroup(HDF_CurrentID)
-     CALL CloseHDF(OldFileID)
-     ! Reopen current group and HDF
-     HDFFileID=OpenHDF(H5File)
-     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-     HDF_CurrentID=H5GroupID
-     CALL Delete(Stat)
-  ELSE
-     CALL Get(BSp,Tag_O=PrvBase)
-     ! Get the current geometry here...
-     CALL Get(GMp,Tag_O=CurGeom)
-     CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
-     CALL Get(OffS ,'atoff',Tag_O=PrvBase)
-     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-  ENDIF
-  CALL Get(BSc,Tag_O=CurBase)
-  CALL Get(GMc,Tag_O=CurGeom)
+  !
+  CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
+  CALL Get(OffS ,'atoff',Tag_O=PrvBase)
+  CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+  !
+  CALL Get(BS,Tag_O=CurBase)
+  CALL Get(GM,Tag_O=CurGeom)
   !
   !------------------------------------------------
   ! Initialization and allocations.
@@ -120,6 +92,15 @@ PROGRAM GONX2
   !
   CALL New(GradAux,(/3,NAtoms/))
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradAux%D(1,1),0.0D0)
+  !
+  CALL New(OffArr,(/BS%NCtrt,BS%NKind/))
+  !
+  CALL New(BoxX,(/3,3/))
+  BoxX%D=0.0D0
+  !
+  CALL GetBufferSize(GM,BS)
+  !
+  CALL GetOffArr(OffArr,BS)
   !
   !------------------------------------------------
   ! Get denstiy matrix.
@@ -142,11 +123,11 @@ PROGRAM GONX2
   !
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL TrnMatBlk(BSp,GMp,DFMcd)
+  CALL TrnMatBlk(BS,GM,DFMcd)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL TrnMatBlk(BSp,GMp,D)
+  CALL TrnMatBlk(BS,GM,D)
   CALL CPU_TIME(Time2)
 #endif
   TmTM = Time2-Time1
@@ -160,14 +141,12 @@ PROGRAM GONX2
   !write(*,*) 'CMin',CMin,'CMax',CMax,'MyID',MyID
   !write(*,*) 'DMin',DMin,'DMax',DMax,'MyID',MyID
   !
-  CALL AllocList(ListC,CMin,CMax)
-  CALL AllocList(ListD,DMin,DMax)
-  CALL GetBufferSize(GMc,BSc)
+  CALL AllocList3(ListC,CMin,CMax)
+  CALL AllocList3(ListD,DMin,DMax)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL AllocList(ListC,1,NAtoms)
-  CALL GetBufferSize(GMc,BSc)
+  CALL AllocList3(ListC,1,NAtoms)
   CALL CPU_TIME(Time2)
 #endif
   TmAL = Time2-Time1
@@ -178,14 +157,14 @@ PROGRAM GONX2
   !WRITE(*,*) 'make List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL MakeGList(ListC,GMc,BSc,CS_OUT,CPt,CNbr,APt,ANbr)
+  CALL MakeGList(ListC,GM,BS,CS_OUT,CPt,CNbr,APt,ANbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
-  CALL MakeGList(ListD,GMc,BSc,CS_OUT,DPt,DNbr,BPt,BNbr)
+  CALL MakeGList(ListD,GM,BS,CS_OUT,DPt,DNbr,BPt,BNbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL MakeGList(ListC,GMc,BSc,CS_OUT)
+  CALL MakeGList(ListC,GM,BS,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmML = Time2-Time1
@@ -197,10 +176,10 @@ PROGRAM GONX2
 #ifdef ONX2_DBUG
   !WRITE(*,*) 'Print List'
 #ifdef ONX2_PARALLEL
-  CALL PrintList(ListC)
-  CALL PrintList(ListD)
+  CALL PrintList3(ListC)
+  CALL PrintList3(ListD)
 #else
-  CALL PrintList(ListC)
+  CALL PrintList3(ListC)
 #endif
   !WRITE(*,*) 'Print List:ok'
 #endif
@@ -211,7 +190,7 @@ PROGRAM GONX2
 #ifdef ONX2_PARALLEL
   CALL GetDab(DFMab,APt,ANbr,BPt,BNbr,Args)
   Time1 = MPI_WTIME()
-  CALL TrnMatBlk(BSp,GMp,DFMab)
+  CALL TrnMatBlk(BS,GM,DFMab)
   Time2 = MPI_WTIME()
   TmTM = TmTM+Time2-Time1
 #endif
@@ -221,11 +200,11 @@ PROGRAM GONX2
   !WRITE(*,*) 'DKx'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,GMc,BSc,CS_OUT)
+  CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GM,BS,CS_OUT)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL ComputDK(D,GradX,ListC,ListC,GMc,BSc,CS_OUT)
+  CALL ComputDK(D,GradX,BoxX,ListC,ListC,OffArr,GM,BS,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmGx = Time2-Time1
@@ -236,12 +215,12 @@ PROGRAM GONX2
   !WRITE(*,*) 'deallocate List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
-  CALL DeAllocList(ListC)
-  CALL DeAllocList(ListD)
+  CALL DeAllocList3(ListC)
+  CALL DeAllocList3(ListD)
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-  CALL DeAllocList(ListC)
+  CALL DeAllocList3(ListC)
   CALL CPU_TIME(Time2)
 #endif
   TmDL = Time2-Time1
@@ -286,11 +265,17 @@ PROGRAM GONX2
   !
 #endif
   !
-!#ifdef 0
-  !write(*,*) 'Grad Kx'
-  !do i=1,natoms
-  !   write(*,100) i,GradX%D(:,i)
-  !enddo
+#ifdef 0
+!StressStressStressStressStressStressStressStress
+!  write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
+!  write(*,*) 'LatFrc(1,1)',GMc%PBC%LatFrc%D(1,1)
+!  write(*,*) 'XBox',BoxX%D(1,1)
+!  write(*,*) 'Tot Stress',GMc%PBC%LatFrc%D(1,1)+BoxX%D(1,1)
+!StressStressStressStressStressStressStressStress
+  write(*,*) 'Grad Kx'
+  do i=1,natoms
+     write(*,100) i,GradX%D(:,i)
+  enddo
 
   !write(*,*) 'Grad before'
   !do i=1,natoms
@@ -302,14 +287,8 @@ PROGRAM GONX2
   !   write(*,100) i,GradAux%D(:,i)
   !enddo
 
-  write(*,*) 'Grad Tot'
-  do i=1,natoms
-     !if(abs(GradAux%D(2,i)).LT.1d-6) GradAux%D(2,i)=0d0
-     write(*,100) i,GradAux%D(:,i)
-  enddo
-
-  100 format(I4,2X,3E24.16)
-!#endif
+100 format(I4,2X,3E24.16)
+#endif
   !
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
   !
@@ -383,11 +362,11 @@ PROGRAM GONX2
   !
   CALL Delete(GradX)
   CALL Delete(GradAux)
+  CALL Delete(BoxX)
+  CALL Delete(OffArr)
   !
-  CALL Delete(BSc)
-  CALL Delete(GMc)
-  CALL Delete(BSp)
-  CALL Delete(GMp)
+  CALL Delete(BS)
+  CALL Delete(GM)
   !
   CALL ShutDown(Prog)
   !
