@@ -14,7 +14,13 @@ TwoEObjs=  \
 	Int3311.o \
 	Int3131.o \
 	Int3331.o \
-	Int3333.o 
+	Int3333.o \
+	dInt1111.o \
+	dInt3111.o \
+	dInt3311.o \
+	dInt3131.o \
+	dInt3331.o \
+	dInt3333.o 
 #
 TwoERels=  \
 	Int1111.x \
@@ -22,7 +28,13 @@ TwoERels=  \
 	Int3311.x \
 	Int3131.x \
 	Int3331.x \
-	Int3333.x 
+	Int3333.x \
+	dInt1111.x \
+	dInt3111.x \
+	dInt3311.x \
+	dInt3131.x \
+	dInt3331.x \
+	dInt3333.x 
 #
 all:    TwoE
 #

@@ -489,7 +489,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 
  *)
            WriteString[Subroutine,StringJoin["   SUBROUTINE dInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
-                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) \n"]];
+                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,dI) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -504,18 +504,21 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
            WS["INTEGER        :: LBra,LKet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE) :: I(*)"]];
+           WS[StringJoin["REAL(DOUBLE) :: dI(12,*)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
+
+           WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
+           WS["INTEGER       :: OffSet"];
 
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
@@ -555,6 +558,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["   Qy =PrmBufK(3,J)"];
            WS["   Qz =PrmBufK(4,J)"];
            WS["   Uq =PrmBufK(5,J)"];
+           WS["   Gamma =PrmBufK(6,J)"];
+(*           WS["   Delta =PrmBufK(7,J)"];*)
+
 
 
            (* Add the conversion factor for SP shell *)
@@ -586,6 +592,8 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["      Py  =PrmBufB(3,K)"];
            WS["      Pz  =PrmBufB(4,K)"];
            WS["      Up  =PrmBufB(5,K)"];
+           WS["      Alpha =PrmBufB(6,K)"];
+           WS["      Beta  =PrmBufB(7,K)"];
 
            (* Add the conversion factor for SP shell *)
            If[IntegralClass[Classes[[ic]]]==2,
@@ -722,8 +730,8 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
 	   WriteString[Subroutine,CommentLine]; 
 
-	   MakeList=StringJoin[MakeList,StringJoin[" \\ \n Int",ToString[ijklType],".o"]];
-           RelsList=StringJoin[RelsList,StringJoin[" \\ \n Int",ToString[ijklType],".x"]]; 
+	   MakeList=StringJoin[MakeList,StringJoin[" \\ \n dInt",ToString[ijklType],".o"]];
+           RelsList=StringJoin[RelsList,StringJoin[" \\ \n dInt",ToString[ijklType],".x"]]; 
 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
@@ -751,7 +759,7 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
            WS["   ! HRR "];
            PunchHRRClass[Subroutine,ic,jc,kc,lc]; 
 
-           WS[StringJoin["END SUBROUTINE Int",ToString[ijklType]]];
+           WS[StringJoin["END SUBROUTINE dInt",ToString[ijklType]]];
 
            Close[Subroutine];
            Print[" Closed ",Subroutine];

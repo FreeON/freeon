@@ -2,21 +2,23 @@
 ! COMPUTES THE INTEGRAL CLASS (S S|S S) 
 ! ---------------------------------------------------------- 
    SUBROUTINE dInt1111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
-                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,dI) 
       USE DerivedTypes
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF0
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
-      REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
+      REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
-      REAL(DOUBLE) :: I(*)
+      REAL(DOUBLE) :: dI(12,*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
+      REAL(DOUBLE)  :: Alpha,Beta,Gamma
+      INTEGER       :: OffSet
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
@@ -26,16 +28,16 @@
       I1Bar2=0.0d0
       I1Bar3=0.0d0
       I1Bar4=0.0d0
-               Ia4Bar1=0D0
-               Ia3Bar1=0D0
-               Ia2Bar1=0D0
-               Ib1Bar1=0D0
-               Ib4Bar1=0D0
-               Ib3Bar1=0D0
-               Ib2Bar1=0D0
-               Ic1Bar4=0D0
-               Ic1Bar3=0D0
-               Ic1Bar2=0D0
+      Ia4Bar1=0D0
+      Ia3Bar1=0D0
+      Ia2Bar1=0D0
+      Ib1Bar1=0D0
+      Ib4Bar1=0D0
+      Ib3Bar1=0D0
+      Ib2Bar1=0D0
+      Ic1Bar4=0D0
+      Ic1Bar3=0D0
+      Ic1Bar2=0D0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -60,6 +62,7 @@
          Qy =PrmBufK(3,J)
          Qz =PrmBufK(4,J)
          Uq =PrmBufK(5,J)
+         Gamma =PrmBufK(6,J)
          QCx=Qx-Cx
          QCy=Qy-Cy
          QCz=Qz-Cz
@@ -69,6 +72,8 @@
             Py  =PrmBufB(3,K)
             Pz  =PrmBufB(4,K)
             Up  =PrmBufB(5,K)
+            Alpha =PrmBufB(6,K)
+            Beta  =PrmBufB(7,K)
             r1xZpE=One/(Zeta+Eta)
             Upq=SQRT(r1xZpE)*Up*Uq
             HfxZpE=Half/(Zeta+Eta)
@@ -156,4 +161,4 @@
       W1=-dI(3,V5)-dI(6,V5)
       W2=-dI(9,V5)+dI(12,OffSet)
       dI(12,OffSet)=W1+W2
-   END SUBROUTINE Int1111
+   END SUBROUTINE dInt1111

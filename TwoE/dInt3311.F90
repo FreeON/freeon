@@ -2,21 +2,23 @@
 ! COMPUTES THE INTEGRAL CLASS (P P|S S) 
 ! ---------------------------------------------------------- 
    SUBROUTINE dInt3311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
-                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,dI) 
       USE DerivedTypes
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF2
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
-      REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
+      REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
-      REAL(DOUBLE) :: I(*)
+      REAL(DOUBLE) :: dI(12,*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
+      REAL(DOUBLE)  :: Alpha,Beta,Gamma
+      INTEGER       :: OffSet
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
@@ -69,68 +71,68 @@
       I8Bar4=0.0d0
       I9Bar4=0.0d0
       I10Bar4=0.0d0
-               Ia10Bar1=0D0
-               Ia20Bar1=0D0
-               Ia9Bar1=0D0
-               Ia19Bar1=0D0
-               Ia7Bar1=0D0
-               Ia17Bar1=0D0
-               Ia14Bar1=0D0
-               Ia8Bar1=0D0
-               Ia18Bar1=0D0
-               Ia6Bar1=0D0
-               Ia16Bar1=0D0
-               Ia13Bar1=0D0
-               Ia5Bar1=0D0
-               Ia15Bar1=0D0
-               Ia12Bar1=0D0
-               Ia11Bar1=0D0
-               Ib4Bar1=0D0
-               Ib10Bar1=0D0
-               Ib20Bar1=0D0
-               Ib3Bar1=0D0
-               Ib9Bar1=0D0
-               Ib19Bar1=0D0
-               Ib7Bar1=0D0
-               Ib17Bar1=0D0
-               Ib14Bar1=0D0
-               Ib2Bar1=0D0
-               Ib8Bar1=0D0
-               Ib18Bar1=0D0
-               Ib6Bar1=0D0
-               Ib16Bar1=0D0
-               Ib13Bar1=0D0
-               Ib5Bar1=0D0
-               Ib15Bar1=0D0
-               Ib12Bar1=0D0
-               Ib11Bar1=0D0
-               Ic4Bar4=0D0
-               Ic4Bar3=0D0
-               Ic4Bar2=0D0
-               Ic10Bar4=0D0
-               Ic10Bar3=0D0
-               Ic10Bar2=0D0
-               Ic3Bar4=0D0
-               Ic3Bar3=0D0
-               Ic3Bar2=0D0
-               Ic9Bar4=0D0
-               Ic9Bar3=0D0
-               Ic9Bar2=0D0
-               Ic7Bar4=0D0
-               Ic7Bar3=0D0
-               Ic7Bar2=0D0
-               Ic2Bar4=0D0
-               Ic2Bar3=0D0
-               Ic2Bar2=0D0
-               Ic8Bar4=0D0
-               Ic8Bar3=0D0
-               Ic8Bar2=0D0
-               Ic6Bar4=0D0
-               Ic6Bar3=0D0
-               Ic6Bar2=0D0
-               Ic5Bar4=0D0
-               Ic5Bar3=0D0
-               Ic5Bar2=0D0
+      Ia10Bar1=0D0
+      Ia20Bar1=0D0
+      Ia9Bar1=0D0
+      Ia19Bar1=0D0
+      Ia7Bar1=0D0
+      Ia17Bar1=0D0
+      Ia14Bar1=0D0
+      Ia8Bar1=0D0
+      Ia18Bar1=0D0
+      Ia6Bar1=0D0
+      Ia16Bar1=0D0
+      Ia13Bar1=0D0
+      Ia5Bar1=0D0
+      Ia15Bar1=0D0
+      Ia12Bar1=0D0
+      Ia11Bar1=0D0
+      Ib4Bar1=0D0
+      Ib10Bar1=0D0
+      Ib20Bar1=0D0
+      Ib3Bar1=0D0
+      Ib9Bar1=0D0
+      Ib19Bar1=0D0
+      Ib7Bar1=0D0
+      Ib17Bar1=0D0
+      Ib14Bar1=0D0
+      Ib2Bar1=0D0
+      Ib8Bar1=0D0
+      Ib18Bar1=0D0
+      Ib6Bar1=0D0
+      Ib16Bar1=0D0
+      Ib13Bar1=0D0
+      Ib5Bar1=0D0
+      Ib15Bar1=0D0
+      Ib12Bar1=0D0
+      Ib11Bar1=0D0
+      Ic4Bar4=0D0
+      Ic4Bar3=0D0
+      Ic4Bar2=0D0
+      Ic10Bar4=0D0
+      Ic10Bar3=0D0
+      Ic10Bar2=0D0
+      Ic3Bar4=0D0
+      Ic3Bar3=0D0
+      Ic3Bar2=0D0
+      Ic9Bar4=0D0
+      Ic9Bar3=0D0
+      Ic9Bar2=0D0
+      Ic7Bar4=0D0
+      Ic7Bar3=0D0
+      Ic7Bar2=0D0
+      Ic2Bar4=0D0
+      Ic2Bar3=0D0
+      Ic2Bar2=0D0
+      Ic8Bar4=0D0
+      Ic8Bar3=0D0
+      Ic8Bar2=0D0
+      Ic6Bar4=0D0
+      Ic6Bar3=0D0
+      Ic6Bar2=0D0
+      Ic5Bar4=0D0
+      Ic5Bar3=0D0
+      Ic5Bar2=0D0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -155,6 +157,7 @@
          Qy =PrmBufK(3,J)
          Qz =PrmBufK(4,J)
          Uq =PrmBufK(5,J)
+         Gamma =PrmBufK(6,J)
          QCx=Qx-Cx
          QCy=Qy-Cy
          QCz=Qz-Cz
@@ -164,6 +167,8 @@
             Py  =PrmBufB(3,K)
             Pz  =PrmBufB(4,K)
             Up  =PrmBufB(5,K)
+            Alpha =PrmBufB(6,K)
+            Beta  =PrmBufB(7,K)
             r1xZpE=One/(Zeta+Eta)
             Upq=SQRT(r1xZpE)*Up*Uq
             HfxZpE=Half/(Zeta+Eta)
@@ -688,4 +693,4 @@
       W1=-dI(3,V70)-dI(6,V70)
       W2=-dI(9,V70)+dI(12,OffSet)
       dI(12,OffSet)=W1+W2
-   END SUBROUTINE Int3311
+   END SUBROUTINE dInt3311
