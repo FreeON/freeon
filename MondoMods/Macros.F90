@@ -190,8 +190,8 @@ MODULE Macros
             CALL Delete(End)
          ENDIF
 #endif
-!        IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-         IF(PrintFlags%Key>=DEBUG_MEDIUM.OR.PrintFlags%Chk==DEBUG_CHKSUMS)THEN
+         IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
+!        IF(PrintFlags%Key>=DEBUG_MEDIUM.OR.PrintFlags%Chk==DEBUG_CHKSUMS)THEN
             CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
             CALL PPrint(PerfMon,Prog)
          ENDIF
