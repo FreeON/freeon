@@ -112,13 +112,10 @@ PROGRAM MakeRho
      ! Allocations and precalculations
      CALL NewBraBlok(BS)  
      CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+
 #ifdef PERIODIC
-     ! Calculate the Number of Cells
-#ifdef MMech
-     IF(HasQM()) CALL SetCellNumber(GM)
-#else
-     CALL SetCellNumber(GM)
-#endif
+!    Get the Outer Cell Set
+     CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
      CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
      !--------------------------------------------------------------

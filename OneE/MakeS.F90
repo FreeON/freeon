@@ -63,10 +63,8 @@ PROGRAM MakeS
   CALL New(S)
 #endif
 #ifdef PERIODIC
-!-----------------------------------------------
-! Calculate the Number of Cells
-
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !-----------------------------------------------

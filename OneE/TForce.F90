@@ -47,12 +47,10 @@ PROGRAM TForce
   CALL Get(P,TrixFile('D',Args,1))
   CALL New(TFrc,3*NAtoms)
 #ifdef PERIODIC
-!-----------------------------------------------
-! Calculate the Number of Cells
-!
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
+#endif 
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------

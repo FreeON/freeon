@@ -50,10 +50,8 @@ PROGRAM MakeT
   CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(T)
 #ifdef PERIODIC
-!-----------------------------------------------
-! Calculate the Number of Cells
-!
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !-----------------------------------------------

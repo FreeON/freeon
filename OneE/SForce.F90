@@ -58,11 +58,10 @@ PROGRAM SForce
   CALL Delete(F)
   CALL Delete(T1)
 #ifdef PERIODIC
-!-----------------------------------------------
-! Calculate the number of Cells
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
+#endif 
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------
