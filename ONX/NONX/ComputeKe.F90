@@ -175,7 +175,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
  
               IF (ISL>0) THEN
 
-                IntSpace=ISL*CBra*CKet*IS%NVRR    ! WRONG HERE
+                IntSpace=ISL*IS%NVRR  
                 IF (IntSpace.GT.IB%MAXI) THEN
                   ErrorCode=eMAXI
                   GOTO 9000
