@@ -1279,7 +1279,9 @@ MODULE GeomOpt
 ! Line search in internals was inefficient for bALA.
 !
           GMTag=''
+#ifdef MMech
         IF(HasMM()) GMTag='GM_MM'
+#endif
 !
         CALL Get(GMPrev,TRIM(GMTag)//PrvGeom)
 !
