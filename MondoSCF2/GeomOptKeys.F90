@@ -44,5 +44,10 @@ MODULE GeomOptKeys
 !  Parsing keys for <Options.Refresh=>
 !
     CHARACTER(LEN=11),  PARAMETER :: INTCREFRESH='IntCRefresh'
+!-------------------------------------------------
+!  Parsing keys for <Options.MaxAngle=> and <Options.MaxStre=>
+!
+    CHARACTER(LEN=7),  PARAMETER :: MaxAngle='MaxAngle'
+    CHARACTER(LEN=7),  PARAMETER :: MaxStre='MaxStre'
 !---------------------------------------------------------
 END MODULE GeomOptKeys

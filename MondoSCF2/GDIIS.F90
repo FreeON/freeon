@@ -444,7 +444,8 @@ CONTAINS
      ! Calculate new values of internals by fitting
      !
      CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,RMSErr%D,Displ,&
-                   PWDPath,iGEO,Energy,LWeight%D)
+                   PWDPath,iGEO,Energy,LWeight%D, &
+                   GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
      !
      CALL Delete(VectX)
      CALL Delete(RMSErr)
@@ -560,12 +561,12 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,RMSErr,Displ, &
-                       Path,iGEO,Energy,LWeight)
+                       Path,iGEO,Energy,LWeight,MaxStre,MaxAngle)
      TYPE(INTC)                 :: IntCs
      REAL(DOUBLE),DIMENSION(:)  :: Displ,RMSErr,Energy
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues,LWeight
      REAL(DOUBLE)               :: A,B,C,Conv,Range
-     REAL(DOUBLE)               :: X,Y
+     REAL(DOUBLE)               :: X,Y,MaxStre,MaxAngle
      INTEGER                    :: I,J,NIntC,NDim,iGEO
      INTEGER                    :: MaxDim,IStart,IEnd
      TYPE(DBL_VECT)             :: VectX,VectY,Sig
@@ -636,7 +637,7 @@ CONTAINS
        Displ(I)=IntCs%PredVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def%C(I),IntCValues(I,NDim),Displ(I))
        !
-       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),One)
+       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),One,MaxStre,MaxAngle)
        CALL CtrlRange(Displ(I),Range,NDim)
        IntCs%PredVal%D(I)=IntCValues(I,NDim)+Displ(I)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN

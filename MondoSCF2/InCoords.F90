@@ -609,11 +609,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-!    IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-!       LonelyAtom)) THEN
-!      DoExclude=.TRUE.
-!      RETURN
-!    ENDIF
+   ! IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+   !    LonelyAtom)) THEN
+   !   DoExclude=.TRUE.
+   !   RETURN
+   ! ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -1341,7 +1341,7 @@ CONTAINS
      Print2=(Print>=DEBUG_GEOP_MAX)
      DoClssTrf=.TRUE.
      DoRepeat=.FALSE.
-     RepMax=4
+     RepMax=5
      IF(PRESENT(DoDeloc_O)) THEN
        DoDeloc=DoDeloc_O
      ELSE
@@ -1369,9 +1369,9 @@ CONTAINS
        RefreshAct=.TRUE.
        !
        IF(DoRepeat) THEN
-         RefreshAct=.TRUE.
          VectIntAux%D=VectIntReq%D-IntCValSt%D  
-         CALL CutOffDispl(VectIntAux%D,IntCs,Fact_O=Half)
+         CALL CutOffDispl(VectIntAux%D,IntCs, &
+                     GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle,Fact_O=Half)
          VectIntReq%D=IntCValSt%D+VectIntAux%D
        ENDIF
        !
@@ -1530,8 +1530,8 @@ CONTAINS
          VectIntAux%D=IntCValSt%D-IntCs%Value%D
          CALL MapAngleDispl(IntCs,VectIntAux%D) 
          IF(IRep<RepMax) THEN
-           IF(ABS(MAXVAL(VectIntAux%D))>0.3D0.OR. &
-              ABS(MINVAL(VectIntAux%D))>0.3D0) THEN
+           IF(ABS(MAXVAL(VectIntAux%D))>GCoordCtrl%MaxAngle.OR. &
+              ABS(MINVAL(VectIntAux%D))>GCoordCtrl%MaxStre) THEN
              DoRepeat=.TRUE.
              CYCLE
            ENDIF
@@ -2204,7 +2204,7 @@ CONTAINS
      DoIterate=(DiffMax>GBackTrf%CooTrfCrit)
      IF(RMSD>RMSDOld*GBackTrf%RMSCrit) THEN 
        IF(DiffMax<GBackTrf%MaxCartDiff*GBackTrf%RMSCrit &
-          .AND.IStep>50) THEN
+          .AND.IStep>20) THEN
          DoIterate=.FALSE.
        ELSE 
          RefreshAct=.TRUE.
@@ -5510,8 +5510,9 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CutOffDispl(Displ,IntCs,Fact_O)
+   SUBROUTINE CutOffDispl(Displ,IntCs,StreCritIn,AngleCritIn,Fact_O)
      REAL(DOUBLE),DIMENSION(:) :: Displ
+     REAL(DOUBLE)              :: StreCritIn,AngleCritIn
      TYPE(INTC)                :: IntCs
      INTEGER                   :: I
      REAL(DOUBLE)              :: Fact  
@@ -5520,22 +5521,24 @@ CONTAINS
      Fact=One
      IF(PRESENT(Fact_O)) Fact=Fact_O
      DO I=1,IntCs%N
-       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact)
+       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact, &
+                      StreCritIn,AngleCritIn)
      ENDDO
    END SUBROUTINE CutOffDispl
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CtrlDispl(Def,Displ,Fact)
+   SUBROUTINE CtrlDispl(Def,Displ,Fact,StreCritIn,AngleCritIn)
      REAL(DOUBLE)     :: Displ,StreCrit,AngleCrit
+     REAL(DOUBLE)     :: StreCritIn,AngleCritIn
      REAL(DOUBLE)     :: Fact
      CHARACTER(LEN=*) :: Def
      !
      IF(Def=='STRE') THEN
-       StreCrit=0.15D0*Fact
+       StreCrit=StreCritIn*Fact
        IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
      ELSE
-       AngleCrit=0.15D0*Fact
+       AngleCrit=AngleCritIn*Fact
        IF(ABS(Displ)>AngleCrit) Displ=SIGN(AngleCrit,Displ)
      ENDIF
    END SUBROUTINE CtrlDispl

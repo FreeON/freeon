@@ -200,15 +200,6 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: StpDescInvH
   END TYPE Hessian 
   !
-  TYPE StepSize 
-     REAL(DOUBLE)                       :: Stre
-     REAL(DOUBLE)                       :: Bend
-     REAL(DOUBLE)                       :: LinB
-     REAL(DOUBLE)                       :: OutP
-     REAL(DOUBLE)                       :: Tors
-     REAL(DOUBLE)                       :: Cart
-  END TYPE StepSize 
-  !
   TYPE TrfCtrl
      LOGICAL                            :: DoFullTrf
      LOGICAL                            :: DoClssTrf
@@ -243,6 +234,8 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: LinCrit
      REAL(DOUBLE)                       :: TorsLinCrit
      REAL(DOUBLE)                       :: OutPCrit
+     REAL(DOUBLE)                       :: MaxAngle
+     REAL(DOUBLE)                       :: MaxStre
   END TYPE CoordCtrl
 
   TYPE GeomOpt
@@ -250,7 +243,6 @@ MODULE ControlStructures
      LOGICAL                         :: RestartBas
      TYPE(CoordCtrl)                 :: CoordCtrl
      TYPE(TrfCtrl)                   :: TrfCtrl
-     TYPE(StepSize)                  :: StepSize
      TYPE(Hessian)                   :: Hessian
      TYPE(GOptStat)                  :: GOptStat
      TYPE(GConvCrit)                 :: GConvCrit

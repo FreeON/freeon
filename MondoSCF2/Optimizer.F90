@@ -735,13 +735,15 @@ CONTAINS
        ! CALL RescaleGrad(Grad%D,Print)
        CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                      IntCs,AtNum,iGEO,XYZ)
-       CALL CutOffDispl(Displ%D,IntCs)
+       CALL CutOffDispl(Displ%D,IntCs,One, &
+                        GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
-         CALL CutOffDispl(Displ%D,IntCs)
+         CALL CutOffDispl(Displ%D,IntCs,One, &
+                         GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
        ! CALL RedundancyOff(Displ%D,SCRPath,Print)
        ! CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
@@ -751,7 +753,8 @@ CONTAINS
            Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
            E_O=Etot,PWD_O=PWDPath,IntCs_O=IntCs)
          ! CALL RedundancyOff(Displ%D,SCRPath,Print)
-         ! CALL CutOffDispl(Displ%D,IntCs)
+         ! CALL CutOffDispl(Displ%D,IntCs,One, &
+         !               GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
        ENDIF
      END SELECT
      CALL Delete(Grad)
@@ -1033,7 +1036,6 @@ CONTAINS
      GOpt%RestartBas=.FALSE.
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
-     CALL     SetStepS(GOpt%StepSize)
      CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc)
      CALL     SetGDIIS(GOpt%GDIIS,GOpt%Optimizer)
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
@@ -1177,19 +1179,6 @@ CONTAINS
      GConv%OutP= 1.D0*GCrit/Hess%OutP
      GConv%Tors= 1.D0*GCrit/Hess%Tors
    END SUBROUTINE SetGConvCrit
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE SetStepS(StepS)
-     TYPE(StepSize) :: StepS
-     !
-     StepS%Stre = 0.1D0*AngstromsToAu
-     StepS%Bend = 4.0D0*PI/180.D0
-     StepS%LinB = 4.0D0*PI/180.D0
-     StepS%OutP = 4.0D0*PI/180.D0
-     StepS%Tors = 4.0D0*PI/180.D0
-     StepS%Cart = 0.3D0*AngstromsToAu
-   END SUBROUTINE SetStepS
 !
 !-------------------------------------------------------------------
 !
