@@ -850,7 +850,7 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(Parallel)     :: M
     TYPE(BasisSets)    :: B
-    INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE
+    INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE,A1,A2
     CHARACTER(LEN=DCL) :: chGEO,chBAS    
     REAL(DOUBLE)       :: GradVal
     TYPE(DBL_RNK2)     :: AuxLatF
