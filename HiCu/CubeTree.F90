@@ -280,7 +280,7 @@ MODULE CubeTree
          DeltaGrad=(dPopX-GradRhoOnTheCube(1))**2 &
                   +(dPopY-GradRhoOnTheCube(2))**2 &
                   +(dPopZ-GradRhoOnTheCube(3))**2
-         Cube%ECube=DeltaRho+1.D-1*SQRT(DeltaGrad)
+         Cube%ECube=DeltaRho+SQRT(DeltaGrad)/Three
 !        Determine optimal direction for spliting 
      END SUBROUTINE LayGrid
 !=================================================================================
