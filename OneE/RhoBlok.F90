@@ -242,7 +242,7 @@ CONTAINS
     REAL(DOUBLE)                 :: Zeta,SqUqq
 !
     IF(Rho%AllocRE==ALLOCATED_TRUE) THEN
-       DO zq = 1,Rho%NExpt
+       DO zq = 1,Rho%NExpt-1
           NQ     = Rho%NQ%I(zq)
           IF(NQ/=0) THEN
              oq    =Rho%OffQ%I(zq)
