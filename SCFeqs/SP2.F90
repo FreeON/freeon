@@ -17,28 +17,21 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE LinAlg
   USE DenMatMethods
   IMPLICIT NONE
-  TYPE(BCSR)                     :: F,P,Pold,T,Z
+  TYPE(BCSR)                     :: F,P,Pold,Tmp1,Tmp2
 !-------------------------------------------------------------------------------------
 ! Trace Setting SP2
 !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
-  REAL(DOUBLE)                   :: Energy,Energy_old,Thresh_old
-  REAL(DOUBLE)                   :: ErrorE,ErrorN,ErrorP,ErrorFP,Ne
-  INTEGER                        :: I,Nr_Max_It,PNon0,MM
-  LOGICAL                        :: Present,Converged
-  REAL(DOUBLE),PARAMETER         :: FirstIter = 1.0D-2
-  REAL(DOUBLE),PARAMETER         :: GrowFac   = 1.25D0
+  REAL(DOUBLE)                   :: Ne
+  INTEGER                        :: I,MM
+  LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
-!-------------------------------------------------------------------------
-! Start
-!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
-!-------------------------------------------------------------------------
+  ! Suss for matrix threshold overide
+  CALL SussTrix('SPTwoTrix',Prog)  
   CALL New(F)
-!-------------------------------------------------------------------------
-! Get The Fock Matrix
-!-------------------------------------------------------------------------
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
   IF(Present)THEN
@@ -46,132 +39,32 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   ELSE
      CALL Get(F,TrixFile('OrthoF',Args,0))   
   ENDIF
-!-------------------------------------------------------------------------
 ! Initialize                     
-!-------------------------------------------------------------------------
-  MM         = 0                        
-  Energy     = Zero
-  Nr_Max_It  = 50                   
-  Converged  = .FALSE.  
-  Ne         = Half*DBLE(NEl)    
-  Thresh_old = Thresholds%Trix
-!
   CALL New(P)
   CALL New(Pold)
-  CALL New(T) 
-!
-  CALL New(P2)
-  CALL New(P3)
-  CALL New(Ptmp1)
-  CALL New(Ptmp2)
-!   
-  CALL SetEq(Pold,P)    
-!-------------------------------------------------------------------------
-!  Set up the starting Density Matrix from the Fock Matrix
-!-------------------------------------------------------------------------
+  CALL New(Tmp1)
+  CALL New(Tmp2)
+  MM=0                        
+  Ne=Half*DBLE(NEl)    
+  ! Guess P from F
   CALL FockGuess(F,P,Ne,1)
-!-------------------------------------------------------------------------
-! Main Loop: Iterate until convergence              
-!-------------------------------------------------------------------------
-  DO I = 1,Nr_Max_It
-     CALL SetEq(Pold,P)
-     Energy_old = Energy
-!--------------------------------------------------------------------------
-!    Set the Threshold for reduction of the error
-!--------------------------------------------------------------------------
-     IF(I==1) THEN
-        Thresholds%Trix = Thresh_old*FirstIter
-     ELSEIF(I >= 2) THEN
-        Thresholds%Trix = MIN(GrowFac*Thresholds%Trix,Thresh_old)
-     ENDIF
-!--------------------------------------------------------------------------
-!    One Step of the Algorithm
-!--------------------------------------------------------------------------
-     CALL SP2(P,Ne,MM,.TRUE.)
-!--------------------------------------------------------------------------
-!    Output Convergence Infomation
-!--------------------------------------------------------------------------
-     Energy  = Trace(P,F)
-     PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-     ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
-     CALL Multiply(Pold,-One)
-     CALL Add(Pold,P,T)
-     ErrorP  = TwoNorm(T)/TwoNorm(P)
-     CALL MednOut(Prog,I,Energy,PNon0,ErrorE,ErrorP)
-!--------------------------------------------------------------------------
-!    Output Convergence Infomation
-!--------------------------------------------------------------------------
-     IF(ErrorP  < Thresh_old) Converged=.TRUE.
-     IF(ErrorE  < MAX(Thresh_old**2,1.D-14)) Converged=.TRUE.
-     IF(Converged) EXIT
+  CALL SetEq(Pold,P)    
+  ! Do SP2 iterations
+  DO I=1,100
+     CALL SetVarThresh(MM)
+     CALL SP2(P,Tmp1,Tmp2,Ne,MM)
+     IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO
-!--------------------------------------------------------------------------
-! Normalize Trace
-!--------------------------------------------------------------------------
-  CALL NormTrace(P,Ne,1)
-!--------------------------------------------------------------------------
-! Write Out Statisitcs
-!--------------------------------------------------------------------------
-  Energy  = Trace(P,F)
-  PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-  ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
-  ErrorN  = Trace(P)-Ne
-  CALL Add(Pold,P,T)
-  ErrorP  = TwoNorm(T)/TwoNorm(P)
-  CALL Commute(F,P,T)
-  ErrorFP = TwoNorm(T)/TwoNorm(F)
-  CALL FinalOut(Prog,Energy,ErrorE,ErrorN,ErrorP,ErrorFP,PNon0,MM)
-!=============================================================================
-!  TRANSFORMATION TO AN AO REPRESENTATION AND IO
-!=============================================================================
-!  IO for the orthogonal P
-!
-   CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
-   CALL Put(P,TrixFile('OrthoD',Args,1))
-   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
-   CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
-   CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Convert to AO representation
-!
-   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-   IF(Present)THEN
-      CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
-      CALL Multiply(Z,P,T)
-      CALL Multiply(T,Z,P)
-   ELSE
-      CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
-      CALL Multiply(Z,P,T)
-      CALL Get(Z,TrixFile('ZT',Args))
-      CALL Multiply(T,Z,P)
-   ENDIF
-   CALL Filter(T,P)     ! Thresholding
-!----------------------------------------------------------------------------0-
-!  IO for the non-orthogonal P
-!
-   CALL Put(T,'CurrentDM',CheckPoint_O=.TRUE.)
-   CALL Put(T,TrixFile('D',Args,1))
-   CALL Put(Zero,'homolumogap')
-   CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
-   CALL PPrint(T,'P['//TRIM(NxtCycl)//']')
-   CALL Plot(T,'P_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Tidy up
-! 
-   CALL Delete(F)
-   CALL Delete(P)
-   CALL Delete(Pold)
-   CALL Delete(T)
-   CALL Delete(Z)
-!
-   CALL Delete(P2)
-   CALL Delete(P3)
-   CALL Delete(Ptmp1)
-   CALL Delete(Ptmp2)
-!
-   CALL ShutDown(Prog)
-!
- END PROGRAM DMP_SP2
+  ! Orthogonal put and xform to AO rep and put
+  CALL PutXForm(Prog,Args,P,POld,Tmp1)
+  ! Tidy up
+  CALL Delete(F)
+  CALL Delete(P)
+  CALL Delete(Pold)
+  CALL Delete(Tmp1)
+  CALL Delete(Tmp2)
+  CALL ShutDown(Prog)
+END PROGRAM DMP_SP2
 
 
 
