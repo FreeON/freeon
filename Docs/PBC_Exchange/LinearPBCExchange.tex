@@ -14,7 +14,7 @@
 \begin{document}
 
 \title{Linear scaling computation of the Fock matrix. VIII. Periodic \\
-     boundaries, exact exchange and the minimum image condition. }
+     boundaries, exact exchange and the Minimum Image Condition. }
 
 \author{C. J. Tymczak}
 \author{Valery Weber}
@@ -25,19 +25,12 @@
 New Mexico 87545 }
 
 \date{\today}
-
 \begin{abstract}
-We report on a consistent derivation of the exact exchange matrix for periodic
-systems at the Gamma point. Previous work has always included k-space integration 
-within the calculation of the exchange matrix. However, in  these methods
-we can show that the calculation of the exchange matrix becomes inconsistent as the
-region of k-space shrinks. This leads to a non-translation-ally invariant exchange matrix,
-which is of major concern. We illustrate this problem and then show how, by a set of
-simple ideas and arguments, we can rectify it.
-%
-\vskip 0.07 in
-\noindent{\bf Keywords}: Self-consistent-field, Exact-exchange, Linear-scaling, Gaussian-orbital 
-%
+A translationally invariant formulation of the Hartree-Fock $\Gamma$-point approximation
+is achieved through introduction of the Minimum Image Convention.  This approximation is implemented 
+in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling computation of the periodic Hartree-Fock 
+exchange matrix.  Convergence of the $\Gamma$-point approximation to the $\bf k$-space limit is demonstrated for 
+magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamond and ice. 
 \end{abstract}
 
 \pacs{}
@@ -50,69 +43,81 @@ simple ideas and arguments, we can rectify it.
 \footnotetext[4]{\tt mchalla@lanl.gov}
 \footnotetext[5]{\tt Preprint LA-UR 03-9043}
 
-
 \section{INTRODUCTION}
 
-Many calculations of the electronic structure of condensed matter systems now make use
-of the exact exchange interaction 
-\cite{CPisani80,REvarestov83,MCausa88,JAlmlof94,RDovesi00}. 
-Whereas this has been a very
-important functional in the quantum chemistry community 
-\cite{PLowdin55,py,ASzabo89}, 
-until the advent of the hybrid functionals 
-\cite{Gill92,Becke93,ABecke96,Adamo99}, 
-this functional has had very little impact on the
-condensed matter electronic structure community. Now because of the accuracy obtainable with
-the hybrid functionals, it has become very desirable to include exact exchange into
-existing condensed matter electronic structure algorithms. 
-However, most of these calculations make use of ${\bf k}$-space integrations to 
-deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal situation 
-for linear scaling algorithms, where we would like to remove the need for doing
-${\bf k}$-space integrations altogether by increasing the system size. 
-However, when Gamma point only is attempted for exact exchange, a 
-significant problem arises. For the Gamma point, in the limit of large system size,
-we do not recover the ${\bf k}$-space energy per particle number; we do not have the correct
-limit as particle number increases.  
+Recent progress in linear scaling Density Functional Theory is enabling larger and 
+more complex calculations of condensed phase systems.  In this approach, ${\cal O}(N)$
+scaling with respect to system size, $N$, is achieved with algorithms that exploit 
+quantum locality.  Applications of linear scaling algorithms to mineralogical problems 
+\cite{MCraig04} and to energetic organic materials \cite{} {\bf MORE HERE??} demonstrate the ability 
+of these $N$-scaling algorithms to make valuable contributions well beyond the domain of 
+conventional plane wave methods, which scale with the cube of system size.  
+
+In the simulation of condensed phase systems, Gaussian basis functions have several 
+advantages.  First, they are able to sustain all electron calculations into high 
+pressure regimes where the effects of core electrons may be important. Second, they
+support the application of Hartree-Fock and the hybrid Hartree-Fock/Density Functional 
+Theory (HF/DFT) \cite{Gill92,ABecke93,ABecke93b,VBarone96,CAdammo99} through rapid, 
+analytic evaluation of the exact Hartree-Fock exchange matrix.  
+The Hartree-Fock approximation is often a fast, first approximation and also a starting point 
+for correlated "wavefunction" methods.  The HF/DFT level of theory is also an important next 
+in step in accuracy beyond the pure Generalized Gradient Approximation, which can often correctly 
+describe  weak bonding \cite{}, deliver accurate band gaps \cite{} and treat the self-interaction 
+energy of surfaces \cite{} {\bf( Should add to this list )}.  
+
+To date, condensed phase HF and HF/DFT calculations have been carried out almost 
+exclusively with the {\em ab initio} solid state program {\sc Crystal98} \cite{} (and
+more recently {\sc Crystal03}), which employs conventional (non-direct) ${\cal O}(N^4)$ 
+algorithms for evaluation of the HF exchange matrix.  The {\sc Crystal} programs employ the
+formally (and numerically) correct $\bf k$-space integration algorithms that generate 
+wavefunctions inclusive of the necessary translational symmetries.   In the so-called $\Gamma$-point
+approximation, these symmetries are omitted, but may be regained in the limit of a large
+super-cell, or in the case of a disordered medium, simply a large cell.  With a more
+tractable formulation and asymptotic correctness in the limit of large systems, the
+$\Gamma$-point approximation represents an ideal basis for linear scaling exchange 
+algorithms.  However, preliminary studies of the naive HF $\Gamma$-point were found (by us)
+to converge to position dependent values different from the $\bf k$-space integration 
+limit.  
+
+In this paper we develop a translationally invariant definition of periodic Hartree-Fock exchange 
+in the $\Gamma$-point limit.  This is accomplished through introducing a Minimum Image Convention
+into the two-electron integral algorithm, similar to the approach employed in molecular dynamics when 
+truncating short range potentials \cite{}.  We then go on to describe a modified {\sc ONX} 
+algorithm \cite{} that achieves true linear scaling with the MIC $\Gamma$-point approximation, and 
+numerical equivalence with the $\bf k$-space value in the limit of large super-cells.
+
+%Many calculations of the electronic structure of condensed matter systems now make use
+%of the exact exchange interaction 
+%\cite{CPisani80,REvarestov83,MCausa88,JAlmlof94,RDovesi00}. 
+%Whereas this has been a very
+%important functional in the quantum chemistry community 
+%\cite{PLowdin55,py,ASzabo89}, 
+%until the advent of the hybrid functionals 
+%\cite{Gill92,Becke93,ABecke96,Adamo99}, 
+%this functional has had very little impact on the
+%condensed matter electronic structure community. Now because of the accuracy obtainable with
+%the hybrid functionals, it has become very desirable to include exact exchange into
+%existing condensed matter electronic structure algorithms. 
+%However, most of these calculations make use of ${\bf k}$-space integrations to 
+%deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal situation 
+%for linear scaling algorithms, where we would like to remove the need for doing
+%${\bf k}$-space integrations altogether by increasing the system size. 
+%However, when Gamma point only is attempted for exact exchange, a 
+%significant problem arises. For the Gamma point, in the limit of large system size,
+%we do not recover the ${\bf k}$-space energy per particle number; we do not have the correct
+%limit as particle number increases.  
 %
-
-In the proceeding sections we will first briefly review the Hartree
-Foch equations of motion. Next, we will illuminate the problem that exist
-for the calculation of the exchange matrix in the limit of the Gamma point for
-periodic systems. We then give a solution to this problem, and then we verify that
-the exchange matrix is correct in the limit of large systems as compared to a large 
-${\bf k}$-space calculation done with {\bf Crystal98}. 
-And finally, we verify that the exchange matrix build is indeed linear scaling
-for the dense diamond system.
-
-\section{The Hartree Fock Equations}
-Within the Hatree fock approcimation we define the total energy as \cite{CPisani80,RDovesi00}
-\begin{equation}
-E = Tr[{\bf P} \, {\bf F}]+ E_{nn}
-\label{HFEnergy}
-\end{equation}
-where the Fockian is defined as,
-\begin{equation}
-{\bf F} = 2 {\bf T}+2 {\bf V}_{en}+{\bf J}_{ee}+{\bf K}_x
-\label{Fockian}
-\end{equation}
-
-\begin{eqnarray}
-{\bf T}      & : & \,{\rm kinectic \, energy \, matrix} \nonumber \\
-{\bf V}_{en} & : & \,{\rm electron-nuclear \, coulomb \, matrix} \nonumber \\
-{\bf J}_{ee} & : & \,{\rm electron-electron \, coulomb \, matrix} \nonumber \\
-{\bf K}_{x}  & : & \,{\rm exchange \, matrix} \nonumber \\
-{E}_{nn}  & : & \,{\rm nuclear-nuclear \, repulsion \, energy} \nonumber \\ 
-\label{Defin}
-\end{eqnarray}
-We solve for the density matrix, ${\bf P}$, via the eigen-equation 
-\begin{equation}
-{\bf F} {\bf P} = \epsilon {\bf P}
-\label{DenMat}
-\end{equation}
-and iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
+%In the proceeding sections we will first briefly review the Hartree
+%Foch equations of motion. Next, we will illuminate the problem that exist
+%for the calculation of the exchange matrix in the limit of the Gamma point for
+%periodic systems. We then give a solution to this problem, and then we verify that
+%the exchange matrix is correct in the limit of large systems as compared to a large 
+%${\bf k}$-space calculation done with {\bf Crystal98}. 
+%And finally, we verify that the exchange matrix build is indeed linear scaling
+%for the dense diamond system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Periodic exact exchange}
@@ -186,13 +191,8 @@ satisfy the imposed geometric constraints.  Radial cutoffs are also used to achi
 $N$-scaling of the exchange matrix in gas phase calculations by limiting the allowed range 
 of atom centers $\bf C$ and $\bf D$ corresponding to matrix elements $P_{cd}$\cite{}.  
 
-\pagebreak
-These schemes have been implemented in the
-{\em ab initio} program CRYSTAL \cite{}, allowing the routine calculation of periodic systems
-with the HF and HF/DFT model chemistries.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
@@ -217,8 +217,12 @@ K_{ab}=
 
 However, in this approximation the exact exchange potential, symmetric in the limit of infinite 
 summation, has been asymmetrically truncated, resulting in a potential that depends on position 
-of the unit cell.  Translational invariance can be restored to the exchange $\Gamma$-point approximation 
-by imposing the minimum image criterion (MIC) to the exchange interaction:
+of the unit cell.  This translational variance has a well understood analogue in classical molecular 
+dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
+artifacts in energies and forces.  In both cases, translational invariance is restored by 
+introducing the minimum image convention (MIC), which ensures that the distance between neighboring 
+images is always used in computing interactions. In computation of the Hartree-Fock exchange matrix, 
+the MIC $\Gamma$-point approximation is just
 \begin{equation}
 K_{ab}=
 \sum _{{\bf u v} c d} P_{cd}
@@ -228,72 +232,91 @@ K_{ab}=
 {\big | }
       \phi        _b    
       \phi^{\bf v}_d  
-\right)_{\rm  MIC}.
+\right)_{\rm  MIC},
 \label{MIC}
 \end{equation}
-This criterion is applied at the contraction phase, ensuring that primitive charge distributions 
+where the MIC condition is applied in computation of the two electron integrals
+at the contraction phase, ensuring that primitive charge distributions 
 interact consistently over a minimum distance.  In particular, if the primitive basis 
 function product $\phi_a \phi^{\bf u}_c$ is centered at $\bf P$ and the primitive product 
-$\phi_b \phi^{\bf v}_d$ is at $\bf Q$, then the minimum image criterion is 
-applied simply to the interaction vector ${\bf PQ} = {\bf P}-{\bf Q}$ using
-\begin{description}
-\item{}{\hskip 0.1 in ${\bf pq} = {\bf \underline M}^{-1} \, {\bf PQ}$}
-\item{}{\hskip 0.2 in If[${\rm pq}_i > 1$] then ${\rm pq}_i = {\rm pq}_i - 1$  }
-\item{}{\hskip 0.2 in If[${\rm pq}_i < 0$] then ${\rm pq}_i = {\rm pq}_i + 1$  }
-\item{}{\hskip 0.1 in ${\bf PQ}_{\rm MIC} = {\bf \underline M} \, {\bf pq}$}
-\end{description}
-
-
-where ${\bf \underline M}$ is the box shape matrix of the unit cell.
+$\phi_b \phi^{\bf v}_d$ is at $\bf Q$, then the minimum image convention is 
+applied to the interaction vector ${\bf PQ} \equiv {\bf P}-{\bf Q}$ using
+\begin{subequations}
+\begin{eqnarray}
+{\bf pq}&=&{\bf M}^{-1} \cdot {\bf PQ} \\
+pq_i & =& pq_i - {\tt ANINT} \left( pq_i \right) \\
+{\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
+\end{eqnarray}
+\end{subequations}
+where ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell 
+\begin{equation}
+{\bf M} = ?
+\end{equation}
+{\bf Need to define the
+box shape matrix and give reference to standard definitions}.
 This approach is completely general, and can be used at the primitive level with any modern approach
 to computing two-electron integrals. 
 
 Surprisingly, this work is the first to correctly define the exact Hartree-Fock 
 exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
-$\bf k$-space sampling, and may benefit from employing the minimum image criterion. 
+$\bf k$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Implementation}\label{implementation}
 
 A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implemented in the MondoSCF
-suite of programs for linear scaling programs quantum chemistry.  The program {\sc ONX} \cite{} has been 
-modified by straightforwardly performing double loops over the lattice vectors $\bf v$ and $\bf u$
-around the original ONX loop structures \cite{}.  Thus, two ordered bra and ket distribution buffers are 
-assembled for each lattice vector pair.   Also the symmetry driven Head-Gordon Pople scheme for 
-computing two-electron integrals, innermost to the ONX loops, has been modified to include the 
-minimum image criterion in the contraction stage of the vertical recurrence relations.  While this 
-implementation is linear scaling and simple, it suffers from a number of drawbacks that we will set 
-forth in detail shortly, together with a more efficient algorithm able to achieve scalable parallelism \cite{}.
+suite of programs for linear scaling quantum chemistry.  A detailed account of these developments for 
+pure Density Functional Theory has been given in a companion paper \cite{}, including the periodic 
+development of the Quantum Chemical Tree Code ({\sc QCTC}) for performing $N$-scaling Coulomb summation.  
+
+The Order N eXchange ({\sc ONX}) algorithm \cite{} for computing the gas phase exchange matrix 
+has been modified by placing dual loops running over the lattice vectors 
+$\bf v$ and $\bf u$ around the original ONX loop structures.  Two ordered bra and ket distribution 
+buffers are assembled for each lattice vector pair, which are then used to drive the original {\sc ONX} algorithm.
+The Minimum Image Convention has been introduced into the primitive contraction stage, in the 
+Vertical Recurrence Relations component of a symmetry driven Head-Gordon Pople \cite{} scheme for 
+computing two-electron integrals.  While this implementation is linear scaling and simple, it suffers 
+from a number of drawbacks that we will set forth in detail shortly, together with a more efficient 
+algorithm able to achieve scalable parallelism \cite{}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Validation}
 
 Periodic Hartree-Fock calculations were carried out using the periodic {\sc ONX} and {\sc QCTC}
-programs from the {\sc MondoSCF} suite of linear scaling quantum chemistry programs.  {\sc ONX} was 
-described in Sections \ref{gammapoint} and \ref{implementation}, while periodic {\sc QCTC} has 
-been introduced in companion paper Ref.~\cite{CTymczak04a}.   Comparison to the 
-Gaussian basis set periodic {\em ab initio} program {\sc Crystal98}.  Differences between the
-two programs are like to arise from several factors.  First, {\sc Crystal98} uses an auxiliary
-fitting basis, while {\sc MondoSCF} does not.  Second, {\sc MondoSCF} uses several numerical 
-thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can change 
+programs from the {\sc MondoSCF} suite of linear scaling quantum chemistry programs.  The basic 
+{\sc ONX} algorithm was described in \onlinecite{}, and its extension to periodic boundary conditions
+outlined in Sections \ref{gammapoint} and \ref{implementation}.  The basic {\sc QCTC} method
+was described in Ref.~\onlinecite{} and its extension to the condensed phase described in 
+Ref.~\onlinecite{CTymczak04a}.   The linear scaling, Quartic Trace-ReSetting ({\sc TRS4}) density 
+matrix solver has been used throughout, together with inverse congruence transformations provided
+by sparse approximate {\sc AINV} \cite{}.  
+
+Comparison is made to the Gaussian orbital periodic {\em ab initio} program {\sc Crystal98}, using
+primarily basis sets designed for the condensed phase.  See Ref.~\onlinecite{MTowlerLib} and references 
+therein for details on these basis sets. 
+
+
+Differences between the two programs are likely to arise from several factors.  First, {\sc Crystal98}
+ uses an auxiliary fitting basis, while {\sc MondoSCF} does not.  Second, {\sc MondoSCF} uses several 
+numerical thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can change 
 the energy slightly.   In particular, a quadratic, variational dependence of the total energy
-on the  matrix truncation threshold has recently been demonstrated \cite{ANiklasson03}.  Finally, 
-small super-cell calculations will typically be higher than the $\bf k$-space integration limit.
-See Ref.~\cite{MTowlerLib} and references therein for details on these basis sets. 
+on the  matrix truncation threshold has recently been demonstrated for the {\sc TRS4} algorithm 
+\cite{ANiklasson03}.  Finally, small super-cell calculations will typically be higher than the 
+$\bf k$-space integration limit.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{table}[h]
-\caption{Comparative progression of Hartree-Fock $\Gamma$-point super-cell calculations 
+\caption{Progression of Hartree-Fock $\Gamma$-point super-cell calculations 
 for MgO using the periodic RHF-MIC and RHF 8-511G/8-51G level of theory.  Comparison is 
 made to a final value approaching the $\bf k$-space integration limit for the primitive cell.}
 \label{MgOTable}
@@ -334,7 +357,7 @@ difference between the RHF-MIC and RHF $\Gamma$-point values for small primitive
 the periodic RHF-MIC approximation is convergent 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 In Table~\ref{PIceTable}, total energies computed with the RHF-MIC $\Gamma$-point
@@ -369,7 +392,7 @@ $^b 6\times6\times6$ $\bf k$-space integration grid \\
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Figure~\ref{DiamondLattice} compares the uniform diamond lattice potential computed 
@@ -384,6 +407,10 @@ with the most diffuse $sp$ exponent increased to 0.4, bringing the condition num
 of the overlap matrix into an acceptable range.  The computed lattice constants 
 for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
 the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
+{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesei80b} 
+is $3.59$\AA, while Euwema \cite{REuwema73} found a HF lattice constant of 3.54 using 13 
+Gaussian basis functions per atom.  This should be compared to the experimental value of $3.57$\AA.
+Thus, we are off by $0.15$\AA. }
 
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{Diamond_En_vs_a.ps}}
@@ -397,7 +424,7 @@ using a two atom unit cell and $12 \times 12 \times 12~{\bf k}$-space integratio
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}
@@ -419,13 +446,13 @@ a relative accuracy of 8 digits. The potential minimum for the {\sc Crystal98} c
 and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Scaling}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h]
@@ -452,7 +479,7 @@ calculations involving 800 atoms were just under the 4Gb available, it was impor
 demonstrate an early onset of linear scaling.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h]
@@ -474,7 +501,7 @@ is observed at about 50 water molecules, which is similar to the onset achieved 
 phase \cite{ANiklasson03}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{DISCUSSION}
@@ -502,26 +529,29 @@ For less dense systems such as ice, the periodic {\sc MondoSCF} algorithms handi
 achieve an early onset of linear scaling using {\it tight} thresholding.  With parallelism,
 this opens the prospect of performing hybrid HF/DFT simulations of fluids. 
 
-It is also important that we have demonstrated convergence of our $\Gamma$-point
-super-cell calculations with the well established {\bf k}-space integration methods
-in {\sc Crystal98} to within 8 digits.  We have not carried out calculations involving 
-{\it d}-functions, because the use of fitting functions in {\sc Crystal98} makes a 
-direct comparison more difficult.  We note important differences between the 
+Convergence of the MIC $\Gamma$-point super-cell calculations to values obtained with 
+the well established {\bf k}-space integration methods in {\sc Crystal98} have been 
+demonstrated to 8 digits.  We have not carried out calculations involving 
+{\it d}-functions, because the use of fitting functions in {\sc Crystal98} makes
+comparison to this level difficult.  We note important differences between the 
 conventional truncation criteria employed in the {\sc Crystal98} $\Gamma$-point
 approximation and the Hartree-Fock Minimum Image Condition developed in Section 
 \ref{gammapoint}.  These differences diminish with increasing cell size and larger 
 {\bf k}-space integration grids, following a surface to volume relationship 
-as might be expected.  Nevertheless, achieving high order translational invariance 
+as might be expected. {\bf OK HERE IS A HOLE IN OUR STORY.  OUR VALUES WITHOUT MIC
+NEVER CONVERGED TO THE RIGHT NUMBER, BUT THE CRYSTAL VALUES DO?!!  WHY?  ARE WE
+SURE THE NON-MIC VALUES REALLY CONVERGE TO THE WRONG NUMBER??}
+Nevertheless, achieving high order translational invariance 
 with the $\Gamma$-point approximation is likely to be important in {\em ab initio} 
 molecular dynamics simulations employing the HF or HF/DFT model chemistries.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{CONCLUSIONS}
 
-A new translationaly invariant definition of the periodic Hartree-Fock 
+A new translationally invariant definition of the periodic Hartree-Fock 
 $\Gamma$-point approximation has been introduced, based on inserting 
 the Minimum Image Condition (MIC) into the contraction phase of periodically
 summed two-electron integral algorithms.  This HF-MIC approach has been used 
@@ -539,9 +569,8 @@ We believe this work is the first proper definition of the $\Gamma$-point
 Hartree-Fock potential, as well as the first demonstration of linear scaling
 for periodic Hartree-Fock calculations.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{ACKNOWLEDGMENTS}
@@ -551,14 +580,14 @@ and support. We would also like to thank Anders Niklasson for his help
 in preparation of this manuscript. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \bibliographystyle{apsrmp} 
 \bibliography{mondo_new} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix
@@ -649,7 +678,7 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newpage
+%\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Threshold Definitions}\label{Thresholds}
