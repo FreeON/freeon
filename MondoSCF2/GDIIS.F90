@@ -25,7 +25,7 @@ CONTAINS
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(GeomOpt)               :: GOpt
      INTEGER                     :: iCLONE,InitGDIIS,iGEO,ICount
-     LOGICAL                     :: Print
+     INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
      INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc
      INTEGER                     :: IGeom,HDFFileID,IStart
@@ -105,9 +105,9 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(DBL_RNK2)              :: XYZRot
      INTEGER                     :: NatmsLoc,NCart,NIntC,GDIISMemory
-     INTEGER                     :: I,J,ThreeAt(1:3)
+     INTEGER                     :: I,J,ThreeAt(1:3),Print
      TYPE(BMatr)                 :: B3
-     LOGICAL                     :: Linearity,Print
+     LOGICAL                     :: Linearity
      REAL(DOUBLE)                :: LinCrit
      TYPE(DBL_RNK2)              :: DelocDispl
      TYPE(DBL_RNK2)              :: DelocSR,DelocRef
@@ -315,7 +315,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: RefGrad,RefStruct
      TYPE(DBL_VECT)              :: Vect,Coeffs
      REAL(DOUBLE)                :: Sum
-     LOGICAL                     :: Print
+     INTEGER                     :: Print
      !
      NCart=SIZE(XYZ,2)
      DimGDIIS=SIZE(RefStruct%D,1)
@@ -326,13 +326,13 @@ CONTAINS
      CALL New(Coeffs,GDIISMemory)
      !
      IF(CtrlConstr%NConstr/=0) THEN
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,200) 
          WRITE(Out,200) 
        ENDIF
        CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
      ELSE
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,300) 
          WRITE(Out,300) 
        ENDIF
@@ -358,7 +358,7 @@ CONTAINS
      RefStruct,RefGrad,SRStruct,SRDispl)
      !
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     LOGICAL                     :: Print
+     INTEGER                     :: Print
      TYPE(BackTrf)               :: GBackTrf
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl
@@ -376,7 +376,7 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(INT_VECT)              :: Actives
      !
-     IF(Print) THEN
+     IF(Print>=DEBUG_GEOP_MIN) THEN
        WRITE(*,200) 
        WRITE(Out,200) 
      ENDIF
@@ -551,7 +551,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,PrISR
      REAL(DOUBLE),DIMENSION(:)   :: Coeffs
      TYPE(INTC)                  :: IntCs
-     LOGICAL                     :: Print
+     INTEGER                     :: Print
      TYPE(BackTrf)               :: GBackTrf
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl
@@ -561,7 +561,7 @@ CONTAINS
      INTEGER                     :: I,NIntC,GDIISMemory
      TYPE(INT_VECT)              :: Actives
      !
-     IF(Print) THEN
+     IF(Print>=DEBUG_GEOP_MIN) THEN
        WRITE(*,200) 
        WRITE(Out,200) 
      ENDIF
@@ -582,7 +582,7 @@ CONTAINS
      DO I=1,NIntC
        IF(Actives%I(I)==0) Vect%D(I)=PrISR(I,GDIISMemory)
      ENDDO
-     IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
+     IF(Print>=DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
      !
      CALL InternalToCart(XYZ,IntCs,Vect%D, &
        Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)

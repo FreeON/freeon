@@ -548,7 +548,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: IntOld,Displ
      INTEGER                     :: Refresh
      CHARACTER(LEN=*)            :: SCRPath
-     LOGICAL                     :: Print
+     INTEGER                     :: Print
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -571,7 +571,7 @@ CONTAINS
      !
      ! Print current geometry for debugging
      !
-     IF(Print) CALL PrtIntCoords(IntCs, &
+     IF(Print==DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs, &
        IntCs%Value,'Internals at step #'//TRIM(IntToChar(iGEO)))
      !
      ! Calculate simple relaxation (SR) step from an inverse Hessian
@@ -617,8 +617,8 @@ CONTAINS
      TYPE(DBL_VECT)                 :: IntGrad,Grad,CartGrad
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,NDim,IMaxGrad
-     INTEGER                        :: NatmsLoc,NCart,NIntC
-     LOGICAL                        :: DoInternals,Print
+     INTEGER                        :: NatmsLoc,NCart,NIntC,Print
+     LOGICAL                        :: DoInternals
      CHARACTER(LEN=*)               :: SCRPath 
      !
      NatmsLoc=SIZE(XYZ,2)
@@ -715,7 +715,7 @@ CONTAINS
 !
    SUBROUTINE NewStructure(Print,GBackTrf,GTrfCtrl,GCoordCtrl, &
      GConstr,SCRPath,XYZ,Displ,IntCs)
-     LOGICAL                        :: Print
+     INTEGER                        :: Print
      TYPE(BackTrf)                  :: GBackTrf
      TYPE(TrfCtrl)                  :: GTrfCtrl
      TYPE(CoordCtrl)                :: GCoordCtrl
@@ -1205,13 +1205,14 @@ CONTAINS
      INTEGER,DIMENSION(:) :: Convgd
      INTEGER              :: iGEO,iCLONE
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
-     LOGICAL              :: NoGDIIS,GDIISOn,Print
+     INTEGER              :: Print
+     LOGICAL              :: NoGDIIS,GDIISOn
      CHARACTER(LEN=DCL)   :: SCRPath
      TYPE(DBL_RNK2)       :: XYZNew
      !
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
-     Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
+     Print    =Opts%PFlags%GeOp
      GMLoc%Displ%D=GMLoc%AbCarts%D
      !
      !--------------------------------------------
@@ -1228,10 +1229,10 @@ CONTAINS
    SUBROUTINE SetHessian(Hess)
      TYPE(Hessian) :: Hess
      Hess%Stre = 0.50D0   
-     Hess%Bend = 0.30D0
-     Hess%LinB = 0.30D0
-     Hess%OutP = 0.25D0 
-     Hess%Tors = 0.25D0 
+     Hess%Bend = 0.20D0
+     Hess%LinB = 0.20D0
+     Hess%OutP = 0.10D0 
+     Hess%Tors = 0.10D0 
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
@@ -1355,7 +1356,7 @@ CONTAINS
      INTEGER              :: NConstr,NatmsLoc,NCart,iCLONE
      CHARACTER(LEN=DCL)   :: SCRPath
      INTEGER,DIMENSION(:) :: Convgd
-     LOGICAL              :: Print
+     INTEGER              :: Print
      !
      InitGDIIS=GOpt%GDIIS%Init
      NoGDIIS  =GOpt%GDIIS%NoGDIIS
@@ -1365,7 +1366,7 @@ CONTAINS
      NCart    =3*NatmsLoc
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
-     Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
+     Print    =Opts%PFlags%GeOp
      !
      IF(Convgd(iCLONE)/=1) THEN
        CALL OPENAscii(OutFile,Out)
@@ -1373,11 +1374,11 @@ CONTAINS
          CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
            iGEO,Print,SCRPath,InitGDIIS)
        ELSE
-         IF(Print) THEN
+         IF(Print>=DEBUG_GEOP_MIN) THEN
            WRITE(*,200)
            WRITE(Out,200)
          ENDIF
-         200 FORMAT('No Geometric DIIS is beeing done in this step.')
+         200 FORMAT('No Geometric DIIS is being done in this step.')
        ENDIF
        CLOSE(Out,STATUS='KEEP')
      ENDIF

@@ -99,7 +99,7 @@ CONTAINS
 !
    SUBROUTINE Topology_13(NatmsLoc,Top12,Top13,Tag)
      ! Set up a table which shows the atom numbers of Atoms 
-     ! beeing second neighbours of a certain atom.
+     ! being second neighbours of a certain atom.
      !
      IMPLICIT NONE
      TYPE(INT_RNK2)  :: Top12
@@ -164,7 +164,7 @@ CONTAINS
 !
    SUBROUTINE Topology_14(NatmsLoc,Top12,Top14,Tag)
      ! Set up a table which shows the atom numbers of Atoms 
-     ! beeing second neighbours of a certain atom.
+     ! being second neighbours of a certain atom.
      !
      IMPLICIT NONE
      TYPE(INT_RNK2)         :: Top12
@@ -1258,7 +1258,7 @@ CONTAINS
 !
    SUBROUTINE AngleList(NatmsLoc,Top12,NAngle,AngleIJK)
      ! Set up a table which shows the atom numbers of Atoms 
-     ! beeing second neighbours of a certain atom.
+     ! being second neighbours of a certain atom.
      !
      IMPLICIT NONE
      TYPE(INT_RNK2)          :: Top12
@@ -1295,7 +1295,7 @@ CONTAINS
    SUBROUTINE TorsionList(NatmsLoc,Top12,NTorsion,TorsionIJKL)
      !
      ! Set up a table which shows the atom numbers of Atoms 
-     ! beeing second neighbours of a certain atom.
+     ! being second neighbours of a certain atom.
      !
      IMPLICIT NONE
      TYPE(INT_RNK2):: Top12
@@ -1775,8 +1775,8 @@ CONTAINS
            XYZ(1:3,I4),LinCrit,IntCs%Value(I),IntCs%Active(I))
          !
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
-         CALL TORSValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),&
-           XYZ(1:3,I4),LinCrit,IntCs%Value(I),IntCs%Active(I))
+         CALL OUTPValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I4),&
+           XYZ(1:3,I3),LinCrit,IntCs%Value(I),IntCs%Active(I))
          !
        ELSE IF(IntCs%Def(I)(1:5)=='CARTX') THEN
          IntCs%Value(I)=XYZ(1,I1)
@@ -1851,6 +1851,22 @@ CONTAINS
      ENDIF
      !
    END SUBROUTINE BENDValue
+!
+!-------------------------------------------------------------
+!
+   SUBROUTINE OUTPValue(XIin,XJin,XKin,XLin,LinCrit,VOutP,Active)
+     REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
+     REAL(DOUBLE)                :: LinCrit,VOutP,Sum
+     LOGICAL                     :: Active
+     !
+     CALL TORSValue(XIin,XJin,XKin,XLin,LinCrit,VOutP,Active)
+     !
+     IF(VOutP>Zero) THEN
+       VOutP=PI-VOutP
+     ELSE
+       VOutP=-(PI+VOutP)
+     ENDIF
+   END SUBROUTINE OUTPValue
 !
 !-------------------------------------------------------------
 !
@@ -2049,7 +2065,7 @@ CONTAINS
      DO I=1,NIntC
        SUM=VectAux(I)
        IF(IntCs%Def(I)(1:4)=='BEND'.OR. &
-          IntCs%Def(I)(1:4)=='LINB') THEN
+          IntCs%Def(I)(1:4)=='LINB') THEN 
          J=INT(SUM/TwoPI)
          SUM=SUM-J*TwoPi
          IF(SUM<Zero) SUM=TwoPi+SUM
@@ -2318,11 +2334,11 @@ CONTAINS
      REAL(DOUBLE)    :: DiffMax,RMSD
      REAL(DOUBLE)    :: GrdTrfCrit,MaxGradDiff,Sum
      INTEGER         :: NCart,I,II,J,NIntC
-     INTEGER         :: MaxIt_GrdTrf,NatmsLoc
+     INTEGER         :: MaxIt_GrdTrf,NatmsLoc,Print
      TYPE(INTC)      :: IntCs
      TYPE(Cholesky)  :: CholData
      TYPE(BMATR)     :: B
-     LOGICAL         :: Print,DoClssTrf
+     LOGICAL         :: DoClssTrf
      REAL(DOUBLE)    :: LinCrit
      INTEGER         :: ThreeAt(1:3)
      TYPE(GrdTrf)    :: TrfGrd
@@ -2354,7 +2370,7 @@ CONTAINS
      !
      VectInt=Zero
      !
-     IF(Print) THEN
+     IF(Print>=DEBUG_GEOP_MIN) THEN
        WRITE(*,111) NIntC 
        WRITE(Out,111) NIntC
      111 FORMAT('Gradient transformation, No. Int. Coords= ',I7)
@@ -2403,7 +2419,7 @@ CONTAINS
        ! of the preconditioner, rescale gradients
        !
        IF(DiffMax>MaxGradDiff) THEN
-         IF(Print) THEN
+         IF(Print>=DEBUG_GEOP_MIN) THEN
            WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
            WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
          ENDIF
@@ -2418,7 +2434,7 @@ CONTAINS
        !
        ! Review iteration
        !
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,110) II,DiffMax,RMSD
          WRITE(Out,110) II,DiffMax,RMSD
        ENDIF
@@ -2429,7 +2445,7 @@ CONTAINS
      ENDDO
      !
      IF(II>=MaxIt_GrdTrf) THEN
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,777) 
          WRITE(*,778) 
          WRITE(Out,777) 
@@ -2439,7 +2455,7 @@ CONTAINS
          778 FORMAT('Use current gradient vector!')
        ENDIF
      ELSE
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,120) II
          WRITE(Out,120) II
        ENDIF
@@ -2481,16 +2497,16 @@ CONTAINS
      TYPE(INTC)                :: IntCs
      TYPE(BMATR)               :: B
      LOGICAL                   :: RefreshB,RefreshAct
-     LOGICAL                   :: DoIterate
+     LOGICAL                   :: DoIterate,Print2
      TYPE(Cholesky)            :: CholData
      TYPE(BackTrf)             :: CtrlBackTrf
      TYPE(Constr)              :: CtrlConstr
      TYPE(TrfCtrl)             :: CtrlTrf
      TYPE(CoordCtrl)           :: CtrlCoord
      CHARACTER(LEN=*)          :: SCRPath
-     LOGICAL                   :: Print,DoClssTrf
+     LOGICAL                   :: DoClssTrf
      REAL(DOUBLE)              :: LinCrit
-     INTEGER                   :: ThreeAt(1:3)
+     INTEGER                   :: ThreeAt(1:3),Print
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
@@ -2512,6 +2528,7 @@ CONTAINS
      DoClssTrf    = CtrlTrf%DoClssTrf
      ThreeAt      = CtrlTrf%ThreeAt
      LinCrit      = CtrlCoord%LinCrit
+     Print2       = Print>=DEBUG_GEOP_MAX
      !
      ! Refresh B matrix during iterative back-trf?
      !
@@ -2551,7 +2568,7 @@ CONTAINS
      !
      ! Internal --> Cartesian transformation
      !
-     IF(Print) THEN
+     IF(Print>=DEBUG_GEOP_MIN) THEN
        WRITE(*,*) 'Iterative back-transformation,'//&
                   'No. Int. Coords= ',NIntC
        WRITE(Out,*) 'Iterative back-transformation,'//&
@@ -2606,9 +2623,9 @@ CONTAINS
        ! or when sparse, approximate GcInv is available only.
        !
        IF(CtrlTrf%DoTranslOff) &
-         CALL TranslsOff(VectCartAux2%D,Print)
+         CALL TranslsOff(VectCartAux2%D,Print2)
        IF(CtrlTrf%DoRotOff) &
-         CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print)
+         CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
        !
        ! Check convergence
        !
@@ -2631,7 +2648,7 @@ CONTAINS
        !
        ! Review iteration
        !
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,210) IStep,DiffMax,RMSD
          WRITE(Out,210) IStep,DiffMax,RMSD
        ENDIF
@@ -2653,14 +2670,14 @@ CONTAINS
        IF(RMSD>0.01D0) THEN
          CALL Halt('Iterative backtransformation did not converge')
        ENDIF
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,180) 
          WRITE(Out,180) 
          WRITE(*,190) 
          WRITE(Out,190) 
        ENDIF
      ELSE
-       IF(Print) THEN
+       IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,220) IStep
          WRITE(Out,220) IStep
        ENDIF
@@ -3566,20 +3583,21 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER        :: NatmsLoc,NCart,NIntC
      TYPE(BMATR)    :: B
-     INTEGER        :: ThreeAt(1:3)
-     LOGICAL        :: DoClssTrf,Print
+     INTEGER        :: ThreeAt(1:3),Print
+     LOGICAL        :: DoClssTrf,Print2
      REAL(DOUBLE)   :: LinCrit
      CHARACTER(LEN=*):: SCRPath
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def)
+     Print2=(Print>=DEBUG_GEOP_MAX)
      !
      ! Calculate B matrix in Atomic Units, 
      ! and compute Cholesky factor.
      !
      CALL BMatrix(XYZ,NIntC,IntCs,B,LinCrit,DoClssTrf,ThreeAt)
-     CALL CholFact(B,NCart,CholData,DoClssTrf,Print,ThreeAt)
+     CALL CholFact(B,NCart,CholData,DoClssTrf,Print2,ThreeAt)
      !
      CALL PutBMatInfo(SCRPath,B,CholData)
    END SUBROUTINE RefreshBMatInfo
@@ -4167,7 +4185,7 @@ CONTAINS
      TYPE(Cholesky)            :: CholData
      INTEGER                   :: NIntC,NCart
      TYPE(DBL_VECT)            :: Vect1,Vect2,Displ2
-     LOGICAL                   :: Print
+     INTEGER                   :: Print
      CHARACTER(LEN=*)          :: SCRPath
      !
      CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
@@ -4185,7 +4203,7 @@ CONTAINS
      !
      Perc=DOT_PRODUCT(Displ,Displ2%D)/DOT_PRODUCT(Displ2%D,Displ2%D) 
      Perc=(One-ABS(Perc))*100.D0
-     IF(Print) THEN
+     IF(Print>=DEBUG_GEOP_MAX) THEN
        WRITE(*,100) Perc
        WRITE(Out,100) Perc
      ENDIF
