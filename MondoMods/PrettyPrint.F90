@@ -1526,6 +1526,8 @@ MODULE PrettyPrint
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 #ifdef PARALLEL
     INTEGER :: MaxAllocs,MaxDeAllocs,IErr,MaxMemTab,MaxMaxMem
+    ! This is way to much info in parallel!!
+    RETURN
 #endif
 
     IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
