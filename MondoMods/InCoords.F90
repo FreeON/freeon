@@ -2041,11 +2041,13 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 !
 ! Save values of constraints into HDF
 !
-      CALL New(AuxVect,NIntC)
+      IF(NIntC/=0) THEN
+        CALL New(AuxVect,NIntC)
         AuxVect%D=IntCs%Value
         CALL Put(Current(3),'LastIntcGeom')
         CALL Put(AuxVect,'Constraints'//TRIM(CurGeom))
-      CALL Delete(AuxVect)
+        CALL Delete(AuxVect)
+      ENDIF
 !
 ! Count number of different internal coord types
 !
@@ -3165,10 +3167,17 @@ selection%i=1
 !
 ! First, calculate maximum Cartesian extension of the elementary cell
 !
-     DX=MAX(GMLoc%PBC%BoxShape(1,1),GMLoc%PBC%BoxShape(2,1),GMLoc%PBC%BoxShape(3,1))
-     DY=MAX(GMLoc%PBC%BoxShape(1,2),GMLoc%PBC%BoxShape(2,2),GMLoc%PBC%BoxShape(3,2))
-     DZ=MAX(GMLoc%PBC%BoxShape(1,3),GMLoc%PBC%BoxShape(2,3),GMLoc%PBC%BoxShape(3,3))
-     MaxCart=MAX(DX,DY,DZ) 
+     DX=GMLoc%PBC%BoxShape(1,1)
+     DY=GMLoc%PBC%BoxShape(1,2)
+     DZ=GMLoc%PBC%BoxShape(1,3)
+     DO I=2,3
+       DX=MAX(DX,GMLoc%PBC%BoxShape(I,1))
+       DY=MAX(DY,GMLoc%PBC%BoxShape(I,2))
+       DZ=MAX(DZ,GMLoc%PBC%BoxShape(I,3))
+     ENDDO
+     MaxCart=DX
+     MaxCart=MAX(MaxCart,DY) 
+     MaxCart=MAX(MaxCart,DZ) 
 !
      IF(LJCutOff<DX) THEN
        NX=1
@@ -4413,9 +4422,11 @@ END SUBROUTINE ChkBendToLinB
 !
 ! Get values of constraints from HDF
 !
-        CALL New(Constraints,NIntC)
-        CALL Get(LastIntcGeom,'LastIntcGeom')
-        CALL Get(Constraints,'Constraints'//TRIM(IntToChar(LastIntcGeom)))
+        IF(NIntC/=0) THEN
+          CALL New(Constraints,NIntC)
+          CALL Get(LastIntcGeom,'LastIntcGeom')
+          CALL Get(Constraints,'Constraints'//TRIM(IntToChar(LastIntcGeom)))
+        ENDIF
 !
         IF(DoInternals) THEN
           CALL INTCValue(IntCs,XYZ)
