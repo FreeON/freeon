@@ -831,6 +831,7 @@ MODULE DrvFrcs
 #endif
   END SUBROUTINE CALC_GRAD_NO_GRAD
 !-------------------------------------------------------------
+#ifdef MMech !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! _NEW series begins
   SUBROUTINE CALC_GRAD_ONE_FORCE_NEW(Ctrl)
     IMPLICIT NONE
     TYPE(SCFControls)     :: Ctrl
@@ -1003,6 +1004,7 @@ MODULE DrvFrcs
 #endif
 !
   END SUBROUTINE CALC_GRAD_NO_GRAD_NEW
+#endif  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!end of _NEW series
 !
 !-------------------------------------------------------------
 #ifdef MMech
