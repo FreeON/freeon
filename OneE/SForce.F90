@@ -133,15 +133,9 @@ PROGRAM SForce
         ENDIF
      ENDDO
   ENDDO
-!
-! Print The Lattice Forces
-!
-!!$  WRITE(*,*) 'LatFrc_S'
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
-!!$  ENDDO
 !--------------------------------------------------------------------------------
-#ifdef PARALLEL   
+#ifdef PARALLEL  
+! Collect the Forces
   TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
   CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
@@ -149,16 +143,7 @@ PROGRAM SForce
     SFrc%D(1:TotFrcComp) = TotSFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotSFrc)
-#endif
-! Do some checksumming and IO 
-  CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
-! Start this off as the first contrib to total gradient 
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     GM%Gradients%D(1:3,AtA) = SFrc%D(A1:A2)
-  ENDDO
-#ifdef PARALLEL
+! Collect the Lattice Forces
   CALL New(TmpLatFrc_S,(/3,3/))
   CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_S%D(1,1),0.0d0)
   CALL MPI_REDUCE(LatFrc_S%D(1,1),TmpLatFrc_S%D(1,1),9,MPI_DOUBLE_PRECISION, &
@@ -168,6 +153,25 @@ PROGRAM SForce
 #else
   GM%PBC%LatFrc%D = LatFrc_S%D
 #endif
+! Print The Lattice Forces
+!!$  CALL OpenASCII(OutFile,Out)
+!!$  WRITE(Out,*) 'LatFrc_S'
+!!$  WRITE(*,*)   'LatFrc_S'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$  CLOSE(Out)
+! Do some checksumming and IO 
+  CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_S,'dLat_S/dR',Proc_O=Prog)  
+! Start this off as the first contrib to total gradient 
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GM%Gradients%D(1:3,AtA) = SFrc%D(A1:A2)
+  ENDDO
+! Save Forces to Disk
   CALL Put(GM,Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
 ! Tidy up 
