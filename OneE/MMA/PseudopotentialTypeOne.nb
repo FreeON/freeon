@@ -41,9 +41,9 @@ Wolfram Research.
 
 (*NotebookFileLineBreakTest
 NotebookFileLineBreakTest*)
-(*NotebookOptionsPosition[     62737,       1869]*)
-(*NotebookOutlinePosition[     63670,       1898]*)
-(*  CellTagsIndexPosition[     63626,       1894]*)
+(*NotebookOptionsPosition[     46357,       1290]*)
+(*NotebookOutlinePosition[     47290,       1319]*)
+(*  CellTagsIndexPosition[     47246,       1315]*)
 (*WindowFrame->Normal*)
 
 
@@ -1047,93 +1047,118 @@ Cell[BoxData[
       Editable->False]], "Print"]
 }, Closed]],
 
-Cell[BoxData[
-    \(\(\(\[IndentingNewLine]\)\(\(ClearAll[EvenZero];\)\[IndentingNewLine]
-    EvenZero[i_] := If[Mod[i, 2] == 0, 1, 0]; 
-    FactorialList2 = {X^a_\ \ \ Y^b_\ \ Z^
-              c_\ \ \  \[RuleDelayed] \ \ EvenZero[a] EvenZero[b] 
-            EvenZero[
-              c] \(\((a - 1)\)!!\)\ \(\((b - 1)\)!!\) \(\((\ 
-                  c - 1)\)!!\)/\(\((a + b + c + 
-                    1)\)!!\)\ };\[IndentingNewLine]\[IndentingNewLine]
-    omega1[lambda_, i_, j_, k_, K_List] := 
+Cell[BoxData[{
+    \(ClearAll[a, b, c, X, Y, Z]\), "\[IndentingNewLine]", 
+    \(\(FactorialList = {X^a_\ \ \ \ Y^b_\ \ Z^
+                c_\ \ \ \ \  \[RuleDelayed] \ \(a!!\)\ \(b!!\)\ \
+\(c!!\)/\(\((a + b + 
+                      c)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y^
+                b_\ \ Z^
+                c_\ \ \  \[RuleDelayed] \ \ \ \ \ \ \ \ \ \ \(b!!\)\ \(c!!\)/\
+\(\((\ \ \ \ \ \ \ b + 
+                      c)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X^
+                a_\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Z^
+                c_\ \ \  \[RuleDelayed] \ \(a!!\)\ \ \ \ \ \ \ \ \ \(c!!\)/\(\
+\((a\ \ \ \ \ \ \  + 
+                      c)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X^a_\ \ \ \ Y^
+                b_\ \ \ \ \ \ \ \ \ \ \ \ \ \  \[RuleDelayed] \ \(a!!\)\ \(b\
+!!\)\ \ \ \ \ \ \ \ \ /\(\((a + 
+                      b\ \ \ \ \ \ \ )\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X\ \ \ \ \ \ \ \ \ \ \ \ Y\
+^b_\ \ Z^c_\ \  \[RuleDelayed] \ \(1!!\)\ \(b!!\)\ \(c!!\)/\(\((1 + b + 
+                      c)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X^a_\ \ \ \ Y\ \ \ \ \ \ \ \ \ \ Z^
+                c_\ \  \[RuleDelayed] \ \(a!!\)\ \(1!!\)\ \(c!!\)/\(\((a + 
+                      1 + c)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X^a_\ \ \ \ Y^
+                b_\ \ Z\ \ \ \ \ \ \ \ \ \  \[RuleDelayed] \ \(a!!\)\ \(b!!\)\
+\ \(1!!\)/\(\((a + b + 
+                      1)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X^
+                a_\ \ \ \ Y\ \ \ \ \ \ \ \ \ \ Z\ \ \ \ \ \ \ \ \ \  \
+\[RuleDelayed] \ \(a!!\)\ \(1!!\)\ \(1!!\)/\(\((a + 1 + 
+                      1)\)!!\)\ , \ \ \ \ \ \ \ \ \ \[IndentingNewLine]\ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X\ \ \ \ \ \ \ \ \ \ \ Y\
+^b_\ \ \ Z\ \ \ \ \ \ \ \ \ \  \[RuleDelayed] \ \(1!!\)\ \(b!!\)\ \
+\(1!!\)/\(\((1 + b + 
+                      1)\)!!\)\ , \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ X\ \ \ \ \ \ \ \ \ \ \ \ Y\ \ \ \ \ \ \ \ \ \ Z\
+^c_\ \  \[RuleDelayed] \ \(1!!\)\ \(1!!\)\ \(c!!\)/\(\((1 + 1 + 
+                      c)\)!!\)\ \[IndentingNewLine]\[IndentingNewLine]\
+\[IndentingNewLine]};\)\[IndentingNewLine]\), "\[IndentingNewLine]", 
+    \(omega1[lambda_, i_, j_, k_, K_List] := 
       Module[{Khat}, \[IndentingNewLine]Khat = 
           K/Sqrt[K . K]; \[IndentingNewLine]sum = 
           0; \[IndentingNewLine]Do[\[IndentingNewLine]\ \ \ \ ksum = 
             Zxyz[lambda, mu] /. {X \[Rule] Khat[\([1]\)], 
                 Y \[Rule] Khat[\([2]\)], 
                 Z \[Rule] 
-                  Khat[\([3]\)]}; \[IndentingNewLine]\[IndentingNewLine]\ \ \ \
-\ lsumA = 4\ Pi\ Expand[
-                  Apart[\((Zxyz[lambda, mu]\ *X^Eye\ Y^Jay\ Z^Kay\ )\)\ ]] /. 
-              FactorialList2\ ; \[IndentingNewLine]\[IndentingNewLine]\ \ \ \ \
-\ lsumB = lsumA /. {Eye \[Rule] i, Jay \[Rule] j, 
-                Kay \[Rule] 
-                  k}; \[IndentingNewLine] (*\[IndentingNewLine]\ \ \ \ \
-integrand = \((Expand[
-                    Apart[\((Zxyz[lambda, mu]\ *
-                          X^i\ Y^j\ Z^k\ )\)\ ]] /. {X \[Rule] 
-                      Cos[p]\ Sin[t], Y \[Rule] Sin[p]\ Sin[t], 
-                    Z \[Rule] 
-                      Cos[t]})\); \[IndentingNewLine]\[IndentingNewLine]\ \ \ \
-\ lsum = Integrate[
-                Sin[t]\ \ integrand, {p, 0, 2\ Pi}, {t, 0, 
-                  Pi}]; \ \[IndentingNewLine]\[IndentingNewLine]Print["\< \
-lsum1 = \>", lsum]; \[IndentingNewLine]Print["\<  lsum2 = \>", 
-              lsumB];\[IndentingNewLine]*) \[IndentingNewLine]sum = 
-            sum + ksum*
-                lsumB;\[IndentingNewLine]\[IndentingNewLine], {mu, \
-\(-lambda\), lambda}]; \[IndentingNewLine]sum]\)\)\)], "Input"],
+                  Khat[\([3]\)]}; \[IndentingNewLine]\ \ \ integrand = 
+            Expand[Apart[\((Zxyz[lambda, mu]\ *
+                    X^i\ Y^j\ Z^
+                      k\ )\)\ ]];\[IndentingNewLine]\[IndentingNewLine] \
+(*\(/.\)\({X \[Rule] Cos[p]\ Sin[t], Y \[Rule] Sin[p]\ Sin[t], 
+                Z \[Rule] 
+                  Cos[t]}\)*) ; \[IndentingNewLine]\[IndentingNewLine]Print[
+            integrand]; \[IndentingNewLine]Print[
+            integrand /. 
+              FactorialList]; \[IndentingNewLine] (*\ \ \ \ \(lsum = 
+                Integrate[
+                  Sin[t]\ \ integrand, {p, 0, 2\ Pi}, {t, 0, 
+                    Pi}];\)\ *) \[IndentingNewLine]sum = 
+            sum + ksum*lsum;\[IndentingNewLine], {mu, \(-lambda\), 
+            lambda}]; \[IndentingNewLine]sum]\)}], "Input"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
-    \(omega1[3, 0, 1, 2, {kx, ky, kz}]\)], "Input"],
+    \(omega1[2, 1, 1, 0, {kx, ky, kz}]\)], "Input"],
 
 Cell[BoxData[
-    \(4\ \((1\/4\ \@\(3\/\(14\ \[Pi]\)\) - 
-          1\/20\ \@\(7\/\(6\ \[Pi]\)\))\)\ \((\(5\ ky\ kz\^2\ \@\(21\/\(2\ \
-\[Pi]\)\)\)\/\(4\ \((kx\^2 + ky\^2 + kz\^2)\)\^\(3/2\)\) - \(ky\ \@\(21\/\(2\ \
-\[Pi]\)\)\)\/\(4\ \@\(kx\^2 + ky\^2 + kz\^2\)\))\)\ \[Pi]\)], "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
+    \(1\/2\ \@\(15\/\[Pi]\)\ X\^2\ Y\^2\)], "Print"],
 
 Cell[BoxData[
-    \(omega1[3, 1, 0, 2, {kx, ky, kz}]\)], "Input"],
+    \(\@\(15\/\[Pi]\)\/4\)], "Print"],
 
 Cell[BoxData[
-    \(4\ \((1\/4\ \@\(3\/\(14\ \[Pi]\)\) - 
-          1\/20\ \@\(7\/\(6\ \[Pi]\)\))\)\ \((\(5\ kx\ kz\^2\ \@\(21\/\(2\ \
-\[Pi]\)\)\)\/\(4\ \((kx\^2 + ky\^2 + kz\^2)\)\^\(3/2\)\) - \(kx\ \@\(21\/\(2\ \
-\[Pi]\)\)\)\/\(4\ \@\(kx\^2 + ky\^2 + kz\^2\)\))\)\ \[Pi]\)], "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
+    \(1\/2\ \@\(15\/\[Pi]\)\ X\ Y\^2\ Z\)], "Print"],
 
 Cell[BoxData[
-    \(chi5[{1, 1, 1}, {1, 2, 3}, 2, {1, 0, 1}, {1.2, 2.3, 3.4}, 1/2, 
-      0, {1.3, 2.4, 3.5}, 1]\)], "Input"],
+    \(\@\(15\/\[Pi]\)\/8\)], "Print"],
 
 Cell[BoxData[
-    \(0.0012597186529309972`\)], "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
+    \(\(-\(1\/4\)\)\ \@\(5\/\[Pi]\)\ X\ Y + 
+      3\/4\ \@\(5\/\[Pi]\)\ X\ Y\ Z\^2\)], "Print"],
 
 Cell[BoxData[
-    \(chi1[{1, 1, 1}, {1, 2, 3}, 2, {1, 0, 1}, {1.2, 2.3, 3.4}, 1/2, 
-      0, {1.3, 2.4, 3.5}, 1]\)], "Input"],
+    \(\(3\ \@\(5\/\[Pi]\)\)\/16 - 1\/4\ \@\(5\/\[Pi]\)\ X\ Y\)], "Print"],
 
 Cell[BoxData[
-    \(NIntegrate::"slwcon" \(\(:\)\(\ \)\) 
-      "Numerical integration converging too slowly; suspect one of the \
-following: singularity, value of the integration being 0, oscillatory \
-integrand, or insufficient WorkingPrecision. If your integrand is oscillatory \
-try using the option Method->Oscillatory in NIntegrate."\)], "Message"],
+    \(1\/2\ \@\(15\/\[Pi]\)\ X\^2\ Y\ Z\)], "Print"],
 
 Cell[BoxData[
-    \(0.001259718656884298`\)], "Output"]
+    \(\@\(15\/\[Pi]\)\/8\)], "Print"],
+
+Cell[BoxData[
+    \(1\/4\ \@\(15\/\[Pi]\)\ X\^3\ Y - 
+      1\/4\ \@\(15\/\[Pi]\)\ X\ Y\^3\)], "Print"],
+
+Cell[BoxData[
+    \(1\/4\ \@\(15\/\[Pi]\)\ X\^3\ Y - 
+      1\/4\ \@\(15\/\[Pi]\)\ X\ Y\^3\)], "Print"],
+
+Cell[BoxData[
+    \(\(3\ \@5\ kx\ ky\ X\^2\)\/\(kx\^2 + ky\^2 + kz\^2\) + \(3\ \@5\ kx\ kz\ \
+X\^2\)\/\(kx\^2 + ky\^2 + kz\^2\) + \(3\ \@5\ ky\ kz\ X\^2\)\/\(kx\^2 + ky\^2 \
++ kz\^2\) + 
+      2\ \((\(-\(\@\(5\/\[Pi]\)\/4\)\) + \(3\ kz\^2\ \@\(5\/\[Pi]\)\)\/\(4\ \
+\((kx\^2 + ky\^2 + kz\^2)\)\))\)\ \@\(3\ \[Pi]\)\ X\^2 + 
+      2\ \((\(kx\^2\ \@\(15\/\[Pi]\)\)\/\(4\ \((kx\^2 + ky\^2 + kz\^2)\)\) - \
+\(ky\^2\ \@\(15\/\[Pi]\)\)\/\(4\ \((kx\^2 + ky\^2 + kz\^2)\)\))\)\ \@\(3\ \
+\[Pi]\)\ X\^2\)], "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1157,617 +1182,8 @@ Cell[BoxData[
 Cell[BoxData[
     \(General::"spell1" \(\(:\)\(\ \)\) 
       "Possible spelling error: new symbol name \"\!\(sum\)\" is similar to \
-existing symbol \"\!\(Sum\)\"."\)], "Message"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\[Pi]\ \
-\(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + \
-Kay)\)!!\)\)\/\(\((1 + Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 1, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\[Pi]\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]\(2\ \@\[Pi]\)\),
-      SequenceForm[ "  lsum2 = ", 
-        Times[ 2, 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\[Pi]\ \
-\(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + \
-Kay)\)!!\)\)\/\(\((1 + Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 1, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(False\^3\ \@\[Pi]\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(Jay!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ Jay], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(Kay!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ Kay], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(Eye!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ Eye], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]\(2\ \@\(\[Pi]\/3\)\)\),
-      SequenceForm[ "  lsum2 = ", 
-        Times[ 2, 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\[Pi]\ \
-\(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + \
-Kay)\)!!\)\)\/\(\((1 + Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 1, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(False\^3\ \@\[Pi]\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(Jay!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ Jay], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(Kay!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ Kay], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(Eye!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ Eye], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/3\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]\(2\ \@\(\[Pi]\/3\)\)\),
-      SequenceForm[ "  lsum2 = ", 
-        Times[ 2, 
-          Power[ 
-            Times[ 
-              Rational[ 1, 3], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\[Pi]\ \
-\(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + \
-Kay)\)!!\)\)\/\(\((1 + Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 1, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\[Pi]\)\/3\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Rational[ 2, 3], 
-          Power[ False, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]\(2\ \@\[Pi]\)\/3\),
-      SequenceForm[ "  lsum2 = ", 
-        Times[ 
-          Rational[ 2, 3], 
-          Power[ Pi, 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(Jay!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ Jay], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(1\/4\ False\^3\ \@\(3\ \
-\[Pi]\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Rational[ 1, 4], 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(Kay!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ Kay], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(1\/4\ False\^3\ \@\(3\ \
-\[Pi]\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Rational[ 1, 4], 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(3\ \[Pi]\
-\)\ \(Eye!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((2 + \
-Eye + Jay + Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ Eye], 
-          Factorial2[ 
-            Plus[ -1, Jay]], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 2, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(1\/2\ False\^3\ \@\(3\ \
-\[Pi]\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 
-          Rational[ 1, 2], 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 3, Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(15\ \
-\[Pi]\)\ \(Eye!!\)\ \(Jay!!\)\ \(\((\(-1\) + Kay)\)!!\)\)\/\(\((3 + Eye + Jay \
-+ Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 15, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ Eye], 
-          Factorial2[ Jay], 
-          Factorial2[ 
-            Plus[ -1, Kay]], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 3, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(4\ False\^3\ \
-\@\(\[Pi]\/15\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 4, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 15], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(2\ False\^3\ \@\(15\ \
-\[Pi]\)\ \(\((\(-1\) + Eye)\)!!\)\ \(Jay!!\)\ \(Kay!!\)\)\/\(\((3 + Eye + Jay \
-+ Kay)\)!!\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 15, Pi], 
-            Rational[ 1, 2]], 
-          Factorial2[ 
-            Plus[ -1, Eye]], 
-          Factorial2[ Jay], 
-          Factorial2[ Kay], 
-          Power[ 
-            Factorial2[ 
-              Plus[ 3, Eye, Jay, Kay]], -1]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\(" lsum1 = "\[InvisibleSpace]\(2\ False\^3\ \
-\@\(\[Pi]\/15\)\)\),
-      SequenceForm[ " lsum1 = ", 
-        Times[ 2, 
-          Power[ False, 3], 
-          Power[ 
-            Times[ 
-              Rational[ 1, 15], Pi], 
-            Rational[ 1, 2]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("  lsum2 = "\[InvisibleSpace]0\),
-      SequenceForm[ "  lsum2 = ", 0],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    InterpretationBox[\("lsum = "\[InvisibleSpace]\(4\ \[Pi]\ \((\(-\(\(False\
-\^3\ \@\(5\/\[Pi]\)\ \(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + 
-                            Jay)\)!!\)\ \(\((\(-1\) + 
-                            Kay)\)!!\)\)\/\(4\ \(\((1 + Eye + Jay + 
-                            Kay)\)!!\)\)\)\) + \(3\ False\^3\ \@\(5\/\[Pi]\)\ \
-\(\((\(-1\) + Eye)\)!!\)\ \(\((\(-1\) + Jay)\)!!\)\ \(\((1 + \
-Kay)\)!!\)\)\/\(4\ \(\((3 + Eye + Jay + Kay)\)!!\)\))\)\)\),
-      SequenceForm[ "lsum = ", 
-        Times[ 4, Pi, 
-          Plus[ 
-            Times[ 
-              Rational[ -1, 4], 
-              Power[ False, 3], 
-              Power[ 
-                Times[ 5, 
-                  Power[ Pi, -1]], 
-                Rational[ 1, 2]], 
-              Factorial2[ 
-                Plus[ -1, Eye]], 
-              Factorial2[ 
-                Plus[ -1, Jay]], 
-              Factorial2[ 
-                Plus[ -1, Kay]], 
-              Power[ 
-                Factorial2[ 
-                  Plus[ 1, Eye, Jay, Kay]], -1]], 
-            Times[ 
-              Rational[ 3, 4], 
-              Power[ False, 3], 
-              Power[ 
-                Times[ 5, 
-                  Power[ Pi, -1]], 
-                Rational[ 1, 2]], 
-              Factorial2[ 
-                Plus[ -1, Eye]], 
-              Factorial2[ 
-                Plus[ -1, Jay]], 
-              Factorial2[ 
-                Plus[ 1, Kay]], 
-              Power[ 
-                Factorial2[ 
-                  Plus[ 3, Eye, Jay, Kay]], -1]]]]],
-      Editable->False]], "Print"],
-
-Cell[BoxData[
-    \($Aborted\)], "Output"]
-}, Closed]],
+existing symbol \"\!\(Sum\)\"."\)], "Message"]
+}, Open  ]],
 
 Cell[BoxData[
     \(\(chi5[ella_List, A_List, zetaA_, ellb_List, B_List, zetaB_, ellc_, 
@@ -1820,14 +1236,19 @@ Cell[BoxData[
                 ellb[\([2]\)]}], {f, 0, 
               ellb[\([3]\)]}]; \[IndentingNewLine]4\ Pi\ d*chi];\)\)], "Input"],
 
-Cell[BoxData[
-    \(\t\)], "Input"],
-
 Cell[CellGroupData[{
 
 Cell[BoxData[
     \(chi5[{1, 0, 0}, {1, 2, 3}, 2, {1, 0, 1}, {1.2, 2.3, 3.4}, 1/2, 
       0, {1.3, 2.4, 3.5}, 1]\)], "Input"],
+
+Cell[BoxData[
+    \(Power::"infy" \(\(:\)\(\ \)\) 
+      "Infinite expression \!\(1\/0\) encountered."\)], "Message"],
+
+Cell[BoxData[
+    \(Power::"infy" \(\(:\)\(\ \)\) 
+      "Infinite expression \!\(1\/0\) encountered."\)], "Message"],
 
 Cell[BoxData[
     \(\(-0.015587427776167251`\)\)], "Output"]
@@ -1869,8 +1290,8 @@ Cell[BoxData[
 },
 FrontEndVersion->"4.2 for X",
 ScreenRectangle->{{0, 1024}, {0, 768}},
-WindowSize->{1016, 710},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowSize->{857, 768},
+WindowMargins->{{Automatic, -8}, {Automatic, 0}},
 PrintingPageRange->{Automatic, Automatic},
 PrintingOptions->{"PaperSize"->{612, 792},
 "PaperOrientation"->"Portrait",
@@ -1898,10 +1319,10 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[1754, 51, 724, 13, 123, "Input"],
-Cell[2481, 66, 905, 15, 155, "Input"],
-Cell[3389, 83, 1101, 18, 171, "Input"],
+Cell[2481, 66, 905, 15, 171, "Input"],
+Cell[3389, 83, 1101, 18, 203, "Input"],
 Cell[4493, 103, 500, 11, 107, "Input"],
-Cell[4996, 116, 820, 14, 171, "Input"],
+Cell[4996, 116, 820, 14, 203, "Input"],
 Cell[5819, 132, 1097, 21, 203, "Input"],
 
 Cell[CellGroupData[{
@@ -1943,98 +1364,46 @@ Cell[32120, 939, 1399, 42, 47, "Print"],
 Cell[33522, 983, 972, 29, 47, "Print"],
 Cell[34497, 1014, 1072, 32, 47, "Print"]
 }, Closed]],
-Cell[35584, 1049, 1966, 36, 424, "Input"],
+Cell[35584, 1049, 3764, 63, 488, "Input"],
 
 Cell[CellGroupData[{
-Cell[37575, 1089, 65, 1, 27, "Input"],
-Cell[37643, 1092, 286, 4, 91, "Output"]
+Cell[39373, 1116, 65, 1, 27, "Input"],
+Cell[39441, 1119, 66, 1, 47, "Print"],
+Cell[39510, 1122, 51, 1, 63, "Print"],
+Cell[39564, 1125, 66, 1, 47, "Print"],
+Cell[39633, 1128, 51, 1, 63, "Print"],
+Cell[39687, 1131, 110, 2, 47, "Print"],
+Cell[39800, 1135, 87, 1, 64, "Print"],
+Cell[39890, 1138, 66, 1, 47, "Print"],
+Cell[39959, 1141, 51, 1, 63, "Print"],
+Cell[40013, 1144, 103, 2, 47, "Print"],
+Cell[40119, 1148, 103, 2, 47, "Print"],
+Cell[40225, 1152, 505, 8, 141, "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
-Cell[37966, 1101, 65, 1, 27, "Input"],
-Cell[38034, 1104, 286, 4, 91, "Output"]
+Cell[40767, 1165, 820, 14, 203, "Input"],
+Cell[41590, 1181, 179, 3, 23, "Message"]
+}, Open  ]],
+Cell[41784, 1187, 2926, 49, 571, "Input"],
+
+Cell[CellGroupData[{
+Cell[44735, 1240, 125, 2, 27, "Input"],
+Cell[44863, 1244, 117, 2, 36, "Message"],
+Cell[44983, 1248, 117, 2, 36, "Message"],
+Cell[45103, 1252, 60, 1, 27, "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
-Cell[38357, 1113, 125, 2, 27, "Input"],
-Cell[38485, 1117, 56, 1, 27, "Output"]
+Cell[45200, 1258, 139, 2, 43, "Input"],
+Cell[45342, 1262, 354, 5, 71, "Message"],
+Cell[45699, 1269, 60, 1, 27, "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
-Cell[38578, 1123, 125, 2, 27, "Input"],
-Cell[38706, 1127, 354, 5, 55, "Message"],
-Cell[39063, 1134, 55, 1, 27, "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-Cell[39155, 1140, 820, 14, 171, "Input"],
-Cell[39978, 1156, 179, 3, 23, "Message"],
-Cell[40160, 1161, 622, 18, 46, "Print"],
-Cell[40785, 1181, 265, 8, 30, "Print"],
-Cell[41053, 1191, 226, 6, 30, "Print"],
-Cell[41282, 1199, 622, 18, 46, "Print"],
-Cell[41907, 1219, 257, 7, 30, "Print"],
-Cell[42167, 1228, 143, 3, 23, "Print"],
-Cell[42313, 1233, 614, 18, 46, "Print"],
-Cell[42930, 1253, 325, 10, 47, "Print"],
-Cell[43258, 1265, 143, 3, 23, "Print"],
-Cell[43404, 1270, 614, 18, 46, "Print"],
-Cell[44021, 1290, 325, 10, 47, "Print"],
-Cell[44349, 1302, 143, 3, 23, "Print"],
-Cell[44495, 1307, 614, 18, 46, "Print"],
-Cell[45112, 1327, 325, 10, 47, "Print"],
-Cell[45440, 1339, 286, 8, 47, "Print"],
-Cell[45729, 1349, 622, 18, 46, "Print"],
-Cell[46354, 1369, 257, 7, 30, "Print"],
-Cell[46614, 1378, 143, 3, 23, "Print"],
-Cell[46760, 1383, 614, 18, 46, "Print"],
-Cell[47377, 1403, 325, 10, 47, "Print"],
-Cell[47705, 1415, 143, 3, 23, "Print"],
-Cell[47851, 1420, 614, 18, 46, "Print"],
-Cell[48468, 1440, 325, 10, 47, "Print"],
-Cell[48796, 1452, 143, 3, 23, "Print"],
-Cell[48942, 1457, 614, 18, 46, "Print"],
-Cell[49559, 1477, 325, 10, 47, "Print"],
-Cell[49887, 1489, 286, 8, 47, "Print"],
-Cell[50176, 1499, 622, 18, 46, "Print"],
-Cell[50801, 1519, 293, 9, 43, "Print"],
-Cell[51097, 1530, 254, 7, 43, "Print"],
-Cell[51354, 1539, 614, 18, 46, "Print"],
-Cell[51971, 1559, 324, 10, 40, "Print"],
-Cell[52298, 1571, 143, 3, 23, "Print"],
-Cell[52444, 1576, 614, 18, 46, "Print"],
-Cell[53061, 1596, 324, 10, 40, "Print"],
-Cell[53388, 1608, 143, 3, 23, "Print"],
-Cell[53534, 1613, 614, 18, 46, "Print"],
-Cell[54151, 1633, 324, 10, 40, "Print"],
-Cell[54478, 1645, 143, 3, 23, "Print"],
-Cell[54624, 1650, 577, 17, 46, "Print"],
-Cell[55204, 1669, 327, 10, 47, "Print"],
-Cell[55534, 1681, 143, 3, 23, "Print"],
-Cell[55680, 1686, 577, 17, 46, "Print"],
-Cell[56260, 1705, 327, 10, 47, "Print"],
-Cell[56590, 1717, 143, 3, 23, "Print"],
-Cell[56736, 1722, 1570, 43, 87, "Print"],
-Cell[58309, 1767, 42, 1, 27, "Output"]
-}, Closed]],
-Cell[58366, 1771, 2926, 49, 552, "Input"],
-Cell[61295, 1822, 35, 1, 27, "Input"],
-
-Cell[CellGroupData[{
-Cell[61355, 1827, 125, 2, 27, "Input"],
-Cell[61483, 1831, 60, 1, 27, "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-Cell[61580, 1837, 139, 2, 43, "Input"],
-Cell[61722, 1841, 354, 5, 55, "Message"],
-Cell[62079, 1848, 60, 1, 27, "Output"]
-}, Open  ]],
-
-Cell[CellGroupData[{
-Cell[62176, 1854, 125, 2, 27, "Input"],
-Cell[62304, 1858, 354, 5, 55, "Message"],
-Cell[62661, 1865, 60, 1, 27, "Output"]
+Cell[45796, 1275, 125, 2, 27, "Input"],
+Cell[45924, 1279, 354, 5, 71, "Message"],
+Cell[46281, 1286, 60, 1, 27, "Output"]
 }, Open  ]]
 }
 ]

@@ -119,7 +119,7 @@ Do[Do[
                   kk=kk+1;
                   LMN=LMNDex[l,m,n];
                   glist=Append[glist,StringJoin["o(",ToString[kk],")"]
-                                   ->StringJoin["O(",ToString[Lambda],",",ToString[Ehm],",",ToString[LMN],")"]];
+                                   ->StringJoin["O(",ToString[Ehm+ProjL],",",ToString[Lambda],",",ToString[LMN],")"]];
 
                   olist=Append[olist,omega[Lambda,ProjL,Ehm,l,m,n]/.{0.->Zero,0->Zero}];
         ,{l,0,BFEll-m-n}],{m,0,BFEll-n}],{n,0,BFEll}];
@@ -132,4 +132,3 @@ Do[Do[
 
 Close[FileName];          
 Print[" Closed ",FileName];
-
