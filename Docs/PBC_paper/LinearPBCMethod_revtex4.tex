@@ -60,28 +60,33 @@ phases will be demonstrated.
 
 Quantum chemical methods that  employ Gaussian Type Atomic Orbitals (GTAOs) 
 offer a number of advantages in materials science.  First, because they are local basis functions, it is possible 
-to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two electron integrals 
-involving GTAOs are analytic, enabling the 
-rapid evaluation of expectation values involving complicated operators often involved in response properties \cite{}.
+to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two
+electron integrals involving GTAOs are analytic, enabling the rapid evaluation of expectation values involving 
+complicated operators often involved in response properties 
+\cite{FHarris66,LMcmurchie78,FHarris83,JHead89}.
 The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
 offering a wide range of electric and magnetic molecular response properties.   
 The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
 approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{dirac} 
 and Dirac-Kohn-Sham \cite{rel4d} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
-correlated wavefunction methods \cite{}, the exact HF exchange is central to hybrid HF/DFT models \cite{}.
-The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group \cite{},
-demonstrating blah gnu snort for difficult problems \cite{}.
+correlated wavefunction methods 
+%\cite{}
+, the exact HF exchange is central to hybrid HF/DFT models 
+%\cite{}.
+The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group,
+demonstrating blah gnu snort for difficult problems \cite{Crystal98}.
 
 Recently, we have developed linear scaling quantum chemical methods for gas phase Density Functional Theory 
-(DFT), including computation of the Coulomb matrix $\bf J$ \cite{MChallacombe97} and the exchange-correlation
+(DFT), including computation of the Coulomb matrix ${\bf J}$ \cite{MChallacombe97} and the exchange-correlation
 matrix $\bf K_{\rm xc}$ \cite{MChallacombe00A}.   In this contribution, these linear scaling methods are extended to 
 periodic boundary conditions at the $\Gamma$-point.  
 
 With periodic linear scaling quantum chemical algorithms, it is possible to begin bridging the gap between 
 methods developed for small molecule chemistry and large scale problems in the solid state.  Together with the 
-results presented here, $ {\cal O}(N)$ methods for solving the Self-Consistent-Field equations \cite{} and 
-linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04B}, it is now possible
+results presented here, $ {\cal O}(N)$ methods for solving the Self-Consistent-Field equations 
+%\cite{} 
+and linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04B}, it is now possible
 to perform condensed phase  HF/DFT calculations on systems larger than 500 atoms with a single processor.
 In addition, with the advent of linear scaling density matrix perturbation theory \cite{ANiklasson04,VWeber04},
 well developed quantum chemical methods for the analytic computation of response properties may be brought
@@ -91,7 +96,8 @@ This paper is organized as follows:  In Section~\ref{pbcintro},  periodic bounda
 approximation are introduced, and the avoidance linear dependencies is discused. Next, in 
 Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
 fast linear scaling algorithms for computation of the Coulomb and exchange-correlation matrix are outlined.  
-In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette \cite{} lattice sum 
+In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette 
+\cite{BNijboer57,BNijboer58a} lattice sum 
 method to linear scaling computation of quantum Coulomb sums tin-foil boundaries.  Then, in in Section~\ref{hicu}, 
 ${\cal O}(N)$ methods for computing the GTAO-based  exchange-correlation matrix are presented. 
 In Section~\ref{implement} we discuss the implementation of these developments in the {\sc  MondoSCF} \cite{MondoSCF} suite
@@ -205,7 +211,8 @@ Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the 
 In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
 delimiting the spatial {\em extent} of each node and its children.    This scheme is similar to
 well developed technologies for ray tracing and data base searches, allowing fast 
-${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests \cite{}. 
+${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests 
+%\cite{}. 
 In the case of QCTC, this fast look up constitutes the penetration acceptability criterion (PAC) 
 %\cite{}, 
 which identifies spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately 
@@ -285,7 +292,7 @@ e^{-\zeta_q ({\bf r}-{\bf Q})^2}.
 \end{equation}
 This representation provides an intermediate form into which elements of the density matrix may be folded, and allows
 the use of McMurchie-Davidson recurrence relations 
-%\cite{} 
+\cite{LMcmurchie78} 
 in analytic integral evaluation and density evaluation.
 For this form,  Cramer's inequality 
 %\cite{} 
@@ -482,7 +489,7 @@ This static error is controlled by using the FMM-like error bound,
 \begin{equation}
 \frac{ 2^{p} {\cal C}^2 \,{d}_{\rm max}^{p+1}}
 {({R}^o)^{p+1}\left| {R}^o -2 \, {d}_{\rm max} \right| } 
-\leq \tau_{MAC} \;,
+\leq \tau_{\rm \scriptscriptstyle MAC} \;,
 \end{equation}
 where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Asymtotic Uns{\"o}ld weight of the total density
 and $\tau_{MAC}$ is the threshold controlling the precision of the calculation.
@@ -1013,10 +1020,11 @@ There are four thresholds that control the numerical precision of the linear sca
 in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
 described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ 
 ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
-the distribution threshold  $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref. ~[\onlinecite{CTymczak04A}],
+the distribution threshold  $\tau_{\rm \scriptscriptstyle DIST}$ described in Section \ref{datastruct},
 and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
 Ref.~[\onlinecite{MChallacombe00A}]).  The threshold $\tau_{\rm \scriptscriptstyle 2E}$ also controls accuracy of the
-Coulomb matrix as discussed in Ref.~[\onlinecite{CTymczak04A}].
+Coulomb matrix as discussed in Section \ref{datastruct}, where   $\tau_{\rm \scriptscriptstyle 2E}=
+\tau_{\rm \scriptscriptstyle PAC}=\tau_{\rm \scriptscriptstyle MAC}$.
 These thresholds, listed in Table~\ref{Table:AccurLevels},  have been 
 calibrated over a wide range of systems to yield a minimum of  4, 6 and 8 digits of relative accuracy in the total 
 energy with {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.    Typically however, one additional digit is achieved for 
