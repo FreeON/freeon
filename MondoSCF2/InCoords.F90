@@ -4776,7 +4776,7 @@ return
      ! Weight directions
      ! 
      DO J=1,3
-       Dist=SQRT(ABS(EigVals(J)))
+       Dist=One/SQRT(ABS(EigVals(J)))
        DO K=1,NDim 
          BondVect2(K,J)=Dist*BondVect2(K,J) 
        ENDDO
@@ -5692,9 +5692,20 @@ return
      ENDIF
      !
      IF(IntSet==1) THEN
-       DoRepeat=.FALSE.
-       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                     CritRad,HbondMax,DoRepeat,IEq)
+       DO I=1,6
+         DoRepeat=.FALSE.
+         CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
+                       CritRad,HbondMax,DoRepeat,IEq)
+         !
+         ! Check for ionic systems
+         !
+         IF(Bond%N==0) THEN 
+           Fact=1.5D0
+           CritRad%D=Fact*CritRad%D
+         ELSE
+           EXIT
+         ENDIF
+       ENDDO
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL Topology_12(AtmB,TOPS%Cov12)
        CALL Topology_13(NatmsLoc,TOPS%Cov12,TOPS%Cov13)

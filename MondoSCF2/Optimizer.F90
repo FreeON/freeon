@@ -955,9 +955,9 @@ CONTAINS
      CALL SetConstraints(IntCs,IntCs%PredVal%D)
      Displ%D=IntCs%PredVal%D-IntCs%Value%D
      !
-     CALL CutOffDispl(Displ%D,IntCs, &
-                      GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-   ! CALL CutOffDispl(Displ%D,IntCs,0.1D0,0.1D0)
+   ! CALL CutOffDispl(Displ%D,IntCs, &
+   !                  GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
+     CALL CutOffDispl(Displ%D,IntCs,0.3D0,0.3D0)
      CALL RedundancyOff(Displ%D,SCRPath,Print)  
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      ! 
