@@ -408,7 +408,7 @@ MODULE DrvSCFs
          DTest=DTol(Ctrl%AccL(CBas))
 !        Check for absolute convergence below thresholds
 !        and approach from correct direction.
-         !CALL OpenASCII(OutFile,Out)
+         CALL OpenASCII(OutFile,Out)
          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
@@ -429,7 +429,7 @@ MODULE DrvSCFs
          !WRITE(Out,*)'DIISB = ',DIISB
          !WRITE(Out,*)'DMaxA = ',DMaxA
          !WRITE(Out,*)'DMaxB = ',DMaxB
-         !CLOSE(Out)
+         CLOSE(Out)
 !        Look for non-decreasing errors due to incomplete numerics
          IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.CCyc>2)THEN
             IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN

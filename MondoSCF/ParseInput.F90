@@ -2266,8 +2266,6 @@ MODULE ParseInPut
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
-!        CALL OpenASCII(InpFile,Inp)
-!        CALL OpenASCII(OutFile,Out)
 !
 !        Parse <OPTIONS.THRESHOLDS> 
 !
@@ -2328,8 +2326,6 @@ MODULE ParseInPut
          ENDIF !!! MMonly
 #endif
 !
-!       CLOSE(Out,STATUS='KEEP')
-!       CLOSE(Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseThresholds
 !----------------------------------------------------------
@@ -2357,9 +2353,6 @@ MODULE ParseInPut
       CALL OpenASCII(InpFile,Inp)
 !
       DegToRad=PI/180.D0
-!
-      CALL OpenASCII(InpFile,Inp)
-      CALL OpenASCII(OutFile,Out)
 !
 ! Find extra internal coordinates and constraints
 !
