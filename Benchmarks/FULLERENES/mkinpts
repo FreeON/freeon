@@ -1,0 +1,35 @@
+gunzip XYZ/*
+
+cat template         >  c20.inp
+cat XYZ/c20.xyz      >> c20.inp
+cat end              >> c20.inp
+
+cat template         >  c30.inp
+cat XYZ/c30.xyz      >> c30.inp
+cat end              >> c30.inp
+
+cat template         >  c50.inp
+cat XYZ/c50.xyz      >> c50.inp
+cat end              >> c50.inp
+
+cat template         >  c60.inp
+cat XYZ/c60.xyz      >> c60.inp
+cat end              >> c60.inp
+
+cat template         >  c80.inp
+cat XYZ/c80.xyz      >> c80.inp
+cat end              >> c80.inp
+
+cat template         >  c180.inp
+cat XYZ/c180.xyz     >> c180.inp
+cat end              >> c180.inp
+
+cat template         >  c240.inp
+cat XYZ/c240.xyz     >> c240.inp
+cat end              >> c240.inp
+
+cat template         >  c540.inp
+cat XYZ/c540.xyz     >> c540.inp
+cat end              >> c540.inp
+
+gzip XYZ/*
