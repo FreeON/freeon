@@ -7111,7 +7111,7 @@ return
      INTEGER                     :: I1,I,J,NDim,IMax,NDimens
      ! 
      RefBonds=0     
-     CondNum1=0.05D0 ! This parameter controls recognition of flatness of molecule in the vicinity of atom I1
+     CondNum1=0.1D0 ! This parameter controls recognition of flatness of molecule in the vicinity of atom I1
      NDim=AtmB%Count%I(I1)
      CALL New(BondVect2,(/NDim,3/))
      CALL New(Mark,NDim)
