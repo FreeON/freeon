@@ -3,10 +3,10 @@
       INTEGER LenS,len0,len1,len2,len3,len4
       REAL*8 re0,re1,re2,Zero,rpi,PSch,Prev,Prev1,Prev2
 
-      PARAMETER (MXBUF1  =  83000)
-      PARAMETER (MXBUF2  =   6000)
-      PARAMETER (MXINTS  = 500000)
-      PARAMETER (MXBATCH =    500)
+      PARAMETER (MXBUF1  =  163000)
+      PARAMETER (MXBUF2  =   12000)
+      PARAMETER (MXINTS  = 1000000)
+      PARAMETER (MXBATCH =    1000)
 c
 c
 c
