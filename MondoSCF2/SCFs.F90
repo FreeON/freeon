@@ -433,7 +433,7 @@ CONTAINS
              ! Exceeded density criteria
              DLogic=DMaxB<5D-2*DTest
              ! Exceeded energy criteria
-             ELogic=ETotQ<3D-2*ETest
+             ELogic=ETotQ<3D-2*ETest.AND.DMaxB<1D-2
              ! Quasi convergence from below (bad)
              QLogic=(.NOT.ALogic).AND.DLogic.AND.ELogic
              ! Going to wrong state with DIIS
@@ -446,9 +446,8 @@ CONTAINS
              ! Turn on KS recomputation if ODA is not strictly decreasing
              RLogic=DoODA.AND.(cSCF>2.AND.ODAQ>1D-4.OR..NOT.ALogic) !1D1*ETotQ
              ! If we are increasing with ODA and rebuild is on, we are well fucked.
-             FLogic=DoODA.AND.RebuildPostODA.AND..NOT.ALogic
+             FLogic=DoODA.AND.RebuildPostODA.AND..NOT.ALogic.AND.cSCF>3
              ! Sort through logic hopefully in the conditionally correct order ...
-
 
              WRITE(Out,*)' ETest  = ',ETest
              WRITE(Out,*)' DTest  = ',DTest
