@@ -284,7 +284,7 @@ each other implicitly and must be solved for self-consistently
 via the coupled-perturbed self-consistent-field (CPSCF) equations.
 The necessary and sufficient criteria for convergence of the 
 CPSCF equations involve an extension to the well-known SCF equations \cite{Furche_2001}
-\begin{subequations}
+\begin{subequations}\label{eq:commutators}
   \begin{gather}
     [\F^{0} ,\D^{0}]=0,\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\\
@@ -340,7 +340,56 @@ when the density matrix derivative $D^{a\ldots}_n$ and the desired property
 $\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$)
 have reached a sufficient level of accuracy.
 
-\subsection{DDIIS Maybe???}
+\subsection{Derivative based DIIS Algorithm (DDIIS)}
+ The direct inversion in the iterative subspace (DIIS) method, introduced
+ some time ago by Pulay \cite{Pulay1,Pulay2}, provides a significant 
+ acceleration of the SCF rate. The idea of the DIIS scheme consists to use
+ the information accumulated during the preceding iterations by 
+ constructing an averaged effective AO
+ Fock matrix $\widetilde F_{k}$ at the
+ $k$-th iteration. This effective Fock matrix is then used instead of $F_{k}$
+ to generate an improved set of molecular orbitals and thus an 
+ improved AO density matrix $D_{k+1}$. In this manner, the SCF procedure
+ is stabilized and the oscillations avoided.
+ This elegant method has been recently extended to improve the
+ convergence of the CPSCF equations leading to the DDIIS procedure \cite{Weber_2003}.
+
+As the well-known DIIS, the DDIIS scheme is based on the minimization of the norm 
+of the averaged error vector $\mathbf{\bar{e}}_n$ given by
+\begin{equation}
+  \mathbf{\bar{e}}_n=\sum_{i=n-m}^{n}c_i\mathbf{e}_i,
+\end{equation}
+where the $\mathbf{e}_i$'s are just one of the commutator relations 
+Eqs. (\ref{eq:commutators}) depeanding on the order of the perturbation. 
+The optimal coefficients $c_i$ are solution to the 
+quadratic programming problem
+\begin{equation}
+  \inf \left \{-\frac{1}{2}\sum_{i,j=n-m}^nc_iB_{ij}c_j,\, \sum_{i=n-m}^n c_i=1 \right \},
+\end{equation}
+where the elements of the $\mathbf{B}$ matrix are given by 
+the scalar product $B_{ij}=(\mathbf{e}_i,\mathbf{e}_j)$.
+A working equation is then obtained through the associated Euler-Lagrange equation
+\begin{equation}\label{eq:diismatrix}
+ \left ( \begin{array}{cc}
+     \mathbf{B}     & \mathbf{1} \\
+     \mathbf{1}^{T} & 0 
+   \end{array}\right )
+ \cdot \left ( \begin{array}{c}
+     \mathbf{c}     \\
+     \lambda  
+   \end{array}\right )
+  =  \left ( \begin{array}{c}
+     \mathbf{0}      \\
+         1  
+   \end{array}\right )
+\end{equation}
+ where $\mathbf{0}=(0,\ldots,0)^{T}$ and $\mathbf{1}=(1,\ldots,1)^{T}$ are
+ vectors whose all components are 0 and 1 respectively, 
+ and $\lambda$ is the Lagrange multiplier of the constraint 
+ $\sum_{i=n-m}^{n}c_{i}=1$. The set of linear equations is solved
+ by inverting the left-hand side matrix. The inverse matrix is iteratively 
+ refined and thus if a linear set of equations is encountered, the oldest
+ iterations are discarded until the system of equations becomes solvable.
 
 \subsection{Perturbed projection}
 Perturbed projection is based on purification projections for the 
