@@ -54,7 +54,7 @@ PROGRAM dN4KTest
   REAL(DOUBLE)                          :: Tmp1,Grad
   TYPE(AtomPr), DIMENSION(100)          :: ACAtmPair,BDAtmPair
   TYPE(ONX2OffSt) :: OffSet
-  INTEGER, PARAMETER                     :: MaxBK=1000
+  INTEGER, PARAMETER                     :: MaxBK=10
   REAL(DOUBLE) , DIMENSION(MaxBK)       :: C,Cm,Cp
   REAL(DOUBLE) , DIMENSION(MaxBK,12)    :: dC
   REAL(DOUBLE) , DIMENSION(:,:), ALLOCATABLE :: GradKx
@@ -103,7 +103,7 @@ PROGRAM dN4KTest
               BDAtmInfo%Atm2X=GMc%Carts%D(1,AtD)
               BDAtmInfo%Atm2Y=GMc%Carts%D(2,AtD)
               BDAtmInfo%Atm2Z=GMc%Carts%D(3,AtD)
-              DO iDir=3,12,3              
+              DO iDir=3,3              
                  IF(iDir==3)THEN
                     Tmp1=ACAtmInfo%Atm1Z
                  ELSEIF(iDir==6)THEN
@@ -184,10 +184,11 @@ PROGRAM dN4KTest
                  C(1:NBFA*NBFB*NBFC*NBFD)=(Half*1D4)*(Cp(1:NBFA*NBFB*NBFC*NBFD)-Cm(1:NBFA*NBFB*NBFC*NBFD))
                  !-------------------------------------------------------------------------------------------
                  ! Analytics !!! 
-                 CALL GetAtomPair2(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
-                 CALL GetAtomPair2(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1))
+                 CALL GetAtomPair2(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1),GRADIENTS_O=.TRUE.)
+                 CALL GetAtomPair2(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1),GRADIENTS_O=.TRUE.)
                  DO I=1,12
-                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),BIG_DBL)
+                    CALL DBL_VECT_EQ_DBL_SCLR(MaxBK,dC(1,I),BIG_DBL)
+!                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD*12,dC(1,I),BIG_DBL)
                     !CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),0D0)
                  ENDDO
                  NIntBlk=MaxBK ! NBFA*NBFB*NBFC*NBFD
@@ -208,6 +209,9 @@ PROGRAM dN4KTest
                              iFBD=iFBD+1
                              DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                              IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+
+!      WRITE(*,*)' AAAA GRAED = ',dC(:,:)
+
                              INCLUDE 'dERIInterfaceB.Inc'
                              OffSet%D=OffSet%D+DDLen
                           ENDDO ! End blkfunc on D

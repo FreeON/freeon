@@ -93,7 +93,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_x)"]];
     If[ LK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -106,7 +106,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_y)"]];
     If[ MK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPY,",L)-",ToString[MK],"D0*HRR(1:",BS,",",KMY,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -118,7 +118,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_z)"]];
     If[ NK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPZ,",L)-",ToString[NK],"D0*HRR(1:",BS,",",KMZ,",L)"]];
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRTmp,GRADIENTS(1,1))"]]; 
@@ -177,7 +177,7 @@ Do[Do[
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA],")"]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA-1],")"]];
 
 
                 Kount = Kount + 1;
@@ -188,7 +188,7 @@ Do[Do[
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB],")"]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB-1],")"]];
 
              ,{cart,1,3}]
  ,{i,LBegin[il],LEnd[il]}]

@@ -7,70 +7,70 @@
       REAL(DOUBLE)  :: GRADIENT(NINT,12)
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(1_x,1|
-      GRADIENT(OffSet,1 + GOA)=HRRA(2)
+      GRADIENT(OffSet,GOA)=HRRA(2)
       !=(1,1_x|
-      GRADIENT(OffSet,1 + GOB)=ABx*HRRB(1)+&
+      GRADIENT(OffSet,GOB)=ABx*HRRB(1)+&
                          HRRB(2)
       !=(1_y,1|
-      GRADIENT(OffSet,2 + GOA)=HRRA(3)
+      GRADIENT(OffSet,1 + GOA)=HRRA(3)
       !=(1,1_y|
-      GRADIENT(OffSet,2 + GOB)=ABy*HRRB(1)+&
+      GRADIENT(OffSet,1 + GOB)=ABy*HRRB(1)+&
                          HRRB(3)
       !=(1_z,1|
-      GRADIENT(OffSet,3 + GOA)=HRRA(4)
+      GRADIENT(OffSet,2 + GOA)=HRRA(4)
       !=(1,1_z|
-      GRADIENT(OffSet,3 + GOB)=ABz*HRRB(1)+&
+      GRADIENT(OffSet,2 + GOB)=ABz*HRRB(1)+&
                          HRRB(4)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(2_x,1|
-      GRADIENT(OffSet,1 + GOA)=-HRR(1)+&
+      GRADIENT(OffSet,GOA)=-HRR(1)+&
                          HRRA(5)
       !=(2,1_x|
-      GRADIENT(OffSet,1 + GOB)=ABx*HRRB(2)+&
+      GRADIENT(OffSet,GOB)=ABx*HRRB(2)+&
                          HRRB(5)
       !=(2_y,1|
-      GRADIENT(OffSet,2 + GOA)=HRRA(6)
+      GRADIENT(OffSet,1 + GOA)=HRRA(6)
       !=(2,1_y|
-      GRADIENT(OffSet,2 + GOB)=ABy*HRRB(2)+&
+      GRADIENT(OffSet,1 + GOB)=ABy*HRRB(2)+&
                          HRRB(6)
       !=(2_z,1|
-      GRADIENT(OffSet,3 + GOA)=HRRA(8)
+      GRADIENT(OffSet,2 + GOA)=HRRA(8)
       !=(2,1_z|
-      GRADIENT(OffSet,3 + GOB)=ABz*HRRB(2)+&
+      GRADIENT(OffSet,2 + GOB)=ABz*HRRB(2)+&
                          HRRB(8)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(3_x,1|
-      GRADIENT(OffSet,1 + GOA)=HRRA(6)
+      GRADIENT(OffSet,GOA)=HRRA(6)
       !=(3,1_x|
-      GRADIENT(OffSet,1 + GOB)=ABx*HRRB(3)+&
+      GRADIENT(OffSet,GOB)=ABx*HRRB(3)+&
                          HRRB(6)
       !=(3_y,1|
-      GRADIENT(OffSet,2 + GOA)=-HRR(1)+&
+      GRADIENT(OffSet,1 + GOA)=-HRR(1)+&
                          HRRA(7)
       !=(3,1_y|
-      GRADIENT(OffSet,2 + GOB)=ABy*HRRB(3)+&
+      GRADIENT(OffSet,1 + GOB)=ABy*HRRB(3)+&
                          HRRB(7)
       !=(3_z,1|
-      GRADIENT(OffSet,3 + GOA)=HRRA(9)
+      GRADIENT(OffSet,2 + GOA)=HRRA(9)
       !=(3,1_z|
-      GRADIENT(OffSet,3 + GOB)=ABz*HRRB(3)+&
+      GRADIENT(OffSet,2 + GOB)=ABz*HRRB(3)+&
                          HRRB(9)
       OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=
       !=(4_x,1|
-      GRADIENT(OffSet,1 + GOA)=HRRA(8)
+      GRADIENT(OffSet,GOA)=HRRA(8)
       !=(4,1_x|
-      GRADIENT(OffSet,1 + GOB)=ABx*HRRB(4)+&
+      GRADIENT(OffSet,GOB)=ABx*HRRB(4)+&
                          HRRB(8)
       !=(4_y,1|
-      GRADIENT(OffSet,2 + GOA)=HRRA(9)
+      GRADIENT(OffSet,1 + GOA)=HRRA(9)
       !=(4,1_y|
-      GRADIENT(OffSet,2 + GOB)=ABy*HRRB(4)+&
+      GRADIENT(OffSet,1 + GOB)=ABy*HRRB(4)+&
                          HRRB(9)
       !=(4_z,1|
-      GRADIENT(OffSet,3 + GOA)=-HRR(1)+&
+      GRADIENT(OffSet,2 + GOA)=-HRR(1)+&
                          HRRA(10)
       !=(4,1_z|
-      GRADIENT(OffSet,3 + GOB)=ABz*HRRB(4)+&
+      GRADIENT(OffSet,2 + GOB)=ABz*HRRB(4)+&
                          HRRB(10)
     END SUBROUTINE BraHRR21ab
     SUBROUTINE BraHRR21cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT)

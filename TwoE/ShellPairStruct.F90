@@ -22,7 +22,7 @@ MODULE ShellPairStruct
      INTEGER :: IntType
      INTEGER :: L
      TYPE(SmallAtomInfo) :: AtmInfo
-     REAL(DOUBLE), DIMENSION(7,MaxSPairs) :: Cst
+     REAL(DOUBLE), DIMENSION(10,MaxSPairs) :: Cst
   END TYPE ShellPairG
   !
   TYPE AtomInfo
@@ -37,7 +37,7 @@ MODULE ShellPairStruct
      INTEGER :: IntType
      INTEGER :: L
      TYPE(SmallAtomInfo) :: AtmInfo
-     REAL(DOUBLE), DIMENSION(7,100) :: Cst
+     REAL(DOUBLE), DIMENSION(10,100) :: Cst
   END TYPE ShellPair
 
   TYPE AtomPr

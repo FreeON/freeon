@@ -1,7 +1,7 @@
-MODULE ShellPairStruct
+MODULE ShellPairStructB
   USE DerivedTypes
   INTEGER,PARAMETER :: PairLngth=5
-  INTEGER,PARAMETER :: MaxSPairs=100
+  INTEGER,PARAMETER :: MaxSPairs=1000
   !
   TYPE SmallAtomInfo
      REAL(DOUBLE) :: Atm1X,Atm1Y,Atm1Z
@@ -22,7 +22,7 @@ MODULE ShellPairStruct
      INTEGER :: IntType
      INTEGER :: L
      TYPE(SmallAtomInfo) :: AtmInfo
-     REAL(DOUBLE), DIMENSION(8,MaxSPairs) :: Cst
+     REAL(DOUBLE), DIMENSION(10,MaxSPairs) :: Cst
   END TYPE ShellPairG
   !
   TYPE AtomInfo
@@ -37,7 +37,7 @@ MODULE ShellPairStruct
      INTEGER :: IntType
      INTEGER :: L
      TYPE(SmallAtomInfo) :: AtmInfo
-     REAL(DOUBLE), DIMENSION(8,100) :: Cst
+     REAL(DOUBLE), DIMENSION(10,100) :: Cst
   END TYPE ShellPair
 
   TYPE AtomPr
@@ -52,4 +52,4 @@ MODULE ShellPairStruct
      INTEGER :: A,B,C,D
   END TYPE ONX2OffSt
   !
-END MODULE ShellPairStruct
+END MODULE ShellPairStructB

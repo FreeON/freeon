@@ -11,7 +11,7 @@
       USE GammaF2
       IMPLICIT REAL(DOUBLE) (A,I,W,R)
       INTEGER        :: LBra,LKet,NINT
-      REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
+      REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: dI(NINT,12)

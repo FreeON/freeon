@@ -45,7 +45,7 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
            WS["IMPLICIT REAL(DOUBLE) (W)"]; 
            WS["INTEGER        :: LBra,LKet,CDOffSet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(8,LBra),PrmBufK(8,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];

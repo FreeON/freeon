@@ -168,10 +168,10 @@ SUBROUTINE dIntB2020101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          CALL BraHRR22ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,1,L),&
                           HRRA(1,1,L),HRRB(1,1,L),GRADIENTS(1,1))
          ! Generating (sp,sp|1_x,L)  and (sp,sp|1,L_x)
-         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,2,L),GRADIENTS(1,1))
+         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,2,L),GRADIENTS(1,1))
          ! Generating (sp,sp|1_y,L)  and (sp,sp|1,L_y)
-         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,3,L),GRADIENTS(1,1))
+         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (sp,sp|1_z,L)  and (sp,sp|1,L_z)
-         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB2020101

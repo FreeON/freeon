@@ -84,3 +84,7 @@ dN4K: Misc HRRs VRRs Ints Grad dN4K.o
 #
 ppMain:
 	rm dInt*.F90 Int*.F90
+
+N4K.o:	INT/ERIInterfaceB.Inc
+
+dN4K.o:	INT/ERIInterfaceB.Inc GRD/dERIInterfaceB.Inc

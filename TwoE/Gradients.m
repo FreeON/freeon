@@ -583,7 +583,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,W,R)"];
            WS["INTEGER        :: LBra,LKet,NINT"];
-           WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
