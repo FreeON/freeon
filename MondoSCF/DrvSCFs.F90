@@ -388,42 +388,45 @@ MODULE DrvSCFs
          DTest=DTol(Ctrl%AccL(CBas))
 !        Check for absolute convergence below thresholds
 !        and approach from correct direction.
-         IF(DMaxB<dTest.AND.ETotQ<ETest.AND.ETotB<ETotA)THEN
+         !CALL OpenASCII(OutFile,Out)
+         IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
 !        Accept convergence from wrong side if thresholds are tightend.
-         IF(DMaxB<dTest*75D-1.AND.ETotQ<ETest*3D-1)THEN
+         IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest*3D-1)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
-!        Check to see if convergence is in an asymptotic regime
-
-!	CALL OpenASCII(OutFile,Out)
-!	WRITE(Out,*)'DIISQ = ',DIISQ
-!	WRITE(Out,*)'DMaxQ = ',DMaxQ
-!	WRITE(Out,*)'DIISB = ',DIISB
-!	WRITE(Out,*)'DIISA = ',DIISA
-!	WRITE(Out,*)'DMaxA = ',DMaxA
-!	WRITE(Out,*)'DMaxB = ',DMaxB
-!	CLOSE(Out)
-
-         IF(DIISB<1.D-2.AND.DMaxB<5.D-1)THEN
-!           Look for non-decreasing error due to incomplete numerics
-            IF(DIISQ<5.D-2.AND.CCyc>2)THEN                
-               IF(DIISB>DIISA)THEN
-	          Mssg='SCF hit DIIS increase.'
-                  ConvergedQ=.TRUE.
-	       ELSEIF(DMaxB>DMaxA)THEN
-	          Mssg='SCF hit DMAX increase.'
-                  ConvergedQ=.TRUE.
-               ENDIF
-            ENDIF
-!           Look for convergence stall-outs 
-            IF(DIISQ<1.D-3.AND.CCyc>2)THEN
-               Mssg='SCF convergence due to DIIS stagnation.'
+         !WRITE(Out,*)'ETest = ',ETest
+         !WRITE(Out,*)'DTest = ',DTest
+         !WRITE(Out,*)'ETotQ = ',ETotQ
+         !WRITE(Out,*)'ETotA = ',ETotA
+         !WRITE(Out,*)'ETotB = ',ETotB
+         !WRITE(Out,*)'DIISQ = ',DIISQ
+         !WRITE(Out,*)'DMaxQ = ',DMaxQ
+         !WRITE(Out,*)'DIISA = ',DIISA
+         !WRITE(Out,*)'DIISB = ',DIISB
+         !WRITE(Out,*)'DMaxA = ',DMaxA
+         !WRITE(Out,*)'DMaxB = ',DMaxB
+         !CLOSE(Out)
+!        Look for non-decreasing errors due to incomplete numerics
+         IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.CCyc>2)THEN
+            IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
+               Mssg='SCF hit DIIS&DMax increase.'
                ConvergedQ=.TRUE.
-            ENDIF 
+            ENDIF
+         ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.CCyc>2)THEN
+            IF(DIISB>DIISA)THEN
+               Mssg='SCF hit DIIS increase.'
+               ConvergedQ=.TRUE.
+            ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
+               Mssg='SCF hit DMAX increase.'
+               ConvergedQ=.TRUE.
+            ENDIF
+         ELSEIF((DIISQ<1D-3.OR.DMaxQ<1D-3).AND.CCyc>2)THEN
+            Mssg='SCF convergence due to DIIS stagnation.'
+            ConvergedQ=.TRUE.
          ENDIF
 !        Logic for incremental Fock builds
          IF(.NOT.ConvergedQ.AND.DMaxB<1D-2.AND. &
@@ -449,11 +452,9 @@ MODULE DrvSCFs
 !        Convergence announcement
          IF(ConvergedQ.AND.PrintFlags%Key>DEBUG_NONE)THEN
             WRITE(*,*)TRIM(Mssg)             
-            IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
-               CALL OpenASCII(OutFile,Out)
-               WRITE(Out,*)TRIM(Mssg)             
-               CLOSE(Out)
-            ENDIF
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*)TRIM(Mssg)             
+            CLOSE(Out)
          ENDIF
 !        Load statistics 
          Ctrl%NCyc(CBas)=CCyc

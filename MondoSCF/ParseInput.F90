@@ -340,6 +340,14 @@ MODULE ParseInPut
 #endif
               IF(Ctrl%Method(I)==SDMM_R_SCF)THEN
                  Method='restricted simplified density matrix minimization using '
+              ELSEIF(Ctrl%Method(I)==PM_R_SCF)THEN
+                 Method='restricted Palser-Manolopoulos (PM) purification using '
+              ELSEIF(Ctrl%Method(I)==SP2_R_SCF)THEN
+                 Method='restricted Quadratic Spectral Projection (SP2) purification using '
+              ELSEIF(Ctrl%Method(I)==SP4_R_SCF)THEN
+                 Method='restricted Quartic Spectral Projection (SP4) purification using '
+              ELSEIF(Ctrl%Method(I)==TS4_R_SCF)THEN
+                 Method='restricted Quartic Trace Setting (TS4) purification using '
               ELSE
                  Method='restricted Roothaan-Hall solution of the SCF using '
               ENDIF
@@ -885,9 +893,7 @@ MODULE ParseInPut
             ENDDO
 #endif
 !           OutPut the coordinates
-         CALL OpenHDF(InfFile)
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
-         CALL CloseHDF()
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
 !            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
@@ -903,21 +909,15 @@ MODULE ParseInPut
                CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied for MD or Opt')
             ENDIF
          ENDIF
-         CALL OpenHDF(InfFile)
          CALL Put(NumGeom,'NumberOfGeometries')
-         CALL CloseHDF()
          NAtoms=GM%NAtms
-
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
          CLOSE(UNIT=Inp,STATUS='KEEP') 
-         CALL OpenHDF(InfFile)
          CALL Put(Ctrl%NGeom,'nconfig') 
-         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
-!
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the inPut file.')
