@@ -575,10 +575,10 @@ MODULE PrettyPrint
                   Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(3,I))          &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
-                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
+                    //'   '//DblToMedmChar(GM%Carts%D(3,I))           
+!                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
+!                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
+!                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
                    WRITE(PU,*)TRIM(Mssg)
               ENDDO
 #else
