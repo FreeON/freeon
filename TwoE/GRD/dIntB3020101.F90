@@ -211,6 +211,7 @@ SUBROUTINE dIntB3020101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG3211(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(13,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(20,1,1) :: HRRA,HRRB 
@@ -227,35 +228,23 @@ SUBROUTINE dIntB3020101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(2,1,1)=HRRA(2,1,1)+Alpha*VRR(2,1,0)
       HRRB(2,1,1)=HRRB(2,1,1)+Beta*VRR(2,1,0)
       HRRC(2,1,1)=HRRC(2,1,1)+Gamma*VRR(2,1,0)
-      HRR(11,1,1)=HRR(11,1,1)+FnSpB*VRR(2,1,0)
       HRRC(2,2,1)=HRRC(2,2,1)+Gamma*VRR(2,2,0)
-      HRR(11,2,1)=HRR(11,2,1)+FnSpB*VRR(2,2,0)
       HRRC(2,3,1)=HRRC(2,3,1)+Gamma*VRR(2,3,0)
-      HRR(11,3,1)=HRR(11,3,1)+FnSpB*VRR(2,3,0)
       HRRC(2,4,1)=HRRC(2,4,1)+Gamma*VRR(2,4,0)
-      HRR(11,4,1)=HRR(11,4,1)+FnSpB*VRR(2,4,0)
       HRR(3,1,1)=HRR(3,1,1)+VRR(3,1,0)
       HRRA(3,1,1)=HRRA(3,1,1)+Alpha*VRR(3,1,0)
       HRRB(3,1,1)=HRRB(3,1,1)+Beta*VRR(3,1,0)
       HRRC(3,1,1)=HRRC(3,1,1)+Gamma*VRR(3,1,0)
-      HRR(12,1,1)=HRR(12,1,1)+FnSpB*VRR(3,1,0)
       HRRC(3,2,1)=HRRC(3,2,1)+Gamma*VRR(3,2,0)
-      HRR(12,2,1)=HRR(12,2,1)+FnSpB*VRR(3,2,0)
       HRRC(3,3,1)=HRRC(3,3,1)+Gamma*VRR(3,3,0)
-      HRR(12,3,1)=HRR(12,3,1)+FnSpB*VRR(3,3,0)
       HRRC(3,4,1)=HRRC(3,4,1)+Gamma*VRR(3,4,0)
-      HRR(12,4,1)=HRR(12,4,1)+FnSpB*VRR(3,4,0)
       HRR(4,1,1)=HRR(4,1,1)+VRR(4,1,0)
       HRRA(4,1,1)=HRRA(4,1,1)+Alpha*VRR(4,1,0)
       HRRB(4,1,1)=HRRB(4,1,1)+Beta*VRR(4,1,0)
       HRRC(4,1,1)=HRRC(4,1,1)+Gamma*VRR(4,1,0)
-      HRR(13,1,1)=HRR(13,1,1)+FnSpB*VRR(4,1,0)
       HRRC(4,2,1)=HRRC(4,2,1)+Gamma*VRR(4,2,0)
-      HRR(13,2,1)=HRR(13,2,1)+FnSpB*VRR(4,2,0)
       HRRC(4,3,1)=HRRC(4,3,1)+Gamma*VRR(4,3,0)
-      HRR(13,3,1)=HRR(13,3,1)+FnSpB*VRR(4,3,0)
       HRRC(4,4,1)=HRRC(4,4,1)+Gamma*VRR(4,4,0)
-      HRR(13,4,1)=HRR(13,4,1)+FnSpB*VRR(4,4,0)
       HRR(5,1,1)=HRR(5,1,1)+VRR(5,1,0)
       HRRA(5,1,1)=HRRA(5,1,1)+Alpha*VRR(5,1,0)
       HRRB(5,1,1)=HRRB(5,1,1)+Beta*VRR(5,1,0)

@@ -21,16 +21,16 @@ SUBROUTINE dIntB10030601(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(56) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(45,10,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(35,10,1) :: HRR 
       REAL(DOUBLE), DIMENSION(56,10,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(45,20,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(35,20,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(56,20,0:7)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(45*10,HRR(1,1,1))
+      CALL InitDbl(35*10,HRR(1,1,1))
       CALL InitDbl(56*10,HRRA(1,1,1))
       CALL InitDbl(56*10,HRRB(1,1,1))
-      CALL InitDbl(45*20,HRRC(1,1,1))
+      CALL InitDbl(35*20,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -65,7 +65,6 @@ SUBROUTINE dIntB10030601(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             Py=PrmBufB(3,K)
             Pz=PrmBufB(4,K)
             Up=PrmBufB(5,K)
-            FnSpB=PrmBufB(6,K)
             Alpha =PrmBufB(9,K)
             Beta  =PrmBufB(10,K)
             r1xZpE=One/(Zeta+Eta)
@@ -455,10 +454,10 @@ SUBROUTINE dIntB10030601(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL CNTRCTG10361(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Dont need to generate (<>CType[11]<>,0|d,s)
-      ! Dont need to generate (<>CType[16]<>,0|d,s)^a
-      ! Dont need to generate (<>CType[16]<>,0|d,s)^b
-      ! Dont need to generate (<>CType[11]<>,0|f,s)^c
+      ! Dont need to generate (g,0|d,s)
+      ! Dont need to generate (h,0|d,s)^a
+      ! Dont need to generate (h,0|d,s)^b
+      ! Dont need to generate (g,0|f,s)^c
       DO L=1,1
       
          !K = 5
@@ -548,9 +547,9 @@ SUBROUTINE dIntB10030601(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       USE VScratchB
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(45,10,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(35,10,1) :: HRR 
       REAL(DOUBLE), DIMENSION(56,10,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(45,20,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(35,20,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(56,20,0:7)
       DO K=1,10
          HRR(1,K,1)=HRR(1,K,1)+VRR(1,K,0)

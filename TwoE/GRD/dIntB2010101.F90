@@ -178,6 +178,7 @@ SUBROUTINE dIntB2010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG2111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(5,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(10,1,1) :: HRRA,HRRB 
@@ -187,13 +188,9 @@ SUBROUTINE dIntB2010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
       HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
       HRRC(1,1,1)=HRRC(1,1,1)+Gamma*VRR(1,1,0)
-      HRR(5,1,1)=HRR(5,1,1)+SpFnB*VRR(1,1,0)
       HRRC(1,2,1)=HRRC(1,2,1)+Gamma*VRR(1,2,0)
-      HRR(5,2,1)=HRR(5,2,1)+SpFnB*VRR(1,2,0)
       HRRC(1,3,1)=HRRC(1,3,1)+Gamma*VRR(1,3,0)
-      HRR(5,3,1)=HRR(5,3,1)+SpFnB*VRR(1,3,0)
       HRRC(1,4,1)=HRRC(1,4,1)+Gamma*VRR(1,4,0)
-      HRR(5,4,1)=HRR(5,4,1)+SpFnB*VRR(1,4,0)
       HRR(2,1,1)=HRR(2,1,1)+VRR(2,1,0)
       HRRA(2,1,1)=HRRA(2,1,1)+Alpha*VRR(2,1,0)
       HRRB(2,1,1)=HRRB(2,1,1)+Beta*VRR(2,1,0)

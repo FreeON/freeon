@@ -264,6 +264,7 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG3121(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(4,5,1) :: HRR 
       REAL(DOUBLE), DIMENSION(10,5,1) :: HRRA,HRRB 
@@ -273,7 +274,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
       HRRB(1,1,1)=HRRB(1,1,1)+Beta*VRR(1,1,0)
       HRRC(1,1,1)=HRRC(1,1,1)+Gamma*VRR(1,1,0)
-      HRR(1,5,1)=HRR(1,5,1)+SpFnK*VRR(1,1,0)
       HRR(1,2,1)=HRR(1,2,1)+VRR(1,2,0)
       HRRA(1,2,1)=HRRA(1,2,1)+Alpha*VRR(1,2,0)
       HRRB(1,2,1)=HRRB(1,2,1)+Beta*VRR(1,2,0)
@@ -299,7 +299,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(2,1,1)=HRRA(2,1,1)+Alpha*VRR(2,1,0)
       HRRB(2,1,1)=HRRB(2,1,1)+Beta*VRR(2,1,0)
       HRRC(2,1,1)=HRRC(2,1,1)+Gamma*VRR(2,1,0)
-      HRR(2,5,1)=HRR(2,5,1)+SpFnK*VRR(2,1,0)
       HRR(2,2,1)=HRR(2,2,1)+VRR(2,2,0)
       HRRA(2,2,1)=HRRA(2,2,1)+Alpha*VRR(2,2,0)
       HRRB(2,2,1)=HRRB(2,2,1)+Beta*VRR(2,2,0)
@@ -325,7 +324,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(3,1,1)=HRRA(3,1,1)+Alpha*VRR(3,1,0)
       HRRB(3,1,1)=HRRB(3,1,1)+Beta*VRR(3,1,0)
       HRRC(3,1,1)=HRRC(3,1,1)+Gamma*VRR(3,1,0)
-      HRR(3,5,1)=HRR(3,5,1)+SpFnK*VRR(3,1,0)
       HRR(3,2,1)=HRR(3,2,1)+VRR(3,2,0)
       HRRA(3,2,1)=HRRA(3,2,1)+Alpha*VRR(3,2,0)
       HRRB(3,2,1)=HRRB(3,2,1)+Beta*VRR(3,2,0)
@@ -351,7 +349,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRA(4,1,1)=HRRA(4,1,1)+Alpha*VRR(4,1,0)
       HRRB(4,1,1)=HRRB(4,1,1)+Beta*VRR(4,1,0)
       HRRC(4,1,1)=HRRC(4,1,1)+Gamma*VRR(4,1,0)
-      HRR(4,5,1)=HRR(4,5,1)+SpFnK*VRR(4,1,0)
       HRR(4,2,1)=HRR(4,2,1)+VRR(4,2,0)
       HRRA(4,2,1)=HRRA(4,2,1)+Alpha*VRR(4,2,0)
       HRRB(4,2,1)=HRRB(4,2,1)+Beta*VRR(4,2,0)
@@ -375,7 +372,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRC(4,10,1)=HRRC(4,10,1)+Gamma*VRR(4,10,0)
       HRRA(5,1,1)=HRRA(5,1,1)+Alpha*VRR(5,1,0)
       HRRB(5,1,1)=HRRB(5,1,1)+Beta*VRR(5,1,0)
-      HRR(5,5,1)=HRR(5,5,1)+SpFnK*VRR(5,1,0)
       HRRA(5,2,1)=HRRA(5,2,1)+Alpha*VRR(5,2,0)
       HRRB(5,2,1)=HRRB(5,2,1)+Beta*VRR(5,2,0)
       HRRA(5,3,1)=HRRA(5,3,1)+Alpha*VRR(5,3,0)
@@ -386,7 +382,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(5,5,1)=HRRB(5,5,1)+Beta*VRR(5,5,0)
       HRRA(6,1,1)=HRRA(6,1,1)+Alpha*VRR(6,1,0)
       HRRB(6,1,1)=HRRB(6,1,1)+Beta*VRR(6,1,0)
-      HRR(6,5,1)=HRR(6,5,1)+SpFnK*VRR(6,1,0)
       HRRA(6,2,1)=HRRA(6,2,1)+Alpha*VRR(6,2,0)
       HRRB(6,2,1)=HRRB(6,2,1)+Beta*VRR(6,2,0)
       HRRA(6,3,1)=HRRA(6,3,1)+Alpha*VRR(6,3,0)
@@ -397,7 +392,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(6,5,1)=HRRB(6,5,1)+Beta*VRR(6,5,0)
       HRRA(7,1,1)=HRRA(7,1,1)+Alpha*VRR(7,1,0)
       HRRB(7,1,1)=HRRB(7,1,1)+Beta*VRR(7,1,0)
-      HRR(7,5,1)=HRR(7,5,1)+SpFnK*VRR(7,1,0)
       HRRA(7,2,1)=HRRA(7,2,1)+Alpha*VRR(7,2,0)
       HRRB(7,2,1)=HRRB(7,2,1)+Beta*VRR(7,2,0)
       HRRA(7,3,1)=HRRA(7,3,1)+Alpha*VRR(7,3,0)
@@ -408,7 +402,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(7,5,1)=HRRB(7,5,1)+Beta*VRR(7,5,0)
       HRRA(8,1,1)=HRRA(8,1,1)+Alpha*VRR(8,1,0)
       HRRB(8,1,1)=HRRB(8,1,1)+Beta*VRR(8,1,0)
-      HRR(8,5,1)=HRR(8,5,1)+SpFnK*VRR(8,1,0)
       HRRA(8,2,1)=HRRA(8,2,1)+Alpha*VRR(8,2,0)
       HRRB(8,2,1)=HRRB(8,2,1)+Beta*VRR(8,2,0)
       HRRA(8,3,1)=HRRA(8,3,1)+Alpha*VRR(8,3,0)
@@ -419,7 +412,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(8,5,1)=HRRB(8,5,1)+Beta*VRR(8,5,0)
       HRRA(9,1,1)=HRRA(9,1,1)+Alpha*VRR(9,1,0)
       HRRB(9,1,1)=HRRB(9,1,1)+Beta*VRR(9,1,0)
-      HRR(9,5,1)=HRR(9,5,1)+SpFnK*VRR(9,1,0)
       HRRA(9,2,1)=HRRA(9,2,1)+Alpha*VRR(9,2,0)
       HRRB(9,2,1)=HRRB(9,2,1)+Beta*VRR(9,2,0)
       HRRA(9,3,1)=HRRA(9,3,1)+Alpha*VRR(9,3,0)
@@ -430,7 +422,6 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRB(9,5,1)=HRRB(9,5,1)+Beta*VRR(9,5,0)
       HRRA(10,1,1)=HRRA(10,1,1)+Alpha*VRR(10,1,0)
       HRRB(10,1,1)=HRRB(10,1,1)+Beta*VRR(10,1,0)
-      HRR(10,5,1)=HRR(10,5,1)+SpFnK*VRR(10,1,0)
       HRRA(10,2,1)=HRRA(10,2,1)+Alpha*VRR(10,2,0)
       HRRB(10,2,1)=HRRB(10,2,1)+Beta*VRR(10,2,0)
       HRRA(10,3,1)=HRRA(10,3,1)+Alpha*VRR(10,3,0)

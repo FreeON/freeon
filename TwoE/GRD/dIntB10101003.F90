@@ -21,15 +21,15 @@ SUBROUTINE dIntB10101003(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(120) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(84,45,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(120,45,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(84,35,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(120,35,4) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(84,56,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(120,56,0:11)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(84*45,HRR(1,1,1))
-      CALL InitDbl(120*45,HRRA(1,1,1))
-      CALL InitDbl(120*45,HRRB(1,1,1))
+      CALL InitDbl(84*35,HRR(1,1,1))
+      CALL InitDbl(120*35,HRRA(1,1,1))
+      CALL InitDbl(120*35,HRRB(1,1,1))
       CALL InitDbl(84*56,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
@@ -55,7 +55,6 @@ SUBROUTINE dIntB10101003(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          Qy=PrmBufK(3,J)
          Qz=PrmBufK(4,J)
          Uq=PrmBufK(5,J)
-         FnSpK=PrmBufK(6,J)
          Gamma =PrmBufK(9,J)
          QCx=Qx-Cx
          QCy=Qy-Cy
@@ -1089,8 +1088,8 @@ SUBROUTINE dIntB10101003(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       USE VScratchB
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(84,45,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(120,45,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(84,35,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(120,35,4) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(84,56,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(120,56,0:11)
       DO K=1,35

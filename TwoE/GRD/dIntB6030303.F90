@@ -21,16 +21,16 @@ SUBROUTINE dIntB6030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(35) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(26,16,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(35,16,4) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(26,20,4) :: HRRC 
+      REAL(DOUBLE), DIMENSION(20,10,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(35,10,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(20,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(35,20,0:6)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(26*16,HRR(1,1,1))
-      CALL InitDbl(35*16,HRRA(1,1,1))
-      CALL InitDbl(35*16,HRRB(1,1,1))
-      CALL InitDbl(26*20,HRRC(1,1,1))
+      CALL InitDbl(20*10,HRR(1,1,1))
+      CALL InitDbl(35*10,HRRA(1,1,1))
+      CALL InitDbl(35*10,HRRB(1,1,1))
+      CALL InitDbl(20*20,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -55,9 +55,6 @@ SUBROUTINE dIntB6030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          Qy=PrmBufK(3,J)
          Qz=PrmBufK(4,J)
          Uq=PrmBufK(5,J)
-         SpSpK=PrmBufK(6,J)
-         FnSpK=PrmBufK(7,J)
-         SpFnK=PrmBufK(8,J)
          Gamma =PrmBufK(9,J)
          QCx=Qx-Cx
          QCy=Qy-Cy
@@ -68,7 +65,6 @@ SUBROUTINE dIntB6030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             Py=PrmBufB(3,K)
             Pz=PrmBufB(4,K)
             Up=PrmBufB(5,K)
-            FnSpB=PrmBufB(6,K)
             Alpha =PrmBufB(9,K)
             Beta  =PrmBufB(10,K)
             r1xZpE=One/(Zeta+Eta)
@@ -382,14 +378,14 @@ SUBROUTINE dIntB6030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL CNTRCTG6333(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (spdf,0|p,p)
-      CALL KetHRR33(26,HRR) 
-      ! Generating (<>CType[11]<>,0|p,p)^a
+      ! Generating (f,0|p,p)
+      CALL KetHRR33(20,HRR) 
+      ! Generating (g,0|p,p)^a
       CALL KetHRR33(35,HRRA) 
-      ! Generating (<>CType[11]<>,0|p,p)^b
+      ! Generating (g,0|p,p)^b
       CALL KetHRR33(35,HRRB) 
-      ! Generating (spdf,0|<>CType[5]<>,p)^c
-      CALL KetHRR53(26,HRRC) 
+      ! Generating (f,0|d,p)^c
+      CALL KetHRR63(20,HRRC) 
       DO L=2,4
       
          !K = 2
@@ -437,9 +433,9 @@ SUBROUTINE dIntB6030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       USE VScratchB
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(26,16,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(35,16,4) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(26,20,4) :: HRRC 
+      REAL(DOUBLE), DIMENSION(20,10,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(35,10,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(20,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(35,20,0:6)
       DO K=1,10
          HRR(1,K,1)=HRR(1,K,1)+VRR(1,K,0)

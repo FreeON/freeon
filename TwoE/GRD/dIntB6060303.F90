@@ -21,15 +21,15 @@ SUBROUTINE dIntB6060303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(56) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(35,16,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(56,16,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(35,10,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(56,10,4) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(35,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(56,20,0:7)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(35*16,HRR(1,1,1))
-      CALL InitDbl(56*16,HRRA(1,1,1))
-      CALL InitDbl(56*16,HRRB(1,1,1))
+      CALL InitDbl(35*10,HRR(1,1,1))
+      CALL InitDbl(56*10,HRRA(1,1,1))
+      CALL InitDbl(56*10,HRRB(1,1,1))
       CALL InitDbl(35*20,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
@@ -55,9 +55,6 @@ SUBROUTINE dIntB6060303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          Qy=PrmBufK(3,J)
          Qz=PrmBufK(4,J)
          Uq=PrmBufK(5,J)
-         SpSpK=PrmBufK(6,J)
-         FnSpK=PrmBufK(7,J)
-         SpFnK=PrmBufK(8,J)
          Gamma =PrmBufK(9,J)
          QCx=Qx-Cx
          QCy=Qy-Cy
@@ -463,8 +460,8 @@ SUBROUTINE dIntB6060303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       CALL KetHRR33(56,HRRA) 
       ! Generating (h,0|p,p)^b
       CALL KetHRR33(56,HRRB) 
-      ! Generating (g,0|<>CType[5]<>,p)^c
-      CALL KetHRR53(35,HRRC) 
+      ! Generating (g,0|d,p)^c
+      CALL KetHRR63(35,HRRC) 
       DO L=2,4
       
          !K = 2
@@ -512,8 +509,8 @@ SUBROUTINE dIntB6060303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       USE VScratchB
       INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(35,16,4) :: HRR 
-      REAL(DOUBLE), DIMENSION(56,16,4) :: HRRA,HRRB 
+      REAL(DOUBLE), DIMENSION(35,10,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(56,10,4) :: HRRA,HRRB 
       REAL(DOUBLE), DIMENSION(35,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(56,20,0:7)
       DO K=1,10
