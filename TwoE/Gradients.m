@@ -199,7 +199,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->250,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
 
@@ -419,12 +419,10 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                   IList=Append[IList,TmpC+dI[OffSet,CffSetC]];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetC],")"]];
 
-						  (*
                                                   Kount = Kount + 1;
                                                   IList=Append[IList,TmpD+dI[OffSet,CffSetD]];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetD],")"]];
 
-						   *)
 ,{cart,1,3}]; 
 
                                                 ,{i,LBegin[il],LEnd[il]}]
@@ -576,7 +574,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE) :: dI(NINT,9)"]];
+           WS[StringJoin["REAL(DOUBLE) :: dI(NINT,12)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
