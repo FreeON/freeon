@@ -15,7 +15,7 @@
 
 \begin{document}
 
-\title{\textbf{Linear scaling computation of the Fock matrix VI. Gaussian
+\title{\textbf{Linear scaling computation of the Exchange-Correlation matrix. Gaussian
 orbital methods for simulation of periodic systems}}
 
 
@@ -30,7 +30,7 @@ New Mexico 87545 }
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
 Quantum Chemistry code \textbf{MondoSCF}. For the two-electron Coulomb
-matrix, this has been achieved with an exact multipole expansion of
+matrix, this has been achieved with an exact multi-pole expansion of
 the long range Coulomb field. This yields a spherically summed boundary
 condition that is easily transformed to Ewald boundary conditions.
 In order to achieve linear scaling of the local Coulomb field, a Quantum
@@ -47,17 +47,36 @@ phases will be demonstrated.
 \maketitle
 
 \section{INTRODUCTION}
+In recent years several successful methods for the simulating molecular or 
+condensed matter systems at the atomic level have been developed
+\cite{??} .
+These methods all attempt to solve for the electronic structure via
+the many-body quantum problem to within some consistent approximation scheme.
+several examples include Hatree-Fock \cite{Slater51,Roothaan51}, Density Functional theory 
+\cite{Hohenberg64,KohnSham65} and Configuration interaction \cite{Choudhury79}. 
+For complex molecular or condensed matter 
+system, where chemical reactions are of central importance, these electronic structure
+method are essential. Unfortunately, most electronic structure quantum chemistry codes
+scale very poorly with system size, ($O(N^3)$), which severely limits the systems 
+that these codes can address. Therefore, it has become increasing important for
+the development of quantum chemistry codes which scale linearly with increasing 
+system size, and several quantum chemistry codes of this type are in 
+development \cite{Goedecker94,Challacombe96,Canning96,Briggs96,Hernandex96,Scuseria99,ANiklasson02}. 
+However, for reasons of simplicity most of these quantum 
+chemistry codes have yet to incorporate Periodic boundary conditions, but many
+technically important systems can only be addressed within a condensed environment,
+where surface effects have been removed \cite{Allen90}. Therefore, the inclusion of 
+periodic boundary conditions into an existing linear scaling quantum chemistry
+codes is essential. 
 
-When simulating bulk behavior in solids or liquids, Periodic Boundary
-Conditions (PBC) are often essential to employ \cite{Allen90}. Therefore,
-we have implemented Periodic boundary conditions into the linear scaling
+We have implemented Periodic boundary conditions into the linear scaling
 Quantum Chemistry code \textbf{MondoSCF} 
 \cite{Challacombe96,Challacombe97,Challacombe99}.
 For the one electron matrix this has been achieved by a re-summation
 over periodic cell images, which because of locality leads to an efficient
 calculation of the one electron matrices. For the two electron matrices
 various methods are employed. For the two-electron Coulomb matrix,
-we achieve this via an exact multipole expansion of the long range
+we achieve this via an exact multi-pole expansion of the long range
 Coulomb field \cite{White94,Challacombe97b}. This yields a spherically
 summed boundary condition that is easily transformed into the Ewald boundary
 condition \cite{Redlack72,Redlack75}. In order to achieve linear
@@ -82,6 +101,27 @@ of the diamond (100) surface.
 %
 Finally we give some conclusion concerning the accuracy and utility of MondoSCF
 and future research directions.
+
+\section{The Kohn-Sham Equations}
+
+Following the seminary work of Kohn and Sham\cite{KohnSham65}, we start with the KS single 
+particle equation
+\begin{equation}
+H \phi_{i}({\bf r})  = \epsilon_i \phi_{i}({\bf r})
+\end{equation}
+where the effective halmiltonian is
+\begin{equation}
+H = -{\nabla}^{2}+ V_{ext}({\bf r}) + J[\rho({\bf r})] + K_{xc}[\rho({\bf r})]
+\end{equation}
+and
+\begin{equation}
+ \rho({\bf r}) = \sum_{i=1}^{N_{el}} | \phi_{i}({\bf r}) |^2
+\end{equation}
+\begin{equation}
+ J[\rho({\bf r})] = \int d{\bf r'} {\rho({\bf r}) \over |{\bf r}-{\bf r'}|}
+\end{equation}
+and the exchange correaltion potential can be calculated from several approximated functionals
+\cite{Hertwig97,Bauschlicher95,Adamo00}
 
 \section{One-Electron Matrices}
 
@@ -119,7 +159,7 @@ to get
 S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
 ({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
-We will use this Periodic Localization Transformation (PLT) repeatedly
+We will use this Periodic Localization Transformation repeatedly
 in what follows. Let us present some useful definitions:
 
 \begin{equation}
@@ -127,6 +167,7 @@ in what follows. Let us present some useful definitions:
 \rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}
 ({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
+Where $P_{ab}$ is the density matrix, and $\rho^loc({\bf r})$ is the local density
 and because of periodicity,
 
 \begin{equation}
@@ -170,7 +211,7 @@ within the code.
 
 In order to calculate the coulomb matrix efficiently, we transform
 the two-electron Coulomb integrals into integrals over all space with
-local distributions via PLT transformation and equations (\ref{rho_pbc})
+local distributions via Periodic Loacalization transformation  and equations (\ref{rho_pbc})
 and (\ref{rho_pbc_ab}), 
 
 \begin{equation}
@@ -242,7 +283,7 @@ d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
 &\approx& \frac{1}{2}\sum _{\mathbf{R}'\in V_{in}}
 \sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, 
 d{\mathbf{r}'}\frac{\rho _{ab}^{loc}({\mathbf{r}})\: 
-\Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }
+\rho_{NF} \left( {\mathbf{r}'+\mathbf{R}'}\right) }
 {\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad 
 \nonumber\\
 %
@@ -252,10 +293,8 @@ d{\mathbf{r}'}\frac{\rho _{ab}^{loc}({\mathbf{r}})\:
 \end{eqnarray}
 
 \begin{eqnarray}
-\quad\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}\right] 
- M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde
-{\Lambda }^{\left\langle 
-j\right\rangle };\mathbf{P}]
+\quad\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho_{ab}^{loc},{\bf Q}\right] 
+ M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\tilde \rho^{loc},{\bf P}]
 \nonumber\\
 \label{QCTC}
 \end{eqnarray}
@@ -266,15 +305,14 @@ where
 O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}
 \left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
 \end{equation}
-and \( \Lambda ^{\left\langle i\right\rangle } \) are the set of distributions
-of the local density which overlap \( \rho _{ab}({\mathbf{r}})\)
+and $\rho_{NF}({\bf r})$ is  the set of distributions
+of the local density which overlap \( \rho_{ab}^{loc}({\mathbf{r}})\)
 (therefore these integrals must be done explicitly) , $\mathbf{Q}$
-is the center of the distribution  \( \rho _{ab}({\mathbf{r}})\)
-\( \widetilde{\Lambda }^{\left\langle j\right\rangle } \)are the
-set of distributions of the local density which do not overlap  \( \rho _{ab}({\mathbf{r}})\),
-are organized on a tree, allow us to achieve linear scaling, and are
-the multipoles of these densities. The multipole operators are are
-defined as
+is the center of the distribution  \( \rho _{ab}({\mathbf{r}})\) and
+$\tilde \rho^{loc},{\bf P}$
+are the set of distributions of the local density which do not overlap  \( \rho _{ab}({\mathbf{r}})\) and 
+therefore the integrals can be done with the multipole approximation. 
+The multipole operators are are defined as
 
 \begin{eqnarray}
 \widehat{O}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}
@@ -283,14 +321,14 @@ defined as
 \\
 
 \end{array}\label{sp_mult_O} \\
-M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
+\widehat{M}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
 \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left| {\mathbf{R}}\right| ^{l+1}}
 \begin{array}{c}
 \\
 
 \end{array}\label{sp_mult_M} 
 \end{eqnarray}
-A detail analysis of the penetration error, and also the multipole error, is given in
+A detail analysis of the penetration and  multipole error will be given in
 reference 7 
 %\cite{MChallacombe03A}. 
 
@@ -361,25 +399,26 @@ to compare directly to \textbf{Crystal98}.
 The correction to the Coulomb matrix is strongly dependent on how
 the periodic multipole tensor is summed. If the matrix is a spherically
 ordered lattice sum, then the connection between the spherically ordered
-potential and the Ewald potential is \cite{Redlack72}, 
+potential,$\Phi _{ss}$ and the Ewald potential, $\Phi _{Ew}$ is \cite{Redlack72}, 
 \begin{equation}
-\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3}
-{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3}Q
+\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3V}
+{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3V}Q
 \label{EW_pot}
 \end{equation}
-%
-in terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
+where $V$ is the volume of the simulation cell, $R_0$ is a arbitrary refference point in the cell, 
+${\bf D}$ is the dipole moment and $Q$ is the quadripole moment.
+In terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
 the corrections
 \begin{eqnarray}
 J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}
-\right) \left\{ \frac{2\pi }{3}Q-\frac{4\pi }{3}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot 
+\right) \left\{ \frac{2\pi }{3V}Q-\frac{4\pi }{3V}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot 
 \mathbf{D}\right\}
 \nonumber\\
- & = & \frac{2\pi }{3}Q\, S_{ab}^{PBC}-\frac{4\pi }{3}\mathbf{d}_{ab}\cdot \mathbf{D}
+ & = & \frac{2\pi }{3V}Q\, S_{ab}^{PBC}-\frac{4\pi }{3V}\mathbf{d}_{ab}\cdot \mathbf{D}
 \nonumber\\
 \label{Jab_ec_2} 
 \end{eqnarray}
-where
+where we calculate
 %
 \begin{eqnarray}
 {\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right)
@@ -392,10 +431,9 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 \rho ^{loc}\left( \mathbf{x}\right) 
 \label{Q} 
 \end{eqnarray}
-are the dipole and quadrapole moments.
 
 
-\subsection{The DFT exchange correlation matrix}
+\subsection{The exchange-correlation matrix}
 
 To calculate the DFT exchange correlation matrix in the periodic case,
 we take advantage of the periodicity of the functions being integrated
@@ -459,15 +497,16 @@ Table \ref{table:ComToCrystal98_1} shows our results for the total
 energy for Sodium Chloride as compared to results obtained from \textbf{Crystal98}.
 We test this system in two different cell geometries, one cubic and
 the other orthorhombic. Also we use two different basis sets , STO-3G
-and 3-21G, and two different theory levels, SlaterDirac and B3LYP
-. We obtain excellent agreement with \textbf{Crystal98} to the accuracy
+and the Crystal98 basis set 8-511G, and two different theory levels, 
+SlaterDirac and B3LYP. We obtain excellent agreement with \textbf{Crystal98} to the accuracy
 of there results, however, \textbf{MondoSCF} is capable of obtaining
 very precise results, beyond the capacity of \textbf{Crystal98} because
 we do not use fitting functions in the calculations of the Coulomb
-or the exchange-correlation energies. Also,in Table \ref{table:ConvegOfNaCl}
+or the exchange-correlation energies. Also,in Table \ref{table:ComToCrystal98_1}
 we show the convergence of the energy per atom of a Sodium Cloride
 test system for increasing system size. This shows convergence with
-system size, and is akin to k-space integration. 
+system size, and is akin to k-space integration, and also has excelent agreement
+with Crystal98 results inwhich we do k-space integration. 
 
 
 \subsubsection{Magnesium Oxide}
@@ -497,11 +536,7 @@ Figure \ref{figure:Scaling_Matrix_Build} shows our scaling results
 of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
 matrix builds for two different error thresholds and two different
 basis sets. Even in this very dense periodic system, linear scaling
-for the matrix build commences very early. Figure \ref{figure:Scaling_Diag}
-show our results for the density matrix solver (TRS4) \cite{ANiklasson03} for
-two different thresholds and basis sets. Again we see the comencement
-of linear scaling early, where we see crossover with an eigen-solver
-around ?? carbon atoms.
+for the matrix build commences very early. 
 
 
 \section{CONCLUSIONS}
@@ -533,10 +568,12 @@ future research directions.
 \section*{ACKNOWLEDGMENTS}
 
 We would like to acknowledge Tommy Sewell and Ed Kober for there advise
-and support. 
+and support. We would also like to thank Anders Niklasson for his help
+in preparation of this manuscript. 
 
 \bibliographystyle{plain}
 \bibliography{GaussianPapers}
+\eject
 %
 % 
 %
@@ -828,11 +865,11 @@ Crystal98\,\,\,\,\,\,\,&
 %
 %
 %
-\begin{figure*}
+\begin{figure}
 
 \caption{\label{figure:SimCell} Simulation cell and interior region.}
 {\centering \includegraphics{UnitCell_2.ps} \par}
-\end{figure*}
+\end{figure}
 %
 %
 %
@@ -861,8 +898,7 @@ inner cell sums for \protect\( 64\protect \) molecules of water.}
 
 \caption{\label{figure:Scaling_Matrix_Build} Scaling Results for the matrix
 builds \protect\( J_{QCTC}\protect \) and \protect\( K_{xc}\protect \)
-for the dense diamond periodic system for the basis set STO-3G and
-3-21G.}
+for the dense diamond periodic system for the Crysral98 basis set 6-31G*/BLYP}
 
 {\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
 \end{figure*}
@@ -871,19 +907,8 @@ for the dense diamond periodic system for the basis set STO-3G and
 %
 \begin{figure*}
 
-\caption{\label{figure:Scaling_Diag} Scaling Results for the Density matix
-solver (TRS4) for the dense diamond periodic for the basis set STO-3G
-and 3-21G}
-
-{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
-\end{figure*}
-%
-%
-%
-\begin{figure*}
-
-\caption{\label{figure:Dense64diamond} Iso-surface potential if a 64 carbon
-atom diamond system}
+\caption{\label{figure:Dense64diamond} Iso-surface plot of the (111) surface reconstruction 
+of a 512 atom diamond system using the 6-21G*/BLYP basis-set/theory}
 
 {\centering \includegraphics{Timing_sto3g_321g.ps} \par}
 \end{figure*}
