@@ -2257,9 +2257,7 @@ MODULE ParseInPut
 !
       CALL Delete(GM_MM)
 !
-write(*,*) 'bef CloseHDF'
       CALL CloseHDF()
-write(*,*) 'aft CloseHDF'
       CLOSE(UNIT=Out,STATUS='KEEP')
       CLOSE(UNIT=Inp,STATUS='KEEP')
 !
