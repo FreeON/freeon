@@ -3,11 +3,11 @@
 #
 CPP=/lib/cpp -P -C -traditional
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
-CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES -DPERIODIC
+CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES -DPERIODIC -DWRAPDIST -DPARALLEL -DPARALLEL_CLONES
 #---------------------------------------------------------------
 # C Compiler and options
 #
-CC        =  gcc
+CC        =  cc
 CDEBUG    = 
 COPTIMIZE = 
 CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
@@ -51,11 +51,8 @@ RANLIB  = ranlib
 # MPI libraries
 #
 # For linking with old style MPI1 (default if only using -DPARALLEL)
-#MPI_LIBS = -lmpich -L$(GM_LIB) -lgm 
 #
-# For new style MPI2 (use -DPARALLEL -DMPI2)
-#MPI_LIBS = -L$(MPI_LIB) -llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam \
-#           -L$(GM_LIB) -lgm
+MPI_LIBS = -L$(MPI_LIB) -lpmpi -lmpi -lpmpi
 #---------------------------------------------------------------------
 #  HDF5 libraries with compression and jpeg libs. 
 #
