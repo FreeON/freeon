@@ -10,7 +10,7 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \commentoutA{\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
-\commentoutB{\documentclass[prb,aps,nobibnotes,showpacs,superbib,preprint]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -37,7 +37,7 @@
               National Laboratory,\\ Los Alamos, New Mexico 87545}
 
 
-\date{Oct 31, 2002}
+\date{Jan 22, 2003}
 
 \begin{abstract}
 Recently, early onset linear scaling computation of the
@@ -75,7 +75,7 @@ complexity due to data parallelism.
                          hierarchical methods, adaptive grid, load balance, parallel computation
 \end{abstract}
 
-\pacs{31.15.-p; 31.15.Ew; 02.60.Jh} 
+%\pacs{31.15.-p; 31.15.Ew; 02.60.Jh} 
 
 %\keywords{Density Functional Theory, numerical integration, Gaussian-Orbital,linear scaling, 
 %          hierarchical methods, adaptive grid, load balance, parallel computation}
@@ -104,7 +104,7 @@ matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,MChall
 the exchange-correlation
 matrix~\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A}, and
 density matrix alternatives to eigensolution of the
-Self-Consistent-Field (SCF) equations~\cite{XLi93,MDaw93,SQiu94,EHernandez95B,Hernandez96,CMGoringe97,ADaniels97,DBowler99B,APalser99,MChallacombe99,ANiklasson02A,ANiklasson02B}.
+Self-Consistent-Field (SCF) equations~\cite{XLi93,MDaw93,SQiu94,EHernandez95B,Hernandez96,CMGoringe97,ADaniels97,DBowler99B,APalser98,MChallacombe99,ANiklasson02A,ANiklasson03}.
 
 The existence of linear scaling methods has been argued from the
 concept of ``nearsightedness'' or quantum
@@ -345,7 +345,8 @@ dimension of the box, since only one cutting plane is passing through
 ${\bf X}$.  Each of the two subboxes after a CM partitioning may be
 subjected to another CM partitioning.  For simplicity, we always
 partition the root BBox in such a way that the number of the subboxes
-is a power of two, even though this restriction can be dropped easily.
+is a power of two, even though this restriction can be dropped easily (see
+Appendix A for a general Equal Time partitioning).
 In a parallel calculation, only one processor will perform the serial
 CM partition and broadcast the dimensions of subboxes to all other
 processors. It is important to emphasize that although the CM
@@ -406,8 +407,11 @@ At the end of the decomposition we are left with $\Np$ ET BBoxes in
 which to construct a HiCu grid.  The astute reader will by now realize
 this construction requires $\Np$ to be a power of two, and that errors
 made early in the decomposition will propagate to the lowest level.
-These are simple conveniences, which can be easily addressed in future
-should they prove problematic.  We have used a robust bisection
+%These are simple inconveniences, which can be easily addressed in future
+%should they prove problematic.  
+The inconvenience associated with the restriction of the power of two for the 
+number of processors is addressed in Appendix A. 
+We have used a robust bisection
 method~\cite{WPress92} to find the plane which equally (to some
 threshold) divides the workload in half (see Figure
 \ref{fig:shiftline}). Notice that the cutting direction may be varied
@@ -548,7 +552,7 @@ details.}
 }
 
 We have implemented the parallel HiCu algorithm in {\sc
-MondoSCF}~\cite{Mondo}, a suite of programs for linear scaling
+MondoSCF}~\cite{MondoSCF}, a suite of programs for linear scaling
 electronic structure theory and {\it ab initio}\/ molecular dynamics.
 Figure~\ref{fig:parahicu} shows the general flow of an SCF cycle, with
 expanded detail of parallel HiCu.  {\sc MondoSCF} has been written in
@@ -567,12 +571,16 @@ calculation.}\label{fig:waterscaling}
 \end{figure}
 }
 
-We have performed scaling tests on taxol and a cluster of 110 water
-molecules with $2^n$ processors, where $n$ typically ranges from 1 to
+We have performed scaling tests on taxol, a cluster of 110 water
+molecules, and $\alpha$-pinene 
+with $2^n$ processors, where $n$ typically ranges from 1 to
 7.  These systems are chosen because they are highly inhomogeneous,
 three-dimensional system posing a challenge to parallel HiCu.  
-All runs are performed on a single SGI Origin 2000
-with 128 (250 MHz MIPS R10000 MIPS) processors.
+All runs on the first two systems are performed on a single SGI Origin 2000
+with 128 (250 MHz MIPS R10000 MIPS) processors. We have used 
+256 x HP/Compaq ES-45 ( 4 x Alpha EV6 at 1.25GHz, 16GB, Quadrics interconnect)
+processors to perform the calculations on 
+$\alpha$-pinene.
 
 We start the calculations with the STO-3G basis set and a large 
 threshold $\tau$, switch to the 3-21G basis set using our mixed
@@ -582,7 +590,7 @@ performed.  Timings for parallel HiCu are taken at the fourth cycle where the
 Center of Mass partition is used, and at the fifth cycle where the
 Equal Time partition is used. The procedure of switching the basis set and 
 iterating for a few SCF cycles places the electron density in the middle 
-of convergence.  This is not really necessary, as performance is pretty 
+of convergence.  This is not really necessary, as performance is quite 
 insensitive to SCF cycle.  
 
 
@@ -616,6 +624,18 @@ overcome/compensate for these effects, we feel that the overall
 performance of ET for parallel HiCu is outstanding.  To explore
 the behavior of the current implementation with $\Np \sim 1024 $ will 
 require a fully parallel {\sc MondoSCF}, which we are actively pursuing.
+
+To study the applicability of our data parallel HiCu to small systems but
+with bigger basis sets, calculations were performed on 26-atom
+$\alpha$-pinene with the 6-311G(df,p) basis set. Benchmarks on this system
+have been performed earlier\cite{Furlani_00v128,Sosa_00v26}. 
+The scaling results in Fig.~\ref{fig:pinenescaling}
+show that good speedups are obtained, even for this relatively small
+system. Our result of a speedup of 44.63 (70\% efficient) 
+with 64 processors compares
+favorably with the speedup of 37.3 of 
+Furlani~{\it et al.}\cite{Furlani_00v128}, which is for an entire single-point
+energy calculation.
 
 \section{Conclusions}
 \label{sec:conclusions}
@@ -676,6 +696,9 @@ of Energy under contract W-7405-ENG-36 and the ASCI project.  The
 Advanced Computing Laboratory of Los Alamos National Laboratory, Los
 Alamos, NM 87545 is acknowledged.  This work was performed on
 computing resources located at this facility.
+We thank the reviewer for valuable comments. A fruitful 
+discussion on the general
+Equal Time partitioning scheme with C.~J.~Tymczak is appreciated.
 \end{acknowledgments}
 
 
@@ -685,13 +708,12 @@ computing resources located at this facility.
 
 \commentoutB{
 
-\pagebreak
-
 \begin{center}
 \bf  FIGURES
 \end{center}
 
-\begin{figure}[h]
+\pagebreak
+\begin{figure}
 \caption{ A schematic diagram to explain the Center of Mass (CM)
 partitioning scheme.  A sphere of Bragg-Slater~\cite{Slater_64v41}
 radius $R_i$ centered on the atom $i$ is drawn for each atom (for
@@ -705,7 +727,7 @@ shown is a cutting plane C passing through the center of mass ${\bf
 X}$.  }\label{fig:CM}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}
 \caption{A schematic diagram to illustrate the Equal Time (ET) partitioning
 scheme.  For simplicity a two-dimensional analog is used. The
 rectangles represent the bounding ``boxes'' of the leaf nodes in a
@@ -719,49 +741,57 @@ gives the largest dimension.}
 \label{fig:shiftline}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}
 \caption{The general flow of {\sc MondoSCF}, with parallel HiCu subroutine
 expanded.  Refer to the text for more details.}
 \label{fig:parahicu}
 \end{figure}
  
-\begin{figure}[h]
+\begin{figure}
 \caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
 RPBE/3-21G, with $\tau = 1.0 \times 10^{-6}$. Speedups are relative to
 a 2-processor calculation.}\label{fig:taxol}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}
 \caption{Scaling of parallel HiCu on (H$_2$O)$_{110}$ RPBE/3-21G, with
 $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
 calculation.}\label{fig:waterscaling}
 \end{figure}
 
-\begin{figure}[h]
-\caption{An illustrative example to show the general Equal Time partitioning scheme, for the case of $m=5$.}\label{fig:binary}
+\begin{figure}
+\caption{Scaling of parallel HiCu on $\alpha$-pinene RPBE/6-311G(df,p), with
+$\tau = 1.0 \times 10^{-8}$. Speedups are relative to a 2-processor
+calculation.}\label{fig:pinenescaling}
 \end{figure}
 
-%\clearpage
+\begin{figure}
+\caption{An illustrative example to show the general Equal Time 
+partitioning scheme for the case of $m=5$.}\label{fig:binary}
+\end{figure}
+
 \pagebreak
+\clearpage
 
 \begin{center}
 Figure 1, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{CM.eps}}
 \end{center}
 
-\pagebreak
+\clearpage
+
 \begin{center}
 Figure 2, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{ET.eps}}
 \end{center}
 
-\pagebreak
+\clearpage
 \begin{center}
 Figure 3, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{PHiCuFlow.eps}}
 \end{center}
 
-\pagebreak
+\clearpage
 \begin{center}
 Figure 4, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
@@ -775,21 +805,28 @@ Figure 5, C.~K.~Gan and M.~Challacombe \\[1.cm]
 
 \pagebreak
 \begin{center}
-Figure x, C.~K.~Gan and M.~Challacombe \\[1.cm]
+Figure 6, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{6.0in}{!}{\includegraphics[clip]{tight-pinene.eps}}
+\end{center}
+
+\pagebreak
+\begin{center}
+Figure 7, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{binary.eps}}
 \end{center}
 }
 
+\clearpage
 \appendix
 \section{A general Equal Time partitioning scheme}
 \label{appex:GET}
-In this appendix we describe a general Equal Time partitioning scheme where 
+In this appendix a general Equal Time partitioning scheme is described where 
 the number of subboxes, denoted by $m$, is not restricted to a power of two.
 To facilitate this general 
-partitioning, we first create a binary tree with $m$ leaf nodes, with
-the condition that the depths between any two leaf nodes do not differ by more
+partitioning, first create a binary tree with $m$ leaf nodes, with
+the condition that the depth between any two leaf nodes differs by no more
 than one. 
-Next we associate the edges connecting a parent node to its left and 
+Next associate the edges connecting a parent node to its left and 
 right child nodes with edge weights equal to 
 $n_{\scriptscriptstyle\mathrm{L}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptscriptstyle\mathrm{R}})$
 and $n_{\scriptscriptstyle\mathrm{R}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptscriptstyle\mathrm{R}})$, respectively. 
@@ -800,15 +837,17 @@ for the case of $m=5$.
 With these edge weights, it is a fairly simple matter 
 to partition a total workload $W$ into $m$ equal workloads. Starting
 from the root node,
-we divide the workload in a parent node
-according to the ratio of the edge weights, i.e. $n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}} $. Using this procedure, all
+recursively divide the workload in a parent node
+according to the ratio of the edge weights, 
+i.e. $n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}} $. 
+At the end of this procedure, all
 leaf nodes will have a workload of $W/m$. Fig.~\ref{fig:binary}(b) shows the 
 detailed workload information in all nodes for the case of $m=5$. In a domain
-decomposition of a root BBox, a bisection search can be used to partition
-a box into 2 subboxes with a workload ratio equals to 
+decomposition of a root BBox, a bisection search may be used to partition
+a box into two subboxes with a workload ratio equals to 
 $n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}}$,
 which can be easily read off from the edge weights of the binary tree.
-It turns out that ``power-of-two'' Equal Time partitioning scheme 
+It should be noticed that the ``power-of-two'' Equal Time partitioning scheme 
 explained in section~\ref{subsec:Equal Time} is a special 
 case of this general partitioning scheme. 
 \end{document}
