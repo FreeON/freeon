@@ -1628,21 +1628,22 @@ MODULE LinAlg
       INTEGER                 :: I,N,N2,Q,R       
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
-            IF(.NOT.AllocQ(A%Alloc))CALL New(A)
 #endif
+            IF(.NOT.AllocQ(A%Alloc))CALL New(A)
       Q=1
       R=1
       A%NAtms=0
       A%RowPt%I(1)=1
       DO I=1,NAtoms
          A%NAtms=A%NAtms+1  
-         N2=BSiz%I(I)**2
+         N=BSiz%I(I)
+         N2=N*N
          A%ColPt%I(Q)=I
          A%BlkPt%I(Q)=R
          IF(PRESENT(B))THEN
             A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
          ELSE
-           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+           CALL DiagI(N,A%MTrix%D(R:R+N2-1))
          ENDIF
          Q=Q+1 
          R=R+N2     
@@ -1666,13 +1667,14 @@ MODULE LinAlg
       A%RowPt%I(1)=1
       DO I=Beg%I(MyId),End%I(MyId)
          A%NAtms=A%NAtms+1  
-         N2=BSiz%I(I)**2
+         N=BSiz%I(I)
+         N2=N*N
          A%ColPt%I(Q)=I
          A%BlkPt%I(Q)=R
          IF(PRESENT(B))THEN
             A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
          ELSE
-           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+           CALL DiagI(N,A%MTrix%D(R:R+N2-1))
          ENDIF
          Q=Q+1 
          R=R+N2     
