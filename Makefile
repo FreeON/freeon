@@ -17,7 +17,7 @@ clean:	CExec cmm cs cx c1 c2 ce
 	rm -f \#*
 	rm -f *~
 #
-purge:	clean PScr PWrk pmm p2 
+purge:	clean PScr PWrk pmm p2 PLib
 #
 Env:	
 	env | grep -i "mondo_"
@@ -38,6 +38,9 @@ cmm:
 #
 pmm:	
 	$(MAKE) -i -C MondoMods purge
+#
+PLib:	
+	rm -rf $(MONDO_HOME)/Libs/*
 #
 #       FRONT END
 #
@@ -78,6 +81,17 @@ o:
 #
 co:	
 	$(MAKE) -i -C ONX clean 
+#
+#       DIRECT J BUILD
+#
+j:	
+	$(MAKE) -C DirectJ
+#
+cj:	
+	$(MAKE) -C DirectJ clean
+#
+pj:	
+	$(MAKE) -C DirectJ purge
 #
 #       QUANTUM CHEMICAL TREE CODE
 #
