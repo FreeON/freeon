@@ -11,7 +11,7 @@ MODULE PrettyPrint
    USE Parse
    USE SetXYZ
    USE InOut
-!  USE Order
+   USE Order
 #ifdef PARALLEL
    USE MondoMPI
 #endif
@@ -601,6 +601,9 @@ MODULE PrettyPrint
      2 FORMAT(72('-'))
      3 FORMAT(72('='))
      END SUBROUTINE Print_CRDS
+
+
+
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !
@@ -818,7 +821,7 @@ MODULE PrettyPrint
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
         REAL(DOUBLE),DIMENSION(5,5)          :: Temp
 !----------------------------------------------------------------------------------------
-        IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+        IF(PrintFlags%Key/=DEBUG_MAXIMUM .AND. &
              PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
 !---------------------------------------------------------------------------------------   
 !       Compute check sum
@@ -827,8 +830,9 @@ MODULE PrettyPrint
            Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
         ENDDO
         Chk=SQRT(Chk) 
+#ifdef PERIODIC
 !---------------------------------------------------------------------------------------   
-!       Compute the Block Error
+!       Compute the Diagonal Block Error
         BlockError=Zero
         DO AtA=1,A%NAtms
            DO P = A%RowPt%I(AtA),A%RowPt%I(AtA+1)-1
@@ -852,6 +856,7 @@ MODULE PrettyPrint
            ENDDO
         ENDDO
         BlockError = SQRT(BlockError/DBLE(A%NAtms))
+#endif
 !
 #ifdef PARALLEL
         IF(MyID==ROOT)THEN
@@ -878,6 +883,7 @@ MODULE PrettyPrint
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
            CALL ClosePU(PU)
+#ifdef PERIODIC
 !--------------------------------------------------------------------------
 !          Create BlockError string
            IF(PRESENT(Proc_O).AND.PrintFlags%Fmt/=DEBUG_MMASTYLE)THEN
@@ -900,13 +906,14 @@ MODULE PrettyPrint
            PU=OpenPU(Unit_O=Unit_O)
            WRITE(PU,'(1x,A)')TRIM(ChkStr)
            CALL ClosePU(PU)
+#endif
 #ifdef PARALLEL
         ENDIF
 #endif
-   END SUBROUTINE Print_CheckSum_BCSR
+      END SUBROUTINE Print_CheckSum_BCSR
 !----------------------------------------------------------------------------------------
 !
-!----------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------   
 #ifdef PARALLEL
    SUBROUTINE Print_CheckSum_DBCSR(A,Name,Proc_O,Unit_O)
       TYPE(DBCSR), INTENT(IN)   :: A
