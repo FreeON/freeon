@@ -186,7 +186,7 @@ cv:
 #----------------------------------------------
 #   Cleaning of other directories 
 #
-pMisc:	pInp pScr pPWD
+pMisc:	pInp pPWD
 #
 pInp:	
 	$(MAKE) -i -C $(MONDO_HOME)/Benchmarks/PROTEINS purge
