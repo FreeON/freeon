@@ -13,8 +13,8 @@
 
 \begin{document}
 
-\title{Linear scaling computation of the Fock matrix VIII. \\
-       Periodic Boundary Conditions for Exact Exchange}
+\title{Linear scaling computation of the Fock matrix. VIII. Periodic \\
+     boundaries, exact exchange and the minimum image condition. }
 
 \author{C. J. Tymczak}
 \author{Valery Weber}
@@ -33,7 +33,7 @@ within the calculation of the exchange matrix. However, in  these methods
 we can show that the calculation of the exchange matrix becomes inconsistent as the
 region of k-space shrinks. This leads to a non-translation-ally invariant exchange matrix,
 which is of major concern. We illustrate this problem and then show how, by a set of
-simple ideas and arguments, we can retifiy it.
+simple ideas and arguments, we can rectify it.
 %
 \vskip 0.07 in
 \noindent{\bf Keywords}: Self-consistent-field, Exact-exchange, Linear-scaling, Gaussian-orbital 
@@ -52,6 +52,7 @@ simple ideas and arguments, we can retifiy it.
 
 
 \section{INTRODUCTION}
+
 Many calculations of the electronic structure of condensed matter systems now make use
 of the exact exchange interaction 
 \cite{CPisani80,REvarestov83,MCausa88,JAlmlof94,RDovesi00}. 
@@ -110,7 +111,9 @@ We solve for the density matrix, ${\bf P}$, via the eigen-equation
 \end{equation}
 and iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
 
-\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Periodic exact exchange}
 
@@ -176,21 +179,25 @@ two Guassians centered at $\bf A$ and $\bf C$ decays also as a Gaussian with $|{
 Truncation based purely on the overlap of Gaussian basis functions is reliable and
 well controlled, leading efficiently to ${\cal O}(N)$ product terms.
 Additionally, the density matrix is known to decay exponentially 
-for non-metalic systems.  A radial cutoff $r_x$ defining the range of allowed exchange 
+for non-metallic systems.  A radial cutoff $r_x$ defining the range of allowed exchange 
 interactions may be used to exploit this fall off {\em a priori} by confining summation over 
 $\bf L$ and ${\bf M}$ \cite{REuwema74,CPisani80,RDovesi80,MCausa88} to only those terms that 
-satisfy the imposed geometric contraints.  Radial cutoffs are also used to achieve
+satisfy the imposed geometric constraints.  Radial cutoffs are also used to achieve
 $N$-scaling of the exchange matrix in gas phase calculations by limiting the allowed range 
 of atom centers $\bf C$ and $\bf D$ corresponding to matrix elements $P_{cd}$\cite{}.  
 
 \pagebreak
-These schemes have been implimented in the
+These schemes have been implemented in the
 {\em ab initio} program CRYSTAL \cite{}, allowing the routine calculation of periodic systems
 with the HF and HF/DFT model chemistries.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
 
-The $\Gamma$-point approximation lifts translational invarience of the Bloch functions, limiting
+The $\Gamma$-point approximation lifts translational invariance of the Bloch functions, limiting
 $\bf k$-space sampling to just the central cell; 
  $\psi^{\bf k}_c \rightarrow \delta_{\bf k,0} \sum_{\bf u} \phi_c ({\bf r}-{\bf u})$.
 With $N$-scaling algorithm, the effects of $\bf k$-space integration may be recouped 
@@ -209,8 +216,8 @@ K_{ab}=
 \end{equation}
 
 However, in this approximation the exact exchange potential, symmetric in the limit of infinite 
-summation, has been asymetically truncated, resulting in a potential that depends on position 
-of the unit cell.  Translational invarience can be restored to the exchange $\Gamma$-point approximation 
+summation, has been asymmetrically truncated, resulting in a potential that depends on position 
+of the unit cell.  Translational invariance can be restored to the exchange $\Gamma$-point approximation 
 by imposing the minimum image criterion (MIC) to the exchange interaction:
 \begin{equation}
 K_{ab}=
@@ -241,42 +248,54 @@ where ${\bf \underline M}$ is the box shape matrix of the unit cell.
 This approach is completely general, and can be used at the primitive level with any modern approach
 to computing two-electron integrals. 
 
-Suprisingly, this work is the first to correctly define the exact Hartree-Fock 
+Surprisingly, this work is the first to correctly define the exact Hartree-Fock 
 exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
-effects related to asymetric truncation may also manifest in methods that perform incomplete 
-$\bf k$-space 
-sampling, and may benifit from employing the minimum image criterion. 
+effects related to asymmetric truncation may also manifest in methods that perform incomplete 
+$\bf k$-space sampling, and may benefit from employing the minimum image criterion. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Implimentation}\label{implimentation}
+\section{Implementation}\label{implementation}
 
-A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implimented in the MondoSCF
+A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implemented in the MondoSCF
 suite of programs for linear scaling programs quantum chemistry.  The program {\sc ONX} \cite{} has been 
-modified by straighforwardly performing double loops over the lattice vectors $\bf v$ and $\bf u$
-arround the original ONX loop structures \cite{}.  Thus, two ordered bra and ket distribution buffers are 
+modified by straightforwardly performing double loops over the lattice vectors $\bf v$ and $\bf u$
+around the original ONX loop structures \cite{}.  Thus, two ordered bra and ket distribution buffers are 
 assembled for each lattice vector pair.   Also the symmetry driven Head-Gordon Pople scheme for 
 computing two-electron integrals, innermost to the ONX loops, has been modified to include the 
-minimum image criterion in the contraction stage of the vertical recurence relations.  While this 
-implimentation is linear scaling and simple, it suffers from a number of drawbacks that we will set 
+minimum image criterion in the contraction stage of the vertical recurrence relations.  While this 
+implementation is linear scaling and simple, it suffers from a number of drawbacks that we will set 
 forth in detail shortly, together with a more efficient algorithm able to achieve scalable parallelism \cite{}.
 
-%
-%
-%
-\suppressfloats
-\begin{table}
-\caption{Comparitive progression of Hartree-Fock $\Gamma$-point supercell calculations 
-applied to magnesium oxide using the 8-511G basis for Magnesium and the 8-51G basis for 
-Oxygen. See Ref.~\cite{MTowlerLib} and references therein for details on these basis sets. 
-Calculations were carried out using periodic {\sc ONX} and other periodic linear scaling
-algorithms in the {\sc MondoSCF} suite described in a companion paper \cite{CTymczak04a}. 
-Comparison is made with $\Gamma$-point values obtained using the {\sc Cyrstal98} program, 
-as well as with a final value approaching the $\bf k$-space integration limit for the 
-primitive cell.  Primitive cubic and triclinic cell coordinates are listed in 
-Appendix~\ref{Coordinates}.  The {\sc Crystal98} values were obtained as 
-described in Ref.~\cite{BCivalleri02}, while the {\sc MondoSCF} values were obtained using 
-the {\it tight} option, defining numerical thresholds delivering numbers precise to the 
-digits quoted.} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Validation}
+
+Periodic Hartree-Fock calculations were carried out using the periodic {\sc ONX} and {\sc QCTC}
+programs from the {\sc MondoSCF} suite of linear scaling quantum chemistry programs.  {\sc ONX} was 
+described in Sections \ref{gammapoint} and \ref{implementation}, while periodic {\sc QCTC} has 
+been introduced in companion paper Ref.~\cite{CTymczak04a}.   Comparison to the 
+Gaussian basis set periodic {\em ab initio} program {\sc Crystal98}.  Differences between the
+two programs are like to arise from several factors.  First, {\sc Crystal98} uses an auxiliary
+fitting basis, while {\sc MondoSCF} does not.  Second, {\sc MondoSCF} uses several numerical 
+thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can change 
+the energy slightly.   In particular, a quadratic, variational dependence of the total energy
+on the  matrix truncation threshold has recently been demonstrated \cite{ANiklasson03}.  Finally, 
+small super-cell calculations will typically be higher than the $\bf k$-space integration limit.
+See Ref.~\cite{MTowlerLib} and references therein for details on these basis sets. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[h]
+\caption{Comparative progression of Hartree-Fock $\Gamma$-point super-cell calculations 
+for MgO using the periodic RHF-MIC and RHF 8-511G/8-51G level of theory.  Comparison is 
+made to a final value approaching the $\bf k$-space integration limit for the primitive cell.}
 \label{MgOTable}
 \begin{tabular}{lrll}
 \toprule
@@ -301,25 +320,40 @@ $^g$Cubic \\
 $^h$Did not converge (See Ref.~\cite{BCivalleri02}) \\
 $^i 8\times8\times8$ $\bf k$-space integration grid  \\
 \end{table}
-%
-%
-%
-\suppressfloats
-\begin{table}
-\caption{
-Comparitive progression of Hartree-Fock $\Gamma$-point supercell calculations 
-applied to proton ordered ice using the 8-51G basis for Oxygen and the 5-11G$^*$ 
-basis for Hydrogen.
-Comparison is made with $\Gamma$-point values obtained using the {\sc Cyrstal98} program, 
-as well as with a final value approaching the $\bf k$-space integration limit for the 
-primitive cell.  The primitive cubic cell coordinates are listed in Appendix~\ref{Coordinates}.
-The {\sc Crystal98} values were obtained as described in Ref.~\cite{PIceProceedure}, while 
-the {\sc MondoSCF} values were obtained using the {\it tight} option, defining numerical 
-thresholds delivering numbers precise to the digits quoted.} 
+
+Table \ref{MgOTable} shows {\sc MondoSCF} $\Gamma$-point super-cell total energies for MgO 
+at the RHF-MIC and RHF-C98 8-511G/8-51G level of theory.  See Ref.~\cite{MTowlerLib} and 
+references therein for details on these basis sets.  Comparison is made between RHF
+$\Gamma$-point values obtained using the {\sc Cyrstal98} program, as well as with a final value 
+approaching the $\bf k$-space integration limit for the primitive cell. 
+Primitive cubic and triclinic cell coordinates for this system are listed in Appendix~\ref{Coordinates}.
+The {\sc Crystal98} values were obtained as described in Ref.~\cite{BCivalleri02}, while the 
+{\sc MondoSCF} values were obtained using the {\it tight} option, defining numerical thresholds 
+delivering numbers precise to the digits quoted (8).  From these numbers, we see a fundamental 
+difference between the RHF-MIC and RHF $\Gamma$-point values for small primitive cells; 
+the periodic RHF-MIC approximation is convergent 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+In Table~\ref{PIceTable}, total energies computed with the RHF-MIC $\Gamma$-point
+super cell approach are listed for proton ordered ice \cite{}, using the 8-51G basis 
+for Oxygen and the 5-11G$^*$ basis for Hydrogen.  A comparison is made to a final 
+value obtained using {\sc Cyrstal98} with a $6\times6\times6$ $\bf k$-space integration grid
+as explained in Ref.~\cite{PIceProceedure}.  The {\sc MondoSCF} values were obtained 
+using the {\it tight} option, defining numerical thresholds that deliver total energies
+precise to the digits quoted (8).  The primitive cubic cell coordinates used in these
+ice calculations are listed in Appendix~\ref{Coordinates}.
+
+\begin{table}[h]
+\caption{Progression of $\Gamma$-point super-cell calculations of proton ordered ice
+at the RHF-MIC/8-51G/5-11G$^*$ level of theory.   Comparison is made to a final value 
+approaching the $\bf k$-space integration limit for the primitive cell.}
 \label{PIceTable}
 \begin{tabular}{lrll}
 \toprule
-Program         & $N_{\rm mol}$              & Energy (au)    & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm H_2O}$\\ 
 \colrule
 {\sc MondoSCF}$^a$  & 2    &  -152.03025  &  -76.01512  \\
                     & 16   &  -1216.3003  &  -76.01877  \\
@@ -333,117 +367,182 @@ Program         & $N_{\rm mol}$              & Energy (au)    & Energy/$N_{\rm a
 $^a \Gamma$-point\\
 $^b 6\times6\times6$ $\bf k$-space integration grid \\
 \end{table}
-%
-%
-%
-\suppressfloats
-\begin{figure}
-\caption{Comparison of the diamond uniform lattice potential computed 
-by MondoSCF using the $\Gamma$-point supercell approximation and by {\sc Crystal98}
-using a two atom unit cell and a ${\bf k}_{max} = (12,12,12)$ integration grid.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Figure~\ref{DiamondLattice} compares the uniform diamond lattice potential computed 
+by MondoSCF using the RHF-MIC $\Gamma$-point super-cell approximation to a {\sc Crystal98}
+calculation using a two atom unit cell and a $12 \times 12 \times 12 ~{\bf k}$-space integration grid.
 The {\sc MondoSCF} curves have been carried out with 64 atoms using {\it tight}
 numerics, and with 512 atoms using a {\it loose} level of accuracy, but with the matrix
-threshold further reduced to $\tau=10^{-3}$.  
-All calculations were carried out with a slightly 
-modified 6-21G$^*$ basis set (see text) using Hartree-Fock theory.
-The minium in the potentials where $3.415$\AA $\,\,$ for the {\sc Crystal98} calculation, $3.421$\AA $\,\,$
-for the {\sc MondoSCF} calculation with 64 atoms per unit cell, and  $3.4151$\AA $\,\,$  for the
-{\sc MondoSCF} calculation with 512 atoms per unit cell. }
-\resizebox*{3.5in}{!}{\includegraphics{Diamond_En_vs_a.ps}}\label{CarbonEnergyVsLattice}
+threshold further loosened to $\Huge \tau_{\rm \scriptscriptstyle MTRIX}=10^{-3}$. 
+This modified level of approximation has been used to achieve the linear scaling shown 
+in Fig.~\ref{DiamondScaling}. All calculations were carried out with a modified 6-31G basis set, 
+with the most diffuse $sp$ exponent increased to 0.4, bringing the condition number 
+of the overlap matrix into an acceptable range.  The computed lattice constants 
+for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
+the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{Diamond_En_vs_a.ps}}
+\caption{The uniform diamond lattice potential, computed by {\sc MondoSCF} using 
+RHF-MIC with a slightly modified 6-31G basis.  The {\sc Crystal98} curve was computed
+using a two atom unit cell and $12 \times 12 \times 12~{\bf k}$-space integration grid.
+{\bf CJ, please relable MondoSCF(64,tight), MondoSCF(512,loose), Crystal98(12x12x12)}
+{\bf CJ, looks like the bounding box is fucked up here}
+}
+\label{DiamondLattice}
 \end{figure}
-%
-%
-%
-\suppressfloats
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{figure}
-\caption{The unrelaxed, uniaxial lattice potential of proton ordered ice \cite{}
-in the $a$ direction (see Appendix \ref{Coordinates} for the coordinate system).  
-Comparison is made between a 250 molecule $\Gamma$-point supercell calculation performed 
-with {\sc MondoSCF} and {\sc Crystal98} calculations carried out with a two molecule primitive
-cell using a~$6\times6\times6$ $\bf k$-space integration grid, the 8-51G basis for Oxygen and the 
-5-11G$^*$ basis for Hydrogen.  The {\sc MondoSCF} {\it tight} option was used, delivering 
-a relative accuracy of 8 digits. The minium in the potential for the {\sc Crystal98} is $7.144$\AA $\,\,$ 
-and  for the {\sc MondoSCF} calculation  $7.145$\AA.}
+\caption{The unrelaxed, uniaxial lattice potential of proton ordered ice \cite{}.
+Comparison is made between a RHF-MIC/8-51G/5-11G$^*$ 250 molecule $\Gamma$-point super-cell 
+calculation and a {\sc Crystal98} calculation carried out with a two molecule primitive
+cell using a~$6\times6\times6$ $\bf k$-space integration grid.
+{\bf CJ, please relabel it MondoSCF(250) and Crystal98(6x6x6)} }
 \resizebox*{3.5in}{!}{\includegraphics{pIce_En_vs_a.ps}}\label{IceEnergyVsLattice}
 \end{figure}
 
+Figure~\ref{IceEnergyVsLattice} shows the unrelaxed, uniaxial lattice potential of 
+proton ordered ice \cite{} in the $a$ direction (see Appendix \ref{Coordinates} for the coordinate system).  
+Comparison is made between a 250 molecule RHF-MIC $\Gamma$-point super-cell calculation performed 
+with {\sc MondoSCF} and {\sc Crystal98} calculations carried out with a two molecule primitive
+cell using a~$6\times6\times6$ $\bf k$-space integration grid, the 8-51G basis for Oxygen and the 
+5-11G$^*$ basis for Hydrogen.  The {\sc MondoSCF} {\it tight} option was used, delivering 
+a relative accuracy of 8 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
+and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
-\section{Validation}
-
-Periodic Hartree-Fock calculations were carried out using the periodic {\sc ONX} and {\sc QCTC}
-programs from the {\sc MondoSCF} suite of linear scaling quantum chemistry programs.  {\sc ONX} was 
-described in Sections \ref{gammapoint} and \ref{implimentation}, while periodic {\sc QCTC} has 
-been introduced in companion paper Ref.~\cite{CTymczak04a}.   Comparison to the 
-Gaussian basis set periodic {\em ab initio} program {\sc Crystal98}.  Differences between the
-two programs are like to arise from several factors.  First, {\sc Crystal98} uses an auxiliary
-fitting basis, while {\sc MondoSCF} does not.  Second, {\sc MondoSCF} uses several numerical 
-thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can change 
-the energy slightly.   In particular, a quadratic, variational dependence of the total energy
-on the  matrix truncation threshold has recently been demonstrated \cite{ANiklasson03}.  Finally, 
-small supercell calculations will typically be higher than the $\bf k$-space integration limit.
-See Ref.~\cite{MTowlerLib} and references therein for details on these basis sets. 
-
-Table \ref{MgOTable} shows our results for the total
-energy for Magnesium Oxide as compared to results obtained from \textbf{Crystal98}.
-for the STO-3G basis set for increasing system size. We see that we obtain excellent
-convergence to the {\bf Crystal98} large ${\bf k}$-space calculation. This verifies that
-our methodology for doing the exchange matrix at the Gamma point is correct, and converges 
-in the correct fashion in regard to increasing system size. In table \ref{PIceTable}
-we show the convergence of the proton ordered ice system as compared to results obtained from 
-\textbf{Crystal98} using a more accurate crystal optimized basis set. Again we see excellent
-agreement with the \textbf{Crystal98} results.
-%
-%
-%
-\suppressfloats
-\begin{figure}
-\caption{Scaling results for the exchange matrix build, the coulomb matrix
-build (scaled by ten), and the density matrix solver (scaled by twenty),  
-for the dense diamond periodic system up to 800 atoms using the
-6-31G$ ^\dagger$ basis set.}
-\label{figure:Scaling_Matrix_Build}
-{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
-\end{figure}
-%
-\begin{figure}
-\caption{Scaling results for the exchange matrix build, coulomb matrix
-build and the density matrix solver  for the proton ordered ice periodic system up to 432 water molecules 
-using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of $\tau=10^{-4}$.}
-\label{figure:Scaling_Matrix_Build_Ice}
-{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
-\end{figure}
-%
-\begin{figure}[p]
-\caption{Scaling results for the exchange matrix
-build  for the proton ordered ice periodic system up to 432 water molecules 
-using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of 
-$\tau=10^{-4}$ and  $\tau=10^{-6}$.}
-\label{figure:Scaling_Matrix_Build_Ice}
-{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
-\end{figure}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Scaling}
- 
-Figure \ref{figure:Scaling_Matrix_Build} is the time it takes to build the
-exact exchange matrix  \( K_{x} \) for the periodic diamond system up to 800 atoms for the modified pople 
-basis set 6-31G$ ^\dagger$ \cite{Pople92} and for a matrix thresholding of $\tau=10^{-3}$ .
-Also included in the figure for comparision are the total time for the
-density matrix solver, TRS4 \cite{ANiklasson03}, 
-and the Coulomb matrix build using our Quantum chemical treee code \cite{CTymczak04c}. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\ref{figure:EnergyVsLattice}
-%We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
-%in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
-%Again we see the convergence of the total energy
-%as a function of increasing system size, which is akin to k-space integration.
-%We also see that our relative error is very well controlled within the \
-%textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
+\begin{figure}[h]
+\caption{CPU time for the exchange, Coulomb (scaled by 10)  and density 
+matrix build (scaled by 20) of diamond using {\it loose} thresholding 
+at the RHF-MIC/6-31G level of theory.
+{\bf CJ, please change "solver" to "solve"}
+{\bf CJ, looks like the bounding box is fucked up here}
+}\label{DiamondScaling}
+\resizebox*{3.5in}{!}{\includegraphics{Timing_Diamond_ONX.ps}}
+\end{figure}
 
+In Fig.~\ref{DiamondScaling}, linear scaling is shown for diamond for 
+building the exact exchange matrix, the Coulomb matrix, and solving for the density matrix. 
+A modified 6-31G basis set was used, where the most diffuse $sp$ exponent was increased to 
+0.4, bringing the condition number of the overlap matrix into an acceptable range.  A 
+{\it loose} thresholding set (described in Appendix~\ref{Thresholds}) was used, with 
+the matrix threshold further loosened to $\Huge \tau_{\rm \scriptscriptstyle MTRIX}=10^{-3}$.  
+This was required to achieve a more aggressive truncation of the density matrix and an earlier 
+onset of linear scaling for {\sc ONX}.  This level of approximation was used to generate 
+the 512 atom lattice potential curve in Fig.~\ref{DiamondLattice}. While using tighter thresholds 
+leads to more accurate results, it also postpones the onset of linear scaling. Because the 
+calculations involving 800 atoms were just under the 4Gb available, it was important to 
+demonstrate an early onset of linear scaling.  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h]
+\caption{CPU time for the exchange, Coulomb and density 
+matrix build (scaled by 10) of proton ordered ice using {\it tight}
+thresholding at the RHF-MIC/8-51G/5-11G$^*$ level of theory.
+{\bf CJ, please change "solver" to "solve"}
+{\bf CJ, looks like you could continue the TRS4 line fit to 50 atoms.  That would be cool.}
+{\bf CJ, looks like the bounding box is fucked up here}
+}
+\label{IceScaling}
+{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
+\end{figure}
+
+Figure~\ref{IceScaling} shows linear scaling for the exchange, Coulomb and density matrix
+construction of proton ordered ice \cite{} using {\it tight} thresholds, the 8-51G basis set
+for Oxygen and the 5-11G$^*$ basis set for Hydrogen.  An early onset of linear scaling 
+is observed at about 50 water molecules, which is similar to the onset achieved in the gas 
+phase \cite{ANiklasson03}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{DISCUSSION}
+
+A basic difference between the periodic {\sc MondoSCF} algorithms demonstrated 
+here and other reduced scaling methods involving Gaussian basis functions is the 
+ability to achieve true linear scaling for three-dimensional systems.  At the risk
+of repetition; two-dimensions is trivial, three-dimensions is hard.  Another unique
+feature of the linear scaling {\sc MondoSCF} algorithms is the use of continuous
+thresholds that set cost to accuracy ratios on the fly.  Thus, as the gap closes and
+a material heads toward a conducting state, periodic {\sc ONX} and {\sc TRS4} will
+properly revert to ${\cal O}(N^2)$ and ${\cal O}(N^3)$ algorithms respectively.  This
+should be compared with other approaches that use radial cutoffs to determine {\em a priori} 
+the sparse matrix structure, range of exchange interactions, etc. 
+
+Even for diamond, which is problematic due to its density, linear scaling was achieved.  
+Albeit at the limit of utility, these {\it loose} $\Gamma$-point super-cell calculations were 
+able to deliver lattice constants identical to those obtained with traditional 
+$\bf k$-space integration methods.  More efficient data structures for sparse 
+matrix representation and a more efficient reformulation of {\sc ONX} will allow 
+tighter calculations for difficult systems like diamond well beyond this mark, 
+as will data parallelism.  
+
+For less dense systems such as ice, the periodic {\sc MondoSCF} algorithms handily 
+achieve an early onset of linear scaling using {\it tight} thresholding.  With parallelism,
+this opens the prospect of performing hybrid HF/DFT simulations of fluids. 
+
+It is also important that we have demonstrated convergence of our $\Gamma$-point
+super-cell calculations with the well established {\bf k}-space integration methods
+in {\sc Crystal98} to within 8 digits.  We have not carried out calculations involving 
+{\it d}-functions, because the use of fitting functions in {\sc Crystal98} makes a 
+direct comparison more difficult.  We note important differences between the 
+conventional truncation criteria employed in the {\sc Crystal98} $\Gamma$-point
+approximation and the Hartree-Fock Minimum Image Condition developed in Section 
+\ref{gammapoint}.  These differences diminish with increasing cell size and larger 
+{\bf k}-space integration grids, following a surface to volume relationship 
+as might be expected.  Nevertheless, achieving high order translational invariance 
+with the $\Gamma$-point approximation is likely to be important in {\em ab initio} 
+molecular dynamics simulations employing the HF or HF/DFT model chemistries.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{CONCLUSIONS}
-We have shown a consistent derivation for the exact exchange integrals at the $\Gamma$-point. 
+
+A new translationaly invariant definition of the periodic Hartree-Fock 
+$\Gamma$-point approximation has been introduced, based on inserting 
+the Minimum Image Condition (MIC) into the contraction phase of periodically
+summed two-electron integral algorithms.  This HF-MIC approach has been used 
+to extend the {\sc ONX} algorithm for linear scaling computation of the exchange 
+matrix to periodic boundary conditions.  Convergence of the HF-MIC $\Gamma$-point
+super-cell approximation to the $\bf k$-space integration limit has been 
+demonstrated for MgO and ice to better than 8 digits.  Differences between
+the simply truncated $\Gamma$-point approximation implemented in the 
+{\sc Crystal98} program and the HF-MIC were observed for small cells, but
+largely disappear with increasing size. Linear scaling was demonstrated for
+diamond and ice, including MIC-exchange, Coulomb and density matrix 
+construction.   
+
+We believe this work is the first proper definition of the $\Gamma$-point
+Hartree-Fock potential, as well as the first demonstration of linear scaling
+for periodic Hartree-Fock calculations.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{ACKNOWLEDGMENTS}
 
@@ -451,8 +550,16 @@ We would like to acknowledge Tommy Sewell and Ed Kober for there advise
 and support. We would also like to thank Anders Niklasson for his help
 in preparation of this manuscript. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \bibliographystyle{apsrmp} 
 \bibliography{mondo_new} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix
 
@@ -541,9 +648,10 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 \end{tabular}}
 \end{table}
 
-%
-%
-%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Threshold Definitions}\label{Thresholds}
 
 \begin{table}[p]
