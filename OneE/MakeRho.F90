@@ -220,8 +220,12 @@ PROGRAM MakeRho
   NDist_old = RhoA%NDist
   CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
-! Fold distributions back into the box; For ForceEvaluation, rho is not foldes
-  IF(SCFActn .NE. 'ForceEvaluation') CALL Fold_Rho_new(GM,RhoA)
+!
+! Fold distributions back into the box; For ForceEvaluation, rho is not folded
+! This is turned off for now inorder to make the lattice force calculation
+! correct
+! IF(SCFActn .NE. 'ForceEvaluation') CALL Fold_Rho_new(GM,RhoA)
+!
 #ifdef MMech
 ! Compute integrated electron and nuclear densities
   IF(HasQM()) THEN
