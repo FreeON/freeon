@@ -91,10 +91,9 @@ CONTAINS
                         DoMIX,RebuildPostMIX,Automatic1,Automatic2,EarlyODA
     CHARACTER(LEN=128) :: Tmp
     !----------------------------------------------------------------------------!
-
+    DoMIX=.FALSE.
     IF(cSCF==0)THEN
        DoODA=.TRUE.
-       DoMIX=.FALSE.
        DoDIIS=.FALSE.
        Automatic1=.TRUE.
        Automatic2=.TRUE.
@@ -695,7 +694,7 @@ CONTAINS
     ENDIF
     ! Kinetic energy matrix T
     CALL Invoke('MakeT',N,S,M)
-    IF(B%BSets(cBAS,1)%HasECPs)THEN
+    IF(B%BSets(1,cBAS)%HasECPs)THEN
        ! Make the ECP matrix U 
        CALL Invoke('MakeU',N,S,M)
     ENDIF
@@ -729,7 +728,7 @@ CONTAINS
     CALL Invoke('SForce',N,S,M)
     ! Kinetic energy piece
     CALL Invoke('TForce',N,S,M)
-    IF(B%BSets(cBAS,1)%HasECPs)THEN
+    IF(B%BSets(1,cBAS)%HasECPs)THEN
        ! Compute ECP component of the force
        CALL Invoke('UForce',N,S,M)
     ENDIF

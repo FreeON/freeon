@@ -214,7 +214,8 @@ MODULE JGen
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
                             ! CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(1:LenHGTF,IA,IB),SPBraC,SPBraS)
-                            CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB),LenHGTF,SPBraC(0),SPBraS(0),LSP(SumEll))
+                            CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB), &
+                                 LenHGTF,SPBraC(0),SPBraS(0),LSP(SumEll))
                             
                             PStrength = Zero
                             DO L=0,EllA+EllB
@@ -270,7 +271,8 @@ MODULE JGen
                                ENDDO
 !                              Far field
                                ! CALL HGToSP(Prim%Zeta,SumEll,HGBra%D(:,IA,IB),SPBraC,SPBraS)
-                               CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB),LenHGTF,SPBraC(0),SPBraS(0),LenSP)
+                               CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB), &
+                                    LenHGTF,SPBraC(0),SPBraS(0),LenSP)
                                DO LM=0,LenSP
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO
