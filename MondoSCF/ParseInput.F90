@@ -168,10 +168,10 @@ MODULE ParseInput
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0 alpha 2                                  ',A1,    &  
+         ' Version 1.0 alpha 3                                  ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, Eric Schwegler,                    ',A1,    &
-         ' C.J. Tymczak and Chee Kwan Gan                       ',A1,    &
+         ' C.J. Tymczak, Chee Kwan Gan and Karoly Nemeth        ',A1,    &
          ' Los Alamos National Laboratory                       ',A1,    & 
          ' Copywrite 2001, University of California.            ',A1)
 !        Write information on host, platform, etc
