@@ -161,9 +161,9 @@ technique, its successful application may require many intricate modifications \
 Recent reviews and comparisons of these algorithms and their technical details can be found in 
 Refs.~\onlinecite{HSchlegel03,VBakken02}.
 
-It is also possible to update the internal coordinate
-Hessian, however this does not allow for the on-the-fly redefinition
-of the internal coordinates, that is important for large molecules.
+It is also possible to update the internal coordinate Hessian. However, this does not allow for 
+on-the-fly redefinition of internal coordinates, which is important when  changes in weak, non-covalent 
+bonds occur due to large amplitude deformations.
 
 Important recent developments of quasi-Newton methods can be found in
 Refs.~\onlinecite{ATurner99,XPrat-Resina02,SBilleter00,JNocedal80}.
@@ -255,16 +255,16 @@ Using this approximate Hessian matrix,
 ABNR carries out a Newton-Raphson or a Rational Function Optimization 
 \cite{ABanerji85} step in the $n$-dimensional subspace. 
 
-Both QUICCA and GDIIS aim on geometry optimization in the iterative
-subspace without building any numerical Hessian matrices, as opposed to
-ABNR. 
+Relative to ABNR, both QUICCA and GDIIS accomplish optimization in the iterative
+subspace without reference to a Hessian. 
 
 In GDIIS, simple relaxation steps are generated using an external optimizer,
-typically involving force relaxation (as described in Section \ref{conventional}) or Rational Function Optimization methods.  These
+typically involving force relaxation (as described in Section \ref{conventional}) or 
+Rational Function Optimization methods.  These
 simple relaxation structures are propagated along an abstract optimization
-coordinate by extrapolating the error associated with them to zero through
-solution of a least squares problem that minimizes errors associated with the
-gradient norm.  GDIIS cannot account for the signed curvature of the potential
+coordinate by extrapolating the errors associated with the
+gradient norm to zero through solution of a least squares problem.
+GDIIS cannot account for the curvature of the potential
 energy surface, and as a consequence,  oscillates in the vicinity of inflexion-points and fails to
 distinguish between minima and saddle points. Furthermore, the extrapolation/interpolation
 process is very sensitive to the condition number of the error matrix. The most recent GDIIS algorithms
@@ -272,16 +272,16 @@ cure these problems through augmenting the Rational Function Optimization scheme
 \cite{FEckert97} or by comparing the GDIIS steps to reference steps
 taken again from a reliable external optimizer \cite{OFarkas02}.
 
-As opposed to GDIIS, QUICCA needs neither simple relaxation
-steps nor external optimizer. Since QUICCA accounts
-for the gradient instead of the gradient norm, it has the capability
-to distinguish between minima, saddles and inflexion points.
-This is due to the weighted curve-fit, that can be applied in any
-kind of coordinate system exhibiting
-reasonably small vibrational coupling. The curve fit avoids 
-numerical problems associated with the condition number
-of the GDIIS error matrix,
-and it also averages noise coming from vibrational coupling.
+While QUICCA reduces the magnitude of each individual gradient directly in an uncoupled internal 
+coordinate approximation, GDIIS corrects the global gradient norm after the fact, employing relaxations 
+provided by an external optimizer.  
+
+Since QUICCA accounts
+for the gradient instead of the gradient norm, it can  distinguish between 
+minima, saddles and inflexion points.  This is due to the weighted curve-fit, which may  
+be applied in any coordinate system exhibiting reasonably small vibrational coupling. 
+The curve fit avoids numerical problems associated with condition number
+of the GDIIS error matrix, and also averages noise from vibrational coupling.
 
 Another method related to QUICCA is the string method from the
 field of reaction-path finding \cite{EWeinan02,BPeters04}
@@ -289,9 +289,7 @@ and other similar algorithms \cite{CGonzalez90} that
 apply curve (spline) fitting of the potential energy surface 
 along the arc of a reaction path. 
 
-Finally, QUICCA can also be considered as a (multidimensional) 
-gradient-based line search method, that explores the potential energy
-surface in directions
+Finally, QUICCA can also be considered as a (multidimensional) gradient-based line search method, that explores the potential energy surface in directions
 exhibiting reasonably small vibrational coupling.
 
 \section{Implementation}\label{implementation}
@@ -630,7 +628,7 @@ for the cases of $n_{fit}=5,7,9$ and $11$, resulting in total optimization
 steps of $188, 187, 192$ and $190$, respectively. 
 Thus, it is clear, that the weigthed curve fit has only a small
 dependence on $n_{fit}$ for small molecules.
-However, a weighted filtering algorithm such as 
+However, a filtering algorithm based on the weights such as 
 the one mentioned in Section~\ref{stepsizectrl}
 may still be useful to provide a more general concept to the 
 number of remembered steps  and the uncertainty of the extrapolation 
@@ -729,7 +727,7 @@ three crystallographic waters, ATP and a fragment of the Protein Kinase Inhibito
 is transfered. This is a model reactant system obtained from Ref.~\onlinecite{GHenkelman04} and is shown in 
 Fig.~\ref{kinasepicture}.  Optimization was performed at the HF/STO-2G level of theory with an 
 approximate absolute energy resolution of $10^{-5}$ hartree using MondoSCF \cite{MondoSCF} at the 
-{\tt tight} accuracy level and with ten peripheral atoms  constrained to mimic steric effects of the enzyme.  
+{\tt TIGHT} accuracy level and with ten peripheral atoms  constrained to mimic steric effects of the enzyme.  
 Note that this minimal level of theory actually makes more work for the optimizer, as it will tend to 
 move away from the more correct crystallographic structure.   This structure was optimized to within a 
 Cartesian force of $3\times10^{-4}$ au and 
