@@ -56,7 +56,7 @@ PROGRAM N4KTest
   TYPE(ONX2OffSt) :: OffSet
 
   REAL(DOUBLE) , DIMENSION(50)          :: RIntCell  ! this should be declared somewhere
-  REAL(DOUBLE) , DIMENSION(38416)       :: C         ! this should be declared somewhere
+  REAL(DOUBLE) , DIMENSION(30**4)       :: C         ! this should be declared somewhere
   REAL(DOUBLE) , DIMENSION(50,50,50,50) :: I
   REAL(DOUBLE) , EXTERNAL               :: DGetAbsMax
   TYPE(ARGMT)                    :: Args
@@ -86,6 +86,7 @@ PROGRAM N4KTest
         ACAtmInfo%Atm12Y=ACAtmInfo%Atm1Y-ACAtmInfo%Atm2Y
         ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
         AC2=(ACAtmInfo%Atm12X)**2+(ACAtmInfo%Atm12Y)**2+(ACAtmInfo%Atm12Z)**2
+        WRITE(*,*)' AtAC = ',AtA,AtC
         CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
         AtBOff=0
         DO AtB=1,NAtoms ! Run over AtB
@@ -97,6 +98,7 @@ PROGRAM N4KTest
            BDAtmInfo%Atm1Z=GM%Carts%D(3,AtB)
            AtDOff=0
            DO AtD=1,NAtoms ! Run over AtD
+!              WRITE(*,*)AtA,AtB,AtC,AtD
               KD=GM%AtTyp%I(AtD)
               NBFD=BS%BfKnd%I(KD)
               BDAtmInfo%K2=KD
@@ -127,6 +129,49 @@ PROGRAM N4KTest
                           DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                           IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
 !                          WRITE(*,*)' IntType = ',ACAtmPair(CFAC)%SP%IntType,BDAtmPair(CFBD)%SP%IntType
+
+#ifdef LDJFLSDFJ
+If(ata==2.and.atb==1.and.atc==1.and.atd==1)then
+! 1 + 4 + 4 + 6 + 1 
+! 1 + 4 + 4 + 6 + 1 + 4 + 4 + 1 =25 (Dxx(2) Px(1)|Dxx(1) Sp(1))
+! 1 + 4 + 4 + 1 = 10
+! 1 + 2 = 3
+!(25,3|10,2)
+!Int2[[ 25,  3, 10,  2]] = -0.6203824563810757*2^( -5); 6262
+!Int2[[ 25,  3, 10,  2]] =  0.5583846467281217*2^( -7); 6361
+!  =============================================
+!  GOOD INT   =    4.3623800525634509E-03
+!  HRR(5,5,1) =    1.3170410392923116E-02
+!  HRR(5)     =    1.3170410392923116E-02
+!  HRR(11)    =   -1.9386951761908872E-02
+!  HRR(5,5,1) =    1.4869504519970716E-02
+!
+
+
+
+   SELECT CASE(IntType)
+   CASE(3020302)
+   CALL IntB3232(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 
+                        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & 
+                        ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & 
+                        OffSet%A  ,1              , & 
+                        OffSet%C-1,NBFA           , & 
+                        OffSet%B-1,NBFA*NBFC      , & 
+                        OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) 
+   CASE(3030301)
+   CALL IntB3331(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 
+                        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & 
+                        ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & 
+                        OffSet%A  ,1              , & 
+                        OffSet%C-1,NBFA           , & 
+                        OffSet%B-1,NBFA*NBFC      , & 
+                        OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) 
+   CASE DEFAULT
+    ! STOP 'MISSED AN INTEGRAL' 
+   END SELECT 
+endif
+#endif
+!
                           INCLUDE 'ERIInclude.Inc'
                           OffSet%D=OffSet%D+DDLen
                        ENDDO ! End blkfunc on D
@@ -136,7 +181,7 @@ PROGRAM N4KTest
                  ENDDO ! End blkfunc on C
                  OffSet%A=OffSet%A+AALen                 !
               ENDDO ! End blkfunc on A
-              CALL SetBigIBlock(AtAOff,AtBOff,AtCOff,AtDOff,NBFA,NBFB,NBFC,NBFD,C(1))
+!              CALL SetBigIBlock(AtAOff,AtBOff,AtCOff,AtDOff,NBFA,NBFB,NBFC,NBFD,C(1))
               AtDOff=AtDOff+NBFD
            ENDDO ! D
            AtBOff=AtBOff+NBFB

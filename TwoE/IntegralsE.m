@@ -53,15 +53,23 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
+Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
+			Return[1]; 
+                        L=LMN[[1]];
+                        M=LMN[[2]];
+                        N=LMN[[3]];
+                        Fct[n_]:=(2 n-1)!!;
+                        X=Fct[L+M+N];
+                        Y=Fct[L]*Fct[M]*Fct[N];
+			Return[Sqrt[X/Y]]];
+
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
 
-Classes = { {0,0},{0,1},{1,1}};
+Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}};
 
-(* Maximal 
-   Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
- *)
+(* Maximal    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}  *)
 
 CType[1]  = "s";
 CType[2]  = "sp";
@@ -71,6 +79,8 @@ CType[10] = "f";
 CType[15] = "g";
 CType[21] = "h";
 CType[28] = "i";
+CType[36] = "j";
+CType[45] = "k";
 
 LC=Length[Classes];
 MxEll = Max[Classes];
@@ -89,98 +99,11 @@ Do[Do[Do[
 
 (**************** THE VRR RELATIONS: THX OS ! ************************)
 
-VRR[a_List,c_List,m_,as_,cs_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2zn,AiO2zn,lmna,lmnc}, 
-
-                              pmin=Position[a,Min[a]][[1, 1]];
-                              qmin=Position[c,Min[c]][[1, 1]];
-
-                              If[ a[[pmin]] < 0 || c[[qmin]] < 0, Return[0] ];                                        
-
-                              TotA=Sum[a[[i]],{i,3}];
-                              TotC=Sum[c[[i]],{i,3}];
-      
-                              If[TotA<=as && TotC<=cs,
-                                 lmna=LMNDex[a[[1]],a[[2]],a[[3]]];                 
-                                 lmnc=LMNDex[c[[1]],c[[2]],c[[3]]];
-                                 Return[
-                                        ToExpression[ StringJoin[ "VRR[",ToString[lmna],",",ToString[lmnc],",",ToString[m],"]"]]
-				       ];
-                                ];
-
-                              p=Position[a,Max[a]][[1, 1]];
-                              q=Position[c,Max[c]][[1, 1]];
-
-			      If[a[[p]]>c[[q]],
-			        (* Taking down ell on bra side *)
-			         If[p == 1, one = {1, 0, 0}; two={2,0,0}; PA=PAx; WP=WPx; ];
-			         If[p == 2, one = {0, 1, 0}; two={0,2,0}; PA=PAy; WP=WPy; ];
-			         If[p == 3, one = {0, 0, 1}; two={0,0,2}; PA=PAz; WP=WPz; ];
-				 Ai1=(a[[p]]-1)*r1x2Z;   (* (a[i]-1)/(2 zeta)   *)
-				 CiO2zn=c[[p]]*HfxZpE;   (* c[i]/(2(zeta+eta)) *)
-                                 a1 = a - one;
-                                 a2 = a - two;
-			         c1 = c - one;                                  
-                                 Return[PA*VRR[a1,c,m,as,cs]+WP*VRR[a1,c,m+1,as,cs]+Ai1*(VRR[a2,c,m,as,cs]-ExZpE*VRR[a2,c,m+1,as,cs]) +CiO2zn*VRR[a1,c1,m+1,as,cs]]
-			       ,(* Taking down ell on ket side *)
-			         If[q == 1, one = {1, 0, 0}; two={2,0,0}; QC=QCx; WQ=WQx;];
-			         If[q == 2, one = {0, 1, 0}; two={0,2,0}; QC=QCy; WQ=WQy;];
-			         If[q == 3, one = {0, 0, 1}; two={0,0,2}; QC=QCz; WQ=WQz;];
-                                 Ci1=(c[[q]]-1)*r1x2E ; (* (c[i]-1)/(2 eta)   *)
-			         AiO2zn=a[[q]]*HfxZpE; (* a[i]/(2(zeta+eta)) *)
-                                 c1 = c - one;
-                                 c2 = c - two;
-                                 a1 = a - one;  
-                                 Return[QC*VRR[a,c1,m,as,cs]+WQ*VRR[a,c1,m+1,as,cs]+Ci1*(VRR[a,c2,m,as,cs]-ZxZpE*VRR[a,c2,m+1,as,cs])+AiO2zn*VRR[a1,c1,m+1,as,cs]]
-                               ];
-                             ];
-
-(**************** THE HRR RELATIONS: THX HGP! ************************)
-
-     HRRKet[a_List,c_List,d_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
-                              pa=Position[a,Max[a]][[1, 1]];
-                              pc=Position[c,Max[c]][[1, 1]];
-                              pd=Position[d,Max[d]][[1, 1]];
-			      (* Exit condition 1 *)
-                              If[ c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];]; 
-			      (* Exit condition 2 *)
-                              If[ d[[pd]]==0,
-                                 adex=LMNDex[a[[1]],a[[2]],a[[3]]];
-                                 cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
-                                 ddex=LMNDex[d[[1]],d[[2]],d[[3]]];
-                                 BarExp=ToExpression[StringJoin["HRR[",ToString[adex],",",ToString[cdex],",",ToString[ddex],"]"]];
-                                 Return[BarExp]
-                                ];
-			      (* Recursion *)
-                              If[pd==1, one = {1, 0, 0}; CD = CDx; ];
-                              If[pd==2, one = {0, 1, 0}; CD = CDy; ];
-                              If[pd==3, one = {0, 0, 1}; CD = CDz; ];
-                              c1=c+one;
-                              d1=d-one;                
-                              Return[HRRKet[a,c1,d1]+CD HRRKet[a,c,d1]]
-                             ];
-
-     HRRBra[a_List,b_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
-                              pa=Position[a,Max[b]][[1, 1]];
-                              pb=Position[b,Max[b]][[1, 1]];
-			      (* Exit condition 1 *)
-                              If[ a[[pa]] < 0 || b[[pb]] < 0 ,Return[0];]; 
-			      (* Exit condition 2 *)
-                              If[ b[[pb]]==0 ,
-                                 adex=LMNDex[a[[1]],a[[2]],a[[3]]];
-				  BarExp=ToExpression[StringJoin["HRR[",ToString[adex],"]"]];
-                                 Return[BarExp]
-                                ];
-			      (* Recursion *)
-                              If[pb==1, one = {1, 0, 0}; AB = ABx; ];
-                              If[pb==2, one = {0, 1, 0}; AB = ABy; ];
-                              If[pb==3, one = {0, 0, 1}; AB = ABz; ];
-                              a1 = a + one;
-                              b1 = b - one;                
-                              Return[ HRRBra[a1, b1] + AB  HRRBra[a, b1]]
-                            ];
 
 
-(* LOAD OPTIMIZING AND FORMATING ROUTINES FOR MMA AND SET ASSOCIATED OPTIONS *)
+(*=============================== 
+                                  LOAD OPTIMIZING AND FORMATING ROUTINES FOR MMA AND SET ASSOCIATED OPTIONS
+                                                                                                            =============================== *)
 
 Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 Get[StringJoin[MondoHome,"/MMA/Format.m"]];
@@ -188,76 +111,20 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->250,AssignBreak->{132," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->5000,AssignBreak->{5000,"         "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
 SetAttributes[AuxR,NHoldAll];
-SetAttributes[VRR,NHoldAll];
+SetAttributes[VRR0,NHoldAll];
+SetAttributes[VRR1,NHoldAll];
+SetAttributes[VRR2,NHoldAll];
 SetAttributes[HRR,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
 SetAttributes[MBarN,NHoldAll];
 
-(* PUT THE TRANSFORMATIONS TO FILE *)
-
-PunchVRRClass[FileName_,BraEll_,KetEll_,VRRDims_]:=Module[{oList,IList,Kount,a,c,CollectList},
-
-(*                         If[BraEll==2&&KetEll==1,kk=1,Return[]]; *)
-
-                         spaces="            ";	 
-			 ClassName=StringJoin["_",CType[IntegralClass[{BraEll,BraEll}]],"0",CType[IntegralClass[{KetEll,KetEll}]],"0"]; 
-
-
-                         TStart=TimeUsed[];
-                         TStartTotal=TStart;
-
-
-CollectList=Flatten[Table[VRR[i,j,m],{i,BraEll},{j,KetEll},{m,BraEll+KetEll}]];
-
-MaxSameEll=Min[BraEll,KetEll];
-
-Print[" MaxSameEll = ",MaxSameEll];
-
-Do[Do[
-If[iell+kell>0,
-      as=Max[0,iell-1];
-      cs=Max[0,kell-1];   
-      TStart=TimeUsed[];oList={" "->""};IList={};Kount = 0;
-      Do[
-         Do[Do[
-               Kount=Kount+1;
-               a={lx[i], my[i], nz[i]};
-               c={lx[k], my[k], nz[k]};
-               vrr=Collect[Expand[VRR[a,c,m,as,cs]],CollectList]; 
-(*
-               vrrList=Coefficient[vrr,CollectList];
-               vrr=Sum[co[vrrList[[i]]] CollectList[[i]],{i,Length[CollectList]}];
-*)
-               IList=Append[IList,vrr];
-               MBarString=StringJoin["VRR(",ToString[i],",",ToString[k],",",ToString[m],")"];
-               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
-           ,{k,LBegin[kell],LEnd[kell]}]
-           ,{i,LBegin[iell],LEnd[iell]}]
-      ,{m,BraEll+KetEll-kell-iell,0,-1}];
-    
-      VRRSubName=StringJoin["VRR",ClassName,"_",CType[IntegralClass[{iell,iell}]],"0",CType[IntegralClass[{kell,kell}]],"0"];
-      MakeList=StringJoin[MakeList,StringJoin[" \\ \n ",VRRSubName,".o"]];
-      VRRSubroutine=StringJoin[VRRSubName,".F90"];
-      OpenWrite[VRRSubroutine];
-      WriteString[FileName,StringJoin[spaces,"! Generating (",CType[IntegralClass[{iell,iell}]],"0|",CType[IntegralClass[{kell,kell}]],"0)^(m) \n"]]; 
-       WriteString[FileName,StringJoin[spaces,"CALL ",VRRSubName,"(VRR) \n"]]; 
-      PunchVRRFront[VRRSubroutine,VRRSubName,BraEll,KetEll];
-      Write[VRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
-      WriteString[VRRSubroutine,StringJoin["END SUBROUTINE ",VRRSubName]];			       
-      Close[VRRSubroutine];
-]
-,{iell,0,BraEll}];
-,{kell,0,KetEll}];
-
-Print["Done. Time total = ",TimeUsed[]-TStartTotal];
-
-];
+(*======================================--  ROUTINE FOR ASSOCIATED INCOMPLETE GAMMA FUNCTIONS F_M(T)  --============================================*)
 
 PunchGammas[Subroutine_,LTot_]:=Block[{WS,FStr,Gammas},
 
@@ -315,180 +182,542 @@ If[L<LTot,WS[StringJoin["  SqInvT=SqInvT*InvT"]]];
 Gammas[LTot];
 ];
 
-(* PUT THE TRANSFORMATIONS TO FILE *)
+(*======================================--  THE OBARA-SAIKA VERTICAL RECURENCE RELATIONS  --============================================*)
 
-PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
-						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
-						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
-						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
-						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
-						 
-						 IList={};
-						 oList={};
-						 Kount = 0;
-                                                 Do[Do[Do[Do[
-                                                 Do[Do[Do[Do[
-                                                             a = {lx[i], my[i], nz[i]};
-                                                             b = {lx[j], my[j], nz[j]};
-                                                             c = {lx[k], my[k], nz[k]};
-                                                             d = {lx[l], my[l], nz[l]};
+VRR2[a_List,c_List,m_,as_,cs_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2zn,AiO2zn,lmna,lmnc}, 
 
-							     (*
+pmin=Position[a,Min[a]][[1, 1]];
+qmin=Position[c,Min[c]][[1, 1]];
+If[ a[[pmin]] < 0 || c[[qmin]] < 0, Return[0] ];                                        
 
-                                                  OffSetString=StringJoin["(OA+",ToString[i-LBegin[il]],")*LDA",
-                                                                         "+(OB+",ToString[j-LBegin[jl]],")*LDB",
-                                                                         "+(OC+",ToString[k-LBegin[kl]],")*LDC",
-                                                                         "+(OD+",ToString[l-LBegin[ll]],")*LDD"];
+TotA=Sum[a[[i]],{i,3}];
+TotC=Sum[c[[i]],{i,3}];
+TotL=TotA+TotC;
+
+If[TotA<=as && TotC<=cs,
+   lmna=LMNDex[a[[1]],a[[2]],a[[3]]];                 
+   lmnc=LMNDex[c[[1]],c[[2]],c[[3]]];
+   Return[ToExpression[StringJoin[ "VRR",ToString[m],"[",ToString[lmna],",",ToString[lmnc],"]"]]]
+  ];
+
+p=Position[a,Max[a]][[1, 1]];
+q=Position[c,Max[c]][[1, 1]];
+If[a[[p]]>c[[q]],
+   (* Taking down ell on bra side *)
+   If[p == 1, one = {1, 0, 0}; two={2,0,0}; PA=PAx; WP=WPx; ];
+   If[p == 2, one = {0, 1, 0}; two={0,2,0}; PA=PAy; WP=WPy; ];
+   If[p == 3, one = {0, 0, 1}; two={0,0,2}; PA=PAz; WP=WPz; ];
+   Ai1=(a[[p]]-1)*r1x2Z;   (* (a[i]-1)/(2 zeta)   *)
+   CiO2zn=c[[p]]*HfxZpE;   (* c[i]/(2(zeta+eta)) *)
+   a1 = a - one;
+   a2 = a - two;
+   c1 = c - one;                                  
+   Return[PA*VRR[a1,c,m,as,cs]+WP*VRR[a1,c,m+1,as,cs]+Ai1*(VRR[a2,c,m,as,cs]-ExZpE*VRR[a2,c,m+1,as,cs]) +CiO2zn*VRR[a1,c1,m+1,as,cs]]
+  ,(* Taking down ell on ket side *)
+   If[q == 1, one = {1, 0, 0}; two={2,0,0}; QC=QCx; WQ=WQx;];
+   If[q == 2, one = {0, 1, 0}; two={0,2,0}; QC=QCy; WQ=WQy;];
+   If[q == 3, one = {0, 0, 1}; two={0,0,2}; QC=QCz; WQ=WQz;];
+   Ci1=(c[[q]]-1)*r1x2E ; (* (c[i]-1)/(2 eta)   *)
+   AiO2zn=a[[q]]*HfxZpE; (* a[i]/(2(zeta+eta)) *)
+   c1 = c - one;
+   c2 = c - two;
+   a1 = a - one;  
+   Return[QC*VRR[a,c1,m,as,cs]+WQ*VRR[a,c1,m+1,as,cs]+Ci1*(VRR[a,c2,m,as,cs]-ZxZpE*VRR[a,c2,m+1,as,cs])+AiO2zn*VRR[a1,c1,m+1,as,cs]]
+  ];
+];
+
+VRR[a_List,c_List,m_,Ell_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2zn,AiO2zn,lmna,lmnc}, 
+
+pmin=Position[a,Min[a]][[1, 1]];
+qmin=Position[c,Min[c]][[1, 1]];
+If[ a[[pmin]] < 0 || c[[qmin]] < 0, Return[0] ];                                        
+
+TotA=Sum[a[[i]],{i,3}];
+TotC=Sum[c[[i]],{i,3}];
+TotL=TotA+TotC;
+
+If[TotL<=Ell,
+   lmna=LMNDex[a[[1]],a[[2]],a[[3]]];                 
+   lmnc=LMNDex[c[[1]],c[[2]],c[[3]]];
+   Return[ToExpression[StringJoin[ "VRR",ToString[m],"[",ToString[lmna],",",ToString[lmnc],"]"]]]
+  ];
+
+p=Position[a,Max[a]][[1, 1]];
+q=Position[c,Max[c]][[1, 1]];
+If[a[[p]]>c[[q]],
+   (* Taking down ell on bra side *)
+   If[p == 1, one = {1, 0, 0}; two={2,0,0}; PA=PAx; WP=WPx; ];
+   If[p == 2, one = {0, 1, 0}; two={0,2,0}; PA=PAy; WP=WPy; ];
+   If[p == 3, one = {0, 0, 1}; two={0,0,2}; PA=PAz; WP=WPz; ];
+   Ai1=(a[[p]]-1)*r1x2Z;   (* (a[i]-1)/(2 zeta)   *)
+   CiO2zn=c[[p]]*HfxZpE;   (* c[i]/(2(zeta+eta)) *)
+   a1 = a - one;
+   a2 = a - two;
+   c1 = c - one;                                  
+   Return[PA*VRR[a1,c,m,Ell]+WP*VRR[a1,c,m+1,Ell]+Ai1*(VRR[a2,c,m,Ell]-ExZpE*VRR[a2,c,m+1,Ell]) +CiO2zn*VRR[a1,c1,m+1,Ell]]
+  ,(* Taking down ell on ket side *)
+   If[q == 1, one = {1, 0, 0}; two={2,0,0}; QC=QCx; WQ=WQx;];
+   If[q == 2, one = {0, 1, 0}; two={0,2,0}; QC=QCy; WQ=WQy;];
+   If[q == 3, one = {0, 0, 1}; two={0,0,2}; QC=QCz; WQ=WQz;];
+   Ci1=(c[[q]]-1)*r1x2E ; (* (c[i]-1)/(2 eta)   *)
+   AiO2zn=a[[q]]*HfxZpE; (* a[i]/(2(zeta+eta)) *)
+   c1 = c - one;
+   c2 = c - two;
+   a1 = a - one;  
+   Return[QC*VRR[a,c1,m,Ell]+WQ*VRR[a,c1,m+1,Ell]+Ci1*(VRR[a,c2,m,Ell]-ZxZpE*VRR[a,c2,m+1,Ell])+AiO2zn*VRR[a1,c1,m+1,Ell]]
+  ];
+];
+
+(* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  *)
+
+PunchVRRCalls[FileName_,BraEll_,KetEll_]:=Module[{spaces,CLenBra,CLenKet,CLenEhm},
+spaces="            ";	 
+CLenBra=ToString[LEnd[BraEll]];
+CLenKet=ToString[LEnd[KetEll]];
+CLenEhm=ToString[BraEll+KetEll];
+Do[Do[
+If[iell+kell>0,
+   VRRSubName=StringJoin["VRR",CType[IntegralClass[{iell,iell}]],"0",CType[IntegralClass[{kell,kell}]],"0"];
+   Do[
+      WriteString[FileName,StringJoin[spaces,"! Generating (",CType[IntegralClass[{iell,iell}]],"0|", \
+                                                              CType[IntegralClass[{kell,kell}]],"0)^(",ToString[m-1],") \n"]]; 
+      WriteString[FileName,StringJoin[spaces,"CALL ",VRRSubName,"(",CLenBra,",",CLenKet,",VRR(1,1,",ToString[m-1],"),VRR(1,1,",ToString[m],")) \n"]]; 
+     ,{m,BraEll+KetEll-(iell+kell)+1,1,-1}];
+  ]
+,{iell,0,BraEll}];
+,{kell,0,KetEll}];
+];
+
+(* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  *)
+
+PunchVRRFront[Subroutine_,Subname_]:=Block[{WS,BKType,LenBra,LenKet},
+WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(LB,LK,VRR0,VRR1) \n"]];
+WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
+WS["USE DerivedTypes"];
+WS["USE VScratchB"];
+WS["USE GlobalScalars"];
+WS["IMPLICIT REAL(DOUBLE) (W)"]; 
+WS["INTEGER :: LB,LK"];
+WS[StringJoin["REAL(DOUBLE), DIMENSION(1:LB,1:LK) :: VRR0,VRR1"]];
+];
+
+(* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  *)
+
+PunchVRRClass[BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c,CollectList},
+
+spaces="            ";	 
+TStart=TimeUsed[];
+TStartTotal=TStart;
+(* CollectList=Flatten[Table[VRR[i,j,m],{i,BraEll},{j,KetEll},{m,BraEll+KetEll}]]; *)
+MaxSameEll=Min[BraEll,KetEll];
+Do[Do[
+If[iell+kell>0,
+   TStart=TimeUsed[];
+   as=Max[0,iell-1];
+   cs=Max[0,kell-1];   
+   TStart=TimeUsed[];oList={" "->""};IList={};Kount = 0;
+   Do[Do[
+         Kount=Kount+1;
+         a={lx[i], my[i], nz[i]};
+         c={lx[k], my[k], nz[k]};
+         vrr=VRR[a,c,0, kell+iell-1];
+
+(*       vrrList=Coefficient[vrr,CollectList];
+         vrr=Sum[co[vrrList[[i]]] CollectList[[i]],{i,Length[CollectList]}];*)
+         IList=Append[IList,vrr];
+         MBarString=StringJoin["VRR0(",ToString[i],",",ToString[k],")"];
+         oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
+    ,{k,LBegin[kell],LEnd[kell]}]
+    ,{i,LBegin[iell],LEnd[iell]}];
+
+   VRRSubName=StringJoin["VRR",CType[IntegralClass[{iell,iell}]],"0",CType[IntegralClass[{kell,kell}]],"0"];
+   MakeList=Append[MakeList,StringJoin[VRRSubName,".o"]];
+   RelsList=Append[RelsList,StringJoin[VRRSubName,".x"]];
+   VRRSubroutine=StringJoin[VRRSubName,".F90"];
+   OpenWrite[VRRSubroutine];
+   PunchVRRFront[VRRSubroutine,VRRSubName];
+   Write[VRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
+   WriteString[VRRSubroutine,StringJoin["END SUBROUTINE ",VRRSubName]];			       
+   Close[VRRSubroutine];
+   Print["Done with ",VRRSubName," Time = ",TimeUsed[]-TStart];
+  ]
+,{iell,0,BraEll}];
+,{kell,0,KetEll}];
+];
+
+(*======================================--  VRR 2 HRR CONTRACTION STEP (A FUCKING BITCH IF SP) --==========================================*)
+
+PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,bra,ket},
+
+      WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
+
+      WS["      ! Contracting ... "] ;
+
+      BEnd=LEnd[LBra];
+      KEnd=LEnd[LKet];
+      LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]];
+      LenI1=LBegin[Classes[[ic,2]]]-1;
+      LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]];
+      LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]];
+      LenK1=LBegin[Classes[[kc,2]]]-1;
+      LenL=LEnd[Classes[[lc,2]]]-LBegin[Classes[[lc,1]]];
+
+      WS[StringJoin["      CALL DBLAXPY(",ToString[BEnd*KEnd],",HRR(1,1,1),VRR(1,1,0))"]];
 
 
-                                              Kount = Kount + 1;
-                                              IList=Append[IList,ZippyForPres];
-                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+      Do[
+         lb=lx[bra];
+         mb=my[bra];
+         nb=nz[bra];
+         braell=lb+mb+nb;
+         Do[
+	    lk=lx[ket];
+            mk=my[ket];
+            nk=nz[ket];
+            ketell=lk+mk+nk;
+	    BraAd1=bra;BraAd2=bra;
+            KetAd1=ket;KetAd2=ket;
+            BraCo1="";BraCo2="";
+            KetCo1="";KetCo2="";
 
-							      *)
+            (* Bra addressing scheme for auxiliary SP integrals *)
+            (* OFF SET:        1            LenI |  1    LenJ   *)
+            (* TARGET CLASSS:  SiS or SiSj  FiS  |  SSj   SFj   *)
+            (*                |   Address 1      |  Address 2   *)
 
-                                              Kount = Kount + 1;
-                                              IList=Append[IList,HRR[a,b,c,d]];
-					      HRRAddress=StringJoin[ToString[i],",",ToString[j],",",ToString[k],",",ToString[l]];
-                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["HRR(",HRRAddress,")"]];
+            BK00=StringJoin[ToString[bra],",",ToString[ket],","];
+	    (*
+            WS[StringJoin["      HRR(",BK00,"1)=HRR(",BK00,"1)+VRR(",BK00,"0)"]];
+	     *)
+
+	    (* ----------------------------------------------------------------------------------------*)
+            If[ic==2 && jc!=2 && braell <= Classes[[jc,2]] , BraCo1="SpFnB*" ; BraAd1=BEnd+bra];
+            If[kc==2 && lc!=2 && ketell <= Classes[[lc,2]] , KetCo1="SpFnK*" ; KetAd1=KEnd+ket];
+
+            If[ic!=2 && jc==2 && braell == Classes[[ic,1]] , BraCo2="FnSpB*" ; BraAd2=BEnd+bra-LenI1];
+            If[kc!=2 && lc==2 && ketell == Classes[[kc,1]] , KetCo2="FnSpK*" ; KetAd2=KEnd+ket-LenK1];
+
+	    If[ BraCo1!=""&&KetCo1=="",
+                BK11=StringJoin[ToString[BraAd1],",",ToString[KetAd1],","];
+	    WS[StringJoin["      HRR(",BK11,"1)=HRR(",BK11,"1)+",BraCo1,KetCo1,"VRR(",BK00,"0)"]];
+              ];
+
+            If[BraCo1==""&&KetCo1!="",
+                BK11=StringJoin[ToString[BraAd1],",",ToString[KetAd1],","];
+	    WS[StringJoin["      HRR(",BK11,"1)=HRR(",BK11,"1)+",BraCo1,KetCo1,"VRR(",BK00,"0)"]];
+              ];
+
+	    If[BraCo2!=""&&KetCo2=="",
+                BK22=StringJoin[ToString[BraAd2],",",ToString[KetAd2],","];
+	    WS[StringJoin["      HRR(",BK22,"1)=HRR(",BK22,"1)+",BraCo2,KetCo2,"VRR(",BK00,"0)"]];
+              ];
+
+	    If[BraCo2==""&&KetCo2!="",
+                BK22=StringJoin[ToString[BraAd2],",",ToString[KetAd2],","];
+	    WS[StringJoin["      HRR(",BK22,"1)=HRR(",BK22,"1)+",BraCo2,KetCo2,"VRR(",BK00,"0)"]];
+              ];
+
+	    (* ----------------------------------------------------------------------------------------*)
+	    If[ BraCo2 != "" && KetCo2 != "" || BraCo1 != "" && KetCo1 != ""  ,
+                BK12=StringJoin[ToString[BraAd1],",",ToString[KetAd2],","];
+                BK21=StringJoin[ToString[BraAd2],",",ToString[KetAd1],","];
+                WS[StringJoin["      HRR(",BK12,"1)=HRR(",BK12,"1)+",BraCo1,KetCo2,"VRR(",BK00,"0)"]]
+                WS[StringJoin["      HRR(",BK21,"1)=HRR(",BK21,"1)+",BraCo2,KetCo1,"VRR(",BK00,"0)"]]
+              ];
+
+	    (* ----------------------------------------------------------------------------------------*)
+            BraCo1="";
+            BraCo2="";
+            KetCo1="";
+            KetCo2="";
+	    (* ----------------------------------------------------------------------------------------*)
+            If[ic==2 && jc==2 ,
+               If[braell == 0               , BraCo1="SpSpB*" ; BraAd1=BEnd+bra;
+                                              BraCo2="SpFnB*" ; BraAd2=BEnd+LenI+bra+1];
+               If[braell == Classes[[jc,2]] , BraCo1="FnSpB*" ; BraAd1=BEnd+bra;
+                                              BraCo2="SpFnB*" ; BraAd2=BEnd+LenI+bra+1];
+               ];
+            If[kc==2 && lc==2,
+               If[ketell == 0               , KetCo1="SpSpK*" ; KetAd1=KEnd+ket;
+                                              KetCo2="SpFnK*" ; KetAd2=KEnd+LenK+ket+1];
+               If[ketell == Classes[[lc,2]] , KetCo1="FnSpK*" ; KetAd1=KEnd+ket;
+                                              KetCo2="SpFnK*" ; KetAd2=KEnd+LenK+ket+1];
+	      ];
+	    If[ BraCo1 != "" && KetCo2 != "" , 
+                BK12=StringJoin[ToString[BraAd1],",",ToString[KetAd2],","];
+                WS[StringJoin["      HRR(",BK12,"1)=HRR(",BK12,"1)+",BraCo1,KetCo2,"VRR(",BK00,"0)"]]
+              ];
+	    If[ BraCo1 != "" && KetCo1 != "" , 
+                BK11=StringJoin[ToString[BraAd1],",",ToString[KetAd1],","];
+                WS[StringJoin["      HRR(",BK11,"1)=HRR(",BK11,"1)+",BraCo1,KetCo1,"VRR(",BK00,"0)"]]
+              ];
+	    If[ BraCo2 != "" && KetCo1 != "" , 
+                BK21=StringJoin[ToString[BraAd2],",",ToString[KetAd1],","];
+                WS[StringJoin["      HRR(",BK21,"1)=HRR(",BK21,"1)+",BraCo2,KetCo1,"VRR(",BK00,"0)"]]
+              ];
+	    If[ BraCo2 != "" && KetCo2 != "" , 
+                BK22=StringJoin[ToString[BraAd2],",",ToString[KetAd2],","];
+                WS[StringJoin["      HRR(",BK22,"1)=HRR(",BK22,"1)+",BraCo2,KetCo2,"VRR(",BK00,"0)"]]
+              ];
+	    (* ----------------------------------------------------------------------------------------*)
+        ,{ket,1,LEnd[LKet]}]
+        ,{bra,1,LEnd[LBra]}]; 
+      WS["   ENDDO ! (M0| loop"];            					 
+      WS["ENDDO ! |N0) loop"];            					 
+];
 
 
-                                                ,{i,LBegin[il],LEnd[il]}]
-                                                ,{j,LBegin[jl],LEnd[jl]}]
-                                                ,{k,LBegin[kl],LEnd[kl]}]
-                                                ,{l,LBegin[ll],LEnd[ll]}]
-                                                ,{il,imin,imax}]
-                                                ,{jl,jmin,jmax}]
-                                                ,{kl,kmin,kmax}]
-                                                ,{ll,lmin,lmax}];
+(*======================================--  BRA HRR --============================================*)
 
-						 oList=Append[oList,{" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz","In"->"INTGRL"}];
-						 oList=Flatten[oList];
+PunchBraHRRFront[Subroutine_,Subname_,ic_,jc_]:=Block[{WS,BKType,LenBra,LenKet},
+ WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(OA,OB,LDA,LDB,CDOffSet,HRR,INTGRL) \n"]];
 
-						 Print[oList];
-						 Print[IList];
+ imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+ jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
 
-                                                Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
-                                               ];
+ LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]];
+ LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]];
+
+ BEnd=LEnd[imax+jmax];
+
+ BraMax=BEnd;
+
+ WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
+ WS["USE DerivedTypes"];
+ WS["USE VScratchB"];
+ WS["USE GlobalScalars"];
+ WS["IMPLICIT REAL(DOUBLE) (W)"]; 
+ WS["INTEGER       :: OA,OB,LDA,LDB,CDOffSet,OffSet"];
+ WS[StringJoin["REAL(DOUBLE)  :: HRR(*)"]];
+ WS[StringJoin["REAL(DOUBLE)  :: INTGRL(*)"]];
+];
+
+HRRBra[a_List,b_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+                              pa=Position[a,Max[b]][[1, 1]];
+                              pb=Position[b,Max[b]][[1, 1]];
+			      (* Exit condition 1 *)
+                              If[ a[[pa]] < 0 || b[[pb]] < 0 ,Return[0];]; 
+			      (* Exit condition 2 *)
+                              If[ b[[pb]]==0 ,
+                                 adex=LMNDex[a[[1]],a[[2]],a[[3]]];
+                                 BarExp=ToExpression[StringJoin["HRR[",ToString[adex],"]"]];
+                                 Return[BarExp]
+                                ];
+			      (* Recursion *)
+                              If[pb==1, one = {1, 0, 0}; AB = ABx; ];
+                              If[pb==2, one = {0, 1, 0}; AB = ABy; ];
+                              If[pb==3, one = {0, 0, 1}; AB = ABz; ];
+                              a1 = a + one;
+                              b1 = b - one;                
+                              Return[ HRRBra[a1, b1] + AB  HRRBra[a, b1]]
+                            ];
 
 PunchHRRBra[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 
-						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
-						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
-						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
-						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+ imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+ jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+ kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+ lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+ LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]];
+ LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]];
+ BEnd=LEnd[imax+jmax];
 
-			     HRRSubName=StringJoin["HRR_Bra_",CType[IntegralClass[{imin,imax}]],CType[IntegralClass[{jmin,jmax}]]];
+ IClass=ToString[IntegralClass[Classes[[ic]]]];
+ JClass=ToString[IntegralClass[Classes[[jc]]]];
+ HRRSubName=StringJoin["HRR_Bra_",IClass,JClass];
 
+ WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{imin,imax}]],",",
+                                                        CType[IntegralClass[{jmin,jmax}]],"|",
+                                                        CType[IntegralClass[{kmin,kmax}]],",",
+                                                        CType[IntegralClass[{lmin,lmax}]],")^(0) \n"]];
 
-			   WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{imin,imax}]],",",
-                                                                                  CType[IntegralClass[{jmin,jmax}]],"|",
-                                                                                  CType[IntegralClass[{kmin,kmax}]],",",
-                                                                                  CType[IntegralClass[{lmin,lmax}]],")^(0) \n"]];
+ WriteString[FileName,StringJoin["      DO L=",ToString[LBegin[lmin]],",",ToString[LEnd[lmax]],"\n"]];
+ WriteString[FileName,StringJoin["         DO K=",ToString[LBegin[kmin]],",",ToString[LEnd[kmax]],"\n"]];
+ WriteString[FileName,StringJoin["            CDOffSet=(OC+K-",ToString[LBegin[kmin]],")*LDC+(OD+L-",ToString[LBegin[lmin]],")*LDD \n"]];
+ WriteString[FileName,StringJoin["            CALL ",HRRSubName,"(OA,OB,LDA,LDB,CDOffSet,HRR(1,",ToString[K],",",ToString[L],"),INTGRL) \n"]];
+ WriteString[FileName,"          ENDDO \n"];
+ WriteString[FileName,"      ENDDO \n "];
 
-                           WriteString[FileName,StringJoin["      DO L=",ToString[LBegin[lmin]],",",ToString[LEnd[lmax]],"\n"]];
-                           WriteString[FileName,StringJoin["         DO K=",ToString[LBegin[kmin]],",",ToString[LEnd[kmax]],"\n"]];
+ IList={};
+ oList={};
+ Kount = 0;
+ Do[Do[Do[Do[
+             a = {lx[i], my[i], nz[i]};
+             b = {lx[j], my[j], nz[j]};
 
-                           WriteString[FileName,StringJoin["            CDOffSet=(OC+K-",ToString[LBegin[kmin]],")*LDC+(OD+L-",ToString[LBegin[lmin]],")*LDD \n"]];
+	     hrr=Normy[a]*Normy[b]*HRRBra[a,b];
 
-                           WriteString[FileName,StringJoin["            CALL ",HRRSubName,"(OA,OB,LDA,LDB,CDOffSet,HRR(1,",ToString[K],",",ToString[L],"),INTGRL) \n"]];
+             (* Bra addressing scheme for auxiliary SP integrals *)
+             (*  1   LenI  1    LenJ *)
+	     (*  SS  SFi   SSj  SFj  *)
 
+             If[ ic == 2 && jc != 2 && il == 0 ,hrr=hrr/.{HRR[a_]:>HRR[BEnd+a]}];
+             If[ ic != 2 && jc == 2 && jl == 0 ,hrr=hrr/.{HRR[a_]:>HRR[BEnd+a-LenI+1]}];
+             If[ ic == 2 && jc == 2 && il >= 0 && jl == 0 ,hrr=hrr/.{HRR[a_]:>HRR[BEnd+a]}];
+             If[ ic == 2 && jc == 2 && il == 0 && jl >  0 ,hrr=hrr/.{HRR[a_]:>HRR[BEnd+LenI+1+a]}];
 
-                           WriteString[FileName,"          ENDDO \n"];
-                           WriteString[FileName,"      ENDDO \n "];
+             If[hrr=!=HRR[i,k,l],
 
-                                                 If[kmax!=0&&lmax!=0,Return[]];
+                OffSetString=StringJoin["(OA+",ToString[i-LBegin[imin]],")*LDA+(OB+",ToString[j-LBegin[jmin]],")*LDB+CDOffSet"];
+                Kount = Kount + 1;
 
-						 IList={};
-						 oList={};
-						 Kount = 0;
-                                                 Do[Do[
-                                                 Do[Do[
-                                                        a = {lx[i], my[i], nz[i]};
-                                                        b = {lx[j], my[j], nz[j]};
+                IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"xx",ToString[j],"KK"]]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+                Kount = Kount + 1;
+                IList=Append[IList,Horner[hrr]];
+                HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["INTGRL(OffSet)"]];
+		];
 
-                                              OffSetString=StringJoin["(OA+",ToString[i-LBegin[il]],")*LDA+(OB+",ToString[j-LBegin[jl]],")*LDB+CDOffSet"];
+ ,{i,LBegin[il],LEnd[il]}]
+ ,{j,LBegin[jl],LEnd[jl]}]
+ ,{il,imin,imax}]
+ ,{jl,jmin,jmax}];
 
-                                              Kount = Kount + 1;
-                                              IList=Append[IList, ZippyForPresident];
-                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+  oList=Append[oList,{" "->"","xx"->",","BB"->"(","KK"->"|","In"->"INTGRL"}];
+  oList=Flatten[oList];
 
-                                                        Kount = Kount + 1;
-                                                        IList=Append[IList,Horner[Expand[HRRBra[a,b]]]];
-			                                HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                                                        oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["INTGRL(OffSet)"]];
+ If[Kount>0,
+    MakeList=Append[MakeList,StringJoin[HRRSubName,".o"]];
+    RelsList=Append[RelsList,StringJoin[HRRSubName,".x"]];
+    HRRSubroutine=StringJoin[HRRSubName,".F90"];
+    OpenWrite[HRRSubroutine];
+    PunchBraHRRFront[HRRSubroutine,HRRSubName,ic,jc];
+    Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
+    WriteString[HRRSubroutine,StringJoin["END SUBROUTINE ",HRRSubName]];			       
+    Close[HRRSubroutine];
+   ];
+];
 
+(*======================================--  KET HRR --============================================*)
 
-                                                ,{i,LBegin[il],LEnd[il]}]
-                                                ,{j,LBegin[jl],LEnd[jl]}]
-                                                ,{il,imin,imax}]
-                                                ,{jl,jmin,jmax}];
+PunchKetHRRFront[Subroutine_,Subname_,ic_,jc_,kc_,lc_]:=Block[{WS,BKType,LenBra,LenKet},
 
-						 oList=Append[oList,{" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz","In"->"INTGRL"}];
-						 oList=Flatten[oList];
+           WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(HRR) \n"]];
 
+           imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+           jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+           kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+           lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+           LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]]+1;
+           LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]]+1;
+           LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]]+1;
+           LenL=LEnd[Classes[[lc,2]]];
+           BEnd=LEnd[imax+jmax];
+           KEnd=LEnd[kmax+lmax];
 
+           BraMax=BEnd;
+           If[ic==2&&jc==2,BraMax=BraMax+LenI+LenJ];
+           If[ic==2&&jc!=2,BraMax=BraMax+1];
+           If[jc==2&&ic!=2,BraMax=BraMax+LenI];
 
-			If[Kount>0,
+           KetMax=KEnd;
+           If[kc==2&&lc==2,KetMax=KetMax+LenK+LenL];
+           If[kc==2&&lc!=2,KetMax=KetMax+1];
+           If[lc==2&&kc!=2,KetMax=KetMax+LenK];
 
-			   MakeList=StringJoin[MakeList,StringJoin[" \\ \n ",HRRSubName,".o"]];
-			   HRRSubroutine=StringJoin[HRRSubName,".F90"];
-			   OpenWrite[HRRSubroutine];
-                           PunchBraHRRFront[HRRSubroutine,HRRSubName,imax,jmax];
-                           Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
-                           WriteString[HRRSubroutine,StringJoin["END SUBROUTINE ",HRRSubName]];			       
-                           Close[HRRSubroutine];
+           WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
+	   WS["USE DerivedTypes"];
+	   WS["USE VScratchB"];
+	   WS["USE GlobalScalars"];
+           WS["IMPLICIT REAL(DOUBLE) (W)"]; 
+           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[BraMax],",",ToString[KetMax],",",ToString[LenL],")"]];
 
-                          ];
+];
 
-
-
-
-                                               ];
-
-
+HRRKet[adex_,c_List,d_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,ddex,cdex},
+                              pc=Position[c,Max[c]][[1, 1]];
+                              pd=Position[d,Max[d]][[1, 1]];
+			      (* Exit condition 1 *)
+                              If[ c[[pc]] < 0 || d[[pd]] < 0 ,Return[0];]; 
+			      (* Exit condition 2 *)
+                              If[ d[[pd]]==0,
+                                 cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
+                                 ddex=LMNDex[d[[1]],d[[2]],d[[3]]];
+                                 BarExp=ToExpression[StringJoin["HRR[",ToString[adex],",",ToString[cdex],",",ToString[ddex],"]"]];
+                                 Return[BarExp]
+                                ];
+			      (* Recursion *)
+                              If[pd==1, one = {1, 0, 0}; CD = CDx; ];
+                              If[pd==2, one = {0, 1, 0}; CD = CDy; ];
+                              If[pd==3, one = {0, 0, 1}; CD = CDz; ];
+                              c1=c+one;
+                              d1=d-one;                
+                              Return[HRRKet[adex,c1,d1]+CD HRRKet[adex,c,d1]]
+                             ];
 
 PunchHRRKet[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
+
+ imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+ jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+ kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+ lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+ LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]]+1;
+ LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]]+1;
+ LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]]+1;
+ LenK1=LBegin[Classes[[kc,1]]]-1;
+ LenL=LEnd[Classes[[lc,2]]]-LBegin[Classes[[lc,1]]]+1;
+ BEnd=LEnd[imax+jmax];
+ KEnd=LEnd[kmax+lmax];
+
+           BraMax=BEnd;
+
+           If[ic==2&&jc==2,BraMax=BraMax+LenI+LenJ];
+           If[ic==2&&jc!=2,BraMax=BraMax+1];
+           If[jc==2&&ic!=2,BraMax=BraMax+LenI];
  
-						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
-						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
-						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
-						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+           KetMax=KEnd;
+           If[kc==2&&lc==2,KetMax=KetMax+LenK+LenL];
+           If[kc==2&&lc!=2,KetMax=KetMax+1];
+           If[lc==2&&kc!=2,KetMax=KetMax+LenK];
+                  
+ IList={};
+ oList={"+"->"+  & \n        "};
 
- 					       If[kmin==0||lmin==0,Return[]];                                
+ Kount = 0;
+ Do[Do[Do[Do[
+             Kount = Kount + 1;
+	     
+             IList=Append[IList,ToExpression[StringJoin["KK",ToString[k],"xx",ToString[l],"BB"]]];
+             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
+	     (*             Do[ *)
+                c = {lx[k], my[k], nz[k]};
+                d = {lx[l], my[l], nz[l]};
+                hrr=Normy[c]*Normy[d]*HRRKet[1,c,d];
 
-						 IList={};
-						 oList={};
-						 Kount = 0;
-                                                 Do[Do[Do[
-                                                 Do[Do[Do[
-                                                             a = {lx[i], my[i], nz[i]};
-                                                             c = {lx[k], my[k], nz[k]};
-                                                             d = {lx[l], my[l], nz[l]};
+                (* Ket addressing scheme for auxiliary SP integrals *)
+                (*  1   LenK  1    LenL *)
+	        (*  SS  SFk   SSl  SFl  *)
 
-                                              Kount = Kount + 1;
-                                              IList=Append[IList,Horner[Expand[HRRKet[a,c,d]]]];
+                If[ kc != 2 && lc == 2 && ll == 0 ,hrr=hrr/.{HRR[a_,b_,c_]:>HRR[a,KEnd+b-LenK1,c]}];
+                If[ kc == 2 && lc != 2 && kl == 0 ,hrr=hrr/.{HRR[a_,b_,c_]:>HRR[a,KEnd+b,c]}];
+                If[ kc == 2 && lc == 2 && kl >=  0 && ll == 0 ,hrr=hrr/.{HRR[a_,b_,c_]:>HRR[a,KEnd+b,c]}];
+                If[ kc == 2 && lc == 2 && kl == 0 && ll > 0 ,hrr=hrr/.{HRR[a_,b_,c_]:>HRR[a,KEnd+LenK+b,c]}];
 
+                If[hrr=!=HRR[1,k,l],
+		   hrr=hrr/.{HRR[i_,k_,l_]:>HRR[abc,k,l]};
+                   Kount = Kount + 1;
+                   IList=Append[IList,Horner[hrr]];
+                   HRRAddress=StringJoin["1:",ToString[BraMax],",",ToString[k],",",ToString[l]];
+                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["HRR(",HRRAddress,")"]];
+                  ]; 
+		(*		,{i,1,BraMax}] *)
+ ,{k,LBegin[kl],LEnd[kl]}]
+ ,{l,LBegin[ll],LEnd[ll]}]
+ ,{kl,kmax,kmin,-1}]
+ ,{ll,lmax,lmin,-1}];
 
-					      HRRAddress=StringJoin[ToString[i],",",ToString[k],",",ToString[l]];
-                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["HRR(",HRRAddress,")"]];
-                                                ,{i,LBegin[il],LEnd[il]}]
-                                                ,{k,LBegin[kl],LEnd[kl]}]
-                                                ,{l,LBegin[ll],LEnd[ll]}]
-                                                ,{il,0,imax+jmax}]
-                                                ,{kl,kmin,kmax}]
-                                                ,{ll,lmin,lmax}];
- 
-						 oList=Append[oList,{" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy",
-                                                                     "z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz","In"->"INTGRL"}];
-						 oList=Flatten[oList];
+  oList=Append[oList,{" "->"","xx"->",","BB"->")","KK"->"|","In"->"INTGRL","abc"->StringJoin["1:",ToString[BraMax]]}];
+  oList=Flatten[oList];
 
 			If[Kount>0,
-
-			   HRRSubName=StringJoin["HRR_Ket_",CType[IntegralClass[{imin,imax}]],CType[IntegralClass[{jmin,jmax}]],
-                                                            CType[IntegralClass[{kmin,kmax}]],CType[IntegralClass[{lmin,lmax}]]];
- 
-			   MakeList=StringJoin[MakeList,StringJoin[" \\ \n ",HRRSubName,".o"]];
+			   IClass=ToString[IntegralClass[Classes[[ic]]]];
+			   JClass=ToString[IntegralClass[Classes[[jc]]]];
+			   KClass=ToString[IntegralClass[Classes[[kc]]]];
+			   LClass=ToString[IntegralClass[Classes[[lc]]]];
+			   HRRSubName=StringJoin["HRR_Ket_",IClass,JClass,KClass,LClass];
+			   MakeList=Append[MakeList,StringJoin[HRRSubName,".o"]];
+			   RelsList=Append[RelsList,StringJoin[HRRSubName,".x"]];
 			   HRRSubroutine=StringJoin[HRRSubName,".F90"];
 			   OpenWrite[HRRSubroutine];
 			   WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{imin,imax}]],",0|",
@@ -496,65 +725,43 @@ PunchHRRKet[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                                                   CType[IntegralClass[{lmin,lmax}]],")^(0) \n"]];
 
                            WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(HRR) \n"]]; 
-                           PunchKetHRRFront[HRRSubroutine,HRRSubName,imax,jmax,kmax,lmax];
+                           PunchKetHRRFront[HRRSubroutine,HRRSubName,ic,jc,kc,lc];
                            Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
                            WriteString[HRRSubroutine,StringJoin["END SUBROUTINE ",HRRSubName]];			       
                            Close[HRRSubroutine];
                           ];
+ ];
 
-                      ];
 
-PunchVRRFront[Subroutine_,Subname_,LBra_,LKet_]:=Block[{WS,BKType,LenBra,LenKet},
-           WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(VRR) \n"]];
-	   LenBra=LEnd[LBra];
-           LenKet=LEnd[LKet];
-	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
-	   WS["USE DerivedTypes"];
-	   WS["USE VScratchB"];
-	   WS["USE GlobalScalars"];
-           WS["IMPLICIT REAL(DOUBLE) (W)"]; 
-           WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra],",",ToString[LenKet],",0:",ToString[LBra+LKet],")"]];
-];
+PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra,LenKet},
 
-PunchKetHRRFront[Subroutine_,Subname_,imax_,jmax_,kmax_,lmax_]:=Block[{WS,BKType,LenBra,LenKet},
-           WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(HRR) \n"]];
-	   LenI=LEnd[imax+jmax];
-           LenK=LEnd[kmax+lmax];
-           LenL=LEnd[lmax];
-	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
-	   WS["USE DerivedTypes"];
-	   WS["USE VScratchB"];
-	   WS["USE GlobalScalars"];
-           WS["IMPLICIT REAL(DOUBLE) (W)"]; 
-           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenI],",",ToString[LenK],",",ToString[LenL],")"]];
+	   imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+	   jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+	   kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+           lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
-];
+           LenI=LEnd[Classes[[ic,2]]]-LBegin[Classes[[ic,1]]]+1;
+           LenJ=LEnd[Classes[[jc,2]]]-LBegin[Classes[[jc,1]]]+1;
+           LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]]+1;
+           LenL=LEnd[Classes[[lc,2]]]-LBegin[Classes[[lc,1]]]+1;
 
-PunchBraHRRFront[Subroutine_,Subname_,imax_,jmax_]:=Block[{WS,BKType,LenBra,LenKet},
+           BEnd=LEnd[imax+jmax];
+           KEnd=LEnd[kmax+lmax];
 
-           WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(OA,OB,LDA,LDB,CDOffSet,HRR,INTGRL) \n"]];
-	   LenI=LEnd[imax+jmax];
-           LenJ=LEnd[jmax];
-	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
-	   WS["USE DerivedTypes"];
-	   WS["USE VScratchB"];
-	   WS["USE GlobalScalars"];
-           WS["IMPLICIT REAL(DOUBLE) (W)"]; 
-           WS["INTEGER       :: OA,OB,LDA,LDB,CDOffSet,OffSet"];
-           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenI],")"]];
-           WS[StringJoin["REAL(DOUBLE)  :: INTGRL(*)"]];
+           BraMax=BEnd;
+           If[ic==2&&jc==2,BraMax=BraMax+LenI+LenJ];
+           If[ic==2&&jc!=2,BraMax=BraMax+1];
+           If[jc==2&&ic!=2,BraMax=BraMax+LenI];
 
-];
+           KetMax=KEnd;
+           If[kc==2&&lc==2,KetMax=KetMax+LenK+LenL];
+           If[kc==2&&lc!=2,KetMax=KetMax+1];
 
-PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra,LenKet},
-           LBra=IMax+JMax;
-           LKet=KMax+LMax;
+           If[lc==2&&kc!=2,KetMax=KetMax+LenK];
+
+           LBra=imax+jmax;
+           LKet=kmax+lmax;
 	   BKType=100*LBra+LKet;					   
-
-           ityp=IntegralClass[Classes[[ic]]];
-           jtyp=IntegralClass[Classes[[jc]]];
-           ktyp=IntegralClass[Classes[[kc]]];
-           ltyp=IntegralClass[Classes[[lc]]];
 
            WriteString[Subroutine,StringJoin["   SUBROUTINE IntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
                                              "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,INTGRL) \n"]];
@@ -570,9 +777,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
-
-	      WS["IMPLICIT REAL(DOUBLE) (W)"]; 
-
+           WS["IMPLICIT REAL(DOUBLE) (W)"]; 
            WS["INTEGER        :: LBra,LKet,CDOffSet"];
            WS["REAL(DOUBLE)   :: PrmBufB(8,LBra),PrmBufK(8,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
@@ -585,15 +790,18 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz"];
            WS["REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
-           WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra],",",ToString[LenKet],",0:",ToString[LBra+LKet],")"]];
-           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenBra],",",ToString[LenKet],",",ToString[LEnd[LMax]],")"]];
-           WS["INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,I,J,K,L"];
+           If[ic==2||jc==2,						     
+              WS["REAL(DOUBLE)  :: SpSpB,FnSpB,SpFnB"]];
+           If[kc==2||lc==2,						     
+              WS["REAL(DOUBLE)  :: SpSpK,FnSpK,SpFnK"]];
 
-           WS[StringJoin["DO L=1,",ToString[LEnd[LKet]]]];
-           WS[StringJoin["   DO I=1,",ToString[LEnd[LBra]]]];
-           WS[           "       HRR(I,L,1)=Zero"];
-           WS[           "   ENDDO "];            					 
-           WS[           "ENDDO "];            					 
+
+           WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LEnd[LBra]],",",ToString[LEnd[LKet]],",0:",ToString[LBra+LKet],")"]];
+           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],")"]];
+
+           WS["INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,I,J,K,L"];
+           WS["EXTERNAL InitDbl"];						     
+           WS[StringJoin["CALL InitDbl(",ToString[BraMax],"*",ToString[KetMax],",HRR(1,1,1))"]];
 
            WS["Ax=ACInfo%Atm1X"];
            WS["Ay=ACInfo%Atm1Y"];
@@ -619,11 +827,11 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["   Qy=PrmBufK(3,J)"];
            WS["   Qz=PrmBufK(4,J)"];
            WS["   Uq=PrmBufK(5,J)"];
-           If[ktyp==1&&ltyp==2,WS["   SxSk=PrmBufK(6,J)"]];
-           If[ktyp==2&&ltyp==1,WS["   SxSk=PrmBufK(6,J)"]];
-           If[ktyp==2&&ltyp==2,WS["   SxSk=PrmBufK(6,J)"];
-                               WS["   PxSk=PrmBufK(7,J)"];
-                               WS["   SxPk=PrmBufK(8,J)"]];
+           If[kc==2&&lc!=2,WS["   SpFnK=PrmBufK(6,J)"]];
+           If[kc!=2&&lc==2,WS["   FnSpK=PrmBufK(6,J)"]];
+           If[kc==2&&lc==2,WS["   SpSpK=PrmBufK(6,J)"];
+                           WS["   FnSpK=PrmBufK(7,J)"];
+                           WS["   SpFnK=PrmBufK(8,J)"]];
            WS["   QCx=Qx-Cx"];
            WS["   QCy=Qy-Cy"];
            WS["   QCz=Qz-Cz"];
@@ -633,11 +841,11 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      Py=PrmBufB(3,K)"];
            WS["      Pz=PrmBufB(4,K)"];
            WS["      Up=PrmBufB(5,K)"];
-           If[ktyp==1&&ltyp==2,WS["      SxSb=PrmBufB(6,J)"]];
-           If[ktyp==2&&ltyp==1,WS["      SxSb=PrmBufB(6,J)"]];
-           If[ktyp==2&&ltyp==2,WS["      SxSb=PrmBufB(6,J)"];
-                               WS["      PxSb=PrmBufB(7,J)"];
-                               WS["      SxPb=PrmBufB(8,J)"]];
+           If[ic==2&&jc!=2,WS["      SpFnB=PrmBufB(6,K)"]];
+           If[ic!=2&&jc==2,WS["      FnSpB=PrmBufB(6,K)"]];
+           If[ic==2&&jc==2,WS["      SpSpB=PrmBufB(6,K)"];
+                           WS["      FnSpB=PrmBufB(7,K)"];
+                           WS["      SpFnB=PrmBufB(8,K)"]];
            WS["      r1xZpE=One/(Zeta+Eta)"];
 	   WS["      Upq=SQRT(r1xZpE)*Up*Uq"];					   
            WS["      HfxZpE=Half/(Zeta+Eta)"];
@@ -673,22 +881,10 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            PunchGammas[Subroutine,LBra+LKet];
 ];
 
+MakeList={};
+RelsList={};
 
-PunchVRRBack[Subroutine_,BKType_,LBra_,LKet_]:=Block[{WS},
-      WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
-      WS[StringJoin["      DO L=1,",ToString[LEnd[LKet]]]];
-      WS[StringJoin["         DO I=1,",ToString[LEnd[LBra]]]];
-      WS["            HRR(I,L,1)=HRR(I,L,1)+VRR(I,L,0)"];					 
-      WS["         ENDDO "];            					 
-      WS["      ENDDO "];            					 
-      WS["   ENDDO ! (M0| loop"];            					 
-      WS["ENDDO ! |N0) loop"];            					 
-];
-
-
-MakeList="TwoEObjs= ";
-RelsList="TwoERels= ";
-
+PunchVRRClass[MxEll*2,MxEll*2];
 
 IncludeFile="ERIInclude.Inc";
 OpenWrite[IncludeFile];
@@ -699,10 +895,12 @@ WSI["SELECT CASE(IntType)"];
 
 Do[Do[Do[Do[
 
+
    If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
       IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
       IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
       IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
+
 
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
@@ -731,13 +929,13 @@ Do[Do[Do[Do[
 
 
              WSI[StringJoin["CASE(",ToString[ijklFlag],")"]];
-	     WSI[StringJoin["CALL Int",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
-                            "                       BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
-                            "                       ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
-                            "                       OffSet%A  ,1              , & \n",
-                            "                       OffSet%C-1,NBFA           , & \n",
-                            "                       OffSet%B-1,NBFA*NBFC      , & \n",
-                            "                       OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) \n"]];
+	     WSI[StringJoin["CALL IntB",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
+                            "                        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
+                            "                        ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
+                            "                        OffSet%A  ,1              , & \n",
+                            "                        OffSet%C-1,NBFA           , & \n",
+                            "                        OffSet%B-1,NBFA*NBFC      , & \n",
+                            "                        OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) \n"]];
 
 Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClass[Classes[[jc]]]," k=",IntegralClass[Classes[[kc]]]," l=",IntegralClass[Classes[[lc]]]];
 
@@ -746,14 +944,13 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 	   Print[" Openned ",Subroutine];
 	   WS[String_]:=WriteString[Subroutine,"   ",String,"\n"];
 	   WriteString[Subroutine,CommentLine]; 
-	   MakeList=StringJoin[MakeList,StringJoin[" \\ \n IntB",ToString[ijklType],".o"]];
-           RelsList=StringJoin[RelsList,StringJoin[" \\ \n IntB",ToString[ijklType],".x"]]; 
+	   MakeList=Append[MakeList,StringJoin["IntB",ToString[ijklType],".o"]];
+           RelsList=Append[RelsList,StringJoin["IntB",ToString[ijklType],".x"]]; 
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
-           PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType]; 
-           VRRDims=StringJoin[ToString[LEnd[BraEll]],",",ToString[LEnd[KetEll]],",",ToString[BraEll+KetEll]];;
-           PunchVRRClass[Subroutine,BraEll,KetEll,VRRDims];
-           PunchVRRBack[Subroutine,BKType,BraEll,KetEll];
+           PunchFront[Subroutine,ic,jc,kc,lc,ijklType]; 
+           PunchVRRCalls[Subroutine,BraEll,KetEll];
+           PunchVRRContract[Subroutine,ic,jc,kc,lc,BraEll,KetEll];
            PunchHRRKet[Subroutine,ic,jc,kc,lc]; 
 	   PunchHRRBra[Subroutine,ic,jc,kc,lc]; 
            WS[StringJoin["END SUBROUTINE IntB",ToString[ijklType]]];
@@ -761,23 +958,39 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
            Print[" Closed ",Subroutine];
       ]; 
 
+
 ,{ic,1,LC}]
 ,{jc,1,LC}]
 ,{kc,1,LC}]
 ,{lc,1,LC}];
 
 WSI["CASE DEFAULT"];
-WSI["  STOP 'MISSED AN INTEGRAL' "];
+WSI[" ! STOP 'MISSED AN INTEGRAL' "];
 WSI["END SELECT "];
 
 Close[IncludeFile];
 
-MakeList=StringJoin[MakeList," \n"];
-RelsList=StringJoin[RelsList," \n"]; 
+TAB=FromCharacterCode[9];
+
+MakeList=Union[MakeList];
+RelsList=Union[RelsList];
+MakeString=""
+RelsString=""
+LM=Length[MakeList];
+LR=Length[RelsList];
+Do[MakeString=StringJoin[MakeString,MakeList[[i]],"\\\n"],{i,LM-1}]
+MakeString=StringJoin[MakeString,MakeList[[LM]],"\n"];
+Do[RelsString=StringJoin[RelsString,RelsList[[i]],"\\\n"],{i,LR-1}]
+RelsString=StringJoin[RelsString,RelsList[[LR]],"\n"];
+MakeList=MakeString;
+RelsList=RelsString;
+
+MakeList=StringJoin["IntObjs=",MakeList];
+RelsList=StringJoin["IntRels=",RelsList]; 
 
 (**************** Print out the Makefile ************************)
 
-Makefile="Makefile1"
+Makefile="Makefile"
 
 OpenWrite[Makefile];
 
@@ -789,7 +1002,9 @@ WriteString[Makefile,"CPPMISC =\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"EXTRA_INCLUDES=\n"];
 WriteString[Makefile,"#\n"];
-WriteString[Makefile,"SPObObjs=ShellPairStruct.o\n"];
+WriteString[Makefile,"TwoELibs=$(F90_LIBRARIES) -lTwoE $(LAPACK)\n"] 
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"MiscObjs=ShellPairStruct.o VScratchB.o GetAtomPair.o InitDbl.o \n"];
 WriteString[Makefile,"#\n"];
 Print[MakeList];
 Print[RelsList];
@@ -801,12 +1016,14 @@ WriteString[Makefile,"all:    TwoE\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CTwoE\n"];
 WriteString[Makefile,"#\n"];
-WriteString[Makefile,"purge:clean \n","rm -f $(MONDO_LIB)/libTwoE.a\n","rm -f $(REMOVESRCE)\n"];
+WriteString[Makefile,"purge:clean\n",TAB,"rm -f $(MONDO_LIB)/libTwoE.a\n",TAB,"rm -f $(REMOVESRCE)\n"];
+WriteString[Makefile,"ppurge:purge\n",TAB,"rm -f IntB*.F90 HRR*.F90 VRR*.F90 \n"];
 WriteString[Makefile,"#\n"];
-WriteString[Makefile,"TwoE:$(SPObObjs) $(TwoEObjs)\n","$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
+WriteString[Makefile,"TwoE:$(MiscObjs) $(IntObjs)\n",TAB,"$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n",TAB,"$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
 WriteString[Makefile,"#\n"];
-WriteString[Makefile,"CTwoE:\n","rm -f $(REMOVEMISC) $(REMOVEMODS)\n","rm -f \#*\n","rm -f *~\n","ln -s /dev/null core\n","ls -l\n"];
-
+WriteString[Makefile,"CTwoE:\n",TAB,"rm -f $(REMOVEMISC) $(REMOVEMODS)\n",TAB,"rm -f \#*\n",TAB,"rm -f *~\n",TAB,"ln -s /dev/null core\n",TAB,"ls -l\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"N4K: TwoE N4K.o ERIInclude.Inc\n",TAB,"$(LD) $(LDFLAGS) N4K N4K.o $(TwoELibs)\n"];
 Close[Makefile];
 
 
