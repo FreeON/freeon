@@ -1,37 +1,6 @@
-!------------------------------------------------------------------------------
-!--  This source code is part of the MondoSCF suite of programs for 
-!    linear scaling electronic structure theory and ab initio molecular 
-!    dynamics.
-!
-!--  Matt Challacombe
-!    Los Alamos National Laboratory
-!
-!--  Copyright (c) 2001, the Regents of the University of California.  
-!    This SOFTWARE has been authored by an employee or employees of the 
-!    University of California, operator of the Los Alamos National Laboratory 
-!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
-!    The U.S. Government has rights to use, reproduce, and distribute this 
-!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
-!    and publicly display this SOFTWARE without charge, provided that this 
-!    Notice and any statement of authorship are reproduced on all copies.  
-!    Neither the Government nor the University makes any warranty, express 
-!    or implied, or assumes any liability or responsibility for the use of 
-!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
-!    such modified SOFTWARE should be clearly marked, so as not to confuse 
-!    it with the version available from LANL.  The return of derivative works
-!    to the primary author for integration and general release is encouraged. 
-!    The first publication realized with the use of MondoSCF shall be
-!    considered a joint work.  Publication of the results will appear
-!    under the joint authorship of the researchers nominated by their
-!    respective institutions. In future publications of work performed
-!    with MondoSCF, the use of the software shall be properly acknowledged,
-!    e.g. in the form "These calculations have been performed using MondoSCF, 
-!    a suite of programs for linear scaling electronic structure theory and
-!    ab initio molecular dynamics", and given appropriate citation.
-!------------------------------------------------------------------------------
-!    USE THE AINV FACTORIZED INVERSE HESSIAN TO TAKE A NEWTON STEP
-!    Currently just use dense matrix inversion to simplify debuging...
-!    Author(s):  Matt Challacombe
+!    ULTIMATELY USE THE AINV FACTORIZED INVERSE HESSIAN TO TAKE A NEWTON STEP
+!    FOR NOW, JUST DO EIGENVALUES TO INVERT THE BFGS HESSIAN 
+!    Autho:  Matt Challacombe
 !------------------------------------------------------------------------------
 PROGRAM NewStep
    USE DerivedTypes
@@ -79,12 +48,12 @@ PROGRAM NewStep
    CALL New(G1,N3)
    CALL New(X1,N3)
    CALL New(X2,N3)!
-   CALL Get(GM,Tag_O=CurGeom)
-!   WRITE(*,*)' NewStep: OLD GEOMETRY # ',CurGeom
+   CALL Get(GM,Tag_O=PrvGeom)
+!   WRITE(*,*)' NewStep: OLD GEOMETRY # ',PrvGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
-   CALL Get(G1,'GradE',Tag_O=CurGeom)
-!   WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
-!   CALL PPrint(G1,'GradE',Unit_O=6)
+   CALL Get(G1,'GradE',Tag_O=PrvGeom)
+ !  WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
+ !  CALL PPrint(G1,'GradE',Unit_O=6)
    K=0
    DO I=1,NAtoms
       DO J=1,3
@@ -93,6 +62,7 @@ PROGRAM NewStep
       ENDDO
    ENDDO
    CALL Get(B,TrixFile('B',Args,NoTags_O=.TRUE.))
+!   CALL PPrint(B,'B',Unit_O=6)
    CALL New(DnsB,(/N3,N3/))
    CALL New(BInv,(/N3,N3/))
    CALL SetEq(DnsB,B)
@@ -110,15 +80,15 @@ PROGRAM NewStep
          GM%Carts%D(J,I)=X2%D(K)
       ENDDO
    ENDDO   
-   CALL Put(GM,Tag_O=NxtGeom)   
-   WRITE(*,*)' NewStep: NEW GEOMETRY # ',NxtGeom
+   CALL Put(GM,CurGeom)   
+!   WRITE(*,*)' NewStep: NEW GEOMETRY # ',CurGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
    GRMS=SQRT(DOT_PRODUCT(G1%D,G1%D))/DBLE(N3)
    GMAX=Zero
    DO I=1,N3;GMAX=MAX(GMAX,ABS(G1%D(I)));ENDDO
-   CALL Put(GRMS,'RMSGrad',NxtGeom)
-   CALL Put(GMAX,'MaxGrad',NxtGeom)
-   WRITE(*,*)NxtGeom,'GradStats ',GRMS,GMAX
+   CALL Put(GRMS,'RMSGrad',CurGeom)
+   CALL Put(GMAX,'MaxGrad',CurGeom)
+!   WRITE(*,*)NxtGeom,'GradStats ',GRMS,GMAX
 
    CALL Shutdown(Prog)
 END PROGRAM 
