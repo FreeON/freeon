@@ -228,7 +228,7 @@ CPSCF equations involve an extension to the SCF equations \cite{Furche_2001}
   \begin{gather}
     [\F^{0} ,\D^{0}]=0,\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\\
-    [\F^{ab},\D^{0}]+[\F^{a},\D^{b}]+[\F^{b} ,\D^{a}]+[\F^{0},\D^{ab}]=0,\\
+    [\F^{ab},\D^{0}]+\frac{1}{2}[\F^{a},\D^{b}]+\frac{1}{2}[\F^{b} ,\D^{a}]+[\F^{0},\D^{ab}]=0,\\
     \text{May be the third order???}
   \end{gather}
 \end{subequations}
@@ -237,7 +237,7 @@ and the idempotency-like constraint \cite{Furche_2001}
   \begin{gather}
     \D^{0} =\D^{0} \D^{0},\\
     \D^{a} =\{\D^{a},\D^{0}\},\\
-    \D^{ab}=\{\D^{ab},\D^{0}\}+\{\D^{a},\D^{b}\}\\
+    \D^{ab}=\{\D^{ab},\D^{0}\}+\frac{1}{2}\{\D^{a},\D^{b}\}\\
     \D^{abc}=\{\D^{abc},\D_0\}+
         \frac{1}{3}(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}+\{\D^{bc},\D^{a}\})
   \end{gather}
@@ -249,7 +249,7 @@ in \cite{Weber04} based on perturbed projection:
   \begin{gather}
 F^{a\ldots}_{n}= \left\{
 \begin{array}{ll}
-\mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild}\\
+\mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild},\\
 J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1.
 \end{array}\right.\\
 %    F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
@@ -376,7 +376,7 @@ energy response from the n-th order response. These kind of expressions
 based on the wave function perturbation theory are well known and are 
 descibed in for exemple \cite{Dupuis_1991}.
 A density matrix analogy to 
-the Wigner's 2n+1 rule was given in cite{...}, here we will present
+The Wigner's 2n+1 rule was given in cite{...}, here we will present
 a generalization to the non orthogonal case for mixed derivatives 
 up to fourth order....
 
@@ -611,11 +611,11 @@ ANDERS SHOULD ADD SOMETHING HERE.
 \begin{table}[t]
   \centering
   \caption{\protect
-    Longitudinal polarizabilities.\\
-    SHOULD REMOVE SOME DIGITS.\\
+    Longitudinal polarizabilities.
+    SHOULD REMOVE SOME DIGITS.
     TABLE OR GRAPH?
-  }\label{tab:UCPHF_1D_h2o}
-  \begin{tabular}{cccc}
+   }\label{tab:UCPHF_1D_h2o}
+  \begin{tabular}{cccccc}
     \toprule
     Order 
           & n=2
@@ -624,8 +624,6 @@ ANDERS SHOULD ADD SOMETHING HERE.
           & n=30
           & n=40 \\
     \hline 
-
-
      2 & -2.17651690073638      & -11.07341368413361      & -22.21691102006962     & -33.35887301244362     & -44.49989115576956         \\
      3 & -2.22455681544148      & -4.61329209646009       & -7.14601040066529      & missing                & -12.18809639549116         \\
      4 & -13.95074218268175     & -87.54437442498153      & -1.792840983157341e+02 & -2.729919339557335e+02 & -3.664801418080078e+02     \\
