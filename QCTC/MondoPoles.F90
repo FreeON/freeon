@@ -83,12 +83,13 @@ CONTAINS
 !====================================================================================
 !
 !====================================================================================
-       SUBROUTINE HGToSP_Direct(L,PiZ,HGCo,LenHGTF,C,S,LenSP) 
+       SUBROUTINE HGToSP_Direct(L,LenHGTF,LenSP,PiZ,HGCo,C,S) 
           INTEGER                    :: L,LenHGTF,LenSP
           REAL(DOUBLE)               :: PiZ
           REAL(DOUBLE),DIMENSION(1:LenHGTF) :: HGCo      
           REAL(DOUBLE),DIMENSION(0:LenSP) :: C,S
           REAL(DOUBLE),DIMENSION(20) :: W
+!
           SELECT CASE(L)
           INCLUDE 'HGToSP.Inc'
           CASE DEFAULT

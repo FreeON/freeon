@@ -18,7 +18,10 @@ MODULE TreeWalk
   USE ERIGlobals
   IMPLICIT NONE
 !---------------------------------------------------------------------
-  CONTAINS  !
+  CONTAINS  
+!===================================================================================================
+!
+!===================================================================================================
      SUBROUTINE SetKet(P,E)
        TYPE(PrimPair) :: P
        REAL(DOUBLE)   :: E
@@ -38,6 +41,9 @@ MODULE TreeWalk
        PBox%BndBox(2,2)=P%P(2)
        PBox%BndBox(3,2)=P%P(3)
 !      Expand this BBox from zero to the correct extent
+#ifdef NewPAC
+       E=1.D-16
+#endif
        PBox=ExpandBox(PBox,E)
     END SUBROUTINE SetKet
 !===================================================================================================
@@ -55,6 +61,9 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
+#ifdef NewPAC
+       REAL(DOUBLE)                     :: SqrtW,SqrtT,LeftS,RightS
+#endif
 !-----------------------------------------------------------------------------------------------
 !      PAC: 
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -65,10 +74,18 @@ MODULE TreeWalk
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
        T=Omega*PQ2
+#ifdef NewPAC
+       SqrtW  = SQRT(PrimBeta*Q%Beta/(PrimBeta+Q%Beta))
+       SqrtT  = SqrtW*(SQRT(PQ2)-SQRT(Q%DMax2))
+       LeftS  = PrimWCoef*SqrtW*Erfcc(SqrtT)
+       RightS = Q%PACStr*SqrtT
+       IF(SqrtT > Zero .AND. LeftS < RightS .OR. T>Gamma_Switch) THEN
+#else
        IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
           T>Gamma_Switch)THEN
+#endif
 !         MAC: 
           IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
 !            Evaluate multipoles
@@ -160,6 +177,9 @@ MODULE TreeWalk
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
        REAL(DOUBLE),PARAMETER           :: VTol = 1.D-12
+#ifdef NewPAC
+       REAL(DOUBLE)                     :: SqrtW,SqrtT,LeftS,RightS
+#endif
 !---------------------------------------------------------------------------------------------------
 !      PAC:
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -170,10 +190,18 @@ MODULE TreeWalk
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE 
        T=Omega*PQ2
+#ifdef NewPAC
+       SqrtW  = SQRT(GFactor*Omega)
+       SqrtT  = SqrtW*(SQRT(PQ2)-SQRT(Q%DMax2))
+       LeftS  = PrimWCoef*SqrtW*Erfcc(SqrtT)
+       RightS = Q%PACStr*SqrtT
+       IF(LeftS < RightS) THEN
+#else
        IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
-              T>Gamma_Switch) THEN
+          T>Gamma_Switch)THEN
+#endif
 !         MAC:
           IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
              IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN

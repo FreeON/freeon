@@ -36,7 +36,7 @@ PROGRAM QCTC
 #endif
   TYPE(BCSR)                     :: T1,T2
 
-  REAL(DOUBLE)                   :: E_Nuc_Tot
+  REAL(DOUBLE)                   :: E_Nuc_Tot,SdvErrorJ,MaxErrorJ,JMExact
   TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
@@ -44,6 +44,9 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
   REAL(DOUBLE),EXTERNAL          :: MondoTimer
+#ifdef NewPAC
+  REAL(DOUBLE)                   :: GammaExp
+#endif
 !------------------------------------------------------------------------------- 
   ETimer(:) = Zero
 ! Start up macro
@@ -86,6 +89,12 @@ PROGRAM QCTC
   ENDIF
 ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
+#ifdef NewPAC
+  GammaExp=0.9D0
+  CALL SetLocalCoefs(GammaExp)
+  WRITE(*,*) 'Doing NewPAC'
+  WRITE(*,*) 'GammaExp = ',GammaExp
+#endif
 ! Potentially overide local QCTC thresholds
   IF(Args%NI==8)THEN
      TauPAC=1D1**(-Args%I%I(7))
@@ -148,7 +157,34 @@ PROGRAM QCTC
 #ifdef PARALLEL
      TmBegJ = MondoTimer()
 #endif
+     WRITE(*,*) 'TauPAC = ',TauPAC 
+     WRITE(*,*) 'TauMAC = ',TauMAC
      CALL MakeJ(J)
+     WRITE(*,*) 'JWalk Done'
+     CALL Elapsed_TIME(TimeMakeJ,'Accum')
+     WRITE(*,*) 'Time = ',TimeMakeJ%Wall
+!
+     IF(.TRUE.) THEN
+        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='unknown')
+        DO I=1,J%NNon0
+           WRITE(99,*) J%MTrix%D(I)
+        ENDDO
+        CLOSE(99)
+     ELSE
+        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='unknown')
+        MaxErrorJ = Zero
+        SdvErrorJ = Zero
+        DO I=1,J%NNon0
+           READ(99,*) JMExact
+           MaxErrorJ = MAX(MaxErrorJ,ABS(J%MTrix%D(I)-JMExact))
+           SdvErrorJ = SdvErrorJ + (J%MTrix%D(I)-JMExact)**2
+        ENDDO
+        CLOSE(99)
+        WRITE(*,*) 'Max  Error = ', MaxErrorJ
+        WRITE(*,*) 'SDV  Error = ', SQRT(SdvErrorJ/DBLE(J%NNon0-1))
+     ENDIF
+     IF(.TRUE.) STOP
+!
 #ifdef PARALLEL
      TmEndJ = MondoTimer()
      TmJ = TmEndJ - TmBegJ

@@ -15,7 +15,6 @@ MODULE PoleTree
 !----------------------------------------------------------------------------------
 !  Globals
    TYPE(PoleNode), POINTER               :: PoleRoot ! Root of the pole tree 
-   TYPE(PoleNode), POINTER               :: PR1
    INTEGER                               :: PoleNodes
    INTEGER                               :: RhoLevel
    INTEGER                               :: CurrentTier
@@ -42,21 +41,38 @@ MODULE PoleTree
 !       Initialize the root node
         
         CALL NewPoleNode(PoleRoot,0)
-        ! CALL NewSPArrays(PoleRoot)
-        
+        ! CALL NewSPArrays(PoleRoot) 
         PoleRoot%Bdex=1
         PoleRoot%Edex=Rho%NDist
         PoleRoot%NQ=Rho%NDist
 !       Convert the density into a 3-D BinTree
         CALL SplitPole(PoleRoot)
 !       Make PoleTree tier by tier, recuring up from the bottom
-        DO CurrentTier=MaxTier,0,-1         
+        DO CurrentTier=MaxTier,0,-1   
            CALL MakePoleTree(PoleRoot) 
         ENDDO
 !       Reset Ell of PoleRoot
         PoleRoot%Ell     = SPEll
 !
       END SUBROUTINE RhoToPoleTree
+!=====================================================================================
+!     
+!=====================================================================================
+      RECURSIVE SUBROUTINE CheckNodes(Node)
+        TYPE(PoleNode), POINTER :: Node
+!
+        IF(Node%Leaf)THEN
+           WRITE(*,*) 'Leaf Node',Node%Box%Tier
+           WRITE(*,*) Node%DMax2
+           RETURN   
+        ELSE
+           WRITE(*,*) 'Pole Node',Node%Box%Tier
+           WRITE(*,*) Node%DMax2
+           CALL CheckNodes(Node%Descend)
+           CALL CheckNodes(Node%Descend%Travrse)
+        ENDIF
+!
+      END SUBROUTINE CheckNodes
 !=====================================================================================
 !
 !=====================================================================================
@@ -124,6 +140,7 @@ MODULE PoleTree
                PMax = (Rho%Qx%D(J)-P%Box%Center(1))**2+(Rho%Qy%D(J)-P%Box%Center(2))**2+(Rho%Qz%D(J)-P%Box%Center(3))**2
                P%DMax2=MAX(P%DMax2,PMax)
             ENDDO
+!            WRITE(*,*) P%DMax2,P%Box%Tier
 !           Compute Zeta
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
 !           Set the Ells and the Strengths
@@ -162,8 +179,13 @@ MODULE PoleTree
                ENDDO
                MaxUnsold  = CQ*(P%DMax2**(Half*DBLE(SPEll+1)))
                P%Strength = MaxUnsold**(Two/DBLE(SPEll+2))
-!
             ENDIF
+#ifdef NewPAC
+!           Accumulate Info for PAC from Left and Right Nodes
+            P%Beta    = MIN(LeftQ%Beta,RightQ%Beta)
+            P%WCoef   = LeftQ%WCoef+RightQ%WCoef
+            P%PACStr  = (TauPAC/P%WCoef)
+#endif
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -188,7 +210,7 @@ MODULE PoleTree
          KQ=Qdex(B)
          Node%Zeta=Zeta(KQ)
 !        Reset leaf nodes ell to min value: its untranslated!
-         Node%Ell     = Ldex(KQ)
+         Node%Ell = Ldex(KQ)
 !        Set and inflate this nodes BBox
          Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
          Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
@@ -200,8 +222,19 @@ MODULE PoleTree
          CALL IncMem(Status,0,LMNLen)
          KC=Cdex(KQ)
          Node%Co(1:LMNLen)=Rho%Co%D(KC:KC+LMNLen-1)
-!        Mark node to identify nuclear self interaction
-         Node%Bdex=MAX(0,KQ-NElecDist)
+!        Initialize the MAC Stuff to be Zero
+         Node%DMax2    = Zero
+         Node%Strength = Zero
+#ifdef NewPAC
+!        Accumulate Info for the New PAC
+         IF(Node%Ell==0) THEN
+            Node%Beta = Node%Zeta
+         ELSE
+            Node%Beta = GFactor*Node%Zeta
+         ENDIF
+         Node%WCoef  = MaxCoef(Node%Ell,Node%Zeta,Node%Co)*((Pi/Node%Beta)**(1.5D0))
+         Node%PACStr = (TauPAC/Node%WCoef)
+#endif
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
 !     Initialize a new PoleNode
@@ -339,7 +372,11 @@ MODULE PoleTree
             DO Q=1,Rho%NQ%I(z)
                QD=oq+Q
                CD=or+(Q-1)*LMNLen+1
+#ifdef NewPAC
+               EX=1.0D-16
+#else
                EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+#endif
 !              Threshold out distributions with zero extent 
                IF(EX>Zero)THEN
                   Qdex(IQ)=QD

@@ -21,7 +21,7 @@ MODULE JGen
 #endif
   IMPLICIT NONE
   LOGICAL PrintFlag
-
+ 
 #ifdef PARALLEL
   INTEGER :: PrIndex,AbsIndex
 #endif
@@ -155,13 +155,13 @@ MODULE JGen
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
                                                    Tau,OmegaMin,Px,Py,Pz
        REAL(DOUBLE)                             :: PExtent,EX
-       REAL(DOUBLE)                             :: PStrength,Error
+       REAL(DOUBLE)                             :: PStrength,Error,PiZ
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,StartLA,      &
                                                    StartLB,StopLA,StopLB
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,LMNA, &
                                                    LMNB,LA,LB,MA,MB,NA,NB,LAB, &
-                                                   MAB,NAB,LM,LMN,SumEll,EllA,    &
+                                                   MAB,NAB,LM,LMN,EllAB,EllA,    &
                                                    EllB,NC,L,M,LenHGTF,LenSP
 #ifdef PARALLEL
        REAL(DOUBLE)                             :: ZA,ZB,T1,T2
@@ -225,6 +225,46 @@ MODULE JGen
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
+#ifdef NewPAC
+!                     Compute MAC and PAC
+                      DP2       = Zero
+                      PrimWCoef = Zero
+                      IA = IndexA
+                      DO LMNA=StartLA,StopLA
+                         IA=IA+1
+                         IB=IndexB
+                         EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                         DO LMNB=StartLB,StopLB
+                            IB=IB+1
+                            EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)  
+                            EllAB   = EllA+EllB
+                            LenHGTF = LHGTF(EllAB)
+                            LenSP   = LSP(EllAB)
+                            PiZ     = (Pi/Prim%Zeta)**(ThreeHalves)
+!                           Strength for MAC
+                            CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,HGBra%D(1:LenHGTF,IA,IB), &
+                                               SPBraC(0:LenSP),SPBraS(0:LenSP))
+                            PStrength = Zero
+                            DO L=0,EllAB
+                               PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
+                            ENDDO
+                            PStrength=(PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                            IF(DP2<PStrength) THEN
+                               DP2=PStrength
+                            ENDIF
+!                           Strength for PAC
+                            IF(EllAB==0) THEN
+                               PrimBeta = Prim%Zeta
+                            ELSE
+                               PrimBeta = GFactor*Prim%Zeta
+                            ENDIF
+                            PrimWCoef = PrimWCoef+MaxCoef(EllAB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB)) &
+                                                  *((Pi/PrimBeta)**(ThreeHalves))
+                         ENDDO
+                      ENDDO
+                      DP2=MIN(1.D10,DP2)
+                      IF(PrimWCoef>Zero .AND. DP2>Zero)THEN
+#else
 !-------------------------------------------------------------------------------
 !                     Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !                     looping over all angular symmetries
@@ -238,18 +278,18 @@ MODULE JGen
                          DO LMNB=StartLB,StopLB
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                            SumEll = EllA+EllB
-                            LenHGTF=LHGTF(SumEll)
+                            EllAB=EllA+EllB
+                            LenSP=LSP(EllAB)
+                            LenHGTF=LHGTF(EllAB)
+                            PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
 !                           Extent (for PAC)
-                            EX=Extent(SumEll,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
+                            EX=Extent(EllAB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
-                            ! CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(1:LenHGTF,IA,IB),SPBraC,SPBraS)
-                            CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB), &
-                                 LenHGTF,SPBraC(0),SPBraS(0),LSP(SumEll))
-                            
+                            CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,HGBra%D(1:LenHGTF,IA,IB), &
+                                               SPBraC(0:LenSP),SPBraS(0:LenSP))
                             PStrength = Zero
-                            DO L=0,EllA+EllB
+                            DO L=0,EllAB
                                PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             ENDDO
                             PStrength=(PStrength/TauMAC)**(Two/DBLE(SPEll+2))
@@ -262,6 +302,7 @@ MODULE JGen
 !-------------------------------------------------------------------------------
 !                     If finite compute ...
                       IF(PExtent>Zero.AND.DP2>Zero)THEN
+#endif
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
@@ -292,18 +333,18 @@ MODULE JGen
                             EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
                             DO LMNB=StartLB,StopLB
                                IB=IB+1
-                               EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                               SumEll=EllA+EllB
-                               LenHGTF=LHGTF(SumEll)
-                               LenSP=LSP(SumEll)
+                               EllB   = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
+                               EllAB  = EllA+EllB
+                               LenHGTF= LHGTF(EllAB)
+                               LenSP  = LSP(EllAB)
+                               PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
 !                              Near field
                                DO LMN=1,LenHGTF
                                   JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                                ENDDO
 !                              Far field
-                               ! CALL HGToSP(Prim%Zeta,SumEll,HGBra%D(:,IA,IB),SPBraC,SPBraS)
-                               CALL HGToSP_Direct(SumEll,(Pi/Prim%Zeta)**(ThreeHalves),HGBra%D(1,IA,IB), &
-                                    LenHGTF,SPBraC(0),SPBraS(0),LenSP)
+                               CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,HGBra%D(1:LenHGTF,IA,IB), &
+                                                  SPBraC(0:LenSP),SPBraS(0:LenSP))
                                DO LM=0,LenSP
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO

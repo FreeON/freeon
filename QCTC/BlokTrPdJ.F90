@@ -41,13 +41,13 @@ MODULE BlokTrPdJ
                                                      StartLA,StartLB,            &
                                                      StopLA,StopLB
        INTEGER                                    :: I,J,K,L,MaxLA,MaxLB,IA,IB,  &
-                                                     LMNA,LMNB,LA,LB,MA,MB,    &
-                                                     NA,NB,LAB,MAB,NAB,LM,LMN, &
-                                                     Ell,EllA,EllB,EllAB,LenAB,&
-                                                     HGLenEll,SPLenEll,KI 
+                                                     LMNA,LMNB,LA,LB,MA,MB,      &
+                                                     NA,NB,LAB,MAB,NAB,LM,LMN,   &
+                                                     EllA,EllB,EllAB,LenHGTF,    &
+                                                     LenSP,KI 
        REAL(DOUBLE), EXTERNAL                     :: BlkTrace_2 
        INTEGER                                    :: NC
-       REAL(DOUBLE)                               :: Px,Py,Pz,HGFac
+       REAL(DOUBLE)                               :: Px,Py,Pz,HGFac,PiZ
 !
        REAL(DOUBLE),DIMENSION(15)                 :: Vck
        REAL(DOUBLE),DIMENSION(3)                  :: nlm
@@ -91,6 +91,49 @@ MODULE BlokTrPdJ
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=.FALSE.)
+#ifdef NewPAC
+!               Compute MAC and PAC
+                DP2       = Zero
+                PrimWCoef = Zero
+                IA = IndexA
+                DO LMNA=StartLA,StopLA
+                   IA=IA+1
+                   IB=IndexB
+                   EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                   DO LMNB=StartLB,StopLB
+                      IB=IB+1
+                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)  
+                      Pab     = P(IA,IB)
+                      EllAB   = EllA+EllB+1
+                      LenHGTF = LHGTF(EllAB)
+                      LenSP   = LSP(EllAB)
+                      PiZ     = (Pi/Prim%Zeta)**(ThreeHalves)
+                      DO K=1,3
+!                        Strength for MAC
+                         CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,Pab*dHGBra%D(1:LenHGTF,IA,IB,K), &
+                                            SPBraC(0:LenSP),SPBraS(0:LenSP))
+                         PStrength = Zero
+                         DO L=0,EllAB
+                            PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
+                         ENDDO
+                         PStrength=(PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                         IF(DP2<PStrength) THEN
+                            DP2=PStrength
+                         ENDIF
+!                        Strength for PAC
+                         IF(EllAB==0) THEN
+                            PrimBeta = Prim%Zeta
+                         ELSE
+                            PrimBeta = GFactor*Prim%Zeta
+                         ENDIF
+                         PrimWCoef = PrimWCoef+MaxCoef(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenHGTF,IA,IB,K)) &
+                                               *((Pi/PrimBeta)**(ThreeHalves))
+                      ENDDO
+                   ENDDO
+                ENDDO
+                DP2=MIN(1.D10,DP2)
+                IF(PrimWCoef>Zero .AND. DP2>Zero)THEN
+#else
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !               Looping over all angular symmetries and Directions
@@ -104,16 +147,18 @@ MODULE BlokTrPdJ
                    DO LMNB=StartLB,StopLB
                       IB=IB+1
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)    
-                      Pab=P(IA,IB)
-                      EllAB=EllA+EllB+1
-                      LenAB=LHGTF(EllAB)
+                      Pab    = P(IA,IB)
+                      EllAB  = EllA+EllB+1
+                      LenHGTF= LHGTF(EllAB)
+                      LenSP  = LSP(EllAB)
+                      PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
 !                     Extent (for PAC)
                       DO K=1,3
-                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenAB,IA,IB,K),TauPAC,Potential_O=.TRUE.)
+                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenHGTF,IA,IB,K),TauPAC,Potential_O=.TRUE.)
                          PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
-                         CALL HGToSP(Prim%Zeta,EllAB,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
-!
+                         CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,Pab*dHGBra%D(1:LenHGTF,IA,IB,K), &
+                                            SPBraC(0:LenSP),SPBraS(0:LenSP))
                          PStrength = Zero
                          DO L=0,EllAB
                             PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
@@ -122,25 +167,20 @@ MODULE BlokTrPdJ
                          IF(DP2 < PStrength) THEN
                             DP2   = PStrength
                          ENDIF
-!
-                         DO L=0,EllAB
-                            PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
-                            DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
-                         ENDDO
                       ENDDO
                    ENDDO
                 ENDDO 
                 DP2=MIN(1.D10,DP2)
-!-----------------------------------------------------------------------------------------
-                IF(PExtent>Zero .AND. DP2 > Zero)THEN ! Evaluate this primitives Ket contribution
+                IF(PExtent>Zero .AND. DP2 > Zero) THEN
+#endif
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
 !                  Initialize
-                   SPLenEll=LSP(Prim%Ell)
-                   HGLenEll=LHGTF(Prim%Ell)
-                   HGKet_L(1:HGLenEll,1:3) = Zero
-                   SPKetC_L(0:SPLenEll,1:3) = Zero
-                   SPKetS_L(0:SPLenEll,1:3) = Zero
+                   LenSP=LSP(Prim%Ell)
+                   LenHGTF=LHGTF(Prim%Ell)
+                   HGKet_L(1:LenHGTF,1:3) = Zero
+                   SPKetC_L(0:LenSP,1:3) = Zero
+                   SPKetS_L(0:LenSP,1:3) = Zero
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells 
@@ -149,16 +189,16 @@ MODULE BlokTrPdJ
 !                     Calculate the fractional coordinates
                       nlm =  AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
 !                     Store the Old Stuff
-                      HGKet_old(1:HGLenEll)  = HGKet(1:HGLenEll)
-                      SPKetC_old(0:SPLenEll) = SPKetC(0:SPLenEll)
-                      SPKetS_old(0:SPLenEll) = SPKetS(0:SPLenEll)
+                      HGKet_old(1:LenHGTF)  = HGKet(1:LenHGTF)
+                      SPKetC_old(0:LenSP) = SPKetC(0:LenSP)
+                      SPKetS_old(0:LenSP) = SPKetS(0:LenSP)
 !                     Walk the walk
                       CALL JWalk(PoleRoot)
 !                     Acumulate the Lattice Forces
                       DO I=1,3
-                         HGKet_L(1:HGLenEll,I)  = HGKet_L(1:HGLenEll,I)  + nlm(I)*(HGKet(1:HGLenEll)  - HGKet_old(1:HGLenEll))
-                         SPKetC_L(0:SPLenEll,I) = SPKetC_L(0:SPLenEll,I) + nlm(I)*(SPKetC(0:SPLenEll) - SPKetC_old(0:SPLenEll))
-                         SPKetS_L(0:SPLenEll,I) = SPKetS_L(0:SPLenEll,I) + nlm(I)*(SPKetS(0:SPLenEll) - SPKetS_old(0:SPLenEll))
+                         HGKet_L(1:LenHGTF,I)= HGKet_L(1:LenHGTF,I)+ nlm(I)*(HGKet(1:LenHGTF)- HGKet_old(1:LenHGTF))
+                         SPKetC_L(0:LenSP,I) = SPKetC_L(0:LenSP,I) + nlm(I)*(SPKetC(0:LenSP) - SPKetC_old(0:LenSP))
+                         SPKetS_L(0:LenSP,I) = SPKetS_L(0:LenSP,I) + nlm(I)*(SPKetS(0:LenSP) - SPKetS_old(0:LenSP))
                       ENDDO
                    ENDDO
                    Prim%P=PTmp
@@ -171,16 +211,18 @@ MODULE BlokTrPdJ
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
-                         Ell=EllA+EllB+1
-                         SPLenEll=LSP(Ell)
-                         HGLenEll=LHGTF(Ell)
+                         EllAB  = EllA+EllB+1
+                         LenHGTF= LHGTF(EllAB)
+                         LenSP  = LSP(EllAB)
+                         PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
                          DO K=1,3
                             KI = K
-                            DO LMN=1,HGLenEll
+                            DO LMN=1,LenHGTF
                                dJ(IA,IB,KI) = dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
                             ENDDO
-                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
-                            DO LM=0,SPLenEll
+                            CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,dHGBra%D(1:LenHGTF,IA,IB,K), &
+                                               SPBraC(0:LenSP),SPBraS(0:LenSP))
+                            DO LM=0,LenSP
                                dJ(IA,IB,KI) = dJ(IA,IB,KI)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                             ENDDO
                          ENDDO
@@ -211,17 +253,19 @@ MODULE BlokTrPdJ
                       EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
-                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
-                         Ell=EllA+EllB+1
-                         SPLenEll=LSP(Ell)
-                         HGLenEll=LHGTF(Ell)
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)   
+                         EllAB  = EllA+EllB+1
+                         LenHGTF= LHGTF(EllAB)
+                         LenSP  = LSP(EllAB)
+                         PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
                          DO K=1,3
                             KI = K+3
-                            DO LMN=1,HGLenEll
+                            DO LMN=1,LenHGTF
                                dJ(IA,IB,KI) = dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
                             ENDDO
-                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
-                            DO LM=0,SPLenEll
+                            CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,dHGBra%D(1:LenHGTF,IA,IB,K), &
+                                               SPBraC(0:LenSP),SPBraS(0:LenSP))
+                            DO LM=0,LenSP
                                dJ(IA,IB,KI) = dJ(IA,IB,KI)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                             ENDDO
                          ENDDO
@@ -252,18 +296,20 @@ MODULE BlokTrPdJ
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
-                         Ell=EllA+EllB+1
-                         SPLenEll=LSP(Ell)
-                         HGLenEll=LHGTF(Ell)
+                         EllAB  = EllA+EllB+1
+                         LenHGTF= LHGTF(EllAB)
+                         LenSP  = LSP(EllAB)
+                         PiZ    = (Pi/Prim%Zeta)**(ThreeHalves)
                          DO K=1,3
-                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                            CALL HGToSP_Direct(EllAB,LenHGTF,LenSP,PiZ,dHGBra%D(1:LenHGTF,IA,IB,K), &
+                                               SPBraC(0:LenSP),SPBraS(0:LenSP))
                             DO I=1,3
                                KI = K + 3*(I+1)
                                IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN 
-                                  DO LMN=1,HGLenEll
+                                  DO LMN=1,LenHGTF
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet_L(LMN,I)
                                   ENDDO
-                                  DO LM=0,SPLenEll
+                                  DO LM=0,LenSP
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
                                   ENDDO
                                ENDIF
@@ -292,7 +338,7 @@ MODULE BlokTrPdJ
        REAL(DOUBLE)                      :: Tau,NukeCo,NukePole,PExtent
        REAL(DOUBLE),DIMENSION(4)         :: dBra
        REAL(DOUBLE),DIMENSION(0:SPLen)   :: SPBraC,SPBraS 
-       INTEGER                           :: At,SPLenEll,HGLenEll,I,J,K,LM,LMN
+       INTEGER                           :: At,LenSP,LenHGTF,I,J,K,LM,LMN
        INTEGER                           :: NC,KI
        REAL(DOUBLE),DIMENSION(3)         :: PTmp,nlm
 !
@@ -317,16 +363,22 @@ MODULE BlokTrPdJ
 !      Set the MAC
        DP2=((FudgeFactorial(1,SPEll+1)*ABS(GMLoc%AtNum%D(At)))/TauMAC)**(Two/DBLE(SPEll+3))
        DP2=MIN(1.D10,DP2)
+#ifdef NewPAC
+!      Set the PAC
+       PrimBeta  = Prim%Zeta
+       PrimWCoef = ABS(GMLoc%AtNum%D(At)) 
+#else
 !      Set the PAC
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
+#endif
 !      Initialize <KET|
        CALL SetKet(Prim,PExtent)
        HGKet_L(:,:)  = Zero
        SPKetC_L(:,:) = Zero
        SPKetS_L(:,:) = Zero
 !      KlumsyBl
-       SPLenEll=LSP(Prim%Ell)
-       HGLenEll=LHGTF(Prim%Ell)
+       LenSP  =LSP(Prim%Ell)
+       LenHGTF=LHGTF(Prim%Ell)
        PTmp=GMLoc%Carts%D(:,At)
        DO NC=1,CS_IN%NCells
 !         Set atomic "primitive"
@@ -334,16 +386,16 @@ MODULE BlokTrPdJ
 !         Calculate the fractional coordinates
           nlm = AtomToFrac(GMLoc,CS_IN%CellCarts%D(:,NC))
 !         Store the Old Stuff
-          HGKet_old(1:HGLenEll)  = HGKet(1:HGLenEll)
-          SPKetC_old(0:SPLenEll) = SPKetC(0:SPLenEll)
-          SPKetS_old(0:SPLenEll) = SPKetS(0:SPLenEll)
+          HGKet_old(1:LenHGTF)= HGKet(1:LenHGTF)
+          SPKetC_old(0:LenSP) = SPKetC(0:LenSP)
+          SPKetS_old(0:LenSP) = SPKetS(0:LenSP)
 !         Walk the walk
           CALL VWalk(PoleRoot)
 !         Acumulate the Lattice Forces
           DO I=1,3
-             HGKet_L(1:HGLenEll,I)  = HGKet_L(1:HGLenEll,I)  + nlm(I)*(HGKet(1:HGLenEll)  - HGKet_old(1:HGLenEll))
-             SPKetC_L(0:SPLenEll,I) = SPKetC_L(0:SPLenEll,I) + nlm(I)*(SPKetC(0:SPLenEll) - SPKetC_old(0:SPLenEll))
-             SPKetS_L(0:SPLenEll,I) = SPKetS_L(0:SPLenEll,I) + nlm(I)*(SPKetS(0:SPLenEll) - SPKetS_old(0:SPLenEll))
+             HGKet_L(1:LenHGTF,I)= HGKet_L(1:LenHGTF,I)+ nlm(I)*(HGKet(1:LenHGTF)- HGKet_old(1:LenHGTF))
+             SPKetC_L(0:LenSP,I) = SPKetC_L(0:LenSP,I) + nlm(I)*(SPKetC(0:LenSP) - SPKetC_old(0:LenSP))
+             SPKetS_L(0:LenSP,I) = SPKetS_L(0:LenSP,I) + nlm(I)*(SPKetS(0:LenSP) - SPKetS_old(0:LenSP))
           ENDDO
        ENDDO
 !      Reset the Atomic Coordinates
@@ -351,11 +403,11 @@ MODULE BlokTrPdJ
 !      Init bra xforms
        Vck=Zero
        DO K=1,3
-          DO LMN=1,HGLenEll
+          DO LMN=1,LenHGTF
              Vck(K)=Vck(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
           ENDDO
           CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
-          DO LM=0,SPLenEll
+          DO LM=0,LenSP
              Vck(K)=Vck(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
           ENDDO
        ENDDO
@@ -371,10 +423,10 @@ MODULE BlokTrPdJ
           DO I=1,3
              KI = K + 3*(I+1)
              IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN
-                DO LMN=1,HGLenEll
+                DO LMN=1,LenHGTF
                    Vck(KI)=Vck(KI)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet_L(LMN,I)
                 ENDDO
-                DO LM=0,SPLenEll
+                DO LM=0,LenSP
                    Vck(KI)=Vck(KI)+SPBraC(LM)*SPKetC_L(LM,I)+SPBraS(LM)*SPKetS_L(LM,I)
                 ENDDO
              ENDIF
