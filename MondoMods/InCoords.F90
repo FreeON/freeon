@@ -26,7 +26,7 @@ IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12,InfFile,Tag_O)
+SUBROUTINE Topology_12(NatmsLoc,NBond,BondI,BondJ,Top12,InfFile,Tag_O)
 !
 ! Set up a table which shows the atom numbers of Atoms 
 ! connected to a certain atom by the input bonds (Topology mtr)
@@ -36,12 +36,12 @@ SUBROUTINE Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12,InfFile,Tag_O)
 IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top12
 TYPE(INT_RNK2) :: Top12_2
-INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NAtoms_Loc,NMax12
+INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NatmsLoc,NMax12
 INTEGER,DIMENSION(1:NBond) :: BondI,BondJ
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     NMax12=5
-    CALL New(Top12,(/NAtoms_Loc,NMax12+1/))
+    CALL New(Top12,(/NatmsLoc,NMax12+1/))
     Top12%I(:,:)=0 
 !
     DO I=1,NBond
@@ -54,11 +54,11 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 ! check matrix Size, increase Size if necessary
       IF(NI>=NMax12 .OR. NJ>=NMax12) THEN
         NMax12=NMax12+5
-        CALL New(Top12_2,(/NAtoms_Loc,NMax12+1/))
-        Top12_2%I(1:NAtoms_Loc,1:NMax12+1)=0 
-        Top12_2%I(1:NAtoms_Loc,1:NMax12+1-5)=Top12%I(1:NAtoms_Loc,1:NMax12+1-5)
+        CALL New(Top12_2,(/NatmsLoc,NMax12+1/))
+        Top12_2%I(1:NatmsLoc,1:NMax12+1)=0 
+        Top12_2%I(1:NatmsLoc,1:NMax12+1-5)=Top12%I(1:NatmsLoc,1:NMax12+1-5)
         CALL Delete(Top12)
-        CALL New(Top12,(/NAtoms_Loc,NMax12+1/))
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
         Top12%I(:,:)=Top12_2%I(:,:)
         CALL Delete(Top12_2)
       ENDIF
@@ -110,7 +110,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 END SUBROUTINE Topology_12 
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_13(NAtoms_Loc,Top12,Top13,InfFile,Tag_O)
+SUBROUTINE Topology_13(NatmsLoc,Top12,Top13,InfFile,Tag_O)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -118,14 +118,14 @@ IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top12
 TYPE(INT_RNK2),OPTIONAL :: Top13
 TYPE(INT_RNK2) :: Top13_2
-INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NAtoms_Loc,NMax13,NMax12,KK,IN12,JN12
+INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NatmsLoc,NMax13,NMax12,KK,IN12,JN12
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax12,'NMax12')
         K=NMax12+1
-        CALL New(Top12,(/NAtoms_Loc,K/))
+        CALL New(Top12,(/NatmsLoc,K/))
         CALL Get(Top12,'Top12')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix')
@@ -136,10 +136,10 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     NMax13=10
     K=NMax13+1
-    CALL New(Top13,(/NAtoms_Loc,K/))
-    Top13%I(1:NAtoms_Loc,1:NMax13+1)=0 
+    CALL New(Top13,(/NatmsLoc,K/))
+    Top13%I(1:NatmsLoc,1:NMax13+1)=0 
 !
-    DO II=1,NAtoms_Loc
+    DO II=1,NatmsLoc
       IN12=Top12%I(II,1)
       DO J=1,IN12
         JJ=Top12%I(II,J+1)
@@ -154,12 +154,12 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
       IF(NI>=NMax13) THEN
         NMax13=NMax13+10
-        CALL New(Top13_2,(/NAtoms_Loc,NMax13+1/))
-        Top13_2%I(1:NAtoms_Loc,1:NMax13+1)=0 
-        Top13_2%I(1:NAtoms_Loc,1:NMax13+1-10)=Top13%I(1:NAtoms_Loc,1:NMax13+1-10)
+        CALL New(Top13_2,(/NatmsLoc,NMax13+1/))
+        Top13_2%I(1:NatmsLoc,1:NMax13+1)=0 
+        Top13_2%I(1:NatmsLoc,1:NMax13+1-10)=Top13%I(1:NatmsLoc,1:NMax13+1-10)
         CALL Delete(Top13)
-        CALL New(Top13,(/NAtoms_Loc,NMax13+1/))
-        Top13%I(1:NAtoms_Loc,1:NMax13+1)=Top13_2%I(1:NAtoms_Loc,1:NMax13+1)
+        CALL New(Top13,(/NatmsLoc,NMax13+1/))
+        Top13%I(1:NatmsLoc,1:NMax13+1)=Top13_2%I(1:NatmsLoc,1:NMax13+1)
         CALL Delete(Top13_2)
       ENDIF
 !
@@ -197,7 +197,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 END SUBROUTINE Topology_13 
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_14(NAtoms_Loc,Top12,Top14,InfFile,Tag_O)
+SUBROUTINE Topology_14(NatmsLoc,Top12,Top14,InfFile,Tag_O)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -206,14 +206,14 @@ TYPE(INT_RNK2),OPTIONAL:: Top12
 TYPE(INT_RNK2),OPTIONAL:: Top14
 TYPE(INT_RNK2) :: Top14_2
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL
-INTEGER :: NAtoms_Loc,NMax14,NMax12,IN12,JN12,KN12
+INTEGER :: NatmsLoc,NMax14,NMax12,IN12,JN12,KN12
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
      IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax12,'NMax12')
         K=NMax12+1
-        CALL New(Top12,(/NAtoms_Loc,K/))
+        CALL New(Top12,(/NatmsLoc,K/))
         CALL Get(Top12,'Top12')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix')
@@ -224,10 +224,10 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     NMax14=10
     K=NMax14+1
-    CALL New(Top14,(/NAtoms_Loc,K/))
-    Top14%I(1:NAtoms_Loc,1:NMax14+1)=0 
+    CALL New(Top14,(/NatmsLoc,K/))
+    Top14%I(1:NatmsLoc,1:NMax14+1)=0 
 !
-    DO II=1,NAtoms_Loc
+    DO II=1,NatmsLoc
       IN12=Top12%I(II,1)
       DO J=1,IN12
         JJ=Top12%I(II,J+1)
@@ -246,12 +246,12 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
       IF(NI>=NMax14) THEN
         NMax14=NMax14+10
-        CALL New(Top14_2,(/NAtoms_Loc,NMax14+1/))
-        Top14_2%I(1:NAtoms_Loc,1:NMax14+1)=0 
-        Top14_2%I(1:NAtoms_Loc,1:NMax14+1-10)=Top14%I(1:NAtoms_Loc,1:NMax14+1-10)
+        CALL New(Top14_2,(/NatmsLoc,NMax14+1/))
+        Top14_2%I(1:NatmsLoc,1:NMax14+1)=0 
+        Top14_2%I(1:NatmsLoc,1:NMax14+1-10)=Top14%I(1:NatmsLoc,1:NMax14+1-10)
         CALL Delete(Top14)
-        CALL New(Top14,(/NAtoms_Loc,NMax14+1/))
-        Top14%I(1:NAtoms_Loc,1:NMax14+1)=Top14_2%I(1:NAtoms_Loc,1:NMax14+1)
+        CALL New(Top14,(/NatmsLoc,NMax14+1/))
+        Top14%I(1:NatmsLoc,1:NMax14+1)=Top14_2%I(1:NatmsLoc,1:NMax14+1)
         CALL Delete(Top14_2)
       ENDIF
 !
@@ -290,15 +290,15 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 END SUBROUTINE Topology_14 
 !--------------------------------------------------------------
 !
-SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+SUBROUTINE SORT_INTO_Box1(BoxSize,C,NatmsLoc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
 ! sort the Atoms of a molecule into Boxes
 !
 ! BoxSize: linear Box Size
 !
 IMPLICIT NONE
-INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NAtoms_Loc
-REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NAtoms_Loc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
+INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NatmsLoc
+REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NatmsLoc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
 SAVE VBIG
 DATA VBIG/1.D+90/ 
 !
@@ -312,7 +312,7 @@ DATA VBIG/1.D+90/
       BYMax=-VBIG
       BZMIN= VBIG
       BZMax=-VBIG
-    DO I=1,NAtoms_Loc
+    DO I=1,NatmsLoc
       IF(C(1,I)<BXMIN) BXMIN=C(1,I)
       IF(C(1,I)>BXMax) BXMax=C(1,I)
       IF(C(2,I)<BYMIN) BYMIN=C(2,I)
@@ -329,12 +329,12 @@ DATA VBIG/1.D+90/
 END SUBROUTINE SORT_INTO_Box1
 !
 !--------------------------------------------------------------
-SUBROUTINE SORT_INTO_Box2(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,InfFile,ISet)
+SUBROUTINE SORT_INTO_Box2(BoxSize,C,NatmsLoc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,InfFile,ISet)
 !
 ! sort the Atoms of a molecule into Boxes
 !
-! BoXI(I) : contains the ordering number of the first atom of the I-th Box (like in sparse row-wise)
-! BoXJ(J) : gives the original serial number of the atom desribed by the J-th ordering number
+! BoxI(I) : contains the ordering (box) number of the first atom of the I-th Box (like in sparse row-wise)
+! BoxJ(J) : gives the original serial number of the atom desribed by the J-th ordering number
 ! C: contains Cartesian coordinates of Atoms
 ! BoxSize: linear Box Size
 !
@@ -343,26 +343,26 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 INTEGER,OPTIONAL :: ISET 
 TYPE(INT_VECT),OPTIONAL :: BoxI1,BoxJ1
 TYPE(INT_VECT) :: BoxI,BoxJ
-INTEGER,ALLOCATABLE,DIMENSION(:) :: ISIGN
-INTEGER,ALLOCATABLE,DIMENSION(:,:,:) :: BoxCOUNTER 
-INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NAtoms_Loc
-REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NAtoms_Loc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
+TYPE(INT_RNK2) :: ISign
+TYPE(INT_RNK3) :: BoxCounter 
+INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NatmsLoc
+REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NatmsLoc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
 SAVE VBIG
 DATA VBIG/1.D+90/ 
 !
   NBox=NX*NY*NZ
   CALL New(BoxI,NBox+1)
-  CALL New(BoxJ,NAtoms_Loc)
+  CALL New(BoxJ,NatmsLoc)
 !
-  ALLOCATE(ISIGN(1:NAtoms_Loc))
+  CALL New(ISign,(/2,NatmsLoc/))
 !
-  ALLOCATE(BoxCOUNTER(1:NX,1:NY,1:NZ))
-  BoxCOUNTER(1:NX,1:NY,1:NZ)=0
+  CALL New(BoxCounter,(/NX,NY,NZ/))
+  BoxCounter%I(1:NX,1:NY,1:NZ)=0
   BoxI%I(1:NBox+1)=0
 !
 ! COUNT NUMBER OF Atoms IN THE Box
 !
-  DO I=1,NAtoms_Loc
+  DO I=1,NatmsLoc
 !
 ! identify Box
 !     
@@ -371,8 +371,10 @@ DATA VBIG/1.D+90/
     IZ=INT((C(3,I)-BZMIN)/BoxSize)+1
 !     
     IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY !order parameter: ZXY
-    BoxCOUNTER(IX,IY,IZ)=BoxCOUNTER(IX,IY,IZ)+1
-    ISIGN(I)=IORD*(NAtoms_Loc+1)+BoxCOUNTER(IX,IY,IZ) !!! shows both Box and index within Box
+!
+    BoxCounter%I(IX,IY,IZ)=BoxCounter%I(IX,IY,IZ)+1
+    ISign%I(1,I)=IORD
+    ISign%I(2,I)=BoxCounter%I(IX,IY,IZ) !!! shows both Box and index within Box
 !     
   ENDDO
 !     
@@ -384,7 +386,7 @@ DATA VBIG/1.D+90/
   DO IY=1,NY
 !
     IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
-    BoxI%I(IORD+1)=BoxI%I(IORD)+BoxCOUNTER(IX,IY,IZ)
+    BoxI%I(IORD+1)=BoxI%I(IORD)+BoxCounter%I(IX,IY,IZ)
 !     
   ENDDO
   ENDDO
@@ -392,12 +394,10 @@ DATA VBIG/1.D+90/
 !
 ! Set up contents of Boxes as represented in A, sparse row-wise
 !
-  DO I=1,NAtoms_Loc
-!
-    IORD=INT(ISIGN(I)/(NAtoms_Loc+1))
-    IADD=ISIGN(I)-IORD*(NAtoms_Loc+1)
+  DO I=1,NatmsLoc
+    IORD=ISign%I(1,I)
+    IADD=ISign%I(2,I)
     BoxJ%I(BoxI%I(IORD)-1+IADD)=I
-!     
   ENDDO
 !
 ! Now check ordering algorithm
@@ -423,7 +423,8 @@ DATA VBIG/1.D+90/
     CALL Put(BoxJ,'BoxJ'//TRIM(IntToChar(ISet)))
   ENDIF
 !
-  DEALLOCATE(BoxCOUNTER)
+  CALL Delete(ISign)
+  CALL Delete(BoxCounter)
   CALL Delete(BoxI)
   CALL Delete(BoxJ)
 !
@@ -431,22 +432,22 @@ END SUBROUTINE SORT_INTO_Box2
 !
 !----------------------------------------------------------------
 !
-SUBROUTINE SORT_INTO_Box(BoxSize,C,NAtoms_Loc,InfFile,ISet)
+SUBROUTINE SORT_INTO_Box(BoxSize,C,NatmsLoc,InfFile,ISet)
 IMPLICIT NONE
 INTEGER,OPTIONAL :: ISet
-INTEGER :: NAtoms_Loc,NX,NY,NZ,NBox
+INTEGER :: NatmsLoc,NX,NY,NZ,NBox
 REAL(DOUBLE) :: BoxSize,BXMIN,BYMIN,BZMIN
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 TYPE(INT_VECT) :: BoxI1,BoxJ1
-REAL(DOUBLE),DIMENSION(1:3,1:NAtoms_Loc) :: C
+REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: C
 !
-CALL SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+CALL SORT_INTO_Box1(BoxSize,C,NatmsLoc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
 NBox=NX*NY*NZ
 CALL New(BoxI1,NBox+1)
-CALL New(BoxJ1,NAtoms_Loc)
+CALL New(BoxJ1,NatmsLoc)
 !
-CALL SORT_INTO_Box2(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,InfFile,ISet)
+CALL SORT_INTO_Box2(BoxSize,C,NatmsLoc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,BoxJ1,InfFile,ISet)
 !
 CALL Delete(BoxI1)
 CALL Delete(BoxJ1)
@@ -454,7 +455,7 @@ CALL Delete(BoxJ1)
 END SUBROUTINE SORT_INTO_Box
 !----------------------------------------------------------------
 !
-SUBROUTINE Topologies_MM(NAtoms_Loc,NBond,BondI,BondJ,InfFile,Top12OUT)
+SUBROUTINE Topologies_MM(NatmsLoc,NBond,BondI,BondJ,InfFile,Top12OUT)
 !
 ! Set up a table which shows the atom numbers of Atoms 
 ! connected to a certain atom by the input bonds (Topology mtr)
@@ -468,28 +469,28 @@ IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top12OUT
 TYPE(INT_RNK2) :: Top12OUT_2
 TYPE(INT_RNK2) :: Top12,Top13,Top14
-INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NAtoms_Loc
+INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NatmsLoc
 INTEGER,DIMENSION(1:NBond) :: BondI,BondJ
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 CHARACTER(LEN=DefAULT_CHR_LEN) :: Tag_O
 !
    Tag_O='MMTop'
 !
-   CALL Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12=Top12,InfFile=InfFile,Tag_O=Tag_O)
-   CALL Topology_13(NAtoms_Loc,Top12,Top13=Top13,InfFile=InfFile,Tag_O=Tag_O)
-   CALL Topology_14(NAtoms_Loc,Top12,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
-   CALL Excl_List(NAtoms_Loc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
-   CALL Excl_List14(NAtoms_Loc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Topology_12(NatmsLoc,NBond,BondI,BondJ,Top12=Top12,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Topology_13(NatmsLoc,Top12,Top13=Top13,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Topology_14(NatmsLoc,Top12,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Excl_List(NatmsLoc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Excl_List14(NatmsLoc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
 !
    IF(PRESENT(Top12OUT)) THEN
      IF(AllocQ(Top12OUT%Alloc)) CALL Delete(Top12OUT)
      N=Size(Top12%I,2)
-     CALL New(Top12OUT_2,(/NAtoms_Loc,N/))
+     CALL New(Top12OUT_2,(/NatmsLoc,N/))
      Top12OUT_2=Top12
      CALL Delete(Top12)
      CALL Delete(Top13)
      CALL Delete(Top14)
-     CALL New(Top12OUT,(/NAtoms_Loc,N/))
+     CALL New(Top12OUT,(/NatmsLoc,N/))
      Top12OUT=Top12OUT_2
      CALL Delete(Top12OUT_2)
    ELSE
@@ -501,7 +502,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN) :: Tag_O
 END SUBROUTINE Topologies_MM
 !----------------------------------------------------------------
 !
-SUBROUTINE Excl_List(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
+SUBROUTINE Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
 !
 ! This subroutine merges Topological information
 ! to get the list for Exclusion energy calculation
@@ -510,7 +511,7 @@ IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
 TYPE(INT_RNK2) :: Top_Excl,Top_New
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
-INTEGER :: NAtoms_Loc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
+INTEGER :: NatmsLoc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
 INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
 !
     IF(PRESENT(Top12)) THEN
@@ -518,7 +519,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax12,'NMax12')
-        CALL New(Top12,(/NAtoms_Loc,NMax12+1/))
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
         CALL Get(Top12,'Top12')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix in Excl_list')
@@ -530,7 +531,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax13,'NMax13')
-        CALL New(Top13,(/NAtoms_Loc,NMax13+1/))
+        CALL New(Top13,(/NatmsLoc,NMax13+1/))
         CALL Get(Top13,'Top13')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_13 matrix in Excl_list')
@@ -542,7 +543,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax14,'NMax14')
-        CALL New(Top14,(/NAtoms_Loc,NMax14+1/))
+        CALL New(Top14,(/NatmsLoc,NMax14+1/))
         CALL Get(Top14,'Top14')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_14 matrix in Excl_list')
@@ -552,15 +553,15 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
 ! Initialize Top_Excl
 !
     NMax_Excl=NMax12+NMax13+NMax14
-    CALL New(Top_Excl,(/NAtoms_Loc,NMax_Excl+1/))
+    CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
     Top_Excl%I(:,:)=0
-    Top_Excl%I(1:NAtoms_Loc,1:NMax12+1)=Top12%I(1:NAtoms_Loc,1:NMax12+1)
+    Top_Excl%I(1:NatmsLoc,1:NMax12+1)=Top12%I(1:NatmsLoc,1:NMax12+1)
 !
 ! Now merge Topologies, in order to avoid double counting in 
 ! Exclusion energies
 !
       NMax_Excl_Out=0
-    DO I=1,NAtoms_Loc
+    DO I=1,NatmsLoc
 !
       NNew=0
       NOLD=Top_Excl%I(I,1)
@@ -597,9 +598,9 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
 ! STORE RESULT
 !
     IF(PRESENT(Top_Excl_Out)) THEN
-      CALL New(Top_Excl_Out,(/NAtoms_Loc,NMax_Excl_Out+1/))
-      Top_Excl_Out%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=&
-      Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
+      CALL New(Top_Excl_Out,(/NatmsLoc,NMax_Excl_Out+1/))
+      Top_Excl_Out%I(1:NatmsLoc,1:NMax_Excl_Out+1)=&
+      Top_Excl%I(1:NatmsLoc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
         IF(PRESENT(Tag_O)) THEN
           CALL Put(NMax_Excl_Out,'NMax_Excl'//TRIM(Tag_O))
@@ -610,9 +611,9 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
         ENDIF
       ENDIF
     ELSE IF(PRESENT(InfFile)) THEN
-      CALL New(Top_New,(/NAtoms_Loc,NMax_Excl_Out+1/))
-      Top_New%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=&
-      Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
+      CALL New(Top_New,(/NatmsLoc,NMax_Excl_Out+1/))
+      Top_New%I(1:NatmsLoc,1:NMax_Excl_Out+1)=&
+      Top_Excl%I(1:NatmsLoc,1:NMax_Excl_Out+1)
         IF(PRESENT(Tag_O)) THEN
           CALL Put(NMax_Excl_Out,'NMax_Excl'//TRIM(Tag_O))
           CALL Put(Top_New,'TOP_Excl'//TRIM(Tag_O))
@@ -634,7 +635,7 @@ END SUBROUTINE Excl_LIST
 !
 !----------------------------------------------------------------
 !
-SUBROUTINE Excl_List14(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
+SUBROUTINE Excl_List14(NatmsLoc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
 !
 ! This subroutine merges Topological information
 ! to get the list for Exclusion energy calculation
@@ -645,7 +646,7 @@ IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
 TYPE(INT_RNK2) :: Top_Excl,Top_New
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
-INTEGER :: NAtoms_Loc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
+INTEGER :: NatmsLoc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
 INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
 !
     IF(PRESENT(Top12)) THEN
@@ -653,7 +654,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax12,'NMax12')
-        CALL New(Top12,(/NAtoms_Loc,NMax12+1/))
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
         CALL Get(Top12,'Top12')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix in Excl_list')
@@ -665,7 +666,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax13,'NMax13')
-        CALL New(Top13,(/NAtoms_Loc,NMax13+1/))
+        CALL New(Top13,(/NatmsLoc,NMax13+1/))
         CALL Get(Top13,'Top13')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_13 matrix in Excl_list')
@@ -677,7 +678,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
     ELSE
       IF(PRESENT(InfFile)) THEN
         CALL Get(NMax14,'NMax14')
-        CALL New(Top14,(/NAtoms_Loc,NMax14+1/))
+        CALL New(Top14,(/NatmsLoc,NMax14+1/))
         CALL Get(Top14,'Top14')
       ELSE
         CALL MondoHalt(INTC_ERROR,'Missing Top_14 matrix in Excl_list')
@@ -687,14 +688,14 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
 ! Initialize Top_Excl to the Size of Top14 and to zero 
 !
     NMax_Excl=NMax14
-    CALL New(Top_Excl,(/NAtoms_Loc,NMax_Excl+1/))
+    CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
     Top_Excl%I(:,:)=0
 !
 ! Now merge Topologies, in order to avoid double counting in 
 ! Exclusion energies
 !
       NMax_Excl_Out=0
-    DO I=1,NAtoms_Loc
+    DO I=1,NatmsLoc
 !
       DO J=1,Top14%I(I,1)
           NExcl=Top_Excl%I(I,1)
@@ -718,8 +719,8 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
 ! STORE RESULT
 !
     IF(PRESENT(Top_Excl_Out)) THEN
-      CALL New(Top_Excl_Out,(/NAtoms_Loc,NMax_Excl_Out+1/))
-      Top_Excl_Out%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
+      CALL New(Top_Excl_Out,(/NatmsLoc,NMax_Excl_Out+1/))
+      Top_Excl_Out%I(1:NatmsLoc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NatmsLoc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
         IF(PRESENT(Tag_O)) THEN
           CALL Put(NMax_Excl_Out,'NMax_Excl14'//TRIM(Tag_O))
@@ -730,8 +731,8 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
         ENDIF
       ENDIF
     ELSE
-      CALL New(Top_New,(/NAtoms_Loc,NMax_Excl_Out+1/))
-      Top_New%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
+      CALL New(Top_New,(/NatmsLoc,NMax_Excl_Out+1/))
+      Top_New%I(1:NatmsLoc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NatmsLoc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
         IF(PRESENT(Tag_O)) THEN
           CALL Put(NMax_Excl_Out,'NMax_Excl14'//TRIM(Tag_O))
@@ -751,7 +752,7 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
 !
 END SUBROUTINE Excl_LIST14 
 !----------------------------------------------------------------
-      SUBROUTINE BMatrix(NAtoms_Loc,XYZ,NIntC,IntCs,B)
+      SUBROUTINE BMatrix(NatmsLoc,XYZ,NIntC,IntCs,B)
 !
 ! This subroutine calculates the sparse, TYPE(BMATR) type 
 ! representation of the B matrix 
@@ -761,9 +762,9 @@ END SUBROUTINE Excl_LIST14
 ! Linear bendings _must_ always appear in pairs, Defd as LINB1 and LINB2
 !
       IMPLICIT NONE
-      INTEGER :: NIntC,NIntC2,I,J,K,L,NAtoms_Loc,IntCoo
+      INTEGER :: NIntC,NIntC2,I,J,K,L,NatmsLoc,IntCoo
       REAL(DOUBLE) :: Zero,thresh_B
-      REAL(DOUBLE),DIMENSION(1:3,1:NAtoms_Loc) :: XYZ
+      REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       TYPE(INTC) :: IntCs
       TYPE(BMATR):: B
 !
@@ -1308,7 +1309,7 @@ END SUBROUTINE Excl_LIST14
 !
 !----------------------------------------------------------------
 !
-      SUBROUTINE DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,IntSet,IntCs,NIntC)
+      SUBROUTINE DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,IntSet,IntCs,NIntC)
 !
 ! This routine defines internal coordinates
 ! being used in geometry manipulations.
@@ -1321,9 +1322,9 @@ END SUBROUTINE Excl_LIST14
 !            from more temporary VdW interactions
 !
       IMPLICIT NONE
-      INTEGER :: I,J,N,Natoms_Loc,NBond,NIntC,IntSet
+      INTEGER :: I,J,N,NatmsLoc,NBond,NIntC,IntSet
       INTEGER :: NMax_Excl,NMax12,ILast
-      REAL(DOUBLE),DIMENSION(1:3,1:Natoms_Loc) :: XYZ
+      REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       TYPE(INT_RNK2) :: BondIJ 
       TYPE(INT_RNK2) :: AngleIJK
       TYPE(INT_RNK2) :: TorsionIJKL
@@ -1340,14 +1341,14 @@ END SUBROUTINE Excl_LIST14
 ! first sort atoms into boxes      
 !
    BoxSize=5.D0*AngstromsToAU !in A
-   CALL SORT_INTO_Box1(BoxSize,XYZ,Natoms_Loc,&
+   CALL SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc,&
                    NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
    NBox=NX*NY*NZ
    CALL New(BoxI,NBox+1)
-   CALL New(BoxJ,Natoms_Loc)
+   CALL New(BoxJ,NatmsLoc)
 !
-   CALL SORT_INTO_Box2(BoxSize,XYZ,Natoms_Loc,&
+   CALL SORT_INTO_Box2(BoxSize,XYZ,NatmsLoc,&
                    NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI,BoxJ)
 !
 ! now define bonding scheme, based on Slater or Van der Waals radii
@@ -1364,20 +1365,20 @@ END SUBROUTINE Excl_LIST14
         CritRad%D=Fact*VDWRadii*AngstromsToAU
       ENDIF
 !
-      CALL BondList(Natoms_Loc,XYZ,NBond,MMAtNum, &
+      CALL BondList(NatmsLoc,XYZ,NBond,MMAtNum, &
            BoxI,BoxJ,NBox,NX,NY,NZ,CritRad)
       CALL New(BondIJ,(/2,NBond/))
-      CALL BondList(Natoms_Loc,XYZ,NBond,MMAtNum, &
+      CALL BondList(NatmsLoc,XYZ,NBond,MMAtNum, &
            BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,BondIJ)
 !
       IF(IntSet==1) THEN
 !
 ! Now define covalent topology matrices
 !
-        CALL Topology_12(NAtoms_Loc,NBond,BondIJ%I(1,1:NBond),BondIJ%I(2,1:NBond),Top12,InfFile=InfFile)
-        CALL Topology_13(NAtoms_Loc,Top12,Top13)
-        CALL Topology_14(NAtoms_Loc,Top12,Top14)
-        CALL Excl_List(NAtoms_Loc,Top12,Top13,Top14,Top_Excl,InfFile=InfFile)
+        CALL Topology_12(NatmsLoc,NBond,BondIJ%I(1,1:NBond),BondIJ%I(2,1:NBond),Top12,InfFile=InfFile)
+        CALL Topology_13(NatmsLoc,Top12,Top13)
+        CALL Topology_14(NatmsLoc,Top12,Top14)
+        CALL Excl_List(NatmsLoc,Top12,Top13,Top14,Top_Excl,InfFile=InfFile)
 !
         CALL Delete(Top_Excl)
         CALL Delete(Top14)
@@ -1388,7 +1389,7 @@ END SUBROUTINE Excl_LIST14
 ! Filter out covalent 12, 13 and 14 connections from VWD bondlist
 !
         CALL Get(NMax_Excl,'NMax_Excl')
-        CALL New(Top_Excl,(/Natoms_Loc,NMax_Excl+1/))
+        CALL New(Top_Excl,(/NatmsLoc,NMax_Excl+1/))
         CALL Get(Top_Excl,'TOP_EXCL')
           CALL VDWFilter(BondIJ,NBond,Top_Excl)
         CALL Delete(Top_Excl)
@@ -1399,25 +1400,25 @@ END SUBROUTINE Excl_LIST14
 !
       IF(IntSet==1) THEN
 !
-        CALL AngleList(NAtoms_Loc,Top12,NAngle=NAngle)
+        CALL AngleList(NatmsLoc,Top12,NAngle=NAngle)
         CALL New(AngleIJK,(/3,NAngle/))
-        CALL AngleList(NAtoms_Loc,Top12,AngleIJK,NAngle)
+        CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle)
 !
-        CALL TorsionList(NAtoms_Loc,Top12,NTorsion=NTorsion)
+        CALL TorsionList(NatmsLoc,Top12,NTorsion=NTorsion)
         CALL New(TorsionIJKL,(/4,NTorsion/))
-        CALL TorsionList(NAtoms_Loc,Top12,TorsionIJKL,NTorsion)
+        CALL TorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion)
 !
         CALL Delete(Top12)
 !
       ELSE
 !
         CALL Get(NMax12,'NMax12')
-        CALL New(Top12,(/Natoms_Loc,NMax12+1/))
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
         CALL Get(Top12,'TOP12')
 !
-        CALL VDWAngleList(NAtoms_Loc,Top12,AngleIJK,NAngle,BondIJ,NBond)
+        CALL VDWAngleList(NatmsLoc,Top12,AngleIJK,NAngle,BondIJ,NBond)
 !
-        CALL VDWTorsionList(NAtoms_Loc,Top12,TorsionIJKL,NTorsion,BondIJ,NBond)
+        CALL VDWTorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion,BondIJ,NBond)
 !
         CALL Delete(Top12)
 !
@@ -1461,14 +1462,14 @@ END SUBROUTINE Excl_LIST14
       END SUBROUTINE DefineIntCoos
 !
 !--------------------------------------------------------
-      SUBROUTINE BondList(NAtoms_Loc,XYZ,NBond,MMAtNum,&
+      SUBROUTINE BondList(NatmsLoc,XYZ,NBond,MMAtNum,&
              BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,BondIJ)
 !
 ! Define number of bonds
 !
       IMPLICIT NONE
-      INTEGER :: I,J,Natoms_Loc,NBond
-      REAL(DOUBLE),DIMENSION(1:3,1:Natoms_Loc) :: XYZ
+      INTEGER :: I,J,NatmsLoc,NBond
+      REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       TYPE(DBL_VECT) :: CritRad !!! VdW or Slater Radii
       REAL(DOUBLE) :: R12,R12_2
       INTEGER :: IZ,IX,IY,I1,I2,JJ1,JJ2,NBOX,IORD,IORDD
@@ -1545,7 +1546,7 @@ END SUBROUTINE Excl_LIST14
       END SUBROUTINE BondList
 !
 !----------------------------------------------------------------
-SUBROUTINE AngleList(NAtoms_Loc,Top12,AngleIJK,NAngle)
+SUBROUTINE AngleList(NatmsLoc,Top12,AngleIJK,NAngle)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -1553,13 +1554,13 @@ IMPLICIT NONE
 TYPE(INT_RNK2) :: Top12
 TYPE(INT_RNK2),OPTIONAL :: AngleIJK 
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ
-INTEGER :: NAtoms_Loc,KK,IN12,JN12,NAngle
+INTEGER :: NatmsLoc,KK,IN12,JN12,NAngle
 LOGICAL :: AngleFill
 !
             AngleFill=.FALSE.
             IF(PRESENT(AngleIJK)) AngleFill=.TRUE.
             NAngle=0
-    DO II=1,NAtoms_Loc
+    DO II=1,NatmsLoc
       IN12=Top12%I(II,1)
       DO J=1,IN12
         JJ=Top12%I(II,J+1)
@@ -1582,7 +1583,7 @@ LOGICAL :: AngleFill
 !
 END SUBROUTINE AngleList   
 !------------------------------------------------------
-SUBROUTINE TorsionList(NAtoms_Loc,Top12,TorsionIJKL,NTorsion)
+SUBROUTINE TorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -1590,13 +1591,13 @@ IMPLICIT NONE
 TYPE(INT_RNK2):: Top12
 TYPE(INT_RNK2),OPTIONAL :: TorsionIJKL
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL,NTorsion
-INTEGER :: NAtoms_Loc,IN12,JN12,KN12
+INTEGER :: NatmsLoc,IN12,JN12,KN12
 LOGICAL :: TorsionFill
 !
             TorsionFill=.FALSE.
             IF(PRESENT(TorsionIJKL)) TorsionFill=.TRUE.
             NTorsion=0
-    DO II=1,NAtoms_Loc
+    DO II=1,NatmsLoc
       IN12=Top12%I(II,1)
       DO J=1,IN12
         JJ=Top12%I(II,J+1)
@@ -1654,11 +1655,11 @@ SUBROUTINE VDWFilter(BondIJ,NBond,Top_Excl)
 !
 END SUBROUTINE VDWFilter
 !------------------------------------------------------------
-SUBROUTINE VDWAngleList(NAtoms_Loc,Top12,AngleIJK,NAngle,BondIJ,NBond)
+SUBROUTINE VDWAngleList(NatmsLoc,Top12,AngleIJK,NAngle,BondIJ,NBond)
 ! this routine generates bond-angles associated with WDV bonds
 !
     IMPLICIT NONE
-    INTEGER :: NAtoms_Loc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
+    INTEGER :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
     TYPE(INT_RNK2) :: Top12   
     TYPE(INT_RNK2) :: AngleIJK
     TYPE(INT_RNK2) :: BondIJ
@@ -1696,11 +1697,11 @@ SUBROUTINE VDWAngleList(NAtoms_Loc,Top12,AngleIJK,NAngle,BondIJ,NBond)
 !
 END SUBROUTINE VDWAngleList
 !-------------------------------------------------
-SUBROUTINE VDWTorsionList(NAtoms_Loc,Top12,TorsionIJKL,NTorsion,BondIJ,NBond)
+SUBROUTINE VDWTorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion,BondIJ,NBond)
 ! this routine generates bond-angles associated with WDV bonds
 !
     IMPLICIT NONE
-    INTEGER :: NAtoms_Loc,I,I1,I2,J,J1,J2,N1,N2,NBond,NTorsion,K1,K2
+    INTEGER :: NatmsLoc,I,I1,I2,J,J1,J2,N1,N2,NBond,NTorsion,K1,K2
     TYPE(INT_RNK2) :: Top12
     TYPE(INT_RNK2) :: TorsionIJKL
     TYPE(INT_RNK2) :: BondIJ
@@ -1739,7 +1740,7 @@ SUBROUTINE VDWTorsionList(NAtoms_Loc,Top12,TorsionIJKL,NTorsion,BondIJ,NBond)
 !
 END SUBROUTINE VDWTorsionList
 !--------------------------------------------------------
-SUBROUTINE GetIntCs(XYZ,Natoms_Loc,InfFile,IntCs,NIntC,Refresh)
+SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 !
 ! This subroutine constructs the IntCs array, which holds
 ! definitions of internal coordinates to be used in the 
@@ -1753,27 +1754,27 @@ SUBROUTINE GetIntCs(XYZ,Natoms_Loc,InfFile,IntCs,NIntC,Refresh)
       IMPLICIT NONE
       TYPE(INTC) :: IntCs,IntC_Cov,IntC_VDW,IntC_Extra,IntC_New
       INTEGER :: NIntC,NIntC_Cov,NIntC_VDW,NIntC_Extra,NNew,Nintc_New
-      INTEGER :: I,J,K,Refresh,Natoms_Loc,II,ILast
+      INTEGER :: I,J,K,Refresh,NatmsLoc,II,ILast
       INTEGER :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
       TYPE(INT_VECT) :: MMAtNum,LinAtom,MarkLinb
       TYPE(INT_RNK2) :: LinBBridge,Top12
       TYPE(CRDS) :: GMLoc
       CHARACTER(LEN=DefAULT_CHR_LEN) :: InfFile
-      REAL(DOUBLE),DIMENSION(1:3,1:Natoms_Loc) :: XYZ
+      REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       REAL(DOUBLE) :: Value
 !
 ! Get atomnames (numbers) from HDF 
 !
-      CALL New(MMAtNum,Natoms_Loc)
+      CALL New(MMAtNum,NatmsLoc)
       CALL Get(MMAtNum,'MMATNUM')
 !
       IF(Refresh==1) Then !!! Total refresh
 !
 !define covalent bonding scheme
-        CALL DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,1,IntC_Cov,NIntC_Cov)
+        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1,IntC_Cov,NIntC_Cov)
 !define Van der Waals bonding scheme
-        CALL DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!!    CALL DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
+        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
+!!!!    CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
 !!!NIntC_VDW=0 !!!! temporary, see same comment also a few lines below
 !get extra internal coordinates and constraints
           CALL Get(NIntC_Extra,'NIntC_Extra')
@@ -1799,8 +1800,8 @@ SUBROUTINE GetIntCs(XYZ,Natoms_Loc,InfFile,IntCs,NIntC,Refresh)
           CALL New(IntC_Cov,NIntC_Cov)
           CALL Get(IntC_Cov,'IntC_Cov')
 !       define Van der Waals bonding scheme
-        CALL DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!!!   CALL DefineIntCoos(NAtoms_Loc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
+        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
+!!!!!   CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
 !!!!NIntC_VDW=0 !!!!! temporary !!!!
           CALL Put(NIntC_VDW,'NIntC_VDW')
           IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
@@ -1958,7 +1959,7 @@ IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
 ! since it is supposed to be done in previous steps
 !
         CALL Get(NMax12,'NMax12')
-        CALL New(Top12,(/Natoms_Loc,NMax12+1/))
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
         CALL Get(Top12,'TOP12')
 !
         CALL NEW(LinBBridge,(/2,NIntc/))
@@ -2077,15 +2078,15 @@ END SUBROUTINE GetIntCs
 !
 !-------------------------------------------------------
 !
-SUBROUTINE INTCValue(IntCs,XYZ,Natoms_Loc)
+SUBROUTINE INTCValue(IntCs,XYZ,NatmsLoc)
 !
 ! Determine value of internal coordinates.
 ! Input coordintes are now in atomic units!
 ! 
     IMPLICIT NONE
     TYPE(INTC) :: IntCs
-    INTEGER :: NIntCs,I,J,K,L,I1,I2,I3,I4,Natoms_Loc
-    REAL(DOUBLE),DIMENSION(1:3,1:NAtoms_Loc) :: XYZ
+    INTEGER :: NIntCs,I,J,K,L,I1,I2,I3,I4,NatmsLoc
+    REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
 !
     NIntCs=SIZE(IntCs%Def(:))
 !
@@ -2825,6 +2826,8 @@ END SUBROUTINE CoordTrf
      SUBROUTINE LJCell(GMLoc,LJCutOff,AtmMark,LJEps,LJRad, &
        XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
 !
+! WARNING! Pass in coordinates in Angstroms!
+!
 ! Calculate coordinates of multiples of the elementary cell
 ! including the central cell, and store them in XYZLJCell.
 ! Storage is saved by filtering out replica atoms, which are
@@ -2905,12 +2908,15 @@ END SUBROUTINE CoordTrf
       DO IC=-NZ,NZ
   IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
        DO I=1,GMLoc%Natms
-         XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape(1,1)+IB*GMLoc%PBC%BoxShape(2,1)+IC*GMLoc%PBC%BoxShape(3,1)
-           IF(XTrans<-LJCutOff .OR. XTrans>DX+LJCutOff) CYCLE
-         YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape(1,2)+IB*GMLoc%PBC%BoxShape(2,2)+IC*GMLoc%PBC%BoxShape(3,2)
-           IF(YTrans<-LJCutOff .OR. YTrans>DY+LJCutOff) CYCLE
-         ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape(1,3)+IB*GMLoc%PBC%BoxShape(2,3)+IC*GMLoc%PBC%BoxShape(3,3)
-           IF(ZTrans<-LJCutOff .OR. ZTrans>DZ+LJCutOff) CYCLE
+         XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape(1,1)+&
+                IB*GMLoc%PBC%BoxShape(2,1)+IC*GMLoc%PBC%BoxShape(3,1)
+                IF(XTrans<-LJCutOff .OR. XTrans>DX+LJCutOff) CYCLE
+         YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape(1,2)+&
+                IB*GMLoc%PBC%BoxShape(2,2)+IC*GMLoc%PBC%BoxShape(3,2)
+                IF(YTrans<-LJCutOff .OR. YTrans>DY+LJCutOff) CYCLE
+         ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape(1,3)+&
+                IB*GMLoc%PBC%BoxShape(2,3)+IC*GMLoc%PBC%BoxShape(3,3)
+                IF(ZTrans<-LJCutOff .OR. ZTrans>DZ+LJCutOff) CYCLE
          II=II+1
          XYZLJCell2%D(1,II)=XTrans
          XYZLJCell2%D(2,II)=YTrans
