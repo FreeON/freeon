@@ -23,11 +23,13 @@ PROGRAM MakeS
 #else
   TYPE(BCSR)          :: S,T1
 #endif
+
 #ifdef PERIODIC 
   LOGICAL             :: NotMakeBlock
   INTEGER             :: NC
   REAL(DOUBLE)        :: Bx,By,Bz
 #endif
+
   TYPE(AtomPair)      :: Pair
 !
   TYPE(BSET)          :: BS
@@ -40,7 +42,7 @@ PROGRAM MakeS
 !--------------------------------------- 
 ! Start up macro
 !
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !----------------------------------------------
 ! Get basis set and geometry
 !
@@ -73,6 +75,8 @@ PROGRAM MakeS
   S%NAtms=NAtoms
   DO AtA=1,NAtoms
 #endif
+
+
      DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
            NN = Pair%NA*Pair%NB
