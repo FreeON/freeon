@@ -1,10 +1,30 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
 !
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
 MODULE GlobalScalars
    IMPLICIT NONE
 !------------------------------------------------------------
@@ -41,11 +61,10 @@ MODULE GlobalScalars
 !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
 !   
    INTEGER,      PARAMETER :: HGEll=5
-   INTEGER,      PARAMETER :: SPEll=5 
+   INTEGER,      PARAMETER :: SPEll=5
    INTEGER,      PARAMETER :: SPEll2=2*SPell
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
-   INTEGER,      PARAMETER :: dHGLen=(HGEll+2)*(HGEll+3)*(HGEll+4)/6
-   INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2 ! note, poles start from 0.
+   INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
 !---------------------------------------------------------------------------------------  
 !  Other numbers
@@ -73,6 +92,7 @@ MODULE GlobalScalars
 !
    INTEGER, PARAMETER      :: ROOT=0
 !-------------------------------------------------  IO Unit numbers 
+   INTEGER, PARAMETER      :: Geo=22                 ! Unit for geometries
    INTEGER, PARAMETER      :: Bas=33                 ! Unit for basis file IO
    INTEGER, PARAMETER      :: Seq=44                 ! Unit for sequential, binary IO
    INTEGER, PARAMETER      :: Tmp=55                 ! Unit for temp/scratch files
