@@ -199,8 +199,10 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeNull->{dI},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
+
 SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
