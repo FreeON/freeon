@@ -1003,27 +1003,27 @@ CONTAINS
      !
      B=Zero
      IF(CHAR=='X') THEN
-       IF(Constraint) THEN
-         B(1)=1.D-6
-       ELSE
+       !IF(Constraint) THEN
+       !  B(1)=1.D-6
+       !ELSE
          B(1)=One
-       ENDIF
+       !ENDIF
      ENDIF
      !
      IF(CHAR=='Y') THEN
-       IF(Constraint) THEN
-         B(2)=1.D-6
-       ELSE
+       !IF(Constraint) THEN
+       !  B(2)=1.D-6
+       !ELSE
          B(2)=One
-       ENDIF
+       !ENDIF
      ENDIF
      !
      IF(CHAR=='Z') THEN
-       IF(Constraint) THEN
-         B(3)=1.D-6
-       ELSE
+       !IF(Constraint) THEN
+       !  B(3)=1.D-6
+       !ELSE
          B(3)=One
-       ENDIF
+       !ENDIF
      ENDIF
    END SUBROUTINE BCART
 !
@@ -1697,18 +1697,18 @@ CONTAINS
      INTEGER    :: NIntC_Extra
      !
      ILast=NIntC_Cov+NIntC_VDW
+     II=0
      DO III=1,NIntC
-       II=0
        DO I=ILast+1,ILast+NIntC_Extra
-           IF(IntCs%Def(I)=='CART ') CYCLE
+           IF(IntCs%Def(I)(1:5)=='CART ') CYCLE
          DO J=1,ILast
-           IF(IntCs%Def(J)=='BLANK') CYCLE
+           IF(IntCs%Def(J)(1:5)=='BLANK') CYCLE
            IF(IntCs%Atoms(J,1)==IntCs%Atoms(I,1).AND.&
               IntCs%Atoms(J,2)==IntCs%Atoms(I,2).AND.&
               IntCs%Atoms(J,3)==IntCs%Atoms(I,3).AND.&
               IntCs%Atoms(J,4)==IntCs%Atoms(I,4)) THEN
               II=II+1
-              IntCs%Def(J)='BLANK'
+              IntCs%Def(J)(1:5)='BLANK'
               IntCs%Atoms(J,1:4)=0      
            ENDIF
          ENDDO
@@ -1718,15 +1718,15 @@ CONTAINS
      ! Compress IntCs array, get rid of BLANK-s
      !
      IF(II/=0) THEN
-       IF(ANY(IntCs%Def(:)=='BLANK')) THEN
+       IF(ANY(IntCs%Def(:)(1:5)=='BLANK')) THEN
          NNew=NIntC
          DO I=1,NIntc
-           IF(IntCs%Def(I)=='BLANK') NNew=NNew-1
+           IF(IntCs%Def(I)(1:5)=='BLANK') NNew=NNew-1
          ENDDO
          CALL New(IntC_New,NNew)
          NNew=0    
          DO I=1,NIntc
-           IF(IntCs%Def(I)/='BLANK') THEN
+           IF(IntCs%Def(I)(1:5)/='BLANK') THEN
              NNew=NNew+1
              CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NNew)
            ENDIF
@@ -2618,6 +2618,7 @@ CONTAINS
        CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
                        DiffMax,RMSD) 
        IF(.NOT.GConstr%DoLagr) THEN
+write(out,*) 'setting hard Cartesian constraints '
          CALL SetCartConstr(VectCartAux2%D,IntCs,GConstr%NCartConstr)
        ENDIF
        !
@@ -2863,9 +2864,11 @@ CONTAINS
      !
      ! Percentage of rotations
      !
-     SUM1=SUM1*SUM1/SUM*100.D0
-     SUM2=SUM2*SUM2/SUM*100.D0
-     SUM3=SUM3*SUM3/SUM*100.D0
+     IF(SUM>1.D-6) THEN
+       SUM1=SUM1*SUM1/SUM*100.D0
+       SUM2=SUM2*SUM2/SUM*100.D0
+       SUM3=SUM3*SUM3/SUM*100.D0
+     ENDIF
      IF(Print) THEN
        WRITE(*,100) SUM1,SUM2,SUM3
      ENDIF
@@ -3053,6 +3056,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
      INTEGER :: I,J,NatmsLoc
      LOGICAL,OPTIONAL :: Add_O
+     !
      NatmsLoc=SIZE(ActCarts,2)
      IF(PRESENT(Add_O)) THEN
        IF(Add_O) THEN
@@ -4295,11 +4299,11 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LagrInvHess(CholData,IntCs,SCRPath,GHessian, &
-                          LagrMult,NCart,NConstr)
+   SUBROUTINE LagrInvHess(IntCs,SCRPath,GHessian, &
+                          LagrMult,NCart,NConstr, &
+                          IHessM,JHessM,AHessM)
      TYPE(BMATR)      :: B
      TYPE(Hessian)    :: GHessian
-     TYPE(Cholesky)   :: CholData
      TYPE(INTC)       :: IntCs
      REAL(DOUBLE),DIMENSION(:) :: LagrMult
      INTEGER          :: I,J,NIntC,NCart,NConstr
@@ -4312,16 +4316,26 @@ CONTAINS
      !
      CALL ReadBMATR(B,TRIM(SCRPath)//'B')
      IF(SIZE(B%IB,1)/=NIntC) &
-       CALL Halt('Dimension error in DiagHessLagr')
+       CALL Halt('Dimension error in LagrInvHess.')
+write(*,*) 'LagrInvHess 1'
      CALL GetHessXX(IntCs,B,GHessian,LagrMult, &
                     IHessXX,JHessXX,AHessXX,NCart,SCRPath_O=SCRPath)
+write(*,*) 'LagrInvHess 2'
      CALL GetHessXL(IntCs,B,IHessXL,JHessXL,AHessXL, &
                     NCart,NConstr,SCRPath_O=SCRPath)
+write(*,*) 'LagrInvHess 3'
      CALL MergeXLXX(IHessXL,JHessXL,AHessXL, &
                     IHessXX,JHessXX,AHessXX, &
                     IHessM,JHessM,AHessM,SCRPath_O=SCRPath)
+write(*,*) 'LagrInvHess 4'
      write(*,*) 'aft GetHessXL'
      !
+     CALL Delete(IHessXX)
+     CALL Delete(JHessXX)
+     CALL Delete(AHessXX)
+     CALL Delete(IHessXL)
+     CALL Delete(JHessXL)
+     CALL Delete(AHessXL)
      CALL Delete(B)
    END SUBROUTINE LagrInvHess
 !
@@ -4356,12 +4370,16 @@ CONTAINS
          BScale=GHessian%OutP
        ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
          BScale=GHessian%LinB
+       ELSE IF(IntCs%Def(I)(1:4)=='CART') THEN
+         BScale=Zero
        ELSE
          BScale=One
        ENDIF
        IF(IntCs%Constraint(I)) THEN
          NConstraint=NConstraint+1
-         BScale=BScale-LagrMult(NConstraint)
+         !IF(IntCs%Def(I)(1:4)/='CART') THEN
+         !  BScale=BScale-LagrMult(NConstraint)
+         !ENDIF
        ENDIF
        DO J=1,12 ; BSc%B(I,J)=BScale*BSc%B(I,J) ; ENDDO
      ENDDO
@@ -4380,17 +4398,16 @@ CONTAINS
                      ISpBSc%I,JSpBSc%I,ASpBSc%D, &
                      IHessXX,JHessXX,AHessXX,NCart,NIntC,NCart)
      !
-     CALL Delete(ISpBt)
-     CALL Delete(JSpBt)
-     CALL Delete(ASpBt)
-     !
-     CALL Delete(BSc)
      CALL Delete(ISpB)
      CALL Delete(JSpB)
      CALL Delete(ASpB)
+     CALL Delete(ISpBt)
+     CALL Delete(JSpBt)
+     CALL Delete(ASpBt)
      CALL Delete(ISpBSc)
      CALL Delete(JSpBSc)
      CALL Delete(ASpBSc)
+     CALL Delete(BSc)
    END SUBROUTINE GetHessXX
 !
 !------------------------------------------------------------------
@@ -4442,7 +4459,7 @@ CONTAINS
              NZ=NZ+1
              KK=3*(J-1)+K
              JHessXL%I(NZ)=JJ+K
-             AHessXL%D(NZ)=B%B(I,KK)
+             AHessXL%D(NZ)=-B%B(I,KK)
            ENDDO
          ENDDO
        ENDIF
@@ -4501,6 +4518,67 @@ CONTAINS
      !ENDIF
      CALL Delete(IHessP)
    END SUBROUTINE MergeXLXX
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE DiagDispl(IHessL,JHessL,AHessL,SCRPath, &
+                        Grad,GradMult,Displ,LagrDispl)
+     TYPE(INT_VECT)             :: IHessL,JHessL
+     TYPE(DBL_VECT)             :: AHessL,Vect0,Vect1,Vect2
+     REAL(DOUBLE),DIMENSION(:)  :: Grad,GradMult,Displ,LagrDispl
+     TYPE(DBL_RNK2)             :: FullMat,InvMat
+     INTEGER                    :: I,J,NLagr,NIntC,NDim,NCart
+     CHARACTER(LEN=*)           :: SCRPath
+     TYPE(BMATR)                :: B 
+     !
+write(*,*) 'DiagDispl 1'
+     NLagr=SIZE(GradMult)
+     IF(NLagr/=SIZE(LagrDispl)) &
+       CALL Halt('Dimension error #1 in DiagDispl.')
+     NIntC=SIZE(Grad)
+     IF(NIntC/=SIZE(Displ)) &
+       CALL Halt('Dimension error #2 in DiagDispl.')
+     NDim=SIZE(IHessL%I)-1
+     NCart=NDim-NLagr
+     !
+write(*,*) 'DiagDispl 12'
+     CALL ReadBMATR(B,TRIM(SCRPath)//'B')
+     IF(NIntC/=SIZE(B%IB,1)) &
+       CALL Halt('Dimension error #3 in DiagDispl.')
+     !
+write(*,*) 'DiagDispl 20'
+     CALL New(Vect0,NCart)
+write(*,*) 'DiagDispl 2'
+     CALL CALC_BxVect(B,Grad,Vect0%D,Trp_O=.TRUE.)
+     !
+     CALL Sp1x1ToFull(IHessL%I,JHessL%I,AHessL%D,NDim,NDim,FullMat)
+     !
+     ! Calc. Abs.Val. Inverse of the Hessian
+     !
+     CALL New(InvMat,(/NDim,NDim/))
+     CALL SetDSYEVWork(NDim**2)
+     CALL FunkOnSqMat(NDim,AbsInv,FullMat%D,InvMat%D,Unit_O=6)
+     CALL UnSetDSYEVWork()
+     !
+     CALL New(Vect1,NDim)
+     Vect1%D(1:NCart)=-Vect0%D(1:NCart)
+     IF(NDim>NCart) Vect1%D(NCart+1:NDim)=-GradMult(1:NLagr)
+     !
+     CALL New(Vect2,NDim)
+       CALL DGEMM_NNc(NDim,NDim,1,One,Zero,InvMat%D,Vect1%D,Vect2%D)
+     CALL Delete(Vect1)
+     !
+     Vect0%D(1:NCart)=Vect2%D(1:NCart)
+     CALL CALC_BxVect(B,Displ,Vect0%D)
+     IF(NDim>NCart) LagrDispl(1:NLagr)=Vect2%D(NCart+1:NDim)
+     CALL Delete(Vect2)
+     !
+write(*,*) 'DiagDispl final'
+     CALL Delete(Vect0)
+     CALL Delete(InvMat)
+     CALL Delete(FullMat)
+     CALL Delete(B)
+   END SUBROUTINE DiagDispl
 !
 !------------------------------------------------------------------
 !

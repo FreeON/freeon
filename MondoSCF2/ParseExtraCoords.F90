@@ -80,6 +80,7 @@ MODULE ParseExtraCoords
          Call LowCase(LineLowCase)
          !
          IF(INDEX(LineLowCase,'stre')/=0) THEN
+
                 NIntC_Extra=NIntC_Extra+1 
                 IntC_Extra%DEF(NIntC_Extra)='STRE ' 
          !--------------------
