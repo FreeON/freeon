@@ -13,13 +13,13 @@
 
 \begin{document}
 
-\title{\textbf{Linear scaling computation of the Fock matrix VIII. The exchange matrix
-for periodic systems}}
-
+\title{Linear scaling computation of the Fock matrix VIII. \\
+       Periodic Boundary Conditions for Exact Exchange}
 
 \author{C. J. Tymczak}
 \author{Matt Challacombe}
 \author{Eric Schwegler}
+\author{Valery Weber}
 
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
 New Mexico 87545 }
@@ -84,6 +84,7 @@ and also,
 {E}_{nn}  & : & \,{\rm nuclear-nuclear \, energy} \nonumber \\ 
 \label{Defin}
 \end{eqnarray}
+and we solve for the density matrix, ${\bf P}$, via the eigen-equation 
 and we solve for the density matrix, ${\bf P}$, via the eigen-equation 
 \begin{equation}
 {\bf F} {\bf P} = \epsilon {\bf P}
@@ -161,7 +162,6 @@ in the correct fashion in regard to increasing system size.
 
 \section{Scaling}
  
-For testing of linear scaling, we us a set of periodic diamond systems [ref].
 Figure \ref{figure:Scaling_Matrix_Build} the time it takes to build the
 matrix  \( K_{x} \) for the dense diamond periodic system up to 512 atoms for the
 basis set 6-21G* \cite{C98Basis} at a {\it good} level of accuracy.
