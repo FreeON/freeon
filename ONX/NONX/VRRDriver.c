@@ -79,7 +79,7 @@ void vrrdriver(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf("ONX binary VRR drivers do not exist.\n");
        printf("Creating the binary contraction driver.\n");
-       vconvert(VDrv,LDrv,LngDrv,3*LngLoc); 
+       vconvert(VDrv,LDrv,LngDrv,LngLoc); 
     }
     else {
        fread(LngDrv,sizeof(int),1,InFile);
