@@ -82,20 +82,20 @@ PROGRAM MondoSCF
                                   //TRIM(IntToChar(MaxSCFs))   &
                                   //' SCF iterations. ')
 999     CONTINUE
+        Begin(1) = 0
 !       Summarize SCF stats
         CALL SCFSummry(Ctrl) 
      ENDDO
+     Begin(2) = 1
 !    Do Action
      SELECT CASE (Ctrl%ForceAction)
-     CASE('Molecular-Dynamics')
+     CASE('MolecularDynamics')
         CALL Forces(Ctrl)
-!        CALL NextMDGeometry(Ctrl)
-     CASE('Geometry-Optimization') 
-!        IChk=CheckStep(Ctrl)      
-        CALL Forces(Ctrl)        
+        CALL NextMDGeometry(Ctrl)
+     CASE('GeometryOptimization')   
+!        CALL Forces(Ctrl)        
 !        CALL NextGOGeometry(Ctrl,IChk)
-     CASE('Forces')
-        WRITE(*,*) 'Doing Force'
+     CASE('Force')
         CALL Forces(Ctrl)
      END SELECT
   ENDDO
