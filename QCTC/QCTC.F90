@@ -157,33 +157,33 @@ PROGRAM QCTC
 #ifdef PARALLEL
      TmBegJ = MondoTimer()
 #endif
-     WRITE(*,*) 'TauPAC = ',TauPAC 
-     WRITE(*,*) 'TauMAC = ',TauMAC
+!     WRITE(*,*) 'TauPAC = ',TauPAC 
+!     WRITE(*,*) 'TauMAC = ',TauMAC
      CALL MakeJ(J)
-     WRITE(*,*) 'JWalk Done'
+!     WRITE(*,*) 'JWalk Done'
      CALL Elapsed_TIME(TimeMakeJ,'Accum')
-     WRITE(*,*) 'Time = ',TimeMakeJ%Wall
+!     WRITE(*,*) 'Time = ',TimeMakeJ%Wall
 !
-     IF(.TRUE.) THEN
-        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='unknown')
-        DO I=1,J%NNon0
-           WRITE(99,*) J%MTrix%D(I)
-        ENDDO
-        CLOSE(99)
-     ELSE
-        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='unknown')
-        MaxErrorJ = Zero
-        SdvErrorJ = Zero
-        DO I=1,J%NNon0
-           READ(99,*) JMExact
-           MaxErrorJ = MAX(MaxErrorJ,ABS(J%MTrix%D(I)-JMExact))
-           SdvErrorJ = SdvErrorJ + (J%MTrix%D(I)-JMExact)**2
-        ENDDO
-        CLOSE(99)
-        WRITE(*,*) 'Max  Error = ', MaxErrorJ
-        WRITE(*,*) 'SDV  Error = ', SQRT(SdvErrorJ/DBLE(J%NNon0-1))
-     ENDIF
-     IF(.TRUE.) STOP
+!     IF(.FALSE.) THEN
+!        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='new')
+!        DO I=1,J%NNon0
+!           WRITE(99,*) J%MTrix%D(I)
+!        ENDDO
+!        CLOSE(99)
+!     ELSE
+!        OPEN(UNIT=99,FILE='JMatrix.dat',STATUS='old')
+!        MaxErrorJ = Zero
+!        SdvErrorJ = Zero
+!        DO I=1,J%NNon0
+!           READ(99,*) JMExact
+!           MaxErrorJ = MAX(MaxErrorJ,ABS(J%MTrix%D(I)-JMExact))
+!           SdvErrorJ = SdvErrorJ + (J%MTrix%D(I)-JMExact)**2
+!        ENDDO
+!        CLOSE(99)
+!        WRITE(*,*) 'Max  Error = ', MaxErrorJ
+!        WRITE(*,*) 'SDV  Error = ', SQRT(SdvErrorJ/DBLE(J%NNon0-1))
+!     ENDIF
+!     IF(.TRUE.) STOP
 !
 #ifdef PARALLEL
      TmEndJ = MondoTimer()
