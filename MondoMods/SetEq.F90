@@ -15,6 +15,7 @@ MODULE SetXYZ
 #ifdef MMech
                        Set_BCSR_EQ_BMATR,         &
                        Set_DBL_VECT_EQ_BCSRColVect,&
+                       Set_INTC_EQ_INTC,          &
 #endif
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
@@ -764,4 +765,26 @@ MODULE SetXYZ
             CALL Halt(' Dimensions off in Set_DBL_SCLR_DBL_VECT')
          CALL DBL_VECT_EQ_DBL_SCLR(N,Y%D,X)
       END SUBROUTINE Set_DBL_VECT_EQ_DBL_SCLR
+!
+!===============================================================
+!
+      SUBROUTINE Set_INTC_EQ_INTC(Intcs,IntcsCopy,From,To,Start)
+!
+        TYPE(INTC) :: Intcs,IntcsCopy
+        INTEGER    :: I,J,From,To,Start,NSize,To2
+!
+        NSize=SIZE(IntcsCopy%Def)
+        IF(NSize<Start+(To-From)) THEN
+          CALL Halt('Dimensionality error in IntCCopy')
+        ENDIF
+!
+         To2=Start+(To-From)
+        IntCsCopy%Def(Start:To2)       =IntCs%Def(From:To)
+        IntCsCopy%Atoms(Start:To2,1:4) =IntCs%Atoms(From:To,1:4)
+        IntCsCopy%Value(Start:To2)     =IntCs%Value(From:To)
+        IntCsCopy%Constraint(Start:To2)=IntCs%Constraint(From:To)
+        IntCsCopy%Active(Start:To2)    =IntCs%Active(From:To)
+!
+      END SUBROUTINE Set_INTC_EQ_INTC
+!===============================================================
 END MODULE
