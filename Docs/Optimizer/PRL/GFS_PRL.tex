@@ -90,61 +90,30 @@ valence angle bendings and torsions of dihedral angles. These
 coordinates are curvilinear, since they can be composed
 as non-linear functions of the Cartesian coordinates of atomic nuclei.
 
-An important property of these chemical
-internal coordinates
+An important property of these chemical internal coordinates
 is that they significantly reduce the harmonic and higher order 
-vibrational coupling, as compared to Cartesian coordinates. 
-In internal coordinate representation it is much easier to estimate 
-harmonic and higher order force-constants than in Cartesian. Even
-if accurate harmonic force-constants are available, internal coordinates
-are superior for geometry optimization, since anharmonic effects are
-usually large. In practice, accurate harmonic force constants are 
-not available for geometry optimization, since their calculation 
-is very expensive.
+vibrational coupling, as compared to Cartesian coordinates 
+\cite{pulay_dynamics,Baker_deloc_1}. 
+Even if accurate harmonic force-constants are available, 
+internal coordinates are superior for geometry optimization, 
+since anharmonic effects are
+usually large, especially far from the minimum 
+\cite{Baker_deloc_1}. 
 
-Internal coordinates represent a natural energy and 
-length-scale separation of molecular movements.
-The stiffest molecular motions are usually those of strechings, while 
-the softest ones are related to torsions. 
-Typical harmonic force constants for stretches are in the order of 
-0.5 atomic units (a.u.), those of bendings are of 0.2 a.u. and the
-torsions are around 0.1 a.u or below. 
-These typical values however, can vary a lot.
-For example, a double bond is much stiffer than a single bond or 
-a hydrogen-bridge. Also, the values of the force constants depend
-on the actual conformation of the molecule. Thus, a rough estimate
-of these force constants is usually not satisfactory 
-for an efficient optimization
-of complex molecules. However it is often enough in the case of small
-molecules \cite{fogarasi_diaghess}.
+A rough estimate of internal coordinate force constants is usually 
+enough for an efficient geometry optimization of small molecules
+\cite{bakken,fogarasi_diaghess}, however it is not satisfactory
+for larger molecules of complex structure.
 
 In order to get more accurate curvature information about the 
 potential energy surface the so-called Hessian-matrix update schemes
 are used \cite{RFletcher}. 
 Hessian matrix update schemes are derived from the assumption of a 
-harmonic potential energy surface. A series of rank-1 updates
-can build the exact Hessian matrix using gradients and displacements
-of consequtive geometry optimization steps.
-E.g. for a 100 atom system, on an ideal harmonic surface 300 rank-1
-updates are necessary to to build the exact Hessian. The success
-of Hessian update schemes is based on, that for geometry optimization
-an imperfect Hessian is enough to bring the molecule to a local 
-optimum by quasi-Newton steps. 
-It should also be obvious, that the assumption of a harmonic potential energy 
-surface is a very crude approach to the molecular reality. 
-It holds best for the motions of covalent bonds, and least for
-hydrogen bonds or interchain interactions. Since large molecules of practical
-interest are usually full of hydrogen bonds, it is needless to say how
-crude the harmonic approximation is.
-In order to maintain convergence to a local
-minimum instead of a transition state, the positive definite nature
-of the updated Hessian must always be ensured. However, as 
-an approximate Hessian cannot provide absolute certainty about the 
-nature of a local extremum, the exact Hessian remains the only tool
-to examine the quality of the extremum with full reliability. 
-This problem has been investigated
-in Ref \cite{Wales_saddlepoint} for the case of 
-gradients-only optimizations.
+harmonic potential energy surface. 
+The success of Hessian update schemes is based on, that for geometry 
+optimization a reasonable estimate of the Hessian 
+is enough to bring the molecule to a local optimum by 
+quasi-Newton steps. 
 
 The updated Hessian matrices require ${\cal{O}}(N^{2})$ storage, thus
 their use becomes a computational bottleneck for large molecules.
@@ -157,8 +126,6 @@ the necessary operations by an implicite application of the Hessian
 via its component vectors. LBFGS
 has the limitation that it can use only a small number of remembered
 steps.
-LBFGS has never been used in conjuction with internal coordinates
-for large systems yet.
 Another efficient approach has been constructed very recently by Bofill,
 Anglada et.al. \cite{bofill_lanczos}. This approach is similar
 to LBFGS in the sense that it avoids the use of the explicite
@@ -183,7 +150,8 @@ only in recent developments
 
 In the present communication we introduce a fundamentally new approach
 to molecular geometry optimization. We call this approach the
-Gradient Curve Fitting (GCF) technique. This new approach is very simple
+Optimization through Gradient Curve Fitting (OGCF) technique. 
+This new approach is very simple
 to implement, scales fully linearly with system size 
 and is very efficient for both small and large molecules.
 
@@ -193,17 +161,22 @@ on harmonic potential energy surfaces.
 In the process of geometry optimization the goal is to reveal the roots
 of these lines, where all gradients become zero. In order to 
 find these roots, first a few points should be determined from each
-lines, then the roots can be revealed by line-fitting. 
+lines, then the roots can be revealed by line-fitting. This technique
+would be quadratically convergent, as long as the normal modes
+can be determined and the potential energy surface is harmonic.
 
 In a realistic case neither the potential energy surface is 
 harmonic, nor the normal modes are available. However, it is always
 possible to construct internal coordinates based on the chemical
 intuition, and these internal coordinates will have a reduced
-vibrational coupling, similar to normal modes. The corresponding
+vibrational coupling, similar to normal modes. 
+In this sense the internal coordinates represent an a-priory
+approximation to normal modes.
+The corresponding
 gradient curves will not be straight lines for internal coordinates,
 but they still represent stronger or weaker tendencies, as the molecular
 structure walks on the potential energy surface, e.g. during geometry
-optimization.
+optimization. 
 See Fig. \ref{NH3outp6} for a typical progression of internal
 coordinate gradients during geometry optimization.
 These tendencies can again be revealed by fitting curves to the
@@ -212,10 +185,14 @@ the root of the fitted curve then
 serves as a new estimate for the coordinate value where the gradient
 should become zero. Repeating this fitting process can finally
 reveal a local optimum of the the potential energy surface.
+The analogy with the case of the normal modes suggests a possibility
+for quadratic convergence, as long as the rate of vibrational
+coupling is small enough.
+
 The fitting of gradient surfaces has already been applied to 
 the parametrization of empirical
 force-fields for the case of small molecules
-\cite{force-field-fitting}, however it 
+\cite{force-field-fitting,force-matching}, however it 
 has not been investigated for the purpose of geometry optimization yet.
 \begin{figure}[h]
 %\resizebox*{3.5in}{!}{\includegraphics{1_6_6_Data.eps}}
@@ -231,10 +208,9 @@ indicate the sequence of optimization steps.
 \label{NH3outp6}
 }
 \end{figure}
-The fitting of curves happens through 
+The curves-fitting happens through 
 well established and robust algorithms, which are available in standard 
-computational libraries 
-\cite{slatec}. 
+computational libraries \cite{slatec}. 
 It is important to note
 that data points are weighted before the fit. The weights, 
 $w_{k}^{(i)}$, are
@@ -254,7 +230,7 @@ of the gradient curve of a primary fit.
 %\begin{equation}
 %H_{ll}^{i} = \left . \frac{\partial g_{l}^{(i)}}{\partial r_{l}^{}} \right|_{r_{l}^{}=r_{l}^{(i)}}
 %\end{equation}
-The primary fit is done with 
+This primary fit is done with 
 the weights $w{'}_{k}^{(i)} = 1/g_{k}^{(i)2}$ usual to 
 estimate relative errors.
 The statistical F test is used to decide about the order of the fit. 
@@ -304,10 +280,10 @@ curve fitting technique.
 %is used to overshoot the predicted root.
 %
 We will provide detailed information about the technology of 
-the Gradient Curve Fitting
-optimizer in a forthcoming paper \cite{bisect-paper}.
+the Optimization through Gradient Curve Fitting
+technique in a forthcoming paper \cite{bisect-paper}.
 
-The performance of this initial implementation of the GCF optimizer
+The performance of this initial implementation of the OGCF optimizer
 has been tested on a 
 series of small molecules, called Baker's test set \cite{bakerstest}.
 Table \ref{Bakers_test} lists all the test results
@@ -315,7 +291,7 @@ in order to convince
 the reader, that our fundamentally new approach to geometry optimization
 works as well on small molecules as the best traditional techniques.
 \begin{table}[h]
-\squeezetable
+%\squeezetable
 \caption{
 Geometry optimization steps of small molecules (upto 30 atoms)
 of the Baker's test set. Calculations have been carried out 
@@ -333,7 +309,7 @@ which was based on the so called extra redundant coordinates.
 \toprule
 Molecule               & Present  & Bakken & Eckert  & Lindh &  Baker  \\
          & work & {\it{et al.}} & {\it{et al.}} & {\it{et al.}} &    \\
-         &(GCF) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
+         &(OGCF) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
 \colrule
 Water                  &   4    &   4    &    4    &    4   &   6     \\
 Ammonia                &   4    &   5    &    6    &    5   &   6     \\
@@ -342,7 +318,7 @@ Acetylene              &   4    &   4    &    6    &    5   &   6     \\
 Allene                 &   3    &   4    &    4    &    5   &   5     \\
 Hydroxysulphane        &   7    &   7    &    7    &    8   &   8     \\
 Benzene                &   2    &   3    &    3    &    3   &   4     \\
-Methylamin             &   4    &   4    &    5    &    5   &   6     \\
+Methylamine            &   4    &   4    &    5    &    5   &   6     \\
 Ethanol                &   5    &   4    &    5    &    5   &   6     \\
 Acetone                &   5    &   4    &    5    &    5   &   6     \\
 Disilyl ether          &   9    &   8    &    9    &   11   &   8     \\
