@@ -19,7 +19,9 @@ MODULE PFFTen
 !====================================================================================
   TYPE(CellSet)                       :: CSMM
   TYPE(DBL_VECT)                      :: TensorC,TensorS
-  REAL(DOUBLE), DIMENSION(0:FFLen)    :: RhoC,RhoS
+  TYPE(DBL_VECT)                      :: TenRhoC,TenRhoS
+  TYPE(DBL_VECT)                      :: RhoC,RhoS
+!
   REAL(DOUBLE), DIMENSION(0:FFLen)    :: PFFBraC,PFFBraS,PFFKetC,PFFKetS,FarFS,FarFC
 !
   REAL(DOUBLE),PARAMETER              :: Small=1.0D-12
@@ -40,8 +42,8 @@ MODULE PFFTen
       TYPE(ARGMT)            :: Args
 !-------------------------------------------------------------------------------- 
       INTEGER                :: MaxEll
-      INTEGER                :: Layers
-      REAL(DOUBLE)           :: Scale,R1,R2,Radius
+      INTEGER                :: Layers,NC
+      REAL(DOUBLE)           :: Scale,R1,R2,Radius,Rx,Ry,Rz
       CHARACTER(LEN=7)       :: CellType
 !
       IF(GM%PBC%Dimen==0) THEN 
@@ -55,10 +57,9 @@ MODULE PFFTen
          CALL New(TensorS,LSP(2*MaxEll),0)
          TensorC%D = Zero
          TensorS%D = Zero 
-         CALL Put(MaxEll ,'MaxEll'//CurGeom)
-         CALL Put(TensorC,'PFFTensorC'//CurGeom)
-         CALL Put(TensorS,'PFFTensorS'//CurGeom)
-!
+         CALL Put(MaxEll ,'MaxEll'//CurBase//CurGeom)
+         CALL Put(TensorC,'PFFTensorC'//CurBase//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurBase//CurGeom)
          RETURN
       ENDIF
 ! 
@@ -73,21 +74,33 @@ MODULE PFFTen
          TensorC%D = Zero
          TensorS%D = Zero 
 !             
-!        Make and Store the Inner Box
+!        Make the Inner Box
 !
          Layers = GM%PBC%PFFMaxLay
-         Radius = DBLE(Layers)*MaxBoxDim(GM)
          CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/Layers,Layers,Layers/))
          CALL Sort_CellSet(CS_IN)
 !
-         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
-         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!        Calculate the Minium Radius
+!
+         CALL New_CellSet_Cube(CSMM,GM%PBC%AutoW,GM%PBC%BoxShape,(/2*Layers,2*Layers,2*Layers/))
+         Radius = 1D16
+         DO NC=1,CSMM%NCells
+            Rx= CSMM%CellCarts%D(1,NC)            
+            Ry= CSMM%CellCarts%D(2,NC)
+            Rz= CSMM%CellCarts%D(3,NC)
+            IF(.NOT. InCell_CellSet(CS_IN,Rx,Ry,Rz)) THEN
+               Radius=MIN(Radius,SQRT(Rx**2+Ry**2+Rz**2))
+            ENDIF
+         ENDDO
+         CALL Delete_CellSet(CSMM)
 !
 !        Determine Cell Type
 !
          CellType=DetCellType(GM,CS_IN%NCells,Scale)
 !     
 !        Read from Archive or Make the Tensor
+!
+         CellType=NonCube
 !
          IF(    CellType==Cube111) THEN
             CALL GetExactTensor1L3D(2*MaxEll,GM,Scale)
@@ -103,11 +116,16 @@ MODULE PFFTen
             ENDIF
          ENDIF
 !
+!        Store the Inner Box
+!
+         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
+         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!
 !        Store the Tensor
 !
-         CALL Put(MaxEll ,'MaxEll'//CurGeom)
-         CALL Put(TensorC,'PFFTensorC'//CurGeom)
-         CALL Put(TensorS,'PFFTensorS'//CurGeom)
+         CALL Put(MaxEll ,'MaxEll'//CurBase//CurGeom)
+         CALL Put(TensorC,'PFFTensorC'//CurBase//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurBase//CurGeom)
          RETURN
       ELSE
 !
@@ -118,7 +136,7 @@ MODULE PFFTen
          TensorC%D = Zero
          TensorS%D = Zero 
 !
-!        Determin The Minuim Radius
+!        Determin The Radius For CS_IN
 !
          Layers = GM%PBC%PFFMaxLay
          R1     = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
@@ -126,13 +144,24 @@ MODULE PFFTen
          Radius = MAX(R1,R2)
          GM%PBC%PFFMaxLay = INT(Radius/MaxBoxDim(GM)+Half)
 !             
-!        Make and Store the Inner Box
+!        Make the Inner Box
 !
          CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
          CALL Sort_CellSet(CS_IN)
 !
-         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
-         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!        Calculate the Minium Radius
+!
+         CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,GM%PBC%BoxShape,2*Radius)
+         Radius = 1D16
+         DO NC=1,CSMM%NCells
+            Rx= CSMM%CellCarts%D(1,NC)            
+            Ry= CSMM%CellCarts%D(2,NC)
+            Rz= CSMM%CellCarts%D(3,NC)
+            IF(.NOT. InCell_CellSet(CS_IN,Rx,Ry,Rz)) THEN
+               Radius=MIN(Radius,SQRT(Rx**2+Ry**2+Rz**2))
+            ENDIF
+         ENDDO
+         CALL Delete_CellSet(CSMM)
 !
 !        Determine Cell Type
 !
@@ -154,11 +183,16 @@ MODULE PFFTen
             ENDIF
          ENDIF
 !
+!        Store the Inner Box
+!
+         CALL Put(Radius,'CS_IN%Radius'//CurBase//CurGeom)
+         CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
+!
 !        Store the Tensor
 !
-         CALL Put(FFELL  ,'MaxEll'//CurGeom)
-         CALL Put(TensorC,'PFFTensorC'//CurGeom)
-         CALL Put(TensorS,'PFFTensorS'//CurGeom)
+         CALL Put(FFELL  ,'MaxEll'//CurBase//CurGeom)
+         CALL Put(TensorC,'PFFTensorC'//CurBase//CurGeom)
+         CALL Put(TensorS,'PFFTensorS'//CurBase//CurGeom)
          RETURN
       ENDIF
 !
@@ -172,7 +206,7 @@ MODULE PFFTen
       INTEGER              :: I,L,M,LM,K,NumberOfRecords
       REAL(DOUBLE)         :: Scale
 !
-      INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"			
+      INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"	
 !
       TensorC%D = Zero
       TensorS%D = Zero 
@@ -478,7 +512,7 @@ MODULE PFFTen
 !
       DO
          CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax)
-         IF(CSMM%NCells .GT. 500000) THEN
+         IF(CSMM%NCells .GT. 600000) THEN
             Rmax = 0.99*Rmax
             CALL Delete_CellSet(CSMM)
          ELSE
@@ -507,6 +541,7 @@ MODULE PFFTen
          ENDIF
       ENDDO
       CALL Delete_CellSet(CSMM)
+!
 !
 !     Sum the Reciprical Space 
 !
