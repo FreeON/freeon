@@ -31,7 +31,7 @@ CONTAINS
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0 alpha 10                                 ',A1,    &  
+         ' Version 1.0 alpha 10 "Gyokuro"                       ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, C.J. Tymczak,                      ',A1,    &
          ' Chee Kwan Gan, Karoly Nemeth, Valery Weber,          ',A1,    &  

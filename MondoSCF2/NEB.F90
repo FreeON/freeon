@@ -1,4 +1,5 @@
 MODULE NEB
+#ifdef NEB
   !===============================================================================
   ! Module for calculating reaction (minimum energy) paths between known 
   ! reactant and product states.  This module impliments the climbing image
@@ -205,4 +206,25 @@ MODULE NEB
     ! Not implemented yet
   END SUBROUTINE NEBSpline
 
+#else
+
+  USE InOut
+  USE PrettyPrint
+  USE ControlStructures
+  IMPLICIT NONE
+  SAVE
+  PRIVATE
+  PUBLIC :: NEBInit,NEBForce
+  CONTAINS
+  SUBROUTINE NEBInit(G)
+    TYPE(Geometries) :: G
+    CALL MondoHalt(DRIV_ERROR,'NEB ROUTINES ARE NOT OPERATIONAL IN THIS RELEASE.')
+  END SUBROUTINE NEBInit
+  SUBROUTINE NEBForce(G,O)
+    TYPE(Geometries) :: G
+    TYPE(Options)    :: O
+    CALL MondoHalt(DRIV_ERROR,'NEB ROUTINES ARE NOT OPERATIONAL IN THIS RELEASE.')
+  END SUBROUTINE NEBForce
+
+#endif
 END MODULE NEB
