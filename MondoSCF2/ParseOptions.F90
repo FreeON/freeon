@@ -40,8 +40,9 @@ CONTAINS
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
     CALL ParseNEB(O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
+    ! Check for option conflicts.
+    CALL OptConflictCheck(O)
     CLOSE(UNIT=Inp,STATUS='KEEP')
-    CALL ConflictCheck()
   END SUBROUTINE LoadOptions
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS
