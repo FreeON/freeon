@@ -337,9 +337,12 @@ PROGRAM ONX2
   !
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
+  !=======
+  !!!CALL Reduce_FASTMAT(T1,KxFM)
+  !=======
   CALL Redistribute_FASTMAT(KxFM)
-  !oCALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
   CALL Set_BCSR_EQ_DFASTMAT(T1,KxFM)
+  !=======
   CALL Delete_FastMat1(KxFM)
   !
   time1 = MondoTimer()
