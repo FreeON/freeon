@@ -7,8 +7,7 @@ Charge=0
 Multiplicity=1
 DebugAll =(MaxDebug,CheckSums)
 Guess=SuperPos
-Opt=QuNew
-Extrap=Proj
+Grad=(Optimize,PrimInt,NoBackTr,DiagHess)
 SCFMethod=(RH,RH,RH)
 BasisSets=(STO-2G,STO-3G,STO-6G)
 ModelChem=(PW91xc,BLYPxc,PBExc)
@@ -17,8 +16,9 @@ Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>
-H  0.0 0.0 -1.0
-H  0.0 0.0 1.0
+o              0.000000    0.000000    0.000000
+h              0.000000    0.000000    1.949000
+h              1.803234    0.000000   -0.739560
 <EndGeometry>
 
 External reference number RPBE/STO-3G        -75.222866 0852  

@@ -7,10 +7,11 @@ Charge=0
 Multiplicity=1
 DebugAll =(MaxDebug,CheckSums)
 Guess=Core
+Grad=(Optimize,PrimInt,NoBackTr,DiagHess)
 SCFMethod=(RH,RH)
 BasisSets=(SBKJC,SBKJC)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Good,Tight)
+Accuracy =(Good,Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
