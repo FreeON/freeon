@@ -9,5 +9,11 @@ an easy fix. The DriverMaker.F program in /ONX/GDrivers should be set
 up to regenerate all of the data files correctly. It is just going 
 to take some cut-and-paste work. 
 
+         Done
+
+
+2. I am getting Nans from the Dab subblock when the gradient is 
+digested... For some reason the subblock is not being loaded 
+correctly.
 
 
