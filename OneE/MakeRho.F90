@@ -322,18 +322,10 @@ PROGRAM MakeRho
   IF(SCFActn=='ForceEvaluation')THEN
      IF(MMOnly()) THEN
         CALL Put_HGRho(Rho,'Rho',Args,Current(1)) 
-#ifdef PARALLEL_CLONES
-       CALL Put(MP)  
-#else
-       CALL Put(MP,CurGeom)
-#endif
+        CALL Put(MP)  
      ELSE
         CALL Put_HGRho(Rho,'Rho',Args,1) 
-#ifdef PARALLEL_CLONES
         CALL Put(MP)   
-#else
-        CALL Put(MP,NxtCycl)
-#endif
      ENDIF
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho,'DeltaRho',Args,0)
@@ -341,48 +333,22 @@ PROGRAM MakeRho
   ELSE
      IF(MMOnly()) THEN
         CALL Put_HGRho(Rho,'Rho',Args,0)
-#ifdef PARALLEL_CLONES
         CALL Put(MP)   
-#else
-        CALL Put(MP,CurGeom) 
-#endif
      ELSE
         CALL Put_HGRho(Rho,'Rho',Args,0) 
-#ifdef PARALLEL_CLONES
         CALL Put(MP)   
-#else
-        CALL Put(MP,IntToChar(Current(1))) 
-#endif
      ENDIF
   ENDIF
 #else
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho,'Rho',Args,1)
-#ifdef PARALLEL_CLONES
-       CALL Put(MP)  
-#else
-     CALL Put(MP,NxtCycle)
-#endif
+     CALL Put(MP)  
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho,'DeltaRho',Args,0)
      CALL Put(MP,'Delta'//TRIM(SCFCycl))
-!-----------------------------------------------
-!  ELSE                                                    !vw             
-!  ELSEIF(SCFActn=='StartResponse'.OR.SCFActn=="DensityPrime") THEN!vw
-!     CALL Put_HGRho(Rho,'RhoPrim',Args,0)                    !vw
-!#ifdef PARALLEL_CLONES                                       !vw
-!      CALL Put(MP)                                           !vw
-!#else                                                        !vw
-!     CALL Put(MP,IntToChar(Current(1)))                      !vw
-!#endif                                                       !vw
-  ELSE                                                       !vw
-!-----------------------------------------------
-     CALL Put_HGRho(Rho,'Rho',Args,0) 
-#ifdef PARALLEL_CLONES
-       CALL Put(MP)  
-#else
-     CALL Put(MP,IntToChar(Current(1))) 
-#endif
+  ELSE                                                      
+     CALL Put_HGRho(Rho,'Rho',Args,0)
+     CALL Put(MP)  
   ENDIF
 #endif
   CALL PChkSum(Rho,'Rho',Prog)
