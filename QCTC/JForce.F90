@@ -35,10 +35,11 @@ PROGRAM JForce
   TYPE(AtomPair)               :: Pair
   TYPE(DBL_VECT)               :: Frc,JFrc
   INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
-  REAL(DOUBLE)                 :: JFrcChk
+  REAL(DOUBLE)                 :: JFrcChk,Rad
   CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
-  INTEGER                      :: NC,I,J
-  REAL(DOUBLE),DIMENSION(3)    :: B,nlm
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
+  INTEGER                      :: NC,I,J,K
+  REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm,PQ
   REAL(DOUBLE),DIMENSION(15)   :: F_nlm
   TYPE(DBL_RNK2)               :: LatFrc_J
 #ifdef MMech
@@ -104,6 +105,34 @@ PROGRAM JForce
 #endif   
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
+! Potentially overide local QCTC thresholds
+  IF(Args%NI==8)THEN
+     TauPAC=1D1**(-Args%I%I(7))
+     TauMAC=1D1**(-Args%I%I(8))
+     CALL OpenASCII(OutFile,Out)         
+     Mssg=TRIM(ProcessName('JForce'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
+     WRITE(Out,*)TRIM(Mssg)
+     Mssg=TRIM(ProcessName('JForce'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
+  ELSE
+     CALL OpenASCII(InpFile,Inp)         
+     IF(OptDblQ(Inp,'TauPAC',TauPAC))THEN
+       Mssg=TRIM(ProcessName('JForce'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
+       CALL OpenASCII(OutFile,Out)     
+       WRITE(Out,*)TRIM(Mssg)     
+       WRITE(*,*)TRIM(Mssg)
+       CLOSE(Out)
+     ENDIF
+     IF(OptDblQ(Inp,'TauMAC',TauMAC))THEN
+       Mssg=TRIM(ProcessName('JForce'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
+       CALL OpenASCII(OutFile,Out)         
+       WRITE(Out,*)TRIM(Mssg)
+       WRITE(*,*)TRIM(Mssg)
+       CLOSE(Out)
+     ENDIF
+     CLOSE(Inp)
+  ENDIF
 ! Setup global arrays for computation of multipole tensors
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
@@ -132,14 +161,12 @@ PROGRAM JForce
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
-!
   CALL New(LatFrc_J,(/3,3/))
   LatFrc_J%D = Zero
-!
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
-#ifdef PARALLEL
+#ifdef PARALLEL 
   MyAtomNum = End%I(MyId)-Beg%I(MyId)+1
   CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MONDO_COMM,IErr)
   IF(TotAtomNum /= GMLoc%Natms) THEN
@@ -153,14 +180,14 @@ PROGRAM JForce
   DO AtA=1,GMLoc%Natms
 #endif
      MA=BSiz%I(AtA)
-     A1=3*(AtA-1)+1
+     A1=3*(AtA-1)+1 
      A2=3*AtA
-     F_nlm = dNukE(GMLoc,AtA)
+     F_nlm        = dNukE(GMLoc,AtA)
      JFrc%D(A1:A2)= Two*F_nlm(1:3)
 !    Store Inner Nuc Lattice Forces
-     LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + F_nlm(7:9)
-     LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + F_nlm(10:12)
-     LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + F_nlm(13:15)
+     LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
+     LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
+     LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + F_nlm(13:15)
 !    Outer Nuc Lattice Forces
      nlm        = AtomToFrac(GMLoc,GMLoc%Carts%D(:,AtA))
      LatFrc_J%D = LatFrc_J%D + Two*LaticeForce(GMLoc,nlm,F_nlm(1:3))
@@ -168,11 +195,14 @@ PROGRAM JForce
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1 
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair)) THEN 
-           Q=P%BlkPt%I(JP)
+           Q=P%BlkPt%I(JP) 
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           A=Pair%A
            B=Pair%B
-           DO NC=1,CS_OUT%NCells
+!
+           DO NC=1,CS_OUT%NCells 
+              Pair%A=A
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                       +(Pair%A(2)-Pair%B(2))**2 &
@@ -183,15 +213,15 @@ PROGRAM JForce
                     JFrc%D(A1:A2) = JFrc%D(A1:A2) +  Four*F_nlm(4:6)
                  ELSE
                     JFrc%D(A1:A2) = JFrc%D(A1:A2) + Eight*F_nlm(1:3)
-                 ENDIF
+                 ENDIF  
 !                Store Inner J Lattice Forces
-                 LatFrc_J%D(1,1:3) =   LatFrc_J%D(1,1:3) + Two*F_nlm(7:9)
-                 LatFrc_J%D(2,1:3) =   LatFrc_J%D(2,1:3) + Two*F_nlm(10:12)
-                 LatFrc_J%D(3,1:3) =   LatFrc_J%D(3,1:3) + Two*F_nlm(13:15)
+                 LatFrc_J%D(1:3,1) =   LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
+                 LatFrc_J%D(1:3,2) =   LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
+                 LatFrc_J%D(1:3,3) =   LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
 !                Outer Lattice J Forces
-                 nlm        = AtomToFrac(GMLoc,Pair%A) 
-                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3))
-                 nlm        = AtomToFrac(GMLoc,Pair%B) 
+                 nlm        = AtomToFrac(GMLoc,Pair%A)
+                 LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3)) 
+                 nlm        = AtomToFrac(GMLoc,Pair%B)
                  LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,(F_nlm(4:6)-F_nlm(1:3)))
               ENDIF
            ENDDO
@@ -199,10 +229,37 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
-! Dipole Correction
+!********************
+!!$  PFFBraC%D=Zero
+!!$  PFFBraS%D=Zero
+!!$  DO AtA=1,NAtoms
+!!$     PFFKetC%D(0)=-Half*GMLoc%AtNum%D(AtA)
+!!$     PFFKetS%D(0)= Zero             
+!!$     PQ(:)       = GMLoc%Carts%D(:,AtA)-GMLoc%PBC%CellCenter%D(:)
+!!$     CALL Regular(FFELL,PQ(1),PQ(2),PQ(3)) 
+!!$     CALL XLate77(FFELL,0,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
+!!$  ENDDO
+!********************
+  PFFBraC%D=RhoC%D
+  PFFBraS%D=RhoS%D
+  DO I=1,3
+     DO J=1,3
+        TenRhoC%D=Zero
+        TenRhoS%D=Zero
+        CALL CTraX77(MaxEll,MaxEll,TenRhoC%D,TenRhoS%D,dTensorC%D(:,I,J),dTensorS%D(:,I,J),RhoC%D,RhoS%D)  
+        DO K = 0,LSP(MaxELL)
+           LatFrc_J%D(I,J) = LatFrc_J%D(I,J)-Two*(PFFBraC%D(K)*TenRhoC%D(K)+PFFBraS%D(K)*TenRhoS%D(K))
+        ENDDO
+     ENDDO
+  ENDDO
+! Dipole Correction  to the Lattice Forces
   DO I=1,3
      LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
   ENDDO  
+!!$  WRITE(*,*) 'LatFrc_J Direct+PFF+Dipole'
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
+!!$  ENDDO
 #ifdef PARALLEL
   JFrcEndTm = MondoTimer()
   JFrcTm = JFrcEndTm-JFrcBegTm
