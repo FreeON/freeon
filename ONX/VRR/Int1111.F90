@@ -19,12 +19,12 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   REAL(DOUBLE)  :: Zeta,Up,PQx,PQy,PQz
   REAL(DOUBLE)  :: Eta, Uq,Qx,Qy,Qz
   REAL(DOUBLE)  :: r1xZpE,TwoE
-  REAL(DOUBLE)  :: T1,T2,T3
+  REAL(DOUBLE)  :: T1
   REAL(DOUBLE)  :: R1
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  INTEGER       :: I,J,K,MG
+  INTEGER       :: I,J,K,MG,M
   INTEGER       :: I0,I1
 
   IF(N.EQ.0) RETURN
@@ -50,7 +50,7 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
         IF (T1<Gamma_Switch)THEN
           MG=AINT(T1*Gamma_Grid)
-          R1=F0_0(J)+T1*(F0_1(MG)+T1*(F0_2(MG)+T1*(F0_3(MG)+T1*F0_4(MG))))
+          R1=F0_0(MG)+T1*(F0_1(MG)+T1*(F0_2(MG)+T1*(F0_3(MG)+T1*F0_4(MG))))
         ELSE
           R1=IB%GammaA%D(1)/DSQRT(T1)
         ENDIF
