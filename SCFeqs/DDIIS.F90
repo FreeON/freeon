@@ -67,10 +67,20 @@ PROGRAM DDIIS
   ! Dont allow damping above 0.5, as this is silly (DIIS would certainly work better).
   Damp=MIN(Damp,5D-1)
   ! Max number of equations to keep in DIIS.
-  IF(.NOT.OptIntQ(Inp,'DDIISDimension',BMax))BMax=10
+  IF(.NOT.OptIntQ(Inp,'DDIISDimension',BMax))BMax=15
   !IF(.NOT.OptIntQ(Inp,'DDIISStart',DDIISStart)) DDIISStart=1
   DDIISStart=1
   CLOSE(Inp)
+  !
+  ! Crate or zero the DDIISQueue.
+  !  CALL New(DDIISQueue,(/0,BMax/))
+  !  CALL SetEq(DDIISQueue%I,0)
+  !  IF(CPSCFCycl.EQ.0) THEN
+  !     DDIISQueue%I(0)=1
+  !     CALL Put(DDIISQueue,'DDIISQueue')
+  !  ELSE
+  !     CALL Get(DDIISQueue,'DDIISQueue')
+  !  ENDIF
   !
   ! Allocations.
   CALL New(P    )

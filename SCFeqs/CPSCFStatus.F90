@@ -159,7 +159,7 @@ PROGRAM CPSCFSts
           &                         //', '   //TRIM(FltToShrtChar(Tensor(3))) 
 
      IF(CPSCFCycl.GT.0) &
-          & CPSCFMessage=TRIM(CPSCFMessage)//', dD = '//TRIM(DblToShrtChar(DPrimMax))
+          & CPSCFMessage=TRIM(CPSCFMessage)//', dD'' = '//TRIM(DblToShrtChar(DPrimMax))
      !CPSCFMessage=TRIM(CPSCFMessage)//' T = '//TRIM(FltToShrtChar(Tensor(1))) &
      !     &                         //', '   //TRIM(FltToShrtChar(Tensor(2))) &
      !     &                         //', '   //TRIM(FltToShrtChar(Tensor(3))) &
