@@ -158,7 +158,7 @@ MODULE SetSCFs
          CALL LineToChars(MPI_FLAGS,Chr)
          NPrc=FAIL
          DO I=1,SIZE(Chr%C)
-            IF(TRIM(Chr%C(I))=='-np'.OR. &
+            IF(TRIM(Chr%C(I))=='-n' .OR. TRIM(Chr%C(I))=='-np'.OR. &
                TRIM(Chr%C(I))=='-procs'  )THEN
                NPrc=CharToInt(Chr%C(I+1))
                IF(PRESENT(OverRideNProc_O))THEN
