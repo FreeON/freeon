@@ -167,6 +167,7 @@ MODULE JGen
        REAL(DOUBLE)                             :: ZA,ZB,T1,T2
        LOGICAL                                  :: FirstIterQ,OtherIterQ
 #endif
+       REAL(DOUBLE),EXTERNAL :: MondoTimer
 !------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
@@ -217,7 +218,7 @@ MODULE JGen
                       IF(FirstIterQ .OR. OtherIterQ) THEN
 
                       PrIndex = PrIndex + 1
-                      T1 = MPI_WTime()
+                      T1 = MondoTimer()
                       PosTimePair%D(1:3,PrIndex) = Prim%P(1:3)
 
 #endif
@@ -323,7 +324,7 @@ MODULE JGen
                          ENDIF
                       ENDIF
 #ifdef PARALLEL
-                      T2 = MPI_WTime()
+                      T2 = MondoTimer()
                       PosTimePair%D(4,PrIndex) = T2-T1
                       ENDIF
 #endif

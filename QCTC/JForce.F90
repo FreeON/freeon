@@ -51,6 +51,7 @@ PROGRAM JForce
 #else
   TYPE(CRDS)                   :: GMLoc
 #endif
+  REAL(DOUBLE),EXTERNAL        :: MondoTimer
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -146,7 +147,7 @@ PROGRAM JForce
     WRITE(*,*) 'GMLoc%Natms = ',GMLoc%Natms
     STOP 'TotAtomNum not equal to GMLoc%Natms in JForce!'
   ENDIF
-  JFrcBegTm = MPI_Wtime()
+  JFrcBegTm = MondoTimer()
   DO AtA=Beg%I(MyId),End%I(MyId)
 #else
   DO AtA=1,GMLoc%Natms
@@ -203,7 +204,7 @@ PROGRAM JForce
      LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
   ENDDO  
 #ifdef PARALLEL
-  JFrcEndTm = MPI_Wtime()
+  JFrcEndTm = MondoTimer()
   JFrcTm = JFrcEndTm-JFrcBegTm
 #endif
 #ifdef MMech

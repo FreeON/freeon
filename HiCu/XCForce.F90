@@ -50,6 +50,7 @@ PROGRAM XCForce
   TYPE(DBL_RNK2)                 :: LatFrc_XC   
   TYPE(BBox)                     :: WBox,WBoxTmp
   REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot
+  REAL(DOUBLE),EXTERNAL    :: MondoTimer
 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
@@ -100,7 +101,7 @@ PROGRAM XCForce
   XCFrc%D=Zero
   LatFrc_XC%D=Zero
 #ifdef PARALLEL
-  XCFrcBegTm = MPI_Wtime()
+  XCFrcBegTm = MondoTimer()
 #endif
   DO AtA=1,NAtoms
      MA=BSiz%I(AtA)
@@ -161,7 +162,7 @@ PROGRAM XCForce
   CALL DeleteRhoTree(RhoRoot)
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
-  XCFrcEndTm = MPI_Wtime()
+  XCFrcEndTm = MondoTimer()
   XCFrcTm = XCFrcEndTm-XCFrcBegTm
 #endif
 ! Do some checksumming, resumming and IO 

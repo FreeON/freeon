@@ -91,6 +91,7 @@ PROGRAM ONX
   TYPE(DBL_VECT)                 :: TmKArr,NERIsArr,TmDOArr,TmREArr,TmFOArr,TmTMArr,TmKTArr
 #endif
   INTEGER                        :: I,NCC,NCD
+  REAL(DOUBLE),EXTERNAL          :: MondoTimer
 !--------------------------------------------------------------------------------
 !
   type(dbcsr) :: Ddbcsr
@@ -176,7 +177,7 @@ PROGRAM ONX
   !
   ! Start total timing.
 #ifdef PARALLEL
-  TmBegKT = MPI_WTIME()
+  TmBegKT = MondoTimer()
 #endif
   !
 #ifdef PARALLEL
@@ -197,11 +198,11 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   !
 #ifdef PARALLEL
-  time1 = MPI_WTIME()
+  time1 = MondoTimer()
   CALL Get_Essential_RowCol(DFastMat,RowPt,NbrRow,ColPt,NbrCol)
   CALL InitBfnInd(DBC,BSp,GMp,RowPt,NbrRow)
   CALL InitBfnInd(DBD,BSp,GMp,ColPt,NbrCol,BfnInd)
-  time2 = MPI_WTIME()
+  time2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   IF(CS_OUT%NCells.NE.1) CALL InitBfnInd(DBC,BSp,GMp,BfnInd)
@@ -210,7 +211,7 @@ PROGRAM ONX
 #endif
   !
 #ifdef PARALLEL
-  time1 = MPI_WTIME()
+  time1 = MondoTimer()
   ! Have to bump both buffers 1 and 2, otherwise if buffer2 is to
   ! small, buffer 1 gets bumped infinately untill you run out of memory!
   ErrorCodeTmp = ErrorCode
@@ -223,7 +224,7 @@ PROGRAM ONX
      CALL MemInit(DBD,IB,SB,Drv,BSc,BSp,SchT,BufT,BufN)
      CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN,ColPt,NBrCol)
   ENDDO
-  time2 = MPI_WTIME()
+  time2 = MondoTimer()
 #else
 1000 CONTINUE
   CALL CPU_TIME(time1)
@@ -254,9 +255,9 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   !
 #ifdef PARALLEL
-  time1 = MPI_WTIME()
+  time1 = MondoTimer()
   CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFastMat)
-  time2 = MPI_WTIME()
+  time2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   CALL RangeOfExchangeBCSR(BSc,GMc,BSp,GMp,D)
@@ -304,9 +305,9 @@ PROGRAM ONX
   DO NCC = 1,CS_OUT%NCells
      PBC%D(:) = CS_OUT%CellCarts%D(:,NCC)
 #ifdef PARALLEL
-     time1 = MPI_WTIME()
+     time1 = MondoTimer()
      IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN,RowPt,NBrRow)
-     time2 = MPI_WTIME()
+     time2 = MondoTimer()
 #else
      CALL CPU_TIME(time1)
      IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN)
@@ -317,9 +318,9 @@ PROGRAM ONX
      DO NCD = 1,CS_OUT%NCells
         PBC%D(:) = CS_OUT%CellCarts%D(:,NCD)
 #ifdef PARALLEL
-        time1 = MPI_WTIME()
+        time1 = MondoTimer()
         IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN,ColPt,NBrCol)
-        time2 = MPI_WTIME()
+        time2 = MondoTimer()
 #else
         CALL CPU_TIME(time1)
         IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN)
@@ -331,9 +332,9 @@ PROGRAM ONX
 !       All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
-        time1 = MPI_WTIME()
+        time1 = MondoTimer()
         CALL ComputeK(BSc,GMc,BSp,GMp,DFastMat,KFastMat,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
-        time2 = MPI_WTIME()
+        time2 = MondoTimer()
 #else
         CALL CPU_TIME(time1)
         IF(CS_OUT%NCells.EQ.1) THEN
@@ -396,9 +397,9 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   !
 #ifdef PARALLEL
-  time1 = MPI_WTIME()
+  time1 = MondoTimer()
   CALL FillOutFastMat(BSc,GMc,KFastMat)
-  time2 = MPI_WTIME()
+  time2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   CALL FillOutBCSR(BSc,GMc,K)
@@ -407,9 +408,9 @@ PROGRAM ONX
   TmFO = time2-time1
   !
 #ifdef PARALLEL
-  time1 = MPI_WTIME()
+  time1 = MondoTimer()
   CALL TrnMatBlk(BSc,GMc,KFastMat)
-  time2 = MPI_WTIME()
+  time2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   CALL TrnMatBlk(BSc,GMc,K)
@@ -422,7 +423,7 @@ PROGRAM ONX
 #ifdef PARALLEL
   !
   ! End Total Timing
-  TmEndKT = MPI_WTIME()
+  TmEndKT = MondoTimer()
   TmKT = TmEndKT-TmBegKT
   !
   CALL New(TmKArr  ,NPrc)

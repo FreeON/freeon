@@ -82,6 +82,7 @@ CONTAINS
     REAL(DOUBLE)              :: TmBeg,TmEnd
     TYPE(DBL_VECT)            :: DA                                    ! Buffer to store block of density matrix.
     LOGICAL                   :: Explicit
+    REAL(DOUBLE)              :: MondoTimer
 !-------------------------------------------------------------------
 ! Function calls
 !-------------------------------------------------------------------
@@ -158,7 +159,7 @@ CONTAINS
                                   ENDIF
                                   AtD = U%L                      
                                   ! Set Time.                    
-                                  TmBeg = MPI_WTIME()            
+                                  TmBeg = MondoTimer()            
                                   !call cpu_time(TmBeg)          
 #else
                                DO ci = D%RowPt%I(ri),D%RowPt%I(ri+1)-1        ! Loop over atom D (Dcd)
@@ -423,7 +424,7 @@ CONTAINS
 
 #ifdef PARALLEL
                                   ! Set Time.
-                                  TmEnd = MPI_WTIME()
+                                  TmEnd = MondoTimer()
                                   !call cpu_time(TmEnd)
                                   !Add Time.
                                   U%Part = U%Part+TmEnd-TmBeg

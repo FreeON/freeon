@@ -1,15 +1,4 @@
 MODULE FastMatrices
-!H---------------------------------------------------------------------------------
-!H MODULE FastMatrices
-!H
-!H
-!H Comments:
-!H - SRSTCount: does not work anymore. To be fixed.
-!H - Matmul: does not work anymore.
-!H - Remain some old stuff. Should be removed.
-!H - May change the tree style?
-!H - ....
-!H---------------------------------------------------------------------------------
    USE DerivedTypes
    USE GlobalScalars   
    USE GlobalObjects
@@ -559,8 +548,9 @@ MODULE FastMatrices
     REAL(DOUBLE)           :: AllToAllBegTm,AllToAllEndTm,AllToAllTotTm
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: Status
     INTEGER :: TotDblSent,DblSentMax,NumDblSent,LDblSendMaxSize,LDblRecvMaxSize,ActDblRecvAmt
+    REAL(DOUBLE),EXTERNAL :: MondoTimer
 
-    StartTm = MPI_Wtime()
+    StartTm = MondoTimer()
 
     ! Messy output is unsightly and unessesary.  Protect with if defs in future...
     !    IF(MyID == 0) THEN 
@@ -584,11 +574,11 @@ MODULE FastMatrices
     LocalDims%I(:,MyId)=(/0,0,0/)
 
     CALL AlignNodes()
-    AllToAllBegTm = MPI_Wtime()
+    AllToAllBegTm = MondoTimer()
     
     CALL MPI_ALLTOALL( LocalDims%I(1,0),3,MPI_INTEGER, &
          RemoteDims%I(1,0),3,MPI_INTEGER,MONDO_COMM,IErr)
-    AllToAllEndTm = MPI_Wtime()
+    AllToAllEndTm = MondoTimer()
     AllToAllTotTm = AllToAllEndTm - AllToAllBegTm
     CALL MPI_Allgather(AllToAllTotTm,1,MPI_DOUBLE_PRECISION,DimTmArr(0),1,&
       MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
@@ -839,7 +829,7 @@ MODULE FastMatrices
     CALL FlattenAllRows(A)
 
     CALL AlignNodes()
-    EndTm = MPI_Wtime()
+    EndTm = MondoTimer()
     TotTm = EndTm - StartTm
     ! Messy output is unsightly and unessesary.  Protect with if defs in future...
     !    IF(MyID == ROOT) THEN

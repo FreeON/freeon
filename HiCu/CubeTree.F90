@@ -175,6 +175,7 @@ MODULE CubeTree
          REAL(DOUBLE)             :: Q,MaxDir
          INTEGER                  :: J,ISplit
          REAL(DOUBLE)             :: StartWTime,EndWTime
+         REAL(DOUBLE),EXTERNAL    :: MondoTimer
 !------------------------------------------------------------------------
 !        Stupid should be painfull...
          IF(.NOT.Cube%Leaf)CALL Halt(' Logic error in SplitCube ')
@@ -193,20 +194,20 @@ MODULE CubeTree
          CALL SplitBox(Cube%Box,Left%Box,Right%Box,ISplit)
 !        Compute approximate and exact integrals of the density
 #ifdef PARALLEL 
-         StartWTime = MPI_Wtime()
+         StartWTime = MondoTimer()
 #endif 
          CALL LayGrid(Left)
 #ifdef PARALLEL 
-         EndWTime = MPI_Wtime()
+         EndWTime = MondoTimer()
          Left%LayGridCost = EndWTime - StartWTime
 #ifdef USE_LEAF_COUNT
          Left%LayGridCost = 1.0D0
 #endif
-         StartWTime = MPI_Wtime()
+         StartWTime = MondoTimer()
 #endif 
          CALL LayGrid(Right)
 #ifdef PARALLEL 
-         EndWTime = MPI_Wtime()
+         EndWTime = MondoTimer()
          Right%LayGridCost = EndWTime - StartWTime
 #ifdef USE_LEAF_COUNT
          Right%LayGridCost = 1.0D0

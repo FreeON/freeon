@@ -43,6 +43,7 @@ PROGRAM QCTC
   TYPE(CRDS)                     :: GM_MM
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: I,K,UOUT !!!!
+  REAL(DOUBLE),EXTERNAL          :: MondoTimer
 !------------------------------------------------------------------------------- 
   ETimer(:) = Zero
 ! Start up macro
@@ -139,11 +140,11 @@ PROGRAM QCTC
      ! Compute the Coulomb matrix J in O(N Lg N)
      CALL Elapsed_Time(TimeMakeJ,'Init')
 #ifdef PARALLEL
-     TmBegJ = MPI_WTime()
+     TmBegJ = MondoTimer()
 #endif
      CALL MakeJ(J)
 #ifdef PARALLEL
-     TmEndJ = MPI_WTime()
+     TmEndJ = MondoTimer()
      TmJ = TmEndJ - TmBegJ
 #endif
      CALL Elapsed_TIME(TimeMakeJ,'Accum')

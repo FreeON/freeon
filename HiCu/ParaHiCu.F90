@@ -251,8 +251,9 @@ CONTAINS
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: IntStatus
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: DblStatus
     REAL(DOUBLE) :: StartTm,EndTm,TotTm
+    REAL(DOUBLE),EXTERNAL    :: MondoTimer
 
-    StartTm = MPI_Wtime()
+    StartTm = MondoTimer()
     !    IF(MyID == 0) THEN
     !      CALL OpenASCII(OutFile,Out)
     !      WRITE(Out,*) 'DistDist is entered...'
@@ -616,7 +617,7 @@ CONTAINS
     DEALLOCATE(HeadArr)
     CALL DeleteRho
     CALL AlignNodes()
-    EndTm = MPI_Wtime()
+    EndTm = MondoTimer()
     TotTm = EndTm - StartTm
     !    IF(MyID == ROOT) THEN
     !      CALL OpenASCII(OutFile,Out)
@@ -815,12 +816,13 @@ CONTAINS
     TYPE(DBL_VECT) :: TmHiCuArr
     TYPE(FastMat),POINTER  :: Kxc
     INTEGER :: IErr
+    REAL(DOUBLE),EXTERNAL    :: MondoTimer
 
     WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
     WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
 
     CALL CalCenterAndHalf(WBox)
-    HiCuBegTm = MPI_WTime()
+    HiCuBegTm = MondoTimer()
     !    IF(MyID == 0) THEN
     !      CALL OpenASCII(OutFile,Out)
     !      WRITE(Out,*) 'Calling GridGen...'
@@ -837,7 +839,7 @@ CONTAINS
     !      CLOSE(Out,STATUS='KEEP')
     !    ENDIF
     CALL MakeKxc(Kxc,CubeRoot)
-    HiCuEndTm = MPI_WTime()
+    HiCuEndTm = MondoTimer()
     ! VolTm = TmEndM-TmBegM
     HiCuTm = HiCuEndTm-HiCuBegTm
     CALL New(TmHiCuArr,NPrc)
@@ -864,9 +866,10 @@ CONTAINS
     TYPE(DBL_VECT) :: TauArr,ETRootArr
     TYPE(INT_VECT) :: ETDirArr
     INTEGER :: RootNum,RootIndex
+    REAL(DOUBLE),EXTERNAL    :: MondoTimer
 
 
-    StartTm = MPI_Wtime()
+    StartTm = MondoTimer()
 
     CALL New(RepLCoor,(/3,NVol/))
     CALL New(RepRCoor,(/3,NVol/))
@@ -1129,7 +1132,7 @@ CONTAINS
     CALL Delete(RepLCoor)
     CALL Delete(RepRCoor)
     CALL Delete(RepLeavesTm)
-    EndTm = MPI_Wtime()
+    EndTm = MondoTimer()
     TotTm = EndTm - StartTm
     ! Messy output is unacceptable and uneccesary:  Protect with ifdef if you want to keep it       
     !IF(MyID == 0) THEN
