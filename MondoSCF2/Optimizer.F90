@@ -1234,8 +1234,8 @@ CONTAINS
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
-   ! GCrit=GTol(AccL)
-     GCrit=3.D-4
+     GCrit=GTol(AccL)
+   ! GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
