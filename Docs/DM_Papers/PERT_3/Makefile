@@ -22,14 +22,14 @@ links:
 #	ln -s $(MONDO_HOME)/Docs/RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -t a4 -o jcp3.ps Response3
+	dvips  -o jcp3.ps Response3
 
 pdf:	ps
 	ps2pdf jcp3.ps jcp3.pdf
 
 
 dvi:	latex
-	xdvi -s 3 Response3 &
+	xdvi -s 2 Response3 &
 
 latex:
 	latex Response3

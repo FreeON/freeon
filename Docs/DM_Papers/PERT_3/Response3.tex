@@ -33,7 +33,7 @@
 %%\usepackage{bm}% bold math
 
 
-\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[prl,aps,letterpaper,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -55,8 +55,7 @@
 \begin{document}
 
 
-\title{The linear scaling self-consistent perturbed projection 
-       method for high order response}
+\title{High order response in ${\cal O}(N)$ by perturbed projection} 
 %\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
 
 \author{Val\'ery Weber}
@@ -68,27 +67,20 @@
 
 \affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
 
-\date{\today}% It is always \today, today,
-             %  but any date may be explicitly specified
+\date{\today}
 
 \begin{abstract}
-A first principles linear scaling electronic structure scheme for high order 
-response properties is proposed. The scheme solves the coupled perturbed self 
-consistent field equations by the perturbed projection method (Niklasson and Challacombe, 
-Phys.\ Rev.\ Lett. {\bf 92}, 193001 (2004); Weber, Niklasson and  Challacombe, 
-Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)). It is applied to the computation 
-of the first and second electric hyperpolarizabilities of three
-dimensional water clusters. Linear scaling and locality of the response
-densities under a global electric field perturbation are demonstrated. 
-Response functions up to 10th order are calculated for the uncoupled perturbation 
-equations and density matrix analogues to Wigner's $2n+1$ rule are given up to fourth order
-for mixed perturbation terms including non-orthogonal representations.
-% Linear scaling self consisitent scheme for high order response peoperties
-% is proposed. The scheme solves the coupled perturbed self consitent field 
-% equation by the perturbed projection method. It is applied to the computation
-% of the first and second electric hyperpolarizabilities of three
-% dimensional water clusters. Linear scaling and locality of the response
-% densities are demonstrated. 
+A framework for linear scaling evaluation of high order static response properties is 
+presented, based on the perturbed projection method [Niklasson and Challacombe, 
+Phys.\ Rev.\ Lett. {\bf 92}, 193001 (2004)]  for solving the coupled perturbed 
+self consistent field equations [Weber, Niklasson and  Challacombe, 
+Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)].  Perturbed projection is applied to 
+the self-consistent computation of the first and second electric hyperpolarizabilities 
+of three dimensional water clusters.  Density matrix analogues to Wigner's $2n+1$ rule 
+are given up to fourth order for mixed perturbation terms including non-orthogonal 
+representations. Linear scaling and locality of the response densities under a global 
+electric field perturbation are demonstrated.  Perturbed projection is also used to compute 
+response functions up to 10th order {\bf for what??} in the uncoupled approximation.  
 \end{abstract}
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
@@ -100,29 +92,19 @@ for mixed perturbation terms including non-orthogonal representations.
 \footnotetext[1]{LA-UR-04-5219} 
 
 \section{Introduction}
- Electronic structure theory based on the first principles 
- of physics was for a long time limited to the study of small
- systems with only a limited number of nonequivalent atoms. 
- Despite a tremendous increase in computational power
- of digital computers this would still be the situation
- if not also more efficient theoretical and computational
- tools were developed. A lot of effort has therefore been
- devoted to the construction of reduced complexity algorithms.
- These new methods have been developed within the framework of
- a new computational linear scaling paradigm that has evolved in 
- electronic structure theory during the last decade, where
- no critical part of a calculation is allowed to increase in 
- computational complexity more than linearly (or near linearly) with the number
- of atoms \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. 
-
- Linear scaling algorithms exploit the quantum locality 
- (or nearsightedness) of non-metallic systems, 
- manifested in the approximate exponential decay of the density matrix 
- with atom-atom separation, through the effective use of sparse 
- matrix methods. For small systems this is usually an inefficient
- approach, but for large systems consisting of millions
- of atoms it will have a major future impact, bridging the gap
- between material science, chemistry and biology. 
+First principles electronic structure theory  has  for a long time been limited to 
+the study of small  systems with  a limited number of nonequivalent atoms. 
+Despite a tremendous increase in computational power of digital computers this 
+has remained the case, untill the advent of reduced complexity algorithms over the
+last decade \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. In the 
+best case, these reduced complexity algorithms scale only linearly with system size, 
+allowing simulation capabilities to keep pace with hardware improvements.
+These linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
+non-metallic systems,  manifested in the approximate exponential decay of the density matrix 
+with atom-atom separation, through the effective use of sparse matrix methods. For small systems,
+linear scaling methods may be inefficient due to overheads.  However, these methods hold the promise 
+of major impact, allowing a rigourous approach to large scale simmulation across materials science, 
+chemistry and biology. 
 
  So far, most attention in linear scaling electronic structure theory 
  has been focused on calculations of the ground state total energy and 
