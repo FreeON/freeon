@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm dy s e x 1 n 2 d ic #v 
+all:	CatCpy mm ic dy s e x 1 n 2 d #v 
 #
-clean:	cmm cs cdy ce cx c1 cn c2 cd cv cic
+clean:	cmm cic cdy cs ce cx c1 cn c2 cd cv 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pdy pe px p1 pn p2 pd pv pMisc pic 
+purge:	pmm pic pdy ps pe px p1 pn p2 pd pv pMisc  
 #
-release: rmLegacy swREADME rmm rs rdy re rx r1 rn r2 rd rv ric tarball
+release: rmLegacy swREADME rmm rdy ric rs re rx r1 rn r2 rd rv tarball
 #
 backup:	purge rmLegacy tarball
 #
