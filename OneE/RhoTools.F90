@@ -36,7 +36,7 @@ CONTAINS
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
-          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:))
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet))
           IF(Mag  .GT. TOL) THEN
              Rho_out%NQ%I(zq) = Rho_out%NQ%I(zq) + 1            
           ENDIF
@@ -69,7 +69,7 @@ CONTAINS
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
-          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:))
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet))
           IF(Mag .GT. TOL) THEN
              iiadd = Rho_out%OffQ%I(zq) + iqq
              jjadd = Rho_out%OffR%I(zq) + (iqq-1)*LenKet+1
