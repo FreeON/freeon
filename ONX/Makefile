@@ -10,7 +10,7 @@ all:
 release:clean
 	$(MAKE) -C NONX release
 	rm -rf PONXMults PONX GMEONX GSONX MEONX \
-               Drivers GDrivers VRRm ONX SONX MASONX
+               GDrivers VRRm ONX SONX MASONX
 #
 purge:	clean
 	make -C NONX purge
