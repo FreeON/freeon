@@ -1,0 +1,68 @@
+<BeginTitle>
+10 Molecule MD Steam, Periodic
+<EndTitle>
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+DebugAll =(MinDebug,CheckSums)
+Guess=SuperPos
+SCFConvergences=(ODA,DIIS)
+SCFMethod=(TRS4,TRS4)
+BasisSets=(STO-2G,User2) 
+ModelChem=(HF,HF)
+Accuracy =(Loose,Good)
+Geometry=InAngstroms 
+
+Grad=(MolecularDynamics)
+InitTemp=100
+MDMethod=Verlet
+DeltaTime=0.25
+MaxMDStep=2
+DMPOrder=2
+MinSCF=5
+MaxSCF=12
+
+PBC=(T,T,T)
+Periodic=(AtomCoords,WrapAtoms)
+<EndOptions>
+
+<BeginPeriodic>
+ 11.7124  11.7124  11.7124   90.00000   90.00000   90.00000 
+<EndPeriodic>
+
+
+<BeginGeometry>
+O        5.76600       -4.96500       -4.62700
+H        5.68200       -5.40000       -5.47500
+H        4.96200       -4.45300       -4.53900
+O       -0.21800        5.46200        2.49600
+H        0.29200        5.04200        3.19000
+H        0.05700        6.37800        2.51800
+O       -3.77900        3.51800       -5.69400
+H       -3.77100        3.01300       -6.50700
+H       -4.35800        3.02600       -5.11100
+O       -3.83100       -5.39800       -1.01000
+H       -4.66300       -5.57900       -0.57300
+H       -3.44000       -6.26100       -1.14800
+O        4.33000       -3.72900        3.08600
+H        4.86800       -3.78700        2.29600
+H        4.07400       -2.80800        3.13400
+O        3.57300       -3.36300       -1.88800
+H        3.64700       -3.40200       -2.84200
+H        2.64400       -3.51500       -1.71400
+O       -3.51700        3.67800       -2.61300
+H       -2.61800        3.40400       -2.79500
+H       -3.72300        4.30200       -3.31000
+O       -2.42500       -4.53100       -3.42000
+H       -3.20300       -4.38700       -3.95900
+H       -2.72000       -4.37100       -2.52400
+O        0.01500       -3.03500       -5.52000
+H       -0.29800       -3.63200       -4.84100
+H        0.11700       -2.19500       -5.07200
+O        0.73400       -4.39800       -2.28100
+H        0.68100       -4.62200       -3.21000
+H       -0.00300       -4.85800       -1.88100
+<EndGeometry>
+
