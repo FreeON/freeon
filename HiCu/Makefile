@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+#####################################################################################
 #--  This code is part of the MondoSCF suite of programs for linear scaling 
 #    electronic structure theory and ab initio molecular dynamics.
 #
@@ -24,15 +24,14 @@
 #    e.g. in the form "These calculations have been performed using MondoSCF, 
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.  
-#------------------------------------------------------------------------------
+#####################################################################################
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
 CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 #
-EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
-                -I$(MONDO_HOME)/MondoMods/MMA/Functionals
+EXTRA_INCLUDES=-I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #
 CommonObjs = Grid.o Thresholds.o RhoTree.o CubeTree.o TreeWalk.o 
 HObjs      = $(CommonObjs) KxcGen.o HiCu.o 
@@ -40,15 +39,22 @@ XFObjs     = $(CommonObjs) dXCBlok.o XCForce.o
 #
 VObjs  = VRhoMD.o 
 #
+ReleaseFiles=Grid.x Thresholds.x RhoTree.x    \
+             CubeTree.x TreeWalk.x KxcGen.x   \
+             HiCu.x dXCBlok.x XCForce.x VRhoMD.x 
+#
 all:	VR HC XF
 #
+release:clean $(ReleaseFiles)
+#
+purge:	clean
+	rm -f $(REMOVESRCE)
+#
 clean:	CHC CXF
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	ls -lS
-#
-purge:	clean CVR
 #-----------------------------------------------------------------------
 HC:	$(HObjs)
 	$(LD) $(LDFLAGS) HiCu $(HObjs) $(LibOpts) $(F90_LIBRARIES)
