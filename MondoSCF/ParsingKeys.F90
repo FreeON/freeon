@@ -1,10 +1,3 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 MODULE ParsingKeys
    USE GlobalScalars
    USE GlobalCharacters
