@@ -15,7 +15,7 @@ void cconvert(int *CDrv, int *LngDrv)
        printf(" The MONDO_HOME environment variable is not set.\n");
        exit( EXIT_FAILURE );
     }
-    sprintf(FileName,"%s/MakeK/Drivers/CDriver.ascii",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/CDriver.ascii",DriverHome);
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
        printf(" Could not find the ONX contraction driver data file.\n");
@@ -26,7 +26,7 @@ void cconvert(int *CDrv, int *LngDrv)
        fscanf(InFile,"%d",CDrv+i);
     }
     fclose(InFile);
-    sprintf(FileName,"%s/MakeK/Drivers/CDriver.binary",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/CDriver.binary",DriverHome);
     Mode = "wb";
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
@@ -48,7 +48,7 @@ void ccdriver(int *CDrv, int *LngDrv)
 
     if ((DriverHome = getenv("MONDO_HOME")) == NULL)
        exit( EXIT_FAILURE );
-    sprintf(FileName,"%s/MakeK/Drivers/CDriver.binary",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/CDriver.binary",DriverHome);
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf("ONX binary contraction drivers do not exist.\n");
        printf("Creating the binary contraction driver.\n");

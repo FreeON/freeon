@@ -16,13 +16,13 @@ void vconvert(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
        printf(" The MONDO_HOME environment variable is not set.\n");
        exit( EXIT_FAILURE );
     }
-    sprintf(FileName,"%s/MakeK/Drivers/VRRDriver.ascii",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRDriver.ascii",DriverHome);
     if ((InFileD = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
        printf(" Could not find the ONX VRR driver data file.\n");
        exit( EXIT_FAILURE );
     }
-    sprintf(FileName,"%s/MakeK/Drivers/VRRLoc.ascii",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRLoc.ascii",DriverHome);
     if ((InFileL = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
        printf(" Could not find the ONX VRR address data file.\n");
@@ -42,7 +42,7 @@ void vconvert(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
     }
     fclose(InFileL);
 
-    sprintf(FileName,"%s/MakeK/Drivers/VRRDriver.binary",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRDriver.binary",DriverHome);
     Mode = "wb";
     if ((InFileD = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
@@ -53,7 +53,7 @@ void vconvert(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
     fwrite(VDrv,sizeof(int),(*LngDrv),InFileD);
     fclose(InFileD);
 
-    sprintf(FileName,"%s/MakeK/Drivers/VRRLoc.binary",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRLoc.binary",DriverHome);
     Mode = "wb";
     if ((InFileL = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
@@ -75,7 +75,7 @@ void vrrdriver(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
 
     if ((DriverHome = getenv("MONDO_HOME")) == NULL)
        exit( EXIT_FAILURE );
-    sprintf(FileName,"%s/MakeK/Drivers/VRRDriver.binary",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRDriver.binary",DriverHome);
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf("ONX binary VRR drivers do not exist.\n");
        printf("Creating the binary contraction driver.\n");
@@ -85,7 +85,7 @@ void vrrdriver(int *VDrv, int *LDrv, int *LngDrv, int *LngLoc)
        fread(LngDrv,sizeof(int),1,InFile);
        fread(VDrv,sizeof(int),(*LngDrv),InFile);
        fclose(InFile);
-       sprintf(FileName,"%s/MakeK/Drivers/VRRLoc.binary",DriverHome);
+       sprintf(FileName,"%s/ONX/Drivers/VRRLoc.binary",DriverHome);
        InFile = fopen(FileName,Mode);
        fread(LngLoc,sizeof(int),1,InFile);
        fread(LDrv,sizeof(int),(*LngLoc),InFile);
@@ -105,7 +105,7 @@ void vrrlng(int *LngDrv, int *LngLoc)
        printf(" The MONDO_HOME environment variable is not set.\n");
        exit( EXIT_FAILURE );
     }
-    sprintf(FileName,"%s/MakeK/Drivers/VRRLoc.ascii",DriverHome);
+    sprintf(FileName,"%s/ONX/Drivers/VRRLoc.ascii",DriverHome);
     if ((InFile = fopen(FileName,Mode)) == NULL) {
        printf(" %s\n",FileName);
        printf(" Could not find the ONX VRR address data file.\n");
