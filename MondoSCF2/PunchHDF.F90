@@ -202,20 +202,25 @@ CONTAINS
     TYPE(Geometries) :: G    
     TYPE(CellSet)    :: CS
     INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
-    INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc
+    INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc,iGEOStart
+    INTEGER          :: iGEOMem
     CHARACTER(LEN=DCL) :: chGEO
     TYPE(CRDS)       :: GMLoc
     !
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
     !
-    NatmsLoc=G%Clone(1)%Natms
-    NCart=3*NatmsLoc
+    iGEOMem=11
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
+    IGEOStart=MAX(LastGeo-iGEOMem,1)
+    !
+    NatmsLoc=G%Clone(1)%Natms
+    NCart=3*NatmsLoc
+    !
     DO iCLONE=1,G%Clones
       ! Reachive GMLoc-s 
-      DO iGEO=1,LastGeo
+      DO iGEO=iGEOStart,LastGeo
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                       "Clone #"//TRIM(IntToChar(iCLONE)))

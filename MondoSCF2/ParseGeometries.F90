@@ -63,9 +63,9 @@ CONTAINS
           ! CALL PPrint(G%Clone(G%Clones+1),Unit_O=6)
        ELSE 
           ! Read in the reactants geometry from input
-          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0))          
+          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
           ! Read in the products geometry from input
-          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1))   
+          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)   
        ENDIF
        IF(O%Guess==GUESS_EQ_RESTART)THEN
           ! Get midpoints from HDF
@@ -116,7 +116,7 @@ CONTAINS
        ELSE       
           G%Clones=1
           ALLOCATE(G%Clone(1))
-          CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1))
+          CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1),O%Coordinates)
           IF(O%Guess==GUESS_EQ_RESTART .AND. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM)) THEN
 !             WRITE(*,*)' REPARSING GEOMETRY ON RESTART'
           ENDIF
@@ -136,14 +136,14 @@ CONTAINS
 !------------------------------------------------------------------------!
 !
 !------------------------------------------------------------------------!
-  SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G)
+  SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G,Coordinates)
     CHARACTER(LEN=*)          :: BeginDelimiter,EndDelimiter
     TYPE(CRDS)                :: G
     TYPE(CHR_VECT)            :: C
     REAL(DOUBLE),DIMENSION(3) :: Carts(3)
-    INTEGER                   :: J,N
+    INTEGER                   :: J,N,Coordinates
     CHARACTER(LEN=2)          :: At
-    CHARACTER(LEN=DCL)        :: Line,LineLowCase    
+    CHARACTER(LEN=DCL)        :: Line,LineLowCase
 !------------------------------------------------------------------------!
 !   Determine the number of atoms in this block
     N=0
@@ -155,7 +155,12 @@ CONTAINS
        N=N+1
     ENDDO
     G%NAtms=N
-    G%IntCs%N=IntCPerAtom*G%NAtms !!! estimated upper limit
+    IF(Coordinates==GRAD_CART_OPT) THEN
+      IntCMax=1
+    ELSE
+      IntCMax=30*G%NAtms
+    ENDIF
+    G%IntCs%N=IntCMax
     N=0
     CALL New(G) ! Allocate a geometry
 !   Parse the coordinates
