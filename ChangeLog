@@ -1,3 +1,214 @@
+2002-06-26 13:13  mchalla
+
+	* MondoMods/Thresholding.F90: Further improved Extent0.
+
+2002-06-26 11:36  ckgan
+
+	* MondoMods/MMA/LookUpTables/GammaAssymptotics.Inc: Fixed the
+	dimensioning problem. Generating files need to be fixed.
+
+2002-06-26 11:35  ckgan
+
+	* MondoMods/MemMan.F90: NewBCSR and DeleteBCSR subroutines
+	included. These will go away when the fast matrix subroutines are
+	in place.
+
+2002-06-26 11:30  ckgan
+
+	* IntCoo/IntCoo.F90: intent(in) and intent(out) are omitted for
+	variables T12 and T14.
+
+2002-06-26 11:28  ckgan
+
+	* SCFeqs/: NT4.F90, PM.F90, SP2.F90, SP4.F90: an trivial extension
+	`p' is added to the program name so that it does not conflict with
+	the subroutine names.
+
+2002-06-26 11:25  ckgan
+
+	* Includes/CompilerSpecifics.SGIIrix.MIPS: Changes are made to
+	accomodate the inclusion of Dynamo and IntCoo
+
+2002-06-26 11:21  ckgan
+
+	* HiCu/: CubeTree.F90, HiCu.F90, Makefile, ParaHiCu.F90,
+	XCForce.F90: Changes are made to incorporate parallelization of
+	HiCu.
+	
+	HiCu.F90 -- a variable of TYPE(BBOX) is defined so that a bounding
+	box can be passed to GridGen.  Makefile is changed to incorporate
+	the inclusion of ParaHiCu.F90.
+
+2002-06-26 11:15  ckgan
+
+	* Dynamo/dynamo.F90: move #ifdef statement to the top
+
+2002-06-25 16:38  mchalla
+
+	* MondoMods/Thresholding.F90: Fixed bugs in Extent0--still needs
+	some work though.  This is probably the only rigorous way to go and
+	doesn't seem any slower than old way.
+
+2002-06-24 11:55  mchalla
+
+	* MondoMods/: Macros.F90, PrettyPrint.F90: Change printing.  Now we
+	 print CPU time if checksumming.  Usefull to spot any large
+	inprovements/decrements in performance in addition to inaccuracies
+	provided by checksums.
+
+2002-06-24 11:51  mchalla
+
+	* SCFeqs/: FillPBlok.F90, Makefile, NT4.F90: Added Cr to FillPBlok,
+	and options for looking at Fock degeneracy in NT4.F90
+
+2002-06-24 11:51  mchalla
+
+	* MondoMods/MatFunk.F90: Added pretty print options.
+
+2002-06-21 16:27  mchalla
+
+	* Validate/Makefile: Now clean removes pdb files.
+
+2002-06-21 16:23  mchalla
+
+	* MondoMods/: PrettyPrint.F90, Thresholding.F90: Switched back to
+	CJ's Extent.  Not using this was a serioud bug.  Also, commented
+	out box error printing of checksums.
+
+2002-06-21 14:23  nemeth
+
+	* OneE/MakeRho.F90: Ok, one more iteration on getting the error
+	checking right for charge QM and MM correct. -MC
+
+2002-06-21 12:21  nemeth
+
+	* OneE/MakeRho.F90: Signs changed in charge-checking.
+
+2002-06-21 11:39  mchalla
+
+	* OneE/MakeRho.F90: added consistency check to look for improperly
+	charged states.
+
+2002-06-21 10:53  nemeth
+
+	* Dynamo/dynamo.F90: QM/MM Lennard Jones calculation modified,
+	wrong, unnecessary checking for atomtypes removed.
+
+2002-06-20 22:17  nemeth
+
+	* QCTC/QCTC.F90: New printout for coulomb energy in QM/MM cases
+	added.
+
+2002-06-20 22:02  nemeth
+
+	* MondoSCF/ParseInput.F90: MM system coordinates get written out.
+
+2002-06-20 22:01  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Boxwidth modified in calling for
+	Lennard-Jones energy. Lennard Jones energy calculation is cut off
+	at the boxwidth value (this is the radius of cut-off).
+
+2002-06-20 21:52  nemeth
+
+	* Dynamo/dynamo.F90: New topological matrices used.
+
+2002-06-20 21:51  nemeth
+
+	* IntCoo/IntCoo.F90: New subroutines introduced to handle
+	topologically more complex systems, containing rings.
+
+2002-06-19 17:06  mchalla
+
+	* SCFeqs/Makefile: Works.
+
+2002-06-19 17:06  mchalla
+
+	* MondoMods/: AInv.F90, Makefile: Removed unness USE statements
+
+2002-06-19 17:06  mchalla
+
+	* Makefile: No longer makes x
+
+2002-06-19 17:04  mchalla
+
+	* XForm/: BlokAInv.F90, LowdinO.F90, Makefile, OLD/BlokOpsDns.F90,
+	OLD/DGEMMS.F90, OLD/DenseAInv.F90: "Removed" the XForm directory. 
+	LowdinO and AInv are now in SCFeqs.
+
+2002-06-19 16:36  nemeth
+
+	* IntCoo/IntCoo.F90: Matrix size parameters had to be fixed,
+	modification in topology matrix sizes.
+
+2002-06-19 16:34  mchalla
+
+	* SCFeqs/: BlokAInv.F90, LowdinO.F90: Moved routines for
+	orthogonalization transformations here, since most of their
+	functionality has been subsumed into MondoMods anyway.
+
+2002-06-19 16:33  mchalla
+
+	* MondoMods/AInv.F90: AInv module that is now available to other
+	routines, for example for delocalized internal coordinates.
+
+2002-06-19 15:21  mchalla
+
+	* SCFeqs/: DenMatMethods.F90, NT4.F90, PM.F90, SP2.F90, SP4.F90:
+	Fixed misc bugs in new density matrix subroutines.
+
+2002-06-19 14:50  mchalla
+
+	* MondoSCF/DrvSCFs.F90: Added in AINV as default.
+
+2002-06-19 14:34  tymczak
+
+	* MondoMods/LinAlg.F90: Added in OneNorm and TwoNorm
+
+2002-06-19 14:28  tymczak
+
+	* SCFeqs/: DenMatMethods.F90, Makefile, NT4.F90, PM.F90, SP2.F90,
+	SP4.F90: New density matrix minimization methods.  Has somewhat
+	clumsy memory allocation/deallocation in DenMatMethods that needs
+	to be addressed.
+
+2002-06-19 12:45  tymczak
+
+	* SCFeqs/DenMatMethods.F90: Density Matrix Methods Modual
+	
+	Contains
+	
+	  Initial Density matrix Guesser
+	  Gap Calculater
+	  Degen Calculator
+	  Printing
+	
+	  PM,SP2,SP4,NT4
+
+2002-06-19 12:40  tymczak
+
+	* MondoSCF/DrvSCFs.F90: The new density matrix minemizer keys have
+	been added
+
+2002-06-19 12:39  tymczak
+
+	* MondoSCF/ParsingKeys.F90: The New density matrix minimizer keys
+	have been added
+
+2002-06-19 12:38  tymczak
+
+	* MondoSCF/ParseInput.F90: The New density Matrix Minimizer Keys
+	have been added
+
+2002-06-18 10:00  mchalla
+
+	* Validate/sub_pbs: changed the -joe option so that you get the
+	*.oe file.
+
+2002-06-17 15:43  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-06-17 15:33  mchalla
 
 	* OneE/MakeRho.F90: Added ifdef MMech to remove all QM/MM parts. 
