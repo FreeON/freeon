@@ -297,7 +297,7 @@ MODULE ParseInPut
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !
 !----------------------------------------------------------------------------
-!        Tidy up 
+!       Tidy up 
 !
          CALL CloseHDF()
          CALL Delete(Args)
@@ -2346,7 +2346,8 @@ MODULE ParseInPut
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: GMTag
       TYPE(INTC)                  :: IntC_Extra
       CHARACTER(LEN=5)            :: CHAR
-      INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum
+      INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum,NConstr
+      INTEGER                     :: NCartConstr
       REAL(DOUBLE)                :: V,Value,DegToRad
       TYPE(CRDS)                  :: GMLoc
 !
@@ -2357,10 +2358,12 @@ MODULE ParseInPut
 ! Find extra internal coordinates and constraints
 !
         NIntC_Extra=0
+        NConstr=0
+        NCartConstr=0
 !
       IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        GO TO 500
+        GO TO 400
       ENDIF
 !
       CALL AlignLowCase('begin_add_internals',Inp)
@@ -2386,9 +2389,7 @@ MODULE ParseInPut
    2  CONTINUE
 !
       IF(NIntC_Extra==0) THEN
-        CALL Put(NIntC_Extra,'NIntC_Extra')
-        CLOSE(Inp,STATUS='KEEP')
-	RETURN   
+        GO TO 400
       ENDIF
 !
 ! Get GM array
@@ -2429,6 +2430,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*AngstromsToAu
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
@@ -2443,6 +2445,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
@@ -2457,6 +2460,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
@@ -2471,6 +2475,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
@@ -2485,6 +2490,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
@@ -2499,6 +2505,7 @@ MODULE ParseInPut
                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
                  IntC_Extra%Value(NIntC_Extra)=Value*DegToRad 
+                 NConstr=NConstr+1
                ENDIF
 !--------------------
         ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
@@ -2516,12 +2523,14 @@ MODULE ParseInPut
                IntC_Extra%Constraint(NIntC_Extra+1)=.TRUE.
                IntC_Extra%Constraint(NIntC_Extra+2)=.TRUE.
                IntC_Extra%Constraint(NIntC_Extra+3)=.TRUE.
+                 NConstr=NConstr+3
 !
                IntC_Extra%Value(NIntC_Extra+1)=GMLoc%Carts%D(1,Sernum)
                IntC_Extra%Value(NIntC_Extra+2)=GMLoc%Carts%D(2,Sernum)
                IntC_Extra%Value(NIntC_Extra+3)=GMLoc%Carts%D(3,Sernum)
 !
                  NIntC_Extra=NIntC_Extra+3 
+                 NCartConstr=NCartConstr+3
 !
 !               IF(INDEX(LineLowCase,'.')==0) THEN
 !READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
@@ -2537,18 +2546,21 @@ MODULE ParseInPut
   11  CALL MondoHalt(PRSE_ERROR,' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
   12  CONTINUE
 !
+400   CONTINUE
+!
 ! save IntC_Extra into HDF
 !
+        CALL Put(NConstr,'NConstraints')
+        CALL Put(NCartConstr,'NCartConstr')
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        CALL Put(IntC_Extra,'IntC_Extra')
+        IF(NIntC_Extra>0) THEN
+          CALL Put(IntC_Extra,'IntC_Extra')
+          CALL PrtIntCoords(IntC_Extra,IntC_Extra%Value, &
+            'Extra Internals & Constraints')
+          CALL Delete(IntC_Extra)
+          CALL Delete(GMLoc)
+        ENDIF
 !
-        CALL PrtIntCoords(IntC_Extra,IntC_Extra%Value, &
-          'Extra Internals & Constraints')
-!
-      CALL Delete(IntC_Extra)
-      CALL Delete(GMLoc)
-!
-500   CONTINUE
       CLOSE(Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseIntCoo
