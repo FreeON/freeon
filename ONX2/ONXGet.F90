@@ -39,7 +39,8 @@ MODULE ONXGet
 #ifdef ONX2_PARALLEL
   PUBLIC :: Get_Essential_RowCol
   PUBLIC :: Set_DFASTMAT_EQ_DBCSR2
-  PUBLIC :: Reduce_FASTMAT
+  !PUBLIC :: Reduce_FASTMAT
+  PUBLIC :: GetDab
 #endif
   !
 CONTAINS
@@ -469,5 +470,220 @@ CONTAINS
        OldR=B%RowPt%I(At)
     ENDDO
   END SUBROUTINE Set_LBCSR_EQ_DFASTMAT
+#endif
+#ifdef ONX2_PARALLEL
+  SUBROUTINE GetDab(DFMab,APt,ANbr,BPt,BNbr,Args)
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(FASTMAT), POINTER    :: DFMab
+    TYPE(INT_VECT)            :: APt,BPt
+    INTEGER      , INTENT(IN) :: ANbr,BNBr
+    TYPE(ARGMT)               :: Args
+    !-------------------------------------------------------------------
+    TYPE(BCSR )     :: A
+    TYPE(DBCSR)     :: B
+    TYPE(INT_VECT)  :: ANBrArr,BNBrArr,APtArr,BPtArr,ADisp,BDisp
+    INTEGER         :: iPrc,ANbrTot,BNbrTot
+    INTEGER         :: I,J,JG,M,MN,MN1,P,NAtms,NBlks,NNon0,ICol,IRow
+    LOGICAL         :: ReAllocate
+    !-------------------------------------------------------------------
+    INTEGER, EXTERNAL :: IBinSrch
+    !-------------------------------------------------------------------
+    INTEGER :: TotBlk
+    !
+    !Send ANbr,BNbr to ROOT
+    CALL New(ANBrArr,NPrc)
+    CALL New(BNBrArr,NPrc)
+    CALL Gather(ANBr,ANBrArr)
+    CALL Gather(BNBr,BNBrArr)
+    !
+    IF(MyID==0) THEN
+       !write(*,*) 'ANBrArr',ANBrArr%I
+       !write(*,*) 'BNBrArr',BNBrArr%I
+    ENDIF
+    !
+    ! Compute some indicies.
+    IF(MyID.EQ.ROOT) THEN
+       CALL New(ADisp,NPrc+1)
+       CALL New(BDisp,NPrc+1)
+       ANbrTot=ANBrArr%I(1)
+       BNbrTot=BNBrArr%I(1)
+       ADisp%I(1)=0
+       BDisp%I(1)=0
+       DO iPrc=2,NPrc
+          ADisp%I(iPrc)=ANBrArr%I(iPrc-1)+ADisp%I(iPrc-1)
+          BDisp%I(iPrc)=BNBrArr%I(iPrc-1)+BDisp%I(iPrc-1)
+          ANbrTot=ANbrTot+ANBrArr%I(iPrc)
+          BNbrTot=BNbrTot+BNBrArr%I(iPrc)
+       ENDDO
+       ADisp%I(NPrc+1)=ANbrTot
+       BDisp%I(NPrc+1)=BNbrTot
+       !write(*,*) 'ANbrTot',ANbrTot
+       !write(*,*) 'ADisp',ADisp%I
+       !write(*,*) 'BNbrTot',BNbrTot
+       !write(*,*) 'BDisp',BDisp%I
+       CALL New(APtArr,ANbrTot)
+       CALL New(BPtArr,BNbrTot)
+    ENDIF
+    !
+    !Alloc the arrays A,B on ROOT to get the atom lists
+    CALL Gather(APt,APtArr,ANBr,ANBrArr,ADisp)
+    CALL Gather(BPt,BPtArr,BNBr,BNBrArr,BDisp)
+    !
+    !IF(MyId==ROOT) write(*,*) 'APtArr',APtArr%I
+    !IF(MyId==ROOT) write(*,*) 'BPtArr',BPtArr%I
+    !
+    ! Get the B matrix from disc.
+    CALL Get_BCSR(A,TrixFile('D',Args,0))
+    !
+    !CALL PChkSum(A,'Density matrix on root',Unit_O=6)  
+    !
+    CALL New(B)
+    !
+!------------------------------------------------
+!        Distribute to each processor
+!
+    DO iPrc=NPrc-1,0,-1
+       IF(MyId==ROOT)THEN
+          B%NAtms=0
+          B%NBlks=1
+          B%NNon0=1
+          B%RowPt%I(1)=1
+          !
+          !vw beg and end must be set somewhere else.
+          IRow=1
+          DO I=1,NAtoms !Row min, Row max.
+             ! Is it the right row?
+             IF(IBinSrch(APtArr%I(ADisp%I(iPrc+1)+1),I,ADisp%I(iPrc+2)-ADisp%I(iPrc+1)).LT.1) CYCLE
+             !if(iPrc==1) write(*,*) 'I',I
+             ICol=1
+             M=BSiz%I(I)
+             DO J=A%RowPt%I(I),A%RowPt%I(I+1)-1
+                JG=A%ColPt%I(J)
+                ! Is it the right col?
+                IF(IBinSrch(BPtArr%I(BDisp%I(iPrc+1)+1),JG,BDisp%I(iPrc+2)-BDisp%I(iPrc+1)).LT.1) CYCLE
+                !if(iPrc==1) write(*,*) 'JG',JG
+                B%ColPt%I(B%NBlks)=JG
+                B%BlkPt%I(B%NBlks)=B%NNon0
+                B%NBlks=B%NBlks+1
+                MN=M*BSiz%I(JG);MN1=MN-1
+                P=A%BlkPt%I(J)         
+                B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
+                B%NNon0=B%NNon0+MN
+             ENDDO
+             B%NAtms=B%NAtms+1
+             B%RowPt%I(B%NAtms+1)=B%NBlks
+          ENDDO
+          B%NBlks=B%NBlks-1
+          B%NNon0=B%NNon0-1
+! MINUS 
+          IF(iPrc/=ROOT)THEN
+             CALL Send(B%NAtms,iPrc,1)               
+             CALL Send(B%NBlks,iPrc,2)               
+             CALL Send(B%NNon0,iPrc,3)
+             CALL Send(B%RowPt,B%NAtms+1,iPrc,4)               
+             CALL Send(B%ColPt,B%NBlks,iPrc,5)               
+             CALL Send(B%BlkPt,B%NBlks,iPrc,6)               
+             CALL Send(B%MTrix,B%NNon0,iPrc,7)
+          ENDIF
+       ELSEIF(MyId==iPrc)THEN
+          CALL Recv(B%NAtms,ROOT,1)               
+          CALL Recv(B%NBlks,ROOT,2)               
+          CALL Recv(B%NNon0,ROOT,3)
+          ReAllocate=(SIZE(B%RowPt%I)<B%NAtms+1).OR. &
+               (SIZE(B%ColPt%I)<B%NBlks)  .OR. &
+               (SIZE(B%BlkPt%I)<B%NBlks)  .OR. &
+               (SIZE(B%MTrix%D)<B%NNon0)
+          IF(ReAllocate)THEN     
+             NAtms=B%NAtms; NBlks=B%NBlks; NNon0=B%NNon0
+             CALL Delete(B)     
+             CALL New(B,(/NAtms,NBlks,NNon0/))
+          ENDIF
+          CALL Recv(B%RowPt,B%NAtms+1,ROOT,4)               
+          CALL Recv(B%ColPt,B%NBlks,ROOT,5)               
+          CALL Recv(B%BlkPt,B%NBlks,ROOT,6)               
+          CALL Recv(B%MTrix,B%NNon0,ROOT,7)               
+       ENDIF
+    ENDDO
+    !------------------------------------------------
+    CALL BCast(A%NBlks)
+    IF(MyId==ROOT)THEN
+       CALL SetEq(B%GRwPt,A%RowPt,NAtoms+1)
+       CALL SetEq(B%GClPt,A%ColPt,A%NBlks)
+    ENDIF
+    CALL BCast(B%GRwPt,NAtoms+1)
+    CALL BCast(B%GClPt,A%NBlks)
+    B%Node=MyId
+    B%GUpDate=STATUS_TRUE
+    !------------------------------------------------
+    !
+    !IF(MyID==1)write(*,*) 'B MyID=',MyID,B%MTrix%D
+    !IF(MyID==1)write(*,*) 'B MyID=',MyID,B%RowPt%I
+    !IF(MyID==1)write(*,*) 'B MyID=',MyID,B%ColPt%I
+    !
+    IF(MyID.EQ.ROOT) TotBlk=A%NBlks
+    CALL BCast(TotBlk)
+    !
+    WRITE(*,100) DBLE(B%NBlks)/DBLE(TotBlk)*100d0,DBLE(B%NBlks)/(DBLE(NAtoms)**2)*100d0,MyID
+100 FORMAT(' Remaining block, Rel=',F8.3,'% Abs=',F8.3,'% MyID=',I4)
+    !
+    ! Copy the DBCSR to a FastMat.
+    CALL New_FASTMAT(DFMab,0,(/0,0/))
+    CALL Set_DFASTMAT_EQ_DBCSR2(DFMab,B,APt,ANBr)
+    !CALL PChkSum_FASTMAT2(DFMab,'Density matrix ab',Unit_O=6)
+    !
+    ! Delete arrays.
+    IF(MyID.EQ.ROOT) THEN
+       CALL Delete(APtArr)
+       CALL Delete(BPtArr)
+       CALL Delete(A)
+    ENDIF
+    !
+    CALL Delete(B)
+    CALL Delete(ANBrArr)
+    CALL Delete(BNBrArr)
+    !
+  END SUBROUTINE GetDab
+  !
+  !
+!!$  SUBROUTINE Set_DFASTMAT_EQ_DBCSR2(B,A,RowPt,RowNbr)
+!!$    TYPE(FASTMAT),POINTER :: B,C
+!!$    TYPE(SRST),POINTER    :: S
+!!$    TYPE(DBCSR)           :: A
+!!$    TYPE(INT_VECT)        :: RowPt
+!!$    INTEGER, INTENT(IN)   :: RowNbr
+!!$    INTEGER               :: I,IRow,J,JP,P,N,M
+!!$    !---------------------------------------------------------------------
+!!$    !
+!!$    ! Set some pointers.
+!!$    NULLIFY(C,S)
+!!$    !
+!!$    ! Check for prior allocation
+!!$    IF(ASSOCIATED(B))THEN
+!!$       CALL Delete_FASTMAT1(B)
+!!$       ! Begin with a new header Node     
+!!$       CALL New_FASTMAT(B,0,(/0,0/))
+!!$    ENDIF
+!!$    !
+!!$    DO I = 1,RowNbr
+!!$       IRow=RowPt%I(I)
+!!$       M = BSiz%I(IRow)
+!!$       IF(A%RowPt%I(I+1)-A%RowPt%I(I)>1) THEN
+!!$          ! Set current row link
+!!$          C => FindFastMatRow_1(B,IRow)
+!!$          DO JP = A%RowPt%I(I),A%RowPt%I(I+1)-1
+!!$             J = A%ColPt%I(JP)
+!!$             P = A%BlkPt%I(JP)
+!!$             N = BSiz%I(J)
+!!$             ! Add bloks to this sparse row search tree
+!!$             CALL AddFASTMATBlok(C,IRow,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
+!!$          ENDDO
+!!$       ENDIF
+!!$    ENDDO
+!!$    !
+!!$    CALL FlattenAllRows(B)
+!!$    !
+!!$  END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
+  !
 #endif
 END MODULE ONXGet
