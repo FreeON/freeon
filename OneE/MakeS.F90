@@ -22,7 +22,7 @@ PROGRAM MakeS
   TYPE(DBCSR)                :: S,T1
 #else
   TYPE(BCSR)                 :: S,T1
-#endif 
+#endif
   INTEGER                    :: NC
   REAL(DOUBLE),DIMENSION(3)  :: B
   TYPE(AtomPair)             :: Pair
@@ -53,7 +53,6 @@ PROGRAM MakeS
   CALL SetEq(S%MTrix,Zero)
 !-----------------------------------------------
 ! Main loops
-
 #ifdef PARALLEL
   S%NAtms=0
   DO AtA=Beg%I(MyId),End%I(MyId)
@@ -101,7 +100,7 @@ PROGRAM MakeS
   Thresholds%Trix = Thresholds%Trix*1.D-2
   CALL Filter(T1,S)
   Thresholds%Trix = Thresholds%Trix*1.D2
-!! the following line gives a problem!!
+! the following line gives a problem!!
 !  CALL PPrint(T1,'S',Unit_O=6)
   CALL Put(T1,TrixFile('S',Args))
 !-----------------------------------------------------------
