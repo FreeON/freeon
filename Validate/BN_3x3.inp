@@ -5,22 +5,13 @@ boron nitride
 <BeginOptions>
 Charge=0
 Multiplicity=1
-
 Clones=1
-
-MPIInvoke="mpirun"
-MPIProcessors=2 
-MPIProcFlag="-np"
-MPISpatialProc=2 
-MPIMachineFlag="--nper"
-MPIMachineFile="2"
-
 Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
-DebugAll=(MaxDebug,MaxGeOp)
+DebugAll=(MinDebug,MinGeOp)
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-2G-SPLIT)
-ModelChem=(PBExc)
+ModelChem=(HF)
 Accuracy =(good)
 Geometry=(InAngstroms,NoOrder)
 PBC=(T,T,F)

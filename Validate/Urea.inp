@@ -5,13 +5,7 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
-MPIInvoke="prun"
-MPIProcFlag="-n"
-
 Clones=1
-MPIProcessors=32
-MPISpatialProc=32
-
 Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
 SCFConvergence=(DIIS)
 DebugAll=(MinDebug,CheckSums)
@@ -48,13 +42,4 @@ Periodic=(18,AtomCoord)
  H    4.215  -1.433   3.360
  H    3.584  -0.802   4.862
 <EndGeometry>
-
-<BEGIN_ADD_INTERNALS>
-STRE_A 5.565
-STRE_B 5.565
-STRE_C 4.684
-ALPHA 90.0
-BETA  90.0
-GAMMA 90.0
-<END_ADD_INTERNALS>
 
