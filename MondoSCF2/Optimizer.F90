@@ -1242,7 +1242,7 @@ CONTAINS
      TYPE(BackTrf)   :: BackT
      TYPE(GConvCrit) :: GConv
      !
-     BackT%MaxIt_CooTrf = 20
+     BackT%MaxIt_CooTrf = 50
      BackT%CooTrfCrit   = MIN(GConv%Stre/10.D0,1.D-4)
      BackT%RMSCrit      = 0.75D0 
      BackT%MaxCartDiff  = 0.50D0  
@@ -1547,7 +1547,7 @@ CONTAINS
      LOGICAL                   :: Print2
      !
      Print2= Print>=DEBUG_GEOP_MAX
-     SetMax=0.100D0
+     SetMax=0.050D0
      MaxGradP=MAXVAL(Grad)
      MaxGradN=MAXVAL(-Grad)
      MaxGrad=MAX(MaxGradP,MaxGradN)
