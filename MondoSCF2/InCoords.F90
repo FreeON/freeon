@@ -2020,30 +2020,13 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SpectralShift(Matr,Shift)
-     IMPLICIT NONE
-     TYPE(BCSR) :: Matr,SpAux,Identity
-     REAL(DOUBLE) :: Shift,Buf
-     INTEGER      :: I,N
-     !
-     CALL SetToI(Identity)
-     CALL Multiply(Identity,Shift)
-     CALL SetEq(SpAux,Matr)
-     CALL Delete(Matr)
-     CALL Add(SpAux,Identity,Matr)
-     CALL Delete(SpAux)
-     CALL Delete(Identity)
-   END SUBROUTINE SpectralShift
-!
-!-------------------------------------------------------
-!
    SUBROUTINE GetSpBMatr(XYZ,B,SpB) 
      !
      ! Generate vibrational B matrix in quasi-sparse 
      ! TYPE(BMATR) representation and transform into sparse one
      !
      TYPE(BCSR)                           :: SpB
-     INTEGER                              :: NIntC,NCart,I,NatmsLoc
+     INTEGER                              :: NIntC,NCart,I,NatmsLoc,NZ
      TYPE(BMATR)                          :: B
      REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
      !
@@ -4575,6 +4558,55 @@ write(*,*) 'DiagDispl final'
      CALL Delete(FullMat)
      CALL Delete(B)
    END SUBROUTINE DiagDispl
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE BMatrConstr(IBc,JBc,ABc,IntCs,SCRPath,NLagr,NCart)
+     TYPE(INT_VECT)        :: IBc,JBc,JBc2
+     TYPE(DBL_VECT)        :: ABc,ABc2
+     INTEGER               :: I,J,L,LL,JJ,NLagr,NCart,NIntC,NConstr,NZ
+     CHARACTER(LEN=*)      :: SCRPath
+     TYPE(INTC)            :: IntCs
+     TYPE(BMATR)           :: B     
+     !
+     NIntC=SIZE(IntCs%Def)
+     CALL ReadBMATR(B,TRIM(SCRPath)//'B')
+     IF(NIntC/=SIZE(B%IB,1)) CALL Halt('Dimension error in BMatrConstr')
+     !
+     CALL New(IBc,NLagr+1)
+     CALL New(JBc2,NLagr*12)
+     CALL New(ABc2,NLagr*12)
+     IBc%I(1)=1
+     NZ=0
+     NConstr=0 
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         NConstr=NConstr+1
+         IF(NConstr>NLagr)CALL Halt('Dimension error #2 in BMatrConstr')
+         DO J=1,4
+           LL=IntCs%Atoms(I,J)
+           IF(LL==0) EXIT
+           JJ=(J-1)*3
+           LL=(LL-1)*3
+           DO L=1,3
+             NZ=NZ+1
+             JBc2%I(NZ)=LL+L 
+             ABc2%D(NZ)=B%B(I,JJ+L)
+           ENDDO
+         ENDDO
+         IBc%I(NConstr+1)=NZ+1
+       ENDIF
+     ENDDO
+     !
+     CALL New(JBc,NZ)
+     CALL New(ABc,NZ)
+     JBc%I(1:NZ)=JBc2%I(1:NZ)
+     ABc%D(1:NZ)=ABc2%D(1:NZ)
+     CALL Delete(JBc2)
+     CALL Delete(ABc2)
+     !
+     CALL Delete(B) 
+   END SUBROUTINE BMatrConstr
 !
 !------------------------------------------------------------------
 !

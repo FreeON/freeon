@@ -1053,7 +1053,8 @@ CONTAINS
      CtrlStat%RMSIntDispl =RMSIntDispl
      !
      IF(CtrlConstr%NConstr/=0) THEN
-       CtrlStat%GeOpConvgd=CtrlStat%MaxLGrad<GConvCr%Grad.AND. &
+       CtrlStat%GeOpConvgd=MaxCGrad<2.D0*GConvCr%Grad.AND. &
+                           CtrlStat%MaxLGrad<GConvCr%Grad.AND. &
                            CtrlStat%MaxTrGrad<GConvCr%Grad.AND. &
                            CtrlStat%MaxRotGrad<GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
@@ -1379,7 +1380,6 @@ CONTAINS
      !
      GT%MaxIt_GrdTrf = 10 
      GT%GrdTrfCrit   = 0.1D0*GConv%Grad
-    !GT%GrdTrfCrit   = MIN(0.1D0*GConv%Grad,1.D-6)
      GT%MaxGradDiff  = 5.D+2      
    END SUBROUTINE SetGrdTrf
 !
@@ -1726,14 +1726,11 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NConstr=SIZE(LagrMult)
-write(*,*) 'bef LagrInvHess' 
      CALL LagrInvHess(IntCs,SCRPath,GHessian, &
                       LagrMult,NCart,NConstr, &
                       IHessL,JHessL,AHessL)
-write(*,*) 'aft LagrInvHess' 
      CALL DiagDispl(IHessL,JHessL,AHessL,SCRPath, &
                     Grad,GradMult,Displ,LagrDispl)
-write(*,*) 'aft DiagDispl' 
      ! 
      CALL Delete(IHessL)
      CALL Delete(JHessL)
@@ -1826,8 +1823,6 @@ write(*,*) 'aft DiagDispl'
                            GradIn,GGrdTrf,GCoordCtrl,GTrfCtrl,GConstr,&
                            GHess,Print,SCRPath)
      !
-     !Check the sign of Lagrange multipliers
-     !
      REAL(DOUBLE),DIMENSION(:)   :: GradMult,LagrMult,LagrDispl
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
      REAL(DOUBLE)                :: Sum,Hess
@@ -1842,11 +1837,17 @@ write(*,*) 'aft DiagDispl'
      TYPE(CoordCtrl)             :: GCoordCtrl
      TYPE(GrdTrf)                :: GGrdTrf
      TYPE(Hessian)               :: GHess   
+     TYPE(INT_VECT)              :: IBc,JBc
+     TYPE(DBL_VECT)              :: ABc
      !
      NLagr=SIZE(GradMult)
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def)
+     !
+     ! Calculate constraint B-matrix
+     !
+  !  CALL BMatrConstr(IBc,JBc,ABc,IntCs,SCRPath,NLagr,NCart)
      !
      ! Calculate new values of Lagrange multipliers 
      ! on internal coord constraints
@@ -1891,6 +1892,9 @@ write(*,*) 'aft DiagDispl'
      !
      CALL Delete(CartGrad)
      CALL Delete(IntGrad)
+     CALL Delete(IBc)
+     CALL Delete(JBc)
+     CALL Delete(ABc)
    END SUBROUTINE CalcLagrMult
 !
 !-------------------------------------------------------------------
