@@ -37,9 +37,9 @@
       INTEGER LenBi,LenKi,LenBf,LenKf,NumB
       INTEGER LenAA,LenBB,LenCC
       INTEGER I0,I1,I2,iCP,iCL
-
       INTEGER Leng(10),Lmax(10),Lmin(10)
       INTEGER IDmn(0:4),ILen(0:4),iT(6,6)
+      LOGICAL Mults
 
       INCLUDE "bkonx.inc"
       DATA Leng / 1, 4, 3,10, 9, 6,20,19,16,10 /
@@ -221,16 +221,16 @@ c
 c
 c Check for multipoles
 c
-c      INCLUDE "MultipoleSelect.inc"
-c      IF(Mults) THEN
-c
-c         CALL Digest(LTot,N,LenAA,LenBB,LenCC,KThresh,
-c     >               L1,L2,L3,L4,ISw,pK,jK,iK,
-c     >               SubInd,Bfn,W2,sK,W1,DA)
-c
-c         xNMults = xNMults + FLOAT(L1*L2*L3*L4*N)
-c
-c      ENDIF
+      INCLUDE "MultipoleSelect.inc"
+      IF(Mults) THEN
+
+         CALL Digest(LTot,N,LenAA,LenBB,LenCC,KThresh,
+     >               L1,L2,L3,L4,ISw,pK,jK,iK,
+     >               SubInd,Bfn,W2,sK,W1,DA)
+
+         xNMults = xNMults + FLOAT(L1*L2*L3*L4*N)
+
+      ENDIF
 c
 c Find the true length of the current batch and store some info.
 c

@@ -70,7 +70,7 @@ SUBROUTINE ONXBuf(BSc,GMc,BSp,GMp,LenF,NameBuf)
 !--------------------------------------------------------------------------------
 ! Allocate the large buffers
 !--------------------------------------------------------------------------------
-  BufSize=1000000
+  BufSize=5000000
   MXPrm=BufSize
   MXDis=BufSize/30
   MXMom=BufSize/3
