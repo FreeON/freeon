@@ -16,6 +16,7 @@ PROGRAM MakePFFT
   USE BraBloks
   USE PFFTen
   USE AtomPairs
+  IMPLICIT NONE
 !
   TYPE(TIME)                     :: TimePFFT
   TYPE(CRDS)                     :: GM

@@ -55,9 +55,9 @@ release:clean $(ReleaseFiles)
 	rm -rf MMA/MD3TRR
 	rm -rf MMA/XLate
 #
-clean:	CQCTC CJFrc cmma 
+clean:	CQCTC CJFrc cmma CPFFT
 #
-purge:	CQCTC CJFrc cmma 
+purge:	CQCTC CJFrc cmma CPFFT
 	rm -f $(REMOVESRCE)
 #
 QCTC:	$(QCTCObjs)
