@@ -10,9 +10,9 @@ Accuracy =(VeryTight)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 BlokAInv=(Test,1.D20)
-Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,PFFOverRide)
 PFFLayers=1
-PFFMaxEll=6
+PFFMaxEll=8
 <EndOptions>
 
 <BeginPeriodic>
@@ -25,7 +25,9 @@ Water64mm.seq
 Water64mm.crd
 <END_MM_filenames>
 
-OverRide Off  (TauMAC=1.D-16)  
+
+===============================================================
+(TauMC=1.D-16)  
 
 1-Layer      ELL     Energy                 PFFTau   Error
 ---------------------------------------------------------        
