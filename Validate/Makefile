@@ -17,10 +17,10 @@ big:	small
 	mondo Vancomycin
 
 small_pbs:
-	sub_pbs SiliconTetraFluride
-	sub_pbs Urea 
-	sub_pbs Caffiene
-	sub_pbs Biotin
+	./sub_pbs SiliconTetraFluride
+	./sub_pbs Urea 
+	./sub_pbs Caffiene
+	./sub_pbs Biotin
 
 big_pbs:small_pbs
 	sub_pbs BetaCarotene
