@@ -197,7 +197,7 @@ MODULE JGen
                       IF(PExtent>Zero.AND.PStrength>Zero)THEN
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
-#ifdef PERIODIC
+#ifdef PERIODIC  
 #ifdef WRAPDIST
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
                          CALL AtomCyclic(GM,Prim%P)
