@@ -1,8 +1,7 @@
-!    COMPUTE THE EXCHANGE CORRELATION MATRIX $K_{xc}$ IN O(N)
-!    USING HIERARCHICAL CUBATURE BASED ON ADDAPTIVE CUBATURE 
-!    AND K-D BINARY TREE DATA STRUCTURES FOR EFFICIENT RANGE QUERRIES
-
-!    Author: Matt Challacombe
+! COMPUTE THE EXCHANGE CORRELATION MATRIX $K_{xc}$ IN O(N)
+! USING ADAPTIVE, HIERARCHICAL CUBATURE  AND K-D BINARY TREE DATA STRUCTURES 
+! FOR EFFICIENT RANGE QUERRIES OF THE DENSITY AND GRID
+! Author: Matt Challacombe
 !-------------------------------------------------------------------------------
 PROGRAM HaiKu
   USE DerivedTypes
@@ -54,13 +53,13 @@ PROGRAM HaiKu
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
-  CALL Get(ModelChem,'ModelChemistry',CurBase)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
   NEl=GM%NElec
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif 
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)
   ! Potentially overide local HiCu thresholds
@@ -175,10 +174,18 @@ PROGRAM HaiKu
 ! Put Exc to Info
 #ifdef PARALLEL
   IF(MyID == 0) THEN
+#ifdef PARALLEL_CLONES    
+    CALL Put(TotExc,'Exc')
+#else
     CALL Put(TotExc,'Exc',Tag_O=SCFCycl)
+#endif
   ENDIF
 #else
+#ifdef PARALLEL_CLONES    
+  CALL Put(Exc,'Exc')
+#else
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
+#endif
 #endif
 
 ! Printing

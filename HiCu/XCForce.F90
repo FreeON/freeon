@@ -58,19 +58,18 @@ PROGRAM XCForce
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
-  CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif 
-
 #ifdef PARALLEL
   CALL ParaInitRho(Args)
   CALL GetBBox()
@@ -162,7 +161,7 @@ PROGRAM XCForce
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotXCFrc,TotFrcComp)
-  CALL MPI_Reduce(XCFrc%D(1),TotXCFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Reduce(XCFrc%D(1),TotXCFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
     XCFrc%D(1:TotFrcComp) = TotXCFrc%D(1:TotFrcComp)
   ENDIF
@@ -187,13 +186,12 @@ PROGRAM XCForce
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(TmXCFrcArr,NPrc)
-  CALL MPI_Gather(XCFrcTm,1,MPI_DOUBLE_PRECISION,TmXCFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
-  IF(MyID == ROOT) THEN
-    CALL PImbalance(TmXCFrcArr,NPrc,Prog_O='XCFrc')
-  ENDIF
+  CALL MPI_Gather(XCFrcTm,1,MPI_DOUBLE_PRECISION,TmXCFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+!  IF(MyID == ROOT) THEN
+!    CALL PImbalance(TmXCFrcArr,NPrc,Prog_O='XCFrc')
+!  ENDIF
   CALL Delete(TmXCFrcArr)
 #endif
-
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 

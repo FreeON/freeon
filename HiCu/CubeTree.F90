@@ -130,7 +130,7 @@ MODULE CubeTree
                   //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
                   //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
                CALL OpenASCII(OutFile,Out)         
-               WRITE(*,*)TRIM(Mssg)
+!               WRITE(*,*)TRIM(Mssg)
                WRITE(Out,*)TRIM(Mssg)
                CLOSE(Out)
             ENDIF
@@ -147,7 +147,7 @@ MODULE CubeTree
                 //', RhoErr = '//TRIM(DblToShrtChar(RelativeError(1)))  &
                 //', <Exc> = '//TRIM(DblToMedmChar(Exc))         
             CALL OpenASCII(OutFile,Out)         
-            WRITE(*,*)TRIM(Mssg)
+!            WRITE(*,*)TRIM(Mssg)
             WRITE(Out,*)TRIM(Mssg)
             CLOSE(Out)
          ENDIF
