@@ -40,6 +40,8 @@ If[MondoHome==$FAILED,
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];
 Get[EllFile];
 
+NFunctions=2*HGEll+2;
+
 (* LOAD FIXEDNUBERFORM *)
 
 Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
@@ -47,6 +49,22 @@ Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 (*                                          *)
 
 <<Rules.m;
+
+(* WRITE ASSYMPTOTIC COEFFICIENTS TO FILE *)
+
+FileName="GammaAssymptotics.Inc";
+Print[" Openned ",FileName];
+OpenWrite[FileName];
+WriteString[FileName,"      REAL(DOUBLE), PARAMETER :: GammAss(0:",ToString[NFunctions],")= (/& \n"];
+Do[ 
+WriteString[FileName,"                                ",FF[Abs[2 n - 1]!!/(2 (2)^n) Sqrt[Pi]],", & \n"];
+   ,{n,0,NFunctions-2}];
+n=NFunctions-1
+WriteString[FileName,"                                ",FF[Abs[2 n - 1]!!/(2 (2)^n) Sqrt[Pi]],"/) \n"];
+WriteString[FileName,"\n"];
+Close[FileName];
+
+Abort[];
 
 (*                                          *)
 
@@ -61,8 +79,6 @@ FunctionList[x_] := {F[0,x],F[1,x],F[2,x],F[3,x],F[4,x],F[5,x],F[6,x],F[7,x],F[8
 
 FuncList          = {"F0","F1","F2","F3","F4","F5","F6","F7","F8",  
                      "F9","F10","F11","F12","F13","F14","F15","F16"};
-
-NFunctions=2*HGEll+2;
 
 ClearAll[Delta];
 
