@@ -158,6 +158,7 @@ CONTAINS
 !
     Radius = MaxBoxDim(GM) + SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+!    CALL Sort_CellSet(CS_OUT)
 !
   END SUBROUTINE SetCellNumber
 !-------------------------------------------------------------------------------
@@ -190,19 +191,20 @@ CONTAINS
   SUBROUTINE FracCyclic(GM,VecF)
     TYPE(CRDS)                 :: GM        
     REAL(DOUBLE),DIMENSION(3)  :: VecF
-    INTEGER                    :: I,N      
+    INTEGER                    :: I,N     
+    REAL(DOUBLE),PARAMETER     :: MDelt = 1.D-12
 
     DO I=1,3
        IF(GM%PBC%AutoW(I)) THEN
           DO 
-             IF(VecF(I) > One) THEN
+             IF(VecF(I) > (One+MDelt)) THEN
                 VecF(I) = VecF(I) - One
              ELSE
                 EXIT
              ENDIF
           ENDDO
           DO 
-             IF(VecF(I) < Zero) THEN
+             IF(VecF(I) < (Zero-MDelt)) THEN
                 VecF(I) = VecF(I) + One
              ELSE
                 EXIT
