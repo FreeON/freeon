@@ -11,8 +11,8 @@ CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 # Currently, -DPERIODIC does not work with -DPARALLEL.
 # When using -DPARALLEL, uncomment options for F90_INCLUDE and MPI_LIBS
 #
-CPPOPTS = -DQMvsMM -DMMech
-#CPPOPTS = -DPERIODIC -DQMvsMM -DMMech
+#CPPOPTS = -DQMvsMM -DMMech
+CPPOPTS = -DPERIODIC 
 #-DPARALLEL  -DMPI2
 #---------------------------------------------------------------
 #
@@ -89,7 +89,7 @@ HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz
 #
 #  The generic libs needed by most of the programs.  
 #
-F90_LIBRARIES = -L$(MONDO_HOME)/Libs -lMondoMods -lDynamo \
+F90_LIBRARIES = -L$(MONDO_HOME)/Libs -lMondoMods \
                 -L/usr/local/lib $(MPI_LIBS) $(HDF_LIBS) 
 #--------------------------------------------------------------------------
 #
