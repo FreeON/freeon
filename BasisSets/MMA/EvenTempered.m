@@ -90,6 +90,16 @@ PunchSet[6,O,p,FileName];
 WriteString[FileName," D   1  1.00\n       1.29200000      1.00000000\n"];
  *)
 WriteString[FileName," ****\n"];
+
+(* WRITE BASIS FOR C *)
+ 
+WriteString[FileName," ",C,"   0\n"];
+PunchSet[6,C,s,FileName];
+PunchSet[3,C,p,FileName];
+(*
+WriteString[FileName," D   1  1.00\n       1.29200000      1.00000000\n"];
+ *)
+WriteString[FileName," ****\n"];
  
 Close[FileName];
 Print[" Closed ",FileName];
