@@ -110,7 +110,7 @@ CONTAINS
 
     TYPE(DBL_VECT)   :: GradE
     INTEGER          :: cBAS,cGEO,K,J,iATS,iCLONE
-    CHARACTER(LEN=3) :: chGEO
+    CHARACTER(LEN=DCL) :: chGEO
     !----------------------------------------------------------------------------!
     ! Initialize the force vector in HDF, clone by clone
     chGEO=IntToChar(cGEO)
@@ -224,7 +224,7 @@ CONTAINS
     TYPE(Parallel)   :: M
     TYPE(DBL_VECT)   :: GradE
     INTEGER          :: cBAS,cGEO,J,iATS,iCLONE
-    CHARACTER(LEN=3) :: chGEO,chBAS,chSCF
+    CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
     TYPE(BCSR),DIMENSION(G%Clones)   :: P
     TYPE(CRDS),DIMENSION(G%Clones)   :: GTmp
     TYPE(BCSR)                       :: K
@@ -470,7 +470,7 @@ CONTAINS
                                    DDMAX,DMAXA,DMAXB,DMAXQ,DTEST
     LOGICAL,DIMENSION(G%Clones) :: Converged
     LOGICAL                     :: ConvergedQ
-    CHARACTER(LEN=3)            :: chGEO
+    CHARACTER(LEN=DCL)            :: chGEO
     !----------------------------------------------------------------------------!
     ! Convergence thresholds
     ETest=ETol(O%AccuracyLevels(cBAS))

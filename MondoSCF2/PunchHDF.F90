@@ -71,7 +71,7 @@ CONTAINS
     TYPE(BCSR)       :: DM
     CHARACTER(LEN=DCL) :: FailedProgram
     INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s
-    CHARACTER(LEN=2) :: chGEO
+    CHARACTER(LEN=DCL) :: chGEO
     TYPE(INT_VECT)   :: ETDirArr
     TYPE(DBL_VECT)   :: ETRootArr
     !---------------------------------------------------------------------------!
@@ -147,7 +147,7 @@ CONTAINS
     TYPE(Geometries) :: G    
     TYPE(CellSet)    :: CS
     INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
-    CHARACTER(LEN=2) :: chGEO
+    CHARACTER(LEN=DCL) :: chGEO
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
@@ -182,7 +182,7 @@ CONTAINS
     TYPE(CellSet)    :: CS
     INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
     INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc
-    CHARACTER(LEN=2) :: chGEO
+    CHARACTER(LEN=DCL) :: chGEO
     TYPE(CRDS)       :: GMLoc
     TYPE(DBL_VECT)   :: GradE
     !
