@@ -1155,10 +1155,15 @@ CONTAINS
        DoAllow=.FALSE.
        K1=1
        K2=4
-       IF(IntCs%Def%C(I)(1:4)=='LINB') K2=3
-       IF(IntCs%Def%C(I)(1:5)=='TORSL') THEN
+       IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
+          IntCs%Def%C(I)(1:4)=='OUTP') THEN
          K1=2
          K2=3
+       ENDIF
+       IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
+          IntCs%Def%C(I)(1:4)=='LINB') THEN
+         K1=2
+         K2=2
        ENDIF
        Tr=0
        DO J=K1,K2
