@@ -638,7 +638,7 @@ CONTAINS
      ELSE
        WRITE(*,200) iCLONE
        WRITE(Out,200) iCLONE
-       200 FORMAT('     Geometry optimization of Clone #'I2' converged.')
+       200 FORMAT('     Geometry optimization of Clone #',I2,' converged.')
        Convgd(iCLONE)=1
      ENDIF
      CALL GeOpReview(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
