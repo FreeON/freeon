@@ -73,7 +73,7 @@ pbs:
 pbs_parallel:
 	chmod u+x sub_pbs
 	./sub_pbs Water         2
-	./sub_pbs NH3           3
+#	./sub_pbs NH3           6 # Unless scratch is globally available, this will fail
 	./sub_pbs Biotin        4
 	./sub_pbs Diamond       4
 	./sub_pbs Na2Cl2        2

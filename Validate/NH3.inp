@@ -6,6 +6,9 @@
 
    >> Currently NEB will not converge without a constrained atom in common <<
 
+   >> Note, scratch dir must be globally accessible to run this job  << 
+   >> (each clone must open the hdf file in parallel)                <<
+
 <EndTitle>
 
 <BeginOptions>
@@ -27,9 +30,9 @@ ModelChem=(PBExc)
 Accuracy =(Good)
 
 MPIInvoke="mpirun"
-MPIProcessors=3
+MPIProcessors=6
 MPIProcFlag="-np"
-MPISpatialProc=1
+MPISpatialProc=2
 MPIMachineFlag="-machinefile"
 MPIMachineFile="$PBS_NODEFILE"
 
