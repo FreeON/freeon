@@ -1,3 +1,30 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
 MODULE MondoPoles
    USE Derivedtypes
    USE GlobalScalars   
@@ -17,14 +44,13 @@ MODULE MondoPoles
 !=================================================================================================
    TYPE PoleNode
       LOGICAL                               :: Leaf     ! Is this a data containing node?
-!     Indexes USEd for tree building
       INTEGER                               :: Bdex     ! Begining index of ORB list for this node
       INTEGER                               :: Edex     ! ENDign index of ORB list for this node
       INTEGER                               :: NQ       ! Number of centers
-      TYPE(BBox)                            :: Box      ! Bounding box 
       INTEGER                               :: Ell      ! Ell type
       REAL(DOUBLE)                          :: Zeta     ! Minimum exponent in this node
-      REAL(DOUBLE)                          :: D2       ! Max distance from node center to BBox
+      REAL(DOUBLE)                          :: Strength ! Max distance from node center to BBox
+      TYPE(BBox)                            :: Box      ! Bounding box 
       TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
       TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
 #ifdef POINTERS_IN_DERIVED_TYPES
@@ -44,10 +70,13 @@ MODULE MondoPoles
      MODULE PROCEDURE HGToSP_PoleNode,HGToSP_Bra
   END INTERFACE
 !====================================================================================================
-!  Global Array intermediates for multipole opperations
+!  Global Array intermediates for multipole computations
 !====================================================================================================
-   REAL(DOUBLE), DIMENSION(0:FFEll2) :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
-   REAL(DOUBLE), DIMENSION(0:FFLen2) :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
+   REAL(DOUBLE), DIMENSION(0:2*FFEll2)          :: Factorial
+   REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
+   REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
+   REAL(DOUBLE), DIMENSION(0:SPLen2)            :: Sx,Cx
+   REAL(DOUBLE), DIMENSION(0:FFEll2,0:FFEll2)   :: FudgeFactorial
    CONTAINS
 !====================================================================================
 !     Q->P
@@ -57,12 +86,12 @@ MODULE MondoPoles
          REAL(DOUBLE),DIMENSION(3) :: QP
          INTEGER                   :: LP,LQ,LPQ
 !------------------------------------------------------------------------------------
-         QP=(Q%Box%Center-P%Box%Center)
-         LP=P%Ell
+         LP=SPEll+1
          LQ=Q%Ell
-         LPQ = MAX(LP,LQ)
-         CALL Regular(LPQ,QP)
-         CALL XLate90(LP,LQ,P%C,P%S,Cpq,Spq,Q%C,Q%S)
+         LPQ=MAX(LP,LQ)
+         QP=Q%Box%Center-P%Box%Center
+         CALL Regular(LPQ,QP(1),QP(2),QP(3))
+         CALL XLate77(LP,LQ,Cx,Sx,Cpq,Spq,Q%C,Q%S)
        END SUBROUTINE XLate
 !====================================================================================
 !
@@ -74,11 +103,11 @@ MODULE MondoPoles
          INTEGER                   :: LP,LQ,LPQ
          REAL(DOUBLE),DIMENSION(0:):: SPKetC,SPKetS
 !------------------------------------------------------------------------------------
-         PQ=(P%P-Q%Box%Center)
          LP=P%Ell
          LQ=Q%Ell
          LPQ=LP+LQ        
-         CALL IrRegular(LPQ,PQ)
+         PQ=P%P-Q%Box%Center
+         CALL IrRegular(LPQ,PQ(1),PQ(2),PQ(3))
          CALL CTraX77(LP,LQ,SPKetC,SPKetS,Cpq,Spq,Q%C,Q%S)
       END SUBROUTINE CTrax
 !====================================================================================
@@ -125,55 +154,20 @@ MODULE MondoPoles
 !====================================================================================
 !
 !====================================================================================
-       SUBROUTINE Print_PoleNode(Node,Tag_O)
-          TYPE(PoleNode)                 :: Node
-          CHARACTER(LEN=*),OPTIONAL      :: Tag_O 
-          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
-          INTEGER                        :: L,M,LMDx
-          REAL(DOUBLE)                   :: Cpp,Spp
-!
-          WRITE(*,*)'======================================================'
-          IF(PRESENT(Tag_O))WRITE(*,*)Tag_O          
-          IF(Node%Leaf)THEN
-             Line='Q[#'//TRIM(IntToChar(Node%Box%Number))//',Tier' &
-                 //TRIM(IntToChar(Node%Box%Tier))//',Leaf] = (' &
-                 //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
-                 //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
-                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
-          ELSE
-             Line='Q[#'//TRIM(IntToChar(Node%Box%Number))//',Tier' &
-                 //TRIM(IntToChar(Node%Box%Tier))//'] = (' &
-                 //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
-                 //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
-                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
-          ENDIF
-          WRITE(*,*)TRIM(Line)
-          DO l=0,Node%Ell
-             DO m=0,l
-               lmdx=LTD(l)+m
-               Cpp = Node%C(lmdx)
-               Spp = Node%S(lmdx)
-               IF(ABS(Cpp) .LT. 1.D-12) Cpp = Zero 
-               IF(ABS(Spp) .LT. 1.D-12) Spp = Zero 
-               Line='L = '//TRIM(IntToChar(L))//' M = '//TRIM(IntToChar(M)) &
-                    //' Cq = '//TRIM(DblToMedmChar(Cpp)) &
-                    //' Sq = '//TRIM(DblToMedmChar(Spp))
-               WRITE(*,*)TRIM(Line)
-            ENDDO
-         ENDDO
-       END SUBROUTINE Print_PoleNode
-!====================================================================================
-!
-!====================================================================================
        SUBROUTINE MultipoleSetUp(Ell)
-          INTEGER                          :: Ell,L,M,LDex,LMDex
-          REAL(DOUBLE), DIMENSION(0:2*Ell) :: Factorial
-          REAL(DOUBLE)                     :: Sgn,DblFact,TwoTimes
+          INTEGER                          :: Ell,L,M,LDex,LMDex,   &
+                                              LP,LQ,MP,MQ
+          REAL(DOUBLE)                     :: Sgn,DblFact,TwoTimes, &
+                                              DenomP,DenomQ,NumPQ,  &
+                                              DegenP,DegenQ
 !------------------------------------------------------------------------------------          
+!         Factorial(M)=M!
           Factorial(0)=One
+          WRITE(*,*)' Ell = ',Ell
           DO L=1,2*Ell 
              Factorial(L)=Factorial(L-1)*DBLE(L)
           ENDDO
+!         FactOlm2=
           DO L=2,Ell 
             LDex=L*(L+1)/2
             DO M=0,L-2
@@ -181,6 +175,7 @@ MODULE MondoPoles
                FactOlm2(LMDex)=One/DBLE((L+M)*(L-M))
              ENDDO
           ENDDO
+!         FactMlm2=
           DO L=0,Ell
              LDex=L*(L+1)/2
              DO M=0,Ell
@@ -188,6 +183,8 @@ MODULE MondoPoles
                 FactMlm2(LMDex)=DBLE((L+M-1)*(L-M-1))
              ENDDO
           ENDDO
+!         FactOlm=
+!         FactMlm=
           Sgn=One
           DblFact=One
           TwoTimes=One
@@ -198,32 +195,57 @@ MODULE MondoPoles
              TwoTimes=TwoTimes+Two
              Sgn=-Sgn
           ENDDO
+!
+!         FudgeFactorial(LP,LQ)=[Sum_(MP,MQ) (LP+LQ-MP-MQ)!/((LP+MP)!(LQ+MQ)!)]/{
+!                               [Sum_MP (LP-MP)!/(LP+MP)!]*[Sum_MQ (LQ-MQ)!/(LQ+MQ)!]}
+          DO LP=0,Ell
+             DO LQ=0,Ell
+                DenomP=One
+                DenomQ=One
+                DO MP=1,LP
+                   DenomP=DenomP+Two*Factorial(LP-MP)/Factorial(LP+MP)
+                ENDDO
+                DO MQ=1,LQ
+                   DenomQ=DenomQ+Two*Factorial(LQ-MQ)/Factorial(LQ+MQ)
+                ENDDO
+                NumPQ=Zero
+                DO MP=0,LP
+                   IF(MP==0)THEN
+                      DegenP=One
+                   ELSE
+                      DegenP=Two
+                   ENDIF
+                   DO MQ=0,LQ
+                      IF(MQ==0)THEN
+                         DegenQ=One
+                      ELSE
+                         DegenQ=Two
+                      ENDIF
+                      NumPQ=NumPQ+DegenP*DegenQ*Factorial(LP+LQ-MP-MQ)/(Factorial(LP+MP)*Factorial(LQ+MQ))
+                   ENDDO
+                ENDDO
+                FudgeFactorial(LP,LQ)=NumPQ/(DenomP*DenomQ)
+             ENDDO
+          ENDDO
       END SUBROUTINE MultipoleSetup
 !====================================================================================
 !     Regular Function
 !====================================================================================
-      SUBROUTINE Regular(Ell,PtoQ)
+      SUBROUTINE Regular(Ell,PQx,PQy,PQz)
          INTEGER                   :: Ell
-         REAL(DOUBLE), DIMENSION(3):: PtoQ
          INTEGER                   :: L,M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
          REAL(DOUBLE)              :: PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
                                       CoFact,PQToThPlsL,PQx,PQy,PQz
 !------------------------------------------------------------------------------------
          Cpq=Zero
          Spq=Zero
-         PQx = PtoQ(1)
-         PQy = PtoQ(2)
-         PQz = PtoQ(3)
-!
          PQx2=PQx*PQx
          PQy2=PQy*PQy      
          PQ=SQRT(PQx2+PQy2+PQz*PQz)
-!
          IF(PQ==Zero)THEN
             Cpq(0) = One
             RETURN
          ENDIF
-!
          OneOvPQ=One/PQ
          CoTan=PQz*OneOvPQ
 !        Sine and Cosine by recursion
@@ -281,26 +303,17 @@ MODULE MondoPoles
 !====================================================================================
 !     Irregular Function
 !====================================================================================
-      SUBROUTINE IrRegular(Ell,PtoQ)
+      SUBROUTINE IrRegular(Ell,PQx,PQy,PQz)
          INTEGER                    :: Ell
-         REAL(DOUBLE), DIMENSION(3) :: PtoQ
          INTEGER                    :: L,M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
          REAL(DOUBLE)               :: PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
                                        CoFact,PQToThMnsL,PQx,PQy,PQz
 !------------------------------------------------------------------------------------
          Cpq = Zero
          Spq = Zero
-         PQx = PtoQ(1)
-         PQy = PtoQ(2)
-         PQz = PtoQ(3)
-!
          PQx2=PQx*PQx
          PQy2=PQy*PQy      
          PQ=SQRT(PQx2+PQy2+PQz*PQz)
-         IF(PQ < 1.D-15 ) THEN 
-            STOP
-         ENDIF
-!
          OneOvPQ=One/PQ
          CoTan=PQz*OneOvPQ
 !        Sine and Cosine by recursion
@@ -356,6 +369,59 @@ MODULE MondoPoles
          ENDDO
       END SUBROUTINE IrRegular
 !====================================================================================
+!     Compute a multipole strength O_L based on Unsolds theorem
+!====================================================================================
+      FUNCTION UnsoldO(L,C,S)
+         INTEGER                     :: K,L,M
+         REAL(DOUBLE)                :: UnsoldO
+         REAL(DOUBLE), DIMENSION(0:) :: C,S
+         UnsoldO=Zero
+         K=LTD(L)
+         UnsoldO=(C(K)**2+S(K)**2)*Factorial(L)**2
+         DO M=1,L
+            UnsoldO=UnsoldO+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)
+         ENDDO
+         UnsoldO=SQRT(UnsoldO)
+       END FUNCTION UnsoldO
+!====================================================================================
+!
+!====================================================================================
+       SUBROUTINE Print_PoleNode(Node,Tag_O)
+          TYPE(PoleNode)                 :: Node
+          CHARACTER(LEN=*),OPTIONAL      :: Tag_O 
+          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+          INTEGER                        :: L,M,LMDx
+          REAL(DOUBLE)                   :: Cpp,Spp
+!
+          WRITE(*,*)'======================================================'
+          IF(PRESENT(Tag_O))WRITE(*,*)Tag_O          
+          IF(Node%Leaf)THEN
+             Line='Q[#'//TRIM(IntToChar(Node%Box%Number))//',Tier' &
+                 //TRIM(IntToChar(Node%Box%Tier))//',Leaf] = (' &
+                 //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
+                 //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
+                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
+          ELSE
+             Line='Q[#'//TRIM(IntToChar(Node%Box%Number))//',Tier' &
+                 //TRIM(IntToChar(Node%Box%Tier))//'] = (' &
+                 //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
+                 //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
+                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
+          ENDIF
+          WRITE(*,*)TRIM(Line)
+          DO l=0,Node%Ell
+             DO m=0,l
+               lmdx=LTD(l)+m
+               Cpp = Node%C(lmdx)
+               Spp = Node%S(lmdx)
+               Line='L = '//TRIM(IntToChar(l))//' M = '//TRIM(IntToChar(m)) &
+                    //' Cq = '//TRIM(DblToMedmChar(Cpp)) &
+                    //' Sq = '//TRIM(DblToMedmChar(Spp))
+               WRITE(*,*)TRIM(Line)
+            ENDDO
+         ENDDO
+       END SUBROUTINE Print_PoleNode
+!====================================================================================
 !     Xlate in F90
 ! 
 !        OO_{l1,m1}[Q] = Sum_{l2,m2} OO_{l1-l2,m1-m2}[Q-P] OO_{l2,m2}[P]
@@ -408,56 +474,5 @@ MODULE MondoPoles
         ENDDO
 !
       END SUBROUTINE XLate90
-!====================================================================================
-! 
-!        MM_{l1,m1}[Q] = Sum_{l2,m2} (-1^l1) MM_{l1+l2,m1+m2}[Q-P] OO_{l2,m2}[P]
-!
-!====================================================================================
-      SUBROUTINE CTraX90(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
-        INTEGER                         :: LP,LQ
-        INTEGER                         :: L1,L2,L3,M1,M2,M3,LDX1,LDX2,LDX3,ABSM2,ABSM3
-        REAL(DOUBLE)                    :: CN,SN,CMN,SMN
-        REAL(DOUBLE),DIMENSION(0:FFLen) :: Cp,Sp,Cq,Sq
-        REAL(DOUBLE),DIMENSION(0:FFLen2):: Cpq,Spq
-!
-        DO L1 = 0,LP
-           DO M1 = 0,L1
-              LDX1 = LTD(L1)+M1
-              DO L2 = 0,LQ
-                 L3 = L1+L2
-                 DO M2 = -L2,L2
-                    ABSM2 = ABS(M2)
-                    LDX2  = LTD(L2)+ABSM2
-!
-                    M3    = M1+M2
-                    ABSM3 = ABS(M3)
-                    LDX3  = LTD(L3)+ABSM3 
-!
-                    IF(M2 .LT. 0) THEN
-                       CN = (-One)**(ABSM2)
-                       SN = -CN
-                    ELSE
-                       CN = One
-                       SN = One
-                    ENDIF
-                    IF(M3 .LT. 0) THEN
-                       CMN = (-One)**(ABSM3)
-                       SMN = -CMN
-                    ELSE
-                       CMN = One
-                       SMN = One
-                    ENDIF
-                    Cp(LDX1) = Cp(LDX1)+CN*CMN*Cq(LDX2)*Cpq(LDX3) &
-                                       +SN*SMN*Sq(LDX2)*Spq(LDX3)
-                    Sp(LDX1) = Sp(LDX1)-CN*SMN*Cq(LDX2)*Spq(LDX3) &
-                                       +SN*CMN*Sq(LDX2)*Cpq(LDX3)
-                 ENDDO
-              ENDDO
-           ENDDO
-        ENDDO
-!
-      END SUBROUTINE CTraX90
-!
-!
-!
+
 END MODULE 
