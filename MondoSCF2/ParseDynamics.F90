@@ -17,8 +17,9 @@ CONTAINS
     TYPE(Dynamics)     :: D
     CHARACTER(LEN=DCL) :: Line
 !---------------------------------------------------------------------------------------!
-    CALL OpenASCII(N%IFile,Inp)
+    CALL OpenASCII(N%IFile,Inp)       
 !   Initialize
+    D%Initial_Temp   = .FALSE.
     D%Velcty_Scaling = .FALSE.
     D%Const_Temp     = .FALSE.
     D%Const_Press    = .FALSE.
@@ -39,7 +40,23 @@ CONTAINS
     IF(.NOT. OptIntQ(Inp,MD_MAX_STEP,D%MDMaxSteps)) THEN
        CALL MondoHalt(PRSE_ERROR,MD_MAX_STEP//' not found in input.')
     ENDIF
-!
+!   Parse for Initial Temp, if any
+    IF(OptDblQ(Inp,MD_INIT_TEMP,D%TempInit))THEN
+       D%Initial_Temp   = .TRUE.
+    ELSE
+       D%TempInit       = Zero
+    ENDIF
+!   Parse for Density Matrix Projection Order: Default = 0
+    IF(.NOT. OptIntQ(Inp,MD_DMPOrder,O%DMPOrder)) THEN
+       O%DMPOrder = 0
+    ENDIF
+!   Parse for Min and Max SCF
+    IF(.NOT. OptIntQ(Inp,MD_MinSCF,O%MinSCF)) THEN
+       O%MinSCF = 0
+    ENDIF
+    IF(.NOT. OptIntQ(Inp,MD_MaxSCF,O%MaxSCF)) THEN
+       O%MaxSCF = 256
+    ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
 !
   END SUBROUTINE LoadDynamics

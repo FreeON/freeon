@@ -18,8 +18,11 @@ Geometry=InAU
 
 Grad=(MolecularDynamics)
 MDMethod=Verlet
-DeltaTime=0.1
-MaxMDStep=200
+DeltaTime=0.5
+MaxMDStep=1000
+DMPOrder=0
+MinSCF=5
+MaxSCF=12
 
 <EndOptions>
 

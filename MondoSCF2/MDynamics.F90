@@ -20,13 +20,15 @@ MODULE MDynamics
 !--------------------------------------------------------------
  SUBROUTINE  MD(C)  
     TYPE(Controls)  :: C
-    INTEGER         :: iBAS,iGEO,iCLONE,I
+    INTEGER         :: iSCF,iBAS,iGEO,iCLONE,iREMOVE,I,DMPOrder
     REAL(DOUBLE)    :: Temp 
 !--------------------------------------------------------------
 !   Do Molecular Dynamics:Loop over Time Steps
 !   Intitialize
     C%Stat%Previous%I=(/0,1,1/)
-    iGEO=1
+    iGEO      = 1 
+    DMPOrder  = C%Opts%DMPOrder
+    iREMOVE   = DMPOrder+1
     CALL New(Carts0,(/3,C%Geos%Clone(1)%NAtms,C%Geos%Clones/))
     Carts0%D=Zero
     CALL New(MDTime ,C%Geos%Clones)
@@ -34,30 +36,40 @@ MODULE MDynamics
     CALL New(MDEpot ,C%Geos%Clones)
     CALL New(MDETot ,C%Geos%Clones)
     CALL New(MDTemp ,C%Geos%Clones)
-!   Initial Guess
+!   Initial Guess     
     IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
 !      Init the Time
        HDFFileID=OpenHDF(C%Nams%RFile)
        DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Get(MDTime%D(iCLONE),"MDTime")
-       ENDDO
+          CALL Put(.TRUE.,'DoingMD')
+          CALL Put(C%Opts%DMPOrder,'DMPOrder')
+          CALL CloseHDFGroup(HDF_CurrentID)
+       ENDDO   
+       CALL CloseHDF(HDFFileID)
 !      Do The initial SCF
        iBAS=C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ELSE
-!      Hack, Give an intial Maxwell Boltzman Temp
-!!$       Temp=20.D0
-!!$       CALL SetTempMaxBoltDist(C,Temp)
+!      Give an intial Maxwell Boltzman Temp
+       IF(C%Dyns%Initial_Temp) THEN
+          WRITE(*,*) "Inital Temperature = ",C%Dyns%TempInit
+          CALL SetTempMaxBoltDist(C,C%Dyns%TempInit)
+       ENDIF
 !      Init the Time
        MDTime%D(:) = Zero
        HDFFileID=OpenHDF(C%Nams%HFile)
        DO iCLONE=1,C%Geos%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
+          CALL Put(.TRUE.,'DoingMD')
+          CALL Put( C%Opts%DMPOrder,'DMPOrder')
+          CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
+       CALL CloseHDF(HDFFileID)
 !      Build the SCF 
        DO iBAS=1,C%Sets%NBSets
           CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
@@ -65,8 +77,10 @@ MODULE MDynamics
           CALL SCF(iBAS,iGEO,C)
        ENDDO
     ENDIF
-!   Do MD    
     iBAS=C%Sets%NBSets
+!   Store the Last P matrix
+    CALL RenameDensityMatrix(C,iREMOVE)
+!   Do MD    
     DO iGEO = 1,C%Dyns%MDMaxSteps
 !      Calculate the Force
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
@@ -100,7 +114,7 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
-       IF(.TRUE.) THEN
+       IF(.FALSE.) THEN
           C%Opts%Guess=GUESS_EQ_SUPR
           DO iBAS=1,C%Sets%NBSets
              CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos) 
@@ -114,6 +128,8 @@ MODULE MDynamics
 !         Evaluate energies at the new geometry
           CALL SCF(iBAS,iGEO+1,C)
        ENDIF
+!      Store the Last P matrix
+       CALL RenameDensityMatrix(C,iREMOVE)
 !      Remove old Stuff from Scratch
        CALL CleanScratch(C,iGEO)
     ENDDO
@@ -152,7 +168,7 @@ MODULE MDynamics
           MDKin%D(iCLONE) = MDKin%D(iCLONE) + Half*Mass*(Vel(1)**2+Vel(2)**2+Vel(3)**2)
 !         Update
           Carts0%D(1:3,iATS,iCLONE)                 = Pos1(1:3)
-          C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)  = Pos2(1:3)
+          C%Geos%Clone(iCLONE)%AbCarts%D(1:3,iATS)  = Pos2(1:3) 
           C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
        ENDDO
 !
@@ -161,8 +177,13 @@ MODULE MDynamics
        MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
 !
 !!$       CALL OpenASCII("EnergiesMD.dat",99)
-!!$       WRITE(99,'(F12.4,F14.8,F14.8,F14.8)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+!!$       WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
 !!$       CLOSE(99)
+!!$!
+!!$       CALL OpenASCII("PositionMD.dat",99)
+!!$       WRITE(99,'(F18.12,1x,F18.12,1x,F18.12)') Carts0%D(1:3,1,1)
+!!$       CLOSE(99) 
+!!$!
 !!$       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
 !
     ENDDO
@@ -224,7 +245,15 @@ MODULE MDynamics
              Line = "# MD Algorithm = Gear"
           ENDIF
           WRITE(Out,97) Line
-          Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))
+          Line = "# DMPOrder     = "//TRIM(IntToChar(C%Opts%DMPOrder))
+          WRITE(Out,97) Line
+          Line = "# Minium SCF   = "//TRIM(IntToChar(C%Opts%MinSCF))
+          WRITE(Out,97) Line
+          Line = "# Maxium SCF   = "//TRIM(IntToChar(C%Opts%MaxSCF))
+          WRITE(Out,97) Line
+          Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime))//" au" 
+          WRITE(Out,97) Line
+          Line = "# MD Time Step = "//TRIM(DblToMedmChar(C%Dyns%DTime*InternalTimeToSeconds))//" sec"
           WRITE(Out,97) Line
           Line = "# MD Max Step  = "//TRIM(IntToChar(C%Dyns%MDMaxSteps))
           WRITE(Out,97) Line
@@ -347,4 +376,44 @@ MODULE MDynamics
     ENDDO
   END SUBROUTINE RescaleTemp
 !--------------------------------------------------------------
+! Rename the Last Density Matrix, Remove old ones
+!--------------------------------------------------------------
+  SUBROUTINE RenameDensityMatrix(C,iREMOVE)
+    TYPE(Controls)                 :: C
+    INTEGER                        :: iCLONE,iREMOVE
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: chSCF,chBAS,chGEO,chCLONE
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: PoldFile,PnewFile
+!      
+    chSCF = IntToChar(C%Stat%Current%I(1))
+    chBAS = IntToChar(C%Stat%Current%I(2))
+    chGEO = IntToChar(C%Stat%Current%I(3))
+!
+    DO iCLONE=1,C%Geos%Clones
+       chCLONE = IntToChar(iCLONE)
+       PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                        //'_Geom#'//TRIM(chGEO)  &
+                                        //'_Base#'//TRIM(chBAS)  &
+                                        //'_Cycl#'//TRIM(chSCF)  &
+                                        //'_Clone#'//TRIM(chCLONE)//'.D'
+       PnewFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                        //'_G#'//TRIM(chGEO)     &
+                                        //'_C#'//TRIM(chCLONE)//'.Dsave'
+       CALL SYSTEM('/bin/cp -f  '//PoldFile//' '//PnewFile)
+    ENDDO
+!
+    IF(C%Stat%Current%I(3)-iREMOVE > 0) THEN
+       DO iCLONE=1,C%Geos%Clones
+          chCLONE = IntToChar(iCLONE)
+          chGEO   = IntToChar(C%Stat%Current%I(3)-iREMOVE)
+          PoldFile = TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)  &
+                                           //'_G#'//TRIM(chGEO)     &
+                                           //'_C#'//TRIM(chCLONE)//'.Dsave'
+          CALL SYSTEM('/bin/rm -f  '//PoldFile)
+       ENDDO
+    ENDIF
+!
+  END SUBROUTINE RenameDensityMatrix
+!
+!
+!
 END MODULE MDynamics

@@ -43,12 +43,19 @@ MODULE ControlStructures
      REAL(DOUBLE)                   :: NEBSpring
      LOGICAL                        :: NEBClimb      
      CHARACTER(LEN=3)               :: GeomPrint
+!
+     INTEGER                        :: DMPOrder
+     INTEGER                        :: MinSCF
+     INTEGER                        :: MaxSCF
   END TYPE Options
 
   TYPE Dynamics
      INTEGER                        :: MDMaxSteps
      INTEGER                        :: MDAlgorithm
      REAL(DOUBLE)                   :: DTime
+!
+     LOGICAL                        :: Initial_Temp
+     REAL(DOUBLE)                   :: TempInit
 !
      LOGICAL                        :: Velcty_Scaling
 !

@@ -11,5 +11,11 @@ MODULE DynamicsKeys
 ! MD Inputs
   CHARACTER(LEN=*),  PARAMETER :: MD_TIME_STEP       ='DeltaTime'
   CHARACTER(LEN=*),  PARAMETER :: MD_MAX_STEP        ='MaxMDStep' 
+! Initial Temp
+  CHARACTER(LEN=*),  PARAMETER :: MD_INIT_TEMP       ='InitTemp'
+! Density Matrix Projection Order, ect
+  CHARACTER(LEN=*),  PARAMETER :: MD_DMPOrder        ='DMPOrder'
+  CHARACTER(LEN=*),  PARAMETER :: MD_MinSCF          ='MinSCF'
+  CHARACTER(LEN=*),  PARAMETER :: MD_MaxSCF          ='MaxSCF'
 !
-END MODULE DynamicsKeys
+END MODULE DynamicsKeys 

@@ -112,6 +112,9 @@ CONTAINS
        CALL Put(BIG_DBL,'diiserr')
        CALL Put(.TRUE.,'programfailed')
        CALL Put(.FALSE.,'archivedensity')
+!      MD Stuff
+       CALL Put(.FALSE.,'DoingMD')
+       CALL Put(0,'DMPOrder')
 #ifdef PARALLEL
        CALL Put(0,'LineLocExist')
        CALL New(ETDirArr,P%NSpace-1)
