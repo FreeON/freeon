@@ -107,21 +107,21 @@ MODULE PBCFarField
 !
 !     Output
 !
-      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
-      WRITE(*,*) 'MaxEll        = ',MaxEll
-      WRITE(*,*) 'MaxLay        = ',Radius/MaxBoxDim(GMLoc)
-      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-      WRITE(*,*) 'PACDist       = ',PACDist
-      WRITE(*,*) 'BOXDist       = ',BDist
-      WRITE(*,*) 'RDist         = ',RDist      
-      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-      WRITE(*,*)
-      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-      WRITE(*,*) 'E_PFF         = ',E_PFF
-      WRITE(*,*) 'E_DP          = ',E_DP     
-      WRITE(*,*)
+!!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+!!$      WRITE(*,*) 'MaxEll        = ',MaxEll
+!!$      WRITE(*,*) 'MaxLay        = ',Radius/MaxBoxDim(GMLoc)
+!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+!!$      WRITE(*,*) 'PACDist       = ',PACDist
+!!$      WRITE(*,*) 'BOXDist       = ',BDist
+!!$      WRITE(*,*) 'RDist         = ',RDist      
+!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+!!$      WRITE(*,*)
+!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
+!!$      WRITE(*,*) 'E_DP          = ',E_DP     
+!!$      WRITE(*,*)
 !
 !!$!
 !!$!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
