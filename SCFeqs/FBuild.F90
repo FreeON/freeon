@@ -28,7 +28,7 @@ PROGRAM FockNGrueven
   TYPE(BCSR)                     :: F,V,T,J,K,X,Tmp1 
 #endif
   TYPE(ARGMT)                    :: Args
-  REAL(DOUBLE)                   :: KShift
+  REAL(DOUBLE)                   :: KScale
   INTEGER                        :: ISCF
   CHARACTER(LEN=2)               :: Cycl
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,Mssg
@@ -38,9 +38,6 @@ PROGRAM FockNGrueven
   CALL StartUp(Args,Prog)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
-!
-!  CALL Get(KShift,'ExchangeShift',CurBase)
-  KShift=1.0D0
 !
   CALL New(F)
   CALL New(Tmp1)
@@ -65,16 +62,13 @@ PROGRAM FockNGrueven
      CALL New(K)
      IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
         CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-        IF(KShift/=One)THEN
-           CALL Multiply(K,KShift)                            ! K=KShift*K_hf
-        ENDIF
+        KScale=ExactXScale(ModelChem)
+        CALL Multiply(K,KScale)                               ! K=KScale*K_hf
         CALL Add(F,K,Tmp1)                                    ! F=J+T+K
         CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
         CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
      ELSEIF(HasHF(ModelChem))THEN
         CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-        IF(KShift/=One) &
-           CALL Multiply(K,KShift)
         CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
         CALL SetEq(F,Tmp1)
      ELSEIF(HasDFT(ModelChem))THEN
@@ -133,29 +127,5 @@ PROGRAM FockNGrueven
 !
   CALL Delete(F)
   CALL Delete(Tmp1)
-!---------------------------------
-! Print info on Fock build
-!
-#ifdef PARALLEL
-    IF(MyId==ROOT)THEN
-#endif
-       IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
-          IF(ExchangeShift)THEN
-             CALL OpenASCII(OutFile,Out)
-             CALL PrintProtectL(Out)
-             Mssg=TRIM(Prog)//' :: Exchange shift = ' &
-                //TRIM(DblToShrtChar(KShift))//' .'
-             WRITE(Out,*)TRIM(Mssg)
-             CALL PrintProtectR(Out)
-             CLOSE(UNIT=Out,STATUS='KEEP')
-          ENDIF
-       ENDIF
-#ifdef PARALLEL
-   ENDIF
-#endif
-!-----------------------
-! The end
-!
   CALL ShutDown(Prog)
-!
 END PROGRAM FockNGrueven

@@ -7,7 +7,8 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-CPPMISC=-DSCFDEVELOP
+CPPMISC=
+#-DNODIIS
 
 Gues_Objs  = FillPBlok.o P2Use.o 
 SDMM_Objs  = FillPBlok.o SDMM.o               
@@ -15,6 +16,7 @@ Stat_Objs  = SCFStatus.o
 RHEq_Objs  = RHeqs.o              
 FBuild_Objs= FBuild.o       
 DIIS_Objs  = DIIS.o               
+Dev_Objs   = ToDev.o               
 
 All:	Stat Gues SDMM FBuild  DIIS RHEq
 
@@ -41,6 +43,10 @@ FBuild:	$(FBuild_Objs)
 DIIS:	$(DIIS_Objs)
 	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv DIIS $(MONDO_HOME)/Exec/DIIS
+
+Dev:	$(Dev_Objs)
+	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	mv ToDev $(MONDO_HOME)/Exec/ToDev
 
 clean:
 	rm -f $(REMOVEALL)

@@ -136,26 +136,23 @@ PROGRAM SCFStatus
 #endif
     WRITE(*,* )TRIM(SCFString)
     WRITE(*,10) KinE     ,RTRN, &
-                E_el_tot ,RTRN, &
-                E_nuc_tot,RTRN, &
                 E_es_tot ,RTRN, &
                 ExchE    ,RTRN, &
                 Exc      ,RTRN, &
                 Etot     ,RTRN, &
-                Virial   ,RTRN, &
                 Gap      ,RTRN
     IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
        CALL OpenASCII(OutFile,Out)
        IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
 
-          WRITE(Out,9) SCFCycl                                ,RTRN, &
-                       FRACTION(KinE)     ,EXPONENT(KinE)     ,RTRN, &
-                       FRACTION(E_el_tot) ,EXPONENT(E_el_tot) ,RTRN, &
-                       FRACTION(E_nuc_tot),EXPONENT(E_nuc_tot),RTRN, &
-                       FRACTION(E_es_tot) ,EXPONENT(E_es_tot) ,RTRN, &
-                       FRACTION(ExchE)    ,EXPONENT(ExchE)    ,RTRN, &
-                       FRACTION(Exc)      ,EXPONENT(Exc)      ,RTRN, &
-                       FRACTION(Etot)     ,EXPONENT(Etot)
+!          WRITE(Out,9) SCFCycl                                ,RTRN, &
+!                       FRACTION(KinE)     ,EXPONENT(KinE)     ,RTRN, &
+!                       FRACTION(E_el_tot) ,EXPONENT(E_el_tot) ,RTRN, &
+!                       FRACTION(E_nuc_tot),EXPONENT(E_nuc_tot),RTRN, &
+!                       FRACTION(E_es_tot) ,EXPONENT(E_es_tot) ,RTRN, &
+!                       FRACTION(ExchE)    ,EXPONENT(ExchE)    ,RTRN, &
+!                       FRACTION(Exc)      ,EXPONENT(Exc)      ,RTRN, &
+!                       FRACTION(Etot)     ,EXPONENT(Etot)
           9 FORMAT('(*================== MondoSCF[',I3,']=====================*) ',A1,&
                    '  TrKin[',I3,' ] = ',F19.16,'*2^(',I4,');',A1, &
                    '  TrVel[',I3,' ] = ',F19.16,'*2^(',I4,');',A1, &
@@ -167,22 +164,16 @@ PROGRAM SCFStatus
        ELSE
           WRITE(Out,* )TRIM(SCFString)
           WRITE(Out,10) KinE     ,RTRN, &
-                        E_el_tot ,RTRN, &
-                        E_nuc_tot,RTRN, &
                         E_es_tot ,RTRN, &
                         ExchE    ,RTRN, &
                         Exc      ,RTRN, &
                         Etot     ,RTRN, &
-                        Virial   ,RTRN, &
                         Gap      ,RTRN
           10 FORMAT('  <T>       = ',D22.16,A1, &
-                    '  <Vee+Vne> = ',D22.16,A1, &
-                    '  <Vne+Vnn> = ',D22.16,A1, &
-                    '  <V_es>    = ',D22.16,A1, &
+                    '  <V>       = ',D22.16,A1, &
                     '  <HF>      = ',D22.16,A1, &
                     '  <DFT>     = ',D22.16,A1, &
                     '  <SCF>     = ',D22.16,A1, &
-                    '  VirialCo  = ',F8.5  ,A1, &
                     '  HOMO-LUMO = ',F8.5  ,A1)
        ENDIF
        CLOSE(Out)

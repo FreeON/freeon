@@ -4,10 +4,16 @@
 !
 !--  Matt Challacombe
 !--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
+!--  Copyright 2000, The University of California
 !
+!    Based on
 !    Matt Challacombe,  "A simplified density matrix minimization for linear 
 !    scaling SCF theory", Journal of Chemical Physics,  110, 2332 (1999) 
+!
+!    Major hack by MatCha on 11/7/00:
+!    Carefull handling of sensitive numerics by avoiding over filtration
+!    Suss of CG convergence with Tr(P.P-P)
+!    All around improved convergence
 !
 PROGRAM SDMM
   USE DerivedTypes
@@ -35,13 +41,15 @@ PROGRAM SDMM
                                 Numerator,Denominator,Powell,    & 
                                 B,C,D,StepL,Discrim,SqDis,Root1, &
                                 Root2,Ar1,Ar2,Ar,DeltaN,         &
-                                DeltaN_Old,DeltaP,TrP,Fact,Denom,&
-                                Diff,LShift
+                                OldDeltaN,OldDeltaP,DeltaP,TrP,Fact,Denom,&
+                                Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,   &
+                                FixedPoint,NumPot,DenPot,OldPoint
   INTEGER                        :: I,J,ICG,NCG,IPur,NPur
   LOGICAL                        :: Present,LevelShift=.FALSE.
   CHARACTER(LEN=2)               :: Cycl,NxtC
-  CHARACTER(LEN=4),PARAMETER     :: Prog='SDMM'
+  CHARACTER(LEN=20)              :: ItAnounce
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
+  CHARACTER(LEN=4),PARAMETER     :: Prog='SDMM'
 !------------------------------------------------------------------ 
 ! Set up ...
 !
@@ -65,25 +73,13 @@ PROGRAM SDMM
   ENDIF
 #endif
 !-------------------------------------------------------------------------
-!
-!
-!  IF(Args%NI>=2)THEN
-!     NCG=Args%I%I(2)
-!  ELSE
-     NCG=20
-!  ENDIF
-!-----------------------------------------
-! Allocations 
-!
   CALL New(F)
   CALL New(P)
   CALL New(G)
   CALL New(H)
   CALL New(T1)
   CALL New(T2)
-#ifdef PARALLEL
   CALL New(T3)
-#endif
 !-----------------------------------------------------------
 !
 !
@@ -96,6 +92,8 @@ PROGRAM SDMM
 !     CALL Get(F,'/users/mchalla/Estane_1.3-21G.Cyc0.OrthoF')
     CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
   ENDIF
+
+
 !---------------------------------------------
 ! Compute the 0th order SDMM gradient 
 !
@@ -103,36 +101,31 @@ PROGRAM SDMM
   Factr=Six*(Fract-One)*Fract
   CALL SetEq(G,F)                 ! G=F
   CALL Multiply(G,Factr)          ! G=[6(N_El/N_BasF-1)*(N_El/N_BasF)]*F
-  ChemP=Trace(G)/DBLE(NBasF)      ! mu=Trace[G]/NBasF
-  CALL Add(G,ChemP)               ! G[0]=G[0]-mu*I
+  ChemP=-Trace(G)/DBLE(NBasF)     ! mu=-Trace[G]/NBasF
+  CALL Add(G,ChemP)               ! G[0]=G[0]+mu*I
   CALL SetEq(H,G)                 ! H[0]=G[0]
-!=============================================================  
-! CONGUGATE GRADIENT MINIMIZATION
 !
-  DO ICG=0,NCG
+!=============================================================  
+! CONGUGATE GRADIENT MINIMIZATION OF Tr{(3P^2-2P^3).F}
+!=============================================================  
+!
+  NCG=0
+  OldPoint=BIG_DBL
+!  Thresholds%Trix=1.D-20
+
+!
+  DO ICG=0,19
+     NCG=NCG+1
+!
 #ifdef PARALLEL
      CALL AlignNodes()
      IF(MyId==ROOT)THEN
 #endif
-        Mssg='SDMM: CG Step # '//TRIM(IntToChar(ICG))
-        WRITE(*,*)TRIM(Mssg)
-        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-           CALL OpenASCII(OutFile,Out)
-           CALL PrintProtectL(Out)
-           WRITE(Out,*)TRIM(Mssg)
-           CALL PrintProtectR(Out)
-           CLOSE(UNIT=Out,STATUS='KEEP')
-        ENDIF
-#ifdef PARALLEL
-     ENDIF
-!     CALL AlignNodes()
-!      CALL PPrint(PerfMon,Prog)
-!     IF(ICG==1)CALL HALT(Prog)   
-!     IF(ICG==2)CALL ShutDown(Prog)   
-#endif
 !--------------------------------------------
 !    LINE MINIMIZATION: compute coeficients
 !
+!    Can do these more cheaply
+!     Thresholds%Trix=1.D2*Thresholds%Trix
 #ifdef PARALLEL
      CALL Multiply(H,G,T1)
      B=-Trace(T1)                         ! B=-Tr{H.G}=6*Tr{H.(I-P).P.F}
@@ -163,17 +156,12 @@ PROGRAM SDMM
         C=Three*Trace(T2,T1)              ! C=3*Trace{(I-2*P).HHF}        
 #endif
      ENDIF         
-!#ifdef PARALLEL
-!     IF(MyId==ROOT)  &
-!#endif
-!     WRITE(*,*)' I = ',ICG,' B = ',B,' C = ',C,'D = ',D
 !--------------------------------------------
 !    LINE MINIMIZATION: solve quadratic
 !
      IF(C==Zero.AND.D==Zero)THEN
         IF(ICG<5)THEN 
-           WRITE(*,*)' Warning: exiting CG loop in SDMM '
-           WRITE(*,*)' Warning: with ICG = ',ICG
+           WRITE(*,*)' Warning: exiting CG loop in SDMM with c=0, d=0 '
         ENDIF
         EXIT
      ELSEIF(d==Zero)THEN
@@ -181,8 +169,10 @@ PROGRAM SDMM
      ELSE
         Discrim=C*C-Three*B*D
         Denom=Three*D
-        IF(Discrim<Zero)  &
-           CALL Halt(' Complex solution in SDMM Line Minimization ')
+        IF(Discrim<Zero)THEN 
+           WRITE(*,*)'Warning: Complex solution in SDMM Line Minimization '
+           EXIT
+        ENDIF
         SqDis=DSQRT(Discrim)
         Root1=-(C+SqDis)/Denom
         Root2=(SqDis-c)/Denom
@@ -195,6 +185,8 @@ PROGRAM SDMM
            StepL=Root2
         ENDIF
      ENDIF
+!    Reset thresholds
+!     Thresholds%Trix=1.D-2*Thresholds%Trix
 !------------------------------------------------
 !    DENSITY UPTDATE
 !
@@ -208,49 +200,86 @@ PROGRAM SDMM
         CALL Add(H,P,T1)                ! T1=P[N+1,I+1]=P[N+1,I]+StepL[I]*H[I]   
         CALL Multiply(H,One/StepL)      ! H=H/StepL 
      ENDIF
-     CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
+!    This filter leads to instability in early cycles
+     IF(NCG>3)THEN
+       CALL Filter(P,T1)                ! P=Filter[P[N+1,I+1]]
+     ELSE
+       CALL SetEq(P,T1)                 ! P=P[N+1,I+1]
+     ENDIF
+!------------------------------------------------
+!    COMPUTE CONVERGENCE STATS
+!
+     CALL Multiply(P,P,T2)
+     CALL Multiply(T2,-One)
+     CALL Add(P,T2,T3)
+     DenPot=Trace(T3)
+     CALL Multiply(T3,P,T2) 
+     NumPot=Trace(T2)
+     FixedPoint=NumPot/DenPot
+     FixedPoint=Half-FixedPoint     
+!
+     CALL Multiply(P,F,T2)              ! T2=P.F    
+     CALL Filter(T3,T2)                 ! T3=Filter[P.F]
+!
+     ENew=Trace(T3)                     ! Tr{P.F}
+!------------------------------------------------
+!    PRINT CONVERGENCE STATS IF REQUESTED
+!
+     IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+        Mssg=ProcessName(Prog,'CG '//TRIM(IntToChar(NCG))) &
+           //'FixedPoint = '//TRIM(DblToShrtChar(FixedPoint))     &
+           //', Tr(P.F) = '//TRIM(DblToMedmChar(ENew)) 
+        WRITE(*,*)TRIM(Mssg)
+        CALL OpenASCII(OutFile,Out)
+        CALL PrintProtectL(Out)
+        WRITE(Out,*)TRIM(Mssg)
+        CALL PrintProtectR(Out)
+        CLOSE(UNIT=Out,STATUS='KEEP')
+     ENDIF
+!------------------------------------------------
+!    CHECK FOR MINIMIZATION CONVERGENCE
+!
+!    Convergence inflection
+!          
+     IF(NINT(OldPoint/ABS(OldPoint))/=NINT(FixedPoint/ABS(FixedPoint)).AND.NCG/=1)EXIT
+     OldPoint=FixedPoint
 !--------------------------------------------------------
 !    GRADIENT EVALUATION
 !
-     CALL Multiply(T1,Six)              ! T1=6*P
-     CALL Add(T1,-Six)                  ! T1=6*(P-I)
-     CALL Multiply(T1,P,T2)             ! T2=6*(P-I).P
-     CALL Filter(T1,T2)                 ! T1=Filter[6*(P-I).P]    
-     CALL Multiply(T1,F,T2)             ! T2=G[i+1]=6*(P-I).P.F
-     ChemP=Trace(T2)/DBLE(NBasF)        ! mu=Trace[GradE]/NBasF
-     CALL Add(T2,ChemP)                 ! T2 = G[i+1]=G[i+1]-mu*I     
-     Denominator=Dot(G,G)               ! D=(G[i],G[i])
-     CALL Multiply(G,-One)              ! G=-G[i]          
-     CALL Add(T2,G,T1)                  ! T1=(G[i+1]-G[i])
-     CALL SetEq(G,T2)                   ! G=G[i+1]
-     Numerator=Dot(T1,G)                ! N=(G[i+1]-G[i]).G[i+1]
+     CALL SetEq(T1,P)
+     CALL Multiply(T1,Six)                 ! T1=6*P
+     CALL Add(T1,-Six)                     ! T1=6*(P-I)
+     CALL Multiply(T1,T3,T2)               ! T2=6*(P-I).PF
+     ChemP=-Trace(T2)/DBLE(NBasF)          ! mu=-Trace[GradE]/NBasF
+     CALL Add(T2,ChemP)                    ! T2 = G[i+1]=G[i+1]+mu*I     
+     Denominator=Dot(G,G)                  ! D=(G[i],G[i])
+     CALL Multiply(G,-One)                 ! G=-G[i]          
+     CALL Add(T2,G,T1)                     ! T1=(G[i+1]-G[i])
+     CALL SetEq(G,T2)                      ! G=G[i+1]
+     Numerator=Dot(T1,G)                   ! N=(G[i+1]-G[i]).G[i+1]
      Gamma=MAX(Zero,Numerator/Denominator) 
-     CALL Multiply(H,Gamma)             ! H=Gamma*H[i]
-     CALL Add(G,H,T1)                   ! T1=G[i+1]+Gamma*H[i]
-     CALL Filter(H,T1)                  ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
-
-!     WRITE(*,*)' Beta[',ICG+1,'] = ',Gamma
-!     WRITE(*,*)' HDot = ',Dot(H,H)
-!     WRITE(*,*)' GDot = ',Dot(G,G)     
-!--------
-!      IF(ICG==1)CALL Halt(' ICG')
+     CALL Multiply(H,Gamma)                ! H=Gamma*H[i]
+     CALL Add(G,H,T1)                      ! T1=G[i+1]+Gamma*H[i]
+     CALL Filter(H,T1)                     ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
+!
    ENDDO
 !-------------------------
 !  Tidy up a bit ...
 !
    CALL Delete(G)
    CALL Delete(H) 
-   CALL Delete(F)
-#ifdef PARALLEL
    CALL Delete(T3)
-#endif
-!=============================================================
-!  PURIFICATION CYCLE
 !
-   DeltaN_Old=1.D10
-   CALL SetEq(T1,P)          ! T1=P
+!=============================================================
+!  PURIFICATION CYCLES
+!=============================================================
+!
    NPur=0
-   DO J=0,30
+   CALL SetEq(T1,P)          ! T1=P
+   OldDeltaN=BIG_DBL
+   OldDeltaP=BIG_DBL
+!
+   DO J=0,20
       NPur=NPur+1
 !--------------------------------------------
 !     P[J+1]=(2*P.P.P-3*P.P)[J]
@@ -262,40 +291,74 @@ PROGRAM SDMM
       CALL Multiply(T1,P,T2) ! T2=P[J+1]=(3*I-2*P[J]).P[J].P[J] 
       CALL Filter(T1,T2)     ! T1=Filter[(3*I-2*P[J]).P[J].P[J]]
 !--------------------------------------------------------------------
-!     Stagnation Check
+!     COMPUTE PURIFICATION STATS
 !
-      CALL Multiply(P,-One)                ! P=-P[J]
-      CALL Add(T1,P,T2)                    ! T2=P[J+1]-P[J]
-      DeltaP=Max(T2)                       ! DeltaP=MAX(P[J+1]-P[J])
-!      IF(DeltaP<Thresholds%Trix)EXIT       ! Convergence check
-      TrP=Trace(T1)                        ! N[J+1]=Tr{P[J+1]}
-      DeltaN=DABS(Two*TrP-DBLE(NEl))       ! DeltaN=2*Tr{P}-N_El
-      IF(DeltaN/=Zero)THEN
-         Diff=DABS(DLOG10(DeltaN/DeltaN_Old))
-      ELSE
-         Diff=Zero
+      TrP=Trace(T1)                              ! N[J+1]=Tr{P[J+1]}
+      CALL Multiply(P,-One)                      ! P=-P[J]
+      CALL Add(T1,P,T2)                          ! T2=P[J+1]-P[J]
+      DeltaP=Max(T2)+1.D-20                      ! DeltaP=MAX(P[J+1]-P[J])
+      DeltaN=DABS(Two*TrP-DBLE(NEl))+1.D-20      ! DeltaN=2*Tr{P}-N_El
+      DeltaPQ=ABS(DeltaP-OldDeltaP)/DeltaP
+      DeltaNQ=ABS(DeltaN-OldDeltaN)/DeltaN
+!
+      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+#ifdef PARALLEL
+         CALL Multiply(P,F,T3)
+         ENew=Trace(T3)                          ! Tr{P.F}
+#else
+         ENew=Trace(P,F)
+#endif     
       ENDIF
-      IF(Diff<0.1D0.AND.DeltaP<1.D-3.AND.J>4)EXIT  ! Stagnation ?
-      CALL SetEq(P,T1)                     ! P=P[J+1]
-      DeltaN_Old=DeltaN
+!------------------------------------------------------------------
+!     PRINT CONVERGENCE INFO IF REQUESTED
+!
 #ifdef PARALLEL
       IF(MyId==ROOT)THEN
 #endif
          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
             CALL OpenASCII(OutFile,Out)
             CALL PrintProtectL(Out)
-            WRITE(Out,111)J,Two*TrP,DeltaP,Two*DeltaN
+            Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur))) &
+             //'    Tr(P)-Nel = '//TRIM(DblToShrtChar(DeltaN))         &
+             //', Tr(P.F) = '//TRIM(DblToMedmChar(ENew))
+            WRITE(*,*)TRIM(Mssg)
+            WRITE(Out,*)TRIM(Mssg)
             CALL PrintProtectR(Out)
             CLOSE(UNIT=Out,STATUS='KEEP')
          ENDIF
-         WRITE(*,111)J,Two*TrP,DeltaP,Two*DeltaN
 #ifdef PARALLEL
       ENDIF
 #endif
+!--------------------------------------------------------------------
+!     CHECK CONVERGENCE
+!
+!     Test only in asymptotic regime
+!      WRITE(*,*)' DeltaN = ',DeltaN,' DeltaP = ',DeltaP
+      IF(DeltaN<1.0D-2.AND.DetlaP<1.D-1.AND.NPur>3)THEN
+!        Check for low digit rebound
+         IF(DeltaP>OldDeltaP)THEN
+!            WRITE(*,*)' exit 1 '
+!            WRITE(*,*)' DeltaPs = ',DeltaP,OldDeltaP
+           EXIT
+         ENDIF
+!        Check for stagnation stallout
+!         WRITE(*,*)' Delta NQ = ',DeltaNQ,' DeltaPQ = ',DeltaPQ
+         IF(DeltaNQ<2.D-1.OR.DeltaPQ<2.D-1)THEN
+!            WRITE(*,*)' exit 2'
+            EXIT
+         ENDIF
+      ENDIF  
+      OldDeltaP=DeltaP
+      OldDeltaN=DeltaN
+      CALL SetEq(P,T1)                           ! P=P[J+1]
+!
    ENDDO
+!  Check for failure
+   IF(DeltaN>1.0D0)CALL Warn(' Convergence failure in SDMM, lost /N = ' &
+                            //TRIM(DblToMedmChar(DeltaN))//' electrons.')
+!  Clean up a bit ...
+   CALL Delete(F)
    CALL Delete(P)
-!   CALL PPrint(PerfMon,File_O=TRIM(SCFName)//'.SCALING_RESULTS', &
-!               BareBones_O=.TRUE.)
 !-----------------------------------------------
 !  Report SDMM statistics
 !
@@ -304,21 +367,20 @@ PROGRAM SDMM
 #endif
        CALL OpenASCII(OutFile,Out)
        CALL PrintProtectL(Out)
-       IF(LevelShift)THEN
-          Mssg=ProcessName(Prog)//'Level shift = '//TRIM(DblToShrtChar(LShift))//' .'
-          WRITE(Out,*)TRIM(Mssg)
-       ENDIF
        Mssg=ProcessName(Prog)//TRIM(IntToChar(NCG))//' CG, and ' &
              //TRIM(IntToChar(NPur))//' purification steps taken.'
+       WRITE(*,*)TRIM(Mssg)
        WRITE(Out,*)TRIM(Mssg)
        Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(DeltaP))//', ' &
-             //'||Tr{P}-N_El|| = '//TRIM(DblToShrtChar(DeltaN))//' .'
+             //'|TrP-NEl| = '//TRIM(DblToShrtChar(DeltaN))//' .'
+       WRITE(*,*)TRIM(Mssg)
        WRITE(Out,*)TRIM(Mssg)
        CALL PrintProtectR(Out)
        CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL
    ENDIF
 #endif
+!
 !--------------------------------------------------------------------
 !  Renormalization
 !         
@@ -338,7 +400,7 @@ PROGRAM SDMM
    CALL Multiply(Z,T1,T2)
    CALL Get(Z,TrixFile('ZT',Args))
    CALL Multiply(T2,Z,T1)
-   CALL Filter(T2,T1)   
+   CALL Filter(T2,T1) 
 !--------------------------------------------------------------------
 !  IO for the non-orthogonal P 
 !
@@ -364,7 +426,7 @@ PROGRAM SDMM
 !
    CALL ShutDown(Prog)   
 !----------------------------------------------------------------------
-111 FORMAT(' ',I2,' Tr{P} = ',D16.8,' /P = ',D10.3,' /NEl = ',D10.3)
+
 !
 END PROGRAM ! SDMM
 
