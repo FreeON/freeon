@@ -571,13 +571,13 @@ CONTAINS
          CYCLE
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTX' ) THEN
          I=IntCs%Atoms(IntCoo,1)
-         CALL BCART('X',B%B(IntCoo,1:12))
+         CALL BCART('X',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTY' ) THEN
          I=IntCs%Atoms(IntCoo,1)
-         CALL BCART('Y',B%B(IntCoo,1:12))
+         CALL BCART('Y',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTZ' ) THEN
          I=IntCs%Atoms(IntCoo,1)
-         CALL BCART('Z',B%B(IntCoo,1:12))
+         CALL BCART('Z',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ENDIF
        !
      ENDDO !!!! loop over internal coords
@@ -995,22 +995,35 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE BCART(CHAR,B)
+   SUBROUTINE BCART(CHAR,B,Constraint)
      INTEGER :: I,J
      REAL(DOUBLE),DIMENSION(1:12) :: B
      CHARACTER :: CHAR
+     LOGICAL   :: Constraint
      !
      B=Zero
      IF(CHAR=='X') THEN
-       B(1)=One
+       IF(Constraint) THEN
+         B(1)=1.D-6
+       ELSE
+         B(1)=One
+       ENDIF
      ENDIF
      !
      IF(CHAR=='Y') THEN
-       B(2)=One
+       IF(Constraint) THEN
+         B(2)=1.D-6
+       ELSE
+         B(2)=One
+       ENDIF
      ENDIF
      !
      IF(CHAR=='Z') THEN
-       B(3)=One
+       IF(Constraint) THEN
+         B(3)=1.D-6
+       ELSE
+         B(3)=One
+       ENDIF
      ENDIF
    END SUBROUTINE BCART
 !

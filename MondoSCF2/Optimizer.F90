@@ -1363,7 +1363,8 @@ CONTAINS
      TYPE(FileNames)      :: Nams
      TYPE(GeomOpt)        :: GOpt
      TYPE(CRDS)           :: GMLoc
-     INTEGER              :: InitGDIIS,NoGDIIS,GDIISOn,iGEO
+     LOGICAL              :: NoGDIIS,GDIISOn
+     INTEGER              :: InitGDIIS,iGEO
      INTEGER              :: NConstr,NatmsLoc,NCart,iCLONE
      CHARACTER(LEN=DCL)   :: SCRPath
      INTEGER,DIMENSION(:) :: Convgd
