@@ -113,44 +113,58 @@ MODULE PFFT
       INTEGER                           :: LSwitch
       REAL(DOUBLE),DIMENSION(3)         :: PQ
       REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
-      REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale
+      REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
+!
+      INTEGER                           :: NDiv
+      REAL(DOUBLE)                      :: LenMax,Delt,IntFac
+      REAL(DOUBLE),DIMENSION(3)         :: Vec
+      REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
 !
 !     Initialize 
 !
       Accuracy = 1.D-16
 !
+!     Get The Lattice and Reciprocal Lattice Vectors
+!
+      DO I = 1,3
+         DO J = 1,3
+            RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
+            LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+         ENDDO
+      ENDDO
+!
 !     One Dimension
 !
       IF(GM%PBC%Dimen==1) THEN
          IF(GM%PBC%AutoW(1)) THEN
-            CALL IrRegular(MaxL,GM%PBC%BoxShape(1,1),Zero,Zero)
+            CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
          ELSEIF(GM%PBC%AutoW(2)) THEN
-            CALL IrRegular(MaxL,Zero,GM%PBC%BoxShape(2,2),Zero)
+            CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
          ELSEIF(GM%PBC%AutoW(3)) THEN      
-            CALL IrRegular(MaxL,Zero,Zero,GM%PBC%BoxShape(3,3))
+            CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
          ENDIF
          NC = (CS_IN%NCells-1)/2
          DO L=1,MaxL
             DO M = 0,L
-               LM = LTD(L)
-               TensorC(LM) = Cpq(LM)*RZeta(L+1,NC)
+               LM = LTD(L)+M
+               TensorC(LM) = Two*Cpq(LM)*RZeta(L+1,NC)
             ENDDO
          ENDDO
       ENDIF
 !
-!     Two and Three Dimension
+!     Two Dimension
 !
-      IF(GM%PBC%Dimen == 2 .OR. GM%PBC%Dimen == 3) THEN
+      IF(GM%PBC%Dimen == 2) THEN
          LSwitch  = 10
-         LenScale = GM%PBC%CellVolume**(One/DBLE(GM%PBC%Dimen))
-         BetaSq   = (0.5D0/LenScale)**2
-         Rmax = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+         LenScale = GM%PBC%CellVolume**(Half)
+         Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+         BetaSq   = One/(LenScale)**2
 !           
 !        Sum the Real Space
 !
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,GM%PBC%BoxShape,Rmax,Rmin)
-            IF(CSMM%NCells .GT. 400000) THEN
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax,Rmin)
+            IF(CSMM%NCells .GT. 500000) THEN
                Rmax = 0.99*Rmax
                CALL Delete_CellSet(CSMM)
             ELSE
@@ -176,14 +190,142 @@ MODULE PFFT
             ENDDO
          ENDDO
          CALL Delete_CellSet(CSMM)
-
 !
 !        Sum the Reciprical Space 
 !
-         ExpFac = (Pi/BetaSq)**2
+         ExpFac = Pi*Pi/BetaSq
          Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,GM%PBC%InvBoxSh,Rmax)
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+            IF(CSMM%NCells .LT. 9) THEN
+               Rmax = 1.01D0*Rmax
+            ELSE
+               EXIT
+            ENDIF
+         ENDDO
+!
+         NDiv    = 1000
+         LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
+         Delt    = LenMax/DBLE(NDiv)
+         DO I=-NDiv,NDiv
+            Vec(:) = Zero
+            IF(.NOT.GM%PBC%AutoW(1)) Vec(1) = I*Delt
+            IF(.NOT.GM%PBC%AutoW(2)) Vec(2) = I*Delt
+            IF(.NOT.GM%PBC%AutoW(3)) Vec(3) = I*Delt
+            DO NC = 1,CSMM%NCells
+               PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
+               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+               IF(Rad .GT. 1.D-14) THEN
+                  CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+                  DO L = 1,LSwitch
+                     CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                     SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                     DO M = 0,L
+                        LM = LTD(L)+M
+                        TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                        TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+                     ENDDO              
+                  ENDDO
+               ENDIF
+            ENDDO
+         ENDDO
+!
+!        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
+!
+         DO I=1,3
+            IF(.NOT. GM%PBC%AutoW(I)) THEN
+               PQ(:) = Zero
+               PQ(I) = 1.D-10
+               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+               L     = 2
+               CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
+               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+               ENDDO
+               PQ(:) = Zero
+               PQ(I) = -1.D-10
+               Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+               L     = 2
+               CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
+               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+               ENDDO
+            ENDIF
+         ENDDO
+         CALL Delete_CellSet(CSMM)
+!
+!        Substract the inner boxes
+!
+         DO NC = 1,CS_IN%NCells
+            PQ(:) = CS_IN%CellCarts%D(:,NC)
+            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            IF(RadSq .GT. 1.D-14) THEN
+               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+               DO L = 1,LSwitch
+                  CFac = FScript(L,RadSq)
+                  DO M = 0,L
+                     LM = LTD(L)+M
+                     TensorC(LM)=TensorC(LM)-Cpq(LM)*CFac
+                     TensorS(LM)=TensorS(LM)-Spq(LM)*CFac
+                  ENDDO
+               ENDDO
+            ENDIF
+         ENDDO
+      ENDIF
+!
+!     Three Dimension
+!
+      IF(GM%PBC%Dimen == 3) THEN
+         LSwitch  = 10
+         LenScale = GM%PBC%CellVolume**(One/Three)
+         Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+         BetaSq   = One/(LenScale)**2
+!           
+!        Sum the Real Space
+!
+         DO
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax,Rmin)
+            IF(CSMM%NCells .GT. 500000) THEN
+               Rmax = 0.99*Rmax
+               CALL Delete_CellSet(CSMM)
+            ELSE
+               EXIT
+            ENDIF
+         ENDDO
+!
+         DO NC = 1,CSMM%NCells
+            PQ(:) = CSMM%CellCarts%D(:,NC)
+            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,MaxL
+               IF(L .LE. LSwitch) THEN
+                  CFac = GScript(L,RadSq)
+               ELSE
+                  CFac = One
+               ENDIF
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
+                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
+               ENDDO
+            ENDDO
+         ENDDO
+         CALL Delete_CellSet(CSMM)
+!
+!        Sum the Reciprical Space 
+!
+         ExpFac = Pi*Pi/BetaSq
+         Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+         DO
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
             IF(CSMM%NCells .LT. 27) THEN
                Rmax = 1.01D0*Rmax
             ELSE
@@ -194,20 +336,15 @@ MODULE PFFT
          DO NC = 1,CSMM%NCells
             PQ(:) = CSMM%CellCarts%D(:,NC)
             Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            IF(Rad .GT. 1.D-14) THEN
+            IF(Rad .GT. 1.D-14) THEN 
                CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,MaxL
-                  IF(L .LE. LSwitch) THEN        
-                     CFac = FT_FScriptC(L,ExpFac,Rad)/GM%PBC%CellVolume
-                     SFac = FT_FScriptS(L,ExpFac,Rad)/GM%PBC%CellVolume
-                  ELSE
-                     CFac = Zero
-                     SFac = Zero
-                  ENDIF
+               DO L = 1,LSwitch
+                  CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                  SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
                   DO M = 0,L
                      LM = LTD(L)+M
-                     TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                     TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+                      TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                      TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
                   ENDDO
                ENDDO
             ENDIF
@@ -221,12 +358,8 @@ MODULE PFFT
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
             IF(RadSq .GT. 1.D-14) THEN
                CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,MaxL
-                  IF(L .LE. LSwitch) THEN
-                     CFac = FScript(L,RadSq)
-                  ELSE
-                     CFac = Zero
-                  ENDIF
+               DO L = 1,LSwitch
+                  CFac = FScript(L,RadSq)
                   DO M = 0,L
                      LM = LTD(L)+M
                      TensorC(LM)=TensorC(LM)-Cpq(LM)*CFac
@@ -252,9 +385,9 @@ MODULE PFFT
 !========================================================================================
 !   FT_FSCriptC
 !========================================================================================
-    FUNCTION FT_FScriptC(L,ExpFac,R)
+    FUNCTION FT_FScriptC_3D(L,ExpFac,R)
       INTEGER                    :: L,IFac,Isgn
-      REAL(DOUBLE)               :: ExpFac,R,FT_FScriptC,Fac
+      REAL(DOUBLE)               :: ExpFac,R,FT_FScriptC_3D,Fac
       REAL(DOUBLE),DIMENSION(41) :: Sfac = (/2.00000000000000000D0 ,1.61199195401646964D0 , &
                       1.39399011673806825D0 ,1.24836057075206815D0 ,1.14180213615392840D0 , &
                       1.05927697236749128D0 ,9.92824332104422014D-1,9.37767832227969827D-1, &
@@ -272,20 +405,20 @@ MODULE PFFT
 !
       IFac = 1+(-1)**L
       IF(IFac == 0) THEN
-         FT_FScriptC = Zero
+         FT_FScriptC_3D = Zero
       ELSE
          Isgn = (-1)**(L/2)
          Fac  = ExpFac/DBLE(2*L-1)
-         FT_FScriptC = Isgn*(Sfac(L)*R*EXP(-Fac*R*R))**(2*L-1)   
+         FT_FScriptC_3D = Isgn*(Sfac(L)*R*EXP(-Fac*R*R))**(2*L-1)   
       ENDIF
 ! 
-    END FUNCTION FT_FScriptC
+    END FUNCTION FT_FScriptC_3D
 !========================================================================================
 ! FT_FSCriptS
 !========================================================================================
-    FUNCTION FT_FScriptS(L,ExpFac,R)
+    FUNCTION FT_FScriptS_3D(L,ExpFac,R)
       INTEGER                    :: L,IFac,Isgn
-      REAL(DOUBLE)               :: ExpFac,R,FT_FScriptS,Fac
+      REAL(DOUBLE)               :: ExpFac,R,FT_FScriptS_3D,Fac
       REAL(DOUBLE),DIMENSION(41) :: Sfac = (/2.00000000000000000D0 ,1.61199195401646964D0 , &
                     1.39399011673806825D0 ,1.24836057075206815D0 ,1.14180213615392840D0 , &
                     1.05927697236749128D0 ,9.92824332104422014D-1,9.37767832227969827D-1, &
@@ -303,14 +436,14 @@ MODULE PFFT
 !
       IFac = 1-(-1)**L
       IF(IFac == 0) THEN
-         FT_FScriptS = Zero
+         FT_FScriptS_3D = Zero
       ELSE
          Isgn = (-1)**((L-1)/2)
          Fac  = ExpFac/DBLE(2*L-1)
-         FT_FScriptS = Isgn*(Sfac(L)*R*EXP(-Fac*R*R))**(2*L-1)
+         FT_FScriptS_3D = Isgn*(Sfac(L)*R*EXP(-Fac*R*R))**(2*L-1)
       ENDIF
 !
-    END FUNCTION FT_FScriptS
+    END FUNCTION FT_FScriptS_3D
 !========================================================================================
 !   FT_FSCriptC
 !========================================================================================
@@ -410,10 +543,11 @@ MODULE PFFT
          RZeta = One
       ENDIF
 !
-      DO I=2,M
+      RSum = Zero
+      DO I=1,M
          RSum = RSum + One/(DBLE(I)**N)
       ENDDO
-      RZeta = RZ(N) - RSum
+      RZeta = RZeta - RSum
 !
     END FUNCTION RZeta
 #endif
