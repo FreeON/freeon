@@ -73,8 +73,8 @@ PROGRAM MakeRho
      ELSEIF(SCFActn=='Restart')THEN
         ! Get the old information
         CALL Get(RestartHDF,'OldInfo')
-        CALL CloseHDF()
-        CALL OpenHDF(RestartHDF)
+        CALL CloseHDF(HDF_CurrentID)
+        HDF_CurrentID=OpenHDF(RestartHDF)
         CALL New(Stat,3)
         CALL Get(Stat,'current')
         SCFCycl=TRIM(IntToChar(Stat%I(1)))
@@ -91,8 +91,8 @@ PROGRAM MakeRho
      	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
      	CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
-        CALL CloseHDF()
-        CALL OpenHDF(InfFile)     
+        CALL CloseHDF(HDF_CurrentID)
+        HDF_CurrentID=OpenHDF(InfFile)     
         CALL Get(Dmat,TrixFile('D',Args,0))
      ELSE
         ! Get the current information

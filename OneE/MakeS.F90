@@ -35,6 +35,7 @@ PROGRAM MakeS
 
   TYPE(ARGMT)         :: Args
   INTEGER             :: P,R,AtA,AtB,NN                         
+character(len=dcl) :: mssg
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeS'
 !--------------------------------------- 
 ! Start up macro

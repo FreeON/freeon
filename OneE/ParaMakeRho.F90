@@ -2,7 +2,6 @@
 ! IN PARALLEL
 ! C. K. Gan, modify MakeRho.f90
 ! deleted MP stuff
-
 PROGRAM ParaMakeRho
 #ifdef PARALLEL
   USE DerivedTypes
@@ -73,8 +72,8 @@ PROGRAM ParaMakeRho
      ELSEIF(SCFActn=='Restart')THEN
         ! Get the old information
         CALL Get(RestartHDF,'OldInfo')
-        CALL CloseHDF()
-        CALL OpenHDF(RestartHDF)
+        CALL CloseHDF(HDF_CurrentID)
+        HDF_CurrentID=OpenHDF(RestartHDF)
         CALL New(Stat,3)
         CALL Get(Stat,'current')
         SCFCycl=TRIM(IntToChar(Stat%I(1)))
@@ -86,8 +85,8 @@ PROGRAM ParaMakeRho
         CALL New_HGRho(Rho,(/NExpt,0,0/))
         CALL Get(Rho%Expt,'dexpt',CurBase)
         CALL Get(Rho%Lndx ,'lndex',CurBase)
-        CALL CloseHDF()
-        CALL OpenHDF(InfFile)     
+        CALL CloseHDF(HDF_CurrentID)
+        HDF_CurrentID=OpenHDF(InfFile)     
         CALL Get(Dmat,TrixFile('D',Args,0))
      ELSE
         ! Get the current information
