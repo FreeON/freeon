@@ -5,10 +5,10 @@ and set new ones, please remove/add them from/to your todo list and update this 
 CVS tree. 
 
 Matt:
+o Rewrite QCTC with k-d trees, and generalize VMD code to arbitrary Ell.
+o Profile/tune PBC and Gradients code
 o Remove junk on the fly from scratch dir
 o Create validation suite
-o Rewrite QCTC with k-d trees
-o Profile/tune PBC and Gradients code
 o Talk for NC Nano-Bio
 o Make sure parallel LinAlg still works
 o Get working under AIX.XLF, True64.COMPAQ
@@ -17,11 +17,9 @@ o Documentation
 o Interface with OpenDX for isosurfacing and movies
 
 CJ:
-o Integrate PBCs with new code
-o Get pure DFT PBC working and validated
-o Clean and document for multipole tensors with arb PBCs
+o Validation with NaCl, diamond, and ice: BLYP/6-31G**
 o PBC scaling runs for HiCu, LinAlg and short write up
-o QCTC
+o Help with QCTC
 o Write up linear scaling and PBC
 o Big apps and talk for ACS 2001
 o New density matrix guesser/minimizers
@@ -30,15 +28,26 @@ Eric:
 o F90ify and consolidate flavors of ONX, Gammas, etc
 o Gradients of exact K
 o Periodics of exact K
-o Parallel exact K
+o Parallelize exact K
 o Talk for ACS 2001
 
 Mike:
 o Clean and validate gradients code.
 o Document and check in.
-o Drivers for TS and dynamics.
+o Drivers for minimization and dynamics.
 o Big apps and talk for ACS 2001
 !==========================================================================================
+MC Change log 12/12/00
+o  SCFeqs
+ - SDMM:        SDMM now uses the Parser-Manopopulis purification scheme instead of 
+                McWeeny purification.  Works now on "hard" problems like coordinated
+                metals etc.
+ - MMA/SCFDev/new.m:  This is a MMA file that mirrors the methods now in SDMM.  Also allows
+                the use of PM parameters in the CG minimization, although this was found
+                to be less advantageous than retaining the original McWeeny based objective
+                function.
+!==========================================================================================
+CJ Change log 12/8/00
 o MondoMods
  - AtomPairs:   Added an extra distance to New_CellSet_sphere to take into account
   	        atoms at the corners of the cell. Takes into account the size and shape
