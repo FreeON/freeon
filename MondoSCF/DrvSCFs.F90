@@ -547,7 +547,9 @@ MODULE DrvSCFs
        CALL ENERGY_ANGLE ( EANGLE ,InfFile=InfFile)
        CALL ENERGY_DIHEDRAL ( EDIHEDRAL ,InfFile=InfFile)
        CALL ENERGY_IMPROPER ( EIMPROPER ,InfFile=InfFile)
-       CALL ENERGY_NON_BONDING_CALCULATE( EELECT, ELJ, VIRIAL)
+!      CALL ENERGY_NON_BONDING_CALCULATE( EELECT, ELJ, VIRIAL)
+!      write(*,*) 'elj aft traditional= ',elj,Ctrl%Current(2)
+       CALL ENERGY_LENNARD_JONES(ELJ,Ctrl%Current(2),7.D0)
 !
 ! calculate exclusion energies
 !
