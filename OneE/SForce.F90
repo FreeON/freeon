@@ -150,16 +150,27 @@ PROGRAM SForce
      LatFrc_S%D = TmpLatFrc_S%D
   ENDIF
   CALL Delete(TmpLatFrc_S)
+#endif
+#ifdef PARALLEL  
   IF(MyID == ROOT) THEN
-!!$!    Print The Lattice Forces
-!!$     CALL OpenASCII(OutFile,Out)
-!!$     WRITE(Out,*) 'LatFrc_S'
-!!$     WRITE(*,*)   'LatFrc_S'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$     CLOSE(Out)
+#endif
+!    Zero the Lower Triange
+     DO I=1,3
+        DO J=1,I-1
+           LatFrc_S%D(I,J)   = Zero
+        ENDDO
+     ENDDO
+     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+!       Print The Lattice Forces
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LatFrc_S'
+        WRITE(*,*)   'LatFrc_S'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
+        ENDDO
+        CLOSE(Out)
+     ENDIF
 !    Sum in the S contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -168,25 +179,8 @@ PROGRAM SForce
      ENDDO
 !    Sum in the S contribution to total lattice force
      GM%PBC%LatFrc%D = LatFrc_S%D
+#ifdef PARALLEL 
   ENDIF
-#else
-!!$! Print The Lattice Forces
-!!$  CALL OpenASCII(OutFile,Out)
-!!$  WRITE(Out,*) 'LatFrc_S'
-!!$  WRITE(*,*)   'LatFrc_S'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
-!!$  ENDDO
-!!$  CLOSE(Out)
-! Sum in the S contribution to total force
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     GM%Gradients%D(1:3,AtA) =  SFrc%D(A1:A2)
-  ENDDO
-! Sum in the S contribution to total lattice force
-  GM%PBC%LatFrc%D = LatFrc_S%D
 #endif
 ! Do some checksumming and IO 
   CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)  
