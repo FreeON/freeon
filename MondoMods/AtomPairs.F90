@@ -419,18 +419,13 @@ CONTAINS
 !-------------------------------------------------------------------------------
   SUBROUTINE PBCInfoFromNewCarts(PBC)
     TYPE(PBCInfo)             :: PBC
-    REAL(DOUBLE),DIMENSION(3) :: VectAux,A,B,C
-    !
-    ! this routine rebuilds PBC data based on PBC%BoxShape
-    !
-    A=PBC%BoxShape%D(1:3,1)
-    B=PBC%BoxShape%D(1:3,2)
-    C=PBC%BoxShape%D(1:3,3)
-    CALL CROSS_PRODUCT(A,B,VectAux)
-    PBC%CellVolume=ABS(DOT_PRODUCT(VectAux,C))
-    !
+!
+!   This routine rebuilds PBC data based on PBC%BoxShape
+!
+    PBC%CellVolume   = CellVolume(PBC%BoxShape%D,PBC%AutoW%I)
     PBC%CellCenter%D = CellCenter(PBC%BoxShape%D,PBC%AutoW%I)
-    PBC%InvBoxSh%D = InverseMatrix(PBC%BoxShape%D)
+    PBC%InvBoxSh%D   = InverseMatrix(PBC%BoxShape%D)
+!
   END SUBROUTINE PBCInfoFromNewCarts
 !-------------------------------------------------------------------------------
   FUNCTION CellCenter(BoxShape,AutoW)
@@ -451,9 +446,40 @@ CONTAINS
        ENDIF
     ENDDO
   END FUNCTION CellCenter
+!-------------------------------------------------------------------------------
+  FUNCTION CellVolume(BoxShape,AutoW)
+    REAL(DOUBLE)                :: CellVolume
+    REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+    REAL(DOUBLE),DIMENSION(3)   :: AB
+    INTEGER,DIMENSION(3)        :: AutoW
+    INTEGER                     :: I,J
 !
-!--------------------------------------------------------------------
+    J=0
+    DO I=1,3
+       J = J + AutoW(I)
+    ENDDO
 !
+    IF(J==1) THEN
+       IF(AutoW(1)==1) CellVolume=BoxShape(1,1)
+       IF(AutoW(2)==1) CellVolume=BoxShape(2,2)
+       IF(AutoW(3)==1) CellVolume=BoxShape(3,3)
+    ELSEIF(J==2) THEN
+       IF(AutoW(1)==0) THEN
+          CellVolume = BoxShape(2,2)*BoxShape(3,3)-BoxShape(3,2)*BoxShape(2,3)
+       ENDIF  
+       IF(AutoW(2)==0) THEN
+          CellVolume = BoxShape(1,1)*BoxShape(3,3)-BoxShape(1,3)*BoxShape(3,1)
+       ENDIF  
+       IF(AutoW(3)==0) THEN
+          CellVolume = BoxShape(1,1)*BoxShape(2,2)-BoxShape(1,2)*BoxShape(2,1)
+       ENDIF  
+    ELSE
+       CALL CROSS_PRODUCT(BoxShape(:,1),BoxShape(:,2),AB)
+       CellVolume = ABS(DOT_PRODUCT(AB,BoxShape(:,3)))
+    ENDIF
+!
+  END FUNCTION CellVolume
+!--------------------------------------------------------------------------------
   SUBROUTINE BoxParsToCart(Vec,BoxShape)
     REAL(DOUBLE),DIMENSION(6)   :: Vec
     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
@@ -466,9 +492,7 @@ CONTAINS
                   -BoxShape(1,2)*BoxShape(1,3))/BoxShape(2,2) 
     BoxShape(3,3)=SQRT(Vec(3)**2-BoxShape(1,3)**2-BoxShape(2,3)**2) 
   END SUBROUTINE BoxParsToCart
-!
 !--------------------------------------------------------------------
-!
   SUBROUTINE CalcBoxPars(Vec,BoxShape)
     REAL(DOUBLE),DIMENSION(6)  :: Vec
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecB,VecC,VecCr
@@ -487,9 +511,7 @@ CONTAINS
     Vec(5)=ACOS(Vec(5)) 
     Vec(6)=ACOS(Vec(6)) 
   END SUBROUTINE CalcBoxPars
-!
 !--------------------------------------------------------------------
-!
   SUBROUTINE MakeGMPeriodic(GM,WP_O)
     TYPE(CRDS)                     :: GM
     INTEGER                        :: K
@@ -505,12 +527,7 @@ CONTAINS
     ENDIF
 !   Calculate the Volume and Dipole term
     IF(WP(1)) THEN
-       GM%PBC%CellVolume = One
-       DO K=1,3
-          IF(GM%PBC%AutoW%I(K)==1) THEN
-             GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape%D(K,K)
-          ENDIF
-       ENDDO
+       GM%PBC%CellVolume = CellVolume(GM%PBC%BoxShape%D,GM%PBC%AutoW%I)
 !      Calculate the Dipole and Quadripole Factors
        IF(GM%PBC%Dimen < 2) THEN
           GM%PBC%DipoleFAC = Zero
@@ -542,7 +559,6 @@ CONTAINS
   FUNCTION InverseMatrix(Mat) RESULT(InvMat)
     REAL(DOUBLE)                    :: Det,Norm
     REAL(DOUBLE),DIMENSION(3,3)     :: Mat,InvMat
-
 !
     Det  = Mat(1,1)*Mat(2,2)*Mat(3,3) + Mat(1,2)*Mat(2,3)*Mat(3,1) + Mat(1,3)*Mat(2,1)*Mat(3,2) &
          - Mat(1,3)*Mat(2,2)*Mat(3,1) - Mat(1,1)*Mat(2,3)*Mat(3,2) - Mat(1,2)*Mat(2,1)*Mat(3,3)
@@ -558,9 +574,7 @@ CONTAINS
     InvMat(3,3) = Norm*(Mat(1,1)*Mat(2,2) - Mat(1,2)*Mat(2,1))
 !
   END FUNCTION InverseMatrix
-!
 !----------------------------------------------------------------
-!
    SUBROUTINE ConvertToXYZRef(XYZ,RefXYZ,PBCDim,BoxShape_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      REAL(DOUBLE),DIMENSION(3)   :: VectA,VectB,VectC,VectAux
