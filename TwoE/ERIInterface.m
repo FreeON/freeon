@@ -55,7 +55,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{0,1},{1,1}} 
+   Classes = { {0,0},{1,1}} 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
  *)
@@ -157,7 +157,7 @@ Do[Do[Do[Do[
                   If[braketswitch==0,
                       ArgString1="ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n";
                       ArgString2="                  BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n";
-                      ArgString3="                  ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo,C(1), & \n ";
+                      ArgString3="                  ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n ";
                       If[braswitch==0,
                           ArgString4="                 OffSet%A  ,1             ";
                           ArgString5="                 OffSet%C-1,NBFA*NBFB     ";
@@ -182,7 +182,7 @@ Do[Do[Do[Do[
                   ,
                       ArgString1="BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n";
                       ArgString2="                  ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n";
-                      ArgString3="                  BDAtmPair(CFBD)%SP%AtmInfo,ACAtmPair(CFAC)%SP%AtmInfo,C(1), & \n ";                  
+                      ArgString3="                  BDAtmPair(CFBD)%SP%AtmInfo,ACAtmPair(CFAC)%SP%AtmInfo, & \n ";                  
                       If[ketswitch==0,
                          ArgString4="                 OffSet%B-1,NBFA          ";
                          ArgString5="                 OffSet%D-1,NBFA*NBFB*NBFC";
@@ -208,7 +208,7 @@ Do[Do[Do[Do[
 
                   ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
                                        ArgString4,", & \n ",ArgString5,", & \n ",\
-                                       ArgString6,", & \n ",ArgString7];
+                                       ArgString6,", & \n ",ArgString7,",GM%PBC,C(1)"];
 
 
 
@@ -284,7 +284,7 @@ Do[Do[
    
    ArgString1="ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n";
    ArgString2="                  ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n";
-   ArgString3="                  ACAtmPair(CFAC)%SP%AtmInfo,ACAtmPair(CFAC)%SP%AtmInfo,C(1), & \n ";
+   ArgString3="                  ACAtmPair(CFAC)%SP%AtmInfo,ACAtmPair(CFAC)%SP%AtmInfo, & \n ";
    If[braswitch==0,
 
    Print["value=",(LEnd[imax]-LBegin[imin]+1)*(LEnd[jmax]-LBegin[jmin]+1)*(LEnd[imax]-LBegin[imin]+1)];
@@ -300,7 +300,7 @@ Do[Do[
 
 
    ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-             ArgString4,",",ArgString5];
+             ArgString4,",",ArgString5,",GM%PBC,C(1)"];
 
 
    WS[StringJoin["  CALL Int",ToString[ijklType],"(",ArgString,")"]];

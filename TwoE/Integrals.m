@@ -56,7 +56,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Minimal 
    Classes = { {0,0},{1,1}} 
  *)
-   Classes = { {0,0},{0,1},{1,1} } 
+   Classes = { {0,0},{1,1} } 
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -288,14 +288,15 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & \n", \
-                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) \n"]];
+           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
+                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
 	   WS["USE GlobalScalars"];
-	   WS["USE ONX2DataType"];
+           (*WS["USE ONX2DataType"];*)
+           WS["USE ShellPairStruct"];
 	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
@@ -305,6 +306,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["INTEGER        :: LBra,LKet"];
            WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
+           WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
@@ -316,6 +318,8 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
+           WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
+
 
            Do[Do[
                  WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=0.0d0"]];
@@ -418,11 +422,33 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      PAy=Py-Ay"];
            WS["      PAz=Pz-Az"];
 
-
-
            WS["      PQx=Px-Qx"];
            WS["      PQy=Py-Qy"];
            WS["      PQz=Pz-Qz"];
+
+           (* Should improve this part, scalar replacement... *)
+           (*FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
+           FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
+           FPQz = PQz*PBC%InvBoxSh%D(3,3)
+           IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
+           IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
+           IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+           PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
+           PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+           PQz  = FPQz*PBC%BoxShape%D(3,3)*)
+
+           WS["! Need to be improve..."];
+           WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
+           WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
+           WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
+           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)"];
+           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)"];
+           WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
+           WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
+           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
+           WS["!"];
+
            WS["      WPx=Wx-Px"];
            WS["      WPy=Wy-Py"];
            WS["      WPz=Wz-Pz"];
@@ -529,12 +555,27 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 ,{lc,1,LC}];
 
 
-Print[MakeList];
 
-Print[RelsList];
+(**************** Print out the Makefile ************************)
 
+Makefile="Makefile1"
 
+OpenWrite[Makefile];
 
+WriteString[Makefile,"include $(MONDO_COMPILER)\n"];
+WriteString[Makefile,"include $(MONDO_HOME)/Includes/Suffixes\n"];
+WriteString[Makefile,"include $(MONDO_HOME)/Includes/RemoveAll\n"];
+WriteString[Makefile,"CPPMISC =\n"];
+WriteString[Makefile,"EXTRA_INCLUDES=\n"];
+WriteString[Makefile,"SPObObjs=ShellPairStruct.o\n"];
+WriteString[Makefile,MakeList];
+WriteString[Makefile,RelsList];
+WriteString[Makefile,"all:    TwoE\n"];
+WriteString[Makefile,"clean:  CTwoE\n"];
+WriteString[Makefile,"purge:  clean \n","rm -f $(MONDO_LIB)/libTwoE.a\n","rm -f $(REMOVESRCE)\n"];
+WriteString[Makefile,"TwoE:   $(SPObObjs) $(TwoEObjs)\n","	$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","	$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
+WriteString[Makefile,"CTwoE:\n","	rm -f $(REMOVEMISC) $(REMOVEMODS)\n","	rm -f \#*\n","	rm -f *~\n","	ln -s /dev/null core\n","	ls -l\n"];
 
+Close[Makefile];
 
 
