@@ -278,12 +278,7 @@ MODULE PoleTree
             DO Q=1,Rho%NQ%I(z)
                QD=oq+Q
                CD=or+(Q-1)*LMNLen+1
-               IF(z==Rho%NExpt)THEN
-                  Ex=1.D-10
-               ELSE
-                 EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC,Potential_O=.TRUE.)
-!                 WRITE(33,*)'EX = ',EX,Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC)
-               ENDIF
+               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
 !              Threshold out distributions with zero extent 
                IF(EX>Zero)THEN
                   Qdex(IQ)=QD

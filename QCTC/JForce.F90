@@ -43,7 +43,9 @@ PROGRAM JForce
   USE AtomPairs
   USE BraBloks
   USE PoleTree
+#ifdef PERIODIC
   USE PBCFarField
+#endif
   USE BlokTrPdJ
   USE BlokTrWdS
   USE NuklarE
