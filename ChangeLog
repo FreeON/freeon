@@ -1,3 +1,17 @@
+2005-02-03 13:57  tymczak
+
+	* QCTC/JGen.F90: Turned off te wrapping inorder to fix the lattice
+	forces
+
+2005-02-03 13:57  tymczak
+
+	* OneE/MakeRho.F90: Turned off the Wrapping to fixed the lattice
+	forces
+
+2005-02-03 12:34  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-02-02 21:04  nemeth
 
 	* MondoSCF2/QUICCA.F90: Totalgrad is commented out.
