@@ -1,0 +1,70 @@
+\documentstyle[12pt,letterpaper]{letter}
+\begin{document}
+\pagestyle{empty}
+
+\signature{Matt Challacombe}
+
+\address{
+Dr.~Matt Challacombe \\
+(mchalla@lanl.gov) \\
+Theoretical Division \\
+Group T-12, MS B268 \\
+Los Alamos National Laboratory \\
+Los Alamos, NM 87545 }
+
+\begin{letter}{
+Professor Donald Levy, Editor\\
+Journal of Chemical Physics\\
+Department of Chemistry\\
+5735 S. Ellis Ave\\
+The University of Chicago\\
+Chicago, IL 60637}
+
+\opening{Dear Professor Levy,}
+
+Enclosed, please find two copies of 
+{\em Linear Scaling Computation of the Fock Matrix.~VI.~Data Parallel Computation 
+of the Exchange-Correlation Matrix} by Gan and Challacombe,
+which I am submitting for publication in the Journal of Chemical Physics (JCP). This 
+article builds 
+on our last JCP publication {\em Linear Scaling Computation of the Fock Matrix.~V.~Hierarchical Cubature
+for numerical integration of the Exchange-Correlation Matrix}.
+
+This article is more than just a numerical recipe, establishing a strong connection between linear 
+scaling methods and methods that are efficient in parallel. In particular, this contribution 
+makes the following points:
+
+\pagebreak
+
+
+\begin{itemize}
+\item The properties of quantum locality that allow linear scaling should also lead to 
+      data locality and scalable parallel algorithms.  This is an important and completely 
+      unexplored aspect of the linear scaling paradigm.
+
+\item The correspondence between quantum locality and data locality requires a new approach
+      that we have taken with our Hierarchical Cubature method. 
+      The results achieved here for fine grained massive parallelism speak for themselves.
+
+\item A novel and general load balancing scheme  well suited to many aspects of quantum chemistry is developed.
+\end{itemize}
+
+The Journal of Chemical Physics has a rich history of publishing work on numerical methods for 
+Electronic Structure Theory.  More and more, the success of these numerical methods are
+determined by their ability to map efficiently onto parallel platforms.  This
+is clearly reflected in a number of recent JCP articles on parallel methods, notably 
+{\em Parallel filter diagonalization: A novel method to resolve quantum states in dense spectral regions} and
+{\em Multigrid methods for classical molecular dynamics simulations of biomolecules}.  
+
+With this in mind, I hope you will consider this submission for publication in the Journal of Chemical Physics.
+Suggestions for reviewers with expertise in both parallel methods and Quantum Chemistry include:
+Michael Colvin at LLNL (colvin2@llnl.gov), Emily Carter at UCLA (eac@chem.ucla.edu),
+Peter Taylor (ptaylor@ucsd.edu) or Kim Baldridge (kimb@sdsc.edu) at San Diego,
+Bill Goddard at CalTech (wag@wag.caltech.edu), Tom Furlani at SUNY (furlani@chem.buffalo.edu), 
+and Mark Gordon at Ames (mark@si.fi.ameslab.gov).  
+
+
+\closing{With best regards,}
+\end{letter}
+\end{document}
+
