@@ -500,6 +500,7 @@ MODULE MemMan
          INTEGER NBond,NatmsLoc
          IF(AllocQ(A%Alloc)) CALL Delete(A)
          A%N=NBond
+         IF(NBond==0) RETURN
          CALL New(A%IJ,(/2,NBond/))
          CALL New(A%Length,NBond)
          CALL New(A%Type,NBond)
@@ -513,6 +514,10 @@ MODULE MemMan
 !
       SUBROUTINE Delete_BONDDATA(A)
          TYPE(BONDDATA) :: A
+         IF(A%N==0) THEN
+           A%Alloc=ALLOCATED_FALSE
+           RETURN
+         ENDIF
          A%N=0       
          CALL Delete(A%IJ)
          CALL Delete(A%Length)

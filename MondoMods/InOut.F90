@@ -2254,8 +2254,8 @@ CONTAINS
     CHARACTER(LEN=*),OPTIONAL :: Tag_O
     !
     CALL Get(A%N,TRIM(Name)//'N',Tag_O=Tag_O) 
-    CALL New(A,A%N)
     IF(A%N/=0) THEN   
+      CALL New(A,A%N)
       CALL Get(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
       CALL Get(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
       CALL Get(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
