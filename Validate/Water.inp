@@ -1,18 +1,31 @@
 <BeginTitle>
-             ** Water **
+
+  Water
+
+External reference 1 RHF/CEP-31G HF=-16.411968
+External reference 2 RHF/CEP-31G HF=-16.413968
+MondoSCF benchmark # RHF/CEP-31G HF=-16.412239
+External reference 2 RBLYP/CEP-31G HF=-16.82735
+MondoSCF benchmark # RBLYP/CEP-31G HF=-16.82497
+
 <EndTitle>
 
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
-DebugAll =(MaxDebug,CheckSums)
-Guess=SuperPos
-Grad=(Optimize,PrimInt,NoBackTr,DiagHess)
-SCFMethod=(RH,RH,RH)
-BasisSets=(STO-2G,STO-3G,STO-6G)
-ModelChem=(PW91xc,BLYPxc,PBExc)
-Accuracy =(Loose,Good,Tight)
-Geometry =(InAngstroms,NoOrder)
+
+OutPut=pdb
+DebugAll =(MinDebug,CheckSums)
+
+Guess=Core
+SCFMethod=(RH,RH)
+BasisSets=(SBKJC,SBKJC)
+ModelChem=(HF,BLYPxc)
+Accuracy =(Loose,Good)
+
+Grad=(Optimize,NoGDIIS,PrimInt,NoBackTr,DiagHess)
+
 <EndOptions>
 
 <BeginGeometry>
@@ -21,5 +34,3 @@ h              0.000000    0.000000    1.949000
 h              1.803234    0.000000   -0.739560
 <EndGeometry>
 
-External reference number RPBE/STO-3G        -75.222866 0852  
-BENCHMARK PBE/STO-3G            <SCF>     = -.75 22286613 134627E+02 
