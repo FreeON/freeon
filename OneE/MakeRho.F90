@@ -21,9 +21,9 @@ PROGRAM MakeRho
 #endif
   IMPLICIT NONE
 #ifdef PARALLEL
-  TYPE(DBCSR)               :: Dmat
+  TYPE(DBCSR)               :: Dmat,D1,D2
 #else
-  TYPE(BCSR)                :: Dmat
+  TYPE(BCSR)                :: Dmat,D1,D2
 #endif
 #ifdef PERIODIC 
   INTEGER                   :: NC
@@ -35,12 +35,12 @@ PROGRAM MakeRho
   TYPE(DBL_RNK4)            :: MD
   TYPE(ARGMT)               :: Args
   TYPE(HGRho)               :: Rho,Rho2
-  TYPE(CMPoles)             :: MP
+  TYPE(CMPoles)             :: MP,PrvMP
   INTEGER                   :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                   :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL                   :: First
   REAL(DOUBLE)              :: DistThresh,RSumE,RSumN,RelRhoErr
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg1,Mssg2
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
 ! Start up macro
@@ -69,7 +69,17 @@ PROGRAM MakeRho
      CALL Get(Rho%Expt,'dexpt',CurBase)
      CALL Get(Rho%Lndx ,'lndex',CurBase)
      IF(SCFActn=='InkFok')THEN
-        CALL Get(Dmat,TrixFile('DeltaD',Args,0))
+        CALL Get(D1,TrixFile('D',Args,-1))
+        CALL Get(D2,TrixFile('D',Args,0))
+        CALL Multiply(D1,-One)
+        CALL Add(D1,D2,DMat)
+        IF(HasHF(ModelChem))THEN                
+          CALL Filter(D1,DMat)
+          CALL Put(D1,TrixFile('DeltaD',Args,0))
+        ENDIF
+        CALL Delete(D1)
+        CALL Delete(D2)
+!        CALL PPrint(DMat,'D',Unit_O=6)
      ELSEIF(SCFActn=='ForceEvaluation')THEN
         CALL Get(Dmat,TrixFile('D',Args,1))
      ELSEIF(SCFActn/='Core')THEN
@@ -89,19 +99,6 @@ PROGRAM MakeRho
 ! Main loops: First pass calculates the size.
 !             Second pass calculates the density
 !---------------------------------------------------
-  IF(SCFActn=='Core')THEN
-!    Re-allocate the density
-     CALL New_HGRho(Rho,(/NExpt,NAtoms,NAtoms/))
-!    Initailize  NQ
-     Rho%NQ%I            = 0
-     Rho%NQ%I(Rho%NExpt) = NAtoms
-!    Initailize  OffQ,OffR and RhoCo
-     Rho%OffQ%I=CalOffQ(Rho)
-     Rho%OffR%I=CalOffR(Rho)
-     Rho%Co%D=Zero
-!    Add in the density for the nuclear centers
-     CALL AddNukes(GM,Rho)
-  ELSE
 !    Initailize  NQ
      Rho%NQ%I = 0
      IF(SCFActn/='InkFok')Rho%NQ%I(Rho%NExpt)=NAtoms
@@ -174,72 +171,68 @@ PROGRAM MakeRho
 !    Add in the density for the nuclear centers
 !
      IF(SCFActn/='InkFok')CALL AddNukes(GM,Rho)
-  ENDIF
 #ifdef PERIODIC
 !-----------------------------------------------------------
 !  Fold the Distributions back into the Cell
 !
 !  CALL Fold_Rho(GM,Rho)
 #endif
-!------------------------------------------------------------
-!  Remove distribution which do not contibute significantly 
-!  to the density
-!
+!--------------------------------------------------------
+! Prune negligible distributions from density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
-!------------------------------------------------------------
-! Halt if we lost to many electrons
-!
+! Compute integrated electron and nuclear densities
   CALL Integrate_HGRho(Rho2,RSumE,RSumN)
+! Calculate dipole and quadrupole moments
+  CALL CalRhoPoles(MP,GM,RHo2)
+! Format output for pruning and multipole stats
+  IF(SCFActn=='InkFok')THEN
+     Mssg1=ProcessName(Prog,'InkFok')
+     Mssg2=Mssg1
+  ELSE
+     Mssg1=ProcessName(Prog,'Pruned Rho')
+     Mssg2=ProcessName(Prog,'Moments')
+  ENDIF
   RelRhoErr=Two*ABS(RSumE+RSumN)/DBLE(NEl)
-  Mssg=ProcessName(Prog,'Pruned Rho')//'dNel = '    &
+  Mssg1=TRIM(Mssg1)//'dNel = '                       &
        //TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
        //', '//TRIM(IntToChar(FLOOR(1.D2*DBLE(Rho2%NDist)/DBLE(Rho%NDist)))) &
        //'% of distributions retained'
+  Mssg2=TRIM(Mssg2)                                     &
+        //'<r> = ('//TRIM(DblToShrtChar(MP%DPole%D(1))) &
+        //', '//TRIM(DblToShrtChar(MP%DPole%D(2)))      &
+        //', '//TRIM(DblToShrtChar(MP%DPole%D(3)))      &
+        //'), <r^2> = '//TRIM(DblToShrtChar(            &
+           MP%QPole%D(1)+MP%QPole%D(2)+MP%QPole%D(3)))
+! Output pruning and multipole stats
   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
      I=OpenPU()
-     WRITE(*,*)TRIM(Mssg)
-     WRITE(I,*)TRIM(Mssg)
+     WRITE(*,*)TRIM(Mssg1)
+     WRITE(*,*)TRIM(Mssg2)
+     WRITE(I,*)TRIM(Mssg1)
+     WRITE(I,*)TRIM(Mssg2)
      CALL ClosePU(I)
   ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
      I=OpenPU()
-     WRITE(I,*)TRIM(Mssg)
+     WRITE(I,*)TRIM(Mssg1)
+     WRITE(I,*)TRIM(Mssg2)
      CALL ClosePU(I)
   ENDIF
+! Check for errors
   IF(RelRhoErr>Thresholds%Dist*1.D3) &
   CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
            //' electrons after pruning.')
-!------------------------------------------------------------
-!  Calculate the DiPole and QuadruPole moments of Rho
-!
-  CALL CalRhoPoles(MP,GM,RHo2)
-  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-     CALL PPrint(MP,Prog,Unit_O=6)  
-     CALL PPrint(MP,Prog)  
-  ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
-     CALL PPrint(MP,Prog)  
-  ENDIF
-!------------------------------------------------------------
-! Put Rho and MP to disk
-! 
+! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho2,'Rho',Args,1) 
      CALL Put(MP,NxtCycl)
- ELSE 
-     CALL Put_HGRho(Rho2,'Rho',Args,0)
+  ELSEIF(SCFActn=='InkFok')THEN
+     CALL Put_HGRho(Rho2,'DeltaRho',Args,0)
+  ELSE
+     CALL Put_HGRho(Rho2,'Rho',Args,0) 
      CALL Put(MP,SCFCycl)
   ENDIF
-!------------------------------------------------------------
-! Printing
-!
   CALL PChkSum(Rho2,'Rho',Prog)
-!
-!  PrintFlags%Fmt=DEBUG_MMASTYLE
-!  CALL PPrint(Rho,'Rho',Unit_O=6)
-!  CALL PPrint(Rho2,'Rho2',Unit_O=6)
-!---------------------------------------------------
 ! Tidy up
-! 
-  IF(SCFActn/='Core') &
   CALL Delete(Dmat)
   CALL Delete(BS)
   CALL Delete(GM)
@@ -248,6 +241,5 @@ PROGRAM MakeRho
   CALL Delete_HGRho(Rho)
   CALL Delete_HGRho(Rho2)
   CALL ShutDown(Prog)
-!
 END PROGRAM MakeRho
 

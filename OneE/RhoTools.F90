@@ -38,7 +38,7 @@ CONTAINS
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
           Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet-1))
-          IF(Mag  .GT. TOL) THEN
+          IF(Mag>TOL) THEN
              Rho_out%NQ%I(zq) = Rho_out%NQ%I(zq) + 1            
           ENDIF
        ENDDO
@@ -71,7 +71,7 @@ CONTAINS
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
           Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet-1))
-          IF(Mag .GT. TOL) THEN
+          IF(Mag>TOL)THEN
              iiadd = Rho_out%OffQ%I(zq) + iqq
              jjadd = Rho_out%OffR%I(zq) + (iqq-1)*LenKet+1
              Rho_out%Qx%D(iiadd) = Rho_in%Qx%D(iadd)
@@ -158,8 +158,8 @@ CONTAINS
 !========================================================================================
 ! Calculate the total Dipole of Rho
 !========================================================================================
-  SUBROUTINE CalRhoPoles(RhoPoles,GM,Rho)
-    TYPE(CMPoles)             :: RhoPoles
+  SUBROUTINE CalRhoPoles(MP,GM,Rho)
+    TYPE(CMPoles)             :: MP
     TYPE(HGRho)               :: Rho
     TYPE(CRDS)                :: GM
     INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
@@ -172,8 +172,8 @@ CONTAINS
     Center(:) = Half*(GM%BndBox%D(:,2)+GM%BndBox%D(:,1))
 #endif
 !
-    RhoPoles%DPole%D = Zero
-    RhoPoles%QPole%D = Zero
+    MP%DPole%D = Zero
+    MP%QPole%D = Zero
     DO zq=1,Rho%NExpt
        NQ     = Rho%NQ%I(zq)
        Expt   = Rho%Expt%D(zq)
@@ -188,10 +188,8 @@ CONTAINS
              RX   = Rho%Qx%D(iadd)-Center(1)
              RY   = Rho%Qy%D(iadd)-Center(2)
              RZ   = Rho%Qz%D(iadd)-Center(3)
-!
-             RhoPoles%DPole%D = RhoPoles%DPole%D + CalculateDiPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1))
-             RhoPoles%QPole%D = RhoPoles%QPole%D + CalculateQuadruPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1)) 
-!
+             MP%DPole%D=MP%DPole%D+CalculateDiPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ-1))
+             MP%QPole%D=MP%QPole%D+CalculateQuadruPole(LQ,Expt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ-1)) 
           ENDDO     
        ENDIF
     ENDDO
