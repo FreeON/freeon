@@ -1059,6 +1059,7 @@ CONTAINS
      INTEGER,DIMENSION(:)           :: AtNum
      TYPE(CoordCtrl)                :: CtrlCoord
      CHARACTER(LEN=*)               :: SCRPath
+     LOGICAL                        :: HBondOnly
      !
      NIntC=0
      NBond=0
@@ -1086,18 +1087,20 @@ CONTAINS
        CALL New(CritRad,N)
        Fact=1.3D0 !!! Scaling factor for Slater Radii
        CritRad%D=Fact*SLRadii*AngstromsToAU
+       HBondOnly=.FALSE.
      ELSE
        N=SIZE(VDWRadii,1)
        CALL New(CritRad,N)
        Fact=CtrlCoord%VDWFact !!! Scaling factor for VDW Radii
        CritRad%D=Fact*VDWRadii*AngstromsToAU
+       HBondOnly=.TRUE.
      ENDIF
      !
      CALL BondList(NatmsLoc,XYZ,NBond,AtNum, &
-          BoxI,BoxJ,NBox,NX,NY,NZ,CritRad)
+          BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,HBondOnly)
      CALL New(BondIJ,(/2,NBond/))
      CALL BondList(NatmsLoc,XYZ,NBond,AtNum, &
-        BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,BondIJ)
+        BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,HBondOnly,BondIJ)
      !
      IF(IntSet==1) THEN
        !
@@ -1143,10 +1146,14 @@ CONTAINS
      ELSE
        CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
          NMax12=J-1
-       CALL VDWAngleList(NatmsLoc,Top12,AngleIJK,NAngle, &
-                         BondIJ,NBond)
-       CALL VDWTorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion,&
-                           BondIJ,NBond)
+     NAngle=0
+     NTorsion=0
+     CALL New(AngleIJK,(/3,NAngle/))
+     CALL New(TorsionIJKL,(/4,NTorsion/))
+     ! CALL VDWAngleList(NatmsLoc,Top12,AngleIJK,NAngle, &
+     !                   BondIJ,NBond)
+     ! CALL VDWTorsionList(NatmsLoc,Top12,TorsionIJKL,NTorsion,&
+     !                     BondIJ,NBond)
        CALL Delete(Top12)
      ENDIF
      !
@@ -1201,7 +1208,7 @@ CONTAINS
 !--------------------------------------------------------
 !
    SUBROUTINE BondList(NatmsLoc,XYZ,NBond,AtNum,&
-          BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,BondIJ)
+          BoxI,BoxJ,NBox,NX,NY,NZ,CritRad,HBondOnly,BondIJ)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -1209,6 +1216,7 @@ CONTAINS
      REAL(DOUBLE)                :: R12,R12_2
      INTEGER                   :: IZ,IX,IY,I1,I2,JJ1,JJ2,NBOX,IORD,IORDD
      INTEGER                   :: IZD,IXD,IYD,NX,NY,NZ,NJJ1,NJJ2
+     LOGICAL                   :: HBondOnly
      LOGICAL                   :: FillBondIJ
      TYPE(INT_RNK2),OPTIONAL   :: BondIJ
      TYPE(DBL_VECT)            :: DVect
@@ -1243,6 +1251,9 @@ CONTAINS
                          DO I2=BoxI%I(IOrdD),BoxI%I(IOrdD+1)-1
                            JJ2=BoxJ%I(I2) !!! second atom
                            NJJ2=AtNum(JJ2)
+                           IF(HBondOnly) THEN
+                             IF(NJJ1/=1.AND.NJJ2/=1) CYCLE
+                           ENDIF
                            IF(JJ2<=JJ1) CYCLE !!!avoid double counting
                            DVect%D(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
                            R12_2=DOT_PRODUCT(DVect%D,DVect%D)
@@ -1611,6 +1622,7 @@ CONTAINS
      !
      ! Merge INTC arrays
      !
+     CtrlCoord%NCov=NIntC_Cov
      NIntC=NIntC_Cov+NIntC_VDW+NIntC_Extra+NIntC_Cart
      !
      CALL New(IntCs,NIntC)
@@ -2598,9 +2610,6 @@ CONTAINS
        RMSDOld=RMSD
        CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
                        DiffMax,RMSD) 
-       IF(.NOT.GConstr%DoLagr) THEN
-         CALL SetCartConstr(VectCartAux2%D,IntCs,GConstr%NCartConstr)
-       ENDIF
        !
        ! Refresh B matrix?  
        !
@@ -2612,6 +2621,10 @@ CONTAINS
        !
        ! Modify Cartesians
        !
+       IF(.NOT.GConstr%DoLagr) THEN
+         CALL SetCartConstr(VectCart%D,VectCartAux2%D, &
+                            IntCs,GConstr%NCartConstr)
+       ENDIF
        VectCart%D=VectCart%D+VectCartAux2%D
        CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
        !
@@ -3233,8 +3246,8 @@ CONTAINS
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE SetCartConstr(CartDispl,IntCs,NConstr)
-     REAL(DOUBLE),DIMENSION(:) :: CartDispl 
+   SUBROUTINE SetCartConstr(Carts,CartDispl,IntCs,NConstr)
+     REAL(DOUBLE),DIMENSION(:) :: CartDispl,Carts
      INTEGER                   :: I,J,JJ,NIntC,NConstr
      TYPE(INTC)                :: IntCs
      !
@@ -3254,6 +3267,7 @@ CONTAINS
            ELSE IF(IntCs%Def(I)(5:5)=='Z') THEN
              JJ=JJ+3
            ENDIF
+           Carts(JJ)=IntCs%ConstrValue(I)
            CartDispl(JJ)=Zero
          ENDIF
        ENDDO
@@ -4644,6 +4658,56 @@ write(*,*) 'DiagDispl final'
      !
      CALL Delete(B) 
    END SUBROUTINE BMatrConstr
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE DistMatr(ITop,JTop,ATop,IntCs,NatmsLoc,NStre)
+     TYPE(INT_VECT)       :: ITop,JTop,NAux
+     TYPE(DBL_VECT)       :: ATop
+     TYPE(INTC)           :: IntCs
+     INTEGER              :: NatmsLoc,I,J,NBond,NStre,I1,I2,NIntC
+     INTEGER              :: I1off,I2Off
+     !
+     NIntC=SIZE(IntCs%Def)
+     CALL New(ITop,NatmsLoc+1)
+     CALL New(JTop,2*NStre)
+     CALL New(ATop,2*NStre)
+     CALL New(NAux,NatmsLoc)
+     NBond=0
+     NAux%I=0
+     DO I=1,NIntC
+       IF(IntCs%Def(I)(1:4)=='STRE') THEN
+         I1=IntCs%Atoms(I,1)
+         I2=IntCs%Atoms(I,2)
+         NAux%I(I1)=NAux%I(I1)+1
+         NAux%I(I2)=NAux%I(I2)+1
+       ENDIF 
+     ENDDO
+     !
+     ITop%I=0
+     ITop%I(1)=1
+     DO I=1,NatmsLoc
+       ITop%I(I+1)=ITop%I(I)+NAux%I(I)
+     ENDDO
+     !
+     NAux%I=0
+     DO I=1,NIntC
+       IF(IntCs%Def(I)(1:4)=='STRE') THEN
+         I1=IntCs%Atoms(I,1)
+         I2=IntCs%Atoms(I,2)
+         NAux%I(I1)=NAux%I(I1)+1
+         NAux%I(I2)=NAux%I(I2)+1
+         I1off=ITop%I(I1)+NAux%I(I1)-1
+         I2off=ITop%I(I2)+NAux%I(I2)-1
+         JTop%I(I1off)=I2
+         ATop%D(I1off)=IntCs%Value(I)
+         JTop%I(I2off)=I1
+         ATop%D(I2off)=IntCs%Value(I)
+       ENDIF 
+     ENDDO
+     !
+     CALL Delete(NAux)
+   END SUBROUTINE DistMatr
 !
 !------------------------------------------------------------------
 !

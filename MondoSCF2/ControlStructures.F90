@@ -231,6 +231,7 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: VDWFact
      LOGICAL                            :: Linearity
      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
+     INTEGER                            :: NCov  
      INTEGER                            :: NExtra
      INTEGER                            :: NStre
      INTEGER                            :: NBend

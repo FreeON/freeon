@@ -9,6 +9,7 @@ MODULE Optimizer
   USE GDIISMod
   USE GeomOptKeys     
   USE PunchHDF
+  USE GlobalScalars
   IMPLICIT NONE
 CONTAINS
   !=====================================================================================
@@ -685,7 +686,7 @@ CONTAINS
         !             IntCs,XYZ,SCRPath,LagrMult,GradMult,LagrDispl)
         !ELSE
            CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-                         IntCs,XYZ)
+                         IntCs,AtNum,XYZ)
         !ENDIF
      END SELECT
      !
@@ -815,51 +816,39 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE DiagHess(CoordC,Hess,Grad,Displ,IntCs,XYZ)
+   SUBROUTINE DiagHess(CoordC,Hess,Grad,Displ,IntCs,AtNum,XYZ)
      TYPE(CoordCtrl)   :: CoordC
      TYPE(Hessian)     :: Hess
      TYPE(DBL_VECT)    :: Grad,Displ 
      TYPE(INTC)        :: IntCs       
-     INTEGER           :: I,J,NIntC,NCart,NConstr
+     INTEGER           :: I,J,NIntC,NCart,NConstr,NatmsLoc
      REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum
+     TYPE(DBL_VECT)    :: DHess
      !
      NIntC=SIZE(IntCs%Def)
-     NCart=3*SIZE(XYZ,2)
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     CALL New(DHess,NIntC)
      !
-     HStre=One/Hess%Stre
-     HBend=One/Hess%Bend
-     HLinB=One/Hess%LinB
-     HOutP=One/Hess%OutP
-     HTors=One/Hess%Tors
+     CALL DiagHess_Vals(DHess%D,AtNum,XYZ,IntCs,CoordC, &
+                        Hess,CoordC%NStre,'ThreeVals')
+    !CALL DiagHess_Vals(DHess%D,AtNum,XYZ,IntCs,CoordC, &
+    !                   Hess,CoordC%NStre,'Lindh')
      !
      IF(CoordC%CoordType==CoordType_Cartesian) THEN
        Displ%D=-1.D0*Grad%D !!!! equivalent with stpdesc
      ELSE IF(CoordC%CoordType==CoordType_PrimInt) THEN
        DO I=1,NIntC
-         IF(.NOT.IntCs%Active(I)) THEN
-           Displ%D(I)=Zero
-         ELSE IF(IntCs%Def(I)(1:4)=='STRE') THEN
-           Displ%D(I)=-HStre*Grad%D(I)
-         ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
-           Displ%D(I)=-HBend*Grad%D(I)
-         ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
-           Displ%D(I)=-HLinB*Grad%D(I)
-         ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
-           Displ%D(I)=-HOutP*Grad%D(I)
-         ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
-           Displ%D(I)=-HTors*Grad%D(I)
-         ELSE IF(IntCs%Def(I)(1:4)=='CART') THEN
-           Displ%D(I)=-HStre*Grad%D(I)
-         ENDIF
+         Displ%D(I)=-DHess%D(I)*Grad%D(I)
        ENDDO
-       !
-       !project out redundancy
-       !         CALL RedundancyOff(Displ%D,XYZ,DoSet_O=.TRUE.)
+       ! CALL RedundancyOff(Displ%D,XYZ,DoSet_O=.TRUE.)
      ELSE
        CALL Halt('Only Primitiv Internals are available yet.')
      ENDIF 
      ! 
+     CALL Delete(DHess)
    END SUBROUTINE DiagHess
 !
 !-------------------------------------------------------
@@ -1042,9 +1031,9 @@ CONTAINS
      CtrlStat%MaxTorsDispl=MaxTorsDispl
      CtrlStat%RMSIntDispl =RMSIntDispl
      !
-     GradConv=(MaxCGrad<2.D0*GConvCr%Grad.AND. &
-              (RMSGrad<GConvCr%Grad.AND.MaxGrad<GConvCr%Grad)).OR. &
-              (CtrlConstr%NConstr/=0.AND..NOT.CtrlConstr%DoLagr)
+     GradConv=MaxCGrad<GConvCr%Grad.AND. &
+              ((RMSGrad<GConvCr%Grad.AND.MaxGrad<GConvCr%Grad).OR. &
+              (CtrlConstr%NConstr/=0.AND..NOT.CtrlConstr%DoLagr))
      CtrlStat%GeOpConvgd=GradConv.AND. &
                          CtrlStat%MaxLGrad<GConvCr%Grad.AND. &
                          MaxStreDispl<GConvCr%Stre.AND. &
@@ -1351,6 +1340,7 @@ CONTAINS
      !
      GT%MaxIt_GrdTrf = 10 
      GT%GrdTrfCrit   = 0.1D0*GConv%Grad
+    !GT%GrdTrfCrit   = 1.D-7
      GT%MaxGradDiff  = 5.D+2      
    END SUBROUTINE SetGrdTrf
 !
@@ -1900,6 +1890,152 @@ CONTAINS
        ENDIF
      ENDDO
    END SUBROUTINE LagrEnergy
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE DiagHess_Vals(DHess,AtNum,XYZ,IntCs,CoordC,Hess,NStre,Char)
+     TYPE(Hessian)                 :: Hess
+     TYPE(CoordCtrl)               :: CoordC
+     REAL(DOUBLE),DIMENSION(:)     :: DHess,AtNum
+     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ  
+     TYPE(INTC)                    :: IntCs 
+     INTEGER                       :: I,J,NIntC,NatmsLoc,NStre
+     CHARACTER(LEN=*)              :: Char
+     TYPE(INT_VECT)                :: ITop,JTop
+     TYPE(DBL_VECT)                :: ATop
+     !
+     NIntC=SIZE(IntCs%Def)
+     NatmsLoc=SIZE(XYZ,2)
+     IF(NIntC/=SIZE(DHess)) &
+       CALL Halt('Dimesion error in DiagHess_Vals.')
+     !
+     IF(Char=='Lindh') CALL DistMatr(ITop,JTop,ATop,IntCs,NatmsLoc,NStre)
+     !
+     DO I=1,NIntC
+       IF(.NOT.IntCs%Active(I)) THEN
+         DHess(I)=Zero
+       ELSE 
+         CALL CalcHess(DHess(I),Char,IntCs%Def(I),Hess,AtNum, &
+                       XYZ,IntCs%Atoms(I,1:4),ITop,JTop,ATop)
+       ENDIF
+     ENDDO
+     !
+     IF(Char=='Lindh') THEN 
+       CALL Delete(ITop)
+       CALL Delete(JTop)
+       CALL Delete(ATop)
+     ENDIF
+   END SUBROUTINE DiagHess_Vals
+!
+!-------------------------------------------------------------------
+!
+   FUNCTION PeriodicRow(I)
+     INTEGER   ::  PeriodicRow,I
+     !
+     IF(I<=0) THEN
+       PeriodicRow=0
+     ELSE IF(0<I.AND.I<=2) THEN
+       PeriodicRow=1
+     ELSE IF(2<I.AND.I<=10) THEN
+       PeriodicRow=2
+     ELSE IF(10<I.AND.I<=18) THEN
+       PeriodicRow=3
+     ELSE IF(18<I.AND.I<=36) THEN
+       PeriodicRow=4
+     ELSE IF(36<I.AND.I<=54) THEN
+       PeriodicRow=5
+     ELSE IF(54<I.AND.I<=86) THEN
+       PeriodicRow=5
+     ELSE 
+       PeriodicRow=7
+     ENDIF
+   END FUNCTION PeriodicRow
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CalcHess(DHess,Char,Type,Hess,AtNum,XYZ,Atoms,ITop,JTop,ATop)
+     REAL(DOUBLE)                :: DHess
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum
+     TYPE(Hessian)               :: Hess
+     CHARACTER(LEN=*)            :: Char,Type
+     INTEGER,DIMENSION(1:4)      :: Atoms 
+     TYPE(INT_VECT)              :: ITop,JTop
+     TYPE(DBL_VECT)              :: ATop
+     INTEGER                     :: I1Row,I2Row,I3Row,I4Row  
+     REAL(DOUBLE)                :: R12,R23,R34
+     REAL(DOUBLE)                :: Rho12,Rho23,Rho34
+     !
+     IF(Char=='ThreeVals') THEN
+       IF(Type(1:4)=='STRE') DHess=Hess%Stre
+       IF(Type(1:4)=='BEND') DHess=Hess%Bend
+       IF(Type(1:4)=='LINB') DHess=Hess%LinB
+       IF(Type(1:4)=='OUTP') DHess=Hess%OutP
+       IF(Type(1:4)=='TORS') DHess=Hess%Tors
+       IF(Type(1:4)=='CART') DHess=Hess%Stre
+     ELSE IF(Char=='Lindh') THEN
+       I1Row=PeriodicRow(INT(AtNum(Atoms(1))))
+       I2Row=PeriodicRow(INT(AtNum(Atoms(2))))
+       I3Row=PeriodicRow(INT(AtNum(Atoms(3))))
+       I4Row=PeriodicRow(INT(AtNum(Atoms(4))))
+       IF(Atoms(2)/=0) THEN
+         R12=GetR(XYZ,Atoms(1),Atoms(2),ITop,JTop,ATop) 
+         Rho12=EXP(Lindh_Alpha(I1Row,I2Row)*(Lindh_R(I1Row,I2Row)**2-R12**2))
+       ENDIF
+       IF(Atoms(3)/=0) THEN
+         R23=GetR(XYZ,Atoms(2),Atoms(3),ITop,JTop,ATop) 
+         Rho23=EXP(Lindh_Alpha(I2Row,I3Row)*(Lindh_R(I2Row,I3Row)**2-R23**2))
+       ENDIF
+       IF(Atoms(4)/=0) THEN
+         IF(Type=='OUTP') THEN
+           R34=GetR(XYZ,Atoms(2),Atoms(4),ITop,JTop,ATop) 
+           Rho34=EXP(Lindh_Alpha(I2Row,I4Row)*(Lindh_R(I2Row,I4Row)**2-R34**2))
+         ELSE
+           R34=GetR(XYZ,Atoms(3),Atoms(4),ITop,JTop,ATop) 
+           Rho34=EXP(Lindh_Alpha(I3Row,I4Row)*(Lindh_R(I3Row,I4Row)**2-R34**2))
+         ENDIF
+       ENDIF
+       DHess=One
+       IF(Type(1:4)=='STRE') THEN
+         DHess=Lindh_K(1)*Rho12
+       ELSE IF(Type(1:4)=='BEND') THEN
+         DHess=Lindh_K(2)*Rho12*Rho23
+       ELSE IF(Type(1:4)=='LINB') THEN
+         DHess=Lindh_K(2)*Rho12*Rho23
+       ELSE IF(Type(1:4)=='OUTP') THEN
+         DHess=Lindh_K(3)*Rho12*Rho23*Rho34
+       ELSE IF(Type(1:4)=='TORS') THEN
+         DHess=Lindh_K(3)*Rho12*Rho23*Rho34
+       ELSE IF(Type(1:4)=='CART') THEN
+         DHess=Lindh_K(1)*Rho12
+       ENDIF
+     ENDIF
+     DHess=One/DHess
+   END SUBROUTINE CalcHess
+!
+!-------------------------------------------------------------------
+!
+   FUNCTION GetR(XYZ,I1Row,I2Row,ITop,JTop,ATop)
+     REAL(DOUBLE)                  :: GetR
+     REAL(DOUBLE),DIMENSION(:,:)   :: XYZ 
+     INTEGER                       :: I1Row,I2Row,I,J,III,NDim
+     TYPE(INT_VECT)                :: ITop,JTop
+     TYPE(DBL_VECT)                :: ATop
+     !
+     NDim=SIZE(ITop%I)-1
+     III=0
+     DO J=ITop%I(I1Row),ITop%I(I1Row+1)-1
+       IF(JTop%I(J)==I2Row) THEN
+         GetR=ATop%D(J)
+         III=1
+       ENDIF
+     ENDDO
+     IF(III==0) THEN
+       GetR=SQRT((XYZ(1,I1Row)-XYZ(1,I2Row))**2+&
+                 (XYZ(2,I1Row)-XYZ(2,I2Row))**2+&
+                 (XYZ(3,I1Row)-XYZ(3,I2Row))**2)
+     ENDIF 
+   END FUNCTION GetR
 !
 !-------------------------------------------------------------------
 !
