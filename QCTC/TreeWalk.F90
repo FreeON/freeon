@@ -127,7 +127,7 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
-       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-8
+       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-12
 !---------------------------------------------------------------------------------------------------
 !      PAC:
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -144,6 +144,7 @@ MODULE TreeWalk
               T>Gamma_Switch) THEN
 !         MAC:
           IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
+             IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
