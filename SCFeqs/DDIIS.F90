@@ -35,9 +35,13 @@ PROGRAM DDIIS
   IMPLICIT NONE
   !-------------------------------------------------------------------
 #ifdef PARALLEL
-  TYPE(DBCSR)                      :: F,P,FPrim,PPrim,EPrim,Tmp1
+  TYPE(BCSR )                      :: F,P,EPrm,Tmp1
+  TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
+  TYPE(BCSR )                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #else
-  TYPE(BCSR )                      :: F,P,FPrim,PPrim,EPrim,Tmp1
+  TYPE(BCSR )                      :: F,P,EPrm,Tmp1
+  TYPE(BCSR )                      :: PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
+  TYPE(BCSR )                      :: FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #endif
   TYPE(ARGMT)                      :: Args
   TYPE(INT_VECT)                   :: Idx,SCFOff
@@ -49,6 +53,7 @@ PROGRAM DDIIS
   INTEGER                          :: I,J,I0,J0,N,M,BMax,DoDIIS,iOffSet
   INTEGER                          :: LastSCFCycle,CPSCFCycl,DDIISStart
   INTEGER                          :: DDIISBeg,DDIISEnd,DDIISCurDim
+  INTEGER                          :: RespOrder
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=*), PARAMETER      :: Prog='DDIIS'
   LOGICAL                          :: IsPresent
@@ -70,6 +75,8 @@ PROGRAM DDIIS
   !
   ! Get Last SCF cycle.
   CALL Get(LastSCFCycle,'lastscfcycle')
+  !
+  RespOrder=1
   !
   !-------------------------------------------------------------------
   ! Parse for DDIIS options.
@@ -158,22 +165,36 @@ PROGRAM DDIIS
   ! Allocations.
   !-------------------------------------------------------------------
   !
-  CALL New(Tmp1 )
-  CALL New(EPrim)
-  CALL New(FPrim)
-  CALL New(P    )
-  CALL New(F    )
-  CALL New(PPrim)
+  CALL New(Tmp1)
+  CALL New(EPrm)
+  CALL New(F)
+  CALL New(FPrm1_1)
+  CALL New(P)
+  CALL New(PPrm1_1)
+  IF(RespOrder.GE.2) THEN
+     CALL New(FPrm2_1)
+     CALL New(PPrm2_1)
+     CALL New(PPrm1_2)
+  ENDIF
+  IF(RespOrder.GE.2) THEN
+     CALL New(FPrm3_1)
+     CALL New(PPrm3_1)
+     CALL New(FPrm2_2)
+     CALL New(PPrm2_2)
+     CALL New(FPrm2_3)
+     CALL New(PPrm2_3)
+     CALL New(PPrm1_3)
+  ENDIF
   !
   !-------------------------------------------------------------------
   ! Loading matrices.
   !-------------------------------------------------------------------
   !
   ! Load the orthogonal Derivative Fock matrix.
-  CALL Get(FPrim,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,0))
+  CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,0))
   !
   ! Load the orthogonal Derivative Density matrix.
-  CALL Get(PPrim,TrixFile('OrthoDPrime'//TRIM(Args%C%C(4)),Args,0))
+  CALL Get(PPrm1_1,TrixFile('OrthoDPrime'//TRIM(Args%C%C(4)),Args,0))
   !
   ! Load the orthogonal GS Fock matrix.
   CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)))
@@ -185,26 +206,72 @@ PROGRAM DDIIS
   ! Build up new DDIIS error.
   !-------------------------------------------------------------------
   !
-  ! Create a new error vector E'=[F_(i+1),P_i]'  (Could be done in a better way!)
-  CALL Multiply(PPrim,F,EPrim     )  !E'=P'F
-  CALL Multiply(P,FPrim,EPrim, One)  !E'=PF'+P'F
-  CALL Multiply(FPrim,P,EPrim,-One)  !E'=F'P-(PF'+P'F)
-  CALL Multiply(F,PPrim,EPrim, One)  !E'=FP'+F'P-(PF'+P'F)
+  SELECT CASE(RespOrder)
+  CASE(1)
+     ! Create a new error vector E'=[F_(i+1),P_i]'     (Could be done in a better way!)
+     ! PPrm1_1 <-> a
+     CALL Multiply(PPrm1_1,F      ,EPrm     )  !E'=P'F
+     CALL Multiply(P      ,FPrm1_1,EPrm, One)  !E'=PF'+P'F
+     CALL Multiply(FPrm1_1,P      ,EPrm,-One)  !E'=F'P-(PF'+P'F)
+     CALL Multiply(F      ,PPrm1_1,EPrm, One)  !E'=FP'+F'P-(PF'+P'F)
+  CASE(2)
+     ! Create a new error vector E''=[F_(i+1),P_i]''   (Could be done in a better way!)
+     ! PPrm2_1 <-> ab
+     ! PPrm1_1 <-> a
+     ! PPrm1_2 <-> b
+     CALL Multiply(PPrm2_1,F      ,EPrm     )  !Eab=Psb*F
+     CALL Multiply(PPrm1_1,FPrm1_2,EPrm, One)  !Eab=Pa*Fb
+     CALL Multiply(PPrm1_2,FPrm1_1,EPrm, One)  !Eab=Pb*Fa
+     CALL Multiply(P      ,FPrm2_1,EPrm, One)  !Eab=P*Fab
+     !
+     CALL Multiply(FPrm2_1,P      ,EPrm,-One)  !Eab=Fab*P
+     CALL Multiply(FPrm1_1,PPrm1_2,EPrm, One)  !Eab=Fa*Pb
+     CALL Multiply(FPrm1_2,PPrm1_1,EPrm, One)  !Eab=Fb*Pa
+     CALL Multiply(F      ,PPrm2_1,EPrm, One)  !Eab=F*Pab
+     !
+  CASE(3)
+     ! Create a new error vector E'''=[F_(i+1),P_i]''' (Could be done in a better way!)
+     ! PPrm3_1 <-> abc
+     ! PPrm2_1 <-> ab
+     ! PPrm2_2 <-> ac
+     ! PPrm2_3 <-> bc
+     ! PPrm1_1 <-> a
+     ! PPrm1_2 <-> b
+     ! PPrm1_3 <-> c
+     CALL Multiply(PPrm3_1,F      ,EPrm     )  !Eabc=Psbc*F
+     CALL Multiply(PPrm2_1,FPrm1_3,EPrm, One)  !Eabc=Pab*Fc
+     CALL Multiply(PPrm2_2,FPrm1_2,EPrm, One)  !Eabc=Pac*Fb
+     CALL Multiply(PPrm2_3,FPrm1_1,EPrm, One)  !Eabc=Pbc*Fa
+     CALL Multiply(PPrm1_1,FPrm1_3,EPrm, One)  !Eabc=Pa*Fbc
+     CALL Multiply(PPrm1_2,FPrm1_2,EPrm, One)  !Eabc=Pb*Fac
+     CALL Multiply(PPrm1_3,FPrm1_1,EPrm, One)  !Eabc=Pc*Fab
+     CALL Multiply(P      ,FPrm3_1,EPrm, One)  !Eabc=P*Fabc
+     !
+     CALL Multiply(FPrm3_1,P      ,EPrm,-One)  !Eabc=Fabc*P
+     CALL Multiply(FPrm2_1,PPrm1_3,EPrm, One)  !Eabc=Fab*Pc
+     CALL Multiply(FPrm2_2,PPrm1_2,EPrm, One)  !Eabc=Fac*Pb
+     CALL Multiply(FPrm2_3,PPrm1_1,EPrm, One)  !Eabc=Fbc*Pa
+     CALL Multiply(FPrm1_1,PPrm2_3,EPrm, One)  !Eabc=Fa*Pbc
+     CALL Multiply(FPrm1_2,PPrm2_2,EPrm, One)  !Eabc=Fb*Pac
+     CALL Multiply(FPrm1_3,PPrm2_1,EPrm, One)  !Eabc=Fc*Pab
+     CALL Multiply(F      ,PPrm3_1,EPrm, One)  !Eabc=F*Pabc
+     !
+  END SELECT
   !
   ! Deallocate local arrays.
   CALL Delete(F    )
   CALL Delete(P    )
-  CALL Delete(PPrim)
+  CALL Delete(PPrm1_1)
   !
   ! We dont filter E' for obvious reasons .
-  CALL Put(EPrim,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))
+  CALL Put(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))
   !
 #ifdef DDIIS_DBUG
 if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))//'>'
 #endif
   !
   ! Compute the DDIIS error.
-  DIISErr=SQRT(Dot(EPrim,EPrim))/DBLE(NBasF)
+  DIISErr=SQRT(Dot(EPrm,EPrm))/DBLE(NBasF)
   !
   ! IO save DDIIS error.
   CALL Put(DIISErr,'ddiiserr')
@@ -236,8 +303,8 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
 #ifdef DDIIS_DEBUG
            WRITE(*,*) 'Load |ej>=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,J0))//'>'
 #endif
-           CALL Get(EPrim,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,J0))
-           B%D(I,J)=Dot(Tmp1,EPrim)
+           CALL Get(EPrm,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,J0))
+           B%D(I,J)=Dot(Tmp1,EPrm)
            B%D(J,I)=B%D(I,J)
            J0=J0+1
         ENDDO
@@ -392,15 +459,37 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
   CALL Sort(AbsDIISCo,Idx,N-1,1)
   !
   ! Start with a matrix of diagonal zeros...
-  CALL SetToI(FPrim)
-  CALL Multiply(FPrim,Zero)
+  SELECT CASE(RespOrder)
+  CASE(1)
+     CALL SetToI(FPrm1_1)
+     CALL Multiply(FPrm1_1,Zero)
+  CASE(2)
+     CALL SetToI(FPrm2_1)
+     CALL Multiply(FPrm2_1,Zero)
+  CASE(3)
+     CALL SetToI(FPrm3_1)
+     CALL Multiply(FPrm3_1,Zero)
+  END SELECT
   !
   ! And do the summation
   DO I=1,N-1
-     CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
-     CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
-     CALL Add(FPrim,Tmp1,EPrim)
-     CALL SetEq(FPrim,EPrim)
+     SELECT CASE(RespOrder)
+     CASE(1)
+        CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
+        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
+        CALL Add(FPrm1_1,Tmp1,EPrm)
+        CALL SetEq(FPrm1_1,EPrm)
+     CASE(2)
+        CALL Get(Tmp1,TrixFile('OrthoFPrim2'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
+        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
+        CALL Add(FPrm2_1,Tmp1,EPrm)
+        CALL SetEq(FPrm2_1,EPrm)
+     CASE(3)
+        CALL Get(Tmp1,TrixFile('OrthoFPrim3'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
+        CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
+        CALL Add(FPrm3_1,Tmp1,EPrm)
+        CALL SetEq(FPrm3_1,EPrm)
+     END SELECT
   ENDDO
   !
   ! Deallocate local arrays.
@@ -425,19 +514,34 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
   ! IO for the orthogonal, extrapolated FPrim 
   !-------------------------------------------------------------------
   !
-  CALL Put(FPrim,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0)) 
-  CALL PChkSum(FPrim,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( FPrim,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-  CALL Plot(   FPrim,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
+  CALL Put(FPrm1_1,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0)) 
+  CALL PChkSum(FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+  CALL Plot(   FPrm1_1,'FPrime_DDIIS'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
   !
   !-------------------------------------------------------------------
   ! Tidy up 
   !-------------------------------------------------------------------
   !
   CALL Delete(Tmp1     )
-  CALL Delete(FPrim    )
-  CALL Delete(EPrim    )
+  CALL Delete(FPrm1_1  )
+  CALL Delete(EPrm     )
   CALL Delete(DIISCo   )
+  IF(RespOrder.GE.2) THEN
+     CALL Delete(FPrm2_1)
+     CALL Delete(PPrm2_1)
+     CALL Delete(PPrm1_2)
+  ENDIF
+  IF(RespOrder.GE.2) THEN
+     CALL Delete(FPrm3_1)
+     CALL Delete(PPrm3_1)
+     CALL Delete(FPrm2_2)
+     CALL Delete(PPrm2_2)
+     CALL Delete(FPrm2_3)
+     CALL Delete(PPrm2_3)
+     CALL Delete(PPrm1_3)
+  ENDIF
+  !
   !CALL Delete(BTmp)
   !
   CALL ShutDown(Prog)   
