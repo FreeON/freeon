@@ -39,7 +39,7 @@ PROGRAM MakeRho
   TYPE(HGRho_new)                 :: RhoA
   TYPE(CMPoles)                   :: MP
   TYPE(INT_VECT)                  :: Stat
-  INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
+  INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2,IL
   INTEGER                         :: NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
   INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
   REAL(DOUBLE)                    :: DistThresh,RSumE,RSumN,RSumMM,RSum_TPS,RelRhoErr, &
@@ -169,7 +169,6 @@ PROGRAM MakeRho
 !    Initailize  Counters
      NDist        = 0
      NCoef        = 0
-
 #ifdef PARALLEL
      DO LocalAtom = 1, Dmat%NAtms
         AtA  = Beg%I(MyID)+(LocalAtom-1)
@@ -212,25 +211,20 @@ PROGRAM MakeRho
   ELSE
      CALL New_HGRho_new(RhoA,(/0,0/))
   ENDIF
-! In case of MM, append MM atoms to nuclear-exponent list 
+! In case of MM, append MM atoms to nuclear-exponent list  
   IF(HasMM()) THEN
      CALL AddDist(RhoA,GM_MM,NuclearExpnt,1,GM_MM%NAtms)
   ENDIF
 #endif
 ! Prune negligible distributions from the electronic density
   NDist_old = RhoA%NDist
-  CALL Prune_Rho_new(Thresholds%Dist,RhoA)
+!  CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
-! Fold distributions back into the box
-#ifdef FOLDRHO
-  IF(SCFActn=='ForceEvaluation') THEN
-     WRITE(*,*) '***  NOT FOLDING RHO  ***'
-  ELSE
+! Fold distributions back into the box 
+! For ForceEvaluation, rho is not foldes
+  IF(SCFActn .NE. 'ForceEvaluation') THEN 
      CALL Fold_Rho_new(GM,RhoA)
   ENDIF
-#else
-  CALL Fold_Rho_new(GM,RhoA) 
-#endif
 #ifdef MMech
 ! Compute integrated electron and nuclear densities
   IF(HasQM()) THEN
