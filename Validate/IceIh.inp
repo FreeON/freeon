@@ -14,7 +14,7 @@ MPIMachineFile="2"
 
 Multiplicity=1
 Guess=Superpos
-Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
 DebugAll=(MaxDebug,CheckSums,MaxGeOp)
 SCFMethod=(TC2)
 BasisSets=(STO-2G-SPLIT)
