@@ -78,7 +78,8 @@ CONTAINS
        CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        DO J=1,NCart ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
-       CALL Get(Vect,'grade',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        DO J=1,NCart ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
        DO I=1,NatmsLoc
          IF(CConstr(I)==2) THEN
