@@ -79,7 +79,7 @@ MODULE ParseInput
          PROCESS_ID=IntToChar(GetPID())
 !------------------------------------------------------------------------------------------------
 !        Determine input and output names with full paths        
-         InpFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(1))
+         InpFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
 !        Determine if input file has a '.' in it.  If so, create SCF name 
 !        from string up to the '.'
          DotDex=INDEX(Args%C%C(1),'.')
@@ -149,7 +149,7 @@ MODULE ParseInput
 !
          CALL OpenASCII(InpFile,Inp)
          CALL OpenASCII(OutFile,Out)
-         CALL PrintProtectL(Out)
+!         CALL PrintProtectL(Out)
          WRITE(Out,77)(Rtrn,I=1,15)
          WRITE(*,77)(Rtrn,I=1,15)
       77 FORMAT(A1,A1,                                                   &
@@ -171,12 +171,12 @@ MODULE ParseInput
          DO I=1,1000
             READ(Inp,DEFAULT_CHR_FMT,END=1)Line
             IF(INDEX(Line,END_TITLE)/=0)GOTO 2
-            WRITE(Out,*)TRIM(Line)
+            WRITE(Out,DEFAULT_CHR_FMT)Line
          ENDDO
       1  CALL MondoHalt(PRSE_ERROR,' Found no <EndTitle> in input file '//TRIM(InpFile))
       2  CONTINUE
          WRITE(Out,*)' '
-         CALL PrintProtectR(Out)
+!         CALL PrintProtectR(Out)
 !        Close input and output
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CLOSE(UNIT=Out,STATUS='KEEP')
