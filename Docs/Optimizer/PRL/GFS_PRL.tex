@@ -400,7 +400,11 @@ At convergence, the maximum remaining Cartesian
 force vector had a length less than $3\times10^{-4}$ a.u. for each
 atom. This criterion is somewhat tighter then the original requirements
 of Ref. \cite{bakerstest}, stating the same for the Cartesian X,Y and Z
-components of the force. The energies of the optimized
+components of the force. 
+In addition to this criterion, either the energy change in the last step
+was less than $1\times10^{-6}$ a.u. or the predicted displacement
+smaller than $3\times10^{-4}$ a.u. at the last geometry.
+The energies of the optimized
 structures have been reproduced to all digits given in 
 Ref. \cite{bakerstest}.
 
@@ -409,9 +413,6 @@ in order to convince
 the reader, that our new concept of geometry optimization
 works as well on small molecules as the best implementations
 of traditional algorithms.
-Note, that the alternative choices of the
-internal coordinate systems can easily change the number
-of optimization steps by at least $\pm$10\%.
 We expect further improvement by the application of combined    
 internal coordinates, such as the natural internal ones or the 
 delocalized ones. 
@@ -428,9 +429,9 @@ and refs. therein) took place in our calculations.
 Geometry optimization steps of small molecules (upto 30 atoms)
 of the Baker's test set. Calculations have been carried out 
 with the Hartree-Fock model in STO-3G basis set.
-All calculations used standard primitive internal coordinates,
-except the one by Bakken {\it et.al.}, which used extra redundant
-ones.
+All calculations have been carried out using local primitive
+internal coordinates. In addition to them the ones made
+by Bakken {\it et.al.} used extra redundant coordinates \cite{bakken}.
 }
 \label{Bakers_test}
 \begin{tabular}{lccccc}
@@ -510,7 +511,8 @@ with an acceleration towards convergence. Note, that in the case
 of first order convergence the rate of the convergence is still
 smaller than one, which results in decreasing error.
 \begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{curve3.eps}}
+%\resizebox*{3.5in}{!}{\includegraphics{curve3.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{curve2_1.eps}}
 \caption{
 \small  
 The error of the energy has an exponential decline during
@@ -525,7 +527,8 @@ $E_{opt}$ is the optimum energy.
 %
 %
 \begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{curve2.eps}}
+%\resizebox*{3.5in}{!}{\includegraphics{curve2.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{curve3_1.eps}}
 \caption{
 \small  
 Relative errors of the energy show linear improvement.
