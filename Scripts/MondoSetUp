@@ -52,6 +52,9 @@ else if ( "$MONDO_PLAT" == "AMDLinux.PG" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AMDLinux.PG
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
      setenv NO_STOP_MESSAGE
+else if ( "$MONDO_PLAT" == "AMDLinux.IFC" ) then
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AMDLinux.IFC
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
 else if ( "$MONDO_PLAT" == "IBMAIX.XLF" ) then 
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IBMAIX.XLF
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
