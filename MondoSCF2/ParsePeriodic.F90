@@ -18,7 +18,7 @@ CONTAINS
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I
 !-----------------------------------------------------------------------!
-    ! If we are restarting, just use values read from HDF ...
+!   If we are restarting, just use values read from HDF ...
     CALL OpenASCII(N%IFile,Inp)
     IF(O%Guess==GUESS_EQ_RESTART.AND. &
           .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN
@@ -26,15 +26,16 @@ CONTAINS
        RETURN
     ENDIF
     WRITE(*,*)' reparsing periodics '
-    ! ... otherwise do some parsing
+    CALL New(PBC)
     CALL LoadPeriodicOptions(PBC)
-    CALL LoadLattice(PBC)
+    CALL LoadLattice(PBC)    
     CALL UnitCellSetUp(PBC)
     CLOSE(UNIT=Inp,STATUS='KEEP')
     DO I=1,G%Clones
        G%Clone(I)%PBC=PBC
-       CALL YeeshFourCoordinateArrays(G%Clone(I))
+       CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
+!
   END SUBROUTINE LoadPeriodic
 !=========================================================================
 !
@@ -53,26 +54,32 @@ CONTAINS
 !   Parse Periodic Directions
     Ntot = 0
     IF(FindKey(PBCWRAP,Inp))THEN
+
        IF(OptKeyLocQ(Inp,PBCWRAP,PBC_TRUE,MaxSets,NLoc,Location)) THEN
           Ntot = NLoc
           DO I=1,NLoc
-             PBC%AutoW(Location(I)) = .TRUE.
+             PBC%AutoW%I(Location(I)) = 1
           ENDDO
        ENDIF
        PBC%Dimen=NLoc
        IF(OptKeyLocQ(Inp,PBCWRAP,PBC_FALSE,MaxSets,NLoc,Location)) THEN
           Ntot = NTot+NLoc
           DO I=1,NLoc
-             PBC%AutoW(Location(I)) = .FALSE.
+             PBC%AutoW%I(Location(I)) = 0
           ENDDO
        ENDIF
        IF(NTot .NE. 3) THEN
-          PBC%AutoW(:)=.TRUE.
-!          CALL MondoHalt(PRSE_ERROR,'PBC = (?,?,?): Three Logicals must be Specified')
+          CALL MondoHalt(PRSE_ERROR,'PBC = (?,?,?): Three Logicals must be Specified')
        ENDIF
     ELSE
-       PBC%AutoW(:) = .FALSE.
+       PBC%AutoW%I(1:3) = 0
        PBC%Dimen=0
+    ENDIF
+!   Parse Translate
+    IF(OptKeyQ(Inp,PBOUNDRY,CENTERATOMS))THEN
+       PBC%Translate=.TRUE.
+    ELSE
+       PBC%Translate=.FALSE.
     ENDIF
 !   Intput over-ride
     IF(OptKeyQ(Inp,PBOUNDRY,PFFOVRDE))THEN
@@ -94,7 +101,7 @@ CONTAINS
        IF(.NOT.OptIntQ(Inp,PBOUNDRY,PBC%PFFMaxEll))  PBC%PFFMaxEll=16
     ENDIF
 !   Parse permeability 
-    IF(.NOT.OptDblQ(Inp,EpsILON,PBC%Epsilon))THEN
+    IF(.NOT.OptDblQ(Inp,EPSILON,PBC%Epsilon))THEN
        PBC%Epsilon=BIG_DBL !1.D32
     ENDIF
   END SUBROUTINE LoadPeriodicOptions
@@ -111,10 +118,10 @@ CONTAINS
     REAL(DOUBLE)                    :: AngAB,AngAC,AngBC,Error
 !
 
-    PBC%TransVec=Zero
-    PBC%BoxShape=Zero  
+    PBC%TransVec%D=Zero
+    PBC%BoxShape%D=Zero  
     DO I=1,3
-       PBC%BoxShape(I,I)=One
+       PBC%BoxShape%D(I,I)=One
     ENDDO
     IF(PBC%Dimen==0) RETURN
 !
@@ -134,13 +141,13 @@ CONTAINS
              CALL LineToGeom(Line,At,Vec)
              IF(At==ALAT_VEC) THEN
                 NLvec = NLvec+1
-                PBC%BoxShape(1:3,1)=Vec(1:3)
+                PBC%BoxShape%D(1:3,1)=Vec(1:3)
              ELSEIF(At==BLAT_VEC) THEN
                 NLvec = NLvec+1
-                PBC%BoxShape(1:3,2)=Vec(1:3)
+                PBC%BoxShape%D(1:3,2)=Vec(1:3)
              ELSEIF(At==CLAT_VEC) THEN
                 NLvec = NLvec+1
-                PBC%BoxShape(1:3,3)=Vec(1:3)
+                PBC%BoxShape%D(1:3,3)=Vec(1:3)
              ENDIF
           ELSE
              NLvec=3
@@ -156,46 +163,46 @@ CONTAINS
                    IF(PBC%Dimen > 1) THEN
                       CALL MondoHalt(PRSE_ERROR,'Number of Magnitudes and Angles supplied is incorrect')
                    ENDIF
-                   IF(PBC%AutoW(1)) PBC%BoxShape(1,1) = Vec(1)
-                   IF(PBC%AutoW(2)) PBC%BoxShape(2,2) = Vec(1)
-                   IF(PBC%AutoW(3)) PBC%BoxShape(3,3) = Vec(1)
+                   IF(PBC%AutoW%I(1)==1) PBC%BoxShape%D(1,1) = Vec(1)
+                   IF(PBC%AutoW%I(2)==1) PBC%BoxShape%D(2,2) = Vec(1)
+                   IF(PBC%AutoW%I(3)==1) PBC%BoxShape%D(3,3) = Vec(1)
                 ELSEIF(J==3) THEN 
                    IF(PBC%Dimen > 2) THEN
                       CALL MondoHalt(PRSE_ERROR,'Number of Magnitudes and Angles supplied is incorrect')
                    ENDIF
-                   IF(.NOT. PBC%AutoW(3)) THEN
-                      PBC%BoxShape(1,1)=Vec(1)
-                      PBC%BoxShape(1,2)=Vec(2)*COS(DegToRad*Vec(3))
-                      PBC%BoxShape(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
-                   ELSEIF(.NOT. PBC%AutoW(2)) THEN
-                      PBC%BoxShape(1,1)=Vec(1)
-                      PBC%BoxShape(1,3)=Vec(2)*COS(DegToRad*Vec(3))
-                      PBC%BoxShape(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
-                   ELSEIF(.NOT. PBC%AutoW(1)) THEN
-                      PBC%BoxShape(2,2)=Vec(1)
-                      PBC%BoxShape(2,3)=Vec(2)*COS(DegToRad*Vec(3))
-                      PBC%BoxShape(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                   IF(PBC%AutoW%I(3)==0) THEN
+                      PBC%BoxShape%D(1,1)=Vec(1)
+                      PBC%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(3))
+                      PBC%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
+                   ELSEIF(PBC%AutoW%I(2)==0) THEN
+                      PBC%BoxShape%D(1,1)=Vec(1)
+                      PBC%BoxShape%D(1,3)=Vec(2)*COS(DegToRad*Vec(3))
+                      PBC%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                   ELSEIF(PBC%AutoW%I(1)==0) THEN
+                      PBC%BoxShape%D(2,2)=Vec(1)
+                      PBC%BoxShape%D(2,3)=Vec(2)*COS(DegToRad*Vec(3))
+                      PBC%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
                    ENDIF
                 ELSEIF(J==6) THEN
-                   PBC%BoxShape(1,1)=Vec(1)
-                   PBC%BoxShape(1,2)=Vec(2)*COS(DegToRad*Vec(6))
-                   PBC%BoxShape(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
-                   PBC%BoxShape(1,3)=Vec(3)*COS(DegToRad*Vec(5))
-                   PBC%BoxShape(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
-                        -PBC%BoxShape(1,2)*PBC%BoxShape(1,3))/PBC%BoxShape(2,2)
-                   PBC%BoxShape(3,3)=SQRT(Vec(3)**2-PBC%BoxShape(1,3)**2-PBC%BoxShape(2,3)**2)
+                   PBC%BoxShape%D(1,1)=Vec(1)
+                   PBC%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(6))
+                   PBC%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
+                   PBC%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Vec(5))
+                   PBC%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
+                        -PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3))/PBC%BoxShape%D(2,2)
+                   PBC%BoxShape%D(3,3)=SQRT(Vec(3)**2-PBC%BoxShape%D(1,3)**2-PBC%BoxShape%D(2,3)**2)
                 ELSE
                    CALL MondoHalt(PRSE_ERROR,'Number of Magnitudes and Angles supplied is incorrect')
                 ENDIF
              ELSE
                 IF(J==6) THEN
-                   PBC%BoxShape(1,1)=Vec(1)
-                   PBC%BoxShape(1,2)=Vec(2)*COS(DegToRad*Vec(6))
-                   PBC%BoxShape(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
-                   PBC%BoxShape(1,3)=Vec(3)*COS(DegToRad*Vec(5))
-                   PBC%BoxShape(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
-                        -PBC%BoxShape(1,2)*PBC%BoxShape(1,3))/PBC%BoxShape(2,2)
-                   PBC%BoxShape(3,3)=SQRT(Vec(3)**2-PBC%BoxShape(1,3)**2-PBC%BoxShape(2,3)**2)
+                   PBC%BoxShape%D(1,1)=Vec(1)
+                   PBC%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(6))
+                   PBC%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
+                   PBC%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Vec(5))
+                   PBC%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
+                        -PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3))/PBC%BoxShape%D(2,2)
+                   PBC%BoxShape%D(3,3)=SQRT(Vec(3)**2-PBC%BoxShape%D(1,3)**2-PBC%BoxShape%D(2,3)**2)
                 ELSE
                    CALL MondoHalt(PRSE_ERROR,'In fractional coordinates all lattice vectors must be supplied')
                 ENDIF
@@ -210,7 +217,7 @@ CONTAINS
     ENDIF
     DO I=1,3
        DO J=1,3
-          IF(ABS(PBC%BoxShape(I,J)).LT. 1.D-12) PBC%BoxShape(I,J)=Zero
+          IF(ABS(PBC%BoxShape%D(I,J)).LT. 1.D-12) PBC%BoxShape%D(I,J)=Zero
        ENDDO
     ENDDO
     RETURN
@@ -227,8 +234,8 @@ CONTAINS
 !   CalculatetheBoxVolume
     PBC%CellVolume=One
     DO I=1,3
-       IF(PBC%AutoW(I))THEN
-          PBC%CellVolume=PBC%CellVolume*PBC%BoxShape(I,I)
+       IF(PBC%AutoW%I(I)==1)THEN
+          PBC%CellVolume=PBC%CellVolume*PBC%BoxShape%D(I,I)
        ENDIF
     ENDDO
 !   Calculate dipole and quadripole factors
@@ -238,7 +245,7 @@ CONTAINS
     ELSEIF(PBC%Dimen==2)THEN
        PBC%DipoleFAC=(Four*Pi/PBC%CellVolume)*(One/(PBC%Epsilon+One))
        PBC%QupoleFAC=Zero
-       IF(ABS(PBC%DipoleFAC).LT.1.D-14)PBC%DipoleFAC=Zero
+       IF(ABS(PBC%DipoleFAC).LT.1.D-14) PBC%DipoleFAC=Zero
     ELSEIF(PBC%Dimen==3)THEN
        PBC%DipoleFAC=-(Four*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
        PBC%QupoleFAC=(Two*Pi/PBC%CellVolume)*(One/Three-One/(Two*PBC%Epsilon+One))
@@ -247,38 +254,40 @@ CONTAINS
     ENDIF
 !   Find the center of the cell
     DO I=1,3
-       PBC%CellCenter(I)=Zero
-       IF(PBC%AutoW(I))THEN
+       PBC%CellCenter%D(I)=Zero
+       IF(PBC%AutoW%I(I)==1)THEN
           DO J=1,3
-             IF(PBC%AutoW(J))THEN
-                PBC%CellCenter(I)=PBC%CellCenter(I)+Half*PBC%BoxShape(I,J)
+             IF(PBC%AutoW%I(J)==1)THEN
+                PBC%CellCenter%D(I)=PBC%CellCenter%D(I)+Half*PBC%BoxShape%D(I,J)
              ENDIF
           ENDDO
        ENDIF
     ENDDO
 !   Compute the inverse box shape
-    PBC%InvBoxSh = InverseMatrix(PBC%BoxShape)
+    PBC%InvBoxSh%D = InverseMatrix(PBC%BoxShape%D)
 !
   END SUBROUTINE UnitCellSetUp
 !=========================================================================
 ! ACCOUNT FOR ALL FOUR (YEP COUNT EM FOUR) COORDINATE ARRAYS... YEESH!
 !=========================================================================
-  SUBROUTINE YeeshFourCoordinateArrays(G)
+  SUBROUTINE CalculateCoordArrays(G)
     TYPE(CRDS) :: G
     INTEGER    :: I
 !-----------------------------------------------------------------------!
     IF(G%PBC%InAtomCrd)THEN
+       G%Carts%D=G%AbCarts%D
+       CALL CalFracCarts(G)
        CALL WrapAtoms(G)
     ELSE
-       ! These are the two fractional coordinate arrays ... 
        G%BoxCarts%D=G%AbCarts%D
-       G%AbBoxCarts%D=G%AbCarts%D
-       ! ... and here are the two Cartesian coordinate arrays
+       CALL CalAtomCarts(G)
+       G%AbCarts%D=G%Carts%D
+       CALL WrapAtoms(G)
+!      Convert the Velocities from Fractional to Atomic
        DO I=1,G%NAtms
-          G%Carts%D(:,I)=FracToAtom(G,G%BoxCarts%D(:,I))
-          G%AbCarts%D(:,I)=FracToAtom(G,G%AbBoxCarts%D(:,I))          
+          G%Velocity%D(:,I)   = FracToAtom(G,G%Velocity%D(:,I))
        ENDDO
     ENDIF
-  END SUBROUTINE YeeshFourCoordinateArrays
+  END SUBROUTINE CalculateCoordArrays
 !-----------------------------------------------------------------------!
 END MODULE ParsePeriodic
