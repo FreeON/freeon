@@ -868,23 +868,20 @@ CONTAINS
     ENDIF
     ! Build density with last DM
     CALL Invoke('MakeRho',N,S,M)
+#ifdef NLATTFORCE    
     ! Coulomb part
-#ifdef NLATTFORCE
     CALL Invoke('JForce',N,S,M)
     CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       WRITE(*,*) 'Doing GONX'
        CALL Invoke('GONX',N,S,M)       
-       WRITE(*,*) 'Doing Latt GONX'
        CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
     ENDIF
 #else
+    ! Coulomb part
     CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-    !  CALL NXForce(cBAS,cGEO,N,G,B,S,M)
-    !  CALL Invoke('XForce',N,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
 #endif
@@ -986,6 +983,7 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
 !
@@ -1063,7 +1061,8 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)     
        CALL CloseHDF(HDFFileID)
 !
        CALL Delete(BSiz)
@@ -1106,6 +1105,7 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
 !
@@ -1169,6 +1169,7 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
 !
