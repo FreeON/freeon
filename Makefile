@@ -30,7 +30,7 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e 1 2 t #d #v 
+all:	CatCpy mm s e 1 2 t o2 #d #v 
 #
 clean:	cmm cs ce c1 c2 cd cv 
 	rm -f $(REMOVEALL)
