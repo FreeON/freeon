@@ -20,10 +20,12 @@ CONTAINS
 !-----------------------------------------------------------------------!
 !   If we are restarting, just use values read from HDF ...
     CALL OpenASCII(N%IFile,Inp)
-    IF(O%Guess==GUESS_EQ_RESTART.AND. &
-          .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN
+    IF(O%Guess==GUESS_EQ_RESTART .AND. .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN
        CLOSE(Inp)
        RETURN
+    ENDIF
+    IF(O%Guess==GUESS_EQ_RESTART .AND. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM)) THEN
+       WRITE(*,*)' REPARSING PERIODIC ON RESTART'
     ENDIF
     CALL New(PBC)
     CALL LoadPeriodicOptions(PBC)
