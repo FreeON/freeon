@@ -1,19 +1,19 @@
 all: normal
 
 normal:
-	latex LinearPBCMethod_revtex4.tex
-	latex LinearPBCMethod_revtex4.tex
-	xdvi -s 2 LinearPBCMethod_revtex4
+	latex PFFTensorMake.tex
+	latex PFFTensorMake.tex
+	xdvi -s 2 PFFTensorMake
 
 new: 	clean links figs bib ps
 
 bib:	
-	latex LinearPBCMethod_revtex4.tex
-	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex
-	bibtex LinearPBCMethod_revtex4
-	latex LinearPBCMethod_revtex4.tex	
-	latex LinearPBCMethod_revtex4.tex	
+	latex PFFTensorMake.tex
+	bibtex PFFTensorMake
+	latex PFFTensorMake.tex
+	bibtex PFFTensorMake
+	latex PFFTensorMake.tex	
+	latex PFFTensorMake.tex	
 
 links:
 	ln -s ../../Bib/mondo.bib ./mondo.bib 
@@ -32,8 +32,8 @@ figs:
 	make -C FULL_FIGS
 
 ps:
-	dvips -o LinearPBCMethod_revtex4.ps LinearPBCMethod_revtex4
+	dvips -o PFFTensorMake.ps PFFTensorMake
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
-	rm -rf mondo.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
+	rm -rf mondo.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bs
