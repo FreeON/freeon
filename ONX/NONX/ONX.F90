@@ -130,13 +130,10 @@ PROGRAM ONX
   CALL TrnMatBlk(BSc,GMc,K)
   CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
   CALL Put(K,TrixFile('K',Args,0))!InFile,'.K')
-  CALL Put(K%NBlks,'nki')
-  CALL Put(K%NNon0,'nkm')
-
-  CALL PPrint(K,'K')
-  CALL PChkSum(K,'K',Prog)
-  CALL PPrint(K,'K')
-  CALL Plot(K,'K')
+!
+  CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
+  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------
