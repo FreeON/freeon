@@ -208,7 +208,7 @@ MODULE GlobalScalars
 ! Maximum number of internal coords per atom
 ! this is needed to estimate storage of IntCs in HDF
 !
-   INTEGER, PARAMETER :: IntCPerAtom=30
+   INTEGER :: IntCMax    
 !
 ! SCF global arrays 
 !

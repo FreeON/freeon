@@ -568,7 +568,7 @@ MODULE MemMan
          CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%PBCDispl)
-         CALL New(A%IntCs,IntCPerAtom*A%NAtms)
+         CALL New(A%IntCs,IntCMax)
         !CALL New(A%IntCs,A%IntCs%N)
          CALL New(A%AtmB,A%NAtms,0)
          CALL New(A%Bond,0)
