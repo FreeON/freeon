@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-EXTRA_INCLUDES=-I. -I$(MONDO_HOME)/TwoE
+EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
 
 all: ONX2 GONX2
 

@@ -95,7 +95,7 @@ PROGRAM GONX2
   CALL Get(GMc,Tag_O=CurGeom)
   !
   !
-  WRITE(*,*) '-------- We are in GONX2 --------'
+!!$  WRITE(*,*) '-------- We are in GONX2 --------'
 
 
 !!$  write(*,*) '1x',GMc%Carts%D(1,1)
@@ -155,7 +155,7 @@ PROGRAM GONX2
 !#endif
   !
   !
-  WRITE(*,*) 'allocate List'
+!!$  WRITE(*,*) 'allocate List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL AllocList(ListC,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
@@ -166,11 +166,11 @@ PROGRAM GONX2
   CALL AllocList(ListC,NAtoms)
   CALL CPU_TIME(Time2)
 !#endif
-  WRITE(*,*) 'allocate List: ok',Time2-Time1
+!!$  WRITE(*,*) 'allocate List: ok',Time2-Time1
   !
   !------------------------------------------------
   ! Make the distribution list(s).
-  WRITE(*,*) 'make List'
+!!$  WRITE(*,*) 'make List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL MakeList(ListC,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
@@ -182,7 +182,7 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 !#endif
   !TmML = Time2-Time1
-  WRITE(*,*) 'make List: ok',Time2-Time1
+!!$  WRITE(*,*) 'make List: ok',Time2-Time1
   !
   !------------------------------------------------
   !
@@ -206,7 +206,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Compute Exchange Forces.
-  WRITE(*,*) 'DKx'
+!!$  WRITE(*,*) 'DKx'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL ComputK(DFastMat,KxFastMat,ListC,ListD,GMc,BSc,CS_OUT)
@@ -217,15 +217,15 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 !#endif
   !TmKx = Time2-Time1
-  WRITE(*,*) 'DKx:ok',Time2-Time1
+!!$  WRITE(*,*) 'DKx:ok',Time2-Time1
 
-!!$  write(*,*) GradX%D
-!!$  write(*,*) 'sum(GradX%D)=',sum(GradX%D)
+  write(*,*) GradX%D
+  write(*,*) 'sum(GradX%D)=',sum(GradX%D)
 
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
-  WRITE(*,*) 'deallocate List'
+!!$  WRITE(*,*) 'deallocate List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL DeAllocList(ListC)
@@ -236,7 +236,7 @@ PROGRAM GONX2
   CALL DeAllocList(ListC)
   CALL CPU_TIME(Time2)
 !#endif
-  WRITE(*,*) 'deallocate List:ok',Time2-Time1
+!!$  WRITE(*,*) 'deallocate List:ok',Time2-Time1
 
 
 

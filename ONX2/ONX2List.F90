@@ -281,7 +281,7 @@ CONTAINS
 #ifdef PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
-    write(*,*) 'size C=',isize**4
+    !write(*,*) 'size C=',isize**4
     !
     !
     NULLIFY(AtAList,AtAListTmp,NodeA)
@@ -407,7 +407,7 @@ CONTAINS
        !
     ENDDO ! End AtC
     !
-!#ifdef GONX2_INFO
+#ifdef GONX2_INFO
 #ifdef PARALLEL
   IF(MyID.EQ.ROOT) THEN
 #endif
@@ -418,11 +418,9 @@ CONTAINS
 #ifdef PARALLEL
   ENDIF
 #endif
-!#endif
+#endif
     !
-
-  write(*,*) 'End of MakeGList'
-
+!  write(*,*) 'End of MakeGList'
   END SUBROUTINE MakeGList
   !
   !
@@ -770,7 +768,7 @@ CONTAINS
        CASE(2); WRITE(IOUT,3000) (I+SHFTN,I=IMIN,IMAX)
        CASE(3); WRITE(IOUT,4000) (I+SHFTN,I=IMIN,IMAX)
        END SELECT
-       DO J = 1,N
+       DO J = 1,M
           SELECT CASE(IOPT)
           CASE(0); WRITE(IOUT,1100) J+SHFTM,(V(J,I),I=IMIN,IMAX)
           CASE(1); WRITE(IOUT,2100) J+SHFTM,(V(J,I),I=IMIN,IMAX)
