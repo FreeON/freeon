@@ -14,10 +14,11 @@ MODULE MondoMPI
    INTEGER,SAVE :: MONDO_COMM=MPI_COMM_WORLD
    INTERFACE BCast          ! Wrappers for MPI_BCAST
       MODULE PROCEDURE BCast_DBL_SCLR, BCast_DBL_VECT,  BCast_DBL_RNK2, &
-                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, BCast_INT_SCLR, &
+                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, & 
+                       BCast_INT_SCLR,                                  &
                        BCast_INT_VECT, BCast_INT_RNK2,  BCast_INT_RNK3, &
                        BCast_INT_RNK4, BCast_CHR_SCLR,  BCast_LOG_SCLR, &
-                       BCast_DEBG
+                       BCast_DEBG                        
    END INTERFACE
    INTERFACE AllReduce   ! Wrappers for MPI_ALLREDUCE
       MODULE PROCEDURE AllReduce_DBL_SCLR
@@ -61,11 +62,10 @@ MODULE MondoMPI
       SUBROUTINE InitMPI()
          INTEGER :: IErr
          CHARACTER(LEN=4),PARAMETER :: Sub='Init'
+!------------------------------------------------
          CALL MPI_INIT(IErr)
          CALL ErrChk(IErr,Sub)
-!-------------------------------------
 !        Load global MPI variables
-!
          MyID=MRank()
          NPrc=MSize()
          InParallel=.TRUE.
@@ -248,14 +248,12 @@ MODULE MondoMPI
             CALL HaltMPI(' MPI_BCAST failed for double vector ',IErr)
       END SUBROUTINE CRNDAV
 !-------------------------------------------------- 
-!     
-!
-      SUBROUTINE BCast_DEBG(A)
+       SUBROUTINE BCast_DEBG(A)
          TYPE(DEBG) :: A
          CALL BCast(A%Key)
          CALL BCast(A%Mat)
          CALL BCast(A%Fmt)
-      END SUBROUTINE BCast_DEBG
+       END SUBROUTINE BCast_DEBG
 !===============================================================
 !
 !     REDUCE WRAPPERS
