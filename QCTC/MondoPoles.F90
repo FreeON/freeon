@@ -23,8 +23,9 @@ MODULE MondoPoles
       INTEGER                               :: Ell      ! Ell type
       REAL(DOUBLE)                          :: Zeta     ! Minimum exponent in this node
       REAL(DOUBLE)                          :: Strength ! Strength of the Pole
-      REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to BBox 
-      TYPE(BBox)                            :: Box      ! Bounding box 
+      REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to DBox 
+      TYPE(BBox)                            :: Box      ! Bounding Box of distribution (for PAC)
+      TYPE(BBox)                            :: DBox     ! Bounding Box of distribution centers (for MAC)
       TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
       TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
 #ifdef POINTERS_IN_DERIVED_TYPES
@@ -350,26 +351,61 @@ MODULE MondoPoles
 !====================================================================================
 !     Compute a multipole strength O_L based on Unsolds theorem
 !====================================================================================
-      FUNCTION UnsoldO(L,C,S)
-         INTEGER                     :: I,K,L,M
-         REAL(DOUBLE)                :: UnsoldO,U
-         REAL(DOUBLE), DIMENSION(0:) :: C,S
-         UnsoldO=Zero
-         ! Must take into account the possibility of untranslated nodes,
-         ! and chance cancelations in misc powers: Take the max over all L
-         DO I=0,L
-            K=LTD(I)
-            ! M=0 term 
-            U=(C(K)**2+S(K)**2)*Factorial(I)**2
-            DO M=1,I
-               ! The rest times 2
-               U=U+Two*(C(K+M)**2+S(K+M)**2)*Factorial(I+M)*Factorial(I-M)            
-            ENDDO
-            UnsoldO=MAX(UnsoldO,U)
-         ENDDO
-         UnsoldO = SQRT(UnsoldO)
-       END FUNCTION UnsoldO
-!16.79290770668148
+      FUNCTION Unsold2(Llow,Lhig,C,S)
+        INTEGER                     :: L,Llow,Lhig
+        REAL(DOUBLE)                :: Unsold2,U,Exp
+        REAL(DOUBLE), DIMENSION(0:) :: C,S
+!
+        Unsold2=Zero
+        DO L=Llow,Lhig
+           IF(L==0) THEN 
+              U   = Unsold0(L,C,S)
+              Unsold2=MAX(Unsold2,U)
+           ELSE
+              Exp = DBLE(Lhig)/DBLE(L) 
+              U   = Unsold0(L,C,S)**Exp
+              Unsold2=MAX(Unsold2,U)
+           ENDIF
+        ENDDO
+!
+      END FUNCTION Unsold2
+!====================================================================================
+!     Compute a multipole strength O_L based on Unsolds theorem
+!====================================================================================
+      FUNCTION Unsold1(L,C,S)
+        INTEGER                     :: L,LL
+        REAL(DOUBLE)                :: Unsold1,U,Exp
+        REAL(DOUBLE), DIMENSION(0:) :: C,S
+!
+        Unsold1=Zero
+        DO LL=0,L
+           IF(LL==0) THEN 
+              U   = Unsold0(LL,C,S)
+              Unsold1=MAX(Unsold1,U)
+           ELSE
+              Exp = DBLE(L)/DBLE(LL) 
+              U   = Unsold0(LL,C,S)**Exp
+              Unsold1=MAX(Unsold1,U)
+           ENDIF
+        ENDDO
+!
+      END FUNCTION Unsold1
+!====================================================================================
+!     Compute a multipole strength O_L based on Unsolds theorem
+!====================================================================================
+      FUNCTION Unsold0(L,C,S)
+        INTEGER                     :: I,K,L,M
+        REAL(DOUBLE)                :: Unsold0
+        REAL(DOUBLE), DIMENSION(0:) :: C,S
+!
+        K=LTD(L)
+        Unsold0=(C(K)**2+S(K)**2)*Factorial(L)**2
+        DO M=1,L
+           Unsold0=Unsold0+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)            
+        ENDDO
+        Unsold0 = SQRT(ABS(Unsold0))
+!
+      END FUNCTION Unsold0
 !====================================================================================
 !
 !====================================================================================
