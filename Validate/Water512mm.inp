@@ -1,0 +1,25 @@
+<BeginTitle>
+512 water molecules in cubic box, periodic
+MONDO electrostatic energy : -0.2272382565405526
+<EndTitle>
+
+<BeginOptions>
+Mechanics=(MM)
+Accuracy =(VeryTight)
+DebugAll=(MinDebug)
+Geometry=(InAngstroms,NoOrder)
+BlokAInv=(Test,1.D20)
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+PFFLayers=2
+PFFMaxEll=16
+<EndOptions>
+
+<BeginPeriodic>
+d3   24.86620495D0 24.86620495D0 24.86620495D0  90.0D0   90.0D0   90.0D0
+<EndPeriodic>
+
+<BeGIN_MM_filenames>
+validation_opls
+Water512mm.seq
+Water512mm.crd
+<END_MM_filenames>
