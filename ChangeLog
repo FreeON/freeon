@@ -1,3 +1,108 @@
+2003-05-03 11:12  mchalla
+
+	* MondoMods/Thresholding.F90: Declared variable I
+
+2003-05-03 11:12  mchalla
+
+	* MondoMods/: Macros.F90, McMurch.F90: Added logic to macros to
+	allow printing of integrals (used by fbuild).  Also added quick and
+	dirty (very dirty) McMurchie style integral code with printing.
+
+2003-05-03 11:09  mchalla
+
+	* SCFeqs/FBuild.F90: Added bits for dumping integrals to MMA/SCFDev
+	where we do development of SCF solvers etc.
+
+2003-05-03 11:06  mchalla
+
+	* MondoSCF2/SCFs.F90: Added bits for levelshifting, tightened
+	convergence.
+
+2003-05-03 10:54  mchalla
+
+	* SCFeqs/SP2.F90: Added in levelshift capability to SP2.  Needs to
+	be called twice ...
+
+2003-05-03 10:51  mchalla
+
+	* SCFeqs/MMA/SCFDev/: SCF_STO-2G_Water.nb, STO-2G_Water.in: example
+	scf calculations for minimal basis set HF water.  .in file obtained
+	from new hooks in FBuild, which print out core hamiltonian,
+	intergrals, etc to this directory.
+
+2003-05-03 09:59  mchalla
+
+	* MondoSCF2/: OptionKeys.F90, ParseGeometries.F90: Modest changes
+	to allow reading in a new geometry on restart, to be used with for
+	example an archived density matrix.
+
+2003-05-02 15:33  nemeth
+
+	* MondoSCF2/Optimizer.F90: Subroutine 'GeOpConv' made more
+	transparent.
+
+2003-05-02 14:24  nemeth
+
+	* MondoSCF2/InCoords.F90: Gradient transformation
+	convergence-criterium was not set after 'go to' has been removed.
+	Now fixed.
+
+2003-05-02 13:33  nemeth
+
+	* MondoMods/: DerivedTypes.F90, InOut.F90, MemMan.F90: 'Displ'
+	(displaced geometry) introduced into CRDS for the geometry
+	optimizers.
+
+2003-05-02 12:34  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, MondoSCF.F90, Optimizer.F90,
+	ParseExtraCoords.F90, PunchHDF.F90: A few new modifications on the
+	optimizer. Rearchivation for GDIIS, compatibility at restart
+	between different types of optimizers and 'eradication' of 'go
+	to'-s from the intc optimizer.
+
+2003-04-28 14:57  schwegle
+
+	* ONX/GDrivers/: G2.101x101.ascii, G2.101x201.ascii,
+	G3.101x101.ascii, GCMaker.C: Some changes to get the gradients
+	working.
+
+2003-04-28 10:40  schwegle
+
+	* ONX/NONX/: ComputeXForce.F90, ContractG.F90, DigestGradient.F90,
+	GDLoader.C, GetGradient.F90, HrrKet.F90: First attempt at getting
+	the onx forces working. This is not working yet.
+
+2003-04-25 13:41  tymczak
+
+	* Docs/PBC_paper/: GaussianPapers.bib, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, PFFMultipoles_water.ps, RepCell_2.ps,
+	Timing_sto3g_321g.ps, UnitCell_2.ps, NewTable.tex: [no log message]
+
+2003-04-24 16:06  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-04-24 16:05  tymczak
+
+	* Docs/PBC_paper/GaussianPapers.bib: 
+	
+	New Enties
+
+2003-04-23 11:09  nemeth
+
+	* MondoSCF2/PunchHDF.F90: Needed to be checked in again.
+
+2003-04-23 10:39  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Optimizer.F90: Recent changes related the
+	optimizer, 'made in Scotland'. I'm cheking them in again, since the
+	previous check-in was not the 'scottish' version.
+
+2003-04-23 09:10  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-04-23 09:04  mchalla
 
 	* QCTC/Thresholds.F90: Bumped the threshold by 100 to compensate
