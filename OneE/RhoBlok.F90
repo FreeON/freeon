@@ -78,7 +78,7 @@ CONTAINS
 !--------------------------------------------------------------
 ! Calculate the Primative Distributions Generated from atom A and B
 !--------------------------------------------------------------
-  SUBROUTINE RhoBlk(AtA,AtB,BS,MD,Dmat,Pair,First,Rho)
+  SUBROUTINE RhoBlk(BS,MD,Dmat,Pair,First,Rho)
     TYPE(BSET)                              :: BS
     TYPE(DBL_RNK4)                          :: MD
     TYPE(AtomPair)                          :: Pair

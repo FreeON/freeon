@@ -6,7 +6,7 @@ MODULE TBlock
   USE AtomPairs
   IMPLICIT NONE
   CONTAINS
-  FUNCTION TBlok(AtA,AtB,BS,MD,Pair) RESULT(TVck)
+  FUNCTION TBlok(BS,MD,Pair) RESULT(TVck)
     TYPE(BSET)                                :: BS
     TYPE(DBL_RNK4)                            :: MD
     TYPE(AtomPair)                            :: Pair

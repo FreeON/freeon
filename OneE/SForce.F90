@@ -49,7 +49,7 @@ PROGRAM SForce
   TYPE(BCSR)          :: T1,F,P
 #endif
 #ifdef PERIODIC 
-  INTEGER             :: NC,NLay,MMLow,MMHig,MaxL
+  INTEGER             :: NC,NLay,MMLow,MMHig
   REAL(DOUBLE)        :: Bx,By,Bz
 #endif
   TYPE(AtomPair)      :: Pair
