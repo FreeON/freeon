@@ -41,6 +41,14 @@ MODULE GlobalScalars
    INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
 !-------------------------------------------------------------------------------
+! MD
+!
+    REAL(DOUBLE), PARAMETER :: KelvinToHartrees=3.166815208D-6  ! Boltz's Const. in Hartrees/Kelvin (NIST)
+    REAL(DOUBLE), PARAMETER :: HartreesToKelvin=3.157746614D+5           
+    REAL(DOUBLE), PARAMETER :: InternalTimeToSeconds=1.032749873D-15
+    REAL(DOUBLE), PARAMETER :: SecondsToInternalTime=0.968288669D+15
+    REAL(DOUBLE), PARAMETER :: BohrsToAngstroms=0.5291772083D0
+!-------------------------------------------------------------------------------
 !  Other numbers
 !
    INTEGER,      PARAMETER :: BIG_INT      =2**28               ! bigest integer*4
@@ -84,6 +92,12 @@ MODULE GlobalScalars
    INTEGER, PARAMETER      :: Inp=77                 ! Unit for ASCI input files
    INTEGER, PARAMETER      :: Out=88                 ! Unit for ASCI output files
    INTEGER, PARAMETER      :: LgF=99                 ! Unit for ASCI log files
+   INTEGER, PARAMETER      :: INP_UNIT=115  
+   INTEGER, PARAMETER      :: CRD_UNIT=110           
+   INTEGER, PARAMETER      :: VEL_UNIT=111 
+   INTEGER, PARAMETER      :: ENE_UNIT=112
+   INTEGER, PARAMETER      :: RES_IN_UNIT=113
+   INTEGER, PARAMETER      :: RES_OUT_UNIT=114
 !-------------------------------------------------  Matrix dimensions
    INTEGER, SAVE           :: NBasF,NEl,NAtoms
 #ifdef PARALLEL
