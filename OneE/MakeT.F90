@@ -100,7 +100,7 @@ PROGRAM MakeT
               ENDIF
            ENDDO
 #else
-           TK%MTrix%D(R:R+NN-1)=TBlok(AtA,AtB,BS,MD,Pair)
+           TK%MTrix%D(R:R+NN-1)=TBlok(BS,MD,Pair)
 #endif
            TK%ColPt%I(P)=AtB
            TK%BlkPt%I(P)=R

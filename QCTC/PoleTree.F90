@@ -72,8 +72,6 @@ MODULE PoleTree
         CALL InitPoleRoot
 !       Convert the density into a 3-D BinTree
         CALL SplitPole(PoleRoot)
-!       Delete the global array based density
-        CALL DeleteGlobals
 !       Make PoleTree tier by tier, recuring up from the bottom
         DO NTier=MaxTier,0,-1         
            CALL MakePoleTree(PoleRoot) 

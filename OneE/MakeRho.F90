@@ -204,7 +204,7 @@ PROGRAM MakeRho
               ENDDO
 #else
               NN = Pair%NA*Pair%NB
-              CALL RhoBlk(AtA,AtB,BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+              CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
 #endif
            ENDIF
         ENDDO

@@ -33,7 +33,7 @@ Libs =  $(F90_LIBRARIES)
 #
 ObjsS = SBlok.o     MakeS.o 
 ObjsT = TBlok.o     MakeT.o 
-ObjsR = RhoTools.o RhoBlok.o   MakeRho.o 
+ObjsR = RhoBlok.o RhoTools.o  MakeRho.o 
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o 
 #
