@@ -120,18 +120,18 @@ atomic eigenfunctions \cite{}.
 With periodic boundary conditions, the exact Hartree-Fock exchange matrix is 
 \cite{RDovesi00,MCausa88}
 \begin{equation}
-{\bf K} [{\bf k}] = \sum_{{\bf G}} {\bf K} [{\bf G}] e^{i {\bf k}\cdot {\bf G}} \, ,
+{\bf K} [{\bf k}] = \sum_{{\bf L}} {\bf K} [{\bf L}] e^{i {\bf k}\cdot {\bf L}} \, ,
 \label{Kinkspace}
 \end{equation}
 where
 \begin{equation}
-K_{ab} [{\bf G}] = - \frac{1}{2}
+K_{ab} [{\bf L}] = - \frac{1}{2}
 \sum _{{\bf H N},c d} P_{cd}[{\bf N}]
 \left(
       \phi        _a    
       \phi^{\bf H}_c    
 {\big | }
-      \phi^{\bf G}_b    
+      \phi^{\bf L}_b    
       \phi^{\bf H+N}_d  
 \right) 
 \label{CryEq}
@@ -142,7 +142,7 @@ is defined in real space, and the two-electron integrals, written in  chemist's 
       \phi        _a  
       \phi^{\bf H}_c  
 {\big | }
-      \phi^{\bf G}_b  
+      \phi^{\bf L}_b  
       \phi^{\bf H+N}_d
 \right)
 = \quad\quad\quad\quad\quad 
@@ -150,7 +150,7 @@ is defined in real space, and the two-electron integrals, written in  chemist's 
  \quad\quad\quad\quad\quad 
 \nonumber \\
 \iint d {\bf r} d {\bf r}'
-\frac{{\phi_a({\bf r}) \phi_c({\bf r}+{\bf H}})\phi_b({\bf r'}+{\bf G})\phi_d({\bf r'}+{\bf H}+{\bf{N})}}
+\frac{{\phi_a({\bf r}) \phi_c({\bf r}+{\bf H}})\phi_b({\bf r'}+{\bf L})\phi_d({\bf r'}+{\bf H}+{\bf{N})}}
 {{\left|{\bf r}-{\bf r'}\right|}} \, .
 \nonumber\\
 \end{eqnarray}
@@ -177,13 +177,13 @@ ${\bf k} = 0$.   In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equi
 reducing Eq.~(\ref{CryEq}) to the less cumbersome relation:
 \begin{equation}
 K_{ab}= -\frac{1}{2}
-\sum _{{\bf H G}, c d} P_{cd}
+\sum _{{\bf H L}, c d} P_{cd}
 \left(
       \phi_a    
-      \phi^{\bf H}_c    
+      \phi^{\bf H}_c     
 {\big | }
       \phi_b  
-      \phi^{\bf G}_d  
+      \phi^{\bf L}_d  
 \right)\, .
 \label{CryEq_2}
 \end{equation}
@@ -201,7 +201,7 @@ E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]
 \end{equation}
 where 
 \begin{equation}
-E_x[{\bf P}^a,{\bf P}^b] = {\rm Tr} \left[  {\bf P}^a \cdot {\bf K}^b  \right] \, ,
+E_x[{\bf P}^a,{\bf P}^b] = {\rm Tr} \left[  {\bf P}^a \cdot {\bf K}\left({\bf P}^b\right)  \right] \, ,
 \end{equation}
 and the superscripts label different density matrices. 
 
@@ -213,13 +213,13 @@ the Minimum Image Convention (MIC), which ensures that interactions are always c
 In computation of the Hartree-Fock exchange matrix, the MIC $\Gamma$-point approximation is just
 \begin{equation}
 K_{ab}=-\frac{1}{2}
-\sum _{{\bf H G} c d} P_{cd}
+\sum _{{\bf H L}, c d} P_{cd}
 \left(
       \phi        _a    
       \phi^{\bf H}_c    
 {\big | }
       \phi        _b    
-      \phi^{\bf G}_d  
+      \phi^{\bf L}_d  
 \right)_{\rm  MIC},
 \label{MIC}
 \end{equation}
@@ -227,7 +227,7 @@ where the MIC condition is applied in computation of the two-electron integrals
 at the contraction phase, ensuring that primitive charge distributions 
 interact consistently over a minimum distance.  In particular, if the primitive basis 
 function product $\phi_a \phi^{\bf H}_c$ is centered at ${\bf P}$ and the primitive product 
-$\phi_b \phi^{\bf G}_d$ is at ${\bf Q}$, then the minimum image convention is 
+$\phi_b \phi^{\bf L}_d$ is at ${\bf Q}$, then the minimum image convention is 
 applied to the interaction vector ${\bf PQ} \equiv {\bf P}-{\bf Q}$ using
 \begin{subequations}
 \begin{eqnarray}
@@ -312,7 +312,7 @@ together with inverse congruence transformations provided by sparse atom-blocked
 
 The Order N eXchange ({\sc ONX}) algorithm \cite{ESchwegler97} for computing the gas phase exchange matrix 
 has been modified by placing dual loops running over the lattice vectors 
-${\bf H}$ and ${\bf G}$ around the original ONX loop structures.  Two ordered bra and ket distribution 
+${\bf H}$ and ${\bf L}$ around the original ONX loop structures.  Two ordered bra and ket distribution 
 buffers are assembled for each lattice vector pair, which are then used to drive the basic {\sc ONX} algorithm.
 The Minimum Image Convention has been introduced into the primitive contraction stage, in the 
 Vertical Recurrence Relations component of a symmetry driven Head-Gordon Pople \cite{MHeadgordon88} scheme for 
