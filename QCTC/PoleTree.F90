@@ -50,9 +50,8 @@ MODULE PoleTree
            CALL MakePoleTree(PoleRoot) 
         ENDDO
 !       Reset Ell of PoleRoot
-        PoleRoot%Ell=SPEll
-        ! Set terminating link of root node
-        NULLIFY(PoleRoot%Travrse)
+        PoleRoot%Ell     = SPEll
+!
       END SUBROUTINE RhoToPoleTree
 !=====================================================================================
 !
@@ -153,6 +152,7 @@ MODULE PoleTree
                ENDDO
                MaxUnsold  = CQ*(P%DMax2**(Half*DBLE(SPEll+1)))
                P%Strength = MaxUnsold**(Two/DBLE(SPEll+2))
+!
             ENDIF
          ELSE
 !           Keep on truckin ...
