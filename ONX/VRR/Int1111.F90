@@ -1,4 +1,4 @@
-SUBROUTINE Int1111(N,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
+SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   USE DerivedTypes
   USE GlobalScalars
   IMPLICIT NONE
@@ -8,7 +8,7 @@ SUBROUTINE Int1111(N,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   TYPE(DBuf),INTENT(IN)    :: DB            ! ONX distribution buffers
   TYPE(IBuf),INTENT(INOUT) :: IB            ! ONX 2-e eval buffers
   TYPE(DSL),INTENT(IN)     :: SB            ! ONX distribution pointers
-  INTEGER       :: N,CBra,CKet
+  INTEGER       :: N,IntCode,CBra,CKet
   REAL(DOUBLE)  :: DisBufB(DB%MAXC)
   REAL(DOUBLE)  :: PrmBufB(DB%MAXP,CBra+DB%MInfo)
   REAL(DOUBLE)  :: C(N),U(1)
