@@ -52,6 +52,7 @@ F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 LD          = $(F90) 
 #
 LDMISC      = $(F_PROF) -v 
+#                        -Wl,-Bstatic # make statically linked executables
 #
 LDFLAGS     = $(LDMISC) -o 
 #
