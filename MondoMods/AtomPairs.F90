@@ -23,9 +23,7 @@ MODULE AtomPairs
 ! Global variables
 !---------------------------------------------------------------------------
 #ifdef PERIODIC
-!  LOGICAL,DIMENSION(3)        :: PBCXYZ     
-!  REAL(DOUBLE),DIMENSION(3,3) :: LATVEC     
-  TYPE(CellSet)               :: CS,CSMM1,CSMM2
+  TYPE(CellSet)                :: CS,CSMM1,CSMM2
 #endif
 CONTAINS
 !--------------------------------------------------------------------------
@@ -129,7 +127,7 @@ CONTAINS
 !
   END SUBROUTINE SetCellNumber
 !----------------------------------------------------------------------------
-!     Convert from Atomic Coordinates  to Fractional Coordinates
+! Convert from Atomic Coordinates  to Fractional Coordinates
 !----------------------------------------------------------------------------
   FUNCTION AtomToFrac(GM,VecA) RESULT(VecF)
     TYPE(CRDS)                 :: GM
@@ -142,7 +140,7 @@ CONTAINS
 !
   END FUNCTION AtomToFrac
 !-----------------------------------------------------------------------------
-!     Convert from Fractional Coordinates to Atomic Coordinates
+! Convert from Fractional Coordinates to Atomic Coordinates
 !-----------------------------------------------------------------------------
   FUNCTION FracToAtom(GM,VecF) RESULT(VecA)
     TYPE(CRDS)                 :: GM
@@ -155,7 +153,7 @@ CONTAINS
 !
   END FUNCTION FracToAtom
 !-----------------------------------------------------------------------------
-!     In Perodic Systems, Cyclically put positions back in the Fracional Box
+! In Perodic Systems, Cyclically put positions back in the Fracional Box (in Frac Coord)
 !-----------------------------------------------------------------------------
   SUBROUTINE FracCyclic(GM,VecF)
     TYPE(CRDS)                 :: GM        
@@ -176,7 +174,19 @@ CONTAINS
     ENDDO
   END SUBROUTINE FracCyclic
 !------------------------------------------------------------------------------
-!     Test to See if in the Box (Fractional Coordinates)
+! In Perodic Systems, Cyclically put positions back in the Atomic Box (in Atom Coord)
+!------------------------------------------------------------------------------
+  SUBROUTINE AtomCyclic(GM,VecA)
+    TYPE(CRDS)                 :: GM        
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF     
+!
+    VecF = AtomToFrac(GM,VecA)
+    CALL FracCyclic(GM,VecF)
+    VecA = FracToAtom(GM,VecF)
+!
+  END SUBROUTINE AtomCyclic
+!------------------------------------------------------------------------------
+! Test to See if in the Box (Fractional Coordinates)
 !------------------------------------------------------------------------------
   FUNCTION InFracBox(GM,VecF)
     TYPE(CRDS)                 :: GM     
