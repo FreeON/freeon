@@ -1759,7 +1759,7 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
-CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
+!CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
