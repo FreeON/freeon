@@ -54,6 +54,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 (* Minimal *)
+
    Classes = { {0,0},{1,1}} 
 
  
@@ -202,7 +203,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeNull->{dI},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 
@@ -391,9 +392,16 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                                          "+(OD+",ToString[l-LBegin[ll]],")*LDD"];
 
 
-                                              Kount = Kount + 1;
-                                              IList=Append[IList,ZippyForPres];
-                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+
+
+                           Kount = Kount + 1;
+                           IList=Append[IList,ZippyForPres];
+                           oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+
+                           Kount = Kount + 1;
+                           IList=Append[IList,ZippyForPres];
+                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["WRITE(*,*)",ToString[Kount],", OffSet !"]];
+
 
                                               Do[ 
 

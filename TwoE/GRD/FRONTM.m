@@ -68,7 +68,7 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],") :: HRRTmp "]];
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRR "]];
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRRA,HRRB "]];
-           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax1],",",ToString[LEnd[lmax]],") :: HRRC "]];
+           WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax1],",",ToString[LEnd[lmax]],") :: HRRC "]];
            WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
 
            WS["INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L"];
@@ -77,7 +77,7 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS[StringJoin["CALL InitDbl(",ToString[BraMax],"*",ToString[KetMax],",HRR(1,1,1))"]];
            WS[StringJoin["CALL InitDbl(",ToString[BraMax1],"*",ToString[KetMax],",HRRA(1,1,1))"]];
            WS[StringJoin["CALL InitDbl(",ToString[BraMax1],"*",ToString[KetMax],",HRRB(1,1,1))"]];
-           WS[StringJoin["CALL InitDbl(",ToString[BraMax1],"*",ToString[KetMax1],",HRRC(1,1,1))"]];
+           WS[StringJoin["CALL InitDbl(",ToString[BraMax],"*",ToString[KetMax1],",HRRC(1,1,1))"]];
 
            WS["Ax=ACInfo%Atm1X"];
            WS["Ay=ACInfo%Atm1Y"];

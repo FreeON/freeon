@@ -250,7 +250,6 @@ tt=tt+t2-t1
              RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
                 !
-!WRITE(*,*)' AtA = ',Ata, ' AtB = ',AtB
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
                    !
                    BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
@@ -312,9 +311,6 @@ tt=tt+t2-t1
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
 
                             INCLUDE 'ERIInterfaceB.Inc'
-
-!                            CALL ShellPrint(NBFA,NBFB,NBFC,NBFD,AALen,BBLen,CCLen,DDLen,  &
-!                                            OffSet%A,OffSet%B,OffSet%C,OffSet%D,IntType,C(1))
 
                             NInts=NInts+DBLE(LocNInt)
 !#ifdef GTRESH

@@ -10,7 +10,7 @@
       USE GammaF2
       IMPLICIT REAL(DOUBLE) (W)
       INTEGER        :: LBra,LKet,CDOffSet
-      REAL(DOUBLE)   :: PrmBufB(8,LBra),PrmBufK(8,LKet)
+      REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE)  :: INTGRL(*)

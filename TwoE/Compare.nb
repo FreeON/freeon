@@ -41,9 +41,9 @@ Wolfram Research.
 
 (*NotebookFileLineBreakTest
 NotebookFileLineBreakTest*)
-(*NotebookOptionsPosition[      2818,         80]*)
-(*NotebookOutlinePosition[      3446,        102]*)
-(*  CellTagsIndexPosition[      3402,         98]*)
+(*NotebookOptionsPosition[      2790,         79]*)
+(*NotebookOutlinePosition[      3421,        101]*)
+(*  CellTagsIndexPosition[      3377,         97]*)
 (*WindowFrame->Normal*)
 
 
@@ -52,7 +52,7 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[
-    \(\(\(\[IndentingNewLine]\)\(n = 14\[IndentingNewLine]
+    \(\(\(\[IndentingNewLine]\)\(n = 22\[IndentingNewLine]
     \(ClearAll[Int, Int2];\)\[IndentingNewLine]
     \(Int = 
         Table[Table[Table[Table[0, {i, n}], {j, n}], {k, n}], {l, 
@@ -60,12 +60,11 @@ Cell[BoxData[
     \(Int2 = 
         Table[Table[Table[Table[0, {i, n}], {j, n}], {k, n}], {l, 
             n}];\)\[IndentingNewLine]
-    \(<< /home/mchalla/MONDO_December_25_03/SCFeqs/MMA/SCFDev/scf.in;\)\
-\[IndentingNewLine]
-    \(<< /home/mchalla/MONDO_December_25_03/TwoE/fort.33;\)\)\)\)], "Input"],
+    \(<< /n/srv1/mchalla/MONDO/SCFeqs/MMA/SCFDev/scf.in;\)\[IndentingNewLine]
+    \(<< /n/srv1/mchalla/MONDO/TwoE/fort.44;\)\)\)\)], "Input"],
 
 Cell[BoxData[
-    \(14\)], "Output"]
+    \(22\)], "Output"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -74,14 +73,14 @@ Cell[BoxData[
                 Abs[Int[\([i, j, k, l]\)] - Int2[\([i, j, k, l]\)]] > 
                   0.000001, \ 
                 Print[\ "\<(\>", i, "\<,\>", j, "\<|\>", k, "\<,\>", 
-                  l, "\<) = \>", Int[\([i, j, k, l]\)], "\< \>", 
+                  l, "\<) = \>", Int[\([i, j, k, l]\)], "\<,\>", 
                   Int2[\([i, j, k, l]\)]]];\)\[IndentingNewLine], {i, 
               n}], {j, n}], {k, n}], {l, n}]\)], "Input"]
 },
 FrontEndVersion->"4.2 for X",
-ScreenRectangle->{{0, 1024}, {0, 768}},
+ScreenRectangle->{{0, 1920}, {0, 1200}},
 WindowSize->{814, 566},
-WindowMargins->{{Automatic, 0}, {19, Automatic}}
+WindowMargins->{{539, Automatic}, {58, Automatic}}
 ]
 
 (*******************************************************************
@@ -103,10 +102,10 @@ CellTagsIndex->{}
 Notebook[{
 
 Cell[CellGroupData[{
-Cell[1776, 53, 527, 11, 123, "Input"],
-Cell[2306, 66, 36, 1, 27, "Output"]
+Cell[1776, 53, 499, 10, 123, "Input"],
+Cell[2278, 65, 36, 1, 27, "Output"]
 }, Open  ]],
-Cell[2357, 70, 457, 8, 91, "Input"]
+Cell[2329, 69, 457, 8, 91, "Input"]
 }
 ]
 *)

@@ -7,9 +7,12 @@
       REAL(DOUBLE)  :: HRR(*)
       REAL(DOUBLE)  :: INTGRL(*)
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=(2,1|
-      INTGRL(OffSet)=HRR(2)
+      INTGRL(OffSet)=HRR(2)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=(3,1|
-      INTGRL(OffSet)=HRR(3)
+      INTGRL(OffSet)=HRR(3)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=(4,1|
-      INTGRL(OffSet)=HRR(4)
+      INTGRL(OffSet)=HRR(4)+  & 
+        INTGRL(OffSet)
 END SUBROUTINE BraHRR31

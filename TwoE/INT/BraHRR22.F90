@@ -7,47 +7,63 @@
       REAL(DOUBLE)  :: HRR(*)
       REAL(DOUBLE)  :: INTGRL(*)
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=(1,1|
-      INTGRL(OffSet)=HRR(11)
+      INTGRL(OffSet)=HRR(11)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+CDOffSet !=(2,1|
-      INTGRL(OffSet)=HRR(12)
+      INTGRL(OffSet)=HRR(12)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+CDOffSet !=(3,1|
-      INTGRL(OffSet)=HRR(13)
+      INTGRL(OffSet)=HRR(13)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+3)*LDA+(OB+0)*LDB+CDOffSet !=(4,1|
-      INTGRL(OffSet)=HRR(14)
+      INTGRL(OffSet)=HRR(14)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=(1,2|
       INTGRL(OffSet)=ABx*HRR(15)+  & 
-        HRR(16)
+        HRR(16)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=(1,3|
       INTGRL(OffSet)=ABy*HRR(15)+  & 
-        HRR(17)
+        HRR(17)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=(1,4|
       INTGRL(OffSet)=ABz*HRR(15)+  & 
-        HRR(18)
+        HRR(18)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+1)*LDA+(OB+1)*LDB+CDOffSet !=(2,2|
       INTGRL(OffSet)=ABx*HRR(2)+  & 
-        HRR(5)
+        HRR(5)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+2)*LDA+(OB+1)*LDB+CDOffSet !=(3,2|
       INTGRL(OffSet)=ABx*HRR(3)+  & 
-        HRR(6)
+        HRR(6)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+3)*LDA+(OB+1)*LDB+CDOffSet !=(4,2|
       INTGRL(OffSet)=ABx*HRR(4)+  & 
-        HRR(8)
+        HRR(8)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+1)*LDA+(OB+2)*LDB+CDOffSet !=(2,3|
       INTGRL(OffSet)=ABy*HRR(2)+  & 
-        HRR(6)
+        HRR(6)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+2)*LDA+(OB+2)*LDB+CDOffSet !=(3,3|
       INTGRL(OffSet)=ABy*HRR(3)+  & 
-        HRR(7)
+        HRR(7)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+3)*LDA+(OB+2)*LDB+CDOffSet !=(4,3|
       INTGRL(OffSet)=ABy*HRR(4)+  & 
-        HRR(9)
+        HRR(9)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+1)*LDA+(OB+3)*LDB+CDOffSet !=(2,4|
       INTGRL(OffSet)=ABz*HRR(2)+  & 
-        HRR(8)
+        HRR(8)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+2)*LDA+(OB+3)*LDB+CDOffSet !=(3,4|
       INTGRL(OffSet)=ABz*HRR(3)+  & 
-        HRR(9)
+        HRR(9)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+3)*LDA+(OB+3)*LDB+CDOffSet !=(4,4|
       INTGRL(OffSet)=ABz*HRR(4)+  & 
-        HRR(10)
+        HRR(10)+  & 
+        INTGRL(OffSet)
 END SUBROUTINE BraHRR22

@@ -2,23 +2,24 @@
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
       INTEGER :: LB
-      REAL(DOUBLE) :: HRR(1:LB,35,10)
+      REAL(DOUBLE) :: HRR(1:LB,20,4)
       !=|5,2)
       HRR(1:LB,5,2)=CDx*HRR(1:LB,5,1)+  & 
                         HRR(1:LB,11,1)
       !=|6,2)
-      HRR(1:LB,6,2)=1.73205080756888D0*CDx*HRR(1:LB,6,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,12,1)
+      HRR(1:LB,6,2)=CDx*HRR(1:LB,6,1)+  & 
+                        HRR(1:LB,12,1)
       !=|7,2)
       HRR(1:LB,7,2)=CDx*HRR(1:LB,7,1)+  & 
                         HRR(1:LB,13,1)
       !=|8,2)
-      HRR(1:LB,8,2)=1.73205080756888D0*CDx*HRR(1:LB,8,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,15,1)
+      HRR(1:LB,8,2)=CDx*HRR(1:LB,8,1)+  & 
+                        HRR(1:LB,15,1)
       !=|9,2)
-      HRR(1:LB,9,2)=1.73205080756888D0*CDx*HRR(1:LB,9,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,16,1)
+      HRR(1:LB,9,2)=CDx*HRR(1:LB,9,1)+  & 
+                        HRR(1:LB,16,1)
       !=|10,2)
       HRR(1:LB,10,2)=CDx*HRR(1:LB,10,1)+  & 
                         HRR(1:LB,18,1)
@@ -26,17 +27,17 @@
       HRR(1:LB,5,3)=CDy*HRR(1:LB,5,1)+  & 
                         HRR(1:LB,12,1)
       !=|6,3)
-      HRR(1:LB,6,3)=1.73205080756888D0*CDy*HRR(1:LB,6,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,13,1)
+      HRR(1:LB,6,3)=CDy*HRR(1:LB,6,1)+  & 
+                        HRR(1:LB,13,1)
       !=|7,3)
       HRR(1:LB,7,3)=CDy*HRR(1:LB,7,1)+  & 
                         HRR(1:LB,14,1)
       !=|8,3)
-      HRR(1:LB,8,3)=1.73205080756888D0*CDy*HRR(1:LB,8,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,16,1)
+      HRR(1:LB,8,3)=CDy*HRR(1:LB,8,1)+  & 
+                        HRR(1:LB,16,1)
       !=|9,3)
-      HRR(1:LB,9,3)=1.73205080756888D0*CDy*HRR(1:LB,9,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,17,1)
+      HRR(1:LB,9,3)=CDy*HRR(1:LB,9,1)+  & 
+                        HRR(1:LB,17,1)
       !=|10,3)
       HRR(1:LB,10,3)=CDy*HRR(1:LB,10,1)+  & 
                         HRR(1:LB,19,1)
@@ -44,17 +45,17 @@
       HRR(1:LB,5,4)=CDz*HRR(1:LB,5,1)+  & 
                         HRR(1:LB,15,1)
       !=|6,4)
-      HRR(1:LB,6,4)=1.73205080756888D0*CDz*HRR(1:LB,6,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,16,1)
+      HRR(1:LB,6,4)=CDz*HRR(1:LB,6,1)+  & 
+                        HRR(1:LB,16,1)
       !=|7,4)
       HRR(1:LB,7,4)=CDz*HRR(1:LB,7,1)+  & 
                         HRR(1:LB,17,1)
       !=|8,4)
-      HRR(1:LB,8,4)=1.73205080756888D0*CDz*HRR(1:LB,8,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,18,1)
+      HRR(1:LB,8,4)=CDz*HRR(1:LB,8,1)+  & 
+                        HRR(1:LB,18,1)
       !=|9,4)
-      HRR(1:LB,9,4)=1.73205080756888D0*CDz*HRR(1:LB,9,1)+  & 
-                        1.73205080756888D0*HRR(1:LB,19,1)
+      HRR(1:LB,9,4)=CDz*HRR(1:LB,9,1)+  & 
+                        HRR(1:LB,19,1)
       !=|10,4)
       HRR(1:LB,10,4)=CDz*HRR(1:LB,10,1)+  & 
                         HRR(1:LB,20,1)

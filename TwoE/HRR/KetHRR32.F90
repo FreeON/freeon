@@ -2,8 +2,9 @@
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
       INTEGER :: LB
-      REAL(DOUBLE) :: HRR(1:LB,23,10)
+      REAL(DOUBLE) :: HRR(1:LB,13,4)
       !=|2,2)
       HRR(1:LB,2,2)=CDx*HRR(1:LB,2,1)+  & 
                         HRR(1:LB,5,1)
@@ -31,10 +32,21 @@
       !=|4,4)
       HRR(1:LB,4,4)=CDz*HRR(1:LB,4,1)+  & 
                         HRR(1:LB,10,1)
+      !=|1,2)
+      HRR(1:LB,1,2)=CDx*HRR(1:LB,1,1)+  & 
+                        HRR(1:LB,2,1)
+      !=|1,3)
+      HRR(1:LB,1,3)=CDy*HRR(1:LB,1,1)+  & 
+                        HRR(1:LB,3,1)
+      !=|1,4)
+      HRR(1:LB,1,4)=CDz*HRR(1:LB,1,1)+  & 
+                        HRR(1:LB,4,1)
       !=|2,1)
       HRR(1:LB,2,1)=HRR(1:LB,11,1)
       !=|3,1)
       HRR(1:LB,3,1)=HRR(1:LB,12,1)
       !=|4,1)
       HRR(1:LB,4,1)=HRR(1:LB,13,1)
+      !=|1,1)
+      HRR(1:LB,1,1)=HRR(1:LB,10,1)
 END SUBROUTINE KetHRR32

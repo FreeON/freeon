@@ -54,7 +54,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
-			(*			Return[1]; *)
+			Return[1];
                         L=LMN[[1]];
                         M=LMN[[2]];
                         N=LMN[[3]];
@@ -63,7 +63,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-Classes = {{0,0},{0,1},{0,2},{1,1},{2,2},{3,3},{4,4}};
+Classes = {{0,0},{0,1},{0,2},{1,1},{2,2},{3,3}}; 
 
 CType[1]  = "s";
 CType[2]  = "sp";
@@ -116,8 +116,8 @@ WriteString[Subroutine,StringJoin["   SUBROUTINE ",Subname,"(LB,HRR) \n"]];
 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 LenK=LEnd[Classes[[kc,2]]]-LBegin[Classes[[kc,1]]]+1;
-LenL=LEnd[Classes[[lc,2]]+1];
-KEnd=LEnd[kmax+lmax+1];
+LenL=LEnd[Classes[[lc,2]]];
+KEnd=LEnd[kmax+lmax];
 
 KetMax=KEnd;
 
@@ -129,6 +129,7 @@ WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 WS["USE DerivedTypes"];
 WS["USE VScratchB"];
 WS["USE GlobalScalars"];
+WS["IMPLICIT REAL(DOUBLE) (W)"]; 
 WS["INTEGER :: LB"];							      
 WS[StringJoin["REAL(DOUBLE) :: HRR(1:LB,",ToString[KetMax],",",ToString[LenL],")"]];
 
@@ -200,7 +201,7 @@ Do[Do[
                   ]; 
  ,{k,LBegin[kl],LEnd[kl]}]
  ,{l,LBegin[ll],LEnd[ll]}]
- ,{kl,kmax,kmin,-1}]
+ ,{kl,kmax,0,-1}]
  ,{ll,lmax,lmin,-1}];
   oList=Append[oList,{" "->"","xx"->",","BB"->")","KK"->"|","In"->"INTGRL","abc"->"1:LB"}];
   oList=Flatten[oList];
@@ -275,7 +276,7 @@ WriteString[Makefile,"purge: clean\n",
                             TAB,"rm -f $(MONDO_LIB)/libHRR.a\n",
                             TAB,"rm -f $(REMOVESRCE)\n"];
 WriteString[Makefile,"ppurge: purge\n",
-                              TAB,"rm -f HRR*.F90 \n"];
+                              TAB,"rm -f KetHRR*.F90 \n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"source:\n",
                              TAB,"math<HRR.m>HRR.out\n",

@@ -9,28 +9,34 @@
       OffSet=(OA+0)*LDA+(OB+0)*LDB+CDOffSet !=(1,5|
       INTGRL(OffSet)=ABx*(ABx*HRR(1)+  & 
         2.D0*HRR(2))+  & 
-        HRR(5)
+        HRR(5)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+CDOffSet !=(1,6|
-      INTGRL(OffSet)=1.73205080756888D0*ABy*HRR(2)+  & 
-        ABx*(1.73205080756888D0*ABy*HRR(1)+  & 
-        1.73205080756888D0*HRR(3))+  & 
-        1.73205080756888D0*HRR(6)
+      INTGRL(OffSet)=ABy*HRR(2)+  & 
+        ABx*(ABy*HRR(1)+  & 
+        HRR(3))+  & 
+        HRR(6)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+CDOffSet !=(1,7|
       INTGRL(OffSet)=ABy*(ABy*HRR(1)+  & 
         2.D0*HRR(3))+  & 
-        HRR(7)
+        HRR(7)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+3)*LDB+CDOffSet !=(1,8|
-      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(2)+  & 
-        ABx*(1.73205080756888D0*ABz*HRR(1)+  & 
-        1.73205080756888D0*HRR(4))+  & 
-        1.73205080756888D0*HRR(8)
+      INTGRL(OffSet)=ABz*HRR(2)+  & 
+        ABx*(ABz*HRR(1)+  & 
+        HRR(4))+  & 
+        HRR(8)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+4)*LDB+CDOffSet !=(1,9|
-      INTGRL(OffSet)=1.73205080756888D0*ABz*HRR(3)+  & 
-        ABy*(1.73205080756888D0*ABz*HRR(1)+  & 
-        1.73205080756888D0*HRR(4))+  & 
-        1.73205080756888D0*HRR(9)
+      INTGRL(OffSet)=ABz*HRR(3)+  & 
+        ABy*(ABz*HRR(1)+  & 
+        HRR(4))+  & 
+        HRR(9)+  & 
+        INTGRL(OffSet)
       OffSet=(OA+0)*LDA+(OB+5)*LDB+CDOffSet !=(1,10|
       INTGRL(OffSet)=ABz*(ABz*HRR(1)+  & 
         2.D0*HRR(4))+  & 
-        HRR(10)
+        HRR(10)+  & 
+        INTGRL(OffSet)
 END SUBROUTINE BraHRR16

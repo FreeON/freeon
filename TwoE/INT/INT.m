@@ -54,7 +54,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
-			(* Return[1]; *) 
+			Return[1];
                         L=LMN[[1]];
                         M=LMN[[2]];
                         N=LMN[[3]];
@@ -67,7 +67,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
    Classes = { {0,0},{1,1}} 
  *)
 
-  Classes = { {0,0},{0,1},{1,1} } ; (*,{2,2}};,{3,3}}; *)
+  Classes = { {0,0},{0,1},{1,1},{2,2}};
 
 (* Maximal    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}  *)
 

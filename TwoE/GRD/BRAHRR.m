@@ -96,7 +96,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 
@@ -109,7 +109,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPY,",L)-",ToString[MK],"D0*HRR(1:",BS,",",KMY,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 
@@ -121,7 +121,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPZ,",L)-",ToString[NK],"D0*HRR(1:",BS,",",KMZ,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 
@@ -173,7 +173,7 @@ Do[Do[
                 IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"DV",CartS[[cart]],"XX",ToString[j],"KK"]]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
  
-	        hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b]);
+	        hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b])+GRADIENT[OffSet,cart+GOA-1];
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
@@ -184,7 +184,7 @@ Do[Do[
                 IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"XX",ToString[j],"DV",CartS[[cart]],"KK"]]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
 
-	        hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus]);
+	        hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus])+GRADIENT[OffSet,cart+GOB-1];
                 Kount = Kount + 1;
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
@@ -233,7 +233,7 @@ Do[Do[
              IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"XX",ToString[j],"KK"]]];
              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
  
-             hrr=Normy[a]*Normy[b]*HRRBra["",a,b];
+             hrr=Normy[a]*Normy[b]*HRRBra["",a,b]+GRADIENT[OffSet,cart+GOC];;
              Kount = Kount + 1;
              IList=Append[IList,Horner[hrr]];
              HRRAddress=StringJoin[ToString[i],",",ToString[j]];
@@ -253,7 +253,8 @@ Do[Do[
 
  spaces="                                ";
  oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                                ",
-     "QRS"->StringJoin["-GRADIENT(OffSet,Cart+GOA)&\n",spaces,"-GRADIENT(OffSet,Cart+GOB)&\n",spaces,"-GRADIENT(OffSet,Cart+GOC)"]}];
+     "QRS"->StringJoin[" GRADIENT(OffSet,Cart+GOD)&\n",spaces,"-GRADIENT(OffSet,Cart+GOA)&\n",spaces,
+                       "-GRADIENT(OffSet,Cart+GOB)&\n",spaces,"-GRADIENT(OffSet,Cart+GOC)"]}];
 
  oList=Flatten[oList];
 

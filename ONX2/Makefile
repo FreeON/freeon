@@ -31,10 +31,9 @@ include $(MONDO_HOME)/Includes/RemoveAll
 
 CPPMISC = -DONX2_PARALLEL -DGTRESH
 
-#VW EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE 
-EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE/MSC  -I$(MONDO_HOME)/TwoE/INT
+EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE  -I$(MONDO_HOME)/TwoE/MSC  -I$(MONDO_HOME)/TwoE/INT -I$(MONDO_HOME)/TwoE/GRD
 
-all: ONX2 #VW GONX2
+all: ONX2 GONX2
 
 Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	  ONXFillOut.o Stats.o ONXRng.o \
@@ -43,19 +42,20 @@ Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 #
 GObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
-	   IntSSSS.o ONX2List.o GONX2ComputDK.o GONX2.o
+	   IntSSSS.o  GONX2ComputDK.o GONX2.o ONX2List.o
 #
 ReleaseFiles= 
 #$(LAPACK)
 #VW Libs =  $(F90_LIBRARIES) -lTwoE $(LAPACK)
-Libs =  $(F90_LIBRARIES) -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
+
 #
 ONX2:	$(Objects)
-	$(LD) $(LDFLAGS) ONX2 $(Objects) $(Libs)
+	$(LD) $(LDFLAGS) ONX2 $(Objects) $(F90_LIBRARIES) -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
 	mv ONX2 $(MONDO_EXEC)/ONX
+#-lGRD -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
 #
 GONX2:	$(GObjects)
-	$(LD) $(LDFLAGS) GONX2 $(GObjects) $(Libs)
+	$(LD) $(LDFLAGS) GONX2 $(GObjects) $(F90_LIBRARIES) -lGRD -lINT -lVRR -lHRR -lTwoEMisc $(LAPACK)
 	mv GONX2 $(MONDO_EXEC)/GONX
 #
 release:purge $(ReleaseFiles)

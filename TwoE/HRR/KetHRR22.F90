@@ -2,8 +2,9 @@
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
+      IMPLICIT REAL(DOUBLE) (W)
       INTEGER :: LB
-      REAL(DOUBLE) :: HRR(1:LB,34,10)
+      REAL(DOUBLE) :: HRR(1:LB,18,4)
       !=|2,2)
       HRR(1:LB,2,2)=CDx*HRR(1:LB,2,1)+  & 
                         HRR(1:LB,5,1)

@@ -184,7 +184,7 @@ PROGRAM ONX2
   Time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(Time1)
-!VW  CALL TrnMatBlk(BSp,GMp,D)
+  CALL TrnMatBlk(BSp,GMp,D)
   CALL CPU_TIME(Time2)
 #endif
   TmTM = Time2-Time1
@@ -277,7 +277,7 @@ PROGRAM ONX2
   CALL CPU_TIME(Time2)
 #endif
   TmKx = Time2-Time1
-  !WRITE(*,*) 'Compute Kx:ok',Time2-Time1
+  WRITE(*,*) 'Compute Kx:ok',Time2-Time1
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
@@ -315,7 +315,7 @@ PROGRAM ONX2
   time2 = MPI_WTIME()
 #else
   CALL CPU_TIME(time1)
-!VW  CALL TrnMatBlk(BSc,GMc,Kx)
+  CALL TrnMatBlk(BSc,GMc,Kx)
   CALL CPU_TIME(time2)
 #endif
   TmTM = time2-time1

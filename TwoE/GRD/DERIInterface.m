@@ -57,7 +57,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
    Classes = { {0,0},{1,1}} 
 *)
 (* Maximal *)
-   Classes = { {0,0},{0,1},{1,1}}
+ Classes = { {0,0},{0,1},{1,1},{2,2}}
 
 
 CType[1]  = "S";
@@ -218,7 +218,7 @@ Do[Do[Do[Do[
                   ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
                                        ArgString4,", & \n ",ArgString5,", & \n ", \
                                        ArgString6,", & \n ",ArgString7,", & \n ", \
-                                       ArgString8,",NIntBlk,GMc%PBC,dC(1,1)"];
+                                       ArgString8,",NIntBlk,GMc%PBC,C(1)"];
 
 
 
@@ -313,7 +313,7 @@ Do[Do[
    ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
              ArgString4,",",ArgString5,",", \
              ToString[(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2], \
-             ",1,4,7,10,GMc%PBC,dC(1,1)"]; (* 1,4,7,10 -> THIS IS NOT RIGHT, BUT DOES NOT MATTER*)
+             ",1,4,7,10,GMc%PBC,C(1)"]; (* 1,4,7,10 -> THIS IS NOT RIGHT, BUT DOES NOT MATTER*)
 
    WS[StringJoin["  CALL dIntB",ToString[ijklType],"(",ArgString,")"]];
 

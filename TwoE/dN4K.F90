@@ -1,6 +1,6 @@
-SUBROUTINE CompareBlock(AtAOff,AtBOff,AtCOff,AtDOff,NA,NB,NC,ND,I,dI)
+SUBROUTINE CompareBlock(AtAOff,AtBOff,AtCOff,AtDOff,NA,NB,NC,ND,idir,I,dI)
   USE DerivedTypes
-  INTEGER :: AtAOff,AtBOff,AtCOff,AtDOff,NA,NB,NC,ND,IA,IB,IC,ID
+  INTEGER :: AtAOff,AtBOff,AtCOff,AtDOff,NA,NB,NC,ND,IA,IB,IC,ID,idir
   REAL(DOUBLE) :: Div
   REAL(DOUBLE), DIMENSION (1:NA,1:NC,1:NB,1:ND) :: I,dI
   DO IA=1,NA
@@ -8,20 +8,23 @@ SUBROUTINE CompareBlock(AtAOff,AtBOff,AtCOff,AtDOff,NA,NB,NC,ND,I,dI)
         DO IB=1,NB
            DO ID=1,ND
               Div=1.0d0
-              IF(ABS(dI(IA,IC,IB,ID)).GT.1d-16)Div=dI(IA,IC,IB,ID)
+              IF(ABS(I(IA,IC,IB,ID)).GT.1d-6)Div=dI(IA,IC,IB,ID)
               IF(ABS((I(IA,IC,IB,ID)-dI(IA,IC,IB,ID))/Div)> 1D-4)THEN 
-                 WRITE(*,101)IA+AtAOff,IC+AtCOff,IB+AtBOff,ID+AtDOff,I(IA,IC,IB,ID),dI(IA,IC,IB,ID)
+                 WRITE(*,101)IA+AtAOff,IC+AtCOff,IB+AtBOff,ID+AtDOff,idir,I(IA,IC,IB,ID),dI(IA,IC,IB,ID)
+                 STOP
               ENDIF
            ENDDO
         ENDDO
      ENDDO
   ENDDO
 !101 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',F20.16,', ',F20.16)
-101 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',E24.16,', ',E24.16)
+101 FORMAT(' (',I3,',',I3,'|',I3,',',I3,')_',i1,' = ',E24.16,', ',E24.16)
 201 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',D22.16)
 301 FORMAT(1x,'Int2[[',I3,',',I3,',',I3,',',I3,']] = ',F19.16,'*2^(',I3,');')
   
 END SUBROUTINE CompareBlock
+
+
 
 PROGRAM dN4KTest
   USE DerivedTypes
@@ -54,7 +57,7 @@ PROGRAM dN4KTest
   REAL(DOUBLE)                          :: Tmp1,Grad
   TYPE(AtomPr), DIMENSION(100)          :: ACAtmPair,BDAtmPair
   TYPE(ONX2OffSt) :: OffSet
-  INTEGER, PARAMETER                     :: MaxBK=10
+  INTEGER, PARAMETER                     :: MaxBK=10000
   REAL(DOUBLE) , DIMENSION(MaxBK)       :: C,Cm,Cp
   REAL(DOUBLE) , DIMENSION(MaxBK,12)    :: dC
   REAL(DOUBLE) , DIMENSION(:,:), ALLOCATABLE :: GradKx
@@ -103,7 +106,7 @@ PROGRAM dN4KTest
               BDAtmInfo%Atm2X=GMc%Carts%D(1,AtD)
               BDAtmInfo%Atm2Y=GMc%Carts%D(2,AtD)
               BDAtmInfo%Atm2Z=GMc%Carts%D(3,AtD)
-              DO iDir=3,3              
+              DO iDir=12,12
                  IF(iDir==3)THEN
                     Tmp1=ACAtmInfo%Atm1Z
                  ELSEIF(iDir==6)THEN
@@ -166,6 +169,9 @@ PROGRAM dN4KTest
                                 iFBD=iFBD+1
                                 DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                                 IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+
+
+
                                 INCLUDE 'ERIInterfaceB.Inc'
                                 OffSet%D=OffSet%D+DDLen
                              ENDDO ! End blkfunc on D
@@ -187,7 +193,7 @@ PROGRAM dN4KTest
                  CALL GetAtomPair2(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1),GRADIENTS_O=.TRUE.)
                  CALL GetAtomPair2(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1),GRADIENTS_O=.TRUE.)
                  DO I=1,12
-                    CALL DBL_VECT_EQ_DBL_SCLR(MaxBK,dC(1,I),BIG_DBL)
+                    CALL DBL_VECT_EQ_DBL_SCLR(MaxBK,dC(1,I),Zero)
 !                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD*12,dC(1,I),BIG_DBL)
                     !CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),0D0)
                  ENDDO
@@ -209,10 +215,33 @@ PROGRAM dN4KTest
                              iFBD=iFBD+1
                              DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                              IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+!   SELECT CASE(IntType)
+!   CASE(3030303)
+!     CALL dInt3333(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & 
+!                  BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & 
+!                  ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & 
+!                  OffSet%A  ,1             , & 
+!                  OffSet%C-1,NBFA*NBFB     , & 
+!                  OffSet%B-1,NBFA          , & 
+!                  OffSet%D-1,NBFA*NBFB*NBFC, & 
+!                  1,4,7,10,NIntBlk,GMc%PBC,dC(1,1))
+!     CALL dIntB3030303(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & 
+!                  BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & 
+!                  ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & 
+!                  OffSet%A  ,1             , & 
+!                  OffSet%C-1,NBFA*NBFB     , & 
+!                  OffSet%B-1,NBFA          , & 
+!                  OffSet%D-1,NBFA*NBFB*NBFC, & 
+!                  1,4,7,10,NIntBlk,GMc%PBC,dC(1,1))
+!     LocNInt=972
+!   END SELECT
 
-!      WRITE(*,*)' AAAA GRAED = ',dC(:,:)
 
                              INCLUDE 'dERIInterfaceB.Inc'
+                             CALL ShellPrint2(NBFA,NBFB,NBFC,NBFD,AALen,BBLen,CCLen,DDLen,  &
+                                             AtAOff,AtBOff,AtCOff,AtDOff,                   &
+                                             OffSet%A,OffSet%B,OffSet%C,OffSet%D,IntType,dC(1,idir),C(1))
+
                              OffSet%D=OffSet%D+DDLen
                           ENDDO ! End blkfunc on D
                           OffSet%B=OffSet%B+BBLen
@@ -221,7 +250,7 @@ PROGRAM dN4KTest
                     ENDDO ! End blkfunc on C
                     OffSet%A=OffSet%A+AALen                 
                  ENDDO ! End blkfunc on A
-                 CALL CompareBlock(AtAOff,AtBOff,AtCOff,AtDOff,NBFA,NBFB,NBFC,NBFD,C(1),dC(1,iDir))
+!                 CALL CompareBlock(AtAOff,AtBOff,AtCOff,AtDOff,NBFA,NBFB,NBFC,NBFD,iDir,C(1),dC(1,iDir))
               ENDDO ! iDir
               AtDOff=AtDOff+NBFD
            ENDDO ! D

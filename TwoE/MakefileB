@@ -11,26 +11,22 @@ TwoELibs=$(F90_LIBRARIES) -lINT -lVRR -lHRR -lTwoEMisc
 all:    Misc HRRs VRRs Ints Grad
 #
 clean:  cMisc cHRRs cVRRs cInts cGrad
+	rm -f N4K dN4K
 #
 source: sHRRs sVRRs sInts sGrad
 #
 purge:  clean pMisc pHRRs pVRRs pInts pGrad
 #
-ppurge: purge ppMain pHRRs ppVRRs ppInts ppGrad 
-	rm N4K dN4K
+ppurge: purge ppMain ppHRRs ppVRRs ppInts ppGrad 
 #
 Misc:	
 	$(MAKE) -C MSC
 cMisc:	
-cVRRs:	
-	$(MAKE) -C VRR clean
-pVRRs:
-	$(MAKE) -C VRR purge
-ppVRRs:
-	$(MAKE) -C VRR ppurge
 	$(MAKE) -C MSC clean
-pMisc:	
+pMisc:
 	$(MAKE) -C MSC purge
+ppVRRs:
+	$(MAKE) -C MSC ppurge
 #
 VRRs:	
 	$(MAKE) -C VRR
@@ -83,7 +79,7 @@ dN4K: Misc HRRs VRRs Ints Grad dN4K.o
 	$(LD) $(LDFLAGS) dN4K dN4K.o -lGRD $(TwoELibs) 
 #
 ppMain:
-	rm dInt*.F90 Int*.F90
+	rm -f dInt*.F90 Int*.F90
 
 N4K.o:	INT/ERIInterfaceB.Inc
 

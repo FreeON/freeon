@@ -127,7 +127,27 @@ END SUBROUTINE SetBigIBlock
                             DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
 
-                            ! ONX :: Kx[0] CheckSum  = 0.7248331634950783D+00
+#ifdef LDSJFLSDFJSLDFJ
+   SELECT CASE(IntType)
+   CASE(3030303)
+     CALL IntB3030303(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & 
+                  BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & 
+                  ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & 
+                  OffSet%A  ,1             , & 
+                  OffSet%C-1,NBFA*NBFB     , & 
+                  OffSet%B-1,NBFA          , & 
+                  OffSet%D-1,NBFA*NBFB*NBFC,GMc%PBC,C(1))
+
+!     CALL Int3333(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & 
+!                  BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & 
+!                  ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & 
+!                  OffSet%A  ,1             , & 
+!                  OffSet%C-1,NBFA*NBFB     , & 
+!                  OffSet%B-1,NBFA          , & 
+!                  OffSet%D-1,NBFA*NBFB*NBFC,GMc%PBC,C(1))
+     LocNInt=81
+   END SELECT
+#endif
 
                             INCLUDE 'ERIInterfaceB.Inc'
 

@@ -375,7 +375,8 @@ CONTAINS
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
                             !
                             ! The integral interface.
-                            INCLUDE 'DERIInterface.Inc'
+!                            INCLUDE 'DERIInterface.Inc'
+                            INCLUDE 'dERIInterfaceB.Inc'
                             !
                             NInts=NInts+DBLE(LocNInt)
 #ifdef GTRESH
@@ -563,11 +564,15 @@ CONTAINS
        Switch=Type1.GE.Type2
        !
        IF(Switch) THEN
-          ISwitch1=6
-          ISwitch2=7
+          ISwitch1=9
+          ISwitch2=10
+!          ISwitch1=6
+!          ISwitch2=7
        ELSE
-          ISwitch1=7
-          ISwitch2=6
+!          ISwitch1=7
+!          ISwitch2=6
+          ISwitch1=10
+          ISwitch2=9
        ENDIF
        !
        II=0

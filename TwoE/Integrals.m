@@ -54,7 +54,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 (* Minimal *)
-   Classes = { {0,0},{1,1}} 
+   Classes = { {0,0},{1,1},{2,2}} 
 
 
 
@@ -168,7 +168,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->250,AssignBreak->{132," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->350,AssignBreak->{300," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
 
@@ -314,7 +314,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
            WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
            WS["INTEGER        :: LBra,LKet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];

@@ -63,7 +63,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-Classes = { {0,0},{0,1},{1,1}};
+Classes = { {0,0},{0,1},{1,1},{2,2}};
 
 CType[1]  = "s";
 CType[2]  = "sp";
@@ -116,7 +116,7 @@ SetAttributes[HRRC,NHoldAll];
 SetAttributes[GRADIENT,NHoldAll];
 
 Get["GAMMAS.m"];
-Get["CNTRCT.m"];
+Get["CNTRCTG.m"];
 Get["BRAHRR.m"];
 Get["KETHRR.m"];
 Get["FRONTM.m"];
