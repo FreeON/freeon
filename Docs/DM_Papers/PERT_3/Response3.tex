@@ -193,7 +193,8 @@ congruence transformations \cite{JWilkinson65,GStewart73} provided
 by the AINV algorithm for computing sparse approximate inverse 
 Cholesky factors \cite{MBenzi95,MBenzi96,MBenzi01}.
 
-The total energy may be developed in a Taylor expansion as
+The total energy of a molecule in a homogenous electric field may 
+be developed in a Taylor expansion as
 \begin{equation}
   \begin{split}
     E_{\rm tot}(\E)= E_{\rm tot}(0) & +\sum_a\mu_a\E^a\\
@@ -215,6 +216,7 @@ The total energy may be developed in a Taylor expansion as
     &+\frac{1}{3!}\sum_{abc} \F^{abc}\E^{a}\E^{b}\E^{c}+\dots
   \end{split}
 \end{equation}
+A similar expantion also holds for the density matrix $\D(\E)$.
 
 The derivative density matrix and derivative Fockian depend on 
 each other implicitly and must be solved for self-consistently 
@@ -860,8 +862,9 @@ We note also that the method is not unique to the TC2 generator or
 extended to other purification schemes such as TRS4 \cite{ANiklasson03} as
 well as other electronic structure programs.
 
-
-
+Convergence of the CPSCF equations for these systems (water cluster ...)
+are typically achived in about 10 cycles, independent of cluster size, basis set,
+matrix threshold or order of the response calculated.
 
 % It is applied to the computation
 % of the first and second electric hyperpolarizabilities of three
