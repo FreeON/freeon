@@ -22,7 +22,7 @@ MODULE ParseInPut
    USE AtomPairs
 #ifdef MMech
    USE Dynamo    
-   USE IntCoo    
+   USE InCoords    
    USE Mechanics 
 #endif
    IMPLICIT NONE
@@ -605,6 +605,14 @@ MODULE ParseInPut
 !
          CALL OpenASCII(InpFile,Inp)
 !----------------------------------------------------------------------------
+! Parse for periodic options and lattice vectors
+!
+         PBC_On=.FALSE.
+         CALL Put(PBC_On,'PBCOn')
+#ifdef PERIODIC
+         CALL ParsePeriodic(Ctrl,GM)
+#endif
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> keys 
 !
          GM%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
@@ -651,115 +659,6 @@ MODULE ParseInPut
          ELSE
             Ctrl%Vis=VIS_DX_NO_VIS
          ENDIF
-#ifdef PERIODIC
-!----------------------------------------------------------------------------
-!        Parse <OPTIONS> for <PERIODIC> keys
-!        Which Directions are Periodic
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,PBC_OFF)) THEN
-            GM%PBC%AutoW(1)=.FALSE.
-            GM%PBC%AutoW(2)=.FALSE.
-            GM%PBC%AutoW(3)=.FALSE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_X)) THEN
-            GM%PBC%AutoW(1)=.TRUE.
-            GM%PBC%AutoW(2)=.FALSE.
-            GM%PBC%AutoW(3)=.FALSE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Y)) THEN
-            GM%PBC%AutoW(1)=.FALSE.
-            GM%PBC%AutoW(2)=.TRUE.
-            GM%PBC%AutoW(3)=.FALSE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Z)) THEN
-            GM%PBC%AutoW(1)=.FALSE.
-            GM%PBC%AutoW(2)=.FALSE.
-            GM%PBC%AutoW(3)=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XY)) THEN
-            GM%PBC%AutoW(1)=.TRUE.
-            GM%PBC%AutoW(2)=.TRUE.
-            GM%PBC%AutoW(3)=.FALSE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XZ)) THEN
-            GM%PBC%AutoW(1)=.TRUE.
-            GM%PBC%AutoW(2)=.FALSE.
-            GM%PBC%AutoW(3)=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_YZ)) THEN
-            GM%PBC%AutoW(1)=.FALSE.
-            GM%PBC%AutoW(2)=.TRUE.
-            GM%PBC%AutoW(3)=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XYZ)) THEN
-            GM%PBC%AutoW(1)=.TRUE.
-            GM%PBC%AutoW(2)=.TRUE.
-            GM%PBC%AutoW(3)=.TRUE.
-         ELSE
-            CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*) '** Auto-Wraps at default value => (Off) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%PBC%AutoW(1)=.FALSE.
-            GM%PBC%AutoW(2)=.FALSE.
-            GM%PBC%AutoW(3)=.FALSE.
-         ENDIF
-!----------------------------------------------------------------------------
-!        Calculate the Dimension
-!         
-         GM%PBC%Dimen=0
-         DO I=1,3
-            IF(GM%PBC%AutoW(I)) GM%PBC%Dimen=GM%PBC%Dimen+1
-         ENDDO
-!----------------------------------------------------------------------------
-!        To wrap or not to wrap atoms into the box
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
-            GM%PBC%AtomW=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
-            GM%PBC%AtomW=.FALSE.
-         ELSE
-            CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%PBC%AtomW=.FALSE.
-         ENDIF
-!----------------------------------------------------------------------------
-!        InPut Type on the BoxShape Vectors
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
-            GM%PBC%InVecForm=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
-            GM%PBC%InVecForm=.FALSE.
-         ELSE
-            CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%PBC%InVecForm=.TRUE.
-         ENDIF
-
-!----------------------------------------------------------------------------
-!        InPut Type on the Coordinates, Atomic or Fractional
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
-            GM%PBC%InAtomCrd=.TRUE.
-         ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
-            GM%PBC%InAtomCrd=.FALSE.
-         ELSE
-            CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
-            CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%PBC%InAtomCrd=.TRUE.
-         ENDIF
-!-------------------------------------------------------------
-!        IntPut Type of Translation
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,TRAN_COM)) THEN
-            GM%PBC%Translate = .TRUE.
-            GM%PBC%Trans_COM = .TRUE.
-         ELSE
-            GM%PBC%Translate = .FALSE.
-            GM%PBC%Trans_COM = .FALSE.
-         ENDIF
-!-------------------------------------------------------------
-!        IntPut permability
-!
-         IF(.NOT. OptDblQ(Inp,EpsILON,GM%PBC%Epsilon)) THEN
-            GM%PBC%Epsilon = 1.D32
-         ENDIF
-#endif
 !----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> format
 !
@@ -768,8 +667,7 @@ MODULE ParseInPut
          ELSEIF(OptKeyQ(Inp,GEOMETRY,XMOL_FORMAT))THEN
             CALL ParseCoordinates_XMOL(Ctrl,GM)
          ELSE
-!          CALL New(GM)
-           CALL ParseCoordinates_MONDO(Ctrl,GM)
+            CALL ParseCoordinates_MONDO(Ctrl,GM)
          ENDIF
 !
          CLOSE(UNIT=Inp,STATUS='KEEP')
@@ -807,12 +705,6 @@ MODULE ParseInPut
 !        Allocate the geometry
          CALL New(GM)
 !
-#ifdef PERIODIC
-!---------------------------------------------------------------------------- 
-!        Parse <PERIODIC> for Lattice Vectors
-!
-         CALL ParsePeriodic_MONDO(Ctrl,GM)
-#endif
 !---------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
@@ -856,10 +748,10 @@ MODULE ParseInPut
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
 #ifdef PERIODIC
-!           Convert to AU and ComPute Fractioan and Atomic Coordinates  
+!           Convert to AU and ComPute Fractioan and Atomic Coordinates
             IF(GM%PBC%InAtomCrd) THEN
-               IF(.NOT.GM%InAU) THEN 
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU 
+               IF(.NOT.GM%InAU) THEN
+                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
                ENDIF
                CALL CalFracCarts(GM)
             ELSE
@@ -873,6 +765,7 @@ MODULE ParseInPut
             ENDIF
             CALL Translate(GM,GM%PBC%TransVec)
             CALL WrapAtoms(GM)
+!
 #else
 !           Convert to AU
             IF(.NOT.GM%InAU) THEN
@@ -884,6 +777,7 @@ MODULE ParseInPut
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
+!
 #ifdef PERIODIC
 !           ReSet the Cell Center
             DO I=1,3
@@ -892,6 +786,7 @@ MODULE ParseInPut
                ENDIF
             ENDDO
 #endif
+!
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
 !           Print the coordinates
@@ -911,6 +806,7 @@ MODULE ParseInPut
          ENDIF
          CALL Put(NumGeom,'NumberOfGeometries')
          NAtoms=GM%NAtms
+
 !---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
@@ -918,6 +814,7 @@ MODULE ParseInPut
          CALL Put(Ctrl%NGeom,'nconfig') 
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
+!
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the inPut file.')
@@ -1156,7 +1053,7 @@ MODULE ParseInPut
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,I,J,K
 !
-        CALL OpenHDF(InfFile)
+!       CALL OpenHDF(InfFile)
 !
         NLvec = 0
         NTvec = 0
@@ -1262,7 +1159,7 @@ MODULE ParseInPut
         GM%PBC%InvBoxSh(2,3)=-GM%PBC%BoxShape(2,3)/(GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
 !
-      CALL CloseHDF()
+!     CALL CloseHDF()
 !
       END SUBROUTINE ParsePeriodic_MONDO
 !============================================================================
@@ -1906,7 +1803,7 @@ MODULE ParseInPut
         TYPE(SCFControls)          :: Ctrl
         TYPE(CRDS)                 :: GM_MM,GM
         INTEGER :: II
-        REAL(DOUBLE)               :: sum,dx,dy,dz,dd
+        REAL(DOUBLE)               :: Sum,SumO,dx,dy,dz,dd
         CHARACTER(LEN=DEFAULT_CHR_LEN) :: OPLS_DATABASE,MM_COORDS,MM_SEQ
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: QMMM_DATA
@@ -1925,11 +1822,14 @@ MODULE ParseInPut
         TYPE(INT_VECT) :: OutOfPlanePeriod,TorsionPeriod
         TYPE(INT_VECT) :: Stat
         TYPE(DBL_VECT) :: GrdMM
-        CHARACTER(LEN=3) :: CurG
+        CHARACTER(LEN=6) :: CurG
         TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutOfPlaneIJKL
 !
-        CALL OpenASCII(InpFile,Inp)
+        REAL(DOUBLE) :: SUM_OLD,XTrans,YTrans,ZTrans
+        INTEGER :: IA,IB,IC,IAtTrans,IAtOrig
+!
         CALL OpenASCII(OutFile,Out)
+        CALL OpenASCII(InpFile,Inp)
         CALL OpenHDF(Ctrl%Info)
 !
           CALL New(Stat,3)
@@ -2120,13 +2020,26 @@ MODULE ParseInPut
         SUM=SUM+ATMCHG(I)
       ENDDO
         GM_MM%TotCh=SUM
-        write(*,*) 'mm total Charge ',GM_MM%TotCh
 !
       GM_MM%NAtms = MM_Natoms
-       CALL New(GM_MM)
-      GM_MM%InAu = .true.
+        CALL New(GM_MM)
+!
+!-----------------------------------------------------------
+! Parse for periodic options, here logical options only
+!-----------------------------------------------------------
+!
+!     GM_MM%InAu = .FALSE. !!! for MM
+      GM_MM%Carts%D(:,:) = ATMCRD(:,:)
+!
+        PBC_On=.FALSE.
+        CALL Put(PBC_On,'PBCOn')
+#ifdef PERIODIC
+        CALL ParsePeriodic(Ctrl,GM_MM)
+#endif
+!
+!     GM_MM%InAu = .TRUE. !!! for MM
+      IF(.NOT.PBC_On) GM_MM%Carts%D = AngstromsToAu*GM_MM%Carts%D
       GM_MM%Nkind = NTYPES
-      GM_MM%Carts%D(:,:) = ATMCRD(:,:)*AngstromsToAU
       GM_MM%AtMss%D(:) = ATMMAS(:)
       GM_MM%AtNum%D(:) = ATMCHG(:)
 !
@@ -2143,11 +2056,91 @@ MODULE ParseInPut
       ELSE
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(1,1:2)/Angstromstoau
+!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(2,1:2)/Angstromstoau
+!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(3,1:2)/Angstromstoau
+!! translate coordinates into 'positive' box
+!Sum=MAX((GM_MM%BndBox%D(1,2)-GM_MM%BndBox%D(1,1)),(GM_MM%BndBox%D(2,2)-GM_MM%BndBox%D(2,1)),(GM_MM%BndBox%D(3,2)-GM_MM%BndBox%D(3,1)))
+!sum=sum+1.d0
+!write(*,*) 'Cartesians of the cell'
+!do i=1,GM_MM%Natms
+!write(*,124) i,GM_MM%Carts%D(1,i)+SUM
+!write(*,125) i,GM_MM%Carts%D(2,i)+SUM
+!write(*,126) i,GM_MM%Carts%D(3,i)+SUM
+!enddo
+!write(*,*) 'charges'
+!do i=1,GM_MM%Natms
+!write(*,123) i,GM_MM%AtNum%D(i)
+!enddo
+!122 format(i4,A10,I8,3F12.6)
+!123 format('z(',I4,')=',3F12.6)
+!124 format('rx(',I4,')=',3F12.6)
+!125 format('ry(',I4,')=',3F12.6)
+!126 format('rz(',I4,')=',3F12.6)
+!!!!!!!!!!!!!!!!
+!sumo=sum
+!sum=zero
+!do i=1,GM_MM%Natms; do j=1,3
+!Sum=MAX(GM_MM%Carts%D(j,i)+SUMO,SUM)
+!enddo; enddo
+!write(*,*) 'edge of the cell= ',sum
+!write(*,*) 'fractional coords of the cell'
+!do i=1,GM_MM%Natms
+!write(*,122) i,ATMNAM(I),ATMNUM(I),(GM_MM%Carts%D(1:3,i)+SUMO)/SUM
+!enddo
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! Define internal coordinates
+! Fractional coordinates handling
 !
-!     CALL  DefineIntCoos(GM_MM%Natms,GM_MM%Carts%D,Ctrl%Info,1)
-!     CALL  DefineIntCoos(GM_MM%Natms,GM_MM%Carts%D,Ctrl%Info,2)
+#ifdef PERIODIC
+!
+            IF(PBC_On) THEN
+!
+!           Convert to AU and ComPute Fractioan and Atomic Coordinates
+!
+            IF(GM_MM%PBC%InAtomCrd) THEN
+               IF(.NOT.GM_MM%InAU) THEN
+                  GM_MM%Carts%D    = GM_MM%Carts%D*AngstromsToAU
+               ENDIF
+               CALL CalFracCarts(GM_MM)
+            ELSE
+               GM_MM%BoxCarts%D=GM_MM%Carts%D
+               GM_MM%BoxVects%D=GM_MM%Vects%D
+               CALL CalAtomCarts(GM_MM)
+            ENDIF
+!
+            IF(GM_MM%PBC%Trans_COM) THEN
+               CALL CalTransVec(GM_MM)
+            ENDIF
+            CALL Translate(GM_MM,GM_MM%PBC%TransVec)
+            CALL WrapAtoms(GM_MM)
+!
+!           ReSet the Cell Center
+            DO I=1,3
+               IF(.NOT. GM_MM%PBC%AutoW(I)) THEN
+                  GM_MM%PBC%CellCenter(I) = Half*(GM_MM%BndBox%D(I,2)+GM_MM%BndBox%D(I,1))
+               ENDIF
+            ENDDO
+!
+            ENDIF
+#endif
+!
+! Print out MM coordinates into outPut file
+!
+        WRITE(Out,*) 
+        WRITE(Out,*) 'MM system Cartesian Coordinates in Angstroems:'
+        WRITE(Out,*) 
+        DO I=1,GM_MM%Natms
+          WRITE(Out,110) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)/AngstromsToAu
+        ENDDO
+        WRITE(Out,*) 
+        WRITE(Out,*) 'MM system Cartesian Coordinates in Bohrs:'
+        WRITE(Out,*) 
+        DO I=1,GM_MM%Natms
+          WRITE(Out,*) I,ATMNAM(I),GM_MM%Carts%D(1:3,I)
+        ENDDO
+110   FORMAT(I7,2X,A8,3F34.25)
 !
 ! Zero GrdMM (initial gradients) for the case MMOnly
 !
@@ -2184,16 +2177,6 @@ MODULE ParseInPut
           CALL Delete(GlobalQMNum)
       ENDIF
 !
-! Print out MM coorinates into outPut file
-!
-        WRITE(Out,*) 
-        WRITE(Out,*) 'MM system coordinates in angstroems:'
-        WRITE(Out,*) 
-      DO I=1,MM_Natoms
-        WRITE(Out,110) I,ATMNAM(I),ATMCRD(1:3,I)
-      ENDDO
-110   FORMAT(I7,2X,A8,3F12.6)
-!
         CALL Put(GM_MM,Tag_O='GM_MM'//CurG)
           IF(MM_NATOMS/=0) THEN
             CALL Put(ATMMARK,'ATMMARK',N_O=MM_NATOMS)
@@ -2208,7 +2191,7 @@ MODULE ParseInPut
           CALL Delete(Active_Angle)
           CALL Delete(Active_Torsion)
           CALL Delete(Active_OutOfPlane)
-!
+!!
 !! test coulomb energy
 !!
 !        SUM=zero
@@ -2224,9 +2207,59 @@ MODULE ParseInPut
 !        write(*,*) 'coulomb energy= ',sum 
 !        write(out,*) 'coulomb energy= ',sum 
 !
+! Test periodic Coulomb energy by O(N2) scheme
+!
+!    IF(PBC_On) THEN
+!!
+!    SUM=Zero
+!!
+!    DO I=1,GM_MM%Natms
+!    DO J=I+1,GM_MM%Natms
+!      DX=GM_MM%Carts%D(1,I)-GM_MM%Carts%D(1,J)
+!      DY=GM_MM%Carts%D(2,I)-GM_MM%Carts%D(2,J)
+!      DZ=GM_MM%Carts%D(3,I)-GM_MM%Carts%D(3,J)
+!      DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
+!      SUM=SUM+GM_MM%AtNum%D(I)*GM_MM%AtNum%D(J)/DD
+!    ENDDO
+!    ENDDO
+!    SUM=Two*SUM
+!
+!! DO I=1,10000 !!! number of 'layers' around elementary cell
+!  DO I=200,200 !!! number of 'layers' around elementary cell
+!    SUM_OLD=SUM
+!
+! translate along 'a' axis, given by BoxShape
+!
+!    DO IA=-I,I
+!    DO IB=-I,I
+!    DO IC=-I,I
+!IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
+! 111 format('test vector= ',3F15.6)
+!      DO IAtTrans=1,GM_MM%Natms
+!        XTrans=GM_MM%Carts%D(1,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,1)+IB*GM_MM%PBC%BoxShape(2,1)+IC*GM_MM%PBC%BoxShape(3,1)
+!        YTrans=GM_MM%Carts%D(2,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,2)+IB*GM_MM%PBC%BoxShape(2,2)+IC*GM_MM%PBC%BoxShape(3,2)
+!        ZTrans=GM_MM%Carts%D(3,IAtTrans)+IA*GM_MM%PBC%BoxShape(1,3)+IB*GM_MM%PBC%BoxShape(2,3)+IC*GM_MM%PBC%BoxShape(3,3)
+!      DO IAtOrig=1,GM_MM%Natms
+!        DX=GM_MM%Carts%D(1,IAtOrig)-XTrans
+!        DY=GM_MM%Carts%D(2,IAtOrig)-YTrans
+!        DZ=GM_MM%Carts%D(3,IAtOrig)-ZTrans
+!        DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
+!        SUM=SUM+GM_MM%AtNum%D(IAtOrig)*GM_MM%AtNum%D(IAtTrans)/DD
+!      ENDDO
+!      ENDDO
+!    ENDDO
+!    ENDDO
+!    ENDDO
+!!
+!   ENDDO
+!
+!   ENDIF !!!! PBC_On
+!
       CALL Delete(GM_MM)
 !
+write(*,*) 'bef CloseHDF'
       CALL CloseHDF()
+write(*,*) 'aft CloseHDF'
       CLOSE(UNIT=Out,STATUS='KEEP')
       CLOSE(UNIT=Inp,STATUS='KEEP')
 !
@@ -2281,6 +2314,8 @@ MODULE ParseInPut
          CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS> for <Grad=>
 !     
+         Ctrl%CoordType=CoordType_PrimInt !!!default coordinate type
+!
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
             Ctrl%NGeom=1
@@ -2312,6 +2347,10 @@ MODULE ParseInPut
             IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
+         ELSEIF(OptKeyQ(Inp,CoordinateType,CoordType_PrimInt)) THEN
+            Ctrl%CoordType=CoordType_PrimInt
+         ELSEIF(OptKeyQ(Inp,CoordinateType,CoordType_Cartesian)) THEN
+            Ctrl%CoordType=CoordType_Cartesian
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_TSTATE))THEN
             Ctrl%Grad=GRAD_TS_SEARCH
             IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
@@ -2698,4 +2737,174 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
       END SUBROUTINE ParseIntCoo
 #endif
 !
+!-----------------------------------------------------------------------
+!
+#ifdef PERIODIC
+SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
+      TYPE(CRDS)                 :: GMLoc
+      TYPE(SCFControls)          :: Ctrl
+      CHARACTER(LEN=6) :: CurG
+      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,AuxChar
+!
+!     CALL OpenASCII(OutFile,Out)
+!     CALL OpenASCII(InpFile,Inp)
+!
+!-----------------------------------------------
+!
+!         CurG=TRIM(IntToChar(Ctrl%Current(3)))
+!     CALL OpenHDF(InfFile)
+!         IF(HasMM()) THEN
+!           CALL Get(GMLoc,Tag_O='GM_MM'//CurG)
+!         ELSE
+!           CALL Get(GMLoc,Tag_O=CurG)
+!         ENDIF
+!     CALL CloseHDF()
+!
+! Check, whether Periodic option is on
+!
+         AuxChar=PBOUNDRY
+         Call LowCase(AuxChar)
+         REWIND(UNIT=Inp)
+         DO 
+           READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+           LineLowCase = Line
+           Call LowCase(LineLowCase)
+           IF(INDEX(TRIM(LineLowCase),TRIM(AuxChar))/=0) GO TO 2
+         ENDDO
+      1  CONTINUE
+         PBC_On=.FALSE. 
+         CALL Put(PBC_On,'PBCOn')
+         RETURN
+      2  CONTINUE
+         PBC_On=.TRUE. 
+         CALL Put(PBC_On,'PBCOn')
+!
+!----------------------------------------------------------------------------
+!        Parse <OPTIONS> for <PERIODIC> keys
+!        Which Directions are Periodic
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,PBC_OFF)) THEN
+            GMLoc%PBC%AutoW(1)=.FALSE.
+            GMLoc%PBC%AutoW(2)=.FALSE.
+            GMLoc%PBC%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_X)) THEN
+            GMLoc%PBC%AutoW(1)=.TRUE.
+            GMLoc%PBC%AutoW(2)=.FALSE.
+            GMLoc%PBC%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Y)) THEN
+            GMLoc%PBC%AutoW(1)=.FALSE.
+            GMLoc%PBC%AutoW(2)=.TRUE.
+            GMLoc%PBC%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Z)) THEN
+            GMLoc%PBC%AutoW(1)=.FALSE.
+            GMLoc%PBC%AutoW(2)=.FALSE.
+            GMLoc%PBC%AutoW(3)=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XY)) THEN
+            GMLoc%PBC%AutoW(1)=.TRUE.
+            GMLoc%PBC%AutoW(2)=.TRUE.
+            GMLoc%PBC%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XZ)) THEN
+            GMLoc%PBC%AutoW(1)=.TRUE.
+            GMLoc%PBC%AutoW(2)=.FALSE.
+            GMLoc%PBC%AutoW(3)=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_YZ)) THEN
+            GMLoc%PBC%AutoW(1)=.FALSE.
+            GMLoc%PBC%AutoW(2)=.TRUE.
+            GMLoc%PBC%AutoW(3)=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XYZ)) THEN
+            GMLoc%PBC%AutoW(1)=.TRUE.
+            GMLoc%PBC%AutoW(2)=.TRUE.
+            GMLoc%PBC%AutoW(3)=.TRUE.
+         ELSE
+            WRITE(Out,*) '** Auto-Wraps at default value => (Off) **'
+            GMLoc%PBC%AutoW(1)=.FALSE.
+            GMLoc%PBC%AutoW(2)=.FALSE.
+            GMLoc%PBC%AutoW(3)=.FALSE.
+         ENDIF
+!----------------------------------------------------------------------------
+!        Calculate the Dimension
+!         
+         GMLoc%PBC%Dimen=0
+         DO I=1,3
+            IF(GMLoc%PBC%AutoW(I)) GMLoc%PBC%Dimen=GMLoc%PBC%Dimen+1
+         ENDDO
+!----------------------------------------------------------------------------
+!        To wrap or not to wrap atoms into the box
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
+            GMLoc%PBC%AtomW=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
+            GMLoc%PBC%AtomW=.FALSE.
+         ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
+            GMLoc%PBC%AtomW=.FALSE.
+         ENDIF
+!----------------------------------------------------------------------------
+!        InPut Type on the BoxShape Vectors
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
+            GMLoc%PBC%InVecForm=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
+            GMLoc%PBC%InVecForm=.FALSE.
+         ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
+            GMLoc%PBC%InVecForm=.TRUE.
+         ENDIF
+!
+!----------------------------------------------------------------------------
+!        InPut Type on the Coordinates, Atomic or Fractional
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
+            GMLoc%PBC%InAtomCrd=.TRUE.
+         ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
+            GMLoc%PBC%InAtomCrd=.FALSE.
+         ELSE
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
+            CLOSE(UNIT=Out,STATUS='KEEP')
+            GMLoc%PBC%InAtomCrd=.TRUE.
+         ENDIF
+!
+!-------------------------------------------------------------
+!        IntPut Type of Translation
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,TRAN_COM)) THEN
+            GMLoc%PBC%Translate = .TRUE.
+            GMLoc%PBC%Trans_COM = .TRUE.
+         ELSE
+            GMLoc%PBC%Translate = .FALSE.
+            GMLoc%PBC%Trans_COM = .FALSE.
+         ENDIF
+!-------------------------------------------------------------
+!        IntPut permability
+!
+         IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
+            GMLoc%PBC%Epsilon = 1.D32
+         ENDIF
+!---------------------------------------------------------------------------- 
+!        Parse <PERIODIC> for Lattice Vectors
+!
+         CALL ParsePeriodic_MONDO(Ctrl,GMLoc)
+!
+!----------------------------------------------------------------------------
+!
+!     CALL OpenHDF(InfFile)
+!        IF(HasMM()) THEN
+!          CALL Put(GMLoc,Tag_O='GM_MM'//CurG)
+!        ELSE
+!          CALL Put(GMLoc,Tag_O=CurG)
+!        ENDIF
+!     CALL CloseHDF()
+!
+!     CLOSE(Inp)
+!     CLOSE(Out)
+!
+!---------------------------------------------------------------------------- 
+!
+END SUBROUTINE ParsePeriodic
+#endif
 END MODULE
