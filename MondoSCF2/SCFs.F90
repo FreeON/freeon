@@ -88,7 +88,7 @@ CONTAINS
     INTEGER          :: cSCF,cBAS,cGEO,iCLONE,Modl,WhatsUp
     LOGICAL,OPTIONAL :: CPSCF_O
     LOGICAL          :: DoDIIS,SCFCycle,DoCPSCF,DoODA,RebuildPostODA, &
-                        DoMIX,RebuildPostMIX,Automatic1,Automatic2
+                        DoMIX,RebuildPostMIX,Automatic1,Automatic2,EarlyODA
     CHARACTER(LEN=128) :: Tmp
     !----------------------------------------------------------------------------!
 
@@ -100,6 +100,7 @@ CONTAINS
        Automatic2=.TRUE.
        ! Switching on/off rebuild doesn't work so well.  Lets be conservative for now
        RebuildPostODA=.TRUE.
+       EarlyODA=(O%Guess==GUESS_EQ_RESTART)
     ENDIF
     ! Parse for strict ODA or DIIS invocation
     CALL OpenASCII(N%IFile,Inp)
@@ -174,7 +175,7 @@ CONTAINS
           CALL Invoke('SCFstats',N,S,M)
        ENDIF
     ELSEIF(DoODA)THEN
-        IF(cSCF>1.OR.cSCF>0.AND.cGEO>1)THEN
+        IF(cSCF>1.OR.(cSCF>0.AND.cGEO>1).OR.(cSCF>0.AND.EarlyODA))THEN
           CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
