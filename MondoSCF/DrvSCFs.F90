@@ -204,8 +204,12 @@ MODULE DrvSCFs
          CALL Invoke('AInv',CtrlVect)
       ENDIF
       CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
+      CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
+      CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
     END SUBROUTINE OneEMats
-
+!========================================================================================
+!
+!========================================================================================
     SUBROUTINE VisDX(Ctrl)
       TYPE(SCFControls)             :: Ctrl
       IF(Ctrl%Vis/=VIS_DX_RHOPOT)RETURN
