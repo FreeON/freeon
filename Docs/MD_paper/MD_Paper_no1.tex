@@ -1,16 +1,14 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
-% COMMENTOUT COMMAND FROM A TO B IE. use
-% \newcommand{\commentoutA}[1]{}
-% \newcommand{\commentoutB}[1]{#1}
-% instead of the following
-\newcommand{\commentout}[1]{}
-\newcommand{\commentoutA}[1]{#1}
-\newcommand{\commentoutB}[1]{}
-%\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+% COMMENTOUT COMMAND FROM A TO B IE. USE:
+%
+\newcommand{\commentoutA}[1]{}
+\newcommand{\commentoutB}[1]{#1}
 
-\commentoutA{\documentclass[prb,aps,twocolumn,twocolumngrid,superbib]{revtex4}}
-%\commentoutA{\documentclass[prl,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
-\commentoutB{\documentclass[prl,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
+
+\commentoutA{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -21,6 +19,7 @@
 \usepackage{graphicx}
 \makeatletter 
 \makeatother
+
 
 \begin{document}
 
@@ -34,6 +33,10 @@ Non-Orthogonal Density Matrix Dynamics }
 \author{Matt Challacombe}
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
 
+\author{Chee Kwan Gan}
+\affiliation{}
+
+
 \begin{abstract}
 We report on the application of the molecular dynamics method to the linear scaling , electronic structure, 
 Gaussian orbital based code, MondoSCF.  When applying the molecular dynamics method to electronic structure 
@@ -42,7 +45,8 @@ Born-Openheimer approximation, a systematic drift in the total energy is observe
 C. Phys Lett., 386 (2004) p. 272-278]. This energy drift is due to a systematic error in the density matrix 
 when the previous density matrix is used to compute a gueuss of the new density matrix. We illustrate this 
 problem with two examples, and then we illuminate a simple solution which eliminates it.
-\noindent{\bf Keywords}: 
+\\ \smallskip
+\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, ab-initio molecular dynamics 
 
 %
 \end{abstract}
@@ -51,8 +55,8 @@ problem with two examples, and then we illuminate a simple solution which elimin
 
 \maketitle
 
-\footnotetext[1]{}
-\footnotetext[2]{}
+\footnotetext[1]{\tt LA-UR}
+\footnotetext[2]{\tt tymczak@lanl.gov}
 
 \section{INTRODUCTION}
 
@@ -61,5 +65,13 @@ problem with two examples, and then we illuminate a simple solution which elimin
 \section{Examples}
 
 \section{Conclusions}
+\section*{ACKNOWLEDGMENTS}
+
+We would like to acknowledge Tommy Sewell and Ed Kober for their advice
+and support. We would also like to thank Chee Kwan Gan and Anders Niklasson 
+for a careful reading of this manuscript.\cite{ANiklasson02A,ANiklasson03}
+
+\bibliographystyle{apsrmp} 
+\bibliography{mondo_new} 
 
 \end{document}
