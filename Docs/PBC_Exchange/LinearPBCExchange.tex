@@ -210,7 +210,7 @@ integaral, or $P_{cd}[{\bf N}] = P_{cd} \, \delta_{\bf N 0}$.
 The second approximation gives us the integral,
 \begin{equation}
 K_{ab}=
-\sum _{{\bf H G} c d} P_{cd}[{\bf N}]
+\sum _{{\bf H G} c d} P_{cd}
 \left(
       \phi_a    
       \phi^{\bf H}_c    
@@ -223,9 +223,37 @@ K_{ab}=
 However, there are two significant problems with this approximation. One, in this approximation the exact 
 exchange potential, symmetric in the limit of infinite summation, has been asymmetrically truncated, 
 resulting in a potential that depends on position  of the unit cell. 
-And two, the $(a \rightarrow c, b \rightarrow d)$ permutational symmetry of the exchange 
-integral kernal, $\Lambda_{{\bf ac,bd}}$,  is violated. 
-
+And two, the permutational symmetry of the exchange integral kernal, 
+\begin{eqnarray}
+\sum _{\bf H G}
+\left(
+      \phi_a    
+      \phi^{\bf H}_c    
+{\big | }
+      \phi_b  
+      \phi^{\bf G}_d  
+\right) 
+\ne
+\sum _{\bf H G}
+\left(
+      \phi_c    
+      \phi^{\bf H}_a    
+{\big | }
+      \phi_b  
+      \phi^{\bf G}_d  
+\right) \nonumber\\
+\ne
+\sum _{\bf H G}
+\left(
+      \phi_a    
+      \phi^{\bf H}_c    
+{\big | }
+      \phi_d 
+      \phi^{\bf G}_b 
+\right) 
+\label{PermSym}
+\end{eqnarray}
+is violated. 
 The translational non-invariance has a well understood analogue in classical
 molecular dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
 artifacts in energies and forces.  In both cases, translational invariance is restored by 
@@ -273,8 +301,22 @@ exchange potential for periodic boundary conditions and the $\Gamma$-point appro
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
 ${\bf k}$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
 
-\section{Integral Kernal Permutational Symmetry}
+\section{Integral Kernal Permutational Symmetry (IKPS)}
 
+For small systems, the permutatioanl non-invariance of Eq. (\ref{PermSym}) can create problems 
+with the Optinal Damping Algorithm (ODA) \cite{ECances00} we use to converge the SCF. The Optimal Damping
+Algorithm makes the implecit assumption of permutational symmetry, which is lost in periodic systems 
+using the Minium Image Convention. This can lead to an incorrect determination of the mixing energy, losing
+the bounded energy convergence of the Optinal Damping Algorithm.  
+However, we can recover this by removing the permutation symmetry assumption in the calculation of the of 
+the Optinal Damping Algorithm mixing parameter, $\lambda$: 
+%
+\begin{eqnarray}
+\lambda = {{\frac{d E[0]}{d \lambda}} \over {3E[1]-3E[0]-2{\frac{d E[0]}{d \lambda}}-{\frac{d E[1]}{d \lambda}}}}
+\end{eqnarray}
+%
+where, the correct energy and energy derivatives at the end-points, without the assumption of
+permutational sysmetry are,
 \begin{eqnarray}
 E[0] &&= {\rm Tr}\left[{\bf P}_0 \left({\bf T} + {\bf F}_0 \right)\right]+E^{0}_{nuc} \nonumber\\
 E[1] &&= {\rm Tr}\left[{\bf P}_1 \left({\bf T} + {\bf F}_1 \right)\right]+E^{1}_{nuc} \nonumber\\
@@ -289,6 +331,10 @@ E[1] &&= {\rm Tr}\left[{\bf P}_1 \left({\bf T} + {\bf F}_1 \right)\right]+E^{1}_
    -{\rm Tr}\left[ {\bf P}_0 {\bf F}_1 \right] 
    +2 {\rm Tr}\left[ {\bf P}_1 {\bf F}_1 \right] \nonumber\\
 \end{eqnarray}
+and where  ${\bf P}_0$, ${\bf F}_0$ and $E^{0}_{nuc}$ are the previous density matrix, fockian and nuclear 
+electrostatic energy; ${\bf P}_0$, ${\bf F}_0$ and $E^{0}_{nuc}$ are the present density matrix, fockian 
+and nuclear electrostatic energy; and  ${\bf T}$ is the kinectic energy matrix. 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -372,17 +418,17 @@ Program         & $N_{\rm at}$              & Energy (au)    & Energy/$N_{\rm at
 \raggedright{
 {\hskip 0.330in}$^f$Triclinic \\
 {\hskip 0.330in}$^g$Cubic \\
-{\hskip 0.330in}$^h$Did not converge (See Ref.~\cite{BCivalleri02}) \\
+{\hskip 0.330in}$^h$Did not converge (See Ref.~\onlinecite{BCivalleri02}) \\
 {\hskip 0.330in}$^i 8\times8\times8$ ${\bf k}$-space integration grid  \\}
 \end{table}
 
 Table \ref{MgOTable} shows {\sc MondoSCF} $\Gamma$-point super-cell total energies for MgO 
-at the RHF-MIC and RHF-C98 8-511G/8-51G level of theory.  See Ref.~\cite{TowlerLib} and 
+at the RHF-MIC and RHF-C98 8-511G/8-51G level of theory.  See Ref.~[\onlinecite{TowlerLib}] and 
 references therein for details on these basis sets.  Comparison is made between RHF
 $\Gamma$-point values obtained using the {\sc Cyrstal98} program, as well as with a final value 
 approaching the ${\bf k}$-space integration limit for the primitive cell. 
 Primitive cubic and triclinic cell coordinates for this system are listed in Appendix~\ref{Coordinates}.
-The {\sc Crystal98} values were obtained as described in Ref.~\cite{BCivalleri02}, while the 
+The {\sc Crystal98} values were obtained as described in Ref.~[\onlinecite{BCivalleri02}], while the 
 {\sc MondoSCF} values were obtained using the {\it tight} option, defining numerical thresholds 
 delivering numbers precise to the digits quoted (8).  From these numbers, we see a fundamental 
 difference between the RHF-MIC and RHF $\Gamma$-point values for small primitive cells; 
@@ -399,7 +445,11 @@ value obtained using {\sc Cyrstal98} with a $6\times6\times6$ ${\bf k}$-space in
 as explained in Ref.~\cite{PIceProceedure}.  The {\sc MondoSCF} values were obtained 
 using the {\it tight} option, defining numerical thresholds that deliver total energies
 precise to the digits quoted (8).  The primitive cubic cell coordinates used in these
-ice calculations are listed in Appendix~\ref{Coordinates}.
+ice calculations are listed in Appendix~\ref{Coordinates}. We also show the level at which
+the integral kernal permutaional symmetry (IKPS) is violated. Which for small systems is at the
+level of about $10^-3$ going rapidly to numerical zero as the unit cell becomes larger then the
+range of the density matrix.
+
 
 \begin{table}[ht]
 \caption{Progression of $\Gamma$-point super-cell calculations of proton ordered ice
@@ -408,20 +458,20 @@ approaching the ${\bf k}$-space integration limit for the primitive cell.}
 \label{PIceTable}
 \center{\begin{tabular}{lrccc}
 \toprule
-Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm H_2O}$ & IKPS \\ 
+Program             & $N_{\rm H_20}$ & Energy (au)    & Energy/$N_{\rm H_2O}$ & IKPS\\ 
 \colrule
-{\sc MondoSCF}$^a$  & 2    &  -152.03025  &  -76.01512  & $10^0$ \\
-                    & 16   &  -1216.3003  &  -76.01877  & $10^0$ \\
-                    & 54   &  -4105.0163  &  -76.01882  & $10^0$ \\
-                    & 128  &  -9730.4090  &  -76.01882  & $10^0$ \\
-                    & 250  &  -19004.705  &  -76.01882  & $10^0$ \\ 
+{\sc MondoSCF}$^a$  & 2              &  -152.03025  &  -76.01512  & $2.5 \times 10^{-3}$\\
+                    & 16             &  -1216.3003  &  -76.01877  & $2.8 \times 10^{-4}$ \\
+                    & 54             &  -4105.0163  &  -76.01882  & $2.7 \times 10^{-5}$ \\
+                    & 128            &  -9730.4090  &  -76.01882  & $10^0$ \\
+                    & 250            &  -19004.705  &  -76.01882  & $10^0$ \\ 
 \hline
 {\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882  \\ 
 \botrule
 \end{tabular}\\}
 \raggedright{
-{\hskip 0.230in}$^a \Gamma$-point\\
-{\hskip 0.230in}$^b 6\times6\times6$ ${\bf k}$-space integration grid \\}
+{\hskip 0.01in}$^a \Gamma$-point\\
+{\hskip 0.01in}$^b 6\times6\times6$ ${\bf k}$-space integration grid \\}
 \end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -429,28 +479,28 @@ Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{table}[ht]
-\caption{Lattice Constants in Angstoms for the Diamond System for different 
+\caption{Lattice Constants in angstoms for the Diamond System for different 
 system sizes, theory levels, and basis sets at a loose tolerance. For comparision, 
-the  experimental value for diamond calculated at zero Kelvin is ${\rm a}_0 = 3.567$ 
+the  experimental value for diamond calculated at zero Kelvin is ${\rm a}_0 = 3.567$\AA. 
 \cite{VStaroverov04,YTouloukian77}}
 \label{DiamondLC}
 \center{\begin{tabular}{lccccc}
 \toprule
 Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{HF}$ & ${\rm a}_0^{PBE0}$ \\
 \colrule
-{\sc MondoSCF}$^a$   &~64~           & ~STO-3g~      & ~3.587~          &  ~3.601~    \\
-                     &~64~           & ~6-21g*~      & ~3.575~          &  ~3.571~    \\
-                     &~216~          & ~STO-3g~      & ~3.582~          &  ~3.594~    \\
-                     &~216~          & ~6-21g*~      & ~3.571~          &  ~3.567~    \\
+{\sc MondoSCF}$^a$   &~64~           & ~STO-3G~      & ~3.587~          &  ~3.601~    \\
+                     &~64~           & ~6-21gG~      & ~3.575~          &  ~3.571~    \\
+                     &~216~          & ~STO-3G~      & ~3.582~          &  ~3.594~    \\
+                     &~216~          & ~6-21G*~      & ~3.571~          &  ~3.569~    \\
 \hline
-{\sc Crystal98}$^b$  & ~2~           & ~STO-3g~      & ~3.581~  & \\ 
-                     & ~2~           & ~6-21g*~      & ~3.574~  & \\
+{\sc Crystal98}$^b$  & ~2~           & ~STO-3G~      & ~3.581~  & \\ 
+                     & ~2~           & ~6-21G*~      & ~3.574~  & \\
 \hline
 \botrule
 \end{tabular}\\}
 \raggedright{
-{\hskip 0.35in}$^a \Gamma$-point\\
-{\hskip 0.35in}$^b$ [\onlinecite{ROrlando90}]\\}
+{\hskip 0.33in}$^a \Gamma$-point\\
+{\hskip 0.33in}$^b$ [\onlinecite{ROrlando90}]\\}
 \end{table}
 
 Table~\ref{DiamondLC}  compares the uniform diamond lattice potential computed 
@@ -526,20 +576,31 @@ and  for the {\sc MondoSCF} calculation $7.145$\AA.
 \begin{figure}[h]
 \caption{CPU time for the exchange, Coulomb (scaled by 10)  and density 
 matrix build (scaled by 20) of diamond using {\it loose} thresholding 
-at the RHF-MIC/6-31G level of theory.}
-\label{DiamondScaling}
+at the RHF-MIC/STO-3G level of theory.}
+\label{DiamondScaling_1}
 {\centering \includegraphics{Timing_Diamond_ONX.ps} \par}
 \end{figure}
 
-In Fig.~\ref{DiamondScaling}, linear scaling is shown for diamond for 
+\begin{figure}[h]
+\caption{CPU time for the exchange, Coulomb (scaled by 10)  and density 
+matrix build (scaled by 20) of diamond using {\it loose} thresholding 
+at the RHF-MIC/6-31G\cite{Modified631g} level of theory.}
+\label{DiamondScaling_2}
+{\centering \includegraphics{Timing_Diamond_ONX.ps} \par}
+\end{figure}
+
+In Fig~\ref{DiamondScaling_1}  linear scaling is shown for diamond for 
+building the exact exchange matrix, the Coulomb matrix, and solving for the density matrix using the STO-3G 
+basis set at a {\it loose} threshold.
+
+In Fig.~\ref{DiamondScaling_2}, linear scaling is shown for diamond for 
 building the exact exchange matrix, the Coulomb matrix, and solving for the density matrix. 
 A modified 6-31G basis set was used, where the most diffuse $sp$ exponent was increased to 
 0.4, bringing the condition number of the overlap matrix into an acceptable range.  A 
 {\it loose} thresholding set (described in Appendix~\ref{Thresholds}) was used, with 
 the matrix threshold further loosened to $\Huge \tau_{\rm \scriptscriptstyle MTRIX}=10^{-3}$.  
 This was required to achieve a more aggressive truncation of the density matrix and an earlier 
-onset of linear scaling for {\sc ONX}.  This level of approximation was used to generate 
-the 512 atom lattice potential curve in Fig.~\ref{DiamondLattice}. While using tighter thresholds 
+onset of linear scaling for {\sc ONX}. While using tighter thresholds 
 leads to more accurate results, it also postpones the onset of linear scaling. Because the 
 calculations involving 800 atoms were just under the 4Gb available, it was important to 
 demonstrate an early onset of linear scaling.  
@@ -600,9 +661,7 @@ conventional truncation criteria employed in the {\sc Crystal98} $\Gamma$-point
 approximation and the Hartree-Fock Minimum Image Condition developed in Section 
 \ref{gammapoint}.  These differences diminish with increasing cell size and larger 
 {\bf k}-space integration grids, following a surface to volume relationship 
-as might be expected. {\bf OK HERE IS A HOLE IN OUR STORY.  OUR VALUES WITHOUT MIC
-NEVER CONVERGED TO THE RIGHT NUMBER, BUT THE CRYSTAL VALUES DO?!!  WHY?  ARE WE
-SURE THE NON-MIC VALUES REALLY CONVERGE TO THE WRONG NUMBER??}
+as might be expected. 
 Nevertheless, achieving high order translational invariance 
 with the $\Gamma$-point approximation is likely to be important in {\em ab initio} 
 molecular dynamics simulations employing the HF or HF/DFT model chemistries.
