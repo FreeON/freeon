@@ -509,6 +509,76 @@ MODULE DerivedTypes
 !
 #endif
 !
+!---------------------------------------------------------
+!
+   TYPE GeOpControls
+      INTEGER                            :: AccL
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
+      LOGICAL                            :: DoInternals
+      INTEGER                            :: ActStep   
+      INTEGER                            :: ReDefIntC
+      INTEGER                            :: MaxGeOpSteps
+      INTEGER                            :: BlkGeomSize 
+!
+      REAL(DOUBLE)                       :: AINVThrsh    
+      REAL(DOUBLE)                       :: BMatThrsh   
+!
+      REAL(DOUBLE)                       :: StreHessian  
+      REAL(DOUBLE)                       :: BendHessian 
+      REAL(DOUBLE)                       :: LinBHessian 
+      REAL(DOUBLE)                       :: OutPHessian 
+      REAL(DOUBLE)                       :: TorsHessian 
+!
+      INTEGER                            :: IMaxGrad
+      REAL(DOUBLE)                       :: MaxGrad      
+      REAL(DOUBLE)                       :: RMSGrad      
+      REAL(DOUBLE)                       :: OldRMSGrad      
+!
+      REAL(DOUBLE)                       :: MaxStreDispl 
+      REAL(DOUBLE)                       :: MaxBendDispl 
+      REAL(DOUBLE)                       :: MaxLinBDispl 
+      REAL(DOUBLE)                       :: MaxOutPDispl 
+      REAL(DOUBLE)                       :: MaxTorsDispl 
+!
+      REAL(DOUBLE)                       :: RMSIntDispl   
+      REAL(DOUBLE)                       :: GradCrit     
+!
+      REAL(DOUBLE)                       :: StreConvCrit
+      REAL(DOUBLE)                       :: BendConvCrit
+      REAL(DOUBLE)                       :: OutPConvCrit
+      REAL(DOUBLE)                       :: LinBConvCrit
+      REAL(DOUBLE)                       :: TorsConvCrit
+!
+      LOGICAL                            :: GeOpConvgd    
+! thresh for AINV
+      REAL(DOUBLE)                       :: AINVThresh    
+! grad trf.
+      INTEGER                            :: MaxIt_GrdTrf
+      REAL(DOUBLE)                       :: GrdTrfCrit    
+      REAL(DOUBLE)                       :: MaxGradDiff   
+! iterative backtrf.
+      INTEGER                            :: MaxIt_CooTrf
+      REAL(DOUBLE)                       :: CooTrfCrit    
+      REAL(DOUBLE)                       :: RMSCrit    
+      REAL(DOUBLE)                       :: MaxCartDiff   
+      REAL(DOUBLE)                       :: DistRefresh   
+! constraints
+      INTEGER                            :: NConstr 
+      INTEGER                            :: NCartConstr 
+      REAL(DOUBLE)                       :: ConstrMax     
+      REAL(DOUBLE)                       :: ConstrMaxCrit 
+! GDIIS
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
+      LOGICAL                            :: GDIISOn
+      INTEGER                            :: GDIISMinDomCount
+      INTEGER                            :: GDIISInit
+      INTEGER                            :: GDIISMaxMem
+      REAL(DOUBLE)                       :: GDIISBandWidth 
+! LineSearch
+      INTEGER                            :: LSStepMax
+!
+   END TYPE
+!
 END MODULE
 
 
