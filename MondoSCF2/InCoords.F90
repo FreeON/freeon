@@ -1673,7 +1673,7 @@ CONTAINS
        CALL Halt('MixMat missing from the CALL of InternalToCart.')
      ENDIF
      DoRepeat=.FALSE.
-     RepMax=1 
+     RepMax=5 
      !
      ! Auxiliary arrays
      !
