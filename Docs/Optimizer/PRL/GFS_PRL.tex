@@ -1,3 +1,5 @@
+%\documentclass[prb,aps,preprint,showpacs,superbib]{revtex4}
+
 \documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 
@@ -17,7 +19,7 @@
 \begin{document}
 
 \title{
-A New View on the Geometry Optimization of Large Molecules\footnotemark[1]}
+A New Look at the Geometry Optimization of Large Molecules\footnotemark[1]}
 
 \author{K\'aroly N\'emeth\footnotemark[2]}
 \author{Matt Challacombe}
@@ -28,16 +30,16 @@ A New View on the Geometry Optimization of Large Molecules\footnotemark[1]}
 
 \begin{abstract}
 {
-This article peresents a new, efficient alternative to well established
-geometry optimization algorithms. The new alternative is based on
-fitting gradient surfaces in terms of curvilinear 
-internal coordinates and 
-determining the roots of the fitted surface. Due to the efficient 
-vibrational decoupling of the curvilinear coordinates the 3N-dimensional
-optimization problem splits into a quasi non-interacting
-set of ${\cal{O}}(N)$ one-dimensional optimization problems, 
-similarly to the self-consistent mean-field concepts of physics.
-This allows for robust, linear scaling implementation of geometry optimizers.
+This article peresents a new and efficient alternative to well established
+algorithms for molecular geometry optimization.   The new approach 
+exploits the approximate decoupling of vibrational modes in a curvilinear 
+internal coordinate system,  allowing seperation  of the 3$N$-dimensional
+optimization problem into an ${\cal{O}}(N)$ set of quasi non-interacting
+one-dimensional problems.  Each  uncoupled optimization is developed by fitting 
+energy gradients in the internal coordinate system followed by root finding.  
+This new approach is competitive with the best  geometry optimization algorithms 
+in the litterature, achieves superlinear convergence and works well for large 
+biolgical problems with complicated ligand binding motifs.  
 }
 
 \smallskip
@@ -53,30 +55,21 @@ curvilinear internal coordinates, fitting
 \footnotetext[2]{\tt KNemeth@LANL.Gov}
 
 \section{Introduction}
-The optimization of molecular structures is one of the most frequent
-tasks carried out by computational chemists. 
-Structures of large molecules have been optimized so far
-only with the use of empirical force-fields, or at most with 
-semi-empirical electronic structure theories 
-\cite{Stewart_crambin_opt,Schlegel_plasminogen_opt}. However, many important phenomena
-can be understood only poorly on these low levels of the theory. 
-Such phenomena are e.g. the structural changes of large molecules, 
-when beeing put from one solvent into another, the mechanisms of 
-enzymatic reactions, the selectivities of ion-channels, etc. 
-Geometry optimization is one of the simplest tools to start studying 
-these phenomena, since it needs only energy gradients, as input, but 
-leads to a welth of relevant structural information.
-Not only equilibrium structures, but also transition states and reaction
-paths can be determined with the help of efficient optimizers 
-\cite{nudged_elastic_band}.
 
-With the advent of linear scaling electronic structure techniques 
-\cite{Goedecker99}
-energies and gradients are available for large molecules on demanding
-levels of the theory. However, even linear scaling can have 
-a considerable computational cost on large molecules. In order to
-make the computational cost smaller, efficient optimizers are
-needed, which are suitable for large molecules.
+The optimization of molecular structures is one of the most frequent
+tasks carried out by computational chemists. Structures of large molecules have been optimized so far
+only with the use of empirical force-fields, or at most with semi-empirical electronic structure theories 
+\cite{Stewart_crambin_opt,Schlegel_plasminogen_opt}. However, many important phenomena
+can be understood only poorly at these low levels of the theory.
+For example, many problems in molecular biophysics involve problems with complicated 
+metal-ligand binding motifs demanding more the more sophisticated hybrid Hartree-Fock/Density Functional
+(HF/DF) level of theory \cite{}.  Recently, the ability of linear scaling electronic structure algorithms 
+to address such large problems at the  HF/DF level of theory have been realized \cite{}. 
+However, the associated tools nessesary to efficiently drive these linear scaling engines 
+are generally less well developed.  Molecular geometry optimization, in which the energy is followed
+down hill to a local minimum,  is one of the simplest such tools.  In addition to providing a welth of 
+structural information, efficient techniques for geometry optimization can often be leveraged in the 
+determination of transition states and reaction paths \cite{nudged_elastic_band}.
 
 The present paper reveals a new concept for the optimization of
 molecular geometries, which is especially suitable for the
