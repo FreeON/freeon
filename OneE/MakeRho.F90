@@ -373,12 +373,13 @@ PROGRAM MakeRho
   ENDIF
   ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
-     CALL Put_HGRho(Rho2,'Rho',Args,1) 
 #ifdef MMech
      IF(MMOnly()) THEN
+       CALL Put_HGRho(Rho2,'Rho',Args,Current(1)) 
        CALL Put(MP,CurGeom)
      ELSE
 #endif
+       CALL Put_HGRho(Rho2,'Rho',Args,1) 
        CALL Put(MP,NxtCycl)
 #ifdef MMech
      ENDIF
