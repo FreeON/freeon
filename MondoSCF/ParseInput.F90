@@ -2160,6 +2160,9 @@ MODULE ParseInPut
       SUBROUTINE ParseGrad(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
+         REAL(DOUBLE),DIMENSION(3)  :: Sum
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+         TYPE(CHR_VECT)                 :: Chars
 !
 !
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Max_Steps = 'Max_Steps'
@@ -2217,6 +2220,35 @@ MODULE ParseInPut
            IF(OptKeyQ(Inp,OPTIMIZATION,OPT_NoGDIIS)) THEN
              Ctrl%GeOp%NoGDIIS=.TRUE.
            ENDIF
+         ENDIF
+!
+! Parse for projecting out rotations and translations
+! from geometry displacements.
+!
+             Ctrl%GeOp%DoRotOff=.TRUE.
+             Ctrl%GeOp%DoTranslOff=.TRUE.
+         IF(OptKeyQ(Inp,OPTIMIZATION,OPT_NoRotOff)) THEN
+            Ctrl%GeOp%DoRotOff=.FALSE.
+         ELSE IF(OptKeyQ(Inp,OPTIMIZATION,OPT_NoTranslOff)) THEN
+            Ctrl%GeOp%DoTranslOff=.FALSE.
+         ENDIF
+!
+! Parse for Steepest descent Inverse Hessian
+!
+              Ctrl%GeOp%StpDescInvH=0.5 !default value
+         IF(FindKey(STPDESCINVH,Inp)) THEN
+           REWIND(UNIT=Inp)
+           DO
+              READ(Inp,DEFAULT_CHR_FMT,END=99) Line
+              IF(INDEX(Line,STPDESCINVH)/=0) THEN
+                CALL New(Chars,2)
+                CALL LineToChars(Line,Chars)
+                CALL LineToDbls(Chars%C(2),1,Sum(1))
+                CALL Delete(Chars)
+                Ctrl%GeOp%StpDescInvH=Sum(1)
+              ENDIF
+           ENDDO
+99         CONTINUE
          ENDIF
 !
 ! Parse for coordtype
