@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+##############################################################################
 #--  This code is part of the MondoSCF suite of programs for linear scaling 
 #    electronic structure theory and ab initio molecular dynamics.
 #
@@ -24,139 +24,134 @@
 #    e.g. in the form "These calculations have been performed using MondoSCF, 
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.
-#------------------------------------------------------------------------------
-#    MAIN MAKEFILE FOR MondoSCF
-#    Author: Matt Challacombe
-#------------------------------------------------------------------------------
+##############################################################################
+#    MAIN MAKEFILE FOR MONDOSCF
+##############################################################################
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	 Env mm s x 1 2 e o n
+all:	CatCpy mm s e x n 1 2 
 #
-clean:	CExec cmm cs cx c1 c2 ce cn 
+release:rmm rs re rx rn r1 r2 rmDJ tarball
+#
+backup:	purge tarball
+#
+rmDJ:
+	rm -rf DirectJ
+#
+purge:	pmm ps pe px pn p1 p2 pExec pScr pWrk pLib
+#
+clean:	cmm cs ce cx cn c1 c2
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	clean PScr PWrk pmm p2 PLib
-#
-Env:	
+CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
 	sleep 2
-#
-2:	q h # o
-#
-c2:	cq ch # co
-#
-p2:	ph pq
-#
-#       LIBRARIES
-#
-mm:	
-	$(MAKE) -C MondoMods all
-#
-cmm:	
-	$(MAKE) -i -C MondoMods clean
-#
+#----------------------------------------------
+#   MondoMods
+ mm:	
+	$(MAKE)    -C MondoMods all
+rmm:
+	$(MAKE) -i -C MondoMods release
 pmm:	
 	$(MAKE) -i -C MondoMods purge
-#
-PLib:	
-	rm -rf $(MONDO_HOME)/Libs/*
-#
-#       FRONT END
-#
-s:	
-	$(MAKE) -C MondoSCF
-#
+cmm:	
+	$(MAKE) -i -C MondoMods clean
+#----------------------------------------------
+#   MondoSCF
+ s:	
+	$(MAKE)    -C MondoSCF
+rs:	
+	$(MAKE) -i -C MondoSCF release
+ps:	
+	$(MAKE) -i -C MondoSCF purge
 cs:	
 	$(MAKE) -i -C MondoSCF clean
-#
-#       GENERATION OF ORTHOGONALIZATION MATRICES
-#
-x:	
-	$(MAKE) -C XForm
-#
-cx:	
-	$(MAKE) -i -C XForm clean
-#
-#       SOLVING THE SELF-CONSISTENT-FIELD EQUATIONS
-#
-e:	
-	$(MAKE) -C SCFeqs
-#
+#----------------------------------------------
+#    Solving SCF Equantions
+ e:	
+	$(MAKE)    -C SCFeqs
+re:	
+	$(MAKE) -i -C SCFeqs release
+pe:	
+	$(MAKE) -i -C SCFeqs purge
 ce:	
 	$(MAKE) -i -C SCFeqs clean
-#
-#       GEOMETRY OPTIMIZATION USING NEWTONS METHOD
-#
-n:	
-	$(MAKE) -C QuNew
-#
+#----------------------------------------------
+#    Orthogonalization transformations
+ x:	
+	$(MAKE)    -C XForm
+rx:	
+	$(MAKE) -i -C XForm release
+px:	
+	$(MAKE) -i -C XForm purge
+cx:	
+	$(MAKE) -i -C XForm clean
+#----------------------------------------------
+#     Geometry optimization via Quasi Newton
+ n:	
+	$(MAKE)    -C QuNew
+rn:	
+	$(MAKE) -i -C QuNew release
+pn:	
+	$(MAKE) -i -C QuNew purge
 cn:	
 	$(MAKE) -i -C QuNew clean
-#
-#       ONE ELECTRON ROUTINES
-#
-1:
-	$(MAKE) -C OneE
-#
+#----------------------------------------------
+#      One electron routines
+ 1:
+	$(MAKE)    -C OneE
+r1:	
+	$(MAKE) -i -C OneE release
+p1:	
+	$(MAKE) -i -C OneE purge
 c1:	
 	$(MAKE) -i -C OneE clean
-#
-#       ORDER N EXCHANGE
-#
-o:	
-	$(MAKE) -C ONX
-#
+#----------------------------------------------
+#     Two electron directories
+ 2:	q   h #o
+c2:	cq ch #co
+p2:	ph pq #po
+#----------------------------------------------
+#     ONX
+ o:	
+	$(MAKE)    -C ONX
+ro:	
+	$(MAKE) -i -C ONX release
+po:	
+	$(MAKE) -i -C ONX purge
 co:	
 	$(MAKE) -i -C ONX clean 
-#
-#       DIRECT J BUILD
-#
-j:	
-	$(MAKE) -C DirectJ
-#
-cj:	
-	$(MAKE) -C DirectJ clean
-#
-pj:	
-	$(MAKE) -C DirectJ purge
-#
-#       QUANTUM CHEMICAL TREE CODE
-#
-q:	
-	$(MAKE) -C QCTC
-#
-cq:	
-	$(MAKE) -C QCTC clean
-#
+#----------------------------------------------
+#     QCTC 
+ q:	
+	$(MAKE)    -C QCTC
+rq:	
+	$(MAKE) -i -C QCTC release
 pq:	
-	$(MAKE) -C QCTC purge
-#
-#       HIERARCHICAL CUBATURE
-#
-h:	
+	$(MAKE) -i -C QCTC purge
+cq:	
+	$(MAKE) -i -C QCTC clean
+#----------------------------------------------
+#      HiCu
+ h:	
 	$(MAKE) -C HiCu
-#
-ch:	
-	$(MAKE) -i -C HiCu clean
-#
+rh:	
+	$(MAKE) -i -C HiCu release
 ph:	
 	$(MAKE) -i -C HiCu purge
-#
-#       CLEAN EXECUTABLES
-#
-CExec:	
+ch:	
+	$(MAKE) -i -C HiCu clean
+#----------------------------------------------
+#   Cleaning of other directories 
+pLib:	
+	rm -rf $(MONDO_HOME)/Libs/*
+pExec:	
 	rm -rf $(MONDO_HOME)/Exec/*
-#
-#       PURGE CURRENT WORK DIRECTORY
-#
-PWrk:	
+pWrk:	
 	$(MAKE) -i -C $(MONDO_WORK) clean
-#
-#       PURGE SCRATCH DIRECTORY
-#
-PScr:	
+pScr:	
 	rm  -rf $(MONDO_SCRATCH)/*.S
 	rm  -rf $(MONDO_SCRATCH)/*.T
 	rm  -rf $(MONDO_SCRATCH)/*.Rho
@@ -171,15 +166,13 @@ PScr:
 	rm  -rf $(MONDO_SCRATCH)/*.Kxc
 	rm  -rf $(MONDO_SCRATCH)/*.PFFT
 	rm  -rf $(MONDO_SCRATCH)/*
-#
-#       A RECURSIVELY GZIPED, DATE-TAGGED TARBALL
-#   
-backup:	purge
+#---------------------------------------------------------------------------------
+#     Date tagged tarball 
+tarball:
 	cd $(MONDO_HOME)/.. ;\
         mv $(MONDO_HOME) MONDO_`date '+%B'`_`date '+%d'`_`date +%y` ;\
         tar -cvf MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar           \
                     MONDO_`date '+%B'`_`date '+%d'`_`date +%y`              ;\
         gzip     MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar          ;\
         mv  MONDO_`date '+%B'`_`date '+%d'`_`date +%y` $(MONDO_HOME) 
-#
 #---------------------------------------------------------------------------------
