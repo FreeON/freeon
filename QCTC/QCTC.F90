@@ -12,11 +12,11 @@ PROGRAM QCTC
   USE Parse
   USE Macros
   USE LinAlg
-  USE Globals
   USE AtomPairs
   USE BraBloks
   USE QCTCThresholds
   USE PoleTree
+  USE Globals
 #ifdef PERIODIC
   USE PBCFarField
 #endif
