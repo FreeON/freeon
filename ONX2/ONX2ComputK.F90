@@ -344,11 +344,14 @@ CONTAINS
                             INCLUDE 'ERIInterfaceB.Inc'
 
                             NInts=NInts+DBLE(LocNInt)
+
 #ifdef GTRESH
                          ENDIF
 #endif
                       ENDDO RnOvFBD
                    ENDDO RnOvFAC
+                   !
+                   !CALL Print2E(AtA,AtC,AtB,AtD,GMc,BSc,GMp,BSp,C)
                    !
                    ! Get address for Kx and digest the block of integral.
 #ifdef ONX2_PARALLEL
@@ -416,6 +419,64 @@ CONTAINS
   END SUBROUTINE ComputK
   !
   !
+  SUBROUTINE Print2E(AtA,AtC,AtB,AtD,GMc,BSc,GMp,BSp,C)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE Print2E(AtA,AtC,AtB,AtD,BSc,BSp,C)
+!H
+!H Print the 2-E integral (ac|bd) matrix strored in the form (ab)x(cd).
+!H !! Doesn't work when SCFActn=='BasisSetSwitch' (need OffSc and OffSp) !!
+!H---------------------------------------------------------------------------------
+    !
+    IMPLICIT NONE
+    !-------------------------------------------------------------------
+    TYPE(CRDS)   :: GMc,GMp
+    TYPE(BSET)   :: BSc,BSp
+    REAL(DOUBLE) :: C(*)
+    INTEGER      :: AtA,AtB,AtC,AtD
+    !-------------------------------------------------------------------
+    INTEGER      :: KA,KB,KC,KD,NBFA,NBFB,NBFC,NBFD
+    INTEGER      :: FA,FB,FC,FD,IJKL,iiii
+    !-------------------------------------------------------------------
+    !
+    WRITE(*,'(4(A,I3))') 'AtA',AtA,' AtC',AtC,' AtB',AtB,' AtD',AtD
+    !
+    KA=GMc%AtTyp%I(AtA)
+    NBFA=BSc%BfKnd%I(KA)
+    KB=GMc%AtTyp%I(AtB)
+    NBFB=BSc%BfKnd%I(KB)
+    !
+    KC=GMp%AtTyp%I(AtC)
+    NBFC=BSp%BfKnd%I(KC)
+    KD=GMp%AtTyp%I(AtD)
+    NBFD=BSp%BfKnd%I(KD)
+    !
+    IJKL=0
+    iiii=0
+    DO FD=1,NBFD
+    DO FC=1,NBFC
+    DO FB=1,NBFB
+    DO FA=1,NBFA
+       IJKL=IJKL+1
+       IF(ABS(C(IJKL)).GT.1D-15) THEN
+          iiii=iiii+1
+          WRITE(*,'(A,4I3,I8,A,E23.10)') 'Int(', &
+               & OffS%I(AtA)+FA-1, &
+               & OffS%I(AtC)+FC-1, &
+               & OffS%I(AtB)+FB-1, &
+               !& OffS%I(AtD)+FD-1,')=',C(IJKL)
+               & OffS%I(AtD)+FD-1,IJKL,')=',C(IJKL)
+          !
+       ENDIF
+    ENDDO
+    ENDDO
+    ENDDO
+    ENDDO
+    !
+    write(*,'(2(A,I5))') '#Int_tot',NBFA*NBFC*NBFB*NBFD,' #IntN0',iiii
+    !
+END SUBROUTINE Print2E
+
+
 #ifdef ONX2_PARALLEL
   SUBROUTINE FASTMAT_RmEmptyRow(A)
     TYPE(FASTMAT), POINTER :: A
@@ -481,7 +542,7 @@ CONTAINS
     TYPE(ANode   ), POINTER      :: List
     !-------------------------------------------------------------------
     INTEGER      :: CF1,CF2,I1,I2,II,JJ,IJ,Cell
-    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2,IntType
+    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
     INTEGER      :: StopL1,StartL1,StopL2,StartL2,iNFPair
     REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ,Cnt
     LOGICAL      :: Switch
@@ -505,17 +566,12 @@ CONTAINS
        StartL1=BSc%LStrt%I(CF1,AtmInfo%K1)
        StopL1=BSc%LStop%I(CF1,AtmInfo%K1)
        !
-       if(Type1==2) stop 'SP shell not yet supported.'
-       !
        MinL2=BSp%ASymm%I(1,CF2,AtmInfo%K2)
        MaxL2=BSp%ASymm%I(2,CF2,AtmInfo%K2)
        Type2=MaxL2*(MaxL2+1)/2+MinL2+1
        StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
        StopL2=BSp%LStop%I(CF2,AtmInfo%K2)
        !
-       if(Type2==2) stop 'SP shell not yet supported.'
-       !
-       !>>>>>
        Switch=Type1.LT.Type2
        AtmPair(iNFPair)%SP%Switch=Switch
        IF(Switch) THEN
@@ -523,9 +579,7 @@ CONTAINS
        ELSE
           AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
        ENDIF
-       !oIntType=Type1*100+Type2
-       !oAtmPair(iNFPair)%SP%IntType=IntType !Type1*100+Type2
-       !<<<<<
+       !
        II=0
        !
        ! We assume the primitives are ordered (exponants in decressing order).
@@ -551,18 +605,19 @@ CONTAINS
                 AtmPair(iNFPair)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*Cnt
+                !
                 IF((Type1.NE.2.AND.Type2==2).OR.(Type2.NE.2.AND.Type1==2))THEN
                    AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1) * &
-                                                 BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                        &                        BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
                    AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
                    AtmPair(iNFPair)%SP%Cst(8,IJ)=BIG_DBL
                 ELSEIF(Type1==2.AND.Type2==2)THEN
                    AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1) * &
-                                                 BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                        &                        BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
                    AtmPair(iNFPair)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1) * &
-                                                 BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                        &                        BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
                    AtmPair(iNFPair)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1) * &
-                                                 BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
+                        &                        BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
                 ELSE
                    AtmPair(iNFPair)%SP%Cst(6,IJ)=BIG_DBL
                    AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
