@@ -1,3 +1,128 @@
+2003-05-15 11:54  mchalla
+
+	* BasisSets/: LANL2_DZ_ECP.bas, SBKJC_VDZ_ECP.bas: Two new ecp
+	basis sets.
+
+2003-05-15 11:53  mchalla
+
+	* MondoSCF2/ParseBasis.F90: [no log message]
+
+2003-05-15 11:53  mchalla
+
+	* MondoMods/: BasisSetParameters.F90, DerivedTypes.F90, InOut.F90:
+	changes to support addition of ECP's to the BSET data structure
+
+2003-05-15 10:14  tymczak
+
+	* QCTC/PFFTensor.F90: Fixed a Bug in MakePFFTensor2D
+
+2003-05-13 11:27  nemeth
+
+	* MondoSCF2/GDIIS.F90: This has not been checked in before.
+
+2003-05-12 23:09  nemeth
+
+	* MondoSCF2/Optimizer.F90: Another cleaning step on the optimizer.
+
+2003-05-12 17:58  nemeth
+
+	* MondoSCF2/InCoords.F90: RefreshBMatInfo changed, B matrix info is
+	now available only from disk.
+
+2003-05-12 17:00  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex,
+	LinearPBCMethod_revtex4.ps: [no log message]
+
+2003-05-12 16:21  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90: First working version of
+	internal coordinate GDIIS.
+
+2003-05-12 12:32  mchalla
+
+	* MondoMods/McMurch.F90: fixed formating bug.
+
+2003-05-12 10:53  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-05-09 22:09  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Optimizer.F90: Cleaning of subroutine
+	MixGeoms in Optimizer.F90 and related things in GDIIS.F90.
+
+2003-05-09 21:33  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90: Modification to
+	Optimizer: incompatible data types corrected. To InCoords: Wilson's
+	B matrix for entries of constrained Cartesians set to a small
+	value, in order to avoid their effect in the calculation of
+	internal coordinate gradients.
+
+2003-05-09 18:13  schwegle
+
+	* ONX/NONX/Notes.txt: Whats left to fix for the gradients. Almost
+	there.
+
+2003-05-09 16:09  mchalla
+
+	* SCFeqs/MMA/SCFDev/: SCF_STO-2G_Water.nb, STO-2G_Water.in: Added
+	compilation of two electron integral contrtraction.
+
+2003-05-09 15:33  mchalla
+
+	* MMA/Compile.m: This is a MMA module to allow inline compilation
+	of modules.
+
+2003-05-09 11:19  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-05-09 00:03  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GDIIS.F90, Optimizer.F90: Two
+	modifications. 1. Maximum unconstrained Cartesian gradient and its
+	location is printed. 2. GDIIS uses _only_ gradient information for
+	coeffs calculation. In case of constraints constrained components
+	are zerod, but only within and for GDIIS, when internal coord
+	optimizer is used.
+
+2003-05-08 17:55  schwegle
+
+	* ONX/NONX/Notes.txt: Things left to do for gradients.
+
+2003-05-08 17:55  schwegle
+
+	* ONX/GDrivers/: G1.101x101.ascii, G1.101x201.ascii,
+	G1.101x202.ascii, G1.201x101.ascii, G1.201x201.ascii,
+	G1.201x202.ascii, G1.202x101.ascii, G1.202x201.ascii,
+	G1.202x202.ascii: New driver gradient contraction files that are
+	consistent with the onx integral code.
+
+2003-05-08 12:08  schwegle
+
+	* ONX/NONX/Notes.txt: What needs to be done to get the gradients
+	working.
+
+2003-05-07 12:01  nemeth
+
+	* MondoSCF2/GDIIS.F90: Return from GDIIS changed.
+
+2003-05-06 12:52  nemeth
+
+	* MondoSCF2/GDIIS.F90: Modification to compile on Q.
+
+2003-05-06 11:26  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: Modifications
+	concerning the internal coordinate GDIIS.
+
+2003-05-05 19:38  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-05-05 19:26  mchalla
 
 	* SCFeqs/: DenMatMethods.F90, P2Use.F90, RHeqs.F90: [no log
@@ -399,12 +524,6 @@
 
 2003-03-13 09:47  tymczak
 
-	* Docs/DSAndErrorEstimates/: Error_vs_TauMAC_Water64_bin.ps,
-	Makefile, Time_vs_N_water_1.ps, Time_vs_N_water_2.ps,
-	Time_vs_Tau_W4096.ps: New Figures
-
-2003-03-13 09:47  tymczak
-
 	* Docs/PFFTensorMake/: GamFun.ps, Makefile, PFFMultipoles_water.ps,
 	PFFTensorMake.tex, PFFvsDist.ps: PFF Tensor Make paper
 
@@ -421,11 +540,6 @@
 2003-03-13 09:22  tymczak
 
 	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
-
-2003-03-13 09:19  tymczak
-
-	* Docs/DSAndErrorEstimates/: DSEE.tex, Makefile: Added stuff about
-	FMM
 
 2003-03-12 14:01  tymczak
 
@@ -1203,14 +1317,6 @@
 
 	* MondoMods/DerivedTypes.F90: Some new keys added to GeOpCtrl.
 
-2002-12-19 16:53  tymczak
-
-	* Docs/DSAndErrorEstimates/: DSEE.lyx, DSEE.ps, DSEE.tex,
-	Error_AllNodes_Water512.dat, Error_AllNodes_Water512.ps,
-	Error_vs_TauMAC_bin_Water512.dat, Error_vs_TauMAC_Water512.dat,
-	Error_vs_TauMAC_bin_Water512.ps, Error_vs_TauMAC_Water512.ps: New
-	Version
-
 2002-12-19 16:51  tymczak
 
 	* Docs/PBC_paper/Timing_sto3g_321g.ps: [no log message]
@@ -1907,16 +2013,6 @@
 
 	* MondoMods/InCoords.F90: [no log message]
 
-2002-11-18 17:52  anders
-
-	* Docs/DM_Papers/TS4/TS4.tex: 
-	:q!
-
-2002-11-18 17:42  anders
-
-	* Docs/DM_Papers/TS4/TS4.tex: 
-	:q!
-
 2002-11-18 17:24  nemeth
 
 	* MondoSCF/GeomOpt.F90: GDIIS related changes.
@@ -1934,10 +2030,6 @@
 2002-11-18 17:18  nemeth
 
 	* MondoMods/GlobalScalars.F90: D0-s added to Slater and VDW Radii.
-
-2002-11-18 16:24  mchalla
-
-	* Docs/DM_Papers/TS4/Let.tex: [no log message]
 
 2002-11-18 15:35  ckgan
 
@@ -1960,39 +2052,15 @@
 
 2002-11-18 13:12  mchalla
 
-	* Docs/: Bib/mondo.bib, DM_Papers/TS4/TS4.tex: [no log message]
+	* Docs/Bib/mondo.bib: [no log message]
 
 2002-11-15 17:03  mchalla
 
-	* Docs/: Bib/mondo.bib, DM_Papers/TS4/TS4.tex: [no log message]
+	* Docs/Bib/mondo.bib: [no log message]
 
-2002-11-15 15:18  mchalla
+2002-11-14 16:41  mchalla
 
-	* Docs/DM_Papers/TS4/TS4.tex: [no log message]
-
-2002-11-15 13:30  anders
-
-	* Docs/DM_Papers/TS4/TS4.tex: 
-	qqqq:q!
-
-2002-11-15 12:19  anders
-
-	* Docs/DM_Papers/TS4/WATER_FIGS/Makefile: 
-	q:q
-	
-	:q
-
-2002-11-15 12:19  anders
-
-	* Docs/DM_Papers/TS4/FULL_FIGS/Makefile: 
-	q:q
-
-2002-11-14 16:40  mchalla
-
-	* Docs/: DM_Papers/TS4/FULL_FIGS/figs,
-	DM_Papers/TS4/WATER_FIGS/figs, DM_Papers/TS4/XE_FIGS/XeErrors.dat,
-	DM_Papers/TS4/XE_FIGS/figs, DM_Papers/TS4/XE_FIGS/xe.eps,
-	DM_Papers/TS4/TS4.tex, Bib/mondo.bib: [no log message]
+	* Docs/Bib/mondo.bib: [no log message]
 
 2002-11-12 21:40  nemeth
 
@@ -2054,10 +2122,6 @@
 
 	* MondoSCF/DrvFrcs.F90: MPIRun_O=.TRUE. for both invocations of
 	SForce and TForce.
-
-2002-11-12 11:50  mchalla
-
-	* Docs/DM_Papers/TS4/TS4.tex: [no log message]
 
 2002-11-12 11:46  ckgan
 
@@ -2133,10 +2197,6 @@
 
 	* ChangeLog: [no log message]
 
-2002-11-07 16:46  mchalla
-
-	* Docs/DM_Papers/TS4/TS4.tex: Redid the abstract.
-
 2002-11-07 12:28  nemeth
 
 	* MondoSCF/DrvFrcs.F90: [no log message]
@@ -2174,16 +2234,6 @@
 2002-11-06 21:35  mchalla
 
 	* ChangeLog: [no log message]
-
-2002-11-06 21:22  mchalla
-
-	* Docs/DM_Papers/TS4/: Makefile, compile: [no log message]
-
-2002-11-06 21:18  mchalla
-
-	* Docs/DM_Papers/TS4/: TS4.tex, compile, FULL_FIGS/figs,
-	WATER_FIGS/figs, XE_FIGS/Makefile, XE_FIGS/XeErrors.dat,
-	XE_FIGS/figs: [no log message]
 
 2002-11-06 17:59  ckgan
 
@@ -3080,21 +3130,6 @@
 	* Includes/CompilerSpecifics.AMDLinux.PG: Turned on the PERIODIC
 	and WRAPDIST flags
 
-2002-10-10 16:07  anders
-
-	* Docs/DM_Papers/TS4/TS4.tex: :w
-
-2002-10-10 16:02  anders
-
-	* Docs/DM_Papers/TS4/TS4.tex: 
-	
-	k
-
-2002-10-10 11:41  anders
-
-	* Docs/DM_Papers/TS4/: TP_Fig_F_G_large.eps, TP_Fig_F_G_small.eps,
-	TS4.tex: New Updated version of the TS4 paper.
-
 2002-10-09 22:25  nemeth
 
 	* MondoSCF/ParseInput.F90: copyright...
@@ -3349,14 +3384,6 @@
 	* ONX/NONX/GetIntCode.F90: All 2-e's with L<=4 are done now with
 	explicit code.
 
-2002-09-26 15:22  mchalla
-
-	* Docs/DM_Papers/TS4/WATER_FIGS/: PM_BadGuess.epsi, PM_BadGuess.nb,
-	PM_C_Plot.nb, PM_GoodGuess.epsi, PM_GoodGuess.nb,
-	PM_Values_BadGuess, PM_Values_GoodGuess, TS4.nb, TS4_BadGuess.epsi,
-	TS4_BadGuess.nb, TS4_Values_BadGuess, Untitled-1.nb: New files and
-	plots showing migration of eigenvalues with iteration count.
-
 2002-09-26 10:09  schwegle
 
 	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
@@ -3395,83 +3422,6 @@
 
 	* SCFeqs/DenMatMethods.F90: Added in options for eigensolution and
 	statistics taking.
-
-2002-09-19 16:35  mchalla
-
-	* Docs/DM_Papers/TS4/compile: [no log message]
-
-2002-09-19 16:20  mchalla
-
-	* Docs/DM_Papers/: TP.tex, TP_Fig_F_G.ps, compile,
-	TS4/TP_Fig_F_G_small.eps, TS4/TS4.tex: [no log message]
-
-2002-09-19 16:16  mchalla
-
-	* Docs/DM_Papers/TS4/Chlorphyll/: Chlorophyll.inp, Chphyll_U1.inp,
-	Chphyll_U1.out, Chphyll_U2.inp, Chphyll_U2.out, Chphyll_U2b.out,
-	Chphyll_U2c.out, Cp_6-311Gbb.inp, Cp_6-311Gbb.out,
-	Cp_6-311ppGbb.inp, Cp_6-311ppGbb.out, Cphyll_3-21G.inp,
-	Cphyll_3-21G.out, Cphyll_3-21Gs.inp, Cphyll_3-21Gs.out,
-	Cphyll_6-311Gss.inp, Cphyll_6-311Gss.out, Cphyll_6-31Gss.inp,
-	Cphyll_6-31Gss.out, Cphyll_ATZV.inp, Cphyll_ATZV.out,
-	Cphyll_AVDZ.inp, Cphyll_AVDZ.out, Cphyll_AVTZ.inp, Cphyll_AVTZ.out,
-	Cphyll_AVTZ_part1.out, Cphyll_ApVDZ.inp, Cphyll_ApVDZ.out,
-	Cphyll_STO3G.inp, Cphyll_STO3G.out, sub_pbs: [no log message]
-
-2002-09-19 16:12  mchalla
-
-	* Docs/DM_Papers/TS4/: WATER_FIGS/ConvergedEnergies.dat,
-	WATER_FIGS/RHCommErrs, WATER_FIGS/RH_Energies, WATER_FIGS/figs,
-	FULL_FIGS/OutFiles/c60_NT4_1D-2.out,
-	FULL_FIGS/OutFiles/c60_NT4_1D-3.out,
-	FULL_FIGS/OutFiles/c60_NT4_1D-4.out,
-	FULL_FIGS/OutFiles/c60_NT4_1D-5.out,
-	FULL_FIGS/OutFiles/c60_NT4_5D-2.out,
-	FULL_FIGS/OutFiles/c60_NT4_5D-3.out,
-	FULL_FIGS/OutFiles/c60_NT4_5D-4.out,
-	FULL_FIGS/OutFiles/c60_NT4_5D-5.out,
-	FULL_FIGS/OutFiles/c60_PM_1D-2.out,
-	FULL_FIGS/OutFiles/c60_PM_1D-3.out,
-	FULL_FIGS/OutFiles/c60_PM_1D-4.out,
-	FULL_FIGS/OutFiles/c60_PM_1D-5.out,
-	FULL_FIGS/OutFiles/c60_PM_5D-2.out,
-	FULL_FIGS/OutFiles/c60_PM_5D-3.out,
-	FULL_FIGS/OutFiles/c60_PM_5D-3_stalledbadly_1.out,
-	FULL_FIGS/OutFiles/c60_PM_5D-4.out,
-	FULL_FIGS/OutFiles/c60_PM_5D-5.out,
-	FULL_FIGS/OutFiles/c60_PMb_5D-3.out, FULL_FIGS/OutFiles/c60_rh.out,
-	FULL_FIGS/RH/c180.out, FULL_FIGS/RH/c240.out, FULL_FIGS/RH/c50.out,
-	FULL_FIGS/RH/c60.out, FULL_FIGS/c60converge.dat, FULL_FIGS/figs:
-	[no log message]
-
-2002-09-19 16:06  mchalla
-
-	* Docs/DM_Papers/TS4/WATER_FIGS/: TS4/CommErr_0.10D-01.dat,
-	TS4/CommErr_0.10D-02.dat, TS4/CommErr_0.10D-03.dat,
-	TS4/CommErr_0.10D-04.dat, TS4/CommErr_0.10D-05.dat,
-	PM/CommErr_0.00D+00.dat, PM/CommErrExactBoundsPM_0.10D-04.dat,
-	PM/CommErr_0.10D-02.dat, PM/CommErr_0.10D-03.dat,
-	PM/CommErr_0.10D-04.dat, PM/CommErr_0.10D-05.dat,
-	PM/EnergyRuns_1.D-4/h2o_10.out, PM/EnergyRuns_1.D-4/h2o_110.out,
-	PM/EnergyRuns_1.D-4/h2o_110_rh.out,
-	PM/EnergyRuns_1.D-4/h2o_130.out,
-	PM/EnergyRuns_1.D-4/h2o_130_1d-3.out,
-	PM/EnergyRuns_1.D-4/h2o_150.out, PM/EnergyRuns_1.D-4/h2o_30.out,
-	PM/EnergyRuns_1.D-4/h2o_50.out, PM/EnergyRuns_1.D-4/h2o_70.out,
-	PM/EnergyRuns_1.D-4/h2o_90.out, TS4/EnergyRuns_1D-3/h2o_10.out,
-	TS4/EnergyRuns_1D-3/h2o_110.out, TS4/EnergyRuns_1D-3/h2o_130.out,
-	TS4/EnergyRuns_1D-3/h2o_150.out, TS4/EnergyRuns_1D-3/h2o_30.out,
-	TS4/EnergyRuns_1D-3/h2o_50.out, TS4/EnergyRuns_1D-3/h2o_70.out,
-	TS4/EnergyRuns_1D-3/h2o_90.out, TS4/EnergyRuns_1D-4/h2o_10.out,
-	TS4/EnergyRuns_1D-4/h2o_110.out,
-	TS4/EnergyRuns_1D-4/h2o_110_rh.out,
-	TS4/EnergyRuns_1D-4/h2o_130.out,
-	TS4/EnergyRuns_1D-4/h2o_130_1d-3.out,
-	TS4/EnergyRuns_1D-4/h2o_150.out, TS4/EnergyRuns_1D-4/h2o_30.out,
-	TS4/EnergyRuns_1D-4/h2o_50.out, TS4/EnergyRuns_1D-4/h2o_70.out,
-	TS4/EnergyRuns_1D-4/h2o_90.out, RH/h2o_10.out, RH/h2o_110.out,
-	RH/h2o_110_rh.out, RH/h2o_130.out, RH/h2o_150.out, RH/h2o_30.out,
-	RH/h2o_50.out, RH/h2o_70.out, RH/h2o_90.out: [no log message]
 
 2002-09-19 11:55  mchalla
 
@@ -4071,11 +4021,6 @@
 	with a more portable DERF bandited from internet (used only to
 	check mondo ERF tables).
 
-2002-06-27 12:26  mchalla
-
-	* Docs/DSAndErrorEstimates/: DSEE.tex, compile: New paper in
-	progress on data structures and error estimates.
-
 2002-06-26 13:35  mchalla
 
 	* ChangeLog: [no log message]
@@ -4605,10 +4550,6 @@
 	addition of MM charges into Rho. New optional argument IOff_O in
 	argument list.
 
-2002-05-31 14:44  mchalla
-
-	* Docs/DM_Papers/: TP.tex, compile: [no log message]
-
 2002-05-31 14:41  nemeth
 
 	* MondoSCF/MondoSCF.F90: Modifications for making QMMM available. 
@@ -4622,10 +4563,6 @@
 	got from HDF.  HasQM, HasMM, MMOnly and QMOnly functions
 	introduced.  Get of Mechanics depending objects (related to basis
 	sets) controlled by HasQM in subroutine StartUp.
-
-2002-05-31 14:30  mchalla
-
-	* Docs/DM_Papers/TP.tex: Added new header material.
 
 2002-05-31 14:23  nemeth
 
@@ -4719,14 +4656,6 @@
 2002-05-31 11:10  nemeth
 
 	* IntCoo/Makefile: Makefile for IntCoo
-
-2002-05-31 11:05  mchalla
-
-	* Docs/DM_Papers/TP_Fig_F_G.ps: Figure one.
-
-2002-05-31 11:03  mchalla
-
-	* Docs/DM_Papers/TP.tex: Trace setting DM paper.
 
 2002-05-31 10:56  nemeth
 
