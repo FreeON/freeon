@@ -178,8 +178,14 @@ CONTAINS
        G%AbCarts%D(3,N)=CharToDbl(C%C(4))
        G%CConstrain%I(N)=0
        IF(SIZE(C%C)==5)THEN
-          IF(TRIM(C%C(5))=='c')THEN
+          IF(TRIM(C%C(5))=='u')THEN
+             G%CConstrain%I(N)=0
+          ELSE IF(TRIM(C%C(5))=='c')THEN
              G%CConstrain%I(N)=1
+          ELSE IF(TRIM(C%C(5))=='r')THEN
+             G%CConstrain%I(N)=2
+          ELSE
+             G%CConstrain%I(N)=0
           ENDIF
        ENDIF
        CALL Delete(C)

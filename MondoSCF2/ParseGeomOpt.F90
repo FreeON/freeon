@@ -37,6 +37,13 @@ MODULE ParseGeomOpt
        GOpt%GDIIS%NoGDIIS=.TRUE.
      ENDIF
      !
+     ! Parse for GDIIS 
+     !
+     GOpt%Constr%DoLagr=.TRUE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoLagr)) THEN
+       GOpt%Constr%DoLagr=.FALSE.
+     ENDIF
+     !
      ! Parse for energy-back-tracking
      !
      GOpt%GConvCrit%DoBackTr=.True.

@@ -415,7 +415,7 @@ CONTAINS
     Energies(:)=C%Geos%Clone(:)%ETotal
   END FUNCTION SteepStep
 !
-!---------------------------------------------------------------------
+!------------------------------------------------------------------
 !
    SUBROUTINE IntOpt(C)
      TYPE(Controls)            :: C
@@ -458,7 +458,8 @@ CONTAINS
        !
        CALL SCF(iBAS,iGEO,C)
        IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
+                  C%Geos,C%Sets,C%MPIs)
        !
        ! Loop over all clones and modify geometries.
        !
@@ -470,9 +471,12 @@ CONTAINS
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
        !
-       ! Archive displaced geometries and fill in new geoms.
+       ! Archive displaced geometries 
        !
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       !
+       ! Fill in new geometries 
+       !
        DO iCLONE=1,C%Geos%Clones
          CALL NewGeomFill(C%Geos%Clone(iCLONE))
        ENDDO
@@ -536,17 +540,17 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,Convgd,ETot, &
-                         iGEO,iCLONE,SCRPath,Print)
+   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,LagrMult,GradMult, &
+                    LagrDispl,Convgd,ETot,iGEO,iCLONE,SCRPath,Print)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
-     REAL(DOUBLE),DIMENSION(:)   :: AtNum
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum,LagrMult,GradMult,LagrDispl
      REAL(DOUBLE)                :: ETot 
      INTEGER,DIMENSION(:)        :: Convgd
      INTEGER                     :: NIntC,NCart
      INTEGER                     :: NatmsLoc,iGEO,iCLONE
      TYPE(INTC)                  :: IntCs
-     TYPE(DBL_VECT)              :: IntOld,Displ
+     TYPE(DBL_VECT)              :: IntOld
      INTEGER                     :: Refresh
      CHARACTER(LEN=*)            :: SCRPath
      INTEGER                     :: Print
@@ -570,23 +574,29 @@ CONTAINS
        IntOld%D=IntCs%Value
      ENDIF
      !
-     ! Print current geometry for debugging
+     ! Print current set of internals for debugging
      !
      IF(Print==DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs, &
        IntCs%Value,'Internals at step #'//TRIM(IntToChar(iGEO)))
      !
-     ! Calculate simple relaxation (SR) step from an inverse Hessian
+     ! Calculate the B matrix and put it onto the disk.
      !
-     CALL NewDispl(GOpt,Displ,NCart,NIntC)
-     CALL SRStep(GOpt%GOptStat,GOpt%Constr,GOpt%TrfCtrl,GOpt%CoordCtrl,&
-                 GOpt%Hessian,GOpt%Optimizer,GOpt%GrdTrf, &
-                 XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print) 
+     CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl%DoClssTrf,Print, &
+                     GOpt%CoordCtrl%LinCrit,GOpt%TrfCtrl%ThreeAt, &
+                     SCRPath)
      !
-     ! Calculate new geometry 
+     ! Overwrite Cartesian Energy gradients with Lagrangian ones.
      !
-     CALL NewStructure(Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-       GOpt%Constr,SCRPath,XYZ,Displ,IntCs)
-     CALL Delete(Displ)
+     IF(GOpt%Constr%DoLagr) THEN
+       CALL LagrGradCart(GradIn,IntCs,LagrMult,SCRPath,iGEO)
+       CALL LagrGradMult(GradMult,XYZ,IntCs, &
+         GOpt%CoordCtrl%LinCrit,GOpt%Constr%NConstr)
+     ENDIF
+     !
+     ! Calculate simple relaxation step from an inverse Hessian
+     !
+     CALL RelaxGeom(GOpt,XYZ,AtNum,GradIn,GradMult, &
+                    LagrMult,LagrDispl,IntCs,SCRPath,Print) 
      !
      ! Check convergence
      !
@@ -605,23 +615,15 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SRStep(GStat,GConstr,GTrfCtrl, &
-                     GCoordCtrl,GHessian,GType,GGrdTrf, &
-                     XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print)
+   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,GradIn,LagrGrad, &
+                        LagrMult,LagrDispl,IntCs,SCRPath,Print)
      !
      ! Simple Relaxation step
      !
-     TYPE(GOptStat)                 :: GStat
-     TYPE(Constr)                   :: GConstr
-     TYPE(TrfCtrl)                  :: GTrfCtrl
-     TYPE(CoordCtrl)                :: GCoordCtrl
-     TYPE(Hessian)                  :: GHessian
-     INTEGER                        :: GType
-     TYPE(GrdTrf)                   :: GGrdTrf
+     TYPE(GeomOpt)                  :: GOpt
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ,GradIn
-     REAL(DOUBLE),DIMENSION(:)      :: AtNum
+     REAL(DOUBLE),DIMENSION(:)      :: AtNum,LagrGrad,LagrMult,LagrDispl
      TYPE(DBL_VECT)                 :: Displ
-     REAL(DOUBLE)                   :: Sum
      TYPE(DBL_VECT)                 :: IntGrad,Grad,CartGrad
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,NDim
@@ -630,30 +632,27 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     IF(GTrfCtrl%DoInternals) THEN
-       NIntC=SIZE(IntCs%Def)
-     ELSE
-       NIntC=0
-     ENDIF
-       NDim =SIZE(Displ%D)
-     IF(NIntC/=NDim.AND.GTrfCtrl%DoInternals) &
-         CALL Halt('Dimensionality error in SRStep')
+     NIntC=SIZE(IntCs%Def)
+     !
+     CALL NewDispl(GOpt,Displ,NCart,NIntC)
+     !
+     NDim =SIZE(Displ%D)
+     IF(NIntC/=NDim.AND.GOpt%TrfCtrl%DoInternals) &
+         CALL Halt('Dimensionality error in RelaxGeom')
      !
      CALL New(Grad,NDim)
      CALL New(CartGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      !
-     CALL GetCGradMax(GConstr,CartGrad%D,NCart, &
-                      IntCs,GStat%IMaxCGrad,GStat%MaxCGrad)
+     CALL GetCGradMax(GOpt%Constr,CartGrad%D,NCart, &
+                      IntCs,GOpt%GOptStat%IMaxCGrad,GOpt%GOptStat%MaxCGrad)
      !
      ! If requested, compute internal coord. gradients
      !
-     IF(GTrfCtrl%DoInternals) THEN
-       NIntC=SIZE(IntCs%Def)
-       IF(NIntC/=NDim) CALL Halt('Dimension error in SRStep')
+     IF(GOpt%TrfCtrl%DoInternals) THEN
        CALL New(IntGrad,NDim)
        CALL CartToInternal(XYZ,IntCs,CartGrad%D,IntGrad%D,&
-         GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
+         GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        Grad%D=IntGrad%D
        CALL Delete(IntGrad)
      ELSE
@@ -663,55 +662,46 @@ CONTAINS
      !
      ! Check for gradient-convergence
      !
-     GStat%IMaxGrad=1
-     GStat%MaxGrad=ABS(Grad%D(1))
-     DO I=2,NDim
-       Sum=ABS(Grad%D(I))
-       IF(Sum>GStat%MaxGrad) THEN
-         GStat%IMaxGrad=I
-          GStat%MaxGrad=Sum
-       ENDIF
-     ENDDO
-     GStat%RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
-     !
-     ! Check for gradient-convergence in the presence of constraints
-     !
-     GStat%MaxGradNoConstr=Zero
-     GStat%RMSGradNoConstr=Zero
-     J=0
-     DO I=1,NIntC
-       IF(.NOT.IntCs%Constraint(I)) THEN
-         J=J+1
-         Sum=ABS(Grad%D(I))
-         IF(GStat%MaxGradNoConstr<Sum) THEN
-           GStat%IMaxGradNoConstr=I
-           GStat%MaxGradNoConstr=Sum
-         ENDIF
-         GStat%RMSGradNoConstr=GStat%RMSGradNoConstr+Sum*Sum
-       ENDIF
-     ENDDO
-     IF(J/=0) GStat%RMSGradNoConstr=SQRT(GStat%RMSGradNoConstr)/DBLE(J)
+     CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
      !
      ! Use Hessian matrix to calculate step
      !
-     SELECT CASE(GType)
-     CASE(GRAD_STPDESC_OPT) 
-       CALL SteepestDesc(GCoordCtrl,GHessian, &
-                         Grad,Displ,XYZ)
-     CASE(GRAD_DIAGHESS_OPT) 
-       CALL DiagonalHess(GCoordCtrl,GHessian, &
-                         Grad,Displ,IntCs,XYZ)
+     SELECT CASE(GOpt%Optimizer)
+       CASE(GRAD_STPDESC_OPT) 
+         CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
+                           Grad,Displ,XYZ,LagrMult,LagrGrad)
+       CASE(GRAD_DIAGHESS_OPT) 
+         !IF(GOpt%Constr%DoLagr.AND.GOpt%Constr%NConstr/=0) THEN
+         !  CALL DiagHessLagr(GOpt%CoordCtrl,GOpt%Hessian, &
+         !       Grad%D,Displ%D,IntCs,XYZ,SCRPath,LagrMult,LagrGrad)
+         !ELSE
+           CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ,IntCs,XYZ,&
+                         LagrDispl,LagrMult,LagrGrad)
+         !ENDIF
      END SELECT
      !
      ! Set constraints on the displacements
      !
-     CALL SetConstraint(IntCs,XYZ,Displ,GCoordCtrl%LinCrit, &
-       GConstr%NConstr,GTrfCtrl%DoInternals)
-     !
-     ! Tidy up
-     !
+     IF(.NOT.GOpt%Constr%DoLagr) THEN
+       CALL SetConstraint(IntCs,XYZ,Displ,GOpt%CoordCtrl%LinCrit, &
+         GOpt%Constr%NConstr,GOpt%TrfCtrl%DoInternals)
+     ENDIF
      CALL Delete(Grad)
-   END SUBROUTINE SRStep
+     !
+     ! Construct new structure either by Cartesian or by internal
+     ! displacements
+     !
+     IF(GOpt%TrfCtrl%DoInternals) THEN 
+       CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
+       IntCs%Value=IntCs%Value+Displ%D
+       CALL InternalToCart(XYZ,IntCs,IntCs%Value, &
+         Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,SCRPath)
+     ELSE
+       CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
+     ENDIF
+     !
+     CALL Delete(Displ)
+   END SUBROUTINE RelaxGeom
 !
 !-------------------------------------------------------
 !
@@ -792,12 +782,14 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE SteepestDesc(CoordC,Hess,Grad,Displ,XYZ)
+   SUBROUTINE SteepestDesc(CoordC,Hess,Grad,Displ,XYZ, &
+                           LagrMult,GradMult)
      TYPE(CoordCtrl)             :: CoordC
      TYPE(Hessian)               :: Hess  
      TYPE(DBL_VECT)              :: Grad,Displ 
      INTEGER                     :: NCart
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: LagrMult,GradMult
      !
      NCart=3*SIZE(XYZ,2)
      IF(CoordC%CoordType==CoordType_Cartesian) THEN
@@ -809,13 +801,15 @@ CONTAINS
        Displ%D=-2.D0*Grad%D 
        !CALL RedundancyOff(Displ%D,XYZ,DoSet_O=.TRUE.)
      ELSE
-       Displ%D=-5.D0*Grad%D 
+       Displ%D=-0.5D0*Grad%D 
      ENDIF 
+       LagrMult=LagrMult-0.5D0*GradMult
    END SUBROUTINE SteepestDesc
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE DiagonalHess(CoordC,Hess,Grad,Displ,IntCs,XYZ)
+   SUBROUTINE DiagHess(CoordC,Hess,Grad,Displ,IntCs,XYZ, &
+                       LagrDispl,LagrMult,GradMult)  
      !
      TYPE(CoordCtrl)   :: CoordC
      TYPE(Hessian)     :: Hess
@@ -824,6 +818,7 @@ CONTAINS
      INTEGER           :: I,J,NIntC,NCart
      REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: LagrMult,LagrDispl,GradMult
      !
      NIntC=SIZE(IntCs%Def)
      NCart=3*SIZE(XYZ,2)
@@ -857,18 +852,22 @@ CONTAINS
      ELSE
        CALL Halt('Only Primitiv Internals are available yet.')
      ENDIF 
-   END SUBROUTINE DiagonalHess
+     ! 
+     ! Make steepest descent on Lagr. multipliers
+     ! 
+     LagrDispl(:)=LagrMult(:)-1.0D0*GradMult(:)
+   END SUBROUTINE DiagHess
 !
 !-------------------------------------------------------
 !
    SUBROUTINE DiagHessRFO(GOpt,Grad,Displ,IntCs,XYZ)
-     TYPE(GeomOpt)     :: GOpt
-     TYPE(DBL_VECT)    :: Grad,Displ
-     TYPE(DBL_RNK2)    :: Hessian
-     TYPE(INTC)        :: IntCs
-     INTEGER           :: I,J,NIntC,NCart,Info
-     REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
-     REAL(DOUBLE)      :: Sum
+     TYPE(GeomOpt)               :: GOpt
+     TYPE(DBL_VECT)              :: Grad,Displ
+     TYPE(DBL_RNK2)              :: Hessian
+     TYPE(INTC)                  :: IntCs
+     INTEGER                     :: I,J,NIntC,NCart,Info
+     REAL(DOUBLE)                :: HStre,HBend,HLinB,HOutP,HTors
+     REAL(DOUBLE)                :: Sum
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      !
      NIntC=SIZE(IntCs%Def)
@@ -1211,25 +1210,74 @@ CONTAINS
      TYPE(Geometries)     :: Geos
      TYPE(CRDS)           :: GMLoc
      INTEGER,DIMENSION(:) :: Convgd
-     INTEGER              :: iGEO,iCLONE
+     INTEGER              :: I,iGEO,iCLONE,NatmsNew
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
-     INTEGER              :: Print
      LOGICAL              :: NoGDIIS,GDIISOn
      CHARACTER(LEN=DCL)   :: SCRPath
-     TYPE(DBL_RNK2)       :: XYZNew
+     TYPE(DBL_RNK2)       :: XYZNew,GradNew
+     TYPE(DBL_VECT)       :: AtNumNew,CartGrad
      !
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
-     Print    =Opts%PFlags%GeOp
      GMLoc%Displ%D=GMLoc%AbCarts%D
+     !
+     ! Now, cut out that part of the molecule, which is 
+     ! not rigidly fixed and pass it in to the optimizer
+     !
+     NatmsNew=0
+     DO I=1,GMLoc%Natms
+       IF(GMLoc%CConstrain%I(I)/=2) NatmsNew=NatmsNew+1
+     ENDDO
+     CALL New(XYZNew,(/3,NatmsNew/))
+     CALL New(AtNumNew,NatmsNew)
+     CALL New(GradNew,(/3,NatmsNew/))
+     ! fill atomic data
+     NatmsNew=0
+     DO I=1,GMLoc%Natms
+       IF(GMLoc%CConstrain%I(I)/=2) THEN
+         NatmsNew=NatmsNew+1
+         XYZNew%D(1:3,NatmsNew)=GMLoc%Displ%D(1:3,I)
+         GradNew%D(1:3,NatmsNew)=GMLoc%Vects%D(1:3,I)
+         AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
+       ENDIF
+     ENDDO
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
-       CALL ModifyGeom(GOpt,GMLoc%Displ%D,GMLoc%AtNum%D,GMLoc%Vects%D, &
-                       Convgd,GMLoc%Etotal,IGeo,iCLONE,SCRPath,Print)
+       CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GradNew%D, &
+                       GMLoc%LagrMult%D,GMLoc%GradMult%D,GMLoc%LagrDispl%D, &
+                       Convgd,GMLoc%Etotal,IGeo,iCLONE,SCRPath, &
+                       Opts%PFlags%GeOp)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
      !
+     ! Put back modified geometry into GMLoc array
+     ! Also, put back gradients, which may be Lagrangian ones now.
+     !
+     NatmsNew=0
+     DO I=1,GMLoc%Natms
+       IF(GMLoc%CConstrain%I(I)/=2) THEN
+         NatmsNew=NatmsNew+1
+         GMLoc%Displ%D(1:3,I)=XYZNew%D(1:3,NatmsNew)
+         GMLoc%Vects%D(1:3,I)=GradNew%D(1:3,NatmsNew)
+       ENDIF
+     ENDDO
+     !
+     ! Put modified (Energy->Lagrangian) gradients into HDF 
+     !
+     HDFFileID=OpenHDF(Nams%HFile)
+     HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                   "Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL New(CartGrad,3*GMLoc%Natms)
+       CALL CartRNK2ToCartRNK1(CartGrad%D,GMLoc%Vects%D)
+       CALL Put(CartGrad,'GradE',Tag_O=IntToChar(iGEO))
+       CALL Delete(CartGrad)
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     CALL Delete(XYZNew)
+     CALL Delete(AtNumNew)
+     CALL Delete(GradNew)
    END SUBROUTINE OptSingleMol
 !
 !-------------------------------------------------------------------
@@ -1370,7 +1418,8 @@ CONTAINS
      IF(Convgd(iCLONE)/=1) THEN
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,GOpt%Constr,GOpt%BackTrf, &
+         CALL GeoDIIS(GMLoc%AbCarts%D,GMLoc%CConstrain%I, &
+           GOpt%Constr,GOpt%BackTrf, &
            GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
            iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
@@ -1501,6 +1550,173 @@ CONTAINS
      !
      CALL Delete(GMOld)
    END SUBROUTINE BackTrack
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE LagrGradCart(GradIn,IntCs,LagrMult,SCRPath,iGEO)
+     REAL(DOUBLE),DIMENSION(:,:)    :: GradIn
+     TYPE(INTC)                     :: IntCs
+     TYPE(BMATR)                    :: B
+     REAL(DOUBLE),DIMENSION(:)      :: LagrMult
+     INTEGER                        :: I,J,NIntC,NatmsLoc,NCart,iGEO
+     CHARACTER(LEN=*)               :: SCRPath
+     !
+     NIntC=SIZE(IntCs%Def) 
+     NatmsLoc=SIZE(GradIn,2)
+     NCart=3*NatmsLoc
+     CALL ReadBMATR(B,TRIM(SCRPath)//'B')
+     !
+     CALL GradAddCarts(GradIn,IntCs,LagrMult)
+     CALL GradAddInt(GradIn,IntCs,B,LagrMult)
+     !
+     CALL Delete(B) 
+   END SUBROUTINE LagrGradCart
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GradAddCarts(GradIn,IntCs,LagrMult)
+     TYPE(INTC)                  :: IntCs
+     REAL(DOUBLE),DIMENSION(:,:) :: GradIn
+     REAL(DOUBLE),DIMENSION(:)   :: LagrMult
+     INTEGER                     :: I,J,NIntC,NConstr,NDim
+     !
+     NIntC=SIZE(IntCs%Def)
+     NDim=SIZE(LagrMult)
+     !
+     NConstr=0
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         NConstr=NConstr+1
+         IF(NConstr>NDim) CALL Halt('Dimension error #2 in GradAddCarts')
+         J=IntCs%Atoms(I,1)
+         IF(IntCs%Def(I)(1:5)=='CARTX') THEN
+           GradIn(1,J)=GradIn(1,J)-LagrMult(NConstr)
+         ELSE IF(IntCs%Def(I)(1:5)=='CARTY') THEN
+           GradIn(2,J)=GradIn(2,J)-LagrMult(NConstr)
+         ELSE IF(IntCs%Def(I)(1:5)=='CARTZ') THEN
+           GradIn(3,J)=GradIn(3,J)-LagrMult(NConstr)
+         ENDIF
+       ENDIF
+     ENDDO
+   END SUBROUTINE GradAddCarts
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GradAddInt(GradIn,IntCs,B,LagrMult)
+     REAL(DOUBLE),DIMENSION(:,:):: GradIn
+     REAL(DOUBLE),DIMENSION(:)  :: LagrMult
+     TYPE(INTC)                 :: IntCs
+     TYPE(BMATR)                :: B 
+     INTEGER                    :: I,J,K,L,JJ,NintC,NConstr,NDim
+     !
+     NintC=SIZE(IntCs%Def)
+     NDim=SIZE(LagrMult)
+     NConstr=0
+     IF(NintC/=SIZE(B%IB,1)) CALL Halt('Dimension error in GradAddInt')
+     DO I=1,NintC
+       IF(IntCs%Constraint(I)) THEN
+         NConstr=NConstr+1
+         IF(NConstr>NDim) CALL Halt('Dimension error #2 in GradAddInt')
+         IF(IntCs%Def(I)(1:4)/='CART') THEN
+           DO J=1,4
+             L=IntCs%Atoms(I,J)
+             IF(L==0) EXIT
+             JJ=3*(J-1)
+             DO K=1,3 
+               GradIn(K,L)=GradIn(K,L)-LagrMult(NConstr)*B%B(I,JJ+K) 
+             ENDDO
+           ENDDO
+         ENDIF
+       ENDIF
+     ENDDO
+   END SUBROUTINE GradAddInt
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE LagrGradMult(GradMult,XYZ,IntCs,LinCrit,NConstrIn)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:) :: GradMult
+     REAL(DOUBLE)              :: LinCrit 
+     TYPE(INTC)                :: IntCs
+     INTEGER                   :: I,J,NIntC,NConstr,NConstrIn
+     !
+     NIntC=SIZE(IntCs%Def)
+     NConstr=0
+     CALL INTCValue(IntCs,XYZ,LinCrit)
+     IF(SIZE(GradMult)/=NConstrIn) &
+       CALL Halt('Dimension error #1 in LagrGradMult')
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         NConstr=NConstr+1
+         IF(NConstr>NConstrIn) &
+           CALL Halt('Dimension error #2 in LagrGradMult')
+         GradMult(NConstr)=-(IntCs%Value(I)-IntCs%ConstrValue(I))
+       ENDIF
+     ENDDO
+   END SUBROUTINE LagrGradMult
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE DiagHessLagr(GCoordCtrl,GHessian, &
+        Grad,Displ,IntCs,XYZ,SCRPath,LagrMult,LagrGrad)
+     REAL(DOUBLE),DIMENSION(:)  :: Grad,Displ,LagrMult,LagrGrad
+     REAL(DOUBLE),DIMENSION(:,:):: XYZ
+     TYPE(CoordCtrl)            :: GCoordCtrl
+     TYPE(Hessian)              :: GHessian
+     TYPE(INTC)                 :: IntCs
+     CHARACTER(LEN=*)           :: SCRPath
+     INTEGER                    :: I,J,K,L,NIntC,NCart
+     INTEGER                    :: NatmsLoc,NConstr
+     TYPE(Cholesky)             :: CholData
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     NConstr=SIZE(LagrMult)
+     CALL LagrInvHess(CholData,IntCs,SCRPath,GHessian,LagrMult,NCart,NConstr)
+stop
+   END SUBROUTINE DiagHessLagr
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GrdConvrgd(GStat,IntCs,Grad)
+     TYPE(GOptStat)            :: GStat
+     TYPE(INTC)                :: IntCs
+     REAL(DOUBLE),DIMENSION(:) :: Grad
+     REAL(DOUBLE)              :: Sum
+     INTEGER                   :: I,J,NDim,NIntC
+     !
+     NDim=SIZE(Grad)
+     NIntC=SIZE(IntCs%Def)
+     !
+     GStat%IMaxGrad=1
+     GStat%MaxGrad=ABS(Grad(1))
+     DO I=2,NDim
+       Sum=ABS(Grad(I))
+       IF(Sum>GStat%MaxGrad) THEN
+         GStat%IMaxGrad=I
+          GStat%MaxGrad=Sum
+       ENDIF
+     ENDDO
+     GStat%RMSGrad=SQRT(DOT_PRODUCT(Grad,Grad)/DBLE(NDim))
+     !
+     ! Check for gradient-convergence in the presence of constraints
+     !
+     GStat%MaxGradNoConstr=Zero
+     GStat%RMSGradNoConstr=Zero
+     J=0
+     DO I=1,NIntC
+       IF(.NOT.IntCs%Constraint(I)) THEN
+         J=J+1
+         Sum=ABS(Grad(I))
+         IF(GStat%MaxGradNoConstr<Sum) THEN
+           GStat%IMaxGradNoConstr=I
+           GStat%MaxGradNoConstr=Sum
+         ENDIF
+         GStat%RMSGradNoConstr=GStat%RMSGradNoConstr+Sum*Sum
+       ENDIF
+     ENDDO
+     IF(J/=0) GStat%RMSGradNoConstr=SQRT(GStat%RMSGradNoConstr)/DBLE(J)
+   END SUBROUTINE GrdConvrgd
 !
 !-------------------------------------------------------------------
 !

@@ -146,6 +146,7 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: ConstrMaxCrit
      LOGICAL                            :: DoFixMM
      LOGICAL                            :: TSSearch
+     LOGICAL                            :: DoLagr
   END TYPE Constr
   !
   TYPE BackTrf

@@ -224,16 +224,23 @@ MODULE ParseExtraCoords
      ! Fill in Cartesian constraints stored 
      ! in Geos%Clone(iCLONE)%CConstrain%I
      ! Again, supposing that constraints are the same for all clones.
+     ! Then, renumber atoms in IntC_Extra by exclusion of Rigid atoms
      !
      !DO iCLONE=1,Geos%Clones
         iCLONE=1
         CALL MergeConstr(IntC_Extra,Geos%Clone(iCLONE),&
           NIntC_Extra,NConstr,NCartConstr)
+        CALL ReNumbIntC(IntC_Extra,Geos%Clone(iCLONE)%CConstrain%I) 
      !ENDDO
      !
-     ! Save IntC_Extra to disk 
+     ! Redefine size of Lagrangian arrays and save IntC_Extra to disk 
      !
      DO iCLONE=1,Geos%Clones
+       Geos%Clone(iCLONE)%NLagr=NConstr
+       CALL Delete(Geos%Clone(iCLONE)%LagrMult)
+       CALL Delete(Geos%Clone(iCLONE)%GradMult)
+       CALL New(Geos%Clone(iCLONE)%LagrMult,NConstr)
+       CALL New(Geos%Clone(iCLONE)%GradMult,NConstr)
        CALL WriteIntCs(IntC_Extra,TRIM(N%M_SCRATCH)//&
          TRIM(N%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))//'IntC_Extra')
      ENDDO
@@ -303,4 +310,36 @@ MODULE ParseExtraCoords
      CALL Set_INTC_EQ_INTC(IntC_New,IntC_Extra,1,NIntC_Extra,1)
      CALL Delete(IntC_New)
    END SUBROUTINE MergeConstr
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE ReNumbIntC(IntCs,CConstr) 
+     TYPE(INTC)           :: IntCs
+     INTEGER,DIMENSION(:) :: CConstr
+     INTEGER              :: I,J,K,NIntC,NatmsOld,NatmsNew
+     TYPE(INT_VECT)       :: Map
+     !
+     NIntC=SIZE(IntCs%Def)
+     NatmsOld=SIZE(CConstr)
+     NatmsNew=0
+     CALL New(Map,NatmsOld)
+     DO I=1,NatmsOld
+       IF(CConstr(I)/=2) THEN
+         NatmsNew=NatmsNew+1
+         Map%I(I)=NatmsNew
+       ELSE
+         Map%I(I)=0
+       ENDIF
+     ENDDO
+     !
+     DO I=1,NIntC
+       DO J=1,4
+         K=IntCs%Atoms(I,J)
+         IF(K==0) EXIT
+         IntCs%Atoms(I,J)=Map%I(K)
+       ENDDO
+     ENDDO
+     !
+     CALL Delete(Map)
+   END SUBROUTINE ReNumbIntC
 END MODULE ParseExtraCoords

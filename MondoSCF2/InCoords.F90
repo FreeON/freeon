@@ -2393,8 +2393,6 @@ CONTAINS
      !
      ! Get B matrix and Bt*B inverse
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,DoClssTrf,Print, &
-                          LinCrit,ThreeAt,SCRPath)
      CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
      IF(.NOT.CtrlTrf%DoClssTrf) THEN
        I=CtrlTrf%ThreeAt(1)
@@ -2609,7 +2607,6 @@ CONTAINS
        ENDIF
        !
        ! Calculate difference between required and actual internals
-       ! Calc [phi_r-phi_a]
        !
        VectIntAux%D=VectIntReq%D-IntCs%Value
        CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
@@ -4322,7 +4319,216 @@ CONTAINS
                   Char(1:4)=='TORS')
    END FUNCTION HasTorsOutP
 !
-!----------------------------------------------------------------------
+!-------------------------------------------------------------------
+!
+   SUBROUTINE LagrInvHess(CholData,IntCs,SCRPath,GHessian, &
+                          LagrMult,NCart,NConstr)
+     TYPE(BMATR)      :: B
+     TYPE(Hessian)    :: GHessian
+     TYPE(Cholesky)   :: CholData
+     TYPE(INTC)       :: IntCs
+     REAL(DOUBLE),DIMENSION(:) :: LagrMult
+     INTEGER          :: I,J,NIntC,NCart,NConstr
+     CHARACTER(LEN=*) :: SCRPath 
+     TYPE(INT_VECT)   :: IHessXX,JHessXX,IHessXL,JHessXL
+     TYPE(INT_VECT)   :: IHessM,JHessM
+     TYPE(DBL_VECT)   :: AHessXX,AHessXL,AHessM
+     !
+     NIntC=SIZE(IntCs%Def)
+     !
+     CALL ReadBMATR(B,TRIM(SCRPath)//'B')
+     IF(SIZE(B%IB,1)/=NIntC) &
+       CALL Halt('Dimension error in DiagHessLagr')
+     CALL GetHessXX(IntCs,B,GHessian,LagrMult, &
+                    IHessXX,JHessXX,AHessXX,NCart,SCRPath_O=SCRPath)
+     CALL GetHessXL(IntCs,B,IHessXL,JHessXL,AHessXL, &
+                    NCart,NConstr,SCRPath_O=SCRPath)
+     CALL MergeXLXX(IHessXL,JHessXL,AHessXL, &
+                    IHessXX,JHessXX,AHessXX, &
+                    IHessM,JHessM,AHessM,SCRPath_O=SCRPath)
+     write(*,*) 'aft GetHessXL'
+     !
+     CALL Delete(B)
+   END SUBROUTINE LagrInvHess
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE GetHessXX(IntCs,B,GHessian,LagrMult, &
+                        IHessXX,JHessXX,AHessXX,NCart,SCRPath_O)
+     TYPE(INTC)       :: IntCs
+     INTEGER          :: I,J,NIntC,NCart,NZSpB,NConstraint
+     REAL(DOUBLE),DIMENSION(:) :: LagrMult
+     TYPE(Hessian)    :: GHessian
+     TYPE(BMATR)      :: B,BSc
+     REAL(DOUBLE)     :: BScale
+     TYPE(INT_VECT)   :: ISpB,JSpB,ISpBSc,JSpBSc,IHessXX,JHessXX
+     TYPE(INT_VECT)   :: ISpBt,JSpBt
+     TYPE(DBL_VECT)   :: ASpB,ASpBSc,AHessXX
+     TYPE(DBL_VECT)   :: ASpBt
+     CHARACTER(LEN=*) :: SCRPath_O
+     !
+     CALL Set_BMATR_EQ_BMATR(BSc,B)
+     NIntC=SIZE(IntCs%Def)
+     !
+     NConstraint=0
+     DO I=1,NIntC
+       IF(IntCs%Def(I)(1:4)=='STRE') THEN
+         BScale=GHessian%Stre
+       ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+         BScale=GHessian%Bend
+       ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
+         BScale=GHessian%Tors
+       ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
+         BScale=GHessian%OutP
+       ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+         BScale=GHessian%LinB
+       ELSE
+         BScale=One
+       ENDIF
+       IF(IntCs%Constraint(I)) THEN
+         NConstraint=NConstraint+1
+         BScale=BScale-LagrMult(NConstraint)
+       ENDIF
+       DO J=1,12 ; BSc%B(I,J)=BScale*BSc%B(I,J) ; ENDDO
+     ENDDO
+     !
+     CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
+     CALL BtoSpB_1x1(BSc,ISpBSc,JSpBSc,ASpBSc)
+     !
+     CALL New(ISpBt,NCart+1)
+     NZSpB=ISpB%I(NIntC+1)-1
+     CALL New(JSpBt,NZSpB)
+     CALL New(ASpBt,NZSpB)
+     CALL TransPose1x1(ISpB%I,JSpB%I,ASpB%D,NIntC,NCart, &
+          ISpBt%I,JSpBt%I,ASpBt%D,'full')
+     !
+     CALL MatMul_1x1(ISpBt%I,JSpBt%I,ASpBt%D, &
+                     ISpBSc%I,JSpBSc%I,ASpBSc%D, &
+                     IHessXX,JHessXX,AHessXX,NCart,NIntC,NCart)
+     !
+     CALL Delete(ISpBt)
+     CALL Delete(JSpBt)
+     CALL Delete(ASpBt)
+     !
+     CALL Delete(BSc)
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(ISpBSc)
+     CALL Delete(JSpBSc)
+     CALL Delete(ASpBSc)
+   END SUBROUTINE GetHessXX
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE GetHessXL(IntCs,B,IHessXLs,JHessXLs,AHessXLs, &
+                        NCart,NConstr,SCRPath_O)
+     TYPE(INTC)       :: IntCs
+     TYPE(BMATR)      :: B
+     TYPE(INT_VECT)   :: IHessXL,JHessXL,IHessXLt,JHessXLt
+     TYPE(INT_VECT)   :: IHessXLs,JHessXLs
+     TYPE(DBL_VECT)   :: AHessXL,AHessXLt,AHessXLs
+     INTEGER          :: NCart,NConstr,NDim,NNew,NZ,I,J,K,JJ,KK,NIntC
+     CHARACTER(LEN=*),OPTIONAL :: SCRPath_O
+     !
+     NDim=NCart+NConstr 
+     NIntC=SIZE(IntCs%Def)
+     CALL New(IHessXL,NDim+1)
+     IHessXL%I(1:NCart+1)=1
+     NNew=NCart
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         NNew=NNew+1
+         IF(NNew-NCart>NConstr) CALL Halt('Dimension error in GetHessXL') 
+         NZ=0
+         DO J=1,4 
+           JJ=B%IB(I,J)
+           IF(JJ==0) EXIT
+           NZ=NZ+3
+         ENDDO
+         IHessXL%I(NNew+1)=IHessXL%I(NNew)+NZ
+       ENDIF
+     ENDDO
+     !
+     NZ=IHessXL%I(NDim+1)-1
+     CALL New(JHessXL,NZ)
+     CALL New(AHessXL,NZ)
+     !
+     NZ=0
+     NNew=0
+     DO I=1,NIntC
+       IF(IntCs%Constraint(I)) THEN
+         NNew=NNew+1
+         IF(NNew>NConstr)CALL Halt('Dimension error #2 in GetHessXL') 
+         DO J=1,4 
+           JJ=B%IB(I,J)
+           IF(JJ==0) EXIT
+           JJ=3*(JJ-1)
+           DO K=1,3 
+             NZ=NZ+1
+             KK=3*(J-1)+K
+             JHessXL%I(NZ)=JJ+K
+             AHessXL%D(NZ)=B%B(I,KK)
+           ENDDO
+         ENDDO
+       ENDIF
+     ENDDO
+     !
+     ! Build transpose of XL and merge XL with it.
+     !
+     CALL New(IHessXLt,NDim+1)
+     CALL New(JHessXLt,NZ)
+     CALL New(AHessXLt,NZ)
+     CALL TransPose1x1(IHessXL%I,JHessXL%I,AHessXL%D, &
+       NDim,NDim,IHessXLt%I,JHessXLt%I,AHessXLt%D,'full')
+     CALL AddMat_1x1(IHessXL%I,JHessXL%I,AHessXL%D, &
+                     IHessXLt%I,JHessXLt%I,AHessXLt%D, &
+                     IHessXLs,JHessXLs,AHessXLs,NDim,NDim)
+     !IF(PRESENT(SCRPath_O)) THEN
+     !  CALL Plot_1x1(IHessXL%I,JHessXL%I,TRIM(SCRPath_O)//'XL',NDim)
+     !  CALL Plot_1x1(IHessXLt%I,JHessXLt%I,TRIM(SCRPath_O)//'XLt',NDim)
+     !  CALL Plot_1x1(IHessXLs%I,JHessXLs%I,TRIM(SCRPath_O)//'XLs',NDim)
+     !ENDIF
+     CALL Delete(IHessXLt)
+     CALL Delete(JHessXLt)
+     CALL Delete(AHessXLt)
+     CALL Delete(IHessXL)
+     CALL Delete(JHessXL)
+     CALL Delete(AHessXL)
+   END SUBROUTINE GetHessXL
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE MergeXLXX(IHessXL,JHessXL,AHessXL, &
+                        IHessXX,JHessXX,AHessXX, &
+                        IHessM,JHessM,AHessM,SCRPath_O)
+     TYPE(INT_VECT)  :: IHessXL,JHessXL,IHessXX,JHessXX,IHessP
+     TYPE(INT_VECT)  :: IHessM,JHessM
+     TYPE(DBL_VECT)  :: AHessXL,AHessXX,AHessM
+     INTEGER         :: NDimXL,NZXL,NDimXX,NZXX
+     CHARACTER(LEN=*),OPTIONAL :: SCRPath_O
+     !
+     NDimXL=SIZE(IHessXL%I)-1
+     NZXL=IHessXL%I(NDimXL+1)-1 
+     NDimXX=SIZE(IHessXX%I)-1
+     NZXX=IHessXX%I(NDimXX+1)-1 
+     IF(NDimXX>NDimXL) CALL Halt('Dimension error in MergeXLXX')
+     CALL New(IHessP,NDimXL+1)  
+     IHessP%I(1:NDimXX+1)=IHessXX%I(1:NDimXX+1) 
+     IHessP%I((NDimXX+2):(NDimXL+1))=IHessP%I(NDimXX+1)
+     !
+     CALL AddMat_1x1(IHessP%I,JHessXX%I,AHessXX%D, &
+                     IHessXL%I,JHessXL%I,AHessXL%D, &
+                     IHessM,JHessM,AHessM,NDimXL,NDimXL)
+     !IF(PRESENT(SCRPath_O)) THEN
+     !  CALL Plot_1x1(IHessP%I,JHessXX%I,TRIM(SCRPath_O)//'XXP',NDimXL)
+     !  CALL Plot_1x1(IHessXL%I,JHessXL%I,TRIM(SCRPath_O)//'XL',NDimXL)
+     !  CALL Plot_1x1(IHessM%I,JHessM%I,TRIM(SCRPath_O)//'M',NDimXL)
+     !ENDIF
+     CALL Delete(IHessP)
+   END SUBROUTINE MergeXLXX
+!
+!------------------------------------------------------------------
 !
    END MODULE InCoords
 

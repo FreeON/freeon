@@ -19,8 +19,8 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,GConstr,GBackTrf,GTrfCtrl,GCoordCtrl, &
-                      GDIISCtrl,HFileIn,iCLONE,iGEO,Print,SCRPath)
+   SUBROUTINE GeoDIIS(XYZ,CConstr,GConstr,GBackTrf,GTrfCtrl, &
+              GCoordCtrl,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,SCRPath)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(Constr)                :: GConstr
@@ -28,17 +28,19 @@ CONTAINS
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl 
      TYPE(GDIIS)                 :: GDIISCtrl  
-     INTEGER                     :: iCLONE,iGEO,ICount
+     INTEGER,DIMENSION(:)        :: CConstr
+     INTEGER                     :: iCLONE,iGEO,ICount,NLagr
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
      INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc
      INTEGER                     :: IGeom,HDFFileID,IStart
      INTEGER                     :: SRMemory,RefMemory
      INTEGER                     :: CartGradMemory,GDIISMemory
-     TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
+     TYPE(DBL_RNK2)              :: SRStruct,RefGrad
+     TYPE(DBL_RNK2)              :: RefStruct,SRDispl
+     TYPE(DBL_RNK2)              :: LagrMult,GradMult
      TYPE(DBL_RNK2)              :: Aux
-     TYPE(DBL_VECT)              :: Vect
-     TYPE(INT_VECT)              :: VectI
+     TYPE(DBL_VECT)              :: Vect,VectLagr
      !
      GDIISMemory=MIN(6,iGEO)
      IF(iGEO<GDIISCtrl%Init) RETURN
@@ -52,6 +54,7 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
+     CALL Get(NLagr,'nlagr',Tag_O=TRIM(IntToChar(1)))
      !
      ! Get GDIIS memory of Cartesian coords and grads
      !
@@ -59,33 +62,38 @@ CONTAINS
      CALL New(RefStruct,(/NCart,GDIISMemory/))
      CALL New(RefGrad,(/NCart,GDIISMemory/))
      CALL New(SRDispl,(/NCart,GDIISMemory/))
+     CALL New(LagrMult,(/NLagr,GDIISMemory/))
+     CALL New(GradMult,(/NLagr,GDIISMemory/))
      !
-     CALL New(VectI,NatmsLoc)
      CALL New(Vect,NCart)
+     CALL New(VectLagr,NLagr)
      CALL New(Aux,(/3,NatmsLoc/))
      DO IGeom=IStart,iGEO
        ICount=IGeom-IStart+1
        CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       SRStruct%D(:,ICount)=Vect%D
+       DO J=1,NCart ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
        CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       RefStruct%D(:,ICount)=Vect%D
+       DO J=1,NCart ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
        CALL Get(Vect,'grade',Tag_O=TRIM(IntToChar(IGeom)))
-       RefGrad%D(:,ICount)=Vect%D
-       CALL Get(VectI,'constraints',Tag_O=TRIM(IntToChar(IGeom)))
-       DO J=1,NatmsLoc
-         IF(VectI%I(J)==1) THEN
-           JJ=3*(J-1)
-           DO K=1,3
-             RefGrad%D(JJ+K,ICount)=Zero
-           ENDDO
+       DO J=1,NCart ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
+       DO I=1,NatmsLoc
+         IF(CConstr(I)==2) THEN
+           K=3*(I-1)
+           DO J=K+1,K+3; RefGrad%D(J,ICount)=Zero ; ENDDO
          ENDIF
        ENDDO
+       IF(NLagr/=0) THEN
+         CALL Get(VectLagr,'LagrMult',Tag_O=TRIM(IntToChar(IGeom)))
+         DO J=1,NLagr ; LagrMult%D(J,ICount)=VectLagr%D(J) ; ENDDO
+         CALL Get(VectLagr,'GradMult',Tag_O=TRIM(IntToChar(IGeom)))
+         DO J=1,NLagr ; GradMult%D(J,ICount)=VectLagr%D(J) ; ENDDO
+       ENDIF
      ENDDO
      CALL Delete(Aux)
      CALL Delete(Vect)
-     CALL Delete(VectI)
+     CALL Delete(VectLagr)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
      ! Calculate new Cartesian coordinates 
@@ -103,6 +111,8 @@ CONTAINS
      !
      ! Tidy up
      !
+     CALL Delete(GradMult)
+     CALL Delete(LagrMult)
      CALL Delete(RefGrad)
      CALL Delete(RefStruct)
      CALL Delete(SRStruct)
