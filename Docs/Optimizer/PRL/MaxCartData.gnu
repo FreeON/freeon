@@ -24,7 +24,7 @@
    dashed dashlength 2.0 linewidth 2.5 defaultplex \
    palfuncparam 2000,0.003 \
    butt "Times Roman" 30
- set output 'curve2_1.eps'
+ set output 'MaxCartData.eps'
 unset clip points
 set clip one
 unset clip two
@@ -89,7 +89,7 @@ set mx2tics default
 set my2tics default
 set mcbtics default
 set xtics border mirror norotate autofreq 
-set ytics border mirror norotate autofreq 
+set ytics border mirror norotate 0.5
 set ztics border nomirror norotate autofreq 
 set nox2tics
 set noy2tics
@@ -110,7 +110,7 @@ set xlabel "i" 0.000000,0.000000  font ""
 set x2label "" 0.000000,0.000000  font ""
 set xrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set x2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
-set ylabel "log|(E_{i+1} - E_{opt})/E_{opt}|" 0.000000,0.000000  font ""
+set ylabel "log_{10}(g_{i})" 0.000000,0.000000  font ""
 set y2label "" 0.000000,0.000000  font ""
 set yrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set y2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
@@ -132,5 +132,5 @@ set colorbox default
 set colorbox vertical origin 0.9,0.2 size 0.1,0.63 bdefault
 set loadpath 
 set fontpath 
-plot "log-log" u 1:4 w linespoints notitle lw 2 ps 2
+plot "MaxCartData" u 1:3 w linespoints notitle lw 2 ps 2
 #    EOF
