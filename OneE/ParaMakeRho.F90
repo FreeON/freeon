@@ -26,6 +26,8 @@ PROGRAM ParaMakeRho
   TYPE(DBCSR)                    :: Dmat,D1,D2
   INTEGER                        :: LocalAtom
   REAL(DOUBLE)                   :: TotRSumE,TotRSumN
+  INTEGER                        :: IErr
+  TYPE(CMPoles)                  :: SMP
 #else
   TYPE(BCSR)                     :: Dmat,D1,D2
 #endif
@@ -38,6 +40,7 @@ PROGRAM ParaMakeRho
   TYPE(ARGMT)                    :: Args
   TYPE(HGRho)                    :: Rho
   TYPE(HGRho_new)                :: RhoA
+  TYPE(CMPoles)                  :: MP
   TYPE(INT_VECT)                 :: Stat
   INTEGER                        :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                        :: NDist,NCoef,I,J,Pbeg,Pend,NDist_old,NDist_new,NumAtoms
@@ -231,6 +234,21 @@ PROGRAM ParaMakeRho
      ENDIF
   ENDIF
 
+  CALL New(MP)
+  CALL New(SMP)
+  CALL CalRhoPoles_new(MP,RhoA,GM)
+#ifdef PARALLEL
+  CALL MPI_Reduce(MP%Dpole%D(1),SMP%Dpole%D(1),3,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  CALL MPI_Reduce(MP%Qpole%D(1),SMP%Qpole%D(1),6,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == 0) THEN
+    MP%Dpole%D(1:3) = SMP%Dpole%D(1:3)
+    MP%Qpole%D(1:6) = SMP%Qpole%D(1:6)
+    ! write(*,'(A,3F20.15)') 'MP%Dpole%D(1:3) = ',MP%Dpole%D(1:3)
+    ! write(*,'(A,6F20.15)') 'MP%Qpole%D(1:6) = ',MP%Qpole%D(1:6)
+  ENDIF
+#endif
+
+
   CALL ConvertToOldRho(Rho,RhoA)
 
 ! Put Rho and MPs to disk
@@ -252,6 +270,9 @@ PROGRAM ParaMakeRho
 #endif
   ENDIF
 ! Tidy up
+
+     CALL Put(MP)
+     CALL PChkSum(Rho,'Rho',Prog)
 
      CALL Delete(GM)
      CALL Delete(Dmat)

@@ -916,6 +916,10 @@ MODULE PrettyPrint
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet,NQ
     REAL(DOUBLE)                         :: Chk,Expt
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
+
+#ifdef PARALLEL
+    REAL(DOUBLE) :: SChk
+#endif
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
        PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
@@ -937,11 +941,21 @@ MODULE PrettyPrint
           ENDDO
        ENDDO
     ENDDO
+#ifdef PARALLEL
+
+    SChk = Reduce(Chk)
+    IF(MyID == ROOT) THEN
+      Chk = SChk
+    
+#endif
     ! Create check string
     ChkStr=CheckSumString(Chk,Name,Proc_O)
     PU=OpenPU(Unit_O=Unit_O)
     WRITE(PU,'(1x,A)')TRIM(ChkStr)
     CALL ClosePU(PU)
+#ifdef PARALLEL
+    ENDIF
+#endif
   END SUBROUTINE Print_CheckSum_HGRho
 
 
