@@ -989,16 +989,17 @@ MODULE PrettyPrint
     CHARACTER(LEN=*)           :: Proc
     CHARACTER(LEN=*), OPTIONAL :: Misc_O
     CHARACTER(LEN=20)          :: Tag
-    CHARACTER(LEN=16)          :: Name
+    CHARACTER(LEN=20)          :: Name
     CHARACTER(LEN=3 ),PARAMETER:: Colon =","
     CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
-    Tag=""
     IF(PRESENT(Misc_O))THEN
-       Name=TRIM(ADJUSTL(Proc))//Colon//TRIM(Misc_O)
-       Tag=Name//Colons
+       Name=TRIM(ADJUSTL(TRIM(Proc)))//Colon//TRIM(Misc_O)
+       Name(18:20)=":: "
+       Tag=Name
     ELSE
-       Name=ADJUSTL(TRIM(Proc))
-       Tag=Name//Colons
+       Name=TRIM(ADJUSTL(TRIM(Proc)))
+       Name(18:20)=":: "
+       Tag=Name
     ENDIF
   END FUNCTION ProcessName
 !---------------------------------------------------------------------
