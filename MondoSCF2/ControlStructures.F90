@@ -174,7 +174,7 @@ MODULE ControlStructures
      LOGICAL                            :: DoLattBackTr
      LOGICAL                            :: DoLattStep
      LOGICAL                            :: Alternate 
-     LOGICAL                            :: FixAtomsFirst
+     LOGICAL                            :: LatticeStart
      LOGICAL                            :: ExplLatt    
      INTEGER                            :: MaxLattice
      INTEGER                            :: MaxAtoms  

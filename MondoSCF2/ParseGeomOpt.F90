@@ -64,12 +64,12 @@ MODULE ParseGeomOpt
      ! Parse for alternating lattice and atomic positions relaxation 
      !
      GOpt%GConvCrit%Alternate=.FALSE.
-     GOpt%GConvCrit%FixAtomsFirst=.FALSE.
+     GOpt%GConvCrit%LatticeStart=.FALSE.
      IF(OptKeyQ(Inp,GRADIENTS,OPT_Alternate)) THEN
        GOpt%GConvCrit%Alternate=.TRUE.
        IF(PBCDim==0) GOpt%GConvCrit%Alternate=.FALSE.
-       IF(OptKeyQ(Inp,GRADIENTS,OPT_FixAtomsFirst)) THEN
-         GOpt%GConvCrit%FixAtomsFirst=.TRUE.
+       IF(OptKeyQ(Inp,GRADIENTS,OPT_LatticeStart)) THEN
+         GOpt%GConvCrit%LatticeStart=.TRUE.
        ENDIF
      ENDIF
      !

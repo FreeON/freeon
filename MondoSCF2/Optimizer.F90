@@ -1391,7 +1391,7 @@ CONTAINS
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
      IF(iGEO==1) THEN
        GMLoc%LatticeOnly=.FALSE.
-       IF(GOpt%GConvCrit%FixAtomsFirst) GMLoc%LatticeOnly=.TRUE.
+       IF(GOpt%GConvCrit%LatticeStart) GMLoc%LatticeOnly=.TRUE.
        GMLoc%AltCount=0
      ENDIF
      !
