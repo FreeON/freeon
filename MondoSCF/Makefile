@@ -32,25 +32,31 @@ include $(MONDO_HOME)/Includes/RemoveAll
 ObjectFiles = SCFLocals.o ParsingKeys.o Spawn.o   \
               GetPID.o Overlay.o ParseInput.o     \
               SetSCFs.o DrvSCFs.o                 \
-              DrvFrcs.o  MondoSCF.o
+              DrvFrcs.o  MondoSCF.o 
 #
 ReleaseFiles= SCFLocals.x ParsingKeys.x Spawn.x   \
               GetPID.x Overlay.x ParseInput.x     \
               SetSCFs.x DrvSCFs.x                 \
-              DrvFrcs.x  MondoSCF.x
+              DrvFrcs.x  MondoSCF.x 
 #
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(LibOpts) $(F90_LIBRARIES)
 	mv MondoSCF $(MONDO_EXEC)/MondoSCF
 #
-release:$(ReleaseFiles)
+release:$(ReleaseFiles) 
 #
-MondoSCF.o:	DrvSCFs.o SetSCFs.o ParseInput.o Overlay.o $(MONDO_HOME)/Libs/libMondoMods.a
+MondoSCF.o:	DrvSCFs.o SetSCFs.o ParseInput.o Overlay.o \
+                $(MONDO_HOME)/Libs/libMondoMods.a \
+                $(MONDO_HOME)/Libs/libDynamo.a
+
 ChkSCFs.o:	SCFLocals.o                                $(MONDO_HOME)/Libs/libMondoMods.a
-DrvSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a
+DrvSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a 
 DrvFrcs.o:      SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a
-ParseInput.o:	SCFLocals.o                                $(MONDO_HOME)/Libs/libMondoMods.a
+ParseInput.o:	SCFLocals.o \
+                $(MONDO_HOME)/Libs/libMondoMods.a \
+                $(MONDO_HOME)/Libs/libDynamo.a
 SetSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a
+
 
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
@@ -62,3 +68,4 @@ clean:
 
 purge:	clean
 	rm -f $(REMOVESRCE)
+
