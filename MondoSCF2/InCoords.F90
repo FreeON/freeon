@@ -32,17 +32,17 @@ CONTAINS
      ! Defd as LINB1 and LINB2
      !
      IMPLICIT NONE
-     INTEGER :: I,J,K,L,NatmsLoc,IIntC,KA,LA
+     INTEGER :: I,J,K,L,NatmsLoc,IInt,KA,LA
      INTEGER :: II,IC1,IC2,M,N,NCart,PBCDim,III
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value
      TYPE(INTC)                  :: IntCs
      TYPE(BMATR)                 :: B
-     REAL(DOUBLE)                :: LinCrit,TorsLinCrit
-     REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT
+     REAL(DOUBLE)                :: LinCrit,TorsLinCrit,Frac(3)
+     REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,BoxShape,InvBoxSh
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
      REAL(DOUBLE),DIMENSION(12)  :: Aux12
-     CHARACTER(LEN=DCL)          :: CharU
+     CHARACTER(LEN=DCL)          :: Char
      TYPE(DBL_VECT)              :: CartAux
      TYPE(INT_VECT)              :: AtmsAux
      !
@@ -51,7 +51,9 @@ CONTAINS
      CALL INTCValue(IntCs,XYZ,LinCrit,TorsLinCrit)
      DO J=1,3
        BoxShapeT(J,1:3)=XYZ(1:3,NatmsLoc-3+J)
+       BoxShape(1:3,J)=XYZ(1:3,NatmsLoc-3+J)
      ENDDO
+     InvBoxSh=InverseMatrix(BoxShape)
      !
      ! allocate B matrix
      !
@@ -59,102 +61,102 @@ CONTAINS
      B%IB%I=0
      B%B%D=Zero
      !
-     DO IIntC=1,IntCs%N   
-       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IIntC)
-       IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
-       CharU=IntCs%Def%C(IIntC)
+     DO IInt=1,IntCs%N   
+       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
+       IF(.NOT.IntCs%Active%L(IInt)) CYCLE
+       Char=IntCs%Def%C(IInt)
        IF(PBCDim>0) THEN
-         IF(CharU(1:5)=='ALPHA') THEN
-           CharU(1:5)='BEND '
-         ELSE IF(CharU(1:4)=='BETA') THEN
-           CharU(1:5)='BEND '
-         ELSE IF(CharU(1:5)=='GAMMA') THEN
-           CharU(1:5)='BEND '
+         IF(Char(1:5)=='ALPHA') THEN
+           Char(1:5)='BEND '
+         ELSE IF(Char(1:4)=='BETA') THEN
+           Char(1:5)='BEND '
+         ELSE IF(Char(1:5)=='GAMMA') THEN
+           Char(1:5)='BEND '
          ENDIF
        ENDIF
        !
-       IF(CharU(1:4)=='STRE') THEN
+       IF(Char(1:4)=='STRE') THEN
          ! stre
-         B%IB%I(IIntC,1:2)=IntCs%Atoms%I(IIntC,1:2)
-         Aux12=B%B%D(IIntC,1:12)
+         B%IB%I(IInt,1:2)=IntCs%Atoms%I(IInt,1:2)
+         Aux12=B%B%D(IInt,1:12)
          CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-        !write(*,100) CharU(1:5), &
-        !B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
+         B%B%D(IInt,1:12)=Aux12
+        !write(*,100) Char(1:5), &
+        !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
          !
-       ELSE IF(CharU(1:4)=='BEND'.OR. &
-               CharU(1:5)=='ALPHA'.OR. &
-               CharU(1:4)=='BETA'.OR. &
-               CharU(1:5)=='GAMMA') THEN
+       ELSE IF(Char(1:4)=='BEND'.OR. &
+               Char(1:5)=='ALPHA'.OR. &
+               Char(1:4)=='BETA'.OR. &
+               Char(1:5)=='GAMMA') THEN
          ! bend
-         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
-         Aux12=B%B%D(IIntC,1:12)
+         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
+         Aux12=B%B%D(IInt,1:12)
          CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-        !write(*,100) CharU(1:5), &
-        !B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
-       ELSE IF(CharU(1:4)=='OUTP') THEN
+         B%B%D(IInt,1:12)=Aux12
+        !write(*,100) Char(1:5), &
+        !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
+       ELSE IF(Char(1:4)=='OUTP') THEN
          ! out of plane
-         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
-         Aux12=B%B%D(IIntC,1:12)
+         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL OutP(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
-                   XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IIntC), &
+                   XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IInt), &
                    BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-       ! write(*,100) CharU(1:5),B%IB%I(IIntC,1:4), &
-       !  B%B%D(IIntC,1:12)*AngstromsToAu
-       ELSE IF(CharU(1:4)=='TORS') THEN
+         B%B%D(IInt,1:12)=Aux12
+       ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
+       !  B%B%D(IInt,1:12)*AngstromsToAu
+       ELSE IF(Char(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
-         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
-         Aux12=B%B%D(IIntC,1:12)
+         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL TORS(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4), &
-                   TorsLinCrit,IntCs%Active%L(IIntC), &
+                   TorsLinCrit,IntCs%Active%L(IInt), &
                    BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-        !write(*,*) IIntC
-        !write(*,100) CharU(1:5),B%IB%I(IIntC,1:4), &
-        !B%B%D(IIntC,1:12)
-       ELSE IF(CharU(1:6)=='VOLM_L') THEN
-         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
-         Aux12=B%B%D(IIntC,1:12)
+         B%B%D(IInt,1:12)=Aux12
+        !write(*,*) IInt
+        !write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
+        !B%B%D(IInt,1:12)
+       ELSE IF(Char(1:6)=='VOLM_L') THEN
+         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL VOLUME(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-           XYZAux(1:3,4),IntCs%Active%L(IIntC),BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-       ELSE IF(CharU(1:6)=='AREA_L') THEN
-         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
-         Aux12=B%B%D(IIntC,1:12)
+           XYZAux(1:3,4),IntCs%Active%L(IInt),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
+       ELSE IF(Char(1:6)=='AREA_L') THEN
+         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
+         Aux12=B%B%D(IInt,1:12)
          CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-                   IntCs%Active%L(IIntC),BB_O=Aux12)
-         B%B%D(IIntC,1:12)=Aux12
-       ELSE IF(CharU(1:5)=='LINB1') THEN
+                   IntCs%Active%L(IInt),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
+       ELSE IF(Char(1:5)=='LINB1') THEN
          ! linear bendig of i-j-k
-         IF(IntCs%Def%C(IIntC+1)(1:5)/='LINB2') &
+         IF(IntCs%Def%C(IInt+1)(1:5)/='LINB2') &
             CALL Halt('LINB2 Definitions are not paired!')
-         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
-         B%IB%I(IIntC+1,1:3)=IntCs%Atoms%I(IIntC+1,1:3)
-         L=IntCs%Atoms%I(IIntC,4)  ! reference atom
+         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
+         B%IB%I(IInt+1,1:3)=IntCs%Atoms%I(IInt+1,1:3)
+         L=IntCs%Atoms%I(IInt,4)  ! reference atom
          CALL LinB(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4),L, &
-                   BB1=B%B%D(IIntC,1:12),BB2=B%B%D(IIntC+1,1:12))  
-        !write(*,100) CharU(1:5), &
-        ! B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
-        !write(*,100) CharU(1:5), &
-        ! B%IB%I(IIntC+1,1:4),B%B%D(IIntC+1,1:12)
-       ELSE IF(CharU(1:5)=='LINB2') THEN
+                   BB1=B%B%D(IInt,1:12),BB2=B%B%D(IInt+1,1:12))  
+        !write(*,100) Char(1:5), &
+        ! B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
+        !write(*,100) Char(1:5), &
+        ! B%IB%I(IInt+1,1:4),B%B%D(IInt+1,1:12)
+       ELSE IF(Char(1:5)=='LINB2') THEN
          CYCLE
-       ELSE IF(CharU(1:5)=='CARTX' ) THEN
-         I=IntCs%Atoms%I(IIntC,1)
-         B%IB%I(IIntC,1)=I
-         CALL BCART('X',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
-       ELSE IF(CharU(1:5)=='CARTY' ) THEN
-         I=IntCs%Atoms%I(IIntC,1)
-         B%IB%I(IIntC,1)=I
-         CALL BCART('Y',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
-       ELSE IF(CharU(1:5)=='CARTZ' ) THEN
-         I=IntCs%Atoms%I(IIntC,1)
-         B%IB%I(IIntC,1)=I
-         CALL BCART('Z',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
+       ELSE IF(Char(1:5)=='CARTX' ) THEN
+         I=IntCs%Atoms%I(IInt,1)
+         B%IB%I(IInt,1)=I
+         CALL BCART('X',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
+       ELSE IF(Char(1:5)=='CARTY' ) THEN
+         I=IntCs%Atoms%I(IInt,1)
+         B%IB%I(IInt,1)=I
+         CALL BCART('Y',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
+       ELSE IF(Char(1:5)=='CARTZ' ) THEN
+         I=IntCs%Atoms%I(IInt,1)
+         B%IB%I(IInt,1)=I
+         CALL BCART('Z',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
        ENDIF
      ENDDO !!!! loop over internal coords
      100 FORMAT(A5,4I6,/,6F12.6,/,6F12.6)
@@ -162,22 +164,22 @@ CONTAINS
      ! Generate BL, the portion of the B matrix related to lattice
      ! distorsions
      !
-     DO IIntC=1,IntCs%N
-       B%BLI%I(IIntC)=0
-       B%BL%D(IIntC,:)=Zero
-       IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
+     DO IInt=1,IntCs%N
+       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
+       B%BLI%I(IInt)=0
+       B%BL%D(IInt,:)=Zero
+       IF(.NOT.IntCs%Active%L(IInt)) CYCLE
        DO J=1,4 ! loop over atoms
-         IF(IntCs%Atoms%I(IIntC,J)==0) EXIT
+         IF(IntCs%Atoms%I(IInt,J)==0) EXIT
          L=(J-1)*3+1
          K=L+2
+         CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,XYZAux(1:3,J),Frac)
          DO II=1,3  ! loop over cell indices
            IC1=(II-1)*3+1
            IC2=IC1+2
-           M=(J-1)*3+II 
-           N=IntCs%Cells%I(IIntC,M)
-           IF(N==0) CYCLE
-           B%BLI%I(IIntC)=NCart-9
-           B%BL%D(IIntC,IC1:IC2)=B%BL%D(IIntC,IC1:IC2)+DBLE(N)*B%B%D(IIntC,L:K)
+           B%BLI%I(IInt)=NCart-9
+           B%BL%D(IInt,IC1:IC2)=B%BL%D(IInt,IC1:IC2)+ &
+             Frac(II)*B%B%D(IInt,L:K)
          ENDDO
        ENDDO
      ENDDO 
@@ -187,13 +189,13 @@ CONTAINS
      IF(PBCDim>0) THEN
        CALL New(CartAux,NCart)
        CALL New(AtmsAux,NatmsLoc)
-       DO IIntC=1,IntCs%N
-         IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
+       DO IInt=1,IntCs%N
+         IF(.NOT.IntCs%Active%L(IInt)) CYCLE
          !
          ! clean memory
          !
          DO J=1,4
-           I=IntCs%Atoms%I(IIntC,J)
+           I=IntCs%Atoms%I(IInt,J)
            IF(I==0) EXIT
             AtmsAux%I(I)=0
            KA=3*(I-1)+1   
@@ -204,39 +206,39 @@ CONTAINS
          ! do lattice sum
          !
          DO J=1,4
-           I=IntCs%Atoms%I(IIntC,J)
+           I=IntCs%Atoms%I(IInt,J)
            IF(I==0) EXIT
            K=3*(J-1)+1
            L=K+2
            KA=3*(I-1)+1   
            LA=KA+2
-            CartAux%D(KA:LA)=CartAux%D(KA:LA)+B%B%D(IIntC,K:L)
+            CartAux%D(KA:LA)=CartAux%D(KA:LA)+B%B%D(IInt,K:L)
             IF(AtmsAux%I(I)==0) THEN
               AtmsAux%I(I)=I
             ELSE
-              B%IB%I(IIntC,J)=0
+              B%IB%I(IInt,J)=0
             ENDIF
          ENDDO
          !
          ! fill back
          !
          II=0
-         B%B%D(IIntC,1:12)=Zero
+         B%B%D(IInt,1:12)=Zero
          DO J=1,4
-           I=IntCs%Atoms%I(IIntC,J)
+           I=IntCs%Atoms%I(IInt,J)
            IF(I==0) EXIT
-           IF(B%IB%I(IIntC,J)==0) THEN
+           IF(B%IB%I(IInt,J)==0) THEN
              CYCLE
            ELSE
-             B%IB%I(IIntC,J)=0
+             B%IB%I(IInt,J)=0
            ENDIF
            II=II+1
-           B%IB%I(IIntC,II)=I
+           B%IB%I(IInt,II)=I
            K=3*(II-1)+1
            L=K+2
            KA=3*(I-1)+1   
            LA=KA+2
-           B%B%D(IIntC,K:L)=CartAux%D(KA:LA)
+           B%B%D(IInt,K:L)=CartAux%D(KA:LA)
          ENDDO
        ENDDO
        CALL Delete(AtmsAux)
@@ -245,14 +247,13 @@ CONTAINS
      !
      ! Clean BL for fixed lattice orientation
      !
-   ! DO IIntC=1,IntCs%N
-   !   B%BL%D(IIntC,2)=Zero
-   !   B%BL%D(IIntC,3)=Zero
-   !   B%BL%D(IIntC,6)=Zero
-   ! ENDDO
+     DO IInt=1,IntCs%N
+       B%BL%D(IInt,2)=Zero
+       B%BL%D(IInt,3)=Zero
+       B%BL%D(IInt,6)=Zero
+     ENDDO
      !
    END SUBROUTINE BMatrix
-!
 !-----------------------------------------------------------------------
 !
    SUBROUTINE Stre(XI,XJ,BB_O,Value_O)
