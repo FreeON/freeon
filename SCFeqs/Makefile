@@ -32,19 +32,20 @@ include $(MONDO_HOME)/Includes/RemoveAll
 CPPMISC=#-DNODIIS
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
-SDMM_Objs  = FillPBlok.o SDMM.o               
+SDMM_Objs  = FillPBlok.o SDMM.o 
 Stat_Objs  = SCFStatus.o          
 RHEq_Objs  = RHeqs.o              
 FBuild_Objs= FBuild.o       
 #DIIS_Objs  = DIIS_Saved.o               
 DIIS_Objs  = DIIS.o               
-Dev_Objs   = ToDev.o               
+Dev_Objs   = ToDev.o  
+SDMM2_Objs = FillPBlok.o SDMM2.o             
 #
 ReleaseFiles=FillPBlok.x P2Use.x FillPBlok.x \
-             SDMM.x SCFStatus.x RHeqs.x      \
-             FBuild.x DIIS.x ToDev.x
+             SDMM.x SCFStatus.x RHeqs.x \
+             FBuild.x DIIS.x ToDev.x SDMM2.x
 #
-all:	Stat Gues SDMM FBuild  DIIS RHEq
+all:	Stat Gues SDMM FBuild  DIIS RHEq SDMM2
 #
 release:clean $(ReleaseFiles)
 #
@@ -62,6 +63,7 @@ clean:
 	rm -f $(MONDO_EXEC)/SCFstats
 	rm -f $(MONDO_EXEC)/DIIS
 	rm -f $(MONDO_EXEC)/ToDev
+	rm -f $(MONDO_EXEC)/SDMM2
 	ln -s /dev/null core
 #
 Stat:	$(Stat_Objs)
@@ -72,9 +74,9 @@ Gues:	$(Gues_Objs)
 	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv P2Use $(MONDO_EXEC)/P2Use
 #
-SDMM:	$(SDMM_Objs)
-	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv SDMM $(MONDO_EXEC)/SDMM
+SDMM2:	$(SDMM2_Objs)
+	$(LD) $(LDFLAGS) SDMM2 $(SDMM2_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv SDMM2 $(MONDO_EXEC)/SDMM2
 #
 RHEq:	$(RHEq_Objs)
 	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
@@ -92,6 +94,10 @@ Dev:	$(Dev_Objs)
 	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
 	mv ToDev $(MONDO_EXEC)/ToDev
 #
+SDMM:	$(SDMM_Objs)
+	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv SDMM $(MONDO_EXEC)/SDMM
+#
 DIIS.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
 FBuild.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
 P2Use.o:	FillPBlok.o $(MONDO_HOME)/Libs/libMondoMods.a
@@ -99,3 +105,5 @@ FillPBlok.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
 RHeqs.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
 SCFStatus.o:                $(MONDO_HOME)/Libs/libMondoMods.a
 SDMM.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
+SDMM2.o:                    $(MONDO_HOME)/Libs/libMondoMods.a
+
