@@ -7,6 +7,8 @@ MODULE CellSets
   USE GlobalObjects
   USE PrettyPrint
   USE Thresholding
+  USE Order
+  USE MemMan
   IMPLICIT NONE
 #ifdef PERIODIC
   CONTAINS
@@ -199,7 +201,6 @@ MODULE CellSets
           ENDDO
        ENDDO
     ENDDO
-    CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet_Cube
 !--------------------------------------------------------------------------
@@ -263,11 +264,46 @@ MODULE CellSets
           ENDDO
        ENDDO
     ENDDO
-    CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet_Sphere
 !--------------------------------------------------------------------------
-! Set up the set of cells out to some radius R
+! Sort the Cells From Large R to Small R
+!--------------------------------------------------------------------------
+  SUBROUTINE Sort_CellSet(CS)
+    TYPE(CellSet)                        :: CS
+    TYPE(INT_VECT)                       :: IPnt
+    TYPE(DBL_VECT)                       :: Vec
+    TYPE(DBL_RNK2)                       :: CCarts
+    INTEGER                              :: NC
+!
+    CALL New(IPnt  ,CS%NCells)
+    CALL New(Vec   ,CS%NCells)
+    CALL New(CCarts,(/3,CS%NCells/))
+    DO NC=1,CS%NCells
+       IPnt%I(NC)= NC
+       Vec%D(NC) = SQRT(CS%CellCarts%D(1,NC)**2+CS%CellCarts%D(2,NC)**2+CS%CellCarts%D(3,NC)**2)
+    ENDDO
+!
+    CALL Sort(Vec,IPnt,CS%NCells,2)
+!
+    DO NC=1,CS%NCells
+       CCarts%D(1,NC) = CS%CellCarts%D(1,IPnt%I(NC))
+       CCarts%D(2,NC) = CS%CellCarts%D(2,IPnt%I(NC))
+       CCarts%D(3,NC) = CS%CellCarts%D(3,IPnt%I(NC))
+    ENDDO     
+!
+    DO NC=1,CS%NCells
+       CS%CellCarts%D(1,CS%NCells-NC+1) = CCarts%D(1,NC)
+       CS%CellCarts%D(2,CS%NCells-NC+1) = CCarts%D(2,NC)
+       CS%CellCarts%D(3,CS%NCells-NC+1) = CCarts%D(3,NC)
+    ENDDO
+    CALL Delete(IPnt)
+    CALL Delete(Vec)
+    CALL Delete(CCarts)
+!
+  END SUBROUTINE Sort_CellSet
+!--------------------------------------------------------------------------
+! TEST if (I,J,K) > (MI,MJ,MK)
 !--------------------------------------------------------------------------
   FUNCTION IJKTest(I,J,K,MI,MJ,MK)
     INTEGER               :: I,J,K,MI,MJ,MK
