@@ -1148,7 +1148,7 @@ CALL Delete(AuxLatF)
     TYPE(Parallel)     :: M
     INTEGER            :: cBAS,cGEO,iCLONE,I,J,II
     CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
-    REAL(DOUBLE)       :: DDelta,Lat00,KScale
+    REAL(DOUBLE)       :: DDelta,Lat00,KScale,Vec(6),BoxShape(3,3)
     CHARACTER(LEN=DCL) :: TrixName
     REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_X
 #ifdef PARRALEL
@@ -1195,12 +1195,17 @@ CALL Delete(AuxLatF)
        CALL Get(P,TrixName)
        chSCF=IntToChar(S%Current%I(1))
 !
-       DO I=1,3
-          DO J=1,3
+       BoxShape=G%Clone(iCLONE)%PBC%BoxShape%D
+
+       DO J=1,3
+          DO I=1,3
              IF(G%Clone(iCLONE)%PBC%AutoW%I(I) == 1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J) == 1) THEN 
+                G%Clone(iCLONE)%PBC%BoxShape%D=BoxShape
                 Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
+                CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
+                CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
                 G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
@@ -1209,7 +1214,10 @@ CALL Delete(AuxLatF)
                      //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
                 CALL Get(K1,TrixName)
 !
+                G%Clone(iCLONE)%PBC%BoxShape%D=BoxShape
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
+                CALL CalcBoxPars(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
+                CALL BoxParsToCart(Vec,G%Clone(iCLONE)%PBC%BoxShape%D)
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
                 G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
