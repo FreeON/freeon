@@ -227,7 +227,7 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
 
                      WS["ELSE"];
                      WS["  InvT=One/T"];
-                     WS["  SqInvT=Upq*DSQRT(InvT)"];
+                     WS["  SqInvT=DSQRT(InvT)"];
                          Do[GSt=ToString[L];
 
            WS[StringJoin["  AuxR(",GSt,")=",GammAss[L],"*SqInvT"]];
@@ -282,8 +282,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz, &  \n",  
-                                                           "                      Dx,Dy,Dz,ShlPrAC2,ShlPrBD2,I) \n"]];
+           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -294,15 +293,16 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
               WS["USE GammaF1"];,
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
 
-	   WS["USE ShellPairStruct"];
+	   WS["USE ONX2DataType"];
 
            WS["IMPLICIT REAL(DOUBLE) (V,W)"];
-
-	   WS["TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 "];
+           WS["INTEGER        :: LBra,LKet"];
+           WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
+	   WS["TYPE(AtomInfo) :: ACInfo,BDInfo"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
            WS[StringJoin["REAL(DOUBLE),DIMENSION(0:",ToString[LBra+LKet],") :: AuxR"]];
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LenBra],",",ToString[LenKet],") :: MBarN=0D0"]];
+           WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LenBra],",",ToString[LenKet],") :: MBarN"]];
 
 
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LEnd[IMax]],",", \
@@ -317,26 +317,54 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 
            WS["INTEGER       :: J,K,L"];
 
-           WS["DO J=1,ShlPrBD2%L ! K^2 VRR |N0) loop "];
+           WS["MBarN=0.0d0"];
 
-           WS["   Eta=ShlPrBD2%SP(1,J)"];
-           WS["   Qx =ShlPrBD2%SP(2,J)"];
-           WS["   Qy =ShlPrBD2%SP(3,J)"];
-           WS["   Qz =ShlPrBD2%SP(4,J)"];
-           WS["   Uq =ShlPrBD2%SP(5,J)"];
+
+  WS["Ax=ACInfo%Atm1X"];
+  WS["Ay=ACInfo%Atm1Y"];
+  WS["Az=ACInfo%Atm1Z"];
+
+  WS["Bx=BDInfo%Atm1X"];
+  WS["By=BDInfo%Atm1Y"];
+  WS["Bz=BDInfo%Atm1Z"];
+
+  WS["Cx=ACInfo%Atm2X"];
+  WS["Cy=ACInfo%Atm2Y"];
+  WS["Cz=ACInfo%Atm2Z"];
+
+  WS["Dx=BDInfo%Atm2X"];
+  WS["Dy=BDInfo%Atm2Y"];
+  WS["Dz=BDInfo%Atm2Z"];
+
+  WS["ABx=Ax-Bx"];
+  WS["ABy=Ay-By"];
+  WS["ABz=Az-Bz"];
+
+  WS["CDx=Cx-Dx"];
+  WS["CDy=Cy-Dy"];
+  WS["CDz=Cz-Dz"];
+
+
+           WS["DO J=1,LKet ! K^2 VRR |N0) loop "];
+
+           WS["   Eta=PrmBufK(1,J)"];
+           WS["   Qx =PrmBufK(2,J)"];
+           WS["   Qy =PrmBufK(3,J)"];
+           WS["   Qz =PrmBufK(4,J)"];
+           WS["   Uq =PrmBufK(5,J)"];
 
            WS["   QCx=Qx-Cx"];
            WS["   QCy=Qy-Cy"];
            WS["   QCz=Qz-Cz"];
 
 
-           WS["   DO K=1,ShlPrAC2%L ! K^2 VRR (M0| loop "];
+           WS["   DO K=1,LBra ! K^2 VRR (M0| loop "];
 
-           WS["      Zeta=ShlPrAC2%SP(1,K)"];
-           WS["      Px  =ShlPrAC2%SP(2,K)"];
-           WS["      Py  =ShlPrAC2%SP(3,K)"];
-           WS["      Pz  =ShlPrAC2%SP(4,K)"];
-           WS["      Up  =ShlPrAC2%SP(5,K)"];
+           WS["      Zeta=PrmBufB(1,K)"];
+           WS["      Px  =PrmBufB(2,K)"];
+           WS["      Py  =PrmBufB(3,K)"];
+           WS["      Pz  =PrmBufB(4,K)"];
+           WS["      Up  =PrmBufB(5,K)"];
 
            WS["      r1xZpE=One/(Zeta+Eta)"];
 	   WS["      Upq=SQRT(r1xZpE)*Up*Uq"];					   
@@ -345,7 +373,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      r1x2Z=Half/Zeta"];
            WS["      ExZpE=Eta*r1xZpE"];
            WS["      ZxZpE=Zeta*r1xZpE"];
-           WS["      Omega=ExZpE*ZxZpE"];
+           WS["      Omega=Eta*Zeta*r1xZpE"];
 
            WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];
            WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];
