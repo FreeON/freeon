@@ -337,9 +337,10 @@ CONTAINS
           ENDIF
        ENDDO
        CALL CloseHDF(HDFFileID)
-       IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+       ! IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+       ConvergedQ = DID_CONVERGE
        DO iCLONE=1,G%Clones
-          ConvergedQ=MAX(ConvergedQ,Converged(iCLONE))
+          ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
        ! Convergence announcement
        IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
@@ -362,7 +363,7 @@ CONTAINS
           DoDIIS=.FALSE.
           DoODA =.FALSE.
        ENDIF
-       !
+        
        ETest=ETol(O%AccuracyLevels(cBAS))
        DTest=DTol(O%AccuracyLevels(cBAS))
        IF(cSCF==0)THEN
@@ -505,9 +506,10 @@ CONTAINS
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
-       IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+      !IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+       ConvergedQ=DID_CONVERGE
        DO iCLONE=1,G%Clones
-          ConvergedQ=MAX(ConvergedQ,Converged(iCLONE))
+          ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
        ! Convergence announcement
        IF(Mssg .NE. " " .AND. cSCF >2)THEN
