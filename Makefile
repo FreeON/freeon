@@ -40,6 +40,9 @@ clean:	cmm cdy cs ce c1 cn c2 cd cv
 purge:	pmm pdy ps pe p1 pn p2 pd pv pMisc  
 #
 release: rmLegacy swREADME rmm rdy  rs re r1 rn r2 rd rv tarball
+	rm -rf Dynamo
+	rm -rf Docs
+	rm -rf ChangeLog
 #
 backup:	purge rmLegacy tarball
 #
@@ -56,6 +59,7 @@ rmLegacy:
 	rm -rf Exec
 	rm -rf Libs
 	rm -rf IntCoo
+#
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #

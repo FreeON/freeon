@@ -19,19 +19,20 @@ directories may be found in MONDO/Scripts/MondoSetUp
 and in the main Makefile.  You do not have the main
 MondoSCF source.  You have reprocessed little postfix
 files, eg *.f90 *.f *.c.  Be careful not to issue 
-purge commands with these files, as purge will delete
+make purge commands with these files, as purge will delete
 your source.  This goes also for "make backup"
+The source you have is for gas phase systems.  Other
+parts of the code for periodic systems, QM/MM and
+parallel methods are more experimental but available on
+request.
+
 
 KNOWN PROBLEMS:
 
 o No documentation.
 
-o The F90 ONX code for exact exchange is not stable.
-  Currently, matrix builds only work under Intel or 
-  AMD Linux. Matrix builds may be slow and forces 
-  incorrect.   Periodic ONX does not exist.
-
 o Clean up of scratch files less than perfect.
   Want to "mk pScr" after big runs to clean scratch.
 
+o Geometry optimization is slow.
 **************************************************
