@@ -32,15 +32,17 @@ MODULE MatFunk
       CALL Delete(BLKMAT2) 
    END SUBROUTINE UnSetDSYEVWork
 !
-   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,EigenThresh_O,PrintCond_O,Prog_O)
+   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PrintValues_O,EigenThresh_O,PrintCond_O,Prog_O,FileName_O,Unit_O)
       INTEGER,                    INTENT(IN)    :: N
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
-      LOGICAL, OPTIONAL                         :: PrintCond_O
+      LOGICAL, OPTIONAL                         :: PrintCond_O,PrintValues_O
       REAL(DOUBLE),OPTIONAL                     :: EigenThresh_O
       CHARACTER(Len=*),OPTIONAL                 :: Prog_O
-      LOGICAL                                   :: PrintCond
-      INTEGER                                   :: I,INFO      
+      CHARACTER(LEN=*), OPTIONAL,INTENT(IN)     :: FileName_O
+      INTEGER,          OPTIONAL,INTENT(IN)     :: Unit_O
+      LOGICAL                                   :: PrintCond,PrintValues
+      INTEGER                                   :: I,INFO,PU
       REAL(DOUBLE)                              :: EigenThreshold
       REAL(DOUBLE)                              :: CondA,Mn,Mx
       REAL(DOUBLE), EXTERNAL                    :: Funk
@@ -59,12 +61,22 @@ MODULE MatFunk
          PrintCond=.FALSE.
       ENDIF
 !
+      IF(PRESENT(PrintValues_O))THEN
+         PrintValues=PrintValues_O
+      ELSE
+         PrintValues=.FALSE.
+      ENDIF
+!
       BLKVECT%D(1:N,1:N)=A(1:N,1:N)
 !
       CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
       IF(INFO/=SUCCEED) &
          CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))  
 !
+      IF(PrintValues)THEN
+         CALL PPrint(BLKVALS,'EigenValues',N,FileName_O=FileName_O,Unit_O=Unit_O)
+      ENDIF
+
       IF(PrintCond)THEN
          Mx=0.0D0
          Mn=1.D30
@@ -78,7 +90,9 @@ MODULE MatFunk
          IF(PRESENT(Prog_O))THEN
             String=ProcessName(Prog_O)//TRIM(String)
          ENDIF
-         WRITE(*,*)TRIM(String)
+         PU=OpenPU(FileName_O,Unit_O)
+         WRITE(PU,*)TRIM(String)
+         CALL ClosePU(PU)
       ENDIF
 !
 !     Apply the function to eigenvalues of the matrix, projecting out "zeros"
