@@ -1,6 +1,50 @@
+2004-01-09 15:39  mchalla
+
+	* MondoSCF2/: OptionKeys.F90, SCFs.F90: Improved SCF convergence
+	algorithms.  Can now specify DIIS or ODA only from input with
+	Convergence=DoODA or Convergence=DoDIIS.
+	
+	Still to do, parallelize ODA.
+
+2004-01-09 15:37  mchalla
+
+	* SCFeqs/: DIIS.F90, Makefile, ODA.F90, P2Use.F90, P2Use2.F90: New
+	improved SCF convergence routines.  ODA now uses AO DM to take
+	advantage of the DM extrapolation in P2Use.  DIIS avoids the first
+	orthogonal DM, which may  not be consistent with ODA generated
+	orthogonal DMs.
+
+2004-01-08 17:09  vweber
+
+	* TwoE/DERIInterface.m: Added cart permutations.
+
+2004-01-08 14:37  nemeth
+
+	* MondoSCF2/InCoords.F90: Another bug related to GeOp Debug option
+	fixed.
+
+2004-01-08 13:58  vweber
+
+	* TwoE/: Int1111.F90, Int3111.F90, Int3131.F90, Int3311.F90,
+	Int3331.F90, Int3333.F90, ShellPairStruct.F90, dInt1111.F90: [no
+	log message]
+
+2004-01-08 13:40  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, ONX2DataType.F90,
+	ONX2List.F90: Minor changes
+
+2004-01-08 12:14  vweber
+
+	* ONX2/IntSSSS.F90: Changed dim arrays.
+
+2004-01-05 05:49  mchalla
+
+	* Validate/sub_pbs: commented out -l gigan stuff
+
 2004-01-05 05:46  mchalla
 
-	* MondoSCF2/SCFs.F90: [no log message]
+	* MondoSCF2/SCFs.F90, ChangeLog: [no log message]
 
 2004-01-05 05:46  mchalla
 
