@@ -4,6 +4,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
   USE PrettyPrint
   USE ONXParameters
   USE ONXMemory
+  USE DOrder
   IMPLICIT NONE
   TYPE(DBuf),INTENT(INOUT) :: DB
   TYPE(IBuf),INTENT(INOUT) :: IB
@@ -19,7 +20,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     DB%MAXPrm  = 30000
     DB%MAXD    = 100
     DB%MAXT    = 10
-    DB%MAXK    = 100
+    DB%MAXK    = 10
     IF (Gradient) THEN
       DB%MAXP    = 10
     ELSE
@@ -36,10 +37,13 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     IB%MAXL    = 12
     Drv%LngCC  = 60000
     CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
-    CALL New(DB)
-    CALL New(IB)
-    CALL New(SB)
-    CALL New(Drv)
+    IF(.NOT.AllocQ(DB%Alloc))  CALL New(DB)
+    IF(.NOT.AllocQ(IB%Alloc))  CALL New(IB)
+    IF(.NOT.AllocQ(SB%Alloc))  CALL New(SB)
+    IF(.NOT.AllocQ(Drv%Alloc)) CALL New(Drv)
+    IF(.NOT.AllocQ(BufN%Alloc)) CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
+    IF(.NOT.AllocQ(BufT%Alloc)) CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+    IF(.NOT.AllocQ(SchT%Alloc)) CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
     CALL CCDriver(Drv%CDrv%I(1),Drv%LngDrv)
     CALL VRRDriver(Drv%VLOC%I(1),Drv%SLOC%I(1,1),Drv%LngVRR,Drv%LngLoc)
   ELSEIF (ErrorCode==eMAXI) THEN
@@ -49,16 +53,30 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     IB%Lval=-1
   ELSEIF (ErrorCode==eMAXD) THEN
     CALL Delete(DB)
-    DB%MAXD = DB%MAXD * 2
+    CALL Delete(BufT)
+    CALL Delete(SchT)
+    DB%MAXD = DB%MAXD * 1.3D0
     CALL New(DB)
+    CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+    CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   ELSEIF (ErrorCode==eMAXK) THEN
     CALL Delete(DB)
+    CALL Delete(BufT)
+    CALL Delete(SchT)
     DB%MAXK = DB%MAXK + 1
     CALL New(DB)
+    CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+    CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   ELSEIF (ErrorCode==eMAXT) THEN
     CALL Delete(DB)
+    CALL Delete(BufN)
+    CALL Delete(BufT)
+    CALL Delete(SchT)
     DB%MAXT = DB%MAXT + 1
     CALL New(DB)
+    CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
+    CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+    CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   ELSEIF (ErrorCode==eMAXDis) THEN
     CALL Delete(DB)
     DB%MAXDis = DB%MAXDis * 5

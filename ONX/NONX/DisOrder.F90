@@ -1,12 +1,19 @@
-SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
-  USE DerivedTypes
-  USE GlobalScalars
-  USE PrettyPrint
-  USE Thresholding
-  USE ONXParameters
-  USE ONXMemory
-  USE Stats
-  IMPLICIT NONE
+MODULE DOrder
+   USE DerivedTypes
+   USE GlobalScalars
+   USE PrettyPrint
+   USE Thresholding
+   USE ONXParameters
+   USE ONXMemory
+   USE Stats
+   IMPLICIT NONE
+   REAL(DOUBLE),DIMENSION(3) :: PBC
+!  Local buffers allocated in MemInit outside of periodic loops
+   TYPE(DBL_RNK3)         :: SchT 
+   TYPE(INT_RNK3)         :: BufT
+   TYPE(INT_RNK2)         :: BufN
+   CONTAINS 
+      SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
 !--------------------------------------------------------------------------------
 ! Basis set, coordinates, ect...
 !--------------------------------------------------------------------------------
@@ -21,11 +28,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  TYPE(DBL_RNK3)         :: SchT
-  TYPE(INT_RNK3)         :: BufT
-  TYPE(INT_RNK2)         :: BufN
   REAL(DOUBLE)           :: Test,VSAC
-  REAL(DOUBLE)           :: ACx,ACy,ACz,AC2,x,y,z
+  REAL(DOUBLE)           :: Ax,Ay,Az,Cx,Cy,Cz,ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
   INTEGER                :: Lng,i,j,n
   INTEGER                :: KonAC,LDis,NInts
@@ -42,13 +46,23 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 ! Function calls
 !--------------------------------------------------------------------------------
   INTEGER                :: NFinal,iT
-
-  CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
-  CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-  CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+  EXTERNAL               INT_VECT_EQ_INT_SCLR
 
   DB%LenCC=0
   DB%LenTC=0
+
+! The following zeroing of DB%DisPtr%I and DB%TcPop%I 
+! is is really expensive for periodic systems.  Unfortunate that 
+! ComputeK depends critically on these being carefully zeroed.
+!
+!  DB%TcPop%I=0  
+!  DB%DisPtr%I=0 <- This one really costs
+   N=SIZE(DB%TcPop%I,1)*SIZE(DB%TcPop%I,2)
+   CALL INT_VECT_EQ_INT_SCLR(N,DB%TcPop%I(1,1),0)
+   N=SIZE(DB%DisPtr%I,1)*SIZE(DB%DisPtr%I,2)* &
+     SIZE(DB%DisPtr%I,3)*SIZE(DB%DisPtr%I,4)
+   CALL INT_VECT_EQ_INT_SCLR(N,DB%DisPtr%I(1,1,1,1),0)
+
   iDis=1
   iPrm=1
   Test=-10.d0*DLOG(Thresholds%Dist) 
@@ -69,18 +83,35 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
       KType=MaxLC*(MaxLC+1)/2+MinLC+1
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
+!     Another expensive zeroing...
+      N=SIZE(BufN%I,1)*SIZE(BufN%I,2)
+      CALL INT_VECT_EQ_INT_SCLR(N,BufN%I(1,1),0)
+!      BufN%I=0
 
-      BufN%I=0
       iBf=1 
       IndexA=0  
 
   DO AtA=1,NAtoms
-    KA=GMc%AtTyp%I(AtA)
+    KA=GMc%AtTyp%I(AtA) 
     NBFA=BSc%BfKnd%I(KA)
-
-    ACx=GMc%Carts%D(1,AtA)-GMp%Carts%D(1,AtC)
-    ACy=GMc%Carts%D(2,AtA)-GMp%Carts%D(2,AtC) 
-    ACz=GMc%Carts%D(3,AtA)-GMp%Carts%D(3,AtC) 
+#ifdef PERIODIC
+    Ax=GMc%Carts%D(1,AtA)
+    Ay=GMc%Carts%D(2,AtA)
+    Az=GMc%Carts%D(3,AtA)
+    Cx=GMp%Carts%D(1,AtC)+PBC(1)
+    Cy=GMp%Carts%D(2,AtC)+PBC(2)
+    Cz=GMp%Carts%D(3,AtC)+PBC(3)
+#else
+    Ax=GMc%Carts%D(1,AtA)
+    Ay=GMc%Carts%D(2,AtA)
+    Az=GMc%Carts%D(3,AtA)
+    Cx=GMp%Carts%D(1,AtC)
+    Cy=GMp%Carts%D(2,AtC)
+    Cz=GMp%Carts%D(3,AtC)
+#endif
+    ACx=Ax-Cx
+    ACy=Ay-Cy
+    ACz=Az-Cz
     AC2=ACx*ACx+ACy*ACy+ACz*ACz    
 !
 ! Need to call something like SetAtomPair here, the problem 
@@ -112,9 +143,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           DB%TBufC%D( 5,iBf)=ACx
           DB%TBufC%D( 6,iBf)=ACy
           DB%TBufC%D( 7,iBf)=ACz
-          DB%TBufC%D( 8,iBf)=GMc%Carts%D(1,AtA)
-          DB%TBufC%D( 9,iBf)=GMc%Carts%D(2,AtA)
-          DB%TBufC%D(10,iBf)=GMc%Carts%D(3,AtA)
+          DB%TBufC%D( 8,iBf)=Ax
+          DB%TBufC%D( 9,iBf)=Ay
+          DB%TBufC%D(10,iBf)=Az
           x=ACx
           y=ACy
           z=ACz
@@ -127,9 +158,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           DB%TBufC%D( 5,iBf)=-ACx
           DB%TBufC%D( 6,iBf)=-ACy
           DB%TBufC%D( 7,iBf)=-ACz
-          DB%TBufC%D( 8,iBf)=GMp%Carts%D(1,AtC)
-          DB%TBufC%D( 9,iBf)=GMp%Carts%D(2,AtC)
-          DB%TBufC%D(10,iBf)=GMp%Carts%D(3,AtC)
+          DB%TBufC%D( 8,iBf)=Cx
+          DB%TBufC%D( 9,iBf)=Cy
+          DB%TBufC%D(10,iBf)=Cz
           x=-ACx
           y=-ACy
           z=-ACz
@@ -150,9 +181,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           IF (TestPrimPair(XiAB,AC2)) THEN
             I0=I0+1
             DB%TBufP%D(1,I0,iBf)=Zeta
-            DB%TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta
-            DB%TBufP%D(3,I0,iBf)=(Za*GMc%Carts%D(2,AtA)+Zc*GMp%Carts%D(2,AtC))/Zeta
-            DB%TBufP%D(4,I0,iBf)=(Za*GMc%Carts%D(3,AtA)+Zc*GMp%Carts%D(3,AtC))/Zeta
+            DB%TBufP%D(2,I0,iBf)=(Za*Ax+Zc*Cx)/Zeta
+            DB%TBufP%D(3,I0,iBf)=(Za*Ay+Zc*Cy)/Zeta
+            DB%TBufP%D(4,I0,iBf)=(Za*Az+Zc*Cz)/Zeta
             DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
               DB%TBufP%D(6,I0,iBf)=1.0D0
@@ -191,15 +222,16 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
             GOTO 9000
           ENDIF
 
-          CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
-                      IB%W1%D,DB%TBufP,DB%TBufC)
+          ! Beware copy in copy out...
+          CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D(1,1),IB%WR,IB%WZ, &
+                      IB%W1%D(1),DB%TBufP,DB%TBufC)
           CALL VRRs(LDis,LDis,Drv)
           CALL VRRl(KonAC*KonAC,IS%NVRR,Drv%nr,Drv%ns,                  &
                     Drv%VLOC%I(Drv%is),                                 &
                     Drv%VLOC%I(Drv%is+Drv%nr),IB,                       &
-                    IB%W2%D,IB%W1%D)
+                    IB%W2%D(1),IB%W1%D(1))
           CALL Contract(1,KonAC,KonAC,IS%NVRR,iCL,Drv%CDrv%I(iCP+1),    &
-                        IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
+                        IB%CB%D(1,1),IB%CB%D,IB%W1%D(1),IB%W2%D(1))
 
           IF(LDis.NE.0) THEN
             CALL HRRKet(IB%W1%D,DB%TBufC%D(1,iBf),1,SB%SLDis%I,IS%NB1,  &
@@ -294,9 +326,6 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   END DO ! Atc
   ErrorCode=eAOK
   9000 CONTINUE
-  CALL Delete(BufN)
-  CALL Delete(BufT)
-  CALL Delete(SchT)
 
 END SUBROUTINE DisOrder
- 
+END MODULE DOrder 

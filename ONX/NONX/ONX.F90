@@ -2,6 +2,9 @@ PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
+#ifdef PERIODIC
+  USE AtomPairs
+#endif
   USE Clock
   USE InOut
   USE PrettyPrint
@@ -9,6 +12,7 @@ PROGRAM ONX
   USE Parse
   USE Macros
   USE LinAlg
+  USE DOrder
   USE ONXParameters
   USE ONXMemory
   USE ContractionScaling
@@ -25,13 +29,18 @@ PROGRAM ONX
 #else
   TYPE(BCSR)          :: D
   TYPE(BCSR)          :: K,T1,T2
+!  INTEGER             :: MyID=0
 #endif
   TYPE(BSET)          :: BSc
   TYPE(CRDS)          :: GMc
   TYPE(BSET)          :: BSp
   TYPE(CRDS)          :: GMp
   TYPE(ARGMT)         :: Args
-  TYPE(DBuf)          :: DB        ! distribution buffers
+#ifdef PERIODIC
+  TYPE(DBuf)          :: DB1,DB2   ! distribution buffers
+#else
+  TYPE(DBuf)          :: DB1       ! distribution buffers
+#endif
   TYPE(IBuf)          :: IB        ! 2-e eval buffers
   TYPE(DSL)           :: SB        ! distribution pointers
   TYPE(ISpc)          :: IS
@@ -40,7 +49,7 @@ PROGRAM ONX
   TYPE(INT_RNK2)      :: SubInd
   TYPE(INT_RNK2)      :: BfnInd
 !--------------------------------------------------------------------------------
-! Large buffers to hold the sorted distribution and multipole data.
+! Large buffers to hold the sorted distribution and multipole data.f
 !--------------------------------------------------------------------------------
   TYPE(DBL_VECT)         :: PrmBuf,DisBuf,CBuf,SBuf
   TYPE(DBL_RNK2)         :: VecBuf
@@ -49,11 +58,19 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
-  INTEGER                :: iSwitch,OldFileID
+  INTEGER                :: iSwitch,ErrorCodeTmp,OldFileID
+#ifdef PERIODIC
+  INTEGER                :: I,NC1,NC2,NC3
+  TYPE(CellSet)          :: CSTemp
+#endif
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
 !    Get the previous geometry, ASSUMING that 
@@ -105,18 +122,20 @@ PROGRAM ONX
 #endif
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
-!    Get the current geometry here...
-     CALL Get(GMp,Tag_O=CurGeom)
+     CALL Get(GMp,Tag_O=PrvGeom)
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-  ENDIF
+  END IF
+!
+!
+!
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   CALL New(NameBuf,NAtoms)
-!----------------------------------------------
-! Get the Density Matrix
-!----------------------------------------------
+  !----------------------------------------------
+  ! Get the Density Matrix
+  !----------------------------------------------
   IF(SCFActn=='InkFok')THEN
      CALL Get(D,TrixFile('DeltaD',Args,0))
   ELSEIF(SCFActn=='BasisSetSwitch')THEN
@@ -133,11 +152,26 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
-  CALL RangeOfDensity(D,NameBuf,BfnInd,DB,BSp,GMp)
-  1000 DO WHILE (ErrorCode/=eAOK) 
-    CALL MemInit(DB,IB,SB,Drv,BSc,BSp)
-    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
-  END DO
+  CALL RangeOfDensity(D,NameBuf,BfnInd,DB1,BSp,GMp)
+  CALL RangeOfDensity(D,NameBuf,BfnInd,DB2,BSp,GMp)
+!
+     PBC=Zero
+1000 CONTINUE 
+!    Have to bump both buffers 1 and 2, otherwise if buffer2 is to
+!    small, buffer 1 gets bumped infinately untill you run out of memory!
+     ErrorCodeTmp=ErrorCode
+     DO WHILE (ErrorCode/=eAOK) 
+        CALL MemInit(DB1,IB,SB,Drv,BSc,BSp)
+        CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)        
+     ENDDO
+     ErrorCode=ErrorCodeTmp
+     DO WHILE (ErrorCode/=eAOK) 
+        CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
+        CALL DisOrder(BSc,GMc,BSp,GMp,DB2,IB,SB,Drv,NameBuf)        
+     ENDDO
+
+!     ErrorCode=eInit
+!     CALL MemInit(DB2,IB,SB,Drv,BSc,BSp)
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
 ! that there is *always* enough space allocated for the exchange matrix. 
@@ -150,26 +184,49 @@ PROGRAM ONX
   CALL New(SubInd,(/3,NBasF/))
   CALL InitK(BSc,GMc,K,NameBuf)
   CALL InitSubInd(BSc,GMc,SubInd)
+!
+#ifdef PERIODIC
+! Set up third sum
+  CALL New_CellSet_Cube(CSTemp,GMc%PBC%AutoW,GMc%PBC%BoxShape,(/1,1,1/))
+! Periodic double sum over R and Rprime
+  DO NC1=1,CS_OUT%NCells
+     PBC=CS_OUT%CellCarts%D(:,NC1)
+     CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
+     DO NC2=1,CS_OUT%NCells
+        PBC=CS_OUT%CellCarts%D(:,NC2)
+        CALL DisOrder(BSc,GMc,BSp,GMp,DB2,IB,SB,Drv,NameBuf)
 !--------------------------------------------------------------------------------
-! All set to compute the exchange matrix
+!       All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
-  IF (ErrorCode/=eAOK) THEN
-    CALL Delete(K)
-    CALL Delete(SubInd)
-    GOTO 1000
+        CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
+        IF(ErrorCode/=eAOK) THEN
+           CALL Delete(K)
+           CALL Delete(SubInd)
+           GOTO 1000
+        END IF
+        CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
+        IF(ErrorCode/=eAOK) THEN
+           CALL Delete(K)
+           CALL Delete(SubInd)
+           GOTO 1000
+        ENDIF
+     ENDDO
+  ENDDO
+  CALL Delete(DB2)
+#else
+  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
+  IF(ErrorCode/=eAOK) THEN
+     CALL Delete(K)
+     CALL Delete(SubInd)
+     GOTO 1000
   END IF
-  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
-  IF (ErrorCode/=eAOK) THEN
-    CALL Delete(K)
-    CALL Delete(SubInd)
-    GOTO 1000
-  END IF
+  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB1,IB,SB,IS,Drv,SubInd,BfnInd)
+#endif
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
   CALL Delete(D)
-  CALL Delete(DB)
+  CALL Delete(DB1)
   CALL Delete(IB)
   CALL Delete(SB)
   CALL Delete(Drv)
@@ -180,7 +237,7 @@ PROGRAM ONX
   CALL Fillout_BCSR(BSc,GMc,K)
   CALL TrnMatBlk(BSc,GMc,K)
   CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
-  K%NAtms=NAtoms ! never set before this...
+  K%NAtms=NAtoms 
 ! Add in correction if incremental K build
   IF(SCFActn=='InkFok')THEN
      CALL New(T1)
@@ -194,7 +251,9 @@ PROGRAM ONX
   CALL Put(K,TrixFile('K',Args,0))
   CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
-  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
+!  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']',Unit_O=6)
+!  IF(.TRUE.) STOP
+!  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------
