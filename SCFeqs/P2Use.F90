@@ -166,12 +166,12 @@ PROGRAM P2Use
   ELSEIF(SCFActn=='DensitySuperposition')THEN
 !    Make a diagonal guess
      CALL Get(BName,'bsetname',CurBase)
-     IF(INDEX(BName,'STO')/=0)THEN
+     IF(INDEX(BName,'STO')/=0.AND.DABS(GM%TotCh)<1.D-10)THEN
 !         Compute a diagonal guess as the superposition of atomic lewis 
 !         structure occupancies--works only for minimal (STO) basis sets
           CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
           DO I=1,NAtoms
-            CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
+            CALL FillPBlok(BSiz%I(I),INT(GM%AtNum%D(I)),BlkP%D(:,I))
           ENDDO
           CALL SetToI(P2,BlkP)
           CALL SetEq(P,P2)
