@@ -34,19 +34,19 @@ PROGRAM SDMM
                                     Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,MinDeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
                                     OldDeltaEQ,OldDeltaPQ,OldDeltaE,MxCom
-  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D2
-  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit,MinPQCount,PcntPNon0
+  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D1
+  INTEGER                        :: I,J,ICG,NCG,IPur,NPur,OnExit,MinPQCount,PcntPNon0,CGCycles
   LOGICAL                        :: Present,FixedUVW,ToExit
-  CHARACTER(LEN=2)               :: Cycl,NxtC
-  CHARACTER(LEN=20)              :: ItAnounce
+   CHARACTER(LEN=20)             :: ItAnounce
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=4),PARAMETER     :: Prog='SDMM'
 !------------------------------------------------------------------ 
-! Set up ...
-!
+! Start
   CALL StartUp(Args,Prog)
-  Cycl=IntToChar(Args%I%I(1))
-  NxtC=IntToChar(Args%I%I(1)+1)
+! Look for overide of default number of CG cycles
+  CALL OpenASCII(InpFile,Inp)  
+  IF(.NOT.OptIntQ(Inp,Prog,CGCycles))CGCycles=8
+  CLOSE(Inp)
 #ifdef PARALLEL
 !-----------------------------------------------------------------------
 ! Repartion based on previous matrices structure
@@ -94,7 +94,7 @@ PROGRAM SDMM
   OnExit=0
   OldPoint=BIG_DBL
   OldE=Zero
-  DO ICG=0,11
+  DO ICG=0,CGCycles-1
      NCG=NCG+1
 !
 #ifdef PARALLEL
@@ -200,8 +200,12 @@ PROGRAM SDMM
         CALL Add(H,P,T1)                ! T1=P[N+1,I+1]=P[N+1,I]+StepL[I]*H[I]   
         CALL Multiply(H,One/StepL)      ! H=H/StepL 
      ENDIF
-!        CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
-     CALL SetEq(P,T1)  ! re-engineer to avoid copy
+!    Begin expensive thresholding 
+     Thresholds%Trix=Thresholds%Trix/ThreshAmp        
+     CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
+!    End expensive thresholding 
+     Thresholds%Trix=Thresholds%Trix*ThreshAmp        
+!       CALL SetEq(P,T1)  
      PcntPNon0=1D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF)        
 !-----------------------------------------------------------------------------
 !    COMPUTE CONVERGENCE STATS
@@ -270,7 +274,6 @@ PROGRAM SDMM
      CALL Multiply(H,Gamma)                ! H=Gamma*H[i]
      CALL Add(G,H,T1)                      ! T1=G[i+1]+Gamma*H[i]
      CALL Filter(H,T1)                     ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
-!     CALL SetEq(H,T1)                     ! H[i+1]=Filter[G[i+1]+Gamma*H[i]]
    ENDDO
 !-----------------------------------------------------------------------------
 !  Tidy up a bit ...
@@ -297,11 +300,11 @@ PROGRAM SDMM
    DO J=0,40
       NPur=NPur+1
       CALL Multiply(P,P,T1) 
-      CALL SetEq(P2,T1)    ! need to re-engineer without the seteq
-!      CALL Filter(P2,T1)    
+!      CALL SetEq(P2,T1)   
+      CALL Filter(P2,T1)    
       CALL Multiply(P2,P,T1) 
-      CALL SetEq(P3,T1)    ! need to re-engineer without the seteq
-!      CALL Filter(P3,T1)    
+!      CALL SetEq(P3,T1)   
+      CALL Filter(P3,T1)    
       TrP1=Trace(p)
       TrP2=Trace(p2)
       TrP3=Trace(P3)
@@ -355,7 +358,7 @@ PROGRAM SDMM
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
          CALL OpenASCII(OutFile,Out)
-         IF(DeltaEQ<1.D-7)THEN
+         IF(DeltaEQ<Thresholds%ETol*1.D-2)THEN
 !           Check for non-decreasing /P
             IF(DeltaP>OldDeltaP)ToExit=.TRUE.
         ENDIF
@@ -434,12 +437,11 @@ PROGRAM SDMM
 !  IO for the orthogonal P 
 !
    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-   CALL PChkSum(P,'OrthoP['//TRIM(NxtC)//']',Prog,Unit_O=6)
-
+   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog,Unit_O=6)
    CALL Put(P,TrixFile('OrthoD',Args,1))
-   CALL PChkSum(P,'OrthoP['//TRIM(NxtC)//']',Prog)
-   CALL PPrint( P,'OrthoP['//TRIM(NxtC)//']')
-   CALL Plot(   P,'OrthoP_'//TRIM(NxtC))
+   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
+   CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
+   CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
 !-----------------------------------------------------------------------------
 !  Convert to AO representation
 !
@@ -453,9 +455,9 @@ PROGRAM SDMM
 !
    CALL Put(T1,TrixFile('D',Args,1))
    CALL Put(Zero,'homolumogap')
-   CALL PChkSum(T1,'P['//TRIM(NxtC)//']',Prog)
-   CALL PPrint(T1,'P['//TRIM(NxtC)//']')
-   CALL Plot(T1,'P_'//TRIM(NxtC))
+   CALL PChkSum(T1,'P['//TRIM(NxtCycl)//']',Prog)
+   CALL PPrint(T1,'P['//TRIM(NxtCycl)//']')
+   CALL Plot(T1,'P_'//TRIM(NxtCycl))
 !-----------------------------------------------------------------------------
 !  Tidy up 
 !
