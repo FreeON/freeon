@@ -100,7 +100,7 @@ PROGRAM JForce
 #ifdef MMech 
 #ifdef PERIODIC
   IF(HasMM()) THEN
-     CALL SetCellNumber(GMLocMM)
+     IF(HasQM()) CALL SetCellNumber(GMLoc)
      CALL PBCFarFieldSetUp(PoleRoot,GMLocMM)
   ELSE
      CALL SetCellNumber(GMLoc)

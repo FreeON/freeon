@@ -160,9 +160,6 @@ PROGRAM MakeRho
      Rho%NQ%I=0
      Rho%Lndx%I=0
      Rho%Expt%D=NuclearExpnt
-#ifdef PERIODIC
-     CALL SetCellNumber(GM_MM)
-#endif
   ELSE
      CALL Halt(' Logic problem in MakeRho ')
   ENDIF !!!! Mechanics

@@ -122,7 +122,7 @@ PROGRAM QCTC
 ! Calculate the Number of Cells
 ! and Set the electrostatic background
   IF(HasMM()) THEN
-     CALL SetCellNumber(GM_MM)
+     IF(HasQM()) CALL SetCellNumber(GM)
      CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
   ELSE
      CALL SetCellNumber(GM)
