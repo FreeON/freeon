@@ -172,7 +172,7 @@ MODULE SetSCFs
          ISet=Ctrl%Current(2)
 !---------------------------------------------------------------
 !        Parse MPI_INVOKE for NPrc or procs
-!
+#if !defined(MPI2)
          CALL LineToChars(MPI_FLAGS,Chr)
          NPrc=FAIL
          DO I=1,SIZE(Chr%C)
@@ -192,6 +192,13 @@ MODULE SetSCFs
          ENDDO
          IF(NPrc==FAIL)CALL Halt(' Failed to find NPrc in' &
                        //' MPI_FLAGS = <'//TRIM(MPI_FLAGS)//'>')
+#endif
+#if defined(MPI2)
+         NPrc=FAIL
+         NPrc = MSize()
+         IF(NPrc==FAIL)CALL Halt(' Failed to assign NPrc in Decomp()')
+#endif
+
 !----------------------------------------------------------------
 !        Allocate domain limits
 !
@@ -312,8 +319,11 @@ MODULE SetSCFs
          IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
             CALL OpenASCII(OutFile,Out)           
             CALL PrintProtectL(Out)
+
+#if defined(PARALLEL) && !defined(MPI2)
             Mssg='MPI Invokation : '//TRIM(MPI_INVOKE)
             WRITE(Out,*)Mssg
+#endif
             CALL New(CBeg,NPrc-1,0)
             CALL New(CEnd,NPrc-1,0)
             DO I=0,NPrc-1
@@ -336,8 +346,10 @@ MODULE SetSCFs
          ENDIF
 !-------------------------------------------------------
 !        Tidy up
-!
+
+#if defined(PARALLEL) && !defined(MPI2)
          CALL Delete(Chr)
+#endif
          CALL Delete(OffSt)
       END SUBROUTINE Decomp
 #endif
