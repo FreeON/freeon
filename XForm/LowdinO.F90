@@ -82,11 +82,8 @@ PROGRAM LowdinO
 !--------------------------------------------------------------------
   IF(Values%D(1)<Zero)CALL Halt(' S matrix is not pos def')
   CondS=Values%D(NBasF)/Values%D(1)
-  IF(CondS>1D2.AND.CondS<1D3)THEN 
-     CALL Warn('Near linear dependence detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
-  ELSEIF(CondS>1D3)THEN
-     CALL Halt('Linear dependence detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
-  ENDIF
+  IF(CondS>1D4)  &
+     CALL Warn('Illconditioning detected in MakeS: Cond(S)='//TRIM(DblToShrtChar(CondS)))
 !--------------------------------------------------------------------
   CALL New(Tmp2,(/NBasF,NBasF/))
   CALL New(Tmp1,(/NBasF,NBasF/))
