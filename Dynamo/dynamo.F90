@@ -4,7 +4,7 @@ USE DerivedTypes
 USE GlobalScalars
 Use MemMan
 USE InOut
-USE Macros, ONLY : HasQM,HasMM,MMOnly 
+USE Mechanics !Macros, ONLY : HasQM,HasMM,MMOnly 
 USE ProcessControl
 USE IntCoo
 !

@@ -274,80 +274,92 @@ MODULE ParseInput
 !     Print Out the Parsed Information
 !============================================================================
       SUBROUTINE ParsePrint(Ctrl)
-         TYPE(SCFControls)                :: Ctrl
-         INTEGER                          :: I,RestAccL,RestMeth,RestModl
-         TYPE(INT_VECT)                   :: Stat
-         TYPE(CRDS)                       :: GM
-         CHARACTER(LEN=8)                 :: Cur
-         CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Method,Accuracy,Chemistry
-         CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
-         CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
+        TYPE(SCFControls)                :: Ctrl
+        INTEGER                          :: I,RestAccL,RestMeth,RestModl
+        TYPE(INT_VECT)                   :: Stat
+        TYPE(CRDS)                       :: GM
+        CHARACTER(LEN=8)                 :: Cur
+        CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Method,Accuracy,Chemistry
+        CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
+        CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !----------------------------------------------------------------------------
-!        Open input file
-         CALL OpenASCII(OutFile,Out)
-         CALL PrintProtectL(Out)
-         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
-         IF(Ctrl%Rest)THEN
-            WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
-            CALL OpenHDF(Ctrl%OldInfo)
-            CALL New(Stat,3)
-            CALL Get(Stat,'current')
-            Cur=IntToChar(Stat%I(2))
-            CALL Get(RestAccL,'SCFAccuracy',Cur)
-            CALL Get(RestMeth,'SCFMethod',Cur)
-            CALL Get(RestModl,'ModelChemistry',Cur)
-            CALL Get(BName,'bsetname',Cur)
-            Cur=IntToChar(Stat%I(3)) 
-            CALL Get(GM,Cur)
-            CALL CloseHDF()
-            Mssg='Restart using '//TRIM(BName)//'/'//TRIM(FunctionalName(RestModl)) &
-               //' density from previous geometry #'//TRIM(Cur)
-            WRITE(Out,*)TRIM(Mssg)
-            CALL Delete(Stat)
-            CALL Delete(GM)
-         ENDIF
-         WRITE(Out,*)
-!        Print the accuracy, method and model chemistry for each basis set
-         WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
-         DO I=1,Ctrl%NSet
-            IF(HasQM()) THEN
+        ! Open input file
+        CALL OpenASCII(OutFile,Out)
+        CALL PrintProtectL(Out)
+        WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
+        IF(Ctrl%Rest)THEN
+           WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
+           CALL OpenHDF(Ctrl%OldInfo)
+           CALL New(Stat,3)
+           CALL Get(Stat,'current')
+           Cur=IntToChar(Stat%I(2))
+           CALL Get(RestAccL,'SCFAccuracy',Cur)
+           CALL Get(RestMeth,'SCFMethod',Cur)
+           CALL Get(RestModl,'ModelChemistry',Cur)
+           CALL Get(BName,'bsetname',Cur)
+           Cur=IntToChar(Stat%I(3)) 
+           CALL Get(GM,Cur)
+           CALL CloseHDF()
+           Mssg='Restart using '//TRIM(BName)//'/'//TRIM(FunctionalName(RestModl)) &
+                //' density from previous geometry #'//TRIM(Cur)
+           WRITE(Out,*)TRIM(Mssg)
+           CALL Delete(Stat)
+           CALL Delete(GM)
+        ENDIF
+        WRITE(Out,*)
+        ! Print the accuracy, method and model chemistry for each basis set
+        WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
+        DO I=1,Ctrl%NSet
+#ifdef MMech
+           IF(HasQM()) THEN
+#endif
               IF(Ctrl%Method(I)==SDMM_R_SCF)THEN
                  Method='restricted simplified density matrix minimization using '
               ELSE
                  Method='restricted Roothaan-Hall solution of the SCF using '
               ENDIF
-            ENDIF
-            IF(Ctrl%AccL(I)==1)THEN
-               Accuracy='  a loose accuracy level, '
-            ELSEIF(Ctrl%AccL(I)==2)THEN
-               Accuracy='  a good accuracy level, '
-            ELSEIF(Ctrl%AccL(I)==3)THEN
-               Accuracy='  a tight accuracy level, '
-            ELSEIF(Ctrl%AccL(I)==4)THEN
-               Accuracy='  a very tight accuracy level, '      
-            ENDIF
-            IF(HasQM()) THEN
+#ifdef MMech
+           ENDIF
+#endif
+           IF(Ctrl%AccL(I)==1)THEN
+              Accuracy='  a loose accuracy level, '
+           ELSEIF(Ctrl%AccL(I)==2)THEN
+              Accuracy='  a good accuracy level, '
+           ELSEIF(Ctrl%AccL(I)==3)THEN
+              Accuracy='  a tight accuracy level, '
+           ELSEIF(Ctrl%AccL(I)==4)THEN
+              Accuracy='  a very tight accuracy level, '      
+           ENDIF
+#ifdef MMech
+           IF(HasQM()) THEN
+#endif
               Chemistry=' and the '//TRIM(FunctionalName(Ctrl%Model(I)))//' model.'
               IF(I==1)THEN
                  Mssg=' A '//TRIM(Method)//Rtrn//TRIM(Accuracy)//' '//TRIM(Ctrl%BName(1))//TRIM(Chemistry)
               ELSE
                  Mssg=' Followed by a  '//TRIM(Method)//Rtrn//TRIM(Accuracy) &
-                     //TRIM(Ctrl%BName(I))//TRIM(Chemistry)
+                      //TRIM(Ctrl%BName(I))//TRIM(Chemistry)
               ENDIF
               WRITE(Out,*)TRIM(Mssg),Rtrn
-            ENDIF
-         ENDDO
-         CALL PrintProtectR(Out)
-         CLOSE(UNIT=Out,STATUS='KEEP')
-!        Put SCF Method
-            IF(HasQM()) THEN
-         CALL OpenHDF(InfFile)
-         DO I=1,Ctrl%NSet
-            CALL Put(Ctrl%AccL(I),'SCFAccuracy',Tag_O=IntToChar(I))
-            CALL Put(Ctrl%Method(I),'SCFMethod',Tag_O=IntToChar(I))
-         ENDDO
-         CALL CloseHDF()
-            ENDIF
+#ifdef MMech
+           ENDIF
+#endif
+        ENDDO
+        CALL PrintProtectR(Out)
+        CLOSE(UNIT=Out,STATUS='KEEP')
+        ! Put SCF Method
+#ifdef MMech
+        IF(HasQM()) THEN
+#endif
+           CALL OpenHDF(InfFile)
+           DO I=1,Ctrl%NSet
+              CALL Put(Ctrl%AccL(I),'SCFAccuracy',Tag_O=IntToChar(I))
+              CALL Put(Ctrl%Method(I),'SCFMethod',Tag_O=IntToChar(I))
+           ENDDO
+           CALL CloseHDF()
+#ifdef MMech
+        ENDIF
+#endif
       END SUBROUTINE ParsePrint
 !============================================================================
 !     Parse The Methods

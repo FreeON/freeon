@@ -10,9 +10,7 @@ MODULE Macros
    USE InOut
    USE Functionals
    USE AtomPairs
-#ifdef MMech
    USE Mechanics
-#endif
 #ifdef PARALLEL
    USE MondoMPI
 #endif
@@ -92,9 +90,9 @@ MODULE Macros
          ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
          PWDName=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
          InfFile=TRIM(ScrName)//TRIM(InfF)
-#ifdef MMech
+!-----------------------------------------------------------------------------
+!        Initialize QM/MM logic
          CALL InitMMech()
-#endif
 !-----------------------------------------------------------------------------
 !        Open HDF file and mark for failure
          CALL OpenHDF(TRIM(InfFile))
