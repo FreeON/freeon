@@ -3118,8 +3118,57 @@ MODULE LinAlg
          CALL Delete(GM)
          CLOSE(Tmp)
       END SUBROUTINE MStats
-
-
+!---------------------------------------------------------------------
+! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
+!---------------------------------------------------------------------
+!   S(R) = Sum_R,C { ABS(F(R,C) }
+!   F_max = Max_R { F(R,R) + S(R) - ABS(F(R,R)) }
+!   F_min = Min_R { F(R,R) - S(R) + ABS(F(R,R)) }
+!---------------------------------------------------------------------
+      SUBROUTINE SpectralBounds(F,F_min,F_max)
+        TYPE(BCSR)       :: F
+        INTEGER          :: I,R,J,M,Col,Blk,N,C,Check
+        REAL(DOUBLE)     :: F_min,F_max,Tmp_max,Tmp_min,Diag,Sum
+!
+        F_min =  1.0D10
+        F_max = -1.0D10 
+        DO I = 1,F%NAtms                                   ! Step over row blocks
+           M = BSiz%I(I)
+           DO R = 0,M-1                                    ! Step over rows in each block
+              Sum = Zero
+              Check = 0
+              DO J = F%RowPt%I(I),F%RowPt%I(I+1)-1         ! Step over column blocks
+                 Col = F%ColPt%I(J)
+                 Blk = F%BlkPt%I(J)
+                 N = BSiz%I(Col)
+                 DO C = 0,N-1                              ! Step over colums in each block
+                    Sum = Sum + ABS(F%MTrix%D(Blk+C*M+R))  ! Assume col by col storage?
+                    IF(I.EQ.Col) THEN
+                       IF(R.EQ.C) THEN
+                          Diag = F%MTrix%D(Blk+C*M+R)      ! Diagonal elements
+                          Check = 1
+                       ENDIF
+                    ENDIF
+                 ENDDO
+              ENDDO
+              IF (Check.EQ.0) THEN                         ! In case there wasn't a diagonal element
+                 Diag = Zero
+              ENDIF
+              Tmp_max = Diag + Sum - ABS(Diag)             ! Upper bound of Grsg. circle
+              Tmp_min = Diag - Sum + ABS(Diag)             ! Lower bound of Grsg. circle
+              IF(F_max .LE.Tmp_max) THEN                   ! Check for the highest bound
+                 F_max = Tmp_max
+              ENDIF
+              IF (F_min.GE.Tmp_min) THEN                   ! Check for the lowest bound
+                 F_min = Tmp_min
+              ENDIF
+           ENDDO
+        ENDDO
+!
+      END SUBROUTINE SpectralBounds
+!
+!
+!
 END MODULE
 
 
