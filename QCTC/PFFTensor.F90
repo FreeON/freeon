@@ -17,12 +17,13 @@ MODULE PFFTen
 !====================================================================================
 ! Globals
 !====================================================================================
+!
   TYPE(CellSet)                       :: CSMM
   TYPE(DBL_VECT)                      :: TensorC,TensorS
   TYPE(DBL_VECT)                      :: TenRhoC,TenRhoS
   TYPE(DBL_VECT)                      :: RhoC,RhoS
-!
-  REAL(DOUBLE), DIMENSION(0:FFLen)    :: PFFBraC,PFFBraS,PFFKetC,PFFKetS,FarFS,FarFC
+  TYPE(DBL_VECT)                      :: PFFBraC,PFFBraS
+  TYPE(DBL_VECT)                      :: PFFKetC,PFFKetS
 !
   REAL(DOUBLE),PARAMETER              :: Small=1.0D-12
   CHARACTER(LEN=7),PARAMETER          :: Cube   ='Cube   '
@@ -52,7 +53,7 @@ MODULE PFFTen
          CALL Put(1.D-12,'CS_IN%Radius'//CurBase//CurGeom)
          CALL Put_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
 !
-         MaxEll = 0
+         MaxEll = 1
          CALL New(TensorC,LSP(2*MaxEll),0)
          CALL New(TensorS,LSP(2*MaxEll),0)
          TensorC%D = Zero
