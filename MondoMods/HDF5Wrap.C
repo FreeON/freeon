@@ -1,6 +1,6 @@
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*    F90 interface to the C HDF5 API                                        */
-/*    Author: Matt Challacombe                                               */
+/*    Author: Matt Challacombe and CK Gan                                    */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 #include <stdio.h>
 #include <stdlib.h>  
@@ -10,8 +10,8 @@
 THESE TURN ON VARIOUS LEVELS OF DEBUG
 #define debug_interface
 #define debug_all
-
 */
+
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -20,10 +20,11 @@ const char* IntToChar(int* NC, int* IntArray)
    int   j;
    char* VarName;
    char  CharTemp[132];
-   VarName = (char*)calloc(*NC,sizeof(char*));
+   VarName = (char*)calloc(*NC+1,sizeof(char));
+
    for(j=0; j<=*NC-1; j++){CharTemp[j]=(char) IntArray[j];}
-   CharTemp[*NC]=NULL;
-   memcpy(VarName,CharTemp,*NC); 
+   CharTemp[*NC]='\0';
+   strcpy(VarName,CharTemp); 
    return VarName;
 }
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -45,6 +46,7 @@ int hdf5createfile_(int* NC, int* IChr)
    FileID=fid;
    return FileID;
 }
+
 int hdf5createfile(int* NC, int* IChr)
 {return hdf5createfile_(NC,IChr);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
