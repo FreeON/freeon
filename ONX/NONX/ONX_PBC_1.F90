@@ -117,7 +117,8 @@ PROGRAM ONX
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB1,BSp,GMp)
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB2,BSp,GMp)
 
-     PBC=Zero
+     PBC_h=Zero
+     PBC_g=Zero
 1000 DO WHILE (ErrorCode/=eAOK) 
         CALL MemInit(DB1,IB,SB,Drv,BSc,BSp)
         CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
@@ -141,10 +142,11 @@ PROGRAM ONX
 #ifdef PERIODIC
 ! Periodic double sum over R and Rprime
   DO NC1=1,CS_OUT%NCells
-     PBC=CS_OUT%CellCarts%D(:,NC1)
+     PBC_h=CS_OUT%CellCarts%D(:,NC1)
+     PBC_g=Zero
      CALL DisOrder(BSc,GMc,BSp,GMp,DB1,IB,SB,Drv,NameBuf)
      DO NC2=1,CS_OUT%NCells
-        PBC=CS_OUT%CellCarts%D(:,NC2)
+        PBC_g=CS_OUT%CellCarts%D(:,NC2)
         CALL DisOrder(BSc,GMc,BSp,GMp,DB2,IB,SB,Drv,NameBuf)
 !--------------------------------------------------------------------------------
 !       All set to compute the exchange matrix
@@ -171,9 +173,6 @@ PROGRAM ONX
           GOTO 1000
         ENDIF
 #ifdef PERIODIC
-!     K%NAtms=NAtoms 
-!     WRITE(*,*)NC1,NC2,Dot(K,K)
-!     WRITE(77,*)NC1,NC2,Dot(K,K)
      ENDDO
   ENDDO
   CALL Delete(DB2)
@@ -208,8 +207,7 @@ PROGRAM ONX
   CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
   CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']',Unit_O=6)
-
-  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
+!  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ MODULE DOrder
    USE ONXMemory
    USE Stats
    IMPLICIT NONE
-   REAL(DOUBLE),DIMENSION(3) :: PBC
+   REAL(DOUBLE),DIMENSION(3) :: PBC_h,PBC_g
    CONTAINS 
       SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)  
 !--------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ MODULE DOrder
   TYPE(INT_RNK3)         :: BufT
   TYPE(INT_RNK2)         :: BufN
   REAL(DOUBLE)           :: Test,VSAC
-  REAL(DOUBLE)           :: Ax,Ay,Az,ACx,ACy,ACz,AC2,x,y,z
+  REAL(DOUBLE)           :: Ax,Ay,Az,Cx,Cy,Cz,ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
   INTEGER                :: Lng,i,j,n
   INTEGER                :: KonAC,LDis,NInts
@@ -84,18 +84,23 @@ MODULE DOrder
     KA=GMc%AtTyp%I(AtA)
     NBFA=BSc%BfKnd%I(KA)
 #ifdef PERIODIC
-    Ax=GMc%Carts%D(1,AtA)+PBC(1)
-    Ay=GMc%Carts%D(2,AtA)+PBC(2)
-    Az=GMc%Carts%D(3,AtA)+PBC(3)
+    Ax=GMc%Carts%D(1,AtA)+PBC_g(1)
+    Ay=GMc%Carts%D(2,AtA)+PBC_g(2)
+    Az=GMc%Carts%D(3,AtA)+PBC_g(3)
+    Cx=GMp%Carts%D(1,AtC)+PBC_h(1)
+    Cy=GMp%Carts%D(2,AtC)+PBC_h(2)
+    Cz=GMp%Carts%D(3,AtC)+PBC_h(3)
 #else
     Ax=GMc%Carts%D(1,AtA)
     Ay=GMc%Carts%D(2,AtA)
     Az=GMc%Carts%D(3,AtA)
+    Cx=GMp%Carts%D(1,AtC)
+    Cy=GMp%Carts%D(2,AtC)
+    Cz=GMp%Carts%D(3,AtC)
 #endif
-
-    ACx=Ax-GMp%Carts%D(1,AtC)
-    ACy=Ay-GMp%Carts%D(2,AtC) 
-    ACz=Az-GMp%Carts%D(3,AtC) 
+    ACx=Ax-Cx
+    ACy=Ay-Cy
+    ACz=Az-Cz
     AC2=ACx*ACx+ACy*ACy+ACz*ACz    
 !
 ! Need to call something like SetAtomPair here, the problem 
@@ -142,9 +147,9 @@ MODULE DOrder
           DB%TBufC%D( 5,iBf)=-ACx
           DB%TBufC%D( 6,iBf)=-ACy
           DB%TBufC%D( 7,iBf)=-ACz
-          DB%TBufC%D( 8,iBf)=GMp%Carts%D(1,AtC)
-          DB%TBufC%D( 9,iBf)=GMp%Carts%D(2,AtC)
-          DB%TBufC%D(10,iBf)=GMp%Carts%D(3,AtC)
+          DB%TBufC%D( 8,iBf)=Cx
+          DB%TBufC%D( 9,iBf)=Cy
+          DB%TBufC%D(10,iBf)=Cz
           x=-ACx
           y=-ACy
           z=-ACz
@@ -165,9 +170,9 @@ MODULE DOrder
           IF (TestPrimPair(XiAB,AC2)) THEN
             I0=I0+1
             DB%TBufP%D(1,I0,iBf)=Zeta
-            DB%TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta
-            DB%TBufP%D(3,I0,iBf)=(Za*GMc%Carts%D(2,AtA)+Zc*GMp%Carts%D(2,AtC))/Zeta
-            DB%TBufP%D(4,I0,iBf)=(Za*GMc%Carts%D(3,AtA)+Zc*GMp%Carts%D(3,AtC))/Zeta
+            DB%TBufP%D(2,I0,iBf)=(Za*Ax+Zc*Cx)/Zeta
+            DB%TBufP%D(3,I0,iBf)=(Za*Ay+Zc*Cy)/Zeta
+            DB%TBufP%D(4,I0,iBf)=(Za*Az+Zc*Cz)/Zeta
             DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
               DB%TBufP%D(6,I0,iBf)=1.0D0
