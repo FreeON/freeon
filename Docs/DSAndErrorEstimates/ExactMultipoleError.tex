@@ -23,16 +23,85 @@
 \date{\today}
 
 \begin{abstract}
-Periodic boundary conditions have been implemented in the linear scaling
-Quantum Chemistry code \textbf{MondoSCF}.
+We report on a derivation of an exact error bound for the multipole approximation when point 
+charges are translated. We then show how this exact error bound can be incorporated into
+multipole tree-code. These tree-codes are used both in large scale astrophysical 
+simulations, and in Quantum Chemistry simulations, inorder to achieve {\cal O}($N log(N)$) 
+scaling. Therefore, good error control is essential inorder to achieve both 
+accuracy and efffieicy within these algorithic methodologies. We show how to derive the
+exact error bound, and then how to incorporate this into exisiting algorithms. We then explore 
+several example systems and show how these modifications improves both the accuracy and efffieicy 
+for our alogorithms.
 \end{abstract}
 
 
 \maketitle
 
-\section{Introduction}
+\section{INTRODUCTION}
 
-\section{Scaling}
+In many areas of interest it becomes essential to simulate 
+the behavior of large scale systems where the interaction 
+falls of as one over the distance. Examples range from  the astrophysical simulation
+of galaxies, to the condensed matter simulations of large water clusters. 
+In both case the interation potential falls of with one over the distance, 
+leading to  {\cal O}($N^2$) with system size. Several algorithm's have been developed to
+overcome this limitation such as the Ewald method [ref], Particle Mesh Ewald (PME) [ref], the
+Fast Multipole Method (FMM) and the multipole tree-codes (MTC) [ref]. 
+Of specific interest are the multipole tree-code methods. 
+Tree-codes have several important advantages over other methods [ref]. i) they are easy to parallize.
+ii) they allow easy and accurte calculation of the energies and the forces. iii) Periodic boundary
+conditions can be easilly included. iv) and because of this work they
+now have supierior error control as compared to other method.
+
+Previous work on tree-code algorithm's has been severly limited by the lack of
+a resonable error estimate [ref].  Most MTC's use the {\it opening criterian} as an error estimate.
+Without great care, this estimate can lead to very poor calculation in both the energies and the
+forces because it neglects a singularity in the true error. This is our main motivation for
+deriving our new error estimate because for quantum chemistry calculations, where the distributions 
+weights can span several magnitudes, the singularity in the true error leads to large uncontrolable
+error in the matrix element calculations, which forced us to lower our error thresholds to
+unacceptable levels. 
+
+In the next section we will review MTC codes. We then show how the effienccy of these codes are
+controlled by the effieincy of the error estimates used. Next we briefly outline the derivation of 
+our exact error bound and how it can be implimented into existing MTC's. In the final
+section we show how this exact error bound improves dramatically the efficientcy and accuracy
+of our Quantum chemical tree code (QCTC) for quantum simulations, and we also show that this
+greatly improves the accuracy for classical simulations
+
+
+\section{MULTIPOLE TREE-CODES}
+
+Consider Figure {\ref{figure:MultInBox}} where we show a set of point distributions in a box, and a 
+refference distribution , $a$, which we want to calculate the interaction with. The nieve way would
+ be to 
+interact distibution $a$ with all the other distributions in the box, but this scales with the 
+number of distributions in the box. A better way would be to calculate the multipoles (we use 
+spherical multipoles [ref]) of the set of distributions in the box at the center of the box, and 
+then interact distibution $a$ with the multipoles via
+
+\begin{equation}
+V[\mathbf{R}_{a},\mathbf{R}_{box}] 
+\approx \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
+\sum _{m'=-l'}^{l'}\,
+\left( -1\right) ^{l}
+\, {\cal O}_{l}^{m}[\mathbf{R}_{a}]M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]\, 
+{\cal O}_{l'}^{m'}[\mathbf{R}_{box}]
+\label{MultI}
+\end{equation}
+
+Where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ and ${\cal O}_{l'}^{m'}[\mathbf{R}_{box}]$ are the multipoles of 
+the distribution $a$ and the distributions in the box, and 
+$M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ is the interaction tensor. This is exact in the 
+limit of $L$ and $L'$ approaching  infinity as long as 
+$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. 
+
+
+
+
+\section{MULTIPOLE ACCEPTABILITY CRITERIA (MAC)} 
+
+\section{SCALING}
 
 
 \section{CONCLUSIONS}
@@ -58,6 +127,7 @@ Let us start by defining some useful quantities
 \left( \cos \theta _{\mathbf{R}}
 \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
 \end{equation}
+%
 \begin{equation}
 \label{B2}
 M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos 
@@ -384,6 +454,7 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 \left|\left|\mathbf{P}-\mathbf{Q}\right|-2\left| \mathbf{d} \right|\right|}
 \label{B44}
 \end{equation}
+\eject
 %
 %
 %
