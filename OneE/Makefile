@@ -38,6 +38,7 @@ ObjsT     = TBlok.o     MakeT.o
 ObjsR     = RhoTools.o  RhoBlok.o  MakeRho.o 
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o
+ObjMF = BlokTrPdM.o MForce.o
 ObjTH = BlokTrPd2T.o THess.o
 ObjUF = UBlok.o UForce.o
 
@@ -46,7 +47,7 @@ ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x  TForce.x       \
                UForce.x MakeM.x MBlok.x BlokTrPd2T.x THess.x
 #
-all: 	 MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce THess
+all: 	 MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce MForce THess
 #
 MakeM:	 $(ObjsM)
 	 $(LD) $(LDFLAGS) MakeM $(ObjsM) $(F90_LIBRARIES)
@@ -75,6 +76,10 @@ SForce: $(ObjSF)
 TForce:	$(ObjTF)
 	$(LD) $(LDFLAGS) TForce $(ObjTF) $(F90_LIBRARIES)
 	mv TForce $(MONDO_EXEC)/TForce
+#
+MForce:	$(ObjMF)
+	$(LD) $(LDFLAGS) MForce $(ObjMF) $(F90_LIBRARIES) $(LAPACK)
+	mv MForce $(MONDO_EXEC)/MForce
 #
 UForce:	$(ObjUF)
 	$(LD) $(LDFLAGS) UForce $(ObjUF) $(F90_LIBRARIES)
@@ -108,4 +113,5 @@ MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a
 SForce.o : BlokTrWdS.o            $(MONDO_LIB)/libMondoMods.a
 TForce.o : BlokTrPdT.o            $(MONDO_LIB)/libMondoMods.a
+MForce.o : BlokTrPdM.o            $(MONDO_LIB)/libMondoMods.a
 THess.o  : BlokTrPd2T.o           $(MONDO_LIB)/libMondoMods.a
