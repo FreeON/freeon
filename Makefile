@@ -66,16 +66,6 @@ CatCpy:
 	cat $(MONDO_HOME)/README
 	sleep 2
 #----------------------------------------------
-#   Dynamo
- dy:	
-	$(MAKE)    -C Dynamo
-rdy:	
-	$(MAKE) -i -C Dynamo release
-pdy:	
-	$(MAKE) -i -C Dynamo purge
-cdy:	
-	$(MAKE) -i -C Dynamo clean
-#----------------------------------------------
 #   MondoMods
  mm:	
 	$(MAKE)    -C MondoMods all
