@@ -660,9 +660,11 @@ MODULE GeomOpt
 !                        IntCs,NIntC,4)
          ENDIF
        ENDIF
-       CALL INTCValue(IntCs,GMLoc%Carts%D)
-       CALL New(IntOld,NIntC)
-       IntOld%D=IntCs%Value
+       IF(NIntC/=0) THEN
+         CALL INTCValue(IntCs,GMLoc%Carts%D)
+         CALL New(IntOld,NIntC)
+         IntOld%D=IntCs%Value
+       ENDIF
 !
 ! Compute Energy at current geometry
 !
@@ -710,7 +712,7 @@ MODULE GeomOpt
 !
 ! Tidy up and continue optimization if necessary
 !
-         CALL Delete(IntOld)
+       IF(NIntC/=0)  CALL Delete(IntOld)
        IF(ActStep<=GeOpCtrl%MaxGeOpSteps) THEN
          IF(.NOT.GeOpCtrl%GeOpConvgd) THEN
            GO TO 300
@@ -743,7 +745,7 @@ MODULE GeomOpt
 !
 ! Tidy up
 !
-       CALL Delete(IntCs)
+       IF(NIntC/=0) CALL Delete(IntCs)
        CALL Delete(GMLoc)
 !!!!!!      CALL Delete(BSiz)
 !!!!!!       CALL Delete(OffS)
@@ -774,8 +776,12 @@ MODULE GeomOpt
 !
         NatmsLoc=GMLoc%Natms
         NCart=3*NatmsLoc
-        NIntC=SIZE(IntCs%Def)
-        NDim =SIZE(Displ%D)
+        IF(AllocQ(IntCs%Alloc)) THEN
+          NIntC=SIZE(IntCs%Def)
+        ELSE
+          NIntC=0
+        ENDIF
+          NDim =SIZE(Displ%D)
         DoInternals=GeOpCtrl%DoInternals
         IF(NIntC/=NDim.AND.DoInternals) &
             CALL Halt('Dimensionality error in LineSearch')
@@ -1132,7 +1138,12 @@ MODULE GeomOpt
 !
         INTEGER                   :: IMaxGrad,IMaxGradNoConstr
 !
-        NIntC=SIZE(IntCs%Def)
+        IF(AllocQ(IntCs%Alloc)) THEN
+          NIntC=SIZE(IntCs%Def)
+        ELSE
+          NIntC=0
+        ENDIF
+!
         NatmsLoc=GMLoc%Natms
         NCart=3*NatmsLoc
 !
@@ -1143,6 +1154,21 @@ MODULE GeomOpt
         ActStep=GeOpCtrl%ActStep
         IMaxGrad=GeOpCtrl%IMaxGrad
         IMaxGradNoConstr=GeOpCtrl%IMaxGradNoConstr
+!
+! For ionic crystals, until ionic radii is not coded
+!
+        IF(GeOpCtrl%CoordType==CoordType_Cartesian.AND.NIntC==0) THEN
+          GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
+                              MaxGrad<GeOpCtrl%GradCrit       
+          WRITE(*,399) ActStep       
+          WRITE(Out,399) ActStep       
+          CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
+          WRITE(*,401) Etot
+          WRITE(Out,401) Etot
+          WRITE(*,900) RMSGrad,MaxGrad
+900       FORMAT(' RMSGrad= ',F12.6,' MaxGrad= ',F12.6)
+          RETURN
+        ENDIF
 !
         CALL Get(NStreGeOp,'NStreGeOp')
         CALL Get(NBendGeOp,'NBendGeOp')
