@@ -1,19 +1,40 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
 !
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe and  C. J. Tymczak
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
-!    Compute and set intermediate thresholds
-!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    COMPUTE AND SET THRESHOLDS AND INTERMEDIATE VALUES USED IN THRESHOLDING
+!    Author: Matt Challacombe
+!------------------------------------------------------------------------------
 MODULE Thresholding
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
   USE GlobalObjects
   USE InOut
+  USE SpecFun
 !-------------------------------------------------  
 !  Primary thresholds
 !
@@ -27,9 +48,9 @@ MODULE Thresholding
   REAL(DOUBLE), SAVE  :: PrimPairDistanceThreshold  ! Prim pairs
   REAL(DOUBLE), SAVE  :: PenetratDistanceThreshold  ! Penetration threshold
   CONTAINS
-!------------------------------------------------------------------------------
+!====================================================================================================
 !    Set and load global threholding parameters
-!
+!====================================================================================================
      SUBROUTINE SetThresholds(CurBase)
          INTEGER          :: NExpt
          TYPE(DBL_VECT)   :: Expts
@@ -49,9 +70,9 @@ MODULE Thresholding
 !        Set Prim-Prim thresholds
          CALL SetPrimPairThresh(Thresholds%Dist)
      END SUBROUTINE SetThresholds
-!------------------------------------------------------------------------------
+!====================================================================================================
 !    Set the Atom Pair Distance Threshhold: Zeta_Min*|A-B|^2 > -Log(Tau)
-!
+!====================================================================================================
      SUBROUTINE SetAtomPairThresh(Tau)
         REAL(DOUBLE),INTENT(IN) :: Tau
         AtomPairDistanceThreshold=-LOG(Tau)/MinRadialExponent
@@ -66,9 +87,9 @@ MODULE Thresholding
            TestAtomPair = .TRUE.
         ENDIF
      END FUNCTION TestAtomPair
-!--------------------------------------------------------------------------
+!====================================================================================================
 !    Set the Primitive Pair Distance Threshhold: Xi_ab*Min*|A-B|^2 > -Log(Tau)
-!
+!====================================================================================================
      SUBROUTINE SetPrimPairThresh(Tau)
         REAL(DOUBLE),INTENT(IN) :: Tau
         PrimPairDistanceThreshold=-LOG(Tau)
@@ -84,11 +105,10 @@ MODULE Thresholding
            TestPrimPair = .TRUE.
         ENDIF
      END FUNCTION TestPrimPair
-!--------------------------------------------------------------------------
+!====================================================================================================
 !    Compute the extent of a Gaussian with exponent Zeta and amplitude Amp:
-!
 !    Amp*Exp[-Zeta*Extent^2] > Tau  
-!
+!====================================================================================================
      SUBROUTINE SetPenetrationThresh(Tau,ExpSwitch_O)
         REAL(DOUBLE),         INTENT(IN) :: Tau
         REAL(DOUBLE),OPTIONAL,INTENT(IN) :: ExpSwitch_O
@@ -102,4 +122,18 @@ MODULE Thresholding
         REAL(DOUBLE)            :: GaussianExtent
         GaussianExtent=SQRT(MAX(1.D-10,PenetratDistanceThreshold+Amp)/Zeta)
      END FUNCTION GaussianExtent
+!====================================================================================================
+!     COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
+!     THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
+!     ERROR:  THESE FUNCTIONS GIVE T (THE PAC) FOR A GIVEN PENETRATION ERROR.
+!====================================================================================================
+     FUNCTION PFunk(Ell,Ack)
+        INTEGER                    :: Ell
+        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
+        REAL(DOUBLE),DIMENSION(30) :: W
+        INCLUDE 'GammaDimensions.Inc'
+        X=-LOG(Ack)
+        INCLUDE 'PFunk.Inc'
+        PFunk=MIN(PFunk,Gamma_Switch)
+     END FUNCTION PFunk    
 END MODULE
