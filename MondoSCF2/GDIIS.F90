@@ -437,7 +437,8 @@ write(*,*) 'chk 1'
          CALL PeriodicAngle(VectX%D)
        ENDIF
        !
-       CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),A,B)
+       CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),&
+                  A,B,IntCs%Def(I))
        CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
                     A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
@@ -766,19 +767,22 @@ write(*,*) 'ss = ',ss
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal,PredGrad,AFit,BFit)
+   SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal,PredGrad, &
+                          AFit,BFit,Def_O)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal,Center,A,B,AbDev,MaxDev
      REAL(DOUBLE)              :: Filter,FitValOld,MinY,MaxY,ValY
      REAL(DOUBLE)              :: SigA,SigB,Chi2,Q,MeanDev,AccGrad
      REAL(DOUBLE)              :: PredGrad,MeanDevOld
-     REAL(DOUBLE)              :: AFit,BFit
+     REAL(DOUBLE)              :: AFit,BFit,CritFlat
      INTEGER                   :: I,J,NDim,NFit,K,MWT
      INTEGER                   :: NFit1,NFitStart,IStart
      INTEGER                   :: ICount,ICountOld
      TYPE(DBL_VECT)            :: VectXAct,VectYAct,Devs,SigAux,SigAct
      TYPE(DBL_VECT)            :: VectAuxX,VectAuxY
+     CHARACTER(LEN=*),OPTIONAL :: Def_O
      !
+     CritFlat=1.D-7
      AFit=Zero
      BFit=Zero
      FitVal=VectX(NDim)
@@ -816,21 +820,24 @@ write(*,*) 'ss = ',ss
        MeanDev=SUM(Devs%D)/DBLE(NFit)
        write(*,*) 'MaxDev= ',MaxDev,' MeanDev= ',MeanDev,' MeanDevOld= ',MeanDevOld
        IF(MeanDev<MeanDevOld.OR.NFit==NFitStart) THEN
-         IF(ABS(B)>1.D-7) THEN
-           IF(B<Zero) THEN
+         IF(B<Zero) THEN
 write(*,*) 'original a,b= ',a,b
-             A=VectY(NDim)+B*VectX(NDim)
-             B=-B
+           A=VectY(NDim)+B*VectX(NDim)
+           B=-B
 write(*,*) 'modified a,b= ',a,b
-           ENDIF
-           PredGrad=-VectY(NDim)/Two
-           FitVal=(PredGrad-A)/B
-           write(*,*) 'extrap 2, predgrad= ',PredGrad 
-         ELSE
-           FitVal=VectX(NDim)
-           PredGrad=VectY(NDim)
-           write(*,*) 'flat line no change of value'  
          ENDIF
+         PredGrad=-VectY(NDim)/Two
+         IF(ABS(B)>CritFlat) THEN
+           FitVal=(PredGrad-A)/B
+         ELSE
+           FitVal=VectX(NDim) !!! no change, see CtrlDispl
+         ENDIF
+         IF(PRESENT(Def_O)) THEN
+           CALL CtrlDispl(Def_O,A,B,PredGrad,FitVal,&
+                          VectX,VectY,CritFlat)
+         ENDIF
+         write(*,*) 'extrap 2, predgrad= ',PredGrad 
+         !
          MeanDevOld=MeanDev
          AFit=A
          BFit=B
@@ -846,6 +853,40 @@ write(*,*) 'modified a,b= ',a,b
      CALL Delete(VectYAct)
      CALL Delete(Devs)
    END SUBROUTINE Extrapolate
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE CtrlDispl(Def,A,B,PredGrad,FitVal,VectX,VectY,CritFlat)
+     CHARACTER(LEN=*)          :: Def
+     REAL(DOUBLE)              :: PredGrad,FitVal,A,B,LastVal,CritFlat
+     REAL(DOUBLE)              :: MaxStep,DeltaMax,Delta,SinAlp2,B2
+     REAL(DOUBLE)              :: FitValOld
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     INTEGER                   :: I,J,NDim
+     !
+     NDim=SIZE(VectX)
+     FitValOld=FitVal
+     B2=B*B
+     SinAlp2=B2/(One+B2)
+write(*,*) Def,' alph= ',ASIN(SQRT(SinAlp2))
+     LastVal=VectX(NDim)
+     !
+     IF(Def(1:4)=='STRE') THEN
+       DeltaMax=0.15D0             
+     ELSE IF(HasAngle(Def)) THEN
+       DeltaMax=5.D0*PI/180.D0     
+     ENDIF
+     MaxStep=DeltaMax*(One+SinAlp2)
+     Delta=FitVal-LastVal
+     IF(ABS(Delta)>MaxStep) THEN
+       FitVal=LastVal+SIGN(MaxStep,Delta)
+write(*,*) 'fitval is changing from-to ',fitvalold,FitVal
+     ENDIF
+     IF(ABS(B)<CritFlat) THEN
+       FitVal=LastVal+SIGN(MaxStep,VectX(NDim)-VectX(Ndim-1))
+write(*,*) 'fitval is changing in critflat ',fitvalold,FitVal
+     ENDIF
+   END SUBROUTINE CtrlDispl
 !
 !---------------------------------------------------------------------
 !
@@ -1216,12 +1257,13 @@ write(*,*) i,'DelocGrads(:,I)= ',DelocGrads(:,I)
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE FitXY(VectX,VectY,RMSErr,FitVal,PredGrad,A,B)
+   SUBROUTINE FitXY(VectX,VectY,RMSErr,FitVal,PredGrad,A,B,Def_O)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr
      REAL(DOUBLE)              :: FitVal,G1,G2,X1,X2,A,B,AbsG
      REAL(DOUBLE)              :: PredGrad,MaxX,MinX
      LOGICAL                   :: DoBisect
      INTEGER                   :: I,J,NMem
+     CHARACTER(LEN=*),OPTIONAL :: Def_O
      !
      A=Zero
      B=Zero
@@ -1253,7 +1295,8 @@ write(*,*) 'bis 2, predgrad= ',PredGrad
 write(*,*) 'fitval= ',FitVal
      ELSE
 write(*,*) 'doing extrapolation'
-       CALL Extrapolate(VectX,VectY,RMSErr,FitVal,PredGrad,A,B)
+       CALL Extrapolate(VectX,VectY,RMSErr,FitVal,PredGrad, &
+                        A,B,Def_O=Def_O)
      ENDIF
 write(*,*) 'predgrad= ',PredGrad
    END SUBROUTINE FitXY
