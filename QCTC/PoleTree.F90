@@ -1,3 +1,30 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
 MODULE PoleTree
    USE Derivedtypes
    USE GlobalScalars   
@@ -19,7 +46,7 @@ MODULE PoleTree
    REAL(DOUBLE)       :: MaxAmp,MiniumExp
 !----------------------------------------------------------------------------------
 !  Global density in array form
-   TYPE(HGRho)                           :: Rho
+!
    INTEGER,     DIMENSION(:),Allocatable :: Qdex      
    INTEGER,     DIMENSION(:),Allocatable :: Cdex
    INTEGER,     DIMENSION(:),Allocatable :: Ldex
@@ -34,27 +61,24 @@ MODULE PoleTree
 !=================================================================================
 !     
 !=================================================================================
-      SUBROUTINE RhoToPoleTree(Args)
-         TYPE(ARGMT)               :: Args
-         INTEGER                   :: Status,K,I
+      SUBROUTINE RhoToPoleTree
+        INTEGER                   :: Status,K,I
 !-------------------------------------------------------------------
-!        Initialize the density
-         CALL InitRho(Args)
-!        Initialize counters
-         PoleNodes=0
-         RhoLevel=0
-!        Initialize the root node
-         CALL NewPoleNode(PoleRoot,0)
-         CALL InitPoleRoot
-!        Convert the density into a 3-D BinTree
-         CALL SplitPole(PoleRoot)
-!        Delete the global array based density
-         CALL DeleteRho
-!        Make PoleTree tier by tier, recuring up from the bottom
-         DO NTier=MaxTier,0,-1         
-            CALL MakePoleTree(PoleRoot) 
-         ENDDO 
-!        CALL Print_PoleNode(PoleRoot,'Root')
+!       Initialize counters
+        PoleNodes=0
+        RhoLevel=0
+!       Initialize the root node
+        CALL NewPoleNode(PoleRoot,0)
+        CALL InitPoleRoot
+!       Convert the density into a 3-D BinTree
+        CALL SplitPole(PoleRoot)
+!       Delete the global array based density
+        CALL DeleteGlobals
+!       Make PoleTree tier by tier, recuring up from the bottom
+        DO NTier=MaxTier,0,-1         
+           CALL MakePoleTree(PoleRoot) 
+        ENDDO
+        CALL Print_PoleNode(PoleRoot,'Root')
       END SUBROUTINE RhoToPoleTree
 !==========================================================================
 !
@@ -80,23 +104,16 @@ MODULE PoleTree
      END SUBROUTINE MakePoleTree
 !===============================================================================
 !     
-!=======================================================================
+!===============================================================================
       SUBROUTINE InitPoleRoot
-         TYPE(DBL_RNK2) :: BndBox
          PoleRoot%Bdex=1
          PoleRoot%Edex=Rho%NDist
          PoleRoot%NQ=Rho%NDist
-!        Get the nuclear bounding box
-         CALL New(BndBox,(/3,2/))
-         CALL Get(BndBox,'boundingbox',CurGeom)
-         PoleRoot%Box%BndBox(1:3,1:2)=BndBox%D(1:3,1:2)
-         CALL Delete(BndBox)
+!        Get the Bounding Box for PoleRoot
+         CALL NewRhoBox(PoleRoot)
 !        Set the largest range (smallest exponent) of the roots BB
          PoleRoot%Zeta=Rho%Expt%D(1)
          MiniumExp=Rho%Expt%D(1)
-!        Set the center and width of the Cartesian part
-         PoleRoot%Box%Half  =Half*(PoleRoot%Box%BndBox(:,2)-PoleRoot%Box%BndBox(:,1))
-         PoleRoot%Box%Center=Half*(PoleRoot%Box%BndBox(:,2)+PoleRoot%Box%BndBox(:,1))
      END SUBROUTINE InitPoleRoot
 !===================================================================
 !
@@ -212,78 +229,6 @@ MODULE PoleTree
 !        New center
          Node%Box%Center(:)=Half*(Node%Box%BndBox(:,2)+Node%Box%BndBox(:,1))
       END SUBROUTINE NewRhoBox
-!========================================================================================
-!     ALLOCATE and read in the density, initalize global lists 
-!========================================================================================
-      SUBROUTINE InitRho(Args)
-         TYPE(ARGMT)  :: Args
-         INTEGER      :: z,oq,or,iq,jq,NQ,Q,Ell,Status,I,IOS,LMNLen
-         REAL(DOUBLE) :: Dummy
-!----------------------------------------------------------------------------------------
-!        Get the density
-         Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
-              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
-         CALL New(Rho%NQ  ,Rho%NExpt)
-         CALL New(Rho%OffQ,Rho%NExpt)
-         CALL New(Rho%OffR,Rho%NExpt)
-         CALL New(Rho%Lndx,Rho%NExpt)
-         CALL New(Rho%Expt,Rho%NExpt)
-         CALL New(Rho%Qx,  Rho%NDist)
-         CALL New(Rho%Qy,  Rho%NDist)
-         CALL New(Rho%Qz,  Rho%NDist)
-         CALL New(Rho%Co,  Rho%NCoef)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%NQ%I  (i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffQ%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%OffR%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Lndx%I(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Expt%D(i),i=1,Rho%NExpt)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qx%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qy%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qz%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Dummy        ,i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef)
-         Close(UNIT=Seq,STATUS='KEEP')
-!-------------------------------------------------------------
-!        ALLOCATE global lists
-         ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(Cdex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(Ldex(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,Rho%NDist,0)
-         ALLOCATE(RList(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-         ALLOCATE(Zeta(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-         ALLOCATE(Amp(1:Rho%NDist),STAT=Status)
-         CALL IncMem(Status,0,Rho%NDist)
-!        Fill the global indeces
-         IQ=1
-         JQ=1
-         MaxAmp=Zero
-         DO z=1,Rho%NExpt!,Rho%NExpt
-            oq  =Rho%OffQ%I(z)   
-            or  =Rho%OffR%I(z)   
-            Ell =Rho%Lndx%I(z)   
-            LMNLen=LHGTF(Ell)
-            NQ  =Rho%NQ%I(z)
-            DO Q=1,NQ
-               Qdex(IQ)=oq+Q
-               Cdex(oq+Q)=or+(Q-1)*LMNLen +1 
-               Zeta(oq+Q)=Rho%Expt%D(z)
-               Ldex(oq+Q)=Ell
-               IQ=IQ+1
-               JQ=JQ+LMNLen
-            ENDDO
-         ENDDO     
-!        Redefine NDist to exclude nuclear charges
-         Rho%NDist=IQ-1
-!        Later 
-         Return            
-!        Bomb on IO error
-    202  CALL Halt('Died in PutRho, IOSTAT = '//Trim(IntToChar(IOS)))
-      END SUBROUTINE InitRho
 !================================================================================
 !     Bisection   
 !================================================================================
@@ -338,19 +283,51 @@ MODULE PoleTree
          CALL NewRhoBox(Right)
       END SUBROUTINE SplitPoleBox
 !========================================================================================
+!     ALLOCATE and read in the density, initalize global lists 
+!========================================================================================
+      SUBROUTINE InitRhoAux
+         INTEGER      :: z,oq,or,iq,jq,NQ,Q,Ell,Status,I,IOS,LMNLen
+!-------------------------------------------------------------
+!        ALLOCATE global lists
+         ALLOCATE(Qdex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(Cdex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(Ldex(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,Rho%NDist,0)
+         ALLOCATE(RList(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+         ALLOCATE(Zeta(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+         ALLOCATE(Amp(1:Rho%NDist),STAT=Status)
+         CALL IncMem(Status,0,Rho%NDist)
+!        Fill the global indeces
+         IQ=1
+         JQ=1
+         MaxAmp=Zero
+         DO z=1,Rho%NExpt!,Rho%NExpt
+            oq  =Rho%OffQ%I(z)   
+            or  =Rho%OffR%I(z)   
+            Ell =Rho%Lndx%I(z)   
+            LMNLen=LHGTF(Ell)
+            NQ  =Rho%NQ%I(z)
+            DO Q=1,NQ
+               Qdex(IQ)=oq+Q
+               Cdex(oq+Q)=or+(Q-1)*LMNLen +1 
+               Zeta(oq+Q)=Rho%Expt%D(z)
+               Ldex(oq+Q)=Ell
+               IQ=IQ+1
+               JQ=JQ+LMNLen
+            ENDDO
+         ENDDO     
+!        Redefine NDist to exclude nuclear charges
+         Rho%NDist=IQ-1
+       END SUBROUTINE InitRhoAux
+!========================================================================================
 !     Delete globals associated with the array representation of the density
 !========================================================================================
-      SUBROUTINE DeleteRho
+       SUBROUTINE DeleteRhoAux
          INTEGER :: Status
-         CALL Delete(Rho%NQ)
-         CALL Delete(Rho%OffQ)
-         CALL Delete(Rho%OffR)
-         CALL Delete(Rho%Lndx)
-         CALL Delete(Rho%Expt)
-         CALL Delete(Rho%Qx)
-         CALL Delete(Rho%Qy)
-         CALL Delete(Rho%Qz)
-         CALL Delete(Rho%Co)
 !        DEALLOCATE global allocatables
          DEALLOCATE(Qdex,STAT=Status)
          CALL DecMem(Status,Rho%NDist,0)
@@ -364,6 +341,7 @@ MODULE PoleTree
          CALL DecMem(Status,0,Rho%NDist)
          DEALLOCATE(RList,STAT=Status) 
          CALL DecMem(Status,0,Rho%NDist)
-      END SUBROUTINE DeleteRho
+       END SUBROUTINE DeleteRhoAux
 !
 END MODULE
+

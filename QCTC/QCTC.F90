@@ -42,17 +42,15 @@ PROGRAM QCTC
   USE AtomPairs
   USE BraBloks
   USE PoleTree
+  USE PBCFarField
   USE JGen
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)         :: J,T1
+  TYPE(DBCSR)         :: J,S,T1
 #else
-  TYPE(BCSR)          :: J,T1
+  TYPE(BCSR)          :: J,S,T1
 #endif
-  TYPE(AtomPair)      :: Pair
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: P,AtA,AtB,NN,iSwitch
   REAL(DOUBLE)        :: E_Nuc_Tot
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
 !-------------------------------------------------------------------------------- 
@@ -63,16 +61,37 @@ PROGRAM QCTC
   CALL Get(GM,Tag_O=CurGeom)
 ! Allocations 
   CALL NewBraBlok(BS)
-  CALL New(J)
+! Get the Density for Poletree
+  CALL Get(Rho,'Rho',Args,0)
+! Initialize the auxiliary density arrays
+  CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp(SPell2)
-! Build the global PoleTree representation of the total density
-  CALL RhoToPoleTree(Args)
+  CALL MultipoleSetUp(FFEll2)
+#ifdef PERIODIC
+! Calculate the Number of Cells
+  CALL SetCellNumber(GM)
 ! Set the electrostatic background 
-  CALL FarField(PoleRoot)
+  CALL PBCFarFieldSetUp(FFEll)
+#endif
+! Build the global PoleTree representation of the total density
+  CALL RhoToPoleTree
+! Delete the auxiliary density arrays
+  CALL DeleteRhoAux
+! Delete the Density
+  CALL Delete(Rho)
+  CALL New(J)
 ! Compute the Coulomb matrix J in O(N Lg N)
   CALL MakeJ(J)
+#ifdef PERIODIC
+! Add the Quadripole correction to J
+  CALL Get(S,TrixFile('S',Args))
+  CALL Multiply(S,QFac*Quadripole)
+  CALL Add(J,S,T1)
+  CALL SetEq(J,T1)
+  CALL Delete(S)
+#endif
 ! Put J to disk
+!  CALL PPrint(J,'J',Unit_O=6)
   CALL Filter(T1,J)
   IF(Args%C%C(2)=='Core')THEN
      CALL Put(T1,TrixFile('V',Args))
@@ -85,7 +104,7 @@ PROGRAM QCTC
   CALL Put(E_Nuc_Tot,'enn+ene',Tag_O=SCFCycl)
 !---------------------------------------------------------------
 ! Printing
-!  CALL PPrint(E_Nuc_Tot,'NukE['//TRIM(SCFCycl)//']')
+  CALL PPrint(E_Nuc_Tot,'NukE['//TRIM(SCFCycl)//']')
   IF(Args%C%C(2)=='Core')THEN
      CALL PChkSum(T1,'V',Prog)
      CALL PPrint( T1,'V')
@@ -95,12 +114,12 @@ PROGRAM QCTC
      CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
      CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
   ENDIF
-!---------------------------------------------------------------
 ! Tidy up
   CALL Delete(J)
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
+  CALL Delete(Args)
 ! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM QCTC
