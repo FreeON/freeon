@@ -508,6 +508,36 @@ MODULE ParseInput
             CALL MondoHalt(PRSE_ERROR,TOTAL_CHARGE//' Not found in input.')
          IF(.NOT.OptIntQ(Inp,MULTIPLICITY,GM%Multp)) &
             CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in input.')
+!----------------------------------------------------------------------------------------- 
+!        Parse <OPTIONS> for <ForceAction>
+!     
+         IF(OptKeyQ(Inp,FACTION,MOLDYN)) THEN
+            Ctrl%ForceAction='MolecularDynamics'
+            IF(.NOT. OptIntQ(Inp,MOLDYN_NS,Ctrl%NGeom)) THEN
+               CALL MondoHalt(PRSE_ERROR,' Number of Molecular-Dynamics Steps Not found in input.')
+            ENDIF
+            IF(Ctrl%NGeom .LT. 1) THEN               
+               CALL MondoHalt(PRSE_ERROR,' Number of Molecular-Dynamics Steps is less then One')
+            ENDIF
+            IF(.NOT.OptDblQ(Inp,MOLDYN_TS,Ctrl%MDControls(1))) THEN
+               Ctrl%MDControls(1) = 1.D-2
+            ENDIF
+            IF(.NOT.OptDblQ(Inp,MOLDYN_VS,Ctrl%MDControls(2))) THEN
+               Ctrl%MDControls(2) = 1.D0
+            ENDIF
+         ELSEIF(OptKeyQ(Inp,FACTION,GEOOPT)) THEN             
+            Ctrl%ForceAction='GeometryOptimization'
+            IF(.NOT. OptIntQ(Inp,GEOOPT,Ctrl%NGeom)) THEN
+               CALL MondoHalt(PRSE_ERROR,' Number of Geometry-Optimization Steps Not found in input.')
+            ENDIF
+            IF(Ctrl%NGeom .LT. 1) THEN               
+               CALL MondoHalt(PRSE_ERROR,' Number of Geometry-Optimization Steps is less then One')
+            ENDIF
+         ELSEIF(OptKeyQ(Inp,FACTION,FORCE)) THEN      
+            Ctrl%ForceAction='Force'
+         ELSE
+            Ctrl%ForceAction='Off'
+         ENDIF   
 #ifdef PERIODIC
 !-------------------------------------------------
 !        Parse <OPTIONS> for <PERIODIC> keys
@@ -571,7 +601,7 @@ MODULE ParseInput
 !
          IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
             GM%InVecForm=.TRUE.
-         ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
             GM%InVecForm=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
@@ -609,12 +639,14 @@ MODULE ParseInput
       END SUBROUTINE ParseGeometry
 !
 !
+!
       SUBROUTINE ParseCoordinates_MONDO(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
          TYPE(INT_VECT)                  :: Kinds
          REAL(DOUBLE)                    :: R,Rx,Ry,Rz
-         REAL(DOUBLE),DIMENSION(3)       :: Carts(3)
+         REAL(DOUBLE),DIMENSION(3)       :: Carts,Vects
+         REAL(DOUBLE),DIMENSION(6)       :: CartsVects
          INTEGER                         :: I,J,K
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
@@ -633,51 +665,127 @@ MODULE ParseInput
          GM%NAtms=NAtoms
 !        Allocate the geometry
          CALL New(GM)
+!
 #ifdef PERIODIC
 !----------------------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
 !
-            CALL ParsePeriodic_MONDO(Ctrl,GM)
+         CALL ParsePeriodic_MONDO(Ctrl,GM)
 #endif
 !----------------------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
-         CALL Align(BEGIN_GEOMETRY,Inp)
-         Ctrl%NGeom=0
-         LastConfig=.FALSE.
-         DO
-            Ctrl%NGeom=Ctrl%NGeom+1
-            GM%Confg=Ctrl%NGeom
-            NAtoms=0
-            DO 
-               READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-               IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT)/=0)EXIT
-               IF(INDEX(Line,END_GEOMETRY)/=0)THEN
-                  LastConfig=.TRUE.
-                  EXIT
+         
+         IF(Ctrl%ForceAction=='Off' .OR. Ctrl%ForceAction=='Force' ) THEN
+            CALL Align(BEGIN_GEOMETRY,Inp)
+            Ctrl%NGeom=0
+            LastConfig=.FALSE.
+            DO
+               Ctrl%NGeom=Ctrl%NGeom+1
+               GM%Confg=Ctrl%NGeom
+               NAtoms=0
+               DO 
+                  READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+                  IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT)/=0)EXIT
+                  IF(INDEX(Line,END_GEOMETRY)/=0)THEN
+                     LastConfig=.TRUE.
+                     EXIT
+                  ELSE
+                     LastConfig=.FALSE.
+                  ENDIF
+                  NAtoms=NAtoms+1
+                  CALL LineToGeom(Line,At,Carts)
+#ifdef PERIODIC
+                  IF(GM%InAtomCrd) THEN
+                     GM%Carts%D(:,NAtoms)=Carts(:)
+                  ELSE
+                     GM%BoxCarts%D(:,NAtoms)=Carts(:) 
+                  ENDIF
+#else
+                  GM%Carts%D(:,NAtoms)=Carts(:) 
+#endif
+                  DO J=1,104
+                     IF(At==Ats(J))THEN
+                        GM%AtNum%I(NAtoms)=J
+                        GM%AtMss%D(NAtoms)=AtsMss(J)
+                        EXIT
+                     ENDIF
+                  ENDDO
+               ENDDO
+               IF(NAtoms/=GM%NAtms) &
+                    CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MONDO')
+!              Determine the number of atom types (kinds)
+               CALL FindKind(GM)
+!              Reorder with SFC
+               CALL ReorderCoordinates(GM)
+#ifdef PERIODIC
+!              Convert to AU and Compute Fractioan and Atomic Coordinates  
+               IF(GM%InAtomCrd) THEN
+                  IF(.NOT.GM%InAU) THEN 
+                     GM%Carts%D    = GM%Carts%D*AngstromsToAU
+                  ENDIF
+                  CALL CalFracCarts(GM)
                ELSE
-                  LastConfig=.FALSE.
+                  CALL CalAtomCarts(GM)
+               ENDIF
+               IF(GM%NoTransVec) THEN
+                  CALL CalTransVec(GM)
+               ENDIF
+               CALL Translate(GM)
+               CALL WrapAtoms(GM)
+#else
+!              Convert to AU
+               IF(.NOT.GM%InAU) &
+                    GM%Carts%D=GM%Carts%D*AngstromsToAU
+#endif
+!
+!              Compute spin coordinates
+               CALL SpinCoords(GM) 
+!              Determine a bounding box for the system
+               GM%BndBox%D=SetBox(GM%Carts)
+!              Output the coordinates
+               CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
+               CALL Put(Ctrl%NGeom,'NumberOfGeometries')
+!              Print the coordinates
+               IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+!
+               IF(LastConfig)EXIT
+            ENDDO
+         ELSE
+            NAtoms = 0
+            CALL Align(BEGIN_GEOMETRY,Inp)
+            DO
+               READ(Inp,DEFAULT_CHR_FMT,END=1) Line
+               IF(INDEX(Line,END_GEOMETRY).NE. 0) EXIT
+               IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT).NE. 0) THEN
+                  CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied')
                ENDIF
                NAtoms=NAtoms+1
-               CALL LineToGeom(Line,At,Carts)
+               CALL LineToGeom(Line,At,CartsVects)
+               DO I=1,3
+                  Carts(I) = CartsVects(I)
+                  Vects(I) = CartsVects(I+3)
+               ENDDO
 #ifdef PERIODIC
                IF(GM%InAtomCrd) THEN
                   GM%Carts%D(:,NAtoms)=Carts(:)
+                  GM%Vects%D(:,NAtoms)=Vects(:)
                ELSE
                   GM%BoxCarts%D(:,NAtoms)=Carts(:) 
+                  GM%BoxVects%D(:,NAtoms)=Vects(:) 
                ENDIF
 #else
                GM%Carts%D(:,NAtoms)=Carts(:) 
+               GM%Vects%D(:,NAtoms)=Vects(:)
 #endif
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%I(NAtoms)=J
+                     GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
                ENDDO
             ENDDO
-            IF(NAtoms/=GM%NAtms) &
-               CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MONDO')
 !           Determine the number of atom types (kinds)
             CALL FindKind(GM)
 !           Reorder with SFC
@@ -686,7 +794,8 @@ MODULE ParseInput
 !           Convert to AU and Compute Fractioan and Atomic Coordinates  
             IF(GM%InAtomCrd) THEN
                IF(.NOT.GM%InAU) THEN 
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
+                  GM%Carts%D = GM%Carts%D*AngstromsToAU
+                  GM%Vects%D = GM%Vects%D*AngstromsToAU
                ENDIF
                CALL CalFracCarts(GM)
             ELSE
@@ -699,28 +808,25 @@ MODULE ParseInput
             CALL WrapAtoms(GM)
 #else
 !           Convert to AU
-            IF(.NOT.GM%InAU) &
-               GM%Carts%D=GM%Carts%D*AngstromsToAU
+            IF(.NOT.GM%InAU) THEN
+               GM%Carts%D = GM%Carts%D*AngstromsToAU
+               GM%Vects%D = GM%Vects%D*AngstromsToAU
+            ENDIF
 #endif
 !
 !           Compute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!           Compute nuclear-nuclear repulsion energy
-!#ifdef PERIODIC
-!            GM%ENucN  = Zero
-!#else
-!            GM%ENucN  = ENukeNuke(GM)
-!#endif
 !           Output the coordinates
-            CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
+            DO I=1,Ctrl%NGeom
+               GM%Confg=I
+               CALL Put(GM,Tag_O=IntToChar(I))
+            ENDDO
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
-!
-            IF(LastConfig)EXIT
-         ENDDO
+         ENDIF
          NAtoms=GM%NAtms
 !----------------------------------------------------------------------------------------- 
 !        Finish up
@@ -735,6 +841,7 @@ MODULE ParseInput
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the input file.')
       END SUBROUTINE ParseCoordinates_MONDO
+
 !
 !
 !
@@ -807,6 +914,7 @@ MODULE ParseInput
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%I(NAtoms)=J
+                     GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
                ENDDO
@@ -920,6 +1028,7 @@ MODULE ParseInput
                DO J=1,104
                   IF(TRIM(At)==TRIM(Ats(J)))THEN
                      GM%AtNum%I(NAtoms)=J
+                     GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
                ENDDO
@@ -1153,6 +1262,7 @@ MODULE ParseInput
 !
          DO I=1,GM%NAtms
             GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
+            GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
          ENDDO
 !
        END SUBROUTINE CalFracCarts
@@ -1167,6 +1277,7 @@ MODULE ParseInput
 !
         DO I=1,GM%NAtms
            GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
+           GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
         ENDDO
 !
       END SUBROUTINE CalAtomCarts
@@ -1282,6 +1393,7 @@ MODULE ParseInput
          CALL New(DTemp,NAtoms)
          CALL New(ITemp,NAtoms)
          CALL SFCOrder(NAtoms,GM%Carts,Point,GM%Ordrd)
+!        Reorder Coordinates
          DO I=1,3
             DO J=1,NAtoms
                DTemp%D(J)=GM%Carts%D(I,J)
@@ -1290,11 +1402,27 @@ MODULE ParseInput
                GM%Carts%D(I,J)=DTemp%D(Point%I(J))
             ENDDO
          ENDDO
+#ifdef PERIODIC
+!        Reorder Fractional Coordinates
+         DO I=1,3
+            DO J=1,NAtoms
+               DTemp%D(J)=GM%BoxCarts%D(I,J)
+            ENDDO
+            DO J=1,NAtoms
+               GM%BoxCarts%D(I,J)=DTemp%D(Point%I(J))
+            ENDDO
+         ENDDO
+#endif
+!        Reorder Velocity
+
+!        Reorder Atomic Number and Mass
          DO J=1,NAtoms
             ITemp%I(J)=GM%AtNum%I(J)
+            DTemp%D(J)=GM%AtMss%D(J)
          ENDDO
          DO J=1,NAtoms
             GM%AtNum%I(J)=ITemp%I(Point%I(J))
+            GM%AtMss%D(J)=DTemp%D(Point%I(J))
          ENDDO
          CALL Delete(Point)
          CALL Delete(DTemp)
