@@ -529,7 +529,7 @@ MODULE ParseInput
          ELSEIF(OptKeyQ(Inp,GEOMETRY,TRAVEL_Order))THEN
             GM%Ordrd=SFC_TRAVEL 
          ELSE
-            CALL MondoHalt(PRSE_ERROR,'Unrecognized ordering.')
+            GM%Ordrd=SFC_NONE
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <TOT_CHARGE> and <MULTIPLICITY>  
