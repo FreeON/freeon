@@ -35,10 +35,12 @@ CPPMISC = -DEXPLICIT_SOURCE_DIRECT -DEXPLICIT_SOURCE_POLES
 #
 EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/MMA/CTraX   \
                 -I$(MONDO_HOME)/QCTC/MMA/HGToSP  \
-                -I$(MONDO_HOME)/QCTC/MMA/HGTraX
+                -I$(MONDO_HOME)/QCTC/MMA/HGTraX  \
+                -I$(MONDO_HOME)/OneE/
 #
-QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PBCFarField.o TreeWalk.o JGen.o NukE.o QCTC.o
-JFrcObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PBCFarField.o TreeWalk.o BlokTrPdJ.o JForce.o
+QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o JGen.o NukE.o QCTC.o
+JFrcObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o BlokTrPdJ.o JForce.o
+QDiffObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PPFFTensor.o BCFarField.o TreeWalk.o JGen.o NukE.o QDiff.o
 #
 all:	QCTC JFrc 
 clean:	CQCTC CJFrc cmma 
@@ -48,6 +50,10 @@ PURGE:  CQCTC CJFrc pmma
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
 	mv QCTC $(MONDO_HOME)/Exec/QCTC
+#
+Diff:	$(QDiffObjs)
+	$(LD) $(LDFLAGS) QDiff $(QDiffObjs) $(LibOpts) $(F90_LIBRARIES) 
+	mv QDiff $(MONDO_HOME)/Exec/QDiff
 #
 JFrc:	$(JFrcObjs)
 	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(LibOpts) $(F90_LIBRARIES) 
