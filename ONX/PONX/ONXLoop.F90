@@ -4,6 +4,7 @@ SUBROUTINE ONXLoop(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
   USE GlobalScalars
   USE PrettyPrint
   USE ONXParameters
+  USE Thresholding
   IMPLICIT NONE
   TYPE(BSET),INTENT(IN)      :: BSc,BSp
   TYPE(CRDS),INTENT(IN)      :: GMc,GMp
@@ -149,7 +150,7 @@ SUBROUTINE ONXLoop(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
                      Bfn%I(1,1),Indx%I(1,1),DA%D(1),K%MTrix%D(1),    &
                      K%GRwPt%I(1),K%ColPt%I(1),K%BlkPt%I(1),         &
                      PrmBuf%D(1),DisBuf%D(1),CBuf%D(1),SBuf%D(1),    &
-                     VecBuf%D(1),WR%D(1),WZ%D(1),W1%D(1),W2%D(1),    &
+                     VecBuf%D(1,1),WR%D(1),WZ%D(1),W1%D(1),W2%D(1),  &
                      RAC%D(1,1),RBD%D(1,1),CBra%D(1),CKet%D(1),      &
                      ESw,ThreshM,ThreshP,xNERIs,xNMults)
 #else
@@ -162,7 +163,7 @@ SUBROUTINE ONXLoop(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
                      Bfn%I(1,1),Indx%I(1,1),DA%D(1),K%MTrix%D(1),    &
                      K%RowPt%I(1),K%ColPt%I(1),K%BlkPt%I(1),         &
                      PrmBuf%D(1),DisBuf%D(1),CBuf%D(1),SBuf%D(1),    &
-                     VecBuf%D(1),WR%D(1),WZ%D(1),W1%D(1),W2%D(1),    &
+                     VecBuf%D(1,1),WR%D(1),WZ%D(1),W1%D(1),W2%D(1),  &
                      RAC%D(1,1),RBD%D(1,1),CBra%D(1),CKet%D(1),      &
                      ESw,ThreshM,ThreshP,xNERIs,xNMults)
 #endif

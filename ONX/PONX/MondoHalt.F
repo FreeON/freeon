@@ -10,23 +10,6 @@ C
 C
       CHARACTER*(*) Message
 C
-      INCLUDE 'Units.Inc'
-      INCLUDE 'Characters.Inc'
-C  
-      LOGICAL Op
-C
-      WRITE(iErr,*)Message
-C
-      CALL OpenAppend(iOut,OutFile)
-      WRITE(iOut,*)Message
-      CLOSE(UNIT=iOut,STATUS='KEEP')
-C
-      CALL OpenAppend(iLog,LogFile)
-      WRITE(iLog,*)'DEAD'
-      CLOSE(UNIT=iLog,STATUS='KEEP')
-C
-      CALL Trap()
-C
       STOP
       END
 C

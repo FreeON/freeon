@@ -3,6 +3,7 @@ SUBROUTINE ONXBuf(BSc,GMc,BSp,GMp,LenF,NameBuf)
   USE GlobalScalars
   USE PrettyPrint
   USE ONXParameters
+  USE Thresholding
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Basis set, coordinates, ect.
