@@ -1249,17 +1249,19 @@ MODULE InOut
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
 !
-         CALL Get(GM%Ordrd,'reordered',Tag_O=Tag_O)
-         CALL Get(GM%AtTyp,'atomtype',Tag_O=Tag_O)
-         CALL Get(GM%AtNum,'atomicnumbers',Tag_O=Tag_O)
-         CALL Get(GM%AtMss,'atomicmass',   Tag_O=Tag_O)
-         CALL Get(GM%Carts,'cartesians',Tag_O=Tag_O)
-         CALL Get(GM%Vects,'velocities',Tag_O=Tag_O)
-         CALL Get(GM%BndBox,'boundingbox',Tag_O=Tag_O)
+         CALL Get(GM%Ordrd,  'reordered',Tag_O=Tag_O)
+         CALL Get(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
+         CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
+         CALL Get(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
+         CALL Get(GM%Carts,  'cartesians',Tag_O=Tag_O)
+         CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
+         CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
+         CALL Get(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
          CALL Get(GM%PBC,Tag_O=Tag_O)
-         CALL Get(GM%BoxCarts,'LatticeCoord',Tag_O=Tag_O)
-         CALL Get(GM%BoxVects,'LatticeVeloc',Tag_O=Tag_O)
+         CALL Get(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
+         CALL Get(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
+         CALL Get(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Get_CRDS
 !---------------------------------------------------------------------
@@ -1282,17 +1284,19 @@ MODULE InOut
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
 !
-         CALL Put(GM%Ordrd,'reordered',Tag_O=Tag_O)
-         CALL Put(GM%AtNum,'atomicnumbers',Tag_O=Tag_O)
-         CALL Put(GM%AtMss,'atomicmass',   Tag_O=Tag_O)
-         CALL Put(GM%AtTyp,'atomtype',Tag_O=Tag_O)
-         CALL Put(GM%Carts,'cartesians',Tag_O=Tag_O)
-         CALL Put(GM%Vects,'velocities',Tag_O=Tag_O)
-         CALL Put(GM%BndBox,'boundingbox',Tag_O=Tag_O)
+         CALL Put(GM%Ordrd,  'reordered',Tag_O=Tag_O)
+         CALL Put(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
+         CALL Put(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
+         CALL Put(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
+         CALL Put(GM%Carts,  'cartesians',Tag_O=Tag_O)
+         CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
+         CALL Put(GM%Vects,  'velocities',Tag_O=Tag_O)
+         CALL Put(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
          CALL Put(GM%PBC,Tag_O=Tag_O)
-         CALL Put(GM%BoxCarts,'LatticeCoord',Tag_O=Tag_O)
-         CALL Put(GM%BoxVects,'LatticeVeloc',Tag_O=Tag_O)
+         CALL Put(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
+         CALL Put(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
+         CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Put_CRDS
 !---------------------------------------------------------------------

@@ -281,9 +281,11 @@ MODULE MemMan
          CALL New(A%AtNum,A%NAtms)
          CALL New(A%AtMss,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
+         CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Vects,(/3,A%NAtms/))
 #ifdef PERIODIC
          CALL New(A%BoxCarts,(/3,A%NAtms/))
+         CALL New(A%AbBoxCarts,(/3,A%NAtms/))
          CALL New(A%BoxVects,(/3,A%NAtms/))
 #endif
          A%Alloc=ALLOCATED_TRUE
@@ -625,9 +627,11 @@ MODULE MemMan
          CALL Delete(A%AtNum)
          CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
+         CALL Delete(A%AbCarts)
          CALL Delete(A%Vects)
 #ifdef PERIODIC
          CALL Delete(A%BoxCarts)
+         CALL Delete(A%AbBoxCarts)
          CALL Delete(A%BoxVects)
 #endif 
          A%NAtms=0
