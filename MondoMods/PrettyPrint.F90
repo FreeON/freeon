@@ -524,7 +524,7 @@ MODULE PrettyPrint
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU
-                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <ETotal> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,22)Mssg
               22 FORMAT('REMARK   1  ',A60)
 #ifdef PERIODIC
@@ -535,8 +535,8 @@ MODULE PrettyPrint
                  ENDIF
 #endif                 
                  DO I=1,GM%NAtms
-                    WRITE(PU,44)I,Ats(INT(GM%AtNum%D(I))),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
-                 44 FORMAT('ATOM  ',I5,1X,A4,A4,2X,I4,4X,3F8.3,2F6.2)
+                    WRITE(PU,44)I,TRIM(GM%AtNam%C(I)),TRIM(GM%AtMMTyp%C(I)),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
+                 44 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
                  ENDDO
                  WRITE(PU,55)
               55 FORMAT('END')
