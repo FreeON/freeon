@@ -78,8 +78,8 @@ CONTAINS  !
     AC2=(ACx**2+ACy**2+ACz**2)
     BC2=(BCx**2+BCy**2+BCz**2)
     ! Some testing of overlaps
+    ECP=Zero
     IF(AC2+BC2<AtomPairDistanceThreshold)THEN
-       ECP=Zero
        AC=SQRT(AC2)
        BC=SQRT(BC2)
        ! Go over basis functions for this atom-atom blok
