@@ -2570,7 +2570,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
                GMLoc%PBC%PFFMaxLay=1
             ENDIF
             IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
-               GMLoc%PBC%PFFMaxEll=16
+               GMLoc%PBC%PFFMaxEll=8
             ENDIF
          ENDIF
 !--------------------------------------------------------------------
