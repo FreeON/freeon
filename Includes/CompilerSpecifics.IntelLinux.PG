@@ -31,7 +31,7 @@ F90          = pgf90
 #
 F90_OPTIMIZE = -O1 
 #
-#F90_DEBUG    =  -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr -Ktrap=fp
+F90_DEBUG    =  -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr -Ktrap=fp
 #
 F_LIST        = -Mlist 
 #
