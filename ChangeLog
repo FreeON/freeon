@@ -1,3 +1,27 @@
+2003-08-22 14:31  ckgan
+
+	* MondoMods/PrettyPrint.F90: Changes made for consistency. Use
+	single quotes rather than double quotes for characters.
+
+2003-08-22 14:22  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Hessian.F90, InCoords.F90, Optimizer.F90:
+	A new version of the bisection based optimizer added. For the
+	diagonal hessian optimizer and GDIIS an agressiver version is set
+	back, after the 'good' forces have been made more accurate.
+
+2003-08-22 13:40  ckgan
+
+	* MondoMods/GlobalCharacters.F90: One space added to Blanks.
+
+2003-08-22 13:25  ckgan
+
+	* QCTC/JForce.F90: dJ/dR rather than dXC/dR
+
+2003-08-22 12:39  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-08-22 12:32  mchalla
 
 	* QCTC/Thresholds.F90: Fixed problem with PAC threshold, which was
