@@ -47,7 +47,7 @@ density. Finally, the current capabilities of MondoSCF for large condensed
 phases will be demonstrated.
 %
 \vskip 0.07 in
-\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, perodic systems, tree-code, Gaussian-orbital
+\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, tree-code, Gaussian-orbital
 %
 \end{abstract}
 
@@ -293,7 +293,7 @@ is a moment of the regular solid harmonic,
 $Q$ runs over the  highest possible nodes in the density-tree as determined by PAC and MAC and 
 $q$ runs on the left over near-field primitive distributions in the density.
 The QCTC near/far-field partition pushes the multipole approximation to the limit, employing a new   
-error estimates that depend on the magnitude and extent of both bra and ket \cite{CTymczak03c} 
+error estimates that depend on the magnitude and extent of both bra and ket \cite{CTymczak04c} 
 and allowing tree traversal to the resolution of primitive distributions.  
 While resolving individual primitives forgoes well developed technologies for the 
 integral evaluation of contracted functions, it accelerates the onset of linear scaling through the early
@@ -536,7 +536,7 @@ This static error is controlled by using the FMM-like error bound,
 \leq \tau \;,
 \end{equation}
 where $d_{\rm max}$ is the maximum translational distance, ${\cal C}$ is the Uns{\"o}ld weight of the system
-and $\tau$ is a threshold controling the precision. This expression is developed in Ref.~\onlinecite{CTymczak03c},
+and $\tau$ is a threshold controlling the precision. This expression is developed in Ref.~\onlinecite{CTymczak04c},
 stemming from new error bounds for the tree-code MAC that are both cheap and sensitive to the particulars
 of the expansion, including magnitude of the charges etc, captured by the  Uns{\"o}ld weight ${\cal C}$.  Because 
 ${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
@@ -595,11 +595,11 @@ K_{ab} = \int _{V_{\Box}}\, d\mathbf{r}\, \rho_{ab}^{\infty}({\bf r}) V_{xc}(\rh
 %
 However, because the distributions and density involve a double sum over 
 lattice vectors, there will be a large number of atom-atom pairs that do not overlap
-with $V_\Box$.  A similar situation is encounted in the gas phase for parallel versions 
+with $V_\Box$.  A similar situation is encountered in the gas phase for parallel versions 
 of HiCu \cite{CGan03}, where each processor has a small, local cube-tree that may 
 overlap only a few of the many possible atom-atom pairs.  
 
-The solution again comes from the ray tracing litterature, in the form of a modified 
+The solution again comes from the ray tracing literature, in the form of a modified 
 ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
 %     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
 %     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems, pp. 247-250
@@ -651,7 +651,7 @@ $N_{\rm at}=2$ and 8 are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}      & $2^f$  &  -622.39101   & -311.19551  \\
 {\sc Crystal98}     & $2^f$  &  -622.3911    & -311.1955    \\
@@ -670,7 +670,7 @@ $ ^g$Cubic
 \center{
 \begin{tabular}{lcll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}  & 2$^f$    &   -610.97536  & -305.48768   \\
                 & 8$^g$    &  -2444.3584   & -305.54480   \\
@@ -699,7 +699,7 @@ $ ^g$Cubic  \\
 \center{
 \begin{tabular}{lrll}
 \toprule
-Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
+Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}  & 2$^f$    &  -275.09097  & -137.54548  \\
                 & 8$^g$    &  -1101.7295  & -137.71618  \\
@@ -724,7 +724,7 @@ $ ^g$Cubic  \\
 \center{
 \begin{tabular}{rll}
 \toprule
- $N_{\rm at}$  & Energy (hartree) & Energy/$N_{\rm at}$\\ 
+ $N_{\rm at}$  & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
   8    &   -303.989 &  -37.9986 \\
   16   &   -608.667 &  -38.0417 \\
@@ -749,7 +749,7 @@ Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
 
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
-highly optimized by symbolic manipulation and factorization, using real arithmatic and expansions through
+highly optimized by symbolic manipulation and factorization, using real arithmetic and expansions through
 7'th order in the calculation of ${\bf J}^{\rm in}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
@@ -771,7 +771,7 @@ cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.}
 
 \section{Validation}
 
-The ability of our implimentation to reproduce true Ewald summation is shown in 
+The ability of our implementation to reproduce true Ewald summation is shown in 
 Fig.~4 for a periodic system of 64 classical water molecules.
 Note that with both the Ewald sum and the Nijboer and De Wette approach,  ordering the
 real and reciprocal space sums is critical; high order agreement is achieved only when
@@ -779,11 +779,11 @@ the summation proceeds from the smallest to the largest terms.
 
 The use of Cartesian Gaussian basis sets in many cases allows direct numerical 
 comparison of different programs, at least to within the approximations, grids, etc 
-peculiar to a code. Here, we make connection with the preemiminent Gaussian orbital 
+peculiar to a code. Here, we make connection with the preeminent Gaussian orbital 
 program for periodic calculations, {\sc Crystal98}.  Calculations have been carried 
 out largely with basis sets optimized for the 
 condensed phase\cite{CrystalLib}, which tend to have less diffuse valence orbitals.  
-Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparsion with {\sc Crystal98} for 
+Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparison with {\sc Crystal98} for 
 NaCl and MgO obtained with the {\sc MondoSCF} {\it tight} precision level 
 %\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
 %a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
@@ -796,8 +796,8 @@ The {\tt BASIS} parameter determines the auxiliary functions used to fit potenti
 in {\sc Crystal98}, an approximation not used by {\sc MondoSCF}.  
 %
 
-In Table~\ref{NaCl8511}, comparision is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
-for the sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for the clorine and BLYP functional \cite{DFT_LYP:88,BLYP:88}.
+In Table~\ref{NaCl8511}, comparison is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
+for the sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for the chlorine and BLYP functional \cite{DFT_LYP:88,BLYP:88}.
 %
 Next, in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
 is demonstrated for NaCl with the STO-3G basis set and the local density approximation
@@ -808,7 +808,7 @@ to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G\cite{CBS:8
 the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the BLYP functional.
 %
 Finally, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
-diamond, using the {\sc MondoSCF} {\it good} precsion (targeting 6 digits), the BLYP functional and the
+diamond, using the {\sc MondoSCF} {\it good} precision (targeting 6 digits), the BLYP functional and the
 6-21G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} 
 employs 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
@@ -837,7 +837,7 @@ of 6 digits in the total energy.}
 
 Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
 ${\bf J}$ and ${\bf K}_{\rm xc}$
-builds with  6-21G*/BLYP diamond at its standard density.  These timings coorespond to a {\it good} level of accuracy, 
+builds with  6-21G*/BLYP diamond at its standard density.  These timings correspond to a {\it good} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
 of calculations with all thresholds reduced by an order of magnitude.
@@ -859,7 +859,7 @@ the long range Coulomb field.
 This yields a spherically summed boundary
 condition that is easily transformed to Ewald boundary conditions.
 In order to achieve linear scaling of the local Coulomb field, a Quantum
-Chemical Tree Code (QCTC) is implimented. 
+Chemical Tree Code (QCTC) is implemented. 
 %
 For the calculation of the local exchange-correlation
 matrix, a Hierarchical Cubature (HiCu), pure Cartesian adaptive grid
@@ -877,7 +877,7 @@ In all cases we achieved excellent comparison with the  \textbf{Crystal98}
 results, including k-space summation in comparison with ever 
 increasing super-cells, to within the accuracy that \textbf{Crystal98} can obtain.
 %
-Filally, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
+Finally, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
 for the Coulomb and Exchange-correlation matrix builds for
 the dense periodic diamond system up to 512 atoms per unit cell. 
 %
@@ -933,7 +933,7 @@ real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$
 \nonumber\\
 \label{C4a0}
 \end{eqnarray}
-which we can then partition into a real and reciprical space summation 
+which we can then partition into a real and reciprocal space summation 
 \begin{eqnarray}
 {\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
@@ -1020,7 +1020,7 @@ e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
 %
 where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
 initial box dimension and angles which are independent of the summation, and 
-$\zeta (l+1)$ is the reimann zeta function.
+$\zeta (l+1)$ is the Riemann zeta function.
 In two dimension, the Fourier integrals for the calculation of \( {\cal M} \)
 tensor become a lot more complicated, therefore we have chosen to
 use the three dimensional formula's and obtain the two dimensional
@@ -1062,7 +1062,7 @@ matrix elements to 8-10 digits of accuracy with this technique.
 \section{Coordinates of Validation Suite}\label{FracCoords}
 
 \begin{table}[h]
-\caption{Fractional coordinates for the triclinic 2 atom unit cell of NaCl, cooresponding to the 
+\caption{Fractional coordinates for the Triclinic 2 atom unit cell of NaCl, corresponding to the 
          calculations reported in Tables~\ref{NaCl8511} and \ref{NaClGammaPt}.  Length of the unit cell is 
          $a=b=c=3.97394011$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
 \center{
@@ -1079,7 +1079,7 @@ Cl &    0.500 &  0.500 &  0.500  \\
 %
 %
 \begin{table}[h]
-\caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
+\caption{Fractional coordinates for the Triclinic 2 atom unit cell of MgO, corresponding to the 
          calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
          $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
 \center{
@@ -1096,7 +1096,7 @@ Mg &    0.500 &   0.500 &  0.500  \\
 %
 %
 \begin{table}[h]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
+\caption{Fractional coordinates for the 8 atom unit cell of Diamond, corresponding to the supercell calculations
          reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
 \center{
 \begin{tabular}{cccc}
@@ -1121,7 +1121,7 @@ C &     0.375 &    0.875 &    0.875  \\
 \center{
 \begin{tabular}{ccccc}
 \toprule
-Level  & Matrix & Penatration & QCTC/ONX & Distrabution \\ 
+Level  & Matrix & Penetration & QCTC/ONX & Distribution \\ 
 \colrule
 loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
 good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
