@@ -1,0 +1,37 @@
+<BeginTitle>
+STO-3G Hartree-Fock
+Graphite (2 atoms)
+loose:  <SCF> = -74.27655454
+good:   <SCF> = -74.27641914
+tight:  <SCF> = -74.27642777
+vtight: <SCF> = -74.27642883
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-3G)
+ModelChem=(HF) 
+Accuracy =(good)
+DebugAll =(MinDebug,CheckSums)
+Geometry=(InAnstroms,NoOrder) 
+Periodic=(FracCoord)
+PBC=(T,T,F)
+DIISDamp=0.5
+<EndOptions>
+
+
+<BeginPeriodic>
+   2.4200000000    2.4200000000    1.0000000000   90.00000   90.00000  120.00000  
+<EndPeriodic>
+
+<BeginGeometry>   
+C    0.3333333333    0.1666666666    0.00000000000
+C    0.6666666666    0.8400000000    0.00000000000
+<EndGeometry>
+
+
+
+
