@@ -47,7 +47,7 @@ MODULE ParsingKeys
    CHARACTER(LEN=4),  PARAMETER :: GUESS_CORE     ='Core'
    CHARACTER(LEN=8),  PARAMETER :: GUESS_SUPER    ='SuperPos'
    CHARACTER(LEN=7),  PARAMETER :: GUESS_RESTART  ='Restart'
-   CHARACTER(LEN=7),  PARAMETER :: RESTART_INFO   ='InfoFile'
+   CHARACTER(LEN=8),  PARAMETER :: RESTART_INFO   ='InfoFile'
 !  Guess keys
    INTEGER, PARAMETER :: GUESS_EQ_CORE=14334 ! Density matrix from core Hamiltonian
    INTEGER, PARAMETER :: GUESS_EQ_SUPR=40823 ! Density matrix from superposition of 
@@ -106,8 +106,6 @@ MODULE ParsingKeys
 !  Do no visualization
    INTEGER, PARAMETER           :: VIS_DX_NO_VIS    = 1000001 
    CHARACTER(LEN=6),  PARAMETER :: VIS_RHOPOT       ='RhoPot'
-   CHARACTER(LEN=7),  PARAMETER :: VIS_ONE_BASE     ='OneBase'
-   CHARACTER(LEN=8),  PARAMETER :: VIS_EACH_BASE    ='EachBase'
 !  Create density and potential on a grid for use with OpenDX
    INTEGER, PARAMETER           :: VIS_DX_RHOPOT    = 4234234 
 #ifdef PERIODIC

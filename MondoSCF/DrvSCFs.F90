@@ -32,6 +32,7 @@ MODULE DrvSCFs
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
+              CALL VisDX(Ctrl)
               CALL CleanScratch(Ctrl,'CleanOnConverge')
               Ctrl%Previous=Ctrl%Current
               RETURN
@@ -81,7 +82,7 @@ MODULE DrvSCFs
          ENDIF
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
-!         CALL CleanScratch(Ctrl,'CleanLastGeom')
+         CALL CleanScratch(Ctrl,'CleanLastGeom')
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
          CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &
@@ -127,6 +128,8 @@ MODULE DrvSCFs
       CALL Invoke('FBuild',CtrlVect,MPIRun_O=.TRUE.)
       IF(DoDIIS) &
       CALL Invoke('DIIS',CtrlVect,MPIRun_O=.TRUE.)
+      IF(CtrlVect(2)=='BasisSetSwitch') &  
+         CALL CleanScratch(Ctrl,'CleanLastBase')
     END SUBROUTINE FockBuild
 !==========================================================================
 !   Solve the SCF equations 
@@ -161,6 +164,16 @@ MODULE DrvSCFs
       ENDIF
       CALL Invoke('MakeT',CtrlVect)
     END SUBROUTINE OneEMats
+
+    SUBROUTINE VisDX(Ctrl)
+      TYPE(SCFControls)             :: Ctrl
+      IF(Ctrl%Vis/=VIS_DX_RHOPOT)RETURN
+      Ctrl%Current(1)=Ctrl%Current(1)+1
+      CtrlVect=SetCtrlVect(Ctrl,'Visualization')
+      Ctrl%Current(1)=Ctrl%Current(1)-1
+      CALL Invoke('MakeRho',CtrlVect)
+      CALL Invoke('PotMapRho',CtrlVect)
+    END SUBROUTINE VisDX
 !========================================================================================
 !
 !========================================================================================
@@ -251,7 +264,26 @@ MODULE DrvSCFs
          RemoveFile=TRIM(ScrName)//'*.T' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
       ELSEIF(Action=='CleanLastGeom')THEN
-         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*' 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.S' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.F' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.D' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.OrthoD' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.Rho' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+      ELSEIF(Action=='CleanLastBase')THEN
+         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.S' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.F' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.D' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.OrthoD' 
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvGeom)//'*.Rho' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
@@ -269,7 +301,7 @@ MODULE DrvSCFs
 !-----------------------------------------------------------------------
          ConvergedQ=.FALSE.
          IF(CCyc==0)RETURN
-!-------------------------------------
+!-----------------------------------------------------------------------
 !        Gather convergence parameters
          CALL OpenHDF(Ctrl%Info)
          CALL Get(EtotA,'Etot',StatsToChar(Ctrl%Previous))
@@ -296,7 +328,7 @@ MODULE DrvSCFs
          ETotQ=dETot/ABS(ETotB)
          DMaxQ=dDMax/ABS(DMaxB+1.D-50)
          DIISQ=dDIIS/ABS(DIISB+1.D-50)
-!------------------------------
+!----------------------------------------------------------------------------
 !        Check for convergence
          ETest=ETol(Ctrl%AccL(CBas))
          DTest=DTol(Ctrl%AccL(CBas))
@@ -307,7 +339,7 @@ MODULE DrvSCFs
             ConvergedQ=.TRUE.
          ENDIF
 !        Accept convergence from wrong side if thresholds are tightend.
-         IF(dDMax<dTest*1.D-1.AND.ETotQ<ETest*1.D-2)THEN
+         IF(dDMax<dTest*5.D-1.AND.ETotQ<ETest*1.D-1)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF

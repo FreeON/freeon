@@ -87,11 +87,6 @@ PROGRAM MondoSCF
         DO IGeo=Begin(3)+1,Ctrl%NGeom
            Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
            CALL OneSCF(Ctrl)
-
-!           Ctrl%Current(1)=Ctrl%Current(1)+1
-!           CtrlVect=SetCtrlVect(Ctrl,'Visualization')
-!           CALL Invoke('MakeRho',CtrlVect)
-!           CALL Invoke('PotMapRho',CtrlVect)
         ENDDO
      ENDIF
   END SELECT
