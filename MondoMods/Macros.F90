@@ -92,13 +92,13 @@ MODULE Macros
          InfFile=TRIM(ScrName)//TRIM(InfF)
 !-----------------------------------------------------------------------------
 !        Initialize QM/MM logic
-         CALL InitMMech()
 !-----------------------------------------------------------------------------
 !        Open HDF file and mark for failure
-         CALL OpenHDF(TRIM(InfFile))
-         CALL MarkFailure(Prog)
 !-----------------------------------------------------------------------------
 !        Load global characters
+         CALL OpenHDF(InfFile)
+         CALL InitMMech()
+         CALL MarkFailure(Prog)
          CALL Get(logFile,'logfile')
          CALL Get(OutFile,'outputfile')
          CALL Get(InpFile,'inputfile')
@@ -175,9 +175,6 @@ MODULE Macros
 !-------------------------------------------------------------------------------
       SUBROUTINE ShutDown(Prog)
          CHARACTER(LEN=*),INTENT(IN) :: Prog
-#ifdef MMech
-!        LOGICAL :: HasQM
-#endif
 !-------------------------------------------------------------------------------
 #ifdef MMech
          IF(HasQM()) THEN
@@ -200,7 +197,6 @@ MODULE Macros
          IF(PrintFlags%Key==DEBUG_MAXIMUM) &
             CALL PPrint(MemStats,Prog)
          CALL MarkSuccess()
-         CALL CloseHDF()
 !        Print time stamp
 #ifdef PARALLEL
          IF(InParallel) &
@@ -211,6 +207,7 @@ MODULE Macros
          IF(PrintFlags%Key>DEBUG_MEDIUM)  &
             CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
 #endif 
+         CALL CloseHDF()
          STOP 
       END SUBROUTINE ShutDown     
 
