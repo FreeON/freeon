@@ -1220,16 +1220,18 @@ WRITE(*,*)' C = ',C
 !-------------------------------------------------------------------------
 ! Polynominal Projection Algorithmn for MD
 !-------------------------------------------------------------------------
-   SUBROUTINE DMPProj(iGEO,Order,P0,Tmp1,Tmp2)
+   SUBROUTINE DMPProj(iGEO,Order,P,P0,Tmp1,Tmp2)
      INTEGER                       :: iGEO,Order
 #ifdef PARALLEL
-     TYPE(DBCSR)                   :: P0,Tmp1,Tmp2
+     TYPE(DBCSR)                   :: P,P0,Tmp1,Tmp2
 #else
-     TYPE(BCSR)                    :: P0,Tmp1,Tmp2
+     TYPE(BCSR)                    :: P,P0,Tmp1,Tmp2
 #endif          
      CHARACTER(LEN=DEFAULT_CHR_LEN):: FileName
 !
-     IF(Order==1) THEN
+     IF(   Order== 0) THEN 
+        CALL SetEq(P,P0)
+     ELSEIF(Order==1) THEN
         CALL SetEq(Tmp1,P0)
         CALL Multiply(Tmp1, 2.0D0)
 !
@@ -1237,7 +1239,7 @@ WRITE(*,*)' C = ',C
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-1.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
+        CALL Add(Tmp1,Tmp2,P)
      ELSEIF(Order==2) THEN
         CALL SetEq(Tmp1,P0)
         CALL Multiply(Tmp1, 3.0D0)
@@ -1246,14 +1248,14 @@ WRITE(*,*)' C = ',C
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-3.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2, 1.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
+        CALL Add(Tmp1,Tmp2,P)
      ELSEIF(Order==3) THEN
         CALL SetEq(Tmp1,P0)
         CALL Multiply(Tmp1, 4.0D0)
@@ -1262,21 +1264,21 @@ WRITE(*,*)' C = ',C
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-6.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2, 4.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-1.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
+        CALL Add(Tmp1,Tmp2,P)
      ELSEIF(Order==4) THEN
         CALL SetEq(Tmp1,P0)
         CALL Multiply(Tmp1, 5.0D0)
@@ -1285,29 +1287,29 @@ WRITE(*,*)' C = ',C
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-10.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-3))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2, 10.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-4))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2,-5.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
 !
         FileName = TRIM(SCRName)//'_G#'//TRIM(IntToChar(iGEO-5))  &
                                 //'_C#'//TRIM(IntToChar(MyClone))//'.Dsave'
         CALL Get(Tmp2,FileName)
         CALL Multiply(Tmp2, 1.0D0)
-        CALL Add(Tmp1,Tmp2,P0)
-        CALL SetEq(Tmp1,P0)
+        CALL Add(Tmp1,Tmp2,P)
+        CALL SetEq(Tmp1,P)
      ENDIF
    END SUBROUTINE DMPProj
 !-------------------------------------------------------------------------------
