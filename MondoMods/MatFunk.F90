@@ -32,19 +32,35 @@ MODULE MatFunk
       CALL Delete(BLKMAT2) 
    END SUBROUTINE UnSetDSYEVWork
 !
-   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA)
+   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PrintCond_O)
       INTEGER,                    INTENT(IN)    :: N
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
+      LOGICAL, OPTIONAL                         :: PrintCond_O
+      LOGICAL                                   :: PrintCond
       INTEGER                                   :: I,INFO      
       REAL(DOUBLE), PARAMETER                   :: EigenThreshold=1.D-8
+      REAL(DOUBLE)                              :: CondA
       REAL(DOUBLE), EXTERNAL                    :: Funk
+      CHARACTER(LEN=DEFAULT_CHR_LEN)            :: String
 !----------------------------------------------------------------------------
+      IF(PRESENT(PrintCond_O))THEN
+         PrintCond=PrintCond_O
+      ELSE
+         PrintCond=.FALSE.
+      ENDIF
+!
       BLKVECT%D(1:N,1:N)=A(1:N,1:N)
-
+!
       CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
       IF(INFO/=SUCCEED) &
          CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))  
+!
+      IF(PrintCond)THEN
+         CondA=BLKVALS%D(N)/BLKVALS%D(1)
+         String="Cond(A) = "//TRIM(DblToShrtChar(CondA))
+         WRITE(*,*)TRIM(String)
+      ENDIF
 !
 !     Apply the function to eigenvalues of the matrix, projecting out "zeros"
 !
