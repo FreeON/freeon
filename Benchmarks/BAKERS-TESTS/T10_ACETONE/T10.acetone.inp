@@ -1,0 +1,39 @@
+<BeginTitle>
+acetone     
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+
+Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect)
+
+MPIInvoke="prun"
+MPIProcFlag="-n"
+MPIProcessors=4
+MPISpatialProc=4
+
+DebugAll =(MaxGeOp)
+DMPOrder=1
+Guess=SuperPos
+SCFMethod=(TC2)
+SCFConvergence=(DIIS)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(VeryTight)           
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+C   0.000000000   0.000000000   -0.603434329
+O   0.000000000   0.000000000   -1.834634416
+C   0.000000000  -1.323673822    0.156333936
+C   0.000000000   1.323673822    0.156333936
+H   0.000000000  -2.189491617   -0.531508890
+H   0.896215877  -1.412822337    0.797104664
+H  -0.896215877  -1.412822337    0.797104664
+H  -0.896215877   1.412822337    0.797104664
+H   0.000000000   2.189491617   -0.531508890
+H   0.896215877   1.412822337    0.797104664
+<EndGeometry>
+

@@ -1,0 +1,32 @@
+<BeginTitle>
+   NH3_neb 
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+
+Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect)
+
+MPIInvoke="prun"
+MPIProcFlag="-n"
+MPIProcessors=4
+MPISpatialProc=4
+
+DebugAll =(MaxGeOp)
+DMPOrder=1
+Guess=SuperPos
+SCFMethod=(TC2)
+SCFConvergence=(DIIS)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(VeryTight)           
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+   N   0.000000000  0.000000000  0.252365857
+   H  -0.476150513  0.824716866 -0.084121957
+   H  -0.476150513 -0.824716866 -0.084121957
+   H   0.952301025  0.000000000 -0.084121957
+<EndGeometry>

@@ -1,0 +1,1377 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 10 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak,                      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Eric Schwegler and Anders Niklasson                  
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for IntelLinux.NAG, executing on zinc44.lanl.gov
+ a i686 machine running Linux 2.4.21-15.0.3.ELsmp
+
+ Current HDF :: /scratch/nemeth/T19_3905.hdf
+<<Starting MondoSCF 10/18/04 @ 22:30:20>>
+ SCFStatus : [0,1,1]    :: <SCF> = -547.44739507, dD = 0.22D+01
+ SCFStatus : [1,1,1]    :: <SCF> = -572.59712851, dD = 0.72D-01, DIIS = 0.16D-01
+ SCFStatus : [2,1,1]    :: <SCF> = -572.87344395, dD = 0.30D+00, DIIS = 0.14D-01
+ SCFStatus : [3,1,1]    :: <SCF> = -573.56993837, dD = 0.77D-01, DIIS = 0.28D-02
+ SCFStatus : [4,1,1]    :: <SCF> = -573.59428438, dD = 0.19D-01, DIIS = 0.70D-03
+ SCFStatus : [5,1,1]    :: <SCF> = -573.59575435, dD = 0.52D-02, DIIS = 0.17D-03
+ SCFStatus : [6,1,1]    :: <SCF> = -573.59586370, dD = 0.20D-02, DIIS = 0.69D-04
+ SCFStatus : [7,1,1]    :: <SCF> = -573.59588833, dD = 0.11D-02, DIIS = 0.23D-04
+ SCFStatus : [8,1,1]    :: <SCF> = -573.59589361, dD = 0.43D-03, DIIS = 0.11D-04
+ SCFStatus : [9,1,1]    :: <SCF> = -573.59589467, dD = 0.30D-03, DIIS = 0.51D-05
+ SCFStatus : [10,1,1]   :: <SCF> = -573.59589500, dD = 0.11D-03, DIIS = 0.17D-05
+ SCFStatus : [11,1,1]   :: <SCF> = -573.59589503, dD = 0.29D-04, DIIS = 0.63D-06
+ SCFStatus : [12,1,1]   :: <SCF> = -573.59589504, dD = 0.80D-05, DIIS = 0.16D-06
+ Normal SCF convergence.
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+ Internals at step #1
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.391120    F    0.000000    T
+      2  STRE          2   14    0    0      1.080721    F    0.000000    T
+      3  STRE          3   12    0    0      1.368356    F    0.000000    T
+      4  STRE          3    4    0    0      1.404160    F    0.000000    T
+      5  STRE          1    2    0    0      1.388794    F    0.000000    T
+      6  STRE          1    6    0    0      1.388765    F    0.000000    T
+      7  STRE          1   13    0    0      1.080317    F    0.000000    T
+      8  STRE          6   15    0    0      1.081586    F    0.000000    T
+      9  STRE          4    7    0    0      1.399590    F    0.000000    T
+     10  STRE          4    5    0    0      1.442776    F    0.000000    T
+     11  STRE          7    8    0    0      1.388765    F    0.000000    T
+     12  STRE          7   16    0    0      1.081586    F    0.000000    T
+     13  STRE          8    9    0    0      1.388794    F    0.000000    T
+     14  STRE          8   17    0    0      1.080317    F    0.000000    T
+     15  STRE          5    6    0    0      1.399590    F    0.000000    T
+     16  STRE          5   10    0    0      1.404160    F    0.000000    T
+     17  STRE          9   10    0    0      1.391120    F    0.000000    T
+     18  STRE          9   18    0    0      1.080721    F    0.000000    T
+     19  STRE         10   11    0    0      1.368356    F    0.000000    T
+     20  BEND          2    1    6    0    120.532995    F    0.000000    T
+     21  BEND          2    1   13    0    119.721803    F    0.000000    T
+     22  BEND          6    1   13    0    119.745202    F    0.000000    T
+     23  BEND          3    2   14    0    119.936537    F    0.000000    T
+     24  BEND          1    2    3    0    120.767982    F    0.000000    T
+     25  BEND          1    2   14    0    119.295481    F    0.000000    T
+     26  BEND          2    3   12    0    118.449283    F    0.000000    T
+     27  BEND          2    3    4    0    120.001578    F    0.000000    T
+     28  BEND          4    3   12    0    121.549140    F    0.000000    T
+     29  BEND          3    4    7    0    121.817069    F    0.000000    T
+     30  BEND          3    4    5    0    119.238085    F    0.000000    T
+     31  BEND          5    4    7    0    118.944846    F    0.000000    T
+     32  BEND          4    5    6    0    118.944846    F    0.000000    T
+     33  BEND          4    5   10    0    119.238085    F    0.000000    T
+     34  BEND          6    5   10    0    121.817069    F    0.000000    T
+     35  BEND          1    6   15    0    118.235797    F    0.000000    T
+     36  BEND          1    6    5    0    120.514514    F    0.000000    T
+     37  BEND          5    6   15    0    121.249689    F    0.000000    T
+     38  BEND          4    7    8    0    120.514514    F    0.000000    T
+     39  BEND          4    7   16    0    121.249689    F    0.000000    T
+     40  BEND          8    7   16    0    118.235797    F    0.000000    T
+     41  BEND          7    8    9    0    120.532995    F    0.000000    T
+     42  BEND          7    8   17    0    119.745202    F    0.000000    T
+     43  BEND          9    8   17    0    119.721803    F    0.000000    T
+     44  BEND          8    9   10    0    120.767982    F    0.000000    T
+     45  BEND          8    9   18    0    119.295481    F    0.000000    T
+     46  BEND         10    9   18    0    119.936537    F    0.000000    T
+     47  BEND          5   10    9    0    120.001578    F    0.000000    T
+     48  BEND          5   10   11    0    121.549140    F    0.000000    T
+     49  BEND          9   10   11    0    118.449283    F    0.000000    T
+     50  TORS          1    2    3    4      0.000000    F    0.000000    T
+     51  TORS          2    3    4    5      0.000000    F    0.000000    T
+     52  TORS          3    2    1    6      0.000001    F    0.000000    T
+     53  TORS          2    1    6    5      0.000001    F    0.000000    T
+     54  TORS          5    4    7    8      0.000000    F    0.000000    T
+     55  TORS          6    5    4    7    179.999998    F    0.000000    T
+     56  TORS          4    7    8    9      0.000001    F    0.000000    T
+     57  TORS          7    8    9   10      0.000001    F    0.000000    T
+     58  TORS          1    6    5    4      0.000000    F    0.000000    T
+     59  TORS          4    5   10    9      0.000000    F    0.000000    T
+     60  TORS          5   10    9    8      0.000000    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000000    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000000    F    0.000000    T
+     63  OUTP          6    1    2   13     -0.000000    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000000    F    0.000000    T
+     65  OUTP          3    2    1   14      0.000000    F    0.000000    T
+     66  OUTP          1    2    3   14     -0.000000    F    0.000000    T
+     67  OUTP         12    3    2    4     -0.000000    F    0.000000    T
+     68  OUTP          4    3    2   12      0.000000    F    0.000000    T
+     69  OUTP          2    3    4   12     -0.000000    F    0.000000    T
+     70  OUTP          7    4    3    5     -0.000000    F    0.000000    T
+     71  OUTP          5    4    3    7      0.000000    F    0.000000    T
+     72  OUTP          3    4    5    7     -0.000000    F    0.000000    T
+     73  OUTP          6    5    4   10     -0.000000    F    0.000000    T
+     74  OUTP          4    5    6   10     -0.000000    F    0.000000    T
+     75  OUTP         10    5    4    6     -0.000000    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000000    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000000    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000000    F    0.000000    T
+     79  OUTP         16    7    4    8     -0.000000    F    0.000000    T
+     80  OUTP          4    7    8   16     -0.000000    F    0.000000    T
+     81  OUTP          8    7    4   16      0.000000    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000000    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000000    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000000    F    0.000000    T
+     85  OUTP         18    9    8   10     -0.000000    F    0.000000    T
+     86  OUTP         10    9    8   18     -0.000000    F    0.000000    T
+     87  OUTP          8    9   10   18     -0.000000    F    0.000000    T
+     88  OUTP         11   10    5    9      0.000000    F    0.000000    T
+     89  OUTP          5   10    9   11      0.000000    F    0.000000    T
+     90  OUTP          9   10    5   11     -0.000000    F    0.000000    T
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Step=   1   Max_DX=     0.078376  X_RMSD=     0.027511
+Step=   2   Max_DX=     0.002893  X_RMSD=     0.000597
+Step=   3   Max_DX=     0.000081  X_RMSD=     0.000017
+Step=   4   Max_DX=     0.000004  X_RMSD=     0.000001
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      1 Total Energy =        -573.59589504
+                   Max intl Grad =     0.026994 between atoms    1   6   0   0
+     Max Unconstrained Cart Grad =     0.053129      on atom    10
+                   RMS intl Grad =     0.008827
+                  Max STRE Displ =     0.029523 between atoms    1   6
+                  Max BEND Displ =     3.706112 between atoms    5  10  11
+                  Max OUTP Displ =     0.000000 between atoms    5   4   3   7
+                  Max TORS Displ =     0.000002 between atoms    4   5  10   9
+                       RMS Displ =     0.023000
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.24D-01, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.36D-01, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.26D-08, %Non0=0.10D+03
+ P2Use : AO-DMX 4       ::  dN=-.14D-13, %Non0=0.10D+03
+ SCFStatus : [0,1,2]    :: <SCF> = -573.60070364, dD = 0.17D-01
+ SCFStatus : [1,1,2]    :: <SCF> = -573.60422509, dD = 0.79D-03, DIIS = 0.31D-03
+ SCFStatus : [2,1,2]    :: <SCF> = -573.60431681, dD = 0.14D-01, DIIS = 0.29D-03
+ SCFStatus : [3,1,2]    :: <SCF> = -573.60512439, dD = 0.98D-03, DIIS = 0.41D-04
+ SCFStatus : [4,1,2]    :: <SCF> = -573.60513354, dD = 0.31D-03, DIIS = 0.10D-04
+ SCFStatus : [5,1,2]    :: <SCF> = -573.60513422, dD = 0.59D-04, DIIS = 0.20D-05
+ SCFStatus : [6,1,2]    :: <SCF> = -573.60513424, dD = 0.30D-04, DIIS = 0.78D-06
+ SCFStatus : [7,1,2]    :: <SCF> = -573.60513424, dD = 0.80D-05, DIIS = 0.17D-06
+ Normal SCF convergence.
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+ Internals at step #2
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.367641    F    0.000000    T
+      2  STRE          2   14    0    0      1.082203    F    0.000000    T
+      3  STRE          3   12    0    0      1.351857    F    0.000000    T
+      4  STRE          3    4    0    0      1.430024    F    0.000000    T
+      5  STRE          1    2    0    0      1.409569    F    0.000000    T
+      6  STRE          1    6    0    0      1.359241    F    0.000000    T
+      7  STRE          1   13    0    0      1.082452    F    0.000000    T
+      8  STRE          6   15    0    0      1.082067    F    0.000000    T
+      9  STRE          4    7    0    0      1.420749    F    0.000000    T
+     10  STRE          4    5    0    0      1.423944    F    0.000000    T
+     11  STRE          7    8    0    0      1.359246    F    0.000000    T
+     12  STRE          7   16    0    0      1.082067    F    0.000000    T
+     13  STRE          8    9    0    0      1.409568    F    0.000000    T
+     14  STRE          8   17    0    0      1.082451    F    0.000000    T
+     15  STRE          5    6    0    0      1.420751    F    0.000000    T
+     16  STRE          5   10    0    0      1.430020    F    0.000000    T
+     17  STRE          9   10    0    0      1.367644    F    0.000000    T
+     18  STRE          9   18    0    0      1.082205    F    0.000000    T
+     19  STRE         10   11    0    0      1.351857    F    0.000000    T
+     20  BEND          2    1    6    0    120.751957    F    0.000000    T
+     21  BEND          2    1   13    0    119.500333    F    0.000000    T
+     22  BEND          6    1   13    0    119.747710    F    0.000000    T
+     23  BEND          3    2   14    0    119.553275    F    0.000000    T
+     24  BEND          1    2    3    0    119.655372    F    0.000000    T
+     25  BEND          1    2   14    0    120.791352    F    0.000000    T
+     26  BEND          2    3   12    0    120.081927    F    0.000000    T
+     27  BEND          2    3    4    0    122.073158    F    0.000000    T
+     28  BEND          4    3   12    0    117.844915    F    0.000000    T
+     29  BEND          3    4    7    0    123.117002    F    0.000000    T
+     30  BEND          3    4    5    0    116.960684    F    0.000000    T
+     31  BEND          5    4    7    0    119.922314    F    0.000000    T
+     32  BEND          4    5    6    0    119.922697    F    0.000000    T
+     33  BEND          4    5   10    0    116.961139    F    0.000000    T
+     34  BEND          6    5   10    0    123.116163    F    0.000000    T
+     35  BEND          1    6   15    0    119.864527    F    0.000000    T
+     36  BEND          1    6    5    0    120.636131    F    0.000000    T
+     37  BEND          5    6   15    0    119.499342    F    0.000000    T
+     38  BEND          4    7    8    0    120.636334    F    0.000000    T
+     39  BEND          4    7   16    0    119.499266    F    0.000000    T
+     40  BEND          8    7   16    0    119.864400    F    0.000000    T
+     41  BEND          7    8    9    0    120.751892    F    0.000000    T
+     42  BEND          7    8   17    0    119.747657    F    0.000000    T
+     43  BEND          9    8   17    0    119.500451    F    0.000000    T
+     44  BEND          8    9   10    0    119.655239    F    0.000000    T
+     45  BEND          8    9   18    0    120.791401    F    0.000000    T
+     46  BEND         10    9   18    0    119.553360    F    0.000000    T
+     47  BEND          5   10    9    0    122.073082    F    0.000000    T
+     48  BEND          5   10   11    0    117.843028    F    0.000000    T
+     49  BEND          9   10   11    0    120.083890    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000000    F    0.000000    T
+     51  TORS          2    3    4    5      0.000001    F    0.000000    T
+     52  TORS          3    2    1    6     -0.000001    F    0.000000    T
+     53  TORS          2    1    6    5      0.000001    F    0.000000    T
+     54  TORS          5    4    7    8     -0.000000    F    0.000000    T
+     55  TORS          3    4    5   10   -180.000000    F    0.000000    T
+     56  TORS          4    7    8    9      0.000001    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000001    F    0.000000    T
+     58  TORS          1    6    5    4     -0.000000    F    0.000000    T
+     59  TORS          4    5   10    9      0.000002    F    0.000000    T
+     60  TORS          5   10    9    8     -0.000000    F    0.000000    T
+     61  OUTP         13    1    2    6      0.000000    F    0.000000    T
+     62  OUTP          2    1    6   13      0.000000    F    0.000000    T
+     63  OUTP          6    1    2   13     -0.000000    F    0.000000    T
+     64  OUTP         14    2    1    3      0.000000    F    0.000000    T
+     65  OUTP          1    2    3   14      0.000000    F    0.000000    T
+     66  OUTP          3    2    1   14     -0.000000    F    0.000000    T
+     67  OUTP         12    3    2    4      0.000000    F    0.000000    T
+     68  OUTP          4    3    2   12     -0.000000    F    0.000000    T
+     69  OUTP          2    3    4   12      0.000000    F    0.000000    T
+     70  OUTP          7    4    3    5      0.000000    F    0.000000    T
+     71  OUTP          3    4    5    7      0.000000    F    0.000000    T
+     72  OUTP          5    4    3    7     -0.000000    F    0.000000    T
+     73  OUTP          6    5    4   10     -0.000000    F    0.000000    T
+     74  OUTP         10    5    4    6      0.000000    F    0.000000    T
+     75  OUTP          4    5    6   10      0.000000    F    0.000000    T
+     76  OUTP         15    6    1    5     -0.000000    F    0.000000    T
+     77  OUTP          5    6    1   15      0.000000    F    0.000000    T
+     78  OUTP          1    6    5   15     -0.000000    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000000    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000000    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000000    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000000    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000000    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000000    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000000    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000000    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000000    F    0.000000    T
+     88  OUTP         11   10    5    9     -0.000000    F    0.000000    T
+     89  OUTP          5   10    9   11     -0.000000    F    0.000000    T
+     90  OUTP          9   10    5   11      0.000000    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Step=   1   Max_DX=     0.058638  X_RMSD=     0.013790
+Step=   2   Max_DX=     0.000624  X_RMSD=     0.000138
+Step=   3   Max_DX=     0.000016  X_RMSD=     0.000003
+Step=   4   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      2 Total Energy =        -573.60513424
+                   Max intl Grad =     0.012853 between atoms    4   5   0   0
+     Max Unconstrained Cart Grad =     0.023832      on atom     5
+                   RMS intl Grad =     0.002775
+                  Max STRE Displ =     0.017813 between atoms    4   5
+                  Max BEND Displ =     1.436612 between atoms    1   6  15
+                  Max OUTP Displ =     0.000001 between atoms    4   5   6  10
+                  Max TORS Displ =     0.000011 between atoms    4   7   8   9
+                       RMS Displ =     0.009140
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.55D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.13D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.71D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,3]    :: <SCF> = -573.60572036, dD = 0.56D-02
+ SCFStatus : [1,1,3]    :: <SCF> = -573.60610724, dD = 0.25D-03, DIIS = 0.90D-04
+ SCFStatus : [2,1,3]    :: <SCF> = -573.60611640, dD = 0.43D-02, DIIS = 0.85D-04
+ SCFStatus : [3,1,3]    :: <SCF> = -573.60619606, dD = 0.34D-03, DIIS = 0.11D-04
+ SCFStatus : [4,1,3]    :: <SCF> = -573.60619702, dD = 0.17D-03, DIIS = 0.42D-05
+ SCFStatus : [5,1,3]    :: <SCF> = -573.60619716, dD = 0.11D-04, DIIS = 0.51D-06
+ SCFStatus : [6,1,3]    :: <SCF> = -573.60619716, dD = 0.40D-05, DIIS = 0.14D-06
+ Normal SCF convergence.
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+ Internals at step #3
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.360922    F    0.000000    T
+      2  STRE          2   14    0    0      1.081755    F    0.000000    T
+      3  STRE          3   12    0    0      1.355984    F    0.000000    T
+      4  STRE          3    4    0    0      1.441528    F    0.000000    T
+      5  STRE          1    2    0    0      1.422051    F    0.000000    T
+      6  STRE          1    6    0    0      1.356629    F    0.000000    T
+      7  STRE          1   13    0    0      1.082860    F    0.000000    T
+      8  STRE          6   15    0    0      1.082016    F    0.000000    T
+      9  STRE          4    7    0    0      1.424470    F    0.000000    T
+     10  STRE          4    5    0    0      1.406131    F    0.000000    T
+     11  STRE          7    8    0    0      1.356631    F    0.000000    T
+     12  STRE          7   16    0    0      1.082016    F    0.000000    T
+     13  STRE          8    9    0    0      1.422049    F    0.000000    T
+     14  STRE          8   17    0    0      1.082860    F    0.000000    T
+     15  STRE          5    6    0    0      1.424471    F    0.000000    T
+     16  STRE          5   10    0    0      1.441532    F    0.000000    T
+     17  STRE          9   10    0    0      1.360917    F    0.000000    T
+     18  STRE          9   18    0    0      1.081756    F    0.000000    T
+     19  STRE         10   11    0    0      1.355984    F    0.000000    T
+     20  BEND          2    1    6    0    120.779388    F    0.000000    T
+     21  BEND          2    1   13    0    119.374828    F    0.000000    T
+     22  BEND          6    1   13    0    119.845784    F    0.000000    T
+     23  BEND          3    2   14    0    119.570175    F    0.000000    T
+     24  BEND          1    2    3    0    119.685079    F    0.000000    T
+     25  BEND          1    2   14    0    120.744746    F    0.000000    T
+     26  BEND          2    3   12    0    120.533597    F    0.000000    T
+     27  BEND          2    3    4    0    121.310313    F    0.000000    T
+     28  BEND          4    3   12    0    118.156090    F    0.000000    T
+     29  BEND          3    4    7    0    122.232039    F    0.000000    T
+     30  BEND          3    4    5    0    117.831013    F    0.000000    T
+     31  BEND          5    4    7    0    119.936948    F    0.000000    T
+     32  BEND          4    5    6    0    119.937279    F    0.000000    T
+     33  BEND          4    5   10    0    117.830846    F    0.000000    T
+     34  BEND          6    5   10    0    122.231875    F    0.000000    T
+     35  BEND          1    6   15    0    121.301139    F    0.000000    T
+     36  BEND          1    6    5    0    120.456928    F    0.000000    T
+     37  BEND          5    6   15    0    118.241933    F    0.000000    T
+     38  BEND          4    7    8    0    120.457202    F    0.000000    T
+     39  BEND          4    7   16    0    118.242105    F    0.000000    T
+     40  BEND          8    7   16    0    121.300693    F    0.000000    T
+     41  BEND          7    8    9    0    120.779483    F    0.000000    T
+     42  BEND          7    8   17    0    119.845569    F    0.000000    T
+     43  BEND          9    8   17    0    119.374948    F    0.000000    T
+     44  BEND          8    9   10    0    119.684707    F    0.000000    T
+     45  BEND          8    9   18    0    120.744848    F    0.000000    T
+     46  BEND         10    9   18    0    119.570445    F    0.000000    T
+     47  BEND          5   10    9    0    121.310815    F    0.000000    T
+     48  BEND          5   10   11    0    118.157454    F    0.000000    T
+     49  BEND          9   10   11    0    120.531731    F    0.000000    T
+     50  TORS          1    2    3    4      0.000000    F    0.000000    T
+     51  TORS          2    3    4    5     -0.000003    F    0.000000    T
+     52  TORS          3    2    1    6      0.000003    F    0.000000    T
+     53  TORS          2    1    6    5     -0.000005    F    0.000000    T
+     54  TORS          5    4    7    8      0.000011    F    0.000000    T
+     55  TORS          3    4    5   10    179.999998    F    0.000000    T
+     56  TORS          4    7    8    9     -0.000010    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000000    F    0.000000    T
+     58  TORS          1    6    5    4      0.000004    F    0.000000    T
+     59  TORS          4    5   10    9     -0.000008    F    0.000000    T
+     60  TORS          5   10    9    8      0.000009    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000000    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000000    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000000    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000000    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000000    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000000    F    0.000000    T
+     67  OUTP         12    3    2    4     -0.000000    F    0.000000    T
+     68  OUTP          4    3    2   12      0.000000    F    0.000000    T
+     69  OUTP          2    3    4   12     -0.000000    F    0.000000    T
+     70  OUTP          5    4    3    7     -0.000001    F    0.000000    T
+     71  OUTP          3    4    5    7      0.000001    F    0.000000    T
+     72  OUTP          7    4    3    5      0.000001    F    0.000000    T
+     73  OUTP          4    5    6   10     -0.000001    F    0.000000    T
+     74  OUTP         10    5    4    6     -0.000001    F    0.000000    T
+     75  OUTP          6    5    4   10      0.000001    F    0.000000    T
+     76  OUTP         15    6    1    5     -0.000000    F    0.000000    T
+     77  OUTP          5    6    1   15      0.000000    F    0.000000    T
+     78  OUTP          1    6    5   15     -0.000000    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000000    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000000    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000000    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000001    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000001    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000001    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000000    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000000    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000000    F    0.000000    T
+     88  OUTP         11   10    5    9     -0.000001    F    0.000000    T
+     89  OUTP          5   10    9   11     -0.000001    F    0.000000    T
+     90  OUTP          9   10    5   11      0.000001    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Step=   1   Max_DX=     0.017024  X_RMSD=     0.005929
+Step=   2   Max_DX=     0.000034  X_RMSD=     0.000010
+Step=   3   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      3 Total Energy =        -573.60619716
+                   Max intl Grad =     0.003638 between atoms    4   5   0   0
+     Max Unconstrained Cart Grad =     0.006484      on atom     4
+                   RMS intl Grad =     0.000979
+                  Max STRE Displ =     0.006909 between atoms    4   5
+                  Max BEND Displ =     0.428882 between atoms    5   6  15
+                  Max OUTP Displ =     0.000004 between atoms   11  10   5   9
+                  Max TORS Displ =     0.000105 between atoms    5   4   7   8
+                       RMS Displ =     0.003223
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.43D-02, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.81D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.71D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,4]    :: <SCF> = -573.60623312, dD = 0.16D-02
+ SCFStatus : [1,1,4]    :: <SCF> = -573.60627687, dD = 0.79D-04, DIIS = 0.32D-04
+ SCFStatus : [2,1,4]    :: <SCF> = -573.60627778, dD = 0.12D-02, DIIS = 0.30D-04
+ SCFStatus : [3,1,4]    :: <SCF> = -573.60628501, dD = 0.17D-03, DIIS = 0.55D-05
+ SCFStatus : [4,1,4]    :: <SCF> = -573.60628518, dD = 0.55D-04, DIIS = 0.14D-05
+ SCFStatus : [5,1,4]    :: <SCF> = -573.60628520, dD = 0.94D-05, DIIS = 0.43D-06
+ SCFStatus : [6,1,4]    :: <SCF> = -573.60628520, dD = 0.94D-06, DIIS = 0.63D-07
+ Normal SCF convergence.
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+ Internals at step #4
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.361579    F    0.000000    T
+      2  STRE          2   14    0    0      1.081703    F    0.000000    T
+      3  STRE          3   12    0    0      1.355542    F    0.000000    T
+      4  STRE          3    4    0    0      1.440017    F    0.000000    T
+      5  STRE          1    2    0    0      1.420207    F    0.000000    T
+      6  STRE          1    6    0    0      1.353354    F    0.000000    T
+      7  STRE          1   13    0    0      1.082934    F    0.000000    T
+      8  STRE          6   15    0    0      1.081994    F    0.000000    T
+      9  STRE          4    7    0    0      1.430221    F    0.000000    T
+     10  STRE          4    5    0    0      1.399223    F    0.000000    T
+     11  STRE          7    8    0    0      1.353350    F    0.000000    T
+     12  STRE          7   16    0    0      1.081994    F    0.000000    T
+     13  STRE          8    9    0    0      1.420209    F    0.000000    T
+     14  STRE          8   17    0    0      1.082934    F    0.000000    T
+     15  STRE          5    6    0    0      1.430219    F    0.000000    T
+     16  STRE          5   10    0    0      1.440017    F    0.000000    T
+     17  STRE          9   10    0    0      1.361584    F    0.000000    T
+     18  STRE          9   18    0    0      1.081703    F    0.000000    T
+     19  STRE         10   11    0    0      1.355543    F    0.000000    T
+     20  BEND          2    1    6    0    120.749242    F    0.000000    T
+     21  BEND          2    1   13    0    119.166123    F    0.000000    T
+     22  BEND          6    1   13    0    120.084636    F    0.000000    T
+     23  BEND          3    2   14    0    119.684833    F    0.000000    T
+     24  BEND          1    2    3    0    119.824092    F    0.000000    T
+     25  BEND          1    2   14    0    120.491074    F    0.000000    T
+     26  BEND          2    3   12    0    120.821935    F    0.000000    T
+     27  BEND          2    3    4    0    121.220205    F    0.000000    T
+     28  BEND          4    3   12    0    117.957860    F    0.000000    T
+     29  BEND          3    4    7    0    122.052642    F    0.000000    T
+     30  BEND          3    4    5    0    117.843388    F    0.000000    T
+     31  BEND          5    4    7    0    120.103969    F    0.000000    T
+     32  BEND          4    5    6    0    120.103824    F    0.000000    T
+     33  BEND          4    5   10    0    117.843574    F    0.000000    T
+     34  BEND          6    5   10    0    122.052602    F    0.000000    T
+     35  BEND          1    6   15    0    121.069936    F    0.000000    T
+     36  BEND          1    6    5    0    120.259249    F    0.000000    T
+     37  BEND          5    6   15    0    118.670815    F    0.000000    T
+     38  BEND          4    7    8    0    120.259147    F    0.000000    T
+     39  BEND          4    7   16    0    118.670925    F    0.000000    T
+     40  BEND          8    7   16    0    121.069928    F    0.000000    T
+     41  BEND          7    8    9    0    120.749282    F    0.000000    T
+     42  BEND          7    8   17    0    120.084279    F    0.000000    T
+     43  BEND          9    8   17    0    119.166439    F    0.000000    T
+     44  BEND          8    9   10    0    119.824283    F    0.000000    T
+     45  BEND          8    9   18    0    120.491019    F    0.000000    T
+     46  BEND         10    9   18    0    119.684698    F    0.000000    T
+     47  BEND          5   10    9    0    121.219744    F    0.000000    T
+     48  BEND          5   10   11    0    117.957045    F    0.000000    T
+     49  BEND          9   10   11    0    120.823211    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000001    F    0.000000    T
+     51  TORS          2    3    4    5      0.000009    F    0.000000    T
+     52  TORS          3    2    1    6     -0.000029    F    0.000000    T
+     53  TORS          2    1    6    5      0.000050    F    0.000000    T
+     54  TORS          5    4    7    8     -0.000095    F    0.000000    T
+     55  TORS          3    4    5   10   -179.999987    F    0.000000    T
+     56  TORS          4    7    8    9      0.000092    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000006    F    0.000000    T
+     58  TORS          1    6    5    4     -0.000041    F    0.000000    T
+     59  TORS          4    5   10    9      0.000074    F    0.000000    T
+     60  TORS          5   10    9    8     -0.000078    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000002    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000002    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000002    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000000    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000000    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000000    F    0.000000    T
+     67  OUTP         12    3    2    4     -0.000000    F    0.000000    T
+     68  OUTP          4    3    2   12      0.000000    F    0.000000    T
+     69  OUTP          2    3    4   12     -0.000000    F    0.000000    T
+     70  OUTP          5    4    3    7     -0.000001    F    0.000000    T
+     71  OUTP          3    4    5    7      0.000001    F    0.000000    T
+     72  OUTP          7    4    3    5      0.000001    F    0.000000    T
+     73  OUTP          4    5    6   10      0.000002    F    0.000000    T
+     74  OUTP         10    5    4    6      0.000002    F    0.000000    T
+     75  OUTP          6    5    4   10     -0.000002    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000002    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000002    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000002    F    0.000000    T
+     79  OUTP         16    7    4    8     -0.000003    F    0.000000    T
+     80  OUTP          4    7    8   16     -0.000003    F    0.000000    T
+     81  OUTP          8    7    4   16      0.000003    F    0.000000    T
+     82  OUTP         17    8    7    9      0.000002    F    0.000000    T
+     83  OUTP          9    8    7   17     -0.000002    F    0.000000    T
+     84  OUTP          7    8    9   17      0.000002    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000002    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000002    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000002    F    0.000000    T
+     88  OUTP         11   10    5    9      0.000003    F    0.000000    T
+     89  OUTP          5   10    9   11      0.000003    F    0.000000    T
+     90  OUTP          9   10    5   11     -0.000003    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.002350 ChangeNorm=     0.000619
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Step=   1   Max_DX=     0.014118  X_RMSD=     0.003676
+Step=   2   Max_DX=     0.000050  X_RMSD=     0.000011
+Step=   3   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      4 Total Energy =        -573.60628520
+                   Max intl Grad =     0.002350 between atoms    4   5   0   0
+     Max Unconstrained Cart Grad =     0.003135      on atom     9
+                   RMS intl Grad =     0.000619
+                  Max STRE Displ =     0.002723 between atoms    4   5
+                  Max BEND Displ =     0.483347 between atoms    2   1  13
+                  Max OUTP Displ =     0.000042 between atoms    5   4   3   7
+                  Max TORS Displ =     0.000538 between atoms    2   1   6   5
+                       RMS Displ =     0.002129
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.26D-04, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.22D-09, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,5]    :: <SCF> = -573.60631851, dD = 0.62D-03
+ SCFStatus : [1,1,5]    :: <SCF> = -573.60632715, dD = 0.29D-04, DIIS = 0.14D-04
+ SCFStatus : [2,1,5]    :: <SCF> = -573.60632729, dD = 0.46D-03, DIIS = 0.13D-04
+ SCFStatus : [3,1,5]    :: <SCF> = -573.60632833, dD = 0.55D-04, DIIS = 0.16D-05
+ SCFStatus : [4,1,5]    :: <SCF> = -573.60632835, dD = 0.18D-04, DIIS = 0.56D-06
+ SCFStatus : [5,1,5]    :: <SCF> = -573.60632835, dD = 0.15D-04, DIIS = 0.27D-06
+ SCFStatus : [6,1,5]    :: <SCF> = -573.60632835, dD = 0.75D-06, DIIS = 0.48D-07
+ Normal SCF convergence.
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+ Internals at step #5
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.361217    F    0.000000    T
+      2  STRE          2   14    0    0      1.081691    F    0.000000    T
+      3  STRE          3   12    0    0      1.355388    F    0.000000    T
+      4  STRE          3    4    0    0      1.440781    F    0.000000    T
+      5  STRE          1    2    0    0      1.421378    F    0.000000    T
+      6  STRE          1    6    0    0      1.354335    F    0.000000    T
+      7  STRE          1   13    0    0      1.082903    F    0.000000    T
+      8  STRE          6   15    0    0      1.081922    F    0.000000    T
+      9  STRE          4    7    0    0      1.428571    F    0.000000    T
+     10  STRE          4    5    0    0      1.401945    F    0.000000    T
+     11  STRE          7    8    0    0      1.354335    F    0.000000    T
+     12  STRE          7   16    0    0      1.081922    F    0.000000    T
+     13  STRE          8    9    0    0      1.421380    F    0.000000    T
+     14  STRE          8   17    0    0      1.082903    F    0.000000    T
+     15  STRE          5    6    0    0      1.428572    F    0.000000    T
+     16  STRE          5   10    0    0      1.440781    F    0.000000    T
+     17  STRE          9   10    0    0      1.361217    F    0.000000    T
+     18  STRE          9   18    0    0      1.081692    F    0.000000    T
+     19  STRE         10   11    0    0      1.355387    F    0.000000    T
+     20  BEND          2    1    6    0    120.820822    F    0.000000    T
+     21  BEND          2    1   13    0    118.682776    F    0.000000    T
+     22  BEND          6    1   13    0    120.496403    F    0.000000    T
+     23  BEND          3    2   14    0    119.940914    F    0.000000    T
+     24  BEND          1    2    3    0    119.760778    F    0.000000    T
+     25  BEND          1    2   14    0    120.298308    F    0.000000    T
+     26  BEND          2    3   12    0    120.750439    F    0.000000    T
+     27  BEND          2    3    4    0    121.215476    F    0.000000    T
+     28  BEND          4    3   12    0    118.034085    F    0.000000    T
+     29  BEND          3    4    7    0    122.082933    F    0.000000    T
+     30  BEND          3    4    5    0    117.890957    F    0.000000    T
+     31  BEND          5    4    7    0    120.026110    F    0.000000    T
+     32  BEND          4    5    6    0    120.026261    F    0.000000    T
+     33  BEND          4    5   10    0    117.891076    F    0.000000    T
+     34  BEND          6    5   10    0    122.082662    F    0.000000    T
+     35  BEND          1    6   15    0    121.159455    F    0.000000    T
+     36  BEND          1    6    5    0    120.285706    F    0.000000    T
+     37  BEND          5    6   15    0    118.554838    F    0.000000    T
+     38  BEND          4    7    8    0    120.285653    F    0.000000    T
+     39  BEND          4    7   16    0    118.554901    F    0.000000    T
+     40  BEND          8    7   16    0    121.159446    F    0.000000    T
+     41  BEND          7    8    9    0    120.821180    F    0.000000    T
+     42  BEND          7    8   17    0    120.495551    F    0.000000    T
+     43  BEND          9    8   17    0    118.683269    F    0.000000    T
+     44  BEND          8    9   10    0    119.760281    F    0.000000    T
+     45  BEND          8    9   18    0    120.297277    F    0.000000    T
+     46  BEND         10    9   18    0    119.942442    F    0.000000    T
+     47  BEND          5   10    9    0    121.215700    F    0.000000    T
+     48  BEND          5   10   11    0    118.034056    F    0.000000    T
+     49  BEND          9   10   11    0    120.750244    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000075    F    0.000000    T
+     51  TORS          2    3    4    5     -0.000040    F    0.000000    T
+     52  TORS          3    2    1    6      0.000346    F    0.000000    T
+     53  TORS          2    1    6    5     -0.000488    F    0.000000    T
+     54  TORS          5    4    7    8      0.000050    F    0.000000    T
+     55  TORS          3    4    5   10    179.999903    F    0.000000    T
+     56  TORS          4    7    8    9     -0.000041    F    0.000000    T
+     57  TORS          7    8    9   10      0.000036    F    0.000000    T
+     58  TORS          1    6    5    4      0.000367    F    0.000000    T
+     59  TORS          4    5   10    9      0.000048    F    0.000000    T
+     60  TORS          5   10    9    8     -0.000039    F    0.000000    T
+     61  OUTP         13    1    2    6      0.000015    F    0.000000    T
+     62  OUTP          2    1    6   13      0.000015    F    0.000000    T
+     63  OUTP          6    1    2   13     -0.000015    F    0.000000    T
+     64  OUTP         14    2    1    3      0.000005    F    0.000000    T
+     65  OUTP          1    2    3   14      0.000005    F    0.000000    T
+     66  OUTP          3    2    1   14     -0.000005    F    0.000000    T
+     67  OUTP         12    3    2    4     -0.000000    F    0.000000    T
+     68  OUTP          4    3    2   12      0.000000    F    0.000000    T
+     69  OUTP          2    3    4   12     -0.000000    F    0.000000    T
+     70  OUTP          5    4    3    7      0.000041    F    0.000000    T
+     71  OUTP          3    4    5    7     -0.000040    F    0.000000    T
+     72  OUTP          7    4    3    5     -0.000039    F    0.000000    T
+     73  OUTP          4    5    6   10      0.000002    F    0.000000    T
+     74  OUTP         10    5    4    6      0.000002    F    0.000000    T
+     75  OUTP          6    5    4   10     -0.000002    F    0.000000    T
+     76  OUTP         15    6    1    5     -0.000017    F    0.000000    T
+     77  OUTP          5    6    1   15      0.000017    F    0.000000    T
+     78  OUTP          1    6    5   15     -0.000017    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000032    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000032    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000031    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000024    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000023    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000023    F    0.000000    T
+     85  OUTP         18    9    8   10     -0.000015    F    0.000000    T
+     86  OUTP          8    9   10   18     -0.000015    F    0.000000    T
+     87  OUTP         10    9    8   18      0.000016    F    0.000000    T
+     88  OUTP         11   10    5    9     -0.000027    F    0.000000    T
+     89  OUTP          5   10    9   11     -0.000027    F    0.000000    T
+     90  OUTP          9   10    5   11      0.000027    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.002350 ChangeNorm=     0.000619
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000756 ChangeNorm=     0.000195
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+Step=   1   Max_DX=     0.003064  X_RMSD=     0.000979
+Step=   2   Max_DX=     0.000001  X_RMSD=     0.000000
+Coordinate back-transformation converged in   2 steps
+       Clone =      1 GeOp step =      5 Total Energy =        -573.60632835
+                   Max intl Grad =     0.000756 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.001276      on atom     2
+                   RMS intl Grad =     0.000195
+                  Max STRE Displ =     0.001149 between atoms    1   2
+                  Max BEND Displ =     0.080700 between atoms    8   9  10
+                  Max OUTP Displ =     0.000187 between atoms    5   6   1  15
+                  Max TORS Displ =     0.000542 between atoms    2   1   6   5
+                       RMS Displ =     0.000595
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.21D-04, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.29D-04, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,6]    :: <SCF> = -573.60633116, dD = 0.29D-03
+ SCFStatus : [1,1,6]    :: <SCF> = -573.60633242, dD = 0.12D-04, DIIS = 0.52D-05
+ SCFStatus : [2,1,6]    :: <SCF> = -573.60633245, dD = 0.18D-03, DIIS = 0.49D-05
+ SCFStatus : [3,1,6]    :: <SCF> = -573.60633268, dD = 0.34D-04, DIIS = 0.10D-05
+ SCFStatus : [4,1,6]    :: <SCF> = -573.60633269, dD = 0.71D-05, DIIS = 0.42D-06
+ SCFStatus : [5,1,6]    :: <SCF> = -573.60633269, dD = 0.54D-05, DIIS = 0.11D-06
+ Normal SCF convergence.
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.88 % # of  Gc%NNon0      1067
+Sparsity of Ch=  33.54 % # of  Ch%NNon0       655
+ Internals at step #6
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.360445    F    0.000000    T
+      2  STRE          2   14    0    0      1.081643    F    0.000000    T
+      3  STRE          3   12    0    0      1.355371    F    0.000000    T
+      4  STRE          3    4    0    0      1.440819    F    0.000000    T
+      5  STRE          1    2    0    0      1.422527    F    0.000000    T
+      6  STRE          1    6    0    0      1.354146    F    0.000000    T
+      7  STRE          1   13    0    0      1.082898    F    0.000000    T
+      8  STRE          6   15    0    0      1.081939    F    0.000000    T
+      9  STRE          4    7    0    0      1.428753    F    0.000000    T
+     10  STRE          4    5    0    0      1.401757    F    0.000000    T
+     11  STRE          7    8    0    0      1.354146    F    0.000000    T
+     12  STRE          7   16    0    0      1.081939    F    0.000000    T
+     13  STRE          8    9    0    0      1.422527    F    0.000000    T
+     14  STRE          8   17    0    0      1.082898    F    0.000000    T
+     15  STRE          5    6    0    0      1.428752    F    0.000000    T
+     16  STRE          5   10    0    0      1.440819    F    0.000000    T
+     17  STRE          9   10    0    0      1.360447    F    0.000000    T
+     18  STRE          9   18    0    0      1.081643    F    0.000000    T
+     19  STRE         10   11    0    0      1.355371    F    0.000000    T
+     20  BEND          2    1    6    0    120.756754    F    0.000000    T
+     21  BEND          2    1   13    0    118.737421    F    0.000000    T
+     22  BEND          6    1   13    0    120.505825    F    0.000000    T
+     23  BEND          3    2   14    0    119.882669    F    0.000000    T
+     24  BEND          1    2    3    0    119.840968    F    0.000000    T
+     25  BEND          1    2   14    0    120.276363    F    0.000000    T
+     26  BEND          2    3   12    0    120.798716    F    0.000000    T
+     27  BEND          2    3    4    0    121.150693    F    0.000000    T
+     28  BEND          4    3   12    0    118.050591    F    0.000000    T
+     29  BEND          3    4    7    0    122.033417    F    0.000000    T
+     30  BEND          3    4    5    0    117.932016    F    0.000000    T
+     31  BEND          5    4    7    0    120.034567    F    0.000000    T
+     32  BEND          4    5    6    0    120.034612    F    0.000000    T
+     33  BEND          4    5   10    0    117.932119    F    0.000000    T
+     34  BEND          6    5   10    0    122.033269    F    0.000000    T
+     35  BEND          1    6   15    0    121.170664    F    0.000000    T
+     36  BEND          1    6    5    0    120.284958    F    0.000000    T
+     37  BEND          5    6   15    0    118.544378    F    0.000000    T
+     38  BEND          4    7    8    0    120.284977    F    0.000000    T
+     39  BEND          4    7   16    0    118.544426    F    0.000000    T
+     40  BEND          8    7   16    0    121.170597    F    0.000000    T
+     41  BEND          7    8    9    0    120.756766    F    0.000000    T
+     42  BEND          7    8   17    0    120.505871    F    0.000000    T
+     43  BEND          9    8   17    0    118.737363    F    0.000000    T
+     44  BEND          8    9   10    0    119.840981    F    0.000000    T
+     45  BEND          8    9   18    0    120.276362    F    0.000000    T
+     46  BEND         10    9   18    0    119.882657    F    0.000000    T
+     47  BEND          5   10    9    0    121.150590    F    0.000000    T
+     48  BEND          5   10   11    0    118.050541    F    0.000000    T
+     49  BEND          9   10   11    0    120.798868    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000108    F    0.000000    T
+     51  TORS          2    3    4    5      0.000184    F    0.000000    T
+     52  TORS          3    2    1    6     -0.000013    F    0.000000    T
+     53  TORS          2    1    6    5      0.000054    F    0.000000    T
+     54  TORS          5    4    7    8     -0.000001    F    0.000000    T
+     55  TORS          3    4    5   10    179.999893    F    0.000000    T
+     56  TORS          4    7    8    9      0.000178    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000262    F    0.000000    T
+     58  TORS          1    6    5    4      0.000027    F    0.000000    T
+     59  TORS          4    5   10    9      0.000007    F    0.000000    T
+     60  TORS          5   10    9    8      0.000166    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000169    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000168    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000165    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000069    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000069    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000069    F    0.000000    T
+     67  OUTP         12    3    2    4      0.000032    F    0.000000    T
+     68  OUTP          4    3    2   12     -0.000032    F    0.000000    T
+     69  OUTP          2    3    4   12      0.000031    F    0.000000    T
+     70  OUTP          5    4    3    7      0.000014    F    0.000000    T
+     71  OUTP          3    4    5    7     -0.000014    F    0.000000    T
+     72  OUTP          7    4    3    5     -0.000013    F    0.000000    T
+     73  OUTP          4    5    6   10      0.000031    F    0.000000    T
+     74  OUTP         10    5    4    6      0.000030    F    0.000000    T
+     75  OUTP          6    5    4   10     -0.000030    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000168    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000170    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000165    F    0.000000    T
+     79  OUTP         16    7    4    8     -0.000009    F    0.000000    T
+     80  OUTP          4    7    8   16     -0.000009    F    0.000000    T
+     81  OUTP          8    7    4   16      0.000009    F    0.000000    T
+     82  OUTP         17    8    7    9      0.000008    F    0.000000    T
+     83  OUTP          9    8    7   17     -0.000008    F    0.000000    T
+     84  OUTP          7    8    9   17      0.000008    F    0.000000    T
+     85  OUTP         18    9    8   10     -0.000027    F    0.000000    T
+     86  OUTP          8    9   10   18     -0.000027    F    0.000000    T
+     87  OUTP         10    9    8   18      0.000027    F    0.000000    T
+     88  OUTP         11   10    5    9     -0.000031    F    0.000000    T
+     89  OUTP          5   10    9   11     -0.000030    F    0.000000    T
+     90  OUTP          9   10    5   11      0.000030    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.002350 ChangeNorm=     0.000619
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000756 ChangeNorm=     0.000195
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.88 % # of  Gc%NNon0      1067
+Sparsity of Ch=  33.54 % # of  Ch%NNon0       655
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000430 ChangeNorm=     0.000085
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.88 % # of  Gc%NNon0      1067
+Sparsity of Ch=  33.54 % # of  Ch%NNon0       655
+Step=   1   Max_DX=     0.001086  X_RMSD=     0.000382
+Step=   2   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   2 steps
+       Clone =      1 GeOp step =      6 Total Energy =        -573.60633269
+                   Max intl Grad =     0.000430 between atoms    4   5   0   0
+     Max Unconstrained Cart Grad =     0.000463      on atom     4
+                   RMS intl Grad =     0.000085
+                  Max STRE Displ =     0.000390 between atoms    4   5
+                  Max BEND Displ =     0.024161 between atoms    8   9  18
+                  Max OUTP Displ =     0.000091 between atoms   10   9   8  18
+                  Max TORS Displ =     0.000259 between atoms    5  10   9   8
+                       RMS Displ =     0.000193
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.24D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.34D-05, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,7]    :: <SCF> = -573.60633316, dD = 0.98D-04
+ SCFStatus : [1,1,7]    :: <SCF> = -573.60633328, dD = 0.46D-05, DIIS = 0.18D-05
+ SCFStatus : [2,1,7]    :: <SCF> = -573.60633329, dD = 0.43D-04, DIIS = 0.17D-05
+ SCFStatus : [3,1,7]    :: <SCF> = -573.60633330, dD = 0.26D-04, DIIS = 0.74D-06
+ SCFStatus : [4,1,7]    :: <SCF> = -573.60633330, dD = 0.15D-04, DIIS = 0.38D-06
+ SCFStatus : [5,1,7]    :: <SCF> = -573.60633330, dD = 0.18D-05, DIIS = 0.76D-07
+ Normal SCF convergence.
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.78 % # of  Gc%NNon0      1063
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+ Internals at step #7
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.360564    F    0.000000    T
+      2  STRE          2   14    0    0      1.081651    F    0.000000    T
+      3  STRE          3   12    0    0      1.355315    F    0.000000    T
+      4  STRE          3    4    0    0      1.440930    F    0.000000    T
+      5  STRE          1    2    0    0      1.422217    F    0.000000    T
+      6  STRE          1    6    0    0      1.354008    F    0.000000    T
+      7  STRE          1   13    0    0      1.082880    F    0.000000    T
+      8  STRE          6   15    0    0      1.081952    F    0.000000    T
+      9  STRE          4    7    0    0      1.428931    F    0.000000    T
+     10  STRE          4    5    0    0      1.401368    F    0.000000    T
+     11  STRE          7    8    0    0      1.354008    F    0.000000    T
+     12  STRE          7   16    0    0      1.081952    F    0.000000    T
+     13  STRE          8    9    0    0      1.422216    F    0.000000    T
+     14  STRE          8   17    0    0      1.082880    F    0.000000    T
+     15  STRE          5    6    0    0      1.428932    F    0.000000    T
+     16  STRE          5   10    0    0      1.440930    F    0.000000    T
+     17  STRE          9   10    0    0      1.360563    F    0.000000    T
+     18  STRE          9   18    0    0      1.081651    F    0.000000    T
+     19  STRE         10   11    0    0      1.355314    F    0.000000    T
+     20  BEND          2    1    6    0    120.748219    F    0.000000    T
+     21  BEND          2    1   13    0    118.724485    F    0.000000    T
+     22  BEND          6    1   13    0    120.527296    F    0.000000    T
+     23  BEND          3    2   14    0    119.902598    F    0.000000    T
+     24  BEND          1    2    3    0    119.845144    F    0.000000    T
+     25  BEND          1    2   14    0    120.252258    F    0.000000    T
+     26  BEND          2    3   12    0    120.813472    F    0.000000    T
+     27  BEND          2    3    4    0    121.151965    F    0.000000    T
+     28  BEND          4    3   12    0    118.034562    F    0.000000    T
+     29  BEND          3    4    7    0    122.040649    F    0.000000    T
+     30  BEND          3    4    5    0    117.924020    F    0.000000    T
+     31  BEND          5    4    7    0    120.035331    F    0.000000    T
+     32  BEND          4    5    6    0    120.035374    F    0.000000    T
+     33  BEND          4    5   10    0    117.924041    F    0.000000    T
+     34  BEND          6    5   10    0    122.040585    F    0.000000    T
+     35  BEND          1    6   15    0    121.171638    F    0.000000    T
+     36  BEND          1    6    5    0    120.295279    F    0.000000    T
+     37  BEND          5    6   15    0    118.533083    F    0.000000    T
+     38  BEND          4    7    8    0    120.295275    F    0.000000    T
+     39  BEND          4    7   16    0    118.533110    F    0.000000    T
+     40  BEND          8    7   16    0    121.171615    F    0.000000    T
+     41  BEND          7    8    9    0    120.748255    F    0.000000    T
+     42  BEND          7    8   17    0    120.527274    F    0.000000    T
+     43  BEND          9    8   17    0    118.724471    F    0.000000    T
+     44  BEND          8    9   10    0    119.845082    F    0.000000    T
+     45  BEND          8    9   18    0    120.252201    F    0.000000    T
+     46  BEND         10    9   18    0    119.902717    F    0.000000    T
+     47  BEND          5   10    9    0    121.152015    F    0.000000    T
+     48  BEND          5   10   11    0    118.034594    F    0.000000    T
+     49  BEND          9   10   11    0    120.813391    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000046    F    0.000000    T
+     51  TORS          2    3    4    5      0.000063    F    0.000000    T
+     52  TORS          3    2    1    6      0.000067    F    0.000000    T
+     53  TORS          2    1    6    5     -0.000105    F    0.000000    T
+     54  TORS          5    4    7    8      0.000067    F    0.000000    T
+     55  TORS          3    4    5   10    179.999888    F    0.000000    T
+     56  TORS          4    7    8    9      0.000019    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000005    F    0.000000    T
+     58  TORS          1    6    5    4      0.000122    F    0.000000    T
+     59  TORS          4    5   10    9      0.000173    F    0.000000    T
+     60  TORS          5   10    9    8     -0.000092    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000096    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000095    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000094    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000053    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000053    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000053    F    0.000000    T
+     67  OUTP         12    3    2    4      0.000052    F    0.000000    T
+     68  OUTP          4    3    2   12     -0.000051    F    0.000000    T
+     69  OUTP          2    3    4   12      0.000050    F    0.000000    T
+     70  OUTP          5    4    3    7     -0.000042    F    0.000000    T
+     71  OUTP          3    4    5    7      0.000041    F    0.000000    T
+     72  OUTP          7    4    3    5      0.000040    F    0.000000    T
+     73  OUTP          4    5    6   10     -0.000012    F    0.000000    T
+     74  OUTP         10    5    4    6     -0.000012    F    0.000000    T
+     75  OUTP          6    5    4   10      0.000011    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000099    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000100    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000097    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000046    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000046    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000045    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000075    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000074    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000073    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000064    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000064    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000064    F    0.000000    T
+     88  OUTP         11   10    5    9      0.000043    F    0.000000    T
+     89  OUTP          5   10    9   11      0.000043    F    0.000000    T
+     90  OUTP          9   10    5   11     -0.000042    F    0.000000    T
+ Sparsity of B=   7.41 % # of SpB%NNon0       420
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.026994 ChangeNorm=     0.008827
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.002350 ChangeNorm=     0.000619
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000756 ChangeNorm=     0.000195
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.88 % # of  Gc%NNon0      1067
+Sparsity of Ch=  33.54 % # of  Ch%NNon0       655
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000430 ChangeNorm=     0.000085
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.78 % # of  Gc%NNon0      1063
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000115 ChangeNorm=     0.000027
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.78 % # of  Gc%NNon0      1063
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+Step=   1   Max_DX=     0.000240  X_RMSD=     0.000112
+Step=   2   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   2 steps
+       Clone =      1 GeOp step =      7 Total Energy =        -573.60633330
+                   Max intl Grad =     0.000115 between atoms    5  10   0   0
+     Max Unconstrained Cart Grad =     0.000156      on atom    10
+                   RMS intl Grad =     0.000027
+                  Max STRE Displ =     0.000154 between atoms    3   4
+                  Max BEND Displ =     0.005268 between atoms    4   7  16
+                  Max OUTP Displ =     0.000073 between atoms    5   4   3   7
+                  Max TORS Displ =     0.000161 between atoms    4   5  10   9
+                       RMS Displ =     0.000061
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.39D-07, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=0.71D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,8]    :: <SCF> = -573.60633336, dD = 0.30D-04
+ SCFStatus : [1,1,8]    :: <SCF> = -573.60633338, dD = 0.14D-05, DIIS = 0.57D-06
+ SCFStatus : [2,1,8]    :: <SCF> = -573.60633338, dD = 0.13D-04, DIIS = 0.53D-06
+ SCFStatus : [3,1,8]    :: <SCF> = -573.60633338, dD = 0.99D-05, DIIS = 0.24D-06
+ Normal SCF convergence.
+ Sparsity of B=  15.29 % # of SpB%NNon0       867
+Sparsity of Gc=  24.92 % # of  Gc%NNon0       989
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+ Internals at step #8
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.360528    F    0.000000    T
+      2  STRE          2   14    0    0      1.081653    F    0.000000    T
+      3  STRE          3   12    0    0      1.355312    F    0.000000    T
+      4  STRE          3    4    0    0      1.441085    F    0.000000    T
+      5  STRE          1    2    0    0      1.422305    F    0.000000    T
+      6  STRE          1    6    0    0      1.353989    F    0.000000    T
+      7  STRE          1   13    0    0      1.082867    F    0.000000    T
+      8  STRE          6   15    0    0      1.081963    F    0.000000    T
+      9  STRE          4    7    0    0      1.428926    F    0.000000    T
+     10  STRE          4    5    0    0      1.401349    F    0.000000    T
+     11  STRE          7    8    0    0      1.353989    F    0.000000    T
+     12  STRE          7   16    0    0      1.081963    F    0.000000    T
+     13  STRE          8    9    0    0      1.422305    F    0.000000    T
+     14  STRE          8   17    0    0      1.082867    F    0.000000    T
+     15  STRE          5    6    0    0      1.428926    F    0.000000    T
+     16  STRE          5   10    0    0      1.441084    F    0.000000    T
+     17  STRE          9   10    0    0      1.360528    F    0.000000    T
+     18  STRE          9   18    0    0      1.081653    F    0.000000    T
+     19  STRE         10   11    0    0      1.355313    F    0.000000    T
+     20  BEND          2    1    6    0    120.753057    F    0.000000    T
+     21  BEND          2    1   13    0    118.721590    F    0.000000    T
+     22  BEND          6    1   13    0    120.525353    F    0.000000    T
+     23  BEND          3    2   14    0    119.902657    F    0.000000    T
+     24  BEND          1    2    3    0    119.840286    F    0.000000    T
+     25  BEND          1    2   14    0    120.257057    F    0.000000    T
+     26  BEND          2    3   12    0    120.814730    F    0.000000    T
+     27  BEND          2    3    4    0    121.150266    F    0.000000    T
+     28  BEND          4    3   12    0    118.035003    F    0.000000    T
+     29  BEND          3    4    7    0    122.040391    F    0.000000    T
+     30  BEND          3    4    5    0    117.927124    F    0.000000    T
+     31  BEND          5    4    7    0    120.032486    F    0.000000    T
+     32  BEND          4    5    6    0    120.032504    F    0.000000    T
+     33  BEND          4    5   10    0    117.927164    F    0.000000    T
+     34  BEND          6    5   10    0    122.040332    F    0.000000    T
+     35  BEND          1    6   15    0    121.175395    F    0.000000    T
+     36  BEND          1    6    5    0    120.296763    F    0.000000    T
+     37  BEND          5    6   15    0    118.527842    F    0.000000    T
+     38  BEND          4    7    8    0    120.296757    F    0.000000    T
+     39  BEND          4    7   16    0    118.527841    F    0.000000    T
+     40  BEND          8    7   16    0    121.175402    F    0.000000    T
+     41  BEND          7    8    9    0    120.753063    F    0.000000    T
+     42  BEND          7    8   17    0    120.525339    F    0.000000    T
+     43  BEND          9    8   17    0    118.721598    F    0.000000    T
+     44  BEND          8    9   10    0    119.840290    F    0.000000    T
+     45  BEND          8    9   18    0    120.257049    F    0.000000    T
+     46  BEND         10    9   18    0    119.902661    F    0.000000    T
+     47  BEND          5   10    9    0    121.150241    F    0.000000    T
+     48  BEND          5   10   11    0    118.035003    F    0.000000    T
+     49  BEND          9   10   11    0    120.814756    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000024    F    0.000000    T
+     51  TORS          2    3    4    5     -0.000008    F    0.000000    T
+     52  TORS          3    2    1    6      0.000081    F    0.000000    T
+     53  TORS          2    1    6    5     -0.000104    F    0.000000    T
+     54  TORS          5    4    7    8     -0.000015    F    0.000000    T
+     55  TORS          3    4    5   10    179.999947    F    0.000000    T
+     56  TORS          4    7    8    9      0.000053    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000058    F    0.000000    T
+     58  TORS          1    6    5    4      0.000070    F    0.000000    T
+     59  TORS          4    5   10    9      0.000013    F    0.000000    T
+     60  TORS          5   10    9    8      0.000024    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000080    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000079    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000078    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000039    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000039    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000039    F    0.000000    T
+     67  OUTP         12    3    2    4      0.000039    F    0.000000    T
+     68  OUTP          4    3    2   12     -0.000039    F    0.000000    T
+     69  OUTP          2    3    4   12      0.000038    F    0.000000    T
+     70  OUTP          5    4    3    7      0.000031    F    0.000000    T
+     71  OUTP          3    4    5    7     -0.000031    F    0.000000    T
+     72  OUTP          7    4    3    5     -0.000030    F    0.000000    T
+     73  OUTP          4    5    6   10     -0.000036    F    0.000000    T
+     74  OUTP         10    5    4    6     -0.000035    F    0.000000    T
+     75  OUTP          6    5    4   10      0.000034    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000089    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000090    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000088    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000008    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000008    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000008    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000045    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000045    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000044    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000026    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000026    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000026    F    0.000000    T
+     88  OUTP         11   10    5    9      0.000002    F    0.000000    T
+     89  OUTP          5   10    9   11      0.000002    F    0.000000    T
+     90  OUTP          9   10    5   11     -0.000002    F    0.000000    T
+ Sparsity of B=   8.40 % # of SpB%NNon0       476
+Sparsity of Gc=  15.19 % # of  Gc%NNon0       603
+Sparsity of Ch=  20.28 % # of  Ch%NNon0       396
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.012853 ChangeNorm=     0.002775
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  13.26 % # of SpB%NNon0       752
+Sparsity of Gc=  18.12 % # of  Gc%NNon0       719
+Sparsity of Ch=  35.38 % # of  Ch%NNon0       691
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.003638 ChangeNorm=     0.000979
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.03 % # of SpB%NNon0       852
+Sparsity of Gc=  25.42 % # of  Gc%NNon0      1009
+Sparsity of Ch=  35.02 % # of  Ch%NNon0       684
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.002350 ChangeNorm=     0.000619
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.38 % # of SpB%NNon0       872
+Sparsity of Gc=  27.08 % # of  Gc%NNon0      1075
+Sparsity of Ch=  34.46 % # of  Ch%NNon0       673
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000756 ChangeNorm=     0.000195
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.88 % # of  Gc%NNon0      1067
+Sparsity of Ch=  33.54 % # of  Ch%NNon0       655
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000430 ChangeNorm=     0.000085
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.43 % # of SpB%NNon0       875
+Sparsity of Gc=  26.78 % # of  Gc%NNon0      1063
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000115 ChangeNorm=     0.000027
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  15.29 % # of SpB%NNon0       867
+Sparsity of Gc=  24.92 % # of  Gc%NNon0       989
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+Gradient transformation, No. Int. Coords=      90
+Grad Trf, step=   1 MaxChange=     0.000029 ChangeNorm=     0.000010
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     90
+ Sparsity of B=  15.29 % # of SpB%NNon0       867
+Sparsity of Gc=  24.92 % # of  Gc%NNon0       989
+Sparsity of Ch=  33.85 % # of  Ch%NNon0       661
+Step=   1   Max_DX=     0.000325  X_RMSD=     0.000086
+Step=   2   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   2 steps
+       Clone =      1 GeOp step =      8 Total Energy =        -573.60633338
+                   Max intl Grad =     0.000029 between atoms    9  10   0   0
+     Max Unconstrained Cart Grad =     0.000056      on atom     4
+                   RMS intl Grad =     0.000010
+                  Max STRE Displ =     0.000031 between atoms    3   4
+                  Max BEND Displ =     0.010349 between atoms    8   7  16
+                  Max OUTP Displ =     0.000238 between atoms    4   5   6  10
+                  Max TORS Displ =     0.000391 between atoms    2   3   4   5
+                       RMS Displ =     0.000041
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.56D-04, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.92D-07, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,9]    :: <SCF> = -573.60633338, dD = 0.20D-04
+ SCFStatus : [1,1,9]    :: <SCF> = -573.60633339, dD = 0.88D-06, DIIS = 0.41D-06
+ SCFStatus : [2,1,9]    :: <SCF> = -573.60633339, dD = 0.82D-05, DIIS = 0.38D-06
+ Sparsity of B=  15.34 % # of SpB%NNon0       870
+Sparsity of Gc=  27.94 % # of  Gc%NNon0      1109
+Sparsity of Ch=  33.59 % # of  Ch%NNon0       656
+ Internals at step #9
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.360498    F    0.000000    T
+      2  STRE          2   14    0    0      1.081654    F    0.000000    T
+      3  STRE          3   12    0    0      1.355306    F    0.000000    T
+      4  STRE          3    4    0    0      1.441053    F    0.000000    T
+      5  STRE          1    2    0    0      1.422326    F    0.000000    T
+      6  STRE          1    6    0    0      1.353971    F    0.000000    T
+      7  STRE          1   13    0    0      1.082875    F    0.000000    T
+      8  STRE          6   15    0    0      1.081961    F    0.000000    T
+      9  STRE          4    7    0    0      1.428937    F    0.000000    T
+     10  STRE          4    5    0    0      1.401324    F    0.000000    T
+     11  STRE          7    8    0    0      1.353971    F    0.000000    T
+     12  STRE          7   16    0    0      1.081961    F    0.000000    T
+     13  STRE          8    9    0    0      1.422326    F    0.000000    T
+     14  STRE          8   17    0    0      1.082875    F    0.000000    T
+     15  STRE          5    6    0    0      1.428937    F    0.000000    T
+     16  STRE          5   10    0    0      1.441053    F    0.000000    T
+     17  STRE          9   10    0    0      1.360498    F    0.000000    T
+     18  STRE          9   18    0    0      1.081653    F    0.000000    T
+     19  STRE         10   11    0    0      1.355306    F    0.000000    T
+     20  BEND          2    1    6    0    120.753907    F    0.000000    T
+     21  BEND          2    1   13    0    118.720887    F    0.000000    T
+     22  BEND          6    1   13    0    120.525207    F    0.000000    T
+     23  BEND          3    2   14    0    119.902526    F    0.000000    T
+     24  BEND          1    2    3    0    119.841892    F    0.000000    T
+     25  BEND          1    2   14    0    120.255582    F    0.000000    T
+     26  BEND          2    3   12    0    120.817995    F    0.000000    T
+     27  BEND          2    3    4    0    121.148024    F    0.000000    T
+     28  BEND          4    3   12    0    118.033981    F    0.000000    T
+     29  BEND          3    4    7    0    122.036607    F    0.000000    T
+     30  BEND          3    4    5    0    117.928770    F    0.000000    T
+     31  BEND          5    4    7    0    120.034623    F    0.000000    T
+     32  BEND          4    5    6    0    120.034626    F    0.000000    T
+     33  BEND          4    5   10    0    117.928771    F    0.000000    T
+     34  BEND          6    5   10    0    122.036603    F    0.000000    T
+     35  BEND          1    6   15    0    121.185739    F    0.000000    T
+     36  BEND          1    6    5    0    120.292781    F    0.000000    T
+     37  BEND          5    6   15    0    118.521480    F    0.000000    T
+     38  BEND          4    7    8    0    120.292777    F    0.000000    T
+     39  BEND          4    7   16    0    118.521472    F    0.000000    T
+     40  BEND          8    7   16    0    121.185751    F    0.000000    T
+     41  BEND          7    8    9    0    120.753914    F    0.000000    T
+     42  BEND          7    8   17    0    120.525198    F    0.000000    T
+     43  BEND          9    8   17    0    118.720888    F    0.000000    T
+     44  BEND          8    9   10    0    119.841886    F    0.000000    T
+     45  BEND          8    9   18    0    120.255581    F    0.000000    T
+     46  BEND         10    9   18    0    119.902533    F    0.000000    T
+     47  BEND          5   10    9    0    121.148029    F    0.000000    T
+     48  BEND          5   10   11    0    118.033998    F    0.000000    T
+     49  BEND          9   10   11    0    120.817973    F    0.000000    T
+     50  TORS          1    2    3    4     -0.000016    F    0.000000    T
+     51  TORS          2    3    4    5      0.000383    F    0.000000    T
+     52  TORS          3    2    1    6     -0.000228    F    0.000000    T
+     53  TORS          2    1    6    5      0.000094    F    0.000000    T
+     54  TORS          5    4    7    8      0.000099    F    0.000000    T
+     55  TORS          3    4    5   10    179.999711    F    0.000000    T
+     56  TORS          4    7    8    9      0.000095    F    0.000000    T
+     57  TORS          7    8    9   10     -0.000128    F    0.000000    T
+     58  TORS          1    6    5    4      0.000286    F    0.000000    T
+     59  TORS          4    5   10    9      0.000219    F    0.000000    T
+     60  TORS          5   10    9    8     -0.000033    F    0.000000    T
+     61  OUTP         13    1    2    6     -0.000084    F    0.000000    T
+     62  OUTP          2    1    6   13     -0.000084    F    0.000000    T
+     63  OUTP          6    1    2   13      0.000082    F    0.000000    T
+     64  OUTP         14    2    1    3     -0.000025    F    0.000000    T
+     65  OUTP          1    2    3   14     -0.000025    F    0.000000    T
+     66  OUTP          3    2    1   14      0.000026    F    0.000000    T
+     67  OUTP         12    3    2    4     -0.000045    F    0.000000    T
+     68  OUTP          4    3    2   12      0.000045    F    0.000000    T
+     69  OUTP          2    3    4   12     -0.000044    F    0.000000    T
+     70  OUTP          5    4    3    7      0.000035    F    0.000000    T
+     71  OUTP          3    4    5    7     -0.000034    F    0.000000    T
+     72  OUTP          7    4    3    5     -0.000034    F    0.000000    T
+     73  OUTP          4    5    6   10      0.000202    F    0.000000    T
+     74  OUTP         10    5    4    6      0.000198    F    0.000000    T
+     75  OUTP          6    5    4   10     -0.000194    F    0.000000    T
+     76  OUTP         15    6    1    5      0.000062    F    0.000000    T
+     77  OUTP          5    6    1   15     -0.000062    F    0.000000    T
+     78  OUTP          1    6    5   15      0.000060    F    0.000000    T
+     79  OUTP         16    7    4    8      0.000022    F    0.000000    T
+     80  OUTP          4    7    8   16      0.000022    F    0.000000    T
+     81  OUTP          8    7    4   16     -0.000022    F    0.000000    T
+     82  OUTP         17    8    7    9     -0.000036    F    0.000000    T
+     83  OUTP          9    8    7   17      0.000036    F    0.000000    T
+     84  OUTP          7    8    9   17     -0.000036    F    0.000000    T
+     85  OUTP         18    9    8   10      0.000035    F    0.000000    T
+     86  OUTP          8    9   10   18      0.000035    F    0.000000    T
+     87  OUTP         10    9    8   18     -0.000035    F    0.000000    T
+     88  OUTP         11   10    5    9      0.000138    F    0.000000    T
+     89  OUTP          5   10    9   11      0.000137    F    0.000000    T
+     90  OUTP          9   10    5   11     -0.000134    F    0.000000    T
+     Geometry optimization of Clone # 1 converged in   9 steps.
+       Clone =      1 GeOp step =      9 Total Energy =        -573.60633339
+     Max Unconstrained Cart Grad =     0.000027      on atom     2
+Energies of final structures:
+ Clone #         Energy         
+     1     -573.6063333914
+>-Successful MondoSCF run 10/19/04 @ 00:13:48-<

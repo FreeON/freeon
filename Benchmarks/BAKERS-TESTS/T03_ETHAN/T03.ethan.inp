@@ -1,0 +1,36 @@
+<BeginTitle>
+   ethane   
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+
+Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect)
+
+MPIInvoke="prun"
+MPIProcFlag="-n"
+MPIProcessors=4
+MPISpatialProc=4
+
+DebugAll =(MaxGeOp)
+DMPOrder=1
+Guess=SuperPos
+SCFMethod=(TC2)
+SCFConvergence=(DIIS)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(VeryTight)           
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+    C   0.000000000     0.000000000     0.769840240
+    C   0.000000000     0.000000000    -0.769840240
+    H   0.889464378     0.513532519     1.134849072
+    H   0.000000000    -1.027065039     1.134849072
+    H  -0.889464378     0.513532519     1.134849072
+    H   0.889464378    -0.513532519    -1.134849072
+    H   0.000000000     1.027065039    -1.134849072
+    H  -0.889464378    -0.513532519    -1.134849072
+<EndGeometry>

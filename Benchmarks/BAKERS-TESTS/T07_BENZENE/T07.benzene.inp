@@ -1,0 +1,40 @@
+<BeginTitle>
+benzene
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+
+Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS,BiSect)
+
+MPIInvoke="prun"
+MPIProcFlag="-n"
+MPIProcessors=4
+MPISpatialProc=4
+
+DebugAll =(MaxGeOp)
+DMPOrder=1
+Guess=SuperPos
+SCFMethod=(TC2)
+SCFConvergence=(DIIS)
+BasisSets=(STO-3G-SPLIT)
+ModelChem=(HF)
+Accuracy =(VeryTight)           
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+C  -1.207353289   -0.697065746    0.000000000
+C  -1.207353289    0.697065746    0.000000000
+C   0.000000000    1.394131493    0.000000000
+C   1.207353289    0.697065746    0.000000000
+C   1.207353289   -0.697065746    0.000000000
+C   0.000000000   -1.394131493    0.000000000
+H  -2.142871219   -1.237187275    0.000000000
+H  -2.142871219    1.237187275    0.000000000
+H   0.000000000    2.474374550    0.000000000
+H   2.142871219    1.237187275    0.000000000
+H   2.142871219   -1.237187275    0.000000000
+H   0.000000000   -2.474374550    0.000000000
+<EndGeometry>

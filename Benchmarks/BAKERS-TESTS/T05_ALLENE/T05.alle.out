@@ -1,0 +1,378 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 10 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak,                      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Eric Schwegler and Anders Niklasson                  
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for IntelLinux.NAG, executing on zinc40.lanl.gov
+ a i686 machine running Linux 2.4.21-15.0.4.ELsmp
+
+ Current HDF :: /scratch/nemeth/T05_4996.hdf
+<<Starting MondoSCF 10/18/04 @ 22:23:50>>
+ SCFStatus : [0,1,1]    :: <SCF> = -106.44575075, dD = 0.21D+01
+ SCFStatus : [1,1,1]    :: <SCF> = -114.25984212, dD = 0.47D-01, DIIS = 0.22D-01
+ SCFStatus : [2,1,1]    :: <SCF> = -114.29737619, dD = 0.28D+00, DIIS = 0.19D-01
+ SCFStatus : [3,1,1]    :: <SCF> = -114.41344656, dD = 0.51D-01, DIIS = 0.37D-02
+ SCFStatus : [4,1,1]    :: <SCF> = -114.41767885, dD = 0.91D-02, DIIS = 0.56D-03
+ SCFStatus : [5,1,1]    :: <SCF> = -114.41781908, dD = 0.42D-02, DIIS = 0.30D-03
+ SCFStatus : [6,1,1]    :: <SCF> = -114.41784498, dD = 0.30D-02, DIIS = 0.98D-04
+ SCFStatus : [7,1,1]    :: <SCF> = -114.41785134, dD = 0.20D-03, DIIS = 0.11D-04
+ SCFStatus : [8,1,1]    :: <SCF> = -114.41785141, dD = 0.48D-04, DIIS = 0.31D-05
+ SCFStatus : [9,1,1]    :: <SCF> = -114.41785141, dD = 0.18D-04, DIIS = 0.83D-06
+ SCFStatus : [10,1,1]   :: <SCF> = -114.41785141, dD = 0.17D-05, DIIS = 0.19D-06
+ Normal SCF convergence.
+ Sparsity of B=  20.58 % # of SpB%NNon0       142
+Sparsity of Gc=  29.56 % # of  Gc%NNon0       266
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+ Internals at step #1
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.319870    F    0.000000    T
+      2  STRE          3    6    0    0      1.080214    F    0.000000    T
+      3  STRE          3    7    0    0      1.080214    F    0.000000    T
+      4  STRE          1    2    0    0      1.319870    F    0.000000    T
+      5  STRE          1    4    0    0      1.080214    F    0.000000    T
+      6  STRE          1    5    0    0      1.080214    F    0.000000    T
+      7  BEND          2    1    4    0    120.005955    F    0.000000    T
+      8  BEND          2    1    5    0    120.005955    F    0.000000    T
+      9  BEND          4    1    5    0    119.988089    F    0.000000    T
+     10  LINB1         1    2    3    4    180.000000    F    0.000000    T
+     11  LINB2         1    2    3    4    179.999999    F    0.000000    T
+     12  BEND          2    3    6    0    120.005955    F    0.000000    T
+     13  BEND          2    3    7    0    120.005955    F    0.000000    T
+     14  BEND          6    3    7    0    119.988089    F    0.000000    T
+     15  TORS          1    2    3    7      0.000000    F    0.000000    F
+     16  TORS          3    2    1    5      0.000000    F    0.000000    F
+     17  OUTP          4    1    2    5     -0.000000    F    0.000000    T
+     18  OUTP          2    1    4    5     -0.000000    F    0.000000    T
+     19  OUTP          5    1    2    4     -0.000000    F    0.000000    T
+     20  OUTP          6    3    2    7     -0.000000    F    0.000000    T
+     21  OUTP          2    3    6    7     -0.000000    F    0.000000    T
+     22  OUTP          7    3    2    6     -0.000000    F    0.000000    T
+     23  TORSL         4    1    3    7     90.000000    F    0.000000    T
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.049683 ChangeNorm=     0.014911
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+Iterative back-transformation, No. Int. Coords=     23
+ Sparsity of B=  20.58 % # of SpB%NNon0       142
+Sparsity of Gc=  29.56 % # of  Gc%NNon0       266
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+Step=   1   Max_DX=     0.099365  X_RMSD=     0.035413
+Step=   2   Max_DX=     0.000241  X_RMSD=     0.000133
+Step=   3   Max_DX=     0.000006  X_RMSD=     0.000002
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      1 Total Energy =        -114.41785141
+                   Max intl Grad =     0.049683 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.060679      on atom     1
+                   RMS intl Grad =     0.014912
+                  Max STRE Displ =     0.052582 between atoms    1   2
+                  Max BEND Displ =     2.151316 between atoms    4   1   5
+                  Max LINB Displ =     0.000001 between atoms    1   2   3
+                  Max OUTP Displ =     0.000001 between atoms    5   1   2   4
+                  Max TORS Displ =     0.000000 between atoms    4   1   3   7
+                       RMS Displ =     0.032309
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.93D-01, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.21D-01, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.46D-08, %Non0=0.10D+03
+ P2Use : AO-DMX 4       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,2]    :: <SCF> = -114.41892163, dD = 0.24D-01
+ SCFStatus : [1,1,2]    :: <SCF> = -114.41986125, dD = 0.79D-03, DIIS = 0.51D-03
+ SCFStatus : [2,1,2]    :: <SCF> = -114.41987267, dD = 0.83D-02, DIIS = 0.46D-03
+ SCFStatus : [3,1,2]    :: <SCF> = -114.41993720, dD = 0.11D-02, DIIS = 0.84D-04
+ SCFStatus : [4,1,2]    :: <SCF> = -114.41993860, dD = 0.39D-03, DIIS = 0.18D-04
+ SCFStatus : [5,1,2]    :: <SCF> = -114.41993872, dD = 0.22D-04, DIIS = 0.12D-05
+ SCFStatus : [6,1,2]    :: <SCF> = -114.41993872, dD = 0.10D-05, DIIS = 0.12D-06
+ Normal SCF convergence.
+ Sparsity of B=  21.30 % # of SpB%NNon0       147
+Sparsity of Gc=  29.78 % # of  Gc%NNon0       268
+Sparsity of Ch=  40.00 % # of  Ch%NNon0       174
+ Internals at step #2
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.267289    F    0.000000    T
+      2  STRE          3    6    0    0      1.081737    F    0.000000    T
+      3  STRE          3    7    0    0      1.081737    F    0.000000    T
+      4  STRE          1    2    0    0      1.267288    F    0.000000    T
+      5  STRE          1    4    0    0      1.081737    F    0.000000    T
+      6  STRE          1    5    0    0      1.081737    F    0.000000    T
+      7  BEND          2    1    4    0    121.081613    F    0.000000    T
+      8  BEND          2    1    5    0    121.081613    F    0.000000    T
+      9  BEND          4    1    5    0    117.836773    F    0.000000    T
+     10  LINB1         1    2    3    6   -179.999999    F    0.000000    T
+     11  LINB2         1    2    3    6    180.000000    F    0.000000    T
+     12  BEND          2    3    6    0    121.081595    F    0.000000    T
+     13  BEND          2    3    7    0    121.081596    F    0.000000    T
+     14  BEND          6    3    7    0    117.836809    F    0.000000    T
+     15  TORS          1    2    3    6      0.000000    F    0.000000    F
+     16  TORS          3    2    1    4      0.000000    F    0.000000    F
+     17  OUTP          5    1    2    4     -0.000001    F    0.000000    T
+     18  OUTP          2    1    4    5     -0.000001    F    0.000000    T
+     19  OUTP          4    1    2    5      0.000001    F    0.000000    T
+     20  OUTP          7    3    2    6      0.000000    F    0.000000    T
+     21  OUTP          2    3    6    7      0.000000    F    0.000000    T
+     22  OUTP          6    3    2    7     -0.000000    F    0.000000    T
+     23  TORSL         4    1    3    6    -89.999999    F    0.000000    T
+ Sparsity of B=  20.58 % # of SpB%NNon0       142
+Sparsity of Gc=  29.56 % # of  Gc%NNon0       266
+Sparsity of Ch=  39.77 % # of  Ch%NNon0       173
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.049683 ChangeNorm=     0.014911
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  21.30 % # of SpB%NNon0       147
+Sparsity of Gc=  29.78 % # of  Gc%NNon0       268
+Sparsity of Ch=  40.00 % # of  Ch%NNon0       174
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.040356 ChangeNorm=     0.012057
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+Iterative back-transformation, No. Int. Coords=     23
+ Sparsity of B=  21.30 % # of SpB%NNon0       147
+Sparsity of Gc=  29.78 % # of  Gc%NNon0       268
+Sparsity of Ch=  40.00 % # of  Ch%NNon0       174
+Step=   1   Max_DX=     0.078889  X_RMSD=     0.031657
+Step=   2   Max_DX=     0.000239  X_RMSD=     0.000133
+Step=   3   Max_DX=     0.000006  X_RMSD=     0.000002
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      2 Total Energy =        -114.41993872
+                   Max intl Grad =     0.040356 between atoms    1   2   0   0
+     Max Unconstrained Cart Grad =     0.032928      on atom     1
+                   RMS intl Grad =     0.012057
+                  Max STRE Displ =     0.023568 between atoms    1   2
+                  Max BEND Displ =     2.151318 between atoms    4   1   5
+                  Max LINB Displ =     0.000009 between atoms    1   2   3
+                  Max OUTP Displ =     0.000006 between atoms    6   3   2   7
+                  Max TORS Displ =     0.000002 between atoms    4   1   3   6
+                       RMS Displ =     0.018916
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.90D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.64D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.38D-12, %Non0=0.10D+03
+ SCFStatus : [0,1,3]    :: <SCF> = -114.42148533, dD = 0.10D-01
+ SCFStatus : [1,1,3]    :: <SCF> = -114.42166005, dD = 0.30D-03, DIIS = 0.19D-03
+ SCFStatus : [2,1,3]    :: <SCF> = -114.42166175, dD = 0.29D-02, DIIS = 0.17D-03
+ SCFStatus : [3,1,3]    :: <SCF> = -114.42167024, dD = 0.35D-03, DIIS = 0.26D-04
+ SCFStatus : [4,1,3]    :: <SCF> = -114.42167039, dD = 0.28D-04, DIIS = 0.18D-05
+ SCFStatus : [5,1,3]    :: <SCF> = -114.42167039, dD = 0.57D-05, DIIS = 0.49D-06
+ Normal SCF convergence.
+ Sparsity of B=  26.81 % # of SpB%NNon0       185
+Sparsity of Gc=  31.11 % # of  Gc%NNon0       280
+Sparsity of Ch=  34.94 % # of  Ch%NNon0       152
+ Internals at step #3
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.290856    F    0.000000    T
+      2  STRE          3    6    0    0      1.083259    F    0.000000    T
+      3  STRE          3    7    0    0      1.083259    F    0.000000    T
+      4  STRE          1    2    0    0      1.290856    F    0.000000    T
+      5  STRE          1    4    0    0      1.083260    F    0.000000    T
+      6  STRE          1    5    0    0      1.083260    F    0.000000    T
+      7  BEND          2    1    4    0    122.157272    F    0.000000    T
+      8  BEND          2    1    5    0    122.157272    F    0.000000    T
+      9  BEND          4    1    5    0    115.685456    F    0.000000    T
+     10  LINB1         1    2    3    6    179.999992    F    0.000000    T
+     11  LINB2         1    2    3    6   -179.999994    F    0.000000    T
+     12  BEND          2    3    6    0    122.157236    F    0.000000    T
+     13  BEND          2    3    7    0    122.157237    F    0.000000    T
+     14  BEND          6    3    7    0    115.685527    F    0.000000    T
+     15  TORS          1    2    3    6      0.000000    F    0.000000    F
+     16  TORS          3    2    1    4      0.000000    F    0.000000    F
+     17  OUTP          5    1    2    4      0.000000    F    0.000000    T
+     18  OUTP          2    1    4    5      0.000000    F    0.000000    T
+     19  OUTP          4    1    2    5     -0.000000    F    0.000000    T
+     20  OUTP          7    3    2    6      0.000006    F    0.000000    T
+     21  OUTP          2    3    6    7      0.000006    F    0.000000    T
+     22  OUTP          6    3    2    7     -0.000006    F    0.000000    T
+     23  TORSL         5    1    3    7    -89.999981    F    0.000000    T
+ Sparsity of B=  20.58 % # of SpB%NNon0       142
+Sparsity of Gc=  29.56 % # of  Gc%NNon0       266
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.049683 ChangeNorm=     0.014911
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  21.30 % # of SpB%NNon0       147
+Sparsity of Gc=  29.78 % # of  Gc%NNon0       268
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.040356 ChangeNorm=     0.012057
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  26.81 % # of SpB%NNon0       185
+Sparsity of Gc=  31.11 % # of  Gc%NNon0       280
+Sparsity of Ch=  34.94 % # of  Ch%NNon0       152
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.005636 ChangeNorm=     0.001739
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     23
+ Sparsity of B=  26.81 % # of SpB%NNon0       185
+Sparsity of Gc=  31.11 % # of  Gc%NNon0       280
+Sparsity of Ch=  34.94 % # of  Ch%NNon0       152
+Step=   1   Max_DX=     0.012517  X_RMSD=     0.004921
+Step=   2   Max_DX=     0.000010  X_RMSD=     0.000005
+Step=   3   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   3 steps
+       Clone =      1 GeOp step =      3 Total Energy =        -114.42167039
+                   Max intl Grad =     0.005636 between atoms    2   3   0   0
+     Max Unconstrained Cart Grad =     0.003531      on atom     3
+                   RMS intl Grad =     0.001739
+                  Max STRE Displ =     0.002888 between atoms    2   3
+                  Max BEND Displ =     0.428959 between atoms    4   1   5
+                  Max LINB Displ =     0.000008 between atoms    1   2   3
+                  Max OUTP Displ =     0.000002 between atoms    5   1   2   4
+                  Max TORS Displ =     0.000138 between atoms    5   1   3   7
+                       RMS Displ =     0.003178
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.64D-02, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.15D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.00D+00, %Non0=0.10D+03
+ SCFStatus : [0,1,4]    :: <SCF> = -114.42171612, dD = 0.11D-02
+ SCFStatus : [1,1,4]    :: <SCF> = -114.42171886, dD = 0.32D-04, DIIS = 0.21D-04
+ SCFStatus : [2,1,4]    :: <SCF> = -114.42171888, dD = 0.31D-03, DIIS = 0.20D-04
+ SCFStatus : [3,1,4]    :: <SCF> = -114.42171899, dD = 0.36D-04, DIIS = 0.26D-05
+ SCFStatus : [4,1,4]    :: <SCF> = -114.42171899, dD = 0.29D-05, DIIS = 0.29D-06
+ SCFStatus : [5,1,4]    :: <SCF> = -114.42171899, dD = 0.76D-06, DIIS = 0.14D-06
+ Normal SCF convergence.
+ Sparsity of B=  25.36 % # of SpB%NNon0       175
+Sparsity of Gc=  30.22 % # of  Gc%NNon0       272
+Sparsity of Ch=  34.48 % # of  Ch%NNon0       150
+ Internals at step #4
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.287967    F    0.000000    T
+      2  STRE          3    6    0    0      1.082691    F    0.000000    T
+      3  STRE          3    7    0    0      1.082691    F    0.000000    T
+      4  STRE          1    2    0    0      1.287967    F    0.000000    T
+      5  STRE          1    4    0    0      1.082691    F    0.000000    T
+      6  STRE          1    5    0    0      1.082691    F    0.000000    T
+      7  BEND          2    1    4    0    121.942793    F    0.000000    T
+      8  BEND          2    1    5    0    121.942792    F    0.000000    T
+      9  BEND          4    1    5    0    116.114415    F    0.000000    T
+     10  LINB1         1    2    3    7    179.999999    F    0.000000    T
+     11  LINB2         1    2    3    7    179.999997    F    0.000000    T
+     12  BEND          2    3    6    0    121.942785    F    0.000000    T
+     13  BEND          2    3    7    0    121.942782    F    0.000000    T
+     14  BEND          6    3    7    0    116.114433    F    0.000000    T
+     15  TORS          1    2    3    7      0.000000    F    0.000000    F
+     16  TORS          3    2    1    5      0.000000    F    0.000000    F
+     17  OUTP          4    1    2    5     -0.000003    F    0.000000    T
+     18  OUTP          2    1    4    5      0.000002    F    0.000000    T
+     19  OUTP          5    1    2    4      0.000003    F    0.000000    T
+     20  OUTP          6    3    2    7     -0.000007    F    0.000000    T
+     21  OUTP          2    3    6    7      0.000007    F    0.000000    T
+     22  OUTP          7    3    2    6      0.000007    F    0.000000    T
+     23  TORSL         5    1    3    7    -90.000119    F    0.000000    T
+ Sparsity of B=  20.58 % # of SpB%NNon0       142
+Sparsity of Gc=  29.56 % # of  Gc%NNon0       266
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.049683 ChangeNorm=     0.014911
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  21.30 % # of SpB%NNon0       147
+Sparsity of Gc=  29.78 % # of  Gc%NNon0       268
+Sparsity of Ch=  38.16 % # of  Ch%NNon0       166
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.040356 ChangeNorm=     0.012057
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Grad Trf, step=   3 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   3 steps
+ Sparsity of B=  26.81 % # of SpB%NNon0       185
+Sparsity of Gc=  31.11 % # of  Gc%NNon0       280
+Sparsity of Ch=  34.94 % # of  Ch%NNon0       152
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.005636 ChangeNorm=     0.001739
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  25.36 % # of SpB%NNon0       175
+Sparsity of Gc=  30.22 % # of  Gc%NNon0       272
+Sparsity of Ch=  34.48 % # of  Ch%NNon0       150
+Gradient transformation, No. Int. Coords=      23
+Grad Trf, step=   1 MaxChange=     0.000162 ChangeNorm=     0.000061
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=     23
+ Sparsity of B=  25.36 % # of SpB%NNon0       175
+Sparsity of Gc=  30.22 % # of  Gc%NNon0       272
+Sparsity of Ch=  34.48 % # of  Ch%NNon0       150
+Step=   1   Max_DX=     0.000684  X_RMSD=     0.000288
+Step=   2   Max_DX=     0.000000  X_RMSD=     0.000000
+Coordinate back-transformation converged in   2 steps
+       Clone =      1 GeOp step =      4 Total Energy =        -114.42171899
+                   Max intl Grad =     0.000162 between atoms    2   3   0   0
+     Max Unconstrained Cart Grad =     0.000078      on atom     5
+                   RMS intl Grad =     0.000061
+                  Max STRE Displ =     0.000085 between atoms    2   3
+                  Max BEND Displ =     0.036046 between atoms    4   1   5
+                  Max LINB Displ =     0.000058 between atoms    1   2   3
+                  Max OUTP Displ =     0.000033 between atoms    5   1   2   4
+                  Max TORS Displ =     0.000127 between atoms    5   1   3   7
+                       RMS Displ =     0.000233
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=0.97D-04, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.55D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=0.18D-14, %Non0=0.10D+03
+ SCFStatus : [0,1,5]    :: <SCF> = -114.42171912, dD = 0.32D-04
+ SCFStatus : [1,1,5]    :: <SCF> = -114.42171912, dD = 0.14D-05, DIIS = 0.92D-06
+ SCFStatus : [2,1,5]    :: <SCF> = -114.42171912, dD = 0.12D-04, DIIS = 0.84D-06
+ SCFStatus : [3,1,5]    :: <SCF> = -114.42171912, dD = 0.46D-05, DIIS = 0.47D-06
+ Normal SCF convergence.
+ Sparsity of B=  26.81 % # of SpB%NNon0       185
+Sparsity of Gc=  34.44 % # of  Gc%NNon0       310
+Sparsity of Ch=  37.01 % # of  Ch%NNon0       161
+ Internals at step #5
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          2    3    0    0      1.287882    F    0.000000    T
+      2  STRE          3    6    0    0      1.082716    F    0.000000    T
+      3  STRE          3    7    0    0      1.082716    F    0.000000    T
+      4  STRE          1    2    0    0      1.287882    F    0.000000    T
+      5  STRE          1    4    0    0      1.082716    F    0.000000    T
+      6  STRE          1    5    0    0      1.082716    F    0.000000    T
+      7  BEND          2    1    4    0    121.924771    F    0.000000    T
+      8  BEND          2    1    5    0    121.924769    F    0.000000    T
+      9  BEND          4    1    5    0    116.150461    F    0.000000    T
+     10  LINB1         1    2    3    6   -179.999949    F    0.000000    T
+     11  LINB2         1    2    3    6    179.999945    F    0.000000    T
+     12  BEND          2    3    6    0    121.924766    F    0.000000    T
+     13  BEND          2    3    7    0    121.924771    F    0.000000    T
+     14  BEND          6    3    7    0    116.150463    F    0.000000    T
+     15  TORS          1    2    3    6      0.000000    F    0.000000    F
+     16  TORS          3    2    1    5      0.000000    F    0.000000    F
+     17  OUTP          4    1    2    5      0.000031    F    0.000000    T
+     18  OUTP          2    1    4    5     -0.000029    F    0.000000    T
+     19  OUTP          5    1    2    4     -0.000031    F    0.000000    T
+     20  OUTP          7    3    2    6     -0.000026    F    0.000000    T
+     21  OUTP          2    3    6    7     -0.000025    F    0.000000    T
+     22  OUTP          6    3    2    7      0.000026    F    0.000000    T
+     23  TORSL         4    1    3    6    -89.999859    F    0.000000    T
+     Geometry optimization of Clone # 1 converged in   5 steps.
+       Clone =      1 GeOp step =      5 Total Energy =        -114.42171912
+     Max Unconstrained Cart Grad =     0.000036      on atom     1
+Energies of final structures:
+ Clone #         Energy         
+     1     -114.4217191215
+>-Successful MondoSCF run 10/18/04 @ 22:25:30-<
