@@ -1,3 +1,90 @@
+2004-02-28 00:27  vweber
+
+	* SCFeqs/DIIS.F90: I may have fixed the 9th step bug (=size(B
+	matrix)+1). Then both the 8-9th cycles gave the same M which means
+	both 8-9th cycles generated the same B matrix -> same diis coef ->
+	same density matrices and a nice dD=0.
+
+2004-02-27 00:12  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_all.ps, Beta_all.ps, Gamma_all.ps,
+	Makefile, Response3.tex, DATA/H2O_1D/Alpha_All.agr,
+	DATA/H2O_1D/Alpha_All.ps, DATA/H2O_1D/Beta_All.agr,
+	DATA/H2O_1D/Beta_All.ps, DATA/H2O_1D/Gamma_All.agr,
+	DATA/H2O_1D/Gamma_All.ps: [no log message]
+
+2004-02-26 16:25  mchalla
+
+	* Validate/sub_pbs: works better with zinc.
+
+2004-02-26 16:24  mchalla
+
+	* TwoE/Makefile: Now TwoE compiles again.
+
+2004-02-26 16:24  mchalla
+
+	* SCFeqs/ODA.F90: Goes better with NAG.
+
+2004-02-26 16:23  mchalla
+
+	* MondoSCF2/Optimizer.F90, MondoSCF2/SCFs.F90, QCTC/JGen.F90: Works
+	better with NAG.
+
+2004-02-26 16:22  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: Update of NAG
+
+2004-02-26 13:44  tymczak
+
+	* QCTC/PBCFarField.F90: Added Back in the Quadripole Correction,
+	Mkaes the matrix elements invariant to translation
+
+2004-02-24 16:03  vweber
+
+	* MondoSCF2/SCFs.F90: Fixed numerical exchange gradient. The prob.
+	was that it saved the gradients (=big_dbl) through GeoArchive. Now
+	it initialize the gradients and box forces before to archive.
+
+2004-02-22 20:05  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_Decay_Z_6-31G.eps, Alpha_all.ps,
+	Alpha_h2o3D_6-31G_6-31Gss_G_T.ps, Beta_all.ps,
+	Beta_h2o3D_6-31G_6-31Gss_G_T.ps, DPrimeMix2.ps, Gamma_ONX_T.ps,
+	Gamma_QCTC_T.ps, Gamma_TC2R_T.ps, Gamma_all.ps,
+	Gamma_h2o3D_6-31G_6-31Gss_G_T.ps, Makefile, Mix_h2o3D_6-31G_T.ps,
+	Response3.tex, DATA/H2O_1D/Alpha_All.agr, DATA/H2O_1D/Alpha_All.ps,
+	DATA/H2O_1D/Beta_All.agr, DATA/H2O_1D/Beta_All.ps,
+	DATA/H2O_1D/Gamma_All.agr, DATA/H2O_1D/Gamma_All.ps,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.arg,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.agr,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.arg,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.pdf: [no log message]
+
+2004-02-20 19:54  vweber
+
+	* Docs/DM_Papers/PERT_3/DATA/H2O_GAMMA/:
+	Gamma_h2o3D_6-31G_6-31Gss_G_T.arg, Gamma_ONX_T.agr,
+	Gamma_ONX_T.dat, Gamma_ONX_T_fit.dat, Gamma_QCTC_T.agr,
+	Gamma_QCTC_T.dat, Gamma_QCTC_T_fit.dat, Gamma_TC2R_T.agr,
+	Gamma_TC2R_T.dat, Gamma_TC2R_T_fit1.dat, Gamma_TC2R_T_fit2.dat,
+	Gamma_h2o3D_6-31G_6-31Gss_G_T.agr, Timing_h2o3D_6-31Gss_T.dat: [no
+	log message]
+
+2004-02-18 10:16  vweber
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: [no log message]
+
+2004-02-17 09:48  mchalla
+
+	* Docs/DM_Papers/PERT_PROP_1/: Figure_1.ps, Figure_2.ps, PROP2.tex:
+	First run at an ER propsal.
+
+2004-02-16 07:56  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-02-16 07:50  mchalla
 
 	* Docs/Bib/mondo_new.bib: A few new entries, and some cleaning.
