@@ -80,14 +80,14 @@ MODULE DrvSCFs
             Ctrl%Previous(1)=Ctrl%Previous(1)+1
             CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
          ENDIF
-         CALL Invoke('P2Use',CtrlVect)
+         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
          CALL CleanScratch(Ctrl,'CleanLastGeom')
       ELSEIF(Ctrl%Rest)THEN
 !        Restart from a previous density
          CALL LogSCF(Ctrl%Current,'Restarting from '//TRIM(Ctrl%OldInfo),.TRUE.)
          CtrlVect=SetCtrlVect(Ctrl,'Restart')
-         CALL Invoke('P2Use',CtrlVect)
+         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
          Ctrl%Rest=.FALSE.
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
@@ -104,7 +104,7 @@ MODULE DrvSCFs
          CALL LogSCF(Ctrl%Current,' Density guess from superposition of AOs.')
 !        Create density from guess
          CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
-         CALL Invoke('P2Use',CtrlVect)
+         CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
       ELSEIF(Ctrl%InkFok)THEN
 !        First do a full density build 
@@ -176,7 +176,7 @@ MODULE DrvSCFs
       ELSE
          CALL MondoHalt(MISC_ERROR,' Neither FactoredS or LOrthog invoked in OneEMats ')
       ENDIF
-      CALL Invoke('MakeT',CtrlVect)
+      CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
     END SUBROUTINE OneEMats
 
     SUBROUTINE VisDX(Ctrl)

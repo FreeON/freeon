@@ -25,7 +25,9 @@ PROGRAM MondoSCF
 !------------------------------------------------------------
 
 #if defined(PARALLEL) && defined(MPI2)
+WRITE(*,*)' INITING '
   CALL InitMPI()
+WRITE(*,*)' INITed '
   InParallel=.FALSE.
   IF(MyID==0)THEN
 #endif

@@ -38,7 +38,7 @@ PROGRAM MakeT
 !--------------------------------------- 
 ! Start up macro
 !
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !----------------------------------------------
 ! Get basis set and geometry
 !

@@ -47,11 +47,10 @@ MODULE Macros
          IF(PRESENT(Serial_O))THEN
             Serial=Serial_O
          ELSE
-            Serial=.FALSE.
+            Serial=.TRUE.
          ENDIF
 !        Fire up MPI
          IF(.NOT.Serial)CALL InitMPI()
-#else
 #endif
 !        Get arguments and open InfFile 
          CALL Get(Args)

@@ -111,6 +111,13 @@ MODULE LinAlg
       MODULE PROCEDURE Plot_DBCSR
 #endif
    END INTERFACE
+
+   INTERFACE SetToI
+      MODULE PROCEDURE SetToI_BCSR &
+#ifdef PARALLEL
+                      ,SetToI_DBCSR
+#endif
+   END INTERFACE
 !------------------------------------------------------------------------
 !  Global stuff for matrix algebra
 !
@@ -1612,6 +1619,78 @@ MODULE LinAlg
 #endif
       END FUNCTION Trace_BCSR
 !
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!     MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX E
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   SUBROUTINE SetToI_BCSR(A,B)
+      TYPE(BCSR)              :: A
+      TYPE(DBL_RNK2),OPTIONAL :: B
+      INTEGER                 :: I,N,N2,Q,R       
+#ifdef PARALLEL
+         IF(MyId==ROOT)THEN
+            IF(.NOT.AllocQ(A%Alloc))CALL New(A)
+#endif
+      Q=1
+      R=1
+      A%NAtms=0
+      A%RowPt%I(1)=1
+      DO I=1,NAtoms
+         A%NAtms=A%NAtms+1  
+         N2=BSiz%I(I)**2
+         A%ColPt%I(Q)=I
+         A%BlkPt%I(Q)=R
+         IF(PRESENT(B))THEN
+            A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+         ELSE
+           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+         ENDIF
+         Q=Q+1 
+         R=R+N2     
+         A%RowPt%I(A%NAtms+1)=Q
+      ENDDO
+      A%NBlks=Q-1 
+      A%NNon0=R-1
+#ifdef PARALLEL
+      ENDIF
+#endif
+   END SUBROUTINE SetToI_BCSR
+#ifdef PARALLEL
+   SUBROUTINE SetToI_DBCSR(A,B)
+      TYPE(DBCSR)             :: A
+      TYPE(DBL_RNK2),OPTIONAL :: B
+      INTEGER                 :: I,N,N2,Q,R       
+      IF(.NOT.AllocQ(A%Alloc))CALL New(A)
+      Q=1
+      R=1
+      A%NAtms=0
+      A%RowPt%I(1)=1
+      DO I=Beg%I(MyId),End%I(MyId)
+         A%NAtms=A%NAtms+1  
+         N2=BSiz%I(I)**2
+         A%ColPt%I(Q)=I
+         A%BlkPt%I(Q)=R
+         IF(PRESENT(B))THEN
+            A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+         ELSE
+           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+         ENDIF
+         Q=Q+1 
+         R=R+N2     
+         A%RowPt%I(A%NAtms+1)=Q
+      ENDDO
+      A%NBlks=Q-1 
+      A%NNon0=R-1
+      CALL LocalToGlobal(A)
+   END SUBROUTINE SetToI_DBCSR
+#endif
+   SUBROUTINE DiagI(N,A)
+      INTEGER                      :: I,N
+      REAL(DOUBLE), DIMENSION(N,N) :: A
+      A=Zero
+      DO I=1,N
+         A(I,I)=One
+      ENDDO
+   END SUBROUTINE DiagI
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !     MATRIX DOT PRODUCT MATRIX DOT PRODUCT MATRIX DOT PRODUCT MATRIX DOT PRODUCT
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

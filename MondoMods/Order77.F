@@ -212,7 +212,7 @@ C
       IF (NN .LT. 1) THEN                                               
          write(*,*)                                                     
      +      'the number of values to be sorted is not positive.',nn        
-         STOP 
+         CALL Trap() 
          RETURN                                                         
       ENDIF                                                             
 C                                                                       
@@ -220,7 +220,7 @@ C
       IF (KK.NE.1 .AND. KK.NE.2) THEN                                   
          write(*,*)                                                     
      +      'The sort control parameter, K, is not 2, 1, -1, or -2.'    
-         RETURN                                                         
+         CALL Trap() 
       ENDIF                                                             
 C                                                                       
 C     Alter array DX to get decreasing order if needed                  
@@ -428,13 +428,15 @@ C***FIRST EXECUTABLE STATEMENT  ISORT
       NN = N
       IF (NN .LT. 1) THEN
 C        The number of values to be sorted is not positive
-         STOP ' Died from error 1 in I8Sort '
+         WRITE(*,*)' Died from error 1 in I8Sort '
+         CALL Trap()
       ENDIF
 C
       KK = ABS(KFLAG)
       IF (KK.NE.1 .AND. KK.NE.2) THEN
 C        The sort control parameter, K, is not 2, 1, -1, or -2
-        STOP ' Died from error 2 in I8Sort '
+         WRITE(*,*)' Died from error 2 in I8Sort '
+         CALL Trap()
       ENDIF
 C
 C     Alter array IX to get decreasing order if needed
@@ -717,13 +719,13 @@ c
       NN = N
       IF (NN.LT.1) THEN
         write(*,*)' The number of values to be sorted was not positive.'
-        stop
+        CALL Trap()
       ENDIF
       IF( N.EQ.1 ) RETURN
       KK = ABS(KFLAG)
       IF ( KK.NE.1 ) THEN
         write(*,*)'The sort control parameter, K, was not 1 or -1.'
-        stop
+        CALL Trap()
       ENDIF
 C
 C     Alter array IA to get decreasing order if needed.
@@ -897,13 +899,13 @@ c
       NN = N
       IF (NN.LT.1) THEN
         write(*,*)' The number of values to be sorted was not positive.'
-        stop
+        CALL Trap()
       ENDIF
       IF( N.EQ.1 ) RETURN
       KK = ABS(KFLAG)
       IF ( KK.NE.1 ) THEN
         write(*,*)'The sort control parameter, K, was not 1 or -1.'
-        stop
+        CALL Trap()
       ENDIF
 C
 C     Alter array IA to get decreasing order if needed.

@@ -5,6 +5,7 @@ MODULE MondoMPI
    USE ProcessControl
    USE MPIInclude
    USE MemMan
+   USE Parse
    IMPLICIT NONE   
 #ifdef PARALLEL
 !    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
@@ -61,7 +62,7 @@ MODULE MondoMPI
 !
       SUBROUTINE InitMPI()
          INTEGER :: IErr
-         CHARACTER(LEN=4),PARAMETER :: Sub='Init'
+         CHARACTER(LEN=7),PARAMETER :: Sub='InitMPI'
 !------------------------------------------------
          CALL MPI_INIT(IErr)
          CALL ErrChk(IErr,Sub)
@@ -74,7 +75,7 @@ MODULE MondoMPI
 
       SUBROUTINE FiniMPI()
          INTEGER                    :: IErr
-         CHARACTER(LEN=4),PARAMETER :: Sub='Fini'
+         CHARACTER(LEN=7),PARAMETER :: Sub='FiniMPI'
          CALL MPI_FINALIZE(IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE FiniMPI
@@ -251,7 +252,11 @@ MODULE MondoMPI
        SUBROUTINE BCast_DEBG(A)
          TYPE(DEBG) :: A
          CALL BCast(A%Key)
+         CALL BCast(A%Chk)
          CALL BCast(A%Mat)
+         CALL BCast(A%Set)
+         CALL BCast(A%Int)
+         CALL BCast(A%Rho)
          CALL BCast(A%Fmt)
        END SUBROUTINE BCast_DEBG
 !===============================================================
@@ -753,13 +758,18 @@ MODULE MondoMPI
 !
 !     NODE ALLINGMENT
 !
-      SUBROUTINE AlignNodes()
-         INTEGER                     :: IErr
+      SUBROUTINE AlignNodes(String_O)
+         INTEGER                        :: IErr
+         CHARACTER(LEN=*),OPTIONAL      :: String_O
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String 
          CHARACTER(LEN=10),PARAMETER :: Sub='AlignNodes'
          CALL MPI_BARRIER(MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
+         IF(PRESENT(String_O))THEN
+            String="Node#"//TRIM(IntToChar(MyId))//' :: '//TRIM(String_O)
+            WRITE(*,*)TRIM(String)
+         ENDIF
       END SUBROUTINE AlignNodes
-
 !===============================================================
 !
 !     Error checking

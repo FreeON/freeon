@@ -16,15 +16,15 @@ PROGRAM MakeRho
   USE BraBloks
   USE RhoBlok
   USE RhoTools
-#ifdef PARALLEL
-  USE MondoMPI
-#endif
+!#ifdef PARALLEL
+!  USE MondoMPI
+!#endif
   IMPLICIT NONE
-#ifdef PARALLEL
-  TYPE(DBCSR)               :: Dmat,D1,D2
-#else
+!#ifdef PARALLEL
+!  TYPE(DBCSR)               :: Dmat,D1,D2
+!#else
   TYPE(BCSR)                :: Dmat,D1,D2
-#endif
+!#endif
 #ifdef PERIODIC 
   INTEGER                   :: NC
   REAL(DOUBLE),DIMENSION(3) :: B

@@ -56,11 +56,11 @@ MODULE Overlay
          ENDIF
 
 #ifdef PARALLEL
-         IF(PRESENT(MPIRun_O))THEN
-#if !defined(MPI2) 
-            CALL SerialSpawn(Command,CmndOpts,MPIRun_O=MPIRun_O,AbsPath_O=AbsPath_O)
-#else    
+         IF(PRESENT(MPIRun_O).OR.NPrc==1)THEN
+#ifdef MPI2 
             CALL MPISpawn(Command,CmndOpts)
+#else    
+            CALL SerialSpawn(Command,CmndOpts,MPIRun_O=MPIRun_O,AbsPath_O=AbsPath_O)
 #endif
          ELSE
 #endif

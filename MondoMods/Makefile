@@ -35,8 +35,8 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
 #
 MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            GlobalObjects.o BasisSetParameters.o  MPIInclude.o   \
-           ProcessControl.o Trap.o MemMan.o MondoMPI.o          \
-           Clock.o  Seconds.o  ParsingConstants.o Parse.o       \
+           ProcessControl.o Trap.o MemMan.o Clock.o  Seconds.o  \
+           ParsingConstants.o Parse.o MondoMPI.o                \
            Indexing.o SetEq.o SetEq77.o InOut.o HDF5Wrap.o      \
            Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
            LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
@@ -46,8 +46,8 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
-           ProcessControl.x Trap.x MemMan.x MondoMPI.x          \
-           Clock.x  Seconds.x  ParsingConstants.x Parse.x       \
+           ProcessControl.x Trap.x MemMan.x Clock.x  Seconds.x  \
+           ParsingConstants.x Parse.x  MondoMPI.x               \
            Indexing.x SetEq.x SetEq77.x InOut.x HDF5Wrap.x      \
            Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
            LinAlg.x LinAlg77.x MatFunk.x SMWrap.x SpecFun.x     \
@@ -173,7 +173,7 @@ McMurch.o:	 	MemMan.o GlobalScalars.o DerivedTypes.o
 MemMan.o: 		ProcessControl.o GlobalObjects.o GlobalCharacters.o\
 			GlobalScalars.o DerivedTypes.o 
 #
-MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o \
+MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o Parse.o \
 			GlobalObjects.o GlobalScalars.o DerivedTypes.o 
 #
 Order.o: 		Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
