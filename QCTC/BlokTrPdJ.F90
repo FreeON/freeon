@@ -118,7 +118,7 @@ MODULE BlokTrPdJ
 !                        Strength (for MAC)
                          CALL HGToSP(Prim,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
                          DO L=0,EllA+EllB+1
-                            PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
+                            PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
                          ENDDO
                       ENDDO
@@ -130,6 +130,10 @@ MODULE BlokTrPdJ
 !                  Initialize <KET|
                    CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
+#ifdef WRAPDIST
+!                  WRAP the center of d Phi_A(r) Phi_B(r+R) back into the box
+                   CALL AtomCyclic(GM,Prim%P)
+#endif
                    PTmp=Prim%P
 !                  Sum over cells
                    DO NC=1,CS_IN%NCells
