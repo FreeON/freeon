@@ -197,10 +197,8 @@ MODULE DrvSCFs
       CALL Invoke('MakeS',CtrlVect,MPIRun_O = .TRUE.)
       IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
          CALL Invoke('LowdinO',  CtrlVect)
-      ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
-         CALL Invoke('AInv',CtrlVect)
       ELSE
-         CALL MondoHalt(MISC_ERROR,' Neither FactoredS or LOrthog invoked in OneEMats ')
+         CALL Invoke('AInv',CtrlVect)
       ENDIF
       CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
     END SUBROUTINE OneEMats
