@@ -207,7 +207,7 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !    PRINT CONVERGENCE STATS IF REQUESTED
 !
-!     IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+     IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
         Mssg=ProcessName(Prog,'CG '//TRIM(IntToChar(NCG))) &
            //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))      &
            //', c = '//TRIM(DblToShrtChar(c))
@@ -217,7 +217,7 @@ PROGRAM SDMM
         WRITE(Out,*)TRIM(Mssg)
         CALL PrintProtectR(Out)
         CLOSE(UNIT=Out,STATUS='KEEP')
-!     ENDIF
+     ENDIF
 !-----------------------------------------------------------------------------
 !    CHECK FOR MINIMIZATION CONVERGENCE
 !
@@ -318,16 +318,23 @@ PROGRAM SDMM
 !     CHECK CONVERGENCE
 !
 !     Test when in the asymptotic regime
-      IF(DeltaEQ<Thresholds%ETol*1.D2.AND.NPur>3)THEN
+      IF(DeltaEQ<Thresholds%ETol*1.D1.AND.NPur>3)THEN
 !        Check for low digit rebound in the energy
-         IF(NewE-OldE>Zero)EXIT
-!        Check for low digit rebound in the density matrix
-         IF(DeltaP-OldDeltaP>Zero)EXIT
-!        Check for stallout in convergence of the energy 
-         IF(DeltaEQ-OldDeltaEQ>0)EXIT
+         IF(NewE-OldE>Zero)THEN
+!            WRITE(*,*)' SDMM EXIT 1 '
+            EXIT
+         ENDIF
+!        Check for density matrix stall out 
+         IF(DeltaPQ<1.D-2)THEN
+!            WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
+            EXIT
+         ENDIF
 !        Check for exceeding target accuracies
          IF(DeltaEQ<Thresholds%ETol*1.D-1.AND. &
-            DeltaP<Thresholds%DTol*5.D-1)EXIT
+            DeltaP<Thresholds%DTol*1.D-1)THEN
+!            WRITE(*,*)' SDMM EXIT 4 '
+            EXIT
+         ENDIF
       ENDIF  
 !     Updtate previous cycle values
       OldE=NewE
@@ -371,18 +378,20 @@ PROGRAM SDMM
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif
-       CALL OpenASCII(OutFile,Out)
-       CALL PrintProtectL(Out)
-       Mssg=ProcessName(Prog)//TRIM(IntToChar(NCG))//' CG, and ' &
-             //TRIM(IntToChar(NPur))//' purification steps taken.'
-       WRITE(*,*)TRIM(Mssg)
-       WRITE(Out,*)TRIM(Mssg)
-       Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(DeltaP))//', ' &
-             //'|Tr(P)-NEl| = '//TRIM(DblToShrtChar(DeltaN))//' .'
-       WRITE(*,*)TRIM(Mssg)
-       WRITE(Out,*)TRIM(Mssg)
-       CALL PrintProtectR(Out)
-       CLOSE(UNIT=Out,STATUS='KEEP')
+!       IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+          CALL OpenASCII(OutFile,Out)
+          CALL PrintProtectL(Out)
+          Mssg=ProcessName(Prog)//TRIM(IntToChar(NCG))//' CG, and ' &
+                //TRIM(IntToChar(NPur))//' purification steps taken.'
+          WRITE(*,*)TRIM(Mssg)
+          WRITE(Out,*)TRIM(Mssg)
+          Mssg=ProcessName(Prog)//'MAX(/\P) = '//TRIM(DblToShrtChar(DeltaP))//', ' &
+                //'|Tr(P)-NEl| = '//TRIM(DblToShrtChar(DeltaN))//' .'
+          WRITE(*,*)TRIM(Mssg)
+          WRITE(Out,*)TRIM(Mssg)
+          CALL PrintProtectR(Out)
+          CLOSE(UNIT=Out,STATUS='KEEP')
+!       ENDIF
 #ifdef PARALLEL
    ENDIF
 #endif
@@ -397,6 +406,7 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !  IO for the orthogonal P 
 !
+   CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
    CALL Put(P,TrixFile('OrthoD',Args,1))
    CALL PChkSum(P,'OrthoP['//TRIM(NxtC)//']',Prog)
    CALL PPrint( P,'OrthoP['//TRIM(NxtC)//']')
