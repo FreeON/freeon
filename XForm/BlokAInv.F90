@@ -295,8 +295,8 @@ PROGRAM BlokAInv
 !
 !  Put Z and ZT to disk
 !  
-   CALL Put(Z,TrixFile('ZT',Args))
-   CALL Put(Zt,TrixFile('Z',Args))
+   CALL Put(Z,TrixFile('Z',Args))
+   CALL Put(Zt,TrixFile('ZT',Args))
 !
 !  Debug
 !
