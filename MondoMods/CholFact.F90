@@ -650,6 +650,7 @@ CONTAINS
      40 CONTINUE
      X(N)=X(N)*DI(N)
      K=NM
+     IF(K<=0) RETURN
      50 IUA=IU(K)
      IUB=IU(K+1)-1
      IF(IUB.LT.IUA) GO TO 70
