@@ -59,7 +59,8 @@ PROGRAM SCFStatus
   KinE=Two*Trace(Tmp2)     
 #else
   KinE=Two*Trace(P,Tmp1)    
-#endif
+#endif 
+  CALL Put(KinE,'Kin',Tag_O=SCFCycl)
 !---------------------------------------------
 ! E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
   CALL Get(Tmp1,TrixFile('J',Args,0))
@@ -69,6 +70,7 @@ PROGRAM SCFStatus
 #else
   E_el_tot=Trace(P,Tmp1)    
 #endif
+  CALL Put(E_el_tot,'ene+eee',Tag_O=SCFCycl)
 !---------------------------------------------
 ! ExchE=<K>=Tr{P.K}
   IF(HasHF(ModelChem))THEN
@@ -82,6 +84,7 @@ PROGRAM SCFStatus
   ELSE
      ExchE=Zero
   ENDIF
+  CALL Put(ExchE,'Ex',Tag_O=SCFCycl)
 !----------------------------------------------
 ! Get E_nuc_tot =<Vnn+Vne> 
   CALL Get(E_nuc_tot,'enn+ene',Tag_O=SCFCycl)
