@@ -157,7 +157,7 @@ with the inclusion of periodic boundary conditions.
 
 }
 
-\section{Boundary Conditions}
+\section{boundary conditions, linear scaling and notation}
 
 In conventional implementations of periodic boundary conditions, 
 Bloch functions 
@@ -195,69 +195,47 @@ S_{ab}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{\rm UC}}\, d{\mathbf{r}}\,
 in the periodic regime.  
 This formalism can be changed via the 
 transformation $\sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r})$,
-allowing use of conventional analytic integral technologies \cite{twoels}.  With this
+allowing use of conventional analytic integral technologies \cite{twoels}.  With this 
 transformation, elements of the periodic overlap matrix become
 \begin{equation}
 \label{Sab_pbc2}
-S_{ab}^{PBC}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
+S_{ab}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
 ({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}).
 \end{equation}
-
-
-
-
-
-We will use this Periodic Localization Transformation repeatedly
-in what follows. Let us present some useful definitions:
-
-\begin{equation}
-\label{rho_loc}
-\rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}
-({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
-\end{equation}
-Where $P_{ab}$ is the density matrix, and $\rho^{loc}({\bf r})$ is the local density
-and because of periodicity,
-
-\begin{equation}
-\label{rho_pbc}
-\rho ^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho ^{loc}({\mathbf{r}+\mathbf{R}})
-\end{equation}
-We also define:\begin{equation}
-\label{rho_loc_ab}
-\rho _{ab}^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
+Under this transformation, it is convienient to define the half summed, intermediate 
+basis function products (distributions)
+$\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
 ({\mathbf{r}+\mathbf{R}})
-\end{equation}
+$ associated with integration over $V_\infty$.  We likewise denfine an intermediate 
+electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab}{\bf{P}}_{ab} \rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
+where $\bf P$ is the one-electron reduced density matrix.  
+In this convention, elements of periodic overlap matrix become simply 
+$S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$, while the electron count is
+$N_{\rm el} =\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}({\mathbf{r}})$.
+
+It is worth noting that the complexity of $\rho^{\scriptscriptstyle \infty}$ is ${\cal O}(N)$, due to the
+exponential prefactor factor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ that results from the Gaussian product theorem
+and occurs in each term  $\rho^{\scriptscriptstyle \infty}_{ab}$.  Thus, the implicit sum over {\bf A}, {\bf B} and {\bf R} involves $N$-scaling 
+non-zero terms, which are easily eliminated {\em a priori}.  For small exponents  $\chi_{ab}$, care must be excersized in 
+truncation of periodic sums to avoid overlap matrices that are not positivie definate.  While these situations
+can be avoided simply with tighter neglect criteria, they are often due to use of basis sets designed for gas phase 
+calculations in conjunction with small UCs.  An alternative is to use one of the Crystal basis sets \cite{} or 
+increasing the most diffuse uncontracted exponent(s).
+
+\section{Periodic Quantum Coulomb Sums}
+\commentout{
+historic N log N
+  
+diff between FMM and TREECODE
+worstcase error
+more powerfull error estimates and data structures
+
+Advantages of multipole approximation
+PERIODIC, Nighbor DW
+
+}
 
 
-\begin{equation}
-\label{rho_pbc_ab}
-\rho _{ab}^{PBC}({\mathbf{r}})=\sum _{\mathbf{R}}\, \rho _{ab}^{loc}({\mathbf{r}+
-\mathbf{R}})
-\end{equation}
-Which allows us to rewrite the overlap matrix as
-
-\begin{equation}
-\label{Sab_pbc_3}
-S_{ab}^{PBC}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \rho ^{loc}_{ab}({\mathbf{r}}).
-\end{equation}
-Finally, we can rewrite the kinetic energy matrix as
-
-\begin{equation}
-\label{Tab_pbc}
-T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-\phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
-\end{equation}
-
-Both the $S_{ab}$ and $T_{ab}$ matrix elements are calculated very efficiently
-with this method, asymptotically costing the same as non-periodic phase calculations
-within the code.
-
-
-
-\section{The Two-Electron matrices}
-
-
-\subsection{The Coulomb matrix}
 
 In order to calculate the coulomb matrix efficiently, we transform
 the two-electron Coulomb integrals into integrals over all space with
