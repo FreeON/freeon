@@ -1,9 +1,8 @@
 !  MODULE FOR SPARSE BLOCKED LINEAR ALGEBRA
 !  Author:  Matt Challacombe
-!--------------------------------------------------
+!-------------------------------------------------------------------------------
 MODULE COMMON_DEBUG
    USE DerivedTypes
-   USE GlobalCharacters
    IMPLICIT NONE
    INTEGER :: JPrc,FFrom
    REAL(DOUBLE) :: T1
@@ -30,9 +29,9 @@ MODULE LinAlg
 #endif
    USE Thresholding
    IMPLICIT NONE
-!===========================================================
+!===============================================================================
 !  Interface blocks for generic linear algebra routines
-!===========================================================
+!===============================================================================
    INTERFACE Multiply
 #ifdef PARALLEL
       MODULE PROCEDURE MultiplyM_BCSR, MultiplyM_DBCSR, &
@@ -43,7 +42,7 @@ MODULE LinAlg
 !,MultiplyM_DBL_RNK2
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE SymbolikMM
 #ifdef PARALLEL
       MODULE PROCEDURE SymbolikMM_BCSR, SymbolikMM_DBCSR
@@ -51,7 +50,7 @@ MODULE LinAlg
       MODULE PROCEDURE SymbolikMM_BCSR
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE NumerikMM
 #ifdef PARALLEL
       MODULE PROCEDURE NumerikMM_BCSR, NumerikMM_DBCSR
@@ -59,7 +58,7 @@ MODULE LinAlg
       MODULE PROCEDURE NumerikMM_BCSR
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Add
 #ifdef PARALLEL
       MODULE PROCEDURE Add_BCSR, Add_DBCSR,  &
@@ -70,7 +69,7 @@ MODULE LinAlg
    END INTERFACE
 
 
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Trace
 #ifdef PARALLEL
       MODULE PROCEDURE TraceMM_BCSR, TraceMM_DBCSR, &
@@ -79,7 +78,7 @@ MODULE LinAlg
       MODULE PROCEDURE TraceMM_BCSR, Trace_BCSR
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Dot
 #ifdef PARALLEL
       MODULE PROCEDURE Dot_BCSR, Dot_DBCSR, Dot_DBL_VECT
@@ -87,7 +86,7 @@ MODULE LinAlg
       MODULE PROCEDURE Dot_BCSR, Dot_DBL_VECT
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Filter
 #ifdef PARALLEL
       MODULE PROCEDURE FilterM_BCSR,FilterM_DBCSR
@@ -95,11 +94,11 @@ MODULE LinAlg
       MODULE PROCEDURE FilterM_BCSR
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE XPose
       MODULE PROCEDURE XPose_BCSR
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Max
 #ifdef PARALLEL
       MODULE PROCEDURE Max_BCSR, Max_DBCSR
@@ -107,7 +106,7 @@ MODULE LinAlg
       MODULE PROCEDURE Max_BCSR
 #endif
    END INTERFACE
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
    INTERFACE Plot
       MODULE PROCEDURE Plot_BCSR
 #ifdef PARALLEL 
@@ -121,19 +120,28 @@ MODULE LinAlg
       MODULE PROCEDURE SetToI_DBCSR
 #endif
    END INTERFACE
-!------------------------------------------------------------------------
+
+
+   INTERFACE FNorm
+      MODULE PROCEDURE FNorm_BCSR
+#ifdef PARALLEL
+      MODULE PROCEDURE FNorm_DBCSR
+#endif
+   END INTERFACE
+
+!-------------------------------------------------------------------------------
 !  Global stuff for matrix algebra
-!
+
    TYPE(INT_VECT) :: Flag,GlobalRowPtA,GlobalRowPtB
-!========================================================================
+!===============================================================================
    CONTAINS
 !  MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY
 !  PLY MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTI
 !  LTIPLY MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MULTIPLY, MATRIX MU
 #ifdef PARALLEL 
-!====================================================================
+!===============================================================================
 !     F90 wrapper for F77 BCSR numeric matrix multiply: C=C+Beta*A.B               
-!====================================================================
+!===============================================================================
       SUBROUTINE SymbolikMM_DBCSR(A,B,C,UpDate)
          IMPLICIT NONE
          INTEGER                    :: CNNon0_Old
@@ -144,7 +152,7 @@ MODULE LinAlg
          INTEGER                    :: Status,DNAtms,DNBlks
          INTEGER, EXTERNAL          :: SymbolikMM_GENERIC77
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: SzCpt,SzMat
-!-----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(UpDate)THEN
             DNAtms=C%NAtms
             DNBlks=C%NBlks
@@ -189,9 +197,9 @@ MODULE LinAlg
          ENDIF
       END SUBROUTINE SymbolikMM_DBCSR
 #endif
-!==========================================================================
+!===============================================================================
 !     BCSR wrapper for generic BCSR symbolic matrix multiply: C=Beta*C+A.B
-!==========================================================================
+!===============================================================================
       SUBROUTINE SymbolikMM_BCSR(A,B,C,UpDate)
          IMPLICIT NONE
          INTEGER                    :: CNNon0_Old
@@ -201,7 +209,7 @@ MODULE LinAlg
          TYPE(INT_VECT)             :: DRowPt,DColPt,DBlkPt
          INTEGER, EXTERNAL          :: SymbolikMM_GENERIC77
          INTEGER                    :: Status,DNAtms,DNBlks
-!-----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(UpDate)THEN
             DNAtms=C%NAtms
             DNBlks=C%NBlks
@@ -216,7 +224,7 @@ MODULE LinAlg
             CALL New(DColPt,1)
             CALL New(DBlkPt,1)
          ENDIF
-!
+
          Status=SymbolikMM_GENERIC_77(NAtoms,A%NAtms,A%NBlks,A%NAtms,               &
                                      B%NAtms,B%NBlks,B%NAtms,                       &
                                      DNAtms,DNBlks,SIZE(C%ColPt%I),SIZE(C%MTrix%D), &
@@ -336,9 +344,9 @@ MODULE LinAlg
          RETURN
       END FUNCTION SymbolikMM_Generic_77
 #ifdef PARALLEL
-!================================================================================
+!===============================================================================
 !     Wrapper for generic F77 style DBCSR numeric matrix multiply: C=C+A.B          
-!================================================================================
+!===============================================================================
       SUBROUTINE NumerikMM_DBCSR(A,B,BMTrix,C,Perf_O)
          IMPLICIT NONE
          TYPE(DBCSR),              INTENT(IN)    :: A,B
@@ -346,7 +354,7 @@ MODULE LinAlg
          TYPE(DBCSR),              INTENT(INOUT) :: C    
          TYPE(TIME),OPTIONAL,      INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                            :: FlOp
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          FlOp=Zero
          CALL Load(A,GlobalRowPtA)
          CALL Load(B,GlobalRowPtB)
@@ -371,7 +379,7 @@ MODULE LinAlg
          TYPE(BCSR),         INTENT(INOUT) :: C    
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                      :: FlOp
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          FlOp=Zero
          CALL NumerikMM_GENERIC(A%NAtms,0,                               &
                                 A%RowPt%I,A%ColPt%I,A%BlkPt%I,A%MTrix%D, & 
@@ -381,9 +389,9 @@ MODULE LinAlg
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
       END SUBROUTINE NumerikMM_BCSR
-!======================================================================
+!===============================================================================
 !     Generic F77 style (D,B)CSR numeric matrix multiply: C=C+A.B     
-!======================================================================
+!===============================================================================
       SUBROUTINE NumerikMM_GENERIC(ANAtms,AOffSt,               &
                                    ARowPt,AColPt,ABlkPt,AMTrix, & 
                                    BRowPt,BColPt,BBlkPt,BMTrix, &
@@ -413,7 +421,7 @@ MODULE LinAlg
          INTEGER      :: K,JP,KP,P,Q,R,IL,IG,JG,KG, &
                          MA,MB,NB,MNA,IStrtA,IStopA, &
                          IStrtB,IStopB,IStrtC,IStopC
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          Op=Zero
          DO IL=1,ANAtms
             IG=IL+AOffSt  
@@ -450,9 +458,9 @@ MODULE LinAlg
          ENDDO 
          FlOp=FlOp+Two*Op
       END SUBROUTINE NumerikMM_GENERIC
-!=======================================================================
+!===============================================================================
 !     Double GEneral Matrix Multiply: C_MxN=C_MxN+Beta*(A_MxK).(B_KxN)
-!=======================================================================
+!===============================================================================
       SUBROUTINE DGEMM_NN2(M,K,N,Beta,A,B,C)
          IMPLICIT NONE
          INTEGER,                   INTENT(IN)  :: M,K,N
@@ -476,24 +484,24 @@ MODULE LinAlg
             ENDDO
          ENDDO
       END SUBROUTINE DGEMM_NN2
-!===================================================================
+!===============================================================================
 !     Matrix multiply for BCSR matrices
-!===================================================================
+!===============================================================================
       SUBROUTINE MultiplyM_BCSR(A,B,C,Beta_O,Perf_O)
          TYPE(BCSR),           INTENT(IN)    :: A,B
          REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Beta_O
          TYPE(BCSR),           INTENT(INOUT) :: C
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
          LOGICAL                             :: UpDate
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(PRESENT(Beta_O))THEN
             IF(Beta_O/=Zero)THEN
-!
+
 !              Check allocation
                IF(.NOT.AllocQ(C%Alloc)) &
                  CALL Halt(' Asking for update of non-allocated' &
                          //' BCSR matrix in MultiplyM_BCSR')
-!
+
 !              If Beta /=1 then rescale
                IF(Beta_O/=One)THEN               
                   C%MTrix%D(1:C%NNon0)=Beta_O*C%MTrix%D(1:C%NNon0)
@@ -510,7 +518,7 @@ MODULE LinAlg
             IF(.NOT.AllocQ(C%Alloc))CALL New(C)
             UpDate=.FALSE.
          ENDIF
-!
+
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
          CALL SymbolikMM(A,B,C,UpDate)
@@ -519,9 +527,9 @@ MODULE LinAlg
       END SUBROUTINE MultiplyM_BCSR
 #ifdef PARALLEL
 
-!======================================================================
+!===============================================================================
 !     Matrix multiply for DBCSR matrices: C=Beta*C+A.B
-!=======================================================================
+!===============================================================================
       SUBROUTINE MultiplyM_DBCSR(A,B,C,Beta_O,Perf_O,NoGlobal_O,Stop_O)
          USE COMMON_DEBUG
          REAL(DOUBLE),OPTIONAL,INTENT(IN)      :: Beta_O
@@ -554,7 +562,7 @@ MODULE LinAlg
          CALL AlignNodes()
 !         CALL Elapsed_TIME(Time0,'Init')
 !         CALL Elapsed_TIME(Time1,'Init')
-!-------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !         IF(PRESENT(Stop_O))
 !         CALL PPrint(MemStats,'Begin MultiplyM_DBCSR')
          IF(PRESENT(Beta_O))THEN
@@ -579,18 +587,18 @@ MODULE LinAlg
             IF(.NOT.AllocQ(C%Alloc))CALL New(C)
             UpDate=.FALSE.
          ENDIF
-!
+
          StartMem=MemStats%MemTab
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Find global symbolic matrix structure if not alread known.
-!
+
          CALL AlignNodes()
          CALL LocalToGlobal(A)
          CALL LocalToGlobal(B)        
          C%GUpDate=STATUS_FALSE
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Set up flag and global row pointers
-!
+
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
          CALL New(GlobalRowPtA,NAtoms+1)
@@ -604,7 +612,7 @@ MODULE LinAlg
          CALL New(RecvPrior,NPrc-1)
          CALL New(SendReqst,NPrc-1)
          CALL New(RecvReqst,NPrc-1)
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          K=0
          V=0
          U%NNon0=0
@@ -619,9 +627,9 @@ MODULE LinAlg
          ENDDO
          CALL Sort(RecvPrior,RecvSched)
          CALL Sort(SendPrior,SendSched)
-!-------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Allocate contigous recieve buffers  
-!
+
          U(:)%NNon0=U(:)%NNon0
          UTotal=MAX(1,SUM(U(:)%NNon0))
          IF(UTotal/=0)THEN
@@ -639,13 +647,13 @@ MODULE LinAlg
                         Node_O=From,NoGlobals_O=.TRUE.)
             ENDIF
          ENDDO
-!-------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Allocate contigous send buffers  
-!
+
          ALLOCATE(BMTrix(1:B%NNon0),STAT=Status)
          CALL IncMem(Status,0,B%NNon0)
          BMTrix(1:B%NNon0)=B%MTrix%D(1:B%NNon0)
-!
+
          VType=MPI_DATATYPE_NULL
          VTotal=MAX(1,SUM(V(:)))
          IF(VTotal/=0)THEN
@@ -657,9 +665,9 @@ MODULE LinAlg
 !        -----------------------------------------------
 !         CALL Elapsed_TIME(Time1,'Accum') ! Preliminarys
 !         CALL Elapsed_TIME(Time2,'Init')  ! Recvs
-!------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Post non-blocking recieves
-!
+
          DO N=1,NPrc-1         
             IF(RecvPrior%I(N)/=FAIL)THEN
                From=RecvSched%I(N)
@@ -669,7 +677,7 @@ MODULE LinAlg
 !              Stupididy check #2
                IF(UTotal<Q+U(From)%NNon0-1) &
                   CALL Halt(' Stupid error 1 in MultiplyMM_DBCSR')
-!
+
 !               RecvReqst%I(N)=PostRecv_77(NAtoms,MyId,From,Tag,MONDO_COMM,            &
 !                                         A%NAtms,A%NBlks,BNBlks,                      &
 !                                         U(From)%NAtms,U(From)%NBlks,U(From)%NNon0,   &
@@ -698,22 +706,22 @@ MODULE LinAlg
                RecvReqst%I(N)=MPI_REQUEST_NULL        
             ENDIF
          ENDDO 
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Make sure all recieves have been posted before comencing the sends
          CALL AlignNodes()
 !        ----------------------------------------
 !         CALL Elapsed_TIME(Time2,'Accum') ! Recvs
 !         CALL Elapsed_TIME(Time3,'Init')  ! Sends
-!------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Post sends
-!
+
          Q=1
          DO N=1,NPrc-1                 
             IF(SendPrior%I(N)/=FAIL)THEN
                To=SendSched%I(N)
                Tag=MyId*MaxProc+To
                ANBlks=A%GRwPt%I(NAtoms+1)-1
-!
+
 !               SendReqst%I(N)=PostSend_77(                                       &
 !                              NAtoms,ANBlks,B%NAtms,B%NBlks,                     &
 !                              B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,    & 
@@ -723,7 +731,7 @@ MODULE LinAlg
 !                              VBlks(Q:Q+V(To)-1),VDisp(Q:Q+V(To)-1),             &
 !                              Flag%I(1:NAtoms),BSiz%I(1:NAtoms),OffSt%I(MyId),   &
 !                              Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        ) 
-!
+
                SendReqst%I(N)=PostSend77(                                            &
                               NAtoms,ANBlks,B%NAtms,B%NBlks,                         &
                               B%NNon0,V(To),To,Tag,MyId,VType(To),MONDO_COMM,        & 
@@ -731,7 +739,7 @@ MODULE LinAlg
                               B%BlkPt%I(1),BMTrix(1),VBlks(Q),VDisp(Q),              &
                               Flag%I(1),BSiz%I(1),OffSt%I(MyId),                     &
                               Beg%I(MyId),End%I(MyId),Beg%I(To),End%I(To)        ) 
-!
+
                Q=Q+V(To)
             ELSE            
                SendReqst%I(N)=MPI_REQUEST_NULL
@@ -739,16 +747,16 @@ MODULE LinAlg
          ENDDO
 #ifdef NONBLOCKING
 #else
-!-----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        This call can really speed things up with blocking sends
          CALL AlignNodes()
 #endif
 !        --------------------------------------------
 !         CALL Elapsed_TIME(Time3,'Accum') ! Sends
 !         CALL Elapsed_TIME(Time4,'Init')  ! Symbolic
-!-----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Symbolic matrix-matrix multiply
-!
+
          CALL SymbolikMM(A,B,C,UpDate) ! Local
          DO N=1,NPrc-1
             IF(RecvPrior%I(N)/=FAIL)THEN
@@ -759,7 +767,7 @@ MODULE LinAlg
 !        --------------------------------------------
 !         CALL Elapsed_TIME(Time4,'Accum') ! Symbolic
 !         CALL Elapsed_TIME(Time5,'Init')  ! Numeric
-!---------------------- ---------------------------------
+!-------------------------------------------------------------------------------
 !        Local numerical matrix-matrix multiply
          FlOp=Zero
          CALL Load(A,GlobalRowPtA)
@@ -825,7 +833,7 @@ MODULE LinAlg
 !         CALL Elapsed_TIME(Time7,'Init') ! Tidy
 !--------------------------------------------------------------------------- 
 !        Tidy up ...
-!
+
          DO N=0,NPrc-1
             IF(AllocQ(U(N)%Alloc))  &
                CALL Delete(U(N))
@@ -845,8 +853,8 @@ MODULE LinAlg
          CALL Delete(GlobalRowPtB)
          CALL Delete(Flag)
 #ifdef NONBLOCKING
-!-------------------------------------------------------------------
-!
+!-------------------------------------------------------------------------------
+
 !        Make sure sends complete before deallocating send buffers
          CALL WaitAll(SendReqst)
 #endif
@@ -863,17 +871,17 @@ MODULE LinAlg
             IF(VType(N)/=MPI_DATATYPE_NULL)  &
                CALL FreeType(VType(N))
          ENDDO
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Check for leaks ....
-!
+
          StopMem=MemStats%MemTab
          IF(StartMem/=StopMem)&
             CALL Halt('Memory Leak in MultiplyM_DBCSR')
-!--------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL AlignNodes()
 !        -------------------------------------------
 !         CALL Elapsed_TIME(Time7,'Accum') ! Tidy
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Print preformance statistics
 ! 
 !         CALL Elapsed_TIME(Time0,'Accum')
@@ -886,7 +894,7 @@ MODULE LinAlg
 !         CALL Elapsed_TIME(Time8,Mssg_O='Imbalance', Proc_O=Prog)
 !         CALL Elapsed_TIME(Time7,Mssg_O='TidyUp',    Proc_O=Prog)
 !         CALL Elapsed_TIME(Time0,Mssg_O='Total',     Proc_O=Prog)
-!
+
       END SUBROUTINE  MultiplyM_DBCSR
 !===============================================================================
 !     Determine structure of the recieve buffer DBCSR matrix U
@@ -898,18 +906,18 @@ MODULE LinAlg
          INTEGER                       :: S,T,JP,KP,IL,IG,JH,JL,JG,KG, &
                                           MA,MB,MN_A,MN_B
          REAL(DOUBLE)                  :: FlOp
-!-----------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Check for a quick return
-!
+
          IF(MyId==From.OR.From==MPI_PROC_NULL)THEN
             RecvStruct=FAIL
             RETURN
          ENDIF
-!
+
          Flag%I=0
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Check for overlaping row-col blocks and compute DBCSR dimensions
-!
+
          T=0
          S=1
          FlOp=Zero
@@ -954,11 +962,11 @@ MODULE LinAlg
          U%NAtms=End%I(From)-Beg%I(From)+1
          U%NNon0=S
          U%NBlks=T
-!
+
          RecvStruct=FLOOR(FlOp)/DBLE(S)
 !         RecvStruct=S
 !         RecvStruct=RANDOM_INT((/1,1000/))
-!
+
       END FUNCTION RecvStruct
 !===============================================================================
 !     Determine structure of the send buffer DBCSR matrix V
@@ -970,20 +978,20 @@ MODULE LinAlg
          INTEGER                       :: S,T,JH,JP,KP,IG,JG,JL,KG, &
                                           MA,MB,MN_A,MN_B
          REAL(DOUBLE)                  :: FlOp
-!--------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Check for a quick return
-!
+
          IF(MyId==To.OR.To==MPI_PROC_NULL)THEN
             SendStruct=FAIL
             RETURN
          ENDIF
-!-------------------------------------
+!-------------------------------------------------------------------------------
 !        Overkill....
-!
+
          Flag%I=0
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Find overlaping row-col blocks in B%MTrix and commark for SEND
-!
+
          T=0
          S=1
          FlOp=Zero
@@ -1061,9 +1069,9 @@ MODULE LinAlg
          DO I=1,NAtoms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Flag77(I)=0
          ENDDO
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Find overlaping row-col blocks and compute pointers
-!
+
          T=1
          S=1
          CALL INT_VECT_EQ_INT_SCLR(UNAtms,URowPt,BIG_INT)
@@ -1090,20 +1098,20 @@ MODULE LinAlg
             ENDDO
          ENDDO
          CALL INT_VECT_EQ_INT_SCLR(NAtoms,Flag77,0)
-!-------------------------------------------------
+!-------------------------------------------------------------------------------
          URowPt(UNAtms+1)=T 
          DO I=UNAtms+1,2,-1
             IF(URowPt(I-1)==BIG_INT)THEN
                URowPt(I-1)=URowPt(I)
             ENDIF
          ENDDO
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL MPI_IRECV(UMTrix,UNNon0,MPI_DOUBLE_PRECISION,From,Tag, &
                         COMM,PostRecv_77,IErr)
          CALL ErrChk(IErr,'PostRecv_77')
          RETURN
       END FUNCTION PostRecv_77
-!
+
 
       INTEGER FUNCTION PostSend_77(NAtoms,ANBlks,BNAtms,BNBlks,         &
                                  BNNon0,V,To,Tag,MyId,VType,COMM,       &  
@@ -1130,9 +1138,9 @@ MODULE LinAlg
          DO I=1,NAtoms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Flag77(I)=0
          ENDDO
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Find overlaping row-col blocks in BMTrix and mark for SEND
-!
+
          T=0
          S=1
          NAtms=MyEnd-MyBeg+1
@@ -1162,7 +1170,7 @@ MODULE LinAlg
                ENDDO
             ENDDO
          ENDDO
-!
+
          CALL INT_VECT_EQ_INT_SCLR(NAtoms,Flag77,0)
          CALL MPI_TYPE_INDEXED(T,VBlks,VDisp, &
               MPI_DOUBLE_PRECISION,VType,IErr)
@@ -1181,14 +1189,14 @@ MODULE LinAlg
 #endif         
          RETURN
       END FUNCTION PostSend_77
-!===================================================================
+!===============================================================================
 !     Matrix-scalar multiply for DCSR matrices
-!===================================================================
+!===============================================================================
       SUBROUTINE MultiplyM_DBCSR_SCLR(A,B,Perf_O)
          REAL(DOUBLE),         INTENT(IN)    :: B
          TYPE(DBCSR),          INTENT(INOUT) :: A
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL DBL_Scale(A%NNon0,A%MTrix%D,B)
 !         CALL DSCAL(A%NNon0,B,A%MTrix%D,1)
          PerfMon%FLOP=PerfMon%FLOP+DBLE(A%NNon0)
@@ -1196,14 +1204,14 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+DBLE(A%NNon0)
       END SUBROUTINE MultiplyM_DBCSR_SCLR
 #endif
-!===================================================================
+!===============================================================================
 !     Matrix-scalar multiply for BCSR matrices
-!===================================================================
+!===============================================================================
       SUBROUTINE MultiplyM_BCSR_SCLR(A,B,Perf_O)
          REAL(DOUBLE),         INTENT(IN)    :: B
          TYPE(BCSR),           INTENT(INOUT) :: A
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
@@ -1220,9 +1228,9 @@ MODULE LinAlg
 !     MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION, MATRIX ADDITION
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifdef PARALLEL
-!====================================================================
+!===============================================================================
 !     DBCSR wrapper for generic matrix addition
-!====================================================================
+!===============================================================================
       SUBROUTINE Add_DBCSR(A,B,C,Perf_O,NoGlobal_O)
          IMPLICIT NONE
          TYPE(DBCSR),        INTENT(INOUT) :: A,B
@@ -1231,7 +1239,7 @@ MODULE LinAlg
          INTEGER                           :: Status
          REAL(DOUBLE)                      :: FlOp
          LOGICAL,OPTIONAL, INTENT(IN)      :: NoGlobal_O
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(.NOT.AllocQ(C%Alloc)   )CALL New(C)
          C%GUpDate=STATUS_FALSE
          CALL New(Flag,NAtoms)
@@ -1249,11 +1257,11 @@ MODULE LinAlg
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+FlOp
-!-----------------------------
+!-------------------------------------------------------------------------------
 !        Tidy up ...
-!
+
          CALL Delete(Flag)
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Unless asked not to, perform update of global symbolic matrix
 !        
 !         RETURN
@@ -1262,12 +1270,12 @@ MODULE LinAlg
 !         ELSE
 !           CALL LocalToGlobal(C)
 !         ENDIF
-!
+
       END SUBROUTINE Add_DBCSR
 #endif
-!====================================================================
+!===============================================================================
 !     BCSR wrapper for generic matrix addition
-!====================================================================
+!===============================================================================
       SUBROUTINE Add_BCSR(A,B,C,Perf_O)
          IMPLICIT NONE
          TYPE(BCSR),         INTENT(INOUT) :: A,B
@@ -1275,7 +1283,7 @@ MODULE LinAlg
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          INTEGER                           :: Status
          REAL(DOUBLE)                      :: FlOp
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(.NOT.AllocQ(C%Alloc)   )CALL New(C)
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
@@ -1300,9 +1308,9 @@ MODULE LinAlg
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+FlOp
       END SUBROUTINE Add_BCSR
-!==================================================================
+!===============================================================================
 !     Generic F77 style (D)BCSR matrix addition
-!==================================================================
+!===============================================================================
       FUNCTION Add_GENERIC(MxBlks,MxNon0,ANAtms,AOffSt,   &
                            CNAtms,CNBlks,CNNon0,          &
                            ARowPt,AColPt,ABlkPt,AMTrix,   &
@@ -1324,7 +1332,7 @@ MODULE LinAlg
       REAL(DOUBLE)                            :: Op
       INTEGER                                 :: JP,P,Q,R,S,IL,KL,IG,JG,M,MN,MN1,  &  
                                                  IStrtA,IStopA,IStrtB,IStopB
-!-----------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       Q=1
       R=1
       Op=Zero
@@ -1383,15 +1391,15 @@ MODULE LinAlg
       FlOp=FlOp+Op
       END FUNCTION Add_GENERIC
 #ifdef PARALLEL
-!====================================================================
+!===============================================================================
 !     DBCSR wrapper for generic matrix-scalar addition
-!====================================================================
+!===============================================================================
       SUBROUTINE Add_DBCSR_SCLR(A,B,Perf_O)
          IMPLICIT NONE
          TYPE(DBCSR),        INTENT(INOUT) :: A
          REAL(DOUBLE),       INTENT(IN)    :: B
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL Add_GENERIC_SCLR(A%NAtms,OffSt%I(MyId),A%RowPt%I,A%ColPt%I,  &
                                A%BlkPt%I,A%MTrix%D,B,BSiz%I)
          PerfMon%FLOP=PerfMon%FLOP+DBLE(NBasF)
@@ -1399,15 +1407,15 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+DBLE(NBasF)
       END SUBROUTINE Add_DBCSR_SCLR
 #endif
-!====================================================================
+!===============================================================================
 !     BCSR wrapper for generic matrix-scalar addition
-!====================================================================
+!===============================================================================
       SUBROUTINE Add_BCSR_SCLR(A,B,Perf_O)
          IMPLICIT NONE
          TYPE(BCSR),         INTENT(INOUT) :: A
          REAL(DOUBLE),       INTENT(IN)    :: B
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL Add_GENERIC_SCLR(A%NAtms,0,A%RowPt%I,A%ColPt%I,  &
                                A%BlkPt%I,A%MTrix%D,B,BSiz%I)
          PerfMon%FLOP=PerfMon%FLOP+DBLE(NBasF)
@@ -1424,7 +1432,7 @@ MODULE LinAlg
       REAL(DOUBLE),             INTENT(IN)    :: B
       REAL(DOUBLE),DIMENSION(:),INTENT(INOUT) :: AMTrix
       INTEGER                                 :: I,IG,JP,Q,MA,IStrtA,IStopA
-!--------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       DO I=1,ANAtms
          IG=I+AOffSt
          MA=BSiz(IG)
@@ -1443,9 +1451,9 @@ MODULE LinAlg
 !     MATRIX TRACE MATRIX TRACE MATRIX TRACE MATRIX TRACE MATRIX TRACE MATRIX TRACE MATRIX 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifdef PARALLEL
-!================================================================================
+!===============================================================================
 !     DBCSR trace of a matrix product Tr{A.B}=Sum_{ki} A_ki*B_ik          
-!================================================================================
+!===============================================================================
       FUNCTION TraceMM_DBCSR(A,B,Perf_O)
          IMPLICIT NONE
          REAL(DOUBLE)                      :: TraceMM_DBCSR
@@ -1455,16 +1463,16 @@ MODULE LinAlg
          REAL(DOUBLE), EXTERNAL            :: BlkTrace_2
          INTEGER                           :: I,MA,J,JP,K,KP,P,Q,MB, &
                                               IStrtA,IStopA,IStrtB,IStopB
-!----------------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
          CALL New(GlobalRowPtA,NAtoms+1)
          CALL New(GlobalRowPtB,NAtoms+1)
          CALL SetEq(GlobalRowPtA,0)
          CALL SetEq(GlobalRowPtB,0)
          CALL Load(A,GlobalRowPtA)
          CALL Load(B,GlobalRowPtB)
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          Tr=Zero
          Op=Zero
          DO I=Beg%I(MyId),End%I(MyId)
@@ -1493,16 +1501,16 @@ MODULE LinAlg
          TraceMM_DBCSR=AllReduce(Tr)   
 !-----------------------------------------         
 !        Count the muscle
-!
+
          PerfMon%FLOP=PerfMon%FLOP+Two*Op
          IF(PRESENT(Perf_O))  &
            Perf_O%FLOP=Perf_O%FLOP+Two*Op
-!----------------------------------------
+!-------------------------------------------------------------------------------
 !        Tidy up ...
-!
+
          CALL Delete(GlobalRowPtA)
          CALL Delete(GlobalRowPtB)
-!
+
       END FUNCTION TraceMM_DBCSR
 #endif
 !===============================================================================
@@ -1517,7 +1525,7 @@ MODULE LinAlg
          REAL(DOUBLE), EXTERNAL            :: BlkTrace_2
          INTEGER                           :: IL,MA,J,JP,K,KP,P,Q,MB, &
                                               IStrtA,IStopA,IStrtB,IStopB
-!--------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          Op=Zero
          TraceMM_BCSR=Zero
          DO IL=1,A%NAtms
@@ -1547,9 +1555,9 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+Two*Op
       END FUNCTION TraceMM_BCSR
 #ifdef PARALLEL
-!================================================================================
+!===============================================================================
 !     DBCSR trace of a matrix Tr{A}=Sum_i A_ii          
-!================================================================================
+!===============================================================================
       FUNCTION Trace_DBCSR(A,Perf_O)
          IMPLICIT NONE
          REAL(DOUBLE)                      :: Trace_DBCSR
@@ -1558,7 +1566,7 @@ MODULE LinAlg
          REAL(DOUBLE)                      :: Op,Tr
          REAL(DOUBLE),EXTERNAL             :: BlkTrace_1
          INTEGER                           :: IL,IG,MA,J,JP,P,IStrtA,IStopA
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          Op=Zero
          Tr=Zero
          DO IL=1,A%NAtms
@@ -1593,7 +1601,7 @@ MODULE LinAlg
          REAL(DOUBLE)                      :: Op
          REAL(DOUBLE), EXTERNAL            :: BlkTrace_1
          INTEGER                           :: IL,MA,J,JP,P,IStrtA,IStopA
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
@@ -1618,10 +1626,11 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+Op
 #ifdef PARALLEL
          ENDIF
-         CALL BCast(Trace_BCSR)
+         !! write(*,*) 'warning from parallel: trace_bcsr not broadcasted!'
+         !! CALL Bcast(Trace_BCSR)
 #endif
       END FUNCTION Trace_BCSR
-!
+
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !     MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX EQUALS IDENTITY MATRIX E
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1659,6 +1668,8 @@ MODULE LinAlg
 #endif
    END SUBROUTINE SetToI_BCSR
 #ifdef PARALLEL
+
+
    SUBROUTINE SetToI_DBCSR(A,B)
       TYPE(DBCSR)             :: A
       TYPE(DBL_RNK2),OPTIONAL :: B
@@ -1700,16 +1711,16 @@ MODULE LinAlg
 !     MATRIX DOT PRODUCT MATRIX DOT PRODUCT MATRIX DOT PRODUCT MATRIX DOT PRODUCT
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifdef PARALLEL
-!================================================================================
+!===============================================================================
 !     Wrapper for generic F77 style DBCSR matrix inner product
-!================================================================================
+!===============================================================================
       FUNCTION Dot_DBCSR(A,B,Perf_O)
          IMPLICIT NONE
          REAL(DOUBLE)                      :: Dot_DBCSR
          TYPE(DBCSR),        INTENT(INOUT)    :: A,B
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                      :: Tmp,FlOp
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          FlOp=Zero
          CALL New(Flag,NAtoms)
          CALL SetEq(Flag,0)
@@ -1732,7 +1743,7 @@ MODULE LinAlg
          TYPE(BCSR),         INTENT(IN)    :: A,B
          TYPE(TIME),OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                      :: FlOp
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef PARALLEL
          IF(MyId==ROOT)THEN
 #endif
@@ -1751,10 +1762,10 @@ MODULE LinAlg
          ENDIF
 #endif
       END FUNCTION Dot_BCSR
-!======================================================================
+!===============================================================================
 !     Generic F77 style (D,B)CSR inner product of two matrices 
 !     MatrixDot = (A,B)     
-!======================================================================
+!===============================================================================
       FUNCTION Dot_GENERIC(ANAtms,OffStA,BSiz,Flag,FlOp, &
                            ARowPt,AColPt,ABlkPt,AMTrix,  & 
                            BRowPt,BColPt,BBlkPt,BMTrix)
@@ -1770,7 +1781,7 @@ MODULE LinAlg
          REAL(DOUBLE), EXTERNAL                  :: DBL_Dot
          INTEGER                                 :: I,IG,J,L,JP,P,Q,MA,MN, &
                                                     IStrtA,IStopA,IStrtB,IStopB
-!---------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          Op=Zero
          Dot_GENERIC=Zero
          DO I=1,ANAtms
@@ -1801,9 +1812,9 @@ MODULE LinAlg
          ENDDO
          FlOp=FlOp+Two*Op
       END FUNCTION Dot_GENERIC
-!===============================================================
+!===============================================================================
 !     Take the dot (inner) product of DBL_VECTs
-!===============================================================
+!===============================================================================
       FUNCTION Dot_DBL_VECT(A,B,N_O,Perf_O)
          REAL(DOUBLE)                      :: Dot_DBL_VECT
          TYPE(DBL_VECT),     INTENT(IN)    :: A,B        
@@ -1822,9 +1833,9 @@ MODULE LinAlg
 !     MATRIX FILTRATION, MATRIX FILTRATION, MATRIX FILTRATION, MATRIX FILTRATION
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #ifdef PARALLEL
-!====================================================================
+!===============================================================================
 !     Wrapper for generic F77 style DBCSR matrix filtration
-!====================================================================
+!===============================================================================
       SUBROUTINE FilterM_DBCSR(A,B,Tol_O,Perf_O,SetEq_O)
          REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Tol_O         
          LOGICAL,     OPTIONAL,INTENT(IN)    :: SetEq_O         
@@ -1832,7 +1843,7 @@ MODULE LinAlg
          TYPE(DBCSR),          INTENT(INOUT) :: A
          TYPE(DBCSR),          INTENT(INOUT) :: B
          REAL(DOUBLE)                        :: Tol,FlOp        
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(.NOT.AllocQ(A%Alloc))CALL New(A)
          FlOp=Zero
          IF(PRESENT(Tol_O))THEN
@@ -1856,9 +1867,9 @@ MODULE LinAlg
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
       END SUBROUTINE FilterM_DBCSR
-!===================================================================
+!===============================================================================
 !     Gather local indecies to global ones, bcast global indecies
-!===================================================================
+!===============================================================================
       SUBROUTINE LocalToGlobal2(A)
          TYPE(DBCSR), INTENT(INOUT) :: A
          INTEGER                    :: I,K,NAtms
@@ -1909,31 +1920,31 @@ MODULE LinAlg
                ENDDO
             ENDDO
          ENDIF
-         CALL BCast(A%GRwPt)
-         CALL BCast(A%GClPt)
-!------------------------------------------
+         CALL Bcast(A%GRwPt)
+         CALL Bcast(A%GClPt)
+!-------------------------------------------------------------------------------
 !        Tidy up
-!
+
          IF(MyId==ROOT)THEN
             CALL Delete(MA); CALL Delete(MB); CALL Delete(MN)
             CALL Delete(NA); CALL Delete(NB); CALL Delete(NN)
          ENDIF        
       END SUBROUTINE LocalToGlobal2
-!
+
       SUBROUTINE LocalToGlobal(A)
          TYPE(DBCSR),     INTENT(INOUT) :: A
          INTEGER                        :: I,K,NAtms,IErr
          TYPE(INT_VECT)                 :: MA,MB,MN,NA,NB,NN 
-!
+
          IF(A%GUpDate==STATUS_TRUE)THEN
             RETURN
          ELSE
             A%GUpDate=STATUS_TRUE
          ENDIF
-!
+
 !         CALL LocalToGlobal2(A)
 !         RETURN
-!
+
          CALL New(MA,NPrc,M_O=0)
          CALL New(MB,NPrc,M_O=0)
          CALL New(MN,NPrc,M_O=0)
@@ -1999,16 +2010,16 @@ MODULE LinAlg
          CALL Delete(NA); CALL Delete(NB); CALL Delete(NN)
       END SUBROUTINE LocalToGlobal
 #endif
-!====================================================================
+!===============================================================================
 !     Wrapper for generic F77 style BCSR matrix filtration
-!====================================================================
+!===============================================================================
       SUBROUTINE FilterM_BCSR(A,B,Tol_O,Perf_O,SetEq_O)
          TYPE(BCSR),           INTENT(INOUT)    :: A,B
          REAL(DOUBLE),OPTIONAL,INTENT(IN)    :: Tol_O         
          TYPE(TIME),  OPTIONAL,INTENT(INOUT) :: Perf_O         
          REAL(DOUBLE)                        :: Tol,FlOp
          LOGICAL,     OPTIONAL,INTENT(IN)    :: SetEq_O         
-!-------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(.NOT.AllocQ(A%Alloc))CALL New(A)
          FlOp=Zero
          IF(PRESENT(Tol_O))THEN
@@ -2035,10 +2046,10 @@ MODULE LinAlg
          PerfMon%FLOP=PerfMon%FLOP+FlOp
          IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+FlOp
       END SUBROUTINE FilterM_BCSR
-!============================================================================
+!===============================================================================
 !     Generic F77 style routine for filtering (D/B)CSR matrices:
 !     A=FILTER(B,Tol)
-!============================================================================
+!===============================================================================
       SUBROUTINE FilterM_GENERIC(BNAtms,BOffSt,               &
                                  ANAtms,ANBlks,ANNon0,        &
                                  ARowPt,AColPt,ABlkPt,AMTrix, &
@@ -2092,9 +2103,9 @@ MODULE LinAlg
          ANNon0=Q-1
          FlOp=FlOp+Two*Op
       END SUBROUTINE FilterM_GENERIC
-!=================================================================
+!===============================================================================
 !     Max block of a DBCSR matrix
-!=================================================================
+!===============================================================================
    SUBROUTINE XPose_BCSR(A,B)
       TYPE(BCSR)           :: A
       TYPE(BCSR), OPTIONAL :: B
@@ -2131,13 +2142,13 @@ MODULE LinAlg
       INTEGER                              :: I,J,K,MI,NJ,MN,MN1,P,Q,NEXT
       LOGICAL                              :: SymbolicOnly
       
-!
+
       IF(PRESENT(AMTrix).AND.PRESENT(BMTrix))THEN
          SymbolicOnly=.FALSE.
       ELSE
          SymbolicOnly=.TRUE.
       ENDIF
-!
+
       DO I=1,NAtoms
          BRowPt(I)=0
       ENDDO
@@ -2205,9 +2216,9 @@ MODULE LinAlg
    END SUBROUTINE XPoseSqMat        
 
 #ifdef PARALLEL
-!=================================================================
+!===============================================================================
 !     Max block of a DBCSR matrix
-!=================================================================
+!===============================================================================
       FUNCTION Max_DBCSR(A,Perf_O)
          IMPLICIT NONE
          REAL(DOUBLE)                      :: Max_DBCSR
@@ -2217,12 +2228,12 @@ MODULE LinAlg
          INTEGER                           :: IL,IG,MA,NA,J,JP,P,IStrtA,IStopA
          REAL(DOUBLE), EXTERNAL            :: DBL_Dot
 !         TYPE(BCSR) :: B
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !         CALL SetEq(B,A)
 !         Max_DBCSR=Max_BCSR(B)
 !         CALL delete(B)
 !         RETURN
-!
+
          Mx=Zero
          DO IL=1,A%NAtms
             IG=IL+OffSt%I(MyId)
@@ -2244,9 +2255,9 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+DBLE(2*A%NNon0)
       END FUNCTION Max_DBCSR
 #endif
-!=================================================================
+!===============================================================================
 !     Max block of a BCSR matrix
-!=================================================================
+!===============================================================================
       FUNCTION Max_BCSR(A,Perf_O)
          IMPLICIT NONE
          REAL(DOUBLE)                      :: Max_BCSR
@@ -2276,14 +2287,15 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+DBLE(2*A%NNon0)
 #ifdef PARALLEL
          ENDIF
-         CALL BCast(Max_BCSR)
+         !! write(*,*) 'warning from parallel : max_bcrs not broadcasted!'
+         !! CALL Bcast(Max_BCSR)
 #endif
       END FUNCTION Max_BCSR
-!
+
 !===================================================================      
-!
+
 !===================================================================      
-!
+
       SUBROUTINE RowColChk(N,RowPt,ColPt,Mssg)
          INTEGER :: I,N
          TYPE(INT_VECT) :: RowPt,ColPt
@@ -2297,14 +2309,14 @@ MODULE LinAlg
       END SUBROUTINE RowColChk
 
 !===================================================================      
-!
+
 !===================================================================      
       SUBROUTINE MatrixCheck(A,Mssg)
          TYPE(BCSR),       INTENT(IN) :: A
          CHARACTER(LEN=*), INTENT(IN) :: Mssg
          INTEGER                      :: I,J,SzRow,SzCol,SzMat, &
                                          IStrtA,IStopA
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          SzRow=SIZE(A%RowPt%I)
          SzCol=MIN(SIZE(A%ColPt%I),SIZE(A%BlkPt%I))
          SzMat=SIZE(A%MTrix%D)
@@ -2328,7 +2340,7 @@ MODULE LinAlg
          ENDDO
      END SUBROUTINE MatrixCheck            
 #ifdef PARALLEL
-!==================================================================================
+!===============================================================================
 !     More intelegent domain decomposition based on a matrices symbolic structure
 !==================================================================================      
       SUBROUTINE RePart(MatrixFile)
@@ -2342,16 +2354,16 @@ MODULE LinAlg
          INTEGER, DIMENSION(Mns:Pls)         :: Beg3,End2
          INTEGER, DIMENSION(Mns:Pls,Mns:Pls) :: End3,Dv
          LOGICAL                             :: Exists
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Allocate domain limits if nessesary
-!
+
          IF(.NOT.AllocQ(Beg%Alloc))  CALL New(Beg,NPrc-1,0)
          IF(.NOT.AllocQ(End%Alloc))  CALL New(End,NPrc-1,0)
          IF(.NOT.AllocQ(OffSt%Alloc))CALL New(OffSt,NPrc-1,0)
          IF(MyId==ROOT)THEN
-!---------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Get global structure from BCSR matrix
-!
+
             INQUIRE(FILE=MatrixFile,EXIST=Exists)
             IF(Exists)THEN
                OPEN(UNIT=Seq,FILE=MatrixFile,STATUS='OLD', &
@@ -2365,12 +2377,12 @@ MODULE LinAlg
             READ(UNIT=Seq,Err=1,IOSTAT=IOS)(RowPt%I(I),I=1,NAtoms+1)
             READ(UNIT=Seq,Err=1,IOSTAT=IOS)(ColPt%I(I),I=1,NBlks)
             CLOSE(Seq)
-!------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Calculate the number of NNon0s per row
-!
+
             CALL New(Count,NAtoms)
             CALL New(NAv,NPrc-1,0)
-!
+
             DO I=1,NAtoms
                MA=BSiz%I(I)
                Count%I(I)=0
@@ -2384,24 +2396,24 @@ MODULE LinAlg
                ENDIF
                WRITE(55,*)I,Count%I(I)
             ENDDO
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Look ahead 1 node algorithm for decomposition
 !           If NPrc==2^p, should use bisection instead. 
 !           -- See ORB.F90 for work in progress...
-!
+
             Beg%I(0)=1
             End%I(NPrc-1)=NAtoms
 
 !            NNon0Av=SUM(Count%I(1:NAtoms))/DBLE(NPrc)
 !            WRITE(*,*)' NNon0Av = ',NNon0Av
-!
+
             DO IPrc=0,NPrc-2
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !             Running averages to section
-!
+
                NNon0Av=SUM(Count%I(Beg%I(IPrc):NAtoms))/DBLE(NPrc-IPrc)
                NAv%I(IPrc)=NNon0Av
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !              Forcast Beg and End for (de/inc)rements of (+/- 1) 
 !   
                DO K=Beg%I(IPrc),NAtoms
@@ -2486,7 +2498,7 @@ MODULE LinAlg
             ENDDO
 !---------------------------------------------------------        
 !           Calculate DBCSR matrix RowPt -> GRwPt off-sets
-!
+
             DO I=0,NPrc-1
                OffSt%I(I)=End%I(I)-Beg%I(I)+1
             ENDDO
@@ -2497,25 +2509,25 @@ MODULE LinAlg
                OffSt%I(I)=OffSt%I(I-1)
             ENDDO
             OffSt%I(0)=0
-!-----------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
             MaxAtmsNode=0
             DO K=0,NPrc-1
                MaxAtmsNode=MAX(MaxAtmsNode,End%I(K)-Beg%I(K)+1)
             ENDDO
             MaxAtmsNode=1+MaxAtmsNode
-!-------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Put the domain boundaries to disk
-!
+
 !            CALL OpenHDF(Ctrl%Info(Ctrl%ISet))         
 !            CALL Put(Beg,'beg')
 !            CALL Put(End,'end')
 !            CALL Put(OffSt,'dbcsroffsets')
 !            CALL CloseHDF()         
-!-------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Debug if asked
-!
+
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                CALL OpenASCII(OutFile,Out)           
                CALL PrintProtectL(Out)
@@ -2540,24 +2552,24 @@ MODULE LinAlg
                CALL Delete(CBeg)
                CALL Delete(CEnd)
             ENDIF
-!-------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Tidy up
-!
+
             CALL Delete(RowPt)
             CALL Delete(ColPt)
             CALL Delete(Count)
             CALL Delete(NAv)
          ENDIF
-         CALL BCast(MaxAtmsNode)
-         CALL BCast(Beg)
-         CALL BCast(End)
-         CALL BCast(OffSt)
+         CALL Bcast(MaxAtmsNode)
+         CALL Bcast(Beg)
+         CALL Bcast(End)
+         CALL Bcast(OffSt)
          RETURN
        1 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in RePart.')
       END SUBROUTINE RePart
-!===========================================================================
+!===============================================================================
 !     Simulated Annealing Domain Decomposition
-!===========================================================================
+!===============================================================================
       SUBROUTINE SADD(MatrixFile)
          CHARACTER(LEN=*), INTENT(IN)        :: MatrixFile
          TYPE(INT_VECT)                      :: RowPt,ColPt,Counts,NAv
@@ -2569,16 +2581,16 @@ MODULE LinAlg
          LOGICAL                             :: Exists
          REAL(DOUBLE)                        :: AtsPerPrc,Ats,Temp,TFct,R,DF
 
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Allocate domain limits if nessesary
-!
+
          IF(.NOT.AllocQ(Beg%Alloc))  CALL New(Beg,NPrc-1,0)
          IF(.NOT.AllocQ(End%Alloc))  CALL New(End,NPrc-1,0)
          IF(.NOT.AllocQ(OffSt%Alloc))CALL New(OffSt,NPrc-1,0)
          IF(MyId==ROOT)THEN
-!---------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Get global structure from BCSR matrix
-!
+
             INQUIRE(FILE=MatrixFile,EXIST=Exists)
             IF(Exists)THEN
                OPEN(UNIT=Seq,FILE=MatrixFile,STATUS='OLD', &
@@ -2592,12 +2604,12 @@ MODULE LinAlg
             READ(UNIT=Seq,Err=1,IOSTAT=IOS)(RowPt%I(I),I=1,NAtoms+1)
             READ(UNIT=Seq,Err=1,IOSTAT=IOS)(ColPt%I(I),I=1,NBlks)
             CLOSE(Seq)
-!------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Calculate the number of NNon0s per row
-!
+
             CALL New(Counts,NAtoms)
             CALL New(NAv,NPrc-1,0)
-!
+
             DO I=1,NAtoms
                MA=BSiz%I(I)
                Counts%I(I)=0
@@ -2611,7 +2623,7 @@ MODULE LinAlg
                ENDIF
                WRITE(55,*)I,Counts%I(I)
             ENDDO
-!------------------------------------------------------------
+!-------------------------------------------------------------------------------
             AtsPerPrc=DBLE(NAtoms)/DBLE(NPrc)
             Beg%I(0)=1
             Ats=0
@@ -2652,14 +2664,14 @@ MODULE LinAlg
 !            11 FORMAT('Temp = ',F14.6,' NSuc = ',I3,' F = ',I14)
                Temp=Temp*TFct
             ENDDO
-!
+
             DO I=0,NPrc-2
                End%I(I)=Beg%I(I+1)-1
             ENDDO
             End%I(NPrc-1)=NAtoms
 !---------------------------------------------------------        
 !           Calculate DBCSR matrix RowPt -> GRwPt off-sets
-!
+
             DO I=0,NPrc-1
                OffSt%I(I)=End%I(I)-Beg%I(I)+1
             ENDDO
@@ -2670,17 +2682,17 @@ MODULE LinAlg
                OffSt%I(I)=OffSt%I(I-1)
             ENDDO
             OffSt%I(0)=0
-!-----------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
             MaxAtmsNode=0
             DO K=0,NPrc-1
                MaxAtmsNode=MAX(MaxAtmsNode,End%I(K)-Beg%I(K)+1)
             ENDDO
             MaxAtmsNode=1+MaxAtmsNode
-!-------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Debug if asked
-!
+
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                CALL OpenASCII(OutFile,Out)           
                CALL PrintProtectL(Out)
@@ -2705,24 +2717,24 @@ MODULE LinAlg
                CALL Delete(CBeg)
                CALL Delete(CEnd)
             ENDIF
-!-------------------------------------------------------
+!-------------------------------------------------------------------------------
 !           Tidy up
-!
+
             CALL Delete(RowPt)
             CALL Delete(ColPt)
             CALL Delete(Counts)
             CALL Delete(NAv)
          ENDIF
-         CALL BCast(MaxAtmsNode)
-         CALL BCast(Beg)
-         CALL BCast(End)
-         CALL BCast(OffSt)
+         CALL Bcast(MaxAtmsNode)
+         CALL Bcast(Beg)
+         CALL Bcast(End)
+         CALL Bcast(OffSt)
          RETURN
        1 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in GreedySCF.')
       END SUBROUTINE SADD
-!=========================================================================
+!===============================================================================
 !     Cumulative deviation of NNon0s per proc from the average
-!=========================================================================
+!===============================================================================
       INTEGER FUNCTION ObjectiveF(Beg,Counts)
          INTEGER,INTENT(IN),DIMENSION(:) :: Counts,Beg
          INTEGER                         :: I,NP,NA,B,E,C,AverageNon0
@@ -2741,9 +2753,9 @@ MODULE LinAlg
             ObjectiveF=MAX(ObjectiveF,MAX(0,C-AverageNon0))
          ENDDO
       END FUNCTION ObjectiveF
-!=========================================================================
-!
-!=========================================================================
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE Plot_DBCSR(A,Name)
        TYPE(DBCSR) :: A
        CHARACTER(LEN=*) :: Name
@@ -2796,9 +2808,9 @@ MODULE LinAlg
 
 
 #ifdef USE_METIS
-!=============================================================================
+!===============================================================================
 !     Performs P.A, where P is a permutation opperator
-!=============================================================================
+!===============================================================================
       SUBROUTINE MetisReorder(A)
          TYPE(BCSR)     :: A
          TYPE(INT_VECT) :: Perm,IPerm
@@ -2851,9 +2863,9 @@ MODULE LinAlg
          CALL Delete(IPerm)
       END SUBROUTINE
 #endif
-!=============================================================================
+!===============================================================================
 !     Performs the symetric permutation P^T.A.P, where P is in vector form 
-!=============================================================================
+!===============================================================================
       SUBROUTINE SymPe(A,P)
          TYPE(BCSR)     :: A
          TYPE(INT_VECT) :: P
@@ -2897,9 +2909,9 @@ MODULE LinAlg
          CALL Delete(RowPt)
          CALL Delete(ColPt)
          CALL Delete(BlkPt)
-!
+
       END SUBROUTINE SymPe
-!
+
 
 
      SUBROUTINE PlotDecay(A,GM,Name)
@@ -2935,7 +2947,7 @@ MODULE LinAlg
             WRITE(Plt,*)Distance%D(I),Magnitude%D(ISort%I(I))
          ENDDO
          CLOSE(Plt)
-!
+
          CALL OpenASCII(TRIM(Name)//'_MatrixDecayPlotMe',Plt,NewFile_O=.TRUE.)
          WRITE(Plt,2)
          WRITE(Plt,3)TRIM(Name)//'.eps'
@@ -3001,17 +3013,19 @@ MODULE LinAlg
          REAL(DOUBLE)                        :: R,E,Op
          INTEGER                             :: I,J,JP,K,P,Q,MA,NA,MN,MN1, &
                                                 IStrtA,IStopA
-!
-         TYPE(INT_VECT)            :: Stat
-!
-!----------------------------------------------------------------------------------
 
-!
+         TYPE(INT_VECT)            :: Stat
+         CHARACTER(LEN=3)          :: CurGeom
+
+!-------------------------------------------------------------------------------
+
+
         CALL New(Stat,3)
         CALL Get(Stat,'current')
-!
+        CurGeom=TRIM(IntToChar(Stat%I(3)))
+
         CALL Get(GM,Tag_O=CurGeom)
-!
+
          CALL OpenASCII(FileName,Tmp,NewFile_O=.TRUE.)
          K=1
          Q=1
@@ -3038,21 +3052,32 @@ MODULE LinAlg
          CALL Delete(GM)
          CLOSE(Tmp)
       END SUBROUTINE MStats
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !      Frobenious Norm 
-!---------------------------------------------------------------------
-      FUNCTION FNorm(M)
+!-------------------------------------------------------------------------------
+#ifdef PARALLEL
+      FUNCTION FNorm_DBCSR(M)
+        TYPE(DBCSR)       :: M
+        INTEGER          :: I
+        REAL(DOUBLE)     :: FNorm_DBCSR,Frob
+        FNorm_DBCSR = Zero
+        DO I = 1, M%NNon0
+           FNorm_DBCSR = FNorm_DBCSR + (M%MTrix%D(I))**2
+        ENDDO
+        Frob=AllReduce(FNorm_DBCSR)
+	FNorm_DBCSR=SQRT(Frob)
+      END FUNCTION FNorm_DBCSR
+
+#endif
+      FUNCTION FNorm_BCSR(M)
         TYPE(BCSR)       :: M
         INTEGER          :: I
-        REAL(DOUBLE)     :: FNorm
-        FNorm = Zero
+        REAL(DOUBLE)     :: FNorm_BCSR
+        FNorm_BCSR = Zero
         DO I = 1, M%NNon0
-           FNorm = FNorm + (M%MTrix%D(I))**2
+           FNorm_BCSR = FNorm_BCSR + (M%MTrix%D(I))**2
         ENDDO
-        FNorm = SQRT(FNorm)
-      END FUNCTION FNorm
+        FNorm_BCSR = SQRT(FNorm_BCSR)
+      END FUNCTION FNorm_BCSR
+
 END MODULE
-
-
-
-

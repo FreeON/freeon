@@ -11,18 +11,18 @@ MODULE MondoMPI
 !    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
 !    AUXILIARY INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN
 !    BY THE FULLER NAME, EG. INT_VECTOR, WHICH SPECIFIES THE ARRAY ONLY.
-!
+
    INTEGER,SAVE :: MONDO_COMM=MPI_COMM_WORLD
-   INTERFACE BCast          ! Wrappers for MPI_BCAST
-      MODULE PROCEDURE BCast_DBL_SCLR, BCast_DBL_VECT,  BCast_DBL_RNK2, &
-                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, & 
-                       BCast_INT_SCLR,                                  &
-                       BCast_INT_VECT, BCast_INT_RNK2,  BCast_INT_RNK3, &
-                       BCast_INT_RNK4, BCast_CHR_SCLR,  BCast_LOG_SCLR, &
-                       BCast_DEBG                        
+   INTERFACE Bcast          ! Wrappers for MPI_BCAST
+      MODULE PROCEDURE Bcast_DBL_SCLR, Bcast_DBL_VECT,  Bcast_DBL_RNK2, &
+                       Bcast_DBL_RNK3, Bcast_DBL_RNK4,  Bcast_DBL_RNK6, & 
+                       Bcast_INT_SCLR,                                  &
+                       Bcast_INT_VECT, Bcast_INT_RNK2,  Bcast_INT_RNK3, &
+                       Bcast_INT_RNK4, Bcast_CHR_SCLR,  Bcast_LOG_SCLR, &
+                       Bcast_DEBG                        
    END INTERFACE
    INTERFACE AllReduce   ! Wrappers for MPI_ALLREDUCE
-      MODULE PROCEDURE AllReduce_DBL_SCLR
+      MODULE PROCEDURE AllReduce_DBL_SCLR,AllReduce_INT_SCLR
    END INTERFACE
    INTERFACE Reduce       ! Wrappers for MPI_REDUCE
       MODULE PROCEDURE Reduce_DBL_SCLR, Reduce_INT_SCLR
@@ -54,16 +54,16 @@ MODULE MondoMPI
       MODULE PROCEDURE PSpew_INT_VECT, PSpew_DBL_VECT
    END INTERFACE
    CONTAINS
-!===============================================================
-!
+!===============================================================================
+
 !     WRAPPERS FOR MPI INITIALIZATION AND FINALIZATION
-!
-!===============================================================
-!
+
+!===============================================================================
+
       SUBROUTINE InitMPI()
          INTEGER :: IErr
          CHARACTER(LEN=7),PARAMETER :: Sub='InitMPI'
-!------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL MPI_INIT(IErr)
          CALL ErrChk(IErr,Sub)
 !        Load global MPI variables
@@ -93,14 +93,14 @@ MODULE MondoMPI
          CALL MPI_COMM_SIZE(MONDO_COMM,MSize,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION MSize
-!
-!===============================================================
-!
+
+!===============================================================================
+
 !     BCAST WRAPPERS
-!
-!===============================================================
+
+!===============================================================================
 !--------------------------------------------------------BCAST CHARACTERS
-      SUBROUTINE BCast_CHR_SCLR(A)
+      SUBROUTINE Bcast_CHR_SCLR(A)
          CHARACTER(LEN=*)                   :: A
          CHARACTER(LEN=1),DIMENSION(LEN(A)) :: LocalChars
          INTEGER                            :: IErr,I,L
@@ -110,32 +110,32 @@ MODULE MondoMPI
          ENDDO
          CALL MPI_BCAST(LocalChars,L,MPI_CHARACTER,ROOT,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_STR',IErr)
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_STR',IErr)
          DO I=1,L
             A(I:I)=LocalChars(I)
          ENDDO
-      END SUBROUTINE BCast_CHR_SCLR
+      END SUBROUTINE Bcast_CHR_SCLR
 
-      SUBROUTINE BCast_CHR_VECT(A)
+      SUBROUTINE Bcast_CHR_VECT(A)
          TYPE(CHR_VECT), INTENT(INOUT)  :: A
          INTEGER                        :: I,N
          N=SIZE(A%C)
          DO I=1,N
-            CALL BCast_CHR_SCLR(A%C(I))
+            CALL Bcast_CHR_SCLR(A%C(I))
          ENDDO
-      END SUBROUTINE BCast_CHR_VECT
+      END SUBROUTINE Bcast_CHR_VECT
 !--------------------------------------------------------BCAST CHARACTERS
-      SUBROUTINE BCast_LOG_SCLR(A)
+      SUBROUTINE Bcast_LOG_SCLR(A)
          LOGICAL,INTENT(INOUT)      :: A
          INTEGER                    :: IErr,I
          I=0; IF(A)I=1
          CALL MPI_BCAST(I,1,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_STR',IErr)
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_STR',IErr)
          A=.FALSE.; IF(I==1)A=.TRUE.
-      END SUBROUTINE BCast_LOG_SCLR
+      END SUBROUTINE Bcast_LOG_SCLR
 !--------------------------------------------------------BCAST DOUBLES
-      SUBROUTINE BCast_DBL_SCLR(D,Id_0)
+      SUBROUTINE Bcast_DBL_SCLR(D,Id_0)
          REAL(DOUBLE), INTENT(INOUT) :: D
          INTEGER, OPTIONAL           :: Id_0
          INTEGER                     :: IErr,Id
@@ -143,10 +143,10 @@ MODULE MondoMPI
          IF(PRESENT(Id_0))Id=Id_0
          CALL MPI_BCAST(D,1,MPI_DOUBLE_PRECISION,Id,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_DBL',IErr)
-      END SUBROUTINE BCast_DBL_SCLR
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_DBL',IErr)
+      END SUBROUTINE Bcast_DBL_SCLR
 
-      SUBROUTINE BCast_DBL_VECT(A,N_O)
+      SUBROUTINE Bcast_DBL_VECT(A,N_O)
          TYPE(DBL_VECT),INTENT(INOUT) :: A
          INTEGER,OPTIONAL,INTENT(IN) :: N_O
 
@@ -154,88 +154,88 @@ MODULE MondoMPI
          L=SIZE(A%D); IF(PRESENT(N_O)) L=N_O
          CALL MPI_BCAST(A%D,L,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_DBL_VECT',IErr)
-      END SUBROUTINE BCast_DBL_VECT
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_DBL_VECT',IErr)
+      END SUBROUTINE Bcast_DBL_VECT
 
-      SUBROUTINE BCast_DBL_RNK2(A)
+      SUBROUTINE Bcast_DBL_RNK2(A)
          TYPE(DBL_RNK2), INTENT(INOUT) :: A
          INTEGER :: L,M
          L=SIZE(A%D,1); M=SIZE(A%D,2)
          CALL CRNDAV(L*M,A%D)
-      END SUBROUTINE BCast_DBL_RNK2
+      END SUBROUTINE Bcast_DBL_RNK2
 
-      SUBROUTINE BCast_DBL_RNK3(A)
+      SUBROUTINE Bcast_DBL_RNK3(A)
          TYPE(DBL_RNK3), INTENT(INOUT) :: A
          INTEGER :: L,M,N
          L=SIZE(A%D,1); M=SIZE(A%D,2); N=SIZE(A%D,3)
          CALL CRNDAV(L*M*N,A%D)
-      END SUBROUTINE BCast_DBL_RNK3
+      END SUBROUTINE Bcast_DBL_RNK3
 
-      SUBROUTINE BCast_DBL_RNK4(A)
+      SUBROUTINE Bcast_DBL_RNK4(A)
          TYPE(DBL_RNK4), INTENT(INOUT) :: A
          INTEGER :: L,M,N,K
          L=SIZE(A%D,1); M=SIZE(A%D,2)
          N=SIZE(A%D,3); K=SIZE(A%D,4)
          CALL CRNDAV(L*M*N*K,A%D)
-      END SUBROUTINE BCast_DBL_RNK4
+      END SUBROUTINE Bcast_DBL_RNK4
 
-      SUBROUTINE BCast_DBL_RNK6(A)
+      SUBROUTINE Bcast_DBL_RNK6(A)
          TYPE(DBL_RNK6), INTENT(INOUT) :: A
          INTEGER :: L
          L=SIZE(A%D,1)*SIZE(A%D,2)*SIZE(A%D,3)* &
            SIZE(A%D,4)*SIZE(A%D,5)*SIZE(A%D,6)
          CALL CRNDAV(L,A%D)
-      END SUBROUTINE BCast_DBL_RNK6
+      END SUBROUTINE Bcast_DBL_RNK6
 !--------------------------------------------------------BCAST INTEGERS
-      SUBROUTINE BCast_INT_SCLR(A,Id_O)
+      SUBROUTINE Bcast_INT_SCLR(A,Id_O)
          INTEGER, INTENT(INOUT) :: A
          INTEGER, OPTIONAL      :: Id_O
          INTEGER                :: IErr,Id
          Id=ROOT; IF(PRESENT(Id_O))Id=Id_O   
          CALL MPI_BCAST(A,1,MPI_INTEGER,Id,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_INT',IErr)
-      END SUBROUTINE BCast_INT_SCLR
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_INT',IErr)
+      END SUBROUTINE Bcast_INT_SCLR
 
-      SUBROUTINE BCast_INT_VECT(A,N_O)
+      SUBROUTINE Bcast_INT_VECT(A,N_O)
          TYPE(INT_VECT),    INTENT(INOUT) :: A
          INTEGER, OPTIONAL, INTENT(IN)    :: N_O
          INTEGER                          :: IErr,N
          N=SIZE(A%I); IF(PRESENT(N_O))N=N_O
          CALL MPI_BCAST(A%I,N,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
-            CALL HaltMPI(' MPI_BCAST failed in BCast_INT_VECT',IErr)
-      END SUBROUTINE BCast_INT_VECT
+            CALL HaltMPI(' MPI_BCAST failed in Bcast_INT_VECT',IErr)
+      END SUBROUTINE Bcast_INT_VECT
 
-      SUBROUTINE BCast_INT_RNK2(A)
+      SUBROUTINE Bcast_INT_RNK2(A)
          TYPE(INT_RNK2), INTENT(INOUT) :: A
          INTEGER :: L,M
          L=SIZE(A%I,1) ; M=SIZE(A%I,2)
          CALL CRNIAV(L*M,A%I)
-      END SUBROUTINE BCast_INT_RNK2
+      END SUBROUTINE Bcast_INT_RNK2
 
-      SUBROUTINE BCast_INT_RNK3(A)
+      SUBROUTINE Bcast_INT_RNK3(A)
          TYPE(INT_RNK3), INTENT(INOUT) :: A
          INTEGER :: L,M,N
          L=SIZE(A%I,1) ; M=SIZE(A%I,2); N=SIZE(A%I,3)
          CALL CRNIAV(L*M*N,A%I)
-      END SUBROUTINE BCast_INT_RNK3
+      END SUBROUTINE Bcast_INT_RNK3
 
-      SUBROUTINE BCast_INT_RNK4(A)
+      SUBROUTINE Bcast_INT_RNK4(A)
          TYPE(INT_RNK4),INTENT(INOUT) :: A
          INTEGER :: I,J,L,M
          I=SIZE(A%I,1); J=SIZE(A%I,2)
          L=SIZE(A%I,3) ; M=SIZE(A%I,4)
          CALL CRNIAV(I*J*L*M,A%I)
-      END SUBROUTINE BCast_INT_RNK4
-!
-!=================================================================
-!
+      END SUBROUTINE Bcast_INT_RNK4
+
+!===============================================================================
+
 !     RANK N -> RANK 1 BCAST
 !  
-!=================================================================
-!
-      SUBROUTINE CRNIAV(L,A)               ! BCast RANK N Integer As VECTOR
+!===============================================================================
+
+      SUBROUTINE CRNIAV(L,A)               ! Bcast RANK N Integer As VECTOR
          INTEGER :: L,IErr
          INTEGER, DIMENSION(L), INTENT(INOUT)  :: A
          CALL MPI_BCAST(A,L,MPI_INTEGER,ROOT,MONDO_COMM,IErr)
@@ -243,7 +243,7 @@ MODULE MondoMPI
             CALL HaltMPI(' MPI_BCAST failed for integer vector ',IErr)
       END SUBROUTINE CRNIAV
 
-      SUBROUTINE CRNDAV(L,A)               ! BCast RANK N Double As VECTOR
+      SUBROUTINE CRNDAV(L,A)               ! Bcast RANK N Double As VECTOR
          INTEGER :: L,IErr
          REAL(DOUBLE), DIMENSION(L), INTENT(INOUT)  :: A
          CALL MPI_BCAST(A,L,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
@@ -251,22 +251,39 @@ MODULE MondoMPI
             CALL HaltMPI(' MPI_BCAST failed for double vector ',IErr)
       END SUBROUTINE CRNDAV
 !-------------------------------------------------- 
-       SUBROUTINE BCast_DEBG(A)
+       SUBROUTINE Bcast_DEBG(A)
          TYPE(DEBG) :: A
-         CALL BCast(A%Key)
-         CALL BCast(A%Chk)
-         CALL BCast(A%Mat)
-         CALL BCast(A%Set)
-         CALL BCast(A%Int)
-         CALL BCast(A%Rho)
-         CALL BCast(A%Fmt)
-       END SUBROUTINE BCast_DEBG
-!===============================================================
-!
+         CALL Bcast(A%Key)
+         CALL Bcast(A%Chk)
+         CALL Bcast(A%Mat)
+         CALL Bcast(A%Set)
+         CALL Bcast(A%Int)
+         CALL Bcast(A%Rho)
+         CALL Bcast(A%Fmt)
+       END SUBROUTINE Bcast_DEBG
+!===============================================================================
+
 !     REDUCE WRAPPERS
-!
-!===============================================================
-!
+
+!===============================================================================
+
+
+      FUNCTION AllReduce_INT_SCLR(D,Op_O)
+         INTEGER, INTENT(INOUT)  :: D
+         INTEGER,OPTIONAL,INTENT(IN)  :: Op_O
+         INTEGER                 :: AllReduce_INT_SCLR
+         INTEGER                      :: Op,IErr
+         CHARACTER(LEN=18), PARAMETER :: Sub='AllReduce_INT_SCLR'
+         IF(PRESENT(Op_O))THEN
+            Op=Op_O
+         ELSE
+            Op=MPI_SUM
+         ENDIF
+         CALL MPI_ALLREDUCE(D,AllReduce_INT_SCLR,1, &
+              MPI_INTEGER,Op,MONDO_COMM,IErr)
+         CALL ErrChk(IErr,Sub)
+      END FUNCTION AllReduce_INT_SCLR
+
       FUNCTION AllReduce_DBL_SCLR(D,Op_O)
          REAL(DOUBLE), INTENT(INOUT)  :: D
          INTEGER,OPTIONAL,INTENT(IN)  :: Op_O
@@ -283,8 +300,8 @@ MODULE MondoMPI
          CALL ErrChk(IErr,Sub)
       END FUNCTION AllReduce_DBL_SCLR
 !-------------------------------------------------- DOUBLES
-!
-!
+
+
       FUNCTION Reduce_DBL_SCLR(D,Op_O)
          REAL(DOUBLE), INTENT(INOUT)  :: D
          INTEGER,OPTIONAL,INTENT(IN)  :: Op_O
@@ -301,8 +318,8 @@ MODULE MondoMPI
          CALL ErrChk(IErr,Sub)
       END FUNCTION Reduce_DBL_SCLR
 !-------------------------------------------------- INTEGERS
-!
-!
+
+
       FUNCTION Reduce_INT_SCLR(I)
          INTEGER                      :: I,Reduce_INT_SCLR
          INTEGER                      :: IErr
@@ -311,12 +328,12 @@ MODULE MondoMPI
                          MPI_SUM,ROOT,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION Reduce_INT_SCLR
-!
-!======================================================================
+
+!===============================================================================
 !     GATHERS (Note, be carefull to avoid 
 !     reference to uninitialised POINTERs
-!======================================================================
-!
+!===============================================================================
+
       SUBROUTINE Gather_INT_SCLR(A,B)
          INTEGER,       INTENT(IN)    :: A
          TYPE(INT_VECT),INTENT(INOUT) :: B
@@ -387,13 +404,13 @@ MODULE MondoMPI
          ENDIF
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Gather_DBL_VECT
-!======================================================================
-!
+!===============================================================================
+
 !     BLOCKING SENDS AND RECIEVES
-!
-!---------------------------------------------------------------------
-!
-!
+
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Send_DBL_SCLR(Snd,To,Tag)
          REAL(DOUBLE),INTENT(IN)      :: Snd
          INTEGER,     INTENT(IN)      :: To,Tag
@@ -403,9 +420,9 @@ MODULE MondoMPI
                        MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_DBL_SCLR
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Send_DBL_VECT(Snd,N,To,Tag,M_O)
          TYPE(DBL_VECT),  INTENT(IN) :: Snd
          INTEGER,         INTENT(IN) :: N,To,Tag
@@ -419,9 +436,9 @@ MODULE MondoMPI
                        MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_DBL_VECT
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Send_INT_SCLR(Snd,To,Tag)
          INTEGER, INTENT(IN)          :: Snd,To,Tag
          INTEGER                      :: IErr
@@ -430,9 +447,9 @@ MODULE MondoMPI
                        MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_SCLR
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Send_INT_VECT(Snd,N,To,Tag,M_O)
          TYPE(INT_VECT),  INTENT(IN) :: Snd
          INTEGER,         INTENT(IN) :: N,To,Tag
@@ -449,9 +466,9 @@ MODULE MondoMPI
                        MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_VECT
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Send_INT_VECTOR(Snd,N,To,Tag,M_O)
          INTEGER,DIMENSION(:),INTENT(IN) :: Snd
          INTEGER,             INTENT(IN) :: N,To,Tag
@@ -463,9 +480,9 @@ MODULE MondoMPI
                        MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Send_INT_VECTOR
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Recv_DBL_SCLR(Rec,From,Tag)
          REAL(DOUBLE),INTENT(INOUT)          :: Rec
          INTEGER,     INTENT(IN)             :: From,Tag
@@ -476,9 +493,9 @@ MODULE MondoMPI
                        MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_DBL_SCLR
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Recv_DBL_VECT(Rec,N,From,Tag,M_O)
          TYPE(DBL_VECT),INTENT(INOUT)        :: Rec
          INTEGER,       INTENT(IN)           :: N,From,Tag
@@ -492,9 +509,9 @@ MODULE MondoMPI
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_DBL_VECT
 
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Recv_INT_SCLR(Rec,From,Tag)
          INTEGER, INTENT(INOUT)              :: Rec
          INTEGER, INTENT(IN)                 :: From,Tag
@@ -505,9 +522,9 @@ MODULE MondoMPI
                        MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_INT_SCLR
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Recv_INT_VECT(Rec,N,From,Tag,M_O)
          TYPE(INT_VECT),INTENT(INOUT)        :: Rec
          INTEGER,       INTENT(IN)           :: N,From,Tag
@@ -527,9 +544,9 @@ MODULE MondoMPI
 !         WRITE(*,*)' IErr = ',IErr
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_INT_VECT
-!---------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE Recv_INT_VECTOR(Rec,N,From,Tag,M_O)
          INTEGER,DIMENSION(:),INTENT(INOUT)  :: Rec
          INTEGER,             INTENT(IN)     :: N,From,Tag
@@ -542,13 +559,13 @@ MODULE MondoMPI
                        MONDO_COMM,Status,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE Recv_INT_VECTOR
-!======================================================================
-!
+!===============================================================================
+
 !     WRAPPERS FOR NON-BLOCKING (IMEDIATE) SENDS AND RECIEVES
-!
-!--------------------------------------------------------------------
-!
-!
+
+!-------------------------------------------------------------------------------
+
+
       FUNCTION ISend_DBL_SCLR(Snd,To,Tag)
          REAL(DOUBLE),INTENT(INOUT)     :: Snd
          INTEGER,     INTENT(IN)     :: To,Tag
@@ -558,9 +575,9 @@ MODULE MondoMPI
                         MONDO_COMM,ISend_DBL_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_DBL_SCLR
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION ISend_DBL_VECT(Snd,N,To,Tag,M_O)
          TYPE(DBL_VECT),INTENT(INOUT)    :: Snd
          INTEGER,       INTENT(IN)    :: N,To,Tag
@@ -572,9 +589,9 @@ MODULE MondoMPI
                         MONDO_COMM,ISend_DBL_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_DBL_VECT
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION ISend_INT_SCLR(Snd,To,Tag)
          INTEGER,INTENT(INOUT)          :: Snd
          INTEGER,INTENT(IN)          :: To,Tag
@@ -586,9 +603,9 @@ MODULE MondoMPI
                         MONDO_COMM,ISend_INT_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_INT_SCLR
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION ISend_INT_VECT(Snd,N,To,Tag,M_O)
          TYPE(INT_VECT),INTENT(INOUT) :: Snd
          INTEGER,       INTENT(IN)    :: N,To,Tag
@@ -607,9 +624,9 @@ MODULE MondoMPI
                         MONDO_COMM,ISend_INT_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION ISend_INT_VECT
-!-----------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION IRecv_DBL_SCLR(Rec,From,Tag)
          REAL(DOUBLE),INTENT(INOUT) :: Rec
          INTEGER,INTENT(IN)         :: From,Tag
@@ -619,9 +636,9 @@ MODULE MondoMPI
                         MONDO_COMM,IRecv_DBL_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_DBL_SCLR
-!-----------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION IRecv_DBL_VECT(Rec,N,From,Tag,M_O)
          TYPE(DBL_VECT),INTENT(INOUT)  :: Rec
          INTEGER,INTENT(IN)            :: From,N,Tag
@@ -633,9 +650,9 @@ MODULE MondoMPI
                         MONDO_COMM,IRecv_DBL_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_DBL_VECT
-!-----------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION IRecv_INT_SCLR(Rec,From,Tag)
          INTEGER,INTENT(INOUT) :: Rec
          INTEGER,INTENT(IN)    :: From,Tag
@@ -647,9 +664,9 @@ MODULE MondoMPI
                         MONDO_COMM,IRecv_INT_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_INT_SCLR
-!-----------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       FUNCTION IRecv_INT_VECT(Rec,N,From,Tag,M_O)
          TYPE(INT_VECT),INTENT(INOUT)  :: Rec
          INTEGER,INTENT(IN)            :: From,N,Tag
@@ -671,8 +688,8 @@ MODULE MondoMPI
 
 
 
-!===============================================================
-!
+!===============================================================================
+
 !     WRAPER FOR CART_CREATE ROUTINE
       
       SUBROUTINE CreateComm()
@@ -681,17 +698,17 @@ MODULE MondoMPI
          CALL MPI_CART_CREATE(MPI_COMM_WORLD,1,NPrc,.FALSE.,.TRUE.,MONDO_COMM,IErr)
          CALL ErrChk(IErr,Sub)
       END SUBROUTINE CreateComm
-!===============================================================
-!
+!===============================================================================
+
 !     WRAPERS FOR WAIT ROUTINES
-!
+
       SUBROUTINE WaitAll(Reqs,Mssg)
          TYPE(INT_VECT),INTENT(INOUT)    :: Reqs     
          TYPE(INT_RNK2)                  :: Stats
          INTEGER                         :: I,J,N,IErr
          CHARACTER(LEN=*), OPTIONAL      :: Mssg
          CHARACTER(LEN=8)                :: Sub='MWaitAll'
-!------------------------------------------------------------
+!-------------------------------------------------------------------------------
          IF(PRESENT(Mssg))THEN
             WRITE(*,*)' WAITALL:'
             CALL PSpew(Mssg,Reqs)
@@ -711,16 +728,16 @@ MODULE MondoMPI
          CALL ErrChk(IErr,Sub)
          CALL Delete(Stats)
       END SUBROUTINE WaitAll
-!---------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
       SUBROUTINE WaitSome(Reqs,ToDo)
          TYPE(INT_VECT),             INTENT(INOUT)  :: Reqs,ToDo            
          TYPE(INT_VECT)                             :: Indxs
          TYPE(INT_RNK2)                             :: Stats
          INTEGER                                    :: I,J,L,N,IErr
          CHARACTER(LEN=8),PARAMETER                 :: Sub='WaitSome'
-!-----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Allocation check
          IF(AllocQ(ToDo%Alloc))CALL Delete(ToDo)
 !        Check to see if all requests are NULL
@@ -743,10 +760,10 @@ MODULE MondoMPI
          CALL Delete(Indxs)
          CALL Delete(Stats)
       END SUBROUTINE WaitSome
-!===============================================================
-!
+!===============================================================================
+
 !     WRAPER FOR MPI_TYPE_FREE
-!
+
       SUBROUTINE FreeType(Type)
          INTEGER, INTENT(INOUT) :: Type
          INTEGER                :: IErr
@@ -756,10 +773,10 @@ MODULE MondoMPI
             CALL ErrChk(IErr,Sub)
          ENDIF
       END SUBROUTINE FreeType
-!===============================================================
-!
+!===============================================================================
+
 !     NODE ALLINGMENT
-!
+
       SUBROUTINE AlignNodes(String_O)
          INTEGER                        :: IErr
          CHARACTER(LEN=*),OPTIONAL      :: String_O
@@ -772,10 +789,10 @@ MODULE MondoMPI
             WRITE(*,*)TRIM(String)
          ENDIF
       END SUBROUTINE AlignNodes
-!===============================================================
-!
+!===============================================================================
+
 !     Error checking
-!
+
       SUBROUTINE ErrChk(IErr,Caller,Seqnce_O)
          INTEGER                              :: IErr
          CHARACTER(LEN=*),INTENT(IN)          :: Caller
