@@ -40,7 +40,6 @@ CONTAINS
     !-------------------------------------------------------------------------------
 #ifdef PARALLEL_CLONES
     CALL InitMPI()
-    !       CALL AlignNodes('Inited MPI')
 #else         
     IF(PRESENT(Serial_O))THEN
        IF(Serial_O)THEN
@@ -169,11 +168,9 @@ CONTAINS
     ! Revert back to global communicator, rank etc
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()    
-#endif
-#endif
-    !
     CALL AlignNodes()
-    !
+#endif
+#endif
     IF(HasQM()) THEN
        CALL Delete(BSiz)
        CALL Delete(OffS)
