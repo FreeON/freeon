@@ -1,262 +1,57 @@
-!============================================================================================
-Following are todo lists for developers.  Please feel free to add to my todo list, 
-and to update this file in the CVS tree thereafter.  Also, as you accomplish old goals
-and set new ones, please remove/add them from/to your todo list and update this file in the 
-CVS tree. 
 
-Matt:
-o Rewrite QCTC with k-d trees, and generalize VMD code to arbitrary Ell.
-o Profile/tune PBC and Gradients code
-o Remove junk on the fly from scratch dir
-o Create validation suite
-o Talk for NC Nano-Bio
-o Make sure parallel LinAlg still works
-o Get working under AIX.XLF, True64.COMPAQ
-o Parallelization 
-o Documentation
-o Interface with OpenDX for isosurfacing and movies
+
+
+
+
+        TO DO LIST FOR MondoSCF DEVELOPERS 
+
+    >> Release of Version 1.0b this November << 
+
+Items marked with an x need to be in place before the release!
 
 CJ:
-o Validation with NaCl, diamond, and ice: BLYP/6-31G**
-o PBC scaling runs for HiCu, LinAlg and short write up
-o Help with QCTC
-o Write up linear scaling and PBC
-o Big apps and talk for ACS 2001
-o New density matrix guesser/minimizers
+x Validation suite
+x PBC scaling runs for HiCu, QCTC and SDMM
+o Write up PBC
+o Write up new MAC and PAC
+o Help perodifiy ONX
+? Coordinate transformations for HiCu
+? On the fly PAO basis set contractions in the 
+  molecular environs
 
 Eric:  
-o F90ify and consolidate flavors of ONX, Gammas, etc
-o Gradients of exact K
-o Periodics of exact K
-o Parallelize exact K
-o Talk for ACS 2001
+x Explicit code into NONX
+o Switch over to new gammas
+o Help perodify ONX 
+o Help parallelize ONX
 
-Mike:
-o Clean and validate gradients code.
-o Document and check in.
-o Drivers for minimization and dynamics.
-o Big apps and talk for ACS 2001
-!==========================================================================================
-MC Change log 12/12/00
+Matt:
+x Finish validation suite and checking accuracies
+x Get front end and output formatting cleaned
+  >> hostname, machetype, etc to outfile
+x Get geometry optimization working again
+x Make sure density matrix extrapolation is working
+x Documentation
+o Get working under AIX.XLF, True64.COMPAQ
+o Help with parallization
+o HDF5 Interface with OpenDX for isosurfacing and movies
 
-o  MondoMods/DerivedTypes,InOut &
-   MondoSCF/ParseInput:  Added %ETol and %DTol to type TOLS. 
+Chee Kwan:
+o Get parallel code working as is to level of OneE
+o Help redo front end to work with MPI-2 and MPI_COMM_SPAWN
+  as well as with old style serial spawning of mpirun
+o Make sure MPI2 code works on SGIs, LINUX/LAM-MPI, IBM SP2, HP/Compaq?
+o Preliminary work on ordering algothim for load balancing
+  and locality: demonstrate scaling of OneE routines in 
+  both limits of Natoms/Nproc->0,Infinity
 
-o  MONDO/ONX/PONX/pmonx.inc: Doubled the size of buffers.
+Postdoc X:
+o Gradients only transition state theory
+o Geometry optimization
+o Density matrix extrapolation 
+o SCRF,Crystal field,QM/MM for boundary conditions
+o Accelerated MD/Parallel Tempering
+o Applications to Protein Kinase
 
-o  MondoMods/Parse:  Added 3 more digits to DblToMedmChar
 
-o  SCFeqs
- - SDMM:        SDMM now uses the Parser-Manopopulis purification scheme instead of 
-                McWeeny purification.  Works now on "hard" problems like coordinated
-                metals etc. Uses Thresholds%ETol and %DTol to halt convergence.
- - MMA/SCFDev/new.m:  This is a MMA file that mirrors the methods now in SDMM.  Also allows
-                the use of PM parameters in the CG minimization, although this was found
-                to be less advantageous than retaining the original McWeeny based objective
-                function.
-!==========================================================================================
-CJ Change log 12/8/00
-o MondoMods
- - AtomPairs:   Added an extra distance to New_CellSet_sphere to take into account
-  	        atoms at the corners of the cell. Takes into account the size and shape
-	        of the box
- - PBC:         Fixed New_CellSet_spher and New_CellSet_Cube. Now the Lattice vectors need
- 	        to be called threw to make CellSet. Also Added the Logical Funtion IJKTest
-o MondoSCF
- - ParseInput:  Added the functionality to turn the Periodicd on in any direction 
-	        {On-X,On-Y,On-Z,On-XY,On-XZ,On-YZ,On-XYZ}
- - ParsingKeys: Added the Keys for {On-X,On-Y,On-Z,On-XY,On-XZ,On-YZ,On-XYZ}
-o OneE  
- - RhoBlock:    Removed the Atom,State,Primative sysmetiztion factors, this was incorrect
-o QCTC
- - Makefile:    Modified to include the New Moduales
- - Moments/:    Subdirectory that includes the Include files (HGTFToCarts.inc, HGTFToSP.inc) 
-	        plus the matematica Programs which generates them.
- - MakeDJ:      MaxL = 16: Now calls a CalQRho(rho) which calculate the Cartesisan Multipole 
-	        tensor  
- - JBlok:       Added in the Calculation of the Cartesian Multipole Correction to the Matrix 
-	        elemets. Took the MD2TRR,SetBraBlok,BraEst calculation out of the cell sum, 
-	        which was an error. Added some logic (Dimen) so that CTraxBraKet and 
-	        QTraxBraKet will only be done in the correct dimensional system.
-
- - Multipoles:  Originally MMoments, split this into Multipole.F90 and Moments.F90
-	        Multipoles can now be done in box shape or size, now longer read the file 
-	        Multipoles_Cube.dat, but generated them. Still needs work in one and two 
-	        dimensions
- - Moments:     NEW Moduale, two classes (Spherical) SpMoments and (Cartesian) QMoments.
- - MMML:        Fortran90 Vesion of MMML_OLD.F, not completed
- - MMML_OLD:    Matts Multipole Manipultion Library, in F77
-
- - MMA/Moments: Added a new directory with symbolics for the multipole moments.
-!==========================================================================================
-MC Change log 12/4/00
-
-o  HiCu
-   -  CubeTree:  Removed RhoOnGrid from RhoTree and put it in here,
-      along with associated routines.  Got rid of RhoAtPoint.  
-      Now have both explicit and general source for computing the
-      population and evaluation the density on the grid.  Recoded
-      (renamed) the code that determines the CubeRoots bounding box;
-      InitCubeRoot uses bisection to find the BBox that integrates
-      the density to exactly Thresholds%cube. 
-      All loops over NGrid variables now have quickest running variable
-      (IGrid) to the left.  Added an extra RETURN statement to check
-      for insignificant distributions in both RhoOnGrid and PopInBox
-      (which is a new routine that evaluates the density in a Cube%BBox).
-      Cleaned up GridGen substantially and added new output lines that
-      still need some work.
-
-  -   VRhoMD:  All interpolatory EXPInv and ERF functions have been
-      explicitly inlined into the include files.  
-!==========================================================================================
-MC Change log 11/27/00
-
-o MondoMods
-  - BraKetBloks: getprimative has been renamed SetBraBlok, and an option for 
-    including a phase factor has been added.
-  - DerivedTypes: The PrimPair type has Ket as the accumulatory vector
-    instead of Bra.  Bra is HGBra from BraKetBlocks.
-  - Functionals: has been redone.  Includes Slater-Dirac which is
-    alpha=1 and rhototal^(4/3) and XAlpha which is alpha=2/3 and
-    rhoalpha^(4/3)+rhobeta^(4/3).  All functionals except PBE and PBE0
-    have been validated against G98 and Q-Chem.  Functionals now include
-    source from MMA/Functionals, generated by the completely redone 
-    MMA source Functionals.nb.  An important point here is that the 
-    factor of 2 multiplying dEdAbsGradRho2 in HiCu/KxcGen has been subsumed
-    into the functionals, as have misc factors of 2 and 4 from Functionals.F90.
-  - GlobalScalars: constants ThreeHalf etc have been changed to ThreeHalves
-    etc to be gramtically correct.  These changes have been propigated 
-    throughout.
-  - Indexing: IBloDex has been renamed CFBlokDex
-  - Macros: Getting and setting thresholds has now been replaced by a call to
-    SetThresholds(CurBase).
-  - Makefile:  mk mma makes the entire MondoMods, while mk mm makes all but
-    the DGEMMs and small matrix benchmarks.
-  - MatFunk:  Fixed a serious bug (Missing ABS()) for thresholding small
-    eigenvalues.
-  - Parse: Added the new function DblToMMAChar() which will return a string
-    suitable for printing a MMA formated character.  Fixed DblToShrtChar()
-    so that it can return a negative value.
-  - PrettyPrint:  Added MMA support to Print_HGRHO.  Added the optional argument
-    Misc_O to ProcessName(Proc,Misc_O)  which lets additional info be added.
-  - SMWrap.c: removed double underscore routines.
-  - Thresholds: Added SetThresholds(CurBase) which gets and sets intermediate
-    thresholds.
-  - MondoMods/MMA/Functionals/PBEx.Inc etc. These are include files used 
-    by Functionals.  
-  - MondoMods/MMA/Functionals/Functionals.nb.  This is the 99% ready for openshell
-    notebook that generates functional source.  Note that compiling with
-    PGF90 v3.1 and -O2 breaks some of this code. Therefore, use only  
-    -O1 untill we try v3.2 (which still has bugs).
-o SCFeqs
-  - DIIS: Works now.  Fixed several bigbugs,included an uninitialized variable.
-    OOed the inverse matrix to MatFunk.  Avoid thresholding the error matrices,
-    since these will go to zero much to fast otherwise.  May want to threshold 
-    eventually with a tighter value....
-  - FBuild: Fixed bug that added in whole K matrix for B3LYP.  B3LYP works fine now.
-  - RHeqs: Removed DSYEVD source.  Fixed bug in computing HOMO-LUMO gap.
-  - SCFStatus:  Reformated stdoutput.
-  - SDMM: SDMM now has an automatic criterion for swithcing from CG to purification.
-    Numerous minor improvments. Still needs some tuning.
-  - ToDev: New routine added which writes MMA formatted matrices to MMA/SCFDev
-    for development of DMM methods.  Only made if requested, eg "make Dev"
-  - /MMA/SCFDev/dev.m: Development code that mirrors changes to SDMM.
-o ONX
-  - MakeTables/Makefile: Added EXTRA_INCLUDES to specify MondoMods/MMA/Functions
-  - PONX/ONXLoop:  Added "USE SpecFun" and changed "TE=ErrorFC(T)" to "TE=ERFC(T)",
-    where ERFC is defined in SpecFun.
-  - PONX/Makefile: Removed $(LAPACK)
-o QCTC
-  - JBlok: Fixed the now famous "phase" bug.  Eliminated the double counting of ExpAB
-    by changing Tol=TwoENeglect/MAX(1.D-32,ExpAB*BraEstimate) to 
-                Tol     = TwoENeglect/MAX(1.D-32,BraEstimate).
-    Added a missing Sqrt to the Bra integral estimates.
-  - MakeDJ:  Added new call to NewBraKetBlok(BS) which allocates HGBra.
-    removed underscores in PChkSum and PPrint which broke the MMA formating.
-o OneE
-  - RhoBlok: Switched ThreshPrim to the now standard TestPrimPair.
-    Propigated misc changes through from MondoMods.
-  - SBlok:  Added TestPrimPair.
-o HiCu
-  - CubeTree:  Added optional argument Exp_Switch to SetPenetrationThresh.
-    Changed IF(Cube%Box%Tier<2)THEN to IF(Cube%Box%Tier<10)THEN.  I think this
-    fixes the near infinite recursion that occurs for high-symmetry systems.
-    Added an ABS as in ABS(RhoV(J+1,I))) when determining ISplit.  
-  - HiCu:  Added call to NewBraKetBlok to initialize braketbloks.
-  - Makefile:  Added option -DEXPLICIT_SOURCE which togles on the explicit
-    fortran source gerated by VRhoMD.F90.  Also added EXTRA_INCLUDES.
-  - RhoTree:  Added general source back in, and made optional.  General source
-    for computing populations may still be broken.
-  - KxcGen: Switched sign of grid-center vectors and removed phase factor.
-    Added HGRho and SetBraBlok.  Computes only upper triagle of Kxc now.
-    Added general code.  In gernal code, factor of two has moved to 
-    MondoMods/MMA/Functionals/Functionals.nb.
-  - VRhoMD: Switched sign of grid-center vectors and removed factor of two from
-    explicitbraelements.
-o XForm
-  - BlokAInv:  Switched Z and Zt in output.  
-o Includes
-  - Suffixes:  Added $(EXTRA_INCLUDES) to compiler line.  This is where non-standard
-    includes to say MondoMods/MMA/Functions should og.
-  - CompilerSpecifics.IntelLinux.X have been updated.  In particular, now
-    works for LAHEY, NAG, and PG.  PG optimizations have been depricated to -O1
-    for now, as -O2 breaks certain functionals.  ABSOFT compiles but is broken
-    in many places (compilers fault I'm 99% sure). 
-o MondoSCF
-  - ChkSCFs:  Convergence checking has been improved somewhat.  Still needs
-    more work. 
-  - Overlay:  Added code to mark ProgramFailed=.TRUE. before invokation.
-  - ParseInput: Moved parsing for guess in to parsebasissets.  Guess=Core works now.
-    Fixed uninitialized basis set name bug.
-  - SetSCFs:  Commented out BKEst call and associated IO.
-  - SCFLocals:  Still fidling with thresholds ...
-!-------------------------------------------------------------------------------
-MC Change log 11/1/00:
-o The BlokAInv code is now working (very well!) in F90, allowing 
-  sparse linear algebra for O(N) calculations.
-
-o Much legacy code has been trimmed from the source tree.  Backup
-  tarballs take up much less space.
-
-o I've added the PHiPAC directory for optimizing small matrix DGEMMs
-  An environmental variable is set at login which picks an 
-  optimized set of DGEMMs for your machine.  This speeds up the 
-  linear algebra quite a bit.   Only works for LINUX at this point.
-
-o You will want to redo some of your .cshrc file.  See the example
-  in Scripts/CSHRC
-
-o The makefiles have been redone.  See the main makefile and
-  the MONDO/Scripts/MondoSetUp file for short cuts.  For example,
-  you can now make just a few directories at a time using the
-  same "abreviations" you used for going places:
-
-  $ mk mm q 
-
-  makes both MondoMods and QCTC, in that order.
-
-  $ mk cmm cq
-
-  will clean those directories, but will not remove the associated libraries.
-
-  $ mk pmm pq 
-
-  will purge those directories, removing the libraries and any .Inc files that
-  can be recomputed from other code, as for example VRhoMD.F90 in HiCu.
-  This is really a usefull and powerfull utility that will save you lots of time.
-
-o I've added a Thresholding module in MondoMods.  This should now be a unified
-  place to collect all methods related to thresholding atom pairs, primitive pairs,
-  evaluation of density outside a box (penetration criteria),  exact exchange thresholding,
-  etc, etc.  Please consolidate your thresholds in here!
-
-o Any Mathematica files should now go in an appropriate subdirectory called MMA
-  in the relavent directory.  For example, the notebook that generates special functions
-  is now in MONDO/MondoMods/MMA/Functions.  
-!-------------------------------------------------------------------------------
-MS Change log 2/5/01:
-o Committed gradients to the repository along with Makefiles
-o Updated GlobalScalars.F90 to include:
-  INTEGER,      PARAMETER :: dHGLen=(HGEll+2)*(HGEll+3)*(HGEll+4)/6,
-  which is needed by GradXCBlok.F90
 
