@@ -386,6 +386,7 @@ MODULE TravelMan
 
 END MODULE TravelMan
 
+
 !---------------------------------------------------------------------------
 MODULE AnnealMap
   USE PrettyPrint
@@ -400,26 +401,45 @@ CONTAINS
     TYPE(INT_RNK3)::AnnealKey
     INTEGER::Imax,IntVect(3),NCityV,I,J,K,LinDim,LM1,ReadNCity,M,Rank,IndexInt
     REAL(DOUBLE)::Ratio,RMin(3),Diff,MaxDiff
+
+!#define USE_Final_TravO_Dat
+#undef USE_Final_TravO_Dat
+
+#ifdef  USE_Final_TravO_Dat 
     INTEGER,PARAMETER::ReadU=30
-    TYPE(INT_VECT)::ReadTravO
+    INTEGER,ALLOCATABLE::ReadTravO(:)
+#else
+    INCLUDE 'Final_TravO.Inc'
+#endif
    
-  
+#ifdef  USE_Final_TravO_Dat
+!   write(*,*) 'Final_TravO.dat is used.'
+#else
+!   write(*,*) 'Final_TravO.Inc is used.'  
+#endif
+
     NCity = NCityV
+#ifdef USE_Final_TravO_Dat
     CALL OpenASCII('Final_TravO.dat',ReadU,OldFileQ_O=.TRUE.,Rewind_O=.TRUE.)
     Read(ReadU,*) ReadNCity
     WRITE(*,*) 'TableAnneal, ReadNCity = ',ReadNCity
+#else ! assign ReadNCity
+    ReadNCity = NCity_Const
+#endif
     LinDim = NINT(ReadNCity**(1.0d0/3.0d0))
-    WRITE(*,*) 'LinDim = ', LinDim
+!   WRITE(*,*) 'LinDim = ', LinDim
     IF(LinDim*LinDim*LinDim /= ReadNCity) THEN
       STOP 'Error: Cube root problem in TableAnneal!'
     ENDIF
     LM1 = LinDim-1
-    WRITE(*,*) 'LinDim = ', LinDim, ', Lm1=', LM1
+!   WRITE(*,*) 'LinDim = ', LinDim, ', Lm1=', LM1
     CALL New(AnnealKey,(/LM1,LM1,LM1/),(/0,0,0/))
-    CALL New(ReadTravO,ReadNCity)
 
-    Read(ReadU,*) (ReadTravO%I(I),I=1,ReadNCity)
-!   WRITE(*,*) (ReadTravO%I(I),I=1,ReadNCity)
+#ifdef USE_Final_TravO_Dat
+    ALLOCATE(ReadTravO(ReadNCity))
+    Read(ReadU,*) (ReadTravO(I),I=1,ReadNCity)
+#endif
+
     IndexInt = 0
     DO I = 0,LM1
       DO J = 0, LM1
@@ -427,7 +447,7 @@ CONTAINS
           IndexInt = IndexInt + 1
           Rank = 0
           DO M = 1, ReadNCity
-            IF(ReadTravO%I(M) == IndexInt) THEN
+            IF(ReadTravO(M) == IndexInt) THEN
               Rank = M
               EXIT
             ENDIF
@@ -449,7 +469,9 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+#ifdef USE_Final_TravO_Dat
     CLOSE(ReadU)
+#endif
   
     RMin(1) = Big_DBL
     RMin(2) = Big_DBL
@@ -492,11 +514,12 @@ CONTAINS
     ENDIF
     CALL I8Sort(CityRank,TravO%I,NCity,2)
     CALL Delete(AnnealKey)
-    CALL Delete(ReadTravO)
+#ifdef USE_Final_TravO_Dat
+    DEALLOCATE(ReadTravO)
+#endif
 
   END SUBROUTINE TableAnneal
 END MODULE AnnealMap
-
 
 MODULE Order
    USE DerivedTypes
