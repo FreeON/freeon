@@ -138,7 +138,7 @@ CONTAINS
      IF(J<=I) CYCLE !!!avoid double counting
      IF(AtmMark%I(I)/=0.AND.AtmMark%I(J)/=0) CYCLE !!! no QM-QM intr.act
        DVect%D(:)=GMLoc%Carts%D(:,I)-GMLoc%Carts%D(:,J)
-       DVect%D(:)=DVect%D(:)/AngstromsToAU !!!work in angstroems
+       DVect%D(:)=DVect%D(:)
        DIJ2=DOT_PRODUCT(DVect%D,DVect%D)
        DIJ=SQRT(DIJ2)
        IF(PRESENT(E_LJ_EXCL)) THEN
@@ -231,16 +231,16 @@ CONTAINS
    TYPE(INT_VECT) :: AtmMarkLJCell
    TYPE(DBL_RNK2) :: XYZLJCell
 !
-! LJCutOff is in Bohrs    
-! Cartesians are passed in Bohrs, in present version
+! LJCutOff is in Angstroms now
+! Cartesians are passed in Angstroms, in present version
 ! WARNING! Subroutines of this routine use translations by vectors 
 ! expressed in Bohrs, therefore incoming coordinates should 
 ! be in bohrs, as well
 !
 ! Define BoxSize, to determine how fine the division of the system
-! into atoms will be - in Bohrs
+! into atoms will be - in Angstroms
 !
-   BoxSize=10.D0  
+   BoxSize=5.D0  
 !
 ! Now, define xyz coordinates of a vector around a given box, which
 ! points to a cubic unit inside a sphere of LJCutOff
@@ -278,11 +278,11 @@ CONTAINS
    CALL Get(LJEps,'LJEps')
    CALL New(LJRad,GMLoc%Natms)
    CALL Get(LJRad,'LJRad') 
-!
-! Rescale LJRad to atomic units
-!
-   SUM=SQRT(AngstromsToAu)
-   LJRad%D=SUM*LJRad%D
+!!
+!! Rescale LJRad to atomic units (only if coordinates are in Bohrs)
+!!
+!   SUM=SQRT(AngstromsToAu)
+!   LJRad%D=SUM*LJRad%D
 !
 #ifdef PERIODIC
 ! Now, if periodicity is present, generate nearest neighbour images, 
