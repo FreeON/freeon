@@ -327,12 +327,12 @@ CONTAINS
      !
      IF(PRESENT(Value_O)) THEN
        Sum=DOT_PRODUCT(UxW,VxW)/(SinPhiU*SinPhiV)
-       IF(ABS(Sum)>One-1.D-8) THEN
-         Sum=SIGN(One-1.D-8,Sum)
+       IF(ABS(Sum)>One) THEN
+         Sum=SIGN(One,Sum)
        ENDIF
          Value_O=ACOS(Sum)
        Sum=DOT_PRODUCT(W,UxV) ! orientation of torsion
-       IF(ABS(Sum)>1.D-8) THEN
+       IF(ABS(Sum)>Zero) THEN
          Value_O=SIGN(Value_O,Sum)
        ENDIF
      ENDIF
@@ -609,11 +609,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-   ! IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-   !    LonelyAtom)) THEN
-   !   DoExclude=.TRUE.
-   !   RETURN
-   ! ENDIF
+     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+        LonelyAtom)) THEN
+       DoExclude=.TRUE.
+       RETURN
+     ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -3445,12 +3445,12 @@ CONTAINS
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-      !HasHBond=HasAttached(AtNum,Top12%I,JJ1)
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ1)
+      !HasHBond=.TRUE.
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-      !HasHBond=HasAttached(AtNum,Top12%I,JJ2)
-       HasHBond=.TRUE.
+       HasHBond=HasAttached(AtNum,Top12%I,JJ2)
+      !HasHBond=.TRUE.
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
@@ -4329,6 +4329,73 @@ CONTAINS
      Matrix%I=Matrix2%I
      CALL Delete(Matrix2)
    END SUBROUTINE Resize_INT_RNK2
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE ReorderN(VectX,IWork,NDim)
+     REAL(DOUBLE),DIMENSION(:) :: VectX
+     INTEGER     ,DIMENSION(:) :: IWork
+     REAL(DOUBLE)              :: X1,X2
+     INTEGER                   :: I,J,NDim,I1,I2
+     ! order set by decreasing x
+     DO I=1,NDim ; IWork(I)=I ; ENDDO
+     DO I=1,NDim-1
+       DO J=I,NDim-1
+         I1=IWork(J)
+         I2=IWork(J+1)
+         X1=VectX(I1)
+         X2=VectX(I2) 
+         IF(X1<X2) THEN
+           IWork(J)=I2
+           IWork(J+1)=I1
+         ENDIF
+       ENDDO
+     ENDDO
+   END SUBROUTINE ReorderN 
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE ReorderI(VectX,IWork)
+     REAL(DOUBLE),DIMENSION(:) :: VectX
+     INTEGER     ,DIMENSION(:) :: IWork
+     REAL(DOUBLE)              :: X1,X2
+     INTEGER                   :: I,J,NDim,I1,I2
+     ! order set by increasing x
+     NDim=SIZE(VectX)
+     DO I=1,NDim ; IWork(I)=I ; ENDDO
+     DO I=1,NDim-1
+       DO J=1,NDim-I
+         I1=IWork(J)
+         I2=IWork(J+1)
+         X1=VectX(I1)
+         X2=VectX(I2) 
+         IF(X1>X2) THEN
+           IWork(J)=I2
+           IWork(J+1)=I1
+         ENDIF
+       ENDDO
+     ENDDO
+   END SUBROUTINE ReorderI 
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Reorder1D(VectX)
+     REAL(DOUBLE),DIMENSION(:) :: VectX
+     REAL(DOUBLE)              :: X1,X2
+     INTEGER                   :: I,J,NDim
+     ! order set by increasing x
+     NDim=SIZE(VectX)
+     DO I=1,NDim-1
+       DO J=1,NDim-I
+         X1=VectX(J)
+         X2=VectX(J+1)
+         IF(X1>X2) THEN
+           VectX(J)=X2
+           VectX(J+1)=X1
+         ENDIF
+       ENDDO
+     ENDDO
+   END SUBROUTINE Reorder1D
 !
 !---------------------------------------------------------------------
 !
@@ -5549,12 +5616,12 @@ CONTAINS
      REAL(DOUBLE) :: Displ,Range,StepMax
      INTEGER      :: NDim
      !
-     IF(NDim<=4) THEN
-       StepMax=3.D0*Range
-      !StepMax=Range
-     ELSE 
+   ! IF(NDim<=3) THEN
+   !   StepMax=2.D0*Range
+   !  !StepMax=Range
+   ! ELSE 
        StepMax=Range
-     ENDIF
+   ! ENDIF
      IF(ABS(Displ)>StepMax) Displ=SIGN(StepMax,Displ)
    END SUBROUTINE CtrlRange
 !

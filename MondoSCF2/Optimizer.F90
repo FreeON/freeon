@@ -453,7 +453,7 @@ CONTAINS
 !
    SUBROUTINE IntOpt(C)
      TYPE(Controls)            :: C
-     INTEGER                   :: iBAS,iGEO,iGEOst,iCLONE
+     INTEGER                   :: I,iBAS,iGEO,iGEOst,iCLONE
      INTEGER                   :: AccL 
      INTEGER                   :: FirstGeom,NatmsLoc
      INTEGER                   :: ConvgdAll,MaxSteps,IStart
@@ -735,25 +735,25 @@ CONTAINS
        ! CALL RescaleGrad(Grad%D,Print)
        CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                      IntCs,AtNum,iGEO,XYZ)
-       CALL CutOffDispl(Displ%D,IntCs,One, &
+       CALL CutOffDispl(Displ%D,IntCs, &
                         GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-       CALL RedundancyOff(Displ%D,SCRPath,Print)
+      !CALL RedundancyOff(Displ%D,SCRPath,Print)  
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
-         CALL CutOffDispl(Displ%D,IntCs,One, &
+         CALL CutOffDispl(Displ%D,IntCs, &
                          GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
        ! CALL RedundancyOff(Displ%D,SCRPath,Print)
        ! CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
-         CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
+         CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf,GOpt%Hessian, &
            GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
            GOpt%GConvCrit,HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
            Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
            E_O=Etot,PWD_O=PWDPath,IntCs_O=IntCs)
          ! CALL RedundancyOff(Displ%D,SCRPath,Print)
-         ! CALL CutOffDispl(Displ%D,IntCs,One, &
+         ! CALL CutOffDispl(Displ%D,IntCs, &
          !               GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
        ENDIF
      END SELECT
@@ -961,10 +961,10 @@ CONTAINS
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
      WRITE(*,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
-     WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
+     WRITE(*,140) MaxCGrad,IMaxCGrad
      WRITE(*,420) RMSGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms%I(IMaxGrad,1:4)
-     WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
+     WRITE(Out,140) MaxCGrad,IMaxCGrad
      WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
        WRITE(*,510) MaxGradNoConstr, &
@@ -1168,8 +1168,8 @@ CONTAINS
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
-     GCrit=GTol(AccL)
-   ! GCrit=3.D-4
+   ! GCrit=GTol(AccL)
+     GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1188,7 +1188,7 @@ CONTAINS
      !
      GD%Init    = 3
      IF(GOptimizer==GRAD_BiSect_OPT) THEN
-       GD%MaxMem  = 7
+       GD%MaxMem  = 5
      ELSE
        GD%MaxMem  = 3
      ENDIF
@@ -1328,7 +1328,7 @@ CONTAINS
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
            iGEO>=GOpt%GDIIS%Init) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D, &
-           GOpt%Constr,GOpt%BackTrf,GOpt%GrdTrf, &
+           GOpt%Constr,GOpt%BackTrf,GOpt%Hessian,GOpt%GrdTrf, &
            GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,GOpt%GConvCrit, &
            Nams%HFile,iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
@@ -1371,13 +1371,18 @@ CONTAINS
 !
    SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad)
      REAL(DOUBLE),DIMENSION(:) :: CartGrad
+     REAL(DOUBLE),DIMENSION(3) :: Vect    
      REAL(DOUBLE)              :: MaxCGrad,Sum
-     INTEGER                   :: NCart,I,JJ,J,IMaxCGrad
+     INTEGER                   :: Nat,NCart,I,I1,I2,IMaxCGrad
      !
      IMaxCGrad=1   
      MaxCGrad=Zero
-     DO I=1,NCart
-       Sum=ABS(CartGrad(I))
+     Nat=NCart/3
+     DO I=1,Nat   
+       I1=3*(I-1)+1
+       I2=I1+2
+       Vect=CartGrad(I1:I2)
+       Sum=SQRT(DOT_PRODUCT(Vect,Vect))
        IF(Sum>MaxCGrad) THEN
          IMaxCGrad=I
           MaxCGrad=Sum
