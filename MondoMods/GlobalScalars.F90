@@ -27,13 +27,13 @@
 !------------------------------------------------------------------------------
 MODULE GlobalScalars
    IMPLICIT NONE
-!------------------------------------------------------------
+!---------------------------------------------------------------------------------
 !  Default system types
 !
    INTEGER, PARAMETER :: INTEGR=KIND(0)              !--Integer*4 or Integer*8
    INTEGER, PARAMETER :: SINGLE=KIND(0.0)            !--Real*4
    INTEGER, PARAMETER :: DOUBLE=KIND(0.D0)           !--Real*8
-!------------------------------------------------------------
+!----------------------------------------------------------------------------------
 !  Defined precision types
 !
    INTEGER, PARAMETER :: INT1=SELECTED_INT_KIND(2)  !--Integer*1
@@ -62,10 +62,14 @@ MODULE GlobalScalars
 !   
    INTEGER,      PARAMETER :: HGEll=5
    INTEGER,      PARAMETER :: SPEll=5
+   INTEGER,      PARAMETER :: FFEll=30
    INTEGER,      PARAMETER :: SPEll2=2*SPell
+   INTEGER,      PARAMETER :: FFEll2=2*FFell
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
    INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2                ! note, poles start from 0.
+   INTEGER,      PARAMETER :: FFLen=FFEll*(FFEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
+   INTEGER,      PARAMETER :: FFLen2=(2*FFEll)*((2*FFEll)+3)/2
 !---------------------------------------------------------------------------------------  
 !  Other numbers
 !
