@@ -48,24 +48,6 @@ MODULE DrvSCFs
 !        Restricted direct SCF cycle
          CALL DirectRSCF(Ctrl)
       ENDIF
-!!$!
-!!$        IF(ICyc>0)THEN
-!!$!          Restricted direct SCF cycle
-!!$           CALL DirectRSCF(Ctrl)
-!!$        ELSEIF(ICyc==0.AND.Ctrl%Rest.OR.(IGeo==1.AND.Ctrl%SuperP))THEN
-!!$!          Restricted SCF start up from guess or previous density 
-!!$           CALL SuperRSCF(Ctrl)
-!!$        ELSEIF(ICyc==0.AND.IGeo==1)THEN
-!!$!          Resctricted direct SCF from core Hamiltonian
-!!$           CALL CoreRSCF(Ctrl)
-!!$        ELSEIF(ICyc==0.AND.IGeo>1)THEN
-!!$!          Restricted SCF with basis set switch 
-!!$           CALL SwitchRSCF(Ctrl)
-!!$        ELSE
-!!$           WRITE(*,*)' Previous state = ',Ctrl%Previous
-!!$           WRITE(*,*)' Current  state = ',Ctrl%Current
-!!$           CALL MondoHalt(DRIV_ERROR,' bad option in SCFCycle ')
-!!$        ENDIF
     END SUBROUTINE SCFCycle
 !========================================================================================
 !    Perform a direct resctricted SCF cycle
@@ -89,7 +71,9 @@ MODULE DrvSCFs
       ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
          CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)                                     
       ENDIF
-      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
+      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)
+!
+      CALL CleanScratch(Ctrl,'Cycl')              
     END SUBROUTINE DirectRSCF
 !========================================================================================
 !    Perform a direct resctricted SCF cycle
@@ -176,10 +160,13 @@ MODULE DrvSCFs
       ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
          CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)
       ENDIF
-      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
+      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)     
+!
+      CALL CleanScratch(Ctrl,'Base')  
     END SUBROUTINE SwitchBasisRSCF
 !========================================================================================
-!    Perform a resctricted SCF cycle with basis set switch
+!    Perform a resctricted SCF cycle with a geometry switch
+!    For Now-Start from begining
 !========================================================================================
     SUBROUTINE SwitchGeometryRSCF(Ctrl)
       TYPE(SCFControls)               :: Ctrl
@@ -201,7 +188,9 @@ MODULE DrvSCFs
       ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
          CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)
       ENDIF
-      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
+      CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)  
+!
+      CALL CleanScratch(Ctrl,'Geom')                              
     END SUBROUTINE SwitchGeometryRSCF
 !========================================================================================
 !
@@ -227,7 +216,7 @@ MODULE DrvSCFs
 !========================================================================================
     SUBROUTINE LogSCF(Stats,Mssg)
       INTEGER,DIMENSION(3),INTENT(IN) :: Stats
-      CHARACTER(LEN=*), INTENT(IN) :: Mssg
+      CHARACTER(LEN=*), INTENT(IN)    :: Mssg
       CALL Logger('------------------------------------------------------------')
       CALL Logger('  Cycl = '//TRIM(IntToChar(Stats(1))) &
                 //', Base = '//TRIM(IntToChar(Stats(2))) &
@@ -235,6 +224,48 @@ MODULE DrvSCFs
       CALL Logger(Mssg)
       CALL Logger('------------------------------------------------------------')
     END SUBROUTINE LogSCF
+!========================================================================================
+!   Clean the Scratch Directory
+!========================================================================================
+    SUBROUTINE CleanScratch(Ctrl,Action)
+      TYPE(SCFControls)      :: Ctrl
+      CHARACTER(LEN=4)       :: Action
+      CHARACTER(LEN=120)     :: RemoveFile
+      INTEGER                :: IGeo,IBas,ICyc
+!      
+      ICyc=Ctrl%Current(1)
+      IBas=Ctrl%Current(2)
+      IGeo=Ctrl%Current(3)
+      IF(Action=='Cycl') THEN
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
+                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.Rho'                                
+         CALL SYSTEM('/bin/rm '//RemoveFile)
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
+                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.J'                                
+         CALL SYSTEM('/bin/rm '//RemoveFile)
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
+                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.K*'                                
+         CALL SYSTEM('/bin/rm '//RemoveFile)
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
+                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.D'                                
+         CALL SYSTEM('/bin/rm '//RemoveFile)
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
+                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.F'                                
+         CALL SYSTEM('/bin/rm '//RemoveFile)
+      ELSEIF(Action=='Base') THEN
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))    & 
+                                    //'_Base#'//TRIM(INTTOCHAR(IBas-1)) //'*' 
+         CALL SYSTEM('/bin/rm '//RemoveFile)  
+      ELSEIF(Action=='Geom') THEN
+         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo-1))//'*' 
+         CALL SYSTEM('/bin/rm '//RemoveFile) 
+      ENDIF
+    END SUBROUTINE CleanScratch
 #ifdef NEEDS_LOTS_OF_WORK
 !------------------------------------------------------------------------------------
 !       Delete files from previous SCF cycle that are no longer needed 
