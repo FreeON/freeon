@@ -743,7 +743,7 @@ MODULE DrvFrcs
    If(HasQM()) Then
 #endif
 !  Loop first over basis sets 
-     DO ISet=1,Ctrl%NSet
+     DO ISet=1,Ctrl%NSet-1
         Ctrl%Current=(/0,ISet,1/)
         CALL SetGlobalCtrlIndecies(Ctrl)           
 #ifdef MMech
