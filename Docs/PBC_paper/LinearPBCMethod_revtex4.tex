@@ -343,7 +343,9 @@ we can approximate  the error bound  as
 \right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -2\left| \mathbf{d}_{max}\right| \right| }
 \end{equation}
 where we are assuming a distribution of unit weight, and \( \mathbf{R}_{max} \) 
-is the distance to the nearest cell in the sum in equation (\ref{ScriptM}). 
+is the distance to the nearest cell in the sum in equation (\ref{ScriptM}). In figure 
+\ref{figure:ErrorPFF} we show the the relative error in the periodic far field energy vers
+expansion order $L$ for 27 and 125 inner box sums for a 64 water molecule system. 
 
 In the next section we describe the corrections to the Coulomb matrix
 which allows us to obtain Ewald boundary conditions in order to obtain
@@ -485,7 +487,7 @@ Agian we obtain excellent agreement to within the accuracy of the
 \section{Scaling}
 
 For testing of linear scaling, we us a set of periodic diamond systems.
-Figure \ref{figure: Scaling_Matrix_Build} shows our scaling results
+Figure \ref{figure:Scaling_Matrix_Build} shows our scaling results
 of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
 matrix builds for two different error thresholds and two different
 basis sets. Even in this very dense periodic system, linear scaling
@@ -868,54 +870,71 @@ Energy (\( E \))&
 \end{table*}
 
 \eject
-
-
+%
+%
+%
 \begin{figure*}
 
 \caption{\label{figure:SimCell} Simulation cell and interior region.}
-
-{\centering \includegraphics{UnitCell.eps} \par}
+{\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure*}
-
-
-
+%
+%
+%
 \begin{figure*}
 
 \caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
 Matrix}
 
-{\centering \includegraphics{RepCell.eps} \par}
+{\centering \includegraphics{RepCell_2.ps} \par}
 \end{figure*}
-
+%
+%
+%
 \begin{figure*}
 
-\caption{\label{figure: Scaling_Matrix_Build} Scaling Results for the matrix
+\caption{\label{figure:ErrorPFF} Error in the Periodic Far Field approximation
+with increasing \protect\( \mathbf{L}_{max}\protect \) for two different
+inner cell sums for \protect\( 64\protect \) molecules of water.}
+
+{\centering \includegraphics{PFFMultipoles_water.ps} \par}
+\end{figure*}
+%
+%
+%
+\begin{figure*}
+
+\caption{\label{figure:Scaling_Matrix_Build} Scaling Results for the matrix
 builds \protect\( J_{QCTC}\protect \) and \protect\( K_{xc}\protect \)
 for the dense diamond periodic system for the basis set STO-3G and
 3-21G.}
 
-\includegraphics{Timing_sto3g_321g.ps} 
+{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
 \end{figure*}
-
-
-
+%
+%
+%
 \begin{figure*}
 
 \caption{\label{figure:Scaling_Diag} Scaling Results for the Density matix
 solver (TRS4) for the dense diamond periodic for the basis set STO-3G
 and 3-21G}
 
-system\fbox{\rule[-0.5in]{0pt}{1in}empty figure path} 
+{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
 \end{figure*}
-
+%
+%
+%
 \begin{figure*}
 
 \caption{\label{figure:Dense64diamond} Iso-surface potential if a 64 carbon
 atom diamond system}
 
-{\centering \fbox{\rule[-0.5in]{0pt}{1in}empty figure path} \par}
+{\centering \includegraphics{Timing_sto3g_321g.ps} \par}
 \end{figure*}
-
+%
+%
+%
 
 
 \end{document}
