@@ -44,7 +44,8 @@ MODULE BlokTrPdJ
        INTEGER                                  :: I,J,K,L,MaxLA,MaxLB,IA,IB,  &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LM,LMN, &
-                                                   Ell,EllA,EllB,HGLenEll,SPLenEll
+                                                   Ell,EllA,EllB,EllAB,LenAB,&
+                                                   HGLenEll,SPLenEll
        REAL(DOUBLE), EXTERNAL                   :: BlkTrace_2 
 #ifdef PERIODIC
        INTEGER                                  :: NC
@@ -107,12 +108,14 @@ MODULE BlokTrPdJ
                       IB=IB+1
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)    
                       Pab=P(IA,IB)
+                      EllAB=EllA+EllB+1
+                      LenAB=LHGTF(EllAB)
 !                     Extent (for PAC)
                       DO K=1,3
-                         Ext = Extent(EllA+EllB+1,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauPAC)
+                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenAB,IA,IB,K),TauPAC)
                          PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
-                         CALL HGToSP(Prim,Pab*dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                         CALL HGToSP(Prim,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
                          DO L=0,EllA+EllB+1
                             PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
                             DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))

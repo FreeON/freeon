@@ -161,12 +161,10 @@ PROGRAM SCFStatus
 #ifdef PARALLEL
   IF(MyId==ROOT)THEN
 #endif
-     WRITE(*,* )TRIM(SCFMessage)
-     IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
         CALL OpenASCII(OutFile,Out)
+        WRITE(*,* )TRIM(SCFMessage)
         WRITE(Out,* )TRIM(SCFMessage)
         CLOSE(Out)
-     ENDIF
 #ifdef PARALLEL
   ENDIF
 #endif

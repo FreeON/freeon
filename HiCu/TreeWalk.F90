@@ -69,7 +69,6 @@ MODULE TreeWalk
           RPy=Cube%Grid(I,2)-Prim%P(2)
           RPz=Cube%Grid(I,3)-Prim%P(3)
           RP2=RPx**2+RPy**2+RPz**2
-          Dist=Z*RP2
           Xpt=EXP(-Prim%Zeta*RP2)
           IF(Xpt>1.D-14)THEN
           TwoZ=Two*Prim%Zeta

@@ -1111,7 +1111,7 @@ MODULE PrettyPrint
 #ifdef PARALLEL
     IF(MyID==ROOT)THEN
 #endif
-       IF(FLOPS>Zero)THEN
+       IF(MFlops(FLOPS,Elapsed_Wall)>Zero)THEN
           IF(Elapsed_CPUS/=Zero)THEN
 #ifdef PARALLEL
              Mssg=ProcessName(TRIM(Proc))//'CPU (Sec,MFLOPS) = (' &

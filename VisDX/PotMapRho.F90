@@ -18,9 +18,9 @@ MODULE RhoUtil
    REAL(DOUBLE) :: AA=One/AngstromsToAU
    CONTAINS
       SUBROUTINE RhoCubed(Arg,Del,Origin,Nx,Ny,Nz)
-        INTEGER                    :: I,J,K,Nx,Ny,Nz
+        INTEGER                    :: I,J,K,Nx,Ny,Nz,NC
         REAL(DOUBLE),DIMENSION(3)  :: Origin
-        REAL(DOUBLE)               :: Del
+        REAL(DOUBLE)               :: Del,Den
         TYPE(ARGMT)                :: Arg
 !---------------------------------------------------------------------------
 !       Get the geometry

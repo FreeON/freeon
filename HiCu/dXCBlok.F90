@@ -34,10 +34,11 @@ MODULE dXCBlok
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
-                                                   StopLA,StopLB,AtA,AtB,HGLenAB
-       INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,    &
+                                                   StopLA,StopLB,AtA,AtB
+       INTEGER                                  :: I,J,K,MaxLA,MaxLB,IA,IB,  &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
-                                                   NA,NB,LAB,MAB,NAB,LMN,EllA,EllB,K
+                                                   NA,NB,LAB,MAB,NAB,LMN,    &
+                                                   EllA,EllB,EllAB,LenAB
 !-------------------------------------------------------------------------------------- 
        Prim%A=Pair%A
        Prim%B=Pair%B
@@ -88,11 +89,12 @@ MODULE dXCBlok
                       IB=IB+1
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
                       Pab=P(IA,IB)
+                      EllAB=EllA+EllB+1
+                      LenAB=LHGTF(EllAB)
                       DO K=1,3
-                         PExtent=MAX(PExtent,                         &
-                                      Extent(EllA+EllB+1,Prim%Zeta,   &
-                                             Pab*dHGBra%D(:,IA,IB,K), &
-                                             TauRho,ExtraEll_O=1))
+                         PExtent=MAX(PExtent,Extent(EllAB,Prim%Zeta,  &
+                                     Pab*dHGBra%D(1:LenAB,IA,IB,K),   &
+                                     TauRho,ExtraEll_O=1))
                       ENDDO
                    ENDDO
                 ENDDO
@@ -114,9 +116,9 @@ MODULE dXCBlok
                          IB=IB+1
                           EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
                           Pab=P(IA,IB)
-                          HGLenAB=LHGTF(EllA+EllB+1)
+                          LenAB=LHGTF(EllA+EllB+1)
                           DO K=1,3
-                             DO LMN=1,HGLenAB
+                             DO LMN=1,LenAB
                                 Vck(K)=Vck(K)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
                              ENDDO
                          ENDDO
