@@ -8,8 +8,8 @@ HF/STO-3G      -1399.7 9993407 CRYSTAL98
                -1399.7 8972910 MondoSCF (Gamma-point,tight)
 
 HF/CEP-31G(z->.45) -101.46390384 CRYSTAL98 
+                   -101.45503344 CRYSTAL03 
                    -101.55906019 MondoSCF (1x1, Gamma-point, tight)
-                   -101.49237460          (2x1, Gamma-point, tight,-202.98474921)
                    -101.45525304          (2x2, Gamma-point, tight,-405.82101219)
                    -101.45588421          (3x3, Gamma-point, tight,-913.10295792)
 
