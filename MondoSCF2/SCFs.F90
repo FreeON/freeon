@@ -873,11 +873,7 @@ CONTAINS
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
 !
-    O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D-4
-    CALL Put(O%Thresholds(cBAS),chBAS)
-    CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
-    O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D4
-    CALL Put(O%Thresholds(cBAS),chBAS)
+    CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,O,S,M)
 !
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
@@ -964,7 +960,7 @@ CONTAINS
 !===============================================================================
 ! Numerically compute Lattice Forces for J
 !===============================================================================
-  SUBROUTINE NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
+  SUBROUTINE NLATTFORCE_J(cBAS,cGEO,G,B,N,O,S,M)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
@@ -992,6 +988,10 @@ CONTAINS
 !
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!
+       O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D-4
+       CALL Put(O%Thresholds(cBAS),chBAS)
+!
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
@@ -1070,6 +1070,10 @@ CONTAINS
 !
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+!
+       O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D4
+       CALL Put(O%Thresholds(cBAS),chBAS)
+!
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)     
