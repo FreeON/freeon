@@ -228,6 +228,13 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
+!        
+!!$    DO I=1,3
+!!$       WRITE(Out,*) (PBC%BoxShape%D(I,J),J=1,3) 
+!!$       WRITE(*,*)   (PBC%BoxShape%D(I,J),J=1,3) 
+!!$    ENDDO
+!!$    IF(.TRUE.) STOP
+!
     IF(NLVec .NE. 3) THEN
        CALL MondoHalt(PRSE_ERROR,'Lattice Vectors are incorrect')
     ENDIF
