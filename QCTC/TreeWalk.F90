@@ -62,7 +62,7 @@ MODULE TreeWalk
                                            CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
                                            TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
        INTEGER                          :: J,Ell,LCode
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_DIRECT
        REAL(DOUBLE)                     :: o1,o2,ET,TwoT
 #else
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
@@ -70,20 +70,21 @@ MODULE TreeWalk
 #endif
 !-----------------------------------------------------------------------------------------------
 !      PAC: Exp[-W_pq PQ^2]/2 < Tau/Amp
+!
        PQx=Prim%P(1)-Q%Box%Center(1)
        PQy=Prim%P(2)-Q%Box%Center(2)
        PQz=Prim%P(3)-Q%Box%Center(3)
        PQ2=PQx*PQx+PQy*PQy+PQz*PQz
        RTE=Prim%Zeta*Q%Zeta
        RPE=Prim%Zeta+Q%Zeta
-       Omega=RTE/RPE
+       Omega=RTE/RPE 
        IF(Omega*PQ2>PoleSwitch)THEN
 !         MAC: (d_q/|PQ|)^(p+1) < Tau/Amp
-          IF(PQ2>Q%D2*DP2.OR.Q%Leaf)THEN 
+          IF(PQ2>Q%D2*DP2 .OR. Q%Leaf)THEN 
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_POLES
              INCLUDE "IrRegulars.Inc"
              INCLUDE "CTraX.Inc"
 #else
@@ -102,7 +103,7 @@ MODULE TreeWalk
           PQx=-PQx; PQy=-PQy; PQz=-PQz
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
           Ell=Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_DIRECT
           LCode=Prim%Ell*100+Q%Ell
           INCLUDE 'HGTraX.Inc'
 #else
@@ -117,8 +118,6 @@ MODULE TreeWalk
                          DO NQ=0,Q%Ell-LQ-MQ
                             QDex=LMNDex(LQ,MQ,NQ)
                             HGKet(PDex)=HGKet(PDex)+MDR(LP+LQ,MP+MQ,NP+NQ,0)*Q%Co(QDex)
-!WRITE(*,11)LP+LQ,MP+MQ,NP+NQ,MDR(LP+LQ,MP+MQ,NP+NQ,0)*Q%Co(QDex)
-!11 format("R[",I2,",",I2,",",I2,"]=",F14.8)
                          ENDDO 
                       ENDDO 
                    ENDDO
@@ -141,12 +140,13 @@ MODULE TreeWalk
                                            CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
                                            TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
        INTEGER                          :: J,Ell,LCode
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_DIRECT
        REAL(DOUBLE)                     :: o1,o2,ET,TwoT
 #else
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
+       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-14
 !---------------------------------------------------------------------------------------------------
 !      PAC: Exp[-W_Min PQ^2]/2 < Tau/Amp
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -163,7 +163,7 @@ MODULE TreeWalk
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_POLES
              INCLUDE "IrRegulars.Inc"
              INCLUDE "CTraX.Inc"
 #else
@@ -175,7 +175,7 @@ MODULE TreeWalk
              CALL VWalk(Q%Descend%Travrse)
           ENDIF
        ELSEIF(Q%Leaf)THEN
-          IF(Q%BDex>0.AND.PQ2==Zero)RETURN
+          IF(Q%BDex>0 .AND. PQ2 < VTol)RETURN
 !         Set up
           T=Omega*PQ2          
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
@@ -183,7 +183,7 @@ MODULE TreeWalk
           PQx=-PQx; PQy=-PQy; PQz=-PQz
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
           Ell=Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
+#ifdef EXPLICIT_SOURCE_DIRECT
           LCode=Prim%Ell*100+Q%Ell
           INCLUDE 'HGTraX.Inc'
 #else
