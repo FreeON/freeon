@@ -117,7 +117,7 @@ CONTAINS
   SUBROUTINE MakeTensor1D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,L,M,LM,NC
-    TYPE(CellSet)                       ::CS, CSMM
+    TYPE(CellSet)                     :: CS, CSMM
     TYPE(DBL_VECT)                    :: TenC,TenS
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
@@ -181,9 +181,9 @@ CONTAINS
     INTEGER                           :: I,J,K,L,M,LM,NC
     INTEGER                           :: LSwitch
     REAL(DOUBLE),DIMENSION(3)         :: PQ
-    TYPE(DBL_VECT)       :: TenC,TenS
+    TYPE(DBL_VECT)                    :: TenC,TenS
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
-    TYPE(CellSet)                       ::CS, CSMM
+    TYPE(CellSet)                     :: CS, CSMM
     REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
 !
     INTEGER                           :: NDiv
@@ -228,6 +228,7 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
+    CALL Sort_CellSet(CSMM)
 !
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
@@ -258,10 +259,12 @@ CONTAINS
        CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
        IF(CSMM%NCells .LT. 9) THEN
           Rmax = 1.01D0*Rmax
+          CALL Delete_CellSet(CSMM)
        ELSE
           EXIT
        ENDIF
     ENDDO
+    CALL Sort_CellSet(CSMM)
 !
     NDiv    = 1000
     LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
@@ -289,7 +292,7 @@ CONTAINS
        ENDDO
     ENDDO
 !
-!        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
+!   Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
 !
     DO I=1,3
        IF(.NOT. GM%PBC%AutoW(I)) THEN
@@ -347,8 +350,8 @@ CONTAINS
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
     INTEGER                           :: LSwitch
-    TYPE(DBL_VECT)       :: TenC,TenS
-    TYPE(CellSet)                       ::CS, CSMM
+    TYPE(DBL_VECT)                    :: TenC,TenS
+    TYPE(CellSet)                     :: CS, CSMM
     REAL(DOUBLE),DIMENSION(3)         :: PQ
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
     REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
@@ -361,31 +364,31 @@ CONTAINS
     TYPE(ARGMT)                       :: Args
 !-------------------------------------------------------------------------------------!
 !
-!     Initialize 
+!   Initialize 
 !
     TenC%D=Zero
     TenS%D=Zero
     Accuracy = 1.D-14
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
-    !
-    !     Get The Lattice and Reciprocal Lattice Vectors
-    !
+!
+!   Get The Lattice and Reciprocal Lattice Vectors
+!
     DO I = 1,3
        DO J = 1,3
           RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
           LatVec(I,J)     = GM%PBC%BoxShape(I,J)
        ENDDO
     ENDDO
-    !
-    !     Three Dimension
-    !
+!
+!   Three Dimension
+!
     LSwitch  = 10
     LenScale = GM%PBC%CellVolume**(One/Three)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
     BetaSq   = 0.25D0/(LenScale)**2
-    !           
-    !     Sum the Real Space
-    !
+!           
+!   Sum the Real Space
+!
     DO
        CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax)
        IF(CSMM%NCells .GT. 600000) THEN
@@ -396,7 +399,7 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Sort_CellSet(CSMM)
-    !
+!
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
        IF(.NOT. InCell_CellSet(CS,PQ(1),PQ(2),PQ(3))) THEN
@@ -417,10 +420,9 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Delete_CellSet(CSMM)
-    !
-    !
-    !     Sum the Reciprical Space 
-    !
+!
+!   Sum the Reciprical Space 
+!
     ExpFac = Pi*Pi/BetaSq
     Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
     DO
@@ -433,7 +435,7 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Sort_CellSet(CSMM)
-    !
+!
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
        Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
@@ -451,9 +453,9 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Delete_CellSet(CSMM)
-    !
-    !     Substract the inner boxes
-    !
+!
+!   Substract the inner boxes
+!
     DO NC = 1,CS%NCells
        PQ(:) = CS%CellCarts%D(:,NC)
        RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
@@ -469,6 +471,7 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
+!
   END SUBROUTINE MakeTensor3D
 !========================================================================================
 !   Determine Cell Type
@@ -478,9 +481,9 @@ CONTAINS
     INTEGER                      :: I,NC
     REAL(DOUBLE)                 :: MagA,MagB,MagC,AdotB,AdotC,BdotC,Scale
     CHARACTER(LEN=7)             :: DetCellType
-    !
-    !     Determine the cell type
-    !
+!
+!   Determine the cell type
+!
     MagA  = Zero
     MagB  = Zero
     MagC  = Zero
@@ -501,7 +504,7 @@ CONTAINS
     AdotB = SQRT(AdotB/(MagA*MagB))
     AdotC = SQRT(AdotC/(MagA*MagC))
     BdotC = SQRT(BdotC/(MagB*MagC))
- !
+!
     DetCellType=NonCube
     IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
        IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
@@ -519,7 +522,7 @@ CONTAINS
     ELSE
        DetCellType=NonCube
     ENDIF
-    !
+!
   END FUNCTION DetCellType
 !========================================================================================
 !   FT_FSCriptC
