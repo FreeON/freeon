@@ -77,15 +77,21 @@ CONTAINS
                            BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*   &
                            BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                       IF((Type1.NE.2.AND.Type2==2).OR.(Type2.NE.2.AND.Type1==2))THEN
-                         Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-                         AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                         Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
+                                   BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                         AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,&
+            I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
                          AtmPair(CF12)%SP%Cst(7,IJ)=BIG_DBL
                          AtmPair(CF12)%SP%Cst(8,IJ)=BIG_DBL
                       ELSEIF(Type1==2.AND.Type2==2)THEN
-                         Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-                         AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
-                         AtmPair(CF12)%SP%Cst(7,IJ)=BS%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
-                         AtmPair(CF12)%SP%Cst(8,IJ)=BS%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
+                         Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
+                                    BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                         AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,&
+          I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                         AtmPair(CF12)%SP%Cst(7,IJ)=BS%CCoef%D(StartL1+&
+        1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                         AtmPair(CF12)%SP%Cst(8,IJ)=BS%CCoef%D(StartL1,&
+          I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
                       ELSE
                          AtmPair(CF12)%SP%Cst(6,IJ)=BIG_DBL
                          AtmPair(CF12)%SP%Cst(7,IJ)=BIG_DBL
