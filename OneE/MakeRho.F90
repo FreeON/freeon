@@ -336,13 +336,29 @@ PROGRAM MakeRho
   ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho2,'Rho',Args,1) 
-     CALL Put(MP,NxtCycl)
+#ifdef MMech
+     IF(MMOnly()) THEN
+       CALL Put(MP,CurGeom)
+     ELSE
+#endif
+       CALL Put(MP,NxtCycl)
+#ifdef MMech
+     ENDIF
+#endif
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho2,'DeltaRho',Args,0)
      CALL Put(MP,'Delta'//TRIM(SCFCycl))
   ELSE
-     CALL Put_HGRho(Rho2,'Rho',Args,0) 
-     CALL Put(MP,IntToChar(Current(1))) 
+#ifdef MMech
+     IF(MMOnly()) THEN
+       CALL Put(MP,CurGeom) 
+     ELSE
+#endif
+       CALL Put(MP,IntToChar(Current(1))) 
+#ifdef MMech
+     ENDIF
+#endif
+       CALL Put_HGRho(Rho2,'Rho',Args,0) 
   ENDIF
   CALL PChkSum(Rho2,'Rho',Prog)
   ! Tidy up
