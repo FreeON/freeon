@@ -362,16 +362,15 @@ MODULE DrvSCFs
             ENDIF 
          ENDIF
 !        Logic for incremental Fock builds
-         IF(.NOT.ConvergedQ.AND.DMaxB<1D-1.AND. &
+         IF(.NOT.ConvergedQ.AND.DMaxB<1D-2.AND. &
             Ctrl%ShudInk.AND..NOT.Ctrl%BeenInkn)THEN
 !           Turn on incremental Fock builds if we should, but havnt yet
             Ctrl%InkFok=.TRUE.
             Ctrl%BeenInkn=.TRUE.
          ELSEIF(ETotB>ETotA.AND.Ctrl%InkFok)THEN
 !           If approaching convergence from the wrong direction, 
-!           turn off IncFok with possibility of later inkn again.
+!           turn off IncFok.
             Ctrl%InkFok=.FALSE.
-            Ctrl%BeenInkn=.FALSE.
          ELSEIF(ConvergedQ.AND.Ctrl%InkFok)THEN
 !           Turn full builds back on if convergence reached
 !           with incremental methods.  
