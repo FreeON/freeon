@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=31
+   INTEGER, PARAMETER :: NSupSets=34
 
 ! Element 105-107  are ghost function with charge = 0. 
   
@@ -74,8 +74,11 @@ MODULE BasisSetParameters
 !               USER DEFINED BASIS SETS
                 'user1           ' , 'User1           ',   &  ! 29
                 'user2           ' , 'User2           ',   &  ! 30
+                'user3           ' , 'User3           ',   &  ! 31
+                'user4           ' , 'User4           ',   &  ! 32
+                'user5           ' , 'User5           ',   &  ! 33
 !               Crystal Basis Set
-                'Crystal         ' , 'Crystal98       '    &  ! 31
+                'Crystal         ' , 'Crystal98       '    &  ! 34
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &
