@@ -35,13 +35,15 @@ MODULE GlobalScalars
 !   
    INTEGER,      PARAMETER :: HGEll=5
    INTEGER,      PARAMETER :: SPEll=5
-   INTEGER,      PARAMETER :: FFEll=32
-   INTEGER,      PARAMETER :: SPEll2=2*SPell
-   INTEGER,      PARAMETER :: FFEll2=2*FFell
+   INTEGER,      PARAMETER :: FFEll=16
+!
+   INTEGER,      PARAMETER :: SPEll2=2*SPEll
+   INTEGER,      PARAMETER :: FFEll2=2*FFEll
+!
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
    INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2                ! note, poles start from 0.
-   INTEGER,      PARAMETER :: FFLen=FFEll*(FFEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
+   INTEGER,      PARAMETER :: FFLen=FFEll*(FFEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: FFLen2=(2*FFEll)*((2*FFEll)+3)/2
 !---------------------------------------------------------------------------------------  
 !  Other numbers
