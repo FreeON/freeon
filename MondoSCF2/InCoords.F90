@@ -1303,9 +1303,9 @@ CONTAINS
          NC1=-NDim_O
        ENDIF
      ENDIF
-!NA1=0 ; NA2=2
-!NB1=0 ; NB2=2
-!NC1=0 ; NC2=0
+!NA1=0 ; NA2=3
+!NB1=0 ; NB2=3
+!NC1=0 ; NC2=3
      !
      NCells=(NA2-NA1+1)*(NB2-NB1+1)*(NC2-NC1+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
@@ -1646,7 +1646,7 @@ CONTAINS
      !
      ! Project out hard constraints
      !
-!    CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
+  !  CALL ProjectBCol(SCRPath,IntCs,XYZ,VectInt,PBCDim,Print2)
 !CALL PrtIntCoords(IntCs,VectInt,'aft hard constr filt',PBCDim_O=PBCDim)
    END SUBROUTINE CartToInternal
 !
@@ -1755,10 +1755,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(iGEO_O)) THEN
-        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-        !                  IRep,IStep,iGEO_O)
-        !ENDIF
+       ! IF(PRESENT(iGEO_O)) THEN
+       !   CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+       !                   IRep,IStep,iGEO_O)
+       ! ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1783,12 +1783,11 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
-!CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl%D',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
-                                BackLinCrit,BackTLinCrit,PBCDim, &
-                                Print,SCRPath,.TRUE.)
+                               BackLinCrit,BackTLinCrit,PBCDim, &
+                               Print,SCRPath,.TRUE.,DoCleanCol_O=.TRUE.)
            CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
          ENDIF
          !
@@ -1837,7 +1836,7 @@ CONTAINS
          CALL SetFixedCartesians(VectCart%D,VectCartAux2%D, &
                             IntCs,GConstr%NCartConstr)
          VectCart%D=VectCart%D+VectCartAux2%D
-         CALL SetFixedLattice(VectCart%D,IntCsE)
+       ! CALL SetFixedLattice(VectCart%D,IntCsE)
          CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
          !
          ! Review iteration
@@ -1918,22 +1917,22 @@ CONTAINS
      !
      ! rotate lattice back to standard orientation
      !
-   ! IF(PBCDim>0) THEN
-   !   CALL New(RotCarts,(/3,NatmsLoc+1/))
-   !   DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
-   !   RotCarts%D(1:3,NatmsLoc+1)=Zero
-   !   GTrfCtrl%ThreeAt(1)=NatmsLoc+1
-   !   GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
-   !   GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
-   !   CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
-   !                    .FALSE.,GTrfCtrl%TranslAt1, &
-   !                    GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
-   !                    DoCopy_O=.TRUE.)
-   !   DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
-   !   XYZ(2:3,NatmsLoc-3+1)=Zero
-   !   XYZ(3,NatmsLoc-3+2)=Zero
-   !   CALL Delete(RotCarts)
-   ! ENDIF
+     IF(PBCDim>0) THEN
+       CALL New(RotCarts,(/3,NatmsLoc+1/))
+       DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
+       RotCarts%D(1:3,NatmsLoc+1)=Zero
+       GTrfCtrl%ThreeAt(1)=NatmsLoc+1
+       GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
+       GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
+       CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
+                        .FALSE.,GTrfCtrl%TranslAt1, &
+                        GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
+                        DoCopy_O=.TRUE.)
+       DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
+       XYZ(2:3,NatmsLoc-3+1)=Zero
+       XYZ(3,NatmsLoc-3+2)=Zero
+       CALL Delete(RotCarts)
+     ENDIF
      !
      ! Tidy up
      !
@@ -1973,12 +1972,14 @@ CONTAINS
      CALL SetEq(BS,B)
      CALL CleanBConstr(IntCs,BS,NatmsLoc)
      CALL CleanBLConstr(XYZ,IntCs,BS,PBCDim)
+     CALL CleanBLRot(XYZ,IntCs,BS,PBCDim)
      B%B%D=B%B%D-BS%B%D
      B%BL%D=B%BL%D-BS%BL%D
-     !
+     ! B now contains only colums of hard constraints
+     ! and lattice rotations
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      CALL CholFact(ISpB,JSpB,ASpB,NCart,IntCs%N, &
-                   CholData,Print2,Shift_O=1.D0)
+                   CholData,Print2,Shift_O=1.D-4)
      CALL POffHardGc(VectInt,ISpB,JSpB,ASpB,CholData, &
                      NCart,IntCs%N,Fact)
      IF(Print2) THEN
@@ -1987,12 +1988,46 @@ CONTAINS
        100 FORMAT('Percentage of Hard Constraints Projected Out= ',F6.2)
      ENDIF
      !
+     CALL Delete(B)
      CALL Delete(BS)
      CALL Delete(ISpB)
      CALL Delete(JSpB)
      CALL Delete(ASpB)
      CALL Delete(CholData)
    END SUBROUTINE ProjectBCol
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE SYMMSTRESS(Grad,XYZ,PBCDim)
+     REAL(DOUBLE),DIMENSION(9)   :: Grad,Grad1,Grad2,Delta
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(9,9) :: P
+     REAL(DOUBLE)                :: Fact,Fact2,Crit
+     INTEGER                     :: PBCDim,I,J,MaxStep
+     !
+     MaxStep=100
+     Crit=1.D-6
+     CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
+     Grad1=Grad
+     DO I=1,MaxStep
+       CALL DGEMM_NNc(9,9,1,One,Zero,P,Grad1,Grad2)
+       Delta=Grad1-Grad2
+       Grad2(1)=Grad(1)
+       Grad2(4:5)=Grad(4:5)
+       Grad2(7:9)=Grad(7:9)
+       Fact=Zero 
+       DO J=1,9 
+         Fact2=ABS(Delta(J))
+         IF(Fact<Fact2) Fact=Fact2
+       ENDDO
+       Grad1=Grad2
+       IF(Fact<Crit) EXIT
+     ENDDO
+     IF(Fact>Crit) THEN
+       CALL Halt('Unsuccessful symmetrization of stress in SYMMSTRESS')
+     ENDIF
+     Grad=Grad1
+   END SUBROUTINE SYMMSTRESS
 !
 !---------------------------------------------------------------------
 !
@@ -2349,55 +2384,67 @@ CONTAINS
      ! while still maintaining a no-rotation framework 
      !
      ! only space of rotations is in P, space of constraints is not
-    !CALL GetPBCProj(Carts,PBCDim,P)
-    !CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
-    !Norm=DOT_PRODUCT(DCarts,DCarts)
-    !Fact=DOT_PRODUCT(DCarts2,DCarts2)
-    !IF(Norm>1.D-6) THEN
-    !  Fact=(Norm-Fact)/Norm*100.D0
-    !ELSE
-    !  Fact=Zero
-    !ENDIF
-    !IF(Print) THEN
-    !  WRITE(*,100) Fact
-    !  WRITE(Out,100) Fact
-    !ENDIF
-    !!
-    !DCarts=DCarts2 
-100  FORMAT('PRot= ',F7.3,'%')
+     CALL GetPBCProj(PBCDim,P,Carts_O=Carts)
+     CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
      !
      ! In the standard version A is along X, B in XY, C general
      ! thus projection of rotation is very simple
      !
-     DCarts(2:3)=Zero
-     DCarts(6)=Zero
+   ! DCarts2(2:3)=Zero
+   ! DCarts2(6)=Zero
+     !
+     Norm=DOT_PRODUCT(DCarts,DCarts)
+     Fact=DOT_PRODUCT(DCarts2,DCarts2)
+     IF(Norm>1.D-6) THEN
+       Fact=(Norm-Fact)/Norm*100.D0
+     ELSE
+       Fact=Zero
+     ENDIF
+     IF(Print) THEN
+       WRITE(*,100) Fact
+       WRITE(Out,100) Fact
+     ENDIF
+     !
+     DCarts=DCarts2 
+100  FORMAT('PRot= ',F7.3,'%')
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
 !
-   SUBROUTINE GetPBCProj(Carts,PBCDim,P)
-     REAL(DOUBLE),DIMENSION(:)   :: Carts
+   SUBROUTINE GetPBCProj(PBCDim,P,Carts_O,XYZ_O)
      INTEGER                     :: PBCDim,NCart,I,J,K,L
-     INTEGER                     :: NCoinc,Info,Dim
+     INTEGER                     :: NCoinc,Info,Dim,NatmsLoc
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(3,4) :: XYZ
      REAL(DOUBLE),DIMENSION(9,9) :: S,P,P1
      REAL(DOUBLE),DIMENSION(9)   :: Eigs
      TYPE(BMATR)                 :: B
+     REAL(DOUBLE),DIMENSION(:,:), OPTIONAL :: XYZ_O
+     REAL(DOUBLE),DIMENSION(:)  , OPTIONAL :: Carts_O
      !
      ! This subroutine prepares the projection matrix
      ! that refers to the counterspace of the lattice parameters
      ! in Cartesian representation
      !
-     NCart=SIZE(Carts)-9
      XYZ(1:3,1)=Zero
-     DO I=1,3 
-       K=NCart+3*(I-1)+1
-       L=K+2
-       XYZ(1:3,I+1)=Carts(K:L)
-     ENDDO 
-     CALL LatticeINTC(IntCs,PBCDim)
+     IF(PRESENT(Carts_O)) THEN
+       NCart=SIZE(Carts_O)-9
+       DO I=1,3 
+         K=NCart+3*(I-1)+1
+         L=K+2
+         XYZ(1:3,I+1)=Carts_O(K:L)
+       ENDDO 
+     ELSE IF(PRESENT(XYZ_O)) THEN
+       NatmsLoc=SIZE(XYZ_O,2)-3
+       IF(NatmsLoc<0) Call Halt('Dimension error in GetPBCProj')
+       DO I=1,3 
+         XYZ(1:3,I+1)=XYZ_O(1:3,NatmsLoc+I)
+       ENDDO 
+     ELSE
+       CALL Halt('XYZ or Carts missing from GetPBCProj') 
+     ENDIF
      !
+     CALL LatticeINTC(IntCs,PBCDim)
      CALL BMatrix(XYZ,IntCs,B,PBCDim,1.D0,1.D0)
      CALL DGEMM_TNc(9,IntCs%N,9,One,Zero,B%BL%D,B%BL%D,S)
      !
@@ -3330,7 +3377,7 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,LinCrit,TorsLinCrit,&
-                             PBCDim,Print,SCRPath,DoCleanB,Gi_O,Shift_O)
+                             PBCDim,Print,SCRPath,DoCleanB,Gi_O,Shift_O,                             DoCleanCol_O)
      TYPE(INTC)                   :: IntCs
      TYPE(Cholesky)               :: CholData
      TYPE(TrfCtrl)                :: GTrfCtrl
@@ -3346,12 +3393,15 @@ CONTAINS
      CHARACTER(LEN=*)             :: SCRPath
      TYPE(INT_VECT)               :: ISpB,JSpB,ISpBt,JSpBt,ISpBC,JSpBC
      TYPE(DBL_VECT)               :: ASpB,ASpBt,ASpBC
-     LOGICAL,OPTIONAL             :: Gi_O
+     LOGICAL,OPTIONAL             :: Gi_O,DoCleanCol_O
+     LOGICAL                      :: DoCleanCol
      REAL(DOUBLE),DIMENSION(9)    :: AuxBL
      REAL(DOUBLE),DIMENSION(9,9)  :: P    
      !
      DoGi=.FALSE.
      IF(PRESENT(Gi_O)) DoGi=Gi_O
+     DoCleanCol=.TRUE.
+     IF(PRESENT(DoCleanCol_O)) DoCleanCol=DoCleanCol_O
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def%C)
@@ -3363,8 +3413,11 @@ CONTAINS
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL SetEq(BS,B)
-     CALL CleanBConstr(IntCs,B,NatmsLoc)
-     CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+     IF(DoCleanCol) THEN
+       CALL CleanBConstr(IntCs,B,NatmsLoc)
+       CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+     ENDIF
+     CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
 !write(*,*) 'B%BL hardwired to zero'
 !B%BL%D=Zero
      !
@@ -3400,7 +3453,7 @@ CONTAINS
      TYPE(BMATR)                 :: B
      INTEGER                     :: I,J,PBCDim
      !
-     ! Get projector to constraints P
+     ! Get projector to constraints
      !
      CALL GetLattProj(XYZ,IntCs,PBCDim,P) 
      P=-P
@@ -3410,60 +3463,43 @@ CONTAINS
          Vect1(1:9)=B%BL%D(I,1:9)
          CALL DGEMM_NNc(9,9,1,One,Zero,P,Vect1,Vect2)
          B%BL%D(I,1:9)=Vect2(1:9)
-         !
-         ! Treatment for lattice rotation here:
-         ! Observe that A is along X, B is in XY plane, C is general 
-         !
-         B%BL%D(I,2:3)=Zero
-         B%BL%D(I,6)=Zero
        ENDIF 
      ENDDO
    END SUBROUTINE CleanBLConstr
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE PrHardConstr(XYZ,IntCsE,PBCDim,ISpB,JSpB, &
-                              ASpB,ISpBC,JSpBC,ASpBC,NZ)
+   SUBROUTINE CleanBLRot(XYZ,IntCs,B,PBCDim)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(INTC)                  :: IntCsE
-     TYPE(INT_VECT)              :: ISpB,JSpB,IConstr
-     TYPE(INT_VECT)              :: ISpBC,JSpBC
-     TYPE(DBL_VECT)              :: ASpB,ASpBC
-     INTEGER                     :: PBCDim,NatmsLoc,I,J,NCart
-     INTEGER                     :: NConstr,NZ,N,NZP
-     REAL(DOUBLE),DIMENSION(9,9) :: P
+     REAL(DOUBLE),DIMENSION(9,9) :: P   
+     REAL(DOUBLE),DIMENSION(9)   :: Vect1,Vect2
+     REAL(DOUBLE)                :: Trace
+     TYPE(INTC)                  :: IntCs
+     TYPE(BMATR)                 :: B
+     INTEGER                     :: I,J,PBCDim
      !
-     ! Construct B matrix of lattice constraints
+     ! Get projector to constraints
      !
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     !
-     CALL GetLattProj(XYZ,IntCsE,PBCDim,P,NZP_O=NZP)
-     !
-     NZ=ISpB%I(IntCsE%N+1)-1
-     CALL New(ISpBC,IntCsE%N+1)
-     CALL New(JSpBC,NZ)
-     CALL New(ASpBC,NZ)
-     ISpBC%I(1:IntCsE%N+1)=ISpB%I(1:IntCsE%N+1)
-     JSpBC%I(1:NZ)=JSpB%I(1:NZ)
-     ASpBC%D(1:NZ)=ASpB%D(1:NZ)
-     !
-     CALL CleanHardConstr(ISpBC,JSpBC,ASpBC,NZ,NCart,NZP,P,IntCsE)
-!CALL Show1x1(ISpBC%I,JSpBC%I,ASpBC%D,'SpBC constraints',IntCsE%N,NCart)
-!stop
-   END SUBROUTINE PrHardConstr
+     CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
+     DO I=1,IntCs%N
+       IF(B%BLI%I(I)/=0) THEN
+         Vect1(1:9)=B%BL%D(I,1:9)
+         CALL DGEMM_NNc(9,9,1,One,Zero,P,Vect1,Vect2)
+         B%BL%D(I,1:9)=Vect2(1:9)
+       ENDIF 
+     ENDDO
+   END SUBROUTINE CleanBLRot
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE GetLattProj(XYZ,IntCsE,PBCDim,P,NZP_O)
+   SUBROUTINE GetLattProj(XYZ,IntCsE,PBCDim,P)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(INTC)                  :: IntCsE
      INTEGER                     :: PBCDim,NCoinc,NatmsLoc,I,J,K,L
      INTEGER                     :: NZ,N,NZP
-     INTEGER,OPTIONAL            :: NZP_O
      TYPE(DBL_RNK2)              :: AL,BL
      REAL(DOUBLE)                :: Trace   
-     REAL(DOUBLE),DIMENSION(9,9) :: P,PRot  
+     REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE),DIMENSION(9)   :: AuxBL
      !
      ! Construct Projector of lattice constraints
@@ -3478,29 +3514,16 @@ CONTAINS
            L=K+2
            AuxBL(K:L)=XYZ(1:3,NatmsLoc-3+I)
          ENDDO
-         !
-         ! Let's restrict this routine to the projection of 
-         ! lattice-vector constraints, and do not do any
-         ! lattice-rotation treatment here
-         !
-         !CALL GetPBCProj(AuxBL,PBCDim,PRot)
-         !PRot=-PRot
-         !DO I=1,9 ; PRot(I,I)=One+PRot(I,I) ; ENDDO
        IF(NCoinc>0) THEN
          CALL DGEMM_TNc(9,NCoinc,9,One,Zero,AL%D,BL%D,P)
-         ! P=P+PRot
          CALL Delete(AL)
          CALL Delete(BL)
        ELSE
-       ! P=PRot
          P=Zero
        ENDIF
-       NZP=81
      ELSE
-       NZP=0
        P=Zero
      ENDIF
-     IF(PRESENT(NZP_O)) NZP_O=NZP
    END SUBROUTINE GetLattProj
 !
 !---------------------------------------------------------------------
@@ -7322,67 +7345,6 @@ return
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE POffHardGi(IntCs,XYZ,PBCDim,CartGrad,SCRPath,Print2)
-     TYPE(INTC)                 :: IntCs
-     REAL(DOUBLE),DIMENSION(:)  :: CartGrad
-     REAL(DOUBLE),DIMENSION(:,:):: XYZ
-     INTEGER                    :: PBCDim
-     CHARACTER(LEN=*)           :: SCRPath
-     TYPE(Cholesky)             :: CholData
-     TYPE(INT_VECT)             :: ISpB,JSpB,ISpBC,JSpBC
-     TYPE(DBL_VECT)             :: ASpB,ASpBC
-     TYPE(DBL_VECT)             :: IntA1,CartA1,IntA2,Carts
-     INTEGER                    :: I,J,NCart,NatmsLoc,NZ,NIntC
-     LOGICAL                    :: Print2
-     REAL(DOUBLE)               :: Fact
-     !
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     !
-     CALL New(Carts,NCart)
-     CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
-     ! Rotation of the lattice is treated as a hard constraint
-     IF(PBCDim>0) THEN
-       CALL PBCRotOff(CartGrad(NCart-8:NCart),Carts%D(NCart-8:NCart), &
-                      Print2,PBCDim)
-     ENDIF
-     CALL Delete(Carts)
-     !
-     CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-     CALL Delete(CholData)
-     NIntC=SIZE(ISpB%I)-1
-     !
-     CALL New(IntA1,NIntC)
-     CALL New(IntA2,NIntC)
-     CALL New(CartA1,NCart)
-     !
-     CALL PrHardConstr(XYZ,IntCs,PBCDim,ISpB,JSpB,ASpB, &
-                       ISpBC,JSpBC,ASpBC,NZ)
-     CALL CholFactGi(ISpBC,JSpBC,ASpBC,NCart,NIntC, &
-                     CholData,Print2,Shift_O=1.D-6)
-     IF(NZ>0) THEN
-       CALL CALC_BxVect(ISpBC,JSpBC,ASpBC,IntA1%D,CartGrad)
-       CALL GiInvIter(ISpBC,JSpBC,ASpBC,CholData,IntA1%D,IntA2%D, &
-                      NCart,IntCs%N)
-       CALL CALC_BxVect(ISpBC,JSpBC,ASpBC,IntA2%D,CartA1%D,Trp_O=.TRUE.)
-       !
-       Fact=DOT_PRODUCT(CartGrad,CartA1%D)/DOT_PRODUCT(CartGrad,CartGrad)
-       Fact=Fact*100.D0
-       WRITE(*,100) Fact
-       WRITE(Out,100) Fact
-       100 FORMAT('Percentage of Constraint Force That is Projected Out= ',F6.2)
-       CartGrad=CartGrad-CartA1%D
-     ENDIF
-     CALL Delete(ISpBC) ; CALL Delete(JSpBC) ; CALL Delete(ASpBC)
-     CALL Delete(ISpB) ; CALL Delete(JSpB) ; CALL Delete(ASpB)
-     CALL Delete(CholData)
-     CALL Delete(IntA1)
-     CALL Delete(IntA2)
-     CALL Delete(CartA1)
-   END SUBROUTINE POffHardGi
-!
-!-------------------------------------------------------------------
-!
    SUBROUTINE CleanConstrCart(XYZ,PBCDim,CartGrad,GOpt,SCRPath)
      TYPE(INTC)                 :: IntCs,IntCsX
      REAL(DOUBLE),DIMENSION(:)  :: CartGrad
@@ -7411,10 +7373,11 @@ return
      CALL New(IntA1,IntCsX%N)
      CALL New(IntA2,IntCsX%N)
      !
-     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl%LinCrit, &
+     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl, &
+                          GOpt%CoordCtrl%LinCrit, &
                           GOpt%CoordCtrl%TorsLinCrit, &
                           PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE., &
-                          Shift_O=1.D0)
+                          Shift_O=1.0D-4,DoCleanCol_O=.FALSE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA1%D,CartGrad)

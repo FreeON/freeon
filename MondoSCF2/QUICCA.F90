@@ -848,8 +848,8 @@ CONTAINS
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-                RangeT%D,NDegsT%I,Zero,.TRUE.)
-              ! RangeT%D,NDegsT%I,Zero,.FALSE.)
+              ! RangeT%D,NDegsT%I,Zero,.TRUE.)
+                RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
@@ -859,7 +859,7 @@ CONTAINS
      CALL SetConstraints(IntCsT,IntCsT%PredVal%D)
      DisplT%D=IntCsT%PredVal%D-IntCValuesT%D(:,NDim)
      !
-    !CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+   ! CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
      PredVals%D=IntCsT%PredVal%D
      Displ%D=DisplT%D
      !
@@ -1242,6 +1242,18 @@ CONTAINS
        MinX=MINVAL(VectX%D)
        MaxX=MAXVAL(VectX%D)
        !
+       IF(MaxX-MinX<1.D-6) THEN
+         ! Do steepest descent with empirical force constants if 
+         ! range is too small for fitting.
+         ! Control over stepsize is going to be modified to
+         ! standard DiagHess range (0.3 a.u.)
+         Range(I,1)=VectX%D(NDim)-0.15D0
+         Range(I,2)=VectX%D(NDim)+0.15D0
+         ABC(I,1)=VectY%D(NDim)-ABC(I,2)*VectX%D(NDim)
+         NDegs(I)=1      
+         CYCLE  
+       ENDIF
+       !
        ! invert to get weights
        DO J=1,NDim  
          RMSErr%D(J)=One/(RMSErr%D(J)+1.D-20)
@@ -1260,18 +1272,6 @@ CONTAINS
          Range(I,1)=MinX
          Range(I,2)=MaxX
          IStart=1
-       ENDIF
-       !
-       IF(Range(I,2)-Range(I,1)<1.D-6) THEN
-         ! Do steepest descent with empirical force constants if
-         ! range is too small for fitting.
-         ! Control over stepsize is going to be modified to
-         ! standard DiagHess range (0.3 a.u.)
-         Range(I,1)=VectX%D(NDim)-0.15D0
-         Range(I,2)=VectX%D(NDim)+0.15D0
-         ABC(I,1)=VectY%D(NDim)-ABC(I,2)*VectX%D(NDim)
-         NDegs(I)=1
-         CYCLE
        ENDIF
        !
        VectAux%D=ABC(I,:)
@@ -1378,15 +1378,14 @@ CONTAINS
      ENDIF
      !
      !QTab=QTest90(MIN(10,NDim-I+1))
+    !QTab=One/DBLE(NDim)
     !QTab=QTab-QTab*QTab
     !QTab=0.001D0
-     QTab=One/DBLE(NDim)
      J=NDim-ILeft+1
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
       !IF(Q>0.9999D0) THEN
        IF(Q>0.999D0) THEN
-      !IF(RMSErr(I)+1.D-6<QTab) THEN
          IStart=I+1
          EXIT
        ENDIF

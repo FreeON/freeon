@@ -685,6 +685,7 @@ CONTAINS
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
+     CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
      CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
@@ -693,14 +694,6 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoRotOff) &
        CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
      CALL Delete(Carts)
-     !
-!write(*,*) 'after rotoff cartgrad = '
-!write(out,*) 'after rotoff cartgrad = '
-!do j=1,natmsloc
-!i=(j-1)*3
-!write(*,*) cartgrad%d(i+1:i+3)
-!write(out,*) cartgrad%d(i+1:i+3)
-!enddo
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
@@ -943,6 +936,7 @@ CONTAINS
      !
      CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
+!CALL ProjectBCol(SCRPath,IntCs,XYZ,Grad%D,PBCDim,.TRUE.)
      IF(PBCDim>0) THEN
        CALL PrtIntCoords(IntCs,Grad%D,&
          'Internal Coordinate forces',PBCDim_O=PBCDim)
@@ -967,6 +961,7 @@ CONTAINS
      ! 
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,PBCDim,Print)
+!CALL ProjectBCol(SCRPath,IntCs,XYZ,Displ%D,PBCDim,.TRUE.)
      IntCs%PredVal%D=IntCs%Value%D+Displ%D
      CALL InternalToCart(XYZ,AtNum,IntCs,IntCs%PredVal%D, &
                          RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
@@ -1252,18 +1247,6 @@ CONTAINS
      CALL New(GradNew,(/3,NatmsNew/))
      CALL New(RefXYZ,(/3,NatmsNew/))
      ! fill atomic data
-!write(*,*) 'GMLoc%Gradients%D = '
-!write(out,*) 'GMLoc%Gradients%D = '
-!do j=1,GMLoc%Natms
-!write(*,*) GMLoc%Gradients%D(1:3,j)
-!write(out,*) GMLoc%Gradients%D(1:3,j)
-!enddo
-!write(*,*) 'GMLoc%PBC%LatFrc%D = '
-!write(out,*) 'GMLoc%PBC%LatFrc%D = '
-!do j=1,3
-!write(*,*) GMLoc%PBC%LatFrc%D(J,1:3)
-!write(out,*) GMLoc%PBC%LatFrc%D(J,1:3)
-!enddo
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) THEN
@@ -1274,19 +1257,16 @@ CONTAINS
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
-!write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          RefXYZ%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
-!GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
      ! ensure proper orientation of (numerical) forces
-!write(*,*) 'forces orientation hardwired to zero'
-     GradNew%D(2:3,NatmsNew+1)=Zero
-     GradNew%D(3,NatmsNew+2)=Zero
+   ! GradNew%D(2:3,NatmsNew+1)=Zero
+   ! GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
