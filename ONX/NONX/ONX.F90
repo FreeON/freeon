@@ -12,9 +12,7 @@ PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
-#ifdef PERIODIC  !per
-  USE AtomPairs  !per
-#endif           !per
+  USE AtomPairs  
   USE Clock
   USE InOut
   USE PrettyPrint
