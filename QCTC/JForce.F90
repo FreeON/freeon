@@ -198,10 +198,12 @@ PROGRAM JForce
 !    'closed shell'
      MMJFrc%D=Two*MMJFrc%D
 !    checks, prints
-     CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in au ')
-     MMJFrc%D=MMJFrc%D/KJPerMolPerAngstToHPerBohr
-     CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in KJ/mol/A ')
-     MMJFrc%D=MMJFrc%D*KJPerMolPerAngstToHPerBohr
+     IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+       CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in au ')
+       MMJFrc%D=MMJFrc%D/KJPerMolPerAngstToHPerBohr
+       CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in KJ/mol/A ')
+       MMJFrc%D=MMJFrc%D*KJPerMolPerAngstToHPerBohr
+     ENDIF
   ENDIF
 #endif 
 !--------------------------------------------------------------------------------

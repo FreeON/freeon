@@ -96,6 +96,7 @@ MODULE ParsingKeys
    CHARACTER(LEN=8),  PARAMETER :: OPT_DiagHess     ='DiagHess'
    CHARACTER(LEN=8),  PARAMETER :: OPT_CartDIIS     ='CartDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_IntDIIS      ='IntDIIS'
+   CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_ONE_BASE     ='OneBase'
    CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE       ='TS'
 !  Perform quasi-newton geometry optimization for each basis set in turn
