@@ -1,8 +1,6 @@
                            EMSL Basis Set Library
                    Generated Wed May 14 10:25:20 PDT 2003
 
-!
-BASIS="LANL2DZ ECP"
  H   0
  S   3  1.00
        19.2384000         0.328280000E-01
