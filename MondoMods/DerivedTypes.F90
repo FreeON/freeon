@@ -361,6 +361,15 @@ MODULE DerivedTypes
      TYPE(INT_RNK2)   :: SLOC
   END TYPE IDrv
 !-------------------------------------------------------------------------------------
+!  ONX integral space
+!
+  TYPE ISpc
+    INTEGER           :: L1,L2,L3,L4
+    INTEGER           :: NB1,NB2
+    INTEGER           :: NK1,NK2
+    INTEGER           :: NVRR
+  END TYPE ISpc
+!-------------------------------------------------------------------------------------
 !  ONX gradient driver
 !
   TYPE GradD
