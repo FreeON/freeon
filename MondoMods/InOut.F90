@@ -1,6 +1,6 @@
 !    GENERIC IO ROUTINES FOR MONDOSCF TYPES
 !    Author: Matt Challacombe and CK Gan
-!----------------------------------------------------------
+!-------------------------------------------------------------------------------
 MODULE InOut
    USE DerivedTypes
    USE GlobalScalars   
@@ -66,14 +66,14 @@ MODULE InOut
                          HDF5WriteDoubleVector,HDF5SizeOfData
    INTEGER, PARAMETER :: NATIVE_DOUBLE=6, NATIVE_INT32=24
    CONTAINS 
-!================================================================
-!
+!===============================================================================
+
 !  FILE MANIPULATION ROUTINES
-!
-!================================================================
-!
+
+!===============================================================================
+
 !     Initialize a HDF file
-!
+
       SUBROUTINE InitHDF(FileName)
          CHARACTER(LEN=*), INTENT(IN) :: FileName
          INTEGER                      :: NC,STATUS
@@ -92,9 +92,9 @@ MODULE InOut
 
 
 
-!=================================================================
+!===============================================================================
 !    Open a HDF file
-!================================================================= 
+!=============================================================================== 
       SUBROUTINE OpenHDF(FileName)
          CHARACTER(LEN=*),INTENT(IN) :: FileName
          INTEGER                     :: NC,STATUS
@@ -116,9 +116,9 @@ MODULE InOut
       END SUBROUTINE OpenHDF
 
 
-!-----------------------------------------------------------------------
-!
-!----------------------------------------------------------------------- 
+!-------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------- 
       SUBROUTINE CloseHDF()
          INTEGER :: Status
 #ifdef PARALLEL
@@ -132,9 +132,9 @@ MODULE InOut
          ENDIF
 #endif  
       END SUBROUTINE CloseHDF
-!-----------------------------------------------------------------------
-!
-!-----------------------------------------------------------------------  
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------  
       SUBROUTINE CreateData(Meta)
          TYPE(META_DATA) :: Meta
          INTEGER         :: NC
@@ -146,9 +146,9 @@ MODULE InOut
          CALL Halt(' Failed in CreateData:'//TRIM(MetaChar(Meta)))
          Meta%Status=SUCCEED
       END SUBROUTINE CreateData
-!-----------------------------------------------------------------------
-!
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
       SUBROUTINE OpenData(Meta,Put_O)
          TYPE(META_DATA)  :: Meta
          LOGICAL,OPTIONAL :: Put_O
@@ -179,9 +179,9 @@ MODULE InOut
             ENDIF
          ENDIF
       END SUBROUTINE OpenData
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! 
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       SUBROUTINE CloseData(Meta)
          TYPE(META_DATA) :: Meta
          IF(Meta%Status==FAIL) &
@@ -190,9 +190,9 @@ MODULE InOut
          IF(Meta%Status==FAIL) &
          CALL Halt(' HDF5CloseData error for '//TRIM(MetaChar(Meta)))
       END SUBROUTINE CloseData
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! 
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       FUNCTION NameTag(VarName,Tag_O) RESULT(FullName)
          CHARACTER(LEN=*),         INTENT(IN)    :: VarName
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
@@ -204,9 +204,9 @@ MODULE InOut
          ENDIF
          CALL LowCase(FullName)
       END FUNCTION NameTag
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! 
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       FUNCTION SetMeta(VarName,DataType,SizeOf,UnLimit_O) RESULT(Meta)
          TYPE(META_DATA)              :: Meta
          CHARACTER(LEN=*), INTENT(IN) :: VarName
@@ -227,9 +227,9 @@ MODULE InOut
          Meta%DataId=FAIL
          Meta%Status=FAIL
       END FUNCTION SetMeta
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! 
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       FUNCTION MetaChar(Meta) RESULT(CharMeta)
          TYPE(META_DATA)                :: Meta
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: CharMeta
@@ -245,18 +245,18 @@ MODULE InOut
                       //'Meta%DataId   = '//TRIM(IntToChar(Meta%DataId))   //Rtrn &
                       //'Meta%Status   = '//TRIM(IntToChar(Meta%Status))
       END FUNCTION MetaChar
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 
-!=====================================================================
+!===============================================================================
       FUNCTION StringLen(String)
          CHARACTER(LEN=*),INTENT(IN) :: String
          INTEGER                     :: StringLen
          StringLen=LEN(TRIM(String))
       END FUNCTION StringLen
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 
  
-!=====================================================================
+!===============================================================================
 
 
 
@@ -269,7 +269,7 @@ MODULE InOut
             Char2Ints(I)=ICHAR(String(I:I))
          ENDDO
       END FUNCTION Char2Ints
-!-----------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !  
 !  
 !  
@@ -279,30 +279,30 @@ MODULE InOut
             DIMENSION(Meta%Dimension)   :: A
          Meta%Status=HDF5WriteIntegerVector(Meta%DataId,Meta%DataSpc,A)
       END SUBROUTINE WriteIntegerVector
-!
+
       SUBROUTINE WriteDoubleVector(Meta,A)       
          TYPE(META_DATA)                :: Meta
          REAL(DOUBLE),              &
             DIMENSION(Meta%Dimension)   :: A
          Meta%Status=HDF5WriteDoubleVector(Meta%DataId,Meta%DataSpc,A)
       END SUBROUTINE WriteDoubleVector
-!
+
       SUBROUTINE ReadIntegerVector(Meta,A)       
          TYPE(META_DATA)               :: Meta
          INTEGER,                    &
            DIMENSION(Meta%Dimension)   :: A
          Meta%Status=HDF5ReadIntegerVector(Meta%DataId,Meta%DataSpc,A)
       END SUBROUTINE ReadIntegerVector
-!
+
       SUBROUTINE ReadDoubleVector(Meta,A)       
          TYPE(META_DATA)               :: Meta
          REAL(DOUBLE),              &
             DIMENSION(Meta%Dimension)  :: A
          Meta%Status=HDF5ReadDoubleVector(Meta%DataId,Meta%DataSpc,A)
       END SUBROUTINE ReadDoubleVector
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
     SUBROUTINE Get_INT_SCLR(A,VarName,Tag_O)
        INTEGER,                  INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -322,9 +322,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_SCLR
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
     SUBROUTINE Get_INT_VECT(A,VarName,Tag_O)
        TYPE(INT_VECT),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -343,8 +343,8 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_VECT
-!--------------------------------------------------------------------
-!
+!-------------------------------------------------------------------------------
+
     SUBROUTINE Get_INTC(A,VarName,Tag_O)
        TYPE(INTC),               INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -366,17 +366,17 @@ MODULE InOut
           DO I=1,N; A%DEF(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
         ENDDO
           DEALLOCATE(B)
-!
+
           Meta=SetMeta(NameTag(Trim(VarName)//'Atoms',Tag_O),NATIVE_INT32,NN*4,.FALSE.)
           CALL OpenData(Meta)
           CALL ReadIntegerVector(Meta,A%ATOMS)
           CALL CloseData(Meta)
-!
+
           Meta=SetMeta(NameTag(Trim(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
           CALL OpenData(Meta)
           CALL ReadDoubleVector(Meta,A%Value)
           CALL CloseData(Meta)
-!
+
           Meta=SetMeta(NameTag(Trim(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
           ALLOCATE(B(NN))
           CALL OpenData(Meta)
@@ -387,16 +387,16 @@ MODULE InOut
               IF(B(I)==1) A%Constraint(I)=.TRUE.
             ENDDO
           DEALLOCATE(B)
-!
+
 #ifdef PARALLEL 
        ENDIF
        !! not supported yet. IF(InParallel)CALL Bcast(A)
        STOP 'ERROR : Bcast in Get_INTC (InOut.F90) not supported!'
 #endif 
     END SUBROUTINE Get_INTC
-!
-!------------------------------------------------------------
-!
+
+!-------------------------------------------------------------------------------
+
     SUBROUTINE Put_INTC(A,VarName,Tag_O)
        INTEGER  :: I,N,II,NN
        TYPE(INTC),               INTENT(IN) :: A
@@ -419,17 +419,17 @@ MODULE InOut
           CALL WriteIntegerVector(Meta,B)
           CALL CloseData(Meta)
           DEALLOCATE(B)
-!
+
           Meta=SetMeta(NameTag(TRIM(VarName)//'Atoms',Tag_O),NATIVE_INT32,4*NN,.FALSE.)
           CALL OpenData(Meta,.TRUE.)
           CALL WriteIntegerVector(Meta,A%ATOMS)
           CALL CloseData(Meta)
-!
+
           Meta=SetMeta(NameTag(TRIM(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
           CALL OpenData(Meta,.TRUE.)
           CALL WriteDoubleVector(Meta,A%Value)
           CALL CloseData(Meta)
-!
+
           ALLOCATE(B(NN))
           B=0
           DO I=1,NN
@@ -440,13 +440,13 @@ MODULE InOut
           CALL WriteIntegerVector(Meta,B)
           CALL CloseData(Meta)
           DEALLOCATE(B)
-!
+
 #ifdef PARALLEL 
        ENDIF       
 #endif 
-!
+
     END SUBROUTINE Put_INTC
-!
+
     SUBROUTINE Get_BMATR(A,VarName,Tag_O)
        TYPE(BMATR),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -459,7 +459,7 @@ MODULE InOut
           CALL OpenData(Meta)
           CALL ReadIntegerVector(Meta,A%IB)
           CALL CloseData(Meta)
-!
+
           Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
           CALL OpenData(Meta)
           CALL ReadDoubleVector(Meta,A%B)
@@ -470,7 +470,7 @@ MODULE InOut
        STOP 'ERROR : Bcast in Get_BMatr (InOut.F90) not supported!'
 #endif 
     END SUBROUTINE Get_BMATR
-!
+
     SUBROUTINE Put_BMATR(A,VarName,Tag_O)
        TYPE(BMATR),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -483,7 +483,7 @@ MODULE InOut
           CALL OpenData(Meta)
           CALL WriteIntegerVector(Meta,A%IB)
           CALL CloseData(Meta)
-!
+
           Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
           CALL OpenData(Meta)
           CALL WriteDoubleVector(Meta,A%B)
@@ -492,13 +492,13 @@ MODULE InOut
        ENDIF
 #endif 
     END SUBROUTINE Put_BMATR
-!
-!
-!--------------------------------------------------------------------
-!
-!
-!----------------------------------------------------------
-!
+
+
+!-------------------------------------------------------------------------------
+
+
+!-------------------------------------------------------------------------------
+
     SUBROUTINE Get_INT_RNK2(A,VarName,Tag_O)
        TYPE(INT_RNK2),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -517,9 +517,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK2
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
     SUBROUTINE Get_INT_RNK3(A,VarName,Tag_O)
        TYPE(INT_RNK3),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -539,9 +539,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK3
-!--------------------------------------------------------------------
-!
-!
+!-------------------------------------------------------------------------------
+
+
     SUBROUTINE Get_INT_RNK4(A,VarName,Tag_O)
        TYPE(INT_RNK4),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -561,7 +561,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK4
-!
+
     SUBROUTINE Get_DBL_SCLR(A,VarName,Tag_O)
        REAL(DOUBLE),             INTENT(INOUT)   :: A
        CHARACTER(LEN=*),         INTENT(IN)      :: VarName
@@ -581,7 +581,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_SCLR
-!
+
     SUBROUTINE Get_DBL_VECT(A,VarName,Tag_O)
        TYPE(DBL_VECT),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -600,7 +600,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_VECT
-!
+
     SUBROUTINE Get_DBL_RNK2(A,VarName,Tag_O)
        TYPE(DBL_RNK2),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -619,7 +619,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK2
-!
+
     SUBROUTINE Get_DBL_RNK3(A,VarName,Tag_O)
        TYPE(DBL_RNK3),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -639,7 +639,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK3
-!
+
     SUBROUTINE Get_DBL_RNK4(A,VarName,Tag_O)
        TYPE(DBL_RNK4),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -659,7 +659,7 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK4
-!
+
     SUBROUTINE Get_DBL_RNK6(A,VarName,Tag_O)
        TYPE(DBL_RNK6),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -679,9 +679,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK6
-!---------------------------------------------------------------------------------------
-!
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Get_CHR_SCLR(A,VarName,Tag_O)
        CHARACTER(LEN=*),         INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -706,9 +706,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_CHR_SCLR
-!---------------------------------------------------------------------------------------
-!
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Get_LOG_SCLR(A,VarName,Tag_O)
        LOGICAL,                  INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -734,9 +734,9 @@ MODULE InOut
        IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_LOG_SCLR
-!---------------------------------------------------------------------------------------
-!
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_INT_SCLR(A,VarName,Tag_O)
        INTEGER,                  INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -755,7 +755,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_INT_SCLR
-!
+
     SUBROUTINE Put_INT_VECT(A,VarName,N_O,Tag_O,UnLimit_O)
        TYPE(INT_VECT),           INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -780,7 +780,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_INT_VECT
-!
+
     SUBROUTINE Put_INT_RNK2(A,VarName,N_O,Tag_O,UnLimit_O)
        TYPE(INT_RNK2),           INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -805,7 +805,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_INT_RNK2
-!
+
     SUBROUTINE Put_INT_RNK3(A,VarName,N_O,Tag_O,UnLimit_O)
        TYPE(INT_RNK3),           INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -830,7 +830,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_INT_RNK3
-!
+
     SUBROUTINE Put_INT_RNK4(A,VarName,N_O,Tag_O,UnLimit_O)
        TYPE(INT_RNK4),           INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -855,9 +855,9 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_INT_RNK4
-!---------------------------------------------------------------------------------------------
-!
-!---------------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_DBL_SCLR(A,VarName,Tag_O)
        REAL(DOUBLE),             INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -876,7 +876,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_DBL_SCLR
-!
+
     SUBROUTINE Put_DBL_VECT(A,VarName,N_O,Tag_O,UnLimit_O)
        TYPE(DBL_VECT),           INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -1002,9 +1002,9 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_DBL_RNK6
-!----------------------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_CHR_SCLR(A,VarName,Tag_O)
        CHARACTER(LEN=*),         INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -1029,9 +1029,9 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_CHR_SCLR
-!----------------------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_LOG_SCLR(A,VarName,Tag_O)
        LOGICAL,                  INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
@@ -1051,9 +1051,9 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_LOG_SCLR
-!----------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get a basis set
-!----------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
       SUBROUTINE Get_BSET(BS,Tag_O)
          TYPE(BSET),              INTENT(OUT) :: BS
          CHARACTER(LEN=*),OPTIONAL            :: Tag_O
@@ -1080,7 +1080,7 @@ MODULE InOut
          CALL Get(BS%LyDex,'lydex',Tag_O=Tag_O)
          CALL Get(BS%LzDex,'lzdex',Tag_O=Tag_O)
       END SUBROUTINE Get_BSET
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put a  basis set
 !  
       SUBROUTINE Put_BSET(BS,Tag_O)
@@ -1108,15 +1108,15 @@ MODULE InOut
          CALL Put(BS%LzDex,'lzdex',Tag_O=Tag_O)
       END SUBROUTINE Put_BSET
 #ifdef PERIODIC
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get the Periodic Info
-!
+
       SUBROUTINE Get_PBCInfo(PBC,Tag_O)
         TYPE(PBCInfo),            INTENT(OUT) :: PBC 
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !       Items that should not change with geometry
-!
+
         CALL Get(PBC%Dimen     ,'Dimension')
         CALL Get(PBC%PFFMaxEll ,'PFFMaxEll')
         CALL Get(PBC%PFFMaxLay ,'PFFMaxLay')
@@ -1126,26 +1126,26 @@ MODULE InOut
         CALL Get(PBC%InAtomCrd ,'AtomicCrd')
         CALL Get(PBC%Translate ,'Translate')
         CALL Get(PBC%Trans_COM ,'Trans_COM')
-!
+
         CALL Get(PBC%AutoW(1)  ,'AutoWrap(1)')        
         CALL Get(PBC%AutoW(2)  ,'AutoWrap(2)')
         CALL Get(PBC%AutoW(3)  ,'AutoWrap(3)')
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !       Items that can change with geometry ...   
-!
+
         CALL Get(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
         CALL Get(PBC%Epsilon,      'Epsilon'             ,Tag_O=Tag_O)
         CALL Get(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
         CALL Get(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
-!
+
         CALL Get(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
         CALL Get(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
         CALL Get(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
-!
+
         CALL Get(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
         CALL Get(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
         CALL Get(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
-!
+
         CALL Get(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
         CALL Get(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
         CALL Get(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
@@ -1155,7 +1155,7 @@ MODULE InOut
         CALL Get(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
         CALL Get(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
         CALL Get(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
-!
+
         CALL Get(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
         CALL Get(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
         CALL Get(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
@@ -1165,17 +1165,17 @@ MODULE InOut
         CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
         CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
         CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
-!
+
       END SUBROUTINE Get_PBCInfo
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put the Periodic Info
-!
+
       SUBROUTINE Put_PBCInfo(PBC,Tag_O)
         TYPE(PBCInfo),            INTENT(IN)  :: PBC 
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !       Items that should not change with geometry
-!
+
         CALL Put(PBC%Dimen     ,'Dimension')
         CALL Put(PBC%PFFMaxEll ,'PFFMaxEll')
         CALL Put(PBC%PFFMaxLay ,'PFFMaxLay')
@@ -1185,26 +1185,26 @@ MODULE InOut
         CALL Put(PBC%InAtomCrd ,'AtomicCrd')
         CALL Put(PBC%Translate ,'Translate')
         CALL Put(PBC%Trans_COM ,'Trans_COM')
-!
+
         CALL Put(PBC%AutoW(1)  ,'AutoWrap(1)')        
         CALL Put(PBC%AutoW(2)  ,'AutoWrap(2)')
         CALL Put(PBC%AutoW(3)  ,'AutoWrap(3)')
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !       Items that can change with geometry ...   
-!
+
         CALL Put(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
         CALL Put(PBC%Epsilon,      'Epsilon'             ,Tag_O=Tag_O)
         CALL Put(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
         CALL Put(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
-!
+
         CALL Put(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
         CALL Put(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
         CALL Put(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
-!
+
         CALL Put(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
         CALL Put(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
         CALL Put(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
-!
+
         CALL Put(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
         CALL Put(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
         CALL Put(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
@@ -1214,7 +1214,7 @@ MODULE InOut
         CALL Put(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
         CALL Put(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
         CALL Put(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
-!
+
         CALL Put(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
         CALL Put(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
         CALL Put(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
@@ -1224,19 +1224,19 @@ MODULE InOut
         CALL Put(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
         CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
         CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
-!
+
       END SUBROUTINE Put_PBCInfo
 #endif
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get some coordinates
-!
+
       SUBROUTINE Get_CRDS(GM,Tag_O)
          TYPE(CRDS),           INTENT(OUT)    :: GM
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
          IF(AllocQ(GM%Alloc))CALL Delete(GM)
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Items that should not change with geometry...
-!
+
          CALL Get(GM%NAtms,'natoms',Tag_O=Tag_O)
          CALL Get(GM%Confg,'configuration',Tag_O=Tag_O)
          CALL Get(GM%NElec,'nel',Tag_O=Tag_O)
@@ -1246,9 +1246,9 @@ MODULE InOut
          CALL Get(GM%NKind,'nkind',Tag_O=Tag_O)
          CALL Get(GM%InAu, 'inau',Tag_O=Tag_O)
          CALL New(GM)
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Items that can change with geometry ...       
-!
+
          CALL Get(GM%Ordrd,  'reordered',Tag_O=Tag_O)
          CALL Get(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
          CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
@@ -1264,15 +1264,15 @@ MODULE InOut
          CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Get_CRDS
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put a coordinate set
-!
+
       SUBROUTINE Put_CRDS(GM,Tag_O)
          TYPE(CRDS),               INTENT(IN) :: GM
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-!-------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Items that should not change with geometry...
-!
+
          CALL Put(GM%NAtms,'natoms',Tag_O=Tag_O)
          CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
          CALL Put(GM%NElec,'nel',Tag_O=Tag_O)
@@ -1281,9 +1281,9 @@ MODULE InOut
          CALL Put(GM%TotCh,'charge',Tag_O=Tag_O)
          CALL Put(GM%NKind,'nkind',Tag_O=Tag_O)
          CALL Put(GM%InAu, 'inau',Tag_O=Tag_O)
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Items that can change with geometry ...       
-!
+
          CALL Put(GM%Ordrd,  'reordered',Tag_O=Tag_O)
          CALL Put(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
          CALL Put(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
@@ -1299,9 +1299,9 @@ MODULE InOut
          CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Put_CRDS
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get a BCSR matrix
-!
+
       SUBROUTINE Get_BCSR(A,Name,PFix_O,CheckPoint_O,Bcast_O)
          TYPE(BCSR),               INTENT(INOUT) :: A     
          CHARACTER(LEN=*),         INTENT(IN)    :: Name
@@ -1352,7 +1352,7 @@ MODULE InOut
                   RETURN
                ENDIF
             ENDIF
-!
+
             IF(PRESENT(PFix_O))THEN
                FileName=TRIM(Name)//TRIM(PFix_O)
             ELSE
@@ -1420,7 +1420,7 @@ MODULE InOut
       END SUBROUTINE Get_BCSR
 
 
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef PARALLEL
   SUBROUTINE BcastBCSR(A)
     TYPE(BCSR) :: A
@@ -1454,9 +1454,9 @@ MODULE InOut
     CALL Bcast(A%MTrix,N_O=NNon0)
   END SUBROUTINE BcastBCSR
 #endif
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put a BCSR matrix
-!
+
       SUBROUTINE Put_BCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(BCSR),               INTENT(IN) :: A             
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
@@ -1473,7 +1473,7 @@ MODULE InOut
             ELSE
                FileName=Name
             ENDIF
-!
+
             IF(PRESENT(CheckPoint_O))THEN
                IF(CheckPoint_O)THEN
                   CALL Put(A%NAtms,TRIM(Name)//'%NAtms')
@@ -1530,9 +1530,9 @@ MODULE InOut
         1 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_BCSR.')
       END SUBROUTINE Put_BCSR
 #ifdef PARALLEL
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get a DBCSR matrix
-!
+
       SUBROUTINE Get_DBCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(DBCSR),              INTENT(INOUT) :: A     
          LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
@@ -1542,7 +1542,7 @@ MODULE InOut
 #ifdef PARALLEL
          LOGICAL                                 :: InParTemp
 #endif
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 #ifdef PARALLEL
          IF(PRESENT(Checkpoint_O))THEN
             InParTemp=InParallel
@@ -1561,25 +1561,25 @@ MODULE InOut
          CALL Delete(B)
          A%Node=MyId
       END SUBROUTINE Get_DBCSR
-!---------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put a DBCSR matrix
-!
+
       SUBROUTINE Put_DBCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(DBCSR), INTENT(INOUT)           :: A     
          LOGICAL,         OPTIONAL,INTENT(IN) :: CheckPoint_O
          TYPE(BCSR)                           :: B                          
          CHARACTER(LEN=*),         INTENT(IN) :: Name
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
-!----------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
          CALL SetEq(B,A)
          CALL Put_BCSR(B,Name,PFix_O,CheckPoint_O)
          CALL Delete(B)
-!--------------------------------------------
+!-------------------------------------------------------------------------------
       END SUBROUTINE Put_DBCSR
 #endif
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Put thresholds 
-!
+
       SUBROUTINE Put_TOLS(NGLCT,Tag_O)
          TYPE(TOLS),               INTENT(IN) :: NGLCT
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
@@ -1592,9 +1592,9 @@ MODULE InOut
          CALL Put(NGLCT%DTol,'densityneglect',Tag_O=Tag_O)
       END SUBROUTINE Put_TOLS
 
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get thresholds 
-!
+
       SUBROUTINE Get_TOLS(NGLCT,Tag_O)
          IMPLICIT NONE
          TYPE(TOLS),              INTENT(OUT) :: NGLCT
@@ -1607,9 +1607,9 @@ MODULE InOut
          CALL Get(NGLCT%DTol,'densityneglect',Tag_O=Tag_O)
       END SUBROUTINE Get_TOLS
 
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Get arguments from the command line
-!
+
       SUBROUTINE Get_ARGMT(A)
 #ifdef NAG
          USE F90_UNIX
@@ -1670,17 +1670,30 @@ MODULE InOut
          ENDIF
 #endif
       END SUBROUTINE Get_ARGMT
-!
-!
-!
-  SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle)
+
+
+
+  SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle,BCast_O)
     TYPE(HGRho)                      :: A
     TYPE(ARGMT)                      :: Args
     INTEGER                          :: SCFCycle,IOS,I,NExpt,NDist,NCoef
     CHARACTER(LEN=*)                 :: Name 
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
     LOGICAL                          :: Exists
-!   
+    LOGICAL,OPTIONAL,INTENT(IN)      :: Bcast_O
+    LOGICAL                          :: BcastQ
+ 
+#ifdef PARALLEL
+    IF(PRESENT(Bcast_O)) THEN
+      BcastQ = Bcast_O
+    ELSE
+      BcastQ = .FALSE.
+    ENDIF
+#endif
+    
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
     FileName=TrixFile(Name,Args,SCFCycle)
     INQUIRE(FILE=FileName,EXIST=Exists)
     IF(Exists) THEN
@@ -1688,14 +1701,24 @@ MODULE InOut
     ELSE
        CALL Halt(' Get_HGRho could not find '//TRIM(FileName))
     ENDIF
-!
-!   Allocate Memory
-!
+ 
+    ! Allocate Memory
+ 
     READ(UNIT=Seq,Err=100,IOSTAT=IOS) NExpt,NDist,NCoef
+#ifdef PARALLEL
+  ENDIF
+  IF(BcastQ) THEN
+    CALL Bcast(NExpt)
+    CALL Bcast(NDist)
+    CALL Bcast(NCoef)
+  ENDIF
+#endif
     CALL New_HGRho(A,(/NExpt,NDist,NCoef/))
-!
-!   Read In the Density
-!
+ 
+    ! Read In the Density
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffQ%I(I)  ,I=1,A%NExpt)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffR%I(I)  ,I=1,A%NExpt)
@@ -1705,14 +1728,32 @@ MODULE InOut
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
     READ(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
-!
+#ifdef PARALLEL
+  ENDIF
+  IF(BcastQ) THEN
+    Call Bcast(A%NQ,N_O=A%NExpt)
+    Call Bcast(A%OffQ,N_O=A%NExpt)
+    Call Bcast(A%OffR,N_O=A%NExpt)
+    Call Bcast(A%Lndx,N_O=A%NExpt)
+    Call Bcast(A%Expt,N_O=A%NExpt)
+    Call Bcast(A%Qx,N_O=A%NDist)
+    Call Bcast(A%Qy,N_O=A%NDist)
+    Call Bcast(A%Qz,N_O=A%NDist)
+    Call Bcast(A%Co,N_O=A%NCoef)
+  ENDIF
+  IF(MyID == ROOT) THEN
+#endif
+ 
     Close(UNIT=Seq,STATUS='KEEP')
+#ifdef PARALLEL
+  ENDIF
+#endif
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_HGRho.')
   END SUBROUTINE Get_HGRho
-!========================================================================================
+!===============================================================================
 ! Write  the density to disk 
-!========================================================================================
+!===============================================================================
   SUBROUTINE Put_HGRho(A,Name,Args,SCFCycle)
     TYPE(HGRho)                      :: A
     TYPE(ARGMT)                      :: Args
@@ -1729,9 +1770,9 @@ MODULE InOut
     ELSE
        OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
     ENDIF
-!
+
 !   Write density to disk
-!
+
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) A%NExpt,A%NDist,A%NCoef
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%NQ%I(I)    ,I=1,A%NExpt)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%OffQ%I(I)  ,I=1,A%NExpt)
@@ -1742,31 +1783,33 @@ MODULE InOut
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qy%D(I)    ,I=1,A%NDist)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Qz%D(I)    ,I=1,A%NDist)
     WRITE(UNIT=Seq,Err=100,IOSTAT=IOS)(A%Co%D(I)    ,I=1,A%NCoef)
-!
+
     CLOSE(UNIT=Seq,STATUS='KEEP')
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_HGRho.')
   END SUBROUTINE Put_HGRho
-!========================================================================================
+!===============================================================================
 ! Get Cartesian multipoles
-!========================================================================================
+!===============================================================================
   SUBROUTINE Get_CMPoles(A,Tag_O)
     TYPE(CMPoles)                    :: A
     CHARACTER(LEN=*),OPTIONAL        :: Tag_O
+
     IF(.NOT.AllocQ(A%Alloc))CALL New_CMPoles(A)
+    ! Get will broadcast DPole and QPole automatically.
     CALL Get(A%DPole,'dipole',Tag_O=Tag_O)
     CALL Get(A%QPole,'quadrupole',Tag_O=Tag_O)
   END SUBROUTINE Get_CMPoles
-!========================================================================================
+!===============================================================================
 ! Put Cartesian multipoles
-!========================================================================================
+!===============================================================================
   SUBROUTINE Put_CMPoles(A,Tag_O)
     TYPE(CMPoles)                    :: A
     CHARACTER(LEN=*),OPTIONAL        :: Tag_O
     CALL Put(A%DPole,'dipole',Tag_O=Tag_O)
     CALL Put(A%QPole,'quadrupole',Tag_O=Tag_O)
   END SUBROUTINE Put_CMPoles
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !     Open an ASCII file   
 ! 
       SUBROUTINE OpenASCII(FileName,Unit,NewFile_O,OldFileQ_O,Rewind_O)
@@ -1775,18 +1818,18 @@ MODULE InOut
          LOGICAL, OPTIONAL,INTENT(IN) :: NewFile_O,OldFileQ_O,Rewind_O
          INTEGER                      :: IOS
          LOGICAL                      :: Opened, Exists
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Does the file exist?
-!
+
          INQUIRE(FILE=FileName,OPENED=Opened, &
                  EXIST=Exists,ERR=11,IOSTAT=IOS)
          IF(PRESENT(OldFileQ_O))THEN
              IF(OldFileQ_O.AND.(.NOT.Exists)) &
                 CALL HALT(' File '//TRIM(FileName)//' does not exist! ')
           ENDIF
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Open a new file
-!
+
          IF(PRESENT(NewFile_O))THEN
             IF(NewFile_O.AND.Exists)THEN
 !              Open replace if already exists
@@ -1799,9 +1842,9 @@ MODULE InOut
                     ACCESS='SEQUENTIAL',FORM='FORMATTED', &
                     ERR=11,IOSTAT=IOS,STATUS='NEW')         
             ENDIF
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Open existing file and position at the top
-!
+
          ELSEIF(PRESENT(Rewind_O))THEN
             IF(Rewind_O.AND.Exists)THEN
                OPEN(UNIT=Unit,FILE=FileName, &
@@ -1810,16 +1853,16 @@ MODULE InOut
             ELSE
                CALL Halt(' Logic error 2 in OpenASCII ')
             ENDIF
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Open existing file and position at the bottom (default)
-!
+
          ELSEIF(Exists.AND.(.NOT.Opened))THEN
             OPEN(UNIT=Unit,FILE=FileName, &
                  ACCESS='SEQUENTIAL', FORM='FORMATTED', &
                  POSITION='APPEND',ERR=11,IOSTAT=IOS,STATUS='OLD')
-!------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !        Create a new file and open it
-!
+
          ELSEIF(Exists.AND.Opened)THEN
            CALL Warn(' File '//TRIM(FileName)//' already open')
          ELSE
@@ -1832,7 +1875,7 @@ MODULE InOut
                    ' on file '//TRIM(FileName)//'.') 
       END SUBROUTINE OpenASCII
 
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_CHR_VECT(A,VarName,Tag_O)
        INTEGER                              :: I,N,II,NN
        TYPE(CHR_VECT) :: A
@@ -1859,7 +1902,7 @@ MODULE InOut
 #endif
     END SUBROUTINE Put_CHR_VECT
 
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
     SUBROUTINE Get_CHR_VECT(A,VarName,Tag_O)
        INTEGER                                 :: I,N,II,NN
        TYPE(CHR_VECT),           INTENT(INOUT) :: A
@@ -1886,7 +1929,7 @@ MODULE InOut
        STOP 'ERROR : Bcast in Get_Chr_vect (InOut.F90) not supported!'
 #endif 
        END SUBROUTINE Get_CHR_VECT
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
     SUBROUTINE Put_LOG_VECT(A,VarName,NN,Tag_O)
        INTEGER                              :: I,N,II,NN
        LOGICAL,DIMENSION(1:NN),  INTENT(IN) :: A
@@ -1909,7 +1952,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_LOG_VECT
-!--------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
     SUBROUTINE Get_LOG_VECT(A,VarName,NN,Tag_O)
        INTEGER                              :: I,NN
        LOGICAL,DIMENSION(1:NN),INTENT(INOUT) :: A
@@ -1935,7 +1978,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Get_LOG_VECT
-!------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 
 
 END MODULE
