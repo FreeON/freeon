@@ -76,7 +76,6 @@ PROGRAM QCTC
   CALL Put(E_Nuc_Tot,'enn+ene',Tag_O=SCFCycl)
 !---------------------------------------------------------------
 ! Printing
-  CALL PPrint(E_Nuc_Tot,'NukE['//TRIM(SCFCycl)//']')
   IF(Args%C%C(2)=='Core')THEN
      CALL PChkSum(T1,'V',Prog)
      CALL PPrint( T1,'V')
