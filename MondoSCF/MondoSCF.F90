@@ -100,14 +100,20 @@ WRITE(*,*)' INITed '
 #endif
      DO ISet=1,Ctrl%NSet
         Ctrl%Current=(/0,ISet,1/)
+#ifdef MMech
+! Ooopss... KN forgot to add an ifdef here.  Also, should get hidden in OneSCF probably
         IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
+#endif
         CALL OneSCF(Ctrl)
      ENDDO
      IF(Ctrl%NGeom>1)THEN
 !       Go over additional geometries at last basis set
         DO IGeo=2,Ctrl%NGeom
            Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+#ifdef MMech
+! Ooopss... KN forgot to add an ifdef here.  Also, should get hidden in OneSCF probably
            IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms
+#endif
            CALL OneSCF(Ctrl)
         ENDDO
      ENDIF
