@@ -14,17 +14,17 @@ links:
 	ln -s ../../RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -o prl2.ps Response2
+	dvips -o prl2.ps Response3
 
 dvi:	latex
-	xdvi -s 2 Response2
+	xdvi -s 2 Response3
 
 latex:
-	latex Response2
-	bibtex Response2
-	latex Response2
-	bibtex Response2
-	latex Response2
+	latex Response3
+	bibtex Response3
+	latex Response3
+	bibtex Response3
+	latex Response3
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~

@@ -36,7 +36,9 @@
 
 %\preprint{APS/123-QED}
 
-\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
+\title{The linear scaling self-consistent perturbed projection method 
+for high order response}
+%\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
 
 \author{Val\'ery Weber}
 % \altaffiliation[Also at ]{Physics Department, XYZ University.}%Lines break automatically or can be forced with \\
@@ -52,12 +54,18 @@ Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexi
              %  but any date may be explicitly specified
 
 \begin{abstract}
- Linear scaling self consisitent sheme for high order response peoperties
- is proposed. The sheme solves the coupled perturbed self consitent field 
- equation by the perturbed projection method. It is applied to the computation
- of the first and second electric hyperpolarizabilities of three
- dimensional water clusters. Linear scaling and locality of the response
- densities are demonstrated. 
+A first principles linear scaling electronic structure scheme for high order 
+response properties is proposed. The sheme solves the coupled perturbed self 
+consistent field equation by the perturbed projection method. It is applied to 
+the computation of the first and second electric hyperpolarizabilities of three
+dimensional water clusters. Linear scaling and locality of the response
+densities are demonstrated. 
+% Linear scaling self consisitent sheme for high order response peoperties
+% is proposed. The sheme solves the coupled perturbed self consitent field 
+% equation by the perturbed projection method. It is applied to the computation
+% of the first and second electric hyperpolarizabilities of three
+% dimensional water clusters. Linear scaling and locality of the response
+% densities are demonstrated. 
 \end{abstract}
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
@@ -68,102 +76,117 @@ Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexi
 
 
 \section{Introduction}
- Material properties calculated
- from the first principle of physics was for long time
- limitied to small systems. During the last 10 years a
- new paradigm has evolved in computational material science, where
+ Electronic structure theory based on the first principle 
+ of physics was for long time limitied to the study of small 
+ systems with only a small number of nonequivalent atoms. 
+ Despite a tremendous increase in computational power
+ of digital computers this would still be a severe limitation
+ if not more efficient theoretical and computational
+ tools were developed. During the last 10 years a new paradigm 
+ has evolved in electronic structure theory, where
  no single part of a calculation is allowed to increase in 
  computational complexity more than linearly with the number
- of atoms. For small systems this is usually inefficient
- approach, but for large systems consisting of millions
- of atoms linear scaling theory will have major future impact
- bridging the gap between material science, chemistry and biology.
- So far, most attentions in linear scaling electronic structure
- theory has been focused on total energy calculations and little
- attention has been devoted to the problem of materials response 
- properties such as magnetic and electric responses or nuclear
- displacement. 
+ of atoms. 
 
-
-
-
- Algorithms for linear scaling self-consistent-field (SCF) theory 
- exploit the quantum locality of non-metallic systems, manifested
- in the approximate exponential decay of the density matrix 
+ Algorithms in linear scaling self-consistent-field (SCF) theory 
+ exploit the quantum locality (or nearsightedness) of non-metallic systems, 
+ manifested in the approximate exponential decay of the density matrix 
  with atom-atom separation, through the effective use of sparse 
- matrix methods. This quantum locality is possible
- to extent to linear response 
- properties. In early studies linear scaling calculation of
- response propertie was demonstrated for one 
+ matrix methods. For small systems this is usually an inefficient
+ approach, but for large systems consisting of millions
+ of atoms it will have a major future impact, bridging the gap
+ between material science, chemistry and biology. So far, most 
+ attentions in linear scaling electronic structure
+ theory has been focused on total energy calculations and little
+ attention has been devoted to the problem of materials response
+ properties, such as magnetic and electric responses or nuclear
+ displacement. However, the locality principle is extandable
+ also to response properties. In previous studies linear scaling 
+ for the calculation of response propertie was demonstrated for one
  dimensional linear chain systems (CHECK IT)
- \cite{Ochsenfeld_1997,Ochsenfeld_1998,chintoc}.
+ \cite{Ochsenfeld_1997,Ochsenfeld_1998,chintoc}. Recently
+ a perturbed projection algorithm was proposed for low order
+ response properties for which linear scaling was demonstrated
+ also for three dimensional systems \cite{Weber_Niklasson_Challacombe_2004}.
 
+ In the calculation of materials response properties within 
+ Hartree-Fock or density functional theory the electronic
+ response is given from self-consistent solutions of both
+ the ground state density and its perturbative response functions,
+ refered to as the solutions to the coupled perturbed self consistent 
+ field (CPSCF) equations.
+ Standard non-linear scaling approaches to solutions of the CPSCF equations 
+ \cite{Pople_1979,Sekino_1986,Dupuis_1991} do not admit full exploitation 
+ of locality and sparse matrix algebra, as they are based on perturbation 
+ of the wave functions, requiring a solution of the eigenvalue problem
+ that scales as ${\cal O}(N^3)$ and with transformation of two-electron
+ integrals that typically scales as ${\cal O}(N^5)$ with system size.
+ These problems are avoided in a density matrix approach, where both
+ the density matrix and its derivatives are calculated directly.
+ A few linear scaling response schemes have been proposed.
+ Ochsenfeld and Head-Gordon developed a scheme based on the
+ Li-Nunes-Vanderbilt density matrix functional \cite{Ochsenfeld_1997}
+ and later Larsen {\em et al.} \cite{Helgaker_2001} proposed iterative 
+ solutions to the CPSCF equations based on unitary operations
+ invovling matrix exponentials. In both of these approaches, a linear 
+ system of equations containing commutation relations must be solved.
+ Another very interesting approach was demonstrated by Chintoc, who
+ derived the frequency response of one dimensional molecular chains
+ by calculating the time evolution of the density matrix from
+ the quantum-Liouville equation.
 
- In non-linear scaling standard approaches to the CPSCF equations 
- \cite{Pople_1979,Sekino_1986,Dupuis_1991} do not admit exploitation 
- of this locality, as they are based on perturbation of the wave
- function, requiring ${\cal O}(N^3)$ eigensolution 
- and typically ${\cal O}(N^5)$ transformation of two-electron 
- integrals into the eigenbasis. Avoiding both 
- eigensolution and integral transformation, Ochsenfeld and Head-Gordon
- \cite{Ochsenfeld_1997} and later Larsen {\em et al.}
- \cite{Helgaker_2001} proposed iterative solutions to the 
- CPSCF equations involving purely non-orthogonal representations.  
- In both of these approaches, a linear system of equations 
- containing commutation relations must be solved.
-
-
- Recently, linear scaling {\em ab initio} calculations were shown
- for the first electric polarizability of three-dimensional water
- clusters \cite{Weber_Niklasson_Challacombe_2004}.
-
+ Our approach to linear scaling response theory is quite different 
+ from previous attempts. It is based on the perturbed projection
+ method in density matrix perturbation theory, recently developed
+ by the authors \cite{Niklasson04,Weber04}. With this theory it
+ was possible to demonstrate efficient linear scaling {\em ab initio}
+ computations for the first electric polarizability of three-dimensional 
+ water clusters.
 
  In this article, we present a linear scaling self consisitent sheme
- for high order response peoperties up fourth order in energy.
- First we give a general description for the computation of 
- response properties through the solution of the CPSCF equations.
- Then we describe the perturbed projection approach and present
- an algorithm for the density matrix derivatives up to third order.
+ for higher order response peoperties up fourth order in energy.
+ First we give a general description through the solution of the CPSCF equations.
+ Then we describe the perturbed projection approach for the calculation
+ of the density matrix derivatives and present
+ an algorithm for derivatives up to third order.
  Thereafter, we derive a density matrix analogy to Wigner's 2n+1
- rule for nonorthogonal representations. We also briefly discuse
- self concistent accelaration of the CPSCF equations. In the next section,
+ rule for nonorthogonal representations. We also briefly discuss the
+ self concistent accelaration technique by Weber and ... . In the next section,
  we first show the saturation of the hyperpolarizabilities up to fourth order
  for a series of 1D chain of water molecules. Thereafter, we demonstate
  linear scaling computation of the higher order electric response properties
  for 3D water clusters.
 
 
+
 \section{CPSCF equations}
- The coupled perturbed self concistent field equations occur in Hartree-Fock
- and density functional theory for the computation of material response
- properties. Here, we discuss the CPSCF equation in the framework of
- HF theory, however an extension to DFT is straightforward.
+The coupled perturbed self concistent field equations occur in Hartree-Fock
+and density functional theory for the computation of material response
+properties. Here, we discuss the CPSCF equation in the framework of
+HF theory, however an extension to DFT is straightforward.
 
 
- The following schematic algorithm is a higher order generalization of the
- SC scheme for the solution of the CPSCF equations descibe in \cite{SV} 
- based on perturbed pronjection:
- \begin{subequations}
-   \begin{eqnarray}
-     &&  F^{ab\ldots}_{n}=
-         \mu_a+J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild} \\
-     && \displaystyle\widetilde{F}^{ab\ldots}_{n}=
-         \sum_{k=n-m}^{n}c_k F^{ab\ldots}_{k} \label{DDIIS} \\
-     && \displaystyle\mathcal{D}^{ab\ldots}_{n+1}=
-	 \frac{\partial^N}{\partial\mathcal{E}^a \partial\mathcal{E}^b\ldots}
-	 \theta(\tilde{\mu}I-(\mathcal{F}^{0}
-	 +\mathcal{E}^{a}\widetilde{\mathcal{F}}^{a}_n
-	 +\mathcal{E}^{b}\widetilde{\mathcal{F}}^{b}_n+\ldots))
-	 \bigg|_{\mathcal{E}=0} \label{DDeriv}
+The following schematic algorithm is a higher order generalization of the
+SC scheme for the solution of the CPSCF equations descibe in \cite{SV} 
+based on perturbed pronjection:
+\begin{subequations}
+\begin{eqnarray}
+&&  F^{ab\ldots}_{n}=\mu_a+J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild} \\
+&& \displaystyle\widetilde{F}^{ab\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{ab\ldots}_{k} \label{DDIIS} \\
+&& \displaystyle\mathcal{D}^{ab\ldots}_{n+1}=
+  \frac{\partial^N}{\partial\mathcal{E}^a \partial\mathcal{E}^b\ldots}
+     \theta(\tilde{\mu}I-(\mathcal{F}^{0}
+     +\mathcal{E}^{a}\widetilde{\mathcal{F}}^{a}_n
+     +\mathcal{E}^{b}\widetilde{\mathcal{F}}^{b}_n+\ldots))
+     \bigg|_{\mathcal{E}=0} \label{DDeriv}
    \end{eqnarray} 
- \end{subequations}
+\end{subequations}
 
 The scheme solves for the self concistent density response, \\
 first... Linear scaling construction of the Fockian expansion follows in
 the same way as the O(N) construction of the Fockian cite{Matt...}\\
 second... DDIIS optimizing scheme based on DIIS.\\
 third... density matrix derivative through perturbation projection.\\
-
 
 
 %with starting point $D^a_0=0$. In step~(\ref{FockBuild}),  $F^a_n$ is constructed in 
@@ -248,6 +271,7 @@ or
 \end{verbatim}
 \end{figure}
 
+
 \subsubsection{Higher order response and Wigner's 2n+1 rule }
 Higher order energy derivatives can be calculated from the lower
 order response. Wigner's 2n+1 rule gives a general way to calculate the 2n+1
@@ -262,6 +286,15 @@ To demonstrate the ability, accuracy and numerical stability we present
 figures ... show the saturation ....
 table shows comparison to 2n+1 and n+1.
 10-th order (at least +2n+1 til 21-th order in E (for Anders)).
+\subsection{Linear scaling: 3D water clusters}
+3D water clusters show an early onset of linear scaling for accrurate
+basis set and low tresholds and higher order response.
+
+The density responses matrices show an exponential decay as a function
+of the internuclear distance, however the decay is slower and the locality
+becomes lower for the higher order response functions.
+Therefor, we find a later onset for the linear scaling for the higher order
+responses.
 
 
 
@@ -480,7 +513,21 @@ responses.
 
 \begin{figure}[t]
   \caption{\protect
-    Total CPU time of the fifth second order CPSCF iteration for
+    Total WALL time of the fifth first order CPSCF iteration for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{Alpha_scaling}
+  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
+                        {Alpha_h2o3D_6-31G_6-31Gss_G_T_t}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    Total WALL time of the fifth second order CPSCF iteration for
     the water cluster sequence with the 6-31G and 6-31G** 
     basis sets and the {\tt GOOD} and {\tt TIGHT} 
     numerical thresholds (see text) controlling numerical
@@ -494,7 +541,7 @@ responses.
 
 \begin{figure}[t]
   \caption{\protect
-    Total CPU time of the fifth third order CPSCF iteration for
+    Total WALL time of the fifth third order CPSCF iteration for
     the water cluster sequence with the 6-31G and 6-31G** 
     basis sets and the {\tt GOOD} and {\tt TIGHT} 
     numerical thresholds (see text) controlling numerical
@@ -503,6 +550,20 @@ responses.
   }\label{Beta_scaling}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
                         {Gamma_h2o3D_6-31G_6-31Gss_G_T_t}}
+\end{figure}
+
+
+
+\begin{figure}[t]
+  \caption{\protect
+    Total WALL time of the fifth first, second and third order
+    CPSCF iteration for the water cluster sequence with the 6-31G
+    basis set and the {\tt GOOD} numerical threshold (see text) 
+    controlling numerical precision of the result. The lines
+    are fits to the last three and four points, respectively.
+  }\label{Alpha_scaling}
+  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
+                        {Mix_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
 
 
