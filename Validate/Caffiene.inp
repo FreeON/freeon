@@ -12,7 +12,7 @@ Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,DiagHess)
 
 Guess=SuperPos
 SCFMethod=(RH,RH)
-BasisSets=(STO-3G,6-31G**)
+BasisSets=(STO-3G-split,6-31G**-split)
 ModelChem=(HF,BLYPxc)
 Accuracy=(Loose,Loose)
 

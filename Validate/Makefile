@@ -58,28 +58,27 @@ big:
 pbs:
 	chmod u+x sub_pbs
 	./sub_pbs Water         1
-	./sub_pbs NH3           1
 	./sub_pbs Biotin        1
 	./sub_pbs Graphite      1
 	./sub_pbs Diamond       1
-	./sub_pbs Na2Cl2        1
-	./sub_pbs PeroxideCycle 1
 	./sub_pbs Histidine     1
 	./sub_pbs Caffiene      1
 	./sub_pbs BetaCarotene  1
 	./sub_pbs Chlorophyll   1
 	./sub_pbs Vancomycin    1
+	./sub_pbs ureaPBCVopt   1
+	./sub_pbs MDSteam_10    1
+	./sub_pbs waterPBCopt   1
+#	./sub_pbs PeroxideCycle 1
 #
 #       Submit parallel validation suite to pbs queing system 
 #
 pbs_parallel:
 	chmod u+x sub_pbs
 	./sub_pbs Water         2
-#	./sub_pbs NH3           6 # Unless scratch is globally available, this will fail
 	./sub_pbs Biotin        4
 	./sub_pbs Graphite      2
 	./sub_pbs Diamond       4
-	./sub_pbs Na2Cl2        2
 	./sub_pbs PeroxideCycle 2
 	./sub_pbs Histidine     4
 	./sub_pbs Caffiene      4

@@ -20,7 +20,7 @@ DIISDamp=0.5
 Guess=SuperPos
 
 SCFMethod=(RH)
-BasisSets=(STO-3G)
+BasisSets=(STO-3G-SPLIT)
 ModelChem=(HF) 
 Accuracy=(Loose)
 

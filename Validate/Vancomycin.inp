@@ -12,9 +12,10 @@ DebugAll=(MinDebug,CheckSums)
 
 Guess=SuperPos
 SCFMethod=(TRS4)
-BasisSets=(STO-3G)
+BasisSets=(STO-3G-SPLIT)
 ModelChem=(B3LYP/VWN5)
 Accuracy =(Loose)
+SCFConvergences=(DIIS)
 
 MPIInvoke="mpirun"
 MPIProcessors=8

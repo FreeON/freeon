@@ -12,7 +12,7 @@ DebugAll =(MinDebug,CheckSums)
 
 Guess=SuperPos
 SCFMethod=(TC2,TC2)
-BasisSets=(STO-2G,3-21G)
+BasisSets=(STO-2G-SPLIT,3-21G-SPLIT)
 ModelChem=(HF,PBE0)
 Accuracy =(Loose,Good)
 

@@ -12,7 +12,7 @@ DebugAll=(MinDebug,CheckSums)
 DIISDamp=0.3
 Guess=SuperPos
 SCFMethod=(RH,TRS4)
-BasisSets=(STO-3G,3-21G)
+BasisSets=(STO-3G-SPLIT,3-21G-SPLIT)
 ModelChem=(HF,B3LYP/VWN5)
 Accuracy=(Loose,Good)
 

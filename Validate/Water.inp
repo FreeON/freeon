@@ -20,7 +20,7 @@ DebugAll =(MinDebug,CheckSums)
 
 Guess=Core
 SCFMethod=(RH,RH)
-BasisSets=(STO-2G,STO-3G)
+BasisSets=(STO-2G-SPLIT,STO-3G)
 ModelChem=(HF,BLYPxc)
 Accuracy =(Loose,Tight)
 
