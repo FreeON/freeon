@@ -66,7 +66,7 @@ PROGRAM P2Use
 !   Check for the correct elctron count
     TrP=Trace(P)
     IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
-       CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar))
+       CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
 !   IO for the orthogonal P 
     CALL Put(P,TrixFile('OrthoD',Args,0)) 
     CALL PChkSum(P,'OrthoP['//TRIM(Cycl)//']',Prog)

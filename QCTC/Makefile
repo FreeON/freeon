@@ -18,7 +18,7 @@ clean:	CQCTC
 purge:	CMD CQCTC 
 
 MD:	
-	make -i -C VMD
+	$(MAKE) -i -C VMD
 
 QCTC:	$(JObjs)
 	$(LD) $(LDFLAGS) QCTC $(JObjs) $(LibOpts) $(F90_LIBRARIES) -lMcMurchieDavidson 
@@ -32,7 +32,7 @@ CQCTC:
 	ls 
 
 CMD:	
-	make -i -C VMD clean
+	$(MAKE) -i -C VMD clean
 
 
 MakeDJ.o: 	JBlok.o MMoments.o MultipoleLib.o $(MONDO_HOME)/Libs/libMondoMods.a

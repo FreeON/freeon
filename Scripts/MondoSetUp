@@ -11,23 +11,23 @@ setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_HOME}/Exec
 #
 # make all of MondoSCF
 #
-alias ma  make -C ${MONDO_HOME} all 
-#
+alias ma  ${MAKE} -C ${MONDO_HOME} all 
+# 
 # clean all source files
 #
-alias mc  make -C ${MONDO_HOME} clean
+alias mc  ${MAKE} -C ${MONDO_HOME} clean
 #
 # clean source, scratch and work directories
 #
-alias mp  make -C ${MONDO_HOME} purge
+alias mp  ${MAKE} -C ${MONDO_HOME} purge
 #
 # make a date-tagged backup
 #
-alias mb  make -C ${MONDO_HOME} backup
+alias mb  ${MAKE} -C ${MONDO_HOME} backup
 #
 # remake a source directory as given in the main Makefile
 #
-alias mk  make -C ${MONDO_HOME} $1
+alias mk  ${MAKE} -C ${MONDO_HOME} $1
 #
 # goto shortcuts
 #
@@ -43,6 +43,7 @@ alias gq    'cd ${MONDO_HOME}/QCTC;      ls -l; pwd'
 alias go    'cd ${MONDO_HOME}/ONX;       ls -l; pwd'
 alias g1    'cd ${MONDO_HOME}/OneE;      ls -l; pwd'
 alias gx    'cd ${MONDO_HOME}/XForm;     ls -l; pwd'
+alias gd    'cd ${MONDO_DGEMMS};         ls -l; pwd'
 #
 #
 #
@@ -53,23 +54,47 @@ set MACH_TYP = `/bin/uname -m`
 rm -f ${MONDO_HOME}/Includes/CompilerSpecifics
 
 if ( "$PLATFORM" == "IntelLinux.NAG" ) then
+#
      setenv MONDO_COMPILER  ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.NAG 
+#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
 else if ( "$PLATFORM" == "IntelLinux.LAHEY" ) then
+#
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.LAHEY
+#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
 else if ( "$PLATFORM" == "IntelLinux.PG" ) then
+#
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.PG
+#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
 else if ( "$PLATFORM" == "IntelLinux.ABSOFT" ) then
+#
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IntelLinux.ABSOFT
+#
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
+else if ( "$PLATFORM" == "AMDLinux.PG" ) then
+#
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AMDLinux.PG
+#
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/TBird/PHiPAC_dgemm/src 
+#
 else if ( "$PLATFORM" == "IBMAIX.XLF" ) then
+#
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.IBMAIX.XLF
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/XLF/PHiPAC_dgemm/src 
+#
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
 else if ( "$PLATFORM" == "SGIIrix.MIPS" ) then
-     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.SGIrix.MIPS
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/MIPS/PHiPAC_dgemm/src 
+#
+     setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.SGIIrix.MIPS
+#
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+#
 endif
 
 
