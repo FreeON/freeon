@@ -1502,7 +1502,7 @@ CONTAINS
        CALL Halt('MixMat missing from the CALL of InternalToCart.')
      ENDIF
      DoRepeat=.FALSE.
-     RepMax=10
+     RepMax=5 
      !
      ! Auxiliary arrays
      !
@@ -1591,6 +1591,7 @@ CONTAINS
            IntCDispl%D=VectIntAux%D
          ENDIF
          !
+         CALL CutOffDispl(IntCDispl%D,IntCs,1.D-2,1.D-2)
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
          !
          ! Check convergence on constraints
@@ -1668,7 +1669,8 @@ CONTAINS
              WRITE(Out,*) 'Rescaling and Repeating back-transformation'
            ENDIF
            IF(IRep==RepMax) THEN
-             CALL Halt('Iterative backtransformation has not converged.')
+             CALL Warn('Iterative backtransformation has not converged.')
+             EXIT
            ENDIF
            !
            VectIntAux%D=VectIntReq%D-ValSt%D  
