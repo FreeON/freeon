@@ -51,7 +51,8 @@ rmLegacy:
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
 	rm -rf Inpts
-
+	rm -rf Scratch
+	rm -rf Exec
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
