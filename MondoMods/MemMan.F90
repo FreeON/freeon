@@ -15,6 +15,9 @@ MODULE MemMan
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
+#ifdef MMech
+                       New_INTC,     New_BMATR, &
+#endif
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
@@ -31,6 +34,9 @@ MODULE MemMan
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
+#ifdef MMech
+                       Delete_INTC,     Delete_BMATR, &
+#endif
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
@@ -234,8 +240,39 @@ MODULE MemMan
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_CHR_VECT
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!     
 !
+      SUBROUTINE New_INTC(A,N,M_O)
+         TYPE(INTC),      INTENT(OUT) :: A
+         INTEGER,         INTENT(IN)  :: N
+         INTEGER,OPTIONAL,INTENT(IN)  :: M_O
+         INTEGER                      :: M
+         CALL AllocChk(A%Alloc)
+         M=1; IF(PRESENT(M_O))M=M_O
+         ALLOCATE(A%Def(M:N),STAT=MemStatus)
+         ALLOCATE(A%Atoms(M:N,1:4),STAT=MemStatus)
+         ALLOCATE(A%Value(M:N),STAT=MemStatus)
+         ALLOCATE(A%Constraint(M:N),STAT=MemStatus)
+         CALL IncMem(MemStatus,0,0)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_INTC
+!     
+!------------------------------------------------------
+!     
+      SUBROUTINE New_BMATR(A,N,M_O)
+         TYPE(BMATR),     INTENT(OUT) :: A
+         INTEGER,         INTENT(IN)  :: N
+         INTEGER,OPTIONAL,INTENT(IN)  :: M_O
+         INTEGER                      :: M
+         CALL AllocChk(A%Alloc)
+         M=1; IF(PRESENT(M_O))M=M_O
+         ALLOCATE(A%IB(M:N,1:12),STAT=MemStatus)
+         ALLOCATE(A%B(M:N,1:12),STAT=MemStatus)
+         CALL IncMem(MemStatus,0,0)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_BMATR
+!     
+!-----------------------------------------------------
+!     
       SUBROUTINE New_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
@@ -254,7 +291,6 @@ MODULE MemMan
       END SUBROUTINE New_CRDS
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
-!
       SUBROUTINE New_BCSR(A,N_O,OnAll_O)
          TYPE(BCSR),INTENT(INOUT)             :: A
          INTEGER,OPTIONAL,DIMENSION(3)        :: N_O
@@ -560,7 +596,27 @@ MODULE MemMan
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CHR_VECT
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      SUBROUTINE Delete_INTC(A)
+         TYPE(INTC)     :: A
+         INTEGER        :: MemStatus
+         DEALLOCATE(A%Def,STAT=MemStatus)
+         DEALLOCATE(A%Atoms,STAT=MemStatus)
+         DEALLOCATE(A%Value,STAT=MemStatus)
+         DEALLOCATE(A%Constraint,STAT=MemStatus)
+         CALL DecMem(MemStatus,0,0)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_INTC
 !     
+      SUBROUTINE Delete_BMATR(A)
+         TYPE(BMATR)     :: A
+         INTEGER        :: MemStatus
+         DEALLOCATE(A%IB,STAT=MemStatus)
+         DEALLOCATE(A%B,STAT=MemStatus)
+         CALL DecMem(MemStatus,0,0)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_BMATR
+!
+!------------------------------------------------------
 !
       SUBROUTINE Delete_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
