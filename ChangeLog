@@ -1,3 +1,38 @@
+2003-10-28 11:56  mchalla
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: [no log message]
+
+2003-10-28 09:59  vweber
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: Modified the input ouput to
+	the subroutine.
+
+2003-10-27 11:01  mchalla
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: Not perfect, but the right
+	numbers?
+
+2003-10-24 16:14  mchalla
+
+	* TwoE/: Int1111.F90, Int1113.F90, Int1131.F90, Int1133.F90,
+	Int1311.F90, Int1313.F90, Int1331.F90, Int1333.F90, Int3111.F90,
+	Int3113.F90, Int3131.F90, Int3133.F90, Int3311.F90, Int3313.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: Integrals are no longer
+	resummed.
+
+2003-10-24 12:51  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-10-24 12:49  mchalla
 
 	* TwoE/: HRR.Inc, HRR.m, HRR.nb, Int1111.F90, Int1113.F90,
