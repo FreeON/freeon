@@ -46,7 +46,7 @@ is extended to the computation of higher order static response properties.
 Although generally applicable, perturbed projection is developed here 
 in the context of the self-consistent first and second electric hyperpolarizabilities 
 of water networks at the Hartree-Fock level of theory. 
-Non-orthogonal, density matrix analogues of Wigner's $2n+1$ rule valid for one-electron perturbations 
+Non-orthogonal, density matrix analogues of Wigner's $2n+1$ rule valid for linear one-electron perturbations 
 are given up to fourth order.  Linear scaling and locality of the higher order response densities under perturbation 
 by a global electric field are demonstrated for three dimensional water clusters.  
 \end{abstract}
@@ -160,10 +160,10 @@ unitary operations and approximations to the matrix exponential.    In both of t
 a linear system of equations containing commutation relations is obtained, which {\em implicitly}
 determines the response function.  However, the method of solution for these equations
 is not discussed, and computational results are not presented.  Recently though, 
-with an apparent reformulation of Ref.~[\onlinecite{Ochsenfeld97}],
+with an apparent reformulation of the commutation relations presented in Ref.~[\onlinecite{Ochsenfeld97}],
 Ochsenfeld, Kussmann and Koziol~\cite{COchsenfeld04} claim linear scaling computation
 of NMR chemical shifts for one-dimensional alcanes at the GIAO-HF/6-31G* level of theory,
-but likewise provide no details on their method of solution.  Such commutation relations are 
+but likewise provide no details on their method of solution.  Such commutation relations 
 lead to equations of the Sylvester type and may be solved with a number of approaches \cite{JBrandts01}, 
 the particulars of which are of interest. 
 
@@ -183,7 +183,7 @@ and perform well for all occupation to state ratios.
 Perhaps most important to the current contribution, these methods converge rapidly to smooth, 
 monotone projectors.
 
-Prior to Ref.~[\onlinecite{COchsenfeld04}], Perturbed Projection demonstrated linear scaling in 
+Perturbed Projection has demonstrated linear scaling in 
 computation of the first electric polarizability for three-dimensional water clusters with the 
 Hartree-Fock model \cite{VWeber04}. Also, in a preceding paper, we outlined a non-orthogonal density matrix
 perturbation theory \cite{ANiklasson05a} for response to a change in basis (i.e.~as occurs in 
@@ -337,7 +337,8 @@ The derivative density matrices and derivative Fockians depend on
 each other implicitly, and must be solved for self-consistently
 via the CPSCF equations.
 The necessary and sufficient criteria for convergence of the 
-CPSCF equations involve generalized self-consistence conditions \cite{Furche_2001},
+CPSCF equations involve generalized self-consistence conditions 
+that obtain from perturbative expansion of the SCF commutation criteria \cite{Furche_2001},
 \begin{gather}
     [\F^{0} ,\D^{0}]=0,\label{eq:commutators1}\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\label{eq:commutators2}\\
@@ -345,21 +346,10 @@ CPSCF equations involve generalized self-consistence conditions \cite{Furche_200
   \begin{split}
     [\F^{abc},\D^{0}]&+[\F^{ab},\D^{c}]+[\F^{ac},\D^{b}]+[\F^{ab},\D^{c}]\\
     &+[\F^{a},\D^{bc}]+[\F^{b},\D^{ac}]+[\F^{c},\D^{ab}]\\
-    &+[\F^{0},\D^{abc}]=0,\label{eq:commutators4}\\
+    &+[\F^{0},\D^{abc}]=0, \label{eq:commutators4}\\
   \end{split}
 \end{gather}
-%\begin{subequations}\label{eq:commutators}
-%  \begin{gather}
-%    [\F^{0} ,\D^{0}]=0,\\
-%    [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\\
-%    [\F^{ab},\D^{0}]+\frac{1}{2}[\F^{a},\D^{b}]+\frac{1}{2}[\F^{b},\D^{a}]+[\F^{0},\D^{ab}]=0,\\
-%    [\F^{abc},\D^{0}]
-%+\frac{1}{3}[\F^{ab},\D^{c}]+\frac{1}{3}[\F^{ac},\D^{b}]+\frac{1}{3}[\F^{ab},\D^{c}]
-%+\frac{1}{3}[\F^{a},\D^{bc}]+\frac{1}{3}[\F^{b},\D^{ac}]+\frac{1}{3}[\F^{c},\D^{ab}]
-%+[\F^{0},\D^{abc}]=0,\\
-%  \end{gather}
-%\end{subequations}
-in addition to generalized idempotency-like constraints \cite{Furche_2001},
+in addition to the idempotency constraints \cite{Furche_2001},
 \begin{gather}
   \D^{0} =\D^{0} \D^{0},\label{eq:anticommutators1}\\
   \D^{a} =\{\D^{a},\D^{0}\},\label{eq:anticommutators2}\\
@@ -369,16 +359,6 @@ in addition to generalized idempotency-like constraints \cite{Furche_2001},
     &+\{\D^{bc},\D^{a}\}\label{eq:anticommutators4},
   \end{split}
 \end{gather}
-%\begin{subequations}\label{eq:anticommutators}
-%  \begin{gather}
-%    \D^{0} =\D^{0} \D^{0},\\
-%    \D^{a} =\{\D^{a},\D^{0}\},\\
-%    \D^{ab}=\{\D^{ab},\D^{0}\}+\frac{1}{2}\{\D^{a},\D^{b}\}\\
-%    \D^{abc}=\{\D^{abc},\D_0\}+
-%        \frac{1}{3}\left(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}
-%	                 +\{\D^{bc},\D^{a}\}\right),
-%  \end{gather}
-%\end{subequations}
 where the anti-commutator notation $\{A,B\} = AB+BA$ has been used.
 
 \section{Solving the higher order CPSCF equations with Perturbed Projection}
@@ -413,7 +393,9 @@ obtained directly through variation of the occupied subspace projector,
 \end{equation}
 which is accomplished via Perturbed Projection, a subset of the Niklasson and 
 Challacombe density matrix perturbation theory \cite{ANiklasson04} 
-cooresponding to solution of the CPSCF equations.
+corresponding to solution of the CPSCF equations.  However, in contrast
+to Ref.~[\onlinecite{ANiklasson04}], a Taylor series expansion is employed here,
+consistent with previous work on the polarization tensor.
 
 After a few CPSCF cycles, the approach to self-consistency may be accelerated with 
 Weber and Daul's DDIIS algorithm \cite{VWeber03}, 
@@ -428,14 +410,14 @@ DDIIS algorithm to acceleration of higher order CPSCF equations is developed fur
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
 appropriate to compute response properties.   In general, we can obtain an expectation value for properties that is 
 linear in the response functions through direct, order by order expansion of Eq.~(\ref{totalE}).  In the
-case of polarization, and other  properties that involve a one-electron perturbation $h^{(1)}$, 
-expresions for the expectation value reduce to  
+case of polarization, and other  properties that involve a linear one-electron perturbation $h^{(1)}$, 
+expressions for the total energy response reduce to  
 \begin{equation}
 %E^{ab\ldots c}\equiv
 %\frac{\partial^n E_{\rm tot}}{\partial \mathcal{E}^a\partial\mathcal{E}^b\cdots\partial\mathcal{E}^c}
 %     \bigg|_{\mathcal{E}=0}
 % = 2 Tr(D^{ab\ldots}\mu_c), \label{Np1Rule}
-E^{(\gamma+1)} = 2 Tr(D^{(\gamma)} h^{(1)}), \label{Np1Rule}
+E^{(\gamma+1)}_{\rm tot} = 2 Tr(D^{(\gamma)} h^{(1)}), \label{Np1Rule}
 \end{equation}
 consistent with Eqs.~\ref{pol}(a-c) for the (hyper)polarizabilities.
 
@@ -453,7 +435,7 @@ incurs a cost that is at best ${\cal O}(\sqrt{p})$ \cite{WLiang03,WLiang04}.  Po
 such as those based on the the Chebychev polynomials, may also be plagued by Gibbs oscillations \cite{AVoter96},
 which are high order ripples in the approximate $\theta$ due to incompleteness.
 Alternatively, recursive purification methods achieve high order representation in 
-${\cal O}( \log p )$ \cite{ANiklasson03}.  Also, purification methods (such as TC2 and TRS4) 
+${\cal O}( \log p )$ \cite{ANiklasson03}.  In addition, purification methods (such as TC2 and TRS4) 
 yield projectors that are smooth and strictly monotonic.
 
 Each Perturbed Projection sequence is based on a corresponding  purification scheme or generator, such as TC2 \cite{ANiklasson02A}.   
@@ -461,7 +443,7 @@ The Perturbed Projection sequence is obtained by collecting terms of the respons
 order upon perturbative expansion of its generator \cite{ANiklasson04}.
 Perturbed Projection provides explicit, recursive formulae 
 for the construction of response functions, retaining the convergence properties,  smoothness and 
-montonicity of the generating sequence.   These explicit formulae stand in contrast to methods where the 
+monotonicity of the generating sequence.   These explicit formulae stand in contrast to methods where the 
 density matrix derivatives are implicitly defined as solutions to equations of Sylvester type \cite{Ochsenfeld97,HLarsen01a,COchsenfeld04}.
 
 Sufficient to compute fourth order properties using the $2 n+1$ rule presented in Section \ref{Wigner2Np1}, 
@@ -574,14 +556,15 @@ A working equation is then obtained through the associated Euler-Lagrange equati
 
 Wigner's $2n+1$ rule, traditionally predicated on derivatives of the wavefunction,
 yields order $2n+1$ in the energy response from $n$-th order derivatives \cite{SKarna91,SEpstein74}.   
-A density matrix analogue of Wigner's $2n+1$ rule for a single one-electron perturbation
+A density matrix analogue of Wigner's $2n+1$ rule for a linear one-electron perturbation
 was given to third order by McWeeny \cite{RMcWeeny62} and up to to fourth order by Niklasson 
-and Challacombe \cite{ANiklasson04} in the orthogonal representation, suitable for perturbation 
-by a constant.  
+and Challacombe \cite{ANiklasson04} in the orthogonal representation, suitable for first order perturbation.
 
 In the framework of electric polarizabilities, we present non-orthogonal $2n+1$ rules 
-up to fourth order, which generalize to other one-electron perturbations.
-This new formulation includes mixed perturbations and accounts for self-consistency.
+up to fourth order in response of the total energy.  This new formulation includes mixed 
+perturbations, accounts for self-consistency and may be generalized to other linear one-electron 
+perturbations.  However,  this formulation may not be extended to  basis set
+dependent perturbations; that case is addressed by Ref.~[\onlinecite{ANiklasson05a}]
 
 The first and second order energy corrections to electric perturbations 
 are well known, corresponding simply to expectation
@@ -961,8 +944,8 @@ in computation of the Hessian matrix.
  performed on computing resources located at this facility.
 \end{acknowledgments}
 
-\bibliography{Response3}
-%\bibliography{mondo_new}
+%\bibliography{Response3}
+\bibliography{mondo_new}
 
 \commentoutB{
 
