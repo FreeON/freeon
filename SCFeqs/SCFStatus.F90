@@ -209,14 +209,19 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
-         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
 #ifdef MMech
+IF(HasMM()) THEN
+         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
                                     //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
                                     //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
-#else
-                                    //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot)) &
-#endif
                                     //', dD = '//TRIM(DblToShrtChar(DMax))
+ELSE
+#endif
+         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+                                    //', dD = '//TRIM(DblToShrtChar(DMax))
+#ifdef MMech
+ENDIF
+#endif
       ENDIF
 !     Add in DIIS error
       IF(DIISErr/=Zero)                                                     &
