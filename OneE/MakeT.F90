@@ -55,7 +55,7 @@ PROGRAM MakeT
 !---------------------------------------------- 
 ! Allocations 
 !
-  CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,0/))
+  CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(TK)
 #ifdef PERIODIC
 !-----------------------------------------------
@@ -100,7 +100,7 @@ PROGRAM MakeT
               ENDIF
            ENDDO
 #else
-           TK%MTrix%D(R:R+NN-1)=TBlok(BS,MD,Pair)
+           TK%MTrix%D(R:R+NN-1)=TBlok(AtA,AtB,BS,MD,Pair)
 #endif
            TK%ColPt%I(P)=AtB
            TK%BlkPt%I(P)=R

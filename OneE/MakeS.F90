@@ -20,6 +20,7 @@ PROGRAM MakeS
   USE LinAlg
   USE AtomPairs
   USE OverlapBlock
+  USE BraBloks
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -55,7 +56,7 @@ PROGRAM MakeS
 !---------------------------------------------- 
 ! Allocations 
 !
-  CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+  CALL NewBraBlok(BS)
   CALL New(S)
 #ifdef PERIODIC
 !-----------------------------------------------
@@ -95,12 +96,12 @@ PROGRAM MakeS
                         + (Pair%A(2)-Pair%B(2))**2 &
                         + (Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,MD,Pair)
+                 S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,Pair)
                  NotMakeBlock = .FALSE.
               ENDIF
            ENDDO
 #else
-           S%MTrix%D(R:R+NN-1)=SBlok(BS,MD,Pair)
+           S%MTrix%D(R:R+NN-1)=SBlok(BS,Pair)
 #endif
 
            S%ColPt%I(P)=AtB
@@ -132,7 +133,7 @@ PROGRAM MakeS
 ! Put S to disk
 !  
   CALL Filter(T1,S)
-  CALL Put(T1,TrixFile('S',Args),BlksName_O='nsi',Non0Name_O='nsm')
+  CALL Put(T1,TrixFile('S',Args))
 !-----------------------------------------------------------
 ! Printing
 !
@@ -146,7 +147,7 @@ PROGRAM MakeS
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
-  CALL Delete(MD)
+  CALL DeleteBraBlok()
   CALL ShutDown(Prog)
 !
 END PROGRAM MakeS

@@ -19,7 +19,8 @@ PROGRAM MakeRho
   USE Macros
   USE LinAlg
   USE AtomPairs
-  USE RhoBlok
+  USE BraBloks
+  USE RhoBlok  
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -53,7 +54,7 @@ PROGRAM MakeRho
 !----------------------------------------------
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  CALL NewBraKetBlok(BS)
+  CALL NewBraBlok(BS)
 !----------------------------------------------
 ! Set up the appropriate action
 !----------------------------------------------
@@ -117,10 +118,6 @@ PROGRAM MakeRho
 !    Add in the density for the nuclear centers
 !
      CALL AddNukes(GM,Rho)
-!---------------------------------------------------
-!    Calculate Integral estimates for Rho
-!
-     CALL RhoEst(Rho)
   ELSE
 !-----------------------------------------------------
 !    Initailize  NQ
@@ -205,7 +202,7 @@ PROGRAM MakeRho
               ENDDO
 #else
               NN = Pair%NA*Pair%NB
-              CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
+              CALL RhoBlk(AtA,AtB,BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
 #endif
            ENDIF
         ENDDO
@@ -214,10 +211,6 @@ PROGRAM MakeRho
 !    Add in the density for the nuclear centers
 !
      IF(iSwitch == 1) CALL AddNukes(GM,Rho)
-!---------------------------------------------------
-!    Calculate Integral estimates for Rho
-!
-     CALL RhoEst(Rho)
   ENDIF
 !------------------------------------------------------------
 ! Put Rho to disk
@@ -227,7 +220,8 @@ PROGRAM MakeRho
 ! Printing
 !
   CALL PChkSum(Rho,'Rho',Prog)
-  CALL PPrint(Rho,'Rho')
+!  PrintFlags%Fmt=DEBUG_MMASTYLE
+!  CALL PPrint(Rho,'Rho',Unit_O=6)
 !---------------------------------------------------
 ! Tidy up
 ! 
@@ -235,6 +229,7 @@ PROGRAM MakeRho
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(MD)
+  CALL DeleteBraBlok()
   CALL Delete_HGRho(Rho)
   CALL ShutDown(Prog)
 !

@@ -5,8 +5,8 @@ MODULE TBlock
   USE McMurchie
   USE AtomPairs
   IMPLICIT NONE
-CONTAINS
-  FUNCTION TBlok(BS,MD,Pair) RESULT(TVck)
+  CONTAINS
+  FUNCTION TBlok(AtA,AtB,BS,MD,Pair) RESULT(TVck)
     TYPE(BSET)                                :: BS
     TYPE(DBL_RNK4)                            :: MD
     TYPE(AtomPair)                            :: Pair
@@ -16,7 +16,7 @@ CONTAINS
 !
     REAL(DOUBLE),DIMENSION(0:BS%NASym,0:BS%NASym) :: TKx,TKy,TKz
 !
-    INTEGER                                   :: NBFA,NBFB,KA,KB,KK
+    INTEGER                                   :: NBFA,NBFB,KA,KB,KK,AtA,AtB
     REAL(DOUBLE)                              :: Ax,Ay,Az,Bx,By,Bz,AB2 
     REAL(DOUBLE)                              :: Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz,ZetaA,ZetaB,  &
                                                  EtaAB,EtaIn,ZAB,XiAB,ExpAB,Ov,PiE32,CA,CB,     &
@@ -68,8 +68,9 @@ CONTAINS
                 PBx=Px-Bx
                 PBy=Py-By
                 PBz=Pz-Bz               
+
                 CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB+1,EtaAB,MD%D, &
-                     PAx,PBx,PAy,PBy,PAz,PBz) 
+                            PAx,PBx,PAy,PBy,PAz,PBz) 
                 DO LA=0,MaxLA
                    DLA=DBLE(LA)
                    DO LB=0,MaxLB
@@ -103,10 +104,26 @@ CONTAINS
                       MA=BS%LyDex%I(LMNA)
                       NA=BS%LzDex%I(LMNA)
                       CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+
+!IF(AtA==1.AND.AtB==2.AND.CFA==1.AND.CFB==1)THEN
+!WRITE(*,*)' '
+!WRITE(*,*)' '
+!WRITE(*,*)' '
+!           WRITE(*,*)' CFA = ',CFA,' PFA = ',PFA,' CFB = ',CFB,' PFB = ',PFB
+!WRITE(*,*)LA,MA,NA,LB,MB,NB
+!WRITE(*,22)AtA,AtB,BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB),ZetaA,ZetaB,Pair%A,Pair%B
+!22 FORMAT('test[',I3,',',I3,']={ca->',F10.7,',cb->',F10.7,               &
+!                       ',za->',F10.7,',zb->',F10.7,               &
+!                       ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
+!                       ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
+
                       TBlkx = TKx(LA,LB)     *MD%D(2,MA,MB,0)*MD%D(3,NA,NB,0) 
                       TBlky = MD%D(1,LA,LB,0)*TKy(MA,MB)     *MD%D(3,NA,NB,0) 
                       TBlkz = MD%D(1,LA,LB,0)*MD%D(2,MA,MB,0)*TKz(NA,NB) 
                       TBlk(IA,IB)=TBlk(IA,IB)+Half*CA*CB*Ov*(TBlkx+TBlky+TBlkz)
+!WRITE(*,*)' T = ',Half*CA*CB*Ov,' Tz = ',TBlkz,' TBlk = ',TBlk(IA,IB)
+!ENDIF
+
                    ENDDO
                 ENDDO
              ENDDO

@@ -4,7 +4,7 @@ MODULE RhoBlok
   USE PrettyPrint
   USE McMurchie
   USE AtomPairs
-  USE BraKetBloks
+  USE BraBloks
   IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
@@ -82,10 +82,11 @@ CONTAINS
 !--------------------------------------------------------------
 ! Calculate the Primative Distributions Generated from atom A and B
 !--------------------------------------------------------------
-  SUBROUTINE RhoBlk(BS,MD,Dmat,Pair,First,Rho)
+  SUBROUTINE RhoBlk(AtA,AtB,BS,MD,Dmat,Pair,First,Rho)
     TYPE(BSET)                              :: BS
     TYPE(DBL_RNK4)                          :: MD
     TYPE(AtomPair)                          :: Pair
+    TYPE(PrimPair)                          :: Prim
     TYPE(HGRho)                             :: Rho
     REAL(DOUBLE)                            :: FacAtom
 !
@@ -96,11 +97,11 @@ CONTAINS
                                                IndexB,StartLB,StopLB,MaxLB, &
                                                IE,Endex,Qndex,Rndex,LMN,LMNA,LMNB, &
                                                IA,IB,LA,MA,NA,LB,MB,NB,LAB,MAB,NAB, &
-                                               LenKet
+                                               LenKet,AtA,AtB
     REAL(DOUBLE)                            :: ZetaA,ZetaB,ZetaAB,ZetaIn,XiAB,ExpAB, &
                                                AB2,Ax,Ay,Az,Bx,By,Bz, &
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
-                                               Ex,Exy,Exyz,CA,CB,ComCoef
+                                               Ex,Exy,Exyz,CA,CB,MaxAmp
 !
     TYPE(INT_VECT),SAVE                     :: OffQ,OffR
     LOGICAL                                 :: First,AEQB
@@ -119,14 +120,14 @@ CONTAINS
     KB   = Pair%KB  
     NBFA = Pair%NA
     NBFB = Pair%NB
-    Ax   = Pair%A(1)
-    Ay   = Pair%A(2)
-    Az   = Pair%A(3)
-    Bx   = Pair%B(1)
-    By   = Pair%B(2)
-    Bz   = Pair%B(3)
-    AB2  = Pair%AB2  
     AEQB = Pair%SameAtom
+!----------------------------------
+    Prim%A=Pair%A
+    Prim%B=Pair%B
+    Prim%AB2=Pair%AB2
+    Prim%KA=Pair%KA
+    Prim%KB=Pair%KB
+!----------------------------------
 !
     DD = VectToBlock(NBFA,NBFB,Dmat)
 ! 
@@ -140,21 +141,31 @@ CONTAINS
           StartLB = BS%LStrt%I(CFB,KB)
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
+!----------------------------------
+          Prim%CFA=CFA
+          Prim%CFB=CFB
+          Prim%Ell=MaxLA+MaxLB
+!----------------------------------
           DO PFA=1,BS%NPFnc%I(CFA,KA)                ! Loops over primitives in CFA and CFB
+!----------------------------------
+             Prim%PFA=PFA 
+!----------------------------------
              DO PFB=1,BS%NPFnc%I(CFB,KB)             ! Loops over primitives in CFB
-                ZetaA=BS%Expnt%D(PFA,CFA,KA)
-                ZetaB=BS%Expnt%D(PFB,CFB,KB)
-                ZetaAB=ZetaA+ZetaB 
-                ZetaIn=One/ZetaAB
-                XiAB =ZetaA*ZetaB*ZetaIn
-                IF(TestPrimPair(XiAB,Pair%AB2))THEN
-                   ExpAB=EXP(-XiAB*AB2)
-!
-!                  Determine the Indexs
-!
+!----------------------------------
+                Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
+                Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
+                Prim%Zeta=Prim%ZA+Prim%ZB
+                Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
+                IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+                   Prim%PFB=PFB
+!----------------------------------
+!               Set primitive values
+!               Primitive coefficients in a HG representation
+!--------------------------------------------------
+                   MaxAmp=SetBraBlok(Prim,BS)
                    Endex = 0
                    DO IE=1,Rho%NExpt-1
-                      IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.0D-8) THEN
+                      IF(ABS(Prim%Zeta-Rho%Expt%D(IE))<1.0D-8) THEN
                          Endex = IE
                          GOTO 100
                       ENDIF
@@ -171,25 +182,13 @@ CONTAINS
                    OffQ%I(Endex) = OffQ%I(Endex) + 1 
                    OffR%I(Endex) = OffR%I(Endex) + LenKet
 !
-!                  Calculate and Store the Position of the Distribution
+!                  Store the position of the distribution
 !
-                   Px=(ZetaA*Ax+ZetaB*Bx)*ZetaIn
-                   Py=(ZetaA*Ay+ZetaB*By)*ZetaIn
-                   Pz=(ZetaA*Az+ZetaB*Bz)*ZetaIn
-                   PAx=Px-Ax
-                   PAy=Py-Ay
-                   PAz=Pz-Az
-                   PBx=Px-Bx
-                   PBy=Py-By
-                   PBz=Pz-Bz
-                   Rho%Qx%D(Qndex) = Px
-                   Rho%Qy%D(Qndex) = Py
-                   Rho%Qz%D(Qndex) = Pz
+                   Rho%Qx%D(Qndex)=Prim%P(1)
+                   Rho%Qy%D(Qndex)=Prim%P(2)
+                   Rho%Qz%D(Qndex)=Prim%P(3)
 !
 !                  Calculate and Store the Coefficients of the Distribution
-!
-                   CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,ZetaAB,MD%D, &
-                        PAx,PBx,PAy,PBy,PAz,PBz) 
 !
                    IA=IndexA
                    DO LMNA=StartLA,StopLA
@@ -198,143 +197,31 @@ CONTAINS
                       LA=BS%LxDex%I(LMNA)
                       MA=BS%LyDex%I(LMNA)
                       NA=BS%LzDex%I(LMNA)
-                      CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
                       DO LMNB=StartLB,StopLB
                          IB=IB+1
                          LB=BS%LxDex%I(LMNB)
                          MB=BS%LyDex%I(LMNB)
                          NB=BS%LzDex%I(LMNB)
-                         CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
-                         ComCoef = CA*CB*ExpAB*DD(IA,IB)
-                         DO LAB=0,LA+LB
-                            Ex = ComCoef*MD%D(1,LA,LB,LAB)
-                            DO MAB=0,MA+MB
-                               Exy = Ex*MD%D(2,MA,MB,MAB)
-                               DO NAB=0,NA+NB
-                                  Exyz = Exy*MD%D(3,NA,NB,NAB)
-                                  LMN = LMNdex(LAB,MAB,NAB)
-                                  Rho%Co%D(Rndex+LMN)=Rho%Co%D(Rndex+LMN)+Exyz
-                               ENDDO
-                            ENDDO
+
+
+!WRITE(66,22)AtA,AtB,BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB),Prim%ZA,Prim%ZB,Prim%A,Prim%B
+!22 FORMAT('test3[',I3,',',I3,']={ca->',F10.7,',cb->',F10.7,               &
+!                       ',za->',F10.7,',zb->',F10.7,               &
+!                       ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
+!                       ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
+
+
+                         DO LMN=1,LHGTF(LA+MA+NA+LB+MB+NB)
+                            Rho%Co%D(Rndex+LMN)=Rho%Co%D(Rndex+LMN)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
                          ENDDO
                       ENDDO
                    ENDDO
-!
                 ENDIF
              ENDDO
           ENDDO
        ENDDO
     ENDDO
   END SUBROUTINE RhoBlk
-!--------------------------------------------------------------
-! Estimate the Integrals from the Primative Distributions
-!--------------------------------------------------------------
-  SUBROUTINE RhoEst(Rho)
-    TYPE(HGRho)                  :: Rho
-    INTEGER                      :: MaxL,zq,iq,oq,or,LKet,LenKet,qadd,radd,NQ
-    REAL(DOUBLE)                 :: Zeta,SqUqq
-!
-    IF(Rho%AllocRE==ALLOCATED_TRUE) THEN
-       DO zq = 1,Rho%NExpt-1
-          NQ     = Rho%NQ%I(zq)
-          IF(NQ/=0) THEN
-             oq    =Rho%OffQ%I(zq)
-             or    =Rho%OffR%I(zq)
-             Zeta  =Rho%Expt%D(zq)
-             LKet  =Rho%Lndx%I(zq)
-             LenKet=LHGTF(LKet)
-             SqUqq =Sqrt2Pi5x2*Zeta**(-FiveFourths)
-!
-!            Generate The R and AuxR Function
-!
-             CALL GenerateRfun(Zeta,LKet)
-!
-!            Calculate the Estimate
-!
-             DO iq=1,NQ
-                qadd=oq+iq
-                radd=or+(iq-1)*LenKet
-                Rho%Est%D(qadd)=SqUqq*Estimate(LKet,LenKet,Rho%Co%D(radd+1:))  
-             ENDDO
-!
-!            Sort the estimates
-!
-             CALL SortRhoEst(zq,NQ,LenKet,Rho)
-          ENDIF
-       ENDDO
-    ENDIF
-!       DO zq = 1,Rho%NExpt
-!          NQ     = Rho%NQ%I(zq)
-!          IF(NQ/=0) THEN
-!             oq    =Rho%OffQ%I(zq)
-!             or    =Rho%OffR%I(zq)
-!             Zeta  =Rho%Expt%D(zq)
-!             LKet  =Rho%Lndx%I(zq)
-!             LenKet=LHGTF(LKet)
-!             SqUqq   =Sqrt2Pi5x2*Zeta**(-FiveFourths)
-!             WRITE(11,*)' ====================================================='
-!             WRITE(11,*)' oq, or, zeta, lket = ',oq,or,zeta,lket
-!             WRITE(11,*)' SqUqq = ',SqUqq
-!             DO iq=1,NQ
-!               qadd=oq+iq
-!               WRITE(11,*)iq,Rho%Est%D(qadd)
-!             ENDDO
-!          ENDIF
-!       ENDDO
-  END SUBROUTINE RhoEst
-!--------------------------------------------------------------
-! Sort the Estimates per Exponent
-!--------------------------------------------------------------
-  SUBROUTINE SortRhoEst(zq,NQ,LenKet,Rho)
-    INTEGER                           :: zq,NQ,LenKet
-    TYPE(HGRho)                       :: Rho
-    INTEGER                           :: oq,or,iq,qadd,radd,LMN,add,sadd,isort
-    INTEGER,DIMENSION(NQ)             :: IntRhoEst
-    REAL(DOUBLE),DIMENSION(NQ)        :: RhoEst,QRx,QRy,QRz
-    REAL(DOUBLE),DIMENSION(NQ*LenKet) :: RhoCo
-!
-    oq     = Rho%OffQ%I(zq)
-    or     = Rho%OffR%I(zq)
-!
-    DO iq = 1,NQ
-       qadd = oq+iq
-       IntRhoEst(iq)= iq
-       RhoEst(iq)   = Rho%Est%D(qadd)
-    ENDDO
-    CALL DblIntSort77(NQ,RhoEst,IntRhoEst,-2)
-!
-!   Reorder RhoEst QRx,QRy, and QRz and RhoCo
-!
-    DO iq = 1,NQ
-       add  = (iq-1)*LenKet
-       qadd = oq+iq
-       radd = or+add
-       RhoEst(iq)  = Rho%Est%D(qadd)
-       QRx(iq)     = Rho%Qx%D(qadd)
-       QRy(iq)     = Rho%Qy%D(qadd)
-       QRz(iq)     = Rho%Qz%D(qadd)
-       DO LMN = 1,LenKet
-          RhoCo(add+LMN) = Rho%Co%D(radd+LMN)
-       ENDDO
-    ENDDO
-    DO iq = 1,NQ
-       add   = (iq-1)*LenKet
-       qadd  = oq+iq
-       radd  = or+add
-       isort = IntRhoEst(iq)
-       sadd  = (isort-1)*LenKet
-       Rho%Est%D(qadd) = RhoEst(isort)
-       Rho%Qx%D(qadd)    = QRx(isort)
-       Rho%Qy%D(qadd)    = QRy(isort)
-       Rho%Qz%D(qadd)    = QRz(isort)
-       DO LMN = 1,LenKet
-          Rho%Co%D(radd+LMN) = RhoCo(sadd+LMN)
-       ENDDO
-    ENDDO
-!
-  END SUBROUTINE SortRhoEst
-!
-!
 !
   SUBROUTINE Integrate_HGRho(Rho)
     TYPE(HGRho)                      :: Rho
