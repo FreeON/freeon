@@ -176,7 +176,7 @@ MemMan.o: 		ProcessControl.o GlobalObjects.o GlobalCharacters.o\
 MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o Parse.o \
 			GlobalObjects.o GlobalScalars.o DerivedTypes.o 
 #
-Anneal:o                PrettyPrint.o MemMan.o
+Anneal.o:               PrettyPrint.o MemMan.o
 #
 Order.o: 		PrettyPrint.o Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
 			GlobalScalars.o GlobalCharacters.o DerivedTypes.o 
