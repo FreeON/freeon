@@ -233,7 +233,7 @@ CONTAINS
     ENDDO
 99  CONTINUE
 !
-!   Do the Same Search, but in Ghost.bas
+!
 !
     IF(KFound/=BS%NKind) THEN
        REWIND(GBas)
