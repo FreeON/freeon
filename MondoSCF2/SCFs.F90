@@ -515,17 +515,17 @@ CONTAINS
           DMaxQ=dDMax/ABS(DMaxB+1.D-50)
           DIISQ=dDIIS/ABS(DIISB+1.D-50)
           CALL OpenASCII(OutFile,Out)
-          WRITE(Out,*)'ETest = ',ETest
-          WRITE(Out,*)'DTest = ',DTest
-          WRITE(Out,*)'ETotQ = ',ETotQ
-          WRITE(Out,*)'ETotA = ',ETotA
-          WRITE(Out,*)'ETotB = ',ETotB
-          WRITE(Out,*)'DIISQ = ',DIISQ
-          WRITE(Out,*)'DMaxQ = ',DMaxQ
-          WRITE(Out,*)'DIISA = ',DIISA
-          WRITE(Out,*)'DIISB = ',DIISB
-          WRITE(Out,*)'DMaxA = ',DMaxA
-          WRITE(Out,*)'DMaxB = ',DMaxB
+!          WRITE(Out,*)'ETest = ',ETest
+!          WRITE(Out,*)'DTest = ',DTest
+!          WRITE(Out,*)'ETotQ = ',ETotQ
+!          WRITE(Out,*)'ETotA = ',ETotA
+!          WRITE(Out,*)'ETotB = ',ETotB
+!          WRITE(Out,*)'DIISQ = ',DIISQ
+!          WRITE(Out,*)'DMaxQ = ',DMaxQ
+!          WRITE(Out,*)'DIISA = ',DIISA
+!          WRITE(Out,*)'DIISB = ',DIISB
+!          WRITE(Out,*)'DMaxA = ',DMaxA
+!          WRITE(Out,*)'DMaxB = ',DMaxB
           CLOSE(Out)
           ! Convergence tests
           IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
