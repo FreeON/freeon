@@ -128,6 +128,7 @@ MODULE ControlStructures
   TYPE State
      TYPE(CHR_VECT)                    :: Action ! Array of character options that tell a program what to do
      TYPE(INT_VECT)                    :: Current,Previous ! Tracking the SCF, basis and geometry states
+     LOGICAL                           :: SameCrds,SameLatt,SameGeom,SameBasis
   END TYPE State  
  
   TYPE GDIIS
