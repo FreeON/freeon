@@ -32,11 +32,10 @@ include $(MONDO_HOME)/Includes/RemoveAll
 all: NONX XForce
 
 Objects1 = ONXParameters.o ONXInit.o ONXGet.o ONXFillOut.o ONXMemory.o     \
-           ContractionScaling.o ONXVrr.o ONXHrr.o ONXPut.o ONXRGen.o       \
+           ONXCtrSclg.o ONXVrr.o ONXHrr.o ONXPut.o ONXRGen.o       \
            Sizes.o Stats.o ONXInLoop.o ONXComptK.o ONXRng.o ONXDOrder.o \
-           Contract.o QuickSortDis.o PartDrv.o ONXMemInit.o \
+           QuickSortDis.o PartDrv.o ONXMemInit.o \
            CCDriver.o VRRDriver.o ONX.o
-
 
 Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o       \
            Sizes.o Stats.o MemInit.o InitExchangeMatrix.o GradONX.o Contract.o  \
