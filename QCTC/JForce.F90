@@ -85,12 +85,8 @@ PROGRAM JForce
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
-  CALL New(LatFrc_J,    (/3,3/))
-  CALL New(LatFrc_J_Dip,(/3,3/))
-  CALL New(LatFrc_J_PFF,(/3,3/))
-  LatFrc_J%D     = Zero
-  LatFrc_J_Dip%D = Zero
-  LatFrc_J_PFF%D = Zero
+  CALL New(LatFrc_J,(/3,3/))
+  LatFrc_J%D = Zero
 #ifdef PARALLEL
   MyAtomNum = End%I(MyId)-Beg%I(MyId)+1
   CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MONDO_COMM,IErr)
@@ -158,6 +154,8 @@ PROGRAM JForce
   IF(MyID == ROOT) THEN
 #endif
 !    The Dipole Contribution to the Lattice Forces
+     CALL New(LatFrc_J_Dip,(/3,3/))
+     LatFrc_J_Dip%D = Zero
      IF(GMLoc%PBC%Dimen > 0) THEN
         DivCV   = DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
         DO I=1,3
@@ -169,6 +167,8 @@ PROGRAM JForce
         ENDDO
      ENDIF
 !    The Farfield Contribution to the Lattice Forces
+     CALL New(LatFrc_J_PFF,(/3,3/))
+     LatFrc_J_PFF%D = Zero
      IF(GMLoc%PBC%Dimen > 0) THEN
         DO I=1,3
            DO J=1,3
@@ -210,11 +210,34 @@ PROGRAM JForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_J%D(I,J)     = 1.D8
-           LatFrc_J_Dip%D(I,J) = 1.D8
-           LatFrc_J_PFF%D(I,J) = 1.D8
+           LatFrc_J%D(I,J)     = Zero
+           LatFrc_J_Dip%D(I,J) = Zero
+           LatFrc_J_PFF%D(I,J) = Zero
         ENDDO
      ENDDO
+     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+!       Print The Lattice Forces
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LatFrc_J'
+        WRITE(*,*)   'LatFrc_J'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
+        ENDDO
+        WRITE(Out,*) 'LatFrc_J_Dip'
+        WRITE(*,*)   'LatFrc_J_Dip'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
+        ENDDO
+        WRITE(Out,*) 'LatFrc_J_PFF'
+        WRITE(*,*)   'LatFrc_J_PFF'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
+        ENDDO
+        CLOSE(Out)
+     ENDIF
 !    Sum in the J contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -224,18 +247,12 @@ PROGRAM JForce
 !    Sum in the J contribution to total lattice force,including Dip and PFF
      LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
      GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+!    Tidy Up
+     CALL Delete(LatFrc_J_Dip)
+     CALL Delete(LatFrc_J_PFF)
 #ifdef PARALLEL
   ENDIF
 #endif
-! Do some printing
-  CALL Print_Force(GMLoc,JFrc,'J Force')
-  CALL Print_Force(GMLoc,JFrc,'J Force',Unit_O=6)
-  CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force')
-  CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force',Unit_O=6)
-  CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force')
-  CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force',Unit_O=6)
-  CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force')
-  CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force',Unit_O=6)
 ! Do some checksumming and IO 
   CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)  
@@ -244,8 +261,6 @@ PROGRAM JForce
 ! Tidy Up  
   CALL Delete(JFrc)
   CALL Delete(LatFrc_J)
-  CALL Delete(LatFrc_J_Dip)
-  CALL Delete(LatFrc_J_PFF)
   CALL Delete(P)
   CALL Delete(BS)
   CALL Delete(GMLoc)
