@@ -174,10 +174,10 @@ in the correct fashion in regard to increasing system size.
  
 Figure \ref{figure:Scaling_Matrix_Build} the time it takes to build the
 matrix  \( K_{x} \) for the dense diamond periodic system up to 800 atoms for the
-basis set 6-31G$ ^\dagger$ \cite{} at a {\it loose} level of accuracy.
+basis set 6-31G$ ^\dagger$ \cite{Pople92} at a {\it loose} level of accuracy.
 Also included in the figure for comparision are the total time for the
-density matrix solver, TRS4 \cite{}, 
-and the Coulomb matrix build using our Quantum chemical treee code \cite{}. 
+density matrix solver, TRS4 \cite{ANiklasson03}, 
+and the Coulomb matrix build using our Quantum chemical treee code \cite{CTymczak03c}. 
 
 
 %We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
@@ -198,7 +198,7 @@ and support. We would also like to thank Anders Niklasson for his help
 in preparation of this manuscript. 
 
 \bibliographystyle{apsrmp} 
-\bibliography{mondo_new}
+\bibliography{mondo_new} 
 
 
 \eject
@@ -262,7 +262,7 @@ $ ^g$Cubic  \\
 \caption{Scaling results for the exchange matrix build, the coulomb matrix
 build (scaled by ten), and the density matrix solver (scaled by twenty),  
 for the dense diamond periodic system up to 800 atoms using the
-6-31G$ ^\dagger$ basis set \cite{}}
+6-31G$ ^\dagger$ basis set.}
 \label{figure:Scaling_Matrix_Build}
 {\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
 \end{figure}
