@@ -66,18 +66,17 @@ MODULE BoundingBox
          ENDIF
       END FUNCTION PointOutSideBox
 #endif
-      FUNCTION PointOutSideBox(R,Box,Extent)
-         LOGICAL                      :: PointOutSideBox
+      FUNCTION PointOutSideBox(R,Box)
+         LOGICAL                                :: PointOutSideBox
          REAL(DOUBLE),DIMENSION(3),INTENT(IN)   :: R
-         REAL(DOUBLE),INTENT(IN)                 :: Extent
-         TYPE(BBox),  INTENT(IN)                   :: Box
+         TYPE(BBox),  INTENT(IN)                :: Box
          PointOutSideBox=.TRUE.
-         IF(R(1)<Box%BndBox(1,1)-Extent)RETURN
-         IF(R(1)>Box%BndBox(1,2)+Extent)RETURN
-         IF(R(2)<Box%BndBox(2,1)-Extent)RETURN
-         IF(R(2)>Box%BndBox(2,2)+Extent)RETURN
-         IF(R(3)<Box%BndBox(3,1)-Extent)RETURN
-         IF(R(3)>Box%BndBox(3,2)+Extent)RETURN
+         IF(R(1)<Box%BndBox(1,1))RETURN
+         IF(R(1)>Box%BndBox(1,2))RETURN
+         IF(R(2)<Box%BndBox(2,1))RETURN
+         IF(R(2)>Box%BndBox(2,2))RETURN
+         IF(R(3)<Box%BndBox(3,1))RETURN
+         IF(R(3)>Box%BndBox(3,2))RETURN
          PointOutSideBox=.FALSE.
       END FUNCTION PointOutSideBox
 !===============================================================================
