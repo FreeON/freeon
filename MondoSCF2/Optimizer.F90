@@ -1542,7 +1542,6 @@ CONTAINS
 !
    SUBROUTINE RescaleGrad(Grad,Print)
      REAL(DOUBLE),DIMENSION(:) :: Grad
-     REAL(DOUBLE),DIMENSION(:,:)::XYZ
      REAL(DOUBLE)              :: MaxGrad,SetMax,MaxGradP,MaxGradN,Fact
      INTEGER                   :: Print
      LOGICAL                   :: Print2
