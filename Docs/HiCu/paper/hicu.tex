@@ -2,11 +2,11 @@
 %
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. use
-\newcommand{\commentoutA}[1]{} 
-\newcommand{\commentoutB}[1]{#1}
+%\newcommand{\commentoutA}[1]{} 
+%\newcommand{\commentoutB}[1]{#1}
 % instead of the following
-%\newcommand{\commentoutA}[1]{#1}
-%\newcommand{\commentoutB}[1]{}
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \commentoutA{\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
@@ -37,7 +37,7 @@
               National Laboratory,\\ Los Alamos, New Mexico 87545}
 
 
-\date{Jan 22, 2003}
+\date{Feb 20, 2003}
 
 \begin{abstract}
 Recently, early onset linear scaling computation of the
@@ -69,6 +69,12 @@ molecule water cluster at standard density.  For more coarse grained
 calculations, superlinear speedups are obtained, resulting from
 combination of a good load balance with a reduced computational
 complexity due to data parallelism.
+Highly accurate calculations on $\alpha$-pinene, a relatively small molecule,
+with a large basis set of 6-311G(df,p) have been performed.
+For these calculations, superlinear speedups with 4, 
+8, 16, and 32 processors have been observed.
+An excellent speedup of 63.71 (i.e. an efficiency of 99.5\%) with 64 processors
+has also been obtained.
 
 \smallskip
 \noindent{\bf Keywords}: Density Functional Theory, linear scaling, numerical integration, Gaussian-Orbital, 
@@ -213,7 +219,7 @@ to reduce communications between processors.
 Section~\ref{sec:implementation} describes a computational
 implementation of data parallel HiCu.  Section~\ref{sec:results}
 presents the results and discussions of the speedup tests performed on
-two systems. Section~\ref{sec:conclusions} summarizes the main
+three systems. Section~\ref{sec:conclusions} summarizes the main
 conclusions of the paper.
 
 \section{Parallelization of HiCu}
@@ -409,7 +415,7 @@ this construction requires $\Np$ to be a power of two, and that errors
 made early in the decomposition will propagate to the lowest level.
 %These are simple inconveniences, which can be easily addressed in future
 %should they prove problematic.  
-The inconvenience associated with the restriction of the power of two for the 
+The inconvenience associated with the restriction of a power of two for the 
 number of processors is addressed in Appendix A. 
 We have used a robust bisection
 method~\cite{WPress92} to find the plane which equally (to some
@@ -503,15 +509,6 @@ carried out.  Rather, ${\bf L}_{\mathrm{xc}}^{p}$ is redistributed and
 resumed to yield a non-overlapping row-distributed ${\bf
 K}_{\mathrm{xc}}^{p}$.
 
-\commentoutA{
-\begin{figure}[t]
-\resizebox*{3.5in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
-\caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
-RPBE/3-21G, with $\tau = 1.0 \times 10^{-6}$. Speedups are relative to
-a 2-processor calculation.}\label{fig:taxol}
-\end{figure}
-}
-
 As $\Np$ becomes large, the ET BBox will become small and the
 corresponding local exchange-correlation matrix will become very
 sparse.  During matrix construction there can be significant overheads
@@ -564,6 +561,15 @@ Leaf-node times are calculated with the {\tt MPI\_WTIME} MPI function.
 
 \commentoutA{
 \begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
+\caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
+RPBE/3-21G, with $\tau = 1.0 \times 10^{-6}$. Speedups are relative to
+a 2-processor calculation.}\label{fig:taxol}
+\end{figure}
+}
+
+\commentoutA{
+\begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
 \caption{Scaling of parallel HiCu on (H$_2$O)$_{110}$ RPBE/3-21G, with
 $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
@@ -577,10 +583,12 @@ with $2^n$ processors, where $n$ typically ranges from 1 to
 7.  These systems are chosen because they are highly inhomogeneous,
 three-dimensional system posing a challenge to parallel HiCu.  
 All runs on the first two systems are performed on a single SGI Origin 2000
-with 128 (250 MHz MIPS R10000 MIPS) processors. We have used 
-256 x HP/Compaq ES-45 ( 4 x Alpha EV6 at 1.25GHz, 16GB, Quadrics interconnect)
-processors to perform the calculations on 
-$\alpha$-pinene.
+with 128 (250 MHz MIPS R10000 MIPS) processors. 
+For the calculations of $\alpha$-pinene, we have used
+a cluster of 256 4 CPU HP/Compaq Alphaserver ES45's.
+Each node has 16 GB of RAM and an 8 MB cache, with a peak
+speed of 2.56 Teraflops. The nodes are interconnected using
+Quadrics QsNet High Speed Interconnect, with 2 mus latency and 300 MB/sec.
 
 We start the calculations with the STO-3G basis set and a large 
 threshold $\tau$, switch to the 3-21G basis set using our mixed
@@ -625,18 +633,47 @@ performance of ET for parallel HiCu is outstanding.  To explore
 the behavior of the current implementation with $\Np \sim 1024 $ will 
 require a fully parallel {\sc MondoSCF}, which we are actively pursuing.
 
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{good-thres-pinene.eps}}
+\caption{
+Scaling of parallel HiCu on $\alpha$-pinene RPBE/6-311G(df,p), with
+$\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
+calculation.
+}\label{fig:good-thres-pinene}
+\end{figure}
+}
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{tight-thres-pinene.eps}}
+\caption{
+Scaling of parallel HiCu on $\alpha$-pinene RPBE/6-311G(df,p), with
+$\tau = 1.0 \times 10^{-8}$. Speedups are relative to a 2-processor
+calculation.
+}\label{fig:tight-thres-pinene}
+\end{figure}
+}
 To study the applicability of our data parallel HiCu to small systems but
-with bigger basis sets, calculations were performed on 26-atom
-$\alpha$-pinene with the 6-311G(df,p) basis set. Benchmarks on this system
-have been performed earlier\cite{Furlani_00v128,Sosa_00v26}. 
-The scaling results in Fig.~\ref{fig:pinenescaling}
+with bigger basis sets, calculations were performed on a 26-atom
+$\alpha$-pinene with 6-311G(df,p) basis sets. Benchmarkings on this system
+have been performed earlier~\cite{Furlani_00v128,Sosa_00v26}.
+The scaling results in Figure~\ref{fig:good-thres-pinene}
 show that good speedups are obtained, even for this relatively small
-system. Our result of a speedup of 44.63 (70\% efficient) 
+system and a relatively good threshold of $\tau = 1.0 \times 10^{-6}$.
+Our result of a speedup of 45.11 (70\% efficient)
 with 64 processors compares
-favorably with the speedup of 37.3 of 
+favorably with the speedup of 37.3 of
 Furlani~{\it et al.}\cite{Furlani_00v128}, which is for an entire single-point
-energy calculation.
-
+energy calculation. Since a larger basis set warrants more accuracy in the SCF
+calculation, we have performed the similar scaling test on $\alpha$-pinene,
+but with a tighter threshold where $\tau = 1.0 \times 10^{-8}$.
+From Figure~\ref{fig:tight-thres-pinene}, it is observed that
+superlinear speedups are obtained for $\Np$
+equals to 4, 8, 16, and 32. The speedup for $\Np = 64$ is near perfect, which
+is 99.5\%. 
+The results in Figures~\ref{fig:good-thres-pinene} and \ref{fig:tight-thres-pinene} clearly show that ET is at its best when the ratio of grid-related work (which involves the generation of the grid
+for integration and followed by the integration itself) per processor is 
+increased.
 \section{Conclusions}
 \label{sec:conclusions}
 
@@ -680,7 +717,7 @@ weights and (ii) we employ measurement based load balancing.  It is
 also different from many implementations in that (iii) it is data
 parallel.  In addition to the numerical issues discussed in Section
 \ref{sec:intro}, we believe the non-overlapping Cartesian subdivision
-used by HiCu enables a more straight forward approach to data locality
+used by HiCu enables a more straightforward approach to data locality
 and domain decomposition.  Both the replicated data and the
 master-slave approach have well known shortcomings for fine grained
 massive parallelism, which have been avoided here.  With less than one
@@ -689,6 +726,14 @@ heavy atom per processor, data parallel HiCu using ET partitioning is
 deviation from the ideal is due to basic non-linearities in ET
 partitioning of the HiCu grid, rather than overheads associated with
 inefficient data structures or communication.
+Finally we note that Equal Time partition performed very well 
+for $\alpha$-pinene (a relatively small molecule)
+but with a large basis set of 6-311G(df,p).
+The results show that superlinear speedups have been obtained 
+up to 32 processors, while a near ideal speedup of 
+63.71 (an efficiency of 99.5\%) with 64 processors has also been obtained.
+This suggests that Equal Time partition should find its use in other
+highly accurate calculations on small molecules and large basis sets.
 
 \begin{acknowledgments}
 This work has been carried out under the auspices of the US Department
@@ -761,8 +806,14 @@ calculation.}\label{fig:waterscaling}
 
 \begin{figure}
 \caption{Scaling of parallel HiCu on $\alpha$-pinene RPBE/6-311G(df,p), with
+$\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
+calculation.}\label{fig:good-thres-pinene}
+\end{figure}
+
+\begin{figure}
+\caption{Scaling of parallel HiCu on $\alpha$-pinene RPBE/6-311G(df,p), with
 $\tau = 1.0 \times 10^{-8}$. Speedups are relative to a 2-processor
-calculation.}\label{fig:pinenescaling}
+calculation.}\label{fig:tight-thres-pinene}
 \end{figure}
 
 \begin{figure}
@@ -773,51 +824,66 @@ partitioning scheme for the case of $m=5$.}\label{fig:binary}
 \pagebreak
 \clearpage
 
-\begin{center}
-Figure 1, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{CM.eps}}
-\end{center}
-
-\clearpage
-
-\begin{center}
-Figure 2, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{ET.eps}}
-\end{center}
-
-\clearpage
-\begin{center}
-Figure 3, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{PHiCuFlow.eps}}
-\end{center}
-
-\clearpage
-\begin{center}
-Figure 4, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
-\end{center}
-
-\pagebreak
-\begin{center}
-Figure 5, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
-\end{center}
-
-\pagebreak
-\begin{center}
-Figure 6, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{tight-pinene.eps}}
-\end{center}
-
-\pagebreak
-\begin{center}
-Figure 7, C.~K.~Gan and M.~Challacombe \\[1.cm]
-\resizebox*{6.0in}{!}{\includegraphics[clip]{binary.eps}}
-\end{center}
+%NoFig\begin{center}
+%NoFigFigure 1, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{6.0in}{!}{\includegraphics[clip,angle=90]{CM.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\clearpage
+%NoFig
+%NoFig\begin{center}
+%NoFigFigure 2, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{6.0in}{!}{\includegraphics[clip,angle=90]{ET.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\clearpage
+%NoFig\begin{center}
+%NoFigFigure 3, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{6.0in}{!}{\includegraphics[clip,angle=90]{PHiCuFlow.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\clearpage
+%NoFig\begin{center}
+%NoFigFigure 4, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{5.0in}{!}{\includegraphics[clip,angle=90]{taxol_speedup.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\pagebreak
+%NoFig\begin{center}
+%NoFigFigure 5, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{5.0in}{!}{\includegraphics[clip,angle=90]{3-21G_good_div10.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\pagebreak
+%NoFig\begin{center}
+%NoFigFigure 6, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{5.0in}{!}{\includegraphics[clip,angle=90]{good-thres-pinene.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\pagebreak
+%NoFig\begin{center}
+%NoFigFigure 7, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{5.0in}{!}{\includegraphics[clip,angle=90]{tight-thres-pinene.eps}}
+%NoFig\end{center}
+%NoFig
+%NoFig\pagebreak
+%NoFig\begin{center}
+%NoFigFigure 8, C.~K.~Gan and M.~Challacombe \\[1.cm]
+%NoFig\resizebox*{6.0in}{!}{\includegraphics[clip,angle=90]{binary.eps}}
+%NoFig\end{center}
 }
 
 \clearpage
 \appendix
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{binary.eps}}
+\caption{
+An illustrative example to show the general Equal Time
+partitioning scheme for the case of $m=5$.
+}\label{fig:binary}
+\end{figure}
+}
 \section{A general Equal Time partitioning scheme}
 \label{appex:GET}
 In this appendix a general Equal Time partitioning scheme is described where 
@@ -832,7 +898,7 @@ $n_{\scriptscriptstyle\mathrm{L}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptsc
 and $n_{\scriptscriptstyle\mathrm{R}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptscriptstyle\mathrm{R}})$, respectively. 
 Here $n_{\scriptscriptstyle\mathrm{L}}$ ($n_{\scriptscriptstyle\mathrm{R}}$)
 is the number of left (right) leaf nodes of the parent node. 
-Fig.~\ref{fig:binary}(a) shows a binary tree and all the edge weights 
+Figure~\ref{fig:binary}(a) shows a binary tree and all the edge weights 
 for the case of $m=5$.
 With these edge weights, it is a fairly simple matter 
 to partition a total workload $W$ into $m$ equal workloads. Starting
@@ -841,7 +907,7 @@ recursively divide the workload in a parent node
 according to the ratio of the edge weights, 
 i.e. $n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}} $. 
 At the end of this procedure, all
-leaf nodes will have a workload of $W/m$. Fig.~\ref{fig:binary}(b) shows the 
+leaf nodes will have a workload of $W/m$. Figure~\ref{fig:binary}(b) shows the 
 detailed workload information in all nodes for the case of $m=5$. In a domain
 decomposition of a root BBox, a bisection search may be used to partition
 a box into two subboxes with a workload ratio equals to 
