@@ -1480,10 +1480,10 @@ CONTAINS
                         (NNon0<=SIZE(A%MTrix%D))
                    IF(LimitsQ)THEN
                       CALL Delete(A)
-                      CALL New(A,(/NAtms,NBlks,NNon0/))
+                      CALL New(A,(/NAtms,NBlks,NNon0/),OnAll_O=.TRUE.)
                    ENDIF
                 ELSE
-                   CALL New(A,(/NAtms,NBlks,NNon0/))
+                   CALL New(A,(/NAtms,NBlks,NNon0/),OnAll_O=.TRUE.)
                 ENDIF
                 CALL Bcast(A%RowPt,N_O=NAtoms+1)
                 CALL Bcast(A%ColPt,N_O=NBlks)
