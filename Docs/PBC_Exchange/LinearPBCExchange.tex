@@ -30,11 +30,10 @@ New Mexico 87545 }
 \date{\today}
 \begin{abstract}
 A translationally invariant formulation of the Hartree-Fock $\Gamma$-point approximation
-is achieved through introduction of the Minimum Image Convention.  This approximation is implemented 
-in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling computation of the periodic 
-Hartree-Fock 
-exchange matrix.  Convergence of the $\Gamma$-point approximation to the ${\bf k}$-space limit is 
-demonstrated for 
+is achieved through introduction of the Minimum Image Convention.  This approximation is 
+implemented  in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling 
+computation of the periodic Hartree-Fock exchange matrix.  Convergence of the 
+$\Gamma$-point approximation to the ${\bf k}$-space limit is demonstrated for 
 magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamond and ice. 
 \end{abstract}
 
@@ -54,8 +53,8 @@ Recent progress in linear scaling Density Functional Theory is enabling larger a
 more complex calculations of condensed phase systems.  In this approach, ${\cal O}(N)$
 scaling with respect to system size, $N$, is achieved with algorithms that exploit 
 quantum locality.  Applications of linear scaling algorithms to mineralogical problems 
-\cite{MCraig04} and to energetic organic materials \cite{} {\bf MORE HERE??} demonstrate the ability 
-of these $N$-scaling algorithms to make valuable contributions well beyond the domain of 
+\cite{MCraig04} and to energetic organic materials \cite{} {\bf MORE HERE??} demonstrate the 
+ability of these $N$-scaling algorithms to make valuable contributions well beyond the domain of 
 conventional plane wave methods, which scale with the cube of system size.  
 
 In the simulation of condensed phase systems, Gaussian basis functions have several 
@@ -75,9 +74,9 @@ exclusively with the {\em ab initio} solid state program {\sc Crystal98} \cite{}
 more recently {\sc Crystal03}), which employs conventional (non-direct) ${\cal O}(N^4)$ 
 algorithms for evaluation of the HF exchange matrix.  The {\sc Crystal} programs employ the
 formally (and numerically) correct ${\bf k}$-space integration algorithms that generate 
-wavefunctions  inclusive of the necessary translational symmetries.   In the so-called $\Gamma$-point
-approximation,  these symmetries are omitted, but may be regained in the limit of a large
-super-cell,  or in the case of a disordered medium, simply a large cell.  With a more
+wavefunctions  inclusive of the necessary translational symmetries.   In the so-called 
+$\Gamma$-pointapproximation,  these symmetries are omitted, but may be regained in the limit 
+of a large super-cell,  or in the case of a disordered medium, simply a large cell.  With a more
 tractable  formulation and asymptotic correctness in the limit of large systems, the
 $\Gamma$-point  approximation represents an ideal basis for linear scaling exchange 
 algorithms.   However, preliminary studies of the naive HF $\Gamma$-point were found (by us)
@@ -86,10 +85,11 @@ limit.
 
 In this paper we develop a translationally invariant definition of periodic Hartree-Fock exchange 
 in the $\Gamma$-point limit.  This is accomplished through introducing a Minimum Image Convention
-into the two-electron integral algorithm, similar to the approach employed in molecular dynamics when 
-truncating short range potentials \cite{}.  We then go on to describe a modified {\sc ONX} 
-algorithm \cite{} that achieves true linear scaling with the MIC $\Gamma$-point approximation, and 
-numerical equivalence with the ${\bf k}$-space value in the limit of large super-cells.
+into the two-electron integral algorithm, similar to the approach employed in molecular 
+dynamics when truncating short range potentials \cite{}.  We then go on to describe a modified 
+{\sc ONX} algorithm \cite{} that achieves true linear scaling with the MIC $\Gamma$-point 
+approximation, and numerical equivalence with the ${\bf k}$-space value in the limit of 
+large super-cells.
 
 %Many calculations of the electronic structure of condensed matter systems now make use
 %of the exact exchange interaction 
@@ -104,7 +104,8 @@ numerical equivalence with the ${\bf k}$-space value in the limit of large super
 %the hybrid functionals, it has become very desirable to include exact exchange into
 %existing condensed matter electronic structure algorithms. 
 %However, most of these calculations make use of ${\bf k}$-space integrations to 
-%deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal situation 
+%deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal 
+%situation 
 %for linear scaling algorithms, where we would like to remove the need for doing
 %${\bf k}$-space integrations altogether by increasing the system size. 
 %However, when Gamma point only is attempted for exact exchange, a 
@@ -309,7 +310,8 @@ development of the Quantum Chemical Tree Code ({\sc QCTC}) for performing $N$-sc
 The Order N eXchange ({\sc ONX}) algorithm \cite{} for computing the gas phase exchange matrix 
 has been modified by placing dual loops running over the lattice vectors 
 ${\bf H}$ and ${\bf G}$ around the original ONX loop structures.  Two ordered bra and ket distribution 
-buffers are assembled for each lattice vector pair, which are then used to drive the original {\sc ONX} algorithm.
+buffers are assembled for each lattice vector pair, which are then used to drive the original {\sc ONX}
+ algorithm.
 The Minimum Image Convention has been introduced into the primitive contraction stage, in the 
 Vertical Recurrence Relations component of a symmetry driven Head-Gordon Pople \cite{} scheme for 
 computing two-electron integrals.  While this implementation is linear scaling and simple, it suffers 
@@ -435,12 +437,16 @@ theory levels and basis sets}
 \label{DamondLC}
 \center{\begin{tabular}{lccccc}
 \toprule
-Program             & $N_{\rm at}$ & Basis      &  HF   & PBE   & PBE0 \\
+Program             & $N_{\rm at}$ & Basis      &  HF     & PBE0 \\
 \colrule
-{\sc MondoSCF}$^a$  & 216          & sto-3g     & ~3.500~ &  ~3.500~   &  ~3.500    \\
-{\sc MondoSCF}$^a$  & 216          & 6-31g      & ~3.500~ &  ~3.500~   &  ~3.500    \\
-{\sc Crystal98}$^b$ &  8           & sto-3g     & ~3.500~ &  ~3.500~   &  ~3.500    \\
-{\sc Crystal98}$^b$ &  8           & 6-31g      & ~3.500~ &  ~3.500~   &  ~3.500    \\
+{\sc MondoSCF}$^a$  &  64          & sto-3g     & ~3.587~ &  ~3.601    \\
+                    &  64          & 6-31g      & ~3.575~ &  ~3.500    \\
+\\
+                    & 216          & sto-3g     & ~3.500~ &  ~3.500    \\
+                    & 216          & 6-31g      & ~3.500~ &  ~3.500    \\
+\colrule
+{\sc Crystal98}$^b$ &   8          & sto-3g     & ~3.500~ &  ~3.500    \\
+                    &   8          & 6-31g      & ~3.500~ &  ~3.500    \\
 \botrule
 \end{tabular}\\}
 \raggedright{
