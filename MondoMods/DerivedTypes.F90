@@ -214,8 +214,7 @@ MODULE DerivedTypes
      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
-     LOGICAL                     :: Translate  !-- Should the Atomic Coordinated be Translated 
-     LOGICAL                     :: Trans_COM  !-- Weither to Translate to The center of The Box
+     LOGICAL                     :: NoTransVec !-- Was the translate calculated or suppied
      LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
      REAL(DOUBLE)                :: CellVolume !-- Cell Volume
      REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
@@ -361,15 +360,6 @@ MODULE DerivedTypes
      TYPE(INT_VECT)   :: CDrv
      TYPE(INT_RNK2)   :: SLOC
   END TYPE IDrv
-!-------------------------------------------------------------------------------------
-!  ONX integral space
-!
-  TYPE ISpc
-    INTEGER           :: L1,L2,L3,L4
-    INTEGER           :: NB1,NB2
-    INTEGER           :: NK1,NK2
-    INTEGER           :: NVRR
-  END TYPE ISpc
 !-------------------------------------------------------------------------------------
 !  ONX gradient driver
 !

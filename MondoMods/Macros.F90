@@ -40,7 +40,6 @@ MODULE Macros
          CHARACTER(LEN=*),INTENT(IN)          :: Prog
          LOGICAL,OPTIONAL                     :: Serial_O
          INTEGER                              :: I
-         LOGICAL                              :: Potential
 #ifdef PARALLEL
          LOGICAL                              :: Serial
          INTEGER                              :: ChkNPrc
@@ -126,7 +125,7 @@ MODULE Macros
          MaxBlkSize=0
          DO I=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)); ENDDO
 !        Load global thresholding values
-         CALL SetThresholds(CurBase,Prog)
+         CALL SetThresholds(CurBase)
 #ifdef PARALLEL
          IF(InParallel)THEN        
             CALL New(OffSt,NPrc-1,0)

@@ -29,7 +29,11 @@ MODULE KxcGen
       TYPE(DBL_RNK2)         :: Temp
       TYPE(AtomPair)         :: Pair
       INTEGER                :: AtA,AtB
-      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J,NACount 
+      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
+#ifdef PERIODIC        
+      INTEGER                   :: NCA,NCB
+      REAL(DOUBLE),DIMENSION(3) :: A,B
+#endif     
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
       P=1; 
@@ -42,9 +46,26 @@ MODULE KxcGen
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
-               IF(AtB<=AtA)THEN   
-!                 Compute only the lower triangle of symmetric Kxc
+               IF(AtB<=AtA)THEN
+!              Compute only the lower triangle of symmetric Kxc
+#ifdef PERIODIC
+                  A = Pair%A
+                  B = Pair%B
+                  DO NCA = 1,CS_OUT%NCells
+                     Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
+                     DO NCB = 1,CS_OUT%NCells
+                        Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
+                        Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                                  + (Pair%A(2)-Pair%B(2))**2 &
+                                  + (Pair%A(3)-Pair%B(3))**2
+                        IF(TestAtomPair(Pair)) THEN
+                           Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
+                        ENDIF
+                     ENDDO
+                  ENDDO
+#else
                   Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
+#endif
                ENDIF
                Kxc%ColPt%I(P)=AtB
                Kxc%BlkPt%I(P)=R
@@ -108,11 +129,10 @@ MODULE KxcGen
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
-                                                   StopLA,StopLB
-       INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,      &
-                                                   LMNA,LMNB,LA,LB,MA,MB,      &
-                                                   NA,NB,LAB,MAB,NAB,LMN,EllA, &
-                                                   LenHG,EllB,NC
+                                                   StopLA,StopLB,LenHG
+       INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,    &
+                                                   LMNA,LMNB,LA,LB,MA,MB,    &
+                                                   NA,NB,LAB,MAB,NAB,LMN,EllA,EllB
 !-------------------------------------------------------------------------------------- 
        KBlk=Zero
        KA=Pair%KA
@@ -147,18 +167,7 @@ MODULE KxcGen
              Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
              Prim%Zeta=Prim%ZA+Prim%ZB
              Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-!
-#ifdef PERIODIC
-             CALL SetKxcCell(GM,Prim%Ell,Prim%ZA,Prim%ZB,ExtraEll_O=1) 
-             DO NC=1,CS_Kxc%NCells
-                Prim%A   = Pair%A + CS_Kxc%CellCarts%D(1:3,NC)
-                Prim%B   = Pair%B + CS_Kxc%CellCarts%D(4:6,NC)
-                Prim%AB2 = (Prim%A(1)-Prim%B(1))**2 &
-                         + (Prim%A(2)-Prim%B(2))**2 &
-                         + (Prim%A(3)-Prim%B(3))**2
-#endif
-!
-             IF(TestPrimPair(Prim%Ell,Prim%Xi,Prim%AB2)) THEN
+             IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values
@@ -187,7 +196,7 @@ MODULE KxcGen
                    PBox%BndBox(:,2)=Prim%P
                    PBox=ExpandBox(PBox,PExtent)
 !                  Walk the walk
-                   Ket=Zero  
+                   Ket=Zero
                    CALL KxcWalk(CubeRoot)
 !                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc
                    IA = IndexA
@@ -206,9 +215,6 @@ MODULE KxcGen
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF
-#ifdef PERIODIC
-             ENDDO
-#endif
           ENDDO 
           ENDDO
        ENDDO

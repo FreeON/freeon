@@ -679,7 +679,6 @@ MODULE ParseInput
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%InVecForm=.TRUE.
          ENDIF
-
 !----------------------------------------------------------------------------
 !        Input Type on the Coordinates, Atomic or Fractional
 !
@@ -692,16 +691,6 @@ MODULE ParseInput
             WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%InAtomCrd=.TRUE.
-         ENDIF
-!-------------------------------------------------------------
-!        Intput Type of Translation
-!
-         IF(OptKeyQ(Inp,PBOUNDRY,TRAN_COM)) THEN
-            GM%PBC%Translate = .TRUE.
-            GM%PBC%Trans_COM = .TRUE.
-         ELSE
-            GM%PBC%Translate = .FALSE.
-            GM%PBC%Trans_COM = .FALSE.
          ENDIF
 #endif
 !----------------------------------------------------------------------------
@@ -796,7 +785,7 @@ MODULE ParseInput
 !           Convert to AU and Compute Fractioan and Atomic Coordinates  
             IF(GM%PBC%InAtomCrd) THEN
                IF(.NOT.GM%InAU) THEN 
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU 
+                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
                ENDIF
                CALL CalFracCarts(GM)
             ELSE
@@ -805,10 +794,10 @@ MODULE ParseInput
                CALL CalAtomCarts(GM)
             ENDIF
 !
-            IF(GM%PBC%Trans_COM) THEN
+            IF(GM%PBC%NoTransVec) THEN
                CALL CalTransVec(GM)
             ENDIF
-            CALL Translate(GM,GM%PBC%TransVec)
+!           CALL Translate(GM)
             CALL WrapAtoms(GM)
 #else
 !           Convert to AU
@@ -833,9 +822,7 @@ MODULE ParseInput
             CALL Put(GM,Tag_O=IntToChar(NumGeom))
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
-!            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
-!            IF(.TRUE.) STOP
-!           Exit 
+!           Exit
             IF(LastConfig)EXIT
          ENDDO
 !
@@ -1116,23 +1103,18 @@ MODULE ParseInput
               CALL MondoHalt(PRSE_ERROR,'No Lattice Vectors where supplied')
            ENDIF
         ENDIF
-!--------------------------------------------------------------
-!       Logic for the Translate and Lattice Vector
 !
-        IF(.NOT. GM%PBC%Trans_COM) THEN
-           IF(NTvec == 0) THEN
-              GM%PBC%Translate = .FALSE.
-           ELSEIF(NTvec == 1) THEN
-              GM%PBC%Translate = .TRUE.
-           ELSE
-              CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
-           ENDIF
+        IF(NTvec == 0) THEN
+           GM%PBC%NoTransVec=.TRUE.
+        ELSEIF(NTvec == 1) THEN
+           GM%PBC%NoTransVec=.FALSE.
+        ELSE
+           CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
         ENDIF
-!--------------------------------------------------------------
+!
         IF(NLvec .LT. GM%PBC%Dimen) THEN
            CALL MondoHalt(PRSE_ERROR,'Number of Lattice Vectors is Incorrect')      
         ENDIF
-
 !---------------------------------------------------------------------------- 
 !       Convert the lattice and translate vectors to AU 
 !
@@ -1339,12 +1321,42 @@ MODULE ParseInput
 !============================================================================
 !
 !============================================================================
-      SUBROUTINE  CalTransVec(GM)
-        TYPE(CRDS)                  :: GM
-        REAL(DOUBLE),DIMENSION(1:3) :: CMVec
-        INTEGER                     :: I
+      SUBROUTINE  CalFracCarts(GM)
+         TYPE(CRDS)                 :: GM
+         INTEGER                    :: I
 !
-        CMVec(:)=Zero
+!        Generate the Fractioanl Coordinates
+!
+         DO I=1,GM%NAtms
+            GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
+            GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
+         ENDDO
+!
+       END SUBROUTINE CalFracCarts
+!============================================================================
+!
+!============================================================================
+      SUBROUTINE  CalAtomCarts(GM)
+        TYPE(CRDS)                 :: GM
+        INTEGER                    :: I
+!
+!       Generate the Atomic Coordinates
+!
+        DO I=1,GM%NAtms
+           GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
+           GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
+        ENDDO
+!
+      END SUBROUTINE CalAtomCarts
+!============================================================================
+!
+!============================================================================
+      SUBROUTINE  CalTransVec(GM)
+        TYPE(CRDS)                 :: GM
+        REAL(DOUBLE),DIMENSION(3)  :: CMVec
+        INTEGER                    :: I
+!
+        CMVec=Zero
         DO I=1,GM%NAtms
            CMVec(:) = CMVec(:)+GM%BoxCarts%D(:,I)
         ENDDO
@@ -1356,6 +1368,38 @@ MODULE ParseInput
         ENDDO
 !
       END SUBROUTINE CalTransVec
+!============================================================================
+!
+!============================================================================
+      SUBROUTINE  Translate(GM)
+        TYPE(CRDS)                 :: GM
+        REAL(DOUBLE),DIMENSION(3)  :: ATvec,FTvec
+!
+        ATvec(:) = GM%PBC%TransVec(:)
+        FTvec(:) = AtomToFrac(GM,ATvec(:))
+!
+!       Tranaslate The Atoms
+!
+        DO I=1,GM%NAtms
+           GM%Carts%D(:,I)    = GM%Carts%D(:,I) + ATvec(:)
+           GM%BoxCarts%D(:,I) = GM%BoxCarts%D(:,I) + FTvec(:)
+        ENDDO
+!
+      END SUBROUTINE Translate
+!============================================================================
+!
+!============================================================================
+      SUBROUTINE  WrapAtoms(GM)
+        TYPE(CRDS)     :: GM
+!
+        IF(GM%PBC%AtomW) THEN
+           DO I=1,GM%NAtms
+              CALL FracCyclic(GM,GM%BoxCarts%D(:,I))
+              CALL AtomCyclic(GM,GM%Carts%D(:,I))
+           ENDDO
+        ENDIF
+!
+      END SUBROUTINE WrapAtoms
 #endif
 !============================================================================
 !

@@ -13,22 +13,16 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Delete the CellSet
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCELL,Dimen_O)
+  SUBROUTINE New_CellSet(CS,NCELL)
     TYPE(CellSet)                    :: CS   
-    INTEGER                          :: NCELL,Dimen
-    INTEGER,OPTIONAL                 :: Dimen_O
+    INTEGER                          :: NCELL
 !
-    IF(Present(Dimen_O)) THEN
-       Dimen = Dimen_O
-    ELSE
-       Dimen = 3
-    ENDIF
     CS%NCells = NCELL
     IF(AllocQ(CS%Alloc)) THEN
        CALL Delete(CS%CellCarts)
-       CALL New(CS%CellCarts,(/Dimen,CS%NCells/))    
+       CALL New(CS%CellCarts,(/3,CS%NCells/))    
     ELSE
-       CALL New(CS%CellCarts,(/Dimen,CS%NCells/))    
+       CALL New(CS%CellCarts,(/3,CS%NCells/))    
     ENDIF
     CS%Alloc=ALLOCATED_TRUE
 !

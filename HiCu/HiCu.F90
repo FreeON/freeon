@@ -41,9 +41,9 @@ PROGRAM HaiKu
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
 #ifdef PERIODIC
-! Calculate the Number of Cells for the Grid
-  CALL SetGridCell(GM,ExtraEll_O=1)
-  CALL PPrint(CS_Grid,'CS_Grid',Prog)
+! Calculate the Number of Cells
+  CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif 
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)

@@ -146,8 +146,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           Cnt=BSc%CCoef%D(StopLA,PFA,CFA,KA)*BSp%CCoef%D(StopLC,PFC,CFC,KC)
           VSAC=EXP(-Za*Zc/Zeta*AC2)/Zeta*Prev1*Cnt
           XiAB=Za*Zc/Zeta
-          IF (TestPrimPair(MaxLA+MaxLC,XiAB,AC2)) THEN
-!          IF(XiAB*AC2 < PrimPairDistanceThreshold%D(0)) THEN
+          IF (TestPrimPair(XiAB,AC2)) THEN
             I0=I0+1
             DB%TBufP%D(1,I0,iBf)=Zeta
             DB%TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta

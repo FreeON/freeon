@@ -333,7 +333,7 @@ PROGRAM SDMM
       CALL Add(P,P2,T1)
       CALL Add(T1,P3,P2)     !     P[J+1] = u*P[J] + v*P[J].P[J] + w*P[J].P[J].P[J]
       CALL Filter(P,P2)      !     P=Filter[P[N+1,I+1]]
-      PcntPNon0=1D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF)    
+      PcntPNon0=1D2*DBLE(P%NNon0)/DBLE(NBasF*NBasF)        
 !-----------------------------------------------------------------------------
 !     COMPUTE PURIFICATION STATS
 !
@@ -347,12 +347,7 @@ PROGRAM SDMM
       CALL Multiply(P,F,T1)
       NewE=Trace(T1)                             ! E=Tr{P.F}
 #else
-      CALL Multiply(P,F,T1)
-      NewE=Trace(T1)
-      CALL XPose(T1,T2)
-      CALL Multiply(T2,-One)
-      CALL ADD(T1,T2,T3)
-      MxCom=MAX(T3)       
+      NewE=Trace(P,F)
 #endif     
       DeltaE=ABS(OldE-NewE)
       DeltaEQ=ABS((NewE-OldE)/NewE)
@@ -389,8 +384,7 @@ PROGRAM SDMM
                //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))               &
                //', %Non0= '//TRIM(IntToChar(PcntPNon0))               &
 !               //', c = '//TRIM(DblToShrtChar(c))                     &
-               //', MAX(/P) = '//TRIM(DblToShrtChar(DeltaP))           & 
-               //', MAX[P,F]= '//TRIM(DblToShrtChar(MxCom))    
+               //', MAX(/P) = '//TRIM(DblToShrtChar(DeltaP)) 
             WRITE(*,*)TRIM(Mssg)
             WRITE(Out,*)TRIM(Mssg)
             CALL PrintProtectR(Out)
