@@ -48,20 +48,25 @@
 !    IF (IntCodeC.eq.06010201) Explicit=.FALSE.
 !    IF (IntCodeC.eq.02010601) Explicit=.FALSE.
 
-    IF (IntCodeC.eq.03020301) Explicit=.FALSE.  ! 02020201
-    IF (IntCodeC.eq.03030301) Explicit=.FALSE.  ! 02020201
-    IF (IntCodeC.eq.03020201) Explicit=.FALSE.  ! 02020201
-    IF (IntCodeC.eq.03030201) Explicit=.FALSE.  ! 02020201
-    IF (IntCodeC.eq.02020301) Explicit=.FALSE.  ! 02020201
-    IF (IntCodeC.eq.03010302) Explicit=.FALSE.  ! 02010202
-    IF (IntCodeC.eq.02010303) Explicit=.FALSE.  ! 02010202
-    IF (IntCodeC.eq.03010303) Explicit=.FALSE.  ! 02010202
-    IF (IntCodeC.eq.03010202) Explicit=.FALSE.  ! 02010202
-    IF (IntCodeC.eq.02010302) Explicit=.FALSE.  ! 02010202
-    IF (IntCodeC.eq.06030101) Explicit=.FALSE.
-    IF (IntCodeC.eq.01010603) Explicit=.FALSE.
-    IF (IntCodeC.eq.06010301) Explicit=.FALSE.
-    IF (IntCodeC.eq.03010601) Explicit=.FALSE.
+!    IF (IntCodeC.eq.03020301) Explicit=.FALSE.  ! 02020201
+!    IF (IntCodeC.eq.03030301) Explicit=.FALSE.  ! 02020201
+!    IF (IntCodeC.eq.03020201) Explicit=.FALSE.  ! 02020201
+!    IF (IntCodeC.eq.03030201) Explicit=.FALSE.  ! 02020201
+!    IF (IntCodeC.eq.02020301) Explicit=.FALSE.  ! 02020201
+
+!    IF (IntCodeC.eq.03010302) Explicit=.FALSE.  ! 02010202
+!    IF (IntCodeC.eq.02010303) Explicit=.FALSE.  ! 02010202
+!    IF (IntCodeC.eq.03010303) Explicit=.FALSE.  ! 02010202
+!    IF (IntCodeC.eq.03010202) Explicit=.FALSE.  ! 02010202
+!    IF (IntCodeC.eq.02010302) Explicit=.FALSE.  ! 02010202
+
+!    IF (IntCodeC.eq.06030101) Explicit=.FALSE.  ! 06020101
+
+!    IF (IntCodeC.eq.01010603) Explicit=.FALSE.  ! 01010602
+
+!    IF (IntCodeC.eq.06010301) Explicit=.FALSE.  ! 06010201
+
+!    IF (IntCodeC.eq.03010601) Explicit=.FALSE.  ! 02010601 
 !
 ! L=4 exceptions
 !
@@ -80,6 +85,7 @@
     IF (IntCodeC.eq.06020301) Explicit=.FALSE.
     IF (IntCodeC.eq.06030201) Explicit=.FALSE.
     IF (IntCodeC.eq.06030301) Explicit=.FALSE.
+
     IF (IntCodeC.eq.03020202) Explicit=.FALSE.  ! 02020202
     IF (IntCodeC.eq.02020302) Explicit=.FALSE.  ! 02020202
     IF (IntCodeC.eq.03030202) Explicit=.FALSE.  ! 02020202
@@ -88,6 +94,7 @@
     IF (IntCodeC.eq.03030302) Explicit=.FALSE.  ! 02020202
     IF (IntCodeC.eq.03020303) Explicit=.FALSE.  ! 02020202
     IF (IntCodeC.eq.03030303) Explicit=.FALSE.  ! 02020202
+
     IF (IntCodeC.eq.06010302) Explicit=.FALSE.
     IF (IntCodeC.eq.06010303) Explicit=.FALSE.
     IF (IntCodeC.eq.03020601) Explicit=.FALSE.

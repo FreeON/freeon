@@ -82,7 +82,6 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
 
     iCP=Drv%CDrv%I(I2)            ! The pointer to the 2e contraction
     iCL=Drv%CDrv%I(iCP)           ! driver
-!    CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
     CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
 
   DO iCBra=1,DB1%LenCC       ! Loop over contraction lengths on the Bra
@@ -214,10 +213,7 @@ WRITE(*,*)'Ket ',LenKet,idKet,iPKet
 K%NAtms=NAtoms
 WRITE(*,*)Dot(K,K)
 
-
               END IF  ! ISL
-
-
 
             END DO ! I, LenBra
           END IF ! LenKet
