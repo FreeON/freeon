@@ -1,12 +1,5 @@
-C==============================================================================
-C--  This source code is part of the MondoSCF suite of 
-C--  linear scaling electronic structure codes.  
-C
-C--  Matt Challacombe
-C--  Los Alamos National Laboratory
-C--  Copyright 2000, The University of California
-C
-C    ECONOMIZED CONTRACTION OF SP MULTIPOLE TENSORS
+C    ECONOMIZED (FULLY FACTORED) CONTRACTION OF SP MULTIPOLE TENSORS
+C    Author: Matt Challacombe
 C==============================================================================
       SUBROUTINE CTraX77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
       IMPLICIT REAL*8 (a-h,o-z)

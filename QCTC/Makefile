@@ -1,4 +1,4 @@
-#------------------------------------------------------------------------------
+####################################################################################
 #--  This code is part of the MondoSCF suite of programs for linear scaling 
 #    electronic structure theory and ab initio molecular dynamics.
 #
@@ -24,7 +24,7 @@
 #    e.g. in the form "These calculations have been performed using MondoSCF, 
 #    a suite of programs for linear scaling electronic structure theory and
 #    ab initio molecular dynamics", and given appropriate citation.  
-#------------------------------------------------------------------------------
+####################################################################################
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
@@ -41,10 +41,23 @@ CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o  \
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
 #
+ReleaseFiles=XLate.x CTraX.x Globals.x MondoPoles.x \
+             Thresholds.x PoleTree.x PFFTensor.x    \
+             PBCFarField.x TreeWalk.x JGen.x NukE.x \
+             QCTC.x BlokTrPdJ.x JForce.x
+#
 all:	QCTC JFrc 
+#
+release:clean $(ReleaseFiles)
+	rm -rf MMA/Moments
+	rm -rf MMA/PAC
+	rm -rf MMA/MD3TRR
+	rm -rf MMA/XLate
+#
 clean:	CQCTC CJFrc cmma 
+#
 purge:	CQCTC CJFrc cmma 
-PURGE:  CQCTC CJFrc pmma 
+	rm -f $(REMOVESRCE)
 #
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
@@ -55,14 +68,14 @@ JFrc:	$(JFrcObjs)
 	mv JForce $(MONDO_HOME)/Exec/JForce
 #
 CQCTC:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/QCTC
 	ls 
 #
 CJFrc:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/JForce

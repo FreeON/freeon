@@ -1,12 +1,5 @@
-C==============================================================================
-C--  This source code is part of the MondoSCF suite of 
-C--  linear scaling electronic structure codes.  
-C
-C--  Matt Challacombe
-C--  Los Alamos National Laboratory
-C--  Copyright 2000, The University of California
-C
 C    TRANSLATION OF SP MULTIPOLE TENSORS
+C    Author: Matt Challacombe
 C==============================================================================
       SUBROUTINE XLate77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
       IMPLICIT REAL*8 (a-h,o-z)
@@ -42,9 +35,9 @@ C==============================================================================
                      sn=1.0D0
                   ENDIF
                   Cp(ldx)=Cp(ldx)+cn*Cq(kdx)*cmn*Cpq(lkdx)
-     $                           -sn*Sq(kdx)*smn*Spq(lkdx)        
+     >                           -sn*Sq(kdx)*smn*Spq(lkdx)        
                   Sp(ldx)=Sp(ldx)+cn*Cq(kdx)*smn*Spq(lkdx)
-     $                           +sn*Sq(kdx)*cmn*Cpq(lkdx)
+     >                           +sn*Sq(kdx)*cmn*Cpq(lkdx)
                ENDDO
             ENDDO
          ENDDO
