@@ -1,0 +1,8 @@
+./sub_pbs Conotoxin
+./sub_pbs ChyInh2
+./sub_pbs CytB562
+./sub_pbs Lysozyme
+./sub_pbs Interleukin
+./sub_pbs FibroblastGF
+./sub_pbs TyrPhos
+./sub_pbs HIVProtease

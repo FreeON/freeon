@@ -1,0 +1,30 @@
+<BeginTitle>
+Water Cluster Scaling
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+<<<<<<< template_inp
+Guess=SuperPos
+SCFMethod=(RH,RH)
+BasisSets=(STO-3G,6-31G**)
+ModelChem=(BLYPxc,BLYPxc)
+Accuracy =(Loose,Good)
+=======
+Guess=SuperPos
+SCFMethod=(SDMM,SDMM)
+BasisSets=(STO-2G,6-31G**)
+ModelChem=(BLYPxc,BLYPxc)
+Accuracy =(Loose,Good)
+>>>>>>> 1.4
+DebugAll=(MaxDebug)
+Geometry=(InAngstroms,HOrder)
+<<<<<<< template_inp
+BlokAInv=(Test,1.D3)
+=======
+BlokAInv=(Test,1.D20)
+>>>>>>> 1.4
+<EndOptions>
+
+<BeginGeometry>

@@ -1,39 +1,39 @@
 gunzip XYZ/*
 
-cat template             >  ChyInh2.in
-cat XYZ/ChyInh2.xyz      >> ChyInh2.in
-cat end                  >> ChyInh2.in
+cat template_inp         >  ChyInh2.inp
+cat XYZ/ChyInh2.xyz      >> ChyInh2.inp
+cat end_inp              >> ChyInh2.inp
 
-cat template             >  CytB562.in
-cat XYZ/CytB562.xyz       >> CytB562.in
-cat end                  >> CytB562.in
+cat template_inp         >  CytB562.inp
+cat XYZ/CytB562.xyz      >> CytB562.inp
+cat end_inp              >> CytB562.inp
 
-cat template             >  HIVProtease.in
-cat XYZ/HIVProtease.xyz  >> HIVProtease.in
-cat end                  >> HIVProtease.in
+cat template_inp         >  HIVProtease.inp
+cat XYZ/HIVProtease.xyz  >> HIVProtease.inp
+cat end_inp              >> HIVProtease.inp
 
-cat template             >  Lysozyme.in
-cat XYZ/Lysozyme.xyz     >> Lysozyme.in
-cat end                  >> Lysozyme.in
+cat template_inp         >  Lysozyme.inp
+cat XYZ/Lysozyme.xyz     >> Lysozyme.inp
+cat end_inp              >> Lysozyme.inp
 
-cat template             >  Lysozyme.in
-cat XYZ/Lysozyme.xyz     >> Lysozyme.in
-cat end                  >> Lysozyme.in
+cat template_inp         >  Lysozyme.inp
+cat XYZ/Lysozyme.xyz     >> Lysozyme.inp
+cat end_inp              >> Lysozyme.inp
 
-cat template             >  Conotoxin.in
-cat XYZ/Conotoxin.xyz      >> Conotoxin.in
-cat end                  >> Conotoxin.in
+cat template_inp         >  Conotoxin.inp
+cat XYZ/Conotoxin.xyz    >> Conotoxin.inp
+cat end_inp              >> Conotoxin.inp
 
-cat template             >  FibroblastGF.in
-cat XYZ/FibroblastGF.xyz >> FibroblastGF.in
-cat end                  >> FibroblastGF.in
+cat template_inp         >  FibroblastGF.inp
+cat XYZ/FibroblastGF.xyz >> FibroblastGF.inp
+cat end_inp              >> FibroblastGF.inp
 
-cat template             >  Interleukin.in
-cat XYZ/Interleukin.xyz  >> Interleukin.in
-cat end                  >> Interleukin.in
+cat template_inp         >  Interleukin.inp
+cat XYZ/Interleukin.xyz  >> Interleukin.inp
+cat end_inp              >> Interleukin.inp
 
-cat template             >  TyrPhos.in
-cat XYZ/TyrPhos.xyz      >> TyrPhos.in
-cat end                  >> TyrPhos.in
+cat template_inp         >  TyrPhos.inp
+cat XYZ/TyrPhos.xyz      >> TyrPhos.inp
+cat end_inp              >> TyrPhos.inp
 
 gzip XYZ/*
