@@ -9,10 +9,10 @@ RBLYPxc/6-31G** -679.97838 9298
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(RH,SDMM,SDMM)
-BasisSets=(STO-3G,6-31G**,6-31G**)
-ModelChem=(HF,BLYPxc,PBE0)
-Accuracy =(Loose,Good,Good)
+SCFMethod=(RH,SDMM)
+BasisSets=(STO-3G,6-31G**)
+ModelChem=(HF,BLYPxc)
+Accuracy =(Loose,Good)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms)
 <EndOptions>
