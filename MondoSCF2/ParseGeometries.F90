@@ -7,6 +7,7 @@ MODULE ParseGeometries
   USE GeometryKeys
   USE PrettyPrint
   USE ControlStructures
+  USE ls_rmsd
   USE NEB
   USE Conflicted
 CONTAINS
@@ -19,7 +20,10 @@ CONTAINS
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
     TYPE(Int_Vect)   :: CurrentState
-    INTEGER          :: I,iCLONE,HDFFileID
+    INTEGER          :: I,iCLONE,HDFFileID,J
+    REAL(DOUBLE),DIMENSION(3,3) :: U
+    REAL(DOUBLE),DIMENSION(3)   :: Center1,Center2
+    REAL(DOUBLE) :: Error,R2
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
 !   NEB
@@ -65,7 +69,28 @@ CONTAINS
           ! Read in the reactants geometry from input
           CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0),O%Coordinates)          
           ! Read in the products geometry from input
-          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)   
+          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1),O%Coordinates)  
+          ! Minimize the RMS deviation between the products and reactants
+          CALL RMSD(G%Clone(0)%NAtms,G%Clone(0)%AbCarts%D,G%Clone(G%Clones+1)%AbCarts%D,  &
+                    1, U, center2, center1, error )! , calc_g, grad)
+          ! Rotation ... 
+          DO I=1,G%Clone(0)%NAtms
+             G%Clone(0)%AbCarts%D(:,I)=MATMUL(U,G%Clone(0)%AbCarts%D(:,I))
+          ENDDO
+          ! ... and translation
+          DO I=1,G%Clone(0)%NAtms
+             G%Clone(0)%AbCarts%D(:,I)=G%Clone(0)%AbCarts%D(:,I)+center1
+             G%Clone(G%Clones+1)%AbCarts%D(:,I)=G%Clone(G%Clones+1)%AbCarts%D(:,I)+center2
+          ENDDO
+
+          DO I=1,G%Clone(0)%NAtms
+             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(0)%AbCarts%D(:,I)
+          ENDDO
+          WRITE(*,*)' '
+          DO I=1,G%Clone(0)%NAtms
+             WRITE(*,3)Ats(INT(G%Clone(0)%AtNum%D(I))),G%Clone(G%Clones+1)%AbCarts%D(:,I)
+          ENDDO
+3         format(A3,' ',3(F10.5,', '))
        ENDIF
        IF(O%Guess==GUESS_EQ_RESTART)THEN
           ! Get midpoints from HDF

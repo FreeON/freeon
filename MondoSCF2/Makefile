@@ -29,18 +29,18 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC=#-DFULL_ON_FRONT_END_DEBUG
+CPPMISC= -DNEB2 #-DFULL_ON_FRONT_END_DEBUG
 #
-ObjectFiles = GetPID.o Spawn.o  ControlStructures.o NEB.o Numerics.o ParseCommands.o  \
+ObjectFiles = GetPID.o Spawn.o  ControlStructures.o ls_rmsd.o NEB.o Numerics.o ParseCommands.o  \
               OptionKeys.o ConflictDetect.o ParseOptions.o DynamicsKeys.o             \
               ParseDynamics.o GeometryKeys.o ParseProperties.o InCoords.o             \
               ParseGeometries.o PeriodicKeys.o ParsePeriodic.o ParseBasis.o           \
               ParallelKeys.o ParseParallel.o Massage.o GeomOptKeys.o ParseGeomOpt.o   \
               ParseExtraCoords.o ParseInput.o PunchHDF.o Overlay.o PrintParsed.o      \
-              SCFKeys.o SCFs.o MLP.o Response.o Hessian.o QUICCA.o Optimizer.o         \
-	      MDynamics.o ZippyQuote.o MondoSCF.o
+              SCFKeys.o SCFs.o MLP.o Response.o Hessian.o QUICCA.o Optimizer.o        \
+	      MDynamics.o ZippyQuote.o MondoSCF.o 
 #
-ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseCommands.x  \
+ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x ls_rmsd.x NEB.x Numerics.x ParseCommands.x  \
               OptionKeys.x ConflictDetect.x ParseOptions.x DynamicsKeys.x             \
               ParseDynamics.x GeometryKeys.x ParseProperties.x InCoords.x             \
               ParseGeometries.x PeriodicKeys.x ParsePeriodic.x ParseBasis.x           \

@@ -916,7 +916,7 @@ CONTAINS
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
     ELSE        
-!      Constraint the Gradients
+!      Constrain the Gradients
        DO iCLONE=1,G%Clones
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !         Get Forces
@@ -947,21 +947,6 @@ CONTAINS
                 ENDDO
              ENDDO
           ENDIF
-          IF(.FALSE.) THEN
-!            Force printing should be wired off!!
-             CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
-             DO iATS=1,G%Clone(iCLONE)%NAtms
-                A1=3*(iATS-1)+1
-                A2=3*iATS
-                Ftmp%D(A1:A2) = G%Clone(iCLONE)%Gradients%D(1:3,iATS)
-             ENDDO     
-             PrintFlags%Key=DEBUG_MAXIMUM
-             CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force')
-             CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force',Unit_O=6)
-             CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force')
-             CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force',Unit_O=6)
-             CALL Delete(Ftmp)
-          ENDIF
 !         Put back to disk
           CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
 !         Close the group
@@ -969,10 +954,12 @@ CONTAINS
           G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
        ENDDO
        CALL CloseHDF(HDFFileID)
+!
 !      NEB force projections
        IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
           CALL NEBForce(G,O)
        ENDIF
+!
 !      Zero forces on constrained atoms and compute stats with projected forces
        HDFFileID=OpenHDF(N%HFile)
        DO iCLONE=1,G%Clones
@@ -1006,7 +993,22 @@ CONTAINS
 !   Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
     CALL Delete(S%Action)
-!
+    IF(.FALSE.)THEN
+       DO iCLONE=1,G%Clones
+          CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
+          DO iATS=1,G%Clone(iCLONE)%NAtms
+             A1=3*(iATS-1)+1
+             A2=3*iATS
+             Ftmp%D(A1:A2) = G%Clone(iCLONE)%Gradients%D(1:3,iATS)
+          ENDDO
+          PrintFlags%Key=DEBUG_MAXIMUM
+          CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force')
+          CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force',Unit_O=6)
+          CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force')
+          CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force',Unit_O=6)
+          CALL Delete(Ftmp)
+       ENDDO
+    ENDIF
   END SUBROUTINE Force
 !===============================================================================
 ! Numerically compute Lattice Forces for J

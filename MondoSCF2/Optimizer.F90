@@ -7,6 +7,7 @@ MODULE Optimizer
   USE ControlStructures  
   USE InCoords
   USE QUICCAMod
+  USE NEB
   USE GeomOptKeys     
   USE PunchHDF
   USE GlobalScalars
@@ -407,6 +408,8 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
        ENDDO
+       ! Purify NEB images
+       CALL NEBPurify(C%Geos)
        ! Archive geometries
        CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
        ! Evaluate energies at the new geometry
@@ -527,6 +530,8 @@ CONTAINS
      CALL NEW(BCur ,SIZE(C%Stat%Previous%I))
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
+      IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
+          CALL NEBPurify(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -572,6 +577,8 @@ CONTAINS
        !
        ! Archive displaced geometries 
        !
+        IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB) &
+           CALL NEBPurify(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
        ! Fill in new geometries

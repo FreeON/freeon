@@ -500,11 +500,11 @@ CONTAINS
     CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
 
     IF(.NOT. OptDblQ(Inp, RSL, StepLength)) THEN
-      StepLength = 0.5D0
+      StepLength = 0.1D0
     ENDIF
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
-       NEBSpring=1.0
+       NEBSpring=2D-3
     ENDIF
     ! Use the climbing image?
     IF(OptKeyQ(Inp,NEB_OPTION,NEB_CLIMB))THEN
