@@ -1,3 +1,116 @@
+2004-04-14 17:38  nemeth
+
+	* MondoSCF2/Optimizer.F90: Max number of backtracking steps is set
+	to 1 from 10.
+
+2004-04-14 16:30  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Matt,
+	
+	Edited through and Made some changes
+	
+	1) Redid the Figure lableing, was not working correct
+	
+	2) put in some references, found the MTowler00 ref, and    put
+	placeholders in mondo_new.bib for GGens, RedHat90 and MGomez99	 
+	need to be corrected
+	
+	Left to Do
+	
+	a) Fix References b) Conclusions
+	
+	Otherwise, Looks very Good
+	
+	CJ
+
+2004-04-14 16:26  tymczak
+
+	* Docs/PBC_paper/Regions.eps: Rescale Figure
+
+2004-04-14 16:26  tymczak
+
+	* Docs/PBC_paper/BoxUC.eps: Rescale figure
+
+2004-04-14 16:25  tymczak
+
+	* Docs/Bib/mondo_new.bib: New Entries
+
+2004-04-14 15:08  nemeth
+
+	* MondoSCF2/Optimizer.F90: This should fix backtracking upon
+	restart.
+
+2004-04-14 14:39  ckgan
+
+	* MondoSCF2/SCFs.F90: Karoly and CK's fix for SCF convergence of
+	NEB.
+
+2004-04-14 08:56  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-14 00:24  nemeth
+
+	* MondoSCF2/Optimizer.F90: Internal coord backtracking is set back
+	to optional.
+
+2004-04-13 20:29  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: Recent
+	changes in the optimizer, related to parts of the periodic
+	optimizer andmodifications in the back-tracking.
+
+2004-04-13 18:07  ckgan
+
+	* MondoSCF2/: ControlStructures.F90, Optimizer.F90, OptionKeys.F90,
+	ParseOptions.F90: Karoly and CK's work on printing the NEB clones.
+
+2004-04-13 14:32  mchalla
+
+	* Docs/DM_Papers/PERT_2/perturbedprojector.tex: [no log message]
+
+2004-04-13 14:06  tymczak
+
+	* MondoMods/Macros.F90: Put in BarBones Timer, which is off
+
+2004-04-13 12:12  mchalla
+
+	* Docs/DM_Papers/PERT_2/: Makefile, figure2.eps,
+	perturbedprojector.tex: [no log message]
+
+2004-04-13 10:26  mchalla
+
+	* Docs/DM_Papers/PERT_2/: perturbedprojector.bbl,
+	perturbedprojector.tex: hopefully final revision
+
+2004-04-13 03:50  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-13 03:33  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Added some stuff.
+
+2004-04-13 00:07  nemeth
+
+	* MondoSCF2/InCoords.F90: A bug has been fixed in the projector of
+	translations.
+
+2004-04-12 15:25  nemeth
+
+	* MondoSCF2/Optimizer.F90: A backtracking problem is fixed now in
+	the internal coord optimizer.
+
+2004-04-09 21:29  nemeth
+
+	* Docs/Optimizer/PRL/: T27_2_1.eps, T27_2_1.gnu, T27_3_1.eps,
+	T27_3_1.gnu, T27energ, T27logdata1, T27logdata2: New files added to
+	the optimizer paper.
+
+2004-04-08 10:03  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-08 02:09  vweber
 
 	* OneE/: MBlok.F90, MakeM.F90: Fixed an array size problem.
