@@ -138,8 +138,8 @@ PROGRAM PulayDIIS
 !--------------------------------------------------------------------------------
    IF(ISCF<=1)THEN
 !    Damping on the first cycle
-     C0=0.9D0 
-     C1=0.1D0
+     C0=8D-1 
+     C1=2D-1
      CALL Multiply(F,C1)
      CALL Get(Tmp1,TrixFile('OrthoF',Args,-1))
      CALL Multiply(Tmp1,C0)

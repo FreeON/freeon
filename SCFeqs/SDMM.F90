@@ -45,7 +45,7 @@ PROGRAM SDMM
   CALL StartUp(Args,Prog)
 ! Look for overide of default number of CG cycles
   CALL OpenASCII(InpFile,Inp)  
-  IF(.NOT.OptIntQ(Inp,Prog,CGCycles))CGCycles=8
+  IF(.NOT.OptIntQ(Inp,Prog,CGCycles))CGCycles=14
   CLOSE(Inp)
 #ifdef PARALLEL
 !-----------------------------------------------------------------------
@@ -357,7 +357,8 @@ PROGRAM SDMM
       ToExit=.FALSE.
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
-         IF(DeltaEQ<Thresholds%ETol*1D-2)THEN
+         IF(DeltaEQ<Thresholds%ETol*1D-1)THEN !.OR. &
+!            DeltaP<5.D1*Thresholds%Trix)THEN
 !           Check for non-decreasing /P
             IF(DeltaP>OldDeltaP)ToExit=.TRUE.
         ENDIF
@@ -446,10 +447,17 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !  Convert to AO representation
 !
-   CALL Get(Z,TrixFile('Z',Args))
-   CALL Multiply(Z,P,T1)
-   CALL Get(Z,TrixFile('ZT',Args))
-   CALL Multiply(T1,Z,P)
+   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+   IF(Present)THEN     
+      CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
+      CALL Multiply(Z,P,T1)
+      CALL Multiply(T1,Z,P)
+   ELSE
+      CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
+      CALL Multiply(Z,P,T1)
+      CALL Get(Z,TrixFile('ZT',Args))
+      CALL Multiply(T1,Z,P)
+   ENDIF
    CALL Filter(T1,P) 
 !-----------------------------------------------------------------------------
 !  IO for the non-orthogonal P 
