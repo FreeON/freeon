@@ -43,11 +43,12 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode,IntCodeV,IntCodeC
+  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCodeV,IntCodeC
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
   TYPE(DBL_VECT)        :: DA
+  LOGICAL               :: Explicit
 !-------------------------------------------------------------------
 ! Function calls
 !-------------------------------------------------------------------
@@ -70,22 +71,8 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
     LTot=LBra+LKet
 
-!    IntCode=GetCode(TBra,TKet)
-
-    IntCode=TBra*10000+TKet
-
-    IntCodeV=IntCode
-    IntCodeC=IntCode
-
-    if(IntCode.eq.01010301) IntCodeV=01010201
-    if(IntCode.eq.03010101) IntCodeV=02010101
-    if(IntCode.eq.01010302) IntCodeV=01010202
-    if(IntCode.eq.01010303) IntCodeV=01010202
-    if(IntCode.eq.03020101) IntCodeV=02020101
-    if(IntCode.eq.03030101) IntCodeV=02020101
-
-    IF (LTot.LE.2) THEN
-!    if(IntCode.eq.02010201) then
+    CALL GetIntCode(LTot,TBra,TKet,IntCodeV,IntCodeC,Explicit)
+    IF (Explicit) THEN
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -255,7 +242,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 !                  CASE (22220000)
 !                    CALL Int6611()
                   CASE DEFAULT
-                    WRITE(*,*) "IntCode=",IntCode
+                    WRITE(*,*) "IntCode=",IntCodeV
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')
                 END SELECT
 

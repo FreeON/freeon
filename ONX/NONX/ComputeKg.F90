@@ -43,11 +43,12 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode
+  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCodeC,IntCodeV
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
   TYPE(DBL_VECT)        :: DA
+  LOGICAL               :: Explicit
 !-------------------------------------------------------------------
 ! Function calls
 !-------------------------------------------------------------------
@@ -70,9 +71,13 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
     LTot=LBra+LKet
 
-    IntCode=TBra*10000+TKet
+    CALL GetIntCode(LTot,TBra,TKet,IntCodeV,IntCodeC,Explicit)
+    IF (.NOT.Explicit) THEN
 
-    IF(LTot.GT.2) THEN
+!
+!    IntCode=TBra*10000+TKet
+!
+!    IF(LTot.GT.2) THEN
 !    if(IntCode.ne.02010201) then
 
 

@@ -12,7 +12,7 @@ Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            RangeOfExchange.o Tables.o GetTables.o \
            GetSubBlk.o XPose.o InitSubInd.o \
            RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o \
-           ComputeKe.o ComputeKg.o
+           ComputeKe.o ComputeKg.o GetIntCode.o
 
 Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
