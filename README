@@ -28,8 +28,6 @@ o Big apps and talk for ACS 2001
 o New density matrix guesser/minimizers
 
 Eric:  
-o Get ONX working again
-o Eliminate QChem stuff like KonK2L etc
 o F90ify and consolidate flavors of ONX, Gammas, etc
 o Gradients of exact K
 o Periodics of exact K
