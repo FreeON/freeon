@@ -110,8 +110,7 @@ MODULE Functionals
          ELSEIF(Key==HYBRID_PBE0)THEN
             Scalar=0.25D0
          ELSEIF(Key==HYBRID_B3LYP_VWN3.OR. &
-                Key==HYBRID_B3LYP_VWN5.OR. &
-                Key==HYBRID_B3LYP_PW91)THEN
+                Key==HYBRID_B3LYP_VWN5)THEN
             Scalar=0.20D0
          ELSEIF(Key==HYBRID_X3LYP)THEN
             Scalar=0.218D0
