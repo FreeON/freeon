@@ -88,6 +88,8 @@ MODULE SCFLocals
       INTEGER                            :: Vis
       TYPE(MDControls)                   :: MDC
 !
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: PopAnalysis
+!
    END TYPE
 
 !------------------------------------------------------------------------------------------------  
@@ -122,7 +124,7 @@ MODULE SCFLocals
         TYPE(SCFControls),        INTENT(IN) :: Ctrl
         Previous=Ctrl%Previous
         Current=Ctrl%Current
-!       Set SCF cycle indecies
+!     Set SCF cycle indecies
         PCyc=Previous(1)
         CCyc=Current(1)
         NCyc=CCyc+1
@@ -130,12 +132,12 @@ MODULE SCFLocals
         CurCycl=TRIM(IntToChar(CCyc))
         SCFCycl=TRIM(IntToChar(CCyc))
         NxtCycl=TRIM(IntToChar(NCyc))
-!       Set basis set indecies
+!     Set basis set indecies
         PBas=Previous(2)
         CBas=Current(2)
         PrvBase=TRIM(IntToChar(PBas))
         CurBase=TRIM(IntToChar(CBas))
-!       Set geometry indecies
+!     Set geometry indecies
         PGeo=Previous(3)
         CGeo=Current(3)
         NGeo=CGeo+1
