@@ -15,9 +15,9 @@ MODULE InCoords
 !
 !  USE GlobalCharacters
 !  USE Parse
-#ifdef NAG
-    USE F90_UNIX_ENV
-#endif
+!#ifdef NAG
+!    USE F90_UNIX_ENV
+!#endif
 !
 IMPLICIT NONE
 !
