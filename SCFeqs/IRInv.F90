@@ -13,34 +13,21 @@ PROGRAM IRInv
   USE LinAlg
   USE AtomPairs
   USE SetXYZ
+  USE DenMatMethods
   IMPLICIT NONE
 !
-  INTERFACE DSYEV
-     SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
-       USE GlobalScalars
-       CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
-       INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
-       INTEGER,          INTENT(OUT)   :: INFO
-       REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
-       REAL(DOUBLE),     INTENT(OUT)   :: W(*)
-       REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
-     END SUBROUTINE DSYEV
-  END INTERFACE
-!
-  TYPE(BCSR)                     :: S,S0,SDg,SNotDg,SInvH,Tmp1,Tmp2,Tmp3
+  TYPE(BCSR)                     :: S,SInvL,SInvR,Tmp1,Tmp2,Tmp3
 !
   TYPE(BSET)                     :: BS
   TYPE(CRDS)                     :: GM
   TYPE(ARGMT)                    :: Args
   TYPE(AtomPair)                 :: Pair 
-  TYPE(DBL_VECT)                 :: Values,Work
-  TYPE(DBL_RNK2)                 :: SBlk,InvSBlk,Vectors
-  INTEGER                        :: I,J,K,AtA,AtB,NN,P,R,Sbeg,  &
-                                    NA,NB,NANBmax,LWork,Info
-  REAL(DOUBLE)                   :: F2N,Beta,Factor,OneOvF2N,Error,Error_old     
+  INTEGER                        :: I,J,K,L,IC
+  REAL(DOUBLE)                   :: Error,Smax,Smin,Factor
+  LOGICAL                        :: ErrorTrue
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),PARAMETER     :: Prog='IRInv'
-!--------------------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 ! Start up macro
   CALL StartUp(Args,Prog)
 ! Get basis set and geometry
@@ -48,76 +35,63 @@ PROGRAM IRInv
   CALL Get(GM,Tag_O=CurGeom)
 ! Get the Overlap Matrix
   CALL Get(S,TrixFile('S',Args))
-!-------------------------------------------------
-! Find the Max and Min Eignevalue of S
-  CALL New(Vectors,(/NBasF,NBasF/))
-  CALL New(Values,NBasF)
-  LWork=MAX(1,3*NBasF)
-  CALL New(Work,LWork)
-  CALL SetEq(Vectors,S)
-  CALL DSYEV('V','U',NBasF,Vectors%D,NBasF,Values%D,Work%D,LWork,Info)
-  WRITE(*,*) "S:"
-  WRITE(*,*) "Smallest Eigenvalue = ",Values%D(1)
-  WRITE(*,*) "Largest  Eigenvalue = ",Values%D(NBasF)
-  Beta = Values%D(NBasF)*0.01D0
-  CALL New(S0)
-  CALL SetEq(S0,S)
-  CALL Add(S0,Beta)
-!-------------------------------------------------
-! Iterate Using Anders Algorithm
-!
+!----------------------------------------------------------------------------
+! Allocate 
   CALL New(Tmp1)
   CALL New(Tmp2)
-  CALL New(Tmp3)
-! Rescale S0 as the Initial Guess
-  Factor = One/SQRT(Two*Values%D(NBasF)**3)
-  CALL SetEq(SInvH,S0)
-  CALL Multiply(SInvH,Factor)
+  CALL New(Tmp3) 
+  CALL New(SInvL)
+  CALL New(SInvR)
+!-------------------------------------------------
+! Calculate Eigen Bounds of S
+!  CALL EigenBounds(S,Smin,Smax)
+  Smin=5D-3
+  Smax=5.D0
+!-------------------------------------------------
+! Iterate Using Anders Algorithm
+! Rescale I as the Initial Guess
+  Factor = SQRT(1.9D0)/SQRT(ABS(Smax))
+  CALL SetToI(SInvL)  
+  CALL SetToI(SInvR)
+  CALL Multiply(SInvL,Factor)  
+  CALL Multiply(SInvR,Factor)
 ! Calculate the Inverse of S
-  DO J=1,2
-     Error_old=1D8
-     DO I=1,20
-!       Calculate X
-        CALL Multiply(SInvH,S0,Tmp1)
-        CALL Multiply(Tmp1,SInvH,Tmp2)
-        CALL SetEq(Tmp1,Tmp2)
-!       Compute the Error
-        CALL Add(Tmp2,-One)
-        Error = MAX(Tmp2)
-        WRITE(*,*) I,Error,100.D0*DBLE(SInvH%NNon0)/DBLE(NBasF*NBasF)
-        IF(Error > Error_old) THEN
-           CALL SetEq(SInvH,Tmp3)
-           EXIT
-        ENDIF
-        IF(Error < 1.D-8) EXIT
-        Error_old = Error
-!       Calculate X2
-        CALL Multiply(Tmp1,Tmp1,Tmp3)
-        CALL SetEq(Tmp2,Tmp3)
-!       Calculate 1.875*I-1.250*X+0.375*X*X
-        CALL Multiply(Tmp1,-1.250D0)
-        CALL Multiply(Tmp2, 0.375D0)
-        CALL Add(Tmp1,1.875D0)
-        CALL Add(Tmp1,Tmp2,Tmp3)
-        CALL SetEq(Tmp1,Tmp3)
-!       Calculate SInvH*(1.875*I-1.250*X+0.375*X*X)
-        CALL Multiply(SInvH,Tmp1,Tmp2)
-        CALL Multiply(Tmp1,SInvH,Tmp3)
-        CALL Add(Tmp2,Tmp3,Tmp1)
-        CALL Multiply(Tmp1,Half)
-        CALL SetEq(Tmp3,SInvH)
-        CALL Filter(SInvH,Tmp1)
-     ENDDO
-!    Rescale delta+S0
-     WRITE(*,*) 
-     CALL Add(S0,-Beta)
+  IC        = 0
+  ErrorTrue = .FALSE.
+  DO I=1,20
+!    Calculate X
+     CALL Multiply(SInvL,S,Tmp1)
+     CALL Filter(Tmp3,Tmp1)
+     WRITE(*,'(F8.2,1x,F8.2)') 100.D0*DBLE(Tmp3%NNon0)/DBLE(NBasF*NBasF),100.D0*DBLE(Tmp1%NNon0)/DBLE(NBasF*NBasF)
+     CALL Multiply(Tmp3,SInvR,Tmp2)
+     CALL Filter(Tmp1,Tmp2)
+     WRITE(*,'(F8.2,1x,F8.2)') 100.D0*DBLE(Tmp1%NNon0)/DBLE(NBasF*NBasF),100.D0*DBLE(Tmp2%NNon0)/DBLE(NBasF*NBasF)
+!    Compute the Error
+     CALL Add(Tmp2,-One)
+     Error = MAX(Tmp2)
+     WRITE(*,'(i4,1x,D14.6,1x,F8.2,1x,F8.2)') I,Error,                                   &
+                                           100.D0*DBLE(SInvL%NNon0)/DBLE(NBasF*NBasF),   &
+                                           100.D0*DBLE(Tmp1%NNon0)/DBLE(NBasF*NBasF)
+     IF(Error < Thresholds%Trix .AND. ErrorTrue==.FALSE.) ErrorTrue = .TRUE.
+     IF(ErrorTrue) IC = IC + 1
+     IF(IC > 1) EXIT
+!    Calculate X2
+     CALL Multiply(Tmp1,Tmp1,Tmp3)
+     CALL Filter(Tmp2,Tmp3)
+!    Calculate 1.875*I-1.250*X+0.375*X*X
+     CALL Multiply(Tmp1,-1.250D0)
+     CALL Multiply(Tmp2, 0.375D0)
+     CALL Add(Tmp1,Tmp2,Tmp3)
+     CALL SetEq(Tmp1,Tmp3)
+     CALL Add(Tmp1,1.875D0)
+!    Calculate SInvL = (1.875*I-1.250*X+0.375*X*X)*SinvL
+     CALL Multiply(Tmp1,SInvL,Tmp2)
+     CALL Filter(SInvL,Tmp2)
+!    Calculate SInvR = SInvR*(1.875*I-1.250*X+0.375*X*X)
+     CALL Multiply(SInvR,Tmp1,Tmp2)
+     CALL Filter(SInvR,Tmp2)
   ENDDO
-! Calculte the Error In the Inverse
-  CALL Multiply(SInvH,S,Tmp1)
-  CALL Multiply(Tmp1,SInvH,Tmp2)
-  CALL Add(Tmp2,-One)
-  WRITE(*,*) "MaxError = ",MAX(Tmp2)
-!
+!---------------------------------------------------
   IF(.TRUE.) STOP
 !---------------------------------------------------
 !!$    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
