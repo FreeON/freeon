@@ -134,14 +134,9 @@ PROGRAM ONX
   CALL Put(K%NNon0,'nkm')
 
   CALL PPrint(K,'K')
-  IF(PrintFlags%Key>=DEBUG_MEDIUM) THEN
-    CALL PChkSum(K,'K',Prog)
-  END IF
-  IF(PrintFlags%Mat==DEBUG_MATRICES)THEN
-     CALL PPrint(K,'K')
-  ELSEIF(PrintFlags%Mat==PLOT_MATRICES)THEN
-     CALL Plot(K,'K')
-  ENDIF
+  CALL PChkSum(K,'K',Prog)
+  CALL PPrint(K,'K')
+  CALL Plot(K,'K')
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------
