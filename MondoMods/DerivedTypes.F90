@@ -260,6 +260,7 @@ MODULE DerivedTypes
       INTEGER          :: NBeta     !-- Number of beta electrons
 !     Misc
       REAL(DOUBLE)     :: ETotal    !-- Total SCF Energy at this geometry
+      REAL(DOUBLE)     :: ELagr     !-- Constraint Energy at this geometry
       REAL(DOUBLE)     :: GradRMS   !-- RMS error in gradient at this geometry
       REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
       LOGICAL          :: Unstable  !-- SCF is unstable at this geometry 

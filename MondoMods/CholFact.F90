@@ -300,21 +300,32 @@ CONTAINS
    SUBROUTINE Show1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M)
      INTEGER,DIMENSION(:)   :: GcSRowPt,GcSColPt
      REAL(DOUBLE),DIMENSION(:) :: GcSMTrix
-     INTEGER        :: GcSNon0,I,J,N,NDim,K,L,M
+     INTEGER        :: I,J,N,NDim,K,L,M
      TYPE(DBL_RNK2) :: Aux
      CHARACTER(LEN=*) :: Char
      !
-     CALL New(Aux,(/N,M/))
-     Aux%D=Zero
-     DO I=1,N
-       DO J=GcSRowPt(I),GcSRowPt(I+1)-1
-         L=GcSColPt(J)
-         Aux%D(I,L)=GcSMTrix(J)
-       ENDDO
-     ENDDO
+     CALL Sp1x1ToFull(GcSRowPt,GcSColPt,GcSMTrix,N,M,Aux)
      CALL PPrint(Aux,Char,Unit_O=6)
      CALL Delete(Aux)
    END SUBROUTINE Show1x1
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE Sp1x1ToFull(IA,JA,AN,N,M,FullMat)
+     INTEGER,DIMENSION(:)   :: IA,JA
+     REAL(DOUBLE),DIMENSION(:) :: AN
+     INTEGER        :: I,J,N,L,M
+     TYPE(DBL_RNK2) :: FullMat
+     !
+     CALL New(FullMat,(/N,M/))
+     FullMat%D=Zero
+     DO I=1,N
+       DO J=IA(I),IA(I+1)-1
+         L=JA(J)
+         FullMat%D(I,L)=AN(J)
+       ENDDO
+     ENDDO
+   END SUBROUTINE Sp1x1ToFull
 !
 !---------------------------------------------------------------------
 !

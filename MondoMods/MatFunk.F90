@@ -135,5 +135,11 @@ MODULE MatFunk
       REAL(DOUBLE) :: InvSqRtA
       InvSqRtA=One/SQRT(A)
    END FUNCTION InvSqRt
+
+   FUNCTION AbsInv(A) RESULT(AbsInvA)
+      REAL(DOUBLE), INTENT(IN)  :: A
+      REAL(DOUBLE) :: AbsInvA
+      AbsInvA=One/ABS(A)
+   END FUNCTION AbsInv
 !
 END MODULE MatFunk
