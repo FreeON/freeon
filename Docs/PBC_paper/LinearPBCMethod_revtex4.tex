@@ -1,6 +1,5 @@
-%% LyX 1.1 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
-\documentclass[prb,aps,twocolumn]{revtex4}
+\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -8,7 +7,6 @@
 \usepackage{bm}
 \usepackage{alltt}
 \usepackage{dcolumn} 
-\usepackage{amsmath} 
 \usepackage{graphicx}
 \makeatletter 
 \makeatother
@@ -602,8 +600,9 @@ We would like to acknowledge Tommy Sewell and Ed Kober for there advise
 and support. We would also like to thank Anders Niklasson for his help
 in preparation of this manuscript. 
 
-\bibliographystyle{plain}
-\bibliography{GaussianPapers}
+%\bibliographystyle{plain}
+%\bibliography{GaussianPapers}
+\bibliographystyle{apsrmp} \bibliography{mondo}
 
 
 \appendix
@@ -775,19 +774,16 @@ direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 
 
-\eject
-%
-% 
-%
 \begin{table}
-\caption{\label{table:ComToCrystal98_1} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
 Sodium Chloride test system. The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
+\label{table:ComToCrystal98_1}
  
-{\centering \begin{tabular}{clcll}
+\begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
@@ -870,20 +866,21 @@ STO-3G/LDA\,\,&
 -611.09228\,\,\,\,\,\,\,\,\,\,\,&
 -305.54614\\
 \hline
-\end{tabular}\par}
+\end{tabular}
 \end{table}
 %
 %
 %
 \begin{table}
-\caption{\label{table:ComToCrystal98_2} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
 Magnesium Oxide test system.   The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
 The \textbf{Crystal98} 8-61G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
+\label{table:ComToCrystal98_2}
 
-{\centering \begin{tabular}{clcll}
+\begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
@@ -966,20 +963,21 @@ M-SCF&
 -275.47547 &
 -137.73774  \\ 
 \hline
-\end{tabular}\par}
+\end{tabular}
 \end{table}
 %
 %
 %
 \begin{table}
-\caption{\label{table:ComToCrystal98_3} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
 Diamond test system.  The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(2,2,2)$.
 The \textbf{Crystal98} 8-21G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
 functional \cite{Becke92}.}
+\label{table:ComToCrystal98_3}
 
-{\centering \begin{tabular}{clcll}
+\begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
@@ -1026,7 +1024,7 @@ M-SCF&
 -304.4756 &
 -38.05945\\
 \hline
-\end{tabular}\par}
+\end{tabular}
 \end{table}
 %
 %
