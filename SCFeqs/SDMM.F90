@@ -357,14 +357,12 @@ PROGRAM SDMM
       ToExit=.FALSE.
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
-         CALL OpenASCII(OutFile,Out)
-         IF(DeltaEQ<Thresholds%ETol*2.D-1)THEN
+         IF(DeltaEQ<Thresholds%ETol*1D-2)THEN
 !           Check for non-decreasing /P
             IF(DeltaP>OldDeltaP)ToExit=.TRUE.
         ENDIF
 !       Check for absolute convergence in total energy
         IF(DeltaEQ<1.D-11)ToExit=.TRUE.
-        CLOSE(Out)
       ENDIF
 !     Updtate previous cycle values
       OldE=NewE
