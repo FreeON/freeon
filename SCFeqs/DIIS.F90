@@ -186,23 +186,19 @@ PROGRAM DIIS
       CLOSE(Out)
   ENDIF
 !-------------------------------------------------------------------------------------
-! Extrapolation with DIIS coefficients
+! Extrapolation or damping 
   CALL Multiply(F,DIISCo%D(N-1))     
   I0=N-2
   DO I=ISCF-1,M,-1
-     WRITE(*,*)' I-ISCF = ',I-ISCF,' Co = ',DIISCo%D(I0)
      IF(DoDIIS==0)THEN
-        WRITE(*,*)TRIM(TrixFile('F_DIIS',Args,I-ISCF))
         CALL Get(Tmp1,TrixFile('F_DIIS',Args,I-ISCF))
      ELSE
-        WRITE(*,*)TRIM(TrixFile('OrthoF',Args,I-ISCF))
         CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
      ENDIF
      CALL Multiply(Tmp1,DIISCo%D(I0))
      CALL Add(F,Tmp1,E)
      IF(I==M)THEN
 !       Only filter the end product
-        Write(*,*)' Filter '
         CALL Filter(F,E)
      ELSE
         CALL SetEq(F,E)
