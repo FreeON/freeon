@@ -43,8 +43,9 @@ small:
 	MondoSCF Graphite.inp      Graphite.out      Graphite.log
 	MondoSCF PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
 	MondoSCF Histidine.inp     Histidine.out     Histidine.log 
-        MondoSCF Polyacetylene.inp Polyacetylene.out Polyacetylene.log
+	MondoSCF PBCUrea.inp       PBCUrea.out       PBCUrea.log
 big:	
+	MondoSCF PBCWater.inp     PBCWater.out      PBCWater.log
 	MondoSCF Caffiene.inp     Caffiene.out      Caffine.log
 	MondoSCF Diamond.inp      Diamond.out       Diamond.log
 	MondoSCF BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
@@ -61,7 +62,6 @@ pbs:
 	./sub_pbs Histidine      1
 	./sub_pbs Caffiene       1
 	./sub_pbs Vancomycin     1
-	./sub_pbs Polyacetylene  1
 	./sub_pbs PBCUrea        1
 	./sub_pbs PBCWater       1
 	./sub_pbs Steam          1
