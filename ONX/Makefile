@@ -14,6 +14,7 @@ release:clean
 #
 purge:	clean
 	make -C NONX purge
+	rm -rf Drivers/*.binary
 #
 clean:
 	cd VRR        ; $(MAKE) -i clean
