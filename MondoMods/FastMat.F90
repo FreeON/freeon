@@ -38,226 +38,217 @@ MODULE FastMatrices
 !======================================================================
 !
 !======================================================================
-    SUBROUTINE Redistribute_FastMat(A)
-      TYPE(FastMat),    POINTER :: A
-      TYPE(INT_RNK2)             :: LocalDims,RemoteDims
-      TYPE(INT_VECT)             :: SndBeg,SndRow,SndCol,SndBlk,SndMtx,SndEnd, &
-                                    RcvBeg,RcvRow,RcvCol,RcvBlk,RcvMtx,RcvEnd, &
-                                    RecvReqst,SendReqst,ToDo,                  &
-                                    SendOrder,RecvOrder,SendSched,RecvSched
-      REAL(DOUBLE),ALLOCATABLE, &
-                   DIMENSION(:)  :: SendBuffer,RecvBuffer
-      INTEGER,DIMENSION(2)       :: MyRow,AllCol
-      INTEGER                    :: B,E,Num,Row,Col,Blk,Mtx,N,I,K,Tag,IErr,    &
-                                    RE,To,From,NRecvs,NSends
-      CHARACTER(LEN=20)          :: Sub='Redistribute_FastMat'
-      REAL(DOUBLE)               :: StartTm,EndTm,TotTm
-      StartTm = MPI_Wtime()
+  SUBROUTINE Redistribute_FastMat(A)
+    TYPE(FastMat),    POINTER :: A
+    TYPE(INT_RNK2)             :: LocalDims,RemoteDims
+    TYPE(INT_VECT)             :: SndBeg,SndRow,SndCol,SndBlk,SndMtx,SndEnd, &
+         RcvBeg,RcvRow,RcvCol,RcvBlk,RcvMtx,RcvEnd, &
+         RecvReqst,SendReqst,ToDo,                  &
+         SendOrder,RecvOrder,SendSched,RecvSched
+    REAL(DOUBLE),ALLOCATABLE, &
+         DIMENSION(:)  :: SendBuffer,RecvBuffer
+    INTEGER,DIMENSION(2)       :: MyRow,AllCol
+    INTEGER                    :: B,E,Num,Row,Col,Blk,Mtx,N,I,K,Tag,IErr,    &
+         RE,To,From,NRecvs,NSends
+    CHARACTER(LEN=20)          :: Sub='Redistribute_FastMat'
+    REAL(DOUBLE)               :: StartTm,EndTm,TotTm
+    StartTm = MPI_Wtime()
 !----------------------------------------------------------------------
-      CALL SkipsOffQ(A%Alloc,'Redistribute_FASTMAT : A')
-      CALL SkipsOnFASTMAT(A)
+    CALL SkipsOffQ(A%Alloc,'Redistribute_FASTMAT : A')
+    CALL SkipsOnFASTMAT(A)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      CALL New(LocalDims,(/3,NPrc-1/),(/1,0/))
-      CALL New(RemoteDims,(/3,NPrc-1/),(/1,0/))
-      AllCol=(/1,NAtoms/)
-      DO N=0,NPrc-1 
-         LocalDims%I(:,N)=MatDimensions(A,(/Beg%I(N),End%I(N)/),AllCol)
-      ENDDO
-      LocalDims%I(:,MyId)=(/0,0,0/)
-!!$!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!!$      DO N=0,NPrc-1
-!!$         CALL AlignNodes()         
-!!$         IF(MyId==N)THEN
-!!$            WRITE(*,*)' =========== Local Id = ',MyId,'=================='
-!!$            DO I=0,NPrc-1
-!!$               WRITE(*,*)LocalDims%I(:,I)
-!!$            ENDDO
-!!$         ENDIF
-!!$      ENDDO
+    CALL New(LocalDims,(/3,NPrc-1/),(/1,0/))
+    CALL New(RemoteDims,(/3,NPrc-1/),(/1,0/))
+    AllCol=(/1,NAtoms/)
+    DO N=0,NPrc-1 
+       LocalDims%I(:,N)=MatDimensions(A,(/Beg%I(N),End%I(N)/),AllCol)
+    ENDDO
+    LocalDims%I(:,MyId)=(/0,0,0/)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      CALL MPI_ALLTOALL( LocalDims%I(1,0),3,MPI_INTEGER, &
-                        RemoteDims%I(1,0),3,MPI_INTEGER, &
-                        MONDO_COMM,IErr)
-      CALL ErrChk(IErr,Sub)            
-!!$!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!!$      DO N=0,NPrc-1
-!!$         CALL AlignNodes()         
-!!$         IF(MyId==N)THEN
-!!$            WRITE(*,*)' =========== Remote Id = ',MyId,'=================='
-!!$            DO I=0,NPrc-1
-!!$               WRITE(*,*)RemoteDims%I(:,I)
-!!$            ENDDO
-!!$         ENDIF
-!!$      ENDDO
-!!$      CALL AlignNodes()
+    CALL MPI_ALLTOALL( LocalDims%I(1,0),3,MPI_INTEGER, &
+         RemoteDims%I(1,0),3,MPI_INTEGER, &
+         MONDO_COMM,IErr)
+    CALL ErrChk(IErr,Sub)            
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Randomize communications
-      CALL New(RecvOrder,NPrc)
-      CALL New(SendOrder,NPrc)
-      CALL New(RecvSched,NPrc)
-      CALL New(SendSched,NPrc)
-      NRecvs=0
-      DO N=0,NPrc-1
-         IF(N/=MyId.AND.RemoteDims%I(2,N)/=0)THEN
-            NRecvs=NRecvs+1
-            RecvSched%I(NRecvs)=N
-            RecvOrder%I(NRecvs)=RANDOM((/1,100000/))
-         ENDIF
-      ENDDO
-      CALL AlignNodes()
-      NSends=0
-      DO N=0,NPrc-1
-         IF(N/=MyId.AND.RemoteDims%I(2,N)/=0)THEN
-            NSends=NSends+1
-            SendSched%I(NSends)=N
-            SendOrder%I(NSends)=RANDOM((/1,100000/))
-         ENDIF
-      ENDDO
-      CALL Sort(RecvOrder,RecvSched,NRecvs)
-      CALL Sort(SendOrder,SendSched,NSends)
-      CALL Delete(RecvOrder)
-      CALL Delete(SendOrder)
-      CALL New(ToDo,NRecvs)
-      CALL New(RecvReqst,NRecvs)
-      CALL New(SendReqst,NSends)
+    ! Randomize communications
+    CALL New(RecvOrder,NPrc)
+    CALL New(SendOrder,NPrc)
+    CALL New(RecvSched,NPrc)
+    CALL New(SendSched,NPrc)
+    NRecvs=0
+    DO N=0,NPrc-1
+       IF(N/=MyId.AND.RemoteDims%I(2,N)/=0)THEN
+          NRecvs=NRecvs+1
+          RecvSched%I(NRecvs)=N
+          RecvOrder%I(NRecvs)=RANDOM((/1,100000/))
+       ENDIF
+    ENDDO
+    NSends=0
+    DO N=0,NPrc-1
+       IF(N/=MyId.AND.RemoteDims%I(2,N)/=0)THEN
+          NSends=NSends+1
+          SendSched%I(NSends)=N
+          SendOrder%I(NSends)=RANDOM((/1,100000/))
+       ENDIF
+    ENDDO
+    ! Check for no work 
+    IF(NRecvs==0.AND.NSends==0)THEN
+       CALL Delete(LocalDims)
+       CALL Delete(RemoteDims)
+       CALL Delete(RecvOrder)
+       CALL Delete(SendOrder)
+       CALL Delete(RecvSched)
+       CALL Delete(SendSched)
+       CALL SkipsOffFASTMAT(A)
+       CALL AlignNodes()
+       RETURN
+    ENDIF
+!
+    CALL Sort(RecvOrder,RecvSched,NRecvs)
+    CALL Sort(SendOrder,SendSched,NSends)
+    CALL Delete(RecvOrder)
+    CALL Delete(SendOrder)
+    CALL New(ToDo,NRecvs)
+    CALL New(RecvReqst,NRecvs)
+    CALL New(SendReqst,NSends)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      CALL New(SndBeg,NPrc-1,0)
-      CALL New(SndRow,NPrc-1,0)
-      CALL New(SndCol,NPrc-1,0)
-      CALL New(SndBlk,NPrc-1,0)
-      CALL New(SndMtx,NPrc-1,0)
-      CALL New(SndEnd,NPrc-1,0)
-      SndBeg%I(0)=1
-      DO N=0,NPrc-1
-         IF(N>0)  &
-         SndBeg%I(N)=SndEnd%I(N-1)+1
-         SndRow%I(N)=SndBeg%I(N)+3
-         SndCol%I(N)=SndRow%I(N)+LocalDims%I(1,N)+1
-         SndBlk%I(N)=SndCol%I(N)+LocalDims%I(2,N)+1
-         SndMtx%I(N)=SndBlk%I(N)+LocalDims%I(2,N)+1
-         SndEnd%I(N)=SndMtx%I(N)+LocalDims%I(3,N)+1
-      ENDDO
-      ! Allocate contigous memory for non-blocking sends
-      ALLOCATE(SendBuffer(1:SndEnd%I(NPrc-1)),STAT=MemStatus)
-      CALL IncMem(MemStatus,0,SndEnd%I(NPrc-1))
+    CALL New(SndBeg,NPrc-1,0)
+    CALL New(SndRow,NPrc-1,0)
+    CALL New(SndCol,NPrc-1,0)
+    CALL New(SndBlk,NPrc-1,0)
+    CALL New(SndMtx,NPrc-1,0)
+    CALL New(SndEnd,NPrc-1,0)
+    SndBeg%I(0)=1
+    DO N=0,NPrc-1
+       IF(N>0)  &
+            SndBeg%I(N)=SndEnd%I(N-1)+1
+       SndRow%I(N)=SndBeg%I(N)+3
+       SndCol%I(N)=SndRow%I(N)+LocalDims%I(1,N)+1
+       SndBlk%I(N)=SndCol%I(N)+LocalDims%I(2,N)+1
+       SndMtx%I(N)=SndBlk%I(N)+LocalDims%I(2,N)+1
+       SndEnd%I(N)=SndMtx%I(N)+LocalDims%I(3,N)+1
+    ENDDO
+    ! Allocate contigous memory for non-blocking sends
+    ALLOCATE(SendBuffer(1:SndEnd%I(NPrc-1)),STAT=MemStatus)
+    CALL IncMem(MemStatus,0,SndEnd%I(NPrc-1))
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      CALL New(RcvBeg,NPrc-1,0)
-      CALL New(RcvRow,NPrc-1,0)
-      CALL New(RcvCol,NPrc-1,0)
-      CALL New(RcvBlk,NPrc-1,0)
-      CALL New(RcvMtx,NPrc-1,0)
-      CALL New(RcvEnd,NPrc-1,0)
-      RcvBeg%I(0)=1
-      DO N=0,NPrc-1
-         IF(N>0)  &
-         RcvBeg%I(N)=RcvEnd%I(N-1)+1
-         RcvRow%I(N)=RcvBeg%I(N)+3
-         RcvCol%I(N)=RcvRow%I(N)+RemoteDims%I(1,N)+1
-         RcvBlk%I(N)=RcvCol%I(N)+RemoteDims%I(2,N)+1
-         RcvMtx%I(N)=RcvBlk%I(N)+RemoteDims%I(2,N)+1
-         RcvEnd%I(N)=RcvMtx%I(N)+RemoteDims%I(3,N)+1
-      ENDDO
-      ! Allocate contigous memory for non-blocking recieves
-      RE=RcvEnd%I(NPrc-1)
-      ALLOCATE(RecvBuffer(1:RE),STAT=MemStatus)
-      CALL IncMem(MemStatus,0,RcvEnd%I(NPrc-1))
+    CALL New(RcvBeg,NPrc-1,0)
+    CALL New(RcvRow,NPrc-1,0)
+    CALL New(RcvCol,NPrc-1,0)
+    CALL New(RcvBlk,NPrc-1,0)
+    CALL New(RcvMtx,NPrc-1,0)
+    CALL New(RcvEnd,NPrc-1,0)
+    RcvBeg%I(0)=1
+    DO N=0,NPrc-1
+       IF(N>0)  &
+       RcvBeg%I(N)=RcvEnd%I(N-1)+1
+       RcvRow%I(N)=RcvBeg%I(N)+3
+       RcvCol%I(N)=RcvRow%I(N)+RemoteDims%I(1,N)+1
+       RcvBlk%I(N)=RcvCol%I(N)+RemoteDims%I(2,N)+1
+       RcvMtx%I(N)=RcvBlk%I(N)+RemoteDims%I(2,N)+1
+       RcvEnd%I(N)=RcvMtx%I(N)+RemoteDims%I(3,N)+1
+    ENDDO
+    ! Allocate contigous memory for non-blocking recieves
+    RE=RcvEnd%I(NPrc-1)
+    ALLOCATE(RecvBuffer(1:RE),STAT=MemStatus)
+    CALL IncMem(MemStatus,0,RcvEnd%I(NPrc-1))
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Post recieves 
-      DO N=1,NRecvs
-         From=RecvSched%I(N)
-         B=RcvBeg%I(From)
-         E=RcvEnd%I(From)
-         Num=E-B+1
-         Tag=From*MaxProc+MyId
-         CALL MPI_IRECV(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,  &
-              From,Tag,MONDO_COMM,RecvReqst%I(N),IErr)
-         CALL ErrChk(IErr,Sub)            
-      ENDDO
-      ! Wait for all recieves to post before executing sends.
-      ! This way, even blocking sends should be fast
-      CALL AlignNodes()
-      ! Post sends
-      DO N=1,NSends
-         To=SendSched%I(N)
-         B=SndBeg%I(To)
-         E=SndEnd%I(To)
-         Row=SndRow%I(To)
-         Col=SndCol%I(To)
-         Blk=SndBlk%I(To)
-         Mtx=SndMtx%I(To)
-         Num=E-B+1
-         Tag=MyId*MaxProc+To
-         CALL PackFastMat(A,(/Beg%I(To),End%I(To)/),          &
-              SendBuffer(B),SendBuffer(B+1),SendBuffer(B+2),  &
-              SendBuffer(Row:Col-1),SendBuffer(Col:Blk-1),    &
-              SendBuffer(Blk:MTx-1),SendBuffer(Mtx:E))
-         CALL MPI_ISEND(SendBuffer(B:E),Num,MPI_DOUBLE_PRECISION,To, &
-                        Tag,MONDO_COMM,SendReqst%I(N),IErr)        
-         CALL ErrChk(IErr,Sub)            
-      ENDDO
-      CALL AlignNodes()
+    ! Post recieves 
+    DO N=1,NRecvs
+       From=RecvSched%I(N)
+       B=RcvBeg%I(From)
+       E=RcvEnd%I(From)
+       Num=E-B+1
+       Tag=From*MaxProc+MyId
+       CALL MPI_IRECV(RecvBuffer(B),Num,MPI_DOUBLE_PRECISION,  &
+            From,Tag,MONDO_COMM,RecvReqst%I(N),IErr)
+       CALL ErrChk(IErr,Sub)            
+    ENDDO
+    ! Wait for all recieves to post before executing sends.
+    ! This way blocking sends should be fast
+    CALL AlignNodes()
+    ! Post sends
+    DO N=1,NSends
+       To=SendSched%I(N)
+       B=SndBeg%I(To)
+       E=SndEnd%I(To)
+       Row=SndRow%I(To)
+       Col=SndCol%I(To)
+       Blk=SndBlk%I(To)
+       Mtx=SndMtx%I(To)
+       Num=E-B+1
+       Tag=MyId*MaxProc+To
+       CALL PackFastMat(A,(/Beg%I(To),End%I(To)/),          &
+            SendBuffer(B),SendBuffer(B+1),SendBuffer(B+2),  &
+            SendBuffer(Row:Col-1),SendBuffer(Col:Blk-1),    &
+            SendBuffer(Blk:MTx-1),SendBuffer(Mtx:E))
+       CALL MPI_SEND(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To,Tag,MONDO_COMM,IErr)
+!       CALL MPI_ISEND(SendBuffer(B),Num,MPI_DOUBLE_PRECISION,To, &
+!            Tag,MONDO_COMM,SendReqst%I(N),IErr)        
+       CALL ErrChk(IErr,Sub)            
+    ENDDO
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Delete rows from A that have been sent to another processor
-      CALL SkipsOffFASTMAT(A)
-      CALL Delete_FASTMAT(A,(/Beg%I(MyId),End%I(MyId)/))
-      CALL SkipsOnFASTMAT(A)
+    ! Delete rows from A that have been sent to another processor
+    CALL SkipsOffFASTMAT(A)
+    CALL Delete_FASTMAT(A,(/Beg%I(MyId),End%I(MyId)/))
+    CALL SkipsOnFASTMAT(A)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      DO 
-         ! Wait for some buffers to fill
-         CALL WaitSome(RecvReqst,ToDo)
-         ! If done, exit
-         IF(ToDo%I(1)==FAIL)EXIT
-         ! Go over filled buffers
-         DO N=1,SIZE(ToDo%I)
-            From=RecvSched%I(ToDo%I(N))
-            B=RcvBeg%I(From)
-            Row=RcvRow%I(From)
-            Col=RcvCol%I(From)
-            Blk=RcvBlk%I(From)
-            Mtx=RcvMtx%I(From)
-            E=RcvEnd%I(From)
-            CALL UnPackNSumFastMat(A,OffSt%I(MyId),RecvBuffer(B),                &
-                                   RecvBuffer(B+1),RecvBuffer(B+2),              &
-                                   RecvBuffer(Row:Col-1),RecvBuffer(Col:Blk-1),  &
-                                   RecvBuffer(Blk:Mtx-1),RecvBuffer(Mtx:E))
-         ENDDO
-      ENDDO
-      CALL AlignNodes()      
+    DO 
+       ! Wait for some buffers to fill
+       CALL WaitSome(RecvReqst,ToDo)
+       ! If done, exit
+       IF(ToDo%I(1)==FAIL)EXIT
+       ! Go over filled buffers
+       DO N=1,SIZE(ToDo%I)
+          From=RecvSched%I(ToDo%I(N))
+          B=RcvBeg%I(From)
+          Row=RcvRow%I(From)
+          Col=RcvCol%I(From)
+          Blk=RcvBlk%I(From)
+          Mtx=RcvMtx%I(From)
+          E=RcvEnd%I(From)
+          CALL UnPackNSumFastMat(A,OffSt%I(MyId),RecvBuffer(B),                &
+               RecvBuffer(B+1),RecvBuffer(B+2),              &
+               RecvBuffer(Row:Col-1),RecvBuffer(Col:Blk-1),  &
+               RecvBuffer(Blk:Mtx-1),RecvBuffer(Mtx:E))
+       ENDDO
+    ENDDO
+    CALL AlignNodes()      
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Delete contigous memory
-      DEALLOCATE(SendBuffer,STAT=MemStatus)
-      CALL DecMem(MemStatus,SndEnd%I(NPrc-1),0)
-      DEALLOCATE(RecvBuffer,STAT=MemStatus) 
-      ! Delete the rest
-      CALL DecMem(MemStatus,RcvEnd%I(NPrc-1),0)
-      CALL Delete(LocalDims)
-      CALL Delete(RemoteDims)
-      CALL Delete(RecvReqst)
-      CALL Delete(SendReqst)  
-      CALL Delete(ToDo)
-      CALL Delete(SndBeg)
-      CALL Delete(SndRow)
-      CALL Delete(SndCol)
-      CALL Delete(SndBlk)
-      CALL Delete(SndMtx)
-      CALL Delete(SndEnd)
-      CALL Delete(RcvBeg)
-      CALL Delete(RcvRow)
-      CALL Delete(RcvCol)
-      CALL Delete(RcvBlk)
-      CALL Delete(RcvMtx)
-      CALL Delete(RcvEnd)
-      CALL Delete(RecvSched)
-      CALL Delete(SendSched)
+    ! Delete contigous memory
+    DEALLOCATE(SendBuffer,STAT=MemStatus)
+    CALL DecMem(MemStatus,SndEnd%I(NPrc-1),0)
+    DEALLOCATE(RecvBuffer,STAT=MemStatus) 
+    ! Delete the rest
+    CALL DecMem(MemStatus,RcvEnd%I(NPrc-1),0)
+    CALL Delete(LocalDims)
+    CALL Delete(RemoteDims)
+    CALL Delete(RecvReqst)
+    CALL Delete(SendReqst)  
+    CALL Delete(ToDo)
+    CALL Delete(SndBeg)
+    CALL Delete(SndRow)
+    CALL Delete(SndCol)
+    CALL Delete(SndBlk)
+    CALL Delete(SndMtx)
+    CALL Delete(SndEnd)
+    CALL Delete(RcvBeg)
+    CALL Delete(RcvRow)
+    CALL Delete(RcvCol)
+    CALL Delete(RcvBlk)
+    CALL Delete(RcvMtx)
+    CALL Delete(RcvEnd)
+    CALL Delete(RecvSched)
+    CALL Delete(SendSched)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      CALL AlignNodes()
-      CALL SkipsOffFASTMAT(A)
-      EndTm = MPI_Wtime()
-      TotTm = EndTm - StartTm
-      IF(MyID == ROOT) THEN
-        WRITE(*,*) 'Total time to Redistribute_FastMat is ', TotTm
-      ENDIF
-    END SUBROUTINE Redistribute_FastMat
+    CALL SkipsOffFASTMAT(A)
+    CALL AlignNodes()
+    EndTm = MPI_Wtime()
+    TotTm = EndTm - StartTm
+    IF(MyID == ROOT) THEN
+       WRITE(*,*) 'Total time to Redistribute_FastMat is ', TotTm
+    ENDIF
+  END SUBROUTINE Redistribute_FastMat
 !======================================================================
 !
 !======================================================================
@@ -1218,7 +1209,13 @@ MODULE FastMatrices
       DO WHILE(ASSOCIATED(C))
          IF(ASSOCIATED(C%RowRoot))THEN 
             ! Set skip pointers for this sparse row search tree
-            CALL SetSRSTSkipPtrs(C%RowRoot%Left,C%RowRoot%Right)
+            IF(ASSOCIATED(C%RowRoot%Left).AND.ASSOCIATED(C%RowRoot%Right))THEN
+               CALL SetSRSTSkipPtrs(C%RowRoot%Left,C%RowRoot%Right)
+            ELSEIF(ASSOCIATED(C%RowRoot%Left))THEN
+               CALL SetSRSTSkipPtrs(C%RowRoot%Left)
+            ELSEIF(ASSOCIATED(C%RowRoot%Right))THEN
+               CALL SetSRSTSkipPtrs(C%RowRoot%Right)
+            ENDIF
          ENDIF
          C=>C%Next
       ENDDO
@@ -1228,41 +1225,56 @@ MODULE FastMatrices
 !   SET SKIP POINTERS FOR THE SPARSE ROW SEARCH TREE (SRST), 
 !   ALLOWING IN-PROCEDURE RECURSION OVER LEAF NODES
 !======================================================================
-    RECURSIVE SUBROUTINE SetSRSTSkipPtrs(A,B)
-      TYPE(SRST),POINTER :: A,B
-      LOGICAL            :: AssocA,AssocB,AssocAL,AssocAR
+  RECURSIVE SUBROUTINE SetSRSTSkipPtrs(A,B)
+    TYPE(SRST),POINTER          :: A
+    TYPE(SRST),POINTER,OPTIONAL :: B
+    LOGICAL                     :: AssocAL,AssocAR, &
+                                   AssocBL,AssocBR
 !----------------------------------------------------------------------
-      AssocA=ASSOCIATED(A)
-      AssocB=ASSOCIATED(B)
-      IF(AssocA.AND.AssocB)THEN
-         IF(A%L==A%R)THEN
-            IF(A%R>B%L)CALL Halt('bad logic in SetSRSTSkipPtrs')
-            A%Right=>B
-         ELSE
-            AssocAL=ASSOCIATED(A%Left)
-            AssocAR=ASSOCIATED(A%Right)
-            IF(AssocAL.AND.AssocAR)THEN
-               CALL SetSRSTSkipPtrs(A%Left,A%Right)
-               CALL SetSRSTSkipPtrs(A%Right,B)
-            ELSEIF(AssocAL)THEN
-               CALL SetSRSTSkipPtrs(A%Left,B)
-            ELSEIF(AssocAR)THEN
-               CALL SetSRSTSkipPtrs(A%Right,B)
-            ELSEIF(A%R<B%L)THEN
-               A%Right=>B
-            ENDIF
-         ENDIF
-      ELSEIF(AssocA)THEN
-         IF(ASSOCIATED(A%Left).AND.ASSOCIATED(A%Right))THEN
-            CALL SetSRSTSkipPtrs(A%Left,A%Right)         
-         ENDIF
-      ENDIF
-      IF(AssocB)THEN
-         IF(ASSOCIATED(B%Left).AND.ASSOCIATED(B%Right))THEN
-            CALL SetSRSTSkipPtrs(B%Left,B%Right)
-         ENDIF
-      ENDIF
-    END SUBROUTINE SetSRSTSkipPtrs
+    IF(PRESENT(B))THEN
+       AssocB=ASSOCIATED(B)
+       IF(A%L==A%R)THEN ! Done!
+          A%Right=>B    ! Set the skip pointer
+       ELSE
+          AssocAL=ASSOCIATED(A%Left)
+          AssocAR=ASSOCIATED(A%Right)
+          ! Follow the left link (A) 
+          IF(AssocAL.AND.AssocAR)THEN
+             CALL SetSRSTSkipPtrs(A%Left,A%Right)
+             CALL SetSRSTSkipPtrs(A%Right,B)
+          ELSEIF(AssocAL)THEN
+             CALL SetSRSTSkipPtrs(A%Left,B)
+          ELSEIF(AssocAR)THEN
+             CALL SetSRSTSkipPtrs(A%Right,B)
+          ENDIF
+       ENDIF
+       ! Check for dead end
+       IF(B%L==B%R)RETURN 
+       AssocBL=ASSOCIATED(B%Left)
+       AssocBR=ASSOCIATED(B%Right)
+       ! Follow the right link (B)
+       IF(AssocBL.AND.AssocBR)THEN
+          CALL SetSRSTSkipPtrs(B%Left,B%Right)
+       ELSEIF(AssocBL)THEN
+          CALL SetSRSTSkipPtrs(B%Left)
+       ELSEIF(AssocBR)THEN
+          CALL SetSRSTSkipPtrs(B%Right)
+       ENDIF
+    ELSE ! There was no right link passed in ...
+       ! Check for dead end
+       IF(A%L==A%R)RETURN 
+       AssocAL=ASSOCIATED(A%Left)
+       AssocAR=ASSOCIATED(A%Right)
+       ! Follow the left link (A)
+       IF(AssocAL.AND.AssocAR)THEN
+          CALL SetSRSTSkipPtrs(A%Left,A%Right)
+       ELSEIF(AssocAL)THEN
+          CALL SetSRSTSkipPtrs(A%Left)
+       ELSEIF(AssocAR)THEN
+          CALL SetSRSTSkipPtrs(A%Right)
+       ENDIF
+    ENDIF
+  END SUBROUTINE SetSRSTSkipPtrs
 !======================================================================
 !   QUERY TO SEE IF SKIP POINTERS ARE ON
 !======================================================================
