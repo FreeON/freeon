@@ -105,8 +105,8 @@ MODULE BraBloks
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
                    PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
-       MaxAmp=Zero
-       dHGBra%D=Zero
+       MaxAmp   = Zero
+       dHGBra%D = Zero
        IA=IndexA
        DO LMNA=StartLA,StopLA
           IA=IA+1
@@ -184,7 +184,7 @@ MODULE BraBloks
 !=================================================================================================
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
-       HGBra%D = Zero
+       HGBra%D  = Zero
        IA = IndexA
        MaxAmp=Zero
        DO LMNA=StartLA,StopLA
