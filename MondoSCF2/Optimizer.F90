@@ -6,7 +6,7 @@ MODULE Optimizer
   USE AtomPairs
   USE ControlStructures  
   USE InCoords
-  USE GDIISMod
+  USE QUICCAMod
   USE GeomOptKeys     
   USE PunchHDF
   USE GlobalScalars

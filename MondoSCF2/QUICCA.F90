@@ -1,4 +1,4 @@
-MODULE GDIISMod
+MODULE QUICCAMod
 !
    USE DerivedTypes
    USE GlobalScalars
@@ -848,7 +848,8 @@ CONTAINS
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-                RangeT%D,NDegsT%I,Zero,.FALSE.)
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
+              ! RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
@@ -858,7 +859,7 @@ CONTAINS
      CALL SetConstraints(IntCsT,IntCsT%PredVal%D)
      DisplT%D=IntCsT%PredVal%D-IntCValuesT%D(:,NDim)
      !
-    !CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+     CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
      PredVals%D=IntCsT%PredVal%D
      Displ%D=DisplT%D
      !
@@ -1809,4 +1810,4 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-END MODULE GDIISMod
+END MODULE QUICCAMod
