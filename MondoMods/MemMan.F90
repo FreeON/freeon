@@ -281,7 +281,7 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          A%N=N
          CALL New(A%Def,N)
-           A%Def%C(:)(1:10)='          '
+           A%Def%C(:)(1:10)='XXXXXXXXXX'
          CALL New(A%Atoms,(/N,4/))
            A%Atoms%I=0
          CALL New(A%Cells,(/N,12/))
