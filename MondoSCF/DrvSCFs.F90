@@ -33,6 +33,7 @@ MODULE DrvSCFs
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
               Ctrl%Previous=Ctrl%Current
+
               RETURN
            ENDIF
            Ctrl%Previous=Ctrl%Current
@@ -50,7 +51,7 @@ MODULE DrvSCFs
       CALL DensityBuild(Ctrl)
       CALL FockBuild(Ctrl)
       CALL SolveSCF(Ctrl)
-      CALL CleanScratch(Ctrl)
+!      CALL CleanScratch(Ctrl)
     END SUBROUTINE SCFCycle
 !==========================================================================
 !   Build a density by hook or by crook
@@ -59,6 +60,8 @@ MODULE DrvSCFs
       TYPE(SCFControls)    :: Ctrl
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !---------------------------------------------------------------------------------------
+!WRITE(*,*)' A PREVIOUS = ',Ctrl%Previous
+!WRITE(*,*)' A CURRENT =  ',Ctrl%Current
       IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
          IF(DensityProject)THEN
 !           Projection of density matrix between geometries
@@ -73,6 +76,7 @@ MODULE DrvSCFs
                                    //TRIM(PrvGeom)//' to configuration# ' &
                                    //TRIM(CurGeom)//'.')
 !           Create density from last SCFs DM (ICyc+1)
+
             Ctrl%Previous(1)=Ctrl%Previous(1)+1
             CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
          ENDIF
@@ -85,6 +89,9 @@ MODULE DrvSCFs
                                 //TRIM(Ctrl%BName(CBas))//'.')
 !        Create density from last SCFs DM (ICyc+1)
          Ctrl%Previous(1)=Ctrl%Previous(1)+1
+!WRITE(*,*)' B PREVIOUS = ',Ctrl%Previous
+!WRITE(*,*)' B CURRENT =  ',Ctrl%Current
+
          CtrlVect=SetCtrlVect(Ctrl,'BasisSetSwitch')
          CALL Invoke('MakeRho',CtrlVect)
      ELSEIF(CCyc==0.AND.CBas==1.AND.CGeo==1)THEN

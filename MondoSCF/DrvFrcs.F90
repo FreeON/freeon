@@ -140,6 +140,7 @@ MODULE DrvFrcs
              Ctrl%Previous=PrevState
              CALL SetGlobalCtrlIndecies(Ctrl)    
           ELSEIF(KS==-1)THEN
+             Ctrl%Previous=Ctrl%Current
              RETURN
           ENDIF
 !         Take another step 
