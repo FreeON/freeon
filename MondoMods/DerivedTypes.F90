@@ -283,17 +283,6 @@ MODULE DerivedTypes
      INTEGER                        :: NB
      LOGICAL                        :: SameAtom
   ENDTYPE AtomPair
-!--------------------------------------------------------------------------
-! Primative Atom Pair Type
-!
-  TYPE PrimPair
-     INTEGER                        :: Ell  
-     REAL(DOUBLE)                   :: Z
-     REAL(DOUBLE),DIMENSION(3)      :: P
-     REAL(DOUBLE),DIMENSION(MaxLen) :: Ket
-     REAL(DOUBLE)                   :: Extent
-     TYPE(BBox)                     :: Box
-  ENDTYPE PrimPair
 #ifdef PERIODIC
 !-----------------------------------------------------------
 ! The Set of Cells needed to sum over: CellSet
