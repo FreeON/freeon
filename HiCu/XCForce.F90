@@ -44,7 +44,7 @@ PROGRAM XCForce
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
 ! Set local integration thresholds 
-  CALL SetLocalThresholds(Thresholds%Cube)
+  CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)

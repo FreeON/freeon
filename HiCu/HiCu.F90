@@ -53,8 +53,10 @@ PROGRAM HaiKu
 ! Generate the CubeTree (a 3-D BinTree) 
   CALL GridGen()
   CALL Elapsed_TIME(TimeRhoToGrid,'Accum')
-  CALL PPrint(TimeRhoToGrid,Sub2)
-  CALL PPrint(TimeRhoToGrid,Sub2,Unit_O=6)
+  IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
+     CALL PPrint(TimeRhoToGrid,Sub2)
+     CALL PPrint(TimeRhoToGrid,Sub2,Unit_O=6)
+  ENDIF
 ! Delete the RhoTree
   CALL DeleteRhoTree(RhoRoot)
 ! Compute the exchange correlation matirix Kxc
@@ -64,8 +66,10 @@ PROGRAM HaiKu
   CALL Elapsed_Time(TimeGridToMat,'Init')
   CALL MakeKxc(Kxc,CubeRoot)
   CALL Elapsed_TIME(TimeGridToMat,'Accum')
-  CALL PPrint(TimeGridToMat,Sub3)
-  CALL PPrint(TimeGridToMat,Sub3,Unit_O=6)
+  IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
+     CALL PPrint(TimeGridToMat,Sub3)
+     CALL PPrint(TimeGridToMat,Sub3,Unit_O=6)
+  ENDIF
   CALL DeleteBraBlok()
 ! Put Kxc to disk
   CALL Filter(T1,Kxc)
