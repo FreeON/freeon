@@ -38,8 +38,17 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
 	   LenBra1=LEnd[LBra+1];
            LenKet1=LEnd[LKet+1];
 
-           WriteString[Subroutine,StringJoin["SUBROUTINE dIntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &\n ",
-					     "OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)\n "]];
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+              WriteString[Subroutine,StringJoin["SUBROUTINE dIntB",ToString[IJKL], \
+                       "(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &\n ", \
+                              "OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS,STRESS)\n "]];
+           ,
+              WriteString[Subroutine,StringJoin["SUBROUTINE dIntB",ToString[IJKL], \
+                       "(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &\n ", \
+                              "OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)\n "]];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -59,6 +68,11 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS["TYPE(PBCInfo) :: PBC"];
          
            WS[StringJoin["REAL(DOUBLE)  :: GRADIENTS(NINT,12)"]];
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS[StringJoin["REAL(DOUBLE)  :: STRESS(NINT,9)"]];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz"];
            WS["REAL(DOUBLE)  :: Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
            WS["REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz"];
@@ -70,7 +84,13 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRRA,HRRB "]];
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax1],",",ToString[LEnd[lmax]],") :: HRRC "]];
            WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
-
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS[StringJoin["REAL(DOUBLE)  :: HRRS(",ToString[BraMax],",",ToString[KetMax],",", \
+                           ToString[LEnd[lmax]],",9)"]];
+             WS["REAL(DOUBLE)  :: DUMX,DUMY,DUMZ,TOm,PQIJ(9),FP(9)"];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L"];
            WS["EXTERNAL InitDbl"];						     
 
@@ -78,7 +98,11 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS[StringJoin["CALL InitDbl(",ToString[BraMax1],"*",ToString[KetMax],",HRRA(1,1,1))"]];
            WS[StringJoin["CALL InitDbl(",ToString[BraMax1],"*",ToString[KetMax],",HRRB(1,1,1))"]];
            WS[StringJoin["CALL InitDbl(",ToString[BraMax],"*",ToString[KetMax1],",HRRC(1,1,1))"]];
-
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS[StringJoin["CALL InitDbl(9*",ToString[BraMax],"*",ToString[KetMax],",HRRS(1,1,1,1))"]];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["Ax=ACInfo%Atm1X"];
            WS["Ay=ACInfo%Atm1Y"];
            WS["Az=ACInfo%Atm1Z"];
@@ -97,6 +121,22 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS["CDx=Cx-Dx"];
            WS["CDy=Cy-Dy"];
            WS["CDz=Cz-Dz"];
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS["!"];
+             WS["!This will feel better above!"];
+             WS["FP(1)=PBC%InvBoxSh%D(1,1)*(Ax-Dx)+PBC%InvBoxSh%D(1,2)*(Ay-Dy)+PBC%InvBoxSh%D(1,3)*(Az-Dz)"];
+             WS["FP(2)=                            PBC%InvBoxSh%D(2,2)*(Ay-Dy)+PBC%InvBoxSh%D(2,3)*(Az-Dz)"];
+             WS["FP(3)=                                                        PBC%InvBoxSh%D(3,3)*(Az-Dz)"];
+             WS["FP(4)=PBC%InvBoxSh%D(1,1)*(Cx-Dx)+PBC%InvBoxSh%D(1,2)*(Cy-Dy)+PBC%InvBoxSh%D(1,3)*(Cz-Dz)"];
+             WS["FP(5)=                            PBC%InvBoxSh%D(2,2)*(Cy-Dy)+PBC%InvBoxSh%D(2,3)*(Cz-Dz)"];
+             WS["FP(6)=                                                        PBC%InvBoxSh%D(3,3)*(Cz-Dz)"];
+             WS["FP(7)=PBC%InvBoxSh%D(1,1)*(Bx-Dx)+PBC%InvBoxSh%D(1,2)*(By-Dy)+PBC%InvBoxSh%D(1,3)*(Bz-Dz)"];
+             WS["FP(8)=                            PBC%InvBoxSh%D(2,2)*(By-Dy)+PBC%InvBoxSh%D(2,3)*(Bz-Dz)"];
+             WS["FP(9)=                                                        PBC%InvBoxSh%D(3,3)*(Bz-Dz)"];
+             WS["!"];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["DO J=1,LKet ! K^2 VRR |N0) loop "];
            WS["   Eta=PrmBufK(1,J)"];
            WS["   Qx=PrmBufK(2,J)"];
@@ -143,13 +183,38 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
-           WS["      IF(PBC%AutoW%I(1)==1)FPQx=FPQx-ANINT(FPQx-SIGN(1D-15,FPQx))"];
-           WS["      IF(PBC%AutoW%I(2)==1)FPQy=FPQy-ANINT(FPQy-SIGN(1D-15,FPQy))"];
-           WS["      IF(PBC%AutoW%I(3)==1)FPQz=FPQz-ANINT(FPQz-SIGN(1D-15,FPQz))"];
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS["      IF(PBC%AutoW%I(1)==1)DUMX=ANINT(FPQx-SIGN(1D-15,FPQx));FPQx=FPQx-DUMX"];
+             WS["      IF(PBC%AutoW%I(2)==1)DUMY=ANINT(FPQy-SIGN(1D-15,FPQy));FPQy=FPQy-DUMY"];
+             WS["      IF(PBC%AutoW%I(3)==1)DUMZ=ANINT(FPQz-SIGN(1D-15,FPQz));FPQz=FPQz-DUMZ"];
+           ,
+             WS["      IF(PBC%AutoW%I(1)==1)FPQx=FPQx-ANINT(FPQx-SIGN(1D-15,FPQx))"];
+             WS["      IF(PBC%AutoW%I(2)==1)FPQy=FPQy-ANINT(FPQy-SIGN(1D-15,FPQy))"];
+             WS["      IF(PBC%AutoW%I(3)==1)FPQz=FPQz-ANINT(FPQz-SIGN(1D-15,FPQz))"];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["      PQx=FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
            WS["      PQy=FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
            WS["      PQz=FPQz*PBC%BoxShape%D(3,3)"];
            WS["      ! End MIC"];
+           (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+           If[DoStress==0,
+             WS["      TOm=2.0d0*Omega"];
+             WS["      DUMX=DUMX*TOm"];
+             WS["      DUMY=DUMY*TOm"];
+             WS["      DUMZ=DUMZ*TOm"];
+             WS["      PQIJ(1)=PQx*DUMX"];
+             WS["      PQIJ(2)=PQy*DUMX"];
+             WS["      PQIJ(3)=PQz*DUMX"];
+             WS["      PQIJ(4)=PQx*DUMY"];
+             WS["      PQIJ(5)=PQy*DUMY"];
+             WS["      PQIJ(6)=PQz*DUMY"];
+             WS["      PQIJ(7)=PQx*DUMZ"];
+             WS["      PQIJ(8)=PQy*DUMZ"];
+             WS["      PQIJ(9)=PQz*DUMZ"];
+           ];
+           (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            WS["      WPx = -Eta*PQx*r1xZpE"];
            WS["      WPy = -Eta*PQy*r1xZpE"];
            WS["      WPz = -Eta*PQz*r1xZpE"];

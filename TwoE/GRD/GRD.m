@@ -63,7 +63,13 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}};
+(*Classes = { {0,0},{0,1},{1,1} };*)
+Classes = { {0,0},{0,1},{1,1},{2,2},{3,3} };
+
+(*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+(* DoStres, Yes=0, No!=0 *)
+DoStress=1;
+(*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
 CType[1]  = "s";
 CType[2]  = "sp";
@@ -114,6 +120,14 @@ SetAttributes[HRRA,NHoldAll];
 SetAttributes[HRRB,NHoldAll];
 SetAttributes[HRRC,NHoldAll];
 SetAttributes[GRADIENT,NHoldAll];
+
+(*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+If[DoStress==0,
+  SetAttributes[STRESS,NHoldAll];
+  SetAttributes[PQIJ,NHoldAll];
+  SetAttributes[FP,NHoldAll];
+];
+(*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
 Get["GAMMAS.m"];
 Get["CNTRCTG.m"];

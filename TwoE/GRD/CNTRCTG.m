@@ -93,7 +93,13 @@ PunchContractCalls[Subroutine_,ic_,jc_,kc_,lc_]:=Block[{WS,BKString,bra,ket},
       KClass=ToString[IntegralClass[Classes[[kc]]]];
       LClass=ToString[IntegralClass[Classes[[lc]]]];
       ContractName=StringJoin["CNTRCTG",IClass,JClass,KClass,LClass];
-      WS[StringJoin["      CALL ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0,
+        WS[StringJoin["      CALL ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC,HRRS(1,1,1,1),PQIJ(1))"]];
+      ,
+        WS[StringJoin["      CALL ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)"]];
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
  ];
 
 PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,bra,ket},
@@ -139,16 +145,32 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
       LenL=LEnd[Classes[[lc,2]]]-LBegin[Classes[[lc,1]]];
 
       ContractName=StringJoin["CNTRCTG",IClass,JClass,KClass,LClass];
-      WS[StringJoin["SUBROUTINE ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0,
+        WS[StringJoin["SUBROUTINE ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC,HRRS,PQIJ)"]];
+      ,
+        WS[StringJoin["SUBROUTINE ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)"]];
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
       WS["  USE DerivedTypes"];
       WS["  USE VScratchB"];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0,
+        WS["  IMPLICIT NONE"];
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
       WS["  INTEGER :: K"];
       WS["  REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
       WS[StringJoin["  REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRR "]];
       WS[StringJoin["  REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRRA,HRRB "]];
       WS[StringJoin["  REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax1],",",ToString[LEnd[lmax]],") :: HRRC "]];
       WS[StringJoin["  REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
-
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0,
+        WS[StringJoin["  REAL(DOUBLE)  :: HRRS(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],",9),PQIJ(9)"]];
+        WS[StringJoin["  INTEGER :: IJ,K"]];
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
       If[LKet>=2,
          WS[StringJoin["  DO K=1,",ToString[LEnd[LKet]]]];
@@ -156,6 +178,13 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
                 BK00=StringJoin[ToString[bra],",K,"];
                 If[LB<=LBra,
                    WS[StringJoin["     HRR(",BK00,"1)=HRR(",BK00,"1)+VRR(",BK00,"0)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+                   If[DoStress==0,
+                     WS[StringJoin["     DO IJ=1,9"]];
+                     WS[StringJoin["       HRRS(",BK00,"1,IJ)=HRRS(",BK00,"1,IJ)+PQIJ(IJ)*VRR(",BK00,"1)"]];
+                     WS[StringJoin["     ENDDO"]];
+                   ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
                    WS[StringJoin["     HRRC(",BK00,"1)=HRRC(",BK00,"1)+Gamma*VRR(",BK00,"0)"]];
                   ];
                 WS[StringJoin["     HRRA(",BK00,"1)=HRRA(",BK00,"1)+Alpha*VRR(",BK00,"0)"]];
@@ -197,6 +226,13 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
 
                If[bra<=BraMax && ket<=KetMax,
                   WS[StringJoin["  HRR(",BK00,"1)=HRR(",BK00,"1)+VRR(",BK00,"0)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+                  If[DoStress==0,
+                    WS[StringJoin["  DO IJ=1,9"]];
+                    WS[StringJoin["    HRRS(",BK00,"1,IJ)=HRRS(",BK00,"1,IJ)+PQIJ(IJ)*VRR(",BK00,"1)"]];
+                    WS[StringJoin["  ENDDO"]];
+                  ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
                  ];
 
                If[bra<=BraMax1 && ket<=KetMax,

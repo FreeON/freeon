@@ -74,9 +74,16 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L)  and ",
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"'|",ToString[k],",L)"]];
-
-    WS[StringJoin["   CALL ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(",HRRAddress,"),&\n                          ",
+    (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    If[DoStress==0, 
+      WS[StringJoin["   CALL ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(",HRRAddress,"),&\n",
+      "                      HRRA(",HRRAddress,"),HRRB(",HRRAddress,"),GRADIENTS(1,1),FP(1),&\n",
+      "                      STRESS(1,1))"]];
+    ,
+      WS[StringJoin["   CALL ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(",HRRAddress,"),&\n                          ",
                                         "HRRA(",HRRAddress,"),HRRB(",HRRAddress,"),GRADIENTS(1,1))"]];
+    ];
+    (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
     LK=lx[k];
     MK=my[k];
     NK=nz[k];
@@ -93,12 +100,25 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_x)"]];
     If[ LK==0 , 
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,&\n",
+        "                      HRRC(1,",KPX,",L),GRADIENTS(1,1),FP(1),STRESS(1,1))"]];
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
-       ,
-        WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ,
+       WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,&\n",
+        "                      HRRTmp,GRADIENTS(1,1),FP(1),STRESS(1,1))"]]; 
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
-
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ];
 
 
     WS[StringJoin["   ! Generating (",CType[IntegralClass[{imin,imax}]],",",
@@ -106,11 +126,25 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_y)"]];
     If[ MK==0 , 
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,&\n",
+        "                      HRRC(1,",KPY,",L),GRADIENTS(1,1),FP(1),STRESS(1,1))"]];
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
-       ,
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPY,",L)-",ToString[MK],"D0*HRR(1:",BS,",",KMY,",L)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,&\n",
+        "                      HRRTmp,GRADIENTS(1,1),FP(1),STRESS(1,1))"]]; 
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ];
 
 
     WS[StringJoin["   ! Generating (",CType[IntegralClass[{imin,imax}]],",",
@@ -118,16 +152,46 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_z)"]];
     If[ NK==0 , 
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,&\n", 
+        "                      HRRC(1,",KPZ,",L),GRADIENTS(1,1),FP(1),STRESS(1,1))"]];
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
-       ,
+      ];
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPZ,",L)-",ToString[NK],"D0*HRR(1:",BS,",",KMZ,",L)"]];
+      (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+      If[DoStress==0, 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,&\n", 
+        "                      HRRTmp,GRADIENTS(1,1),FP(1),STRESS(1,1))"]]; 
+      ,
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
-
+      (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+    ];
 
 
  ,{k,LBegin[kmin],LEnd[kmax]}];
  WriteString[FileName,"      ENDDO \n "];
+
+ (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+ If[DoStress==0, 
+   WriteString[FileName,StringJoin["     ! Stress: Generating (",CType[IntegralClass[{imin,imax}]],",",
+                                                       CType[IntegralClass[{jmin,jmax}]],"|",
+                                                       CType[IntegralClass[{kmin,kmax}]],",",
+                                                       CType[IntegralClass[{lmin,lmax}]],")^(1) \n"]];
+   WriteString[FileName,           "      DO IJ=1,9\n"];
+   WriteString[FileName,StringJoin["        DO L=",ToString[LBegin[lmin]],",",ToString[LEnd[lmax]],"\n"]];
+   WriteString[FileName,StringJoin["          DO K=",ToString[LBegin[kmin]],",",ToString[LEnd[kmax]],"\n"]];
+   WriteString[FileName,StringJoin["            CDOffSet=(OC+K-",ToString[LBegin[kmin]],")*LDC+(OD+L-",ToString[LBegin[lmin]],")*LDD \n"]];
+   WriteString[FileName,StringJoin["            CALL ",HRRSubName,"(OA,OB,LDA,LDB,CDOffSet,HRRS(1,",ToString[K],",",ToString[L],",IJ),STRESS(1,IJ))\n"]];
+   WriteString[FileName,           "          ENDDO \n"];
+   WriteString[FileName,           "        ENDDO \n"];
+   WriteString[FileName,           "      ENDDO \n"];
+ ];
+ (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
 ];
 
@@ -173,22 +237,94 @@ Do[Do[
                 IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"DV",CartS[[cart]],"XX",ToString[j],"KK"]]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
  
-	        hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b])+GRADIENT[OffSet,cart+GOA-1];
-                Kount = Kount + 1;
-                IList=Append[IList,Horner[hrr]];
-                HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA-1],")"]];
+                (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+                If[DoStress==0, 
 
+                  hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b]);
+                  Kount = Kount + 1;
+                  IList=Append[IList,Horner[hrr]];
+                  HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["DUM"]];
+
+
+                  (* Set Gradient *)
+
+                  Kount = Kount + 1;
+                  tmpp=DUM+GRADIENT[OffSet,cart+GOA-1];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA-1],")"]];
+
+                  (* Set Stress *)
+
+                  Kount = Kount + 1;
+                  tmpp=DUM*FP[1]+STRESS[OffSet,1+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];
+
+                  Kount = Kount + 1;
+                  tmpp=DUM*FP[2]+STRESS[OffSet,2+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];
+
+                  Kount = Kount + 1;
+
+                  tmpp=DUM*FP[3]+STRESS[OffSet,3+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];
+
+                ,
+                  hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b])+GRADIENT[OffSet,cart+GOA-1];
+                  Kount = Kount + 1;
+                  IList=Append[IList,Horner[hrr]];
+                  HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOA-1],")"]];
+                ];
+                (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
                 Kount = Kount + 1;
                 IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"XX",ToString[j],"DV",CartS[[cart]],"KK"]]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
+                (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+                If[DoStress==0, 
 
-	        hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus])+GRADIENT[OffSet,cart+GOB-1];
-                Kount = Kount + 1;
-                IList=Append[IList,Horner[hrr]];
-                HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-                oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB-1],")"]];
+                          hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus]);
+                  Kount = Kount + 1;
+                  IList=Append[IList,Horner[hrr]];
+                  HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["DUM"]];
+
+                  (* Set Gradient *)
+
+                  Kount = Kount + 1;
+                  tmpp=DUM+GRADIENT[OffSet,cart+GOB-1];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB-1],")"]];
+
+                  (* Set Stress *)
+
+                  Kount = Kount + 1;
+                  tmpp=DUM*FP[7]+STRESS[OffSet,1+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];
+
+                  Kount = Kount + 1;
+                  tmpp=DUM*FP[8]+STRESS[OffSet,2+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];
+
+                  Kount = Kount + 1;
+                  tmpp=DUM*FP[9]+STRESS[OffSet,3+3*(cart-1)];
+                  IList=Append[IList,tmpp];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];
+
+                ,
+                  hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus])+GRADIENT[OffSet,cart+GOB-1];
+                  Kount = Kount + 1;
+                  IList=Append[IList,Horner[hrr]];
+                  HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[cart+GOB-1],")"]];
+                ];
+                (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
              ,{cart,1,3}]
  ,{i,LBegin[il],LEnd[il]}]
@@ -196,7 +332,7 @@ Do[Do[
  ,{il,imin,imax}]
  ,{jl,jmin,jmax}];
 
-  oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                         "}];
+  oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                         ","CC"->")"}];
   oList=Flatten[oList];
 
   MakeList=Append[MakeList,StringJoin[HRRSubName,".o"]];
@@ -205,13 +341,29 @@ Do[Do[
 
   OpenWrite[HRRSubroutine];
   WSS[String_]:=WriteString[HRRSubroutine,"    ",String,"\n"];
-  WSS[StringJoin["SUBROUTINE ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT)"]];
+
+  (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+  If[DoStress==0,
+    WSS[StringJoin["SUBROUTINE ",HRRSubName, \
+        "ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT,FP,STRESS)"]];
+  ,
+    WSS[StringJoin["SUBROUTINE ",HRRSubName,"ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR,HRRA,HRRB,GRADIENT)"]];
+  ];
+  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+
   WSS["  USE DerivedTypes"];
   WSS["  USE VScratchB"];
   WSS["  USE GlobalScalars"];
   WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,OffSet"];
   WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)"]];
   WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
+
+  (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+  If[DoStress==0,
+    WSS[StringJoin["  REAL(DOUBLE)  :: STRESS(NINT,9),FP(9),DUM"]];
+  ];
+  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+
   Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
   WSS[StringJoin["END SUBROUTINE ",HRRSubName,"ab"]];			       
 
@@ -233,12 +385,50 @@ Do[Do[
              IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"XX",ToString[j],"KK"]]];
              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"!"];
  
-             hrr=Normy[a]*Normy[b]*HRRBra["",a,b]+GRADIENT[OffSet,cart+GOC];;
-             Kount = Kount + 1;
-             IList=Append[IList,Horner[hrr]];
-             HRRAddress=StringJoin[ToString[i],",",ToString[j]];
-             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+GOC],")"]];
 
+  (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+             If[DoStress==0,
+
+               hrr=Normy[a]*Normy[b]*HRRBra["",a,b];
+               Kount = Kount + 1;
+               IList=Append[IList,Horner[hrr]];
+               HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["DUM"]];
+
+               (* Set Gradient *)
+               Kount = Kount + 1;
+
+               tmpp=DUM+GRADIENT[OffSet,Cart+GOC];
+               IList=Append[IList,tmpp];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+GOC],")"]];
+
+               (* Set Stress *)
+
+               Kount = Kount + 1;
+               tmpp=DUM*FP[4]+STRESS[OffSet,1+3*Cart];
+               IList=Append[IList,tmpp];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,1+3*Cart)"]];
+
+               Kount = Kount + 1;
+               tmpp=DUM*FP[5]+STRESS[OffSet,2+3*Cart];
+               IList=Append[IList,tmpp];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,2+3*Cart)"]];
+
+               Kount = Kount + 1;
+               tmpp=DUM*FP[6]+STRESS[OffSet,3+3*Cart];
+               IList=Append[IList,tmpp];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,3+3*Cart)"]];
+
+             ,
+               hrr=Normy[a]*Normy[b]*HRRBra["",a,b]+GRADIENT[OffSet,cart+GOC];
+               Kount = Kount + 1;
+               IList=Append[IList,Horner[hrr]];
+               HRRAddress=StringJoin[ToString[i],",",ToString[j]];
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["GRADIENT(OffSet,",ToString[Cart+GOC],")"]]; 
+             ];
+  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+
+             (* Use translational symmetry *)
              hrr=QRS;
              Kount = Kount + 1;
              IList=Append[IList,Horner[hrr]];
@@ -258,16 +448,30 @@ Do[Do[
 
  oList=Flatten[oList];
 
-  WSS[StringJoin["SUBROUTINE ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT)"]];
+  (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+  If[DoStress==0,
+    WSS[StringJoin["SUBROUTINE ",HRRSubName, \
+        "cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT,FP,STRESS)"]];
+  ,
+    WSS[StringJoin["SUBROUTINE ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,Cart,HRR,GRADIENT)"]];
+  ];
+  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+
   WSS["  USE DerivedTypes"];
   WSS["  USE VScratchB"];
   WSS["  USE GlobalScalars"];
   WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,Cart,CDOffSet,OffSet"];
   WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*)"]];
   WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
+
+  (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+  If[DoStress==0,
+    WSS[StringJoin["  REAL(DOUBLE)  :: STRESS(NINT,9),FP(9),DUM"]];
+  ];
+  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+
   Write[HRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
   WSS[StringJoin["END SUBROUTINE ",HRRSubName,"cd"]];			       
-
  Close[HRRSubroutine];
 
 
