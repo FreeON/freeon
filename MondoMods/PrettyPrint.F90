@@ -1293,9 +1293,9 @@ MODULE PrettyPrint
     CHARACTER(LEN=*), OPTIONAL :: Misc_O
     CHARACTER(LEN=24)          :: Tag
     CHARACTER(LEN=24)          :: Name
-    CHARACTER(LEN=24),PARAMETER:: Blks=""                    
-    CHARACTER(LEN=3), PARAMETER:: Colon =" : "
-    CHARACTER(LEN=4), PARAMETER:: Colons=" :: "
+    CHARACTER(LEN=24),PARAMETER:: Blks='                        '
+    CHARACTER(LEN=3), PARAMETER:: Colon =' : '
+    CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
        Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
        Name(22:24)=":: "
