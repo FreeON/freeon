@@ -2,6 +2,7 @@ all:
 #	cd MakeTables ; $(MAKE)
 #	cd PONXMults  ; $(MAKE)
 #	cd PONX       ; $(MAKE)
+	cd VRR        ; $(MAKE) 
 	cd NONX       ; $(MAKE)
 	cd GDrivers   ; $(MAKE)
 	cd MakeTables ; $(MAKE)
@@ -17,6 +18,7 @@ clean:
 #	cd MakeTables ; $(MAKE) -i clean
 #	cd PONXMults  ; $(MAKE) -i clean
 #	cd PONX       ; $(MAKE) -i clean
+	cd VRR        ; $(MAKE) -i clean
 	cd NONX       ; $(MAKE) -i clean
 	cd GDrivers   ; $(MAKE) -i clean
 	cd MakeTables ; $(MAKE) -i clean
