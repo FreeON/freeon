@@ -2,11 +2,11 @@
 %
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. use
-%\newcommand{\commentoutA}[1]{} 
-%\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{} 
+\newcommand{\commentoutB}[1]{#1}
 % instead of the following
-\newcommand{\commentoutA}[1]{#1}
-\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutA}[1]{#1}
+%\newcommand{\commentoutB}[1]{}
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \commentoutA{\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
@@ -104,7 +104,7 @@ matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,MChall
 the exchange-correlation
 matrix~\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A}, and
 density matrix alternatives to eigensolution of the
-Self-Consistent-Field (SCF) equations~\cite{XLi93,MDaw93,SQiu94,EHernandez95B,Hernandez96,CMGoringe97,ADaniels97,DBowler99B,APalser98,MChallacombe99,ANiklasson02A,ANiklasson02B}.
+Self-Consistent-Field (SCF) equations~\cite{XLi93,MDaw93,SQiu94,EHernandez95B,Hernandez96,CMGoringe97,ADaniels97,DBowler99B,APalser99,MChallacombe99,ANiklasson02A,ANiklasson02B}.
 
 The existence of linear scaling methods has been argued from the
 concept of ``nearsightedness'' or quantum
@@ -678,6 +678,7 @@ Alamos, NM 87545 is acknowledged.  This work was performed on
 computing resources located at this facility.
 \end{acknowledgments}
 
+
 \bibliographystyle{apsrmp} \bibliography{mondo}
 
 \pagebreak
@@ -736,6 +737,10 @@ $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a 2-processor
 calculation.}\label{fig:waterscaling}
 \end{figure}
 
+\begin{figure}[h]
+\caption{An illustrative example to show the general Equal Time partitioning scheme, for the case of $m=5$.}\label{fig:binary}
+\end{figure}
+
 %\clearpage
 \pagebreak
 
@@ -767,6 +772,43 @@ Figure 4, C.~K.~Gan and M.~Challacombe \\[1.cm]
 Figure 5, C.~K.~Gan and M.~Challacombe \\[1.cm]
 \resizebox*{6.0in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
 \end{center}
+
+\pagebreak
+\begin{center}
+Figure x, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{6.0in}{!}{\includegraphics[clip]{binary.eps}}
+\end{center}
 }
 
+\appendix
+\section{A general Equal Time partitioning scheme}
+\label{appex:GET}
+In this appendix we describe a general Equal Time partitioning scheme where 
+the number of subboxes, denoted by $m$, is not restricted to a power of two.
+To facilitate this general 
+partitioning, we first create a binary tree with $m$ leaf nodes, with
+the condition that the depths between any two leaf nodes do not differ by more
+than one. 
+Next we associate the edges connecting a parent node to its left and 
+right child nodes with edge weights equal to 
+$n_{\scriptscriptstyle\mathrm{L}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptscriptstyle\mathrm{R}})$
+and $n_{\scriptscriptstyle\mathrm{R}}/(n_{\scriptscriptstyle\mathrm{L}}+n_{\scriptscriptstyle\mathrm{R}})$, respectively. 
+Here $n_{\scriptscriptstyle\mathrm{L}}$ ($n_{\scriptscriptstyle\mathrm{R}}$)
+is the number of left (right) leaf nodes of the parent node. 
+Fig.~\ref{fig:binary}(a) shows a binary tree and all the edge weights 
+for the case of $m=5$.
+With these edge weights, it is a fairly simple matter 
+to partition a total workload $W$ into $m$ equal workloads. Starting
+from the root node,
+we divide the workload in a parent node
+according to the ratio of the edge weights, i.e. $n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}} $. Using this procedure, all
+leaf nodes will have a workload of $W/m$. Fig.~\ref{fig:binary}(b) shows the 
+detailed workload information in all nodes for the case of $m=5$. In a domain
+decomposition of a root BBox, a bisection search can be used to partition
+a box into 2 subboxes with a workload ratio equals to 
+$n_{\scriptscriptstyle\mathrm{L}} : n_{\scriptscriptstyle\mathrm{R}}$,
+which can be easily read off from the edge weights of the binary tree.
+It turns out that ``power-of-two'' Equal Time partitioning scheme 
+explained in section~\ref{subsec:Equal Time} is a special 
+case of this general partitioning scheme. 
 \end{document}
