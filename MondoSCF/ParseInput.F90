@@ -1,6 +1,6 @@
 !    PARSING MODULE
 !    Authors: Matt Challacombe, C.J. Tymczak
-!------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 MODULE ParseInput
    USE DerivedTypes
    USE GlobalScalars
@@ -26,9 +26,9 @@ MODULE ParseInput
    CHARACTER(LEN=3)           :: CSet
    CHARACTER(LEN=8)           :: CCrd
    CONTAINS
-!==================================================================================
+!============================================================================
 !     Parse the input and create proto-HDF file
-!==================================================================================
+!============================================================================
       SUBROUTINE ParseInp(Ctrl)
          TYPE(SCFControls), INTENT(INOUT) :: Ctrl
 !        Read comand line, environement variables, create file names, init files etc
@@ -42,9 +42,9 @@ MODULE ParseInput
 !        Print Parsed options
          CALL ParsePrint(Ctrl)
       END SUBROUTINE ParseInp
-!==================================================================================
+!============================================================================
 !     Parce The Command Lines
-!==================================================================================
+!============================================================================
       SUBROUTINE ParseCmndLine(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(ARGMT)                    :: Args
@@ -57,7 +57,7 @@ MODULE ParseInput
                    DIMENSION(3)         :: SoftLinks
          CHARACTER(LEN=1)               :: S=CHAR(092)
          TYPE(CHR_VECT)                 :: TmpChars
-!---------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Get command line arguments and environment variables
 !
          CALL Get(Args)
@@ -74,7 +74,7 @@ MODULE ParseInput
          CALL GetEnv('MONDO_PLAT',MONDO_PLAT)
          IF(LEN(TRIM(MONDO_HOME))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_HOME) not set.')
          IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_SCRATCH) not set.')
-!------------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Set local path names etc
 !
          MONDO_PWD=TRIM(MONDO_PWD)//'/'
@@ -82,7 +82,7 @@ MODULE ParseInput
          MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
          MONDO_EXEC=TRIM(MONDO_EXEC)//'/'
          PROCESS_ID=IntToChar(GetPID())
-!------------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Determine input and output names with full paths        
          InpFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
 !        Determine if input file has a '.' in it.  If so, create SCF name 
@@ -120,7 +120,7 @@ MODULE ParseInput
          Ctrl%Name=TRIM(SCF_NAME)
          CALL InitHDF(Ctrl%Info)
          CALL OpenHDF(Ctrl%Info)
-!------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Check for guess, restart. Initialize HDF file
 !
          CALL OpenASCII(InpFile,Inp,OldFileQ_O=.TRUE.)
@@ -140,7 +140,7 @@ MODULE ParseInput
             Ctrl%Rest=.FALSE.
          ENDIF
          CLOSE(UNIT=Inp,STATUS='KEEP')
-!---------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Initialize and open info file 
 !
          CALL Put(InpFile,'inputfile')
@@ -152,7 +152,7 @@ MODULE ParseInput
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
          CLOSE(UNIT=Out,STATUS='KEEP')
          CLOSE(UNIT=LgF,STATUS='KEEP')
-!--------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Write banner and title to output file
 !
          CALL OpenASCII(InpFile,Inp)
@@ -199,7 +199,7 @@ MODULE ParseInput
 !        TimeStamp
          CALL TimeStamp('Starting MondoSCF')
 #if defined(PARALLEL) && !defined(MPI2)
-!--------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for mpirun invokation
  
          CALL OpenASCII(InpFile,Inp)
@@ -216,7 +216,7 @@ MODULE ParseInput
          ENDDO
          CALL Delete(TmpChars)           
 #endif
-!----------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> file for print flags (uses Init in Macros...)
 !
          CALL Init(PrintFlags,'MAIN')
@@ -232,15 +232,15 @@ MODULE ParseInput
             PrintFlags%Set=DEBUG_NONE
          ENDIF                       
          CLOSE(UNIT=Inp,STATUS='KEEP')
-!--------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Tidy up 
 !
          CALL CloseHDF()
          CALL Delete(Args)
       END SUBROUTINE 
-!==================================================================================
+!============================================================================
 !     Print Out the Parsed Information
-!==================================================================================
+!============================================================================
       SUBROUTINE ParsePrint(Ctrl)
          TYPE(SCFControls)                :: Ctrl
          INTEGER                          :: I,RestAccL,RestMeth,RestModl
@@ -250,7 +250,7 @@ MODULE ParseInput
          CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Method,Accuracy,Chemistry
          CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
          CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
-!---------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Open input file
          CALL OpenASCII(OutFile,Out)
          CALL PrintProtectL(Out)
@@ -311,18 +311,18 @@ MODULE ParseInput
          ENDDO
          CALL CloseHDF()
       END SUBROUTINE ParsePrint
-!==================================================================================
+!============================================================================
 !     Parse The Methods
-!==================================================================================
+!============================================================================
       SUBROUTINE ParseMethods(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
-!---------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Open info file
          CALL OpenHDF(InfFile)
 !        Open input file
          CALL OpenASCII(InpFile,Inp) 
-!-------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS.SCF>
 !
          IF(OptKeyQ(Inp,INKFOCK_OPTION,INKFOCK_ON))THEN
@@ -347,7 +347,7 @@ MODULE ParseInput
             CALL MondoHalt(PRSE_ERROR,'Number of '//SCF_OPTION &
                            //' options does not match number of Basis sets.')
          ENDIF
-!-------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS.MODEL> 
 !
          NOpts=0
@@ -437,7 +437,7 @@ MODULE ParseInput
          DO I=1,Ctrl%NSet
             CALL Put(Ctrl%Model(I),'ModelChemistry',Tag_O=IntToChar(I))
          ENDDO
-!-------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS.ACCURACY> 
 !
          Ctrl%AccL=2 ! Default is "good"    
@@ -496,9 +496,9 @@ MODULE ParseInput
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL CloseHDF()
       END SUBROUTINE ParseMethods
-!==================================================================================
+!============================================================================
 !     Parse the Geometry Variable
-!==================================================================================
+!============================================================================
       SUBROUTINE ParseGeometry(Ctrl)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
@@ -506,15 +506,15 @@ MODULE ParseInput
          LOGICAL                         :: ReOrder,HilbertOrder
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
-!----------------------------------------------
+!----------------------------------------------------------------------------
 !        Open infofile
 !
          CALL OpenHDF(InfFile)
-!----------------------------------------------
+!----------------------------------------------------------------------------
 !        Open input file for parsing
 !
          CALL OpenASCII(InpFile,Inp)
-!-------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> keys 
 !
          GM%InAU=OptKeyQ(Inp,GEOMETRY,IN_AU)
@@ -527,14 +527,14 @@ MODULE ParseInput
          ELSE
             GM%Ordrd=SFC_HILBERT 
          ENDIF
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <TOT_CHARGE> and <MULTIPLICITY>  
 !
          IF(.NOT.OptDblQ(Inp,TOTAL_CHARGE,GM%TotCh)) &
             CALL MondoHalt(PRSE_ERROR,TOTAL_CHARGE//' Not found in input.')
          IF(.NOT.OptIntQ(Inp,MULTIPLICITY,GM%Multp)) &
             CALL MondoHalt(PRSE_ERROR,MULTIPLICITY//' Not found in input.')
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <Grad=>
 !     
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
@@ -580,7 +580,7 @@ MODULE ParseInput
                Ctrl%NGeom=500
             ENDIF
          ENDIF
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <Extrap=>
 !     
          IF(OptKeyQ(Inp,EXTRAPOLATE,EXTRAP_NO_EXTRAP))THEN
@@ -590,7 +590,7 @@ MODULE ParseInput
          ELSE
             Ctrl%Extrap=EXTRAP_GEOM_INTRP
          ENDIF
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <Vis=>
          IF(OptKeyQ(Inp,VISUALIZE,VIS_RHOPOT))THEN
             Ctrl%Vis=VIS_DX_RHOPOT
@@ -598,7 +598,7 @@ MODULE ParseInput
             Ctrl%Vis=VIS_DX_NO_VIS
          ENDIF
 #ifdef PERIODIC
-!-------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <PERIODIC> keys
 !        Which Directions are Periodic
 !
@@ -642,14 +642,14 @@ MODULE ParseInput
             GM%PBC%AutoW(2)=.FALSE.
             GM%PBC%AutoW(3)=.FALSE.
          ENDIF
-!------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Calculate the Dimension
 !         
          GM%PBC%Dimen=0
          DO I=1,3
             IF(GM%PBC%AutoW(I)) GM%PBC%Dimen=GM%PBC%Dimen+1
          ENDDO
-!------------------------------------------------------
+!----------------------------------------------------------------------------
 !        To wrap or not to wrap atoms into the box
 !
          IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
@@ -662,7 +662,7 @@ MODULE ParseInput
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%AtomW=.FALSE.
          ENDIF
-!------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Input Type on the BoxShape Vectors
 !
          IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
@@ -675,7 +675,7 @@ MODULE ParseInput
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%PBC%InVecForm=.TRUE.
          ENDIF
-!------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Input Type on the Coordinates, Atomic or Fractional
 !
          IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
@@ -689,7 +689,7 @@ MODULE ParseInput
             GM%PBC%InAtomCrd=.TRUE.
          ENDIF
 #endif
-!-------------------------------------------------
+!----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> format
 !
          IF(OptKeyQ(Inp,GEOMETRY,MSI_FORMAT))THEN
@@ -703,9 +703,9 @@ MODULE ParseInput
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !  
       END SUBROUTINE ParseGeometry
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
       SUBROUTINE ParseCoordinates_MONDO(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
@@ -716,7 +716,7 @@ MODULE ParseInput
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
          LOGICAL                         :: LastConfig
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -732,12 +732,12 @@ MODULE ParseInput
          CALL New(GM)
 !
 #ifdef PERIODIC
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
 !
          CALL ParsePeriodic_MONDO(Ctrl,GM)
 #endif
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -829,7 +829,7 @@ MODULE ParseInput
          ENDIF
          CALL Put(NumGeom,'NumberOfGeometries')
          NAtoms=GM%NAtms
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
          CLOSE(UNIT=Inp,STATUS='KEEP')
@@ -842,9 +842,9 @@ MODULE ParseInput
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the input file.')
       END SUBROUTINE ParseCoordinates_MONDO
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
       SUBROUTINE ParseCoordinates_XMOL(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
@@ -856,7 +856,7 @@ MODULE ParseInput
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
          LOGICAL                         :: LastConfig
          TYPE(CHR_VECT)                  :: Chars
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -875,12 +875,12 @@ MODULE ParseInput
 !        Allocate the geometry
          CALL New(GM)
 #ifdef PERIODIC
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
 !
             CALL ParsePeriodic_XMOL(Ctrl,GM)
 #endif
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -938,7 +938,7 @@ MODULE ParseInput
             IF(LastConfig)EXIT
          ENDDO
          NAtoms=GM%NAtms
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Finish up
          CALL Delete(GM)
          CLOSE(UNIT=Inp,STATUS='KEEP')
@@ -963,7 +963,7 @@ MODULE ParseInput
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
          LOGICAL                         :: LastConfig
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -981,12 +981,12 @@ MODULE ParseInput
 !        Allocate the geometry
          CALL New(GM)
 #ifdef PERIODIC
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
 !
             CALL ParsePeriodic_MSI(Ctrl,GM)
 #endif
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -1050,7 +1050,7 @@ MODULE ParseInput
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
          ENDDO
          NAtoms=GM%NAtms
-!----------------------------------------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !        Finish up
 !
          CALL Delete(GM)
@@ -1066,9 +1066,9 @@ MODULE ParseInput
 !
       END SUBROUTINE ParseCoordinates_MSI
 #ifdef PERIODIC
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE ParsePeriodic_MONDO(Ctrl,GM)
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
         TYPE(CRDS)                      :: GM
@@ -1084,7 +1084,7 @@ MODULE ParseInput
            GM%PBC%BoxShape(I,I) = One
            GM%PBC%InvBoxSh(I,I) = One
         ENDDO
-!----------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !       Get the Lattice and Translate Vectors
 !
         IF(FindKey(BEGIN_PERIODIC,Inp)) THEN
@@ -1111,14 +1111,14 @@ MODULE ParseInput
         IF(NLvec .LT. GM%PBC%Dimen) THEN
            CALL MondoHalt(PRSE_ERROR,'Number of Lattice Vectors is Incorrect')      
         ENDIF
-!----------------------------------------------------------- 
+!---------------------------------------------------------------------------- 
 !       Convert the lattice and translate vectors to AU 
 !
         IF(.NOT.GM%InAU) THEN 
            GM%PBC%BoxShape = GM%PBC%BoxShape*AngstromsToAU
            GM%PBC%TransVec = GM%PBC%TransVec*AngstromsToAU
         ENDIF
-!-------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !       Calculate the Box Volume
 !
         GM%PBC%CellVolume = One
@@ -1127,7 +1127,7 @@ MODULE ParseInput
               GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape(I,I)
            ENDIF
         ENDDO
-!-------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !       Calculate the Dipole and Quadripole Factors
 !
         IF(GM%PBC%Dimen < 3) THEN
@@ -1137,7 +1137,7 @@ MODULE ParseInput
            GM%PBC%DipoleFAC = -(Four*Pi)/(Three*GM%PBC%CellVolume)
            GM%PBC%QupoleFAC = (Two*Pi)/(Three*GM%PBC%CellVolume)
         ENDIF
-!-------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !       Calculate the Cell Center
 !
         DO I=1,3
@@ -1150,7 +1150,7 @@ MODULE ParseInput
               ENDDO
            ENDIF
         ENDDO
-!-------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !       Calculate The Inverse of BoxShape  InvBoxSh = [BoxShape]^(-1)
 !
         GM%PBC%InvBoxSh(1,1)=One/GM%PBC%BoxShape(1,1)
@@ -1168,9 +1168,9 @@ MODULE ParseInput
         GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
 !
       END SUBROUTINE ParsePeriodic_MONDO
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE ParsePeriodic_MSI(Ctrl,GM)
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
         TYPE(CRDS)                      :: GM
@@ -1183,9 +1183,9 @@ MODULE ParseInput
         TYPE(CRDS)                      :: GM
         CALL MondoHalt(PRSE_ERROR,'XMOL Format with Periodic not supported')   
       END SUBROUTINE ParsePeriodic_XMOL
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE GetLatVec(GM,NLvec,NTvec)
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec
@@ -1223,9 +1223,9 @@ MODULE ParseInput
                    //'line at the end of the input file.')
 !
       END SUBROUTINE GetLatVec
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE GetLatAng(GM,NLvec,NTvec)
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,Dimen,I,J
@@ -1314,9 +1314,9 @@ MODULE ParseInput
                    //'line at the end of the input file.')
 !
       END SUBROUTINE GetLatAng
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE  CalFracCarts(GM)
          TYPE(CRDS)                 :: GM
          INTEGER                    :: I
@@ -1329,9 +1329,9 @@ MODULE ParseInput
          ENDDO
 !
        END SUBROUTINE CalFracCarts
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE  CalAtomCarts(GM)
         TYPE(CRDS)                 :: GM
         INTEGER                    :: I
@@ -1344,9 +1344,9 @@ MODULE ParseInput
         ENDDO
 !
       END SUBROUTINE CalAtomCarts
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE  CalTransVec(GM)
         TYPE(CRDS)                 :: GM
         REAL(DOUBLE),DIMENSION(3)  :: CMVec
@@ -1364,9 +1364,9 @@ MODULE ParseInput
         ENDDO
 !
       END SUBROUTINE CalTransVec
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE  Translate(GM)
         TYPE(CRDS)                 :: GM
         REAL(DOUBLE),DIMENSION(3)  :: ATvec,FTvec
@@ -1382,9 +1382,9 @@ MODULE ParseInput
         ENDDO
 !
       END SUBROUTINE Translate
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE  WrapAtoms(GM)
         TYPE(CRDS)     :: GM
 !
@@ -1397,13 +1397,13 @@ MODULE ParseInput
 !
       END SUBROUTINE WrapAtoms
 #endif
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE SpinCoords(GM) 
          TYPE(CRDS)     :: GM
          INTEGER        :: I,J,NUnPEl
-!-----------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Calculate the electronic coordinates
          GM%NElec=0
          DO I=1,GM%NAtms
@@ -1418,14 +1418,14 @@ MODULE ParseInput
          GM%NAlph=DBLE(GM%NElec+NUnPEl)*Half
          GM%NBeta=DBLE(GM%NElec-NUnPEl)*Half
       END SUBROUTINE SpinCoords
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE FindKind(GM) 
          TYPE(CRDS)     :: GM
          TYPE(INT_VECT) :: Kinds
          INTEGER        :: I,J,K
-!-----------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
          CALL New(Kinds,GM%NAtms)
          GM%NKind=1
          Kinds%I(1)=GM%AtNum%I(1)
@@ -1446,14 +1446,14 @@ MODULE ParseInput
       END SUBROUTINE FindKind
 !
 
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
 !      FUNCTION ENukeNuke(GM) RESULT(ENucN)
 !         TYPE(CRDS)   :: GM
 !         REAL(DOUBLE) :: ENucN,R
 !         INTEGER      :: I,J
-!-----------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !         ENucN=0.D0
 !         DO I=1,NAtoms
 !            DO J=1,I-1
@@ -1464,14 +1464,14 @@ MODULE ParseInput
 !            ENDDO
 !         ENDDO
 !      END FUNCTION ENukeNuke
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       FUNCTION SetBox(Carts) RESULT(Box)
          TYPE(DBL_RNK2)               :: Carts
          REAL(DOUBLE), DIMENSION(3,2) :: Box
          INTEGER                      :: J
-!-----------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
          Box(:,1)=+1.D8
          Box(:,2)=-1.D8
          DO J=1,SIZE(Carts%D,2)
@@ -1479,15 +1479,15 @@ MODULE ParseInput
             Box(:,2)=MAX(Box(:,2),Carts%D(:,J))
          ENDDO
       END FUNCTION SetBox
-!===================================================================================
+!============================================================================
 !
-!===================================================================================
+!============================================================================
       SUBROUTINE ReorderCoordinates(GM)
          TYPE(CRDS)     :: GM
          TYPE(DBL_VECT) :: DTemp
          TYPE(INT_VECT) :: ITemp,Kinds,Point
          INTEGER        :: J
-!-----------------------------------------------------------------------------------
+!----------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
 !
          CALL New(Point,NAtoms)
@@ -1535,13 +1535,13 @@ MODULE ParseInput
          CALL Delete(DTemp)
          CALL Delete(ITemp)
      END SUBROUTINE ReorderCoordinates
-!==================================================================================
+!============================================================================
 !     Parse the Basis Sets
-!==================================================================================
+!============================================================================
       SUBROUTINE ParseBaseSets(Ctrl)
          USE BasisSetParameters
          IMPLICIT NONE
-!---------------------------------------------------------
+!----------------------------------------------------------------------------
          TYPE(SCFControls)                     :: Ctrl
          TYPE(BSET)                            :: BS
          TYPE(BSET),DIMENSION(MaxSets)         :: Base
@@ -1550,7 +1550,7 @@ MODULE ParseInput
          CHARACTER(LEN=DEFAULT_CHR_LEN)        :: Line
          INTEGER                               :: I,J,K,L,N,NS,NP,NC,NK, &
                                                   MinL,MaxL,ISet,KFound
-!---------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Open infofile
          CALL OpenHDF(InfFile)
 !        Parse basis sets from input file
@@ -1597,7 +1597,7 @@ MODULE ParseInput
                Ctrl%BName(I)=Base(I)%BName
             ENDDO               
 #endif
-!----------------------------------------------
+!----------------------------------------------------------------------------
 !         Allocate a temp basis set
 !
           BS%LMNLen=MaxAsymt
@@ -1608,7 +1608,7 @@ MODULE ParseInput
           CALL New(BS)
           CALL New(ZAtNum,NAtoms)
           CALL Get(ZAtNum,'atomicnumbers',Tag_O='1')
-!------------------------------------------------
+!----------------------------------------------------------------------------
 !         Count kinds and load kind array
 !
           BS%NKind=1
@@ -1621,7 +1621,7 @@ MODULE ParseInput
              BS%Kinds%I(BS%NKind)=ZAtNum%I(I)
           10 CONTINUE
           ENDDO
-!----------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Go over each selected basis set
 !
          DO ISet=1,Ctrl%NSet    
@@ -1713,7 +1713,7 @@ MODULE ParseInput
             CALL Delete(BSiz_2)
             CALL Delete(OffS_2)
          ENDDO
-!-------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Tidy up
 !
          CALL Delete(BS)
@@ -1725,7 +1725,7 @@ MODULE ParseInput
             CALL PPrint(MemStats,'ParseBaseSets')
          CALL CloseHDF()
       END SUBROUTINE ParseBaseSets
-!=================================================================================
+!============================================================================
       SUBROUTINE NormalizeBaseSets(A,B)
          IMPLICIT NONE
          TYPE(BSET), INTENT(INOUT)   :: A
@@ -1806,7 +1806,7 @@ MODULE ParseInput
          TYPE(INT_VECT), INTENT(OUT)  :: BSiz_2,OffS_2
          TYPE(CRDS)                   :: GM
          INTEGER                      :: NA,NK,NC,Stride
-!-----------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !        Get the geometry and compute matrix dimensions and bloking indecies
 !
          CALL Get(GM,Tag_O='1')
