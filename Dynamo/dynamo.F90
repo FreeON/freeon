@@ -7,7 +7,7 @@ Use MemMan
 USE InOut
 USE Mechanics !Macros, ONLY : HasQM,HasMM,MMOnly 
 USE ProcessControl
-USE IntCoo
+USE InCoords
 !
    USE definitions
    USE constants
@@ -455,6 +455,13 @@ CONTAINS
 !
       Cos_AngleIJK=DOT_PRODUCT(DVectIJ%D,DVectJK%D)
 !
+! Eliminate contributions from linear bendings
+!
+      IF(ABS(ABS(Cos_AngleIJK)-One)*180.D0/PI<LinCrit) THEN
+        WRITE(*,*) 'Linear Angle detected, energy term skipped.'
+        CYCLE
+      ENDIF
+!
 ! accuracy of cos(angle) controlled for ACOS function
 !
       IF(DABS(Cos_AngleIJK)>0.999999D0) THEN
@@ -589,9 +596,9 @@ CONTAINS
    REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
    INTEGER            :: ICoord,I,IFAC,J,JFAC,K,KFAC,L,LFAC
    LOGICAL            :: CalcGrad
-   REAL(DOUBLE) :: CosNPhi,CosPhi,CosPhi2,DCos,DForce
+   REAL(DOUBLE) :: CosNPhi,CosPhi,CosPhi2,DCos,DForce,ValueIJK,ValueJKL
    REAL(DOUBLE) :: IJCOSJK,KLCOSJK,D2Cos,Fact1,Fact2,NFJKL,NFIJK
-   REAL(DOUBLE) :: ECoord,DJK
+   REAL(DOUBLE) :: ECoord,DJK,DIJ,DKL
    TYPE(DBL_VECT) :: FIJK,DVectIJ,DVectJK,DVectKL,FJKL
    TYPE(DBL_VECT) :: DGradI,DGradJ,DGradK,DGradL
 !
@@ -621,12 +628,32 @@ CONTAINS
       DVectJK%D=XYZ(1:3,K)-XYZ(1:3,J)
       DVectKL%D=XYZ(1:3,L)-XYZ(1:3,K)
 !
+      DIJ=SQRT(DOT_PRODUCT(DVectIJ%D,DVectIJ%D))
       DJK=SQRT(DOT_PRODUCT(DVectJK%D,DVectJK%D))
+      DKL=SQRT(DOT_PRODUCT(DVectKL%D,DVectKL%D))
 !
       DVectJK%D=DVectJK%D/DJK
 !
       IJCOSJK=DOT_PRODUCT(DVectIJ%D,DVectJK%D)
       KLCOSJK=DOT_PRODUCT(DVectKL%D,DVectJK%D)
+!
+! Check for linearity of three atoms within the torsion
+! In case linearity appears, set torsional energy contribution to
+! zero and increment ICoord 
+! Current criterium is 1 degree.
+!
+!     CALL BENDValue(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),ValueIJK)
+!     CALL BENDValue(XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),ValueJKL)
+!     IF(ABS(ValueIJK-PI)*180.D0/PI<LinCrit .OR. &
+!        ABS(ValueJKL-PI)*180.D0/PI<LinCrit) THEN
+      IF((ABS(ABS(IJCOSJK/DIJ)-One))*180.D0/PI<LinCrit .OR. &
+         (ABS(ABS(KLCOSJK/DKL)-One))*180.D0/PI<LinCrit) THEN
+         WRITE(*,*) 'WARNING, LINEARITY IN TORSION OR OUTP'
+         WRITE(*,*) 'ATOMS: ',I,J,K,L
+         write(*,*) 'IJCOSJK/DIJ= ',IJCOSJK/DIJ
+         write(*,*) 'KLCOSJK/DKL= ',KLCOSJK/DKL
+         CYCLE
+      ENDIF
 !
       FIJK%D=DVectIJ%D-IJCOSJK*DVectJK%D
       FJKL%D=DVectKL%D-KLCOSJK*DVectJK%D
