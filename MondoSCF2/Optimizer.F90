@@ -1212,19 +1212,22 @@ CONTAINS
      TYPE(INTC)     :: IntCL
      TYPE(LattInfo) :: LattIntC
      TYPE(DBL_VECT) :: LatOld
-     INTEGER        :: I,J,PBCDim
+     INTEGER        :: I,J,PBCDim,NDim
      REAL(DOUBLE)   :: Fact
      !
      IF(PBCDim>0) THEN
+       IF(PBCDim==1) NDim=1
+       IF(PBCDim==2) NDim=3
+       IF(PBCDim==3) NDim=6
        WRITE(*,1010) 
        WRITE(Out,1010) 
        Fact=One/AngstromsToAu
-       DO I=1,3
+       DO I=1,MIN(3,NDim)
          WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
          WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
        ENDDO
        Fact=180.D0/PI
-       DO I=4,6
+       DO I=4,MIN(6,NDim)
          WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
          WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
        ENDDO
