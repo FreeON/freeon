@@ -1,4 +1,4 @@
-SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -43,7 +43,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace
+  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
@@ -69,6 +69,11 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     ITypeB=MOD(TKet,100)
     ITypeD=(TKet-ITypeB)/100
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
+    LTot=LBra+LKet
+
+    IF (LTot.LE.0) THEN
+
+                  IntCode=0
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -86,7 +91,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     I2=I0+(I1-1)*10
     iCP=Drv%CDrv%I(I2)            ! The pointer to the 2e contraction
     iCL=Drv%CDrv%I(iCP)           ! driver
-    LTot=LBra+LKet
+
     CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
     CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
 
@@ -96,8 +101,6 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   DO iCKet=1,DB%LenCC       ! Loop over contraction lengths on the Ket
     CKet=DB%CCode%I(iCKet)
     IF (DB%TCPop%I(iTKet,iCKet)==1) THEN
-
-!     MaxInts=MaxBatchSize(iTBra,iCBra,iTKet,iCBra,DB)
 
       ShellC=0
       DO AtC=1,NAtoms                              ! Loop over atom C
@@ -181,19 +184,65 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
               END DO ! J, LenKet
  
               IF (ISL>0) THEN
-                IntSpace=ISL*CBra*CKet*NVRR
+
+                IntSpace=ISL*CBra*CKet*NVRR    ! WRONG HERE
                 IF (IntSpace.GT.IB%MAXI) THEN
                   ErrorCode=eMAXI
                   GOTO 9000
                 ENDIF
+
+                SELECT CASE (IntCode)
+                  CASE (00000000)  
+                    CALL Int1111(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D)
+!                  CASE (00001000)  
+!                    CALL Int1121()
+!                  CASE (00001010)  
+!                    CALL Int1122()
+!                  CASE (10000000)  
+!                    CALL Int2111()
+!                  CASE (10001000)  
+!                    CALL Int2121()
+!                  CASE (10001010)  
+!                    CALL Int2122()
+!                  CASE (10100000)  
+!                    CALL Int2211()
+!                  CASE (10101000)  
+!                    CALL Int2221()
+!                  CASE (10101010) 
+!                    CALL Int2222()
+!                  CASE (00002200)
+!                    CALL Int1161()
+!                  CASE (00002210)
+!                    CALL Int1162()
+!                  CASE (00002222)
+!                    CALL Int1166()
+!                  CASE (10002200)
+!                    CALL Int2161()
+!                  CASE (10002210)
+!                    CALL Int2162()
+!                  CASE (10102200)
+!                    CALL Int2261()
+!                  CASE (22000000)
+!                    CALL Int6111()
+!                  CASE (22001000)
+!                    CALL Int6121()
+!                  CASE (22001010)
+!                    CALL Int6122()
+!                  CASE (22002200)
+!                    CALL Int6161()
+!                  CASE (22100000)
+!                    CALL Int6211()
+!                  CASE (22101000)
+!                    CALL Int6221()
+!                  CASE (22220000)
+!                    CALL Int6611()
+                  CASE DEFAULT
+                    CALL Halt(' Illegal integral type in ONX:ComputeKe')
+                END SELECT
+
                 xNERIs=xNERIs+FLOAT(L1*L2*L3*L4*ISL)
-                CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
-                          DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
-                CALL VRRl(ISL*CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is), &
-                          Drv%VLOC%I(Drv%is+Drv%nr),                           &
-                          IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
-                CALL Contract(ISL,CBra,CKet,NVRR,iCL,Drv%CDrv%I(iCP+1),        &
-                              IB%CB%D,IB%CK%D,IB%W1%D,IB%W2%D)
+
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
                                         SB%SLDis%I,NB1,NB1,TKet)
                 IF (LBra>0) THEN 
@@ -222,8 +271,9 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   END DO ! iCKet
     END IF ! TCPop on Bra
   END DO ! iCBra
+  ENDIF  ! LTot
   END DO ! iTKet
   END DO ! iTBra
 9000 CONTINUE
   CALL Delete(DA)
-END SUBROUTINE ComputeK
+END SUBROUTINE ComputeKe

@@ -10,8 +10,9 @@ Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            vrrl.o RGen1C.o CCDriver.o VRRDriver.o \
            DisOrder.o RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
            RangeOfExchange.o Tables.o GetTables.o \
-           ComputeK.o GetSubBlk.o XPose.o InitSubInd.o \
-           RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o
+           GetSubBlk.o XPose.o InitSubInd.o \
+           RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o \
+           ComputeKe.o ComputeKg.o
 
 Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
@@ -22,7 +23,7 @@ Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            HRRBraGrad.o HRRKetGrad.o GetSubBlk.o GetGradient.o     \
            InitSubInd.o DigestGradient.o GetAdr.o
 
-Libs =  $(F90_LIBRARIES) $(LAPACK) 
+Libs =  $(F90_LIBRARIES) $(LAPACK) -lVRR
 
 NONX:	$(Objects1)
 	$(LD) $(LDFLAGS) NONX $(Objects1) $(LibOpts) $(Libs)

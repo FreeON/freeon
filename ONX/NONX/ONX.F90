@@ -116,7 +116,13 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-  CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+  CALL ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
+  IF (ErrorCode/=eAOK) THEN
+    CALL Delete(K)
+    CALL Delete(SubInd)
+    GOTO 1000
+  END IF
+  CALL ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   IF (ErrorCode/=eAOK) THEN
     CALL Delete(K)
     CALL Delete(SubInd)
