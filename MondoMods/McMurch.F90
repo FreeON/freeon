@@ -1,10 +1,34 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
 !
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    MODULE FOR GENERIC THE McMurchie Davidson APPROACH TO COMPUTATION OF
+!    HERMITE GAUSSIAN ERIS VIA RECURENCE RELATIONS
+!    Author: Matt Challacombe 
+!------------------------------------------------------------------------------
 MODULE McMurchie
    USE DerivedTypes
    USE GlobalScalars
@@ -19,10 +43,10 @@ MODULE McMurchie
          REAL(DOUBLE), INTENT(IN)  :: EtaAB,PAx,PBx,PAy,PBy,PAz,PBz
          REAL(DOUBLE)              :: RL1,TwoZ
          INTEGER,      INTENT(IN)  :: NASym,MD0,MaxLA,MaxLB
-         REAL(DOUBLE), INTENT(OUT) :: MD(3,MD0:NASym,MD0:NASym,0:2*NASym)
+         REAL(DOUBLE), INTENT(OUT) :: MD(3,MD0:NASym,MD0:NASym,MD0:2*NASym)
          INTEGER                   :: LTot,LA,LB,LAB
          LTot=MaxLA+MaxLB
-         DO LAB=0,LTot
+         DO LAB=MD0,LTot
             DO LB=MD0,MaxLB
                DO LA=MD0,MaxLA
                   MD(1,LA,LB,LAB)=Zero
@@ -78,6 +102,15 @@ MODULE McMurchie
                MD(3,LA,LB,LTot)=TwoZ*MD(3,LA,LB-1,LAB-1)+PBz*MD(3,LA,LB-1,LAB)
             ENDDO
           ENDDO
+
+!         DO LAB=0,LTot
+!            DO LB=MD0,MaxLB
+!               DO LA=MD0,MaxLA
+!                  WRITE(*,22)LA,LB,LAB,MD(:,LA,LB,LAB)
+!               22 FORMAT(3(I3,","),3(D14.6,","))
+!               ENDDO
+!            ENDDO
+!         ENDDO                                                          
       END SUBROUTINE MD2TRR
 !-----------------------------------------------------------     
 !     McMurchie-Davidson 3-term recurence relation
@@ -154,7 +187,7 @@ MODULE McMurchie
          REAL(DOUBLE)                               :: SqrtT,ET,OneOvT,FJ,TwoT, &
                                                        OmegaJ,TwoO
          INTEGER                                    :: J
-!---------------------------------------------------
+!---------------------------------------------------------------------------------
 !        Compute the incomplete gamma functions F_j(T)
 !
          IF(T==Zero)THEN
