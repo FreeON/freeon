@@ -484,11 +484,7 @@ CONTAINS
      !
      NIntC=0
      NTorsion=0
-     MaxBonds=20 ! initial value
      NatmsLoc=SIZE(XYZ,2)
-     !
-     CALL New(BondCov,NatmsLoc*MaxBonds)
-     CALL New(BondVDW,NatmsLoc*MaxBonds)
      !
      CALL IntCBoxes(XYZ,Box)
      !
@@ -4440,10 +4436,12 @@ CONTAINS
      TYPE(DBL_VECT)              :: CritRad
      REAL(DOUBLE)                :: Fact  
      INTEGER                     :: I,J,N,NatmsLoc
+     LOGICAL                     :: DoRepeat
      !
      !now define bonding scheme, based on Slater or Van der Waals radii
      !
      NatmsLoc=SIZE(XYZ,2)
+     !
      IF(IntSet==1) THEN
        N=SIZE(SLRadii,1)
        CALL New(CritRad,NatmsLoc)
@@ -4461,7 +4459,8 @@ CONTAINS
      ENDIF
      !
      IF(IntSet==1) THEN
-       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+       DoRepeat=.FALSE.
+       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad,DoRepeat)
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL Topology_12(AtmB,TOPS%Cov12)
        CALL Topology_13(NatmsLoc,TOPS%Cov12,TOPS%Cov13)
@@ -4469,7 +4468,16 @@ CONTAINS
        CALL Excl_List(NatmsLoc,TOPS%Cov12,TOPS%Cov13,TOPS%Cov14, &
                       TOPS%CovExcl)
      ELSE
-       CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+       DO I=1,2
+         DoRepeat=.FALSE.
+         CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad,DoRepeat)
+         IF(DoRepeat) THEN
+           CALL Delete(Bond)
+         ELSE
+           EXIT
+         ENDIF
+         IF(I==2.AND.DoRepeat) CALL Halt('The repeated attemt of recognizing bonds to lonely atoms failed.')
+       ENDDO
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
        CALL Delete(AtmB)
@@ -4485,7 +4493,7 @@ CONTAINS
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad)
+   SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS,CritRad,DoRepeat)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -4493,7 +4501,7 @@ CONTAINS
      TYPE(IntCBox)               :: Box
      TYPE(TOPOLOGY)              :: TOPS
      INTEGER,DIMENSION(:)        :: AtNum
-     TYPE(DBL_VECT)              :: CritRad !!! VdW or Slater Radii
+     TYPE(DBL_VECT)              :: CritRad,CritRadMod 
      REAL(DOUBLE)                :: R12,R12_2,CritDist,HBondMax
      INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
      INTEGER                     :: IORD,IORDD
@@ -4501,15 +4509,19 @@ CONTAINS
      INTEGER                     :: NMax12,JJ,IntSet,IDimExcl,NBondEst
      INTEGER                     :: IDim14,IDim12,IDim13
      INTEGER                     :: HAtm,LAtm,DDim,NBondOld
-     INTEGER                     :: IChk
+     INTEGER                     :: IChk,MaxBonds
      REAL(DOUBLE),DIMENSION(3)   :: DVect
      LOGICAL                     :: FoundHBond,FoundMetLig
-     LOGICAL                     :: LonelyAtom,DoExclude
+     LOGICAL                     :: LonelyAtom,DoExclude,DoRepeat
      !     
-     NBondEst=Bond%N
-     NBond=NBondEst
      NatmsLoc=SIZE(XYZ,2)
+     MaxBonds=20 ! initial value
+     NBondEst=NatmsLoc*MaxBonds
+     NBond=NBondEst
      HAtm=0
+     CALL New(Bond,NBondEst)
+     CALL New(CritRadMod,NatmsLoc)
+     CritRadMod%D=CritRad%D
      !
      HBondMax=2.20D0*AngstromsToAu ! in Au 
      !
@@ -4555,7 +4567,7 @@ CONTAINS
                              IF(FoundHBond.AND..NOT.LonelyAtom) THEN
                                CritDist=HBondMax
                              ELSE
-                               CritDist=CritRad%D(JJ1)+CritRad%D(JJ2)
+                               CritDist=CritRadMod%D(JJ1)+CritRad%D(JJ2)
                              ENDIF
                              DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
                              R12_2=DOT_PRODUCT(DVect,DVect)
@@ -4602,7 +4614,8 @@ CONTAINS
                ENDDO
                IF(IntSet==2) THEN
                  IF(NBondOld==NBond.AND.TOPS%Cov12%I(JJ1,1)==0) THEN
-                   CritRad%D(JJ1)=1.2D0*CritRad%D(JJ1)
+                   DoRepeat=.TRUE.
+                   CritRadMod%D(JJ1)=1.2D0*CritRadMod%D(JJ1)
                  ELSE
                    EXIT  
                  ENDIF
@@ -4618,6 +4631,10 @@ CONTAINS
      ! Compress Bond
      !
      CALL MoreBondArray(Bond,NBond,NBond)
+     IF(DoRepeat) THEN
+       CritRad%D=CritRadMod%D
+     ENDIF
+     CALL Delete(CritRadMod)
    END SUBROUTINE BondList
 !
 !--------------------------------------------------------------
