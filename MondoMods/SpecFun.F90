@@ -131,6 +131,8 @@ END MODULE
 
 MODULE ErfFunk
    USE DerivedTypes
+   USE ProcessControl
+   USE Parse
    IMPLICIT NONE
    INCLUDE "ErrorFunction.Inc"
    CONTAINS
@@ -169,19 +171,18 @@ MODULE ErfFunk
         REAL(DOUBLE)             :: X,ProductLog1,Error
         REAL(DOUBLE),PARAMETER   :: Xmax = 0.3678794411714423216D0
 !
-        IF(X > Xmax) THEN
-           WRITE(*,*) 'In ProductLog[-1,-x] :: |x| > 1/E'
-           STOP
-        ELSE
-           ProductLog1 = One
-           DO I=1,40
-              Error       = ProductLog1
-              ProductLog1 = -LOG(X/ProductLog1)
-              Error = ABS(ProductLog1-Error)
-              IF(Error < 1.0D-14) RETURN
-           ENDDO
-        ENDIF
-!
+        IF(X > Xmax)CALL Halt('In ProductLog1[-1,-x] :: |x| > 1/E')
+        ProductLog1 = One
+        DO I=1,100
+           Error       = ProductLog1
+           ProductLog1 = -LOG(X/ProductLog1)
+           Error = ABS((ProductLog1-Error)/ProductLog1)
+           IF(Error<1D-12)GOTO 99
+        ENDDO
+        CALL Halt('Failed to converge ProductLog1: X = '  &
+                  //TRIM(DblToChar(X))//' ProductLog1 = ' &
+                  //TRIM(DblToChar(ProductLog1))//'.')
+        99 RETURN
       END FUNCTION ProductLog1
 END MODULE
 
