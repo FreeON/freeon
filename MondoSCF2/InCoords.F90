@@ -1350,31 +1350,31 @@ CONTAINS
        ENDDO
        IF(.NOT.DoAllow) CYCLE
        !
-       IF(ANY(Tr<0)) THEN
-         IntCs%Cells%I(I,1:12)=0    
-         DO J=K1,K2
-           K=IntCs%Atoms%I(I,J)
-           IF(K==0) EXIT
-           J1=3*(J-1)+1
-           J2=J1+2
-           ! translate coordinate to positive space eighth
-           IntCs%Cells%I(I,J1:J2)=Cells(K,1:3)-Tr
-         ENDDO
-         !
-         DoAllow=.TRUE.
-         DO J=K1,K2
-           K=IntCs%Atoms%I(I,J)
-           IF(K==0) EXIT
-           J1=3*(J-1)+1
-           J2=J1+2
-           IF(ALL(IntCs%Cells%I(I,J1:J2)==0)) THEN
-             DoAllow=.FALSE.
-             EXIT
-           ENDIF
-         ENDDO
-         IF(DoAllow.AND.(Tr(2)/=0.OR.Tr(3)/=0)) DoAllow=.FALSE.
-         IF(.NOT.DoAllow) CYCLE
-       ENDIF
+     ! IF(ANY(Tr<0)) THEN
+     !   IntCs%Cells%I(I,1:12)=0    
+     !   DO J=K1,K2
+     !     K=IntCs%Atoms%I(I,J)
+     !     IF(K==0) EXIT
+     !     J1=3*(J-1)+1
+     !     J2=J1+2
+     !     ! translate coordinate to positive space eighth
+     !     IntCs%Cells%I(I,J1:J2)=Cells(K,1:3)-Tr
+     !   ENDDO
+     !   !
+     !   DoAllow=.TRUE.
+     !   DO J=K1,K2
+     !     K=IntCs%Atoms%I(I,J)
+     !     IF(K==0) EXIT
+     !     J1=3*(J-1)+1
+     !     J2=J1+2
+     !     IF(ALL(IntCs%Cells%I(I,J1:J2)==0)) THEN
+     !       DoAllow=.FALSE.
+     !       EXIT
+     !     ENDIF
+     !   ENDDO
+     !   IF(DoAllow.AND.(Tr(2)/=0.OR.Tr(3)/=0)) DoAllow=.FALSE.
+     !   IF(.NOT.DoAllow) CYCLE
+     ! ENDIF
        !
        II=II+1
        Sort%I(I)=1
