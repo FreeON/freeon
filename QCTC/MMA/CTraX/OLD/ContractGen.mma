@@ -1,0 +1,75 @@
+lpmax=4; lqmax=15; ltmax=lpmax+lqmax; lbigest=0;
+filename1=StringJoin["ContractIfBlk.Inc"];
+filename2=StringJoin["ContractCaseBlk.Inc"];
+Print[" Openning ",filename1]; Print[" Openning ",filename2];
+OpenWrite[filename1]; OpenWrite[filename2];
+Off[General::spell,General::spell1]; SetOptions[$Output,PageWidth->72];
+<<Format.m; <<PrintTime.m;
+iindex[m_,l_]:=Binomial[l+1,2]+m;
+<<explicitdefs;
+WriteSeperate2[ellp_,ellq_,file1_String,file2_String]:=Block[{newfile,st,sf}, 
+             lcode=100*ellp+ellq;
+             st=StringJoin["Contract",ToString[lcode]];
+             WriteString[file1,StringJoin["           CALL ",st,"(PO2,POx,POy,POz,CKet,SKet, \n"]];
+             WriteString[file1,           "     $           Cq(0,Node),Sq(0,Node)) \n"];
+             WriteString[file2,StringJoin["           CALL ",st,"(PO2,POx,POy,POz,CKet,SKet, \n"]];
+             WriteString[file2,           "     $           Cq(0,Node),Sq(0,Node)) \n"];
+                                                               ];     
+WriteSeperate[ellp_,ellq_,file1_String,file2_String]:=Block[{newfile,st,sf}, 
+             lcode=100*ellp+ellq;
+             st=StringJoin["Contract",ToString[lcode]];
+             WriteString[file1,StringJoin["           CALL ",st,"(PO2,POx,POy,POz,CKet,SKet, \n"]];
+             WriteString[file1,           "     $           Cq(0,Node),Sq(0,Node)) \n"];
+             WriteString[file2,StringJoin["           CALL ",st,"(PO2,POx,POy,POz,CKet,SKet, \n"]];
+             WriteString[file2,           "     $           Cq(0,Node),Sq(0,Node)) \n"];
+             newfile=StringJoin[st,".F"];
+             Print[" Openning ",newfile];
+             OpenWrite[newfile];
+             WriteString[newfile,StringJoin["        SUBROUTINE ",st,"(pq2,pqx,pqy,pqz,CKet,SKet,Cq,Sq) \n"]];
+             WriteString[newfile,           "        IMPLICIT REAL*8 (a-h,o-z) \n"]; 
+             WriteString[newfile,StringJoin["        REAL*8 CKet(0:*),SKet(0:*) \n"]]; 
+             WriteString[newfile,StringJoin["        REAL*8 Cq(0:*),Sq(0:*) \n"]]; 
+             WriteExplicit[ellp,ellq,newfile];              
+             WriteString[newfile,           "        RETURN \n"];
+             WriteString[newfile,           "        END \n"];
+             WriteString[newfile,"         \n"];
+             Close[newfile];             
+                                             ];
+
+Do[ Do[          
+       ellt=ellq+ellp;
+       lcode=100*ellp+ellq;
+       WriteString[filename1,StringJoin["         ELSEIF(LCode.EQ.",ToString[lcode],")THEN \n"]];
+       WriteString[filename2,StringJoin["         CASE(",ToString[lcode],") \n "]];
+       WriteSeperate[ellp,ellq,filename1,filename2];
+ ,{ellp,lpmax,lpmax}]   ,{ellq,lqmax,lqmax}] ;
+
+Close[filename1];
+Close[filename2];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
