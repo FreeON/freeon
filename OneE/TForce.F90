@@ -25,7 +25,7 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !----------------------------------------------------------------------------------
-!    Author: Matt Challacombe
+!    Author: Matt Challacombe and CJ Tymczak
 !    COMPUTE THE FORCE CORESPONDING TO THE DERIVATIVE OF THE 
 !    KINETIC ENERGY MATRIX, TForce=2*Tr{P.dT}
 !----------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ PROGRAM TForce
   TYPE(BCSR)          :: P
 #endif
 #ifdef PERIODIC 
-  INTEGER             :: NC,NLay,MMLow,MMHig,MaxL
+  INTEGER             :: NC
   REAL(DOUBLE)        :: Bx,By,Bz
 #endif
   TYPE(AtomPair)      :: Pair
@@ -71,9 +71,15 @@ PROGRAM TForce
   CALL Get(P,TrixFile('D',Args,0))
   CALL New(Frc,3*NAtoms)
   CALL New(TFrc,3*NAtoms)
-  TFrc%D=Zero
+#ifdef PERIODIC
+!-----------------------------------------------
+! Calculate the Number of Cells
+!
+  CALL SetCellNumber(GM)
+#endif
 !---------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
+  TFrc%D=Zero
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
@@ -81,18 +87,32 @@ PROGRAM TForce
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
-           TFrc%D(A1:A2)=TFrc%D(A1:A2)+Four*TrPdT(BS,Pair,P%MTrix%D(Q:),AtA,AtB)
+#ifdef PERIODIC
+           Bx = Pair%B(1)
+           By = Pair%B(2)           
+           Bz = Pair%B(3)
+           DO NC=1,CS%NCells
+              Pair%B(1)=Bx+CS%CellCarts%D(1,NC)
+              Pair%B(2)=By+CS%CellCarts%D(2,NC)
+              Pair%B(3)=Bz+CS%CellCarts%D(3,NC)
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 TFrc%D(A1:A2)=TFrc%D(A1:A2)+Four*TrPdT(BS,Pair,P%MTrix%D(Q:))
+              ENDIF
+           ENDDO
+#else
+           TFrc%D(A1:A2)=TFrc%D(A1:A2)+Four*TrPdT(BS,Pair,P%MTrix%D(Q:))
+#endif
         ENDIF
      ENDDO
   ENDDO
-!  CALL PPrint(TFrc,'TForce',Unit_O=6)
 !---------------------------------------------------------------
 ! Update forces
+  CALL PPrint(TFrc,'TForce')
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+TFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
   TFrcChk=SQRT(DOT_PRODUCT(TFrc%D,TFrc%D))
-!  WRITE(*,*)' TFrcChk = ',TFrcChk
 !------------------------------------------------------------------------------
 ! Tidy up 
   CALL Delete(P)

@@ -25,7 +25,7 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
-!    Author: Matt Challacombe
+!    Author: Matt Challacombe and CJ Tymczak
 !    COMPUTE THE FORCE DUE TO CHANGES IN THE DENSITY MATRIX:
 !    dP.(2T+J+K)=-2*dS.P.F.P (Early work by McWeeny, need a cite...)
 !------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ PROGRAM SForce
   TYPE(BCSR)          :: T1,F,P
 #endif
 #ifdef PERIODIC 
-  INTEGER             :: NC,NLay,MMLow,MMHig
+  INTEGER             :: NC
   REAL(DOUBLE)        :: Bx,By,Bz
 #endif
   TYPE(AtomPair)      :: Pair
@@ -76,14 +76,22 @@ PROGRAM SForce
   CALL New(T1)
 !--------------------------------------
 ! Compute W=P.F.P
-  CALL Get(F,TrixFile('F',Args,0))
   CALL Get(P,TrixFile('D',Args,0))
+!
+  CALL Get(F,TrixFile('F',Args,0))
+!  CALL Get(F,TrixFile('T',Args))
   PrintFlags%Fmt=DEBUG_DOUBLES
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
   CALL Filter(P,F)            ! P=Filter[P.F.P]      
   CALL Delete(F)
   CALL Delete(T1)
+#ifdef PERIODIC
+!-----------------------------------------------
+! Calculate the Number of Cells
+!
+  CALL SetCellNumber(GM)
+#endif
 !  CALL PPrint(P,'W',Unit_O=6)
 !---------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
@@ -97,16 +105,30 @@ PROGRAM SForce
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
+#ifdef PERIODIC
+           Bx = Pair%B(1)
+           By = Pair%B(2)           
+           Bz = Pair%B(3)
+           DO NC=1,CS%NCells
+              Pair%B(1)=Bx+CS%CellCarts%D(1,NC)
+              Pair%B(2)=By+CS%CellCarts%D(2,NC)
+              Pair%B(3)=Bz+CS%CellCarts%D(3,NC)
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 SFrc%D(A1:A2)=SFrc%D(A1:A2)-Four*TrWdS(BS,Pair,P%MTrix%D(Q:))
+              ENDIF
+           ENDDO
+#else
            SFrc%D(A1:A2)=SFrc%D(A1:A2)-Four*TrWdS(BS,Pair,P%MTrix%D(Q:))
+#endif
         ENDIF
      ENDDO
   ENDDO
-!  CALL PPrint(SFrc,'SForce',Unit_O=6)
 !------------------------------------------------------------------------------
 ! Put SForce to info file
+  CALL PPrint(SFrc,'SForce')
   CALL Put(SFrc,'GradE',Tag_O=CurGeom)
   SFrcChk=SQRT(DOT_PRODUCT(SFrc%D,SFrc%D))
-!  WRITE(*,*)' SFrcChk = ',SFrcChk
 !------------------------------------------------------------------------------
 ! Tidy up 
   CALL Delete(P)
