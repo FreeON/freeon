@@ -21,16 +21,16 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(10) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(4,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(5,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(10,1,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(4,4,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(5,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(10,4,0:2)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(4*1,HRR(1,1,1))
+      CALL InitDbl(5*1,HRR(1,1,1))
       CALL InitDbl(10*1,HRRA(1,1,1))
       CALL InitDbl(10*1,HRRB(1,1,1))
-      CALL InitDbl(4*4,HRRC(1,1,1))
+      CALL InitDbl(5*4,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -65,6 +65,7 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             Py=PrmBufB(3,K)
             Pz=PrmBufB(4,K)
             Up=PrmBufB(5,K)
+            SpFnB=PrmBufB(6,K)
             Alpha =PrmBufB(9,K)
             Beta  =PrmBufB(10,K)
             r1xZpE=One/(Zeta+Eta)
@@ -155,10 +156,10 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL CNTRCTG3111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Dont need to generate (p,0|s,s)
-      ! Dont need to generate (d,0|s,s)^a
-      ! Dont need to generate (d,0|s,s)^b
-      ! Dont need to generate (p,0|p,s)^c
+      ! Dont need to generate (sp,0|s,s)
+      ! Dont need to generate (spd,0|s,s)^a
+      ! Dont need to generate (spd,0|s,s)^b
+      ! Dont need to generate (sp,0|p,s)^c
       DO L=1,1
       
          !K = 1
@@ -177,10 +178,11 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG3111(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(4,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(5,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(10,1,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(4,4,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(5,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(10,4,0:2)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
@@ -210,8 +212,13 @@ SUBROUTINE dIntB3010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRC(4,2,1)=HRRC(4,2,1)+Gamma*VRR(4,2,0)
       HRRC(4,3,1)=HRRC(4,3,1)+Gamma*VRR(4,3,0)
       HRRC(4,4,1)=HRRC(4,4,1)+Gamma*VRR(4,4,0)
+      HRR(5,1,1)=HRR(5,1,1)+VRR(5,1,0)
       HRRA(5,1,1)=HRRA(5,1,1)+Alpha*VRR(5,1,0)
       HRRB(5,1,1)=HRRB(5,1,1)+Beta*VRR(5,1,0)
+      HRRC(5,1,1)=HRRC(5,1,1)+Gamma*VRR(5,1,0)
+      HRRC(5,2,1)=HRRC(5,2,1)+Gamma*VRR(5,2,0)
+      HRRC(5,3,1)=HRRC(5,3,1)+Gamma*VRR(5,3,0)
+      HRRC(5,4,1)=HRRC(5,4,1)+Gamma*VRR(5,4,0)
       HRRA(6,1,1)=HRRA(6,1,1)+Alpha*VRR(6,1,0)
       HRRB(6,1,1)=HRRB(6,1,1)+Beta*VRR(6,1,0)
       HRRA(7,1,1)=HRRA(7,1,1)+Alpha*VRR(7,1,0)

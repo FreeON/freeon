@@ -21,16 +21,16 @@ SUBROUTINE dIntB6030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(35) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(20,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(26,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(35,1,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(20,4,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(26,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(35,4,0:4)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(20*1,HRR(1,1,1))
+      CALL InitDbl(26*1,HRR(1,1,1))
       CALL InitDbl(35*1,HRRA(1,1,1))
       CALL InitDbl(35*1,HRRB(1,1,1))
-      CALL InitDbl(20*4,HRRC(1,1,1))
+      CALL InitDbl(26*4,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -65,6 +65,7 @@ SUBROUTINE dIntB6030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             Py=PrmBufB(3,K)
             Pz=PrmBufB(4,K)
             Up=PrmBufB(5,K)
+            FnSpB=PrmBufB(6,K)
             Alpha =PrmBufB(9,K)
             Beta  =PrmBufB(10,K)
             r1xZpE=One/(Zeta+Eta)
@@ -225,10 +226,10 @@ SUBROUTINE dIntB6030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL CNTRCTG6311(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Dont need to generate (f,0|s,s)
-      ! Dont need to generate (g,0|s,s)^a
-      ! Dont need to generate (g,0|s,s)^b
-      ! Dont need to generate (f,0|p,s)^c
+      ! Dont need to generate (spdf,0|s,s)
+      ! Dont need to generate (<>CType[11]<>,0|s,s)^a
+      ! Dont need to generate (<>CType[11]<>,0|s,s)^b
+      ! Dont need to generate (spdf,0|p,s)^c
       DO L=1,1
       
          !K = 1
@@ -247,10 +248,11 @@ SUBROUTINE dIntB6030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG6311(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      REAL(DOUBLE), DIMENSION(20,1,1) :: HRR 
+      REAL(DOUBLE), DIMENSION(26,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(35,1,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(20,4,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(26,4,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(35,4,0:4)
       HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
       HRRA(1,1,1)=HRRA(1,1,1)+Alpha*VRR(1,1,0)
@@ -392,18 +394,48 @@ SUBROUTINE dIntB6030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       HRRC(20,2,1)=HRRC(20,2,1)+Gamma*VRR(20,2,0)
       HRRC(20,3,1)=HRRC(20,3,1)+Gamma*VRR(20,3,0)
       HRRC(20,4,1)=HRRC(20,4,1)+Gamma*VRR(20,4,0)
+      HRR(21,1,1)=HRR(21,1,1)+VRR(21,1,0)
       HRRA(21,1,1)=HRRA(21,1,1)+Alpha*VRR(21,1,0)
       HRRB(21,1,1)=HRRB(21,1,1)+Beta*VRR(21,1,0)
+      HRRC(21,1,1)=HRRC(21,1,1)+Gamma*VRR(21,1,0)
+      HRRC(21,2,1)=HRRC(21,2,1)+Gamma*VRR(21,2,0)
+      HRRC(21,3,1)=HRRC(21,3,1)+Gamma*VRR(21,3,0)
+      HRRC(21,4,1)=HRRC(21,4,1)+Gamma*VRR(21,4,0)
+      HRR(22,1,1)=HRR(22,1,1)+VRR(22,1,0)
       HRRA(22,1,1)=HRRA(22,1,1)+Alpha*VRR(22,1,0)
       HRRB(22,1,1)=HRRB(22,1,1)+Beta*VRR(22,1,0)
+      HRRC(22,1,1)=HRRC(22,1,1)+Gamma*VRR(22,1,0)
+      HRRC(22,2,1)=HRRC(22,2,1)+Gamma*VRR(22,2,0)
+      HRRC(22,3,1)=HRRC(22,3,1)+Gamma*VRR(22,3,0)
+      HRRC(22,4,1)=HRRC(22,4,1)+Gamma*VRR(22,4,0)
+      HRR(23,1,1)=HRR(23,1,1)+VRR(23,1,0)
       HRRA(23,1,1)=HRRA(23,1,1)+Alpha*VRR(23,1,0)
       HRRB(23,1,1)=HRRB(23,1,1)+Beta*VRR(23,1,0)
+      HRRC(23,1,1)=HRRC(23,1,1)+Gamma*VRR(23,1,0)
+      HRRC(23,2,1)=HRRC(23,2,1)+Gamma*VRR(23,2,0)
+      HRRC(23,3,1)=HRRC(23,3,1)+Gamma*VRR(23,3,0)
+      HRRC(23,4,1)=HRRC(23,4,1)+Gamma*VRR(23,4,0)
+      HRR(24,1,1)=HRR(24,1,1)+VRR(24,1,0)
       HRRA(24,1,1)=HRRA(24,1,1)+Alpha*VRR(24,1,0)
       HRRB(24,1,1)=HRRB(24,1,1)+Beta*VRR(24,1,0)
+      HRRC(24,1,1)=HRRC(24,1,1)+Gamma*VRR(24,1,0)
+      HRRC(24,2,1)=HRRC(24,2,1)+Gamma*VRR(24,2,0)
+      HRRC(24,3,1)=HRRC(24,3,1)+Gamma*VRR(24,3,0)
+      HRRC(24,4,1)=HRRC(24,4,1)+Gamma*VRR(24,4,0)
+      HRR(25,1,1)=HRR(25,1,1)+VRR(25,1,0)
       HRRA(25,1,1)=HRRA(25,1,1)+Alpha*VRR(25,1,0)
       HRRB(25,1,1)=HRRB(25,1,1)+Beta*VRR(25,1,0)
+      HRRC(25,1,1)=HRRC(25,1,1)+Gamma*VRR(25,1,0)
+      HRRC(25,2,1)=HRRC(25,2,1)+Gamma*VRR(25,2,0)
+      HRRC(25,3,1)=HRRC(25,3,1)+Gamma*VRR(25,3,0)
+      HRRC(25,4,1)=HRRC(25,4,1)+Gamma*VRR(25,4,0)
+      HRR(26,1,1)=HRR(26,1,1)+VRR(26,1,0)
       HRRA(26,1,1)=HRRA(26,1,1)+Alpha*VRR(26,1,0)
       HRRB(26,1,1)=HRRB(26,1,1)+Beta*VRR(26,1,0)
+      HRRC(26,1,1)=HRRC(26,1,1)+Gamma*VRR(26,1,0)
+      HRRC(26,2,1)=HRRC(26,2,1)+Gamma*VRR(26,2,0)
+      HRRC(26,3,1)=HRRC(26,3,1)+Gamma*VRR(26,3,0)
+      HRRC(26,4,1)=HRRC(26,4,1)+Gamma*VRR(26,4,0)
       HRRA(27,1,1)=HRRA(27,1,1)+Alpha*VRR(27,1,0)
       HRRB(27,1,1)=HRRB(27,1,1)+Beta*VRR(27,1,0)
       HRRA(28,1,1)=HRRA(28,1,1)+Alpha*VRR(28,1,0)

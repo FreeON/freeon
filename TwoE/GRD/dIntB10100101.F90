@@ -382,6 +382,7 @@ SUBROUTINE dIntB10100101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
     SUBROUTINE CNTRCTG101011(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)
       USE DerivedTypes
       USE VScratchB
+      INTEGER :: K
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(84,1,1) :: HRR 
       REAL(DOUBLE), DIMENSION(120,1,1) :: HRRA,HRRB 

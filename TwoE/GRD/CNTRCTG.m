@@ -142,6 +142,7 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
       WS[StringJoin["SUBROUTINE ",ContractName,"(VRR,HRR,Alpha,HRRA,Beta,HRRB,Gamma,HRRC)"]];
       WS["  USE DerivedTypes"];
       WS["  USE VScratchB"];
+      WS["  INTEGER :: K"];
       WS["  REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
       WS[StringJoin["  REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRR "]];
       WS[StringJoin["  REAL(DOUBLE), DIMENSION(",ToString[BraMax1],",",ToString[KetMax],",",ToString[LEnd[lmax]],") :: HRRA,HRRB "]];
@@ -194,99 +195,21 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
 
             If[LKet<2,
 
-               If[bra<=BraMax&& ket<=KetMax,
+               If[bra<=BraMax && ket<=KetMax,
                   WS[StringJoin["  HRR(",BK00,"1)=HRR(",BK00,"1)+VRR(",BK00,"0)"]];
                  ];
 
-               If[bra<=BraMax1&& ket<=KetMax,
+               If[bra<=BraMax1 && ket<=KetMax,
                   WS[StringJoin["  HRRA(",BK00,"1)=HRRA(",BK00,"1)+Alpha*VRR(",BK00,"0)"]];
                   WS[StringJoin["  HRRB(",BK00,"1)=HRRB(",BK00,"1)+Beta*VRR(",BK00,"0)"]];
                  ];
 
-                If[bra<=BraMax&& ket<=KetMax1,
+                If[bra<=BraMax && ket<=KetMax1,
                   WS[StringJoin["  HRRC(",BK00,"1)=HRRC(",BK00,"1)+Gamma*VRR(",BK00,"0)"]];
                  ];
 
               ]; 
 
-
-            (* ----------------------------------------------------------------------------------------*)
-
-
-            If[ic==2 && jc!=2 && braell <= Classes[[jc,2]] , BraCo1="SpFnB*" ; BraAd1=BEnd+bra];
-            If[kc==2 && lc!=2 && ketell <= Classes[[lc,2]] , KetCo1="SpFnK*" ; KetAd1=KEnd+ket];
-
-            If[ic!=2 && jc==2 && braell == Classes[[ic,1]] , BraCo2="FnSpB*" ; BraAd2=BEnd+bra-LenI1];
-            If[kc!=2 && lc==2 && ketell == Classes[[kc,1]] , KetCo2="FnSpK*" ; KetAd2=KEnd+ket-LenK1];
-
-	    (* ----------------------------------------------------------------------------------------*)
-
-            If[ic==2 && jc==2 ,
-               If[braell == 0               , BraCo1="SpSpB*" ; BraAd1=BEnd+bra;
-                                              BraCo2="SpFnB*" ; BraAd2=BEnd+LenI+bra+1];
-               If[braell == Classes[[jc,2]] , BraCo1="FnSpB*" ; BraAd1=BEnd+bra;
-                                              BraCo2="SpFnB*" ; BraAd2=BEnd+LenI+bra+1];
-               ];
-
-            If[kc==2 && lc==2,
-               If[ketell == 0               , KetCo1="SpSpK*" ; KetAd1=KEnd+ket;
-                                              KetCo2="SpFnK*" ; KetAd2=KEnd+LenK+ket+1];
-               If[ketell == Classes[[lc,2]] , KetCo1="FnSpK*" ; KetAd1=KEnd+ket;
-                                              KetCo2="SpFnK*" ; KetAd2=KEnd+LenK+ket+1];
-	      ];
-
-            (*=======================  B&K =============================== *)
-
-
-	    If[ BraCo1 != "" && KetCo2 != "" , 
-                BK12=StringJoin[ToString[BraAd1],",",ToString[KetAd2],","];
-                WS[StringJoin["  HRR(",BK12,"1)=HRR(",BK12,"1)+",BraCo1,KetCo2,"VRR(",BK00,"0)"]]
-              ];
-
-	    If[ BraCo2 != "" && KetCo1 != "" , 
-                BK21=StringJoin[ToString[BraAd2],",",ToString[KetAd1],","];
-                WS[StringJoin["  HRR(",BK21,"1)=HRR(",BK21,"1)+",BraCo2,KetCo1,"VRR(",BK00,"0)"]]
-              ];
-
-	    If[ BraCo1 != "" && KetCo1 != "" , 
-                BK11=StringJoin[ToString[BraAd1],",",ToString[KetAd1],","];
-                WS[StringJoin["  HRR(",BK11,"1)=HRR(",BK11,"1)+",BraCo1,KetCo1,"VRR(",BK00,"0)"]]
-              ];
-
-
-	    If[ BraCo2 != "" && KetCo2 != "" , 
-                BK22=StringJoin[ToString[BraAd2],",",ToString[KetAd2],","];
-                WS[StringJoin["  HRR(",BK22,"1)=HRR(",BK22,"1)+",BraCo2,KetCo2,"VRR(",BK00,"0)"]]
-              ];
-
-            (*===========================  B  =========================== *)
-
-
-	    If[ BraCo1 != "" && (KetCo1==""||KetCo2=="") , 
-                BK1=StringJoin[ToString[BraAd1],",",ToString[ket],","];
-                WS[StringJoin["  HRR(",BK1,"1)=HRR(",BK1,"1)+",BraCo1,"VRR(",BK00,"0)"]]
-              ];
-
-	    If[ BraCo2 != "" && (KetCo1==""||KetCo2=="") , 
-                BK2=StringJoin[ToString[BraAd2],",",ToString[ket],","];
-                WS[StringJoin["  HRR(",BK2,"1)=HRR(",BK2,"1)+",BraCo2,"VRR(",BK00,"0)"]]
-              ];
-
-
-            (*===========================  K  =========================== *)
-
-
-	    If[ (BraCo1==""||BraCo2=="")&& KetCo1 != "" , 
-                BK1=StringJoin[ToString[bra],",",ToString[KetAd1],","];
-                WS[StringJoin["  HRR(",BK1,"1)=HRR(",BK1,"1)+",KetCo1,"VRR(",BK00,"0)"]]
-              ];
-
-	    If[ (BraCo1==""||BraCo2=="")&& KetCo2 != "" , 
-                BK2=StringJoin[ToString[bra],",",ToString[KetAd2],","];
-                WS[StringJoin["  HRR(",BK2,"1)=HRR(",BK2,"1)+",KetCo2,"VRR(",BK00,"0)"]]
-              ];
-
-	    (* ----------------------------------------------------------------------------------------*)
 
 	    ,{ket,LBegin[LK],LEnd[LK]}],{LK,0,LKet+1}]
             ,{bra,LBegin[LB],LEnd[LB]}],{LB,0,LBra+1}]; 
