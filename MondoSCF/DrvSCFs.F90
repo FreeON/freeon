@@ -9,6 +9,9 @@ MODULE DrvSCFs
   USE Overlay
   USE ParsingKeys
   USE Functionals
+#ifdef MMech
+  USE Dynamo
+#endif
   IMPLICIT NONE 
   CONTAINS
 !========================================================================================
@@ -16,14 +19,20 @@ MODULE DrvSCFs
 !========================================================================================
      SUBROUTINE OneSCF(Ctrl,Sum_O)
         TYPE(SCFControls)  :: Ctrl
+!       TYPE(CRDS)         :: GM_MM
+        INTEGER            :: J
         INTEGER            :: ISCF,ICyc
         LOGICAL,OPTIONAL   :: Sum_O
         LOGICAL            :: Summry
+!
         IF(PRESENT(Sum_O))THEN
            Summry=Sum_O
         ELSE
            Summry=.TRUE.
         ENDIF
+!
+! Do QM Calc on the SCF/DFT level
+!
         DO ICyc=0,MaxSCFs
            Ctrl%Current(1)=ICyc
            CALL SetGlobalCtrlIndecies(Ctrl)
@@ -32,6 +41,7 @@ MODULE DrvSCFs
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
+              CALL VisDX(Ctrl)
               CALL VisDX(Ctrl)
               CALL CleanScratch(Ctrl,'CleanOnConverge')
               Ctrl%Previous=Ctrl%Current
@@ -61,6 +71,7 @@ MODULE DrvSCFs
       TYPE(SCFControls)    :: Ctrl
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !---------------------------------------------------------------------------------------
+!
       IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1.AND. &
          Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
          IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
@@ -127,7 +138,7 @@ MODULE DrvSCFs
     SUBROUTINE FockBuild(Ctrl)
       TYPE(SCFControls)  :: Ctrl
       INTEGER            :: Modl
-      LOGICAL            :: DoDIIS
+      LOGICAL            :: DoDIIs
 !-----------------------------------------------------------
       IF(Ctrl%InkFok)THEN
          CALL LogSCF(Current,'Building an incremental Fock matrix')
@@ -475,6 +486,133 @@ MODULE DrvSCFs
       42 FORMAT(1x,I2,',   ',L2,', ',F20.8,4(', ',D10.4))
 !
       END SUBROUTINE SCFSummry
+!
+!-----------------------------------------------------------------------------
+!
+      SUBROUTINE   MM_COULOMBENERGY(Ctrl)
+      IMPLICIT NONE
+      TYPE(SCFControls)  :: Ctrl
+      TYPE(INT_VECT)     :: Stat
+
+!compute the nuclear energy over the charge distribution given by
+! MM charges        
+!
+       CALL OpenHDF(InfFile)
+       CALL New(Stat,3)
+       Stat%I=Ctrl%Current
+       CALL Put(Stat,'current')
+       Call Delete(Stat)
+       CALL CLOSEHDF()
+!
+       CtrlVect=SetCtrlVect(Ctrl,'PureMM')
+       CALL Invoke('MakeRho',CtrlVect)
+       CALL Invoke('QCTC',CtrlVect)
+!
+      END SUBROUTINE MM_COULOMBENERGY
+!-------------------------------------------------------------
+
+   SUBROUTINE MM_ENERG(Ctrl)
+   IMPLICIT NONE
+   TYPE(Scfcontrols) Ctrl
+   REAL(DOUBLE)       :: MM_COUL,CONVF,E_C_EXCL,E_LJ_EXCL
+   REAL(DOUBLE)       :: EBOND,EELECT,ELJ  
+   CHARACTER(LEN=3)   :: Cur
+   TYPE(INT_VECT)     :: Stat
+!
+       CONVF=1000.D0*JtoHartree/C_Avogadro
+       CALL New(Stat,3)
+       Stat%I=Ctrl%Current
+       Cur=IntToChar(Stat%I(2))
+       Call Delete(Stat)
+!
+! GM_MM must be on HDF before COULOMBENERGY is called
+!
+! MM coulombenergy is calculated here only for case MMOnly 
+! Otherwise it is calculated in QCTC and put into HDF later
+!
+       IF(Ctrl%Mechanics(1).AND..NOT.Ctrl%Mechanics(2)) Then
+         CALL MM_COULOMBENERGY(Ctrl)
+         CALL OpenHDF(Ctrl%Info)
+         CALL GET(MM_COUL,'MM_COUL',Tag_O=Cur)
+         CALL CloseHDF()
+         MM_COUL=MM_COUL/CONVF
+       ENDIF
+!
+! Do MM Covalent terms
+!
+       CALL ENERGY_BOND ( EBOND, VIRIAL,InfFile=InfFile )
+       CALL ENERGY_ANGLE ( EANGLE ,InfFile=InfFile)
+       CALL ENERGY_DIHEDRAL ( EDIHEDRAL ,InfFile=InfFile)
+       CALL ENERGY_IMPROPER ( EIMPROPER ,InfFile=InfFile)
+       CALL ENERGY_NON_BONDING_CALCULATE( EELECT, ELJ, VIRIAL)
+!
+! calculate exclusion energies
+!
+       CALL COULOMB_EXCL(MM_NATOMS,E_C_EXCL,InfFile,Cur)
+       CALL LJ_EXCL(MM_NATOMS,E_LJ_EXCL,InfFile,Cur)
+!
+       CALL OpenASCII(OutFile,Out)
+!
+       write(out,*) 'MM Energies in KJ/mol:'
+       write(out,*) 'Ebond= ',ebond
+       write(out,*) 'Eangle= ',eangle
+       write(out,*) 'Edihedral= ',edihedral
+       write(out,*) 'Eimproper= ',eimproper
+       write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+       write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+       write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+       IF(Ctrl%Mechanics(1).AND..NOT.Ctrl%Mechanics(2)) Then
+       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+       write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+       write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+       write(out,*) 'E_Total= ',MM_COUL+ebond+eangle+edihedral+eimproper+ELJ-E_LJ_EXCL-E_C_EXCL
+       ENDIF
+!
+! convert covalent energies into atomic unit
+!
+       EBOND=EBOND*CONVF
+       EANGLE=EANGLE*CONVF
+       EDIHEDRAL=EDIHEDRAL*CONVF
+       EIMPROPER=EIMPROPER*CONVF
+       ELJ=ELJ*CONVF
+       MM_COUL=MM_COUL*CONVF
+       E_LJ_EXCL=E_LJ_EXCL*CONVF
+       E_C_EXCL=E_C_EXCL*CONVF
+!
+       write(out,*) 
+       write(out,*) 'MM Energies in atomic unit:'
+       write(out,*) 'Ebond= ',ebond
+       write(out,*) 'Eangle= ',eangle
+       write(out,*) 'Edihedral= ',edihedral
+       write(out,*) 'Eimproper= ',eimproper
+       write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+       write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+       write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+       IF(Ctrl%Mechanics(1).AND..NOT.Ctrl%Mechanics(2)) Then
+       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+       write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+       write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+       write(out,*) 'E_Total= ',MM_COUL+ebond+eangle+edihedral+eimproper+ELJ-E_LJ_EXCL-E_C_EXCL
+       ENDIF
+!
+       GM_MM%NAtms = MM_NATOMS
+!
+        CALL OpenHDF(Ctrl%Info)
+        CALL PUT(EBOND,'MM_EBOND',Tag_O=Cur)
+        CALL PUT(EANGLE,'MM_EANGLE',Tag_O=Cur)
+        CALL PUT(EDIHEDRAL,'MM_EDIHEDRAL',Tag_O=Cur)
+        CALL PUT(EIMPROPER,'MM_EIMPROPER',Tag_O=Cur)
+        CALL PUT(VIRIAL,'MM_VIRIAL',Tag_O=Cur)
+        CALL PUT(ELJ,'MM_ELJ',Tag_O=Cur)
+        CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=Cur)
+        CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=Cur)
+        CALL CloseHDF()
+!
+        CLOSE(UNIT=Out,STATUS='KEEP')
+!
+   END SUBROUTINE MM_ENERG
+
+!-----------------------------------------------------------------------------
 END MODULE
 
 
