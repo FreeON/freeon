@@ -95,23 +95,20 @@ PROGRAM JForce
   CALL MultipoleSetUp(FFEll2)
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-! Calculate the Number of Cells
-! and Set the electrostatic background
-#ifdef MMech 
 #ifdef PERIODIC
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
+#ifdef MMech 
+! Set the electrostatic background
   IF(HasMM()) THEN
-     IF(HasQM()) CALL SetCellNumber(GMLoc)
      CALL PBCFarFieldSetUp(PoleRoot,GMLocMM)
   ELSE
-     CALL SetCellNumber(GMLoc)
      CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
   ENDIF
-#endif
 #else
-#ifdef PERIODIC
-  CALL SetCellNumber(GMLoc)
+! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 #endif
 ! Delete the auxiliary density arrays

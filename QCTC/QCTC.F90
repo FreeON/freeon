@@ -117,25 +117,20 @@ PROGRAM QCTC
   CALL MultipoleSetUp(FFEll2)
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-#ifdef MMech 
 #ifdef PERIODIC
-! Calculate the Number of Cells
-! and Set the electrostatic background
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
+#ifdef MMech 
+! Set the electrostatic background
   IF(HasMM()) THEN
-     IF(HasQM()) CALL SetCellNumber(GM)
      CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
   ELSE
-     CALL SetCellNumber(GM)
      CALL PBCFarFieldSetUp(PoleRoot,GM)
   ENDIF
-#endif
 #else
-#ifdef PERIODIC
-! Calculate the Number of Cells
-! and Set the electrostatic background
-  CALL SetCellNumber(GM)
+! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GM)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 #endif
 ! Delete the auxiliary density arrays
