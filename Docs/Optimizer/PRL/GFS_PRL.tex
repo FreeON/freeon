@@ -357,8 +357,8 @@ optimization.  This data is now used to fit curves for each of the $N_{\rm int}$
 The choice of weight is a key factor in the behavior of the QUICCA algorithm, as it is used to prioritize 
 reliable portions of the data and to generally smooth noisy trends.  
 Originally, we considered the standard expression $w_{k}^{(i)}=(1/{g_{k}^{(i)}})^2$ for the weight 
-of the $k$-th internal coordinate ($k=1,N_{int}$) at the $i$-th geometry
-($i=1,n_{fit}$), which is generally recommended for use in curve 
+of the $k$-th internal coordinate ($k=1,N_{\rm int}$) at the $i$-th geometry
+($i=1,n_{\rm fit}$), which is generally recommended for use in curve 
 fitting \cite{WPress92}.  These weights however do not 
 account for the fact that the gradient of the $k$-th internal coordinate may be small, while 
 its immediate  environment may contain large gradients indicating the possibility of large changes in the $k$-th 
@@ -604,7 +604,7 @@ competitive with Bakken's algorithm, requiring 185.
 
 Bakken's method \cite{VBakken02} derives from an optimal combination of advanced techniques
 related to internal coordinate methods based on a dense Cartesian Hessian update. It involves 
-a Cartesian BFGS update \cite{RFletcher81}, the Rational Function Optimization scheme \cite{ABanerji85} 
+a BFGS update \cite{RFletcher81}, the Rational Function Optimization scheme \cite{ABanerji85} 
 and a Newton trust-region model \cite{RFletcher81}. An important addition to these techniques is the 
 extra redundant coordinates, which contribute to the success of Bakken's algorithm relative to more 
 traditional schemes. Extra redundant internal coordinates are local distance coordinates, which bridge 
@@ -813,7 +813,7 @@ force field concepts developed by the Goddard group \cite{AVanDuin01A,AVanDuin01
 \begin{acknowledgments}
 K.~N{\'e}meth gratefully acknowledges {\"{O}}.~Farkas (Budapest) for providing the 
 Cartesian coordinates of the Baker's test set,  B.P.~Uberuaga (Los Alamos) for 
-calling our attention to Ref.~\cite{FErcolessi94} and  J. {\'A}ngy{\'a}n
+calling our attention to Ref.~\onlinecite{FErcolessi94} and  J. {\'A}ngy{\'a}n
 (Nancy), S. Lucidi (Rome) and V. Weber (Los Alamos) for discussions.
 The referee is thanked for calling our attention to 
 Ref.~\onlinecite{BBrooks83}.
