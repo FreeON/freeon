@@ -36,7 +36,7 @@ EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I./LibQCTC/
 QCTCLibs=$(F90_LIBRARIES) -lQCTC $(LAPACK) 
 #
 CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o    \
-           PoleTree.o PFFTensor.o ParaQ.o PBCFarField.o TreeWalk.o 
+           PoleTree.o PFFTensor.o DivPFFTensor.o ParaQ.o PBCFarField.o TreeWalk.o 
 #
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o 
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
@@ -45,7 +45,8 @@ PFFTObjs=$(CommonObjs) MakePFFT.o
 ReleaseFiles=XLate.x CTraX.x Globals.x MondoPoles.x \
              Thresholds.x PoleTree.x PFFTensor.x    \
              PBCFarField.x TreeWalk.x JGen.x NukE.x \
-             QCTC.x BlokTrPdJ.x JForce.x MakePFFT.x
+             QCTC.x BlokTrPdJ.x JForce.x MakePFFT.x \
+             DivPFFTensor.x
 #
 all:	lQCTC QCTC JFrc PFFT
 #
