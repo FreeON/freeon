@@ -18,48 +18,28 @@ PROGRAM TC2R
   USE Parse
   USE Macros
   USE LinAlg
-  USE DenMatMethods, ONLY: SpectralBounds,SetVarThresh
-  USE DenMatResponse
+  USE DenMatMethods , ONLY: SpectralBounds,SetVarThresh
+  USE DenMatResponse, ONLY: AllocArray,LoadMatrices,FockPrimGuess,SetPPrmOld,DoTC2R,SavePPrm,DeAllocArray
   !
   IMPLICIT NONE
   !
-#ifdef TC2R_EIGENVAL
-  INTERFACE DSYEV
-     SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
-       USE GlobalScalars
-       CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
-       INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
-       INTEGER,          INTENT(OUT)   :: INFO
-       REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
-       REAL(DOUBLE),     INTENT(OUT)   :: W(*)
-       REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
-     END SUBROUTINE DSYEV
-  END INTERFACE
-#endif
-  !
   !------------------------------------------------------------------
-  TYPE RINFO
-     INTEGER :: Order
-  END TYPE RINFO
-  !
-  !------------------------------------------------------------------
-  TYPE(BCSR )                    :: F,FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
+  TYPE(BCSR )                    :: F,FPrm1_1,FPrm1_2,FPrm1_3, &
+       &                            FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #ifdef PARALLEL
-  TYPE(DBCSR)                    :: T,P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
+  TYPE(DBCSR)                    :: T,P,PPrm1_1,PPrm1_2,PPrm1_3, &
+       &                            PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
   TYPE(DBCSR)                    :: PPrmOld,Tmp1,Tmp2,Tmp3
 #else
-  TYPE(BCSR )                    :: T,P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
+  TYPE(BCSR )                    :: T,P,PPrm1_1,PPrm1_2,PPrm1_3, &
+       &                            PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
   TYPE(BCSR )                    :: PPrmOld,Tmp1,Tmp2,Tmp3
 #endif
   TYPE(ARGMT)                    :: Args
   !-------------------------------------------------------------------
-  INTEGER                        :: MM,I,RespOrder
-  INTEGER                        :: LastSCFCycle,LastCPSCFCycle
-  REAL(DOUBLE)                   :: Ne,SwitchThresh
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: FFile
-  CHARACTER(LEN=1)               :: Chr1,Chr2,Chr3
+  INTEGER                        :: RespOrder
+  REAL(DOUBLE)                   :: SwitchThresh
   CHARACTER(LEN=*), PARAMETER    :: Prog='TC2R'
-  LOGICAL                        :: EXIST,IsPresent
   !-------------------------------------------------------------------
   REAL(DOUBLE)    , PARAMETER    :: DEFAULT_SWITCHTHRESH=1.00D-3
   !-------------------------------------------------------------------

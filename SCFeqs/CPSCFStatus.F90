@@ -53,6 +53,9 @@ PROGRAM CPSCFSts
   real(double), dimension(3) :: MltN,MltE,COrig
   TYPE(CRDS)                 :: GM
   !-------------------------------------------------------------------
+  !type(bcsr) :: FPrm1,PPrm1,Tmp4,Tmp5
+  !integer :: LastCPSCFCycle
+
   !
   ! Macro the start up.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -91,10 +94,6 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   !
   SELECT CASE(SCFActn)
-  CASE('BasisSetSwitch','Restart')
-     ! If switching the density matrix or using a previous one from 
-     ! restart use i+1 density matrix--its all that is available
-     CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
   CASE('StartResponse','CPSCFSolving')
      CALL Get(PPrm,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,1))
      CALL Get(FPrm,TrixFile('FPrime'//TRIM(Args%C%C(3)),Args,0))
@@ -114,20 +113,71 @@ PROGRAM CPSCFSts
   !
   !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   ! 2n+1 rule 2n+1 rule 2n+1 rule 2n+1 rule 
-  IF(RespOrder==1) THEN
-     CALL New(Tmp3)
-     CALL Multiply(PPrm,S,Tmp1)
-     CALL Multiply(Tmp1,P,Tmp2)
-     CALL Multiply(P,S,Tmp1)
-     CALL Multiply(Tmp1,PPrm,Tmp3)
-     CALL Multiply(Tmp3,-One)
-     CALL Add(Tmp2,Tmp3,Tmp1)
-     CALL Multiply(Tmp1,S,Tmp2)
-     CALL Multiply(Tmp2,PPrm,Tmp3)
-     CALL Multiply(Tmp3,FPrm,Tmp1)
-     write(*,*) '2n+1=',-12d0*Trace(Tmp1)
-     CALL Delete(Tmp3)
-  ENDIF
+  !IF(RespOrder==1) THEN
+  !   CALL New(Tmp3)
+  !   CALL Multiply(PPrm,S,Tmp1)
+  !   CALL Multiply(Tmp1,P,Tmp2)
+  !   CALL Multiply(P,S,Tmp1)
+  !   CALL Multiply(Tmp1,PPrm,Tmp3)
+  !   CALL Multiply(Tmp3,-One)
+  !   CALL Add(Tmp2,Tmp3,Tmp1)
+  !   CALL Multiply(Tmp1,S,Tmp2)
+  !   CALL Multiply(Tmp2,PPrm,Tmp3)
+  !   CALL Multiply(Tmp3,FPrm,Tmp1)
+  !   write(*,*) '2n+1=',-12d0*Trace(Tmp1)
+  !   CALL Delete(Tmp3)
+  !ENDIF
+  !
+  !IF(RespOrder==2) THEN
+  !   !
+  !   CALL Get(LastCPSCFCycle,'lastcpscfcycle'//TRIM(Args%C%C(3)(1:1)))
+  !   !LastCPSCFCycle=1
+  !   !write(*,*) 'LastCPSCFCycle',LastCPSCFCycle
+  !   !write(*,*) '<'//trim(TrixFile('DPrime'//TRIM(Args%C%C(3)(1:1)),Args,LastCPSCFCycle-Args%I%I(1)))//'>'
+  !   !write(*,*) '<'//trim(TrixFile('FPrime'//TRIM(Args%C%C(3)(1:1)),Args,LastCPSCFCycle-Args%I%I(1)))//'>'
+  !   CALL Get(PPrm1,TrixFile('DPrime'//TRIM(Args%C%C(3)(1:1)), &
+  !        &   Args,LastCPSCFCycle-Args%I%I(1)+1)) ! I may use the latest density matrix.
+  !   !LastCPSCFCycle=0
+  !   CALL Get(FPrm1,TrixFile('FPrime'//TRIM(Args%C%C(3)(1:1)), &
+  !        &   Args,LastCPSCFCycle-Args%I%I(1)))
+  !
+  !   CALL New(Tmp3)
+  !   CALL New(Tmp4)
+  !   CALL New(Tmp5)
+  !   CALL Multiply(PPrm,S,Tmp1)
+  !   CALL Multiply(Tmp1,P,Tmp2)
+  !   CALL Multiply(P,S,Tmp1)
+  !   CALL Multiply(Tmp1,PPrm,Tmp3)
+  !   CALL Multiply(Tmp3,-One)
+  !   CALL Add(Tmp2,Tmp3,Tmp1)
+  !   CALL Multiply(Tmp1,S,Tmp2)
+  !   CALL Multiply(Tmp2,PPrm1,Tmp3)
+  !   CALL Multiply(Tmp3,FPrm1,Tmp4)
+  !   
+  !   CALL Multiply(PPrm1,S,Tmp1)
+  !   CALL Multiply(Tmp1,P,Tmp2)
+  !   CALL Multiply(P,S,Tmp1)
+  !   CALL Multiply(Tmp1,PPrm1,Tmp3)
+  !   CALL Multiply(Tmp3,-One)
+  !   CALL Add(Tmp2,Tmp3,Tmp1)
+  !   CALL Multiply(Tmp1,S,Tmp5) !<<<
+  !   
+  !   CALL Multiply(PPrm,FPrm1,Tmp1)
+  !   CALL Multiply(PPrm1,FPrm,Tmp2)
+  !   CALL Add(Tmp1,Tmp2,Tmp3)
+  !   
+  !   CALL Multiply(Tmp5,Tmp3,Tmp1)
+  !   
+  !   CALL Add(Tmp4,Tmp1,Tmp2)
+  !   
+  !   write(*,*) '2n+1=',-24d0*Trace(Tmp2)
+  !   !
+  !   CALL Delete(Tmp3)
+  !   CALL Delete(Tmp4)
+  !   CALL Delete(Tmp5)
+  !   !
+  !
+  !ENDIF
   !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   !
   IF(CPSCFCycl.LE.0) THEN

@@ -32,6 +32,20 @@ MODULE DenMatResponse
   PRIVATE :: Order3_ABC,Order3_AAA,Order3_AAC,Order3_ABB
   PRIVATE :: Order4,Order5,Order6,Order7,Order8,Order9,Order10
   !
+#ifdef TC2R_EIGENVAL
+  INTERFACE DSYEV
+     SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+       USE GlobalScalars
+       CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+       INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+       INTEGER,          INTENT(OUT)   :: INFO
+       REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+       REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+       REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+     END SUBROUTINE DSYEV
+  END INTERFACE
+#endif
+  !
 CONTAINS
   !
   !
@@ -157,8 +171,10 @@ CONTAINS
     INTEGER                        :: LastSCFCycle,LastCPSCFCycle
     LOGICAL                        :: EXIST,IsPresent
     !-------------------------------------------------------------------
-  type(dbl_rnk2)                       :: BTmp
-  integer :: iii,jjj
+
+    type(BCSR) :: S,Z
+    TYPE(DBL_RNK2)                       :: BTmp
+    integer :: iii,jjj
     !
     Chr1=TRIM(Args%C%C(3)(1:1))
     SELECT CASE(RespOrder)
@@ -172,16 +188,6 @@ CONTAINS
     CALL Get(LastSCFCycle,'lastscfcycle')
     CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
     !
-!!$    open(20)
-!!$    CALL SetEq(BTmp,F)
-!!$    do iii=1,size(BTmp%D,1)
-!!$       do jjj=1,size(BTmp%D,1)
-!!$          write(20,'(E26.15)') BTmp%D(iii,jjj)
-!!$       enddo
-!!$    enddo
-!!$    CALL Delete(BTmp)
-!!$    close(20)
-    !
     ! Load FockPrim Matrices.
     SELECT CASE(RespOrder)
     CASE(1)
@@ -191,7 +197,7 @@ CONTAINS
        IF(IsPresent) THEN
           CALL Get(FPrm1_1,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(3)),Args,0),BCast_O=.FALSE.)
        ELSE
-          CALL Get(FPrm1_1,TrixFile('OrthoFPrime' //TRIM(Args%C%C(3)),Args,0),BCast_O=.FALSE.)
+          CALL Get(FPrm1_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)),Args,0),BCast_O=.FALSE.)
        ENDIF
     CASE(2)
        ! Load FockPrime Matrix.
@@ -325,34 +331,66 @@ CONTAINS
     END SELECT
     !
     ! Load perturbation (dipole moment at this moment).
-
-!!$    CALL Get(T,TrixFile('S',Args))
-!!$    !write(*,*) trim(TrixFile('S',Args))
-!!$
-!!$    open(22)
-!!$    CALL SetEq(BTmp,T)
-!!$    do iii=1,size(BTmp%D,1)
-!!$       do jjj=1,size(BTmp%D,1)
-!!$          write(22,'(E26.15)') BTmp%D(iii,jjj)
-!!$       enddo
-!!$    enddo
-!!$    CALL Delete(BTmp)
-!!$    close(22)
-!!$    call delete(t)
-!!$    call new(t)
-    
-    FFile=TRIM(Args%C%C(4))//TRIM(Args%C%C(3)(1:1))
+    FFile='Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(3)(1:1))
     CALL Get(T,TrixFile(FFile,Args))
-    
-!!$    open(21)
-!!$    CALL SetEq(BTmp,T)
+
+!!$    CALL SetEq(BTmp,F)
+!!$    open(20)
 !!$    do iii=1,size(BTmp%D,1)
 !!$       do jjj=1,size(BTmp%D,1)
-!!$          write(21,'(E26.15)') BTmp%D(iii,jjj)
+!!$          write(20,'(E26.15)') BTmp%D(iii,jjj)
 !!$       enddo
 !!$    enddo
-!!$    CALL Delete(BTmp)
-!!$    close(21)
+!!$    close(20)
+!!$
+!!$    select case(TRIM(Args%C%C(3)))
+!!$    case('X')
+!!$       CALL SetEq(BTmp,T)
+!!$       open(21)
+!!$       do iii=1,size(BTmp%D,1)
+!!$          do jjj=1,size(BTmp%D,1)
+!!$             write(21,'(E26.15)') BTmp%D(iii,jjj)
+!!$          enddo
+!!$       enddo
+!!$       close(21)
+!!$    case('Y')
+!!$       CALL SetEq(BTmp,T)
+!!$       open(22)
+!!$       do iii=1,size(BTmp%D,1)
+!!$          do jjj=1,size(BTmp%D,1)
+!!$             write(22,'(E26.15)') BTmp%D(iii,jjj)
+!!$          enddo
+!!$       enddo
+!!$       close(22)
+!!$    case('Z')
+!!$       CALL SetEq(BTmp,T)
+!!$       open(23)
+!!$       do iii=1,size(BTmp%D,1)
+!!$          do jjj=1,size(BTmp%D,1)
+!!$             write(23,'(E26.15)') BTmp%D(iii,jjj)
+!!$          enddo
+!!$       enddo
+!!$       close(23)
+!!$    end select
+!!$    CALL Get(S,TrixFile('S',Args))
+!!$    CALL SetEq(BTmp,S)
+!!$    open(20)
+!!$    do iii=1,size(BTmp%D,1)
+!!$       do jjj=1,size(BTmp%D,1)
+!!$          write(20,'(E26.15)') BTmp%D(iii,jjj)
+!!$       enddo
+!!$    enddo
+!!$    close(20)
+!!$    CALL Get(Z,TrixFile('Z',Args))
+!!$    CALL SetEq(BTmp,Z)
+!!$    open(23)
+!!$    do iii=1,size(BTmp%D,1)
+!!$       do jjj=1,size(BTmp%D,1)
+!!$          write(23,'(E26.15)') BTmp%D(iii,jjj)
+!!$       enddo
+!!$    enddo
+!!$    close(23)
+    !
   END SUBROUTINE LoadMatrices
   !
   !
@@ -539,10 +577,8 @@ CONTAINS
     TYPE(BCSR ), INTENT(INOUT) :: F,FPrm1_1,FPrm1_2,FPrm1_3,FPrm2_1,FPrm2_2,FPrm2_3,FPrm3_1
 #ifdef PARALLEL
     TYPE(DBCSR), INTENT(INOUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
-    !TYPE(DBCSR)                :: Tmp
 #else
     TYPE(BCSR ), INTENT(INOUT) :: P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1
-    !TYPE(BCSR )                :: Tmp,tmp2
 #endif
     INTEGER    , INTENT(IN   ) :: RespOrder
     TYPE(ARGMT)                :: Args
@@ -697,19 +733,6 @@ CONTAINS
        CALL Multiply(Tmp,Z,PPrm)
     ELSE
        CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
-
-
-!!$  open(23)
-!!$  CALL SetEq(BTmp,Z)
-!!$  do iii=1,size(BTmp%D,1)
-!!$     do jjj=1,size(BTmp%D,1)
-!!$        write(23,'(E26.15)') BTmp%D(iii,jjj)
-!!$     enddo
-!!$  enddo
-!!$  CALL Delete(BTmp)
-!!$  close(23)
-
-
        CALL Multiply(Z,PPrm,Tmp)
        CALL Get(Z,TrixFile('ZT',Args))
        CALL Multiply(Tmp,Z,PPrm)
@@ -878,6 +901,7 @@ CONTAINS
     REAL(DOUBLE)                    :: AbsErrPPrim,FNormErrPPrim,TRacePPrim
     REAL(DOUBLE)    ,SAVE           :: OldProp,OldAEP
     CHARACTER(LEN=2*DEFAULT_CHR_LEN):: Mssg,CnvrgCmmnt
+    INTEGER, PARAMETER              :: CyclMin=10
     !-------------------------------------------------------------------
     !
     IF(NPur==0)THEN
@@ -968,7 +992,7 @@ CONTAINS
     ! Set convergence check.
     CnvrgChckPrim=.FALSE.
     !
-    IF(RelErrProp<SQRT(Thresholds%ETol).AND.AbsErrPPrim<Thresholds%DTol) THEN
+    IF(RelErrProp<SQRT(Thresholds%ETol).AND.AbsErrPPrim<Thresholds%DTol.AND.MM.GT.CyclMin) THEN
        CnvrgChckPrim=.TRUE.
        SELECT CASE(RespOrder)
        CASE(1); CnvrgCmmnt='Met dE1 goals'

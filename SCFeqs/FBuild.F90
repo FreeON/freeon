@@ -30,6 +30,10 @@ PROGRAM FockNGrueven
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
   LOGICAL                        :: Present,ExchangeShift,HasECPs
 !------------------------------------------------------------------ 
+  !integer :: iii,jjj
+  !TYPE(DBL_RNK2)                       :: BTmp
+
+
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
@@ -43,8 +47,47 @@ PROGRAM FockNGrueven
         ! At this moment F'=mu.
         ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
         CALL Get(F,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
-     CASE(2)!; write(*,*)'FBuild: Quadratic response'!Do nothing
-     CASE(3)!; write(*,*)'FBuild: Cubic response'!Do nothing
+        !
+        ! Transform also the dipole matrix for TC2.
+        XFile=TrixFile('X',Args)
+#ifdef PARALLEL
+        IF(MyId==ROOT)THEN
+#endif
+           INQUIRE(FILE=XFile,EXIST=Present)
+#ifdef PARALLEL
+        ENDIF
+        CALL BCast(Present)
+#endif
+        IF(Present)THEN
+           CALL Get(X,XFile)                ! X =S^{-1/2}
+           CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
+           CALL Multiply(Tmp1,X,F)          ! T1=S^{-1/2}.F.S^{-1/2}
+        ELSE
+           CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
+           CALL Multiply(X,F,Tmp1)          ! T1=Z^t.F_AO
+           CALL Get(X,TrixFile('Z',Args))   ! X=Z=L^{-1}
+           CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
+        ENDIF
+        CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
+        !
+        CALL Put(Tmp1,TrixFile('Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)),Args)) 
+        CALL PChkSum(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)),Prog)
+        CALL PPrint(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)))
+        CALL Plot(Tmp1,'Ortho'//TRIM(Args%C%C(4))//TRIM(Args%C%C(5)))
+        !
+        ! Reload a fresh matrix.
+        CALL Get(F,TrixFile(ResponsePostFix,Args))            ! T=M_{x} or whatever...
+        !
+     CASE(2)
+        ! Set F^2 to zero.
+        ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
+        CALL Get(F,TrixFile(ResponsePostFix,Args))
+        CALL Multiply(F,Zero)
+     CASE(3)
+        ! Set F^3 to zero.
+        ResponsePostFix=TRIM(Args%C%C(4))//TRIM(Args%C%C(5))
+        CALL Get(F,TrixFile(ResponsePostFix,Args))
+        CALL Multiply(F,Zero)
      CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
      END SELECT
   ELSEIF(SCFActn=='FockPrimeBuild') THEN
@@ -177,6 +220,18 @@ PROGRAM FockNGrueven
      !  CALL PPrint( F,'F['//TRIM(Cycl)//']',Unit_O=6)
      CALL PPrint( F,'F['//TRIM(Cycl)//']')
      CALL Plot(   F,'F['//TRIM(Cycl)//']')
+
+
+     !CALL SetEq(BTmp,F)
+     !open(20)
+     !do iii=1,size(BTmp%D,1)
+     !   do jjj=1,size(BTmp%D,1)
+     !      write(20,'(E26.15)') BTmp%D(iii,jjj)
+     !   enddo
+     !enddo
+     !close(20)
+
+
   ENDIF
 
 ! Now transform to an orthogonal representation
@@ -197,6 +252,19 @@ PROGRAM FockNGrueven
      CALL Get(X,TrixFile('ZT',Args))  ! X =Z^t=L^{-t}           
      CALL Multiply(X,F,Tmp1)          ! T1=Z^t.F_AO
      CALL Get(X,TrixFile('Z',Args))   ! X=Z=L^{-1}
+
+
+
+     !CALL SetEq(BTmp,X)
+     !open(22)
+     !do iii=1,size(BTmp%D,1)
+     !  do jjj=1,size(BTmp%D,1)
+     !     write(22,'(E26.15)') BTmp%D(iii,jjj)
+     !  enddo
+     !enddo
+     !close(22)
+
+
      CALL Multiply(Tmp1,X,F)          ! F=Z^t.F_AO.Z
   ENDIF
   CALL Filter(Tmp1,F)                 ! T1 =F_Orthog=Filter[Z^t.F_AO.Z]
@@ -214,6 +282,27 @@ PROGRAM FockNGrueven
      CALL Plot(Tmp1,'OrthoF_'//TRIM(SCFCycl))
   ENDIF
 ! Tidy up
+
+    !CALL SetEq(BTmp,Tmp1)
+    !open(21)
+    !do iii=1,size(BTmp%D,1)
+    !   do jjj=1,size(BTmp%D,1)
+    !      write(21,'(E26.15)') BTmp%D(iii,jjj)
+    !   enddo
+    !enddo
+    !close(21)
+
+    !CALL Get(X,TrixFile('S',Args))
+    !CALL SetEq(BTmp,X)
+    !open(23)
+    !do iii=1,size(BTmp%D,1)
+    !   do jjj=1,size(BTmp%D,1)
+    !      write(23,'(E26.15)') BTmp%D(iii,jjj)
+    !   enddo
+    !enddo
+    !close(23)
+
+
   CALL Delete(F)
   CALL Delete(Tmp1)
   CALL ShutDown(Prog)
