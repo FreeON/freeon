@@ -196,16 +196,22 @@ MODULE DerivedTypes
       TYPE(DBL_RNK3)   :: Expnt   !-- Exponent per primitive, per contraction, per kind
       TYPE(DBL_RNK4)   :: CCoef   !-- Contraction coefficient, per symmetry type,
                                   !   per primitive, per contraction, per kind
-      ! PSEUDOPOTENTIAL DATA
-
-      INTEGER          :: PSCtrt  !-- Max number of ECP contracted functions
-      INTEGER          :: PSPrim  !-- Max number of primitives in a contraction
-      TYPE(INT_VECT)   :: NECPs   !-- Number of core potentials per kind
-      TYPE(INT_VECT)   :: NCoreE  !-- Number of core electrons replaced by the ECP
-      TYPE(INT_RNK2)   :: PSFncs  !-- Number of primitive functions in a contracted ECP
-      TYPE(INT_RNK3)   :: PSSymm  !-- Angular symmetry of primitive ECPs
-      TYPE(DBL_RNK3)   :: PSCoef  !-- Contraction coefficient of the primitive ECPs
-      TYPE(DBL_RNK3)   :: PSExpt  !-- Contraction coefficient of the primitive ECPs
+      LOGICAL          :: HasECPs
+      INTEGER          :: MxProjL
+      INTEGER          :: Typ1Fnk
+      INTEGER          :: Typ2Fnk
+      TYPE(DBL_VECT)   :: NCoreEl
+      ! Type one ECP data
+      TYPE(INT_VECT)   :: NTyp1PF
+      TYPE(INT_RNK2)   :: Typ1Ell
+      TYPE(DBL_RNK2)   :: Typ1Exp
+      TYPE(DBL_RNK2)   :: Typ1CCo
+      ! Type two ECP data
+      TYPE(INT_VECT)   :: ProjEll
+      TYPE(INT_RNK2)   :: NTyp2PF
+      TYPE(INT_RNK3)   :: Typ2Ell
+      TYPE(DBL_RNK3)   :: Typ2Exp
+      TYPE(DBL_RNK3)   :: Typ2CCo
    END TYPE  
 #ifdef PERIODIC
 !------------------------------------------------------------------------------------

@@ -438,6 +438,18 @@ MODULE MemMan
          CALL New(A%ASymm,(/2,A%NCtrt,A%NKind/))
          CALL New(A%Expnt,(/A%NPrim,A%NCtrt,A%NKind/))
          CALL New(A%CCoef,(/A%LMNLen,A%NPrim,A%NCtrt,A%NKind/))
+         IF(A%HasECPs)THEN
+            CALL New(A%NCoreEl,A%NKind)
+            CALL New(A%NTyp1PF,A%NKind)
+            CALL New(A%ProjEll,A%NKind)
+            CALL New(A%Typ1Ell,(/A%Typ1Fnk,A%NKind/))
+            CALL New(A%Typ1Exp,(/A%Typ1Fnk,A%NKind/))
+            CALL New(A%Typ1CCo,(/A%Typ1Fnk,A%NKind/))
+            CALL New(A%NTyp2PF,(/A%MxProjL,A%NKind/),(/0,1/))
+            CALL New(A%Typ2Ell,(/A%Typ2Fnk,A%MxProjL,A%NKind/),(/1,0,1/))
+            CALL New(A%Typ2Exp,(/A%Typ2Fnk,A%MxProjL,A%NKind/),(/1,0,1/))
+            CALL New(A%Typ2CCo,(/A%Typ2Fnk,A%MxProjL,A%NKind/),(/1,0,1/))
+         ENDIF
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BSET
 !----------------------------------------------------------------------------
@@ -753,6 +765,18 @@ MODULE MemMan
          CALL Delete(A%ASymm)
          CALL Delete(A%Expnt)
          CALL Delete(A%CCoef)
+         IF(A%HasECPs)THEN
+            CALL Delete(A%NCoreEl)
+            CALL Delete(A%NTyp1PF)
+            CALL Delete(A%ProjEll)
+            CALL Delete(A%Typ1Ell)
+            CALL Delete(A%Typ1Exp)
+            CALL Delete(A%Typ1CCo)
+            CALL Delete(A%NTyp2PF)
+            CALL Delete(A%Typ2Ell)
+            CALL Delete(A%Typ2Exp)
+            CALL Delete(A%Typ2CCo)
+         ENDIF
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BSET
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

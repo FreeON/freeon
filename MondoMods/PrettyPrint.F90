@@ -322,6 +322,7 @@ MODULE PrettyPrint
         WRITE(PU,*)'Internal representation of the ', &
              TRIM(BS%BName),' basis set: '//Rtrn
         DO I=1,BS%NKind
+           WRITE(PU,1001)
            NC=BS%NCFnc%I(I)
            WRITE(PU,1002)Ats(BS%Kinds%I(I)),NC
            DO J=1,NC
@@ -344,11 +345,37 @@ MODULE PrettyPrint
                  WRITE(PU,1006)K,BS%Expnt%D(K,J,I), &             
                       (BS%CCoef%D(M,K,J,I),M=MinL,MaxL)
               ENDDO
-              WRITE(PU,*)Rtrn
+!              WRITE(PU,*)Rtrn
            ENDDO
+           IF(BS%HasECPs)THEN
+              IF(BS%NTyp1PF%I(I)>0)THEN
+                 K=BS%NCoreEl%D(I)
+                 WRITE(PU,2000)Ats(BS%Kinds%I(I)),K
+                 WRITE(PU,2001)
+                 WRITE(PU,2002)
+                 DO J=1,BS%NTyp1PF%I(I)
+                    WRITE(PU,2006)BS%Typ1Ell%I(J,I),BS%Typ1Exp%D(J,I),BS%Typ1CCo%D(J,I)
+                 ENDDO
+                 DO K=0,BS%ProjEll%I(I)
+                    WRITE(PU,2003)K
+                    WRITE(PU,2002)
+                    DO J=1,BS%NTyp2PF%I(K,I)
+                       WRITE(PU,2006)BS%Typ2Ell%I(J,K,I),BS%Typ2Exp%D(J,K,I),BS%Typ2CCo%D(J,K,I)
+                    ENDDO
+                 ENDDO
+              ENDIF
+           ENDIF
         ENDDO
+        WRITE(PU,1001)
         CALL PrintProtectR(PU)
         CALL ClosePU(PU)
+
+2000    FORMAT(1x,A2,' has an ECP replacing ',I2,' electrons')
+2001    FORMAT(1x,'Type 1 ECP contraction')
+2002    FORMAT(1x,' Ell      Exponent       CCoefficient ')
+2003    FORMAT(1x,'Type 2 ECP contraction, projector symmetry:',I2)
+2006    FORMAT(1x,I2,6x,2(1x,D14.8))
+
 1001    FORMAT(72('='))
 1002    FORMAT(1x,A2,' has ',I2,' associated contractions,')
 1003    FORMAT(1x,'Contraction ',I2,' involves', &
