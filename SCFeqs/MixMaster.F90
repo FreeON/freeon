@@ -93,8 +93,17 @@ PROGRAM TC2R
      CALL TC2R_DMP(P,PPrim,Tmp1,Tmp2,Tmp3,Ne,MM)
      IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  e0=
-  e0p=
+
+
+      !  Get the exchange correlation energy
+      IF(HasDFT(ModelChem)) &
+           CALL Get(Exc,'Exc',Tag_O=SCFCycl)
+
+
+
+  e0=Trace(P,FnMns2)
+
+  e0p=Trace(PPrime,FnMns2)
   ! Now switch around and expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=1
   ! as P_n(L=1) ~ E_n(1)+Tr{ F_(n-1) PPrime(1) }
   CALL FockPrimGuess(FnMns1,FnMns2,P,PPrim)
@@ -110,9 +119,9 @@ PROGRAM TC2R
   b=e0p
   c=-3D0*e0-2D0*e0p+3D0*e1-e1p
   d=2D0*e0+e0p-2D0*e1+e1p
-  ! Two extrema for a cubic
-  LMns=(-c-SQRT(c*c-3*b*d])/(3*d)
-  LPls=(-c+SQRT(c*c-3*b*d])/(3*d)
+  ! At most two extrema for a cubic
+  LMns=MAX(Zero,MIN(One,(-c-SQRT(c*c-3*b*d])/(3*d)))
+  LPls=MAX(Zero,MIN(One,-c+SQRT(c*c-3*b*d])/(3*d))
   EMns=a+b*LMns+c*LMns**2+d*LMns**3
   EPls=a+b*LPls+c*LPls**2+d*LPls**3
   IF(EMns<EPls)THEN
