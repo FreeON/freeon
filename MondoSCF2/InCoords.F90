@@ -1,5 +1,6 @@
 MODULE InCoords
 !
+   USE ControlStructures
    USE DerivedTypes
    USE GlobalScalars
    USE GlobalObjects
@@ -13,7 +14,6 @@ MODULE InCoords
    USE LinAlg
    USE AInv   
    USE CholFactor
-   USE ControlStructures
    USE AtomPairs
    !
    IMPLICIT NONE
@@ -45,11 +45,11 @@ CONTAINS
      TYPE(DBL_VECT)              :: CartAux
      TYPE(INT_VECT)              :: AtmsAux
      !
-     NatmsLoc=SIZE(XYZ,2)-3
+     NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      CALL INTCValue(IntCs,XYZ,LinCrit,TorsLinCrit)
      DO J=1,3
-       BoxShapeT(J,1:3)=XYZ(1:3,NatmsLoc+J)
+       BoxShapeT(J,1:3)=XYZ(1:3,NatmsLoc-3+J)
      ENDDO
      !
      ! allocate B matrix
@@ -164,7 +164,7 @@ CONTAINS
            M=(J-1)*3+II 
            N=IntCs%Cells%I(IInt,M)
            IF(N==0) CYCLE
-           B%BLI%I(IInt)=NCart
+           B%BLI%I(IInt)=NCart-9
            B%BL%D(IInt,IC1:IC2)=B%BL%D(IInt,IC1:IC2)+DBLE(N)*B%B%D(IInt,L:K)
          ENDDO
        ENDDO
@@ -909,7 +909,8 @@ CONTAINS
 !-----------------------------------------------------------------------
 !
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,Refresh,SCRPath, &
-                       CtrlCoord,CtrlConstr,ArchMem,IntC_Extra, &
+                       CtrlCoord,CtrlConstr,GConvCr, &
+                       ArchMem,IntC_Extra, &
                        TOPS,Bond,AtmB,PBCDim,iGEO,HFileIn_O,iCLONE_O)
      !
      ! This subroutine constructs the IntCs array, which holds
@@ -930,6 +931,7 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(CoordCtrl)             :: CtrlCoord
      TYPE(Constr)                :: CtrlConstr
+     TYPE(GConvCrit)             :: GConvCr    
      LOGICAL                     :: DoFixMM
      REAL(DOUBLE),DIMENSION(:)   :: AtNumIn
      CHARACTER(LEN=*),OPTIONAL   :: HFileIn_O
@@ -991,9 +993,12 @@ CONTAINS
                           CtrlCoord,TOPS,IEq%I)
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
-      !CALL LatticeINTC(IntC_L,PBCDim)
-      !CALL ExtraLattice(IntC_L,PBCDim)
-       IntC_L%N=0
+       IF(GConvCr%ExplLatt) THEN
+         CALL LatticeINTC(IntC_L,PBCDim)
+        !CALL ExtraLattice(IntC_L,PBCDim)
+       ELSE
+         IntC_L%N=0
+       ENDIF
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
        NIntC_Bas=0 
        NIntC_VDW=0 
@@ -1777,7 +1782,8 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE InternalToCart(XYZ,AtNum,IntCs,PredVals,RefPoints,Print, &
-                           GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,PBCDim,&
+                           GBackTrf,GTrfCtrl,GCoordCtrl,GConvCr, &
+                           GConstr,PBCDim,&
                            SCRPath,PWDPath,IntCsE,MixMat_O,iGEO_O)
      REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: MixMat_O
@@ -1806,6 +1812,7 @@ CONTAINS
      TYPE(Constr)               :: GConstr
      TYPE(TrfCtrl)              :: GTrfCtrl
      TYPE(CoordCtrl)            :: GCoordCtrl
+     TYPE(GConvCrit)            :: GConvCr
      CHARACTER(LEN=*)           :: SCRPath,PWDPath
      LOGICAL                    :: Print2,DoRepeat
      INTEGER                    :: Print
@@ -1846,11 +1853,11 @@ CONTAINS
      ELSE
        ValSt%D=IntCs%Value%D
        !
-       IntCDispl%D=VectIntReq%D-ValSt%D
+     ! IntCDispl%D=VectIntReq%D-ValSt%D
      ! CALL CutOffDispl(IntCDispl%D,IntCs, &
      !                GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
-       VectIntReq%D=ValSt%D+IntCDispl%D
-       CALL MapBackAngle(IntCs,VectIntReq%D)
+     ! VectIntReq%D=ValSt%D+IntCDispl%D
+     ! CALL MapBackAngle(IntCs,VectIntReq%D)
      ENDIF
      !
      ! Repeat until convergence
@@ -1868,7 +1875,7 @@ CONTAINS
        !
        ! Internal --> Cartesian transformation
        !
-       IF(Print>=DEBUG_GEOP_MIN) THEN
+       IF(Print2) THEN
          WRITE(*,450) NIntC
          WRITE(Out,450) NIntC
        ENDIF
@@ -1880,10 +1887,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-         IF(PRESENT(iGEO_O)) THEN
-           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-                           IRep,IStep,iGEO_O)
-         ENDIF
+        !IF(PRESENT(iGEO_O)) THEN
+        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+        !                  IRep,IStep,iGEO_O)
+        !ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1911,9 +1918,9 @@ CONTAINS
 !CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl',PBCDim_O=PBCDim)
          !
          IF(RefreshB.AND.RefreshAct) THEN
-           CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
+           CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl,GConvCr, &
                                BackLinCrit,BackTLinCrit,PBCDim, &
-                               Print,SCRPath,.TRUE.,DoCleanCol_O=.TRUE.)
+                               Print,SCRPath,DoCleanCol_O=.TRUE.)
            CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
          ENDIF
          !
@@ -1968,7 +1975,7 @@ RefreshAct=.TRUE.
          !
          ! Review iteration
          !
-         IF(Print>=DEBUG_GEOP_MIN) THEN
+         IF(Print2) THEN
            WRITE(*,210) IStep,DiffMax,RMSD
            WRITE(Out,210) IStep,DiffMax,RMSD
          ENDIF
@@ -1990,7 +1997,7 @@ RefreshAct=.TRUE.
        !
        IF(IStep>=GBackTrf%MaxIt_CooTrf) THEN
          IF(RMSD>0.001D0) THEN
-           IF(Print>=DEBUG_GEOP_MIN) THEN
+           IF(Print2) THEN
              WRITE(*,*) IRep,' Rescaling and Repeating back-transformation'
              WRITE(Out,*) IRep,' Rescaling and Repeating back-transformation'
            ENDIF
@@ -2006,7 +2013,7 @@ RefreshAct=.TRUE.
            DoRepeat=.TRUE.
            CYCLE
          ENDIF
-         IF(Print>=DEBUG_GEOP_MIN) THEN
+         IF(Print2) THEN
            WRITE(*,180) 
            WRITE(Out,180) 
            WRITE(*,190) 
@@ -2022,13 +2029,18 @@ RefreshAct=.TRUE.
            !
            ! check for the size of the displacement
            CALL CheckBigStep(IRep,IntCs,DoRepeat,GCoordCtrl%MaxStre, &
-                   GCoordCtrl%MaxAngle,VectIntReq%D,ValSt%D,IntCDispl%D)
+                   GCoordCtrl%MaxAngle,VectIntReq%D,ValSt%D,IntCDispl%D,Print2)
            IF(DoRepeat) THEN
+             VectIntAux%D=VectIntReq%D-ValSt%D  
+             CALL MapAngleDispl(IntCs,VectIntAux%D)
+             VectIntReq%D=ValSt%D+0.50D0*VectIntAux%D
              CYCLE
            ENDIF
          ENDIF 
-         WRITE(*,220) IStep
-         WRITE(Out,220) IStep
+         IF(Print2) THEN
+           WRITE(*,220) IStep
+           WRITE(Out,220) IStep
+         ENDIF
          EXIT
        ENDIF
      ENDDO !!! Repeat
@@ -2172,9 +2184,10 @@ RefreshAct=.TRUE.
 !---------------------------------------------------------------------
 !
    SUBROUTINE CleanConstrIntc(IntCDispl,XYZ,IntCsE,SCRPath,&
-                              GTrfCtrl,GCoordCtrl,PBCDim,Print)
+                              GTrfCtrl,GCoordCtrl,GConvCr,PBCDim,Print)
      TYPE(TrfCtrl)                :: GTrfCtrl
      TYPE(CoordCtrl)              :: GCoordCtrl
+     TYPE(GConvCrit)              :: GConvCr
      INTEGER                      :: PBCDim,Print,NCart,NatmsLoc
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      REAL(DOUBLE),DIMENSION(:)    :: IntCDispl
@@ -2203,9 +2216,10 @@ RefreshAct=.TRUE.
      CALL New(IntAux,IntCsAux%N)
      CALL New(CartAux,NCart)
      !
-     CALL RefreshBMatInfo(IntCsAux,XYZ,GTrfCtrl,GCoordCtrl%LinCrit, &
+     CALL RefreshBMatInfo(IntCsAux,XYZ,GTrfCtrl,GConvCr, &
+                          GCoordCtrl%LinCrit, &
                           GCoordCtrl%TorsLinCrit, &
-                          PBCDim,Print,SCRPath,.TRUE.)
+                          PBCDim,Print,SCRPath)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)    
      !
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntCDispl,CartAux%D,Trp_O=.TRUE.)
@@ -2301,37 +2315,47 @@ RefreshAct=.TRUE.
 !---------------------------------------------------------------------
 !
    SUBROUTINE CheckBigStep(IRep,IntCs,DoRepeat,MaxStre,MaxAngle,VectIntReq, &
-                           ValSt,IntCDispl)
+                           ValSt,IntCDispl,Print2)
      TYPE(INTC)                :: IntCs
      REAL(DOUBLE),DIMENSION(:) :: VectIntReq,ValSt,IntCDispl
      REAL(DOUBLE)              :: MaxStre,MaxAngle,Crit,Conv
-     REAL(DOUBLE)              :: MaxConv,MaxDispl
-     LOGICAL                   :: DoRepeat
-     INTEGER                   :: I,IRep
+     REAL(DOUBLE)              :: MaxConv,MaxDispl,Fact
+     LOGICAL                   :: DoRepeat,Print2
+     INTEGER                   :: I,IRep,IMax
      !
+     Fact=1.01D0
+     IMax=1
+     MaxDispl=IntCDispl(1)
+     DoRepeat=.FALSE.
      DO I=1,IntCs%N
        IF(.NOT.IntCs%Active%L(I)) CYCLE
-       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-         Crit=1.01D0*MaxStre
-         Conv=One/AngstromsToAu
-       ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN
-         Crit=1.01D0*MaxStre
-         Conv=One/AngstromsToAu
-       ELSE
-         Crit=1.01D0*MaxAngle
-         Conv=180.D0/PI
-       ENDIF
-       IF(ABS(IntCDispl(I))>Crit) THEN
-         VectIntReq(I)=ValSt(I)+ &
-                         0.50D0*(VectIntReq(I)-ValSt(I))
-         MaxConv=Conv
+       IF(IntCs%Def%C(I)(1:4)=='CART') CYCLE
+       IF(ABS(IntCDispl(I))>ABS(MaxDispl)) THEN
+         IMax=I
          MaxDispl=IntCDispl(I)
-         DoRepeat=.TRUE.
        ENDIF
      ENDDO
-     IF(DoRepeat) THEN
-       WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
-       WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
+     !
+     IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
+       Crit=Fact*MaxStre
+     ELSE
+       Crit=Fact*MaxAngle
+     ENDIF
+     IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
+       MaxConv=One/AngstromsToAu
+     ELSE
+       MaxConv=180.D0/PI
+     ENDIF
+     !
+     IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
+     IF(Print2) THEN
+       IF(DoRepeat) THEN
+         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
+         WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
+       ELSE 
+         WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv
+         WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv
+       ENDIF
      ENDIF
    END SUBROUTINE CheckBigStep
 !
@@ -3512,11 +3536,13 @@ RefreshAct=.TRUE.
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,LinCrit,TorsLinCrit,&
-                             PBCDim,Print,SCRPath,DoCleanB,Gi_O,Shift_O,                             DoCleanCol_O)
+   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GConvCr, &
+                              LinCrit,TorsLinCrit,PBCDim,Print, &
+                              SCRPath,Gi_O,Shift_O,DoCleanCol_O)
      TYPE(INTC)                   :: IntCs
      TYPE(Cholesky)               :: CholData
      TYPE(TrfCtrl)                :: GTrfCtrl
+     TYPE(GConvCrit)              :: GConvCr
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      REAL(DOUBLE)                 :: LinCrit,TorsLinCrit
      REAL(DOUBLE),OPTIONAL        :: Shift_O
@@ -3549,7 +3575,8 @@ RefreshAct=.TRUE.
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL SetEq(BS,B)
-     IF(PBCDim<3) THEN
+    !IF(PBCDim<3) THEN
+     IF(.NOT.GConvCr%UnCoupleLatt) THEN
        IF(DoCleanCol) THEN
          CALL CleanBConstr(IntCs,B,NatmsLoc)
          CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
@@ -3914,7 +3941,7 @@ RefreshAct=.TRUE.
          ENDIF
        ENDDO
        CALL DGEMM_NTc(NCoinc,9,NCoinc,One,Zero,BL%D,BL%D,Aux%D)
-       CALL SetDSYEVWork(NCoinc)
+       CALL SetDSYEVWork(NCoinc*NCoinc)
        CALL FunkOnSqMat(NCoinc,Inverse,Aux%D,Inv%D,EigenThresh_O=1.D-10)
        CALL UnSetDSYEVWork()
        CALL DGEMM_NNc(NCoinc,NCoinc,9,One,Zero,Inv%D,BL%D,AL%D)
@@ -7099,7 +7126,7 @@ return
      REAL(DOUBLE)     :: Fact
      CHARACTER(LEN=*) :: Def
      !
-     IF(Def=='STRE') THEN
+     IF(Def(1:4)=='STRE') THEN
        StreCrit=StreCritIn*Fact
        IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
      ELSE
@@ -7521,9 +7548,10 @@ return
      CALL New(IntA2,IntCsX%N)
      !
      CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl, &
+                          GOpt%GConvCrit, &
                           GOpt%CoordCtrl%LinCrit, &
                           GOpt%CoordCtrl%TorsLinCrit, &
-                          PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE., &
+                          PBCDim,Print,SCRPath,Gi_O=.TRUE., &
                           Shift_O=1.0D-4,DoCleanCol_O=.FALSE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
@@ -7555,6 +7583,7 @@ return
      REAL(DOUBLE),DIMENSION(:)   :: CartGrad,LattGrad
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER                     :: NCart,NatmsLoc,NCoinc,NDim,PBCDim
+     INTEGER                     :: I,J
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_RNK2)              :: AL,BL
      !
@@ -7567,6 +7596,7 @@ return
      CALL LatticeINTC(IntCs,PBCDim)
      IntCs%Constraint%L=.TRUE.
      CALL LatticeConstrAB(XYZ,IntCs,PBCDim,AL,BL,NCoinc)
+     CALL Delete(BL)
      IF(PBCDim==1) NDim=1
      IF(PBCDim==2) NDim=3
      IF(PBCDim==3) NDim=6
@@ -7575,7 +7605,6 @@ return
      CALL DGEMM_NNc(NCoinc,9,1,One,Zero,AL%D,CartGrad,LattGrad(1:NCoinc))
      CALL Delete(IntCs)
      CALL Delete(AL)
-     CALL Delete(BL)
    END SUBROUTINE GetLattGrads
 !
 !-------------------------------------------------------------------

@@ -160,11 +160,19 @@ CONTAINS
        DHess=Hess%Stre
      ELSE
        IF(Char=='ThreeVals') THEN
-         IF(Type(1:4)=='STRE') DHess=Hess%Stre
-         IF(Type(1:4)=='BEND') DHess=Hess%Bend
-         IF(Type(1:4)=='LINB') DHess=Hess%LinB
-         IF(Type(1:4)=='OUTP') DHess=Hess%OutP
-         IF(Type(1:4)=='TORS') DHess=Hess%Tors
+         IF(Type(1:5)=='STRE ') THEN
+           DHess=Hess%Stre
+         ELSE IF(Type(1:4)=='BEND') THEN
+           DHess=Hess%Bend
+         ELSE IF(Type(1:4)=='LINB') THEN
+           DHess=Hess%LinB
+         ELSE IF(Type(1:4)=='OUTP') THEN
+           DHess=Hess%OutP
+         ELSE IF(Type(1:4)=='TORS') THEN
+           DHess=Hess%Tors
+         ELSE
+           DHess=0.5D0 ! for inverse hessian of lattice
+         ENDIF
        ELSE IF(Char=='Lindh') THEN
          I1Row=PeriodicRow(INT(AtNum(Atoms(1))))
          I2Row=PeriodicRow(INT(AtNum(Atoms(2))))

@@ -13,7 +13,11 @@ MODULE GeomOptKeys
    CHARACTER(LEN=7),  PARAMETER :: OPT_IntDIIS      ='IntDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
    CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
-   CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'
+   CHARACTER(LEN=12), PARAMETER :: OPT_UnCoupleLatt ='UnCoupleLatt'
+   CHARACTER(LEN=10), PARAMETER :: OPT_AlternLatt   ='AlternLatt'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
+   CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'
+   CHARACTER(LEN=12), PARAMETER :: OPT_DoLattBackTr ='DoLattBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
    CHARACTER(LEN=11), PARAMETER :: OPT_NoTranslOff  ='NoTranslOff'
 !  Perform quasi-newton geometry optimization for each basis set in turn
