@@ -6,7 +6,6 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   USE ONXParameters
   USE ONXMemory
   USE Stats
-  USE GetTables
   IMPLICIT NONE
   TYPE(BCSR)                :: D
   TYPE(DBL_RNK2)            :: XFrc
@@ -50,7 +49,6 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: LTotal,MaxBatchSize,NFinal,iT
 
   MaxInts = 500 ! This is a hack...
-  CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(Dcd,BS%LMNLen*BS%LMNLen)
   CALL New(Dab,MaxInts*BS%LMNLen*BS%LMNLen)  ! THIS NEEDS TO BE FIXED
   CALL New(GD)
@@ -93,7 +91,6 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
     Ltot=LBra+LKet
     LtotG=LBra+LKet+2
 
-    CALL GetGammaTable(LtotG,IB)    ! Get the correct gamma fcn table
 
     write(*,*) "Getting the VRR table for LBra=",LBraG," and LKet=",LKetG
 

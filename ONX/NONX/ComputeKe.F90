@@ -6,7 +6,6 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
   USE ONXParameters
   USE ONXMemory
   USE Stats
-  USE GetTables
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -54,7 +53,6 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
 !-------------------------------------------------------------------
   INTEGER               :: LTotal,MaxBatchSize,NFinal,iT
 
-  CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(DA,BSp%LMNLen*BSp%LMNLen)
   xNERIs=0.0D0
 
@@ -82,7 +80,6 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
     iCP=Drv%CDrv%I(I2)            ! The pointer to the 2e contraction
     iCL=Drv%CDrv%I(iCP)           ! driver
 
-    CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
     CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
 
   DO iCBra=1,DB%LenCC       ! Loop over contraction lengths on the Bra
