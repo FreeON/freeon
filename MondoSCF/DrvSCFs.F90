@@ -255,11 +255,24 @@ MODULE DrvSCFs
               //TRIM(CurGeom)//'_Base#' &
               //TRIM(CurBase)//'_Cycl#' &
               //TRIM(CurCycl)
-         RemPrv=TRIM(ScrName)//'_Geom#' &
-              //TRIM(CurGeom)//'_Base#' &
-              //TRIM(CurBase)//'_Cycl#' &
-              //TRIM(PrvCycl)
-         RemoveFile=TRIM(RemCur)//'.Rho'                                
+         IF(PrvGeom/=CurGeom) THEN
+           RemPrv=TRIM(ScrName)//'_Geom#' &
+                //TRIM(PrvGeom)//'_Base#' &
+                //TRIM(PrvBase)//'_Cycl#' &
+                //TRIM(PrvCycl)
+         ELSE IF(PrvBase/=CurBase) THEN
+           RemPrv=TRIM(ScrName)//'_Geom#' &
+                //TRIM(CurGeom)//'_Base#' &
+                //TRIM(PrvBase)//'_Cycl#' &
+                //TRIM(PrvCycl)
+         ELSE
+           RemPrv=TRIM(ScrName)//'_Geom#' &
+                //TRIM(CurGeom)//'_Base#' &
+                //TRIM(CurBase)//'_Cycl#' &
+                //TRIM(PrvCycl)
+         ENDIF
+         RemoveFile=TRIM(RemPrv)//'.Rho'                                
+!        RemoveFile=TRIM(RemCur)//'.Rho'                                
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          RemoveFile=TRIM(RemPrv)//'.J'                                
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)
@@ -306,7 +319,7 @@ MODULE DrvSCFs
 !         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
 !         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.OrthoD' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
-         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.Rho' 
+!        RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.Rho' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
       ELSEIF(Action=='CleanLastBase')THEN
          RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.S' 
@@ -317,7 +330,7 @@ MODULE DrvSCFs
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
          RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvBase)//'*.OrthoD' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
-         RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvGeom)//'*.Rho' 
+!        RemoveFile=TRIM(ScrName) //'*_Base#'//TRIM(PrvGeom)//'*.Rho' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
