@@ -1,0 +1,57 @@
+<BeginTitle>
+
+  ** Static polarizability of a peroxide cycle **
+
+ GAMESS: RHF/6-31G         
+         ALPHA XX,XY,XZ = 52.9772 , 8.2472 ,-5.8193
+         ALPHA YX,YY,YZ =  8.2473 ,35.8234 ,-2.0431
+         ALPHA ZX,ZY,ZZ = -5.8192 ,-2.0430 ,40.9567
+
+ MONDO:
+ 1 Prc   RHF/6-31G    Tight
+         ALPHA XX,XY,XZ = 52.97707, 8.24711,-5.81938
+         ALPHA YX,YY,YZ =  8.24712,35.82319,-2.04290
+         ALPHA ZX,ZY,ZZ = -5.81937,-2.04289,40.95668
+
+
+<EndTitle>
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+DebugAll=(MinDebug,CheckSums)
+
+Guess=SuperPos
+SCFMethod=(TC2,TC2)
+BasisSets=(STO-3G,6-31G)
+ModelChem=(HF,HF)
+Accuracy =(Good,Tight)
+
+Response=StcAlpha
+
+MPIInvoke="mpirun"
+MPIProcessors=2
+MPIProcFlag="-np"
+MPISpatialProc=2
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
+<EndOptions>
+
+<BeginGeometry>
+ O    0.000000     0.000000     0.000000
+ C    0.000000     0.000000     1.430000
+ N    1.413055     0.000000     1.835187
+ C    2.095382     0.713167     0.745820
+ O    1.331474     0.453170    -0.434751
+ C   -0.953281    -1.088775     1.956711
+ H   -0.617531    -2.060220     1.593853
+ H   -1.960570    -0.884316     1.593853
+ H   -0.940750    -1.074462     3.046545
+ H   -0.493382     0.897604     1.802802
+ H    1.487483     0.164808     2.828866
+ H    3.152806     0.532081     0.553044
+ H    2.108535     1.783171     0.953229
+<EndGeometry>
