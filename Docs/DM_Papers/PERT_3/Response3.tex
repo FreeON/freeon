@@ -56,8 +56,8 @@
 
 %\preprint{APS/123-QED}
 
-\title{MATT: ANDERS AND I KNOW THAT YOU HAVE A NICE HUGE BIG SCREEN THEN THINK ABOUT US!\\
-The linear scaling self-consistent perturbed projection method for high order response}
+\title{The linear scaling self-consistent perturbed projection 
+       method for high order response}
 %\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
 
 \author{Val\'ery Weber}
@@ -121,7 +121,7 @@ densities under a global electric field perturbation are demonstrated.
  displacement. However, the locality principle is extensible
  also to response properties. In previous studies linear scaling 
  for the calculation of response properties was demonstrated for one
- dimensional linear chain systems (CHECK IT, seems to be right, only linear alcans)
+ dimensional linear chain systems ({\bf CHECK IT, seems to be right, only linear alcans})
  \cite{Ochsenfeld97,COchsenfeld98,CYam03,CYam03a}. Recently
  a perturbed projection algorithm was proposed for low order
  response properties for which linear scaling was demonstrated
@@ -194,6 +194,15 @@ congruence transformations \cite{JWilkinson65,GStewart73} provided
 by the AINV algorithm for computing sparse approximate inverse 
 Cholesky factors \cite{MBenzi95,MBenzi96,MBenzi01}.
 
+Within HF theory, the total electronic energy $E_{\rm tot}$ of 
+a molecule in a static electric field $\mathcal{E}$ is
+\begin{equation}
+   E_{\rm tot}(\mathcal{E})=Tr[D(h^0+\mu \mathcal{E})]
+                       +\frac{1}{2}Tr[D(J(D)+K(D))], \label{totalE}
+\end{equation}
+where $D$ is the density matrix in the electric field, 
+$h^0$ is the core Hamiltonian, $\mu$ is the dipole moment matrix, 
+$J(D)$ is the Coulomb matrix and $K(D)$ the exact HF exchange matrix.  
 The total energy of a molecule in a homogenous electric field may 
 be developed in a Taylor expansion as
 \begin{equation}
@@ -210,6 +219,26 @@ be developed in a Taylor expansion as
  the first polarizability and the first and second 
  hyperpolarizabilities respectively, $\mu_a$ is the dipole 
  moment and $\E^a$ is the electric field in direction $a$. 
+ The polarizability is the second order response of the total energy with respect
+ to variation in the electric field while the higher derivatives
+ give rise to the first and second hyperpolarizabilities \cite{StandardCPSCF}
+ %\cite{Sekino_1986}
+ \begin{subequations}\label{pol}
+   \begin{gather}
+     \alpha_{ab}=
+     -\frac{\partial^2 E_{\rm tot}}{\partial \mathcal{E}^a\partial \mathcal{E}^b}
+     \bigg|_{\mathcal{E}=0}=
+     -2Tr[D^a\mu_b],\\
+     \beta_{abc}=
+     -\frac{\partial^3 E_{\rm tot}}{\partial \mathcal{E}^a\partial \mathcal{E}^b\partial \mathcal{E}^c}
+     \bigg|_{\mathcal{E}=0}=
+     -4Tr[D^{ab}\mu_c],\\
+     \gamma_{abc}=
+     -\frac{\partial^4 E_{\rm tot}}{\partial\mathcal{E}^a\partial\mathcal{E}^b\partial \mathcal{E}^c\partial \mathcal{E}^d}
+     \bigg|_{\mathcal{E}=0}=
+     -12Tr[D^{abc}\mu_d].
+   \end{gather}
+\end{subequations}
  The Fockian, $\F(\E)$, may also be expanded by order to give
 \begin{equation}
   \begin{split}
@@ -223,7 +252,17 @@ A similar expantion also holds for the density matrix $\D(\E)$.
 Within HF theory, the Fockian $F^0$ in the non-orthogonal 
 basis is $F^0=h^0+J(D^0)+K(D^0)$, while
 the first derivative Fockian is $F^a=\mu_a+J(D^a)+K(D^a)$ and 
-the higher derivatives are given by $F^{ab\cdots}=J(D^{ab\cdots})+K(D^{ab\cdots})$.  
+the higher derivatives are given by 
+$F^{ab\cdots}=J(D^{ab\cdots})+K(D^{ab\cdots})$. 
+The Coulomb matrix $J$ may be computed in ${\cal O}(N{\rm lg}N)$ 
+with a quantum chemical tree code (QCTC) \cite{MChallacombe97} and the
+exchange matrix $K$ computed in ${\cal O}(N)$ with the ONX algorithm 
+that exploits quantum locality of the density matrix $D^0$ \cite{ESchwegler97}.
+Likewise the derivatives Fockian, $F^{a\ldots}$, may be computed 
+with the same algorithms in linear scaling time if 
+$D^{a\ldots}$ manifests decay properties similar to $D^0$. 
+
+ 
 A similar equation holds for the derivatives Fockian
 within Kohn-Sham and hybrid HF/DFT with addition of 
 the exchange-correlation matrix $V_{xc}^{a\cdots}(D^0,D^a,\cdots)$ 
@@ -250,7 +289,7 @@ CPSCF equations involve an extension to the well-known SCF equations \cite{Furch
     [\F^{0} ,\D^{0}]=0,\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\\
     [\F^{ab},\D^{0}]+\frac{1}{2}[\F^{a},\D^{b}]+\frac{1}{2}[\F^{b} ,\D^{a}]+[\F^{0},\D^{ab}]=0,\\
-    \text{May be the third order???}
+    \text{\bf May be the third order???}
   \end{gather}
 \end{subequations}
 and the idempotency-like constraints \cite{Furche_2001}
@@ -260,7 +299,8 @@ and the idempotency-like constraints \cite{Furche_2001}
     \D^{a} =\{\D^{a},\D^{0}\},\\
     \D^{ab}=\{\D^{ab},\D^{0}\}+\frac{1}{2}\{\D^{a},\D^{b}\}\\
     \D^{abc}=\{\D^{abc},\D_0\}+
-        \frac{1}{3}(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}+\{\D^{bc},\D^{a}\})
+        \frac{1}{3}\left(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}
+	                 +\{\D^{bc},\D^{a}\}\right)
   \end{gather}
 \end{subequations}
 The following schematic algorithm is a higher order generalization of the
@@ -268,11 +308,11 @@ self consistent scheme for the solution of the CPSCF equations describe
 in \cite{Weber04} based on perturbed projection:
 \begin{subequations}
   \begin{gather}
-F^{a\ldots}_{n}= \left\{
-\begin{array}{ll}
-\mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild},\\
-J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1.
-\end{array}\right.\\
+    F^{a\ldots}_{n}= \left\{
+    \begin{array}{ll}
+      \mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild},\\
+      J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1.
+    \end{array}\right.\\
 %    F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
 %    F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild2} \\
     \displaystyle\widetilde{F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{a\ldots}_{k} \label{DDIIS} \\
@@ -395,14 +435,15 @@ becomes smaller than a given threshold.
 \end{figure}
 
 
-\subsubsection{Higher order response and Wigner's 2n+1 rule }
+\subsubsection{Higher order response via Wigner's $2n+1$ rule }
 Higher order energy derivatives can be calculated from the lower
-order response. Wigner's 2n+1 rule gives a general way to calculate the 2n+1
-energy response from the n-th order response. These kind of expressions
+order response. Wigner's $2n+1$ rule gives a general way to calculate the $2n+1$
+energy response from the $n$-th order response. These kind of expressions
 based on the wave function perturbation theory are well known and are 
-descibed in for exemple \cite{Dupuis_1991}.
+descibed in for example \cite{Dupuis_1991}.
 A density matrix analogy to 
-The Wigner's 2n+1 rule was given in cite{...}, here we will present
+The Wigner's $2n+1$ rule was given in cite{\bf ANDERS YOU KNOW THIS CITE}, 
+here we will present
 a generalization to the non orthogonal case for mixed derivatives 
 up to fourth order.
 The third order energy correction is given in an 
@@ -466,42 +507,43 @@ the relation reduces to only one term (9 matrix multipilcations
 In the worst case where all the directions are different e.g. $E^{aabc}$, the
 relation (\ref{eq:2n+1 fourth order}) simplifies to only 12 
 terms (108 matrix multiplications {\bf CAN BE REDUCED WITH THE TRACE}). 
+Similar reductions of the computational cost also apply to 
+Eq. (\ref{eq:2n+1 third order}).
 We can mention that those equations 
 (\ref{eq:2n+1 third order}) and (\ref{eq:2n+1 fourth order}) 
 do not depend on any parametrizations of the wave function
 as the relations previously given \cite{Helgaker_2001,Dupuis_1991}.
 
-\begin{equation}
-  \alpha_{ab}=-2\Tr[D^a\mu_b]
-\end{equation}
+%\begin{equation}
+%  \alpha_{ab}=-2\Tr[D^a\mu_b]
+%\end{equation}
 
-\begin{equation}
-  \beta_{abc}=-4\Tr[D^{ab}\mu_c]
-\end{equation}
+%\begin{equation}
+%  \beta_{abc}=-4\Tr[D^{ab}\mu_c]
+%\end{equation}
 
-\begin{equation}
-  \gamma_{abcd}=-12\Tr[D^{abc}\mu_d]
-\end{equation}
-
+%\begin{equation}
+%  \gamma_{abcd}=-12\Tr[D^{abc}\mu_d]
+%\end{equation}
 
 \section{Examples}
 To demonstrate the ability, accuracy, numerical stability and efficiency 
 of the algorithm we present
-the solution of the 10th order UPSCF (Uncoupled Perturbed SCF) 
-equation for the $\rm C_{60}$ and for one dimensional water chains. 
+the solution of the $10$-th order UPSCF (Uncoupled Perturbed SCF) 
+equation for the $\rm C_{60}$ and for one dimensional water chains up to
+40 water molecules. 
 Then the CPSCF equations are solved up to third order for the one dimensional 
-water chains and the results obtained are compared with the 2n+1 rule presented 
-above and with GAMESS calculations \cite{gamess}. We have also performed polarizabilities
+water chains and the results obtained are compared with the $2n+1$ rule presented 
+above and with GAMESS calculations \cite{gamess}. We have also 
+performed polarizabilities
 calculations up to third order on a series of water clusters at standard 
-liquid density \cite{MChallacombe97,ESchwegler97}, up to $(\rm H_2O)_{150}$. 
-
+liquid density \cite{MChallacombe97,ESchwegler97}, with 
+cluster sizes up to $(\rm H_2O)_{150}$. 
 Calculations were carried out on a single Intel Xeon 2.4GHz processor 
 running RedHat Linux 8.0 and  executables compiled
 with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
 
-
-
-\subsection{C60: 10th order response (uncoupled)}
+\subsection{C60: $10$-th order response (uncoupled)}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  H = H0 + c*H1
 %  E = E_0 + c*E_1 + c^2*E_2 + ... Notice the normalization!
@@ -521,14 +563,14 @@ with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
 
 %I assume the polarizability is given by (Pol  =  - E_N/N!)
 
-
 To show the simplicity of the method, we have computed 
-the electric response up to the 10-th order for a c60.
+the electric response up to the $10$-th order for a $\rm C_{60}$.
 
 \begin{table}[t]
   \centering
   \caption{\protect
-    Polarizabilites along the $z$ axis of C$_{60}$ up to 10-th order via UPSCF equations.
+    Polarizabilites along the $z$ axis of $\rm C_{60}$ up 
+    to $10$-th order via UPSCF equations.
     The calculations have been done at the HF/6-31G level of 
     theory and the {\tt GOOD} thresholding.
   }\label{tab:C60_Values}
@@ -552,10 +594,8 @@ the electric response up to the 10-th order for a c60.
 
 
 
-\subsection{One dimensional water chains 10th order response (uncoupled)}
-ANDERS SHOULD ADD SOMETHING HERE.
-
-
+\subsection{One dimensional water chains $10$-th order response (uncoupled)}
+...TODO...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %              RESULT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -622,6 +662,7 @@ ANDERS SHOULD ADD SOMETHING HERE.
 %n = 30  (H2O)_30
 %E1 = 1.166017616089679e+04
 %E2 = -33.35887301244362
+%E3 = -9.67492792903100
 %E4 = -2.729919339557335e+02
 %E5 = -2.242450578445723e+02
 %E6 = -1.862906350623380e+04
@@ -645,32 +686,30 @@ ANDERS SHOULD ADD SOMETHING HERE.
 \begin{table}[t]
   \centering
   \caption{\protect
-    Longitudinal polarizabilities.
-    SHOULD REMOVE SOME DIGITS.
-    TABLE OR GRAPH?
+    Longitudinal polarizabilities of water chains up to $10$-th order.
+    The results have been obtained within the uncoupled perturbed formalism.
+    SHOULD REMOVE SOME DIGITS. TABLE OR GRAPH?
    }\label{tab:UCPHF_1D_h2o}
   \begin{tabular}{cccccc}
     \toprule
     Order 
-          & $(H_2O)_2$
-          & $(H_2O)_10$
-          & $(H_2O)_20$
-          & $(H_2O)_30$
-          & $(H_2O)_40$ \\
+          & $\rm (H_2O)_2$
+          & $\rm (H_2O)_{10}$
+          & $\rm (H_2O)_{20}$
+          & $\rm (H_2O)_{30}$
+          & $\rm (H_2O)_{40}$ \\
     \hline 
-     2 & -2.17651690073638      & -11.07341368413361      & -22.21691102006962     & -33.35887301244362     & -44.49989115576956         \\
-     3 & -2.22455681544148      & -4.61329209646009       & -7.14601040066529      & missing                & -12.18809639549116         \\
-     4 & -13.95074218268175     & -87.54437442498153      & -1.792840983157341e+02 & -2.729919339557335e+02 & -3.664801418080078e+02     \\
-     5 & -68.40667793915324     & -1.532813458350126e+02  & -1.821498831868175e+02 & -2.242450578445723e+02 & -2.622572632608512e+02     \\
-     6 & -6.423301402856351e+02 & -5.809193401674064e+03  & -1.202343289715785e+04 & -1.862906350623380e+04 & -2.518979994991824e+04     \\
-     7 & -5.318000233645364e+03 & -2.262373010421617e+04  & -1.885722634322121e+04 & -1.941082891792742e+04 & -1.879966795994625e+04     \\
-     8 & -5.086336925936583e+04 & -1.123411187843104e+06  & -2.375089619327842e+06 & -3.730741305731402e+06 & -5.074306583042629e+06     \\
-     9 & -4.691645050426352e+05 & -7.811630497000519e+06  & -5.091741765507719e+06 & -4.082205412051067e+06 & -2.521486674366584e+06     \\
-    10 & -4.535300919019648e+06 & -4.376083207386325e+08  & -9.464017838257253e+08 & -1.502423983585057e+09 & -1.993397136878680e+09     \\
+    2 & 2.1765      & 11.07341      & 22.21691     & 33.35887     & 44.49989    \\
+    3 & 2.2245      & 4.613292      & 7.146010     & 9.674927     & 12.18809    \\
+    4 & 13.9507     & 87.54437      & 1.792840e+02 & 2.729919e+02 & 3.664801e+02\\
+    5 & 68.4066     & 1.532813e+02  & 1.821498e+02 & 2.242450e+02 & 2.622572e+02\\
+    6 & 6.42330e+02 & 5.809193e+03  & 1.202343e+04 & 1.862906e+04 & 2.518979e+04\\
+    7 & 5.31800e+03 & 2.262373e+04  & 1.885722e+04 & 1.941082e+04 & 1.879966e+04\\
+    8 & 5.08633e+04 & 1.123411e+06  & 2.375089e+06 & 3.730741e+06 & 5.074306e+06\\
+    9 & 4.69164e+05 & 7.811630e+06  & 5.091741e+06 & 4.082205e+06 & 2.521486e+06\\
+   10 & 4.53530e+06 & 4.376083e+08  & 9.464017e+08 & 1.502423e+09 & 1.993397e+09\\
     \botrule
   \end{tabular}
-  \footnotetext[1]{GAMESS calculations.}
-  \footnotetext[2]{MondoSCF calculations.}
 \end{table}
 
 
@@ -747,9 +786,9 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
   }\label{tab:Alpha_1D_Values}
   \begin{tabular}{cccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-        &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-        &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+    $N$ &\multicolumn{1}{c}{6-31G\footnote[1]{\sc GAMESS.}}
+        &\multicolumn{1}{c}{6-31G\footnote[2]{\sc MondoSCF.}}
+        &\multicolumn{1}{c}{6-31G**$^b$}\\
     \hline
      1 & 5.8136 & 5.813589 & 6.318837     \\
      2 & 6.3448 & 6.344830 & 7.047412     \\
@@ -765,8 +804,6 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     40 & 7.1996 & 7.199704 & 8.287090     \\
     \botrule
   \end{tabular}
-  \footnotetext[1]{GAMESS calculations.}
-  \footnotetext[2]{MondoSCF calculations.}
 \end{table}
 
 
@@ -782,10 +819,11 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
   }\label{tab:Beta_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-    &\multicolumn{1}{c}{6-31G\footnotemark[2]$^,$\footnotemark[3]}
-    &\multicolumn{1}{c}{6-31G**}\footnotemark[2] \\
+    $N$ &\multicolumn{1}{c}{6-31G\footnote[1]{\sc GAMESS.}}
+    &\multicolumn{1}{c}{6-31G\footnote[2]{\sc MondoSCF.}}
+    &\multicolumn{1}{c}{6-31G$^{b,}$
+      \footnote[3]{The density matrix based 2n+1 rule has been used.}}
+    &\multicolumn{1}{c}{6-31G**}$^b$ \\
     \hline
      1 & -30.6125 & -30.612178 & -30.612274 & -25.232854 \\
      2 & -29.5444 & -29.545096 & -29.545207 & -23.454776 \\
@@ -801,9 +839,6 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     40 & -10.6042 & -10.604860 & -10.605360 &  -6.245644 \\
     \botrule
   \end{tabular}
-  \footnotetext[1]{GAMESS calculations.}
-  \footnotetext[2]{MondoSCF calculations.}
-  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
 
 
@@ -819,10 +854,11 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
   }\label{tab:Gamma_1D_Values}
   \begin{tabular}{ccccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-    &\multicolumn{1}{c}{6-31G\footnotemark[2]$^,$\footnotemark[3]}
-    &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+    $N$ &\multicolumn{1}{c}{6-31G\footnote[1]{\sc GAMESS.}}
+    &\multicolumn{1}{c}{6-31G\footnote[2]{\sc MondoSCF.}}
+    &\multicolumn{1}{c}{6-31G$^{b,}$
+      \footnote[3]{The density matrix based 2n+1 rule has been used.}}
+    &\multicolumn{1}{c}{6-31G**}$^b$ \\
     \hline
      1 &  330.5753 &  330.577009 &  330.572592 &  278.898509 \\
      2 &  820.1398 &  820.160650 &  820.153734 &  663.493200 \\
@@ -838,17 +874,11 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     40 & 1456.5756 & 1456.682800 & 1456.520170 & 1308.644675 \\
     \botrule
   \end{tabular}
-  \footnotetext[1]{GAMESS calculations.}
-  \footnotetext[2]{MondoSCF calculations.}
-  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
 
 
 
 \subsection{Linear scaling: 3D water clusters}
-
-3D water clusters show an early onset of linear scaling for accurate
-basis set and low thresholds and higher order response.
 
 
 Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of
@@ -856,6 +886,8 @@ theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter
 sets that control precision of the linear scaling algorithms, corresponding 
 to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
 
+3D water clusters show an early onset of linear scaling for accurate
+basis set and low thresholds and higher order response.
 
 
 \subsection{Exponential decay}
@@ -972,43 +1004,43 @@ responses.
 
 
 
-\begin{figure}[t]
-  \caption{\protect
-    WE MAY REMOVE THIS!
-    Magnitudes of the RHF/6-31G density matrix derivative elements $D^{x}_{cd}$
-    along the $x$ axis with the separation of basis function centers
-    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
-    derivative has been converged to within {\tt TIGHT} (e.g. 
-    matrix threshold of $10^{-6}$ $[a.u.]$).
-  }\label{fig:Alpha_Decay}
-  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
-\end{figure}
+%\begin{figure}[t]
+%  \caption{\protect
+%    WE MAY REMOVE THIS!
+%    Magnitudes of the RHF/6-31G density matrix derivative elements $D^{x}_{cd}$
+%    along the $x$ axis with the separation of basis function centers
+%    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
+%    derivative has been converged to within {\tt TIGHT} (e.g. 
+%    matrix threshold of $10^{-6}$ $[a.u.]$).
+%  }\label{fig:Alpha_Decay}
+%  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+%\end{figure}
 
 
-\begin{figure}[t]
-  \caption{\protect
-    WE MAY REMOVE THIS!
-    Magnitudes of the RHF/6-31G density matrix second derivative elements $D^{xx}_{cd}$
-    along the $x$ axis with the separation of basis function centers
-    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
-    derivative has been converged to within {\tt TIGHT} (e.g. 
-    matrix threshold of $10^{-6}$ $[a.u.]$).
-  }\label{fig:Beta_Decay}
-  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
-\end{figure}
+%\begin{figure}[t]
+%  \caption{\protect
+%    WE MAY REMOVE THIS!
+%    Magnitudes of the RHF/6-31G density matrix second derivative elements $D^{xx}_{cd}$
+%    along the $x$ axis with the separation of basis function centers
+%    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
+%    derivative has been converged to within {\tt TIGHT} (e.g. 
+%    matrix threshold of $10^{-6}$ $[a.u.]$).
+%  }\label{fig:Beta_Decay}
+%  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+%\end{figure}
 
 
-\begin{figure}[t]
-  \caption{\protect
-    WE MAY REMOVE THIS!
-    Magnitudes of the RHF/6-31G density matrix third derivative elements $D^{xxx}_{cd}$
-    along the $x$ axis with the separation of basis function centers
-    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
-    derivative has been converged to within {\tt TIGHT} (e.g. 
-    matrix threshold of $10^{-6}$ $[a.u.]$).
-  }\label{fig:Beta_Decay}
-  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
-\end{figure}
+%\begin{figure}[t]
+%  \caption{\protect
+%    WE MAY REMOVE THIS!
+%    Magnitudes of the RHF/6-31G density matrix third derivative elements $D^{xxx}_{cd}$
+%    along the $x$ axis with the separation of basis function centers
+%    for the $\rm (H_2O)_{150}$ water cluster. The density matrix 
+%    derivative has been converged to within {\tt TIGHT} (e.g. 
+%    matrix threshold of $10^{-6}$ $[a.u.]$).
+%  }\label{fig:Beta_Decay}
+%  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+%\end{figure}
 
 
 \begin{figure}[t]
