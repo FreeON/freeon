@@ -206,7 +206,7 @@ MODULE MDynamics
   SUBROUTINE MDVerlet_NVE(C,iGEO)
     TYPE(Controls)            :: C
     INTEGER                   :: iGEO
-    INTEGER                   :: iCLONE,iATS,nATOMS
+    INTEGER                   :: iCLONE,iATS
     REAL(DOUBLE)              :: Mass,dT,dT2,dTSq2,Time,Dist
     REAL(DOUBLE),DIMENSION(3) :: Pos,Vel,Acc
 !--------------------------------------------------------------
@@ -219,28 +219,37 @@ MODULE MDynamics
 !      Move The Atoms
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             nATOMS = nATOMS+1
              Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
              Pos(1:3)  =  C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)
              Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
              Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
-!            Velocity: v(t) = v(t-dT/2(t)*dT/2
+!            Velocity: v(t) = v(t-dT/2)+a(t)dT/2
              Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
 !            Position: r(t+dT)= r(t)+v(t)*dT+a(t)*dT*dT/2
              Pos(1:3) = Pos(1:3) + Vel(1:3)*dT + Acc(1:3)*dTSq2
-!            Velocity: v(t+dT/2= v(t) + a(t)*dT/2
-             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
 !            Update
              C%Geos%Clone(iCLONE)%Carts%D(1:3,iATS)    = Pos(1:3) 
              C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
           ENDIF
        ENDDO
-!      Reset the Momentum to Zero    
-       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
-!      Calculate Kinectic and  Temp
+!      Calculate Kinectic and  Temp, update Ave Temp
        CALL CalculateMDKin(C%Geos%Clone(iCLONE),MDKin%D(iCLONE),MDTemp%D(iCLONE))
        MDTave%D(iCLONE) = (DBLE(iGEO)/DBLE(iGEO+1))*MDTave%D(iCLONE) &
                          +(       One/DBLE(iGEO+1))*MDTemp%D(iCLONE)
+!      Velocity: v(t+dT/2) = v(t)+a(t)dT/2
+       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+          IF(C%Geos%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+             Mass      =  C%Geos%Clone(iCLONE)%AtMss%D(iATS)
+             Vel(1:3)  =  C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
+             Acc(1:3)  = -C%Geos%Clone(iCLONE)%Gradients%D(1:3,iATS)/Mass
+!            Velocity: v(t+dT/2= v(t) + a(t)*dT/2
+             Vel(1:3) = Vel(1:3) + Acc(1:3)*dT2
+!            Update
+             C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS) = Vel(1:3)
+          ENDIF
+       ENDDO
+!      Reset the Momentum to Zero    
+       CALL ResetMomentum(C%Geos%Clone(iCLONE),Zero,Zero,Zero)
 !      Store Potential and Total Energy
        MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)

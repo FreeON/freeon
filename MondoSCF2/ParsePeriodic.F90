@@ -102,7 +102,9 @@ CONTAINS
     ELSE      
        PBC%PFFMaxLay=1
 !      Look for MaxEll in periodic boundary options
-       IF(.NOT.OptIntQ(Inp,PBOUNDRY,PBC%PFFMaxEll))  PBC%PFFMaxEll=16
+       IF(.NOT.OptIntQ(Inp,PBOUNDRY,PBC%PFFMaxEll)) THEN 
+          PBC%PFFMaxEll=16
+       ENDIF  
     ENDIF
 !   Parse permeability 
     IF(.NOT.OptDblQ(Inp,EPSILON,PBC%Epsilon))THEN
@@ -114,6 +116,8 @@ CONTAINS
     ELSE
        PBC%AtomW=.TRUE.
     ENDIF
+    PBC%PFFMaxEll=10
+!    WRITE(*,*)   'PBC%PFFMaxEll = ',PBC%PFFMaxEll
 !
   END SUBROUTINE LoadPeriodicOptions
 !============================================================================
