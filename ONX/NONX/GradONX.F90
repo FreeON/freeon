@@ -54,7 +54,7 @@ PROGRAM GradONX
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
   CALL Get(OffS,'atoff',Tag_O=CurBase)
   CALL Get(NBasF,'nbasf',Tag_O=CurBase)
-  CALL Get(D,TrixFile('D',Args,0)) !InFile,'.D')
+  CALL Get(D,TrixFile('D',Args,1)) !InFile,'.D')
   CALL TrnMatBlk(BS,GM,D)
   Gradient=.TRUE.
   CALL New(NameBuf,NAtoms)
