@@ -421,8 +421,8 @@ CONTAINS
 !          WRITE(Out,*)'DMaxB = ',DMaxB
           CLOSE(Out)
           ! Convergence tests
-          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest))THEN
-!         IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
+!         IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest))THEN
+          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
              Converged(iCLONE)=.TRUE.
              Mssg='Normal SCF convergence.a'
           ENDIF
