@@ -203,28 +203,41 @@ PROGRAM JForce
      LatFrc_J%D = TmpLatFrc_J%D
   ENDIF
   CALL Delete(TmpLatFrc_J)
+#endif
+#ifdef PARALLEL
   IF(MyID == ROOT) THEN
-!!$!    Print The Lattice Forces
-!!$     CALL OpenASCII(OutFile,Out)
-!!$     WRITE(Out,*) 'LatFrc_J'
-!!$     WRITE(*,*)   'LatFrc_J'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$     WRITE(Out,*) 'LatFrc_J_Dip'
-!!$     WRITE(*,*)   'LatFrc_J_Dip'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$     WRITE(Out,*) 'LatFrc_J_PFF'
-!!$     WRITE(*,*)   'LatFrc_J_PFF'
-!!$     DO I=1,3
-!!$        WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
-!!$        WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
-!!$     ENDDO
-!!$     CLOSE(Out)
+#endif
+!    Zero the Lower Triange
+     DO I=1,3
+        DO J=1,I-1
+           LatFrc_J%D(I,J)     = Zero
+           LatFrc_J_Dip%D(I,J) = Zero
+           LatFrc_J_PFF%D(I,J) = Zero
+        ENDDO
+     ENDDO
+     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+!       Print The Lattice Forces
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LatFrc_J'
+        WRITE(*,*)   'LatFrc_J'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
+        ENDDO
+        WRITE(Out,*) 'LatFrc_J_Dip'
+        WRITE(*,*)   'LatFrc_J_Dip'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
+        ENDDO
+        WRITE(Out,*) 'LatFrc_J_PFF'
+        WRITE(*,*)   'LatFrc_J_PFF'
+        DO I=1,3
+           WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
+           WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
+        ENDDO
+        CLOSE(Out)
+     ENDIF
 !    Sum in the J contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -237,41 +250,8 @@ PROGRAM JForce
 !    Tidy Up
      CALL Delete(LatFrc_J_Dip)
      CALL Delete(LatFrc_J_PFF)
+#ifdef PARALLEL
   ENDIF
-#else
-!!$! Print The Lattice Forces
-!!$  CALL OpenASCII(OutFile,Out)
-!!$  WRITE(Out,*) 'LatFrc_J'
-!!$  WRITE(*,*)   'LatFrc_J'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
-!!$  ENDDO
-!!$  WRITE(Out,*) 'LatFrc_J_Dip'
-!!$  WRITE(*,*)   'LatFrc_J_Dip'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
-!!$  ENDDO  
-!!$  WRITE(Out,*) 'LatFrc_J_PFF'
-!!$  WRITE(*,*)   'LatFrc_J_PFF'
-!!$  DO I=1,3
-!!$     WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
-!!$     WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
-!!$  ENDDO
-!!$  CLOSE(Out)
-! Sum in the J contribution to total force
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
-  ENDDO
-! Sum in the J contribution to total lattice force
-  LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
-  GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
-! Tidy up
-  CALL Delete(LatFrc_J_Dip)
-  CALL Delete(LatFrc_J_PFF)
 #endif
 ! Do some checksumming and IO 
   CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
