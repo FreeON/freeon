@@ -853,6 +853,7 @@ CONTAINS
     INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE
     CHARACTER(LEN=DCL) :: chGEO,chBAS    
     REAL(DOUBLE)       :: GradVal
+TYPE(DBL_RNK2) :: AuxLatF
     !----------------------------------------------------------------------------!
     CALL New(S%Action,1)
     ! Initialize the force vector in HDF, clone by clone
@@ -881,7 +882,26 @@ CONTAINS
     CALL Invoke('JForce',N,S,M)
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
+#ifdef PARRALEL
+CALL New(AuxLatF,(/3,3/))
+HDFFileID=OpenHDF(N%HFile)
+HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
+CALL CloseHDFGroup(HDF_CurrentID)
+CALL CloseHDF(HDFFileID)
+#endif
        CALL Invoke('XCForce',N,S,M)
+#ifdef PARRALEL
+HDFFileID=OpenHDF(N%HFile)
+HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+G%Clone(1)%PBC%LatFrc%D=AuxLatF%D
+CALL Put(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+CALL CloseHDFGroup(HDF_CurrentID)
+CALL CloseHDF(HDFFileID)
+CALL Delete(AuxLatF)
+       CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+#endif
     ENDIF
     !vw#ifdef NLATTFORCE    
     !vw    ! Exact Hartree-Fock exchange component
@@ -919,6 +939,17 @@ CONTAINS
 !!$          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
 !!$       ENDDO
 !      Close the group
+     ! DO I=1,G%Clone(iCLONE)%PBC%Dimen
+     !   DO J=1,G%Clone(iCLONE)%PBC%Dimen
+     !     DO iATS=1,G%Clone(iCLONE)%NAtms
+     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
+     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)- &
+     !       G%Clone(iCLONE)%Gradients%D(I,iATS)* &
+     !       G%Clone(iCLONE)%BoxCarts%D(J,iATS)
+     !     ENDDO
+     !   ENDDO
+     ! ENDDO
+       CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
 !      Print the Forces and BoxForces if O%Grad==GRAD_ONE_FORCE
@@ -1256,6 +1287,13 @@ CONTAINS
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
        chSCF=IntToChar(S%Current%I(1))
+       !
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+       CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
 !
        DO I=1,3
           DO J=1,3
@@ -1272,6 +1310,7 @@ CONTAINS
                 HDFFileID=OpenHDF(N%HFile)
                 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
                 CALL Get(E1,'Exc')
+                CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
                 CALL CloseHDFGroup(HDF_CurrentID)
                 CALL CloseHDF(HDFFileID)
 !
@@ -1297,12 +1336,14 @@ CONTAINS
 !  
              ENDIF
           ENDDO
+          G%Clone(iCLONE)%PBC%LatFrc%D=G%Clone(iCLONE)%PBC%LatFrc%D+LatFrc_XC
+          CALL GeomArchive(cBAS,cGEO,N,B,G)
        ENDDO
 !      Print J Lattice Forces
-!!$       WRITE(*,*) 'LatFrc_XC NUM'
-!!$       DO I=1,3
-!!$          WRITE(*,*) (LatFrc_XC(I,J),J=1,3)
-!!$       ENDDO
+       WRITE(*,*) 'LatFrc_XC NUM'
+       DO I=1,3
+          WRITE(*,*) (LatFrc_XC(I,J),J=1,3)
+       ENDDO
 !    
     ENDDO
 !

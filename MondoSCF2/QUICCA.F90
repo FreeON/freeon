@@ -651,7 +651,7 @@ CONTAINS
                      PBCDim,Print,SCRPath)
        CALL CartToInternal(IntCs,VectCG%D,VectI%D,XYZAux%D,PBCDim, &
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
-       CALL RedundancyOff(VectI%D,SCRPath,Print)
+       CALL RedundancyOff(VectI%D,SCRPath,Print,Messg_O='Q IntC Grads')
      ! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)
        IntCGrads%D(:,I)=VectI%D
        CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
@@ -799,10 +799,10 @@ CONTAINS
            LWeight(J,I)=ExtraW_O(I)
          ENDIF
        ENDDO
-       IF(PRESENT(ExtraW_O)) THEN
-         W=EXP(ExtraW_O(I)/(WSum+1.D-10))
-         DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
-       ENDIF
+      !IF(PRESENT(ExtraW_O)) THEN
+      !  W=EXP(ExtraW_O(I)/(WSum+1.D-10))
+      !  DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
+      !ENDIF
      ENDDO
      ! 
      CALL Delete(Vect1)
@@ -1517,7 +1517,7 @@ CONTAINS
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X !+W
+           Weights(J,I)=X*X+W
          ELSE
            Weights(J,I)=1.D99
          ENDIF

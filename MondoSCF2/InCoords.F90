@@ -231,6 +231,14 @@ CONTAINS
        CALL Delete(CartAux)
      ENDIF
      !
+     ! Clean BL for fixed lattice orientation
+     !
+     DO IInt=1,IntCs%N
+       B%BL%D(IInt,2)=Zero
+       B%BL%D(IInt,3)=Zero
+       B%BL%D(IInt,6)=Zero
+     ENDDO
+     !
    END SUBROUTINE BMatrix
 !
 !-----------------------------------------------------------------------
@@ -1860,6 +1868,7 @@ CONTAINS
      CALL INTCValue(IntCs,XYZ,BackLinCrit,BackTLinCrit)
      CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
      CALL SetBackToRefs(VectIntReq%D,IntCs,RefPoints)
+     PredVals=VectIntReq%D
      !
      IF(PRESENT(MixMat_O)) THEN
        CALL DGEMM_TNc(NT,NIntC,1,One,Zero, &
@@ -1882,6 +1891,12 @@ CONTAINS
        RefreshAct=.TRUE.
        DoRepeat=.FALSE.
        !
+      !IntCDispl%D=VectIntReq%D-ValSt%D
+      !CALL MapAngleDispl(IntCs,IntCDispl%D) 
+      !CALL RedundancyOff(IntCDispl%D,SCRPath,Print,Messg_O='ToCart Head')
+      !VectIntReq%D=ValSt%D+IntCDispl%D
+      !CALL MapBackAngle(IntCs,VectIntReq%D)
+       !
        ! initialization of new Cartesians
        !
        ActCarts%D=XYZ
@@ -1901,15 +1916,28 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-       ! IF(PRESENT(iGEO_O)) THEN
-       !   CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-       !                   IRep,IStep,iGEO_O)
-       ! ENDIF
-         !
-         ! Get B and refresh values of internal coords
+         IF(PRESENT(iGEO_O)) THEN
+           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+                           IRep,IStep,iGEO_O)
+         ENDIF
          !
          CALL INTCValue(IntCs,ActCarts%D,BackLinCrit,BackTLinCrit)
          CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+         !
+         ! Get B and refresh values of internal coords
+         !
+         IF(RefreshB.AND.RefreshAct) THEN
+           CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl,GConvCr, &
+                               BackLinCrit,BackTLinCrit,PBCDim, &
+                               Print,SCRPath,DoCleanCol_O=.TRUE.)
+           CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
+           !
+          !IntCDispl%D=VectIntReq%D-IntCs%Value%D
+          !CALL MapAngleDispl(IntCs,IntCDispl%D) 
+          !CALL RedundancyOff(IntCDispl%D,SCRPath,Print,Messg_O='ToCart Refresh')
+          !VectIntReq%D=IntCs%Value%D+IntCDispl%D
+          !CALL MapBackAngle(IntCs,VectIntReq%D)
+         ENDIF
          !
          IF(PRESENT(MixMat_O)) THEN
            CALL DGEMM_TNc(NT,NIntC,1,One,Zero, &
@@ -1929,14 +1957,8 @@ CONTAINS
          ENDIF
          !
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
+!CALL RedundancyOff(IntCDispl%D,SCRPath,Print)
 !CALL PrtIntCoords(IntCs,IntCDispl%D,'IntCDispl',PBCDim_O=PBCDim)
-         !
-         IF(RefreshB.AND.RefreshAct) THEN
-           CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl,GConvCr, &
-                               BackLinCrit,BackTLinCrit,PBCDim, &
-                               Print,SCRPath,DoCleanCol_O=.TRUE.)
-           CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-         ENDIF
          !
          ! Check convergence on constraints
          !
@@ -1983,7 +2005,7 @@ CONTAINS
          CALL SetFixedCartesians(VectCart%D,VectCartAux2%D, &
                             IntCs,GConstr%NCartConstr)
          VectCart%D=VectCart%D+VectCartAux2%D
-       ! CALL SetFixedLattice(VectCart%D,IntCsE)
+         CALL SetFixedLattice(VectCart%D,IntCsE)
          CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
          !
          ! Review iteration
@@ -2034,15 +2056,16 @@ CONTAINS
          ENDIF
          EXIT 
        ELSE
-         CALL INTCValue(IntCs,ActCarts%D,BackLinCrit,BackTLinCrit)
-         CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
-         IntCDispl%D=IntCs%Value%D-ValSt%D
-         CALL MapAngleDispl(IntCs,IntCDispl%D) 
          IF(IRep<RepMax) THEN
+           CALL INTCValue(IntCs,ActCarts%D,BackLinCrit,BackTLinCrit)
+           CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+           IntCDispl%D=IntCs%Value%D-ValSt%D
+           CALL MapAngleDispl(IntCs,IntCDispl%D) 
            !
            ! check for the size of the displacement
            CALL CheckBigStep(IRep,IntCs,DoRepeat,GCoordCtrl%MaxStre, &
-                   GCoordCtrl%MaxAngle,VectIntReq%D,ValSt%D,IntCDispl%D,Print2)
+                   GCoordCtrl%MaxAngle,PredVals,VectIntReq%D, &
+                   ValSt%D,IntCDispl%D,Print2)
            IF(DoRepeat) THEN
              VectIntAux%D=VectIntReq%D-ValSt%D  
              CALL MapAngleDispl(IntCs,VectIntAux%D)
@@ -2327,14 +2350,15 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE CheckBigStep(IRep,IntCs,DoRepeat,MaxStre,MaxAngle,VectIntReq, &
-                           ValSt,IntCDispl,Print2)
+   SUBROUTINE CheckBigStep(IRep,IntCs,DoRepeat,MaxStre,MaxAngle,PredVals, &
+                           VectIntReq,ValSt,IntCDispl,Print2)
      TYPE(INTC)                :: IntCs
-     REAL(DOUBLE),DIMENSION(:) :: VectIntReq,ValSt,IntCDispl
+     REAL(DOUBLE),DIMENSION(:) :: VectIntReq,ValSt,IntCDispl,PredVals
      REAL(DOUBLE)              :: MaxStre,MaxAngle,Crit,Conv
-     REAL(DOUBLE)              :: MaxConv,MaxDispl,Fact
+     REAL(DOUBLE)              :: MaxConv,MaxDispl,Fact,Rigid
      LOGICAL                   :: DoRepeat,Print2
      INTEGER                   :: I,IRep,IMax
+     TYPE(DBL_VECT)            :: DReq,DReqAct
      !
      Fact=1.01D0
      IMax=1
@@ -2343,6 +2367,17 @@ CONTAINS
      DO I=1,IntCs%N
        IF(.NOT.IntCs%Active%L(I)) CYCLE
        IF(IntCs%Def%C(I)(1:4)=='CART') CYCLE
+       !
+       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+         Crit=Fact*MaxStre
+       ELSE
+         Crit=Fact*MaxAngle
+       ENDIF
+       IF(ABS(IntCDispl(I))>Crit) THEN
+         IMax=I
+         MaxDispl=IntCDispl(I)
+         EXIT
+       ENDIF
        IF(ABS(IntCDispl(I))>ABS(MaxDispl)) THEN
          IMax=I
          MaxDispl=IntCDispl(I)
@@ -2360,8 +2395,27 @@ CONTAINS
        MaxConv=180.D0/PI
      ENDIF
      !
+     ! Rigidity
+     !
+     CALL New(DReq,IntCs%N) 
+     CALL New(DReqAct,IntCs%N) 
+    !DReq%D=VectIntReq-ValSt
+     DReq%D=PredVals-ValSt
+     DReqAct%D=VectIntReq-IntCs%Value%D
+     CALL MapAngleDispl(IntCs,DReq%D) 
+     CALL MapAngleDispl(IntCs,DReqAct%D) 
+     Rigid=DOT_PRODUCT(DReqAct%D,DReqAct%D)/DOT_PRODUCT(DReq%D,DReq%D)
+    !Rigid=DOT_PRODUCT(DReq%D,IntCDispl)/ &
+    !      (SQRT(DOT_PRODUCT(DReq%D,DReq%D))* &
+    !       SQRT(DOT_PRODUCT(IntCDispl,IntCDispl)))
+     CALL Delete(DReq) 
+     CALL Delete(DReqAct) 
+     !
      IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
+   ! IF(Rigid>0.05D0) DoRepeat=.TRUE.
      IF(Print2) THEN
+       WRITE(*,*) 'Rigidity= ',Rigid
+       WRITE(Out,*) 'Rigidity= ',Rigid
        IF(DoRepeat) THEN
          WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
          WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
@@ -2542,19 +2596,21 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE)                :: Fact,Norm
      !
+   ! ! In the standard version A is along X, B in XY, C general
+   ! ! thus projection of rotation is very simple
+   ! !
+   ! DCarts(2:3)=Zero
+   ! DCarts(6)=Zero
+   ! RETURN
+     !
      !The lines below refer to a situation, where 
      ! all coordinates of the lattice vectors are allowed to change
      ! while still maintaining a no-rotation framework 
      !
-     ! only space of rotations is in P, space of constraints is not
+     ! only counter space of rotations is in P, 
+     ! space of constraints is not
      CALL GetPBCProj(PBCDim,P,Carts_O=Carts)
      CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
-     !
-     ! In the standard version A is along X, B in XY, C general
-     ! thus projection of rotation is very simple
-     !
-   ! DCarts2(2:3)=Zero
-   ! DCarts2(6)=Zero
      !
      Norm=DOT_PRODUCT(DCarts,DCarts)
      Fact=DOT_PRODUCT(DCarts2,DCarts2)
@@ -2586,7 +2642,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:)  , OPTIONAL :: Carts_O
      !
      ! This subroutine prepares the projection matrix
-     ! that refers to the counterspace of the lattice parameters
+     ! that refers to the counterspace of the lattice rotations
      ! in Cartesian representation
      !
      XYZ(1:3,1)=Zero
@@ -3657,7 +3713,7 @@ CONTAINS
      TYPE(BMATR)                 :: B
      INTEGER                     :: I,J,PBCDim
      !
-     ! Get projector to constraints
+     ! Get projector to counterspace of lattice rotations
      !
      CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
      DO I=1,IntCs%N
@@ -4709,16 +4765,18 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE RedundancyOff(Displ,SCRPath,Print)
+   SUBROUTINE RedundancyOff(Displ,SCRPath,Print,Messg_O)
      REAL(DOUBLE),DIMENSION(:) :: Displ
      REAL(DOUBLE)              :: Perc 
      TYPE(INT_VECT)            :: ISpB,JSpB,IGc,JGc
      TYPE(DBL_VECT)            :: ASpB,AGc
      TYPE(Cholesky)            :: CholData
-     INTEGER                   :: NIntC,NCart
+     INTEGER                   :: NIntC,NCart,I
      TYPE(DBL_VECT)            :: Vect1,Displ2
      INTEGER                   :: Print
      CHARACTER(LEN=*)          :: SCRPath
+     CHARACTER(LEN=*),OPTIONAL :: Messg_O
+     CHARACTER(LEN=DCL)        :: Messg
      !
 write(*,*) 'RedundancyOff hardwired to return'
 return
@@ -4737,11 +4795,20 @@ return
      !
      Perc=DOT_PRODUCT(Displ,Displ2%D)/DOT_PRODUCT(Displ2%D,Displ2%D) 
      Perc=(One-ABS(Perc))*100.D0
-     IF(Print>=DEBUG_GEOP_MAX) THEN
-       WRITE(*,100) Perc
-       WRITE(Out,100) Perc
+     IF(PRESENT(Messg_O)) THEN
+       Messg=TRIM(Messg_O)// &
+         " Percentage of Redundancy projected out= " &
+         //TRIM(IntToChar(INT(Perc)))
+     ELSE
+       Messg= &
+         " Percentage of Redundancy projected out= " &
+         //TRIM(IntToChar(INT(Perc)))
      ENDIF
-100  FORMAT("Percentage of Redundancy projected out= ",F8.2)
+     IF(Print>=DEBUG_GEOP_MAX) THEN
+       WRITE(*,*) TRIM(Messg)
+       WRITE(Out,*) TRIM(Messg)
+     ENDIF
+100  FORMAT(F8.2)
      !
      CALL Delete(Displ2)
      CALL Delete(Vect1)

@@ -694,14 +694,14 @@ CONTAINS
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      CALL GetLattGrads(CartGrad%D(NCart-8:NCart),XYZ,Gopt%LattIntC%Grad,PBCDim)
    ! CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
- !   CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
- !   CALL New(Carts,NCart)
- !   CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
- !   IF(GOpt%TrfCtrl%DoTranslOff) &
- !     CALL TranslsOff(CartGrad%D(1:NCart-9),Print2)
- !   IF(GOpt%TrfCtrl%DoRotOff) &
- !     CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
- !   CALL Delete(Carts)
+     CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
+     CALL New(Carts,NCart)
+     CALL CartRNK2ToCartRNK1(Carts%D,XYZ)
+     IF(GOpt%TrfCtrl%DoTranslOff) &
+       CALL TranslsOff(CartGrad%D(1:NCart-9),Print2)
+     IF(GOpt%TrfCtrl%DoRotOff) &
+       CALL RotationsOff(CartGrad%D,Carts%D,Print2,PBCDim)
+     CALL Delete(Carts)
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
@@ -903,7 +903,7 @@ CONTAINS
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
    !                      GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit, &
    !                      PBCDim,Print)
-     CALL RedundancyOff(Displ%D,SCRPath,Print)  
+   ! CALL RedundancyOff(Displ%D,SCRPath,Print)  
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      PredVals%D=IntCs%Value%D+Displ%D
      !
@@ -988,7 +988,7 @@ CONTAINS
        CALL PrtIntCoords(IntCs,Grad%D,&
          'Internal Coordinate forces',PBCDim_O=PBCDim)
      ENDIF
-     CALL RedundancyOff(Grad%D,SCRPath,Print)
+     CALL RedundancyOff(Grad%D,SCRPath,Print,Messg_O='IntC Grads')
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Grad%D,SCRPath,Print2)
      !
      CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
@@ -1002,8 +1002,9 @@ CONTAINS
      !
    ! CALL CutOffDispl(Displ%D,IntCs, &
    !                  GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-     CALL CutOffDispl(Displ%D,IntCs,0.05D0,0.05D0)
-     CALL RedundancyOff(Displ%D,SCRPath,Print)  
+    !CALL CutOffDispl(Displ%D,IntCs,0.05D0,0.05D0)
+     CALL CutOffDispl(Displ%D,IntCs,0.30D0,0.30D0)
+   ! CALL RedundancyOff(Displ%D,SCRPath,Print)  
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      ! 
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&

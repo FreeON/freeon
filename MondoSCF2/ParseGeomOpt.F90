@@ -103,7 +103,7 @@ MODULE ParseGeomOpt
      ENDIF
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
       !GOpt%CoordCtrl%MaxStre=100.000D0 !default value
-       GOpt%CoordCtrl%MaxStre=0.05D0*AngstromsToAu
+       GOpt%CoordCtrl%MaxStre=0.10D0*AngstromsToAu
      ELSE
        GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAu
      ENDIF
