@@ -1,17 +1,20 @@
 SUBROUTINE HrrKet(T,BD,N,SLDis,LenB,NumB,LenK,IType)
-  USE DerivedTypes
-  USE GlobalScalars
-  IMPLICIT NONE
-  INTEGER       :: N,LenB,NumB,LenK,IType,NNumB
-  INTEGER       :: I,Ioff
-  INTEGER       :: SLDis(N)
-  REAL(DOUBLE)  :: T(N*LenB,LenK)
-  REAL(DOUBLE)  :: TM(100)
-  REAL(DOUBLE)  :: BD(*)
-  REAL(DOUBLE)  :: x,y,z
+ USE DerivedTypes
+ USE GlobalScalars
+ USE InOut
+ IMPLICIT NONE
+ INTEGER       :: N,LenB,NumB,LenK,IType,NNumB
+ INTEGER       :: I,Ioff
+ INTEGER       :: SLDis(N)
+ REAL(DOUBLE)  :: T(N*LenB,LenK)
+ REAL(DOUBLE)  :: TM(100)
+ REAL(DOUBLE)  :: BD(*)
+ REAL(DOUBLE)  :: x,y,z
 
-  NNumB=N*NumB
+ NNumB=N*NumB
+
  SELECT CASE(IType)
+ CASE ( 101)
  CASE ( 201)
  CASE ( 202)
    DO I=1,NNumB
@@ -777,6 +780,6 @@ SUBROUTINE HrrKet(T,BD,N,SLDis,LenB,NumB,LenK,IType)
     T(I,   100)=TM(   100)
    ENDDO
  CASE DEFAULT
- !  insert halt statement here
+   CALL Halt('Illegal IType in HrrKet')
  END SELECT
  END SUBROUTINE HrrKet

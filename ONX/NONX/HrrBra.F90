@@ -1,14 +1,20 @@
 SUBROUTINE HrrBra(U,T,x,y,z,N,LenBi,LenBf,NumK,IType)
-  USE DerivedTypes
-  USE GlobalScalars
-  USE InOut
-  IMPLICIT NONE
-  INTEGER       :: I,J,N,LenBi,LenBf,NumK,IType
-  REAL(DOUBLE)  :: U(N,LenBi,NumK)
-  REAL(DOUBLE)  :: T(N,LenBf,NumK)
-  REAL(DOUBLE)  :: x,y,z
+ USE DerivedTypes
+ USE GlobalScalars
+ USE InOut
+ IMPLICIT NONE
+ INTEGER       :: I,J,N,LenBi,LenBf,NumK,IType
+ REAL(DOUBLE)  :: U(N,LenBi,NumK)
+ REAL(DOUBLE)  :: T(N,LenBf,NumK)
+ REAL(DOUBLE)  :: x,y,z
 
  SELECT CASE(IType)
+ CASE ( 101)
+   DO J=1,NumK
+   DO I=1,N
+    T(I,1,J)=U(I,1,J)
+   ENDDO
+   ENDDO
  CASE ( 201)
    DO J=1,NumK
    DO I=1,N
