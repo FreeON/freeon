@@ -258,6 +258,7 @@ MODULE ControlStructures
   TYPE GeomOpt
      INTEGER                         :: Optimizer
      LOGICAL                         :: DoGradNorm
+     LOGICAL                         :: Pictures  
      TYPE(CoordCtrl)                 :: CoordCtrl
      TYPE(TrfCtrl)                   :: TrfCtrl
      TYPE(Hessian)                   :: Hessian

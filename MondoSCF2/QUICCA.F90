@@ -803,7 +803,7 @@ CONTAINS
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl, &
                        PredVals,Displ,Path,SCRPath,NCart,iGEO, &
-                       DoNorm,MixMat_O,PrtFits_O)
+                       DoNorm,PrtFits,MixMat_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
@@ -820,10 +820,7 @@ CONTAINS
      TYPE(INT_VECT)             :: NDegsT   
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL:: MixMat_O
      LOGICAL                    :: PrtFits,DoNorm
-     LOGICAL,OPTIONAL           :: PrtFits_O
      !
-     PrtFits=.FALSE.
-     IF(PRESENT(PrtFits_O)) PrtFits=PrtFits_O
      NIntC=IntCs%N   
      NDim=SIZE(IntCGrads,2)
      IF(PRESENT(MixMat_O)) THEN

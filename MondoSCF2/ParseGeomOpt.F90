@@ -47,6 +47,13 @@ MODULE ParseGeomOpt
        GOpt%DoGradNorm=.TRUE.
      ENDIF
      !
+     ! Parse for printing pictures of fits
+     !
+     GOpt%Pictures=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_Pictures)) THEN
+       GOpt%Pictures=.TRUE.
+     ENDIF
+     !
      ! Parse for energy-back-tracking
      !
      GOpt%GConvCrit%DoAtomBackTr=.TRUE.
