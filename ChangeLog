@@ -1,3 +1,42 @@
+2003-05-26 20:01  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GDIIS.F90, GeomOptKeys.F90,
+	InCoords.F90, Optimizer.F90, ParseExtraCoords.F90,
+	ParseGeomOpt.F90, ParseGeometries.F90, PunchHDF.F90: A number of
+	modifications to allow works with Lagrangian multipliers in
+	geometry optimization. Also a few new subroutines added, to
+	generate data for Lagrange multiplicators related operations.
+	SRStep is cleaned up and called now RelaxGeom.
+
+2003-05-26 19:47  nemeth
+
+	* MondoMods/: DerivedTypes.F90, InOut.F90, MemMan.F90: New
+	quantities in CRDS, related to Lagrangian multipliers.
+
+2003-05-26 19:46  nemeth
+
+	* MondoMods/PrettyPrint.F90: Some duplications reduced.
+
+2003-05-26 19:46  nemeth
+
+	* MondoMods/CholFact.F90: Sparse 1x1 blocked matrix addition added,
+	partly based on Matt's previous code, adapted to F90.
+
+2003-05-23 09:49  mchalla
+
+	* OneE/MMA/: Omega1.Inc, Omega2.Inc: These are include files
+	containing explicit source for the evaluation of the ECP angular
+	integrals Omega1 and Omega2.
+
+2003-05-22 17:22  mchalla
+
+	* OneE/MMA/Omega2Gen.m: MMA code to generate summed ECP angular
+	integrals of type 2.
+
+2003-05-22 11:29  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-05-22 11:27  mchalla
 
 	* OneE/MMA/: Omega1Gen.m, PseudopotentialTypeOne.nb: Notebooks and
