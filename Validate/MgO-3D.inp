@@ -1,0 +1,39 @@
+<BeginOptions>
+
+MPIInvoke="mpirun"
+MPIProcessors=8
+MPIProcFlag="-np"
+MPISpatialProc=8
+MPIMachineFlag="--nper"
+MPIMachineFile="2"
+
+Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
+Charge=0
+Multiplicity=1
+DebugAll=(MaxDebug,CheckSums,MaxGeOp)
+Guess=SuperPos
+SCFMethod=(RH,RH)
+BasisSets=(User2,User2)
+ModelChem=(HF,HF)
+Accuracy=(loose,tight)
+PBC=(T,T,F)
+Periodic=(FracCoord)
+SCFConvergence=(DIIS,DIIS)
+<EndOptions>
+
+<BeginPeriodic>
+4.2000000000 4.2000000000 4.2000000000 90.0000 90.0000 90.0000
+<EndPeriodic>
+
+ <BeginGeometry>
+ Mg     0.0000000000     0.0000000000     0.0000000000
+ O      0.5000000000     0.5000000000     0.5000000000
+ Mg     0.0000000000     0.5000000000     0.5000000000
+ O      0.5000000000     0.0000000000     0.0000000000
+ Mg     0.5000000000     0.0000000000     0.5000000000
+ O      0.0000000000     0.5000000000     0.0000000000
+ Mg     0.5000000000     0.5000000000     0.0000000000
+ O      0.0000000000     0.0000000000     0.5000000000
+ <EndGeometry>
+
+
