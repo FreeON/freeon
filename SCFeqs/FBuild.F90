@@ -65,6 +65,7 @@ PROGRAM FockNGrueven
         CALL SetEq(F,Tmp1)
      ENDIF
      CALL Delete(K)
+#ifdef !PARALLEL
   ELSE
      IF(PrintFlags%Int==DEBUG_INTEGRAL)THEN
         ! This is a full dump run, with output of all matrices
@@ -103,6 +104,7 @@ PROGRAM FockNGrueven
         CLOSE(UNIT=Tmp,STATUS='KEEP')
         STOP ! Done for good and all
      ENDIF
+#endif
   ENDIF
 !
   CALL Put(F,TrixFile('F',Args,0))
