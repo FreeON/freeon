@@ -336,7 +336,11 @@ CONTAINS
 !
 !   Continue On
 !
-    IF(KFound/=BS%NKind)RETURN
+    IF(KFound/=BS%NKind) THEN
+       WRITE(*,*) 'ParseBasis: PROBLEM <KFound/=BS%NKind>'
+       WRITE(*,*) 'ParseBasis: The basis set file may not contain the desired atoms.'
+       RETURN
+    ENDIF
     ! Computing basis set indexing
     CALL BSetIndx(BS)
     ! Normalize the primitives
