@@ -36,6 +36,7 @@ C           X to be slightly outside interval (-1,+1).  (WRB)
 C   920501  Reformatted the REFERENCES section.  (WRB)
 C***END PROLOGUE  DCSEVL
       DOUBLE PRECISION B0, B1, B2, CS(*), ONEPL, TWOX, X, D1MACH
+      INTEGER I,N,NI
       LOGICAL FIRST
       SAVE FIRST, ONEPL
       DATA FIRST /.TRUE./

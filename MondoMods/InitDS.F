@@ -34,7 +34,8 @@ C   891115  REVISION DATE from Version 3.2
 C   891214  Prologue converted to Version 4.0 format.  (BAB)
 C   900315  CALLs to XERROR changed to CALLs to XERMSG.  (THJ)
 C***END PROLOGUE  INITDS
-      DOUBLE PRECISION OS(*)
+      DOUBLE PRECISION INITDS,OS(*),ERR
+      INTEGER NOS,ETA,I,II
 C***FIRST EXECUTABLE STATEMENT  INITDS
       IF (NOS .LT. 1) 
      > STOP 'INITDS Number of coefficients is less than 1'

@@ -18,7 +18,7 @@ MODULE BraBloks
 !
   SUBROUTINE NewBraBlok(BS,Gradients_O)
     TYPE(BSET) :: BS
-    INTEGER    :: K,NBF
+    INTEGER    :: K,NBF,L,M,N,LMN
     LOGICAL, OPTIONAL :: Gradients_O
 !----------------------------------------------------------------
 !   Find the biggest bf block
@@ -74,9 +74,9 @@ MODULE BraBloks
     REAL(DOUBLE),DIMENSION(3) :: PA,PB
     INTEGER           :: CFA,PFA,KA,CFB,PFB,KB
     INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB
-    INTEGER           :: IA,IB,LAB,MAB,NAB,LMN
+    INTEGER           :: IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
-    REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,MaxAmp
+    REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,MaxAmp,Fx,Fy,Fz
 !---------------------------------------------------------------------------------
     KA=Prim%KA
     KB=Prim%KB
