@@ -82,6 +82,10 @@ MODULE SetSCFs
          CALL Put(MaxBlks,'maxblks',Tag_O=CSet)
          CALL Put(MaxNon0,'maxnon0',Tag_O=CSet)
 #ifdef PARALLEL
+         CALL New(BSiz,NAtoms)
+         CALL New(OffS,NAtoms)
+         CALL Get(BSiz,'atsiz',Tag_O=CSet)
+         CALL Get(OffS,'atoff',Tag_O=CSet)
 !-----------------------------------------------------------
 !        Compute and set limits of the domain decomposition
 !
@@ -94,7 +98,7 @@ MODULE SetSCFs
          DO K=0,NPrc-1
             MaxAtmsNode=MAX(MaxAtmsNode,End%I(K)-Beg%I(K)+1)
             MaxBaseNode=MAX(MaxBaseNode,                            & 
-                            SUM(Ctrl%BSiz(I)%I(Beg%I(K):End%I(K)))  &
+                            SUM(BSiz%I(Beg%I(K):End%I(K)))  &
                            )
          ENDDO
 
@@ -114,6 +118,8 @@ MODULE SetSCFs
 !
          CALL Delete(Beg)
          CALL Delete(End)
+         CALL Delete(BSiz)
+         CALL Delete(OffS)
 #endif
 !------------------------------------------------------------
 !        Debug statements
@@ -195,20 +201,20 @@ MODULE SetSCFs
 !        If NPrc==2^p, should use bisection instead. 
 !        -- See ORB.F90 for work in progress...
 !
-         NBasF=SUM(Ctrl%BSiz(ISet)%I(1:NAtoms)) 
+         NBasF=SUM(BSiz%I(1:NAtoms)) 
          Beg%I(0)=1
          End%I(NPrc-1)=NAtoms
          DO IPrc=0,NPrc-2
 !---------------------------------------------------------------------
 !           Compute running average to section
 !
-            NAtsAv=DBLE(SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):NAtoms))) &
+            NAtsAv=DBLE(SUM(BSiz%I(Beg%I(IPrc):NAtoms))) &
                   /DBLE(NPrc-IPrc)
 !--------------------------------------------------------------------
 !           Forcast Beg and End for (de/inc)rements of (+/- 1) 
 !
             DO K=Beg%I(IPrc),NAtoms
-               IF(SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):K))>=NAtsAv)THEN
+               IF(SUM(BSiz%I(Beg%I(IPrc):K))>=NAtsAv)THEN
                   End2(Pls)=K
                   EXIT            
                ENDIF
@@ -218,14 +224,14 @@ MODULE SetSCFs
             Beg3(Mns)=End2(Mns)+1
             End3(Pls,Pls)=NAtoms            
             DO K=Beg3(Pls),NAtoms   
-               IF(SUM(Ctrl%BSiz(ISet)%I(Beg3(Pls):K))>=NAtsAv)THEN
+               IF(SUM(BSiz%I(Beg3(Pls):K))>=NAtsAv)THEN
                   End3(Pls,Pls)=K
                   EXIT            
                ENDIF 
             ENDDO
             End3(Pls,Mns)=End3(Pls,Pls)-1
             DO K=Beg3(Mns),NAtoms    
-               IF(SUM(Ctrl%BSiz(ISet)%I(Beg3(Mns):K))>=NAtsAv)THEN
+               IF(SUM(BSiz%I(Beg3(Mns):K))>=NAtsAv)THEN
                   End3(Mns,Pls)=K
                   EXIT            
                ENDIF
@@ -237,25 +243,25 @@ MODULE SetSCFs
 !           iteration
 !           
             Dv(Pls,Pls)= &
-              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Pls)))) &
-             +ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Pls):End3(Pls,Pls)))) 
+              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Pls)))) &
+             +ABS(NAtsAv-SUM(Bsiz%I(Beg3(Pls):End3(Pls,Pls)))) 
             Dv(Pls,Mns)= &
-              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Pls))))   &
-             +ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Pls):End3(Pls,Mns)))) 
+              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Pls))))   &
+             +ABS(NAtsAv-SUM(Bsiz%I(Beg3(Pls):End3(Pls,Mns)))) 
             Dv(Mns,Pls)= &
-              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Mns))))   &
-             +ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Mns):End3(Mns,Pls)))) 
+              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Mns))))   &
+             +ABS(NAtsAv-SUM(Bsiz%I(Beg3(Mns):End3(Mns,Pls)))) 
             Dv(Mns,Mns)= &
-              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Mns))))   &
-             +ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Mns):End3(Mns,Mns)))) 
+              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Mns))))   &
+             +ABS(NAtsAv-SUM(Bsiz%I(Beg3(Mns):End3(Mns,Mns)))) 
 !write(*,*)' 0th ', &
-!              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Pls)))),   &
-!              ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End2(Mns))))   
+!              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Pls)))),   &
+!              ABS(NAtsAv-SUM(Bsiz%I(Beg%I(IPrc):End2(Mns))))   
 !write(*,*)' 1st ', &
-!             ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Pls):End3(Pls,Pls)))) ,&
-!             ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Pls):End3(Pls,Mns)))) ,&
-!             ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Mns):End3(Mns,Pls)))) ,&
-!             ABS(NAtsAv-SUM(Ctrl%BSiz(ISet)%I(Beg3(Mns):End3(Mns,Mns)))) 
+!             ABS(NAtsAv-SUM(Bsiz%I(Beg3(Pls):End3(Pls,Pls)))) ,&
+!             ABS(NAtsAv-SUM(Bsiz%I(Beg3(Pls):End3(Pls,Mns)))) ,&
+!             ABS(NAtsAv-SUM(Bsiz%I(Beg3(Mns):End3(Mns,Pls)))) ,&
+!             ABS(NAtsAv-SUM(Bsiz%I(Beg3(Mns):End3(Mns,Mns)))) 
 !-------------------------------------------------------------------------------
 !           Pick the best section based on minimizing the I and I+1 deviation
 !           from the average
@@ -266,13 +272,13 @@ MODULE SetSCFs
                Beg%I(IPrc+1)=End%I(IPrc)+1
 !               WRITE(*,12)Dv(Pls,Pls),Dv(Pls,Mns),Dv(Mns,Pls),Dv(Mns,Mns), &
 !                          IPrc,Beg%I(IPrc),End%I(IPrc),                    &
-!                          SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End%I(IPrc)))
+!                          SUM(Bsiz%I(Beg%I(IPrc):End%I(IPrc)))
             ELSE
                End%I(IPrc)=MAX(Beg%I(IPrc),End2(Mns))
                Beg%I(IPrc+1)=End%I(IPrc)+1
 !               WRITE(*,13)Dv(Pls,Pls),Dv(Pls,Mns),Dv(Mns,Pls),Dv(Mns,Mns), &
 !                          IPrc,Beg%I(IPrc),End%I(IPrc) ,                   &
-!                          SUM(Ctrl%BSiz(ISet)%I(Beg%I(IPrc):End%I(IPrc)))
+!                          SUM(Bsiz%I(Beg%I(IPrc):End%I(IPrc)))
             ENDIF
          ENDDO
 !12 format('I  ++ = ',I3,', +- = ',I3,', -+ = ',I3,', -- = ',I3, &
@@ -318,7 +324,7 @@ MODULE SetSCFs
                   '['//TRIM(CBeg%C(NPrc-1))//'-'//TRIM(CEnd%C(NPrc-1)),']'
 
             DO K=0,NPrc-1
-               CBeg%C(K)=IntToChar(SUM(Ctrl%BSiz(ISet)%I(Beg%I(K):End%I(K))))
+               CBeg%C(K)=IntToChar(SUM(Bsiz%I(Beg%I(K):End%I(K))))
             ENDDO
             WRITE(Out,*)'Basis Functions per node = ',                &
                (TRIM(CBeg%C(K))//', ',K=0,NPrc-2),TRIM(CBeg%C(NPrc-1))
@@ -333,43 +339,7 @@ MODULE SetSCFs
          CALL Delete(Chr)
          CALL Delete(OffSt)
       END SUBROUTINE Decomp
-!==================================================================================
-!     Set the domain decomposition based on the overlap matrices structure 
-!==================================================================================      
-      SUBROUTINE SetDomainD(Ctrl)
-         TYPE(SCFControls)  :: Ctrl  
-         INTEGER :: I,K,Acc,BWEstim,MaxBaseNode
-!         CALL Invoke('MakeS90',(/Ctrl%Name(Ctrl%ISet)/),MPIRun_O=.TRUE.)
-!         CALL RePart(Ctrl,'S')
-         I=Ctrl%ISet
-         Acc=Ctrl%AccL(I)
-!        Use assymptotics to set the max matrix dimensions
-         MaxAtms=1+NAtoms
-         BWEstim=MIN(NAtoms, CEILING( (DBLE(NAtoms) &
-                +BandWidth(Acc)*BWDecay(Acc)*DBLE(NAtoms)**2) &
-                /(One+BWDecay(Acc)*DBLE(NAtoms)**2) ) ) 
-         MaxBlks=1+NAtoms*BWEstim
-         NBasF=Base%NBasF
-         MaxNon0=1+NBasF*(DBLE(NBasF)*DBLE(BWEstim)/DBLE(NAtoms))
-!        Re-calculate max limits per node
-         MaxAtmsNode=0
-         MaxBaseNode=0
-         DO K=0,NPrc-1
-            MaxAtmsNode=MAX(MaxAtmsNode,End%I(K)-Beg%I(K)+1)
-            MaxBaseNode=MAX(MaxBaseNode,                            & 
-                            SUM(Ctrl%BSiz(I)%I(Beg%I(K):End%I(K)))  &
-                           )
-         ENDDO
-         MaxAtmsNode=1+MaxAtmsNode
-         MaxBlksNode=1.8D0*(1+MaxAtmsNode*BWEstim)
-         MaxNon0Node=1.8D0*(1+MaxBaseNode*(DBLE(MaxBaseNode)*DBLE(BWEstim) &
-                                   /DBLE(MaxAtmsNode)))
-!        To HDF with the indecies/limits
-         CALL Put(MaxAtmsNode,'maxatmsnode_'//IntToChar(I))
-         CALL Put(MaxBlksNode,'maxblksnode_'//IntToChar(I))
-         CALL Put(MaxNon0Node,'maxnon0node_'//IntToChar(I))
-!         CALL SYSTEM('/bin/rm '//TRIM(Ctrl%Name(I))//'.S')
-      ENDSUBROUTINE SetDomainD
+
 #endif
 
       SUBROUTINE SetDist(Ctrl)

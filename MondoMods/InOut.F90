@@ -1217,18 +1217,17 @@ MODULE InOut
 !---------------------------------------------------------------------
 !     Put a DBCSR matrix
 !
-      SUBROUTINE Put_DBCSR(A,Name,PFix_O,ToHDF_O,BlksName_O,Non0Name_O)
+      SUBROUTINE Put_DBCSR(A,Name,PFix_O,BlksName_O,Non0Name_O)
          TYPE(DBCSR), INTENT(INOUT)           :: A     
          TYPE(BCSR)                           :: B                          
          CHARACTER(LEN=*),         INTENT(IN) :: Name
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O,BlksName_O,Non0Name_O
-         LOGICAL, OPTIONAL,        INTENT(IN) :: ToHDF_O
 !----------------------------------------------------------------------------
 !        KLUGE To maintain compliance with non-parallel f77 version of MONDO
 !        Ultimately, should do distributed IO
 !
          CALL SetEq(B,A)
-         CALL Put_BCSR(B,Name,PFix_O,ToHDF_O,BlksName_O,Non0Name_O)
+         CALL Put_BCSR(B,Name,PFix_O)
          CALL Delete(B)
 !        End KLUGE 
 !--------------------------------------------

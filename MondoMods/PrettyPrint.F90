@@ -531,7 +531,7 @@ MODULE PrettyPrint
                  IF(InParallel)CALL AlignNodes()
                  IF(MyId==I)THEN
                     Name2=TRIM(Name)//'['//TRIM(IntToChar(I))//']'
-                    CALL Print_DBL_RNK2(B,Name2,OutFile,Unit_O)
+                    CALL Print_DBL_RNK2(B,Name2,OutFile)
                  ENDIF
               ENDDO
               CALL Delete(B)
