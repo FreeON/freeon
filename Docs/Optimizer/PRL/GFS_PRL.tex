@@ -1,15 +1,17 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\newcommand{\commentoutB}[1]{}
-\newcommand{\commentoutA}[1]{#1}
+%%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\documentclass[prl,twocolumn,twocolumngrid,superbib]{revtex4}
+%\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-%\newcommand{\commentoutB}[1]{#1}
-%\newcommand{\commentoutA}[1]{}
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+\documentclass[prl,aps,preprint,superbib,12pt]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -52,7 +54,7 @@ biological problems with complicated hydrogen bond networks and ligand binding m
 \noindent{\bf Keywords}: geometry optimization, linear scaling, curvilinear coordinates, robust estimation
 \end{abstract}
 
-\pacs{31.15.-p,31.15.Ne,02.60.Pn, 45.10.Db, 02.40.Hw} 
+%\pacs{31.15.-p,31.15.Ne,02.60.Pn, 45.10.Db, 02.40.Hw} 
 
 \maketitle
 
@@ -835,7 +837,7 @@ Alamos National Laboratory is acknowledged.
 %\end{center}
 
 \begin{table}[h]
-\squeezetable
+%\squeezetable
 \caption{
 Number of geometry optimization steps to convergence of Baker's test set
 (up to 30 atom molecules) for the QUICCA optimizer and also for other 
@@ -942,42 +944,48 @@ data-pairs, using the model function $E_{i}=E_{\rm opt}+A*e^{-f*i}$.}
 
 \begin{center}
 Figure 1, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{picture1_2.eps}}
+%\resizebox*{5in}{!}{\includegraphics{picture1_2.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{picture1_2.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 2, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{kinasepicture.eps}}
+%\resizebox*{5in}{!}{\includegraphics{kinasepicture.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{kinasepicture.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 3, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{curve2_1.eps}}
+%\resizebox*{5in}{!}{\includegraphics{curve2_1.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{curve2_1.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 4, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{RMSCartData.eps}}
+%\resizebox*{5in}{!}{\includegraphics{RMSCartData.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{RMSCartData.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 5, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{RMSloglog.eps}}
+%\resizebox*{5in}{!}{\includegraphics{RMSloglog.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{RMSloglog.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
 Figure 6, N{\'e}meth and Challacombe \\[1.cm]
-\resizebox*{5in}{!}{\includegraphics{convfact.eps}}
+%\resizebox*{5in}{!}{\includegraphics{convfact.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{convfact.eps}}
 \end{center}
 
 }
