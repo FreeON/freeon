@@ -206,6 +206,7 @@ MODULE GammaFunctions
    USE GammaF9
    USE GammaF10
    USE GammaF11
+   USE ErfFunk
    USE ProcessControl
    IMPLICIT NONE
    INCLUDE "GammaGrid.Inc"
