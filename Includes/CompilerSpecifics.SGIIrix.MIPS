@@ -2,7 +2,7 @@
 # Preprocessor
 
 CPP       =/lib/cpp -P -C
-CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include -I$(MPI_INC)
 #CPPOPTS   =-DPOINTERS_IN_DERIVED_TYPES 
 CPPOPTS   =-DPOINTERS_IN_DERIVED_TYPES -DPARALLEL 
 
