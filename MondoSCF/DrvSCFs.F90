@@ -592,7 +592,7 @@ MODULE DrvSCFs
 !
    CONVF=1000.D0*JtoHartree/C_Avogadro
    CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
-   LJCutOff=28.D0 !!! in Bohrs
+   LJCutOff=14.D0 !!! in Angstroems
    CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
 !
    IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
@@ -622,8 +622,8 @@ MODULE DrvSCFs
 ! MM coulombenergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
 !
-!mm_coul=0.d0
-!call put(mm_coul,'mm_coul',Tag_O=CurG)
+mm_coul=0.d0
+call put(mm_coul,'mm_coul',Tag_O=CurG)
    IF(MMOnly()) Then
      CALL MM_COULOMBENERGY(Ctrl)
      CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
@@ -649,9 +649,9 @@ MODULE DrvSCFs
          CALL Angle_Energy(EAngle,GMLoc%Carts%D,Grad_Loc=GrdMM)
          CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,Grad_Loc=GrdMM)
          CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,Grad_Loc=GrdMM)
-  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 !
          CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GrdMM)
+  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
          CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL,GrdMM)
 !
      ELSE
@@ -661,9 +661,9 @@ MODULE DrvSCFs
           CALL Angle_Energy(EAngle,GMLoc%Carts%D)
           CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
           CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
-  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 !
           CALL ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff)
+  GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
           CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL)
 !
      ENDIF
@@ -698,163 +698,163 @@ MODULE DrvSCFs
 !
        CALL OpenASCII(OutFile,Out)
 !
-       write(out,*) 'MM Energies in KJ/mol:'
-       write(out,*) 'EBond= ',EBond
-       write(out,*) 'EAngle= ',EAngle
-       write(out,*) 'ETorsion= ',ETorsion
-       write(out,*) 'EOutOfPlane= ',EOutOfPlane
-       write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
-       write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
-       write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+         write(out,*) 'MM Energies in KJ/mol:'
+         write(out,*) 'EBond= ',EBond
+         write(out,*) 'EAngle= ',EAngle
+         write(out,*) 'ETorsion= ',ETorsion
+         write(out,*) 'EOutOfPlane= ',EOutOfPlane
+         write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+         write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+         write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
        IF(MMOnly()) Then
-       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-       write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
-       write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+         write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+         write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+         write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
          ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
        write(out,*) 'E_Total= ',ETOTMM
        ENDIF
 !
 ! convert covalent energies into atomic unit
 !
-       EBond=EBond*CONVF
-       EAngle=EAngle*CONVF
-       ETorsion=ETorsion*CONVF
-       EOutOfPlane=EOutOfPlane*CONVF
-       ELJ=ELJ*CONVF
-       MM_COUL=MM_COUL*CONVF
-       E_LJ_EXCL=E_LJ_EXCL*CONVF
-       E_C_EXCL=E_C_EXCL*CONVF
+         EBond=EBond*CONVF
+         EAngle=EAngle*CONVF
+         ETorsion=ETorsion*CONVF
+         EOutOfPlane=EOutOfPlane*CONVF
+         ELJ=ELJ*CONVF
+         MM_COUL=MM_COUL*CONVF
+         E_LJ_EXCL=E_LJ_EXCL*CONVF
+         E_C_EXCL=E_C_EXCL*CONVF
 !
-       write(out,*) 
-       write(out,*) 'MM Energies in atomic unit:'
-       write(out,*) 'EBond= ',EBond
-       write(out,*) 'EAngle= ',EAngle
-       write(out,*) 'ETorsion= ',ETorsion
-       write(out,*) 'EOutOfPlane= ',EOutOfPlane
-       write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
-       write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
-	       write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
-	       IF(MMOnly()) Then
-	       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-	       write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
-	       write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
-		 ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
-	       write(out,*) 'E_Total= ',ETOTMM
-		 CALL Put(ETOTMM,'ETot',StatsToChar(Ctrl%Current))
-	       ENDIF
+         write(out,*) 
+         write(out,*) 'MM Energies in atomic unit:'
+         write(out,*) 'EBond= ',EBond
+         write(out,*) 'EAngle= ',EAngle
+         write(out,*) 'ETorsion= ',ETorsion
+         write(out,*) 'EOutOfPlane= ',EOutOfPlane
+         write(out,*) 'E_Lennard_Jones    TOTAL= ',ELJ
+         write(out,*) 'E_Lennard_Jones EXCLUDED= ',E_LJ_EXCL
+         write(out,*) 'E_Lennard_Jones         = ',ELJ-E_LJ_EXCL
+       IF(MMOnly()) Then
+         write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+         write(out,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+         write(out,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+	 ETOTMM=MM_COUL+EBond+EAngle+ETorsion+EOutOfPlane+ELJ-E_LJ_EXCL-E_C_EXCL
+         write(out,*) 'E_Total= ',ETOTMM
+	 CALL Put(ETOTMM,'ETot',StatsToChar(Ctrl%Current))
+       ENDIF
 	!
-		CALL PUT(EBond,'MM_EBond',Tag_O=CurG)
-		CALL PUT(EAngle,'MM_EAngle',Tag_O=CurG)
-		CALL PUT(ETorsion,'MM_ETorsion',Tag_O=CurG)
-		CALL PUT(EOutOfPlane,'MM_EOutOfPlane',Tag_O=CurG)
-		CALL PUT(ELJ,'MM_ELJ',Tag_O=CurG)
-		CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=CurG)
-		CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=CurG)
-	!
-		CLOSE(UNIT=Out,STATUS='KEEP')
-	!
-	   END SUBROUTINE MM_ENERG
-	#endif
-	!-----------------------------------------------------
-	!
-	   SUBROUTINE Mulliken_Analysis(Ctrl)
-	     IMPLICIT NONE
-	     TYPE(Scfcontrols) :: Ctrl
-	     TYPE(BCSR)        :: Pmat,Smat,Tmat
-	     TYPE(BSET)        :: BS
-	     INTEGER           :: I,J,P,Q,S,II,JJ,SS,N,OUT
-	     TYPE(DBL_VECT)    :: Population,NuclCharge
-	     REAL(DOUBLE)      :: SUMM
-	     TYPE(ARGMT)       :: Args
-	!
-	     CALL Get(Args)
-	     CALL SetGlobalCtrlIndecies(Ctrl)
-	!
-	! Get basis set info
-	!
-	     CALL Get(BS,Tag_O=CurBase)
-	!
-	! Get BSiz and OffS
-	!
-	     NBasF=BS%NBasF
-	     PrintFlags%Mat=DEBUG_MATRICES
-	     CALL New(BSiz,natoms)
-	     CALL New(OffS,natoms)
-	     CALL Get(BSiz,'atsiz',Tag_O=CurBase)
-	     CALL Get(OffS,'atoff',Tag_O=CurBase)
-	!
-	! Get P and S matrices from HDF
-	!
-	     CALL Get(Smat,TrixFile('S',Args,Stats_O=Current))
-	     CALL Get(Pmat,TrixFile('D',Args,1,Stats_O=Current))
-	!
-	! Calc. population
-	!
-	     CALL New(Tmat)
-	     CALL Multiply(Pmat,Smat,Tmat)
-	!
-	     CALL New(Population,Tmat%Natms)
-	     Population%D(:)=Zero
-	!
-	     DO I=1,Tmat%Natms
-		   S=BSiz%I(I)
-	       DO J=Tmat%RowPt%I(I),Tmat%RowPt%I(I+1)-1
-		 P=Tmat%ColPt%I(J) ! col. index
-		 IF(I==P) THEN
-		   Q=Tmat%BlkPt%I(J) ! real array of block starts here
-		      SS=0
-		      SUMM=Zero
-		   DO JJ=1,S
-		      DO II=1,S
-		      SS=SS+1
-			IF(JJ==II) SUMM=SUMM+Tmat%MTrix%D(Q-1+SS)
-		      ENDDO
-		   ENDDO
-		      Population%D(I)=SUMM
-		 ENDIF
-	       ENDDO 
-	     ENDDO 
-	!
-	! For RHF, Population must be multiplied by two
-	!
-	     Population%D=Two*Population%D
-	!
-	! Get nuclear charges
-	!
-	     CALL New(NuclCharge,Natoms)
-	     CALL Get(NuclCharge,'atomicnumbers',Tag_O=CurGeom)
-	!
-	! Write Mulliken charges into output file and 
-	! save them into HDF
-	!
-	     CALL OpenASCII(OutFile,Out)
-	!
-	       WRITE(OUT,*)
-	       WRITE(OUT,*) 'Mulliken charges: '
-	       WRITE(OUT,100) SUM(NuclCharge%D-Population%D)
-	100  FORMAT('Total charge= ',F10.6)
-	       WRITE(OUT,*) ' Atom ','   Charge= '
-	       DO I=1,Natoms     
-		 WRITE(OUT,200) I,NuclCharge%D(I)-Population%D(I)
-	200  FORMAT(I6,F10.3)
-	       ENDDO
-	!
-	     CALL Put(Population,'Population',Tag_O='#Geom_'//TRIM(CurGeom)//'_#Base_'//CurBase//'_#Cycle'//CurCycl)
-	!
-	     CLOSE(Out)
-	!
-	     CALL Delete(NuclCharge)
-	     CALL Delete(OffS)
-	     CALL Delete(BSiz)
-	     CALL Delete(Population)
-	     CALL Delete(Tmat)
-	     CALL Delete(Smat)
-	     CALL Delete(Pmat)
-	     CALL Delete(BS)
-	!
-	   END SUBROUTINE Mulliken_Analysis
-	!
-	!-----------------------------------------------------------------------------
+       CALL PUT(EBond,'MM_EBond',Tag_O=CurG)
+       CALL PUT(EAngle,'MM_EAngle',Tag_O=CurG)
+       CALL PUT(ETorsion,'MM_ETorsion',Tag_O=CurG)
+       CALL PUT(EOutOfPlane,'MM_EOutOfPlane',Tag_O=CurG)
+       CALL PUT(ELJ,'MM_ELJ',Tag_O=CurG)
+       CALL PUT(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=CurG)
+       CALL PUT(E_C_EXCL,'E_C_EXCL',Tag_O=CurG)
+!
+CLOSE(UNIT=Out,STATUS='KEEP')
+!
+END SUBROUTINE MM_ENERG
+#endif
+!-----------------------------------------------------
+!
+   SUBROUTINE Mulliken_Analysis(Ctrl)
+     IMPLICIT NONE
+     TYPE(Scfcontrols) :: Ctrl
+     TYPE(BCSR)        :: Pmat,Smat,Tmat
+     TYPE(BSET)        :: BS
+     INTEGER           :: I,J,P,Q,S,II,JJ,SS,N,OUT
+     TYPE(DBL_VECT)    :: Population,NuclCharge
+     REAL(DOUBLE)      :: SUMM
+     TYPE(ARGMT)       :: Args
+!
+     CALL Get(Args)
+     CALL SetGlobalCtrlIndecies(Ctrl)
+!
+! Get basis set info
+!
+     CALL Get(BS,Tag_O=CurBase)
+!
+! Get BSiz and OffS
+!
+     NBasF=BS%NBasF
+     PrintFlags%Mat=DEBUG_MATRICES
+     CALL New(BSiz,natoms)
+     CALL New(OffS,natoms)
+     CALL Get(BSiz,'atsiz',Tag_O=CurBase)
+     CALL Get(OffS,'atoff',Tag_O=CurBase)
+!
+! Get P and S matrices from HDF
+!
+     CALL Get(Smat,TrixFile('S',Args,Stats_O=Current))
+     CALL Get(Pmat,TrixFile('D',Args,1,Stats_O=Current))
+!
+! Calc. population
+!
+     CALL New(Tmat)
+     CALL Multiply(Pmat,Smat,Tmat)
+!
+     CALL New(Population,Tmat%Natms)
+     Population%D(:)=Zero
+!
+     DO I=1,Tmat%Natms
+	   S=BSiz%I(I)
+       DO J=Tmat%RowPt%I(I),Tmat%RowPt%I(I+1)-1
+	 P=Tmat%ColPt%I(J) ! col. index
+	 IF(I==P) THEN
+	   Q=Tmat%BlkPt%I(J) ! real array of block starts here
+	      SS=0
+	      SUMM=Zero
+	   DO JJ=1,S
+	      DO II=1,S
+	      SS=SS+1
+		IF(JJ==II) SUMM=SUMM+Tmat%MTrix%D(Q-1+SS)
+	      ENDDO
+	   ENDDO
+	      Population%D(I)=SUMM
+	 ENDIF
+       ENDDO 
+     ENDDO 
+!
+! For RHF, Population must be multiplied by two
+!
+     Population%D=Two*Population%D
+!
+! Get nuclear charges
+!
+     CALL New(NuclCharge,Natoms)
+     CALL Get(NuclCharge,'atomicnumbers',Tag_O=CurGeom)
+!
+! Write Mulliken charges into output file and 
+! save them into HDF
+!
+     CALL OpenASCII(OutFile,Out)
+!
+       WRITE(OUT,*)
+       WRITE(OUT,*) 'Mulliken charges: '
+       WRITE(OUT,100) SUM(NuclCharge%D-Population%D)
+100  FORMAT('Total charge= ',F10.6)
+       WRITE(OUT,*) ' Atom ','   Charge= '
+       DO I=1,Natoms     
+	 WRITE(OUT,200) I,NuclCharge%D(I)-Population%D(I)
+200  FORMAT(I6,F10.3)
+       ENDDO
+!
+     CALL Put(Population,'Population',Tag_O='#Geom_'//TRIM(CurGeom)//'_#Base_'//CurBase//'_#Cycle'//CurCycl)
+!
+     CLOSE(Out)
+!
+     CALL Delete(NuclCharge)
+     CALL Delete(OffS)
+     CALL Delete(BSiz)
+     CALL Delete(Population)
+     CALL Delete(Tmat)
+     CALL Delete(Smat)
+     CALL Delete(Pmat)
+     CALL Delete(BS)
+!
+   END SUBROUTINE Mulliken_Analysis
+!
+!-----------------------------------------------------------------------------
 END MODULE
 
 
