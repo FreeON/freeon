@@ -42,7 +42,9 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     ! Print the starting coordinates and energy
-    CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+    DO iCLONE=1,C%Geos%Clones
+       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+    ENDDO
     ! Follow the gradient down hill
     iBAS=C%Sets%NBSets
     DO iGEO=1,C%Opts%NSteps
