@@ -98,7 +98,7 @@ MODULE LinAlg
    END INTERFACE
 !-------------------------------------------------------------------------------
    INTERFACE XPose
-      MODULE PROCEDURE XPose_BCSR
+      MODULE PROCEDURE XPose_BCSR,XPose_Simple
    END INTERFACE
 !-------------------------------------------------------------------------------
    INTERFACE Max
@@ -2145,6 +2145,20 @@ MODULE LinAlg
          ANNon0=Q-1
          FlOp=FlOp+Two*Op
       END SUBROUTINE FilterM_GENERIC
+
+!===============================================================================
+     SUBROUTINE XPose_Simple(M,N,A,AT)
+       INTEGER                      :: I,J,M,N,IDex,JDex
+       REAL(DOUBLE), DIMENSION(M*N) :: A,AT
+       DO I=1,N
+          DO J=1,M
+             IDex=(I-1)*M+J
+             JDex=(J-1)*N+I
+             AT(JDex)=A(IDex)
+          ENDDO
+       ENDDO
+     END SUBROUTINE XPose_Simple
+
 !===============================================================================
 !     Max block of a DBCSR matrix
 !===============================================================================
