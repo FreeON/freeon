@@ -44,7 +44,12 @@ GObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
 	   IntSSSS.o  GONX2ComputDK.o GONX2.o ONX2List.o
 #
-ReleaseFiles= 
+ReleaseFiles=QSDis.x PartDrv.x ONXParameters.x ONXInit.x ONXGet.x   \
+	  ONXFillOut.x Stats.x ONXRng.x \
+	  ONX2F77.x ONX2DataType.x ONXCtrSclg.x \
+	  IntSSSS.x  ONX2List.x ONX2ComputK.x ONX2.x \
+	  ONX2F77.x  GONX2ComputDK.x GONX2.x ONX2List.x
+#
 #$(LAPACK)
 #VW Libs =  $(F90_LIBRARIES) -lTwoE $(LAPACK)
 
@@ -59,6 +64,7 @@ GONX2:	$(GObjects)
 	mv GONX2 $(MONDO_EXEC)/GONX
 #
 release:purge $(ReleaseFiles)
+	rm -f *.F*
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
