@@ -151,10 +151,13 @@ PROGRAM P2Use
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      ! Get the old AO-DM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-     ! Purify P
-     CALL Get(S,TrixFile('S',Args))
-     CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-     CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+!     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog,Unit_O=6)
+     !WHAT THE FUCK IS THIS ? ? 
+!     CALL Get(S,TrixFile('S',Args))
+!     CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+!     CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+!     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog,Unit_O=6)
+
      ! IO for the non-orthogonal P 
      CALL Put(P,TrixFile('D',Args,0))
      CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
@@ -169,9 +172,9 @@ PROGRAM P2Use
      HDF_CurrentID=H5GroupID
      ! Clean Up
      CALL Delete(P)
-     CALL Delete(S)
-     CALL Delete(Tmp1)
-     CALL Delete(Tmp2)
+!     CALL Delete(S)
+!     CALL Delete(Tmp1)
+!     CALL Delete(Tmp2)
   !  Restarting with BasisSet Change
   CASE('RestartBasisSwitch') 
      ! Close Current Group
