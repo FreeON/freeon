@@ -14,7 +14,7 @@ Accuracy =(loose,good)
 Geometry=(InAngstroms,NoOrder) 
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
 PFFLayers=1
-PFFMaxEll=8
+PFFMaxEll=16
 <EndOptions>
 
 <BeginPeriodic>
