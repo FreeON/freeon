@@ -64,29 +64,14 @@ PROGRAM ONX
   CALL Get(OffS,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
 !----------------------------------------------
-! Set up the appropriate action
-!----------------------------------------------
-  IF(Args%C%C(2)=='Core') THEN
-     iSwitch=0
-  ELSEIF(Args%C%C(2)=='Direct') THEN
-     iSwitch=1
-  ELSEIF(Args%C%C(2)=='Switch') THEN
-     iSwitch=2
-  ELSEIF(Args%C%C(2)=='InkFok') THEN
-     iSwitch=3
-  ELSE
-     CALL MondoHalt(-100,' Inappropriate Action in ONX:'//Args%C%C(2))
-  ENDIF
-!----------------------------------------------
 ! Get the Density Matrix
 !----------------------------------------------
-  IF(iSwitch==1) THEN
-     CALL Get(D,TrixFile('D',Args,0))
-  ELSEIF(iSwitch==2) THEN
-     CALL Get(D,TrixFile('D',Args,0))
-  ELSEIF(iSwitch==3) THEN
+  IF(SCFActn=='InkFok')THEN
      CALL Get(D,TrixFile('DeltaD',Args,0))
+  ELSE
+     CALL Get(D,TrixFile('D',Args,0))
   ENDIF
+!
   CALL TrnMatBlk(BSp,GMp,D)
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
   CALL Get(OffS,'atoff',Tag_O=CurBase)
