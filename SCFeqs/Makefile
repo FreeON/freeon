@@ -42,7 +42,7 @@ SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
 TS4_Objs   = FillPBlok.o TS4.o  DenMatMethods.o
 PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
-Gues_Objs  = FillPBlok.o P2Use.o 
+Gues_Objs  = FillPBlok.o P2Use.o DenMatMethods.o
 Stat_Objs  = SCFStatus.o 
 RStat_Objs = CPSCFStatus.o
 RHEq_Objs  = RHeqs.o  DenMatMethods.o
@@ -172,7 +172,7 @@ DIIS.o:		            $(MONDO_LIB)/libMondoMods.a
 DDIIS.o:		    $(MONDO_LIB)/libMondoMods.a
 TC2Response.o: DenMatMethods.o	$(MONDO_LIB)/libMondoMods.a
 FBuild.o:	            $(MONDO_LIB)/libMondoMods.a
-P2Use.o:	FillPBlok.o $(MONDO_LIB)/libMondoMods.a
+P2Use.o:	DenMatMethods.o FillPBlok.o $(MONDO_LIB)/libMondoMods.a 
 FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
 RHeqs.o:		    $(MONDO_LIB)/libMondoMods.a
 SCFStatus.o:                $(MONDO_LIB)/libMondoMods.a

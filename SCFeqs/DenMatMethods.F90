@@ -581,6 +581,28 @@ CONTAINS
          CALL Filter(P,Tmp1)
       ENDIF
     END SUBROUTINE SP2
+
+    SUBROUTINE AOSP2(P,S,P2,T1,Norm)
+#ifdef PARALLEL
+      TYPE(DBCSR)   :: P,S,P2,T1
+#else
+      TYPE(BCSR)   :: P,S,P2,T1
+#endif
+      REAL(DOUBLE) :: Norm,CR
+!-------------------------------------------------------------------------------
+      CALL Multiply(S,P,T1)             ! T1=S.P
+      CALL Multiply(P,T1,P2)            ! P2=P.S.P
+      TrP=Trace(T1)                     ! Tr(S.P)
+      CR=TrP-Norm                       ! CR = Occupation error criteria
+      IF(CR>0)THEN                      ! Over occupied
+         CALL Filter(P,P2)              ! P = P.S.P
+      ELSE                              ! Under occupied
+         CALL Multiply(P,Two) 
+         CALL Multiply(P2,-One)
+         CALL Add(P,P2,T1)              ! P = 2P-P.S.P
+         CALL Filter(P,T1)
+      ENDIF
+    END SUBROUTINE AOSP2
 !-------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------

@@ -19,6 +19,7 @@ PROGRAM P2Use
 #ifdef PARALLEL
   USE MondoMPI
 #endif
+  USE DenMatMethods
   IMPLICIT NONE
   TYPE(ARGMT)                   :: Args
   TYPE(BSET)                    :: BS,OldBS
@@ -31,15 +32,15 @@ PROGRAM P2Use
                                 :: S,P,X,T0,T1,T2,S1,P0,dP,dS
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
-       DeltaP,OldDeltaP,DensityDev,dN,MaxGDIff,GDIff,OldN,M
+  REAL(DOUBLE)                  :: Scale,Fact,ECount, &
+       DeltaP,OldDeltaP,DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA, &
        NPur,PcntPNon0,OldFileID,ICart
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present,SameBasis,SameGeom
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
-!------------------------------------------------------------------------------- 
+  !------------------------------------------------------------------------------- 
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   Cycl=IntToChar(Args%I%I(1))
@@ -80,8 +81,8 @@ PROGRAM P2Use
         MaxGDiff=Zero
         DO ICart=1,GM%Natms
            GDiff=ABS(GM%Carts%D(1,ICart)-OldGM%Carts%D(1,ICart)) + &
-                 ABS(GM%Carts%D(2,ICart)-OldGM%Carts%D(2,ICart)) + &
-                 ABS(GM%Carts%D(3,ICart)-OldGM%Carts%D(3,ICart)) 
+                ABS(GM%Carts%D(2,ICart)-OldGM%Carts%D(2,ICart)) + &
+                ABS(GM%Carts%D(3,ICart)-OldGM%Carts%D(3,ICart)) 
            MaxGDiff=MAX(MaxGDiff,GDiff)
         ENDDO
         IF(MaxGDiff<1D-6)THEN
@@ -173,28 +174,32 @@ PROGRAM P2Use
            dN=Two*Trace(T0)-NEl
            IF(MyId==ROOT)THEN
 #else
-           dN=Two*Trace(T1,S1)-NEl
+              dN=Two*Trace(T1,S1)-NEl
 #endif
-!              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-                 Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I)))//'dN='//TRIM(DblToShrtChar(dN))
-                 CALL OpenASCII(OutFile,Out)
-                 CALL PrintProtectL(Out)
-                 WRITE(*,*)TRIM(Mssg)
-                 WRITE(Out,*)TRIM(Mssg)
-                 CALL PrintProtectR(Out)
-                 CLOSE(UNIT=Out,STATUS='KEEP')
-!              ENDIF
+              PNon0s=100.D0*DBLE(P0%NNon0)/DBLE(NBasF*NBasF)
+              !              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
+                   //'dN='//TRIM(DblToShrtChar(dN)) &
+                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
+
+              CALL OpenASCII(OutFile,Out)
+              CALL PrintProtectL(Out)
+              WRITE(*,*)TRIM(Mssg)
+              WRITE(Out,*)TRIM(Mssg)
+              CALL PrintProtectR(Out)
+              CLOSE(UNIT=Out,STATUS='KEEP')
+              !              ENDIF
 #ifdef PARALLEL
            ENDIF
 #endif
-           IF(I>6.AND.ABS(dN)>ABS(OldN))EXIT
+           IF(I>6.AND.ABS(dN)>ABS(OldN).OR.ABS(dN)>1D3)EXIT
            OldN=dN
-           IF(MOD(I,2)==0.AND.I<1)THEN
+           IF(MOD(I,2)==0.AND.I<2)THEN
               CALL Multiply(dP,Two)
               CALL Multiply(T2,-One)
               CALL Add(dP,T2,T1)
               CALL Filter(dP,T1)
-           ELSEIF(I<1)THEN
+           ELSEIF(I<2)THEN
               CALL Filter(dP,T2)
            ELSEIF(dN<0)THEN
               CALL Multiply(dP,Two)
@@ -205,9 +210,72 @@ PROGRAM P2Use
               CALL Filter(dP,T2)
            ENDIF
         ENDDO
-        CALL Add(dp,P0,T0)
-        CALL Put(T0,TrixFile('D',Args,0))     
-        CALL Put(T0,'CurrentDM',CheckPoint_O=.TRUE.)
+        IF(.TRUE.)THEN
+           !        IF(ABS(dN)>1D0)THEN
+#ifdef PARALLEL
+           IF(MyId==ROOT)THEN
+#endif
+              CALL OpenASCII(OutFile,Out)
+              CALL PrintProtectL(Out)
+              Mssg=ProcessName(Prog,'AO-DMX ')//'Failed! '//' Failed! '//' Failed! '//' Failed! '
+              WRITE(*,*)TRIM(Mssg)
+              WRITE(Out,*)TRIM(Mssg)
+              Mssg=ProcessName(Prog,'AO-DMX ')//'Dont panic... trying more stable algorithm '
+              WRITE(*,*)TRIM(Mssg)
+              WRITE(Out,*)TRIM(Mssg)
+              CALL PrintProtectR(Out)
+              CLOSE(UNIT=Out,STATUS='KEEP')
+#ifdef PARALLEL
+           ENDIF
+#endif
+           CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
+           CALL Get(T1,TrixFile('S',Args,Stats_O=Current))
+           CALL Multiply(T1,-One)
+           ! dS=S_Prev-S_Curr 
+           CALL Add(T1,T0,T2)        
+           ! Get previous density matrix 
+           CALL Get(P0,TrixFile('D',Args,-1))     
+           ! P.dS
+           CALL Multiply(P0,T2,T1)
+           ! dP=-P.dS.P
+           CALL Multiply(T1,P0,T0)
+           ! P'=P+dP
+           CALL Add(T0,P0,T1)
+           CALL Filter(P0,T1)
+           CALL Get(S1,TrixFile('S',Args))
+           OldN=BIG_DBL
+           DO I=1,20
+              CALL AOSP2(P0,S1,T0,T2,Half*DBLE(NEl))
+              dN=ABS(Two*TrP-NEl)
+#ifdef PARALLEL
+              IF(MyId==ROOT)THEN
+#endif
+                 PNon0s=100.D0*DBLE(P0%NNon0)/DBLE(NBasF*NBasF)
+                 !              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+                 Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
+                      //'dN='//TRIM(DblToShrtChar(dN)) &
+                      //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
+                 
+                 CALL OpenASCII(OutFile,Out)
+                 CALL PrintProtectL(Out)
+                 WRITE(*,*)TRIM(Mssg)
+                 WRITE(Out,*)TRIM(Mssg)
+                 CALL PrintProtectR(Out)
+                 CLOSE(UNIT=Out,STATUS='KEEP')
+                 !              ENDIF
+#ifdef PARALLEL
+              ENDIF
+#endif
+              IF(dN>OldN.AND.I>4)EXIT
+              OldN=dN
+           ENDDO
+           CALL Put(P0,TrixFile('D',Args,0))
+           CALL Put(P0,'CurrentDM',CheckPoint_O=.TRUE.)
+        ELSE
+           CALL Add(dp,P0,T0)
+           CALL Put(T0,TrixFile('D',Args,0))
+           CALL Put(T0,'CurrentDM',CheckPoint_O=.TRUE.)
+        ENDIF
         CALL ShutDown(Prog)
      ENDIF
   ELSEIF(SCFActn=='Project')THEN
@@ -261,12 +329,12 @@ PROGRAM P2Use
 
   IF(SCFActn/='GuessEqCore')THEN
 #ifdef PARALLEL
-        IF(MyId==ROOT)THEN
+     IF(MyId==ROOT)THEN
 #endif
-           INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+        INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
 #ifdef PARALLEL
-        ENDIF
-        CALL BCast(Present)
+     ENDIF
+     CALL BCast(Present)
 #endif
      IF(Present)THEN     
         CALL Get(T1,TrixFile('X',Args))   ! T1=S_new^(-1/2)
@@ -288,7 +356,7 @@ PROGRAM P2Use
   CALL Put(P,TrixFile('D',Args,0))
   CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
   CALL PPrint( P,'P['//TRIM(Cycl)//']')
-!  CALL PPrint( P,'P['//TRIM(Cycl)//']',Unit_O=6)
+  !  CALL PPrint( P,'P['//TRIM(Cycl)//']',Unit_O=6)
   CALL Plot(   P,'P_'//TRIM(Cycl))
   ! Tidy up ...
   CALL Delete(GM)
