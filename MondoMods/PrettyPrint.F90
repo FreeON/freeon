@@ -1371,8 +1371,8 @@ MODULE PrettyPrint
 10        FORMAT(I4,' ',D12.6,' ',I10)
        ENDIF
 #else
-       WRITE(PU,10)Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
-10     FORMAT(' ',D12.6,' ',I10)
+       WRITE(PU,10) Elapsed_CPUS,Elapsed_Wall
+10     FORMAT( '                        :: (CPU,WALL) = ',F16.2,' ',F16.2)
 #endif
        CALL PrintProtectR(PU)
        CLOSE(Out)
