@@ -7,11 +7,15 @@ MODULE ERIGlobals
   REAL(DOUBLE)                    :: COne,SOne,CTwo,STwo
   REAL(DOUBLE)                    :: DP2
   REAL(DOUBLE)                    :: PoleSwitch
+#ifdef NewPAC
+  REAL(DOUBLE)                    :: PrimWCoef
+  REAL(DOUBLE)                    :: PrimBeta
+#endif
   INTEGER                         :: At
   REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet
   REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetC
   REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetS
-  REAL(DOUBLE),DIMENSION(1000)     :: R
-  REAL(DOUBLE),DIMENSION(500)      :: W
-  REAL(DOUBLE),DIMENSION(0:50)     :: AuxR,G
+  REAL(DOUBLE),DIMENSION(1000)    :: R
+  REAL(DOUBLE),DIMENSION(500)     :: W
+  REAL(DOUBLE),DIMENSION(0:50)    :: AuxR,G
 END MODULE ERIGlobals
