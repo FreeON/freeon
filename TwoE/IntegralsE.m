@@ -57,7 +57,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
    Classes = { {0,0},{1,1}} 
  *)
 
-   Classes = { {0,0},{1,1}};
+   Classes = { {0,0},{1,1},{2,2}};
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -246,7 +246,7 @@ If[iell+kell>0,
       VRRSubroutine=StringJoin[VRRSubName,".F90"];
       OpenWrite[VRRSubroutine];
       WriteString[FileName,StringJoin[spaces,"! Generating (",CType[IntegralClass[{iell,iell}]],"0|",CType[IntegralClass[{kell,kell}]],"0)^(m) \n"]]; 
-      WriteString[FileName,StringJoin[spaces,"CALL ",VRRSubName,"(VRR) \n"]]; 
+       WriteString[FileName,StringJoin[spaces,"CALL ",VRRSubName,"(VRR) \n"]]; 
       PunchVRRFront[VRRSubroutine,VRRSubName,BraEll,KetEll];
       Write[VRRSubroutine,FortranAssign[o,IList,AssignReplace->oList]];
       WriteString[VRRSubroutine,StringJoin["END SUBROUTINE ",VRRSubName]];			       
