@@ -16,7 +16,7 @@ o Preliminary work on ordering algothim for load balancing
   and locality: demonstrate scaling of OneE routines in 
   both limits of Natoms/Nproc->0,Infinity
 
-Karoly/Susan:
+Karoly:
 o Gradients only transition state theory
 o SCRF,Crystal field,QM/MM for boundary conditions
 o Applications to Protein Kinase and ?
@@ -24,10 +24,10 @@ o Internal coordinates geometry optimization
 o Accelerated MD/Parallel Tempering
 
 Matt:
-x Finish validation suite and checking accuracies
-x Get front end and output formatting cleaned
+$ Finish validation suite and checking accuracies
+$ Get front end and output formatting cleaned
   >> hostname, machtype, processor info etc to outfile <<
-x Add example CSHRCs to Scripts file
+$ Add example CSHRCs to Scripts file
 $ Get QuNew geometry optimization working again
 $ Make sure density matrix extrapolation is working
 x Documentation
@@ -46,6 +46,8 @@ o Help periodifiy ONX
   molecular environs
 
 Eric:  
+x Get ONX working on SGIs and Alphas
+x Release enable makefiles 
 x Gradients
 x Explicit code
 o Switch over to new gammas
