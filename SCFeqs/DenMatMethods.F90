@@ -11,6 +11,8 @@ MODULE DenMatMethods
   USE LinAlg
   IMPLICIT NONE
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
+  REAL(DOUBLE),PARAMETER  :: Alpha_min=1.00D-2
+  REAL(DOUBLE),PARAMETER  :: GrowFac  =1.50D0
 CONTAINS
 !--------------------------------------------------------------
 !
@@ -73,13 +75,12 @@ CONTAINS
 !--------------------------------------------------------------
   SUBROUTINE SetVarThresh(MM)
     INTEGER :: MM
-    REAL(DOUBLE),SAVE :: OldThresh=0D0
-    RETURN
+    REAL(DOUBLE),SAVE :: OldThresh=0.D0
     IF(OldThresh==0D0)THEN
        OldThresh=Thresholds%Trix
-       Thresholds%Trix=1D-2*Thresholds%Trix
+       Thresholds%Trix=Alpha_min*Thresholds%Trix
     ElSE
-       Thresholds%Trix=MIN(15D-1**(MM)*Thresholds%Trix,OldThresh)
+       Thresholds%Trix=MIN((GrowFac**MM)*Alpha_min*OldThresh,OldThresh)
     ENDIF
   END SUBROUTINE SetVarThresh
 !--------------------------------------------------------------
