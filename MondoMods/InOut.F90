@@ -1233,9 +1233,9 @@ MODULE InOut
 !---------------------------------------------------------------------
 !     Put a BCSR matrix
 !
-      SUBROUTINE Put_BCSR(A,Name,PFix_O,BlksName_O,Non0Name_O,CheckPoint_O)
+      SUBROUTINE Put_BCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(BCSR),               INTENT(IN) :: A             
-         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O,BlksName_O,Non0Name_O
+         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
          CHARACTER(LEN=*),         INTENT(IN) :: Name
          LOGICAL,         OPTIONAL,INTENT(IN) :: CheckPoint_O
          CHARACTER(LEN=DEFAULT_CHR_LEN)       :: FileName
@@ -1299,12 +1299,6 @@ MODULE InOut
             WRITE(UNIT=Seq,Err=1,IOSTAT=IOS)(A%MTrix%D(i),i=1,A%NNon0)
 #endif
             CLOSE(UNIT=Seq,STATUS='KEEP')
-!--------------------------------------------
-!           KLUGE To maintain complience with old (F77) version of MONDO
-            IF(PRESENT(BlksName_O))CALL Put(A%NBlks,BlksName_O)
-            IF(PRESENT(Non0Name_O))CALL Put(A%NNon0,Non0Name_O)
-!           End KLUGE 
-!--------------------------------------------
 #ifdef PARALLEL
           ENDIF
 #endif
@@ -1315,38 +1309,31 @@ MODULE InOut
 !---------------------------------------------------------------------
 !     Get a DBCSR matrix
 !
-      SUBROUTINE Get_DBCSR(A,Name,PFix_O,FromHDF_O)
+      SUBROUTINE Get_DBCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(DBCSR),              INTENT(INOUT) :: A     
-         TYPE(BCSR)                              :: B                          
+         LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
          CHARACTER(LEN=*),         INTENT(IN)    :: Name
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
-         LOGICAL,         OPTIONAL,INTENT(IN)    :: FromHDF_O
+         TYPE(BCSR)                              :: B                          
 !----------------------------------------------------------------------------
-!        KLUGE To maintain compliance with non-parallel f77 version of MONDO
-!        Ultimately, should do distributed IO
-         CALL Get_BCSR(B,Name,PFix_O,FromHDF_O)
+         CALL Get_BCSR(B,Name,PFix_O,CheckPoint_O)
          CALL SetEq(A,B) 
          CALL Delete(B)
          A%Node=MyId
-!        End KLUGE 
-!--------------------------------------------
       END SUBROUTINE Get_DBCSR
 !---------------------------------------------------------------------
 !     Put a DBCSR matrix
 !
-      SUBROUTINE Put_DBCSR(A,Name,PFix_O,BlksName_O,Non0Name_O)
+      SUBROUTINE Put_DBCSR(A,Name,PFix_O,CheckPoint_O)
          TYPE(DBCSR), INTENT(INOUT)           :: A     
+         LOGICAL,         OPTIONAL,INTENT(IN) :: CheckPoint_O
          TYPE(BCSR)                           :: B                          
          CHARACTER(LEN=*),         INTENT(IN) :: Name
-         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O,BlksName_O,Non0Name_O
+         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: PFix_O
 !----------------------------------------------------------------------------
-!        KLUGE To maintain compliance with non-parallel f77 version of MONDO
-!        Ultimately, should do distributed IO
-!
          CALL SetEq(B,A)
-         CALL Put_BCSR(B,Name,PFix_O)
+         CALL Put_BCSR(B,Name,PFix_O,CheckPoint_O)
          CALL Delete(B)
-!        End KLUGE 
 !--------------------------------------------
       END SUBROUTINE Put_DBCSR
 #endif

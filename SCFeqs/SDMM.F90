@@ -99,7 +99,6 @@ PROGRAM SDMM
 !
 #ifdef PARALLEL
      CALL AlignNodes()
-     IF(MyId==ROOT)THEN
 #endif
 !-----------------------------------------------------------------------------
 !    LINE MINIMIZATION: compute coeficients
@@ -192,11 +191,17 @@ PROGRAM SDMM
         CALL Multiply(T1,StepL)         ! T1=StepL*H[0]
         CALL Add(T1,Fract)              ! P[n+1,1]=(N_El/2*N_BasF)*I+StepL[0]*H[0]        
      ELSE       
+#ifdef PARALLEL
+        CALL Multiply(H,StepL)          ! H=StepL*H 
+#else
+!       Symmetrization to keep [P,F] small, don't use
+!       for parallel because XPose is serial only so far
+!
         CALL Multiply(H,StepL/Two)      ! H=StepL*H 
-!       Symmetrization to keep [P,F] small 
         CALL XPose(H,T2)
         CALL Add(H,T2,T3)
         CALL SetEq(H,T3)
+#endif
         CALL Add(H,P,T1)                ! T1=P[N+1,I+1]=P[N+1,I]+StepL[I]*H[I]   
         CALL Multiply(H,One/StepL)      ! H=H/StepL 
      ENDIF
@@ -219,17 +224,13 @@ PROGRAM SDMM
      c=NumPot/DenPot
      FixedPoint=Half-c
 !
-     CALL Multiply(P,F,T2)              ! T2=P.F    
-     CALL Filter(T3,T2)                 ! T3=Filter[P.F]
-
-!    Add symetrization step to maintain small [F,P]
-     CALL XPose(T3,T1)
-     CALL Multiply(T1,-One)
-     CALL ADD(T3,T1,T2)
-     MxCom=MAX(T2)
-!
+     CALL Multiply(P,F,T1)              ! T1=P.F    
+     CALL Multiply(F,P,T2)              ! T2=F.P
+     CALL Multiply(T2,-One)
+     CALL ADD(T1,T2,T3)
+     MxCom=MAX(T3)
      OldE=NewE
-     NewE=Trace(T3)                     ! Tr{P.F}
+     NewE=Trace(T1)                     ! Tr{P.F}
 !-----------------------------------------------------------------------------
 !    PRINT CONVERGENCE STATS IF REQUESTED
 !

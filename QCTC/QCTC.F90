@@ -21,12 +21,7 @@ PROGRAM QCTC
 #endif
   USE JGen
   USE NuklarE
-#ifdef PARALLEL
-  USE MondoMPI
-  TYPE(DBCSR)                :: J,T1,T2
-#else
   TYPE(BCSR)                 :: J,T1,T2
-#endif
   REAL(DOUBLE)               :: E_Nuc_Tot
   TYPE(TIME)                 :: TimeMakeJ
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'

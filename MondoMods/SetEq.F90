@@ -23,6 +23,14 @@ MODULE SetXYZ
                        Set_INT_VECT_EQ_INT_VECT,  &
                        Set_DBL_VECT_EQ_DBL_VECT
    END INTERFACE
+!
+   INTERFACE SetToI
+      MODULE PROCEDURE SetToI_BCSR &
+#ifdef PARALLEL
+                      ,SetToI_DBCSR
+#endif
+   END INTERFACE
+
    EXTERNAL bcsr_to_dens
    CONTAINS
 !
@@ -41,7 +49,7 @@ MODULE SetXYZ
       END SUBROUTINE VecToAng
 #endif
 !
-   SUBROUTINE SetToI(A,B)
+   SUBROUTINE SetToI_BCSR(A,B)
       TYPE(BCSR)              :: A
       TYPE(DBL_RNK2),OPTIONAL :: B
       INTEGER                 :: I,N,N2,Q,R       
@@ -49,33 +57,49 @@ MODULE SetXYZ
       R=1
       A%NAtms=0
       A%RowPt%I(1)=1
-      IF(PRESENT(B))THEN
-         DO I=1,NAtoms
-            A%NAtms=A%NAtms+1  
-            N2=BSiz%I(I)**2
-            A%ColPt%I(Q)=I
-            A%BlkPt%I(Q)=R
+      DO I=1,NAtoms
+         A%NAtms=A%NAtms+1  
+         N2=BSiz%I(I)**2
+         A%ColPt%I(Q)=I
+         A%BlkPt%I(Q)=R
+         IF(PRESENT(B))THEN
             A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
-            Q=Q+1 
-            R=R+N2     
-            A%RowPt%I(A%NAtms+1)=Q
-         ENDDO
-      ELSE
-         DO I=1,NAtoms
-            A%NAtms=A%NAtms+1  
-            N=BSiz%I(I)
-            A%ColPt%I(Q)=I
-            A%BlkPt%I(Q)=R
-            CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
-            Q=Q+1 
-            R=R+N**2
-            A%RowPt%I(A%NAtms+1)=Q
-         ENDDO
-      ENDIF
+         ELSE
+           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+         ENDIF
+         Q=Q+1 
+         R=R+N2     
+         A%RowPt%I(A%NAtms+1)=Q
+      ENDDO
       A%NBlks=Q-1 
       A%NNon0=R-1
-   END SUBROUTINE SetToI
+   END SUBROUTINE SetToI_BCSR
 
+   SUBROUTINE SetToI_DBCSR(A,B)
+      TYPE(DBCSR)             :: A
+      TYPE(DBL_RNK2),OPTIONAL :: B
+      INTEGER                 :: I,N,N2,Q,R       
+      Q=1
+      R=1
+      A%NAtms=0
+      A%RowPt%I(1)=1
+      DO I=Beg%I(MyId),End%I(MyId)
+         A%NAtms=A%NAtms+1  
+         N2=BSiz%I(I)**2
+         A%ColPt%I(Q)=I
+         A%BlkPt%I(Q)=R
+         IF(PRESENT(B))THEN
+            A%MTrix%D(R:R+N2-1)=B%D(1:N2,I)
+         ELSE
+           CALL DiagI(N,A%MTrix%D(R:R+N*N-1))
+         ENDIF
+         Q=Q+1 
+         R=R+N2     
+         A%RowPt%I(A%NAtms+1)=Q
+      ENDDO
+      A%NBlks=Q-1 
+      A%NNon0=R-1
+   END SUBROUTINE SetToI_DBCSR
 
    SUBROUTINE DiagI(N,A)
       INTEGER                      :: I,N
