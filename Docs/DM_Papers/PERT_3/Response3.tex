@@ -59,6 +59,60 @@ by a global electric field are demonstrated.
 \maketitle
 
 \footnotetext[1]{LA-UR-04-5219} 
+%
+% COMMENTS FROM THE REFEREES COMMENTS FROM THE REFEREES COMMENTS FROM THE REFEREES.
+% COMMENTS FROM THE REFEREES COMMENTS FROM THE REFEREES COMMENTS FROM THE REFEREES.
+%
+%This paper is the latest in a series on the development of a linear
+%scaling ab initio density matrix treatment for coupled perturbed
+%Hartree-Fock or Kohn-Sham response properties. In fact, it is an extension
+%of Ref.[20] to higher-order static polarizabilities.  The work is
+%carefully done, well-presented, and promises to be useful to investigators
+%interested in nonlinear response properties of large systems. I recommend
+%publication with minor revisions that appropriately take into account the
+%comments below (not in any particular order): 
+%
+%1. In the Abstract reference is made to three dimensional water clusters.
+%My understanding, however, is that only quasilinear clusters were treated. 
+%In addition, I would expect it to be much easier to achieve linear scaling
+%(in terms of the number of atoms required for onset)  in the case of
+%quasilinear rather than 3D clusters. I think it would be appropriate for
+%the authors to comment on this point in the text. 
+%
+%2. I haven't been able to verify the various multiplicative factors that
+%appear on the rhs of Eqs.(4) and elsewhere. In this connection, reference
+%is made to the article by Karna & Dupuis (KD). Although the authors imply
+%they have used the same expansions as KD their final formulas are not the
+%same.  In a similar vein the factors of 1/2 in Eqs.(12) and (16) give me
+%pause. See also Eq.(21). Eqs.(24) and (25) seem ok to me with the
+%definition of Eq.(26), but why not use a coefficient of unity everywhere. 
+%                                                                           VW-OK
+%
+%3. The CPSCF procedure begins with a guess at the derivative densities. It
+%would be nice to know how that guess is obtained.                          VW-OK
+%
+%4. In Eq.(22) the identity matrix is missing from the first term in the 
+%numerator.                                                                 VW-OK
+%
+%5. I tried to check Eqs.(30) and (31) for the limiting case S = I and
+%a=b=c=d.  Except for a factor of 2 Eq.(30) is in agreement with Ref. [21].
+%However, I could not verify Eq.(31). Perhaps the idempotency relations are
+%used, but this needs to be spelled out for the reader.                     
+%  VW-I don't know if we can explain how we got that equation!!!
+%
+%6. On the first page of Sec.IV it is stated in one place that the 2n + 1
+%rule is used and in another place that the n + 1 rule is used. Later on
+%the two different usages is made clear but, at this point in my reading, I
+%was confused. 
+%
+%7. The behavior of water chains is interesting but workers in the field
+%will be more interested in delocalized systems such as polyacetylene,
+%polymethineimine or polydiacetylene chains. Will the onset of linear
+%scaling depend upon the degree of delocalization and to what extent ? 
+%
+%8. Perhaps it is due to the quality of my printout but, frankly, I was not
+%able to come with anything from Fig.6. 
+%
 
 \section{Introduction}
 First principles electronic structure theory has traditionally been limited 
@@ -214,21 +268,22 @@ be developed in a Taylor expansion series around $\E = 0$ as
      \beta_{abc}=
      -\frac{\partial^3 E_{\rm tot}}{\partial \mathcal{E}^a\partial \mathcal{E}^b\partial \mathcal{E}^c}
      \bigg|_{\mathcal{E}=0}=
-     -4Tr[D^{ab}\mu_c],\\
-%     -2Tr[D^{ab}\mu_c],\\
+%     -4Tr[D^{ab}\mu_c],\\
+     -2Tr[D^{ab}\mu_c],\\
      \gamma_{abcd}=
      -\frac{\partial^4 E_{\rm tot}}{\partial\mathcal{E}^a\partial\mathcal{E}^b\partial \mathcal{E}^c\partial \mathcal{E}^d}
      \bigg|_{\mathcal{E}=0}=
-     -12Tr[D^{abc}\mu_d].
-%     -2Tr[D^{abc}\mu_d].
+%     -12Tr[D^{abc}\mu_d].
+     -2Tr[D^{abc}\mu_d].
    \end{gather}
 \end{subequations}
 Here $D^{a\ldots}$ denotes a density matrix derivative with respect to a field in directions $a\ldots$ 
-at $\mathcal{E} = 0$.  The  density matrix derivative or ``response function'' is given by 
+at $\mathcal{E} = 0$ and the factor $2$ is the occupation number. 
+The  density matrix derivative or ``response function'' is given by 
 \begin{equation}
-% \displaystyle\D^{a\ldots}=N!
- \displaystyle\D^{a\ldots}=
- \frac{\partial^N}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
+ \displaystyle\D^{a\ldots}=n!
+% \displaystyle\D^{a\ldots}=
+ \frac{\partial^n}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
  \F(\E))\bigg|_{\E=0} \label{DDeriv1}.
 \end{equation}
  The Fockian may also be expanded order by order in the perturbation to yield
@@ -279,14 +334,10 @@ CPSCF equations involve generalized self-consistence conditions \cite{Furche_200
 \begin{gather}
     [\F^{0} ,\D^{0}]=0,\label{eq:commutators1}\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\label{eq:commutators2}\\
+    [\F^{ab},\D^{0}]+[\F^{a},\D^{b}]+[\F^{b},\D^{a}]+[\F^{0},\D^{ab}]=0,\label{eq:commutators3}\\
   \begin{split}
-    [\F^{ab},\D^{0}]&+\frac{1}{2}[\F^{a},\D^{b}]+\frac{1}{2}[\F^{b},\D^{a}] \\
-    &+[\F^{0},\D^{ab}]=0,\label{eq:commutators3}\\
-  \end{split}\\
-  \begin{split}
-    [\F^{abc},\D^{0}]&+\frac{1}{3}[\F^{ab},\D^{c}]+\frac{1}{3}[\F^{ac},\D^{b}]\\
-    &+\frac{1}{3}[\F^{ab},\D^{c}]+\frac{1}{3}[\F^{a},\D^{bc}]\\
-    &+\frac{1}{3}[\F^{b},\D^{ac}]+\frac{1}{3}[\F^{c},\D^{ab}]\\
+    [\F^{abc},\D^{0}]&+[\F^{ab},\D^{c}]+[\F^{ac},\D^{b}]+[\F^{ab},\D^{c}]\\
+    &+[\F^{a},\D^{bc}]+[\F^{b},\D^{ac}]+[\F^{c},\D^{ab}]\\
     &+[\F^{0},\D^{abc}]=0,\label{eq:commutators4}\\
   \end{split}
 \end{gather}
@@ -305,10 +356,10 @@ in addition to generalized idempotency-like constraints \cite{Furche_2001},
 \begin{gather}
   \D^{0} =\D^{0} \D^{0},\label{eq:anticommutators1}\\
   \D^{a} =\{\D^{a},\D^{0}\},\label{eq:anticommutators2}\\
-  \D^{ab}=\{\D^{ab},\D^{0}\}+\frac{1}{2}\{\D^{a},\D^{b}\}\label{eq:anticommutators3}\\
+  \D^{ab}=\{\D^{ab},\D^{0}\}+\{\D^{a},\D^{b}\}\label{eq:anticommutators3}\\
   \begin{split}
-    \D^{abc}=\{\D^{abc},\D_0\}&+\frac{1}{3}\{\D^{ab},\D^{c}\}+\frac{1}{3}\{\D^{ac},\D^{b}\}\\
-    &+\frac{1}{3}\{\D^{bc},\D^{a}\}\label{eq:anticommutators4},
+    \D^{abc}=\{\D^{abc},\D_0\}&+\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}\\
+    &+\{\D^{bc},\D^{a}\}\label{eq:anticommutators4},
   \end{split}
 \end{gather}
 %\begin{subequations}\label{eq:anticommutators}
@@ -334,7 +385,7 @@ the dropping (filtering) of atom-atom blocks with Frobenious norm below a numeri
 defining the ground state projector, from which the derivative density matrices are directly obtained.
 
 Having solved the groundstate SCF equations, solution of the CPSCF equations commences with a guess at the 
-derivative densities, followed by computation of derivative Fockians.  At the $r^{\rm th}$ 
+derivative densities (i.e. $D^{a\ldots}_0=0$), followed by computation of derivative Fockians.  At the $r^{\rm th}$ 
 CPSCF cycle, the $n^{\rm th}$ order derivative Fockians are 
 \begin{equation}
     F^{a\ldots}_{r}= \left\{
@@ -348,8 +399,8 @@ $D^{a\ldots}_{r+1}$ are computed, constituting one cycle in solution of the CPSC
 As described in Section \ref{ResponseFunctions},  these response functions are 
 obtained directly through variation of the occupied subspace projector,  
 \begin{equation}
-%    \displaystyle\D^{a\ldots}_{r+1}=n!
-    \displaystyle\D^{a\ldots}_{r+1}=
+    \displaystyle\D^{a\ldots}_{r+1}=n!
+%    \displaystyle\D^{a\ldots}_{r+1}=
     \frac{\partial^n}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
     \F_r(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
@@ -369,10 +420,10 @@ DDIIS algorithm to acceleration of higher order CPSCF equations is developed fur
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
 appropriate to compute response properties.   In general, we can use the expectation value 
 \begin{equation}
-E^{(\gamma)} = 2 (\gamma-1)! Tr(D^{(\gamma-1)} h^{(1)}), \label{Np1Rule}
+E^{(\gamma)} = 2 Tr(D^{(\gamma-1)} h^{(1)}), \label{Np1Rule}
 \end{equation}
 where in the case of polarization we have the (hyper)polarizabilities $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
-$\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$.
+$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$.
 Alternatively, it is possible to construct density matrix analogues of 
 Wigner's $2 n+1$ rule, which allows the evaluation of response properties up to order $2 n+1$ from response 
 functions of order $n$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
@@ -405,7 +456,7 @@ The Perturbed Projection sequence is started with the  $\X^{a\ldots}_{0}$, which
 prepared from the Fockians $\F^0$, $\F^a$, and $\F^{ab}$ by  compressing their spectrum into the domain of 
 convergence \cite{ANiklasson02A} using
 \begin{equation}
-    \X^0_{0}=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}} 
+    \X^0_{0}=\frac{\F_{max}I-\F^0}{\F_{max}-\F_{min}} 
 \end{equation}
 and 
 \begin{equation}
@@ -531,8 +582,8 @@ contribution is
 \begin{align}
   \begin{split}
 %    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
-    E^{abcd} =&\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
-    &[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd})]\label{eq:2n+1 fourth order}
+    E^{abcd} =\frac{1}{2}\sum_{P(a,b,c,d)}&\Tr[[D^{ab},D^0]_S SD^cF^d+\\ 
+    &[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd})].\label{eq:2n+1 fourth order}
   \end{split}
 \end{align}
 
