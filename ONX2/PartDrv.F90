@@ -394,9 +394,10 @@ CONTAINS
     TYPE(BCSR),  INTENT(INOUT)  :: A
     TYPE(DBCSR), INTENT(INOUT)  :: B
     INTEGER                     :: I,Id,J,JG,M,MN,MN1,P,  &
-         &                         NAtms,NBlks,NNon0
+         &                         NAtms,NBlks,NNon0!,DUM(3)
     LOGICAL                     :: ReAllocate
     TYPE(INT_VECT), INTENT(IN)  :: PrcDist
+    !TYPE(INT_VECT) :: V
 !-----------------------------------------------------------------------
 !        Allocate if required
 !
@@ -423,6 +424,7 @@ CONTAINS
                 B%NBlks=B%NBlks+1
                 MN=M*BSiz%I(JG);MN1=MN-1
                 P=A%BlkPt%I(J)         
+                !CALL DBL_VECT_EQ_DBL_VECT(MN1,B%MTrix%D(B%NNon0),A%MTrix%D(P))
                 B%MTrix%D(B%NNon0:B%NNon0+MN1)=A%MTrix%D(P:P+MN1) 
                 B%NNon0=B%NNon0+MN
              ENDDO
@@ -433,6 +435,16 @@ CONTAINS
           B%NNon0=B%NNon0-1
 ! MINUS 
           IF(Id/=ROOT)THEN
+             !DUM(1)=B%NAtms
+             !DUM(2)=B%NBlks
+             !DUM(3)=B%NNon0
+             !CALL MPI_SEND(DUM(1),3,MPI_INTEGER,Id,1,MONDO_COMM,iErr)
+             !N=B%NAtms+1+2*B%NBlks
+             !CALL INT_VECT_EQ_INT_VECT(B%NAtms+1,V%I(1)                ,B%RowPt%I(1))
+             !CALL INT_VECT_EQ_INT_VECT(B%NBlks  ,V%I(B%NAtms+2)        ,B%ColPt%I(1))
+             !CALL INT_VECT_EQ_INT_VECT(B%NBlks  ,V%I(B%NAtms+2+B%NBlks),B%BlkPt%I(1))
+             !CALL MPI_SEND(V%I(1),N,MPI_INTEGER,Id,2,MONDO_COMM,iErr)
+             !CALL MPI_SEND(B%MTrix%D(1),B%NNon0,MPI_DOUBLE_PRECISION,Id,7,MONDO_COMM,iErr)
              CALL Send(B%NAtms,Id,1)               
              CALL Send(B%NBlks,Id,2)               
              CALL Send(B%NNon0,Id,3)
@@ -442,6 +454,10 @@ CONTAINS
              CALL Send(B%MTrix,B%NNon0,Id,7)
           ENDIF
        ELSEIF(MyId==Id)THEN
+          !CALL MPI_RECV(DUM(1),3,MPI_INTEGER,ROOT,1,MONDO_COMM,MPI_STATUS_IGNORE,iErr)
+          !B%NAtms=DUM(1)
+          !B%NBlks=DUM(2)
+          !B%NNon0=DUM(3)
           CALL Recv(B%NAtms,ROOT,1)               
           CALL Recv(B%NBlks,ROOT,2)               
           CALL Recv(B%NNon0,ROOT,3)
@@ -454,6 +470,13 @@ CONTAINS
              CALL Delete(B)     
              CALL New(B,(/NAtms,NBlks,NNon0/))
           ENDIF
+          !N=B%NAtms+1+2*B%NBlks
+          !CALL MPI_RECV(V%I(1),N,MPI_INTEGER,ROOT,2,MONDO_COMM,MPI_STATUS_IGNORE,iErr)
+          !CALL INT_VECT_EQ_INT_VECT(B%NAtms+1,B%RowPt%I(1),V%I(1))
+          !CALL INT_VECT_EQ_INT_VECT(B%NBlks  ,B%ColPt%I(1),V%I(B%NAtms+2))
+          !CALL INT_VECT_EQ_INT_VECT(B%NBlks  ,B%BlkPt%I(1),V%I(B%NAtms+2+B%NBlks))
+          !CALL MPI_RECV(B%MTrix%D(1),B%NNon0,MPI_DOUBLE_PRECISION, &
+          !         &    ROOT,7,MONDO_COMM,MPI_STATUS_IGNORE,iErr)
           CALL Recv(B%RowPt,B%NAtms+1,ROOT,4)               
           CALL Recv(B%ColPt,B%NBlks,ROOT,5)               
           CALL Recv(B%BlkPt,B%NBlks,ROOT,6)               
