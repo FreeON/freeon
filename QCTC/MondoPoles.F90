@@ -67,7 +67,7 @@ MODULE MondoPoles
          CALL XLate77(LP,LQ,P%C,P%S,Cpq,Spq,Q%C,Q%S)
        END SUBROUTINE XLate
 !====================================================================================
-!     Contrax P with Q
+!     Contract P with Q
 !====================================================================================
       SUBROUTINE CTrax(P,Q,SPKetC,SPKetS)
          TYPE(PrimPair)            :: P
@@ -124,7 +124,7 @@ MODULE MondoPoles
           REAL(DOUBLE),DIMENSION(20) :: W
           SELECT CASE(L)
           INCLUDE 'HGToSP.Inc'
-          CASE(6:) 
+          CASE DEFAULT
              CALL Halt('Bad logic in HGToSP_Gen, time to remake HGToSP.Inc')
           END SELECT
        END SUBROUTINE HGToSP_Gen
@@ -351,18 +351,25 @@ MODULE MondoPoles
 !     Compute a multipole strength O_L based on Unsolds theorem
 !====================================================================================
       FUNCTION UnsoldO(L,C,S)
-         INTEGER                     :: K,L,M
-         REAL(DOUBLE)                :: UnsoldO
+         INTEGER                     :: I,K,L,M
+         REAL(DOUBLE)                :: UnsoldO,U
          REAL(DOUBLE), DIMENSION(0:) :: C,S
          UnsoldO=Zero
-         K=LTD(L)
-         UnsoldO=(C(K)**2+S(K)**2)*Factorial(L)**2
-         DO M=1,L
-            UnsoldO=UnsoldO+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)            
+         ! Must take into account the possibility of untranslated nodes,
+         ! and chance cancelations in misc powers: Take the max over all L
+         DO I=0,L
+            K=LTD(I)
+            ! M=0 term 
+            U=(C(K)**2+S(K)**2)*Factorial(I)**2
+            DO M=1,I
+               ! The rest times 2
+               U=U+Two*(C(K+M)**2+S(K+M)**2)*Factorial(I+M)*Factorial(I-M)            
+            ENDDO
+            UnsoldO=MAX(UnsoldO,U)
          ENDDO
          UnsoldO = SQRT(UnsoldO)
-!
        END FUNCTION UnsoldO
+!16.79290770668148
 !====================================================================================
 !
 !====================================================================================

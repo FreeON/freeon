@@ -109,9 +109,7 @@ MODULE PoleTree
             P%Box%Center(:)=Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
 !-----------------------------------------------------------------------------
-!           Translate Left and Right with SPEll+1, to accumulate 
-!           Unsold estimates
-!
+!           Translate Left and Right with SPEll+1
 !           Translate LeftQ-> P
             CALL XLate(LeftQ,P)
 !           Translate RightQ-> P
@@ -120,8 +118,10 @@ MODULE PoleTree
             IF(.NOT.LeftQ%Leaf)   LeftQ%Ell=SPell
             IF(.NOT.RightQ%Leaf) RightQ%Ell=SPell
 !           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength = UnsoldO(SPEll+1,P%C,P%S)**UnsoldExp
-!           Compute DMax  (check and recheck this...) 
+            P%Strength=UnsoldO(SPEll+1,P%C,P%S)**UnsoldExp
+            ! Compute DMax.  Way overly pesimistic.  Could be
+            ! improved alot, but would have to store vectors.  Probably
+            ! worth it at some point.
             LeftDist  = ( LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
                       + ( LeftQ%Box%Center(2)-P%Box%Center(2))**2 &
                       + ( LeftQ%Box%Center(3)-P%Box%Center(3))**2 

@@ -41,7 +41,7 @@ MODULE NuklarE
           Prim%P=GM_Loc%Carts%D(:,At)
           Prim%Zeta=NuclearExpnt
 !         Set the MAC
-          DP2=(GM_Loc%AtNum%D(At)/TauMAC)**(Two/DBLE(SPEll+2))
+          DP2=(ABS(GM_Loc%AtNum%D(At))/TauMAC)**(Two/DBLE(SPEll+2))
 !         Set the PAC
           PExtent=Extent(0,NuclearExpnt,HGBra,TauPAC)
 !         Initialize <KET|
