@@ -115,11 +115,7 @@ PROGRAM MakeRho
 #ifdef PERIODIC
      ! Calculate the Number of Cells
 #ifdef MMech
-     IF(HasMM()) THEN
-       CALL SetCellNumber(GM_MM)
-     ELSE
-       CALL SetCellNumber(GM)
-     ENDIF
+     IF(HasQM()) CALL SetCellNumber(GM)
 #else
      CALL SetCellNumber(GM)
 #endif
