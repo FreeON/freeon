@@ -111,21 +111,39 @@ MODULE CellSets
 31  FORMAT(1x,'=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=')
   END SUBROUTINE PPrint_CellSet
 !--------------------------------------------------------------------------
-! Test if in Cell With Coordinates (x,y,z) 
+! Test if Cell(N) has Coordinates (x,y,z) 
 !--------------------------------------------------------------------------
-  FUNCTION InCell_CellSet(CS,N,X,Y,Z)
+  FUNCTION CellN_XYZ(CS,NC,X,Y,Z)
     TYPE(CellSet)      :: CS
-    INTEGER            :: N
+    INTEGER            :: NC
+    REAL(DOUBLE)       :: X,Y,Z
+    LOGICAL            :: CellN_XYZ
+!
+    IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-12 .AND. &
+       ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-12 .AND. &
+       ABS(CS%CellCarts%D(3,NC)-Z) < 1.0D-12) THEN
+       CellN_XYZ = .TRUE.
+    ELSE
+       CellN_XYZ = .FALSE.
+    ENDIF
+!
+  END FUNCTION CellN_XYZ
+!--------------------------------------------------------------------------
+! Test if a Cell in CS has Coordinates (x,y,z) 
+!--------------------------------------------------------------------------
+  FUNCTION InCell_CellSet(CS,X,Y,Z)
+    TYPE(CellSet)      :: CS
+    INTEGER            :: NC
     REAL(DOUBLE)       :: X,Y,Z
     LOGICAL            :: InCell_CellSet
 !
-    IF(ABS(CS%CellCarts%D(1,N)-X) < 1.0D-10 .AND. &
-       ABS(CS%CellCarts%D(2,N)-Y) < 1.0D-10 .AND. &
-       ABS(CS%CellCarts%D(3,N)-Z) < 1.0D-10) THEN
-       InCell_CellSet = .TRUE.
-    ELSE
-       InCell_CellSet = .FALSE.
-    ENDIF
+    InCell_CellSet = .FALSE.    
+    DO NC = 1,CS%NCells
+       IF(CellN_XYZ(CS,NC,X,Y,Z)) THEN
+          InCell_CellSet = .TRUE.
+          RETURN
+       ENDIF
+    ENDDO
 !
   END FUNCTION InCell_CellSet
 !--------------------------------------------------------------------------
