@@ -70,11 +70,6 @@ MODULE SCFLocals
    END TYPE MDControls
 !------------------------------------------------------------------------------------------------  
 !
-   TYPE OptControls
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType  
-      INTEGER                            :: ReDefIntC
-   END TYPE 
-!------------------------------------------------------------------------------------------------  
 !  Object to control the SCF
    TYPE SCFControls
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: Info   ! Info file 
@@ -114,7 +109,7 @@ MODULE SCFLocals
 !
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: PopAnalysis
 !
-      TYPE(OptControls)                  :: GeOp
+      TYPE(GeOpControls)                 :: GeOp
 !
    END TYPE
 !
