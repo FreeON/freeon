@@ -29,9 +29,10 @@ PROGRAM MakePFFT
   CALL StartUp(Args,Prog)
 ! Get the geometry
   CALL Get(GM,Tag_O=CurGeom)
-  IF(GM%PBC%PFFMaxEll>FFELL) THEN
-     CALL MondoHalt(0,'MaxELL > FFELL Halting in CalculatePFFT')
-  ELSEIF(GM%PBC%Dimen>0)THEN
+  IF(GM%PBC%Dimen>0)THEN
+     IF(GM%PBC%PFFMaxEll>FFELL) THEN
+        CALL MondoHalt(0,'MaxELL > FFELL Halting in CalculatePFFT')
+     ENDIF
 !    Set up the multipole arrays
      CALL MultipoleSetUp()
 !    Allocate the tensors
@@ -89,14 +90,15 @@ PROGRAM MakePFFT
 !    Put them to HDF
      CALL Put(dTenC,'dPFFTensorC')
      CALL Put(dTenS,'dPFFTensorS')
+!    Delete
+     CALL Delete(TenC)
+     CALL Delete(TenS)  
+     CALL Delete(dTenC)
+     CALL Delete(dTenS)
   ENDIF
 ! Delete
   CALL Delete(GM)
   CALL Delete(Args)
-  CALL Delete(TenC)
-  CALL Delete(TenS)  
-  CALL Delete(dTenC)
-  CALL Delete(dTenS)
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
