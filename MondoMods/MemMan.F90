@@ -15,9 +15,7 @@ MODULE MemMan
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
-#ifdef MMech
                        New_INTC,     New_BMATR, &
-#endif
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
@@ -34,9 +32,7 @@ MODULE MemMan
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
-#ifdef MMech
                        Delete_INTC,     Delete_BMATR, &
-#endif
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &

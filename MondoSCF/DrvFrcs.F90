@@ -1263,12 +1263,12 @@ MODULE DrvFrcs
            II=II+1
            Ctrl%Current(3)=II
            CALL SetGlobalCtrlIndecies(Ctrl)           
-           IF(QMOnly()) THEN
-             CALL Put(GMLoc,CurGeom)
-           ELSE
-             CALL Put(GMLoc,'GM_MM'//CurGeom)
+             CALL Put(GMLoc,TRIM(GMTag)//CurGeom)
+#ifdef MMech
              IF(HasQM()) CALL Halt('put new GM coordinates separately, to be done')
-           ENDIF
+#else
+             CALL Halt('put new GM coordinates separately, to be done')
+#endif
            GO TO 300
          ENDIF
        ELSE

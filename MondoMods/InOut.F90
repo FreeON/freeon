@@ -28,10 +28,8 @@ MODULE InOut
                        Get_PBCInfo,                              &
 #endif  
                        Get_ARGMT,    Get_HGRho,                  &
-#ifdef MMech
                        Get_CHR_VECT, Get_LOG_VECT,     &
                        Get_INTC,     Get_BMATR,        &
-#endif
                        Get_CMPoles
 
    END INTERFACE     
@@ -48,10 +46,8 @@ MODULE InOut
                        Put_PBCInfo,                              &
 #endif 
                        Put_TOLS,     Put_BCSR,     Put_HGRho,    &
-#ifdef MMech
                        Put_CHR_VECT, Put_LOG_VECT,        &
                        Put_INTC, Put_BMATR,               &
-#endif
                        Put_CMPoles
    END INTERFACE     
    TYPE META_DATA
@@ -348,7 +344,6 @@ MODULE InOut
 #endif 
     END SUBROUTINE Get_INT_VECT
 !--------------------------------------------------------------------
-#ifdef MMech
 !
     SUBROUTINE Get_INTC(A,VarName,Tag_O)
        TYPE(INTC),               INTENT(INOUT) :: A
@@ -496,7 +491,6 @@ MODULE InOut
 #endif 
     END SUBROUTINE Put_BMATR
 !
-#endif
 !
 !--------------------------------------------------------------------
 !
@@ -1785,7 +1779,6 @@ MODULE InOut
       END SUBROUTINE OpenASCII
 
 !--------------------------------------------------------------------------
-#ifdef MMech
     SUBROUTINE Put_CHR_VECT(A,VarName,Tag_O)
        INTEGER                              :: I,N,II,NN
        TYPE(CHR_VECT) :: A
@@ -1811,10 +1804,8 @@ MODULE InOut
        ENDIF
 #endif
     END SUBROUTINE Put_CHR_VECT
-#endif
 
 !--------------------------------------------------------------------------
-#ifdef MMech
     SUBROUTINE Get_CHR_VECT(A,VarName,Tag_O)
        INTEGER                                 :: I,N,II,NN
        TYPE(CHR_VECT),           INTENT(INOUT) :: A
@@ -1840,9 +1831,7 @@ MODULE InOut
          IF(InParallel)CALL BCast(A)
 #endif 
        END SUBROUTINE Get_CHR_VECT
-#endif 
 !--------------------------------------------------------------------------
-#ifdef MMech
     SUBROUTINE Put_LOG_VECT(A,VarName,NN,Tag_O)
        INTEGER                              :: I,N,II,NN
        LOGICAL,DIMENSION(1:NN),  INTENT(IN) :: A
@@ -1865,9 +1854,7 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Put_LOG_VECT
-#endif
 !--------------------------------------------------------------------------
-#ifdef MMech
     SUBROUTINE Get_LOG_VECT(A,VarName,NN,Tag_O)
        INTEGER                              :: I,NN
        LOGICAL,DIMENSION(1:NN),INTENT(INOUT) :: A
@@ -1893,7 +1880,6 @@ MODULE InOut
        ENDIF       
 #endif 
     END SUBROUTINE Get_LOG_VECT
-#endif
 !------------------------------------------------------------------------
 
 
