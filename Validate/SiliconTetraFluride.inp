@@ -1,0 +1,28 @@
+<BeginTitle>
+
+ ** SiliconTetraFluride **
+
+RBLYPxc/STO-3G  -679.5923 93168
+RBLYPxc/3-21G   -685.2888 37466 
+RBLYPxc/6-31G** -689.0441 09253 
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH,RH,RH)
+BasisSets=(STO-3G,3-21G,6-31G**)
+ModelChem=(HF,BLYPxc,B3LYP/VWN3)
+Accuracy =(Loose,Good,Tight)
+DebugAll =(MaxDebug)
+Geometry=(InAngstroms)
+<EndOptions>
+
+<BeginGeometry>
+Si  0.028    0.028    0.154  
+F  -0.467   -0.663   -1.127  
+F   0.579   -1.029    1.127  
+F   1.141    1.029   -0.199  
+F  -1.141    0.775    0.818  
+<EndGeometry>
