@@ -123,19 +123,19 @@ PROGRAM MakeT
 !------------------------------------------------------------
 ! Put T to disk
 !  
-! now skiping filtration until after orthogonal Fock is xformed
-!  CALL Filter(T2,T)
-  CALL Put(T,TrixFile('T',Args))
+  CALL Filter(T2,T)
+  CALL Put(T2,TrixFile('T',Args))
 !-----------------------------------------------------------
 ! Printing
 !
-  CALL PChkSum(T,'T',Prog)
-  CALL PPrint( T,'T')
-  CALL Plot(   T,'T')
+  CALL PChkSum(T2,'T',Prog)
+  CALL PPrint( T2,'T')
+  CALL Plot(   T2,'T')
 !------------------------------------------------------------
 ! Tidy up
 ! 
   CALL Delete(T)
+  CALL Delete(T2)
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(MD)
