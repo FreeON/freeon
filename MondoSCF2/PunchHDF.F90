@@ -120,6 +120,9 @@ CONTAINS
        ETRootArr%D(:) = 10.0
        CALL Put(ETDirArr,'ETDirArr')
        CALL Put(ETRootArr,'ETRootArr')
+       CALL Put(0,'QLineLoc')
+       CALL Put(ETDirArr,'QETDir')
+       CALL Put(ETRootArr,'QETRoot')
        CALL Delete(ETDirArr)
        CALL Delete(ETRootArr)
 #endif
