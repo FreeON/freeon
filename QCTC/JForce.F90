@@ -37,10 +37,11 @@ PROGRAM JForce
   INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
   REAL(DOUBLE)                 :: JFrcChk
   CHARACTER(LEN=6),PARAMETER   :: Prog='JForce'
-  INTEGER                      :: NC,I,J
-  REAL(DOUBLE),DIMENSION(3)    :: B,nlm
+  INTEGER                      :: NC,I,J,K
+  REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm
   REAL(DOUBLE),DIMENSION(15)   :: F_nlm
   TYPE(DBL_RNK2)               :: LatFrc_J
+  REAL(DOUBLE),DIMENSION(3,3)  :: DivCV
 #ifdef MMech
   INTEGER                      :: NatmsLoc,I,I1,I2
   TYPE(DBL_VECT)               :: MMJFrc
@@ -128,7 +129,7 @@ PROGRAM JForce
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
-  CALL Delete(Rho)
+!  CALL Delete(Rho)
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
@@ -156,7 +157,7 @@ PROGRAM JForce
      A1=3*(AtA-1)+1
      A2=3*AtA
      F_nlm = dNukE(GMLoc,AtA)
-     JFrc%D(A1:A2)= Two*F_nlm(1:3)
+     JFrc%D(A1:A2)= Two*F_nlm(1:3) 
 !    Store Inner Nuc Lattice Forces
      LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + F_nlm(7:9)
      LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + F_nlm(10:12)
@@ -171,8 +172,11 @@ PROGRAM JForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           A=Pair%A
            B=Pair%B
-           DO NC=1,CS_OUT%NCells
+!
+           DO NC=1,CS_OUT%NCells 
+              Pair%A=A
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                       +(Pair%A(2)-Pair%B(2))**2 &
@@ -188,7 +192,7 @@ PROGRAM JForce
                  LatFrc_J%D(1:3,1) = LatFrc_J%D(1:3,1) + Two*F_nlm(7:9)
                  LatFrc_J%D(1:3,2) = LatFrc_J%D(1:3,2) + Two*F_nlm(10:12)
                  LatFrc_J%D(1:3,3) = LatFrc_J%D(1:3,3) + Two*F_nlm(13:15)
-!                Outer Lattice J Forces
+!                Outer Lattice J Forces 
                  nlm        = AtomToFrac(GMLoc,Pair%A) 
                  LatFrc_J%D = LatFrc_J%D+Four*LaticeForce(GMLoc,nlm,F_nlm(1:3))
                  nlm        = AtomToFrac(GMLoc,Pair%B) 
@@ -199,13 +203,36 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
-! Dipole Correction
-  IF(GMLoc%PBC%Dimen>0) THEN
+! The Dipole Contribution to the Lattice Forces
+  IF(GMLoc%PBC%Dimen > 0) THEN
+     DivCV   = DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
      DO I=1,3
-        LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
+        DO J=1,3
+           IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
+              LatFrc_J%D(I,J) = LatFrc_J%D(I,J)  -  E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
+           ENDIF
+        ENDDO
      ENDDO
   ENDIF
-   LatFrc_J%D = Zero
+! Farfield Contribution to the Inner Box Sum
+  IF(GMLoc%PBC%Dimen > 0) THEN
+     DO I=1,3
+        DO J=1,3
+           IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
+              DO K=0,LSP(MaxEll)
+                 LatFrc_J%D(I,J) = LatFrc_J%D(I,J) - Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
+              ENDDO
+           ENDIF
+        ENDDO
+     ENDDO
+  ENDIF
+!
+! Print Out the Lattice Forces
+!
+!!$  WRITE(*,*) 'LatFrc_J'
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
+!!$  ENDDO
 #ifdef PARALLEL
   JFrcEndTm = MondoTimer()
   JFrcTm = JFrcEndTm-JFrcBegTm
@@ -213,19 +240,6 @@ PROGRAM JForce
 #ifdef MMech
   ENDIF
 #endif
-!
-! Print The Forces and Lattice Forces
-!
-!!$  WRITE(*,*) 'JForce'
-!!$  DO AtA=1,NAtoms
-!!$     A1=3*(AtA-1)+1
-!!$     A2=3*AtA
-!!$     WRITE(*,*) JFrc%D(A1:A2)
-!!$  ENDDO
-!!$  WRITE(*,*) 'LatFrc_J'
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
-!!$  ENDDO
 !--------------------------------------------------------------------------------
 ! Print The JForce
 !  CALL Print_Force(GMLoc,JFrc,'dJ/dR in au ')
@@ -325,11 +339,7 @@ PROGRAM JForce
      A2=3*AtA
      GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
-#ifdef NLATTFORCE
-  WRITE(*,*) 'JForce: Not Putting Lattice Force to Disk'
-#else
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
-#endif
   CALL Put(GMLoc,Tag_O=CurGeom)
 !
   CALL Delete(BS)
