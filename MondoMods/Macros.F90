@@ -87,7 +87,7 @@ MODULE Macros
          MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
          ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
          PWDName=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
-         InfFile=TRIM(PWDName)//TRIM(InfF)
+         InfFile=TRIM(ScrName)//TRIM(InfF)
 !-----------------------------------------------------------------------------
 !        Open HDF file and mark for failure
          CALL OpenHDF(TRIM(InfFile))
