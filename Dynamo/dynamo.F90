@@ -6,6 +6,7 @@ Use MemMan
 USE InOut
 USE Macros, ONLY : HasQM,HasMM,MMOnly 
 USE ProcessControl
+USE IntCoo
 !
    USE definitions
    USE constants
@@ -443,6 +444,133 @@ CONTAINS
 !
    END SUBROUTINE LJ_EXCL
 !-------------------------------------------------------------- 
+!
+   SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,BOXSIZE)
+!
+   IMPLICIT NONE
+   INTEGER :: ISET,NBOX,NATOMS,NX,NY,NZ
+   REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BOXSIZE
+   INTEGER :: IX,IY,IZ,IORD,IORDD
+   INTEGER :: I1,I2,JJ1,JJ2,IXD,IYD,IZD
+   REAL(DOUBLE) :: X1,Y1,Z1,X2,Y2,Z2,R1,R2,R12,R6,Q1,Q2
+   TYPE(INT_VECT) :: BOXI,BOXJ,ATMMARK
+   TYPE(CRDS) :: GM_Loc
+   TYPE(DBL_VECT) :: LJEPS,LJRAD
+   REAL(DOUBLE) :: ELJ       
+!
+   CALL OpenHDF(InfFile)
+!
+! boxsize is in angstroems
+!
+! get MM or QMMM atom coordinates as stored in GM_Loc
+! get ATMMARK to distinguish between QM and MM atoms
+! get LJEPS%D : LJ epsilon
+! get LJRAD%D : LJ radii of atoms
+! calculate and get BOXI and BOXJ for a certain box size, then
+! sum up LJ contributions within boxes and between 
+! neighbouring boxes
+!
+   CALL Get(GM_Loc,'GM_MM'//TRIM(IntToChar(ISet)))
+   NATOMS=GM_Loc%Natms
+!
+     CALL New(ATMMARK,NATOMS)
+   IF(HasQM()) THEN
+     CALL Get(ATMMARK,'ATMMARK')
+   ELSE 
+     ATMMARK%I(:)=0 !!! all MM atoms
+   ENDIF
+!
+   CALL New(LJEPS,NATOMS)
+   CALL New(LJRAD,NATOMS)
+   CALL Get(LJEPS,'LJEPS')
+   CALL Get(LJRAD,'LJRAD') 
+!
+   GM_Loc%Carts%D(:,:)=GM_Loc%Carts%D(:,:)/AngstromsToAU !!! work with angstroems here
+!
+! Now calculate distributions of atoms in the boxes
+!
+   CALL SORT_INTO_BOX1(BOXSIZE,GM_Loc%Carts%D,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+!
+   NBOX=NX*NY*NZ
+   CALL NEW(BOXI,NBOX+1)
+   CALL NEW(BOXJ,NATOMS)
+!
+   CALL SORT_INTO_BOX2(BOXSIZE,GM_Loc%Carts%D,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BOXI,BOXJ)
+!
+! Calculate LJ energy
+!
+   ELJ=Zero
+!
+   DO IZ=1,NZ   
+   DO IX=1,NX   
+   DO IY=1,NY   
+!
+! indices of central and neighboring boxes
+!
+       IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
+!
+     DO I1=BOXI%I(IORD),BOXI%I(IORD+1)-1
+       JJ1=BOXJ%I(I1)
+        X1=GM_Loc%Carts%D(1,JJ1)
+        Y1=GM_Loc%Carts%D(2,JJ1)
+        Z1=GM_Loc%Carts%D(3,JJ1)
+        R1=LJRAD%D(JJ1)
+        Q1=LJEPS%D(JJ1)
+! second atom may come from central or neigbouring boxes 
+! and must be an MM atom, LJ is not calculated for QM-QM pairs
+     DO IZD=-1,1
+       IF(IZ+IZD>0 .AND. IZ+IZD<=NZ) THEN
+     DO IXD=-1,1
+       IF(IX+IXD>0 .AND. IX+IXD<=NX) THEN
+     DO IYD=-1,1
+       IF(IY+IYD>0 .AND. IY+IYD<=NY) THEN
+!
+       IORDD=NX*NY*(IZ-1+IZD)+NY*(IX-1+IXD)+IY+IYD
+         DO I2=BOXI%I(IORDD),BOXI%I(IORDD+1)-1
+           JJ2=BOXJ%I(I2)
+         IF(ATMMARK%I(JJ2)==0) THEN
+           X2=GM_Loc%Carts%D(1,JJ2)
+           Y2=GM_Loc%Carts%D(2,JJ2)
+           Z2=GM_Loc%Carts%D(3,JJ2)
+           R2=LJRAD%D(JJ2)
+           Q2=LJEPS%D(JJ2)
+           R12=SQRT((X1-X2)**2+(Y1-Y2)**2+(Z1-Z2)**2)
+           IF(R12>0.001D0) THEN
+             R6=(R1*R2/R12)**6
+             ELJ=ELJ+Q1*Q2*R6*(R6-One)
+           ENDIF
+         ENDIF
+         ENDDO
+!
+       ENDIF
+     ENDDO
+       ENDIF
+     ENDDO
+       ENDIF
+     ENDDO
+!
+     ENDDO
+!
+   ENDDO
+   ENDDO
+   ENDDO
+!
+! All interactions have been counted twice
+!
+   ELJ=ELJ/Two
+   write(*,*) 'elj in dynamo= ',elj
+!
+   CALL CloseHDF()
+!
+   CALL Delete(GM_Loc)
+   CALL Delete(ATMMARK)
+   CALL Delete(LJEPS)
+   CALL Delete(LJRAD)
+   CALL Delete(BOXI)
+   CALL Delete(BOXJ)
+!
+   END SUBROUTINE ENERGY_LENNARD_JONES
+!
 #endif
 !
 END MODULE DYNAMO
