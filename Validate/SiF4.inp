@@ -1,7 +1,5 @@
 <BeginTitle>
-
-    ** Silicontetrafluride **
-
+            ** Silicontetrafluride **
 <EndTitle>
 
 <BeginOptions>
@@ -9,9 +7,9 @@ Charge=0
 Multiplicity=1
 Guess=SuperPos
 SCFMethod=(RH,RH)
-BasisSets=(STO-2G,6-31G**)
+BasisSets=(STO-3G,6-31G**)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Loose,Tight)
+Accuracy =(Good,Tight)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>

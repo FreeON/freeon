@@ -1,18 +1,20 @@
 <BeginTitle>
-
-        ** Chlorophyll **
-
+               ** Chlorophyll **
 <EndTitle>
 
 <BeginOptions>
 Charge=0
 Multiplicity=1
 Guess=SuperPos
+SDMM=14
+DIISDamp=0.1
 SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-2G,3-21G)
 ModelChem=(HF,BLYPxc)
 Accuracy =(Loose,Good)
-DebugAll =(MaxDebug)
+DebugAll =(MinDebug)
+PulayDIIS=MaxDebug
+SDMM=MaxDebug
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

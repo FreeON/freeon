@@ -1,17 +1,18 @@
 <BeginTitle>
-
-  ** Caffine **
-
+              ** Caffine **
 <EndTitle>
 <BeginOptions>
 Charge=0
 Multiplicity=1
 Guess=SuperPos
+Opt=(QuNew,OneBase)
+Steps=10
+Extrap=Interp
 SCFMethod=(RH,RH)
-BasisSets=(STO-2G,3-21G)
+BasisSets=(STO-2G,6-31G**)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Loose,Tight)
-DebugAll =(MaxDebug)
+Accuracy =(Loose,Good)
+DebugAll =(MinDebug)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 

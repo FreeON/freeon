@@ -1,17 +1,19 @@
 <BeginTitle>
-
-      ** BetaCarotene **
-
+             ** BetaCarotene **
 <EndTitle>
 <BeginOptions>
 Charge=0
 Multiplicity=1
 Guess=SuperPos
+Opt=(QuNew,OneBase)
+Steps=2
+Extrap=Proj
 SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-2G,3-21G)
-ModelChem=(HF,BLYPxc)
+ModelChem=(BLYPxc,BLYPxc)
 Accuracy =(Loose,Good)
-DebugAll =(MaxDebug)
+DebugAll =(MinDebug)
+PulayDIIS=MaxDebug
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 
