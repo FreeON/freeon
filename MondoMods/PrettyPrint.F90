@@ -52,6 +52,9 @@ MODULE PrettyPrint
          CHARACTER(LEN=5)            :: Zone
          INTEGER, DIMENSION(8)       :: Values
          LOGICAL                     :: Enter 
+#ifdef PARALLEL
+         IF(MyID==0)THEN
+#endif
          Enter=.TRUE.; IF(PRESENT(Enter_O))Enter=Enter_O
          CALL DATE_AND_TIME(DDate,TTime,Zone,Values)
          DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
@@ -65,6 +68,9 @@ MODULE PrettyPrint
             WRITE(Out,'(A)')'>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<'
          ENDIF
          CLOSE(UNIT=Out,STATUS='KEEP')
+#ifdef PARALLEL
+         ENDIF
+#endif
       END SUBROUTINE TimeStamp
 
       FUNCTION OpenPU(FileName_O,Unit_O)
