@@ -767,8 +767,7 @@ MODULE ParseInput
             IF(GM%PBC%NoTransVec) THEN
                CALL CalTransVec(GM)
             ENDIF
-!
-            CALL Translate(GM)
+!           CALL Translate(GM)
             CALL WrapAtoms(GM)
 #else
 !           Convert to AU
@@ -926,8 +925,6 @@ MODULE ParseInput
                    //'line at the end of the input file.')
 !
       END SUBROUTINE ParseCoordinates_XMOL
-!
-!
 !
       SUBROUTINE ParseCoordinates_MSI(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
