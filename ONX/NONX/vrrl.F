@@ -14,7 +14,7 @@
           W(I,I1)=R(I,J)
         ENDDO
       ENDDO
-      
+
       DO J=1,NS
         NT=VLOC(1,J)
         IF(NT.EQ.1) THEN
@@ -69,7 +69,6 @@
           I12=MOD(I2,2)+1       ! IZE
           I13=I12+2             ! IZE2
           DO I=1,N
-
             W(I,I3)=WR(I2,I)*W(I,I4)+WR(I11,I)*W(I,I5)
      >              +F10*WZ(5,I)*W(I,I8)
      >              +F9*WZ(I12,I)*(W(I,I6)-WZ(I13,I)*W(I,I7))

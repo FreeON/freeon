@@ -1,6 +1,7 @@
 SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
   USE DerivedTypes
   USE GlobalScalars
+  USE PrettyPrint
   USE ONXParameters
   IMPLICIT NONE
   INTEGER, INTENT(IN)        :: N,KBra,KKet,NVRR,LngDrv

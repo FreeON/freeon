@@ -33,7 +33,6 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
   Cx=DisBufB( 8)
   Cy=DisBufB( 9)
   Cz=DisBufB(10)
-
   DO I=1,CBra
     CB(I,1)=PrmBufB(6,I)
     CB(I,2)=PrmBufB(7,I)
@@ -69,6 +68,7 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
         Tx     = (Zeta*Px+Eta*Qx)*r1xZpE
         Ty     = (Zeta*Py+Eta*Qy)*r1xZpE
         Tz     = (Zeta*Pz+Eta*Qz)*r1xZpE
+
         IB%WR%D( 1,Ind) = Px-Cx
         IB%WR%D( 2,Ind) = Qx-DB%DisBuf%D(I2+7)
         IB%WR%D( 3,Ind) = Py-Cy
@@ -107,7 +107,7 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
           T1=1.0D0/T
           TS=DSQRT(T1)
           DO IG=1,LTot+1
-            R(J,K,I,IG)=Rkk*IB%GammaA%D(IG-1)*TS
+            R(J,K,I,IG)=Rkk*IB%GammaA%D(IG)*TS
             TS=TS*T1
           END DO
         END IF ! Switch

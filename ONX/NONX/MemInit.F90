@@ -11,7 +11,6 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
   TYPE(IDrv),INTENT(INOUT) :: Drv
   TYPE(BSet),INTENT(IN)    :: BSc,BSp
   INTEGER                  :: LR
-  write(*,*) "In MemInit: ErrorCode=",ErrorCode
   IF (ErrorCode==eInit) THEN
     DB%MAXDis  = 1000
     DB%MAXPrm  = 3000
@@ -20,14 +19,11 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     DB%MAXK    = 10
     DB%MAXP    = 8
     DB%MAXC    = 11
-    DB%NShells = 20   !  fix this
-    DB%NTypes  = 20   !  fix this 
-    DB%NCnts   = 20   !  fix this
     DB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
     DB%MInfo   = 0    
     SB%MAXSL   = 10000
     IB%MAXI    = 30000
-    IB%MaxInts = 1000
+    IB%MaxInts = 500
     IB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
     IB%Lval    = -1
     IB%MAXL    = 12
@@ -73,5 +69,4 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     write(*,*) "Error code = ",ErrorCode
     CALL Halt(' Sorry, fatal error in ONX')
   END IF
-  write(*,*) "Leaving MemInit"
 END SUBROUTINE MemInit

@@ -311,7 +311,7 @@ c     ELSEIF(IType.EQ.1003) THEN
 c     ELSEIF(IType.EQ.1006) THEN
 c     ELSEIF(IType.EQ.1010) THEN
       ELSE
-         write(*,*) "IType = ",IType
+         WRITE(*,*) "IType = ",IType
          STOP 'Illegal IType in KetHRR_old'
       ENDIF
       RETURN

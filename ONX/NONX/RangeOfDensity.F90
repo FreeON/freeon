@@ -1,4 +1,4 @@
-  SUBROUTINE RangeOfDensity(D,NameBuf)
+  SUBROUTINE RangeOfDensity(D,NameBuf,BfnInd,DB,BS,GM)
     USE DerivedTypes
     USE GlobalScalars
     USE Macros
@@ -10,7 +10,11 @@
     TYPE(BCSR),INTENT(IN)         :: D
 #endif
     TYPE(INT_VECT),INTENT(INOUT)  :: NameBuf
-    INTEGER                       :: AtA
+    TYPE(INT_RNK2),INTENT(INOUT)  :: BfnInd
+    TYPE(BSET),INTENT(IN)         :: BS
+    TYPE(CRDS),INTENT(IN)         :: GM
+    TYPE(DBuf)                    :: DB
+    INTEGER                       :: AtA,ShellA,KA,CFA
     INTEGER                       :: AtB
     INTEGER                       :: ri,ci
     NameBuf%I=0
@@ -33,6 +37,15 @@
       NameBuf%I(AtB)=1
     END DO
   END DO
+  ShellA=0
+  DO AtA=1,NAtoms
+    KA=GM%AtTyp%I(AtA)
+    DO CFA=1,BS%NCFnc%I(KA)
+      ShellA=ShellA+1
+      BfnInd%I(AtA,CFA)=ShellA
+    END DO
+  END DO 
+  DB%NShells=ShellA
 #endif
   END SUBROUTINE RangeOfDensity
 

@@ -2,6 +2,7 @@ MODULE InitExchangeMatrix
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
+  USE PrettyPrint
   USE ONXParameters
   IMPLICIT NONE
 

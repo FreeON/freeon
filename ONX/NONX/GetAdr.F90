@@ -28,17 +28,17 @@ SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
 
   iBgn=A%RowPt%I(I)
   iEnd=A%RowPt%I(I+1)-1
+
   Ind=0
   Err=0
   IF (PRESENT(E_O)) Err=E_O
 
   SELECT CASE (Err)
-
   CASE (0)
   1000 CONTINUE
     iMid=(iEnd+iBgn)/2
     IF (A%ColPt%I(iMid)==J) GOTO 2000
-    IF (iBgn==iEnd) THEN
+    IF (iBgn>=iEnd) THEN
       WRITE(*,*) "I=",I," J=",J
       CALL Halt(' Matrix element not found in ONX:GetAdrB')
     ENDIF
@@ -55,7 +55,7 @@ SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
   3000 CONTINUE
     iMid=(iEnd+iBgn)/2
     IF (A%ColPt%I(iMid)==J) GOTO 4000
-    IF (iBgn==iEnd) RETURN
+    IF (iBgn>=iEnd) RETURN
     IF (A%ColPt%I(iMid)>J) THEN
       iEnd=iMid-1
     ELSE

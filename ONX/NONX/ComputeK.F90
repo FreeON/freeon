@@ -1,4 +1,4 @@
-SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
+SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -20,13 +20,14 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
   TYPE(BCSR)            :: K
   INTEGER               :: MyID=0
 #endif
-  TYPE(BSET),INTENT(IN) :: BSc,BSp   ! basis set info
-  TYPE(CRDS),INTENT(IN) :: GMc,GMp   ! geometry info
-  TYPE(DBuf)            :: DB        ! ONX distribution buffers
-  TYPE(IBuf)            :: IB        ! ONX 2-e eval buffers
-  TYPE(DSL)             :: SB        ! ONX distribution pointers
-  TYPE(IDrv)            :: Drv       ! VRR/contraction drivers
-  TYPE(INT_RNK2)        :: SubInd    ! Index -> BCSR converter
+  TYPE(BSET),INTENT(IN)     :: BSc,BSp   ! basis set info
+  TYPE(CRDS),INTENT(IN)     :: GMc,GMp   ! geometry info
+  TYPE(DBuf)                :: DB        ! ONX distribution buffers
+  TYPE(IBuf)                :: IB        ! ONX 2-e eval buffers
+  TYPE(DSL)                 :: SB        ! ONX distribution pointers
+  TYPE(IDrv)                :: Drv       ! VRR/contraction drivers
+  TYPE(INT_RNK2)            :: SubInd    ! Index -> BCSR converter
+  TYPE(INT_RNK2),INTENT(IN) :: BfnInd
 !-------------------------------------------------------------------
 ! Misc. internal variables
 !-------------------------------------------------------------------
@@ -34,7 +35,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
   INTEGER               :: iTKet,iCKet,TKet,LKet,ITypeD,ITypeB,CKet
   INTEGER               :: LenBra,iDBra,iPBra,iBra
   INTEGER               :: LenKet,iDKet,iPKet,iKet
-  INTEGER               :: LTot,ShellC,ShellD,IndexA
+  INTEGER               :: LTot,ShellC,ShellD,IndexA,IndexB
   INTEGER               :: AtC,KC,CFC,StartLC,StopLC,StrideC,IndexC,NBFC
   INTEGER               :: AtD,KD,CFD,StartLD,StopLD,StrideD,IndexD,NBFD
   INTEGER               :: ri,ci,iPtr,iCP,iCL
@@ -44,7 +45,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
   INTEGER               :: NA,NB,NC,ND
   INTEGER               :: L1,L2,L3,L4
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
-  REAL(DOUBLE)          :: Dcd,SchB,SchK
+  REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
   TYPE(DBL_VECT)        :: DA
 !-------------------------------------------------------------------
@@ -57,14 +58,14 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
 
   DO iTBra=1,DB%LenTC       ! Loop over angular symmetry types on the Bra
     TBra=DB%TCode%I(iTBra)
-    ITypeC=MOD(TBra,100)
-    ITypeA=(TBra-ITypeC)/100
+    ITypeA=MOD(TBra,100)
+    ITypeC=(TBra-ITypeA)/100
     LBra=LTotal(ITypeA)+LTotal(ITypeC)
 
   DO iTKet=1,DB%LenTC       ! Loop over angular symmetry types on the Ket
     TKet=DB%TCode%I(iTKet)
-    ITypeD=MOD(TKet,100)
-    ITypeB=(TKet-ITypeD)/100
+    ITypeB=MOD(TKet,100)
+    ITypeD=(TKet-ITypeB)/100
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
 
     NB1=IDmn(LBra)
@@ -103,31 +104,30 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
         NBFC=BSp%BfKnd%I(KC)
         IndexC=0
         DO CFC=1,BSp%NCFnc%I(KC)
-          ShellC = ShellC+1
-          StartLC=BSp%LStrt%I(CFC,KC)
-          StopLC=BSp%LStop%I(CFC,KC)
-          StrideC=StopLC-StartLC+1
-          LenBra = DB%DisPtr%I(1,ShellC,iTBra,iCBra)
-          iDBra  = DB%DisPtr%I(2,ShellC,iTBra,iCBra)
-          iPBra  = DB%DisPtr%I(3,ShellC,iTBra,iCBra)
+          ShellC  = BfnInd%I(AtC,CFC)
+          StartLC = BSp%LStrt%I(CFC,KC)
+          StopLC  = BSp%LStop%I(CFC,KC)
+          StrideC = StopLC-StartLC+1
+          LenBra  = DB%DisPtr%I(1,ShellC,iTBra,iCBra)
+          iDBra   = DB%DisPtr%I(2,ShellC,iTBra,iCBra)
+          iPBra   = DB%DisPtr%I(3,ShellC,iTBra,iCBra)
           IF (LenBra>0) THEN
 
       ShellD=0
       DO ci=D%RowPt%I(ri),D%RowPt%I(ri+1)-1        ! Loop over atom D (Dcd)
-        AtD=D%ColPt%I(ci)
-        iPtr=D%BlkPt%I(ci)
-        KD=GMp%AtTyp%I(AtD)
-        NBFD=BSp%BfKnd%I(KD)
-
-        IndexD=0
+        AtD    = D%ColPt%I(ci)
+        iPtr   = D%BlkPt%I(ci)
+        KD     = GMp%AtTyp%I(AtD)
+        NBFD   = BSp%BfKnd%I(KD)
+        IndexD = 0
         DO CFD=1,BSp%NCFnc%I(KD)
-          ShellD = ShellD+1
-          StartLD=BSp%LStrt%I(CFD,KD)
-          StopLD=BSp%LStop%I(CFD,KD)
-          StrideD=StopLD-StartLD+1
-          LenKet = DB%DisPtr%I(1,ShellD,iTKet,iCKet)
-          iDKet  = DB%DisPtr%I(2,ShellD,iTKet,iCKet)
-          iPKet  = DB%DisPtr%I(3,ShellD,iTKet,iCKet)
+          ShellD  = BfnInd%I(AtD,CFD)
+          StartLD = BSp%LStrt%I(CFD,KD)
+          StopLD  = BSp%LStop%I(CFD,KD)
+          StrideD = StopLD-StartLD+1
+          LenKet  = DB%DisPtr%I(1,ShellD,iTKet,iCKet)
+          iDKet   = DB%DisPtr%I(2,ShellD,iTKet,iCKet)
+          iPKet   = DB%DisPtr%I(3,ShellD,iTKet,iCKet)
           IF (LenKet>0) THEN
 
             CALL GetSubBlk(NBFC,NBFD,StrideC,StrideD,IndexC+1,  &
@@ -135,20 +135,20 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
             Dcd=GetAbsMax(StrideC*StrideD,DA)   ! could test on the density here...
 
             IF (DB%DisBuf%D(iDBra+1)<0.0D0) THEN
-              BraSwitch=0
+              BraSwitch=1
               NA=L1
               NC=L2
             ELSE
-              BraSwitch=1
+              BraSwitch=0
               NA=L2
               NC=L1
             END IF
             IF (DB%DisBuf%D(iDKet+1)<0.0D0) THEN
-              KetSwitch=0
+              KetSwitch=1
               NB=L3
               ND=L4
             ELSE 
-              KetSwitch=1
+              KetSwitch=0
               NB=L4
               ND=L3
             END IF
@@ -162,50 +162,44 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
               ACy=DB%DisBuf%D(IBD+5)
               ACz=DB%DisBuf%D(IBD+6)
               SchB=DB%DisBuf%D(IBD+10)
-
+              Test=Thresholds%TwoE/(Dcd*SchB)
               ISL=0
               DO J=1,LenKet
                 IKD=iDKet+(J-1)*DB%MAXC
-                SchK=DB%DisBuf%D(IKD+10)
-                IF (SchB*SchK*Dcd<=Thresholds%TwoE) EXIT ! The ONX skipout statement
-                ISL=ISL+1
-                IKP=iPKet+(J-1)*DB%MAXP*CKet
-                SB%SLDis%I(ISL)=IKD+4
-                SB%SLPrm%I(ISL)=IKP
+                IndexB=ABS(DB%DisBuf%D(IKD+1))
+                IF (IndexA>=IndexB) THEN     ! Symmetry of the K matrix
+                  SchK=DB%DisBuf%D(IKD+10)
+                  IF (SchK<=Test) EXIT       ! ONX skipout
+                  ISL=ISL+1
+                  IKP=iPKet+(J-1)*DB%MAXP*CKet
+                  SB%SLDis%I(ISL)=IKD+4
+                  SB%SLPrm%I(ISL)=IKP
+                END IF
               END DO ! J, LenKet
 
               IF (ISL>0) THEN
-
+                xNERIs=xNERIs+FLOAT(L1*L2*L3*L4)
                 CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
                           DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
-
-                CALL VRRl(CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),     &
+                CALL VRRl(ISL*CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is), &
                           Drv%VLOC%I(Drv%is+Drv%nr),                           &
                           IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
-
                 CALL Contract(ISL,CBra,CKet,NVRR,iCL,Drv%CDrv%I(iCP+1),        &
-                              IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
-
+                              IB%CB%D,IB%CK%D,IB%W1%D,IB%W2%D)
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
-                                        SB%SLDis%I,NK1,NK1,TKet)
+                                        SB%SLDis%I,NB1,NB1,TKet)
                 IF (LBra>0) THEN 
                   CALL HRRBra(IB%W1%D,IB%W2%D,ACx,ACy,ACz,ISL,                 &
                               NB1,NB2,NK2,TBra)
-
                   CALL Digest(ISL,NA,NB,NC,ND,L1,L2,L3,L4,                     &
                               IntSwitch,IB%W1%D,IB%W2%D,DA%D)
-
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D,K)
-
                 ELSE
-
                   CALL Digest(ISL,NA,NB,NC,ND,L1,L2,L3,L4,                     &
                               IntSwitch,IB%W2%D,IB%W1%D,DA%D)
-
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D,K)
-
                 END IF
-              END IF
+              END IF  ! ISL
 
             END DO ! I, LenBra
           END IF ! LenKet
@@ -216,17 +210,11 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd)
           IndexC=IndexC+StrideC
         END DO ! CFC
       END DO ! AtC
-
     END IF ! TCPop on Ket
   END DO ! iCKet
     END IF ! TCPop on Bra
   END DO ! iCBra
-
   END DO ! iTKet
   END DO ! iTBra
-  
-
   CALL Delete(DA)
-  CALL Halt('enough for now')
-
 END SUBROUTINE ComputeK

@@ -43,9 +43,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   INTEGER                :: NFinal,iT
 
   CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
-  CALL New(BufT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
-  CALL New(SchT,(/DB%MAXD,DB%NTypes,DB%NPrim*DB%NPrim/))
-
+  CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
+  CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   DB%LenCC=0
   DB%LenTC=0
   iDis=1
@@ -104,9 +103,9 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
         IF(IType.GE.KType) THEN
           IKType=IType*100+KType
           DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-          DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
-          DB%TBufC%D( 3,iBf)=DFLOAT(IndexA)+Small
-          DB%TBufC%D( 4,iBf)=DFLOAT(IndexC)+Small
+          DB%TBufC%D( 2,iBf)=-DFLOAT(IndexA)-Small
+          DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
+          DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 5,iBf)=ACx
           DB%TBufC%D( 6,iBf)=ACy
           DB%TBufC%D( 7,iBf)=ACz
@@ -119,7 +118,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
         ELSE 
           IKType=KType*100+IType
           DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-          DB%TBufC%D( 2,iBf)=-DFLOAT(IndexA)-Small
+          DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
           DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
           DB%TBufC%D( 5,iBf)=-ACx
@@ -151,8 +150,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
             DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
               DB%TBufP%D(6,I0,iBf)=1.0D0
-              DB%TBufP%D(7,I0,iBf)=2.0D0
-              DB%TBufP%D(8,I0,iBf)=3.0D0
+              DB%TBufP%D(7,I0,iBf)=1.0D0
+              DB%TBufP%D(8,I0,iBf)=1.0D0
             ELSEIF (CType.EQ.12.OR.CType.EQ.21) THEN
               DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
                                    BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
@@ -210,9 +209,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
             rInt = DSQRT(GetAbsMax(NInts,IB%W1))
           ENDIF
 
-          write(*,*) "NONX: rInt = ",rint
-
           IF(rInt>Thresholds%Dist) THEN 
+            DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
             DB%TBufC%D(11,iBf)=rInt
             Found=.FALSE.
             DO I=1,DB%LenCC       ! look for the contraction type
@@ -268,6 +266,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   END DO ! AtA
 
   DO I=1,DB%LenCC
+    KonAC=DB%CCode%I(I)
     DO J=1,DB%LenTC
       N=BufN%I(J,I)
       IF (N>0) THEN

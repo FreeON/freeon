@@ -48,6 +48,9 @@ MODULE ONXParameters
    REAL(DOUBLE), SAVE      :: DenRange = 0.0D0
    REAL(DOUBLE), SAVE      :: ONXRange = 0.0D0
    REAL(DOUBLE), SAVE      :: MatRange = 0.0D0
+
+   REAL(DOUBLE), SAVE      :: xNERIs   = 0.0D0
+   
    INTEGER, SAVE           :: NRows=0,NCols=0,NElem=0
    INTEGER, SAVE           :: MaxN2=0
 
