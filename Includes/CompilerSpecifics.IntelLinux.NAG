@@ -4,9 +4,9 @@
 CPP=/lib/cpp -P -C \
              -traditional # Need this for new RH 7.1 CPP... 
 CPPINCLUDE    = -I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include -I$(MPI_INC)
-CPPOPTS       = -DNAG -DPERIODIC 
+CPPOPTS       = -DNAG -DPERIODIC -DNLATTFORCE 
 #
-#CPPOPTS       = -DNAG -DPERIODIC -DMMech
+#CPPOPTS       = -DNAG -DPERIODIC -DMMech -DNLATTFORCE 
 #               -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options

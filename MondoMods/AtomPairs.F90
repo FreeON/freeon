@@ -422,7 +422,7 @@ CONTAINS
 !
 !   This routine rebuilds PBC data based on PBC%BoxShape
 !
-    PBC%CellVolume   = CellVolume(PBC%BoxShape%D,PBC%AutoW%I)
+    PBC%CellVolume   = ABS(CellVolume(PBC%BoxShape%D,PBC%AutoW%I))
     PBC%CellCenter%D = CellCenter(PBC%BoxShape%D,PBC%AutoW%I)
     PBC%InvBoxSh%D   = InverseMatrix(PBC%BoxShape%D)
 !
@@ -590,7 +590,7 @@ CONTAINS
           IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
        ELSEIF(GM%PBC%Dimen ==3) THEN
           GM%PBC%DipoleFAC = -(Four*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One))
-          GM%PBC%QupoleFAC =  (Two*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One))
+          GM%PBC%QupoleFAC =  ( Two*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One))
           IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
           IF(ABS(GM%PBC%QupoleFAC) .LT. 1.D-14) GM%PBC%QupoleFAC = Zero
        ENDIF

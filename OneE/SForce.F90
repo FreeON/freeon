@@ -133,14 +133,8 @@ PROGRAM SForce
      ENDDO
   ENDDO
 !
-! Print The Forces and Lattice Forces
+! Print The Lattice Forces
 !
-!!$  WRITE(*,*) 'SForce'
-!!$  DO AtA=1,NAtoms
-!!$     A1=3*(AtA-1)+1
-!!$     A2=3*AtA
-!!$     WRITE(*,*) SFrc%D(A1:A2)
-!!$  ENDDO
 !!$  WRITE(*,*) 'LatFrc_S'
 !!$  DO I=1,3
 !!$     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 

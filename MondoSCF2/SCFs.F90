@@ -842,7 +842,7 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(Parallel)     :: M
     TYPE(BasisSets)    :: B
-    INTEGER            :: cBAS,cGEO,K,J,iATS,iCLONE
+    INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE
     CHARACTER(LEN=DCL) :: chGEO,chBAS    
     REAL(DOUBLE)       :: GradVal
     !----------------------------------------------------------------------------!
@@ -869,31 +869,24 @@ CONTAINS
     ENDIF
     ! Build density with last DM
     CALL Invoke('MakeRho',N,S,M)
-#ifdef NLATTFORCE    
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
-!
-    CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,O,S,M)
-!
+    ! DFT exchange corrleation term
+    IF(HasDFT(O%Models(cBas))) THEN
+       CALL Invoke('XCForce',N,S,M)
+    ENDIF
+#ifdef NLATTFORCE    
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)    
-!   
-       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
-!
+       CALL Invoke('GONX',N,S,M)       
+       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
     ENDIF
 #else
-    ! Coulomb part
-    CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
        CALL Invoke('GONX',N,S,M)
     ENDIF
 #endif
-    ! DFT exchange corrleation term
-    IF(HasDFT(O%Models(cBas))) THEN
-       CALL Invoke('XCForce',N,S,M)
-    ENDIF
 !
 !   Constraint the Gradients
 !
@@ -912,6 +905,11 @@ CONTAINS
        ENDIF
 !      Get Lattice Forces
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!      Print Tot Lattice Forces
+       WRITE(*,*) 'LatFrc NUM'
+       DO I=1,3
+          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
+       ENDDO
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
@@ -971,15 +969,18 @@ CONTAINS
     CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
     REAL(DOUBLE)       :: DDelta,Lat00,E1,E2
     CHARACTER(LEN=DCL) :: TrixName
+    REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_J
 #ifdef PARRALEL
     TYPE(DBCSR)        :: P,J1,J2,J3
 #else
     TYPE(BCSR)         :: P,J1,J2,J3
 #endif
 !   
-    DDelta = 1.D-3
+    DDelta = 1.D-4
     DO iCLONE=1,G%Clones
-
+!
+        LatFrc_J = Zero
+!
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
        chSCF=IntToChar(S%Current%I(1))
@@ -989,7 +990,7 @@ CONTAINS
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !
-       O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE*1.D-4
+       O%Thresholds(cBAS)%TwoE=O%Thresholds(cBAS)%TwoE
        CALL Put(O%Thresholds(cBAS),chBAS)
 !
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
@@ -1023,10 +1024,10 @@ CONTAINS
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                G%Clone(iCLONE)%AbCarts%D = G%Clone(iCLONE)%Carts%D
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('MakeRho' ,N,S,M) 
                 CALL Invoke('MakePFFT',N,S,M)
-                CALL Invoke('MakeRho' ,N,S,M)
                 CALL Invoke('QCTC'    ,N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
@@ -1035,14 +1036,14 @@ CONTAINS
                 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
                 CALL Get(E1,'E_NuclearTotal')
                 CALL CloseHDFGroup(HDF_CurrentID)
-                CALL CloseHDF(HDFFileID)
+                CALL CloseHDF(HDFFileID) 
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
-                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                G%Clone(iCLONE)%AbCarts%D = G%Clone(iCLONE)%Carts%D 
                 CALL GeomArchive(cBAS,cGEO,N,B,G)
-                CALL Invoke('MakePFFT',N,S,M)
                 CALL Invoke('MakeRho' ,N,S,M)
+                CALL Invoke('MakePFFT',N,S,M)
                 CALL Invoke('QCTC',N,S,M)  
                 TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
                      //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
@@ -1053,11 +1054,12 @@ CONTAINS
                 CALL CloseHDFGroup(HDF_CurrentID)
                 CALL CloseHDF(HDFFileID)
 !
-                CALL Multiply(J2,-One)
+                CALL Multiply(J2,-One) 
                 CALL Add(J1,J2,J3)
                 CALL Multiply(P,J3,J1)
-                G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) &
-                     + Trace(J1)/(Two*DDelta) + (E1-E2)/(Two*DDelta) 
+!                LatFrc_J(I,J) =  Trace(J1)/(Two*DDelta)
+!                LatFrc_J(I,J) =  (E1-E2)/(Two*DDelta)
+                LatFrc_J(I,J) =  (Trace(J1) + (E1-E2))/(Two*DDelta)
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
@@ -1067,7 +1069,8 @@ CONTAINS
              ENDIF
           ENDDO
        ENDDO
-!
+!      Update Lattice Forces
+       G%Clone(iCLONE)%PBC%LatFrc%D = G%Clone(iCLONE)%PBC%LatFrc%D + LatFrc_J
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !
@@ -1078,6 +1081,11 @@ CONTAINS
        CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)     
        CALL CloseHDF(HDFFileID)
+!      Print J Lattice Forces
+!!$       WRITE(*,*) 'LatFrc_J NUM'
+!!$       DO I=1,3
+!!$          WRITE(*,*) (LatFrc_J(I,J),J=1,3)
+!!$       ENDDO
 !
        CALL Delete(BSiz)
        CALL Delete(OffS)
@@ -1091,7 +1099,7 @@ CONTAINS
 !===============================================================================
 ! Numerically compute Lattice Forces for J
 !===============================================================================
-  SUBROUTINE NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
+  SUBROUTINE NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
@@ -1100,8 +1108,9 @@ CONTAINS
     TYPE(Parallel)     :: M
     INTEGER            :: cBAS,cGEO,iCLONE,I,J,II
     CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
-    REAL(DOUBLE)       :: DDelta,Lat00
+    REAL(DOUBLE)       :: DDelta,Lat00,KScale
     CHARACTER(LEN=DCL) :: TrixName
+    REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_X
 #ifdef PARRALEL
     TYPE(DBCSR)        :: P,K1,K2,K3
 #else
@@ -1110,6 +1119,9 @@ CONTAINS
 !   
     DDelta = 1.D-3
     DO iCLONE=1,G%Clones
+!
+       LatFrc_X = Zero
+!
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
        chSCF=IntToChar(S%Current%I(1))
@@ -1169,7 +1181,7 @@ CONTAINS
                 CALL Multiply(K2,-One)
                 CALL Add(K1,K2,K3)
                 CALL Multiply(P,K3,K1)
-                G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) +  Trace(K1)/(Two*DDelta)
+                LatFrc_X(I,J) = Trace(K1)/(Two*DDelta)
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
@@ -1179,13 +1191,22 @@ CONTAINS
              ENDIF
           ENDDO
        ENDDO
-!
+!      Multiply By KScale
+       KScale   = ExactXScale(O%Models(cBAS))
+       LatFrc_X = KScale*LatFrc_X       
+!      Update X Lattice Force 
+       G%Clone(iCLONE)%PBC%LatFrc%D = G%Clone(iCLONE)%PBC%LatFrc%D + LatFrc_X
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        CALL Put(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
+!      Print X Lattice Forces
+!!$       WRITE(*,*) 'LatFrc_X NUM'
+!!$       DO I=1,3
+!!$          WRITE(*,*) (LatFrc_X(I,J),J=1,3)
+!!$       ENDDO
 !
        CALL Delete(BSiz)
        CALL Delete(OffS)
@@ -1197,6 +1218,86 @@ CONTAINS
     ENDDO
 !
   END SUBROUTINE NLATTFORCE_X
+!===============================================================================
+! Numerically compute Lattice Forces for J
+!===============================================================================
+  SUBROUTINE NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
+    TYPE(FileNames)    :: N
+    TYPE(Options)      :: O
+    TYPE(State)        :: S
+    TYPE(Geometries)   :: G
+    TYPE(BasisSets)    :: B
+    TYPE(Parallel)     :: M
+    INTEGER            :: cBAS,cGEO,iCLONE,I,J,II
+    CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
+    REAL(DOUBLE)       :: DDelta,Lat00,E1,E2
+    CHARACTER(LEN=DCL) :: TrixName
+    REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_XC
+#ifdef PARRALEL
+    TYPE(DBCSR)        :: P,K1,K2,K3
+#else
+    TYPE(BCSR)         :: P,K1,K2,K3
+#endif
+!   
+    DDelta = 1.D-3
+    DO iCLONE=1,G%Clones
+!
+       LatFrc_XC = Zero
+!
+       chGEO=IntToChar(cGEO)
+       chBAS=IntToChar(cBAS)
+       chSCF=IntToChar(S%Current%I(1))
+!
+       DO I=1,3
+          DO J=1,3
+             IF(G%Clone(iCLONE)%PBC%AutoW%I(I) == 1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J) == 1) THEN 
+                Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
+!
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('MakeRho' ,N,S,M)
+                CALL Invoke('HiCu'    ,N,S,M)  
+!
+                HDFFileID=OpenHDF(N%HFile)
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(E1,'Exc')
+                CALL CloseHDFGroup(HDF_CurrentID)
+                CALL CloseHDF(HDFFileID)
+!
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('MakeRho' ,N,S,M)
+                CALL Invoke('HiCu',N,S,M)  
+!
+                HDFFileID=OpenHDF(N%HFile)
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(E2,'Exc')
+                CALL CloseHDFGroup(HDF_CurrentID)
+                CALL CloseHDF(HDFFileID)
+!
+                LatFrc_XC(I,J) =  (E1-E2)/(Two*DDelta)
+!
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+!  
+             ENDIF
+          ENDDO
+       ENDDO
+!      Print J Lattice Forces
+!!$       WRITE(*,*) 'LatFrc_XC NUM'
+!!$       DO I=1,3
+!!$          WRITE(*,*) (LatFrc_XC(I,J),J=1,3)
+!!$       ENDDO
+!    
+    ENDDO
+!
+  END SUBROUTINE NLATTFORCE_XC
 !===============================================================================
 ! Numerically compute gradients of the exact HF exchange
 !===============================================================================
