@@ -14,13 +14,13 @@
  Los Alamos National Laboratory                       
  Copywrite 2001, University of California.            
 
- Compliled for AMDLinux.PG, executing on zinc20
+ Compliled for AMDLinux.PG, executing on zinc19
  a i686 machine running Linux 2.4.2-2
 
              ** Water **                                                                                                        
   
-<<Starting MondoSCF 10/28/01 @ 11:20:39>>
- HDF file :: /scratch/mchalla/Water_16887.hdf
+<<Starting MondoSCF 10/28/01 @ 15:35:01>>
+ HDF file :: /scratch/mchalla/Water_7307.hdf
  PROGRAM OF CALCULATIONS:
 
   A restricted Roothaan-Hall solution of the SCF using
@@ -52,14 +52,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3681828627114513D+01
  FockNGrueven         :: F[1] CheckSum = 0.1981893446114246D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1838297708856790D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:42>>
- PulayDIIS            :: DIISErr = 0.14D-01
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1838969432627154D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:43-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2136084577633224D+01
  SCFStatus : [1,1,1]  :: <SCF> = -75.21126257, dD = 0.38D-01, DIIS = 0.14D-01
@@ -68,14 +61,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3681383104965439D+01
  FockNGrueven         :: F[2] CheckSum = 0.1987383823931187D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1843263203981624D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:44>>
- PulayDIIS            :: DIISErr = 0.64D-02
- PulayDIIS            :: DIISCo = -.75D+00, 0.17D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1846979206460822D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:44-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[3] CheckSum = 0.2154439713177418D+01
  SCFStatus : [2,1,1]  :: <SCF> = -75.21854570, dD = 0.48D-01, DIIS = 0.64D-02
@@ -84,14 +70,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3679895573722371D+01
  FockNGrueven         :: F[3] CheckSum = 0.1990982554502756D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1846508503739816D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:45>>
- PulayDIIS            :: DIISErr = 0.38D-03
- PulayDIIS            :: DIISCo = -.85D-01, 0.20D+00, 0.89D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1846566387678720D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:45-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[4] CheckSum = 0.2153378324734190D+01
  SCFStatus : [3,1,1]  :: <SCF> = -75.21871176, dD = 0.29D-02, DIIS = 0.38D-03
@@ -100,14 +79,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3679841804332896D+01
  FockNGrueven         :: F[4] CheckSum = 0.1991042158031026D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1846560868345457D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:46>>
- PulayDIIS            :: DIISErr = 0.10D-04
- PulayDIIS            :: DIISCo = -.64D-02, 0.16D-01, 0.79D-01, 0.91D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1846555828752375D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:46-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[5] CheckSum = 0.2153347895119957D+01
  SCFStatus : [4,1,1]  :: <SCF> = -75.21870053, dD = 0.85D-04, DIIS = 0.10D-04
@@ -116,15 +88,7 @@
  HiCu                 :: Kxc[5] CheckSum = 0.3679842047885860D+01
  FockNGrueven         :: F[5] CheckSum = 0.1991034262987260D+02
  FockNGrueven         :: OrthoF[5] CheckSum = 0.1846553737455273D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:46>>
- PulayDIIS            :: DIISErr = 0.60D-06
- PulayDIIS            :: DIISCo = -.36D-02, 0.91D-02, 0.43D-01,
-                                  0.50D+00, 0.46D+00
  PulayDIIS            :: F_DIIS[5] CheckSum = 0.1846555049199640D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=47,  DeAllocs=46, 288 bytes are presently allocated.
-                         A max of 3736 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:46-<
  RHEqs                :: OrthoP[6] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[6] CheckSum = 0.2153347697153327D+01
  SCFStatus : [5,1,1]  :: <SCF> = -75.21869790, dD = 0.11D-05, DIIS = 0.60D-06
@@ -133,15 +97,7 @@
  HiCu                 :: Kxc[6] CheckSum = 0.3679842016600847D+01
  FockNGrueven         :: F[6] CheckSum = 0.1991034433785012D+02
  FockNGrueven         :: OrthoF[6] CheckSum = 0.1846553891999318D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:47>>
- PulayDIIS            :: DIISErr = 0.34D-06
- PulayDIIS            :: DIISCo = -.25D-02, 0.63D-02, 0.30D-01,
-                                  0.34D+00, 0.31D+00, 0.31D+00
  PulayDIIS            :: F_DIIS[6] CheckSum = 0.1846554754009777D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=49,  DeAllocs=48, 392 bytes are presently allocated.
-                         A max of 4304 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:47-<
  RHEqs                :: OrthoP[7] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[7] CheckSum = 0.2153347623024007D+01
  SCFStatus : [6,1,1]  :: <SCF> = -75.21869795, dD = 0.43D-06, DIIS = 0.34D-06
@@ -167,14 +123,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3648869800799188D+01
  FockNGrueven         :: F[1] CheckSum = 0.1994455198386670D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1854461197922992D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:51>>
- PulayDIIS            :: DIISErr = 0.97D-02
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1847067927900909D+02
- PulayDIIS            :: CPU Sec = 0.20D-01, WALL Sec = 0.20D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:51-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[2] CheckSum = 0.2181150982671187D+01
  SCFStatus : [1,1,2]  :: <SCF> = -75.22855347, dD = 0.33D-01, DIIS = 0.97D-02
@@ -183,14 +132,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3649878219451035D+01
  FockNGrueven         :: F[2] CheckSum = 0.1989307093739075D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1849763277759245D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:53>>
- PulayDIIS            :: DIISErr = 0.29D-02
- PulayDIIS            :: DIISCo = -.42D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1847801973007269D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:53-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[3] CheckSum = 0.2174270830388105D+01
  SCFStatus : [2,1,2]  :: <SCF> = -75.23056061, dD = 0.19D-01, DIIS = 0.29D-02
@@ -199,14 +141,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650795702541718D+01
  FockNGrueven         :: F[3] CheckSum = 0.1987168841768833D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1847821685554308D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:54>>
- PulayDIIS            :: DIISErr = 0.13D-03
- PulayDIIS            :: DIISCo = -.39D-01, 0.16D+00, 0.88D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1847880399746829D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:54-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[4] CheckSum = 0.2174709855724400D+01
  SCFStatus : [3,1,2]  :: <SCF> = -75.23144870, dD = 0.11D-02, DIIS = 0.13D-03
@@ -215,14 +150,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3650780071879954D+01
  FockNGrueven         :: F[4] CheckSum = 0.1987238775200672D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1847885502775658D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:55>>
- PulayDIIS            :: DIISErr = 0.21D-05
- PulayDIIS            :: DIISCo = 0.55D-04, 0.54D-03, 0.83D-02, 0.99D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1847886344420223D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:55-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[5] CheckSum = 0.2174715441624266D+01
  SCFStatus : [4,1,2]  :: <SCF> = -75.23144661, dD = 0.18D-04, DIIS = 0.21D-05
@@ -231,15 +159,7 @@
  HiCu                 :: Kxc[5] CheckSum = 0.3650779719076756D+01
  FockNGrueven         :: F[5] CheckSum = 0.1987240050341647D+02
  FockNGrueven         :: OrthoF[5] CheckSum = 0.1847886655557411D+02
-<<Entering PulayDIIS 10/28/01 @ 11:20:56>>
- PulayDIIS            :: DIISErr = 0.34D-06
- PulayDIIS            :: DIISCo = 0.25D-03, -.73D-03, -.13D-02,
-                                  0.50D+00, 0.50D+00
  PulayDIIS            :: F_DIIS[5] CheckSum = 0.1847886423109910D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=47,  DeAllocs=46, 288 bytes are presently allocated.
-                         A max of 3736 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:20:56-<
  RHEqs                :: OrthoP[6] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[6] CheckSum = 0.2174715133061647D+01
  SCFStatus : [5,1,2]  :: <SCF> = -75.23144655, dD = 0.97D-06, DIIS = 0.34D-06
@@ -266,14 +186,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650088793718250D+01
  FockNGrueven         :: F[1] CheckSum = 0.1987782475779400D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1848560488315740D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:00>>
- PulayDIIS            :: DIISErr = 0.64D-03
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1848076145361587D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:00-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2177073151988735D+01
  SCFStatus : [1,1,3]  :: <SCF> = -75.23264952, dD = 0.22D-02, DIIS = 0.64D-03
@@ -282,14 +195,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650141993691069D+01
  FockNGrueven         :: F[2] CheckSum = 0.1987440022206254D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1848248043221895D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:01>>
- PulayDIIS            :: DIISErr = 0.20D-03
- PulayDIIS            :: DIISCo = -.42D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1848116533400068D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:01-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[3] CheckSum = 0.2176576053577298D+01
  SCFStatus : [2,1,3]  :: <SCF> = -75.23257728, dD = 0.14D-02, DIIS = 0.20D-03
@@ -298,14 +204,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650160777971560D+01
  FockNGrueven         :: F[3] CheckSum = 0.1987288169838160D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1848109420172940D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:02>>
- PulayDIIS            :: DIISErr = 0.13D-04
- PulayDIIS            :: DIISCo = -.25D-01, 0.14D+00, 0.89D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1848117077390711D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:02-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[4] CheckSum = 0.2176613030171971D+01
  SCFStatus : [3,1,3]  :: <SCF> = -75.23254048, dD = 0.94D-04, DIIS = 0.13D-04
@@ -314,14 +213,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3650160150136373D+01
  FockNGrueven         :: F[4] CheckSum = 0.1987296254014660D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1848116815399784D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:03>>
- PulayDIIS            :: DIISErr = 0.28D-06
- PulayDIIS            :: DIISCo = -.90D-03, 0.83D-02, 0.72D-01, 0.92D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1848116971801370D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:03-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[5] CheckSum = 0.2176613225670973D+01
  SCFStatus : [4,1,3]  :: <SCF> = -75.23254273, dD = 0.17D-05, DIIS = 0.28D-06
@@ -348,14 +240,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650645718026162D+01
  FockNGrueven         :: F[1] CheckSum = 0.1988202038861167D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1848892220849557D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:07>>
- PulayDIIS            :: DIISErr = 0.65D-03
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1848417900603016D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:07-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2180558873103224D+01
  SCFStatus : [1,1,4]  :: <SCF> = -75.23327842, dD = 0.22D-02, DIIS = 0.65D-03
@@ -364,14 +249,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650693449527249D+01
  FockNGrueven         :: F[2] CheckSum = 0.1987857303283871D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1848577413637751D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:08>>
- PulayDIIS            :: DIISErr = 0.19D-03
- PulayDIIS            :: DIISCo = -.41D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1848448226857293D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:08-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499792D+01
  RHEqs                :: P[3] CheckSum = 0.2180050530448798D+01
  SCFStatus : [2,1,4]  :: <SCF> = -75.23320231, dD = 0.15D-02, DIIS = 0.19D-03
@@ -380,14 +258,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650710007295119D+01
  FockNGrueven         :: F[3] CheckSum = 0.1987707598596550D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1848440793569063D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:10>>
- PulayDIIS            :: DIISErr = 0.11D-04
- PulayDIIS            :: DIISCo = -.38D-02, 0.66D-01, 0.94D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1848448141125436D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:10-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[4] CheckSum = 0.2180085069593441D+01
  SCFStatus : [3,1,4]  :: <SCF> = -75.23316453, dD = 0.92D-04, DIIS = 0.11D-04
@@ -396,14 +267,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3650709393326094D+01
  FockNGrueven         :: F[4] CheckSum = 0.1987715773455138D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1848448267114418D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:11>>
- PulayDIIS            :: DIISErr = 0.43D-06
- PulayDIIS            :: DIISCo = -.75D-03, 0.83D-02, 0.12D+00, 0.87D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1848448081340523D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:11-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[5] CheckSum = 0.2180083899963501D+01
  SCFStatus : [4,1,4]  :: <SCF> = -75.23316687, dD = 0.30D-05, DIIS = 0.43D-06
@@ -429,14 +293,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3644603201963263D+01
  FockNGrueven         :: F[1] CheckSum = 0.2005796346166398D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1876952070069676D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:23>>
- PulayDIIS            :: DIISErr = 0.11D+00
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1767297586498989D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:23-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[2] CheckSum = 0.2153217244501118D+01
  SCFStatus : [1,2,4]  :: <SCF> = -75.92157462, dD = 0.45D-01, DIIS = 0.11D+00
@@ -445,14 +302,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3646294472711541D+01
  FockNGrueven         :: F[2] CheckSum = 0.2004573842915617D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1875729934286014D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:29>>
- PulayDIIS            :: DIISErr = 0.77D-01
- PulayDIIS            :: DIISCo = -.21D+01, 0.31D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1873176546967004D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:29-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[3] CheckSum = 0.2180165637322897D+01
  SCFStatus : [2,2,4]  :: <SCF> = -75.94267704, dD = 0.74D-01, DIIS = 0.77D-01
@@ -461,14 +311,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3648825641445311D+01
  FockNGrueven         :: F[3] CheckSum = 0.2003118555394415D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1874223496708299D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:36>>
- PulayDIIS            :: DIISErr = 0.43D-03
- PulayDIIS            :: DIISCo = -.72D-01, 0.11D+00, 0.97D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1874186883140882D+02
- PulayDIIS            :: WALL (Sec) = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:36-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[4] CheckSum = 0.2181178455025740D+01
  SCFStatus : [3,2,4]  :: <SCF> = -75.95994380, dD = 0.33D-02, DIIS = 0.43D-03
@@ -477,14 +320,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3648946886074423D+01
  FockNGrueven         :: F[4] CheckSum = 0.2002848338405671D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1873977442520588D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:43>>
- PulayDIIS            :: DIISErr = 0.16D-03
- PulayDIIS            :: DIISCo = -.90D-02, 0.13D-01, 0.26D+00, 0.73D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1874038517039512D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:43-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499787D+01
  RHEqs                :: P[5] CheckSum = 0.2181308969342835D+01
  SCFStatus : [4,2,4]  :: <SCF> = -75.95995065, dD = 0.10D-02, DIIS = 0.16D-03
@@ -493,15 +329,7 @@
  HiCu                 :: Kxc[5] CheckSum = 0.3648885569857092D+01
  FockNGrueven         :: F[5] CheckSum = 0.2003038538509352D+02
  FockNGrueven         :: OrthoF[5] CheckSum = 0.1874151440618314D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:50>>
- PulayDIIS            :: DIISErr = 0.10D-03
- PulayDIIS            :: DIISCo = 0.68D-04, -.18D-03, 0.68D-01,
-                                  0.42D+00, 0.52D+00
  PulayDIIS            :: F_DIIS[5] CheckSum = 0.1874083861583848D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=47,  DeAllocs=46, 288 bytes are presently allocated.
-                         A max of 3736 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:50-<
  RHEqs                :: OrthoP[6] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[6] CheckSum = 0.2181174364845937D+01
  SCFStatus : [5,2,4]  :: <SCF> = -75.95995016, dD = 0.47D-03, DIIS = 0.10D-03
@@ -510,15 +338,7 @@
  HiCu                 :: Kxc[6] CheckSum = 0.3648907197404493D+01
  FockNGrueven         :: F[6] CheckSum = 0.2002964519989524D+02
  FockNGrueven         :: OrthoF[6] CheckSum = 0.1874083640627455D+02
-<<Entering PulayDIIS 10/28/01 @ 11:21:56>>
- PulayDIIS            :: DIISErr = 0.27D-06
- PulayDIIS            :: DIISCo = 0.48D-04, -.13D-03, 0.47D-01,
-                                  0.29D+00, 0.36D+00, 0.31D+00
  PulayDIIS            :: F_DIIS[6] CheckSum = 0.1874083848580699D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=49,  DeAllocs=48, 392 bytes are presently allocated.
-                         A max of 4304 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:21:56-<
  RHEqs                :: OrthoP[7] CheckSum = 0.2236067977499791D+01
  RHEqs                :: P[7] CheckSum = 0.2181174563857454D+01
  SCFStatus : [6,2,4]  :: <SCF> = -75.95995090, dD = 0.59D-06, DIIS = 0.27D-06
@@ -544,14 +364,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3649714493259076D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003249204934539D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874225767013757D+02
-<<Entering PulayDIIS 10/28/01 @ 11:22:25>>
- PulayDIIS            :: DIISErr = 0.72D-04
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874191048205272D+02
- PulayDIIS            :: CPU Sec = 0.20D-01, WALL Sec = 0.20D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:22:25-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2182580801128534D+01
  SCFStatus : [1,2,5]  :: <SCF> = -75.95998923, dD = 0.26D-03, DIIS = 0.72D-04
@@ -560,14 +373,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3649724323861924D+01
  FockNGrueven         :: F[2] CheckSum = 0.2003215937621067D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1874195366917122D+02
-<<Entering PulayDIIS 10/28/01 @ 11:22:31>>
- PulayDIIS            :: DIISErr = 0.32D-04
- PulayDIIS            :: DIISCo = -.51D+00, 0.15D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1874179889204426D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:22:31-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[3] CheckSum = 0.2182508317053619D+01
  SCFStatus : [2,2,5]  :: <SCF> = -75.95998947, dD = 0.31D-03, DIIS = 0.32D-04
@@ -594,14 +400,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650279671636942D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003104864963257D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874015880586067D+02
-<<Entering PulayDIIS 10/28/01 @ 11:23:00>>
- PulayDIIS            :: DIISErr = 0.21D-03
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874168651794250D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:23:00-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[2] CheckSum = 0.2182019699103795D+01
  SCFStatus : [1,2,6]  :: <SCF> = -75.96002255, dD = 0.69D-03, DIIS = 0.21D-03
@@ -610,14 +409,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650248021766193D+01
  FockNGrueven         :: F[2] CheckSum = 0.2003214340293389D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1874116143451104D+02
-<<Entering PulayDIIS 10/28/01 @ 11:23:06>>
- PulayDIIS            :: DIISErr = 0.63D-04
- PulayDIIS            :: DIISCo = -.41D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1874157343936253D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:23:06-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499787D+01
  RHEqs                :: P[3] CheckSum = 0.2182178559839517D+01
  SCFStatus : [2,2,6]  :: <SCF> = -75.96002400, dD = 0.42D-03, DIIS = 0.63D-04
@@ -626,14 +418,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650236382788064D+01
  FockNGrueven         :: F[3] CheckSum = 0.2003260695959003D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1874158634079372D+02
-<<Entering PulayDIIS 10/28/01 @ 11:23:13>>
- PulayDIIS            :: DIISErr = 0.42D-05
- PulayDIIS            :: DIISCo = -.35D-01, 0.17D+00, 0.87D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1874156491849485D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:23:13-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[4] CheckSum = 0.2182165476525160D+01
  SCFStatus : [3,2,6]  :: <SCF> = -75.96002418, dD = 0.32D-04, DIIS = 0.42D-05
@@ -660,14 +445,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650438854373139D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003244770434984D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874114757457963D+02
-<<Entering PulayDIIS 10/28/01 @ 11:23:41>>
- PulayDIIS            :: DIISErr = 0.58D-04
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874156631828205D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:23:41-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2182091285550106D+01
  SCFStatus : [1,2,7]  :: <SCF> = -75.96002496, dD = 0.19D-03, DIIS = 0.58D-04
@@ -693,14 +471,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650455857753637D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003372776525834D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874231389723645D+02
-<<Entering PulayDIIS 10/28/01 @ 11:24:37>>
- PulayDIIS            :: DIISErr = 0.50D-03
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874178880710946D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:24:37-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2182133356320407D+01
  SCFStatus : [1,3,7]  :: <SCF> = -75.96007135, dD = 0.35D-03, DIIS = 0.50D-03
@@ -709,14 +480,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650471711759094D+01
  FockNGrueven         :: F[2] CheckSum = 0.2003313662245097D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1874177566606266D+02
-<<Entering PulayDIIS 10/28/01 @ 11:24:58>>
- PulayDIIS            :: DIISErr = 0.34D-03
- PulayDIIS            :: DIISCo = -.19D+01, 0.29D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1874076589322558D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:24:58-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[3] CheckSum = 0.2182267392463095D+01
  SCFStatus : [2,3,7]  :: <SCF> = -75.96007208, dD = 0.55D-03, DIIS = 0.34D-03
@@ -725,14 +489,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650438816255536D+01
  FockNGrueven         :: F[3] CheckSum = 0.2003407881638745D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1874264524491372D+02
-<<Entering PulayDIIS 10/28/01 @ 11:25:19>>
- PulayDIIS            :: DIISErr = 0.16D-03
- PulayDIIS            :: DIISCo = -.12D+01, 0.17D+01, 0.50D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1874157957066771D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:25:19-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[4] CheckSum = 0.2182100788019487D+01
  SCFStatus : [3,3,7]  :: <SCF> = -75.96007161, dD = 0.68D-03, DIIS = 0.16D-03
@@ -741,14 +498,7 @@
  HiCu                 :: Kxc[4] CheckSum = 0.3650473747846805D+01
  FockNGrueven         :: F[4] CheckSum = 0.2003291143877452D+02
  FockNGrueven         :: OrthoF[4] CheckSum = 0.1874157633721523D+02
-<<Entering PulayDIIS 10/28/01 @ 11:25:40>>
- PulayDIIS            :: DIISErr = 0.66D-06
- PulayDIIS            :: DIISCo = -.21D+00, 0.31D+00, 0.94D-01, 0.81D+00
  PulayDIIS            :: F_DIIS[4] CheckSum = 0.1874157987467994D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
-                         A max of 3248 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:25:40-<
  RHEqs                :: OrthoP[5] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[5] CheckSum = 0.2182102469865619D+01
  SCFStatus : [4,3,7]  :: <SCF> = -75.96007242, dD = 0.43D-05, DIIS = 0.66D-06
@@ -757,15 +507,7 @@
  HiCu                 :: Kxc[5] CheckSum = 0.3650473667055143D+01
  FockNGrueven         :: F[5] CheckSum = 0.2003291520798449D+02
  FockNGrueven         :: OrthoF[5] CheckSum = 0.1874157980180055D+02
-<<Entering PulayDIIS 10/28/01 @ 11:26:01>>
- PulayDIIS            :: DIISErr = 0.25D-07
- PulayDIIS            :: DIISCo = -.12D+00, 0.17D+00, 0.52D-01,
-                                  0.45D+00, 0.45D+00
  PulayDIIS            :: F_DIIS[5] CheckSum = 0.1874157989406967D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=47,  DeAllocs=46, 288 bytes are presently allocated.
-                         A max of 3736 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:26:01-<
  RHEqs                :: OrthoP[6] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[6] CheckSum = 0.2182102504630362D+01
  SCFStatus : [5,3,7]  :: <SCF> = -75.96007242, dD = 0.90D-07, DIIS = 0.25D-07
@@ -791,14 +533,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650560257437801D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003274640290337D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874129767833074D+02
-<<Entering PulayDIIS 10/28/01 @ 11:27:31>>
- PulayDIIS            :: DIISErr = 0.33D-04
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874153504805387D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:27:31-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[2] CheckSum = 0.2182003329023757D+01
  SCFStatus : [1,3,8]  :: <SCF> = -75.96007259, dD = 0.11D-03, DIIS = 0.33D-04
@@ -807,14 +542,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650555252025505D+01
  FockNGrueven         :: F[2] CheckSum = 0.2003291990787890D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1874145657802337D+02
-<<Entering PulayDIIS 10/28/01 @ 11:27:52>>
- PulayDIIS            :: DIISErr = 0.10D-04
- PulayDIIS            :: DIISCo = -.41D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1874152188081937D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:27:52-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[3] CheckSum = 0.2182030513604496D+01
  SCFStatus : [2,3,8]  :: <SCF> = -75.96007262, dD = 0.71D-04, DIIS = 0.10D-04
@@ -823,14 +551,7 @@
  HiCu                 :: Kxc[3] CheckSum = 0.3650553451953143D+01
  FockNGrueven         :: F[3] CheckSum = 0.2003299322205429D+02
  FockNGrueven         :: OrthoF[3] CheckSum = 0.1874152378237554D+02
-<<Entering PulayDIIS 10/28/01 @ 11:28:13>>
- PulayDIIS            :: DIISErr = 0.72D-06
- PulayDIIS            :: DIISCo = -.33D-01, 0.17D+00, 0.87D+00
  PulayDIIS            :: F_DIIS[3] CheckSum = 0.1874152018576491D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
-                         A max of 2840 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:28:13-<
  RHEqs                :: OrthoP[4] CheckSum = 0.2236067977499788D+01
  RHEqs                :: P[4] CheckSum = 0.2182028210998908D+01
  SCFStatus : [3,3,8]  :: <SCF> = -75.96007263, dD = 0.56D-05, DIIS = 0.72D-06
@@ -857,14 +578,7 @@
  HiCu                 :: Kxc[1] CheckSum = 0.3650509931615310D+01
  FockNGrueven         :: F[1] CheckSum = 0.2003300805499665D+02
  FockNGrueven         :: OrthoF[1] CheckSum = 0.1874160118769509D+02
-<<Entering PulayDIIS 10/28/01 @ 11:29:44>>
- PulayDIIS            :: DIISErr = 0.11D-04
- PulayDIIS            :: DIISCo = 0.10D+01
  PulayDIIS            :: F_DIIS[1] CheckSum = 0.1874152288132872D+02
- PulayDIIS            :: CPU Sec = 0.10D-01, WALL Sec = 0.10D-01
- PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
-                         A max of 2264 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:29:44-<
  RHEqs                :: OrthoP[2] CheckSum = 0.2236067977499789D+01
  RHEqs                :: P[2] CheckSum = 0.2182045072452967D+01
  SCFStatus : [1,3,9]  :: <SCF> = -75.96007264, dD = 0.36D-04, DIIS = 0.11D-04
@@ -873,14 +587,7 @@
  HiCu                 :: Kxc[2] CheckSum = 0.3650511554881302D+01
  FockNGrueven         :: F[2] CheckSum = 0.2003295164395912D+02
  FockNGrueven         :: OrthoF[2] CheckSum = 0.1874154951455467D+02
-<<Entering PulayDIIS 10/28/01 @ 11:30:04>>
- PulayDIIS            :: DIISErr = 0.33D-05
- PulayDIIS            :: DIISCo = -.41D+00, 0.14D+01
  PulayDIIS            :: F_DIIS[2] CheckSum = 0.1874152808760384D+02
- PulayDIIS            :: WALL (Sec) = 0.10D-01
- PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
-                         A max of 2512 bytes were allocated.
->-Exiting PulayDIIS 10/28/01 @ 11:30:04-<
  RHEqs                :: OrthoP[3] CheckSum = 0.2236067977499790D+01
  RHEqs                :: P[3] CheckSum = 0.2182036524690434D+01
  SCFStatus : [2,3,9]  :: <SCF> = -75.96007264, dD = 0.22D-04, DIIS = 0.33D-05
@@ -890,6 +597,4 @@
  JForce               :: dJ/dR CheckSum = 0.7671508496279547D+00
  XCForce              :: dXC/dR CheckSum = 0.4738515868889873D+00
  QuNew : Converged #9 :: dE= -.19D-09, Grms= 0.24D-04, Gmax= 0.16D-03, Xrms= 0.31D-04, Xmax= 0.18D-03
->-Succesfull MondoSCF run 10/28/01 @ 11:30:53-<
-  File /home/mchalla/MONDO/Validate/Water.inp does not exist!
-  File /home/mchalla/MONDO/Validate/Water.inp does not exist!
+>-Succesfull MondoSCF run 10/28/01 @ 15:45:12-<
