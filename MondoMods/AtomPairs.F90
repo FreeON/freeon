@@ -13,10 +13,10 @@ MODULE AtomPairs
   USE GlobalCharacters
   USE GlobalObjects
   USE BoundingBox
+  USE Thresholding
 #ifdef PERIODIC
   USE CellSets
 #endif
-  USE Thresholding
   IMPLICIT NONE
 !-------------------------------------------------------------------------------
 ! Global variables
@@ -30,45 +30,31 @@ CONTAINS
 !-------------------------------------------------------------------------------
   FUNCTION SetAtomPair(GM,BS,I,J,Pair)
     LOGICAL                   :: SetAtomPair
-    INTEGER                   :: I,J,K,N1,N2,N3,M1,M2,M3
+    INTEGER                   :: I,J,K
     TYPE(AtomPair)            :: Pair
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
 #ifdef PERIODIC
-    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
-!
-    NRgn = 0
-    DO K=1,3;IF(GM%PBC%AutoW(K)) NRgn(K) = 1;ENDDO
-!
-    Pair%AB2 = 1.D16
-    DO N1 = -NRgn(1),NRgn(1)
-       DO N2 = -NRgn(2),NRgn(2)
-          DO N3 = -NRgn(3),NRgn(3)
-             VecF   = (/DBLE(N1),DBLE(N2),DBLE(N3)/)
-             VecA   = ABS(FracToAtom(GM,VecF)+GM%Carts%D(:,I)-GM%Carts%D(:,J))
-             Pair%AB2 = MIN(Pair%AB2,VecA(1)**2+VecA(2)**2+VecA(3)**2)
-          ENDDO
-       ENDDO
-    ENDDO
+    Pair%AB2 = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
 #else
     Pair%AB2 = (GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
              + (GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
              + (GM%Carts%D(3,I)-GM%Carts%D(3,J))**2 
 #endif
-    SetAtomPair=TestAtomPair(Pair)
-    IF(SetAtomPair) THEN
-       Pair%A(:) = GM%Carts%D(:,I) 
-       Pair%B(:) = GM%Carts%D(:,J) 
-       Pair%KA   = GM%AtTyp%I(I)
-       Pair%KB   = GM%AtTyp%I(J)
-       Pair%NA   = BS%BFKnd%I(Pair%KA)
-       Pair%NB   = BS%BFKnd%I(Pair%KB)
-    ENDIF
+    Pair%KA   = GM%AtTyp%I(I)
+    Pair%KB   = GM%AtTyp%I(J)
+    Pair%NA   = BS%BFKnd%I(Pair%KA)
+    Pair%NB   = BS%BFKnd%I(Pair%KB)
+    Pair%A(:) = GM%Carts%D(:,I) 
+    Pair%B(:) = GM%Carts%D(:,J) 
     IF(I==J) THEN 
        Pair%SameAtom = .TRUE.
     ELSE
        Pair%SameAtom = .FALSE.
     ENDIF
+!
+    SetAtomPair=TestAtomPair(Pair)
+!
   END FUNCTION SetAtomPair
 !-------------------------------------------------------------------------------
 ! Convert a Block Matrix to a Vector
@@ -167,21 +153,9 @@ CONTAINS
 !-------------------------------------------------------------------------------
   SUBROUTINE SetCellNumber(GM)
     TYPE(CRDS)                     :: GM
-    INTEGER                        :: I
-    REAL(DOUBLE)                   :: Radius,Radd,A0,B0,C0
-
-    A0 = Zero
-    B0 = Zero
-    C0 = Zero
-    DO I=1,3
-       A0 = A0 + (GM%PBC%BoxShape(I,1)+GM%PBC%BoxShape(I,2)+GM%PBC%BoxShape(I,3))**2
-       B0 = B0 + (GM%PBC%BoxShape(I,1)+GM%PBC%BoxShape(I,2)-GM%PBC%BoxShape(I,3))**2
-       C0 = C0 + (GM%PBC%BoxShape(I,1)-GM%PBC%BoxShape(I,2)-GM%PBC%BoxShape(I,3))**2
-    ENDDO
-    Radd = MAX(SQRT(A0),SQRT(B0))
-    Radd = MAX(Radd,SQRT(C0))
-
-    Radius = Radd+SQRT(AtomPairDistanceThreshold)
+    REAL(DOUBLE)                   :: Radius
+!
+    Radius = MaxBoxDim(GM) + SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
 !
   END SUBROUTINE SetCellNumber
@@ -248,6 +222,70 @@ CONTAINS
     VecA = FracToAtom(GM,VecF)
 
   END SUBROUTINE AtomCyclic
+!===================================================================================
+!
+!===================================================================================
+  SUBROUTINE  CalFracCarts(GM)
+    TYPE(CRDS)                 :: GM
+    INTEGER                    :: I
+!
+!   Generate the Fractioanl Coordinates
+!
+    DO I=1,GM%NAtms
+       GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
+       GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
+    ENDDO
+!
+  END SUBROUTINE CalFracCarts
+!===================================================================================
+!
+!===================================================================================
+  SUBROUTINE  CalAtomCarts(GM)
+    TYPE(CRDS)                 :: GM
+    INTEGER                    :: I
+!
+!   Generate the Atomic Coordinates
+!
+    DO I=1,GM%NAtms
+       GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
+       GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
+    ENDDO
+!
+  END SUBROUTINE CalAtomCarts
+!===================================================================================
+!
+!===================================================================================
+  SUBROUTINE  WrapAtoms(GM)
+    TYPE(CRDS)     :: GM
+    INTEGER        :: I
+!
+    CALL CalFracCarts(GM)
+    IF(GM%PBC%AtomW) THEN
+       DO I=1,GM%NAtms
+          CALL FracCyclic(GM,GM%BoxCarts%D(:,I))
+       ENDDO
+    ENDIF
+    CALL CalAtomCarts(GM)
+!
+  END SUBROUTINE WrapAtoms
+!===================================================================================
+!
+!===================================================================================
+  SUBROUTINE  Translate(GM,ATvec)
+    TYPE(CRDS)                 :: GM
+    REAL(DOUBLE),DIMENSION(3)  :: ATvec,FTvec
+    INTEGER                    :: I
+!
+    FTvec(:) = AtomToFrac(GM,ATvec(:))
+!
+!   Tranaslate The Atoms
+!
+    DO I=1,GM%NAtms
+       GM%Carts%D(:,I)    = GM%Carts%D(:,I) + ATvec(:)
+       GM%BoxCarts%D(:,I) = GM%BoxCarts%D(:,I) + FTvec(:)
+    ENDDO
+!
+  END SUBROUTINE Translate
 !-------------------------------------------------------------------------------
 ! Test to See if in the Box (Fractional Coordinates)
 !-------------------------------------------------------------------------------
@@ -280,6 +318,79 @@ CONTAINS
     InAtomBox = InFracBox(GM,VecF)
 
   END FUNCTION InAtomBox
+!-------------------------------------------------------------------------------
+! Calculate the Minmiun Image Distance Between Atoms I and J 
+!-------------------------------------------------------------------------------
+  FUNCTION MinImageDist(GM,Carts1,Carts2)
+    TYPE(CRDS)                :: GM
+    INTEGER                   :: K,N1,N2,N3
+    REAL(DOUBLE)              :: MinImageDist
+    INTEGER,DIMENSION(3)      :: NRgn
+    REAL(DOUBLE),DIMENSION(3) :: Carts1,Carts2
+    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
+!  
+    NRgn = 0
+    DO K=1,3
+       IF(GM%PBC%AutoW(K)) NRgn(K) = 1
+    ENDDO
+!
+    MinImageDist = 1.D16
+    DO N1 = -NRgn(1),NRgn(1)
+       DO N2 = -NRgn(2),NRgn(2)
+          DO N3 = -NRgn(3),NRgn(3)
+             VecF         = (/DBLE(N1),DBLE(N2),DBLE(N3)/)
+             VecA         = FracToAtom(GM,VecF)+Carts1-Carts2
+             MinImageDist = MIN(MinImageDist,VecA(1)**2+VecA(2)**2+VecA(3)**2)
+          ENDDO
+       ENDDO
+    ENDDO
+
+  END FUNCTION MinImageDist
+!!-------------------------------------------------------------------------------
+! Calculate the Minmiun Image Distance Between Atoms I and J 
+!-------------------------------------------------------------------------------
+  FUNCTION MaxBoxDim(GM)
+    TYPE(CRDS)                  :: GM
+    INTEGER                     :: I
+    REAL(DOUBLE)                :: MaxBoxDim
+    REAL(DOUBLE),DIMENSION(3)    :: A,B,C
+! 
+    MaxBoxDim = Zero
+    A(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)+GM%PBC%BoxShape(:,3)
+    B(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)-GM%PBC%BoxShape(:,3)
+    C(:) = GM%PBC%BoxShape(:,1)-GM%PBC%BoxShape(:,2)-GM%PBC%BoxShape(:,3)
+
+    DO I=1,3
+       IF(.NOT. GM%PBC%AutoW(I)) THEN
+         A(I) = Zero
+         B(I) = Zero
+         C(I) = Zero
+       ENDIF
+    ENDDO
+    MaxBoxDim = SQRT(A(1)**2+A(2)**2+A(3)**2)
+    MaxBoxDim = MAX(MaxBoxDim,SQRT(B(1)**2+B(2)**2+B(3)**2))
+    MaxBoxDim = MAX(MaxBoxDim,SQRT(C(1)**2+C(2)**2+C(3)**2))
+!
+  END FUNCTION MaxBoxDim
+!
 #endif
 !
 END MODULE AtomPairs
+!!$!===================================================================================
+!!$!
+!!$!===================================================================================
+!!$      SUBROUTINE VecFormatToAngFormat(GM,A,B,C,Alpha,Beta,Gamma)
+!!$        TYPE(CRDS)                  :: GM
+!!$        REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
+!!$        REAL(DOUBLE),PARAMETER      :: DegToRad =  1.745329251994329576923D-2
+!!$!
+!!$        A = SQRT(GM%PBC%BoxShape(1,1)**2 + GM%PBC%BoxShape(2,1)**2+ GM%PBC%BoxShape(3,1)**2)
+!!$        B = SQRT(GM%PBC%BoxShape(1,2)**2 + GM%PBC%BoxShape(2,2)**2+ GM%PBC%BoxShape(3,2)**2)
+!!$        C = SQRT(GM%PBC%BoxShape(1,3)**2 + GM%PBC%BoxShape(2,3)**2+ GM%PBC%BoxShape(3,3)**2)
+!!$!
+!!$        Gamma = ACOS((GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,2))/(A*B))/DegToRad
+!!$        Beta  = ACOS((GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,3))/(A*C))/DegToRad
+!!$        Alpha = GM%PBC%BoxShape(1,2)*GM%PBC%BoxShape(1,3)+GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(2,3)   
+!!$        Alpha = ACOS(Alpha/(B*C))/DegToRad
+!!$!
+!!$      END SUBROUTINE VecFormatToAngFormat
