@@ -39,9 +39,6 @@ MODULE ParseProperties
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_ALPHA = 'StcAlpha'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_BETA  = 'StcBeta'
   CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_STATIC_GAMMA = 'StcGamma'
-  CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_X_DIRECTION  = 'X'
-  CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_Y_DIRECTION  = 'Y'
-  CHARACTER(LEN=*), PARAMETER, PRIVATE :: PROP_Z_DIRECTION  = 'Z'
   !
 CONTAINS
   !
@@ -72,6 +69,7 @@ CONTAINS
     ! Parse ...
     !
     !
+    ! Close the input file.
     CLOSE(UNIT=Inp,STATUS='KEEP')
     !
   END SUBROUTINE LoadPropertyOptions
@@ -80,23 +78,35 @@ CONTAINS
   SUBROUTINE PPrp_Response(R)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE PPrp_Response(R)
-!H  
+!H 
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(RespOpts) :: R
     !-------------------------------------------------------------------
+    INTEGER :: ijXYZ,ikXYZ,jkXYZ,ijkXYZ,iXYZ,jXYZ,kXYZ
+    LOGICAL :: IsThere,Tmp
+    LOGICAL, DIMENSION( 3) :: ArrTmpA
+    LOGICAL, DIMENSION( 6) :: ArrTmpB
+    LOGICAL, DIMENSION(10) :: ArrTmpG
+    CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
+    !-------------------------------------------------------------------
     !
     ! Look for Static Polarizability.
     IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_ALPHA)) THEN
        R%StcAlpha = .TRUE.
-       IF(    OptKeyQ(Inp,PROP_RESPONSE,PROP_X_DIRECTION).OR. &
-            & OptKeyQ(Inp,PROP_RESPONSE,PROP_Y_DIRECTION).OR. &
-            & OptKeyQ(Inp,PROP_RESPONSE,PROP_Z_DIRECTION)) THEN
-          R%AlphaAxis(:) = .FALSE.
-          IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_X_DIRECTION)) R%AlphaAxis(1) = .TRUE.
-          IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_Y_DIRECTION)) R%AlphaAxis(2) = .TRUE.
-          IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_Z_DIRECTION)) R%AlphaAxis(3) = .TRUE.
+       !
+       ArrTmpA=.FALSE.
+       IsThere=.FALSE.
+       DO iXYZ=1,3
+          IF(OptKeyQ(Inp,PROP_RESPONSE,Cart(iXYZ))) THEN
+             ArrTmpA(iXYZ)=.TRUE.
+             IsThere=.TRUE.
+          ENDIF
+       ENDDO
+       !
+       IF(IsThere) THEN
+          R%AlphaAxis = ArrTmpA
        ENDIF
     ENDIF
     !
@@ -104,7 +114,27 @@ CONTAINS
     IF(OptKeyQ(Inp,PROP_RESPONSE,PROP_STATIC_BETA )) THEN 
        R%StcAlpha = .TRUE.
        R%StcBeta  = .TRUE.
-       CALL MondoHalt(PRSE_ERROR,'Well tryed, but Quadratic Response has not been implemented yet.')
+       !
+       ArrTmpA=.FALSE.
+       ArrTmpB=.FALSE.
+       IsThere=.FALSE.
+       ijXYZ=0
+       DO iXYZ=1,3
+          DO jXYZ=iXYZ,3
+             ijXYZ=ijXYZ+1
+             IF(OptKeyQ(Inp,PROP_RESPONSE,Cart(iXYZ)//Cart(jXYZ))) THEN
+                ArrTmpB(ijXYZ)=.TRUE.
+                ArrTmpA(iXYZ)=.TRUE.
+                ArrTmpA(jXYZ)=.TRUE.
+                IsThere=.TRUE.
+             ENDIF
+          ENDDO
+       ENDDO
+       !
+       IF(IsThere) THEN
+          R%AlphaAxis = ArrTmpA
+          R%BetaAxis  = ArrTmpB
+       ENDIF
     ENDIF
     !
     ! Look for Second Static HyperPolarizability.
@@ -112,7 +142,48 @@ CONTAINS
        R%StcAlpha = .TRUE.
        R%StcBeta  = .TRUE.
        R%StcGamma = .TRUE.
-       CALL MondoHalt(PRSE_ERROR,'Well tryed, but Cubic Response has not been implemented yet.')
+       !
+       ArrTmpA=.FALSE.
+       ArrTmpB=.FALSE.
+       ArrTmpG=.FALSE.
+       IsThere=.FALSE.
+       ijkXYZ =0
+       ijXYZ  =0
+       DO iXYZ=1,3
+          jkXYZ=(-iXYZ**2+9*iXYZ-8)/2
+          DO jXYZ=iXYZ,3
+             ijXYZ=ijXYZ+1
+             DO kXYZ=jXYZ,3
+                ijkXYZ=ijkXYZ+1
+                jkXYZ=jkXYZ+1
+                ikXYZ=(-iXYZ**2+7*iXYZ-6)/2+kXYZ
+                !  1  2  3  4  5  6
+                ! XX XY XZ YY YZ ZZ
+                !  1   2   3   4   5   6   7   8   9   10
+                ! XXX,XXY,XXZ,XYY,XYZ,XZZ,YYY,YYZ,YZZ,ZZZ
+                IF(OptKeyQ(Inp,PROP_RESPONSE,Cart(iXYZ)//Cart(jXYZ)//Cart(kXYZ))) THEN
+                   ArrTmpG(ijkXYZ)=.TRUE.
+                   ArrTmpB(ijXYZ)=.TRUE.
+                   ArrTmpB(jkXYZ)=.TRUE.
+                   ArrTmpB(ikXYZ)=.TRUE.
+                   ArrTmpA(iXYZ)=.TRUE.
+                   ArrTmpA(jXYZ)=.TRUE.
+                   ArrTmpA(kXYZ)=.TRUE.
+                   IsThere=.TRUE.
+                ENDIF
+             ENDDO
+          ENDDO
+       ENDDO
+       !
+       !write(*,*) 'ArrTmpG',ArrTmpG
+       !write(*,*) 'ArrTmpB',ArrTmpB
+       !write(*,*) 'ArrTmpA',ArrTmpA
+       IF(IsThere) THEN
+          R%AlphaAxis = ArrTmpA
+          R%BetaAxis  = ArrTmpB
+          R%GammaAxis = ArrTmpG
+       ENDIF
+       !CALL MondoHalt(PRSE_ERROR,'Well tryed, but Cubic Response has not been implemented yet.')
     ENDIF
     !
     !write(*,*) 'PPrp_Response: R%StcAlpha=',R%StcAlpha
@@ -137,11 +208,12 @@ CONTAINS
     Prp%Resp%StcGamma = .FALSE.
     ! Initialize the polarizability axis.
     Prp%Resp%AlphaAxis(:) = .TRUE.
+    Prp%Resp%BetaAxis (:) = .TRUE.
+    Prp%Resp%GammaAxis(:) = .TRUE.
     ! 
     ! ...
     !
   END SUBROUTINE PPrp_Init
   !
   !
-
 END MODULE ParseProperties
