@@ -575,7 +575,7 @@ MODULE InOut
 #ifdef PARALLEL 
        IF(MyId==ROOT)THEN
 #endif 
-          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
+          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_DOUBLE,1,.FALSE.)
           CALL OpenData(Meta)
           CALL ReadDoubleVector(Meta,B)
           CALL CloseData(Meta)
