@@ -24,7 +24,7 @@
 !   ENCODE_INTEGER                  Encode an integer in a string.
 !
 !===============================================================================
-MODULE STRING
+MODULE STRINGS
 
 ! . Module declarations.
 USE DEFINITIONS, ONLY : DP, LINE_LENGTH
@@ -247,4 +247,4 @@ CONTAINS
 
    END FUNCTION TO_UPPER_CASE
 
-END MODULE STRING
+END MODULE STRINGS
