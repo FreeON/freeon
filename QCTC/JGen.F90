@@ -227,7 +227,11 @@ MODULE JGen
 !               Set MAC and PAC parameters
                 Tau=Thresholds%TwoE
                 DP2=(MaxAmp/Tau)**(Two/DBLE(SPEll+1))
-                PoleSwitch=MAX(1.D-2,-LOG(Two*Tau/MaxAmp))
+                PoleSwitch=PFunk(Prim%Ell+PoleRoot%Ell,Tau/MaxAmp)
+!
+!               WRITE(*,22)Prim%Ell+PoleRoot%Ell,Tau/MaxAmp,PoleSwitch
+!           22 FORMAT(' Ell = ',I2,' Acc = ',D12.3,' PoleSwitch = ',F12.6)
+!
 !               Walk the walk
                 CALL JWalk(PoleRoot)
 !               Contract <Bra|Ket> bloks to compute matrix elements of J
@@ -258,6 +262,16 @@ MODULE JGen
        ENDDO
        Jvct=BlockToVect(Pair%NA,Pair%NB,Jblk)
      END FUNCTION JBlock
+!====================================================================================================
+!
+!====================================================================================================
+     FUNCTION PFunk(Ell,Ack)
+        INTEGER                    :: Ell
+        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
+        REAL(DOUBLE),DIMENSION(30) :: W
+        X=-LOG(Ack)
+        INCLUDE "PFunk.Inc"
+     END FUNCTION PFunk    
 !====================================================================================================
 !
 !====================================================================================================
