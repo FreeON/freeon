@@ -1230,29 +1230,33 @@ MODULE FastMatrices
 !======================================================================
     RECURSIVE SUBROUTINE SetSRSTSkipPtrs(A,B)
       TYPE(SRST),POINTER :: A,B
-      LOGICAL            :: AssocA,AssocB
+      LOGICAL            :: AssocA,AssocB,AssocAL,AssocAR
 !----------------------------------------------------------------------
       AssocA=ASSOCIATED(A)
       AssocB=ASSOCIATED(B)
       IF(AssocA.AND.AssocB)THEN
-         ! Follow both links (A and B)
-         IF(ASSOCIATED(A%Left).AND.ASSOCIATED(A%Right))THEN
-            CALL SetSRSTSkipPtrs(A%Left,A%Right)
-            CALL SetSRSTSkipPtrs(A%Right,B)
-         ELSEIF(ASSOCIATED(A%Left))THEN 
-            CALL SetSRSTSkipPtrs(A%Left,B)
-         ELSEIF(ASSOCIATED(A%Right))THEN
-            CALL SetSRSTSkipPtrs(A%Right,B)
-         ELSEIF(A%R<B%L)THEN
+         IF(A%L==A%R)THEN
+            IF(A%R>B%L)CALL Halt('bad logic in SetSRSTSkipPtrs')
             A%Right=>B
+         ELSE
+            AssocAL=ASSOCIATED(A%Left)
+            AssocAR=ASSOCIATED(A%Right)
+            IF(AssocAL.AND.AssocAR)THEN
+               CALL SetSRSTSkipPtrs(A%Left,A%Right)
+               CALL SetSRSTSkipPtrs(A%Right,B)
+            ELSEIF(AssocAL)THEN
+               CALL SetSRSTSkipPtrs(A%Left,B)
+            ELSEIF(AssocAR)THEN
+               CALL SetSRSTSkipPtrs(A%Right,B)
+            ELSEIF(A%R<B%L)THEN
+               A%Right=>B
+            ENDIF
          ENDIF
       ELSEIF(AssocA)THEN
-         ! Just follow the left link (A)
          IF(ASSOCIATED(A%Left).AND.ASSOCIATED(A%Right))THEN
-            CALL SetSRSTSkipPtrs(A%Left,A%Right)
+            CALL SetSRSTSkipPtrs(A%Left,A%Right)         
          ENDIF
       ENDIF
-      ! Now follow right link (B)
       IF(AssocB)THEN
          IF(ASSOCIATED(B%Left).AND.ASSOCIATED(B%Right))THEN
             CALL SetSRSTSkipPtrs(B%Left,B%Right)
