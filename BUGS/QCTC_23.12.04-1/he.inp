@@ -1,0 +1,22 @@
+<BeginTitle>
+  sadasd
+<EndTitle>
+
+<BeginOptions>
+Accuracy=(VeryTight)
+Charge=0
+Multiplicity=1
+DebugAll=(MinDebug,CheckSums)
+Guess=Core
+SCFMethod=(TC2)
+BasisSets=(sto-3g-split)
+ModelChem=(HF)
+Geometry=(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+ He   0.5    0.0    0.0
+<EndGeometry>
+
+
+

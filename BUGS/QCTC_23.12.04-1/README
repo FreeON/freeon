@@ -1,0 +1,10 @@
+This is a He calculation, which crashes in QCTC with
+the error
+
+<<No explicit code for case LCode = 7 in HGTraX.Inc>>
+
+Setting:
+ zinc, NAGWare Fortran 95 compiler Release 5.0(253)
+
+SV 23.12.04
+------------------------------------------------------------------

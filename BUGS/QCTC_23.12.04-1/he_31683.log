@@ -1,0 +1,11 @@
+  /n/scratch/vweber/ScandiumExec1/MakePFFT he_31683 OneElectronMatrices 0 1 1 0 1 1
+  /n/scratch/vweber/ScandiumExec1/MakeS he_31683 OneElectronMatrices 0 1 1 0 1 1
+  /n/scratch/vweber/ScandiumExec1/AInv he_31683 OneElectronMatrices 0 1 1 0 1 1
+  /n/scratch/vweber/ScandiumExec1/MakeT he_31683 OneElectronMatrices 0 1 1 0 1 1
+  /n/scratch/vweber/ScandiumExec1/P2Use he_31683 GuessEqCore 0 1 1 0 1 1
+  /n/scratch/vweber/ScandiumExec1/MakeRho he_31683 GuessEqCore 0 1 1 0 1 1
+ ... ning Warning  Warning  Warning Wa ...
+MakeRho                :: relative error in density = 0.10D+01. Distribution threshold
+  /n/scratch/vweber/ScandiumExec1/QCTC he_31683 GuessEqCore 0 1 1 0 1 1
+ No explicit code for case LCode = 7 in HGTraX.Inc
+ Unknown error: < /n/scratch/vweber/ScandiumExec1/QCTC he_31683 GuessEqCore 0 1 1 0 1 1>
