@@ -38,7 +38,7 @@ PROGRAM XCForce
   TYPE(DBL_VECT)                 :: XCFrc,Frc
   TYPE(AtomPair)                 :: Pair
   REAL(DOUBLE)                   :: Electrons,XCFrcChk
-  INTEGER                        :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q,I
+  INTEGER                        :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q,I,J
   CHARACTER(LEN=3)               :: SCFCycle
   CHARACTER(LEN=7),PARAMETER     :: Prog='XCForce'
   CHARACTER(LEN=15),PARAMETER    :: Sub1='XCForce.RhoTree' 
@@ -130,9 +130,7 @@ PROGRAM XCForce
                        XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + Four*F_nlm(1:3)
                     ENDIF
                     nlm = AtomToFrac(GM,Pair%A)
-                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,F_nlm(1:3))
-                    nlm = AtomToFrac(GM,Pair%B)
-                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,(F_nlm(4:6)-F_nlm(1:3)))
+                    LatFrc_XC%D =  LatFrc_XC%D + Four*LaticeForce(GM,nlm,F_nlm(1:3))
                  ENDIF
               ENDDO
            ENDDO
@@ -148,7 +146,7 @@ PROGRAM XCForce
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree
-  DO I = 1,1
+  DO I = 1,3 
      IF(GM%PBC%AutoW%I(I)==1) THEN
         WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
         WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
@@ -160,7 +158,11 @@ PROGRAM XCForce
   ENDDO
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
-!--------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------
+!!$  WRITE(*,*) 'LatFrc_XC'
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_XC%D(I,J),J=1,3)  
+!!$  ENDDO
 #ifdef PARALLEL
   XCFrcEndTm = MondoTimer()
   XCFrcTm = XCFrcEndTm-XCFrcBegTm
