@@ -186,11 +186,13 @@ equations.
  Then we describe the perturbed projection approach for the calculation
  of the density matrix derivatives and present
  an algorithm for derivatives up to third order in the density matrix.
- Thereafter, we derive a density matrix analogy to Wigner's 2n+1 rule 
- for nonorthogonal representations with mixed perturbation terms. We also briefly 
+ Thereafter, we present a density matrix analogy to Wigner's 2n+1 rule 
+ for nonorthogonal representations with mixed perturbation terms within the
+ coupled perturbed sheme. We also briefly 
  discuss the self consistent acceleration technique by Weber and Daul \cite{Weber_2003}. 
  In the next section, we first show the saturation of the hyperpolarizabilities up to 
- fourth order for a series of 1D chains of water molecules. Thereafter, we demonstrate
+ fourth order (i.e. up to the second hyperpolarizability $\gamma$) for a series 
+ of 1D chains of water molecules. Thereafter, we demonstrate
  linear scaling computation of the higher order electric response properties
  for 3D water clusters.
 
@@ -220,12 +222,15 @@ scaling linearly with the system size \cite{MBenzi95,MBenzi96,MBenzi01}.
 Within HF theory, the total electronic energy $E_{\rm tot}$ of 
 a molecule in a static electric field $\mathcal{E}$ is
 \begin{equation}
-   E_{\rm tot}(\mathcal{E})=Tr[D(h^0+\mu \mathcal{E})]
-                       +\frac{1}{2}Tr[D(J(D)+K(D))], \label{totalE}
+  \begin{split}\label{totalE}
+   E_{\rm tot}(\E)&=Tr[D(h^0+\mu\E)]+\frac{1}{2}Tr[D(J(D)+K(D))] \\
+                  &=Tr[DF]-\frac{1}{2}Tr[D(J(D)+K(D)),
+  \end{split}
 \end{equation}
 where $D$ is the density matrix in the electric field, 
 $h^0$ is the core Hamiltonian, $\mu$ is the dipole moment matrix, 
-$J(D)$ is the Coulomb matrix and $K(D)$ the exact HF exchange matrix.  
+$J(D)$ is the Coulomb matrix, $K(D)$ the exact HF exchange matrix
+and $F=h^0+\mu\E+J(D)+K(D)$ is the perturbed Fockian.
 The total energy of a molecule in a homogenous electric field may 
 be developed in a Taylor expansion as
 \begin{equation}
@@ -262,17 +267,18 @@ be developed in a Taylor expansion as
      -12Tr[D^{abc}\mu_d].
    \end{gather}
 \end{subequations}
-Here $D^{a}$ denotes density matrix derivates with respect to a field in  direction $a$ 
-at $\mathcal{E} = 0$,
+Here $D^{a\ldots}$ denotes density matrix derivates with respect to a field in directions $a\ldots$ 
+at $\mathcal{E} = 0$ and is given by
 \begin{equation}
  \displaystyle\D^{a\ldots}_{n+1}=
  \frac{\partial^N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
  \F(\E))\bigg|_{\E=0} \label{DDeriv}.
 \end{equation}
- The Fockian {\bf May need to choose between ortho and non-ortho rep}, 
-\begin{equation}
-\F(\E) = h^0+J(D)+K(D),
-\end{equation}
+ The Fockian 
+%{\bf May need to choose between ortho and non-ortho rep}, 
+%\begin{equation}
+%\F(\E) = h^0+J(D)+K(D),
+%\end{equation}
 may also be expanded by order in the perturbation to yield
 \begin{equation}\label{FockianTaylor}
   \begin{split}
@@ -352,7 +358,7 @@ and the idempotency-like constraints \cite{Furche_2001}
   \end{gather}
 \end{subequations}
 
-\subsection{The perturbed projection algorithm}
+\subsection{The CPSCF algorithm}
 
 The following schematic algorithm is a higher order generalization of the
 self consistent scheme for the solution of the CPSCF equations describe 
@@ -386,7 +392,7 @@ in step~(\ref{DDeriv}) as $\D^{a\ldots}_{n+1}=\lim_{i\to\infty}\D^{a\ldots}_i$
 via the NC density matrix perturbation theory, based on the TC2
 projector. Having solved for $D^{a\ldots}_n$, the next Fock matrix derivative
 $F^{a\ldots}_{n+1}$ is built, and the iteration continues until selfconsistency,
-when the density matrix derivative $D^{a\ldots}_n$ and the desired property 
+when the density matrix derivative $D^{a\ldots}_n$ and the corresponding property 
 (e.g. the (hyper)polarizability $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
 $\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$)
 have reached a sufficient level of accuracy.
@@ -456,7 +462,7 @@ the density matrix response. This is in contrast to previous suggestions for
 solving the CPSCF equations with N-scaling complexity through implicit
 formulations, where the density matrix derivatives are given as solutions
 to commuting operator equations of Sylvester type 
-{\bf CITE: Frisch, Karna, Ochsenfeld, Larsen ...?}.
+{\bf CITE: Frisch, Ochsenfeld, Larsen ...?}.
 
 
 {\bf WE SHOULD SAY STG ABOUT THE SYM OF THE DERIVATVES}
@@ -557,17 +563,22 @@ descibed in for example \cite{Dupuis_1991}.
 A density matrix analogy to the Wigner's $2n+1$ rule in the orthogonal 
 representation for a single perturbation parameter
 was given to third order by Mcweeny {\bf Phys. Rev. vol. 126, 1028 (1962) Check!} 
-and to fourth order by Niklasson and Challacombe \cite{Niklasson04}.
+and up to fourth order by Niklasson and Challacombe \cite{Niklasson04} 
+within the uncoupled perturbed sheme and one perturbation.
 Here we will present a full generalization to the non orthogonal case 
 and for mixed derivatives up to fourth order.
-The third order energy correction is given in an 
-othogonal representation by
-\begin{equation}\label{eq:2n+1 third order}
-  E^{abc}=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)
-\end{equation}
+The third order energy correction is given in the 
+othogonal and non orthogonal representations respectively by
+\begin{align}
+%  \begin{split}
+    E^{abc}&=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)\label{eq:2n+1 third order ortho}\\
+    &=\frac{1}{6}P(a,b,c)\Tr([D^a,D^0]_SSD^bF^c)\label{eq:2n+1 third order nonortho}
+%  \end{split}
+\end{align}
 where $P(a,b,c)$ stands for the permutation operator such that all
-permutations of $a$, $b$ and $c$ are made. {\bf Describe the
-permutation operator and what it does exactly!}
+permutations of $a$, $b$ and $c$ are made (e.g. $P(a,b,c)$ generates the sum of
+all the six terms: $(a,b,c)$, $(a,c,b)$, $(b,a,c)$, $(b,c,a)$, $(c,a,b)$ and $(c,b,a)$)
+and $[A,B]_S=ASB-BSA$. 
 %\begin{equation}
 %\begin{split}
 %  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
@@ -607,38 +618,46 @@ permutation operator and what it does exactly!}
 %\end{split}
 %\end{equation}
 %OR A LITTLE BIT SHORTER
-A similar expression can be derived for the fourth order
-\begin{equation}\label{eq:2n+1 fourth order}
+Similar expressions can be derived for the fourth order
+\begin{align}
   \begin{split}
     E^{abcd}=&\frac{1}{24}P(a,b,c,d) \\
     &\Tr([\D^{ab},\D^0] \D^c \F^d + \\ 
-    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd})),
+    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd}))\label{eq:2n+1 fourth order ortho}
+  \end{split}\\
+  \begin{split}
+    =&\frac{1}{24}P(a,b,c,d) \\
+    &\Tr([D^{ab},D^0]_S SD^cF^d + \\ 
+    &[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd}))\label{eq:2n+1 fourth order nonortho}
   \end{split}
-\end{equation}
-This relation may seem to be very expansive to compute. But after further
-inspections, we see that the correction along the same direction $a$ e.g. $E^{aaaa}$,
+\end{align}
+
+%\begin{equation}\label{eq:2n+1 fourth order}
+%  \begin{split}
+%    E^{abcd}&=\frac{1}{24}P(a,b,c,d) \\
+%    &\quad\Tr([\D^{ab},\D^0] \D^c \F^d + \\ 
+%    &\quad\quad[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd}))\\
+%    &=\frac{1}{24}P(a,b,c,d) \\
+%    &\quad\Tr([D^{ab},D^0]_S SD^cF^d + \\ 
+%    &\quad\quad[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd}))
+%  \end{split}
+%\end{equation}
+
+Those relations may seem to be very expansive to compute. But after further
+inspections, we see ,for example in the orhtogonal representation, that the 
+correction along the same direction $a$ i.e. $E^{aaaa}$,
 the relation reduces to only one term (7 matrix multipilcations).
-In the worst case where all the directions are different e.g. $E^{aabc}$, the
-relation (\ref{eq:2n+1 fourth order}) simplifies to only 12 
+In the worst case where all the directions are different i.e. $E^{aabc}$, the
+relation \eqref{eq:2n+1 fourth order ortho} simplifies to only 12 
 terms (84 matrix multiplications). 
 Similar reductions of the computational cost also apply to 
-Eq. (\ref{eq:2n+1 third order}).
+Eqs. \eqref{eq:2n+1 third order ortho}, \eqref{eq:2n+1 third order nonortho} 
+and \eqref{eq:2n+1 fourth order nonortho}.
 We can mention that those equations 
-(\ref{eq:2n+1 third order}) and (\ref{eq:2n+1 fourth order}) 
+(\ref{eq:2n+1 third order ortho}-\ref{eq:2n+1 fourth order nonortho}) 
 do not depend on any parametrizations of the wave function
 as the relations previously given \cite{Helgaker_2001,Dupuis_1991}.
 
-%\begin{equation}
-%  \alpha_{ab}=-2\Tr[D^a\mu_b]
-%\end{equation}
-
-%\begin{equation}
-%  \beta_{abc}=-4\Tr[D^{ab}\mu_c]
-%\end{equation}
-
-%\begin{equation}
-%  \gamma_{abcd}=-12\Tr[D^{abc}\mu_d]
-%\end{equation}
 
 \section{Examples}
 To demonstrate the ability, accuracy, numerical stability and efficiency 
