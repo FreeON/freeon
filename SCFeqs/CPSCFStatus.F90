@@ -33,9 +33,9 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   TYPE(ARGMT)                      :: Args
 #ifdef PARALLEL
-  TYPE(DBCSR)                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2
+  TYPE(DBCSR)                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2,Tmp3
 #else
-  TYPE(BCSR )                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2
+  TYPE(BCSR )                      :: PPrm,FPrm,T,P,S,Tmp1,Tmp2,Tmp3
 #endif
   !-------------------------------------------------------------------
   REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop,TmpP
@@ -54,8 +54,6 @@ PROGRAM CPSCFSts
   TYPE(CRDS)                 :: GM
   !-------------------------------------------------------------------
   !
-  type(bcsr) :: tmp3
-
   ! Macro the start up.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   !
