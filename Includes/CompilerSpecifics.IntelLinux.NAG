@@ -4,7 +4,8 @@
 CPP=/lib/cpp -P -C \
              -traditional # Need this for new RH 7.1 CPP... 
 CPPINCLUDE    = -I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
-CPPOPTS       = -DNAG -DPERIODIC 
+CPPOPTS       = -DNAG -DMMech
+#CPPOPTS       = -DNAG -DPERIODIC -DMMech
 #               -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
@@ -35,6 +36,8 @@ F77_EXTRAS    = -132 -w -dusty
 #
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
+                -I$(MONDO_HOME)/Dynamo                  \
+                -I$(MONDO_HOME)/IntCoo                  \
                 -I/usr/local/include                    \
 #               -I$(MPI_INC) 
 #
@@ -89,7 +92,7 @@ HDF_LIBS=-lhdf5 -ljpeg -lz
 #-------------------------------------------------------------------------
 #  Support libraries 
 # 
-F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
+F90_LIBRARIES = -lMondoMods -lDynamo $(MPI_LIBS) $(HDF_LIBS) 
 #
 #--------------------------------------------------------------------------
 #  'Nuff said

@@ -6,7 +6,8 @@ CPP       =/lib/cpp -P -C \
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS   = -DPERIODIC
+CPPOPTS   =  -DMMech
+#CPPOPTS   = -DPERIODIC -DMMech
 #           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
@@ -40,6 +41,8 @@ F90_MISC     = $(F_LIST) $(F_PROF) -Mbackslash
 #
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
+               -I$(MONDO_HOME)/Dynamo                  \
+               -I$(MONDO_HOME)/IntCoo                  \
                -I/usr/local/include                    \
 #              -I$(MPI_INC) 
 #
@@ -102,7 +105,7 @@ HDF_LIBS=-lhdf5 -ljpeg -lz
 #-------------------------------------------------------------------------
 #  The generic libs needed by most of the programs.  
 #
-F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
+F90_LIBRARIES = -lMondoMods -lDynamo $(MPI_LIBS) $(HDF_LIBS) 
 #
 #--------------------------------------------------------------------------
 #  'Nuff said
