@@ -36,7 +36,7 @@ EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I./LibQCTC/
 QCTCLibs=$(F90_LIBRARIES) -lQCTC $(LAPACK) 
 #
 CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o    \
-           PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o 
+           PoleTree.o PFFTensor.o ParaQ.o PBCFarField.o TreeWalk.o 
 #
 QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o 
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
@@ -69,7 +69,7 @@ clQCTC:
 rlQCTC:
 	$(MAKE) -C LibQCTC release
 #
-QCTC:	$(QCTCObjs)
+QCTC: $(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(QCTCLibs) 
 	mv QCTC $(MONDO_EXEC)/QCTC
 cQCTC:
@@ -122,3 +122,16 @@ chgtrax:
 #
 # dependencies are laking here, needs work!
 #
+
+JGen.o: Globals.o ParaQ.o
+BlokTrPdJ.o: Globals.o
+JForce.F90: Globals.o
+MakePFFT.o : Globals.o
+NukE.o: Globals.o ParaQ.o
+PBCFarField.o: Globals.o ParaQ.o
+PoleTree.o: Globals.o
+QCTC.o: Globals.o MondoPoles.o JGen.o 
+Thresholds.o : Globals.o
+TreeWalk.o: Globals.o
+
+
