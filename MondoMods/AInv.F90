@@ -36,9 +36,10 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
     CHARACTER(LEN=8),&
          PARAMETER  :: Prog='BlokAInv'
+    INTEGER :: II
 !------------------------------------------------------------------------------------------------
 #ifdef FIND_CONDA
-    ! Usefull if AInv is behaving badly.  If A is singular, you 
+    ! Useful if AInv is behaving badly.  If A is singular, you 
     ! will have problems.
     CALL New(B,(/NBasF,NBasF/))
     CALL New(C,(/NBasF,NBasF/))
@@ -57,22 +58,27 @@ CONTAINS
     ! Set global workspace for FunkOnSqMat
     CALL SetDSYEVWork(MaxBlkSize)
     ! Allocate intermediate blocks 
-    CALL New(Blk1,MaxBlkSize*MaxBlkSize)
-    CALL New(Blk2,MaxBlkSize*MaxBlkSize)
+    IF(.NOT.AllocQ(Blk1%Alloc)) CALL New(Blk1,MaxBlkSize*MaxBlkSize)
+    IF(.NOT.AllocQ(Blk2%Alloc)) CALL New(Blk2,MaxBlkSize*MaxBlkSize)
     ! Allocate diagonal "pivot" blocks
-    CALL New(P,(/MaxBlkSize*MaxBlkSize,NAtoms/))
+    IF(.NOT.AllocQ(P%Alloc)) CALL New(P,(/MaxBlkSize*MaxBlkSize,NAtoms/))
     ! Allocate coloumn flags
-    CALL New(AiFlg,NAtoms); AiFlg%I=0
-    CALL New(ZiFlg,NAtoms); ZiFlg%I=0
+    IF(.NOT.AllocQ(AiFlg%Alloc)) CALL New(AiFlg,NAtoms); AiFlg%I=0
+    IF(.NOT.AllocQ(ZiFlg%Alloc)) CALL New(ZiFlg,NAtoms); ZiFlg%I=0
     ! Allocate temporaries for symbolic Z_I
-    CALL New(ColPt,MaxBlks)
-    CALL New(BlkPt,MaxBlks)
+    IF(.NOT.AllocQ(ColPt%Alloc)) CALL New(ColPt,MaxBlks)
+    IF(.NOT.AllocQ(BlkPt%Alloc)) CALL New(BlkPt,MaxBlks)
     ! Start with the identity; Z=I
     CALL SetToI(Z)
     ! Index for new Z bloks
     ZBlk=Z%NNon0+1
     ! Main outer loop down rows 
-    DO IRow=1,NAtoms
+    DO IRow=1,Natoms !!!!! DANGER !!!!! mixing Natoms and GM%Natms
+      IF(IRow>GM%Natms) THEN
+          II=Z%RowPt%I(GM%Natms+1)
+          Z%RowPt%I(IRow+1)=II
+        GO TO 200 !!!! Quick fix, temporary, good for specific cases
+      ENDIF
 #ifdef SPATIAL_THRESHOLDING
        ! Set IRow coordinates for distance based screening
        IRowX=GM%Carts%D(1,IRow)
@@ -168,6 +174,7 @@ CONTAINS
 #endif
           ENDIF
        ENDDO ! end inner loop over JRow
+200    CONTINUE
        ! Reup symbolic structure of Z
        IF(IRow>1)THEN
           NewBloks=ZDex-StopZI-1
@@ -220,7 +227,7 @@ CONTAINS
     DO I=1,NAtoms
        DiagD%NNon0=DiagD%NNon0+BSiz%I(I)**2
     ENDDO
-    CALL New(DiagD,(/NAtoms,DiagD%NBlks,DiagD%NNon0/))
+    IF(.NOT.AllocQ(DiagD%Alloc)) CALL New(DiagD,(/NAtoms,DiagD%NBlks,DiagD%NNon0/))
     ! DiagD=P^(-1/2) in BCSR format
     DO I=1,NAtoms
        N=BSiz%I(I)
