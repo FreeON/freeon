@@ -489,7 +489,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 
  *)
            WriteString[Subroutine,StringJoin["   SUBROUTINE dInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
-                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,dI) \n"]];
+                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,NINT,PBC,dI) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -503,14 +503,14 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
-           WS["INTEGER        :: LBra,LKet"];
+           WS["INTEGER        :: LBra,LKet,NINT"];
            WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE) :: dI(12,*)"]];
+           WS[StringJoin["REAL(DOUBLE) :: dI(NINT,12)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz"];
@@ -578,12 +578,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
               WS["   C3q=PrmBufK(8,J)"];
            ];
 
-
-
            WS["   QCx=Qx-Cx"];
            WS["   QCy=Qy-Cy"];
            WS["   QCz=Qz-Cz"];
-
 
            WS["   DO K=1,LBra ! K^2 VRR (M0| loop "];
 
