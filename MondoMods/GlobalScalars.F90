@@ -38,10 +38,14 @@ MODULE GlobalScalars
                               Four=4.0D0, Five =5.0D0, &
                               Six =6.0D0
 !---------------------------------------------------------------------------------------  
-!  Max Angular Symmetries
-!
-   INTEGER,      PARAMETER :: MaxEll=4                            
-   INTEGER,      PARAMETER :: MaxLen=(MaxEll+1)*(MaxEll+2)*(MaxEll+3)/6
+!  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
+!   
+   INTEGER,      PARAMETER :: HGEll=5
+   INTEGER,      PARAMETER :: SPEll=5 
+   INTEGER,      PARAMETER :: SPEll2=2*SPell
+   INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
+   INTEGER,      PARAMETER :: SPLen=SPEll*(SPEll+3)/2 ! note, poles start from 0.
+   INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
 !---------------------------------------------------------------------------------------  
 !  Other numbers
 !
@@ -96,3 +100,6 @@ MODULE GlobalScalars
    INTEGER, PARAMETER      :: MaxProc=1024
 #endif
 END MODULE
+
+
+   
