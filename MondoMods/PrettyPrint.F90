@@ -1513,6 +1513,40 @@ MODULE PrettyPrint
     IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.Unit/=6) &
          WRITE(Unit,*)RightParenStar
   END SUBROUTINE PrintProtectR
+
+    SUBROUTINE PImbalance(A,NPrc,Prog_O)
+    TYPE(DBL_VECT) :: A
+    INTEGER :: NPrc,I
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Prog_O
+    CHARACTER(LEN=100) :: Prog
+    REAL(DOUBLE) :: TmMin,TmMax,Imbalance,DevSum
+
+    IF(Present(Prog_O)) THEN
+      Prog = Prog_O
+    ELSE
+      Prog = ''
+    ENDIF
+    TmMax = -100.0D0
+    TmMin = 1.D+10
+    DO I = 1, NPrc
+      TmMax = Max(TmMax,A%D(I))
+      TmMin = Min(TmMin,A%D(I))
+    ENDDO
+    CALL OpenASCII(OutFile,Out)
+    WRITE(*,*) TRIM(Prog)//': TmMax= ',TmMax,', TmMin=',TmMin
+    WRITE(Out,*) TRIM(Prog)//': TmMax= ',TmMax,', TmMin=',TmMin
+
+    DevSum = 0.0D0
+    DO I = 1, NPrc
+      DevSum = DevSum + (TmMax-A%D(I))
+    ENDDO
+    Imbalance = DevSum/(NPrc*TmMax)
+    WRITE(*,*) TRIM(Prog)//': Imbalance = ',Imbalance
+    WRITE(Out,*) TRIM(Prog)//': Imbalance = ',Imbalance
+    CLOSE(Out,STATUS='KEEP')
+
+  END SUBROUTINE PImbalance
+
 !
 !==================================================================
 !
