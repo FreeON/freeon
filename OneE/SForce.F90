@@ -18,7 +18,9 @@ PROGRAM SForce
 
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(BCSR)         :: T1,F,P
+! TYPE(BCSR)         :: T1,F,P
+  TYPE(DBCSR)         :: T1,F,P_DBCSR
+  TYPE(BCSR)          :: P
   TYPE(DBL_VECT)      :: TotSFrc
   INTEGER :: IErr,TotFrcComp
 #else
@@ -50,23 +52,34 @@ PROGRAM SForce
   CALL Get(GM,Tag_O=CurGeom)
 !---------------------------------------------- 
 ! Allocations 
+
+#ifdef PARALLEL
+#else
   CALL New(P,OnAll_O=.TRUE.)
   CALL New(F)
   CALL New(T1)
+#endif
 !--------------------------------------
 ! Compute W=P.F.P
+#ifdef PARALLEL
+  CALL Get(P_DBCSR,TrixFile('D',Args,1))
+#else
   CALL Get(P,TrixFile('D',Args,1))
+#endif
 ! Is this a bug if we don't use the extrapolated Fockian?
   CALL Get(F,TrixFile('F',Args,0))
 #ifdef PARALLEL
-  IF(MyID == ROOT) THEN
-#endif
+  CALL Multiply(P_DBCSR,F,T1)       ! T1:=P.F
+  CALL Multiply(T1,P_DBCSR,F)       ! F:=P.F.P
+  CALL Filter(P_DBCSR,F)            ! P=Filter[P.F.P]      
+  CALL SetEq(P,P_DBCSR)
+  CALL BcastBCSR(P)
+  CALL Delete(P_DBCSR)
+
+#else
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
   CALL Filter(P,F)            ! P=Filter[P.F.P]      
-#ifdef PARALLEL
-  ENDIF
-  CALL BCastBCSR(P)
 #endif
   CALL Delete(F)
   CALL Delete(T1)
