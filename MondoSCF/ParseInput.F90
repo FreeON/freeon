@@ -528,6 +528,8 @@ MODULE ParseInput
             GM%Ordrd=SFC_HILBERT 
          ELSEIF(OptKeyQ(Inp,GEOMETRY,TRAVEL_Order))THEN
             GM%Ordrd=SFC_TRAVEL 
+         ELSEIF(OptKeyQ(Inp,GEOMETRY,TABLETRAV_ORDER))THEN
+         GM%Ordrd=SFC_TABLETRAV
          ELSE
             GM%Ordrd=SFC_NONE
          ENDIF
