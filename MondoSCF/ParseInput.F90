@@ -524,8 +524,12 @@ MODULE ParseInput
             GM%Ordrd=SFC_PEANO
          ELSEIF(OptKeyQ(Inp,GEOMETRY,RANDOM_ORDER))THEN
             GM%Ordrd=SFC_RANDOM
-         ELSE
+         ELSEIF(OptKeyQ(Inp,GEOMETRY,H_Order))THEN
             GM%Ordrd=SFC_HILBERT 
+         ELSEIF(OptKeyQ(Inp,GEOMETRY,TRAVEL_Order))THEN
+            GM%Ordrd=SFC_TRAVEL 
+         ELSE
+            CALL MondoHalt(PRSE_ERROR,'Unrecognized ordering.')
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <TOT_CHARGE> and <MULTIPLICITY>  
