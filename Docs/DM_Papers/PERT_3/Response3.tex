@@ -324,21 +324,8 @@ While the expansions above are given explicitly for Hartree-Fock Theory, similar
 hold also for Kohn-Sham and hybrid HF/DFT,  which involve variation of the  exchange-correlation 
 matrix $V_{xc}^{a\ldots}(D^0,D^a,\ldots)$ \cite{Lee_1994,PSalek02}.
 
-\subsection{Technical details}
 
-In our approach to linear scaling computation of the polarizabilities 
-$\alpha_{ab}$ \cite{Weber04}, $\beta_{abc}$ and $\gamma_{abcd}$, the ground state
-density matrix $\mathcal{D}^0$ is computed using a spectral projection algorithm such
-as the trace correcting second order scheme (TC2) by Niklasson \cite{ANiklasson02A} in 
-conjunction with sparse atom-blocked linear algebra \cite{ANiklasson03,MChallacombe00B}.
-The recently developed second order trace correcting purification method is robust,
-fast and memory efficient. Linear scaling is achieved for insulating systems through the 
-dropping (filtering) of atom-atom blocks with Frobenious norm below a numerical threshold ($\sim 10^{-5}-10^{-6}$).
-At SCF convergence the TC2 algorithm generates a polynomial sequence 
-defining the ground state projector, from which expansion of the derivative 
-density matrices can be obtained term by term \cite{ANiklasson04}.
-
-\subsection{Convergence criteria}
+\subsection{Self-Consistency}\label{SelfConsistency}
 
 The derivative density matrices and derivative Fockians depend on 
 each other implicitly, and must be solved for self-consistently
@@ -394,66 +381,69 @@ where the anti-commutator notation $\{A,B\} = AB+BA$ has been used.
 
 \newpage
 
-\subsection{Perturbed projection and higher order CPSCFs}
+\section{High Order Perturbed Projection}
 
-The perturbed projector algorithm was originally presented for solution of the first 
-order CPSCF equations in Ref.~\onlinecite{Weber04}.  In the following, a higher order 
-generalization of perturbed projection is presented for the self consistent solution 
-of the $N$-th order CPSCF equations, specifically for the case of polarization
-and Hartree-Fock theory.  However, it should again be stressed that the methods presented 
-are generally applicable to all static perturbations and self-consistent-field theorys.
+\subsection{Overview}
 
-Following Eq.~(\ref{fockianN}), the $N^{\rm th}$ order variation of the Fockian at the $n^{\rm th}$ CPSCF cycle is
+The perturbed projector algorithm was originally presented in Ref.~\onlinecite{Weber04}
+for solution of the first order CPSCF equations.  Here, a higher order, generally applicable 
+extention of perturbed projection is outlined for self consistent solution 
+of the $N$-th order CPSCF equations, with specific application to the case of polarization and  the
+Hartree-Fock  model.  
+
+First, it is nessesary to determine the ground state density matrix $\mathcal{D}^0$.  This is may 
+be accomplished in ${\cal O}(N)$ using a purification algorithim such as Niklasson's \cite{ANiklasson02A} 
+second order trace correcting scheme (TC2) in conjunction with sparse atom-blocked linear algebra \cite{ANiklasson03,MChallacombe00B}.
+Linear scaling is achieved for insulating systems through the dropping (filtering) of atom-atom blocks with Frobenious norm 
+below a numerical threshold ($\sim 10^{-5}-10^{-6}$).  At SCF convergence the TC2 algorithm generates a polynomial sequence 
+defining the ground state projector, from which the derivative density matrices are directly obtained.
+
+As with other approaches, solution of the CPSCF equations commences with a guess at the 
+derivative density, followed by computation of the derivative Fockian.  At the $n^{\rm th}$ 
+CPSCF cycle, the $N^{\rm th}$ order derivative Fockian is 
 \begin{equation}
     F^{a\ldots}_{n}= \left\{
     \begin{array}{ll}
       \mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild}\\
-      J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1
+      J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1 \,.
     \end{array}\right.
 \end{equation}
-After construction of the derivative Fockian, it is advantageous to employ 
-Weber and Daul's DDIIS algorithm for convergence acceleration 
-of the CPSCF equation \cite{Weber_2003}
-\begin{equation}
-  \begin{gather}
-    F^{a\ldots}_{n}= \left\{
-    \begin{array}{ll}
-      \mu_a+J(D^{a}_n)+K(D^{a}_n), & N=1\label{FockBuild},\\
-      J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1.
-    \end{array}\right.\\
-%    F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
-%    F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild2} \\
-    \displaystyle\widetilde{\F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k \F^{a\ldots}_{k} \label{DDIIS} \\
-    \displaystyle\D^{a\ldots}_{n+1}=N!
-    \frac{\partial^N}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
-    \F(\E))\bigg|_{\E=0} \label{DDeriv}
-%    (\F^{0}+\sum_c\E^{c}\widetilde{\F}^{c}_n+\ldots))\bigg|_{\E=0} \label{DDeriv}
-  \end{gather} 
-\end{subequations}
-in which the $c_k$ coefficients  are chosen to minimize the $N^{\rm th}$ order commutation 
-relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}).
-Finally, the central component in the Perturbed Projector algorithm involves direct variation of
-the occupied subspace projector,  
+After construction of the derivative Fockian, response functions through 
+$D^{a\ldots}_{n+1}$ are computed, constituting one cycle in solution of the CPSCF.  
+As described fully in Section \ref{ResponseFunctions},  these response functions are 
+obtained through direct variation of the occupied subspace projector,  
 \begin{equation}
     \displaystyle\D^{a\ldots}_{n+1}=N!
     \frac{\partial^N}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
-    \F(\E))\bigg|_{\E=0} \label{DDeriv}
+    \F(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
-where each derivative may be obtained recursively via the Niklasson and Challacombe 
-Density Matrix Perturbation Theory \cite{ANiklasson04}.  
+which is accomplished via the Niklasson and Challacombe approach to Density Matrix Perturbation Theory \cite{ANiklasson04}.  
 
+\newpage
 
-for $D^{a\ldots}_n$, the next Fock 
-matrix derivative $F^{a\ldots}_{n+1}$ is built, and the iteration continues until 
-selfconsistency, when the density matrix derivative $D^{a\ldots}_n$ and the 
-corresponding property (e.g. the (hyper)polarizability $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
-$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$)
-have reached a sufficient level of accuracy, {\em i.\ e.} when 
-Eqs.\ (\ref{eq:commutators1}-\ref{eq:commutators4}) 
-and (\ref{eq:anticommutators1}-\ref{eq:anticommutators4}) are satisfied.
+After a few CPSCF cycles, the approach to self-consistency may be accelerated with Weber and Daul's DDIIS algorithm \cite{Weber_2003}, 
+\begin{equation}
+    \displaystyle\widetilde{\F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k \F^{a\ldots}_{k} \label{DDIIS} \\
+\end{equation}
+in which the $c_k$ coefficients are chosen to minimize ({\bf UP TO ??}) $N^{\rm th}$ order commutation 
+relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The application of the
+DDIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
 
+At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
+appropriate to compute response properties.   In general, we can use the $N+1$ rule,
+\begin{equation}
+E^{(\gamma)} = \gamma^{-1} Tr(D^{(\gamma-1)} H^{(1)}),
+\end{equation}
+where in the case of polarization we have the (hyper)polarizabilities $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
+$\beta_{abc}=-2\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-2\Tr[D^{abc}\mu_d]$. ({\bf THIS DOESN'T LOOK RIGHT.  IS THERE
+A NORMALIZTION THING HERE??}).  Alternatively, it is possible
+to construct density matrix anologues of Wigner's $2 N+1$ rule, which allows the evaluation of response
+properties up to order $2N+1$ from response functions of order $N$.  These anologues are given in Section \ref{Wigner2Np1}
+through $4^{th}$ order.
 
-\subsubsection{Density matrix derivatives by perturbed projection}
+\newpage
+
+\subsubsection{Response Functions from Perturbed Projection}\label{ResponseFunctions}
 
 Perturbed projection is based on purification projections for the 
 construction of the density matrix. To calculate the
@@ -574,12 +564,10 @@ calculated by perturbed projection with the following algorithm (up to second or
 %\end{figure}
 
 
-
-
 \newpage
 
 
-\subsubsection{Derivative based DIIS Algorithm (DDIIS)}
+\subsubsection{Derivative  DIIS}\label{DDIIS}
 
  The direct inversion in the iterative subspace (DIIS) method, introduced
  some time ago by Pulay \cite{Pulay80,Pulay82}, provides a significant 
@@ -634,8 +622,7 @@ A working equation is then obtained through the associated Euler-Lagrange equati
  refined and thus if a linear set of equations is encountered, the oldest
  iterations are discarded until the system of equations becomes solvable.
 
-
-\subsection{Higher order response via Wigner's $2n+1$ rule }
+\subsection{Density matrix formulation of Wigner's $2n+1$ rule }\label{Wigner2Np1}
 
 Higher order energy derivatives can be calculated from the lower
 order response. Wigner's $2n+1$ rule gives a general way to calculate the $2n+1$
