@@ -76,7 +76,7 @@ vibrational coupling than Cartesian ones do
 By recent proposals of Kudin {\it et.al.} \cite{KKudin01} and of
 Andzelm {\it et.al.} \cite{JAndzelm01} the foundations of 
 internal coordinate
-crystal structure optimizations are laid down. These outhors
+crystal structure optimizations are laid down. These authors
 pointed out how to build Wilson's B matrix \cite{EWilson55} 
 when periodic boundary conditions are present. They have also
 presented a few examples for succesful application of internal 
@@ -118,26 +118,134 @@ Let us consider a three-dimensional crystal with atomic
 Cartesian positions $X$ that extend the range $[-\infty,\infty]$
 in all spacial directions. The periodicity of the crystal
 is given by the lattice vectors $A$, $B$ and $C$.
-For this infinitely large crystal, local internal coordinates can be
-defined, as usual for isolated molecules. Let us now suppose,
-that there is a periodicity also in the set of internal coordinates.
-This is simply a consequence of applying the same rules for the 
+For this infinitely large crystal, local internal coordinates ($\phi$) 
+can be defined, as usual for isolated molecules. Let us now suppose,
+that there is periodicity also in the set of internal coordinates.
+This being the case is simply a consequence of applying the 
+same rules for the 
 construction of internal coordinates everywhere in the crystal.
 If this periodicity exists, a unique set of primitive internal 
 coordinates, $\phi^{(000)}$ can be defined. Each $i$-th element of this
 set, $\phi^{(000)}_{i}$ depends on the Cartesian coordinates of
 maximum four atoms: 
-$\phi^{(000)}_{i}=\phi^{(000)}_{i}(X(A_{1}),X(A_{2}),X(A_{3}),X(A_{4}))$,
-where $A_{j}$ denotes the serial number of atoms in the infinite
-crystal, $j$ refers to a serial number in the atom-list of 
-$\phi^{(000)}_{i}$, and $X(A_{j})$ denotes the Cartesian coordinates
-of atom $A_{j}$. 
+\begin{equation}
+\phi^{(000)}_{i}=\phi^{(000)}_{i}[
+(a_{i1},k_{i1},l_{i1},m_{i1}),
+(a_{i2},k_{i2},l_{i2},m_{i2}),
+(a_{i3},k_{i3},l_{i3},m_{i3}),
+(a_{i4},k_{i4},l_{i4},m_{i4})],
+\end{equation}
+where $a_{ij}$ ($j=1,2,3,4$) denotes serial numbers of atoms in 
+a reference cell, called the 
+central cell, and the corresponding $k_{ij}$, $l_{ij}$ and $m_{ij}$ 
+denote integer cell indices.
+The translationally unique $a_{ij}$ atoms and the 
+$k_{ij}$, $l_{ij}$ and $m_{ij}$ 
+cell indices together determine
+the atoms within the infinite crystal that compose 
+the $i$-th internal coordinate of the $\phi^{(000)}$ set. 
+
+It should be noted, that the elementary cell in the
+internal coordinate space has a different meaning than what 
+the elementary cell in the Cartesian space is. This should
+be clear from the fact that the internal coordinate elementary cell 
+containes such $\phi^{(000)}_{i}$ coordinates that connect
+two or more different Cartesian cells. Furthermore, the internal
+coordinate central cell $\phi^{(000)}$ may be located over atoms, 
+that are far
+from the Cartesian elementary cell. For the sake of simplicity,
+we choose the internal coordinate elementary cell to be in maximum
+possible overlap with the atoms of the Cartesian elementary cell.
+
 All internal coordinates of the crystal can be retrieved
-by applying the same $T_{klm}=kA+lB+mC$ translation vector
-to the elements of $\phi^{(000)}$: 
-$\phi^{(klm)}_{i}=\phi^{(000)}_{i}(X(A_{1})+T_{klm},X(A_{2})+
-T_{klm},X(A_{3})+T_{klm},X(A_{4})+T_{klm})$,
-where $k$, $l$ and $m$ denote arbitrary integers.
+by applying the same $T_{k_{T}l_{T}m_{T}}=k_{T}A+l_{T}B+m_{T}C$ 
+translation vector to the atoms of $\phi^{(000)}$: 
+\begin{equation}
+\phi^{(k_{T}l_{T}m_{T})}_{i}=\phi^{(000)}_{i}[
+(a_{i1},k_{i1}',l_{i1}',m_{i1}'),
+(a_{i2},k_{i2}',l_{i2}',m_{i2}'),
+(a_{i3},k_{i3}',l_{i3}',m_{i3}'),
+(a_{i4},k_{i4}',l_{i4}',m_{i4}')] ,
+\end{equation}
+where $k_{ij}'=k_{ij}+k_{T}$ and the same holds for the $l$ and $m$ 
+cell indices.
+$k_{T}$, $l_{T}$ and $m_{T}$ denote arbitrary integers.
+The corresponding Cartesian coordinates transform as
+\begin{equation}
+X^{(k_{ij}+k_{T},l_{ij}+k_{T},m_{ij}+k_{T})}_{a_{ij}} 
+= X^{(k_{ij},l_{ij},m_{ij})}_{a_{ij}} + T_{k_{T}l_{T}m_{T}} .
+\end{equation} 
+
+Now, let us consider the relationship of an infinitesimally small
+Cartesian displacement, $\delta X$ and the corresponding $\delta \phi$
+internal coordinate displacement.
+Because of the translational symmetry, displacements are the same
+in all internal coordinate cells:
+\begin{equation}
+\delta \phi^{(klm)}_{i} = \delta \phi^{(000)}_{i} 
+\end{equation}
+for any $i$-th internal coordinate.
+The displacements of the Cartesian coordinates, however, do not equal
+for different cells: 
+\begin{equation} \label{cartdispl}
+\delta X^{(klm}_{a_{ij}} = \delta X^{(000)}_{ij}) + k \delta A 
++ l \delta B + m \delta C ,
+\end{equation}
+with $\delta A$, $\delta B$ and $\delta C$
+being the displacements of the lattice vectors. 
+The different behaviour of the internal and the Cartesian displacements
+reflects the fact, that internal coordinates describe relative
+atomic displacements, while Cartesian ones are absolute displacements, 
+relative to the Cartesian coordinate axis.
+
+The relationship between the Cartesian and internal coordinate 
+displacements can be expressed by Wilson's $B$ matrix:
+\begin{equation}
+\delta \phi = B \delta X
+\end{equation}
+where $B$ here has the size of $\infty \times \infty$ and its
+elements are given by
+\begin{equation}
+B_{pq}= \frac{\partial \phi_{p}}{\partial X_{q}} , 
+\end{equation}
+where $X_{q}$ denotes a single Cartesian coordinate of the set $X$.
+
+It is enough to investigate the relationship of the internal 
+coordinates of the central cell and all the Cartesian coordinates,
+since all other internal coordinate displacements equal with the 
+central cell ones:
+\begin{equation} \label{intdispl1}
+\delta \phi^{(000)}_{i} = \sum_{q=1}^{\infty} B^{(000)}_{iq} \delta X_{q} .
+\end{equation}
+Here, $B^{(000)}_{iq}$ denotes elements of the $B$ matrix that refer to
+the central internal coordinate cell. All $i$-th internal coordinates
+are members of the central internal coordinate cell.
+Now, let us further decompose $\delta X_{q}$ and $B^{(000)}_{iq}$ 
+to contributions from Cartesian cells:
+\begin{equation}
+\delta \phi^{(000)}_{i} = \sum_{k,l,m=-\infty}^{\infty} 
+\sum_{a_{ij}=1}^{4} 
+B^{(000)(klm)}_{ia_{ij}} [ \delta X^{(000)}_{a_{ij}} + k \delta A + 
+l \delta B + m \delta C ] ,
+\end{equation}
+$B^{(000)(klm)}_{ia_{ij}}$ is defined by
+\begin{equation} 
+B^{(000)(klm)}_{ia_{ij}} = \frac{\partial \phi^{(000)}_{i}}{\partial X^{(klm)}_{a_{ij}}} .
+\end{equation} 
+The summation over $a_{ij}$ goes over those translationally unique
+atoms, that compose the $i$-th internal coordinate. The number of 
+these atoms never exceeds 4 if primitive internal coordinates are used.
+In case of more complex internal coordinates that are linear 
+combinations of primitive ones the $B$ matrix of the composite 
+internal coordinates will be built
+by appropriately transforming the $B$ matrix of the primitives. 
+We do not consider this case further in the 
+present paper.
+Observe that $B^{(000)(klm)}_{ia_{ij}}$ is a 
+vector with three components referring to the Cartesian components
+of atom $a_{ij}$, {\it and} the Cartesian components of the
+lattice vectors $A$, $B$ and $C$.
+
 
 
 
