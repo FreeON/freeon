@@ -74,6 +74,12 @@ MODULE ParsingKeys
    CHARACTER(LEN=7),  PARAMETER :: NO_ORDER     ='NoOrder'
    CHARACTER(LEN=9),  PARAMETER :: MSI_FORMAT   ='MSIFormat'
    CHARACTER(LEN=10), PARAMETER :: XMOL_FORMAT  ='XMolFormat'
+!-----------------------------------------------------------------------------------------------------  
+!  Parsing keys for <Options.Force=>
+   CHARACTER(LEN=11), PARAMETER :: FACTION      ='ForceAction'   
+   CHARACTER(LEN=17), PARAMETER :: MOLDYN       ='MolecularDynamics'
+   CHARACTER(LEN=20), PARAMETER :: GEOOPT       ='GeometryOptimization'
+   CHARACTER(LEN=5 ), PARAMETER :: FORCE        ='Force'
 !---------------------------------------------------------------
 !  Parsing keys for <Options.Periodic=>
 !
