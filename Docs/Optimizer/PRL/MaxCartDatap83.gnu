@@ -89,7 +89,7 @@ set mx2tics default
 set my2tics default
 set mcbtics default
 set xtics border mirror norotate autofreq 
-set ytics border mirror norotate 1
+set ytics border mirror norotate 0.5
 set ztics border nomirror norotate autofreq 
 set nox2tics
 set noy2tics
