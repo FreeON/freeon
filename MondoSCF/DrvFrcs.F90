@@ -973,8 +973,6 @@ MODULE DrvFrcs
 !
 ! Set GDIISmemory, it tells the number of 'remembered' steps in GDIIS
 !
-       GDIISMemory=500
-!
        CALL OpenASCII(OutFile,Out)
        IF(Ctrl%Geop%CoordType==CoordType_Cartesian) THEN
          WRITE(*,*) '*****************************************'
@@ -1051,7 +1049,7 @@ MODULE DrvFrcs
 !
        CALL CALC_SinglePoint(Ctrl)
 !
-! Calculate single relaxation (SR) step from an inverse Hessian
+! Calculate simple relaxation (SR) step from an inverse Hessian
 !
        CALL NewDispl(Ctrl,Displ,NCart,NIntC)
        CALL SRStep(Ctrl,GMLoc,Displ,MaxGrad,RMSGrad,IntCs) 
@@ -1170,7 +1168,7 @@ MODULE DrvFrcs
 !
       SUBROUTINE SRStep(Ctrl,GMLoc,Displ,MaxGrad,RMSGrad,IntCs)
 !
-! Single Relaxation step
+! Simple Relaxation step
 !
       TYPE(SCFControls)              :: Ctrl 
       TYPE(CRDS)                     :: GMLoc
@@ -1249,7 +1247,7 @@ MODULE DrvFrcs
       TYPE(DBL_VECT)                 :: Energy
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
       LOGICAL                        :: IntSearch,LineSearchOn
-      INTEGER                        :: OldGrad
+      INTEGER                        :: OldGrad,GDIISMemory
 !
 ! MaxSteps : Maximum number of Line Search Steps
 ! Displ    : Initial displacement vector from SR step, 
@@ -1260,6 +1258,8 @@ MODULE DrvFrcs
 !            in order coordinate transformation can converge
 !
       MaxSteps=15
+!
+      GDIISMemory=500
 !
       NatmsLoc=GMLoc%Natms
       NCart=3*NatmsLoc   
@@ -1341,7 +1341,7 @@ MODULE DrvFrcs
 ! May work in either Cartesian or internal displacemets space.
 ! Subroutine modifies Cartesian Coordinates in GMLoc, now.
 !
-!      CALL GDIIS(CurGeom,GDIISMemory,GMLoc)
+!     IF(CGeo>2) CALL GDIIS(CGeo,GDIISMemory,GMLoc)
 !
 !
 ! Tidy up
