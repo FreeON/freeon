@@ -383,10 +383,32 @@ MODULE ParseInput
 !
          NOpts=0
          Ctrl%Method=RH_R_SCF ! default is restricted RH
+!
          IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_SDMM,MaxSets,NLoc,Loc))THEN
             NOpts=NOpts+NLoc
             DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=SDMM_R_SCF; ENDDO             
          ENDIF
+!
+         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_PM,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=PM_R_SCF; ENDDO             
+         ENDIF         
+!
+         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_SP2,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=SP2_R_SCF; ENDDO             
+         ENDIF
+!
+         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_SP4,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=SP4_R_SCF; ENDDO             
+         ENDIF
+!
+         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_NT4,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=NT4_R_SCF; ENDDO             
+         ENDIF
+!
          IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_RHHF,MaxSets,NLoc,Loc))THEN
             NOpts=NOpts+NLoc
             DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=RH_R_SCF; ENDDO
