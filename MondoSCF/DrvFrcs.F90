@@ -46,6 +46,9 @@ MODULE DrvFrcs
         CALL Invoke('TForce',CtrlVect,MPIRun_O=.TRUE.)
 !       Build a density with last DM
         CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+        CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
 !       Coulomb part
         CALL Invoke('JForce',CtrlVect)
 !       Exact Hartree-Fock exchange component
