@@ -53,9 +53,10 @@ Recent progress in linear scaling Density Functional Theory is enabling larger a
 more complex calculations of condensed phase systems.  In this approach, ${\cal O}(N)$
 scaling with respect to system size, $N$, is achieved with algorithms that exploit 
 quantum locality.  Applications of linear scaling algorithms to mineralogical problems 
-\cite{MCraig04} and to energetic organic materials \cite{} {\bf MORE HERE??} demonstrate the 
-ability of these $N$-scaling algorithms to make valuable contributions well beyond the domain of 
-conventional plane wave methods, which scale with the cube of system size.  
+\cite{MCraig04} and to energetic organic materials 
+%\cite{} {\bf MORE HERE??} 
+demonstrate the ability of these $N$-scaling algorithms to make valuable contributions well 
+beyond the domain of conventional plane wave methods, which scale with the cube of system size.  
 
 In the simulation of condensed phase systems, Gaussian basis functions have several 
 advantages.  First, they are able to sustain all electron calculations into high 
@@ -153,7 +154,8 @@ and the exponent $\zeta_a$ is chosen to describe a particular length scale.
 Gaussian basis functions are often contracted to approximate 
 atomic eigenfunctions \cite{}.
  
-With periodic boundary conditions, the exact Hartree-Fock exchange matrix in {\bf k}-space is \cite{MCausa88}
+With periodic boundary conditions, the exact Hartree-Fock exchange matrix in {\bf k}-space is 
+\cite{MCausa88}
 \begin{equation}
 K_{ab} [{\bf k}] = \sum_{{\bf G}} K_{ab} [{\bf G}] e^{i {\bf k}\cdot {\bf G}}
 \label{Kinkspace}
@@ -250,8 +252,8 @@ However, ther are two significant problems with this approximation. One, in this
 exchange potential, symmetric in the limit of infinite summation, has been asymmetrically truncated, 
 resulting in a potential that depends on position  of the unit cell. 
 And two, the $(a \rightarrow c, b \rightarrow d)$ permutational symmetry of the exchange 
-integral is violated.  The translational non-invariance has a well understood analogue in classical molecular 
-dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
+integral is violated.  The translational non-invariance has a well understood analogue in classical
+molecular dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
 artifacts in energies and forces.  In both cases, translational invariance is restored by 
 introducing the Minimum Image Convention (MIC), which ensures that the distance between neighboring 
 images is always used in computing interactions. In computation of the Hartree-Fock exchange matrix, 
@@ -340,8 +342,8 @@ therein for details on these basis sets.
 
 Differences between the two programs are likely to arise from several factors.  First, {\sc Crystal98}
  uses an auxiliary fitting basis, while {\sc MondoSCF} does not.  Second, {\sc MondoSCF} uses several 
-numerical thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can change 
-the energy slightly.   In particular, a quadratic, variational dependence of the total energy
+numerical thresholds, outlined in Appendix \ref{Thresholds}, in its linear scaling algorithms that can 
+change the energy slightly.   In particular, a quadratic, variational dependence of the total energy
 on the  matrix truncation threshold has recently been demonstrated for the {\sc TRS4} algorithm 
 \cite{ANiklasson03}.  Finally, small super-cell calculations will typically be higher than the 
 ${\bf k}$-space integration limit.  
@@ -440,7 +442,7 @@ theory levels and basis sets}
 Program             & $N_{\rm at}$ & Basis      &  HF     & PBE0 \\
 \colrule
 {\sc MondoSCF}$^a$  &  64          & sto-3g     & ~3.587~ &  ~3.601    \\
-                    &  64          & 6-31g      & ~3.575~ &  ~3.500    \\
+                    &  64          & 6-31g      & ~3.575~ &  ~3.571    \\
 \\
                     & 216          & sto-3g     & ~3.500~ &  ~3.500    \\
                     & 216          & 6-31g      & ~3.500~ &  ~3.500    \\
@@ -688,9 +690,9 @@ O  &    0.500 &   0.500 &  0.500  \\
 %
 %
 \begin{table}[p]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
-         reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA with
-         angles  $\alpha=\beta=\gamma=90^\circ$.}
+\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell 
+calculations reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are 
+$a=b=c=3.5700$\AA with angles  $\alpha=\beta=\gamma=90^\circ$.}
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -711,8 +713,8 @@ C &     0.375 &    0.875 &    0.875  \\
 %
 \begin{table}[p]
 \caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, cooresponding to 
-         the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
-         cell are $a=7.328$\AA, $b=7.920$\AA  and $c=4.400$\AA with angles  $\alpha=\beta=\gamma=90^\circ$. }
+the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
+cell are $a=7.328$\AA, $b=7.920$\AA  and $c=4.400$\AA with angles  $\alpha=\beta=\gamma=90^\circ$. }
 \center{
 \begin{tabular}{cccc}
 \toprule
