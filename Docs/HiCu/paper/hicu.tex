@@ -1,116 +1,138 @@
-\documentclass[preprint]{revtex4}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%,twocolumngrid%
+%,secnumarabic%
+
+%\documentclass[prl,twocolumngrid,twocol,secnumarabic,amssymb]{revtex4}
+
+\commentoutA{\documentclass[prb,aps,twocolumn,twocolumngrid]{revtex4}}
+%\commentoutA{\documentclass[prb,aps,twocolumn,twocolumngrid,secnumarabic,superbib,hyperref]{revtex4}}
+
+\commentoutB{\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}}
+%\documentclass[preprint]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+
+
 %\documentclass[prb,twocolumn]{revtex4}
+
 \usepackage{dcolumn} \usepackage{amsmath} \usepackage{graphicx}
 \makeatletter \makeatother
 
 \newcommand{\Kxc}{{\bf K}_{\mathrm{xc}}}
 \newcommand{\Np}{N_{\mathrm{p}}} \newcommand{\Nbox}{N_{\mathrm{b}}}
 \begin{document}
-\title[Short Title]{ Linear scaling computation of the Fock
-matrix. VI. Data parallel computation of the exchange-correlation
-matrix }
+\title[Short Title]{ Linear Scaling Computation of the Fock
+Matrix. VI. \\ Data Parallel Computation of the Exchange-Correlation
+Matrix }
 
 \author{Chee Kwan Gan\footnote{{\tt ckgan@lanl.gov}} and Matt
 Challacombe\footnote{{\tt mchalla@lanl.gov}}}
  
-\affiliation{ Theoretical Division, Group T-12, MS B268, Los Alamos
-National Laboratory, Los Alamos, New Mexico 87545}
+\affiliation{ Theoretical Division,\\ Group T-12, MS B268, Los Alamos
+National Laboratory,\\ Los Alamos, New Mexico 87545}
 
 \date{Oct 24, 2002}
 
 \begin{abstract}
-Recently early onset linear scaling computation of the
-exchange-correlation matrix $\Kxc$ essential to density functional
-calculations has been proposed and achieved by one of the authors
-using Hierarchical Cubature [J. Chem. Phys. {\bf 113}, 10037 (2000)].
-Hierarchical Cubature differs from other methods in that it is
-adaptive and purely Cartesian, which allows straightforward spatial
-decompositions, i.e., the volume enclosing the whole system is simply
-divided into a number of non-overlapping boxes. The finite extent of
-each box requires only a locally essential density, rather than the
-entire density.  This inherent data locality is exploited to reduce
-communications between processors as well as to avoid memory and copy
-overheads associated with data replication.  Two schemes to partition
-the volume of the system (i) the center-of-mass, and (ii) equal-time
-partitioning schemes are proposed to achieve a good load balance for
-highly irregular parallel computation of $\Kxc$.  The equal-time
-partitioning scheme is a measurement based scheme designed to exploit
-the temporal locality of the self-consistent-field calculations.
-Tests are performed on two systems: (i) taxol, and (ii) a cluster of
-110 water molecules. Excellent speedups are obtained. In particular,
-we have obtained a 113-fold speedup with 128 processors (i.e., an
-efficiency of 88\%) at a very fine-grained level (about one heavy atom
-per processor).  For medium-grained calculations, we obtained
-superlinear speedups resulting from a combination of good load
-balancing and a reduced computational complexity due to data
-parallelism.
+Recently, early onset linear scaling computation of the
+exchange-correlation matrix has been achieved using Hierarchical Cubature 
+[J. Chem. Phys. {\bf 113}, 10037 (2000)]. Hierarchical Cubature differs from other 
+methods in that the integration grid is adaptive and purely Cartesian, 
+which allows for a straightforward domain decomposition in 
+parallel computations; the volume enclosing the entire grid may be simply
+divided into a number of non-overlapping boxes. In our data parallel approach, the 
+finite extent of each box requires only a fraction of the total density to perform the necessary 
+numerical integrations.  This inherent data locality may be exploited to reduce communications 
+between processors as well as to avoid memory and copy overheads associated with data replication.  
+Although the HiCu grid is Cartesian, naive boxing leads to
+irregular work loads due to strong spatial variations of the grid and the
+the electron density.  In this paper we
+\commentoutA{describe {\bf equal-time partitioning},}
+\commentoutB{describe      equal-time partitioning,}
+which employs time measurement of the smallest sub-volumes (corresponding to the raw 
+cubature rule) to load-balance  grid-work for the next self-consistent-field iteration.
+After start up from a heuristic Center of Mass  partitioning,
+equal-time partitioning exploits smooth variation of the density and grid between 
+iterations  to achieve a good load balance. In particular, speedups for equal time 
+partitioning applied to taxol (62 heavy atoms) were found to be 61 out of 64 processors, 
+and 113 out of 128 processors for a 110 molecule water cluster at standard density.  
+For more coarse grained calculations, superlinear speedups are obtained, resulting from 
+combination of a good load balance with a reduced computational complexity due to data parallelism.
 \end{abstract}
 
 \maketitle
 
 \section{Introduction}
 \label{sec:intro}
-Density Functional Theory (DFT) and its variant, the hybrid
-Hartree-Fock/Density Functional Theory (HF/DFT) have proven to be very
-accurate and computationally efficient (compared to those wavefunction
-methods~\cite{Kohn_99v71}) that they have been routinely used in
-quantum chemistry calculations without compromising accuracy and
-reliability~\cite{Becke93,bjohnson93b,Stephens94,Perdew_96v77}. The
-recent years have witnessed impressive progress in the algorithmic
-developments of $O(N)$ (so-called linear scaling) methods where the
-computing time scales linearly with the system size
-$N$~\cite{Schwegler96,Challacombe97,%
-Scuseria99,Challacombe99,Goedecker99}.  These methods overcome several
-computational bottlenecks of $O(N^2)$ to $O(N^3)$, including
-computation of the exact Hartree-Fock exchange
-matrix~\cite{Schwegler96}, the Coulomb matrix~\cite{Challacombe97},
-the exchange-correlation matrix~\cite{Challacombe_00v113}, and
-eigensolution of the self-consistent-field
-equations~\cite{Challacombe99,Niklasson02}.
+Density Functional Theory (DFT) and its variant, the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) 
+have proven to be accurate and computationally efficient.  These model chemistries are routinely used by 
+conventional Gaussian-Orbital Quantum Chemistry codes to excellent advantage.   Recently, significant 
+progress has been achieved in the algorithmic development of ${\cal }O(N)$ alternatives to these conventional 
+methods, where compute times scale linearly with system size $N$\cite{Goedecker99,SWu02}.  
+These linear scaling methods overcome a number of  bottlenecks of order $O(N^{2-3})$ associated with conventional methods, including
+computation of the exact Hartree-Fock exchange matrix
+\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler98C,ESchwegler99,ESchwegler00}, 
+the Coulomb matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,MChallacombe97},
+the exchange-correlation matrix\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A},
+and density matrix alternatives to eigensolution of the Self-Consistent-Field (SCF)
+equations 
+\cite{XLi93,MDaw93,SQiu94,EHernandez95B,Hernandez96,CMGoringe97,ADaniels97,DBowler99B,APalser99,MChallacombe99,ANiklasson02A,ANiklasson02B}.
 
 The existence of linear scaling methods has been argued from the
-concept of ``nearsightedness'' or quantum
-locality~\cite{WKohn95,WKohn96}, which implies that the density matrix
+concept of ``nearsightedness'' or quantum locality~\cite{WKohn95,WKohn96}, which implies that the density matrix
 $n({\bf r},{\bf r'})$ goes to zero as $|{\bf r}-{\bf r'}| \rightarrow
 \infty$. The fundamental reason for this is the loss of quantum phase
-coherence between points that are far apart.  Many linear scaling
-methods that exploit this decay property have been
-proposed~\cite{XLi93,Hernandez96}. It is important to note that
-quantum locality also implies data locality, which is an essential
-property for scalable parallel algorithms. It should be noted that
-successful parallelization of linear scaling methods holds the promise
-of very large scale applications, since in principle, with linear
-scaling methods an $n$-fold increase in the number of processors
-enable the system size to be increased by $n$ times.  However, the
-same cannot be said for, say, $O(N^2)$ or $O(N^3)$ methods.  Scalable
-parallel algorithms will fully utilize the computing resources that
-lie in clusters of personal computers or powerful supercomputers. The
-approach to use a cluster of personal computers has proven to be very
-cost-effective over the years because the ratio of performance to cost
-has been continuously improved. Recently there has been continued
-efforts to parallelize quantum chemistry
-codes~\cite{Harrison_94v45,Guerra_95,Sosa_98v19,%
-Stephan_98v108,Furlani_00v128,Sosa_00v26,Yoshihiro_01v346,Baker_02v23}.
+coherence between points that are far apart.  
+It is important to note that quantum locality also implies data locality, 
+which is an essential property for scalable parallel algorithms. 
+With parallel linear scaling methods, an $n$-fold increase in processors 
+should lead approximately to an $n$-fold increase in simulation capability. 
+In practice however, this is true only for scalable algorithms.  
+While there has been continued efforts to parallelize conventional Quantum Chemistry codes 
+\cite{Harrison_94v45,Guerra_95,Sosa_98v19,Stephan_98v108,Furlani_00v128,Sosa_00v26,Yoshihiro_01v346,Baker_02v23,HTakashima02},
+taking advantage of quantum  locality to achieve parallel efficiency is a largely
+unexplored but important area of research in linear scaling SCF theory.
 
-One of most computationally demanding parts of a modern Gaussian
-orbital self-consistent-field (SCF) code is numerical integration of
-the exchange-correlation potential for DFT or HF/DFT
-calculations. Efficient linear scaling approaches have been proposed
-to solve this problem~\cite{Challacombe_00v113,Jorda95,Stratmann96}.
-Most works~\cite{Furlani_00v128,Jorda95,Stratmann96,Scuseria99} use the idea of
+One of most computationally demanding parts of a modern Gaussian-Orbital SCF code is numerical integration of
+the exchange-correlation potential for DFT or HF/DFT calculations. Linear scaling approaches have been proposed
+to solve this problem~\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A}.
+Most works~\cite{Furlani_00v128,Jorda95,RStratmann96,Scuseria99} use the idea of
 fuzzy polyhedra introduced by Becke~\cite{Becke88}.  These fuzzy
-polyhedra are used to create nuclear weight functions so that
-integration can be written as a sum of many single-center integrations
-centered on atomic nuclei.  Standard numerical techniques are then
-used to perform one-center, atomic-like integration in spherical polar
+polyhedra are used to create nuclear weight functions that partition the integrand
+into a sum of single-center integrations, each centered on a nuclear center.  
+Standard numerical techniques are then used to perform one-center numerical integration in spherical polar
 coordinates.  It should be observed that by this transformation, the
-singularities due to the cusps at the atomic nuclei are overcome.
+primary singularities due to the cusp at the nuclear origin are overcome.
+However, there are additional complexities associated with the Becke approach.
+First,  cusps not associated with the nuclear origin (ie. those due to off center nuclei) are not 
+suppressed by the Jacobian, and may require both high angular and radial densities to 
+resolve. While these secondary singularities are damped by the Becke weight functions
+and can be avoided altogether by introducing a sharper partitioning of the density, 
+doing so can in turn introduce discontinuities in the integrand that require greater radial 
+densities to resolve.  Second, increasing the density of the Becke 
+integration grid does not guarantee convergence to a more accurate result.  
+Third, the overlapping nature of Becke grids and decay of the weight functions with 
+radius do not lend themselves to a clean partitioning of space, important for achieving both linear 
+scaling and simple approaches to domain decomposition and data parallelism.
 
-A different approach, Hierarchical Cubature (HiCu), has been developed
-by Challacombe where an adaptive telescoping Cartesian grid with
-cubature rules is used~\cite{Challacombe_00v113}.  In HiCu, the
-hierarchical adaptive grids resolve strong variations and multiple
-length scales encountered in numerical integration of the
+A different approach, Hierarchical Cubature (HiCu) employs an adaptive 
+telescoping Cartesian grid with primitive cubature rules at the finest level of 
+resolution\cite{MChallacombe00A}.  In HiCu, the hierarchical adaptive grid resolves 
+strong variations and multiple length scales encountered in numerical integration of the
 exchange-correlation matrix $\Kxc$.  The $k$-d
 tree~\cite{Bentley79,Bentley80,Gaede98} data structure is used to
 represent the adaptive grid or CubeTree. The electron density of the
@@ -143,27 +165,33 @@ where $w_i$ are the grid weights and $N_{\mathrm{g}}$ is the number of
 grid points in the cubature rule. The magnitude of the difference
 between the analytic and numerical integrations of the $i$th component
 (i.e., $i = x$, $y$, or $z$) of the density gradient $\nabla \rho$,
-denoted by $\Delta \rho_i $, is calculated in a similar fashion as
-$\Delta \rho$.  Unlike the first implementation of
-HiCu~\cite{Challacombe_00v113}, our latest HiCu implementation has
-incorporated the errors due to the density gradient.  We note that the
-accuracy of HiCu can be systematically improved by decreasing $\tau$.
-One of the strengths of HiCu is that it displays an early onset of
-true linear scaling, even for large basis sets and 3D systems.  The
-Cartesian approach of HiCu allows a straightforward domain
-decomposition while maintaining data locality.
+denoted by $\Delta \rho_i $, is calculated in a fashion similar to $\Delta \rho$. 
 
-The main purpose of this work is to efficiently parallelize the
-computation of $\Kxc$. We propose a measurement based repartitioning
-scheme (called the equal-time partitioning scheme) for domain
-decomposition in quantum chemistry, which fully exploits the temporal
-locality of the SCF calculations. Temporal
-locality means that the workload pattern in the work space (which is
-the volume of the system in the case of HiCu) is more or less the same, since the
-change in density between SCF cycles is usually small. The inherent data
-locality of HiCu is fully utilized to both reduce communications
-between processors and memory requirement through a data parallel
-approach.
+Unlike the first implementation of
+HiCu~\cite{MChallacombe00A}, the current implementation 
+incorporates errors due to the density gradient, which leads
+to improved convergence properties for functionals that employ the 
+Generalized Gradient Approximation (GGA).  Following the spirit
+of Direct SCF methods \cite{JAlmlof82,MHaser89}, the accuracy of HiCu 
+can be systematically improved by decreasing a threshold ($\tau$).  We also note
+that no fitting functions are employed
+The non-overlapping Cartesian approach combined with advanced data structures
+allows maximal exploitation of quantum locality, leading to an early onset of true 
+linear scaling even for large basis sets and 3D systems.  This non-overlapping 
+approach to quantum locality may  be leveraged to achieve both data locality
+and straightforward domain decompositions.
+
+The purpose of this work is to describe our development of data parallel HiCu,
+with emphasis on new, efficient and generally applicable load balancing algorithms.
+\commentoutA{
+{\bf For the first time, we propose measurement based load balancing 
+(equal-time partitioning) for domain decomposition in quantum chemistry.}}
+\commentoutB{
+ For the first time, we propose  measurement based load balancing 
+(equal-time partitioning) for domain decomposition in quantum chemistry.}
+Equal-time partitioning exploits the smooth variation of the electron density 
+between SCF cycles (so called temporal-locality \cite{JPilkington96}), 
+to predict an optimal domain decomposition for the next iteration. 
 
 The remainder of this paper is organized as follows.
 Section~\ref{sec:parahicu} discusses our strategies to efficiently
@@ -178,79 +206,81 @@ conclusions of the paper.
 
 \section{Parallelization of HiCu}
 \label{sec:parahicu}
-In this section we describe the parallelization of HiCu with the goal
-of obtaining good speedups even at fine-grained parallelism.  This is
-difficult, as computation of the exchange-correlation potential, which
-depends on the electron density of the system, is highly irregular for
-an inhomogeneous system.  To obtain a good speedup, we need to reduce
+In this section we describe parallelization of HiCu with the goal
+of obtaining good speedups even for fine-grained parallelism, which we consider
+to be one heavy atom per processor.  This is difficult, as the spatial distribution
+of the grid-work, which depends on the electron density, is highly irregular 
+for an inhomogeneous system.  We note that grid points can experience very different 
+work loads depending on their environment, as the HiCu method will always try to minimize
+the work associated with griding the density.  To obtain a good speedup, we need to reduce
 both load imbalance and communications between processors. First we
-discuss the issue of load balancing. The issue of communication is
-discussed in Section~\ref{sec:data-locality}.
+discuss the issue of load balancing. The issue of communication and data parallelism 
+is discussed in Section~\ref{sec:data-locality}.
 
 Since HiCu is purely Cartesian, spatial decomposition can be performed
-by simply sectioning the {\it root BBox} of the RhoTree, which is the BBox
-enclosing the entire electron density.  We may arbitrarily partition
-the root BBox into $\Nbox$ non-overlapping subboxes.  This suggests a
-very naive approach to a dynamic master-slave load balancing scheme
-when $\Nbox$ is made much larger than $\Np$ (say, $\Nbox= 4\Np$),
-where $\Np$ the number of processors. A master program collects the
+by simply sectioning the root BBox of the RhoTree into $\Nbox$ non-overlapping subboxes. 
+The root BBox encloses the entire electron density, and is constructed by an upward merge
+of sub BBoxes in the RhoTree.  At the lowest level, each BBox of the RhoTree is determined
+by the Gaussian extent.
+
+One approach to load balance is the master-slave approach, which has been used to 
+calculate $\Kxc$ in conventional Quantum Chemistry programs 
+\cite{Baker_02v23,Furlani_00v128,Yoshihiro_01v346}.  In the context of HiCu, 
+a naive approach to master-slave load balancing involves making 
+ $\Nbox$ larger than $\Np$ (say, $\Nbox= 4\Np$), where $\Np$ is the number 
+of processors. The master program collects the
 results from a slave program which has finished its work on a
 particular subbox. The master program then instructs the slave program
 to work on a new subbox which has not been assigned to any of the
-slave programs before. It should be pointed out that the master-slave
-approach has been used to calculate $\Kxc$ in
-parallel~\cite{Furlani_00v128,Yoshihiro_01v346} and other quantum
-chemistry codes~\cite{Baker_02v23}.
+slave programs before. 
 
-We have tested the simple dynamic master-slave load balancing
+We have tested this simple dynamic master-slave load balancing
 scheme. Unfortunately, poor speedups are obtained, especially when
 both $\Nbox$ and $\Np$ are large.  This is because as $\Nbox$
 increases, the time to deal with a subbox is generally small (since
 the volumes are smaller), so most slave programs will finish their
-work very quickly and they will spend some time contending for the
-master program to respond. This problem is exacerbated by the fact
-that the maximum load does not necessarily decrease linearly with
-$\Nbox$ due to the irregular nature of the problem, which means a good
-speedup may not be obtained even in principle.  It is interesting to
-note that Guerra {\it et al.}\/~\cite{Guerra_95} have preferred a
-static dynamic load balancing scheme over a master-slave dynamic
-load-balance scheme because they found that repeated distribution of
-data requires much more communication.
+work very quickly and they will spend some time in contention for the
+master program, a well know problem with this approach [{\bf CITE SOME TEXT BOOKS}].
+In HiCu, this problem is exacerbated by the fact that the maximum load does not 
+necessarily decrease linearly with $\Nbox$ due to the irregular nature of the problem.
+It is interesting to note that Guerra {\it et al.}\/~\cite{Guerra_95}  preferred a
+static dynamic load balancing scheme over  master-slave load-balancing  
+because they found that repeated distribution of data requires much more 
+communication.
 
-So for massive parallelism, we concluded that a careful domain
-decomposition should be made. Since HiCu is intrinsically a tree code,
-we have looked into various domain decomposition schemes mostly
-related to $N$-body problems~\cite{warren:92_article,Grama94_article,%
-Warren95b,Singh93,Singh_95v27,Pilkington96,Grama_98v24}, where most
-implementations use a tree data structure (e.g. a quadtree in 2D or an
-octree in 3D).  In our case here, we choose to use a static
-partitioning scheme where the root BBox is partitioned into $\Nbox =
-\Np$ subboxes with the aim of a good load balance.  One may of course
-use a larger value for $\Nbox$, but having $\Nbox = \Np$ has the
-obvious advantage that each processor needs to deal with one subbox at
-most.  We propose a heuristic center-of-mass (COM) partitioning scheme
-for the parallel calculation of $\Kxc$ in the very first
-self-consistent-field (SCF) cycle.  The COM partitioning scheme will
-be explained in subsection~\ref{subsec:COM}.  For all subsequent SCF
-cycles after the first SCF cycle, we will repartition the root BBox
-using the load information collected in the previous cycle.  The
-reason for this repartitioning scheme is as follows.  In a SCF
-calculation, the electron density of the system changes from one SCF
-cycle to the next.  The grid (CubeTree) for integration of
-exchange-correlation potential in each SCF cycle will adapt
-automatically to the new density.  Since the change in the electron
-density is usually gradual (especially if one starts from a reasonably
-good density guess, such as a superposition of atomic densities), and
-small near self-consistency, it is of great importance to use the load
-information in the previous SCF cycle to repartition the root BBox in
-the current SCF cycle. In this way, temporal
-locality~\cite{Pilkington96} of the problem will be exploited and load
-balance will be continuously improved through repartitioning. This
-equal-time (ET) repartitioning scheme will be further explained in
+An alternative is to employ a heuristic work estimate to guide the 
+domain decomposition.  We experimented with a number
+of heuristics, including  splitting the density into charge equal volumes and 
+partitioning by Center of Mass.  Of these heuristic approaches the Center 
+of Mass method explained in subsection~\ref{subsec:COM} was found to have 
+the greatest, but still unsatisfactory efficiency.
+
+Other approaches to achieving a scalable load balance are decentralized 
+control schemes such as the diffusion methods \cite{} and measurement 
+approaches.  Measurement approaches have several advantages here: First
+they are easier to program then diffusion methods.  Second, they work 
+well with smooth variation of work load in the time or iteration space 
+(temporal locality), an exploitable feature in the SCF procedure.  Third, they have been employed 
+with great success in tree-code methods for solving the $N$-body problem
+\cite{JPilkington96,warren:92_article,Grama94_article,Warren95b,Singh93,Singh_95v27,Grama_98v24} ~--~
+HiCu has significant homology with the current implementation of the 
+Quantum Chemical Tree-Code for solving the Quantum Coulomb problem.
+
+The remainder of this work describes our development of a measurement based
+method for load balancing data parallel HiCu.  Briefly, the overall scheme is
+as follows:  First the heuristic COM partitioning is used for parallel calculation 
+of $\Kxc$ in the  first SCF cycle.   This provides a first measurement for repartitioning
+the root BBox in the next SCF cycle.  As long as the starting guess is reasonable and 
+pathological charge sloshing does not occur each repartition should yield good
+load balance for the next iteration. In this way, temporal locality~\cite{JPilkington96} 
+of the problem will be exploited and load balance will be continuously improved through 
+repartitioning. This equal-time (ET) repartitioning scheme will be further explained in
 subsection~\ref{subsec:equal-time}.
 
 \subsection{Center-of-mass partitioning scheme}
 \label{subsec:COM}
+
+\commentoutA{
 % BEGIN FIGURE
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{COM.eps}}
@@ -267,6 +297,7 @@ shown is a cutting plane C passing through the center of mass ${\bf
 X}$.  }\label{fig:COM}
 \end{figure}
 % END FIGURE
+}
 
 In the center-of-mass (COM) partitioning scheme, we make a plausible
 assumption that the computing time for a subbox is proportional to the
@@ -315,6 +346,7 @@ partitioning schemes to replace COM partitioning scheme.
 
 \subsection{Equal-time partitioning scheme}
 \label{subsec:equal-time}
+\commentoutA{
 % BEGIN FIGURE
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{ET.eps}}
@@ -326,173 +358,131 @@ that the leaf-node times are different in general. The distance of the
 cutting line C from the left edge, $x$, is determined by the condition
 that the sum of the leaf-node times on both sides of the partition line is
 equal (i.e., $T_L = T_R$).  Notice that we have chosen the direction
-for partitioning as the direction which gives the largest dimension.}
+for partitioning as the direction which gives the largest dimension.
+[{\bf NOTE THAT THE LOWER RIGHT BOX IMPLIES CUTTING THE SHORTEST DIMENSION FIRST!}]
+}
 \label{fig:shiftline}
 \end{figure}
 % END FIGURE
+}
 
-Next we discuss the equal-time (ET) partitioning scheme, which is used
-to repartition the root BBox based on the workload
-information collected during the CubeTree construction in a particular
-SCF cycle so that so that a better load balance will be achieved in
-the next SCF calculation. In this way, the load information in the
-$n$th SCF cycle will be used to load balance the computation of the
-$(n+1)$th SCF cycle, for $n \ge 1$.  Through several experimentations,
-we find the useful load information is the leaf-node time, which
-measures the time to create a leaf node in a local CubeTree. The leaf-node
-time includes the time to lay a grid in the BBox for the leaf node according to the 
-cubature rules and evaluations of the density
-and the density gradient on the leaf-node's grid. The
-leaf-node time is collected during runtime and is stored along with
-other attributes in a variable of type
-CubeNode~\cite{Challacombe_00v113}.  It is important to notice that
-the BBoxes of all leaf nodes on all processors will fill the root
-BBox. The spatial distribution of all leaf nodes (which are spread
-across all processors) will be very dense at places where a high resolution is
-needed, and this will tend to have a higher workload. One might assume
-that the workload is proportional to the number of leaf
-nodes. However, we find we can do much better by assuming that the
-workload is proportional to the sum of leaf-node times.
-It should be remembered that the time
-to create each leaf node will not be the same in general since the
-environment (i.e. the portion of the RhoTree visited) that the BBox of a leaf
-node experiences is generally different from all others.
+Next we discuss measurement approaches to domain decomposition, with the goal of 
+repartitioning the root BBox based on workload information collected during 
+CubeTree construction in the previous SCF cycle.  By analogy with parallel $N$-Body
+methods\cite{JPilkington96,warren:92_article,Grama94_article,Warren95b,Singh93,Singh_95v27,Grama_98v24},
+we first tried to share out an equal load of leaf-nodes, then an equal share of grid points, 
+reasoning that the spatial distribution of grid points would correspond to the distribution 
+of work.  If we evaluated the density using conventional methods, this would certainly be so.
+However, because each leaf-node interacts with the RhoTree in a different way, always attempting 
+to minimize the total work load, these counting approaches were not as reliable as hoped.  
+This line of reasoning lead us to the present Equal Time (ET) partitioning, which uses the elapsed 
+wall time to evaluate the density and it's gradient on the raw cubature grid contained by each leaf-node.
 
-Given that all processors hold the leaf-node times in their
-respective local CubeTrees, the equal-time partitioning scheme creates
-a new domain decomposition by recursively partitioning a box into two
-subboxes such that each subbox carries approximately the same total
-leaf-node times (hence the name ``equal-time'').  We have used a
-robust bisection method~\cite{WPress92} to find the plane which
-equally (to some threshold) divides the workload into half (see Figure
+In ET partitioning, the leaf-node time is stored along with other attributes in a variable of 
+type CubeNode~\cite{MChallacombe00A}.  With all processors holding leaf-node times in their 
+respective local CubeTrees, ET creates a new domain decomposition by recursively partitioning
+a box into two subboxes such that each subbox carries approximately the same total
+leaf-node time (hence ``Equal-Time'').  At the end of the decomposition we are left with
+$\Np$ ET BBoxes in which to construct a HiCu grid.  The astute reader will by now realize this
+construction requires $\Np$ to be a power of two, and that errors made early in the decomposition
+will propagate to the lowest level.  These are simple conveniences, which can be easily addressed 
+in future should they prove problematic.  We have used a robust bisection method~\cite{WPress92} 
+to find the plane which equally (to some threshold) divides the workload into half (see Figure
 \ref{fig:shiftline}). Notice that the cutting direction may be varied
-at each level of the recursion to avoid elongated subboxes which could
-lead to poorly-balanced workloads. We have always chosen a direction
+at each level of the recursion to avoid elongated ET BBoxes which could
+lead to poorly-balanced workloads. Our decomposition always choses a direction
 which cuts along the largest box dimension, since the cubature rules
-will work best for near cube-like BBoxes for the leaf
-nodes~\cite{Stroud71}.
+will work best for near cube-like BBoxes for the leaf nodes~\cite{Stroud71}.
 
-It is important to point out that the working hypothesis of ET
-partitioning scheme is that the sum of leaf-node times
-for the root BBox is constant irrespective of the sectioning of the
-root BBox.  In practice, this is not true since the total leaf-node
-times will fluctuate if the cutting planes are shifted slightly. This
-is because with each new partitioning, the adaptive grid will be
-different. Since the time to create each leaf node depends on the
-environment, the total leaf-node times will be different. However, it
-is important to notice that the relative fluctuation of total
-leaf-node times is small if the problem is coarse-grained. For very
-fine-grained problems, relative fluctuations may be large and this
-will create an imbalance problem, as will be seen in the results in
+It is important to point out that the working hypothesis of ET partitioning 
+is that the sum of leaf-node times for the root BBox is constant 
+irrespective of the sectioning of the root BBox.  In practice, this is not true since 
+the total number of leaf-nodes and their times will fluctuate if the cutting planes are 
+shifted slightly. This is because with each new partitioning the CubeTree will 
+readjust, potentially using more or less leaf-nodes to satisfy $\delta<\tau$.
+Also, as the time to create each leaf node depends on its size and position, readjustments 
+will lead to leaf-node times that are somewhat different. Finally, variation of the
+density and hence the grid will occur in all but the last few SCF cycles.  All of these
+factors work against  ET partitioning.  The magnitude of these factors depends
+on the granularity of the partition, as will be seen in the results in
 Section~\ref{sec:results}.
 
-It is interesting to compare and contrast our ET repartitioning scheme
-with other measurement based repartitioning schemes in the $N$-body
-methods, such as the Orthogonal Recursive Bisection
-(ORB)~\cite{warren:92_article} and the costzones
-methods~\cite{Singh93}.  First we note the differences
-between the ET partition and ORB.  In ET partition, we recursively split the 3D
-space into many subspaces according to equal leaf-node times. However,
-in the ORB for the Barnes-Hut
-implementation~\cite{warren:92_article}, particles are grouped into groups
-of particles.  This is achieved by partitioning the space containing
-the particles with equal costs, where the costs correspond to the
-number of interactions required to compute the force on the particles
-in the space. It would be interesting to replace the cost counting in
-ORB to the load timing information as in the ET partition, which may be more
-appropriate since the time to compute each interaction might not be
-the same in general.  In a costzones partitioning scheme~\cite{Singh93}, the {\it
-tree} (rather than the 3D space) is partitioned 
-with equal costs. The cost in the costzones method is defined in the
-way as in the ORB.  So we concluded that ET partition
-differs somewhat from ORB and costzones methods.  However, notice that
-our ET partitioning scheme resembles the
-ORB~\cite{warren:92_article} in the sense that both systematically section the work
-space in varying directions.  In
-Section~\ref{sec:implementation} we will show how both COM and ET
-partitioning schemes may be incorporated into parallel HiCu with the
-rest of the subroutines.
+
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{taxol.eps}}
+\caption{The taxol electron density color-mapped with the electrostatic potential.}
+\end{figure}
+}
 
 \section{Data parallel approach}
 \label{sec:data-locality}
-We have used a data parallel approach to implement parallel HiCu, in
-anticipation of applications of our programs to very large systems
-containing many atoms.  Data parallelism is an important issue because
-naive data replication will exhaust the memory very quickly,
-especially for very large systems. A data parallel approach is
-possible because HiCu exhibits intrinsic data locality, which allows
-us to use data parallel representation of the RhoTree, CubeTree, and
-even $\Kxc$. The data parallel approach to these quantities will be
-discussed in turn.  For HiCu, it is important to notice that each
-subbox from a partitioning scheme has a well-defined boundary
-(i.e. the six bounding planes), which means only the local information
-about the electron density is needed.  By building a {\it locally
-essential RhoTree}, which is {\it just}
-sufficient to create the grid in a subbox, redundant replication of
-data is avoided. Another advantage of a data parallel RhoTree is that
-a traversal of a smaller locally essential RhoTree is more
-efficient relative to a traversal of the entire RhoTree in the case of a
-replicated density.
 
-In a typical calculation, program {\tt MakeRho} will use the
-row-distributed density matrix ${\bf P}^{P}$ ($P = 1, 2, \ldots, \Np$) 
-to compute a distributed
-intermediate Hermite-Gaussian (HG) ~\cite{Ahmadi95,Challacombe_00v113}
-density.  Each process will independently calculate a set of density
-distributions $\rho_q$ associated with only a number of rows
-of ${\bf P}$. Each process will then save the
-intermediate HG density distributions to its local disk, thus
-spreading the data across many disks and avoiding hard disk
-bottleneck. When parallel HiCu is invoked, each process will read the
-intermediate HG density from its local disk.  It is important to
-notice that the intermediate HG density, which is derived from
-row-wise partitioning of the density matrix ${\bf P}$, is generally insufficient
-to build a locally essential RhoTree for the subbox.  To
-construct locally essential RhoTrees, all processes will go through
-all local density distributions $\rho_q$ and use the information of
-the dimensions of all other subboxes to determine if a local density
-distribution $\rho_q$ needs to be sent to a remote process.
-Once all local density distributions have been exchanged, each process
-can build its own RhoTree which does not involve communications
-between processes.  The construction of local CubeTrees follows,
-which also involves no communication.
+Data parallelism is essential for scalable algorithms, as data replication
+stands to exhaust local memory and throttle communications with increasing $N$ and $\Np$.
+For parallel HiCu, each of the ET BBoxes requires only local information
+about the electron density.  By building a {\it locally essential RhoTree}, which is {\it just}
+sufficient to create the grid in an ET BBox, redundant replication of data is avoided. 
+Another advantage of a data parallel RhoTree is that traversal of a smaller locally essential 
+RhoTree is more efficient relative to traversal of the entire RhoTree in the case of a
+replicated density.  This reduced complexity due to data parallelism can lead to 
+superlinear speed ups as shown in Section \ref{sec:results}.
 
-It is important to note that for a large system, $\Kxc$ is expected to
-be sparse.  To facilitate efficient additions and updates of non-zero
-matrix elements, we have designed a data structure called FastMat to store
-the local $\Kxc$, denoted by ${\bf L}_{\mathrm{xc}}^{P}$, for $P = 1,
-2, \ldots, \Np$.  In FastMat, all rows are connected by a linear
-linked list, while each row is represented by a binary tree.  The
-FastMat overcomes the inadequacy of the conventional blocked compressed
-sparse row (BCSR) and distributed blocked compressed sparse row
-(DBCSR) data structures, which do not allow random insertions and
-updates of matrix elements.
-
-We note that no communication between processes is needed when ${\bf
-L}_{\mathrm{xc}}^{P}$ are computed.  The exchange-correlation matrix
-$\Kxc$ is related to ${\bf L}_{\mathrm{xc}}^{P}$ by
+Data parallelism begins with a distributed atom-blocked compressed sparse row (DBCSR) \cite{MChallacombe00B}
+density matrix ${\bf P}^{p}$, which is used by program {\sc MakeRho} to create an intermediate distributed Hermite-Gaussian 
+(HG)\cite{Ahmadi95,MChallacombe97,MChallacombe00A} density $\rho^p$. 
+The intermediate density consists of primitive distributions associated with only the rows spanned by ${\bf P}^p$. 
+{\sc MakeRho} writes $\rho^p$ to local disk in parallel, avoiding IO and network bottlenecks.  As an aside, this
+is the same density also used by program {\sc QCTC}.  The intermediate density $\rho^p$
+is generally insufficient to build a CubeTree in an ET BBox.  Communication
+involving all processors now occurs to construct the locally essential density $\rho^p_{\rm \tiny LE}$.
+Ultimately, sophisticated ordering and scheduling techniques could be used to reduce 
+complexity of this step.  So far however, we have found no degradation of performance
+due to this redistribution.  Construction of $\rho^p_{\rm \tiny LE}$ involves all processes 
+going through their local primitive density distributions, performing box-box overlap tests as 
+described in Ref.~\onlinecite{MChallacombe00A} to determine the exchange of data.  After this redistribution of 
+densities, construction of the locally essential RhoTree, local CubeTree, and local partially summed 
+exchange-correlation matrix (denoted by ${\bf L}_{\mathrm{xc}}^{p}$) proceed independently.
+The local, partially summed exchange-correlation matrix results from numerical integration of all
+basis function products in the ET BBox, and is related to the full exchange-correlation matrix $\Kxc$ by 
 \begin{equation}
-\Kxc = \sum_{P=1}^{\Np}{\bf L}_{\mathrm{xc}}^{P}
+\Kxc = \sum_{p=1}^{\Np}{\bf L}_{\mathrm{xc}}^{p}~,
 \label{eq:kxcp}
 \end{equation}
-even though the summation in Eq.~(\ref{eq:kxcp}) has not been carried
-out as a global sum in our program.  Instead, ${\bf
-L}_{\mathrm{xc}}^{P} $ are redistributed to create row-wise
-distributed ${\bf K}_{\mathrm{xc}}^{P}$, also stored in FastMat.  We
-find that FastMat is also very useful for the redistribution of ${\bf
-L}_{\mathrm{xc}}^{P}$ for ${\bf K}_{\mathrm{xc}}^{P}$,
-since it involves insertions and updates of matrix
-elements.  Our distribution approach should be contrasted with that
-taken by Furlani {\it et al.}\/~\cite{Furlani_00v128} where
-global summations to a single processor are performed. It should be
-noted that parallel I/O is possible where ${{\bf
-K}}_{\mathrm{xc}}^{P}$ may be written to separate disks for future
-use.
+although the summation in Eq.~(\ref{eq:kxcp}) is not explicitly carried out.  Rather, ${\bf L}_{\mathrm{xc}}^{p}$
+is redistributed and resumed to yield a non-overlapping row-distributed ${\bf K}_{\mathrm{xc}}^{p}$.
 
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
+\caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
+RPBE/3-21G, with $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a
+2-processor calculation.}\label{fig:taxol}
+\end{figure}
+}
+
+As  $\Np$ becomes large, the ET BBox will become small and the corresponding local 
+exchange-correlation matrix will become very sparse.  During matrix construction there 
+can be significant overheads associated with simple box-box testing of primitive basis function product
+BBox overlaps with the ET BBox.  This problem is also encountered for periodic HiCu \cite{CTymczak02},
+where a double sum over lattice vectors leads to a substantial fraction of basis function products 
+that are outside the root BBox.  Our solution, described in detail elsewhere, is to perform a
+higher level overlap test between the cylinder defined by all possible basis function products 
+in an atom-atom pair and the ET BBox.  
+
+Another potential complexity encountered with fine grained parallelism involves the redistribution 
+and resummation of ${\bf L}_{\mathrm{xc}}^{p}$.  If one uses sparse-matrix data structures related to 
+the standard CSR \cite{FGustavson78,SPissanetzky84} data structure such as the DBCSR or BCSR 
+constructs \cite{MChallacombe00B}, the resummation of very many small sparse matrices can lead to large 
+copy overheads.   We have developed  the Fast Matrix (FastMat) data structure
+to address this problem,  in which all rows are connected by a linear linked list, while each row is 
+represented by a binary tree.  This new construct has a very low overhead for random insertions and 
+updates of atom-atom blocks.  It also allows many operations such as matrix-matrix addition and
+matrix filtration to be done in-place, reducing both memory and copy overheads.
 
 \section{Implementation}
 \label{sec:implementation}
-
+\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{PHiCuFlow.eps}}
 \caption{The general flow of MondoSCF, with parallel HiCu subroutine
@@ -500,87 +490,51 @@ expanded.  Refer to Section~\ref{sec:implementation} for more
 details.}
 \label{fig:parahicu}
 \end{figure}
+}
 
-We have implemented parallel HiCu in MondoSCF~\cite{Mondo}, a suite of
+We have implemented the parallel HiCu algorithm in {\sc MondoSCF}~\cite{Mondo}, a suite of
 programs for linear scaling electronic structure theory and {\it ab
-initio}\/ molecular dynamics.  Figure~\ref{fig:parahicu} shows the
-general flow of MondoSCF, with an emphasis on parallel HiCu.  The
-program {\tt MakeRho} is executed in parallel to calculate the
-intermediate Hermite-Gaussian (HG) density distributions $\rho_q$ from
-the row-wise distributed density matrix. If there are $\Np$ processes, 
-then each process
-will write a portion of the density distribution, $\rho^{P}({\bf
-r})$, to its local disk, where $ P = 1, 2, \ldots, \Np$. When parallel
-HiCu is invoked, one process will domain decompose the work space
-(i.e. the root BBox) using either the center-of-mass partitioning
-scheme at the first SCF cycle or the equal-time partitioning scheme at the
-second or higher SCF cycles. The dimensions of subboxes after the
-partitioning will be broadcast to all processors. Each process will
-then load the intermediate HG density $\rho^{P}({\bf r})$,
-from its local disk.  By going
-through each density distribution $\rho_q$, a process will determine if a
-distribution should be sent to other processes from the dimensions of
-the subboxes. Some communications are needed to send the
-necessary density distributions to other processes. Once a process
-have all the essential density distributions, $\rho_{\mathrm{E}}^{P}({\bf r})$, 
-a locally essential RhoTree is built.  Notice
-that the locally essential RhoTrees are much smaller than the entire RhoTree in
-the case of a replicated density.  Next local CubeTrees are built,
-followed by an equal-time partition to facilitate repartitioning of
-the root BBox in the next SCF cycle. The output of equal-time
-partition is saved and will be used in the next SCF cycle.  Parallel
-HiCu then proceeds with the calculation of local exchange-correlation
-matrix, ${\bf L}_{\mathrm{xc}}^{P}$, which is related to $\Kxc$ by
-Eq.~(\ref{eq:kxcp}).  To facilitate a full data parallel approach, we
-redistribute ${\bf L}_{\mathrm{xc}}^{P}$ ($P = 1, 2, \ldots,\Np$) to
-obtain row-wise distributed ${\bf K}_{\mathrm{xc}}^{P}$.
-
-MondoSCF has been written in F95 with a message-passing paradigm using
-the MPI library~\cite{mpi}.  The choice is made to ensure portability
-of MondoSCF across different platforms and to free us from relying on
-the underlying softwares and hardwares of the system.  More
-importantly, the message-passing paradigm is used because as in many
-parallel tree codes~\cite{Warren95b}, which involves dynamic and
-irregular data structures, optimal performance can only be obtained by
-having control over distribution and communication. We have used an
-MPI function {\tt MPI\_WTIME} to calculate the leaf-node times.
-
-%It is interesting to contrast our implementation approach with that used
-%by Sosa {\it et al.}\/ They have used OpenMP to achieve parallelism,
-%where user can fine-tune the codes via compiler directives or
-%high-level command tools, which might need some experience.
+initio}\/ molecular dynamics.   Figure~\ref{fig:parahicu} shows the
+general flow of an SCF cycle, with expanded detail of parallel HiCu.  
+MondoSCF has been written in Fortran 90/95 with the message-passing library
+MPI~\cite{mpi}.  Leaf-node times are calculated with the {\tt MPI\_WTIME} MPI function.
 
 \section{Results}
 \label{sec:results}
 
+\commentoutA{
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
+\caption{Scaling of parallel HiCu on (H$_2$O)$_{110}$ RPBE/3-21G, with
+$\tau = 1.0 \times 10^{-6}$. Speedups are relative to a
+2-processor calculation.}\label{fig:waterscaling}
+\end{figure}
+}
+
 We have performed scaling tests on taxol and a cluster of 110 water
 molecules with $2^n$ processors, where $n$ typically ranges from 1 to
 7.  These systems are chosen because they are highly inhomogeneous,
-which pose a challenge for a good performance of the parallel HiCu.
-All runs are performed on the SGI Origin 2000 with 250 MHz MIPS R10000
-MIPS processors.  The result of the taxol scaling tests is shown in
-Figure~\ref{fig:taxol}.
-%The scaling results of taxol (which contains
-%113 atoms) for 128-processor run is unavailable since MondoSCF
-%requires each processor to hold at least one atom, which is not a
-%severe restriction since large systems involving many atoms are the
-%targets of MondoSCF.  
-We start the calculation with a STO-3G basis set with a large $\tau$
-threshold and then switch to 3-21G basis set and run for 3 SCF cycles.
-The density matrix ${\bf P}$ is saved to the disk and scaling tests of
-parallel HiCu are performed.  The procedure of switching the basis set
-and iterating for a few SCF cycles is to ensure a typical electron density is
-used.  The timings for parallel HiCu are taken at the fourth cycle
-where the center-of-mass partition is used, and at the fifth cycle
-where the equal-time partition is used.  Figure~\ref{fig:taxol}
-shows that COM partitions perform rather poorly after 16 processors
-where only a speedup of 22.4 is obtained with 64 processors.  However,
+three-dimensional system posing a challenge for a good performance of 
+parallel HiCu.  All runs are performed on a single SGI Origin 2000 
+with 128 250 MHz MIPS R10000 MIPS processors. 
+
+We start the calculations with a STO-3G basis set with a large $\tau$
+threshold and then switch to the 3-21G basis set using our mixed integral
+approach, and run for 3 SCF cycles.  The density matrix ${\bf P}$ is saved to 
+disk and scaling tests of parallel HiCu are performed.  The procedure of 
+switching the basis set and iterating for a few SCF cycles is to ensure a 
+typical electron density is used. The timings for parallel HiCu are taken 
+at the fourth cycle where the center-of-mass partition is used, and at the 
+fifth cycle where the equal-time partition is used.  
+
+The result of taxol scaling tests is shown in Figure~\ref{fig:taxol}, 
+where the COM partitions perform rather poorly past 16 processors,
+with a speedup of only 22.4 obtained at 64 processors.  However,
 the equal-time partitions give good scaling results compared to the
 ideal speedup, obtaining a speedup of 60.8 with 64 processors.  We
 note that our result of a speedup of 7.03 with 8 processors compares
-favorably with the speedup of about 6.0 of Sosa {\it et
-al.}~\cite{Sosa_00v26}, which is for the single-point energy
-calculation.
+favorably with the speedup of about 6.0 of Sosa {\it et al.}~\cite{Sosa_00v26}, 
+which is for an entire single-point energy calculation.
 
 Similar scaling tests have been performed on a cluster of 110 water
 molecules.  Figure~\ref{fig:waterscaling} shows that the
@@ -588,127 +542,155 @@ center-of-mass partition gives a better speedup than in the case of
 taxol, presumably due to coarser-grained calculations.  The equal-time
 repartitioning scheme is observed to be highly effective.  The speedup
 is almost ideal up to 64 processors. We observe a superlinear speedup
-at 32 processors, which corresponds to a medium-grained calculation.
-We attribute the superlinear speedup as a result of a good load
-balance as well as data parallelism, where the memory access time has been
-greatly minimized since smaller trees are used.  The speedup with 128
-processors degrades slightly, which is 112.64 (this corresponds to an
-efficiency of 88\%).  But still this is an encouraging result because
+at 32 processors, which is a medium-grained calculation.
+We attribute the superlinear speedup to a good load
+balance and to reduced complexity associated with data parallelism, 
+where the memory access time has been greatly reduced with a smaller RhoTree.  
+The speedup with 128 processors degrades slightly to 112.64 (an
+efficiency of 88\%).  Still, this is an encouraging result as
 the 128-processor run corresponds to very fine-grained parallelism,
-where each processor handles about 1 heavy atom (oxygen). The reason
-for a degraded efficiency for this very fine-grained calculation is
-that an imbalance occurs due a relatively large fluctuation in the sum of
-leaf-node times for each subbox, as explained in~
-\ref{subsec:equal-time}.
-
-Finally we note that SGI shared memory platform might not be ideal to
-test our message-passing implementation of parallel HiCu. However, we
-do not find a degradation of performance as shown by the results in
-Figs.~\ref{fig:taxol} and \ref{fig:waterscaling}. This suggests that
-the performance of parallel HiCu should be robust across different
-platforms.
+with less than one heave atom per processor. The reason for this degraded efficiency 
+is not due to communication overhead but to intrinsic limitations in the ET
+scheme associated with fluctuations in the leaf-node count and small non-conservation of
+total times as explained in \ref{subsec:equal-time}.   While there are almost certainly 
+ways to overcome/compensate for these effects, we feel that the overall performance of ET 
+for parallel HiCu is outstanding, and that our efforts are better spent parallelizing the 
+remainder of {\sc MondoSCF}.  When this is accomplished, we will be able to 
+go to larger systems on larger platforms, where doubtless other considerations may arise!
 
 \section{Conclusions}
 \label{sec:conclusions}
 %approach.  Stratment. LinXC. and Jorda.  comment on
 %\cite{Furlani_00v128,Sosa_98v19,Sosa_00v26}
 
-We have proposed efficient parallelization of linear scaling
-Hierarchical Cubature (HiCu) for numerical integration of
-the exchange-correlation potential.  Both spatial and temporal localities
-are exploited to domain decompose the work space, which is the volume
-enclosing the electron density of the whole system.  The spatial locality has
-been used to reduce communications between processors and to enable a
-data parallel approach, which greatly reduce the memory usage and
-facilitate efficient memory access since redundant information are not
-stored.
 
-To the best of our knowledge, we have proposed one of the first
-measurement based strategies in quantum chemistry, called the
-equal-time (ET) partitioning scheme, to perform domain decomposition
-of the work space in all self-consistent-field cycles, except the first cycle.
-This adaptive repartitioning scheme is proven to be highly effective
-since we can exploit the temporal locality in a typical
-self-consistent-field calculation. Even though the ET partitioning
-scheme shares some ideas with the existing repartitioning schemes
-for the tree implementations of the $N$-body methods, 
-such as the Orthogonal Recursive Bisection (ORB)~\cite{warren:92_article} 
-and costzones methods~\cite{Singh93}, the ET partition
-differs from these two methods because (i) it partitions the 3D space (rather than
-grouping the particles in ORB or partitioning the tree in costzones)
-and (ii) exact load timing information is used (rather than counting the
-number of interactions in $N$-body simulations in the ORB and costzones methods).
+We have developed an efficient and general load balancing technique, Equal Time (ET) 
+partitioning, and used it in data parallel implementation of the ${\cal O}(N)$ 
+Hierarchical Cubature (HiCu) algorithm for numerical integration of the exchange-correlation 
+matrix.  In the ET approach, strong spatial irregularities in the work load are overcome by exploiting 
+temporal locality between SCF cycles.  We expect ET to also exploit this effect
+between geometry steps in an optimization or molecular dynamics run.
+In this data parallel implementation, quantum locality has been used to reduce communications 
+between processors, to lower memory usage and to reduce the computational complexity 
+associated with traversal of the RhoTree.  In some cases, this last effect can lead to
+superlinear speedups for medium grained calculations.
 
-We have developed a new data structure FastMat to efficiently
-facilitate insertions and updates of matrix elements, a feature which
-is not found in the conventional blocked compressed sparse row (BCSR)
-and distributed blocked compressed sparse row (DBCSR) data structures.
+To the best of our knowledge, Equal Time partitioning is the first measurement based 
+load balancing strategy applied to Quantum Chemistry.  While ET partitioning
+shares some commonalities with partitioning schemes for parallel $N$-body tree-code solvers
+such as Orthogonal Recursive Bisection (ORB)~\cite{warren:92_article} 
+and Costzones \cite{Singh93}, ET differs by (i) using exact load timing information rather 
+than counting the number of interactions as in the ORB and Costzones methods and (ii) associating
+this load with rectilinear partitioning of Cartesian space rather than particle groupings (ORB) 
+or nodes in a tree (Costzones).  These are important distinctions for Quantum Chemistry.
+Often methods are much more complicated than the simple $N$-body problem.  Measured loads encompass 
+irregularities associated with different Gaussian extents, non-uniform access patterns, etc.~that 
+cannot be accounted for by counting interactions.  Also, because we are often doing several complicated things 
+at once, associating a work load with a portion of three-space is a convenient catch-all
+that can be associated with all objects and processes: basis functions and matrix construction,
+electron densities and grid construction, etc.  
 
-% Kxc and density matrix
-It should be pointed out our parallelizations of $\Kxc$ differs
-fundamentally from many existing parallelizations 
-of $\Kxc$~\cite{Furlani_00v128,Yoshihiro_01v346}, which are
-based on the original or modified Becke nuclear weight functions to
-handle numerical integrations~\cite{Jorda95,Stratmann96,Scuseria99}. 
-In most approaches~\cite{Furlani_00v128,Yoshihiro_01v346}, grid batches
-are created and a simple master-slave dynamic loading balancing
-scheme has been used. The master-slave scheme works 
-well for a small number of slave programs
-with coarse-grained parallelism.  However, unless a more sophisticated
-dynamic loading balancing scheme is used, the simple master-slave scheme will not
-give good scalings for fine-grained calculations with many processors,
-since excessive communications between the master and the slave programs
-will become the bottleneck of the calculations.
-
-Our parallel HiCu code (in fact, all programs in MondoSCF) uses the intermediate 
-Hermite-Gaussian densities~\cite{Ahmadi95,Challacombe_00v113}, which allows the
-possibility of a data parallel approach. In this approach,
-the row-distributed density matrix is used rather than the entire
-density matrix~\cite{Furlani_00v128,Stratmann96,Sosa_00v26}, 
-which can be prohibitively large to load onto any single processor
-for very a large calculation.
-
-Due to the use of advanced data structures to handle 
-a dynamic irregular problem, we find
-that the message-passing implementation of MPI gives us more control over 
-distribution and communication. 
-This will entail more programming efforts, however,
-the efforts will be paid off with a highly efficient program, a conclusion
-that has also been independently reached in Ref.~\cite{Warren95b}.
-
-Due to a similar pattern of workload as in the $\Kxc$ calculation, the
-exchange-correlation force calculation should lend itself to
-straightforward parallelization.  Work is underway to parallelize HiCu
-with periodic boundary conditions, which we expect
-the equal-time partition should also work well.
-Work is also underway to parallelize other parts of MondoSCF suite of
-programs.  We expected the tree code experiences gained in parallel
-HiCu would be valuable to parallelization of the Coulomb matrix
-calculation with Quantum Chemistry Tree 
-Code (QCTC)~\cite{Challacombe97,MChallacombe96,Challacombe96B}, which is another tree
-code.
+Our parallel approach to construction of $\Kxc$ differs fundamentally from other all-electron approaches 
+in that (i) we do not employ Becke weights and (ii) we employ measurement based load balancing.
+It is also different from many implementations in that (iii) it is data parallel. 
+In addition to numerical issues discussed in Section \ref{sec:intro}, we believe the non-overlapping
+Cartesian subdivision used by HiCu enables a more straight forward approach to data locality 
+and domain decomposition.  Both the replicated data and the master-slave approach 
+have well known shortcomings for fine grained massive parallelism, which have been avoided
+here.  With less than one heavy atom per processor, data parallel HiCu using ET partitioning
+is 88\% efficient with 128 processors.  The predominent cause of deviation from the ideal
+is due to basic non-linearities in ET partitioning of the HiCu grid, rather than overheads 
+associated with inefficient data structures or communication.
 
 \begin{acknowledgments}
 The Advanced Computing Laboratory of Los Alamos National Laboratory,
 Los Alamos, New Mexico is acknowledged. Most of the calculations have
 been performed on computing resources located at this facility.
+[{\bf NEED TO ALSO ACKNOWLEDGE ASCI MATERIALS PROGRAM AND DOE UNDER SOME
+UC CONTRACT NUMBER OR SOME SUCH}]
 \end{acknowledgments}
 
 \bibliographystyle{apsrmp} \bibliography{mondo}
 
-\begin{figure}[t]
-\resizebox*{3.5in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
-\caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
-RHF/3-21G, with $\tau = 1.0 \times 10^{-6}$. The speedup for a
-2-processor calculation is defined to be 2.}\label{fig:taxol}
+\pagebreak
+
+\commentoutB{
+
+\pagebreak
+
+\begin{center}
+\bf  FIGURES
+\end{center}
+
+\begin{figure}[h]
+\caption{ A schematic diagram to explain the center-of-mass (COM)
+partitioning scheme.  A sphere of Bragg-Slater~\cite{Slater_64v41}
+radius $R_i$ centered on the atom $i$ is drawn for each atom (for
+simplicity, only one atom is considered in this case).  The volume of
+box-sphere intersection is approximated by $L_x L_y L_z$, where the
+$L_x$ is the range of intersection between the sphere and the box in
+the $x$ direction. $L_y$ and $L_z$ are calculated in a similar
+way. For simplicity we have assumed that the effective charge
+$Z_{\mathrm{eff},i}$ is centered at ${\bf X}_{\mathrm{eff}}$. Also
+shown is a cutting plane C passing through the center of mass ${\bf
+X}$.  }\label{fig:COM}
+\end{figure}
+
+\begin{figure}[h]
+\caption{A schematic diagram to illustrate the equal-time (ET) partitioning
+scheme.  For simplicity a two-dimensional analog is used. The
+rectangles represent the bounding ``boxes'' of the leaf nodes in a
+CubeTree.  Different shades are used for different rectangles to indicate
+that the leaf-node times are different in general. The distance of the
+cutting line C from the left edge, $x$, is determined by the condition
+that the sum of the leaf-node times on both sides of the partition line is
+equal (i.e., $T_L = T_R$).  Notice that we have chosen the direction
+for partitioning as the direction which gives the largest dimension.}
+\label{fig:shiftline}
 \end{figure}
 
 \begin{figure}[t]
-\resizebox*{3.5in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
-\caption{Scaling of parallel HiCu on (H$_2$O)$_{110}$ RHF/3-21G, with
-$\tau = 1.0 \times 10^{-6}$. The speedup for a 2-processor calculation
-is defined to be 2.}
-\label{fig:waterscaling}
+\caption{Scaling of parallel HiCu on taxol (C$_{47}$H$_{51}$NO$_{14}$)
+RPBE/3-21G, with $\tau = 1.0 \times 10^{-6}$. Speedups are relative to a
+2-processor calculation.}\label{fig:taxol}
 \end{figure}
+
+\begin{figure}[t]
+\caption{Scaling of parallel HiCu on (H$_2$O)$_{110}$ RPBE/3-21G, with
+$\tau = 1.0 \times 10^{-6}$. Speedups are relative to a
+2-processor calculation.}\label{fig:waterscaling}
+\end{figure}
+
+\pagebreak
+
+\pagebreak
+
+\begin{center}
+Figure 1, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{7.0in}{!}{\includegraphics[clip]{COM.eps}}
+\end{center}
+
+\pagebreak
+\begin{center}
+Figure 2, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{7.0in}{!}{\includegraphics[clip]{ET.eps}}
+\end{center}
+
+\pagebreak
+\begin{center}
+Figure 3, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{7.0in}{!}{\includegraphics[clip]{taxol_speedup.eps}}
+\end{center}
+
+\pagebreak
+\begin{center}
+Figure 4, C.~K.~Gan and M.~Challacombe \\[1.cm]
+\resizebox*{7.0in}{!}{\includegraphics[clip]{3-21G_good_div10.eps}}
+\end{center}
+
+
+
+
+}
 
 \end{document}
