@@ -266,6 +266,8 @@ MODULE DerivedTypes
       INTEGER          :: Nkind     !-- Number of atom kinds or types
       TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
+      TYPE(CHR_VECT)   :: AtNam     !-- Atomname
+      TYPE(CHR_VECT)   :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Velocity Cartesian coordinates 
@@ -486,6 +488,7 @@ MODULE DerivedTypes
      INTEGER,POINTER,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),POINTER,DIMENSION(:) :: Value
      LOGICAL,POINTER,DIMENSION(:) :: Constraint 
+     LOGICAL,POINTER,DIMENSION(:) :: Active 
    END TYPE INTC
 !
    TYPE BMATR
@@ -501,6 +504,7 @@ MODULE DerivedTypes
      INTEGER,ALLOCATABLE,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: Value
      LOGICAL,ALLOCATABLE,DIMENSION(:) :: Constraint 
+     LOGICAL,ALLOCATABLE,DIMENSION(:) :: Active 
    END TYPE INTC
 !
    TYPE BMATR
@@ -510,8 +514,6 @@ MODULE DerivedTypes
    END TYPE BMATR
 !
 #endif
-!
-!---------------------------------------------------------
 !
    TYPE GeOpControls
       INTEGER                            :: AccL
@@ -535,6 +537,9 @@ MODULE DerivedTypes
       REAL(DOUBLE)                       :: MaxGrad      
       REAL(DOUBLE)                       :: RMSGrad      
       REAL(DOUBLE)                       :: OldRMSGrad      
+      INTEGER                            :: IMaxGradNoConstr
+      REAL(DOUBLE)                       :: MaxGradNoConstr
+      REAL(DOUBLE)                       :: RMSGradNoConstr
 !
       REAL(DOUBLE)                       :: MaxStreDispl 
       REAL(DOUBLE)                       :: MaxBendDispl 
@@ -570,12 +575,15 @@ MODULE DerivedTypes
       REAL(DOUBLE)                       :: ConstrMax     
       REAL(DOUBLE)                       :: ConstrMaxCrit 
 ! GDIIS
+      LOGICAL                            :: NoGDIIS    
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
       LOGICAL                            :: GDIISOn
       INTEGER                            :: GDIISMinDomCount
       INTEGER                            :: GDIISInit
       INTEGER                            :: GDIISMaxMem
       REAL(DOUBLE)                       :: GDIISBandWidth 
+      LOGICAL                            :: GDIISMetricOn
+      REAL(DOUBLE)                       :: GDIISMetric
 ! LineSearch
       INTEGER                            :: LSStepMax
 !
