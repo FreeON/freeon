@@ -18,6 +18,7 @@ CONTAINS
     INTEGER             :: LL,LenKet,NExpt,NDist,NCoef
     INTEGER             :: L,M,N,LMN,LP,MP,NP,LMNP
     REAL(DOUBLE)        :: Expt,Mag,TOL,Factor
+    LOGICAL             :: HasQMI,HasMMI
 !
     NExpt = Rho_in%NExpt
     CALL Delete_HGRho(Rho_out)
@@ -120,12 +121,24 @@ CONTAINS
 !---------------------------------------------------------------------
 !  Integrate Rho
 !---------------------------------------------------------------------
-  SUBROUTINE Integrate_HGRho(Rho,RhoSumE,RhoSumN)
+  SUBROUTINE Integrate_HGRho(Rho,RhoSumE,RhoSumN,RhoSumMM,MM_NATOMS,QM_NATOMS)
     TYPE(HGRho)                      :: Rho
     INTEGER                          :: zq,iq,oq,orr,NQ,jadd,LenKet,LL
-    REAL(DOUBLE)                     :: RhoSumE,RhoSumN,Expt,Weig
+    INTEGER                          :: MM_NATOMS,QM_NATOMS
+    REAL(DOUBLE)                     :: RhoSumE,RhoSumN,RhoSumMM,Expt,Weig
+    LOGICAL                          :: HasQMI,HasMMI
+!
+    HasMMI=.FALSE. 
+    HasQMI=.FALSE. 
+    IF(MM_NATOMS/=0) HasMMI=.TRUE. 
+    IF(QM_NATOMS/=0) HasQMI=.TRUE. 
 !
     RhoSumE = Zero
+    RhoSumN = Zero
+    RhoSumMM= Zero
+!
+    IF(HasQMI) THEN
+!
     DO zq = 1,Rho%NExpt-1
        Expt   = Rho%Expt%D(zq)
        NQ     = Rho%NQ%I(zq)
@@ -140,10 +153,16 @@ CONTAINS
        ENDDO
     ENDDO
 !
-    RhoSumN = Zero
+! Nuclear integration
+!
     zq     = Rho%NExpt
     Expt   = Rho%Expt%D(zq)
-    NQ     = Rho%NQ%I(zq)
+    IF(HasMMI) THEN 
+      NQ=QM_NATOMS !!!! MM charges may have been pruned, however this is very unlikely for QM nuclear charges
+!     NQ=NQ-MM_NATOMS
+    ELSE
+      NQ=Rho%NQ%I(zq)
+    ENDIF
     oq     = Rho%OffQ%I(zq)
     orr    = Rho%OffR%I(zq)
     LL     = Rho%Lndx%I(zq) 
@@ -154,23 +173,48 @@ CONTAINS
        RhoSumN = RhoSumN + Weig
     ENDDO
 !
+    ENDIF
+!
+    IF(HasMMI) THEN
+!
+! MM integration
+!
+    zq     = Rho%NExpt
+    Expt   = Rho%Expt%D(zq)
+!     NQ=MM_NATOMS
+      NQ=Rho%NQ%I(zq)-QM_NATOMS
+      oq     = Rho%OffQ%I(zq)
+      orr    = Rho%OffR%I(zq)
+    IF(HasQMI) THEN
+      oq     = oq+QM_NATOMS
+      orr    = orr+QM_NATOMS 
+    ENDIF
+    LL     = Rho%Lndx%I(zq) 
+    LenKet = LHGTF(LL)
+    DO iq = 1,NQ
+       jadd = orr+(iq-1)*LenKet+1
+       Weig = Rho%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
+       RhoSumMM= RhoSumMM+ Weig
+    ENDDO
+!
+    ENDIF
+!
   END SUBROUTINE Integrate_HGRho
 !========================================================================================
 ! Calculate the total Dipole of Rho
 !========================================================================================
-  SUBROUTINE CalRhoPoles(MP,GM,Rho)
+  SUBROUTINE CalRhoPoles(MP,Center,Rho)
     TYPE(CMPoles)             :: MP
     TYPE(HGRho)               :: Rho
-    TYPE(CRDS)                :: GM
     INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
     REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt
     REAL(DOUBLE),DIMENSION(3) :: Center
 !
-#ifdef PERIODIC
-    Center(:) = GM%PBC%CellCenter(:)
-#else
-    Center(:) = Half*(GM%BndBox%D(:,2)+GM%BndBox%D(:,1))
-#endif
+!#ifdef PERIODIC
+!    Center(:) = GM%PBC%CellCenter(:)
+!#else
+!    Center(:) = Half*(GM%BndBox%D(:,2)+GM%BndBox%D(:,1))
+!#endif
 !
     MP%DPole%D = Zero
     MP%QPole%D = Zero
@@ -239,4 +283,28 @@ CONTAINS
 !
   END FUNCTION DoubleFac
 !
+!-----------------------------------------------------------
+!
+    SUBROUTINE RhoFill(Rho2,Rho,IExpt,IDist,ICoef)
+!
+    INTEGER :: IExpt,IDist,ICoef
+    TYPE(HGRho) :: Rho,Rho2
+!
+! Fill the content of Rho2 into Rho upto the given numbers
+!
+    Rho%NQ%I(1:IExpt)=Rho2%NQ%I(1:IExpt)
+    Rho%Lndx%I(1:IExpt)=Rho2%Lndx%I(1:IExpt)
+    Rho%OffQ%I(1:IExpt)=Rho2%OffQ%I(1:IExpt)
+    Rho%OffR%I(1:IExpt)=Rho2%OffR%I(1:IExpt)
+    Rho%Expt%D(1:IExpt)=Rho2%Expt%D(1:IExpt)
+    Rho%Qx%D(1:IDist)=Rho2%Qx%D(1:IDist)
+    Rho%Qy%D(1:IDist)=Rho2%Qy%D(1:IDist)
+    Rho%Qz%D(1:IDist)=Rho2%Qz%D(1:IDist)
+    Rho%Co%D(1:ICoef)=Rho2%Co%D(1:ICoef)
+!
+    END SUBROUTINE RhoFill
+
+
+
 END MODULE RhoTools
+!
