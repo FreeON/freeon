@@ -56,16 +56,16 @@ big:
 #
 pbs:
 	chmod u+x sub_pbs
+	./sub_pbs Ice            1
+	./sub_pbs Steam          1
 	./sub_pbs Water          1
+	./sub_pbs Urea           1
 	./sub_pbs Biotin         1
 	./sub_pbs Graphite       1
+	./sub_pbs PeroxideCycle  1
 	./sub_pbs Histidine      1
 	./sub_pbs Caffiene       1
 	./sub_pbs Vancomycin     1
-	./sub_pbs PBCUrea        1
-	./sub_pbs PBCWater       1
-	./sub_pbs Steam          1
-	./sub_pbs PeroxideCycle  1
 	./sub_pbs BetaCarotene   1
 	./sub_pbs Diamond        1
 	./sub_pbs Chlorophyll    1
