@@ -54,6 +54,9 @@ MODULE SCFLocals
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: Name   ! SCF name 
       INTEGER,DIMENSION(3)               :: Previous
       INTEGER,DIMENSION(3)               :: Current
+#ifdef MMech
+      LOGICAL,DIMENSION(2)               :: Mechanics   ! M(1)=.true. if MM calc must be done, M(2)=.true. if QM, both: QM-MM
+#endif
       INTEGER                            :: NSet   ! Number of basis sets 
       INTEGER                            :: NGeom  ! Number of configurations 
       LOGICAL                            :: SuperP ! Start from the superposition of atomic densitites
@@ -68,6 +71,9 @@ MODULE SCFLocals
       CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    DIMENSION(MaxSets)    :: BName  ! Basis set name
       INTEGER,     DIMENSION(MaxSets)    :: Method ! SCF method
+#ifdef MMech
+      INTEGER,     DIMENSION(MaxSets)    :: MMMethod ! MM method
+#endif
       INTEGER,     DIMENSION(MaxSets)    :: Model  ! Model chemistry
       INTEGER,     DIMENSION(MaxSets)    :: AccL   ! Accuracy level to use 
       INTEGER,     DIMENSION(MaxSets)    :: NCyc   ! Number of SCF cycles taken for each set
@@ -83,6 +89,7 @@ MODULE SCFLocals
       TYPE(MDControls)                   :: MDC
 !
    END TYPE
+
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose ~4 digits, Good ~6 digits, Tight ~8 digits, VeryTight ~10 digits):
 !
