@@ -695,7 +695,7 @@ CONTAINS
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
-                      GOpt%GOptStat%LMaxCGrad)
+                      GOpt%GOptStat%LMaxCGrad,PBCDim)
      !
      CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
@@ -1623,11 +1623,12 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE GetCGradMax(CartGrad,NCart,IMaxCGrad,MaxCGrad, &
-                          ILMaxCGrad,LMaxCGrad)
+                          ILMaxCGrad,LMaxCGrad,PBCDim)
      REAL(DOUBLE),DIMENSION(:) :: CartGrad
      REAL(DOUBLE),DIMENSION(3) :: Vect    
      REAL(DOUBLE)              :: MaxCGrad,Sum,LMaxCGrad
      INTEGER                   :: Nat,NCart,I,I1,I2,IMaxCGrad,ILMaxCGrad
+     INTEGER                   :: PBCDim
      !
      IMaxCGrad=1   
      MaxCGrad=Zero
@@ -1644,16 +1645,19 @@ CONTAINS
      ENDDO
      !
      LMaxCGrad=Zero
-     DO I=Nat-2,Nat
-       I1=3*(I-1)+1
-       I2=I1+2
-       Vect=CartGrad(I1:I2)
-       Sum=SQRT(DOT_PRODUCT(Vect,Vect))
-       IF(Sum>LMaxCGrad) THEN
-         ILMaxCGrad=I
-          LMaxCGrad=Sum
-       ENDIF
-     ENDDO
+     ILMaxCGrad=0   
+     IF(PBCDim>0) THEN
+       DO I=Nat-2,Nat
+         I1=3*(I-1)+1
+         I2=I1+2
+         Vect=CartGrad(I1:I2)
+         Sum=SQRT(DOT_PRODUCT(Vect,Vect))
+         IF(Sum>LMaxCGrad) THEN
+           ILMaxCGrad=I
+            LMaxCGrad=Sum
+         ENDIF
+       ENDDO
+     ENDIF
    END SUBROUTINE GetCGradMax
 !
 !-------------------------------------------------------------------
@@ -2022,7 +2026,7 @@ CONTAINS
      CALL Delete(Carts)
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
-                      GOpt%GOptStat%LMaxCGrad)
+                      GOpt%GOptStat%LMaxCGrad,PBCDim)
      CALL Delete(CartGrad)
      CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
