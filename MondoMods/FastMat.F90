@@ -1,5 +1,5 @@
 MODULE FastMatrices
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
    USE DerivedTypes
    USE GlobalScalars   
    USE GlobalObjects
