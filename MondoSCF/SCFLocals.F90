@@ -83,15 +83,11 @@ MODULE SCFLocals
 !-----------------------------------------------------------------------------------------------
 !  Asymptotic dimensioning parameters for memory limits of BCSR and DBCSR matrices
 !
-   REAL(DOUBLE),DIMENSION(4) :: BandWidth=(/ 7.D2, 1.D3,1.3D3,1.6D3/)
-   REAL(DOUBLE),DIMENSION(4) :: BWDecay  =(/1.D-5,1.D-4,1.D-3,1.D-2/)
+   REAL(DOUBLE),DIMENSION(4) :: BandWidth=(/ 1.D3, 1.D3,1.3D3,1.6D3/)
+   REAL(DOUBLE),DIMENSION(4) :: BWDecay  =(/1.D-4,1.D-4,1.D-3,1.D-2/)
 !-----------------------------------------------------------------------------------------------
 !  Global variables for file control
 !
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PWD 
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOME   
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SCRATCH
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_EXEC
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: SCF_NAME
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: PROCESS_ID 
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: HOST_NAME
