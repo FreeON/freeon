@@ -32,11 +32,11 @@ CONTAINS
          "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
          '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
          '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
-         ' Version 1.0 alpha 7                                  ',A1,    &  
+         ' Version 1.0 alpha 8                                  ',A1,    &  
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, Eric Schwegler, C.J. Tymczak,      ',A1,    &
          ' Chee Kwan Gan, Karoly Nemeth, Anders Niklasson,      ',A1,    &
-         ' Hugh Nymeyer, and Graeme Henkelman                   ',A1,    &
+         ' Graeme Henkelman, and Valery Weber                   ',A1,    &
          ' Los Alamos National Laboratory (LA-CC 01-2)          ',A1,    & 
          ' Copyright 2001, University of California.            ',A1)
     ! Write information on host, platform, etc
