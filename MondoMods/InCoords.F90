@@ -2812,319 +2812,6 @@ END SUBROUTINE CoordTrf
 !
 !-------------------------------------------------------
 !
-    SUBROUTINE GDIIS(GMLoc)
-    IMPLICIT NONE
-    TYPE(CRDS)     :: GMLoc
-    INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
-    INTEGER        :: SRMemory,RefMemory,CartGradMemory
-    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
-    INTEGER        :: INFO,NewDim 
-    TYPE(DBL_RNK2) :: SRDispl,AMat,SRStruct,ActCarts
-    TYPE(DBL_RNK2) :: TrfDispl,TrfGrad,EigVect
-    TYPE(DBL_RNK2) :: RefGrad
-    TYPE(DBL_RNK2) :: AuxStruct,RefStruct
-    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVect2,EigVal
-    TYPE(DBL_VECT) :: GrdDotGrd,GrdDotDX,DXDotDX,MetricA
-    TYPE(INT_VECT) :: Selection
-    CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
-    REAL(DOUBLE)                   :: Sum,S1,S2
-    REAL(DOUBLE)                   :: Eig,MFact
-    REAL(DOUBLE)                   :: SumX,SumY,SumZ
-    REAL(DOUBLE)                   :: MinGrdDotGrd,MinGrdDotDX
-    REAL(DOUBLE)                   :: MinDXDotDX
-    REAL(DOUBLE)                   :: EDI,ED0,EDT 
-!
-! Current implementation runs on Cartesian displacements only
-! Input GMLoc contains the actual geometry
-! CurGeom is set to the last (simple relaxation) structure
-!
-      CALL Get(SRMemory,'SRMemory')
-      CALL Get(RefMemory,'RefMemory')
-      CALL Get(CartGradMemory,'CartGradMemory')
-      NCart=3*GMLoc%Natms
-      DimGDIIS=NCart   !!! later dimension may become NIntC
-      IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
-      IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
-      GDIISMemory=SRMemory
-!
-      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
-        CALL OpenAscii(OutFile,Out)
-        WRITE(Out,*) 'GDIISMemory= ',GDIISMemory
-        WRITE(*,*) 'GDIISMemory= ',GDIISMemory
-        CLOSE(Unit=Out,STATUS='KEEP')
-      ENDIF
-!
-    GMTag=''
-#ifdef MMech
-    IF(HasMM()) GMTag='GM_MM'
-#endif
-!
-! Get Displacements from geometries, stored in HDF
-! and fill them into SRDispl columns.
-!
-      CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
-      CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
-      CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
-      CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
-      SRStruct%D=Zero
-      CALL New(AuxVect,DimGDIIS)
-      CALL New(GrdDotDX,GDIISMemory)
-      CALL New(DXDotDX,GDIISMemory)
-      CALL New(GrdDotGrd,GDIISMemory)
-      CALL New(Selection,GDIISMemory)
-      Selection%I=1
-      CALL New(MetricA,GDIISMemory)
-      CALL New(Coeffs,GDIISMemory)
-!
-! Get recent Ref and SR structures, as well as the Gradients
-!
-      DO IGeom=1,GDIISMemory
-        CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
-        SRStruct%D(:,IGeom)=AuxVect%D
-        CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
-        RefStruct%D(:,IGeom)=AuxVect%D
-        CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
-        RefGrad%D(:,IGeom)=AuxVect%D
-      ENDDO
-!
-! Get simple relaxation displacements ('error vectors')
-! and normalize them!
-!
-      SRDispl%D=SRStruct%D-RefStruct%D
-!
-! Now calculate overlap ('A' matrix). 
-! Presently only non-sparse representation is available
-!
-      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
-!
-!     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
-!                  SRDispl%D,SRDispl%D,AMat%D)
-      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
-                   RefGrad%D,RefGrad%D,AMat%D)
-!
-! Now, calculate eigenvalues and eigenvectors of Overlap
-!
-      CALL New(EigVal,GDIISMemory)
-      EigVal%D=Zero
-      CALL New(TrfDispl,(/GDIISMemory,GDIISMemory/))
-      CALL New(TrfGrad,(/GDIISMemory,GDIISMemory/))
-!
-        CALL SetDSYEVWork(GDIISMemory)
-!
-        BLKVECT%D=AMat%D
-        CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
-          BLKWORK%D,BLKLWORK,INFO)
-        IF(INFO/=SUCCEED) &
-        CALL Halt('DSYEV hosed in RotationsOff. INFO='&
-                   //TRIM(IntToChar(INFO)))
-!
-! Construct transformation matrices
-!
-        DO I=1,GDIISMemory
-            Sum=Zero
-          DO J=1,GDIISMemory
-            Sum=Sum+BLKVECT%D(J,I)
-          ENDDO
-          IF(ABS(Sum)>1.D-8) THEN
-            SumX=One/Sum
-            TrfDispl%D(:,I)=SumX*BLKVECT%D(:,I)
-            TrfGrad%D(:,I)=Sum*BLKVECT%D(:,I)
-          ELSE
-            TrfDispl%D(:,I)=Zero 
-            TrfGrad%D(:,I)=Zero
-            Selection%I(I)=0
-          ENDIF
-        ENDDO
-!
-! Now, transform SR and Ref structures and RefGrad
-! to get the unselected basis for new GDIIS steps
-!
-         CALL New(AuxStruct,(/DimGDIIS,GDIISMemory/))
-!!
-!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
-!            SRStruct%D,TrfDispl%D,AuxStruct%D)
-!          SRStruct%D=AuxStruct%D
-!!
-!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
-!            RefStruct%D,TrfDispl%D,AuxStruct%D)
-!          RefStruct%D=AuxStruct%D
-!!
-!! Gradient transformation
-!!
-!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
-!            RefGrad%D,TrfGrad%D,AuxStruct%D)
-!          RefGrad%D=AuxStruct%D
-!!
-!          SRDispl%D=SRStruct%D-RefStruct%D
-!!
-!! Calculate scalar product of gradients and displacement in the 
-!! orthogonal-displacements' basis
-!
-          MinDXDotDX  =1.D99
-          MinGrdDotDX =1.D99
-          MinGrdDotGrd=1.D99
-        DO I=1,GDIISMemory
-          IF(Selection%I(I)/=1) CYCLE
-          SumX=DOT_PRODUCT(RefGrad%D(:,I),SRDispl%D(:,I))
-          SumY=DOT_PRODUCT(SRDispl%D(:,I),SRDispl%D(:,I))
-          SumZ=DOT_PRODUCT(RefGrad%D(:,I),RefGrad%D(:,I))
-          GrdDotDX%D(I) =SumX
-          DXDotDX%D(I)  =SumY
-          GrdDotGrd%D(I)=SumZ
-          MinGrdDotDX =MIN(MinGrdDotDX,ABS(SumX))
-          MinDXDotDX  =MIN(MinDXDotDX      ,SumY)
-          MinGrdDotGrd=MIN(MinGrdDotGrd    ,SumZ)
-        ENDDO  
-!
-! Now, redefine metric of coordinates, and gradients
-! Currently only metric of coordinates determines all other metrics.
-!
-        IF(GeOpCtrl%GDIISMetricOn) THEN
-          MFact=One/SQRT(MinDXDotDX)
-!         MFact=One/SQRT(MinGrdDotGrd)
-          GeOpCtrl%GDIISMetric=MFact*GeOpCtrl%GDIISMetric
-          RefStruct%D         =MFact*RefStruct%D 
-          SRStruct%D          =MFact*SRStruct%D 
-          SRDispl%D           =MFact*SRDispl%D 
-          Sum=One/MFact
-          RefGrad%D           =Sum*RefGrad%D 
-          MFact=MFact*MFact
-          GrdDotDX%D          =GrdDotDX%D
-          DXDotDX%D           =MFact*DXDotDX%D
-          GrdDotGrd%D         =GrdDotGrd%D/MFact
-          DO I=1,GDIISMemory
-            IF(Selection%I(I)/=1) THEN
-              RefStruct%D(:,I)    =Zero
-              SRStruct%D(:,I)     =Zero
-              SRDispl%D(:,I)      =Zero
-              GrdDotDX%D(I)       =Zero
-              DXDotDX%D(I)        =Zero
-              GrdDotGrd%D(I)      =Zero
-            ENDIF
-          ENDDO
-        ENDIF !!!! Metric On
-!
-! Check for 'uphill' trajectories and 'reverse' them.
-!
-!        DO I=1,GDIISMemory
-!          Sum=GrdDotDX%D(I)
-!          IF(Sum>Zero) THEN
-!            SRStruct%D(:,I)=RefStruct%D(:,I)-SRDispl%D(:,I)
-!            GrdDotDX%D(I)=-GrdDotDX%D(I)
-!          ENDIF
-!        ENDDO
-!
-! Calculate total energy lowering over images
-!
-          ED0=GrdDotDX%D(1)
-          EDT=ED0
-        DO I=2,GDIISMemory
-	  Sum=GrdDotDX%D(I)
-	  EDT=EDT+Sum
-	  ED0=MAX(ED0,Sum)
-	ENDDO
-!
-! Define unnormalized, unselected set of coefficients
-!
-        DO I=1,GDIISMemory
-            Sum=Zero
-          DO J=1,GDIISMemory
-            Sum=Sum+BLKVECT%D(J,I)
-          ENDDO
-          IF(ABS(BLKVALS%D(I))>1.D-8) THEN
-            Coeffs%D(I)=Sum/BLKVALS%D(I)
-!           Coeffs%D(I)=One/DXDotDX%D(I)
-          ELSE
-            Coeffs%D(I)=Zero   
-          ENDIF
-        ENDDO
-!
-! Select out subspace for final GDIIS
-!
-        CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
-          BLKVECT%D,Coeffs%D,DXDotDX%D)
-          Coeffs%D=DXDotDX%D
-!
-        CALL GDIISSelect(Coeffs%D,Selection%I)
-selection%i=1
-!
-      CALL UnSetDSYEVWork()
-!
-! Rescale coeffs to get a sum of One.
-!
-          Sum=Zero
-        DO I=1,GDIISMemory 
-          IF(Selection%I(I)==1) THEN 
-            Sum=Sum+Coeffs%D(I)  
-          ELSE
-            Coeffs%D(I)=Zero
-          ENDIF
-        ENDDO
-        Sum=One/Sum
-        Coeffs%D=Sum*Coeffs%D
-!
-! Calculate new geometry, linearcombine previous steps 
-!
-          AuxVect%D=Zero
-        DO I=1,GDIISMemory
-          IF(Selection%I(I)/=1) CYCLE
-          AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
-        ENDDO
-!
-! Restore original metric on resulting GDIIS geometry
-!
-        IF(GeOpCtrl%GDIISMetricOn) THEN
-          MFact=One/GeOpCtrl%GDIISMetric
-          AuxVect%D=MFact*AuxVect%D
-        ENDIF
-!
-! Fill new geometry into GM array
-!
-        CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
-!
-! Save unitary transformed structures and gradients
-!
-        CALL Put(0,'SrMemory')
-        CALL Put(0,'RefMemory')
-        CALL Put(0,'CartGradMemory')
-!       CALL Put(0,'IntGradMemory')
-        DO I=1,GDIISMemory
-          IF(Selection%I(I)==1) THEN
-            AuxVect%D=SRStruct%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR',Metric_O=.FALSE.)
-            AuxVect%D=RefStruct%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
-            AuxVect%D=RefGrad%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
-                           Metric_O=.FALSE.)
-          ENDIF
-        ENDDO
-!
-!call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
-!
-! Tidy up
-!
-       CALL Delete(Selection)
-       CALL Delete(AuxStruct)
-       CALL Delete(GrdDotGrd)
-       CALL Delete(GrdDotDX)
-       CALL Delete(DXDotDX)
-       CALL Delete(AuxVect)
-       CALL Delete(Coeffs)
-       CALL Delete(EigVal)
-       CALL Delete(TrfDispl)
-       CALL Delete(TrfGrad)
-       CALL Delete(MetricA)
-       CALL Delete(AMat)
-       CALL Delete(RefGrad)
-       CALL Delete(RefStruct)
-       CALL Delete(SRStruct)
-       CALL Delete(SRDispl)
-!
-     END SUBROUTINE GDIIS
-!
-!--------------------------------------------------------------------
-!
 !    SUBROUTINE FoldBMatrix(NatLoc,XYZ,NIntC,IntCs,B,BFolded)
 !!
 !    TYPE(INTC) :: IntCs
@@ -4661,13 +4348,14 @@ END SUBROUTINE ChkBendToLinB
 !
       END SUBROUTINE PrtXYZ
 !----------------------------------------------------------------------
-      SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O,Metric_O)
+      SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O,Metric_O,GradMetric_O)
         INTEGER                              :: IGeom,NCart
         INTEGER                              :: NatmsLoc,J,I
         REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
         TYPE(DBL_VECT),OPTIONAL              :: Vect_O
         REAL(DOUBLE)                         :: CMX,CMY,CMZ
         REAL(DOUBLE)                         :: MFact
+        REAL(DOUBLE),OPTIONAL                :: GradMetric_O
         TYPE(DBL_VECT)                       :: AuxVect
         CHARACTER(LEN=*),OPTIONAL            :: Tag_O
         INTEGER                              :: GDIISMemory
@@ -4719,6 +4407,10 @@ END SUBROUTINE ChkBendToLinB
           CartGradMemory=CartGradMemory+1
           IGeom=CartGradMemory
           CALL Put(CartGradMemory,'CartGradMemory')
+          IF(PRESENT(GradMetric_O)) THEN
+write(*,*) 'put gradmetric ',CartGradMemory,GradMetric_O
+            CALL Put(GradMetric_O,'GradMetric'//TRIM(IntToChar(IGeom)))
+          ENDIF
         ENDIF
 !
 !       IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='IntGrad') THEN
@@ -5058,6 +4750,108 @@ END SUBROUTINE ChkBendToLinB
 !
       END SUBROUTINE GDIISSelect
 !
+!------------------------------------------------------------------
+!
+      SUBROUTINE GDIISSelect2(EigVals,Selection)
+        REAL(DOUBLE),DIMENSION(:) :: EigVals
+        INTEGER,     DIMENSION(:) :: Selection
+        REAL(DOUBLE)              :: GapWidth,MeanWidth,Fluct
+        REAL(DOUBLE)              :: MaxEig,MinEig
+        INTEGER                   :: I,J,K,L,NDim,LastDomain
+        REAL(DOUBLE)              :: GDIISBandWidth
+        REAL(DOUBLE)              :: Sum,SumX,Percent
+        INTEGER                   :: MinDomCount    
+        TYPE(DBL_VECT)            :: AuxVect
+        TYPE(INT_VECT)            :: Ordered,Domain,DomainCount
+        REAL(DOUBLE)              :: GDIISMaxMem
+!
+        GDIISMaxMem=GeOpCtrl%GDIISMaxMem
+        GDIISBandWidth=GeOpCtrl%GDIISBandWidth 
+        MinDomCount=GeOpCtrl%GDIISMinDomCount
+!
+        NDim=SIZE(EigVals)
+        I=SIZE(Selection)
+        IF(NDim/=I.OR.NDim==0) THEN
+          CALL Halt('Dimensionality error in GDIISSelect')
+        ENDIF
+!
+        CALL New(AuxVect,NDim)
+        CALL New(Ordered,NDim)
+        CALL New(Domain,NDim)
+        CALL New(DomainCount,NDim)
+!
+! Put eigenvalues onto a logarithmic scale
+!
+          DO I=1,NDim
+            IF(Selection(I)==1) THEN  
+              AuxVect%D(I)=DLOG10(ABS(EigVals(I)))
+            ELSE
+              AuxVect%D(I)=-1.D99
+            ENDIF
+          ENDDO
+!
+! Form ordered set with lowest log10 first
+!
+          DO I=1,NDim
+            Ordered%I(I)=I 
+          ENDDO
+          DO I=2,NDim
+          DO J=2,NDim-I+2
+            K=Ordered%I(J)
+            L=Ordered%I(J-1)
+            IF(AuxVect%D(K)<AuxVect%D(L)) THEN
+              Ordered%I(J)=L
+              Ordered%I(J-1)=K
+            ENDIF
+          ENDDO
+          ENDDO
+!
+! calculate ratio of the two largest coeffs
+!
+K=Ordered%I(NDim)
+L=Ordered%I(NDim-1)
+write(*,44) EigVals(L)/EigVals(K)*100.D0,EigVals(K),EigVals(L)
+44 format('ratio= ',F12.1,2F20.10)
+!sum=EigVals(L)/EigVals(K)
+!sumx=0.8D0/sum
+!if(sumx<10.d0) Then
+!write(*,*) 'ratio rescaling factor= ',sumx
+!do i=ndim-1,1
+!eigvals(i)=sumx*eigvals(i)
+!enddo
+!endif
+!
+             J=0
+             SumX=Zero
+          DO I=NDim,1,-1
+             K=Ordered%I(I)
+             IF(Selection(K)/=1) CYCLE
+             Sum=AuxVect%D(K)
+             SumX=SumX+EigVals(K)
+             Percent=ABS(EigVals(K))/ABS(SumX)*100.D0
+write(*,50) i,k,EigVals(K),Percent
+50 format(2I4,2X,E12.6,' percent= ',F8.2)
+            IF(Percent>GDIISBandWidth) THEN
+              J=J+1
+              Selection(K)=1
+            ELSE
+              Selection(K)=0
+            ENDIF
+!           IF(J>=GDIISMaxMem) EXIT
+            IF(J>=GDIISMaxMem) THEN
+              Selection(K)=0
+            ENDIF
+          ENDDO
+!
+1000    CONTINUE
+!        
+        CALL Delete(DomainCount)
+        CALL Delete(Domain)        
+        CALL Delete(Ordered)        
+        CALL Delete(AuxVect)        
+!
+      END SUBROUTINE GDIISSelect2
+!
 !----------------------------------------------------------------
 !
       SUBROUTINE GDIISSave(DimGDIIS,EtotCurr,EtotPrev)
@@ -5367,7 +5161,7 @@ END SUBROUTINE ChkBendToLinB
             CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
             AuxVect%D=RefGrad%D(:,I)
             CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
-                           Metric_O=.FALSE.)
+                         Metric_O=.FALSE.)
           ENDIF
         ENDDO
 !
@@ -5391,6 +5185,597 @@ END SUBROUTINE ChkBendToLinB
        CALL Delete(SRDispl)
 !
      END SUBROUTINE GDIIS2
+!
+!--------------------------------------------------------------------
+!
+    SUBROUTINE GDIIS3(GMLoc)
+    IMPLICIT NONE
+    TYPE(CRDS)     :: GMLoc
+    INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
+    INTEGER        :: SRMemory,RefMemory,CartGradMemory
+    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
+    INTEGER        :: INFO,NewDim 
+    TYPE(DBL_RNK2) :: SRDispl,AMat,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: TrfDispl,TrfGrad,EigVect
+    TYPE(DBL_RNK2) :: RefGrad
+    TYPE(DBL_RNK2) :: AuxStruct,RefStruct
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVectS,Scale,EigVal
+    TYPE(DBL_VECT) :: GradMetric,Lupe
+    TYPE(DBL_VECT) :: GrdDotGrd,GrdDotDX,DXDotDX
+    TYPE(INT_VECT) :: Selection
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
+    REAL(DOUBLE)                   :: Sum,S1,S2
+    REAL(DOUBLE)                   :: Eig,MFact,MaxEig
+    REAL(DOUBLE)                   :: SumX,SumY,SumZ
+    REAL(DOUBLE)                   :: MinGrdDotGrd,MinGrdDotDX
+    REAL(DOUBLE)                   :: MinDXDotDX,ScaleMin
+    REAL(DOUBLE)                   :: EDI,ED0,EDT 
+!
+! Current implementation runs on Cartesian displacements only
+! Input GMLoc contains the actual geometry
+! CurGeom is set to the last (simple relaxation) structure
+!
+      CALL Get(SRMemory,'SRMemory')
+      CALL Get(RefMemory,'RefMemory')
+      CALL Get(CartGradMemory,'CartGradMemory')
+      NCart=3*GMLoc%Natms
+      DimGDIIS=NCart   !!! later dimension may become NIntC
+      IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+      IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+      GDIISMemory=SRMemory
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        CALL OpenAscii(OutFile,Out)
+        WRITE(Out,*) 'GDIISMemory= ',GDIISMemory
+        WRITE(*,*) 'GDIISMemory= ',GDIISMemory
+        CLOSE(Unit=Out,STATUS='KEEP')
+      ENDIF
+!
+    GMTag=''
+#ifdef MMech
+    IF(HasMM()) GMTag='GM_MM'
+#endif
+!
+! Get Displacements from geometries, stored in HDF
+! and fill them into SRDispl columns.
+!
+write(*,*) 'chk 1'
+      CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+      CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
+      CALL New(AuxStruct,(/DimGDIIS,GDIISMemory/))
+      SRStruct%D=Zero
+      CALL New(AuxVect,DimGDIIS)
+      CALL New(TrfGrad,(/DimGDIIS,DimGDIIS/))
+      CALL New(Scale,GDIISMemory)
+      CALL New(AuxVectS,GDIISMemory)
+      CALL New(GrdDotDX,GDIISMemory)
+      CALL New(DXDotDX,GDIISMemory)
+      CALL New(GrdDotGrd,GDIISMemory)
+      CALL New(Selection,GDIISMemory)
+      CALL New(GradMetric,GDIISMemory)
+      CALL New(Coeffs,GDIISMemory)
+write(*,*) 'chk 2'
+!
+! Get recent Ref and SR structures, as well as the Gradients
+! and the metric
+!
+      DO IGeom=1,GDIISMemory
+        CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+        SRStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+        RefStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+        RefGrad%D(:,IGeom)=AuxVect%D
+write(*,*) 'chk 3'
+        CALL Get(GradMetric%D(IGeom),'GradMetric'//TRIM(IntToChar(IGeom)))
+write(*,*) 'chk 4'
+      ENDDO
+write(*,*) 'GradMetric read= ',GradMetric%d
+!
+! Get simple relaxation displacements ('error vectors')
+! and normalize them!
+!
+      SRDispl%D=SRStruct%D-RefStruct%D
+!
+! Now calculate overlap ('A' matrix). 
+! Presently only non-sparse representation is available
+!
+      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+!
+!     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+!                  SRDispl%D,SRDispl%D,AMat%D)
+      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                   RefGrad%D,RefGrad%D,AMat%D)
+!
+! Scale AMat before diagonalization
+!
+call pprint(amat%d,' amat',unit_o=6)
+         Scale%D=Zero
+         ScaleMin=1.D99
+       DO I=1,GDIISMemory
+         Sum=One/SQRT(AMat%D(I,I))
+         Scale%D(I)=Sum
+         ScaleMin=MIN(ScaleMin,Sum)
+       ENDDO
+write(*,*) 'scale= ',scale%d
+!scale%d=one
+!ScaleMin=One
+       DO I=1,GDIISMemory
+         SumX=Scale%D(I)
+         DO J=1,GDIISMemory
+           SumY=Scale%D(J)
+           AMat%D(I,J)=SumX*AMat%D(I,J)*SumY 
+         ENDDO
+       ENDDO
+call pprint(amat%d,'scaled amat',unit_o=6)
+!
+! Now, calculate eigenvalues and eigenvectors of Overlap
+!
+      CALL SetDSYEVWork(GDIISMemory)
+!
+        BLKVECT%D=AMat%D
+        CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+          BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+        CALL Halt('DSYEV hosed in GDIIS. INFO='&
+                   //TRIM(IntToChar(INFO)))
+!
+! Form inverse square roots of eigenvalues
+! and reverse the sign of some eigenvectors
+!
+call pprint(blkvect%d,'eigenvectors',unit_o=6)
+write(*,*) 'original blockvals= ',BLKVALS%D
+        DO I=1,GDIISMemory
+!          BLKVALS%D(I)=One/SQRT(BLKVALS%D(I))
+          Sum=Zero
+          DO J=1,GDIISMemory
+            Sum=Sum+BLKVECT%D(J,I)
+          ENDDO
+write(*,*) 'sum= ',i,sum
+          IF(Sum<Zero) THEN
+write(*,*) i,'turn sign'
+            BLKVECT%D(:,I)=-BLKVECT%D(:,I)
+          ENDIF
+        ENDDO
+!write(*,*) 'inv sqrt blockvals= ',BLKVALS%D
+!
+! Generate new metric: GradMetric=GradMetric*Scale*U*D^-1/2
+! and transform geometries and gradients
+!
+call pprint(srstruct%d,'srstr original',unit_o=6)
+        DO I=1,GDIISMemory
+          GradMetric%D(I) =GradMetric%D(I)*Scale%D(I)
+          SRStruct%D(:,I) =SRStruct%D(:,I)*Scale%D(I)
+          RefStruct%D(:,I)=RefStruct%D(:,I)*Scale%D(I)
+          SRDispl%D(:,I)  =SRDispl%D(:,I)*Scale%D(I)
+          RefGrad%D(:,I)  =RefGrad%D(:,I)*Scale%D(I)
+        ENDDO
+call pprint(srstruct%d,'srstr after scaling',unit_o=6)
+write(*,*) 'GradMetric new1 = ',GradMetric%d
+!
+        CALL DGEMM_NNc(1,GDIISMemory,GDIISMemory,One,Zero,  &
+          GradMetric%D,BLKVECT%D,AuxVectS%D)
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          SRStruct%D,BLKVECT%D,AuxStruct%D)
+        SRStruct%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          RefStruct%D,BLKVECT%D,AuxStruct%D)
+        RefStruct%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          SRDispl%D,BLKVECT%D,AuxStruct%D)
+        SRDispl%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          RefGrad%D,BLKVECT%D,AuxStruct%D)
+        RefGrad%D=AuxStruct%D
+!
+write(*,*) 'GradMetric new2 = ',AuxVectS%d
+call pprint(srstruct%d,'srstr trf2',unit_o=6)
+        DO I=1,GDIISMemory
+          Sum=AuxVectS%D(I)
+!         IF(Sum<Zero) Sum=-Sum 
+          Sum=One/Sum
+write(*,*) 'sum2= ',sum
+          GradMetric%D(I) =One
+          Coeffs%D(I)=AuxVectS%D(I)*AuxVectS%D(I)/BLKVALS%D(I)
+          BLKVALS%D(I)=Sum*BLKVALS%D(I)*Sum
+          SRStruct%D(:,I) =SRStruct%D(:,I)*Sum
+          RefStruct%D(:,I)=RefStruct%D(:,I)*Sum
+          SRDispl%D(:,I)  =SRDispl%D(:,I)*Sum
+          RefGrad%D(:,I)  =RefGrad%D(:,I)*Sum
+        ENDDO
+write(*,*) 'GradMetric new3 = ',GradMetric%d
+write(*,*) 'coeffs unnormed= ',coeffs%d
+call pprint(srstruct%d,'srstr transformed',unit_o=6)
+!
+! Select out subspace for final GDIIS
+!
+        Selection%I=1
+        CALL GDIISSelect2(Coeffs%D,Selection%I)
+write(*,*) 'selection= ',Selection%I
+!
+      CALL UnSetDSYEVWork()
+!
+! Calculate new geometry, linearcombine previous steps 
+!
+          AuxVect%D=Zero
+          SumX=Zero
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)/=1) CYCLE
+          Sum=Coeffs%D(I)
+          SumX=SumX+Sum
+          AuxVect%D=AuxVect%D+Sum*SRStruct%D(:,I)
+        ENDDO
+!
+! Now, renorm new geometry to original metric
+!
+write(*,*) 'norm**2 of metric= ',sumx
+          SumX=One/SumX
+        AuxVect%D=SumX*AuxVect%D 
+!
+! Fill new geometry into GM array
+!
+        CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
+!
+! Save unitary transformed structures and gradients
+!
+        CALL Put(0,'SrMemory')
+        CALL Put(0,'RefMemory')
+        CALL Put(0,'CartGradMemory')
+!       CALL Put(0,'IntGradMemory')
+!!!     J=MAX(1,GDIISMemory-5)
+!!!     DO I=J,GDIISMemory
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)==1) THEN
+            AuxVect%D=SRStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR',Metric_O=.FALSE.)
+            AuxVect%D=RefStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
+            AuxVect%D=RefGrad%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
+                         Metric_O=.FALSE.,GradMetric_O=GradMetric%D(I))
+          ENDIF
+        ENDDO
+!
+!call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
+!
+! Tidy up
+!
+       CALL Delete(Selection)
+       CALL Delete(GrdDotGrd)
+       CALL Delete(GrdDotDX)
+       CALL Delete(DXDotDX)
+       CALL Delete(AuxVectS)
+       CALL Delete(Scale)
+       CALL Delete(TrfGrad)
+       CALL Delete(AuxVect)
+       CALL Delete(Coeffs)
+       CALL Delete(GradMetric)
+       CALL Delete(AMat)
+       CALL Delete(AuxStruct)
+       CALL Delete(RefGrad)
+       CALL Delete(RefStruct)
+       CALL Delete(SRStruct)
+       CALL Delete(SRDispl)
+!
+     END SUBROUTINE GDIIS3
+!
+!--------------------------------------------------------------------
+!
+    SUBROUTINE GDIIS4(GMLoc)
+    IMPLICIT NONE
+    TYPE(CRDS)     :: GMLoc
+    INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
+    INTEGER        :: SRMemory,RefMemory,CartGradMemory
+    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
+    INTEGER        :: INFO,NewDim 
+    TYPE(DBL_RNK2) :: SRDispl,AMat,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: TrfDispl,TrfGrad,EigVect
+    TYPE(DBL_RNK2) :: RefGrad
+    TYPE(DBL_RNK2) :: AuxStruct,RefStruct
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVectS,Scale,EigVal
+    TYPE(DBL_VECT) :: GradMetric,Lupe
+    TYPE(DBL_VECT) :: GrdDotGrd,GrdDotDX,DXDotDX
+    TYPE(INT_VECT) :: Selection
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
+    REAL(DOUBLE)                   :: Sum,S1,S2
+    REAL(DOUBLE)                   :: Eig,MFact,MaxEig
+    REAL(DOUBLE)                   :: SumX,SumY,SumZ
+    REAL(DOUBLE)                   :: MinGrdDotGrd,MinGrdDotDX
+    REAL(DOUBLE)                   :: MinDXDotDX,ScaleMin
+    REAL(DOUBLE)                   :: EDI,ED0,EDT 
+!
+! Current implementation runs on Cartesian displacements only
+! Input GMLoc contains the actual geometry
+! CurGeom is set to the last (simple relaxation) structure
+!
+      CALL Get(SRMemory,'SRMemory')
+      CALL Get(RefMemory,'RefMemory')
+      CALL Get(CartGradMemory,'CartGradMemory')
+      NCart=3*GMLoc%Natms
+      DimGDIIS=NCart   !!! later dimension may become NIntC
+      IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+      IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+      GDIISMemory=SRMemory
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        CALL OpenAscii(OutFile,Out)
+        WRITE(Out,*) 'GDIISMemory= ',GDIISMemory
+        WRITE(*,*) 'GDIISMemory= ',GDIISMemory
+        CLOSE(Unit=Out,STATUS='KEEP')
+      ENDIF
+!
+    GMTag=''
+#ifdef MMech
+    IF(HasMM()) GMTag='GM_MM'
+#endif
+!
+! Get Displacements from geometries, stored in HDF
+! and fill them into SRDispl columns.
+!
+write(*,*) 'chk 1'
+      CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+      CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
+      CALL New(AuxStruct,(/DimGDIIS,GDIISMemory/))
+      SRStruct%D=Zero
+      CALL New(AuxVect,DimGDIIS)
+      CALL New(TrfGrad,(/DimGDIIS,DimGDIIS/))
+      CALL New(Scale,GDIISMemory)
+      CALL New(AuxVectS,GDIISMemory)
+      CALL New(GrdDotDX,GDIISMemory)
+      CALL New(DXDotDX,GDIISMemory)
+      CALL New(GrdDotGrd,GDIISMemory)
+      CALL New(Selection,GDIISMemory)
+      CALL New(GradMetric,GDIISMemory)
+      CALL New(Coeffs,GDIISMemory)
+write(*,*) 'chk 2'
+!
+! Get recent Ref and SR structures, as well as the Gradients
+! and the metric
+!
+      DO IGeom=1,GDIISMemory
+        CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+        SRStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+        RefStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+        RefGrad%D(:,IGeom)=AuxVect%D
+write(*,*) 'chk 3'
+        CALL Get(GradMetric%D(IGeom),'GradMetric'//TRIM(IntToChar(IGeom)))
+write(*,*) 'chk 4'
+      ENDDO
+write(*,*) 'GradMetric read= ',GradMetric%d
+!
+! Get simple relaxation displacements ('error vectors')
+! and normalize them!
+!
+      SRDispl%D=SRStruct%D-RefStruct%D
+!
+! Now calculate overlap ('A' matrix). 
+! Presently only non-sparse representation is available
+!
+      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+!
+!     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+!                  SRDispl%D,SRDispl%D,AMat%D)
+      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                   RefGrad%D,RefGrad%D,AMat%D)
+!      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+!                   RefGrad%D,SRDispl%D,AMat%D)
+!call pprint(amat%d,' amat',unit_o=6)
+!      DO I=1,GDIISMemory
+!        DO J=I,GDIISMemory
+!          Sum=AMat%D(I,J)+AMat%D(J,I)
+!          AMat%D(I,J)=Sum
+!          AMat%D(J,I)=Sum
+!        ENDDO
+!      ENDDO
+!call pprint(amat%d,' amat symmetrized',unit_o=6)
+!
+! Scale AMat before diagonalization
+!
+! first scale reference (last grad) to 1
+      Sum=One/AMat%D(GDIISMemory,GDIISMemory)
+      AMat%D=Sum*AMat%D
+call pprint(amat%d,' amat scaled by constant',unit_o=6)
+! then, calculate cosines of grad vector pair angles
+! where one of the grad vectors is the reference one
+         Scale%D=Zero
+         ScaleMin=1.D99
+       DO I=1,GDIISMemory
+         Sum=AMat%D(I,GDIISMemory)/SQRT(AMat%D(I,I))
+         Scale%D(I)=Sum
+         ScaleMin=MIN(ScaleMin,Sum)
+         IF(ABS(AMat%D(I,GDIISMemory))>1.D-4) THEN
+           Scale%D(I)=1.D15 
+         ELSE
+           Scale%D(I)=One
+         ENDIF
+       ENDDO
+write(*,*) 'scale= ',scale%d
+write(*,*) 'scalemin= ',scalemin
+!scale%d=one
+!ScaleMin=One
+!
+! Scale factors will be the inverses of the cosines
+! this is one of the reasonable choices to do landscaping,
+! i.e. the smaller the similarity (cosine of angle) to the reference is
+! the bigger the error should be
+!
+!       DO I=1,GDIISMemory
+!         Scale%D(I)=One/Scale%D(I)
+!       ENDDO
+write(*,*) 'inverse scale= ',scale%d
+!
+! Now, use the magnifying glass of scaling, which is based on 
+! similarity as compared to the last step
+! The gradients which are on a less similar lengthscale
+! will be magnified most.
+!
+       DO I=1,GDIISMemory
+         SumX=Scale%D(I)
+         DO J=1,GDIISMemory
+           SumY=Scale%D(J)
+           AMat%D(I,J)=SumX*AMat%D(I,J)*SumY 
+         ENDDO
+       ENDDO
+call pprint(amat%d,'scaled amat',unit_o=6)
+!
+! Now, calculate eigenvalues and eigenvectors of Overlap
+!
+      CALL SetDSYEVWork(GDIISMemory)
+!
+        BLKVECT%D=AMat%D
+        CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+          BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+        CALL Halt('DSYEV hosed in GDIIS. INFO='&
+                   //TRIM(IntToChar(INFO)))
+!
+! Form inverse square roots of eigenvalues
+! and reverse the sign of some eigenvectors
+!
+call pprint(blkvect%d,'eigenvectors',unit_o=6)
+write(*,*) 'original blockvals= ',BLKVALS%D
+        DO I=1,GDIISMemory
+!          BLKVALS%D(I)=One/SQRT(BLKVALS%D(I))
+          Sum=Zero
+          DO J=1,GDIISMemory
+            Sum=Sum+BLKVECT%D(J,I)
+          ENDDO
+write(*,*) 'sum= ',i,sum
+          IF(Sum<Zero) THEN
+write(*,*) i,'turn sign'
+            BLKVECT%D(:,I)=-BLKVECT%D(:,I)
+          ENDIF
+        ENDDO
+!write(*,*) 'inv sqrt blockvals= ',BLKVALS%D
+!
+! Generate new metric: GradMetric=GradMetric*Scale*U*D^-1/2
+! and transform geometries and gradients
+!
+!        DO I=1,GDIISMemory
+!          GradMetric%D(I) =GradMetric%D(I)*Scale%D(I)
+!          SRStruct%D(:,I) =SRStruct%D(:,I)*Scale%D(I)
+!          RefStruct%D(:,I)=RefStruct%D(:,I)*Scale%D(I)
+!          SRDispl%D(:,I)  =SRDispl%D(:,I)*Scale%D(I)
+!          RefGrad%D(:,I)  =RefGrad%D(:,I)*Scale%D(I)
+!        ENDDO
+!
+        CALL DGEMM_NNc(1,GDIISMemory,GDIISMemory,One,Zero,  &
+          GradMetric%D,BLKVECT%D,AuxVectS%D)
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          SRStruct%D,BLKVECT%D,AuxStruct%D)
+        SRStruct%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          RefStruct%D,BLKVECT%D,AuxStruct%D)
+        RefStruct%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          SRDispl%D,BLKVECT%D,AuxStruct%D)
+        SRDispl%D=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+          RefGrad%D,BLKVECT%D,AuxStruct%D)
+        RefGrad%D=AuxStruct%D
+!
+write(*,*) 'GradMetric new2 = ',AuxVectS%d
+        DO I=1,GDIISMemory
+          Sum=AuxVectS%D(I)
+!         IF(Sum<Zero) Sum=-Sum 
+          Sum=One/Sum
+write(*,*) 'sum2= ',sum
+          GradMetric%D(I) =One
+          Coeffs%D(I)=AuxVectS%D(I)*AuxVectS%D(I)/BLKVALS%D(I)
+          BLKVALS%D(I)=Sum*BLKVALS%D(I)*Sum
+          SRStruct%D(:,I) =SRStruct%D(:,I)*Sum
+          RefStruct%D(:,I)=RefStruct%D(:,I)*Sum
+          SRDispl%D(:,I)  =SRDispl%D(:,I)*Sum
+          RefGrad%D(:,I)  =RefGrad%D(:,I)*Sum
+        ENDDO
+write(*,*) 'GradMetric new3 = ',GradMetric%d
+write(*,*) 'coeffs unnormed= ',coeffs%d
+!
+! Select out subspace for final GDIIS
+!
+        Selection%I=1
+        CALL GDIISSelect2(Coeffs%D,Selection%I)
+write(*,*) 'selection= ',Selection%I
+!
+      CALL UnSetDSYEVWork()
+!
+! Calculate new geometry, linearcombine previous steps 
+!
+          AuxVect%D=Zero
+          SumX=Zero
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)/=1) CYCLE
+          Sum=Coeffs%D(I)
+          SumX=SumX+Sum
+          AuxVect%D=AuxVect%D+Sum*SRStruct%D(:,I)
+        ENDDO
+!
+! Now, renorm new geometry to original metric
+!
+write(*,*) 'renormalization for geometry= ',sumx
+          SumX=One/SumX
+        AuxVect%D=SumX*AuxVect%D 
+!
+! Fill new geometry into GM array
+!
+        CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
+!
+! Save unitary transformed structures and gradients
+!
+        CALL Put(0,'SrMemory')
+        CALL Put(0,'RefMemory')
+        CALL Put(0,'CartGradMemory')
+!       CALL Put(0,'IntGradMemory')
+!!!     J=MAX(1,GDIISMemory-5)
+!!!     DO I=J,GDIISMemory
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)==1) THEN
+            AuxVect%D=SRStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR',Metric_O=.FALSE.)
+            AuxVect%D=RefStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
+            AuxVect%D=RefGrad%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
+                         Metric_O=.FALSE.,GradMetric_O=GradMetric%D(I))
+          ENDIF
+        ENDDO
+!
+!call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
+!
+! Tidy up
+!
+       CALL Delete(Selection)
+       CALL Delete(GrdDotGrd)
+       CALL Delete(GrdDotDX)
+       CALL Delete(DXDotDX)
+       CALL Delete(AuxVectS)
+       CALL Delete(Scale)
+       CALL Delete(TrfGrad)
+       CALL Delete(AuxVect)
+       CALL Delete(Coeffs)
+       CALL Delete(GradMetric)
+       CALL Delete(AMat)
+       CALL Delete(AuxStruct)
+       CALL Delete(RefGrad)
+       CALL Delete(RefStruct)
+       CALL Delete(SRStruct)
+       CALL Delete(SRDispl)
+!
+     END SUBROUTINE GDIIS4
 !
 !--------------------------------------------------------------------
 !
