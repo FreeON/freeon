@@ -48,6 +48,12 @@ MODULE SCFLocals
       REAL(DOUBLE)                       :: VelScaling
       REAL(DOUBLE)                       :: TempScaling
    END TYPE MDControls
+!---------------------------------------------------------------  
+!
+   TYPE OptControls
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType  
+      INTEGER                            :: ReDefIntC
+   END TYPE 
 !------------------------------------------------------------------------------------------------  
 !  Object to control the SCF
    TYPE SCFControls
@@ -87,10 +93,11 @@ MODULE SCFLocals
       TYPE(MDControls)                   :: MDC
 !
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: PopAnalysis
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType ! Coord. type for optimization
+!
+      TYPE(OptControls)                  :: GeOp
 !
    END TYPE
-
+!
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose ~4 digits, Good ~6 digits, Tight ~8 digits, VeryTight ~10 digits):
 !

@@ -91,10 +91,13 @@ MODULE ParsingKeys
 !  <Options.Opt=>
    CHARACTER(LEN=3),  PARAMETER :: OPTIMIZATION     ='Opt'
    CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW        ='QuNew'
+   CHARACTER(LEN=7),  PARAMETER :: OPT_StpDesc      ='StpDesc'
    CHARACTER(LEN=7),  PARAMETER :: OPT_ONE_BASE     ='OneBase'
    CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE       ='TS'
 !  Perform quasi-newton geometry optimization for each basis set in turn
    INTEGER, PARAMETER           :: GRAD_QNEW_OPT    = 3489343 
+!  Optimizer type is set to Steepest Descent
+   INTEGER, PARAMETER           :: GRAD_StpDesc_OPT = 3876123 
 !  Perform quasi-newton geometry optimization for last basis in sequence
    INTEGER, PARAMETER           :: GRAD_QNEW_ONE_OPT= 3498345
 !  Perform a gradients only transition state search.
@@ -175,7 +178,7 @@ MODULE ParsingKeys
 !-------------------------------------------------
 !  Parsing keys for <Options.CoordType=>
 !
-    CHARACTER(LEN=9),  PARAMETER :: CoordinateType='CoordType'
+    CHARACTER(LEN=9),  PARAMETER :: COORDTYPE='CoordType'
     CHARACTER(LEN=7),  PARAMETER :: CoordType_PrimInt='PrimInt'
     CHARACTER(LEN=9),  PARAMETER :: CoordType_Cartesian='Cartesian'
 !---------------------------------------------------------
