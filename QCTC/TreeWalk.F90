@@ -30,6 +30,20 @@ MODULE TreeWalk
   REAL(DOUBLE),DIMENSION(0:20)     :: AuxR,G
 !-----------
   CONTAINS  !
+     SUBROUTINE SetKet(P,E)
+       TYPE(PrimPair) :: P
+       REAL(DOUBLE)   :: E
+!---------------------------------------------
+!      Zero <KET| accumulators
+       HGKet=Zero
+       SPKetC=Zero
+       SPKetS=Zero
+!      Set global BBox for this primitive
+       PBox%BndBox(:,1)=P%P
+       PBox%BndBox(:,2)=P%P
+!      Expand this BBox from zero to the correct extent
+       PBox=ExpandBox(PBox,E)
+    END SUBROUTINE SetKet
 !===================================================================================================
 !
 !===================================================================================================
@@ -137,9 +151,9 @@ MODULE TreeWalk
        IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
           ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
-                 T>Gamma_Switch) THEN
+              T>Gamma_Switch) THEN
 !         MAC:
-          IF(PQ2>(Q%Strength*DP2+Q%DMax2) .OR. Q%Leaf)THEN
+          IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
@@ -156,12 +170,8 @@ MODULE TreeWalk
           ENDIF
        ELSEIF(Q%Leaf)THEN
 !         Check for self-interaction
-          IF(Q%BDex==At)RETURN
-!         or use this bit o code...
-!         IF(Q%Leaf.AND.Q%Zeta==NuclearExpnt.AND.PQ2<VTol)THEN
-!            RETURN
-!         ENDIF
-
+          IF(Q%Zeta==NuclearExpnt.AND.PQ2<VTol)RETURN
+!         Flip sign...
           PQx=-PQx; PQy=-PQy; PQz=-PQz
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
