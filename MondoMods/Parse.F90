@@ -120,7 +120,7 @@ MODULE Parse
               DO N=1,L
                  S1=SCAN(LCLine(J:L),Delimiters(1:LD))
                  K1=J-1+S1
-                 S2=SCAN(LCLine(K1+1:L),Delimiters(1:LD))
+                 S2=SCAN(LCLine(K1+1:L),Delimiters(1:LD-1))
                  IF(S1==0)RETURN
                  K2=K1+S2
                  IF(K1==K2)K2=L
