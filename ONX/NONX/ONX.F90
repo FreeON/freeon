@@ -49,8 +49,9 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
+  INTEGER                :: iSwitch
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
-  CHARACTER(LEN=5),PARAMETER     :: Prog='ONX'
+  CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   InFile=TRIM(SCFName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
@@ -62,7 +63,31 @@ PROGRAM ONX
   CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
   CALL Get(OffS,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-  CALL Get(D,TrixFile('D',Args,0)) !InFile,'.D')
+
+!----------------------------------------------
+! Set up the appropriate action
+!----------------------------------------------
+  IF(Args%C%C(2)=='Core') THEN
+     iSwitch=0
+  ELSEIF(Args%C%C(2)=='Direct') THEN
+     iSwitch=1
+  ELSEIF(Args%C%C(2)=='Switch') THEN
+     iSwitch=2
+  ELSEIF(Args%C%C(2)=='InkFok') THEN
+     iSwitch=3
+  ELSE
+     CALL MondoHalt(-100,' Inappropriate Action in ONX:'//Args%C%C(2))
+  ENDIF
+!----------------------------------------------
+! Get the Density Matrix
+!----------------------------------------------
+  IF(iSwitch==1) THEN
+     CALL Get(D,TrixFile('D',Args,0))
+  ELSEIF(iSwitch==2) THEN
+     CALL Get(D,TrixFile('D',Args,0))
+  ELSEIF(iSwitch==3) THEN
+     CALL Get(D,TrixFile('DeltaD',Args,0))
+  ENDIF
   CALL TrnMatBlk(BSp,GMp,D)
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
   CALL Get(OffS,'atoff',Tag_O=CurBase)
@@ -72,7 +97,7 @@ PROGRAM ONX
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf,BfnInd,DB,BSp,GMp)
-  DO WHILE (ErrorCode/=eAOK) 
+  1000 DO WHILE (ErrorCode/=eAOK) 
     CALL MemInit(DB,IB,SB,Drv,BSc,BSp)
     CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   END DO
@@ -92,7 +117,11 @@ PROGRAM ONX
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
   CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
-!  write(*,*) "xNERIs=",xNERIs
+  IF (ErrorCode/=eAOK) THEN
+    CALL Delete(K)
+    CALL Delete(SubInd)
+    GOTO 1000
+  END IF
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
@@ -107,7 +136,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   CALL Fillout_BCSR(BSc,GMc,K)
   CALL TrnMatBlk(BSc,GMc,K)
-  CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
+!  CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
   CALL Put(K,TrixFile('K',Args,0))!InFile,'.K')
   CALL Put(K%NBlks,'nki')
   CALL Put(K%NNon0,'nkm')

@@ -43,7 +43,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4
+  INTEGER               :: L1,L2,L3,L4,IntSpace
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
@@ -53,8 +53,10 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 !-------------------------------------------------------------------
   INTEGER               :: LTotal,MaxBatchSize,NFinal,iT
 
+
   CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(DA,BSp%LMNLen*BSp%LMNLen)
+  xNERIs=0.0D0
 
   DO iTBra=1,DB%LenTC       ! Loop over angular symmetry types on the Bra
     TBra=DB%TCode%I(iTBra)
@@ -164,6 +166,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
               SchB=DB%DisBuf%D(IBD+10)
               Test=Thresholds%TwoE/(Dcd*SchB)
               ISL=0
+
               DO J=1,LenKet
                 IKD=iDKet+(J-1)*DB%MAXC
                 IndexB=ABS(DB%DisBuf%D(IKD+1))
@@ -176,9 +179,14 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                   SB%SLPrm%I(ISL)=IKP
                 END IF
               END DO ! J, LenKet
-
+ 
               IF (ISL>0) THEN
-                xNERIs=xNERIs+FLOAT(L1*L2*L3*L4)
+                IntSpace=ISL*CBra*CKet*NVRR
+                IF (IntSpace.GT.IB%MAXI) THEN
+                  ErrorCode=eMAXI
+                  GOTO 9000
+                ENDIF
+                xNERIs=xNERIs+FLOAT(L1*L2*L3*L4*ISL)
                 CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
                           DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
                 CALL VRRl(ISL*CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is), &
@@ -216,5 +224,6 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   END DO ! iCBra
   END DO ! iTKet
   END DO ! iTBra
+9000 CONTINUE
   CALL Delete(DA)
 END SUBROUTINE ComputeK

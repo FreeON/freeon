@@ -26,6 +26,10 @@ SUBROUTINE RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
   TYPE(INT_VECT)           :: NameBuf
   TYPE(DBL_VECT)           :: MR
 
+
+  NRows=0
+  NCols=0
+  NElem=0
   NameBuf%I=0
   DenRange=0.0D0
 #ifdef PARALLEL

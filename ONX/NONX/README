@@ -55,7 +55,12 @@ DB. This is getting very messy...
       DONE
 
 12. Need to address memory issues with IB%MaxInts, as it is now, the 
-buffers could overflow... 
+buffers could overflow...  DONE
 
 13. Everything seems to be in place, time to check some K matrices.
-     Works for s-type integrals, p-type is messed up.
+     Works for s-type integrals, p-type is messed up. DONE
+
+14. Still a small bug in the d-type integral code. The PONX code works 
+fine, so should be easy to find bug.
+
+

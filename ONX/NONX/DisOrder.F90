@@ -189,7 +189,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           iCP=Drv%CDrv%I(I1)
           iCL=Drv%CDrv%I(iCP)
 
-          IF (KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
+          IF (2*KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
             ErrorCode=eMAXI
             GOTO 9000
           ENDIF
@@ -212,7 +212,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           ELSE
             rInt = DSQRT(GetAbsMax(NInts,IB%W1))
           ENDIF
-
+      
           IF(rInt>Thresholds%Dist) THEN 
             DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
             DB%TBufC%D(11,iBf)=rInt
