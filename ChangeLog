@@ -1,3 +1,70 @@
+2003-05-05 19:26  mchalla
+
+	* SCFeqs/: DenMatMethods.F90, P2Use.F90, RHeqs.F90: [no log
+	message]
+
+2003-05-05 19:26  mchalla
+
+	* OneE/: MakeRho.F90, ParaMakeRho.F90: Fix to allow restart with
+	new geometry and old DM.
+
+2003-05-05 19:23  mchalla
+
+	* ONX/NONX/: ONX.F90, ONX_PBC_1.F90:  fix to allow restarts with
+	changed geometry, old DM.
+
+2003-05-05 17:36  tymczak
+
+	* Docs/PBC_paper/: EnergyVsNumber_Diamond512.ps,
+	GaussianPapers.bib, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, Timing_Diamond_512_log.ps: [no log
+	message]
+
+2003-05-05 15:42  nemeth
+
+	* MondoMods/ParsingConstants.F90: [no log message]
+
+2003-05-05 15:41  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90,
+	ParseOptions.F90: Two modifications to the optimizer: 1. printing
+	debug stuff, from now use MinGeOp or MaxGeOp instead of GeOpDebug
+	in the input for debugging the optimizer.  2. Values of
+	out-of-plane coordinates are set to the 'real' out-of-plane values
+	now, instead of the value which refers to the corresponding
+	torsion.
+
+2003-05-05 12:14  schwegle
+
+	* ONX/GDrivers/: G2.101x101.ascii, G2.101x201.ascii,
+	G2.101x202.ascii, G2.201x101.ascii, G2.201x201.ascii,
+	G2.201x202.ascii, G2.202x101.ascii, G2.202x201.ascii,
+	G2.202x202.ascii, G3.101x201.ascii, G3.101x202.ascii,
+	G3.201x101.ascii, G3.201x201.ascii, G3.201x202.ascii,
+	G3.202x101.ascii, G3.202x201.ascii, G3.202x202.ascii, Notes.txt:
+	Changed the format of the driver files. Should now support s and sp
+	type basis functions.
+
+2003-05-05 12:13  schwegle
+
+	* ONX/NONX/: ComputeXForce.F90, ContractG.F90, DigestGradient.F90,
+	GetGradient.F90, Notes.txt: More debuging of the gradient code.
+	There is an indexing bug in GetIntSpace.F90.  Also added a notes
+	file.
+
+2003-05-05 10:27  schwegle
+
+	* ONX/GDrivers/: DriverMaker.F, DriverMaker.f, MAIN.C, MAIN.c: Just
+	some name changes
+
+2003-05-05 10:20  nemeth
+
+	* MondoSCF2/Optimizer.F90: An opening and close of 'Out' added.
+
+2003-05-04 14:55  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-05-04 14:49  mchalla
 
 	* MondoSCF2/: ParsePeriodic.F90, SCFs.F90: Fixed bug in single
