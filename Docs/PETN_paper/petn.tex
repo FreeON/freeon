@@ -3,8 +3,8 @@
 \newcommand{\Bulk}{B_0}
 \newcommand{\BPrime}{{B'_0}}
 
-\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
+%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
+\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -26,7 +26,7 @@ pentaerythritol tetranitrate (PETN)}
 
 \affiliation{ Theoretical Division, Los Alamos
               National Laboratory,\\ Los Alamos, New Mexico 87545}
-\date{July 31, 2003}
+\date{August 1, 2003}
 
 \begin{abstract}
 All-electron calculations of the hydrostatic compression of
@@ -81,7 +81,6 @@ for pressures up to 10.45~GPa.  Dick and von Dreele~\cite{Dick_1997}
 used neutron scattering from deuterated PETN to study detailed
 pressure-induced changes in dihedral angles and molecular orientations
 in the unit cell for pressures up to 4.28~GPa.
-%It is interesting to note that, 
 While the volumetric compression reported by Dick and von Dreele is
 consistent with the data of Olinger {\it et al.}, significant
 differences are observed in the linear compressions along the $a$ and
@@ -204,21 +203,17 @@ gradient-corrected density-functional theory (GGA), using the PBE
 functional~\cite{Perdew_96v77}. The small 3-21G split-valence Gaussian 
 basis set was tried first, but found to be inadequate relative to the
 larger 6-31G** basis set.  Thus, the 6-31G** basis set was used
-for all results reported here. The $\Gamma$-point for the Brillouin zone sampling was 
-used throughout with a $1 \times 1 \times 1 $ crystallographic unit 
-cell containing two molecules (58 atoms).  However, a number of calculations 
+for all results reported here. The $\Gamma$-point for Brillouin zone sampling was 
+used throughout with the crystallographic unit 
+cell, which contains two molecules (58 atoms).  However, a number of calculations 
 were carried out using a $1 \times 1 \times 2 $ supercell to verify 
-convergence of the $\Gamma$-point sampling (as shown in 
+convergence of the $\Gamma$-point approximation (as shown in 
 Fig.~\ref{fig:volume_compress}(a)).  
-%Because PETN has a number of soft modes and we are attempting to resolve 
-%energy differences at the milihartree level, a ``good'' level of numerical 
-%thresholding was used throughout, achieving a relative accuracy of 6-7 digits 
-%in the total energy.  
 Because of the necessity to resolve milihartree energy differences,
 a ``good'' level of numerical approximation was used throughout to
 achieve the required 7-8 digits of accuracy in the total energy,
 which was approximately $-$2600 Hartree.
-The combination of large basis set and accurate numerical
+This combination of large basis set and accurate numerical
 approximation was mastered through parallel ${\cal O}(N)$ algorithms, a 
 key enabling technology for these types of calculations. 
 
@@ -288,19 +283,6 @@ that this behavior has been observed for similar systems, including
 $\beta$-octahydro-1,3,5,7-tetranitro-1,3,5,7-tetrazocine
 ($\beta$-HMX)\cite{Gump_2003,Sewell03_unpublished}.
 
-%\begin{figure}
-%\resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_EDiff_Press.eps}}
-%\caption{Volumetric hydrostatic compression for PETN.
-%(a) Relative energy difference. The solid line is a sixth-degree
-%polynomial fit to the $1\times 1\times 1$ predictions.  Crosses are
-%calculations for a $1\times 1\times 2$ supercell, and indicate that
-%finite size effects are minimal.  (b) Pressure-volume relationship
-%calculated from the fit in (a).  Uncertainties in the experimental
-%data of Olinger {\it et al.}~\cite{Olinger_1975v62} are smaller than
-%the symbol sizes.  }
-%\label{fig:volume_compress}
-%\end{figure}
-
 The linear compression along the $a$ and $c$ crystallographic
 directions is shown in Fig.~\ref{fig:linear_compress}.
 Figure~\ref{fig:linear_compress}(a) reveals good agreement between our
@@ -316,44 +298,6 @@ lattice structure.  The positions of the minima in the curves are in
 fairly good agreement, and correspond to a volume ratio of 0.8 and a
 pressure of about 7~GPa.
 
-
-%\begin{figure}
-%\resizebox*{3.5in}{!}{\includegraphics[clip]{CAndA.eps}}
-%\caption{Linear compression of PETN.  (a) Relative linear compression
-%of the lattice parameters. Squares and circles correspond to the $a$
-%and $c$ crystallographic axes, respectively; dashed lines are simply a
-%guide for the eye.  Experimental data from Olinger {\it et
-%al.}~\cite{Olinger_1975v62}; experimental uncertainties are comparable
-%to the size of the symbols. (b) Ratio of $c$ to $a$.  Squares denote
-%calculated results; dashed line is a guide for the eye.  Circles are
-%experimental data;~\cite{Olinger_1975v62} error bars in $c/a$ and
-%$V/V_0$ are representative; solid line is a polynomial form taken from
-%Ref.~\cite{Olinger_1975v62}.  }
-%\label{fig:linear_compress}
-%\end{figure}
-%
-%\begin{figure}
-%\resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_Bond_Angle_CloseContact.eps}}
-%\caption{(a) Variation of bond lengths in PETN as a function of hydrostatic 
-%compression.  Circle: C-C; square: C-O; diamond: O-N; up-triangle and
-%cross: N-O; down-triangle and plus: C-H.  (b) Variation of
-%three-center angles. Circle: C-C-C; square: C-O-N; diamond: C-C-H;
-%up-triangle: H-C-O; cross: C-C-O. (c) Compression of intermolecular
-%contacts whose value is less than 3 \AA\/ at zero pressure.  All three
-%correspond to O$\cdot\cdot\cdot$H contacts.}
-%\label{fig:intramolecular}
-%\end{figure}
-
-%In Figs.~\ref{fig:intramolecular}(a) and (b), we show the changes in
-%intramolecular bond lengths and three-center angles as PETN is
-%compressed.  For clarity of presentation, we only include coordinates that
-%undergo significant changes.  Dihedral angles are not shown, as they
-%only exhibit small changes.  (We note that Dick and von
-%Dreele~\cite{Dick_1997} observed variations of up to several degrees
-%in some of the dihedral angles in deuterated PETN between zero
-%and 4.28~GPa.)  It is observed that the bond lengths and angles remain
-%almost constant for $ 0.8 \leq V/V_0 \leq 1.0$, with the onset of
-%sizable changes for higher compressions.
 In Figs.~\ref{fig:intramolecular}(a) and (b), we show the changes in
 intramolecular bond lengths and three-center angles as PETN is
 compressed.  For clarity of presentation, we only include coordinates that
@@ -545,11 +489,8 @@ $a$(\AA) & $c$(\AA) & $V$(\AA$^3$) & Source \\
 9.425  & 6.758  &  600.3  & This work \\
 9.383  & 6.711  &  590.8  & Olinger {\it et al.}~\cite{Olinger_1975v62}\\
 9.3776 & 6.7075 &  589.9  & Conant {\it et al.}~\cite{Conant_1979} \\
-%9.117  & 6.721  &  558.6  & Bunte and Sun~\cite{Bunte_2000v104} \\
 9.3348 & 6.6500 &  579.47 & Sorescu {\it et al.}~\cite{Sorescu_1999v103} (NPT-MD, 293K) \\
 9.35   & 6.67   &  583    & Bunte and Sun~\cite{Bunte_2000v104} (NPT-MD, 293K) \\
-% wrong values 9.2836 & 6.5995 &  569.79 & Sorescu {\it et al.}\/ (energy minimization, rigid molecules) \\
-% 9.3471 & 6.6571 &  581.5  & Sorescu {\it et al.}\/ (NPT-MD, 300K, rigid molecules) \\
 \hline\hline
 \end{tabular}
 \end{center}
@@ -608,9 +549,6 @@ $\Bulk$(GPa) &   $\BPrime$   &   Source  &    Fitting form &      Comment \\
 12.2 & 6.4 & Olinger {\it et al.}~\cite{Olinger_1975v62} & Eq.~(\ref{eq:cs}) \\
 8.8 & 9.9 &   Olinger {\it et al.}~\cite{Olinger_1976}&   &                  \\
  9.1 & --- &   Winey and Gupta~\cite{Winey_2001v90} &     & Calculated from isentropic value \\
-                                     %  value using $\Bulk_t=\Bulk_s*(C_v/C_p)$
-                                     %  with $K_s=9.85$~GPa, $C_v=1.00$~J/g/K,
-                                     %  and Cp=1.08 J/g/K.
 14.1 &10.4 &Sorescu {\it et al.}~\cite{Sorescu_1999v103} & Eq.~(\ref{eq:Murna})&         NPT-MD at 298K\\
 \hline\hline
 \end{tabular}
