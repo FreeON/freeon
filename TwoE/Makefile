@@ -6,6 +6,8 @@ CPPMISC =
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE/MSC/ -I$(MONDO_HOME)/TwoE/INT/ -I$(MONDO_HOME)/TwoE/GRD/ 
 #
+ReleaseFiles=N4K.x dN4K.x
+#
 TwoELibs=$(F90_LIBRARIES) -lINT -lVRR -lHRR -lTwoEMisc
 #
 all:    Misc HRRs VRRs Ints Grad
@@ -15,14 +17,20 @@ clean:  cMisc cHRRs cVRRs cInts cGrad
 #
 source: sHRRs sVRRs sInts sGrad
 #
+release: clean $(ReleaseFiles)
+#
 purge:  clean pMisc pHRRs pVRRs pInts pGrad
 #
 ppurge: purge ppMain ppHRRs ppVRRs ppInts ppGrad 
+#
+release: rMisc rHRRs rVRRs rInts rGrad 
 #
 Misc:	
 	$(MAKE) -C MSC
 cMisc:	
 	$(MAKE) -C MSC clean
+rMisc:
+	$(MAKE) -C MSC release
 pMisc:
 	$(MAKE) -C MSC purge
 ppVRRs:
@@ -32,6 +40,8 @@ VRRs:
 	$(MAKE) -C VRR
 cVRRs:	
 	$(MAKE) -C VRR clean
+rVRRs:
+	$(MAKE) -C VRR release
 pVRRs:
 	$(MAKE) -C VRR purge
 ppVRRs:
@@ -43,6 +53,8 @@ HRRs:
 	$(MAKE) -C HRR
 cHRRs:	
 	$(MAKE) -C HRR clean
+rHRRs:
+	$(MAKE) -C HRR release
 pHRRs:
 	$(MAKE) -C HRR purge
 ppHRRs:
@@ -54,6 +66,8 @@ Ints:
 	$(MAKE) -C INT
 cInts:	
 	$(MAKE) -C INT clean
+rInts:	
+	$(MAKE) -C INT release
 pInts:	
 	$(MAKE) -C INT purge
 ppInts:	
@@ -65,6 +79,8 @@ Grad:
 	$(MAKE) -C GRD
 cGrad:	
 	$(MAKE) -C GRD clean
+rGrad:	
+	$(MAKE) -C GRD release
 pGrad:	
 	$(MAKE) -C GRD purge
 ppGrad:	
