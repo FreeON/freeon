@@ -11,7 +11,8 @@ CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 # Currently, -DPERIODIC does not work with -DPARALLEL.
 # When using -DPARALLEL, uncomment options for F90_INCLUDE and MPI_LIBS
 #
-CPPOPTS = -DPERIODIC
+CPPOPTS = -DQMvsMM -DMMech
+#CPPOPTS = -DPERIODIC -DQMvsMM -DMMech
 #-DPARALLEL  -DMPI2
 #---------------------------------------------------------------
 #
@@ -19,7 +20,7 @@ CPPOPTS = -DPERIODIC
 #
 CC        =  gcc
 #CDEBUG   = -g
-COPTIMIZE = -O1
+COPTIMIZE = -O1 
 CFLAGS    = $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
 #---------------------------------------------------------------
 # Fortran postfixes for compiler peculiarities
@@ -46,6 +47,8 @@ F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash
 #
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
+                -I$(MONDO_HOME)/Dynamo                  \
+                -I$(MONDO_HOME)/IntCoo                  \
                 -I/usr/local/include                    \
 #                -I$(MPI_INC) 
 #
@@ -86,7 +89,7 @@ HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz
 #
 #  The generic libs needed by most of the programs.  
 #
-F90_LIBRARIES = -L$(MONDO_HOME)/Libs -lMondoMods \
+F90_LIBRARIES = -L$(MONDO_HOME)/Libs -lMondoMods -lDynamo \
                 -L/usr/local/lib $(MPI_LIBS) $(HDF_LIBS) 
 #--------------------------------------------------------------------------
 #
