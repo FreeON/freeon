@@ -11,22 +11,23 @@ CONTAINS
 !--------------------------------------------------------------
 ! Subroutine to Remove unnessesary distributions in rho
 !--------------------------------------------------------------
-  SUBROUTINE Prune_Rho(TOL,Rho_in)
+  SUBROUTINE Prune_Rho(TOL,Rho_in,Rho_out)
     TYPE(HGRho)         :: Rho_in,Rho_out
     INTEGER             :: zq,iq,iqq,NQ,LMN,iadd,iiadd,jadd,jjadd
     INTEGER             :: LL,LenKet,NExpt,NDist,NCoef
     INTEGER             :: L,M,N,LMN,LP,MP,NP,LMNP
-    REAL(DOUBLE)        :: Expt,Weig,Mag,TOL,Factor
+    REAL(DOUBLE)        :: Expt,Mag,TOL,Factor
 !
     NExpt = Rho_in%NExpt
+    CALL Delete_HGRho(Rho_out)
     CALL New_HGRho(Rho_out,(/NExpt,0,0/))
     Rho_out%Expt%D = Rho_in%Expt%D
     Rho_out%Lndx%I = Rho_in%Lndx%I   
     Rho_out%NQ%I = 0  
 !
-!   Count the Number of Distribution whose Weig is above TOL
+!   Count the Number of Distribution whose Magnitude is above TOL
 !
-    DO zq = 1,NExpt
+    DO zq = 1,NExpt  
        Expt   = Rho_in%Expt%D(zq)
        NQ     = Rho_in%NQ%I(zq)
        LL     = Rho_in%Lndx%I(zq) 
@@ -34,33 +35,9 @@ CONTAINS
        DO iq = 1,NQ
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
-!
-!         Calculate Weight ang Magnitude
-!
-          Weig = Rho_in%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
-          Mag  = Zero
-          DO L=0,LL
-             DO M=0,LL-L
-                DO N=0,LL-L-M
-                   LMN=LMNDex(L,M,N)+jadd
-                   DO LP=0,LL
-                      DO MP=0,LL-LP
-                         DO NP=0,LL-LP-MP
-                            LMNP=LMNDex(LP,MP,NP)+jadd
-                            Factor = DoubleFac(Expt,L+LP)*DoubleFac(Expt,M+MP)*DoubleFac(Expt,N+NP)
-                            Mag    = Mag + (-One)**(LP+MP+NP)*Factor*Rho_in%Co%D(jadd+LMN)*Rho_in%Co%D(jadd+LMNP)
-                         ENDDO
-                      ENDDO
-                   ENDDO
-                ENDDO
-             ENDDO
-          ENDDO
-          DO LMN=0,LenKet-1
-             Mag = Mag+(Rho_in%Co%D(jadd+LMN))
-          ENDDO
-          Mag = SQRT( Mag*((Pi/(Two*Expt))**ThreeHalves) )
-!
-          IF(Mag .GT. TOL .OR. Weig .GT. TOL) THEN
+!         Calculate Magnitude
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:))
+          IF(Mag  .GT. TOL) THEN
              Rho_out%NQ%I(zq) = Rho_out%NQ%I(zq) + 1            
           ENDIF
        ENDDO
@@ -91,8 +68,9 @@ CONTAINS
        DO iq = 1,NQ
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
-          Weig  = Rho_in%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
-          IF(ABS(Weig) .GE. TOL) THEN
+!         Calculate Magnitude
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:))
+          IF(Mag .GT. TOL) THEN
              iiadd = Rho_out%OffQ%I(zq) + iqq
              jjadd = Rho_out%OffR%I(zq) + (iqq-1)*LenKet+1
              Rho_out%Qx%D(iiadd) = Rho_in%Qx%D(iadd)
@@ -105,7 +83,7 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
-
+!
   END SUBROUTINE Prune_Rho
 #ifdef PERIODIC
 !---------------------------------------------------------------------
@@ -179,19 +157,48 @@ CONTAINS
     WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
     WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
   END SUBROUTINE Integrate_HGRho
+
+!---------------------------------------------------------------------------------------
+! Function MagnitudeDistribution
+!---------------------------------------------------------------------------------------
+  FUNCTION MagDist(LL,Expt,Coefs)
+    INTEGER                      :: LL,L,M,N,LP,MP,NP,LMN,LMNP,LSUM
+    REAL(DOUBLE)                 :: MagDist,Expt,Factor
+    REAL(DOUBLE),DIMENSION(1:)    :: Coefs
+!
+    MagDist = Zero
+    DO L=0,LL
+       DO M=0,LL-L
+          DO N=0,LL-L-M
+             LMN=LMNDex(L,M,N)
+             DO LP=0,LL
+                DO MP=0,LL-LP
+                   DO NP=0,LL-LP-MP
+                      LMNP=LMNDex(LP,MP,NP)
+                      LSUM = LP+MP+NP
+                      Factor  =  ((-1)**LSUM)*DoubleFac(Expt,L+LP,M+MP,N+NP)
+                      MagDist = MagDist + Factor*Coefs(LMN)*Coefs(LMNP)
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+    MagDist = SQRT(ABS(MagDist)*((Pi/(Two*Expt))**ThreeHalves))
+!
+  END FUNCTION MagDist
 !---------------------------------------------------------------------------------------
 ! Function DoubleFac
 !---------------------------------------------------------------------------------------
-  FUNCTION DoubleFac(Expt,N)
-    INTEGER                       :: N,NFac
-    REAL(DOUBLE)                  :: Expt,DoubleFac
-    REAL(DOUBLE),DIMENSION(-1:10) :: DFac = (/1.D0,1.D0,1.D0,2.D0,3.D0,8.D0,15.D0,48.D0, &
-                                              105.D0,384.D0,945.D0,3840.D0/)
+  FUNCTION DoubleFac(Expt,L,M,N)
+    INTEGER                       :: L,M,N
+    REAL(DOUBLE)                  :: DoubleFac,Expt
+    REAL(DOUBLE),DIMENSION(-1:11) :: DFac = (/1.D0,0.D0,1.D0,0.D0,3.D0,0.D0,15.D0,0.D0, &
+                                              105.D0,0.D0,945.D0,0.D0,10395.D0/)
 !
-    NFac = 1-(-1)**N
-    DoubleFac = Zero
-    IF(NFac == 0) RETURN
-    DoubleFac = (-Expt)**(N/2)*DFac(N-1)
+    DoubleFac = DFac(L-1)*DFac(M-1)*DFac(N-1)
+    IF(DoubleFac == Zero) RETURN
+    DoubleFac =  (Expt**((L+M+N)/2))*DoubleFac
 !
   END FUNCTION DoubleFac
 !
