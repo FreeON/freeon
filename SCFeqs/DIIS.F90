@@ -43,7 +43,7 @@ PROGRAM DIIS
 !  Threshold for projection of small eigenvalues
    IF(.NOT.OptDblQ(Inp,'DIISThresh',EigThresh))EigThresh=1.D-10
 !  Damping coefficient for first cycle
-   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D-1
+   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=3D-1
 !  Dont allow damping below 0.005, as this can cause false convergence
    Damp=MAX(Damp,5D-3)
 !  Max number of equations to keep in DIIS 
