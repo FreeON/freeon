@@ -46,7 +46,6 @@ PROGRAM HaiKu
   CALL NewBraKetBlok(BS)
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
-!  Thresholds%Cube=1.D-3
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
@@ -55,13 +54,6 @@ PROGRAM HaiKu
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree 
   CALL GridGen(CubeRoot)
-!
-  WRITE(*,*)' Exc = ',Exc
-!
-  CALL Elapsed_TIME(PerfMon,'Accum',Proc_O=Prog)
-  CALL PPrint(PerfMon,Prog,Unit_O=6)
-!  CALL ShutDown(Prog)
-
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
 ! Compute the exchange correlation matirix Kxc
@@ -72,12 +64,10 @@ PROGRAM HaiKu
 ! Put Exc to Info
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
 ! Printing
-
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
-
 ! Tidy up
   CALL Delete(Kxc)
   CALL Delete(T1)
