@@ -49,7 +49,7 @@ RHEq_Objs  = RHeqs.o  DenMatMethods.o
 FBuild_Objs= FBuild.o                   
 DIIS_Objs  = DIIS.o               
 DDIIS_Objs = DDIIS.o                #vw
-TC2Response_Objs = TC2Response.o DenMatMethods.o   #vw
+TC2Response_Objs = TC2Response.o DenMatMethods.o DenMatResponse.o   #vw
 Dev_Objs   = ToDev.o  
 #
 ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
@@ -57,7 +57,7 @@ ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              FillPBlok.x P2Use.x FillPBlok.x \
              SCFStatus.x FBuild.x DIIS.x ToDev.x \
 	     DDIIS.x TC2Response.x CPSCFStatus.x \
-             DenMatMethods.x 
+             DenMatMethods.x DenMatResponse.x
 
 #
 all:	ODA RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
@@ -170,7 +170,7 @@ Dev:	$(Dev_Objs)
 #
 DIIS.o:		            $(MONDO_LIB)/libMondoMods.a
 DDIIS.o:		    $(MONDO_LIB)/libMondoMods.a
-TC2Response.o: DenMatMethods.o	$(MONDO_LIB)/libMondoMods.a
+TC2Response.o: DenMatMethods.o DenMatResponse.o	$(MONDO_LIB)/libMondoMods.a
 FBuild.o:	            $(MONDO_LIB)/libMondoMods.a
 P2Use.o:	DenMatMethods.o FillPBlok.o $(MONDO_LIB)/libMondoMods.a 
 FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
