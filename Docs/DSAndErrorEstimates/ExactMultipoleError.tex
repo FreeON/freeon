@@ -13,7 +13,7 @@
 
 \begin{document}
 
-\title{\textbf{Exact Bounded Multipole Error Estimates for O(N) Tree Codes}}
+\title{\textbf{An Exact Bounded Error for Multipoles}}
 
 \author{C. J. Tymczak}
 \author{Matt Challacombe}
@@ -23,9 +23,9 @@
 \date{\today}
 
 \begin{abstract}
-We report on a derivation of an exact error bound for the multipole approximation when point 
-charges are translated. We then show how this exact error bound can be incorporated into
-multipole tree-code. These tree-codes are used both in large scale astrophysical 
+We derive an exact error bound for the multipole approximation as it is used in both multipole tree-codes
+and also the fast multipole method (FMM). We show how this exact error bound can be incorporated into
+multipole tree-code. Tree-codes are used both in large scale astrophysical 
 simulations, and in Quantum Chemistry simulations, inorder to achieve {\cal O}($N log(N)$) 
 scaling. Therefore, good error control is essential inorder to achieve both 
 accuracy and efffieicy within these algorithic methodologies. We show how to derive the
@@ -224,7 +224,7 @@ weights can span several orders of magnitude, but also this will have an impact 
 where a better bound on the calculation of the forces is needed. We have also shown that for classical and 
 quantum simulations that our error bound, at least to about ten million tests, is obeyed. 
 We have also shown that we do achieve linear scaling for very large classicle system, up to one million particals, 
-when  our new error bound is used, and that we can achieve significant speedups for small tolerance calculations 
+when our new error bound is used, and that we can achieve significant speedups for the tolerance $\tau < 10^-4$, 
 by increasing the maxium multipole expansion order. 
 
 \section*{ACKNOWLEDGMENTS}
