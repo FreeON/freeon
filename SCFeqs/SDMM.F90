@@ -34,6 +34,7 @@ PROGRAM SDMM
                                     Diff,LShift,ENew,CnvgQ,DeltaNQ,DeltaPQ,   &
                                     FixedPoint,NumPot,DenPot,OldPoint,NewE,OldE,DeltaE,DeltaEQ, &
                                     OldDeltaEQ,OldDeltaPQ,OldDeltaE
+  REAL(DOUBLE),PARAMETER         :: ThreshAmp=1.D2
   INTEGER                        :: I,J,ICG,NCG,IPur,NPur
   LOGICAL                        :: Present,FixedUVW
   CHARACTER(LEN=2)               :: Cycl,NxtC
@@ -102,7 +103,7 @@ PROGRAM SDMM
 !    LINE MINIMIZATION: compute coeficients
 !
 !    Can do these more cheaply
-     Thresholds%Trix=1.D2*Thresholds%Trix
+     Thresholds%Trix=ThreshAmp*Thresholds%Trix
 #ifdef PARALLEL
      CALL Multiply(H,G,T1)
      B=-Trace(T1)                         ! B=-Tr{H.G}=6*Tr{H.(I-P).P.F}
@@ -164,7 +165,7 @@ PROGRAM SDMM
      ENDIF
 !----------------------------------------------------------------------------
 !    End cheap thresholding 
-     Thresholds%Trix=1.D-2*Thresholds%Trix
+     Thresholds%Trix=Thresholds%Trix/ThreshAmp
 !-----------------------------------------------------------------------------
 !    DENSITY UPTDATE
 !
@@ -316,7 +317,7 @@ PROGRAM SDMM
             EXIT
          ENDIF
 !        Check for density matrix stall out 
-         IF(DeltaPQ<1.D-2)THEN
+         IF(DeltaPQ<1.D-1)THEN
 !            WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
             EXIT
          ENDIF
