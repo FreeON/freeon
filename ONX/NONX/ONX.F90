@@ -9,10 +9,15 @@ PROGRAM ONX
 !H Comment:
 !H
 !H=================================================================================
+  !
+#ifdef ONX_DBUG
+#define ONX_INFO
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
-  USE AtomPairs  !per
+  USE AtomPairs
   USE Clock
   USE InOut
   USE PrettyPrint
@@ -22,7 +27,7 @@ PROGRAM ONX
   USE LinAlg
   USE ONXParameters
   USE ONXMemory
-  USE ONXCtrSclg, ONLY: TrnMatBlk   !old USE ContractionScaling
+  USE ONXCtrSclg, ONLY: TrnMatBlk
   USE ONXComptK , ONLY: ComputeK
   USE ONXDOrder , ONLY: DisOrder
   USE ONXMemInit, ONLY: MemInit
@@ -85,11 +90,7 @@ PROGRAM ONX
   REAL(DOUBLE)                   :: TmBegK,TmEndK,TmKT,TmBegKT,TmEndKT
   TYPE(DBL_VECT)                 :: TmKArr,NERIsArr,TmDOArr,TmREArr,TmFOArr,TmTMArr,TmKTArr
 #endif
-  INTEGER                        :: I,NCC,NCD       !per
-!--------------------------------------------------------------------------------
-! vw comments:
-! o clean up the code.
-! o Optimise the fastmat in the innermost loop.
+  INTEGER                        :: I,NCC,NCD
 !--------------------------------------------------------------------------------
 !
 #ifdef PARALLEL
@@ -113,16 +114,12 @@ PROGRAM ONX
      PrvGeom=TRIM(IntToChar(Stat%I(3)))
      HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
      CALL Get(BSp,Tag_O=PrvBase)
-!    Get the previous geometry, ASSUMING that 
-!    we are not extrapolating the DM
-
-     !CALL Get(GMp,Tag_O=PrvGeom) !old
-     CALL Get(GMp,Tag_O=CurGeom) !per
-
+     ! Get the previous geometry, ASSUMING that 
+     ! we are not extrapolating the DM
+     CALL Get(GMp,Tag_O=CurGeom)
      CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS ,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-     !  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
      ! Close the old hdf up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)
@@ -130,10 +127,10 @@ PROGRAM ONX
      HDFFileID=OpenHDF(H5File)
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
-     CALL Delete(Stat) !NEW_29.07.03
+     CALL Delete(Stat)
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
-!    Get the current geometry here...
+     ! Get the current geometry here...
      CALL Get(GMp,Tag_O=CurGeom)
      CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS ,'atoff',Tag_O=PrvBase)
@@ -141,13 +138,12 @@ PROGRAM ONX
   ENDIF
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
-
+  !
 !----------------------------------------------
 ! Get the Density Matrix
 !----------------------------------------------
+  !
   IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
-     !write(*,*) 'ONX: Start'
-     !write(*,*) 'ONX: File=<'//'DPrime'//Args%C%C(4)//'>'
 #ifndef PARALLEL
      CALL Get(D,TrixFile('DPrime'//Args%C%C(4),Args,0))
 #else
@@ -172,10 +168,6 @@ PROGRAM ONX
      CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,0),'ONXPart',Args)
 #endif
   ENDIF
-  !
-#ifndef PARALLEL
-  CALL PlotDecay(D,GMc,'test_'//TRIM(IntToChar(Args%i%i(1))))
-#endif
   !
   ! Start total timing.
 #ifdef PARALLEL
@@ -205,15 +197,13 @@ PROGRAM ONX
   CALL InitBfnInd(DBC,BSp,GMp,RowPt,NbrRow)
   CALL InitBfnInd(DBD,BSp,GMp,ColPt,NbrCol,BfnInd)
   time2 = MPI_WTIME()
-  !write(*,*) 'List',time2-time1,MyID
 #else
   CALL CPU_TIME(time1)
   IF(CS_OUT%NCells.NE.1) CALL InitBfnInd(DBC,BSp,GMp,BfnInd)
   CALL InitBfnInd(DBD,BSp,GMp,BfnInd)
   CALL CPU_TIME(time2)
-  !write(*,*) 'List',time2-time1
 #endif
-!
+  !
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   ! Have to bump both buffers 1 and 2, otherwise if buffer2 is to
@@ -229,12 +219,11 @@ PROGRAM ONX
      CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN,ColPt,NBrCol)
   ENDDO
   time2 = MPI_WTIME()
-  !write(*,*) 'DisOrder',time2-time1,MyID
 #else
 1000 CONTINUE
   CALL CPU_TIME(time1)
-!    Have to bump both buffers 1 and 2, otherwise if buffer2 is to
-!    small, buffer 1 gets bumped infinately untill you run out of memory!
+  ! Have to bump both buffers 1 and 2, otherwise if buffer2 is to
+  ! small, buffer 1 gets bumped infinately untill you run out of memory!
   IF(CS_OUT%NCells.NE.1) THEN
      ErrorCodeTmp=ErrorCode
      DO WHILE (ErrorCode/=eAOK) 
@@ -248,9 +237,9 @@ PROGRAM ONX
      CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN)
   ENDDO
   CALL CPU_TIME(time2)
-  ! write(*,*) 'DisOrder',time2-time1
 #endif
- !
+  TmDO = time2-time1
+  !
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
 ! that there is *always* enough space allocated for the exchange matrix. 
@@ -258,23 +247,22 @@ PROGRAM ONX
 ! should be set to some hard cut-off, and KThresh in CalcK will need to 
 ! be set to 1 instead of 0 (and possibly other things need to be changed...)
 !--------------------------------------------------------------------------------
-  TmRE = Zero
+  !
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFastMat)
   time2 = MPI_WTIME()
-  !write(*,*) 'Range of K',time2-time1,MyID
 #else
   CALL CPU_TIME(time1)
   CALL RangeOfExchangeBCSR(BSc,GMc,BSp,GMp,D)
   CALL CPU_TIME(time2)
-  !write(*,*) 'Range of K',time2-time1
 #endif
   TmRE = time2-time1
   !
 !------------------------------------------------------------------------------- 
 !     Initialize the matrix and associated indecies
 !------------------------------------------------------------------------------- 
+  !
 #ifdef PARALLEL
   CALL New_FASTMAT(KFastMat,0,(/0,0/))
 #else
@@ -297,21 +285,19 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-#ifdef PARALLEL
-  TmK  = Zero
-  TmDO = Zero
   !
-#else
+  TmK  = Zero
+#ifndef PARALLEL
   ! Set this variable for the 
   ! serial+gaz phase calculations,
   ! this avoids the skip out of the NCD-loop.
   IF(CS_OUT%NCells.EQ.1) DBC%LenTC = -1
 #endif
   !
-  xTotNERIs = Zero                                                                            !per
-  ! Periodic double sum over R and Rprime                                                     !per
-  DO NCC = 1,CS_OUT%NCells                                                                    !per
-     PBC%D(:) = CS_OUT%CellCarts%D(:,NCC)                                                     !per
+  xTotNERIs = Zero
+  ! Periodic double sum over R and Rprime
+  DO NCC = 1,CS_OUT%NCells
+     PBC%D(:) = CS_OUT%CellCarts%D(:,NCC)
 #ifdef PARALLEL
      time1 = MPI_WTIME()
      IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN,RowPt,NBrRow)
@@ -343,21 +329,23 @@ PROGRAM ONX
         time1 = MPI_WTIME()
         CALL ComputeK(BSc,GMc,BSp,GMp,DFastMat,KFastMat,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
         time2 = MPI_WTIME()
-        TmK = TmK+time2-time1
 #else
+        CALL CPU_TIME(time1)
         IF(CS_OUT%NCells.EQ.1) THEN
            !serial+gas phase.
-           CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBD,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
+           CALL ComputeK(BSc,GMc,BSp,GMp,D    ,K       ,DBD,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
         ELSE
            !serial+periodic.
-           CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
+           CALL ComputeK(BSc,GMc,BSp,GMp,D    ,K       ,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
         ENDIF
+        CALL CPU_TIME(time2)
         IF(ErrorCode/=eAOK) THEN
            CALL Delete(K)
            CALL Delete(SubInd)
            GOTO 1000
         ENDIF
 #endif
+        TmK = TmK+time2-time1
         xTotNERIs = xTotNERIs+xNERIs
      ENDDO
   ENDDO
@@ -373,6 +361,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Redistribute partition informations.
 !--------------------------------------------------------------------------------
+  !
 #ifdef PARALLEL
   CALL PDrv_Finalize(DFastMat,CollectInPar_O=.TRUE.)
 #endif
@@ -380,6 +369,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
+  !
 #ifdef PARALLEL
   CALL Delete_FastMat1(DFastMat)
   CALL Delete(RowPt )
@@ -399,51 +389,45 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Collect the distributed exchange matrices on the root node.
 !--------------------------------------------------------------------------------
-  TmFO = Zero
+  !
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   CALL FillOutFastMat(BSc,GMc,KFastMat)
   time2 = MPI_WTIME()
-  !write(*,*) 'Symmetrized',time2-time1,MyID
 #else
   CALL CPU_TIME(time1)
   CALL FillOutBCSR(BSc,GMc,K)
   CALL CPU_TIME(time2)
-  !write(*,*) 'Symmetrized',time2-time1
 #endif
   TmFO = time2-time1
   !
-  !
-  TmTM = Zero
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   CALL TrnMatBlk(BSc,GMc,KFastMat)
   time2 = MPI_WTIME()
-  !write(*,*) 'Normalization2',time2-time1,MyID
 #else
   CALL CPU_TIME(time1)
   CALL TrnMatBlk(BSc,GMc,K)
   CALL CPU_TIME(time2)
-  !write(*,*) 'Normalization2',time2-time1
 #endif
   TmTM = time2-time1
   !
   ! Collect number of integrals.
+#ifdef ONX_INFO
 #ifdef PARALLEL
   !
   ! End Total Timing
   TmEndKT = MPI_WTIME()
   TmKT = TmEndKT-TmBegKT
   !
-  IF(MyID.EQ.ROOT) THEN
-     CALL New(TmKArr  ,NPrc)
-     CALL New(TmKTArr ,NPrc)
-     CALL New(NERIsArr,NPrc)
-     CALL New(TmDOArr ,NPrc)
-     CALL New(TmREArr ,NPrc)
-     CALL New(TmFOArr ,NPrc)
-     CALL New(TmTMArr ,NPrc)
-  ENDIF
+  CALL New(TmKArr  ,NPrc)
+  CALL New(TmKTArr ,NPrc)
+  CALL New(NERIsArr,NPrc)
+  CALL New(TmDOArr ,NPrc)
+  CALL New(TmREArr ,NPrc)
+  CALL New(TmFOArr ,NPrc)
+  CALL New(TmTMArr ,NPrc)
+  !
   CALL MPI_Gather(TmK      ,1,MPI_DOUBLE_PRECISION,TmKArr%D(1)  ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmKT     ,1,MPI_DOUBLE_PRECISION,TmKTArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(xTotNERIs,1,MPI_DOUBLE_PRECISION,NERIsArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
@@ -452,20 +436,14 @@ PROGRAM ONX
   CALL MPI_Gather(TmFO     ,1,MPI_DOUBLE_PRECISION,TmFOArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   CALL MPI_Gather(TmTM     ,1,MPI_DOUBLE_PRECISION,TmTMArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
 #endif
-  !
+#endif
   !
 #ifdef PARALLEL
   !
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
-  !time1 = MPI_WTIME()
   ! Collect the data on the root.
   CALL Redistribute_FASTMAT(KFastMat)
-  !time2 = MPI_WTIME()
-  !write(*,*) 'Redistribute',MyID,time2-time1
-  !time1 = MPI_WTIME()
   CALL Set_BCSR_EQ_DFASTMAT(K,KFastMat)
-  !time2 = MPI_WTIME()
-  !write(*,*) 'Set_BCSR_Eq_FASTMAT',MyID,time2-time1
   CALL Delete_FastMat1(KFastMat)
   !
 #else
@@ -480,7 +458,6 @@ PROGRAM ONX
      CALL Delete(T2)
   ENDIF
 #endif
-  !
   !
 #ifdef ONX_INFO
 #ifdef PARALLEL
@@ -497,14 +474,6 @@ PROGRAM ONX
      WRITE(*,1005) SUM(TmFOArr%D )/DBLE(NPrc),MINVAL(TmFOArr%D ),MAXVAL(TmFOArr%D )
      WRITE(*,1006) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
      !
-     CALL Delete(TmKArr  )
-     CALL Delete(TmKTArr )
-     CALL Delete(NERIsArr)
-     CALL Delete(TmDOArr )
-     CALL Delete(TmREArr )
-     CALL Delete(TmFOArr )
-     CALL Delete(TmTMArr )
-     !
 1001 FORMAT(' ONX: Ave TmK  = ',F15.2,', Min TmK  = ',F15.2,', Max TmK  = ',F15.2)
 1002 FORMAT(' ONX: Tot ERI  = ',F15.2,', Min ERI  = ',F15.2,', Max ERI  = ',F15.2)
 1003 FORMAT(' ONX: Ave TmDO = ',F15.2,', Min TmDO = ',F15.2,', Max TmDO = ',F15.2)
@@ -512,6 +481,14 @@ PROGRAM ONX
 1005 FORMAT(' ONX: Ave TmFO = ',F15.2,', Min TmFO = ',F15.2,', Max TmFO = ',F15.2)
 1006 FORMAT(' ONX: Ave TmTM = ',F15.2,', Min TmTM = ',F15.2,', Max TmTM = ',F15.2)
   ENDIF
+  !
+  CALL Delete(TmKArr  )
+  CALL Delete(TmKTArr )
+  CALL Delete(NERIsArr)
+  CALL Delete(TmDOArr )
+  CALL Delete(TmREArr )
+  CALL Delete(TmFOArr )
+  CALL Delete(TmTMArr )
   !
 #else
   !
@@ -535,20 +512,20 @@ PROGRAM ONX
   ! Save on disc.
   IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
      CALL Put(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))
-     !write(*,*) 'ONX: Name=','Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']'
      CALL PChkSum(K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint( K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
      CALL Plot(   K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-     !write(*,*) 'ONX: End'
   ELSE
      CALL Put(K,TrixFile('K',Args,0))
      CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
      CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
      CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
   ENDIF
+  !
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------
+  !
   CALL Delete(K     )
   CALL Delete(BfnInd)
   CALL Delete(BSc   )
