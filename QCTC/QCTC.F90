@@ -38,7 +38,7 @@ PROGRAM QCTC
   TYPE(BCSR)                     :: T1,T2
 
   REAL(DOUBLE)                   :: E_Nuc_Tot
-  TYPE(TIME)                     :: TimeMakeJ
+  TYPE(TIME)                     :: TimeMakeJ,TimeMakeTree,TimeNukE
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   TYPE(CRDS)                     :: GM_MM
@@ -104,7 +104,9 @@ PROGRAM QCTC
 ! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
+  CALL Elapsed_Time(TimeMakeTree,'Init')
   CALL RhoToPoleTree
+  CALL Elapsed_TIME(TimeMakeTree,'Accum')
 #ifdef PERIODIC
 ! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GM)
@@ -155,18 +157,34 @@ PROGRAM QCTC
      ! Compute the nuclear-total electrostatic energy in O(N Lg N)
      IF(SCFActn=='InkFok')THEN
         CALL Get(E_Nuc_Tot,'E_NuclearTotal')
+        CALL Elapsed_Time(TimeNukE,'Init')
         E_Nuc_Tot=E_Nuc_Tot+NukE(GM)
+        CALL Elapsed_Time(TimeNukE,'Accum')
      ELSE     
-        E_Nuc_Tot=NukE(GM)
+        CALL Elapsed_Time(TimeNukE,'Init')
+        E_Nuc_Tot=NukE(GM)        
+        CALL Elapsed_Time(TimeNukE,'Accum')
      ENDIF
      CALL Put(E_Nuc_Tot,'E_NuclearTotal')
   ENDIF 
 !-------------------------------------------------------------------------------
 ! QM calculations
   IF(HasMM()) THEN
+     CALL Elapsed_Time(TimeNukE,'Init')
      MM_COUL = NukE(GM_MM)
+     CALL Elapsed_Time(TimeNukE,'Accum')
      CALL Put(MM_COUL,'MM_COUL')
   ENDIF
+!*******
+!!$  OPEN(99,FILE='Timing_QCTC.dat',STATUS='UNKNOWN',POSITION='APPEND')
+!!$  WRITE(99,7) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeNukE%CPUS,TimeNukE%WALL
+!!$  WRITE(99,8) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeMakeJ%CPUS,TimeMakeJ%WALL
+!!$  WRITE(99,9) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeMakeTree%CPUS,TimeMakeTree%WALL
+!!$7 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeNukE     = ',F12.4,1X,F12.4)
+!!$8 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeMakeJ    = ',F12.4,1X,F12.4)
+!!$9 FORMAT(A2,'  ',A2,'  ',A2,'  QCTC.TimeMakeTree = ',F12.4,1X,F12.4)
+!!$  CLOSE(99)
+!*******
 !-------------------------------------------------------------------------------
 ! Printing
 !  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
