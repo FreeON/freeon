@@ -562,7 +562,7 @@ CONTAINS
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,LagrMult,GradMult, &
                   LagrDispl,Convgd,ETot,ELagr,iGEO,iCLONE, &
-                  SCRPath,DoNEB,Print,HFileIn)
+                  SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,LagrMult,GradMult,LagrDispl
@@ -573,7 +573,7 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: IntOld,CartGrad
      INTEGER                     :: Refresh
-     CHARACTER(LEN=*)            :: SCRPath,HFileIn
+     CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath
      INTEGER                     :: Print
      LOGICAL                     :: DoNEB,Print2
      !
@@ -588,8 +588,8 @@ CONTAINS
      CALL New(CartGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      CALL CleanConstrGrad(GOpt%Constr,CartGrad%D,SCRPath)
-   ! CALL TranslsOff(CartGrad%D,Print2)
-   ! CALL RotationsOff(CartGrad%D,XYZ,Print2)
+     CALL TranslsOff(CartGrad%D,Print2)
+     CALL RotationsOff(CartGrad%D,XYZ,Print2)
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
@@ -616,6 +616,7 @@ CONTAINS
                        GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
                           GOpt%CoordCtrl,Print,SCRPath,.TRUE.)
+     CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
      !
@@ -643,7 +644,8 @@ CONTAINS
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult,iCLONE, &
-                  LagrMult,LagrDispl,IntCs,iGEO,SCRPath,Print,HFileIn) 
+                  LagrMult,LagrDispl,IntCs,iGEO,SCRPath,PWDPath, &
+                  Print,HFileIn) 
      ELSE
        WRITE(*,200) iCLONE
        WRITE(Out,200) iCLONE
@@ -682,7 +684,8 @@ CONTAINS
 !--------------------------------------------------------------------
 !
    SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult,iCLONE, &
-                    LagrMult,LagrDispl,IntCs,IGEO,SCRPath,Print,HFileIn)
+                    LagrMult,LagrDispl,IntCs,IGEO,SCRPath,PWDPath, &
+                    Print,HFileIn)
      !
      ! Simple Relaxation step
      !
@@ -695,7 +698,7 @@ CONTAINS
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,NDim,iGEO,iCLONE
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
-     CHARACTER(LEN=*)               :: SCRPath,HFileIn 
+     CHARACTER(LEN=*)               :: SCRPath,HFileIn,PWDPath 
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -732,8 +735,8 @@ CONTAINS
        CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
                          Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
-      !IF(iGEO<2) THEN
-         CALL RescaleGrad(Grad%D,Print)
+      !IF(iGEO<3) THEN
+       ! CALL RescaleGrad(Grad%D,Print)
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
          CALL CutOffDispl(Displ%D,IntCs)
@@ -742,7 +745,9 @@ CONTAINS
       !  CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
       !    GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
       !    HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
-      !    Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D)
+      !    Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
+      !    PWD_O=PWDPath)
+      !  CALL CutOffDispl(Displ%D,IntCs)
       !ENDIF
      END SELECT
      !
@@ -764,7 +769,8 @@ CONTAINS
        IntCs%Value=IntCs%Value+Displ%D
        CALL InternalToCart(XYZ,IntCs,IntCs%Value,Print, &
                            GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
-                           GOpt%Constr,SCRPath,AtNum_O=AtNum)
+                           GOpt%Constr,SCRPath,AtNum_O=AtNum, &
+                           DoDeloc_O=.FALSE.)
      ELSE
        CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
      ENDIF
@@ -1124,12 +1130,13 @@ CONTAINS
      INTEGER              :: I,iGEO,iCLONE,NatmsNew
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
      LOGICAL              :: NoGDIIS,GDIISOn,DoNEB
-     CHARACTER(LEN=DCL)   :: SCRPath
+     CHARACTER(LEN=DCL)   :: SCRPath,PWDPath
      TYPE(DBL_RNK2)       :: XYZNew,GradNew
      TYPE(DBL_VECT)       :: AtNumNew,CartGrad
      !
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
+     PWDPath  =TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
      GMLoc%Displ%D=GMLoc%AbCarts%D
      DoNEB=(Opts%Grad==GRAD_TS_SEARCH_NEB)
      !
@@ -1159,7 +1166,7 @@ CONTAINS
        CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GradNew%D, &
                        GMLoc%LagrMult%D,GMLoc%GradMult%D, &
                        GMLoc%LagrDispl%D,Convgd,GMLoc%Etotal, &
-                       GMLoc%ELagr,IGeo,iCLONE,SCRPath, &
+                       GMLoc%ELagr,IGeo,iCLONE,SCRPath,PWDPath, &
                        DoNEB,Opts%PFlags%GeOp,Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
@@ -1520,7 +1527,7 @@ CONTAINS
      LOGICAL       :: On
      !
      On=.FALSE.
-     IF(MaxCGrad<0.010D0) THEN
+     IF(MaxCGrad<0.150D0) THEN
        On=.TRUE.
      ENDIF
    END SUBROUTINE TurnOnGDIIS

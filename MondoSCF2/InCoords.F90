@@ -2357,23 +2357,22 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE InternalToCart(XYZ,IntCs,VectInt,Print, &
-       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,AtNum_O)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE),DIMENSION(:) :: VectInt
+       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,AtNum_O,DoDeloc_O)
+     REAL(DOUBLE),DIMENSION(:,:)        :: XYZ
+     REAL(DOUBLE),DIMENSION(:)          :: VectInt
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: AtNum_O
+     LOGICAL,OPTIONAL                   :: DoDeloc_O
+     LOGICAL                            :: DoDeloc
      TYPE(DBL_VECT)            :: VectCart
      TYPE(DBL_VECT)            :: VectCartAux,VectIntAux
      TYPE(DBL_VECT)            :: VectCartAux2
      TYPE(DBL_VECT)            :: VectIntReq
      TYPE(DBL_RNK2)            :: ActCarts
      REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld
-     REAL(DOUBLE)              :: Sum
-     REAL(DOUBLE)              :: ConstrMax,ConstrRMS
-     REAL(DOUBLE)              :: ConstrRMSOld
-     REAL(DOUBLE)              :: ConstrMaxCrit,RMSCrit
+     REAL(DOUBLE)              :: Sum,ConstrMax,ConstrRMS
+     REAL(DOUBLE)              :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
      INTEGER                   :: NCart,I,IStep,J,NIntC,NConstr
-     INTEGER                   :: NatmsLoc
-     INTEGER                   :: NCartConstr
+     INTEGER                   :: NatmsLoc,NCartConstr
      TYPE(INTC)                :: IntCs
      TYPE(INT_VECT)            :: ISpB,JSpB
      TYPE(DBL_VECT)            :: ASpB
@@ -2387,12 +2386,20 @@ CONTAINS
      CHARACTER(LEN=*)          :: SCRPath
      LOGICAL                   :: DoClssTrf,Print2
      INTEGER                   :: Print
+     TYPE(INT_VECT)            :: ISpBD,JSpBD
+     TYPE(DBL_VECT)            :: ASpBD
+     TYPE(DBL_RNK2)            :: UMatr
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
      NIntC=SIZE(IntCs%Def)
-     Print2= Print>=DEBUG_GEOP_MAX
+     Print2=(Print>=DEBUG_GEOP_MAX)
      DoClssTrf=.TRUE.
+     IF(PRESENT(DoDeloc_O)) THEN
+       DoDeloc=DoDeloc_O
+     ELSE
+       DoDeloc=.FALSE.
+     ENDIF
      !
      ! Refresh B matrix during iterative back-trf?
      !
@@ -2411,7 +2418,13 @@ CONTAINS
      ! The required new value of internal coordinates
      !
      VectIntReq%D=VectInt
-     CALL MapBackAngle(IntCs,VectIntReq%D) 
+     IF(DoDeloc) THEN
+       CALL ReadBMATR(ISpBD,JSpBD,ASpBD,TRIM(SCRPath)//'UMatr', &
+                      UMatr_O=UMatr)
+       CALL DelocP(VectIntReq%D,ISpBD,JSpBD,ASpBD,UMatr)
+     ELSE
+       CALL MapBackAngle(IntCs,VectIntReq%D) 
+     ENDIF
      !
      CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
      !
@@ -2457,7 +2470,7 @@ CONTAINS
          CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
                               GCoordCtrl,Print,SCRPath,.TRUE.)
          CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-         IF(IStep>=4) THEN
+         IF(IStep>=4.AND..NOT.DoDeloc) THEN
            VectIntAux%D=VectIntReq%D-IntCs%Value
            CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
            CALL MapAngleDispl(IntCs,VectIntAux%D) 
@@ -2469,6 +2482,7 @@ CONTAINS
        ! Calculate difference between required and actual internals
        !
        VectIntAux%D=VectIntReq%D-IntCs%Value
+       IF(DoDeloc) CALL DelocP(VectIntAux%D,ISpBD,JSpBD,ASpBD,UMatr)
        CALL MapAngleDispl(IntCs,VectIntAux%D) 
        !
        ! Check convergence on constraints
@@ -2590,6 +2604,12 @@ CONTAINS
      CALL Delete(VectCartAux)
      CALL Delete(VectCart)
      CALL Delete(ActCarts)
+     IF(DoDeloc) THEN
+       CALL Delete(ISpBD)
+       CALL Delete(JSpBD)
+       CALL Delete(ASpBD)
+       CALL Delete(UMatr)
+     ENDIF
      CALL DeleteBMatInfo(ISpB,JSpB,ASpB,CholData)
    END SUBROUTINE InternalToCart
 !
@@ -4087,11 +4107,13 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE ReadBMATR(ISpB,JSpB,ASpB,FileName,IPerm1_O,IPerm2_O)
-     INTEGER          :: NDim,NZ,NCart
+   SUBROUTINE ReadBMATR(ISpB,JSpB,ASpB,FileName, &
+                        IPerm1_O,IPerm2_O,UMatr_O)
+     INTEGER          :: NDim,NZ,NCart,NDim1,NDim2
      TYPE(INT_VECT)   :: ISpB,JSpB
-     TYPE(INT_VECT),OPTIONAL   :: IPerm1_O,IPerm2_O
      TYPE(DBL_VECT)   :: ASpB
+     TYPE(INT_VECT),OPTIONAL   :: IPerm1_O,IPerm2_O
+     TYPE(DBL_RNK2),OPTIONAL   :: UMatr_O
      LOGICAL          :: Exists
      CHARACTER(LEN=*) :: FileName
      !
@@ -4117,15 +4139,23 @@ CONTAINS
        CALL New(IPerm2_O,NCart)
        READ(99) IPerm2_O%I
      ENDIF
+     IF(PRESENT(UMatr_O)) THEN
+       READ(99) NDim1
+       READ(99) NDim2
+       CALL New(UMatr_O,(/NDim1,NDim2/))
+       READ(99) UMatr_O%D
+     ENDIF
      CLOSE(Unit=99,STATUS='KEEP')
    END SUBROUTINE ReadBMATR
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE WriteBMATR(ISpB,JSpB,ASpB,FileName,IPerm1_O,IPerm2_O)
+   SUBROUTINE WriteBMATR(ISpB,JSpB,ASpB,FileName, &
+                         IPerm1_O,IPerm2_O,UMatr_O)
      INTEGER          :: NDim,NZ
      TYPE(INT_VECT)   :: ISpB,JSpB
      TYPE(INT_VECT),OPTIONAL   :: IPerm1_O,IPerm2_O
+     TYPE(DBL_RNK2),OPTIONAL   :: UMatr_O
      TYPE(DBL_VECT)   :: ASpB
      CHARACTER(LEN=*) :: FileName
      !
@@ -4143,6 +4173,11 @@ CONTAINS
      IF(PRESENT(IPerm2_O)) THEN
        WRITE(99) SIZE(IPerm2_O%I)
        WRITE(99) IPerm2_O%I
+     ENDIF
+     IF(PRESENT(UMatr_O)) THEN
+       WRITE(99) SIZE(UMatr_O%D,1)
+       WRITE(99) SIZE(UMatr_O%D,2)
+       WRITE(99) UMatr_O%D 
      ENDIF
      CLOSE(Unit=99,STATUS='KEEP')
    END SUBROUTINE WriteBMATR
@@ -4426,7 +4461,7 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE PrimToDeloc(VectInt,VectCart,ISpB,JSpB,ASpB,CholData)
+   SUBROUTINE PrimToDelocOld(VectInt,VectCart,ISpB,JSpB,ASpB,CholData)
      REAL(DOUBLE),DIMENSION(:) :: VectInt,VectCart
      TYPE(INT_VECT)            :: ISpB,JSpB
      TYPE(DBL_VECT)            :: ASpB
@@ -4453,11 +4488,11 @@ CONTAINS
      VectCart=VectCartAux%D
      !
      CALL Delete(VectCartAux)
-   END SUBROUTINE PrimToDeloc
+   END SUBROUTINE PrimToDelocOld
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE DelocToPrim(NewDelocs,NewPrims,ISpB,JSpB,ASpB,CholData)
+   SUBROUTINE DelocToPrimOld(NewDelocs,NewPrims,ISpB,JSpB,ASpB,CholData)
      REAL(DOUBLE),DIMENSION(:) :: NewDelocs,NewPrims
      INTEGER                   :: NCart,NIntC
      TYPE(Cholesky)            :: CholData
@@ -4482,7 +4517,7 @@ CONTAINS
      CALL CALC_BxVect(ISpB,JSpB,ASpB,NewPrims,NewDelocs)
      !
      CALL Delete(VectCart)
-   END SUBROUTINE DelocToPrim
+   END SUBROUTINE DelocToPrimOld
 !
 !----------------------------------------------------------------------
 !
@@ -4592,7 +4627,7 @@ CONTAINS
      CHARACTER(LEN=*)       :: SCRPath
      !
      CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
-     MaxHBond=10
+     MaxHBond=50
      CALL New(CountHBonds,NatmsLoc)
      CALL New(HBondList,(/NatmsLoc,MaxHBond/))
      CALL New(BondIJNew,(/2,NBond/))
@@ -5340,6 +5375,110 @@ CONTAINS
    END SUBROUTINE MapAngleDispl
 !
 !------------------------------------------------------------------
+!
+   SUBROUTINE BuildUMatr(SCRPath,NCart)
+     CHARACTER(LEN=*) :: SCRPath
+     TYPE(INT_VECT)   :: ISpB,JSpB
+     TYPE(DBL_VECT)   :: ASpB
+     TYPE(INT_VECT)   :: IGc,JGc
+     TYPE(DBL_VECT)   :: AGc
+     INTEGER          :: NCart,INFO,I,J
+     TYPE(DBL_RNK2)   :: FullGc,UMatr,Aux1,Aux2
+     REAL(DOUBLE)     :: Fact
+     !
+     CALL New(UMatr,(/NCart,NCart-6/))
+     !
+     CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
+     CALL GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
+     CALL Sp1x1ToFull(IGc%I,JGc%I,AGc%D,NCart,NCart,FullGc)
+     !
+     CALL SetDSYEVWork(NCart)
+       BLKVECT%D=FullGc%D
+       CALL DSYEV('V','U',NCart,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+       BLKWORK%D,BLKLWORK,INFO)
+       IF(INFO/=SUCCEED) &
+       CALL Halt('DSYEV hosed in BuildUMatr. INFO='&
+                  //TRIM(IntToChar(INFO)))
+       DO I=7,NCart
+         Fact=One/SQRT(BLKVALS%D(I))
+         DO J=1,NCart ; UMatr%D(J,I-6)=BLKVECT%D(J,I)*Fact ; ENDDO
+       ENDDO     
+     CALL UnSetDSYEVWork()
+     !
+   ! call pprint(UMatr,'UMatr',Unit_O=6)
+   ! CALL New(Aux1,(/NCart-6,NCart/))
+   ! CALL New(Aux2,(/NCart-6,NCart-6/))
+   ! !     CALL PPrint(SpB,'SpB2',Unit_O=6)
+   ! CALL DGEMM_TNc(NCart-6,NCart,NCart,One,Zero,UMatr%D,&
+   !                FullGc%D,Aux1%D)
+   ! CALL DGEMM_NNc(NCart-6,NCart,NCart-6,One,Zero,Aux1%D, &
+   !                UMatr%D,Aux2%D)
+   ! call pprint(Aux2,'Unit Matr?',Unit_O=6)
+   ! CALL Delete(Aux1)
+   ! CALL Delete(Aux2)
+     !
+     CALL WriteBMATR(ISpB,JSpB,ASpB, &
+                     TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
+     !
+     CALL Delete(FullGc)
+     CALL Delete(UMatr)
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(IGc)
+     CALL Delete(JGc)
+     CALL Delete(AGc)
+   END SUBROUTINE BuildUMatr
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE PrimToDeloc(VectInt,VectDeloc,ISpB,JSpB,ASpB,UMatr,Char_O)
+     REAL(DOUBLE),DIMENSION(:) :: VectInt,VectDeloc
+     CHARACTER(LEN=*),OPTIONAL :: Char_O
+     INTEGER                   :: NCart,NIntC
+     TYPE(DBL_RNK2)            :: UMatr
+     TYPE(INT_VECT)            :: ISpB,JSpB
+     TYPE(DBL_VECT)            :: ASpB 
+     TYPE(DBL_VECT)            :: AuxCart
+     !
+     NCart=SIZE(UMatr%D,1)
+     CALL New(AuxCart,NCart)
+     !
+     IF(PRESENT(Char_O)) THEN
+       IF(Char_O(1:4)=='Back') THEN
+         CALL DGEMM_NNc(NCart,NCart-6,1,One,Zero,UMatr%D,&
+                        VectDeloc,AuxCart%D)
+         CALL CALC_BxVect(ISpB,JSpB,ASpB,VectInt,AuxCart%D)
+       ELSE
+         CALL Halt('Erroneous input in PrimToDeloc.')
+       ENDIF
+     ELSE
+       CALL CALC_BxVect(ISpB,JSpB,ASpB,VectInt,AuxCart%D,Trp_O=.TRUE.)
+       CALL DGEMM_TNc(NCart-6,NCart,1,One,Zero,UMatr%D,&
+                      AuxCart%D,VectDeloc)
+     ENDIF
+     !
+     CALL Delete(AuxCart)
+   END SUBROUTINE PrimToDeloc
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE DelocP(VectInt,ISpB,JSpB,ASpB,UMatr)
+     REAL(DOUBLE),DIMENSION(:)  :: VectInt
+     TYPE(INT_VECT)             :: ISpB,JSpB
+     TYPE(DBL_VECT)             :: ASpB,VectDeloc
+     TYPE(DBL_RNK2)             :: UMatr
+     INTEGER                    :: NCart
+     !
+     NCart=SIZE(UMatr%D,1)
+     CALL New(VectDeloc,NCart-6)
+     CALL PrimToDeloc(VectInt,VectDeloc%D,ISpB,JSpB,ASpB,UMatr)
+     CALL PrimToDeloc(VectInt,VectDeloc%D,ISpB,JSpB,ASpB,UMatr, &
+                      Char_O='Back')
+     CALL Delete(VectDeloc)
+   END SUBROUTINE DelocP
+!
+!---------------------------------------------------------------------
 !
    END MODULE InCoords
 

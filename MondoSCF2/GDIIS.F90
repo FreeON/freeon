@@ -23,7 +23,7 @@ CONTAINS
    SUBROUTINE GeoDIIS(XYZ,GConstr,GBackTrf, &
               GGrdTrf,GTrfCtrl,GCoordCtrl,GDIISCtrl, &
               HFileIn,iCLONE,iGEO,Print,SCRPath, &
-              Displ_O,Grad_O,IntGrad_O)
+              Displ_O,Grad_O,IntGrad_O,PWD_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(Constr)                :: GConstr
@@ -35,6 +35,7 @@ CONTAINS
      INTEGER                     :: iCLONE,iGEO,ICount
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
+     CHARACTER(Len=*),OPTIONAL   :: PWD_O
      INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc,NDim
      INTEGER                     :: IGeom,HDFFileID,IStart
      INTEGER                     :: SRMemory,RefMemory
@@ -91,8 +92,8 @@ CONTAINS
      !
      IF(PRESENT(Displ_O).AND.PRESENT(Grad_O)) THEN
        CALL IntCFit(XYZ,Grad_O,IntGrad_O,Displ_O, &
-                    RefStruct%D,RefGrad%D,SCRPath, &
-                    GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
+                    RefStruct%D,RefGrad%D,SCRPath,PWD_O, &
+                    GGrdTrf,GCoordCtrl,GTrfCtrl,Print,iGEO+1)
      ELSE
        CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
                        SRStruct,SRDispl)
@@ -114,233 +115,6 @@ CONTAINS
      CALL Delete(SRDispl)
    END SUBROUTINE GeoDIIS
 ! 
-!-------------------------------------------------------------------
-!
-   SUBROUTINE DelocGDIIS(SRStruct,RefStruct,RefGrad,SRDispl,XYZ,&
-     Print,SCRPath,CtrlTrf,CtrlCoord,CtrlBackTrf,CtrlConstr)
-     REAL(DOUBLE),DIMENSION(:,:) :: SRDispl,RefGrad
-     REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct
-     TYPE(INTC)                  :: IntCs
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(DBL_RNK2)              :: XYZRot
-     INTEGER                     :: NatmsLoc,NCart,NIntC,GDIISMemory
-     INTEGER                     :: I,J,ThreeAt(1:3),Print
-     TYPE(BMatr)                 :: B3
-     TYPE(INT_VECT)              :: ISpB3,JSpB3
-     TYPE(DBL_VECT)              :: ASpB3
-     LOGICAL                     :: Linearity
-     TYPE(DBL_RNK2)              :: DelocDispl
-     TYPE(DBL_RNK2)              :: DelocSR,DelocRef
-     TYPE(DBL_VECT)              :: NewDelocs,NewPrims,Displ,Coeffs
-     TYPE(Cholesky)              :: CholData3
-     TYPE(Constr)                :: CtrlConstr
-     TYPE(CoordCtrl)             :: CtrlCoord
-     TYPE(BackTrf)               :: CtrlBackTrf
-     TYPE(TrfCtrl)               :: CtrlTrf
-     CHARACTER(LEN=*)            :: SCRPath
-     !
-     ! Read internal coord definitions from disk
-     !
-     CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
-     NIntC=SIZE(IntCs%Def)
-     !
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     GDIISMemory=SIZE(SRDispl,2)
-     !
-     ! Calculate three-atoms reference system
-     ! and rotated structure
-     !
-     CALL New(XYZRot,(/3,NatmsLoc/))
-     XYZRot%D=XYZ
-     CALL CALC_XYZRot(XYZRot%D,ThreeAt,Linearity,&
-                      CtrlTrf%TranslAt1,CtrlTrf%RotAt2ToX, &
-                      CtrlTrf%RotAt3ToXY)
-     !
-     ! Calculate B matrix for reference system 
-     !
-     CALL BMatrix(XYZRot%D,NIntC,IntCs,B3, &
-                  CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
-     CALL BtoSpB_1x1(B3,ISpB3,JSpB3,ASpB3)
-     !
-     ! Calc Gc=B3t*B3 and its Cholesky factors
-     !
-     CALL CholFact(ISpB3,JSpB3,ASpB3,NCart,NIntC, &
-                   CholData3,.FALSE.,Shift_O=0.D0)
-     !
-     ! Transform Cartesian structures into delocalized internals
-     !
-     CALL New(DelocRef,(/NCart,GDIISMemory/))
-     CALL New(DelocSR,(/NCart,GDIISMemory/))
-     CALL New(DelocDispl,(/NCart,GDIISMemory/))
-     CALL DelocIntValues(SRStruct,DelocSR%D,B3,CholData3,IntCs, &
-                         CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
-     CALL DelocIntValues(RefStruct,DelocRef%D,B3,CholData3,IntCs, &
-                         CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
-     DelocDispl%D=DelocSR%D-DelocRef%D
-     !
-     ! Calculate new set of delocalized internals
-     !
-     CALL New(Coeffs,GDIISMemory)
-     CALL CalcGDCoeffs(RefGrad,Coeffs%D,Print)
-     !
-     CALL New(NewDelocs,NCart) 
-     !CALL MixDeloc(Coeffs%D,DelocSR%D,NewDelocs%D) !!! continue here
-     !CALL DelocStruct(DelocDispl%D,DelocSR%D,NewDelocs%D)
-     !
-     ! Turn delocalized internals into primitive ints
-     !
-     CALL New(NewPrims,NIntC) 
-     CALL DelocToPrim(NewDelocs%D,NewPrims%D, &
-                      ISpB3,JSpB3,ASpB3,CholData3)
-     CALL Delete(B3)
-     CALL DeleteBMatInfo(ISpB3,JSpB3,ASpB3,CholData3)
-     !
-     CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
-     CALL New(Displ,NIntC) 
-     Displ%D=NewPrims%D-IntCs%Value
-     !
-     CALL RefreshBMatInfo(IntCs,XYZ,CtrlTrf,CtrlCoord, &
-                          Print,SCRPath,.FALSE.)
-     CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
-       CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
-     !
-     CALL Delete(Coeffs)
-     CALL Delete(Displ)
-     CALL Delete(NewPrims)
-     CALL Delete(NewDelocs)
-     CALL Delete(DelocDispl)
-     CALL Delete(DelocSR)
-     CALL Delete(DelocRef)
-     CALL Delete(XYZRot)
-     CALL Delete(IntCs)
-   END SUBROUTINE DelocGDIIS
-! 
-!-------------------------------------------------------------------
-!
-   SUBROUTINE PrimIntDispl(RefStruct,SRStruct,PrimDispl,IntCs,&
-                           LinCrit,Torslincrit)
-     TYPE(INTC)     :: IntCs
-     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,SRStruct,PrimDispl
-     REAL(DOUBLE)   :: LinCrit,TorsLinCrit
-     INTEGER        :: I,J,NCart,NIntC,GDIISMemory,NatmsLoc
-     TYPE(DBL_RNK2) :: XYZTmp
-     TYPE(DBL_VECT) :: RefValue,SRValue
-     !
-     NCart=SIZE(RefStruct,1)
-     NatmsLoc=NCart/3
-     IF(3*NatmsLoc/=NCart) CALL Halt('Dimension error in PrimIntDispl')
-     GDIISMemory=SIZE(RefStruct,2)
-     NIntC=SIZE(IntCs%Def)
-     !
-     CALL New(XYZTmp,(/3,NatmsLoc/))
-     CALL New(RefValue,NIntC)
-     CALL New(SRValue,NIntC)
-     DO I=1,GDIISMemory
-       CALL CartRNK1ToCartRNK2(RefStruct(1:NCart,I),XYZTmp%D)
-       CALL INTCValue(IntCs,XYZTmp%D,LinCrit,TorslinCrit)
-       RefValue%D=IntCs%Value        
-       CALL CartRNK1ToCartRNK2(SRStruct(1:NCart,I),XYZTmp%D)
-       CALL INTCValue(IntCs,XYZTmp%D,LinCrit,TorslinCrit)
-       SRValue%D=IntCs%Value        
-       PrimDispl(1:NIntC,I)=SRValue%D-RefValue%D
-     ENDDO  
-     CALL Delete(SRValue)
-     CALL Delete(RefValue)
-     CALL Delete(XYZTmp)
-   END SUBROUTINE PrimIntDispl
-! 
-!-------------------------------------------------------------------
-!
-   SUBROUTINE DelocIntValues(CartStruct,DStruct,B3,CholData3, &
-                            IntCs,LinCrit,TorslinCrit)
-     TYPE(BMatr)                 :: B3
-     TYPE(INT_VECT)              :: ISpB3,JSpB3
-     TYPE(DBL_VECT)              :: ASpB3
-     REAL(DOUBLE),DIMENSION(:,:) :: CartStruct,DStruct
-     REAL(DOUBLE)                :: LinCrit,TorsLinCrit
-     INTEGER                     :: NCart,NIntC,GDIISMemory
-     INTEGER                     :: I,J,NatmsLoc
-     TYPE(Cholesky)              :: CholData3
-     TYPE(DBL_VECT)              :: VectInt,VectCart
-     TYPE(DBL_RNK2)              :: ActCarts
-     TYPE(INTC)                  :: IntCs
-     !
-     NCart=SIZE(DStruct,1)
-     NatmsLoc=NCart/3
-     NIntC=SIZE(B3%IB,1)
-     GDIISMemory=SIZE(CartStruct,2)
-     CALL New(VectInt,NIntC)
-     CALL New(VectCart,NCart)
-     CALL New(ActCarts,(/3,NatmsLoc/))
-     CALL BtoSpB_1x1(B3,ISpB3,JSpB3,ASpB3)
-     !
-     ! B3^t * PrimDispl
-     !
-     DO I=1,GDIISMemory
-       VectCart%D=CartStruct(1:NCart,I)
-       CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-       CALL INTCValue(IntCs,ActCarts%D,LinCrit,TorsLinCrit)
-       VectInt%D=IntCs%Value
-       CALL PrimToDeloc(VectInt%D,VectCart%D, &
-                        ISpB3,JSpB3,ASpB3,CholData3)
-       DStruct(1:NCart,I)=VectCart%D
-     ENDDO
-     !
-     CALL Delete(ActCarts)
-     CALL Delete(VectCart)
-     CALL Delete(VectInt)
-   END SUBROUTINE DelocIntValues
-! 
-!-------------------------------------------------------------------
-!
-   SUBROUTINE DelocStruct(DelocDispl,DelocSR,NewDelocs)
-     REAL(DOUBLE),DIMENSION(:,:) :: DelocDispl,DelocSR
-     REAL(DOUBLE),DIMENSION(:)   :: NewDelocs 
-     REAL(DOUBLE)                :: Sum,DotP 
-     INTEGER                     :: I,J,NCart,GDIISMemory
-     TYPE(DBL_VECT)              :: Vect
-     !
-     NCart=SIZE(DelocDispl,1)
-     GDIISMemory=SIZE(DelocDispl,2)
-     CALL New(Vect,GDIISMemory)
-     !
-     DO I=1,NCart
-       Vect%D=DelocDispl(I,1:GDIISMemory)
-       DotP=DOT_PRODUCT(Vect%D,Vect%D)
-       IF(DotP<1.D-3) THEN
-         NewDelocs(I)=DelocSR(I,GDIISMemory)
-         CYCLE
-       ENDIF
-       !
-       Sum=Zero
-       DO J=1,GDIISMemory
-         Sum=Sum+Vect%D(J)
-       ENDDO
-       Sum=Sum/DotP**2
-       Vect%D=Sum*Vect%D
-       !
-       ! ensure, that sum of the components of Vect adds up to One.
-       !
-       Sum=Zero
-       DO J=1,GDIISMemory
-         Sum=Sum+Vect%D(J)
-       ENDDO
-       Sum=One/Sum
-       Vect%D=Sum*Vect%D
-       !
-       ! Calculate new value of the delocalized internals
-       !
-       Sum=Zero
-       DO J=1,GDIISMemory
-         Sum=Sum+Vect%D(J)*DelocSR(I,J)
-       ENDDO
-       NewDelocs(I)=Sum
-     ENDDO
-     !
-     CALL Delete(Vect)
-   END SUBROUTINE DelocStruct
-!
 !-------------------------------------------------------------------
 !
    SUBROUTINE BasicGDIIS(XYZ,CtrlConstr,Print, &
@@ -392,122 +166,6 @@ CONTAINS
    END SUBROUTINE BasicGDIIS
 !
 !----------------------------------------------------------------------
-!
-   SUBROUTINE PIntGDIIS(XYZ, &
-     PrintIn,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath, &
-     RefStruct,RefGrad,SRStruct,SRDispl)
-     !
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     LOGICAL                     :: Print
-     TYPE(BackTrf)               :: GBackTrf
-     TYPE(TrfCtrl)               :: GTrfCtrl
-     TYPE(CoordCtrl)             :: GCoordCtrl
-     TYPE(Constr)                :: GConstr
-     CHARACTER(LEN=*)            :: SCRPath
-     INTEGER                     :: PrintIn
-     INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc,NIntC
-     INTEGER                     :: DimGDIIS
-     INTEGER                     :: GDIISMemory
-     TYPE(DBL_RNK2)              :: AMat,InvA,SRDispl,SRStruct
-     TYPE(DBL_RNK2)              :: RefGrad,RefStruct
-     TYPE(DBL_RNK2)              :: XYZ2
-     TYPE(DBL_RNK2)              :: PrIDispl,PrIRef,PrISR
-     TYPE(DBL_VECT)              :: Coeffs,Vect,Scale
-     REAL(DOUBLE)                :: Sum
-     TYPE(INTC)                  :: IntCs
-     TYPE(INT_VECT)              :: Actives,RangeType
-     !
-     Print=PrintIn>=DEBUG_GEOP_MIN
-     IF(Print) THEN
-       WRITE(*,200) 
-       WRITE(Out,200) 
-     ENDIF
-     200 FORMAT('Geometric DIIS, coeffs are calculated from displacements of primitive internal displacements.')
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     DimGDIIS=SIZE(RefStruct%D,1)
-     GDIISMemory=SIZE(RefStruct%D,2)
-     !
-     ! Read internal coord definitions from disk
-     !
-     CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
-     NIntC=SIZE(IntCs%Def)
-     !
-     ! Calculate displacements in internal coordinates
-     !
-     CALL New(PrIDispl,(/NintC,GDIISMemory/))
-     CALL New(PrIRef,(/NintC,GDIISMemory/))
-     CALL New(PrISR,(/NintC,GDIISMemory/))
-     !
-     CALL New(XYZ2,(/3,NatmsLoc/))
-     CALL New(Vect,DimGDIIS)
-     CALL New(Actives,NIntC)
-     CALL New(RangeType,NIntC)
-     RangeType%I=0
-     Actives%I=1
-     DO I=1,GDIISMemory
-       Vect%D=SRStruct%D(1:DimGDIIS,I)
-       CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
-       CALL INTCValue(IntCs,XYZ2%D, &
-                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-       PrISR%D(1:NIntC,I)=IntCs%Value
-       DO J=1,NIntC 
-         IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
-       ENDDO
-       !
-       Vect%D=RefStruct%D(1:DimGDIIS,I)
-       CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
-       CALL INTCValue(IntCs,XYZ2%D, &
-                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-       PrIRef%D(1:NIntC,I)=IntCs%Value
-       DO J=1,NIntC 
-         IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
-       ENDDO
-       !
-       PrIDispl%D(1:NIntC,I)=PrISR%D(1:NIntC,I)-PrIRef%D(1:NIntC,I)
-     ENDDO
-     CALL Delete(Vect)
-     CALL Delete(XYZ2)
-     !
-     ! Set types of angle ranges
-     !
-     CALL SetRangeType(RangeType%I,IntCs,PrIRef%D,PrISR%D)
-     !
-     ! Convert angle-displacements into degrees and check actives.
-     !
-     Sum=180.D0/PI
-     DO I=1,NIntC
-       IF(HasAngle(IntCs%Def(I))) THEN
-         PrIDispl%D(I,:)=Sum*PrIDispl%D(I,:)
-       ENDIF
-       IF(Actives%I(I)==0) PrIDispl%D(I,:)=Zero
-     ENDDO
-     !
-     ! Calculate GDIIS coeffs from internal coord displacements!
-     !
-     CALL New(Coeffs,GDIISMemory)
-     !CALL CalcGDCoeffs(PrIDispl%D,Coeffs%D,PrintIn)
-     CALL CalcGDCoeffs(RefGrad%D,Coeffs%D,PrintIn)
-     !
-     ! Calculate new geometry
-     !
-     !CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
-     CALL IntCSum(XYZ,PrISR%D,RangeType%I, &
-                  Coeffs%D,IntCs,PrintIn,GBackTrf, &
-                  GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
-     !
-     ! Tidy up
-     !
-     CALL Delete(Actives)
-     CALL Delete(RangeType)
-     CALL Delete(Coeffs)
-     CALL Delete(PrISR)
-     CALL Delete(PrIRef)
-     CALL Delete(PrIDispl)
-     CALL Delete(IntCs)
-   END SUBROUTINE PIntGDIIS
-!
-!-------------------------------------------------------------------
 !
    SUBROUTINE CalcGDCoeffs(ErrorVects,Coeffs,PrintIn)
      REAL(DOUBLE),DIMENSION(:,:) :: ErrorVects
@@ -601,142 +259,6 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE IntCSum(XYZ,PrISR,RangeType,Coeffs,IntCs,PrintIn, &
-       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,PrISR
-     REAL(DOUBLE),DIMENSION(:)   :: Coeffs
-     INTEGER,DIMENSION(:)        :: RangeType
-     TYPE(INTC)                  :: IntCs
-     LOGICAL                     :: Print
-     TYPE(BackTrf)               :: GBackTrf
-     TYPE(TrfCtrl)               :: GTrfCtrl
-     TYPE(CoordCtrl)             :: GCoordCtrl
-     TYPE(Constr)                :: GConstr
-     CHARACTER(LEN=*)            :: SCRPath
-     TYPE(DBL_VECT)              :: Vect
-     INTEGER                     :: I,NIntC,GDIISMemory
-     TYPE(INT_VECT)              :: Actives
-     INTEGER                     :: PrintIn
-     !
-     PRint=PrintIn>=DEBUG_GEOP_MIN
-     IF(Print) THEN
-       WRITE(*,200) 
-       WRITE(Out,200) 
-     ENDIF
-     200 FORMAT('Doing Geometric DIIS based on the linear combination of primitive internal coordinates.')
-     NIntC=SIZE(PrISR,1)
-     GDIISMemory=SIZE(PrISR,2)
-     !
-     ! Calculate new value of internal coordinates
-     !
-     CALL New(Vect,NIntC)
-     Vect%D=Zero
-     DO I=1,GDIISMemory
-       Vect%D=Vect%D+Coeffs(I)*PrISR(1:NIntC,I)
-     ENDDO
-     !
-     ! For inactive internals set the very last value
-     !
-     DO I=1,NIntC
-       IF(Actives%I(I)==0.OR. &
-          RangeType(I)==2) Vect%D(I)=PrISR(I,GDIISMemory)
-     ENDDO
-     CALL RangeBack(IntCs,RangeType,Vect%D)
-       CALL INTCValue(IntCs,XYZ, &
-                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-       Vect%D=Vect%D-IntCs%Value
-       !CALL RedundancyOff(Vect%D,SCRPath,Print)
-     IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted change ')
-       Vect%D=IntCs%Value+Vect%D
-     IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
-     !
-     CALL InternalToCart(XYZ,IntCs,Vect%D, &
-       PrintIn,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
-     CALL Delete(Vect)
-   END SUBROUTINE IntCSum
-!
-!---------------------------------------------------------------------
-!
-   SUBROUTINE SetRangeType(RangeType,IntCs,PrIRef,PrISR)
-     TYPE(INTC)                  :: IntCs
-     INTEGER,DIMENSION(:)        :: RangeType
-     REAL(DOUBLE),DIMENSION(:,:) :: PrIRef,PrISR
-     INTEGER                     :: I,J,K,NIntC,GDIISMemory
-     TYPE(DBL_VECT)              :: VectSR,VectRef
-     REAL(DOUBLE)                :: MaxAng,MinAng,MaxRange,PIHalf
-     REAL(DOUBLE)                :: Sum1,Sum2,TwoPi,Conv
-     !
-     ! Set RangeType(I) to 0: no 'remapping', default
-     !                     1: do 'remapping at 180 degrees of tors/outp 
-     !                     2: range too broad, use last geom's value
-     Conv=PI/180.D0  
-     MaxRange=10.D0*Conv
-     PIHalf=PI*Half
-     TwoPi=Two*Pi
-     NIntC=SIZE(PrISR,1)
-     GDIISMemory=SIZE(PrISR,2) 
-     !
-     CALL New(VectRef,GDIISMemory)
-     CALL New(VectSR,GDIISMemory)
-     DO I=1,NIntC
-       RangeType(I)=0
-       IF(HasAngle(IntCs%Def(I))) THEN
-         DO J=1,GDIISMemory ; VectRef%D(J)=PrIRef(I,J) ; ENDDO
-         DO J=1,GDIISMemory ; VectSR%D(J)=PrISR(I,J) ; ENDDO
-         MaxAng=MaxVal(VectRef%D)
-         MaxAng=MAX(MaxAng,MaxVal(VectSR%D))
-         MinAng=MinVal(VectRef%D)
-         MinAng=MIN(MinAng,MinVal(VectSR%D))
-         IF(HasTorsOutP(IntCs%Def(I))) THEN
-           IF(MaxAng*MinAng<Zero) THEN
-             IF(MaxAng>PiHalf.AND.MinAng<-PiHalf) THEN
-               IF(TwoPi+MinAng-MaxAng>MaxRange) THEN
-                 RangeType(I)=2
-               ELSE
-                 RangeType(I)=1
-                 DO J=1,GDIISMemory
-                   Sum1=PrIRef(I,J)
-                   Sum2=PrISR(I,J)
-                   PrIRef(I,J)=SIGN(PI,Sum1)-Sum1
-                   PrISR(I,J)=SIGN(PI,Sum2)-Sum2
-                 ENDDO
-               ENDIF
-             ENDIF
-           ENDIF
-         ENDIF
-         IF(MaxAng*MinAng<Zero) THEN
-           IF(MaxAng+MinAng>MaxRange) RangeType(I)=2
-         ELSE
-           IF(MaxAng-MinAng>MaxRange) RangeType(I)=2
-         ENDIF
-       ENDIF
-     ENDDO 
-     !
-     CALL Delete(VectRef)
-     CALL Delete(VectSR)
-   END SUBROUTINE SetRangeType
-!
-!---------------------------------------------------------------------
-!
-   SUBROUTINE RangeBack(IntCs,RangeType,Vect)
-     TYPE(INTC)                :: IntCs
-     INTEGER,DIMENSION(:)      :: RangeType
-     REAL(DOUBLE),DIMENSION(:) :: Vect
-     REAL(DOUBLE)              :: Sum 
-     INTEGER                   :: I,J,NIntC
-     !
-     NIntC=SIZE(Vect) 
-     IF(NIntC/=SIZE(RangeType))CALL Halt('Dimension error in RangeBack')
-     DO I=1,NIntC
-       IF(RangeType(I)==1) THEN
-         Sum=Vect(I)
-         Vect(I)=SIGN(PI,Sum)-Sum
-       ENDIF  
-     ENDDO
-   END SUBROUTINE RangeBack
-!
-!---------------------------------------------------------------------
-!
    SUBROUTINE DIISInvMat(AMat,InvA,Char)
      REAL(DOUBLE),DIMENSION(:,:) :: AMat,InvA
      REAL(DOUBLE)                :: CondNum,EigMax,TolAbs,EigAux   
@@ -789,16 +311,17 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE IntCFit(XYZ,Grad,IntGrad,Displ, &
-                      RefStruct,RefGrad,SCRPath, &
-                      GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
+                      RefStruct,RefGrad,SCRPath,PWDPath, &
+                      GGrdTrf,GCoordCtrl,GTrfCtrl,Print,iGEO)
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ,RefStruct,RefGrad
      REAL(DOUBLE),DIMENSION(:)    :: Grad,Displ,IntGrad
-     CHARACTER(LEN=*)             :: SCRPath
-     INTEGER                      :: Print
+     CHARACTER(LEN=*)             :: SCRPath,PWDPath
+     INTEGER                      :: Print,iGEO
      INTEGER                      :: I,J,NMem,NCart,NatmsLoc,NIntC
      TYPE(INTC)                   :: IntCs
      TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
-     TYPE(DBL_VECT)               :: VectC,VectI,VectCG,RMSErr
+     TYPE(DBL_RNK2)               :: DelocVals,DelocGrads
+     TYPE(DBL_VECT)               :: VectC,VectI,VectCG,RMSErr,VectX
      TYPE(GrdTrf)                 :: GGrdTrf
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
@@ -813,6 +336,9 @@ write(*,*) 'chk 1'
      CALL New(XYZAux,(/3,NatmsLoc/))
      CALL New(VectC,NCart)
      CALL New(VectCG,NCart)
+     CALL New(VectX,NMem+1)
+     CALL New(DelocVals,(/NCart-6,NMem+1/))
+     CALL New(DelocGrads,(/NCart-6,NMem+1/))
      !
      CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
      NIntC=SIZE(IntCs%Def)
@@ -829,36 +355,40 @@ write(*,*) 'chk 1'
          VectC%D(J)=RefStruct(J,I)
          VectCG%D(J)=RefGrad(J,I)
        ENDDO
-write(*,*) I,'VectC = ',VectC%D/AngstromsToAu
-write(*,*) I,'VectCG= ',VectCG%D
        RMSErr%D(I)=SQRT(DOT_PRODUCT(VectCG%D,VectCG%D)/DBLE(NCart))
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
        CALL RefreshBMatInfo(IntCs,XYZAux%D,GTrfCtrl, &
                           GCoordCtrl,Print,SCRPath,.TRUE.)
        CALL CartToInternal(XYZAux%D,IntCs,VectCG%D,VectI%D,&
          GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
-write(*,*) I,'internal gradients= ',VectI%D
        IntCGrads%D(:,I)=VectI%D
-       CALL INTCValue(IntCs,XYZAux%D,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+       CALL INTCValue(IntCs,XYZAux%D,GCoordCtrl%LinCrit, &
+                      GCoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value
-write(*,*) I,'internal values= ',IntCValues%D(:,I)
      ENDDO
        RMSErr%D(NMem+1)=SQRT(DOT_PRODUCT(Grad,Grad)/DBLE(NCart))
-write(*,*) 'RMSErr= ',RMSErr%D
        CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl, &
                           GCoordCtrl,Print,SCRPath,.TRUE.)
      ! CALL CartToInternal(XYZ,IntCs,Grad,VectI%D,&
      !   GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
        IntCGrads%D(:,NMem+1)=IntGrad
-write(*,*) NMem+1,'internal gradients= ',IntCGrads%D(:,NMem+1)
        CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        IntCValues%D(:,NMem+1)=IntCs%Value
-write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
+     !
+     ! Turn primitive internals into delocalized internals
+     !
+   ! CALL DelocEnMass(IntCValues%D,IntCGrads%D, &
+   !                  DelocVals%D,DelocGrads%D,SCRPath)
      !
      ! Calculate new values of internals by fitting
      !
-     CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,RMSErr%D,Displ)
+    !CALL DelocFit(DelocGrads%D,DelocVals%D,RMSErr%D,Displ,SCRPath)
+     CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,RMSErr%D,Displ,&
+                   PWDPath,iGEO)
      !
+     CALL Delete(DelocVals)
+     CALL Delete(DelocGrads)
+     CALL Delete(VectX)
      CALL Delete(RMSErr)
      CALL Delete(IntCGrads) 
      CALL Delete(IntCValues) 
@@ -871,13 +401,15 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,RMSErr,Displ)
+   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues, &
+                       RMSErr,Displ,Path,iGEO)
      TYPE(INTC)                 :: IntCs
      REAL(DOUBLE),DIMENSION(:)  :: Displ,RMSErr
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
-     REAL(DOUBLE)               :: Center
-     INTEGER                    :: I,J,NIntC,NDim
-     TYPE(DBL_VECT)             :: FitVal,VectX,VectY,Sig
+     REAL(DOUBLE)               :: Center,A,B
+     INTEGER                    :: I,J,NIntC,NDim,iGEO
+     TYPE(DBL_VECT)             :: FitVal,VectX,VectY,Sig,PredGrad
+     CHARACTER(LEN=*)           :: Path
      !
      NIntC=SIZE(IntCs%Def)
      NDim=SIZE(IntCGrads,2)
@@ -885,6 +417,7 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
      CALL New(VectX,NDim)
      CALL New(VectY,NDim)
      CALL New(FitVal,NIntC)
+     CALL New(PredGrad,NIntC)
      !
      DO I=1,NIntC
        IF(.NOT.IntCs%Active(I)) THEN
@@ -895,22 +428,18 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
          VectX%D(J)=IntCValues(I,J) 
          VectY%D(J)=IntCGrads(I,J) 
        ENDDO
-write(*,*) I,IntCs%Def(I),IntCs%Atoms(I,1:4)
-write(*,*) 'data points= '
-do j=1,ndim
-write(*,*) vectx%d(j),vecty%d(j)
-enddo
+       !
+       ! Reorder angle values for periodic cases
+       !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
           IntCs%Def(I)(1:4)=='TORS') THEN
          CALL PeriodicAngle(VectX%D)
-write(*,*) 'data points angle ordered= '
-do j=1,ndim
-write(*,*) vectx%d(j),vecty%d(j)
-enddo
        ENDIF
        !
-       CALL FitInt(VectX%D,VectY%D,RMSErr,FitVal%D(I),IntCs%Def(I))
+       CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),A,B)
+       CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
+                    A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
@@ -927,13 +456,19 @@ enddo
        CALL MapDAngle(IntCs%Def(I),IntCValues(I,NDim),Displ(I))
 if(IntCs%Def(I)(1:4)=='STRE') then
 write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)/angstromstoau
-write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)/angstromstoau,Displ(I)/angstromstoau
-else
+write(*,*) iGEO,'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)/angstromstoau,Displ(I)/angstromstoau
+write(*,*) igeo,' final line= ',A,B
+else if(IntCs%Def(I)(1:4)/='CART') then
 write(*,*) 'fit= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
-write(*,*) 'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)*180.D0/PI,Displ(I)*180.D0/PI
+write(*,*) iGEO,'displ= ',i,IntCs%Def(I),IntCValues(I,NDim)*180.D0/PI,Displ(I)*180.D0/PI
+write(*,*) igeo,' final line= ',A,B
 endif
      ENDDO
+!
+     CALL PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
+                  FitVal%D,PredGrad%D,Path)
      !
+     CALL Delete(PredGrad)
      CALL Delete(VectY)
      CALL Delete(VectX)
      CALL Delete(FitVal)
@@ -942,52 +477,58 @@ endif
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE FitInt(VectX,VectY,Sig,FitVal,Def)
-     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
-     REAL(DOUBLE)              :: FitVal
-     INTEGER                   :: I,J,NDim,MWT,ILower,IUpper
-     REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q,G1,G2,X1,X2
-     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin,AbDev,Center
-     REAL(DOUBLE)              :: UpperB,LowerB
-     CHARACTER(LEN=*)          :: Def
-     LOGICAL                   :: DoBisect
+   SUBROUTINE PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
+                      FitVal,PredGrad,Path)
+     INTEGER                   :: iGEO,I,NDim,NIntC
+     TYPE(INTC)                :: IntCs
+     REAL(DOUBLE),DIMENSION(:,:) :: IntCValues,IntCGrads
+     REAL(DOUBLE),DIMENSION(:) :: FitVal,PredGrad
+     CHARACTER(LEN=*)          :: Path
      !
-     NDim=SIZE(VectX)
-     MWT=1
-     XMin=MINVAL(VectX)
-     XMax=MAXVAL(VectX)
-     YMin=MINVAL(VectY)
-     YMax=MAXVAL(VectY)
-     IF(ABS(XMin-XMax)<1.D-5) THEN
-       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4) THEN
-         CALL Halt('Grad too big in FitInt, while coordinate does not move.')
-       ELSE
-         FitVal=VectX(NDim)-VectY(NDim)
-         RETURN
-       ENDIF
+     NIntC=SIZE(IntCs%Def)
+     OPEN(UNIT=91,FILE=TRIM(Path)//'Pred_'// &
+          TRIM(IntToChar(IGEO)),STATUS='UNKNOWN')
+     DO I=1,NIntC
+       WRITE(91,12) I,IntCs%Def(I)(1:5),IntCValues(I,NDim), &
+                    IntCGrads(I,NDim),FitVal(I),PredGrad(I)
+     ENDDO
+     12 FORMAT(I3,2X,A5,2X,3F12.6,F20.6)
+     CLOSE(91)
+   END SUBROUTINE PrtPred
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE PrtFits(I,IntCs,iGEO,NDim,VectX,VectY,Path, &
+                      A,B,FitVal,PredGrad,Def)
+     INTEGER                   :: iGEO,NDim,I,J
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+     REAL(DOUBLE)              :: A,B,FitVal,PredGrad,Conv
+     CHARACTER(LEN=*)          :: Path,Def
+     TYPE(INTC)                :: IntCs
+     !
+     IF(Def(1:4)=='STRE') THEN
+       Conv=One/AngstromsToAu
+     ELSE IF(HasAngle(Def)) THEN
+       Conv=180.D0/PI
      ENDIF
-     !
-     ! Now bisect or extrapolate
-     !
-     DoBisect=(VectY(Ndim)*VectY(NDim-1)<Zero)
-     IF(DoBisect) THEN
-       G1=VectY(NDim) ; G2=VectY(Ndim-1)
-       X1=VectX(NDim) ; X2=VectX(Ndim-1)
-write(*,*) 'doing bisect ',X1,G1,X2,G2
-       IF(ABS(X1-X2)<1.D-4) THEN
-         FitVal=(X1+X2)/Two
-write(*,*) 'doing bisect 1 ',X1,X2,FitVal
-       ELSE
-         B=(G1-G2)/(X1-X2) ; A=G1-B*X1
-         FitVal=-A/B
-write(*,*) 'doing bisect 2 ',FitVal
-       ENDIF
-     ELSE
-write(*,*) 'doing extrapolation '
-       CALL Extrapolate(VectX,VectY,Sig,FitVal)
- !!!!! CALL TestExtraPol(VectX(NDim),VectY(NDim),FitVal)
-     ENDIF
-   END SUBROUTINE FitInt
+     WRITE(*,*) I,IntCs%Def(I),IntCs%Atoms(I,1:4)
+     OPEN(UNIT=91,FILE=TRIM(Path)//'Fit_'// &
+       TRIM(IntToChar(IGEO))//'_'// &
+       TRIM(IntToChar(I)),STATUS='UNKNOWN')
+       WRITE(*,*) i,'Data Points= '
+       DO J=1,NDim
+         WRITE(*,11) iGEO-NDim+J,J,Conv*VectX(J),VectY(J), &
+                                   Conv*VectX(J),A+B*VectX(J)
+         WRITE(91,11) iGEO-NDim+J,J,Conv*VectX(J),VectY(J), &
+                                    Conv*VectX(J),A+B*VectX(J)
+       ENDDO
+         WRITE(*,11) iGEO+1,iGEO+1,Conv*VectX(NDim),VectY(NDim), &
+                                   Conv*FitVal,PredGrad
+         WRITE(91,11) iGEO+1,iGEO+1,Conv*VectX(NDim),VectY(NDim), &
+                                    Conv*FitVal,PredGrad
+       11 FORMAT(I3,2X,I3,2X,5F20.8)
+     CLOSE(91)
+   END SUBROUTINE PrtFits
 !
 !---------------------------------------------------------------------
 !
@@ -1225,63 +766,82 @@ write(*,*) 'ss = ',ss
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal)
+   SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal,PredGrad,AFit,BFit)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal,Center,A,B,AbDev,MaxDev
-     REAL(DOUBLE)              :: Filter,FitValOld
-     REAL(DOUBLE)              :: SigA,SigB,Chi2,Q
+     REAL(DOUBLE)              :: Filter,FitValOld,MinY,MaxY,ValY
+     REAL(DOUBLE)              :: SigA,SigB,Chi2,Q,MeanDev,AccGrad
+     REAL(DOUBLE)              :: PredGrad,MeanDevOld
+     REAL(DOUBLE)              :: AFit,BFit
      INTEGER                   :: I,J,NDim,NFit,K,MWT
-     TYPE(DBL_VECT)            :: VectXAct,VectYAct,Devs
+     INTEGER                   :: NFit1,NFitStart,IStart
+     INTEGER                   :: ICount,ICountOld
+     TYPE(DBL_VECT)            :: VectXAct,VectYAct,Devs,SigAux,SigAct
+     TYPE(DBL_VECT)            :: VectAuxX,VectAuxY
      !
+     AFit=Zero
+     BFit=Zero
+     FitVal=VectX(NDim)
+     PredGrad=VectY(NDim)
      NDim=SIZE(VectX)
-     Filter=Sig(NDim)
      CALL New(Devs,NDim)
      CALL New(VectXAct,NDim)
      CALL New(VectYAct,NDim)
+     CALL New(VectAuxX,NDim)
+     CALL New(VectAuxY,NDim)
+     CALL New(SigAux,NDim)
+     CALL New(SigAct,NDim)
      !
-     NFit=NDim
-     VectXAct%D=VectX
-     VectYAct%D=VectY
-     FitValOld=Zero
-     DO K=1,NDim
-       IF(NFit<3) THEN
-         FitVal=VectX(NDim)-VectY(NDim)
-write(*,*) 'fitval is changing in ExtraPol to ',FitVal
-         EXIT
-       ENDIF
-       MWT=0 ; CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
-   !   CALL MedFit(VectXAct%D(1:NFit),VectYAct%D(1:NFit),NFit,A,B,AbDev)
-write(*,*) 'AbDev= ',AbDev
-write(*,*) 'line= ',a,b     
-write(*,*) 'last RMS= ',Filter   
-       FitVal=(-A)/B
-       IF(ABS(FitVal-FitValOld)<Filter) EXIT
-       FitValOld=FitVal
-write(*,*) K,' FitVal = ',FitVal,(FitVal-VectX(NDim))*180.D0/PI
+     NFit1=MIN(5,NDim)
+     NFitStart=3
+     MeanDevOld=1.D99
+     DO NFit=NFitStart,NFit1    
+       IStart=NDim-NFit+1
        !
-       DO I=1,NDim
-         Devs%D(I)=ABS(VectY(I)-(A+B*VectX(I)))
+       MWT=0 
+       CALL Fit(VectX(IStart:NDim),VectY(IStart:NDim),NFit, &
+                Sig(IStart:NDim),MWT,A,B,SigA,SigB,Chi2,Q)
+   !   CALL MedFit(VectX(IStart:NDim),VectY(IStart:NDim), &
+   !               NFit,A,B,AbDev)
+       write(*,*) 'SigA,SigB,Chi2,Q= ',SigA,SigB,Chi2,Q
+       write(*,*) nfit,'line= ',a,b     
+       !
+       Devs%D=Zero
+       DO I=1,NFit
+         K=IStart+I-1
+         Devs%D(K)=ABS(VectY(K)-(A+B*VectX(K)))
        ENDDO
-write(*,*) 'Devs= ',Devs%D
+       write(*,*) 'Devs= ',Devs%D
        MaxDev=MAXVAL(Devs%D)
-       IF(MaxDev>Filter) THEN
-         NFit=0
-         DO J=1,NDim-1
-           IF(Devs%D(J)<Filter) THEN
-             NFit=NFit+1
-             VectXAct%D(NFit)=VectX(J)
-             VectYAct%D(NFit)=VectY(J)
-write(*,*) 'newfit= ',nfit,VectXAct%D(NFit),VectYAct%D(NFit)
+       MeanDev=SUM(Devs%D)/DBLE(NFit)
+       write(*,*) 'MaxDev= ',MaxDev,' MeanDev= ',MeanDev,' MeanDevOld= ',MeanDevOld
+       IF(MeanDev<MeanDevOld.OR.NFit==NFitStart) THEN
+         IF(ABS(B)>1.D-7) THEN
+           IF(B<Zero) THEN
+write(*,*) 'original a,b= ',a,b
+             A=VectY(NDim)+B*VectX(NDim)
+             B=-B
+write(*,*) 'modified a,b= ',a,b
            ENDIF
-         ENDDO
-         NFit=NFit+1
-         VectXAct%D(NFit)=VectX(NDim)
-         VectYAct%D(NFit)=VectY(NDim)
-       ELSE
-         EXIT
+           PredGrad=-VectY(NDim)/Two
+           FitVal=(PredGrad-A)/B
+           write(*,*) 'extrap 2, predgrad= ',PredGrad 
+         ELSE
+           FitVal=VectX(NDim)
+           PredGrad=VectY(NDim)
+           write(*,*) 'flat line no change of value'  
+         ENDIF
+         MeanDevOld=MeanDev
+         AFit=A
+         BFit=B
        ENDIF
+       write(*,*) ' FitVal = ',FitVal
      ENDDO
-     IF(K>=NDim) CALL Halt('Error in Extrapolate.')
+     !
+     CALL Delete(SigAux)
+     CALL Delete(SigAct)
+     CALL Delete(VectAuxX)
+     CALL Delete(VectAuxY)
      CALL Delete(VectXAct)
      CALL Delete(VectYAct)
      CALL Delete(Devs)
@@ -1573,6 +1133,130 @@ write(*,*) 'fitval is changing in ChkBendLim to ',FitVal
        FitVal=Val+DeltaMax
      ENDIF
    END SUBROUTINE ChkStreLim
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE DelocEnMass(IntCValues,IntCGrads, &
+                          DelocVals,DelocGrads,SCRPath)
+     REAL(DOUBLE),DIMENSION(:,:) :: IntCValues,IntCGrads 
+     REAL(DOUBLE),DIMENSION(:,:) :: DelocVals,DelocGrads 
+     CHARACTER(LEN=*)            :: SCRPath
+     TYPE(INT_VECT)              :: ISpB,JSpB 
+     TYPE(DBL_VECT)              :: ASpB
+     TYPE(DBL_RNK2)              :: UMatr
+     INTEGER                     :: I,J,K,NCart,NIntC,NMem
+     !
+     CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
+     NCart=SIZE(Umatr%D,1)
+     NIntC=SIZE(IntCValues,1)
+     NMem=SIZE(IntCValues,2)
+     !
+     DO I=1,NMem
+write(*,*) i,'IntCValues(:,I)= ',IntCValues(:,I)
+       CALL PrimToDeloc(IntCValues(:,I),DelocVals(:,I), &
+                        ISpB,JSpB,ASpB,UMatr)
+write(*,*) i,'DelocVals(:,I)=  ',DelocVals(:,I)
+write(*,*) i,'IntCGrads(:,I)= ',IntCGrads(:,I)
+       CALL PrimToDeloc(IntCGrads(:,I),DelocGrads(:,I), &
+                        ISpB,JSpB,ASpB,UMatr)
+write(*,*) i,'DelocGrads(:,I)= ',DelocGrads(:,I)
+     ENDDO
+     !
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(UMatr)
+   END SUBROUTINE DelocEnMass
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE DelocFit(DelocGrads,DelocVals,RMSErr,Displ,SCRPath)
+     REAL(DOUBLE),DIMENSION(:,:) :: DelocGrads,DelocVals
+     REAL(DOUBLE),DIMENSION(:)   :: Displ,RMSErr
+     CHARACTER(LEN=*)            :: SCRPath
+     INTEGER                     :: NMem,NIntC,I,J,NDel
+     TYPE(DBL_VECT)              :: VectX,VectY,NewDelocVals
+     TYPE(INT_VECT)              :: ISpB,JSpB
+     TYPE(DBL_VECT)              :: ASpB
+     TYPE(DBL_RNK2)              :: UMatr
+     REAL(DOUBLE)                :: FitVal,PredGrad,A,B
+     !
+     NDel=SIZE(DelocGrads,1)
+     NMem=SIZE(DelocGrads,2)
+     CALL New(VectX,NMem)
+     CALL New(VectY,NMem)
+     CALL New(NewDelocVals,NDel)
+     !
+     DO I=1,NDel
+       DO J=1,NMem 
+         VectX%D(J)=DelocVals(I,J)  
+         VectY%D(J)=DelocGrads(I,J)  
+       ENDDO
+       CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal,PredGrad,A,B)
+       NewDelocVals%D(I)=FitVal
+     ENDDO 
+     !
+     CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
+     !
+     ! Deloc and PrimInt displacements 
+     !
+     NewDelocVals%D=NewDelocVals%D-DelocVals(:,NMem)
+     CALL PrimToDeloc(Displ,NewDelocVals%D,ISpB,JSpB,ASpB,UMatr, &
+                      Char_O='Back')
+!if(nmem==3) stop
+     !
+     CALL Delete(ISpB)
+     CALL Delete(JSpB)
+     CALL Delete(ASpB)
+     CALL Delete(UMatr)
+     CALL Delete(NewDelocVals)
+     CALL Delete(VectX)
+     CALL Delete(VectY)
+   END SUBROUTINE DelocFit
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE FitXY(VectX,VectY,RMSErr,FitVal,PredGrad,A,B)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr
+     REAL(DOUBLE)              :: FitVal,G1,G2,X1,X2,A,B,AbsG
+     REAL(DOUBLE)              :: PredGrad,MaxX,MinX
+     LOGICAL                   :: DoBisect
+     INTEGER                   :: I,J,NMem
+     !
+     A=Zero
+     B=Zero
+     NMem=SIZE(VectX)
+     MaxX=MAXVAL(VectX)
+     MinX=MINVAL(VectX)
+     IF(ABS(MaxX-MinX)<1.D-6) THEN
+       FitVal=(MaxX+MinX)/Two
+       PredGrad=Zero
+       RETURN
+     ENDIF
+     DoBisect=(VectY(NMem)*VectY(NMem-1)<Zero)
+     IF(DoBisect) THEN
+write(*,*) 'doing bisection'
+       G1=VectY(NMem) ; G2=VectY(NMem-1)
+       X1=VectX(NMem) ; X2=VectX(NMem-1)
+       B=(G1-G2)/(X1-X2) ; A=G1-B*X1
+       AbsG=MIN(ABS(G1),ABS(G2))
+       IF(ABS(B)>1.D-4) THEN
+         FitVal=-A/B
+         PredGrad=Zero
+write(*,*) 'bis 1, predgrad= ',PredGrad 
+        !FitVal=(SIGN(AbsG/Two,-G1)-A)/B
+       ELSE
+         FitVal=(X1+X2)/Two
+         PredGrad=G1+G2/Two
+write(*,*) 'bis 2, predgrad= ',PredGrad 
+       ENDIF
+write(*,*) 'fitval= ',FitVal
+     ELSE
+write(*,*) 'doing extrapolation'
+       CALL Extrapolate(VectX,VectY,RMSErr,FitVal,PredGrad,A,B)
+     ENDIF
+write(*,*) 'predgrad= ',PredGrad
+   END SUBROUTINE FitXY
 !
 !---------------------------------------------------------------------
 !

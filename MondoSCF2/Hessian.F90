@@ -130,16 +130,16 @@ CONTAINS
 !
    SUBROUTINE SetHessian(Hess)
      TYPE(Hessian) :: Hess
-     Hess%Stre = 0.80D0
-     Hess%Bend = 0.30D0 
-     Hess%LinB = 0.30D0
-     Hess%OutP = 0.20D0 
-     Hess%Tors = 0.20D0 
-     Hess%VDWStre  = 0.80D0 
-     Hess%VDWBend  = 0.30D0 
-     Hess%VDWLinB  = 0.30D0 
-     Hess%VDWOutP  = 0.20D0 
-     Hess%VDWTors  = 0.20D0 
+     Hess%Stre = 0.50D0
+     Hess%Bend = 0.20D0 
+     Hess%LinB = 0.20D0
+     Hess%OutP = 0.10D0 
+     Hess%Tors = 0.10D0 
+     Hess%VDWStre  = 0.20D0 
+     Hess%VDWBend  = 0.20D0 
+     Hess%VDWLinB  = 0.20D0 
+     Hess%VDWOutP  = 0.10D0 
+     Hess%VDWTors  = 0.10D0 
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
