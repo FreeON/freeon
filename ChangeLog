@@ -1,3 +1,177 @@
+2005-03-23 14:24  nemeth
+
+	* MondoSCF2/Optimizer.F90: Max number of backtracking steps is set
+	to 4.
+
+2005-03-23 14:13  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, ParseGeomOpt.F90,
+	PunchHDF.F90: Optimizer related files with an update in the
+	recognition scheme and some cleaning of no more used stuff.
+
+2005-03-23 14:05  nemeth
+
+	* MondoMods/: CholFact.F90, DerivedTypes.F90, InOut.F90,
+	MemMan.F90: Modifications for the new internal coordinate
+	recognition scheme. Cleaning of some old arrays that are no more
+	used or saved in HDF.
+
+2005-03-22 16:44  nemeth
+
+	* MondoSCF2/Optimizer.F90: Backtracking is tightened now.
+
+2005-03-22 10:34  mchalla
+
+	* Makefile: [no log message]
+
+2005-03-22 09:48  mchalla
+
+	* Includes/CopyrightNotice.txt: [no log message]
+
+2005-03-22 09:44  mchalla
+
+	* Includes/CompilerSpecifics.IntelLinux.PG_GRANDALS, README: [no
+	log message]
+
+2005-03-22 09:34  mchalla
+
+	* Includes/: CompilerSpecifics.IntelLinux.PG_PINK,
+	CopyrightBanner.txt, CopyrightNotice.txt: [no log message]
+
+2005-03-22 06:38  mchalla
+
+	* Validate/sub_lsf_pink: [no log message]
+
+2005-03-21 13:30  mchalla
+
+	* Validate/: sub_pbs, BetaCarotene.inp, BoronNitride.inp,
+	IceIh.inp, Makefile, Steam.inp, Vancomycin.inp, WaterHexamer.inp:
+	Some more small progress on the validation suite.
+
+2005-03-21 12:33  mchalla
+
+	* Validate/: H2O.ref, AcO-.inp, H2O.inp, NO+.inp: [no log message]
+
+2005-03-21 12:19  mchalla
+
+	* Validate/: H2O.inp, h2o_nfreq.inp: Another small name change.
+
+2005-03-21 12:18  mchalla
+
+	* Validate/: Ice.inp, Ice.ref, PIce.inp, PIce.ref: Another small
+	name change..
+
+2005-03-21 12:12  mchalla
+
+	* Validate/: NH3.inp, NH3.ref: Just name changed the NH3_DoGradNorm
+	to NH3 ...
+
+2005-03-21 12:10  mchalla
+
+	* Validate/: NH3_DoGradNorm.inp, NH3_DoGradNorm.ref: [no log
+	message]
+
+2005-03-21 12:07  mchalla
+
+	* Validate/: WaterHexamerMaslen.jpg, WaterHexamerMaslen.rfo.im.mkl:
+	Removed these comparitive files, they are there for posterity and
+	comparison to QUICCA when the time comes...
+
+2005-03-21 12:06  mchalla
+
+	* Validate/BoronNitride.inp: [no log message]
+
+2005-03-21 08:21  mchalla
+
+	* Validate/: CH2x-6.inp, Ice.inp, IceIh.inp, Quartz.inp,
+	PBCBenzene.inp, PBCBenzene.ref: [no log message]
+
+2005-03-21 08:13  mchalla
+
+	* Validate/: Sulphure.inp, Sulphure.ref: [no log message]
+
+2005-03-21 08:04  mchalla
+
+	* Validate/: MgO-2D.inp, MgO-2D.ref, MgO-3D.inp, MgO-3D.ref: [no
+	log message]
+
+2005-03-21 08:03  mchalla
+
+	* MondoSCF2/SCFs.F90: Turned off hardwired printing of forces to
+	the output file.
+
+2005-03-21 07:42  mchalla
+
+	* BasisSets/User5.bas: SBKJC (CEP-31G) SPLIT basis for Ice.inp
+	calculation.
+
+2005-03-21 07:34  mchalla
+
+	* OneE/UForce.F90: [no log message]
+
+2005-03-21 07:14  mchalla
+
+	* Validate/: Corundum.inp, Quartz2.inp, Urea.inp, Urea.ref,
+	Water.inp, Water.ref: These  files can always be retrieved from the
+	attic, but for now, I think they take too long to run as validation
+	etc
+
+2005-03-21 07:02  mchalla
+
+	* Validate/: Quartz2.inp, Corundum.inp: [no log message]
+
+2005-03-20 10:16  mchalla
+
+	* Validate/: urea_2x2x2.inp, urea_2x2x2.ref: [no log message]
+
+2005-03-20 10:04  mchalla
+
+	* Validate/: IceIh_LatticeOpt.inp, IceIh_LatticeOpt.ref: IceIh will
+	now involve lattice optimization.
+
+2005-03-20 10:02  mchalla
+
+	* Validate/: WaterHexamer.inp, WaterHexamer.ref,
+	WaterHexamerMaslen.jpg, WaterHexamerMaslen.rfo.im.mkl: This is a
+	challenging QUICCA test.  Included are the best results from Paul
+	Maslen's "scaled internals" paper in JCP.  QUICCA is 38 steps (with
+	backtracking) to his 48.  Not sure of the convergence criteria. 
+	This should definately be used in developing the QUICCA bond
+	recognition and steplength control.
+
+2005-03-20 09:18  mchalla
+
+	* Validate/: BoronNitride.inp, BoronNitride.ref: [no log message]
+
+2005-03-20 09:17  mchalla
+
+	* Validate/: BN_3x3.inp, BN_3x3.ref, BN_4x4x4.inp, BN_4x4x4.ref:
+	moved 3x3 to BoronNitride
+
+2005-03-20 09:06  mchalla
+
+	* Validate/: AgCl.inp, AgCl_2x2x2.inp, AgCl_loose.ref: Not a good
+	example, due to C98 use of 5D, not much hope of getting agreement
+	to a lot of digits.
+
+2005-03-20 09:03  mchalla
+
+	* Validate/: Ice.hdf, Ice.inp: New Ice example demos optimization
+	with PBC and ECPs.  Note, we dont have lattice forces yet with
+	ECPs.
+
+2005-03-20 07:02  mchalla
+
+	* Validate/Quartz2.inp: PBC ECP example.
+
+2005-03-19 17:04  mchalla
+
+	* Validate/CorundumGP.inp: Begining of a long clean up...
+
+2005-03-19 13:46  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-03-19 13:46  mchalla
 
 	* OneE/UForce.F90: PBC ECP forces working now, but not the ECP
@@ -7733,16 +7907,6 @@
 	ParsingConstants.F90, PrettyPrint.F90, ProcessControl.F90: Another
 	CHARACTER(LEN=*),PARAMETER checkin.
 
-2003-08-26 17:42  nemeth
-
-	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
-	bALA_000-periodic.inp, bALA_000.seq, spec2.opls: [no log message]
-
-2003-08-26 17:39  nemeth
-
-	* Validate/BALA-PERIODIC/MM/EWALD/: ews8BALA-highp.f, fort.22:
-	Gradually removing a directory structure from Validate.
-
 2003-08-26 17:33  nemeth
 
 	* Validate/: MgOmm.crd, MgOmm.seq, Water512mm.crd, Water512mm.seq,
@@ -11594,12 +11758,6 @@
 	* Validate/: MgOmm.inp, validation.opls, Water64mm.crd,
 	Water64mm.inp, Water64mm.seq: [no log message]
 
-2002-10-12 12:00  mchalla
-
-	* Validate/MgO-PERIODIC/MM/: EWALD/ews8MgOcubic.f, EWALD/fort.22,
-	MgO-PERIODIC.crd, MgO-PERIODIC.inp, MgO.seq, spec2.opls: [no log
-	message]
-
 2002-10-12 11:59  mchalla
 
 	* Validate/: MgOmm.crd, MgOmm.inp, MgOmm.seq, spec2.opls: Adding in
@@ -11697,22 +11855,6 @@
 
 	* Docs/DM_Papers/TS4/: TP_Fig_F_G_large.eps, TP_Fig_F_G_small.eps,
 	TS4.tex: New Updated version of the TS4 paper.
-
-2002-10-07 23:08  nemeth
-
-	* Validate/MgO-PERIODIC/MM/: MgO-PERIODIC.crd, MgO-PERIODIC.inp,
-	MgO.seq, spec2.opls, EWALD/ews8MgOcubic.f, EWALD/fort.22: [no log
-	message]
-
-2002-10-07 22:21  nemeth
-
-	* Validate/BALA-PERIODIC/MM/EWALD/fort.22: [no log message]
-
-2002-10-07 22:18  nemeth
-
-	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
-	bALA_000-periodic.inp, bALA_000.seq, spec2.opls,
-	EWALD/ews8BALA-highp.f: [no log message]
 
 2002-10-07 17:35  nemeth
 
