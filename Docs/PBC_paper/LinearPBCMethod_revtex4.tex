@@ -33,9 +33,7 @@ Los Alamos, NM 87545, USA}
 \begin{abstract}
 {\bf CJ, to do list:}
 \begin{itemize}
-\item round values in tables to 8'th digit.
 \item Need correct citations (not just generic website) for all the crystal basis sets used
-\item {\it Need the correct BLYP citations}
 \end{itemize}
 {\bf Matt to do list:}
 \begin{itemize}
@@ -166,12 +164,7 @@ with the inclusion of periodic boundary conditions.
 
 }
 
-
-\pagebreak
-
-
-\section{periodic 
-boundary conditions, linear scaling and basis sets}
+\section{periodic boundary conditions, linear scaling and basis sets}
 
 In conventional implementations of periodic boundary conditions, 
 Bloch functions 
@@ -180,21 +173,19 @@ Bloch functions
 \end{equation}
 are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the local function
 $\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
-sum on $\bf R$ runs over the Bravais lattice defined by integer translates of the primitive 
+sum on ${\bf R}$ runs over the Bravais lattice defined by integer translates of the primitive 
 lattice vectors {\bf a}, {\bf b} and {\bf  c}.   These Bloch functions (crystal orbitals)
-yield all possible translational symmetries through variation of the reciprocal lattice vector $\bf k$.     
-For small system sizes with high symmetry, a careful sampling of reciprocal space is required 
-for an accurate description of the periodic system.  An alternative approach to including these
+yield all possible translational symmetries through variation of the reciprocal lattice vector ${\bf k}$.     
+For small system sizes with high symmetry, a careful sampling of reciprocal space is required  
+for an accurate description of the periodic system.  An alternative approach to including these 
 important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through replication 
 and translation of the primitive UC.  This is the supercell $\Gamma$-point approximation, used
-primarily for the study of defects and vacancies rather than as a replacement for $\bf k$-space integration,
+primarily for the study of defects and vacancies rather than as a replacement for ${\bf k}$-space integration,
 perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
-
-\pagebreak
 
 In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the $\Gamma$-point 
 approximation, allowing the use of large supercells in the case of high symmetry and large primary UCs 
-in the case of disordered systems.  While the $\bf k$  dependence is avoided, lattice summation and formal integration over 
+in the case of disordered systems.  While the ${\bf k}$  dependence is avoided, lattice summation and formal integration over 
 the unit cell volume, $V_{\rm UC}$ are retained. At first sight this would seem to make matrix construction quite 
 different than in the gas phase,  where integrals are typically taken over all space, $V_\infty$.  
 Thus, elements of the gas phase overlap matrix 
@@ -224,11 +215,11 @@ $\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a
 ({\mathbf{r}+\mathbf{R}})
 $ associated with integration over $V_\infty$.  We likewise define an intermediate 
 electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} \rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
-where $\bf P$ is the one-electron reduced density matrix.  
+where ${\bf P}$ is the one-electron reduced density matrix.  
 In this convention, $V_\infty$ is the default volume of integration, and elements of the periodic overlap 
-matrix are expressed simply  as $S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$, while the electron count is
+matrix are expressed simply  as $S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$,
+ while the electron count is
 $N_{\rm el} =\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}({\mathbf{r}})$.
-
 
 It is worth noting that the complexity of $\rho^{\scriptscriptstyle \infty}$ is ${\cal O}(N)$, due to the
 exponential prefactor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ that enters each term in the sum 
@@ -258,8 +249,6 @@ of these particulars first, before addressing their extension to periodic bounda
 Also, the current version of QCTC is quite different from previous descriptions \cite{}, and deserves some
 introduction.  
 
-\newpage
-\newpage
 
 Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the density.  
 In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
@@ -292,8 +281,6 @@ electrostatic screening in MAC error estimates \cite{} and provides charge neutr
 feature for periodic calculations.  Thus, the Coulomb matrix employed here includes the electron-nuclear terms;
 ${\bf J} \equiv {\bf J} + {\bf V}_{\rm en}$.
 
-\newpage
-\newpage
 
 In the case of HiCu, two separate $k$-d tree structures are used.  The rho-tree holds the electron density,
 while the cube-tree contains a hierarchical grid for integration of the exchange-correlation potential.  Each node of the 
@@ -337,9 +324,6 @@ the constant $K=1.09$ and
 \end{cases}
 \end{equation}
 
-\newpage
-\newpage
-
 
 For HiCu, the overlap extent $R^{\rm o}_q$ is used, beyond which numerical evaluation of the 
 distribution $\rho_q$ yields an accumulation less than $\tau$;
@@ -361,8 +345,10 @@ moments are also translated to a common center and recursively merged up the tre
 matrix elements of $\bf J$, the primitive bra AABB is computed with $R^{\rm o}_q$, while  $R^{\rm p}_q$ are 
 used to construct AABBs of the density-tree.
 
-\newpage
-\newpage
+In Fig.~\ref{extent}, differences between the penetration and overlap extent are shown for a diffuse $s$-type
+Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents are 
+equivalent.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
+critical. 
 
 \begin{figure}
 \resizebox*{3.5in}{!}{\includegraphics{Extent.eps}}\label{extent}
@@ -374,32 +360,7 @@ used to construct AABBs of the density-tree.
          while $R^p$ goes slowly to zero due to the Coulomb singularity.}
 \end{figure}
 
-
-In Fig.~\ref{extent}, differences between the penetration and overlap extent are shown for a diffuse $s$-type
-Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents are 
-equivalent.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
-critical. 
-
-\newpage
-\newpage
-
-
-\begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics{Regions.eps}}\label{regions}
-\caption{Schematic of the regions contributing to $N$-scaling summation of the Coulomb matrix.
-The inner cells that make up $V_{\rm in}$ provide a buffer region that guarantees convergence of the multipole 
-expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
-periodic far-field region, $V_{\rm PFF}$, is the spherically ordered lattice extending
-to infinity but excluding $V_{\rm in}$.  For large cells and/or high order multipole 
-expansions, $V_{\rm in}$ includes just the unit cell and its nearest 27 neighbors.  In fast multipole
-method notation this corresponds to a well-separated index of unity.  However, for smaller cells and/or lower 
-order multipole expansions, $V_{\rm in}$ tends to a spherical distribution of cells surrounding the unit cell.   
-Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  $S_{\infty}$, which must be
-be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with Ewald summation.}
-\end{figure}
-
-\newpage
-\newpage
+\eject
 
 \section{Periodic Quantum Coulomb Sums}
 
@@ -433,6 +394,22 @@ corresponding to the three separate regions shown in Fig.~\ref{regions}.   Here,
 the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of ${\bf J}_{\rm PFF}$ 
 will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}_{\rm TF}$ necessary to 
 introduce tin-foil boundary conditions is detailed.
+
+
+\begin{figure}
+\resizebox*{3.5in}{!}{\includegraphics{Regions.eps}}\label{regions}
+\caption{Schematic of the regions contributing to $N$-scaling summation of the Coulomb matrix.
+The inner cells that make up $V_{\rm in}$ provide a buffer region that guarantees convergence of the multipole 
+expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
+periodic far-field region, $V_{\rm PFF}$, is the spherically ordered lattice extending
+to infinity but excluding $V_{\rm in}$.  For large cells and/or high order multipole 
+expansions, $V_{\rm in}$ includes just the unit cell and its nearest 27 neighbors.  In fast multipole
+method notation this corresponds to a well-separated index of unity.  However, for smaller cells and/or lower 
+order multipole expansions, $V_{\rm in}$ tends to a spherical distribution of cells surrounding the unit cell.   
+Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  $S_{\infty}$, which must be
+be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with Ewald summation.}
+\end{figure}
+
 
 \newpage
 \newpage
@@ -519,7 +496,7 @@ and $\tau$ is a threshold controling the precision. This expression is developed
 stemming from new error bounds for the tree-code MAC that are both cheap and sensitive to the particulars
 of the expansion, including magnitude of the charges etc, captured by the  Uns{\"o}ld weight ${\cal C}$.  Because 
 ${\cal C}$ will fluctuate slightly with the density between self-consistent-field cycles, so to will the
-expansion order $p$.  
+expansion order~$p$.  
 
 \newpage
 \newpage
@@ -534,7 +511,8 @@ strongly dependent on ordering of the direct sum; as the Nijboer and De Wette
 summation corresponds to spherical summation due to symmetry of the real/reciprocal space
 partition, the appropriate correction is \cite{Redlack72} 
 \begin{equation}
-\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + \frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right),
+\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + \frac{2\pi }
+{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right),
 \label{EW_pot}
 \end{equation}
 where ${\bf D}$ is the system dipole moment and $Q$ is trace of the system quadrupole, and we have assumed origin centering, 
@@ -545,8 +523,6 @@ J_{ab}^{TF}  = \frac{2\pi }{3V_{\rm UC}} \left(  Q\, S_{ab}-2 \, \mathbf{d}_{ab}
 with  $S_{ab}$ an element of the overlap matrix, and ${\bf d}_{ab}$ the
 dipole moment of the distribution $\rho^\infty_{ab}$.  
 
-\newpage
-\newpage
 
 \begin{figure}
 \resizebox*{3.5in}{!}{\includegraphics{BoxUC.eps}}
@@ -554,6 +530,9 @@ dipole moment of the distribution $\rho^\infty_{ab}$.
 \caption{Transformation between the rectangular integration volume $V_\Box$ employed by HiCu and the
          unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a}, {\bf b} and {\bf c}.}
 \end{figure}
+
+\newpage
+\newpage
 
 \section{Periodic exchange-correlation}
 
@@ -611,21 +590,19 @@ Next, we directly calculate the integral of equation (\ref{Kxc_pbc_0}),
 where we obtain significant increase in efficacy by exploiting the
 localization of the atomic orbitals. 
 }
-\newpage
-\newpage
 
 \begin{table}
 \caption{Comparison of {\sc Crystal98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
-8-511/BLYP level of theory at a {\it verytight} accuracy level. The lattice coordinates for 
+8-511/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
 $N_{\rm at}=2$ and 8 are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
 \colrule
-{\sc MondoSCF}      & $2^f$  &  -622.391011  & -311.195506  \\
+{\sc MondoSCF}      & $2^f$  &  -622.39101   & -311.19551  \\
 {\sc Crystal98}     & $2^f$  &  -622.3911    & -311.1955    \\
-{\sc MondoSCF}      & $8^g$  &  -2490.00163  & -311.250204  \\
+{\sc MondoSCF}      & $8^g$  &  -2490.0016   & -311.25020  \\
 {\sc Crystal98}     & $8^g$  &  -2490.0013   & -311.25016   \\
 \botrule
 $ ^f$Triclinic \\
@@ -642,13 +619,13 @@ $ ^g$Cubic
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
 \colrule
-{\sc MondoSCF}  & 2$^f$    &   -610.975355  & -305.487677   \\
-                & 8$^g$    &  -2444.35836   & -305.544795   \\
-                & 16$^f$   &  -4888.70023   & -305.543765   \\
-                & 54$^f$   & -16499.4900    & -305.546111   \\
-                & 64$^g$   & -19554.9556    & -305.546181   \\
-                & 128$^f$  & -39109.9115    & -305.546184   \\
-                & 216$^g$  & -65997.9768    & -305.546185   \\ 
+{\sc MondoSCF}  & 2$^f$    &   -610.97536  & -305.48768   \\
+                & 8$^g$    &  -2444.3584   & -305.54480   \\
+                & 16$^f$   &  -4888.7002   & -305.54377   \\
+                & 54$^f$   & -16499.490    & -305.54611   \\
+                & 64$^g$   & -19554.956    & -305.54618   \\
+                & 128$^f$  & -39109.912    & -305.54618   \\
+                & 216$^g$  & -65997.977    & -305.54619   \\ 
 \hline
 {\sc Crystal98} & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
@@ -671,13 +648,13 @@ $ ^g$Cubic  \\
 \toprule
 Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
 \colrule
-{\sc MondoSCF}  & 2$^f$    &  -275.090965  & -137.545482  \\
-                & 8$^g$    &  -1101.72945  & -137.716181  \\
-                & 16$^f$   &  -2203.69044  & -137.730653  \\
-                & 54$^f$   &  -7437.79892  & -137.737017  \\
-                & 64$^g$   &  -8815.21310  & -137.737705  \\
-                & 128$^f$  &  -17630.4304  & -137.737737  \\
-                & 216$^g$  &  -29751.3517  & -137.737739  \\ 
+{\sc MondoSCF}  & 2$^f$    &  -275.09097  & -137.54548  \\
+                & 8$^g$    &  -1101.7295  & -137.71618  \\
+                & 16$^f$   &  -2203.6904  & -137.73065  \\
+                & 54$^f$   &  -7437.7989  & -137.73702  \\
+                & 64$^g$   &  -8815.2131  & -137.73771  \\
+                & 128$^f$  &  -17630.430  & -137.73774  \\
+                & 216$^g$  &  -29751.352  & -137.73774  \\ 
 \hline
 {\sc Crystal98} & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
@@ -710,9 +687,6 @@ $ ^g$Cubic  \\
 \end{table}
 
 
-\newpage
-\newpage
-
 \section{Implementation}
 
 All calculations were implemented in a serial version of {\sc MondoSCF} v1.0$\alpha$7, a suite of 
@@ -728,8 +702,6 @@ employs a general code for multipole contraction, allowing expansion through $p=
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
 matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.
 All calculations were performed with $C_1$ (no) symmetry.
-\newpage
-\newpage
 
 
 \begin{figure}
@@ -770,7 +742,8 @@ in {\sc Crystal98}, an approximation not used by {\sc MondoSCF}.
 %
 
 In Table~\ref{NaCl8511}, comparision is made for $\Gamma$-point NaCl with the 8-511G\cite{} basis set
-and BLYP functional \cite{Becke88,ABecke96}, while in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
+and BLYP functional \cite{DFT_LYP:88,BLYP:88}, while in Table~\ref{NaClGammaPt} convergence of the supercell 
+$\Gamma$-point approximation 
 is demonstrated for NaCl with the STO-3G basis set and the local density approximation\cite{}.
 In Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
 to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G basis set \cite{} and the BLYP functional.
@@ -779,8 +752,6 @@ diamond, using the {\sc MondoSCF} {\it good} precsion (targeting 6 digits), the 
 6-31G* basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} employs 
 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
-\newpage
-\newpage
 
 \section{Scaling}
 
@@ -798,7 +769,8 @@ of cubic diamond at the 6-21G*/BLYP level of theory using a {\it good} (6 digit)
          of 6 digits in the total energy.}
 \end{figure}
 
-Demonstrating perfect linear scaling at the outset,  Fig.~\ref{Scaling_Matrix_Build} shows the CPU time for $\bf J$ and $\bf K_{\rm xc}$
+Demonstrating perfect linear scaling at the outset,  Fig.~\ref{Scaling_Matrix_Build} shows the CPU time for 
+$\bf J$ and $\bf K_{\rm xc}$
 builds with  6-21G*\cite{}/BLYP diamond at its standard density.  These timings coorespond to a {\it good} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
 Shown in Fig.~\ref{} is the precision of the computed energies, obtained by performing a second set of calculations with
@@ -1018,7 +990,9 @@ and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 
-\section{Coordinates of Validation Suite}\label{FracCoords}
+\section{Coordinates of Validation Suite}\label{FracCoords}~
+%
+%
 %
 \begin{table}
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of NaCl, cooresponding to the 
@@ -1033,9 +1007,9 @@ Na &    0.000 &  0.000 &  0.000  \\
 Cl &    0.500 &  0.500 &  0.500  \\
 \botrule
 \end{tabular}}
-\end{table}
 %
-\begin{table}
+%
+%
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
          calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
          $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
@@ -1048,9 +1022,9 @@ O  &    0.000 &   0.000 &  0.000  \\
 Mg &    0.500 &   0.500 &  0.500  \\
 \botrule
 \end{tabular}}
-\end{table}
 %
-\begin{table}
+%
+%
 \caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
          reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
 \center{
@@ -1068,10 +1042,9 @@ C &     0.125 &    0.625 &    0.625  \\
 C &     0.375 &    0.875 &    0.875  \\
 \botrule
 \end{tabular}}
-\end{table}
-
 %
-\begin{table}
+%
+%
 \caption{The various thresholds which enter into our four levels of accuracy}
 \label{Table:AccurLevels}
 \center{
@@ -1082,13 +1055,10 @@ Level  & Matrix & Penatration & QCTC/ONX & Distrabution \\
 loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
 good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
 tight     & $10^{-6}$ & $10^{-7}$ & $10^{-10}$ & $10^{-12}$ \\
-verytight & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-14}$ \\
+%verytight & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-14}$ \\
 \botrule
 \end{tabular}}
-
 \end{table}
 
-
-\vfill\vfill\vfill
 
 \end{document}
