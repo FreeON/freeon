@@ -186,17 +186,11 @@ CONTAINS
     INTEGER    :: I
     !-----------------------------------------------------------------------!
     IF(G%PBC%InAtomCrd)THEN
-       ! These are the two Cartesian coordinate arrays       
-       G%AbCarts%D=G%Carts%D
-       DO I=1,G%NAtms
-          ! ... and here are the two fractional coordinate arrays
-          G%BoxCarts%D(:,I)=AtomToFrac(G,G%Carts%D(:,I))
-          G%AbBoxCarts%D(:,I)=AtomToFrac(G,G%Carts%D(:,I))
-       ENDDO
+       CALL WrapAtoms(G)
     ELSE
        ! These are the two fractional coordinate arrays ... 
-       G%BoxCarts%D=G%Carts%D
-       G%AbBoxCarts%D=G%Carts%D
+       G%BoxCarts%D=G%AbCarts%D
+       G%AbBoxCarts%D=G%AbCarts%D
        ! ... and here are the two Cartesian coordinate arrays
        DO I=1,G%NAtms
           G%Carts%D(:,I)=FracToAtom(G,G%BoxCarts%D(:,I))
