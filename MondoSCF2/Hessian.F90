@@ -835,7 +835,8 @@ CONTAINS
      !
      CALL New(InvMat,(/NDim,NDim/))
      CALL SetDSYEVWork(NDim**2)
-     CALL FunkOnSqMat(NDim,AbsInv,FullMat%D,InvMat%D,Unit_O=6)
+     CALL FunkOnSqMat(NDim,AbsInv,FullMat%D,InvMat%D,&
+                      Unit_O=6,PosDefMat_O=.FALSE.)
      CALL UnSetDSYEVWork()
      !
      CALL New(Vect1,NDim)

@@ -4492,7 +4492,8 @@ CONTAINS
      CALL Sp1x1ToFull(IGc%I,JGc%I,AGc%D,NCart,NCart,FullGc)
      !
      CALL SetDSYEVWork(NCart)
-     CALL FunkOnSqMat(NCart,Inverse,FullGc%D,FullGcInv%D)
+     CALL FunkOnSqMat(NCart,Inverse,FullGc%D,FullGcInv%D, &
+                      PosDefMat_O=.FALSE.)
      CALL UnSetDSYEVWork()
      !
      CALL DGEMM_NNc(NCart,NCart,1,One,Zero,FullGcInv%D,Vect1%D,Vect2%D)
