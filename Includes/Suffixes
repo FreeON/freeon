@@ -29,10 +29,9 @@ COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
 #	rm -f $*.$(LIST_POSTFIX)
 #
 .C.o:   
-	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.C $*.x
-	cp $(COPY_RIGHT_C) $*.c; cat $*.x >> $*.c
-	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.C
-	rm -f $*.x
+	rm -f $*.c
+	cp $(COPY_RIGHT_C) $*.c; cat $*.C >> $*.c
+	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.c
 #
 ################################################################
 #       RULES FOR MAKING A RELEASE
