@@ -20,7 +20,7 @@ MODULE OptionKeys
   ! Restricted quartic Trace Correcting Purification
   CHARACTER(LEN=3),  PARAMETER :: SCF_SP4            ='TC4'
   INTEGER,           PARAMETER :: SP4_R_SCF          =58638505 
-  ! Restricted quartic Trace Re-Setting Purification 
+  ! Restricted quartic Trace Re-Setting Purification
   CHARACTER(LEN=4),  PARAMETER :: SCF_TS4            ='TRS4'
   INTEGER,           PARAMETER :: TS4_R_SCF          =58638506 
   !---------------------------------------------------------
@@ -96,4 +96,16 @@ MODULE OptionKeys
   !
   CHARACTER(LEN=9),   PARAMETER :: NEB_SPRING        ='NEBSpring'
   !------------------------------------------------------------------------------
+  !------------------------------------------------------------------------------
+  ! Options: Output=
+  CHARACTER(LEN=6),  PARAMETER :: OUTPUT_OPTION       ='Output'
+  !
+  CHARACTER(LEN=3),  PARAMETER :: OUTPUT_PDB          ='PDB'
+  INTEGER,           PARAMETER :: PDB_FILE	      = -40
+  !
+  CHARACTER(LEN=3),  PARAMETER :: OUTPUT_XYZ          ='XYZ'
+  INTEGER,           PARAMETER :: XYZ_FILE	      = -41
+  !
+  CHARACTER(LEN=3),  PARAMETER :: OUTPUT_XCD          ='XSF'
+  INTEGER,           PARAMETER :: XSF_FILE	      = -42
 END MODULE OptionKeys
