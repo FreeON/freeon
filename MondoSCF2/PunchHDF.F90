@@ -111,6 +111,7 @@ CONTAINS
        CALL Put(BIG_DBL,'dmax')
        CALL Put(BIG_DBL,'diiserr')
        CALL Put(.TRUE.,'programfailed')
+       CALL Put(.FALSE.,'archivedensity')
 #ifdef PARALLEL
        CALL Put(0,'LineLocExist')
        CALL New(ETDirArr,P%NSpace-1)

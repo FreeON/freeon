@@ -275,7 +275,6 @@ CONTAINS
              ETotO=1D10
           ENDIF
        ENDIF
-       CALL CloseHDFGroup(HDF_CurrentID)
        ! Load current energies
        G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
        Converged(iCLONE)=NOT_CONVERGE
@@ -395,6 +394,14 @@ CONTAINS
              Converged(iCLONE)=DIIS_NOPATH
           ENDIF
        ENDIF
+       IF(DoDIIS.AND.DIISB<DIISA)THEN
+          ! If DIIS is making progress, then turn on archivation of the density
+          CALL Put(.TRUE.,'ArchiveDensity')
+       ELSE
+          ! otherwise, dont archive a potential instability
+          CALL Put(.FALSE.,'ArchiveDensity')
+       ENDIF       
+       CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)
     IF(cSCF>1)ConvergedQ=NOT_CONVERGE
