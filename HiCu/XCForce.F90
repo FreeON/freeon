@@ -101,6 +101,7 @@ PROGRAM XCForce
   ENDDO
 !---------------------------------------------------------------
 ! Update forces
+  CALL PPrint(XCFrc,'XCFrce',Unit_O=6)
   CALL PPrint(XCFrc,'XCFrce')
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+XCFrc%D

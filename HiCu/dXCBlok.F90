@@ -30,7 +30,7 @@ MODULE dXCBlok
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab
+                                                   Pab,NewEx
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
@@ -47,11 +47,6 @@ MODULE dXCBlok
        KB=Prim%KB
        Prim%AB2=Pair%AB2
        Vck=Zero
-!       PNorm=Zero
-!       DO IA=1,Pair%NA; DO IB=1,Pair%NB
-!          PNorm=PNorm+P(IA,IB)**2
-!       ENDDO; ENDDO
-!       PNorm=SQRT(PNorm)
 !----------------------------------
        IndexA=0                  
        DO CFA=1,BS%NCFnc%I(KA)    
@@ -81,12 +76,6 @@ MODULE dXCBlok
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
-!---------------------------------------------------------------------------
-!               Evaluate this primitives Ket contribution to Kxc_ab
-                Ket=Zero
-                PBox%BndBox(1,:)=Prim%P(1)
-                PBox%BndBox(2,:)=Prim%P(2)
-                PBox%BndBox(3,:)=Prim%P(3)
 !-----------------------------------------------------------------------------------------
 !               Find the maximum extent of this primitive
                 PExtent=Zero
@@ -100,12 +89,18 @@ MODULE dXCBlok
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
                       Pab=P(IA,IB)
                       DO K=1,3
-                         PExtent=MAX(PExtent, & 
-                                     Extent(EllA+EllB,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauRho,ExtraEll_O=2))
+                         PExtent=MAX(PExtent,                         &
+                                      Extent(EllA+EllB+1,Prim%Zeta,   &
+                                             Pab*dHGBra%D(:,IA,IB,K), &
+                                             TauRho,ExtraEll_O=1))
                       ENDDO
                    ENDDO
                 ENDDO
                 IF(PExtent>Zero)THEN
+                   Ket=Zero
+!                  Set BBox for this primitive
+                   PBox%BndBox(:,1)=Prim%P
+                   PBox%BndBox(:,2)=Prim%P
                    PBox=ExpandBox(PBox,PExtent)
 !                  Walk the walk
                    CALL KxcWalk(CubeRoot)
@@ -140,6 +135,21 @@ MODULE dXCBlok
           Vck=Two*Vck
        ENDIF
      END FUNCTION dXC
+
+     FUNCTION Extent2(HGTF) RESULT (R)
+       INTEGER                         :: Ell,ExtraEll
+       REAL(DOUBLE)                    :: Zeta,Tau
+       REAL(DOUBLE),DIMENSION(:)       :: HGTF
+       REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,HGPot
+       REAL(DOUBLE)                    :: FUN,F0,F1
+       INTEGER                         :: J,L,K,M,N,LMN,SN,LL
+       REAL(DOUBLE)                    :: ConvergeTo,RMIN,RMAX,R,RErr
+       LOGICAL                         :: Potential
+
+
+       WRITE(*,*)' HGTF = ',HGTF
+
+     END FUNCTION Extent2
 !====================================================================================================
 !
 !====================================================================================================

@@ -205,6 +205,9 @@ MODULE KxcGen
                    ENDDO
                 ENDDO
                 IF(PExtent>Zero)THEN
+!                  Set BBox for this primitive
+                   PBox%BndBox(:,1)=Prim%P
+                   PBox%BndBox(:,2)=Prim%P
                    PBox=ExpandBox(PBox,PExtent)
 !                  Walk the walk
                    Ket=Zero
