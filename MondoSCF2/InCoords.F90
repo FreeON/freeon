@@ -846,6 +846,7 @@ CONTAINS
      INTEGER,DIMENSION(:)        :: AtNum
      !    
      PIHalf=PI*Half
+    !SelectTors=.FALSE.
      SelectTors=.TRUE.
      NBond=SIZE(BondIJ%I,2)
      NTorsion=0
@@ -1761,6 +1762,12 @@ CONTAINS
              EXIT            
            ENDIF
            !
+         ! CALL INTCValue(IntCs,ActCarts%D, &
+         !                GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         ! CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+         ! IntCDispl%D=IntCs%Value%D-ValSt%D
+         ! CALL MapAngleDispl(IntCs,IntCDispl%D) 
+           ! 
            VectIntAux%D=VectIntReq%D-ValSt%D  
            CALL MapAngleDispl(IntCs,VectIntAux%D)
            VectIntReq%D=ValSt%D+0.50D0*VectIntAux%D
@@ -1938,6 +1945,7 @@ CONTAINS
      TYPE(INTC)                :: IntCs
      REAL(DOUBLE),DIMENSION(:) :: VectIntReq,ValSt,IntCDispl
      REAL(DOUBLE)              :: MaxStre,MaxAngle,Crit,Conv
+     REAL(DOUBLE)              :: MaxConv,MaxDispl
      LOGICAL                   :: DoRepeat
      INTEGER                   :: I,IRep
      !
@@ -1954,18 +1962,16 @@ CONTAINS
          Conv=180.D0/PI
        ENDIF
        IF(ABS(IntCDispl(I))>Crit) THEN
-       ! VectIntReq(I)=ValSt(I)+ &
-       !                 0.50D0*(VectIntReq(I)-ValSt(I))
-         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',Conv*IntCDispl(I)
-         WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',Conv*IntCDispl(I)
+         VectIntReq(I)=ValSt(I)+ &
+                         0.50D0*(VectIntReq(I)-ValSt(I))
+         MaxConv=Conv
+         MaxDispl=IntCDispl(I)
          DoRepeat=.TRUE.
-         EXIT
        ENDIF
      ENDDO
      IF(DoRepeat) THEN
-       WRITE(*,*) 'Halve displ'
-       WRITE(Out,*) 'halve displ'
-       VectIntReq=ValSt+0.50D0*(VectIntReq-ValSt)
+       WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
+       WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
      ENDIF
    END SUBROUTINE CheckBigStep
 !
@@ -3133,8 +3139,8 @@ CONTAINS
      CALL BMatrix(XYZ,IntCs,B,PBCDim, &
                   GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
      CALL CleanBConstr(IntCs,B,NatmsLoc)
-   ! CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
-write(*,*) 'B%BL%D=0 : hardwired constraints on the lattice params.'
+  !  CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+write(*,*) 'B%BL hardwired to zero'
 B%BL%D=Zero
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
@@ -3197,7 +3203,7 @@ B%BL%D=Zero
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
-     CALL GetLattProj(XYZ,IntCsE,PBCDim,P,NZ_O=NZ,NZP_O=NZP)
+     CALL GetLattProj(XYZ,IntCsE,PBCDim,P,NZP_O=NZP)
      !
      NZ=ISpB%I(IntCsE%N+1)-1
      CALL New(ISpBC,IntCsE%N+1)
@@ -3214,12 +3220,12 @@ B%BL%D=Zero
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE GetLattProj(XYZ,IntCsE,PBCDim,P,NZ_O,NZP_O)
+   SUBROUTINE GetLattProj(XYZ,IntCsE,PBCDim,P,NZP_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(INTC)                  :: IntCsE
      INTEGER                     :: PBCDim,NCoinc,NatmsLoc,I,J,K,L
      INTEGER                     :: NZ,N,NZP
-     INTEGER,OPTIONAL            :: NZ_O,NZP_O
+     INTEGER,OPTIONAL            :: NZP_O
      TYPE(DBL_RNK2)              :: AL,BL
      REAL(DOUBLE),DIMENSION(9,9) :: P,PRot  
      REAL(DOUBLE),DIMENSION(9)   :: AuxBL
@@ -3252,7 +3258,6 @@ B%BL%D=Zero
        NZP=0
        P=Zero
      ENDIF
-     IF(PRESENT(NZ_O)) NZ_O=NZ 
      IF(PRESENT(NZP_O)) NZP_O=NZP
    END SUBROUTINE GetLattProj
 !
@@ -4041,9 +4046,10 @@ B%BL%D=Zero
      INTEGER                     :: NStreLinb,NBendLinb,JJ,IC,IEx
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
-     LOGICAL                     :: RepeatChk,DoVdW,Found
+     LOGICAL                     :: RepeatChk,DoVdW,Found,AllTors
      INTEGER,DIMENSION(:)        :: AtNum
      !
+     AllTors=.FALSE.
      Conv=180.D0/PI
      NIntC=SIZE(IntCs%Def%C)
      NatmsLoc=SIZE(Top12%I,1)
@@ -4158,36 +4164,38 @@ B%BL%D=Zero
                IF(AtNum(I4)>AtNum(II4)) II4=I4
              ENDIF
              !
-           ! I1=II1
-           ! I4=II4
-           !!IF(Found) THEN
-           !   NIntC=NIntC+1
-           !   IntC_New%Def%C(NIntC)(1:5)='TORS '
-           !   IntC_New%Atoms%I(NIntC,1)=I1
-           !   IntC_New%Atoms%I(NIntC,2)=I2
-           !   IntC_New%Atoms%I(NIntC,3)=I3
-           !   IntC_New%Atoms%I(NIntC,4)=I4
-           !   IntC_New%Value%D(NIntC)=Zero
-           !   IntC_New%Constraint%L(NIntC)=.FALSE.
-           !   IntC_New%ConstrValue%D(NIntC)=Zero   
-           !   IntC_New%Active%L(NIntC)=.TRUE. 
-           !!ENDIF
+             IF(AllTors) THEN
+               I1=II1
+               I4=II4
+               NIntC=NIntC+1
+               IntC_New%Def%C(NIntC)(1:10)='TORS      '
+               IntC_New%Atoms%I(NIntC,1)=I1
+               IntC_New%Atoms%I(NIntC,2)=I2
+               IntC_New%Atoms%I(NIntC,3)=I3
+               IntC_New%Atoms%I(NIntC,4)=I4
+               IntC_New%Value%D(NIntC)=Zero
+               IntC_New%Constraint%L(NIntC)=.FALSE.
+               IntC_New%ConstrValue%D(NIntC)=Zero   
+               IntC_New%Active%L(NIntC)=.TRUE. 
+             ENDIF
            ENDIF
          ENDDO
        ENDDO
-       I1=II1
-       I4=II4
-       IF(Found) THEN
-         NIntC=NIntC+1
-         IntC_New%Def%C(NIntC)(1:5)='TORS '
-         IntC_New%Atoms%I(NIntC,1)=I1
-         IntC_New%Atoms%I(NIntC,2)=I2
-         IntC_New%Atoms%I(NIntC,3)=I3
-         IntC_New%Atoms%I(NIntC,4)=I4
-         IntC_New%Value%D(NIntC)=Zero
-         IntC_New%Constraint%L(NIntC)=.FALSE.
-         IntC_New%ConstrValue%D(NIntC)=Zero   
-         IntC_New%Active%L(NIntC)=.TRUE. 
+       IF(.NOT.AllTors) THEN
+         I1=II1
+         I4=II4
+         IF(Found) THEN
+           NIntC=NIntC+1
+           IntC_New%Def%C(NIntC)(1:5)='TORS '
+           IntC_New%Atoms%I(NIntC,1)=I1
+           IntC_New%Atoms%I(NIntC,2)=I2
+           IntC_New%Atoms%I(NIntC,3)=I3
+           IntC_New%Atoms%I(NIntC,4)=I4
+           IntC_New%Value%D(NIntC)=Zero
+           IntC_New%Constraint%L(NIntC)=.FALSE.
+           IntC_New%ConstrValue%D(NIntC)=Zero   
+           IntC_New%Active%L(NIntC)=.TRUE. 
+         ENDIF
        ENDIF
      ENDDO
      !
