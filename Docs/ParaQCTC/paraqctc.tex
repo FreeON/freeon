@@ -1,5 +1,5 @@
-%\newcommand{\commentoutA}[1]{} \newcommand{\commentoutB}[1]{#1}
-\newcommand{\commentoutA}[1]{#1} \newcommand{\commentoutB}[1]{}
+\newcommand{\commentoutA}[1]{} \newcommand{\commentoutB}[1]{#1}
+%\newcommand{\commentoutA}[1]{#1} \newcommand{\commentoutB}[1]{}
 \newcommand{\tTT}{t_{TT}}
 \newcommand{\tTB}{t_{TB}}
 
@@ -431,7 +431,7 @@ processors compares favorably with the speedup of about 6.0 of Sosa
 {\it et al.}\cite{Sosa_00v26}, which is for an entire single-point
 energy calculation with HF/3-21G.
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{taxol-6-31g-6-31gss.eps}}
 \caption{ 
@@ -442,9 +442,9 @@ parallel QCTC speedups, respectively, as explained in the main text.
 }
 \label{fig:taxol}
 \end{figure}
-}
+%}
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{NProc_TTBTTTRatio.eps}}
 \caption{ 
@@ -453,9 +453,9 @@ to traverse the density tree ($\tTT$), as a function of the number of
 processors.  }
 \label{fig:time_ratio}
 \end{figure}
-}
+%}
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{sys1Iter2_sys2Iter3.eps}}
 \caption{ 
@@ -463,9 +463,9 @@ Scaling of parallel QCTC on 2 cluster of water molecules with
 BLYP/6-31G**. Speedups are relative to a 2-processor calculation.  }
 \label{110And200WaterOnGood}
 \end{figure}
-}
+%}
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{sys1Iter2_sys7Iter3.eps}}
 \caption{ 
@@ -474,9 +474,9 @@ BLYP/6-31G** on ``good'' and ``tight'' accuracies.  Speedups are
 relative to a 2-processor calculation.  }
 \label{fig:110WaterOnGoodAndTight}
 \end{figure}
-}
+%}
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{NProc_TRatio_110H2O_GoodAndTight.eps}}
 \caption{ 
@@ -486,7 +486,9 @@ number of processors, for 110-molecule water cluster (BLYP/6-31G**)
 calculations with a ``good'' and ``tight'' accuracy.  }
 \label{fig:NProc_TRatio_110H2O_GoodAndTight}
 \end{figure}
-} Similar scaling tests have been performed on a 110-molecule and
+%} 
+
+Similar scaling tests have been performed on a 110-molecule and
 200-molecule water clusters with BLYP/6-31G** at a ``good'' level of
 accuracy.  The result of the scaling tests is shown in
 Fig.~\ref{110And200WaterOnGood}. It is found that the equal time
@@ -516,7 +518,7 @@ due to the decrease in the $\tTB/\tTT$ ratio, as shown in
 Fig.~\ref{fig:NProc_TRatio_110H2O_GoodAndTight}.
 
 
-\commentoutA{
+%\commentoutA{
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics[clip]{Sys3Iter3_Sys8Iter3.eps}}
 \caption{ 
@@ -524,7 +526,7 @@ Scaling of parallel QCTC on $\beta$-HMX and PETN with PBE/6-31G**.
 Speedups are relative to a 2-processor calculation.  }
 \label{fig:111DHMX212PETN}
 \end{figure}
-}
+%}
 
 Finally, for the periodic systems Fig.~\ref{fig:111DHMX212PETN} shows
 that the overall parallel QCTC with PBE/6-31G** at the ``good'' level
