@@ -380,7 +380,7 @@ CONTAINS
     DoDIIS=cSCF>0
     Modl=O%Models(cBAS)
     CALL Invoke('QCTC',N,S,M)
-    IF(S%SubAction/=SCF_GUESSEQCORE)THEN
+    IF(S%Action/=SCF_GUESSEQCORE)THEN
        IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
        IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
     ENDIF
