@@ -39,7 +39,7 @@ PROGRAM MakePFFT
 #else
   CALL Get(GM,Tag_O=CurGeom)
   CALL SetCellNumber(GM)
-#endif
+#endif 
   CALL Put_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom) 
 ! Set Up the Multipoles  
   CALL MultipoleSetUp()
