@@ -1,4 +1,3 @@
-      SELECT CASE(LCode)
       CASE(0)
 !       -------------------------------- Lp=0, Mp = 0-------------------------------------
         COne=Cpq(0)*Q%C(0)
@@ -3004,4 +3003,3 @@
          CALL CTraX706(Q)
       CASE(707)
          CALL CTraX707(Q)
-      END SELECT

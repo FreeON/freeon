@@ -1,5 +1,3 @@
-      J=AINT(T*Gamma_Grid)
-      SELECT CASE(Ell)
       CASE(0)
         AuxR(0)=Upq*(F0_0(J)+T*(F0_1(J)+T*(F0_2(J)+T*(F0_3(J)+T*F0_4(J)))))
         r(1) = AuxR(0)
@@ -828,4 +826,3 @@
         o1=o2*o1
         AuxR(13)=o1*G(13)
         CALL AuxInt13(PQx,PQy,PQz)
-      END SELECT

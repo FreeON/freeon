@@ -1,4 +1,3 @@
-      SELECT CASE(Ell)
       CASE(0)
          Cpq(0)=One/SQRT(PQ2)
       CASE(1)
@@ -3661,4 +3660,3 @@
          TT=PQToThMnsL*ALegendreP(119)
          Spq(119)=TT*Sine(14)
          Cpq(119)=TT*Cosine(14)
-      END SELECT

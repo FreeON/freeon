@@ -1,4 +1,3 @@
-      SELECT CASE(LCode)
       CASE(0)
         HGKet(1)=HGKet(1) + Q%Co(1)*r(1)
       CASE(1)
@@ -1057,4 +1056,3 @@
         CALL HGTraX705(PQx,PQy,PQz,Q)
       CASE(706)
         CALL HGTraX706(PQx,PQy,PQz,Q)
-      END SELECT
