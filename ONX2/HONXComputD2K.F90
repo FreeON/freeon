@@ -98,12 +98,12 @@ CONTAINS
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE)               :: TmBeg,TmEnd
 #endif
-    REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB
+    REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB,TmpHess(12,12)!TmpHess(78)
     REAL(DOUBLE)               :: Dcd,Dab,NInts,NIntsTot
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2) :: Work
     REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
-    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
+    REAL(DOUBLE) , DIMENSION(78*MaxFuncPerAtmBlk**4) :: C
     !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
     REAL(DOUBLE) , DIMENSION( 9*MaxFuncPerAtmBlk**4) :: CC
     !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
@@ -135,8 +135,8 @@ CONTAINS
     isize=0
     do i=1,natoms
        isize=MAX(isize,BSc%BfKnd%I(GMc%AtTyp%I(i)))
-       IF(12*(BSc%BfKnd%I(GMc%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
-          write(*,*) 'size',12*BSc%BfKnd%I(GMc%AtTyp%I(i))**4
+       IF(78*(BSc%BfKnd%I(GMc%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
+          write(*,*) 'size',78*BSc%BfKnd%I(GMc%AtTyp%I(i))**4
           STOP 'Incrase the size of C'
        ENDIF
     enddo
@@ -358,7 +358,7 @@ CONTAINS
                    !
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
-                   CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0D0)
+                   CALL DBL_VECT_EQ_DBL_SCLR(78*NIntBlk,C(1),0.0D0)
                    !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
                    IF(DoLHess) CALL DBL_VECT_EQ_DBL_SCLR(9*NIntBlk,CC(1),0.0D0)
                    !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
@@ -414,7 +414,18 @@ CONTAINS
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
                             !
                             ! The integral interface.
-!H                            INCLUDE 'd2ERIInterfaceB.Inc'
+                            IF(IntType.EQ.1010101) THEN
+                               CALL hIntB1010101(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & 
+                                    BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & 
+                                    ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & 
+                                    OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk, &
+                                    GMc%PBC,C(1))
+                               write(*,*) C(1)
+                            ELSE
+                               write(*,*) 'Doesn''t support that integral type:',IntType
+                               STOP 'In ComputD2K'
+                            ENDIF
+                            !HINCLUDE 'hERIInterfaceB.Inc'
                             !
                             NInts=NInts+DBLE(LocNInt)
 #ifdef GTRESH
@@ -425,38 +436,96 @@ CONTAINS
                    ENDDO
                    !
                    !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
-                   IF(DoLHess) THEN
-                      DO JXYZ=1,3
-                         DO IXYZ=1,3
-                            IF(GMc%PBC%AutoW%I(IXYZ).EQ.1.AND.GMc%PBC%AutoW%I(JXYZ).EQ.1) THEN
-                               Indx=3*NIntBlk*(JXYZ-1)+NIntBlk*(IXYZ-1)+1
-                               ! Compute Stress Components.
-#ifdef ONX2_PARALLEL
-                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
-                                    &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,   &
-                                    &     Work(1),1)
-                               LatHessX%D(IXYZ,JXYZ)=LatHessX%D(IXYZ,JXYZ) &
-                                    & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
-#else
-                               !write(*,*) 'CC(Indx)',CC(Indx)
-                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
-                                    &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
-                                    &     Work(1),1)
-                               LatHessX%D(IXYZ,JXYZ)=LatHessX%D(IXYZ,JXYZ) &
-                                    & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-#endif
-                            !
-                            ENDIF
-                         ENDDO
-                      ENDDO
-                   ENDIF
+!!$                   IF(DoLHess) THEN
+!!$                      DO JXYZ=1,3
+!!$                         DO IXYZ=1,3
+!!$                            IF(GMc%PBC%AutoW%I(IXYZ).EQ.1.AND.GMc%PBC%AutoW%I(JXYZ).EQ.1) THEN
+!!$                               Indx=3*NIntBlk*(JXYZ-1)+NIntBlk*(IXYZ-1)+1
+!!$                               ! Compute Stress Components.
+!!$#ifdef ONX2_PARALLEL
+!!$                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+!!$                                    &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,   &
+!!$                                    &     Work(1),1)
+!!$                               LatHessX%D(IXYZ,JXYZ)=LatHessX%D(IXYZ,JXYZ) &
+!!$                                    & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+!!$#else
+!!$                               !write(*,*) 'CC(Indx)',CC(Indx)
+!!$                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+!!$                                    &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
+!!$                                    &     Work(1),1)
+!!$                               LatHessX%D(IXYZ,JXYZ)=LatHessX%D(IXYZ,JXYZ) &
+!!$                                    & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+!!$#endif
+!!$                            !
+!!$                            ENDIF
+!!$                         ENDDO
+!!$                      ENDDO
+!!$                   ENDIF
                    !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN 
                    !
-                   ! Compute the exchange-Hessian.
+!!$                   ! Compute the exchange-Hessian.
+!!$                   DO jAtm=1,3
+!!$                   DO JXYZ=1,3
+!!$                      DO iAtm=jAtm,3
+!!$                         IMin=1
+!!$                         IF(jAtm.EQ.iAtm)IMin=JXYZ
+!!$                         DO IXYZ=1,3
+!!$
+!!$                         !TODO TODO TODO TODO TODO TODO 
+!!$                         Indx=1!TODO TODO TODO TODO TODO
+!!$                         !TODO TODO TODO TODO TODO TODO  
+!!$                         ii=3*(iAtm-1)+IXYZ
+!!$                         jj=3*(jAtm-1)+JXYZ
+!!$                         !ij=ii+(2*12-jj)*(jj-1)/2
+!!$#ifdef ONX2_PARALLEL
+!!$                         CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+!!$                              &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,    &
+!!$                              &     Work(1),1)
+!!$                         TmpHess(ii,jj)=-DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+!!$#else
+!!$                         CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
+!!$                              &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,    &
+!!$                              &     Work(1),1)
+!!$                         TmpHess(ii,jj)=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+!!$#endif
+!!$                         TmpHess(jj,ii)=TmpHess(ii,jj)
+!!$                      ENDDO
+!!$                      ENDDO
+!!$                   ENDDO
+!!$                   ENDDO
+!!$                   
+!!$                   APt=3*(AtA-1)
+!!$                   CPt=3*(AtC-1)
+!!$                   BPt=3*(AtB-1)
+!!$                   DPt=3*(AtD-1)
+!!$
+!!$                   DO J=1,3
+!!$                   DO I=1,3
+!!$                      !
+!!$                      iAtm=0;jAtm=0
+!!$                      ii=3*(iAtm-1)+I;jj=3*(jAtm-1)+J
+!!$                      HessX%D(APt+I,APt+J)=HessX%D(APt+I,APt+J)+TmpHess(ii,jj)
+!!$                      !
+!!$                      iAtm=1;jAtm=0
+!!$                      ii=3*(iAtm-1)+I;jj=3*(jAtm-1)+J
+!!$                      HessX%D(CPt+I,APt+J)=HessX%D(CPt+I,APt+J)+TmpHess(ii,jj)
+!!$                      !
+!!$                      iAtm=2;jAtm=0
+!!$                      ii=3*(iAtm-1)+I;jj=3*(jAtm-1)+J
+!!$                      HessX%D(BPt+I,APt+J)=HessX%D(Bpt+I,Apt+J)+TmpHess(ii,jj)
+!!$                      !
+!!$                      iAtm=3;jAtm=0
+!!$                      ii=3*(iAtm-1)+I;jj=3*(jAtm-1)+J
+!!$                      HessX%D(DPt+I,APt+J)=HessX%D(Dpt+I,Apt+J)+TmpHess(ii,jj)
+!!$                      !
+!!$                      
+!!$                      !....
+!!$                   ENDDO
+!!$                   ENDDO
+
+
+
                    DO IXYZ=1,3
-                      !
-                      !-----------------------------------------------------
-                      ! AtA
                       Indx=(IXYZ-1)*NIntBlk+1
                       !
 #ifdef ONX2_PARALLEL
@@ -552,6 +621,217 @@ CONTAINS
 100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputD2K
+  !
+  !
+! ---------------------------------------------------------- 
+! COMPUTES THE INTEGRAL CLASS (s s|s s) 
+! ---------------------------------------------------------- 
+  SUBROUTINE hIntB1010101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
+       OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,HESSIAN)
+    USE DerivedTypes
+    USE VScratchB
+    USE GlobalScalars
+    USE ShellPairStruct
+    USE GammaF2
+    IMPLICIT REAL(DOUBLE) (W)
+    INTEGER        :: LBra,LKet,NINT,CDOffSet
+    REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)
+    TYPE(SmallAtomInfo) :: ACInfo,BDInfo
+    TYPE(PBCInfo) :: PBC
+    REAL(DOUBLE)  :: HESSIAN(NINT,12)
+    REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz
+    REAL(DOUBLE)  :: Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
+    REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz
+    REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq
+    REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
+    REAL(DOUBLE)  :: Alpha,Beta,Gamma
+    REAL(DOUBLE), DIMENSION(4) :: HRRTmp 
+    REAL(DOUBLE), DIMENSION(1,1,1) :: HRR 
+    REAL(DOUBLE), DIMENSION(4,1,1) :: HRRA,HRRB 
+    REAL(DOUBLE), DIMENSION(1,4,1) :: HRRC 
+    real(double) HRRAA(10,1,1),HRRBB(10,1,1),HRRCC(1,10,1),HRRAB(10,1,1),HRRAC(4,4,1),HRRBC(4,4,1)
+    real(double)  :: AlpAlp,BetBet,GamGam,AlpBet,AlpGam,BetGam
+    REAL(DOUBLE)  :: VRR(4,4,0:1)
+    REAL(DOUBLE)  :: TOm,PQJ(3),FP(9)
+    INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L,IJ,i1,i2
+    EXTERNAL InitDbl
+    HRR  =BIG_DBL
+    HRRA =BIG_DBL
+    HRRB =BIG_DBL
+    HRRC =BIG_DBL
+    HRRAA=BIG_DBL
+    HRRBB=BIG_DBL
+    HRRCC=BIG_DBL
+    HRRAB=BIG_DBL
+    HRRAC=BIG_DBL
+    HRRBC=BIG_DBL
+    !
+    CALL InitDbl(1*1,HRR(1,1,1))
+    CALL InitDbl(4*1,HRRA(1,1,1))
+    CALL InitDbl(4*1,HRRB(1,1,1))
+    CALL InitDbl(1*4,HRRC(1,1,1))
+    !
+    CALL InitDbl(10,HRRAA(1,1,1))
+    CALL InitDbl(10,HRRBB(1,1,1))
+    CALL InitDbl(10,HRRCC(1,1,1))
+    CALL InitDbl(10,HRRAB(1,1,1))
+    CALL InitDbl(16,HRRAC(1,1,1))
+    CALL InitDbl(16,HRRBC(1,1,1))
+    !
+    Ax=ACInfo%Atm1X
+    Ay=ACInfo%Atm1Y
+    Az=ACInfo%Atm1Z
+    Bx=ACInfo%Atm2X
+    By=ACInfo%Atm2Y
+    Bz=ACInfo%Atm2Z
+    Cx=BDInfo%Atm1X
+    Cy=BDInfo%Atm1Y
+    Cz=BDInfo%Atm1Z
+    Dx=BDInfo%Atm2X
+    Dy=BDInfo%Atm2Y
+    Dz=BDInfo%Atm2Z
+    ABx=Ax-Bx
+    ABy=Ay-By
+    ABz=Az-Bz
+    CDx=Cx-Dx
+    CDy=Cy-Dy
+    CDz=Cz-Dz
+    !
+    DO J=1,LKet ! K^2 VRR |N0) loop 
+       Eta=PrmBufK(1,J)
+       Qx=PrmBufK(2,J)
+       Qy=PrmBufK(3,J)
+       Qz=PrmBufK(4,J)
+       Uq=PrmBufK(5,J)
+       Gamma =PrmBufK(9,J)
+       QCx=Qx-Cx
+       QCy=Qy-Cy
+       QCz=Qz-Cz
+       DO K=1,LBra ! K^2 VRR (M0| loop 
+          Zeta=PrmBufB(1,K)
+          Px=PrmBufB(2,K)
+          Py=PrmBufB(3,K)
+          Pz=PrmBufB(4,K)
+          Up=PrmBufB(5,K)
+          Alpha =PrmBufB(9,K)
+          Beta  =PrmBufB(10,K)
+          r1xZpE=One/(Zeta+Eta)
+          Upq=SQRT(r1xZpE)*Up*Uq
+          HfxZpE=Half/(Zeta+Eta)
+          r1x2E=Half/Eta
+          r1x2Z=Half/Zeta
+          ExZpE=Eta*r1xZpE
+          ZxZpE=Zeta*r1xZpE
+          Omega=Eta*Zeta*r1xZpE
+          PAx=Px-Ax
+          PAy=Py-Ay
+          PAz=Pz-Az
+          PQx=Px-Qx
+          PQy=Py-Qy
+          PQz=Pz-Qz
+          !
+          WPx = -Eta*PQx*r1xZpE
+          WPy = -Eta*PQy*r1xZpE
+          WPz = -Eta*PQz*r1xZpE
+          WQx = Zeta*PQx*r1xZpE
+          WQy = Zeta*PQy*r1xZpE
+          WQz = Zeta*PQz*r1xZpE
+          T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
+          IF(T<Gamma_Switch)THEN
+             L=AINT(T*Gamma_Grid)
+             ET=EXP(-T)
+             TwoT=Two*T
+             W2=(F2_0(L)+T*(F2_1(L)+T*(F2_2(L)+T*(F2_3(L)+T*F2_4(L)))))
+             W1=+3.333333333333333D-01*(TwoT*W2+ET)
+             W0=TwoT*W1+ET
+             VRR(1,1,0)=Upq*W0
+             VRR(1,1,1)=Upq*W1
+             VRR(1,1,2)=Upq*W2
+          ELSE
+             InvT=One/T
+             SqInvT=DSQRT(InvT)
+             VRR(1,1,0)=+8.862269254527580D-01*Upq*SqInvT
+             SqInvT=SqInvT*InvT
+             VRR(1,1,1)=+4.431134627263790D-01*Upq*SqInvT
+             SqInvT=SqInvT*InvT
+             VRR(1,1,2)=+6.646701940895685D-01*Upq*SqInvT
+          ENDIF
+          ! Generating (p0|s0)^(1)
+          VRR(2,1,1)=PAx*VRR(1,1,1)+WPx*VRR(1,1,2) 
+          VRR(3,1,1)=PAy*VRR(1,1,1)+WPy*VRR(1,1,2) 
+          VRR(4,1,1)=PAz*VRR(1,1,1)+WPz*VRR(1,1,2) 
+          ! Generating (p0|s0)^(0)
+          VRR(2,1,0)=PAx*VRR(1,1,0)+WPx*VRR(1,1,1) 
+          VRR(3,1,0)=PAy*VRR(1,1,0)+WPy*VRR(1,1,1) 
+          VRR(4,1,0)=PAz*VRR(1,1,0)+WPz*VRR(1,1,1) 
+          ! Generating (d0|s0)^(0)
+          VRR( 5,1,0)=PAx*VRR(2,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPx*VRR(2,1,1)
+          VRR( 6,1,0)=PAx*VRR(3,1,0)+WPx*VRR(3,1,1)
+          VRR( 7,1,0)=PAy*VRR(3,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPy*VRR(3,1,1)
+          VRR( 8,1,0)=PAx*VRR(4,1,0)+WPx*VRR(4,1,1)
+          VRR( 9,1,0)=PAy*VRR(4,1,0)+WPy*VRR(4,1,1)
+          VRR(10,1,0)=PAz*VRR(4,1,0)+r1x2Z*(VRR(1,1,0)-ExZpE*VRR(1,1,1))+WPz*VRR(4,1,1)
+          ! Generating (s0|p0)^(1)
+          VRR(1,2,1)=QCx*VRR(1,1,1)+WQx*VRR(1,1,2)
+          VRR(1,3,1)=QCy*VRR(1,1,1)+WQy*VRR(1,1,2)
+          VRR(1,4,1)=QCz*VRR(1,1,1)+WQz*VRR(1,1,2)
+          ! Generating (s0|p0)^(0)
+          VRR(1,2,0)=QCx*VRR(1,1,0)+WQx*VRR(1,1,1)
+          VRR(1,3,0)=QCy*VRR(1,1,0)+WQy*VRR(1,1,1)
+          VRR(1,4,0)=QCz*VRR(1,1,0)+WQz*VRR(1,1,1)
+          ! Generating (s0|d0)^(0)
+          VRR(1, 5,0)=r1x2E*VRR(1,1,0)+QCx*VRR(1,2,0)-r1x2E*ZxZpE*VRR(1,1,1)+WQx*VRR(1,2,1)
+          VRR(1, 6,0)=QCx*VRR(1,3,0)+WQx*VRR(1,3,1)
+          VRR(1, 7,0)=r1x2E*VRR(1,1,0)+QCy*VRR(1,3,0)-r1x2E*ZxZpE*VRR(1,1,1)+WQy*VRR(1,3,1)
+          VRR(1, 8,0)=QCx*VRR(1,4,0)+WQx*VRR(1,4,1)
+          VRR(1, 9,0)=QCy*VRR(1,4,0)+WQy*VRR(1,4,1)
+          VRR(1,10,0)=r1x2E*VRR(1,1,0)+QCz*VRR(1,4,0)-r1x2E*ZxZpE*VRR(1,1,1)+WQz*VRR(1,4,1)
+          ! Generating (p0|p0)^(0)
+          VRR(2,2,0)=QCx*VRR(2,1,0)+HfxZpE*VRR(1,1,1)+WQx*VRR(2,1,1)
+          VRR(2,3,0)=QCy*VRR(2,1,0)+WQy*VRR(2,1,1)
+          VRR(2,4,0)=QCz*VRR(2,1,0)+WQz*VRR(2,1,1)
+          VRR(3,2,0)=QCx*VRR(3,1,0)+WQx*VRR(3,1,1)
+          VRR(3,3,0)=QCy*VRR(3,1,0)+HfxZpE*VRR(1,1,1)+WQy*VRR(3,1,1)
+          VRR(3,4,0)=QCz*VRR(3,1,0)+WQz*VRR(3,1,1)
+          VRR(4,2,0)=QCx*VRR(4,1,0)+WQx*VRR(4,1,1)
+          VRR(4,3,0)=QCy*VRR(4,1,0)+WQy*VRR(4,1,1)
+          VRR(4,4,0)=QCz*VRR(4,1,0)+HfxZpE*VRR(1,1,1)+WQz*VRR(4,1,1)
+          ! Contracting ... 
+          AlpAlp=Alpha*Alpha
+          BetBet=Beta *Beta
+          GamGam=Gamma*Gamma
+          AlpBet=Alpha*Beta
+          AlpGam=Alpha*Gamma
+          BetGam=Beta *Gamma
+          HRR(1,1,1)=HRR(1,1,1)+VRR(1,1,0)
+          DO I1=1,10
+             HRRAA(I1,1,1)=HRRAA(I1,1,1)+AlpAlp*VRR(I1,1,0)
+             HRRBB(I1,1,1)=HRRBB(I1,1,1)+BetBet*VRR(I1,1,0)
+             HRRAB(I1,1,1)=HRRAB(I1,1,1)+AlpBet*VRR(I1,1,0)
+             HRRCC(1,I1,1)=HRRCC(1,I1,1)+GamGam*VRR(1,I1,0)
+          ENDDO
+          DO I2=1,4
+             HRRA(I2,1,1)=HRRA(I2,1,1)+Alpha*VRR(I2,1,0)
+             HRRB(I2,1,1)=HRRB(I2,1,1)+Beta *VRR(I2,1,0)
+             HRRC(1,I2,1)=HRRC(1,I2,1)+Gamma*VRR(1,I2,0)
+             DO I1=1,4
+                HRRAC(I1,I2,1)=HRRAC(I1,I2,1)+AlpGam*VRR(I1,I2,0)
+                HRRBC(I1,I2,1)=HRRBC(I1,I2,1)+BetGam*VRR(I1,I2,0)
+             ENDDO
+          ENDDO
+          !
+       ENDDO ! (M0| loop
+    ENDDO ! |N0) loop
+
+    
+
+
+
+    !TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+    !Nedd to collect integrals in HESSIAN(...)
+    !TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO 
+    
+  END SUBROUTINE hIntB1010101
   !
   !
   SUBROUTINE GetAtomPairH(AtmInfo,List,AtmPair,BSc,CS_OUT)

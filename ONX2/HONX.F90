@@ -45,7 +45,7 @@ PROGRAM HONX
   TYPE(INT_VECT)             :: APt,BPt,CPt,DPt
 #endif
   TYPE(DBL_RNK2)             :: HessX,HessAux,LatHessX,MixHessX
-  TYPE(DBL_VECT)             :: GTmp
+  TYPE(DBL_VECT)             :: HTmp
   REAL(DOUBLE)               :: KScale
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
@@ -200,6 +200,7 @@ PROGRAM HONX
   !------------------------------------------------
   ! Compute Exchange Forces.
   !
+  write(*,*) 'We are before ComputD2K'
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
   CALL ComputD2K(DFMcd,DFMab,HessX,MixHessX,LatHessX,DoLHess,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
@@ -210,6 +211,7 @@ PROGRAM HONX
   CALL CPU_TIME(Time2)
 #endif
   TmGx = Time2-Time1
+  write(*,*) 'We are after ComputD2K'
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
@@ -240,29 +242,30 @@ PROGRAM HONX
   !------------------------------------------------
   ! Add Exchange Gradient.
   !
-  CALL Get(HessAux,'hessian',Tag_O=CurGeom)
+!!$  CALL Get(HessAux,'hessian',Tag_O=CurGeom)
   KScale=ExactXScale(ModelChem)
-#ifdef ONX2_PARALLEL
-  CALL New(HessTmp,(/3,NAtoms/))
-  CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,HessTmp%D(1,1),0.0d0)
-  CALL MPI_REDUCE(HessX%D(1,1),HessTmp%D(1,1),3*NAtoms,MPI_DOUBLE_PRECISION, &
-       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  ! Print out.
-  CALL New(GTmp,3*NAtoms)
-  CALL CartRNK2ToCartRNK1(GTmp%D,HessTmp%D)
-  CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
-  CALL Delete(GTmp)
-  !
-  CALL DAXPY(3*NAtoms,KScale,HessTmp%D(1,1),1,HessAux%D(1,1),1)
-  CALL Delete(HessTmp)
-  !
-  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
-  IF(DoLHess) THEN
-     CALL New(HessTmp,(/3,3/))
-     CALL DBL_VECT_EQ_DBL_SCLR(9,HessTmp%D(1,1),0.0d0)
-     CALL MPI_REDUCE(LatHessX%D(1,1),HessTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
-          &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-     CALL DAXPY(9,KScale,HessTmp%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+!!$#ifdef ONX2_PARALLEL
+!!$  CALL New(HessTmp,(/3,NAtoms/))
+!!$  CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,HessTmp%D(1,1),0.0d0)
+!!$  CALL MPI_REDUCE(HessX%D(1,1),HessTmp%D(1,1),3*NAtoms,MPI_DOUBLE_PRECISION, &
+!!$       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+!!$  ! Print out.
+!!$  CALL New(HTmp,9*(NAtoms)**2)
+!!$  CALL CartRNK2ToCartRNK1(HTmp%D,HessTmp%D)
+!!$  CALL PChkSum(HTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
+!!$  CALL Delete(HTmp)
+!!$  !
+!!$  CALL DAXPY(3*NAtoms,KScale,HessTmp%D(1,1),1,HessAux%D(1,1),1)
+!!$  CALL Delete(HessTmp)
+!!$  !
+!!$  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
+!!$  IF(DoLHess) THEN
+!!$     CALL New(HessTmp,(/3,3/))
+!!$     CALL DBL_VECT_EQ_DBL_SCLR(9,HessTmp%D(1,1),0.0d0)
+!!$     CALL MPI_REDUCE(LatHessX%D(1,1),HessTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
+!!$          &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+!!$     CALL DAXPY(9,KScale,HessTmp%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+!!$
 !!$     if(myid.eq.root) then
 !!$        do jxyz=1,3
 !!$           do ixyz=1,3
@@ -273,41 +276,41 @@ PROGRAM HONX
 !!$           enddo
 !!$        enddo
 !!$     endif
-     !
-     CALL Delete(HessTmp)
-  ENDIF
-  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
-  !
-#else
+!!$     !
+!!$     CALL Delete(HessTmp)
+!!$  ENDIF
+!!$  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
+!!$  !
+!!$#else
   ! Print out.
-  CALL New(GTmp,3*NAtoms)
-  CALL CartRNK2ToCartRNK1(GTmp%D,HessX%D)
-  CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
-  CALL Delete(GTmp)
+  CALL New(HTmp,9*NAtoms**2)
+  CALL DCOPY(9*NAtoms**2,HessX%D(1,1),1,HTmp%D(1),1)
+  CALL PChkSum(HTmp,'Hess(Kx)['//TRIM(CurGeom)//']',Proc_O=Prog)  
+  CALL Delete(HTmp)
   !
-  CALL DAXPY(3*NAtoms,KScale,HessX%D(1,1),1,HessAux%D(1,1),1)
-  !
-  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
-  IF(DoLHess) THEN
-     CALL DAXPY(9,KScale,LatHessX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
-     do jxyz=1,3
-        do ixyz=1,3
-!           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
-              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',LatHessX%D(ixyz,jxyz),&
-                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
-!           endif
-        enddo
-     enddo
-     !
-  ENDIF
-  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
-  !
-#endif
+!!$  CALL DAXPY(3*NAtoms,KScale,HessX%D(1,1),1,HessAux%D(1,1),1)
+!!$  !
+!!$  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
+!!$  IF(DoLHess) THEN
+!!$     CALL DAXPY(9,KScale,LatHessX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+!!$     do jxyz=1,3
+!!$        do ixyz=1,3
+!!$!           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
+!!$              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',LatHessX%D(ixyz,jxyz),&
+!!$                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
+!!$!           endif
+!!$        enddo
+!!$     enddo
+!!$     !
+!!$  ENDIF
+!!$  !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
+!!$  !
+!!$#endif
   !
   !------------------------------------------------
   ! Save Exchange Gradients and Stress.
   !
-  CALL Put(HessAux,'hessian',Tag_O=CurGeom)
+!!$  CALL Put(HessAux,'hessian',Tag_O=CurGeom)
   !
   !LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN LATTICE HESSIAN
 !!$  IF(DoLHess) CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
@@ -335,7 +338,7 @@ PROGRAM HONX
   IF(MyID.EQ.ROOT) THEN
      !
      ! Imbalance stuff.
-     CALL PImbalance(TmGxArr ,NPrc,Prog_O='ComputeGK')
+     CALL PImbalance(TmGxArr ,NPrc,Prog_O='ComputeHK')
      !
      WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
      WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
@@ -388,6 +391,7 @@ PROGRAM HONX
   CALL Delete(BSc)
   CALL Delete(GMc)
   !
+  write(*,*) 'We are at the End'
   CALL ShutDown(Prog)
   !
 END PROGRAM HONX
