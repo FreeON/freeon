@@ -83,6 +83,7 @@ MODULE PFFT
       CHARACTER(LEN=120)  :: FileName
       CHARACTER(LEN=1)     :: AWX,AWY,AWZ
       TYPE(CRDS)           :: GMLoc
+      LOGICAL            :: Exists
 !
       AWX = '0'
       AWY = '0'
@@ -96,7 +97,12 @@ MODULE PFFT
                 "_LM"   // TRIM(IntToChar(MaxL)) //                  &
                 ".PFFT"
 !
-      OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='NEW')
+      INQUIRE(FILE=FileName,EXIST=Exists)
+      IF(Exists)THEN
+         RETURN
+      ELSE
+         OPEN(FILE=Filename,Unit=77,FORM='UNFORMATTED')
+      ENDIF
       DO L = 1,MaxL
          DO M = 0,L
             LM = LTD(L)+M
