@@ -42,7 +42,15 @@ If[MondoHome==$FAILED,
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];
 Get[EllFile];
 
-Ell=(HGEll-1)/2;
+Ell=HGEll;
+
+(* INDEXING OF HG ARRAY ELEMENTS *)
+
+LBegin[L_]:=(L*(L+1)*(L+2))/6+1;
+LMNDex[L_,M_,N_]:=LBegin[L+M+N]+N*(2*(L+M+N)-N+3)/2+M;
+HGLen[L_]:=(L+1)*(L+2)*(L+3)/6;                                    
+
+(* REAL SPHERICAL HARMONICS *)
 
 Z[l_,m_,x_,y_,z_]:=Module[{prefactor,em},
     em=Abs[m];
@@ -63,18 +71,18 @@ Do[Do[
 ,{mu,-lambda,lambda}],{lambda,0,Ell}]
 
 EvenZero[i_]:=If[Mod[i,2]==0,1,0];
-FactorialList={X^a_*Y^b_*Z^c_:>EvenZero[a]EvenZero[b]EvenZero[c](a-1)!!(b-1)!!(c-1)!!/(a+b+c+1)!!};
+FactorialList={X^a_*Y^b_*Z^c_:>4 Pi EvenZero[a]EvenZero[b]EvenZero[c](a-1)!!(b-1)!!(c-1)!!/(a+b+c+1)!!};
 
-(* HERE IS THE ANGULAR INTEGRALS *)
+(* HERE ARE THE ANGULAR INTEGRALS *)
 
 omega[lambda_,i_,j_,k_]:=Module[{sum,kpart,apart},
       sum=0;
        Do[
           kpart=Zxyz[lambda,mu]/.{X->Kx,Y->Ky,Z->Kz};
-          apart=4 Pi Expand[Apart[(Zxyz[lambda,mu]*X^Eye Y^Jay Z^Kay)]];
+          apart=Expand[Apart[(Zxyz[lambda,mu]*X^Eye Y^Jay Z^Kay)]];
           apart=apart/.FactorialList;
           apart=apart/.{Eye->i,Jay->j,Kay->k};
-          sum=sum+kpart;
+          sum=sum+kpart*apart;
          ,{mu,-lambda,lambda}];
        N[Factor[Expand[Simplify[sum]]]]]
 
@@ -84,8 +92,10 @@ Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 Get[StringJoin[MondoHome,"/MMA/Format.m"]];
 Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
-SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->300,AssignBreak->{132," & \n          "},
-                         AssignTemporary->{W,Array},AssignTemporary->{W,Array}];
+SetOptions[Optimize,OptimizeVariable->{V,Array}];
+
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->400,AssignBreak->{132," & \n          "},
+                         AssignTemporary->{W,Array}];
 
 SetOptions[OpenWrite, PageWidth -> 200];
 
@@ -94,10 +104,22 @@ SetOptions[OpenWrite, PageWidth -> 200];
 FileName="Omega1.Inc";
 Print[" Openned ",FileName];
 OpenWrite[FileName];
-
-Do[WriteString[FileName,"     CASE(",lambda,") \n"];
-   Write[FileName,FortranAssign[Omega1,omega[lambda,0,0,0]]];
-,{lambda,0,Ell}]
+Do[
+   Print[" Lambda = ",lambda];
+   WriteString[FileName,"     CASE(",lambda,") \n"];
+   glist={" "->""};
+   olist={};
+   kk=0;
+   Do[
+      Do[Do[Do[ 
+               kk=kk+1;
+               LMN=LMNDex[l,m,n];
+               glist=Append[glist,StringJoin["o(",ToString[kk],")"]->StringJoin["O(",ToString[L],",",ToString[LMN],")"]];
+               olist=Append[olist,omega[L,l,m,n]/.{0.->Zero}];
+               ,{l,0,lambda-m-n}],{m,0,lambda-n}],{n,0,lambda}];
+     ,{L,0,lambda}];
+     Write[FileName,FortranAssign[o,olist,AssignReplace->glist]];
+,{lambda,0,Ell}];
 
 Close[FileName];          
 Print[" Closed ",FileName];
