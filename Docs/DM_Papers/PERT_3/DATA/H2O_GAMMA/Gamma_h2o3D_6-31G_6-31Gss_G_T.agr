@@ -1,6 +1,6 @@
 # Grace project file
 #
-@version 50102
+@version 50114
 @page size 792, 612
 @page scroll 5%
 @page inout 5%
@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Sat Feb 14 17:39:23 2004"
+@timestamp def "Wed May  5 17:13:35 2004"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -111,7 +111,7 @@
 @    view xmax 1.150000
 @    view ymin 0.150000
 @    view ymax 0.850000
-@    title "Table 1"
+@    title ""
 @    title font 0
 @    title size 1.500000
 @    title color 1
@@ -132,8 +132,9 @@
 @    xaxis  bar linewidth 1.0
 @    xaxis  label "number of water molecules"
 @    xaxis  label layout para
-@    xaxis  label place auto
-@    xaxis  label char size 1.400000
+@    xaxis  label place spec
+@    xaxis  label place 0.000000, 0.080000
+@    xaxis  label char size 1.600000
 @    xaxis  label font 0
 @    xaxis  label color 1
 @    xaxis  label place normal
@@ -169,7 +170,7 @@
 @    xaxis  ticklabel start 0.000000
 @    xaxis  ticklabel stop type auto
 @    xaxis  ticklabel stop 0.000000
-@    xaxis  ticklabel char size 1.400000
+@    xaxis  ticklabel char size 1.500000
 @    xaxis  ticklabel font 0
 @    xaxis  ticklabel color 1
 @    xaxis  tick place both
@@ -183,8 +184,9 @@
 @    yaxis  bar linewidth 1.0
 @    yaxis  label "WALL time [hours]"
 @    yaxis  label layout para
-@    yaxis  label place auto
-@    yaxis  label char size 1.400000
+@    yaxis  label place spec
+@    yaxis  label place 0.000000, 0.080000
+@    yaxis  label char size 1.600000
 @    yaxis  label font 0
 @    yaxis  label color 1
 @    yaxis  label place normal
@@ -220,7 +222,7 @@
 @    yaxis  ticklabel start 0.000000
 @    yaxis  ticklabel stop type auto
 @    yaxis  ticklabel stop 0.000000
-@    yaxis  ticklabel char size 1.400000
+@    yaxis  ticklabel char size 1.500000
 @    yaxis  ticklabel font 0
 @    yaxis  ticklabel color 1
 @    yaxis  tick place both
@@ -237,7 +239,7 @@
 @    legend box fill color 0
 @    legend box fill pattern 1
 @    legend font 0
-@    legend char size 1.400000
+@    legend char size 1.500000
 @    legend color 1
 @    legend length 4
 @    legend vgap 1
@@ -253,7 +255,7 @@
 @    s0 hidden false
 @    s0 type xy
 @    s0 symbol 9
-@    s0 symbol size 1.400000
+@    s0 symbol size 1.600000
 @    s0 symbol color 1
 @    s0 symbol pattern 1
 @    s0 symbol fill color 1
@@ -302,7 +304,7 @@
 @    s1 hidden false
 @    s1 type xy
 @    s1 symbol 8
-@    s1 symbol size 1.400000
+@    s1 symbol size 1.600000
 @    s1 symbol color 2
 @    s1 symbol pattern 1
 @    s1 symbol fill color 2
@@ -351,7 +353,7 @@
 @    s2 hidden false
 @    s2 type xy
 @    s2 symbol 1
-@    s2 symbol size 1.400000
+@    s2 symbol size 1.600000
 @    s2 symbol color 3
 @    s2 symbol pattern 1
 @    s2 symbol fill color 3
@@ -400,7 +402,7 @@
 @    s3 hidden false
 @    s3 type xy
 @    s3 symbol 2
-@    s3 symbol size 1.400000
+@    s3 symbol size 1.600000
 @    s3 symbol color 4
 @    s3 symbol pattern 1
 @    s3 symbol fill color 4
