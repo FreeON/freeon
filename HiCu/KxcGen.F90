@@ -129,7 +129,7 @@ MODULE KxcGen
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
-                                                   StopLA,StopLB
+                                                   StopLA,StopLB,LenHG
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,    &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,EllA,EllB
@@ -185,8 +185,9 @@ MODULE KxcGen
                    DO LMNB=StartLB,StopLB
                       IB=IB+1
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                      PExtent=MAX(PExtent, & 
-                                  Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauRho,ExtraEll_O=1))
+                      LenHG=LHGTF(EllA+EllB)
+                      PExtent=MAX(PExtent,Extent(EllA+EllB,Prim%Zeta, &
+                                  HGBra%D(1:LenHG,IA,IB),TauRho,ExtraEll_O=1))
                    ENDDO
                 ENDDO
                 IF(PExtent>Zero)THEN

@@ -48,7 +48,7 @@ PROGRAM XCForce
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
