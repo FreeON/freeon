@@ -87,6 +87,7 @@ MODULE FastMatrices
     TYPE(INT_VECT) :: CA,CB,CN,DispN,DispB,DispA
 
     CALL GetLocalBCSR(B,A,(/Beg%I(MyID),End%I(MyID)/))
+
     NAtms = End%I(MyID)-Beg%I(MyID)+1
     IF(MyID == 0) THEN
       CALL New(CA,NPrc-1,M_O=0)
@@ -95,6 +96,11 @@ MODULE FastMatrices
       CALL New(DispN,NPrc-1,M_O=0)
       CALL New(DispB,NPrc-1,M_O=0)
       CALL New(DispA,NPrc-1,M_O=0)
+    ELSE
+      ! Allocate something to allow full debug...
+      CALL New(CA,0,0)
+      CALL New(CB,0,0)
+      CALL New(CN,0,0)
     ENDIF
 
     CALL MPI_Gather(NAtms,1,MPI_INTEGER,CA%I(0),1,MPI_INTEGER,0,&
@@ -103,6 +109,7 @@ MODULE FastMatrices
            MPI_COMM_WORLD,IErr)
     CALL MPI_Gather(B%NNon0,1,MPI_INTEGER,CN%I(0),1,MPI_INTEGER,0,&
            MPI_COMM_WORLD,IErr)
+
     IF(MyID == 0) THEN
       GBNBlks = 0
       GBNNon0 = 0
@@ -144,6 +151,7 @@ MODULE FastMatrices
              0,MPI_COMM_WORLD,IErr)
     ENDIF
  
+
     ! take differences
     LocalNBlks = B%NBlks
     DO I = 1, LocalNBlks-1
@@ -189,10 +197,11 @@ MODULE FastMatrices
              0,MPI_COMM_WORLD,IErr)
     ENDIF
     
+    CALL Delete(CA)
+    CALL Delete(CB)
+    CALL Delete(CN)
+    
     IF(MyID == 0) THEN
-      CALL Delete(CA)
-      CALL Delete(CB)
-      CALL Delete(CN)
       CALL Delete(DispA)
       CALL Delete(DispB)
       CALL Delete(DispN)
@@ -269,8 +278,6 @@ MODULE FastMatrices
     B%NBlks = P-1
     B%NNon0 = MtxBegInd-1
   END SUBROUTINE GetLocalBCSR
-
-
 !=================================================================
   SUBROUTINE Delete_FastMat1(A,RowLimits_O)
     TYPE(FASTMAT),POINTER         :: A,R,NextR,P

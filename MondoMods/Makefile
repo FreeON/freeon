@@ -28,6 +28,8 @@
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
+
+CPPMISC =-Ddebug_interface -Ddebug_all
 #
 EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
                 -I$(MONDO_HOME)/MondoMods/MMA/Functionals  \

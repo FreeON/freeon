@@ -11,15 +11,15 @@ MODULE MondoMPI
 !    NOTE DIFFERENCES BETWEEN DERIVED TYPES, EG. INT_VECT, WHICH INCLUDE
 !    AUXILIARY INFO SUCH AS ARRAY BOUNDS, AND THE ARRAYS THEMSELVES GIVEN
 !    BY THE FULLER NAME, EG. INT_VECTOR, WHICH SPECIFIES THE ARRAY ONLY.
-
-   INTEGER,SAVE :: MONDO_COMM=MPI_COMM_WORLD
-   INTERFACE Bcast          ! Wrappers for MPI_BCAST
-      MODULE PROCEDURE Bcast_DBL_SCLR, Bcast_DBL_VECT,  Bcast_DBL_RNK2, &
-                       Bcast_DBL_RNK3, Bcast_DBL_RNK4,  Bcast_DBL_RNK6, & 
-                       Bcast_INT_SCLR,                                  &
-                       Bcast_INT_VECT, Bcast_INT_RNK2,  Bcast_INT_RNK3, &
-                       Bcast_INT_RNK4, Bcast_CHR_SCLR,  Bcast_LOG_SCLR, &
-                       Bcast_DEBG                        
+!
+   INTEGER,SAVE :: MONDO_COMM
+   INTERFACE BCast          ! Wrappers for MPI_BCAST
+      MODULE PROCEDURE BCast_DBL_SCLR, BCast_DBL_VECT,  BCast_DBL_RNK2, &
+                       BCast_DBL_RNK3, BCast_DBL_RNK4,  BCast_DBL_RNK6, & 
+                       BCast_INT_SCLR,                                  &
+                       BCast_INT_VECT, BCast_INT_RNK2,  BCast_INT_RNK3, &
+                       BCast_INT_RNK4, BCast_CHR_SCLR,  BCast_LOG_SCLR, &
+                       BCast_DEBG                        
    END INTERFACE
    INTERFACE AllReduce   ! Wrappers for MPI_ALLREDUCE
       MODULE PROCEDURE AllReduce_DBL_SCLR,AllReduce_INT_SCLR
@@ -53,12 +53,13 @@ MODULE MondoMPI
    INTERFACE PSpew
       MODULE PROCEDURE PSpew_INT_VECT, PSpew_DBL_VECT
    END INTERFACE
+
    CONTAINS
 !===============================================================================
 
 !     WRAPPERS FOR MPI INITIALIZATION AND FINALIZATION
-
-!===============================================================================
+!
+!===============================================================
 
       SUBROUTINE InitMPI()
          INTEGER :: IErr
@@ -66,18 +67,40 @@ MODULE MondoMPI
 !-------------------------------------------------------------------------------
          CALL MPI_INIT(IErr)
          CALL ErrChk(IErr,Sub)
+         MONDO_COMM=MPI_COMM_WORLD
 !        Load global MPI variables
          MyID=MRank()
          NPrc=MSize()
          InParallel=.TRUE.
-         CALL CreateComm()
       END SUBROUTINE InitMPI
 
+      FUNCTION CartCommSplit(Dims) RESULT(MyClone)
+        INTEGER               :: IErr,MyClone,CART_COMM
+        TYPE(INT_VECT)        :: Dims 
+        CHARACTER(LEN=10)     :: Sub='SpaceNTime'
+        INTEGER,DIMENSION(2)  :: Local
+        ! Create a Dims(1) x Dims(2) Cartesian communicator
+        CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,Dims%I,  & 
+             (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+        CALL ErrChk(IErr,Sub)
+        ! Find out which row (group) this PE belongs to
+        CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local)
+        MyClone=Local(1)
+        ! Now split into Dims(1) rows. Each row has Dims(2) processors
+        ! parallel in the spatial domain and using MONDO_COMM as their
+        ! default communicator
+        CALL MPI_CART_SUB(CART_COMM,(/.FALSE.,.TRUE./),MONDO_COMM,IErr)
+        CALL ErrChk(IErr,Sub)
+        ! Reload local rank and PE number for split MONDO_COMM
+        MyID=MRank()
+        NPrc=MSize()
+      END FUNCTION CartCommSplit
+
       SUBROUTINE FiniMPI()
-         INTEGER                    :: IErr
-         CHARACTER(LEN=7),PARAMETER :: Sub='FiniMPI'
-         CALL MPI_FINALIZE(IErr)
-         CALL ErrChk(IErr,Sub)
+        INTEGER                    :: IErr
+        CHARACTER(LEN=7),PARAMETER :: Sub='FiniMPI'
+        CALL MPI_FINALIZE(IErr)
+        CALL ErrChk(IErr,Sub)
       END SUBROUTINE FiniMPI
 
       FUNCTION MRank()
@@ -93,11 +116,8 @@ MODULE MondoMPI
          CALL MPI_COMM_SIZE(MONDO_COMM,MSize,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION MSize
-
 !===============================================================================
-
 !     BCAST WRAPPERS
-
 !===============================================================================
 !--------------------------------------------------------BCAST CHARACTERS
       SUBROUTINE Bcast_CHR_SCLR(A)
@@ -684,24 +704,9 @@ MODULE MondoMPI
                         MONDO_COMM,IRecv_INT_VECT,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION IRecv_INT_VECT
-
-
-
-
-!===============================================================================
-
-!     WRAPER FOR CART_CREATE ROUTINE
-      
-      SUBROUTINE CreateComm()
-         INTEGER                       :: IErr
-         CHARACTER(LEN=10)             :: Sub='CreateComm'
-         CALL MPI_CART_CREATE(MPI_COMM_WORLD,1,NPrc,.FALSE.,.TRUE.,MONDO_COMM,IErr)
-         CALL ErrChk(IErr,Sub)
-      END SUBROUTINE CreateComm
-!===============================================================================
-
+!
 !     WRAPERS FOR WAIT ROUTINES
-
+!
       SUBROUTINE WaitAll(Reqs,Mssg)
          TYPE(INT_VECT),INTENT(INOUT)    :: Reqs     
          TYPE(INT_RNK2)                  :: Stats

@@ -5,6 +5,7 @@ MODULE GlobalCharacters
 !  Lengths and formats for default character string stuff 
 !
    INTEGER, PARAMETER          :: DEFAULT_CHR_LEN=128
+   INTEGER, PARAMETER          :: DCL=DEFAULT_CHR_LEN
    CHARACTER(LEN=6), PARAMETER :: DEFAULT_CHR_FMT='(A128)'
 !-------------------------------------------------  
 !  Lengths and formats for internal IO

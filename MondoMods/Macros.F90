@@ -21,147 +21,75 @@ MODULE Macros
    INTERFACE Init
       MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS
    END INTERFACE
-!-------------------------------------------------------------------------------
-!  Global status variables : take them from GlobalCharacters and GlobalScalars
-!  INTEGER,DIMENSION(3) :: Current
-!  INTEGER,DIMENSION(3) :: Previous
-!  CHARACTER(LEN=3)     :: SCFCycl
-!  CHARACTER(LEN=3)     :: PrvCycl
-!  CHARACTER(LEN=3)     :: NxtCycl
-!  CHARACTER(LEN=20)    :: SCFActn
-!  CHARACTER(LEN=3)     :: CurBase
-!  CHARACTER(LEN=3)     :: PrvBase
-!  CHARACTER(LEN=3)     :: CurGeom
-!  CHARACTER(LEN=3)     :: PrvGeom
-!  CHARACTER(LEN=3)     :: NxtGeom
+
+   INTEGER HDFFileID,H5GroupID
 !-------------------------------------------------------------------------------
    CONTAINS
       SUBROUTINE StartUp(Args,Prog,Serial_O)
          TYPE(ARGMT),INTENT(OUT)              :: Args
          CHARACTER(LEN=*),INTENT(IN)          :: Prog
+         CHARACTER(LEN=DCL)                   :: H5File
          LOGICAL,OPTIONAL                     :: Serial_O
          INTEGER                              :: I
 #ifdef PARALLEL
          LOGICAL                              :: Serial
-         INTEGER                              :: ChkNPrc
+         INTEGER                              :: ChkNPrc,MyClone
+         TYPE(INT_VECT)                       :: SpaceTimeSplit
+	 CHARACTER(LEN=DCL)                   :: MONDO_HOST 
 !-------------------------------------------------------------------------------
          IF(PRESENT(Serial_O))THEN
-            Serial=Serial_O
-         ELSE
-            Serial=.TRUE.
+            IF(.NOT.Serial_O)CALL InitMPI()
          ENDIF
-!        Fire up MPI
-         IF(.NOT.Serial)CALL InitMPI()
-#endif
-!        Get arguments and open InfFile 
-         CALL Get(Args)
-         IF(Args%NC>=2) &
-            SCFActn=TRIM(Args%C%C(2))
-         Current=Args%I%I(1:3)
-         Previous=Args%I%I(4:6)
-!        SCF Cycle
-         SCFCycl=TRIM(IntToChar(Args%I%I(1)))
-         IF(Args%I%I(3)-1<1)THEN
-            PrvCycl=TRIM(IntToChar(Previous(1)))        
-         ELSE
-            PrvCycl=TRIM(IntToChar(Args%I%I(1)-1))
-         ENDIF
-         NxtCycl=TRIM(IntToChar(Args%I%I(1)+1))
-!        Geometry
-         CurGeom=TRIM(IntToChar(Args%I%I(3)))
-         IF(Args%I%I(3)-1<1)THEN
-            PrvGeom=TRIM(IntToChar(Previous(3)))        
-         ELSE
-            PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
-         ENDIF
-         NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
-!        Basis
-         CurBase=TRIM(IntToChar(Args%I%I(2)))
-         PrvBase=TRIM(IntToChar(Previous(2)))
-!-----------------------------------------------------------------------------
-!        Get PWD and SCRATCH directories from env
-         CALL GetEnv('PWD',MONDO_PWD)   
-         CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
-         IF(LEN(TRIM(MONDO_HOME))==0)CALL Halt(' $(MONDO_HOME) not set.')
-         IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL Halt(' $(MONDO_SCRATCH) not set.')
-!        Set current working file names
-         MONDO_PWD=TRIM(MONDO_PWD)//'/'
-         MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
-         ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
-         PWDName=TRIM(MONDO_PWD)//TRIM(Args%C%C(1))
-         InfFile=TRIM(ScrName)//TRIM(InfF)
-!-----------------------------------------------------------------------------
-!        Initialize QM/MM logic
-!-----------------------------------------------------------------------------
-!        Open HDF file and mark for failure
-!-----------------------------------------------------------------------------
-!        Load global characters
-         CALL OpenHDF(InfFile)
-         CALL InitMMech()
-         CALL MarkFailure(Prog)
-         CALL Get(logFile,'logfile')
-         CALL Get(OutFile,'outputfile')
-         CALL Get(InpFile,'inputfile')
-!        Load global scalars
-#ifdef MMech
-         IF(HasQM())THEN
-#endif
-            CALL Get(NEl,      'nel',           Tag_O=CurGeom)
-            CALL Get(NAtoms,   'natoms',        Tag_O=CurGeom)
-            CALL Get(MaxAtms,  'maxatms',       Tag_O=CurBase)
-            CALL Get(MaxBlks,  'maxblks',       Tag_O=CurBase)
-            CALL Get(MaxNon0,  'maxnon0',       Tag_O=CurBase)
-            CALL Get(NBasF,    'nbasf',         Tag_O=CurBase)
-            CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
-#ifdef PARALLEL
-            CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
-            CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
-            CALL Get(MaxNon0Node,'maxnon0node', Tag_O=CurBase)
-#endif
-#ifdef MMech
-         ENDIF
-#endif
-!        Initialize global objects
-         CALL Init(MemStats)
-         CALL Init(PrintFlags,Prog)
-         CALL Elapsed_Time(PerfMon,'Init')
-!        Load global objects
-#ifdef MMech
-         IF(HasQM())THEN
-#endif
-            CALL New(BSiz,NAtoms)
-            CALL New(OffS,NAtoms)
-            CALL Get(BSiz,'atsiz',Tag_O=CurBase)
-            CALL Get(OffS,'atoff',Tag_O=CurBase)
-            ! Load global value for max block size
-            MaxBlkSize=0
-            DO I=1,NAtoms 
-               MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)) 
-            ENDDO
-            ! Load global thresholding values
-            CALL SetThresholds(CurBase)
-#ifdef MMech
-         ELSE !!! for the MMOnly case
-            CALL SetThresholds('1')
-         ENDIF
-#endif
-#ifdef PARALLEL
-         IF(InParallel)THEN        
-            CALL New(OffSt,NPrc-1,0)
-            CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
-            CALL Get(ChkNPrc,'chknprc')
-            IF(NPrc/=ChkNPrc) &
-              CALL Halt(' In StartUp() --- Inconsistency: NPrc = '  &
-              //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
-              //TRIM(IntToChar(ChkNPrc)))
-            CALL New(Beg,NPrc-1,0)
-            CALL New(End,NPrc-1,0)
-            CALL Get(Beg,'beg',Tag_O=CurBase)
-            CALL Get(End,'end',Tag_O=CurBase)
-         ENDIF
-#endif
-!        Print time stamp
 
+
+!	 CALL GetEnv('MONDO_HOST',MONDO_HOST)
+!	 IF(InParallel)CALL AlignNodes(TRIM(MONDO_HOST))
+#endif
+!        Get arguments
+         CALL Get(Args)
+!        Get SCRATCH directoryfrom env
+         CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
+         MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+         IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL Halt(' $(MONDO_SCRATCH) not set.')
+!        The HDF5 file name 
+         H5File=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))//TRIM(InfF)
+         InfFile=H5File
+         ! Open the HDF file
+         HDFFileID=OpenHDF(H5File)
+         ! This is the global IO file ID
+         HDF_CurrentID=HDFFileID
+#ifdef PARALLEL_CLONES
+         ! Get the space-time parallel topology
+         CALL Get(SpaceTimeSplit,'spacetimesplit')
+         CALL CloseHDF(HDFFileID)
+         ! Create Cartesian topology for the clones         
+         MyClone=CartCommSplit(SpaceTimeSplit)
+         ! Each ROOT in each MONDO_COMM opens the HDF file 
+         HDFFileID=OpenHDF(H5File)
+         ! Now we open a group that the ROOT of each clone accesses by default 
+         H5GroupID=OpenHDFGroup(HDFFileID,"clone"//TRIM(IntToChar(MyClone)))
+         ! Default is now the cloned group id rather than the HDF file id 
+         HDF_CurrentID=H5GroupID
+         ! Now back to busy as usual 
+#endif
+         ! Mark for failure
+         CALL MarkFailure(Prog)
+         ! Load global SCF status strings
+         CALL Init_SCFStat(Args)
+         ! Load QM/MM switches
+         CALL InitMMech()
+         ! Load global thresholding values
+         CALL SetThresholds(CurBase)
+         ! Initialize memory statistics
+         CALL Init(MemStats)
+         ! Load some more global variables
+         CALL Init_Globals(Args)
+         ! Initialize debug level
+         CALL Init(PrintFlags,Prog)
+         PrintFlags%Key=DEBUG_MAXIMUM
+         ! Start the clock ...
+         CALL Elapsed_Time(PerfMon,'Init')
+!        Print time stamp
          IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
 #ifdef PARALLEL
             IF(MyId==ROOT) &
@@ -170,12 +98,11 @@ MODULE Macros
             CALL TimeStamp('Entering '//TRIM(Prog))
 #endif 
          ENDIF
-      END SUBROUTINE StartUp
-
-!-------------------------------------------------------------------------------
-      SUBROUTINE ShutDown(Prog)
+       END SUBROUTINE StartUp
+       !-------------------------------------------------------------------------------
+       SUBROUTINE ShutDown(Prog)
          CHARACTER(LEN=*),INTENT(IN) :: Prog
-!-------------------------------------------------------------------------------
+         !-------------------------------------------------------------------------------
 #ifdef MMech
          IF(HasQM()) THEN
 #endif
@@ -197,8 +124,11 @@ MODULE Macros
          ENDIF
          IF(PrintFlags%Key==DEBUG_MAXIMUM) &
             CALL PPrint(MemStats,Prog)
-         CALL MarkSuccess()
-!        Print time stamp
+
+#ifdef PARALLEL_CLONES
+         CALL CloseHDFGroup(H5GroupID)
+         HDF_CurrentID=HDFFileID
+#endif
 #ifdef PARALLEL
          IF(InParallel) &
             CALL FiniMPI()
@@ -207,20 +137,112 @@ MODULE Macros
 #else
          IF(PrintFlags%Key>DEBUG_MEDIUM)  &
             CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
+
 #endif 
-         CALL CloseHDF()
+         CALL MarkSuccess()
+!        Print time stamp
+         CALL CloseHDF(HDFFileID)
          STOP 
       END SUBROUTINE ShutDown     
-
+      !=========================================================
+      ! MARK FAILURE OF PROG
+      !=========================================================
       SUBROUTINE MarkFailure(Prog)
          CHARACTER(LEN=*) :: Prog
          CALL Put(.TRUE.,'ProgramFailed')
          CALL Put(Prog  ,'FailedProgram')
       END SUBROUTINE         
- 
+      !=========================================================
+      ! MARK SUCCESS OF PROG
+      !=========================================================
       SUBROUTINE MarkSuccess()
          CALL Put(.FALSE.,'ProgramFailed')
       END SUBROUTINE         
+      !=========================================================
+      ! LOAD MISC GLOBAL VARIABLES
+      !=========================================================
+      SUBROUTINE Init_Globals(Args)
+        TYPE(ARGMT) :: Args
+        INTEGER :: I,ChkNPrc
+        !--------------------------------------------------------!
+         CALL Get(logFile,'logfile')
+         CALL Get(OutFile,'outputfile')
+         CALL Get(InpFile,'inputfile')
+         ScrName=TRIM(MONDO_SCRATCH)//TRIM(Args%C%C(1))
+!         CALL BCast(ScrName)
+!        Load global scalars
+#ifdef MMech
+         IF(HasQM())THEN
+#endif
+            CALL Get(NEl,      'nel',           Tag_O=CurGeom)
+            CALL Get(NAtoms,   'natoms',        Tag_O=CurGeom)
+            CALL Get(MaxAtms,  'maxatms',       Tag_O=CurBase)
+            CALL Get(MaxBlks,  'maxblks',       Tag_O=CurBase)
+            CALL Get(MaxNon0,  'maxnon0',       Tag_O=CurBase)
+            CALL Get(NBasF,    'nbasf',         Tag_O=CurBase)
+            CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+            CALL New(BSiz,NAtoms)
+            CALL New(OffS,NAtoms)
+            CALL Get(BSiz,'atsiz',Tag_O=CurBase)
+            CALL Get(OffS,'atoff',Tag_O=CurBase)
+            ! Global value for max block size
+            MaxBlkSize=0
+            DO I=1,NAtoms 
+               MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)) 
+            ENDDO
+#ifdef PARALLEL
+            IF(InParallel)THEN
+               CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
+               CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
+               CALL Get(MaxNon0Node,'maxnon0node', Tag_O=CurBase)
+               CALL New(OffSt,NPrc-1,0)
+               CALL Get(OffSt,'dbcsroffsets',Tag_O=CurBase)
+               CALL Get(ChkNPrc,'chknprc')
+               IF(NPrc/=ChkNPrc) &
+                    CALL Halt(' In StartUp() --- Inconsistency: NPrc = '  &
+                    //TRIM(IntToChar(NPrc))//' ChkNPrc = ' &
+                    //TRIM(IntToChar(ChkNPrc)))
+               CALL New(Beg,NPrc-1,0)
+               CALL New(End,NPrc-1,0)
+               CALL Get(Beg,'beg',Tag_O=CurBase)
+               CALL Get(End,'end',Tag_O=CurBase)
+            ENDIF
+#endif
+#ifdef MMech
+         ENDIF
+#endif
+       END SUBROUTINE Init_Globals
+      !=========================================================
+      ! LOAD GLOBAL STRINGS FOR SCF STATE INFORMATION
+      ! Clumsy, should ultimately be done away with....
+      !=========================================================
+      SUBROUTINE Init_SCFStat(Args)
+         TYPE(ARGMT) :: Args
+        !------------------------------------------------------!
+        IF(Args%NC>=2) &
+             SCFActn=TRIM(Args%C%C(2))
+        Current=Args%I%I(1:3)
+        Previous=Args%I%I(4:6)
+        ! SCF Cycle
+        SCFCycl=TRIM(IntToChar(Args%I%I(1)))
+        IF(Args%I%I(3)-1<1)THEN
+           PrvCycl=TRIM(IntToChar(Previous(1)))        
+        ELSE
+           PrvCycl=TRIM(IntToChar(Args%I%I(1)-1))
+        ENDIF
+        NxtCycl=TRIM(IntToChar(Args%I%I(1)+1))
+        ! Geometry
+        CurGeom=TRIM(IntToChar(Args%I%I(3)))
+        IF(Args%I%I(3)-1<1)THEN
+           PrvGeom=TRIM(IntToChar(Previous(3)))        
+        ELSE
+           PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
+        ENDIF
+        NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
+        ! Basis
+        CurBase=TRIM(IntToChar(Args%I%I(2)))
+        PrvBase=TRIM(IntToChar(Previous(2)))
+      END SUBROUTINE Init_SCFStat
 !-------------------------------------------------------------------------------
 !
 !-------------------------------------------------------------------------------

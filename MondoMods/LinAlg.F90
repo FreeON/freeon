@@ -122,7 +122,6 @@ MODULE LinAlg
 #endif
    END INTERFACE
 
-
    INTERFACE FNorm
       MODULE PROCEDURE FNorm_BCSR
 #ifdef PARALLEL
@@ -130,7 +129,6 @@ MODULE LinAlg
 #endif
    END INTERFACE
 
-!-------------------------------------------------------------------------------
 !  Global stuff for matrix algebra
 
    TYPE(INT_VECT) :: Flag,GlobalRowPtA,GlobalRowPtB
@@ -2288,11 +2286,10 @@ MODULE LinAlg
            Perf_O%FLOP=Perf_O%FLOP+DBLE(2*A%NNon0)
 #ifdef PARALLEL
          ENDIF
-         !! write(*,*) 'warning from parallel : max_bcrs not broadcasted!'
-         !! CALL Bcast(Max_BCSR)
+         IF(InParallel) &
+            CALL BCast(Max_BCSR)
 #endif
       END FUNCTION Max_BCSR
-
 !===================================================================      
 
 !===================================================================      
@@ -3066,7 +3063,6 @@ MODULE LinAlg
         Frob=AllReduce(FNorm_DBCSR)
 	FNorm_DBCSR=SQRT(Frob)
       END FUNCTION FNorm_DBCSR
-
 #endif
       FUNCTION FNorm_BCSR(M)
         TYPE(BCSR)       :: M
@@ -3078,5 +3074,4 @@ MODULE LinAlg
         ENDDO
         FNorm_BCSR = SQRT(FNorm_BCSR)
       END FUNCTION FNorm_BCSR
-
 END MODULE

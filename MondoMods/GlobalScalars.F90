@@ -109,15 +109,6 @@ MODULE GlobalScalars
 ! 
    INTEGER, SAVE           :: SizeOfInt,SizeOfDbl
    REAL(DOUBLE), SAVE      :: IntToMB,DblToMB
-#ifdef PARALLEL
-!-------------------------------------------------  
-!  MPI Scalars, default values
-!
-   INTEGER, SAVE           :: MyID=ROOT
-   INTEGER, SAVE           :: NPrc=1
-   LOGICAL, SAVE           :: InParallel=.FALSE.
-   INTEGER, PARAMETER      :: MaxProc=1024
-#endif
 !-------------------------------------------------
 !
 ! Van der Waals radii as listed in JMol program
@@ -191,5 +182,16 @@ MODULE GlobalScalars
 ! Whether Periodic Boundary Condition is On
 !
    LOGICAL :: PBC_On
+
+
+#ifdef PARALLEL
+!-------------------------------------------------  
+!  MPI Scalars, default values
 !
+   INTEGER, SAVE           :: MyID=ROOT
+   INTEGER, SAVE           :: MyKlone=1
+   INTEGER, SAVE           :: NPrc=1
+   LOGICAL, SAVE           :: InParallel=.FALSE.
+   INTEGER, PARAMETER      :: MaxProc=1024
+#endif
 END MODULE GlobalScalars

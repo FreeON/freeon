@@ -102,6 +102,86 @@ int hdf5closefile_(int* FileID)
 }
 int hdf5closefile(int* FileID){return hdf5closefile_(FileID);}
 int hdf5closefile__(int* FileID){return hdf5closefile_(FileID);}
+/*=================================================================================*/
+
+
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+/*                                                                           */
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+int hdf5creategroup_(int* FileID, int* NC, int* IChr)
+{
+   hid_t fid;
+   hid_t gid;
+   int GroupID;
+#ifdef debug_interface
+   printf("IN CREATE_HDF5_GROUP: Creating %s \n",IntToChar(NC,IChr));
+#endif
+   fid=*FileID;
+   gid=H5Gcreate(fid,IntToChar(NC,IChr),0);
+#ifdef debug_interface
+#ifdef debug_all
+   printf("IN CREATE_HDF5_GROUP: FileID = %d, GroupID= %d \n",fid,gid);
+#endif
+#endif
+   GroupID=gid;
+   return GroupID;   
+}
+int hdf5creategroup(int* FileID, int* NC, int* IChr){return hdf5creategroup_(FileID,NC,IChr);}
+int hdf5creategroup__(int* FileID, int* NC, int* IChr){return hdf5creategroup_(FileID,NC,IChr);}
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+/*                                                                           */
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+int hdf5opengroup_(int* FileID, int* NC, int* IChr) 
+{
+   hid_t fid;
+   hid_t gid;
+   int   GroupID;
+#ifdef debug_interface
+   printf("IN OPEN_HDF5_GROUP: Opening <%s> \n",IntToChar(NC,IChr));
+#endif
+   fid=*FileID;
+   H5Eset_auto(NULL, NULL);
+   gid=H5Gopen(fid,IntToChar(NC,IChr));
+#ifdef debug_interface
+#ifdef debug_all
+   printf("IN OPEN_HDF5_GROUP: FileID = %d, GroupID = %d \n",fid,gid);
+#endif
+#endif
+   GroupID=gid;
+   return GroupID;
+}
+int hdf5opengroup(int* FileID, int* NC, int* IChr){return hdf5opengroup_(FileID,NC,IChr);}
+int hdf5opengroup__(int* FileID, int* NC, int* IChr){return hdf5opengroup_(FileID,NC,IChr);}
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+/*                                                                           */
+/*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
+int hdf5closegroup_(int* GroupID)
+{
+   herr_t stat;
+   int   STATUS;
+   hid_t gid;
+   gid=*GroupID;
+#ifdef debug_interface
+#ifdef debug_all
+   printf("IN CLOSE_HDF5_GROUP: Flushing GroupID= %d \n",GroupID);
+#endif
+#endif
+#ifdef debug_interface
+#ifdef debug_all
+   printf("IN CLOSE_HDF5_GROUP: Closing  GroupID= %d \n",GroupID);
+#endif
+#endif
+   stat=H5Gclose(gid);
+#ifdef debug_interface
+#ifdef debug_all
+   printf("IN CLOSE_HDF5_GROUP: STATUS = %d \n",stat);
+#endif
+#endif
+   STATUS=stat;
+   return STATUS;
+}
+int hdf5closegroup(int* GroupID){return hdf5closegroup_(GroupID);}
+int hdf5closegroup__(int* GroupID){return hdf5closegroup_(GroupID);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
