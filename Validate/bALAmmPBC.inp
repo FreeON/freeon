@@ -1,0 +1,24 @@
+<BeginTitle>
+bALA, periodic
+Ewald-electrostatic energy: -0.4752740004488429 Hartree (mxbox=600)
+MONDO PBC:                  -0.4752740004080185 Hartree (very tight)
+<EndTitle>
+
+<BeginOptions>
+Mechanics=(MM)
+Accuracy =(VeryTight)
+DebugAll=(MaxDebug)
+Geometry=(InAngstroms,NoOrder)
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+<EndOptions>
+
+<BeginPeriodic>
+d3   14.9771172490D0 14.9771172490D0 14.9771172490D0  90.0D0   90.0D0   90.0D0
+<EndPeriodic>
+
+<BeGIN_MM_filenames>
+validation.opls
+bALAmmPBC.seq
+bALAmmPBC.crd
+<END_MM_filenames>
+
