@@ -36,7 +36,7 @@ CONTAINS
        GhostFile=TRIM(N%M_HOME)//'BasisSets/Ghost.bas'
        CALL OpenASCII(GhostFile,GBas,OldFileQ_O=.TRUE.)
        DO I=1,G%Clones
-          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))  THEN
+          IF(.NOT.ParseBasisSets(G%Clone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))THEN
              CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file '//RTRN//TRIM(BaseFile))
           ENDIF
           B%BSets(I,J)%BName=B%BName(J)
@@ -108,7 +108,7 @@ CONTAINS
     INTEGER, DIMENSION(2)      :: Ints
     LOGICAL                    :: ParseBasisSets
     CHARACTER(LEN=DCL)         :: Line
-    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,ECP
+    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound,Prim,Ell
 !-------------------------------------------------------------------------!
 ! Allocate temporary set
     BS%LMNLen=LHGTF(MaxAsymt)
@@ -116,8 +116,10 @@ CONTAINS
     BS%NPrim=MaxPrmtv
     BS%NAtms=G%NAtms
     BS%NKind=G%NAtms
-    BS%PSCtrt=MaxCntrx
-    BS%PSPrim=MaxPrmtv
+    BS%HasECPs=.TRUE.
+    BS%MxProjL=5
+    BS%Typ1Fnk=MaxPrmtv
+    BS%Typ2Fnk=MaxPrmtv
     CALL New(BS)
     ! Count kinds and load basis set kind index
     BS%NKind=1
@@ -141,14 +143,17 @@ CONTAINS
     BS%NASym=0
     BS%NCtrt=0
     BS%NPrim=0
-    BS%PSCtrt=0
-    BS%PSPrim=0
     DO I=1,BS%NKind
        BS%NCFnc%I(I)=0
+       BS%NTyp1PF%I(I)=0
        DO J=1,MaxCntrx
           BS%NPFnc%I(J,I)=0
        ENDDO
     ENDDO
+    BS%HasECPs=.False.
+    BS%MxProjL=0
+    BS%Typ1Fnk=0
+    BS%Typ2Fnk=0
 !   Parse basis set 
     KFound=0
     REWIND(Bas)
@@ -203,28 +208,48 @@ CONTAINS
              ! Add a dilimeter (space) to allow correct parsing
              Line=" "//Line
              IF(KeyQ(Line,TRIM(Ats(BS%Kinds%I(NK)))//'-ecp'))THEN                    
-                ! Parse in the ECP 
+                BS%HasECPs=.TRUE.
+                ! Parse in the ECP info 
                 CALL LineToChars(Line,C)
-                BS%NECPs%I(NK)=CharToInt(C%C(2))+1
-                BS%NCoreE%I(NK)=CharToInt(C%C(3))
+                BS%ProjEll%I(NK)=CharToInt(C%C(2))-1
+                BS%NCoreEl%D(NK)=CharToInt(C%C(3))
+                BS%MxProjL=MAX(BS%MxProjL,BS%ProjEll%I(NK))
                 CALL Delete(C)
-                BS%PSCtrt=MAX(BS%PSCtrt,BS%NECPs%I(NK))
-                ! Go over the number of ECPs
-                DO ECP=1,BS%NECPs%I(NK)
+                ! Read a dummy line, something about potentials 
+                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                ! This line should contain number of primitives in this ECP
+                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                CALL LineToInts(Line,1,Ints)                   
+                BS%NTyp1PF%I(NK)=Ints(1)
+                BS%Typ1Fnk=MAX(BS%Typ1Fnk,BS%NTyp1PF%I(NK))
+                ! Parse in the type one potential
+                DO Prim=1,BS%NTyp1PF%I(NK)
+                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                   CALL LineToInts(Line,1,Ints)                      
+                   CALL LineToDbls(Line,N,Dbls)                      
+                   ! Load this ECPs primitive angular symmetries, exponents and coefficients 
+                   BS%Typ1Ell%I(Prim,NK)=Ints(1)
+                   BS%Typ1Exp%D(Prim,NK)=Dbls(2)
+                   BS%Typ1CCo%D(Prim,NK)=Dbls(3)
+                ENDDO
+                ! Parse in the type two potential
+                DO Ell=0,BS%ProjEll%I(NK)
                    ! Read a dummy line, something about potentials 
                    READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
                    ! This line should contain number of primitives in this ECP
                    READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                   ! Parse in the type two potential for this ell value
                    CALL LineToInts(Line,1,Ints)                   
-                   BS%PSFncs%I(ECP,NK)=Ints(1)
-                   BS%PSPrim=MAX(BS%PSPrim,BS%PSFncs%I(ECP,NK))
-                   DO Prim=1,BS%PSFncs%I(ECP,NK)
+                   BS%NTyp2PF%I(Ell,NK)=Ints(1)
+                   BS%Typ2Fnk=MAX(BS%Typ2Fnk,BS%NTyp2PF%I(Ell,NK))
+                   DO Prim=1,BS%NTyp2PF%I(Ell,NK)
                       READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
                       CALL LineToDbls(Line,N,Dbls)                      
+                      CALL LineToInts(Line,1,Ints)                      
                       ! Load this ECPs primitive angular symmetries, exponents and coefficients 
-                      BS%PSSymm%I(Prim,ECP,NK)=Dbls(1)
-                      BS%PSExpt%D(Prim,ECP,NK)=Dbls(2)
-                      BS%PSCoef%D(Prim,ECP,NK)=Dbls(3)
+                      BS%Typ2Ell%I(Prim,Ell,NK)=Ints(1)
+                      BS%Typ2Exp%D(Prim,Ell,NK)=Dbls(2)
+                      BS%Typ2CCo%D(Prim,Ell,NK)=Dbls(3)
                    ENDDO
                 ENDDO
              ENDIF
@@ -233,8 +258,6 @@ CONTAINS
 100    CONTINUE
     ENDDO
 99  CONTINUE
-!
-!
 !
     IF(KFound/=BS%NKind) THEN
        REWIND(GBas)
@@ -304,8 +327,10 @@ CONTAINS
     B%NPrim=BS%NPrim
     B%NAtms=BS%NAtms
     B%NKind=BS%NKind
-    B%PSCtrt=BS%PSCtrt
-    B%PSPrim=BS%PSPrim
+    B%HasECPs=BS%HasECPs
+    B%MxProjL=BS%MxProjL
+    B%Typ1Fnk=BS%Typ1Fnk
+    B%Typ2Fnk=BS%Typ2Fnk
     ! New basis set
     CALL New(B)
     ! Set old eq to new (should go to seteq sometime soon...)
@@ -321,17 +346,24 @@ CONTAINS
     B%ASymm%I(:,1:B%NCtrt,1:B%NKind)=BS%ASymm%I(:,1:B%NCtrt,1:B%NKind)
     B%Expnt%D(1:B%NPrim,1:B%NCtrt,1:B%NKind)=BS%Expnt%D(1:B%NPrim,1:B%NCtrt,1:B%NKind)
     B%CCoef%D(1:B%LMNLen,1:B%NPrim,1:B%NCtrt,1:B%NKind)=BS%CCoef%D(1:B%LMNLen,1:B%NPrim,1:B%NCtrt,1:B%NKind)
-    IF(B%PSCtrt/=0)THEN
+    IF(B%HasECPs)THEN
        ! If we have pseudopotentials, copy them over too
-       B%NECPs%I(1:B%NKind)=BS%NECPs%I(1:B%NKind)
-       B%NCoreE%I(1:B%NKind)=BS%NCoreE%I(1:B%NKind)
-       B%PSFncs%I(1:B%PSCtrt,1:B%NKind)=BS%PSFncs%I(1:B%PSCtrt,1:B%NKind)
-       B%PSSymm%I(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)=BS%PSSymm%I(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)
-       B%PSExpt%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)=BS%PSExpt%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)
-       B%PSCoef%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)=BS%PSCoef%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)
+       B%NCoreEl%D(1:B%NKind)=BS%NCoreEl%D(1:B%NKind)
+       B%NTyp1PF%I(1:B%NKind)=BS%NTyp1PF%I(1:B%NKind)
+       B%ProjEll%I(1:B%NKind)=BS%ProjEll%I(1:B%NKind)
+       B%NTyp2PF%I(0:B%MxProjL,1:B%NKind)=BS%NTyp2PF%I(0:B%MxProjL,1:B%NKind)
+       B%Typ1Ell%I(1:B%Typ1Fnk,1:B%NKind)=BS%Typ1Ell%I(1:B%Typ1Fnk,1:B%NKind)
+       B%Typ1Exp%D(1:B%Typ1Fnk,1:B%NKind)=BS%Typ1Exp%D(1:B%Typ1Fnk,1:B%NKind)
+       B%Typ1CCo%D(1:B%Typ1Fnk,1:B%NKind)=BS%Typ1CCo%D(1:B%Typ1Fnk,1:B%NKind)
+       B%Typ2Ell%I(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2Ell%I(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
+       B%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
+       B%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
     ENDIF
-    ! Cheezy fix for allocation of ECP elements
-    BS%PSCtrt=1
+
+    WRITE(*,*)' HASECPS = ',B%HasECPs
+
+    PrintFlags%Set=DEBUG_BASISSET
+    CALL PPrint(B,Unit_O=6)
     ! Done with the temp BS
     CALL Delete(BS)
     ! Compute blocking for sparse matrix methods
