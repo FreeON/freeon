@@ -505,7 +505,6 @@ CONTAINS
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Gather convergence parameters
-#ifdef PARALLEL_CLONES
        IF(CPSCF) THEN
           CALL Get(Etot%D(cSCF,iCLONE),'Prop'    )
           CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax')
@@ -515,17 +514,6 @@ CONTAINS
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
           CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr' )
        ENDIF
-#else
-       IF(CPSCF) THEN
-          CALL Get(Etot%D(cSCF,iCLONE),'Prop'    ,StatsToChar(S%Current%I))
-          CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax',StatsToChar(S%Current%I))
-          CALL Get(DIIS%D(cSCF,iCLONE),'DDIISErr',StatsToChar(S%Current%I))
-       ELSE
-          CALL Get(Etot%D(cSCF,iCLONE),'Etot',StatsToChar(S%Current%I))
-          CALL Get(DMax%D(cSCF,iCLONE),'DMax',StatsToChar(S%Current%I))
-          CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr',StatsToChar(S%Current%I))
-       ENDIF
-#endif
        CALL CloseHDFGroup(HDF_CurrentID)
        ! Load current energies
        G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
