@@ -39,11 +39,13 @@ PROGRAM TestMondoSCFOutput
       I1=0;I2=0
       IF(INDEX(Line1,'<SCF>')/=0)THEN
          I1=INDEX(Line1,'=')
-         J1=INDEX(Line1,',')
+         J1=INDEX(Line1(I1:),',')
+         J1=I1+J1
       ENDIF
       IF(INDEX(Line2,'<SCF>')/=0)THEN
          I2=INDEX(Line2,'=')
-         J2=INDEX(Line2,',')
+         J2=INDEX(Line2(I2:),',')
+         J2=I2+J2
       ENDIF
       IF(I1/=0.AND.I2/=0)THEN
          D1=CharToDbl(TRIM(Line1(I1+1:J1-1)))
