@@ -150,10 +150,10 @@ PROGRAM JForce
   JFrc%D=Two*JFrc%D
 !--------------------------------------------------------------------------------
 ! Print The JForce
-  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in au ')
-  JFrc%D(:)=JFrc%D(:)/KJPerMolPerAngstToHPerBohr
-  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
-  JFrc%D(:)=JFrc%D(:)*KJPerMolPerAngstToHPerBohr
+!  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in au ')
+!  JFrc%D(:)=JFrc%D(:)/KJPerMolPerAngstToHPerBohr
+!  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
+!  JFrc%D(:)=JFrc%D(:)*KJPerMolPerAngstToHPerBohr
 !
 #ifdef MMech
   ENDIF
@@ -234,10 +234,6 @@ PROGRAM JForce
 #else
     CALL New(Frc,3*GMLoc%Natms)
     CALL Get(Frc,'GradE',Tag_O=CurGeom)
-  CALL Print_Force(GMLoc,JFrc,'MM dJ/dR in au ')
-  JFrc%D=JFrc%D/KJPerMolPerAngstToHPerBohr
-  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
-  JFrc%D=JFrc%D*KJPerMolPerAngstToHPerBohr
     Frc%D=Frc%D+JFrc%D
     CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
     CALL Put(Frc,'GradE',Tag_O=CurGeom)

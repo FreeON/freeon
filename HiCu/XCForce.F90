@@ -113,8 +113,6 @@ PROGRAM XCForce
 ! Do some checksumming, resumming and IO 
 !  CALL PPrint(XCFrc,'dXC/dR')
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
-! Print The XCForce
-  CALL Print_Force(GM,XCFrc,' dXC/dR ')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
