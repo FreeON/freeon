@@ -6942,6 +6942,7 @@ return
          ENDIF
          TopDim=TOPS%Tot12%I(II1,1)
          IF(ANY(TOPS%Tot12%I(II1,2:TopDim+1)==II2)) CYCLE
+         IF(II1==II2) CYCLE
          NAngle=NAngle+1
          Angle%IJK%I(2,NAngle)=IAt
          IF(IEq(II1)<IEq(II2)) THEN
@@ -7299,16 +7300,16 @@ return
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(INT_VECT)              :: ITop,JTop,Perm,IPerm
      TYPE(INT_VECT)              :: Center,IFrag,Mark,FragID
-     TYPE(INT_VECT)              :: LastFrag,JFrag
+     TYPE(INT_VECT)              :: LastFrag,JFrag,FragMark
      TYPE(DBL_VECT)              :: ATop
      TYPE(DBL_RNK2)              :: CenterFrag
-     INTEGER                     :: NZ,NAtmsLoc,I,J,II,K,L,M,N
+     INTEGER                     :: NZ,NAtmsLoc,I,J,II,K,L,M,N,MM,NN,JJ
      INTEGER                     :: ColMax,ISt,IStN
      INTEGER,DIMENSION(:)        :: AtNum,IEq
      INTEGER,DIMENSION(:,:)      :: Cells
      TYPE(BONDDATA)              :: BondF
      REAL(DOUBLE),DIMENSION(3)   :: Vect
-     REAL(DOUBLE)                :: Length
+     REAL(DOUBLE)                :: Length,Dist,Dist0
      INTEGER,DIMENSION(3)        :: CellAux2
      LOGICAL                     :: DoC,Longer
      ! 
@@ -7372,6 +7373,8 @@ return
      ENDDO
      !
      CALL New(LastFrag,II)
+     CALL New(FragMark,II)
+     FragMark%I=0
      CALL New(JFrag,NatmsLoc)
      LastFrag%I=0
      DO I=1,NatmsLoc
@@ -7390,30 +7393,49 @@ return
      K=II*(II-1)
      CALL New(BondF,K)
      K=0
-     DO I=1,II
-       DO J=I+1,II
-         IF(I==J) CYCLE
-         ! connect only to central cell
+     FragMark%I(1)=1
+     DO I=1,II-2
+       IF(FragMark%I(I)/=0) CYCLE ! only unconnected fragments pass
+       !
+       MM=0
+       Dist=1.D99
+       DO J=1,II
+         IF(FragMark%I(J)==0) CYCLE ! only already connected frags pass
          CALL ClosestAtms(M,N,I,J,IFrag%I,JFrag%I, &
                           CenterFrag%D,XYZ)
-         IF(HasCentralCell(I,IFrag%I,JFrag%I,IEq)) THEN
-           IF(ANY(Cells(N,1:3)>1).OR.ANY(Cells(N,1:3)<-1)) CYCLE 
-         ELSE IF(HasCentralCell(J,IFrag%I,JFrag%I,IEq)) THEN
-           IF(ANY(Cells(M,1:3)>1).OR.ANY(Cells(M,1:3)<-1)) CYCLE 
-         ELSE
-           CYCLE
-         ENDIF
-         K=K+1
          Vect=XYZ(1:3,M)-XYZ(1:3,N)
-         Length=SQRT(DOT_PRODUCT(Vect,Vect))
-         IF(IEq(M)<IEq(N)) THEN
-           BondF%IJ%I(1:2,K)=(/M,N/)
-         ELSE
-           BondF%IJ%I(1:2,K)=(/N,M/)
+         Dist0=SQRT(DOT_PRODUCT(Vect,Vect))
+         IF(Dist0<Dist) THEN
+           Dist=Dist0
+           MM=M
+           NN=N
+           JJ=J
          ENDIF
-         BondF%Length%D(K)=Length
-         BondF%Type%C(K)(1:4)='Frag'
        ENDDO
+       IF(MM==0) CALL Halt('Error in fragment recognition')
+       M=MM
+       N=NN
+       J=JJ
+       FragMark%I(I)=1
+       !
+       ! connect only to central cell
+       IF(HasCentralCell(I,IFrag%I,JFrag%I,IEq)) THEN
+         IF(ANY(Cells(N,1:3)>1).OR.ANY(Cells(N,1:3)<-1)) CYCLE 
+       ELSE IF(HasCentralCell(J,IFrag%I,JFrag%I,IEq)) THEN
+         IF(ANY(Cells(M,1:3)>1).OR.ANY(Cells(M,1:3)<-1)) CYCLE 
+       ELSE
+         CYCLE
+       ENDIF
+       K=K+1
+       Vect=XYZ(1:3,M)-XYZ(1:3,N)
+       Length=SQRT(DOT_PRODUCT(Vect,Vect))
+       IF(IEq(M)<IEq(N)) THEN
+         BondF%IJ%I(1:2,K)=(/M,N/)
+       ELSE
+         BondF%IJ%I(1:2,K)=(/N,M/)
+       ENDIF
+       BondF%Length%D(K)=Length
+       BondF%Type%C(K)(1:4)='Frag'
      ENDDO
      IF(K==0) THEN
        CALL Delete(BondF)
@@ -7423,6 +7445,7 @@ return
      !
      CALL Delete(CenterFrag)
      CALL Delete(FragID)
+     CALL Delete(FragMark)
      CALL Delete(IFrag)
      CALL Delete(LastFrag)
      CALL Delete(JFrag)
