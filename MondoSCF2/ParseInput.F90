@@ -31,7 +31,9 @@ CONTAINS
     ! Parse generic options 
     CALL LoadOptions(C%Nams,C%Opts)
     ! Parse dynamics options
-!    CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
+    IF(C%Opts%Grad==GRAD_DO_DYNAMICS) THEN
+       CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
+    ENDIF  
     ! Parse geometry or get from restart HDF 
     CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
     ! Parse periodic info

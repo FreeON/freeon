@@ -22,88 +22,86 @@ CONTAINS
     INTEGER          :: I,iCLONE,HDFFileID
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
-    IF(O%Grad==GRAD_TS_SEARCH_NEB.OR.D%MDAlgorithm==MD_PARALLEL_REP)THEN
-       ! Parse for the number of clones to use in parallel replica exchange or NEB or ...
+!   NEB
+    IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
+       ! Parse for the number of clones to use in NEB
        IF(.NOT.OptIntQ(Inp,CLONES,G%Clones))THEN
-          IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
-             CALL MondoHalt(PRSE_ERROR,'Doing NEB, did not find input number of beads (clones) to use ')
-          ELSE
-             CALL MondoHalt(PRSE_ERROR,'Doing RepX, did not find input number of temperatures (clones) to use ')
-          ENDIF
+          CALL MondoHalt(PRSE_ERROR,'Doing NEB, did not find input number of beads (clones) to use ')
        ENDIF
-       IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
-          IF(O%Guess==GUESS_EQ_RESTART)THEN
-             ! Overide any potential change in the number of clones ...
-             HDFFileID=OpenHDF(N%RFile)
-             HDF_CurrentID=HDFFileID
-             CALL Get(G%Clones,'clones')
-             CALL CloseHDF(HDFFileID)          
-          ENDIF
-          ! Allocate Clones+2 geometries for NEB
-          ALLOCATE(G%Clone(0:G%Clones+1))
-          ! Get left and right endpoints
-          IF(O%EndPts==ENDPOINTS_FROM_HDF)THEN            
-             CALL New(CurrentState,3)
-             ! Get the left endpoint from reactants HDF
-             HDFFileID=OpenHDF(N%ReactantsFile)
-             HDF_CurrentID=HDFFileID
-             ! Get the current reactants state 
-             CALL Get(CurrentState,'current_state')
-             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-             CALL Get(G%Clone(0),TAG_O=GTag(CurrentState))
-             CALL CloseHDFGroup(HDF_CurrentID)
-             CALL CloseHDF(HDFFileID)          
-             ! Get the right endpoint from products HDF
-             HDFFileID=OpenHDF(N%ProductsFile)
-             HDF_CurrentID=HDFFileID
-             ! Get the current reactants state 
-             CALL Get(CurrentState,'current_state')
-             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
-             CALL Get(G%Clone(G%Clones+1),TAG_O=GTag(CurrentState))
-             CALL CloseHDFGroup(HDF_CurrentID)
-             CALL CloseHDF(HDFFileID)          
-             CALL Delete(CurrentState)
-             ! CALL PPrint(G%Clone(0),Unit_O=6)
-             ! CALL PPrint(G%Clone(G%Clones+1),Unit_O=6)
-          ELSE 
-             ! Read in the reactants geometry from input
-             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0))          
-             ! Read in the products geometry from input
-             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1))   
-          ENDIF
-          IF(O%Guess==GUESS_EQ_RESTART)THEN
-             ! Get midpoints from HDF
-             HDFFileID=OpenHDF(N%RFile)
-             HDF_CurrentID=HDFFileID
-             DO iCLONE=1,G%Clones
-                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-                CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
-                CALL CloseHDFGroup(HDF_CurrentID)
-             ENDDO
-             CALL CloseHDF(HDFFileID)          
-             ! DO I=0,G%Clones+1
-             !    CALL PPrint(G%Clone(I),Unit_O=6)
-             ! ENDDO
-          ELSE
-             ! Initialize midpoints via interpolation
-             DO iCLONE=1,G%Clones
-                G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
-                G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
-                CALL New(G%Clone(iCLONE))
-             ENDDO
-             CALL NEBInit(G)
-          ENDIF
-       ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
-#if !defined(PARALLEL)
-          CALL MondoHalt(PRSE_ERROR,'Compile with -DPARALLEL to activate replica exchange.')
-#endif
-          ALLOCATE(G%Clone(1:G%Clones))
-          IF(O%Guess==GUESS_EQ_RESTART)THEN
-          ELSE       
-             ! HUGH PUTS A ROUTINE TO GENERATE (G%Clones) TRAJECTORIES AND VELOCITIES?
-          ENDIF
+       IF(O%Guess==GUESS_EQ_RESTART)THEN
+          ! Overide any potential change in the number of clones ...
+          HDFFileID=OpenHDF(N%RFile)
+          HDF_CurrentID=HDFFileID
+          CALL Get(G%Clones,'clones')
+          CALL CloseHDF(HDFFileID)          
        ENDIF
-    ELSE ! Not doing any fancy shmancy with clones ...
+       ! Allocate Clones+2 geometries for NEB
+       ALLOCATE(G%Clone(0:G%Clones+1))
+       ! Get left and right endpoints
+       IF(O%EndPts==ENDPOINTS_FROM_HDF)THEN            
+          CALL New(CurrentState,3)
+          ! Get the left endpoint from reactants HDF
+          HDFFileID=OpenHDF(N%ReactantsFile)
+          HDF_CurrentID=HDFFileID
+          ! Get the current reactants state 
+          CALL Get(CurrentState,'current_state')
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+          CALL Get(G%Clone(0),TAG_O=GTag(CurrentState))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)          
+          ! Get the right endpoint from products HDF
+          HDFFileID=OpenHDF(N%ProductsFile)
+          HDF_CurrentID=HDFFileID
+          ! Get the current reactants state 
+          CALL Get(CurrentState,'current_state')
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+          CALL Get(G%Clone(G%Clones+1),TAG_O=GTag(CurrentState))
+          CALL CloseHDFGroup(HDF_CurrentID)
+          CALL CloseHDF(HDFFileID)          
+          CALL Delete(CurrentState)
+          ! CALL PPrint(G%Clone(0),Unit_O=6)
+          ! CALL PPrint(G%Clone(G%Clones+1),Unit_O=6)
+       ELSE 
+          ! Read in the reactants geometry from input
+          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0))          
+          ! Read in the products geometry from input
+          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1))   
+       ENDIF
+       IF(O%Guess==GUESS_EQ_RESTART)THEN
+          ! Get midpoints from HDF
+          HDFFileID=OpenHDF(N%RFile)
+          HDF_CurrentID=HDFFileID
+          DO iCLONE=1,G%Clones
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+             CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+          ENDDO
+          CALL CloseHDF(HDFFileID)          
+          ! DO I=0,G%Clones+1
+          !    CALL PPrint(G%Clone(I),Unit_O=6)
+          ! ENDDO
+       ELSE
+          ! Initialize midpoints via interpolation
+          DO iCLONE=1,G%Clones
+             G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
+             G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
+             CALL New(G%Clone(iCLONE))
+          ENDDO
+          CALL NEBInit(G)
+       ENDIF
+!   Parrelel Rep
+    ELSEIF(O%Grad==GRAD_DO_DYNAMICS .AND. D%Parallel_Rep)THEN
+       CALL MondoHalt(PRSE_ERROR,'Parralel Rep not implimented')
+       ! Parse for the number of clones to use in Parallel Rep
+       IF(.NOT.OptIntQ(Inp,CLONES,G%Clones))THEN
+          CALL MondoHalt(PRSE_ERROR,'Doing Parralel Rep, input number of beads (clones) to use ')
+       ENDIF
+       ALLOCATE(G%Clone(1:G%Clones))
+       IF(O%Guess==GUESS_EQ_RESTART)THEN
+       ELSE         
+       ENDIF 
+!   Not doing any fancy shmancy with clones ...
+    ELSE 
        IF(O%Guess==GUESS_EQ_RESTART .AND. .NOT. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN      
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
@@ -125,23 +123,19 @@ CONTAINS
        ENDIF
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
-#ifdef FULL_ON_FRONT_END_DEBUG
-    DO I=1,G%Clones
-       !       CALL Print_CRDS(G%Clone(I),UNIT_O=6)
-    ENDDO
-#endif
+!
   END SUBROUTINE LoadCoordinates
+!------------------------------------------------------------------------!
 !
-!
-!
+!------------------------------------------------------------------------!
   FUNCTION GTag(State) RESULT(Tag)
     TYPE(INT_VECT)   :: State
     CHARACTER(LEN=4) :: Tag
     Tag=IntToChar(State%I(3))
   END FUNCTION GTag
+!------------------------------------------------------------------------!
 !
-!
-!
+!------------------------------------------------------------------------!
   SUBROUTINE ParseCoordinates(BeginDelimiter,EndDelimiter,G)
     CHARACTER(LEN=*)          :: BeginDelimiter,EndDelimiter
     TYPE(CRDS)                :: G

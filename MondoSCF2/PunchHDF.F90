@@ -162,10 +162,12 @@ CONTAINS
        G%Clone(iCLONE)%Confg=cGEO
 !      Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS),CS_IN,CS_OUT)
+!
 !      Make sure everything is wrapped correctly
        G%Clone(iCLONE)%Carts%D = G%Clone(iCLONE)%AbCarts%D
        CALL CalFracCarts(G%Clone(iCLONE))
        CALL WrapAtoms(G%Clone(iCLONE))
+!
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
 !      If we have ECPs, temporarily reset this geometries nuclear charges
        IF(B%BSets(iCLONE,cBAS)%HasECPs) &
@@ -186,7 +188,9 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
+!==============================================================================
 !
+!==============================================================================
   SUBROUTINE GeomReArchive(N,O,G)
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O

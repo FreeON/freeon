@@ -49,8 +49,8 @@ MODULE MDynamics
        CALL SCF(iBAS,iGEO,C)
     ELSE
 !      Hack, Give an intial Maxwell Boltzman Temp
-       Temp=20.D0
-       CALL SetTempMaxBoltDist(C,Temp)
+!!$       Temp=20.D0
+!!$       CALL SetTempMaxBoltDist(C,Temp)
 !      Init the Time
        MDTime%D(:) = Zero
        HDFFileID=OpenHDF(C%Nams%HFile)
@@ -100,7 +100,7 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
-       IF(.FALSE.) THEN
+       IF(.TRUE.) THEN
           C%Stat%Action%C(1) ==SCF_GUESSEQCORE
           DO iBAS=1,C%Sets%NBSets
              CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
@@ -262,10 +262,14 @@ MODULE MDynamics
        WRITE(Out,'(a18,F16.10)') "MD Temperature = ",MDTemp%D(iCLONE)
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
           WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
-                        Carts0%D(1:3,iATS,iCLONE)/AngstromsToAU,   &
-                        C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)/AngstromsToAU
+                        Carts0%D(1:3,iATS,iCLONE),   &
+                        C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
        ENDDO
-
+!!$       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+!!$          WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
+!!$                        Carts0%D(1:3,iATS,iCLONE)/AngstromsToAU,   &
+!!$                        C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)/AngstromsToAU
+!!$       ENDDO
        CLOSE(Out)
     ENDDO
 99  FORMAT(a3,6(1x,F14.8))

@@ -33,7 +33,7 @@ CPPMISC=#-DWORK_ON_DEGENERACY #-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA
 #
 BlkAInvObjs = BlokAInv.o  DenMatMethods.o
 LowdinOObjs = LowdinO.o 
-IRInvObjs   = IRInv.o 
+IRInvObjs   = IRInv.o DenMatMethods.o
 #
 ODA_Objs   = ODA.o DenMatMethods.o
 MIX_Objs   = MIX.o DenMatMethods.o
@@ -190,4 +190,4 @@ TS4.o:          DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
 PM.o:           DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
 LowdinO.o:		    $(MONDO_LIB)/libMondoMods.a
 BlokAInv.o:		    $(MONDO_LIB)/libMondoMods.a
-IRInv.o:		    $(MONDO_LIB)/libMondoMods.a
+IRInv.o:	DenMatMethods.o $(MONDO_LIB)/libMondoMods.a

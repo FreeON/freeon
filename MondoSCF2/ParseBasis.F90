@@ -95,7 +95,7 @@ CONTAINS
     TYPE(BSET) :: B
     INTEGER    :: AccL,MaxAtms,MaxBlks,MaxNon0
     INTEGER, INTENT(IN) :: MaxNon0s,MaxNBlks ! From input.
-    REAL(DOUBLE) :: BWEstim
+    REAL(DOUBLE) :: BWEstim,ShrinkFactor
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.3D3, 1.3D3,1.6D3/)
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
     !-------------------------------------------------------------------------!
@@ -106,12 +106,11 @@ CONTAINS
          /(One+BWDecay(AccL)*DBLE(G%NAtms)**2) ) ) 
     MaxBlks=1+G%NAtms*BWEstim
     MaxNon0=1+B%NBasF*(DBLE(B%NBasF)*DBLE(BWEstim)/DBLE(G%NAtms))
-    !
     ! Set the variable if def in the input.
     IF(MaxNon0s.GT.0) MaxNon0=MaxNon0s !if def in the input.
     IF(MaxNBlks.GT.0) MaxBlks=MaxNBlks !if def in the input.
-!    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2),' NAtms**2+1=',G%NAtms**2+1
-!    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2),' NBasF**2+1=',B%NBasF**2+1
+!    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks-1)/DBLE(G%NAtms**2)
+!    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0-1)/DBLE(B%NBasF**2)
 !    STOP
   END SUBROUTINE BCSRDimensions
 !============================================================================

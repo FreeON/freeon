@@ -420,7 +420,8 @@ CONTAINS
        NSteps=1
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_DYNAMICS))THEN
        ! Do molecular dynamics
-       Grad=GRAD_DO_DYNAMICS    
+       Grad=GRAD_DO_DYNAMICS  
+       NSteps=1
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_OPTIMIZE))THEN
        ! Go downhill in energy
        Grad=GRAD_GO_DOWNHILL

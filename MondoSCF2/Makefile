@@ -38,7 +38,7 @@ ObjectFiles = GetPID.o Spawn.o  ControlStructures.o NEB.o Numerics.o ParseComman
               ParallelKeys.o ParseParallel.o Massage.o GeomOptKeys.o ParseGeomOpt.o   \
               ParseExtraCoords.o ParseInput.o PunchHDF.o Overlay.o PrintParsed.o      \
               SCFKeys.o SCFs.o MLP.o Response.o Hessian.o GDIIS.o Optimizer.o         \
-	      ZippyQuote.o MondoSCF.o
+	      MDynamics.o ZippyQuote.o MondoSCF.o
 #
 ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseCommands.x  \
               OptionKeys.x ConflictDetect.x ParseOptions.x DynamicsKeys.x             \
@@ -47,7 +47,7 @@ ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseComman
               ParallelKeys.x ParseParallel.x Massage.x GeomOptKeys.x ParseGeomOpt.x   \
               ParseExtraCoords.x ParseInput.x PunchHDF.x Overlay.x PrintParsed.x      \
               SCFKeys.x SCFs.x MLP.x Response.x Hessian.x GDIIS.x Optimizer.x         \
-	      ZippyQuote.x MondoSCF.x
+	      MDynamics.x ZippyQuote.x MondoSCF.x
 #
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)
