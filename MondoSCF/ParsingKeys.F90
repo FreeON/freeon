@@ -159,6 +159,7 @@ MODULE ParsingKeys
 !
    CHARACTER(LEN=7),  PARAMETER :: EPSILON      ='Epsilon'
    CHARACTER(LEN=10), PARAMETER :: PFFMXELL     ='PFFMaxEll'
+   CHARACTER(LEN=10), PARAMETER :: PFFMXLAY     ='PFFLayers'
 #endif
 !-------------------------------------------------  
 !  Parsing keys for <Options.BasisSets=>
