@@ -158,13 +158,13 @@ cn:
 #----------------------------------------------
 #     DX Visualization support
  v:	
-	$(MAKE)    -C Vis
+	$(MAKE)    -C VisDX
 rv:	
-	$(MAKE) -i -C Vis release
+	$(MAKE) -i -C VisDX release
 pv:	
-	$(MAKE) -i -C Vis purge
+	$(MAKE) -i -C VisDX purge
 cv:	
-	$(MAKE) -i -C Vis clean
+	$(MAKE) -i -C VisDX clean
 #----------------------------------------------
 #   Cleaning of other directories 
 #
