@@ -1,6 +1,6 @@
-%\documentclass[prb,aps,preprint,showpacs,superbib]{revtex4}
+%\documentclass[prb,preprint,showpacs,superbib]{revtex4}
 
-\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 
 \usepackage{graphicx}
@@ -19,7 +19,8 @@
 \begin{document}
 
 \title{
-A New Look at the Geometry Optimization of Large Molecules\footnotemark[1]}
+Linear Scaling Geometry Optimization of Large Molecules by Fitting
+Internal Coordinate Gradients \footnotemark[1]}
 
 \author{K\'aroly N\'emeth\footnotemark[2]}
 \author{Matt Challacombe}
@@ -38,8 +39,9 @@ optimization problem into an ${\cal{O}}(N)$ set of quasi non-interacting
 one-dimensional problems.  Each  uncoupled optimization is developed by fitting 
 energy gradients in the internal coordinate system followed by root finding.  
 This new approach is competitive with the best  geometry optimization algorithms 
-in the litterature, achieves superlinear convergence and works well for large 
-biolgical problems with complicated ligand binding motifs.  
+in the literature, achieves superlinear convergence and works well for large 
+biological problems with complicated hydrogen bonding network 
+and ligand binding motifs.  
 }
 
 \smallskip
@@ -57,47 +59,49 @@ curvilinear internal coordinates, fitting
 \section{Introduction}
 
 Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  have 
-realized their promise of delivering energies and forces on nuclei for 
-large systems at both a numerical accuracy and theoretical level suitable to begin 
-addressing many complex problems.  For example, many problems in molecular biophysics 
-involve complicated metal-ligand binding motifs demanding model chemistries at the 
-hybrid Hartree-Fock/Density Functional (HF/DF) level of theory together with a large 
-quantum descritiption of the environment ... need something more... 
-However, despite favorable scaling properties, ${\cal O}(N)$ methods often carry a larger 
-cost prefactor than their conventional counterparts.  Thus, in addition to parallelism, 
-developing $N$-scaling algorithms to drive core linear scaling electronic structure engines 
-is paramount.  Perhaps the most useful such algorithm is the molecular geometry optimizer, 
-which follows the energy gradient downhill to a local mininum.  
-In addition to providing a welth of 
-structural information, efficient techniques for geometry optimization can often be leveraged in the 
-determination of transition states and reaction paths \cite{nudged_elastic_band}.
+realized their promise, delivering energies and forces on nuclei for large systems at 
+both a numerical accuracy and theoretical level suitable to begin addressing many complex 
+problems.  For example, it is now possible to routinely apply hybrid Hartree-Fock/Density 
+Functional theory to fragment models in molecular biophysics involving complicated 
+hydrogen bonding network and metal-ligand binding motifs 
+with several hundred atoms using basis sets of triple-zeta plus 
+polarization quality.  However, despite favorable scaling properties, ${\cal O}(N)$ 
+methods typically carry a larger cost prefactor than their conventional counterparts.  Thus, 
+in addition to parallelism, developing efficient algorithms to drive the core engines of 
+linear scaling electronic structure theory is paramount.  Of these, perhaps the most useful 
+driver of electronic structure theory is the molecular geometry optimizer, which follows 
+the energy gradient downhill to a local minimum.   
 
-The present paper reveals a new concept for the optimization of
-molecular geometries, which is especially suitable for the
-optimization of large molecules and performs equally well in the
-domain of small molecules, as well. In addition, 
-it can easily be implemented in a linear scaling fashion.
-The new concept is based on the availability of internal coordinate
-gradients for large molecules - a result of recent developments
-\cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}.
-Our observation is that internal coordinate gradients show clear
-tendencies during the optimization process and these tendencies 
-can be revealed
-by curve fitting in one-dimension. 
-For an illustration of this concept,
-see Fig. \ref{NH3outp6} for a typical progression of internal coordinate
-gradients. The roots of the fitted curve reveal the expected location
-of the minimum. This concept can be realized only in terms of
-internal coordinates which are representations of chemical entities, such as
-bond lengths, bond angles and torsional angles. Cartesian
-coordinates do not provide the same clear progression.
+This paper presents a new concept for the optimization of molecular 
+geometries based on the approximate separability of 
+curvilinear internal coordinate motions
+and the recent availability of internal coordinate technology 
+for large molecules
+\cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2}.  
+Internal coordinates represent motions along chemical entities 
+such as bond stretchings, valence angle bendings 
+and torsions. In terms of internal coordinates,
+interaction constants of the Hessian and higher order 
+energy derivative matrices are usually an order of 
+magnitude smaller than the diagonal ones 
+\cite{pulay_69,fogarasi_diaghess,Pulay_natural_internals,pulay_review,pulay_dynamics}.
+This is the basis for the approximate decoupling of molecular motions
+in terms of internal coordinates.
+
+An observation central to 
+the present contribution is that internal coordinate gradients 
+show recognizable trends during geometry optimization, 
+and these trends can be formalized by curve-fitting.
+The roots of the fitted curves provide a new, improved
+aproximation for the location of the extrema during geometry optimization.
+Such a trend is illustrated in Fig.~\ref{NH3outp6}, 
+showing a typical progression of 
+internal coordinate gradients and how a fitted line can predict the location
+of the minimum.
+
 \begin{figure}[h]
-%\resizebox*{3.5in}{!}{\includegraphics{1_6_6_Data.eps}}
-%\resizebox*{3.5in}{!}{\includegraphics{1_5_6_Data.eps}}
-%\resizebox*{3.5in}{!}{\includegraphics{1_7_6_Data.eps}}
 \resizebox*{3.5in}{!}{\includegraphics{picture1_2.eps}}
 \caption{
-\small  
 Progression of gradients on a valence angle bending coordinate of
 ammonia. Energies and forces were obtained by the PBE 
 density functional model in STO-3G basis set.
@@ -105,93 +109,183 @@ The optimization was started from near planar geometry, i.e.
 from the vicinity of a transition state, and converged to a local 
 minimum of the potential energy surface. The numbers in the picture
 indicate the sequence of optimization steps. The dashed line represents
-a linear fit, the star the predicted location of the minimum.
+a linear fit, the star the predicted location of the minimum.}
 \label{NH3outp6}
-}
 \end{figure}
 
-\section{Traditional techniques}
-In the last three decades the so-called internal coordinate 
-optimizers became standard tools of geometry optimization when energies 
-and forces are calculated by electronic structure theory 
-\cite{Pulay_natural_internals}.
-Internal coordinates describe the internal motions of molecules 
-by displacements of chemical entities, such as bond-stretches, 
-valence angle bendings and torsions of dihedral angles. These 
-coordinates are curvilinear, since they can be composed
-as non-linear functions of the Cartesian coordinates of atomic nuclei.
+\pagebreak
 
-An important property of these chemical internal coordinates
-is that they significantly reduce the harmonic and higher order 
-vibrational coupling, as compared to Cartesian ones 
-\cite{fogarasi_diaghess}. 
-Even if accurate harmonic force-constants are available, 
-internal coordinates are superior for geometry optimization, 
-since anharmonic effects are
-usually large, especially far from the minimum 
-\cite{Baker_deloc_1}. 
+We therefore propose solving the $3N$-dimensional molecular geometry 
+optimization problem as a set of $N_{\rm int}$  
+quasi-uncoupled one-dimensional 
+optimization problems, where $N_{\rm int}$ is the number of internal 
+coordinates. Since internal coordinates which represent chemical
+concepts are well localized, $N_{\rm int}$ is proportional to $N$, the number of
+atoms. This allows for constructing an optimization scheme 
+which scales linearly with the system-size.
+All these one-dimensional optimization problems are then treated similarly
+to the one of Fig.~\ref{NH3outp6}, i.e. the location of the extrema
+are determined by curve-fitting.
 
-A rough estimate of internal coordinate force constants is usually 
-enough for an efficient geometry optimization of small molecules
-\cite{bakken,fogarasi_diaghess}, however it is not satisfactory
-for larger molecules of complex structure.
+\subsection{Conventional Methods}
+As mentioned above, internal coordinates minimize both harmonic, and
+more importantly, anharmonic vibrational couplings 
+\cite{pulay_69,fogarasi_diaghess,Pulay_natural_internals,pulay_review,pulay_dynamics}.
+This fact provides internal coordinates with a great advantage 
+in molecular
+geometry optimization \cite{Pulay_natural_internals} 
+and molecular dynamics \cite{pulay_dynamics}, as opposed to Cartesians.
+Since Cartesian coordinates are highly coupled, a large displacement
+on one coordinate may generate a large gradient on the other one
+and thus delays convergence and causes oscillations. 
+Not even the use of an accurate Hessian can cure this situation,
+since large Cartesian displacements will induce the same effect 
+as before, via anharmonic
+coupling. An excellent discussion of this issue can be found in 
+the Introduction of Ref.~\cite{Pulay_natural_internals}.
+By this, it should be clear, that only internal coordinates 
+allow large steps on the potential energy surface of molecules.
+As a consequence, the use of internal coordinates can dramatically
+reduce the number of optimization steps, as compared to Cartesian ones,
+and is definitely the choice of coordinate systems for geometry optimization
+with expensive energy and gradient evaluations, such as {\it ab initio}
+calculations. This is even more valid for the optimization
+of large molecules.
 
-In order to get more accurate curvature information about the 
-potential energy surface the so-called Hessian-matrix update schemes
-are used \cite{RFletcher}. 
-Hessian matrix update schemes are derived from the assumption of a 
-harmonic potential energy surface. 
-The success of Hessian update schemes is based on, that for geometry 
-optimization a reasonable estimate of the Hessian 
-is enough to bring the molecule to a local extremum by 
-quasi-Newton steps. It is important to note, that while the knowledge
-of the exact Hessian leads to quadratically convergent optimization
-in the Newton scheme, updated Hessians exibit linear or slightly 
-superlinear
-convergence during quasi-Newton optimizations
-\cite{RFletcher,fogarasi_diaghess}.
+In the last three decades internal coordinate algorithms 
+became standard, well established tools for geometry optimization 
+in quantum chemistry. A recent review and comparison 
+of these algorithms and their technical
+details can be found in Ref.~\cite{bakken}.
 
-The updated Hessian matrices require ${\cal{O}}(N^{2})$ storage, thus
-their use becomes a computational bottleneck for large molecules.
-There are a few approaches to overcome this limitation.
-The most widely used one is the Limited Memory BFGS (LBFGS) 
-technique of Nocedal
-{\it et.al.} \cite{nocedal_lbgs}. This technique does never explicitely 
-construct the full Hessian matrix. Instead, it carries out all 
-the necessary operations by an implicite application of the Hessian
-via its component vectors. LBFGS
-has the limitation that it can use only a small number of remembered
-steps.
-Another efficient approach has been constructed very recently by Bofill,
-Anglada et.al. \cite{bofill_lanczos}. This approach is similar
-to LBFGS in the sense that it avoids the use of the explicite
-Hessian, but it can calculate necessary eigenvectors of the 
-Hessian by a Lanczos-type algorithm. A
-similar approach is the ${\cal{O}}(N^{2})$ scaling iterative
-scheme of Schlegel and Farkas \cite{schlegel_on2iter}.
-In Stewart's approach, an update
-formula of the inverse Hessian has been used, and the full explicite
-Hessian has been truncated by spacial thresholding and stored in a 
-sparse matrix fashion \cite{Stewart_crambin_opt}. 
-The reported performance
-of Stuart's scheme was rather poor on large molecules.
+All this optimization algorithms follow the Newton-Raphson scheme:
+\begin{equation}
+q_{i+1} = q_{i} - H^{-1} g_{i} ,
+\end{equation}
+where $g_{i}$ is the gradient vector, $H$ is the Hessian and
+$q_{i}$ the coordinate vector of the system in the $i$-th step.
+The models which use an approximate Hessian are called the
+quasi-Newton techniques \cite{RFletcher}. 
 
-The efficient use of internal coordinates for large molecules has 
-been limited by another important factor. That is the coordinate
-transformation problem, which must be carried out very frequently
-to transform Cartesian vectors and curvilinear internal ones into each
-other. This problem has found a linear scaling solution   
-only in recent developments 
-\cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}. 
+A diagonal or semidiagonal approximation of the Hessian offers one
+of the simplest choices to optimize geometry.
+This family of techniques are often referred to as "force relaxation" 
+methods.
+In this case, diagonal or semidiagonal force constants are approximated
+by spectroscopic values or by empirical force-fields \cite{pulay_69,pulay_review,sellers,fogarasi_diaghess,Pulay_natural_internals,van_alsenoy_98,lindh}.
+Key to the success of these schemes is an appropriate choice of the
+diagonal force-constants. In a complicated biomolecule, with 
+an extended hydrogen bonding network and occasionally metal-ligand bonds the
+variety of bonds is so large, that it is very difficult to find appropriate
+force constants for each bonds. In spite of these difficulties, the biggest
+{\it ab initio} geometry optimization in the literature, the geometry 
+optimization of Crambin, has been carried out using the force 
+relaxation technique. This optimization,
+carried out by Van Alsenoy \cite{van_alsenoy_98}, used a 
+relative small basis set, 4-21G and the {\it ab initio} Hartree-Fock model.
+The electronic structure code has been reported to scale linearly with 
+system size. The scaling of the optimizer has not been reported, it was
+probably at least cubic, due to the lack of appropriate coordinate 
+transformations. The crystal structure has been optimized in 79 steps
+by the internal coordinate optimizer.
 
+It is important to mention, that the steps calculated by 
+force relaxation are often strongly damped, in order to avoid divergence
+\cite{sellers}. One way of damping the steps, that can be used in general,
+not just for force relaxation, is the line search \cite{sclegel_linesearch}.
+The essence of a line search is, that once a bad step is observed by an 
+increase of the energy an interpolation between Cartesian structures takes 
+place, to reduce the stepsize and find a lower energy structure. 
+Usually no gradient evaluation takes place during the line search, thus
+the line search is not counted as an optimization step.
+
+Another important technique to control and accelarate convergence of geometry
+optimization is the geometric DIIS \cite{Pulay_GDIIS} (GDIIS). Geometric DIIS is
+seems to be a simple technique, however its successful application needs
+to take care of many intricate details \cite{Farkas_GDIIS}.
+For this reason, simple implementations do not always succeed \cite{bakken}.
+Still the technique counts as one of the standard algorithms of the field
+\cite{fogarasi_diaghess,Pulay_natural_internals,eckert,Farkas_GDIIS}.
+Most successful force relaxation methods either used damping, line-search,
+or GDIIS, or combinations of them. 
+
+In order to avoid the empirism related to the choice of approximate diagonal
+Hessians and to have explicite account of the
+coupling force constants, the use of Hessian matrix update techniques
+\cite{RFletcher} emerged also in quantum chemistry. For a list
+of some of the most important practical choices of update
+techniques see Ref.~\cite{bakken}. 
+The most frequently used updating method in molecular geometry optimization
+is the Broyden-Fletcher-Goldfarb-Shanno (BFGS) technique \cite{RFletcher}
+A rough guess of the Hessian, usually a
+diagonal approximation, is set up in the first optimization step, in Cartesian
+representation. This guess is then updated at each new optimization step
+using Cartesian displacement and gradient vectors from past optimization steps.
+The update matrices are of rank-1 or rank-2 type \cite{RFletcher}. 
+In order to utilize internal coordinates in connection with the updated
+Cartesian Hessians, the Cartesian Hessian matrices are transformed into
+internal coordinate representation at each optimization step \cite{bakken}.
+
+It is important to note, that it is technically difficult to 
+update Hessians in internal coordinates, if the definition of 
+the internal coordinates changes during the course of the optimization. 
+Since the Cartesian Hessian matrix is usually much less sparse then the 
+internal coordinate one, it is more difficult to treat it by sparse matrix 
+techniques, which would allow linear scaling operation count during the
+optimization steps. In the approach of Stewart \cite{Stewart_crambin_opt}
+the updated inverse Hessian was stored in a sparse matrix fashion to
+optimize the structure of crambin on the PM3 semiempirical level of theory. 
+The approach used mixed Cartesian-internal
+coordinate system, due to the lack of linear scaling coordinate transformations.
+The reported efficiency of the algorithm was rather poor.
+
+There have been some other approaches to reduce the operation
+count of geometry optimization steps. Schlegel and Farkas developed
+a quadratically scaling scheme to carry out coordinate transformations
+and step-vector calculations in the framework of the rational function 
+optimization scheme \cite{schlegel_on2iter}. Bofill {\it et.al.} 
+applied Lanczos algorithm for a similar problem \cite{bofill_lanczos}.
+
+Daniels {\it et.al.} \cite{Schlegel_plasminogen_opt} optimized the
+structure of an 80 aminoic acid protein, Kringle 1, by the semiempirical 
+PM3 technique, using a linear scaling PM3 code and the quadratically scaling
+optimizer of Schlegel {\it et.al.} \cite{schlegel_on2iter}. 
+Initial structures were taken from the crystallographyc data bank and
+refined by molecular mechanics optimization. The resulting structure 
+served as a starting point for the PM3 optimization, which converged in 
+362 steps.
+
+Merz {\it et.al.} used Cartesian coordinates to optimize several large 
+proteins, such as AFP, crambin and Kringle1 \cite{merz_divc_geomopt} using
+the PM3 semiempirical level of theory.
+The structures have been refined first by molecular mechanics optimization,
+then by PM3. The Cartesian optimizer was driven by
+the limited memory BFGS algorithmm of Nocedal {\it et.al.} (LBFGS) 
+\cite{nocedal_lbgs}. LBFGS is a simplified version of the BFGS, which scales
+linearly with the system size, as opposed to BFGS. The quality of the 
+approximate LBFGS Hessian is much more crude than the one of BFGS, which 
+usually ends up in a larger number of optimization steps, than BFGS.
+
+Summarizing all the above efforts, there has been considerable work
+put in reducing the operation count of optimizers and extending the 
+applicability of electronic structure methods to the optimization of
+large molecules.
+
+Our contribution in the present paper focuses on the applicability of
+internal coordinate geometry optimization of large molecules. Particularly,
+on the reduction of scaling in the optimizer. We will show, that a new
+concept of geometry optimization, which does not use any of the Hessian update
+techniques can provide efficiency and linear scaling for the optimization
+of both small and large molecules, while using only first order energy 
+derivatives.
 
 \section{A new concept}
+
 In the present article we introduce a new concept 
 to molecular geometry optimization. We call this approach the
 Extrapolation of Fitted Internal coordinate
 Gradients for the localization of Extrema (EFIGE).
-This new approach is very simple
-to implement, scales fully linearly with system size 
+This new approach is very simple to implement, scales fully linearly with system size 
 and is very efficient for both small and large molecules.
 
 The new algorithm is based on the fact that
