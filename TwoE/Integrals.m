@@ -285,14 +285,14 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
+           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & \n", \
                                              "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
 	   WS["USE GlobalScalars"];
-	   WS["USE ShellPairStruct"];
+	   WS["USE ONX2DataType"];
 	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
@@ -305,14 +305,14 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(:) :: I"]];
+           WS[StringJoin["REAL(DOUBLE) :: I(*)"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz"];
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
-           WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
+           WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
-           WS["INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L"];
+           WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
 
            Do[Do[
                  WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=Zero"]];
@@ -322,13 +322,13 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
   WS["Ay=ACInfo%Atm1Y"];
   WS["Az=ACInfo%Atm1Z"];
 
-  WS["Bx=BDInfo%Atm1X"];
-  WS["By=BDInfo%Atm1Y"];
-  WS["Bz=BDInfo%Atm1Z"];
+  WS["Bx=ACInfo%Atm2X"];
+  WS["By=ACInfo%Atm2Y"];
+  WS["Bz=ACInfo%Atm2Z"];
 
-  WS["Cx=ACInfo%Atm2X"];
-  WS["Cy=ACInfo%Atm2Y"];
-  WS["Cz=ACInfo%Atm2Z"];
+  WS["Cx=BDInfo%Atm1X"];
+  WS["Cy=BDInfo%Atm1Y"];
+  WS["Cz=BDInfo%Atm1Z"];
 
   WS["Dx=BDInfo%Atm2X"];
   WS["Dy=BDInfo%Atm2Y"];

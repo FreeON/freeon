@@ -1,22 +1,22 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (P P|S S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE Int3311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
       USE DerivedTypes
       USE GlobalScalars
-      USE ShellPairStruct
+      USE ONX2DataType
       USE GammaF2
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(:) :: I
+      REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
-      REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L
+      REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
+      INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       I1Bar1=Zero
       I2Bar1=Zero
       I3Bar1=Zero
@@ -30,12 +30,12 @@
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
-      Bx=BDInfo%Atm1X
-      By=BDInfo%Atm1Y
-      Bz=BDInfo%Atm1Z
-      Cx=ACInfo%Atm2X
-      Cy=ACInfo%Atm2Y
-      Cz=ACInfo%Atm2Z
+      Bx=ACInfo%Atm2X
+      By=ACInfo%Atm2Y
+      Bz=ACInfo%Atm2Z
+      Cx=BDInfo%Atm1X
+      Cy=BDInfo%Atm1Y
+      Cz=BDInfo%Atm1Z
       Dx=BDInfo%Atm2X
       Dy=BDInfo%Atm2Y
       Dz=BDInfo%Atm2Z
