@@ -34,7 +34,6 @@ F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/Dynamo                  \
                 -I$(MONDO_HOME)/IntCoo                  \
                 -I/usr/local/include                    
-#                -I$(MPI_INC) 
 F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES

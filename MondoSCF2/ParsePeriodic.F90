@@ -34,6 +34,7 @@ CONTAINS
     INTEGER          :: I,J,MaxEll
 !-----------------------------------------------------------------------!
 !   Parse the coordinate type 
+!
     IF(OptKeyQ(Inp,PBOUNDRY,CRT_FRAC))THEN
        PBC%InAtomCrd=.FALSE.
     ELSE
