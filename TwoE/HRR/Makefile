@@ -31,7 +31,7 @@ KetHRR63.o\
 KetHRR64.o\
 KetHRR66.o
 #
-HRRRels=KetHRR1010.x\
+ReleaseFiles=KetHRR1010.x\
 KetHRR102.x\
 KetHRR103.x\
 KetHRR104.x\
@@ -57,6 +57,8 @@ KetHRR66.x
 all:    HRR
 #
 clean:  CHRR
+#
+release: clean $(ReleaseFiles)
 #
 purge: clean
 	rm -f $(MONDO_LIB)/libHRR.a

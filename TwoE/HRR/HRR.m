@@ -246,7 +246,7 @@ MakeList=MakeString;
 RelsList=RelsString;
 
 MakeList=StringJoin["HRRObjs=",MakeList];
-RelsList=StringJoin["HRRRels=",RelsList]; 
+RelsList=StringJoin["ReleaseFiles=",RelsList]; 
 
 (**************** Print out the Makefile ************************)
 
@@ -271,6 +271,8 @@ WriteString[Makefile,"#\n"];
 WriteString[Makefile,"all:    HRR\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CHRR\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"release: clean $(ReleaseFiles)\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"purge: clean\n",
                             TAB,"rm -f $(MONDO_LIB)/libHRR.a\n",

@@ -224,7 +224,7 @@ MakeList=MakeString;
 RelsList=RelsString;
 
 MakeList=StringJoin["IntObjs=",MakeList];
-RelsList=StringJoin["IntRels=",RelsList]; 
+RelsList=StringJoin["ReleaseFiles=",RelsList]; 
 
 (**************** Print out the Makefile ************************)
 
@@ -249,6 +249,8 @@ WriteString[Makefile,"#\n"];
 WriteString[Makefile,"all:    GRD\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CGRD\n"];
+WriteString[Makefile,"#\n"];
+WriteString[Makefile,"release: clean $(ReleaseFiles)\n",TAB,"rm -f *.F90\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"purge:clean\n",
                             TAB,"rm -f $(MONDO_LIB)/libGRD.a\n",

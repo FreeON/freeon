@@ -8,6 +8,7 @@ EXTRA_INCLUDES=
 #
 MiscObjs=ShellPairStruct.o ShellPrint.o Scratch.o GetAtomPair.o InitDbl.o 
 #
+ReleaseFiles=ShellPairStruct.x ShellPrint.x Scratch.x GetAtomPair.x InitDbl.x 
 #
 all:    Misc
 #
@@ -15,6 +16,8 @@ clean:  CMisc
 #
 purge:clean
 	rm -f $(REMOVESRCE)
+#
+release: clean $(ReleaseFiles)
 #
 Misc:	$(MiscObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoEMisc.a $(?:.F90=.o)

@@ -248,6 +248,8 @@ WriteString[Makefile,"all:    INT\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CINT\n"];
 WriteString[Makefile,"#\n"];
+WriteString[Makefile,"release: clean $(ReleaseFiles)\n",TAB,"rm -f *.F90\n"];
+WriteString[Makefile,"#\n"];
 WriteString[Makefile,"purge:clean\n",
                             TAB,"rm -f $(MONDO_LIB)/libINT.a\n",
                             TAB,"rm -f $(REMOVESRCE)\n"];

@@ -157,6 +157,9 @@ all:    VRR
 #
 clean:  CVRR
 #
+release: clean $(ReleaseFiles)
+	rm -f *.F90
+#
 purge: clean
 	rm -f $(MONDO_LIB)/libVRR.a
 	rm -f $(REMOVESRCE)

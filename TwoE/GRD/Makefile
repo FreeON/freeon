@@ -80,7 +80,7 @@ dIntB6060601.o\
 dIntB6060603.o\
 dIntB6060606.o
 #
-IntRels=BraHRR1010.x\
+ReleaseFiles=BraHRR1010.x\
 BraHRR101.x\
 BraHRR103.x\
 BraHRR106.x\
@@ -155,6 +155,9 @@ dIntB6060606.x
 all:    GRD
 #
 clean:  CGRD
+#
+release: clean $(ReleaseFiles)
+	rm -f *.F90
 #
 purge:clean
 	rm -f $(MONDO_LIB)/libGRD.a

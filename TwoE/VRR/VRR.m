@@ -256,6 +256,7 @@ WriteString[Makefile,"all:    VRR\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"clean:  CVRR\n"];
 WriteString[Makefile,"#\n"];
+WriteString[Makefile,"release: clean $(ReleaseFiles)\n",TAB,"rm -f *.F90 \n",];
 WriteString[Makefile,"purge: clean\n",
                             TAB,"rm -f $(MONDO_LIB)/libVRR.a\n",
                             TAB,"rm -f $(REMOVESRCE)\n"];

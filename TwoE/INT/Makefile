@@ -154,7 +154,7 @@ IntB6060602.o\
 IntB6060603.o\
 IntB6060606.o
 #
-IntRels=BraHRR1010.x\
+ReleaseFiles=BraHRR1010.x\
 BraHRR101.x\
 BraHRR102.x\
 BraHRR103.x\
@@ -303,6 +303,9 @@ IntB6060606.x
 all:    INT
 #
 clean:  CINT
+#
+release: clean $(ReleaseFiles)
+	rm -f *.F90
 #
 purge:clean
 	rm -f $(MONDO_LIB)/libINT.a
