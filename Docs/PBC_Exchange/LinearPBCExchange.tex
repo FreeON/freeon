@@ -40,14 +40,19 @@ simple ideas and arguments, we can correct this problem.
 
 \section{Introduction}
 Many calculations of the electronic structure of condensed matter systems now make use
-of the exact exchange interaction [ref]. Whereas this has been a very
-important functional in the quantum chemistry community [ref], until the
-advent of the hybrid functionals [ref] this functional has had very little impact on the
+of the exact exchange interaction 
+\cite{Pisani80,REvarestov83,MCausa88,JAlmlof94,RDovesi00}. 
+Whereas this has been a very
+important functional in the quantum chemistry community 
+\cite{PLowdin55,py,ASzabo89}, 
+until the advent of the hybrid functionals 
+\cite{Gill92,Becke93,ABecke96,Adamo99}, 
+this functional has had very little impact on the
 condensed matter electronic structure community. Now because of the accuracy obtainable with
 the hybrid functionals, it has become very desirable to include exact exchange into
 existing condensed matter electronic structure algorithms. 
 However, most of these calculations make use of ${\bf k}$-space integrations to 
-deal with the periodicity of the system [ref]. However, this is not an ideal situation 
+deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal situation 
 for linear scaling algorithms, where we would like to remove the need for doing
 ${\bf k}$-space integrations altogether by increasing the system size. 
 However, when Gamma point only is attempted for exact exchange, a 
@@ -66,7 +71,7 @@ And finally, we verify that the exchange matrix build is indeed linear scaling
 for the dense diamond system.
 
 \section{The Hartree Fock Equations}
-Within the Hatree fock approcimation we define the total energy as [ref]
+Within the Hatree fock approcimation we define the total energy as \cite{Pisani80,RDovesi00}
 \begin{equation}
 E = Tr[{\bf P} \, {\bf F}]+ E_{nn}
 \label{HFEnergy}
@@ -90,11 +95,11 @@ We solve for the density matrix, ${\bf P}$, via the eigen-equation
 {\bf F} {\bf P} = \epsilon {\bf P}
 \label{DenMat}
 \end{equation}
-nd iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
+and iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
 
 \section{The Exchange matrix}
 The exchange matrix calculated withing a LCAO basis set, including $k$-space, 
-is define as [ref] 
+is define as  \cite{Pisani80,RDovesi00}
 \begin{equation}
 K_{ab}=\sum _{\mathbf{hgn}\,\,cd} \int
 {{\phi _{a}(\mathbf{r}) 
@@ -133,7 +138,7 @@ we calculate the exchange matrix elements for atom $a$, include exchanges only w
 defined by the volume centered about atom $a$ (the red box in figure \ref{figure:ExchangeRegion}).
 This gives both a convergent exchange matrix, and also a  translationally invariant one.
 We do this by defining  a Minimum Image Distance (MID) condition, which is similiar to what is done
-in Molecular Dynamics for the force on an atom due to neighboring cells [ref], 
+in Molecular Dynamics for the force on an atom due to neighboring cells \cite{awindemuth95}, 
 
 \begin{equation}
 K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
@@ -168,17 +173,19 @@ in the correct fashion in regard to increasing system size.
 \section{Scaling}
  
 Figure \ref{figure:Scaling_Matrix_Build} the time it takes to build the
-matrix  \( K_{x} \) for the dense diamond periodic system up to 512 atoms for the
-basis set 6-21G* \cite{C98Basis} at a {\it good} level of accuracy.
-%Even in this very dense periodic system for a medium basis set with d-functions, 
-%linear scaling for the matrix build commences very early. 
+matrix  \( K_{x} \) for the dense diamond periodic system up to 800 atoms for the
+basis set 6-31G$ ^\dagger$ \cite{} at a {\it loose} level of accuracy.
+Also included in the figure for comparision are the total time for the
+density matrix solver, TRS4 \cite{}, 
+and the Coulomb matrix build using our Quantum chemical treee code \cite{}. 
 
-We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
-in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
-Again we see the convergence of the total energy
-as a function of increasing system size, which is akin to k-space integration.
-We also see that our relative error is very well controlled within the \
-textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
+
+%We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
+%in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
+%Again we see the convergence of the total energy
+%as a function of increasing system size, which is akin to k-space integration.
+%We also see that our relative error is very well controlled within the \
+%textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
 
 
 \section{CONCLUSIONS}
@@ -198,7 +205,8 @@ in preparation of this manuscript.
 
 \begin{table}
 \caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Magnesium Oxide test system. The \textbf{MondoSCF} calculations where done to
+Magnesium Oxide test system within the Hartree-Fock approxiamtion using
+the STO-3G basis set. The \textbf{MondoSCF} calculations where done to
 the accuracy of the quoted digits. All calculations where done at the Gamma point
 for comparison except the last \textbf{Crystal98} calculation, which was done at 
 ${\bf k}_{max}=\{6,6,6\}$.}
@@ -251,30 +259,43 @@ $ ^g$Cubic  \\
 %
 %
 \begin{figure}
-\caption{Scaling Results for the matrix build \protect\( K_{x}\protect \)
-for the dense diamond periodic system up to 512 atoms using the
-{\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
+\caption{Scaling results for the exchange matrix build, the coulomb matrix
+build (scaled by ten), and the density matrix solver (scaled by twenty),  
+for the dense diamond periodic system up to 800 atoms using the
+6-31G$ ^\dagger$ basis set \cite{}}
 \label{figure:Scaling_Matrix_Build}
-{\centering \includegraphics{blank.ps} \par} 
+{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
 \end{figure}
 %
 %
 %
 \begin{figure}
-\caption{ Energy per carbon atom for the dense diamond
-periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
-\label{figure:EnergyPerN}
-{\centering \includegraphics{blank.ps} \par} 
+\caption{Energy per Carbon atoms vs. Lattice constants for an 8 atom 
+unit cell with the 6-31G$ ^\dagger$/HF basis set and a tight level of accuracy. Also
+shown is the same calculation, but in a 216 atom unit cell at a losse level
+of accuracy.}
+\label{figure:EnergyVsLattice}
+{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
 \end{figure}
+
 %
 %
 %
-\begin{figure}
-\caption{ Relative Error per carbon atom for the dense diamond
-periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{C98Basis}.}
-\label{figure:ErrorPerN}
-{\centering \includegraphics{blank.ps} \par} 
-\end{figure}
+%\begin{figure}
+%\caption{ Energy per carbon atom for the dense diamond
+%periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{CBS:621G:C}.}
+%\label{figure:EnergyPerN}
+%{\centering \includegraphics{blank.ps} \par} 
+%\end{figure}
+%
+%
+%
+%\begin{figure}
+%\caption{ Relative Error per carbon atom for the dense diamond
+%periodic system up to 512 atoms using the {\bf Crystal98} basis set 6-21G* \cite{CBS:621G:C}.}
+%\label{figure:ErrorPerN}
+%{\centering \includegraphics{blank.ps} \par} 
+%\end{figure}
 
 
 

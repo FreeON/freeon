@@ -57,7 +57,7 @@ phases will be demonstrated.
 
 \footnotetext[3]{\tt tymczak@lanl.Gov}
 \footnotetext[6]{\tt MChalla@lanl.Gov}
-\footnotetext[4]{Preprint LA-UR-03-XXXX.}
+\footnotetext[4]{Preprint LA-UR-03-7723.}
 
 \section{INTRODUCTION}
 In recent years several successful methods for the calculating the electronic structure of
@@ -79,28 +79,28 @@ that these codes can address. Therefore, it has become increasing important for
 the development of quantum chemistry codes which scale linearly with increasing 
 system size, and several quantum chemistry codes of this type are in 
 development 
-\cite{Goedecker94,Challacombe96,Canning96,Briggs96,EHernandez96,Scuseria99,ANiklasson02B}. 
+\cite{SGoedecker94,MChallacombe96,Canning96,Briggs96,EHernandez96,Scuseria99,ANiklasson02B}. 
 However, for reasons of simplicity most of these quantum 
 chemistry codes have yet to incorporate periodic boundary conditions.
 Unfortunately many
 technically important systems can only be addressed within a condensed phase environment,
-where surface effects have been removed \cite{Allen90}. Therefore, the inclusion of 
+where surface effects have been removed \cite{MAllen90}. Therefore, the inclusion of 
 periodic boundary conditions into existing linear scaling quantum chemistry
 codes is essential. 
 
 We have implemented periodic boundary conditions into the linear scaling
 quantum chemistry code \textbf{MondoSCF} 
-\cite{Challacombe96,Challacombe97,Challacombe99}.
+\cite{MChallacombe96,MChallacombe97,MChallacombe99}.
 For the one electron matrix this has been achieved by a re-summation
 over periodic cell images, which because of locality leads to an efficient
 calculation of the one electron matrices. For the two electron matrices
 various methods are employed. For the two-electron Coulomb matrix,
 we achieve this via an exact multi-pole expansion of the long range
-Coulomb field \cite{White94,Challacombe97b}. This yields a spherically
+Coulomb field \cite{White94,Challacombe97}. This yields a spherically
 summed boundary condition that is easily transformed into the Ewald boundary
 condition \cite{Redlack72,Redlack75}. In order to achieve linear
 scaling of the local Coulomb field, a Quantum Chemical Tree Code (QCTC)
-is used \cite{WarSal93,WarSal95,Salmon:93,Challacombe96A}. For the calculations of the 
+is used \cite{MWarren93,MWarren95a,JSalmon94,MChallacombe96A}. For the calculations of the 
 local exchange-correlation matrix, a Hierarchical Cubature (HiCu), pure 
 Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
@@ -874,7 +874,7 @@ in preparation of this manuscript.
 
 \section{Computation of the \protect\( {\cal M}\protect \) Tensor}\label{calMTen}
 
-Following the work of Nijboer-De Wette \cite{Nijboer57,Nijboer58a}.
+Following the work of Nijboer-De Wette \cite{BNijboer57,BNijboer58a}.
 We start by first partitioning  
 
 \begin{equation}

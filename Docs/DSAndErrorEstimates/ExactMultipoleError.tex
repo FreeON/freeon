@@ -24,16 +24,18 @@
 
 \begin{abstract}
 We derive an exact error bound for the multipole approximation which is essential for the control of
-errors within several important algorithms, for example the multipole tree-codes 
-and the fast multipole method algorithms. 
+errors within several algorithms such as the multipole tree-codes 
+or the fast multipole method algorithms. 
 %
-The multipole tree-codes and the fast multipole method algorithms are both used in large scale astrophysical 
-simulations, and in Quantum Chemistry simulations, in order to achieve {\cal O}($N log(N)$) 
-scaling. 
+The multipole tree-codes and the fast multipole method algorithms 
+are used in order to achieve {\cal O}($N {\rm log}(N)$) for long range interactions.
+Examples include the
+large scale astrophysical 
+simulations, such as galaxies, and in large scale  Quantum Chemistry simulations, such as dipolar proteins in water. 
 %
 Error control is essential in order to achieve both  accuracy and efficiency for both these algorithms. 
 %
-We then illustrate how this new exact multipole error bound can be incorporated into our existing 
+Specifically, we then illustrate how this new exact multipole error bound can be incorporated into our existing 
 quantum chemical tree-code within the linear scaling {\bf MondoSCF} suite,  
 and then with several example systems we illustrate how these modifications improves both the accuracy and 
 efficiency of our quantum chemical tree code, where we have achieve orders of magnitude reduction of the
@@ -45,7 +47,7 @@ computational cost
 
 \section{INTRODUCTION}
 
-In many areas of interest it becomes essential to simulate 
+In many interesting and technically relavent areas it sometimes becomes essential to simulate 
 the behavior of large scale systems where the interaction 
 falls of as one over the distance. Examples range from  the astrophysical simulation
 of the gravitational interaction, to the condensed matter simulations of electrostatic interactions. 
@@ -53,7 +55,7 @@ In both cases the interaction potential falls of with one over the distance,
 leading to  {\cal O}($N^2$) scaling with system size. Several algorithm's have been developed to
 overcome this limitation such as the Ewald method \cite{DFincham94}, 
 Particle Mesh Ewald \cite{luty:94}, 
-the Fast Multipole Method \cite{Singh93,shimada:94,singer:95a}
+the Fast Multipole Method \cite{Singh93,shimada:94,singer:95a},
 and the multipole tree-code methods \cite{Salmon94}. 
 Of specific interest are the multipole tree-code methods. 
 Tree-codes have several important advantages over other methods [ref]: i) they are easy to parallelize,
@@ -66,51 +68,58 @@ a reasonable error estimate [ref].
 This has severely hampered the utility of these methods, and to a large degree have negated the advantages
 of tree-codes which we have stated above.
 This is our main motivation for deriving our new error estimate because for quantum chemistry calculations, 
-where the distributions weights can span several magnitudes, the singularity in the true error
-leads to large uncontrollable error in the matrix element calculations, which forced us to lower our error 
-thresholds to unacceptable small levels. 
+where the distributions weights can span several magnitudes, any problem with the multipole error 
+estimate can  
+lead to large uncontrollable error in the matrix element calculations. 
+This would usually force us to lower our error 
+thresholds to unacceptable small levels, also increasing the time to compute the matrix by order of
+magnitude 
 
 In the next section we will review MTC codes. We then show how the efficiency of these codes are
 controlled by the efficiency of the error estimates used. Next we briefly outline the derivation of 
 our exact error bound and how it can be implemented into existing MTC's. In the final
 section we show how this exact error bound improves dramatically the efficiency and accuracy
 of our Quantum chemical tree code (QCTC) for quantum simulations, and we also show that this
-greatly improves the accuracy for classical simulations
+greatly improves the accuracy for classical simulations, such as dipolar water.
 
 
 \section{MULTIPOLE TREE-CODES}
 
 \subsection{The Multipole Expansion}
 
-Consider Figure {\ref{figure:MultInBox}}, where we have depicted $N$ point distributions in a box, and a 
-reference distribution , $a$, which we want to calculate the interaction with the distributions in the box. 
+Let us first consider figure {\ref{figure:MultInBox}}, where we have depicted $N$ distributions in a box, and a 
+reference distribution , $a$, to which we want to calculate the long range interactions with the 
+distributions in the box. And also where we define {\it distribution} as a confined area of charge, be it
+a point charge or other.  Let us also consider the long range interaction to be electrostatic in nature.
 %
-Of course the very simple way to calculated this interaction of distribution $a$ with all the distributions in the box,
+Of course the very simple way to calculated this interaction of distribution $a$ with all 
+the distributions in the box is,
 \begin{equation}
 V[\mathbf{R}_{a},\mathbf{R}_{box}] =
 \sum_{i=1}^{N} \frac{q_{a} \, q_{i}}{|\mathbf{R}_{a}-\mathbf{R}_{i}|}
 \end{equation}
-however, this scales with the number of distributions in the box, leading to quadratic scaling for the interaction 
+However, this scales with the number of distributions in the box, leading to quadratic scaling for the interaction 
 energy of $N$ distributions (a distributions interacting with $N-1$ distributions done $N$ times) . 
 %
-One solution to this poor scaling would be to calculate the multipoles (we use 
+One solution to this poor scaling would be to calculate the multipoles (here we use 
 spherical multipoles [ref]) of the set of distributions in the box at the center of the box, and 
 then interact the reference distribution $a$ with the multipoles via
 %
 \begin{equation}
 V[\mathbf{R}_{a},\mathbf{R}_{box}]  
-= \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
+= \varepsilon + \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
 \sum _{m'=-l'}^{l'}\,
 \left( -1\right) ^{l}
 \, {\cal O}_{l}^{m}[\mathbf{R}_{a}]M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]\, 
-{\cal O}_{l'}^{m'}[\mathbf{R}_{box}]+\varepsilon
+{\cal O}_{l'}^{m'}[\mathbf{R}_{box}]
 \label{MultI}
 \end{equation}
 Where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ and ${\cal O}_{l'}^{m'}[\mathbf{R}_{box}]$ are the spherical multiple's of 
-the distribution $a$ and the distributions in the box , and  $M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ 
-is the interaction tensor (see equations (A1-A3) in Appendix A). 
+the distribution $a$ and the distributions in the box , $M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ 
+is the interaction tensor (see equations (A1-A3) in Appendix A), and
+$\varepsilon$ is the error we make by this approximation. 
 %
-This is exact in the limit of $L$ and $L'$ approaching  infinity as long as 
+This is exact, $\varepsilon=0$,  in the limit of $L$ and $L'$ approaching  infinity as long as 
 $|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. In tree code calculations 
 ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ is usually of a particular angular momentum type, $l_0$, such that the sum over $L$ is 
 removed, and the value of $L'$ are usually fixed at some maximum value, $L'=L_{max}$.
@@ -130,7 +139,7 @@ depicted in  Figure {\ref{figure:TreeInBox}}. So instead of contracting our refe
 original box, we now contract it with the set of sub-boxes which will control the error. In general for our reference
 distribution we will need to visit {\cal O}($\log (N)$) nodes and leafs, which is also depicted in the figure. The 
 only issue yet to be resolved is how we estimate the error due to the contraction; what should be our
-{\it multipole Acceptability Criteria} for whether or not we contract on this node, or recur down to the next two 
+{\it Multipole Acceptability Criteria} (MAC) for whether or not we contract on this node, or recur down to the next two 
 sub nodes. In the next section we explore this issue.
 
 
@@ -139,7 +148,7 @@ sub nodes. In the next section we explore this issue.
 Several multipole acceptability criteria have been devised for multipole tree codes [ref]. The 
 multipole acceptability criteria which is used in many applications is the, and
 which we use as an illustration of the problems associated with using error estimates not error bounds, is the 
-{\it opening criteria},
+{\it opening criteria}, which is due to Barn and Hut [ref],
 \begin{equation}
 \varepsilon_{oc} \approx \frac{ \left| {\bf d}_{max} \right| }{ \left| {\bf R}_a - {\bf R}_{box} \right|}
 \label{OpenCri}
@@ -153,7 +162,7 @@ iv) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it can significantly unde
 the error. 
 %
 To avoid this problem we have derived an exact error bound, which significantly improves the performance of 
-multipole tree codes.
+iour multipole tree codes.
 In Appendix A we give a complete derivation of this exact bound, here we just give a brief description. 
 Let us start with the expression of the exact multipole error as,
 \begin{equation}
@@ -190,7 +199,7 @@ where
 \begin{equation}
 n\left[ l,l'\right] =\sqrt{2} \frac{(l+l')!}{l!\, l'!}
 \end{equation}
-To continue with the main points of our derivation, we can show that
+To continue with the main points of our derivation, we can then show that
 \begin{equation}
 {\cal O}_{l}[\left| \mathbf{R}\right| ]\leq {\cal C} \left| \mathbf{d}_{max}\right| ^{l}
 \label{Cbound}
@@ -213,7 +222,7 @@ iii) It takes into account the angular momentum type of the distributions,
 iv) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the error. 
 %
 It is possible to continue this analysis to include the multipole error made within the fast multipole algorithm, 
-but in this case we are contracting distributions ion two different boxes. Making the Assumption that $L=L'=L_{max}$ we
+but in this case we are contracting distributions in two different boxes. Making the Assumption that $L=L'=L_{max}$ we
 can write the fast multipole error as
 \begin{equation}
 \varepsilon_{FMM} \leq 
