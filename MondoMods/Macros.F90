@@ -250,17 +250,17 @@ MODULE Macros
        LOGICAL :: HasMM
        HasMM=Mechanics(1)
      END FUNCTION HasMM
-
+!
      FUNCTION HasQM() 
        LOGICAL :: HasQM
        HasQM=Mechanics(2)
      END FUNCTION HasQM
-
+!
      FUNCTION MMOnly() 
        LOGICAL :: MMOnly
        MMOnly=Mechanics(1).AND..NOT.Mechanics(2)
      END FUNCTION MMOnly
-
+!
      FUNCTION QMOnly() 
        LOGICAL :: QMOnly
        QMOnly=Mechanics(2).AND..NOT.Mechanics(1)
