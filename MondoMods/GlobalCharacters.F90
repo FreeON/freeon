@@ -74,5 +74,19 @@ MODULE GlobalCharacters
    CHARACTER(LEN=1), PARAMETER :: Blnk=' '
    INTEGER,          PARAMETER :: IBlnk=ICHAR(Blnk)
    CHARACTER(LEN=2), PARAMETER :: Delta='/'//BakSlash
+!
+! SCF global characters
+!
+   CHARACTER(LEN=3)     :: SCFCycl
+   CHARACTER(LEN=3)     :: PrvCycl
+   CHARACTER(LEN=3)     :: CurCycl
+   CHARACTER(LEN=3)     :: NxtCycl
+   CHARACTER(LEN=20)    :: SCFActn
+   CHARACTER(LEN=3)     :: CurBase
+   CHARACTER(LEN=3)     :: PrvBase
+   CHARACTER(LEN=6)     :: CurGeom
+   CHARACTER(LEN=6)     :: PrvGeom
+   CHARACTER(LEN=6)     :: NxtGeom
+!
 END MODULE
 
