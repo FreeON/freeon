@@ -58,6 +58,9 @@ PROGRAM XCForce
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
+#ifdef PERIODIC
+  CALL MakeBoxPeriodic(WBox)
+#endif
   CALL CalCenterAndHalf(WBox)
   CALL GridGen(WBox,VolRho,VolExc)
 ! Delete the density

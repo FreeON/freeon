@@ -57,6 +57,13 @@ MODULE ParallelHiCu
            3,MPI_DOUBLE_PRECISION,MPI_MIN,MPI_COMM_WORLD,IErr)
     CALL MPI_AllReduce(LocalRhoBBox%BndBox(1,2),GRhoBBox%BndBox(1,2),&
            3,MPI_DOUBLE_PRECISION,MPI_MAX,MPI_COMM_WORLD,IErr)
+#ifdef PERIODIC
+  IF(MyID == 0) THEN
+    CALL MakeBoxPeriodic(GRhoBBox)
+  ENDIF
+  CALL MPI_Bcast(GRhoBBox%BndBox(1,1),3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Bcast(GRhoBBox%BndBox(1,2),3,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+#endif
     GRhoBBoxVol = 1.0D0
     DO I = 1, 3
       GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
@@ -230,7 +237,7 @@ MODULE ParallelHiCu
     
 !===============================================================================
   SUBROUTINE DistDist()
-    INTEGER :: Tot,FloatDblIndex,ActIntRecvAmt,ActDblRecvAmt,&
+    INTEGER :: NC,Tot,FloatDblIndex,ActIntRecvAmt,ActDblRecvAmt,&
       DblSendBufIndex,IntSendBufIndex,IntAmtRecv,DblAmtRecv,&
       SendTo,RecvFrom,CD,DistIndex,EllFillIndex,CoFillIndex,NumOfCo,&
       GIntSendMaxSize,GDblSendMaxSize,IntSendToOthers,DblSendToOthers,&
@@ -278,6 +285,7 @@ MODULE ParallelHiCu
       !! Distribution box obtained
       !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
       DO J = 0, NPrc-1
+#if !defined(PERIODIC)
         BoxL(1:3) = LCoor%D(1:3,J+1)
         BoxU(1:3) = RCoor%D(1:3,J+1)
         QBL(1:3) = NodeBox%BndBox(1:3,1)
@@ -298,6 +306,31 @@ MODULE ParallelHiCu
           CoToSend%I(J) = CoToSend%I(J) + LMNLen
           DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen !! x,y,z,zeta,extent,co
         ENDIF
+#else
+        DO NC = 1, CS_OUT%NCells
+          BoxL(1:3) = LCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
+          BoxU(1:3) = RCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
+          QBL(1:3) = NodeBox%BndBox(1:3,1)
+          QBU(1:3) = NodeBox%BndBox(1:3,2)
+          IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
+             QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
+             QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
+            !! do nothing, no intersection
+          ELSE
+            !! Put KQ into the list
+            !! first go the pointer that has is pointing to J
+            !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+            !! J is the proc to send
+            IndexToSend%I(J) = IndexToSend%I(J) + 1
+            IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell
+            Ell = Ldex(KQ)
+            LMNLen = LHGTF(Ell)
+            CoToSend%I(J) = CoToSend%I(J) + LMNLen
+            DblToSend%I(J) = DblToSend%I(J) + 5 + LMNLen !! x,y,z,zeta,extent,co
+            EXIT ! crucial exit
+          ENDIF
+        ENDDO
+#endif
       ENDDO
     ENDDO
     !! allocate memory
@@ -316,6 +349,7 @@ MODULE ParallelHiCu
       NodeBox=ExpandBox(NodeBox,Ext(KQ))
       !! Distribution box obtained
       DO J = 0, NPrc-1
+#if !defined(PERIODIC)
         BoxL(1:3) = LCoor%D(1:3,J+1)
         BoxU(1:3) = RCoor%D(1:3,J+1)
         QBL(1:3) = NodeBox%BndBox(1:3,1)
@@ -332,6 +366,27 @@ MODULE ParallelHiCu
           IndexToSend%I(J) = IndexToSend%I(J) + 1
           HeadArr(J)%LS(IndexToSend%I(J)) = I
         ENDIF
+#else
+        DO NC = 1, CS_OUT%NCells
+          BoxL(1:3) = LCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
+          BoxU(1:3) = RCoor%D(1:3,J+1)+CS_OUT%CellCarts%D(:,NC)
+          QBL(1:3) = NodeBox%BndBox(1:3,1)
+          QBU(1:3) = NodeBox%BndBox(1:3,2)
+          IF(QBU(1) <= BoxL(1) .OR. QBL(1) >= BoxU(1) .OR. &
+             QBU(2) <= BoxL(2) .OR. QBL(2) >= BoxU(2) .OR. &
+             QBU(3) <= BoxL(3) .OR. QBL(3) >= BoxU(3)) THEN
+            !! do nothing, no intersection
+          ELSE
+            !! Put KQ into the list
+            !! first go the pointer that has is pointing to J
+            !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+            !! J is the proc to send
+            IndexToSend%I(J) = IndexToSend%I(J) + 1
+            HeadArr(J)%LS(IndexToSend%I(J)) = I
+            EXIT ! crucial exit
+          ENDIF
+        ENDDO
+#endif
       ENDDO
     ENDDO
     CALL AlignNodes()
@@ -1194,11 +1249,13 @@ MODULE ParallelHiCu
     TableAtomRad(6) = 0.70*AngstromsToAU
     TableAtomRad(7) = 0.65*AngstromsToAU
     TableAtomRad(8) = 0.60*AngstromsToAU
+    TableAtomRad(12) = 1.50*AngstromsToAU
     AtomExists = .FALSE.
     AtomExists = AtomExists .OR. ABS(Z-1.0D0) < 1.0D-10
     AtomExists = AtomExists .OR. ABS(Z-6.0D0) < 1.0D-10
     AtomExists = AtomExists .OR. ABS(Z-7.0D0) < 1.0D-10
     AtomExists = AtomExists .OR. ABS(Z-8.0D0) < 1.0D-10
+    AtomExists = AtomExists .OR. ABS(Z-12.0D0) < 1.0D-10
     IF(.NOT. AtomExists) THEN
       WRITE(*,*) 'Z = ', Z
       WRITE(*,*) 'ERROR: Atom radius for this Z has not been set yet!'

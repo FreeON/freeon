@@ -483,9 +483,10 @@ MODULE CubeTree
 !        Use the RhoTrees BBox
 !        CALL SetBBox(RhoRoot%Box,CubeRoot%Box)
          CALL SetBBox(WBox,CubeRoot%Box)
-#ifdef PERIODIC
-         CALL MakeBoxPeriodic(CubeRoot%Box)
-#endif
+! moved to HiCu.F90 and XCForce.F90
+!#ifdef PERIODIC
+!         CALL MakeBoxPeriodic(CubeRoot%Box)
+!#endif
 !        Set global Cube BBox
 !        CALL SetBBox(CubeRoot%Box,Box)
          CubeRoot%ISplit=1
