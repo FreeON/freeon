@@ -1,14 +1,14 @@
-#===============================================================
-# Set MPI related direcories if compiling MONDO with -DPARALLEL
-# Note, you will need to modify the Includes/CompilerSpecifics
-# file set the MPI includes etc
 #
-#setenv MPI_HOME        /usr/local/lib/lam-6.6b1
-#setenv MPI_LIB         $MPI_HOME/lib
-#setenv MPI_INC         $MPI_HOME/include
-#setenv MPI_BIN         $MPI_HOME/bin
-#setenv GM_LIB          /usr/local/rels/gm-1.4pre48/binary/lib
-#===============================================================
+# Set MPI related direcories if you have a parallel release.
+# Note, you may need to modify the Includes/CompilerSpecifics
+# file to set the MPI includes & libs etc
+#
+setenv MPI_HOME         /usr/local/lib/mpich-1.2.4_PG_P4
+setenv MPI_LIB          $MPI_HOME/lib/
+setenv MPI_INC          $MPI_HOME/include
+setenv MPI_BIN          $MPI_HOME/bin
+setenv GM_LIB           /GM/lib
+#
 # Set MONDO related enviromental variables 
 #
 setenv MONDO_PLAT        AMDLinux.PG
@@ -16,22 +16,24 @@ setenv MONDO_PLAT        AMDLinux.PG
 #setenv MONDO_PLAT        IntelLinux.NAG
 #setenv MONDO_PLAT        AlphaLinux.COMPAQ
 #setenv MONDO_PLAT        SGIIrix.MIPS
+#setenv MONDO_PLAT        True64.COMPAQ
+#setenv MONDO_PLAT        IBMAIX.XLF 
 
 setenv MONDO_HOME     	/home/joeuser/MONDO
-setenv MONDO_SCRATCH   	/scratch/
-setenv MONDO_EXEC      	/usr/local/bin/MONDO
-setenv MONDO_LIB       	/usr/local/lib/MONDO
+setenv MONDO_SCRATCH   	/scratch/joeuser/MondoScratch
+setenv MONDO_EXEC      	/usr/local/bin/MondoExec
+setenv MONDO_LIB       	/usr/local/lib/MondoLib
 setenv MONDO_INC     	$MONDO_HOME/Includes
-#===============================================================
-# Set MAKE (use gnumake if your make does not support -C)
+#
+# Set MAKE (use gnumake if your make does not support "make -C")
 #
 setenv MAKE make
 #setenv MAKE /usr/local/bin/gnumake
-#===============================================================
+#
 # Set up MONDO 
 #
 source $MONDO_HOME/Scripts/MondoSetUp
-#===============================================================
+#
 # Set HDF5 related direcories 
 #
 # Obtain the HDF5 libraries from http://hdf.ncsa.uiuc.edu/

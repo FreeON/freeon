@@ -39,7 +39,7 @@ clean:	cmm cs ce c1 c2 cd cv
 #
 purge:	pmm ps pe p1 p2 pd pv pMisc  
 #
-release: rmLegacy swREADME rmm  rs re r1 rn r2 rd rv tarball
+release: rmLegacy swREADME rmm rs re r1 r2 rd rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -57,6 +57,10 @@ rmLegacy:
 	rm -rf Libs
 	rm -rf QuNew
 	rm -rf MondoSCF
+	rm -rf Dynamo
+	rm -rf Bader
+	rm -rf Changelog
+#
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
@@ -142,16 +146,6 @@ ph:
 	$(MAKE) -i -C HiCu purge
 ch:	
 	$(MAKE) -i -C HiCu clean
-#----------------------------------------------
-#     Geometry optimization via Quasi Newton
- n:	
-	$(MAKE)    -C QuNew
-rn:	
-	$(MAKE) -i -C QuNew release
-pn:	
-	$(MAKE) -i -C QuNew purge
-cn:	
-	$(MAKE) -i -C QuNew clean
 #----------------------------------------------
 #     DX Visualization support
  d:	
