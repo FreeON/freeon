@@ -85,10 +85,11 @@ PROGRAM ONX
 #ifdef PARALLEL
   INTEGER                        :: IErr
   REAL(DOUBLE)                   :: TmBegK,TmEndK,TmKT,TmBegKT,TmEndKT
-  TYPE(DBL_VECT)                 :: TmKArr
+  TYPE(DBL_VECT)                 :: TmKArr,NERIsArr,TmDOArr,TmREArr,TmFOArr,TmTMArr,TmKTArr
 #endif
   INTEGER                        :: I,NCC,NCD       !per
   TYPE(CellSet)                  :: CSTemp          !per
+  CHARACTER(100)                 :: User
 !--------------------------------------------------------------------------------
 ! vw comments:
 ! o clean up the code.
@@ -100,7 +101,10 @@ PROGRAM ONX
 #else
   CALL StartUp(Args,Prog)
 #endif
-
+  !
+  CALL GetEnv('USER',User)
+  IF(TRIM(User).EQ.'tymczak') WRITE(*,*)'    CJ, The ONX Ghost is back!'
+  !
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
      ! Close current group and HDF
@@ -311,6 +315,7 @@ PROGRAM ONX
      CALL CPU_TIME(time2)
 #endif
      TmDO = TmDO+time2-time1
+     IF(DBC%LenTC.EQ.0) CYCLE
      DO NCD = 1,CS_OUT%NCells                                                                 !per
         PBC%D(:) = CS_OUT%CellCarts%D(:,NCD)                                                  !per
 #ifdef PARALLEL
@@ -325,6 +330,7 @@ PROGRAM ONX
         CALL CPU_TIME(time2)
 #endif
         TmDO = TmDO+time2-time1
+        IF(DBD%LenTC.EQ.0) CYCLE
 !--------------------------------------------------------------------------------
 !       All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
@@ -417,21 +423,33 @@ PROGRAM ONX
   !
   ! Collect number of integrals.
 #ifdef PARALLEL
-  xTotNERIs = Reduce(xTotNERIs)
-  TmDO = Reduce(TmDO)
-  TmRE = Reduce(TmRE)
-  TmFO = Reduce(TmFO)
-  TmTM = Reduce(TmTM)
+  !
+  ! End Total Timing
+  TmEndKT = MPI_WTIME()
+  TmKT = TmEndKT-TmBegKT
+  !
+  IF(MyID.EQ.ROOT) THEN
+     CALL New(TmKArr  ,NPrc)
+     CALL New(TmKTArr ,NPrc)
+     CALL New(NERIsArr,NPrc)
+     CALL New(TmDOArr ,NPrc)
+     CALL New(TmREArr ,NPrc)
+     CALL New(TmFOArr ,NPrc)
+     CALL New(TmTMArr ,NPrc)
+  ENDIF
+  CALL MPI_Gather(TmK      ,1,MPI_DOUBLE_PRECISION,TmKArr%D(1)  ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmKT     ,1,MPI_DOUBLE_PRECISION,TmKTArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(xTotNERIs,1,MPI_DOUBLE_PRECISION,NERIsArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmDO     ,1,MPI_DOUBLE_PRECISION,TmDOArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmRE     ,1,MPI_DOUBLE_PRECISION,TmREArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmFO     ,1,MPI_DOUBLE_PRECISION,TmFOArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+  CALL MPI_Gather(TmTM     ,1,MPI_DOUBLE_PRECISION,TmTMArr%D(1) ,1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
 #endif
   !
   !
 #ifdef PARALLEL
   !
-  ! End Total Timing
-  TmEndKT = MPI_WTIME()
-  TmKT = TmEndKT-TmBegKT
-
-  IF(SCFActn == 'InkFok') STOP 'InkFok in PARALLEL ONX is not supported.'
+  IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   !time1 = MPI_WTIME()
   ! Collect the data on the root.
   CALL Redistribute_FASTMAT(KFastMat)
@@ -442,24 +460,6 @@ PROGRAM ONX
   !time2 = MPI_WTIME()
   !write(*,*) 'Set_BCSR_Eq_FASTMAT',MyID,time2-time1
   CALL Delete_FastMat1(KFastMat)
-  !
-#ifdef ONX_INFO
-  ! Imbalance stuff.
-  CALL New(TmKArr,NPrc)
-  CALL MPI_Gather(TmK,1,MPI_DOUBLE_PRECISION,TmKArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  IF(MyID == ROOT) THEN
-     CALL PImbalance(TmKArr,NPrc,Prog_O='ComputeK')
-  ENDIF
-  CALL Delete(TmKArr)
-  !
-  ! Imbalance stuff.
-  CALL New(TmKArr,NPrc)
-  CALL MPI_Gather(TmKT,1,MPI_DOUBLE_PRECISION,TmKArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  IF(MyID == ROOT) THEN
-     CALL PImbalance(TmKArr,NPrc,Prog_O='ONX')
-  ENDIF
-  CALL Delete(TmKArr)
-#endif
   !
 #else
   ! Add in correction if incremental K build
@@ -477,17 +477,53 @@ PROGRAM ONX
   !
 #ifdef ONX_INFO
 #ifdef PARALLEL
+  !
   IF(MyID.EQ.ROOT) THEN
-#endif
-     WRITE(*,*) 'ONX: NbrTot ERI = ',xTotNERIs
-     WRITE(*,*) 'ONX: Sum TmDO = ',TmDO
-     WRITE(*,*) 'ONX: Sum TmRE = ',TmRE
-     WRITE(*,*) 'ONX: Sum TmFO = ',TmFO
-     WRITE(*,*) 'ONX: Sum TmTM = ',TmTM
-#ifdef PARALLEL
+     ! Imbalance stuff.
+     CALL PImbalance(TmKArr ,NPrc,Prog_O='ComputeK')
+     CALL PImbalance(TmKTArr,NPrc,Prog_O='ONX'     )
+     !
+     WRITE(*,1001) SUM(TmKArr%D  )/DBLE(NPrc),MINVAL(TmKArr%D  ),MAXVAL(TmKArr%D  )
+     WRITE(*,1002) SUM(NERIsArr%D)/DBLE(NPrc),MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
+     WRITE(*,1003) SUM(TmDOArr%D )/DBLE(NPrc),MINVAL(TmDOArr%D ),MAXVAL(TmDOArr%D )
+     WRITE(*,1004) SUM(TmREArr%D )/DBLE(NPrc),MINVAL(TmREArr%D ),MAXVAL(TmREArr%D )
+     WRITE(*,1005) SUM(TmFOArr%D )/DBLE(NPrc),MINVAL(TmFOArr%D ),MAXVAL(TmFOArr%D )
+     WRITE(*,1006) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
+     !
+     CALL Delete(TmKArr  )
+     CALL Delete(TmKTArr )
+     CALL Delete(NERIsArr)
+     CALL Delete(TmDOArr )
+     CALL Delete(TmREArr )
+     CALL Delete(TmFOArr )
+     CALL Delete(TmTMArr )
+     !
+1001 FORMAT(' ONX: Ave TmK  = ',F15.2,', Min TmK  = ',F15.2,', Max TmK  = ',F15.2)
+1002 FORMAT(' ONX: Tot ERI  = ',F15.2,', Min ERI  = ',F15.2,', Max ERI  = ',F15.2)
+1003 FORMAT(' ONX: Ave TmDO = ',F15.2,', Min TmDO = ',F15.2,', Max TmDO = ',F15.2)
+1004 FORMAT(' ONX: Ave TmRE = ',F15.2,', Min TmRE = ',F15.2,', Max TmRE = ',F15.2)
+1005 FORMAT(' ONX: Ave TmFO = ',F15.2,', Min TmFO = ',F15.2,', Max TmFO = ',F15.2)
+1006 FORMAT(' ONX: Ave TmTM = ',F15.2,', Min TmTM = ',F15.2,', Max TmTM = ',F15.2)
   ENDIF
-#endif
-#endif
+  !
+#else
+  !
+  WRITE(*,1001) TmK
+  WRITE(*,1002) xTotNERIs
+  WRITE(*,1003) TmDO
+  WRITE(*,1004) TmRE
+  WRITE(*,1005) TmFO
+  WRITE(*,1006) TmTM
+  !
+1001 FORMAT(' ONX: Tot TmK  = ',F15.2)
+1002 FORMAT(' ONX: Tot ERI  = ',F15.2)
+1003 FORMAT(' ONX: Tot TmDO = ',F15.2)
+1004 FORMAT(' ONX: Tot TmRE = ',F15.2)
+1005 FORMAT(' ONX: Tot TmFO = ',F15.2)
+1006 FORMAT(' ONX: Tot TmTM = ',F15.2)
+  !
+#endif !PARALLEL
+#endif !ONX_INFO
   !
   ! Save on disc.
   CALL Put(K,TrixFile('K',Args,0))
