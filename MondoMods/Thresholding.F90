@@ -259,7 +259,9 @@ MODULE Thresholding
            Val=Ec/R
            CTest=(Val-NewTau)/Tau
 !           WRITE(*,33)R,DelR,X,CTest; 33 format(5(2x,D12.6))
-           IF(ABS(CTest)<1D-3)THEN
+           ! Go for relative error to get smoothness, but bail if 
+           ! absolute accuracy of erf interpolation is exceeded         
+           IF(ABS(CTest)<1D-4.OR.Tau*ABS(CTest)<1.D-12)THEN
               ! Converged
               RETURN           
            ELSEIF(DelR<1D-40)THEN
@@ -273,6 +275,7 @@ MODULE Thresholding
         CALL Halt(' Failed to converge in PFunk: Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
                                            //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
                                            //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
+                                           //' R = '//TRIM(DblToShrtChar(R))//RTRN &
                                            //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
                                            //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
                                            //' SqZ*R = '//TRIM(DblToMedmChar(X)))
