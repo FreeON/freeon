@@ -1385,7 +1385,7 @@ CONTAINS
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
       !IF(Q>0.9999D0) THEN
-       IF(Q>0.99D0) THEN
+       IF(Q>0.999D0) THEN
       !IF(RMSErr(I)+1.D-6<QTab) THEN
          IStart=I+1
          EXIT
