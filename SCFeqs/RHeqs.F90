@@ -33,7 +33,7 @@ PROGRAM RHEqs
   INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FMatrix,PMatrix,XFile
   CHARACTER(LEN=5),PARAMETER     :: Prog='RHEqs'
-  LOGICAL                        :: Present
+  LOGICAL                        :: Present,DensityArchive
 !--------------------------------------------------------------------
 !
 !
@@ -99,8 +99,6 @@ PROGRAM RHEqs
   CALL New(sP)              
   CALL Filter(sP,sX)        !  sP=Filter[sX]
   CALL Put(sP,TrixFile('OrthoD',Args,1))
-  ! Archive the orthogonal DM
-  CALL Put(sP,'CurrentDM',CheckPoint_O=.TRUE.)   
   CALL PChkSum(sP,'OrthoP['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sP,'OrthoP['//TRIM(NxtCycl)//']')
   CALL Plot(sP,'OrthoP['//TRIM(NxtCycl)//']')
@@ -118,6 +116,10 @@ PROGRAM RHEqs
      CALL Multiply(sTmp1,sX,sP)          ! F=Z.P_Orthog.Z^t
   ENDIF
   CALL Filter(sTmp1,sP)                  ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
+  ! Archive the AO-DM
+  CALL Get(DensityArchive,'ArchiveDensity')
+  IF(DensityArchive) &
+     CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL Put(sTmp1,TrixFile('D',Args,1))
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')

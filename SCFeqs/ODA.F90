@@ -176,6 +176,7 @@ PROGRAM ODA
   ENDIF
   CALL Put(FTilde,TrixFile('OrthoF',Args,0)) 
   CALL Put(PTilde,TrixFile('D',Args,0))
+  CALL Put(PTilde,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
   CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
   IF(iSCF>1)THEN
@@ -204,6 +205,7 @@ PROGRAM ODA
   ENDIF
   CALL Put(FTilde,TrixFile('OrthoF',Args,0)) 
   CALL Put(PTilde,TrixFile('D',Args,0))
+  CALL Put(PTilde,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
   CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
   IF(iSCF>1)THEN

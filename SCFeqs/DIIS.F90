@@ -50,7 +50,7 @@ PROGRAM DIIS
   !  Dont allow damping above 0.5, as this is silly (DIIS would certainly work better)
   Damp=MIN(Damp,5D-1)
   !  Max number of equations to keep in DIIS 
-  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=5
+  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=8
   CLOSE(Inp)
   !  Allocations
   CALL New(P)

@@ -71,6 +71,23 @@ PROGRAM P2Use
         ! Get the old basis set and geometry for indexing the DM
         CALL Get(OldBS,CurBase)
         CALL Get(OldGM,CurGeom)
+        IF(OldBS%BName==BS%BName.AND.OldBS%NBasF==BS%NBasF)THEN
+           SameBasis=.TRUE.
+        ELSE
+           SameBasis=.FALSE.
+        ENDIF
+        MaxGDiff=Zero
+        DO ICart=1,GM%Natms
+           GDiff=ABS(GM%Carts(1,ICart)-OldGM%(1,ICart)) + &
+                 ABS(GM%Carts(2,ICart)-OldGM%(2,ICart)) + &
+                 ABS(GM%Carts(3,ICart)-OldGM%(3,ICart)) 
+           MaxGDiff=MAX(MaxGDiff,GDiff)
+        ENDDO
+        IF(MaxGDiff<1D-6)THEN
+           SameGeom=.TRUE.
+        ELSE
+           SameGeom=.FALSE.
+        ENDIF
         IF(.NOT.SameGeom.AND..NOT.SameBasis)THEN ! Don't know how to do this
            CALL MondoHalt(' Restart with different basis and geometry in P2Use ')
         ELSEIF(.NOT.SameGeom.AND.SameBasis)THEN  ! Restart with new geometry
@@ -89,14 +106,21 @@ PROGRAM P2Use
 #ifdef PARALLEL
            CALL BCast(BSiz)
            CALL BCast(OffS)
-#endif
-           ! Get the old AO-DM in the old basis 
+#endif           ! Get the old AO-DM in the old basis 
            CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
            !CALL PChkSum(P,'CurrentDM',Prog)
            !CALL PPrint(P,'CURRENTDM',Unit_O=6)
         ELSE                                     ! Simple restart 
            ! Get the old AO-DM
            CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+           ! IO for the non-orthogonal P 
+           CALL Put(P,TrixFile('D',Args,0))
+           CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+           CALL PPrint( P,'P['//TRIM(Cycl)//']')
+           !  CALL PPrint( P,'P['//TRIM(Cycl)//']',Unit_O=6)
+           CALL Plot(   P,'P_'//TRIM(Cycl))
+           ! go down 
+           CALL ShutDown(Prog)   
         ENDIF
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(OldFileID)
@@ -158,41 +182,6 @@ PROGRAM P2Use
         CALL Put(T0,TrixFile('D',Args,0))     
         CALL ShutDown(Prog)
      ENDIF
-  ELSEIF(SCFActn=='Restart')THEN  
-     ! Close current group and HDF
-     CALL CloseHDFGroup(H5GroupID)
-     CALL CloseHDF(HDFFileID)
-     ! Open old group and HDF
-     OldFileID=OpenHDF(Restart)
-     HDF_CurrentID=OpenHDF(Restart)
-     ! Get old basis set stuff
-     CALL New(Stat,3)
-     CALL Get(Stat,'current_state')
-     SCFCycl=TRIM(IntToChar(Stat%I(1)))
-     CurBase=TRIM(IntToChar(Stat%I(2)))
-     CurGeom=TRIM(IntToChar(Stat%I(3)))
-     ! Open the old group
-     HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-     ! Get the old basis set and geometry for indexing the DM
-     CALL Get(BS,CurBase)
-     CALL Get(GM,CurGeom)
-     ! Compute a new sparse matrix blocking scheme for the old BS
-     CALL BlockBuild(GM,BS,BSiz,OffS)
-#ifdef PARALLEL
-     CALL BCast(BSiz)
-     CALL BCast(OffS)
-#endif
-     ! Find the current orthogonal density matrix
-     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-     !CALL PChkSum(P,'CurrentDM',Prog)
-     !CALL PPrint(P,'CURRENTDM',Unit_O=6)
-     ! Close it up 
-     CALL CloseHDFGroup(HDF_CurrentID)
-     CALL CloseHDF(OldFileID)
-     ! Reopen current group and HDF
-     HDFFileID=OpenHDF(H5File)
-     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-     HDF_CurrentID=H5GroupID
   ELSEIF(SCFActn=='Project')THEN
      ! Get previous geometries orthogonal density matrix 
      CALL Get(P,TrixFile('OrthoD',Args,-1))     

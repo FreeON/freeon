@@ -39,7 +39,7 @@ PROGRAM SCFStatus
    CALL New(Tmp2)
 !---------------------------------------------
 !  Get the density matrix 
-   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN 
+   IF(SCFActn=='BasisSetSwitch')THEN !.OR.SCFActn=='Restart')THEN 
       ! If switching the density matrix or using a previous one from 
       ! restart use i+1 density matrix--its all that is available
       CALL Get(P,TrixFile('D',Args,1))
@@ -229,9 +229,9 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
 
-      ELSEIF(SCFActn=='Restart')THEN
-         SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
-                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
+!      ELSEIF(SCFActn=='Restart')THEN
+!         SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
+!                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
 #ifdef MMech
 IF(HasMM()) THEN

@@ -71,12 +71,10 @@ CONTAINS
     TYPE(DBCSR)       :: P,Z,Tmp1
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
-    LOGICAL          :: Present
+    LOGICAL          :: Present,DensityArchive
 !-------------------------------------------------------------------------------
     ! IO for the orthogonal P
     CALL Put(P,TrixFile('OrthoD',Args,1))
-    ! Archive the orthogonal DM 
-    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
     CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
@@ -93,7 +91,10 @@ CONTAINS
        CALL Multiply(Tmp1,Z,P)
     ENDIF
     CALL Filter(Tmp1,P)     ! Thresholding
-    ! IO for the non-orthogonal P
+    ! Archive the AO-DM ?
+    CALL Get(DensityArchive,'ArchiveDensity')
+    IF(DensityArchive) &
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
@@ -106,12 +107,10 @@ CONTAINS
     TYPE(BCSR)       :: P,Z,Tmp1
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
-    LOGICAL          :: Present
+    LOGICAL          :: Present,DensityArchive 
 !-------------------------------------------------------------------------------
     ! IO for the orthogonal P
     CALL Put(P,TrixFile('OrthoD',Args,1))
-    ! Archive the orthogonal DM 
-    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
     CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
@@ -128,6 +127,10 @@ CONTAINS
        CALL Multiply(Tmp1,Z,P)
     ENDIF
     CALL Filter(Tmp1,P)     ! Thresholding
+    ! Archive the AO-DM ?
+    CALL Get(DensityArchive,'ArchiveDensity')
+    IF(DensityArchive) &
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
     ! CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']',Unit_O=6)
