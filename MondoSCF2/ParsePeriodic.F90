@@ -42,14 +42,14 @@ CONTAINS
 !   Parse Periodic Directions
     Ntot = 0
     IF(FindKey(PBCWRAP,Inp))THEN
-       IF(OptKeyLocQ(Inp,PBCWRAP,"T",MaxSets,NLoc,Location)) THEN
+       IF(OptKeyLocQ(Inp,PBCWRAP,PBC_TRUE,MaxSets,NLoc,Location)) THEN
           Ntot = NLoc
           DO I=1,NLoc
              PBC%AutoW(Location(I)) = .TRUE.
           ENDDO
        ENDIF
        PBC%Dimen=NLoc
-       IF(OptKeyLocQ(Inp,PBCWRAP,"F",MaxSets,NLoc,Location)) THEN
+       IF(OptKeyLocQ(Inp,PBCWRAP,PBC_FALSE,MaxSets,NLoc,Location)) THEN
           Ntot = NTot+NLoc
           DO I=1,NLoc
              PBC%AutoW(Location(I)) = .FALSE.
