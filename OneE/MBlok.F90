@@ -74,7 +74,7 @@ CONTAINS
                 PBy=Py-By
                 PBz=Pz-Bz
                 !
-                CALL MD2TRR(BS%NASym+1,-1,MaxLA,MaxLB,EtaAB,MD%D, &
+                CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB+1,EtaAB,MD%D, &
                      &      PAx,PBx,PAy,PBy,PAz,PBz)
                 !vw--->
                 POx = Px-COrig%D(1)
