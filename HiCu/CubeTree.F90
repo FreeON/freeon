@@ -409,7 +409,6 @@ MODULE CubeTree
             IF(DelSep<TauRel*1.D1)EXIT
 !           If still to the left, increment bisection point
             IF(FMid>Zero)BisSep=MidSep
-WRITE(*,*)' MidPop = ',MidPop
          ENDDO
 !        MidPop is now the most accurate evaluation of the integrated density
 !        that HiCu can achieve with current thresholds.
