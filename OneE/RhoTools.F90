@@ -13,7 +13,7 @@ CONTAINS
 !--------------------------------------------------------------
   SUBROUTINE Prune_Rho(TOL,Rho_in,Rho_out)
     TYPE(HGRho)         :: Rho_in,Rho_out
-    INTEGER             :: zq,iq,iqq,NQ,LMN,iadd,iiadd,jadd,jjadd
+    INTEGER             :: zq,iq,iqq,NQ,iadd,iiadd,jadd,jjadd
     INTEGER             :: LL,LenKet,NExpt,NDist,NCoef
     INTEGER             :: L,M,N,LMN,LP,MP,NP,LMNP
     REAL(DOUBLE)        :: Expt,Mag,TOL,Factor
@@ -36,7 +36,7 @@ CONTAINS
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
-          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet))
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet-1))
           IF(Mag  .GT. TOL) THEN
              Rho_out%NQ%I(zq) = Rho_out%NQ%I(zq) + 1            
           ENDIF
@@ -69,7 +69,7 @@ CONTAINS
           iadd  = Rho_in%OffQ%I(zq) + iq
           jadd  = Rho_in%OffR%I(zq) + (iq-1)*LenKet+1
 !         Calculate Magnitude
-          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet))
+          Mag = MagDist(LL,Expt,Rho_in%Co%D(jadd:jadd+LenKet-1))
           IF(Mag .GT. TOL) THEN
              iiadd = Rho_out%OffQ%I(zq) + iqq
              jjadd = Rho_out%OffR%I(zq) + (iqq-1)*LenKet+1
