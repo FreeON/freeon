@@ -943,6 +943,10 @@ CONTAINS
      !
      CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
+     IF(PBCDim>0) THEN
+       CALL PrtIntCoords(IntCs,Grad%D,&
+         'Internal Coordinate forces',PBCDim_O=PBCDim)
+     ENDIF
      CALL RedundancyOff(Grad%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Grad%D,SCRPath,Print2)
      !

@@ -966,6 +966,12 @@ CONTAINS
      !
      CALL PrepCells(XYZ,AtNum%I,PBCDim,XYZRepl,AtNumRepl, &
                     Cells,CellEq,IEq)
+!do i=1,size(XYZRepl%D,2)
+!write(*,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
+!write(out,100) AtNumRepl%I(i),XYZRepl%D(1:3,i)/angstromstoau
+!enddo
+!100 format(I4,3F20.8)
+!stop
      !
      IF(Refresh==1) THEN !!! Total refresh
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
@@ -1297,6 +1303,9 @@ CONTAINS
          NC1=-NDim_O
        ENDIF
      ENDIF
+!NA1=0 ; NA2=2
+!NB1=0 ; NB2=2
+!NC1=0 ; NC2=0
      !
      NCells=(NA2-NA1+1)*(NB2-NB1+1)*(NC2-NC1+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
@@ -2340,28 +2349,28 @@ CONTAINS
      ! while still maintaining a no-rotation framework 
      !
      ! only space of rotations is in P, space of constraints is not
-     CALL GetPBCProj(Carts,PBCDim,P)
-     CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
-     Norm=DOT_PRODUCT(DCarts,DCarts)
-     Fact=DOT_PRODUCT(DCarts2,DCarts2)
-     IF(Norm>1.D-6) THEN
-       Fact=(Norm-Fact)/Norm*100.D0
-     ELSE
-       Fact=Zero
-     ENDIF
-     IF(Print) THEN
-       WRITE(*,100) Fact
-       WRITE(Out,100) Fact
-     ENDIF
+    !CALL GetPBCProj(Carts,PBCDim,P)
+    !CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
+    !Norm=DOT_PRODUCT(DCarts,DCarts)
+    !Fact=DOT_PRODUCT(DCarts2,DCarts2)
+    !IF(Norm>1.D-6) THEN
+    !  Fact=(Norm-Fact)/Norm*100.D0
+    !ELSE
+    !  Fact=Zero
+    !ENDIF
+    !IF(Print) THEN
+    !  WRITE(*,100) Fact
+    !  WRITE(Out,100) Fact
+    !ENDIF
+    !!
+    !DCarts=DCarts2 
 100  FORMAT('PRot= ',F7.3,'%')
-     !
-     DCarts=DCarts2 
      !
      ! In the standard version A is along X, B in XY, C general
      ! thus projection of rotation is very simple
      !
-    !DCarts(2:3)=Zero
-    !DCarts(6)=Zero
+     DCarts(2:3)=Zero
+     DCarts(6)=Zero
    END SUBROUTINE PBCRotOff
 !
 !----------------------------------------------------------
