@@ -5,14 +5,14 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MinDebug,CheckSums)
 Guess=SuperP
 SCFMethod=(RH,RH) 
 BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,PBE0) 
 Accuracy =(loose,good)
 Geometry=(InAngstroms,NoOrder) 
-PFFLayers=2
+PFFLayers=3
 PFFMaxEll=16
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
 <EndOptions>
