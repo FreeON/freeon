@@ -14,6 +14,7 @@ MODULE SetXYZ
                        Set_BCSR_EQ_RNK2,          &
 #ifdef MMech
                        Set_BCSR_EQ_BMATR,         &
+                       Set_DBL_VECT_EQ_BCSRColVect,&
 #endif
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
@@ -55,6 +56,24 @@ MODULE SetXYZ
          T2%Wall=T1%Wall
          T2%FLOP=T1%FLOP
       END SUBROUTINE Set_TIME_EQ_TIME
+!======================================================================
+! Set a Column-vector from BCSR form to DBL_VECT form
+!
+      SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect(A,B)
+        TYPE(BCSR) :: B
+        TYPE(DBL_VECT) :: A
+        INTEGER :: I,J,K,L,II,KK
+          KK=0
+        DO I=1,Natoms  
+              L=B%BlkPt%I(I)
+              II=0
+            DO K=1,BSiz%I(I)
+              II=II+1
+              KK=KK+1
+              A%D(KK)=B%MTrix%D(L-1+II)
+            ENDDO
+        ENDDO
+      END SUBROUTINE Set_DBL_VECT_EQ_BCSRColVect
 !======================================================================
 !     Copy a BCSR matrix
 !======================================================================
@@ -154,14 +173,22 @@ MODULE SetXYZ
 !
 ! Fill in quasi-sparse BMATR into a sparse blocked form.
 !
-      SUBROUTINE Set_BCSR_EQ_BMATR(B,A)
+      SUBROUTINE Set_BCSR_EQ_BMATR(B,A,NCart,Transpose)
          TYPE(BMATR), INTENT(INOUT) :: A        
          TYPE(BCSR),     INTENT(INOUT) :: B        
          INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA,K,KK,M,MM,IC
+         INTEGER                       :: BMSIZE
+         INTEGER,OPTIONAL              :: NCart
          TYPE(DBL_RNK2) :: BlockBM
+         LOGICAL,OPTIONAL :: Transpose
+!
+         IF(.NOT.PRESENT(Transpose)) Transpose=.FALSE.
+!
          IF(AllocQ(B%Alloc))  &
          CALL Delete(B)
          CALL New(B)
+         BMSIZE=SIZE(A%IB,1)
+         IF(.NOT.PRESENT(NCart)) NCart=BMSIZE
          MM=MAXVAL(BSiz%I)
          CALL New(BlockBM,(/MM,MM/))
          P=1
@@ -172,14 +199,30 @@ MODULE SetXYZ
             OJ=0
             MA=BSiz%I(I) 
             DO J=1,NAtoms
+               IF(OJ+1>NCart) EXIT
                NA=BSiz%I(J)
 !
 ! Now fill MAxNA block starting at (OI+1,OJ+1) of non-sparse representation
 !
                BlockBM%D=Zero
                   IC=0
+!
+             IF(Transpose) THEN
+               DO K=1,NA
+                  KK=OJ+K
+                  IF(KK>BMSIZE) EXIT
+                  DO M=1,12
+                    MM=A%IB(KK,M)
+                    IF(MM>OI .AND. MM<=OI+MA) THEN
+                      IC=IC+1
+                      BlockBM%D(MM-OI,K)=A%B(KK,M)
+                    ENDIF
+                  ENDDO
+               ENDDO
+             ELSE
                DO K=1,MA
                   KK=OI+K
+                  IF(KK>BMSIZE) EXIT
                   DO M=1,12
                     MM=A%IB(KK,M)
                     IF(MM>OJ .AND. MM<=OJ+NA) THEN
@@ -188,19 +231,20 @@ MODULE SetXYZ
                     ENDIF
                   ENDDO
                ENDDO
+             ENDIF
 !
                  IF(IC/=0) THEN
-                   CALL BlockToBlock2(MA,NA,BlockBM%D,B%MTrix%D(Q:))
-                   B%BlkPt%I(P)=Q
-                   B%ColPt%I(P)=J               
-                   Q=Q+MA*NA
-                   P=P+1
-                   B%RowPt%I(I+1)=P
+               CALL BlockToBlock2(MA,NA,BlockBM%D,B%MTrix%D(Q:))
+               B%BlkPt%I(P)=Q
+               B%ColPt%I(P)=J               
+               Q=Q+MA*NA
+               P=P+1
                  ENDIF
 !
                OJ=OJ+NA
             ENDDO
             OI=OI+MA
+            B%RowPt%I(I+1)=P
          ENDDO
          B%NAtms=NAtoms
          B%NBlks=P-1
@@ -262,11 +306,11 @@ MODULE SetXYZ
          REAL(DOUBLE),DIMENSION(M,N), INTENT(INOUT) :: B
          INTEGER                                    :: I,J
 
-         DO J=1,N
-            DO I=1,M
-               B(I,J)=A(I,J)
-            ENDDO
-         ENDDO
+           DO J=1,N
+              DO I=1,M
+                 B(I,J)=A(I,J)
+              ENDDO
+           ENDDO
       END SUBROUTINE BlockToBlock2
 !
       SUBROUTINE Set_BCSR_EQ_VECT(B,A)
