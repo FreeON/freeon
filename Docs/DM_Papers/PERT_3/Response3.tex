@@ -77,7 +77,7 @@ response properties is proposed. The scheme solves the coupled perturbed self
 consistent field equation by the perturbed projection method. It is applied to 
 the computation of the first and second electric hyperpolarizabilities of three
 dimensional water clusters. Linear scaling and locality of the response
-densities are demonstrated. 
+densities under a global electric field perturbation are demonstrated. 
 % Linear scaling self consisitent scheme for high order response peoperties
 % is proposed. The scheme solves the coupled perturbed self consitent field 
 % equation by the perturbed projection method. It is applied to the computation
@@ -121,7 +121,7 @@ densities are demonstrated.
  displacement. However, the locality principle is extensible
  also to response properties. In previous studies linear scaling 
  for the calculation of response properties was demonstrated for one
- dimensional linear chain systems (CHECK IT)
+ dimensional linear chain systems (CHECK IT, seems to be right, only linear alcans)
  \cite{Ochsenfeld97,COchsenfeld98,CYam03,CYam03a}. Recently
  a perturbed projection algorithm was proposed for low order
  response properties for which linear scaling was demonstrated
@@ -210,7 +210,7 @@ be developed in a Taylor expansion as
  the first polarizability and the first and second 
  hyperpolarizabilities respectively, $\mu_a$ is the dipole 
  moment and $\E^a$ is the electric field in direction $a$. 
-
+ The Fockian, $\F(\E)$, may also be expanded by order to give
 \begin{equation}
   \begin{split}
     \F(\E)=\F^{0} & +\sum_a \F^{a}\E^{a}\\
@@ -220,11 +220,31 @@ be developed in a Taylor expansion as
 \end{equation}
 A similar expantion also holds for the density matrix $\D(\E)$.
 
-The derivative density matrix and derivative Fockian depend on 
+Within HF theory, the Fockian $F^0$ in the non-orthogonal 
+basis is $F^0=h^0+J(D^0)+K(D^0)$, while
+the first derivative Fockian is $F^a=\mu_a+J(D^a)+K(D^a)$ and 
+the higher derivatives are given by $F^{ab\cdots}=J(D^{ab\cdots})+K(D^{ab\cdots})$.  
+A similar equation holds for the derivatives Fockian
+within Kohn-Sham and hybrid HF/DFT with addition of 
+the exchange-correlation matrix $V_{xc}^{a\cdots}(D^0,D^a,\cdots)$ 
+{\bf TO CHECK IF IT IS THE RIGHT DEPANDENCY} \cite{Lee_1994}.
+
+In our approach to linear scaling computation of the polarizabilities 
+$\alpha_{ab}$ \cite{Weber04}, $\beta_{abc}$ and $\gamma_{abcd}$, the ground state
+density matrix $\mathcal{D}^0$ is computed using a spectral projection algorithm such
+as TC2 \cite{ANiklasson02A} in conjunction with sparse atom-blocked 
+linear algebra \cite{ANiklasson03,MChallacombe00B}.
+Linear scaling is achieved for insulating systems through the dropping (filtering) of atom-atom
+blocks with Frobenious norm below a numerical threshold ($\sim 10^{-4}-10^{-6}$).
+At SCF convergence the TC2 algorithm generates a polynomial sequence 
+defining the groundstate projector, from which expansion of the derivative 
+density matrices can be obtained term by term.
+
+The derivative density matrices and derivative Fockians depend on 
 each other implicitly and must be solved for self-consistently 
 via the coupled-perturbed self-consistent-field (CPSCF) equations.
 The necessary and sufficient criteria for convergence of the 
-CPSCF equations involve an extension to the SCF equations \cite{Furche_2001}
+CPSCF equations involve an extension to the well-known SCF equations \cite{Furche_2001}
 \begin{subequations}
   \begin{gather}
     [\F^{0} ,\D^{0}]=0,\\
@@ -233,7 +253,7 @@ CPSCF equations involve an extension to the SCF equations \cite{Furche_2001}
     \text{May be the third order???}
   \end{gather}
 \end{subequations}
-and the idempotency-like constraint \cite{Furche_2001}
+and the idempotency-like constraints \cite{Furche_2001}
 \begin{subequations}
   \begin{gather}
     \D^{0} =\D^{0} \D^{0},\\
@@ -263,27 +283,30 @@ J(D^{a\ldots}_n)+K(D^{a\ldots}_n), & N>1.
   \end{gather} 
 \end{subequations}
 with starting points $D^{a\ldots}_0=0$. In step~(\ref{FockBuild}),  
-$F^a_n$ is constructed in ${\cal O}(N)$ using algorithms 
+$F^{a\ldots}_n$ is constructed in ${\cal O}(N)$ using algorithms 
 \cite{MChallacombe97,ESchwegler97} in the {\sc MondoSCF} \cite{MondoSCF} 
 suite of linear scaling quantum chemistry programs.  Next,
 Weber and Daul's DDIIS algorithm for convergence acceleration 
 of the CPSCF equation \cite{Weber_2003} is used to optimize 
-the $c_k$ coefficients in step~(\ref{DDIIS}).
+the $c_k$ coefficients in step~(\ref{DDIIS}), 
+keeping the last $m$ steps in the extrapolation.
+Then, the density matrix derivatives $\D^{a\ldots}_{n+1}$ are obtained
+in step~(\ref{DDeriv}) as $\D^{a\ldots}_{n+1}=\lim_{i\to\infty}\D^{a\ldots}_i$
+via the NC density matrix perturbation theory, based on the TC2
+projector. Having solved for $D^{a\ldots}_n$, the next Fock matrix derivative
+$F^{a\ldots}_{n+1}$ is built, and the iteration continues until selfconsistency,
+when the density matrix derivative $D^{a\ldots}_n$ and the desired property 
+(e.g. the (hyper)polarizability $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
+$\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$)
+have reached a sufficient level of accuracy.
 
-
-The scheme solves for the self consistent density response, \\
-first... Linear scaling construction of the Fockian expansion follows in
-the same way as the O(N) construction of the Fockian cite{Matt...}\\
-second... DDIIS optimizing scheme based on DIIS.\\
-third... density matrix derivative through perturbation projection.\\
-
-
-\subsection{DDIIS Maybe}
+\subsection{DDIIS Maybe???}
 
 \subsection{Perturbed projection}
 Perturbed projection is based on purification projections for the 
 construction of the density matrix...
 
+{\bf WE SHOULD SAY STG ABOUT THE SYM OF THE DERIVATVES}
 \begin{equation}
   D^{ab\ldots}=D^{ba\ldots}=\ldots
 \end{equation}
@@ -330,11 +353,13 @@ compressing their spectrum into the domain of convergence
 \end{equation}
 where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
 bounds of the eigenvalues of $\F^0$.
-
+Recursion of the perturbed projection sequence is
+stopped when the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$
+becomes smaller than a given threshold.
 
 
 \subsubsection{Algorithm}
-...\\
+.ANDERS SHOULD ADD STG..\\
 \begin{figure}[htbp]
   \centering
   \caption{\protect
@@ -379,16 +404,14 @@ descibed in for exemple \cite{Dupuis_1991}.
 A density matrix analogy to 
 The Wigner's 2n+1 rule was given in cite{...}, here we will present
 a generalization to the non orthogonal case for mixed derivatives 
-up to fourth order....
-
-The third order energy correction is given in an othogonal representation
-by
-\begin{equation}
+up to fourth order.
+The third order energy correction is given in an 
+othogonal representation by
+\begin{equation}\label{eq:2n+1 third order}
   E^{abc}=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)
 \end{equation}
 where $P(a,b,c)$ stands for the permutation operator such that all
 permutations of $a$, $b$ and $c$ are made.
-
 %\begin{equation}
 %\begin{split}
 %  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
@@ -396,8 +419,6 @@ permutations of $a$, $b$ and $c$ are made.
 %                        &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
 %\end{split}
 %\end{equation}
-
-
 %\begin{equation}
 %\begin{split}
 %E^{abcd}=\frac{1}{24}\Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
@@ -430,21 +451,26 @@ permutations of $a$, $b$ and $c$ are made.
 %\end{split}
 %\end{equation}
 %OR A LITTLE BIT SHORTER
-A similar epression can be derived for the fourth order
-\begin{equation}
+A similar expression can be derived for the fourth order
+\begin{equation}\label{eq:2n+1 fourth order}
   \begin{split}
     E^{abcd}=&\frac{1}{24}P(a,b,c,d) \\
     &\Tr([\D^{ab},\D^0] \D^c \F^d + \\ 
-    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd})).
+    &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd})),
   \end{split}
 \end{equation}
- This relation may seem to be very expansive to compute. After further
-inspections, we see that the correction along the same direction e.g. $E^{aaaa}$,
+This relation may seem to be very expansive to compute. But after further
+inspections, we see that the correction along the same direction $a$ e.g. $E^{aaaa}$,
 the relation reduces to only one term (9 matrix multipilcations 
 {\bf CAN BE REDUCED WITH THE TRACE}).
 In the worst case where all the directions are different e.g. $E^{aabc}$, the
-relation (ref{}) simplifies to only 12 terms (108 matrix multiplications 
-{\bf CAN BE REDUCED WITH THE TRACE}).
+relation (\ref{eq:2n+1 fourth order}) simplifies to only 12 
+terms (108 matrix multiplications {\bf CAN BE REDUCED WITH THE TRACE}). 
+We can mention that those equations 
+(\ref{eq:2n+1 third order}) and (\ref{eq:2n+1 fourth order}) 
+do not depend on any parametrizations of the wave function
+as the relations previously given \cite{Helgaker_2001,Dupuis_1991}.
+
 \begin{equation}
   \alpha_{ab}=-2\Tr[D^a\mu_b]
 \end{equation}
@@ -616,7 +642,6 @@ ANDERS SHOULD ADD SOMETHING HERE.
 %E9 = -2.521486674366584e+06
 %E10 =  -1.993397136878680e+09
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \begin{table}[t]
   \centering
   \caption{\protect
@@ -627,11 +652,11 @@ ANDERS SHOULD ADD SOMETHING HERE.
   \begin{tabular}{cccccc}
     \toprule
     Order 
-          & n=2
-          & n=10
-          & n=20
-          & n=30
-          & n=40 \\
+          & $(H_2O)_2$
+          & $(H_2O)_10$
+          & $(H_2O)_20$
+          & $(H_2O)_30$
+          & $(H_2O)_40$ \\
     \hline 
      2 & -2.17651690073638      & -11.07341368413361      & -22.21691102006962     & -33.35887301244362     & -44.49989115576956         \\
      3 & -2.22455681544148      & -4.61329209646009       & -7.14601040066529      & missing                & -12.18809639549116         \\
@@ -649,7 +674,6 @@ ANDERS SHOULD ADD SOMETHING HERE.
 \end{table}
 
 
-
 \subsection{One dimensional water chains}
 figures ... show the saturation ....
 table shows comparison to 2n+1 and n+1.
@@ -662,7 +686,8 @@ theory and at the {\tt TIGHT} thresholding parameter
 that control precision of the linear scaling algorithms.
 The static properties of water chains have been evaluated
 by using the same geometry as Otto et al \cite{POtto00}. We also
-present the results obtained with the density matrix based 2n+1 rule.
+present the results obtained with the density matrix based 2n+1 rule 
+previously introduiced.
 We also draw comparison with the results obtained with the GAMESS 
 quantum chemistry package \cite{gamess} at the RHF/6-31G level of theory.
 
