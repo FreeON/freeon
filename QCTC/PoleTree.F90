@@ -246,7 +246,7 @@ MODULE PoleTree
          E=Node%Edex
          N=E-B+1
 !        Determine the Split in the Largest Direction 
-`        ISplit = Mod(Node%Box%Tier,3)+1
+         ISplit = Mod(Node%Box%Tier,3)+1
 !!$         MaxQL(1:3) = Zero         
 !!$         MaxQH(1:3) = Zero
 !!$         DO I=B,E
