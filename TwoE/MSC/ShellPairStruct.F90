@@ -1,4 +1,4 @@
-MODULE ShellPairStructB
+MODULE ShellPairStruct
   USE DerivedTypes
   INTEGER,PARAMETER :: PairLngth=5
   INTEGER,PARAMETER :: MaxSPairs=1000
@@ -52,4 +52,4 @@ MODULE ShellPairStructB
      INTEGER :: A,B,C,D
   END TYPE ONX2OffSt
   !
-END MODULE ShellPairStructB
+END MODULE ShellPairStruct

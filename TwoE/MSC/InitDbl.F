@@ -70,7 +70,7 @@
       MM=16
       M=MOD(N,MM)
       DO I=1,M
-         A(I)=A(I)+B(I)
+         A(I)=A(I)+Z*B(I)
       ENDDO
       IF(N.LT.MM)RETURN
       DO I=M+1,N,MM
