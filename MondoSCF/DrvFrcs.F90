@@ -114,10 +114,8 @@ MODULE DrvFrcs
        Ctrl%Current=(/0,CBas,CGeo+1/)
        CrntState=Ctrl%Current
        CALL SetGlobalCtrlIndecies(Ctrl)           
-!      Set starting stepsize to fraction:
-!      Damp steps untill we build up a reasonable Hessian
        CALL OpenHDF(InfFile)
-       CALL Put(1D-1,'StepSize')
+       CALL Put(One,'StepSize')
        CALL CloseHDF()
 !      Take a step
        CtrlVect=SetCtrlVect(Ctrl,'QuNew')
@@ -198,16 +196,7 @@ MODULE DrvFrcs
             KeepStep=-1
             Mssg=ProcessName('QuNew','Converged #'//TRIM(CurGeom))
           ELSEIF(RelErrE<Zero)THEN
-            IF(CGeo<6)THEN
-!              If we are early in the geometry optimization,
-!              take small steps untill we get an approximate Hessian                
-!              built up.
-               StepSz=1D-1
-            ELSE
-!              If energy is going down, and we have some sort of 
-!              Hessian built up, keep taking unit steps
-               StepSz=One 
-            ENDIF
+            StepSz=One 
 !           Dont back track
             KeepStep=1
             Mssg=ProcessName('QuNew','Descent   #'//TRIM(CurGeom))

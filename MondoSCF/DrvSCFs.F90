@@ -280,8 +280,8 @@ MODULE DrvSCFs
          RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.F' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
          RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.D' 
-         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
-         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.OrthoD' 
+!         CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
+!         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.OrthoD' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
          RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*.Rho' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile) 
