@@ -2612,7 +2612,7 @@ END SUBROUTINE CoordTrf
 !
 ! Calculate 'folded' B matrix for composit 'B matrix coordinates'
 !
-    CALL FoldBMatrix(GMLoc%Natms,GMLoc%Carts%D,NIntC,IntCs,B)
+!   CALL FoldBMatrix(GMLoc%Natms,GMLoc%Carts%D,NIntC,IntCs,B)
 !
     NCart=3*GMLoc%Natms
 !
@@ -2757,21 +2757,21 @@ END SUBROUTINE CoordTrf
 !
 !--------------------------------------------------------------------
 !
-    SUBROUTINE FoldBMatrix(NatLoc,XYZ,NIntC,IntCs,B,BFolded)
-!
-    TYPE(INTC) :: IntCs
-    TYPE(BMATR) :: B,BFolded
-    INTEGER :: I,J,K,L,NIntC,NatLoc
-!
-! Find three atoms which are non-linear,
-! possibly find the ones of having the larges distance and angles
-! close to 60 degree
-! Inclusion of the Cartesian coordinates of three atoms would also 
-! help to construct
-!
-!
-!
-    END SUBROUTINE FoldBMatrix
+!    SUBROUTINE FoldBMatrix(NatLoc,XYZ,NIntC,IntCs,B,BFolded)
+!!
+!    TYPE(INTC) :: IntCs
+!    TYPE(BMATR) :: B,BFolded
+!    INTEGER :: I,J,K,L,NIntC,NatLoc
+!!
+!! Find three atoms which are non-linear,
+!! possibly find the ones of having the larges distance and angles
+!! close to 60 degree
+!! Inclusion of the Cartesian coordinates of three atoms would also 
+!! help to construct
+!!
+!!
+!!
+!    END SUBROUTINE FoldBMatrix
 !
 #endif
 !-------------------------------------------------------
