@@ -155,6 +155,32 @@ MODULE DerivedTypes
       TYPE(INT_VECT) :: GClPt  !-- Global col index  
    END TYPE                                      
 #endif
+#ifdef PARALLEL_DEVELOPMENT
+!-------------------------------------------------------------------
+!   ROW LINKED LIST, COLOUMN SEARCH TREE BLOCK SPARSE MATRIX:
+!   A FAST (LG N) SPARSE MATRIX DS
+!
+    TYPE FastMat
+      INTEGER                  :: Alloc   !-- Allocation key
+      INTEGER                  :: Nodes   !-- Number of nodes in this SRST
+      INTEGER                  :: Row     !-- Row index of this link
+      TYPE(SRST),    POINTER   :: RowRoot !-- Row link to a sparse row search tree  
+      TYPE(FastMat), POINTER   :: Next    !-- Next row in linked list
+    END TYPE FastMat
+!------------------------------------------------------------
+!   SPARSE ROW SEARCH TREE: A FAST (LG N) SPARSE VECTOR DS
+!
+    TYPE SRST
+       INTEGER                                :: Alloc  !-- Allocation key
+       INTEGER                                :: Row    !-- Row number
+       INTEGER                                :: Tier   !-- Tree depth
+       INTEGER                                :: Number !-- This nodes number in the tree
+       INTEGER                                :: L,R    !-- Left and right coloumn interval bounds 
+       TYPE(SRST), POINTER                    :: Left 
+       TYPE(SRST), POINTER                    :: Right
+       REAL(DOUBLE), POINTER, DIMENSION(:,:)  :: MTrix  !-- Matrix block
+    END TYPE 
+#endif
 !------------------------------------------------------------
 !  BLOCK COMPRESSED SPARSE ROW MATRIX
 !
