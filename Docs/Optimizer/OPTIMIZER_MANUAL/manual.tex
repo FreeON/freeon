@@ -206,34 +206,35 @@ default scheme.
 \end{itemize}
 
 \begin{itemize}
-\item[{\tt MaxAtoms}] :
-This option must be put into a separate line, e.g. {\tt MaxAtoms=3}
+\item[{\tt MaxAtomSteps}] :
+This option must be put into a separate line, e.g. {\tt MaxAtomSteps=3}
 forces the alternating optimizer to do a maximum of 3 steps 
 when in the fractionals-only phase.    
 \end{itemize}
 
 \begin{itemize}
-\item[{\tt MaxLattice}] :
-Similar to {\tt MaxAtoms}. E.g. {\tt MaxLattice=5} forces the optimizer
+\item[{\tt MaxLatticeSteps}] :
+Similar to {\tt MaxAtomSteps}. E.g. {\tt MaxLatticeSteps=5} forces the optimizer
 to make no more than 5 steps when doing a lattice-only optimization.
-Any combination of {\tt MaxAtoms} and {\tt MaxLattice} is allowed.
+Any combination of {\tt MaxAtomSteps} and {\tt MaxLatticeSteps} is allowed.
 In the absence of these commands, the deafult operation works, i.e.
-{\tt MaxAtoms=10000} and {\tt MaxLattice=1}.
+{\tt MaxAtomSteps=10000} and {\tt MaxLatticeSteps=1}.
 \end{itemize}
 
 \subsection{Symmetrization of lattice parameters}
 It usually has a convergence accelerating effect if the symmetry of the
 lattice parameters is preserved during the optimization.
-The following options serve this purpose.
+This can be done by constraining the ratio of lattice parameters
+by the following options.
 \begin{itemize}
-\item[{\tt AeqB}] : length of A and B lattice vectors should equal 
-during the optimization.
-\item[{\tt AeqC}] : similar to {\tt AeqB}, but for A and C
-\item[{\tt BeqC}] : similar to {\tt AeqB}, but for B and C
-\item[{\tt ALPHAeqBETA}] : ALPHA and BETA angles are kept the same
-\item[{\tt ALPHAeqGAMMA}] : ALPHA and GAMMA angles are kept the same
-\item[{\tt BETAeqGAMMA}] : BETA and GAMMA angles are kept the same
+\item[{\tt RatioABC}] : ratios of lengths values of A, B and C.
+\item[{\tt RatioAlpBetGam}] : ratios of angle values of ALPHA, 
+BETA and GAMMA.
 \end{itemize}
+Usage: E.g. {\tt RatioABC 1.0 1.1 -1.0} in a separate input line
+will fix the ratio A:B=1:1.1 while C remains fully flexible. 
+Fully flexible parameters should be marked with a negative number.
+{\tt RatioAlpBetGam} is used similarly.
 These options can arbitrarily be combined with all other options 
 available for geometry optimization.
 
