@@ -137,6 +137,8 @@ MODULE OptionKeys
   CHARACTER(LEN=*),  PARAMETER :: Op_MinSCF          ='MinSCF'
   CHARACTER(LEN=*),  PARAMETER :: Op_MaxSCF          ='MaxSCF'
   !------------------------------------------------------------------------------
+  ! Option: misc
+   CHARACTER(LEN=*), PARAMETER :: Op_Pressure        ='Pressure' 
   !------------------------------------------------------------------------------
   ! Options: Output=
   CHARACTER(LEN=*),  PARAMETER :: OUTPUT_OPTION       ='Output'
