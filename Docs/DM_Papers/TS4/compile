@@ -1,0 +1,28 @@
+#
+rm -rf mondo.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx 
+ln -s ../../Bib/mondo.bib ./mondo.bib 
+ln -s ../../RevTex/revtex4.cls ./revtex4.cls
+ln -s ../../RevTex/revsymb.sty ./revsymb.sty
+ln -s ../../RevTex/aps.rtx ./aps.rtx
+ln -s ../../RevTex/10pt.rtx ./10pt.rtx
+ln -s ../../RevTex/11pt.rtx ./11pt.rtx
+ln -s ../../RevTex/12pt.rtx ./12pt.rtx
+#
+cd WATER_FIGS
+gnuplot < figs
+cd .. 
+#
+cd FULL_FIGS
+gnuplot < figs
+cd ..
+#
+latex TS4
+bibtex TS4
+latex TS4
+bibtex TS4
+latex TS4
+bibtex TS4
+dvips -o TP.ps TS4
+xdvi -s 3 TS4
+
+
