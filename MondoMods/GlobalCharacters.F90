@@ -24,27 +24,35 @@ MODULE GlobalCharacters
 !  Lengths and formats for string output 
 !
    CHARACTER(LEN=6), PARAMETER :: OUTPUT_STR_FMT='(2x,A)'
-!-------------------------------------------------  
+!-------------------------------------------------
+!  Environmental variables
+!
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PWD 
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOME   
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SCRATCH
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_EXEC
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOST
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_MACH
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SYST
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_VRSN
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PLAT
+!--------------------------------------------------------  
 !  File names
 ! 
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: ScrName
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: PWDName
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: InpFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: OutFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: InfFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: GeoFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: LogFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: BasFile
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: SCFName
-   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: HDFFile
 !-------------------------------------------------  
 !  File postfixes 
 !
    CHARACTER(LEN=4), PARAMETER :: InpF='.inp'
    CHARACTER(LEN=4), PARAMETER :: OutF='.out'
-   CHARACTER(LEN=4), PARAMETER :: InfF='.inf'
-!- - -- -  - 
-!  change to once F77->F90 transition is final
-!   CHARACTER(LEN=4), PARAMETER :: InfF='.scf' 
-!
+   CHARACTER(LEN=4), PARAMETER :: InfF='.hdf'
    CHARACTER(LEN=4), PARAMETER :: GeoF='.geo'
    CHARACTER(LEN=4), PARAMETER :: LogF='.log'
    CHARACTER(LEN=4), PARAMETER :: BasF='.bas'
