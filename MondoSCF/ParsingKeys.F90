@@ -82,7 +82,11 @@ MODULE ParsingKeys
 !
    CHARACTER(LEN=3),  PARAMETER :: PBC_OFF      ='Off'
    CHARACTER(LEN=4),  PARAMETER :: PBC_X        ='On-X'
+   CHARACTER(LEN=4),  PARAMETER :: PBC_Y        ='On-Y'
+   CHARACTER(LEN=4),  PARAMETER :: PBC_Z        ='On-Z'
    CHARACTER(LEN=5),  PARAMETER :: PBC_XY       ='On-XY'
+   CHARACTER(LEN=5),  PARAMETER :: PBC_XZ       ='On-XZ'
+   CHARACTER(LEN=5),  PARAMETER :: PBC_YZ       ='On-YZ'
    CHARACTER(LEN=6),  PARAMETER :: PBC_XYZ      ='On-XYZ'
 !
    CHARACTER(LEN=8),  PARAMETER :: ATOMW_ON     ='AtomWrap'

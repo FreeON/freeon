@@ -486,17 +486,33 @@ MODULE ParseInput
             GM%AutoW(1)=.TRUE.
             GM%AutoW(2)=.FALSE.
             GM%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Y)) THEN
+            GM%AutoW(1)=.FALSE.
+            GM%AutoW(2)=.TRUE.
+            GM%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Z)) THEN
+            GM%AutoW(1)=.FALSE.
+            GM%AutoW(2)=.FALSE.
+            GM%AutoW(3)=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XY)) THEN
             GM%AutoW(1)=.TRUE.
             GM%AutoW(2)=.TRUE.
             GM%AutoW(3)=.FALSE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XZ)) THEN
+            GM%AutoW(1)=.TRUE.
+            GM%AutoW(2)=.FALSE.
+            GM%AutoW(3)=.TRUE.
+         ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_YZ)) THEN
+            GM%AutoW(1)=.FALSE.
+            GM%AutoW(2)=.TRUE.
+            GM%AutoW(3)=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XYZ)) THEN
             GM%AutoW(1)=.TRUE.
             GM%AutoW(2)=.TRUE.
             GM%AutoW(3)=.TRUE.
          ELSE
             CALL OpenASCII(OutFile,Out)
-            WRITE(Out,*) '** Autowraps at default value => (On-XYZ) **'
+            WRITE(Out,*) '** Auto-Wraps at default value => (On-XYZ) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%AutoW(1)=.TRUE.
             GM%AutoW(2)=.TRUE.
@@ -511,7 +527,7 @@ MODULE ParseInput
             GM%AtomW=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
-            WRITE(*,*) '** Atom Wrap at default value => (AtomWrap-On) **'
+            WRITE(*,*) '** Atom-Wrap at default value => (AtomWrap-On) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
             GM%AtomW=.TRUE.
          ENDIF
