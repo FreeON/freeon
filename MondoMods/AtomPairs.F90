@@ -122,8 +122,10 @@ CONTAINS
     Radd = MAX(SQRT(A0),SQRT(B0))
     Radd = MAX(Radd,SQRT(C0))
 !
-    Radius = Radd+AtomPairDistanceThreshold
+    Radius = Radd+SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS,GM%AutoW,GM%BoxShape%D,Radius)
+!
+    WRITE(*,*) 'THE NUMBER OF CELLS  in CS = ',CS%NCells  
 !
   END SUBROUTINE SetCellNumber
 !----------------------------------------------------------------------------
