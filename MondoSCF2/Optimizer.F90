@@ -565,7 +565,7 @@ CONTAINS
        BPrev%I=C%Stat%Previous%I
        BCur%I=C%Stat%Current%I
        CALL SCF(iBAS,iGEO,C)
-       IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
+       IF(iGEO>iGEOst) CALL BackTrack(iBAS,iGEO,C,BPrev%I,BCur%I)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
      ! CALL PrintClones(IGeo,C%Nams,C%Geos)
