@@ -2,12 +2,11 @@
 # PREPROCESSOR OPTIONS:
 #
 CPP       =/lib/cpp -P -C -traditional
-IPM_INC = $(HOME)/IPM/include
-IPM_LIB = $(HOME)/IPM/lib
-CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include -I$(MPI_INC) -I$(IPM_INC)
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) \
+           -I/usr/local/include -I$(MPI_INC) -I$(IPM_INC)
 #
 # PREPROCESSING OPTIONS:
-#CPPOPTS = -DIPM -DPERIODIC -DPARALLEL_CLONES  -DPARALLEL
+#
 CPPOPTS = -DIPM -DPERIODIC -DPARALLEL_CLONES  -DPARALLEL
 #---------------------------------------------------------------
 # C Compiler and options
@@ -49,31 +48,34 @@ LDFLAGS     = $(LDMISC) -o
 AR      = ar
 ARFLAGS = -rcv
 RANLIB  = ranlib
-#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------
+#
 # MPI libraries
 #
-# For linking with old style MPI1 (default if only using -DPARALLEL)
-#MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm
-#MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm # myrinet
-MPI_LIBS = -L$(IPM_LIB) -lipm -L$(MPI_LIB) -lmpich -lgm -lpthread
+MPI_LIBS = -L$(MPI_LIB) -lmpich -lgm -lpthread
 #
-# For new style MPI2 (use -DPARALLEL -DMPI2)
-#MPI_LIBS = -L$(MPI_LIB) -llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam \
-#           -L$(GM_LIB) -lgm
 #---------------------------------------------------------------------
+#
+# IPM Timing libraries
+#
+IPM_LIBS = -L$(IPM_LIB) -lipm 
+#---------------------------------------------------------------------
+#
 #  HDF5 libraries with compression and jpeg libs.
 #
 HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz
 #---------------------------------------------------------------------
+#
 #  Mondo libraries
+#
 MONDO_LIBS= -L$(MONDO_LIB) -lMondoMods
 #-------------------------------------------------------------------------
 #
 #  The generic libs needed by most of the programs.
 #
-F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
+F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(IPM_LIBS) $(HDF_LIBS) 
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = $(LAPACK_LIB) -llapack -lblas
+LAPACK = -llapack -lblas
 #---------------------------------------------------------------------------
