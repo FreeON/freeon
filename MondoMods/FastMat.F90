@@ -1,4 +1,15 @@
 MODULE FastMatrices
+!H---------------------------------------------------------------------------------
+!H MODULE FastMatrices
+!H
+!H
+!H Comments:
+!H - SRSTCount: does not work anymore. To be fixed.
+!H - Matmul: does not work anymore.
+!H - Remain some old stuff. Should be removed.
+!H - May change the tree style?
+!H - ....
+!H---------------------------------------------------------------------------------
 #ifdef PARALLEL
    USE DerivedTypes
    USE GlobalScalars   
@@ -28,6 +39,7 @@ MODULE FastMatrices
        INTEGER                  :: Tier   !-- Tree depth
        INTEGER                  :: Number !-- This nodes number in the tree
        INTEGER                  :: L,R    !-- Left/right coloumn interval bounds
+       real(double) :: Part
        TYPE(SRST), POINTER      :: Left 
        TYPE(SRST), POINTER      :: Right 
        TYPE(SRST), POINTER      :: Next
@@ -306,7 +318,8 @@ MODULE FastMatrices
 
         NextR => R%Next
         !! CALL Print_SRST_1(R%RowRoot)
-        CALL Delete_SRST_1(R%RowRoot)
+        IF(ASSOCIATED(R%RowRoot)) CALL Delete_SRST_1(R%RowRoot)   !vw add that: if(associated(R%RowRoot))
+        !!CALL Delete_SRST_1(R%RowRoot)   !vw add that: if(associated(R%RowRoot))
         DEALLOCATE(R)
         P%Next => NextR
         R => NextR
@@ -316,7 +329,6 @@ MODULE FastMatrices
       ENDIF
     ENDDO
   END SUBROUTINE Delete_FastMat1
-    
 !=================================================================
   RECURSIVE SUBROUTINE Print_SRST_1(A)
     TYPE(SRST),POINTER :: A
@@ -385,7 +397,7 @@ MODULE FastMatrices
         IF(.NOT. ASSOCIATED(C)) EXIT
         IF(C%L == C%R) THEN
           IF(MyID == 0) THEN
-            !! WRITE(*,*) 'Row = ',Row, ' Col = ', C%L
+             !!WRITE(*,*) 'Row = ',Row, ' Col = ', C%L
           ENDIF
           IF(ASSOCIATED(C%Left) .OR. ASSOCIATED(C%Right)) THEN
             STOP 'ERR in PrintAllLinearRows.. Left or Right is not null!'
@@ -864,8 +876,8 @@ MODULE FastMatrices
     REAL(DOUBLE) :: Alpha,Op
     TYPE(TIME),OPTIONAL :: Perf_O
     INTEGER :: Row,Col,M,N
-    Op=Zero
-    IF(.NOT. ASSOCIATED(A)) THEN
+    Op=Zero                                                             !vw I should put the FlattenAllRows ?
+    IF(.NOT.ASSOCIATED(A)) THEN
       WRITE(*,*) 'ERR: A is null in Multiply_FASTMAT_SCALAR!'
       STOP
     ENDIF
@@ -919,7 +931,6 @@ MODULE FastMatrices
       ! Update counter
       C%Nodes=SRSTCount
     END SUBROUTINE AddFASTMATBlok
-
 !=================================================================
   FUNCTION FindFastMatRow_1(A,Row,SoftFind_O) RESULT(C)
     TYPE(FASTMAT),POINTER       :: A,P,C
@@ -991,9 +1002,16 @@ MODULE FastMatrices
       CALL AddIn_FASTMAT(B,C,Perf_O=Perf_O)
     END SUBROUTINE Add_FASTMAT
 !======================================================================
-!   ADD TWO FAST MATRICES TOGETHER: A=Alpha*A+B
 !======================================================================
     SUBROUTINE AddIn_FASTMAT(A,B,Alpha_O,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE AddIn_FASTMAT(A,B,Alpha_O,Perf_O)
+!H  This routine add two fast matrices together: A=Alpha*A+B.
+!H
+!H Comments:
+!H  - The B fast matrix IS FLATTENED in this routine!
+!H  - vw removed some bugs (See after).
+!H--------------------------------------------------------------------------------- 
       TYPE(FASTMAT),POINTER  :: A,B
       TYPE(FASTMAT),POINTER  :: P,Q
       TYPE(SRST),   POINTER  :: U,V
@@ -1009,12 +1027,12 @@ MODULE FastMatrices
       ENDIF 
       Op=Zero
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Skip pointers of A should be off since 
-      ! its getting added to
-      CALL SkipsOffQ(A%Alloc,'AddIn_Fastmat :: A ')
+      ! Skip pointers of A should be off since its getting added to
+      !vw CALL SkipsOffQ(A%Alloc,'AddIn_Fastmat :: A ')
       ! B is walked upon, turn on skip pointers
-      CALL SkipsOffQ(B%Alloc,'AddIn_FASTMAT : B')
-      CALL SkipsOnFASTMAT(B)
+      !vw CALL SkipsOffQ(B%Alloc,'AddIn_FASTMAT : B')
+      ! +++++ Build up the Skip list +++++
+      CALL FlattenAllRows(B)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       Q=>B%Next
       ! Go over rows of B
@@ -1023,13 +1041,13 @@ MODULE FastMatrices
          V=>Q%RowRoot
          Row=Q%Row
          M=BSiz%I(Row)
-         ! Add/find P, a Sparse Row ST
-         ! corresponding to Row of A
-         P=>FindFastMatRow_1(B,Row)
+         ! Add/find P, a Sparse Row ST corresponding to Row of A
+         P=>FindFastMatRow_1(A,Row)               !vw there was a bug here B -> A
          ! Initialize column nodes counter for Row of A
          SRSTCount=P%Nodes
          ! Go over columns of B
          DO
+            IF(.NOT.ASSOCIATED(V)) EXIT
             ! Check for leaf nodes
             IF(V%L==V%R)THEN
                Col=V%L
@@ -1047,20 +1065,24 @@ MODULE FastMatrices
                   U%MTrix=V%MTrix
                ENDIF
             ENDIF
-            IF(ASSOCIATED(V%Left))THEN
-               V=>V%Left
-            ELSEIF(ASSOCIATED(V%Right))THEN
-               V=>V%Right
-            ELSE
-               EXIT
-            ENDIF
+!            IF(ASSOCIATED(V%Left))THEN           !vw problems come from here
+!               V=>V%Left                         !vw problems come from here
+!            ELSEIF(ASSOCIATED(V%Right))THEN      !vw problems come from here
+!               V=>V%Right                        !vw problems come from here
+!           ELSE                                  !vw problems come from here
+!               EXIT                              !vw problems come from here
+!            ENDIF                                !vw problems come from here
+            V=>V%Next
          ENDDO
          ! Update counter
          P%Nodes=SRSTCount
          Q=>Q%Next
       ENDDO
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      CALL SkipsOffFASTMAT(B)
+      ! +++++ Build up the Skip list +++++
+      CALL FlattenAllRows(A)
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+      !vw CALL SkipsOffFASTMAT(B)                 !vw We do not use this any more.
       IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Two*Op
     END SUBROUTINE AddIn_FASTMAT
 !======================================================================
@@ -1195,14 +1217,14 @@ MODULE FastMatrices
                ENDIF
             ENDIF
             ! Tracing skip pointers over U, the kontraction index K
-            IF(ASSOCIATED(U%Left))THEN
-               U=>U%Left
-            ELSEIF(ASSOCIATED(U%Right))THEN
-               U=>U%Right
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO ! Cols of A
+            IF(ASSOCIATED(U%Left))THEN          !vw this does not work anymore!
+               U=>U%Left                        !vw this does not work anymore!
+            ELSEIF(ASSOCIATED(U%Right))THEN     !vw this does not work anymore!
+               U=>U%Right                       !vw this does not work anymore!
+            ELSE                                !vw this does not work anymore!
+               EXIT                             !vw this does not work anymore!
+            ENDIF                               !vw this does not work anymore!
+         ENDDO ! Cols of A                      !vw this does not work anymore!
          ! Update C column nodes counter
          R%Nodes=SRSTCount
          ! Keep following As row links
@@ -1213,17 +1235,20 @@ MODULE FastMatrices
       CALL SkipsOffFASTMAT(B)
       IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Two*Op
     END SUBROUTINE Multiply_FASTMAT
-
 !======================================================================
 !  IN PLACE FILTERATION OF SMALL BLOCKS FROM A FAST MATRIX
 !======================================================================
-   SUBROUTINE FilterOut_FASTMAT(A,Tol_O,Perf_O)
-      TYPE(FASTMAT),POINTER  :: A,P,Q
-      REAL(DOUBLE),OPTIONAL  :: Tol_O         
-      TYPE(TIME)  ,OPTIONAL  :: Perf_O         
-      REAL(DOUBLE)           :: Tol,Op 
-      TYPE(SRST),   POINTER  :: U,V
-      INTEGER                :: Row,Col,M,N,MN
+    SUBROUTINE FilterOut_FASTMAT(A,Tol_O,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE FilterOut_FASTMAT(A,Tol_O,Perf_O)
+!H
+!H--------------------------------------------------------------------------------- 
+      TYPE(FASTMAT), POINTER  :: A,P,Q
+      REAL(DOUBLE ), OPTIONAL :: Tol_O         
+      TYPE(TIME   ), OPTIONAL :: Perf_O         
+      REAL(DOUBLE )           :: Tol,Op 
+      TYPE(SRST   ), POINTER  :: U,V
+      INTEGER                 :: Row,Col,M,N,MN
 !----------------------------------------------------------------------
       IF(PRESENT(Tol_O))THEN
          Tol=Tol_O
@@ -1232,27 +1257,32 @@ MODULE FastMatrices
       ENDIF
       Op=Zero
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-      ! Cols of A are walked on as an ordinary binary tree, 
-      ! skip pointers should be off
-      CALL SkipsOffQ(A%Alloc,'FilterOut_FASTMAT : A')
+      ! Cols of A are walked on as an ordinary binary tree,  ! We do not need this any more
+      ! skip pointers should be off                          ! We do not need this any more
+      !vw CALL SkipsOffQ(A%Alloc,'FilterOut_FASTMAT : A')    ! We do not need this any more
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       ! Q is the parent link of P, to allow excission of a row
       Q=>A
       P=>A%Next
       ! Go over rows of A
-      DO WHILE(ASSOCIATED(P))
+      DO
+         IF(.NOT.ASSOCIATED(P)) EXIT
          ! Initialize column nodes counter for Row of A
-         SRSTCount=P%Nodes
+         SRSTCount = P%Nodes
          ! Filter out columns for this row, incrementing FLOP count
-         Op=Op+FilterOut_SRST(P%RowRoot,Tol)
+         Op = Op+FilterOut_SRST(P%RowRoot,Tol)
          ! Reset SRST node counter 
          P%Nodes=SRSTCount
          ! Check to see if the SRST is now empty for this row
          IF(P%Nodes==0)THEN
-            ! Skip over P in the LL 
+            ! Skip over P in the LL
             Q%Next=>P%Next
             ! Delete P
-            CALL Delete_FASTMAT(P)
+            !CALL Delete_FASTMAT(P) !vw changed ""->1
+            CALL Delete_FASTMAT_Node(P)      ! vw add that
+            !write(*,*) 'go out delete',myid
+            P=>Q                             ! vw add that
+            P%Next=>Q%Next                   ! vw add that
          ENDIF
          Q=>P
          P=>P%Next
@@ -1261,26 +1291,34 @@ MODULE FastMatrices
       IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Op
     END SUBROUTINE FilterOut_FASTMAT
 !======================================================================
-!
+!======================================================================
+    SUBROUTINE Delete_FASTMAT_Node(A)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE Delete_FASTMAT_Node(A)
+!H
+!H--------------------------------------------------------------------------------- 
+      IMPLICIT NONE
+      TYPE(FASTMAT), POINTER :: A
+      IF(ASSOCIATED(A%RowRoot)) CALL Delete_SRST_1(A%RowRoot)
+      DEALLOCATE(A)
+    END SUBROUTINE Delete_FASTMAT_Node
+!======================================================================
 !======================================================================
     RECURSIVE FUNCTION FilterOut_SRST(A,Tol) RESULT(Op)
       TYPE(SRST),POINTER  :: A
       REAL(DOUBLE)        :: Tol,Op,FNorm
       INTEGER             :: MN
 !---------------------------------------------------------------------
-      IF(ASSOCIATED(A%Left))                 &
-         Op=Op+FilterOut_SRST(A%Left,Tol)
-      IF(ASSOCIATED(A%Right))                &      
-         Op=Op+FilterOut_SRST(A%Right,Tol)
+      IF(ASSOCIATED(A%Left )) Op = Op+FilterOut_SRST(A%Left,Tol)
+      IF(ASSOCIATED(A%Right)) Op = Op+FilterOut_SRST(A%Right,Tol)
       ! Found a leaf node?
-      IF(.NOT.ASSOCIATED(A%Left).AND.        &
-         .NOT.ASSOCIATED(A%Right))THEN
+      IF(.NOT.ASSOCIATED(A%Left).AND..NOT.ASSOCIATED(A%Right))THEN
          ! Check for leaf nodes with blocks
          IF(ASSOCIATED(A%MTrix))THEN
             ! Compute Frobinious norm
-            FNorm=SQRT(DOT_PRODUCT(PACK(A%MTrix,.TRUE.),PACK(A%MTrix,.TRUE.)))
-            MN=SIZE(A%MTrix,1)*SIZE(A%MTrix,2)
-            Op=MN+6 ! Approximately 6 flops for the SQRT
+            FNorm = SQRT(DOT_PRODUCT(PACK(A%MTrix,.TRUE.),PACK(A%MTrix,.TRUE.)))
+            MN = SIZE(A%MTrix,1)*SIZE(A%MTrix,2)
+            Op = MN+6 ! Approximately 6 flops for the SQRT
             IF(FNorm<Tol)THEN
                ! Block is under threshold, delete the parent SRST node
                DEALLOCATE(A%MTrix,STAT=MemStatus)
@@ -1289,31 +1327,32 @@ MODULE FastMatrices
                DEALLOCATE(A,STAT=MemStatus)
                CALL DecMem(MemStatus,6,0)
                ! Decrement SRST counter
-               SRSTCount=SRSTCount-1
+               SRSTCount = SRSTCount-1
             ENDIF
          ELSE
             ! This must be a dangling node, and we are now backtracking, 
             ! deleting links leading to the matrix containg node.
             DEALLOCATE(A,STAT=MemStatus)
             CALL DecMem(MemStatus,6,0)
-            SRSTCount=SRSTCount-1
+            SRSTCount = SRSTCount-1
          ENDIF
       ENDIF
     END FUNCTION FilterOut_SRST
-
 !======================================================================
-   SUBROUTINE Set_FASTMAT_EQ_BCSR(B,A)
+    SUBROUTINE Set_FASTMAT_EQ_BCSR(B,A)
+!    SUBROUTINE Set_FASTMAT_EQ_BCSR_1(A)
       TYPE(FASTMAT),POINTER :: B,C
       TYPE(SRST),POINTER    :: S
       TYPE(BCSR)            :: A
       INTEGER               :: I,J,JP,P,N,M
 !---------------------------------------------------------------------
       ! Check for prior allocation
-      IF(ASSOCIATED(B%Next))THEN
-         CALL Delete_FASTMAT(B)
+
+      IF(ASSOCIATED(B))THEN
+         CALL Delete_FASTMAT1(B)                                            !vw I have changed that
          ! Begin with a new header Node     
-         CALL New_FASTMAT(B,0,(/0,0/))
       ENDIF
+      CALL New_FASTMAT(B,0,(/0,0/))
       !
       DO I=1,A%NAtms
          M=BSiz%I(I)
@@ -1326,12 +1365,115 @@ MODULE FastMatrices
                N=BSiz%I(J)
                ! Add bloks to this sparse row search tree
                CALL AddFASTMATBlok(C,I,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
-!              CALL AddFASTMATBlok(C,I,J,VectToBlock(M,N,A%MTrix%D(P:P+M*N-1)))
+               !CALL AddFASTMATBlok(C,I,J,VectToBlock(M,N,A%MTrix%D(P:P+M*N-1)))
             ENDDO
          ENDIF
       ENDDO
+      !
+      CALL FlattenAllRows(B)                                                !vw I have had that
+      !
     END SUBROUTINE Set_FASTMAT_EQ_BCSR
 
+!======================================================================                  !New
+   SUBROUTINE Set_BCSR_EQ_FASTMAT(B,A)                                                   !New
+      TYPE(FASTMAT),POINTER :: A,R                                                       !New
+      TYPE(SRST),POINTER    :: U                                                         !New
+      TYPE(BCSR)            :: B                                                         !New
+      INTEGER               :: I,J,JP,P,N,M,Q,OI,OJ,IC,JC                                !New
+!---------------------------------------------------------------------                   !New
+      ! Check for prior allocation
+      !write(*,*) 'In Set_BCSR_EQ_FASTMAT -1'
+      !write(*,*) ASSOCIATED(A),ASSOCIATED(A%Next)
+      IF(.NOT.ASSOCIATED(A%Next)) CALL Halt(' A not associated in Set_BCSR_EQ_FASTMAT')
+      !
+      !write(*,*) 'In Set_BCSR_EQ_FASTMAT 0'
+      CALL FlattenAllRows(A)
+      !
+      IF(AllocQ(B%Alloc)) CALL Delete(B)
+      CALL New(B)
+      !
+      P=1
+      Q=1
+      OI=0
+      B%RowPt%I(1)=1 
+      !
+      R => A%Next
+      DO
+         IF(.NOT.ASSOCIATED(R)) EXIT
+         I = R%Row
+         M = BSiz%I(I)
+         OJ=0
+         U => R%RowRoot
+         DO
+            IF(.NOT.ASSOCIATED(U)) EXIT
+            IF(U%L.EQ.U%R) THEN
+               IF(ASSOCIATED(U%MTrix)) THEN
+                  J = U%L
+                  N = BSiz%I(J)
+                  DO JC=1,N                                                       ! I can create a BlockToBlock3 with that
+                     DO IC=1,M                                                    !---->
+                        B%MTrix%D(Q+IC-1+(JC-1)*M) = U%MTrix(IC,JC)               !
+                     ENDDO                                                        !
+                  ENDDO                                                           !<----
+                  B%BlkPt%I(P)=Q
+                  B%ColPt%I(P)=J
+                  Q=Q+M*N
+                  P=P+1
+                  B%RowPt%I(I+1)=P
+                  OJ=OJ+N
+               ENDIF
+               OI=OI+M
+            ENDIF
+            U => U%Next
+            !write(*,*) 'In Set_BCSR_EQ_FASTMAT 7'
+         ENDDO
+         R => R%Next
+         !write(*,*) 'In Set_BCSR_EQ_FASTMAT 8'
+      ENDDO
+      B%NAtms=NAtoms
+      B%NBlks=P-1
+      B%NNon0=Q-1
+      !write(*,*) 'In Set_BCSR_EQ_FASTMAT 9'
+      !
+    END SUBROUTINE Set_BCSR_EQ_FASTMAT
+!======================================================================
+!
+!======================================================================
+   SUBROUTINE Set_DFASTMAT_EQ_DBCSR(B,A)
+      TYPE(FASTMAT),POINTER :: B,C
+      TYPE(SRST),POINTER    :: S
+      TYPE(DBCSR)           :: A
+      INTEGER               :: I,IRow,J,JP,P,N,M
+!---------------------------------------------------------------------
+      ! Check for prior allocation
+      IF(ASSOCIATED(B))THEN
+         CALL Delete_FASTMAT1(B)
+         ! Begin with a new header Node     
+         CALL New_FASTMAT(B,0,(/0,0/))
+      ENDIF
+      !
+      NULLIFY(C)
+      NULLIFY(S)
+      !
+      DO I = Beg%I(MyID),End%I(MyID)
+         IRow = I-Beg%I(MyID)+1
+         M = BSiz%I(I)
+         IF(A%RowPt%I(IRow+1)-A%RowPt%I(IRow)>1) THEN
+            ! Set current row link
+            C => FindFastMatRow_1(B,I)
+            DO JP = A%RowPt%I(IRow),A%RowPt%I(IRow+1)-1
+               J = A%ColPt%I(JP)
+               P = A%BlkPt%I(JP)
+               N = BSiz%I(J)
+               ! Add bloks to this sparse row search tree
+               CALL AddFASTMATBlok(C,I,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
+            ENDDO
+         ENDIF
+      ENDDO
+      !
+      CALL FlattenAllRows(B)
+      !
+    END SUBROUTINE Set_DFASTMAT_EQ_DBCSR
 !=================================================================
 !
 !=================================================================    
@@ -1340,7 +1482,6 @@ MODULE FastMatrices
       INTEGER,OPTIONAL,DIMENSION(2) :: RowLimits_O
       INTEGER,         DIMENSION(2) :: RowLimits
 !-----------------------------------------------------------------
-
       STOP 'ERR: This is the old Delete_FASTMAT. Do not use this!'
     END SUBROUTINE Delete_FASTMAT
 
@@ -1458,7 +1599,6 @@ MODULE FastMatrices
             Split=L+N
          ENDIF
       END FUNCTION IntervalSplit
-
 !======================================================================
 !   SET SKIP POINTERS FOR A FAST MATRIX
 !======================================================================
@@ -1545,5 +1685,223 @@ MODULE FastMatrices
           CALL Halt(' Uninitialized allocation key in '//TRIM(Proc))
        ENDIF
      END SUBROUTINE SkipsOffQ
+
+
+!======================================================================
+!======================================================================
+     SUBROUTINE SetFASTMATPart(A)
+       IMPLICIT NONE
+       TYPE(FASTMAT), POINTER :: A
+       TYPE(FASTMAT), POINTER :: P
+       TYPE(SRST   ), POINTER :: U
+       !
+       IF(.NOT.ASSOCIATED(A)) STOP 'A is null in SetFASTMATPart, STOP.' !CALL Halt(' A is null in SetFASTMATPart, STOP. ')
+       P => A%Next
+       DO
+          IF(.NOT.ASSOCIATED(P)) EXIT
+          U => P%RowRoot
+          DO
+             IF(.NOT.ASSOCIATED(U)) EXIT
+             IF(U%L == U%R) THEN
+                U%Part = Zero
+             ENDIF
+             U => U%Next
+          ENDDO
+          P => P%Next
+       ENDDO
+       !
+     END SUBROUTINE SetFASTMATPart
+!======================================================================
+!======================================================================
+     SUBROUTINE Symmetrized_FASMAT(A,MatFormat,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE Symmetrized_FASMAT(A,MatFormat,Perf_O)
+!H 
+!H
+!H--------------------------------------------------------------------------------- 
+       IMPLICIT NONE
+       TYPE(FASTMAT)   , POINTER    :: A,B,C
+       TYPE(TIME   )   , OPTIONAL   :: Perf_O
+       INTEGER                      :: Col,Row,M
+       REAL(DOUBLE)                 :: Op
+       CHARACTER(LEN=1), INTENT(IN) :: MatFormat !="L" (Lower) or "U" (Upper) 
+!                                                ! block triangular matrix.
+!----------------------------------------------------------------------
+       IF(.NOT.ASSOCIATED(A))  &
+            CALL Halt(' A not associated in Symmetrized_FASTMAT ')
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+       ! +++++ Aii=0.5*Aii and Ai>j=0 or Ai<j=0 +++++
+       CALL CleanDiag_FASTMAT(A,MatFormat,Alpha_O=0.5d0,Perf_O=Perf_O)
+       ! +++++ B=A^t +++++
+       B => Transpose_FASTMAT(A,Perf_O=Perf_O)
+       ! +++++ A=A+B +++++
+       CALL AddIn_FASTMAT(A,B,Perf_O=Perf_O)
+       ! +++++ Delete B +++++
+       CALL Delete_FASTMAT1(B)
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     END SUBROUTINE Symmetrized_FASMAT
+!======================================================================
+!  TRANSPOSE (LOCALY) A FAST MATT-RIX
+!======================================================================
+     FUNCTION Transpose_FASTMAT(A,Perf_O) RESULT(B)
+!H--------------------------------------------------------------------------------- 
+!H FUNCTION Transpose_FASTMAT(A,Perf_O) RESULT(B)
+!H  This routine transpose (localy) a fast matrix.
+!H
+!H Comments:
+!H
+!H--------------------------------------------------------------------------------- 
+       IMPLICIT NONE
+       TYPE(FASTMAT), POINTER  :: A,P,B
+       TYPE(SRST   ), POINTER  :: U
+       TYPE(TIME   ), OPTIONAL :: Perf_O
+       INTEGER                 :: Col,Row,M
+       REAL(DOUBLE)            :: Op
+!----------------------------------------------------------------------
+       IF(.NOT.ASSOCIATED(A)) CALL Halt(' A not associated in Transpose_FASTMAT ')
+       CALL New_FASTMAT(B,0,(/0,0/))
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+       CALL FlattenAllRows(A)
+
+       Op = Zero
+       P => A%Next
+       DO 
+          IF(.NOT.ASSOCIATED(P)) EXIT
+          Row = P%Row
+          M = BSiz%I(Row)
+          U => P%RowRoot
+          DO 
+             IF(.NOT.ASSOCIATED(U)) EXIT
+             IF(U%L == U%R) THEN
+                IF(ASSOCIATED(U%MTrix)) THEN
+                   Col = U%L
+                   ! +++++ Copy the transposed block in the new FASTMAT +++++
+                   CALL AddFASTMATBlok(B,Col,Row,TRANSPOSE(U%MTrix(:,:)))
+                   Op = Op+M*BSiz%I(U%L)
+                ENDIF
+             ENDIF
+             U => U%Next
+          ENDDO
+          P => P%Next
+       ENDDO
+
+       CALL FlattenAllRows(A)
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+       IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Op
+     END FUNCTION Transpose_FASTMAT
+!======================================================================
+     SUBROUTINE CleanDiag_FASTMAT(A,MatFormat,Alpha_O,Perf_O)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE CleanDiag_FASTMAT(A,MatFormat,Perf_O)
+!H  This routine clean the diagonal part of a fast matrix.
+!H  e.g.: Aii=Alpha*Aii and Ai>j=0 or Ai<j=0
+!H
+!H  MatFormat = 'L', The matrix is in LOWER triangular part -> Clean UPPER part.
+!H  MatFormat = 'U', The matrix is in UPPER triangular part -> Clean LOWER part.
+!H
+!H Comments:
+!H
+!H--------------------------------------------------------------------------------- 
+       IMPLICIT NONE
+       TYPE(FASTMAT)   , POINTER    :: A,P
+       TYPE(SRST   )   , POINTER    :: U
+       TYPE(TIME   )   , OPTIONAL   :: Perf_O
+       REAL(DOUBLE )   , OPTIONAL   :: Alpha_O
+       CHARACTER(LEN=1), INTENT(IN) :: MatFormat
+       INTEGER                      :: Row,M,I,J,Split
+       REAL(DOUBLE)                 :: Op,Alpha
+       LOGICAL                      :: IsLower
+!----------------------------------------------------------------------
+       IF(MatFormat.NE.'L'.AND.MatFormat.NE.'U')  &
+            CALL Halt(' Cannot recognize the MatFormat in CleanDiag_FASTMAT ')
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+       IF(PRESENT(Alpha_O)) THEN
+          Alpha=Alpha_O
+       ELSE
+          Alpha=1.0d0
+       ENDIF
+       IF(MatFormat.EQ.'L') IsLower=.TRUE.
+       IF(MatFormat.EQ.'U') IsLower=.FALSE.
+       Op=Zero
+       P=>A%Next
+       DO WHILE(ASSOCIATED(P))
+          Row=P%Row
+          U=>P%RowRoot
+          M=BSiz%I(Row)
+          Tree: DO
+             IF(Row==U%L.AND.Row==U%R) then
+                IF(ASSOCIATED(U%MTrix)) THEN
+                   IF(IsLower) THEN
+                      ! +++++ Clean Upper Part +++++
+                      U%MTrix(1,1)=U%MTrix(1,1)*Alpha
+                      DO J=2,M
+                         U%MTrix(J,J)=U%MTrix(J,J)*Alpha
+                         DO I=1,J-1
+                            U%MTrix(I,J)=Zero
+                         ENDDO
+                      ENDDO
+                   ELSE
+                      ! +++++ Clean Lower Part +++++
+                      DO J=1,M-1
+                         U%MTrix(J,J)=U%MTrix(J,J)*Alpha
+                         DO I=J+1,M
+                            U%MTrix(I,J)=Zero
+                         ENDDO
+                      ENDDO
+                      U%MTrix(M,M)=U%MTrix(M,M)*Alpha
+                   ENDIF
+                   Op=Op+DBLE(M*(M-1))
+                ENDIF
+                EXIT Tree
+             ENDIF
+             Split=IntervalSplit(U%L,U%R)
+             IF(Row>=U%L.AND.Row<=Split.AND.ASSOCIATED(U%Left))THEN
+                U=>U%Left
+             ELSEIF(Row>=Split.AND.Row<=U%R.AND.ASSOCIATED(U%Right))THEN
+                U=>U%Right
+             ELSE
+                EXIT Tree
+             ENDIF
+          ENDDO Tree
+          P=>P%Next
+       ENDDO
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+       IF(PRESENT(Perf_O))Perf_O%FLOP=Perf_O%FLOP+Op    
+     END SUBROUTINE CleanDiag_FASTMAT
+
+!======================================================================
+!   FAST MATT-RIX
+!======================================================================
+     SUBROUTINE DepthTree_FASTMAT(A)
+       IMPLICIT NONE
+       TYPE(FASTMAT), POINTER :: A,P
+       TYPE(SRST   ), POINTER :: U
+       INTEGER                :: Col,Row,DepthMin,DepthMax
+       INTEGER                :: Tier
+!----------------------------------------------------------------------
+       P=>A%Next
+       DO WHILE(ASSOCIATED(P))
+          Row=P%Row
+          U=>P%RowRoot
+          DepthMin=0
+          DepthMax=0
+          call DepthTree(U,DepthMin,DepthMax)
+          write(*,*) "Row=",Row," DepthMin",DepthMin," DepthMax",DepthMax
+          P=>P%Next
+       ENDDO
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+     END SUBROUTINE DepthTree_FASTMAT
+
+     RECURSIVE SUBROUTINE DepthTree(U,DepthMin,DepthMax)
+       TYPE(SRST   ), POINTER :: U
+       INTEGER                :: DepthMin,DepthMax
+       IF(ASSOCIATED(U%Left )) call depthTree(U%Left ,DepthMin,DepthMax)
+       IF(ASSOCIATED(U%Right)) call depthTree(U%Right,DepthMin,DepthMax)
+       IF(.NOT.ASSOCIATED(U%Left).AND..NOT.ASSOCIATED(U%Right)) THEN
+          DepthMin=MIN(DepthMin,U%Tier)
+          DepthMax=MAX(DepthMax,U%Tier)
+       ENDIF
+     END SUBROUTINE DepthTree
+
 #endif
-  END MODULE FASTMATRICES
+   END MODULE FASTMATRICES
