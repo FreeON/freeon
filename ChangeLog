@@ -1,3 +1,148 @@
+2004-03-27 13:50  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, prl.ps: Another iteration on
+	the optimizer paper.
+
+2004-03-27 00:54  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-27 00:02  nemeth
+
+	* Docs/Optimizer/PRL/prl.ps: Additions to the optimizer paper.
+
+2004-03-27 00:02  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-26 18:50  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, curve2_1.eps, curve2_1.gnu,
+	curve3_1.eps, curve3_1.gnu: New pictures and modified text added to
+	the optimizer paper.
+
+2004-03-26 18:04  nemeth
+
+	* Docs/Optimizer/PRL/: mondo_new.bib, GFS_PRL.tex: [no log message]
+
+2004-03-26 16:24  nemeth
+
+	* Docs/Optimizer/PRL/picture1_2.gnu: A picture's gnu file added.
+
+2004-03-26 15:26  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: This version
+	of the optimizer makes Baker's test set in 190 steps, with the
+	modified ('supertight') Numerics.F90. The usual VeryTight makes it
+	in 193 steps.
+
+2004-03-26 08:35  vweber
+
+	* MondoSCF2/ConflictDetect.F90: Added the routines for basis set
+	checking.
+
+2004-03-26 08:14  vweber
+
+	* MondoSCF2/ParseBasis.F90: Added a warning if not all the atoms
+	needed are in the basis set file.  Now the code does not stop if it
+	does not find all the BS, then it trys to save empty array latter
+	(NKind=0). This should be checked somewhere else.
+
+2004-03-26 05:57  vweber
+
+	* MondoSCF2/SCFs.F90: Fixed a problem with rms gradient, rms was
+	not define in the right way.  Missing the square, then it could
+	lead to negative argument for sqrt...  It remains few other places
+	in Force with the same problem (wrong def of rms), should be fixed.
+	 ----THIS CHANGE MAY AFFECT KAROLITO GEO OPT----
+
+2004-03-24 06:57  vweber
+
+	* SCFeqs/P2Use.F90: Added a test on dS, if dS<10^-10 then do not
+	try to do an Extrapolate.  This avoid some strange behaviors in Geo
+	opt.
+
+2004-03-23 18:34  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, picture1_2.eps: A new version
+	of picture1 and some modifications in the text.
+
+2004-03-23 11:18  mchalla
+
+	* TwoE/DEInts.F90: [no log message]
+
+2004-03-23 11:02  mchalla
+
+	* TwoE/DEInts.F90: a first weak attempt at a general integrals
+	code.
+	
+	
+	-------------------------------------------------------------------
+	---
+
+2004-03-22 16:14  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Another iteration on the
+	optimizer paper.
+
+2004-03-19 20:31  nemeth
+
+	* MondoSCF2/InCoords.F90: The iterative back-transformation is
+	modified now, for the case of very large displacements.
+
+2004-03-19 17:52  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90: Some uninitialized variables
+	have been initialized.
+
+2004-03-19 15:18  nemeth
+
+	* MondoMods/MemMan.F90: Initialization of some, previously
+	un-initialized arrays.
+
+2004-03-19 04:46  vweber
+
+	* ONX2/: HONX.F90, HONXComputD2K.F90: New files to compute the
+	analytic hessian... still some work todo.
+
+2004-03-19 04:37  vweber
+
+	* ONX2/GONX2ComputDK.F90: nag does not like intent(out) for derived
+	data types (at least with debuging options), in particular
+	int_vect. Then it complains -> vect not allocated.
+
+2004-03-18 16:21  ckgan
+
+	* QCTC/: Makefile, ParaQ.F90: Module for parallel QCTC included.
+
+2004-03-18 14:26  tymczak
+
+	* ONX/VRR/Int1111.F90: [no log message]
+
+2004-03-18 12:13  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Hessian.F90, InCoords.F90, Optimizer.F90,
+	ParseGeomOpt.F90: Setting back optimizer to last state before
+	restructuring for delocalized internals happened. This to to
+	provide a reference about last best state of Baker's test set
+	calculations.
+
+2004-03-17 17:17  ckgan
+
+	* Docs/Bib/mondo.bib: A triplicate reference removed.
+
+2004-03-17 13:59  nemeth
+
+	* Docs/Optimizer/PRL/prl.ps: [no log message]
+
+2004-03-17 13:14  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-17 10:44  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-03-16 21:46  nemeth
 
 	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
