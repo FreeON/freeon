@@ -219,9 +219,9 @@ MODULE ParseInput
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)WRITE(Out,*)LeftParenStar
          WRITE(Out,77)(Rtrn,I=1,6)
       77 FORMAT(A1,A1,' << M o n d o S C F >>  ',A1,                       &
-                      '  Version 0.3.0 Beta  ',A1,                         &
+                      '  Version 1.0 Beta  ',A1,                         &
                       '  Matt Challacombe, Eric Schwegler, ',A1,           &
-                      '  C.J. Tymczak and Mike Salazar     ',A1,           &
+                      '  and C.J. Tymczak                  ',A1,           &
                       '  Los Alamos National Laboratory    ',A1,           & 
                       '  Copywrite 2000, University of California.',A1)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)WRITE(Out,*)RightParenStar

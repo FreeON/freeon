@@ -87,6 +87,8 @@ PROGRAM MondoSCF
      ENDDO
      Begin=(/Ctrl%NSet,2/)
   ENDIF 
+  STOP
+
 !
 !  CALL Invoke('SForce',CtrlVect)
 !  CALL Invoke('TForce',CtrlVect)
