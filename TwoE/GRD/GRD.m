@@ -175,8 +175,13 @@ Do[Do[Do[Do[
 	   Print[" Openned ",Subroutine];
 	   WS[String_]:=WriteString[Subroutine,String,"\n"];
 	   WriteString[Subroutine,CommentLine]; 
+If[IntegralClass[Classes[[ic]]]!=2 &&\
+   IntegralClass[Classes[[jc]]]!=2 &&\
+   IntegralClass[Classes[[kc]]]!=2 &&\
+   IntegralClass[Classes[[lc]]]!=2,
 	   MakeList=Append[MakeList,StringJoin["dIntB",ToString[ijklType],".o"]];
            RelsList=Append[RelsList,StringJoin["dIntB",ToString[ijklType],".x"]]; 
+];
            BraEll=imax+jmax;
            KetEll=kmax+lmax;
            PunchFront[Subroutine,ic,jc,kc,lc,ijklType]; 

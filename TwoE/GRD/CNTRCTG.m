@@ -1085,7 +1085,7 @@ PunchVRRContract[Subroutine_,ic_,jc_,kc_,lc_,LBra_,LKet_]:=Block[{WS,BKString,br
       WS[StringJoin["  REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
       (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
       If[DoStress==0,
-        WS[StringJoin["  REAL(DOUBLE)  :: VRRS(",ToString[LEnd[LBra]],",",ToString[LEnd[LKet]],",0:",ToString[LBra+LKet],",3)"]];
+        WS[StringJoin["  REAL(DOUBLE)  :: VRRS(",ToString[BraMax],",",ToString[KetMax],",0:",ToString[LBra+LKet],",3)"]];
         WS[StringJoin["  REAL(DOUBLE)  :: HRRS(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax]],",9),PQJ(3)"]];
         WS[StringJoin["  INTEGER :: IJ,J,I,IW(3)"]];
       ];

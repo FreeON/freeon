@@ -86,7 +86,7 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra1],",",ToString[LenKet1],",0:",ToString[LBra+LKet+1],")"]];
            (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
            If[DoStress==0,
-             WS[StringJoin["REAL(DOUBLE)  :: VRRS(",ToString[LEnd[LBra]],",",ToString[LEnd[LKet]],",0:", \
+             WS[StringJoin["REAL(DOUBLE)  :: VRRS(",ToString[BraMax],",",ToString[KetMax],",0:", \
                            ToString[LBra+LKet],",3)"]];
              WS[StringJoin["REAL(DOUBLE)  :: HRRS(",ToString[BraMax],",",ToString[KetMax],",", \
                            ToString[LEnd[lmax]],",9)"]];

@@ -357,8 +357,13 @@ Do[Do[
   oList=Append[oList,{" "->"","DV"->"_","ZP"->"","XX"->",","BB"->"(","KK"->"|","+"->"+&\n                         ","CC"->")"}];
   oList=Flatten[oList];
 
+
+If[IntegralClass[Classes[[ic]]]!=2 &&\
+   IntegralClass[Classes[[jc]]]!=2,
   MakeList=Append[MakeList,StringJoin[HRRSubName,".o"]];
   RelsList=Append[RelsList,StringJoin[HRRSubName,".x"]];
+];
+
   HRRSubroutine=StringJoin[HRRSubName,".F90"];
 
   OpenWrite[HRRSubroutine];
