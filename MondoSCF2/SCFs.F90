@@ -245,6 +245,7 @@ CONTAINS
     ! Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
     ! .. and clean up 
+    CALL Delete(Tmp)
     CALL Delete(GradE)
   END SUBROUTINE Force
   !===============================================================================
