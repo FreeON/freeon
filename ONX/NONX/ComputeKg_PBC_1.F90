@@ -110,7 +110,7 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
 
 
           IF (LenBra>0) THEN
-WRITE(*,*)'Bra ',LenBra,idBra,iPBra
+!WRITE(*,*)'Bra ',LenBra,idBra,iPBra
 
       ShellD=0
       DO ci=D%RowPt%I(ri),D%RowPt%I(ri+1)-1        ! Loop over atom D (Dcd)
@@ -130,7 +130,7 @@ WRITE(*,*)'Bra ',LenBra,idBra,iPBra
 
 
           IF (LenKet>0) THEN
-WRITE(*,*)'Ket ',LenKet,idKet,iPKet
+!WRITE(*,*)'Ket ',LenKet,idKet,iPKet
 
             CALL GetSubBlk(NBFC,NBFD,StrideC,StrideD,IndexC+1,  &
                            IndexD+1,D%MTrix%D(iPtr),DA%D(1))
@@ -211,7 +211,7 @@ WRITE(*,*)'Ket ',LenKet,idKet,iPKet
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB2,IB%W2%D(1),K)          ! DB1 ? 
                 END IF
 K%NAtms=NAtoms
-WRITE(*,*)Dot(K,K)
+!WRITE(*,*)Dot(K,K)
 
               END IF  ! ISL
 
