@@ -15,6 +15,7 @@ pbs:
 #
 purge:	clean
 	rm -f *.inp
+	rm -f *.pbs
 #
 clean:
 	rm -f $(REMOVEALL) 

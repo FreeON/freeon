@@ -1,6 +1,8 @@
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/RemoveAll
 
+purge:	clean
+
 clean:
 	rm -f $(REMOVEALL) 
 	rm -f *.out *.log *.o*
