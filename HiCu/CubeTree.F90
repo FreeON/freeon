@@ -643,8 +643,10 @@ MODULE CubeTree
            IF(GM%PBC%AutoW(I)) THEN
               IF(Box%BndBox(I,1) < Zero) THEN
                  Box%BndBox(I,1) = Zero
+                 Box%BndBox(I,2) = GM%PBC%BoxShape(I,I)
               ENDIF
               IF(Box%BndBox(I,2) > GM%PBC%BoxShape(I,I)) THEN
+                 Box%BndBox(I,1) = Zero
                  Box%BndBox(I,2) = GM%PBC%BoxShape(I,I)
               ENDIF
            ENDIF
