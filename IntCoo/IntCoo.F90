@@ -11,155 +11,150 @@ IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
 !
-SUBROUTINE TOPOLOGY_12(NATOMS,NBONDS,BONDI,BONDJ,TOP12,InfFile)
+SUBROUTINE Topology_12(NATOMS,NBONDS,BONDI,BONDJ,Top12,InfFile)
 ! Set up a table which shows the atom numbers of atoms 
-! connected to a certain atom by the input bonds (topology mtr)
-! Here, the generation of the topology mtr is based on input list
+! connected to a certain atom by the input bonds (Topology mtr)
+! Here, the generation of the Topology mtr is based on input list
 ! of bonds
 IMPLICIT NONE
-TYPE(INT_RNK2),OPTIONAL :: TOP12
-TYPE(INT_RNK2) :: TOP12_2
-INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBONDS,NATOMS,NMAX12
+TYPE(INT_RNK2),OPTIONAL :: Top12
+TYPE(INT_RNK2) :: Top12_2
+INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBONDS,NATOMS,NMax12
 INTEGER,DIMENSION(1:NBONDS) :: BONDI,BONDJ
 CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
-    NMAX12=5
-    CALL NEW(TOP12,(/NATOMS,NMAX12+1/))
-    TOP12%I(:,:)=0 
+    NMax12=5
+    CALL New(Top12,(/NATOMS,NMax12+1/))
+    Top12%I(:,:)=0 
 !
     DO I=1,NBONDS
 !
       II=BONDI(I)
       JJ=BONDJ(I)
-      NI=TOP12%I(II,1)
-      NJ=TOP12%I(JJ,1)
+      NI=Top12%I(II,1)
+      NJ=Top12%I(JJ,1)
 !
 ! check matrix size, increase size if necessary
-      IF(NI>=NMAX12 .OR. NJ>=NMAX12) THEN
-        NMAX12=NMAX12+5
-        CALL NEW(TOP12_2,(/NATOMS,NMAX12+1/))
-        TOP12_2%I(1:NATOMS,1:NMAX12+1)=0 
-        TOP12_2%I(1:NATOMS,1:NMAX12+1-5)=TOP12%I(1:NATOMS,1:NMAX12+1-5)
-        CALL DELETE(TOP12)
-        CALL NEW(TOP12,(/NATOMS,NMAX12+1/))
-        TOP12%I(:,:)=TOP12_2%I(:,:)
-        CALL DELETE(TOP12_2)
+      IF(NI>=NMax12 .OR. NJ>=NMax12) THEN
+        NMax12=NMax12+5
+        CALL New(Top12_2,(/NATOMS,NMax12+1/))
+        Top12_2%I(1:NATOMS,1:NMax12+1)=0 
+        Top12_2%I(1:NATOMS,1:NMax12+1-5)=Top12%I(1:NATOMS,1:NMax12+1-5)
+        CALL DELETE(Top12)
+        CALL New(Top12,(/NATOMS,NMax12+1/))
+        Top12%I(:,:)=Top12_2%I(:,:)
+        CALL DELETE(Top12_2)
       ENDIF
 !
       IF(NI/=0) THEN
       DO M=1,NI         
-        IF(TOP12%I(II,M+1)==JJ) THEN
+        IF(Top12%I(II,M+1)==JJ) THEN
           EXIT
         ELSE
-          TOP12%I(II,1)=NI+1
-          TOP12%I(II,1+(NI+1))=JJ
+          Top12%I(II,1)=NI+1
+          Top12%I(II,1+(NI+1))=JJ
           EXIT
         ENDIF
       ENDDO 
       ELSE
-          TOP12%I(II,1)=NI+1
-          TOP12%I(II,1+(NI+1))=JJ
+          Top12%I(II,1)=NI+1
+          Top12%I(II,1+(NI+1))=JJ
       ENDIF
 !
       IF(NJ/=0) THEN
       DO M=1,NJ         
-        IF(TOP12%I(JJ,M+1)==II) THEN
+        IF(Top12%I(JJ,M+1)==II) THEN
           EXIT
         ELSE
-          TOP12%I(JJ,1)=NJ+1
-          TOP12%I(JJ,1+(NJ+1))=II
+          Top12%I(JJ,1)=NJ+1
+          Top12%I(JJ,1+(NJ+1))=II
           EXIT
         ENDIF
       ENDDO 
       ELSE
-          TOP12%I(JJ,1)=NJ+1
-          TOP12%I(JJ,1+(NJ+1))=II
+          Top12%I(JJ,1)=NJ+1
+          Top12%I(JJ,1+(NJ+1))=II
       ENDIF
 !
     ENDDO
 !
     IF(PRESENT(InfFile)) THEN
       CALL OpenHDF(InfFile)
-      CALL Put(NMAX12,'NMAX12')
-      CALL Put(TOP12,'TOP12')
+      CALL Put(NMax12,'NMax12')
+      CALL Put(Top12,'Top12')
       CALL CloseHDF()
     ENDIF
 !
-    IF(.NOT.PRESENT(TOP12)) CALL DELETE(TOP12)
+    IF(.NOT.PRESENT(Top12)) CALL DELETE(Top12)
 !
-END SUBROUTINE TOPOLOGY_12 
+END SUBROUTINE Topology_12 
 !--------------------------------------------------------------
 !
-SUBROUTINE TOPOLOGY_13(NATOMS,TOP12,TOP13,InfFile)
+SUBROUTINE Topology_13(NATOMS,Top12,Top13,InfFile)
 ! Set up a table which shows the atom numbers of atoms 
 ! beeing second neighbours of a certain atom.
 !
 IMPLICIT NONE
-TYPE(INT_RNK2),OPTIONAL :: TOP12
-TYPE(INT_RNK2),OPTIONAL :: TOP13
-TYPE(INT_RNK2) :: TOP13_2
-INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NATOMS,NMAX13,NMAX12,KK,IN12,JN12
+TYPE(INT_RNK2),OPTIONAL :: Top12
+TYPE(INT_RNK2),OPTIONAL :: Top13
+TYPE(INT_RNK2) :: Top13_2
+INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NATOMS,NMax13,NMax12,KK,IN12,JN12
 CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
-    IF(.NOT.PRESENT(TOP12)) THEN
+    IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
         CALL OpenHDF(InfFile)
-        CALL Get(NMAX12,'NMAX12')
-        K=NMAX12+1
-        CALL NEW(TOP12,(/NATOMS,K/))
-        CALL Get(TOP12,'TOP12')
+        CALL Get(NMax12,'NMax12')
+        K=NMax12+1
+        CALL New(Top12,(/NATOMS,K/))
+        CALL Get(Top12,'Top12')
         CALL CloseHDF()
       ELSE
-        CALL MondoHalt(INTC_ERROR,'Missing top_12 matrix')
+        CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix')
       ENDIF
     ELSE
-      NMAX12=SIZE(TOP12%I,2)
+      NMax12=SIZE(Top12%I,2)
     ENDIF
 !
-    NMAX13=10
-    K=NMAX13+1
-    CALL NEW(TOP13,(/NATOMS,K/))
-    TOP13%I(1:NATOMS,1:NMAX13+1)=0 
+    NMax13=10
+    K=NMax13+1
+    CALL New(Top13,(/NATOMS,K/))
+    Top13%I(1:NATOMS,1:NMax13+1)=0 
 !
     DO II=1,NATOMS
-      IN12=TOP12%I(II,1)
+      IN12=Top12%I(II,1)
       DO J=1,IN12
-        JJ=TOP12%I(II,J+1)
-        JN12=TOP12%I(JJ,1)
+        JJ=Top12%I(II,J+1)
+        JN12=Top12%I(JJ,1)
           DO K=1,JN12
-          KK=TOP12%I(JJ,K+1)
+          KK=Top12%I(JJ,K+1)
           IF(II/=KK) THEN
 !
-! continue here
-!
-      NI=TOP13%I(II,1)
+      NI=Top13%I(II,1)
 !
 ! check matrix size, increase size if necessary
 !
-      IF(NI>=NMAX13) THEN
-        NMAX13=NMAX13+10
-        CALL NEW(TOP13_2,(/NATOMS,NMAX13+1/))
-        TOP13_2%I(1:NATOMS,1:NMAX13+1)=0 
-        TOP13_2%I(1:NATOMS,1:NMAX13+1-10)=TOP13%I(1:NATOMS,1:NMAX13+1-10)
-        CALL DELETE(TOP13)
-        CALL NEW(TOP13,(/NATOMS,NMAX13+1/))
-        TOP13%I(1:NATOMS,1:NMAX13+1)=TOP13_2%I(1:NATOMS,1:NMAX13+1)
-        CALL DELETE(TOP13_2)
+      IF(NI>=NMax13) THEN
+        NMax13=NMax13+10
+        CALL New(Top13_2,(/NATOMS,NMax13+1/))
+        Top13_2%I(1:NATOMS,1:NMax13+1)=0 
+        Top13_2%I(1:NATOMS,1:NMax13+1-10)=Top13%I(1:NATOMS,1:NMax13+1-10)
+        CALL DELETE(Top13)
+        CALL New(Top13,(/NATOMS,NMax13+1/))
+        Top13%I(1:NATOMS,1:NMax13+1)=Top13_2%I(1:NATOMS,1:NMax13+1)
+        CALL DELETE(Top13_2)
       ENDIF
 !
       IF(NI/=0) THEN
-      DO M=1,NI         
-        IF(TOP13%I(II,M+1)==KK) THEN
-          EXIT
+        IF(ANY(Top13%I(II,2:NI+1)==KK)) THEN
+          CYCLE
         ELSE
-          TOP13%I(II,1)=NI+1
-          TOP13%I(II,1+(NI+1))=KK
-          EXIT
+          Top13%I(II,1)=NI+1
+          Top13%I(II,1+(NI+1))=KK
         ENDIF
-      ENDDO 
       ELSE
-          TOP13%I(II,1)=NI+1
-          TOP13%I(II,1+(NI+1))=KK
+          Top13%I(II,1)=NI+1
+          Top13%I(II,1+(NI+1))=KK
       ENDIF
 !
         ENDIF !!! II/=KK
@@ -167,95 +162,90 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
       ENDDO !!!! JJ
     ENDDO !!!! II
 !
-    IF(.NOT.PRESENT(TOP12)) CALL DELETE(TOP12)
+    IF(.NOT.PRESENT(Top12)) CALL DELETE(Top12)
 !
     IF(PRESENT(InfFile)) THEN
       CALL OpenHDF(InfFile)
-      CALL Put(NMAX13,'NMAX13')
-      CALL Put(TOP13,'TOP13')
+      CALL Put(NMax13,'NMax13')
+      CALL Put(Top13,'Top13')
       CALL CloseHDF()
     ENDIF
 !
-    IF(.NOT.PRESENT(TOP13)) CALL DELETE(TOP13)
+    IF(.NOT.PRESENT(Top13)) CALL DELETE(Top13)
 !
-END SUBROUTINE TOPOLOGY_13 
+END SUBROUTINE Topology_13 
 !--------------------------------------------------------------
 !
-SUBROUTINE TOPOLOGY_14(NATOMS,TOP12,TOP14,InfFile)
+SUBROUTINE Topology_14(NATOMS,Top12,Top14,InfFile)
 ! Set up a table which shows the atom numbers of atoms 
 ! beeing second neighbours of a certain atom.
 !
 IMPLICIT NONE
-TYPE(INT_RNK2),OPTIONAL,INTENT(IN) :: TOP12
-TYPE(INT_RNK2),OPTIONAL,INTENT(OUT) :: TOP14
-TYPE(INT_RNK2) :: TOP14_2
+TYPE(INT_RNK2),OPTIONAL,INTENT(IN) :: Top12
+TYPE(INT_RNK2),OPTIONAL,INTENT(OUT) :: Top14
+TYPE(INT_RNK2) :: Top14_2
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL
-INTEGER :: NATOMS,NMAX14,NMAX12,IN12,JN12,KN12
+INTEGER :: NATOMS,NMax14,NMax12,IN12,JN12,KN12
 CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
-     IF(.NOT.PRESENT(TOP12)) THEN
+     IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
         CALL OpenHDF(InfFile)
-        CALL Get(NMAX12,'NMAX12')
-        K=NMAX12+1
-        CALL NEW(TOP12,(/NATOMS,K/))
-        CALL Get(TOP12,'TOP12')
+        CALL Get(NMax12,'NMAX12')
+        K=NMax12+1
+        CALL New(Top12,(/NATOMS,K/))
+        CALL Get(Top12,'Top12')
         CALL CloseHDF()
       ELSE
-        CALL MondoHalt(INTC_ERROR,'Missing top_12 matrix')
+        CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix')
       ENDIF
     ELSE
-      NMAX12=SIZE(TOP12%I,2)
+      NMax12=SIZE(Top12%I,2)
     ENDIF
 !
-    NMAX14=10
-    K=NMAX14+1
-    CALL NEW(TOP14,(/NATOMS,K/))
-    TOP14%I(1:NATOMS,1:NMAX14+1)=0 
+    NMax14=10
+    K=NMax14+1
+    CALL New(Top14,(/NATOMS,K/))
+    Top14%I(1:NATOMS,1:NMax14+1)=0 
 !
     DO II=1,NATOMS
-      IN12=TOP12%I(II,1)
+      IN12=Top12%I(II,1)
       DO J=1,IN12
-        JJ=TOP12%I(II,J+1)
-        JN12=TOP12%I(JJ,1)
+        JJ=Top12%I(II,J+1)
+        JN12=Top12%I(JJ,1)
           DO K=1,JN12
-          KK=TOP12%I(JJ,K+1)
+          KK=Top12%I(JJ,K+1)
           IF(II/=KK) THEN
-            KN12=TOP12%I(KK,1)
+            KN12=Top12%I(KK,1)
               DO L=1,KN12
-              LL=TOP12%I(KK,L+1)
+              LL=Top12%I(KK,L+1)
           IF(JJ/=LL.AND.II/=LL) THEN
 !
-! continue here
-!
-      NI=TOP14%I(II,1)
+      NI=Top14%I(II,1)
 !
 ! check matrix size, increase size if necessary
 !
-      IF(NI>=NMAX14) THEN
-        NMAX14=NMAX14+10
-        CALL NEW(TOP14_2,(/NATOMS,NMAX14+1/))
-        TOP14_2%I(1:NATOMS,1:NMAX14+1)=0 
-        TOP14_2%I(1:NATOMS,1:NMAX14+1-10)=TOP14%I(1:NATOMS,1:NMAX14+1-10)
-        CALL DELETE(TOP14)
-        CALL NEW(TOP14,(/NATOMS,NMAX14+1/))
-        TOP14%I(1:NATOMS,1:NMAX14+1)=TOP14_2%I(1:NATOMS,1:NMAX14+1)
-        CALL DELETE(TOP14_2)
+      IF(NI>=NMax14) THEN
+        NMax14=NMax14+10
+        CALL New(Top14_2,(/NATOMS,NMax14+1/))
+        Top14_2%I(1:NATOMS,1:NMax14+1)=0 
+        Top14_2%I(1:NATOMS,1:NMax14+1-10)=Top14%I(1:NATOMS,1:NMax14+1-10)
+        CALL DELETE(Top14)
+        CALL New(Top14,(/NATOMS,NMax14+1/))
+        Top14%I(1:NATOMS,1:NMax14+1)=Top14_2%I(1:NATOMS,1:NMax14+1)
+        CALL DELETE(Top14_2)
       ENDIF
 !
       IF(NI/=0) THEN
-      DO M=1,NI         
-        IF(TOP14%I(II,M+1)==LL) THEN
-          EXIT
+        IF(ANY(Top14%I(II,2:NI+1)==LL)) THEN
+          CYCLE
         ELSE
-          TOP14%I(II,1)=NI+1
-          TOP14%I(II,1+(NI+1))=LL
-          EXIT
+          Top14%I(II,1)=NI+1
+          Top14%I(II,1+(NI+1))=LL
         ENDIF
-      ENDDO 
       ELSE
-          TOP14%I(II,1)=NI+1
-          TOP14%I(II,1+(NI+1))=LL
+          Top14%I(II,1)=NI+1
+          Top14%I(II,1+(NI+1))=LL
       ENDIF
 !
           ENDIF !!! II/=LL and JJ/=LL
@@ -267,15 +257,15 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
     IF(PRESENT(InfFile)) THEN
       CALL OpenHDF(InfFile)
-      CALL Put(NMAX14,'NMAX14')
-      CALL Put(TOP14,'TOP14')
+      CALL Put(NMax14,'NMax14')
+      CALL Put(Top14,'Top14')
       CALL CloseHDF()
     ENDIF
 !
-    IF(.NOT.PRESENT(TOP12)) CALL DELETE(TOP12)
-    IF(.NOT.PRESENT(TOP14)) CALL DELETE(TOP14)
+    IF(.NOT.PRESENT(Top12)) CALL DELETE(Top12)
+    IF(.NOT.PRESENT(Top14)) CALL DELETE(Top14)
 !
-END SUBROUTINE TOPOLOGY_14 
+END SUBROUTINE Topology_14 
 !--------------------------------------------------------------
 !
 SUBROUTINE SORT_INTO_BOX1(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
@@ -339,8 +329,8 @@ SAVE VBIG
 DATA VBIG/1.D+90/ 
 !
   NBOX=NX*NY*NZ
-  CALL NEW(BOXI,NBOX+1)
-  CALL NEW(BOXJ,NATOMS)
+  CALL New(BOXI,NBOX+1)
+  CALL New(BOXJ,NATOMS)
 !
   ALLOCATE(ISIGN(1:NATOMS))
 !
@@ -432,8 +422,8 @@ REAL(DOUBLE),DIMENSION(1:3,1:NATOMS) :: C
 !
 CALL SORT_INTO_BOX1(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
-CALL NEW(BOXI1,NBOX+1)
-CALL NEW(BOXJ1,NATOMS)
+CALL New(BOXI1,NBOX+1)
+CALL New(BOXJ1,NATOMS)
 !
 CALL SORT_INTO_BOX2(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BOXI1,BOXJ1,InfFile,ISet)
 !
@@ -443,41 +433,279 @@ CALL DELETE(BOXJ1)
 END SUBROUTINE SORT_INTO_BOX
 !----------------------------------------------------------------
 !
-SUBROUTINE TOPOLOGIES_MM(NATOMS,NBONDS,BONDI,BONDJ,InfFile,TOP12OUT)
+SUBROUTINE Topologies_MM(NATOMS,NBONDS,BONDI,BONDJ,InfFile,Top12OUT)
 ! Set up a table which shows the atom numbers of atoms 
-! connected to a certain atom by the input bonds (topology mtr)
-! Here, the generation of the topology mtr is based on input list
+! connected to a certain atom by the input bonds (Topology mtr)
+! Here, the generation of the Topology mtr is based on input list
 ! of bonds
 IMPLICIT NONE
-TYPE(INT_RNK2),OPTIONAL :: TOP12OUT
-TYPE(INT_RNK2) :: TOP12OUT_2
-TYPE(INT_RNK2) :: TOP12,TOP13,TOP14
+TYPE(INT_RNK2),OPTIONAL :: Top12OUT
+TYPE(INT_RNK2) :: Top12OUT_2
+TYPE(INT_RNK2) :: Top12,Top13,Top14
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBONDS,NATOMS
 INTEGER,DIMENSION(1:NBONDS) :: BONDI,BONDJ
 CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 !
-   CALL TOPOLOGY_12(NATOMS,NBONDS,BONDI,BONDJ,TOP12,InfFile)
-   CALL TOPOLOGY_13(NATOMS,TOP12,TOP13,InfFile)
-   CALL TOPOLOGY_14(NATOMS,TOP12,TOP14,InfFile)
-   IF(PRESENT(TOP12OUT)) THEN
-     IF(AllocQ(TOP12OUT%Alloc)) CALL DELETE(TOP12OUT)
-     N=SIZE(TOP12%I,2)
-     CALL NEW(TOP12OUT_2,(/NATOMS,N/))
-     TOP12OUT_2=TOP12
-     CALL DELETE(TOP12)
-     CALL DELETE(TOP13)
-     CALL DELETE(TOP14)
-     CALL NEW(TOP12OUT,(/NATOMS,N/))
-     TOP12OUT=TOP12OUT_2
-     CALL DELETE(TOP12OUT_2)
+   CALL Topology_12(NATOMS,NBONDS,BONDI,BONDJ,Top12,InfFile)
+   CALL Topology_13(NATOMS,Top12,Top13,InfFile)
+   CALL Topology_14(NATOMS,Top12,Top14,InfFile)
+   CALL Excl_List(Natoms,InfFile,Top12,Top13,Top14)
+   CALL Excl_List14(Natoms,InfFile,Top12,Top13,Top14)
+!
+   IF(PRESENT(Top12OUT)) THEN
+     IF(AllocQ(Top12OUT%Alloc)) CALL DELETE(Top12OUT)
+     N=SIZE(Top12%I,2)
+     CALL New(Top12OUT_2,(/NATOMS,N/))
+     Top12OUT_2=Top12
+     CALL DELETE(Top12)
+     CALL DELETE(Top13)
+     CALL DELETE(Top14)
+     CALL New(Top12OUT,(/NATOMS,N/))
+     Top12OUT=Top12OUT_2
+     CALL DELETE(Top12OUT_2)
    ELSE
-     CALL DELETE(TOP12)
-     CALL DELETE(TOP13)
-     CALL DELETE(TOP14)
+     CALL DELETE(Top12)
+     CALL DELETE(Top13)
+     CALL DELETE(Top14)
    ENDIF
 !
-END SUBROUTINE TOPOLOGIES_MM
+END SUBROUTINE Topologies_MM
 !----------------------------------------------------------------
-
-
+!
+SUBROUTINE Excl_List(Natoms,InfFile,Top12,Top13,Top14,Top_Excl_Out)
+!
+! This subroutine merges Topological information
+! to get the list for Exclusion energy calculation
+!
+IMPLICIT NONE
+TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
+TYPE(INT_RNK2) :: Top_Excl,Top_New
+CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
+INTEGER :: Natoms,NMax12,NMax13,NMax14,NMax_Excl,NNEW,NOLD
+INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
+!
+      IF(PRESENT(InfFile)) CALL OpenHDF(InfFile)
+!
+    IF(PRESENT(Top12)) THEN
+      NMax12=SIZE(Top12%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax12,'NMax12')
+        CALL New(Top12,(/Natoms,NMax12+1/))
+        CALL Get(Top12,'Top12')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+    IF(PRESENT(Top13)) THEN
+      NMax13=SIZE(Top13%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax13,'NMax13')
+        CALL New(Top13,(/Natoms,NMax13+1/))
+        CALL Get(Top13,'Top13')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_13 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+    IF(PRESENT(Top14)) THEN
+      NMax14=SIZE(Top14%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax14,'NMax14')
+        CALL New(Top14,(/Natoms,NMax14+1/))
+        CALL Get(Top14,'Top14')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_14 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+! Initialize Top_Excl
+!
+    NMax_Excl=NMax12+NMax13+NMax14
+    CALL New(Top_Excl,(/Natoms,NMax_Excl+1/))
+    Top_Excl%I(:,:)=0
+    Top_Excl%I(1:Natoms,1:NMAX12+1)=Top12%I(1:Natoms,1:NMAX12+1)
+!
+! Now merge Topologies, in order to avoid double counting in 
+! exclusion energies
+!
+      NMAX_Excl_Out=0
+    DO I=1,Natoms
+!
+      NNEW=0
+      NOLD=Top_Excl%I(I,1)
+      DO J=1,Top13%I(I,1)
+        JJ=Top13%I(I,J+1)
+        IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
+          CYCLE
+        ELSE
+          NNEW=NNEW+1
+          Top_Excl%I(I,NOLD+1+NNEW)=JJ
+        ENDIF
+      ENDDO 
+      NNEW=NOLD+NNEW
+      Top_Excl%I(I,1)=NNEW
+      IF(NMAX_Excl_Out<NNEW) NMAX_Excl_Out=NNEW
+!
+      NNEW=0
+      NOLD=Top_Excl%I(I,1)
+      DO J=1,Top14%I(I,1)
+        JJ=Top14%I(I,J+1)
+        IF(ANY(Top_Excl%I(I,2:NOLD+1)==JJ)) THEN
+          CYCLE
+        ELSE
+          NNEW=NNEW+1
+          Top_Excl%I(I,NOLD+1+NNEW)=JJ
+        ENDIF
+      ENDDO 
+      NNEW=NOLD+NNEW
+      Top_Excl%I(I,1)=NNEW
+      IF(NMAX_Excl_Out<NNEW) NMAX_Excl_Out=NNEW
+!
+    ENDDO 
+!
+! STORE RESULT
+!
+    IF(PRESENT(Top_Excl_Out)) THEN
+      CALL New(Top_Excl_Out,(/Natoms,NMAX_Excl_Out+1/))
+      Top_Excl_Out%I(1:Natoms,1:NMAX_Excl_Out+1)=Top_Excl%I(1:Natoms,1:NMAX_Excl_Out+1)
+      IF(PRESENT(InfFile)) THEN
+        CALL Put(NMAX_Excl_Out,'NMAX_EXCL')
+        CALL Put(Top_Excl_Out,'TOP_EXCL')
+      ENDIF
+    ELSE
+      CALL New(Top_New,(/Natoms,NMAX_Excl_Out+1/))
+      Top_New%I(1:Natoms,1:NMAX_Excl_Out+1)=Top_Excl%I(1:Natoms,1:NMAX_Excl_Out+1)
+      IF(PRESENT(InfFile)) THEN
+        CALL Put(NMAX_Excl_Out,'NMAX_EXCL')
+        CALL Put(Top_New,'TOP_EXCL')
+      ENDIF
+    ENDIF
+!
+    CALL Delete(Top_Excl)
+    CALL Delete(Top_New)
+    IF(.NOT.PRESENT(Top12)) CALL Delete(Top12)
+    IF(.NOT.PRESENT(Top13)) CALL Delete(Top13)
+    IF(.NOT.PRESENT(Top14)) CALL Delete(Top14)
+!
+    IF(PRESENT(InfFile)) CALL CloseHDF()
+!
+END SUBROUTINE Excl_LIST 
+!
+!----------------------------------------------------------------
+!
+SUBROUTINE Excl_List14(Natoms,InfFile,Top12,Top13,Top14,Top_Excl_Out)
+!
+! This subroutine merges Topological information
+! to get the list for Exclusion energy calculation
+! of atoms in 14 distance. From the Top14 list
+! Top13 and Top12 occurences must be filtered out
+!
+IMPLICIT NONE
+TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
+TYPE(INT_RNK2) :: Top_Excl,Top_New
+CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
+INTEGER :: Natoms,NMax12,NMax13,NMax14,NMax_Excl,NNEW,NOLD
+INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NEXCL,N12,N13
+!
+      IF(PRESENT(InfFile)) CALL OpenHDF(InfFile)
+!
+    IF(PRESENT(Top12)) THEN
+      NMax12=SIZE(Top12%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax12,'NMax12')
+        CALL New(Top12,(/Natoms,NMax12+1/))
+        CALL Get(Top12,'Top12')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_12 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+    IF(PRESENT(Top13)) THEN
+      NMax13=SIZE(Top13%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax13,'NMax13')
+        CALL New(Top13,(/Natoms,NMax13+1/))
+        CALL Get(Top13,'Top13')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_13 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+    IF(PRESENT(Top14)) THEN
+      NMax14=SIZE(Top14%I,2)-1
+    ELSE
+      IF(PRESENT(InfFile)) THEN
+        CALL Get(NMax14,'NMax14')
+        CALL New(Top14,(/Natoms,NMax14+1/))
+        CALL Get(Top14,'Top14')
+      ELSE
+        CALL MondoHalt(INTC_ERROR,'Missing Top_14 matrix in Excl_list')
+      ENDIF
+    ENDIF
+!
+! Initialize Top_Excl to the size of Top14 and to zero 
+!
+    NMax_Excl=NMax14
+    CALL New(Top_Excl,(/Natoms,NMax_Excl+1/))
+    Top_Excl%I(:,:)=0
+!
+! Now merge Topologies, in order to avoid double counting in 
+! exclusion energies
+!
+      NMAX_Excl_Out=0
+    DO I=1,Natoms
+!
+      DO J=1,Top14%I(I,1)
+          NEXCL=Top_Excl%I(I,1)
+          N12=Top12%I(I,1)
+          N13=Top13%I(I,1)
+          JJ=Top14%I(I,J+1)
+        IF(ANY(Top_Excl%I(I,2:NEXCL+1)==JJ).OR. &
+           ANY(Top12%I(I,2:N12+1)==JJ).OR. & 
+           ANY(Top13%I(I,2:N13+1)==JJ)  ) THEN
+          CYCLE
+        ELSE
+          Top_Excl%I(I,1)=NEXCL+1
+          Top_Excl%I(I,NEXCL+2)=JJ
+        ENDIF
+      ENDDO 
+          NEXCL=Top_Excl%I(I,1)
+      IF(NMAX_Excl_Out<NEXCL) NMAX_Excl_Out=NEXCL
+!
+    ENDDO 
+!
+! STORE RESULT
+!
+    IF(PRESENT(Top_Excl_Out)) THEN
+      CALL New(Top_Excl_Out,(/Natoms,NMAX_Excl_Out+1/))
+      Top_Excl_Out%I(1:Natoms,1:NMAX_Excl_Out+1)=Top_Excl%I(1:Natoms,1:NMAX_Excl_Out+1)
+      IF(PRESENT(InfFile)) THEN
+        CALL Put(NMAX_Excl_Out,'NMAX_EXCL14')
+        CALL Put(Top_Excl_Out,'TOP_EXCL14')
+      ENDIF
+    ELSE
+      CALL New(Top_New,(/Natoms,NMAX_Excl_Out+1/))
+      Top_New%I(1:Natoms,1:NMAX_Excl_Out+1)=Top_Excl%I(1:Natoms,1:NMAX_Excl_Out+1)
+      IF(PRESENT(InfFile)) THEN
+        CALL Put(NMAX_Excl_Out,'NMAX_EXCL14')
+        CALL Put(Top_New,'TOP_EXCL14')
+      ENDIF
+    ENDIF
+!
+    CALL Delete(Top_Excl)
+    CALL Delete(Top_New)
+    IF(.NOT.PRESENT(Top12)) CALL Delete(Top12)
+    IF(.NOT.PRESENT(Top13)) CALL Delete(Top13)
+    IF(.NOT.PRESENT(Top14)) CALL Delete(Top14)
+!
+    IF(PRESENT(InfFile)) CALL CloseHDF()
+!
+END SUBROUTINE Excl_LIST14 
+!----------------------------------------------------------------
 END MODULE IntCoo
