@@ -11,8 +11,8 @@ Extrap=Interp
 Opt=(QuNew,OneBase)
 SCFMethod=(RH,RH)
 BasisSets=(STO-3G,6-31G**)
-ModelChem=(HF,PBExc)
-Accuracy =(Good,Good)
+ModelChem=(PBExc,PBExc)
+Accuracy =(Loose,Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
