@@ -2188,9 +2188,9 @@ CONTAINS
     !-------------------------------------------------------------------
     INTEGER        :: iBAS,iGEO,iCLONE,AtA,AtB,I,J,II,JJ,IMin,N
     INTEGER        :: NatmsLoc,IStart,GBeg,GEnd
-    TYPE(DBL_RNK2) :: Grad0,Hess,P,NMode
-    TYPE(DBL_VECT) :: Freqs,EigenV,Work
-    REAL(DOUBLE)   :: SMA,SMB
+    TYPE(DBL_RNK2) :: Grad0,Hess,P,NMode,DDer
+    TYPE(DBL_VECT) :: Freqs,EigenV,Work,Dipole
+    REAL(DOUBLE)   :: SMA,SMB,Dum
     INTEGER        :: LWORK,Info,NNeg
     ! FreqToWaveNbr=E*E*NA/4*PI*PI*C*C*A0*A0*A0,
     !            E =4.803242E-10 SQRT(G*CM**3)/SEC
@@ -2212,9 +2212,12 @@ CONTAINS
     CALL DBL_VECT_EQ_DBL_SCLR(N,Grad0%D(1,1),0.0D0)
     CALL New(Hess,(/N,N/))
     CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1),0.0D0)
+    CALL New(DDer,(/3,N/))
+    CALL DBL_VECT_EQ_DBL_SCLR(3*N ,DDer%D(1,1),0.0D0)
     CALL New(P,(/N,N/))
     CALL New(Freqs,N)
     CALL New(NMode,(/N,N/))
+    CALL New(Dipole,3)
     !
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
@@ -2227,12 +2230,20 @@ CONTAINS
     CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
     CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
     !
+    ! Get Dipole.
+    !HDFFileID=OpenHDF(C%Nams%HFile)
+    !HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+    !CALL Get(Dipole,'dipole')
+    !write(*,*) 'Dipole',Dipole%D
+    !CALL CloseHDFGroup(HDF_CurrentID)
+    !CALL CloseHDF(HDFFileID)
+    !
     iGEO=iGEO+1
     J=1
     DO AtA=1,NAtmsLoc
        DO I=1,3
           !
-          ! Move the atom.
+          ! Move the atom
           DO iCLONE=1,C%Geos%Clones
              C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)=C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)+ATOM_DISP
              CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
@@ -2243,9 +2254,17 @@ CONTAINS
           CALL SCF(iBAS,iGEO,C)
           CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
           !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Carts,'Posi',Unit_O=6)
-          CALL Print_DBL_RNK2(C%Geos%Clone(1)%Gradients,'Grad',Unit_O=6)
+          !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Gradients,'Grad',Unit_O=6)
           CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Hess%D(1,J),1)
           CALL DAXPY(N,-1D0,Grad0%D(1,1),1,Hess%D(1,J),1)
+          !
+          ! Get Dipole.
+          !HDFFileID=OpenHDF(C%Nams%HFile)
+          !HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+          !CALL Get(Dipole,'dipole')
+          !write(*,*) 'Dipole',Dipole%D
+          !CALL CloseHDFGroup(HDF_CurrentID)
+          !CALL CloseHDF(HDFFileID)
           !
           ! Move back.
           DO iCLONE=1,C%Geos%Clones
@@ -2257,10 +2276,12 @@ CONTAINS
           J=J+1
        ENDDO
     ENDDO
-    CALL DSCAL(N**2,1D0/ATOM_DISP,Hess%D(1,1),1)
+    Dum=1D0/ATOM_DISP
+    CALL DSCAL(N**2,Dum,Hess%D(1,1),1)
     !
     ! Symmetrize the Hessian
     CALL SymmMtrx(Hess,N)
+    !CALL Print_DBL_RNK2(Hess,'Hessian',Unit_O=6)
     !
     ! Generate mass weighted hessian.
     CALL WghtMtrx(C%Geos%Clone(1)%AtMss,Hess,NatmsLoc,'CToWC')
@@ -2270,7 +2291,7 @@ CONTAINS
     CALL ProjOut(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
     !CALL Print_DBL_RNK2(Hess,'Projected Hessian',Unit_O=6)
     !
-    ! Get Normal modes.
+      ! Get Normal modes.
     CALL New(EigenV,N)
     LWORK=MAX(1,3*N+10)
     CALL New(WORK,LWORK)
@@ -2283,7 +2304,7 @@ CONTAINS
     !CALL Print_DBL_RNK2(NMode,'NMode0',Unit_O=6)
     !
     ! Translational and rotational Sayvetz conditions.
-    CALL Sayvetz()
+    CALL Sayvetz(NMode,C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,NatmsLoc)
     !
     ! Count number of negative eigenvalues.
     NNeg=0
@@ -2317,8 +2338,15 @@ CONTAINS
     !   write(*,*) 'Reduced Mass=',1D0/DDOT(N,NMode%D(1,I),1,NMode%D(1,I),1)
     !END DO
     !
+    ! Print out frequency.
+    DO I=1,N
+       IF(ABS(Freqs%D(I)).GT.1D-3)write(*,'(A,F10.4)') 'Frequencies=',Freqs%D(I)
+    ENDDO
+    CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
+    CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
+    !
     ! Compute IR intensities.
-    CALL CompIRInt()
+    CALL CompIRInt(NMode,DDer,NatmsLoc)
     !
     ! Compute Raman intensities.
     CALL CompRAMANInt()
@@ -2327,20 +2355,16 @@ CONTAINS
     CALL ThermoStat(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Freqs, &
          &          NatmsLoc,C%Geos%Clone(1)%Multp)
     !
-    DO I=1,N
-       IF(ABS(Freqs%D(I)).GT.1D-3)write(*,'(A,F10.4)') 'Frequencies=',Freqs%D(I)
-    ENDDO
-    !CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
-    !CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
-    !
     ! Clean up.
     CALL Delete(Freqs)
     CALL Delete(NMode)
     CALL Delete(Grad0)
     CALL Delete(P)
     CALL Delete(Hess)
+    CALL Delete(DDer)
+    CALL Delete(Dipole)
     !
-  END SUBROUTINE NHessian
+  END SUBROUTINE NHessian  
   !
   SUBROUTINE WghtMtrx(AtMss,A,NAtoms,FromTo)
     !-------------------------------------------------------------------
@@ -2390,7 +2414,7 @@ CONTAINS
     TYPE(DBL_VECT) :: EigenV,Work
     INTEGER        :: LWork,Info,N,I,J,II,JJ,AtA,AtB,IMin,IA,IB,IC,JA,JB,JC
     INTEGER        :: KK,LL
-    REAL(DOUBLE)   :: MssTot,SMA,SMB,Dum,Tens(3,3,3),CX,CY,CZ,CMss(3)
+    REAL(DOUBLE)   :: MssTot,SMA,SMB,Dum,Det,Tens(3,3,3),CX,CY,CZ,CMss(3)
     DATA Tens/ 0.0D0, 0.0D0, 0.0D0, 0.0D0, 0.0D0,-1.0D0, &
          &     0.0D0, 1.0D0, 0.0D0, 0.0D0, 0.0D0, 1.0D0, &
          &     0.0D0, 0.0D0, 0.0D0,-1.0D0, 0.0D0, 0.0D0, &
@@ -2434,19 +2458,48 @@ CONTAINS
     CALL New(Tmp,(/3,3/))
     CALL Inertia(Carts,AtMss,NAtoms,Theta%D,EigenV%D,Tmp%D)
     CALL Delete(Tmp)
+    !CALL Print_DBL_RNK2(Theta,'I0',Unit_O=6)
     !
     ! Inverse I0.
+    CALL DBL_VECT_EQ_DBL_SCLR(9,ITheta%D(1,1),0.0D0)
     IF(ABS(EigenV%D(1)*EigenV%D(2)*EigenV%D(3)).LT.1.0D-8) THEN
+       IF(ABS(EigenV%D(1))+ABS(EigenV%D(2))+ABS(EigenV%D(3)).LT.1.0D-8) THEN
+          WRITE(*,*) 'Is it an atom?'
+          WRITE(*,*) 'STOPPED in ProjOut'
+          STOP 
+       ENDIF
        ! Linear systems.
-       WRITE(*,*) 'Linear molecules are not supported yet.'
-       WRITE(*,*) 'STOPPED in ProjOut'
-       STOP 
+       ! X.eq.0 and Y,Z.ne.0
+       IF(ABS(Theta%D(1,1)).LT.1.0D-8) THEN
+          Det=Theta%D(2,2)*Theta%D(3,3)-Theta%D(2,3)*Theta%D(3,2)
+          ITheta%D(2,2)= Theta%D(3,3)/Det
+          ITheta%D(3,3)= Theta%D(2,2)/Det
+          ITheta%D(2,3)=-Theta%D(2,3)/Det
+          ITheta%D(3,2)=-Theta%D(3,2)/Det
+       ENDIF
+       ! Y.eq.0 and X,Z.ne.0
+       IF(ABS(Theta%D(2,2)).LT.1.0D-8) THEN
+          Det=Theta%D(1,1)*Theta%D(3,3)-Theta%D(1,3)*Theta%D(3,1)
+          ITheta%D(1,1)= Theta%D(3,3)/Det
+          ITheta%D(3,3)= Theta%D(1,1)/Det
+          ITheta%D(1,3)=-Theta%D(1,3)/Det
+          ITheta%D(3,1)=-Theta%D(3,1)/Det
+       ENDIF
+       ! Z.eq.0 and X,Y.ne.0
+       IF(ABS(Theta%D(3,3)).LT.1.0D-8) THEN
+          Det=Theta%D(1,1)*Theta%D(2,2)-Theta%D(1,2)*Theta%D(2,1)
+          ITheta%D(1,1)= Theta%D(2,2)/Det
+          ITheta%D(2,2)= Theta%D(1,1)/Det
+          ITheta%D(1,2)=-Theta%D(1,2)/Det
+          ITheta%D(2,1)=-Theta%D(2,1)/Det
+       ENDIF
     ELSE
        ! Non-linear systems.
        ITheta%D(:,:)=InverseMatrix(Theta%D(:,:))
        !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)    
     ENDIF
     CALL Delete(EigenV)
+    !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)
     !
     ! Compute the projection matrix.
     CALL DBL_VECT_EQ_DBL_SCLR(N**2,P%D(1,1),0.0D0)
@@ -2473,7 +2526,7 @@ CONTAINS
                       Dum=Dum+Tens(IA,IB,IC)*Tens(JA,JB,JC)*ITheta%D(IA,JA) &
                            & *WCarts%D(IB,I)*WCarts%D(JB,J)
                    ENDDO
-                   ENDDO
+                             ENDDO
                 ENDDO
                 ENDDO
                 P%D(KK,LL)=Dum
@@ -2533,10 +2586,9 @@ CONTAINS
     REAL(DOUBLE)   :: MssTot,Mss,XC,YC,ZC,Work(20),CMss(3),CTmp(3,NAtoms)
     !-------------------------------------------------------------------
     !
-    CALL DCOPY(3*NAtoms,Carts%D(1,1),1,CTmp(1,1),1)
-    !
     ! Center of mass.
-    MssTot=0.0D0
+    CALL DCOPY(3*NAtoms,Carts%D(1,1),1,CTmp(1,1),1)
+    MssTot =0.0D0
     CMss(1)=0.0D0
     CMss(2)=0.0D0
     CMss(3)=0.0D0
@@ -2550,7 +2602,7 @@ CONTAINS
        CMss(I)=CMss(I)/MssTot
     ENDDO
     !
-    ! Weight coordinates.
+    ! Translate coordinates.
     DO AtA=1,NAtoms
        DO I=1,3
           CTmp(I,AtA)=CTmp(I,AtA)-CMss(I)
@@ -2748,10 +2800,31 @@ CONTAINS
 911 FORMAT(1X,A6,6F10.3)
   END SUBROUTINE ThermoStat
   !
-  SUBROUTINE CompIRInt()
+  SUBROUTINE CompIRInt(NMode,DDer,NAtoms)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2)         :: NMode,DDer
+    TYPE(DBL_VECT)         :: IRIts
+    INTEGER                :: NAtoms
+    !-------------------------------------------------------------------
+    INTEGER                :: J,N,IErr
+    REAL(DOUBLE)           :: Dx,Dy,Dz
+    REAL(DOUBLE), EXTERNAL :: DDOT
+    !-------------------------------------------------------------------
     ! Compute IR intensities.
     ! Project the dipole derivative onto each normal mode,
     ! and take the square of the norm of this 3 component vector.
+    !
+    N=3*NAtoms
+    CALL New(IRIts,N)
+    !
+    DO J=1,N
+       Dx=DDOT(N,NMode%D(1,J),1,DDer%D(1,1),3)
+       Dy=DDOT(N,NMode%D(1,J),1,DDer%D(2,1),3)
+       Dz=DDOT(N,NMode%D(1,J),1,DDer%D(3,1),3)
+       IRIts%D(J)=Dx**2+Dy**2+Dz**2
+       !write(*,*) 'IR=',IRIts%D(J)
+    ENDDO
+    CALL Delete(IRIts)
   END SUBROUTINE CompIRInt
   !
   SUBROUTINE CompRAMANInt()
@@ -2761,7 +2834,147 @@ CONTAINS
     ! W.B.Person and G.Zerbi, Eds., Elsevier NY 1982, Page 23.
   END SUBROUTINE CompRAMANInt
   !
-  SUBROUTINE Sayvetz()
+  SUBROUTINE Sayvetz(NMode,Carts,AtMss,NAtoms)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: NMode,Carts
+    TYPE(DBL_VECT) :: AtMss
+    INTEGER        :: NAtoms
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: SvtzT,SvtzR
+    INTEGER        :: AtA,I,K,JJ,N,K1,K2,J
+    REAL(DOUBLE)   :: Mss
+    REAL(DOUBLE)   :: MssTot,XC,YC,ZC,Work(20),CMss(3),CTmp(3,NAtoms)
+    !-------------------------------------------------------------------
+    !
+    N=3*NAtoms
+    CALL New(SvtzT,(/3,3*NAtoms/))
+    CALL New(SvtzR,(/3,3*NAtoms/))
+    CALL DBL_VECT_EQ_DBL_SCLR(3*N,SvtzT%D(1,1),0.0D0)
+    CALL DBL_VECT_EQ_DBL_SCLR(3*N,SvtzR%D(1,1),0.0D0)
+    !
+    ! Center of mass.
+    CALL DCOPY(3*NAtoms,Carts%D(1,1),1,CTmp(1,1),1)
+    MssTot =0.0D0
+    CMss(1)=0.0D0
+    CMss(2)=0.0D0
+    CMss(3)=0.0D0
+    DO AtA=1,NAtoms
+       MssTot=MssTot+AtMss%D(AtA)
+       DO I=1,3
+          CMss(I)=CMss(I)+AtMss%D(AtA)*CTmp(I,AtA)
+       ENDDO
+    ENDDO
+    DO I=1,3
+       CMss(I)=CMss(I)/MssTot
+    ENDDO
+    !
+    ! Translate coordinates.
+    DO AtA=1,NAtoms
+       DO I=1,3
+          CTmp(I,AtA)=CTmp(I,AtA)-CMss(I)
+       ENDDO
+    ENDDO
+    !
+    DO I=1,N
+       DO AtA=1,NAtoms
+          JJ=3*(AtA-1)
+          Mss=SQRT(AtMss%D(AtA))
+          DO K=1,3
+             K1=MOD(K+1,4)+(K+1)/4
+             K2=MOD(K+2,4)+(K+2)/4
+             SvtzT%D(K,I)=SvtzT%D(K,I)+Mss*NMode%D(JJ+K,I)
+             SvtzR%D(K,I)=SvtzR%D(K,I)+Mss*CTmp(K1,AtA)*NMode%D(JJ+K2,I) &
+                  &      -Mss*CTmp(K2,AtA)*NMode%D(JJ+K1,I)
+          ENDDO
+       ENDDO
+       !
+       write(*,'(A,I3,A,E26.16)') 'SVTZTT(',I,')=', &
+            & SQRT(SvtzT%D(1,I)**2+SvtzT%D(2,I)**2+SvtzT%D(3,I)**2)
+       write(*,'(A,I3,A,E26.16)') 'SVTZRT(',I,')=', &
+            & SQRT(SvtzR%D(1,I)**2+SvtzR%D(2,I)**2+SvtzR%D(3,I)**2)
+       !SvtzTT(I)=SQRT(SvtzT(1,I)**2+SvtzT(2,I)**2+SvtzT(3,I)**2)
+       !SvtzRT(I)=SQRT(SvtzR(1,I)**2+SvtzR(2,I)**2+SvtzR(3,I)**2)
+    ENDDO
+    !
+    CALL Delete(SvtzT)
+    CALL Delete(SvtzR)
+    !
   END SUBROUTINE Sayvetz
+  !
+!!$  SUBROUTINE CompDipole(Dipole,cBAS,cGEO,G,N,S,M)
+!!$    TYPE(DBL_VECT)     :: Dipole
+!!$    TYPE(Geometries)   :: G
+!!$    TYPE(FileNames)    :: N
+!!$    TYPE(State)        :: S
+!!$    TYPE(Parallel)     :: M
+!!$    INTEGER            :: cBAS,cGEO
+!!$    !
+!!$#ifdef PARALLEL
+!!$    TYPE(DBCSR)        :: P,M1,M2
+!!$#else
+!!$    TYPE(BCSR)         :: P,M1,M2
+!!$#endif
+!!$    CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF,TrixName
+!!$    REAL(DOUBLE)       :: NDip
+!!$    REAL(DOUBLE), EXTERNAL :: DDOT
+!!$    !
+!!$    write(*,*) 'dipoleComp -10'
+!!$    CALL New(S%Action,3)
+!!$    CALL New(P)
+!!$    CALL New(M1)
+!!$    CALL New(M2)
+!!$    !
+!!$    chGEO=IntToChar(cGEO)
+!!$    chBAS=IntToChar(cBAS)
+!!$    chSCF=IntToChar(S%Current%I(1)-1)
+!!$    !
+!!$    ! Get DM
+!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
+!!$         //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(1))//'.D'
+!!$
+!!$    write(*,*) trim(TrixName)
+!!$
+!!$    CALL Get(P,TrixName)
+!!$    CALL Print_BCSR(P,'DM',Unit_O=6)
+!!$    ! 
+!!$write(*,*) 'dipoleComp 00'
+!!$    ! Compute dipole matrix.
+!!$    S%Action%C(1)='DipoleBuild'
+!!$    S%Action%C(2)='Dipole'
+!!$    S%Action%C(3)='All'
+!!$    CALL Invoke('MakeM',N,S,M)
+!!$write(*,*) 'dipoleComp 10'
+!!$    !X
+!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
+!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
+!!$write(*,*) 'dipoleComp 11'
+!!$    CALL Get(M1,TrixName)
+!!$    CALL Print_BCSR(M1,'M1',Unit_O=6)
+!!$write(*,*) 'dipoleComp 12'
+!!$    CALL Multiply(P,M1,M2)
+!!$write(*,*) 'dipoleComp 20'
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(1,1),3)
+!!$    Dipole%D(1) = NDip-2D0*Trace(M2)
+!!$    !Y
+!!$write(*,*) 'dipoleComp 30'
+!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
+!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
+!!$    CALL Get(M1,TrixName)
+!!$    CALL Multiply(P,M1,M2)
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(2,1),3)
+!!$    Dipole%D(2) = NDip-2D0*Trace(M2)
+!!$    !Z
+!!$    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO) &
+!!$         &      //'_Base#'//TRIM(chBAS)//'_Clone#'//TRIM(IntToChar(1))//'.DipoleX'
+!!$    CALL Get(M1,TrixName)
+!!$    CALL Multiply(P,M1,M2)
+!!$    NDip=DDOT(NAtoms,G%Clone(1)%AtNum%D(1),1,G%Clone(1)%AbCarts%D(3,1),3)
+!!$    Dipole%D(3) = NDip-2D0*Trace(M2)
+!!$    !
+!!$    CALL Delete(S%Action)
+!!$    CALL Delete(P)
+!!$    CALL Delete(M1)
+!!$    CALL Delete(M2)
+!!$  END SUBROUTINE CompDipole
   !
 END MODULE Optimizer
