@@ -180,6 +180,10 @@ MODULE ControlStructures
      LOGICAL                            :: ExplLatt    
      INTEGER                            :: MaxLatticeSteps
      INTEGER                            :: MaxAtomSteps
+     LOGICAL                            :: NonCovBend 
+     LOGICAL                            :: NonCovTors 
+     LOGICAL                            :: HBondOnly  
+     LOGICAL                            :: NoFragmConnect
   END TYPE GConvCrit 
   !
   TYPE GOptStat 

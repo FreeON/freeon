@@ -61,6 +61,25 @@ MODULE ParseGeomOpt
        GOpt%GConvCrit%ExplLatt=.TRUE.
      ENDIF
      !
+     ! Parse for VDW-bonding related options
+     !
+     GOpt%GConvCrit%NonCovBend=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NonCovBend)) THEN
+       GOpt%GConvCrit%NonCovBend=.TRUE.
+     ENDIF
+     GOpt%GConvCrit%NonCovTors=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NonCovTors)) THEN
+       GOpt%GConvCrit%NonCovTors=.TRUE.
+     ENDIF
+     GOpt%GConvCrit%HBondOnly=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_HBondOnly)) THEN
+       GOpt%GConvCrit%HBondOnly=.TRUE.
+     ENDIF
+     GOpt%GConvCrit%NoFragmConnect=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoFragmConnect)) THEN
+       GOpt%GConvCrit%NoFragmConnect=.TRUE.
+     ENDIF
+     !
      ! Parse for lattice parameter ratios
      !
      CALL FindLattRattio(OPT_RatioABC,GOpt%Constr%RatioABC)

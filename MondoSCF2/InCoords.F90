@@ -703,7 +703,7 @@ CONTAINS
 !
    SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC, &
                             Cells,IEq,GCoordCtrl, &
-                            Bond,AtmB,TOPS, &
+                            Bond,AtmB,TOPS,GConvCr, &
                             ArchMem_O,HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This routine defines internal coordinates
@@ -725,6 +725,7 @@ CONTAINS
      INTEGER,DIMENSION(:,:)         :: Cells
      INTEGER,DIMENSION(:)           :: AtNum,IEq
      TYPE(CoordCtrl)                :: GCoordCtrl
+     TYPE(GConvCrit)                :: GConvCr
      TYPE(TOPOLOGY)                 :: TOPS
      TYPE(IntCBox)                  :: Box
      TYPE(ANGLEDATA)                :: Angle
@@ -737,9 +738,9 @@ CONTAINS
      CALL IntCBoxes(XYZ,Box)
      !
      CALL BondingScheme(XYZ,AtNum,1,AtmBCov,BondCov,TOPS, &
-                        Box,GCoordCtrl,Cells,IEq)
+                        Box,GCoordCtrl,GConvCr,Cells,IEq)
      CALL BondingScheme(XYZ,AtNum,2,AtmBVDW,BondVDW,TOPS, &
-                        Box,GCoordCtrl,Cells,IEq)
+                        Box,GCoordCtrl,GConvCr,Cells,IEq)
      CALL MergeBonds(BondCov,BondVDW,BondTot)
      CALL SortBonds(NatmsLoc,AtmBTot,BondTot)
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
@@ -753,8 +754,10 @@ CONTAINS
      !
      ! Now define bond angles and torsions
      !
-     CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,Angle,OutP,Cells,IEq)
+     CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,GConvCr%NonCovBend, &
+                    Angle,OutP,Cells,IEq)
      CALL TorsionList(NatmsLoc,AtmBTot,BondTot,XYZ, &
+                      GConvCr%NonCovTors, &
                       AtNum,TorsionIJKL,NTorsion,IEq)
      !
      ! Fill Data into IntCs
@@ -877,7 +880,7 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE TorsionList(NatmsLoc,AtmB,Bond,XYZ, &
+   SUBROUTINE TorsionList(NatmsLoc,AtmB,Bond,XYZ,NonCovTors, &
                           AtNum,TorsionIJKL,NTorsion,IEq)
      IMPLICIT NONE
      INTEGER                     :: NatmsLoc,I,I1,I2
@@ -894,9 +897,9 @@ CONTAINS
      INTEGER,DIMENSION(1:4)      :: Atoms
      INTEGER,DIMENSION(:)        :: AtNum,IEq
      INTEGER                     :: I1JJ1,I2JJ2
-     LOGICAL                     :: ExcludeVDW
+     LOGICAL                     :: ExcludeVDW,NonCovTors
      !    
-     ExcludeVDW=.TRUE.
+     ExcludeVDW=.NOT.NonCovTors
      PIHalf=PI*Half
     !SelectTors=.FALSE.
      SelectTors=.TRUE.
@@ -1041,11 +1044,13 @@ CONTAINS
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
                             Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS, &
-                            ArchMem_O=ArchMem,HFileIn_O=HFileIn_O, &
-                            iCLONE_O=iCLONE_O,iGEO_O=iGEO)
+                            GConvCr,ArchMem_O=ArchMem, &
+                            HFileIn_O=HFileIn_O,iCLONE_O=iCLONE_O, &
+                            iGEO_O=iGEO)  
        ELSE
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
-                            Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS)
+                            Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS,& 
+                            GConvCr)  
        ENDIF
        !
        ! Check for bending - lin.bending transions
@@ -6202,7 +6207,7 @@ return
 !---------------------------------------------------------------------
 !
    SUBROUTINE BondingScheme(XYZ,AtNum,IntSet,AtmB,Bond,TOPS, &
-                            Box,GCoordCtrl,Cells,IEq)
+                            Box,GCoordCtrl,GConvCr,Cells,IEq)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum,IEq
      INTEGER                     :: IntSet 
@@ -6212,6 +6217,7 @@ return
      INTEGER,DIMENSION(:,:)      :: Cells
      TYPE(IntCBox)               :: Box 
      TYPE(CoordCtrl)             :: GCoordCtrl
+     TYPE(GConvCrit)             :: GConvCr   
      TYPE(DBL_VECT)              :: CritRad
      REAL(DOUBLE)                :: Fact,HBondMax
      INTEGER                     :: I,J,N,NatmsLoc
@@ -6242,7 +6248,7 @@ return
        DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                       CritRad,HbondMax,DoRepeat,IEq)
+                       CritRad,HbondMax,DoRepeat,GConvCr,IEq)
          !
          ! Check for ionic systems
          !
@@ -6264,7 +6270,7 @@ return
        DO I=1,6
          DoRepeat=.FALSE.
          CALL BondList(XYZ,AtNum,IntSet,Box,Bond1,TOPS, &
-                       CritRad,HBondMax,DoRepeat,IEq)
+                       CritRad,HBondMax,DoRepeat,GConvCr,IEq)
          IF(DoRepeat) THEN
            CALL Delete(Bond1)
          ELSE
@@ -6275,7 +6281,11 @@ return
        !
        CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond1%IJ,Bond1%N)
        !
-       CALL ConnectFragments(XYZ,AtNum,BondF,TOPS,Cells,IEq)
+       IF(GConvCr%NoFragmConnect) THEN
+         BondF%N=0
+       ELSE
+         CALL ConnectFragments(XYZ,AtNum,BondF,TOPS,Cells,IEq)
+       ENDIF
        !
        CALL SortBonds(NatmsLoc,AtmBF,BondF)
        CALL SortNonCov2(AtNum,XYZ,BondF,AtmBF)
@@ -6305,13 +6315,14 @@ return
 !--------------------------------------------------------
 !
    SUBROUTINE BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
-                       CritRad,HBondMax,DoRepeat,IEq)
+                       CritRad,HBondMax,DoRepeat,GConvCr,IEq)
      IMPLICIT NONE
      INTEGER                     :: I,J,NatmsLoc,NBond
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(BONDDATA)              :: Bond
      TYPE(IntCBox)               :: Box
      TYPE(TOPOLOGY)              :: TOPS
+     TYPE(GConvCrit)             :: GConvCr
      INTEGER,DIMENSION(:)        :: AtNum,IEq
      TYPE(DBL_VECT)              :: CritRad,CritRadMod 
      TYPE(INT_VECT)              :: Neighbors
@@ -6377,6 +6388,8 @@ return
                                CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2,TOPS, &
                                              FoundHBond,FoundMetLig,&
                                              LonelyAtom,DoExclude)
+                               IF(GConvCr%HBondOnly.AND. &
+                                  .NOT.FoundHBond) DoExclude=.TRUE.
                                IF(DoExclude) CYCLE
                              ENDIF
                       !!!!!! IF(FoundHBond.AND..NOT.LonelyAtom) THEN
@@ -6905,7 +6918,8 @@ return
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE AngleList(AtmB,Bond,TOPS,XYZ,Angle,OutP,Cells,IEq)
+   SUBROUTINE AngleList(AtmB,Bond,TOPS,XYZ,NonCovBend, &
+                        Angle,OutP,Cells,IEq)
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
      TYPE(TOPOLOGY)              :: TOPS
@@ -6918,6 +6932,7 @@ return
      INTEGER                     :: I,J,K,L,NAngle,NatmsLoc,AllBond
      INTEGER                     :: I1,I2,I3,NDimens,NOutP
      INTEGER,DIMENSION(:)        :: IEq
+     LOGICAL                     :: NonCovBend
      !
      CALL SetDSYEVWork(3)
      NatmsLoc=SIZE(XYZ,2)
@@ -6941,9 +6956,9 @@ return
        ENDIF
        CALL AnglesRef(RefBonds,NDimens,BondScore%I,I,XYZ,AtmB,Bond)
       !CALL AngleGen(I,Angle,NAngle,RefBonds,NDimens,XYZ,AtmB,Bond,TOPS)
-       CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS,IEq)
+       CALL FullAngleGen(I,Angle,NAngle,AtmB,Bond,TOPS,NonCovBend,IEq)
        CALL OutPGen(I,OutP,NOutP,RefBonds,NDimens, &
-                    XYZ,AtmB,Bond,TOPS,IEq)
+                    XYZ,AtmB,Bond,TOPS,NonCovBend,IEq)
      ENDDO
      CALL Delete(BondScore)
      CALL UnSetDSYEVWork()
@@ -6955,7 +6970,7 @@ return
 !----------------------------------------------------------------------
 !
    SUBROUTINE OutPGen(IAt,OutP,NOutP,RefBonds,NDimens, &
-                      XYZ,AtmB,Bond,TOPS,IEq)
+                      XYZ,AtmB,Bond,TOPS,NonCovBend,IEq)
      INTEGER                       :: IAt,I,J,K,L,NOutP,NDimens
      TYPE(OUTPDATA)                :: OutP
      INTEGER,DIMENSION(:)          :: RefBonds,IEq
@@ -6966,9 +6981,9 @@ return
      TYPE(TOPOLOGY)                :: TOPS
      TYPE(INT_VECT)                :: Mark
      INTEGER                       :: NDim,IBonds(3),I1,I2,IM
-     LOGICAL                       :: ExcludeVDW
+     LOGICAL                       :: ExcludeVDW,NonCovBend
      !
-     ExcludeVDW=.TRUE.
+     ExcludeVDW=.NOT.NonCovBend
      IF(NDimens==2.AND.TOPS%Tot12%I(IAt,1)>2) THEN
        NDim=AtmB%Count%I(IAt)
        CALL New(Mark,NDim)
@@ -7069,7 +7084,8 @@ return
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE FullAngleGen(IAt,Angle,NAngle,AtmB,Bond,TOPS,IEq)
+   SUBROUTINE FullAngleGen(IAt,Angle,NAngle,AtmB,Bond,TOPS, &
+                           NonCovBend,IEq)
      INTEGER                :: IAt,I,J,K,L,NAngle
      TYPE(ANGLEDATA)        :: Angle
      TYPE(ATOMBONDS)        :: AtmB
@@ -7077,9 +7093,9 @@ return
      TYPE(TOPOLOGY)         :: TOPS
      INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2,TopDim
      INTEGER,DIMENSION(:)   :: IEq
-     LOGICAL                :: ExcludeVDW
+     LOGICAL                :: ExcludeVDW,NonCovBend
      !
-     ExcludeVDW=.TRUE.
+     ExcludeVDW=.NOT.NonCovBend
      DO J=1,AtmB%Count%I(IAt)
        B1=AtmB%Bonds%I(IAt,J)
        IF(ExcludeVDW.AND.Bond%Type%C(B1)(1:3)/='COV') CYCLE

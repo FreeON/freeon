@@ -25,6 +25,10 @@ MODULE GeomOptKeys
    CHARACTER(LEN=12), PARAMETER :: OPT_DoLattBackTr ='DoLattBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
    CHARACTER(LEN=11), PARAMETER :: OPT_NoTranslOff  ='NoTranslOff'
+   CHARACTER(LEN=10), PARAMETER :: OPT_NonCovTors   ='NonCovTors'
+   CHARACTER(LEN=10), PARAMETER :: OPT_NonCovBend   ='NonCovBend'
+   CHARACTER(LEN=9),  PARAMETER :: OPT_HBondOnly    ='HBondOnly'
+   CHARACTER(LEN=14), PARAMETER :: OPT_NoFragmConnect ='NoFragmConnect'
 !  Perform quasi-newton geometry optimization for each basis set in turn
    INTEGER, PARAMETER           :: GRAD_QNEW_OPT    = 3489343 
 !  Optimizer type is set to Steepest Descent
