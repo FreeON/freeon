@@ -1,5 +1,5 @@
 !    PARSING AND CHARACTER MANIPULATION ROUTINES FOR MONDOSCF
-!    Author: Matt Challacombe
+!    Author: Matt Challacombe and CJ Tymczak
 !-----------------------------------------------------------------------
 MODULE Parse
    USE DerivedTypes
@@ -304,12 +304,13 @@ MODULE Parse
 !------------------------------------------------------------------
 !     Resolve a line into geometry components (AtomType,X,Y,Z) 
 !
-      SUBROUTINE LineToGeom(Line,At,Carts)
-         CHARACTER(LEN=*)               :: Line
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: TmpLine
-         CHARACTER(LEN=2)               :: At      
-         INTEGER                        :: J,L,N,K1,K2
-         REAL(DOUBLE), DIMENSION(:)     :: Carts
+      SUBROUTINE LineToGeom(Line,At,Carts,Vects_O)
+         CHARACTER(LEN=*)                    :: Line
+         CHARACTER(LEN=DEFAULT_CHR_LEN)      :: TmpLine
+         CHARACTER(LEN=2)                    :: At      
+         INTEGER                             :: J,L,N,K1,K2
+         REAL(DOUBLE), DIMENSION(:)          :: Carts
+         REAL(DOUBLE), DIMENSION(:),OPTIONAL ::Vects_O
 !
          Carts=Zero
          TmpLine=Line
@@ -319,13 +320,21 @@ MODULE Parse
          At=TmpLine(J:J+1)
          J=J+2
          L=LEN(Line)   
-         DO N=1,SIZE(Carts)
+!         DO N=1,SIZE(Carts)
+         DO N=1,3
             K1=J-1+SCAN(Line(J:L),Numbers)
-            K2=K1-2+SCAN(Line(K1:L),' ')            
-            Carts(N)=CharToDbl(TRIM(Line(K1:K2)))
+            K2=K1-2+SCAN(Line(K1:L),' ') 
             J=K2+1
-            IF(J .GE. L) EXIT
+            Carts(N)=CharToDbl(TRIM(Line(K1:K2)))
          ENDDO 
+         IF(PRESENT(Vects_O)) THEN
+            DO N=4,6        
+               K1=J-1+SCAN(Line(J:L),Numbers)
+               K2=K1-2+SCAN(Line(K1:L),' ') 
+               J=K2+1
+               Vects_O(N)=CharToDbl(TRIM(Line(K1:K2)))
+            ENDDO
+         ENDIF
 !   
       END SUBROUTINE LineToGeom
 !------------------------------------------------------------------
