@@ -9,7 +9,7 @@
       USE ShellPairStruct
       IMPLICIT REAL(DOUBLE) (V,W)
       TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 
-      REAL(DOUBLE),DIMENSION(0) :: AuxR
+      REAL(DOUBLE),DIMENSION(0:0) :: AuxR
       REAL(DOUBLE),DIMENSION(1,1) :: MBarN=0D0
       REAL(DOUBLE),DIMENSION(1,1,1,1) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
@@ -39,7 +39,7 @@
             r1x2Z=Half/Zeta
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
-            Omega=ExZpe+ZxZpE
+            Omega=ExZpE*ZxZpE
             Wx=(Zeta*Px+Eta*Qx)*r1xZpE
             Wy=(Zeta*Py+Eta*Qy)*r1xZpE
             Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
@@ -63,9 +63,9 @@
               SqInvT=Upq*DSQRT(InvT)
               AuxR(0)=+8.862269254527580D-01*SqInvT
             ENDIF
-            MBarN(1,1)=MBarN(1,1)+AuxR(0)
+            MBarN(1,1)=MBarN(1,1)+Upq*AuxR(0)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(1,1,1,1)=MBarN(2,2)+MBarN(2,1)*CDx+(MBarN(1,2)+MBarN(1,1)*CDx)*ABx
+      I(1,1,1,1)=MBarN(1,1)
    END SUBROUTINE Int1111

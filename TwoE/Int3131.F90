@@ -9,7 +9,7 @@
       USE ShellPairStruct
       IMPLICIT REAL(DOUBLE) (V,W)
       TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 
-      REAL(DOUBLE),DIMENSION(2) :: AuxR
+      REAL(DOUBLE),DIMENSION(0:2) :: AuxR
       REAL(DOUBLE),DIMENSION(4,4) :: MBarN=0D0
       REAL(DOUBLE),DIMENSION(4,1,4,1) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
@@ -39,7 +39,7 @@
             r1x2Z=Half/Zeta
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
-            Omega=ExZpe+ZxZpE
+            Omega=ExZpE*ZxZpE
             Wx=(Zeta*Px+Eta*Qx)*r1xZpE
             Wy=(Zeta*Py+Eta*Qy)*r1xZpE
             Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
@@ -58,7 +58,7 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-              V1=Upq
+              V1=One
               V2=-Two*Omega
               ET=EXP(-T)
               TwoT=Two*T
@@ -79,9 +79,9 @@
               SqInvT=SqInvT*InvT
               AuxR(2)=+6.646701940895685D-01*SqInvT
             ENDIF
-            V1=AuxR(0)
+            V1=Upq*AuxR(0)
             V2=PAx*V1
-            V3=AuxR(1)
+            V3=Upq*AuxR(1)
             V4=V3*WPx
             V5=PAy*V1
             V6=V3*WPy
@@ -90,7 +90,7 @@
             V9=HfxZpE*V3
             V10=V2+V4
             V11=PAx*V3
-            V12=AuxR(2)
+            V12=Upq*AuxR(2)
             V13=V12*WPx
             V14=V11+V13
             V15=V5+V6
@@ -120,13 +120,13 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(2,1,2,1)=MBarN(5,5)+MBarN(5,2)*CDx+(MBarN(2,5)+MBarN(2,2)*CDx)*ABx
-      I(3,1,2,1)=MBarN(6,5)+MBarN(6,2)*CDx+(MBarN(3,5)+MBarN(3,2)*CDx)*ABx
-      I(4,1,2,1)=MBarN(8,5)+MBarN(8,2)*CDx+(MBarN(4,5)+MBarN(4,2)*CDx)*ABx
-      I(2,1,3,1)=MBarN(5,6)+MBarN(5,3)*CDx+(MBarN(2,6)+MBarN(2,3)*CDx)*ABx
-      I(3,1,3,1)=MBarN(6,6)+MBarN(6,3)*CDx+(MBarN(3,6)+MBarN(3,3)*CDx)*ABx
-      I(4,1,3,1)=MBarN(8,6)+MBarN(8,3)*CDx+(MBarN(4,6)+MBarN(4,3)*CDx)*ABx
-      I(2,1,4,1)=MBarN(5,8)+MBarN(5,4)*CDx+(MBarN(2,8)+MBarN(2,4)*CDx)*ABx
-      I(3,1,4,1)=MBarN(6,8)+MBarN(6,4)*CDx+(MBarN(3,8)+MBarN(3,4)*CDx)*ABx
-      I(4,1,4,1)=MBarN(8,8)+MBarN(8,4)*CDx+(MBarN(4,8)+MBarN(4,4)*CDx)*ABx
+      I(2,1,2,1)=MBarN(2,2)
+      I(3,1,2,1)=MBarN(3,2)
+      I(4,1,2,1)=MBarN(4,2)
+      I(2,1,3,1)=MBarN(2,3)
+      I(3,1,3,1)=MBarN(3,3)
+      I(4,1,3,1)=MBarN(4,3)
+      I(2,1,4,1)=MBarN(2,4)
+      I(3,1,4,1)=MBarN(3,4)
+      I(4,1,4,1)=MBarN(4,4)
    END SUBROUTINE Int3131

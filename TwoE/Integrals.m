@@ -109,38 +109,40 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
 
 (**************** THE HRR RELATIONS: THX HGP! ************************)
 
-KetHRR[a_List,b_List,c_List,d_List]:=Module[{p, CD, c1, d1,adex,cdex,c1dex}, 
-                                            p=Position[d, Max[d]][[1, 1]];
-                                            If[p == 1, one = {1, 0, 0}; CD = x1; ];
-                                            If[p == 2, one = {0, 1, 0}; CD = y1; ];
-                                            If[p == 3, one = {0, 0, 1}; CD = z1; ];
-                                            c1=c+one;
-                                            d1=d-one;                
-                                            If[Max[d1] == 0,                                       
-					       adex=LMNDex[a[[1]],a[[2]],a[[3]]];
-					       cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
-					       c1dex=LMNDex[c1[[1]],c1[[2]],c1[[3]]];
-					       v1=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[c1dex],"w"]];
-                                               v2=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[cdex],"w"]];
-                                               v1+CD*v2 
-                                              ,
-                                               Return[KetHRR[a,b,c1,d1]+CD KetHRR[a,b,c,d1]]
-                                               ]
-                                           ]
+     HRR[a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two},
 
-HRR[a_List,b_List,c_List,d_List]:=Module[{p,AB,a1,b1}, 
-                                         p=Position[b,Max[b]][[1, 1]];
-                                         If[p == 1, one = {1, 0, 0}; AB = x2; ];
-                                         If[p == 2, one = {0, 1, 0}; AB = y2; ];
-                                         If[p == 3, one = {0, 0, 1}; AB = z2; ];
-                                         a1 = a + one;
-                                         b1 = b - one;                
-                                         If[Max[b1] == 0, 
-                                            Return[ KetHRR[a1, b1, c, d] + AB  KetHRR[a, b1, c, d]],
-                                            Return[HRR[a1, b1, c, d] + AB  HRR[a, b1, c, d]]
-                                           ] 
-                                        ];
+                              pa=Position[a,Max[a]][[1, 1]];
+                              pb=Position[b,Max[b]][[1, 1]];
+                              pc=Position[c,Max[c]][[1, 1]];
+                              pd=Position[d,Max[d]][[1, 1]];
+                              MaxEll=Max[Join[a,b,c,d]];
+			      (* Exit condition 1 *)
 
+                              If[a[[pa]]<0 || b[[pb]]<0 || c[[pc]]<0 || d[[pd]]<0 , Return[0] ];                                        
+			      (* Exit condition 2 *)
+                              If[ b[[pb]]==0 && d[[pd]]==0,
+                                 adex=LMNDex[a[[1]],a[[2]],a[[3]]];
+                                 cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
+                                 Return[MBarN[adex,cdex]]
+                                ];
+			      (* Recursion *)
+			      If[b[[pb]]==MaxEll,(* Taking down ell on b *)
+                                 If[pb==1, one = {1, 0, 0}; AB = ABx; ];
+                                 If[pb==2, one = {0, 1, 0}; AB = ABy; ];
+                                 If[pb==3, one = {0, 0, 1}; AB = ABz; ];
+                                 a1 = a + one;
+                                 b1 = b - one;                
+                                 Return[ HRR[a1, b1, c, d] + AB  HRR[a, b1, c, d]]
+                                ];
+			      If[d[[pd]]==MaxEll,(* Taking down ell on d *)
+                                 If[pd==1, one = {1, 0, 0}; CD = CDx; ];
+                                 If[pd==2, one = {0, 1, 0}; CD = CDy; ];
+                                 If[pd==3, one = {0, 0, 1}; CD = CDz; ];
+                                 c1=c+one;
+                                 d1=d-one;                
+                                 Return[HRR[a,b,c1,d1]+CD HRR[a,b,c,d1]]
+                                ];
+                            ];
 
 (* LOAD OPTIMIZING AND FORMATING ROUTINES FOR MMA AND SET ASSOCIATED OPTIONS *)
 
@@ -155,7 +157,7 @@ SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
-SetAttributes[X,NHoldAll];
+SetAttributes[MBarN,NHoldAll];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
@@ -172,7 +174,7 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
 						       MBarString=StringJoin["MBarN(",ToString[i],",",ToString[k],")"];
                                                        oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
                                                        sList=Append[sList,StringJoin["SSSS(",ToString[i-1+k-1],")"]-> \
-                                                                          StringJoin["AuxR(",ToString[i-1+k-1],")"]];
+                                                                          StringJoin["Upq*AuxR(",ToString[i-1+k-1],")"]];
                                                  ,{i,1,LEnd[BraEll]}],{k,1,LEnd[KetEll]}];
 						 oList=Join[oList,sList];
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
@@ -199,14 +201,14 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                                 WS["  L=AINT(T*Gamma_Grid)"];			
          If[EllTot==1,
 	    Print[" EllTot= ",EllTot];
-                     WS[StringJoin["   AuxR(0)=",FStr[0]]];
-                     WS[StringJoin["   AuxR(1)=",FStr[1]]];
+                     WS[StringJoin["  AuxR(0)=",FStr[0]]];
+                     WS[StringJoin["  AuxR(1)=",FStr[1]]];
 
             ];
           If[EllTot>1,
              LSt=ToString[EllTot];
 
-                     WS["  V1=Upq"];
+                     WS["  V1=One"];
                      WS["  V2=-Two*Omega"];
                      WS["  ET=EXP(-T)"];
                      WS["  TwoT=Two*T"];
@@ -267,6 +269,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
                                                 ,{ll,lmin,lmax}];
+						 Print[IList];
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
                                                ];
 
@@ -298,7 +301,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 	   WS["TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 "];
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LBra+LKet],") :: AuxR"]];
+           WS[StringJoin["REAL(DOUBLE),DIMENSION(0:",ToString[LBra+LKet],") :: AuxR"]];
            WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LenBra],",",ToString[LenKet],") :: MBarN=0D0"]];
 
 
@@ -342,7 +345,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["      r1x2Z=Half/Zeta"];
            WS["      ExZpE=Eta*r1xZpE"];
            WS["      ZxZpE=Zeta*r1xZpE"];
-           WS["      Omega=ExZpe+ZxZpE"];
+           WS["      Omega=ExZpE*ZxZpE"];
 
            WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];
            WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];

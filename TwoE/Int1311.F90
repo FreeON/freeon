@@ -10,7 +10,7 @@
       USE ShellPairStruct
       IMPLICIT REAL(DOUBLE) (V,W)
       TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 
-      REAL(DOUBLE),DIMENSION(1) :: AuxR
+      REAL(DOUBLE),DIMENSION(0:1) :: AuxR
       REAL(DOUBLE),DIMENSION(4,1) :: MBarN=0D0
       REAL(DOUBLE),DIMENSION(1,4,1,1) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
@@ -40,7 +40,7 @@
             r1x2Z=Half/Zeta
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
-            Omega=ExZpe+ZxZpE
+            Omega=ExZpE*ZxZpE
             Wx=(Zeta*Px+Eta*Qx)*r1xZpE
             Wy=(Zeta*Py+Eta*Qy)*r1xZpE
             Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
@@ -59,8 +59,8 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-               AuxR(0)=(F0_0(L)+T*(F0_1(L)+T*(F0_2(L)+T*(F0_3(L)+T*F0_4(L)))))
-               AuxR(1)=(F1_0(L)+T*(F1_1(L)+T*(F1_2(L)+T*(F1_3(L)+T*F1_4(L)))))
+              AuxR(0)=(F0_0(L)+T*(F0_1(L)+T*(F0_2(L)+T*(F0_3(L)+T*F0_4(L)))))
+              AuxR(1)=(F1_0(L)+T*(F1_1(L)+T*(F1_2(L)+T*(F1_3(L)+T*F1_4(L)))))
             ELSE
               InvT=One/T
               SqInvT=Upq*DSQRT(InvT)
@@ -68,8 +68,8 @@
               SqInvT=SqInvT*InvT
               AuxR(1)=+4.431134627263790D-01*SqInvT
             ENDIF
-            V1=AuxR(0)
-            V2=AuxR(1)
+            V1=Upq*AuxR(0)
+            V2=Upq*AuxR(1)
             MBarN(1,1)=V1+MBarN(1,1)
             MBarN(2,1)=PAx*V1+V2*WPx+MBarN(2,1)
             MBarN(3,1)=PAy*V1+V2*WPy+MBarN(3,1)
@@ -77,9 +77,8 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      V1=MBarN(1,1)*CDx
-      V2=MBarN(1,2)+V1
-      I(1,2,1,1)=MBarN(2,2)+MBarN(2,1)*CDx+V2*ABx
-      I(1,3,1,1)=MBarN(3,2)+MBarN(3,1)*CDx+V2*ABy
-      I(1,4,1,1)=MBarN(4,2)+MBarN(4,1)*CDx+V2*ABz
+      V1=MBarN(1,1)
+      I(1,2,1,1)=ABx*V1+MBarN(2,1)
+      I(1,3,1,1)=ABy*V1+MBarN(3,1)
+      I(1,4,1,1)=ABz*V1+MBarN(4,1)
    END SUBROUTINE Int1311

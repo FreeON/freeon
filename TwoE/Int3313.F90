@@ -9,7 +9,7 @@
       USE ShellPairStruct
       IMPLICIT REAL(DOUBLE) (V,W)
       TYPE(ShellPair), POINTER :: ShlPrAC2,ShlPrBD2 
-      REAL(DOUBLE),DIMENSION(3) :: AuxR
+      REAL(DOUBLE),DIMENSION(0:3) :: AuxR
       REAL(DOUBLE),DIMENSION(10,4) :: MBarN=0D0
       REAL(DOUBLE),DIMENSION(4,4,1,4) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
@@ -39,7 +39,7 @@
             r1x2Z=Half/Zeta
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
-            Omega=ExZpe+ZxZpE
+            Omega=ExZpE*ZxZpE
             Wx=(Zeta*Px+Eta*Qx)*r1xZpE
             Wy=(Zeta*Py+Eta*Qy)*r1xZpE
             Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
@@ -58,7 +58,7 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-              V1=Upq
+              V1=One
               V2=-Two*Omega
               ET=EXP(-T)
               TwoT=Two*T
@@ -84,9 +84,9 @@
               SqInvT=SqInvT*InvT
               AuxR(3)=+1.661675485223921D+00*SqInvT
             ENDIF
-            V1=AuxR(0)
+            V1=Upq*AuxR(0)
             V2=PAx*V1
-            V3=AuxR(1)
+            V3=Upq*AuxR(1)
             V4=V3*WPx
             V5=PAy*V1
             V6=V3*WPy
@@ -97,7 +97,7 @@
             V11=r1x2Z*V10
             V12=V2+V4
             V13=PAx*V3
-            V14=AuxR(2)
+            V14=Upq*AuxR(2)
             V15=V14*WPx
             V16=V13+V15
             V17=V5+V6
@@ -132,7 +132,7 @@
             V46=r1x2Z*V45
             V47=HfxZpE*V14
             V48=PAx*V14
-            V49=AuxR(3)
+            V49=Upq*AuxR(3)
             V50=V49*WPx
             V51=V48+V50
             V52=HfxZpE*V21
@@ -230,58 +230,82 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      V1=MBarN(2,1)*CDx
-      V2=MBarN(2,2)+V1
-      V3=MBarN(6,1)*CDx
-      V4=MBarN(3,1)*CDx
-      V5=MBarN(3,2)+V4
-      V6=MBarN(8,1)*CDx
-      V7=MBarN(4,1)*CDx
-      V8=MBarN(4,2)+V7
-      V9=MBarN(9,1)*CDx
-      V10=MBarN(2,1)*CDy
-      V11=MBarN(2,3)+V10
-      V12=MBarN(6,1)*CDy
-      V13=MBarN(3,1)*CDy
-      V14=MBarN(3,3)+V13
-      V15=MBarN(8,1)*CDy
-      V16=MBarN(4,1)*CDy
-      V17=MBarN(4,3)+V16
-      V18=MBarN(9,1)*CDy
-      V19=MBarN(2,1)*CDz
-      V20=MBarN(2,4)+V19
-      V21=MBarN(6,1)*CDz
-      V22=MBarN(3,1)*CDz
-      V23=MBarN(3,4)+V22
-      V24=MBarN(8,1)*CDz
-      V25=MBarN(4,1)*CDz
-      V26=MBarN(4,4)+V25
-      V27=MBarN(9,1)*CDz
-      I(2,2,1,2)=MBarN(5,2)+MBarN(5,1)*CDx+V2*ABx
-      I(3,2,1,2)=MBarN(6,2)+V3+V5*ABx
-      I(4,2,1,2)=MBarN(8,2)+V6+V8*ABx
-      I(2,3,1,2)=MBarN(6,2)+V3+V2*ABy
-      I(3,3,1,2)=MBarN(7,2)+MBarN(7,1)*CDx+V5*ABy
-      I(4,3,1,2)=MBarN(9,2)+V9+V8*ABy
-      I(2,4,1,2)=MBarN(8,2)+V6+V2*ABz
-      I(3,4,1,2)=MBarN(9,2)+V9+V5*ABz
-      I(4,4,1,2)=MBarN(10,2)+MBarN(10,1)*CDx+V8*ABz
-      I(2,2,1,3)=MBarN(5,3)+V11*ABx+MBarN(5,1)*CDy
-      I(3,2,1,3)=MBarN(6,3)+V12+V14*ABx
-      I(4,2,1,3)=MBarN(8,3)+V15+V17*ABx
-      I(2,3,1,3)=MBarN(6,3)+V12+V11*ABy
-      I(3,3,1,3)=MBarN(7,3)+MBarN(7,1)*CDy+V14*ABy
-      I(4,3,1,3)=MBarN(9,3)+V18+V17*ABy
-      I(2,4,1,3)=MBarN(8,3)+V15+V11*ABz
-      I(3,4,1,3)=MBarN(9,3)+V18+V14*ABz
-      I(4,4,1,3)=MBarN(10,3)+MBarN(10,1)*CDy+V17*ABz
-      I(2,2,1,4)=MBarN(5,4)+V20*ABx+MBarN(5,1)*CDz
-      I(3,2,1,4)=MBarN(6,4)+V21+V23*ABx
-      I(4,2,1,4)=MBarN(8,4)+V24+V26*ABx
-      I(2,3,1,4)=MBarN(6,4)+V21+V20*ABy
-      I(3,3,1,4)=MBarN(7,4)+V23*ABy+MBarN(7,1)*CDz
-      I(4,3,1,4)=MBarN(9,4)+V27+V26*ABy
-      I(2,4,1,4)=MBarN(8,4)+V24+V20*ABz
-      I(3,4,1,4)=MBarN(9,4)+V27+V23*ABz
-      I(4,4,1,4)=MBarN(10,4)+MBarN(10,1)*CDz+V26*ABz
+      V1=MBarN(2,1)
+      V2=CDx*V1
+      V3=MBarN(2,2)
+      V4=V2+V3
+      V5=MBarN(3,1)
+      V6=CDx*V5
+      V7=MBarN(3,2)
+      V8=V6+V7
+      V9=MBarN(6,1)
+      V10=CDx*V9
+      V11=MBarN(6,2)
+      V12=MBarN(4,1)
+      V13=CDx*V12
+      V14=MBarN(4,2)
+      V15=V13+V14
+      V16=MBarN(8,1)
+      V17=CDx*V16
+      V18=MBarN(8,2)
+      V19=MBarN(9,1)
+      V20=CDx*V19
+      V21=MBarN(9,2)
+      V22=CDy*V1
+      V23=MBarN(2,3)
+      V24=V22+V23
+      V25=CDy*V5
+      V26=MBarN(3,3)
+      V27=V25+V26
+      V28=CDy*V9
+      V29=MBarN(6,3)
+      V30=CDy*V12
+      V31=MBarN(4,3)
+      V32=V30+V31
+      V33=CDy*V16
+      V34=MBarN(8,3)
+      V35=CDy*V19
+      V36=MBarN(9,3)
+      V37=CDz*V1
+      V38=MBarN(2,4)
+      V39=V37+V38
+      V40=CDz*V5
+      V41=MBarN(3,4)
+      V42=V40+V41
+      V43=CDz*V9
+      V44=MBarN(6,4)
+      V45=CDz*V12
+      V46=MBarN(4,4)
+      V47=V45+V46
+      V48=CDz*V16
+      V49=MBarN(8,4)
+      V50=CDz*V19
+      V51=MBarN(9,4)
+      I(2,2,1,2)=N(ll+ABx*V4
+      I(3,2,1,2)=V10+V11+ABx*V8
+      I(4,2,1,2)=ABx*V15+V17+V18
+      I(2,3,1,2)=V10+V11+ABy*V4
+      I(3,3,1,2)=N(ll+ABy*V8
+      I(4,3,1,2)=ABy*V15+V20+V21
+      I(2,4,1,2)=V17+V18+ABz*V4
+      I(3,4,1,2)=V20+V21+ABz*V8
+      I(4,4,1,2)=N(ll+ABz*V15
+      I(2,2,1,3)=N(ll+ABx*V24
+      I(3,2,1,3)=ABx*V27+V28+V29
+      I(4,2,1,3)=ABx*V32+V33+V34
+      I(2,3,1,3)=ABy*V24+V28+V29
+      I(3,3,1,3)=N(ll+ABy*V27
+      I(4,3,1,3)=ABy*V32+V35+V36
+      I(2,4,1,3)=ABz*V24+V33+V34
+      I(3,4,1,3)=ABz*V27+V35+V36
+      I(4,4,1,3)=N(ll+ABz*V32
+      I(2,2,1,4)=N(ll+ABx*V39
+      I(3,2,1,4)=ABx*V42+V43+V44
+      I(4,2,1,4)=ABx*V47+V48+V49
+      I(2,3,1,4)=ABy*V39+V43+V44
+      I(3,3,1,4)=N(ll+ABy*V42
+      I(4,3,1,4)=ABy*V47+V50+V51
+      I(2,4,1,4)=ABz*V39+V48+V49
+      I(3,4,1,4)=ABz*V42+V50+V51
+      I(4,4,1,4)=N(ll+ABz*V47
    END SUBROUTINE Int3313
