@@ -454,6 +454,9 @@ CONTAINS
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_TS_SEARCH))THEN
        ! Transition state search 
        Grad=GRAD_TS_SEARCH_NEB 
+    ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_NHESSIAN))THEN
+       ! Do numerical hessian, frequencies and thermostatistic
+       Grad=GRAD_DO_NHESSIAN
     ELSE
        ! Single point energy only
        Grad=GRAD_NO_GRAD       

@@ -2112,4 +2112,586 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
+  SUBROUTINE NHessian(C)
+    !-------------------------------------------------------------------
+    TYPE(Controls) :: C
+    !-------------------------------------------------------------------
+    INTEGER        :: iBAS,iGEO,iCLONE,AtA,AtB,I,J,II,JJ,IMin,N
+    INTEGER        :: NatmsLoc,IStart,GBeg,GEnd
+    TYPE(DBL_RNK2) :: Grad0,Hess,P,NMode
+    TYPE(DBL_VECT) :: Freqs,EigenV,Work
+    REAL(DOUBLE)   :: SMA,SMB
+    INTEGER        :: LWORK,Info,NNeg
+    ! FreqToWaveNbr=E*E*NA/4*PI*PI*C*C*A0*A0*A0,
+    !            E =4.803242E-10 SQRT(G*CM**3)/SEC
+    !            NA=6.022045E+23 /G
+    !            A0=5.291771E-09 A
+    !            C =2.997925E+10 A/SEC
+    REAL(DOUBLE), PARAMETER :: FreqToWaveNbr=2.642461D+07
+    REAL(DOUBLE), PARAMETER :: ATOM_DISP=0.001D0
+    REAL(DOUBLE), EXTERNAL  :: DDOT
+    !-------------------------------------------------------------------
+    !
+    GBeg=1
+    GEnd=C%Geos%Clones
+    ! initial geometry
+    iGEO=C%Stat%Previous%I(3)
+    NatmsLoc=C%Geos%Clone(1)%Natms
+    N=3*NatmsLoc
+    CALL New(Grad0,(/3,NatmsLoc/))
+    CALL DBL_VECT_EQ_DBL_SCLR(N,Grad0%D(1,1),0.0D0)
+    CALL New(Hess,(/N,N/))
+    CALL DBL_VECT_EQ_DBL_SCLR(N**2,Hess%D(1,1),0.0D0)
+    CALL New(P,(/N,N/))
+    CALL New(Freqs,N)
+    CALL New(NMode,(/N,N/))
+    !
+    ! Build the guess 
+    DO iBAS=1,C%Sets%NBSets
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+       CALL SCF(iBAS,iGEO,C)
+    ENDDO
+    iBAS=C%Sets%NBSets
+    CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+    CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Grad0%D(1,1),1)
+    CALL Print_DBL_RNK2(Grad0,'Grad0',Unit_O=6)
+    !
+    iGEO=iGEO+1
+    J=1
+    DO AtA=1,NAtmsLoc
+       DO I=1,3
+          !
+          ! Move the atom.
+          DO iCLONE=1,C%Geos%Clones
+             C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)=C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)+ATOM_DISP
+             CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+          ENDDO
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          !
+          ! Optimize and Forces.
+          CALL SCF(iBAS,iGEO,C)
+          CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+          !CALL Print_DBL_RNK2(C%Geos%Clone(1)%Carts,'Posi',Unit_O=6)
+          CALL Print_DBL_RNK2(C%Geos%Clone(1)%Gradients,'Grad',Unit_O=6)
+          CALL DCOPY(N,C%Geos%Clone(1)%Gradients%D(1,1),1,Hess%D(1,J),1)
+          CALL DAXPY(N,-1D0,Grad0%D(1,1),1,Hess%D(1,J),1)
+          !
+          ! Move back.
+          DO iCLONE=1,C%Geos%Clones
+             C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)=C%Geos%Clone(iCLONE)%AbCarts%D(I,AtA)-ATOM_DISP
+             CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+          ENDDO
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          iGEO=iGEO+1
+          J=J+1
+       ENDDO
+    ENDDO
+    CALL DSCAL(N**2,1D0/ATOM_DISP,Hess%D(1,1),1)
+    !
+    ! Symmetrize the Hessian
+    CALL SymmMtrx(Hess,N)
+    !
+    ! Generate mass weighted hessian.
+    CALL WghtMtrx(C%Geos%Clone(1)%AtMss,Hess,NatmsLoc,'CToWC')
+    !CALL Print_DBL_RNK2(Hess,'Weighted Hessian',Unit_O=6)
+    !
+    ! Project out translations and rotations.
+    CALL ProjOut(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Hess,NatmsLoc)
+    !CALL Print_DBL_RNK2(Hess,'Projected Hessian',Unit_O=6)
+    !
+    ! Get Normal modes.
+    CALL New(EigenV,N)
+    LWORK=MAX(1,3*N+10)
+    CALL New(WORK,LWORK)
+    CALL DCOPY(N**2,Hess%D(1,1),1,NMode%D(1,1),1)
+    CALL DSYEV('V','U',N,NMode%D(1,1),N,EigenV%D(1),Work%D(1),LWORK,Info)
+    IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in NHessian. INFO='//TRIM(IntToChar(Info)))
+    CALL DCOPY(N,EigenV%D(1),1,Freqs%D(1),1)
+    CALL Delete(EigenV)
+    CALL Delete(Work)
+    !CALL Print_DBL_RNK2(NMode,'NMode0',Unit_O=6)
+    !
+    ! Translational and rotational Sayvetz conditions.
+    CALL Sayvetz()
+    !
+    ! Count number of negative eigenvalues.
+    NNeg=0
+    DO I=1,N
+       IF(Freqs%D(I).LT.0.0D0) NNeg=NNeg+1
+    ENDDO
+    !
+    ! Convert frequencies to wavenumbers.
+    !CALL Print_DBL_VECT(Freqs,'Frequencies**2',Unit_O=6)
+    DO I=1,N
+       Freqs%D(I)=SQRT(ABS(FreqToWaveNbr*Freqs%D(I)))
+    ENDDO
+    !
+    ! Convert normal mode displacements from mass 
+    ! weighted cartesian to cartesian.
+    DO AtB=1,NatmsLoc
+       DO J=1,3
+          JJ=3*(AtB-1)+J
+          DO AtA=1,NatmsLoc
+             SMA=1D0/SQRT(C%Geos%Clone(1)%AtMss%D(AtA))
+             DO I=1,3
+                II=3*(AtA-1)+I
+                NMode%D(II,JJ)=NMode%D(II,JJ)*SMA
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+    !
+    ! Compute reduced mass.
+    !DO I=1,N
+    !   write(*,*) 'Reduced Mass=',1D0/DDOT(N,NMode%D(1,I),1,NMode%D(1,I),1)
+    !END DO
+    !
+    ! Compute IR intensities.
+    CALL CompIRInt()
+    !
+    ! Compute Raman intensities.
+    CALL CompRAMANInt()
+    !
+    ! Statistic.
+    CALL ThermoStat(C%Geos%Clone(1)%AbCarts,C%Geos%Clone(1)%AtMss,Freqs, &
+         &          NatmsLoc,C%Geos%Clone(1)%Multp)
+    !
+    DO I=1,N
+       IF(ABS(Freqs%D(I)).GT.1D-3)write(*,'(A,F10.4)') 'Frequencies=',Freqs%D(I)
+    ENDDO
+    !CALL Print_DBL_VECT(Freqs,'Frequencies' ,Unit_O=6)
+    !CALL Print_DBL_RNK2(NMode,'Normal Modes',Unit_O=6)
+    !
+    ! Clean up.
+    CALL Delete(Freqs)
+    CALL Delete(NMode)
+    CALL Delete(Grad0)
+    CALL Delete(P)
+    CALL Delete(Hess)
+    !
+  END SUBROUTINE NHessian
+  !
+  SUBROUTINE WghtMtrx(AtMss,A,NAtoms,FromTo)
+    !-------------------------------------------------------------------
+    TYPE(DBL_VECT)   :: AtMss
+    TYPE(DBL_RNK2)   :: A
+    INTEGER          :: NAtoms
+    CHARACTER(LEN=*) :: FromTo
+    !-------------------------------------------------------------------
+    INTEGER          :: AtA,AtB,I,II,J,JJ,IFromTo
+    REAL(DOUBLE)     :: SMA,SMB
+    !-------------------------------------------------------------------
+    SELECT CASE(FromTo)
+    CASE('CToWC');IFromTo=0
+    CASE('WCToC');IFromTo=1
+    CASE DEFAULT; STOP'Err:WghtMtrx'
+    END SELECT
+    DO AtB=1,NAtoms
+       IF(IFromTo.EQ.0) THEN
+          SMB=1.0D0/SQRT(AtMss%D(AtB))
+       ELSE
+          SMB=SQRT(AtMss%D(AtB))
+       ENDIF
+       DO J=1,3
+          JJ=3*(AtB-1)+J
+          DO AtA=1,NAtoms
+             IF(IFromTo.EQ.0) THEN
+                SMA=1.0D0/SQRT(AtMss%D(AtA))
+             ELSE
+                SMA=SQRT(AtMss%D(AtA))
+             ENDIF
+             DO I=1,3
+                II=3*(AtA-1)+I
+                A%D(II,JJ)=A%D(II,JJ)*SMA*SMB
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+  END SUBROUTINE WghtMtrx
+  !
+  SUBROUTINE ProjOut(Carts,AtMss,A,NAtoms)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: Carts,A
+    TYPE(DBL_VECT) :: AtMss
+    INTEGER        :: NAtoms
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: WCarts,Theta,ITheta,P,Tmp
+    TYPE(DBL_VECT) :: EigenV,Work
+    INTEGER        :: LWork,Info,N,I,J,II,JJ,AtA,AtB,IMin,IA,IB,IC,JA,JB,JC
+    INTEGER        :: KK,LL
+    REAL(DOUBLE)   :: MssTot,SMA,SMB,Dum,Tens(3,3,3),CX,CY,CZ,CMss(3)
+    DATA Tens/ 0.0D0, 0.0D0, 0.0D0, 0.0D0, 0.0D0,-1.0D0, &
+         &     0.0D0, 1.0D0, 0.0D0, 0.0D0, 0.0D0, 1.0D0, &
+         &     0.0D0, 0.0D0, 0.0D0,-1.0D0, 0.0D0, 0.0D0, &
+         &     0.0D0,-1.0D0, 0.0D0, 1.0D0, 0.0D0, 0.0D0, &
+         &     0.0D0, 0.0D0, 0.0D0  /
+    !-------------------------------------------------------------------
+    !
+    N=3*NAtoms
+    !
+    ! Allocate arrays.
+    CALL New(Theta ,(/3,3/))
+    CALL New(ITheta,(/3,3/))
+    CALL New(P     ,(/N,N/))
+    CALL New(WCarts,(/3,NAtoms/))
+    !
+    ! Center of mass.
+    MssTot=0.0D0
+    CMss(1)=0.0D0
+    CMss(2)=0.0D0
+    CMss(3)=0.0D0
+    DO AtA=1,NAtoms
+       MssTot=MssTot+AtMss%D(AtA)
+       DO I=1,3
+          CMss(I)=CMss(I)+AtMss%D(AtA)*Carts%D(I,AtA)
+       ENDDO
+    ENDDO
+    DO I=1,3
+       CMss(I)=CMss(I)/MssTot
+    ENDDO
+    !
+    ! Weight coordinates.
+    DO AtA=1,NAtoms
+       SMA=SQRT(AtMss%D(AtA))
+       DO I=1,3
+          WCarts%D(I,AtA)=SMA*(Carts%D(I,AtA)-CMss(I))
+       ENDDO
+    ENDDO
+    !
+    ! Compute I0.
+    CALL New(EigenV,3)
+    CALL New(Tmp,(/3,3/))
+    CALL Inertia(Carts,AtMss,NAtoms,Theta%D,EigenV%D,Tmp%D)
+    CALL Delete(Tmp)
+    !
+    ! Inverse I0.
+    IF(ABS(EigenV%D(1)*EigenV%D(2)*EigenV%D(3)).LT.1.0D-8) THEN
+       ! Linear systems.
+       WRITE(*,*) 'Linear molecules are not supported yet.'
+       WRITE(*,*) 'STOPPED in ProjOut'
+       STOP 
+    ELSE
+       ! Non-linear systems.
+       ITheta%D(:,:)=InverseMatrix(Theta%D(:,:))
+       !CALL Print_DBL_RNK2(ITheta,'Inv(I0)',Unit_O=6)    
+    ENDIF
+    CALL Delete(EigenV)
+    !
+    ! Compute the projection matrix.
+    CALL DBL_VECT_EQ_DBL_SCLR(N**2,P%D(1,1),0.0D0)
+    DO J=1,NAtoms
+       SMB=SQRT(AtMss%D(J))
+       JJ=3*(J-1)
+       DO JC=1,3
+          LL=JJ+JC
+          DO I=J,NAtoms
+             SMA=SQRT(AtMss%D(I))
+             II=3*(I-1)
+             IMin=1
+             IF(I.EQ.J)IMin=JC
+             DO IC=IMin,3
+                KK=II+IC
+                ! Rotation.
+                Dum=0.0D0
+                DO IA=1,3
+                DO IB=1,3
+                   IF(Tens(IA,IB,IC).EQ.ZERO) CYCLE
+                   DO JA=1,3
+                   DO JB=1,3
+                      IF(Tens(JA,JB,JC).EQ.ZERO) CYCLE
+                      Dum=Dum+Tens(IA,IB,IC)*Tens(JA,JB,JC)*ITheta%D(IA,JA) &
+                           & *WCarts%D(IB,I)*WCarts%D(JB,J)
+                   ENDDO
+                   ENDDO
+                ENDDO
+                ENDDO
+                P%D(KK,LL)=Dum
+                ! Translation.
+                IF(IC.EQ.JC) P%D(KK,LL)=P%D(KK,LL)+SMA*SMB/MssTot
+                ! Symmetrize.
+                P%D(LL,KK)=P%D(KK,LL)
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+    !
+    ! Compute (1-P).
+    CALL DSCAL(N**2,-1.0D0,P%D(1,1),1)
+    DO I=1,N
+       P%D(I,I)=1.0D0+P%D(I,I)
+    ENDDO
+    !CALL Print_DBL_RNK2(P,'Projector',Unit_O=6)
+    !
+    ! Let's projecte out.
+    CALL New(Tmp,(/N,N/))
+    CALL DGEMM('N','N',N,N,N,1D0,A%D(1,1),N,  P%D(1,1),N,0.0D0,Tmp%D(1,1),N)
+    CALL DGEMM('T','N',N,N,N,1D0,P%D(1,1),N,Tmp%D(1,1),N,0.0D0,  A%D(1,1),N)
+    CALL Delete(Tmp)
+    !
+    ! Clean up.
+    CALL Delete(P)
+    CALL Delete(Theta)
+    CALL Delete(ITheta)
+    CALL Delete(WCarts)
+    !
+  END SUBROUTINE ProjOut
+  !
+  SUBROUTINE SymmMtrx(A,N)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: A
+    INTEGER :: N
+    !-------------------------------------------------------------------
+    INTEGER :: I,J
+    !-------------------------------------------------------------------
+    DO J=1,N
+       DO I=J+1,N
+          A%D(I,J)=(A%D(J,I)+A%D(I,J))*0.5D0
+          A%D(J,I)=A%D(I,J)
+       ENDDO
+    ENDDO
+  END SUBROUTINE SymmMtrx
+  !
+  SUBROUTINE Inertia(Carts,AtMss,NAtoms,TInrt,TEig,TVec)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: Carts
+    TYPE(DBL_VECT) :: AtMss
+    INTEGER        :: NAtoms
+    REAL(DOUBLE)   :: TInrt(3,3),TVec(3,3),TEig(3)
+    !-------------------------------------------------------------------
+    INTEGER        :: AtA,I,Info,LWork
+    REAL(DOUBLE)   :: MssTot,Mss,XC,YC,ZC,Work(20),CMss(3),CTmp(3,NAtoms)
+    !-------------------------------------------------------------------
+    !
+    CALL DCOPY(3*NAtoms,Carts%D(1,1),1,CTmp(1,1),1)
+    !
+    ! Center of mass.
+    MssTot=0.0D0
+    CMss(1)=0.0D0
+    CMss(2)=0.0D0
+    CMss(3)=0.0D0
+    DO AtA=1,NAtoms
+       MssTot=MssTot+AtMss%D(AtA)
+       DO I=1,3
+          CMss(I)=CMss(I)+AtMss%D(AtA)*CTmp(I,AtA)
+       ENDDO
+    ENDDO
+    DO I=1,3
+       CMss(I)=CMss(I)/MssTot
+    ENDDO
+    !
+    ! Weight coordinates.
+    DO AtA=1,NAtoms
+       DO I=1,3
+          CTmp(I,AtA)=CTmp(I,AtA)-CMss(I)
+       ENDDO
+    ENDDO
+    !
+    CALL DBL_VECT_EQ_DBL_SCLR(9,TVec(1,1),0.0D0)
+    DO AtA=1,NAtoms
+       Mss=AtMss%D(AtA)
+       XC=CTmp(1,AtA)
+       YC=CTmp(2,AtA)
+       ZC=CTmp(3,AtA)
+       TVec(1,1)=TVec(1,1)+Mss*(YC*YC+ZC*ZC)
+       TVec(2,2)=TVec(2,2)+Mss*(XC*XC+ZC*ZC)
+       TVec(3,3)=TVec(3,3)+Mss*(XC*XC+YC*YC)
+       TVec(2,1)=TVec(2,1)-Mss*XC*YC
+       TVec(3,1)=TVec(3,1)-Mss*XC*ZC
+       TVec(3,2)=TVec(3,2)-Mss*YC*ZC
+    ENDDO
+    TVec(1,2)=TVec(2,1)
+    TVec(1,3)=TVec(3,1)
+    TVec(2,3)=TVec(3,2)
+    CALL DCOPY(9,TVec(1,1),1,TInrt(1,1),1)
+    LWORK=20
+    CALL DSYEV('V','U',3,TVec(1,1),3,TEig(1),Work(1),LWORK,Info)
+    IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in Inertia. INFO='//TRIM(IntToChar(Info)))
+    !
+  END SUBROUTINE Inertia
+  !
+  SUBROUTINE ThermoStat(Carts,AtMss,Freqs,NAtoms,Multp)
+    !-------------------------------------------------------------------
+    TYPE(DBL_RNK2) :: Carts
+    TYPE(DBL_VECT) :: AtMss,Freqs
+    INTEGER        :: NAtoms,Multp
+    !-------------------------------------------------------------------
+    REAL(DOUBLE)   :: MssTot,R,T,KT,P,Sigma,Dum,Fac,U,ExpU,ExpMU
+    REAL(DOUBLE)   :: QElec,UElec,HElec,CvElec,CpElec,SElec,GElec,AElec
+    REAL(DOUBLE)   :: QTran,UTran,HTran,CvTran,CpTran,STran,GTran,ATran
+    REAL(DOUBLE)   :: QRot ,URot ,HRot ,CvRot ,CpRot ,SRot ,GRot ,ARot
+    REAL(DOUBLE)   :: QVib ,UVib ,HVib ,CvVib ,CpVib ,SVib ,GVib ,AVib
+    REAL(DOUBLE)   :: QTot ,UTot ,HTot ,CvTot ,CpTot ,STot ,GTot ,ATot
+    REAL(DOUBLE)   :: TInrt(3,3),TEig(3),TEVec(3,3)
+    INTEGER        :: I
+    !-------------------------------------------------------------------
+    REAL(DOUBLE), PARAMETER :: C_Planck=6.626176D-34
+    REAL(DOUBLE), PARAMETER :: C_Boltzmann=1.380662D-23
+    REAL(DOUBLE), PARAMETER :: C_Light=2.99792458D+08
+    REAL(DOUBLE), PARAMETER :: JouleToCal=4.184D+00
+    !
+    real(double), parameter :: TOKCAL=627.51D+00
+    real(double), parameter :: TOCM=2.194746D+05
+    !
+    T=298.15D0
+    KT=C_Boltzmann*T
+    R=C_Avogadro*C_Boltzmann
+    P=1.01325D+05
+    MssTot=SUM(AtMss%D(1:NAtoms))
+    !
+    ! Electronic.
+    ! Since the excitation to excited states is unknown, and we also
+    ! know nothing about spin-orbit splittings, We assume that only
+    ! one electronic state contributes to the partition function.
+    ! In addition, since we don't know what the spatial degeneracy of
+    ! this state is, we take the electronic degeneratcy to be just
+    ! the spin multiplicity.
+    QElec = DBLE(Multp)
+    UElec = ZERO
+    HElec = ZERO
+    CvElec= ZERO
+    CpElec= ZERO
+    SElec = R*LOG(QElec)
+    GElec = HElec-T*Selec
+    AElec = UElec-T*Selec
+    !
+    ! Translation.
+    QTran = (TwoPi*(1D-3*MssTot/C_Avogadro/C_Planck)*(KT/C_Planck))**(3D0/2D0)*KT/P
+    UTran = 3D0/2D0*R*T
+    HTran = 5D0/2D0*R*T
+    CvTran= 3D0/2D0*R
+    CpTran= 5D0/2D0*R
+    STran = R*(LOG(QTran)+5D0/2D0)
+    GTran = HTran-T*STran
+    ATran = UTran-T*STran
+    !
+    ! Rotation.
+    CALL Inertia(Carts,AtMss,NAtoms,TInrt,TEig,TEVec)
+    ! Check for atoms or linear molecules.
+    IF(ABS(TEig(1)*TEig(2)*TEig(3)).LT.1D-3) THEN
+       WRITE(*,*) 'Atoms or linear molecules are not supported yet'
+       STOP 'Err:ThermoStat'
+    ENDIF
+    !
+    !Should be changed to account the molecular symmetry.
+    WRITE(*,*) 'WARNING WARNING WARNING WARNING'
+    WRITE(*,*) ' In ThermoStat, Sigma is set to 1'
+    WRITE(*,*) ' then change it if needed.'
+    WRITE(*,*) 'WARNING WARNING WARNING WARNING'
+    Sigma=1.0D+00
+    !
+    Fac=BohrsToAngstroms**2/C_Avogadro
+    TEig(1)=Fac*TEig(1)
+    TEig(2)=Fac*TEig(2)
+    TEig(3)=Fac*TEig(3)
+    !
+    Dum  = 8D0*Pi2*(KT/C_Planck)*(1.0D-23/C_Planck)
+    QRot = SQRT(Pi*(Dum*TEig(1))*(Dum*TEig(2))*(Dum*TEig(3)))/Sigma
+    URot = 3D0/2D0*R*T
+    CvRot= 3D0/2D0*R
+    CpRot= 3D0/2D0*R
+    SRot = R*(LOG(QRot)+3D0/2D0)
+    HRot = URot
+    GRot = HRot-T*SRot
+    ARot = URot-T*SRot
+    !
+    ! Vibration.
+    Dum = ZERO
+    DO I=1,3*NAtoms
+       IF(Freqs%D(I).LT.1D-2) CYCLE
+       Dum=Dum+Freqs%D(I)
+    ENDDO
+    Dum=Dum*TOKCAL*JouleToCal/(TOCM*TWO)
+    !
+    QVib = ONE
+    UVib = ZERO
+    CvVib= ZERO
+    SVib = ZERO
+    DO I=1,3*NAtoms
+       IF(Freqs%D(I).LT.1D-2) CYCLE
+       U = (C_Planck*Freqs%D(I)*C_Light*1.0D+02)/KT
+       ExpU=1D+35
+       IF(U.LT.80D0) ExpU = EXP(U)
+       ExpMU= EXP(-U)
+       QVib = QVib/(ONE-ExpMU)
+       UVib = UVib+R*T*U/(ExpU-ONE)
+       CvVib= CvVib+R*U*U*(ExpU/(ExpU-ONE))/(ExpU-ONE)
+       SVib = SVib+R*(U/(ExpU-ONE)-LOG(ONE-ExpMU))
+    ENDDO
+    CpVib= CvVib
+    UVib = UVib+Dum*1D3
+    HVib = UVib
+    GVib = HVib-T*SVib
+    AVib = UVib-T*SVib
+    !
+    ! Sum up the contributions.
+    QTot = QElec*QTran*QRot*QVib
+    !
+    UElec= 1D-3*UElec
+    HElec= 1D-3*HElec
+    GElec= 1D-3*GElec
+    AElec= 1D-3*AElec
+    !
+    UTran= 1D-3*UTran
+    HTran= 1D-3*HTran
+    GTran= 1D-3*GTran
+    ATran= 1D-3*ATran
+    !
+    URot = 1D-3*URot
+    HRot = 1D-3*HRot
+    GRot = 1D-3*GRot
+    ARot = 1D-3*ARot
+    !
+    UVib = 1D-3*UVib
+    HVib = 1D-3*HVib
+    GVib = 1D-3*GVib
+    AVib = 1D-3*AVib
+    !
+    UTot = UElec+UTran+URot+UVib
+    HTot = HElec+HTran+HRot+HVib
+    GTot = GElec+GTran+GRot+GVib
+    ATot = AElec+ATran+ARot+AVib
+    STot = SElec+STran+SRot+SVib
+    CvTot= CvElec+CvTran+CvRot+CvVib
+    CpTot= CpElec+CpTran+CpRot+CpVib
+
+    WRITE(*,  *)
+    WRITE(*,907) 
+    WRITE(*,908) 'Elec ',QElec,LOG(QElec)
+    WRITE(*,908) 'Trans',QTran,LOG(QTran)
+    WRITE(*,908) 'Rot  ',QRot ,LOG(QRot )
+    WRITE(*,908) 'Vib  ',QVib ,LOG(QVib )
+    WRITE(*,908) 'Tot  ',QTot ,LOG(QTot )
+    WRITE(*,  *)
+    WRITE(*,909) 
+    WRITE(*,910) '    KJ/Mol','    KJ/Mol','    KJ/Mol','    J/MolK','    J/MolK','    J/MolK'
+    WRITE(*,911) 'Elec ',UElec,HElec,GElec,CvElec,CpElec,SElec
+    WRITE(*,911) 'Trans',UTran,HTran,GTran,CvTran,CpTran,STran
+    WRITE(*,911) 'Rot  ',URot ,HRot ,GRot ,CvRot ,CpRot ,SRot
+    WRITE(*,911) 'Vib  ',UVib ,HVib ,GVib ,CvVib ,CpVib ,SVib
+    WRITE(*,911) 'Tot  ',UTot ,HTot ,GTot ,CvTot ,CpTot ,STot
+
+907 FORMAT(/1X,14X,'Q',15X,'ln(Q)')
+908 FORMAT(1X,A6,1P,E15.5,0P,F15.6)
+909 FORMAT(/14X,'E',9X,'H',9X,'G',9X,'CV',8X,'CP',8X,'S')
+910 FORMAT(1X,6X,6A10)
+911 FORMAT(1X,A6,6F10.3)
+  END SUBROUTINE ThermoStat
+  !
+  SUBROUTINE CompIRInt()
+    ! Compute IR intensities.
+    ! Project the dipole derivative onto each normal mode,
+    ! and take the square of the norm of this 3 component vector.
+  END SUBROUTINE CompIRInt
+  !
+  SUBROUTINE CompRAMANInt()
+    ! Compute Raman intensities.
+    ! The formulae can be found in
+    ! Vibrational Intensities in IR and Raman spectroscopy,
+    ! W.B.Person and G.Zerbi, Eds., Elsevier NY 1982, Page 23.
+  END SUBROUTINE CompRAMANInt
+  !
+  SUBROUTINE Sayvetz()
+  END SUBROUTINE Sayvetz
+  !
 END MODULE Optimizer

@@ -40,6 +40,8 @@ PROGRAM MondoSCF
   CASE(GRAD_ONE_FORCE)
      CALL SinglePoints(C)
      CALL Force(C%Sets%NBSets,1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+  CASE(GRAD_DO_NHESSIAN)
+     CALL NHessian(C)
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()

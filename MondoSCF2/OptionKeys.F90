@@ -112,6 +112,9 @@ MODULE OptionKeys
   INTEGER,            PARAMETER  :: GRAD_INTS_OPT    =83458086
   CHARACTER(LEN=*),   PARAMETER  :: GRAD_CARTESIAN   ='Cartesian'
   INTEGER,            PARAMETER  :: GRAD_CART_OPT    =34243945
+  ! Hessian and frequencies
+  CHARACTER(LEN=*),   PARAMETER  :: GRAD_NHESSIAN    ='NumFreq'
+  INTEGER,            PARAMETER  :: GRAD_DO_NHESSIAN =13458986
   !------------------------------------------------------------------------------
   ! Options:NEB=
   CHARACTER(LEN=*),  PARAMETER :: NEB_OPTION         ='NEB'
