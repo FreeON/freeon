@@ -178,7 +178,7 @@ MODULE PotUtil
          USE Globals
 #ifdef PERIODIC
          USE PBCFarField
-         USE PFFT
+         USE PFFTen
 #endif
          TYPE(ARGMT)                     :: Arg
          INTEGER                         :: I,J,K,Nx,Ny,Nz
