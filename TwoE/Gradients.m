@@ -488,8 +488,9 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE dInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
-                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,NINT,PBC,dI) \n"]];
+           WriteString[Subroutine,StringJoin[ \
+           "   SUBROUTINE dInt",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
+           "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,dI) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
@@ -522,6 +523,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["INTEGER       :: OffSet"];
 
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
+           WS["INTEGER       :: GOA,GOB,GOC,GOD"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
 
@@ -641,7 +643,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
            PQz  = FPQz*PBC%BoxShape%D(3,3)*)
 
-           WS["! Need to be improve..."];
+           WS["! Need to be improved..."];
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
