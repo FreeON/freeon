@@ -21,12 +21,20 @@ CONTAINS
   ! ALL REORDERING, RESCALING, WRAPPING AND TRANSLATING OF COORDINATES OCCURS 
   ! HERE AND NO WHERE ELSE!
   !============================================================================
-  SUBROUTINE MassageCoordinates(G,P)
+  SUBROUTINE MassageCoordinates(O,G,P)
+    TYPE(Options)    :: O
     TYPE(Geometries) :: G
     TYPE(Periodics)  :: P
-    INTEGER          :: I,J
+    INTEGER          :: I,J,GBeg,GEnd
     !-------------------------------------------------------------------------!
-    DO I=1,G%Clones
+    IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
+       GBeg=0
+       GEnd=G%Clones+1
+    ELSE	
+       GBeg=1
+       GEnd=G%Clones
+    ENDIF
+    DO I=GBeg,GEnd
        CALL ToAtomicUnits(G%Clone(I))
 #ifdef PERIODIC
        CALL PeriodicXLate(G%Clone(I))

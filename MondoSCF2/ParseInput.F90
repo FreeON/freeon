@@ -33,7 +33,7 @@ CONTAINS
     ! Parse periodic info
     CALL LoadPeriodic(C%Nams,C%Geos,C%PBCs)
     ! Massage coodrinates, switch to AUs etc 
-    CALL MassageCoordinates(C%Geos,C%PBCs)
+    CALL MassageCoordinates(C%Opts,C%Geos,C%PBCs)
     ! Load basis sets  
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets) 
     ! Parse in parallel info
