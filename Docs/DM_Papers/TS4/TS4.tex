@@ -30,7 +30,8 @@
 
 \date{\today}
 
-\title{Trace setting density matrix purification}
+\title{Trace setting density matrix purification in first-principles
+linear scaling electronic structure calculations}
 
 \author{Anders~M.~N.~Niklasson}
 \author{C.~J.~Tymczak}
@@ -48,18 +49,15 @@ In this sense the method is related to the trace preserving canonical
 purification scheme by Palser and Manolopoulos \cite{McWeeny60,Palser98}, 
 but instead of a fixed trace criteria we only require the correct
 occupation at convergence. The two methods are
-compared within the MondoSCF suite of linear scaling self-consistent
-programs for different materials, and we find an overall improved performance,
+compared within the MondoSCF suite of linear scaling self-consistent total energy
+programs for different materials \cite{Mondo}, and we find an overall improved performance,
 especially at low and high occupancies. In comparison
 with some variational methods the two schemes has the major advantage of
 dealing also with degenerate eigenstates and fractional occupancy. 
 Formulas for calculating the fractional filling and degeneracy from 
 the density matrix are derived, and alternative critereas to idempotency
 in the case of degeneracy and fractional filling are suggested.
-Thresholding is analyzed and it is shown how the numerical error 
-in the density matrix at convergence is proportional to the upper bound of 
-the truncation error in a single iteration and how it is independent of the total 
-number of iterations performed in the expansion. 
+Thresholding is analyzed regarding numerical stability and error.
 %
 %\keywords{density matrix, purification, linear scaling, electronic structure,
 %spectral projection, degeneracy}
@@ -70,24 +68,29 @@ number of iterations performed in the expansion.
 
 \section{Introduction}
 
-For non-metalic systems it is now possible to solve the Self-Consistent-Field 
+For non-metallic systems it is now possible to solve the Self-Consistent-Field 
 equations for systems with thousands of atoms using linear scaling methods. These methods 
 achieve a reduced ${\cal O}(N)$ computational complexity, where $N$ is the number of basis 
 functions assumed proportional to system size. In contrast, conventional formulations of 
 Self-Consistent-Field theory such as the Roothaan-Hall\cite{CRoothaan51} and Kohn-Sham\cite{Kohn65} 
-method involve an ${\cal O}(N^3)$ solution to the eigenvalue problem 
-$\bf F C = \bf e \bf C $, where $\bf F$ is the Fockian, the effective 
-single-particle Hamiltonian in an orthogonal representation.  The eigenvectors (molecular 
-orbitals), ${\bf c}_k$ span $\bf C$, may be used to construct the first order reduced density 
-matrix via the outer product
-\begin{equation}\label{Density}
-{\bf P} = \sum_{k=1}^{N_{\rm el}} {\bf c}^{\rm T}_{k} {\bf c}_{k} 
+method involve an ${\cal O}(N^3)$ solution to an eigenvalue problem 
+\begin{equation}\label{EgenvalueProblem}
+\bf F C = \bf e \bf C.
 \end{equation}
-while the eigenvalues $e_i$ determine the electronic single-particle energy
+Here $\bf F$ is the Fockian, the effective single-particle Hamiltonian 
+in an orthogonal representation. The notation in this paper follows the Roothaan-Hall 
+method, but is traighforward to apply also to the Kohn-Sham scheme in density functional theory.
+The matrix $\bf C$ is spanned by eigenvectors (molecular orbitals), ${\bf c}_k$, which may be 
+used to construct the first order reduced density matrix via the outer product
+\begin{equation}\label{Density}
+{\bf P} = \sum_{k=1}^{N_{\rm el}} {\bf c}^{\rm T}_{k} {\bf c}_{k},
+\end{equation}
+while the vector $\bf e$ is spanned by the eigenvalues $e_i$ that determine 
+the electronic single-particle energy
 \begin{subequations}
 \begin{eqnarray} 
 E_{\rm el} &=& \sum_{i=1}^{N_{\rm el}} e_i \label{EigenEnergy}  \\
-&=&{\rm Tr}\{ \bf P F \}, \label{TraceEnergy} 
+&=&{\rm Tr}[ \bf P F ], \label{TraceEnergy} 
 \end{eqnarray}
 \end{subequations}
 with $N_{\rm el}$ the number of occupied states.
@@ -95,24 +98,26 @@ with $N_{\rm el}$ the number of occupied states.
 Many of these linear scaling methods involve iteratively constructing the density matrix 
 in a local, non-orthogonal basis, exploiting the approximately exponential decay of matrix
 elements with basis function seperation through the use of  sparse matrix technologies.  
-These technologies include linear algebra kernals such as the sparse matrix-matrix multiply 
+These technologies include linear algebra kernals such as the sparse matrix-matrix multiplication
 and incomplete methods for computing congruence transformations between orthogonal and 
 non-orthogonal representations.  
 
-One approach to constructing the density matrix is via functional minimization of the energy trace 
+One approach to constructing the density matrix is via constrained functional minimization of the energy trace 
 expresion, Eq.(\ref{TraceEnergy}), with $\bf P$ driven towards idempotence and electron conservation
-\cite{Sameh82,Li93,Carlsson95,Hernandez96,Kohn96,Daniels97,Yang97,Stephan98,Haynes99,Bowler99,Daniels99}.
-This is the density matrix minimization approach (DMM).
-A second approach is via polynomial approximation of
+\cite{Sameh82,Li93,Carlsson95,Hernandez96,Kohn96,Daniels97,Yang97,Stephan98,Challacombe99,Haynes99,Bowler99,Daniels99}.
+This is the density matrix minimization (DMM) or the constrained functional minimization 
+approach. A second approach is via polynomial approximation of
 \begin{equation}
 \label{Heavyside}
 \bf P = \theta ( \mu \bf I - \bf F ),
 \end{equation}
 where $\theta$ is the Heavyside step function setting all eigenvalues
-above the chemical potential $\mu$ to $0$ and all the occupied eigenvalues below $\mu$ to $1$, 
-\cite{Bowler99,Daniels99,McWeeny60,Goedecker94,Palser98,MChallacombe99,Beylkin99,Holas01,Niklasson02,Kenney95}.
-This is the polynmial expansion (PE) approach.  Both methods can be 
-posed as a general polynomial expansion of the density matrix in terms of 
+above the chemical potential $\mu$ to $0$ and all the occupied eigenvalues below $\mu$ to $1$,
+forming an idempotent density matrix 
+\cite{Bowler99,Daniels99,McWeeny60,Goedecker94,Palser98,Challacombe99,Beylkin99,Holas01,Niklasson02,Kenney95}.
+This is the polynmial expansion (PE) or the spectral projection approach.
+Both the constrained functional minimization and the spectral projection methods 
+can be posed as a general expansion of the density matrix in terms of 
 the Fockian, {\em i.e.} $\bf P = {\cal P}(F)$ for some polynomial ${\cal P}$.
 In an iterative approach this expansion can be formulated as
 \begin{subequations}
@@ -120,14 +125,14 @@ In an iterative approach this expansion can be formulated as
 && {\bf X}_0 = {\cal P}_{0}(\bf F) \\
 && {\bf X}_{n+1} = {\cal P}_{n+1}({\bf F}, {\bf X}_n) ~~ {\rm (DMM)} \label{DMMPoly}\\
 && {\bf X}_{n+1} = {\cal P}_{n+1}({\bf X}_n)~~~~~~~~ {\rm  (PE)} \label{PEPoly}\\
-&& {\bf P} = \lim_{n \rightarrow \infty} {\bf X}_n
+&& {\bf P} = \lim_{n \rightarrow \infty} {\bf X}_n.
 \end{eqnarray}
 \end{subequations}
 
 
 
-There is a subtle distinction between polynomial expansion and density 
-matrix minimization resulting due to the use of approximate sparse matrix algebra, wherein
+There is a subtle distinction between polynomial expansion (PE) and density 
+matrix minimization (DMM) resulting due to the use of approximate sparse matrix algebra, wherein
 sparsity is enforced through a radial cutoff or numerical threshold  to 
 achieve $N$-scaling of the sparse matrix-matrix multiply. In polynomial expansion schemes, 
 such as Chebyshev expansion and density matrix purification, 
@@ -135,7 +140,7 @@ this approximate sparse-matrix algebra leads to an {\em accumulated error} in th
 that is seperate and additional to the {\em truncation errror}.  Truncation errors are simply 
 the errors that result from dropping elements of the exact density matrix.  Density matrix 
 minimization methods such as the Li-Nunes-Vanderbilt\cite{xli93} (LNV) approach are able to 
-avoid accumulation errors through continued ues of gradient expressions that contain the Fockian, 
+avoid accumulation errors through continued use of gradient expressions that contain the Fockian, 
 as implied by Eq.~(\ref{DMMPoly}). On the other hand, polynomial expansion methods lose contact 
 with the Fockian after the first iteration, allowing repeated iterations with 
 approximate sparse matrix algebra to blur the eigenbasis.  However, density matrix purification 
@@ -144,37 +149,40 @@ matrix-multiplies and converging quadratically as they reach idempotence.
 
 There are a number density matrix purification schemes worth differentiating: 
 {\it 1)} {\it grand canonical} schemes, with a step function  expansion around a predefined 
-         chemical potential \cite{McWeeny60,Kryachko,Holas},
+         chemical potential \cite{McWeeny60,Palser98,Holas01},
 {\it 2)} {\it canonical trace conserving} schemes, with a fixed trace
          in each iteration step \cite{Palser98}, 
 {\it 3)} {\it trace correcting} methods, where the trace only reaches the correct value at 
          convergence \cite{Niklasson02b}, and finally 
 {\it 4)} {\it trace setting} algorithms (this article), where the 
          trace is set to the correct value in most steps and towards convergence.
-There are also various hybrid approaches that mix both DMM and PE together.  For example
-Challacombe\cite{MChallacombe00} used a commuting DMM to precondition a grand cannonical PE,
-while Bowler \cite{DBowler00} suggests the use of the LNV DMM post-purification to reduce 
-accumulation errors.
+There are also various hybrid approaches that mix both density matrix minimization and 
+purification together.  For example
+Challacombe\cite{Challacombe99} used a commuting constrained minimization scheme to precondition 
+a grand canonical purification scheme,
+while Bowler \cite{Bowler99} suggests the use of the LNV density matrix minimization 
+after purification to reduce accumulation errors.
 
 Perhaps most closely related to the present work, a canonical trace 
-conserving  scheme was recently constructed by Palser and Manolopoulos 
-(PM) in Ref.~\onlinecite{Palser98}. By using a starting guess ${\bf X}_0$ with the trace equal to 
+conserving purification scheme, was recently constructed by Palser and Manolopoulos 
+(PM) in Ref.~\onlinecite{Palser98}. 
+By using a starting guess ${\bf X}_0$ with the trace equal to 
 the occupation number and thereafter performing trace-conserving
 spectral projections, ${\bf X}_n$ converges to the correct density matrix without
 prior knowledge of the chemical potential. 
 
 The PM scheme has an excellent
-performance compared to other methods \cite{JDaniels99,XPalser98}, and is also
-able to deal with degenerate eigensystems.   However, it has been found
-to fail for certain systems such as C60 \cite{JDaniels99}, and the accumulation
-errors are to large in some cases for performing ab initio MD \cite{DBowler00}.
+performance compared to other methods \cite{Palser98,Daniels99}, and is also
+able to deal with degenerate eigensystems.  However, it has been found
+to fail for certain systems such as C60 \cite{Daniels99} (MATT-Check reference!), and the accumulation
+errors are to large in some cases for performing ab initio MD \cite{DBowler00} (MATT-Check reference!).
 Also, due to the constraint of trace conservation the method is inefficient at low 
 and high filling, $f_{occ}=N_e/N$, due to the unfavorable behavior of ${\cal P}_{\rm PM}$ near 
 its endpoints.  Low filling $f_{occ}\lesssim .2$  is encounted 
 with a large basis set, while high filling $f_{occ} \gtrsim .8$ corresponds to a small basis set.
 
 In this paper, we introduce a new fourth order trace setting purification scheme (TS4) 
-that is efficient for both high and low fillings.  This new method is 
+that is efficient also for high and low fillings.  This new method is 
 efficient because it employs a polynomial that is uniformly well behaved, but with the
 potential for violating trace conservation in intermediate steps.  The method
 converges more rapidly for both small and large basis sets, significantly reducing 
@@ -184,19 +192,25 @@ The outline of this paper follows:  In Section \ref{TSP}, we define trace settin
 and present a fourth order algorithm.  Then, in Section \ref{Degen} we discuss the ability of
 trace setting methods to cope with degenerate eigensystems.  In Section \ref{Error}, we
 analyse the asymptotic behavior of both the initial accumulated error and the accumulated
-error at idempotence. Finally, the new trace setting algorithm is compared to PM and 
-eigensolution on the basis of accuracy and time to convergence.
+error at idempotence due to thresholding. Finally, the new trace setting algorithm is compared 
+to the PM scheme and the exact eigensolution on the basis of accuracy and time to convergence.
 
-\section{Trace setting purification}\label{TSP}
+\section{Purification schemes}\label{TSP}
 
 The general idea behind purification (spectral projection) for construction 
 of the density matrix is based on an iterative expansion of the
 Fockian in terms of a continuously increasing 
 polynomial ${\cal P}(x)$, $x \in [0,1]$  with stationary fixed end points extremums 
-at $0$ and $1$, i.e. ${\cal P}(0) = 0$ and ${\cal P}(1) = 1$. 
+at $0$ and $1$, i.e. ${\cal P}(0) = 0$, ${\cal P}(1) = 1$, and ${\cal P}'(0)={\cal P}'(1)=0$. 
 It can be shown that a nested sequence of such polynomials 
 converges to a step function with a step somewhere in $[0,1]$. 
-For example, the grand canonical McWeeny purification scheme \cite{McWeeny60,Palser98}
+First we discuss the grand canonical McWeeny method and the canonical
+purification scheme before presenting the main ideas of our
+trace setting purification technique.
+
+\subsection{McWeeny purification}
+
+The grand canonical McWeeny purification scheme \cite{McWeeny60,Palser98}
 is a polynomial expansion based on the following iteration:
 \begin{equation} \label{P3}
 {\bf X}_{n+1} = {\cal P}_{\rm McW}({\bf X}_n) = 3 {\bf X}_n^2 - 2 {\bf X}_n^3, ~~~~~ n = 0,1,2, \ldots
@@ -210,20 +224,63 @@ where
 \alpha = {\rm min} \left\{ \beta[\varepsilon_{\rm max} - \mu]^{-1},
 (1-\beta)[\mu - \varepsilon_{\rm min}]^{-1} \right\}.
 \end{equation}
-The constant $\beta$ is the inflection point where ${\cal P}(x) = x$ and for 
+The constant $\beta \in [0,1]$ is the inflection point where ${\cal P}(x) = x$ and for 
 the symmetric McWeeny polynomials $\beta = 1/2$. With this fixed
 inflection point the step is formed at $x=0.5$. This scheme is very
 efficient if the chemical potential $\mu$ is known in advance. 
 Alternatively, it is possible to form a good guess through use of a commuting 
-DMM as suggested in \onlinecite{MChallacombe00}, or $\mu$ can be adjusted 
-until the correct trace (occupancy or population) is reached. 
+density matrix minimization as suggested in \onlinecite{MChallacombe00}, 
+or $\mu$ can be adjusted until the correct trace (occupancy or population) is reached. 
 
-Another approach is to incorporate the chemical potential into the
-polynomial expansion through trace conservation.  This is the basis 
-of the Palser-Manolopoulos\cite{Palser98} (PM) method, and is achieved
-by applying both a purification polynomial ${\cal F}(x)$ and a ``re-occupation''
-polynomial ${\cal G}(x)$ such that the linear combintation preserves 
-the correct trace in every iteration:
+\subsection{Canonical purification}
+
+Another approach that avoids the problem with the unknown chemical
+potential is to incorporate $\mu$ into the
+polynomial expansion through trace conservation. This is the basis 
+of the Palser-Manolopoulos\cite{Palser98} (PM) method.
+The PM method starts with the correctly normalized guess ${\bf X}_0$ in Eq.\ (\ref{Pur2}) with 
+the trace equal to the occupation number $N_{\rm el}$, where
+\begin{equation} \left\{
+\begin{array}{ll}
+\alpha & = \frac{1}{N} \min \left( \frac{N_{\rm el}}{\varepsilon_{\rm max} - \mu},  \frac{N-N_{\rm el}}{\mu-\varepsilon_{\rm min}} \right), \\
+\beta &\equiv f_{\rm occ}  = N_{\rm el}/N \\
+\mu  &= {\rm Tr}[{\bf F}]/N.
+\end{array} \right.
+\end{equation}
+and thereafter trace-conserving purification is performed with
+\begin{equation} 
+{\bf X}_{n+1}  = \left\{ 
+\begin{array}{l}
+[(1+c_n){\bf X}^2_n - {\bf X}^3_n]/c_n,~~ c_n \geq 1/2  \\
+\left. [(1-2c_n){\bf X}_n + (1+c_n){\bf X}^2_n - {\bf X}^3_n]/(1-c_n) \right.
+\end{array} \right.
+\end{equation}
+where
+\begin{equation}
+c_n  = \frac{ {\rm Tr}[{\bf X}^2_n-{\bf X}^3_n] } { {\rm Tr}[{\bf X}_n-{\bf X}^2_n] }.
+\end{equation} 
+The PM polynomials has the property that no 
+eigenvalues are maped out of [0,1].
+This ensures stability and ${\bf X}_n$ converges to the correct density matrix.
+However, at high or low occupancy
+where the step has to be formed at values near 0 or 1 the initial
+mappings becomes close equivalence and the method stalls \cite{Palser98,Niklasson02b}. 
+This occurs at high occupancies in the small basis set limit, $f_{\rm occ} \rightarrow 1$ 
+or in the case of a low occupancy with large basis sets, $f_{\rm occ} \rightarrow 0$. 
+For particular systems this becomes a severe problem for the PM scheme.
+A scheme that works just as efficiently as the PM scheme, but avoids the particular
+problems at high and low occupancies and that also can deal with degenerate systems
+would thus be a great advantage. This is what our trace correcting purification scheme
+tries to accomplish.
+
+\subsection{Trace setting purification}
+
+By not resticting the purification to trace conservation, except
+at idempotency convergence, it is possible to avoid the problem of slow convergence
+at high and low occupancies. The trace setting purification scheme is 
+achieved by applying both a purification polynomial ${\cal F}(x)$ and a ``re-occupation''
+polynomial ${\cal G}(x)$ such that the linear combintation gives
+the correct trace after an iteration:
 \begin{equation} \label{NT}
 {\bf X}_{n+1} = {\cal P}({\bf X}_n) = {\cal F}({\bf X}_n) + \gamma_n {\cal G}({\bf X}_n)
 \end{equation}
@@ -231,62 +288,33 @@ with
 \begin{equation} \label{gamma}
 \gamma_n = (N_{\rm el} - {\rm Tr}[{\cal F}({\bf X}_n)])/{\rm Tr}[{\cal G}({\bf X}_n)].
 \end{equation}
-
-The PM method starts with the correctly normalized guess, Eq.~\ref{Pur2}, with
-\begin{equation}
-\alpha = \frac{1}{N}\min 
-\left(
-\frac{N_{\rm el}}{\varepsilon_{\rm max} - \mu},  \frac{N-N_{\rm el}}{\mu-\varepsilon_{\rm min}}
-\right),
-\end{equation}
-where $\beta\equiv f_{\rm occ}=N_{\rm el}/N$ and $\mu={\rm Tr}\{{\bf F}\}/N$.
-The PM polynomial has the property that no values map out of [0,1], achieving this with 
-a slope that limits to unity near the endpoints as shown in Figure~1 of Ref.~\ref{Palser98}.   
-However, the strength of the PM method is also its weakness;  values near 0 or 1 
-encounter mappings near equivalence and the method stalls. In the small basis set
-limit, $f_{\rm occ} \rightarrow 1$ and the identity is added fully to the guess shifting 
-the majority of initial eigenvalues close to 0 or 1?. At the other end,   
-
-
- ,Starting with the PM guess
-density matrix, using 
-
-
-
-
-
-
-The highest and lowest 
-eigenvalue of the Fockian therefore control convergence of the PM method.  Large basis
-sets will 
-lead to guess density matrices with HELP according to the PM guess protocol 
-Eq.~\ref{PMGuess}, while small basis sets will produce guess density matrices with HELP.
-
-
-
-An example of a $F(x)$ and $G(x)$ and their sum for some
+The trace setting purification scheme is based on the 
+spectral projection of Eqs.\ \ref{NT} and \ref{gamma} with an initial guess ${\bf X}_0$ 
+with all eigenvalues of $-\bf F$ (reversed in order) normalized to the interval $[0,1]$.
+The trace is thus not necessarily correct at the initial guess.
+An example of a ${\cal F}(x)$ and ${\cal G}(x)$ and their sum for some
 different values of $\gamma_n$ is shown in Fig. \ref{Fig_F_G}.
-Notice, that if the value of $\gamma_n$ is too large we may create
-a composite polynomial $P(x)$ that no longer is a continuously  increasing
+If the value of $\gamma_n$ is too large we may create
+a composite polynomial ${\cal P}(x)$ that no longer is a continuously  increasing
 function in $[0,1]$, but has an extremum with values below or above $[0,1]$.
 This, means that the expansion series does not necessary converge
 to the desired step function, and that eigenvalues might be thrown out
 of the interval $[0,1]$ leading to divergence and instability.
 We can therefore not always set the trace as we wish and
-the adjusting parameter $\gamma$ must be bounded in order to preserve
+the adjusting parameter $\gamma_n$ must be bounded in order to preserve
 stability. The problem arises when too many eigenvalues are
 either too low or too high such that the flexible inflection
 point, acting like a chemical potential, is out of bounds.
-One way of fixing this problem is to apply an eigenvalue
+Our way of fixing this problem is to perform an eigenvalue
 redistribution. This can be done by using the spectral
-projection functions  $P(x) = x^2$
-or $P(x) = 2x-x^2$, as shown in Fig.\ \ref{Fig_F_G}, whenever $\gamma_n$ is 
-too large or to small. In a redistribution step the trace will change 
-such that
+projection functions  ${\cal P}(x) = x^2$
+or its ``mirror function'' ${\cal P}(x) = 2x-x^2$, as shown in Fig.\ \ref{Fig_F_G}, 
+whenever $\gamma_n$ is too large or to small. In a redistribution step the trace 
+will change such that
 \begin{equation}
 \left \{ \begin{array}{ll}
-Tr[X_n^2] & < Tr[X_n]\\
-Tr[2X_n-X_n^2] & > Tr[X_n].
+{\rm Tr}[X_n^2] & < {\rm Tr}[X_n]\\
+{\rm Tr}[2X_n-X_n^2] & > {\rm Tr}[X_n].
 \end{array} \right.
 \end{equation}
 With sufficiently
@@ -294,8 +322,8 @@ redistributed eigenvalues the trace setting purification
 step can be applied with $\gamma_n$ within
 the bounds of stability. All projection
 polynomials are continuously increasing with fixed end
-points at $0$ and $1$ and the expansion converge
-to a step function with a step automatically adjusted to
+points at $x=0={\cal P}(0)$ and $x=1={\cal P}(1)$, and the expansion 
+converges to a step function with a step automatically adjusted to
 the corresponding unknown chemical potential. This means
 that the converged density matrix is idempotent and with
 the correct number of occupied states. For the particular
@@ -306,79 +334,166 @@ purification steps always can be applied at the final projection steps.
 
 %
 
-\begin{figure}[!]
+\begin{figure}[t]
 \caption{Examples of spectral projection polynomials $P(x) = F(x) + \gamma G(x)$
-for different values of the adjustment factor $\gamma \in [0,6]$.} 
-\includegraphics{TP_Fig_F_G_small.eps}
-%\resizebox*{3.5in}{!}{\includegraphics{TP_Fig_F_G.eps}}
+for different values of the adjustment factor $\gamma \in [0,6]$.} \label{Fig_F_G}
+%\includegraphics{TP_Fig_F_G_large.eps}
+\resizebox*{3.5in}{!}{\includegraphics{TP_Fig_F_G_large.eps}}
 \end{figure}
 
-Our particular choice of $F$ and $G$ for the trace setting projection are
+Our particular choice of ${\cal F}$ and ${\cal G}$ for the trace setting projection are
 \begin{equation} \label{FG}
 \left\{ \begin{array}{ll}
-F(x) &= x^2 (4x-3x^2) \\
-G(x) &= x^2 (1-x)^2 ,
+{\cal F}(x) &= x^2 (4x-3x^2) \\
+{\cal G}(x) &= x^2 (1-x)^2 ,
 \end{array} \right.
 \end{equation}
 which are the depicted functions in Fig. \ref{Fig_F_G}.
 The adjustment factor $\gamma$ is bounded such that $\gamma \in [0,6]$.
 At convergence $\gamma \rightarrow 3$,
-which means that the expansion polynomial $P(x) = F(x) + \gamma G(x)$ 
+which means that the expansion polynomial ${\cal P}(x) = {\cal F}(x) + \gamma {\cal G}(x)$ 
 finally converges to the McWeeny polynomial similar to the PM scheme.
-The choice of $F$ and $G$ is quite arbitrary, but this particular
+The choice of $\cal F$ and $\cal G$ is quite arbitrary, but this particular
 choice has turned out to be both efficient and simple.
-The fourth order projection polynomial $F(x)$ 
+The fourth order projection polynomial ${\cal F}(x)$ 
 requires only two matrix multiplications, the same as for
 the third order McWeeny polynomial, but with one additional
-vanishing derivative at $x=0$. Adding the perturbation $\gamma G(x)$ with
+vanishing derivative at $x=0$. Adding the perturbation $\gamma {\cal G}(x)$ with
 $\gamma$ increasing from $0$ to $6$ continuously changes the composite 
-polynomial $F(x) + \gamma G(x)$ to $F$'s mirror function at $\gamma = 6$ 
-with the extra vanishing derivative at $x=1$.
-Many other choices of $F$ and $G$ can be made, maybe even more efficient than
+polynomial ${\cal P}(x) = {\cal F}(x) + \gamma {\cal G}(x)$ to $\cal F$'s mirror 
+function $1-{\cal F}(1-x)$ at $\gamma = 6$ with the extra vanishing derivative at $x=1$.
+Many other choices of $\cal F$ and $\cal G$ can be made, maybe even more efficient than
 what's given in Eq.\ (\ref{FG}). In this way the trace setting
 expansion technique can be viewed as a framework for a set
 of purification polynomials of varying order.
 The algorithm can be described by the following pseudo-code:
 \begin{equation} \label{Alg}
 \begin{array}{l}
-{\it function~ } \rho_0( H, N_e, {\it ErrorLimit})\\
-{\it estimate~} \varepsilon_0(H),~\varepsilon_N(H) \\
-X_0 = (\varepsilon_{\rm N}I-H)/(\varepsilon_{\rm N}-\varepsilon_{\rm 0}) \\
+{\it function~ } {\bf P}( {\bf F}, N_e, {\it ErrorLimit})\\
+{\it estimate~} \varepsilon_0({\bf F}),~\varepsilon_N({\bf F}) \\
+{\bf X}_0 = (\varepsilon_{\rm N}{\bf I}-{\bf F})/(\varepsilon_{\rm N}-\varepsilon_{\rm 0}) \\
 {\it while~ Error > ErrorLimit} \\
-~~ \gamma_n =(N_e - Tr [F(X_n ) ])/Tr [G(X_n ) ]\\
+~~ \gamma_n =(N_e - {\rm Tr} [{\cal F}({\bf X}_n ) ])/{\rm Tr} [{\cal G}({\bf X}_n ) ]\\
 ~~ {\it if}~ \gamma_n  > \gamma_{\rm max}  \\
-~~ ~~ X_{n+1} = 2X_n-X_n^2  \\
+~~ ~~ {\bf X}_{n+1} = 2{\bf X}_n-{\bf X}_n^2~~~~~~(i)  \\
 ~~ {\it else~ if}~ \gamma_n  < \gamma_{\rm min}  \\
-~~ ~~ X_{n+1} = X_n^2 \\
+~~ ~~ {\bf X}_{n+1} = {\bf X}_n^2~~~~~~~~~(ii) \\
 ~~ {\it else}\\
-~~ ~~ X_{n+1} = F(X_n) + \gamma_n  G(X_n) \\
+~~ ~~ {\bf X}_{n+1} = {\cal F}({\bf X}_n) + \gamma_n  {\cal G}({\bf X}_n)~~~(iii) \\
 ~~ {\it end}\\
 ~~ {\it estimate~ Error} \\
 {\it endwhile}\\
-\rho_0 = X_n .
+{\bf P} = {\bf X}_n .
 \end{array}
 \end{equation}
-The estimate of the the spectral bounds of $H$, i.e. 
-$\varepsilon_0(H)$ and $\varepsilon_N(H)$ can be given
+The estimate of the the spectral bounds of $\bf F$, i.e. 
+$\varepsilon_0({\bf F})$ and $\varepsilon_N({\bf F})$ can be given
 by, for example, Gersgorin estimates \cite{Palser98}
 or via a couple of Lanczos iterations \cite{Daniels99},
-with only a small extra computational cost. 
-
+with only a small extra computational cost. In the present
+article we have chosen the Gersgorin bond, which is
+always giving an upper or lower eigenvalue estimate.
+It is less accurate than, for example, a Lanczos
+estimate. This leads to a somewhat compressed
+spectra of ${\bf X}_0$ on $[0,1]$ and a slightly shifted
+stepfunction expansion compared to an exact estimate.
+This has generally little effect on the TS4 scheme but
+could sometimes, at low or high occupancies, make a difference
+for the PM scheme, which is more sensitive to the initial
+guess.
 
 A main reason for the increased efficiency is the fact that
-the derivative at $0$ and $1$ of the spectral projections used
-in the PM scheme approaches $1$ in the limit of no or maximum
-occupancy. This leads to a very slow convergence and is avoided
-in the trace setting scheme. Moreover, it is more efficient to 
-work with a 4th order polynomials. In this way one extra vanishing
-derivative at the fixed points may be achieved, but without any
+the derivative at $0$ and $1$ of the spectral projections 
+no longer approaches $1$ in the limit of no or maximum
+occupancy as in the case of the PM scheme avoiding a spectral
+projection that is close to identity, which leads to a slow
+convergence in the trace conserving approach. Moreover, it is more efficient to 
+work with 4th order polynomials. In this way one extra vanishing
+derivative at the fixed points may be achieved, essentially without any
 extra computational cost since a 4th order polynomial can be
-calculated with only to matrix-matrix multiplications. The
-same number of matrix multiplications is needed for a 3rd
+calculated with only two matrix-matrix multiplications. The
+same number of matrix multiplications is needed for a third
 order polynomial. Order 2, 4 and 9 seems to be optimal \cite{Niklasson02}.
 
 
-\section{Thresholding and Stability}\label{Error}
+\section{Degeneracy}\label{Degen}
+
+One advantage with the trace setting scheme and the trace
+conserving PM scheme, compared to some variational schemes \cite{Li93}
+and the grand canonical purification method,
+are their ability to deal with degeneracy and fractional occupancy.
+Below we briefly discuss the problem with degeneracy and fractional
+occupancy, how they destroys idempotency and how they can be calculated
+from the density matrix.
+
+Consider the density matrix ${\bf P}$  with a $\nu$ folded degeneracy
+with $n_d$ occupied degenerate states. The trace of the density matrix
+can be described as
+\begin{equation}
+Tr [ {\bf P}  ] = N_e = N_e-n_d + \nu \tau,
+\end{equation}
+where $\tau = n_d/\nu$ is the filling factor of the degenerate states.
+In the case of fractional filling of a non-degenerate state at the
+chemical potential $\nu = 1$ and $\tau = n_d < 1$.
+The density matrix can be described in analogy with Eq. (\ref{Density} as
+\begin{equation}\label{Density}
+{\bf P} = \sum_{k=1}^{N_{\rm el}-n_d} {\bf c}^{\rm T}_{k} {\bf c}_{k} +
+ \sum_{k=N_{\rm el}-n_d +1}^{N_{\rm el}- n_d + \nu } \tau {\bf c}^{\rm T}_{k} {\bf c}_{k}
+\end{equation}
+and with an orthogonal representation we have that
+\begin{equation}
+{\bf P}^m = \sum_{k=1}^{N_{\rm el}-n_d} {\bf c}^{\rm T}_{k} {\bf c}_{k} +
+ \sum_{k=N_{\rm el}-n_d +1}^{N_{\rm el}- n_d + \nu } \tau^m {\bf c}^{\rm T}_{k} {\bf c}_{k}.
+\end{equation}
+For powers of the density matrix we thus have that
+\begin{equation} \label{Rhom}
+{\rm Tr} [ {\bf P}^m  ] = N_{\rm el} - n_d + \nu \tau^m \neq Tr  [ {\bf P} ] = N_{\rm el}.
+\end{equation}
+From Eq.\ (\ref{Rhom}) we see that idempotency is not
+fulfilled (when $m>1$) in the case of degeneracy or fractional filling. 
+This means, for example, that grand canonical purification does not work and
+that the McWeeny constraint in conjugate gradient
+minimization schemes cannot be applied \cite{Li93}.
+In order to achieve a constrained search also
+in the degenerate case the trace imposing polynomials
+${\cal F}({\bf X}) + \gamma {\cal G}({\bf X})$ above, or the trace conserving polynomials
+in the canonical PM scheme may possibly be used as alternatives.
+
+Equation (\ref{Rhom}) can be used, as long as
+$n \neq \nu$, to calculate the degenerate filling factor and the degeneracy.
+Solving the equations (with $m=1,2,3$) for the degeneracy and occupancy
+of the degenerate states we get
+\begin{equation}
+n_d = \frac{({\rm Tr} [{\bf P}-\rho_0^2 ])^2}{{\rm Tr} [{\bf P}-2{\bf P}^2+{\bf P}^3 ]},
+\end{equation}
+\begin{equation}
+\nu = \frac{({\rm Tr} [{\bf P}-{\bf P}^2 ])^3}{{\rm Tr} [{\bf P}^2-{\bf P}^3 ]
+{\rm Tr} [{\bf P}-2{\bf P}^2+{\bf P}^3 ]}
+\end{equation}
+and
+\begin{equation}
+\tau = \frac{{\rm Tr} [{\bf P}^2-{\bf P}^3 ]}{{\rm Tr} [{\bf P}-{\bf P}^2 ]}.
+\end{equation}
+These formulas can be viewed as alternative conditions to idempotency
+for a degenerate density matrix or in the case of fractional occupancy. 
+The relations can also be used
+to derive the value of $\gamma_n$ at convergence. For the particular
+choice of functions $\cal F$ and $\cal G$ above, Eq.\ (\ref{FG}), we have that
+\begin{equation}
+\lim_{n \rightarrow \infty} \gamma_n = \frac{n_d - \nu {\cal F}(\tau )}
+                                               {\nu {\cal G}(\tau )}.
+\end{equation}
+Notice, that if $\gamma_{\infty}$
+is outside its bounds of stability, i.e.\ if $\gamma_{\infty} \notin [0,6]$, we cannot deal with
+degeneracy and fractional filling. The scheme will still
+converge, but not to the correct density matrix. For example,
+a 100 folded degeneracy requires $n_d \in [24,76]$ otherwise
+$\gamma$ will be out of bound at convergence. This puts some
+limitations on the ability to treat degeneracy and fractional filling
+with the proposed trace setting algorithm.
+
+
+\section{Thresholding, Error and Stability} \label{Error}
 
 To achieve ${\cal O}(N)$ scaling when solving for the density matrix, sparsity 
 must be enforced to prevent fill in following matrix-matrix multiplications.
@@ -387,13 +502,14 @@ The most common approach to achieving this sparsity involves an atom-atom or rad
 beyond which matrix elements elements are not computed:
 \begin{subequations}\label{CutOff}
 \begin{eqnarray}
-X_{ab}&=&X_{ab} ~~\mbox{\rm iff} ~~|{\bf A -B}| < R_{cut}\\
+X_{\bf AB}&=&X_{\bf AB} ~~\mbox{\rm iff} ~~|{\bf A -B}| < R_{cut}\\
 &=&0 ~~\mbox{\rm else},
 \end{eqnarray}
 \end{subequations}
-allowing all matrices to employ the same graph.  In this work we use a sparse 
-atom-blocked linear algebra\cite{MChallacombe99,MChallacombe00}, with thresholding 
-at the level of atom-atom blocks:
+allowing all matrices to employ the same graph. This technique has not been used
+in the present study. Instead we use a sparse 
+atom-blocked linear algebra\cite{Challacombe99,MChallacombe00} (MATT check references!),
+ with thresholding at the level of atom-atom blocks:
 \begin{subequations}
 \begin{eqnarray}
 {\bf X}_{AB}&=&{\bf X}_{AB} ~~\mbox{\rm iff} ~~ ||{\bf X}_{AB} ||_F > \tau \\
@@ -401,7 +517,8 @@ at the level of atom-atom blocks:
 \end{eqnarray}
 \end{subequations}
 where $||\cdot||_F$ is the Frobenious norm. An alternative to blocking 
-is to drop element by element\cite{ADaniels97}, which generates maximum sparsity.  
+is to drop element by element\cite{ADaniels97}, which generates maximum sparsity
+and is somewhat similar to a change in the computational machine epsilon, i.e. the numerical resolution.  
 In either case, we assume a filter opperation is applied after every sparse matrix-matrix 
 multiply to avoid fill in,
 \begin{eqnarray}
@@ -409,103 +526,123 @@ multiply to avoid fill in,
 	      &=&{\bf X}+\bm{\epsilon},\nonumber 
 \end{eqnarray}
 leading to the approximate matrix $\widetilde{ \bf X}$ which is in error by $\bm \epsilon$,
-a matrix we will asume constant and with $||\bm{\epsilon}||_1 \sim \tau$ in what follows.
+a matrix we will asume constant and with $||\bm{\epsilon}|| \sim \tau$ in what follows.
 
 After one matrix-matrix multiply with thresholding we have
 \begin{equation}
-{\widetilde{ \bf X}}^2 = {\bf X}^2 + \bm{\epsilon}\cdot {\bf X} +{\bf X} \cdot \bm{\epsilon}+{\cal O}(\bm{\epsilon}^2).
+{\widetilde{ \bf X}}^2 = {\bf X}^2 + \bm{\epsilon}\cdot {\bf X} +{\bf X} 
+\cdot \bm{\epsilon}+{\cal O}(\bm{\epsilon}^2).
 \end{equation}
-Following this thresholding policy, droping second and higher order error terms in $\bm\epsilon$, and 
-using the identity $||{\bf X}||_2 =\rho({\bf X})$ with spectral radius $\rho=1$ (by construction, 
-see Eq.~\ref{Guesstimate1}), repeated  McWeeny iteration leads to the assymptotic behavior
+Following this thresholding policy, droping second and higher order error terms in $\bm\epsilon$, 
+repeated purification iterations leads initially to the behavior
 \begin{equation}
-{\widetilde{\bf{ X}}}_n  = {\bf X}_n + {\cal O}(  3^n ||\bm{\epsilon}||_2 ).
+{\widetilde{\bf{ X}}}_n  = {\bf X}_n + {\cal O}(  k^n ||\bm{\epsilon}||),
 \end{equation}
-At first glance this would seem to lead to an unbounded eponential growth of error in purification. 
-However, the number of iterations $M$ required by purification schemes to reach convergence scales as \cite{Niklasson02b}
+for some constant $k>1$, depending on the purification scheme.
+At first glance this would seem to lead to an unbounded exponential growth of error in purification. 
+However, the number of iterations $M$ required by purification schemes to reach convergence has been
+shown to scale as \cite{Niklasson02b}
 \begin{equation}
 \label{Mlog}
 M = \alpha + \beta \log_2 \Delta g^{-1},
 \end{equation}
 where $\Delta g$ is the band gap at the chemical potential, and
 the constants $\alpha$ and $\beta$ depend on the projection polynomial, occupancy and accuracy goals.
-Also, as $\bf X_n$ enters the regime of quadratic convergence it approaches 
+At worst we thus have an error that is proportional to $||\bm{\epsilon}||$ and inversely
+proportional to the band gap $\Delta g$.
+Also, as ${\bf X}_n$ enters the regime of quadratic convergence it approaches 
 the nearly idempotent matrix $\bf P$.  At this point, the accumulation 
 of thresholding errors transitions from exponential to linear growth. 
-For example,  $n$-fold iteration of the filtered McWeeny sequence leads to the following
+For example,  $n$-fold iteration of the filtered McWeeny sequence 
+close to idempotency leads to the following
 fixed point with weak linear drift:
 \begin{equation}
 {\bf P}={\bf P}+\bm{\epsilon} \cdot {\bf Q}+ (n-1){\bf P}\cdot \bm{\epsilon} \cdot{\bf Q} 
 + {\cal O}(\bm{\epsilon}^2),
 \end{equation}
-where ${\bf Q}={\bf I}-{\bf P}$ is the virtual projector\cite{RMcWeeny59b}.
+where ${\bf Q}={\bf I}-{\bf P}$ is the virtual projector.
 Of course our threshold must be small enough to approach approximate idempotence to achieve
-this stabilization.
+this stabilization. We also see that if no further thersholding is performed
+the solution is fix and even the small linear drift dissapears.
+Purification is thus numerically stable to initial errors due to thresholding
+or finite erithmetics.
 
-\begin{equation}
-|| {\bf P}_{\rm ex}-{\bf P}||_2 < || {\bf P}_{\rm ex},{\bf P}||_2 \label{DensCommBound}
-\end{equation}
-
-
-In methods employing the cut-off approximation Eq.~(\ref{CutOff}), the rise in energy at 
-convergence due to incomplete sparse linear algebra makes 
-purification unsuitable for {\em ab initio} MD \cite{DBowler99b}. However, 
-under numerical thresholding it is the early accumulation of errors preceeding 
+Compared to the total accumulated error the idempotency error
+at covergence $||{\bf P} - {\bf P}^2||$ is small. The main source of 
+error is instead due to the commutation $||\{ {\bf F},{\bf P} \} || $. 
+In the exact case $|| \{ {\bf F},{\bf P}_{\rm ex} \} || =0$.
+Under numerical thresholding it is the early accumulation of errors preceeding 
 convergence that are of special concern, as error accumulation stabilizes at convergence 
 increasing only linearly and with a small prefactor goverened by $\tau$.  To address 
 this concern we propose the following threshold update
 \begin{equation}
-\tau_m = \min ( \delta \gamma^m,1)*\tau
+\tau_m = \min ( \delta \nu^m,1)*\tau
 \end{equation}
-where $m$ is purification step.  The parameters $\delta$ and $\gamma$ at this point are chosen 
+where $m$ is purification step.  The parameters $\delta$ and $\nu$ at this point are chosen 
 emprically to bring the accumulated error to a level consistent the truncation error, which 
 is the error expected purely from truncation of the exact density matrix with $\tau$.
+However, even if the exponential thersholding sheme above looks appealing it does not
+seem practical or necessary and it has not been used in the present study.
+
 
 \section{Results}
 
-A comparison is made between eigensolution (ES) followed by truncation, the 
-Palser-Manolopoulos scheme (PM) \cite{Palser98} and the quartic trace setting method (TS4).  
+In order to analyze and demonstrate properties of the quartic trace setting method (TS4)
+a comparison is made with the truncated exact density-matrix solution (TES), and the 
+Palser-Manolopoulos scheme (PM) \cite{Palser98} implemented in an {\it ab initio}
+linear scaling total energy scheme for electronic structure calculations.
 Atomic units are used throughout. 
 
 \subsection{Implementation}
 
 \subsubsection{Programming}
-Both the TS4 and PM algorithms were implemented in the {\sc MondoSCF}v1.0a4 suite of 
-quantum chemistry programs\cite{MondoSCF}.  In both algorithms, thresholding is carried out 
-only after a matrix-matrix addition but before each matrix-matrix multiply.  
-in  $/max |{\bf X}_{N+1}-{\bf X}_N|$ or ${\rm Tr}\{{\bf F P} \}$. 
+The algorithms were implemented in the {\sc MondoSCF}v1.0a4 suite of 
+quantum chemistry programs\cite{MondoSCF}.  
 All sparse matrix computations employ the same blocked compressed sparse row 
-(BCSR)\cite{MChallacombe99,MChallacombe00} 
+(BCSR)\cite{Challacombe99,MChallacombe00} {MATT check references!) 
 data structure.  With the BCSR data structure, the cost of recomputing the symbolic 
 matrix is negligible, allowing dynamic fill-in.  Also, the BCSR matrix-matrix multiplies 
-are carried out with platform specific {\sc DGEMM}s written by  
-{\sc PHiPAC} \cite{JBilmes96a,JBilmes97b,PHiPAC} in highly optimized C for small 
-(5x5x5 to 15x15x15) dense matrix-matrix multiplies.  The code was compiled using the 
+are carried out in highly optimized C for small 
+(5x5x5 to 15x15x15) dense matrix-matrix multiplies. 
+
+The code was compiled using the 
 Portland Group F90 compiler {\sc pgf90}v3.2 \cite{pgf90} with the {\tt -O1 -tp athlon} 
 options  and with the gnu C compiler {\sc gcc}v2.96 using the {\tt -O1} flag.  All 
 calculations were carried out on a 1.2GHz AMD Athlon Thunderbird running RedHat 
-{\sc Linux}v7.3\cite{RedHat73}.  Eigensolution was carried out with the native
-{\sc LAPACK} \cite{LAPACK} {\sc DSYEV} and {\sc BLAS} supplied with the {\sc pgf90}v3.2 compiler.
-Also, all ES calculations employed L{\"o}wdin symmetric orthogonalization \cite{PLowdin50}, 
+{\sc Linux}v7.3\cite{RedHat73} (MATT check references!).  The exact eigensolution was carried out with the native
+{\sc LAPACK} \cite{LAPACK}  (MATT check references!) {\sc DSYEV} and {\sc BLAS} supplied with the {\sc pgf90}v3.2 compiler.
+
+All TES calculations employed L{\"o}wdin symmetric orthogonalization \cite{PLowdin50} (MATT check reference!), 
 while all TS4 and PM calculations used the congruence transformation provided by
-AINV \cite{MChallacombe02c} compuation of the sparse approximate inverse Cholesky factor.
+compuation of the sparse approximate inverse AINV \cite{AINV,MChallacombe02c} 
+(MATT check references! AINV should be included!)
+Cholesky factor.
 
 \subsubsection{Thresholds and convergence}
-Experiments were carried out with all thresholds set to ``tight''
-(${\tt TwoE}=10^{-10}$,  ${\tt Cube}=10^{-7}$, ${\tt Dist}=10^{-12}$, 
-and ${\tt Trix}=10^{-6}$) while only the matrix thresholds ($\tau \equiv {\tt Trix}$, 
-see Eq.~\ref{filter}) local to the programs {\sc PM} and {\sc TS4} were varied.
-Unless otherwise stated, all errors in ES coorespond to  truncation with ${\tt Trix}=10^{-6}$.
+Experiments were carried out with the thresholding in the algorithm of Eq. (\ref{Alg})
+as follows:
+\begin{equation} 
+\begin{array}{lll}
+i)    &{\bf X}_{n+1} &= {\rm filter}[2{\bf X}_n - \widetilde{\bf X}^2_n,\tau] \\
+ii)   &{\bf X}_{n+1} &= {\rm filter}[\widetilde{\bf X}^2_n,\tau] \\
+iii)~ &\widetilde{\bf X}^2_n &= {\rm filter}[\widetilde{\bf X}^2_n,\tau] \\
+      &{\bf X}_{n+1} &= 
+{\rm filter}[\widetilde{\bf X}^2_n {\rm filter}[\gamma_n + \\
+ && +(4-2\gamma_n){\bf X}_n + (\gamma_n-3)\widetilde{\bf X}^2_n,\tau],\tau].
+\end{array}
+\end{equation}
+Unless otherwise stated, all errors in the TES coorespond to a single
+truncation of the exact solution of the density matrix (to machine precision) with $\tau=10^{-6}$.
 No variable thresholding or incremental Fock builds were used in the experiments. 
-Conditions for convergence of the PM and TS4 algorithms include a rise in relative 
+Conditions for convergence (MATT this is not clear!) of the PM and TS4 algorithms include a rise in relative 
 error of the electronic energy $\delta E_{\rm el}$, a rise in the maximum absolute 
 error in a density matrix element $\Delta{\bf P}$, or meeting the criteria 
 $\delta E_{\rm el} < 10^{-11}$ and $\Delta{\bf P} < 10^{-6}$.  
 All calculations also employed DIIS extrapolation \cite{PPulay88}, with the SCF
 converged to within $\delta E < 10^{-9}$ and $\Delta{\bf P} < 10^{-5}$ when possible.
-As previously discussed in Section whatever, DIIS attempts to extrapolate the between
-cycle, {\em inter-SCF} 
-commutator to zero.  With thresholding however, the {\em intra-SCF} commutator 
+The SCF convergence scheme DIIS attempts to extrapolate the between
+cycle, {\em inter-SCF} commutator ($[{\bf F}^{I},{\bf P}^{I-1}]$) to zero.  
+With thresholding however, the {\em intra-SCF} commutator 
 will never be truely zero, and for large accumulation errors this can lead to 
 stagnation of the DIIS.  An SCF termination policy that recognizes this is 
 therefore important.  In {\sc MondoSCF}, there are two additional conditions 
@@ -541,28 +678,29 @@ for (H$_2$O)$_{150}$ RHF/6-31G**.} \label{fillin}
 \caption{for (H$_2$O)$_{150}$ RHF/6-31G**.} \label{EigenBounds}
 \end{figure}
 
-The standard sequence of water clusters (H$_2$O)$_{10}$ through (H$_2$O)$_{150}$ 
+A sequence of water clusters (H$_2$O)$_{10}$ through (H$_2$O)$_{150}$  \cite{WaterCluster}
 were used to explore the differences between PM, TS4 and ES at the RHF/6-31G** level of theory.  
-%This level of theory leads to a large gap, $\Delta g \approx 0.5$, and should easily lead to 
-linear scaling.  The 6-31G** basis set is large enough to bring out the differences between PM and TS4 
+%This level of theory leads to a large gap, $\Delta g \approx 0.5$, and should easily lead to linear scaling.  
+The 6-31G** basis set is large enough to bring out the differences between PM and TS4 
 ($f_{\rm occ}=0.2$), but not so large as to be impractical in linear scaling calculations.  
 
 In Figure~\ref{waterconvergence}, convergence to idempotence is shown for 
 construction of the  RHF/6-31G** (H$_2$O)$_{150}$ density matrix using the PM and TS4 methods
-and their local thresholds ${\tt Trix}=10^{-3}, 10^{-4}, 10^{-5}$ and $10^{-6}$. 
-Note that each method starts with a different guess as discussed in Section \ref{TSP}.  Convergence
+and their local thresholds $\tau=10^{-3}, 10^{-4}, 10^{-5}$ and $10^{-6}$ (indicated
+in the paranthesis). Convergence
 of TS4 occurs in approximately 18 iterations, and for PM in about 30.  At first, 
 one might conclude that the longer iteration count for PM translates into significantly 
-longer CPU times reltative to TS4.  However, the fill in of the two methods
+longer CPU times reltative to TS4. However, the fill in of the two methods
 can be quite different as shown in Figure~\ref{fillin};  the PM method involves much
 sparser intermediate matrices than does TS4, which fills in quickly.  The actual ratio
 of PM to TS4 CPU times is only about 1.2 with $\tau=10^{-4}$ as shown in 
-Figure \ref{cputimes}.  At this level of approximation, both methods achieve 
+Figure \ref{cputimes}. At this level of approximation, both methods achieve 
 an early onset of true linear scaling, crossing  over the ES time at about 50 water 
-molecules.  One reason for this early crossover is the aforementioned use 
-{\sc DGEMM}s optimized for small matrices, with which the programs {\sc TS4} and {\sc PM} achieve sustained
-rates better than 400 Mflop/s.  This compares favorably with the dense $n=100$
-{\sc LINPACK} at 558 Mflop/s on this platform \cite{JDongarra01}.
+molecules. 
+%One reason for this early crossover is the aforementioned use 
+%{\sc DGEMM}s optimized for small matrices, with which the programs {\sc TS4} and {\sc PM} achieve 
+%sustained rates better than 400 Mflop/s. This compares favorably with the dense $n=100$
+%{\sc LINPACK} at 558 Mflop/s on this platform \cite{JDongarra01}.
 
 \begin{figure}[b]
 \resizebox*{3.5in}{!}{\includegraphics{WATER_FIGS/WaterTimings.eps}}
@@ -572,7 +710,7 @@ rates better than 400 Mflop/s.  This compares favorably with the dense $n=100$
 
 \begin{figure}[b]
 \resizebox*{3.5in}{!}{\includegraphics{WATER_FIGS/TS4vsPMWaterCommutatorErrors.eps}}
-\caption{The accumulated PM and TS4 commutator errors $||[{\bf F P,P F }]||_F$ 
+\caption{The accumulated PM and TS4 commutator errors $||[{\bf F ,P }]||_F$ 
 with iteration and the truncation errors corresponding to eigensolution followed
 by one filter opperation (straight lines), for tightly converged RHF/6-31G** (H$_2$O)$_{150}$ density 
 and Fock matrices.}\label{commerrors}
@@ -588,24 +726,29 @@ While the compensation between convergence and fill rates lead to similar CPU ti
 the differences in accumulated errors are quite differenet for the two purification schemes.
 This is shown in Figure~\ref{commerrors}, which compares the commutator errors $||[{\bf FP,PF}]||_F$
 for PM and TS4 with iteration at $\tau=10^{-3}, \tau=10^{-4}, \tau=10^{-5}$ and $\tau=10^{-6}$
-for RHF/6-31G** (H$_2$O)$_{150}$.  The commutator errors are a sensitive measure of eigenbasis
+for (included in the parenthesis) RHF/6-31G** (H$_2$O)$_{150}$. 
+The commutator errors are a sensitive measure of eigenbasis
 blurring due to thresholding.  Also shown in Figure~\ref{commerrors} 
-are the truncation errors for these matrix thresholds, corresponding to ES followed by one 
-filter operation.  In each case, the TS4 accumulated errors are approximately one order of 
+are the truncation errors for these matrix thresholds, corresponding to the TES 
+given from the exact density matrix followed by a single threshold with
+$\tau = 10 ^{-3}$, $\tau = 10 ^{-4}$, $\tau = 10 ^{-5}$, and $\tau = 10 ^{-6}$.  
+In each case, the TS4 accumulated errors are approximately one order of 
 magnitude larger than those due to truncation, while the PM accumulated errors are two
 orders larger.  Note the decade by decade control of the commutator error by the matrix
 threshold, an initial exponential increase in the accumulated error and the 
 small linear rise in error upon convergence of the purification schemes as discussed
 in Section~\ref{Error}.
 
-While we have the bound Eq.~\ref{DensCommBound} relating $||[{\bf P}_{\rm ex},{\bf P}]||_2$ 
-to error in the density matrix, the more readily accesible measure $||[{\bf F},{\bf P}]||_F$
-requires  system dependent callibration for use in estimating the error in computed
-properties.  In particular, the eigenvalue spectrum of $\bf F$ will be different from
-system to system; errors in the density matrix will propigate through the one-electron potential
-every SCF cycle, and will have a different impact on convergence depending on sensitivity 
-of the problem to perturbation.  In Figure~\ref{waterenergyerrors}, 
-converged total energies per water molecule are shown for ES, and for PM and TS4 at
+%While we have the bound Eq.~\ref{DensCommBound} relating $||[{\bf P}_{\rm ex},{\bf P}]||_2$ 
+%to error in the density matrix, the more readily accesible measure $||[{\bf F},{\bf P}]||_F$
+%requires  system dependent callibration for use in estimating the error in computed
+%properties.  In particular, the eigenvalue spectrum of $\bf F$ will be different from
+%system to system; errors in the density matrix will propagate through the one-electron potential
+%every SCF cycle, and will have a different impact on convergence depending on sensitivity 
+%of the problem to perturbation.  
+
+In Figure~\ref{waterenergyerrors}, 
+converged total energies per water molecule are shown for TES, and for PM and TS4 at
 $\tau=10^{-4}$.  After an initial broadening, the error per water molecule 
 holds constant with system size.  For this system and at this level of 
 approximation the order of magnitude difference between PM and TS4 commutator errors 
@@ -628,10 +771,10 @@ corresponds to one order of magnitude in the total energy.
 \end{figure}
 
 
-In reference~\onlinecite{JDaniels98}, Daniels and Scuseria found the PM method to be 
+In reference~\onlinecite{JDaniels98} (MATT Check reference!), Daniels and Scuseria found the PM method to be 
 unstable for semi-empirical calculations on C60 requiring  $\approx 100$ SCF
 cycles, and converging to an excited state solution without level shifting.  
-We surmise that this is a result of DIIS pollution 
+We sumarise that this is a result of DIIS pollution 
 by large commutator errors due to the use of ``fixed-form'' 
 linear algebra (as opposed to dynamic fill-in) and/or the low filling 
 $f_{\rm occ} \gtrsim 0.8$ inherent in the semi-empirical approximation, rather
@@ -646,7 +789,7 @@ C60 filling factor is $f_{\rm occ}=0.62$. All calculations start with the same s
 averaged, block diagonal $1s^22s^22p^2$ guess. The PM and TS4 total 
 energies with matrix threshold $\tau \in [10^{-2},10^{-5}]$ are shown in 
 Figure~\ref{c60convergence}.  The inset contains the signed absolute errors 
-$\Delta E$ relative to the total energy $E_{\rm ES}=-2278.116~453$ and the fit 
+$\Delta E$ relative to the total energy $E_{\rm TES}=-2278.116~453$ and the fit 
 $10^{4.4} \tau^2$, demonstrating quadratic convergence. 
 While the precise number of matrix-matrix multiplies depends on $\tau$,
 $M_{\rm PM}/M_{\rm TS4} \approx 1.2$ and $M_{\rm TS4}=38$ for $\tau=10^{-5}$.
@@ -656,7 +799,7 @@ except those that depend on the matrix threshold $\tau$ local to {\sc PM} and {\
 the number of SCF cycles behaves erratically for large thresholds due to large intra-SCF 
 commutator errors that pollute the DIIS solution.  This behavior is shown in 
 Figure~\ref{c60SCFs}. For smaller thresholds and TS4, the number of SCF cycles 
-approaches the ES value of 7.  
+approaches the TES value of 7.  
 
 \subsection{Chlorophyll}
 
@@ -670,7 +813,7 @@ approaches the ES value of 7.
 \begin{table}
 \caption{Dependence of the number of matrix-matrix multiplies $M$, order of the signed absolute 
 error in the converged total energy $\Delta E$ for both the PM and the TS4 method with basis set 
-progression for RPBE Cholophyll.}
+progression for RPBE Cholophyll. $\tau = ?$ (MATT what is $\tau$ ?)}
 \label{ChlorophyllConvergence}
 \squeezetable
 \begin{tabular}{lcccccc}
@@ -683,8 +826,8 @@ Ahlrichs VDZ    &  0.34      & -2375.971  & 59      & 43       & $ 10^{-7}$   & 
 6-31G**         &  0.19      & -2378.313  & 75      & 48       & $ 10^{-6}$   &  $ 10^{-7}$   \\
 Ahlrichs VTZ    &  0.21      & -2378.400  & 107     & 57       & $ 10^{-3}$   &  $ 10^{-7}$   \\
 6-311G**        &  0.15      & -2378.853  & 115     & 55       & $ 10^{-4}$   &  $ 10^{-7}$   \\
-6-311G(2d,2p)   &  0.11      & -2378.930  & 147     & 61       & $ 10^{-3}$   &  $ 10^{-8}$   \\
-6-311G(3d,3p)   &            & -2378.970  &         &          &              &        \\
+%6-311G(2d,2p)   &  0.11      & -2378.930  & 147     & 61       & $ 10^{-3}$   &  $ 10^{-8}$   \\
+%6-311G(3d,3p)   &            & -2378.970  &         &          &              &        \\
 \botrule
 \end{tabular}
 \end{table}
@@ -693,14 +836,14 @@ Linear scaling methods in the large basis set limit have heretofore been largely
 ignored.  However, as parallel ${\cal O}(N)$ methods mature it is likely that  this 
 regime will be accessed more frequently.
 
-Here, ES, PM and TS4 are used in the basis set progression 
+Here, TES, PM and TS4 are used in the basis set progression 
 of Chlorophyll, a relatively small (91 atom) Mg containing porhyrin ring system. 
 The electrostatic mapped electron density isosurface of Chlorophyll at the
 RPBE/6-311G(3d,3p) level of theory is shown in Figure~\ref{ChPic}. 
-In Table~\ref{ChlorophyllConvergence}, total energies computed with ES, the number 
+In Table~\ref{ChlorophyllConvergence}, total energies computed with TES, the number 
 of matrix-matrix multiplies and the absolute signed error in the total energies are 
 presented.  Although the Fock-derived initial guess for the PE methods is initially 
-close to 99% dense, PM takes a more sparse path towards convergence, 
+close to $99\%$ dense, PM takes a more sparse path towards convergence, 
 droping to $\approx 90\%$ full as in Figure~\ref{fillin}.  Also, as the basis set 
 size increases so does the number of matrix-matrix multiplies $M_{\rm PM}$ required 
 for PM to reach convergence. For the larger basis sets the behavior of PM becomes 
@@ -710,8 +853,8 @@ stable at about 0.1 $\mu$hartree.
 
 \section{Discussion}
 
-A recent WTEC workshop on computational chemistry \cite{WTEC00} noted that when it comes
-to linear scaling ``the devils in the details''. These details include
+A recent WTEC workshop on computational chemistry \cite{WTEC00} (MATT Check reference!) noted that when it comes
+to linear scaling ``the devils are in the details''. These details include
 interplay between the interative density matrix solver, the underlying incomplete sparse 
 linear algebra, basis set approximations and methods for convergence acceleration.   
 Despite these complexities, TS4 is a clear improvment relative to PM, arguably the best 
@@ -727,6 +870,7 @@ does not suffer this problem.
 %One approach to avoiding these difficulties might be to employ 
 %{\em in situ} basis set optimization \cite{Conquest,JTalman00,GBerghold02}, allowing 
 %high accuracy with a reduced representation.
+At the same time it is still possible to deal with degeneracy and fractional occupancy.
 
 Under thresholding intra-SCF errors corrupt DIIS, preventing 
 extrapolation of the inter-SCF commutator to zero.  For thresholds $\tau \lesssim 10^{-4}$
@@ -736,27 +880,21 @@ the use of auxilliary SCF convergence criteria
 to detect DIIS stagnation does allow robust application of PE methods
 under severe thresholding ($\tau \approx 10^{-2})$.
 In particular, no intrinsic problems (excited states, non-convergence, etc) were
-found in application to RPBE/STO-6G C60, although extra SCF cycles were in sometimes required. 
-In all cases the approximate PE total energies were found to approach the ES values
+found in application to RPBE/STO-6G C60, although extra SCF cycles were sometimes required. 
+In all cases the approximate PE total energies were found to approach the TES values
 from above, and for C60 were shown to converge quadratically with $\tau$.
 Clearly the effect of both accumulated and truncation errors is to move 
-$[\bf P,F]$ away from zero, which can only raise the energy.  Of special concern is smoothness
-of the energy surface subject to these errors \cite{DBowler00}.  As pointed out by 
-Bowler \cite{DBowler00},  the accumulation errors can be reduced 
+$[\bf P,F]$ away from zero.  Of special concern is smoothness
+of the energy surface subject to these errors \cite{DBowler00} (MATT check reference! Bowler99?).  As pointed out by 
+Bowler \cite{DBowler00} (MATT check reference! Bowler99?),  the accumulation errors can be reduced 
 (at least to the level of truncation) by following PE with DMM. 
 It is also possible to achieve the same effect with PE only, but with a tighter matrix threshold.  
 Here again there may be differences between numerical thresholds and radial cutoffs 
 that are not yet fully appreciated. It is certain though that the faster convergence of TS4 can 
 lead to faster CPU times in the small and large basis set limit with the static graphs 
-that obtain using radial cut-offs.  
+that are obtained using radial cut-offs.  
 
 \section{Conclusions}
-
-
-
-
-
-
 
 In summary we have proposed a general, simple, and efficient 
 trace setting density-matrix expansion algorithm that converges 
@@ -767,91 +905,20 @@ low and high occupancies. The methods ability to give the
 correct expansion also for degenerate systems or for problems
 with a fractional occupancy was discussed
 and formulas for calculating the degeneracy and filling factors
-from the density matrix were derived. The relations can
-be used as alternative conditions to idempotency in the
-case of degeneracy and fractional occupation.
+from the density matrix were derived. 
 The numerical stability in the case of thresholding
-was discussed and it was shown that the upper bound of 
+was discussed and analyzed. The method was implemented in
+MONDOSCF suite of {\it ab initio} linear scaling electronic structure
+programs and compared to the PM scheme and the
+truncated exact solution and the numerical stability
+and error was analyzed.
+
 total accumulated error of the converged density matrix is independent
 of the number of matrix multiplications. The main error 
 is instead due to the size of the inverse band gap which, however,
 may lead to problems for large metallic systems.
 
 \section{Acknowledgement}
-
-\appendix{Degeneracy}\label{Degen}
-
-One advantage with the trace setting scheme and the trace
-conserving PM scheme, compared to some variational schemes \cite{Li93},
-are their ability to deal with degeneracy and fractional occupancy.
-Below we briefly discuss the problem with degeneracy and fractional
-occupancy, how they destroys idempotency and how they can be calculated
-from the density matrix.
-
-Consider the density matrix $\rho_0$  with a $\nu$ folded degeneracy
-with $n_d$ occupied degenerate states. The trace of the density matrix
-can be described as
-\begin{equation}
-Tr [ \rho_0  ] = N_e = N_e-n_d + \nu \tau,
-\end{equation}
-where $\tau = n_d/\nu$ is the filling factor of the degenerate states.
-In the case of fractional filling of a non-degenerate state at the
-chemical potential $\nu = 1$ and $\tau = n_d < 1$.
-The density matrix can be described within the bra-ket notation as
-\begin{equation}
-\rho_0 = \sum_{ i=1 }^{ N_e - n_d } |\Psi_i >< \Psi_i | + 
-\sum_{ i= N_e - n_d + 1 }^{ N_e - n_d + \nu } \tau | \Psi_i> < \Psi_i |
-\end{equation}
-and with an orthogonal representation we have that
-\begin{equation}
-\rho_0^m = \sum_{i=1}^{N_e-n_d} |\Psi_i><\Psi_i| + 
-\sum_{i=N_e-n_d + 1}^{N_e - n_d +\nu} \tau^m |\Psi_i><\Psi_i|.
-\end{equation}
-For powers of the density matrix $(m \geq 1)$ we thus have that
-\begin{equation} \label{Rhom}
-Tr [ \rho_0^m  ] = N_e - n_d + \nu \tau^m \neq Tr  [ \rho_0  ] = N_e.
-\end{equation}
-From Eq.\ (\ref{Rhom}) we see that idempotency is not
-fulfilled in the case of degeneracy or fractional filling. 
-This means, for example, that grand canonical purification does not work and
-that the McWeeny constraint in conjugate gradient
-minimization schemes cannot be applied \cite{Li93}.
-In order to achieve a constrained search also
-in the degenerate case the trace imposing polynomials
-$F(S) + \gamma G(S)$ above, or the trace conserving polynomials
-in the canonical PM scheme may possibly be used as alternatives.
-
-Equation (\ref{Rhom}) can be used, as long as
-$n \neq \nu$, to calculate the degenerate filling factor and the degeneracy.
-Solving the equations (with $m=1,2,3$) for the degeneracy and occupancy
-of the degenerate states we get
-\begin{equation}
-n_d = \frac{(Tr [\rho_0-\rho_0^2 ])^2}{Tr [\rho_0-2\rho_0^2+\rho_0^3 ]},
-\end{equation}
-\begin{equation}
-\nu = \frac{(Tr [\rho_0-\rho_0^2 ])^3}{Tr [\rho_0^2-\rho_0^3 ]Tr [\rho_0-2\rho_0^2+\rho_0^3 ]}
-\end{equation}
-and
-\begin{equation}
-\tau = \frac{Tr [\rho_0^2-\rho_0^3 ]}{Tr [\rho_0-\rho_0^2 ]}.
-\end{equation}
-These formulas can be viewed as alternative conditions to idempotency
-for a degenerate density matrix or in the case of fractional occupancy. 
-The relations can also be used
-to derive the value of $\gamma_n$ at convergence. For the particular
-choice of functions $F$ and $G$ above, Eq.\ (\ref{FG}), we have that
-\begin{equation}
-\lim_{n \rightarrow \infty} \gamma_n = \frac{n_d - \nu F(\tau )}
-                                               {\nu G(\tau )}.
-\end{equation}
-Notice, that if $\gamma_{\infty}$
-is outside its bounds of stability, i.e.\ if $\gamma_{\infty} \notin [0,6]$, we cannot deal with
-degeneracy and fractional filling. The scheme will still
-converge, but not to the correct density matrix. For example,
-a 100 folded degeneracy requires $n_d \in [24,76]$ otherwise
-$\gamma$ will be out of bound at convergence. This puts some
-limitations on the ability to treat degeneracy and fractional filling
-with the proposed trace setting algorithm.
 
 
 \bibliographystyle{apsrmp}
@@ -921,10 +988,10 @@ J.\ Comp.\ Phys. {\bf 152}, 32 (1999).
 
 \bibitem{Niklasson02} A.\ M.\ N. Niklasson, C.\ J. Tymczak, and H. R\"oder,
 {\it "A multi-resolution density matrix approach to electronic structure
-calculations"} (unpublished).
+calculations"} (Accepted to PRB).
 
 \bibitem{Niklasson02b} A.\ M.\ N. Niklasson, {\it Expansion
-algorithm for the density matrix}, (unpublished).
+algorithm for the density matrix}, (Accepted to PRB).
 
 \bibitem{Kenney95} C.\ S. Kenney, and A.\ J. Laub,
 IEEE Trans. Automat. Control {\bf 40}, 1330 (1995).
@@ -963,24 +1030,9 @@ J.\ Chem.\ Phys. {\bf 106}, 9708 (1997).
 M. Challacombe, J.\ Chem.\ Phys. {\bf 110}, 2332 (1999).
 M.  Challacombe, J.\ Chem.\ Phys. {\bf 113}, 10037 (2000).
 
+\bibitem{WaterCluster} Can be downloaded from  http://www.t12.lanl.gov/~mchalla
+
 
 \end{references}
-
-\begin{figure}
-\caption{\small
-\label{Conv}}
-\end{figure}
-
-
-
-\begin{figure}
-\caption{\small
-\label{ConvN}}
-\end{figure}
-
-\begin{figure}
-\caption{\small
-\label{Lin}}
-\end{figure}
 
 \end{document}
