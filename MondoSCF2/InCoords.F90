@@ -2065,13 +2065,6 @@ CONTAINS
            ENDDO
          ENDIF
          !
-         ! Scale Cartesian displacements
-         ! (preserves constrained fractionals)
-         !
-         RMSDOld=RMSD
-         CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
-                         DiffMax,RMSD)
-         !
          ! Project out translations. 
          ! Rotations are treated in fractional coordinates.
          !
@@ -2081,6 +2074,13 @@ CONTAINS
          IF(GTrfCtrl%DoRotOff) THEN
            CALL RotationsOff(VectCartAux2%D,VectCart%D,Print2,PBCDim)
          ENDIF
+         !
+         ! Scale Cartesian displacements
+         ! (preserves constrained fractionals)
+         !
+         RMSDOld=RMSD
+         CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
+                         DiffMax,RMSD)
          !
          ! Refresh B matrix?  
          !
@@ -2689,6 +2689,8 @@ CONTAINS
      ELSE
        CALL PBCRotOff(DCarts(NCart+1:NCart+9),Carts(NCart+1:NCart+9), &
                       Print,PBCDim)
+       IF(PBCDim==1) CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print,X_O=.TRUE.)
+       IF(PBCDim==2) CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print,Z_O=.TRUE.)
      ENDIF
    END SUBROUTINE RotationsOff
 !
@@ -2806,7 +2808,7 @@ CONTAINS
 !
 !----------------------------------------------------------
 !
-   SUBROUTINE MolRotOff(CartVect,Carts,Print)
+   SUBROUTINE MolRotOff(CartVect,Carts,Print,X_O,Y_O,Z_O)
      REAL(DOUBLE),DIMENSION(:) :: CartVect,Carts
      REAL(DOUBLE)                :: X,Y,Z,XX,YY,ZZ,XY,YZ,ZX
      REAL(DOUBLE)                :: CMX,CMY,CMZ
@@ -2817,7 +2819,15 @@ CONTAINS
      TYPE(DBL_RNK2)              :: Theta,Theta2,CMCarts
      TYPE(DBL_Vect)              :: Rot1,Rot2,Rot3,Vect
      INTEGER                     :: NCart,NatmsLoc,I,J,INFO
-     LOGICAL                     :: Print
+     LOGICAL                     :: Print,XOff,YOff,ZOff
+     LOGICAL,OPTIONAL            :: X_O,Y_O,Z_O
+     !
+     XOff=.FALSE.
+     YOff=.FALSE.
+     ZOff=.FALSE.
+     IF(PRESENT(X_O)) XOff=X_O
+     IF(PRESENT(Y_O)) YOff=Y_O
+     IF(PRESENT(Z_O)) ZOff=Z_O
      !
      NCart=SIZE(CartVect)
      NatmsLoc=NCart/3
@@ -2844,19 +2854,26 @@ CONTAINS
      !
      ! Build inertial momentum tensor
      !
-     CALL PrincMomTens(CMCarts%D,Theta%D)
-     !
-     ! Get eigenvectors of inertial momentum tensor
-     !
-     CALL SetDSYEVWork(3)
-       BLKVECT%D(1:3,1:3)=Theta%D(1:3,1:3)
-       CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
-       BLKWORK%D,BLKLWORK,INFO)
-       IF(INFO/=SUCCEED) &
-       CALL Halt('DSYEV hosed in RotationsOff. INFO='&
-                  //TRIM(IntToChar(INFO)))
-       Theta2%D(1:3,1:3)=BLKVECT%D(1:3,1:3)
-     CALL UnSetDSYEVWork()
+     IF(.NOT.(XOff.OR.YOff.OR.ZOff)) THEN
+       CALL PrincMomTens(CMCarts%D,Theta%D)
+       !
+       ! Get eigenvectors of inertial momentum tensor
+       !
+       CALL SetDSYEVWork(3)
+         BLKVECT%D(1:3,1:3)=Theta%D(1:3,1:3)
+         CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+         BLKWORK%D,BLKLWORK,INFO)
+         IF(INFO/=SUCCEED) &
+         CALL Halt('DSYEV hosed in RotationsOff. INFO='&
+                    //TRIM(IntToChar(INFO)))
+         Theta2%D(1:3,1:3)=BLKVECT%D(1:3,1:3)
+       CALL UnSetDSYEVWork()
+     ELSE
+       Theta2%D=Zero
+       IF(XOff) Theta2%D(1,1)=One
+       IF(YOff) Theta2%D(2,2)=One
+       IF(ZOff) Theta2%D(3,3)=One
+     ENDIF
      !
      ! Calculate displacements resulting from rotations
      ! around principal axis by a unit rotation vector pointing along
@@ -7094,7 +7111,7 @@ return
      INTEGER                     :: I1,I,J,NDim,IMax,NDimens
      ! 
      RefBonds=0     
-     CondNum1=0.1D0
+     CondNum1=0.05D0 ! This parameter controls recognition of flatness of molecule in the vicinity of atom I1
      NDim=AtmB%Count%I(I1)
      CALL New(BondVect2,(/NDim,3/))
      CALL New(Mark,NDim)
