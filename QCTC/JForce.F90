@@ -41,50 +41,13 @@ PROGRAM JForce
   INTEGER                      :: NC,I,J,K
   REAL(DOUBLE),DIMENSION(3)    :: A,B,nlm
   REAL(DOUBLE),DIMENSION(15)   :: F_nlm
-  TYPE(DBL_RNK2)               :: LatFrc_J
+  TYPE(DBL_RNK2)               :: LatFrc_J,LatFrc_J_PFF,LatFrc_J_Dip
   REAL(DOUBLE),DIMENSION(3,3)  :: DivCV
-#ifdef MMech
-  INTEGER                      :: NatmsLoc,I,I1,I2
-  TYPE(DBL_VECT)               :: MMJFrc
-  TYPE(INT_VECT)               :: GlobalQMNum
-  TYPE(INT_VECT)               :: AtmMark    
-  TYPE(CRDS)                   :: GMLocMM,GMLoc
-  TYPE(DBL_RNK2)               :: GradAux
-#else
   TYPE(CRDS)                   :: GMLoc
-#endif
   REAL(DOUBLE),EXTERNAL        :: MondoTimer
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-!
-#ifdef MMech
-  IF(HasQM()) THEN
-!    Get basis set and geometry
-     CALL Get(BS,Tag_O=CurBase)
-     CALL Get(GMLoc,Tag_O=CurGeom)
-!    Allocations 
-     CALL New(JFrc,3*GMLoc%Natms)
-     JFrc%D(:)=Zero
-     CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-     CALL Get(P,TrixFile('D',Args,1))
-  ENDIF
-  IF(HasMM()) THEN
-    CALL Get(GMLocMM,Tag_O='GM_MM'//CurGeom)
-    CALL New(AtmMark,GMLocMM%NAtms)
-    CALL Get(AtmMark,'AtmMark')
-    CALL New(MMJFrc,3*GMLocMM%NAtms)
-    MMJFrc%D(:)=Zero
-    CALL NewBraBlok(Gradients_O=.TRUE.)
-  ENDIF
-  IF(MMOnly()) THEN
-     CALL Get(Rho,'Rho',Args,Current(1))
-     CALL Get(RhoPoles,CurGeom)
-  ELSE
-     CALL Get(Rho,'Rho',Args,1)
-     CALL Get(RhoPoles,NxtCycl)
-  ENDIF
-#else
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GMLoc,Tag_O=CurGeom)
@@ -94,16 +57,13 @@ PROGRAM JForce
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(P,OnAll_O=.TRUE.)
-#endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
-
-#ifdef PARALLEL
   CALL GetDistrRho('Rho',Args,1)
 #else
+  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
 #endif
-  CALL Get(RhoPoles)
-#endif   
+  CALL Get(RhoPoles) 
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
 ! Setup global arrays for computation of multipole tensors
@@ -116,31 +76,17 @@ PROGRAM JForce
 #else
   CALL RhoToPoleTree
 #endif
-#ifdef MMech 
-! Set the electrostatic background
-  IF(HasMM()) THEN
-     CALL PBCFarFieldSetUp(PoleRoot,GMLocMM)
-  ELSE
-     CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
-  ENDIF
-#else
 ! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
-#endif
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
-!  CALL Delete(Rho)
+  CALL Delete(Rho)
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
-!
   CALL New(LatFrc_J,(/3,3/))
   LatFrc_J%D = Zero
-!
-#ifdef MMech
-  IF(HasQM()) THEN
-#endif
 #ifdef PARALLEL
   MyAtomNum = End%I(MyId)-Beg%I(MyId)+1
   CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MONDO_COMM,IErr)
@@ -204,28 +150,31 @@ PROGRAM JForce
         ENDIF
      ENDDO
   ENDDO
-  !
 #ifdef PARALLEL
-  IF(MyID.EQ.ROOT) THEN
+  IF(MyID == ROOT) THEN
 #endif
-     ! The Dipole Contribution to the Lattice Forces
+!    The Dipole Contribution to the Lattice Forces
+     CALL New(LatFrc_J_Dip,(/3,3/))
+     LatFrc_J_Dip%D = Zero
      IF(GMLoc%PBC%Dimen > 0) THEN
         DivCV   = DivCellVolume(GMLoc%PBC%BoxShape%D,GMLoc%PBC%AutoW%I)
         DO I=1,3
            DO J=1,3
               IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
-                 LatFrc_J%D(I,J) = LatFrc_J%D(I,J)  -  E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
+                 LatFrc_J_Dip%D(I,J) = LatFrc_J_Dip%D(I,J)  -  E_DP*DivCV(I,J)/GMLoc%PBC%CellVolume
               ENDIF
            ENDDO
         ENDDO
      ENDIF
-     ! Farfield Contribution to the Inner Box Sum
+!    The Farfield Contribution to the Lattice Forces
+     CALL New(LatFrc_J_PFF,(/3,3/))
+     LatFrc_J_PFF%D = Zero
      IF(GMLoc%PBC%Dimen > 0) THEN
         DO I=1,3
            DO J=1,3
               IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(J)==1) THEN
                  DO K=0,LSP(MaxEll)
-                    LatFrc_J%D(I,J) = LatFrc_J%D(I,J) - Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
+                    LatFrc_J_PFF%D(I,J) = LatFrc_J_PFF%D(I,J) - Two*(RhoC%D(K)*dTenRhoC%D(K,I,J)+RhoS%D(K)*dTenRhoS%D(K,I,J))
                  ENDDO
               ENDIF
            ENDDO
@@ -234,149 +183,112 @@ PROGRAM JForce
 #ifdef PARALLEL
   ENDIF
 #endif
-!
-! Print Out the Lattice Forces
-!
-!!$  WRITE(*,*) 'LatFrc_J'
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 
-!!$  ENDDO
 #ifdef PARALLEL
+! Collect the timings
   JFrcEndTm = MondoTimer()
   JFrcTm = JFrcEndTm-JFrcBegTm
-#endif
-#ifdef MMech
-  ENDIF
-#endif
-!--------------------------------------------------------------------------------
-! Print The JForce
-!  CALL Print_Force(GMLoc,JFrc,'dJ/dR in au ')
-!  JFrc%D(:)=JFrc%D(:)/KJPerMolPerAngstToHPerBohr
-!  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
-!  JFrc%D(:)=JFrc%D(:)*KJPerMolPerAngstToHPerBohr
-#ifdef MMech
-  IF(HasMM()) THEN
-     DO AtA=1,GMLocMM%NAtms
-        IF(AtmMark%I(AtA)==0) THEN
-           A1=3*(AtA-1)+1
-           A2=3*AtA
-           MMJFrc%D(A1:A2)=dNukE(GMLocMM,AtA)
-        ENDIF
-     ENDDO
-!    'closed shell'
-     MMJFrc%D=Two*MMJFrc%D
-!    checks, prints
-     IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
-       CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in au ')
-       MMJFrc%D=MMJFrc%D/KJPerMolPerAngstToHPerBohr
-       CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in KJ/mol/A ')
-       MMJFrc%D=MMJFrc%D*KJPerMolPerAngstToHPerBohr
-     ENDIF
-  ENDIF
-#endif 
-!--------------------------------------------------------------------------------
-#ifdef MMech
-! Sum in contribution to total force
-  IF(HasMM()) THEN
-    NatmsLoc=GMLocMM%Natms
-  ELSE IF(HasQM()) THEN
-    NatmsLoc=GMLoc%Natms
-  ELSE
-    CALL Halt('No mechanics defined in JForce') 
-  ENDIF
-  CALL New(Frc,3*NatmsLoc)
-  CALL New(GradAux,(/3,NatmsLoc/))
-  CALL Get(GradAux,'gradients',Tag_O=CurGeom)
-  CALL CartRNK2ToCartRNK1(Frc%D,GradAux%D)
-  CALL New(GlobalQMNum,NatmsLoc)
-  IF(HasQM().AND.HasMM()) THEN
-     CALL Get(GlobalQMNum,'GlobalQMNum')
-  ELSE
-     DO I=1,GMLoc%Natms; GlobalQMNum%I(I)=I ; ENDDO
-     IF(HasQM()) THEN
-        Do Ata=1,GMLoc%Natms 
-           I=GlobalQMNum%I(Ata)
-           IF(I/=0) THEN !!! don't save gradients on link atoms
-              I1=3*(I-1)+1
-              I2=3*I
-              A1=3*(AtA-1)+1
-              A2=3*AtA
-              Frc%D(I1:I2)=Frc%D(I1:I2)+JFrc%D(A1:A2)
-           ENDIF
-        ENDDO
-     ENDIF
-     CALL PChkSum(Frc ,'Frc bef dJ/dR added',Proc_O=Prog)  
-     IF(HasMM()) THEN
-        Frc%D=Frc%D+MMJFrc%D
-        CALL PChkSum(MMJFrc,'MMJFrc bef dJ/dR added',Proc_O=Prog)  
-     ENDIF
-     CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
-     CALL CartRNK1ToCartRNK2(Frc%D,GradAux%D)
-     CALL Put(GradAux,'gradients',Tag_O=CurGeom)
-     CALL Delete(GradAux)
-     CALL Delete(Frc)
-     CALL Delete(GlobalQMNum)
-! Tidy up
-!--------------------------------------------------------------------------------
-     IF(HasQM()) THEN
-        CALL Delete(BS)
-        CALL Delete(GMLoc)
-        CALL Delete(JFrc)
-        CALL Delete(P)
-     ENDIF
-     IF(HasMM()) THEN
-        CALL Delete(GMLocMM)
-        CALL Delete(MMJFrc)
-        CALL Delete(AtmMark)
-     ENDIF
-  ENDIF
-#else
-#ifdef PARALLEL
+! Collect the Forces
   TotFrcComp = 3*GMLoc%Natms
   CALL New(TotJFrc,TotFrcComp)
   CALL MPI_Reduce(JFrc%D(1),TotJFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
-  IF(MyID == 0) THEN
+  IF(MyID == ROOT) THEN
     JFrc%D(1:TotFrcComp) = TotJFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotJFrc)
-#endif
-  CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
-! Sum in contribution to total force
+! Collect the Lattice Forces
+  CALL New(TmpLatFrc_J,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_J%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_J%D(1,1),TmpLatFrc_J%D(1,1),9,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == ROOT) THEN
+     LatFrc_J%D = TmpLatFrc_J%D
+  ENDIF
+  CALL Delete(TmpLatFrc_J)
+  IF(MyID == ROOT) THEN
+!!$!    Print The Lattice Forces
+!!$     CALL OpenASCII(OutFile,Out)
+!!$     WRITE(Out,*) 'LatFrc_J'
+!!$     WRITE(*,*)   'LatFrc_J'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$     WRITE(Out,*) 'LatFrc_J_Dip'
+!!$     WRITE(*,*)   'LatFrc_J_Dip'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$     WRITE(Out,*) 'LatFrc_J_PFF'
+!!$     WRITE(*,*)   'LatFrc_J_PFF'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$     CLOSE(Out)
+!    Sum in the J contribution to total force
+     DO AtA=1,NAtoms
+        A1=3*(AtA-1)+1
+        A2=3*AtA
+        GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
+     ENDDO
+!    Sum in the J contribution to total lattice force,including Dip and PFF
+     LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
+     GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+!    Tidy Up
+     CALL Delete(LatFrc_J_Dip)
+     CALL Delete(LatFrc_J_PFF)
+  ENDIF
+#else
+!!$! Print The Lattice Forces
+!!$  CALL OpenASCII(OutFile,Out)
+!!$  WRITE(Out,*) 'LatFrc_J'
+!!$  WRITE(*,*)   'LatFrc_J'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$  WRITE(Out,*) 'LatFrc_J_Dip'
+!!$  WRITE(*,*)   'LatFrc_J_Dip'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
+!!$  ENDDO  
+!!$  WRITE(Out,*) 'LatFrc_J_PFF'
+!!$  WRITE(*,*)   'LatFrc_J_PFF'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$  CLOSE(Out)
+! Sum in the J contribution to total force
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
      GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
-
-#ifdef PARALLEL
-  CALL New(TmpLatFrc_J,(/3,3/))
-  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_J%D(1,1),0.0d0)
-  CALL MPI_REDUCE(LatFrc_J%D(1,1),TmpLatFrc_J%D(1,1),9,MPI_DOUBLE_PRECISION, &
-       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+TmpLatFrc_J%D
-  CALL Delete(TmpLatFrc_J)
-#else
+! Sum in the J contribution to total lattice force
+  LatFrc_J%D         = LatFrc_J%D+LatFrc_J_Dip%D+LatFrc_J_PFF%D
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+! Tidy up
+  CALL Delete(LatFrc_J_Dip)
+  CALL Delete(LatFrc_J_PFF)
 #endif
+! Do some checksumming and IO 
+  CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)  
+! Save Forces to Disk
   CALL Put(GMLoc,Tag_O=CurGeom)
-!
+! Tidy Up  
+  CALL Delete(JFrc)
+  CALL Delete(LatFrc_J)
+  CALL Delete(P)
   CALL Delete(BS)
   CALL Delete(GMLoc)
-  CALL Delete(LatFrc_J)
-  CALL Delete(JFrc)
-#endif
   CALL Delete(RhoPoles)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(TmJFrcArr,NPrc)
   CALL MPI_Gather(JFrcTm,1,MPI_DOUBLE_PRECISION,TmJFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-  IF(MyID == ROOT) THEN
-     ! Output needs a lot of work, and should not go to STDOUT
-     ! Also, these statistics were written long ago by      
-     ! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
-     ! another routine to do this????
-     ! CALL PImbalance(TmJFrcArr,NPrc,Prog_O='JFrc')
-  ENDIF
   CALL Delete(TmJFrcArr)
 #endif
 ! didn't count flops, any accumulation is residual from matrix routines
