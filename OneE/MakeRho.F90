@@ -184,7 +184,7 @@ PROGRAM MakeRho
            AtB = Dmat%ColPt%I(P)
            R   = Dmat%BlkPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN                   
-              B = Pair%B
+              B = Pair%B 
               DO NC = 1,CS_OUT%NCells
                  Pair%B = B+CS_OUT%CellCarts%D(:,NC)
                  Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
@@ -207,7 +207,7 @@ PROGRAM MakeRho
 #else
         CALL AddDist(RhoA,GM,NuclearExpnt,1,GM%NAtms)
 #endif
-     ENDIF
+     ENDIF 
 #ifdef MMech
   ELSE
      CALL New_HGRho_new(RhoA,(/0,0/))
@@ -222,7 +222,15 @@ PROGRAM MakeRho
   CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
 ! Fold distributions back into the box
-  CALL Fold_Rho_new(GM,RhoA)
+#ifdef FOLDRHO
+  IF(SCFActn=='ForceEvaluation') THEN
+     WRITE(*,*) '***  NOT FOLDING RHO  ***'
+  ELSE
+     CALL Fold_Rho_new(GM,RhoA)
+  ENDIF
+#else
+  CALL Fold_Rho_new(GM,RhoA) 
+#endif
 #ifdef MMech
 ! Compute integrated electron and nuclear densities
   IF(HasQM()) THEN
@@ -257,11 +265,10 @@ PROGRAM MakeRho
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
+!
 #endif
 ! Calculate dipole and quadrupole moments
   CALL New(MP)
-
-
   CALL CalRhoPoles_new(MP,RhoA,GM)
 #ifdef PARALLEL
   CALL New(SMP)
