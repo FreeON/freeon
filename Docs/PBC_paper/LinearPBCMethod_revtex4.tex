@@ -42,9 +42,9 @@ of the crystal field [J.~Chem.~Phys., {\bf 107}, 10131 (1997)].   A periodic ver
 algorithm [J.~Chem.~Phys., {\bf 113}, 10037 (2000)], which builds a telescoping adaptive grid for numerical 
 integration of the exchange-correlation matrix, is shown to be efficient when the problem is posed as integration over 
 the unit cell.  Commonalities between the Coulomb and exchange-correlation algorithms are discussed, with an emphasis on 
-achieving linear scaling through the use of modern data structures.  With these developments, convergence of the $\Gamma$-point 
-supercell approximation to the $\bf k$-space integration limit is demonstrated for MgO and NaCl.    Linear scaling 
-construction of the Fockian and control of error is demonstrated for RBLYP/6-21G* diamond up to 512 atoms.  \\
+achieving linear scaling through the use of modern data structures.  With these developments, convergence of the 
+$\Gamma$-point supercell approximation to the ${\bf k}$-space integration limit is demonstrated for MgO and NaCl. 
+Linear scaling construction of the Fockian and control of error is demonstrated for RBLYP/6-21G* diamond up to 512 atoms.\\
 \noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, tree-code, Gaussian-orbital
 %
 \end{abstract}
@@ -354,19 +354,21 @@ or Ewald-like summation of the multipole expansion. Expansion of the Ewald poten
 tin foil (TF) boundary conditions, requires reciprocal and real space summation with every ${\bf J}$ build, 
 and scales as $O(N^{3/2})$.  An alternative is the Ewald-like summation of the multipole interaction tensor,
 which was first described by Nijboer and De Wette (NDW) \cite{BNijboer57,BNijboer58a} and later reviewed and extended 
-by Challacombe, White and Head-Gordon \cite{MChallacombe97D} to lattice summation of the irregular solid harmonic multipole interaction tensor. 
-This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, and is equivalent to a  direct lattice summation (not a true Ewald sum) 
-excluding an inner region, $V_{\rm In}$, surrounding the unit cell.  This inner region has been subtracted to avoid penetration
-errors and to guarantee convergence of the multipole expansion. 
-With the summed interaction tensors cheaply precomputed and reused, the cost of Coulomb summation over the PFF 
-scales as as ${\cal O}(N p^2)$, where $p$ is the order of the multipole expansion.  With this partition,  the  $N$-scaling periodic quantum Coulomb sums 
+by Challacombe, White and Head-Gordon \cite{MChallacombe97D} to lattice summation of the irregular solid harmonic 
+multipole interaction tensor. This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, and is
+equivalent to a  direct lattice summation (not a true Ewald sum) excluding an inner region, $V_{\rm In}$, surrounding 
+the unit cell.  This inner region has been subtracted to avoid penetration errors and to guarantee convergence of the 
+multipole expansion. With the summed interaction tensors cheaply precomputed and reused, the cost of Coulomb 
+summation over the PFF scales as as ${\cal O}(N p^2)$, where $p$ is the order of the multipole expansion.  With this 
+partition,  the  $N$-scaling periodic quantum Coulomb sums 
 involve the contributions
 \begin{equation}
 {\bf J} = {\bf J}^{\rm In} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
 corresponding to the three separate regions shown in Fig.~2.   Here, ${\bf J}^{\rm In}$ is computed using 
 the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of 
-${\bf J}^{\rm PFF}$ will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$, necessary to 
+${\bf J}^{\rm PFF}$ will be developed in the following section, while in Section~\ref{tinfoil} the term 
+${\bf J}^{\rm TF}$, necessary to 
 introduce tin-foil boundary conditions, is detailed.
 %
 % Figure 2
@@ -435,7 +437,8 @@ interaction tensor
 \end{equation}
 which can be efficiently computed on the fly for each new lattice, both to high accuracy and to high order (large $p$) 
 using the new methods detailed in Appendix~\ref{calMTen}.  Note that this is a direct sum of the interaction tensor, 
-and is {\em not} equivalent to Ewald summation.  Nevertheless, with this simplification,  the ${\cal O}(p^2 N)$  working equation 
+and is {\em not} equivalent to Ewald summation.  Nevertheless, with this simplification,  the ${\cal O}(p^2 N)$  
+working equation 
 \begin{equation}
 \label{WorkingPFF}
 J_{ab}^{\rm PFF}= \sum^p_{l=0} \sum^{l}_{m=-l} O_{l}^{m}\left[ \rho^\infty_{ab}\right] {\cal J}^m_l \;,
@@ -458,8 +461,9 @@ between the
 penetration and overlap extent are negligible. 
 With $V_{\rm In}$ fixed, the precision of ${\bf J}^{\rm PFF}$ is controlled entirely by the expansion order $p$.  
 In general $p$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of 
-${\bf J}^{\rm In}$.  With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
-computation of ${\bf J}^{\rm PFF}$ involves a static, worst-case error dominated by the multipole expansion.  
+${\bf J}^{\rm In}$.  With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic 
+near/far-field partition, while computation of ${\bf J}^{\rm PFF}$ involves a static, worst-case error dominated by 
+the multipole expansion.  
 This static error is controlled by using the FMM-like error bound, 
 \begin{equation}
 \label{FMMError}
@@ -468,8 +472,9 @@ This static error is controlled by using the FMM-like error bound,
 \leq \tau_{\rm \scriptscriptstyle MAC} \;,
 \end{equation}
 to set the appropriate expansion order $p$.  In Eq.~(\ref{FMMError}),  $d_{\rm max}$ is the maximum translational distance, 
-${\cal C}$ is the asymptotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the threshold controlling the 
-translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  and further explanation of these parameters.
+${\cal C}$ is the asymptotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the 
+threshold controlling the translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  
+and further explanation of these parameters.
 
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
@@ -501,7 +506,8 @@ dipole moment of the distribution $\rho^\infty_{ab}$.
 %
 \begin{figure} 
 \includegraphics{BoxUC.eps}
-\caption{Transformation between  the unit cell with volume  $V_{\rm UC}$ (described by the primitive lattice vectors {\bf a}, {\bf b} and {\bf c}) 
+\caption{Transformation between  the unit cell with volume  $V_{\rm UC}$ (described by the primitive lattice vectors 
+{\bf a}, {\bf b} and {\bf c}) 
 and the rectangular integration volume $V_\Box$ employed by HiCu.}
 \label{boxuc}
 \end{figure}
@@ -529,7 +535,8 @@ Because the distributions and density both involve a double sum over lattice vec
 there will be a large number of atom-atom pairs that do not overlap with $V_\Box$.  A similar situation is 
 encountered in the gas phase for parallel versions of HiCu \cite{CGan03}, where each processor has a small, 
 local cube-tree that may overlap only a few of the many possible atom-atom pairs.  
-The solution to this problem  again comes from the ray tracing literature, in the form of a modified ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
+The solution to this problem  again comes from the ray tracing literature, in the form of a modified ray-AABB 
+\cite{MGomez99} and sphere-AABB test \cite{GGems}.  
 %     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
 %     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems,  pp. 247-250
 The ray-AABB test has been modified into a cylinder-AABB test, where the radius of the cylinder
@@ -579,7 +586,7 @@ Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ ${\bf k}$-space grid.}
 \end{tabular}}
 \end{table}
 
@@ -607,7 +614,7 @@ Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ ${\bf k}$-space grid.}
 \end{tabular}}
 \end{table}
 
@@ -699,12 +706,13 @@ For the {\sc CRYSTAL98} calculations, we used the following threshold parameters
 the auxiliary functions used to fit the exchange-correlation potential 
 
 In Table~\ref{NaCl8511}, comparison is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
-for sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for chlorine and using the restricted BLYP functional \cite{DFT_LYP:88,BLYP:88}.
+for sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for chlorine and using the restricted BLYP functional 
+\cite{DFT_LYP:88,BLYP:88}.
 Next, in Table~\ref{NaClGammaPt}, convergence of the supercell $\Gamma$-point approximation 
 is demonstrated for NaCl with the STO-3G basis set and the restricted local density approximation.
 Then, in Table~\ref{MgOGammaPt}, convergence of the supercell $\Gamma$-point approximation
-to the  $\bf k$-space integration result is demonstrated for MgO, using the 8-61G\cite{CBS:861G:MgO} basis set for magnesium,
-the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the restricted BLYP functional.
+to the  ${\bf k}$-space integration result is demonstrated for MgO, using the 8-61G\cite{CBS:861G:MgO} basis set for 
+magnesium,the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the restricted BLYP functional.
 The primitive lattice coordinates for these systems are given in Ref.~[\onlinecite{PBCCoordinates}].
 
 Finally, in Table~\ref{DiamondGammaPt}, convergence of the supercell $\Gamma$-point approximation is shown for
@@ -744,9 +752,9 @@ We have extended linear scaling quantum chemical methods for computation of exch
 periodic boundary conditions at the $\Gamma$-point.  These methods have demonstrated an early onset of linear scaling and
 error control for diamond, allowing calculations up to 512 atoms at the RBLYP/6-21G* level of theory.  In both cases, this 
 early onset of linear scaling has been enabled by the use of modern data structures such as the $k$-d tree, together with 
-reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, demonstrating
-high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of state for 
-pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
+reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, 
+demonstrating high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of 
+state for pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
 
 While this contribution has focused on demonstrating linear scaling for diamond system, 
 the methods presented here work for slabs and wires as well, using methods for computation 
@@ -790,8 +798,8 @@ and
 %\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 where $\gamma$ is the incomplete gamma function \cite{MAbramowitz87} and \( \beta  \) is a parameter controling the 
-partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, ${\cal M}^{m}_{l}$, 
-may be expressed as 
+partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, 
+${\cal M}^{m}_{l}$, may be expressed as 
 %
 \begin{eqnarray}
 {\cal M}^{m}_{l} & = & \sum _{\mathbf{R}\in V_{\rm PFF}}\, M_{l}^{m}[\mathbf{R}]
@@ -823,6 +831,7 @@ Following  CWHG, this expression can be further developed into real and reciproc
 \nonumber\\
 \label{C4}
 \end{eqnarray}
+Where $\mathbf{G}$ are the reciprical lattice vectors.
 With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \),
 and summing terms from smallest to largest, the periodic multipole interaction tensor can be computed
 to high precision given an accurate representation of the incomplete gamma function.  In 
@@ -902,8 +911,8 @@ where,
 \label{C10p}
 \end{eqnarray}
 and \( A_{\rm UC} \) is the area of the cell along the non-periodic
-direction.  {\bf USING A WHAT KIND OF METHOD??}, we are able to obtain  $\sim 8-10$ digit accuracy 
-in the two-dimensional  \( {\cal M} \).
+direction. With this, we are able to obtain  $\sim 8-10$ digit accuracy 
+in the calculation of the two-dimensional \( {\cal M} \).
 
 %\section{Coordinates of Validation Suite}\label{FracCoords}
 %
