@@ -283,7 +283,7 @@ MODULE DerivedTypes
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
       INTEGER          :: Nkind     !-- Number of atom kinds or types
-      TYPE(INT_VECT)   :: AtNum     !-- Atomic number per atom      
+      TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
