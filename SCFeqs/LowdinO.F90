@@ -42,10 +42,23 @@ PROGRAM LowdinO
   TYPE(INT_VECT)                 :: IWork
   TYPE(ARGMT)                    :: Args
   INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status
+  REAL(DOUBLE)                   :: Chk,CondS,OverlapEThresh
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
-  REAL(DOUBLE)                   :: Chk,CondS
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !--------------------------------------------------------------------
   CALL StartUp(Args,Prog)
+  ! Check for thresholds overide 
+  CALL OpenASCII(InpFile,Inp)         
+  IF(OptDblQ(Inp,Prog,OverlapEThresh))THEN
+     Mssg=TRIM(ProcessName(Prog))//' OverlapEigenThreshold  = '  &
+          //TRIM(DblToShrtChar(OverlapEThresh))
+     CALL OpenASCII(OutFile,Out)         
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
+  ELSE
+     OverlapEThresh=1.D-12
+  ENDIF
+  CLOSE(Inp)
   CALL New(Values,NBasF)
   CALL New(Vectors,(/NBasF,NBasF/))
   CALL Get(S,TrixFile('S',Args))
@@ -90,7 +103,7 @@ PROGRAM LowdinO
 !--------------------------------------------------------------------
   Tmp1%D=Zero
   DO I=1,NBasF
-     IF(Values%D(I)>1.D-12)THEN
+     IF(Values%D(I)>OverlapEThresh)THEN
         Tmp1%D(I,I)=One/SQRT(Values%D(I))
      ELSE
         Tmp1%D(I,I)=Zero
