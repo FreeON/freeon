@@ -216,8 +216,7 @@ PROGRAM ParaMakeRho
      IF(SCFActn=='Restart')THEN
         CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)))
      ELSE
-        WRITE(*,*) 'MyID = ', MyID, ' prepare to crash!!!! Halt is to be called'
-        CALL Halt(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
+        CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
              //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
              //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
      ENDIF
