@@ -15,25 +15,25 @@ PROGRAM MakeM
 #endif
   IMPLICIT NONE
 #ifdef PARALLEL
-  TYPE(DBCSR)         :: M,M2
+  TYPE(DBCSR)                :: M,M2
 #else
-  TYPE(BCSR)          :: M,M2
+  TYPE(BCSR)                 :: M,M2
 #endif
-  INTEGER                    :: NC
-  REAL(DOUBLE), DIMENSION(3) :: B
+  INTEGER                    :: NCA,NCB
+  REAL(DOUBLE), DIMENSION(3) :: B,A
   TYPE(AtomPair)             :: Pair
 !
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(DBL_RNK4)      :: MD
+  TYPE(BSET)                 :: BS
+  TYPE(CRDS)                 :: GM
+  TYPE(DBL_RNK4)             :: MD
 !
-  TYPE(ARGMT)         :: Args
-
-  TYPE(DBL_VECT)      :: COrig
-  INTEGER             :: P,R,AtA,AtB,NN                          
-  INTEGER             :: IXYZ                                       !vw
-  CHARACTER(LEN=5)              , PARAMETER :: Prog='MakeM'         !vw
-  CHARACTER(LEN=1), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/) !vw
+  TYPE(ARGMT)                :: Args
+  TYPE(DBL_VECT)             :: COrig
+  INTEGER                    :: P,R,AtA,AtB,NN                          
+  INTEGER                    :: IXYZ
+  CHARACTER(LEN=*)              , PARAMETER :: Prog='MakeM'
+  CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
+!
 !--------------------------------------- 
 ! Start up macro
 !
@@ -46,17 +46,18 @@ PROGRAM MakeM
 !
 ! Get Multipole origine. TODO
   CALL New(COrig,3)
-  CALL SetEQ(COrig,Zero)
-  !COrig%D(3)=0.580836d0
+  CALL SetEQ(COrig,0.0d0)
+  !COrig%D(:)=GM%PBC%CellCenter%D(:)
 !---------------------------------------------- 
 ! Allocations 
 !
   CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(M)
+  CALL NewBraBlok(BS)
 !-----------------------------------------------
 ! Run over cartisian componants 
 !
-  DO IXYZ=1,3  !vw
+  DO IXYZ=1,3
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
 !
@@ -66,9 +67,9 @@ PROGRAM MakeM
 ! Main loops
 !
 #ifdef PARALLEL
-  M%NAtms=0
-  DO AtA=Beg%I(MyId),End%I(MyId)
-     M%NAtms=M%NAtms+1  
+     M%NAtms=0
+     DO AtA=Beg%I(MyId),End%I(MyId)
+        M%NAtms=M%NAtms+1
 #else
      M%NAtms=NAtoms
      DO AtA=1,NAtoms
@@ -76,21 +77,44 @@ PROGRAM MakeM
         DO AtB=1,NAtoms
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
               NN = Pair%NA*Pair%NB
-              B = Pair%B
-              DO NC = 1,CS_OUT%NCells
-                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
+!--------------------------------------------------------
+              A(:) = Pair%A(:)
+              B(:) = Pair%B(:)
+              DO NCA = 1,CS_OUT%NCells
+                 Pair%A(:) = A(:)+CS_OUT%CellCarts%D(:,NCA)
                  Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                       &    + (Pair%A(2)-Pair%B(2))**2 &
                       &    + (Pair%A(3)-Pair%B(3))**2
+!--------------------------------------------------------
                  IF(TestAtomPair(Pair)) THEN
                     M%MTrix%D(R:R+NN-1)=M%MTrix%D(R:R+NN-1)+DBlok(BS,MD,Pair,IXYZ,COrig)
                  ENDIF
+!--------------------------------------------------------
+! Add the correction to the periodic dipole moment.
+! ONLY FOR SQUARE BOX.
+!
+                 IF(CS_OUT%NCells.EQ.1) CYCLE
+                 DO NCB = 1,CS_OUT%NCells
+                    !IF(SUM(ABS(CS_OUT%CellCarts%D(:,NCB))).LT.1.0d-10) CYCLE
+                    IF(SUM(ABS(CS_OUT%CellCarts%D(:,NCA))).LT.1.0d-10) CYCLE
+                    Pair%B(:) = B(:)+CS_OUT%CellCarts%D(:,NCB)
+                    Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                         &    + (Pair%A(2)-Pair%B(2))**2 &
+                         &    + (Pair%A(3)-Pair%B(3))**2
+!--------------------------------------------------------
+                    IF(TestAtomPair(Pair)) THEN
+                       M%MTrix%D(R:R+NN-1)=M%MTrix%D(R:R+NN-1)- &
+                            & CS_OUT%CellCarts%D(IXYZ,NCA)*DipolCorrect(BS,GM,Pair)
+                    ENDIF
+!--------------------------------------------------------
+                 ENDDO
               ENDDO
               M%ColPt%I(P)=AtB
               M%BlkPt%I(P)=R
-              R=R+NN 
-              P=P+1 
-#ifdef PARALLEL           
+
+              R=R+NN
+              P=P+1
+#ifdef PARALLEL
               M%RowPt%I(M%NAtms+1)=P
               IF(R>MaxNon0Node.OR.P>MaxBlksNode)THEN
                  WRITE(*,*)' MyId = ',MyId,MaxBlksNode,MaxNon0Node
@@ -118,16 +142,23 @@ PROGRAM MakeM
      CALL PChkSum(M2,'Dipole'//Cart(IXYZ),Prog)
      CALL PPrint( M2,'Dipole'//Cart(IXYZ))
      CALL Plot(   M2,'Dipole'//Cart(IXYZ))
+!     IF(Cart(IXYZ)=='X') CALL Print_BCSR(M2,'Dipole X',Unit_O=6)
+!     IF(Cart(IXYZ)=='Y') CALL Print_BCSR(M2,'Dipole Y',Unit_O=6)
+!     IF(Cart(IXYZ)=='Z') CALL Print_BCSR(M2,'Dipole Z',Unit_O=6)
 !------------------------------------------------------------
-  ENDDO ! End Loop over Cartesian Componants  !vw
+  ENDDO ! End Loop over Cartesian Componants
 !------------------------------------------------------------
 ! Tidy up
 ! 
+
   CALL Delete(M )
   CALL Delete(M2)
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(MD)
+  CALL Delete(COrig)
+  CALL DeleteBraBlok()
+!
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
@@ -135,3 +166,5 @@ PROGRAM MakeM
   CALL ShutDown(Prog)
 !
 END PROGRAM MakeM
+
+
