@@ -92,36 +92,6 @@ dynamics when truncating short range potentials \cite{}.  We then go on to descr
 approximation, and numerical equivalence with the ${\bf k}$-space value in the limit of 
 large super-cells.
 
-%Many calculations of the electronic structure of condensed matter systems now make use
-%of the exact exchange interaction 
-%\cite{CPisani80,REvarestov83,MCausa88,JAlmlof94,RDovesi00}. 
-%Whereas this has been a very
-%important functional in the quantum chemistry community 
-%\cite{PLowdin55,py,ASzabo89}, 
-%until the advent of the hybrid functionals 
-%\cite{Gill92,Becke93,ABecke96,Adamo99}, 
-%this functional has had very little impact on the
-%condensed matter electronic structure community. Now because of the accuracy obtainable with
-%the hybrid functionals, it has become very desirable to include exact exchange into
-%existing condensed matter electronic structure algorithms. 
-%However, most of these calculations make use of ${\bf k}$-space integrations to 
-%deal with the periodicity of the system \cite{RDovesi00}. However, this is not an ideal 
-%situation 
-%for linear scaling algorithms, where we would like to remove the need for doing
-%${\bf k}$-space integrations altogether by increasing the system size. 
-%However, when Gamma point only is attempted for exact exchange, a 
-%significant problem arises. For the Gamma point, in the limit of large system size,
-%we do not recover the ${\bf k}$-space energy per particle number; we do not have the correct
-%limit as particle number increases.  
-%
-%In the proceeding sections we will first briefly review the Hartree
-%Foch equations of motion. Next, we will illuminate the problem that exist
-%for the calculation of the exchange matrix in the limit of the Gamma point for
-%periodic systems. We then give a solution to this problem, and then we verify that
-%the exchange matrix is correct in the limit of large systems as compared to a large 
-%${\bf k}$-space calculation done with {\bf Crystal98}. 
-%And finally, we verify that the exchange matrix build is indeed linear scaling
-%for the dense diamond system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -220,7 +190,7 @@ with increasing cell-size. For the exact exchange matrix great care must be exer
 of decreasing {\bf k}-space. To this end, and to illustrate the problems asscoiated with this limit, let
 us rewrite Eq.~(\ref{CryEq}) as 
 \begin{equation}
-K_{ab}[{\bf k}=0]=
+K_{ab}[{\bf 0}]\equiv
 \sum _{{\bf H G N} c d} P_{cd}[{\bf N}]
 \left(
       \phi_a    
@@ -232,10 +202,12 @@ K_{ab}[{\bf k}=0]=
 \label{CryEq_1}
 \end{equation}
 However, we can not evalulate this expression because for the  $\Gamma$-point approximation 
-$P_{cd}[{\bf N}]$ does not exist, we only have $P_{cd}[{\bf 0}]$. This leads us to two posibilities,
-$P_{cd}[{\bf N}] = P_{cd}$ or $P_{cd}[{\bf N}] = P_{cd} \, \delta_{\bf N 0}$. But the first 
-approximation leads to a divergent integral, so this is not correct. We are forced to consider the
-second approximation, which  gives us the integral,
+$P_{cd}[{\bf N}]$ for all ${\bf N} \ne {\bf 0 )}$ does not exist. 
+%
+This leads us to two posibilities, $P_{cd}[{\bf N}] = P_{cd}$, which  leads to a diverent 
+integaral, or $P_{cd}[{\bf N}] = P_{cd} \, \delta_{\bf N 0}$. 
+%
+The second approximation gives us the integral,
 \begin{equation}
 K_{ab}=
 \sum _{{\bf H G} c d} P_{cd}[{\bf N}]
@@ -248,11 +220,13 @@ K_{ab}=
 \right)
 \label{CryEq_2}
 \end{equation}
-However, ther are two significant problems with this approximation. One, in this approximation the exact 
+However, there are two significant problems with this approximation. One, in this approximation the exact 
 exchange potential, symmetric in the limit of infinite summation, has been asymmetrically truncated, 
 resulting in a potential that depends on position  of the unit cell. 
 And two, the $(a \rightarrow c, b \rightarrow d)$ permutational symmetry of the exchange 
-integral is violated.  The translational non-invariance has a well understood analogue in classical
+integral kernal, $\Lambda_{{\bf ac,bd}}$,  is violated. 
+
+The translational non-invariance has a well understood analogue in classical
 molecular dynamics, where the arbitrary truncation of short range potentials also leads to numerical 
 artifacts in energies and forces.  In both cases, translational invariance is restored by 
 introducing the Minimum Image Convention (MIC), which ensures that the distance between neighboring 
@@ -274,16 +248,17 @@ where the MIC condition is applied in computation of the two electron integrals
 at the contraction phase, ensuring that primitive charge distributions 
 interact consistently over a minimum distance.  In particular, if the primitive basis 
 function product $\phi_a \phi^{\bf H}_c$ is centered at ${\bf P}$ and the primitive product 
-$\phi_b \phi^{\bf C}_d$ is at ${\bf Q}$, then the minimum image convention is 
+$\phi_b \phi^{\bf G}_d$ is at ${\bf Q}$, then the minimum image convention is 
 applied to the interaction vector ${\bf PQ} \equiv {\bf P}-{\bf Q}$ using
 \begin{subequations}
 \begin{eqnarray}
 {\bf pq}&=&{\bf M}^{-1} \cdot {\bf PQ} \\
-pq_i & =& pq_i - {\tt ANINT} \left( pq_i \right) \\
+pq_i & =& pq_i - {\tt ANINT} \left( pq_i -{\tt SIGN}\left( \delta,pq_i\right) \right) \\
 {\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
 \end{eqnarray}
 \end{subequations}
-where ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
+where $\delta \approx 10^{-15}$ and is needed inorder to avoid wrapping errors,  and 
+${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
 composed of the primative lattice vectors,
 \begin{equation}
 {\bf M} = \left( {\bf a}:{\bf b}:{\bf c} \right)
@@ -297,6 +272,23 @@ Surprisingly, this work is the first to correctly define the exact Hartree-Fock
 exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
 ${\bf k}$-space sampling, and may likewise benefit from employing the Minimum Image Convention. 
+
+\section{Integral Kernal Permutational Symmetry}
+
+\begin{eqnarray}
+E[0] &&= {\rm Tr}\left[{\bf P}_0 \left({\bf T} + {\bf F}_0 \right)\right]+E^{0}_{nuc} \nonumber\\
+E[1] &&= {\rm Tr}\left[{\bf P}_1 \left({\bf T} + {\bf F}_1 \right)\right]+E^{1}_{nuc} \nonumber\\
+\frac{d E[0]}{d \lambda} &&=  E^{1}_{nuc}-E^{0}_{nuc}  
++{\rm Tr}\left[\left( {\bf P}_1 - {\bf P}_0 \right) {\bf T}  \right]\nonumber\\
+&& +{\rm Tr}\left[ {\bf P}_1 {\bf F}_0 \right] 
+   +{\rm Tr}\left[ {\bf P}_0 {\bf F}_1 \right] 
+   -2 {\rm Tr}\left[ {\bf P}_0 {\bf F}_0 \right] \nonumber\\
+\frac{d E[1]}{d \lambda} &&=  E^{1}_{nuc}-E^{0}_{nuc}  
++{\rm Tr}\left[\left( {\bf P}_1 - {\bf P}_0 \right) {\bf T}  \right]\nonumber\\
+&& -{\rm Tr}\left[ {\bf P}_1 {\bf F}_0 \right] 
+   -{\rm Tr}\left[ {\bf P}_0 {\bf F}_1 \right] 
+   +2 {\rm Tr}\left[ {\bf P}_1 {\bf F}_1 \right] \nonumber\\
+\end{eqnarray}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -352,7 +344,7 @@ ${\bf k}$-space integration limit.
 %\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{table}[h]
+\begin{table}[ht]
 \caption{Progression of Hartree-Fock $\Gamma$-point super-cell calculations 
 for MgO using the periodic RHF-MIC and RHF 8-511G/8-51G level of theory.  Comparison is 
 made to a final value approaching the ${\bf k}$-space integration limit for the primitive cell.}
@@ -361,6 +353,8 @@ made to a final value approaching the ${\bf k}$-space integration limit for the 
 \toprule
 Program         & $N_{\rm at}$              & Energy (au)    & Energy/$N_{\rm at}$\\ 
 \colrule
+{\sc MondoSCF}       & 2$^f$    & -274.53003     & -137.26501\\
+{\sc Crystal98}      & 2$^f$    & -288.83329$^h$ & -144.41664$^h$\\
 {\sc MondoSCF}       & 8$^g$    & -1098.4382     & -137.30478  \\
 {\sc Crystal98}      & 16$^f$   & -2166.9440$^h$ & -135.43400$^h$ \\
 {\sc MondoSCF}       & 16$^f$   & -2197.0564     & -137.31603  \\
@@ -407,20 +401,20 @@ using the {\it tight} option, defining numerical thresholds that deliver total e
 precise to the digits quoted (8).  The primitive cubic cell coordinates used in these
 ice calculations are listed in Appendix~\ref{Coordinates}.
 
-\begin{table}[h]
+\begin{table}[ht]
 \caption{Progression of $\Gamma$-point super-cell calculations of proton ordered ice
 at the RHF-MIC/8-51G/5-11G$^*$ level of theory.   Comparison is made to a final value 
 approaching the ${\bf k}$-space integration limit for the primitive cell.}
 \label{PIceTable}
-\center{\begin{tabular}{lrll}
+\center{\begin{tabular}{lrccc}
 \toprule
-Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm H_2O}$\\ 
+Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm H_2O}$ & IKPS \\ 
 \colrule
-{\sc MondoSCF}$^a$  & 2    &  -152.03025  &  -76.01512  \\
-                    & 16   &  -1216.3003  &  -76.01877  \\
-                    & 54   &  -4105.0163  &  -76.01882  \\
-                    & 128  &  -9730.4090  &  -76.01882  \\
-                    & 250  &  -19004.705  &  -76.01882  \\ 
+{\sc MondoSCF}$^a$  & 2    &  -152.03025  &  -76.01512  & $10^0$ \\
+                    & 16   &  -1216.3003  &  -76.01877  & $10^0$ \\
+                    & 54   &  -4105.0163  &  -76.01882  & $10^0$ \\
+                    & 128  &  -9730.4090  &  -76.01882  & $10^0$ \\
+                    & 250  &  -19004.705  &  -76.01882  & $10^0$ \\ 
 \hline
 {\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882  \\ 
 \botrule
@@ -433,48 +427,69 @@ Program         & $N_{\rm H_20}$              & Energy (au)    & Energy/$N_{\rm 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[h]
-\caption{Lattice Constants for the Diamond System for different 
-system sizes, theory levels, and basis sets calculated at the $\Gamma$-point}
-\label{DamondLC}
-\center{\begin{tabular}{ccccc}
+
+\begin{table}[ht]
+\caption{Lattice Constants in Angstoms for the Diamond System for different 
+system sizes, theory levels, and basis sets at a loose tolerance. For comparision, 
+the  experimental value for diamond calculated at zero Kelvin is ${\rm a}_0 = 3.567$ 
+\cite{VStaroverov04,YTouloukian77}}
+\label{DiamondLC}
+\center{\begin{tabular}{lccccc}
 \toprule
-$N_{\rm at}$  & Basis       &  HF     & PBE0 \\
+Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{HF}$ & ${\rm a}_0^{PBE0}$ \\
 \colrule
-  64          & sto-3g      & ~3.587~ &  ~3.601    \\
-  64          & 6-21g*      & ~3.575~ &  ~3.571    \\
-\\
- 216          & sto-3g      & ~3.500~ &  ~3.500    \\
- 216          & 6-21g*      & ~3.500~ &  ~3.500    \\
+{\sc MondoSCF}$^a$   &~64~           & ~STO-3g~      & ~3.587~          &  ~3.601~    \\
+                     &~64~           & ~6-21g*~      & ~3.575~          &  ~3.571~    \\
+                     &~216~          & ~STO-3g~      & ~3.582~          &  ~3.594~    \\
+                     &~216~          & ~6-21g*~      & ~3.571~          &  ~3.567~    \\
+\hline
+{\sc Crystal98}$^b$  & ~2~           & ~STO-3g~      & ~3.581~  & \\ 
+                     & ~2~           & ~6-21g*~      & ~3.574~  & \\
+\hline
 \botrule
 \end{tabular}\\}
+\raggedright{
+{\hskip 0.35in}$^a \Gamma$-point\\
+{\hskip 0.35in}$^b$ [\onlinecite{ROrlando90}]\\}
 \end{table}
 
+Table~\ref{DiamondLC}  compares the uniform diamond lattice potential computed 
+by MondoSCF using the RHF-MIC $\Gamma$-point super-cell approximation to results obtained in 
+reference [\onlinecite{ROrlando90}].
 
-Figure~\ref{DiamondLattice} compares the uniform diamond lattice potential computed 
-by MondoSCF using the RHF-MIC $\Gamma$-point super-cell approximation to a {\sc Crystal98}
-calculation using a two atom unit cell and a $12 \times 12 \times 12 ~{\bf k}$-space integration grid.
-The {\sc MondoSCF} curves have been carried out with 64 atoms using {\it tight}
-numerics, and with 512 atoms using a {\it loose} level of accuracy, but with the matrix
-threshold further loosened to $\Huge \tau_{\rm \scriptscriptstyle MTRIX}=10^{-3}$. 
-This modified level of approximation has been used to achieve the linear scaling shown 
-in Fig.~\ref{DiamondScaling}. All calculations were carried out with a modified 6-31G basis set, 
-with the most diffuse $sp$ exponent increased to 0.4, bringing the condition number 
-of the overlap matrix into an acceptable range.  The computed lattice constants 
-for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
-the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
-{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesi80b} 
-is $3.59$\AA, while Euwema \cite{REuwema73} found a HF lattice constant of 3.54 using 13 
-Gaussian basis functions per atom.  This should be compared to the experimental value of $3.57$\AA.
-Thus, we are off by $0.15$\AA. }
 
-\begin{figure}[h]
-\caption{The uniform diamond lattice potential, computed by {\sc MondoSCF} using 
-RHF-MIC with a slightly modified 6-31G basis.  The {\sc Crystal98} curve was computed
-using a two atom unit cell and $12 \times 12 \times 12~{\bf k}$-space integration grid.}
-\label{DiamondLattice}
-{\center \includegraphics{Diamond_En_vs_a.ps} \par}
-\end{figure}
+%for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
+%the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
+%{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesi80b} 
+%is $3.59$\AA, while Euwema \cite{REuwema73} found a HF lattice constant of 3.54 using 13 
+%Gaussian basis functions per atom.  This should be compared to the experimental value of $3.57$\AA.
+%Thus, we are off by $0.15$\AA. }
+
+%Figure~\ref{DiamondLattice} compares the uniform diamond lattice potential computed 
+%by MondoSCF using the RHF-MIC $\Gamma$-point super-cell approximation to a {\sc Crystal98}
+
+%calculation using a two atom unit cell and a $12 \times 12 \times 12 ~{\bf k}$-space integration grid.
+%The {\sc MondoSCF} curves have been carried out with 64 atoms using {\it tight}
+%numerics, and with 512 atoms using a {\it loose} level of accuracy, but with the matrix
+%threshold further loosened to $\Huge \tau_{\rm \scriptscriptstyle MTRIX}=10^{-3}$. 
+%This modified level of approximation has been used to achieve the linear scaling shown 
+%in Fig.~\ref{DiamondScaling}. All calculations were carried out with a modified 6-31G basis set, 
+%with the most diffuse $sp$ exponent increased to 0.4, bringing the condition number 
+%of the overlap matrix into an acceptable range.  The computed lattice constants 
+%for diamond are $3.415$\AA~for the {\sc Crystal98} calculation, $3.421$\AA~for 
+%the 64 atom RHF-MIC calculation and $3.415$\AA~ for the 512 atom RHF-MIC calculation.
+%{\bf In comparison, the RHF/STO-3G lattice constant reported by Dovessi et.al \cite{RDovesi80b} 
+%is $3.59$\AA, while Euwema \cite{REuwema73} found a HF lattice constant of 3.54 using 13 
+%Gaussian basis functions per atom.  This should be compared to the experimental value of $3.57$\AA.
+%Thus, we are off by $0.15$\AA. }
+%
+%\begin{figure}[h]
+%\caption{The uniform diamond lattice potential, computed by {\sc MondoSCF} using 
+%RHF-MIC with a slightly modified 6-31G basis.  The {\sc Crystal98} curve was computed
+%using a two atom unit cell and $12 \times 12 \times 12~{\bf k}$-space integration grid.}
+%\label{DiamondLattice}
+%{\center \includegraphics{Diamond_En_vs_a.ps} \par}
+%\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -494,8 +509,8 @@ proton ordered ice \cite{} in the $a$ direction (see Appendix \ref{Coordinates} 
 Comparison is made between a 250 molecule RHF-MIC $\Gamma$-point super-cell calculation performed 
 with {\sc MondoSCF} and {\sc Crystal98} calculations carried out with a two molecule primitive
 cell using a~$6\times6\times6$ ${\bf k}$-space integration grid, the 8-51G basis for Oxygen and the 
-5-11G${^*}$ basis for Hydrogen.  The {\sc MondoSCF} {\it tight} option was used, delivering 
-a relative accuracy of 8 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
+5-11G${^*}$ basis for Hydrogen.  The {\sc MondoSCF} {\it good} option was used, delivering 
+a relative accuracy of 6-8 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
 and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -643,7 +658,7 @@ in preparation of this manuscript.
 %
 %
 %
-\begin{table}[p]
+\begin{table}[ht]
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
          $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
@@ -658,7 +673,7 @@ O   &    0.500 &   0.500 &  0.500  \\
 \end{tabular}}
 \end{table}
 
-\begin{table}[p]
+\begin{table}[ht]
 \caption{Fractional coordinates for the cubic 8 atom unit cell of MgO, cooresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
          $a=b=c=4.21121$\AA, with angles $\alpha=\beta=\gamma=90^\circ$.}
@@ -683,7 +698,7 @@ O  &    0.500 &   0.500 &  0.500  \\
 %
 %
 %
-\begin{table}[p]
+\begin{table}[ht]
 \caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell 
 calculations reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are 
 $a=b=c=3.5700$\AA with angles  $\alpha=\beta=\gamma=90^\circ$.}
@@ -705,7 +720,7 @@ C &     0.375 &    0.875 &    0.875  \\
 \end{table}
 %
 %
-\begin{table}[p]
+\begin{table}[ht]
 \caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, cooresponding to 
 the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
 cell are $a=7.328$\AA, $b=7.920$\AA  and $c=4.400$\AA with angles  $\alpha=\beta=\gamma=90^\circ$. }
@@ -730,7 +745,7 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 
 \section{Threshold Definitions}\label{Thresholds}
 
-\begin{table}[p]
+\begin{table}[ht]
 \caption{The various thresholds which enter into our three levels of accuracy}
 \label{Table:AccurLevels}
 \center{
