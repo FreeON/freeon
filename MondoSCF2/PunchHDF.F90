@@ -107,9 +107,9 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
-  !==============================================================================
-  !
-  !==============================================================================
+!==============================================================================
+!
+!==============================================================================
   SUBROUTINE GeomArchive(cBAS,cGEO,N,B,G)
     TYPE(FileNames)  :: N
     TYPE(BasisSets)  :: B
@@ -131,6 +131,8 @@ CONTAINS
        ! ... and the corresponding lattice vectors which for now ONLY DEPEND
        ! ON THE BASIS SET.  THIS WILL HAVE TO BE CHANGED WHEN WE ADD BOX FORCES! 
        CALL Put(CS,Tag_O=IntToChar(cBAS))
+!!$       CALL Put(CS,'CS_OUT',Tag_O=IntToChar(cBAS))
+!!$       CALL Put(CS,'CS_IN' ,Tag_O=IntToChar(cBAS))
        ! Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
        ! And free memory for the the lattice vectors 
@@ -138,35 +140,35 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
-  !==============================================================================
-  ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
-  !==============================================================================
+!==============================================================================
+! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
+!==============================================================================
   SUBROUTINE SetLatticeVectors(G,C,AtomPairThresh,Rad_O)
     TYPE(CRDS)                :: G
     TYPE(CellSet)             :: C
     REAL(DOUBLE), OPTIONAL    :: Rad_O
-    REAL(DOUBLE)              :: AtomPairThresh,Radius,MinBoxDim
-    !---------------------------------------------------------------------------!
-    ! This is the radius of Gaussian infulence
+    REAL(DOUBLE)              :: AtomPairThresh,Radius
+!------------------------------------------------------------------------------
+!   First we create a CellSet with a Distance of MaxBoxDim+SQRT(AtomPairThresh)
+!   Some of these boxes will be to far away, next we determine how close the 
+!   closest Faces of each cell are, if they are within SQRT(AtomPairThresh), 
+!   then we keep them
+!------------------------------------------------------------------------------
     IF(PRESENT(Rad_O)) THEN
-       C%Radius=Rad_O
+       Radius = Rad_O
+       CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
     ELSE
-       ! WANT THE MIN DISTANCE FROM CENTER TO EDGE OF CELL 
-       ! MaxBoxDim IS CERTAINLY NOT THE RIGHT ALGORITHM 
-       ! COMMENT OUT FOR NOW 
-       WRITE(*,*)' NEED HELP WITH BOX ONLY PERIODIC ALGORITHM : '
-       WRITE(*,*)' MaxBoxDim   = ',MaxBoxDim(G)
-       WRITE(*,*)' MaxAtomDist = ',MaxAtomDist(G)
-       ! GOT RID OF FACTOR OF TWO!!!!!
-       ! MUST MUST GET RID OF ATOM DEPENDENCE !!!! 
-       C%Radius=SQRT(AtomPairThresh)+MaxAtomDist(G) 
+!!$       Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
+       Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
+       CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)
     ENDIF
-    CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,C%Radius)
     CALL Sort_CellSet(C)
+    C%Radius = SQRT(C%CellCarts%D(1,1)**2+C%CellCarts%D(2,1)**2+C%CellCarts%D(3,1)**2)
+!
   END SUBROUTINE SetLatticeVectors
-  !==============================================================================
-  !
-  !==============================================================================
+!==============================================================================
+!
+!==============================================================================
   SUBROUTINE BSetArchive(cBAS,N,O,G,B,M)    
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
