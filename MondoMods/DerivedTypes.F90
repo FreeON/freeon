@@ -342,7 +342,7 @@ MODULE DerivedTypes
      INTEGER          :: NCON
      INTEGER          :: NLOCB1,NLOCB2,NLOCB3,NLOCK2,NLOCK3
      TYPE(INT_RNK2)   :: GDrv1,GDrv2,GDrv3,GDrv4,GDrv5
-  END TYPE IDrv
+  END TYPE GradD
 !--------------------------------------------------------------------------
 !  Bounding Box Type
 !
