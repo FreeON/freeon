@@ -57,10 +57,10 @@ else if ( "$MONDO_PLAT" == "IBMAIX.XLF" ) then
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
 else if ( "$MONDO_PLAT" == "SGIIrix.MIPS" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.SGIIrix.MIPS
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/Alpha/PHiPAC_dgemm/src 
 else if ( "$MONDO_PLAT" == "AlphaLinux.Compaq" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.AlphaLinux.COMPAQ
-     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
+     setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/Alpha/PHiPAC_dgemm/src 
 else if ( "$MONDO_PLAT" == "True64.COMPAQ" ) then
      setenv MONDO_COMPILER ${MONDO_HOME}/Includes/CompilerSpecifics.True64.COMPAQ
      setenv MONDO_DGEMMS ${MONDO_HOME}/PHiPAC/runs/P3/PHiPAC_dgemm/src 
