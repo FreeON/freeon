@@ -1,3 +1,60 @@
+2005-03-17 15:52  mchalla
+
+	* Includes/: CopyrightBanner.C, CopyrightBanner.F,
+	CopyrightBanner.F90: The NEW GNU COPYLEFT!!
+
+2005-03-17 15:46  nemeth
+
+	* MondoSCF2/InCoords.F90: The electrostatics-based internal coord
+	recognition "bondlist2" is checked in. Does not seem to be a good
+	direction, still it is well debugged now and checked in.
+
+2005-03-17 13:58  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2005-03-17 13:56  mchalla
+
+	* Validate/Corundum.inp: [no log message]
+
+2005-03-17 13:56  tymczak
+
+	* MondoSCF2/ParsePeriodic.F90: SuperCell Stuff
+
+2005-03-17 13:54  tymczak
+
+	* MondoSCF2/PrintParsed.F90: Puts the Input file into the output
+
+2005-03-17 13:53  tymczak
+
+	* MondoSCF2/PeriodicKeys.F90: New Keyword SuperCell
+
+2005-03-17 13:46  tymczak
+
+	* HiCu/XCForce.F90, ONX2/GONX2.F90: New Force Output
+
+2005-03-17 13:40  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2005-03-17 13:37  tymczak
+
+	* QCTC/QCTC.F90: Removed alot of MMech stuff
+	
+	CJ
+
+2005-03-17 13:36  tymczak
+
+	* QCTC/MakePFFT.F90: Added Checksums
+
+2005-03-17 13:36  tymczak
+
+	* QCTC/JForce.F90: New output
+
+2005-03-17 10:27  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-03-16 16:25  tymczak
 
 	* MondoSCF2/SCFs.F90: New Force Print
