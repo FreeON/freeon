@@ -64,23 +64,19 @@ MODULE Parse
          INTEGER                        :: J,K1,K2,L,N, &
                                            S1,S2,LD,Pls1,Mns1
          LOGICAL                        :: OptCharQ
+!------------------------------------------------------------------
          REWIND(Unit)
          OptLC=Option
-
-
-
-
 !        CALL LowCase(OptLC)
          LD=LEN(Delimiters)-1 ! to avoid the blank!
          DO 
            READ(Unit,DEFAULT_CHR_FMT,END=1)Line
            LCLine=Line
+!          Make options case sensitive 
 !          CALL LowCase(LCLine)
            IF(INDEX(LCLine,TRIM(OptLC))/=0) THEN
-
-
-              WRITE(*,'(A,A)') 'LCLine is ',TRIM(LCLine)
-              WRITE(*,'(A,A)') 'OptLC is ',TRIM(OptLC)
+!              WRITE(*,'(A,A)') 'LCLine is ',TRIM(LCLine)
+!              WRITE(*,'(A,A)') 'OptLC is ',TRIM(OptLC)
               CALL LowCase(LCLine)
               J=1
               L=LEN(TRIM(LCLine))   
@@ -431,7 +427,6 @@ MODULE Parse
             J=K2+1
          ENDDO    
       END SUBROUTINE LineToInts
-
 !------------------------------------------------------------------
 !     Convert a character string into a vector of character strings
 !
