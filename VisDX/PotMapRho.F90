@@ -45,7 +45,7 @@ MODULE RhoUtil
         Ny=CEILING((Box%BndBox(2,2)-Box%BndBox(2,1))/Del)
         Nz=CEILING((Box%BndBox(3,2)-Box%BndBox(3,1))/Del)
 !       WRITE DENSITY TO FILE
-        CALL OpenASCII(TrixFile('RhoCubes',Arg,PWD_O=.TRUE.),66)
+        CALL OpenASCII(TrixFile('RhoCubes',Arg),66)
         WRITE(66,*)' object 1 class array items ',NX*NY*NZ,' data follows '
         DO I=1,Nx    
            DO J=1,Ny
@@ -201,7 +201,7 @@ MODULE PotUtil
          CALL Delete(Rho)
 !        WRITE POTENTIAL TO FILE
 !        Cubes file to scratch directory (use PWD_O=.TRUE. to go to PWD)
-         CALL OpenASCII(TrixFile('PotCubes',Arg,PWD_O=.TRUE.),77)
+         CALL OpenASCII(TrixFile('PotCubes',Arg),77)
          WRITE(77,*)' object 1 class array items ',NX*NY*NZ,' data follows '
          DO I=1,Nx    
             DO J=1,Ny
