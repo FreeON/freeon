@@ -398,17 +398,30 @@ MODULE DrvSCFs
             ConvergedQ=.TRUE.
          ENDIF
 !        Check to see if convergence is in an asymptotic regime
+
+!	CALL OpenASCII(OutFile,Out)
+!	WRITE(Out,*)'DIISQ = ',DIISQ
+!	WRITE(Out,*)'DMaxQ = ',DMaxQ
+!	WRITE(Out,*)'DIISB = ',DIISB
+!	WRITE(Out,*)'DIISA = ',DIISA
+!	WRITE(Out,*)'DMaxA = ',DMaxA
+!	WRITE(Out,*)'DMaxB = ',DMaxB
+!	CLOSE(Out)
+
          IF(DIISB<1.D-2.AND.DMaxB<5.D-1)THEN
 !           Look for non-decreasing error due to incomplete numerics
-            IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.CCyc>2)THEN                
-               IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
-                  Mssg='SCF hit DIIS/DMax increase.'
+            IF(DIISQ<5.D-2.AND.CCyc>2)THEN                
+               IF(DIISB>DIISA)THEN
+	          Mssg='SCF hit DIIS increase.'
+                  ConvergedQ=.TRUE.
+	       ELSEIF(DMaxB>DMaxA)THEN
+	          Mssg='SCF hit DMAX increase.'
                   ConvergedQ=.TRUE.
                ENDIF
             ENDIF
 !           Look for convergence stall-outs 
-            IF(DIISQ<9.D-2.AND.DMaxQ<1.D-2)THEN
-               Mssg='SCF convergence stalled.'
+            IF(DIISQ<1.D-3)THEN
+               Mssg='SCF convergence due to DIIS stagnation.'
                ConvergedQ=.TRUE.
             ENDIF 
          ENDIF
@@ -576,7 +589,7 @@ MODULE DrvSCFs
 !
 ! Load MM data
 !
-   CALL GET(MMNatms,'natomsGM_MM'//CurG)
+!  CALL GET(MMNatms,'natomsGM_MM'//CurG)
    CALL GET(GMLoc,'GM_MM'//CurG)
    MMNatms=GMLoc%Natms
 !
@@ -614,28 +627,26 @@ MODULE DrvSCFs
      IF(CalcMMForce) THEN
        CALL New(GrdMM,(/3,MMNatms/))
        GrdMM%D(:,:)=Zero
-       GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
 !
+       GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
 CALL Bond_Energy(EBond,GMLoc%Carts%D,Grad_Loc=GrdMM)
 CALL Angle_Energy(EAngle,GMLoc%Carts%D,Grad_Loc=GrdMM)
 CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,Grad_Loc=GrdMM)
 CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,Grad_Loc=GrdMM)
-!
        GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 !
        CALL ENERGY_LENNARD_JONES(ELJ,CurG,14.D0,GrdMM)
        CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL,GrdMM)
-!!
+!
      ELSE
 !
        GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
-!
 CALL Bond_Energy(EBond,GMLoc%Carts%D)
 CALL Angle_Energy(EAngle,GMLoc%Carts%D)
 CALL Torsion_Energy(ETorsion,GMLoc%Carts%D)
 CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
-!
        GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
+!
        CALL ENERGY_LENNARD_JONES(ELJ,CurG,12.D0)
        CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL)
 !
@@ -655,10 +666,6 @@ CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D)
      ENDDO
 !
        CALL Put(GrdTot,'GradE',Tag_O=CurG)
-!
-! Test gradient transformation
-!
-!    CALL CoordTrf(GMLoc,1,GrdTot,GrdTotInt,1)
 !
 ! print forces in KJ/mol/A or H/Bohr
 !
