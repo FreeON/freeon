@@ -29,29 +29,24 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC =-DEXPLICIT_SOURCE
+CPPMISC = -DEXPLICIT_SOURCE_DIRECT -DEXPLICIT_SOURCE_POLES
+#-DEXPLICIT_SOURCE_POLES 
+#-DEXPLICIT_SOURCE_DIRECT
 #
 EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/MMA/CTraX   \
                 -I$(MONDO_HOME)/QCTC/MMA/HGToSP  \
                 -I$(MONDO_HOME)/QCTC/MMA/HGTraX
 #
-QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o TreeWalk.o JGen.o NukE.o QCTC.o
-#DiffObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o TreeWalk.o JGen.o NukE.o QDiff.o
-JFrcObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o TreeWalk.o BlokTrPdJ.o JForce.o
+QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PBCFarField.o TreeWalk.o JGen.o NukE.o QCTC.o
+JFrcObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PBCFarField.o TreeWalk.o BlokTrPdJ.o JForce.o
 #
-all:	QCTC JFrc #Diff
-#
+all:	QCTC JFrc 
 clean:	CQCTC CJFrc cmma 
-#
-purge:	CQCTC CJFrc cmma 
+purge:	CQCTC CJFrc pmma 
 #
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
 	mv QCTC $(MONDO_HOME)/Exec/QCTC
-
-#Diff:	$(DiffObjs)
-#	$(LD) $(LDFLAGS) QDiff $(DiffObjs) $(LibOpts) $(F90_LIBRARIES) 
-#	mv QDiff $(MONDO_HOME)/Exec/QDiff
 #
 JFrc:	$(JFrcObjs)
 	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(LibOpts) $(F90_LIBRARIES) 
