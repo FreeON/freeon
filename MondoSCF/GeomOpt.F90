@@ -801,15 +801,17 @@ MODULE GeomOpt
 !
 ! Purify Cartesian gradients from rotations and translations
 !
-        CALL TranslsOff(CartGrad%D)
-        CALL RotationsOff(CartGrad%D,GMLoc%Carts%D)
+        IF(GeOpCtrl%DoTranslOff) CALL TranslsOff(CartGrad%D)
+        IF(GeOpCtrl%DoRotOff) CALL RotationsOff(CartGrad%D,GMLoc%Carts%D)
 !
         IF(PRESENT(DoSave_O)) THEN
           IF(DoSave_O) THEN
-            CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+            CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad',&
+                           GradMetric_O=One)
           ENDIF
         ELSE
-          CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+          CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad',&
+                           GradMetric_O=One)
         ENDIF
 !
 ! If requested, compute internal coord. gradients
@@ -933,6 +935,8 @@ MODULE GeomOpt
         IF((.NOT.GeOpCtrl%NoGDIIS).AND.&
           (CGeo>InitGDIIS.AND.GeopCtrl%GDIISOn)) THEN
             CALL GDIIS2(GMLoc)
+!           CALL GDIIS3(GMLoc)
+!           CALL GDIIS4(GMLoc)
         ENDIF
 !
       END SUBROUTINE NewStructure
@@ -982,10 +986,10 @@ MODULE GeomOpt
       REAL(DOUBLE),DIMENSION(:,:) :: XYZ
 !
         IF(Ctrl%GeOp%CoordType==CoordType_Cartesian) THEN
-          Displ%D=-1.D0*Grad%D !!!! it oscillates with 2.D0
+          Displ%D=-GeOpCtrl%StpDescInvH*Grad%D !!!! it oscillates with 2.D0
           !!! take translations and rotations off
-          CALL TranslsOff(Displ%D)
-          CALL RotationsOff(Displ%D,XYZ)
+          IF(GeOpCtrl%DoTranslOff) CALL TranslsOff(Displ%D)
+          IF(GeOpCtrl%DoRotOff) CALL RotationsOff(Displ%D,XYZ)
         ELSE IF(Ctrl%GeOp%CoordType==CoordType_PrimInt) THEN
           Displ%D=-2.D0*Grad%D 
           CALL RedundancyOffFull(Displ%D,NCart)
@@ -1372,6 +1376,7 @@ MODULE GeomOpt
         GeOpCtrl%LinBHessian   =   0.20D0
         GeOpCtrl%OutPHessian   =   0.05D0 
         GeOpCtrl%TorsHessian   =   0.05D0 
+        GeOpCtrl%StpDescInvH   =   Ctrl%GeOp%StpDescInvH
 !
 ! Number of optimization steps
 !
