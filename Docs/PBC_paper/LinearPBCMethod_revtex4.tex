@@ -22,7 +22,7 @@
 \date{\today}
 
 \title{Linear scaling computation of the Fock matrix VII.  \\
-       Periodic boundary conditions for Density Functional Theory.}
+       Periodic Density Functional Theory a the $\Gamma$-point.}
 
 \author{C.J. Tymczak and Matt Challacombe}
 
@@ -742,8 +742,8 @@ $ ^g$Cubic  \\
 
 \section{Implementation}
 
-All calculations were implemented in a serial version of {\sc MondoSCF} v1.0$\alpha$7, a suite of 
-linear scaling Quantum Chemistry codes\cite{MondoSCF}.  The code was compiled using the Portland 
+All developments were implemented in a serial version of {\sc MondoSCF} v1.0$\alpha$9 \cite{MondoSCF}, a suite of 
+linear scaling Quantum Chemistry code.  The code was compiled using the Portland 
 Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} options  and with the 
 Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
@@ -753,9 +753,8 @@ highly optimized by symbolic manipulation and factorization, using real arithmet
 7'th order in the calculation of ${\bf J}^{\rm in}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
-matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.
+matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.  
 All calculations were performed with $C_1$ (no) symmetry.
-
 %
 % Figure 4
 %

@@ -13,8 +13,8 @@
 
 \begin{document}
 
-\title{Linear scaling computation of the Fock matrix. VIII. \\ 
-       Periodic, exact exchange in the $\Gamma$-point approximation.$^1$ }
+\title{Linear scaling computation of the Fock matrix. \\ VIII.  
+       Periodic, exact exchange at the $\Gamma$-point.$^1$ }
 
 \author{C. J. Tymczak$^2$}
 \affiliation{ Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
@@ -24,10 +24,6 @@
 \affiliation{Lawrence Livermore National Lab, Livermore, California 94551}
 \author{Matt Challacombe}
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
-
-
-
-
 
 \date{\today}
 \begin{abstract}
@@ -292,7 +288,7 @@ This  modified ODA leads to the correct quadratic parameterization and guarantee
 
 \section{Implementation}\label{implementation}
 
-A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implemented in the MondoSCF
+A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implemented in the {\sc MondoSCF } \cite{MondoSCF}
 suite of programs for linear scaling quantum chemistry.  A detailed account of these developments for 
 pure Density Functional Theory has been given in a companion paper \cite{CTymczak04A}, including the periodic 
 development of the Quantum Chemical Tree Code ({\sc QCTC}) for performing $N$-scaling Coulomb summation.  
@@ -305,11 +301,13 @@ The Minimum Image Convention has been introduced into the primitive contraction 
 Vertical Recurrence Relations component of a symmetry driven Head-Gordon Pople \cite{MHeadgordon88} scheme for 
 computing two-electron integrals.  While this implementation is linear scaling and simple, it suffers 
 from a number of drawbacks that we will set forth in detail shortly, together with a more efficient 
-algorithm able to achieve scalable parallelism \cite{}.
+algorithm able to achieve scalable parallelism.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+All developments  were implemented in  {\sc MondoSCF} v1.0$\alpha$9, a suite of 
+linear scaling Quantum Chemistry codes\cite{MondoSCF}.  The code was compiled using the Portland 
+Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} options  and with the 
+Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
+1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
 
 \begin{table}[h]
 \caption{Progression of Hartree-Fock $\Gamma$-point super-cell calculations 
@@ -432,8 +430,8 @@ Table \ref{MgOTable} shows the progression of total energies computed with {\sc 
 for MgO at the $\Gamma$-point RHF-MIC/8-511G/8-51G level of theory, and comparison to
 a final value approaching the ${\bf k}$-space integration limit for the primitive cell obtained 
 with {\sc CRYSTAL98}.   These {\sc CRYSTAL} basis sets were obtained from Ref.~[\onlinecite{TowlerLib}],
-and the primitive cubic and triclinic cell coordinates used for this system are listed in 
-Appendix~\ref{Coordinates}.   The values controlling accuracy of the {\sc CRYSTAL98} program were 
+and the primitive cubic and triclinic cell coordinates used for this system are given in Ref.~[\onlinecite{PBCCoordinates}].   
+The values controlling accuracy of the {\sc CRYSTAL98} program were 
 obtained from Ref.~[\onlinecite{BCivalleri02}], while the {\sc MondoSCF} calculations were 
 carried out using the {\tt TIGHT} level of accuracy, defining numerical thresholds 
 delivering numbers precise to the digits quoted (8). 
@@ -445,7 +443,7 @@ value obtained using {\sc Cyrstal98} with a $6\times6\times6$ ${\bf k}$-space in
 as explained in Ref.~[\onlinecite{SCasassa97}].  The {\sc MondoSCF} values were obtained 
 using the {\tt GOOD} accuracy level, defining numerical thresholds that deliver total energies
 precise to the digits quoted.
-The primitive cubic cell coordinates used in these ice calculations are listed in Appendix~\ref{Coordinates}.   
+The primitive cubic cell coordinates used in these ice calculations are listed in Ref.~[\onlinecite{PBCCoordinates}].      
 Also shown in this table is a measure of the 
 Deviation from the Exchange Kernel Permutational Symmetry (DEKPS),
 \begin{equation}
@@ -465,7 +463,7 @@ it is nevertheless encouraging when compared to the value $a_0=3.583$\AA compute
 meta-GGA functional (TPSS \cite{JTao03}).
 
 Figure~\ref{IceEnergyVsLattice} shows the unrelaxed, uniaxial lattice potential of 
-proton ordered ice \cite{SCasassa97} in the $a$ direction (see Appendix \ref{Coordinates} 
+proton ordered ice \cite{SCasassa97} in the $a$ direction (see Ref.~[\onlinecite{PBCCoordinates}] 
 for the coordinate system).  Comparison is made between a 250 molecule RHF-MIC $\Gamma$-point 
 super-cell calculation performed with {\sc MondoSCF} and {\sc CRYSTAL98} calculations carried 
 out with a two molecule primitive cell using a~$6\times6\times6$ ${\bf k}$-space integration grid, 
@@ -583,121 +581,4 @@ Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptsc
 \end{tabular}}
 \end{table}
 
-\section{Lattice Coordinates}\label{Coordinates}
-%
-%
-\begin{table}[h]
-\caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, corresponding to the 
-         calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
-         $a=b=c=2.977776807$\AA $\,$ with angles $\alpha=\beta=\gamma=60^\circ$.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-Mg  &    0.000 &   0.000 &  0.000  \\
-O   &    0.500 &   0.500 &  0.500  \\
-\botrule
-\end{tabular}}
-\end{table}
-
-\begin{table}[h]
-\caption{Fractional coordinates for the cubic 8 atom unit cell of MgO, corresponding to the 
-         calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
-         $a=b=c=4.21121$\AA $\,$ with angles $\alpha=\beta=\gamma=90^\circ$.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-Mg &    0.000 &   0.000 &  0.000  \\
-O  &    0.500 &   0.000 &  0.000  \\
-Mg &    0.500 &   0.500 &  0.000  \\
-O  &    0.000 &   0.500 &  0.000  \\
-Mg &    0.500 &   0.000 &  0.500  \\
-O  &    0.000 &   0.000 &  0.500  \\
-Mg &    0.000 &   0.500 &  0.500  \\
-O  &    0.500 &   0.500 &  0.500  \\
-\botrule
-\end{tabular}}
-\end{table}
-%
-\begin{table}[h]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond.
-Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA, with angles  $\alpha=\beta=\gamma=90^\circ$.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-C &     0.125 &    0.125 &    0.125  \\
-C &     0.375 &    0.375 &    0.375  \\
-C &     0.625 &    0.625 &    0.125  \\
-C &     0.875 &    0.875 &    0.375  \\
-C &     0.625 &    0.125 &    0.625  \\
-C &     0.875 &    0.375 &    0.875  \\
-C &     0.125 &    0.625 &    0.625  \\
-C &     0.375 &    0.875 &    0.875  \\
-\botrule
-\end{tabular}}
-\end{table}
-%
-%
-
-\begin{table}[h]
-\caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, corresponding to 
-the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
-cell are $a=7.328$\AA, $b=7.920$\AA $\,$ and $c=4.400$\AA $\,$ with angles  $\alpha=\beta=\gamma=90^\circ$. }
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-O &     0.063737 &  0.583443 &   0.000000 \\
-H &     0.196106 &  0.583443 &   0.000000 \\
-H &     0.018465 &  0.524173 &   0.177576 \\
-O &     0.936263 &  0.916557 &   0.000000 \\
-H &     0.980443 &  0.801105 &   0.000000 \\
-H &     0.981535 &  0.975827 &   0.822424 \\
-\botrule
-\end{tabular}}
-\end{table}
-\vfill
-\vfill
-\vskip 1.0in
-
-%
-%
-%
-%\begin{figure}
-%\caption{Unit cell and its brava lattice vectors.}
-%\label{figure:SimCell}
-%{\centering \includegraphics{UnitCell_2.ps} \par}
-%\end{figure}
-%
-%
-%
-%\begin{figure}
-%\caption{For the Gamma point, the region in which atom $a$ has exchange interactions.}
-%\label{figure:ExchangeRegion}
-%{\centering \includegraphics{ExchangeRegion.ps} \par}
-%\end{figure}
-%
-%
-%
-%\begin{figure}
-%\caption{For ${{\bf k}}_{max}=\{1,1,1\}$, the region in which atom $a$ has exchange interactions.}
-%\label{figure:ExchangeRegion_k111}
-%{\centering \includegraphics{ExchangeRegion_k111.eps} \par}
-%\end{figure}
-%
-%
-%
-%
-%
-%
-%
-%
-%
-%
 \end{document}
