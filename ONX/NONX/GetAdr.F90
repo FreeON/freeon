@@ -22,12 +22,29 @@ SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
   IMPLICIT NONE
   INTEGER,INTENT(IN)          :: I,J
   INTEGER,INTENT(OUT)         :: Ind
+
+#ifdef PARALLEL_ONX
+  TYPE(DBCSR),INTENT(IN)      :: A
+#else
   TYPE(BCSR),INTENT(IN)       :: A
+#endif
+
   INTEGER,OPTIONAL,INTENT(IN) :: E_O
   INTEGER                     :: iMid,iBgn,iEnd,Err
 
-  iBgn=A%RowPt%I(I)
+!vw
+!!$  if(MyID.eq.0) then
+!!$     write(*,*) MyId,'A%RowPt%Alloc',A%RowPt%Alloc
+!!$     write(*,*) MyId,'A%RowPt%I',A%RowPt%I
+!!$     write(*,*) MyId,'Size(A%RowPt%I):',Size(A%RowPt%I)
+!!$  endif
+!vw
+
+  iBgn=A%RowPt%I(I)     !<-- the problem comes from here !vw
   iEnd=A%RowPt%I(I+1)-1
+
+  !write(*,*) MyID,' iBgn',iBgn,' iEnd',iEnd
+  !return
 
   Ind=0
   Err=0
@@ -35,38 +52,38 @@ SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
 
   SELECT CASE (Err)
   CASE (0)
-  1000 CONTINUE
+1000 CONTINUE
     iMid=(iEnd+iBgn)/2
     IF (A%ColPt%I(iMid)==J) GOTO 2000
     IF (iBgn>=iEnd) THEN
-      WRITE(*,*) "I=",I," J=",J
-      CALL Halt(' Matrix element not found in ONX:GetAdrB')
+       WRITE(*,*) "I=",I," J=",J
+       CALL Halt(' Matrix element not found in ONX:GetAdrB')
     ENDIF
     IF (A%ColPt%I(iMid)>J) THEN
-      iEnd=iMid-1
+       iEnd=iMid-1
     ELSE
-      iBgn=iMid+1
+       iBgn=iMid+1
     ENDIF
     GOTO 1000
-  2000 CONTINUE
-  Ind=iMid
+2000 CONTINUE
+    Ind=iMid
 
   CASE (1)
-  3000 CONTINUE
+3000 CONTINUE
     iMid=(iEnd+iBgn)/2
     IF (A%ColPt%I(iMid)==J) GOTO 4000
     IF (iBgn>=iEnd) RETURN
     IF (A%ColPt%I(iMid)>J) THEN
-      iEnd=iMid-1
+       iEnd=iMid-1
     ELSE
-      iBgn=iMid+1
+       iBgn=iMid+1
     ENDIF
     GOTO 3000
-  4000 CONTINUE
-  Ind=iMid
+4000 CONTINUE
+    Ind=iMid
 
   CASE DEFAULT
-    CALL Halt(' Illegal switch in ONX:GetAdrB')
+     CALL Halt(' Illegal switch in ONX:GetAdrB')
   END SELECT
 END SUBROUTINE GetAdrB
 

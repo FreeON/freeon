@@ -73,4 +73,5 @@ SUBROUTINE Digest(N,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,K,W,D)
     WRITE(*,*) "IntSwitch=",IntSwitch
     CALL Halt(' Illegal IntSwitch in ONX:Digest')
   END SELECT
+  !vw write(*,*) 'k',k(1:N,1:NA,1:NB)
 END SUBROUTINE Digest

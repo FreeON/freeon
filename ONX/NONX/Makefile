@@ -29,48 +29,48 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-all: NONX 
+all: NONX XForce
 
-Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
-           InitExchangeMatrix.o Sizes.o Stats.o DisOrder.o MemInit.o \
-           Contract.o HrrBra.o HrrKet.o \
-           VRRl.o RGen1C.o CCDriver.o VRRDriver.o \
-           RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
-           RangeOfExchange.o ONX.o \
-           GetSubBlk.o XPose.o InitSubInd.o \
-           RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o \
-           ComputeKe.o ComputeKg.o GetIntCode.o GetIntSpace.o
+Objects1 = ONXParameters.o ONXInit.o ONXGet.o ONXFillOut.o ONXMemory.o     \
+           ContractionScaling.o ONXVrr.o ONXHrr.o ONXPut.o ONXRGen.o       \
+           Sizes.o Stats.o ONXInLoop.o ONXComptK.o ONXRng.o ONXDOrder.o \
+           Contract.o QuickSortDis.o PartDrv.o ONXMemInit.o \
+           CCDriver.o VRRDriver.o ONX.o
 
-Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
-           Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
+
+Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o       \
+           Sizes.o Stats.o MemInit.o InitExchangeMatrix.o GradONX.o Contract.o  \
            HrrBra.o HrrKet.o VRRl.o RGen1C.o CCDriver.o            \
-           VRRDriver.o DisOrderGrad.o RangeOfDensity.o VRRs.o      \
-           QuickSortDis.o PutDis.o GDLoader.o \
+           VRRDriver.o DisOrderGrad.o   \
+	   RangeOfDensity.o VRRs.o     \
+           QuickSortDis.o PutDis.o  GDLoader.o \
            GDrivers.o ComputeXForce.o ContractG.o RGen.o           \
-           HRRBraGrad.o HRRKetGrad.o GetSubBlk.o GetGradient.o     \
-           InitSubInd.o DigestGradient.o GetAdr.o
+           GetSubBlk.o GetGradient.o     \
+           InitSubInd.o DigestGradient.o GetAdr.o GetIntSpace.o
 
 ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
-             InitExchangeMatrix.x Sizes.x Stats.x MemInit.x \
+             Sizes.x Stats.x MemInit.x \
              ONX.x GradONX.x Contract.x HrrBra.x HrrKet.x \
              VRRl.x RGen1C.x CCDriver.x VRRDriver.x \
              DisOrder.x RangeOfDensity.x VRRs.x QuickSortDis.x PutDis.x \
-             RangeOfExchange.x \
+             InitExchangeMatrix.x RangeOfExchange.x   \
              GetSubBlk.x XPose.x InitSubInd.x \
              RGen.x Digest.x Scatter.x GetAdr.x PutSubBlk.x Fillout.x \
              ComputeKe.x ComputeKg.x GetGradient.x     \
              InitSubInd.x DigestGradient.x GetAdr.x GDLoader.x \
-             BSearch.x  HRRBraGrad.x  HRRKetGrad.x  LSearch.x \
-             ComputeXForce.x  ContractG.x DisOrderGrad.x GDrivers.x 
+             BSearch.x  LSearch.x \
+             ComputeXForce.x  ContractG.x DisOrderGrad.x GDrivers.x \
+             ONXFillOut.x ONXComptK.x ONXRng.x ONXDOrder.x ONXMemInit.x \
+             ONXGet.x ONXInit.x PartDrv.x ONXHrr.x ONXRGen.x
 #
 Libs =  $(F90_LIBRARIES) $(LAPACK) -lVRR
 #
 NONX:	$(Objects1)
-	$(LD) $(LDFLAGS) NONX $(Objects1) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) NONX $(Objects1) $(Libs)
 	mv NONX $(MONDO_EXEC)/ONX
 #
 XForce: $(Objects2)
-	$(LD) $(LDFLAGS) XForce $(Objects2) $(LibOpts) $(Libs)
+	$(LD) $(LDFLAGS) XForce $(Objects2) $(Libs)
 	mv XForce $(MONDO_EXEC)/XForce
 #
 release:purge $(ReleaseFiles)
@@ -85,3 +85,8 @@ clean:
 	rm -f $(MONDO_EXEC)/ONX
 	rm -f $(MONDO_EXEC)/XForce
 	ls
+#
+doc.txt:
+	cat *.F90 | grep "^!H" | sed "s/^!H/  /" > doc.txt;
+
+

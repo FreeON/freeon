@@ -38,8 +38,6 @@
     CALL GetSubBlk(NBFA,NBFB,NA,NB,RS,CS,D%MTrix%D(Ioff),Dab(I,1,1))
   END DO
 
-  write(*,*) "IntSwitch=",IntSwitch
-
   SELECT CASE (IntSwitch)
   CASE(11)
     DO IB=1,L3
@@ -48,7 +46,7 @@
     DO IC=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB) 
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
       FAx=Dabcd*W(I,IC,IA,ID,IB,1)
       FAy=Dabcd*W(I,IC,IA,ID,IB,2)
       FAz=Dabcd*W(I,IC,IA,ID,IB,3)

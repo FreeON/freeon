@@ -85,12 +85,6 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
-
-      if(iU.gt.NVRR) then
-        Call halt("Index blown!")
-      endif
-
-
       IF (iP==0.AND.iQ==0) THEN
         DO I=1,N
           Ind = SB%SLPrm%I(I)+8
@@ -204,6 +198,8 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
 
+      write(*,*) "C:iU=",iU
+
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet
           DO J=1,KBra
@@ -251,10 +247,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
 
-      if(iU.gt.NVRR) then
-        Call halt("Index blown!")
-      endif
-
+      write(*,*) "B:iU=",iU
 
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet

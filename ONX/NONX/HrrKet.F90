@@ -12,6 +12,7 @@ SUBROUTINE HrrKet(T,BD,N,SLDis,LenB,NumB,LenK,IType)
  REAL(DOUBLE)  :: x,y,z
 
  NNumB=N*NumB
+
  SELECT CASE(IType)
  CASE ( 101)
  CASE ( 201)
