@@ -23,10 +23,11 @@ MODULE PFFT
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
-    SUBROUTINE PFFTensor(IMin,JMin,KMin,MaxL_O)
+    SUBROUTINE PFFTensor(RMIN,Volume,MaxL_O)
       INTEGER,OPTIONAL    :: MaxL_O
-      INTEGER             :: MaxL,IMin,JMin,KMin
+      INTEGER             :: MaxL
       LOGICAL             :: HaveTensor
+      REAL(DOUBLE)        :: RMIN,Volume 
 !   
       IF(PRESENT(MaxL_O)) THEN
          MaxL = MaxL_O
@@ -38,58 +39,41 @@ MODULE PFFT
       TensorS = Zero
       IF(Dimen==0) RETURN
 !
-      CALL GetTensor(IMin,JMin,KMin,MaxL,HaveTensor)
+!      WRITE(*,*) 'GETTING TENSOR'
+      CALL GetTensor(MaxL,HaveTensor)
 !
       IF(.NOT. HaveTensor) THEN
-         CALL MakePFFT(IMin,JMin,KMin,MaxL)
-         CALL PutTensor(IMin,JMin,KMin,MaxL)
+!         WRITE(*,*) 'MAKING  TENSOR'
+         CALL MakePFFT(RMIN,Volume,MaxL)
+!         WRITE(*,*) 'SAVEING TENSOR'
+         CALL PutTensor(MaxL)
       ENDIF
 !
     END SUBROUTINE PFFTensor
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE GetTensor(IMin,JMin,KMin,MaxL,HaveTensor)
-      INTEGER              :: MaxL,IMin,JMin,KMin,L,M,LM
+    SUBROUTINE GetTensor(MaxL,HaveTensor)
+      INTEGER              :: MaxL,L,M,LM
       LOGICAL              :: HaveTensor
-      CHARACTER(LEN=80)    :: FileName
-!    
-      IF(Dimen==1) THEN
-         IF(GM%AutoW(1)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(GM%AutoW(2)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_J' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(GM%AutoW(3)) THEN 
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_K' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ENDIF
-      ELSEIF(Dimen==2) THEN
-         IF(.NOT. GM%AutoW(1)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_J' // TRIM(IntToChar(IMin)) //         & 
-              'K' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(.NOT. GM%AutoW(2)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) //         & 
-              'K' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(.NOT. GM%AutoW(3)) THEN            
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) //         &
-              'J' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'           
-         ENDIF
-      ELSEIF(Dimen==3) THEN
-         FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //  & 
-              '_I' // TRIM(IntToChar(IMin)) //         &
-              'J'  // TRIM(IntToChar(IMin)) //         & 
-              'K'  // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-      ENDIF
+      CHARACTER(LEN=120)   :: FileName
+      CHARACTER(LEN=1)     :: AWX,AWY,AWZ
+!
+      AWX = '0'
+      AWY = '0'
+      AWZ = '0'
+      IF(GM%AutoW(1)) AWX = '1'
+      IF(GM%AutoW(2)) AWY = '1'      
+      IF(GM%AutoW(3)) AWZ = '1'
+      FileName= TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
+                "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
+                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
+                ".PFFT"
 !
       INQUIRE(FILE=FileName,EXIST=HaveTensor)
       IF(HaveTensor) THEN
          OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
-         READ(77) MaxL
          DO L = 1,MaxL
             DO M = 0,L
                LM = LTD(L)+M
@@ -103,44 +87,24 @@ MODULE PFFT
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE PutTensor(IMin,JMin,KMin,MaxL)
+    SUBROUTINE PutTensor(MaxL)
       INTEGER             :: MaxL,IMin,JMin,KMin,L,M,LM
-      CHARACTER(LEN=80)   :: FileName
+      CHARACTER(LEN=120)  :: FileName
+      CHARACTER(LEN=1)     :: AWX,AWY,AWZ
 !
-      IF(Dimen==1) THEN
-         IF(GM%AutoW(1)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(GM%AutoW(2)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_J' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(GM%AutoW(3)) THEN 
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_K' // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ENDIF
-      ELSEIF(Dimen==2) THEN
-         IF(.NOT. GM%AutoW(1)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_J' // TRIM(IntToChar(IMin)) //         & 
-              'K' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(.NOT. GM%AutoW(2)) THEN
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) //         & 
-              'K' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-         ELSEIF(.NOT. GM%AutoW(3)) THEN            
-            FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //        & 
-              '_I' // TRIM(IntToChar(IMin)) //         &
-              'J' // TRIM(IntToChar(IMin))  // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'           
-         ENDIF
-      ELSEIF(Dimen==3) THEN
-         FileName= TRIM(Args%C%C(1)) // "_Geo#" // TRIM(CurGeom) //  & 
-              '_I' // TRIM(IntToChar(IMin)) //         &
-              'J'  // TRIM(IntToChar(IMin)) //         & 
-              'K'  // TRIM(IntToChar(IMin)) // 'L' // TRIM(IntToChar(MaxL)) // '.PFFT'
-      ENDIF
+      AWX = '0'
+      AWY = '0'
+      AWZ = '0'
+      IF(GM%AutoW(1)) AWX = '1'
+      IF(GM%AutoW(2)) AWY = '1'      
+      IF(GM%AutoW(3)) AWZ = '1'
+      FileName= TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
+                "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
+                "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
+                "_LM"   // TRIM(IntToChar(MaxL)) //                  &
+                ".PFFT"
 !
       OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='NEW')
-      WRITE(77) MaxL
       DO L = 1,MaxL
          DO M = 0,L
             LM = LTD(L)+M
@@ -153,211 +117,138 @@ MODULE PFFT
 !========================================================================================
 ! Calculate the PFFTensor
 !========================================================================================
-    SUBROUTINE MakePFFT(IMin,JMin,KMin,MaxL)
-      INTEGER                           :: IMin,JMin,KMin,MaxL
+    SUBROUTINE MakePFFT(RMIN,Volume,MaxL)
+      INTEGER                           :: MaxL
       INTEGER                           :: I,J,K,L,M,LM,NC
-      INTEGER                           :: IMax,JMax,KMax,IJKMax,LSwitch
+      INTEGER                           :: LSwitch
       REAL(DOUBLE),DIMENSION(3)         :: PQ
       REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
+      REAL(DOUBLE)                      :: RMIN,RMAX,Accuracy,LenScale,Volume
 !
+!     Initialize and Zero dimension
 !
       TensorC = Zero
       TensorS = Zero
+      Accuracy = 1.D-16
       IF(Dimen==0) RETURN
 !
 !     One Dimension
 !
       IF(Dimen==1) THEN
          IF(GM%AutoW(1)) THEN
-            NC = IMin
             CALL IrRegular(MaxL,GM%BoxShape%D(1,1),Zero,Zero)
          ELSEIF(GM%AutoW(2)) THEN
-            NC = JMin
             CALL IrRegular(MaxL,Zero,GM%BoxShape%D(2,2),Zero)
-         ELSEIF(GM%AutoW(3)) THEN  
-            NC = KMin       
+         ELSEIF(GM%AutoW(3)) THEN      
             CALL IrRegular(MaxL,Zero,Zero,GM%BoxShape%D(3,3))
          ENDIF
+         NC = (CSMM1%NCells-1)/2
          DO L=1,MaxL
             DO M = 0,L
                LM = LTD(L)
                TensorC(LM) = Cpq(LM)*RZeta(L+1,NC)
             ENDDO
          ENDDO
+      ENDIF
 !
-!     Two Dimension
+!     Two and Three Dimension
 !
-      ELSEIF(Dimen==2) THEN
-         LSwitch = 8
-         BetaSq  = (Pi*Pi)/Volume
-         IJKMax  = 32
-         IMax    = IJKMax+IMin
-         JMax    = IJKMax+KMin
-         KMax    = IJKMax+JMin
-!
+      IF(Dimen == 2 .OR. Dimen == 3) THEN
+         LSwitch  = 10
+         LenScale = Volume**(One/DBLE(Dimen))
+         BetaSq   = (0.5D0/LenScale)**2
+         RMAX = RMIN+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+!           
 !        Sum the Real Space
 !
-         IF(.NOT. GM%AutoW(1)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/1,JMax,KMax/),(/1,JMin+1,KMin+1/))
-         ELSEIF(.NOT. GM%AutoW(2)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMax,1,KMax/),(/IMin+1,1,KMin+1/))
-         ELSEIF(.NOT. GM%AutoW(3)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMax,JMax,1/),(/IMin+1,JMin+1,1/))
-         ENDIF
+         DO
+            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%BoxShape%D,RMAX)
+            IF(CSMM2%NCells .GT. 400000) THEN
+               RMAX = 0.99*RMAX
+               CALL Delete_CellSet(CSMM2)
+            ELSE
+               EXIT
+            ENDIF
+         ENDDO
+!
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN
-                  CFac = GScript(L,RadSq)
-               ELSE
-                  CFac = One
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
-                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
+            IF(.NOT. InCell_CellSet(CSMM1,PQ(1),PQ(2),PQ(3))) THEN
+               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+               DO L = 1,MaxL
+                  IF(L .LE. LSwitch) THEN
+                     CFac = GScript(L,RadSq)
+                  ELSE
+                     CFac = One
+                  ENDIF
+                  DO M = 0,L
+                     LM = LTD(L)+M
+                     TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
+                     TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
+                  ENDDO
                ENDDO
-            ENDDO
+            ENDIF
          ENDDO
          CALL Delete_CellSet(CSMM2)
+         IF(.TRUE.) RETURN
 !
 !        Sum the Reciprical Space 
 !
-         ExpFac = (Pi*Pi)/(BetaSq)
-         IF(.NOT. GM%AutoW(1)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%InvBoxSh%D,(/1,JMax,KMax/),(/1,1,1/))
-         ELSEIF(.NOT. GM%AutoW(2)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%InvBoxSh%D,(/IMax,1,KMax/),(/1,1,1/))
-         ELSEIF(.NOT. GM%AutoW(3)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%InvBoxSh%D,(/IMax,JMax,1/),(/1,1,1/))
-         ENDIF
+         ExpFac = (Pi/BetaSq)**2
+         RMAX = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+         DO
+            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%InvBoxSh%D,RMAX)
+            IF(CSMM2%NCells .LT.27) THEN
+               RMAX = 1.01D0*RMAX
+            ELSE
+               EXIT
+            ENDIF
+         ENDDO
+!
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN             
-                  CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
-                  SFac = FT_FScriptS(L,ExpFac,Rad)/Volume
-               ELSE
-                  CFac = Zero
-                  SFac = Zero
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+            IF(Rad .GT. 1.D-14) THEN
+               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+               DO L = 1,MaxL
+                  IF(L .LE. LSwitch) THEN        
+                     CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
+                     SFac = FT_FScriptS(L,ExpFac,Rad)/Volume
+                  ELSE
+                     CFac = Zero
+                     SFac = Zero
+                  ENDIF
+                  DO M = 0,L
+                     LM = LTD(L)+M
+                     TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
+                     TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
+                  ENDDO
                ENDDO
-            ENDDO
+            ENDIF
          ENDDO
          CALL Delete_CellSet(CSMM2)
 !
 !        Substract the inner boxes
 !
-         IF(.NOT. GM%AutoW(1)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/1,JMin,KMin/),(/1,1,1/))
-         ELSEIF(.NOT. GM%AutoW(2)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMin,1,KMin/),(/1,1,1/))
-         ELSEIF(.NOT. GM%AutoW(3)) THEN
-            CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMin,JMin,1/),(/1,1,1/))
-         ENDIF
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
+         DO NC = 1,CSMM1%NCells
+            PQ(:) = CSMM1%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN
-                  CFac = FScript(L,RadSq)
-               ELSE
-                  CFac = Zero
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)-Cpq(LM)*CFac
-                  TensorS(LM)=TensorS(LM)-Spq(LM)*CFac
+            IF(RadSq .GT. 1.D-14) THEN
+               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+               DO L = 1,MaxL
+                  IF(L .LE. LSwitch) THEN
+                     CFac = FScript(L,RadSq)
+                  ELSE
+                     CFac = Zero
+                  ENDIF
+                  DO M = 0,L
+                     LM = LTD(L)+M
+                     TensorC(LM)=TensorC(LM)-Cpq(LM)*CFac
+                     TensorS(LM)=TensorS(LM)-Spq(LM)*CFac
+                  ENDDO
                ENDDO
-            ENDDO
-         ENDDO
-         CALL Delete_CellSet(CSMM2)
-!
-!        Three Dimension
-!
-      ELSEIF(Dimen==3) THEN
-         LSwitch = 8
-         BetaSq  = Pi*Pi/(Volume**(Two/Three))
-!
-!        Sum the Real Space
-!
-         IJKMax = 32
-         IMax = IJKMax+IMin
-         JMax = IJKMax+KMin
-         KMax = IJKMax+JMin
-         CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMax,JMax,KMax/),(/IMin+1,JMin+1,KMin+1/))
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
-            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN
-                  CFac = GScript(L,RadSq)
-               ELSE
-                  CFac = One
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
-                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
-               ENDDO
-            ENDDO
-         ENDDO
-         CALL Delete_CellSet(CSMM2)
-!
-!        Sum the Reciprical Space 
-!
-         ExpFac = (Pi*Pi)/(BetaSq)
-         CALL New_CellSet_Cube(CSMM2,GM%InvBoxSh%D,(/IMax,JMax,KMax/),(/1,1,1/))
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
-            Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN        
-                  CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
-                  SFac = FT_FScriptS(L,ExpFac,Rad)/Volume
-               ELSE
-                  CFac = Zero
-                  SFac = Zero
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
-                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac+Cpq(LM)*SFac
-               ENDDO
-            ENDDO
-         ENDDO
-         CALL Delete_CellSet(CSMM2)
-!
-!        Substract the inner boxes
-!
-         CALL New_CellSet_Cube(CSMM2,GM%BoxShape%D,(/IMin,JMin,KMin/),(/1,1,1/))  
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
-            RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-            DO L = 1,MaxL
-               IF(L .LE. LSwitch) THEN
-                  CFac = FScript(L,RadSq)
-               ELSE
-                  CFac = Zero
-               ENDIF
-               DO M = 0,L
-                  LM = LTD(L)+M
-                  TensorC(LM)=TensorC(LM)-Cpq(LM)*CFac
-                  TensorS(LM)=TensorS(LM)-Spq(LM)*CFac
-               ENDDO
-            ENDDO
+            ENDIF
          ENDDO
          CALL Delete_CellSet(CSMM2)
       ENDIF
@@ -367,8 +258,8 @@ MODULE PFFT
       DO L = 0,MaxL
          DO M = 0,L
             LM = LTD(L)+M
-            IF(ABS(TensorC(LM)) .LT. 1.D-14) TensorC(LM) = Zero
-            IF(ABS(TensorS(LM)) .LT. 1.D-14) TensorS(LM) = Zero
+            IF(ABS(TensorC(LM)) .LT. 1.D-15) TensorC(LM) = Zero
+            IF(ABS(TensorS(LM)) .LT. 1.D-15) TensorS(LM) = Zero
          ENDDO
       ENDDO
 !
