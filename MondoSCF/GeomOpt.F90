@@ -4,6 +4,7 @@
 MODULE GeomOpt
   USE DerivedTypes
   USE GlobalScalars
+  USE GlobalObjects
 #ifdef NAG
   USE F90_UNIX_PROC
 #endif
@@ -20,6 +21,7 @@ MODULE GeomOpt
   USE LinALg
   USE InCoords
   IMPLICIT NONE 
+!
   CONTAINS
 !========================================================================================
 !
@@ -387,8 +389,40 @@ MODULE GeomOpt
    ENDIF
 #endif
   END SUBROUTINE CALC_GRAD_NO_GRAD
+!
 !-------------------------------------------------------------
-  SUBROUTINE CALC_SinglePoint(Ctrl)
+!
+       SUBROUTINE CALC_ForceOnly(Ctrl)
+!
+! Force only calculation, at current geometry and basis set,
+! as defined in Ctrl vector.
+! It is supposed that energy calculation has already been done.
+! In present version MM force and energy cannot be calculated separately
+!
+       IMPLICIT NONE
+       TYPE(SCFControls)     :: Ctrl
+       INTEGER :: I,ISet,IGeo,OldGrad
+!
+#ifdef MMech
+       IF(HasQM()) THEN
+!!! temporary; may overwrite MM energy terms calcd at prev geoms 
+         IF(HasMM()) CALL MM_ENERG(Ctrl) 
+         CALL Forces(Ctrl)
+       ENDIF
+#else
+         CALL Forces(Ctrl)
+#endif
+!
+#ifdef MMech
+       IF(MMOnly()) Then
+         CALL MM_ENERG(Ctrl)
+       ENDIF
+#endif
+!
+       END SUBROUTINE CALC_ForceOnly 
+!-------------------------------------------------------------
+!
+       SUBROUTINE CALC_EnergyOnly(Ctrl)
 !
 ! Energy only calculation, at current geometry and basis set,
 ! as defined in Ctrl vector.
@@ -403,15 +437,9 @@ MODULE GeomOpt
 !!! temporary; may overwrite MM energy terms calcd at prev geoms 
          IF(HasMM()) CALL MM_ENERG(Ctrl) 
          CALL OneSCF(Ctrl)
-           IF(Ctrl%Grad/=GRAD_NO_GRAD) THEN
-             CALL Forces(Ctrl)
-           ENDIF
        ENDIF
 #else
        CALL OneSCF(Ctrl)
-         IF(Ctrl%Grad/=GRAD_NO_GRAD) THEN
-           CALL Forces(Ctrl)
-         ENDIF
 #endif
 !
 #ifdef MMech
@@ -420,8 +448,8 @@ MODULE GeomOpt
        ENDIF
 #endif
 !
-       END SUBROUTINE CALC_SinglePoint 
-!-------------------------------------------------------------
+       END SUBROUTINE CALC_EnergyOnly 
+!----------------------------------------------------------------
   SUBROUTINE OptimizeNew(Ctrl)
      IMPLICIT NONE
      TYPE(SCFControls)     :: Ctrl
@@ -472,38 +500,24 @@ MODULE GeomOpt
     SUBROUTINE GeOpNew(Ctrl)
        TYPE(SCFControls)         :: Ctrl
        TYPE(CRDS)                :: GMLoc
-       INTEGER                   :: JGeo,KS,BlkGeomSize,NCoordsEff,NCoordsEff0
-       INTEGER                   :: Refresh,I,J,K,L,II,MaxGeOpSteps
+       INTEGER                   :: Refresh,I,J,K,L,IStep,MaxGeOpSteps
        INTEGER                   :: NCart,NIntC
        REAL(DOUBLE)              :: RMSGrad,MaxGrad
+       INTEGER                   :: BlkGeomSize,NCoordsEff,NCoordsEff0
        REAL(DOUBLE)              :: TrixThresh,AInvDistanceThresh
-       REAL(DOUBLE)              :: BondConvCrit,AngleConvCrit,GradConvCrit
-       REAL(DOUBLE)              :: MaxBondDispl,MaxAngleDispl,RMSIntDispl
-       REAL(DOUBLE)              :: Etot,GDIISThresh
+       REAL(DOUBLE)              :: Etot
+       REAL(DOUBLE)              :: StreConvCrit,AngleConvCrit
        REAL(DOUBLE),DIMENSION(3) :: PrevState,CrntState
        TYPE(INTC)                :: IntCs
        TYPE(DBL_VECT)            :: IntOld,Displ,AuxVect
        INTEGER                   :: FirstGeom
-       INTEGER                   :: GDIISMemory,GDIISMaxMem,InitGDIIS
-       INTEGER                   :: AccL
-       LOGICAL                   :: GCnvrgd     
-       LOGICAL                   :: LineSearchOn
+       INTEGER                   :: GDIISMaxMem,InitGDIIS
+       INTEGER                   :: AccL,ActStep
+       LOGICAL                   :: GeOpConvgd
        CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
 !-------------------------------------------------------
 !
        CALL SetGlobalCtrlIndecies(Ctrl)           
-!
-! Put initial value of GDIISMemory and GDIISMaxMem
-!
-       InitGDIIS=6
-       GDIISMaxMem=500
-       GDIISThresh=1.D-7
-       CALL Put(0,'RefMemory')  
-       CALL Put(0,'SRMemory')  
-       CALL Put(InitGDIIS,'GDIISMemory')  
-       CALL Put(InitGDIIS,'InitGDIIS')  
-       CALL Put(GDIISMaxMem,'GDIISMaxMem')  
-       CALL Put(GDIISThresh,'GDIISThresh')  
 !
 ! Get some thresholds
 !
@@ -524,20 +538,20 @@ MODULE GeomOpt
 !
        CALL Get(GMLoc,TRIM(GMTag)//CurGeom)
        GMLoc%Confg=CGeo
-!
-! Set Convergence Criteria
-!
-       AccL=Ctrl%AccL(CBas)
-       LineSearchOn=.FALSE.
-       BondConvCrit=0.0005D0 ! in Angstroems
-       AngleConvCrit=0.5D0 ! in degrees   
-!
-! Define maximum number of optimization steps
-!
        NCart=3*GMLoc%Natms
-       MaxGeOpSteps=MAX(NCart,200)
 !
-! Set GDIISmemory, it tells the number of 'remembered' steps in GDIIS
+! Set control parameters of geometry optimization
+!
+       CALL SetGeOpCtrl(Ctrl,GMLoc%Natms)
+!
+! Initializations.
+! Do not use iterative subspace from previous basis calculations!!!!
+! That would make convergence slower!
+!
+       CALL Put(0,'RefMemory')  
+       CALL Put(0,'SRMemory')  
+       CALL Put(0,'CartGradMemory')  
+       CALL Put(0,'IntGradMemory')  
 !
        CALL OpenASCII(OutFile,Out)
        IF(Ctrl%Geop%CoordType==CoordType_Cartesian) THEN
@@ -591,134 +605,100 @@ MODULE GeomOpt
 !
 ! Start iteration over geometries
 !
-       FirstGeom=Ctrl%Current(3)
-       II=FirstGeom
+         FirstGeom=Ctrl%Current(3)
+         IStep=FirstGeom-1
 300    CONTINUE
+         IStep=IStep+1
+         Ctrl%Previous(3)=IStep-1
+         Ctrl%Current(3)=IStep
+         CALL SetGlobalCtrlIndecies(Ctrl)           
+         ActStep=IStep-FirstGeom+1
+         GeOpCtrl%ActStep=ActStep
+!
+! Set dynamic changes in control parameters 
+!
+       CALL SetGeOpCtrl(Ctrl,GMLoc%Natms)
 !
 ! Check for refresh of int. coord. definitions
 !
-       IF(II==FirstGeom) THEN !!!! refresh does not work in HDF
+       IF(IStep==FirstGeom) THEN !!!! refresh does not work in HDF
          CALL IntCReDef(Ctrl,Refresh)
          IF(Refresh/=0) THEN
            CALL GetIntCs(GMLoc%Carts%D,GMLoc%Natms,InfFile, &
                          IntCs,NIntC,Refresh)
+!                        IntCs,NIntC,4)
          ENDIF
        ENDIF
        CALL INTCValue(IntCs,GMLoc%Carts%D)
        CALL New(IntOld,NIntC)
        IntOld%D=IntCs%Value
-!      CALL PrtIntCoords(IntCs,IntCs%Value, &
-!                        'Internals at step '//TRIM(IntToChar(II)))
 !
-! Put current Geometry as a reference for GDIIS
+! Print current geometry in XMol format for debugging
+!
+       IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+         CALL PrtXYZ(GMLoc%Carts%D,Title_O='geometry at step= ' &
+             //TRIM(IntToChar(IStep)),PrtU_O=11,Convert_O=.TRUE.)
+!        CALL PrtIntCoords(IntCs,IntCs%Value, &
+!                   'Internals at step '//TRIM(IntToChar(IStep)))
+       ENDIF
+!
+! Compute Energy at current geometry
+!
+       CALL CALC_EnergyOnly(Ctrl)
+!
+! If energy decreased, old GDIIS was OK, thus save iterative subspace,
+! otherwise restore old subspace and do line search!
+!
+!!!    CALL VerifyStep(Ctrl,GMLoc,IntCs)
+!
+! Compute Force at current geometry
+!
+       CALL CALC_ForceOnly(Ctrl)
+!
+! Put current cartesian coords and gradients as a reference for GDIIS!
 !
        CALL PutSRStep(XYZ_O=GMLoc%Carts%D,Tag_O='Ref')
-call prtxyz(GMLoc%Carts%D,PrtU_O=20,Title_O='geometry at step= '//TRIM(IntToChar(II)))
-!
-! Get Energy and Cartesian gradient at current geometry
-!
-       CALL CALC_SinglePoint(Ctrl)
 !
 ! Calculate simple relaxation (SR) step from an inverse Hessian
 !
        CALL NewDispl(Ctrl,Displ,NCart,NIntC)
-       CALL SRStep(Ctrl,GMLoc,Displ,MaxGrad,RMSGrad,IntCs) 
+       CALL SRStep(Ctrl,GMLoc,Displ,IntCs) 
 !
 ! Calculate new geometry 
 !
-       CALL NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs,FirstGeom)
+       CALL NewStructure(Ctrl,GMLoc,Displ,IntCs)
        CALL Delete(Displ)
 !
 ! Check convergence
 !
-       CALL INTCValue(IntCs,GMLoc%Carts%D)
-       IntOld%D=IntCs%Value-IntOld%D
-       MaxBondDispl=Zero
-       MaxAngleDispl=Zero
-       DO I=1,NIntC 
-          IF(IntCs%Def(I)(1:4)=='STRE') THEN 
-            MaxBondDispl=MAX(MaxBondDispl,ABS(IntOld%D(I))) 
-          ELSE
-            MaxAngleDispl=MAX(MaxAngleDispl,ABS(IntOld%D(I))) 
-          ENDIF
-       ENDDO
-       MaxBondDispl=MaxBondDispl/AngstromsToAU
-       MaxAngleDispl=MaxAngleDispl*180.D0/PI
-       RMSIntDispl=SQRT(DOT_PRODUCT(IntOld%D,IntOld%D)/DBLE(NIntC))
+       CALL GeOpConv(Ctrl,GMLoc,IntCs,IntOld)
+!
+! Save current structure into HDF
+!
+       CALL Put(GMLoc,TRIM(GMTag)//NxtGeom)
+!
+! Tidy up and continue optimization if necessary
+!
          CALL Delete(IntOld)
-!
-       GCnvrgd=RMSGrad<GTol(AccL).AND.MaxGrad<GTol(AccL)
-!
-! Review iterations
-!
-       CALL OpenASCII(OutFile,Out)
-!
-         WRITE(*,399) II-FirstGeom+1
-       IF(LineSearchOn) THEN
-         CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
-         WRITE(*,400) Etot
-         WRITE(Out,400) Etot
-       ELSE
-         CALL Get(Etot,'ETot',StatsToChar(Ctrl%Previous))
-         WRITE(*,401) Etot
-         WRITE(Out,401) Etot
-       ENDIF
-!
-       WRITE(*,410) MaxGrad
-       WRITE(*,420) RMSGrad
-       WRITE(*,430) MaxBondDispl
-       WRITE(*,435) MaxAngleDispl
-       WRITE(*,440) RMSIntDispl
-       WRITE(Out,410) MaxGrad
-       WRITE(Out,420) RMSGrad
-       WRITE(Out,430) MaxBondDispl
-       WRITE(Out,435) MaxAngleDispl
-       WRITE(Out,440) RMSIntDispl
-!
-       CLOSE(Out,STATUS='KEEP')
-!
-399 FORMAT('GeOp step= ',I6)
-400 FORMAT(' Total Energy at Current Geometry  = ',F20.8)
-401 FORMAT('Total Energy at Previous Geometry  = ',F20.8)
-410 FORMAT('           ','             MaxGrad= ',F12.6)
-420 FORMAT('           ','             RMSGrad= ',F12.6)
-430 FORMAT('           ','      Max Bond Displ= ',F12.6)
-435 FORMAT('           ','     Max Angle Displ= ',F12.6)
-440 FORMAT('           ','           RMS Displ= ',F12.6)
-!
-! Check convergence
-!!!!!!!build in AccL dependent criteria for bonds and angles
-!
-       IF(II-FirstGeom+1<=MaxGeOpSteps) THEN
-         IF(.NOT.GCnvrgd) THEN
-!        IF(MaxBondDispl>BondConvCrit .OR. &
-!           MaxAngleDispl>AngleConvCrit .OR. &
-!           .NOT.GCnvrgd) THEN
-           II=II+1
-           Ctrl%Current(3)=II
-           CALL SetGlobalCtrlIndecies(Ctrl)           
-             CALL Put(GMLoc,TRIM(GMTag)//CurGeom)
-!#ifdef MMech
-!             IF(HasQM()) CALL Halt('put new GM coordinates separately, to be done')
-!#else
-!             CALL Halt('put new GM coordinates separately, to be done')
-!#endif
+       IF(ActStep<=GeOpCtrl%MaxGeOpSteps) THEN
+         IF(.NOT.GeOpCtrl%GeOpConvgd) THEN
            GO TO 300
          ENDIF
-       ELSE
        ENDIF
 !
 ! Convergence is reached at this point, calculate final energy
 ! and finish optimization
 !
-       CALL CALC_SinglePoint(Ctrl)
+       Ctrl%Current(3)=IStep+1
+       CALL SetGlobalCtrlIndecies(Ctrl)           
+       CALL CALC_EnergyOnly(Ctrl)
        CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
 !
        CALL OpenAscii(OutFile,Out)
 !
-       WRITE(*,460) II
+       WRITE(*,460) ActStep
+       WRITE(Out,460) ActStep
        WRITE(*,470) Etot
-       WRITE(Out,460) II
        WRITE(Out,470) Etot
 460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
 470  FORMAT('Total Energy at optimum structure= ',F20.8)
@@ -736,192 +716,149 @@ call prtxyz(GMLoc%Carts%D,PrtU_O=20,Title_O='geometry at step= '//TRIM(IntToChar
 !
 !--------------------------------------------------------------------
 !
-      SUBROUTINE SRStep(Ctrl,GMLoc,Displ,MaxGrad,RMSGrad,IntCs)
+      SUBROUTINE SRStep(Ctrl,GMLoc,Displ,IntCs,Step_O,DoSave_O)
 !
 ! Simple Relaxation step
 !
-      TYPE(SCFControls)              :: Ctrl 
-      TYPE(CRDS)                     :: GMLoc
-      TYPE(DBL_VECT)                 :: Displ
-      REAL(DOUBLE)                   :: MaxGrad,RMSGrad
-      TYPE(DBL_VECT)                 :: CartGrad,IntGrad,Grad
-      TYPE(INTC)                     :: IntCs
-      INTEGER                        :: I,J,NDim
-      INTEGER                        :: NatmsLoc,NCart,NIntC
-      LOGICAL                        :: DoInternals
+        TYPE(SCFControls)              :: Ctrl 
+        TYPE(CRDS)                     :: GMLoc
+        TYPE(DBL_VECT)                 :: Displ
+        REAL(DOUBLE)                   :: MaxGrad,RMSGrad
+        TYPE(DBL_VECT)                 :: CartGrad,IntGrad,Grad
+        TYPE(INTC)                     :: IntCs
+        INTEGER                        :: I,J,NDim,IMaxGrad
+        INTEGER                        :: NatmsLoc,NCart,NIntC
+        LOGICAL                        :: DoInternals
+        LOGICAL,OPTIONAL               :: DoSave_O  
+        CHARACTER(Len=*),OPTIONAL      :: Step_O
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: TagStep 
 !
-      NatmsLoc=GMLoc%Natms
-      NCart=3*NatmsLoc
-      NDim =SIZE(Displ%D)
-      DoInternals=.FALSE.
-      IF(NCart/=NDim) DoInternals=.TRUE.
+        NatmsLoc=GMLoc%Natms
+        NCart=3*NatmsLoc
+        NIntC=SIZE(IntCs%Def)
+        NDim =SIZE(Displ%D)
+        DoInternals=GeOpCtrl%DoInternals
+        IF(NIntC/=NDim.AND.DoInternals) &
+            CALL Halt('Dimensionality error in LineSearch')
 !
-      CALL New(Grad,NDim)
+        IF(PRESENT(Step_O)) THEN
+          TagStep=Step_O 
+        ELSE
+          TagStep=CurGeom
+        ENDIF
+!
+        CALL New(Grad,NDim)
 !
 ! First, get Cartesian gradient
 !
-      CALL New(CartGrad,NCart)
-      CALL Get(CartGrad,'GradE',Tag_O=CurGeom) 
+        CALL New(CartGrad,NCart)
+        CALL Get(CartGrad,'GradE',Tag_O=TRIM(TagStep)) 
+        IF(PRESENT(DoSave_O)) THEN
+          IF(DoSave_O) CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+        ELSE
+          CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+        ENDIF
 !
 ! If requested, compute internal coord. gradients
 !
-      IF(DoInternals) THEN
-        NIntC=SIZE(IntCs%Def)
-        IF(NIntC/=NDim) CALL Halt('Dimension error in SRStep')
-        CALL New(IntGrad,NDim)
-        CALL CartToInternal(GMLoc%Carts%D,IntCs,CartGrad%D,IntGrad%D)
-        Grad%D=IntGrad%D
-      ELSE
-        Grad%D=CartGrad%D
-      ENDIF
+        IF(DoInternals) THEN
+          NIntC=SIZE(IntCs%Def)
+          IF(NIntC/=NDim) CALL Halt('Dimension error in SRStep')
+          CALL New(IntGrad,NDim)
+          CALL CartToInternal(GMLoc%Carts%D,IntCs,CartGrad%D,IntGrad%D)
+          Grad%D=IntGrad%D
+!         CALL PutSRStep(Vect_O=IntGrad,Tag_O='IntGrad')
+!         CALL Put(IntGrad,Tag_O='IntGrad'//NxtGeom)
+        ELSE
+          Grad%D=CartGrad%D
+        ENDIF
 !
 ! Check for gradient-convergence
 !
-      MaxGrad=Zero
-      DO I=1,NDim ; MaxGrad=MAX(MaxGrad,ABS(Grad%D(I))) ; ENDDO
-      RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
+        MaxGrad=Zero
+        DO I=1,NDim  
+          IF(MaxGrad<ABS(Grad%D(I))) THEN
+            IMaxGrad=I
+             MaxGrad=ABS(Grad%D(I))
+          ENDIF
+        ENDDO
+        RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
 !
-! Steepest descent (may be either internal or Cartesian)
-! or other inverse Hessian guess
+! Use Hessian matrix to calculate step
 !
-      CALL SteepestDesc(Ctrl,Grad,Displ)
+        SELECT CASE(Ctrl%Grad)
+        CASE(GRAD_STPDESC_OPT) 
+          CALL SteepestDesc(Ctrl,Grad,Displ)
+        CASE(GRAD_DIAGHESS_OPT) 
+          CALL DiagonalHess(Ctrl,Grad,Displ,IntCs)
+        END SELECT
 !
 ! Set constraints on the displacements
 !
-      CALL SetConstraint(IntCs,GMLoc%Carts%D,Displ)
+        CALL SetConstraint(IntCs,GMLoc%Carts%D,Displ)
 !
 ! Tidy up
 !
-      IF(DoInternals) CALL Delete(IntGrad)
-      CALL Delete(CartGrad)
-      CALL Delete(Grad)
+        IF(DoInternals) CALL Delete(IntGrad)
+        CALL Delete(CartGrad)
+        CALL Delete(Grad)
+!
+        GeOpCtrl%MaxGrad=MaxGrad
+        GeOpCtrl%IMaxGrad=IMaxGrad
+        GeOpCtrl%RMSGrad=RMSGrad
 !
       END SUBROUTINE SRStep
 !-------------------------------------------------------
-      SUBROUTINE NewStructure(Ctrl,GMLoc,Displ,LineSearchOn,IntCs,FirstGeom)
+      SUBROUTINE NewStructure(Ctrl,GMLoc,Displ,IntCs,DoSave_O)
 !
-! Line search. Can be carried out either in internals
-! or in Cartesian.
-! Here we optimize a single parameter 'Fact',
-! to get optimum for the energy at Fact*Displ displacement.
+        TYPE(SCFControls)              :: Ctrl
+        TYPE(CRDS)                     :: GMLoc
+        TYPE(INTC)                     :: IntCs
+        INTEGER                        :: I,J,II,NDim,NInTc
+        INTEGER                        :: NatmsLoc,NCart,InitGDIIS
+        REAL(DOUBLE)                   :: EStart,Fact
+        TYPE(DBL_VECT)                 :: Displ
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
+        LOGICAL                        :: DoInternals
+        LOGICAL,OPTIONAL               :: DoSave_O
+        INTEGER                        :: OldGrad
 !
-      TYPE(SCFControls)              :: Ctrl
-      TYPE(CRDS)                     :: GMLoc
-      TYPE(INTC)                     :: IntCs
-      INTEGER                        :: I,J,II,MaxSteps,NDim,NInTc
-      INTEGER                        :: NatmsLoc,NCart,InitGDIIS
-      REAL(DOUBLE)                   :: EStart,Fact
-      TYPE(DBL_VECT)                 :: Displ
-      TYPE(DBL_RNK2)                 :: ActXYZ
-      TYPE(DBL_VECT)                 :: ActDispl
-      TYPE(DBL_VECT)                 :: Energy
-      CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
-      LOGICAL                        :: IntSearch,LineSearchOn
-      INTEGER                        :: OldGrad,FirstGeom
+! In the present version there is no line search, only GDIIS
 !
-! MaxSteps : Maximum number of Line Search Steps
-! Displ    : Initial displacement vector from SR step, 
-!            may be Cartesian or internal
-! ActDispl : Size of actual displacement at the II-th line search step
-!            maximum value is ActDispl=MaxFact*Displ
-!            MaxFact must be small enough for internal coordinates
-!            in order coordinate transformation can converge
+        InitGDIIS=GeOpCtrl%GDIISInit
 !
-      CALL Get(InitGDIIS,'InitGDIIS')
-      MaxSteps=15
-!
-      NatmsLoc=GMLoc%Natms
-      NCart=3*NatmsLoc   
-      NDim =SIZE(Displ%D)
-      IntSearch=.FALSE.
-      IF(NCart/=NDim) THEN
-        IntSearch=.TRUE.
+        NatmsLoc=GMLoc%Natms
+        NCart=3*NatmsLoc   
+        NDim =SIZE(Displ%D)
         NIntC =SIZE(IntCs%Def)
-        IF(NIntC/=NDim) CALL Halt('Dimensionality error in LineSearch')
-      ENDIF
-!
-! Geometry Tag
-!
-    GMTag=''
-#ifdef MMech
-    IF(HasMM()) GMTag='GM_MM'
-#endif
-!
-! Allocate arrays
-!
-      CALL New(ActDispl,NDim)
-      CALL New(ActXYZ,(/3,NatmsLoc/))
-      CALL New(Energy,MaxSteps)
-!
-! Starting energy      
-!
-      CALL Get(EStart,'Etot',StatsToChar(Current))
-!
-! Increment Current and prepare for energy only calculation
-!
-      OldGrad=Ctrl%Grad
-      Ctrl%Grad=GRAD_NO_GRAD
-      Ctrl%Previous  =Ctrl%Current
-      Ctrl%Current(3)=Ctrl%Current(3)+1
-      CALL SetGlobalCtrlIndecies(Ctrl)
-!
-! Initialization
-!
-      Fact=One
-      ActXYZ%D=GMLoc%Carts%D
-!
-      II=0
-100   CONTINUE
-      II=II+1
-!
-      ActDispl%D=Fact*Displ%D
+        DoInternals=GeOpCtrl%DoInternals
+        IF(NIntC/=NDim.AND.DoInternals) &
+            CALL Halt('Dimensionality error in LineSearch')
 !
 ! Construct new structure either by Cartesian or by internal
 ! displacements
 !
-      IF(IntSearch) THEN 
-        CALL INTCValue(IntCs,ActXYZ%D)
-        CALL InternalToCart(ActXYZ%D,IntCs,ActDispl%D)
-      ELSE
-        CALL CartRNK1ToCartRNK2(ActDispl%D,ActXYZ%D,.TRUE.)
-      ENDIF
+        IF(DoInternals) THEN 
+          CALL INTCValue(IntCs,GMLoc%Carts%D)
+          CALL InternalToCart(GMLoc%Carts%D,IntCs,Displ%D)
+        ELSE
+          CALL CartRNK1ToCartRNK2(Displ%D,GMLoc%Carts%D,.TRUE.)
+        ENDIF
 !
 ! Save simple relaxation geometry (Cartesians) into HDF
 !
-      CALL PutSRStep(XYZ_O=ActXYZ%D,Tag_O='SR')
-!
-! Calculate energy at new structure; CurGeom has a new value now,
-! and does not change until new call for LineSearch.
-!
-      GMLoc%Carts%D=ActXYZ%D
-      CALL Put(GMLoc,TRIM(GMTag)//CurGeom)
-      IF(.NOT.LineSearchOn) GO TO 200
-! Continue here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      CALL CALC_SinglePoint(Ctrl)
-      CALL Get(Energy%D(II),'Etot',StatsToChar(Current))
-!write(*,*) II,'  energy= ',Energy%D(II)
-!
-!
-!
-200   CONTINUE
-!
-! Set back Ctrl%Grad to its original value
-!
-      Ctrl%Grad=OldGrad
+        IF(PRESENT(DoSave_O)) THEN
+          IF(DoSave_O) CALL PutSRStep(XYZ_O=GMLoc%Carts%D,Tag_O='SR')
+        ELSE
+          CALL PutSRStep(XYZ_O=GMLoc%Carts%D,Tag_O='SR')
+        ENDIF
 !
 ! Now call GDIIS
 ! and construct GDIIS step from SR step and previous displacements
 ! May work in either Cartesian or internal displacemets space.
 ! Subroutine modifies Cartesian Coordinates in GMLoc, now.
 !
-!     IF(CGeo-FirstGeom+1>InitGDIIS) CALL GDIIS(CGeo,GMLoc)
-!
-! Tidy up
-!
-      CALL Delete(ActDispl)
-      CALL Delete(ActXYZ)
-      CALL Delete(Energy)
-!     IF(IntSearch) CALL Delete(ActIntC)
+        IF(CGeo>InitGDIIS.AND.GeopCtrl%GDIISOn) CALL GDIIS(GMLoc)
 !
       END SUBROUTINE NewStructure
 !
@@ -976,6 +913,450 @@ call prtxyz(GMLoc%Carts%D,PrtU_O=20,Title_O='geometry at step= '//TRIM(IntToChar
         ENDIF 
 !
       END SUBROUTINE SteepestDesc
+!
 !-------------------------------------------------------
+!
+      SUBROUTINE DiagonalHess(Ctrl,Grad,Displ,IntCs)
+!
+      TYPE(SCFControls) :: Ctrl
+      TYPE(DBL_VECT)    :: Grad,Displ 
+      TYPE(INTC)        :: IntCs       
+      INTEGER           :: I,J,NIntC
+      REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
+!
+        NIntC=SIZE(IntCs%Def)
+!
+        IF(Ctrl%GeOp%CoordType==CoordType_Cartesian) THEN
+          CALL OpenAscii(OutFile,Out)
+          WRITE(*,*) 'WARNING! DIAGONAL HESSIAN FOR '// &
+                       'CARTESIANS IS JUST STEEPEST DESCENT'
+          WRITE(Out,*) 'WARNING! DIAGONAL HESSIAN FOR '// &
+                       'CARTESIANS IS JUST STEEPEST DESCENT'
+          CLOSE(Out,STATUS='KEEP')      
+          Displ%D=-1.D0*Grad%D !!!! it oscillates with 2.D0
+        ELSE IF(Ctrl%GeOp%CoordType==CoordType_PrimInt) THEN
+            HStre=One/GeOpCtrl%StreHessian
+            HBend=One/GeOpCtrl%BendHessian
+            HLinB=One/GeOpCtrl%LinBHessian
+            HOutP=One/GeOpCtrl%OutPHessian
+            HTors=One/GeOpCtrl%TorsHessian
+          DO I=1,NIntC
+            IF(IntCs%Def(I)(1:4)=='STRE') THEN
+              Displ%D=-HStre*Grad%D 
+            ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+              Displ%D=-HBend*Grad%D 
+            ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+              Displ%D=-HLinB*Grad%D 
+            ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
+              Displ%D=-HOutP*Grad%D 
+            ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
+              Displ%D=-HTors*Grad%D 
+            ENDIF
+          ENDDO
+        ELSE
+          CALL Halt('Only Primitiv Internals are available yet.')
+        ENDIF 
+!
+      END SUBROUTINE DiagonalHess
+!
+!-------------------------------------------------------
+!
+      SUBROUTINE GeOpConv(Ctrl,GMLoc,IntCs,IntOld)
+        TYPE(SCFControls)         :: Ctrl
+        TYPE(CRDS)                :: GMLoc
+        TYPE(INTC)                :: IntCs
+        TYPE(DBL_VECT)            :: IntOld,AuxVect
+!
+        REAL(DOUBLE)              :: MaxStreDispl,MaxBendDispl
+        REAL(DOUBLE)              :: MaxLinBDispl,MaxOutPDispl
+        REAL(DOUBLE)              :: MaxTorsDispl
+        REAL(DOUBLE)              :: RMSIntDispl
+!
+        REAL(DOUBLE)              :: StreConvCrit,BendConvCrit
+        REAL(DOUBLE)              :: LinBConvCrit,OutPConvCrit
+        REAL(DOUBLE)              :: TorsConvCrit
+!
+        INTEGER                   :: I,J,K,L,ActStep     
+        INTEGER                   :: NCart,NIntC,NatmsLoc
+        REAL(DOUBLE)              :: RMSGrad,MaxGrad
+        REAL(DOUBLE)              :: Etot,Sum
+!
+        INTEGER                   :: NStreGeOp,NBendGeOp,NLinBGeOp
+        INTEGER                   :: NOutPGeOp,NTorsGeOp
+        INTEGER                   :: MaxStre,MaxBend,MaxLinB
+        INTEGER                   :: MaxOutP,MaxTors
+!
+        INTEGER                   :: IMaxGrad
+!
+        NIntC=SIZE(IntCs%Def)
+        NatmsLoc=GMLoc%Natms
+        NCart=3*NatmsLoc
+!
+        RMSGrad=GeOpCtrl%RMSGrad
+        MaxGrad=GeOpCtrl%MaxGrad
+        ActStep=GeOpCtrl%ActStep
+        IMaxGrad=GeOpCtrl%IMaxGrad
+!
+        CALL Get(NStreGeOp,'NStreGeOp')
+        CALL Get(NBendGeOp,'NBendGeOp')
+        CALL Get(NLinBGeOp,'NLinBGeOp')
+        CALL Get(NOutPGeOp,'NOutPGeOp')
+        CALL Get(NTorsGeOp,'NTorsGeOp')
+!
+! Determine internal coordinate changes
+!
+        CALL INTCValue(IntCs,GMLoc%Carts%D)
+        IntOld%D=IntCs%Value-IntOld%D
+        CALL MapDisplTors(IntCs,NIntC,IntOld%D)
+        MaxStre=0
+        MaxBend=0
+        MaxLinB=0
+        MaxOutP=0
+        MaxTors=0
+        MaxStreDispl=Zero
+        MaxBendDispl=Zero
+        MaxLinBDispl=Zero
+        MaxOutPDispl=Zero
+        MaxTorsDispl=Zero
+        DO I=1,NIntC 
+           IF(IntCs%Def(I)(1:4)=='STRE') THEN 
+             Sum=ABS(IntOld%D(I))
+             IF(MaxStreDispl<Sum) THEN
+               MaxStre=I
+               MaxStreDispl=Sum
+             ENDIF
+           ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+             Sum=ABS(IntOld%D(I))
+             IF(MaxBendDispl<Sum) THEN
+               MaxBend=I
+               MaxBendDispl=Sum
+             ENDIF
+           ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+             Sum=ABS(IntOld%D(I))
+             IF(MaxLinBDispl<Sum) THEN
+               MaxLinB=I
+               MaxLinBDispl=Sum
+             ENDIF
+           ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
+             Sum=ABS(IntOld%D(I))
+             IF(MaxOutPDispl<Sum) THEN
+               MaxOutP=I
+               MaxOutPDispl=Sum
+             ENDIF
+           ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
+             Sum=ABS(IntOld%D(I))
+             IF(MaxTorsDispl<Sum) THEN
+               MaxTors=I
+               MaxTorsDispl=Sum
+             ENDIF
+           ENDIF
+        ENDDO
+        RMSIntDispl=SQRT(DOT_PRODUCT(IntOld%D,IntOld%D)/DBLE(NIntC))
+!
+        GeOpCtrl%MaxStreDispl=MaxStreDispl
+        GeOpCtrl%MaxBendDispl=MaxBendDispl
+        GeOpCtrl%MaxLinBDispl=MaxLinBDispl
+        GeOpCtrl%MaxOutPDispl=MaxOutPDispl
+        GeOpCtrl%MaxTorsDispl=MaxTorsDispl
+        GeOpCtrl%RMSIntDispl=RMSIntDispl
+!
+        GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
+                            MaxGrad<GeOpCtrl%GradCrit
+!       GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
+!                           MaxGrad<GeOpCtrl%GradCrit.AND. &
+!                      MaxStreDispl<GeOpCtrl%StreConvCrit.AND. &
+!                      MaxBendDispl<GeOpCtrl%BendConvCrit.AND. &
+!                      MaxLinBDispl<GeOpCtrl%LinBConvCrit.AND. &
+!                      MaxOutPDispl<GeOpCtrl%OutPConvCrit.AND. &
+!                      MaxTorsDispl<GeOpCtrl%TorsConvCrit
+!
+! Review iterations
+!
+        CALL OpenASCII(OutFile,Out)
+!
+        WRITE(*,399) ActStep       
+        CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
+        WRITE(*,401) Etot
+        WRITE(Out,401) Etot
+!
+        MaxStreDispl=MaxStreDispl/AngstromsToAu
+        MaxBendDispl=MaxBendDispl*180.D0/PI
+        MaxLinBDispl=MaxLinBDispl*180.D0/PI
+        MaxOutPDispl=MaxOutPDispl*180.D0/PI
+        MaxTorsDispl=MaxTorsDispl*180.D0/PI
+!
+        WRITE(*,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
+        WRITE(*,420) RMSGrad
+        WRITE(Out,410) MaxGrad
+        WRITE(Out,420) RMSGrad
+!
+        IF(NStreGeOp/=0) THEN
+          WRITE(*,430) MaxStreDispl,IntCs%Atoms(MaxStre,1:2)
+          WRITE(Out,430) MaxStreDispl,IntCs%Atoms(MaxStre,1:2)
+        ENDIF
+        IF(NBendGeOp/=0) THEN
+          WRITE(*,435) MaxBendDispl,IntCs%Atoms(MaxBend,1:3)
+          WRITE(Out,435) MaxBendDispl,IntCs%Atoms(MaxBend,1:3)
+        ENDIF
+        IF(NLinBGeOp/=0) THEN
+          WRITE(*,436) MaxLinBDispl,IntCs%Atoms(MaxLinB,1:3)
+          WRITE(Out,436) MaxLinBDispl,IntCs%Atoms(MaxLinB,1:3)
+        ENDIF
+        IF(NOutPGeOp/=0) THEN
+          WRITE(*,437) MaxOutPDispl,IntCs%Atoms(MaxOutP,1:4)
+          WRITE(Out,437) MaxOutPDispl,IntCs%Atoms(MaxOutP,1:4)
+        ENDIF
+        IF(NTorsGeOp/=0) THEN
+          WRITE(*,438) MaxTorsDispl,IntCs%Atoms(MaxTors,1:4)
+          WRITE(Out,438) MaxTorsDispl,IntCs%Atoms(MaxTors,1:4)
+        ENDIF
+!
+        WRITE(*,440) RMSIntDispl
+        WRITE(Out,440) RMSIntDispl
+!
+        CLOSE(Out,STATUS='KEEP')
+!
+399 FORMAT('GeOp step= ',I6)
+400 FORMAT(' Total Energy at Current Geometry  = ',F20.8)
+401 FORMAT('Total Energy at Previous Geometry  = ',F20.8)
+410 FORMAT('           ','           Max Grad = ',F12.6,' between atoms ',4I4)
+420 FORMAT('           ','           RMS Grad = ',F12.6)
+430 FORMAT('           ','      Max STRE Displ= ',F12.6,' between atoms ',4I4)
+435 FORMAT('           ','      Max BEND Displ= ',F12.6,' between atoms ',4I4)
+436 FORMAT('           ','      Max LINB Displ= ',F12.6,' between atoms ',4I4)
+437 FORMAT('           ','      Max OUTP Displ= ',F12.6,' between atoms ',4I4)
+438 FORMAT('           ','      Max TORS Displ= ',F12.6,' between atoms ',4I4)
+440 FORMAT('           ','           RMS Displ= ',F12.6,' between atoms ',4I4)
+!
+      END SUBROUTINE GeOpConv
+!---------------------------------------------------------------
+!
+      SUBROUTINE SetGeOpCtrl(Ctrl,NatmsLoc)
+!
+        TYPE(SCFControls) :: Ctrl
+        INTEGER :: AccL,NatmsLoc
+        REAL(DOUBLE) :: Sum
+!
+        AccL=Ctrl%AccL(CBas)
+!
+        GeOpCtrl%AINVThrsh=1.D-8
+        GeOpCtrl%BMatThrsh=1.D-8
+!
+        GeOpCtrl%AccL         =   AccL         
+        GeOpCtrl%CoordType    =   Ctrl%GeOp%CoordType
+        IF(GeOpCtrl%CoordType/=CoordType_Cartesian) THEN
+          GeOpCtrl%DoInternals=.TRUE.
+        ELSE
+          GeOpCtrl%DoInternals=.FALSE.
+        ENDIF
+!
+! Blocked sparse matrix algebra for GeOp
+!
+        GeOpCtrl%BlkGeomSize  =   3
+!
+! Hessian data, in AU. Data are based on OPLS force-field data.
+!
+!       GeOpCtrl%StreHessian   =   0.25D0   
+!       GeOpCtrl%BendHessian   =   0.025D0
+!       GeOpCtrl%LinBHessian   =   0.025D0
+!       GeOpCtrl%OutPHessian   =   0.0025D0 
+!       GeOpCtrl%TorsHessian   =   0.0025D0 
+        GeOpCtrl%StreHessian   =   0.50D0   
+        GeOpCtrl%BendHessian   =   0.35D0
+        GeOpCtrl%LinBHessian   =   0.35D0
+        GeOpCtrl%OutPHessian   =   0.25D0 
+        GeOpCtrl%TorsHessian   =   0.25D0 
+!
+! Number of optimization steps
+!
+        GeOpCtrl%MaxGeOpSteps =   MAX(3*NatmsLoc,500)
+!
+! Convergence Criteria
+!
+        GeOpCtrl%GradCrit = GTol(AccL)
+        GeOpCtrl%StreConvCrit= GeOpCtrl%GradCrit/GeOpCtrl%StreHessian
+        GeOpCtrl%BendConvCrit= GeOpCtrl%GradCrit/GeOpCtrl%BendHessian
+        GeOpCtrl%LinBConvCrit= GeOpCtrl%GradCrit/GeOpCtrl%LinBHessian
+        GeOpCtrl%OutPConvCrit= GeOpCtrl%GradCrit/GeOpCtrl%OutPHessian
+        GeOpCtrl%TorsConvCrit= GeOpCtrl%GradCrit/GeOpCtrl%TorsHessian
+!
+! Adaptive Reference GDIIS
+!
+        GeOpCtrl%GDIISInit         =   2
+        GeOpCtrl%GDIISMaxMem       =   500
+        GeOpCtrl%GDIISBandWidth    =   2.2D0
+        GeOpCtrl%GDIISMinDomCount  =   1
+!
+! GDIIS restart control
+!
+        IF(GeOpCtrl%ActStep==1) THEN
+          GeOpCtrl%GDIISOn=.TRUE.
+        ELSE
+!          IF(GeOpCtrl%RMSGrad>GeOpCtrl%OldRMSGrad) THEN
+!!           GeOpCtrl%GDIISOn=.FALSE.
+!            CALL Put(0,'SRMemory') 
+!            CALL Put(0,'RefMemory') 
+!          ENDIF
+            GeOpCtrl%OldRMSGrad=GeOpCtrl%RMSGrad
+        ENDIF
+!
+! Line Search
+!
+        GeOpCtrl%LSStepMax=8  
+!
+! grad. trf.
+!
+        GeOpCtrl%MaxIt_GrdTrf = 10 
+        GeOpCtrl%GrdTrfCrit   = 2*GeOpCtrl%AINVThrsh
+        GeOpCtrl%MaxGradDiff  = 5.D+2      
+!
+! iterative back trf.
+!
+        GeOpCtrl%MaxIt_CooTrf = 20
+        GeOpCtrl%CooTrfCrit = MIN(GeOpCtrl%StreConvCrit, &
+                                  GeOpCtrl%BendConvCrit, &
+                                  GeOpCtrl%LinBConvCrit, &
+                                  GeOpCtrl%OutPConvCrit, &
+                                  GeOpCtrl%TorsConvCrit)/100.D0   
+        GeOpCtrl%RMSCrit    = 0.90D0 !!! at least 10 percent decrease in RMS at a step
+        GeOpCtrl%MaxCartDiff = 0.50D0  
+        GeOpCtrl%DistRefresh = GeOpCtrl%MaxCartDiff*0.75D0
+!
+! Constraints
+!
+        CALL Get(GeOpCtrl%NConstr,'NConstraints')
+        CALL Get(GeOpCtrl%NCartConstr,'NCartConstr')
+        GeOpCtrl%ConstrMaxCrit = GeOpCtrl%CooTrfCrit*1.D-2
+        GeOpCtrl%ConstrMax=GeOpCtrl%ConstrMaxCrit*10.D0
+!
+      END SUBROUTINE SetGeOpCtrl
+!
+!---------------------------------------------------------------
+!
+      SUBROUTINE VerifyStep(Ctrl,GMLoc,IntCs)
+        TYPE(SCFControls)::   Ctrl
+        TYPE(CRDS)    :: GMLoc
+        TYPE(INTC)    :: IntCs
+        INTEGER       :: I,J
+        REAL(DOUBLE)  :: EtotCurr,EtotPrev
+!
+        IF(CGeo==1) RETURN
+!
+! Get recent total energies
+!
+        CALL Get(EtotCurr,'ETot',StatsToChar(Current))
+        CALL Get(EtotPrev,'ETot',StatsToChar(Previous))
+!
+! Take care of iterative subspace
+!
+        CALL GDIISSave(GMLoc%Natms,EtotCurr,EtotPrev)
+!
+! Carry out LineSearch, if EtotCurr>EtotPrev
+!
+        IF(EtotCurr>EtotPrev) THEN  
+          CALL LineSearch(Ctrl,GMLoc,IntCs,EtotCurr,EtotPrev)
+        ENDIF
+!
+      END SUBROUTINE VerifyStep
+!
+!---------------------------------------------------------------
+!
+      SUBROUTINE LineSearch(Ctrl,GMLoc,IntCs,EtotCurr,EtotPrev)
+        TYPE(SCFControls)::   Ctrl
+        TYPE(CRDS)       ::   GMLoc,GMPrev
+        TYPE(INTC)       ::   IntCs
+        INTEGER          ::   I,J,K,L,NDim,MaxStep,NStart,NCart,NIntC
+        INTEGER          ::   OldGrad,OldGrad2,NatmsLoc
+        REAL(DOUBLE)     ::   EtotCurr,EtotPrev,Etot,OldCrit
+        REAL(DOUBLE)     ::   Fact,Delta
+        TYPE(DBL_VECT)   ::   Displ
+        LOGICAL          ::   DoInternals,DoGDIIS
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: CoordTypeSave
+!
+! Search for a lower energy point between CGeo-1 and CGeo
+! along the Cartesian gradient!
+! Line search in internals was inefficient for bALA.
+!
+          GMTag=''
+        IF(HasMM()) GMTag='GM_MM'
+!
+        CALL Get(GMPrev,TRIM(GMTag)//PrvGeom)
+!
+        NatmsLoc=GMLoc%Natms
+        NCart=3*NatmsLoc
+        NIntC=SIZE(IntCs%Def)
+        MaxStep=GeOpCtrl%LSStepMax
+!
+        DoInternals=GeOpCtrl%DoInternals
+!
+! Calculate steepest descent step
+!
+        OldGrad=Ctrl%Grad
+        Ctrl%Grad=GRAD_STPDESC_OPT
+        CoordTypeSave=GeOpCtrl%CoordType
+        GeOpCtrl%CoordType=CoordType_Cartesian
+!
+        CALL NewDispl(Ctrl,Displ,NCart,NIntC)
+        CALL SRStep(Ctrl,GMLoc,Displ,IntCs,&
+                    Step_O=PrvGeom,DoSave_O=.FALSE.)
+!
+! Do line search
+!
+          IF(OldGrad==GRAD_STPDESC_OPT) THEN
+            Fact=0.5D0
+          ELSE
+            Fact=One
+          ENDIF
+!
+        DO I=1,MaxStep
+!
+          Displ%D=Fact*Displ%D
+          DoGDIIS=GeOpCtrl%GDIISOn
+          GeOpCtrl%GDIISOn=.FALSE.
+          OldCrit=GeOpCtrl%CooTrfCrit
+          GeOpCtrl%CooTrfCrit=1.D-8
+            CALL NewStructure(Ctrl,GMLoc,Displ,IntCs,DoSave_O=.FALSE.)
+          GeOpCtrl%CooTrfCrit=OldCrit
+          GeOpCtrl%GDIISOn=DoGDIIS
+!
+          CALL Put(GMLoc,Tag_O=TRIM(GMTag)//CurGeom)
+          OldGrad2=Ctrl%Grad
+          Ctrl%Grad=GRAD_NO_GRAD
+            CALL CALC_EnergyOnly(Ctrl)
+          Ctrl%Grad=OldGrad2    
+          CALL Get(Etot,'ETot',StatsToChar(Current))
+!
+          CALL OpenAscii(OutFile,Out) 
+            WRITE(Out,100) I,ETot  
+            IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+              WRITE(*,100) I,ETot  
+            ENDIF
+100  FORMAT('LineSearch Step= ',I2,' Energy= ',F12.8)
+          Close(Out,STATUS='KEEP')
+!
+          IF(Etot<EtotPrev) THEN
+            EXIT
+          ELSE
+            Fact=Fact/Two
+          ENDIF
+        ENDDO
+!
+        CALL OpenAscii(OutFile,Out) 
+          WRITE(Out,200) I            
+          WRITE(*,200) I            
+        Close(Out,STATUS='KEEP')
+200     FORMAT('WARNING! Line Search did not converge in ',I2,' steps')
+!
+! Set back control
+!
+        Ctrl%Grad=OldGrad
+        GeOpCtrl%CoordType=CoordTypeSave
+!
+        CALL Delete(Displ)
+!
+      END SUBROUTINE LineSearch
+!
+!---------------------------------------------------------------
 !
  END MODULE GeomOpt
