@@ -126,7 +126,7 @@ Typically, these functions have the form
 where the triad $\{l_a,m_a,n_a\}$ sets angular symmetry  
 and the exponent $\zeta_a$ is chosen to describe a particular length scale. 
 Gaussian basis functions are often contracted to approximate 
-atomic eigenfunctions \cite{}.
+atomic eigenfunctions.
  
 With periodic boundary conditions, the exact Hartree-Fock exchange matrix is 
 \cite{RDovesi00,MCausa88}
@@ -303,8 +303,8 @@ for the endpoint derivatives that do not assume EKPS:
    -{\rm Tr}\left[ {\bf P}^0 {\bf F}^1 \right] 
    +2 {\rm Tr}\left[ {\bf P}^1 {\bf F}^1 \right] \, , \nonumber\\
 \end{eqnarray}
-where  ${\bf F}$ is the Fockian, ${\bf T}$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
-This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
+where  ${\bf F}$ is the Fockian, ${\bf T}$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic 
+energy. This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
 
 \section{Implementation}\label{implementation}
 
@@ -317,7 +317,7 @@ together with inverse congruence transformations provided by sparse atom-blocked
 
 The Order N eXchange ({\sc ONX}) algorithm \cite{ESchwegler97} for computing the gas phase exchange matrix 
 has been modified by placing dual loops running over the lattice vectors 
-${\bf H}$ and ${\bf L}$ around the original ONX loop structures.  Two ordered bra and ket distribution 
+${\bf H}$ and ${\bf L}$ around the original { \sc ONX} loop structures.  Two ordered bra and ket distribution 
 buffers are assembled for each lattice vector pair, which are then used to drive the basic {\sc ONX} algorithm.
 The Minimum Image Convention has been introduced into the primitive contraction stage, in the 
 Vertical Recurrence Relations component of a symmetry driven Head-Gordon Pople \cite{MHeadgordon88} scheme for 
@@ -405,7 +405,8 @@ with both the RPBE/6-31G* GGA and the RTPSS/6-31G* meta-GGA level of theory \cit
 \label{DiamondLC}
 \center{\begin{tabular}{crcccc}
 \toprule
-Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptscriptstyle HF}$ & ${\rm a}_0^{\rm \scriptscriptstyle PBE0}$ \\
+Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptscriptstyle HF}$ & 
+${\rm a}_0^{\rm \scriptscriptstyle PBE0}$ \\
 \colrule
 {\sc MondoSCF}$^a$   &~64~           & ~STO-3G~      & ~3.587~          &  ~3.601~    \\
       --             &~216~          & ~STO-3G~      & ~3.582~          &  ~3.594~    \\
@@ -529,9 +530,11 @@ demonstrated linear scaling for three-dimensional systems.  While
 achieving linear scaling in three-dimensions for gas phase systems is challenging, 
 it is even more difficult with full periodicity.  This is especially true for
 dense systems like diamond;  linear scaling was achieved here only for large unit cells, 
-a minimal basis and a {\tt LOOSE} accuracy level.  It is possible to achieve
+a minimal basis and a {\tt LOOSE} accuracy level.  
+%
+It is possible to achieve
 an early onset of linear scaling with significantly larger Gaussian basis sets by 
-tightening the valence region, but doing so without care can lead to  poor 
+tightening the diffuse functions in the valence region, but doing so without care can lead to  poor 
 performance in the computation of proprieties such as the lattice constant.  
 Localization of the  basis set  has received recent, critical attention \cite{SKenny00,JJunquera01,EAnglada02},
 leading to numerical  basis functions that yield both linear scaling and high quality properties.  So far though,
@@ -539,7 +542,8 @@ this issue remains unexplored in the context of a Gaussian representation.
 
 For less dense systems and larger basis functions, the periodic {\sc MondoSCF} algorithms 
 are able to achieve an early onset of linear scaling with more accurate thresholding parameters.
-With parallelism \cite{MChallacombe00B,CGan03,CGan04B}, this opens the prospect of performing hybrid HF/DFT simulations of fluids. 
+With parallelism \cite{MChallacombe00B,CGan03,CGan04B}, this opens the prospect of performing 
+hybrid HF/DFT simulations of fluids. 
 
 These differences in behavior highlight the use of continuous thresholds that set the cost 
 to accuracy ratio on the fly.  Thus, as the gap closes or the basis sets becomes overcomplete,  
@@ -576,7 +580,8 @@ for a careful reading of this manuscript.
 
 There are four thresholds that control the numerical precision of the linear scaling algorithms
 in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
-described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
+described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$
+ ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
 the distribution threshold   $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref.~[\onlinecite{CTymczak04A}],
 and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
 Ref.~[\onlinecite{MChallacombe00A}]).  The threshold $\tau_{\rm \scriptscriptstyle 2E}$ also controls accuracy of the
@@ -594,7 +599,8 @@ models that contain Hartree-Fock exchange.
 \center{
 \begin{tabular}{lllll}
 \toprule
-Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & $\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
+Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & 
+$\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
 \colrule
 {\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
 {\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
@@ -676,7 +682,8 @@ with both the RPBE/6-31G* GGA and the RTPSS/6-31G* meta-GGA level of theory \cit
 \label{DiamondLC}
 \center{\begin{tabular}{crcccc}
 \toprule
-Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptscriptstyle HF}$ & ${\rm a}_0^{\rm \scriptscriptstyle PBE0}$ \\
+Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptscriptstyle HF}$ & 
+${\rm a}_0^{\rm \scriptscriptstyle PBE0}$ \\
 \colrule
 {\sc MondoSCF}$^a$   &~64~           & ~STO-3G~      & ~3.587~          &  ~3.601~    \\
       --             &~216~          & ~STO-3G~      & ~3.582~          &  ~3.594~    \\
