@@ -110,82 +110,222 @@ We solve for the density matrix, ${\bf P}$, via the eigen-equation
 \end{equation}
 and iterate on equation (\ref{Fockian}) until self-cosistancy is reached.
 
-\section{The Exchange matrix}
-The exchange matrix calculated withing a LCAO basis set, including $k$-space, 
-is define as  \cite{Pisani80,RDovesi00}
+\pagebreak
+
+\section{Periodic exact exchange}
+
+Extending methods involving local functions $\phi$ to the periodic regime, the Bloch functions
 \begin{equation}
-K_{ab}=\sum _{\mathbf{hgn}\,\,cd} \int
-{{\phi _{a}(\mathbf{r}) 
-\phi _{c+{\bf h}}(\mathbf{r}) 
-P_{cd}[{\mathbf{n}}]\, 
-\phi _{b+{\bf n}}(\mathbf{r'})
-\phi _{d+{\bf n}+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
+\psi^{\bf L}_c ({\bf r})
+ = \sum_{\bf u}  e^{i {\bf L}\cdot{\bf u}} \phi_c ({\bf r}-{\bf u})
+\label{bloch}
+\end{equation}
+are employed as a primary basis having the correct translational symmetry.
+In Eq.~(\ref{bloch}), $\bf L$ and $\bf u$ are lattice vectors, and the sum 
+formally extends over all periodic images.
+To date, rapid computation of the Hartree-Fock exchange interaction demands
+the analytic evaluation of two-electron integrals, which is possible when the 
+local basis functions are of Cartesian Gaussian type.  Typically, these functions have the form
+\begin{equation}
+\phi_c ({\bf r}) = (x-C_x)^{l_c} (y-C_y)^{m_c} (z-C_z)^{n_c}{\large e}^{-\zeta_c ({\bf r}-{\bf C})^2}
+\end{equation}
+where $\bf C$ is an atom center, the triad $\{l_c,m_c,n_c\}$ sets angular symmetry  
+and the exponent $\zeta_c$ is chosen to describe a 
+particular length scale. Gaussian basis functions are often contracted to approximate 
+atomic eigenfunctions \cite{}.
+ 
+With periodic boundary conditions, the exact Hartree-Fock exchange matrix is \cite{MCausa88}
+\begin{equation}
+K^{\bf M}_{ab}= - \frac{1}{2}
+\sum _{{\bf L N} c d} P^{\bf L}_{cd}
+\left(
+      \psi        _a    
+      \psi^{\bf L}_c    
+{\big | }
+      \psi^{\bf M}_b    
+      \psi^{\bf N+L}_d  
+\right)
 \label{CryEq}
-\end{equation}a
-where {\bf h},{\bf g}, and {\bf n} are the sum over bravi lattice vectors and $a-d$ are
-the atom center basis functions. 
-Let us consider two case; First let us consider the Gamma point, then in this case
-\begin{equation}
-P_{cd}[{\mathbf{n}}] \rightarrow P_{cd}[{0}]\, \delta _{{\mathbf{n},0}}
-\label{NoN}
 \end{equation}
-Which allows us to rewrite equation (\ref{CryEq}) as
+where the two-electron integrals have been written in chemists notation:
+\begin{eqnarray}
+\lefteqn{
+\left(
+      \psi        _a  
+      \psi^{\bf L}_c  
+{\big | }
+      \psi^{\bf M}_b  
+      \psi^{\bf N+L}_d
+\right)
+= }  \nonumber \\
+&& \qquad\qquad
+\iint d {\bf r} d {\bf r}'
+      \frac{
+      \psi        _a    ({\bf r}) 
+      \psi^{\bf L}_c    ({\bf r})~ 
+      \psi^{\bf M}_b    ({\bf r'})
+      \psi^{\bf N+L}_d  ({\bf r'})}
+      {\left|{\bf r}-{\bf r'}\right|} .
+\end{eqnarray}
+
+The formally infinite sums over lattice vectors in Eq.~(\ref{CryEq}) involve 
+many contributions that are in practice infinitesimal.  In part this is due to 
+the decay between local basis function products $\phi_a \phi_c $; the product of
+two Guassians centered at $\bf A$ and $\bf C$ decays also as a Gaussian with $|{\bf A}-{\bf C}|$. 
+Truncation based purely on the overlap of Gaussian basis functions is reliable and
+well controlled, leading efficiently to ${\cal O}(N)$ product terms.
+Additionally, the density matrix is known to decay exponentially 
+for non-metalic systems.  A radial cutoff $r_x$ defining the range of allowed exchange 
+interactions may be used to exploit this fall off {\em a priori} by confining summation over 
+$\bf L$ and ${\bf M}$ \cite{REuwema74,CPisani80,RDovesi80,MCausa88} to only those terms that 
+satisfy the imposed geometric contraints.  Radial cutoffs are also used to achieve
+$N$-scaling of the exchange matrix in gas phase calculations by limiting the allowed range 
+of atom centers $\bf C$ and $\bf D$ corresponding to matrix elements $P_{cd}$\cite{}.  
+
+\pagebreak
+These schemes have been implimented in the
+{\em ab initio} program CRYSTAL \cite{}, allowing the routine calculation of periodic systems
+with the HF and HF/DFT model chemistries.
+
+\section{Exchange at the $\Gamma$-point}
+
+The $\Gamma$-point approximation lifts translational invarience of the Bloch functions, limiting
+$\bf k$-space sampling to just the central cell; 
+ $\psi^{\bf k}_c \rightarrow \delta_{\bf k,0} \sum_{\bf u} \phi_c ({\bf r}-{\bf u})$.
+With $N$-scaling algorithm, the effects of $\bf k$-space integration may be recouped 
+with increasing cell-size.  In this approximation, Eq.~(\ref{CryEq}) reduces to 
 \begin{equation}
-K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
-{{\phi _{a}(\mathbf{r}) 
-\phi _{c+{\bf h}}(\mathbf{r}) 
-P_{cd}[0]\, 
-\phi _{b}(\mathbf{r'})
-\phi _{d+{\bf g}} ( \mathbf{r'})} \over {|{\bf r}-{\bf r'}|}} 
-\label{NoNKab}
+K_{ab}=
+\sum _{{\bf u v} c d} P_{cd}
+\left(
+      \phi        _a    
+      \phi^{\bf u}_c    
+{\big | }
+      \phi        _b    
+      \phi^{\bf v}_d  
+\right)
+\label{CryEq}
 \end{equation}
-However this is still not correct. Consider  figure \ref{figure:ExchangeRegion} where we
-are depicting the exchange interaction of atom $a$ with all its neighbors. Equation
-(\ref{NoNKab}) is the exchange interaction of atom $a$ with the central cell (gray region) in
-figure \ref{figure:ExchangeRegion}, however, this neglects the exchange interaction 
-between neighboring cells. This leads to an exchange matrix which is  not translationally invariant.
-We could fix this by summing over the infinite set of lattice vectors ${\bf n}$, 
-and this leads to a translationally invariant exchange matrix, but these integrals do not converge. 
-Referring to figure \ref{figure:ExchangeRegion} we can see a simple fix to this problem. When 
-we calculate the exchange matrix elements for atom $a$, include exchanges only within region
-defined by the volume centered about atom $a$ (the red box in figure \ref{figure:ExchangeRegion}).
-This gives both a convergent exchange matrix, and also a  translationally invariant one.
-We do this by defining  a Minimum Image Distance (MID) condition, which is similiar to what is done
-in Molecular Dynamics for the force on an atom due to neighboring cells \cite{awindemuth95}, 
 
+However, in this approximation the exact exchange potential, symmetric in the limit of infinite 
+summation, has been asymetically truncated, resulting in a potential that depends on position 
+of the unit cell.  Translational invarience can be restored to the exchange $\Gamma$-point approximation 
+by imposing the minimum image criterion (MIC) to the exchange interaction:
 \begin{equation}
-K_{ab}=\sum _{\mathbf{hg}\,\,cd} \int
-{{\cal MID}[ 
-{\phi _{a}(\mathbf{r}) 
-\phi _{c+{\bf h}}(\mathbf{r}) 
-P_{cd} \, 
-\phi _{b}(\mathbf{r'})
-\phi _{d+{\bf g}}( \mathbf{r'})]} \over {|{\bf r}-{\bf r'}|}} 
-\label{MinImageKab}
+K_{ab}=
+\sum _{{\bf u v} c d} P_{cd}
+\left(
+      \phi        _a    
+      \phi^{\bf u}_c    
+{\big | }
+      \phi        _b    
+      \phi^{\bf v}_d  
+\right)_{\rm  MIC}.
+\label{MIC}
 \end{equation}
-where $\cal MID$ is a function which shifts the distributions to there nearest image.
-In pseudocode,
-\begin{itemize}
-\item[] {{\bf Input[}$\psi_a({\bf r})\psi_c({\bf r+R})$,$\psi_b({\bf r'})\psi_d({\bf r'+R'})${\bf ]}}
-\item[] {{\hskip 0.2 in}${\bf D}\,\,\,\,={\bf AC} - {\bf BD} $}
-\item[] {{\hskip 0.2 in}${\bf FD}=frac[{\bf D}$]}
-\item[] {{\hskip 0.2 in}${\bf FD}={\bf FD}-aint[{\bf FD}]$}
-\item[] {{\hskip 0.2 in}${\bf D}\,\,\,\,=atom[{\bf FD}]$}
-\item[] {{\hskip 0.2 in}$I\,\,\,\,\,\,=(ac|bd)$  }
-\item[] {{\bf Output[}$I${\bf ]}}
-\end{itemize}
-Which we have implimented into our integral code.
+This criterion is applied at the contraction phase, ensuring that primitive charge distributions 
+interact consistently over a minimum distance.  In particular, if the primitive basis 
+function product $\phi_a \phi^{\bf u}_c$ is centered at $\bf P$ and the primitive product 
+$\phi_b \phi^{\bf v}_d$ is at $\bf Q$, then the minimum image criterion is 
+applied simply to the interaction vector $\bf P-Q = \{{\tt PQx},{\tt PQy},{\tt PQz} \}$ using
+\begin{verbatim}
+FPQx=PQx*InvBox(1,1)+PQy*InvBox(1,2)+PQz*InvBox(1,3)
+FPQy=PQy*InvBox(2,2)+PQz*InvBox(2,3)
+FPQz=PQz*InvBox(3,3)
+FPQx=FPQx-ANINT(FPQx)
+FPQy=FPQy-ANINT(FPQy)
+FPQz=FPQz-ANINT(FPQz)
+PQx =FPQx*Box(1,1)+FPQy*Box(1,2)+FPQz*Box(1,3)
+PQy =FPQy*Box(2,2)+FPQz*Box(2,3)
+PQz =FPQz*Box(3,3)
+\end{verbatim}
+where {\tt Box} is the box shape of the unit cell and {\tt InvBox} are the inverse lattice vectors.
+{\bf CJ, we could use one sentance describing what this code does;  changes to fractionals, wraps? back transforms...}.
+This approach is completely general, and can be used at the primitive level with any modern approach
+to computing two-electron integrals. 
 
-This problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
-will also exist for any finite set of lattice vectors ${\bf n}$. Consider 
-figure \ref{figure:ExchangeRegion_k111} where we show the regions that atom $a$ exchanges with
-for a maximum ${\bf k}$-space of ${\bf k}_{max} = \{1,1,1\}$. Here we see again that the integral
-defined in equation (\ref{CryEq}) is over the wrong region for atom $a$, and can be easily 
-rectified by the MID condition. As can also be easily seen this problem will disappear as the 
-region of ${\bf k}$-space increases because of the exponential decay of the density matrix with 
-distance.
+Suprisingly, this work is the first to correctly define the exact Hartree-Fock 
+exchange potential for periodic boundary conditions and the $\Gamma$-point approximation.  Moreover,
+effects related to asymetric truncation may also manifest in methods that perform incomplete $\bf k$-space 
+sampling, and may benifit from employing the minimum image criterion. 
 
-\section{Verification}
+\pagebreak
+
+\section{Implimentation}
+
+A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implimented in the MondoSCF
+suite of programs for linear scaling programs quantum chemistry.  The program {\sc ONX} \cite{} has been 
+modified by straighforwardly performing double loops over the lattice vectors $\bf v$ and $\bf u$
+arround the original ONX loop structure \cite{}.  Thus, ordered bra and ket distribution buffers are 
+assembled for each lattice vector pair.   Also the symmetry driven Head-Gordon Pople scheme for 
+computing two-electron integrals, innermost to the ONX loops, has been modified to include the 
+minimum image criterion in the contraction stage of the Vertical Recurence Relations.  While this implimentation
+is linear scaling and simple, it suffers from a number of drawbacks that we will set forth in detail shortly, 
+together with a more efficient algorithm able to achieve scalable parallelism \cite{}.
+
+\pagebreak
+
+\begin{table}
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+Magnesium Oxide test system within the Hartree-Fock approxiamtion using
+the STO-3G basis set. The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at 
+${\bf k}_{max}=\{6,6,6\}$.}
+\label{table:ComToCrystal98}
+\begin{tabular}{crll}
+\toprule
+Program         & $N_{\rm at}$              & Energy (au)   & Energy/$N_{\rm at}$\\ 
+\colrule
+{\sc MondoSCF}       & 8$^g$    & -1098.4382  & -137.30478 \\
+     --              & 16$^f$   & -2197.0564  & -137.31603 \\
+     --              & 32$^g$   & -4394.4846  & -137.32764 \\
+{\sc Crystal98}$^h$  & 32$^g$   & -4394.5847  & -137.33077 \\
+{\sc MondoSCF}       & 54$^f$   & -7415.8962  & -137.33141  \\
+     --              & 64$^g$   & -8789.2494  & -137.33202  \\
+{\sc Crystal98}$^h$  & 64$^g$   & -8789.2484  & -137.33201 \\
+{\sc MondoSCF}       & 128$^f$  & -17578.502  & -137.33205 \\
+     --              & 216$^g$  & -29663.729  & -137.33208 \\ 
+\hline
+{\sc Crystal98}$^i$  & 2    & -274.66415  & -137.33208  \\ 
+\botrule 
+\end{tabular}
+
+$^f$Triclinic~~
+$^g$Cubic~~
+$^h$Gamma Point \\
+$^i 8\times8\times8$ $\bf k$-space grid  \\
+\end{table}
+
+
+\begin{table}
+\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a proton ordered ice
+test system within the Hartree-Fock approxiamtion using
+a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO}. 
+The \textbf{MondoSCF} calculations where done to
+the accuracy of the quoted digits. All calculations where done at the Gamma point
+for comparison except the last \textbf{Crystal98} calculation, which was done at 
+${\bf k}_{max}=\{6,6,6\}$.}
+\label{table:ComToCrystal98_Ice}
+\center{
+\begin{tabular}{lrll}
+\toprule
+{\sc MondoSCF}  & 2$^a$    &  -152.03025  &  -76.01512 \\
+                & 16$^a$   &  -1216.3003  &  -76.01877 \\
+                & 54$^a$   &  -4105.0163  &  -76.01882 \\
+                & 128$^a$  &  -9730.4090  &  -76.01882 \\
+                & 250$^a$  &  -19004.705  &  -76.01882 \\ 
+\hline
+{\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882   \\ 
+\botrule
+\multicolumn{4}{l}{$ ^a $Gamma Point.} \\
+\multicolumn{4}{l}{$ ^b 6\times6\times6$ $k$-space grid.}
+\end{tabular}}
+\end{table}
+
+
+
+\section{Results}
 
 Table \ref{table:ComToCrystal98} shows our results for the total
 energy for Magnesium Oxide as compared to results obtained from \textbf{Crystal98}.
@@ -195,33 +335,26 @@ our methodology for doing the exchange matrix at the Gamma point is correct, and
 in the correct fashion in regard to increasing system size. In table \ref{table:ComToCrystal98_Ice}
 we show the convergence of the proton ordered ice system as compared to results obtained from 
 \textbf{Crystal98} using a more accurate crystal optimized basis set. Again we see excellent
-agreement with the \textbf{Crystal98} results, and again the results converge to the k-space energy per
-molecule with increasing system size
+agreement with the \textbf{Crystal98} results.
+
 
 \section{Scaling}
  
-Figure \ref{figure:Scaling_Matrix_Build} depicts the time it takes to build the
-exact exchange matrix,  \( K_{x} \), for the periodic diamond system up to 800 atoms for a modified pople 
+Figure \ref{figure:Scaling_Matrix_Build} is the time it takes to build the
+exact exchange matrix  \( K_{x} \) for the periodic diamond system up to 800 atoms for the modified pople 
 basis set 6-31G$ ^\dagger$ \cite{Pople92} and for a matrix thresholding of $\tau=10^{-3}$ .
 Also included in the figure for comparision are the total time for the
 density matrix solver, TRS4 \cite{ANiklasson03}, 
-and the Coulomb matrix build using the Quantum chemical tree code \cite{CTymczak03c}. Linear scaling
-for the exchange matrix build does not kick in until about three hundred atoms. This is do to the 
-very large number density of this system, which is reflected in the non-sparcity of the density matrix until 
-about 300 atom unit cell. This fact make the diamond system very challenging and difficult. In contrast, in 
-figures  \ref{figure:Scaling_Matrix_Build_Ice_1} and  \ref{figure:Scaling_Matrix_Build_Ice_2} we show the 
-scaling results for the proton order ice system \cite{LOjamae94}. In this system, which is a factor of ten 
-less dense then the diamond system, linear scaling comenses very early, around twenty water molecules. 
- 
-\section{Equation of State}
+and the Coulomb matrix build using our Quantum chemical treee code \cite{CTymczak03c}. 
 
-In figure \ref{figure:EnergyVsLattice} we show the energy per carbon atom vs.the volume per carbon atom for a
-\textbf{Crystal98} calculation using a ${\bf k}_{max}=\{6,6,6\}$ and two \textbf{MondoSCF} calculations,
-one with 64 atoms in the unit cell and one with 512 atoms in the unit cell
 
-In figure \ref{figure:EnergyVsLattice_Ice} we show the energy per water molecule  vs. the primative 
-lattice constant $a$ for a \textbf{Crystal98} calculation using a ${\bf k}_{max}=\{6,6,6\}$ and a 
-\textbf{MondoSCF} calculation using 250 water molecules in the unit cell.
+\ref{figure:EnergyVsLattice}
+%We also show in figure \ref{figure:EnergyPerN} the energy per carbon atom and 
+%in figure \ref{figure:ErrorPerN} the relative error in the total energy. 
+%Again we see the convergence of the total energy
+%as a function of increasing system size, which is akin to k-space integration.
+%We also see that our relative error is very well controlled within the \
+%textbf{MondoSCF} quantum chemistry code, even up to 512 carbon atoms.
 
 
 \section{CONCLUSIONS}
@@ -237,114 +370,15 @@ in preparation of this manuscript.
 \bibliography{mondo_new} 
 
 
-\eject
-
-\begin{table}
-\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Magnesium Oxide test system within the Hartree-Fock approxiamtion using
-the STO-3G basis set. The \textbf{MondoSCF} calculations where done to
-the accuracy of the quoted digits. All calculations where done at the Gamma point
-for comparison except the last \textbf{Crystal98} calculation, which was done at 
-${\bf k}_{max}=\{6,6,6\}$.}
-\label{table:ComToCrystal98}
-\center{
-\begin{tabular}{lcll}
-\toprule
-{\sc MondoSCF}  & 8$^g$    & -1098.4382  & -137.30478 \\
-                & 16$^f$   & -2197.0564  & -137.31603 \\
-                & 32$^g$   & -4394.4846  & -137.32764 \\
-                & 54$^f$   & -7415.8962  & -137.33141  \\
-                & 64$^g$   & -8789.2494  & -137.33202  \\
-                & 128$^f$  & -17578.502  & -137.33205 \\
-                & 216$^g$  & -29663.729  & -137.33208 \\ 
-\hline
-{\sc Crystal98}$^h$  & 32$^g$   & -4394.5847  & -137.33077 \\
-                     & 64$^g$   & -8789.2484  & -137.33201 \\
-\hline
-{\sc Crystal98}$^i$  & 2    & -274.66415  & -137.33208  \\ 
-\botrule
-$ ^f$Triclinic \\
-$ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h$Gamma Point.} \\
-\multicolumn{4}{l}{$ ^i8\times8\times8$ $k$-space grid.}
-\end{tabular}}
-\end{table}
 %
 %
-\begin{table}
-\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a proton ordered ice
-test system within the Hartree-Fock approxiamtion using
-a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO}. 
-The \textbf{MondoSCF} calculations where done to
-the accuracy of the quoted digits. All calculations where done at the Gamma point
-for comparison except the last \textbf{Crystal98} calculation, which was done at 
-${\bf k}_{max}=\{6,6,6\}$.}
-\label{table:ComToCrystal98_Ice}
-\center{
-\begin{tabular}{lcll}
-\toprule
-{\sc MondoSCF}  & 2$^a$    &  -152.03025  &  -76.01512 \\
-                & 16$^a$   &  -1216.3003  &  -76.01877 \\
-                & 54$^a$   &  -4105.0163  &  -76.01882 \\
-                & 128$^a$  &  -9730.4090  &  -76.01882 \\
-                & 250$^a$  &  -19004.705  &  -76.01882 \\ 
-\hline
-{\sc Crystal98}$^b$  & 2   &  -152.03765  &  -76.01882   \\ 
-\botrule
-\multicolumn{4}{l}{$ ^a $Gamma Point.} \\
-\multicolumn{4}{l}{$ ^b 6\times6\times6$ $k$-space grid.}
-\end{tabular}}
-\end{table}
-%
-%
-%
-\begin{table}
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
-         reported in Table~\ref{table:ComToCrystal98}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-C &     0.125 &    0.125 &    0.125  \\
-C &     0.375 &    0.375 &    0.375  \\
-C &     0.625 &    0.625 &    0.125  \\
-C &     0.875 &    0.875 &    0.375  \\
-C &     0.625 &    0.125 &    0.625  \\
-C &     0.875 &    0.375 &    0.875  \\
-C &     0.125 &    0.625 &    0.625  \\
-C &     0.375 &    0.875 &    0.875  \\
-\botrule
-\end{tabular}}
-\end{table}
-%
-%
-%
-\begin{table}
-\caption{Fractional coordinates for the 2 molecule unit cell of the proton ordered ice structure, 
-cooresponding to the supercell calculations  reported in Table~\ref{table:ComToCrystal98_Ice}.  
-Dimensions of the cubic unit cell are $a=7.328$\AA, $b=7.920$\AA \,\, and $c=4.400$\AA.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-O &  0.063737 \,&   0.583443 \,&  0.000000 \\
-H &  0.196106 \,&   0.583443 \,&  0.000000 \\
-H &  0.018465 \,&   0.524173 \,&  0.177576 \\
-O &  0.936263 \,&   0.916557 \,&  0.000000 \\
-H &  0.980443 \,&   0.801105 \,&  0.000000 \\
-H &  0.981535 \,&   0.975827 \,&  0.822424 \\
-\botrule
-\end{tabular}}
-\end{table}
 %
 %
 %
 \begin{figure}
 \caption{Unit cell and its brava lattice vectors.}
 \label{figure:SimCell}
-{\centering \includegraphics{UnitCell_2.ps} \par}
+%{\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure}
 %
 %
@@ -352,7 +386,7 @@ H &  0.981535 \,&   0.975827 \,&  0.822424 \\
 \begin{figure}
 \caption{For the Gamma point, the region in which atom $a$ has exchange interactions.}
 \label{figure:ExchangeRegion}
-{\centering \includegraphics{ExchangeRegion.ps} \par}
+%{\centering \includegraphics{ExchangeRegion.ps} \par}
 \end{figure}
 %
 %
@@ -360,7 +394,7 @@ H &  0.981535 \,&   0.975827 \,&  0.822424 \\
 \begin{figure}
 \caption{For ${\bf k}_{max}=\{1,1,1\}$, the region in which atom $a$ has exchange interactions.}
 \label{figure:ExchangeRegion_k111}
-{\centering \includegraphics{ExchangeRegion_k111.ps} \par}
+%{\centering \includegraphics{ExchangeRegion_k111.eps} \par}
 \end{figure}
 %
 %
@@ -368,37 +402,16 @@ H &  0.981535 \,&   0.975827 \,&  0.822424 \\
 \begin{figure}
 \caption{Scaling results for the exchange matrix build, the coulomb matrix
 build (scaled by ten), and the density matrix solver (scaled by twenty),  
-for the dense diamond periodic system up to 800 atoms using the modified pople
-6-31G$ ^\dagger$ basis set for a matrix threshold of $\tau=10^{-3}$.}
+for the dense diamond periodic system up to 800 atoms using the
+6-31G$ ^\dagger$ basis set.}
 \label{figure:Scaling_Matrix_Build}
-{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
+%{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
 \end{figure}
 %
 %
 %
 \begin{figure}
-\caption{Scaling results for the exchange matrix build, coulomb matrix
-build and the density matrix solver  for the proton ordered ice periodic system up to 432 water molecules 
-using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of $\tau=10^{-4}$.}
-\label{figure:Scaling_Matrix_Build_Ice_1}
-{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
-\end{figure}
-%
-%
-%
-\begin{figure}
-\caption{Scaling results for the exchange matrix
-build  for the proton ordered ice periodic system up to 432 water molecules 
-using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of 
-$\tau=10^{-4}$ and  $\tau=10^{-6}$.}
-\label{figure:Scaling_Matrix_Build_Ice_2}
-{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
-\end{figure}
-%
-%
-%
-\begin{figure}
-\caption{Energy per carbon atoms vs. Volume per atom  for a {\bf Crystal98} calculation 
+\caption{Energy per Carbon atoms vs. Lattice constants for a {\bf Crystal98} calculation 
 with a two atoms per unit
 cell and ${\bf k}_{max} = (12,12,12)$, a {\bf MondoSCF} calculation with 64 atoms per
 unit cell at the Gamma-point at a tight level of accuracy, and a {\bf MondoSCF} calculation 
@@ -411,17 +424,35 @@ All calculation where done using the
 \end{figure}
 %
 %
-% Graph is almost done: Just a place holder for now
 %
 \begin{figure}
-\caption{Energy per Molecule vs.  Lattice constant  $a$  for a {\bf Crystal98} calculation 
-with a two molecules per unit cell and ${\bf k}_{max} = (6,6,6)$ and a {\bf MondoSCF} 
-calculation
-with 432 molecules  per unit cell at the Gamma-point at a loose and good level of accuracy.
-All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} 
-hartree fock theory level. }
+\caption{Scaling results for the exchange matrix build, coulomb matrix
+build and the density matrix solver  for the proton ordered ice periodic system up to 432 water molecules 
+using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of $\tau=10^{-4}$.}
+\label{figure:Scaling_Matrix_Build_Ice}
+%{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
+\end{figure}
+%
+%
+%
+\begin{figure}
+\caption{Scaling results for the exchange matrix
+build  for the proton ordered ice periodic system up to 432 water molecules 
+using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of 
+$\tau=10^{-4}$ and  $\tau=10^{-6}$.}
+\label{figure:Scaling_Matrix_Build_Ice}
+%{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
+\end{figure}
+%
+%
+%
+\begin{figure}
+\caption{Energy per Molecule vs. the $a_0$ Lattice constans for a {\bf Crystal98} calculation 
+with a two molecules per unit cell and ${\bf k}_{max} = (6,6,6)$ and a {\bf MondoSCF} calculation 
+with 432 molecules  per unit cell at the Gamma-point at a loose level of accuracy.
+All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} hartree fock theory level. }
 \label{figure:EnergyVsLattice_Ice}
-{\centering \includegraphics{pIce_En_vs_a.ps} \par} 
+%{\centering \includegraphics{pIce_En_vs_a.ps} \par} 
 \end{figure}
 %
 %
