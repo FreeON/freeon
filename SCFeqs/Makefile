@@ -54,7 +54,9 @@ ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              SDMM.x SP2.x SP4.x TS4.x PM.x   \
              FillPBlok.x P2Use.x FillPBlok.x \
              SCFStatus.x FBuild.x DIIS.x ToDev.x \
-	     DDIIS.x TC2Response.x CPSCFStatus.x
+	     DDIIS.x TC2Response.x CPSCFStatus.x \
+             DenMatMethods.x 
+
 #
 all:	RStat DDIIS FBuild TC2Response Blk Lwd RHEq SDMM SP2 SP4 TS4 PM Stat Gues DIIS  
 #

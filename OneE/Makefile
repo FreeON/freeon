@@ -39,11 +39,12 @@ ObjsR     = RhoTools.o  RhoBlok.o  MakeRho.o
 ObjsParaR = RhoTools.o  RhoBlok.o  ParaMakeRho.o
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o
+ObjTF = UBlok.o UForce.o
 
 ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
-               RhoTools.x   RhoBlok.x MakeRho.x ParaMakeRho.x \
-               BlokTrWdS.x SForce.x BlokTrPdT.x \
-               TForce.x MakeM.x MBlok.x
+               RhoTools.x   RhoBlok.x MakeRho.x ParaMakeRho.x   \
+               BlokTrWdS.x SForce.x BlokTrPdT.x  TForce.x       \
+               UForce.x MakeM.x MBlok.x
 #
 all: 	 MakeM MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce UForce 
 #
@@ -80,7 +81,7 @@ TForce:	$(ObjTF)
 	mv TForce $(MONDO_EXEC)/TForce
 #
 UForce:	UForce.o
-	$(LD) $(LDFLAGS) UForce UForce.o UBlok.o $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) UForce $(ObjUF) UBlok.o $(F90_LIBRARIES)
 	mv UForce $(MONDO_EXEC)/UForce
 #
 release:clean $(ReleaseFiles) 
