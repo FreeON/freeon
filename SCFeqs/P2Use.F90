@@ -29,15 +29,15 @@ PROGRAM P2Use
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: P,P0,X,S0,S1,dS,Tmp1,Tmp2
+                                :: P,P0,X,S,S0,S1,dS,Tmp1,Tmp2
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: MaxDS
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-                                   Ipot_Error,Norm_Error
+                                   Ipot_Error,Norm_Error,Lam,TError0
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
-                                   OldFileID,ICart
+                                   OldFileID,ICart,N,NStep
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
@@ -233,6 +233,7 @@ PROGRAM P2Use
      ENDIF
      ! Allocate
      CALL New(P)
+     CALL New(S)
      CALL New(dS)
      CALL New(Tmp1)
      CALL New(Tmp2)
@@ -240,57 +241,70 @@ PROGRAM P2Use
      CALL Multiply(S1,-One)
      CALL Add(S1,S0,dS)
      CALL Multiply(S1,-One)
-     MaxDS = MAX(dS)
+     MaxDS = SQRT(Trace(dS,dS))
      ! Initialize P
      CALL SetEq(P,P0)
+     ! Initial Trace Error
+     TError0  = ABS(Trace(P,S1)-Half*DBLE(NEl))
+     !Number of Steps
+     NStep=INT(ABS(Trace(P,S1)-Half*DBLE(NEl)))/4+1
      ! Purify 
      IF(MaxDS > 1.D-10) THEN
-        Qstep=0
-        DO I=1,20
-           IF(I <= 2) THEN
-              CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
-              CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
-           ELSE
-              IF(ABS(Ipot_Error) > 0.1D0) THEN
+        DO N=1,NStep
+           ! Initialize S
+           Lam  = DBLE(N)/DBLE(NStep)
+           CALL SetEq(Tmp1,S0)
+           CALL SetEq(Tmp2,S1)
+           CALL Multiply(Tmp1,One-Lam)
+           CALL Multiply(Tmp2,Lam)
+           CALL Add(Tmp1,Tmp2,S)
+           TrP        = Trace(P,S)
+           Norm_Error = TrP-Half*DBLE(NEl)
+           Ipot_Error = One
+!
+           Qstep=0
+           DO I=1,20
+              IF((ABS(Ipot_Error) > 0.5D0 .OR. ABS(Norm_Error) > 0.5D0) .AND. I > 1) THEN
                  IF(Norm_Error > Zero) THEN
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
                  ELSE
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
                  ENDIF
               ELSE
-                 Qstep = Qstep+1
+                 IF(I > 1) Qstep = Qstep+1
                  IF(Norm_Error > Zero) THEN
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
                  ELSE
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
-                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
                  ENDIF
               ENDIF
-           ENDIF
-           Norm_Error = TrP-Half*DBLE(NEl)
-           Ipot_Error = TrP2-Trace(P)
+              Norm_Error = TrP-Half*DBLE(NEl)
+              Ipot_Error = TrP2-Trace(P)
 #ifdef PARALLEL
-           IF(MyId==ROOT)THEN
+              IF(MyId==ROOT)THEN
 #endif
-              PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
-                   //'dN='//TRIM(DblToShrtChar(Norm_Error)) &
-                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
-              CALL OpenASCII(OutFile,Out)
-              CALL PrintProtectL(Out)
-              WRITE(*,*)TRIM(Mssg)
-              WRITE(Out,*)TRIM(Mssg)
-              CALL PrintProtectR(Out)
-              CLOSE(UNIT=Out,STATUS='KEEP')
+                 PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+                 Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
+                      //'dN='//TRIM(DblToShrtChar(Norm_Error)) &
+                      //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
+                 CALL OpenASCII(OutFile,Out)
+                 CALL PrintProtectL(Out)
+                 WRITE(*,*)TRIM(Mssg)
+                 WRITE(Out,*)TRIM(Mssg)
+                 CALL PrintProtectR(Out)
+                 CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL          
-           ENDIF 
+              ENDIF
 #endif
-           IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
-           IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) EXIT
-           IF(Qstep > 4) EXIT
+              IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
+              IF(ABS(Norm_Error) > 100.D0*TError0) EXIT
+              IF(Qstep > 4) EXIT
+           ENDDO
         ENDDO
-        IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) THEN
+!
+        IF(ABS(Norm_Error) > TError0) THEN
            CALL Warn("Using Old Density Matrix: Norm Error to Large")
            CALL Filter(P,P0)
         ENDIF
@@ -303,8 +317,9 @@ PROGRAM P2Use
      CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.) 
      ! Clean Up
      CALL Delete(P)
-     CALL Delete(dS)
-     CALL Delete(Tmp1) 
+     CALL Delete(S)
+     CALL Delete(dS) 
+     CALL Delete(Tmp1)
      CALL Delete(Tmp2)
   CASE('Project')
      CALL Halt(' Not Implimented '//TRIM(SCFActn))
