@@ -59,6 +59,11 @@ MODULE OptionKeys
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_OPTION     ='InkFok'
   CHARACTER(LEN=*),  PARAMETER :: INKFOCK_ON         ='On'
   !------------------------------------------------------------------------------
+  ! Options: Convergence=
+  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_OPTION     ='Convergence'
+  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_DODIIS     ='DoDIIS'
+  CHARACTER(LEN=*),  PARAMETER :: CONVERGE_DOODA      ='DoODA'
+  !------------------------------------------------------------------------------
   ! Options:Grad=  
   CHARACTER(LEN=*),   PARAMETER :: GRADIENTS         ='Grad'
   ! Do no gradeint evaluation

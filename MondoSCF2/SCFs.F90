@@ -99,19 +99,29 @@ CONTAINS
        Automatic1=.TRUE.
        Automatic2=.TRUE.
        ! Switching on/off rebuild doesn't work so well.  Lets be conservative for now
-       RebuildPostODA=.FALSE.
+       RebuildPostODA=.TRUE.
     ENDIF
-
+    ! Parse for strict ODA or DIIS invocation
+    CALL OpenASCII(N%IFile,Inp)
+    IF(cSCF>3.AND.OptKeyQ(Inp,CONVERGE_OPTION,CONVERGE_DODIIS))THEN
+       DoODA=.FALSE.
+       DoDIIS=.TRUE.
+    ELSEIF(OptKeyQ(Inp,CONVERGE_OPTION,CONVERGE_DOODA))THEN
+       DoODA=.TRUE.
+       DoDIIS=.FALSE.
+    ENDIF
+    CLOSE(UNIT=Inp,STATUS='KEEP')
+    ! Check semantics
+    IF(DoDIIS.AND.(DoODA.OR.DoMIX))THEN
+       CALL MondoHalt(DRIV_ERROR,'Logic failure 1 in SCFCycle')
+    ENDIF
+    ! Are we maybe solving CPSCF equations?
     IF(PRESENT(CPSCF_O))THEN
        DoCPSCF=CPSCF_O
     ELSE
        DoCPSCF=.FALSE.
     ENDIF
-
-    IF(DoDIIS.AND.(DoODA.OR.DoMIX))THEN
-       CALL MondoHalt(DRIV_ERROR,'Logic failure 1 in SCFCycle')
-    ENDIF
-
+    ! The options...
     IF(DoCPSCF)THEN
        CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O=.TRUE.)
        CALL DensityBuild(N,S,M)
@@ -131,7 +141,7 @@ CONTAINS
        CALL Invoke('SCFstats',N,S,M)
     ELSEIF(DoMIX)THEN
        RebuildPostMIX=.FALSE.
-       IF(cSCF>1)THEN
+       IF((cSCF>1.AND.cGEO==1).OR.cSCF>0)THEN
           CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
@@ -151,7 +161,7 @@ CONTAINS
           CALL Invoke('SCFstats',N,S,M)
        ENDIF
     ELSEIF(DoODA)THEN
-        IF(cSCF>1)THEN
+        IF(cSCF>1.OR.cSCF>0.AND.cGEO>1)THEN
           CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
@@ -183,7 +193,7 @@ CONTAINS
     ENDIF
     !
     CALL StateArchive(N,S)
-    WhatsUp=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,DoDIIS,DoODA,CPSCF_O)
+    WhatsUp=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,DoDIIS,DoODA,RebuildPostODA,CPSCF_O)
     S%Previous%I=S%Current%I
     !
     IF(.NOT.DoCPSCF.AND.Automatic1.AND.DoDIIS.AND.WhatsUp==SCF_STALLED)THEN
@@ -213,7 +223,7 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,DoDIIS,DoODA,CPSCF_O)
+  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,DoDIIS,DoODA,RebuildPostODA,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
     TYPE(Options)               :: O
@@ -221,9 +231,9 @@ CONTAINS
     TYPE(Parallel)              :: M
     TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
     LOGICAL,OPTIONAL            :: CPSCF_O
-    LOGICAL                     :: CPSCF,DoDIIS,DoODA
-    LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic, &
-                                   GLogic,QLogic,ILogic,OLogic,RLogic
+    LOGICAL                     :: CPSCF,DoDIIS,DoODA,RebuildPostODA
+    LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
+                                   GLogic,QLogic,ILogic,OLogic,RLogic,FLogic
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
@@ -298,24 +308,29 @@ CONTAINS
           ELSE
              ODAQ=Zero
           ENDIF
-!          WRITE(6,*)'ODAQ = ',ODAQ
-!          WRITE(6,*)'ETotQ = ',ETotQ
-!          WRITE(6,*)'DIISQ = ',DIISQ
-!          WRITE(6,*)'DMaxQ = ',DMaxQ
-!          WRITE(*,*)'ETOTO = ',ETotO
-!          WRITE(6,*)'ETOTA = ',ETOTA
-!          WRITE(6,*)'ETOTB = ',ETOTB
-!          WRITE(6,*)'DIISA = ',DIISA
-!          WRITE(6,*)'DIISB = ',DIISB
-!          WRITE(6,*)'DMaxA = ',DMaxA
-!          WRITE(6,*)'DMaxB = ',DMaxB
+          CALL OpenASCII(OutFile,Out)
+          WRITE(Out,*)'ODAQ = ',ODAQ
+          WRITE(Out,*)'ETotQ = ',ETotQ
+          WRITE(Out,*)'DIISQ = ',DIISQ
+          WRITE(Out,*)'DMaxQ = ',DMaxQ
+          WRITE(Out,*)'ETOTO = ',ETotO
+          WRITE(Out,*)'ETOTA = ',ETOTA
+          WRITE(Out,*)'ETOTB = ',ETOTB
+          WRITE(Out,*)'DIISA = ',DIISA
+          WRITE(Out,*)'DIISB = ',DIISB
+          WRITE(Out,*)'DMaxA = ',DMaxA
+          WRITE(Out,*)'DMaxB = ',DMaxB
           Converged(iCLONE)=NOT_CONVERGE
           ! Convergence from above +/- expected delta
+          ! relative to historical minimum energy
           ALogic=ETotB*(One+ETest)<ETotA
+          ! Convergence from above +/- expected delta
+          ! simply relative to previous energy
+          A2Logic=ETot%D(cSCF  ,iCLONE)*(One+ETest)<ETot%D(cSCF-1,iCLONE)
           ! Met all criteria
           CLogic=DMaxB<DTest.AND.ETotQ<ETest
           ! Exceeded density criteria
-          DLogic=DMaxB<65D-2*DTest
+          DLogic=DMaxB<5D-2*DTest
           ! Exceeded energy criteria
           ELogic=ETotQ<3D-2*ETest
           ! Quasi convergence from below (bad)
@@ -323,16 +338,36 @@ CONTAINS
           ! Going to wrong state with DIIS
           ILogic=DoDIIS.AND.DLogic.AND.(.NOT.ELogic)
           ! DIIS is oscillating
-          OLogic=DoDIIS.AND.(.NOT.ALogic).AND.ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)
+          OLogic=DoDIIS.AND.(.NOT.ALogic).AND.( (ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)).OR. &
+                                                (ETotQ>2D-3.AND.(DMaxQ>1D0.OR.DIISQ>1D0)) )
           ! Maybe DIIS would be a good idea
-          GLogic=DoODA.AND.DIISB<8D-4.AND.ETotQ<2D-5.AND.DMaxB<2D-1
+          GLogic=DoODA.AND.cSCF>4.AND.DIISB<75D-5.AND.ETotQ<5D-5.AND.DMaxB<1D-1
           ! Turn on KS recomputation if ODA is not strictly decreasing
-          RLogic=DoODA.AND.cSCF>2.AND.ODAQ>1D-4 !1D1*ETotQ
+          RLogic=DoODA.AND.(cSCF>2.AND.ODAQ>1D-4.OR..NOT.ALogic) !1D1*ETotQ
+          ! If we are increasing with ODA and rebuild is on, we are well fucked.
+          FLogic=DoODA.AND.RebuildPostODA.AND..NOT.ALogic
           ! Sort through logic hopefully in the conditionally correct order ...
+
+
+          WRITE(Out,*)' ETest  = ',ETest
+          WRITE(Out,*)' DTest  = ',DTest
+          WRITE(Out,*)' ALogic = ',ALogic
+          WRITE(Out,*)' A2Logic = ',A2Logic
+          WRITE(Out,*)' ELogic = ',ELogic
+          WRITE(Out,*)' CLogic = ',CLogic
+          WRITE(Out,*)' DLogic = ',DLogic
+          WRITE(Out,*)' QLogic = ',QLogic
+          WRITE(Out,*)' ILogic = ',ILogic
+          WRITE(Out,*)' GLogic = ',GLogic
+          WRITE(Out,*)' RLogic = ',RLogic
+          WRITE(Out,*)' FLogic = ',FLogic
+
+          CLOSE(Out)
+
           IF(ALogic.AND.CLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
              Mssg='Normal SCF convergence.'
-          ELSEIF(ALogic.AND.DLogic)THEN
+          ELSEIF(A2Logic.AND.DLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
              Mssg='Convergence of density only'
           ELSEIF(ALogic.AND.ELogic)THEN
@@ -341,18 +376,23 @@ CONTAINS
           ELSEIF(QLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
              Mssg='Quasi convergence from wrong side.'
-          ELSEIF(ILogic)THEN
+          ELSEIF(FLogic)THEN
+             Mssg='ODA with rebuild not strictly decreasing, as good as we can do for now ...'
+             Converged(iCLONE)=DID_CONVERGE
+          ELSEIF(RLogic)THEN
+             Mssg='Rebuilding Fockian post ODA'
              Converged(iCLONE)=SCF_STALLED
-             Mssg='DIIS converging to wrong state'
+             ! We may have a corrupted history here, rest...
+             ETot%D(0:iSCF-1,iCLONE)=BIG_DBL
+!          ELSEIF(ILogic)THEN
+!             Converged(iCLONE)=SCF_STALLED
+!             Mssg='DIIS converging to wrong state'
           ELSEIF(OLogic)THEN
              Converged(iCLONE)=SCF_STALLED
              Mssg='DIIS oscillation'
           ELSEIF(GLogic)THEN
              Mssg='Turning DIIS on'
              Converged(iCLONE)=DIIS_NOPATH
-          ELSEIF(RLogic)THEN
-             Mssg='Rebuilding Fockian post ODA'
-             Converged(iCLONE)=SCF_STALLED
           ENDIF
        ENDIF
     ENDDO
@@ -433,7 +473,8 @@ CONTAINS
           S%Previous%I=O%RestartState%I
           S%Action%C(1)=SCF_RESTART
        ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
-          S%Action%C(1)=SCF_PROJECTION
+!          S%Action%C(1)=SCF_PROJECTION
+          S%Action%C(1)=SCF_EXTRAPOLATE
        ELSEIF(cSCF==0.AND.cBAS/=pBAS)THEN
           S%Action%C(1)=SCF_BASISSETSWITCH
           S%Previous%I(1)=S%Previous%I(1)+1
