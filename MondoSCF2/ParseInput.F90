@@ -9,6 +9,8 @@ MODULE ParseInput
   USE ControlStructures
   USE PrettyPrint
   USE ParseParallel
+  USE ParseGeomOpt
+  USE ParseExtraCoords
 CONTAINS 
   !===============================================================
   ! 'NUFF SAID
@@ -38,5 +40,9 @@ CONTAINS
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets) 
     ! Parse in parallel info
     CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+    ! Load control of internal coord. optimizer
+    CALL LoadGeomOpt(C%Nams,C%GOpt)
+    ! Load constraints and extra internal coords
+    CALL LoadExtraCoords(C%GOpt,C%Nams,C%Geos)
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput
