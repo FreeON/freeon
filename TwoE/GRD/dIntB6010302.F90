@@ -1,7 +1,7 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (p sp|p sp) 
+! COMPUTES THE INTEGRAL CLASS (d s|p sp) 
 ! ---------------------------------------------------------- 
-SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
+SUBROUTINE dIntB6010302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
  OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,GRADIENTS)
        USE DerivedTypes
       USE VScratchB
@@ -21,16 +21,16 @@ SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(20) :: HRRTmp 
-      REAL(DOUBLE), DIMENSION(13,13,4) :: HRR 
+      REAL(DOUBLE), DIMENSION(10,13,4) :: HRR 
       REAL(DOUBLE), DIMENSION(20,13,4) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(13,20,4) :: HRRC 
+      REAL(DOUBLE), DIMENSION(10,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(20,20,0:5)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
-      CALL InitDbl(13*13,HRR(1,1,1))
+      CALL InitDbl(10*13,HRR(1,1,1))
       CALL InitDbl(20*13,HRRA(1,1,1))
       CALL InitDbl(20*13,HRRB(1,1,1))
-      CALL InitDbl(13*20,HRRC(1,1,1))
+      CALL InitDbl(10*20,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -66,7 +66,6 @@ SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             Py=PrmBufB(3,K)
             Pz=PrmBufB(4,K)
             Up=PrmBufB(5,K)
-            FnSpB=PrmBufB(6,K)
             Alpha =PrmBufB(9,K)
             Beta  =PrmBufB(10,K)
             r1xZpE=One/(Zeta+Eta)
@@ -134,53 +133,53 @@ SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             ENDIF
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (spd,0|p,sp)
-      CALL KetHRR32(13,HRR) 
-      ! Generating (spdf,0|p,sp)^a
+      ! Generating (d,0|p,sp)
+      CALL KetHRR32(10,HRR) 
+      ! Generating (f,0|p,sp)^a
       CALL KetHRR32(20,HRRA) 
-      ! Generating (spdf,0|p,sp)^b
+      ! Generating (f,0|p,sp)^b
       CALL KetHRR32(20,HRRB) 
-      ! Generating (spd,0|d,sp)^c
-      CALL KetHRR62(13,HRRC) 
+      ! Generating (d,0|d,sp)^c
+      CALL KetHRR62(10,HRRC) 
       DO L=1,4
       
          !K = 2
          CDOffSet=(OC+2-2)*LDC+(OD+L-1)*LDD
-         ! Generating (p',sp|2,L)  and (p,sp'|2,L)
-         CALL BraHRR61ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,2,L),&
+         ! Generating (d',s|2,L)  and (d,s'|2,L)
+         CALL BraHRR66ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,2,L),&
                           HRRA(1,2,L),HRRB(1,2,L),GRADIENTS(1,1))
-         ! Generating (p,sp|2_x,L)  and (p,sp|2,L_x)
+         ! Generating (d,s|2_x,L)  and (d,s|2,L_x)
          HRRTmp(1:10)=HRRC(1:10,5,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRTmp,GRADIENTS(1,1))
-         ! Generating (p,sp|2_y,L)  and (p,sp|2,L_y)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,6,L),GRADIENTS(1,1))
-         ! Generating (p,sp|2_z,L)  and (p,sp|2,L_z)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,8,L),GRADIENTS(1,1))
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRTmp,GRADIENTS(1,1))
+         ! Generating (d,s|2_y,L)  and (d,s|2,L_y)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,6,L),GRADIENTS(1,1))
+         ! Generating (d,s|2_z,L)  and (d,s|2,L_z)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,8,L),GRADIENTS(1,1))
       
          !K = 3
          CDOffSet=(OC+3-2)*LDC+(OD+L-1)*LDD
-         ! Generating (p',sp|3,L)  and (p,sp'|3,L)
-         CALL BraHRR61ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,3,L),&
+         ! Generating (d',s|3,L)  and (d,s'|3,L)
+         CALL BraHRR66ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,3,L),&
                           HRRA(1,3,L),HRRB(1,3,L),GRADIENTS(1,1))
-         ! Generating (p,sp|3_x,L)  and (p,sp|3,L_x)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,6,L),GRADIENTS(1,1))
-         ! Generating (p,sp|3_y,L)  and (p,sp|3,L_y)
+         ! Generating (d,s|3_x,L)  and (d,s|3,L_x)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,6,L),GRADIENTS(1,1))
+         ! Generating (d,s|3_y,L)  and (d,s|3,L_y)
          HRRTmp(1:10)=HRRC(1:10,7,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
-         ! Generating (p,sp|3_z,L)  and (p,sp|3,L_z)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
+         ! Generating (d,s|3_z,L)  and (d,s|3,L_z)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
       
          !K = 4
          CDOffSet=(OC+4-2)*LDC+(OD+L-1)*LDD
-         ! Generating (p',sp|4,L)  and (p,sp'|4,L)
-         CALL BraHRR61ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,4,L),&
+         ! Generating (d',s|4,L)  and (d,s'|4,L)
+         CALL BraHRR66ab(NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,HRR(1,4,L),&
                           HRRA(1,4,L),HRRB(1,4,L),GRADIENTS(1,1))
-         ! Generating (p,sp|4_x,L)  and (p,sp|4,L_x)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,8,L),GRADIENTS(1,1))
-         ! Generating (p,sp|4_y,L)  and (p,sp|4,L_y)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,9,L),GRADIENTS(1,1))
-         ! Generating (p,sp|4_z,L)  and (p,sp|4,L_z)
+         ! Generating (d,s|4_x,L)  and (d,s|4,L_x)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,0,HRRC(1,8,L),GRADIENTS(1,1))
+         ! Generating (d,s|4_y,L)  and (d,s|4,L_y)
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,9,L),GRADIENTS(1,1))
+         ! Generating (d,s|4_z,L)  and (d,s|4,L_z)
          HRRTmp(1:10)=HRRC(1:10,10,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR61cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR66cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
       ENDDO 
-    END SUBROUTINE dIntB3020302
+    END SUBROUTINE dIntB6010302
