@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-CPPMISC = #-DTRESH
+CPPMISC = #-DGTRESH
 
 EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE 
 
