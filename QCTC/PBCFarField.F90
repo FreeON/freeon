@@ -245,6 +245,9 @@ MODULE PBCFarField
       REAL(DOUBLE)        :: Layers
 !      IF(GMLoc%PBC%Dimen==0.OR.PrintFlags%Key<=DEBUG_MINIMUM)RETURN
 
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
       Unit=OpenPU(Unit_O=Unit_O)
       Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics') &
          //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
@@ -294,6 +297,10 @@ MODULE PBCFarField
 #endif
 
       CALL ClosePU(Unit)
+#ifdef PARALLEL
+  ENDIF
+#endif
+
 !
     END SUBROUTINE Print_Periodic
 !========================================================================================
