@@ -189,9 +189,10 @@ MODULE ProcessControl
          RETURN
       11 WRITE(*,*)TRIM(Mssg)
          WRITE(*,*)' Logging Error: IOS= ',IOS,' on file ',TRIM(LogFile)
+         CALL Trap()
       12 WRITE(*,*)TRIM(Mssg)
          WRITE(*,*)' Logging Error: IOS= ',IOS,' on file ',TRIM(OutFile)
-         STOP 
+         CALL Trap()
       END SUBROUTINE Logger
 
 END MODULE
