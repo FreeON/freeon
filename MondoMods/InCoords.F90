@@ -2098,7 +2098,12 @@ SUBROUTINE INTCValue(IntCs,XYZ)
     INTEGER :: NIntCs,I,J,K,L,I1,I2,I3,I4,NatmsLoc
     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
 !
-    NIntCs=SIZE(IntCs%Def(:))
+    IF(AllocQ(IntCs%Alloc)) THEN
+      NIntCs=SIZE(IntCs%Def(:))
+    ELSE
+      NIntCs=0
+      RETURN
+    ENDIF
     NatmsLoc=SIZE(XYZ,2)
 !
     DO I=1,NIntCs
@@ -3404,7 +3409,11 @@ selection%i=1
       MaxIt_GrdTrf=GeOpCtrl%MaxIt_GrdTrf
       MaxGradDiff =GeOpCtrl%MaxGradDiff
       NatmsLoc=SIZE(XYZ,2)
-      NIntC=SIZE(IntCs%Def)
+      IF(AllocQ(IntCs%Alloc)) THEN
+        NIntC=SIZE(IntCs%Def)
+      ELSE
+        NIntC=0
+      ENDIF
       NCart=3*NatmsLoc        
 !
       CALL New(FullB,(/NIntC,NCart/))
@@ -3549,7 +3558,11 @@ selection%i=1
 !
       NatmsLoc=SIZE(XYZ,2)
       NCart=3*NatmsLoc   
-      NIntC=SIZE(IntCs%Def)
+      IF(AllocQ(IntCs%Alloc)) THEN
+        NIntC=SIZE(IntCs%Def)
+      ELSE
+        NIntC=0
+      ENDIF
 !
 ! iteration control parameters
 !
@@ -3770,8 +3783,12 @@ selection%i=1
       REAL(DOUBLE) :: SUM
       CHARACTER(LEN=*) :: CHAR   
 !
-      NIntC=SIZE(IntCs%Def)
-      IF(NIntC==0) RETURN
+      IF(AllocQ(IntCs%Alloc)) THEN
+        NIntC=SIZE(IntCs%Def)
+      ELSE
+        NIntC=0 
+        RETURN
+      ENDIF
 !
       CALL OpenAscii(OutFile,Out)
 !
@@ -4426,7 +4443,11 @@ END SUBROUTINE ChkBendToLinB
 !
         IF(GeOpCtrl%NConstr==0) RETURN
 !
-        NIntC=SIZE(IntCs%Def)
+        IF(AllocQ(IntCs%Alloc)) THEN
+          NIntC=SIZE(IntCs%Def)
+        ELSE
+          NIntC=0
+        ENDIF
         NDim=SIZE(Displ%D)
         DoInternals=GeOpCtrl%DoInternals
         IF(NDim/=NIntC.AND.DoInternals) &
@@ -4477,7 +4498,11 @@ END SUBROUTINE ChkBendToLinB
       REAL(DOUBLE) :: ConstrMax,ConstrRMS,Sum
       INTEGER      :: I,J,NIntC,NConstr
 !
-      NIntC=SIZE(IntCs%Def)
+      IF(AllocQ(IntCs%Alloc)) THEN
+        NIntC=SIZE(IntCs%Def)
+      ELSE
+        NIntC=0
+      ENDIF
 !
       ConstrMax=Zero
       ConstrRMS=Zero
@@ -4505,7 +4530,11 @@ END SUBROUTINE ChkBendToLinB
       TYPE(INTC)                :: IntCs
 !
       NCart=SIZE(CartDispl)
-      NIntC=SIZE(IntCs%Def)
+      IF(AllocQ(IntCs%Alloc)) THEN
+        NIntC=SIZE(IntCs%Def)
+      ELSE
+        NIntC=0
+      ENDIF
 !
 ! Make constraints on Cartesians 'hard'
 !
