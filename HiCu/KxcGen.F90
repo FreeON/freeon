@@ -12,6 +12,17 @@ MODULE KxcGen
   USE CubeTree 
   IMPLICIT NONE
   LOGICAL PrintFlag
+!--------------------------------------------------------------------------
+! Primative Atom Pair Type
+!
+  TYPE PrimPair
+     INTEGER                        :: Ell  
+     REAL(DOUBLE)                   :: Z
+     REAL(DOUBLE),DIMENSION(3)      :: P
+     REAL(DOUBLE),DIMENSION(HGLen)  :: Ket
+     REAL(DOUBLE)                   :: Extent
+     TYPE(BBox)                     :: Box
+  ENDTYPE PrimPair
 !---------------------------------------
 ! Global primitive 
 !
@@ -274,7 +285,7 @@ MODULE KxcGen
        TYPE(CubeNode), POINTER               :: Cube
 !       TYPE(PrimPair)                        :: Prim
 ! 
-       REAL(DOUBLE), DIMENSION(0:MaxEll+1)   :: LambdaX,LambdaY,LambdaZ
+       REAL(DOUBLE), DIMENSION(0:HGEll+1)    :: LambdaX,LambdaY,LambdaZ
        REAL(DOUBLE)                          :: Z,X,RPx,RPy,RPz,RP2,Xpt,TwoZ,  &
                                                 Co,RL1,Dist, Wght,dEdRho,    &
                                                 dEdAbsGradRho2,GradBraRhoDot,&
