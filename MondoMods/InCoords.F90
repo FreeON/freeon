@@ -1748,6 +1748,8 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 ! Refresh=1 : Refresh all definitions
 !        =2 : Refresh only definitions based on VDW interaction
 !        =3 : Do not refresh definitions, use the one from HDF
+!        =4 : Refresh/generate only the covalent coordinates
+!        =5 : only the extra coordinates from input
 ! WARNING! In the present version bending -> linear bending transitions are 
 ! always checked and refreshed
 ! 
@@ -1819,6 +1821,37 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
           CALL Get(NIntC_VDW,'NIntC_VDW')
           CALL New(IntC_VDW,NIntC_VDW)
           CALL Get(IntC_VDW,'IntC_VDW')
+!
+      ELSE IF(Refresh==4) THEN !!! refresh covalent bonds only
+!
+!define covalent bonding scheme
+        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1,IntC_Cov,NIntC_Cov)
+        NIntC_VDW=0 
+!get extra internal coordinates and constraints
+          CALL Get(NIntC_Extra,'NIntC_Extra')
+          IF(NIntC_Extra/=0) THEN
+            CALL New(IntC_Extra,NIntC_Extra)
+            CALL Get(IntC_Extra,'IntC_Extra')
+          ENDIF
+          CALL Put(NIntC_Cov,'NIntC_Cov')
+          IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
+          CALL Put(NIntC_VDW,'NIntC_VDW')
+          IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
+!
+      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
+!
+        NIntC_Cov=0 
+        NIntC_VDW=0 
+!get extra internal coordinates and constraints
+          CALL Get(NIntC_Extra,'NIntC_Extra')
+          IF(NIntC_Extra/=0) THEN
+            CALL New(IntC_Extra,NIntC_Extra)
+            CALL Get(IntC_Extra,'IntC_Extra')
+          ENDIF
+          CALL Put(NIntC_Cov,'NIntC_Cov')
+          IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
+          CALL Put(NIntC_VDW,'NIntC_VDW')
+          IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
 !
       ENDIF
 !
@@ -2164,87 +2197,126 @@ SUBROUTINE BENDValue(XI,XJ,XK,AIJK)
         Dotj=Dotj+T*Tp
    ENDDO
 !
-      AIJK=ACOS(DotJ)
-!     AIJK=AIJK-DBLE(INT(AIJK/PI))*PI
+      IF(DABS(DotJ)>0.999999D0) THEN
+        DotJ=SIGN(DABS(DotJ),DotJ)
+      ENDIF
+      IF(ABS(DotJ-One)<1.D-6) THEN
+        AIJK=0.D0
+      ELSE IF(ABS(DotJ+One)<1.D-6) THEN
+        AIJK=PI  
+      ELSE
+        AIJK=ACOS(DotJ)
+      ENDIF
 !
 END SUBROUTINE BENDValue
 !
-!-------------------------------------------------------
+!-------------------------------------------------------------
 !
-SUBROUTINE TORSValue(XI,XJ,XK,XL,VTors,Def)
+      SUBROUTINE TORSValue(XIin,XJin,XKin,XLin,VTors,Def)
 !
-   IMPLICIT NONE
-   INTEGER :: NCoord     
-   INTEGER            :: I,IFAC,J,JFAC,K,KFAC,L,LFAC
-   REAL(DOUBLE) :: CosNPhi,CosPhi,CosPhi2,DCos,DForce
-   REAL(DOUBLE) :: IJCOSJK,KLCOSJK,D2Cos,Fact1,Fact2,NFJKL,NFIJK
-   REAL(DOUBLE) :: DJK,DIJ,DKL,VTors
-   REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XL,XK
-   TYPE(DBL_VECT) :: FIJK,DVectIJ,DVectJK,DVectKL,FJKL
-   TYPE(DBL_VECT) :: DGradI,DGradJ,DGradK,DGradL
-   CHARACTER(LEN=5) :: Def
+      REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
+      TYPE(DBL_VECT)              :: XI,XJ,XK,XL,V1,V2
+      TYPE(DBL_RNK2)              :: Rot
+      REAL(DOUBLE)                :: VTors,CosPhi,Sum
+      CHARACTER(LEN=5) :: Def
+      INTEGER          :: I,J,K,L
 !
-   CALL New(DVectIJ,3)
-   CALL New(DVectJK,3)
-   CALL New(DVectKL,3)
-   CALL New(FIJK,3)
-   CALL New(FJKL,3)
+      CALL New(XI,3)
+      CALL New(XJ,3)
+      CALL New(XK,3)
+      CALL New(XL,3)
+      CALL New(Rot,(/3,3/))
+      CALL New(V1,3)
+      CALL New(V2,3)
 !
-      DVectIJ%D=XI-XJ
-      DVectJK%D=XK-XJ
-      DVectKL%D=XL-XK
+      XI%D=XIin
+      XJ%D=XJin
+      XK%D=XKin
+      XL%D=XLin
 !
-      DIJ=SQRT(DOT_PRODUCT(DVectIJ%D,DVectIJ%D))
-      DJK=SQRT(DOT_PRODUCT(DVectJK%D,DVectJK%D))
-      DKL=SQRT(DOT_PRODUCT(DVectKL%D,DVectKL%D))
+! Translate, so that XK be in the origin
 !
-      DVectJK%D=DVectJK%D/DJK
+      XI%D=XI%D-XK%D 
+      XJ%D=XJ%D-XK%D 
+      XL%D=XL%D-XK%D 
+      XK%D=Zero        
 !
-      IJCOSJK=DOT_PRODUCT(DVectIJ%D,DVectJK%D)
-      KLCOSJK=DOT_PRODUCT(DVectKL%D,DVectJK%D)
+! Rotate system, such that J be on Z axis
 !
-! Check for linearity of three atoms within the torsion
-! In case linearity appears, set Value of torsion to zero
-! Current criterium is 1 degree.
+      V1%D=Zero
+      V1%D(3)=One 
+      V2%D=XJ%D
+      CALL Rotate(V1%D,V2%D,Rot%D)
 !
-      IF((ABS(ABS(IJCOSJK/DIJ)-One))*180.D0/PI<LinCrit .OR. &
-         (ABS(ABS(KLCOSJK/DKL)-One))*180.D0/PI<LinCrit) THEN
-         WRITE(*,*) 'WARNING, LINEARITY IN TORSION OR OUTP'
-         WRITE(*,*) 'COORDINATES: '
-         WRITE(*,*) XI(1:3)
-         WRITE(*,*) XJ(1:3)
-         WRITE(*,*) XK(1:3)
-         WRITE(*,*) XL(1:3)
-         CALL Delete(DVectIJ)
-         CALL Delete(DVectJK)
-         CALL Delete(DVectKL)
-         CALL Delete(FIJK)
-         CALL Delete(FJKL)
-!        Def='BLANC' !!! do not change it, since in the next geometry it may be non-linear
-         VTors=Zero
-         RETURN
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
+      XI%D=V2%D
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
+      XJ%D=V2%D
+      V2%D=Zero
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
+      XL%D=V2%D
+!
+! Now, rotate system around z axis such, that IJ bond be 
+! parallel with x axis, I pointing to positive X
+!
+      V1%D=Zero
+      V1%D(1)=One 
+      V2%D=Zero
+      V2%D(1)=XI%D(1)
+      V2%D(2)=XI%D(2)
+      CALL Rotate(V1%D,V2%D,Rot%D)
+!
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
+      XI%D=V2%D
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
+      XJ%D=V2%D
+      CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
+      XL%D=V2%D
+!
+! Check for linearity
+!
+      IF(ABS(XI%D(1)) < 1.D-6 .AND. &
+         ABS(XI%D(2)) < 1.D-6) CALL Halt('Atoms too cloose to each other in TorsValue')
+      IF(ABS(XL%D(1)) < 1.D-6 .AND. &
+         ABS(XL%D(2)) < 1.D-6) CALL Halt('Atoms too cloose to each other in TorsValue')
+!
+! Now, calculate torsional angle
+!
+      V1%D=Zero
+      V1%D(1)=One 
+      V2%D(1)=XL%D(1)
+      V2%D(2)=XL%D(2)
+      V2%D(3)=Zero   
+      Sum=SQRT(DOT_PRODUCT(V2%D,V2%D))
+      V2%D=V2%D/Sum
+      CosPhi=DOT_PRODUCT(V1%D,V2%D)
+!
+      IF(DABS(CosPhi)>0.999999D0) THEN
+        CosPhi=SIGN(DABS(CosPhi),CosPhi)
+      ENDIF
+      IF(ABS(CosPhi-One)<1.D-6) THEN
+        VTors=0.D0
+      ELSE IF(ABS(CosPhi+One)<1.D-6) THEN
+        VTors=PI  
+      ELSE
+        VTors=ACOS(CosPhi)
       ENDIF
 !
-      FIJK%D=DVectIJ%D-IJCOSJK*DVectJK%D
-      FJKL%D=DVectKL%D-KLCOSJK*DVectJK%D
+! Take orientation of torsional chain into account
 !
-      NFIJK=SQRT(DOT_PRODUCT(FIJK%D,FIJK%D))
-      NFJKL=SQRT(DOT_PRODUCT(FJKL%D,FJKL%D))
+      IF(XL%D(2)>Zero) VTors=Two*PI-VTors
 !
-      FIJK%D=FIJK%D/NFIJK
-      FJKL%D=FJKL%D/NFJKL
+      CALL Delete(V2)
+      CALL Delete(V1)
+      CALL Delete(Rot)
+      CALL Delete(XI)
+      CALL Delete(XJ)
+      CALL Delete(XK)
+      CALL Delete(XL)
 !
-      CosPhi=DOT_PRODUCT(FIJK%D,FJKL%D)
+      END SUBROUTINE TORSValue
+!-------------------------------------------------------
 !
-      VTors=ACOS(CosPhi)
-!
-   CALL Delete(DVectIJ)
-   CALL Delete(DVectJK)
-   CALL Delete(DVectKL)
-   CALL Delete(FIJK)
-   CALL Delete(FJKL)
-!
-END SUBROUTINE TorsValue
 !
 !-------------------------------------------------------
 !
@@ -2262,7 +2334,7 @@ END SUBROUTINE TorsValue
     TYPE(DBL_VECT) :: VectInt,VectAux
     TYPE(BCSR) :: SpVectCart,SpVectInt,SpB,SpBt,Gc,Z,Zt,SpVectActInt
     TYPE(BCSR) :: SpVectDiff,SpVectAux
-    REAL(DOUBLE) :: TrixThresh,AInvDistanceThresh,DiffMax,DiffNorm
+    REAL(DOUBLE) :: TrixThresh,AInvDistanceThresh,DiffMax,RMSD
     REAL(DOUBLE) :: GrdTrfCrit,CooTrfCrit,ScaleTo,MaxGradDiff,Sum
     INTEGER :: NCart,I,II,J,TrfType,NIntC,DiffLength
     INTEGER :: NVBlocksB,NHBlocksB,BlockGeomSize
@@ -2391,8 +2463,8 @@ END SUBROUTINE TorsValue
       DO I=1,DiffLength     
         DiffMax=MAX(DiffMax,ABS(SpVectAux%MTrix%D(I)))
       ENDDO
-        DiffNorm=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
-        DiffNorm=DiffNorm/DBLE(NIntC)
+        RMSD=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
+        RMSD=RMSD/DBLE(NIntC)
 !
 ! IF DiffMax is too large, eg. due to the 'bad' quality 
 ! of the preconditioner, rescale gradients
@@ -2414,8 +2486,8 @@ END SUBROUTINE TorsValue
 !      
 ! Review iteration
 !
-      WRITE(*,110) II,DiffMax,DiffNorm
-      WRITE(Out,110) II,DiffMax,DiffNorm
+      WRITE(*,110) II,DiffMax,RMSD
+      WRITE(Out,110) II,DiffMax,RMSD
 110   FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,' ChangeNorm= ',F12.6)
 !      
       IF(DiffMax>GrdTrfCrit.AND.II<=MaxIt_GrdTrf) THEN
@@ -2501,8 +2573,8 @@ END SUBROUTINE TorsValue
       DO I=1,DiffLength     
         DiffMax=MAX(DiffMax,ABS(SpVectAux%MTrix%D(I)))
       ENDDO
-        DiffNorm=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
-        DiffNorm=DiffNorm/DBLE(NCart)
+        RMSD=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
+        RMSD=RMSD/DBLE(NCart)
 !
 ! Scale Displacements
 !
@@ -2541,8 +2613,8 @@ END SUBROUTINE TorsValue
 !
 ! Review iteration
 !
-      WRITE(*,210) II,DiffMax,DiffNorm
-      WRITE(Out,210) II,DiffMax,DiffNorm
+      WRITE(*,210) II,DiffMax,RMSD
+      WRITE(Out,210) II,DiffMax,RMSD
 210   FORMAT('Coord Back-Trf, step= ',I3,' MaxChange= ',F12.6,' ChangeNorm= ',F12.6)
 !      
       IF(DiffMax>CooTrfCrit .AND. II<=MaxIt_CooTrf) THEN 
@@ -2709,6 +2781,7 @@ END SUBROUTINE CoordTrf
           J=INT(SUM/TwoPi)
         SUM=SUM-J*TwoPi
         IF(SUM<Zero) SUM=TwoPi+SUM
+!       IF(SUM>PI) SUM=SUM-TwoPi
           VectAux(I)=SUM
       ENDIF
     ENDDO
@@ -2976,6 +3049,884 @@ END SUBROUTINE CoordTrf
 !
      END SUBROUTINE SetOneLJCell
 !
+!---------------------------------------------------------------------
+!
+    SUBROUTINE FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,TrfType)
+!
+! Routine to carry out coordinate transformations
+! Refresh controls refreshing of internal coordinate set
+! In case of Int-> Cartesian refresh is not allowed,
+! any refresh request will be overwritten
+! TrfType=1 : Cartesian -> Internal
+! TrfType=2 : Internal -> Cartesian
+!
+    TYPE(CRDS)     :: GMLoc
+    TYPE(DBL_VECT) :: VectCart
+    TYPE(DBL_VECT) :: VectInt
+    INTEGER        :: NIntC,TrfType,I
+    TYPE(INTC)     :: IntCs
+    REAL(DOUBLE)   :: SUM
+!
+    IF(TrfType==1) THEN
+      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Starting Int. Coords')
+    ENDIF
+!
+! Perform Coordinate transformation on the input vectors
+!
+    IF(TrfType==1) THEN
+      CALL CartToInternal(GMLoc,IntCs,NIntC,VectCart,VectInt)
+    ELSE 
+      CALL InternalToCart(GMLoc,IntCs,NIntC,VectCart,VectInt)
+    ENDIF 
+!
+END SUBROUTINE FullCoordTrf
+!
+!-------------------------------------------------------------------
+    SUBROUTINE GetFullBMatr(NatmsLoc,CartsLoc,IntCs,NIntC,FullB,FullBt)
+!
+! Generate vibrational B matrix in quasi-sparse TYPE(BMATR) representation
+! and transform into sparse one
+!
+    TYPE(CRDS) :: GMLoc
+    TYPE(INTC) :: IntCs
+    INTEGER    :: NIntC,NCart,I,J,K,NatmsLoc
+    TYPE(BMATR):: B
+    TYPE(DBL_RNK2) :: FullB,FullBt
+    REAL(DOUBLE),DIMENSION(:,:) :: CartsLoc
+    REAL(DOUBLE) :: SUM
+!
+! Calculate B matrix in Atomic Units
+!
+    CALL BMatrix(NatmsLoc,CartsLoc,NIntC,IntCs,B)
+!
+    NCart=3*NatmsLoc
+!
+! Now, turn B matrix into full representation
+!
+        FullB%D=Zero
+        FullBt%D=Zero
+    DO I=1,NIntC
+      DO J=1,12
+        K=B%IB(I,J) 
+        IF(K==0) CYCLE
+        SUM=B%B(I,J)
+        FullB%D(I,K)=SUM
+        FullBt%D(K,I)=SUM
+      ENDDO
+!write(*,100) i,(fullb%d(i,k),k=1,ncart)
+    ENDDO
+!100 format(I4,100F7.3)
+!stop
+!
+! Tidy up
+!
+    CALL Delete(B)
+!
+    END SUBROUTINE GetFullBMatr
+!
+!-------------------------------------------------------
+!
+    SUBROUTINE GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
+!
+    TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv
+    TYPE(DBL_RNK2) :: FullGc,TestMat
+    INTEGER :: NIntC,NCart,I,J,K
+    REAL(DOUBLE) :: SUM
+!
+    CALL New(FullGc,(/NCart,NCart/))
+    CALL New(TestMat,(/NCart,NCart/))
+!
+    FullGc%D=Zero
+    CALL DGEMM_NNc(NCart,NIntC,NCart,One,Zero,FullBt%D,FullB%D,FullGc%D)
+!
+! Get SVD inverse
+!
+    CALL SetDSYEVWork(NCart)
+    CALL FunkOnSqMat(NCart,Inverse,FullGc%D,FullGcInv%D)
+    CALL UnSetDSYEVWork()
+!!
+!! Test inverse
+!!
+!    CALL DGEMM_NNc(NCart,NCart,NCart,One,Zero,FullGcInv%D,FullGc%D,TestMat%D)
+!    DO I=1,NCart
+!      write(*,100) (TestMat%D(I,J),J=1,NCart)
+!    ENDDO
+!100 FORMAT(10F8.4)
+!
+    CALL Delete(TestMat)
+    CALL Delete(FullGc)
+!
+    END SUBROUTINE GetFullGcInv
+!-------------------------------------------------------
+!
+    SUBROUTINE CartToInternal(GMLoc,IntCs,NIntC,VectCart,VectInt)
+!
+      TYPE(CRDS)     :: GMLoc
+      TYPE(DBL_VECT) :: VectCart
+      TYPE(DBL_VECT) :: VectInt
+      TYPE(DBL_VECT) :: VectCartAux,VectIntAux
+      TYPE(DBL_VECT) :: VectCartAux2,VectIntAux2
+      TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv
+      REAL(DOUBLE)   :: DiffMax,RMSD,TrixThresh
+      REAL(DOUBLE)   :: GrdTrfCrit,MaxGradDiff,Sum
+      INTEGER        :: NCart,I,II,J,NIntC
+      INTEGER        :: MaxIt_GrdTrf
+      TYPE(INTC)     :: IntCs
+!
+      TrixThresh=1.D-8
+      GrdTrfCrit=TrixThresh*1.D0 !!! For Gradient transformation
+      MaxIt_GrdTrf=10
+      NCart=3*GMLoc%Natms
+      MaxGradDiff=10000.D0
+!     MaxGradDiff=0.5D0
+!
+      CALL New(FullB,(/NIntC,NCart/))
+      CALL New(FullBt,(/NCart,NIntC/))
+      CALL New(FullGcInv,(/NCart,NCart/))
+!
+      CALL New(VectCartAux,NCart)
+      CALL New(VectCartAux2,NCart)
+      CALL New(VectIntAux,NIntC)
+      CALL New(VectIntAux2,NIntC)
+!
+      VectInt%D=Zero
+!
+      WRITE(*,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+      WRITE(Out,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+!
+! Cartesian --> Internal transformation
+!
+! Get B matrix and Bt*B inverse
+!
+      CALL GetFullBMatr(GMLoc%Natms,GMLoc%Carts%D,IntCs,NIntC,FullB,FullBt)
+      CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
+!
+      II=0
+100   CONTINUE      
+!
+      VectCartAux%D=Zero
+!
+! gc-Bt*gi
+!
+      CALL DGEMM_NNc(NCart,NIntC,1,One,Zero,FullBt%D,VectInt%D,VectCartAux%D)
+      VectCartAux%D=VectCart%D-VectCartAux%D
+!
+! GcInv*[gc-Bt*gi]
+!
+      CALL DGEMM_NNc(NCart,NCart,1,One,Zero,&
+           FullGcInv%D,VectCartAux%D,VectCartAux2%D)
+!
+! B*GcInv*[gc-Bt*gi]
+!
+      CALL DGEMM_NNc(NIntC,NCart,1,One,Zero, &
+           FullB%D,VectCartAux2%D,VectIntAux%D)
+!
+! Check convergence
+!
+      II=II+1
+        DiffMax=Zero
+        DO I=1,NIntC ; DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I))) ; ENDDO
+        RMSD=DOT_PRODUCT(VectIntAux%D,VectIntAux%D)
+        RMSD=RMSD/DBLE(NIntC)
+!
+! IF DiffMax is too large, eg. due to the 'bad' quality 
+! of the preconditioner, rescale gradients
+!
+      IF(DiffMax>MaxGradDiff) THEN
+        WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
+        WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
+        SUM=MaxGradDiff/DiffMax
+        VectIntAux%D(:)=SUM*VectIntAux%D(:)
+        DiffMax=MaxGradDiff
+      ENDIF
+!
+! gi+B*GcInv*[gc-Bt*gi]
+!
+      VectInt%D=VectInt%D+VectIntAux%D
+!
+! Review iteration
+!
+      WRITE(*,110) II,DiffMax,RMSD
+      WRITE(Out,110) II,DiffMax,RMSD
+110   FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,' ChangeNorm= ',F12.6)
+!      
+      IF(DiffMax>GrdTrfCrit.AND.II<=MaxIt_GrdTrf) THEN
+        GO TO 100      
+      ELSE
+        IF(II>MaxIt_GrdTrf) THEN
+          WRITE(*,*) 'Stop Gradient Trf, max. number of Iterations exceeded!'
+          WRITE(*,*) 'Use current gradient vector!'
+          WRITE(Out,*) 'Stop Gradient Trf, max. number of Iterations exceeded!'
+          WRITE(Out,*) 'Use current gradient vector!'
+        ENDIF
+          CALL Put(FullB,'FullB')
+          CALL Put(FullBt,'FullBt')
+          CALL Put(FullGcInv,'FullGcInv')
+      ENDIF
+!
+      WRITE(*,120) II
+      WRITE(Out,120) II
+120   FORMAT('Gradient transformation converged in ',I3,' steps')
+!
+! Tidy up
+!
+      CALL Delete(VectIntAux2)
+      CALL Delete(VectIntAux)
+      CALL Delete(VectCartAux2)
+      CALL Delete(VectCartAux)
+      CALL Delete(FullGcInv)
+      CALL Delete(FullBt)
+      CALL Delete(FullB)
+!
+    END SUBROUTINE CartToInternal
+!
+!-------------------------------------------------------
+!
+    SUBROUTINE InternalToCart(GMLoc,IntCs,NIntC,VectCart,VectInt)
+!
+    TYPE(CRDS) :: GMLoc
+    TYPE(DBL_VECT) :: VectCart
+    TYPE(DBL_VECT) :: VectInt
+    TYPE(DBL_VECT) :: VectCartAux,VectIntAux
+    TYPE(DBL_VECT) :: VectCartAux2,VectIntAux2
+    TYPE(DBL_VECT) :: VectIntReq
+    TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv,ActCarts
+    REAL(DOUBLE)   :: DiffMax,RMSD,TrixThresh
+    REAL(DOUBLE)   :: CooTrfCrit,MaxCartDiff,Sum
+    REAL(DOUBLE)   :: DistRefresh
+    REAL(DOUBLE)   :: SumX,SumY,SumZ
+    INTEGER        :: NCart,I,II,J,NIntC
+    INTEGER        :: MaxIt_CooTrf
+    TYPE(INTC)     :: IntCs
+    TYPE(BMATR)    :: B
+    LOGICAL        :: RefreshB,RefreshAct
+    TYPE(INT_VECT) :: MMAtNum
+!
+      CooTrfCrit=1.D-4 !!! For Backtransformation
+      MaxIt_CooTrf=30
+      NCart=3*GMLoc%Natms
+      MaxCartDiff=0.5D0  !!! In atomic units. No larger cartesian displacements in a back-trf step are allowed
+      DistRefresh=MaxCartDiff*0.75D0
+!
+! Refresh B matrix during iterative back-trf, if displacements are too large?
+!
+      RefreshB=.TRUE.
+      RefreshAct=.TRUE.
+!
+! Auxiliary arrays
+!
+      CALL New(ActCarts,(/3,GMLoc%Natms/))
+      CALL New(FullB,(/NIntC,NCart/))
+      CALL New(FullBt,(/NCart,NIntC/))
+      CALL New(FullGcInv,(/NCart,NCart/))
+!
+      CALL New(VectCartAux,NCart)
+      CALL New(VectCartAux2,NCart)
+      CALL New(VectIntAux,NIntC)
+      CALL New(VectIntAux2,NIntC)
+      CALL New(VectIntReq,NIntC)
+!
+! Calc values of internals in atomic unit, and add displacement,
+! which is stored in VectInt. Then convert into Sparse matrx repr.
+!
+      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+!
+! The required new value of internal coordinates
+!
+      VectIntReq%D=VectInt%D+IntCs%Value
+      CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
+!
+!initialization of new Cartesians
+!
+        ActCarts%D=GMLoc%Carts%D
+      DO I=1,GMLoc%Natms 
+        J=3*(I-1)
+        VectCart%D(J+1)=GMLoc%Carts%D(1,I)
+        VectCart%D(J+2)=GMLoc%Carts%D(2,I)
+        VectCart%D(J+3)=GMLoc%Carts%D(3,I)
+      ENDDO
+!
+! Internal --> Cartesian transformation
+!
+      WRITE(*,*) 'Iterative back-transformation, No. Int. Coords= ',NIntC
+      WRITE(Out,*) 'Iterative back-transformation, No. Int. Coords= ',NIntC
+      II=0
+200   CONTINUE
+!
+! Get B and GcInv
+!
+       IF(II==0) THEN
+         CALL Get(FullB,'FullB')
+         CALL Get(FullBt,'FullBt')
+         CALL Get(FullGcInv,'FullGcInv')
+       ELSE IF(RefreshB.AND.RefreshAct) THEN
+        CALL GetFullBMatr(GMLoc%Natms,ActCarts%D,IntCs,NIntC,FullB,FullBt)
+        CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
+       ENDIF
+!
+! Compute actual value of internals 
+!
+      IF(II>0) CALL INTCValue(IntCs,ActCarts%D,GMLoc%Natms)
+!
+! Calculate difference between required and actual internals
+! Calc [phi_r-phi_a]
+!
+      VectIntAux%D=VectIntReq%D-IntCs%Value
+      CALL MapDisplTors(IntCs,NIntC,VectIntAux%D) 
+!
+! Do transformation
+! 
+! Bt*[phi_r-phi_a]
+!
+      CALL DGEMM_NNc(NCart,NIntC,1,One,Zero,FullBt%D,VectIntAux%D,VectCartAux%D)
+!
+! GcInv*Bt*[phi_r-phi_a]
+!
+      CALL DGEMM_NNc(NCart,NCart,1,One,Zero,FullGcInv%D,VectCartAux%D,VectCartAux2%D)
+!
+! Project out translations and rotations
+!
+!     CALL TranslsOff(VectCartAux2%D)
+!     CALL RotationsOff(VectCartAux2%D,ActCarts%D)
+!
+! Check convergence
+!
+      II=II+1
+        DiffMax=Zero
+      DO I=1,NCart     
+        DiffMax=MAX(DiffMax,ABS(VectCartAux2%D(I)))
+      ENDDO
+!
+! Scale Displacements
+!
+      IF(DiffMax>MaxCartDiff) THEN
+        VectCartAux2%D=MaxCartDiff/DiffMax*VectCartAux2%D
+        DiffMax=MaxCartDiff
+      ENDIF
+!
+      RMSD=DOT_PRODUCT(VectCartAux2%D,VectCartAux2%D)
+      RMSD=SQRT(RMSD/DBLE(NCart))
+!
+! Refresh B matrix?  
+!
+      IF(DiffMax>DistRefresh) THEN
+        RefreshAct=.TRUE.
+      ELSE
+        RefreshAct=.FALSE.
+      ENDIF
+!
+! Modify Cartesians
+!
+write(11,*) GMLoc%Natms           
+write(11,*) 
+call new(mmatnum,GMLoc%Natms)
+call get(mmatnum,'mmatnum')
+      VectCart%D=VectCart%D+VectCartAux2%D
+      DO I=1,GMLoc%Natms 
+        J=3*(I-1)
+        ActCarts%D(1,I)=VectCart%D(J+1)
+        ActCarts%D(2,I)=VectCart%D(J+2)
+        ActCarts%D(3,I)=VectCart%D(J+3)
+write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)/AngstromsToAu
+!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)
+      ENDDO
+call delete(mmatnum)
+215 format(I4,3F20.14)
+!
+! Review iteration
+!
+      WRITE(*,210) II,DiffMax,RMSD
+      WRITE(Out,210) II,DiffMax,RMSD
+210   FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
+!      
+      IF(DiffMax>CooTrfCrit .AND. II<=MaxIt_CooTrf) THEN 
+!       IF(RefreshB.AND.RefreshAct) THEN
+!         CALL Delete(FullB)
+!         CALL Delete(FullBt)
+!         CALL Delete(FullGcInv)
+!       ENDIF
+        GO TO 200
+      ELSE
+          IF(II>MaxIt_CooTrf) THEN
+            IF(RMSD>0.01D0) THEN
+              CALL Halt('Iterative backtransformation did not converge')
+            ENDIF
+            WRITE(*,180) 
+            WRITE(Out,180) 
+            WRITE(*,190) 
+            WRITE(Out,190) 
+            GO TO 300
+          ENDIF
+      ENDIF
+180   FORMAT('Stop Coord Back-Trf, max. number of Iterations exceeded!')
+190   FORMAT('Use Current Geometry!')
+!
+! At this point, convergence has been reached
+!
+      WRITE(*,220) II
+      WRITE(Out,220) II
+220   FORMAT('Coordinate back-transformation converged in ',I3,' steps')
+!
+300   CONTINUE
+!
+! Fill new Cartesians into GMLoc
+!
+      GMLoc%Carts%D=ActCarts%D
+!
+! Final internal coordinates
+!
+      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Final Internals')
+!
+! Tidy up
+!
+      CALL Delete(VectIntReq)
+      CALL Delete(VectIntAux2)
+      CALL Delete(VectIntAux)
+      CALL Delete(VectCartAux2)
+      CALL Delete(VectCartAux)
+      CALL Delete(FullGcInv)
+      CALL Delete(FullB)
+      CALL Delete(FullBt)
+      CALL Delete(ActCarts)
+!
+      END SUBROUTINE InternalToCart
+!
+!----------------------------------------------------------
+!
+      SUBROUTINE PrtIntCoords(IntCs,NIntC,Value,CHAR)
+!
+      TYPE(INTC) :: IntCs
+      INTEGER    :: I,NIntC
+      REAL(DOUBLE),DIMENSION(:) :: Value
+      REAL(DOUBLE) :: SUM
+      CHARACTER(LEN=*) :: CHAR   
+!
+      WRITE(*,*) TRIM(CHAR)
+      WRITE(Out,*) TRIM(CHAR)
+      WRITE(*,*) '         INTERNAL COORDINATES'
+      WRITE(*,*) 'DEFINITION  ATOMS_INVOLVED     VALUE'
+      WRITE(Out,*) 'INTERNAL COORDINATES'
+      WRITE(Out,*) 'DEFINITION  ATOMS_INVOLVED  VALUE'
+      DO I=1,NIntC
+        IF(IntCs%Def(I)(1:4)=='STRE') THEN
+          SUM=Value(I)/AngstromsToAu
+        ELSE
+          SUM=Value(I)*180.D0/PI
+        ENDIF
+        WRITE(*,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM
+        WRITE(Out,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM
+      ENDDO
+ 111 FORMAT(I4,2X,A5,2X,4I3,2X,F12.6)
+      END SUBROUTINE PrtIntCoords
+!
+!----------------------------------------------------------
+!
+      SUBROUTINE RedundancyOffFull(IntDispl,NCart,FullB_O,FullBt_O,FullGcInv_O)
+!
+      REAL(DOUBLE),DIMENSION(:)  :: IntDispl
+      TYPE(DBL_RNK2),OPTIONAL :: FullB_O,FullBt_O,FullGcInv_O
+      TYPE(DBL_RNK2)          :: FullB,FullBt,FullGcInv
+      TYPE(DBL_VECT)          :: IntAux
+      TYPE(DBL_VECT)          :: CartAux1,CartAux2
+      INTEGER                 :: NIntC,NCart
+      REAL(DOUBLE)            :: SUM1,SUM2
+!
+! Project out first order redundancies
+!
+      NIntC=SIZE(IntDispl)
+      CALL New(IntAux,NIntC)
+      CALL New(CartAux1,NCart)
+      CALL New(CartAux2,NCart)
+        CALL New(FullB,(/NIntC,NCart/))
+        CALL New(FullBt,(/NCart,NIntC/))
+        CALL New(FullGcInv,(/NCart,NCart/))
+!
+      IntAux%D=IntDispl
+!
+      IF(.NOT.PRESENT(FullB_O).OR..NOT.PRESENT(FullBt_O).OR. &
+         .NOT.PRESENT(FullGcInv_O)) THEN
+        CALL Get(FullB,'FullB')
+        CALL Get(FullBt,'FullBt')
+        CALL Get(FullGcInv,'FullGcInv')
+      ELSE
+        FullB%D=FullB_O%D
+        FullBt%D=FullBt_O%D
+        FullGcInv%D=FullGcInv_O%D
+      ENDIF
+!
+! Carry out projection intdispl'=B*GcInv*Bt*intdispl
+!
+! Bt*intdispl
+!
+      CALL DGEMM_NNc(NCart,NIntC,1,One,Zero,FullBt%D,IntDispl,CartAux1%D)
+!
+! GcInv*Bt*intdispl
+!
+      CALL DGEMM_NNc(NCart,NCart,1,One,Zero,FullGcInv%D,CartAux1%D,CartAux2%D)
+!
+! intdispl'=B*GcInv*Bt*intdispl
+!
+      CALL DGEMM_NNc(NIntC,NCart,1,One,Zero,FullB%D,CartAux2%D,IntDispl)
+!
+! Calculate rate of redundancy projected out
+!
+      SUM1=SQRT(DOT_PRODUCT(IntAux%D,IntDispl))
+      SUM2=SQRT(DOT_PRODUCT(IntAux%D,IntAux%D))
+      SUM1=(SUM2-SUM1)/SUM2*100.D0 !!! percentage, projected out
+!
+      WRITE(*,100) SUM1
+100   FORMAT('REDUNDANCY, PROJECTED OUT= ',F7.3,'%')
+!
+      CALL Delete(FullB)
+      CALL Delete(FullBt)
+      CALL Delete(FullGcInv)
+      CALL Delete(IntAux)
+      CALL Delete(CartAux1)
+      CALL Delete(CartAux2)
+!
+      END SUBROUTINE RedundancyOffFull
+!
+!----------------------------------------------------------
+!
+      SUBROUTINE RotationsOff(CartVect,XYZ)
+      REAL(DOUBLE),DIMENSION(:) :: CartVect
+      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+      REAL(DOUBLE)                :: X,Y,Z,XX,YY,ZZ,XY,YZ,ZX
+      REAL(DOUBLE)                :: CMX,CMY,CMZ
+      REAL(DOUBLE)                :: SUM,SUM1,SUM2,SUM3
+      REAL(DOUBLE)                :: V1X,V1Y,V1Z
+      REAL(DOUBLE)                :: V2X,V2Y,V2Z
+      REAL(DOUBLE)                :: V3X,V3Y,V3Z
+      TYPE(DBL_RNK2)              :: Theta,Theta2,CMCarts
+      TYPE(DBL_Vect)              :: Rot1,Rot2,Rot3,Vect
+      INTEGER :: NCart,NatmsLoc,I,J,INFO
+!
+      NCart=SIZE(CartVect)
+      NatmsLoc=NCart/3
+      CALL New(Theta,(/3,3/))
+      CALL New(Theta2,(/3,3/))
+      CALL New(CMCarts,(/3,NatmsLoc/))
+      CALL New(Rot1,NCart)
+      CALL New(Rot2,NCart)
+      CALL New(Rot3,NCart)
+      CALL New(Vect,3)
+!
+! Calculate center of Mass (Masses are unit here)
+!
+        CMX=Zero
+        CMY=Zero
+        CMZ=Zero
+      DO I=1,NatmsLoc
+        CMX=CMX+XYZ(1,I)
+        CMY=CMY+XYZ(2,I)
+        CMZ=CMZ+XYZ(3,I)
+      ENDDO
+        CMX=CMX/DBLE(NatmsLoc)
+        CMY=CMY/DBLE(NatmsLoc)
+        CMZ=CMZ/DBLE(NatmsLoc)
+!
+! Mass centered Cartesians
+!
+      DO I=1,NatmsLoc
+        CMCarts%D(1,I)=XYZ(1,I)-CMX
+        CMCarts%D(2,I)=XYZ(2,I)-CMY
+        CMCarts%D(3,I)=XYZ(3,I)-CMZ
+      ENDDO
+!
+! Build inertial momentum tensor
+!
+        Theta%D=Zero
+      DO I=1,NatmsLoc
+        X=CMCarts%D(1,I)
+        Y=CMCarts%D(2,I)
+        Z=CMCarts%D(3,I)
+	XX=X*X
+	YY=Y*Y
+	ZZ=Z*Z
+	XY=X*Y
+	YZ=Y*Z
+	ZX=Z*X
+        Theta%D(1,1)=Theta%D(1,1)+YY+ZZ
+        Theta%D(2,2)=Theta%D(2,2)+ZZ+XX
+        Theta%D(3,3)=Theta%D(3,3)+YY+ZZ
+        Theta%D(1,2)=Theta%D(1,2)-XY    
+        Theta%D(2,1)=Theta%D(2,1)-XY    
+        Theta%D(1,3)=Theta%D(1,3)-ZX    
+        Theta%D(3,1)=Theta%D(3,1)-ZX    
+        Theta%D(2,3)=Theta%D(2,3)-YZ    
+        Theta%D(3,2)=Theta%D(3,2)-YZ    
+      ENDDO
+!
+! Get eigenvectors of inertial momentum tensor
+!
+      CALL SetDSYEVWork(3)
+        BLKVECT%D(1:3,1:3)=Theta%D(1:3,1:3)
+        CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+        BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+	CALL Halt('DSYEV hosed in RotationsOff. INFO='&
+                   //TRIM(IntToChar(INFO)))
+!CALL PPrint(BLKVECT%D,'eigenvectors',Unit_O=6)
+!CALL DGEMM_TNc(3,3,3,One,Zero,BLKVECT%D,Theta%D,Theta2%D)
+!CALL DGEMM_NNc(3,3,3,One,Zero,Theta2%D,BLKVECT%D,Theta%D)
+!CALL PPrint(Theta%D,'eigenvalues',Unit_O=6)
+        Theta2%D(1:3,1:3)=BLKVECT%D(1:3,1:3)
+      CALL UnSetDSYEVWork()
+!
+! Now, form the three vectors of normalized displacements 
+! upon the rotations around principal axis'
+! and transform them back into original system
+!
+      DO I=1,NatmsLoc
+        J=(I-1)*3
+        CALL DGEMM_NNc(3,3,1,One,Zero,Theta2%D, &
+                       CMCarts%D(1:3,I),Vect%D)
+        X=Vect%D(1)
+        Y=Vect%D(2)
+        Z=Vect%D(3)
+        X=CMCarts%D(1,I)
+        Y=CMCarts%D(2,I)
+        Z=CMCarts%D(3,I)
+! r x v1
+        Rot1%D(J+1)=  Y-Z
+        Rot1%D(J+2)=  Zero
+        Rot1%D(J+3)=  Zero
+! r x v2
+        Rot2%D(J+1)=  Zero
+        Rot2%D(J+2)=  Z-X
+        Rot2%D(J+3)=  Zero
+! r x v3
+        Rot3%D(J+1)=  Zero
+        Rot3%D(J+2)=  Zero
+        Rot3%D(J+3)=  X-Y
+        Vect%D=Rot1%D(J+1:J+3)
+        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot1%D(J+1:J+3))
+        Vect%D=Rot2%D(J+1:J+3)
+        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot2%D(J+1:J+3))
+        Vect%D=Rot3%D(J+1:J+3)
+        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot3%D(J+1:J+3))
+      ENDDO
+!
+! Normalize Rot vectors!
+!
+      SUM=One/SQRT(DOT_PRODUCT(Rot1%D,Rot1%D))
+      Rot1%D=Sum*Rot1%D
+      SUM=One/SQRT(DOT_PRODUCT(Rot2%D,Rot2%D))
+      Rot2%D=Sum*Rot2%D
+      SUM=One/SQRT(DOT_PRODUCT(Rot3%D,Rot3%D))
+      Rot3%D=Sum*Rot3%D
+!!
+!! test orthogonalities
+!!
+!      CALL TranslsOff(Rot1%D)
+!      CALL TranslsOff(Rot2%D)
+!      CALL TranslsOff(Rot3%D)
+!      SUM=DOT_PRODUCT(Rot1%D,Rot1%D)
+!      write(*,*) 'rot test 1 1 ',sum
+!      SUM=DOT_PRODUCT(Rot1%D,Rot2%D)
+!      write(*,*) 'rot test 1 2 ',sum
+!      SUM=DOT_PRODUCT(Rot1%D,Rot3%D)
+!      write(*,*) 'rot test 1 3 ',sum
+!      SUM=DOT_PRODUCT(Rot2%D,Rot2%D)
+!      write(*,*) 'rot test 2 2 ',sum
+!      SUM=DOT_PRODUCT(Rot2%D,Rot3%D)
+!      write(*,*) 'rot test 2 3 ',sum
+!      SUM=DOT_PRODUCT(Rot3%D,Rot3%D)
+!      write(*,*) 'rot test 3 3 ',sum
+!
+! Now, project out rotations from Cartesian displacement vector
+!
+      SUM=DOT_PRODUCT(CartVect(1:NCart),CartVect(1:NCart))
+      SUM1=DOT_PRODUCT(Rot1%D(1:NCart),CartVect(1:NCart))
+      SUM2=DOT_PRODUCT(Rot2%D(1:NCart),CartVect(1:NCart))
+      SUM3=DOT_PRODUCT(Rot3%D(1:NCart),CartVect(1:NCart))
+      CartVect(1:NCart)=CartVect(1:NCart)-SUM1*Rot1%D(1:NCart)
+      CartVect(1:NCart)=CartVect(1:NCart)-SUM2*Rot2%D(1:NCart)
+      CartVect(1:NCart)=CartVect(1:NCart)-SUM3*Rot3%D(1:NCart)
+!
+! Percentage of rotations
+!
+      SUM1=SUM1*SUM1/SUM*100.D0
+      SUM2=SUM2*SUM2/SUM*100.D0
+      SUM3=SUM3*SUM3/SUM*100.D0
+      WRITE(*,100) SUM1,SUM2,SUM3
+100   FORMAT('Rot1= ',F7.3,'%    Rot2= ',F7.3,'%     Rot3= ',F7.3,'% ')
+!
+      CALL Delete(Vect)
+      CALL Delete(Rot3)
+      CALL Delete(Rot2)
+      CALL Delete(Rot1)
+      CALL Delete(CMCarts)
+      CALL Delete(Theta2)
+      CALL Delete(Theta)
+!
+      END SUBROUTINE RotationsOff
+!
+!----------------------------------------------------------
+!
+      SUBROUTINE TranslsOff(CartVect)
+!
+      REAL(DOUBLE),DIMENSION(:) :: CartVect
+      REAL(DOUBLE)              :: SUM,SUM1,SUM2,SUM3
+      TYPE(DBL_VECT)            :: Tr1,Tr2,Tr3
+      INTEGER                   :: I,J,NCart,NatmsLoc
+!
+      NCart=SIZE(CartVect)
+      NatmsLoc=NCart/3
+      CALL New(Tr1,NCart) 
+      CALL New(Tr2,NCart) 
+      CALL New(Tr3,NCart) 
+!
+        Tr1%D=Zero
+        Tr2%D=Zero
+        Tr3%D=Zero
+	Sum=One/DBLE(NatmsLoc)
+      DO I=1,NatmsLoc
+        J=(I-1)*3
+        Tr1%D(J+1)=Sum
+        Tr2%D(J+2)=Sum
+        Tr3%D(J+3)=Sum
+      ENDDO
+!
+! Now, project out translations from CartVect
+!
+      SUM =DOT_PRODUCT(CartVect,CartVect)
+      SUM1=DOT_PRODUCT(Tr1%D,CartVect)
+	CartVect=CartVect-SUM1*Tr1%D
+      SUM2=DOT_PRODUCT(Tr2%D,CartVect)
+	CartVect=CartVect-SUM2*Tr2%D
+      SUM3=DOT_PRODUCT(Tr3%D,CartVect)
+	CartVect=CartVect-SUM3*Tr3%D
+!
+! Percentage of translations
+!
+      SUM1=SUM1*SUM1/SUM*100.D0
+      SUM2=SUM2*SUM2/SUM*100.D0
+      SUM3=SUM3*SUM3/SUM*100.D0
+      WRITE(*,100) SUM1,SUM2,SUM3
+100   FORMAT(' Tr1= ',F7.3,'%     Tr2= ',F7.3,'%      Tr3= ',F7.3,'% ')
+!
+      CALL Delete(Tr3)
+      CALL Delete(Tr2)
+      CALL Delete(Tr1)
+!
+      END SUBROUTINE TranslsOff
+!-------------------------------------------------------
+!
+      SUBROUTINE Rotate(V1,V2,Rot)
+!
+! Compute matrix Rot, which rotates vector V2 into vector V1
+!
+      REAL(DOUBLE),DIMENSION(1:3)      :: V1,V2
+      REAL(DOUBLE),DIMENSION(1:3,1:3)  :: Rot  
+      REAL(DOUBLE)                 :: Sum,SumM,Sum1,Sum2,Sum3,V1N,V2N
+      REAL(DOUBLE) :: PnX,PnY,PnZ
+      REAL(DOUBLE) :: CosPhi,SinPhi
+      INTEGER      :: I,J,Step
+      TYPE(DBL_VECT) :: Vect,CrossProd
+!          
+      CALL New(Vect,3)
+      CALL New(CrossProd,3)
+!
+      V1N=DSQRT(DOT_PRODUCT(V1,V1))
+      V2N=DSQRT(DOT_PRODUCT(V2,V2))
+      V1=V1/V1N
+      V2=V2/V2N
+      Step=1
+!
+      CrossProd%D(1)=V1(2)*V2(3)-V1(3)*V2(2)
+      CrossProd%D(2)=V1(3)*V2(1)-V1(1)*V2(3) 
+      CrossProd%D(3)=V1(1)*V2(2)-V1(2)*V2(1) 
+!
+      Sum1=DOT_PRODUCT(CrossProd%D(1:3),CrossProd%D(1:3))
+!
+      IF(DABS(Sum1) < 1.D-6) THEN  !!! V1 & V2 are parallel
+        Rot=Zero
+        Sum=DOT_PRODUCT(V1,V2)
+        DO I=1,3 ; Rot(I,I)=Sum ; ENDDO
+      ELSE      
+        Sum=One/SQRT(Sum1)
+        CrossProd%D=SUM*CrossProd%D
+        CosPhi=DOT_PRODUCT(V1,V2)     
+        SinPhi=SQRT(SUM1)
+        Sum=One-CosPhi
+!
+77      CONTINUE
+!
+        Rot(1,1)=CosPhi + Sum*CrossProd%D(1)**2
+        Rot(2,2)=CosPhi + Sum*CrossProd%D(2)**2
+        Rot(3,3)=CosPhi + Sum*CrossProd%D(3)**2
+!
+        Sum1=Sum*CrossProd%D(1)*CrossProd%D(2)
+        Sum2=SinPhi*CrossProd%D(3)
+        Rot(1,2)=Sum1-Sum2
+        Rot(2,1)=Sum1+Sum2
+!
+        Sum1=Sum*CrossProd%D(1)*CrossProd%D(3)
+        Sum2=SinPhi*CrossProd%D(2)
+        Rot(1,3)=Sum1+Sum2
+        Rot(3,1)=Sum1-Sum2
+!
+        Sum1=Sum*CrossProd%D(2)*CrossProd%D(3)
+        Sum2=SinPhi*CrossProd%D(1)
+        Rot(2,3)=Sum1-Sum2
+        Rot(3,2)=Sum1+Sum2
+!
+! Test rotation
+!
+        CALL DGEMM_NNc(3,3,1,One,Zero,Rot,V2,Vect%D(1:3))
+!
+        SumM=DOT_PRODUCT((V1-Vect%D),(V1-Vect%D))
+        IF(SumM>1.D-6) GO TO 889
+!       IF(SumM<1.D-6) write(*,*) 'rotation succesful'
+        GO TO 100
+889     SinPhi=-SinPhi
+        Step=Step+1
+        IF(Step > 2) THEN
+          Call Halt('Rotation unsuccesful for torsvalue')
+        ENDIF
+        GOTO 77        
+      ENDIF
+!
+100   CONTINUE
+      CALL Delete(CrossProd)
+      CALL Delete(Vect)
+!
+      END SUBROUTINE Rotate
+!-------------------------------------------------------
+      SUBROUTINE MapDisplTors(IntCs,NIntC,VectInt) 
+!
+! This routine maps displacements of torsions:
+! if  0 < DisplTors < PI      => DisplTors=DisplTors
+! if  0 > DisplTors <-PI      => DisplTors=DisplTors
+! if PI < DisplTors < 2*PI    => DisplTors=DisplTors-2*PI
+! if-PI > DisplTors >-2*PI    => DisplTors=DisplTors+2*PI
+!
+      TYPE(INTC)                :: IntCs
+      INTEGER                   :: NIntC,I,II
+      REAL(DOUBLE),DIMENSION(:) :: VectInt
+      REAL(DOUBLE)              :: Sum,ASum,TwoPi
+!
+      TwoPi=Two*PI
+!
+      DO I=1,NIntC
+        IF(IntCs%Def(I)(1:4)/='STRE'.OR.IntCs%Def(I)(1:4)/='CART') THEN
+	  Sum=VectInt(I)
+	  II=INT(Sum/TwoPI)
+	  Sum=Sum-DBLE(II)*TwoPi
+	  VectInt(I)=Sum
+	  ASum=ABS(Sum)
+	  IF(ASum>PI) THEN
+            IF(Sum>Zero) VectInt(I)=VectInt(I)-TwoPi
+            IF(Sum<Zero) VectInt(I)=VectInt(I)+TwoPi 
+	  ENDIF
+	ENDIF
+      ENDDO
+!
+      END SUBROUTINE
+!-------------------------------------------------------
 #endif
 !-------------------------------------------------------
 END MODULE InCoords
