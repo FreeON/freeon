@@ -11,10 +11,10 @@ Items marked with an x need to be in place before the release!
 
 CJ:
 x Validation suite
-x PBC scaling runs for HiCu, QCTC and SDMM
+x PBC Benchmark suite and scaling runs for HiCu, QCTC and SDMM
 o Write up PBC
 o Write up new MAC and PAC
-o Help perodifiy ONX
+o Help periodifiy ONX
 ? Coordinate transformations for HiCu
 ? On the fly PAO basis set contractions in the 
   molecular environs
@@ -22,17 +22,18 @@ o Help perodifiy ONX
 Eric:  
 x Explicit code into NONX
 o Switch over to new gammas
-o Help perodify ONX 
+o Help periodify ONX 
 o Help parallelize ONX
 
 Matt:
 x Finish validation suite and checking accuracies
 x Get front end and output formatting cleaned
-  >> hostname, machetype, etc to outfile
+  >> hostname, machtype, processor info etc to outfile <<
+x Add example CSHRCs to Scripts file
 x Get geometry optimization working again
 x Make sure density matrix extrapolation is working
 x Documentation
-o Get working under AIX.XLF, True64.COMPAQ
+o Get working under AIX.XLF, True64.COMPAQ, SUN? HP? 
 o Help with parallization
 o HDF5 Interface with OpenDX for isosurfacing and movies
 
