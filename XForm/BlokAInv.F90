@@ -15,11 +15,16 @@ PROGRAM BlokAInv
   USE LinAlg
   USE MatFunk
   USE AtomPairs
+#ifdef NAG
+   USE F90_UNIX_ENV
+#endif
   IMPLICIT NONE
-  TYPE(BCSR)          :: A,Z,Zt,DiagD, B
-#ifdef EXTREME_DEBUG
+  TYPE(BCSR)          :: A,Z,Zt,DiagD
+#ifdef SPATIAL_THRESHOLDING
   TYPE(BCSR)          :: T1,T2
-  TYPE(DBL_RNK2)      :: DnsD1,DnsD2,DnsD3,DnsZ1,DnsZ2,DnsZ3
+#endif 
+#ifdef EXTREME_DEBUG
+  TYPE(DBL_RNK2)      :: DnsD1,DnsD2,DnsD3,DnsZ1,DnsZ2,DnsZ3,B,C
 #endif
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
@@ -29,36 +34,77 @@ PROGRAM BlokAInv
                          n,ni,msiz,strtai,stopai,strtaj,stopaj, &
                          strtzi,stopzi,nj,strtzj,stopzj,jcol,k,kdex, &
                          aiblk,ajblk,zjblk,m,ziblk,icol,zrowpt,zcolpt, & 
-                         zblkpt,NewBloks,EndBloks,IRow,JRow
+                         zblkpt,NewBloks,EndBloks,IRow,JRow,ZBlksPreFilter,ZBlksPostFilter
   TYPE(DBL_VECT)      :: Blk1,Blk2
   TYPE(DBL_RNK2)      :: P,DA
   REAL(DOUBLE)        :: Op,Mx0,B2Norm
 
+  REAL(DOUBLE)        :: AInvDistanceThresh,IRowX,IRowY,IRowZ
   TYPE(AtomPair)      :: Pair
   REAL(DOUBLE), &
              EXTERNAL :: DDOT
+
+  LOGICAL             :: TEST_AINV
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),&
            PARAMETER  :: Prog='BlokAInv'
-#ifdef EXTREME_PRINT_DEBUG
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: ZIChar,ZJChar,AIChar, AJChar
+
+#ifdef EXTREME_DEBUG
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: AInvFile
 #endif
 !-----------------------------------------------------------------------------------------------------------
 ! Start up macro
 !
   CALL StartUp(Args,Prog)
+
+#ifdef EXTREME_DEBUG
+
+#endif
 !
 ! Get basis set and geometry
 !
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 !
-  AtomPairDistanceThreshold=1.D3
+#ifdef SPATIAL_THRESHOLDING
+  IF(GM%Ordrd==SFC_HILBERT.OR.GM%Ordrd==SFC_PEANO)THEN
+     CALL OpenASCII(InpFile,Inp)
+     IF(OptDblQ(Inp,Prog,AInvDistanceThresh))THEN
+        WRITE(*,*)'From input, AInvDistanceThresh = ',AInvDistanceThresh
+     ELSE
+        AInvDistanceThresh=1.D3
+        WRITE(*,*)' Using default AInvDistanceThreshold=',AInvDistanceThresh
+     ENDIF
+     IF(OptKeyQ(Inp,Prog,'NoTest'))THEN
+        TEST_AINV=.FALSE.
+     ELSE
+        TEST_AINV=.TRUE.
+        WRITE(*,*)' Testing AInv ... '
+     ENDIF
+     CLOSE(UNIT=Inp)
+  ELSE
+     AInvDistanceThresh=1.D24
+     TEST_AINV=.FALSE.
+     WRITE(*,*)' Using O(N^2) AInv due to non-local ordering. Try HOrder or ZOrder '
+  ENDIF
+  
+#endif
 !
 ! Allocations 
 !
-  CALL New(Z)
   CALL New(A)
   CALL Get(A,TrixFile('S',Args))
+#ifdef FIND_CONDA
+  CALL New(B,(/NBasF,NBasF/))
+  CALL New(C,(/NBasF,NBasF/))
+  CALL SetEq(B,A)
+  CALL SetDSYEVWork(NBasF)
+  CALL FunkOnSqMat(NBasF,Inverse,B%D,C%D,PrintCond_O=.TRUE.)
+  CALL Delete(B)
+  CALL Delete(C)
+  CALL UnSetDSYEVWork()
+#endif
+  CALL New(Z)
 !
 !  PrintFlags%Mat=PLOT_MATRICES
 #ifdef USE_METIS
@@ -88,6 +134,11 @@ PROGRAM BlokAInv
 !
   DO IRow=1,NAtoms
 !
+!    Set IRow coordinates for distance based screening
+     IRowX=GM%Carts%D(1,IRow)
+     IRowY=GM%Carts%D(2,IRow)
+     IRowZ=GM%Carts%D(3,IRow)
+!
      NI=BSiz%I(IRow)
      StrtAI=A%RowPt%I(IRow);StopAI=A%RowPt%I(IRow+1)-1
      StrtZI=Z%RowPt%I(IRow);StopZI=Z%RowPt%I(IRow+1)-1
@@ -106,78 +157,85 @@ PROGRAM BlokAInv
 !
      DO JRow=1,IRow-1
 !
-        IF(SetAtomPair(GM,BS,IRow,JRow,Pair)) THEN
-
-        NJ=BSiz%I(JRow)
-        StrtAJ=A%RowPt%I(JRow);StopAJ=A%RowPt%I(JRow+1)-1
-        StrtZJ=Z%RowPt%I(JRow);StopZJ=Z%RowPt%I(JRow+1)-1
+#ifdef SPATIAL_THRESHOLDING
+        IF(((IRowX-GM%Carts%D(1,JRow))**2+ &
+            (IRowY-GM%Carts%D(2,JRow))**2+ &
+            (IRowZ-GM%Carts%D(3,JRow))**2)<AInvDistanceThresh)THEN
+#endif
+           NJ=BSiz%I(JRow)
+           StrtAJ=A%RowPt%I(JRow);StopAJ=A%RowPt%I(JRow+1)-1
+           StrtZJ=Z%RowPt%I(JRow);StopZJ=Z%RowPt%I(JRow+1)-1
 !
-!       Blk1=P^(j-1)_i=[A^t_j].[Z^(j-1)_i]; Going down rows over N: (NxNJ)^T.(NxNI)
+!          Blk1=P^(j-1)_i=[A^t_j].[Z^(j-1)_i]; Going down rows over N: (NxNJ)^T.(NxNI)
 !
-        NIJ=NI*NJ
-        Blk1%D(1:NIJ)=Zero
-        DO J=StrtAJ,StopAJ
-           JDex=A%ColPt%I(J)
-
-           IF(SetAtomPair(GM,BS,IRow,JDex,Pair)) THEN
+           NIJ=NI*NJ
+           Blk1%D(1:NIJ)=Zero
+           DO J=StrtAJ,StopAJ
+              JDex=A%ColPt%I(J)
+#ifdef SPATIAL_THRESHOLDING
+              IF(((IRowX-GM%Carts%D(1,JDex))**2+ &
+                  (IRowY-GM%Carts%D(2,JDex))**2+ &
+                  (IRowZ-GM%Carts%D(3,JDex))**2)<AInvDistanceThresh)THEN
+#endif
 !
-           IDex=ZiFlg%I(JDex)
-           IF(IDex/=0)THEN                 
-              ZiBlk=BlkPt%I(IDex) 
-              AjBlk=A%BlkPt%I(J)
-              M=BSiz%I(JDex)
-              CALL DGEMM_NN(NJ,M,NI,One,A%MTrix%D(AjBlk),Z%MTrix%D(ZiBlk),Blk1%D)
-              PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*M)
-           ENDIF
-
-           ENDIF
-
-        ENDDO
-!
-!       Blk2=[P^(j-1)_j]^(-1).[P^(j-1)_i]
-!
-        CALL DGEMM_NNc(NJ,NJ,NI,One,Zero,P%D(:,JRow),Blk1%D,Blk2%D)
-        PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*NJ)
-! 
-!       Check the magintude of Blk2.  Update Z_I only if Blk2 is "large" enough.       
-!        
-        B2Norm=SQRT(DDOT(NI*NJ,Blk2%D,1,Blk2%D,1))
-        PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ)
-!        
-        IF(B2Norm>Thresholds%Trix*1.D-1)THEN
-
-!
-!          Z^j_i=Z^(j-1)_i-[Z^(j-1)_j].{[P^(j-1)_j]^(-1).[P^(j-1)_i]}
-!          Update going down rows:(NxNI)=(NxNI)+(NxNJ).(NJxNI)
-!
-           DO JDex=StrtZJ,StopZJ
-              JCol =ColPt%I(JDex) 
-
-              IF(SetAtomPair(GM,BS,IRow,JCol,Pair)) THEN
-
-
-              ZjBlk=BlkPt%I(JDex) 
-              IDex =ZiFlg%I(JCol)
-              M=BSiz%I(JCol)
-              PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*M)
-              IF(IDex/=0)THEN                  
-                 ZiBlk=BlkPt%I(IDex) 
-                 CALL DGEMM_NNc(M,NJ,NI,-One,One,Z%MTrix%D(ZjBlk),Blk2%D,Z%MTrix%D(ZiBlk))
-              ELSE
-                 ZiBlk=ZBlk
-                 CALL DGEMM_NNc(M,NJ,NI,-One,Zero,Z%MTrix%D(ZjBlk),Blk2%D,Z%MTrix%D(ZiBlk))
-                 ZiFlg%I(JCol)=ZDex
-                 ColPt%I(ZDex)=JCol
-                 BlkPt%I(ZDex)=ZiBlk
-                 ZDex=ZDex+1 
-                 ZBlk=ZBlk+M*NI
+                 IDex=ZiFlg%I(JDex)
+                 IF(IDex/=0)THEN                 
+                    ZiBlk=BlkPt%I(IDex) 
+                    AjBlk=A%BlkPt%I(J)
+                    M=BSiz%I(JDex)
+                    CALL DGEMM_NN(NJ,M,NI,One,A%MTrix%D(AjBlk),Z%MTrix%D(ZiBlk),Blk1%D)
+                    PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*M)
+                 ENDIF
+#ifdef SPATIAL_THRESHOLDING
               ENDIF
-
-              ENDIF
-
+#endif
            ENDDO
 !
-        ENDIF
+!          Blk2=[P^(j-1)_j]^(-1).[P^(j-1)_i]
+!
+           CALL DGEMM_NNc(NJ,NJ,NI,One,Zero,P%D(:,JRow),Blk1%D,Blk2%D)
+           PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*NJ)
+! 
+!          Check the magintude of Blk2.  Update Z_I only if Blk2 is "large" enough.       
+!        
+           B2Norm=SQRT(DDOT(NI*NJ,Blk2%D,1,Blk2%D,1))
+           PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ)
+!        
+           IF(B2Norm>Thresholds%Trix*1.D-1)THEN
+!
+!             Z^j_i=Z^(j-1)_i-[Z^(j-1)_j].{[P^(j-1)_j]^(-1).[P^(j-1)_i]}
+!             Update going down rows:(NxNI)=(NxNI)+(NxNJ).(NJxNI)
+!
+              DO JDex=StrtZJ,StopZJ
+                 JCol=ColPt%I(JDex) 
+#ifdef SPATIAL_THRESHOLDING
+                 IF(((IRowX-GM%Carts%D(1,JCol))**2+ &
+                     (IRowY-GM%Carts%D(2,JCol))**2+ &
+                     (IRowZ-GM%Carts%D(3,JCol))**2)<AInvDistanceThresh)THEN
+#endif
+                    ZjBlk=BlkPt%I(JDex) 
+                    IDex =ZiFlg%I(JCol)
+                    M=BSiz%I(JCol)
+                    PerfMon%FLOP=PerfMon%FLOP+DBLE(NIJ*M)
+                    IF(IDex/=0)THEN                  
+                      ZiBlk=BlkPt%I(IDex) 
+                      CALL DGEMM_NNc(M,NJ,NI,-One,One,Z%MTrix%D(ZjBlk),Blk2%D,Z%MTrix%D(ZiBlk))
+                    ELSE
+                      ZiBlk=ZBlk
+                      CALL DGEMM_NNc(M,NJ,NI,-One,Zero,Z%MTrix%D(ZjBlk),Blk2%D,Z%MTrix%D(ZiBlk))
+                      ZiFlg%I(JCol)=ZDex
+                      ColPt%I(ZDex)=JCol
+                      BlkPt%I(ZDex)=ZiBlk
+                      ZDex=ZDex+1 
+                      ZBlk=ZBlk+M*NI
+                    ENDIF
+#ifdef SPATIAL_THRESHOLDING
+                 ENDIF
+#endif
+              ENDDO
+#ifdef SPATIAL_THRESHOLDING
+           ENDIF
+#endif
 !
        ENDIF
 !
@@ -238,9 +296,10 @@ PROGRAM BlokAInv
 !
   CALL Delete(ColPt)
   CALL Delete(BlkPt)
-#ifdef EXTREME_DEBUG
+#ifdef SPATIAL_THRESHOLDING
 #else 
-  CALL Delete(A)
+  IF(TEST_AINV) &
+     CALL Delete(A)
 #endif
 !
 ! Compute dimensions of DiagD & allocate it
@@ -277,14 +336,14 @@ PROGRAM BlokAInv
 ! Symbolic transpose only, bloks in place 
 !
   CALL XPose(Z)
-  WRITE(*,*)' N = ',NAtoms,' NZ = ',Z%NBlks
+! 
+  ZBlksPreFilter=Z%NBlks
 !
 ! Final Z=P^(-1/2).Z
 !
   CALL Multiply(Z,DiagD,Zt)
   CALL Filter(Z,Zt)
-
-!  CALL Plot(Z,'Z_Metis')
+  ZBlksPostFilter=Z%NBlks
 !
 ! Full transpose
 !
@@ -297,23 +356,44 @@ PROGRAM BlokAInv
   CALL Elapsed_TIME(PerfMon,'Accum')
   CALL PPrint(PerfMon,Prog,Unit_O=6)  
 !
-#ifdef EXTREME_DEBUG
+#ifdef SPATIAL_THRESHOLDING 
+  IF(TEST_AINV)THEN
 !
-! Consistency check
+!    Consistency check
 !    
-  CALL New(T1)
-  CALL New(T2)
-  CALL Multiply(Zt,A,T1)
-  CALL Multiply(T1,Z,T2)
+     CALL New(T1)
+     CALL New(T2)
+     CALL Multiply(Zt,A,T1)
+     CALL Multiply(T1,Z,T2)
 !
-  CALL SetToI(T1)
-  CALL Multiply(T1,-One)
-  CALL Add(T1,T2,A)
-  Mx0=Max(A)
-  WRITE(*,*)' Mx0 = ',Mx0
-! CALL ShutDown(Prog)
+     CALL SetToI(T1)
+     CALL Multiply(T1,-One)
+     CALL Add(T1,T2,A)
+     Mx0=Max(A)
+!
+     Mssg=     'Max(Z^t.A.Z-I)='//TRIM(DblToShrtChar(Mx0))                 &
+        //', DistanceThreshold='//TRIM(DblToShrtChar(AInvDistanceThresh))  &
+        //', Thresholds%Trix='//TRIM(DblToShrtChar(Thresholds%Trix))
+!
+     IF(Mx0>1.D1*Thresholds%Trix)THEN
+        CALL Halt('In BlokAInv, failed test: '//TRIM(Mssg))
+     ELSE
+        Mssg=Prog//' :: '//TRIM(Mssg)
+        WRITE(*,*)TRIM(Mssg)
+        CALL OpenASCII(OutFile,Out)
+        CALL PrintProtectL(Out)
+        WRITE(Out,*)TRIM(Mssg)
+        CALL PrintProtectR(Out)
+        CLOSE(UNIT=Out,STATUS='KEEP')
+!
+!        CALL GetEnv('MONDO_WORK',AInvFile)
+!        AInvFile=TRIM(AInvFile)//'/AInv.dat'
+!        CALL OpenASCII(AInvFile,35)
+!        WRITE(35,*)NAtoms,ZBlksPreFilter,ZBlksPostFilter,Mx0
+!        CLOSE(35)
+      ENDIF
+   ENDIF
 #endif
-  WRITE(*,*)' N = ',NAtoms,' NZ = ',Z%NBlks
 !
 !  Put Z and ZT to disk
 !  

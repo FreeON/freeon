@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPOPTS=#-DEXTREME_DEBUG -DEXTREME_PRINT_DEBUG
+CPPMISC=-DSPATIAL_THRESHOLDING 
 #
 Libs =  $(F90_LIBRARIES) $(LAPACK)
 #
