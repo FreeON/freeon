@@ -44,6 +44,18 @@ MODULE Thresholding
 !        Set Prim-Prim thresholds
          CALL SetPrimPairThresh(Thresholds%Dist)
      END SUBROUTINE SetThresholds
+!===================================================
+#ifdef MMech
+     SUBROUTINE SetMMThresholds(Base)
+! this routine is a modification of SetThresholds
+         CHARACTER(LEN=*) :: Base
+         CALL Get(Thresholds,Tag_O=Base)
+         MinZab=NuclearExpnt
+         MinXab=MinZab/Four
+         CALL SetAtomPairThresh(Thresholds%Dist)
+         CALL SetPrimPairThresh(Thresholds%Dist)
+     END SUBROUTINE SetMMThresholds
+#endif
 !====================================================================================================
 !    Preliminary worst case thresholding at level of atom pairs
 !    Using Exp[-MinXab*|A-B|^2] = Tau 
