@@ -195,7 +195,8 @@ CONTAINS
                    CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
                    !
                    ! The integral interface.
-                   INCLUDE 'ERIListInterface.Inc'
+!VW                   INCLUDE 'ERIListInterface.Inc'
+                   INCLUDE 'ERIListInterfaceB.Inc'
                    !
                    Dum=DSQRT(DGetAbsMax(LocNInt,C(1)))
                    !
@@ -447,7 +448,8 @@ CONTAINS
                    CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
                    !
                    ! The integral interface.
-                   INCLUDE 'ERIListInterface.Inc'
+!VW                   INCLUDE 'ERIListInterface.Inc'
+                   INCLUDE 'ERIListInterfaceB.Inc'
                    !INCLUDE 'DERIListInterface.Inc'
                    !
                    Dum=DSQRT(DGetAbsMax(LocNInt,C(1)))
@@ -572,9 +574,9 @@ CONTAINS
     REAL(DOUBLE)  , DIMENSION(3), INTENT(IN) :: PBC
     !-------------------------------------------------------------------
     INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,MAXII
-    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
+    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2,IntType
     INTEGER      :: StartL1,StopL1,StartL2,StopL2
-    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ
+    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ,Cnt
     !-------------------------------------------------------------------
     !
     RX=PBC(1)
@@ -594,14 +596,17 @@ CONTAINS
        StartL1=BSc%LStrt%I(CF1,AtmInfo%K1)
        StopL1=BSc%LStop%I(CF1,AtmInfo%K1)
 
-       if(Type1==2) stop 'SP shell not yet supported.'
+       !if(Type1==2) stop 'SP shell not yet supported.'
        DO CF2=1,BSp%NCFnc%I(AtmInfo%K2)
           CF12=CF12+1
           !
           MinL2=BSp%ASymm%I(1,CF2,AtmInfo%K2)
           MaxL2=BSp%ASymm%I(2,CF2,AtmInfo%K2)
           Type2=MaxL2*(MaxL2+1)/2+MinL2+1
-          AtmPair(CF12)%SP%IntType=Type1*100+Type2
+          !>>>>>
+          IntType=Type1*100+Type2
+          AtmPair(CF12)%SP%IntType=IntType !Type1*100+Type2
+          !<<<<<
           StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
           StopL2=BSp%LStop%I(CF2,AtmInfo%K2)
           !
@@ -623,6 +628,7 @@ CONTAINS
                 IF(XiR12<PrimPairDistanceThreshold) THEN
                    JJ=JJ+1
                    IJ=JJ+II
+                   Cnt=BSc%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                    AtmPair(CF12)%SP%Cst(1,IJ)=Expt
                    !
                    ! AtmInfo must be related to the atoms in the working cell ONLY. 
@@ -630,14 +636,26 @@ CONTAINS
                    AtmPair(CF12)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
                    AtmPair(CF12)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                    AtmPair(CF12)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
-                   !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)* &
-                   AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
-                        &                     BSc%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
-                        &                     BSp%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                   AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*Cnt
+                   !AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt*Cnt
                    !
-                   ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
                    ! Here I need to add the correction factor for SP shell.
-                   ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+                   !TO CHECK TO CHECK TO CHECK TO CHECK TO CHECK TO CHECK
+                   AtmPair(CF12)%SP%Cst(6,IJ)=BIG_DBL
+                   AtmPair(CF12)%SP%Cst(7,IJ)=BIG_DBL
+                   AtmPair(CF12)%SP%Cst(8,IJ)=BIG_DBL
+                   !TO CHECK TO CHECK TO CHECK TO CHECK TO CHECK TO CHECK
+                   IF(IntType.EQ.0102.OR.IntType.EQ.0201) THEN
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)* &
+                           &                     BSp%CCoef%D(StartL2  ,I2,CF2,AtmInfo%K2)/Cnt
+                   ELSEIF(IntType.EQ.0202) THEN
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)* &
+                           &                     BSp%CCoef%D(StartL2  ,I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)* &
+                           &                     BSp%CCoef%D(StartL2  ,I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)* &
+                           &                     BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
+                   ENDIF
                 ELSE
                    ! We can skipp out the loop because the primitives are ordered.
                    EXIT

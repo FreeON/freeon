@@ -101,7 +101,7 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     !-------------------------------------------------------------------
-    integer :: i,isize
+    integer :: i,isize,aalen,bblen,cclen,ddlen
     real(double) :: t1,t2,tt
     tt=0.0d0
     !
@@ -250,6 +250,7 @@ tt=tt+t2-t1
              RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
                 !
+!WRITE(*,*)' AtA = ',Ata, ' AtB = ',AtB
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
                    !
                    BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
@@ -281,37 +282,44 @@ tt=tt+t2-t1
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(NIntBlk,C(1),0.0d0)
+                   !CALL DBL_VECT_EQ_DBL_SCLR(NIntBlk,C(1),BIG_DBL)
                    !
                    RnOvFAC: DO iFAC=1,ACAtmInfo%NFPair
 #ifdef GTRESH
                       IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT RnOvFAC
 #endif
                       CFA=AtAList%Indx(1,iFAC)
+                      AALen=BSc%LStop%I(CFA,KA)-BSc%LStrt%I(CFA,KA)+1
                       CFC=AtAList%Indx(2,iFAC)
+                      CCLen=BSc%LStop%I(CFC,KC)-BSc%LStrt%I(CFC,KC)+1
                       OffSet%A=OffArrC%I(CFA,KA)
                       OffSet%C=OffArrP%I(CFC,KC)
                       !
                       RnOvFBD: DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
+                         BBLen=BSp%LStop%I(CFB,KB)-BSp%LStrt%I(CFB,KB)+1
                          CFD=AtBList%Indx(2,iFBD)
-#ifdef GTRESH
-                         IF(DMcd((CFC-1)*NCFncD+CFD)* &
-                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
-                            IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(iFBD)<Thresholds%TwoE) EXIT RnOvFBD
-#endif
+                         DDLen=BSp%LStop%I(CFD,KD)-BSp%LStrt%I(CFD,KD)+1
+!#ifdef GTRESH
+!                         IF(DMcd((CFC-1)*NCFncD+CFD)* &
+!                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
+!                            IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(iFBD)<Thresholds%TwoE) EXIT RnOvFBD
+!#endif
                             OffSet%B=OffArrC%I(CFB,KB)
                             OffSet%D=OffArrP%I(CFD,KD)
                             !
                             ! Compute integral type.
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
-                            !
-                            ! The integral interface.
-                            INCLUDE 'ERIInterface.Inc'
-                            !
+
+                            INCLUDE 'ERIInterfaceB.Inc'
+
+!                            CALL ShellPrint(NBFA,NBFB,NBFC,NBFD,AALen,BBLen,CCLen,DDLen,  &
+!                                            OffSet%A,OffSet%B,OffSet%C,OffSet%D,IntType,C(1))
+
                             NInts=NInts+DBLE(LocNInt)
-#ifdef GTRESH
-                         ENDIF
-#endif
+!#ifdef GTRESH
+!                         ENDIF
+!#endif
                       ENDDO RnOvFBD
                    ENDDO RnOvFAC
                    !
@@ -403,7 +411,6 @@ tt=tt+t2-t1
     !
   END FUNCTION GetNonNFPair
   !
-  !
   SUBROUTINE GetAtomPair(AtmInfo,List,AtmPair,BSc,BSp,CS_OUT)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE GetAtomPair(AtmInfo,List,AtmPair,BSc,BSp,CS_OUT)
@@ -414,21 +421,16 @@ tt=tt+t2-t1
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(AtomInfo)               :: AtmInfo
-    TYPE(ANode   ), POINTER      :: List
     TYPE(AtomPr  ), DIMENSION(:) :: AtmPair
     TYPE(BSET)                   :: BSc,BSp
     TYPE(CellSet)                :: CS_OUT
+    TYPE(ANode   ), POINTER      :: List
     !-------------------------------------------------------------------
     INTEGER      :: CF1,CF2,I1,I2,II,JJ,IJ,Cell
-    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
+    INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2,IntType
     INTEGER      :: StopL1,StartL1,StopL2,StartL2,iNFPair
-    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ
+    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ,Cnt
     !-------------------------------------------------------------------
-    !
-    ! dbuging
-#ifdef ONX2_DBUG
-    AtmPair(:)%SP%IntType=BIG_INT
-#endif
     !
     DO iNFPair=1,AtmInfo%NFPair
        CF1 =List%Indx(1,iNFPair) !A,B
@@ -453,9 +455,10 @@ tt=tt+t2-t1
        Type2=MaxL2*(MaxL2+1)/2+MinL2+1
        StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
        StopL2=BSp%LStop%I(CF2,AtmInfo%K2)
-       !
-       AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
-       !
+       !>>>>>
+       IntType=Type1*100+Type2
+       AtmPair(iNFPair)%SP%IntType=IntType !Type1*100+Type2
+       !<<<<<
        II=0
        !
        ! We assume the primitives are ordered (exponants in decressing order).
@@ -472,6 +475,7 @@ tt=tt+t2-t1
              IF(XiR12<PrimPairDistanceThreshold) THEN
                 JJ=JJ+1
                 IJ=JJ+II
+                Cnt=BSc%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
                 AtmPair(iNFPair)%SP%Cst(1,IJ)=Expt
                 !
                 ! AtmInfo must be related to the atoms in the working cell ONLY.
@@ -479,14 +483,20 @@ tt=tt+t2-t1
                 AtmPair(iNFPair)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
-                AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt* &
-                     !AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXPInv(XiR12)*InvExpt* &
-                     &                     BSc%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)* &
-                     &                     BSp%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-                !
-                ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-                ! Here I need to add the correction factor for SP shell.
-                ! TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+                AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*Cnt
+                IF((Type1.NE.2.AND.Type2==2).OR.(Type2.NE.2.AND.Type1==2))THEN
+                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
+                   AtmPair(iNFPair)%SP%Cst(8,IJ)=BIG_DBL
+                ELSEIF(Type1==2.AND.Type2==2)THEN
+                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
+                ELSE
+                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BIG_DBL
+                   AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
+                   AtmPair(iNFPair)%SP%Cst(8,IJ)=BIG_DBL
+                ENDIF
              ELSE
                 ! We can skipp out the loop because the primitives are ordered.
                 EXIT
@@ -522,13 +532,7 @@ tt=tt+t2-t1
           AtmPair(iNFPair)%SP%AtmInfo%Atm2Y=AtmInfo%Atm1Y
           AtmPair(iNFPair)%SP%AtmInfo%Atm2Z=AtmInfo%Atm1Z
        ENDIF
-       !
-#ifdef ONX2_DBUG
-       WRITE(*,'(3(A,I3),A,I5)') 'Type1',Type1,' Type2',Type2, &
-            &                    ' IntType',AtmPair(CF12)%SP%IntType
-#endif
     ENDDO
-    !
   END SUBROUTINE GetAtomPair
   !
   !
