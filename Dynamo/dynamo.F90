@@ -547,7 +547,13 @@ CONTAINS
         Cos_AngleIJK=SIGN(DABS(Cos_AngleIJK),Cos_AngleIJK)
       ENDIF
 !
-      VAngleIJK=ACOS(Cos_AngleIJK)
+      IF(ABS(Cos_AngleIJK-One)<1.D-6) THEN
+        VAngleIJK=0.D0
+      ELSE IF(ABS(Cos_AngleIJK+One)<1.D-6) THEN
+        VAngleIJK=PI
+      ELSE
+        VAngleIJK=ACOS(Cos_AngleIJK)
+      ENDIF
 !
       D_Angle=VAngleIJK-ANGLES(IA)%EQ
       D_Force=ANGLES(IA)%FC*D_Angle
