@@ -33,7 +33,7 @@ Libs =  $(F90_LIBRARIES)
 #
 ObjsS = SBlok.o     MakeS.o 
 ObjsT = TBlok.o     MakeT.o 
-ObjsR = RhoBlok.o   MakeRho.o 
+ObjsR = RhoTools.o RhoBlok.o   MakeRho.o 
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o 
 #
@@ -71,9 +71,9 @@ clean:
 	ln -s /dev/null core
 	ls -l
 #
-MakeS.o  : SBlok.o     $(MONDO_HOME)/Libs/libMondoMods.a
-MakeT.o  : TBlok.o     $(MONDO_HOME)/Libs/libMondoMods.a
-MakeRho.o: RhoBlok.o   $(MONDO_HOME)/Libs/libMondoMods.a
-SForce.o : BlokTrWdS.o $(MONDO_HOME)/Libs/libMondoMods.a
-TForce.o : BlokTrPdT.o $(MONDO_HOME)/Libs/libMondoMods.a
+MakeS.o  : SBlok.o                $(MONDO_HOME)/Libs/libMondoMods.a
+MakeT.o  : TBlok.o                $(MONDO_HOME)/Libs/libMondoMods.a
+MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_HOME)/Libs/libMondoMods.a
+SForce.o : BlokTrWdS.o            $(MONDO_HOME)/Libs/libMondoMods.a
+TForce.o : BlokTrPdT.o            $(MONDO_HOME)/Libs/libMondoMods.a
 
