@@ -33,8 +33,6 @@
 
 \author{K\'aroly N\'emeth\footnotemark[1]}
 \author{Matt Challacombe}
-\author{Christopher J. Tymczak}
-\author{Valery Weber}
 
 \affiliation{Theoretical Division,\\ Los Alamos National Laboratory, \\ Los Alamos, NM 87545, USA}
 
@@ -65,373 +63,229 @@ and simplicity of implementation.
 \footnotetext[1]{\tt KNemeth@LANL.Gov}
 
 \section{Introduction}
-Internal coordinates are now routinely used in the optimization of 
+Internal coordinates based on chemical intuition 
+are now routinely used in the optimization of 
 molecular structures by most standard quantum chemistry program 
-packages. A wealth of experience in geometry optimization justifies
-the application of internal coordinates and shows their
-superiority as compared to Cartesians. The reason behind the
-experience is that internal coordinates exhibit much less
-vibrational coupling than Cartesian ones do 
+packages. Internal coordinates are more advantageous 
+for geometry optimization since they exhibit much less 
+harmonic and anharmonic vibrational coupling then Cartesians do
 \cite{PPulay69,GFogarasi79,GFogarasi92,PPulay77}.
-By recent proposals of Kudin {\it et.al.} \cite{KKudin01} and of
-Andzelm {\it et.al.} \cite{JAndzelm01} the foundations of 
-internal coordinate
-crystal structure optimizations are laid down. These authors
-pointed out how to build Wilson's B matrix \cite{EWilson55} 
-when periodic boundary conditions are present. They have also
-presented a few examples for succesful application of internal 
-coordinates for the optimization of crystal structures. It is 
-important to note that the paper by Andzelm {\it et.al.}, in our best
-understanding, does neither contain the definitions of 
-internal coordinate derivatives with respect to lattice parameters,
-nor does describe simultaneous internal coordinate relaxation
-of both atomic positions and lattice parameters.
-The paper by Kudin {\it et.al.} accounts for both of these
-features. We find that the construction of Wilson's B matrix
-is described in both papers in a less compact, more case-specific 
-way, by considering each internal coordinate event by separate 
-discussions. This may be instructive but less suitable for
-a reader who is interested in quick implementation.
-Therefore, we repeat the formulation with the aim of mathematical
-compactness that may be better suited for implementation.
-Our selection of symmetry unique internal coordinates and treatment
-of constraints does also differ from the one proposed by the previous
-authors.
-More important than these interpretative differences,
-our main goal was to
-assess the performance of our recently developed robust internal
-coordinate optimizer, that is based on the concept of
-quasi-independent curvilinear coordinates (QUICCA) \cite{KNemeth04}.
-Similar to Baker's test set \cite{JBaker93}, we have set up 
-a test set of ten crystal structures that we believe is representative
-enough to a very broad range of possible applications. We carry out
-geometry optimizations on this test set with the same accuracy
-that is used in Baker's test set for isolated molecules.
-Test calculations are carried out with both constrained and
-relaxed lattice parameters. The results indicate that
-QUICCA is generally applicable to both isolated molecule and crystal
-structure optimizations, with high efficiency and great robustness,
-while preserving an unparalleled simplicity in the implementation.
+The reduced vibrational coupling allows for much larger steps during the
+optimization and results in at least 7-10 times smaller number of 
+of optimization steps on small and medium sized molecules
+as compared to Cartesian conjugate gradient schemes \cite{TBucko05}.  
 
-\section{Lattice summation for Wilson's B matrix}
-\subsection{The effective $B$ matrix of the central cell}
-Let us consider a three-dimensional crystal with atomic 
-Cartesian positions $X$ that extend the range $[-\infty,\infty]$
-in all spacial directions. The periodicity of the crystal
-is given by the lattice vectors $A$, $B$ and $C$.
-For this infinitely large crystal, local internal coordinates ($\phi$) 
-can be defined, as usual for isolated molecules. Let us now suppose,
-that there is periodicity also in the set of internal coordinates.
-This being the case is simply a consequence of applying the 
-same rules for the 
-construction of internal coordinates everywhere in the crystal.
-If this periodicity exists, a unique set of primitive internal 
-coordinates, $\phi^{(000)}$ can be defined. Each $i$-th element of this
-set, $\phi^{(000)}_{i}$ depends on the Cartesian coordinates of
-maximum four atoms: 
+Until recently, internal coordinates have been used only to optimize
+the structure of isolated molecules.
+In recent articles by Kudin {\it et.al.} \cite{KKudin01} and by
+Andzelm {\it et.al.} \cite{JAndzelm01} crystal structure optimizations
+have been carried out in internal coordinates.
+These authors proposed a way
+how to build Wilson's B matrix \cite{EWilson55} 
+when periodic boundary conditions are present. 
+The scheme presented by Kudin {\it et.al.} \cite{KKudin01} allowed for 
+the simultaneous relaxation of atomic positions and lattice parameters,
+while the one by Andzelm {\it et.al.} \cite{JAndzelm01}  concerned only 
+with the relaxation of atomic positions while lattice parameters have 
+been fixed. 
+An important improvement in the construction of the B-matrix
+was very recently carried out by Bu\v{c}ko, Hafner and {\'A}ngy{\'a}n
+\cite{TBucko05}.
+These authors realized that 
+all internal coordinates may have non-vanishing contribution
+to the displacement of lattice parameters, and not only those
+that cross the boundaries of the central cell. 
+In our opinion, the paper of Bu\v{c}ko, Hafner and {\'A}ngy{\'a}n
+provides the first complete determination of Wilson's B matrix
+for crystals. This definition of the B matrix will be used through
+the present paper. 
+
+In the present article we want to assess the performance of our recently
+developed optimization algorithm, the Quasi Independent Curvilinear 
+Coordinate Approach (QUICCA) \cite{KNemeth04} 
+in crystal structure environment.
+QUICCA is based on a radical exploitation of the approximate decoupling
+of internal coordinate motions within a molecule and is very simple 
+to implement, robust and very efficient for isolated molecules while
+its computational cost scales linearly with the system-size for each 
+optimization step. However, nothing is known yet about the 
+applicability of QUICCA for crystals. In crystals, coupling effects
+may be very different from the ones in isolated molecules. If QUICCA
+works similarly well for crystals as it does for isolated molecules
+it can be used as a generally applicable, extremely robust 
+internal coordinate optimizer for the optimization of large 
+molecules and crystals. 
+
+In the following, we first review the construction of Wilson's B matrix
+for crystals (Sec. \ref{crystalBmat}), then the QUICCA algorithm is 
+reviewed as applied for crystals (Sec. \ref{QUICCAreview}, 
+finally results of test calculations
+ranging over a broad class of crystalline systems are presented
+(Sec. \ref{ResDissc}). Finally, we conclude the analysis of the results
+in that QUICCA is a very efficient method for optimizing both
+crystal structures and isolated molecules (Sec. \ref{Conclusions}).
+
+\section{Methodology}
+\subsection{Wilson's B matrix for crystals}
+In this section we briefly review how the elements of Wilson's
+B matrix can be calculated for crystals. A more detailed discussion 
+of this issue can be found in Ref. \onlinecite{TBucko05}.
+
+The independent geometrical variables of a crystal are the 
+fractional coordinates, $f_{k}$ and the lattice vectors, $h_{l}$.
+The absolute Cartesian position, $r_{k}$ of the $k$-th atom
+can be decomposed as a funtion of both the fractional coordinates 
+$f_{k}$ of atom $k$ and the lattice vectors:
 \begin{equation}
-\phi^{(000)}_{i}=\phi^{(000)}_{i}[
-(a_{i1},k_{i1},l_{i1},m_{i1}),
-(a_{i2},k_{i2},l_{i2},m_{i2}),
-(a_{i3},k_{i3},l_{i3},m_{i3}),
-(a_{i4},k_{i4},l_{i4},m_{i4})],
+r_{i} = h f_{i} ,
 \end{equation}
-where $a_{ij}$ ($j=1,2,3,4$) denotes serial numbers of atoms in 
-a reference cell, called the 
-central cell, and the corresponding $k_{ij}$, $l_{ij}$ and $m_{ij}$ 
-denote integer cell indices.
-The translationally unique $a_{ij}$ atoms and the 
-$k_{ij}$, $l_{ij}$ and $m_{ij}$ 
-cell indices together determine
-the atoms within the infinite crystal that compose 
-the $i$-th internal coordinate of the $\phi^{(000)}$ set. 
+where the matrix $h$ contains the Cartesian components of the 
+$h_{1}$, $h_{2}$ and $h_{3}$ lattice vectors in its 
+columns, respectively.
 
-It should be noted, that the elementary cell in the
-internal coordinate space has a different meaning than what 
-the elementary cell in the Cartesian space is. This should
-be clear from the fact that the internal coordinate elementary cell 
-containes such $\phi^{(000)}_{i}$ coordinates that connect
-two or more different Cartesian cells. Furthermore, the internal
-coordinate central cell $\phi^{(000)}$ may be located over atoms, 
-that are far
-from the Cartesian elementary cell. For the sake of simplicity,
-we choose the internal coordinate elementary cell to be in maximum
-possible overlap with the atoms of the Cartesian elementary cell.
-
-All internal coordinates of the crystal can be retrieved
-by applying the same $T_{k_{T}l_{T}m_{T}}=k_{T}A+l_{T}B+m_{T}C$ 
-translation vector to the atoms of $\phi^{(000)}$: 
+The B matrix for crystals contains the total derivatives 
+of internal coordinates with respect to fractional ones
+and lattice vectors:
 \begin{equation}
-\phi^{(k_{T}l_{T}m_{T})}_{i}=\phi^{(000)}_{i}[
-(a_{i1},k_{i1}',l_{i1}',m_{i1}'),
-(a_{i2},k_{i2}',l_{i2}',m_{i2}'),
-(a_{i3},k_{i3}',l_{i3}',m_{i3}'),
-(a_{i4},k_{i4}',l_{i4}',m_{i4}')] ,
+B_{ik} = \frac{d \phi_{i}}{d f_{k}} ,
 \end{equation}
-where $k_{ij}'=k_{ij}+k_{T}$ and the same holds for the $l$ and $m$ 
-cell indices.
-$k_{T}$, $l_{T}$ and $m_{T}$ denote arbitrary integers.
-The corresponding Cartesian coordinates transform as
 \begin{equation}
-X^{(k_{ij}+k_{T},l_{ij}+k_{T},m_{ij}+k_{T})}_{a_{ij}} 
-= X^{(k_{ij},l_{ij},m_{ij})}_{a_{ij}} + T_{k_{T}l_{T}m_{T}} .
-\end{equation} 
-All vector quantities here and in the forthcoming derivation
-denote row vectors, unless otherwise noted.
-Now, let us consider the relationship of an infinitesimally small
-Cartesian displacement, $\delta X$ and the corresponding $\delta \phi$
-internal coordinate displacement.
-Because of the translational symmetry, displacements are the same
-in all internal coordinate cells:
+B_{il} = \frac{d \phi_{i}}{d h_{l}} ,
+\end{equation}
+where $\phi_{i}$ is the $i$-th internal coordinate,
+and $B_{ik}$ is a 3-component vector, similar to $f_{k}$ and $h_{l}$.
+
+In order to compute elements of the B matrix of a crystal, the above
+expressions must be
+related to B matrix elements of isolated molecules. This decomposition
+can be done by the application of the chain rule to the above 
+total derivatives, which results in
 \begin{equation}
-\delta \phi^{(klm)}_{i} = \delta \phi^{(000)}_{i} 
+B_{ik} =  \frac{\partial \phi_{i}}{\partial r_{k}} h ,
 \end{equation}
-for any $i$-th internal coordinate.
-The displacements of the Cartesian coordinates, however, do not equal
-for different cells: 
-\begin{equation} \label{cartdispl}
-\delta X^{(klm)}_{a_{ij}} = \delta X^{(000)}_{ij} + k \delta A 
-+ l \delta B + m \delta C ,
+and 
+\begin{equation} \label{Blattice}
+B_{il} =  \sum_{m=1}^{4} 
+          \frac{\partial \phi_{i}}{\partial r_{m}} f_{ml},
 \end{equation}
-with $\delta A$, $\delta B$ and $\delta C$
-being the displacements of the lattice vectors. 
-The different behaviour of the internal and the Cartesian displacements
-reflects the fact, that internal coordinates describe relative
-atomic displacements, while Cartesian ones are absolute displacements, 
-relative to the Cartesian coordinate axis.
+where $\frac{\partial \phi_{i}}{\partial r_{k}}$ and 
+$\frac{\partial \phi_{i}}{\partial r_{m}}$ are row-vectors and contain
+the partial derivative of the $i$-th internal coordinate
+with respect of the absolute Cartesian positions of 
+the $k$-th and $m$-th atoms. $f_{ml}$ represents the
+$l$-th component of the fractional coordinates of the $m$-th atom.
+These partial derivatives are identical
+with the B matrix elements of isolated molecules. The summation
+in Eq. \ref{Blattice} goes over all atoms that compose $\phi_{i}$,
+i.e. in case of primitive internal coordinates over maximum $4$ atoms. 
 
-The relationship between the Cartesian and internal coordinate 
-displacements can be expressed by Wilson's $B$ matrix:
+\subsection{Preparation of gradients}
+Our linear scaling electronic structure program, MondoSCF \cite{MondoSCF} provides
+the energy gradients on the absolute Cartesian positions, 
+$\frac{\partial E}{\partial r_{k}}$, and the total derivatives
+of the energy with respect to lattice vector components, 
+$\frac{d E}{d h_{l}}$.
+To calculate the forces, $\frac{d E}{d \phi_{i}}$, which act on the
+internal coordinates, the total derivatives of the energy,
+$\frac{d E}{d f_{k}}$ and 
+$\frac{d E}{d h_{l}}$ are needed of which $\frac{d E}{d h_{l}}$ is 
+given by our electronic stucture code.
+$\frac{d E}{d f_{k}}$ can easily be calculated as:
 \begin{equation}
-\delta \phi = B \delta X
+\frac{d E}{d f_{k}} = \frac{\partial E}{\partial r_{k}} h .
 \end{equation}
-where $B$ here has the size of $\infty \times \infty$ and its
-elements are given by
+For the sake of completeness the relationship between total and
+partial derivatives of the energy with respect of the lattice vectors
+is defined by    
 \begin{equation}
-B_{pq}= \frac{\partial \phi_{p}}{\partial X_{q}} , 
+\frac{d E}{d h_{l}} = \frac{\partial E}{\partial h_{l}} +
+                      \sum_{n=1}^{N_{a}} 
+                      \frac{\partial E}{\partial r_{n}} f_{nl} ,
 \end{equation}
-where $X_{q}$ denotes a single Cartesian coordinate of the set $X$.
+where $N_{a}$ is the number of atoms in the elementary cell.
 
-It is enough to investigate the relationship of the internal 
-coordinates of the central cell and all the Cartesian coordinates,
-since all other internal coordinate displacements equal with the 
-central cell ones:
-\begin{equation} \label{intdispl1}
-\delta \phi^{(000)}_{i} = \sum_{q=1}^{\infty} B^{(000)}_{iq} \delta X_{q} .
-\end{equation}
-Here, $B^{(000)}_{iq}$ denotes elements of the $B$ matrix that refer to
-the central internal coordinate cell. All $i$-th internal coordinates
-are members of the central internal coordinate cell.
-Now, let us further decompose $\delta X_{q}$ and $B^{(000)}_{iq}$ 
-to contributions from Cartesian cells:
-\begin{equation} \label{latsum1}
-\delta \phi^{(000)}_{i} = 
-\sum_{j=1}^{4} 
-B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} [ \delta X^{(000)}_{a_{ij}} + k_{ij} \delta A + 
-l_{ij} \delta B + m_{ij} \delta C ]^{t} ,
-\end{equation}
-where the superscript $t$ denotes transposition
-and $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$ is defined by
-\begin{equation} 
-B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} = \frac{\partial 
-\phi^{(000)}_{i}}{\partial X^{(k_{ij}l_{ij}m_{ij})}_{a_{ij}}} .
-\end{equation} 
-The summation over $j$ goes over those atoms that compose 
-the $i$-th internal coordinate. The number of 
-these atoms never exceeds four if primitive internal coordinates are used.
-In case of more complex internal coordinates that are linear 
-combinations of primitive ones, the $B$ matrix of the composite 
-internal coordinates will be built
-by appropriately transforming the $B$ matrix of the primitives. 
-We do not consider this case further in the 
-present paper.
-Observe that $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$ is a 
-vector with three components referring to the Cartesian components
-of atom $a_{ij}$, {\it and} to the Cartesian components of the
-lattice vectors $A$, $B$ and $C$.
 
-Now, let us introduce the matrices 
-$B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$.
-$B^{(000)(A)}$ is constructed by
-\begin{equation} \label{matba}
-B^{(000)(A)}_{i} = \sum_{j=1}^{4} k_{ij} B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} . 
-\end{equation}
-$B^{(000)(B)}_{i}$ and $B^{(000)(C)}_{i}$ are given by the same formula 
-as $B^{(000)(A)}_{i}$ except that
-the multiplicativ factor $k_{ij}$ in Eqn. \ref{matba} is exchanged to 
-$l_{ij}$ and $m_{ij}$, respectively. Each of these three matrices
-are of the size $N_{i} \times 3$, where $N_{i}$ is the number of
-internal coordinates in the central cell $\phi^{000}$.
 
-The displacements of the lattice vectors affect the displacements
-of the internal coordinates via the matrices 
-$B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$.
-A certain $j$-th component atom of the $i$-th internal
-coordinate gives a nonzero contribution to those of these three
-matrices for which it has a nonzero corresponding lattice index.
-E.g. if the $j$-th atom is located in the cell $(100)$,
-it will contribute only to $B^{(000)(A)}$. It may also happen that
-each of the four atoms of an internal coordinate contribute
-to all three matrices, $B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$,
-when all cell-indices of all component-atoms differ from zero.
+\subsection{Coordinate transformations}
+Once the B matrix is given, the gradients on the internal coordinates
+are calculated by solving 
+\begin{equation} \label{solveintcgrads}
+B^{t} g_{i} = g_{c} ,
+\end{equation}
+where the first $3N_{a}$ elements of $g_{c}$ contain 
+the $\frac{d E}{d f_{k}}$ gradients and the last $9$ elements contain
+the $\frac{d E}{d h_{l}}$ ones and the superscript $t$ means 
+transposition.
 
-Thus, Eqn. \ref{latsum1} can be rewritten to
-\begin{equation} \label{latsum2}
-\delta \phi^{(000)}_{i} = 
-B'^{(000)}
-\left[
-[\oplus_{j=1}^{4} \delta X^{(000)}_{ia_{ij}} ] 
-\oplus \delta A 
-\oplus \delta B 
-\oplus \delta C 
-\right]^{t} ,
-\end{equation}
-where $B'^{(000)}$ denotes the effective $B$ matrix for crystals:
-\begin{equation} \label{latsum3}
-B'^{(000)}_{i} =
-[\oplus_{j=1}^{4}
-B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
-] \oplus B^{(000)(A)}_{i} \oplus B^{(000)(B)}_{i} \oplus B^{(000)(C)}_{i} ,
-\end{equation}
-while the second term of Eqn. \ref{latsum2} 
-provides the displacements of the atomic positions
-and the lattice vectors.
-The description of the effective $B$ matrix, $B'^{(000)}$, 
-as provided by Eqn. \ref{latsum2}, deals only with the
-nonzero elements of $B'^{(000)}$. However, it should be clear from the
-formalism, that
-$B'^{(000)}$ has $3N+9$ colums, where $N$ is the number of atoms
-in the central cell. This can be seen from the fact, that the subscript 
-$a_{ij}$ scans all atoms of the central cell.
+The coordinate transformations are carried out in a linear scaling 
+fashion, as described in Refs. \onlinecite{KNemeth00} and 
+\onlinecite{KNemeth01}. It is worth to mention, that the last 9 columns
+of the B matrix which refer to lattice derivatives of the internal 
+coordinates may be full, as opposed to the first $3N_{a}$ columns 
+which are extremely sparse. Even with 9 colums full, the Cholesky
+factorization of the $G_{c}=B^{t}B$ matrices can be carried out
+in a linear scaling fashion, since the first $3N_{a} \times 3N_{a}$
+block of $G_{c}$ preserves its extreme sparsity, similar to the
+case of isolated molecules \cite{KNemeth00}.
+Thus the solution of Eq. \ref{solveintcgrads} can be carried out 
+in a linear scaling fashion also for crystals.
+Note that the sparsity in the Cholesky factorization step cannot be
+preserved when an alternative solver, based on the $G_{i}=BB^{t}$
+matrix is used, thus this latter route is inefficient to carry out
+the coordinate transformation for large crystals.
 
-We still owe with the determination 
-of the values $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$.
-Whenever these values are to be computed, the absolute Cartesian positions
-of any $j$-th atom of the $i$-th internal coordinate are generated, based
-on the knowledge of the corresponding translationally unique atom $a_{ij}$
-and the cell indices $k_{ij}$, $l_{ij}$ and $m_{ij}$. Once the absolute
-Cartesian positions are recovered, $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
-is determined exactly as for isolated molecules \cite{EWilson55}. Thus,
-the derivation of $B'^{(000)}$ is completed.
+Once predictions are done for improved values of internal coordinates
+on the basis of internal coordinate gradients and the QUICCA 
+\cite{KNemeth04} algorithm, the new Cartesian coordinates 
+are calculated via the iterative back-transformation
+as described in Ref. \onlinecite{KNemeth04}, which also scales 
+linearly with the system-size. At each step of the iterative 
+back-transformation fractional coordinates and lattice vectors
+are updated and the corresponding atomic Cartesian coordinates are
+generated to determine the updated values of internal coordinates
+at an updated crystal structure. The rest of the back-transformation
+is the same as what is used for isolated molecules.
 
-\subsection{The effective $A$ matrix of the central cell}
+\subsection{The QUICCA algorithm for crystals}
+Details of the QUICCA algorithm for geometry optimization 
+of isolated molecules are 
+described in our previous paper \cite{KNemeth04}. Here we provide 
+only a very brief summary of the most important features of the 
+optimizer.
+QUICCA is based on the realization of the fact, that internal coordinate
+gradients show trends during geometry optimization.
+These trends can be formalized by weighted curve fitting for each 
+individual internal coordinate, over internal coordinate value and 
+gradient pairs.
+In practice, this curve fitting is most robust with just a line-fit. 
+The root of the
+fitted curve (line) provides an improved estimate for the minimum
+along the internal coordinate. Collectively, these minima determine
+the optimization step at the actual geometry.
+QUICCA works well, because internal coordinates exhibit  
+reduced harmonic and anharmonic vibrational coupling, as
+compared to Cartesian ones. Furthermore, the fitting process
+has an important averaging effect on the vibrational coupling
+that also strongly contributes to the success of QUICCA.
+A typical fitting process of a gradient curve is illustrated in 
+Fig. \ref{iceIh} on a hydrogen bond of the icosahedral (P63/MMC)
+ice structure \cite{AGoto90}.
 
-Let us represent the displacements of the Cartesian
-positions of the entire crystal, $\delta X$ in a more
-compact way now. For each cell with cell indices
-$(klm)$ the atomic displacement $\delta X^{(klm)}_{a_{ij}}$
-can be decomposed to a translation-free term 
-$\delta X^{(000)}_{a_{ij}}$ and to a term $\delta T_{klm}$ that
-contains translation:
-\begin{equation}
-\delta T_{klm} = k \delta A + l \delta B + m \delta C ,
-\end{equation}
-as it has already been recognized in Eqn. \ref{cartdispl}.
-Thus, the total Cartesian displacement can be formulated also as
-\begin{equation} \label{newx}
-\delta X' = 
-\oplus_{k,l,m=-\infty}^{\infty}
-\left[ \oplus_{a_{ij}=1}^{N} \delta X^{000}_{a_{ij}} \right]
-\oplus
-\left[ 
- k \delta A \oplus l \delta B \oplus m \delta C \right] ,
-\end{equation}
-where the symbol $a_{ij}$ is running over all $N$ atoms
-of the central cell. The prime over $X$ distinguishes
-the new $X'$ representation from the old $X$ one in the sense
-that the old representation had a $3N$ dimensional displacement
-vector for each cell, while in the new $X'$ representation
-the displacements of the atoms in a cell are represented by
-a $3N+9$ dimensional vector.
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{IceIhfit.eps}}
+\caption{
+Progression of gradients on a hydrogen bond coordinate
+of the icosahedral ice crystal.
+Energies and forces have been obtained by the Hartree-Fock
+model in STO-3G basis set.
+The optimization was started from the crystallographic structure
+\cite{AGoto90}.
+The numbers in the picture
+indicate the sequence of optimization steps. The dashed line represents
+a linear fit, the star the predicted location of the minimum.}
+\label{iceIh}
+\end{figure}
 
-The $B$ matrix in the new representation, $B'$ can be written
-as the direct-sum of $B'^{(klm)(k'l'm')}$ matrices:
-\begin{equation}
-B' = \oplus_{k,l,m,k',l',m'=-\infty}^{\infty} B'^{(klm)(k'l'm')} ,
-\end{equation}
-where the cell indices $(klm)$ refer to the internal coordinate
-cell, while $(k'l'm')$ refer to the Cartesian cell.
-
-$B'$ should be such, that for any $\delta X'$ displacement vector
-the corresponding $\delta \phi^{(klm)}$ internal coordinate
-displacements will be the same for any $(klm)$ internal coordinate
-cell. And, when multiplying the row-vector of internal coordinate 
-displacements $\delta \phi^{(klm)}$ with the generalized inverse
-of $B'$, the resulting $\delta X'$ displacements should also
-replect the translational symmetry of the crystal.
-
-In order to satisfy these conditions, the offdiagonal 
-($(k,l,m)/=(k',l',m')$)
-elements of $B'$ must be set to zero:
-\begin{equation} \label{kronecker}
-B'^{(klm)(k'l'm')} = \delta_{(klm),(k'l'm')} B'^{(klm)} ,
-\end{equation}
-with $\delta_{(klm),(k'l'm')}$ being one only when the primed
-and unprimed cell-indices refer to the same cell, otherwise 
-it equals to zero.
-$B'^{(klm)}$ must be defined similarly as in Eqn. \ref{latsum2}:
-\begin{equation} \label{latsum4}
-B'^{(klm)}_{i} =
-[\oplus_{j=1}^{4}
-B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
-] \oplus B^{(klm)(A)}_{i} \oplus B^{(klm)(B)}_{i} 
-\oplus B^{(klm)(C)}_{i} .
-\end{equation}
-Furthermore, to satisfy the above conditions, 
-the matrix $B^{(klm)(A)}$ must take the form
-\begin{equation} 
-B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)} .
-\end{equation}
-Similar definitions must hold for $B^{(klm)(B)}$ and
-$B^{(klm)(C)}$. 
-With these definitions, the $B'$ matrix satisfies all
-required conditions.
-
-The advantage of the new $B'$ representation over $B$ is the fact
-that $B'$ is block-diagonal in terms of the $(klm)(k'l'm')$
-cell-index pairs, while $B$ is not. The block-diagonal representation
-of $B'$ easily allowes for the calculation of the generalized
-inverse of $B'$, that is called $A'$, while the old representation,
-$B$, does not posess this advantage. Clearly, $A'$ can be calculated
-by a block-wise inversion of $B'$, while this block-wise inversion
-does not apply to $B$.
-
-In order to check the transformation of an internal
-coordinate displacement 
-$\delta \phi^{(klm)}=\delta \phi^{(000)}$ into 
-Cartesian $\delta X'^{(klm)}$
-representation, the generalized inverse of $B'{(klm)}$ 
-can be written as
-\begin{equation}
-A'^{(klm)} = D {\left({B'^{(000)}}^t B'^{(000)}\right)}^{-1} D D^{-1} {B'^{(000)}}^t ,
-\end{equation}
-where $D$ is a diagonal matrix of linear size $3N+9$, with one in the
-diagonal positions except for the last $9$ columns, where it takes
-$k$, $l$ or $m$ referring to the matrices $B^{(klm)(A)}$, 
-$B^{(klm)(B)}$ and $B^{(klm)(C)}$, respectively.
-The corresponding $X'^{(klm)}$ displacement is then given by
-\begin{equation}
-\delta X'^{(klm)} = D \delta \varphi^{(000)} ,
-\end{equation}
-where $\delta \varphi^{(000)}$ is the same for all $(klm)$ cells and
-is given by
-\begin{equation}
-\delta \varphi^{(000)} = 
-{\left({B'^{(000)}}^t B'^{(000)}\right)}^{-1} {B'^{(000)}}^t 
-\delta \phi^{(000)}.
-\end{equation}
-Thus, it is clear, that the dependence of $X'^{(klm)}$ on the
-lattice indices $(klm)$ is correct and is in correspondence with
-Eqn. \ref{newx}, as required from $A'$. Consequently, $B'$ and $A'$
-obey the required symmetry conditions as they should.
-
-Even though previous derivations by Kudin {\it et.al} \cite{KKudin01} 
-end up in the same
-effective $B$ ($B'^{(000)}$) matrix elements
-(after a different derivation process),
-we have found it important to justify the use of
-$A'^{(000)}$, the generalized inverse of $B'^{(000)}$, as
-the effective $A$ matrix of the crystal.
 
 \section{Implementation}
 
@@ -509,44 +363,6 @@ recognition of the translationally unique internal coordinates
 of the crystal that form the internal coordinate central 
 cell $\phi^{(000)}$.
 
-\subsection{The optimizer}
-Details of the QUICCA algorithm for geometry optimization are 
-described in our previous paper \cite{KNemeth04}. Here we provide 
-only a very brief summary of the most important features of the 
-optimizer.
-QUICCA is based on the realization of the fact, that internal coordinate
-gradients show trends during geometry optimization.
-These trends can be formalized by weighted curve fitting for each 
-individual internal coordinate, over internal coordinate value and 
-gradient pairs.
-In practice, this curve fitting is most robust with just a line-fit. 
-The root of the
-fitted curve (line) provides an improved estimate for the minimum
-along the internal coordinate. Collectively, these minima determine
-the optimization step at the actual geometry.
-QUICCA works well, because internal coordinates exhibit  
-highly reduced harmonic and anharmonic vibrational coupling, as
-compared to Cartesian ones. Furthermore, the fitting process
-has an important averaging effect on the vibrational coupling
-that also strongly contributes to the success of QUICCA.
-A typical fitting process of a gradient curve is illustrated in 
-Fig. \ref{iceIh} on a hydrogen bond of the icosahedral (P63/MMC)
-ice structure \cite{AGoto90}.
-
-\begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{IceIhfit.eps}}
-\caption{
-Progression of gradients on a hydrogen bond coordinate
-of the icosahedral ice crystal.
-Energies and forces have been obtained by the Hartree-Fock
-model in STO-3G basis set.
-The optimization was started from the crystallographic structure
-\cite{AGoto90}.
-The numbers in the picture
-indicate the sequence of optimization steps. The dashed line represents
-a linear fit, the star the predicted location of the minimum.}
-\label{iceIh}
-\end{figure}
 
 \subsection{Treatment of constraints}
 Since the default convergence control of our optimizer

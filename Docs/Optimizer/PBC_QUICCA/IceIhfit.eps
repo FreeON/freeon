@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0 EPSF-2.0
-%%Title: picture1_2.eps
-%%Creator: gnuplot 3.8j patchlevel 0
-%%CreationDate: Tue Mar 23 18:26:57 2004
+%%Title: 1_5_4_Data.eps
+%%Creator: gnuplot 4.0 patchlevel 0
+%%CreationDate: Thu Feb  3 17:01:02 2005
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 410 302
 %%Orientation: Portrait
@@ -13,7 +13,7 @@ gnudict begin
 /gnulinewidth 12.500 def
 /userlinewidth gnulinewidth def
 /vshift -100 def
-/dl {20.0 mul} def
+/dl {10.0 mul} def
 /hpt_ 31.5 def
 /vpt_ 31.5 def
 /hpt hpt_ def
@@ -46,6 +46,7 @@ gnudict begin
       dup 1 lt {pop 1} if 10 mul /udl exch def } def
 /PL { stroke userlinewidth setlinewidth
       Rounded { 1 setlinejoin 1 setlinecap } if } def
+/LTw { PL [] 1 setgray } def
 /LTb { BL [] 0 0 0 DL } def
 /LTa { AL [1 udl mul 2 udl mul] 0 setdash 0 0 0 setrgbcolor } def
 /LT0 { PL [] 1 0 0 DL } def
@@ -279,14 +280,19 @@ gnudict begin
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
-/MFshow {{dup dup 0 get findfont exch 1 get scalefont setfont
+/MFshow {
+   { dup 5 get 3 ge
+     { 5 get 3 eq {gsave} {grestore} ifelse }
+     {dup dup 0 get findfont exch 1 get scalefont setfont
      [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
      get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
      {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
      get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
      dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
      show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
-     pop aload pop M} ifelse }ifelse }ifelse } forall} bind def
+     pop aload pop M} ifelse }ifelse }ifelse }
+     ifelse }
+   forall} bind def
 /MFwidth {0 exch {dup 3 get{dup dup 0 get findfont exch 1 get scalefont
      setfont 6 get stringwidth pop add} {pop} ifelse} forall} bind def
 /MLshow { currentpoint stroke M
@@ -306,6 +312,18 @@ newpath
 (Times Roman) findfont 300 scalefont setfont
 1.000 UL
 LTb
+1710 900 M
+63 0 V
+4917 0 R
+-63 0 V
+stroke
+1530 900 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 (-0.01)]
+] -100.0 MRshow
+grestore
+1.000 UL
+LTb
 1710 1372 M
 63 0 V
 4917 0 R
@@ -318,6 +336,18 @@ gsave 0 setgray
 grestore
 1.000 UL
 LTb
+1710 1845 M
+63 0 V
+4917 0 R
+-63 0 V
+stroke
+1530 1845 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.01)]
+] -100.0 MRshow
+grestore
+1.000 UL
+LTb
 1710 2317 M
 63 0 V
 4917 0 R
@@ -325,7 +355,19 @@ LTb
 stroke
 1530 2317 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 0.01)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.02)]
+] -100.0 MRshow
+grestore
+1.000 UL
+LTb
+1710 2790 M
+63 0 V
+4917 0 R
+-63 0 V
+stroke
+1530 2790 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.03)]
 ] -100.0 MRshow
 grestore
 1.000 UL
@@ -337,7 +379,19 @@ LTb
 stroke
 1530 3262 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 0.02)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.04)]
+] -100.0 MRshow
+grestore
+1.000 UL
+LTb
+1710 3735 M
+63 0 V
+4917 0 R
+-63 0 V
+stroke
+1530 3735 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.05)]
 ] -100.0 MRshow
 grestore
 1.000 UL
@@ -349,7 +403,19 @@ LTb
 stroke
 1530 4207 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 0.03)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.06)]
+] -100.0 MRshow
+grestore
+1.000 UL
+LTb
+1710 4680 M
+63 0 V
+4917 0 R
+-63 0 V
+stroke
+1530 4680 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 0.07)]
 ] -100.0 MRshow
 grestore
 1.000 UL
@@ -361,19 +427,31 @@ LTb
 stroke
 1710 600 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 100)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.1)]
 ] -100.0 MCshow
 grestore
 1.000 UL
 LTb
-2955 900 M
+2540 900 M
 0 63 V
 0 3717 R
 0 -63 V
 stroke
-2955 600 M
+2540 600 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 105)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.15)]
+] -100.0 MCshow
+grestore
+1.000 UL
+LTb
+3370 900 M
+0 63 V
+0 3717 R
+0 -63 V
+stroke
+3370 600 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.2)]
 ] -100.0 MCshow
 grestore
 1.000 UL
@@ -385,19 +463,31 @@ LTb
 stroke
 4200 600 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 110)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.25)]
 ] -100.0 MCshow
 grestore
 1.000 UL
 LTb
-5445 900 M
+5030 900 M
 0 63 V
 0 3717 R
 0 -63 V
 stroke
-5445 600 M
+5030 600 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 115)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.3)]
+] -100.0 MCshow
+grestore
+1.000 UL
+LTb
+5860 900 M
+0 63 V
+0 3717 R
+0 -63 V
+stroke
+5860 600 M
+gsave 0 setgray
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.35)]
 ] -100.0 MCshow
 grestore
 1.000 UL
@@ -409,12 +499,12 @@ LTb
 stroke
 6690 600 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 ( 120)]
+[ [(Times Roman) 300.0 0.0 true true 0 ( 1.4)]
 ] -100.0 MCshow
 grestore
 1.000 UL
 LTb
-2.000 UL
+3.000 UL
 LTa
 1710 1372 M
 4980 0 V
@@ -429,158 +519,161 @@ LTb
 300 2790 M
 gsave 0 setgray
 currentpoint gsave translate 90 rotate 0 0 moveto
-[ [(Times Roman) 300.0 0.0 true true 0 (gradient \(a.u.\))]
+[ [(Times Roman) 300.0 0.0 true true 0 (gradient [a.u.])]
 ] -100.0 MCshow
 grestore
 grestore
 LTb
 4200 150 M
 gsave 0 setgray
-[ [(Times Roman) 300.0 0.0 true true 0 (angle \(degree\))]
+[ [(Times Roman) 300.0 0.0 true true 0 (coordinate)]
 ] -100.0 MCshow
 grestore
 1.000 UP
 LTb
-6481 2674 M
+6372 4114 M
 gsave 0 setgray
 [ [(Times Roman) 300.0 0.0 true true 0 (#1)]
 ] -100.0 MCshow
 grestore
 LTb
-5962 4183 M
+5510 3774 M
 gsave 0 setgray
 [ [(Times Roman) 300.0 0.0 true true 0 (#2)]
 ] -100.0 MCshow
 grestore
 LTb
-4944 3936 M
+4642 3341 M
 gsave 0 setgray
 [ [(Times Roman) 300.0 0.0 true true 0 (#3)]
 ] -100.0 MCshow
 grestore
 LTb
-3407 2954 M
+2914 2086 M
 gsave 0 setgray
 [ [(Times Roman) 300.0 0.0 true true 0 (#4)]
 ] -100.0 MCshow
 grestore
 LTb
-1869 1624 M
+2486 1586 M
 gsave 0 setgray
 [ [(Times Roman) 300.0 0.0 true true 0 (#5)]
 ] -100.0 MCshow
 grestore
 3.000 UP
-1.000 UL
+2.500 UL
 LT0
-6481 2391 Box
-5713 3900 Box
-4944 3652 Box
-3407 2670 Box
-1869 1215 Box
-2.000 UL
+6372 3831 Box
+5510 3490 Box
+4642 3058 Box
+2914 1802 Box
+2486 1303 Box
+2.500 UL
 LT1
-1869 1252 M
-47 36 V
-47 35 V
-46 36 V
-47 36 V
-46 36 V
-47 36 V
-47 35 V
-46 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-46 36 V
-47 36 V
-47 36 V
-46 35 V
-47 36 V
-46 36 V
-47 36 V
-47 36 V
-46 35 V
-47 36 V
-46 36 V
-47 36 V
-47 36 V
-46 35 V
-47 36 V
-46 36 V
-47 36 V
-46 36 V
-47 35 V
-47 36 V
-46 36 V
-47 36 V
-46 36 V
-47 35 V
-47 36 V
-46 36 V
-47 36 V
-46 36 V
-47 35 V
-46 36 V
-47 36 V
-47 36 V
-46 36 V
-47 35 V
-46 36 V
-47 36 V
-47 36 V
-46 36 V
-47 35 V
-46 36 V
-47 36 V
-46 36 V
-47 36 V
-47 35 V
-46 36 V
-47 36 V
-46 36 V
-47 36 V
-47 35 V
-46 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-47 36 V
-46 36 V
-47 36 V
-46 35 V
-47 36 V
-46 36 V
-47 36 V
-35 27 V
+2486 1314 M
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+40 31 V
+39 30 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 30 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 31 V
+39 31 V
+39 31 V
+39 31 V
+40 30 V
 3.000 UP
-1.000 UL
+2.500 UL
 LT2
-2026 1372 Star
+2560 1372 Star
 1.000 UL
 LTb
 1710 900 M
