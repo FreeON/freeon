@@ -90,8 +90,9 @@ MODULE PBCFarField
       ELSE
          CALL Halt('PBCFarField: Unknown dimension <'//IntToChar(GMLoc%PBC%Dimen)//'>')
       ENDIF
-      WRITE(*,*) "E_PFF = ",E_PFF
-      WRITE(*,*) "E_DP  = ",E_DP
+!
+!      WRITE(*,*) "E_PFF = ",E_PFF
+!      WRITE(*,*) "E_DP  = ",E_DP
 !
     END SUBROUTINE PBCFarFieldSetUp
 !====================================================================================
