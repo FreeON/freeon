@@ -1134,21 +1134,29 @@ MODULE PrettyPrint
 !========================================================================================
 ! Print The Gradients
 !========================================================================================
-  SUBROUTINE Print_Force(GM,Name_O,Unit_O)
+  SUBROUTINE Print_Force(GM,Frc_O,Name_O,Unit_O) 
     TYPE(CRDS)                     :: GM
-    TYPE(DBL_VECT)                 :: Frc
+    TYPE(DBL_VECT),OPTIONAL        :: Frc_O
     CHARACTER(LEN=*),OPTIONAL      :: Name_O
     INTEGER,OPTIONAL               :: Unit_O
-    INTEGER                        :: AtA,A1,PU,I,J
+    INTEGER                        :: AtA,A1,A2,PU,I,J
 !
     PU=OpenPU(Unit_O=Unit_O)
     IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
     WRITE(PU,33)
     WRITE(PU,34)
     WRITE(PU,33) 
-    DO AtA = 1,GM%Natms
-       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Gradients%D(1:3,AtA)
-    ENDDO
+    IF(PRESENT(Frc_O)) THEN
+       DO AtA = 1,GM%Natms
+          A1=3*(AtA-1)+1
+          A2=3*AtA
+          WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),Frc_O%D(A1:A2)
+       ENDDO
+    ELSE
+       DO AtA = 1,GM%Natms
+          WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Gradients%D(1:3,AtA)
+       ENDDO
+    ENDIF
     WRITE(PU,33) 
     IF(GM%PBC%Dimen > 0) THEN
        WRITE(PU,32) 
