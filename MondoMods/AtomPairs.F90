@@ -518,9 +518,9 @@ CONTAINS
     ELSEIF(D==3) THEN
        DO I=1,3
           DO J=1,3
-             Temp = BoxShape
-             Temp(:,J) = Zero
-             Temp(I,J) = One
+             Temp       = BoxShape
+             Temp(:,J)  = Zero
+             Temp(I,J)  = One
              DivCV(I,J) = CellVolume(Temp,AutoW)             
           ENDDO
        ENDDO

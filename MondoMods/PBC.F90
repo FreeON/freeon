@@ -82,9 +82,9 @@ MODULE CellSets
 !
     InCell_CellSet = .FALSE.    
     DO NC = 1,CS%NCells
-       IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-12 .AND. &
-          ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-12 .AND. &
-          ABS(CS%CellCarts%D(3,NC)-Z) < 1.0D-12) THEN
+       IF(ABS(CS%CellCarts%D(1,NC)-X) < 1.0D-10 .AND. &
+          ABS(CS%CellCarts%D(2,NC)-Y) < 1.0D-10 .AND. &
+          ABS(CS%CellCarts%D(3,NC)-Z) < 1.0D-10) THEN
           InCell_CellSet = .TRUE.
           RETURN
        ENDIF
