@@ -1,6 +1,4 @@
 !==============================================================
-! 
-!==============================================================
 PROGRAM MondoSCF
   USE SCFs
   USE Macros
@@ -27,17 +25,19 @@ PROGRAM MondoSCF
   CASE(GRAD_NO_GRAD)
      CALL SinglePoints(C)
   CASE(GRAD_GO_DOWNHILL)
-      CALL Descender(C)
+     IF(C%Opts%Coordinates==GRAD_CART_OPT) CALL Descender(C)
+     IF(C%Opts%Coordinates==GRAD_INTS_OPT) CALL Optimize(C)
   CASE(GRAD_TS_SEARCH_NEB)
      ! Place holder for whatever
-      CALL Descender(C)
+     IF(C%Opts%Coordinates==GRAD_CART_OPT) CALL Descender(C)
+     IF(C%Opts%Coordinates==GRAD_INTS_OPT) CALL Optimize(C)
    CASE(GRAD_DO_DYNAMICS)
       ! Needs work...
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()
 #endif
-  ! Something surreal to celibrate this run
+  ! Something surreal to celebrate this run
   CALL ZippySez()
   !--------------------------------------------------------
   CALL TimeStamp('Successful MondoSCF run',.FALSE.)   
