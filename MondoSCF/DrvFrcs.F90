@@ -147,7 +147,9 @@ MODULE DrvFrcs
 !
             E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
 !
+#ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+#endif
          ENDDO
 !
       ELSEIF(IGeo .LT. Ctrl%NGeom) THEN
@@ -179,7 +181,9 @@ MODULE DrvFrcs
 !
             E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
 !
+#ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+#endif
          ENDDO
       ELSEIF(IGeo .EQ. Ctrl%NGeom) THEN
          CALL OpenHDF(InfFile)
@@ -201,7 +205,9 @@ MODULE DrvFrcs
 !
             E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
 !
+#ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+#endif
          ENDDO
       ENDIF 
 !
