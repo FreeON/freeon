@@ -86,7 +86,6 @@ MODULE PoleTree
          TYPE(PoleNode),POINTER           :: LeftQ,RightQ
          INTEGER                          :: K
          REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/DBLE(SPEll+2)
-         REAL(DOUBLE),DIMENSION(0:SPLenP) :: SPKetC,SPKetS
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
             P%C=Zero
@@ -120,7 +119,7 @@ MODULE PoleTree
             IF(.NOT.LeftQ%Leaf)LeftQ%Ell=SPell
             IF(.NOT.RightQ%Leaf)RightQ%Ell=SPell
 !           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength = UnsoldO(SPEll+1,SPKetC,SPKetS)**UnsoldExp
+            P%Strength = UnsoldO(SPEll+1,P%C,P%S)**UnsoldExp
 !           Compute DMax  (check and recheck this...)          
             P%DMax2 = MAX(LeftQ%DMax2,RightQ%DMax2)            &
                     + (LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
@@ -196,34 +195,6 @@ MODULE PoleTree
          Node%S=Zero
          Node%C=Zero
       END SUBROUTINE NewSPArrays
-!==========================================================================
-!     Resize a PoleNode's Arrary
-!==========================================================================
-     SUBROUTINE ResizeSPArrays(Ell,Node)
-         TYPE(PoleNode), POINTER          :: Node
-         INTEGER                          :: Ell,LenSP,LenSP_new,Status
-         REAL(DOUBLE),DIMENSION(0:SPLenP) :: C,S    
-!
-         LenSP     = LSP(Node%Ell)
-         LenSP_new = LSP(Ell)
-         S = Node%S
-         C = Node%C
-!         
-         DEALLOCATE(Node%S,STAT=Status)
-         CALL DecMem(Status,0,LenSP+1)
-         DEALLOCATE(Node%C,STAT=Status)
-         CALL DecMem(Status,0,LenSP+1)
-! 
-         ALLOCATE(Node%S(0:LenSP_new),STAT=Status)
-         CALL IncMem(Status,0,LenSP_new+1)
-         ALLOCATE(Node%C(0:LenSP_new),STAT=Status)
-         CALL IncMem(Status,0,LenSP_new+1)
-!
-         Node%S   = S
-         Node%C   = C
-         Node%Ell = Ell
-! 
-     END SUBROUTINE ResizeSPArrays
 !================================================================================
 !     Bisection   
 !================================================================================

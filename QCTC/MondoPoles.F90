@@ -49,7 +49,7 @@ MODULE MondoPoles
    REAL(DOUBLE), DIMENSION(0:2*FFEll2)          :: Factorial
    REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
    REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
-   REAL(DOUBLE), DIMENSION(0:SPEllP,0:FFELL)   :: FudgeFactorial
+   REAL(DOUBLE), DIMENSION(0:SPEll+1,0:FFELL)   :: FudgeFactorial
    CONTAINS
 !====================================================================================
 !     Q->P
@@ -173,7 +173,7 @@ MODULE MondoPoles
 !         FudgeFactorial(LP,LQ)=[Sum_(MP,MQ) (LP+LQ-MP-MQ)!/((LP+MP)!(LQ+MQ)!)]/{
 !         [Sum_MP (LP-MP)!/(LP+MP)!]*[Sum_MQ (LQ-MQ)!/(LQ+MQ)!]}
 !
-          DO LP=0,SPEllP
+          DO LP=0,SPEll+1
              DO LQ=0,FFEll
                 DenomP=One
                 DenomQ=One
