@@ -104,7 +104,9 @@ CONTAINS
 #endif 
     ENDIF
   END SUBROUTINE StartUp
-
+!-------------------------------------------------------------------------------------------------
+!
+!-------------------------------------------------------------------------------------------------
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
 #ifdef MMech
@@ -152,8 +154,9 @@ CONTAINS
 #endif     
     STOP !Righteous! 
   END SUBROUTINE ShutDown
-
-
+!-------------------------------------------------------------------------------------------
+!
+!-------------------------------------------------------------------------------------------
   FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
     INTEGER               :: IErr,MyClone,CART_COMM
     TYPE(INT_VECT)        :: SpaceTime 
