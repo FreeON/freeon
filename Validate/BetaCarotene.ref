@@ -1,0 +1,286 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 1                                  
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, Eric Schwegler,                    
+ C.J. Tymczak and Chee Kwan Gan                       
+ Los Alamos National Laboratory                       
+ Copywrite 2001, University of California.            
+
+ Compliled for AMDLinux.PG, executing on zinc17
+ a i686 machine running Linux 2.4.2-2
+
+             ** BetaCarotene **                                                                                                 
+  
+<<Starting MondoSCF 10/29/01 @ 10:54:08>>
+========================================================================
+ Internal representation of the geometry:
+ Geometry originally in Angstroms has been converted to AU.
+ Geometry has not been reordered.
+ Number of electrons = 296
+------------------------------------------------------------------------
+ 1   c    0.00000000D+00   0.00000000D+00   0.00000000D+00
+ 2   c    0.11009544D+00   0.12759619D+01   -.27951693D+01
+ 3   c    0.23945285D+01   0.26238089D+01   -.32327165D+01
+ 4   c    0.38119742D+01   0.36481727D+01   -.12304195D+01
+ 5   c    0.39496029D+01   0.21206127D+01   0.14501190D+01
+ 6   c    0.17752464D+01   0.34145459D+00   0.16232179D+01
+ 7   c    -.76101911D+01   -.35942588D+02   0.19422245D+02
+ 8   c    0.12110309D+01   -.34684598D+01   0.43551759D+01
+ 9   c    0.14862506D+01   -.50139911D+01   0.67637451D+01
+ 10   c    0.52294387D+00   -.74221445D+01   0.67461139D+01
+ 11   c    0.57799159D+00   -.90215897D+01   0.90274478D+01
+ 12   c    -.52294387D+00   -.11303944D+02   0.86725384D+01
+ 13   c    -.81193967D+00   -.13172959D+02   0.10907404D+02
+ 14   c    -.19128751D+01   -.15419370D+02   0.10271322D+02
+ 15   c    -.23532380D+01   -.17450127D+02   0.12266400D+02
+ 16   c    -.33991257D+01   -.19570739D+02   0.11334066D+02
+ 17   c    -.38395075D+01   -.21601496D+02   0.13329163D+02
+ 18   c    -.49404429D+01   -.23847907D+02   0.12693063D+02
+ 19   c    -.52294198D+01   -.25716922D+02   0.14927928D+02
+ 20   c    -.63303553D+01   -.27999276D+02   0.14573038D+02
+ 21   c    -.62753076D+01   -.29598721D+02   0.16854372D+02
+ 22   c    -.72386332D+01   -.32006875D+02   0.16836740D+02
+ 23   c    -.69633946D+01   -.33552406D+02   0.19245291D+02
+ 24   c    -.75276290D+01   -.37362321D+02   0.21977249D+02
+ 25   c    -.57523637D+01   -.37020866D+02   0.23600467D+02
+ 26   c    -.58624591D+01   -.38296828D+02   0.26395636D+02
+ 27   c    -.81468922D+01   -.39644675D+02   0.26833202D+02
+ 28   c    -.97019666D+01   -.39141479D+02   0.22150366D+02
+ 29   c    -.23394808D+01   -.14556748D+01   0.21828225D+00
+ 30   c    0.36606071D+01   0.44928235D+01   0.34037933D+01
+ 31   c    0.64542079D+01   0.82667953D+00   0.17958822D+01
+ 32   c    0.18578274D+01   -.10782776D+01   0.41782220D+01
+ 33   c    0.24770906D+01   -.35583162D+01   0.91639616D+01
+ 34   c    0.27514410D-01   -.12292365D+02   0.13536504D+02
+ 35   c    -.57798970D+01   -.24728501D+02   0.10063963D+02
+ 36   c    -.82294732D+01   -.33462550D+02   0.14436505D+02
+ 37   c    -.34128829D+01   -.35565191D+02   0.23382184D+02
+ 38   c    -.95643568D+01   -.40669039D+02   0.24830886D+02
+ 39   c    -.94129708D+01   -.41513689D+02   0.20196673D+02
+ 40   c    -.12206591D+02   -.37847545D+02   0.21804584D+02
+ 41   h    -.34619780D-01   -.23319219D-01   -.40255321D+01
+ 42   h    -.12686675D+01   0.24135769D+01   -.29617109D+01
+ 43   h    0.34883775D+01   0.14966252D+01   -.41021227D+01
+ 44   h    0.19731952D+01   0.39975264D+01   -.43089532D+01
+ 45   h    0.54983089D+01   0.38283959D+01   -.18192203D+01
+ 46   h    0.31256446D+01   0.52688584D+01   -.87654940D+00
+ 47   h    -.81406561D+01   -.36819346D+02   0.17948202D+02
+ 48   h    0.53503812D+00   -.42752972D+01   0.29008806D+01
+ 49   h    -.19373471D+00   -.80716622D+01   0.52337095D+01
+ 50   h    0.13093722D+01   -.85047118D+01   0.10583335D+02
+ 51   h    -.11217791D+01   -.11761976D+02   0.70432733D+01
+ 52   h    -.24081156D+01   -.15718552D+02   0.85718538D+01
+ 53   h    -.19304496D+01   -.17238628D+02   0.13998296D+02
+ 54   h    -.38219141D+01   -.19782237D+02   0.96021702D+01
+ 55   h    -.33442670D+01   -.21302314D+02   0.15028632D+02
+ 56   h    -.46305846D+01   -.25258890D+02   0.16557212D+02
+ 57   h    -.70617359D+01   -.28516154D+02   0.13017151D+02
+ 58   h    -.55586290D+01   -.28949204D+02   0.18366757D+02
+ 59   h    -.62874018D+01   -.32745569D+02   0.20699586D+02
+ 60   h    -.57177628D+01   -.36997547D+02   0.27625999D+02
+ 61   h    -.44837151D+01   -.39434443D+02   0.26562196D+02
+ 62   h    -.92407601D+01   -.38517491D+02   0.27702589D+02
+ 63   h    -.77255589D+01   -.41018411D+02   0.27909420D+02
+ 64   h    -.32584356D+01   -.13456550D+01   -.13199736D+01
+ 65   h    -.19456430D+01   -.31738137D+01   0.55856521D+00
+ 66   h    -.33337790D+01   -.79296682D+00   0.15581169D+01
+ 67   h    0.49780296D+01   0.56758487D+01   0.31075977D+01
+ 68   h    0.20722735D+01   0.52892486D+01   0.31472441D+01
+ 69   h    0.37634271D+01   0.38930056D+01   0.50927548D+01
+ 70   h    0.65859407D+01   -.54065061D+00   0.64005019D+00
+ 71   h    0.77800208D+01   0.19980073D+01   0.14908426D+01
+ 72   h    0.65796857D+01   0.20484630D+00   0.34753384D+01
+ 73   h    0.23882735D+01   -.20153928D+00   0.56522838D+01
+ 74   h    0.39032290D+01   -.44158739D+01   0.98374789D+01
+ 75   h    0.29468009D+01   -.18889512D+01   0.86997504D+01
+ 76   h    0.11787544D+01   -.34923270D+01   0.10402034D+02
+ 77   h    0.17846761D+01   -.11925380D+02   0.13511900D+02
+ 78   h    -.88588465D+00   -.10815809D+02   0.13992949D+02
+ 79   h    -.29604447D+00   -.13590248D+02   0.14733872D+02
+ 80   h    -.75370587D+01   -.25095486D+02   0.10088586D+02
+ 81   h    -.48664791D+01   -.26205057D+02   0.96075181D+01
+ 82   h    -.54563381D+01   -.23430618D+02   0.88666132D+01
+ 83   h    -.96555927D+01   -.32604992D+02   0.13763007D+02
+ 84   h    -.86991646D+01   -.35131915D+02   0.14900716D+02
+ 85   h    -.69311181D+01   -.33528539D+02   0.13198451D+02
+ 86   h    -.24939470D+01   -.35675211D+02   0.24920440D+02
+ 87   h    -.38067396D+01   -.33847052D+02   0.23041901D+02
+ 88   h    -.24185847D+01   -.36227899D+02   0.22042369D+02
+ 89   h    -.11250673D+02   -.40849262D+02   0.25419687D+02
+ 90   h    -.88780083D+01   -.42289724D+02   0.24477016D+02
+ 91   h    -.10730393D+02   -.42696734D+02   0.20492869D+02
+ 92   h    -.78246372D+01   -.42310115D+02   0.20453241D+02
+ 93   h    -.95157908D+01   -.40913872D+02   0.18507712D+02
+ 94   h    -.12338304D+02   -.36480215D+02   0.22960416D+02
+ 95   h    -.13532403D+02   -.39018873D+02   0.22109624D+02
+ 96   h    -.12332049D+02   -.37225731D+02   0.20125147D+02
+------------------------------------------------------------------------
+ HDF file :: /scratch/mchalla/BetaCarotene_15008.hdf
+ PROGRAM OF CALCULATIONS:
+
+  A restricted simplified density matrix minimization using
+  a loose accuracy level STO-2G and the HFx model.
+ 
+
+  Followed by a  restricted simplified density matrix minimization using
+  a good accuracy level3-21G and the B88x/LYPc model.
+ 
+
+ MakeS                :: S CheckSum = 0.1968992097367968D+02
+ BlokAInv             :: Z CheckSum = 0.2324286881360560D+02
+ MakeT                :: T CheckSum = 0.9879628496379931D+02
+ P2Use                :: P[0] CheckSum = 0.2813078293267711D+02
+ MakeRho              :: Rho CheckSum = 0.1423313988233194D+04
+ QCTC                 :: J[0] CheckSum = 0.1432807294606653D+03
+ ONX                  :: Kx[0] CheckSum = 0.2643062736268316D+02
+ FockNGrueven         :: F[0] CheckSum = 0.7476906753210069D+02
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.6592407563600492D+02
+ SDMM                 :: OrthoP[1] CheckSum = 0.1216552637622097D+02
+ SDMM                 :: P[1] CheckSum = 0.1037104027124756D+02
+ SCFStatus : [0,1,1]  :: <SCF> = -1358.50243193, dD = 0.30D+01
+ MakeRho              :: Rho CheckSum = 0.1212340896274328D+04
+ QCTC                 :: J[1] CheckSum = 0.1460915569938676D+03
+ ONX                  :: Kx[1] CheckSum = 0.2808295211757492D+02
+ FockNGrueven         :: F[1] CheckSum = 0.7814051352546917D+02
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.6856671808069912D+02
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.6669527787362699D+02
+ SDMM                 :: OrthoP[2] CheckSum = 0.1216552582572474D+02
+ SDMM                 :: P[2] CheckSum = 0.1012205459174125D+02
+ SCFStatus : [1,1,1]  :: <SCF> = -1480.84712972, dD = 0.16D+00, DIIS = 0.57D-02
+ MakeRho              :: Rho CheckSum = 0.1205933507850090D+04
+ QCTC                 :: J[2] CheckSum = 0.1459852700685051D+03
+ ONX                  :: Kx[2] CheckSum = 0.2810402672413030D+02
+ FockNGrueven         :: F[2] CheckSum = 0.7801753049878174D+02
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.6848560599217814D+02
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.6837046310442540D+02
+ SDMM                 :: OrthoP[3] CheckSum = 0.1216552406700738D+02
+ SDMM                 :: P[3] CheckSum = 0.9755152953783723D+01
+ SCFStatus : [2,1,1]  :: <SCF> = -1481.78877964, dD = 0.22D+00, DIIS = 0.39D-02
+ MakeRho              :: Rho CheckSum = 0.1191747649791799D+04
+ QCTC                 :: J[3] CheckSum = 0.1458689528775610D+03
+ ONX                  :: Kx[3] CheckSum = 0.2813030155322028D+02
+ FockNGrueven         :: F[3] CheckSum = 0.7787424930847192D+02
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.6839253232317125D+02
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.6836407208392583D+02
+ SDMM                 :: OrthoP[4] CheckSum = 0.1216552555442188D+02
+ SDMM                 :: P[4] CheckSum = 0.9729826263949972D+01
+ SCFStatus : [3,1,1]  :: <SCF> = -1482.59455453, dD = 0.65D-01, DIIS = 0.96D-03
+ MakeRho              :: Rho CheckSum = 0.1190213220272127D+04
+ QCTC                 :: J[4] CheckSum = 0.1458648460120427D+03
+ ONX                  :: Kx[4] CheckSum = 0.2813028158616258D+02
+ FockNGrueven         :: F[4] CheckSum = 0.7786618831145397D+02
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.6838782464933532D+02
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.6838747706568294D+02
+ SDMM                 :: OrthoP[5] CheckSum = 0.1216552573986816D+02
+ SDMM                 :: P[5] CheckSum = 0.9729556080188228D+01
+ SCFStatus : [4,1,1]  :: <SCF> = -1482.63287485, dD = 0.68D-02, DIIS = 0.12D-03
+ MakeRho              :: Rho CheckSum = 0.1190173059748102D+04
+ QCTC                 :: J[5] CheckSum = 0.1458631455475862D+03
+ ONX                  :: Kx[5] CheckSum = 0.2813030859882943D+02
+ FockNGrueven         :: F[5] CheckSum = 0.7786409704735554D+02
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.6838657436687639D+02
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.6838745819585829D+02
+ SDMM                 :: OrthoP[6] CheckSum = 0.1216552570549591D+02
+ SDMM                 :: P[6] CheckSum = 0.9729672845480822D+01
+ SCFStatus : [5,1,1]  :: <SCF> = -1482.63320951, dD = 0.16D-02, DIIS = 0.57D-04
+ MakeS                :: S CheckSum = 0.3388842711416049D+02
+ BlokAInv             :: Z CheckSum = 0.8451069133673315D+02
+ MakeT                :: T CheckSum = 0.1111232706147068D+03
+ MakeRho              :: Rho CheckSum = 0.1190175365239327D+04
+ QCTC                 :: J[0] CheckSum = 0.1589155480664528D+03
+ HiCu                 :: Kxc[0] CheckSum = 0.2338001365203140D+02
+ FockNGrueven         :: F[0] CheckSum = 0.7798018064393438D+02
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.6584571373325331D+02
+ SDMM                 :: OrthoP[1] CheckSum = 0.1216552506733001D+02
+ SDMM                 :: P[1] CheckSum = 0.8919222968213248D+01
+ SCFStatus : [0,2,1]  :: Basis set switch ...  MxD = 0.13D+01
+ MakeRho              :: Rho CheckSum = 0.2042271477312112D+04
+ QCTC                 :: J[1] CheckSum = 0.1569233286157622D+03
+ HiCu                 :: Kxc[1] CheckSum = 0.2347859512434371D+02
+ FockNGrueven         :: F[1] CheckSum = 0.7609890076431752D+02
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.6462545203529025D+02
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.6547484104601486D+02
+ SDMM                 :: OrthoP[2] CheckSum = 0.1216552506410050D+02
+ SDMM                 :: P[2] CheckSum = 0.8876782823933061D+01
+ SCFStatus : [1,2,1]  :: <SCF> = -1547.08120501, dD = 0.49D-01, DIIS = 0.15D-02
+ MakeRho              :: Rho CheckSum = 0.2042032493539221D+04
+ QCTC                 :: J[2] CheckSum = 0.1574263549879423D+03
+ HiCu                 :: Kxc[2] CheckSum = 0.2345859677777422D+02
+ FockNGrueven         :: F[2] CheckSum = 0.7665251837671386D+02
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.6485813063921817D+02
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.6499315642033130D+02
+ SDMM                 :: OrthoP[3] CheckSum = 0.1216552506780962D+02
+ SDMM                 :: P[3] CheckSum = 0.8857223079019233D+01
+ SCFStatus : [2,2,1]  :: <SCF> = -1547.25750894, dD = 0.29D-01, DIIS = 0.58D-03
+ MakeRho              :: Rho CheckSum = 0.2042753009108713D+04
+ QCTC                 :: J[3] CheckSum = 0.1577523856780000D+03
+ HiCu                 :: Kxc[3] CheckSum = 0.2344654407422073D+02
+ FockNGrueven         :: F[3] CheckSum = 0.7699919238186773D+02
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.6502655805274442D+02
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.6502291713238071D+02
+ SDMM                 :: OrthoP[4] CheckSum = 0.1216552506427788D+02
+ SDMM                 :: P[4] CheckSum = 0.8855991376754830D+01
+ SCFStatus : [3,2,1]  :: <SCF> = -1547.27416406, dD = 0.38D-01, DIIS = 0.28D-03
+ MakeRho              :: Rho CheckSum = 0.2042701329021253D+04
+ QCTC                 :: J[4] CheckSum = 0.1577265058928825D+03
+ HiCu                 :: Kxc[4] CheckSum = 0.2344702976929777D+02
+ FockNGrueven         :: F[4] CheckSum = 0.7697742164255860D+02
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.6500785849186423D+02
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.6502517433461451D+02
+ SDMM                 :: OrthoP[5] CheckSum = 0.1216552506443289D+02
+ SDMM                 :: P[5] CheckSum = 0.8855104320063381D+01
+ SCFStatus : [4,2,1]  :: <SCF> = -1547.27809745, dD = 0.23D-01, DIIS = 0.22D-03
+ MakeRho              :: Rho CheckSum = 0.2042673745916881D+04
+ QCTC                 :: J[5] CheckSum = 0.1577166267828712D+03
+ HiCu                 :: Kxc[5] CheckSum = 0.2344680380545770D+02
+ FockNGrueven         :: F[5] CheckSum = 0.7696289343151327D+02
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.6500644244264839D+02
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.6501783787478844D+02
+ SDMM                 :: OrthoP[6] CheckSum = 0.1216552506831976D+02
+ SDMM                 :: P[6] CheckSum = 0.8854007513049140D+01
+ SCFStatus : [5,2,1]  :: <SCF> = -1547.28471101, dD = 0.84D-02, DIIS = 0.61D-04
+ MakeRho              :: Rho CheckSum = 0.2042652005547182D+04
+ QCTC                 :: J[6] CheckSum = 0.1577408317216858D+03
+ HiCu                 :: Kxc[6] CheckSum = 0.2344628981603486D+02
+ FockNGrueven         :: F[6] CheckSum = 0.7699077631150824D+02
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.6501621415648884D+02
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.6501670729015484D+02
+ SDMM                 :: OrthoP[7] CheckSum = 0.1216552506829988D+02
+ SDMM                 :: P[7] CheckSum = 0.8854043363964248D+01
+ SCFStatus : [6,2,1]  :: <SCF> = -1547.28510310, dD = 0.20D-02, DIIS = 0.18D-04
+ MakeRho              :: Rho CheckSum = 0.2042652592203601D+04
+ QCTC                 :: J[7] CheckSum = 0.1577422686017424D+03
+ HiCu                 :: Kxc[7] CheckSum = 0.2344621851298578D+02
+ FockNGrueven         :: F[7] CheckSum = 0.7699220449394404D+02
+ FockNGrueven         :: OrthoF[7] CheckSum = 0.6501709035333037D+02
+ PulayDIIS            :: F_DIIS[7] CheckSum = 0.6501674249555622D+02
+ SDMM                 :: OrthoP[8] CheckSum = 0.1216552506830785D+02
+ SDMM                 :: P[8] CheckSum = 0.8854104957674796D+01
+ SCFStatus : [7,2,1]  :: <SCF> = -1547.28513479, dD = 0.53D-03, DIIS = 0.55D-05
+ MakeRho              :: Rho CheckSum = 0.2042653901046122D+04
+ QCTC                 :: J[8] CheckSum = 0.1577415372874277D+03
+ HiCu                 :: Kxc[8] CheckSum = 0.2344622145916610D+02
+ FockNGrueven         :: F[8] CheckSum = 0.7699127533833736D+02
+ FockNGrueven         :: OrthoF[8] CheckSum = 0.6501687122014982D+02
+ PulayDIIS            :: F_DIIS[8] CheckSum = 0.6501680044154539D+02
+ SDMM                 :: OrthoP[9] CheckSum = 0.1216552506835472D+02
+ SDMM                 :: P[9] CheckSum = 0.8854118804842271D+01
+ SCFStatus : [8,2,1]  :: <SCF> = -1547.28511199, dD = 0.22D-03, DIIS = 0.30D-05
+ MakeRho              :: Rho CheckSum = 0.2042654375967837D+04
+ QCTC                 :: J[9] CheckSum = 0.1577414976813116D+03
+ HiCu                 :: Kxc[9] CheckSum = 0.2344622489274829D+02
+ FockNGrueven         :: F[9] CheckSum = 0.7699125232823954D+02
+ FockNGrueven         :: OrthoF[9] CheckSum = 0.6501683174399091D+02
+ PulayDIIS            :: F_DIIS[9] CheckSum = 0.6501681074424145D+02
+ SDMM                 :: OrthoP[10] CheckSum = 0.1216552506836199D+02
+ SDMM                 :: P[10] CheckSum = 0.8854121456636523D+01
+ SCFStatus : [9,2,1]  :: <SCF> = -1547.28511307, dD = 0.66D-04, DIIS = 0.25D-05
+>-Succesfull MondoSCF run 10/29/01 @ 12:50:59-<
