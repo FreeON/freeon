@@ -71,7 +71,6 @@ PROGRAM SForce
   CALL SetEq(P,P_DBCSR)
   CALL BcastBCSR(P)
   CALL Delete(P_DBCSR)
-
 #else
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
@@ -139,21 +138,39 @@ PROGRAM SForce
   TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
   CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
-  IF(MyID == 0) THEN
+  IF(MyID == ROOT) THEN
     SFrc%D(1:TotFrcComp) = TotSFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotSFrc)
 ! Collect the Lattice Forces
   CALL New(TmpLatFrc_S,(/3,3/))
   CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_S%D(1,1),0.0d0)
-  CALL MPI_REDUCE(LatFrc_S%D(1,1),TmpLatFrc_S%D(1,1),9,MPI_DOUBLE_PRECISION, &
-       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  GM%PBC%LatFrc%D = TmpLatFrc_S%D
+  CALL MPI_REDUCE(LatFrc_S%D(1,1),TmpLatFrc_S%D(1,1),9,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == ROOT) THEN
+     LatFrc_S%D = TmpLatFrc_S%D
+  ENDIF
   CALL Delete(TmpLatFrc_S)
+  IF(MyID == ROOT) THEN
+!!$!    Print The Lattice Forces
+!!$     CALL OpenASCII(OutFile,Out)
+!!$     WRITE(Out,*) 'LatFrc_S'
+!!$     WRITE(*,*)   'LatFrc_S'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$     CLOSE(Out)
+!    Sum in the S contribution to total force
+     DO AtA=1,NAtoms
+        A1=3*(AtA-1)+1
+        A2=3*AtA
+        GM%Gradients%D(1:3,AtA) =  SFrc%D(A1:A2)
+     ENDDO
+!    Sum in the S contribution to total lattice force
+     GM%PBC%LatFrc%D = LatFrc_S%D
+  ENDIF
 #else
-  GM%PBC%LatFrc%D = LatFrc_S%D
-#endif
-! Print The Lattice Forces
+!!$! Print The Lattice Forces
 !!$  CALL OpenASCII(OutFile,Out)
 !!$  WRITE(Out,*) 'LatFrc_S'
 !!$  WRITE(*,*)   'LatFrc_S'
@@ -162,20 +179,21 @@ PROGRAM SForce
 !!$     WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
 !!$  ENDDO
 !!$  CLOSE(Out)
-! Do some checksumming and IO 
-  CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)  
-  CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)  
-! Start this off as the first contrib to total gradient 
+! Sum in the S contribution to total force
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
-     GM%Gradients%D(1:3,AtA) = SFrc%D(A1:A2)
+     GM%Gradients%D(1:3,AtA) =  SFrc%D(A1:A2)
   ENDDO
+! Sum in the S contribution to total lattice force
+  GM%PBC%LatFrc%D = LatFrc_S%D
+#endif
+! Do some checksumming and IO 
+  CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)  
 ! Save Forces to Disk
   CALL Put(GM,Tag_O=CurGeom)
-!--------------------------------------------------------------------------------
 ! Tidy up 
-!--------------------------------------------------------------------------------
   CALL Delete(SFrc)
   CALL Delete(LatFrc_S)
   CALL Delete(P)
