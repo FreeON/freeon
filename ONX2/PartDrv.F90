@@ -129,7 +129,7 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(DBCSR  )                          :: A
     CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS,WhenPartS
-    INTEGER                                :: Cycl,Basis,Geom
+    INTEGER                                :: Cycl,Basis,Geom,iGONXPartExist
     !-------------------------------------------------------------------
     !
     ! Initialize some variables.
@@ -145,6 +145,7 @@ CONTAINS
     IF(PRESENT(WhenPartS_O)) WhenPartS=WhenPartS_O
     !
     ! Initialize semi-global variables.
+    IsFirst = .TRUE.
     SELECT CASE(WhenPartS)
     CASE('SCF')
        IF(OptKeyQ(Inp,'Guess','Core')) THEN
@@ -155,7 +156,15 @@ CONTAINS
           IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
        ENDIF
     CASE('GEO')
-       IsFirst = Geom.LE.1
+       iGONXPartExist=0
+       CALL Get(iGONXPartExist,'GONXPartExist')
+       IsFirst=iGONXPartExist.LE.0
+       !
+       ! It is no more the first relative iteration.
+       IF(IsFirst) THEN
+          iGONXPartExist=1
+          CALL Put(iGONXPartExist,'GONXPartExist')
+       ENDIF
     CASE DEFAULT
        CALL Halt('PartDrv: Does not regonize when to do the Partition <'//TRIM(WhenPartS)//'>.')
     END SELECT
