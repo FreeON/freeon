@@ -1,4 +1,4 @@
-\begin{thebibliography}{47}
+\begin{thebibliography}{45}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \expandafter\ifx\csname bibnamefont\endcsname\relax
   \def\bibnamefont#1{#1}\fi
@@ -21,55 +21,20 @@
  }\if@filesw\immediate\write\@auxout{\the\@temptokena}\fi
 \expandafter\endgroup\the\@temptokena
 
-\bibitem[{\citenamefont{Galli}(1996)}]{GGalli96}
-\bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Galli}}, \bibinfo{journal}{Cur.
-  Op. Sol. State Mat. Sci.} \textbf{\bibinfo{volume}{1}}(\bibinfo{number}{6}),
-  \bibinfo{pages}{864} (\bibinfo{year}{1996}).
-
-\bibitem[{\citenamefont{Bowler} \emph{et~al.}(1997)\citenamefont{Bowler, Aoki,
-  Goringe, Horsfield, and Pettifor}}]{DBowler97}
-\bibinfo{author}{\bibfnamefont{D.~R.} \bibnamefont{Bowler}},
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Aoki}},
-  \bibinfo{author}{\bibfnamefont{C.~M.} \bibnamefont{Goringe}},
-  \bibinfo{author}{\bibfnamefont{A.~P.} \bibnamefont{Horsfield}},
-  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{D.~G.}
-  \bibnamefont{Pettifor}}, \bibinfo{journal}{Mod. Sim. Mat. Sci. Eng.}
-  \textbf{\bibinfo{volume}{5}}(\bibinfo{number}{3}), \bibinfo{pages}{199}
-  (\bibinfo{year}{1997}).
-
-\bibitem[{\citenamefont{Goedecker}(1999)}]{SGoedecker99}
-\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Goedecker}},
-  \bibinfo{journal}{Rev. Mod. Phys.} \textbf{\bibinfo{volume}{71}},
-  \bibinfo{pages}{1085} (\bibinfo{year}{1999}).
-
-\bibitem[{\citenamefont{Ordejon}(2000)}]{POrdejon00}
-\bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Ordejon}},
-  \bibinfo{journal}{Phys. Status Solidi B}
-  \textbf{\bibinfo{volume}{217}}(\bibinfo{number}{1}), \bibinfo{pages}{335}
-  (\bibinfo{year}{2000}).
-
-\bibitem[{\citenamefont{Gogonea} \emph{et~al.}(2001)\citenamefont{Gogonea,
-  Suarez, van~der Vaart, and Merz}}]{VGogonea01}
-\bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Gogonea}},
-  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Suarez}},
-  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{van~der Vaart}},
-  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{K.~W.} \bibnamefont{Merz}},
-  \bibinfo{journal}{Curr. Opin. Struct. Biol.}
-  \textbf{\bibinfo{volume}{11}}(\bibinfo{number}{2}), \bibinfo{pages}{217}
-  (\bibinfo{year}{2001}).
-
-\bibitem[{\citenamefont{Wu and Jayanthi}(2002)}]{SWu02}
-\bibinfo{author}{\bibfnamefont{S.~Y.} \bibnamefont{Wu}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{C.~S.} \bibnamefont{Jayanthi}},
-  \bibinfo{journal}{Phys. Rep.} \textbf{\bibinfo{volume}{358}},
-  \bibinfo{pages}{1} (\bibinfo{year}{2002}).
+\bibitem{GenLinScale} 
+G.~Galli, Cur.~Op.~Sol.~State Mat.~Sci.~{\bf 1}(6), 864 (1996),
+D.~R.~Bowler, M.~Aoki,  C.~M.~Goringe,  A.~P.~Horsfield,  and D.~G.~Pettifor, Mod.~Sim.~Mat.~Sci.~Eng.~{\bf 5}(3), 199 (1997),
+S.~Goedecker, Rev. Mod. Phys. {\bf 71}, 1085 (1999),
+P.~Ordejon,  Phys.~Status Solidi B {\bf 217}(1), 335  (2000),
+V.~Gogonea,  D.~Suarez,  A.~van~der Vaart,  and K.~W. Merz,  Curr.~Opin.~Struct.~Biol.~{\bf 11}(2), 217 (2001),
+S.~Y.~Wu and  C.~S. Jayanthi,  Phys.~Rep.~{\bf 358},  1 (2002).
 
 \bibitem[{\citenamefont{Wolinski} \emph{et~al.}(1990)\citenamefont{Wolinski,
   Hinton, and Pulay}}]{Pulay_1990}
 \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Wolinski}},
   \bibinfo{author}{\bibfnamefont{J.~F.} \bibnamefont{Hinton}},
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Pulay}},
-  \bibinfo{journal}{jacs} \textbf{\bibinfo{volume}{112}}, \bibinfo{pages}{8251}
+  \bibinfo{journal}{J. Am. Chem. Soc.} \textbf{\bibinfo{volume}{112}}, \bibinfo{pages}{8251}
   (\bibinfo{year}{1990}).
 
 \bibitem[{\citenamefont{Gauss} \emph{et~al.}(1996)\citenamefont{Gauss, Ruud,
@@ -80,14 +45,11 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{105}},
   \bibinfo{pages}{2804} (\bibinfo{year}{1996}).
 
-\bibitem[{\citenamefont{Pennington and Slichter}(1991)}]{Pennington_1991}
+\bibitem{SpinSpin}
 \bibinfo{author}{\bibfnamefont{C.~H.} \bibnamefont{Pennington}}
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{C.~P.}
   \bibnamefont{Slichter}}, \bibinfo{journal}{Phys. Rev. Lett.}
-  \textbf{\bibinfo{volume}{66}}, \bibinfo{pages}{381} (\bibinfo{year}{1991}).
-
-\bibitem[{\citenamefont{Malkina} \emph{et~al.}(1996)\citenamefont{Malkina,
-  Salahub, and Malkin}}]{Malkin_1996}
+  \textbf{\bibinfo{volume}{66}}, \bibinfo{pages}{381} (\bibinfo{year}{1991}),
 \bibinfo{author}{\bibfnamefont{O.~L.} \bibnamefont{Malkina}},
   \bibinfo{author}{\bibfnamefont{D.~R.} \bibnamefont{Salahub}},
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{V.~G.}
@@ -102,13 +64,10 @@
   \bibnamefont{Baerends}}, \bibinfo{journal}{Phys. Rev. Lett.}
   \textbf{\bibinfo{volume}{78}}, \bibinfo{pages}{3097} (\bibinfo{year}{1997}).
 
-\bibitem[{\citenamefont{Lazzeri and Mauri}(2003)}]{Lazzeri_2003}
-\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Lazzeri}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Mauri}},
+\bibitem{Raman}
+M.~Lazzeri and F.~\bibnamefont{Mauri},
   \bibinfo{journal}{Phys. Rev. Lett.} \textbf{\bibinfo{volume}{90}},
-  \bibinfo{pages}{36401} (\bibinfo{year}{2003}).
-
-\bibitem[{\citenamefont{Quinet and Champagne}(2001)}]{Champagne_2001}
+  \bibinfo{pages}{36401} (\bibinfo{year}{2003}),
 \bibinfo{author}{\bibfnamefont{O.}~\bibnamefont{Quinet}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Champagne}},
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{115}},
@@ -151,33 +110,12 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{115}},
   \bibinfo{pages}{10344} (\bibinfo{year}{2001}{\natexlab{a}}).
 
-\bibitem[{\citenamefont{Niklasson and Challacombe}(2004)}]{ANiklasson04}
+\bibitem[{\citenamefont{Niklasson and Challacombe}(2003)}]{ANiklasson04}
 \bibinfo{author}{\bibfnamefont{A.~M.~N.} \bibnamefont{Niklasson}}
   \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
   \emph{\bibinfo{title}{Density Matrix Perturbation Theory}}
-  (\bibinfo{year}{2004}), \bibinfo{note}{accepted to Phys. Rev. Let., LJ9425}.
-
-\bibitem[{\citenamefont{Challacombe and
-  Schwegler}(1997{\natexlab{a}})}]{Challacombe97b}
-\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}} \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
-  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
-  \bibinfo{pages}{5526} (\bibinfo{year}{1997}{\natexlab{a}}).
-
-\bibitem[{\citenamefont{Schwegler} \emph{et~al.}(1997)\citenamefont{Schwegler,
-  Challacombe, and Head-Gordon}}]{ESchwegler97}
-\bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
-  \bibnamefont{and}
-  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
-  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
-  \bibinfo{pages}{9708} (\bibinfo{year}{1997}).
-
-\bibitem[{\citenamefont{Challacombe}(2000{\natexlab{a}})}]{MChallacombe00A}
-\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
-  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{113}},
-  \bibinfo{pages}{10037} (\bibinfo{year}{2000}{\natexlab{a}}).
+  (\bibinfo{year}{2003}), \bibinfo{note}{accepted for publication in Phys. Rev. Let.,  LJ9425}.
 
 \bibitem[{\citenamefont{Niklasson}(2002)}]{ANiklasson02A}
 \bibinfo{author}{\bibfnamefont{A.~M.~N.} \bibnamefont{Niklasson}},
@@ -201,22 +139,17 @@
   \bibinfo{journal}{Chem. Phys. Lett.} \textbf{\bibinfo{volume}{270}},
   \bibinfo{pages}{399} (\bibinfo{year}{1997}{\natexlab{b}}).
 
-\bibitem[{\citenamefont{Pople} \emph{et~al.}(1979)\citenamefont{Pople,
-  Krishnan, Schlegel, and Binkley}}]{Pople_1979}
+\bibitem{StandardCPSCF}
 \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Pople}},
   \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Krishnan}},
   \bibinfo{author}{\bibfnamefont{H.~B.} \bibnamefont{Schlegel}},
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{J.~S.}
   \bibnamefont{Binkley}}, \bibinfo{journal}{Int. J. Quant. Chem. Symp.}
-  \textbf{\bibinfo{volume}{S13}}, \bibinfo{pages}{225} (\bibinfo{year}{1979}).
-
-\bibitem[{\citenamefont{Sekino and Bartlett}(1986)}]{Sekino_1986}
+  \textbf{\bibinfo{volume}{S13}}, \bibinfo{pages}{225} (\bibinfo{year}{1979}),
 \bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{Sekino}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{R.~J.} \bibnamefont{Bartlett}},
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{85}},
-  \bibinfo{pages}{976} (\bibinfo{year}{1986}).
-
-\bibitem[{\citenamefont{Karna and Dupuis}(1991)}]{Dupuis_1991}
+  \bibinfo{pages}{976} (\bibinfo{year}{1986}),
 \bibinfo{author}{\bibfnamefont{S.~P.} \bibnamefont{Karna}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Dupuis}},
   \bibinfo{journal}{J. Comput. Chem.} \textbf{\bibinfo{volume}{12}},
@@ -232,80 +165,59 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{115}},
   \bibinfo{pages}{10345} (\bibinfo{year}{2001}{\natexlab{b}}).
 
-\bibitem[{\citenamefont{McWeeny}(1960)}]{RMcWeeny60}
-\bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{McWeeny}},
+\bibitem{Projection}
   \bibinfo{journal}{Rev. Mod. Phys.} \textbf{\bibinfo{volume}{32}},
-  \bibinfo{pages}{335} (\bibinfo{year}{1960}).
-
-\bibitem[{\citenamefont{Clinton} \emph{et~al.}(1969)\citenamefont{Clinton,
-  Galli, and Massa}}]{WClinton69}
+  \bibinfo{pages}{335} (\bibinfo{year}{1960}),
 \bibinfo{author}{\bibfnamefont{W.~L.} \bibnamefont{Clinton}},
   \bibinfo{author}{\bibfnamefont{A.~J.} \bibnamefont{Galli}}, \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{L.~J.} \bibnamefont{Massa}},
   \bibinfo{journal}{Phys. Rev.}
   \textbf{\bibinfo{volume}{177}}(\bibinfo{number}{1}), \bibinfo{pages}{7}
-  (\bibinfo{year}{1969}).
-
-\bibitem[{\citenamefont{Palser and Manolopoulos}(1998)}]{APalser98}
+  (\bibinfo{year}{1969}),
 \bibinfo{author}{\bibfnamefont{A.~H.~R.} \bibnamefont{Palser}}
   \bibnamefont{and} \bibinfo{author}{\bibfnamefont{D.~E.}
   \bibnamefont{Manolopoulos}}, \bibinfo{journal}{Phys. Rev. B}
-  \textbf{\bibinfo{volume}{58}}, \bibinfo{pages}{12704} (\bibinfo{year}{1998}).
-
-\bibitem[{\citenamefont{Beylkin} \emph{et~al.}(1999)\citenamefont{Beylkin,
-  Coult, and Mohlenkamp}}]{GBeylkin99}
+  \textbf{\bibinfo{volume}{58}}, \bibinfo{pages}{12704} (\bibinfo{year}{1998}),
 \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Beylkin}},
   \bibinfo{author}{\bibfnamefont{N.}~\bibnamefont{Coult}}, \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.~J.} \bibnamefont{Mohlenkamp}},
   \bibinfo{journal}{J. Comp. Phys.}
   \textbf{\bibinfo{volume}{152}}(\bibinfo{number}{1}), \bibinfo{pages}{32}
-  (\bibinfo{year}{1999}).
-
-\bibitem[{\citenamefont{Nemeth and Scuseria}(2000)}]{KNemeth00}
+  (\bibinfo{year}{1999}),
 \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Nemeth}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{G.~E.} \bibnamefont{Scuseria}},
   \bibinfo{journal}{J. Chem. Phys.}
   \textbf{\bibinfo{volume}{113}}(\bibinfo{number}{15}), \bibinfo{pages}{6035}
-  (\bibinfo{year}{2000}).
-
-\bibitem[{\citenamefont{Holas}(2001)}]{AHolas01}
+  (\bibinfo{year}{2000}),
 \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Holas}},
   \bibinfo{journal}{Chem. Phys. Lett.}
   \textbf{\bibinfo{volume}{340}}(\bibinfo{number}{5--6}), \bibinfo{pages}{552}
   (\bibinfo{year}{2001}).
 
-\bibitem[{\citenamefont{Wilkinson}(1965)}]{JWilkinson65}
+\bibitem{Congruence}
 \bibinfo{author}{\bibfnamefont{J.~H.} \bibnamefont{Wilkinson}},
   \emph{\bibinfo{title}{The aglebraic Eigenvalue Problem}}
   (\bibinfo{publisher}{Clarendon Press}, \bibinfo{address}{Oxford},
-  \bibinfo{year}{1965}).
-
-\bibitem[{\citenamefont{Stewart}(1973)}]{GStewart73}
+  \bibinfo{year}{1965}),
 \bibinfo{author}{\bibfnamefont{G.~W.} \bibnamefont{Stewart}},
   \emph{\bibinfo{title}{Introduction to Matrix Computations}}
   (\bibinfo{publisher}{Acadmeic Press}, \bibinfo{address}{London},
   \bibinfo{year}{1973}).
 
-\bibitem[{\citenamefont{Benzi and Meyer}(1995)}]{MBenzi95}
+\bibitem{AInv}
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Benzi}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{C.~D.} \bibnamefont{Meyer}},
   \bibinfo{journal}{SIAM J. Sci. Comput.}
   \textbf{\bibinfo{volume}{16}}(\bibinfo{number}{5}), \bibinfo{pages}{1159}
-  (\bibinfo{year}{1995}).
-
-\bibitem[{\citenamefont{Benzi} \emph{et~al.}(1996)\citenamefont{Benzi, Meyer,
-  and T{\accent23 u}ma}}]{MBenzi96}
+  (\bibinfo{year}{1995}),
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Benzi}},
   \bibinfo{author}{\bibfnamefont{C.~D.} \bibnamefont{Meyer}}, \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{T{\accent23 u}ma}},
   \bibinfo{journal}{SIAM J. Sci. Comput.}
   \textbf{\bibinfo{volume}{17}}(\bibinfo{number}{5}), \bibinfo{pages}{1135}
-  (\bibinfo{year}{1996}).
-
-\bibitem[{\citenamefont{Benzi} \emph{et~al.}(2001)\citenamefont{Benzi, R, and
-  Tuma}}]{MBenzi01}
+  (\bibinfo{year}{1996}),
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Benzi}},
-  \bibinfo{author}{\bibfnamefont{R.~K.} \bibnamefont{R}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{R.} \bibnamefont{Kouhia}}, \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Tuma}},
   \bibinfo{journal}{Comp. Meth. App. Mech. Eng.}
   \textbf{\bibinfo{volume}{190}}(\bibinfo{number}{49-50}),
@@ -317,22 +229,30 @@
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{101}},
   \bibinfo{pages}{9704} (\bibinfo{year}{1994}).
 
-\bibitem[{\citenamefont{Challacombe}(2000{\natexlab{b}})}]{MChallacombe00B}
+\bibitem[{\citenamefont{Challacombe}(2000)}]{MChallacombe00B}
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
   \bibinfo{journal}{Comput. Phys. Commun.} \textbf{\bibinfo{volume}{128}},
-  \bibinfo{pages}{93} (\bibinfo{year}{2000}{\natexlab{b}}).
+  \bibinfo{pages}{93} (\bibinfo{year}{2000}).
 
 \bibitem[{\citenamefont{Furche}(2001)}]{Furche_2001}
 \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Furche}}, \bibinfo{journal}{J.
   Chem. Phys.} \textbf{\bibinfo{volume}{114}}, \bibinfo{pages}{5982}
   (\bibinfo{year}{2001}).
 
-\bibitem[{\citenamefont{Challacombe and
-  Schwegler}(1997{\natexlab{b}})}]{MChallacombe97}
+\bibitem[{\citenamefont{Challacombe and Schwegler}(1997)}]{MChallacombe97}
 \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}} \bibnamefont{and}
   \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
   \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
-  \bibinfo{pages}{5526} (\bibinfo{year}{1997}{\natexlab{b}}).
+  \bibinfo{pages}{5526} (\bibinfo{year}{1997}).
+
+\bibitem[{\citenamefont{Schwegler} \emph{et~al.}(1997)\citenamefont{Schwegler,
+  Challacombe, and Head-Gordon}}]{ESchwegler97}
+\bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Schwegler}},
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Challacombe}},
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Head-Gordon}},
+  \bibinfo{journal}{J. Chem. Phys.} \textbf{\bibinfo{volume}{106}},
+  \bibinfo{pages}{9708} (\bibinfo{year}{1997}).
 
 \bibitem[{\citenamefont{Challacombe}
   \emph{et~al.}(2001)\citenamefont{Challacombe, Schwegler, Tymczak, Gan,

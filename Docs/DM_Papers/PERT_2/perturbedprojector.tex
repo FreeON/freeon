@@ -1,23 +1,22 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
- \documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
- \newcommand{\commentoutB}[1]{}
- \newcommand{\commentoutA}[1]{#1}
+% \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+% \newcommand{\commentoutB}[1]{}
+% \newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-%\newcommand{\commentoutB}[1]{#1}
-%\newcommand{\commentoutA}[1]{}
-%\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 %
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{alltt}
-\usepackage{fancyhdr}
-
-\pagestyle{fancy}
+%\usepackage{fancyhdr}
+%\pagestyle{fancy}
 
 \begin{document}
 
@@ -39,20 +38,22 @@ is developed and applied to calculation of the static electric polarizability.  
 density matrix perturbation theory [Niklasson and Challacombe, PRL (LJ9425)], obtaining  response functions
 directly via a perturbative approach to spectral projection.  The accuracy and efficiency of the linear scaling 
 method is demonstrated for a series of three-dimensional 
-water cluster at the RHF/6-31G** level of theory.  Locality of the response under a global electric field 
-perturbation is numerically demonstrated by approximate exponential decay of density matrix derivative matrix elements.
+water clusters at the RHF/6-31G** level of theory.  Locality of the response under a global electric field 
+perturbation is numerically demonstrated by approximate exponential decay of derivative density matrix elements.
 \end{abstract}
 
 \pacs{31.15.Ar,31.15.Md,31.15.Ne,33.15.Kr,36.40.Cg}
 
 \maketitle
 
-\footnotetext[1]{LA-UR-03-9111}
+%\footnotetext[1]{LA-UR-03-9111}
 
 Linear scaling methods that reduce the computational complexity of 
 electronic structure calculations to ${\cal O}(N)$, where $N$ is system size, 
 impact disciplines that demand quantum simulation of increasingly large and complex systems
-\cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. 
+%\cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}
+\cite{GenLinScale}
+. 
 To date, the most successful and prolific applications of linear scaling technologies are
 ground state studies involving empirical model Hamiltonians.  
 To a lesser degree, ground state applications using {\em ab initio} models 
@@ -66,9 +67,15 @@ Beyond ground state methods, little attention has been given
 to linear scaling algorithms for the computation of dynamic and static response 
 properties; the latter including the nuclear magnetic shielding tensor \cite{Pulay_1990}, 
 the rotational g-tensor \cite{Helgaker_1996}, indirect spin-spin coupling constant 
-\cite{Pennington_1991,Malkin_1996}, third order  properties such as the first hyperpolarizability 
+%\cite{Pennington_1991,Malkin_1996}, 
+\cite{SpinSpin},
+third order  properties such as the first hyperpolarizability 
 \cite{Franky_1997} and polarizability derivatives such as the Raman intensity 
-\cite{Lazzeri_2003,Champagne_2001}.  Dynamic  properties may be computed using linear scaling algorithms to propagate the density matrix \cite{SNomura97,CYam03} in 
+%\cite{Lazzeri_2003,Champagne_2001}
+\cite{Raman}
+.  
+Dynamic  properties may be computed using linear scaling algorithms to propagate the density matrix 
+\cite{SNomura97,CYam03} in 
 the time domain, followed by convolution to obtain the spectral response.  In this way, 
 Yam, Yokojima and Chen \cite{CYam03} have recently demonstrated linear scaling 
 computation of the absorption spectra for one-dimensional polymers at the local 
@@ -86,19 +93,16 @@ demonstrate the early onset of linear scaling for the accurate calculation of th
 polarizability of three-dimensional systems using large basis sets. This perturbed projection 
 method is general and can be extended to a variety of static properties.
 
-Algorithms for linear scaling SCF theory exploit the quantum locality
-of non-metallic systems, manifested in an approximate exponential decay of density matrix elements
-with atom-atom separation.  In linear scaling construction of the single particle SCF Hamiltonian 
-or Fock matrix $\bf F$, the non-local  Coulomb interaction is computed in $ {\cal O}(N {\rm lg} N )$ 
-with fast hierarchical methods \cite{Challacombe97b}, while  quantum locality is exploited to 
-achieve $N$-scaling algorithms for computing the exact Hartree-Fock exchange matrix \cite{ESchwegler97} and the 
-exchange-correlation matrix \cite{MChallacombe00A}.  Likewise, decay properties of the density matrix 
-may be exploited  in its construction via sparse matrix methods and iterative approaches to spectral projection 
-\cite{ANiklasson02A,ANiklasson03}.   This quantum locality should,  in principle, extend also to 
+Algorithms for linear scaling self-consistent-field (SCF) theory exploit the quantum locality
+of non-metallic systems, manifested in the approximate exponential decay of the density matrix 
+with atom-atom separation, through the effective use of sparse matrix methods and iterative 
+approaches to spectral projection \cite{ANiklasson02A,ANiklasson03}.  This quantum locality should,  in principle, extend also to 
 the derivative density matrices central to the CPSCF equations.  Indeed,  
 exponential decay of the derivative density matrix within {\em ab initio} SCF theory has been demonstrated 
 numerically for local nuclear displacement \cite{Ochsenfeld_1997}. However, standard approaches to the CPSCF equations 
-\cite{Pople_1979,Sekino_1986,Dupuis_1991} do not admit exploitation of this locality, as they are based 
+%\cite{Pople_1979,Sekino_1986,Dupuis_1991} 
+\cite{StandardCPSCF}
+do not admit exploitation of this locality, as they are based 
 on perturbation of the wave function, requiring ${\cal O}(N^3)$ eigensolution and typically ${\cal O}(N^5)$ 
 transformation of two-electron integrals into the eigenbasis.   Avoiding both 
 eigensolution and integral transformation,  Ochsenfeld and Head-Gordon \cite{Ochsenfeld_1997} and
@@ -115,9 +119,9 @@ The new approach is based on the relationship between the density matrix $\mathc
 or Fockian $\mathcal{F}$ through the spectral projector (Heaviside step function) $\mathcal{D}=\theta(\tilde{\mu}I-\mathcal{F})$, 
 where the chemical potential $\tilde{\mu}$ determines the occupied states via Aufbau filling.   
 Spectral projection can be carried out in a number of ways 
-\cite{ANiklasson02A,ANiklasson03,RMcWeeny60,WClinton69,APalser98,GBeylkin99,KNemeth00,AHolas01}, 
-with perhaps the best know algorithm being McWeeny's cubic purification scheme \cite{RMcWeeny60}. 
-More recently new recursive polynomial expansions of the projector have emerged, 
+\cite{ANiklasson02A,ANiklasson03,Projection}.
+%RMcWeeny60,WClinton69,APalser98,GBeylkin99,KNemeth00,AHolas01}.
+Recently, new recursive polynomial expansions of the projector have emerged, 
 such as the second order trace correcting (TC2) \cite{ANiklasson02A} and fourth order trace resetting 
 (TRS4) \cite{ANiklasson03} purification.  These new methods (TC2 and TRS4) have convergence properties 
 that depend only weakly on the band gap, do not require knowledge of the chemical potential
@@ -126,17 +130,22 @@ the perturbation expansion is developed within the reference groundstate project
 order by order collection of terms at each iteration, establishing a quadratically convergent 
 sequence for the response functions.  
 
-We now proceed with development of the perturbed projection approach, which will be  
-outlined for the concrete case of perturbation by an electric field within the Hartree-Fock (HF) theory.  
-However, the perturbed projection method is general and extensible to DF and hybrid HF/DF models, 
-and to other static perturbations through high order.
+%We now proceed with development of the perturbed projection approach, which will be  
+%outlined for the concrete case of perturbation by an electric field within the Hartree-Fock (HF) theory.  
+%However, the perturbed projection method is general and extensible to DF and hybrid HF/DF models, 
+%and to other static perturbations through high order.
 
-Superscripts and subscripts refer to perturbation order and iteration count respectively.  
+In the following, the indexes $a, b, \dots$ refer to perturbation order, while $i, j, \dots$  mark the iteration count.
 The symbols $\mathcal{D},\mathcal{F},\dots$  are  matrices in an orthogonal representation, while
 $D,F,\dots$ are the corresponding matrices in a non-orthogonal basis.  The 
 transformation between orthogonal and non-orthogonal representations is carried out in ${\cal O}(N)$ using
-congruence transformations \cite{JWilkinson65,GStewart73} provided by the AINV algorithm for computing 
-sparse approximate inverse Cholesky factors \cite{MBenzi95,MBenzi96,MBenzi01}.  
+congruence transformations 
+%\cite{JWilkinson65,GStewart73} 
+\cite{Congruence}
+provided by the AINV algorithm for computing 
+sparse approximate inverse Cholesky factors 
+%\cite{MBenzi95,MBenzi96,MBenzi01}  
+\cite{AInv}.  
 
 Within HF theory, the total electronic energy $E_{\rm tot}$ of a molecule in a static electric field $\mathcal{E}$ is
 \begin{equation}
@@ -152,7 +161,8 @@ E_{\rm tot}(\mathcal{E})=E_{\rm tot}(0)-\sum_a\mu_a\mathcal{E}^a-\frac{1}{2}\sum
  where 
 $\alpha_{ab}$ is the first order polarizability, $\mu_a$ is the dipole moment and $\mathcal{E}^a$ is the electric field in
 direction $a$.  The polarizability is the second order response of the total energy with respect 
-to variation in the electric field \cite{Sekino_1986}
+to variation in the electric field \cite{StandardCPSCF}
+%\cite{Sekino_1986}
 \begin{equation}\label{pol}
    \alpha_{ab}=
    -\frac{\partial^2 E_{\rm tot}}{\partial \mathcal{E}^a\partial \mathcal{E}^b}
@@ -168,8 +178,11 @@ $\theta$ and the Fockian $\mathcal{F}=\mathcal{F}^{0}+\sum_a\mathcal{E}^{a}\math
    \bigg|_{\mathcal{E}=0}.
  \end{equation}
 
-The HF Fockian $F^0$ in the non-orthogonal basis is $F^0=h^0+J(D^0)+K(D^0)$, while 
-the derivative Fockian is $F^a=\mu_a+J(D^a)+K(D^a)$.  A similar equation holds for the derivative Fockian 
+The HF Fockian $F^0$ in the non-orthogonal basis is $F^0=h^0+J(D^0)+K(D^0)$, where the Coulomb matrix $J$ may
+be computed in ${\cal O}(N {\rm lg} N )$ with a quantum chemical tree code (QCTC) \cite{MChallacombe97} and the 
+exchange matrix $K$ computed in ${\cal O}(N)$ with the ONX algorithm that exploits quantum locality  of $D^0$ \cite{ESchwegler97}.
+Likewise the derivative Fockian, $F^a=\mu_a+J(D^a)+K(D^a)$, may be computed with the same algorithms in 
+linear scaling time if $D^a$ manifests decay properties similar to $D^0$.  A similar equation holds for the derivative Fockian 
 within DF and hybrid HF/DF theories with addition of the exchange-correlation 
 matrix $V_{xc}^a(D^0,D^a)$ \cite{Lee_1994}.
 
@@ -183,9 +196,8 @@ from which expansion of the derivative density matrix can be obtained term by te
 
 The derivative density matrix and derivative Fockian depend on each other implicitly and must be 
 solved for self-consistently via the coupled-perturbed self-consistent-field (CPSCF) equations.
-The necessary and sufficient criteria for convergence of the CPSCF equations involve an extension to 
-the SCF equations, $[\mathcal{F}^{a},\mathcal{D}^{0}]+[\mathcal{F}^{0},\mathcal{D}^{a}]=0$,
-and the idempotency-like constraint
+The necessary and sufficient criteria for convergence of the CPSCF equations are 
+$[\mathcal{F}^{a},\mathcal{D}^{0}]+[\mathcal{F}^{0},\mathcal{D}^{a}]=0$ and 
 $\mathcal{D}^{a}=\mathcal{D}^{a} \mathcal{D}^{0}+\mathcal{D}^{0} \mathcal{D}^{a}$ \cite{Furche_2001}.
 Solution of the CPSCF equations with perturbed projection involves the steps
 \begin{subequations}
@@ -199,15 +211,15 @@ Solution of the CPSCF equations with perturbed projection involves the steps
    \end{eqnarray} 
 \end{subequations}
 with starting point $D^a_0=0$. In step~(\ref{FockBuild}),  $F^a_n$ is constructed in 
-${\cal O}(N)$ using algorithms \cite{MChallacombe97,ESchwegler97} in 
-the {\sc MondoSCF} \cite{MondoSCF} suite of linear scaling quantum chemistry programs.  Next, 
+${\cal O}(N)$ using the QCTC \cite{MChallacombe97} and ONX \cite{ESchwegler97} algorithms in 
+{\sc MondoSCF} \cite{MondoSCF}.  Next, 
 Weber and Daul's DDIIS algorithm for convergence acceleration of the CPSCF equation
 \cite{Weber_2003} is used to optimize the $c_k$ coefficients in step~(\ref{DDIIS}), keeping the last $m$
 steps in the extrapolation. 
 Then, the density matrix derivative $\mathcal{D}^a_{n+1}$ is obtained in step~(\ref{DDeriv}) as 
 $\mathcal{D}^a_{n+1}=\lim_{i\to\infty}\mathcal{X}^a_{i}$ via
 the NC density matrix perturbation theory,
-based on the TC2 projection:
+based on the TC2 projector:
 \begin{equation}\label{PP1}
 \left.
 \begin{array}{ll}
@@ -232,7 +244,7 @@ compressing their spectrum into the domain of convergence \cite{ANiklasson02A} u
 \mathcal{X}^0_{0}=\frac{\mathcal{F}_{max}-\mathcal{F}^0}{\mathcal{F}_{max}-\mathcal{F}_{min}}~{\rm and}~
 \mathcal{X}^a_{0}=\frac{\mathcal{F}^a_{n}}{\mathcal{F}_{min}-\mathcal{F}_{max}},
 \end{equation}
-where $\mathcal{F}_{min}$ and $\mathcal{F}_{max}$ are approximate upper and lower bounds of the eigenvalues of $\mathcal{F}^0$.
+where $\mathcal{F}_{min}$ and $\mathcal{F}_{max}$ are approximate upper and lower bounds to the eigenvalues of $\mathcal{F}^0$.
 
 Recursion of the perturbed projection sequence is stopped when the change 
 $\left| \mathcal{X}^a_{i+1}-\mathcal{X}^a_i \right|$ becomes small. Having solved for $D^a_n$, 
@@ -252,12 +264,14 @@ self-consistency, when the density matrix derivative $D^a_n$ and the desired pro
 We have implemented these methods in the {\sc MondoSCF} suite of linear scaling quantum chemistry programs \cite{MondoSCF},
 and performed polarizability calculations on a series of water clusters up to (H$_2$O)$_{150}$.  These clusters were
 obtained by carving a spherical region out of a snapshot from a periodic classical  molecular dynamics simulation of water 
-at standard liquid density, and have been used previously in a number scaling tests \cite{ESchwegler97,ANiklasson03,MChallacombe97}.
+at standard liquid density, and have been used previously in a number of scaling tests 
+\cite{ANiklasson03,MChallacombe97,ESchwegler97}.
+
 Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of 
 theory and with both the {\tt GOOD} and {\tt TIGHT} thresholding parameter sets that control precision of the 
 linear scaling algorithms, corresponding to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.  
 These calculations were carried out on a single Intel Xeon 2.4GHz processor running RedHat Linux 8.0 and  executables compiled 
-with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}. In Fig.~\ref{scaling} the 
+with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}. In Fig.~\ref{scaling}, the 
 total CPU time for the fifth CPSCF cycle (including build time for $\mathcal{F}^a$, 
 iterative construction of $\mathcal{D}^a$ and all intermediate 
 steps including congruence transformation) is shown for the RHF/6-31G and RHF/6-31G** series 
@@ -272,9 +286,10 @@ derivative atom-atom blocks as a function of atom-atom distance under global per
 \begin{table}[t]
 \caption{\protect Average polarizabilities $\bar{\alpha}=(\alpha_{xx}+\alpha_{yy}+\alpha_{zz})/3N_{H_20}$
          in a.u.~for a sequence of water clusters at the RHF/6-31G and RHF/6-31G** levels of theory.
-         A comparison is made between results obtained with the {\sc GAMESS} quantum chemistry program
-         \cite{gamess} and those calculated with {\sc MondoSCF} using different numerical approximations
-         (see text) controlling precision of the linear scaling algorithms.}\label{tab:Polari_Values}
+  %       A comparison is made between results obtained with the {\sc GAMESS} quantum chemistry program
+  %       \cite{gamess} and those calculated with {\sc MondoSCF} using different numerical approximations
+  %       (see text) controlling precision of the linear scaling algorithms.
+}\label{tab:Polari_Values}
 \begin{tabular}{cccccc}
 \toprule 
       &\multicolumn{1}{c}{6-31G\footnote[1]{\sc GAMESS}}
@@ -298,8 +313,8 @@ derivative atom-atom blocks as a function of atom-atom distance under global per
   \caption{\protect
     Magnitudes of atom-atom blocks of the RHF/6-31G density matrix derivative
     in the z direction with the separation of basis function centers for $(H_2O)_{150}$.
-    The density matrix derivative has been converged using a {\tt TIGHT} accuracy level (e.g. 
-    a matrix threshold of $10^{-6}$ au).
+  %  The density matrix derivative has been converged using a {\tt TIGHT} accuracy level (e.g. 
+  %  a matrix threshold of $10^{-6}$ au).
   }\label{fig:DPrimeZ_150_6-31G}
 \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{figure2.eps}}
 \end{figure}
@@ -309,18 +324,18 @@ These results demonstrate an onset of linear scaling as early as 70 water molecu
 for properties with 4 digits of precision (RHF/6-31G at {\tt GOOD}). 
 While the CPSCF equations must be solved iteratively with perturbed projection,  
 the number of CPSCF cycles is $\sim 10$ when using DDIIS acceleration on well behaved systems.
-Using an incomplete sparse linear algebra with thresholding is a particular advantage of the 
-present implementation, as the small gap limit correctly leads to ${\cal O}(N^3)$ 
-algorithms while preserving accuracy.  In contrast, methods that employ radial cutoffs
+Using an incomplete sparse linear algebra with thresholding is an advantage of the 
+present implementation, as the small gap limit correctly leads to an ${\cal O}(N^3)$ 
+algorithm while preserving accuracy.  In contrast, methods that employ radial cutoffs
 incorrectly retain $N$-scaling in this limit at the sacrifice of accuracy. 
 However, the iterative approach proposed here for solution of the CPSCF equations is prone to the same 
-numerical difficulties encountered by the SCF equations in the small gap limit.
+instabilities encountered by the SCF equations in the small gap limit.  
 
-We have presented a simple and efficient algorithm for solution of the coupled-perturbed 
-self-consistent-field (CPSCF) equations in the context of spectral projection and the static 
-electric polarizability. Unique features of the perturbed projection algorithm include linear 
-scaling, simplicity, numerical stability and quadratic convergence in computation of the derivative 
-density matrix.  
+%We have presented a simple and efficient algorithm for solution of the coupled-perturbed 
+%self-consistent-field (CPSCF) equations in the context of spectral projection and the static 
+%electric polarizability. Unique features of the perturbed projection algorithm include linear 
+%scaling, simplicity, numerical stability and quadratic convergence in computation of the derivative 
+%density matrix.  
 
 We have shown that the density matrix response is local upon {\em global} electric perturbation, 
 corresponding to an approximate exponential decay of matrix elements. A similar exponential decay 
@@ -329,22 +344,22 @@ demonstrated by Ochsenfeld and Head-Gordon \cite{Ochsenfeld_1997}.   These key o
 hold generally for both local and global perturbations to insulating systems.  The implication of these 
 results are that the perturbed projection algorithm described in steps (\ref{FockBuild}-\ref{DDeriv}) and
 Eqs.~(\ref{PP1}-\ref{PP2}) can be easily extended to the linear scaling computation of higher order 
-response functions, DF and HF/DF models and a large class of static molecular properties such as the 
-nuclear magnetic shielding tensor (NMR shift), indirect spin-spin coupling and the electronic g-tensor.
-We note also that the method is not unique to the TC2 generator or {\sc MondoSCF} $N$-scaling algorithms, 
-but can be straightforwardly extended to other purification schemes such as TRS4 \cite{ANiklasson03} as
-well as other electronic structure programs.
+response functions, other projections schemes such as  TRS4 \cite{ANiklasson03},
+DF and HF/DF models and a large class of static molecular properties.
+% such as the 
+%nuclear magnetic shielding tensor (NMR shift), indirect spin-spin coupling and the electronic g-tensor.
+%We note also that the method is not unique to the TC2 generator or {\sc MondoSCF} $N$-scaling algorithms, 
+%but can be straightforwardly extended to other purification schemes such as TRS4 \cite{ANiklasson03} as
+%well as other electronic structure programs.
 
 This work has been supported by the US Department of Energy 
 under contract W-7405-ENG-36 and the ASCI project.  
 The Advanced Computing Laboratory of Los 
 Alamos National Laboratory is acknowledged.
-All the numerical computations have been
-performed on computing resources located at this facility.
+%All the numerical computations have been
+%performed on computing resources located at this facility.
 
-%\bibliography{perturbedprojector}
-
-\bibliography{Response2}
+\bibliography{perturbedprojector}
 
 \commentoutB{
 
@@ -357,9 +372,10 @@ performed on computing resources located at this facility.
 \begin{table}[h]
 \caption{\protect Average polarizabilities $\bar{\alpha}=(\alpha_{xx}+\alpha_{yy}+\alpha_{zz})/3N_{H_20}$
          in a.u.~for a sequence of water clusters at the RHF/6-31G and RHF/6-31G** levels of theory.
-         A comparison is made between results obtained with the {\sc GAMESS} quantum chemistry program
-         \cite{gamess} and those calculated with {\sc MondoSCF} using different numerical approximations
-         (see text) controlling precision of the linear scaling algorithms.}\label{tab:Polari_Values}
+%         A comparison is made between results obtained with the {\sc GAMESS} quantum chemistry program
+%         \cite{gamess} and those calculated with {\sc MondoSCF} using different numerical approximations
+%         (see text) controlling precision of the linear scaling algorithms.
+}\label{tab:Polari_Values}
 \begin{tabular}{cccccc}
 \toprule 
       &\multicolumn{1}{c}{6-31G\footnote[1]{\sc GAMESS}}
@@ -390,14 +406,16 @@ performed on computing resources located at this facility.
          in a.u.~for a sequence of water clusters at the RHF/6-31G and RHF/6-31G** levels of theory.
          A comparison is made between results obtained with the {\sc GAMESS} quantum chemistry program
          \cite{gamess} and those calculated with {\sc MondoSCF} using different numerical approximations
-         (see text) controlling precision of the linear scaling algorithms.}\label{tab:Polari_Values}
+         (see text) controlling precision of the linear scaling algorithms.
+}\label{tab:Polari_Values}
 
 
 \caption{\protect
     Magnitudes of atom-atom blocks of the RHF/6-31G density matrix derivative
     in the z direction with the separation of basis function centers for $(H_2O)_{150}$.
-    The density matrix derivative has been converged using a {\tt TIGHT} accuracy level (e.g. 
-    a matrix threshold of $10^{-6}$ au).}\label{fig:DPrimeZ_150_6-31G}
+%    The density matrix derivative has been converged using a {\tt TIGHT} accuracy level (e.g. 
+%    a matrix threshold of $10^{-6}$ au).
+}\label{fig:DPrimeZ_150_6-31G}
 
 \end{figure}
 
