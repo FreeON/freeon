@@ -21,6 +21,7 @@ MODULE BasisSetParameters
         'cf','es','fm','md','no','lr','ky','g0','g1','g2'/)  
 !
    REAL(DOUBLE),DIMENSION(107)    :: AtsMss = (/ 1.007900D0,    4.0026D0,      6.941D0,     &  
+!  REAL(DOUBLE),DIMENSION(107)    :: AtsMss = (/ 2.013553213D0,    4.0026D0,      6.941D0,     &  
     9.01218D0,    10.81D0,       12.011D0,      14.00670D0,    15.9994D0,     18.998403D0,  & 
    20.179D0,      22.98977D0,    24.305D0,      26.98154D0,    28.0855D0,     30.97376D0,   & 
    32.06D0,       35.453D0,      39.948D0,      39.0983D0,     40.08D0,       44.9559D0,    & 
@@ -78,7 +79,7 @@ MODULE BasisSetParameters
                 'user4           ' , 'User4           ',   &  ! 32
                 'user5           ' , 'User5           ',   &  ! 33
 !               Crystal Basis Set
-                'Crystal         ' , 'Crystal98       '    &  ! 34
+                'crystal98       ' , 'Crystal98       '    &  ! 34
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &
