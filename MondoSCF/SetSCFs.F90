@@ -22,12 +22,15 @@ MODULE SetSCFs
       SUBROUTINE SetSCF(Ctrl)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          INTEGER                         :: ISet
-         CALL New(Ctrl%Current,3)
-         CALL New(Ctrl%Previous,3)
+         TYPE(INT_VECT)                  :: Stat
          CALL OpenHDF(Ctrl%Info)         
          IF(Ctrl%Rest)THEN
-            CALL Get(Ctrl%Previous,'PreviousStatus')
-            CALL Get(Ctrl%Current,'CurrentStatus')
+            CALL New(Stat,3)
+            CALL Get(Stat,'PreviousStatus')
+            Ctrl%Previous=Stat%I
+            CALL Get(Stat,'CurrentStatus')
+            Ctrl%Current=Stat%I
+            CALL Delete(Stat)
             CALL Get(Ctrl%NSet,'NumberOfSets')
             CALL Get(Ctrl%NGeom,'NumberOfGeometries')
             DO ISet=1,Ctrl%NSet
@@ -37,7 +40,7 @@ MODULE SetSCFs
             ENDDO
          ELSE
             DO ISet=1,Ctrl%NSet
-               Ctrl%Current%I(2)=ISet
+               Ctrl%Current(2)=ISet
                CSet=TRIM(IntToChar(ISet))
                CALL Get(Base,Tag_O=CSet)
 !              Matrix limits to HDF InfFile
@@ -63,7 +66,7 @@ MODULE SetSCFs
          INTEGER           :: I,K,Acc,BWEstim,MaxBaseNode
          CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !-------------------------------------------------------------
-         I=Ctrl%Current%I(2)
+         I=Ctrl%Current(2)
          Acc=Ctrl%AccL(I)
          Ctrl%EErr=1.D0
 !        Use assymptotics to set the max matrix dimensions
@@ -159,7 +162,7 @@ MODULE SetSCFs
          INTEGER, DIMENSION(Mns:Pls)         :: Beg3,End2
          INTEGER, DIMENSION(Mns:Pls,Mns:Pls) :: End3,Dv
          CHARACTER(LEN=DEFAULT_CHR_LEN)      :: Mssg
-         ISet=Ctrl%Current%I(2)
+         ISet=Ctrl%Current(2)
 !---------------------------------------------------------------
 !        Parse MPI_INVOKE for NPrc or procs
 !
