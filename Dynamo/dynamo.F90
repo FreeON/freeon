@@ -37,6 +37,7 @@ CONTAINS
 !
 !-------------------------------------------------------------- 
 !
+#ifdef MMech
    SUBROUTINE COULOMB_EXCL(NATOMS,E_C_EXCL,InfFile,Cur)
 !
 ! Calculate Coulomb exclusion for MM and QMMM calculations
@@ -444,5 +445,6 @@ CONTAINS
 !
    END SUBROUTINE LJ_EXCL
 !-------------------------------------------------------------- 
+#endif
 !
 END MODULE DYNAMO
