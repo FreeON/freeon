@@ -761,7 +761,7 @@ END SUBROUTINE Excl_LIST14
 !
       IMPLICIT NONE
       INTEGER :: NIntC,NIntC2,I,J,K,L,NatmsLoc,IntCoo
-      REAL(DOUBLE) :: Zero,thresh_B
+      REAL(DOUBLE) :: thresh_B
       REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       TYPE(INTC) :: IntCs
       TYPE(BMATR):: B
@@ -857,43 +857,42 @@ END SUBROUTINE Excl_LIST14
 !...  Calculate the B matrix elements for a bond stretch as Defined
 !...  by Wilson.
 !...
-
+!
       IMPLICIT NONE
       REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,RIJ
       REAL(DOUBLE) :: dijsq,t,dij,thresh_B   
       INTEGER :: I,J,K,L,M,N
       INTEGER :: IBB(1:12)
       REAL(DOUBLE) :: BB(1:12)
-
-      dijsq = 0.0d0
-
-      DO m =1,3
-         t = XJ(m) - XI(m)
-         rij(m) = t
-         dijsq = dijsq + t * t
-      end DO
-
-      dij = sqrt(dijsq)
-
-      DO m = 1, 3
-         t = rij(m)
-         if (dabs(t) > thresh_B) then
-            IBB(m) = (3*(i-1)+m) 
-            IBB(3+m) = (3*(j-1)+m) 
-            t = t / dij
-            BB(m) = -t
-            BB(3+m) = t
-         end if
-      end DO
-
-      RETURN
+!
+      DijSq = 0.0d0
+!  
+      DO M=1,3
+         T=XJ(M)-XI(M)
+         Rij(M)=T
+         DijSq=DijSq+T*T
+      ENDDO 
+!
+      Dij = SQRT(DijSq)
+!
+      DO M=1,3
+         T=Rij(M)
+         IF(ABS(T)>Thresh_B) THEN
+            IBB(M)=(3*(I-1)+M) 
+            IBB(3+M)=(3*(J-1)+M) 
+            T=T/Dij
+            BB(M)=-T
+            BB(3+M)=T
+         ENDIF   
+      ENDDO 
+!
       END SUBROUTINE STRE
 !
 !----------------------------------------------------------------
 !
       SUBROUTINE Bend(I,J,K,XI,XJ,XK,IBB,BB,thresh_B)
 !
-!  this subroutine computes the b matrix elements of a valence
+!  This subroutine computes the b matrix elements of a valence
 !  angle bending coordinate as Defined by wilson.
 !  i and k are the numbers of the end Atoms.
 !  j is the number of the central atom.
@@ -902,59 +901,60 @@ END SUBROUTINE Excl_LIST14
 !
       IMPLICIT NONE
       REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,RJI,RJK,EJI,EJK
-      REAL(DOUBLE) :: DIJSq,Tp,t,DJKSq,dxsq,dx,DOtj,DJK,DJI
-      REAL(DOUBLE) :: sinj,SMI,SMK,SUM,thresh_B
+      REAL(DOUBLE) :: DIJSq,Tp,T,DJKSq,DxSq,Dx,DOtj,DJK,DJI
+      REAL(DOUBLE) :: SinJ,SMI,SMK,SUM,thresh_B
       INTEGER  :: I,J,K,L,M,N,II,JJ,KK,IER
       INTEGER :: IBB(1:12)
       REAL(DOUBLE) :: BB(1:12)
 !
-   10 DIJSq=0.d0
-      DJKSq=0.d0
-      DO 20 m=1,3
-        Tp=XJ(m)
-        t=XI(m)-Tp
-        RJI(m)=t
-        DIJSq=DIJSq+t*t
-        t=xk(m)-Tp
-        rjk(m)=t
-        DJKSq=DJKSq+t*t
-   20 Continue        
-      DJI=dsqrt(DIJSq)
-      DJK=dsqrt(DJKSq)
-      dx=1.d0
-      DOtj=0.d0
-      DO 30 m=1,3
-      t=RJI(m)/DJI
-      eji(m)=t
-      Tp=rjk(m)/DJK
-      ejk(m)=Tp
-   30 DOtj=DOtj+t*Tp
-      if(dabs(DOtj).gt.0.99995d0)go to 60  !!!! colinearity
-      sinj=dsqrt(1.d0-DOtj*DOtj)
-      ii=3*(i-1)
-      jj=3*(j-1)
-      kk=3*(k-1)
-      DO 40 m=1,3
-      smi=dx*(DOtj*eji(m)-ejk(m))/(DJI*sinj)
-      IF(dabs(smi)>thresh_B) THEN
-        IBB(m) = ii+m
-        BB(m) = smi
+      DijSq=Zero 
+      DjkSq=Zero 
+      DO 20 M=1,3
+        Tp=XJ(M)
+        T=XI(M)-Tp
+        Rji(M)=T
+        DijSq=DijSq+T*T
+        T=XK(M)-Tp
+        Rjk(m)=T
+        DjkSq=DjkSq+T*T
+   20 Continue
+        Dji=SQRT(DIJSq)
+        Djk=SQRT(DJKSq)
+        DX=One 
+        DotJ=Zero 
+        DO 30 M=1,3
+        T=RJI(M)/DJI
+        Eji(M)=T
+        Tp=Rjk(M)/Djk
+        Ejk(M)=Tp
+        DotJ=DotJ+T*Tp
+   30 CONTINUE      
+      IF(ABS(DotJ) > 0.99995D0) GO TO 60  !!!! colinearity
+      SinJ=SQRT(One-DotJ*DotJ)
+      II=3*(I-1)
+      JJ=3*(J-1)
+      KK=3*(K-1)
+      DO 40 M=1,3
+      SMI=Dx*(DotJ*Eji(M)-Ejk(M))/(Dji*SinJ)
+      IF(ABS(SMI)>Thresh_B) THEN
+        IBB(M) = II+M
+        BB(M) = SMI
       ENDIF
-      smk=dx*(DOtj*ejk(m)-eji(m))/(DJK*sinj)
-      IF(dabs(smk)>thresh_B) THEN
-        IBB(6+m) = kk+m
-        BB(6+m) = smk
+      SMK=DX*(DotJ*Ejk(M)-Eji(M))/(DJK*SinJ)
+      IF(ABS(SMK)>Thresh_B) THEN
+        IBB(6+M) = KK+M
+        BB(6+M) = SMK
       ENDIF
-      sum=smi+smk
-      IF(dabs(sum)>thresh_B) THEN
-        IBB(3+m) = jj+m
-        BB(3+m) = -sum
+      Sum=SMI+SMK
+      IF(ABS(Sum)>Thresh_B) THEN
+        IBB(3+M) = JJ+M
+        BB(3+M) = -Sum
       ENDIF
    40 CONTINUE
       RETURN
-   50 ier=1
+   50 IER=1
       RETURN
-   60 ier=-1
+   60 IER=-1
       WRITE(6,1000)
         IBB(:)=0
         BB(:)=Zero 
@@ -968,9 +968,6 @@ END SUBROUTINE Excl_LIST14
 !
       SUBROUTINE OutP(I,J,K,L,XI,XJ,XK,XL,IBB,BB,thresh_B)
 !
-!  this subroutine computes the b matrix elements for an out of
-!  plane wagging coordinate as Defined by decius, mcintosh, michaelian
-!  and peterson.  subroutine coded by m peterson, univ of toronto.
 !  i is the end atom (atom wagged with respect to j-k-l plane).
 !  j is the apex atom (Atoms i, k and l are attached to j).
 !  k and l are the anchor Atoms (Define the j-k-l plane).
@@ -985,90 +982,94 @@ END SUBROUTINE Excl_LIST14
       INTEGER :: IBB(1:12)
       REAL(DOUBLE) :: BB(1:12)
 !
-   10 DIJSq=0.d0
-      DJKSq=0.d0
-      djlsq=0.d0
-      do 20 m=1,3
-      Tp=XJ(m)
-      t=XI(m)-Tp
-      RJI(m)=t
-      DIJSq=DIJSq+t*t
-      t=xk(m)-Tp
-      rjk(m)=t
-      DJKSq=DJKSq+t*t
-      t=xl(m)-XJ(m)
-      rjl(m)=t
-      djlsq=djlsq+t*t
+      DijSq=Zero
+      DjkSq=Zero
+      DjlSq=Zero
+      DO 20 M=1,3
+        Tp=XJ(M)
+        T=XI(M)-Tp
+        Rji(M)=T
+        DijSq=DijSq+T*T
+        T=XK(M)-Tp
+        Rjk(M)=T
+        DjkSq=DjkSq+T*T
+        T=XK(M)-XJ(M)
+        Rjl(M)=T
+        DjlSq=DjlSq+T*T
    20 CONTINUE      
-      DJI=dsqrt(DIJSq)
-      DJK=dsqrt(DJKSq)
-      djl=dsqrt(djlsq)
-      dx=1.d0
-      cosi=0.d0
-      cosk=0.d0
-      cosl=0.d0
-      do 30 m=1,3
-      t=RJI(m)/DJI
-      eji(m)=t
-      Tp=rjk(m)/DJK
-      ejk(m)=Tp
-      Tpp=rjl(m)/djl
-      ejl(m)=Tpp
-      cosi=cosi+Tp*Tpp
-      cosk=cosk+t*Tpp
-   30 cosl=cosl+t*Tp
-      if(dabs(cosi).gt.0.99995d0)go to 70
-      sinsin=1.d0-cosi*cosi
-      sini=dsqrt(sinsin)
-      c1(1)=ejk(2)*ejl(3)-ejk(3)*ejl(2)
-      c1(2)=ejk(3)*ejl(1)-ejk(1)*ejl(3)
-      c1(3)=ejk(1)*ejl(2)-ejk(2)*ejl(1)
-      dot=eji(1)*c1(1)+eji(2)*c1(2)+eji(3)*c1(3)
-      sint=dot/sini
+      Dji=SQRT(DijSq)
+      Djk=SQRT(DjkSq)
+      Djl=SQRT(DjlSq)
+      Dx=One 
+      CosI=Zero 
+      CosK=Zero 
+      CosL=Zero 
+      DO 30 M=1,3
+        T=Rji(M)/Dji
+        Eji(M)=T
+        Tp=Rjk(M)/Djk
+        Ejk(M)=Tp
+        Tpp=Rjl(M)/Djl
+        Ejl(M)=Tpp
+        CosI=CosI+Tp*Tpp
+        CosK=CosK+T*Tpp
+        CosL=CosL+T*Tp
+   30 CONTINUE         
+      IF(ABS(CosI) > 0.99995D0) GO TO 70
+      SinSin=One-CosI*CosI
+      SinI=SQRT(SinSin)
+      C1(1)=Ejk(2)*Ejl(3)-Ejk(3)*Ejl(2)
+      C1(2)=Ejk(3)*Ejl(1)-Ejk(1)*Ejl(3)
+      C1(3)=Ejk(1)*Ejl(2)-Ejk(2)*Ejl(1)
+      Dot=Eji(1)*C1(1)+Eji(2)*C1(2)+Eji(3)*C1(3)
+      SinT=Dot/SinI
 !     if(dabs(sint).gt.0.00005d0) then
 !        write(6,1020)nob
 !        write(6,'(15x,a36)')intch(nob)
 !     end if
-      if(dabs(sint).gt.0.99995d0)go to 80 !!!! sint show OutP angle
-      cost=dsqrt(1.d0-sint*sint)
-      tant=sint/cost
-      ii=3*(i-1)
-      jj=3*(j-1)
-      kk=3*(k-1)
-      ll=3*(l-1)
-      cossin=cost*sini
-      do 50 m=1,3
-      t=c1(m)/cossin
-      smi=(t-tant*eji(m))/DJI
-      IF(dabs(smi)>thresh_B) THEN
-        IBB(m) = ii+m
-        BB(m) = dx*smi
-      ENDIF
-      smk=t*(cosi*cosk-cosl)/(sinsin*DJK)
-      IF(dabs(smk)>thresh_B) THEN
-        IBB(6+m) = kk+m
-        BB(6+m) = dx*smk
-      ENDIF
-      sml=t*(cosi*cosl-cosk)/(sinsin*djl)
-      IF(dabs(sml)>thresh_B) THEN
-        IBB(9+m) = ll+m
-        BB(9+m) = dx*sml
-      ENDIF
-      sum=smi+smk+sml
-      IF(dabs(sum)>thresh_B) THEN
-        IBB(6+m) = jj+m
-        BB(6+m) = -dx*sum
-      ENDIF
+      IF(ABS(SinT)>0.99995D0) GO TO 80 !!!! sint show OutP angle
+      CosT=SQRT(One-SinT*SinT)
+      TanT=SinT/CosT
+      II=3*(I-1)
+      JJ=3*(J-1)
+      KK=3*(K-1)
+      LL=3*(L-1)
+      CosSin=CosT*SinI
+      DO 50 M=1,3
+        T=C1(M)/CosSin
+        SMI=(T-TanT*Eji(M))/Dji
+        IF(ABS(SMI)>Thresh_B) THEN
+          IBB(M) = II+M
+          BB(M) = Dx*SMI
+        ENDIF
+        SMK=T*(CosI*CosK-CosL)/(SinSin*Djk)
+        IF(ABS(SMK)>Thresh_B) THEN
+          IBB(6+M) = KK+M
+          BB(6+M) = Dx*SMK
+        ENDIF
+        SML=T*(CosI*CosL-CosK)/(SinSin*Djl)
+        IF(ABS(SML)>Thresh_B) THEN
+          IBB(9+M) = LL+M
+          BB(9+M) = Dx*SML
+        ENDIF
+        Sum=SMI+SMK+SML
+        IF(ABS(Sum)>Thresh_B) THEN
+          IBB(6+M) = JJ+M
+          BB(6+M) = -Dx*Sum
+        ENDIF
    50 CONTINUE
-      return
-   60 ier=1
-      return
-   70 ier=-1
-      write(6,1000)
-      return
-   80 ier=-1
-      write(6,1010)
-      return
+        RETURN
+   60 CONTINUE
+        IEr=1
+        RETURN
+   70 CONTINUE
+        IEr=-1
+        WRITE(6,1000)
+        RETURN
+   80 CONTINUE
+      IEr=-1
+      WRITE(6,1010)
+      RETURN
 !
  1000 format(/,2x,'<!> k-j-l is colinear (no plane Defined for wag of i)')
  1010 format(/,2x,'<!> i is perpendicular to j-k-l plane - use valence angle bends')
@@ -1081,124 +1082,128 @@ END SUBROUTINE Excl_LIST14
       SUBROUTINE Tors(I,J,K,L,XI,XJ,XK,XL,IBB,BB,thresh_B)
 !...
 !...  Calculate the B matrix elements for torsion as Defined by
-!...  R.L. Hilderbrandt, J. Mol. Spec., 44 (1972) 599.
+!...  R.L. Hildebrandt, J. Mol. Spec., 44 (1972) 599.
 !...
 !...  i-j-k-l : torsion around j-k bond
 !... 
 !
       IMPLICIT NONE
-      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,XL,rij,rjk,rlk,eij,ejk,elk,cr,sj,sk
-      REAL(DOUBLE) :: SMI,SMK,thresh_B,dij,dijsq,dx,DJK,t,dxsq,DJKSq
+      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,XL,rij,rjk,rlk
+      REAL(DOUBLE),DIMENSION(1:3) :: eij,ejk,elk,cr,sj,sk
+      REAL(DOUBLE) :: SMI,SMK,Thresh_B,dij,dijsq,dx,DJK,t,dxsq,DJKSq
       REAL(DOUBLE) :: cosj,sin2j,smj,dlksq,dlk,cosk,sin2k,sml 
       INTEGER :: I,J,K,L,M,N,II,JJ,KK,LL,IER
       INTEGER :: IBB(1:12)
       REAL(DOUBLE) :: BB(1:12)
 !
-      DJKSq = 0.0d0
-      dxsq = 0.0d0
+      DjkSq=Zero 
+      DxSq=Zero 
 !
-      do m = 1, 3
-         sj(m) = 0.0d0
-         sk(m) = 0.0d0
-         t = xk(m) - XJ(m)
-         rjk(m) = t
-         DJKSq = DJKSq + t * t
-      end do
+      DO M=1,3
+         Sj(M) = Zero 
+         Sk(M) = Zero 
+         T=XK(M)-XJ(M)
+         Rjk(M)=T
+         DjkSq=DjkSq+T*T
+      ENDDO 
 !
-      DJK = 1.0d0 / sqrt(DJKSq)
-      dx = 1.0d0
+      DJK=One/SQRT(DjkSq)
+      Dx=One  
 !
-      do m = 1, 3
-        ejk(m) = rjk(m) * DJK
-      end do
+      DO M=1,3
+        Ejk(M)=Rjk(M)*Djk
+      ENDDO 
 !
-      jj = 3 * (j - 1)
-      kk = 3 * (k - 1)
+      JJ=3*(J-1)
+      KK=3*(K-1)
 !
 !...
-        dijsq=0.d0
-      do 40 m=1,3
-        t=XJ(m)-XI(m)
-        rij(m)=t
-        dijsq=dijsq+t*t
+        DijSq=Zero 
+      DO 40 M=1,3
+        T=XJ(M)-XI(M)
+        Rij(M)=T
+        DijSq=DijSq+T*T
    40 CONTINUE        
-        dij=1.d0/dsqrt(dijsq)
-        cosj=0.d0
-      do 50 m=1,3
-        t=rij(m)*dij
-        eij(m)=t
-        cosj=cosj-t*ejk(m)
+        Dij=One/SQRT(DijSq)
+        CosJ=Zero
+      DO 50 M=1,3
+        T=Rij(M)*Dij
+        Eij(M)=T
+        CosJ=CosJ-T*Ejk(M)
    50 CONTINUE
-      if(dabs(cosj).gt.0.99995d0)go to 120
-      sin2j=(1.d0-cosj*cosj)
-      ii=3*(i-1)
-      cr(1)=eij(2)*ejk(3)-eij(3)*ejk(2)
-      cr(2)=eij(3)*ejk(1)-eij(1)*ejk(3)
-      cr(3)=eij(1)*ejk(2)-eij(2)*ejk(1)
-      do 60 m=1,3
-        t=cr(m)/sin2j
-        smi=t*dij
-      IF(dabs(smi)>thresh_B) THEN
-        IBB(m) = ii+m
-        BB(m) = -dx*smi
+      IF(ABS(CosJ)>0.99995d0) GO TO 120
+      Sin2J=(One-CosJ*CosJ)
+      II=3*(I-1)
+      Cr(1)=Eij(2)*Ejk(3)-Eij(3)*Ejk(2)
+      Cr(2)=Eij(3)*Ejk(1)-Eij(1)*Ejk(3)
+      Cr(3)=Eij(1)*Ejk(2)-Eij(2)*Ejk(1)
+      DO 60 M=1,3
+        T=Cr(M)/Sin2J
+        SMI=T*Dij
+      IF(ABS(SMI)>Thresh_B) THEN
+        IBB(M) = II+M
+        BB(M) = -Dx*SMI
       ENDIF
-        smk=t*cosj*DJK
-        sk(m)=sk(m)+smk
-        smj=smi-smk
-        sj(m)=sj(m)+smj
+        SMK=T*CosJ*DJK
+        SK(M)=SK(M)+SMK
+        SMJ=SMI-SMK
+        SJ(M)=SJ(M)+SMJ
    60 CONTINUE
 !
-      dlksq=0.d0
-      do 70 m=1,3
-      t=xk(m)-xl(m)
-      rlk(m)=t
-   70 dlksq=dlksq+t*t
-      dlk=1.d0/dsqrt(dlksq)
-      cosk=0.d0
-      do 80 m=1,3
-        t=rlk(m)*dlk
-        elk(m)=t
-      cosk=cosk+ejk(m)*t
+      DlkSq=Zero
+      DO 70 M=1,3
+        T=XK(M)-XL(M)
+        Rlk(M)=T
+        DlkSq=DlkSq+T*T
+   70 CONTINUE          
+      Dlk=One/SQRT(DlkSq)
+      CosK=Zero
+      DO 80 M=1,3
+        T=Rlk(M)*Dlk
+        Elk(m)=T
+      CosK=CosK+Ejk(M)*T
    80 CONTINUE
-      if(dabs(cosk).gt.0.99995d0) go to 120
-      sin2k=(1.d0-cosk*cosk)
-      ll=3*(l-1)
-      cr(1)=elk(3)*ejk(2)-elk(2)*ejk(3)
-      cr(2)=elk(1)*ejk(3)-elk(3)*ejk(1)
-      cr(3)=elk(2)*ejk(1)-elk(1)*ejk(2)
-      do 90 m=1,3
-        t=cr(m)/sin2k
-        sml=t*dlk
-        IF(dabs(sml)>thresh_B) THEN
-          IBB(9+m) = ll+m
-          BB(9+m) = -dx*sml
+      IF(ABS(CosK)>0.99995d0) GO TO 120
+      Sin2K=(One-CosK*CosK)
+      LL=3*(L-1)
+      Cr(1)=Elk(3)*Ejk(2)-Elk(2)*Ejk(3)
+      Cr(2)=Elk(1)*Ejk(3)-Elk(3)*Ejk(1)
+      Cr(3)=Elk(2)*Ejk(1)-Elk(1)*Ejk(2)
+      DO 90 M=1,3
+        T=Cr(M)/Sin2K
+        SML=T*Dlk
+        IF(ABS(SML)>Thresh_B) THEN
+          IBB(9+M) = LL+M
+          BB(9+M) = -Dx*SML
         ENDIF
-        smj=t*cosk*DJK
-        sj(m)=sj(m)+smj
-        smk=sml-smj
-        sk(m)=sk(m)+smk
+        SMJ=T*CosK*DJK
+        SJ(M)=SJ(M)+SMJ
+        SMK=SML-SMJ
+        SK(M)=SK(M)+SMK
    90 CONTINUE
-      do 100 m=1,3
-        smj=sj(m)
-      IF(dabs(smj)>thresh_B) THEN
-        IBB(3+m) = jj+m
-        BB(3+m) = dx*smj
+      DO 100 M=1,3
+        SMJ=SJ(M)
+      IF(ABS(SMJ)>Thresh_B) THEN
+        IBB(3+M) = JJ+M
+        BB(3+M) = Dx*SMJ
       ENDIF
-        smk=sk(m)
-      IF(dabs(smk)>thresh_B) THEN
-        IBB(6+m) = kk+m
-        BB(6+m) = dx*smk
+        SMK=SK(M)
+      IF(ABS(SMK)>Thresh_B) THEN
+        IBB(6+M) = KK+M
+        BB(6+M) = Dx*SMK
       ENDIF
   100 CONTINUE
-      return
-  110 ier=1
-      return
-  120 ier=-1
-      write(6,1030)
+      RETURN
+  110 CONTINUE
+      IEr=1
+      RETURN
+  120 CONTINUE
+      IEr=-1
+      WRITE(6,1030)
 ! colinear bonds in torsion, delete the corresponding row of the B matrix!
         IBB(:)=0    
         BB(:)=Zero
-      return
+        RETURN
 !
 1030 format(' i-j-k or j-k-l is colinear (no torsion possIBBle), this row of the B matrix will be deleted.')
 !
@@ -1245,89 +1250,91 @@ END SUBROUTINE Excl_LIST14
         A(3)= RJI(1)*RJK(2)-RJI(2)*RJK(1)
         SUM=A(1)**2+A(2)**2+A(3)**2
         SUM=SQRT(SUM)
-        a(1:3)=a(1:3)/SUM
+        A(1:3)=A(1:3)/SUM
 ! generate point a
-        a(1:3)=XJ(1:3)+a(1:3)        
+        A(1:3)=XJ(1:3)+A(1:3)        
 !
-      DIJSq=0.d0
-      DJKSq=0.d0
-      djasq=0.d0
-      do 20 m=1,3
-        Tp=XJ(m)
-        t=XI(m)-Tp
-        RJI(m)=t
-        DIJSq=DIJSq+t*t
-        t=xk(m)-Tp
-        rjk(m)=t
-        DJKSq=DJKSq+t*t
-        t=a(m)-Tp
-        un(m)=t
-        djasq=djasq+t*t
+      DIJSq=Zero
+      DJKSq=Zero
+      DjaSq=Zero
+      DO 20 M=1,3
+        Tp=XJ(M)
+        T=XI(M)-Tp
+        RJI(M)=T
+        DijSq=DijSq+T*T
+        T=XK(M)-Tp
+        Rjk(M)=T
+        DjkSq=DjkSq+T*T
+        T=A(M)-Tp
+        UN(M)=T
+        DjaSq=DjaSq+T*T
    20 CONTINUE
-      DJI=dsqrt(DIJSq)
-      DJK=dsqrt(DJKSq)
-      dja=dsqrt(djasq)
-      dx=1.d0
-      dotj=0.d0
-      doTp=0.d0
-      do 30 m=1,3
-        t=RJI(m)/DJI
-        Tp=rjk(m)/DJK
-        ejk(m)=Tp
-        dotj=dotj+t*Tp
-        Tp=un(m)/dja
-        unit(m)=Tp
-        doTp=doTp+t*Tp
+      Dji=SQRT(DijSq)
+      Djk=SQRT(DjkSq)
+      dja=SQRT(DjaSq)
+      Dx=One 
+      DotJ=Zero 
+      DotP=Zero 
+      DO 30 M=1,3
+        T=Rji(M)/Dji
+        Tp=Rjk(M)/Djk
+        Ejk(M)=Tp
+        DotJ=DotJ+T*Tp
+        Tp=UN(M)/Dja
+        Unit(M)=Tp
+        DotP=DotP+T*Tp
    30 CONTINUE       
-      test=dabs(dotj)-1.d0
-      if(dabs(test).gt.0.00005d0)go to 70
-      if(dabs(doTp).gt.0.00005d0)go to 80
-      ii=3*(i-1)
-      jj=3*(j-1)
-      kk=3*(k-1)
-      do 40 m=1,3
-        t=unit(m)
-        if(dabs(t)<thresh_B)go to 40
-        t=-dx*t
-        smi=t/DJI
-        IBB1(m) = ii+m
-        BB1(m) = smi
-        smk=t/DJK
-        IBB1(3+m) = jj+m
-        BB1(3+m) = -smi-smk
-        IBB1(6+m) = kk+m
-        BB1(6+m) = smk
-   40 continue
-      up(1)=ejk(2)*unit(3)-ejk(3)*unit(2)
-      up(2)=ejk(3)*unit(1)-ejk(1)*unit(3)
-      up(3)=ejk(1)*unit(2)-ejk(2)*unit(1)
-      do 50 m=1,3
-        t=up(m)
-        if(dabs(t)<thresh_B)go to 50
-        t=-dx*t
-        smi=t/DJI
-        IBB2(m) = ii+m
-        BB2(m) = smi
-        smk=t/DJK
-        IBB2(3+m) = jj+m
-        BB2(3+m) = -smi-smk
-        IBB2(6+m) = kk+m
-        BB2(6+m) = smk
-   50 continue
-      return
-   60 ier=1
-      return
-   70 ier=-1
-      write(6,1020)
-      return
-   80 ier=-1
-      write(6,1030)
-      return
+      Test=ABS(DotJ)-One 
+      IF(ABS(Test)>0.00005d0) GO TO 70
+      IF(ABS(DotP)>0.00005d0) GO TO 80
+      II=3*(I-1)
+      JJ=3*(J-1)
+      KK=3*(K-1)
+      DO 40 M=1,3
+        T=Unit(M)
+        IF(ABS(T)<Thresh_B) GO TO 40
+        T=-Dx*T
+        SMI=T/Dji
+        IBB1(M)=II+M
+        BB1(M)=SMI
+        SMK=T/Djk
+        IBB1(3+M) = jj+M
+        BB1(3+M) = -SMI-SMK
+        IBB1(6+M) = KK+M
+        BB1(6+M) = SMK
+   40 CONTINUE
+      Up(1)=Ejk(2)*Unit(3)-Ejk(3)*Unit(2)
+      Up(2)=Ejk(3)*Unit(1)-Ejk(1)*Unit(3)
+      Up(3)=Ejk(1)*Unit(2)-Ejk(2)*Unit(1)
+      DO 50 M=1,3
+        T=Up(M)
+        IF(ABS(T)<Thresh_B) GO TO 50
+        T=-Dx*T
+        SMI=T/Dji
+        IBB2(M)=II+M
+        BB2(M)=SMI
+        SMK=T/Djk
+        IBB2(3+M)=JJ+M
+        BB2(3+M)=-SMI-SMK
+        IBB2(6+M)=KK+M
+        BB2(6+M)=SMK
+   50 CONTINUE
+      RETURN
+   60 CONTINUE
+      IEr=1
+      RETURN
+   70 CONTINUE
+      IEr=-1
+      WRITE(6,1020)
+      RETURN
+   80 CONTINUE
+      IEr=-1
+      WRITE(6,1030)
+      RETURN
 !
- 1000 format(3g12.6)
- 1010 format('+',86x,'a = (',2(f11.7,','),f11.7,')')
- 1020 format(' i-j-k not colinear - use valence angle bend')
- 1030 format(' atom a not perpendicular to i-j-k at j')
+ 1010 FORMAT('+',86x,'a = (',2(f11.7,','),f11.7,')')
+ 1020 FORMAT(' i-j-k not colinear - use valence angle bend')
+ 1030 FORMAT(' atom a not perpendicular to i-j-k at j')
 !
       END SUBROUTINE LinB
 !
@@ -1496,8 +1503,8 @@ END SUBROUTINE Excl_LIST14
       ENDDO
         ILast=NBond
       DO I=1,NAngle
-          IntCs%Def(ILast+NLinB+I)='BEND '
-          IntCs%Atoms(ILast+NLinB+I,1:3)=AngleIJK%I(1:3,I)
+          IntCs%Def(ILast+I)='BEND '
+          IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
       ENDDO
         ILast=NBond+NAngle
       DO I=1,NTorsion
@@ -1911,31 +1918,45 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         CALL New(IntCs,NIntC)
 !
           ILast=0
-        IntCs%Def(ILast+1:ILast+NIntC_Cov)=IntC_Cov%Def(1:NIntC_Cov)
-   IntCs%Atoms(ILast+1:ILast+NIntC_Cov,1:4)=IntC_Cov%Atoms(1:NIntC_Cov,1:4)
-        IntCs%Value(ILast+1:ILast+NIntC_Cov)=IntC_Cov%Value(1:NIntC_Cov)
-        IntCs%Constraint(ILast+1:ILast+NIntC_Cov)=IntC_Cov%Constraint(1:NIntC_Cov)
+        IF(NIntC_Cov/=0) THEN
+          IntCs%Def(ILast+1:ILast+NIntC_Cov)=IntC_Cov%Def(1:NIntC_Cov)
+          IntCs%Atoms(ILast+1:ILast+NIntC_Cov,1:4)= &
+                      IntC_Cov%Atoms(1:NIntC_Cov,1:4)
+          IntCs%Value(ILast+1:ILast+NIntC_Cov)= &
+                      IntC_Cov%Value(1:NIntC_Cov)
+          IntCs%Constraint(ILast+1:ILast+NIntC_Cov)= &
+                      IntC_Cov%Constraint(1:NIntC_Cov)
+        ENDIF
           ILast=NIntC_Cov
-        IntCs%Def(ILast+1:ILast+NIntC_VDW)=IntC_VDW%Def(1:NIntC_VDW)
-   IntCs%Atoms(ILast+1:ILast+NIntC_VDW,1:4)=IntC_VDW%Atoms(1:NIntC_VDW,1:4)
-        IntCs%Value(ILast+1:ILast+NIntC_VDW)=IntC_VDW%Value(1:NIntC_VDW)
-        IntCs%Constraint(ILast+1:ILast+NIntC_VDW)=IntC_VDW%Constraint(1:NIntC_VDW)
+        IF(NIntC_VDW/=0) THEN 
+         IntCs%Def(ILast+1:ILast+NIntC_VDW)=IntC_VDW%Def(1:NIntC_VDW)
+         IntCs%Atoms(ILast+1:ILast+NIntC_VDW,1:4)= &
+                IntC_VDW%Atoms(1:NIntC_VDW,1:4)
+         IntCs%Value(ILast+1:ILast+NIntC_VDW)= &
+                IntC_VDW%Value(1:NIntC_VDW)
+         IntCs%Constraint(ILast+1:ILast+NIntC_VDW)= &
+                IntC_VDW%Constraint(1:NIntC_VDW)
+        ENDIF
 !
-       IF(NIntC_Extra/=0) THEN
+        IF(NIntC_Extra/=0) THEN
 !
           ILast=ILast+NIntC_VDW
-       IntCs%Def(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Def(1:NIntC_Extra)
-     IntCs%Atoms(ILast+1:ILast+NIntC_Extra,1:4)=IntC_Extra%Atoms(1:NIntC_Extra,1:4)
-     IntCs%Value(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Value(1:NIntC_Extra)
-IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
+          IntCs%Def(ILast+1:ILast+NIntC_Extra)= &
+                      IntC_Extra%Def(1:NIntC_Extra)
+          IntCs%Atoms(ILast+1:ILast+NIntC_Extra,1:4)= &
+                      IntC_Extra%Atoms(1:NIntC_Extra,1:4)
+          IntCs%Value(ILast+1:ILast+NIntC_Extra)= &
+                      IntC_Extra%Value(1:NIntC_Extra)
+          IntCs%Constraint(ILast+1:ILast+NIntC_Extra)= &
+                      IntC_Extra%Constraint(1:NIntC_Extra)
 !
-       ENDIF
+        ENDIF
 !
 ! tidy up
 !
-       IF(NIntC_Cov/=0) CALL Delete(IntC_Cov)
-       IF(NIntC_VDW/=0) CALL Delete(IntC_VDW)
-       IF(NIntC_Extra/=0) CALL Delete(IntC_Extra)
+        IF(NIntC_Cov/=0) CALL Delete(IntC_Cov)
+        IF(NIntC_VDW/=0) CALL Delete(IntC_VDW)
+        IF(NIntC_Extra/=0) CALL Delete(IntC_Extra)
 !
 ! Now filter out repeated definitions, 
 ! which may have occured in INTC_Extra
@@ -2703,27 +2724,36 @@ END SUBROUTINE CoordTrf
 !
 !-------------------------------------------------------
 !
-    SUBROUTINE GDIIS(CurGeom,GDIISMemoryIn,GMLoc)
+    SUBROUTINE GDIIS(CurGeom,GMLoc)
     IMPLICIT NONE
-    TYPE(CRDS) :: GMLoc
-    INTEGER :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
-    INTEGER :: LastStruct,ILow,NCart,GDIISMemory
-    INTEGER :: CurGeom
-    TYPE(DBL_RNK2) :: Displacements,AMat,InvAMat,Structures,ActCarts
-    TYPE(DBL_VECT) :: Coeffs,AuxVect
+    TYPE(CRDS)     :: GMLoc
+    INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
+    INTEGER        :: SRMemory,RefMemory
+    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory,GDIISMaxMem
+    INTEGER        :: CurGeom
+    INTEGER        :: INFO,II 
+    TYPE(DBL_RNK2) :: SRDispl,AMat,EigVect,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: AuxStruct,RefStruct
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,ScaleFact,EigVal
+    TYPE(INT_VECT) :: Selection
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
-    REAL(DOUBLE) :: Sum
+    REAL(DOUBLE)                   :: Sum,S1,S2,GDIISThresh
+    REAL(DOUBLE)                   :: Eig
+    REAL(DOUBLE)                   :: SumX,SumY,SumZ
 !
 ! Current implementation runs on Cartesian displacements only
 ! Input GMLoc contains the actual geometry
 ! CurGeom is set to the last (simple relaxation) structure
 !
+    CALL Get(SRMemory,'SRMemory')
+    CALL Get(RefMemory,'RefMemory')
+    CALL Get(GDIISMaxMem,'GDIISMaxMem')
+    CALL Get(GDIISThresh,'GDIISThresh')
     NCart=3*GMLoc%Natms
-    DimGDIIS=NCart   !!! later dimeension may become NIntC
-    LastStruct=CurGeom-1 ! number of geometries stored in HDF, does not include newest geometry
-    ILow=LastStruct-GDIISMemoryIn   ! latest geometry not considered
-    IF(ILow<0) ILow=0
-    GDIISMemory=LastStruct-ILow
+    DimGDIIS=NCart   !!! later dimension may become NIntC
+    IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+    GDIISMemory=SRMemory
+write(*,*) 'GDIISMemory got= ',GDIISMemory
 write(*,*) 'curgeom= ',curgeom
 write(*,*) 'gdiismemory= ',gdiismemory
 !
@@ -2733,115 +2763,172 @@ write(*,*) 'gdiismemory= ',gdiismemory
 #endif
 !
 ! Get Displacements from geometries, stored in HDF
-! and fill them into Displacements columns.
+! and fill them into SRDispl columns.
 !
-    CALL New(Displacements,(/DimGDIIS,GDIISMemory/))
-    CALL New(Structures,(/DimGDIIS,GDIISMemory+1/))
-    CALL New(ActCarts,(/3,GMLoc%Natms/))
-    Structures%D=Zero
+    CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+    CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+    CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+    SRStruct%D=Zero
 !
-! Get last GDIISMemory pieces of structures
+! Get recent Ref and SR structures
 !
-    DO IGeom=ILow+1,LastStruct
-      CALL Get(ActCarts,'cartesians',Tag_O=TRIM(GMTag)//TRIM(IntToChar(IGeom)))
-        K=IGeom-ILow
-      DO I=1,GMLoc%Natms
-        J=3*(I-1)
-        Structures%D(J+1,K)=ActCarts%D(1,I)
-        Structures%D(J+2,K)=ActCarts%D(2,I)
-        Structures%D(J+3,K)=ActCarts%D(3,I)
-      ENDDO
+    CALL New(Auxvect,DimGDIIS)
+    DO IGeom=1,GDIISMemory
+      CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+      SRStruct%D(:,IGeom)=AuxVect%D
+      CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+      RefStruct%D(:,IGeom)=AuxVect%D
     ENDDO
-call pprint(Structures%D,'structures 1',unit_o=6)
+    CALL Delete(AuxVect)
 !
-! Fill in present simple relaxation structure
+call pprint(SRStruct%D,'SRStruct 1',unit_o=6)
+call pprint(RefStruct%D,'RefStruct 1',unit_o=6)
 !
-    DO I=1,GMLoc%Natms
-      J=3*(I-1)
-      Structures%D(J+1,GDIISMemory+1)=GMLoc%Carts%D(1,I)
-      Structures%D(J+2,GDIISMemory+1)=GMLoc%Carts%D(2,I)
-      Structures%D(J+3,GDIISMemory+1)=GMLoc%Carts%D(3,I)
-    ENDDO
- call pprint(Structures%D,'structures 2',unit_o=6)
-!
-! Get displacements ('error vectors')
+! Get simple relaxation displacements ('error vectors')
 !
     DO I=1,GDIISMemory    
-      Displacements%D(:,I)=Structures%D(:,I+1)-Structures%D(:,I)
+      SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
     ENDDO
-!call pprint(Displacements%D,'Displacements',unit_o=6)
+ call pprint(SRDispl%D,'SRDispl',unit_o=6)
 !
-! Now calculate overlap ('A' matrix). Presently only non-sparse representation is available
-! dimension of overlap is GDIISMemory+1
+! Now calculate overlap ('A' matrix). 
+! Presently only non-sparse representation is available
 !
     CALL New(AMat,(/GDIISMemory,GDIISMemory/))
 !
     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
-		   Displacements%D,Displacements%D,AMat%D)
-!call pprint(AMat%D,'AMat',unit_o=6)
+		   SRDispl%D,SRDispl%D,AMat%D)
+ call pprint(AMat%D,'AMat',unit_o=6)
 !
-! Now, Calculate SVD inverse of the Overlap
+! Now, calculate eigenvalues and eigenvectors of Overlap
 !
-    CALL New(InvAMat,(/GDIISMemory,GDIISMemory/))
+    CALL New(EigVal,GDIISMemory)
+    CALL New(EigVect,(/GDIISMemory,GDIISMemory/))
+    EigVect%D=Zero
+    EigVal%D=Zero
 !
     CALL SetDSYEVWork(GDIISMemory)
-    CALL FunkOnSqMat(GDIISMemory,Inverse,AMat%D,InvAMat%D)
+!
+      BLKVECT%D=AMat%D
+      CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+        BLKWORK%D,BLKLWORK,INFO)
+      IF(INFO/=SUCCEED) &
+      CALL Halt('DSYEV hosed in RotationsOff. INFO='&
+                   //TRIM(IntToChar(INFO)))
+ CALL PPrint(BLKVECT,'eigenvectors',Unit_O=6)
+!CALL DGEMM_TNc(3,3,3,One,Zero,BLKVECT%D,Theta%D,Theta2%D)
+!CALL DGEMM_NNc(3,3,3,One,Zero,Theta2%D,BLKVECT%D,Theta%D)
+ CALL PPrint(BLKVALS,'eigenvalues',Unit_O=6)
+!
+! Select out SVD subspace
+!
+      CALL New(Selection,GDIISMemory)
+      CALL RecognEigPattern(BLKVALS%D,Selection%I)
+        II=0
+      DO I=1,GDIISMemory
+        Eig=BLKVALS%D(I)*Sum
+        IF(Selection%I(I)==1.AND.II<=GDIISMaxMem) THEN
+          II=II+1
+          EigVect%D(:,II)=BLKVECT%D(:,I)
+          EigVal%D(II)=BLKVALS%D(I)
+        ENDIF
+      ENDDO
+      CALL Delete(Selection)
+write(*,*) 'ii = ',II,' thresh= ',GDIISThresh,' GDIISMaxMem= ',GDIISMaxMem
+call pprint(eigvect,'eigvect',unit_o=6)
+!
+! Now, unitary transform SR and Ref structures and SRDispl
+! to get the basis for new GDIIS steps
+!
+      CALL New(AuxStruct,(/DimGDIIS,II/))
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,II,One,Zero,  &
+          SRDispl%D(:,1:GDIISMemory),EigVect%D(:,1:II),AuxStruct%D)
+        SRDispl%D(:,1:II)=AuxStruct%D
+!
+        CALL DGEMM_NNc(DimGDIIS,GDIISMemory,II,One,Zero,  &
+          RefStruct%D(:,1:GDIISMemory),EigVect%D(:,1:II),AuxStruct%D)
+        RefStruct%D(:,1:II)=AuxStruct%D
+!
+        DO I=1,II
+          SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
+        ENDDO
+ CALL PPrint(SRStruct,'orthogonalized SRStruct',Unit_O=6)
+!call pprint(AMat,'orthogonalized overlap')
+!call DGEMM_TNc(II,DimGDIIS,II,One,Zero,  &
+!   SRDispl%D(:,1:II),SRDispl%D(:,1:II),AMat%D(1:II,1:II))
+!call pprint(AMat%D,'AMat',unit_o=6)
+!
+!
+! Calculate GDIIS Coeffs
+!
+        CALL New(Coeffs,II)
+        CALL New(AuxVect,GDIISMemory)
+        AuxVect%D=One  
+        CALL DGEMM_TNc(II,GDIISMemory,1,One,Zero,  &
+          EigVect%D(:,1:II),AuxVect%D,Coeffs%D)
+        CALL Delete(AuxVect)
+        DO I=1,II
+          Coeffs%D(I)=Coeffs%D(I)/EigVal%D(I)
+        ENDDO
+call PPrint(coeffs,'coeffs aft inv mult',Unit_O=6)
+      CALL Delete(AuxStruct)
+!
+! Rescale coeffs to get a sum of One.
+!
+      Sum=Zero
+      DO I=1,II ; Sum=Sum+Coeffs%D(I) ; ENDDO
+      Sum=One/Sum
+      Coeffs%D=Sum*Coeffs%D
+!
     CALL UnSetDSYEVWork()
-!call pprint(InvAMat%D,'InvAMat',unit_o=6)
 !
-! Solve for linear combination coeffs 
-!
-    CALL New(Coeffs,GDIISMemory)
-    CALL New(AuxVect,GDIISMemory)
-    AuxVect%D=One 
-    CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
-		   InvAMat%D,AuxVect%D,Coeffs%D)
-    CALL Delete(AuxVect)
 write(*,*) 'coeffs 1= '
-write(*,*) (Coeffs%D(i),i=1,GDIISMemory)
-!
-! Calculate length of GDIIS vector, and
-! rescale coeffs
-!
-    Sum=One/SQRT(DOT_PRODUCT(Coeffs%D,Coeffs%D))
-    Coeffs%D=Sum*Coeffs%D
-write(*,*) 'length= ',sqrt(sum)
-write(*,*) 'coeffs 2= '
-write(*,*) (Coeffs%D(i),i=1,GDIISMemory)
+write(*,*) (Coeffs%D(i),i=1,II)
 !
 ! Calculate new geometry, linearcombine previous steps 
 !
     CALL New(AuxVect,DimGDIIS)
 !
       AuxVect%D=Zero
-    DO I=1,GDIISMemory
-!     AuxVect%D=AuxVect%D+Coeffs%D(I)*Displacements%D(:,I)
-      AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I)
-!     AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I+1)
+    DO I=1,II
+      AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
     ENDDO
-write(*,*) 'obsvd length= ',SQRT(DOT_PRODUCT(AuxVect%D,AuxVect%D))
+!
+! Project out translations and rotations from GDIIS step
+!
+    AuxVect%D=AuxVect%D-RefStruct%D(:,II) 
+    CALL CartRNK1ToCartRNK2(RefStruct%D(:,II),GMLoc%Carts%D)
+    CALL TranslsOff(AuxVect%D)
+    CALL RotationsOff(AuxVect%D,GMLoc%Carts%D)
 !
 ! Fill new geometry into GM array
 !
-    DO I=1,GMLoc%Natms
-      J=(I-1)*3
-      GMLoc%Carts%D(1,I)=AuxVect%D(J+1)
-      GMLoc%Carts%D(2,I)=AuxVect%D(J+2)
-      GMLoc%Carts%D(3,I)=AuxVect%D(J+3)
+    CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D,.TRUE.)
+!
+! Save unitary transformed structures
+!
+      CALL Put(0,'SrMemory')
+      CALL Put(0,'RefMemory')
+    DO I=1,II
+      AuxVect%D=SRStruct%D(:,I)
+      CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR')
+      AuxVect%D=RefStruct%D(:,I)
+      CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref')
     ENDDO
 !
     CALL Delete(AuxVect)
-write(*,*) GMLoc%Carts%D
 call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Tidy up
 !
     CALL Delete(Coeffs)
-    CALL Delete(InvAMat)
+    CALL Delete(EigVal)
+    CALL Delete(EigVect)
     CALL Delete(AMat)
-    CALL Delete(ActCarts)
-    CALL Delete(Structures)
-    CALL Delete(Displacements)
+    CALL Delete(SRStruct)
+    CALL Delete(RefStruct)
+    CALL Delete(SRDispl)
 !
     END SUBROUTINE GDIIS
 !
@@ -3613,17 +3700,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Calculate center of Mass (Masses are unit here)
 !
-        CMX=Zero
-        CMY=Zero
-        CMZ=Zero
-      DO I=1,NatmsLoc
-        CMX=CMX+XYZ(1,I)
-        CMY=CMY+XYZ(2,I)
-        CMZ=CMZ+XYZ(3,I)
-      ENDDO
-        CMX=CMX/DBLE(NatmsLoc)
-        CMY=CMY/DBLE(NatmsLoc)
-        CMZ=CMZ/DBLE(NatmsLoc)
+      CALL CenterOfMass(XYZ,CMX,CMY,CMZ)
 !
 ! Mass centered Cartesians
 !
@@ -3635,27 +3712,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Build inertial momentum tensor
 !
-        Theta%D=Zero
-      DO I=1,NatmsLoc
-        X=CMCarts%D(1,I)
-        Y=CMCarts%D(2,I)
-        Z=CMCarts%D(3,I)
-	XX=X*X
-	YY=Y*Y
-	ZZ=Z*Z
-	XY=X*Y
-	YZ=Y*Z
-	ZX=Z*X
-        Theta%D(1,1)=Theta%D(1,1)+YY+ZZ
-        Theta%D(2,2)=Theta%D(2,2)+ZZ+XX
-        Theta%D(3,3)=Theta%D(3,3)+YY+ZZ
-        Theta%D(1,2)=Theta%D(1,2)-XY    
-        Theta%D(2,1)=Theta%D(2,1)-XY    
-        Theta%D(1,3)=Theta%D(1,3)-ZX    
-        Theta%D(3,1)=Theta%D(3,1)-ZX    
-        Theta%D(2,3)=Theta%D(2,3)-YZ    
-        Theta%D(3,2)=Theta%D(3,2)-YZ    
-      ENDDO
+      CALL PrincMomTens(CMCarts%D,Theta%D)
 !
 ! Get eigenvectors of inertial momentum tensor
 !
@@ -3666,55 +3723,41 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
         IF(INFO/=SUCCEED) &
 	CALL Halt('DSYEV hosed in RotationsOff. INFO='&
                    //TRIM(IntToChar(INFO)))
-!CALL PPrint(BLKVECT%D,'eigenvectors',Unit_O=6)
-!CALL DGEMM_TNc(3,3,3,One,Zero,BLKVECT%D,Theta%D,Theta2%D)
-!CALL DGEMM_NNc(3,3,3,One,Zero,Theta2%D,BLKVECT%D,Theta%D)
-!CALL PPrint(Theta%D,'eigenvalues',Unit_O=6)
         Theta2%D(1:3,1:3)=BLKVECT%D(1:3,1:3)
       CALL UnSetDSYEVWork()
 !
-! Now, form the three vectors of normalized displacements 
-! upon the rotations around principal axis'
-! and transform them back into original system
+! Calculate displacements resulting from rotations
+! around principal axis by a unit rotation vector pointing along
+! principal axis. 
 !
       DO I=1,NatmsLoc
         J=(I-1)*3
-        CALL DGEMM_NNc(3,3,1,One,Zero,Theta2%D, &
-                       CMCarts%D(1:3,I),Vect%D)
-        X=Vect%D(1)
-        Y=Vect%D(2)
-        Z=Vect%D(3)
-        X=CMCarts%D(1,I)
-        Y=CMCarts%D(2,I)
-        Z=CMCarts%D(3,I)
-! r x v1
-        Rot1%D(J+1)=  Y-Z
-        Rot1%D(J+2)=  Zero
-        Rot1%D(J+3)=  Zero
-! r x v2
-        Rot2%D(J+1)=  Zero
-        Rot2%D(J+2)=  Z-X
-        Rot2%D(J+3)=  Zero
-! r x v3
-        Rot3%D(J+1)=  Zero
-        Rot3%D(J+2)=  Zero
-        Rot3%D(J+3)=  X-Y
-        Vect%D=Rot1%D(J+1:J+3)
-        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot1%D(J+1:J+3))
-        Vect%D=Rot2%D(J+1:J+3)
-        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot2%D(J+1:J+3))
-        Vect%D=Rot3%D(J+1:J+3)
-        CALL DGEMM_TNc(3,3,1,One,Zero,Theta2%D,Vect%D,Rot3%D(J+1:J+3))
+! r1
+        CALL CROSS_PRODUCT(Theta2%D(:,1),CMCarts%D(:,I),Rot1%D(J+1:J+3))
+! r2
+        CALL CROSS_PRODUCT(Theta2%D(:,2),CMCarts%D(:,I),Rot2%D(J+1:J+3))
+! r3
+        CALL CROSS_PRODUCT(Theta2%D(:,3),CMCarts%D(:,I),Rot3%D(J+1:J+3))
+!
       ENDDO
 !
 ! Normalize Rot vectors!
 !
-      SUM=One/SQRT(DOT_PRODUCT(Rot1%D,Rot1%D))
-      Rot1%D=Sum*Rot1%D
-      SUM=One/SQRT(DOT_PRODUCT(Rot2%D,Rot2%D))
-      Rot2%D=Sum*Rot2%D
-      SUM=One/SQRT(DOT_PRODUCT(Rot3%D,Rot3%D))
-      Rot3%D=Sum*Rot3%D
+      SUM=SQRT(DOT_PRODUCT(Rot1%D,Rot1%D))
+      IF(Sum>1.D-6) THEN
+        Sum=One/Sum
+        Rot1%D=Sum*Rot1%D
+      ENDIF
+      SUM=SQRT(DOT_PRODUCT(Rot2%D,Rot2%D))
+      IF(Sum>1.D-6) THEN
+        Sum=One/Sum
+        Rot2%D=Sum*Rot2%D
+      ENDIF
+      SUM=SQRT(DOT_PRODUCT(Rot3%D,Rot3%D))
+      IF(Sum>1.D-6) THEN
+        Sum=One/Sum
+        Rot3%D=Sum*Rot3%D
+      ENDIF
 !!
 !! test orthogonalities
 !!
@@ -3749,7 +3792,9 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
       SUM1=SUM1*SUM1/SUM*100.D0
       SUM2=SUM2*SUM2/SUM*100.D0
       SUM3=SUM3*SUM3/SUM*100.D0
-      WRITE(*,100) SUM1,SUM2,SUM3
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,100) SUM1,SUM2,SUM3
+      ENDIF
 100   FORMAT('Rot1= ',F7.3,'%    Rot2= ',F7.3,'%     Rot3= ',F7.3,'% ')
 !
       CALL Delete(Vect)
@@ -3791,19 +3836,27 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 ! Now, project out translations from CartVect
 !
       SUM =DOT_PRODUCT(CartVect,CartVect)
-      SUM1=DOT_PRODUCT(Tr1%D,CartVect)
-	CartVect=CartVect-SUM1*Tr1%D
-      SUM2=DOT_PRODUCT(Tr2%D,CartVect)
-	CartVect=CartVect-SUM2*Tr2%D
-      SUM3=DOT_PRODUCT(Tr3%D,CartVect)
-	CartVect=CartVect-SUM3*Tr3%D
+      IF(SUM > 1.D-6) THEN
+        SUM1=DOT_PRODUCT(Tr1%D,CartVect)
+          CartVect=CartVect-SUM1*Tr1%D
+        SUM2=DOT_PRODUCT(Tr2%D,CartVect)
+          CartVect=CartVect-SUM2*Tr2%D
+        SUM3=DOT_PRODUCT(Tr3%D,CartVect)
+          CartVect=CartVect-SUM3*Tr3%D
+        SUM1=SUM1*SUM1/SUM*100.D0
+        SUM2=SUM2*SUM2/SUM*100.D0
+        SUM3=SUM3*SUM3/SUM*100.D0
+      ELSE
+        SUM1=Zero
+        SUM2=Zero
+        SUM3=Zero
+      ENDIF
 !
 ! Percentage of translations
 !
-      SUM1=SUM1*SUM1/SUM*100.D0
-      SUM2=SUM2*SUM2/SUM*100.D0
-      SUM3=SUM3*SUM3/SUM*100.D0
-      WRITE(*,100) SUM1,SUM2,SUM3
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,100) SUM1,SUM2,SUM3
+      ENDIF
 100   FORMAT(' Tr1= ',F7.3,'%     Tr2= ',F7.3,'%      Tr3= ',F7.3,'% ')
 !
       CALL Delete(Tr3)
@@ -3936,14 +3989,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
       NatmsLoc=SIZE(ActCarts,2)
 !
-      IF(.NOT.PRESENT(Add_O)) THEN
-        DO I=1,NatmsLoc 
-          J=3*(I-1)
-          ActCarts(1,I)=VectCart(J+1)
-          ActCarts(2,I)=VectCart(J+2)
-          ActCarts(3,I)=VectCart(J+3)
-        ENDDO
-      ELSE IF(Add_O) THEN
+      IF(PRESENT(Add_O).AND.Add_O) THEN
         DO I=1,NatmsLoc 
           J=3*(I-1)
           ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
@@ -3960,6 +4006,37 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
       ENDIF
 !
       END SUBROUTINE CartRNK1ToCartRNK2
+!
+!---------------------------------------------------------------
+!
+      SUBROUTINE CartRNK2ToCartRNK1(VectCart,ActCarts,Add_O)
+!
+      REAL(DOUBLE),DIMENSION(:)   :: VectCart
+      REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
+      INTEGER :: I,J,NatmsLoc
+      LOGICAL,OPTIONAL :: Add_O
+!
+      NatmsLoc=SIZE(ActCarts,2)
+!
+      IF(PRESENT(Add_O)) THEN
+        IF(Add_O) THEN
+          DO I=1,NatmsLoc 
+            J=3*(I-1)
+            VectCart(J+1)=VectCart(J+1)+ActCarts(1,I)
+            VectCart(J+2)=VectCart(J+2)+ActCarts(2,I)
+            VectCart(J+3)=VectCart(J+3)+ActCarts(3,I)
+          ENDDO
+        ENDIF
+      ELSE
+        DO I=1,NatmsLoc 
+          J=3*(I-1)
+          VectCart(J+1)=ActCarts(1,I)
+          VectCart(J+2)=ActCarts(2,I)
+          VectCart(J+3)=ActCarts(3,I)
+        ENDDO
+      ENDIF
+!
+      END SUBROUTINE CartRNK2ToCartRNK1
 !-------------------------------------------------------
 !
       SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ)
@@ -3975,6 +4052,7 @@ call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Now check for bending -> linear bending transitions
 !
+      NatmsLoc=SIZE(XYZ,2)
       CALL New(MarkLinB,NIntC)
 !
        MarkLinB%I=0
@@ -4303,17 +4381,17 @@ END SUBROUTINE ChkBendToLinB
       END SUBROUTINE BackTrfConvg
 !
 !----------------------------------------------------------------------
-      SUBROUTINE PrtXYZ(XYZ,Unit_O,Title_O)
+      SUBROUTINE PrtXYZ(XYZ,PrtU_O,Title_O)
         REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-        INTEGER,OPTIONAL            :: Unit_O
-        INTEGER                     :: I,J,NatmsLoc,Unit
+        INTEGER,OPTIONAL            :: PrtU_O
+        INTEGER                     :: I,J,NatmsLoc,PrtU
         TYPE(INT_VECT)              :: MMAtNum
         TYPE(DBL_VECT)              :: NuclCharge
         CHARACTER(LEN=*),OPTIONAL   :: Title_O
 !
         NatmsLoc=SIZE(XYZ,2)
-        Unit=6
-        IF(PRESENT(Unit_O)) Unit=Unit_O
+        PrtU=6
+        IF(PRESENT(PrtU_O)) PrtU=PrtU_O
         CALL New(MMAtNum,NatmsLoc) 
 !
 #ifdef MMech
@@ -4332,18 +4410,233 @@ END SUBROUTINE ChkBendToLinB
           CALL Delete(NuclCharge)
 #endif
 !
-          IF(PRESENT(Title_O)) WRITE(Unit,*) Title_O
-!         IF(Unit/=6) OpenPU(Unit_O=Unit)
+        WRITE(PrtU,*) NatmsLoc
+          IF(PRESENT(Title_O)) WRITE(PrtU,*) Title_O
         DO I=1,NatmsLoc
-          WRITE(Unit,100) MMAtNum%I(I),XYZ(1:3,I)
+          WRITE(PrtU,100) MMAtNum%I(I),XYZ(1:3,I)
         ENDDO
 100     FORMAT(I4,3X,3F12.6)
-!         IF(Unit/=6) CALL ClosePU(Unit_O=Unit)
 !
         CALL Delete(MMAtNum) 
 !
       END SUBROUTINE PrtXYZ
 !----------------------------------------------------------------------
+      SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O)
+        INTEGER                              :: IGeom,NCart
+        REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
+        TYPE(DBL_VECT),OPTIONAL              :: Vect_O
+        TYPE(DBL_VECT)                       :: AuxVect
+        CHARACTER(LEN=*),OPTIONAL            :: Tag_O
+        INTEGER                              :: GDIISMemory
+        INTEGER                              :: SRMemory
+        INTEGER                              :: RefMemory
+!
+! Increment GDIISMemory
+!
+        IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='SR') THEN
+          CALL Get(SrMemory,'SRMemory')
+          SRMemory=SRMemory+1
+          IGeom=SRMemory
+          CALL Put(SRMemory,'SRMemory')
+        ENDIF
+!
+        IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='Ref') THEN
+          CALL Get(RefMemory,'RefMemory')
+          RefMemory=RefMemory+1
+          IGeom=RefMemory
+          CALL Put(RefMemory,'RefMemory')
+        ENDIF
+!write(*,*) TRIM(Tag_O),IGeom
+!
+        IF(PRESENT(XYZ_O)) THEN
+!
+          NCart=3*SIZE(XYZ_O,2)
+!
+! Put Geometry of simple relaxation set into HDF, for GDIIS.
+!
+          CALL New(AuxVect,NCart)
+            CALL CartRNK2ToCartRNK1(AuxVect%D,XYZ_O)
+            CALL Put(AuxVect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+          CALL Delete(AuxVect)
+!
+        ELSE IF(PRESENT(Vect_O)) THEN
+!
+          CALL Put(Vect_O,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+!
+        ELSE
+!
+          CALL Halt('No input coordinates in PutSRStep')
+!
+        ENDIF
+!
+      END SUBROUTINE PutSRStep
+!----------------------------------------------------------------------
+!
+      SUBROUTINE CenterOfMass(XYZ,CX,CY,CZ)
+        REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+        REAL(DOUBLE)                :: CX,CY,CZ
+        INTEGER                     :: I,NatmsLoc
+!
+        NatmsLoc=SIZE(XYZ,2)
+!
+          CX=Zero
+          CY=Zero
+          CZ=Zero
+        DO I=1,NatmsLoc
+          CX=CX+XYZ(1,I) 
+          CY=CY+XYZ(2,I) 
+          CZ=CZ+XYZ(3,I) 
+        ENDDO
+        CX=CX/DBLE(NatmsLoc)
+        CY=CY/DBLE(NatmsLoc)
+        CZ=CZ/DBLE(NatmsLoc)
+!
+      END SUBROUTINE CenterOfMass
+!
+!-------------------------------------------------------------------
+!
+      SUBROUTINE PrincMomTens(CMCarts,Theta)
+!
+! Calculates inertial momentum tensor
+! Pass in mass-centered Cartesians
+!
+        REAL(DOUBLE),DIMENSION(:,:) :: Theta,CMCarts
+        INTEGER                     :: I,NatmsLoc
+        REAL(DOUBLE)                :: X,Y,Z,XX,YY,ZZ,XY,YZ,ZX
+!                
+      NatmsLoc=SIZE(CMCarts,2)
+!                
+        Theta=Zero
+      DO I=1,NatmsLoc
+        X=CMCarts(1,I)
+        Y=CMCarts(2,I)
+        Z=CMCarts(3,I)
+	XX=X*X
+	YY=Y*Y
+	ZZ=Z*Z
+	XY=X*Y
+	YZ=Y*Z
+	ZX=Z*X
+        Theta(1,1)=Theta(1,1)+YY+ZZ
+        Theta(2,2)=Theta(2,2)+ZZ+XX
+        Theta(3,3)=Theta(3,3)+XX+YY
+        Theta(1,2)=Theta(1,2)-XY    
+        Theta(2,1)=Theta(2,1)-XY    
+        Theta(1,3)=Theta(1,3)-ZX    
+        Theta(3,1)=Theta(3,1)-ZX    
+        Theta(2,3)=Theta(2,3)-YZ    
+        Theta(3,2)=Theta(3,2)-YZ    
+      ENDDO
+!
+      END SUBROUTINE PrincMomTens
+!
+!------------------------------------------------------------------
+!
+      SUBROUTINE RotateMol(XYZ,U33)
+!
+! Rotate Cartesian set by U33 Unitary matrix
+! XYZ(I)=XYZ(I)*U33
+!
+        REAL(DOUBLE),DIMENSION(:,:) :: XYZ,U33
+        INTEGER                     :: I,J,K,NatmsLoc
+        TYPE(DBL_VECT)              :: AuxVect
+!
+        NatmsLoc=SIZE(XYZ,2)
+!
+        CALL New(AuxVect,3)
+        DO I=1,NatmsLoc
+          CALL DGEMM_NNc(1,3,3,One,Zero,XYZ(1:3,I),U33,AuxVect%D)
+          XYZ(1:3,I)=AuxVect%D 
+        ENDDO
+        CALL Delete(AuxVect)
+!
+      END SUBROUTINE RotateMol
+!
+!-------------------------------------------------------------------
+!
+      SUBROUTINE CROSS_PRODUCT(V1,V2,CrossProd)
+      REAL(DOUBLE),DIMENSION(:) :: V1,V2,CrossProd
+!
+        CrossProd(1)=V1(2)*V2(3)-V1(3)*V2(2)
+        CrossProd(2)=V1(3)*V2(1)-V1(1)*V2(3)
+        CrossProd(3)=V1(1)*V2(2)-V1(2)*V2(1)
+!
+      END SUBROUTINE CROSS_PRODUCT
+!
+!------------------------------------------------------------------
+!
+      SUBROUTINE RecognEigPattern(EigVals,Selection)
+        REAL(DOUBLE),DIMENSION(:) :: EigVals
+        INTEGER,     DIMENSION(:) :: Selection
+        REAL(DOUBLE)              :: Sum,DWidth,LowLim,GapWidth
+        INTEGER                   :: I,J,NDim,NDomain,IDom
+        TYPE(DBL_VECT)            :: AuxVect
+        TYPE(INT_VECT)            :: CountDom,MarkDom
+!
+! To select out the GDIIS subspace, current criterium is
+! a gap in the logarithmic scale of the scaled eigenvalues 
+! of 2 orders of magnitude or more
+! Total range of selected spectral part may not be wider than
+! 2 orders of magnitude
+!
+        GapWidth=2.3D0
+          DWidth=2.D0
+        NDim=SIZE(EigVals)
+        I=SIZE(Selection)
+        IF(NDim/=I) CALL Halt('Dimensionality error in RecognEigPattern')
+        CALL New(AuxVect,NDim)
+        CALL New(CountDom,NDim)
+        CountDom%I=0
+        CALL New(MarkDom,NDim)
+        MarkDom%I=0
+!
+        Sum=Zero
+        DO I=1,NDim ; SUM=MAX(Sum,ABS(BLKVALS%D(I))) ; ENDDO    
+        Sum=One/Sum
+write(*,*) 'scaled eigenvals= ',Sum*BLKVALS%D
+!
+        DO I=1,NDim
+          AuxVect%D(I)=DLOG10(Sum*ABS(BLKVALS%D(I)))
+        ENDDO
+write(*,*) 'LOG scaled eigenvals= ',AuxVect%D
+!
+! set up domain structure
+!
+        NDomain=1
+        LowLim=AuxVect%D(1)
+        MarkDom%I(1)=1
+        CountDom%I(1)=1
+        DO I=2,NDim
+          IF(AuxVect%D(I)-AuxVect%D(I-1)>GapWidth .OR. &
+             AuxVect%D(I)>LowLim+DWidth) THEN
+               NDomain=NDomain+1 
+               LowLim=AuxVect%D(I)
+          ENDIF
+          MarkDom%I(I)=NDomain
+          CountDom%I(NDomain)=CountDom%I(NDomain)+1
+        ENDDO
+!
+! Now, scan domains and use the most populated one
+!
+        IDom=1
+        DO I=1,NDomain
+          IF(CountDom%I(I)>=CountDom%I(IDom)) IDom=I
+        ENDDO
+!
+        Selection(:)=0
+        DO I=1,NDim
+          IF(MarkDom%I(I)==IDom) Selection(I)=1
+        ENDDO
+write(*,*) 'ndomain= ',ndomain
+write(*,*) 'markdom= ',MarkDom%I
+write(*,*) 'countdom= ',CountDom%I
+write(*,*) 'selection= ',selection
+!
+        CALL Delete(CountDom)        
+        CALL Delete(MarkDom)        
+        CALL Delete(AuxVect)        
+!
+      END SUBROUTINE RecognEigPattern
 !
 END MODULE InCoords
 
