@@ -71,15 +71,18 @@ big_pbs:small_pbs
 #
 #--------------------------------------------
 #
-release:clean $(ReleaseFiles) 
-	rm -f *.out
-	rm -f *.log
+release:purge $(ReleaseFiles) 
 #
 purge:	clean 
 	rm -f $(REMOVESRCE)
+	rm -f Test
 	rm -f *.out
 	rm -f *.log
 	rm -f *.geo
+	rm -f *.hdf
+	rm -f *.xyz
+	rm -f *.pdb
+	rm -f *Cubes
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
