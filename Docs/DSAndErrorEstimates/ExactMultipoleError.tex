@@ -9,7 +9,7 @@
 \usepackage{dcolumn} 
 \usepackage{graphicx}
 \makeatletter 
-\makeatother
+\makeatother 
 
 \begin{document}
 
@@ -242,8 +242,9 @@ which we use as an illustration of the problems associated with using unbounded 
 However, this suffers from several severe problems: 
 \begin{itemize}
 \item[i)] It does not take into account the decay of the multipoles
-\item[ii)] It does not take into account the weight of the distributions within the region $\Sigma$, a serious 
-problem for quantum chemistry codes where the distribution weights can span several orders of magnitude,
+\item[ii)] It does not take into account the weight of the distributions within the region $\Sigma$, 
+a serious problem for quantum chemistry codes where the distribution weights can span several orders 
+of magnitude,
 \item[iii)] It does not take into account the angular momentum type of the distributions,
 \item[iv)] When $|R_a - R_{\Sigma}| \rightarrow |{\bf d}_{max}|$ it can significantly underestimate
 the error.
@@ -258,13 +259,13 @@ multipoles, here we just give a brief description.
 Let us start with the expression of the exact multipole error as,
 \begin{eqnarray}
 \label{MultErr}
-\varepsilon \left( l_{0}\right) && =\Big| \frac{1}{2}\sum _{l'=L_{max}+1}^{\infty }\, 
+\varepsilon \left( l_{0}\right) && =\bigg| \frac{1}{2}\sum _{l'=L_{max}+1}^{\infty }\, 
 \sum _{m=-l_{0}}^{l_{0}}\, 
 \sum _{m'=-l'}^{l'}\, \nonumber\\
 && \left( -1\right) ^{l}\, 
 {\cal O}_{l_{0}}^{m}[\mathbf{R}_a]\, 
 M_{l_{0}+l'}^{m+m'}
-[{\mathbf{R}_a-\mathbf{R}_{\Sigma}}]\, {\cal O}_{l'}^{m'}[\mathbf{R}_{\Sigma}] \Big| \nonumber\\
+[{\mathbf{R}_a-\mathbf{R}_{\Sigma}}]\, {\cal O}_{l'}^{m'}[\mathbf{R}_{\Sigma}] \bigg| \nonumber\\
 \end{eqnarray}
 %
 which are the multipoles that are not summed in equation (\ref{MultI}) 
@@ -490,74 +491,87 @@ e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
 {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
 \end{equation}
 Next, let us consider the expansion of the coulomb integral into the
-multipole basis\[
-\int \, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{1}\left( \mathbf{r}\right) \: \rho _{2}
+multipole basis
+%
+\begin{eqnarray}
+\int \, d{\mathbf{r}}\, d{\mathbf{r}'} \frac{\rho _{1}\left( \mathbf{r}\right) \: \rho _{2}
 \left( \mathbf{r}'\right) }
-{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad 
-\qquad \qquad \qquad \qquad 
-\qquad \qquad \]
-\begin{equation}
-\label{B4}
-\approx \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\,
- \left( -1\right) ^{l}
-\, {\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]M_{l+l'}^{m+m'}[\mathbf{P}-\mathbf{Q}]\, 
-{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]
-\end{equation}
+{\left| \mathbf{r}-\mathbf{r}'\right| } \approx \frac{1}{2}\sum _{l=0}^{L}\, 
+\sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, 
+\sum _{m'=-l'}^{l'}\qquad\nonumber\\
+\left( -1\right) ^{l}{\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]{M}_{l+l'}^{m+m'}[\mathbf{P}-\mathbf{Q}]\, 
+{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\nonumber\\
+\end{eqnarray}
+%
 Let us now assume that the primitive distribution \( \rho _{1} \)
 is of a single angular momentum type and expanded about its center, 
-
+%
 \begin{equation}
 \label{B5}
 {\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]={\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]\delta _{l\, l_{0}}
 \end{equation}
-this gives us\[
+%
+this gives us
+%
+\begin{eqnarray}
 \int \, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{1}\left( \mathbf{r}\right) \: \rho _{2}
 \left( \mathbf{r}'\right) }
-{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad 
-\qquad \qquad \qquad \qquad 
-\qquad \qquad \]
-\begin{equation}
-\label{B6}
-\approx \frac{1}{2}\sum _{l'=0}^{L'}\, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\, 
-\left( -1\right) ^{l}\, 
-{\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, 
+{\left| \mathbf{r}-\mathbf{r}'\right| }
+\approx \frac{1}{2}\sum _{l'=0}^{L'}\, \sum _{m=-l_{0}}^{l_{0}}\, 
+\sum _{m'=-l'}^{l'}\, \qquad\nonumber\\
+\left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, 
+M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, 
 {\cal O}_{l'}^{m'}[\rho _{2};
-\mathbf{Q}]
-\end{equation}
-The error in the calculation is then the multipoles that we do not
-sum
-\begin{equation}
-\label{B7}
-\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, 
+\mathbf{Q}] \nonumber\\
+\label{B6}
+\end{eqnarray}
+%
+The error in the calculation is then the multipoles that we do not sum
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) = \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, 
 \sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, 
+\sum _{m'=-l'}^{l'}\qquad\qquad\qquad\nonumber\\ 
+\left( -1\right) ^{l}
+ {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, 
 M_{l_{0}+l'}^{m+m'}
-[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
-\end{equation}
- Let us define for the Uns{\"o}ld operator\[
-{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!
+[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]
+\label{B7}
+\end{eqnarray}
+%
+Let us define for the Uns{\"o}ld operator
+%
+\begin{eqnarray}
+{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] &=& \sqrt{\sum _{m}(l-m)!(l+m)!
 \left| \widehat{O}_{l}^{m}
-\left[ \mathbf{P}\right] \right| ^{2}}\]
-\begin{equation}
-\label{B8}
-\qquad \qquad \qquad \quad =\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}
+\left[ \mathbf{P}\right] \right| ^{2}} \nonumber\\
+&=&\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}
 \left| P_{l}^{m}
-(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}\geq 0
-\end{equation}
-and similarly the Uns{\"o}ld weights\begin{equation}
+(\mathbf{P})\right| ^{2}} \nonumber\\
+&=& \left| \mathbf{P}\right| ^{l}\geq 0
+\end{eqnarray}
+%
+and similarly the Uns{\"o}ld weights
+%
+\begin{equation}
 \label{B9}
 {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}
 \left[ \rho ;\left| 
 \mathbf{P}\right| \right] \right| ^{2}}
 \end{equation}
-Let us rewrite the bounded error estimate as\begin{equation}
-\label{B10}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\left| \, 
-\sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}{\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}
+%
+Let us rewrite the bounded error estimate as
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty } 
+ \bigg|\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}
+ \qquad\qquad\qquad\nonumber\\
+{\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}
 [{\mathbf{P}-\mathbf{Q}}]\, 
-{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
-\end{equation}
+{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\bigg| 
+\label{B10}
+\end{eqnarray}
+%
 Let us also, for compactness of notation, define 
 \begin{equation}
 \label{B11}
@@ -566,35 +580,41 @@ Let us also, for compactness of notation, define
 where the placement will indicate which distribution it is derived
 from. Using equations (\ref{B2}) and (\ref{B3}) we can write this
 as
-\[
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \left| 
-\sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}\frac{(l_{0}+l'-(m+m'))!}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}}\right. 
-\qquad \qquad \]
-\begin{equation}
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty } \bigg| 
+\sum _{m=-l_{0}}^{l_{0}} \sum _{m'=-l'}^{l'} \qquad\qquad\qquad\qquad\qquad\nonumber\\
+\frac{(l_{0}+l'-(m+m'))!  \,\, P_{l_{0}+l'}^{m+m'}\left( \cos \theta _{\mathbf{PQ}}\right)
+}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}}
+\qquad\nonumber\\
+\frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}{\cal O}_{l_{0}}^{m} \, \sqrt{(l'+m')!(l'-m')!}
+{\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}
+\right| ^{l'+l_{0}+1}}\bigg| \nonumber\\
 \label{B12}
-\qquad \left. \frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}{\cal O}_{l_{0}}^{m}\, P_{l_{0}+l'}^{m+m'}\left( \cos 
-\theta _{\mathbf{PQ}}\right) \, \sqrt{(l'+m')!(l'-m')!}{\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}
-\right| ^{l'+l_{0}+1}}\right| 
-\end{equation}
+\end{eqnarray}
+%
 for reasons which will become apparent in what follows. Let us use
 the inequalities (ref)
+%
 \begin{equation}
 \label{B13}
 \left| P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \right| \leq 1
 \end{equation}
-to simplify\[
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \left| 
-\sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'}\frac{(l_{0}+l'-(m+m'))!}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}}
-\right. \qquad \qquad \]
-\begin{equation}
-\label{B14}
-\qquad \qquad \left. \frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}\, {\cal O}_{l_{0}}^{m}\, 
+%
+to simplify
+%
+\begin{eqnarray}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \bigg| 
+\sum _{m=-l_{0}}^{l_{0}} \sum _{m'=-l'}^{l'} \qquad\qquad\qquad\qquad\qquad\nonumber\\
+\frac{(l_{0}+l'-(m+m'))!}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}} 
+\qquad\nonumber\\
+\frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}\, {\cal O}_{l_{0}}^{m}
 \sqrt{(l'+m')!(l'-m')!}\, 
-{\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}\right| 
-\end{equation}
-Now, let use the inequality (ref)
+{\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}\bigg| \nonumber\\
+\label{B14}
+\end{eqnarray}
+%
+Now, let use the triangle inequality 
 \[
 \left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| 
 \qquad \qquad \]
