@@ -19,7 +19,7 @@ MODULE PBCFarField
   IMPLICIT NONE
 !  
   INTEGER                             :: MaxELL
-  REAL(DOUBLE)                        :: E_PFF,E_DP
+  REAL(DOUBLE)                        :: E_PFF,E_DP=0.0D0
   REAL(DOUBLE)                        :: PDist,BDist,RDist
   REAL(DOUBLE),DIMENSION(3)           :: BOXDist
 !
@@ -74,12 +74,16 @@ MODULE PBCFarField
       ENDDO
       E_PFF = Two*E_PFF
 !     Calculate Dipole energy
-      IF(GMLoc%PBC%Dimen == 2) THEN
+      IF(GMLoc%PBC%Dimen == 1) THEN
+         E_DP = 0.0D0
+      ELSEIF(GMLoc%PBC%Dimen == 2) THEN
          IF(GMLoc%PBC%AutoW%I(1)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
          IF(GMLoc%PBC%AutoW%I(2)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
          IF(GMLoc%PBC%AutoW%I(3)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
       ELSEIF(GMLoc%PBC%Dimen == 3) THEN 
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      ELSE
+         CALL Halt('PBCFarField: Unknown dimension <'//IntToChar(GMLoc%PBC%Dimen)//'>')
       ENDIF
     END SUBROUTINE PBCFarFieldSetUp
 !====================================================================================
