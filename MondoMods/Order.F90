@@ -33,12 +33,13 @@ MODULE Order
          INTEGER,      DIMENSION(N),  INTENT(INOUT) :: Point
       END SUBROUTINE
 
-      FUNCTION Interleave(Ix,Iy,Iz)       
-         IMPLICIT NONE
-         INTEGER,INTENT(IN) :: Ix,Iy,Iz
-         INTEGER, PARAMETER :: INT8=SELECTED_INT_KIND(18)    
-         INTEGER(INT8)            :: Interleave
-       END FUNCTION Interleave
+!      FUNCTION Interleave(Ix,Iy,Iz)       
+!         IMPLICIT NONE
+!         INTEGER,INTENT(IN) :: Ix,Iy,Iz
+!         INTEGER, PARAMETER :: INT8=SELECTED_INT_KIND(18)    
+!         INTEGER(INT8)            :: Interleave
+!       END FUNCTION Interleave
+
    END INTERFACE
    CONTAINS
 
