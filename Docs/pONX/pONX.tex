@@ -34,8 +34,9 @@
 
 %\documentclass[pre,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 %\documentclass[prl,aps,twocolumn,showkeys,twocolumngrid,superbib]{revtex4}
-\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-
+%\documentclass[twocolumn,showkeys,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+\documentclass[prl,aps,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -48,7 +49,7 @@
 \pagestyle{fancy}
 
 
-\def\Tr{{\rm Tr}}
+%\def\Tr{{\rm Tr}}
 %\nofiles
 
 \begin{document}
@@ -245,7 +246,6 @@ of the integral estimate $|(ac^\mathbf{m}|ac^\mathbf{m})_{\rm mic}|^{1/2}$.
     \end{split}
   \end{equation*}
 \end{figure}
-
 
 In the second step, parallel ONX $K$ builds begun with the outer loops over
 the rows and columns of the local density matrix $D(p)$, 
@@ -472,7 +472,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
  a stabilization time.
 
 
-\begin{figure}[p]
+\begin{figure}[h]
   \centering
   \caption{\protect
     Scaling of the parallel ONX on (H$_2$O)$_{50}$ 
@@ -485,7 +485,7 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   \end{center}
 \end{figure}
 
-\begin{figure}[p]
+\begin{figure}[h]
   \centering
   \caption{\protect
     Relative speedup of the parallel ONX on (H$_2$O)$_{50}$ with the RHF/6-31G**
@@ -496,7 +496,6 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
     \includegraphics[angle=-90,width=0.5\textwidth]{h2o_50_prop}
   \end{center}
 \end{figure}
-
 
 \subsection{Water box with PBC}
  For the periodic systems, the result of the 64-water molecules is shown
@@ -527,8 +526,6 @@ Level-2 BLAS matrix-vector multiplication subroutine (DGEMV).
   \end{center}
 \end{figure}
 
-
-
 \subsection{Endothelin and periodic KCNS}
 Finally, we present, in Fig.~\ref{fig:Endothelin_KCNS}, speedup obtained for 
 endothelin (C$_{82}$H$_{122}$O$_{26}$N$_{20}$S$_5$) and
@@ -541,7 +538,6 @@ At the 128-processor level, the endothelin (133 heavy atoms) delivers 99 fold
 speedup, while the $2\times 2\times 2$ KCNS (128 atoms per simulation supercell)
 delivers 95 fold speedup. 
 
-
 \begin{figure}[p]
   \centering
   \caption{\protect
@@ -553,8 +549,6 @@ delivers 95 fold speedup.
     \includegraphics[angle=-90,width=0.5\textwidth]{Endothelin_KCNS}
   \end{center}
 \end{figure}
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -652,6 +646,7 @@ delivers 95 fold speedup.
    \multiput(0.75,0.85)(0   ,0.05){ 3} {\line(0,1){0.025}}
  \end{picture}
 \end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
