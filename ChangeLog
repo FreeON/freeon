@@ -1,3 +1,113 @@
+2004-05-05 05:14  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_h2o3D_6-31G_6-31Gss_G_T.ps,
+	Beta_h2o3D_6-31G_6-31Gss_G_T.ps, Gamma_ONX_T.ps, Gamma_QCTC_T.ps,
+	Gamma_TC2R_T.ps, Gamma_h2o3D_6-31G_6-31Gss_G_T.ps,
+	Mix_h2o3D_6-31G_T.ps,
+	DATA/H2O_ALPHA/Alpha_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_BETA/Beta_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_GAMMA/Gamma_h2o3D_6-31G_6-31Gss_G_T.agr,
+	DATA/H2O_MIX/Mix_h2o3D_6-31G_T.agr: [no log message]
+
+2004-05-05 04:44  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-05-04 09:45  vweber
+
+	* Docs/DM_Papers/PERT_3/: Alpha_All.eps, Alpha_all.ps, Beta_all.ps,
+	Gamma_all.ps, Makefile, Response3.tex, DATA/H2O_1D/Alpha_All.agr,
+	DATA/H2O_1D/Alpha_All.dat, DATA/H2O_1D/Alpha_All.ps,
+	DATA/H2O_1D/Beta_All.agr, DATA/H2O_1D/Beta_All.dat,
+	DATA/H2O_1D/Beta_All.ps, DATA/H2O_1D/Gamma_All.agr,
+	DATA/H2O_1D/Gamma_All.dat, DATA/H2O_1D/Gamma_All.ps: [no log
+	message]
+
+2004-05-03 14:08  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-05-02 00:06  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: This version
+	contains developments of the Cartesian fitting.
+
+2004-04-30 07:40  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-28 14:09  nemeth
+
+	* Docs/Optimizer/PRL/snap.eps: [no log message]
+
+2004-04-27 17:30  mchalla
+
+	* Docs/Optimizer/PRL/QUICCA.pdf: [no log message]
+
+2004-04-27 10:40  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-04-27 10:03  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex:
+	[no log message]
+
+2004-04-26 19:34  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, snap.eps2: Picture of kinase
+	molecule has been exchanged to the same view with smaller file
+	(eps2).
+
+2004-04-26 18:23  ckgan
+
+	* QCTC/: Globals.F90, JGen.F90, ParaQ.F90, QCTC.F90: ET partition.
+
+2004-04-26 15:32  tymczak
+
+	* Docs/DSAndErrorEstimates/: ExactMultipoleError.ps,
+	ExactMultipoleError.tex: [no log message]
+
+2004-04-26 12:23  nemeth
+
+	* Docs/Optimizer/PRL/Let.tex: [no log message]
+
+2004-04-26 12:23  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Final version of the optimizer
+	manuscript.
+
+2004-04-26 11:04  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-04-26 10:48  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-26 10:21  mchalla
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, prl.ps: [no log message]
+
+2004-04-26 10:03  mchalla
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, prl.ps: final
+	changes??????!!!!!
+
+2004-04-26 07:13  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-04-26 00:23  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: Recent
+	modifications by Matt and me. Also in bib file.
+
+2004-04-25 09:02  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-24 22:56  nemeth
 
 	* Docs/Optimizer/PRL/: curve2_1.eps, curve2_1.gnu: [no log message]
@@ -14833,7 +14943,7 @@
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
 	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
-	XForm/OLD/DenseAInv.F90: Initial revision
+	XForm/OLD/DenseAInv.F90: New, restructured and improved MondoSCF
 
 2000-10-30 12:54  mondo
 
@@ -15046,5 +15156,5 @@
 	Scripts/nag_dbx, Scripts/pgf_dbx, Scripts/sgi_dbx,
 	Scripts/sgi_dbx2, XForm/BlokAInv.F90, XForm/LowdinO.F90,
 	XForm/Makefile, XForm/OLD/BlokOpsDns.F90, XForm/OLD/DGEMMS.F90,
-	XForm/OLD/DenseAInv.F90: New, restructured and improved MondoSCF
+	XForm/OLD/DenseAInv.F90: Initial revision
 
