@@ -25,7 +25,7 @@ PROGRAM ONX2
   USE MondoMPI
   USE FastMatrices
   USE ONXRng    , ONLY: RangeOfExchangeFASTMAT
-  !oUSE ONXFillOut, ONLY: FillOutFASTMAT,FillOutBCSR
+  USE ONXFillOut, ONLY: FillOutFASTMAT,FillOutBCSR
   USE ONXGet    , ONLY: Get_Essential_RowCol,GetOffArr
   USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
 #else
@@ -116,9 +116,9 @@ PROGRAM ONX2
      CALL Get(BSp,Tag_O=PrvBase)
      ! Get the current geometry here...
      CALL Get(GMp,Tag_O=CurGeom)
-     CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
-     CALL Get(OffS ,'atoff',Tag_O=PrvBase)
-     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+     CALL Get(BSiz ,'atsiz',Tag_O=CurBase)
+     CALL Get(OffS ,'atoff',Tag_O=CurBase)
+     CALL Get(NBasF,'nbasf',Tag_O=CurBase)
   ENDIF
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
@@ -144,11 +144,6 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Get denstiy matrix.
   !
-#ifdef ONX2_PARALLEL
- !IF(MyID.EQ.ROOT) &
-#endif
-  !WRITE(*,*) '-------- We are in ONX2 --------'
-  !
   SELECT CASE(SCFActn)
   CASE('StartResponse','FockPrimeBuild')
 #ifndef PARALLEL
@@ -163,11 +158,19 @@ PROGRAM ONX2
      CALL PDrv_Initialize(DFM,TrixFile('DeltaD',Args,0),'ONXPart',Args)
 #endif
   CASE('BasisSetSwitch')
+     ! We need to load the previous basis set setting.
+     CALL Get(BSiz ,'atsiz',Tag_O=PrvBase)
+     CALL Get(OffS ,'atoff',Tag_O=PrvBase)
+     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
 #ifndef PARALLEL
      CALL Get(D,TrixFile('D',Args,-1))
 #else
      CALL PDrv_Initialize(DFM,TrixFile('D',Args,-1),'ONXPart',Args)
 #endif
+     ! We need to load the current basis set setting.
+     CALL Get(BSiz ,'atsiz',Tag_O=CurBase)
+     CALL Get(OffS ,'atoff',Tag_O=CurBase)
+     CALL Get(NBasF,'nbasf',Tag_O=CurBase)
   CASE DEFAULT
 #ifdef ONX2_PARALLEL
      CALL PDrv_Initialize(DFM,TrixFile('D',Args,0),'ONXPart',Args)
@@ -335,22 +338,23 @@ PROGRAM ONX2
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
   CALL Redistribute_FASTMAT(KxFM)
-  !wok CALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
+  !oCALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
   CALL Set_BCSR_EQ_DFASTMAT(T1,KxFM)
   CALL Delete_FastMat1(KxFM)
-  !norm
-  !wok IF(MyID.EQ.ROOT) CALL TrnMatBlk(BSc,GMc,Kx)
   !
-  !norm
+  time1 = MondoTimer()
   IF(MyID.EQ.ROOT) THEN
      ! The following needs the -Fac- variable 
      ! in ComputK to take into account for the 
      ! double counting of diag(K).
+     CALL TrnMatBlk(BSc,GMc,T1)
      CALL XPose(T1,T2)
      CALL Add(T1,T2,Kx)
      CALL Delete(T1)
      CALL Delete(T2)
   ENDIF
+  time2 = MondoTimer()
+  TmTM = time2-time1
   !
 #else
   ! Add in correction if incremental K build
@@ -382,7 +386,7 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Timing.
   !
-!#ifdef GONX2_INFO
+#ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
   !
   ! End Total Timing
@@ -404,11 +408,11 @@ PROGRAM ONX2
      CALL PImbalance(TmKxArr ,NPrc,Prog_O='ComputeK')
      !CALL PImbalance(TmKTArr,NPrc,Prog_O='GONX'     )
      !
-!     WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
-!     WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
-!     WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
-!     WRITE(*,1004) SUM(TmKxArr%D )/DBLE(NPrc),MINVAL(TmKxArr%D ),MAXVAL(TmKxArr%D )
-!     WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
+     WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
+     WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
+     WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
+     WRITE(*,1004) SUM(TmKxArr%D )/DBLE(NPrc),MINVAL(TmKxArr%D ),MAXVAL(TmKxArr%D )
+     WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
      !WRITE(*,1006) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
      !
 1001 FORMAT(' ONX: Ave TmAL = ',F15.2,', Min TmAL = ',F15.2,', Max TmAL = ',F15.2)
@@ -427,11 +431,11 @@ PROGRAM ONX2
   !
 #else
   !
-!  WRITE(*,1001) TmAL
-!  WRITE(*,1002) TmML
-!  WRITE(*,1003) TmTM
-!  WRITE(*,1004) TmKx
-!  WRITE(*,1005) TmDL
+  WRITE(*,1001) TmAL
+  WRITE(*,1002) TmML
+  WRITE(*,1003) TmTM
+  WRITE(*,1004) TmKx
+  WRITE(*,1005) TmDL
   !WRITE(*,1006) ....
   !
 1001 FORMAT(' ONX: Ave TmAL = ',F15.2)
@@ -441,7 +445,7 @@ PROGRAM ONX2
 1005 FORMAT(' ONX: Ave TmDL = ',F15.2)
   !1006 FORMAT(' ONX: Tot ERI  = ',F15.2)
   !
-!#endif
+#endif
 #endif
   !
   !------------------------------------------------
@@ -459,5 +463,3 @@ PROGRAM ONX2
   CALL ShutDown(Prog)
   !
 END PROGRAM ONX2
-
-
