@@ -173,12 +173,43 @@ CONTAINS
        CALL LineToChars(LineLowCase,C)
        IF(SIZE(C%C)<4)CALL MondoHalt(PRSE_ERROR,' bad data on parsing goemetry at line = <<' &
                                       //TRIM(LineLowCase)//'>>')
-       At=TRIM(ADJUSTL(C%C(1)))
-       G%AbCarts%D(1,N)=CharToDbl(C%C(2))
-       G%AbCarts%D(2,N)=CharToDbl(C%C(3))
-       G%AbCarts%D(3,N)=CharToDbl(C%C(4))
-       G%CConstrain%I(N)=0
-       IF(SIZE(C%C)==5)THEN
+       IF(SIZE(C%C)==4) THEN
+          At=TRIM(ADJUSTL(C%C(1)))
+          G%AbCarts%D(1,N)=CharToDbl(C%C(2))
+          G%AbCarts%D(2,N)=CharToDbl(C%C(3))
+          G%AbCarts%D(3,N)=CharToDbl(C%C(4))
+          G%CConstrain%I(N)=0
+       ELSEIF(SIZE(C%C)==5)THEN
+          At=TRIM(ADJUSTL(C%C(1)))
+          G%AbCarts%D(1,N)=CharToDbl(C%C(2))
+          G%AbCarts%D(2,N)=CharToDbl(C%C(3))
+          G%AbCarts%D(3,N)=CharToDbl(C%C(4))
+          IF(TRIM(C%C(5))=='u')THEN
+             G%CConstrain%I(N)=0
+          ELSE IF(TRIM(C%C(5))=='c')THEN
+             G%CConstrain%I(N)=1
+          ELSE IF(TRIM(C%C(5))=='r')THEN
+             G%CConstrain%I(N)=2
+          ELSE
+             G%CConstrain%I(N)=0
+          ENDIF
+       ELSEIF(SIZE(C%C)==7)THEN
+          At=TRIM(ADJUSTL(C%C(1)))
+          G%AbCarts%D(1,N) =CharToDbl(C%C(2))
+          G%AbCarts%D(2,N) =CharToDbl(C%C(3))
+          G%AbCarts%D(3,N) =CharToDbl(C%C(4))
+          G%Velocity%D(1,N)=CharToDbl(C%C(5))
+          G%Velocity%D(2,N)=CharToDbl(C%C(6))
+          G%Velocity%D(3,N)=CharToDbl(C%C(7))
+          G%CConstrain%I(N)=0
+       ELSEIF(SIZE(C%C)==8)THEN
+          At=TRIM(ADJUSTL(C%C(1)))
+          G%AbCarts%D(1,N) =CharToDbl(C%C(2))
+          G%AbCarts%D(2,N) =CharToDbl(C%C(3))
+          G%AbCarts%D(3,N) =CharToDbl(C%C(4))
+          G%Velocity%D(1,N)=CharToDbl(C%C(5))
+          G%Velocity%D(2,N)=CharToDbl(C%C(6))
+          G%Velocity%D(3,N)=CharToDbl(C%C(7))
           IF(TRIM(C%C(5))=='u')THEN
              G%CConstrain%I(N)=0
           ELSE IF(TRIM(C%C(5))=='c')THEN
@@ -189,6 +220,7 @@ CONTAINS
              G%CConstrain%I(N)=0
           ENDIF
        ENDIF
+!
        CALL Delete(C)
 !      Find the atom number (elements >= 105 are ghost functions) 
        DO J=1,107
