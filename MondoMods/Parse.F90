@@ -237,9 +237,9 @@ MODULE Parse
                K1=J-1+S1
                S2=SCAN(Line(K1:L),Delimiters)            
                K2=K1-2+S2
-               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
+!               WRITE(*,*)' S1 = ',S1,' S2 = ',S2,' Line = <',TRIM(Line(K1:K2)),'>'
                Dbl=CharToDbl(TRIM(Line(K1:K2)))
-               WRITE(*,*)' Dbl = ',Dbl
+!               WRITE(*,*)' Dbl = ',Dbl
                OptDblQ=.TRUE.
                RETURN
             ENDIF
