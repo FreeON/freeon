@@ -31,10 +31,6 @@ Theoretical Division, Los Alamos National Laboratory,
 Los Alamos, NM 87545, USA}
 
 \begin{abstract}
-{\bf CJ, to do list:}
-\begin{itemize}
-\item Need correct citations (not just generic website) for all the crystal basis sets used
-\end{itemize}
 {\bf Matt to do list:}
 \begin{itemize}
 \item Intro, Conclusions, Appendix A.
@@ -250,7 +246,7 @@ Both the Quantum Chemical Tree-Code (QCTC) \cite{} for computing the Coulomb mat
 for computing the Exchange-Correlation matrix are fast ${\cal O}(N {\rm lg} N)$ algorithms whose performance
 is intimately coupled to underlying data structures and error estimates.  It is important to understand some 
 of these particulars first, before addressing their extension to periodic boundary conditions.
-Also, the current version of QCTC is quite different from previous descriptions \cite{}, and deserves some
+Also, the current version of QCTC is quite different from previous descriptions \cite{MChallacombe96B}, and deserves some
 introduction.  
 
 
@@ -388,15 +384,15 @@ which was first described by Nijboer and De Wette (NDW) \cite{} and later review
 to lattice summation of the irregular solid harmonic multipole interaction tensor. 
 This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, which is direct lattice summation excluding 
 an inner region, $V_{\rm in}$, surrounding the unit cell.  This inner region has been subtracted to avoid penetration
-errors and to guarantee convergence of the multipole expansion.  Because the summed interaction tensors maybe cheaply 
+errors and to guarantee convergence of the multipole expansion.  Because the summed interaction tensors are cheaply 
 precomputed and reused, the cost of Coulomb summation over the PFF scales as as ${\cal O}(N p^2)$, where $p$ is the order 
 of the multipole expansion.  With this feature, achieving $N$-scaling periodic quantum Coulomb sums involves the contributions
 \begin{equation}
 {\bf J} = {\bf J}^{\rm in} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
-corresponding to the three separate regions shown in Fig.~\ref{regions}.   Here, $J^{\rm in}$ is computed using 
-the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of ${\bf J}_{\rm PFF}$ 
-will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}_{\rm TF}$ necessary to 
+corresponding to the three separate regions shown in Fig.~\ref{regions}.   Here, ${\bf J}^{\rm in}$ is computed using 
+the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of ${\bf J}^{\rm PFF}$ 
+will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$ necessary to 
 introduce tin-foil boundary conditions is detailed.
 
 
@@ -510,7 +506,7 @@ expansion order~$p$.
 The surface charges created by direct summation over $V_{\rm PFF}$ must be canceled
 to achieve equivalence with Ewald summation.   Achieving this equivalence is more than
 semantic, since without tin-foil boundary conditions matrix elements lack translational
-iinvariance and often incur dramatic charge sloshing instabilities.   The correction is 
+invariance and often incur dramatic charge sloshing instabilities.   The correction is 
 strongly dependent on ordering of the direct sum; as the Nijboer and De Wette 
 summation corresponds to spherical summation due to symmetry of the real/reciprocal space
 partition, the appropriate correction is \cite{Redlack72} 
@@ -597,7 +593,7 @@ localization of the atomic orbitals.
 
 \begin{table}
 \caption{Comparison of {\sc Crystal98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
-8-511/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
+8-511/8-631G/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
 $N_{\rm at}=2$ and 8 are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
@@ -644,7 +640,7 @@ $ ^g$Cubic  \\
 
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc Crystal98} for MgO at the 8-61G/BLYP
+         $k$-space integration with {\sc Crystal98} for MgO at the 8-61G/8-51G/BLYP
          level of theory at a {\it tight} accuracy level. The lattice coordinates for $N_{\rm at}=2$ and 8 
          are listed in Appendix~\ref{FracCoords}.}\label{MgOGammaPt}
 \center{
@@ -701,7 +697,7 @@ Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were
 
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
 highly optimized by symbolic manipulation and factorization, using real arithmatic and expansions through
-7'th order in the calculation of ${\bf J}_{\rm in}$. The computation of ${\bf J}_{\rm PFF}$ 
+7'th order in the calculation of ${\bf J}^{\rm in}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
 Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
 matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.
@@ -731,9 +727,9 @@ comparison of different programs, at least to within the approximations, grids, 
 peculiar to a code. Here, we make connection with the preemiminent Gaussian orbital 
 program for periodic calculations, {\sc Crystal98}.  Calculations have been carried 
 out largely with basis sets optimized for the 
-condensed phase\cite{}, which tend to have less diffuse valence orbitals.  
+condensed phase\cite{CrystalLib}, which tend to have less diffuse valence orbitals.  
 Tables~\ref{NaCl8511}-\ref{MgOGammaPt} make a direct comparsion with {\sc Crystal98} for 
-NaCl and MgO obtained with the {\sc MondoSCF} {\it verytight} precision level 
+NaCl and MgO obtained with the {\sc MondoSCF} {\it tight} precision level 
 %\footnote{This level of precision correspods to a distribution threshold $\tau_{\rm dist}=10^{-12}$,
 %a HiCu threshold $\tau_{\rm HiCu}=10^{-8}$, a QCTC threshold $\tau_{\rm QCTC} = 10^{-10}$ and
 %a $10^{-6}$ convergence in the maximum element of the density matrix.}
@@ -745,15 +741,19 @@ The {\tt BASIS} parameter determines the auxiliary functions used to fit potenti
 in {\sc Crystal98}, an approximation not used by {\sc MondoSCF}.  
 %
 
-In Table~\ref{NaCl8511}, comparision is made for $\Gamma$-point NaCl with the 8-511G\cite{} basis set
-and BLYP functional \cite{DFT_LYP:88,BLYP:88}, while in Table~\ref{NaClGammaPt} convergence of the supercell 
-$\Gamma$-point approximation 
+In Table~\ref{NaCl8511}, comparision is made for $\Gamma$-point NaCl with the 8-511G\cite{CBS:8511G:Na} basis set
+for the sodium, the 8-631G\cite{CBS:8631G:Cl} basis set for the clorine and BLYP functional \cite{DFT_LYP:88,BLYP:88}.
+%
+Next, in Table~\ref{NaClGammaPt} convergence of the supercell $\Gamma$-point approximation 
 is demonstrated for NaCl with the STO-3G basis set and the local density approximation\cite{}.
-In Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
-to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G basis set \cite{} and the BLYP functional.
-Next, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
+%
+And in Table~\ref{MgOGammaPt}, convergence of the {\sc MondoSCF} supercell $\Gamma$-point approximation
+to the {\sc Crystal98} $k$-space result is demonstrated for the 8-61G\cite{CBS:861G:MgO} basis set for the Magnesium, 
+the 8-51G\cite{CBS:861G:MgO} basis set for the oxygen, and the BLYP functional.
+%
+Finally, in Table~\ref{DiamondGammaPt} convergence of the supercell $\Gamma$-point approximation is shown for
 diamond, using the {\sc MondoSCF} {\it good} precsion (targeting 6 digits), the BLYP functional and the
-6-31G* basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} employs 
+6-31G*\cite{CBS:621G:C} basis set.  Since {\sc MondoSCF} employs 6-$d$ and 10-$f$ functions, while {\sc Crystal98} employs 
 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
 
