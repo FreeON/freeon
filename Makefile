@@ -62,15 +62,16 @@ legacy:
 	rm -rf LibTwoE
 	rm -rf IntCoo
 	rm -rf ChangeLog*
+	$(MAKE) -C Validate legacy
 #
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
-	sleep 1
-	cat $(MONDO_HOME)/README
 	sleep 2
+#	cat $(MONDO_HOME)/README
+#	sleep 2
 #----------------------------------------------
 #   MondoMods
  mm:	
