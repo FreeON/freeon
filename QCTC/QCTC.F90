@@ -25,7 +25,7 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
-!    Author:  Matt Challacombe
+!    Author:  Matt Challacombe and CJ Tymczak
 !    FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
 !==============================================================================
 PROGRAM QCTC
@@ -47,9 +47,9 @@ PROGRAM QCTC
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)         :: J,S,T1
+  TYPE(DBCSR)         :: J,S,T1,P
 #else
-  TYPE(BCSR)          :: J,S,T1
+  TYPE(BCSR)          :: J,S,T1,P
 #endif
   REAL(DOUBLE)        :: E_Nuc_Tot
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
@@ -79,17 +79,10 @@ PROGRAM QCTC
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
+! Allocate J
   CALL New(J)
 ! Compute the Coulomb matrix J in O(N Lg N)
   CALL MakeJ(J)
-#ifdef PERIODIC
-! Add the Quadripole correction to J
-  CALL Get(S,TrixFile('S',Args))
-  CALL Multiply(S,QFac*Quadripole)
-  CALL Add(J,S,T1)
-  CALL SetEq(J,T1)
-  CALL Delete(S)
-#endif
 ! Put J to disk
 !  CALL PPrint(J,'J',Unit_O=6)
   CALL Filter(T1,J)
@@ -100,7 +93,6 @@ PROGRAM QCTC
   ENDIF
 ! Compute the nuclear-total electrostatic energy
   E_Nuc_Tot=NukE()
-!  WRITE(*,*)' E_Nuc_Tot = ',E_Nuc_Tot
   CALL Put(E_Nuc_Tot,'enn+ene',Tag_O=SCFCycl)
 !---------------------------------------------------------------
 ! Printing
