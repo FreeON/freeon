@@ -17,13 +17,17 @@ CONTAINS
   SUBROUTINE Descender(C)
     TYPE(Controls) :: C
     !----------------------------------------------------------------------------------!
-    IF(C%Opts%DoGDIIS)THEN
-       ! Follow extrapolated Cartesian gradient down hill
-       CALL GDicer(C)
+    IF(C%Opts%Coordinates==GRAD_CART_OPT) THEN
+      IF(C%Opts%DoGDIIS)THEN
+         ! Follow extrapolated Cartesian gradient down hill
+         CALL GDicer(C)
+      ELSE
+         ! Follow Cartesian gradient down hill
+         CALL SteepD(C)
+      ENDIF
     ELSE
-       ! Follow Cartesian gradient down hill
-       CALL SteepD(C)
-    ENDIF
+      CALL IntOpt(C)
+    ENDIF 
   END SUBROUTINE Descender
   !=====================================================================================
   !
@@ -32,13 +36,12 @@ CONTAINS
     TYPE(Controls) :: C
     INTEGER        :: iBAS,iGEO,iCLONE
     REAL(DOUBLE),DIMENSION(C%Geos%Clones,C%Opts%NSteps) :: Energy
-    !----------------------------------------------------------------------------------!
-    ! Start with the first geometry
-    iGEO=1
-    ! Initialize the previous state
-    C%Stat%Previous%I=(/0,1,1/)
-    ! Initialize HDF groups
-    CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
+    INTEGER        :: NatmsLoc,IStart
+    TYPE(DBL_RNK2) :: OldXYZ
+    !-------------------------------------------------------------------------!
+    ! initial geometry
+    iGEO=C%Stat%Previous%I(3)
+    NatmsLoc=C%Geos%Clone(1)%Natms
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
@@ -51,9 +54,13 @@ CONTAINS
     ENDDO
     ! Follow the gradient down hill
     iBAS=C%Sets%NBSets
-    DO iGEO=1,C%Opts%NSteps
+    IStart=iGEO
+    DO iGEO=IStart,C%Opts%NSteps
        ! Compute new gradients
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+         DO iCLONE=1,C%Geos%Clones
+           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+         ENDDO
        IF(SteepStep(iBAS,iGEO,Energy(:,iGEO),C))THEN
           DO iCLONE=1,C%Geos%Clones
              IF(Energy(iCLONE,iGEO+1)<Energy(iCLONE,iGEO))THEN
@@ -67,6 +74,18 @@ CONTAINS
              CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
           ENDDO
        ENDIF
+         CALL New(OldXYZ,(/3,NatmsLoc/))
+         DO iCLONE=1,C%Geos%Clones
+           OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
+           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+           C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
+         ENDDO
+         CALL Delete(OldXYZ)
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+         DO iCLONE=1,C%Geos%Clones
+           C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+         ENDDO
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
     ENDDO
   END SUBROUTINE SteepD
   !=====================================================================================
@@ -78,17 +97,16 @@ CONTAINS
     REAL(DOUBLE)           :: DIISErr,GRMSQ,GMAXQ
     ! Initial step 
     REAL(DOUBLE),PARAMETER :: StepLength=2D0 
-    INTEGER                :: iBAS,iGEO,iCLONE,AccL    
+    INTEGER                :: iBAS,iGEO,iCLONE,AccL,IStart
     INTEGER                :: Relaxations=3   ! This should be an input variable at some point
     LOGICAL                :: Converged,Steep
     CHARACTER(LEN=DCL)     :: Mssg
+    TYPE(DBL_RNK2)         :: OldXYZ,NewXYZ
+    INTEGER                :: NatmsLoc
     !----------------------------------------------------------------------------------!
     ! Start with the first geometry
-    iGEO=1
-    ! Initialize the previous state
-    C%Stat%Previous%I=(/0,1,1/)
-    ! Initialize HDF groups Archive MPIs and Geos 
-    CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
+    iGEO=C%Stat%Previous%I(3)
+    NatmsLoc=C%Geos%Clone(1)%Natms
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
@@ -102,9 +120,10 @@ CONTAINS
     iBAS=C%Sets%NBSets
     AccL=C%Opts%AccuracyLevels(iBAS)
     ! Use simple Cartesian GDIIS to go down hill
-    DO iGEO=1,C%Opts%NSteps
+    IStart=IGeo
+    DO iGEO=IStart,C%Opts%NSteps
        ! Compute new gradients
-       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)       
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
        ! Convergence statistics for the gradient
        GradMax%D(iGEO)=Zero
        GradRMS%D(iGEO)=Zero
@@ -116,9 +135,24 @@ CONTAINS
        ! Go downhill by following the gradient or with GDIIS
        IF(iGEO>Relaxations)THEN
           ! GDIIS extrapolation 
-          CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
           ! Put the geometries to HDF
-          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+            DO iCLONE=1,C%Geos%Clones
+              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+            ENDDO
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+          CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
+            CALL New(OldXYZ,(/3,NatmsLoc/))
+            DO iCLONE=1,C%Geos%Clones
+              OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
+              C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+              C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
+            ENDDO
+            CALL Delete(OldXYZ)
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+            DO iCLONE=1,C%Geos%Clones
+              C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+            ENDDO
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           Mssg=TRIM(Mssg)//', Ediis='//TRIM(DblToShrtChar(DIISErr))
           ! Check for absolute convergence
           Converged=.FALSE.
@@ -135,10 +169,15 @@ CONTAINS
        ELSE
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%AbCarts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D             
+             C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D &
+                                      -StepLength*C%Geos%Clone(iCLONE)%Vects%D
           ENDDO
+            CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+          DO iCLONE=1,C%Geos%Clones
+             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+          ENDDO
+            CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           ! Put the geometries to HDF
-          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           ! And here is some 
           Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
           Mssg=ProcessName('GDicer',' Relax # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
@@ -378,22 +417,19 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Optimize(C)
+   SUBROUTINE IntOpt(C)
      TYPE(Controls)            :: C
      INTEGER                   :: iBAS,iGEO,iCLONE
      INTEGER                   :: AccL 
-     INTEGER                   :: FirstGeom
-     INTEGER                   :: IStep,ConvgdAll
+     INTEGER                   :: FirstGeom,NatmsLoc
+     INTEGER                   :: ConvgdAll,MaxSteps,IStart
      TYPE(INT_VECT)            :: Convgd
      !
-     ! Start with the first geometry
-     iGEO=1
-     ! Initialize the previous state
-     C%Stat%Previous%I=(/0,1,IGeo/)
-     ! Initialize HDF groups
-     CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
      ! Set geometry optimization controls
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams)
+     ! initial geometry
+     iGEO=C%Stat%Previous%I(3)
+     MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
@@ -412,46 +448,45 @@ CONTAINS
      !
      ! Start optimization                     
      !
-     300 CONTINUE
-        CALL PrintClones(IGeo,C%Nams,C%Geos)
-        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-        !
-        ! Calculate energy and force for all clones at once.
-        !
-        CALL SCF(iBAS,iGEO,C)
-        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-        !
-        ! Loop over all clones and modify geometries.
-        !
-        ConvgdAll=1
-        DO iCLONE=1,C%Geos%Clones
-          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts, &
-            C%Geos%Clone(iCLONE),Convgd%I,IGeo,iCLONE)
-          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
-        ENDDO 
-        !
-        C%Stat%Previous%I(3)=IGeo
-        IGeo=IGeo+1
-        C%Stat%Current%I(3)=IGeo
-        !
-        ! Continue optimization?
-        !
-        IF(IGeo<=C%GOpt%GConvCrit%MaxGeOpSteps) THEN
-          IF(ConvgdAll/=1) GO TO 300
-        ELSE
-          CALL OpenASCII(OutFile,Out)
-          IF(ConvgdAll/=1) THEN
-            WRITE(Out,700) 
-            WRITE(*,700) 
-          ELSE
-            WRITE(Out,460) iGeo-1
-            WRITE(*,460) iGeo-1
-          ENDIF          
-          CLOSE(Out,STATUS='KEEP')
-        ENDIF
-        !
-     CONTINUE
+     IStart=iGEO
+     DO iGEO=IStart,MaxSteps
+       !CALL PrintClones(IGeo,C%Nams,C%Geos)
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+       !
+       ! Calculate energy and force for all clones at once.
+       !
+       CALL SCF(iBAS,iGEO,C)
+       CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+       !
+       ! Loop over all clones and modify geometries.
+       !
+       ConvgdAll=1
+       DO iCLONE=1,C%Geos%Clones
+         CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Sets,C%Geos, &
+           C%Geos%Clone(iCLONE),Convgd%I,iGEO,iBAS,iCLONE)
+         ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
+       ENDDO 
+       !
+       C%Stat%Previous%I(3)=IGeo
+       C%Stat%Current%I(3)=IGeo+1
+       !
+       ! Continue optimization?
+       !
+       IF(ConvgdAll==1) EXIT
+     ENDDO
+     !
+     IF(IGeo>=MaxSteps) THEN
+       CALL OpenASCII(OutFile,Out)
+       IF(ConvgdAll/=1) THEN
+         WRITE(Out,700) 
+         WRITE(*,700) 
+       ELSE
+         WRITE(Out,460) iGeo-1
+         WRITE(*,460) iGeo-1
+       ENDIF          
+       CLOSE(Out,STATUS='KEEP')
+     ENDIF
      !
      ! Convergence is reached at this point, calculate final energy
      ! and finish optimization.
@@ -477,13 +512,16 @@ CONTAINS
      460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
      700  FORMAT('Maximum number of optimization'&
             //' steps exceeded, optimization did not converge.')
-   END SUBROUTINE Optimize
+   END SUBROUTINE IntOpt
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ModifyGeom(GOpt,GMLoc,iGEO,iCLONE,SCRPath,Print)
-     TYPE(GeomOpt)    :: GOpt
-     TYPE(CRDS)       :: GMLoc
+   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,ETot, &
+                         iGEO,iCLONE,SCRPath,Print)
+     TYPE(GeomOpt)               :: GOpt
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
+     REAL(DOUBLE),DIMENSION(:)   :: AtNum
+     REAL(DOUBLE)                :: ETot 
      INTEGER          :: NIntC,NCart,NatmsLoc,iGEO,iCLONE
      TYPE(INTC)       :: IntCs
      TYPE(DBL_VECT)   :: IntOld,Displ
@@ -491,7 +529,7 @@ CONTAINS
      CHARACTER(LEN=*) :: SCRPath
      LOGICAL          :: Print
      !
-     NatmsLoc=GMLoc%Natms
+     NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
      ! Do we have to refresh internal coord defs?   
@@ -501,11 +539,11 @@ CONTAINS
      ! Get internal coord defs.
      !
      IF(Refresh/=0) THEN
-       CALL GetIntCs(GMLoc%AbCarts%D,GMLoc%AtNum%D, &
+       CALL GetIntCs(XYZ,AtNum, &
          IntCs,NIntC,Refresh,SCRPath,GOpt%CoordCtrl,GOpt%Constr)
      ENDIF
      IF(NIntC/=0) THEN
-       CALL INTCValue(IntCs,GMLoc%AbCarts%D,GOpt%CoordCtrl%LinCrit)
+       CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
        CALL New(IntOld,NIntC)
        IntOld%D=IntCs%Value
      ENDIF
@@ -518,31 +556,33 @@ CONTAINS
      ! Calculate simple relaxation (SR) step from an inverse Hessian
      !
      CALL NewDispl(GOpt,Displ,NCart,NIntC)
-     CALL SRStep(GOpt,GMLoc,Displ,IntCs,SCRPath,Print) 
+     CALL SRStep(GOpt,XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print) 
      !
      ! Calculate new geometry 
      !
      CALL NewStructure(Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-       GOpt%Constr,SCRPath,GMLoc,Displ,IntCs)
+       GOpt%Constr,SCRPath,XYZ,Displ,IntCs)
      CALL Delete(Displ)
      !
      ! Check convergence
      !
-     CALL GeOpConv(GOpt,GMLoc,IntCs,IntOld,iCLONE,iGEO)
+     CALL GeOpConv(GOpt,XYZ,ETot,IntCs,IntOld,iCLONE,iGEO)
      !
      ! tidy up
      !
-     IF(NIntC/=0)  CALL Delete(IntOld)
+     CALL Delete(IntOld)
+     CALL Delete(IntCs)
    END SUBROUTINE ModifyGeom
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SRStep(GOpt,GMLoc,Displ,IntCs,SCRPath,Print)
+   SUBROUTINE SRStep(GOpt,XYZ,AtNum,GradIn,Displ,IntCs,SCRPath,Print)
      !
      ! Simple Relaxation step
      !
      TYPE(GeomOpt)                  :: GOpt 
-     TYPE(CRDS)                     :: GMLoc
+     REAL(DOUBLE),DIMENSION(:,:)    :: XYZ,GradIn
+     REAL(DOUBLE),DIMENSION(:)      :: AtNum
      TYPE(DBL_VECT)                 :: Displ
      REAL(DOUBLE)                   :: MaxGrad,RMSGrad
      INTEGER                        :: IMaxGradNoConstr
@@ -555,7 +595,7 @@ CONTAINS
      LOGICAL                        :: DoInternals,Print
      CHARACTER(LEN=*)               :: SCRPath 
      !
-     NatmsLoc=GMLoc%Natms
+     NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      IF(AllocQ(IntCs%Alloc)) THEN
        NIntC=SIZE(IntCs%Def)
@@ -569,16 +609,7 @@ CONTAINS
      !
      CALL New(Grad,NDim)
      CALL New(CartGrad,NCart)
-     CALL CartRNK2ToCartRNK1(CartGrad%D,GMLoc%Vects%D)
-     !
-     ! print forces in KJ/mol/A or H/Bohr
-     !
-     !IF(GOpt%Print) THEN
-     !  CALL Print_Force(GMLoc,CartGrad,'GrdTot in au ')
-     !  CartGrad%D=CartGrad%D/KJPerMolPerAngstToHPerBohr
-     !  CALL Print_Force(GMLoc,CartGrad,'GrdTot in KJ/mol/A')
-     !  CartGrad%D=CartGrad%D*KJPerMolPerAngstToHPerBohr
-     !ENDIF
+     CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
      !
      ! If requested, compute internal coord. gradients
      !
@@ -586,7 +617,7 @@ CONTAINS
        NIntC=SIZE(IntCs%Def)
        IF(NIntC/=NDim) CALL Halt('Dimension error in SRStep')
        CALL New(IntGrad,NDim)
-       CALL CartToInternal(GMLoc%AbCarts%D,IntCs,CartGrad%D,IntGrad%D,&
+       CALL CartToInternal(XYZ,IntCs,CartGrad%D,IntGrad%D,&
         GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        Grad%D=IntGrad%D
        CALL Delete(IntGrad)
@@ -630,17 +661,17 @@ CONTAINS
      SELECT CASE(GOpt%Optimizer)
      CASE(GRAD_STPDESC_OPT) 
        CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
-                         Grad,Displ,GMLoc%AbCarts%D)
+                         Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
        CALL DiagonalHess(GOpt%CoordCtrl,GOpt%Hessian, &
-                         Grad,Displ,IntCs,GMLoc%AbCarts%D)
-     ! CALL DiagHessRFO(GOpt,Grad,Displ,IntCs,GMLoc%AbCarts%D)
+                         Grad,Displ,IntCs,XYZ)
+     ! CALL DiagHessRFO(GOpt,Grad,Displ,IntCs,XYZ)
      ! CALL RedundancyOff(GOpt,Displ%D)
      END SELECT
      !
      ! Set constraints on the displacements
      !
-     CALL SetConstraint(IntCs,GMLoc%AbCarts%D,Displ,GOpt%CoordCtrl%LinCrit, &
+     CALL SetConstraint(IntCs,XYZ,Displ,GOpt%CoordCtrl%LinCrit, &
        GOpt%Constr%NConstr,GOpt%TrfCtrl%DoInternals)
      !
      ! Tidy up
@@ -657,14 +688,14 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE NewStructure(Print,GBackTrf,GTrfCtrl,GCoordCtrl, &
-     GConstr,SCRPath,GMLoc,Displ,IntCs)
+     GConstr,SCRPath,XYZ,Displ,IntCs)
      LOGICAL                        :: Print
      TYPE(BackTrf)                  :: GBackTrf
      TYPE(TrfCtrl)                  :: GTrfCtrl
      TYPE(CoordCtrl)                :: GCoordCtrl
      TYPE(Constr)                   :: GConstr
      CHARACTER(LEN=*)               :: SCRPath
-     TYPE(CRDS)                     :: GMLoc
+     REAL(DOUBLE),DIMENSION(:,:)    :: XYZ   
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,II,NDim,NIntc
      INTEGER                        :: NatmsLoc,NCart,InitGDIIS
@@ -674,7 +705,7 @@ CONTAINS
      !
      ! In the present version there is no line search, only GDIIS
      !
-     NatmsLoc=GMLoc%Natms
+     NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
      NDim =SIZE(Displ%D)
      NIntC =SIZE(IntCs%Def)
@@ -687,12 +718,12 @@ CONTAINS
      ! displacements
      !
      IF(DoInternals) THEN 
-       CALL INTCValue(IntCs,GMLoc%AbCarts%D,LinCrit)
+       CALL INTCValue(IntCs,XYZ,LinCrit)
        IntCs%Value=IntCs%Value+Displ%D
-       CALL InternalToCart(GMLoc%AbCarts%D,IntCs,IntCs%Value, &
+       CALL InternalToCart(XYZ,IntCs,IntCs%Value, &
          Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
      ELSE
-       CALL CartRNK1ToCartRNK2(Displ%D,GMLoc%AbCarts%D,.TRUE.)
+       CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
      ENDIF
      !
    END SUBROUTINE NewStructure
@@ -705,12 +736,13 @@ CONTAINS
      !
      !WARNING! refresh may change the number of internal coordinates!
      !
-     IF(GOpt%GOptStat%ActStep==1) THEN
        Refresh=1
-       IF(GOpt%CoordCtrl%RefreshIn==4) Refresh=4
-     ELSE
-       Refresh=GOpt%CoordCtrl%RefreshIn
-     ENDIF
+     !IF(GOpt%GOptStat%ActStep==1) THEN
+     !  Refresh=1
+     !  IF(GOpt%CoordCtrl%RefreshIn==4) Refresh=4
+     !ELSE
+     !  Refresh=GOpt%CoordCtrl%RefreshIn
+     !ENDIF
        GOpt%CoordCtrl%Refresh=Refresh
    END SUBROUTINE IntCReDef
 !
@@ -868,34 +900,34 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE GeOpConv(GOpt,GMLoc,IntCs,IntOld,iCLONE,iGEO)
-     TYPE(GeomOpt)             :: GOpt
-     TYPE(CRDS)                :: GMLoc
-     TYPE(INTC)                :: IntCs
-     TYPE(DBL_VECT)            :: IntOld,AuxVect
-     INTEGER                   :: iCLONE,iGEO
+   SUBROUTINE GeOpConv(GOpt,XYZ,Etot,IntCs,IntOld,iCLONE,iGEO)
+     TYPE(GeomOpt)              :: GOpt
+     REAL(DOUBLE),DIMENSION(:,:):: XYZ
+     TYPE(INTC)                 :: IntCs
+     TYPE(DBL_VECT)             :: IntOld,AuxVect
+     INTEGER                    :: iCLONE,iGEO
      !
-     REAL(DOUBLE)              :: MaxStreDispl,MaxBendDispl
-     REAL(DOUBLE)              :: MaxLinBDispl,MaxOutPDispl
-     REAL(DOUBLE)              :: MaxTorsDispl
-     REAL(DOUBLE)              :: RMSIntDispl
+     REAL(DOUBLE)               :: MaxStreDispl,MaxBendDispl
+     REAL(DOUBLE)               :: MaxLinBDispl,MaxOutPDispl
+     REAL(DOUBLE)               :: MaxTorsDispl
+     REAL(DOUBLE)               :: RMSIntDispl
      !
-     REAL(DOUBLE)              :: StreConvCrit,BendConvCrit
-     REAL(DOUBLE)              :: LinBConvCrit,OutPConvCrit
-     REAL(DOUBLE)              :: TorsConvCrit
-     !
-     INTEGER                   :: I,J,K,L
-     INTEGER                   :: NCart,NIntC,NatmsLoc
-     REAL(DOUBLE)              :: RMSGrad,MaxGrad
-     REAL(DOUBLE)              :: RMSGradNoConstr,MaxGradNoConstr
-     REAL(DOUBLE)              :: Etot,Sum
-     !
-     INTEGER                   :: NStreGeOp,NBendGeOp,NLinBGeOp
-     INTEGER                   :: NOutPGeOp,NTorsGeOp
-     INTEGER                   :: MaxStre,MaxBend,MaxLinB
-     INTEGER                   :: MaxOutP,MaxTors
-     !
-     INTEGER                   :: IMaxGrad,IMaxGradNoConstr
+     REAL(DOUBLE)               :: StreConvCrit,BendConvCrit
+     REAL(DOUBLE)               :: LinBConvCrit,OutPConvCrit
+     REAL(DOUBLE)               :: TorsConvCrit
+     !                      
+     INTEGER                    :: I,J,K,L
+     INTEGER                    :: NCart,NIntC,NatmsLoc
+     REAL(DOUBLE)               :: RMSGrad,MaxGrad
+     REAL(DOUBLE)               :: RMSGradNoConstr,MaxGradNoConstr
+     REAL(DOUBLE)               :: Etot,Sum
+     !                      
+     INTEGER                    :: NStreGeOp,NBendGeOp,NLinBGeOp
+     INTEGER                    :: NOutPGeOp,NTorsGeOp
+     INTEGER                    :: MaxStre,MaxBend,MaxLinB
+     INTEGER                    :: MaxOutP,MaxTors
+     !                      
+     INTEGER                    :: IMaxGrad,IMaxGradNoConstr
      !
      IF(AllocQ(IntCs%Alloc)) THEN
        NIntC=SIZE(IntCs%Def)
@@ -903,9 +935,8 @@ CONTAINS
        NIntC=0
      ENDIF
      !
-     NatmsLoc=GMLoc%Natms
+     NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     ETot=GMLoc%ETotal
      !
      RMSGrad=GOpt%GOptStat%RMSGrad
      RMSGradNoConstr=GOpt%GOptStat%RMSGradNoConstr
@@ -922,7 +953,7 @@ CONTAINS
      !
      ! Size of internal coordinate changes
      !
-     CALL INTCValue(IntCs,GMLoc%AbCarts%D,GOpt%CoordCtrl%LinCrit)
+     CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
      IntOld%D=IntCs%Value-IntOld%D
      CALL MapAngleDispl(IntCs,NIntC,IntOld%D)
      MaxStre=0
@@ -1079,8 +1110,6 @@ CONTAINS
      NatmsLoc=Geos%Clone(1)%Natms
      NCart=3*NatmsLoc
      !
-     CALL InitGDIIS(Nams%HFile,Nams%RFile,Geos%Clones,Opts%Guess,NCart)
-     !
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
      CALL     SetStepS(GOpt%StepSize)
@@ -1164,43 +1193,20 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE InitGDIIS(HFileIn,RFileIn,NClones,Guess,NCart)
-     INTEGER         :: iCLONE,NClones,Guess,NCart
-     CHARACTER(LEN=*):: HFileIn,RFileIn
-     LOGICAL         :: GRestart
-     !
-     GRestart =(Guess==GUESS_EQ_RESTART)
-     !
-     IF(GRestart) THEN
-       DO iCLONE=1,NClones
-         CALL GDIISRestart(HFileIn,RFileIn,iCLONE,NCart)
-       ENDDO
-     ELSE
-       HDFFileID=OpenHDF(HFileIn)
-       DO iCLONE=1,NClones
-         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//&
-                                TRIM(IntToChar(iCLONE)))
-         CALL Put(0,'RefMemory')
-         CALL Put(0,'SRMemory')
-         CALL Put(0,'CartGradMemory')
-         CALL CloseHDFGroup(HDF_CurrentID)
-       ENDDO
-       CALL CloseHDF(HDFFileID)
-     ENDIF
-   END SUBROUTINE InitGDIIS
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE OptSingleMol(GOpt,Nams,Opts,GMLoc,Convgd,IGeo,iCLONE)
+   SUBROUTINE OptSingleMol(GOpt,Nams,Opts,Sets,Geos, &
+                           GMLoc,Convgd,iGEO,iBAS,iCLONE)
      TYPE(GeomOpt)        :: GOpt
      TYPE(FileNames)      :: Nams
      TYPE(Options)        :: Opts
+     TYPE(BasisSets)      :: Sets
+     TYPE(Geometries)     :: Geos
      TYPE(CRDS)           :: GMLoc
      INTEGER,DIMENSION(:) :: Convgd
-     INTEGER              :: IGeo,iCLONE
+     INTEGER              :: iGEO,iBAS,iCLONE
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
      LOGICAL              :: NoGDIIS,GDIISOn,Print
      CHARACTER(LEN=DCL)   :: SCRPath
+     TYPE(DBL_RNK2)       :: XYZNew
      !
      InitGDIIS=GOpt%GDIIS%Init
      NoGDIIS  =GOpt%GDIIS%NoGDIIS
@@ -1212,19 +1218,24 @@ CONTAINS
              '.'//TRIM(IntToChar(iCLONE))
      Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
      !
-     CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='Ref')
-     CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%Vects%D,Tag_O='CartGrad') 
+     CALL New(XYZNew,(/3,NatmsLoc/))
+     XYZNew%D=GMLoc%AbCarts%D
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
-       CALL ModifyGeom(GOpt,GMLoc,IGeo,iCLONE,SCRPath,Print)
+       CALL ModifyGeom(GOpt,XYZNew%D,GMLoc%AtNum%D,GMLoc%Vects%D, &
+                       GMLoc%Etotal,IGeo,iCLONE,SCRPath,Print)
        !
-       CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
+       ! do archivation of displaced geometries for GDIIS
+       !
+       GMLoc%Displ%D=XYZNew%D
+       CALL GeomArchive(iBAS,iGEO,Nams,Sets,Geos)    
+       GMLoc%AbCarts%D=XYZNew%D
        !
        IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
          IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
            CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
-             Print,SCRPath,InitGDIIS)
+             iGEO,Print,SCRPath,InitGDIIS)
          ENDIF
        ENDIF
      CLOSE(Out,STATUS='KEEP')
@@ -1234,6 +1245,7 @@ CONTAINS
      IF(GOpt%GOptStat%GeOpConvgd) THEN
        Convgd(iCLONE)=1
      ENDIF
+     CALL Delete(XYZNew)
    END SUBROUTINE OptSingleMol
 !
 !-------------------------------------------------------------------

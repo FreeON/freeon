@@ -37,193 +37,189 @@ MODULE ParseExtraCoords
      NConstr=0
      NCartConstr=0
      !
-     IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
-       CALL New(IntC_Extra,NIntC_Extra)
-       GO TO 400
-     ENDIF
-     !
-     CALL AlignLowCase('begin_add_internals',Inp)
-     DO 
-       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-       LineLowCase = Line
-       Call LowCase(LineLowCase)
-     !
-     IF(INDEX(LineLowCase,'stre')/=0.OR.&
-        INDEX(LineLowCase,'bend')/=0.OR.&
-        INDEX(LineLowCase,'tors')/=0.OR.&
-        INDEX(LineLowCase,'outp')/=0.OR.&
-        INDEX(LineLowCase,'linb1')/=0.OR.&
-        INDEX(LineLowCase,'linb2')/=0) THEN
-        NIntC_Extra=NIntC_Extra+1 
-     ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
-        NIntC_Extra=NIntC_Extra+3 
-     ENDIF
-     !
-       IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
-     ENDDO
-     1  CALL MondoHalt(PRSE_ERROR, &
-        ' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
-     2  CONTINUE
-     !
-     IF(NIntC_Extra==0) THEN
-       GO TO 400
-     ENDIF
-     !
-     ! Generate an addition to the IntC set!
-     !
-     CALL New(IntC_Extra,NIntC_Extra)
-     IntC_Extra%ATOMS=0
-     IntC_Extra%Value=Zero
-     IntC_Extra%Constraint=.FALSE.
-     IntC_Extra%ConstrValue=Zero   
-     !
-     ! Parse again and fill IntC_Extra!
-     !
-     NIntC_Extra=0
-     CALL AlignLowCase('begin_add_internals',Inp)
-     DO 
-       READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-       LineLowCase = Line
-       Call LowCase(LineLowCase)
+     IF(FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
        !
-       IF(INDEX(LineLowCase,'stre')/=0) THEN
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='STRE ' 
-       !--------------------
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*AngstromsToAu
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
-       ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
-       !--------------------
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='BEND ' 
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
-       ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
-       !--------------------
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='TORS ' 
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
-       ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
-       !--------------------
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='OUTP ' 
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
-       ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
-       !--------------------
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='LINB1' 
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
-       ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
-       !--------------------
-              NIntC_Extra=NIntC_Extra+1 
-              IntC_Extra%DEF(NIntC_Extra)='LINB2'
-              IF(INDEX(LineLowCase,'.')==0) THEN
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
-              ELSE
-                READ(LineLowCase,*) &
-                CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
-                IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
-                IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
-                NConstr=NConstr+1
-              ENDIF
-       !--------------------
+       CALL AlignLowCase('begin_add_internals',Inp)
+       DO 
+         READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+         LineLowCase = Line
+         Call LowCase(LineLowCase)
+       !
+       IF(INDEX(LineLowCase,'stre')/=0.OR.&
+          INDEX(LineLowCase,'bend')/=0.OR.&
+          INDEX(LineLowCase,'tors')/=0.OR.&
+          INDEX(LineLowCase,'outp')/=0.OR.&
+          INDEX(LineLowCase,'linb1')/=0.OR.&
+          INDEX(LineLowCase,'linb2')/=0) THEN
+          NIntC_Extra=NIntC_Extra+1 
        ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
-       !--------------------
-              IntC_Extra%DEF(NIntC_Extra+1)='CARTX' 
-              IntC_Extra%DEF(NIntC_Extra+2)='CARTY' 
-              IntC_Extra%DEF(NIntC_Extra+3)='CARTZ' 
-       !
-                READ(LineLowCase,*) CHAR,SerNum  
-       !
-              IntC_Extra%ATOMS(NIntC_Extra+1,1)=SerNum
-              IntC_Extra%ATOMS(NIntC_Extra+2,1)=SerNum
-              IntC_Extra%ATOMS(NIntC_Extra+3,1)=SerNum
-       !
-              IntC_Extra%Constraint(NIntC_Extra+1)=.TRUE.
-              IntC_Extra%Constraint(NIntC_Extra+2)=.TRUE.
-              IntC_Extra%Constraint(NIntC_Extra+3)=.TRUE.
-                NConstr=NConstr+3
-       !!!! supposing that constraints are the same for all clones
-       !      DO iCLONE=1,Geos%Clones 
-                iCLONE=1
-                IntC_Extra%ConstrValue(NIntC_Extra+1)=&
-                     Geos%Clone(iCLONE)%AbCarts%D(1,SerNum)
-                IntC_Extra%ConstrValue(NIntC_Extra+2)=&
-                     Geos%Clone(iCLONE)%AbCarts%D(2,SerNum)
-                IntC_Extra%ConstrValue(NIntC_Extra+3)=&
-                     Geos%Clone(iCLONE)%AbCarts%D(3,SerNum)
-       !      ENDDO
-       !
-                NIntC_Extra=NIntC_Extra+3 
-                NCartConstr=NCartConstr+3
-       !
-       !               IF(INDEX(LineLowCase,'.')==0) THEN
-       ! READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
-       !               ELSE
-       !               ENDIF
-       !--------------------
-       ELSE 
-       ! dont do anything with non-conform lines
-       !
+          NIntC_Extra=NIntC_Extra+3 
        ENDIF
-       !          
-       IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 12
-     ENDDO
-     11  CALL MondoHalt(PRSE_ERROR, &
-         ' Found no <end_add_internals> in inPut file '&
-         //TRIM(InpFile))
-     12  CONTINUE
-     !
-     400   CONTINUE
+       !
+         IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 2
+       ENDDO
+       1  CALL MondoHalt(PRSE_ERROR, &
+          ' Found no <end_add_internals> in inPut file '//TRIM(InpFile))
+       2  CONTINUE
+       !
+       ! Generate an addition to the IntC set!
+       !
+       CALL New(IntC_Extra,NIntC_Extra)
+       IntC_Extra%Atoms=0
+       IntC_Extra%Value=Zero
+       IntC_Extra%Constraint=.FALSE.
+       IntC_Extra%ConstrValue=Zero   
+       !
+       ! Parse again and fill IntC_Extra!
+       !
+       NIntC_Extra=0
+       CALL AlignLowCase('begin_add_internals',Inp)
+       DO 
+         READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+         LineLowCase = Line
+         Call LowCase(LineLowCase)
+         !
+         IF(INDEX(LineLowCase,'stre')/=0) THEN
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='STRE ' 
+         !--------------------
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:2),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*AngstromsToAu
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
+         !--------------------
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='BEND ' 
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
+         !--------------------
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='TORS ' 
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
+         !--------------------
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='OUTP ' 
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:4),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
+         !--------------------
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='LINB1' 
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
+         !--------------------
+                NIntC_Extra=NIntC_Extra+1 
+                IntC_Extra%DEF(NIntC_Extra)='LINB2'
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3)
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,IntC_Extra%ATOMS(NIntC_Extra,1:3),Value
+                  IntC_Extra%Constraint(NIntC_Extra)=.TRUE.
+                  IntC_Extra%ConstrValue(NIntC_Extra)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
+         !--------------------
+                IntC_Extra%DEF(NIntC_Extra+1)='CARTX' 
+                IntC_Extra%DEF(NIntC_Extra+2)='CARTY' 
+                IntC_Extra%DEF(NIntC_Extra+3)='CARTZ' 
+         !
+                  READ(LineLowCase,*) CHAR,SerNum  
+         !
+                IntC_Extra%ATOMS(NIntC_Extra+1,1)=SerNum
+                IntC_Extra%ATOMS(NIntC_Extra+2,1)=SerNum
+                IntC_Extra%ATOMS(NIntC_Extra+3,1)=SerNum
+         !
+                IntC_Extra%Constraint(NIntC_Extra+1)=.TRUE.
+                IntC_Extra%Constraint(NIntC_Extra+2)=.TRUE.
+                IntC_Extra%Constraint(NIntC_Extra+3)=.TRUE.
+                  NConstr=NConstr+3
+         !!!! supposing that constraints are the same for all clones
+         !      DO iCLONE=1,Geos%Clones 
+                  iCLONE=1
+                  IntC_Extra%ConstrValue(NIntC_Extra+1)=&
+                       Geos%Clone(iCLONE)%AbCarts%D(1,SerNum)
+                  IntC_Extra%ConstrValue(NIntC_Extra+2)=&
+                       Geos%Clone(iCLONE)%AbCarts%D(2,SerNum)
+                  IntC_Extra%ConstrValue(NIntC_Extra+3)=&
+                       Geos%Clone(iCLONE)%AbCarts%D(3,SerNum)
+         !      ENDDO
+         !
+                  NIntC_Extra=NIntC_Extra+3 
+                  NCartConstr=NCartConstr+3
+         !
+         !               IF(INDEX(LineLowCase,'.')==0) THEN
+         ! READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
+         !               ELSE
+         !               ENDIF
+         !--------------------
+         ELSE 
+         ! dont do anything with non-conform lines
+         !
+         ENDIF
+         !          
+         IF(INDEX(LineLowCase,'end_add_internals')/=0) GO TO 12
+       ENDDO
+       11  CALL MondoHalt(PRSE_ERROR, &
+           ' Found no <end_add_internals> in inPut file '&
+           //TRIM(InpFile))
+       12  CONTINUE
+       !
+     ELSE
+       NIntC_Extra=0
+       CALL New(IntC_Extra,NIntC_Extra)
+     ENDIF !!! key for extra internals found
      ! 
      ! Fill in Cartesian constraints stored 
      ! in Geos%Clone(iCLONE)%CConstrain%I
@@ -235,7 +231,7 @@ MODULE ParseExtraCoords
           NIntC_Extra,NConstr,NCartConstr)
      !ENDDO
      !
-     ! save IntC_Extra to disk 
+     ! Save IntC_Extra to disk 
      !
      DO iCLONE=1,Geos%Clones
        CALL WriteIntCs(IntC_Extra,TRIM(N%M_SCRATCH)//&

@@ -661,7 +661,7 @@ CONTAINS
        Ejk(M)=Tp
        DotJ=DotJ+T*Tp
      30 CONTINUE      
-     IF(ABS(DotJ) > 0.99995D0) GO TO 60  !!!! colinearity
+     IF(ABS(DotJ) > 0.99995D0) RETURN    !!!! colinearity
      SinJ=SQRT(One-DotJ*DotJ)
      DO 40 M=1,3
        SMI=Dx*(DotJ*Eji(M)-Ejk(M))/(Dji*SinJ)
@@ -735,7 +735,7 @@ CONTAINS
        CosK=CosK+T*Tpp
        CosL=CosL+T*Tp
      30 CONTINUE         
-     IF(ABS(CosI) > 0.99995D0) GO TO 70
+     IF(ABS(CosI) > 0.99995D0) RETURN  !!!! GO TO 70
      SinSin=One-CosI*CosI
      SinI=SQRT(SinSin)
      C1(1)=Ejk(2)*Ejl(3)-Ejk(3)*Ejl(2)
@@ -747,7 +747,7 @@ CONTAINS
      !        write(6,1020)nob
      !        write(6,'(15x,a36)')intch(nob)
      !     end if
-     IF(ABS(SinT)>0.99995D0) GO TO 80 !!!! sint show OutP angle
+     IF(ABS(SinT)>0.99995D0) RETURN !!!! GO TO 80 !!!! sint shows OutP angle
      CosT=SQRT(One-SinT*SinT)
      TanT=SinT/CosT
      CosSin=CosT*SinI
@@ -831,7 +831,11 @@ CONTAINS
        Eij(M)=T
        CosJ=CosJ-T*Ejk(M)
      50 CONTINUE
-     IF(ABS(CosJ)>0.99995d0) GO TO 120
+     IF(ABS(CosJ)>0.99995d0) THEN   !!!! GO TO 120
+       BB(:)=Zero
+       Active=.FALSE.
+       RETURN
+     ENDIF
      Sin2J=(One-CosJ*CosJ)
      Cr(1)=Eij(2)*Ejk(3)-Eij(3)*Ejk(2)
      Cr(2)=Eij(3)*Ejk(1)-Eij(1)*Ejk(3)
@@ -859,7 +863,11 @@ CONTAINS
        Elk(m)=T
      CosK=CosK+Ejk(M)*T
      80 CONTINUE
-     IF(ABS(CosK)>0.99995d0) GO TO 120
+     IF(ABS(CosK)>0.99995d0) THEN !!!! GO TO 120
+       BB(:)=Zero
+       Active=.FALSE.
+       RETURN
+     ENDIF
      Sin2K=(One-CosK*CosK)
      Cr(1)=Elk(3)*Ejk(2)-Elk(2)*Ejk(3)
      Cr(2)=Elk(1)*Ejk(3)-Elk(3)*Ejk(1)
@@ -1130,40 +1138,40 @@ CONTAINS
      ! Fill Data into IntCs
      !
      NIntC=NBond+NAngle+NTorsion+NOutP
-     IF(NIntC==0) GO TO 300
-     CALL New(IntCs,NIntC)
-     IntCs%Def='     '
-     IntCs%Atoms(1:NIntC,1:4)=0   
-     IntCs%Value=Zero
-     IntCs%Constraint=.FALSE.
-     IntCs%ConstrValue=Zero   
-     !
-     DO I=1,NBond
-       IntCs%Def(I)='STRE '
-       IntCs%Atoms(I,1:2)=BondIJ%I(1:2,I)
-     ENDDO
-       ILast=NBond
-     DO I=1,NAngle
-         IntCs%Def(ILast+I)='BEND '
-         IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
-     ENDDO
-       ILast=NBond+NAngle
-     DO I=1,NTorsion
-       IntCs%Def(ILast+I)='TORS '
-       IntCs%Atoms(ILast+I,1:4)=TorsionIJKL%I(1:4,I)
-     ENDDO
-     IF(IntSet==1) THEN 
+     IF(NIntC/=0) THEN          
+       CALL New(IntCs,NIntC)
+       IntCs%Def='     '
+       IntCs%Atoms(:,:)=0   
+       IntCs%Value=Zero
+       IntCs%Constraint=.FALSE.
+       IntCs%ConstrValue=Zero   
        !
-       ! Add OutP-s, only in covalent network!
-       !
-       ILast=NBond+NAngle+NTorsion
-       DO I=1,NOutP
-         IntCs%Def(ILast+I)='OUTP '
-         IntCs%Atoms(ILast+I,1:4)=OutPIJKL%I(1:4,I)
+       DO I=1,NBond
+         IntCs%Def(I)='STRE '
+         IntCs%Atoms(I,1:2)=BondIJ%I(1:2,I)
        ENDDO
-       !
+         ILast=NBond
+       DO I=1,NAngle
+           IntCs%Def(ILast+I)='BEND '
+           IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
+       ENDDO
+         ILast=NBond+NAngle
+       DO I=1,NTorsion
+         IntCs%Def(ILast+I)='TORS '
+         IntCs%Atoms(ILast+I,1:4)=TorsionIJKL%I(1:4,I)
+       ENDDO
+       IF(IntSet==1) THEN 
+         !
+         ! Add OutP-s, only in covalent network!
+         !
+         ILast=NBond+NAngle+NTorsion
+         DO I=1,NOutP
+           IntCs%Def(ILast+I)='OUTP '
+           IntCs%Atoms(ILast+I,1:4)=OutPIJKL%I(1:4,I)
+         ENDDO
+         !
+       ENDIF
      ENDIF
-     300   CONTINUE
      !
      ! tidy up
      IF(IntSet==1) CALL Delete(OutPIJKL)
@@ -1525,7 +1533,7 @@ CONTAINS
      INTEGER                     :: NIntC,NIntC_Cov,NIntC_VDW
      INTEGER                     :: NIntC_Extra,NNew,Nintc_New
      INTEGER                     :: NIntC_Cart
-     INTEGER                     :: I,J,K,Refresh,NatmsLoc,II,ILast
+     INTEGER                     :: I,J,K,Refresh,NatmsLoc,II,ILast,III
      INTEGER                     :: I1,I2,I3,I4,NMax12
      INTEGER                     :: NStreGeOp,NBendGeOp
      INTEGER                     :: NLinBGeOp,NOutPGeOp,NTorsGeOp
@@ -1535,15 +1543,7 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      !
-     ! Fixed MM coordinates
-     !
      NIntC_Cart=0
-     IF(CtrlConstr%DoFixMM) THEN
-       CALL GetIntcCart(IntC_Cart,XYZ)
-       NIntC_Cart=SIZE(IntC_Cart%Def)
-       !!!!! for QM/MM calcs pass only limited number of Cartesians
-       !!!!! to the routines below
-     ENDIF
      !
      CALL New(AtNum,NatmsLoc)
      DO I=1,NatmsLoc
@@ -1598,81 +1598,34 @@ CONTAINS
      !
      NIntC=NIntC_Cov+NIntC_VDW+NIntC_Extra+NIntC_Cart
      !
-     IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
-     IF(NIntC/=0) CALL New(IntCs,NIntC)
+     CALL New(IntCs,NIntC)
      !
      ILast=0
      IF(NIntC_Cov/=0) THEN
        CALL Set_INTC_EQ_INTC(IntC_Cov,IntCs,1,NIntC_Cov,ILast+1)
+       CALL Delete(IntC_Cov)
      ENDIF
        ILast=NIntC_Cov
      IF(NIntC_VDW/=0) THEN 
        CALL Set_INTC_EQ_INTC(IntC_VDW,IntCs,1,NIntC_VDW,ILast+1)
+       CALL Delete(IntC_VDW)
      ENDIF
      !
      IF(NIntC_Extra/=0) THEN
        ILast=ILast+NIntC_VDW
        CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,NIntC_Extra,ILast+1)
+       CALL Delete(IntC_Extra)
      ENDIF
      !
      IF(NIntC_Cart/=0) THEN
        ILast=MAX(ILast+NIntC_Extra,ILast+NIntC_VDW)
        CALL Set_INTC_EQ_INTC(IntC_Cart,IntCs,1,NIntC_Cart,ILast+1)
+       CALL Delete(IntC_Cart)
      ENDIF
      !
-     ! tidy up
-     !
-     IF(AllocQ(IntC_Cov%Alloc)) CALL Delete(IntC_Cov)
-     IF(AllocQ(IntC_VDW%Alloc)) CALL Delete(IntC_VDW)
-     IF(AllocQ(IntC_Extra%Alloc)) CALL Delete(IntC_Extra)
-     IF(AllocQ(IntC_Cart%Alloc)) CALL Delete(IntC_Cart)
-     !
-     IF(NIntC==0.OR.NIntC_Extra==0.OR.Refresh==5) GO TO 1000
-     !
-     ! Now filter out repeated definitions, 
-     ! which may have occured in INTC_Extra
-     ! keep those values, which were defd. in extras.
-     ! Do not check for Cartesians.
-     !
-     ILast=NIntC_Cov+NIntC_VDW
-     100  II=0
-     DO I=ILast+1,ILast+NIntC_Extra
-         IF(IntCs%Def(I)=='CART ') CYCLE
-       DO J=1,ILast
-         IF(IntCs%Def(J)=='BLANK') CYCLE
-         IF(IntCs%Atoms(J,1)==IntCs%Atoms(I,1).AND.&
-            IntCs%Atoms(J,2)==IntCs%Atoms(I,2).AND.&
-            IntCs%Atoms(J,3)==IntCs%Atoms(I,3).AND.&
-            IntCs%Atoms(J,4)==IntCs%Atoms(I,4)) THEN
-            IntCs%Def(J)='BLANK'
-            IntCs%Atoms(J,1:4)=0      
-         ENDIF
-       ENDDO
-     ENDDO
-     IF(II/=0) GO TO 100
-     !
-     ! Compress IntCs array, get rid of BLANK-s
-     !
-     IF(ANY(IntCs%Def(:)=='BLANK')) THEN
-       NNew=NIntC
-       DO I=1,NIntc
-         IF(IntCs%Def(I)=='BLANK') NNew=NNew-1
-       ENDDO
-       CALL New(IntC_New,NNew)
-       NNew=0    
-       DO I=1,NIntc
-         IF(IntCs%Def(I)/='BLANK') THEN
-           NNew=NNew+1
-           CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NNew)
-         ENDIF
-       ENDDO
-       CALL Delete(IntCs)
-       NIntC=NNew
-       CALL New(IntCs,NIntC)
-         CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
-       CALL Delete(IntC_New)
-     ENDIF
-     1000 CONTINUE
+     IF(.NOT.(NIntC==0.OR.NIntC_Extra==0.OR.Refresh==5)) THEN
+       CALL CleanINTC(IntCs,NIntC,NIntC_Cov,NIntC_VDW,NIntC_Extra)
+     ENDIF             
      !
      ! Check for bending - lin.bending transions
      ! also for long range torsions!
@@ -1687,7 +1640,7 @@ CONTAINS
      ! The set of active coordinates may vary 
      ! during the process of optimization.
      !
-     IF(NIntC/=0) IntCs%Active=.TRUE.
+     IntCs%Active=.TRUE.
      !
      ! Count number of different internal coord types
      !
@@ -1711,11 +1664,68 @@ CONTAINS
      CtrlCoord%NOutP=NOutPGeOp
      CtrlCoord%NTors=NTorsGeOp
      !
-     ! Save current internals to HDF
+     ! Save current internals to disk
      !
      CALL WriteIntCs(IntCs,TRIM(SCRPath)//'IntCs')
      CALL Delete(AtNum)
    END SUBROUTINE GetIntCs
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CleanINTC(IntCs,NIntC,NIntC_Cov,NIntC_VDW,NIntC_Extra)
+     !
+     ! Now filter out repeated definitions, 
+     ! which may have occured in INTC_Extra
+     ! keep those values, which were defd. in extras.
+     ! Do not check for Cartesians.
+     !
+     TYPE(INTC) :: IntCs,IntC_New
+     INTEGER    :: NIntC_Cov,NIntC_VDW,NIntC,I,J,NNew,II,III,ILast
+     INTEGER    :: NIntC_Extra
+     !
+     ILast=NIntC_Cov+NIntC_VDW
+     DO III=1,NIntC
+       II=0
+       DO I=ILast+1,ILast+NIntC_Extra
+           IF(IntCs%Def(I)=='CART ') CYCLE
+         DO J=1,ILast
+           IF(IntCs%Def(J)=='BLANK') CYCLE
+           IF(IntCs%Atoms(J,1)==IntCs%Atoms(I,1).AND.&
+              IntCs%Atoms(J,2)==IntCs%Atoms(I,2).AND.&
+              IntCs%Atoms(J,3)==IntCs%Atoms(I,3).AND.&
+              IntCs%Atoms(J,4)==IntCs%Atoms(I,4)) THEN
+              II=II+1
+              IntCs%Def(J)='BLANK'
+              IntCs%Atoms(J,1:4)=0      
+           ENDIF
+         ENDDO
+       ENDDO
+     ENDDO
+     !
+     ! Compress IntCs array, get rid of BLANK-s
+     !
+     IF(II/=0) THEN
+       IF(ANY(IntCs%Def(:)=='BLANK')) THEN
+         NNew=NIntC
+         DO I=1,NIntc
+           IF(IntCs%Def(I)=='BLANK') NNew=NNew-1
+         ENDDO
+         CALL New(IntC_New,NNew)
+         NNew=0    
+         DO I=1,NIntc
+           IF(IntCs%Def(I)/='BLANK') THEN
+             NNew=NNew+1
+             CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NNew)
+           ENDIF
+         ENDDO
+         CALL Delete(IntCs)
+         NIntC=NNew
+         CALL New(IntCs,NIntC)
+           CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
+         CALL Delete(IntC_New)
+       ENDIF
+     ENDIF
+   END SUBROUTINE CleanINTC
 !
 !-------------------------------------------------------
 !
@@ -1852,11 +1862,12 @@ CONTAINS
      REAL(DOUBLE)                :: VTors,CosPhi,Sum,Conv
      REAL(DOUBLE)                :: V1ABS,V2ABS,LinCrit,TwoPi
      INTEGER                     :: I,J,K,L
-     LOGICAL                     :: Active,ActiveIn
+     LOGICAL                     :: Active,ActiveIn,NonLinear
      !
      Conv=180.D0/PI
      TwoPi=Two*PI
      ActiveIn=Active
+     NonLinear=.TRUE.
      !
      CALL New(XI,3)
      CALL New(XJ,3)
@@ -1879,13 +1890,13 @@ CONTAINS
      V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
      IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
        Active=.FALSE. 
-       GO TO 1000
+       NonLinear=.FALSE.
      ENDIF
      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
      SUM=ACOS(SUM)*Conv
      IF(Sum<LinCrit) THEN
        Active=.FALSE. 
-       GO TO 1000
+       NonLinear=.FALSE.
      ENDIF
      ! 
      ! Check for linearity of J-K-L
@@ -1896,77 +1907,79 @@ CONTAINS
      V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
      IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
        Active=.FALSE. 
-       GO TO 1000
+       NonLinear=.FALSE.
      ENDIF
      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
      SUM=ACOS(SUM)*Conv
      IF(Sum<LinCrit) THEN
        Active=.FALSE. 
-       GO TO 1000
+       NonLinear=.FALSE.
      ENDIF
      !
-     ! Translate, so that XK be in the origin
-     !
-     XI%D=XI%D-XK%D 
-     XJ%D=XJ%D-XK%D 
-     XL%D=XL%D-XK%D 
-     XK%D=Zero        
-     !
-     ! Rotate system, such that J be on Z axis
-     !
-     V1%D=Zero
-     V1%D(3)=One 
-     V2%D=XJ%D
-     CALL Rotate(V1%D,V2%D,Rot%D)
-     !
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
-     XI%D=V2%D
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
-     XJ%D=V2%D
-     V2%D=Zero
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
-     XL%D=V2%D
-     !
-     ! Now, rotate system around z axis such, that IJ bond be 
-     ! parallel with x axis, I pointing to positive X
-     !
-     V1%D=Zero
-     V1%D(1)=One 
-     V2%D=Zero
-     V2%D(1)=XI%D(1)
-     V2%D(2)=XI%D(2)
-     CALL Rotate(V1%D,V2%D,Rot%D)
-     !
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
-     XI%D=V2%D
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
-     XJ%D=V2%D
-     CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
-     XL%D=V2%D
-     !
-     ! Now, calculate torsional angle
-     !
-     V1%D=Zero
-     V1%D(1)=One 
-     V2%D(1)=XL%D(1)
-     V2%D(2)=XL%D(2)
-     V2%D(3)=Zero   
-     Sum=SQRT(DOT_PRODUCT(V2%D,V2%D))
-     V2%D=V2%D/Sum
-     CosPhi=DOT_PRODUCT(V1%D,V2%D)
-     !
-     IF(ABS(CosPhi)>0.999999D0) THEN
-       CosPhi=SIGN(ABS(CosPhi),CosPhi)
+     IF(NonLinear) THEN
+       !
+       ! Translate, so that XK be in the origin
+       !
+       XI%D=XI%D-XK%D 
+       XJ%D=XJ%D-XK%D 
+       XL%D=XL%D-XK%D 
+       XK%D=Zero        
+       !
+       ! Rotate system, such that J be on Z axis
+       !
+       V1%D=Zero
+       V1%D(3)=One 
+       V2%D=XJ%D
+       CALL Rotate(V1%D,V2%D,Rot%D)
+       !
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
+       XI%D=V2%D
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
+       XJ%D=V2%D
+       V2%D=Zero
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
+       XL%D=V2%D
+       !
+       ! Now, rotate system around z axis such, that IJ bond be 
+       ! parallel with x axis, I pointing to positive X
+       !
+       V1%D=Zero
+       V1%D(1)=One 
+       V2%D=Zero
+       V2%D(1)=XI%D(1)
+       V2%D(2)=XI%D(2)
+       CALL Rotate(V1%D,V2%D,Rot%D)
+       !
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
+       XI%D=V2%D
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
+       XJ%D=V2%D
+       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
+       XL%D=V2%D
+       !
+       ! Now, calculate torsional angle
+       !
+       V1%D=Zero
+       V1%D(1)=One 
+       V2%D(1)=XL%D(1)
+       V2%D(2)=XL%D(2)
+       V2%D(3)=Zero   
+       Sum=SQRT(DOT_PRODUCT(V2%D,V2%D))
+       V2%D=V2%D/Sum
+       CosPhi=DOT_PRODUCT(V1%D,V2%D)
+       !
+       IF(ABS(CosPhi)>0.999999D0) THEN
+         CosPhi=SIGN(ABS(CosPhi),CosPhi)
+       ENDIF
+       VTors=ACOS(CosPhi)
+       !
+       ! Take orientation of torsional chain into account
+       !
+       IF(XL%D(2)>Zero) VTors=TwoPi-VTors
+       Sum=TwoPi-VTors
+       IF(Sum<VTors) VTors=-Sum
+       !
      ENDIF
-     VTors=ACOS(CosPhi)
-     !
-     ! Take orientation of torsional chain into account
-     !
-     IF(XL%D(2)>Zero) VTors=TwoPi-VTors
-     Sum=TwoPi-VTors
-     IF(Sum<VTors) VTors=-Sum
-     !
-     1000  CONTINUE
      CALL Delete(V2)
      CALL Delete(V1)
      CALL Delete(Rot)
@@ -2342,9 +2355,9 @@ CONTAINS
      VectInt=Zero
      !
      IF(Print) THEN
-       WRITE(*,111) 
-       WRITE(Out,111)
-     111 FORMAT('Gradient transformation, No. Int. Coords= ')
+       WRITE(*,111) NIntC 
+       WRITE(Out,111) NIntC
+     111 FORMAT('Gradient transformation, No. Int. Coords= ',I7)
      ENDIF
      !
      ! Cartesian --> Internal transformation
@@ -2362,82 +2375,75 @@ CONTAINS
        VectCart(3*I)=Zero
      ENDIF
      !
-     II=0
-     100   CONTINUE      
-     !
-     VectCartAux%D=Zero
-     !
-     ! gc-Bt*gi
-     !
-     CALL CALC_BxVect(B,VectInt,VectCartAux%D,Trp_O=.TRUE.)
-     VectCartAux%D=VectCart-VectCartAux%D
-     !
-     ! GcInv*[gc-Bt*gi]
-     !
-     CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
-     !
-     ! B*GcInv*[gc-Bt*gi]
-     !
-     CALL CALC_BxVect(B,VectIntAux%D,VectCartAux2%D)
-     !
-     ! Check convergence
-     !
-     II=II+1
-     DiffMax=Zero
-     DO I=1,NIntC ; DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I))) ; ENDDO
-     RMSD=DOT_PRODUCT(VectIntAux%D,VectIntAux%D)
-     RMSD=SQRT(RMSD/DBLE(NIntC))
-     !
-     ! IF DiffMax is too large, eg. due to the 'bad' quality 
-     ! of the preconditioner, rescale gradients
-     !
-     IF(DiffMax>MaxGradDiff) THEN
-       IF(Print) THEN
-         WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
-         WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
-       ENDIF
-       SUM=MaxGradDiff/DiffMax
-       VectIntAux%D(:)=SUM*VectIntAux%D(:)
-       DiffMax=MaxGradDiff
-     ENDIF
-     !
-     ! gi+B*GcInv*[gc-Bt*gi]
-     !
-     VectInt=VectInt+VectIntAux%D
-     !
-     ! project out redundancy again
-     !
-     ! CALL RedundOffGeneral(VectInt,XYZ,&
-     ! ,SpB,SpBt,CholData,DoSet_O=.FALSE.) 
-     !
-     ! Review iteration
-     !
-     IF(Print) THEN
-       WRITE(*,110) II,DiffMax,RMSD
-       WRITE(Out,110) II,DiffMax,RMSD
-     ENDIF
-     110  FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,&
-                 ' ChangeNorm= ',F12.6)
-     !      
-     IF(DiffMax>GrdTrfCrit.AND.II<=MaxIt_GrdTrf) THEN
-       GO TO 100      
-     ELSE
-       IF(II>MaxIt_GrdTrf) THEN
+     DO II=1,MaxIt_GrdTrf
+       !
+       VectCartAux%D=Zero
+       !
+       ! gc-Bt*gi
+       !
+       CALL CALC_BxVect(B,VectInt,VectCartAux%D,Trp_O=.TRUE.)
+       VectCartAux%D=VectCart-VectCartAux%D
+       !
+       ! GcInv*[gc-Bt*gi]
+       !
+       CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
+       !
+       ! B*GcInv*[gc-Bt*gi]
+       !
+       CALL CALC_BxVect(B,VectIntAux%D,VectCartAux2%D)
+       !
+       ! Check convergence
+       !
+       DiffMax=Zero
+       DO I=1,NIntC ; DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I))) ; ENDDO
+       RMSD=DOT_PRODUCT(VectIntAux%D,VectIntAux%D)
+       RMSD=SQRT(RMSD/DBLE(NIntC))
+       !
+       ! IF DiffMax is too large, eg. due to the 'bad' quality 
+       ! of the preconditioner, rescale gradients
+       !
+       IF(DiffMax>MaxGradDiff) THEN
          IF(Print) THEN
-           WRITE(*,777) 
-           WRITE(*,778) 
-           WRITE(Out,777) 
-           WRITE(Out,778) 
-           777 FORMAT('Stop Gradient Trf, max. number '//&
-                        'of Iterations exceeded!')
-           778 FORMAT('Use current gradient vector!')
+           WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
+           WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',MaxGradDiff
          ENDIF
+         SUM=MaxGradDiff/DiffMax
+         VectIntAux%D(:)=SUM*VectIntAux%D(:)
+         DiffMax=MaxGradDiff
        ENDIF
-     ENDIF
+       !
+       ! gi+B*GcInv*[gc-Bt*gi]
+       !
+       VectInt=VectInt+VectIntAux%D
+       !
+       ! Review iteration
+       !
+       IF(Print) THEN
+         WRITE(*,110) II,DiffMax,RMSD
+         WRITE(Out,110) II,DiffMax,RMSD
+       ENDIF
+       110  FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,&
+                   ' ChangeNorm= ',F12.6)
+       !      
+       IF(DiffMax<GrdTrfCrit) THEN
+       ENDIF
+     ENDDO
      !
-     IF(Print) THEN
-       WRITE(*,120) II
-       WRITE(Out,120) II
+     IF(II>=MaxIt_GrdTrf) THEN
+       IF(Print) THEN
+         WRITE(*,777) 
+         WRITE(*,778) 
+         WRITE(Out,777) 
+         WRITE(Out,778) 
+         777 FORMAT('Stop Gradient Trf, max. number '//&
+                      'of Iterations exceeded!')
+         778 FORMAT('Use current gradient vector!')
+       ENDIF
+     ELSE
+       IF(Print) THEN
+         WRITE(*,120) II
+         WRITE(Out,120) II
+       ENDIF
      ENDIF
      120  FORMAT('Gradient transformation converged in ',I3,' steps')
      !
@@ -2558,122 +2564,113 @@ CONTAINS
      ConstrRMSOld=2.D0
      RMSD=1.D+9
      !
-     IStep=0
-     200  CONTINUE
-     !
-     ! Get B and refresh values of internal coords
-     !
-     IF(IStep==0) THEN
-       CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
-     ELSE IF(RefreshB.AND.RefreshAct) THEN
-       CALL RefreshBMatInfo(IntCs,ActCarts%D,B,CholData, &
-         DoClssTrf,Print,LinCrit,ThreeAt,SCRPath)
-     ELSE
-       CALL INTCValue(IntCs,ActCarts%D,LinCrit)
-     ENDIF
-     !
-     ! Calculate difference between required and actual internals
-     ! Calc [phi_r-phi_a]
-     !
-     VectIntAux%D=VectIntReq%D-IntCs%Value
-     CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
-     !
-     ! Check convergence on constraints
-     !
-     IF(CtrlConstr%NConstr/=0) THEN
-       ConstrRMSOld=ConstrRMS
-       CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
-     ENDIF
-     !
-     ! Do transformation
-     ! 
-     ! Bt*[phi_r-phi_a]
-     !
-     CALL CALC_BxVect(B,VectIntAux%D,VectCartAux%D,Trp_O=.TRUE.)
-     !
-     ! GcInv*Bt*[phi_r-phi_a]
-     !
-     CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
-     !
-     ! Project out rotations and translations 
-     ! from Cartesian displacements
-     ! this is especially important in the presence 
-     ! of Cartesian constraints,
-     ! or when sparse, approximate GcInv is available only.
-     !
-     IF(CtrlTrf%DoTranslOff) &
-       CALL TranslsOff(VectCartAux2%D,Print)
-     IF(CtrlTrf%DoRotOff) &
-       CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print)
-     !
-     ! Check convergence
-     !
-     IStep=IStep+1
-     !
-     RMSDOld=RMSD
-     CALL CartConv(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD, &
-                    IntCs,NCartConstr)
-     !
-     ! Refresh B matrix?  
-     !
-     IF(DiffMax>DistRefresh) THEN
-       RefreshAct=.TRUE.
-     ELSE
-       RefreshAct=.FALSE.
-     ENDIF
-     !
-     ! Modify Cartesians
-     !
-     VectCart%D=VectCart%D+VectCartAux2%D
-     CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-     !
-     ! Review iteration
-     !
-     IF(Print) THEN
-       WRITE(*,210) IStep,DiffMax,RMSD
-       WRITE(Out,210) IStep,DiffMax,RMSD
-     ENDIF
-     210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
-     !      
-     CALL BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
-       RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
-       ConstrRMS,ConstrRMSOld,CtrlConstr%NConstr, &
-       MaxIt_CooTrf,MaxCartDiff,IStep,RefreshAct)
-     !
-     IF(DoIterate) THEN
-       IF(RefreshB.AND.RefreshAct) THEN
-         CALL DeleteBMatInfo(B,CholData)
+     DO IStep=1,MaxIt_CooTrf
+       !
+       ! Get B and refresh values of internal coords
+       !
+       IF(IStep==0) THEN
+         CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
+       ELSE IF(RefreshB.AND.RefreshAct) THEN
+         CALL RefreshBMatInfo(IntCs,ActCarts%D,B,CholData, &
+           DoClssTrf,Print,LinCrit,ThreeAt,SCRPath)
+       ELSE
+         CALL INTCValue(IntCs,ActCarts%D,LinCrit)
        ENDIF
-       GO TO 200
+       !
+       ! Calculate difference between required and actual internals
+       ! Calc [phi_r-phi_a]
+       !
+       VectIntAux%D=VectIntReq%D-IntCs%Value
+       CALL MapAngleDispl(IntCs,NIntC,VectIntAux%D) 
+       !
+       ! Check convergence on constraints
+       !
+       IF(CtrlConstr%NConstr/=0) THEN
+         ConstrRMSOld=ConstrRMS
+         CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
+       ENDIF
+       !
+       ! Do transformation
+       ! 
+       ! Bt*[phi_r-phi_a]
+       !
+       CALL CALC_BxVect(B,VectIntAux%D,VectCartAux%D,Trp_O=.TRUE.)
+       !
+       ! GcInv*Bt*[phi_r-phi_a]
+       !
+       CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
+       !
+       ! Project out rotations and translations 
+       ! from Cartesian displacements
+       ! this is especially important in the presence 
+       ! of Cartesian constraints,
+       ! or when sparse, approximate GcInv is available only.
+       !
+       IF(CtrlTrf%DoTranslOff) &
+         CALL TranslsOff(VectCartAux2%D,Print)
+       IF(CtrlTrf%DoRotOff) &
+         CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print)
+       !
+       ! Check convergence
+       !
+       RMSDOld=RMSD
+       CALL CartConv(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD, &
+                      IntCs,NCartConstr)
+       !
+       ! Refresh B matrix?  
+       !
+       IF(DiffMax>DistRefresh) THEN
+         RefreshAct=.TRUE.
+       ELSE
+         RefreshAct=.FALSE.
+       ENDIF
+       !
+       ! Modify Cartesians
+       !
+       VectCart%D=VectCart%D+VectCartAux2%D
+       CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
+       !
+       ! Review iteration
+       !
+       IF(Print) THEN
+         WRITE(*,210) IStep,DiffMax,RMSD
+         WRITE(Out,210) IStep,DiffMax,RMSD
+       ENDIF
+       210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
+       !      
+       CALL BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
+         RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
+         ConstrRMS,ConstrRMSOld,CtrlConstr%NConstr, &
+         MaxIt_CooTrf,MaxCartDiff,IStep,RefreshAct)
+       !
+       IF(DoIterate) THEN
+         IF(RefreshB.AND.RefreshAct) CALL DeleteBMatInfo(B,CholData)
+       ELSE
+         EXIT
+       ENDIF
+     ENDDO          
+     !
+     IF(IStep>=MaxIt_CooTrf) THEN
+       IF(RMSD>0.01D0) THEN
+         CALL Halt('Iterative backtransformation did not converge')
+       ENDIF
+       IF(Print) THEN
+         WRITE(*,180) 
+         WRITE(Out,180) 
+         WRITE(*,190) 
+         WRITE(Out,190) 
+       ENDIF
      ELSE
-       IF(IStep>MaxIt_CooTrf) THEN
-         IF(RMSD>0.01D0) THEN
-           CALL Halt('Iterative backtransformation did not converge')
-         ENDIF
-         IF(Print) THEN
-           WRITE(*,180) 
-           WRITE(Out,180) 
-           WRITE(*,190) 
-           WRITE(Out,190) 
-         ENDIF
-         GO TO 300
+       IF(Print) THEN
+         WRITE(*,220) IStep
+         WRITE(Out,220) IStep
        ENDIF
      ENDIF
      180  FORMAT(&
           'Stop Coord Back-Trf, max. number of Iterations exceeded!')
      190  FORMAT('Use Current Geometry!')
-     !
-     ! At this point, convergence has been reached
-     !
-     195 CONTINUE
-     IF(Print) THEN
-       WRITE(*,220) IStep
-       WRITE(Out,220) IStep
-     ENDIF
      220  FORMAT('Coordinate back-transformation converged in ',&
                  I3,' steps')
-     !
-     300  CONTINUE
      !
      ! Fill new Cartesians into XYZ  
      !
@@ -2949,7 +2946,7 @@ CONTAINS
      REAL(DOUBLE)                 :: Sum,SumM,Sum1,Sum2,Sum3,V1N,V2N
      REAL(DOUBLE) :: PnX,PnY,PnZ
      REAL(DOUBLE) :: CosPhi,SinPhi
-     INTEGER      :: I,J,Step
+     INTEGER      :: I,J,Step,III
      TYPE(DBL_VECT) :: Vect,CrossProd
      !          
      CALL New(Vect,3)
@@ -2977,40 +2974,42 @@ CONTAINS
        CosPhi=DOT_PRODUCT(V1,V2)     
        SinPhi=SQRT(SUM1)
        Sum=One-CosPhi
-       77 CONTINUE
-       Rot(1,1)=CosPhi + Sum*CrossProd%D(1)**2
-       Rot(2,2)=CosPhi + Sum*CrossProd%D(2)**2
-       Rot(3,3)=CosPhi + Sum*CrossProd%D(3)**2
-       !
-       Sum1=Sum*CrossProd%D(1)*CrossProd%D(2)
-       Sum2=SinPhi*CrossProd%D(3)
-       Rot(1,2)=Sum1-Sum2
-       Rot(2,1)=Sum1+Sum2
-       !
-       Sum1=Sum*CrossProd%D(1)*CrossProd%D(3)
-       Sum2=SinPhi*CrossProd%D(2)
-       Rot(1,3)=Sum1+Sum2
-       Rot(3,1)=Sum1-Sum2
-       !
-       Sum1=Sum*CrossProd%D(2)*CrossProd%D(3)
-       Sum2=SinPhi*CrossProd%D(1)
-       Rot(2,3)=Sum1-Sum2
-       Rot(3,2)=Sum1+Sum2
-       !
-       ! Test rotation
-       !
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot,V2,Vect%D(1:3))
-       !
-       SumM=DOT_PRODUCT((V1-Vect%D),(V1-Vect%D))
-       IF(SumM>1.D-6) GO TO 889
-       !      IF(SumM<1.D-6) write(*,*) 'rotation succesful'
-       GO TO 100
-       889    SinPhi=-SinPhi
-       Step=Step+1
-       IF(Step > 2) THEN
-         Call Halt('Rotation unsuccesful for torsvalue')
-       ENDIF
-       GOTO 77        
+       DO III=1,2    
+         Rot(1,1)=CosPhi + Sum*CrossProd%D(1)**2
+         Rot(2,2)=CosPhi + Sum*CrossProd%D(2)**2
+         Rot(3,3)=CosPhi + Sum*CrossProd%D(3)**2
+         !
+         Sum1=Sum*CrossProd%D(1)*CrossProd%D(2)
+         Sum2=SinPhi*CrossProd%D(3)
+         Rot(1,2)=Sum1-Sum2
+         Rot(2,1)=Sum1+Sum2
+         !
+         Sum1=Sum*CrossProd%D(1)*CrossProd%D(3)
+         Sum2=SinPhi*CrossProd%D(2)
+         Rot(1,3)=Sum1+Sum2
+         Rot(3,1)=Sum1-Sum2
+         !
+         Sum1=Sum*CrossProd%D(2)*CrossProd%D(3)
+         Sum2=SinPhi*CrossProd%D(1)
+         Rot(2,3)=Sum1-Sum2
+         Rot(3,2)=Sum1+Sum2
+         !
+         ! Test rotation
+         !
+         CALL DGEMM_NNc(3,3,1,One,Zero,Rot,V2,Vect%D(1:3))
+         !
+         SumM=DOT_PRODUCT((V1-Vect%D),(V1-Vect%D))
+         IF(SumM>1.D-6) THEN
+           SinPhi=-SinPhi
+           Step=Step+1
+           IF(Step > 2) THEN
+             Call Halt('Rotation unsuccesful for torsvalue')
+           ENDIF
+         ELSE
+           ! write(*,*) 'rotation succesful'
+           EXIT    
+         ENDIF
+       ENDDO
      ENDIF
      !
 100  CONTINUE
@@ -3632,7 +3631,7 @@ CONTAINS
      DO I=1,NatmsLoc
        XYZRot%D(:,I)=XYZ(:,I)-Vect1%D   
      ENDDO
-     CALL Put(Vect1,'Translation')
+     !!!!CALL Put(Vect1,'Translation')
      !
      ! Place At2 onto X axis
      !
@@ -3640,7 +3639,7 @@ CONTAINS
      Vect1%D(1)=One
      Vect2%D=XYZRot%D(:,At2)-XYZRot%D(:,At1) 
      CALL Rotate(Vect1%D,Vect2%D,Rot%D)
-     CALL Put(Rot,'RotAt2')
+     !!!!CALL Put(Rot,'RotAt2')
      DO I=1,NatmsLoc
        Vect1%D=XYZRot%D(:,I)
        CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,Vect1%D,XYZRot%D(:,I))
@@ -3648,26 +3647,24 @@ CONTAINS
      !
      ! Linearity
      !
-     IF(Linearity) GO TO 100
+     IF(.NOT.Linearity) THEN         
+       !
+       ! Place At3 onto XY plane
+       !
+       Vect1%D=XYZRot%D(:,At1)-XYZRot%D(:,At3)
+       Vect2%D=XYZRot%D(:,At2)-XYZRot%D(:,At3)
+       CALL CROSS_PRODUCT(Vect1%D,Vect2%D,Vect3%D)
+       Vect1%D=Zero
+       Vect1%D(3)=One 
+       CALL Rotate(Vect1%D,Vect3%D,Rot%D)
+       !!!!CALL Put(Rot,'RotAt3')
+       DO I=1,NatmsLoc
+         Vect1%D=XYZRot%D(:,I)
+         CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,Vect1%D,XYZRot%D(:,I))
+       ENDDO
+       !!!!CALL Put(XYZRot,'XYZRot')
+     ENDIF
      !
-     ! Place At3 onto XY plane
-     !
-     Vect1%D=XYZRot%D(:,At1)-XYZRot%D(:,At3)
-     Vect2%D=XYZRot%D(:,At2)-XYZRot%D(:,At3)
-     CALL CROSS_PRODUCT(Vect1%D,Vect2%D,Vect3%D)
-     Vect1%D=Zero
-     Vect1%D(3)=One 
-     CALL Rotate(Vect1%D,Vect3%D,Rot%D)
-     CALL Put(Rot,'RotAt3')
-     DO I=1,NatmsLoc
-       Vect1%D=XYZRot%D(:,I)
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,Vect1%D,XYZRot%D(:,I))
-     ENDDO
-     CALL Put(XYZRot,'XYZRot')
-     !
-     ! Tidy up
-     !
-     100  CONTINUE
      XYZ=XYZRot%D
      CALL Delete(XYZRot)
      CALL Delete(Rot)
@@ -3889,95 +3886,6 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE XYZRotToXYZ(XYZ,XYZRot)
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(DBL_RNK2)              :: XYZRot,Rot
-     TYPE(DBL_VECT)              :: Vect1,Vect2
-     INTEGER                     :: I,J,K,L,NatmsLoc,NCart
-     !
-     NatmsLoc=SIZE(XYZ,2)
-     NCart=3*NatmsLoc
-     CALL New(Vect1,NCart)
-     CALL New(Rot,(/3,3/))
-     ! inv Rotat3 
-     CALL Get(Rot,'RotAt3')
-     DO I=1,NatmsLoc
-       Vect1%D=XYZRot%D(:,I)
-       CALL DGEMM_TNc(3,3,1,One,Zero,Rot%D,Vect1%D, &
-     		                    XYZRot%D(:,I))
-     ENDDO
-     ! inv Rotat2 
-     CALL Get(Rot,'RotAt2')
-     DO I=1,NatmsLoc
-       Vect1%D=XYZRot%D(:,I)
-       CALL DGEMM_TNc(3,3,1,One,Zero,Rot%D,Vect1%D, &
-     		                    XYZRot%D(:,I))
-     ENDDO
-     ! translate back system and fill result
-     CALL Get(Vect1,'Translation')
-     DO I=1,NatmsLoc
-       XYZ(:,I)=XYZRot%D(:,I)+Vect1%D 
-     ENDDO
-     !
-     CALL Delete(Vect1)
-     CALL Delete(Rot)
-     !
-   END SUBROUTINE XYZRotToXYZ
-!
-!--------------------------------------------------------------------
-!
-   SUBROUTINE GetIntcCart(IntC_Cart,XYZ)
-     TYPE(INTC) IntC_Cart
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(INT_VECT) :: AtmMark
-     INTEGER        :: I,J,K,L,NIntC_Cart,NatmsLoc
-     INTEGER        :: NConstr,NCartConstr
-     !
-     NatmsLoc=SIZE(XYZ,2)
-     CALL New(AtmMark,NatmsLoc)
-     CALL Get(AtmMark,'AtmMark')
-     !
-     NIntC_Cart=0
-     DO I=1,NatmsLoc
-       IF(AtmMark%I(I)==0) NIntC_Cart=NIntC_Cart+3
-     ENDDO 
-     !
-     CALL New(IntC_Cart,NIntC_Cart)
-     !
-     IntC_Cart%Def='     '       
-     IntC_Cart%Atoms=0
-     NIntC_Cart=0
-     DO I=1,NatmsLoc
-       IF(AtmMark%I(I)==0) THEN
-         NIntC_Cart=NIntC_Cart+1
-         IntC_Cart%Def(NIntC_Cart)='CARTX'
-         IntC_Cart%Atoms(NIntC_Cart,1)=I
-         IntC_Cart%Value(NIntC_Cart)=XYZ(1,I)
-         IntC_Cart%Constraint(NIntC_Cart)=.TRUE.  
-         IntC_Cart%ConstrValue(NIntC_Cart)=XYZ(1,I)
-         IntC_Cart%Active(NIntC_Cart)=.TRUE.  
-         NIntC_Cart=NIntC_Cart+1
-         IntC_Cart%Def(NIntC_Cart)='CARTY'
-         IntC_Cart%Atoms(NIntC_Cart,1)=I
-         IntC_Cart%Value(NIntC_Cart)=XYZ(2,I)
-         IntC_Cart%Constraint(NIntC_Cart)=.TRUE.  
-         IntC_Cart%ConstrValue(NIntC_Cart)=XYZ(2,I)
-         IntC_Cart%Active(NIntC_Cart)=.TRUE.  
-         NIntC_Cart=NIntC_Cart+1
-         IntC_Cart%Def(NIntC_Cart)='CARTZ'
-         IntC_Cart%Atoms(NIntC_Cart,1)=I
-         IntC_Cart%Value(NIntC_Cart)=XYZ(3,I)
-         IntC_Cart%Constraint(NIntC_Cart)=.TRUE.  
-         IntC_Cart%ConstrValue(NIntC_Cart)=XYZ(3,I)
-         IntC_Cart%Active(NIntC_Cart)=.TRUE.  
-       ENDIF
-     ENDDO
-     !
-     CALL Delete(AtmMark)
-   END SUBROUTINE GetIntcCart
-!
-!--------------------------------------------------------------------
-!
    SUBROUTINE WriteINT_RNK2(Top,FileName)
      INTEGER,DIMENSION(:,:) :: Top
      CHARACTER(LEN=*)       :: FileName
@@ -4126,10 +4034,11 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value,Conv
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
-     INTEGER                     :: I,J,K,NatmsLoc
+     INTEGER                     :: I,J,K,NatmsLoc,III
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
      CHARACTER(LEN=*)            :: SCRPath
+     LOGICAL                     :: RepeatChk
      !
      Conv=180.D0/PI
      NIntC=SIZE(IntCs%Def)
@@ -4155,34 +4064,43 @@ CONTAINS
          ! go on right, then define torsions
          I1=LinBBridge%I(2,NLinB)
          I2=LinBBridge%I(1,NLinB)
-     180 CONTINUE
-         DO J=1,Top12%I(I2,1)
-           I3=Top12%I(I2,1+J) 
-           CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-           IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
-             LinBBridge%I(1,NLinB)=I3
-             LinAtom%I(I3)=1
-             I1=I2
-             I2=I3
-             GO TO 180
-           ENDIF
+         DO III=1,NIntC
+           RepeatChk=.FALSE.
+           DO J=1,Top12%I(I2,1)
+             I3=Top12%I(I2,1+J) 
+             CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+             IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
+               LinBBridge%I(1,NLinB)=I3
+               LinAtom%I(I3)=1
+               I1=I2
+               I2=I3
+               RepeatChk=.TRUE.
+               EXIT
+             ENDIF
+           ENDDO
+           IF(.NOT.RepeatChk) EXIT
          ENDDO
          !
          I1=LinBBridge%I(1,NLinB)
          I2=LinBBridge%I(2,NLinB)
-     120 CONTINUE
-         DO J=1,Top12%I(I2,1)
-           I3=Top12%I(I2,1+J) 
-           CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-           IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
-             LinBBridge%I(2,NLinB)=I3
-             LinAtom%I(I3)=1
-             I1=I2
-             I2=I3
-             GO TO 120
-           ENDIF
+         DO III=1,NIntC
+           RepeatChk=.FALSE.
+           DO J=1,Top12%I(I2,1)
+             I3=Top12%I(I2,1+J) 
+             CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+             IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
+               LinBBridge%I(2,NLinB)=I3
+               LinAtom%I(I3)=1
+               I1=I2
+               I2=I3
+               RepeatChk=.TRUE.
+               EXIT
+             ENDIF
+           ENDDO
+           IF(.NOT.RepeatChk) EXIT
          ENDDO
        ENDIF
+       !
      ENDDO 
      !
      ! bridges are set now, add torsions

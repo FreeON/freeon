@@ -16,8 +16,8 @@ PROGRAM MondoSCF
   CALL InitMPI()
 #endif
   CALL ParseTheInput(C)  
-  ! Initialize the HDF archival file 
-  CALL InitArchive(C%Nams)
+  ! Initialize controls
+  CALL InitGlobal(C)
   ! Print startup 
   CALL PrintsStartUp(C%Nams)
   ! Much ado about gradients
@@ -25,12 +25,10 @@ PROGRAM MondoSCF
   CASE(GRAD_NO_GRAD)
      CALL SinglePoints(C)
   CASE(GRAD_GO_DOWNHILL)
-     IF(C%Opts%Coordinates==GRAD_CART_OPT) CALL Descender(C)
-     IF(C%Opts%Coordinates==GRAD_INTS_OPT) CALL Optimize(C)
+     CALL Descender(C)
   CASE(GRAD_TS_SEARCH_NEB)
      ! Place holder for whatever
-     IF(C%Opts%Coordinates==GRAD_CART_OPT) CALL Descender(C)
-     IF(C%Opts%Coordinates==GRAD_INTS_OPT) CALL Optimize(C)
+     CALL Descender(C)
    CASE(GRAD_DO_DYNAMICS)
       ! Needs work...
   END SELECT

@@ -8,6 +8,7 @@ MODULE PunchHDF
   USE GlobalScalars
   USE ControlStructures
   USE InCoords
+  USE OptionKeys
   IMPLICIT NONE
 CONTAINS
   !==============================================================================
@@ -172,80 +173,72 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
 !
-!---------------------------------------------------------------------
+!--------------------------------------------------------------------
 !
-   SUBROUTINE GDIISArch(HFileIn,iCLONE,XYZ_O,Vect_O,Tag_O)
-     CHARACTER(LEN=*)                     :: HFileIn
-     INTEGER                              :: iCLONE
-     INTEGER                              :: IGeom,NCart
-     INTEGER                              :: NatmsLoc,J,I
-     REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O 
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: Vect_O
-     CHARACTER(LEN=*),OPTIONAL            :: Tag_O
-     TYPE(DBL_RNK2)                       :: XYZ 
-     TYPE(DBL_VECT)                       :: AuxVect
-     TYPE(DBL_VECT)                       :: Vect
-     INTEGER                              :: GDIISMemory
-     INTEGER                              :: SRMemory
-     INTEGER                              :: RefMemory
-     INTEGER                              :: CartGradMemory
-     INTEGER                              :: IntGradMemory
-     INTEGER                              :: HDFFileID
-     !
-     HDFFileID=OpenHDF(HFileIn)
-     HDF_CurrentID= &
-       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-     !
-     ! Increment GDIISMemory
-     !
-     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='SR') THEN
-       CALL Get(SrMemory,'SRMemory')
-       SRMemory=SRMemory+1
-       IGeom=SRMemory
-       CALL Put(SRMemory,'SRMemory')
-     ENDIF
-     !
-     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='Ref') THEN
-       CALL Get(RefMemory,'RefMemory')
-       RefMemory=RefMemory+1
-       IGeom=RefMemory
-       CALL Put(RefMemory,'RefMemory')
-     ENDIF
-     !
-     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='CartGrad') THEN
-       CALL Get(CartGradMemory,'CartGradMemory')
-       CartGradMemory=CartGradMemory+1
-       IGeom=CartGradMemory
-       CALL Put(CartGradMemory,'CartGradMemory')
-     ENDIF
-     !
-     IF(PRESENT(XYZ_O)) THEN
-       NatmsLoc=SIZE(XYZ_O,2)
-       NCart=3*NatmsLoc
-       !
-       ! Put Geometry of simple relaxation set into HDF, for GDIIS.
-       !
-       CALL New(AuxVect,NCart)
-         CALL CartRNK2ToCartRNK1(AuxVect%D,XYZ_O)
-         CALL Put(AuxVect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
-       CALL Delete(AuxVect)
-       !
-     ELSE IF(PRESENT(Vect_O)) THEN
-       !
-       NCart=SIZE(Vect_O)
-       CALL New(Vect,NCart)
-       Vect%D=Vect_O
-         CALL Put(Vect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
-       CALL Delete(Vect)
-     ELSE
-       CALL Halt('No input coordinates in GDIISArch')
-     ENDIF
-     !
-     CALL CloseHDFGroup(HDF_CurrentID)
-     CALL CloseHDF(HDFFileID)
-   END SUBROUTINE GDIISArch
-!
-!---------------------------------------------------------------------
+  SUBROUTINE GeomReArchive(N,O,G)
+    TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
+    TYPE(Geometries) :: G    
+    TYPE(CellSet)    :: CS
+    INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
+    INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc
+    CHARACTER(LEN=2) :: chGEO
+    TYPE(CRDS)       :: GMLoc
+    TYPE(DBL_VECT)   :: GradE
+    !
+    !-----------------------------------------------------------------!
+    ! it is supposed that the number of clones did not change at restart
+    !
+    NatmsLoc=G%Clone(1)%Natms
+    NCart=3*NatmsLoc
+    CALL New(GradE,NCart)
+    LastGeo=O%RestartState%I(3)
+    LastBas=O%RestartState%I(2)
+    DO iCLONE=1,G%Clones
+      !
+      ! Reachive GMLoc-s and GradE-s
+      !
+      DO iGEO=1,LastGeo
+        HDFFileID=OpenHDF(N%RFile)
+        HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                      "Clone #"//TRIM(IntToChar(iCLONE)))
+          chGEO=IntToChar(iGeo)
+          CALL Get(GMLoc,chGEO)
+          IF(iGEO<LastGeo) CALL Get(GradE,'grade',Tag_O=chGEO)
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        !
+        HDFFileID=OpenHDF(N%HFile)
+        HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                      "Clone #"//TRIM(IntToChar(iCLONE)))
+          chGEO=IntToChar(iGEO)
+          CALL Put(GMLoc,chGEO)
+          IF(iGEO<LastGeo) CALL Put(GradE,'grade',Tag_O=chGEO)
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(HDFFileID)
+        CALL Delete(GMLoc)
+      ENDDO
+      !
+      ! Rearchive CS 
+      !
+      HDFFileID=OpenHDF(N%RFile)
+      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                    "Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Get(CS,Tag_O=IntToChar(LastBAS))
+      CALL CloseHDFGroup(HDF_CurrentID)
+      CALL CloseHDF(HDFFileID)
+      !
+      HDFFileID=OpenHDF(N%HFile)
+      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+                    "Clone #"//TRIM(IntToChar(iCLONE)))
+        CALL Put(CS,Tag_O=IntToChar(LastBAS))
+      CALL CloseHDFGroup(HDF_CurrentID)
+      CALL CloseHDF(HDFFileID)
+      CALL Delete(CS)
+    ENDDO
+    CALL Delete(GradE)
+    !
+  END SUBROUTINE GeomReArchive
 !
 !==============================================================================
 ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
@@ -321,5 +314,40 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE BSetArchive
-
+!
+!---------------------------------------------------------------------
+!
+  SUBROUTINE InitState(S,O)
+    TYPE(State)    :: S
+    TYPE(Options)  :: O
+    INTEGER        :: LastGEO,LastBAS
+    !
+    IF(O%Guess==GUESS_EQ_RESTART) THEN
+      LastBAS=O%RestartState%I(2)
+      LastGEO=O%RestartState%I(3)
+    ELSE
+      LastBAS=1
+      LastGEO=1
+    ENDIF
+    S%Previous%I=(/0,LastBAS,LastGEO/)
+    S%Current%I=(/1,LastBAS,LastGEO/)
+  END SUBROUTINE InitState
+!
+!---------------------------------------------------------------------
+!
+  SUBROUTINE InitGlobal(C)
+    TYPE(Controls) :: C
+    !
+    ! Initialize the HDF archival file
+    CALL InitArchive(C%Nams)
+    ! Initialize HDF files for clones
+    CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
+    ! Do rearchivation if requested
+    IF(C%Opts%Guess==GUESS_EQ_RESTART) THEN
+      CALL GeomReArchive(C%Nams,C%Opts,C%Geos)
+    ENDIF
+    ! Set initial state vector
+    CALL InitState(C%Stat,C%Opts)
+  END SUBROUTINE InitGlobal
+!
 END MODULE PunchHDF
