@@ -50,18 +50,14 @@ MODULE Macros
          IF(.NOT.Serial)CALL InitMPI()
 #else
 #endif
-
 !        Get arguments and open InfFile 
          CALL Get(Args)
-         SCFName=TRIM(Args%C%C(1))
- 
-
-
+! 
          IF(Args%NC>=2) &
             SCFActn=TRIM(Args%C%C(2))
          Current=Args%I%I(1:3)
          Previous=Args%I%I(4:6)
-
+!        SCF Cycle
          SCFCycl=TRIM(IntToChar(Args%I%I(1)))
          IF(Args%I%I(3)-1<1)THEN
             PrvCycl=TRIM(IntToChar(Previous(1)))        
@@ -69,7 +65,7 @@ MODULE Macros
             PrvCycl=TRIM(IntToChar(Args%I%I(1)-1))
          ENDIF
          NxtCycl=TRIM(IntToChar(Args%I%I(1)+1))
-
+!        Geometry
          CurGeom=TRIM(IntToChar(Args%I%I(3)))
          IF(Args%I%I(3)-1<1)THEN
             PrvGeom=TRIM(IntToChar(Previous(3)))        
@@ -77,11 +73,24 @@ MODULE Macros
             PrvGeom=TRIM(IntToChar(Args%I%I(3)-1))
          ENDIF
          NxtGeom=TRIM(IntToChar(Args%I%I(3)+1))
-
+!        Basis
          CurBase=TRIM(IntToChar(Args%I%I(2)))
          PrvBase=TRIM(IntToChar(Previous(2)))
-
-         InfFile=TRIM(SCFName)//TRIM(InfF)
+!-----------------------------------------------------------------------------
+!        Get PWD and SCRATCH directories from env
+         CALL GetEnv('PWD',MONDO_PWD)   
+         CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
+         IF(LEN(TRIM(MONDO_HOME))==0)CALL Halt(' $(MONDO_HOME) not set.')
+         IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL Halt(' $(MONDO_SCRATCH) not set.')
+!        Set current working file names
+         MONDO_PWD=TRIM(MONDO_PWD)//'/'
+         MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
+         SCFName=TRIM(Args%C%C(1))
+         ScrName=TRIM(MONDO_SCRATCH)//TRIM(SCFName)
+         PWDName=TRIM(MONDO_PWD)//TRIM(SCFName))
+         InfFile=TRIM(PWDName)//TRIM(InfF)
+!-----------------------------------------------------------------------------
+!        Open HDF file and mark for failure
          CALL OpenHDF(TRIM(InfFile))
          CALL MarkFailure(Prog)
 !-----------------------------------------------------------------------------
