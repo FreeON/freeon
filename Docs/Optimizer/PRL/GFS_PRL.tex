@@ -40,7 +40,7 @@ vibrational decoupling of the curvilinear coordinates the 3N-dimesional
 optimization problem splits into a quasi non-interacting
 set of approximately 3N one-dimensional optimization problems, 
 similarly to the self-consistent mean-field concepts of physics.
-This allows for robust, linear scaling inmplementation of geometry optimizers.
+This allows for robust, linear scaling implementation of geometry optimizers.
 }
 
 \smallskip
@@ -151,8 +151,8 @@ their use becomes a computational bottleneck for large molecules.
 There are a few approaches to overcome this limitation.
 The most widely used one is the Limited Memory BFGS (LBFGS) 
 technique of Nocedal
-e.al. \cite{nocedal_lbgs}. This technique does never explicitely 
-construct the full Hessian matrix. Istead, it carries out all 
+{\it et.al.} \cite{nocedal_lbgs}. This technique does never explicitely 
+construct the full Hessian matrix. Instead, it carries out all 
 the necessary operations by an implicite application of the Hessian
 via its component vectors. LBFGS
 has the limitation that it can use only a small number of remembered
@@ -183,8 +183,7 @@ only in recent developments
 
 In the present communication we introduce a fundamentally new approach
 to molecular geometry optimization. We call this approach the
-Fitting of Internal Coordinate Gradients
-(FICG) technique. This new approach is very simple
+Gradient Curve Fitting (GCF) technique. This new approach is very simple
 to implement, scales fully linearly with system size 
 and is very efficient for both small and large molecules.
 
@@ -205,14 +204,14 @@ gradient curves will not be straight lines for internal coordinates,
 but they still represent stronger or weaker tendencies, as the molecular
 structure walks on the potential energy surface, e.g. during geometry
 optimization.
-See eg. Fig. \ref{NH3outp6} for a typical progression of internal
+See Fig. \ref{NH3outp6} for a typical progression of internal
 coordinate gradients during geometry optimization.
 These tendencies can again be revealed by fitting curves to the
 coordinate-gradient data pairs. For each internal coordinate 
 the root of the fitted curve then 
 serves as a new estimate for the coordinate value where the gradient
 should become zero. Repeating this fitting process can finally
-reveal a local optimum of the molecular structure.
+reveal a local optimum of the the potential energy surface.
 The fitting of gradient surfaces has already been applied to 
 the parametrization of empirical
 force-fields for the case of small molecules
@@ -220,7 +219,8 @@ force-fields for the case of small molecules
 has not been investigated for the purpose of geometry optimization yet.
 \begin{figure}[h]
 %\resizebox*{3.5in}{!}{\includegraphics{1_6_6_Data.eps}}
-\resizebox*{3.5in}{!}{\includegraphics{1_5_6_Data.eps}}
+%\resizebox*{3.5in}{!}{\includegraphics{1_5_6_Data.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{1_7_6_Data.eps}}
 \caption{
 \small  
 Progression of gradients on a valence angle bending coordinate of
@@ -304,10 +304,10 @@ curve fitting technique.
 %is used to overshoot the predicted root.
 %
 We will provide detailed information about the technology of 
-the Fitting of Internal Coordinate Gradients
+the Gradient Curve Fitting
 optimizer in a forthcoming paper \cite{bisect-paper}.
 
-The performance of this initial implementation of the FICG optimizer
+The performance of this initial implementation of the GCF optimizer
 has been tested on a 
 series of small molecules, called Baker's test set \cite{bakerstest}.
 Table \ref{Bakers_test} lists all the test results
@@ -333,7 +333,7 @@ which was based on the so called extra redundant coordinates.
 \toprule
 Molecule               & Present  & Bakken & Eckert  & Lindh &  Baker  \\
          & work & {\it{et al.}} & {\it{et al.}} & {\it{et al.}} &    \\
-         &(FICG) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
+         &(GCF) &  \cite{bakken} &  \cite{eckert} & \cite{lindh} &  \cite{bakerstest} \\
 \colrule
 Water                  &   4    &   4    &    4    &    4   &   6     \\
 Ammonia                &   4    &   5    &    6    &    5   &   6     \\
@@ -394,7 +394,7 @@ of larger molecules. For smaller molecules, like the ones of Baker's
 test set, the order of convergence is between linear and quadratic,
 with an acceleration towards convergence. Note, that in the case
 of first order convergence the rate of the convergence is still
-below one, which results in decreasing error.
+smaller than one, which results in decreasing error.
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{curve3.eps}}
 \caption{
@@ -429,7 +429,7 @@ ever accounting for explicite vibrational couplings, as traditional
 optimization techniques do. This allowes an efficient
 extension of quantum-level modeling to geometrical processes
 of biomolecules, such as enzymatic reactions, macroscopic quantum 
-effects in ion-channels or solvent effect on biomolecules.
+effects in ion-channels or solvent effects on biomolecules.
 Our technique can also be used
 to provide simple and accurate updates of force-fields
 for molecular dynamics simulations, based on the availability of
