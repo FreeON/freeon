@@ -132,12 +132,12 @@ PROGRAM XCForce
                   ! IF(TestAtomPair(Pair)) THEN
                     F_nlm(1:3)     = dXC(Pair,P%MTrix%D(Q:Q+MN1))
                     XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + F_nlm(1:3)
- 
+#ifdef THIS_IS_NOT_WELL_POSED_FOR_DIMEN_ZERO
                     nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCA))+AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCB))
                     LatFrc_XC(1,1:3) = LatFrc_XC(1,1:3) + Half*nlm(1)*F_nlm(1:3)
                     LatFrc_XC(2,1:3) = LatFrc_XC(2,1:3) + Half*nlm(2)*F_nlm(1:3)
                     LatFrc_XC(3,1:3) = LatFrc_XC(3,1:3) + Half*nlm(3)*F_nlm(1:3)
- 
+#endif
                  ENDIF
               ENDDO
            ENDDO
