@@ -33,7 +33,7 @@ F90_OPTIMIZE = -O1
 #
 F_LIST        = -Mlist 
 #
-F_PROF       = -Mprof=lines
+#F_PROF       = -Mprof=lines
 #
 F90_MISC     = $(F_LIST) $(F_PROF) 
 #
