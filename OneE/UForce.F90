@@ -28,7 +28,7 @@ PROGRAM UForce
   TYPE(BSET)                  :: BS
   TYPE(CRDS)                  :: GM
   TYPE(ARGMT)                 :: Args
-  INTEGER                     :: Q,R,AtA,AtB,AtC,KC,JP,MB,MA,NB,MN1,A1,A2,C1,C2
+  INTEGER                     :: Q,R,AtA,AtB,AtC,KC,JP,MB,MA,NB,MN1,A1,A2,C1,C2,NCB,NCC
   TYPE(HGRho)                 :: Rho
   TYPE(DBL_VECT)              :: UFrc,Frc
   REAL(DOUBLE)                :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,UFrcChk,F1a,F2a,F3a,f11,f10
@@ -63,27 +63,28 @@ PROGRAM UForce
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
            B=Pair%B
-           DO NC=1,CS_OUT%NCells
-              Pair%B=B+CS_OUT%CellCarts%D(:,NC)
+           DO NCB=1,CS_OUT%NCells
+              Pair%B=B +CS_OUT%CellCarts%D(:,NCB)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-
                  ! Go over ECP centers
                  DO AtC=1,NAtoms
                     C1=3*(AtC-1)+1
                     C2=3*AtC
                     KC=GM%AtTyp%I(AtC)
                     IF(BS%NTyp1PF%I(KC)>0)THEN
-                       Cx=GM%Carts%D(1,AtC) 
-                       Cy=GM%Carts%D(2,AtC) 
-                       Cz=GM%Carts%D(3,AtC) 
-                       F=Two*TrPdU(BS,Pair,KC,Cx,Cy,Cz,P%MTrix%D(Q:Q+MN1))
-                       ! Derivative contribution from bra <A| and ket |B>
-                       UFrc%D(A1:A2)=UFrc%D(A1:A2)+F
-                       ! then add in the ECP center |C| part
-                       UFrc%D(C1:C2)=UFrc%D(C1:C2)-F
+                       DO NCC=1,CS_OUT%NCells
+                          Cx=GM%Carts%D(1,AtC)+CS_OUT%CellCarts%D(1,NCC)
+                          Cy=GM%Carts%D(2,AtC)+CS_OUT%CellCarts%D(2,NCC)
+                          Cz=GM%Carts%D(3,AtC)+CS_OUT%CellCarts%D(3,NCC)
+                          F=Two*TrPdU(BS,Pair,KC,Cx,Cy,Cz,P%MTrix%D(Q:Q+MN1))
+                          ! Derivative contribution from bra <A| and ket |B>
+                          UFrc%D(A1:A2)=UFrc%D(A1:A2)+F
+                          ! then add in the ECP center |C| part
+                          UFrc%D(C1:C2)=UFrc%D(C1:C2)-F
+                       ENDDO
                     ENDIF
                  ENDDO
               ENDIF
@@ -91,6 +92,8 @@ PROGRAM UForce
         ENDIF
      ENDDO
   ENDDO
+ 
+
 !!$!=====================================================================================
 !!$     f10=Zero
 !!$     DO AtA=1,NAtoms
@@ -184,6 +187,8 @@ UFrc%D=Two*UFrc%D
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
+     WRITE(*,11)AtA,UFrc%D(A1:A2)
+     11 format(I3," ",3(F10.5," "))
      GM%Gradients%D(1:3,AtA)=GM%Gradients%D(1:3,AtA)+UFrc%D(A1:A2)
   ENDDO
   CALL Put(GM,Tag_O=CurGeom)
