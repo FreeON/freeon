@@ -43,7 +43,7 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace
+  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
@@ -52,7 +52,6 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 ! Function calls
 !-------------------------------------------------------------------
   INTEGER               :: LTotal,MaxBatchSize,NFinal,iT
-
 
   CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(DA,BSp%LMNLen*BSp%LMNLen)
@@ -71,7 +70,10 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
     LTot=LBra+LKet
 
-    IF(LTot.GT.0) THEN
+    IntCode=TBra*10000+TKet
+
+!    IF (IntCode.eq.01010301) THEN
+    IF(LTot.GT.1) THEN
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -211,7 +213,6 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D,K)
                 END IF
               END IF  ! ISL
-
             END DO ! I, LenBra
           END IF ! LenKet
           IndexD=IndexD+StrideD

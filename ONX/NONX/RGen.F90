@@ -92,6 +92,7 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
         PQy=Py-Qy
         PQz=Pz-Qz
         T=(PQx*PQx+PQy*PQy+PQz*PQz)*Eta*Zeta*r1xZpE
+
         IF (T<IB%Switch) THEN
           M=INT(T*IB%Grid)
           T2=T*T

@@ -53,7 +53,6 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 !-------------------------------------------------------------------
   INTEGER               :: LTotal,MaxBatchSize,NFinal,iT
 
-
   CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(DA,BSp%LMNLen*BSp%LMNLen)
   xNERIs=0.0D0
@@ -71,9 +70,10 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
     LTot=LBra+LKet
 
-    IF (LTot.LE.0) THEN
+    IntCode=TBra*10000+TKet
 
-                  IntCode=0
+!    IF (IntCode.eq.01010201) THEN
+    IF (LTot.LE.1) THEN
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -192,15 +192,17 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                 ENDIF
 
                 SELECT CASE (IntCode)
-                  CASE (00000000)  
+                  CASE (01010101)  
                     CALL Int1111(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D)
-!                  CASE (00001000)  
-!                    CALL Int1121()
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                  CASE (01010201)  
+                    CALL Int1121(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                  CASE (02010101) 
+                    CALL Int2111(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (00001010)  
 !                    CALL Int1122()
-!                  CASE (10000000)  
-!                    CALL Int2111()
 !                  CASE (10001000)  
 !                    CALL Int2121()
 !                  CASE (10001010)  
@@ -238,6 +240,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 !                  CASE (22220000)
 !                    CALL Int6611()
                   CASE DEFAULT
+                    WRITE(*,*) "IntCode=",IntCode
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')
                 END SELECT
 
