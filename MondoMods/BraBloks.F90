@@ -3,16 +3,16 @@ MODULE BraBloks
   USE GlobalScalars
   USE PrettyPrint
   USE McMurchie
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Globals
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
   TYPE(DBL_RNK3)  :: HGBra
   TYPE(DBL_RNK4)  :: dHGBra
   TYPE(DBL_RNK4)  :: E
   TYPE(DBL_VECT)  :: PhFactor,Phase
   INTEGER         :: MaxL,MaxL2,MaxLMN,MaxBF
   CONTAINS
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Allocate global space for computation of Bra coefficients
 ! and their corresponding integral estimates
 !
@@ -20,7 +20,7 @@ MODULE BraBloks
     TYPE(BSET) :: BS
     INTEGER    :: K,NBF,L,M,N,LMN
     LOGICAL, OPTIONAL :: Gradients_O
-!----------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !   Find the biggest bf block
     MaxBF=0
     DO K=1,BS%NKind
@@ -45,15 +45,17 @@ MODULE BraBloks
     DO L=0,MaxL; PhFactor%D(L)=(-One)**L; ENDDO
     CALL New(Phase,MaxLMN)
     DO L=0,MaxL
-    DO M=0,MaxL-L
-    DO N=0,MaxL-L-M
-       LMN=LMNDex(L,M,N)
-       Phase%D(LMN)=(-One)**(L+M+N)
-    ENDDO; ENDDO; ENDDO
-  ENDSUBROUTINE NewBraBlok
-!--------------------------------------------------------------
+      DO M=0,MaxL-L
+        DO N=0,MaxL-L-M
+           LMN=LMNDex(L,M,N)
+           Phase%D(LMN)=(-One)**(L+M+N)
+        ENDDO  
+      ENDDO  
+    ENDDO
+  END SUBROUTINE NewBraBlok
+!-------------------------------------------------------------------------------
 ! Delete the Global Objects 
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
   SUBROUTINE DeleteBraBlok(Gradients_O)
     LOGICAL, OPTIONAL :: Gradients_O
     IF(PRESENT(Gradients_O))THEN
@@ -63,9 +65,9 @@ MODULE BraBloks
     ENDIF
     CALL Delete(PhFactor)
   END SUBROUTINE DeleteBraBlok
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Generate a primative bra blok
-!--------------------------------------------------------------
+!-------------------------------------------------------------------------------
   FUNCTION SetBraBlok(Prim,BS,SameAtom_O,Print_O,Gradients_O,K_O,KK_O) RESULT(MaxAmp)
     TYPE(PrimPair)    :: Prim
     TYPE(BSET)        :: BS
@@ -77,7 +79,7 @@ MODULE BraBloks
     INTEGER           :: IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
     REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,MaxAmp,Fx,Fy,Fz
-!---------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
     KA=Prim%KA
     KB=Prim%KB
     CFA=Prim%CFA
@@ -101,7 +103,7 @@ MODULE BraBloks
     MaxLA=BS%ASymm%I(2,CFA,KA)
     MaxLB=BS%ASymm%I(2,CFB,KB)
     IF(PRESENT(Gradients_O))THEN
-!=================================================================================================
+!-------------------------------------------------------------------------------
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
                    PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
@@ -147,7 +149,7 @@ MODULE BraBloks
                                ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
                                ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
 #endif
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !            Naive gradients formulae:  See Helgaker and Taylor, TCA 83, p177 (1992), 
 !            Eqs (14), (15), (18) and comments after Eq.(26): Gradients_O==Pair%SameAtom
 !
@@ -186,7 +188,7 @@ MODULE BraBloks
              ENDDO;ENDDO;ENDDO;
           ENDDO
        ENDDO
-!--------------------------------------------------------------------------------------------     
+!-------------------------------------------------------------------------------
        Amp2=Zero
        DO K=1,3
           DO LMN=1,LHGTF(MaxLA+MaxLB+1)
@@ -195,7 +197,7 @@ MODULE BraBloks
           MaxAmp=MAX(MaxAmp,SQRT(Amp2))
        ENDDO
     ELSE
-!=================================================================================================
+!-------------------------------------------------------------------------------
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
 !
@@ -236,7 +238,7 @@ MODULE BraBloks
                    ENDDO
                 ENDDO
              ENDDO
-!--------------------------------------------------------------------------------------------     
+!-------------------------------------------------------------------------------
              Amp2=Zero
              DO LMN=1,LHGTF(MaxLA+MaxLB)
                  Amp2=Amp2+HGBra%D(LMN,IA,IB)**2
@@ -245,7 +247,5 @@ MODULE BraBloks
           ENDDO
        ENDDO
     ENDIF
-!
   END FUNCTION SetBraBlok
-!
 END MODULE BraBloks
