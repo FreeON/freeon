@@ -1,3 +1,39 @@
+2004-12-09 10:42  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-12-09 10:42  mchalla
+
+	* Docs/Bib/mondo_new.bib: Mostly finished Valery paper.
+
+2004-12-08 18:54  nemeth
+
+	* Validate/: CH2x-6.inp, CH2x-6.ref: A nice smooth optimization of
+	polyethilene in HF/STO-3G/tight, with parallel lattice/atomic
+	relaxation.
+
+2004-12-08 18:02  nemeth
+
+	* Validate/: BN_4x4x4.inp, BN_4x4x4.ref: Boron nitride 4x4x4 cell
+	quickly converged in HF/STO-3G/tight, simultaneous lattice/atomic
+	relaxation. Note, that TC2 had problems in the parallel run on Q.
+	TRS4 seems to be the stable option, and seems to contribute to the
+	smoothness of the convergence.
+
+2004-12-08 12:30  nemeth
+
+	* MondoSCF2/Optimizer.F90: Backtracking is allowed to take more
+	steps, more printing of backtracking info.
+
+2004-12-07 17:57  nemeth
+
+	* Validate/urea_2x2x2.ref: With the most recent code Urea2x2x2
+	HF/3-21G/good converges in 3 steps instead of the 5 before.
+
+2004-12-07 10:52  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-12-07 10:50  mchalla
 
 	* Docs/DM_Papers/PERT_3/Response3.tex: Progress!
