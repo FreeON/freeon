@@ -323,13 +323,17 @@ MODULE PBCFarField
 !
       CALL OpenASCII(OutFile,Out)  
       IF(GMLoc%PBC%PFFOvRide) THEN
-         WRITE(Out,990) ML1,GMLoc%PBC%PFFMaxEll
-         WRITE(*,990) ML1,GMLoc%PBC%PFFMaxEll
+         IF(MyID.EQ.ROOT) THEN
+            WRITE(Out,990) ML1,GMLoc%PBC%PFFMaxEll
+            WRITE(*,990) ML1,GMLoc%PBC%PFFMaxEll
+         ENDIF
          ML1 = GMLoc%PBC%PFFMaxEll
       ELSE
          IF(ML1 .GT. GMLoc%PBC%PFFMaxEll) THEN
-            WRITE(Out,991) ML1,GMLoc%PBC%PFFMaxEll
-            WRITE(*,991) ML1,GMLoc%PBC%PFFMaxEll
+            IF(MyID.EQ.ROOT) THEN
+               WRITE(Out,991) ML1,GMLoc%PBC%PFFMaxEll
+               WRITE(*,991) ML1,GMLoc%PBC%PFFMaxEll
+            ENDIF
             ML1=GMLoc%PBC%PFFMaxEll
          ENDIF      
       ENDIF
