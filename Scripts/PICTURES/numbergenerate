@@ -1,0 +1,5 @@
+awk '{
+i+=1
+k=1.0*$3
+print "set label ",$1," \"#"$1"\" at "$2" , "k+0.006" ,0 centre norotate back nopoint"
+}' $1
