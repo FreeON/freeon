@@ -1,3 +1,101 @@
+2004-07-15 16:13  mchalla
+
+	* TwoE/: GetAtomPair.F90, ShellPairStruct.F90: Hopefully reverted
+	to the old, working versions.
+
+2004-07-14 14:09  tymczak
+
+	* SCFeqs/P2Use.F90: Fixced the Parallel Bug
+	
+	CJ
+
+2004-07-14 14:04  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-07-14 14:03  tymczak
+
+	* MondoSCF2/MDynamics.F90: New Stuff
+
+2004-07-14 14:01  tymczak
+
+	* HiCu/XCForce.F90: Uses the Exc energy calculated in XCForce,
+	which is more accurate
+
+2004-07-13 22:49  nemeth
+
+	* MondoSCF2/: InCoords.F90, PunchHDF.F90: Things left out from geom
+	reachivation and printing of back-trf. is omitted.
+
+2004-07-13 22:46  nemeth
+
+	* MondoMods/GlobalScalars.F90: [no log message]
+
+2004-07-13 19:24  nemeth
+
+	* MondoSCF2/Optimizer.F90: Forgot to check in this before.
+
+2004-07-13 19:10  nemeth
+
+	* MondoMods/: GlobalScalars.F90, MemMan.F90: [no log message]
+
+2004-07-13 19:09  nemeth
+
+	* MondoSCF2/: ParseGeometries.F90, PunchHDF.F90: Modifications to
+	minimize internal coordinate's space in CRDS when no geometry
+	optimization takes place. Also, GeomReArchive reads now only last
+	11 geometries ('11' set by 'hardwiring' in
+	PunchHDF.F90/GeomReArchive ).
+
+2004-07-13 14:55  mchalla
+
+	* TwoE/GRD/: CNTRCT.m, FRONTM.m, KETHRR.m, dIntB1010101.F90,
+	dIntB2010101.F90, dIntB2010201.F90, dIntB2020101.F90,
+	dIntB2020201.F90, dIntB2020202.F90, dIntB3010101.F90,
+	dIntB3010201.F90, dIntB3010202.F90, dIntB3010301.F90,
+	dIntB3020101.F90, dIntB3020201.F90, dIntB3020202.F90,
+	dIntB3020301.F90, dIntB3020302.F90, dIntB3030101.F90,
+	dIntB3030201.F90, dIntB3030202.F90, dIntB3030301.F90,
+	dIntB3030302.F90, dIntB3030303.F90: [no log message]
+
+2004-07-12 18:17  nemeth
+
+	* MondoSCF2/: ParseExtraCoords.F90, ParseInput.F90: Source of
+	PBCDim modified for Extra coords.
+
+2004-07-12 16:36  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, ParseExtraCoords.F90:
+	Constraints are fixed now forf lattice parameters. lattice
+	parameters are optimized indirectly, via internal coordinates. Hard
+	constraints are available for lattice parameters.
+
+2004-07-12 13:30  mchalla
+
+	* TwoE/INT/ERIInclude.Inc: [no log message]
+
+2004-07-12 13:16  mchalla
+
+	* TwoE/: GRD/GRD.m, GRD/KETHRR.m, GRD/Makefile,
+	GRD/dIntB2010101.F90, GRD/dIntB2010201.F90, GRD/dIntB2020101.F90,
+	GRD/dIntB2020201.F90, GRD/dIntB2020202.F90, GRD/dIntB3010201.F90,
+	GRD/dIntB3010202.F90, GRD/dIntB3020101.F90, GRD/dIntB3020201.F90,
+	GRD/dIntB3020202.F90, GRD/dIntB3020301.F90, GRD/dIntB3020302.F90,
+	GRD/dIntB3030201.F90, GRD/dIntB3030202.F90, HRR/HRR.m,
+	HRR/KetHRR101.F90, HRR/KetHRR1010.F90, HRR/KetHRR102.F90,
+	HRR/KetHRR103.F90, HRR/KetHRR104.F90, HRR/KetHRR106.F90,
+	HRR/KetHRR151.F90, HRR/KetHRR1510.F90, HRR/KetHRR1515.F90,
+	HRR/KetHRR152.F90, HRR/KetHRR153.F90, HRR/KetHRR154.F90,
+	HRR/KetHRR156.F90, HRR/KetHRR21.F90, HRR/KetHRR22.F90,
+	HRR/KetHRR32.F90, HRR/KetHRR33.F90, HRR/KetHRR41.F90,
+	HRR/KetHRR42.F90, HRR/KetHRR43.F90, HRR/KetHRR44.F90,
+	HRR/KetHRR61.F90, HRR/KetHRR62.F90, HRR/KetHRR63.F90,
+	HRR/KetHRR64.F90, HRR/KetHRR66.F90, HRR/Makefile: [no log message]
+
+2004-07-12 10:30  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-07-10 00:02  nemeth
 
 	* Validate/: CHx.inp, CHx.ref: Polyacethylene (CH)n, and example
