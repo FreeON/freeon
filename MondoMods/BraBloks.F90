@@ -4,6 +4,9 @@ MODULE BraBloks
   USE PrettyPrint
   USE McMurchie
   USE Thresholding
+#ifdef MMech
+  USE Mechanics
+#endif
 !-------------------------------------------------------------------------------
 ! Globals
 !-------------------------------------------------------------------------------
@@ -18,27 +21,44 @@ MODULE BraBloks
 ! and their corresponding integral estimates
 !
   SUBROUTINE NewBraBlok(BS,Gradients_O)
-    TYPE(BSET) :: BS
-    INTEGER    :: K,NBF,L,M,N,LMN
+    TYPE(BSET),OPTIONAL :: BS
+    INTEGER    :: K,NBF,L,M,N,LMN,N_NAsym
     LOGICAL, OPTIONAL :: Gradients_O
 !-------------------------------------------------------------------------------
+#ifdef MMech
+  CALL InitMMech()
+#endif
+!
 !   Find the biggest bf block
     MaxBF=0
-    DO K=1,BS%NKind
-       NBF=BS%BFKnd%I(K)
-       MaxBF=MAX(MaxBF,NBF)
-    ENDDO
-!   Max L on a product function
-    MaxL=2*BS%NAsym+1
-    MaxLMN=LHGTF(MaxL+1)
+    IF(PRESENT(BS)) THEN
+      DO K=1,BS%NKind
+        NBF=BS%BFKnd%I(K)
+        MaxBF=MAX(MaxBF,NBF)
+      ENDDO
+!     Max L on a product function
+      MaxL=2*BS%NAsym+1
+      N_NAsym=BS%NAsym
+#ifdef MMech
+    ELSE IF(MMOnly()) THEN
+      MaxBF=1 !maximum of number of basis funct per atm kind
+      N_NAsym=0
+      MaxL=2*N_NAsym+1
+#else
+    ELSE
+      CALL Halt('No case definition in NewBraBlok')
+#endif
+    ENDIF
+      MaxLMN=LHGTF(MaxL+1)
+!
 !   Allocate space for Bra contractions coefficients and their gradients
     IF(PRESENT(Gradients_O))THEN
 !      Allocate space for McMurchie Davidson E coefficients
-       CALL New(E,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
+       CALL New(E,(/3,N_NASym+1,N_NASym+1,2*N_NASym+2/),(/1,-1,-1,-1/))
        CALL New(dHGBra,(/MaxLMN,MaxBF,MaxBF,3/))
     ELSE
 !      Allocate space for McMurchie Davidson E coefficients
-       CALL New(E,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+       CALL New(E,(/3,N_NASym,N_NASym,2*N_NASym/),(/1,0,0,0/))
        CALL New(HGBra,(/MaxLMN,MaxBF,MaxBF/))
     ENDIF
 !   Allocate space for summed contributions
@@ -87,33 +107,36 @@ MODULE BraBloks
     INTEGER           :: I,IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
     REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,Fx,Fy,Fz
+    INTEGER           :: N_NAsym
 !-------------------------------------------------------------------------------
-    KA=Prim%KA
-    KB=Prim%KB
-    CFA=Prim%CFA
-    CFB=Prim%CFB
-    PFA=Prim%PFA
-    PFB=Prim%PFB
-    ZA=Prim%ZA
-    ZB=Prim%ZB
-    Zeta=Prim%Zeta
-    Xi=Prim%Xi
-    ExpAB=EXP(-Xi*Prim%AB2)
-    Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
-    PA=Prim%P-Prim%A
-    PB=Prim%P-Prim%B
-    IndexA  = CFBlokDex(BS,CFA,KA)
-    IndexB  = CFBlokDex(BS,CFB,KB)
-    StartLA = BS%LStrt%I(CFA,KA)        
-    StopLA  = BS%LStop%I(CFA,KA)
-    StartLB = BS%LStrt%I(CFB,KB)        
-    StopLB  = BS%LStop%I(CFB,KB)
-    MaxLA=BS%ASymm%I(2,CFA,KA)
-    MaxLB=BS%ASymm%I(2,CFB,KB)
+      KA=Prim%KA
+      KB=Prim%KB
+      CFA=Prim%CFA
+      CFB=Prim%CFB
+      PFA=Prim%PFA
+      PFB=Prim%PFB
+      ZA=Prim%ZA
+      ZB=Prim%ZB
+      Zeta=Prim%Zeta
+      Xi=Prim%Xi
+      ExpAB=EXP(-Xi*Prim%AB2)
+      Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+      PA=Prim%P-Prim%A
+      PB=Prim%P-Prim%B
+      IndexA  = CFBlokDex(BS,CFA,KA)
+      IndexB  = CFBlokDex(BS,CFB,KB)
+      StartLA = BS%LStrt%I(CFA,KA)        
+      StopLA  = BS%LStop%I(CFA,KA)
+      StartLB = BS%LStrt%I(CFB,KB)        
+      StopLB  = BS%LStop%I(CFB,KB)
+      MaxLA=BS%ASymm%I(2,CFA,KA)
+      MaxLB=BS%ASymm%I(2,CFB,KB)
+      N_NAsym=BS%NASym
+!
     IF(PRESENT(Gradients_O))THEN
 !-------------------------------------------------------------------------------
 !      Compute McMurchie Davidson E coefficients for HG Primitives
-       CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
+       CALL MD2TRR(N_NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
                    PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
 !
        Ell=MaxLA+MaxLB+1
