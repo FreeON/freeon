@@ -3089,9 +3089,19 @@ MODULE LinAlg
          REAL(DOUBLE)                        :: R,E,Op
          INTEGER                             :: I,J,JP,K,P,Q,MA,NA,MN,MN1, &
                                                 IStrtA,IStopA
+!
+         TYPE(INT_VECT)            :: Stat
+         CHARACTER(LEN=3)          :: CurGeom
+!
 !----------------------------------------------------------------------------------
 
-         CALL Get(GM)
+!
+        CALL New(Stat,3)
+        CALL Get(Stat,'current')
+        CurGeom=TRIM(IntToChar(Stat%I(3)))
+!
+        CALL Get(GM,Tag_O=CurGeom)
+!
          CALL OpenASCII(FileName,Tmp,NewFile_O=.TRUE.)
          K=1
          Q=1
