@@ -1,0 +1,258 @@
+! <<<<<<< ANDERS: THE CURRENT BASIS SET DATA STRUCTURES AND ALGORITHMS ARE NOT HAPPY,
+!         ESPECIALLY IN THE CURRENT USAGE.  I KNOW WE CAN DO MUCH BETTER! >>>>>>>>>>>>
+!
+MODULE ParseBasis
+  USE ControlStructures
+  USE BasisSetParameters
+  USE InOut
+  IMPLICIT NONE
+  CHARACTER(LEN=9),  PARAMETER :: BASIS_SETS ='BasisSets' 
+CONTAINS
+  !============================================================================
+  ! 
+  ! 
+  !============================================================================
+  SUBROUTINE LoadBasisSets(N,G,B)
+    TYPE(FileNames)    :: N
+    TYPE(Geometries)   :: G
+    TYPE(BasisSets)    :: B
+    INTEGER            :: I,J
+    CHARACTER(LEN=DCL) :: BaseFile
+   !-------------------------------------------------------------------------!    
+    CALL OpenASCII(N%IFile,Inp)
+    CALL ParseBasisNames(B)
+    ALLOCATE(B%BSets(1:B%NBSets,1:G%Images))
+    ALLOCATE(B%BSiz(1:B%NBSets,1:G%Images))
+    ALLOCATE(B%OffS(1:B%NBSets,1:G%Images))
+    DO J=1,B%NBSets
+       BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
+       CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
+       DO I=1,G%Images
+          IF(.NOT.ParseBasis(G%Image(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
+               CALL MondoHalt(PRSE_ERROR,'ParseBasis failed for basis set file ' &
+                              //RTRN//TRIM(BaseFile))
+       ENDDO
+       CLOSE(Bas,STATUS='KEEP')
+    ENDDO
+    CLOSE(Inp,STATUS='KEEP')
+  END SUBROUTINE LoadBasisSets
+  !============================================================================
+  ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
+  ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
+  !============================================================================
+  FUNCTION ParseBasis(G,B,BlkSiz,OffSet)
+    TYPE(BSET)                 :: BS,B
+    TYPE(CRDS)                 :: G
+    TYPE(INT_VECT)             :: BlkSiz,OffSet
+    REAL(DOUBLE),    &
+       DIMENSION(1:MaxASymt+2) :: Dbls
+    LOGICAL                    :: ParseBasis
+    CHARACTER(LEN=DCL)         :: Line
+    INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound
+    !-------------------------------------------------------------------------!
+    ! Allocate temporary set
+    BS%LMNLen=MaxAsymt
+    BS%NCtrt=MaxCntrx
+    BS%NPrim=MaxPrmtv
+    BS%NAtms=G%NAtms
+    CALL New(BS)
+    ! Count kinds and load basis set kind index
+    BS%NKind=1
+    BS%Kinds%I(1)=G%AtNum%D(1)
+    DO I=2,BS%NAtms 
+       DO J=1,BS%NKind
+          IF(BS%Kinds%I(J)==G%AtNum%D(I))GOTO 10
+       ENDDO
+       BS%NKind=BS%NKind+1
+       BS%Kinds%I(BS%NKind)=G%AtNum%D(I)
+10     CONTINUE
+    ENDDO
+    ! now load geometry atom type (kinds pointer) array.
+    G%NKind=BS%NKind
+    DO K=1,BS%NKind
+       DO I=1,G%NAtms
+          IF(BS%Kinds%I(K)==G%AtNum%D(I))G%AtTyp%I(I)=K
+       ENDDO
+    ENDDO
+    ! Zero counters
+    BS%NASym=0
+    BS%NCtrt=0
+    BS%NPrim=0
+    DO I=1,BS%NKind
+       BS%NCFnc%I(I)=0
+       DO J=1,MaxCntrx
+          BS%NPFnc%I(J,I)=0
+       ENDDO
+    ENDDO
+    ! Parse basis set 
+    KFound=0
+    REWIND(Bas)
+    DO 
+       READ(Bas,DEFAULT_CHR_FMT,END=99)Line                 
+       DO NK=1,BS%NKind            
+          IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
+             NC=0
+             KFound=KFound+1
+             DO 
+                READ(Bas,DEFAULT_CHR_FMT,END=99)Line         
+                IF(KeyQ(Line,Stars))GOTO 100
+                NC=NC+1                 
+                DO K=1,MaxLTyps
+                   IF(KeyQ(Line,CLTyps(K)))THEN
+                      BS%ASymm%I(1,NC,NK)=LTyps(1,K)                     
+                      BS%ASymm%I(2,NC,NK)=LTyps(2,K)
+                      DO L=1,MaxPrmtv
+                         IF(KeyQ(Line,TRIM(IntToChar(L))))THEN
+                            NP=L
+                            GOTO 101
+                         ENDIF
+                      ENDDO
+                   ENDIF
+                ENDDO
+                RETURN
+101             CONTINUE
+                BS%NCFnc%I(NK)=NC
+                BS%NPFnc%I(NC,NK)=NP
+                BS%NCtrt=Max(BS%NCtrt,NC)
+                BS%NPrim=Max(BS%NPrim,NP)
+                MinL=BS%ASymm%I(1,NC,NK)
+                MaxL=BS%ASymm%I(2,NC,NK)
+                BS%NAsym=Max(BS%NAsym,MaxL)
+                DO NP=1,BS%NPFnc%I(NC,NK)
+                   READ(Bas,DEFAULT_CHR_FMT,END=99)Line
+                   N=MaxL-MinL+2
+                   CALL LineToDbls(Line,N,Dbls)
+                   BS%Expnt%D(NP,NC,NK)=Dbls(1)
+                   K=1
+                   BS%CCoef%D(1:,NP,NC,NK)=Zero
+                   DO NS=MinL,MaxL
+                      K=K+1
+                      BS%CCoef%D(NS+1,NP,NC,NK)=Dbls(K) 
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDIF
+       ENDDO
+100    CONTINUE
+    ENDDO
+99  CONTINUE
+    CLOSE(UNIT=Bas,STATUS='KEEP')
+    IF(KFound/=BS%NKind)RETURN
+    ! Correct dimensions
+    B%LMNLen=BS%LMNLen
+    B%NCtrt=BS%NCtrt
+    B%NPrim=BS%NPrim
+    B%NAtms=BS%NAtms
+    B%NKind=BS%NKind
+    ! New basis set
+    CALL New(B)
+    B%Kinds%I=BS%Kinds%I
+    B%NCFnc%I=BS%NCFnc%I
+    B%BFKnd%I=BS%BFKnd%I
+    B%LxDex%I=BS%LxDex%I
+    B%LyDex%I=BS%LyDex%I
+    B%LzDex%I=BS%LzDex%I
+    B%NPFnc%I=BS%NPFnc%I
+    B%LStrt%I=BS%LStrt%I
+    B%LStop%I=BS%LStop%I
+    B%ASymm%I=BS%ASymm%I
+    B%Expnt%D=BS%Expnt%D
+    B%CCoef%D=BS%CCoef%D
+    ! Done with the temp BS
+    CALL Delete(BS)
+    ! Computing basis set indexing
+    CALL BSetIndx(B)
+    ! Normalize the primitives
+    CALL ReNormalizePrimatives(B)
+    ! Compute blocking for sparse matrix methods
+    CALL New(BlkSiz,B%NAtms)
+    CALL New(OffSet,B%NAtms)
+    CALL BlockBuild(G,B,BlkSiz,OffSet)
+    ParseBasis=.TRUE.
+  END FUNCTION ParseBasis
+
+  SUBROUTINE ReNormalizePrimitives(A)
+    TYPE(BSET)       :: A
+    REAL(DOUBLE)     :: Z,C,Expnt,RNorm,ZA,ZB,CA,CB,SQNrm
+    INTEGER          :: K,L,M,N,NC,NK,NP,LMN,MinL,MaxL,PFA,PFB
+    REAL(DOUBLE),PARAMETER, &      ! Fact=Sqrt[Pi](2*L-1)!! 2^(-L)
+         DIMENSION(0:10)  :: Fact=(/0.17724538509055160273D1, &
+                                              0.8862269254527580136D0,  &
+                                              0.13293403881791370205D1, &
+                                              0.3323350970447842551D1,  &
+                                              0.11631728396567448929D2, &
+                                              0.5234277778455352018D2,  &
+                                              0.28788527781504436100D3, &
+                                              0.1871254305797788347D4,  &
+                                              0.14034407293483412599D5, &
+                                              0.1192924619946090071D6,  &
+                                              0.11332783889487855673D7/) 
+    !-------------------------------------------------------------------------------------!
+    DO K=1,A%NKind
+       DO NC=1,A%NCFnc%I(K)
+          DO LMN=A%LStrt%I(NC,K),A%LStop%I(NC,K)            
+             L=A%LxDex%I(LMN)
+             M=A%LyDex%I(LMN)
+             N=A%LzDex%I(LMN)
+             RNorm=0.0D0
+             DO PFA=1,A%NPFnc%I(NC,K)
+                ZA=A%Expnt%D(PFA,NC,K)
+                CA=A%CCoef%D(L+M+N+1,PFA,NC,K)
+                DO PFB=1,A%NPFnc%I(NC,K)
+                   ZB=A%Expnt%D(PFB,NC,K)
+                   CB=A%CCoef%D(L+M+N+1,PFB,NC,K)
+                   RNorm=RNorm+CA*CB*(ZA*ZB)**(Half*DBLE(L+M+N)+0.75D0)/(ZA+ZB)**(DBLE(L+M+N)+1.5D0)
+                ENDDO
+             ENDDO
+             RNorm=RNorm*Fact(L)*Fact(M)*Fact(N)
+             SqNrm=1.0D0/SQRT(RNorm)
+             DO NP=1,A%NPFnc%I(NC,K)
+                A%CCoef%D(LMN,NP,NC,K)=A%CCoef%D(L+M+N+1,NP,NC,K)*SqNrm
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+  END SUBROUTINE ReNormalizePrimitives
+
+  SUBROUTINE BlockBuild(G,B,BS,OS)
+    TYPE(CRDS)      :: G
+    TYPE(BSET)      :: B         
+    TYPE(INT_VECT)  :: BS,OS
+    INTEGER         :: NA,NK,NC,Stride
+    !-------------------------------------------------------------------------------------!
+    B%NBasF=0
+    ! Off set starts at 1
+    OS%I(1)=1      
+    DO NA=1,G%NAtms
+       ! Block size is total number of basis functions per atom 
+       BS%I(NA)=0
+       NK=G%AtTyp%I(NA)
+       ! Go over contracted functions
+       DO NC=1,B%NCFnc%I(NK)
+          ! Add in size of each contraction
+          Stride=B%LStop%I(NC,NK)-B%LStrt%I(NC,NK)+1
+          BS%I(NA)=BS%I(NA)+Stride
+          ! Oh yeah, accumulate basis function counter too...
+          B%NBasF=B%NBasF+Stride
+       ENDDO
+       ! Off set counter from block sizes
+       IF(NA.GE.2)OS%I(NA)=OS%I(NA-1)+BS%I(NA-1)         
+    ENDDO
+  END SUBROUTINE BlockBuild
+
+  SUBROUTINE ParseBasisNames(B)
+    TYPE(BasisSets) :: B
+    INTEGER                               :: I,ILoc
+    !----------------------------------------------------------------------------
+    B%NBSets=0
+    DO I=1,NSupSets
+       IF(OptKeyLocQ(Inp,BASIS_SETS,TRIM(CSets(1,I)),MaxSets,NLoc,Location))THEN
+          B%NBSets=B%NBSets+NLoc
+          DO ILoc=1,NLoc 
+             B%BName(Loc(ILoc))=ADJUSTL(CSets(2,I))
+          ENDDO
+       ENDIF
+    ENDDO
+    IF(B%NBSets==0)CALL MondoHalt(PRSE_ERROR,TRIM(BASIS_SETS)//' not found in input.')
+  END SUBROUTINE ParseBasisNames
+END MODULE ParseBasis
