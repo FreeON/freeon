@@ -29,9 +29,9 @@ PROGRAM QCTC
   IMPLICIT NONE
 #ifdef PARALLEL
   TYPE(FastMat),POINTER          :: J
-  REAL(DOUBLE)::TmBegJ,TmEndJ,TmJ
-  TYPE(DBL_VECT) :: TmJArr
-  INTEGER :: IErr
+  REAL(DOUBLE)                   :: TmBegJ,TmEndJ,TmJ
+  TYPE(DBL_VECT)                 :: TmJArr
+  INTEGER                        :: IErr
 #else
   TYPE(BCSR)                     :: J
 #endif
@@ -71,9 +71,9 @@ PROGRAM QCTC
      CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)
      CALL Get(RhoPoles)
   ENDIF
-  ! Set thresholds local to QCTC (for PAC and MAC)
+! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
-  ! Potentially overide local QCTC thresholds
+! Potentially overide local QCTC thresholds
   IF(Args%NI==8)THEN
      TauPAC=1D1**(-Args%I%I(7))
      TauMAC=1D1**(-Args%I%I(8))
@@ -191,11 +191,11 @@ PROGRAM QCTC
   CALL New(TmJArr,NPrc)
   CALL MPI_Gather(TmJ,1,MPI_DOUBLE_PRECISION,TmJArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   IF(MyID == ROOT) THEN
-     ! Output needs a lot of work, and should not go to STDOUT
-     ! Also, these statistics were written long ago by      
-     ! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
-     ! another routine to do this????
-     !    CALL PImbalance(TmJArr,NPrc,Prog_O='MakeJ')
+! Output needs a lot of work, and should not go to STDOUT
+! Also, these statistics were written long ago by      
+! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
+! another routine to do this????
+!    CALL PImbalance(TmJArr,NPrc,Prog_O='MakeJ')
   ENDIF
   CALL Delete(TmJArr)
 #endif

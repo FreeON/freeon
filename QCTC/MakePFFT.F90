@@ -23,35 +23,35 @@ PROGRAM MakePFFT
   INTEGER                        :: MaxEll
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),PARAMETER     :: Prog='MakePFFT'
-  !-------------------------------------------------------------------------------- 
-  ! Start up macro
+!-------------------------------------------------------------------------------- 
+! Start up macro
   CALL StartUp(Args,Prog)
-  ! Get the geometry
+! Get the geometry
   CALL Get(GM,Tag_O=CurGeom)
   IF(GM%PBC%PFFMaxEll>FFELL) THEN
      CALL MondoHalt(0,'MaxELL > FFELL Halting in CalculatePFFT')
   ELSEIF(GM%PBC%Dimen>0)THEN
-     ! Set up the multipole arrays
+!    Set up the multipole arrays
      CALL MultipoleSetUp()
-     ! Allocate the tensors
+!    Allocate the tensors
      MaxEll=GM%PBC%PFFMaxEll
      CALL New(TenC,LSP(2*MaxEll),0)
      CALL New(TenS,LSP(2*MaxEll),0)
-     ! Calculate the tensors ...
+!     Calculate the tensors ...
      CALL CalculatePFFT(MaxEll,GM,Args,CS_OUT,TenC,TenS)
-     ! ... and put them to HDF
+!    Put them to HDF
      CALL Put(TenC,'PFFTensorC')
      CALL Put(TenS,'PFFTensorS')
-     ! Delete
+!    Delete
      CALL Delete(GM)
      CALL Delete(Args)
      CALL Delete(TenC)
      CALL Delete(TenS)
   ENDIF
-  ! didn't count flops, any accumulation is residual
-  ! from matrix routines
+! didn't count flops, any accumulation is residual
+! from matrix routines
   PerfMon%FLOP=Zero 
-  ! Shutdown 
+! Shutdown 
   CALL ShutDown(Prog)
 #endif
 END PROGRAM MakePFFT
