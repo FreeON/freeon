@@ -9,6 +9,7 @@ all:
 #
 release:clean
 	$(MAKE) -C NONX release
+	$(MAKE) -C VRR  release
 	rm -rf PONXMults PONX GMEONX GSONX MEONX \
                GDrivers VRRm ONX SONX MASONX
 #
