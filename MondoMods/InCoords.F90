@@ -3,6 +3,7 @@ MODULE InCoords
    USE DerivedTypes
    USE GlobalScalars
    USE GlobalObjects
+   USE GlobalCharacters
    USE InOut
    USE MemMan
    USE SetXYZ
@@ -14,12 +15,9 @@ MODULE InCoords
 !
 !  USE GlobalCharacters
 !  USE Parse
-!  USE Macros
 #ifdef NAG
     USE F90_UNIX_ENV
 #endif
-!
-#ifdef MMech
 !
 IMPLICIT NONE
 !
@@ -770,6 +768,11 @@ END SUBROUTINE Excl_LIST14
 !
       thresh_B=1.d-8
 !
+!     IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+!       CALL INTCValue(IntCs,XYZ)
+!       CALL PrtIntCoords(IntCs,IntCs%Value,'Internals in Bmatr gen')
+!     ENDIF
+!
 ! allocate B matrix
 !
       CALL NEW(B,NIntC)
@@ -779,48 +782,69 @@ END SUBROUTINE Excl_LIST14
       DO IntCoo=1,NIntC     
 !
         IF(IntCs%Def(IntCoo)(1:4)=='STRE') THEN
+! stre
           I=IntCs%Atoms(IntCoo,1)
           J=IntCs%Atoms(IntCoo,2)
-          CALL STRE(I,J,XYZ(1:3,I),XYZ(1:3,J),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
-!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
-        ENDIF
-        IF(IntCs%Def(IntCoo)(1:4)=='BEND') THEN
+          CALL STRE(I,J,XYZ(1:3,I),XYZ(1:3,J), &
+                    B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
+!         write(*,100) IntCs%Def(IntCoo)(1:5), &
+!                      B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
+!
+        ELSE IF(IntCs%Def(IntCoo)(1:4)=='BEND') THEN
+! bend
           I=IntCs%Atoms(IntCoo,1)
           J=IntCs%Atoms(IntCoo,2) !!! central atom
           K=IntCs%Atoms(IntCoo,3) 
-       CALL BEND(I,J,K,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
-!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
-        ENDIF
-! out of plane of i from the plane of jkl, with center at j
-        IF(IntCs%Def(IntCoo)(1:4)=='OutP') THEN
+          CALL BEND(I,J,K,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
+                    B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
+!         write(*,100) IntCs%Def(IntCoo)(1:5), &
+!                      B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
+        ELSE IF(IntCs%Def(IntCoo)(1:4)=='OutP') THEN
+! out of plane
           I=IntCs%Atoms(IntCoo,1) !!! end atom
           J=IntCs%Atoms(IntCoo,2) !!! central atom
           K=IntCs%Atoms(IntCoo,3) !!! Def plane
           L=IntCs%Atoms(IntCoo,4) !!! Def plane
-       CALL OutP(I,J,K,L,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
-!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
-        ENDIF
+          CALL OutP(I,J,K,L,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
+            XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
+!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12), &
+!                      B%B(IntCoo,1:12)
+        ELSE IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
 ! torsion of i-j-k-l
-        IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
           I=IntCs%Atoms(IntCoo,1)
           J=IntCs%Atoms(IntCoo,2) 
           K=IntCs%Atoms(IntCoo,3) 
           L=IntCs%Atoms(IntCoo,4) 
-       CALL TORS(I,J,K,L,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
-!        write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
-        ENDIF
+          CALL TORS(I,J,K,L,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
+            XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
+!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12), &
+!         B%B(IntCoo,1:12)
+        ELSE IF(IntCs%Def(IntCoo)(1:5)=='LINB1') THEN
 ! linear bendig of i-j-k
-        IF(IntCs%Def(IntCoo)(1:5)=='LINB1') THEN
-          IF(IntCs%Def(IntCoo+1)(1:5)/='LINB2') CALL Halt('LINB Definitions are not paired!')
+          IF(IntCs%Def(IntCoo+1)(1:5)/='LINB2') &
+             CALL Halt('LINB Definitions are not paired!')
           I=IntCs%Atoms(IntCoo,1)
           J=IntCs%Atoms(IntCoo,2) 
           K=IntCs%Atoms(IntCoo,3) 
-       CALL LINB(I,J,K,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),B%IB(IntCoo+1,1:12),B%B(IntCoo+1,1:12),thresh_B)
-!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
-!         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo+1,1:12),B%B(IntCoo+1,1:12)
+          CALL LINB(I,J,K,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
+            B%IB(IntCoo,1:12),B%B(IntCoo,1:12), &
+            B%IB(IntCoo+1,1:12),B%B(IntCoo+1,1:12),thresh_B)
+!         write(*,100) IntCs%Def(IntCoo)(1:5), &
+!           B%IB(IntCoo,1:12),B%B(IntCoo,1:12)
+!         write(*,100) IntCs%Def(IntCoo)(1:5), &
+!           B%IB(IntCoo+1,1:12),B%B(IntCoo+1,1:12)
+        ELSE IF(IntCs%Def(IntCoo)(1:5)=='LINB2') THEN
+          CYCLE
+        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTX' ) THEN
+          I=IntCs%Atoms(IntCoo,1)
+          CALL BCART(I,'X',B%IB(IntCoo,1:12),B%B(IntCoo,1:12))
+        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTY' ) THEN
+          I=IntCs%Atoms(IntCoo,1)
+          CALL BCART(I,'Y',B%IB(IntCoo,1:12),B%B(IntCoo,1:12))
+        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTZ' ) THEN
+          I=IntCs%Atoms(IntCoo,1)
+          CALL BCART(I,'Z',B%IB(IntCoo,1:12),B%B(IntCoo,1:12))
         ENDIF
-        IF(IntCs%Def(IntCoo)(1:5)=='LINB2') CYCLE
-        IF(IntCs%Def(IntCoo)(1:4)=='CART' ) CALL Halt('CART is not yet coded')
 !
       ENDDO !!!! loop over internal coords
 100 format(A5,12I3,/,6F12.6,/,6F12.6)
@@ -1309,6 +1333,36 @@ END SUBROUTINE Excl_LIST14
 !
 !----------------------------------------------------------------
 !
+      SUBROUTINE BCART(I,CHAR,IB,B)
+!
+      INTEGER :: I,J
+      INTEGER,DIMENSION(1:12)      :: IB
+      REAL(DOUBLE),DIMENSION(1:12) :: B
+      CHARACTER :: CHAR
+!
+        J=(I-1)*3
+	IB=0
+	 B=Zero
+!
+        IF(CHAR=='X') THEN
+	  IB(1)=J+1
+	   B(1)=One
+	ENDIF
+!
+        IF(CHAR=='Y') THEN
+	  IB(2)=J+2
+	   B(2)=One
+	ENDIF
+!
+        IF(CHAR=='Z') THEN
+	  IB(3)=J+3
+	   B(3)=One
+	ENDIF
+!
+      END SUBROUTINE BCART
+!
+!----------------------------------------------------------------
+!
       SUBROUTINE DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,IntSet,IntCs,NIntC)
 !
 ! This routine defines internal coordinates
@@ -1762,7 +1816,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
       INTEGER :: I,J,K,Refresh,NatmsLoc,II,ILast
       INTEGER :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
       TYPE(INT_VECT) :: MMAtNum,LinAtom,MarkLinb
-      TYPE(DBL_VECT) :: NuclCharge
+      TYPE(DBL_VECT) :: NuclCharge,AuxVect
       TYPE(INT_RNK2) :: LinBBridge,Top12
       TYPE(CRDS) :: GMLoc
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: InfFile
@@ -1843,6 +1897,10 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         IF(NIntC_Extra/=0) THEN
           CALL New(IntC_Extra,NIntC_Extra)
           CALL Get(IntC_Extra,'IntC_Extra')
+            IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+              CALL PrtIntCoords(IntC_Extra, &
+                 IntC_Extra%Value,'Extra Internals after Read')
+            ENDIF
         ENDIF
 !
 ! Merge INTC arrays
@@ -1875,23 +1933,29 @@ IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
 !
 ! tidy up
 !
-        IF(NIntC_Cov/=0) CALL Delete(IntC_Cov)
-        IF(NIntC_VDW/=0) CALL Delete(IntC_VDW)
-        IF(NIntC_Extra/=0) CALL Delete(IntC_Extra)
+       IF(NIntC_Cov/=0) CALL Delete(IntC_Cov)
+       IF(NIntC_VDW/=0) CALL Delete(IntC_VDW)
+       IF(NIntC_Extra/=0) CALL Delete(IntC_Extra)
 !
 ! Now filter out repeated definitions, 
 ! which may have occured in INTC_Extra
+! keep those values, which were defd. in extras.
+! Do not check for Cartesians, since they
+! are not supposed to be generated by anything, but
+! EXTRA-s.
 !
         ILast=NIntC_Cov+NIntC_VDW
 100     II=0
         DO I=ILast+1,ILast+NIntC_Extra
+            IF(IntCs%Def(J)=='CART ') CYCLE
           DO J=1,ILast
+            IF(IntCs%Def(J)=='BLANK') CYCLE
             IF(IntCs%Atoms(J,1)==IntCs%Atoms(I,1).AND.&
                IntCs%Atoms(J,2)==IntCs%Atoms(I,2).AND.&
                IntCs%Atoms(J,3)==IntCs%Atoms(I,3).AND.&
                IntCs%Atoms(J,4)==IntCs%Atoms(I,4)) THEN
-               IntCs%Def(I)='BLANK'
-               IntCs%Atoms(I,1:4)=0      
+               IntCs%Def(J)='BLANK'
+               IntCs%Atoms(J,1:4)=0      
             ENDIF
           ENDDO
         ENDDO
@@ -1918,7 +1982,10 @@ IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
           CALL Delete(IntCs)
           NIntC=NNew
           CALL New(IntCs,NIntC)
-          IntCs=IntC_New
+            IntCs%Def=IntC_New%Def
+            IntCs%Atoms=IntC_New%Atoms
+            IntCs%Value=IntC_New%Value
+            IntCs%Constraint=IntC_New%Constraint
           CALL Delete(IntC_New)
         ENDIF
 !
@@ -1928,10 +1995,23 @@ IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
 !
       CALL ChkBendToLinB(IntCs,NIntC,XYZ)
 !
+! Save values of constraints into HDF
+!
+      CALL New(AuxVect,NIntC)
+        AuxVect%D=IntCs%Value
+        CALL Put(Current(3),'LastIntcGeom')
+        CALL Put(AuxVect,'Constraints'//TRIM(CurGeom))
+      CALL Delete(AuxVect)
+!
+! Save current internals to HDF
+!
+!     CALL Put(NIntC,'NIntC')
+!     CALL Put(IntCs,'IntCs')
+!
 END SUBROUTINE GetIntCs
 !-------------------------------------------------------
 !
-SUBROUTINE INTCValue(IntCs,XYZ,NatmsLoc)
+SUBROUTINE INTCValue(IntCs,XYZ)
 !
 ! Determine value of internal coordinates.
 ! Input coordintes are now in atomic units!
@@ -1939,9 +2019,10 @@ SUBROUTINE INTCValue(IntCs,XYZ,NatmsLoc)
     IMPLICIT NONE
     TYPE(INTC) :: IntCs
     INTEGER :: NIntCs,I,J,K,L,I1,I2,I3,I4,NatmsLoc
-    REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
+    REAL(DOUBLE),DIMENSION(:,:) :: XYZ
 !
     NIntCs=SIZE(IntCs%Def(:))
+    NatmsLoc=SIZE(XYZ,2)
 !
     DO I=1,NIntCs
       IF(IntCs%Def(I)(1:4)=='STRE') THEN
@@ -1949,19 +2030,29 @@ SUBROUTINE INTCValue(IntCs,XYZ,NatmsLoc)
         I2=IntCs%Atoms(I,2)
         CALL STREValue(XYZ(1:3,I1),XYZ(1:3,I2),IntCs%Value(I))
 !       IntCs%Value(I)=IntCs%Value(I)/AngstromsToAU 
-      ENDIF
-      IF(IntCs%Def(I)(1:4)=='BEND'.OR.IntCs%Def(I)=='LINB') THEN
+!
+      ELSE IF(IntCs%Def(I)(1:4)=='BEND'.OR.IntCs%Def(I)(1:4)=='LINB') THEN
         I1=IntCs%Atoms(I,1)
         I2=IntCs%Atoms(I,2)
         I3=IntCs%Atoms(I,3)
         CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),IntCs%Value(I))
-      ENDIF
-      IF(IntCs%Def(I)(1:4)=='OutP'.OR.IntCs%Def(I)=='TORS') THEN
+!
+      ELSE IF(IntCs%Def(I)(1:4)=='OutP'.OR.IntCs%Def(I)(1:4)=='TORS') THEN
         I1=IntCs%Atoms(I,1)
         I2=IntCs%Atoms(I,2)
         I3=IntCs%Atoms(I,3)
         I4=IntCs%Atoms(I,4)
         CALL TORSValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,I4),IntCs%Value(I),IntCs%Def(I))
+!
+      ELSE IF(IntCs%Def(I)(1:5)=='CARTX') THEN
+        I1=IntCs%Atoms(I,1)
+        IntCs%Value(I)=XYZ(1,I1)
+      ELSE IF(IntCs%Def(I)(1:5)=='CARTY') THEN
+        I1=IntCs%Atoms(I,1)
+        IntCs%Value(I)=XYZ(2,I1)
+      ELSE IF(IntCs%Def(I)(1:5)=='CARTZ') THEN
+        I1=IntCs%Atoms(I,1)
+        IntCs%Value(I)=XYZ(3,I1)
       ENDIF
     ENDDO 
 !
@@ -2192,7 +2283,7 @@ END SUBROUTINE BENDValue
 !
 ! Print List of internal coordinates with actual values
 !
-      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      CALL INTCValue(IntCs,GMLoc%Carts%D)
       WRITE(*,*) 'INTERNAL COORDINATES'
       WRITE(*,*) 'DEFINITION  ATOMS_INVOLVED  VALUE'
       WRITE(Out,*) 'INTERNAL COORDINATES'
@@ -2220,7 +2311,7 @@ END SUBROUTINE BENDValue
 ! Calc values of internals in atomic unit, and add displacement,
 ! which is stored in VectInt. Then convert into Sparse matrx repr.
 !
-      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      CALL INTCValue(IntCs,GMLoc%Carts%D)
 !
       VectAux%D(1:NIntC)=VectInt%D(1:NIntC)+IntCs%Value(1:NIntC)
       CALL MapBackAngle(IntCs,NIntC,VectAux%D) 
@@ -2367,7 +2458,7 @@ END SUBROUTINE BENDValue
 !
 ! Set actual internals at present Cartesian coordinates
 !
-      IF(II>0) CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      IF(II>0) CALL INTCValue(IntCs,GMLoc%Carts%D)
 !
       VectAux%D(1:NIntC)=IntCs%Value(1:NIntC)
       IF(NIntC<NBasF) VectAux%D(NIntC+1:NBasF)=Zero
@@ -2940,9 +3031,13 @@ END SUBROUTINE CoordTrf
         FullB%D(I,K)=SUM
         FullBt%D(K,I)=SUM
       ENDDO
+!write(*,200) i,b%ib(i,1:12)
+!write(*,201) i,b%b(i,1:12)
 !write(*,100) i,(fullb%d(i,k),k=1,ncart)
     ENDDO
 !100 format(I4,100F7.3)
+!200 format(I4,100I4)
+!201 format(I4,100F7.3)
 !stop
 !
 ! Tidy up
@@ -3108,6 +3203,9 @@ END SUBROUTINE CoordTrf
       ENDIF
 120   FORMAT('Gradient transformation converged in ',I3,' steps')
 !
+      CLOSE(Out,STATUS='KEEP')
+!
+!
 ! Tidy up
 !
       CALL Delete(VectIntAux2)
@@ -3117,8 +3215,6 @@ END SUBROUTINE CoordTrf
       CALL Delete(FullGcInv)
       CALL Delete(FullBt)
       CALL Delete(FullB)
-!
-      CLOSE(Out)
 !
     END SUBROUTINE CartToInternal
 !
@@ -3143,8 +3239,6 @@ END SUBROUTINE CoordTrf
     TYPE(BMATR)               :: B
     LOGICAL                   :: RefreshB,RefreshAct
     TYPE(INT_VECT)            :: MMAtNum
-!
-    CALL OpenASCII(OutFile,Out)
 !
       CooTrfCrit=1.D-3 !!! For Backtransformation
       MaxIt_CooTrf=30
@@ -3176,7 +3270,7 @@ END SUBROUTINE CoordTrf
 ! Calc values of internals in atomic unit, and add displacement,
 ! which is stored in VectInt. Then convert into Sparse matrx repr.
 !
-      CALL INTCValue(IntCs,XYZ,NatmsLoc)
+      CALL INTCValue(IntCs,XYZ)
 !
 ! The required new value of internal coordinates
 !
@@ -3198,8 +3292,10 @@ END SUBROUTINE CoordTrf
       IF(PrintFlags%Geop==DEBUG_GEOP) THEN
         WRITE(*,*) 'Iterative back-transformation, '//&
                    'No. Int. Coords= ',NIntC
+        CALL OpenAscii(OutFile,Out)
         WRITE(Out,*) 'Iterative back-transformation,'//&
                      ' No. Int. Coords= ',NIntC
+        CLOSE(Out,STATUS='KEEP')
       ENDIF
 !
       II=0
@@ -3218,7 +3314,7 @@ END SUBROUTINE CoordTrf
 !
 ! Compute actual value of internals 
 !
-      IF(II>0) CALL INTCValue(IntCs,ActCarts%D,NatmsLoc)
+      IF(II>0) CALL INTCValue(IntCs,ActCarts%D)
 !
 ! Calculate difference between required and actual internals
 ! Calc [phi_r-phi_a]
@@ -3287,7 +3383,9 @@ END SUBROUTINE CoordTrf
 !
       IF(PrintFlags%Geop==DEBUG_GEOP) THEN
         WRITE(*,210) II,DiffMax,RMSD
+        CALL OpenAscii(OutFile,Out)
         WRITE(Out,210) II,DiffMax,RMSD
+        CLOSE(Out,STATUS='KEEP')
       ENDIF
 210   FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
 !      
@@ -3304,10 +3402,12 @@ END SUBROUTINE CoordTrf
               CALL Halt('Iterative backtransformation did not converge')
             ENDIF
             IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+              CALL OpenAscii(OutFile,Out)
               WRITE(*,180) 
               WRITE(Out,180) 
               WRITE(*,190) 
               WRITE(Out,190) 
+              CLOSE(Out,STATUS='KEEP')
             ENDIF
             GO TO 300
           ENDIF
@@ -3318,8 +3418,10 @@ END SUBROUTINE CoordTrf
 ! At this point, convergence has been reached
 !
       IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        CALL OpenAscii(OutFile,Out)
         WRITE(*,220) II
         WRITE(Out,220) II
+        CLOSE(Out,STATUS='KEEP')
       ENDIF
 220   FORMAT('Coordinate back-transformation converged in ',I3,' steps')
 !
@@ -3331,8 +3433,8 @@ END SUBROUTINE CoordTrf
 !
 ! Final internal coordinates
 !
-      CALL INTCValue(IntCs,XYZ,NatmsLoc)
-!     CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Final Internals')
+      CALL INTCValue(IntCs,XYZ)
+      CALL PrtIntCoords(IntCs,IntCs%Value,'Final Internals')
 !
 ! Tidy up
 !
@@ -3347,19 +3449,21 @@ END SUBROUTINE CoordTrf
       CALL Delete(FullBt)
       CALL Delete(ActCarts)
 !
-      CLOSE(Out)
-!
       END SUBROUTINE InternalToCart
 !
 !----------------------------------------------------------
 !
-      SUBROUTINE PrtIntCoords(IntCs,NIntC,Value,CHAR)
+      SUBROUTINE PrtIntCoords(IntCs,Value,CHAR)
 !
       TYPE(INTC) :: IntCs
-      INTEGER    :: I,NIntC
+      INTEGER    :: I,NIntC,J
       REAL(DOUBLE),DIMENSION(:) :: Value
       REAL(DOUBLE) :: SUM
       CHARACTER(LEN=*) :: CHAR   
+!
+      NIntC=SIZE(IntCs%Def)
+!
+      CALL OpenAscii(OutFile,Out)
 !
       WRITE(*,*) TRIM(CHAR)
       WRITE(Out,*) TRIM(CHAR)
@@ -3370,13 +3474,23 @@ END SUBROUTINE CoordTrf
       DO I=1,NIntC
         IF(IntCs%Def(I)(1:4)=='STRE') THEN
           SUM=Value(I)/AngstromsToAu
-        ELSE
+        ELSE IF(IntCs%Def(I)(1:4)=='BEND'.OR. &
+                IntCs%Def(I)(1:4)=='TORS'.OR. &
+                IntCs%Def(I)(1:4)=='LINB'.OR. &
+                IntCs%Def(I)(1:4)=='OUTP') THEN
           SUM=Value(I)*180.D0/PI
+        ELSE IF(IntCs%Def(I)(1:4)=='CART') THEN
+          SUM=Value(I)
         ENDIF
-        WRITE(*,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM
-        WRITE(Out,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM
+          WRITE(*,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I)
+          WRITE(Out,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I)
       ENDDO
- 111 FORMAT(I4,2X,A5,2X,4I3,2X,F12.6)
+!      
+ 111 FORMAT(I4,2X,A5,2X,4I3,2X,F12.6,L5)
+ 222 FORMAT(I4,2X,A5,2X,4I3,2X,3F12.6,L5)
+!
+      CLOSE(Out,STATUS='KEEP')
+!
       END SUBROUTINE PrtIntCoords
 !
 !----------------------------------------------------------
@@ -3837,22 +3951,28 @@ END SUBROUTINE CoordTrf
 !
       CALL New(MarkLinB,NIntC)
 !
-      MarkLinB%I=0
-          NLinB=0
-      DO I=1,NIntC 
-        IF(IntCs%Def(I)(1:4)=='BEND') THEN
-          I1=IntCs%Atoms(I,1) 
-          I2=IntCs%Atoms(I,2) 
-          I3=IntCs%Atoms(I,3) 
-          CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-          IF(ABS(Value-PI)*180.D0/PI < LinCrit) THEN  !!!linear within 1 degree
-            NLinB=NLinB+1
-            MarkLinB%I(I)=1
-          ENDIF
-        ENDIF
-      ENDDO
+       MarkLinB%I=0
+           NLinB=0
+       DO I=1,NIntC 
+         IF(IntCs%Def(I)(1:4)=='BEND') THEN
+           I1=IntCs%Atoms(I,1) 
+           I2=IntCs%Atoms(I,2) 
+           I3=IntCs%Atoms(I,3) 
+           CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+           IF(ABS(Value-PI)*180.D0/PI < LinCrit) THEN  !!!linear within 1 degree
+             NLinB=NLinB+1
+             MarkLinB%I(I)=1
+           ENDIF
+         ENDIF
+       ENDDO
 !
-    IF(NLinB/=0) THEN
+      IF(NLinB==0) THEN
+        CALL Delete(MarkLinB)
+        RETURN
+      ENDIF
+      CALL Halt('Bend - LinB transition. Subroutine must be tested')
+!
+! modify
 !
       NIntc_New=NIntc+NLinB
       CALL NEW(IntC_New,NIntc_New)
@@ -3876,7 +3996,6 @@ END SUBROUTINE CoordTrf
           IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
         ENDIF
       ENDDO
-!
 !
       CALL Delete(IntCs)
       NIntC=NIntC_New
@@ -4000,21 +4119,63 @@ END SUBROUTINE CoordTrf
         CALL Delete(LinBBridge)
         CALL Delete(Top12)
 !
-! Put IntCs onto HDF
-!
-        CALL Put(NIntC,'NIntC')
-        CALL Put(IntCs,'IntCs')
-!
-    ENDIF
-!
 ! Tidy up
 !
         CALL Delete(MarkLinB)
 !
 END SUBROUTINE ChkBendToLinB    
 !
+!-------------------------------------------------------
 !
-#endif
+      SUBROUTINE SetConstraint(IntCs,XYZ,Displ)
+!
+      TYPE(INTC)     :: IntCs
+      INTEGER        :: I,J,NIntC,LastIntcGeom,NDim,JJ
+      TYPE(DBL_VECT) :: Displ
+      REAL(DOUBLE),DIMENSION(:,:) :: XYZ  
+      TYPE(DBL_VECT) :: Constraints
+      LOGICAL        :: DoInternals
+!
+        NIntC=SIZE(IntCs%Def)
+        NDim=SIZE(Displ%D)
+        DoInternals=.FALSE.
+        IF(NDim==NIntC) DoInternals=.TRUE.
+!
+! Get values of constraints from HDF
+!
+        CALL New(Constraints,NIntC)
+        CALL Get(LastIntcGeom,'LastIntcGeom')
+        CALL Get(Constraints,'Constraints'//TRIM(IntToChar(LastIntcGeom)))
+!
+        IF(DoInternals) THEN
+          CALL INTCValue(IntCs,XYZ)
+          DO I=1,NIntC
+            IF(IntCs%Constraint(I)) THEN
+              Displ%D(I)=Constraints%D(I)-IntCs%Value(I)
+!write(*,100) i,Constraints%D(I),IntCs%Value(I),Displ%D(I)
+!100 format('int= ',i4,3F12.6)
+  	    ENDIF
+          ENDDO	
+        ELSE
+          DO I=1,NIntC
+            IF(IntCs%Constraint(I)) THEN
+              IF(IntCs%Def(I)(1:4)/='CART') CALL Halt('Internal '// &
+                 'coord constraints in Cartesian optimization')
+                J=IntCs%Atoms(I,1)
+              IF(IntCs%Def(I)(1:5)/='CARTX') JJ=(J-1)*3+1
+              IF(IntCs%Def(I)(1:5)/='CARTY') JJ=(J-1)*3+2
+              IF(IntCs%Def(I)(1:5)/='CARTZ') JJ=(J-1)*3+3
+              Displ%D(JJ)=Constraints%D(I)-IntCs%Value(I)
+  	    ENDIF
+          ENDDO	
+        ENDIF
+!
+! Tidy up
+!
+        CALL Delete(Constraints)
+!
+      END SUBROUTINE SetConstraint
+!
 !-------------------------------------------------------
 END MODULE InCoords
 
