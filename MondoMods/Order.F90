@@ -1,6 +1,392 @@
 !
 !    SORTING AND ORDERING (VIA SPACE FILLING CURVES)
 !    Author: Matt Challacombe
+MODULE TravelMan
+  USE DerivedTypes; USE MemMan
+  IMPLICIT NONE
+  CONTAINS
+  
+  SUBROUTINE Anneal(XCoor,YCoor,ZCoor,NCity,TravOrder)
+  IMPLICIT NONE
+  TYPE(DBL_VECT) :: XCoor,YCoor,ZCoor,XX,YY,ZZ
+  INTEGER::LeftCity,RightCity,NCity,I,J,K,NOver,NLimit,NSucc
+  TYPE(INT_VECT)::TravOrder,ChosenCity,NewTravOrder
+  REAL(DOUBLE) :: TFacR,T,MaxIncCost,TotCost1,TotCost,Dec,IncCost
+  REAL(DOUBLE),EXTERNAL::Random
+  LOGICAL::Ans
+
+  IF(NCity <= 4) THEN 
+    STOP 'Error in Anneal! Too few cities!'
+  ENDIF
+
+  CALL GetEndCities1(XCoor,YCoor,ZCoor,NCity,LeftCity,RightCity)
+  DO I = 1, NCity
+    TravOrder%I(I) = I
+  ENDDO  
+  TravOrder%I(1) = LeftCity
+  TravOrder%I(LeftCity) = 1
+  TravOrder%I(NCity) = RightCity
+  TravOrder%I(RightCity) = NCity
+
+  ! Calculate the length of the total path
+  TotCost = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
+  WRITE(*,*) 'TotCost = ',TotCost
+
+  CALL NEW(ChosenCity,6)
+  CALL NEW(XX,6); CALL NEW(YY,6); CALL NEW(ZZ,6)
+  CALL NEW(NewTravOrder,NCity)
+
+  MaxIncCost = -BIG_DBL
+  DO I = 1,5000
+    Dec = Random()
+    WRITE(*,*) 'Dec =', Dec
+    IF(Dec < 0.5) THEN
+      CALL RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
+        ChosenCity,XX,YY,ZZ,IncCost)
+      IF(IncCost > MaxIncCost) THEN
+        MaxIncCost = IncCost
+      ENDIF
+      CALL Revers(TravOrder,ChosenCity)
+      TotCost = TotCost + IncCost
+  
+      TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
+      WRITE(*,*) 'Rev: TotCost,TotCost1 =',TotCost,TotCost1
+      IF(abs(TotCost-TotCost1) > 1.0e-7) THEN
+        STOP 'TotCost and TotCost1 differ!!'
+      ENDIF
+    ELSE
+      CALL TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
+        XX,YY,ZZ,IncCost)
+      IF(IncCost > MaxIncCost) THEN
+        MaxIncCost = IncCost
+      ENDIF
+      CALL Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
+      TotCost = TotCost + IncCost
+      TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
+      WRITE(*,*) 'Trn: TotCost,TotCost1 =',TotCost,TotCost1
+      IF(abs(TotCost-TotCost1) > 1.0e-7) THEN
+        STOP 'TotCost and TotCost1 differ!!'
+      ENDIF
+    ENDIF
+  ENDDO      
+  WRITE(*,*) 'NCity,MaxIncCost =',NCity,MaxIncCost
+
+  NOver = 100*NCity
+  NLimit = 10*NCity
+  TFacR = 0.9
+  T = MaxIncCost*0.5
+  
+  DO J = 1, 100
+    NSucc = 0
+    DO K = 1,NOver
+      Dec = Random() 
+      IF(Dec < 0.5) THEN
+        CALL RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
+          ChosenCity,XX,YY,ZZ,IncCost)
+        Ans = (IncCost < 0.0) .OR. (Random().LT.EXP(-IncCost/T))
+        IF(Ans) THEN
+          NSucc = NSucc + 1
+          TotCost = TotCost + IncCost
+          CALL Revers(TravOrder,ChosenCity)
+        ENDIF
+      ELSE
+        CALL TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
+          XX,YY,ZZ,IncCost)
+        Ans = (IncCost < 0.0) .OR. (Random().LT.EXP(-IncCost/T))
+        IF(Ans) THEN
+          NSucc = NSucc + 1
+          TotCost = TotCost + IncCost
+          CALL Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
+        ENDIF
+      ENDIF
+      IF(NSucc .ge. NLimit) Exit  
+    ENDDO
+    T = T*TFacR
+    write(*,*) 'T = ', T
+    write(*,*) 'NSucc = ',NSucc
+    IF(NSucc == 0) EXIT
+  ENDDO
+  write(*,*) 'temperature index J = ', J
+  write(*,*) 'success number index K = ', K  
+  TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
+  WRITE(*,*) 'Final cost: TotCost,TotCost1 =',TotCost,TotCost1
+  IF(ABS(TotCost-TotCost1) > 1.0e-7) THEN
+    STOP 'TotCost and TotCost1 differ!!'
+  ENDIF
+  
+  END SUBROUTINE Anneal
+
+!---------------------------------------------------------------------  
+  SUBROUTINE TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
+    XX,YY,ZZ,IncCost)
+    TYPE(DBL_VECT)::XCoor,YCoor,ZCoor,XX,YY,ZZ
+    INTEGER::Val,IP,NCity,ArrLen,I,J,RanIndex
+    TYPE(INT_VECT)::TravOrder,SubscrArr,ChosenCity
+    REAL(DOUBLE)::IncCost
+    REAL(DOUBLE),EXTERNAL::Random
+ 
+    ArrLen = NCity-2 ! the first and the last cities are fixed
+    DO
+
+!   DO I = 1, ArrLen
+!     SubscrArr%I(I) = I+1
+!   ENDDO
+!   DO I = 1, 3
+!     RanIndex = 1 + ArrLen*Random()
+!     ChosenCity%I(I) = SubscrArr%I(RanIndex)
+!     ! remove RanIndex from SubscrArr
+!     SubscrArr%I(RanIndex) = SubscrArr%I(ArrLen)
+!     ArrLen = ArrLen-1
+!   ENDDO
+      ChosenCity%I(1) = 2+ArrLen*Random()
+      ChosenCity%I(2) = 2+ArrLen*Random()
+      ChosenCity%I(3) = 2+ArrLen*Random()
+
+      DO I = 2, 3
+        Val = ChosenCity%I(I); IP = I
+        DO 
+          IF(.NOT.(IP > 1 .AND. Val < ChosenCity%I(IP-1))) EXIT
+          ChosenCity%I(IP) = ChosenCity%I(IP-1)
+          IP = IP-1
+        ENDDO
+        ChosenCity%I(IP) = Val
+      ENDDO
+
+      IF(ChosenCity%I(1) /= ChosenCity%I(2) .AND. &
+         ChosenCity%I(2) /= ChosenCity%I(3)) EXIT
+    ENDDO
+    ChosenCity%I(4) = ChosenCity%I(3)+1
+    ChosenCity%I(5) = ChosenCity%I(1)-1
+    ChosenCity%I(6) = ChosenCity%I(2)+1
+
+!   DO I = 1, 6
+!     IF(ChosenCity%I(I) < 1 .OR. ChosenCity%I(I) > NCity) THEN
+!       WRITE(*,*) 'Wrong indices in TrnCst ! Something is wrong !'
+!       STOP
+!     ENDIF
+!   ENDDO
+
+    DO I = 1, 6
+      J = TravOrder%I(ChosenCity%I(I))
+      XX%D(I) = XCoor%D(J)
+      YY%D(I) = YCoor%D(J)
+      ZZ%D(I) = ZCoor%D(J)
+    ENDDO
+    IncCost = -ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(6),yy%D(6),zz%D(6)) &
+              -ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(5),yy%D(5),zz%D(5)) &
+              -ALen(xx%D(3),yy%D(3),zz%D(3),xx%D(4),yy%D(4),zz%D(4)) &
+              +ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(3),yy%D(3),zz%D(3)) &
+              +ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(4),yy%D(4),zz%D(4)) &
+              +ALen(xx%D(5),yy%D(5),zz%D(5),xx%D(6),yy%D(6),zz%D(6))
+
+  END SUBROUTINE TrnCst
+
+!---------------------------------------------------------------------  
+  SUBROUTINE Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
+  TYPE(INT_VECT)::TravOrder,ChosenCity,NewTravOrder
+  INTEGER::NCity,NN,I,J,INDEX
+
+  NN = ChosenCity%I(5)
+  INDEX = 1
+  DO I = 1, NN
+    NewTravOrder%I(INDEX) = TravOrder%I(I)
+    INDEX = INDEX + 1
+  ENDDO
+
+  NN = ChosenCity%I(3)-ChosenCity%I(6)+1
+  J = ChosenCity%I(6)
+  DO I = 1,NN
+    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
+    INDEX = INDEX + 1
+  ENDDO
+
+  NN = ChosenCity%I(2)-ChosenCity%I(1)+1
+  J = ChosenCity%I(1)
+  DO I = 1,NN
+    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
+    INDEX = INDEX + 1
+  ENDDO
+
+  NN = NCity-ChosenCity%I(4)+1
+  J = ChosenCity%I(4)
+  DO I = 1, NN
+    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
+    INDEX = INDEX + 1
+  ENDDO
+
+  IF(INDEX /= (NCity+1)) THEN
+    STOP 'missing cities !!'
+  ENDIF  
+
+  DO I = 1, NCity
+    TravOrder%I(I) = NewTravOrder%I(I)
+  ENDDO    
+  END SUBROUTINE TRNSPT
+  
+!----------------------------------------------------------------------
+  SUBROUTINE RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
+    ChosenCity,XX,YY,ZZ,IncCost)
+    TYPE(DBL_VECT)::XCoor,YCoor,ZCoor,XX,YY,ZZ
+    INTEGER::TmpInt,NCity,ArrLen,I,J,RanIndex1,RanIndex2
+    TYPE(INT_VECT)::TravOrder,SubscrArr,ChosenCity
+    REAL(DOUBLE)::IncCost
+    REAL(DOUBLE),EXTERNAL::Random
+ 
+!   ArrLen = NCity-2 ! the first and the last cities are fixed
+!   DO I = 1, ArrLen
+!     SubscrArr%I(I) = I+1
+!   ENDDO
+!   DO I = 1, 2
+!     RanIndex = 1 + ArrLen*Random()
+!     ChosenCity%I(I) = SubscrArr%I(RanIndex)
+!     ! remove RanIndex from SubscrArr
+!     SubscrArr%I(RanIndex) = SubscrArr%I(ArrLen)
+!     ArrLen = ArrLen-1
+!   ENDDO
+!   ! WRITE(*,*) 'Chosen Cities : ',ChosenCity%I(1),ChosenCity%I(2)
+
+    ArrLen = NCity-2
+    DO 
+      RanIndex1 = 2 + ArrLen*Random()
+      RanIndex2 = 2 + ArrLen*Random()
+      IF(RanIndex1 /= RanIndex2) EXIT
+    ENDDO
+    IF(RanIndex1 > RanIndex2) THEN
+      TmpInt = RanIndex1
+      RanIndex1 = RanIndex2
+      RanIndex2 = TmpInt
+    ENDIF
+
+    ChosenCity%I(1) = RanIndex1
+    ChosenCity%I(2) = RanIndex2
+
+    ChosenCity%I(3) = ChosenCity%I(1)-1
+    ChosenCity%I(4) = ChosenCity%I(2)+1
+
+    DO I = 1, 4
+      IF(ChosenCity%I(I) < 1 .OR. ChosenCity%I(I) > NCity) THEN
+        WRITE(*,*) 'Wrong indices in RevCst ! Something is wrong !'
+        STOP
+      ENDIF
+    ENDDO
+    
+    DO I = 1, 4
+      J = TravOrder%I(ChosenCity%I(I))
+      XX%D(I) = XCoor%D(J)
+      YY%D(I) = YCoor%D(J)
+      ZZ%D(I) = ZCoor%D(J)
+    ENDDO
+
+    IncCost = -ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(3),yy%D(3),zz%D(3)) &
+              -ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(4),yy%D(4),zz%D(4)) &
+              +ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(4),yy%D(4),zz%D(4)) &
+              +ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(3),yy%D(3),zz%D(3))
+  END SUBROUTINE RevCst
+
+!----------------------------------------------------------------------
+  SUBROUTINE Revers(TravOrder,ChosenCity)
+  INTEGER::NN,I,TmpInt,Left,Right
+  TYPE(INT_VECT)::TravOrder,ChosenCity
+  
+  NN = (ChosenCity%I(2)-ChosenCity%I(1)+1)/2
+  DO I = 1,NN
+    Left = ChosenCity%I(1)+I-1
+    Right = ChosenCity%I(2)-I+1
+    TmpInt = TravOrder%I(Left)
+    TravOrder%I(Left) = TravOrder%I(Right)
+    TravOrder%I(Right) = TmpInt
+  ENDDO
+  END SUBROUTINE Revers
+
+!----------------------------------------------------------------------
+  ! the order is coordinates of 1, and followed by 2
+  FUNCTION ALen(x1,y1,z1,x2,y2,z2)
+    REAL(DOUBLE)::x1,y1,z1,x2,y2,z2,ALen,dx,dy,dz
+    dx = x1-x2; dy = y1-y2; dz = z1-z2
+    ALen = SQRT(dx*dx + dy*dy + dz*dz)
+  END FUNCTION ALen
+
+!----------------------------------------------------------------------
+  FUNCTION CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
+  TYPE(DBL_VECT)::XCoor,YCoor,ZCoor
+  TYPE(INT_VECT)::TravOrder
+  INTEGER::NCity,I,J,K
+  REAL(DOUBLE)::CalTotCost
+  
+  CalTotCost = 0.0
+  DO I = 1,NCity-1
+    J = TravOrder%I(I)
+    K = TravOrder%I(I+1)
+    CalTotCost = CalTotCost + ALen(XCoor%D(J),YCoor%D(J),ZCoor%D(J),&
+      XCoor%D(K),YCoor%D(K),ZCoor%D(K))
+  ENDDO
+  END FUNCTION CalTotCost
+
+!----------------------------------------------------------------------
+  ! get the end cities using the tight bounding box
+  SUBROUTINE GetEndCities1(XCoor,YCoor,ZCoor,NCity,LeftCity,RightCity)
+  TYPE(DBL_VECT)::XCoor,YCoor,ZCoor
+  REAL(DOUBLE)::Dis,MinLDis,MinRDis,X,Y,Z,XLEx,YLEx,ZLEx,XREx,YREx,ZREx
+  INTEGER::NCity,I,LeftCity,RightCity
+  
+  XLEx = Big_DBL;  XREx = -Big_DBL
+  YLEx = Big_DBL;  YREx = -Big_DBL
+  ZLEx = Big_DBL;  ZREx = -Big_DBL
+ 
+  DO I = 1, NCity
+    X = XCoor%D(I); Y = YCoor%D(I); Z = ZCoor%D(I)
+    IF(X < XLEx) XLEx = X; IF(X > XREx) XREx = X
+    IF(Y < YLEx) YLEx = Y; IF(Y > YREx) YREx = Y
+    IF(Z < ZLEx) ZLEx = Z; IF(Z > ZREx) ZREx = Z
+  ENDDO
+  WRITE(*,*) 'XEx : ',XLEx, XREx
+  WRITE(*,*) 'YEx : ',YLEx, YREx
+  WRITE(*,*) 'ZEx : ',ZLEx, ZREx
+    
+  MinLDis = Big_DBL; MinRDis = Big_DBL
+ 
+  DO I = 1, NCity
+    Dis = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),XLEx,YLEx,ZLEx)
+    IF(Dis < MinLDis) THEN
+      MinLDis = Dis
+      LeftCity = I
+    ENDIF
+    Dis = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),XREx,YREx,ZREx)
+    IF(Dis < MinRDis) THEN
+      MinRDis = Dis
+      RightCity = I
+    ENDIF
+  ENDDO
+
+  WRITE(*,*) 'MinLDis = ',MinLDis
+  WRITE(*,*) 'MinRDis = ',MinRDis
+  WRITE(*,*) 'LeftCity,RightCity = ',LeftCity,RightCity
+  END SUBROUTINE GetEndCities1
+
+!----------------------------------------------------------------------
+  ! find out the largest end-to-end distance
+  SUBROUTINE GetEndCities2(XCOOR,YCOOR,ZCoor,NCity,LeftCity,RightCity)
+  TYPE(DBL_VECT) :: XCoor,YCoor,ZCoor
+  INTEGER::I,J,Ncity,leftcity,rightcity
+  REAL(DOUBLE)::DisIJ,MaxDis
+
+  MaxDis = 0.0
+  DO I = 1, NCity
+    DO J = I+1, NCity
+      DisIJ = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),&
+        XCoor%D(J),YCoor%D(J),ZCoor%D(J))
+      IF(DisIJ .GE. MaxDis) THEN
+        MaxDis = DisIJ
+        LeftCity = I
+        RightCity = J
+      ENDIF
+    ENDDO
+  ENDDO
+  END SUBROUTINE GetEndCities2
+
+END MODULE TravelMan
+
+
 MODULE Order
    USE DerivedTypes
    USE GlobalCharacters
@@ -8,6 +394,7 @@ MODULE Order
    USE GlobalObjects
    USE ProcessControl
    USE MemMan
+   USE TravelMan
    IMPLICIT NONE
    INTERFACE Sort
       MODULE PROCEDURE Sort_DBL_INT,Sort_INT_INT, Sort_INT_VECT
@@ -42,6 +429,7 @@ MODULE Order
    INTEGER, PARAMETER     :: SFC_PEANO  =5308208
    INTEGER, PARAMETER     :: SFC_HILBERT=4808471
    INTEGER, PARAMETER     :: SFC_RANDOM =5058108
+   INTEGER, PARAMETER     :: SFC_TRAVEL =2505811
    CONTAINS
 !
 !      FUNCTION RANDOM_INT(Limits)
@@ -87,7 +475,9 @@ MODULE Order
         INTEGER(INT8),ALLOCATABLE, &
                          DIMENSION(:) :: IKey
         TYPE(DBL_VECT)                :: RKey
-        INTEGER                       :: I        
+        INTEGER                       :: I
+        TYPE(DBL_VECT)                :: XCoor,YCoor,ZCoor
+        
 !
         IF(SFC_KEY==SFC_RANDOM)THEN
            CALL New(RKey,N)
@@ -105,6 +495,16 @@ MODULE Order
            ALLOCATE(IKey(N))
            CALL SFCOrder77(N,R%D,Point%I,IKey,.TRUE.)
            DEALLOCATE(IKey)
+        ELSEIF(SFC_KEY==SFC_TRAVEL)THEN
+           CALL NEW(XCoor,N)
+           CALL NEW(YCoor,N)
+           CALL NEW(ZCoor,N)
+           DO I = 1,N
+             XCoor%D(I) = R%D(1,I)
+             YCoor%D(I) = R%D(2,I)
+             ZCoor%D(I) = R%D(3,I)
+           ENDDO
+           CALL Anneal(XCoor,YCoor,ZCoor,N,Point)
         ELSE
            CALL MondoHalt(-100,'Bad SFC_Key in SFCOrder')
         ENDIF
