@@ -15,12 +15,16 @@ PROGRAM SForce
   USE AtomPairs
   USE BraBloks
   USE BlokTrWdS
+
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)         :: T1,F,P
+  TYPE(BCSR)         :: T1,F,P
+  TYPE(DBL_VECT)      :: TotSFrc
+  INTEGER :: IErr,TotFrcComp
 #else
   TYPE(BCSR)          :: T1,F,P
 #endif
+
   TYPE(AtomPair)      :: Pair
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
@@ -29,22 +33,24 @@ PROGRAM SForce
   TYPE(HGRho)         :: Rho
   TYPE(DBL_VECT)      :: SFrc
   REAL(DOUBLE)        :: SFrcChk
+
 #ifdef PERIODIC 
   INTEGER                     :: NC
   REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
   REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_S
 #endif
+
   CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
 !---------------------------------------------- 
 ! Start up macro
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !----------------------------------------------
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 !---------------------------------------------- 
 ! Allocations 
-  CALL New(P)
+  CALL New(P,OnAll_O=.TRUE.)
   CALL New(F)
   CALL New(T1)
 !--------------------------------------
@@ -52,23 +58,37 @@ PROGRAM SForce
   CALL Get(P,TrixFile('D',Args,1))
 ! Is this a bug if we don't use the extrapolated Fockian?
   CALL Get(F,TrixFile('F',Args,0))
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
   CALL Filter(P,F)            ! P=Filter[P.F.P]      
+#ifdef PARALLEL
+  ENDIF
+  CALL BCastBCSR(P)
+#endif
   CALL Delete(F)
   CALL Delete(T1)
+
 #ifdef PERIODIC
 ! Get the Outer Cell Set
   CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif 
+
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------
   CALL New(SFrc,3*NAtoms)
   SFrc%D=Zero
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
+
+#ifdef PARALLEL
+  DO AtA=Beg%I(MyId),End%I(MyId)
+#else
   DO AtA=1,NAtoms
+#endif
      A1=3*(AtA-1)+1
      A2=3*AtA
      MA=BSiz%I(AtA)
@@ -88,12 +108,12 @@ PROGRAM SForce
               IF(TestAtomPair(Pair)) THEN
                  F_nlm(1:3)    = -Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
                  SFrc%D(A1:A2) = SFrc%D(A1:A2) + F_nlm(1:3)
-!
+ 
                  nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
                  LatFrc_S(1,1:3) = LatFrc_S(1,1:3) + nlm(1)*F_nlm(1:3)
                  LatFrc_S(2,1:3) = LatFrc_S(2,1:3) + nlm(2)*F_nlm(1:3)
                  LatFrc_S(3,1:3) = LatFrc_S(3,1:3) + nlm(3)*F_nlm(1:3)
-!
+ 
               ENDIF
            ENDDO
 #else
@@ -103,6 +123,15 @@ PROGRAM SForce
      ENDDO
   ENDDO
 !--------------------------------------------------------------------------------
+#ifdef PARALLEL
+  TotFrcComp = 3*NAtoms
+  CALL New(TotSFrc,TotFrcComp)
+  CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == 0) THEN
+    SFrc%D(1:TotFrcComp) = TotSFrc%D(1:TotFrcComp)
+  ENDIF
+  CALL Delete(TotSFrc)
+#endif
 ! Do some checksumming and IO 
 !  CALL PPrint(SFrc,'dS/dR')
   CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
