@@ -27,7 +27,7 @@ PROGRAM QCTC
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
 #ifdef MMech
   TYPE(CRDS)                 :: GM_MM
-  REAL(DOUBLE)               :: MM_COUL  
+  REAL(DOUBLE)               :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                    :: UOUT !!!!
 #endif
 !-------------------------------------------------------------------------------- 
@@ -107,12 +107,38 @@ PROGRAM QCTC
 #ifdef MMech
   ENDIF !!!!  QM calculations
   IF(HasMM()) THEN
+!
      MM_COUL = NukE(GM_MM)
+     CALL Put(MM_COUL,'MM_COUL',Tag_O=CurGeom)
+!
+     IF(HasQM()) THEN
+!
+       CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
+!
      CALL OpenASCII(OutFile,UOut)
-     write(uout,*) 'mm_coul in qctc= ',mm_coul
-     write(*,*) 'mm_coul in qctc= ',mm_coul
+!
+     CONVF=1000.D0*JtoHartree/C_Avogadro
+!
+! Print energies 
+!
+     write(uout,*) 'Energies in KJ/mol'        
+     write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL/CONVF
+     write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL/CONVF
+     write(uout,*) 'E_MM_Coulomb         = ',(MM_COUL-E_C_EXCL)/CONVF
+!
+     write(uout,*) 'Energies in atomic unit'        
+     write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+     write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+     write(uout,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+!
+     write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+!
      CLOSE(UNIT=UOut,STATUS='KEEP')
-     CALL PUT(MM_COUL,'MM_COUL',Tag_O=CurGeom)
+!
+     ELSE
+       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+     ENDIF
+!
   ENDIF
 #endif
 
