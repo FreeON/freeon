@@ -518,7 +518,24 @@ MODULE ParseInput
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
          ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_VERLET))THEN
-            Ctrl%Grad=GRAD_VERLET_MD
+            Ctrl%Grad=GRAD_MD
+            Ctrl%MDC%MD_Algor=1
+            IF(.NOT. OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom)) THEN
+               Ctrl%NGeom=1
+            ENDIF
+            IF(.NOT. OptDblQ(Inp,MD_TIME_STEP,Ctrl%MDC%TimeStep)) THEN
+               Ctrl%MDC%TimeStep    = 1.0D-2
+            ENDIF
+            IF(.NOT. OptDblQ(Inp,MD_VEL_SCALE,Ctrl%MDC%VelScaling)) THEN
+               Ctrl%MDC%VelScaling  = One
+            ENDIF
+            IF(.NOT. OptDblQ(Inp,MD_TMP_SCALE,Ctrl%MDC%TempScaling)) THEN
+               Ctrl%MDC%TempScaling = One
+            ENDIF
+         ELSEIF(OptKeyQ(Inp,DYNAMICS,MD_PRECOR))THEN
+            Ctrl%Grad=GRAD_MD
+            Ctrl%MDC%MD_Algor=2
+            CALL MondoHalt(PRSE_ERROR,'Predictor-Corrector Algorithmn not implimented')
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_QUNEW))THEN
             IF(OptKeyQ(Inp,OPTIMIZATION,OPT_ONE_BASE))THEN
                Ctrl%Grad=GRAD_QNEW_ONE_OPT
@@ -540,13 +557,6 @@ MODULE ParseInput
             IF(.NOT.OptIntQ(Inp,MAX_STEPS,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
-         ENDIF
-         IF(Ctrl%Grad>=GRAD_VERLET_MD)THEN
-            IF(Ctrl%NGeom<1)CALL MondoHalt(PRSE_ERROR,'MD steps less than 1')
-            IF(.NOT.OptDblQ(Inp,MD_TIME_STEP,Ctrl%MDVar(1)))THEN
-               Ctrl%MDVar(1)=1.D-2
-            ENDIF
-            Ctrl%MDVar(2)=One
          ENDIF
 !----------------------------------------------------------------------------------------- 
 !        Parse <OPTIONS> for <Extrap=>
@@ -571,83 +581,90 @@ MODULE ParseInput
 !        Which Directions are Periodic
 !
          IF(OptKeyQ(Inp,PBOUNDRY,PBC_OFF)) THEN
-            GM%AutoW(1)=.FALSE.
-            GM%AutoW(2)=.FALSE.
-            GM%AutoW(3)=.FALSE.
+            GM%PBC%AutoW(1)=.FALSE.
+            GM%PBC%AutoW(2)=.FALSE.
+            GM%PBC%AutoW(3)=.FALSE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_X)) THEN
-            GM%AutoW(1)=.TRUE.
-            GM%AutoW(2)=.FALSE.
-            GM%AutoW(3)=.FALSE.
+            GM%PBC%AutoW(1)=.TRUE.
+            GM%PBC%AutoW(2)=.FALSE.
+            GM%PBC%AutoW(3)=.FALSE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Y)) THEN
-            GM%AutoW(1)=.FALSE.
-            GM%AutoW(2)=.TRUE.
-            GM%AutoW(3)=.FALSE.
+            GM%PBC%AutoW(1)=.FALSE.
+            GM%PBC%AutoW(2)=.TRUE.
+            GM%PBC%AutoW(3)=.FALSE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_Z)) THEN
-            GM%AutoW(1)=.FALSE.
-            GM%AutoW(2)=.FALSE.
-            GM%AutoW(3)=.TRUE.
+            GM%PBC%AutoW(1)=.FALSE.
+            GM%PBC%AutoW(2)=.FALSE.
+            GM%PBC%AutoW(3)=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XY)) THEN
-            GM%AutoW(1)=.TRUE.
-            GM%AutoW(2)=.TRUE.
-            GM%AutoW(3)=.FALSE.
+            GM%PBC%AutoW(1)=.TRUE.
+            GM%PBC%AutoW(2)=.TRUE.
+            GM%PBC%AutoW(3)=.FALSE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XZ)) THEN
-            GM%AutoW(1)=.TRUE.
-            GM%AutoW(2)=.FALSE.
-            GM%AutoW(3)=.TRUE.
+            GM%PBC%AutoW(1)=.TRUE.
+            GM%PBC%AutoW(2)=.FALSE.
+            GM%PBC%AutoW(3)=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_YZ)) THEN
-            GM%AutoW(1)=.FALSE.
-            GM%AutoW(2)=.TRUE.
-            GM%AutoW(3)=.TRUE.
+            GM%PBC%AutoW(1)=.FALSE.
+            GM%PBC%AutoW(2)=.TRUE.
+            GM%PBC%AutoW(3)=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,PBC_XYZ)) THEN
-            GM%AutoW(1)=.TRUE.
-            GM%AutoW(2)=.TRUE.
-            GM%AutoW(3)=.TRUE.
+            GM%PBC%AutoW(1)=.TRUE.
+            GM%PBC%AutoW(2)=.TRUE.
+            GM%PBC%AutoW(3)=.TRUE.
          ELSE
             CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Auto-Wraps at default value => (Off) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%AutoW(1)=.FALSE.
-            GM%AutoW(2)=.FALSE.
-            GM%AutoW(3)=.FALSE.
+            GM%PBC%AutoW(1)=.FALSE.
+            GM%PBC%AutoW(2)=.FALSE.
+            GM%PBC%AutoW(3)=.FALSE.
          ENDIF
+!------------------------------------------------------
+!        Calculate the Dimension
+!         
+         GM%PBC%Dimen=0
+         DO I=1,3
+            IF(GM%PBC%AutoW(I)) GM%PBC%Dimen=GM%PBC%Dimen+1
+         ENDDO
 !------------------------------------------------------
 !        To wrap or not to wrap atoms into the box
 !
          IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_ON)) THEN
-            GM%AtomW=.TRUE.
+            GM%PBC%AtomW=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF)) THEN
-            GM%AtomW=.FALSE.
+            GM%PBC%AtomW=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Atom-Wrap at default value => (AtomWrap-Off) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%AtomW=.FALSE.
+            GM%PBC%AtomW=.FALSE.
          ENDIF
 !------------------------------------------------------
 !        Input Type on the BoxShape Vectors
 !
          IF(OptKeyQ(Inp,PBOUNDRY,LVF_VEC)) THEN
-            GM%InVecForm=.TRUE.
+            GM%PBC%InVecForm=.TRUE.
          ELSEIF(OptKeyQ(Inp,PBOUNDRY,LVF_ANG)) THEN
-            GM%InVecForm=.FALSE.
+            GM%PBC%InVecForm=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Lattice Vector Format at default value => (Vector Format) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%InVecForm=.TRUE.
+            GM%PBC%InVecForm=.TRUE.
          ENDIF
 !------------------------------------------------------
 !        Input Type on the Coordinates, Atomic or Fractional
 !
          IF(OptKeyQ(Inp,PBOUNDRY,CRT_ATOM)) THEN
-            GM%InAtomCrd=.TRUE.
+            GM%PBC%InAtomCrd=.TRUE.
          ELSEIF (OptKeyQ(Inp,PBOUNDRY,CRT_FRAC)) THEN
-            GM%InAtomCrd=.FALSE.
+            GM%PBC%InAtomCrd=.FALSE.
          ELSE
             CALL OpenASCII(OutFile,Out)
             WRITE(Out,*) '** Coodinate Format at default value => (Atomic Coord) **'
             CLOSE(UNIT=Out,STATUS='KEEP')
-            GM%InAtomCrd=.TRUE.
+            GM%PBC%InAtomCrd=.TRUE.
          ENDIF
 #endif
 !-------------------------------------------------
@@ -664,16 +681,16 @@ MODULE ParseInput
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !  
       END SUBROUTINE ParseGeometry
+!----------------------------------------------------------------------------------------- 
 !
-!
-!
+!----------------------------------------------------------------------------------------- 
       SUBROUTINE ParseCoordinates_MONDO(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
          TYPE(INT_VECT)                  :: Kinds
          REAL(DOUBLE)                    :: R,Rx,Ry,Rz
-         REAL(DOUBLE),DIMENSION(3)       :: Carts,Vects
-         INTEGER                         :: I,J,K
+         REAL(DOUBLE),DIMENSION(6)       :: Carts !,Vects
+         INTEGER                         :: I,J,K,NumGeom
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
          LOGICAL                         :: LastConfig
@@ -701,111 +718,26 @@ MODULE ParseInput
 !----------------------------------------------------------------------------------------- 
 !        Parse <GEOMETRY> for coordinates
 !
-         IF(Ctrl%Grad<=GRAD_ONE_FORCE)THEN
-            CALL Align(BEGIN_GEOMETRY,Inp)
-            Ctrl%NGeom=0
-            LastConfig=.FALSE.
-            DO
-               Ctrl%NGeom=Ctrl%NGeom+1
-               GM%Confg=Ctrl%NGeom
-               NAtoms=0
-               DO 
-                  READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-                  IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT)/=0)EXIT
-                  IF(INDEX(Line,END_GEOMETRY)/=0)THEN
-                     LastConfig=.TRUE.
-                     EXIT
-                  ELSE
-                     LastConfig=.FALSE.
-                  ENDIF
-                  NAtoms=NAtoms+1
-                  CALL LineToGeom(Line,At,Carts)
-#ifdef PERIODIC
-                  IF(GM%InAtomCrd) THEN
-                     GM%Carts%D(:,NAtoms)=Carts(:)
-                     GM%Vects%D(:,NAtoms)=Zero
-                  ELSE
-                     GM%BoxCarts%D(:,NAtoms)=Carts(:) 
-                     GM%BoxVects%D(:,NAtoms)=Zero
-                  ENDIF
-#else
-                  GM%Carts%D(:,NAtoms)=Carts(:) 
-                  GM%Vects%D(:,NAtoms)=Zero
-#endif
-                  DO J=1,104
-                     IF(At==Ats(J))THEN
-                        GM%AtNum%I(NAtoms)=J
-                        GM%AtMss%D(NAtoms)=AtsMss(J)
-                        EXIT
-                     ENDIF
-                  ENDDO
-               ENDDO
-               IF(NAtoms/=GM%NAtms) &
-                    CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MONDO')
-!              Reorder with SFC
-               CALL ReorderCoordinates(GM)
-!              Determine the number of atom types (kinds)
-!              Do this AFTER possible reodering or it will mess up the basis set.
-!              NOTE: Should recompute basis for EACH geometry.  Things are quite
-!              messed up at present.  Need to really clean house on front end.
-               CALL FindKind(GM)
-#ifdef PERIODIC
-!              Convert to AU and Compute Fractioan and Atomic Coordinates  
-               IF(GM%InAtomCrd) THEN
-                  IF(.NOT.GM%InAU) THEN 
-                     GM%Carts%D    = GM%Carts%D*AngstromsToAU
-                  ENDIF
-                  CALL CalFracCarts(GM)
-               ELSE                  
-                  CALL CalAtomCarts(GM)
-               ENDIF
-               IF(GM%NoTransVec) THEN
-                  CALL CalTransVec(GM)
-               ENDIF
-!
-               CALL Translate(GM)
-               CALL WrapAtoms(GM)
-#else
-!              Convert to AU
-               IF(.NOT.GM%InAU) &
-                    GM%Carts%D=GM%Carts%D*AngstromsToAU
-#endif
-!
-!              Compute spin coordinates
-               CALL SpinCoords(GM) 
-!              Determine a bounding box for the system
-               GM%BndBox%D=SetBox(GM%Carts)
-!              Output the coordinates
-               CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
-               CALL Put(Ctrl%NGeom,'NumberOfGeometries')
-!              Print the coordinates
-               IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
-!
-               IF(LastConfig)EXIT
-            ENDDO
-         ELSE
-            NAtoms = 0
-            CALL Align(BEGIN_GEOMETRY,Inp)
-            DO
-               READ(Inp,DEFAULT_CHR_FMT,END=1) Line
-               IF(INDEX(Line,END_GEOMETRY).NE. 0) EXIT
-               IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT).NE. 0) THEN
-                  CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied')
+         CALL Align(BEGIN_GEOMETRY,Inp)
+         NumGeom   = 0
+         LastConfig=.FALSE.
+         DO
+            NumGeom = NumGeom+1
+            GM%Confg= NumGeom
+            NAtoms=0
+            DO 
+               READ(Inp,DEFAULT_CHR_FMT,END=1)Line
+               IF(INDEX(Line,NEXT_GEOMETRY_MONDO_DEFAULT)/=0)EXIT
+               IF(INDEX(Line,END_GEOMETRY)/=0)THEN
+                  LastConfig=.TRUE.
+                  EXIT
+               ELSE
+                  LastConfig=.FALSE.
                ENDIF
                NAtoms=NAtoms+1
-               CALL LineToGeom(Line,At,Carts,Vects)
-#ifdef PERIODIC
-               IF(GM%InAtomCrd) THEN
-                  GM%Carts%D(:,NAtoms)=Carts(:)
-                  GM%Vects%D(:,NAtoms)=Vects(:)
-               ELSE
-                  GM%BoxCarts%D(:,NAtoms)=Carts(:) 
-                  GM%BoxVects%D(:,NAtoms)=Vects(:) 
-               ENDIF
-#else
-               GM%Carts%D(:,NAtoms)=Carts(:) 
-               GM%Vects%D(:,NAtoms)=Vects(:)
-#endif
+               CALL LineToGeom(Line,At,Carts)
+               GM%Carts%D(:,NAtoms)=Carts(1:3) 
+               GM%Vects%D(:,NAtoms)=Carts(4:6)
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%I(NAtoms)=J
@@ -814,31 +746,38 @@ MODULE ParseInput
                   ENDIF
                ENDDO
             ENDDO
+            IF(NAtoms/=GM%NAtms) &
+                 CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MONDO')
 !           Reorder with SFC
             CALL ReorderCoordinates(GM)
 !           Determine the number of atom types (kinds)
+!           Do this AFTER possible reodering or it will mess up the basis set.
+!           NOTE: Should recompute basis for EACH geometry.  Things are quite
+!           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
 #ifdef PERIODIC
-!           Convert to AU and Compute Fractioal and Atomic Coordinates  
-            IF(GM%InAtomCrd) THEN
+!           Convert to AU and Compute Fractioan and Atomic Coordinates  
+            IF(GM%PBC%InAtomCrd) THEN
                IF(.NOT.GM%InAU) THEN 
-                  GM%Carts%D = GM%Carts%D*AngstromsToAU
-                  GM%Vects%D = GM%Vects%D*AngstromsToAU
+                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
                ENDIF
                CALL CalFracCarts(GM)
             ELSE
+               GM%BoxCarts%D=GM%Carts%D
+               GM%BoxVects%D=GM%Vects%D
                CALL CalAtomCarts(GM)
             ENDIF
-            IF(GM%NoTransVec) THEN
+!
+            IF(GM%PBC%NoTransVec) THEN
                CALL CalTransVec(GM)
             ENDIF
+!
             CALL Translate(GM)
             CALL WrapAtoms(GM)
 #else
 !           Convert to AU
             IF(.NOT.GM%InAU) THEN
-               GM%Carts%D = GM%Carts%D*AngstromsToAU
-               GM%Vects%D = GM%Vects%D*AngstromsToAU
+               GM%Carts%D=GM%Carts%D*AngstromsToAU
             ENDIF
 #endif
 !
@@ -846,26 +785,26 @@ MODULE ParseInput
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!
-
-            IF(Ctrl%Grad<=GRAD_ONE_FORCE)THEN            
-!              Output the input coordinates (may be more than one)
-               DO I=1,Ctrl%NGeom
-                  GM%Confg=I
-                  CALL Put(GM,Tag_O=IntToChar(I))
-               ENDDO
-            ELSE
-!              We are doing optimization or dynamics, just put 1
-               GM%Confg=1
-               CALL Put(GM,'1')
-            ENDIF
-            CALL Put(Ctrl%NGeom,'NumberOfGeometries')
+!           ReSet the Cell Center
+            DO I=1,3
+               IF(.NOT. GM%PBC%AutoW(I)) THEN
+                  GM%PBC%CellCenter(I) = Half*(GM%BndBox%D(I,2)+GM%BndBox%D(I,1))
+               ENDIF
+            ENDDO
+!           Output the coordinates
+            CALL Put(GM,Tag_O=IntToChar(NumGeom))
 !           Print the coordinates
-!            IF(Ctrl%NGeom==1)THEN
-!              GM%Confg=1
-!              IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
-!            ENDIF
+            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+!           Exit
+            IF(LastConfig)EXIT
+         ENDDO
+!
+         IF(Ctrl%Grad .NE.  GRAD_ONE_FORCE)THEN
+            IF(NumGeom > 1) THEN
+               CALL MondoHalt(PRSE_ERROR,'Only the initial Geometry should be supplied for MD or Opt')
+            ENDIF
          ENDIF
+         CALL Put(NumGeom,'NumberOfGeometries')
          NAtoms=GM%NAtms
 !----------------------------------------------------------------------------------------- 
 !        Finish up
@@ -880,10 +819,9 @@ MODULE ParseInput
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the input file.')
       END SUBROUTINE ParseCoordinates_MONDO
-
+!----------------------------------------------------------------------------------------- 
 !
-!
-!
+!----------------------------------------------------------------------------------------- 
       SUBROUTINE ParseCoordinates_XMOL(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
          TYPE(CRDS)                      :: GM
@@ -971,12 +909,7 @@ MODULE ParseInput
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!           Compute nuclear-nuclear repulsion energy
-!            GM%ENucN=ENukeNuke(GM)
 !           Output the coordinates
-!            CALL OpenASCII(OutFile,Out)
-!            CALL PPrint(GM)            
-!            CLOSE(Out)
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
             IF(LastConfig)EXIT
@@ -1117,72 +1050,106 @@ MODULE ParseInput
 !===================================================================================
       SUBROUTINE ParsePeriodic_MONDO(Ctrl,GM)
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
-        TYPE(CRDS)                      :: GM      
-        INTEGER                         :: NLvec,NTvec,Dimen,I,J,K
+        TYPE(CRDS)                      :: GM
+        INTEGER                         :: NLvec,NTvec,I,J,K
 !
         NLvec = 0
         NTvec = 0
-        Dimen = 0
-        GM%TransVec%D(:)   = Zero
-        GM%BoxShape%D(:,:) = Zero
+        GM%PBC%TransVec = Zero
+        GM%PBC%BoxShape = Zero
+        GM%PBC%InvBoxSh = Zero
+!
         DO I=1,3
-           GM%BoxShape%D(I,I) = One
-           IF(GM%AutoW(I)) Dimen=Dimen+1
+           GM%PBC%BoxShape(I,I) = One
+           GM%PBC%InvBoxSh(I,I) = One
         ENDDO
 !----------------------------------------------------------- 
 !       Get the Lattice and Translate Vectors
 !
         IF(FindKey(BEGIN_PERIODIC,Inp)) THEN
            CALL Align(BEGIN_PERIODIC,Inp)
-           IF(GM%InVecForm) THEN
+           IF(GM%PBC%InVecForm) THEN
               CALL GetLatVec(GM,NLvec,NTvec)
            ELSE
-              CALL GetLatAng(GM,NLvec,NTvec,Dimen)
+              CALL GetLatAng(GM,NLvec,NTvec)
            ENDIF
         ELSE
-           IF(Dimen .NE. 0) THEN
+           IF(GM%PBC%Dimen .NE. 0) THEN
               CALL MondoHalt(PRSE_ERROR,'No Lattice Vectors where supplied')
            ENDIF
         ENDIF
 !
-        IF(NTvec .EQ. 0) THEN
-           GM%NoTransVec=.TRUE.
-        ELSEIF(NTvec .EQ. 1) THEN
-           GM%NoTransVec=.FALSE.
+        IF(NTvec == 0) THEN
+           GM%PBC%NoTransVec=.TRUE.
+        ELSEIF(NTvec == 1) THEN
+           GM%PBC%NoTransVec=.FALSE.
         ELSE
            CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
         ENDIF
 !
-        IF(NLvec .LT. Dimen) THEN
+        IF(NLvec .LT. GM%PBC%Dimen) THEN
            CALL MondoHalt(PRSE_ERROR,'Number of Lattice Vectors is Incorrect')      
         ENDIF
 !----------------------------------------------------------- 
 !       Convert the lattice and translate vectors to AU 
 !
         IF(.NOT.GM%InAU) THEN 
-           GM%BoxShape%D = GM%BoxShape%D*AngstromsToAU
-           GM%TransVec%D = GM%TransVec%D*AngstromsToAU
+           GM%PBC%BoxShape = GM%PBC%BoxShape*AngstromsToAU
+           GM%PBC%TransVec = GM%PBC%TransVec*AngstromsToAU
         ENDIF
+!-------------------------------------------------------------------------
+!       Calculate the Box Volume
+!
+        GM%PBC%CellVolume = One
+        DO I=1,3
+           IF(GM%PBC%AutoW(I)) THEN
+              GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape(I,I)
+           ENDIF
+        ENDDO
+!-------------------------------------------------------------------------
+!       Calculate the Dipole and Quadripole Factors
+!
+        IF(GM%PBC%Dimen < 3) THEN
+           GM%PBC%DipoleFAC = Zero
+           GM%PBC%QupoleFAC = Zero
+        ELSEIF(GM%PBC%Dimen ==3) THEN
+           GM%PBC%DipoleFAC = -(Four*Pi)/(Three*GM%PBC%CellVolume)
+           GM%PBC%QupoleFAC = (Two*Pi)/(Three*GM%PBC%CellVolume)
+        ENDIF
+!-------------------------------------------------------------------------
+!       Calculate the Cell Center
+!
+        DO I=1,3
+           GM%PBC%CellCenter(I) = Zero
+           IF(GM%PBC%AutoW(I)) THEN
+              DO J=1,3
+                 IF(GM%PBC%AutoW(J)) THEN
+                    GM%PBC%CellCenter(I) =  GM%PBC%CellCenter(I) + Half*GM%PBC%BoxShape(I,J)
+                 ENDIF
+              ENDDO
+           ENDIF
+        ENDDO
 !-------------------------------------------------------------------------
 !       Calculate The Inverse of BoxShape  InvBoxSh = [BoxShape]^(-1)
 !
-        GM%InvBoxSh%D(1,1)=One/GM%BoxShape%D(1,1)
-        GM%InvBoxSh%D(2,1)=Zero
-        GM%InvBoxSh%D(3,1)=Zero
+        GM%PBC%InvBoxSh(1,1)=One/GM%PBC%BoxShape(1,1)
+        GM%PBC%InvBoxSh(2,1)=Zero
+        GM%PBC%InvBoxSh(3,1)=Zero
 !
-        GM%InvBoxSh%D(1,2)=-GM%BoxShape%D(1,2)/(GM%BoxShape%D(1,1)*GM%BoxShape%D(2,2))
-        GM%InvBoxSh%D(2,2)=One/GM%BoxShape%D(2,2)
-        GM%InvBoxSh%D(3,2)=Zero
+        GM%PBC%InvBoxSh(1,2)=-GM%PBC%BoxShape(1,2)/(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(2,2))
+        GM%PBC%InvBoxSh(2,2)=One/GM%PBC%BoxShape(2,2)
+        GM%PBC%InvBoxSh(3,2)=Zero
 ! 
-        GM%InvBoxSh%D(1,3)=(GM%BoxShape%D(1,2)*GM%BoxShape%D(2,3)  &
-                          - GM%BoxShape%D(2,2)*GM%BoxShape%D(1,3)) &
-                          /(GM%BoxShape%D(1,1)*GM%BoxShape%D(2,2)*GM%BoxShape%D(3,3))
-        GM%InvBoxSh%D(2,3)=-GM%BoxShape%D(2,3)/(GM%BoxShape%D(2,2)*GM%BoxShape%D(3,3))
-        GM%InvBoxSh%D(3,3)=One/GM%BoxShape%D(3,3)
+        GM%PBC%InvBoxSh(1,3)=(GM%PBC%BoxShape(1,2)*GM%PBC%BoxShape(2,3)  &
+                            - GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(1,3)) &
+                            /(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
+        GM%PBC%InvBoxSh(2,3)=-GM%PBC%BoxShape(2,3)/(GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
+        GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
 !
       END SUBROUTINE ParsePeriodic_MONDO
+!===================================================================================
 !
-!
+!===================================================================================
       SUBROUTINE ParsePeriodic_MSI(Ctrl,GM)
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
         TYPE(CRDS)                      :: GM
@@ -1207,23 +1174,23 @@ MODULE ParseInput
 !
         DO 
            READ(Inp,DEFAULT_CHR_FMT,END=1) Line
-           IF(INDEX(Line,END_PERIODIC) == 0)THEN
+           IF(INDEX(Line,END_PERIODIC)==0)THEN
               CALL LineToGeom(Line,At,Vec)
               IF(At==TRAN_VEC) THEN
                  NTvec = NTvec + 1
-                 GM%TransVec%D(:)=Vec(:)
+                 GM%PBC%TransVec(1:3)  =Vec(1:3)
               ENDIF
               IF(At==ALAT_VEC) THEN
                  NLvec = NLvec+1
-                 GM%BoxShape%D(:,1)=Vec(:)
+                 GM%PBC%BoxShape(1:3,1)=Vec(1:3)
               ENDIF
               IF(At==BLAT_VEC) THEN
                  NLvec = NLvec+1
-                 GM%BoxShape%D(:,2)=Vec(:)
+                 GM%PBC%BoxShape(1:3,2)=Vec(1:3)
               ENDIF
               IF(At==CLAT_VEC) THEN
                  NLvec = NLvec+1
-                 GM%BoxShape%D(:,3)=Vec(:)
+                 GM%PBC%BoxShape(1:3,3)=Vec(1:3)
               ENDIF
            ELSE
               EXIT
@@ -1238,68 +1205,76 @@ MODULE ParseInput
 !===================================================================================
 !
 !===================================================================================
-      SUBROUTINE GetLatAng(GM,NLvec,NTvec,Dimen)
+      SUBROUTINE GetLatAng(GM,NLvec,NTvec)
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,Dimen,I,J
         CHARACTER(LEN=2)                :: At
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
         REAL(DOUBLE),PARAMETER          :: DegToRad =  1.745329251994329576923D-2
-        REAL(DOUBLE),DIMENSION(3)       :: Vec,Ang
+        REAL(DOUBLE),DIMENSION(6)       :: Vec
         REAL(DOUBLE)                    :: AngAB,AngAC,AngBC,Error
 !
         DO 
            READ(Inp,DEFAULT_CHR_FMT,END=1) Line
-           IF(INDEX(Line,END_PERIODIC) == 0)THEN
-              CALL LineToGeom(Line,At,Vec,Ang)
+           IF(INDEX(Line,END_PERIODIC)==0) THEN
+              CALL LineToGeom(Line,At,Vec)
               IF(At==TRAN_VEC) THEN
                  NTvec = NTvec + 1
-                 GM%TransVec%D(:)=Vec(:)
-              ELSEIF(At=='d1') THEN
-                 NLvec = 1
-                 IF(GM%AutoW(1)) THEN
-                    GM%BoxShape%D(1,1)=Vec(1)            
-                 ELSEIF(GM%AutoW(2)) THEN
-                    GM%BoxShape%D(2,2)=Vec(1)
-                 ELSEIF(GM%AutoW(3)) THEN                             
-                    GM%BoxShape%D(3,3)=Vec(1)
-                 ENDIF
-              ELSEIF(At=='d2') THEN                 
-                 NLvec = 2
-                 IF(GM%AutoW(1) .AND. GM%AutoW(2)) THEN
-                    GM%BoxShape%D(1,1)=Vec(1)
-                    GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(3))
-                    GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
-                 ELSEIF(GM%AutoW(1) .AND. GM%AutoW(3)) THEN
-                    GM%BoxShape%D(1,1)=Vec(1)
-                    GM%BoxShape%D(1,3)=Vec(2)*COS(DegToRad*Vec(3))
-                    GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
-                 ELSEIF(GM%AutoW(2) .AND. GM%AutoW(3)) THEN
-                    GM%BoxShape%D(2,2)=Vec(1)
-                    GM%BoxShape%D(2,3)=Vec(2)*COS(DegToRad*Vec(3))
-                    GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
-                 ENDIF
-              ELSEIF(At=='d3') THEN
-                 NLvec = 3
-                 GM%BoxShape%D(1,1)=Vec(1)
-!
-                 GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Ang(3))
-                 GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Ang(3))
-!
-                 GM%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Ang(2))
-                 GM%BoxShape%D(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Ang(1)) &
-                                    -GM%BoxShape%D(1,2)*GM%BoxShape%D(1,3))/ GM%BoxShape%D(2,2)
-                 GM%BoxShape%D(3,3)=SQRT(Vec(3)**2-GM%BoxShape%D(1,3)**2-GM%BoxShape%D(2,3)**2)
-!
-                 AngAB = ACOS(GM%BoxShape%D(1,1)*GM%BoxShape%D(1,2)/(Vec(1)*Vec(2)))/DegToRad
-                 AngAC = ACOS(GM%BoxShape%D(1,1)*GM%BoxShape%D(1,3)/(Vec(1)*Vec(3)))/DegToRad
-                 AngBC = GM%BoxShape%D(1,2)*GM%BoxShape%D(1,3)+GM%BoxShape%D(2,2)*GM%BoxShape%D(2,3)
-                 AngBC = ACOS(AngBC/(Vec(2)*Vec(3)))/DegToRad
-                 Error = ABS(AngAB-Ang(3))+ABS(AngAC-Ang(2))+ ABS(AngBC-Ang(1))
-                 IF(Error .GT. 1.D-6 ) THEN
-                    CALL MondoHalt(PRSE_ERROR,'Angles Are Inccorect')
-                 ENDIF
+                 GM%PBC%TransVec(1:3)=Vec(1:3)
               ELSE
-                 CALL MondoHalt(PRSE_ERROR,'Need to Supply The lattice vectors')
+                 J = 0
+                 DO I=1,6
+                    IF(Vec(I) == Zero) EXIT
+                    J = J + 1
+                 ENDDO
+                 IF(J==1) THEN
+                    NLvec = 1
+                    IF(GM%PBC%AutoW(1)) THEN
+                       GM%PBC%BoxShape(1,1)=Vec(1)            
+                    ELSEIF(GM%PBC%AutoW(2)) THEN
+                       GM%PBC%BoxShape(2,2)=Vec(1)
+                    ELSEIF(GM%PBC%AutoW(3)) THEN                             
+                       GM%PBC%BoxShape(3,3)=Vec(1)
+                    ENDIF
+                 ELSEIF(J==3) THEN                 
+                    NLvec = 2
+                    IF(GM%PBC%AutoW(1) .AND. GM%PBC%AutoW(2)) THEN
+                       GM%PBC%BoxShape(1,1)=Vec(1)
+                       GM%PBC%BoxShape(1,2)=Vec(2)*COS(DegToRad*Vec(3))
+                       GM%PBC%BoxShape(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
+                    ELSEIF(GM%PBC%AutoW(1) .AND. GM%PBC%AutoW(3)) THEN
+                       GM%PBC%BoxShape(1,1)=Vec(1)
+                       GM%PBC%BoxShape(1,3)=Vec(2)*COS(DegToRad*Vec(3))
+                       GM%PBC%BoxShape(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                    ELSEIF(GM%PBC%AutoW(2) .AND. GM%PBC%AutoW(3)) THEN
+                       GM%PBC%BoxShape(2,2)=Vec(1)
+                       GM%PBC%BoxShape(2,3)=Vec(2)*COS(DegToRad*Vec(3))
+                       GM%PBC%BoxShape(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                    ENDIF
+                 ELSEIF(J==6) THEN
+                    NLvec = 3
+                    GM%PBC%BoxShape(1,1)=Vec(1)
+!
+                    GM%PBC%BoxShape(1,2)=Vec(2)*COS(DegToRad*Vec(6))
+                    GM%PBC%BoxShape(2,2)=Vec(2)*SIN(DegToRad*Vec(6))
+!
+                    GM%PBC%BoxShape(1,3)=Vec(3)*COS(DegToRad*Vec(5))
+                    GM%PBC%BoxShape(2,3)=(Vec(2)*Vec(3)*COS(DegToRad*Vec(4)) &
+                                       -GM%PBC%BoxShape(1,2)*GM%PBC%BoxShape(1,3))/ GM%PBC%BoxShape(2,2)
+                    GM%PBC%BoxShape(3,3)=SQRT(Vec(3)**2-GM%PBC%BoxShape(1,3)**2-GM%PBC%BoxShape(2,3)**2)
+!
+                    AngAB = ACOS(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,2)/(Vec(1)*Vec(2)))/DegToRad
+                    AngAC = ACOS(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,3)/(Vec(1)*Vec(3)))/DegToRad
+                    AngBC = GM%PBC%BoxShape(1,2)*GM%PBC%BoxShape(1,3)+GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(2,3)
+                    AngBC = ACOS(AngBC/(Vec(2)*Vec(3)))/DegToRad
+                    Error = ABS(AngAB-Vec(6))+ABS(AngAC-Vec(5))+ ABS(AngBC-Vec(4))
+!
+                    IF(Error .GT. 1.D-6 ) THEN
+                       CALL MondoHalt(PRSE_ERROR,'Angles Are Inccorect')
+                    ENDIF
+                 ELSE
+                    CALL MondoHalt(PRSE_ERROR,'Number of Magnitudes and Angles supplied is incorrect')
+                 ENDIF
               ENDIF
            ELSE
               EXIT
@@ -1308,7 +1283,7 @@ MODULE ParseInput
 !
         DO I=1,3
            DO J=1,3
-              IF(ABS(GM%BoxShape%D(I,J)).LT. 1.D-12) GM%BoxShape%D(I,J)=Zero
+              IF(ABS(GM%PBC%BoxShape(I,J)).LT. 1.D-12) GM%PBC%BoxShape(I,J)=Zero
            ENDDO
         ENDDO
 !
@@ -1353,28 +1328,18 @@ MODULE ParseInput
 !===================================================================================
       SUBROUTINE  CalTransVec(GM)
         TYPE(CRDS)                 :: GM
-        REAL(DOUBLE),DIMENSION(3)  :: CMVec,CBVec
+        REAL(DOUBLE),DIMENSION(3)  :: CMVec
         INTEGER                    :: I
 !
         CMVec=Zero
-        CBVec=Zero
-        IF(GM%InAtomCrd) THEN
-           DO I=1,GM%NAtms
-              CMVec(:) = CMVec(:)+GM%Carts%D(:,I)
-           ENDDO
-           CBVec(:)         = Half*(GM%BoxShape%D(:,1)+GM%BoxShape%D(:,2)+GM%BoxShape%D(:,3))
-           CMVec(:)         = CMVec(:)/DBLE(GM%NAtms)
-           GM%TransVec%D(:) = CBVec(:)-CMVec(:)
-        ELSE
-           DO I=1,GM%NAtms
-              CMVec(:) = CMVec(:)+GM%BoxCarts%D(:,I)
-           ENDDO
-           CBVec(:)         = Half
-           CMVec(:)         = CMVec(:)/DBLE(GM%NAtms)
-           GM%TransVec%D(:) = FracToAtom(GM, (CBVec(:)-CMVec(:)) )
-        ENDIF
+        DO I=1,GM%NAtms
+           CMVec(:) = CMVec(:)+GM%BoxCarts%D(:,I)
+        ENDDO
+        CMVec(:)           = Half-CMVec(:)/DBLE(GM%NAtms)
+        GM%PBC%TransVec(:) = FracToAtom(GM,CMVec(:))
+!
         DO I=1,3
-           IF(.NOT. GM%AutoW(I))  GM%TransVec%D(I) = Zero
+           IF(.NOT. GM%PBC%AutoW(I))  GM%PBC%TransVec(I) = Zero
         ENDDO
 !
       END SUBROUTINE CalTransVec
@@ -1385,7 +1350,7 @@ MODULE ParseInput
         TYPE(CRDS)                 :: GM
         REAL(DOUBLE),DIMENSION(3)  :: ATvec,FTvec
 !
-        ATvec(:) = GM%TransVec%D(:)
+        ATvec(:) = GM%PBC%TransVec(:)
         FTvec(:) = AtomToFrac(GM,ATvec(:))
 !
 !       Tranaslate The Atoms
@@ -1402,7 +1367,7 @@ MODULE ParseInput
       SUBROUTINE  WrapAtoms(GM)
         TYPE(CRDS)     :: GM
 !
-        IF(GM%AtomW) THEN
+        IF(GM%PBC%AtomW) THEN
            DO I=1,GM%NAtms
               CALL FracCyclic(GM,GM%BoxCarts%D(:,I))
               CALL AtomCyclic(GM,GM%Carts%D(:,I))
