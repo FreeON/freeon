@@ -32,6 +32,7 @@ PROGRAM SForce
   INTEGER             :: Q,R,AtA,AtB,NN,iSwitch,IStrtP,IStopP,LP,JP,MB,MA,A1,A2
   TYPE(HGRho)         :: Rho
   TYPE(DBL_VECT)      :: SFrc
+  REAL(DOUBLE)        :: SFrcChk
   CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
 !---------------------------------------------- 
 ! Start up macro
@@ -52,8 +53,6 @@ PROGRAM SForce
   CALL Get(P,TrixFile('D',Args,0))
 !
   CALL Get(F,TrixFile('F',Args,0))
-!  CALL Get(F,TrixFile('T',Args))
-  PrintFlags%Fmt=DEBUG_DOUBLES
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
   CALL Filter(P,F)            ! P=Filter[P.F.P]      

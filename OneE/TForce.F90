@@ -31,6 +31,7 @@ PROGRAM TForce
   INTEGER             :: Q,R,AtA,AtB,NN,iSwitch,IStrtP,IStopP,LP,JP,MB,MA,A1,A2
   TYPE(HGRho)         :: Rho
   TYPE(DBL_VECT)      :: TFrc,Frc
+  REAL(DOUBLE)        :: TFrcChk
   CHARACTER(LEN=6),PARAMETER :: Prog='TForce'
 !------------------------------------------------------------------------------------- 
 ! Start up macro
