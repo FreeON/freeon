@@ -29,7 +29,7 @@
 \begin{document}
 
 \title{Geometry Optimization of Crystals by the Quasi-\\
-       Independent Curvilinear Coordinate Approximation\footnotemark[1]}
+       Independent Curvilinear Coordinate Approximation}
 
 \author{K\'aroly N\'emeth\footnotemark[1]}
 \author{Matt Challacombe}
@@ -434,6 +434,83 @@ $A'^{(000)}$, the generalized inverse of $B'^{(000)}$, as
 the effective $A$ matrix of the crystal.
 
 \section{Implementation}
+
+\subsection{Data preparation}
+During the process of geometry optimization atomic positions
+of the central cell may be folded back to the opposite side of the 
+cell, for varios reasons, e.g. because the folded coordinates 
+are more convenient for energy and gradient evaluation. The folded
+atoms will be translated by a lattice vector.
+In geometry optimization this folding may cause a problem. 
+Say, we have a 
+bond with atoms $A_{1}$ and $A_{2}$, and the cell indices of the
+atoms are all zero. The optimizer supposes that this bond existed
+during the recent history of the optimization process with exactly
+the same lattice indices. If folding happens, in the history
+of the length of this bond a jump may occure: the length of the
+bond jumps by about the length of a lattice vector. 
+One way to avoid such artificial jumps is to keep track
+of the history of folding. Another way, which we prefer, is
+that Cartesian coordinates of past geometries, after retrieved from 
+disk, are compared to a reference geometry (e.g. with the     
+very first structure of the optimization process). If the
+distance between an atom in the reference geometry and its counterpart
+in a retrieved structure is bigger than a lattice vector 
+(taken again from the retrieved data set), the retrieved
+atomic position will be unfolded, by translating it back 
+to the position closest to the reference one.
+Then, internal coordinates of the crystal will be identified on the
+basis of the unfolded structures, and bonding schemes can easily
+be compared and merged if necessary.
+In our first paper about the QUICCA optimization algorithm 
+\cite{KNemeth04}, we suggested the merging of primary
+bonding schemes that come from the retrieved geometries to achieve
+a greater stability for larger molecules. Our recent experience tells
+us that this merging may not be necessary for achieving
+the same stability and efficiency as what was described in our
+previous paper \cite{KNemeth04}, though it may be beneficial
+for very large molecules. In the present paper,
+the internal coordinates used to construct the displaced geometries
+were determined solely on the basis of the Cartesian coordinates
+provided by the most recent optimization step and the unfolding 
+process.
+
+\subsection{Recognition of the internal coordinates}
+The Cartesian central cell is replicated so, that all $27$ 
+cells with lattice indices between $-1$ and $+1$ are generated.
+Even though a smaller replica of 8 cells, with lattice indices
+between $0$ and $1$ contains all necessary local internal coordinates,
+we prefer to start from the bigger cell, to avoid fragmentation
+of molecules at the boundaries of the central cell.
+Then, all internal coordinates are recognized in the supercell
+by means of the recognition algorithm described in our previous paper
+\cite{KNemeth04}, just as for isolated molecules.
+Then comes the selection of internal coordinates.
+First, all internal coordinates are discarded that do not touch 
+the central cell, i.e. do not contain at least one atom with
+cell indices $(000)$.
+Second, all remaining internal coordinates that have 
+negative lattice indices
+are translated by the smallest possible translation so that all 
+negative lattice indices become zero. If a translated 
+internal coordinate
+still contains an atom with cell indices $(000)$
+the coordinate will be discarded, as it should already have an existing
+replica among the non-translated internal ones.
+The internal coordinates that have negative
+lattice indices and survive the second selection may still
+contain translationally equivalent entities. A third selection
+filters the translationally unique ones out, by discarding
+the internal coordinates that are translated 
+by other than a $(001)$ translation vector.
+
+This simple selection scheme allowes for the fast and linear scaling 
+recognition of the translationally unique internal coordinates
+of the crystal that form the internal coordinate central 
+cell $\phi^{(000)}$.
+
+
+
 \bibliography{../../Bib/mondo_new}
 \end{document}
 
