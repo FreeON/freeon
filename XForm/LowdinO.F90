@@ -45,7 +45,7 @@ PROGRAM LowdinO
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
   REAL(DOUBLE)                   :: Chk
 !
-  REAL(DOUBLE)                   :: SUM
+  REAL(DOUBLE)                   :: SUM,Error
 !--------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   CALL New(Values,NBasF)
@@ -83,31 +83,69 @@ PROGRAM LowdinO
 #endif
 !--------------------------------------------------------------------
 !
+  CALL New(Tmp1,(/NBasF,NBasF/))  
   CALL New(Tmp2,(/NBasF,NBasF/))
-  CALL New(Tmp1,(/NBasF,NBasF/))
 !--------------------------------------------------------------------
+!
 !
   Tmp1%D=Zero
   DO I=1,NBasF
      Tmp1%D(I,I)=One/SQRT(Values%D(I))
   ENDDO 
+  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
+             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
+  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
+             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
+!--------------------------------------------------------------------
 !
-!**************************
 !
 !!$  DO I=1,NBasF
 !!$     DO J=1,NBasF
 !!$        SUM = Zero
 !!$        DO K=1,NBasF
-!!$           SUM = SUM + Vectors%D(I,K)*Vectors%D(J,K)/SQRT(Values%D(K))
+!!$           IF(ABS(Values%D(K)) .GT. 1.D-10) THEN
+!!$              SUM = SUM + Vectors%D(I,K)*Vectors%D(J,K)/SQRT(Values%D(K))
+!!$           ENDIF
 !!$        ENDDO
 !!$        Tmp1%D(I,J) = SUM
 !!$     ENDDO
 !!$  ENDDO
+#ifdef DEBUG_Lowden0
 !
-  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
-             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
-  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
-             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
+! Test for Inverse
+!    
+  CALL Get(S,TrixFile('S',Args))
+  CALL SetEq(Vectors,S)
+  CALL Delete(S)
+!
+  DO I=1,NBasF
+     DO J=1,NBasF
+        SUM = Zero
+        DO K=1,NBasF
+           SUM = SUM + Tmp1%D(I,K)*Tmp1%D(K,J)
+        ENDDO
+        Tmp2%D(I,J) = SUM
+     ENDDO
+  ENDDO
+!           
+  Error = Zero
+  DO I=1,NBasF
+     DO J=1,NBasF
+        SUM = Zero
+        DO K=1,NBasF
+           SUM = SUM + Tmp2%D(I,K)*Vectors%D(K,J)
+        ENDDO
+        IF(I==J) THEN
+           Error = Error + ABS((One-SUM))
+        ELSE
+           Error = Error + ABS(SUM)
+        ENDIF
+     ENDDO
+  ENDDO
+  WRITE(*,*) 'Lowest  Eigenvalue = ',Values%D(1)
+  WRITE(*,*) 'Highest Eigenvalue = ',Values%D(NBasF)
+  WRITE(*,*) 'Error in Inverse   = ',Error
+#endif
 !--------------------------------------------------------------------
 !
   CALL Delete(Values)
