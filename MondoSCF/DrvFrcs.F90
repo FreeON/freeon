@@ -102,7 +102,7 @@ MODULE DrvFrcs
        CALL Get(GM,CurGeom)
        CALL Get(GM%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
        GM%Confg=CGeo
-       CALL PPrint(GM,GeoFile,Geo,'XYZ')
+       CALL PPrint(GM,GeoFile,Geo,'PDB')
        CALL Delete(GM)
        CALL CloseHDF()
 !      Evaluate starting forces
@@ -238,7 +238,7 @@ MODULE DrvFrcs
             CALL Get(GM,CurGeom)
             GM%Confg=CGeo
             GM%ETotal=E1
-            CALL PPrint(GM,GeoFile,Geo,'XYZ')
+            CALL PPrint(GM,GeoFile,Geo,'PDB')
          ENDIF
          CALL CloseHDF()
       END FUNCTION KeepStep
