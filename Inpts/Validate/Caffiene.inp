@@ -11,8 +11,8 @@ Multiplicity=1
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-3G)
-ModelChem=(BLYPxc)
-Accuracy =(Tight)
+ModelChem=(HF)
+Accuracy =(Good)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms)
 <EndOptions>
