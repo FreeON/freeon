@@ -21,24 +21,25 @@ PROGRAM MakeRho
 #endif
   IMPLICIT NONE
 #ifdef PARALLEL
-  TYPE(DBCSR)         :: Dmat
+  TYPE(DBCSR)               :: Dmat
 #else
-  TYPE(BCSR)          :: Dmat
+  TYPE(BCSR)                :: Dmat
 #endif
 #ifdef PERIODIC 
-  INTEGER             :: NC
-  REAL(DOUBLE)        :: Bx,By,Bz
+  INTEGER                   :: NC
+  REAL(DOUBLE),DIMENSION(3) :: B
 #endif
-  TYPE(AtomPair)      :: Pair
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(DBL_RNK4)      :: MD
-  TYPE(ARGMT)         :: Args
-  TYPE(HGRho)         :: Rho,Rho2
-  INTEGER             :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
-  INTEGER             :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
-  LOGICAL             :: First
-  REAL(DOUBLE)        :: DistThresh,RSumE,RSumN
+  TYPE(AtomPair)            :: Pair
+  TYPE(BSET)                :: BS
+  TYPE(CRDS)                :: GM
+  TYPE(DBL_RNK4)            :: MD
+  TYPE(ARGMT)               :: Args
+  TYPE(HGRho)               :: Rho,Rho2
+  TYPE(CMPoles)             :: RhoPoles
+  INTEGER                   :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
+  INTEGER                   :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
+  LOGICAL                   :: First
+  REAL(DOUBLE)              :: DistThresh,RSumE,RSumN
 !
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
@@ -77,10 +78,11 @@ PROGRAM MakeRho
 ! Allocations and precalculations
   CALL NewBraBlok(BS)  
   CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
-!
+  CALL New(RhoPoles)
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 !---------------------------------------------------
 ! Main loops: First pass calculates the size.
@@ -110,16 +112,12 @@ PROGRAM MakeRho
            AtB = Dmat%ColPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 #ifdef PERIODIC                 
-              Bx = Pair%B(1)
-              By = Pair%B(2)           
-              Bz = Pair%B(3)
-              DO NC = 1,CS%NCells
-                 Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-                 Pair%B(2) = By+CS%CellCarts%D(2,NC)
-                 Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+              B = Pair%B
+              DO NC = 1,CS_OUT%NCells
+                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
                  Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                      + (Pair%A(2)-Pair%B(2))**2 &
-                      + (Pair%A(3)-Pair%B(3))**2
+                           + (Pair%A(2)-Pair%B(2))**2 &
+                           + (Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
                     CALL PrimCount(BS,Pair,Rho)
                  ENDIF
@@ -153,13 +151,9 @@ PROGRAM MakeRho
            R   = Dmat%BlkPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
 #ifdef PERIODIC                 
-              Bx = Pair%B(1)
-              By = Pair%B(2)           
-              Bz = Pair%B(3)
-              DO NC = 1,CS%NCells
-                 Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-                 Pair%B(2) = By+CS%CellCarts%D(2,NC)
-                 Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+              B = Pair%B
+              DO NC = 1,CS_OUT%NCells
+                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
                  Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                            + (Pair%A(2)-Pair%B(2))**2 &
                            + (Pair%A(3)-Pair%B(3))**2
@@ -187,20 +181,30 @@ PROGRAM MakeRho
 !  CALL Fold_Rho(GM,Rho)
 #endif
 !------------------------------------------------------------
-!  Remove distribution which do not contibute significantly to the density
+!  Remove distribution which do not contibute significantly 
+!  to the density
 !
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
+!------------------------------------------------------------
+! Halt if we lost to many electrons
+!
   CALL Integrate_HGRho(Rho2,RSumE,RSumN)
-  IF(ABS(RSumE+RSumN)>0.1) &
+  IF(ABS(RSumE+RSumN)>1.D-2) &
        CALL Halt(' Density hosed! Rho_e = '//TRIM(DblToMedmChar(Two*RSumE)) &
                               //',Rho_n = '//TRIM(DblToMedmChar(Two*RSumN)))
 !------------------------------------------------------------
-! Put Rho to disk
+!  Calculate the DiPole and QuadruPole moments of Rho
+!
+  CALL CalRhoPoles(RhoPoles,GM,RHo2)
+!------------------------------------------------------------
+! Put Rho and RhoPoles to disk
 ! 
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Put_HGRho(Rho2,'Rho',Args,1)
-  ELSE
+     CALL Put(RhoPoles,'RhoPoles',Args,1)
+  ELSE 
      CALL Put_HGRho(Rho2,'Rho',Args,0)
+     CALL Put(RhoPoles,'RhoPoles',Args,0)
   ENDIF
 !------------------------------------------------------------
 ! Printing
