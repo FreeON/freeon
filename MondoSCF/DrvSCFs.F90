@@ -172,7 +172,7 @@ MODULE DrvSCFs
       CALL Invoke('FBuild',CtrlVect,MPIRun_O=.TRUE.)
       IF(DoDIIS) &
       CALL Invoke('DIIS',CtrlVect,MPIRun_O=.TRUE.)
-      IF(CtrlVect(2)=='BasisSetSwitch') &  
+           IF(CtrlVect(2)=='BasisSetSwitch') &  
          CALL CleanScratch(Ctrl,'CleanLastBase')
     END SUBROUTINE FockBuild
 !===============================================================================
@@ -710,12 +710,14 @@ MODULE DrvSCFs
       CALL Put(GrdTot,'GradE',Tag_O=CurGeom)
 
 ! print forces in KJ/mol/A or H/Bohr
-
-      CALL Print_Force(GMLoc,GrdTot,'GrdTot in au ')
-      GrdTot%D(:)=GrdTot%D(:)/KJPerMolPerAngstToHPerBohr
-      CALL Print_Force(GMLoc,GrdTot,'GrdTot in KJ/mol/A')
-      GrdTot%D(:)=GrdTot%D(:)*KJPerMolPerAngstToHPerBohr
-
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        CALL Print_Force(GMLoc,GrdTot,'GrdTot in au ')
+        GrdTot%D(:)=GrdTot%D(:)/KJPerMolPerAngstToHPerBohr
+        CALL Print_Force(GMLoc,GrdTot,'GrdTot in KJ/mol/A')
+        GrdTot%D(:)=GrdTot%D(:)*KJPerMolPerAngstToHPerBohr
+      ENDIF
+!
       CALL Delete(GMLoc)
       CALL Delete(GrdTot)
       CALL Delete(GrdMM)

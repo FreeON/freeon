@@ -392,6 +392,37 @@ MODULE GeomOpt
 !
 !-------------------------------------------------------------
 !
+       SUBROUTINE CALC_SinglePoint(Ctrl)
+!
+! Energy and Force calculation, at current geometry and basis set,
+! as defined in Ctrl vector.
+!
+       IMPLICIT NONE
+       TYPE(SCFControls)     :: Ctrl
+       INTEGER :: I,ISet,IGeo,OldGrad
+!
+#ifdef MMech
+       IF(HasQM()) THEN
+!!! temporary; may overwrite MM energy terms calcd at prev geoms 
+         IF(HasMM()) CALL MM_ENERG(Ctrl) 
+         CALL OneSCF(Ctrl)
+         CALL Forces(Ctrl)
+       ENDIF
+#else
+         CALL OneSCF(Ctrl)
+         CALL Forces(Ctrl)
+#endif
+!
+#ifdef MMech
+       IF(MMOnly()) Then
+         CALL MM_ENERG(Ctrl)
+       ENDIF
+#endif
+!
+       END SUBROUTINE CALC_SinglePoint 
+!
+!-------------------------------------------------------------
+!
        SUBROUTINE CALC_ForceOnly(Ctrl)
 !
 ! Force only calculation, at current geometry and basis set,
@@ -609,7 +640,7 @@ MODULE GeomOpt
          IStep=FirstGeom-1
 300    CONTINUE
          IStep=IStep+1
-         Ctrl%Previous(3)=IStep-1
+!        Ctrl%Previous(3)=IStep-1
          Ctrl%Current(3)=IStep
          CALL SetGlobalCtrlIndecies(Ctrl)           
          ActStep=IStep-FirstGeom+1
@@ -633,27 +664,27 @@ MODULE GeomOpt
        CALL New(IntOld,NIntC)
        IntOld%D=IntCs%Value
 !
-! Print current geometry in XMol format for debugging
+! Compute Energy at current geometry
 !
+       CALL CALC_SinglePoint(Ctrl)
+!      CALL CALC_EnergyOnly(Ctrl)
+!
+! Print current geometry for debugging
+!
+       GMLoc%Confg=CGeo
+       CALL Get(GMLoc%ETotal,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+       CALL PPrint(GMLoc,GeoFile,Geo,'PDB')
        IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
          CALL PrtXYZ(GMLoc%Carts%D,Title_O='geometry at step= ' &
              //TRIM(IntToChar(IStep)),PrtU_O=11,Convert_O=.TRUE.)
-!        CALL PrtIntCoords(IntCs,IntCs%Value, &
-!                   'Internals at step '//TRIM(IntToChar(IStep)))
+         CALL INTCValue(IntCs,GMLoc%Carts%D)
+         CALL PrtIntCoords(IntCs, &
+           IntCs%Value,'Internals at step #'//TRIM(IntToChar(ActStep)))
        ENDIF
-!
-! Compute Energy at current geometry
-!
-       CALL CALC_EnergyOnly(Ctrl)
-!
-! If energy decreased, old GDIIS was OK, thus save iterative subspace,
-! otherwise restore old subspace and do line search!
-!
-!!!    CALL VerifyStep(Ctrl,GMLoc,IntCs)
 !
 ! Compute Force at current geometry
 !
-       CALL CALC_ForceOnly(Ctrl)
+!      CALL CALC_ForceOnly(Ctrl)
 !
 ! Put current cartesian coords and gradients as a reference for GDIIS!
 !
@@ -724,6 +755,9 @@ MODULE GeomOpt
         TYPE(CRDS)                     :: GMLoc
         TYPE(DBL_VECT)                 :: Displ
         REAL(DOUBLE)                   :: MaxGrad,RMSGrad
+        INTEGER                        :: IMaxGradNoConstr
+        REAL(DOUBLE)                   :: MaxGradNoConstr
+        REAL(DOUBLE)                   :: RMSGradNoConstr,Sum
         TYPE(DBL_VECT)                 :: CartGrad,IntGrad,Grad
         TYPE(INTC)                     :: IntCs
         INTEGER                        :: I,J,NDim,IMaxGrad
@@ -754,7 +788,9 @@ MODULE GeomOpt
         CALL New(CartGrad,NCart)
         CALL Get(CartGrad,'GradE',Tag_O=TRIM(TagStep)) 
         IF(PRESENT(DoSave_O)) THEN
-          IF(DoSave_O) CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+          IF(DoSave_O) THEN
+            CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
+          ENDIF
         ELSE
           CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
         ENDIF
@@ -784,13 +820,32 @@ MODULE GeomOpt
         ENDDO
         RMSGrad=SQRT(DOT_PRODUCT(Grad%D,Grad%D)/DBLE(NDim))
 !
+! Check for gradient-convergence in the presence of constraints
+!
+        MaxGradNoConstr=Zero
+        RMSGradNoConstr=Zero
+        J=0
+        DO I=1,NIntC
+          IF(.NOT.IntCs%Constraint(I)) THEN
+            J=J+1
+            Sum=Grad%D(I)
+            IF(MaxGradNoConstr<ABS(Sum)) THEN
+              IMaxGradNoConstr=I
+              MaxGradNoConstr=Sum
+            ENDIF
+            RMSGradNoConstr=RMSGradNoConstr+Sum*Sum
+          ENDIF
+        ENDDO
+          IF(J/=0) RMSGradNoConstr=SQRT(RMSGradNoConstr)/DBLE(J)
+!
 ! Use Hessian matrix to calculate step
 !
         SELECT CASE(Ctrl%Grad)
         CASE(GRAD_STPDESC_OPT) 
-          CALL SteepestDesc(Ctrl,Grad,Displ)
+          CALL SteepestDesc(Ctrl,Grad,Displ,NCart)
         CASE(GRAD_DIAGHESS_OPT) 
-          CALL DiagonalHess(Ctrl,Grad,Displ,IntCs)
+          CALL DiagonalHess(Ctrl,Grad,Displ,IntCs,NCart)
+!         CALL DiagHessRFO(Ctrl,Grad,Displ,IntCs,NCart)
         END SELECT
 !
 ! Set constraints on the displacements
@@ -804,8 +859,11 @@ MODULE GeomOpt
         CALL Delete(Grad)
 !
         GeOpCtrl%MaxGrad=MaxGrad
+        GeOpCtrl%MaxGradNoConstr=MaxGradNoConstr
         GeOpCtrl%IMaxGrad=IMaxGrad
         GeOpCtrl%RMSGrad=RMSGrad
+        GeOpCtrl%RMSGradNoConstr=RMSGradNoConstr
+        GeOpCtrl%IMaxGradNoConstr=IMaxGradNoConstr
 !
       END SUBROUTINE SRStep
 !-------------------------------------------------------
@@ -853,12 +911,12 @@ MODULE GeomOpt
           CALL PutSRStep(XYZ_O=GMLoc%Carts%D,Tag_O='SR')
         ENDIF
 !
-! Now call GDIIS
-! and construct GDIIS step from SR step and previous displacements
-! May work in either Cartesian or internal displacemets space.
-! Subroutine modifies Cartesian Coordinates in GMLoc, now.
+! GDIIS optimization acceleration
 !
-        IF(CGeo>InitGDIIS.AND.GeopCtrl%GDIISOn) CALL GDIIS(GMLoc)
+        IF((.NOT.GeOpCtrl%NoGDIIS).AND.&
+          (CGeo>InitGDIIS.AND.GeopCtrl%GDIISOn)) THEN
+            CALL GDIIS2(GMLoc)
+        ENDIF
 !
       END SUBROUTINE NewStructure
 !
@@ -899,15 +957,17 @@ MODULE GeomOpt
 !
 !-------------------------------------------------------
 !
-      SUBROUTINE SteepestDesc(Ctrl,Grad,Displ)
+      SUBROUTINE SteepestDesc(Ctrl,Grad,Displ,NCart)
 !
       TYPE(SCFControls) :: Ctrl
       TYPE(DBL_VECT)    :: Grad,Displ 
+      INTEGER           :: NCart
 !
         IF(Ctrl%GeOp%CoordType==CoordType_Cartesian) THEN
           Displ%D=-1.D0*Grad%D !!!! it oscillates with 2.D0
         ELSE IF(Ctrl%GeOp%CoordType==CoordType_PrimInt) THEN
           Displ%D=-2.D0*Grad%D 
+          CALL RedundancyOffFull(Displ%D,NCart)
         ELSE
           Displ%D=-5.D0*Grad%D 
         ENDIF 
@@ -916,12 +976,12 @@ MODULE GeomOpt
 !
 !-------------------------------------------------------
 !
-      SUBROUTINE DiagonalHess(Ctrl,Grad,Displ,IntCs)
+      SUBROUTINE DiagonalHess(Ctrl,Grad,Displ,IntCs,NCart)
 !
       TYPE(SCFControls) :: Ctrl
       TYPE(DBL_VECT)    :: Grad,Displ 
       TYPE(INTC)        :: IntCs       
-      INTEGER           :: I,J,NIntC
+      INTEGER           :: I,J,NIntC,NCart
       REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
 !
         NIntC=SIZE(IntCs%Def)
@@ -942,22 +1002,100 @@ MODULE GeomOpt
             HTors=One/GeOpCtrl%TorsHessian
           DO I=1,NIntC
             IF(IntCs%Def(I)(1:4)=='STRE') THEN
-              Displ%D=-HStre*Grad%D 
+              Displ%D(I)=-HStre*Grad%D(I)
             ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
-              Displ%D=-HBend*Grad%D 
+              Displ%D(I)=-HBend*Grad%D(I)
             ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
-              Displ%D=-HLinB*Grad%D 
+              Displ%D(I)=-HLinB*Grad%D(I)
             ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
-              Displ%D=-HOutP*Grad%D 
+              Displ%D(I)=-HOutP*Grad%D(I)
             ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
-              Displ%D=-HTors*Grad%D 
+              Displ%D(I)=-HTors*Grad%D(I)
             ENDIF
           ENDDO
+!project out redundancy
+          CALL RedundancyOffFull(Displ%D,NCart)
         ELSE
           CALL Halt('Only Primitiv Internals are available yet.')
         ENDIF 
 !
       END SUBROUTINE DiagonalHess
+!
+!-------------------------------------------------------
+      SUBROUTINE DiagHessRFO(Ctrl,Grad,Displ,IntCs,NCart)
+!
+      TYPE(SCFControls) :: Ctrl
+      TYPE(DBL_VECT)    :: Grad,Displ
+      TYPE(DBL_RNK2)    :: Hessian
+      TYPE(INTC)        :: IntCs
+      INTEGER           :: I,J,NIntC,NCart,Info
+      REAL(DOUBLE)      :: HStre,HBend,HLinB,HOutP,HTors
+      REAL(DOUBLE)      :: Sum
+!
+        NIntC=SIZE(IntCs%Def)
+        CALL New(Hessian,(/NIntC+1,NIntC+1/))
+        Hessian%D=Zero
+!
+        IF(Ctrl%GeOp%CoordType==CoordType_Cartesian) THEN
+          CALL OpenAscii(OutFile,Out)
+          WRITE(*,*) 'WARNING! DIAGONAL HESSIAN FOR '// &
+                       'CARTESIANS IS JUST STEEPEST DESCENT'
+          WRITE(Out,*) 'WARNING! DIAGONAL HESSIAN FOR '// &
+                       'CARTESIANS IS JUST STEEPEST DESCENT'
+          CLOSE(Out,STATUS='KEEP')      
+          Displ%D=-1.D0*Grad%D !!!! it oscillates with 2.D0
+        ELSE IF(Ctrl%GeOp%CoordType==CoordType_PrimInt) THEN
+            HStre=GeOpCtrl%StreHessian
+            HBend=GeOpCtrl%BendHessian
+            HLinB=GeOpCtrl%LinBHessian
+            HOutP=GeOpCtrl%OutPHessian
+            HTors=GeOpCtrl%TorsHessian
+          DO I=1,NIntC
+            IF(IntCs%Def(I)(1:4)=='STRE') THEN
+              Hessian%D(I,I)=HStre
+            ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
+              Hessian%D(I,I)=HBend
+            ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+              Hessian%D(I,I)=HLinB
+            ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
+              Hessian%D(I,I)=HOutP
+            ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
+              Hessian%D(I,I)=HTors
+            ENDIF
+          ENDDO
+              Hessian%D(1:NIntC,NIntC+1)=Grad%D
+              Hessian%D(NIntC+1,1:NIntC)=Grad%D
+!
+! diagonalize RFO matrix 
+!
+        CALL SetDSYEVWork(NIntC+1)
+!
+        BLKVECT%D=Hessian%D
+        CALL DSYEV('V','U',NIntC+1,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+          BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+        CALL Halt('DSYEV hosed in RotationsOff. INFO='&
+                   //TRIM(IntToChar(INFO)))
+!
+! Choose the eigenvector of the lowest eigenvalue for step,
+! after RFO scaling
+!
+        Sum=One/BLKVECT%D(NIntC+1,1)  
+        Displ%D=BLKVECT%D(:,1)*Sum
+!
+        CALL UnSetDSYEVWork()
+!
+!project out redundancy
+          CALL RedundancyOffFull(Displ%D,NCart)
+        ELSE
+          CALL Halt('Only Primitiv Internals are available yet.')
+        ENDIF 
+!
+! Tidy up
+!
+        CALL Delete(Hessian)
+!
+      END SUBROUTINE DiagHessRFO
 !
 !-------------------------------------------------------
 !
@@ -979,6 +1117,7 @@ MODULE GeomOpt
         INTEGER                   :: I,J,K,L,ActStep     
         INTEGER                   :: NCart,NIntC,NatmsLoc
         REAL(DOUBLE)              :: RMSGrad,MaxGrad
+        REAL(DOUBLE)              :: RMSGradNoConstr,MaxGradNoConstr
         REAL(DOUBLE)              :: Etot,Sum
 !
         INTEGER                   :: NStreGeOp,NBendGeOp,NLinBGeOp
@@ -986,16 +1125,19 @@ MODULE GeomOpt
         INTEGER                   :: MaxStre,MaxBend,MaxLinB
         INTEGER                   :: MaxOutP,MaxTors
 !
-        INTEGER                   :: IMaxGrad
+        INTEGER                   :: IMaxGrad,IMaxGradNoConstr
 !
         NIntC=SIZE(IntCs%Def)
         NatmsLoc=GMLoc%Natms
         NCart=3*NatmsLoc
 !
         RMSGrad=GeOpCtrl%RMSGrad
+        RMSGradNoConstr=GeOpCtrl%RMSGradNoConstr
         MaxGrad=GeOpCtrl%MaxGrad
+        MaxGradNoConstr=GeOpCtrl%MaxGradNoConstr
         ActStep=GeOpCtrl%ActStep
         IMaxGrad=GeOpCtrl%IMaxGrad
+        IMaxGradNoConstr=GeOpCtrl%IMaxGradNoConstr
 !
         CALL Get(NStreGeOp,'NStreGeOp')
         CALL Get(NBendGeOp,'NBendGeOp')
@@ -1060,21 +1202,32 @@ MODULE GeomOpt
         GeOpCtrl%MaxTorsDispl=MaxTorsDispl
         GeOpCtrl%RMSIntDispl=RMSIntDispl
 !
-        GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
-                            MaxGrad<GeOpCtrl%GradCrit
-!       GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
-!                           MaxGrad<GeOpCtrl%GradCrit.AND. &
-!                      MaxStreDispl<GeOpCtrl%StreConvCrit.AND. &
-!                      MaxBendDispl<GeOpCtrl%BendConvCrit.AND. &
-!                      MaxLinBDispl<GeOpCtrl%LinBConvCrit.AND. &
-!                      MaxOutPDispl<GeOpCtrl%OutPConvCrit.AND. &
-!                      MaxTorsDispl<GeOpCtrl%TorsConvCrit
+        IF(GeOpCtrl%NConstr/=0) THEN
+!  constraints
+          GeOpCtrl%GeOpConvgd=(RMSGradNoConstr<GeOpCtrl%GradCrit.AND. &
+                              MaxGradNoConstr<GeOpCtrl%GradCrit).OR. &
+                              MaxStreDispl<GeOpCtrl%StreConvCrit.AND. &
+                              MaxBendDispl<GeOpCtrl%BendConvCrit.AND. &
+                              MaxLinBDispl<GeOpCtrl%LinBConvCrit.AND. &
+                              MaxOutPDispl<GeOpCtrl%OutPConvCrit.AND. &
+                              MaxTorsDispl<GeOpCtrl%TorsConvCrit
+        ELSE
+! no constraints
+          GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
+                              MaxGrad<GeOpCtrl%GradCrit.AND. &
+                              MaxStreDispl<GeOpCtrl%StreConvCrit.AND. &
+                              MaxBendDispl<GeOpCtrl%BendConvCrit.AND. &
+                              MaxLinBDispl<GeOpCtrl%LinBConvCrit.AND. &
+                              MaxOutPDispl<GeOpCtrl%OutPConvCrit.AND. &
+                              MaxTorsDispl<GeOpCtrl%TorsConvCrit
+        ENDIF
 !
 ! Review iterations
 !
         CALL OpenASCII(OutFile,Out)
 !
         WRITE(*,399) ActStep       
+        WRITE(Out,399) ActStep       
         CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
         WRITE(*,401) Etot
         WRITE(Out,401) Etot
@@ -1087,8 +1240,14 @@ MODULE GeomOpt
 !
         WRITE(*,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
         WRITE(*,420) RMSGrad
-        WRITE(Out,410) MaxGrad
+        WRITE(Out,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
         WRITE(Out,420) RMSGrad
+        IF(GeOpCtrl%NConstr/=0) THEN
+          WRITE(*,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
+          WRITE(*,520) RMSGradNoConstr
+          WRITE(Out,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
+          WRITE(Out,520) RMSGradNoConstr
+        ENDIF
 !
         IF(NStreGeOp/=0) THEN
           WRITE(*,430) MaxStreDispl,IntCs%Atoms(MaxStre,1:2)
@@ -1119,14 +1278,16 @@ MODULE GeomOpt
 399 FORMAT('GeOp step= ',I6)
 400 FORMAT(' Total Energy at Current Geometry  = ',F20.8)
 401 FORMAT('Total Energy at Previous Geometry  = ',F20.8)
-410 FORMAT('           ','           Max Grad = ',F12.6,' between atoms ',4I4)
-420 FORMAT('           ','           RMS Grad = ',F12.6)
-430 FORMAT('           ','      Max STRE Displ= ',F12.6,' between atoms ',4I4)
-435 FORMAT('           ','      Max BEND Displ= ',F12.6,' between atoms ',4I4)
-436 FORMAT('           ','      Max LINB Displ= ',F12.6,' between atoms ',4I4)
-437 FORMAT('           ','      Max OUTP Displ= ',F12.6,' between atoms ',4I4)
-438 FORMAT('           ','      Max TORS Displ= ',F12.6,' between atoms ',4I4)
-440 FORMAT('           ','           RMS Displ= ',F12.6,' between atoms ',4I4)
+410 FORMAT('           ','               Max Grad = ',F12.6,' between atoms ',4I4)
+420 FORMAT('           ','               RMS Grad = ',F12.6)
+510 FORMAT('  Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
+520 FORMAT('  RMS Grad on Unconstrained Coords = ',F12.6)
+430 FORMAT('           ','         Max STRE Displ = ',F12.6,' between atoms ',4I4)
+435 FORMAT('           ','         Max BEND Displ = ',F12.6,' between atoms ',4I4)
+436 FORMAT('           ','         Max LINB Displ = ',F12.6,' between atoms ',4I4)
+437 FORMAT('           ','         Max OUTP Displ = ',F12.6,' between atoms ',4I4)
+438 FORMAT('           ','         Max TORS Displ = ',F12.6,' between atoms ',4I4)
+440 FORMAT('           ','              RMS Displ = ',F12.6,' between atoms ',4I4)
 !
       END SUBROUTINE GeOpConv
 !---------------------------------------------------------------
@@ -1162,14 +1323,14 @@ MODULE GeomOpt
 !       GeOpCtrl%OutPHessian   =   0.0025D0 
 !       GeOpCtrl%TorsHessian   =   0.0025D0 
         GeOpCtrl%StreHessian   =   0.50D0   
-        GeOpCtrl%BendHessian   =   0.35D0
-        GeOpCtrl%LinBHessian   =   0.35D0
-        GeOpCtrl%OutPHessian   =   0.25D0 
-        GeOpCtrl%TorsHessian   =   0.25D0 
+        GeOpCtrl%BendHessian   =   0.20D0
+        GeOpCtrl%LinBHessian   =   0.20D0
+        GeOpCtrl%OutPHessian   =   0.05D0 
+        GeOpCtrl%TorsHessian   =   0.05D0 
 !
 ! Number of optimization steps
 !
-        GeOpCtrl%MaxGeOpSteps =   MAX(3*NatmsLoc,500)
+        GeOpCtrl%MaxGeOpSteps =   MAX(3*NatmsLoc,600)
 !
 ! Convergence Criteria
 !
@@ -1182,9 +1343,14 @@ MODULE GeomOpt
 !
 ! Adaptive Reference GDIIS
 !
+        GeOpCtrl%NoGDIIS           =   Ctrl%GeOp%NoGDIIS
+        GeOpCtrl%GDIISMetricOn     =   .FALSE.
+        IF(GeOpCtrl%ActStep==1) THEN
+          GeOpCtrl%GDIISMetric     =   1.D0 
+        ENDIF
         GeOpCtrl%GDIISInit         =   2
         GeOpCtrl%GDIISMaxMem       =   500
-        GeOpCtrl%GDIISBandWidth    =   2.2D0
+        GeOpCtrl%GDIISBandWidth    =   0.50D0 !(in percent)
         GeOpCtrl%GDIISMinDomCount  =   1
 !
 ! GDIIS restart control
@@ -1249,7 +1415,7 @@ MODULE GeomOpt
 !
 ! Take care of iterative subspace
 !
-        CALL GDIISSave(GMLoc%Natms,EtotCurr,EtotPrev)
+!!!     CALL GDIISSave(GMLoc%Natms,EtotCurr,EtotPrev)
 !
 ! Carry out LineSearch, if EtotCurr>EtotPrev
 !
@@ -1275,13 +1441,10 @@ MODULE GeomOpt
         CHARACTER(LEN=DEFAULT_CHR_LEN) :: CoordTypeSave
 !
 ! Search for a lower energy point between CGeo-1 and CGeo
-! along the Cartesian gradient!
-! Line search in internals was inefficient for bALA.
+! by compressing the range of the GDIIS matrix
 !
           GMTag=''
-#ifdef MMech
         IF(HasMM()) GMTag='GM_MM'
-#endif
 !
         CALL Get(GMPrev,TRIM(GMTag)//PrvGeom)
 !
@@ -1361,4 +1524,5 @@ MODULE GeomOpt
 !
 !---------------------------------------------------------------
 !
- END MODULE GeomOpt
+END MODULE GeomOpt
+ 
