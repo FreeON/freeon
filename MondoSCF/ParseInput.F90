@@ -685,10 +685,13 @@ MODULE ParseInput
                ENDDO
                IF(NAtoms/=GM%NAtms) &
                     CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MONDO')
-!              Determine the number of atom types (kinds)
-               CALL FindKind(GM)
 !              Reorder with SFC
                CALL ReorderCoordinates(GM)
+!              Determine the number of atom types (kinds)
+!              Do this AFTER possible reodering or it will mess up the basis set.
+!              NOTE: Should recompute basis for EACH geometry.  Things are quite
+!              messed up at present.  Need to really clean house on front end.
+               CALL FindKind(GM)
 #ifdef PERIODIC
 !              Convert to AU and Compute Fractioan and Atomic Coordinates  
                IF(GM%InAtomCrd) THEN
@@ -753,10 +756,10 @@ MODULE ParseInput
                   ENDIF
                ENDDO
             ENDDO
-!           Determine the number of atom types (kinds)
-            CALL FindKind(GM)
 !           Reorder with SFC
             CALL ReorderCoordinates(GM)
+!           Determine the number of atom types (kinds)
+            CALL FindKind(GM)
 #ifdef PERIODIC
 !           Convert to AU and Compute Fractioan and Atomic Coordinates  
             IF(GM%InAtomCrd) THEN
@@ -888,10 +891,10 @@ MODULE ParseInput
             ENDDO
             IF(NAtoms/=GM%NAtms) &
                CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_XMOL')
-!           Determine the number of atom types (kinds)
-            CALL FindKind(GM)
 !           Reorder with SFC
             CALL ReorderCoordinates(GM)
+!           Determine the number of atom types (kinds)
+            CALL FindKind(GM)
 !           Convert to AU
             IF(.NOT.GM%InAU) &
                GM%Carts%D=GM%Carts%D*AngstromsToAU
@@ -1003,10 +1006,10 @@ MODULE ParseInput
             IF(LastConfig)EXIT
             IF(NAtoms/=GM%NAtms) &
                CALL MondoHalt(PRSE_ERROR,'Atom number mismatch in ParseCoordinates_MSI')
-!           Determine the number of atom types (kinds)
-            CALL FindKind(GM)
 !           Reorder with SFC
             CALL ReorderCoordinates(GM)
+!           Determine the number of atom types (kinds)
+            CALL FindKind(GM)
 !           Convert to AU
             IF(.NOT.GM%InAU) &
                GM%Carts%D=GM%Carts%D*AngstromsToAU
@@ -1351,7 +1354,6 @@ MODULE ParseInput
          INTEGER        :: J
 !-----------------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
-         RETURN
 !
          CALL New(Point,NAtoms)
          CALL New(DTemp,NAtoms)
@@ -1366,6 +1368,7 @@ MODULE ParseInput
                GM%Carts%D(I,J)=DTemp%D(Point%I(J))
             ENDDO
          ENDDO
+!
 #ifdef PERIODIC
 !        Reorder Fractional Coordinates
          DO I=1,3
@@ -1377,17 +1380,22 @@ MODULE ParseInput
             ENDDO
          ENDDO
 #endif
-!        Reorder Velocity
 
 !        Reorder Atomic Number and Mass
          DO J=1,NAtoms
             ITemp%I(J)=GM%AtNum%I(J)
-            DTemp%D(J)=GM%AtMss%D(J)
          ENDDO
          DO J=1,NAtoms
             GM%AtNum%I(J)=ITemp%I(Point%I(J))
+         ENDDO
+!
+         DO J=1,NAtoms
+            DTemp%D(J)=GM%AtMss%D(J)
+         ENDDO
+         DO J=1,NAtoms
             GM%AtMss%D(J)=DTemp%D(Point%I(J))
          ENDDO
+!
          CALL Delete(Point)
          CALL Delete(DTemp)
          CALL Delete(ITemp)
