@@ -33,7 +33,7 @@ MODULE ParsingKeys
    CHARACTER(LEN=12),  PARAMETER :: MULTIPLICITY ='Multiplicity' 
 !------------------------------------------------- -------------------------------------------------  
 !  Parsing keys for <Options.SCF=>
-   CHARACTER(LEN=3),  PARAMETER :: SCF_OPTION='SCFMethod' 
+   CHARACTER(LEN=9),  PARAMETER :: SCF_OPTION='SCFMethod' 
    CHARACTER(LEN=4),  PARAMETER :: SCF_SDMM  ='SDMM' 
    CHARACTER(LEN=2),  PARAMETER :: SCF_RHHF  ='RH'
    CHARACTER(LEN=6),  PARAMETER :: SCF_INKF  ='InkFok'
