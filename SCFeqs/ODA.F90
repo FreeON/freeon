@@ -116,6 +116,7 @@ PROGRAM ODA
   ! The DIIS error 
   DIISErr=SQRT(Dot(T1,T1))/DBLE(NBasF)
   CALL Put(DIISErr,'diiserr')
+  CALL Put(EMin,'ODAEnergy')
   ! Orthogonal put and xform to AO rep and put of PTilde
   ! Step on density from both this cycle and the next
   CALL Put(PTilde,TrixFile('OrthoD',Args,0))
