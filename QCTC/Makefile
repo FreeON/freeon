@@ -125,7 +125,7 @@ chgtrax:
 
 JGen.o: Globals.o ParaQ.o
 BlokTrPdJ.o: Globals.o
-JForce.F90: Globals.o
+JForce.o: Globals.o
 MakePFFT.o : Globals.o
 NukE.o: Globals.o ParaQ.o
 PBCFarField.o: Globals.o ParaQ.o
