@@ -75,10 +75,11 @@ PROGRAM JForce
     MMJFrc%D(:)=Zero
     CALL NewBraBlok(Gradients_O=.TRUE.)
   ENDIF
-  CALL Get(Rho,'Rho',Args,1)
   IF(MMOnly()) THEN
+     CALL Get(Rho,'Rho',Args,Current(1))
      CALL Get(RhoPoles,CurGeom)
   ELSE
+     CALL Get(Rho,'Rho',Args,1)
      CALL Get(RhoPoles,NxtCycl)
   ENDIF
 #else
