@@ -260,12 +260,13 @@ PROGRAM JForce
            ENDIF
         ENDDO
      ENDIF
-     CALL PChkSum(Frc,'Frc bef dJ/dR added',Proc_O=Prog)  
+     CALL PChkSum(Frc ,'Frc bef dJ/dR added',Proc_O=Prog)  
      IF(HasMM()) THEN
         Frc%D=Frc%D+MMJFrc%D
         CALL PChkSum(MMJFrc,'MMJFrc bef dJ/dR added',Proc_O=Prog)  
      ENDIF
-     CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
+     CALL PChkSum(Frc ,'Frc after dJ/dR added',Proc_O=Prog)  
+     CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
      CALL Put(Frc,'GradE',Tag_O=CurGeom)
      CALL Delete(Frc)
      CALL Delete(GlobalQMNum)
@@ -293,10 +294,10 @@ PROGRAM JForce
   ENDIF
   CALL Delete(TotJFrc)
 #endif
+  CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
   CALL New(Frc,3*GMLoc%Natms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
-  CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
 !
   CALL Put(LatFrc_J,'LatFrc_J',Tag_O=CurGeom)
