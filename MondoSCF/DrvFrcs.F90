@@ -891,14 +891,14 @@ MODULE DrvFrcs
      IF(MMOnly()) THEN
         Ctrl%Current=(/0,0,1/)
         CALL SetGlobalCtrlIndecies(Ctrl)
-        CALL GeOp(Ctrl)
+        CALL GeOpNEW(Ctrl)
      ELSE
 #endif
      DO ISet=1,Ctrl%NSet
 !       Optimize geometry for each basis set
         Ctrl%Current=(/0,ISet,1/)
         CALL SetGlobalCtrlIndecies(Ctrl)
-        CALL GeOp(Ctrl)
+        CALL GeOpNEW(Ctrl)
      ENDDO
 #ifdef MMech
      ENDIF
@@ -949,7 +949,7 @@ MODULE DrvFrcs
      Ctrl%Current=(/0,0,1/)
      CALL SetGlobalCtrlIndecies(Ctrl)
      CALL MM_ENERG(Ctrl)
-     CALL GeOp(Ctrl)
+     CALL GeOpNEW(Ctrl)
    ENDIF
 #endif
   END SUBROUTINE CALC_GRAD_QNEW_ONE_OPT_NEW
@@ -1010,7 +1010,8 @@ MODULE DrvFrcs
        TYPE(SCFControls)         :: Ctrl
        TYPE(CRDS)                :: GMLoc
        INTEGER                   :: JGeo,KS,BlkGeomSize,NCoordsEff,NCoordsEff0
-       INTEGER                   :: NIntC,Refresh,I,J,K,L,II,MaxGeOpSteps
+       INTEGER                   :: Refresh,I,J,K,L,II,MaxGeOpSteps
+       INTEGER                   :: NCart,NIntC
        REAL(DOUBLE)              :: RMSGrad,MaxGrad
        REAL(DOUBLE)              :: TrixThresh,AInvDistanceThresh
        REAL(DOUBLE)              :: BondConvCrit,AngleConvCrit,GradConvCrit
@@ -1067,7 +1068,8 @@ MODULE DrvFrcs
 !
 ! Define maximum number of optimization steps
 !
-       MaxGeOpSteps=MAX(3*GMLoc%Natms,100)
+       NCart=3*GMLoc%Natms
+       MaxGeOpSteps=MAX(NCart,100)
 !
 ! Define parameters of block operations for the optimizer,
 ! this will be the size of the vectors and matrices in the optimizer
@@ -1090,10 +1092,13 @@ MODULE DrvFrcs
 ! dimensions. Since the number of internals may change, this dimensions 
 ! will change from optimization step to optimization step
 !
+! WARNING! refresh can change the number of internal coordinates!
          IF(Ctrl%Current(3)==1) THEN
            Refresh=1
+!          Refresh=5
          ELSE
            Refresh=2
+!          Refresh=5
          ENDIF
 !
          CALL GetIntCs(GMLoc%Carts%D,GMLoc%Natms,InfFile,IntCs,NIntC,Refresh)
@@ -1119,7 +1124,7 @@ MODULE DrvFrcs
          MaxBlkSize=MAXVAL(BSiz%I)
          PrintFlags%Mat=DEBUG_MATRICES
 !
-       CALL New(VectCart,3*GMLoc%Natms)
+       CALL New(VectCart,NCart)
        CALL New(VectInt,NIntC)
        CALL New(IntDispl,NIntC)
        VectInt%D(:)=Zero
@@ -1137,16 +1142,23 @@ MODULE DrvFrcs
 !
 ! Get gradient in internal coordinates
 !
-CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,VectInt,1)
+!CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,VectInt,1)
+CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,1)
 !
 ! Calculate single relaxation (SR) step from an inverse Hessian
 !
 ! steepest descent
-       IntDispl%D=-0.5*VectInt%D
+       IntDispl%D=-10.D0*VectInt%D
+!
+! Get rid of first order redundancy
+!
+!      CALL RedundancyOffFull(IntDispl%D,NCart)
 !
 ! Transform internal displacements back to Cartesian
 !
-CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,IntDispl,2)
+!CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,IntDispl,2)
+CALL FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,IntDispl,2)
+stop
 !
 ! Now call GDIIS
 ! and construct GDIIS step from SR step and previous displacements
@@ -1163,13 +1175,13 @@ CALL CoordTrf(GMLoc,TrixThresh,AInvDistanceThresh,IntCs,NIntC,VectCart,IntDispl,
 !
        VectInt%D=IntCs%Value
        CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
-do i=1,nintc
-if(intcs%def(i)(1:4)=='STRE') then
-write(*,*) 'i= ',i,intcs%def(i),IntCs%Value(i)/angstromstoau
-else
-write(*,*) 'i= ',i,intcs%def(i),IntCs%Value(i)*180.d0/PI
-endif
-enddo
+!do i=1,nintc
+!if(intcs%def(i)(1:4)=='STRE') then
+!write(*,*) 'i= ',i,intcs%def(i),IntCs%Value(i)/angstromstoau
+!else
+!write(*,*) 'i= ',i,intcs%def(i),IntCs%Value(i)*180.d0/PI
+!endif
+!enddo
        VectInt%D=IntCs%Value-VectInt%D
        MaxBondDispl=Zero
        MaxAngleDispl=Zero
