@@ -1,6 +1,6 @@
 !    COMPUTE THE DENSITY IN A HGTF BASIS FROM THE DENSITY MATRIX
 !    BASED ON AHMADI AND ALMLOF, CPL 246 p.364 (1995) 
-!    Authors: Matt Challacombe and C.J. Tymczak
+!    Authors: Matt Challacombe and C.J. Tymczak and C. K. Gan
 !----------------------------------------------------------------
 PROGRAM MakeRho
   USE DerivedTypes
@@ -16,8 +16,19 @@ PROGRAM MakeRho
   USE BraBloks
   USE RhoBlok
   USE RhoTools
+#ifdef PARALLEL
+  USE MondoMPI
+#endif
   IMPLICIT NONE
-  TYPE(BCSR)                      :: Dmat,D1,D2,S
+#ifdef PARALLEL
+  TYPE(DBCSR)                     :: Dmat,D1,D2
+  INTEGER                         :: LocalAtom,NumAtoms
+  REAL(DOUBLE)                    :: TotRSumE,TotRSumN
+  INTEGER                         :: IErr
+  TYPE(CMPoles)                   :: SMP
+#else
+  TYPE(BCSR)                      :: Dmat,D1,D2
+#endif
   INTEGER                         :: NC
   REAL(DOUBLE),DIMENSION(3)       :: B
   TYPE(AtomPair)                  :: Pair
@@ -26,20 +37,22 @@ PROGRAM MakeRho
   TYPE(ARGMT)                     :: Args
   TYPE(HGRho)                     :: Rho
   TYPE(HGRho_new)                 :: RhoA
-  TYPE(CMPoles)                   :: MP,PrvMP
+  TYPE(CMPoles)                   :: MP
   TYPE(INT_VECT)                  :: Stat
-  TYPE(DBL_RNK2)                  :: BlkP !vw
   INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
-  INTEGER                         :: NExpt,NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
+  INTEGER                         :: NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
   INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
   REAL(DOUBLE)                    :: DistThresh,RSumE,RSumN,RSumMM,RSum_TPS,RelRhoErr, &
                                      QMCharge,dQMCharge,MMCharge,dMMCharge,PcntCharge
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
-  CHARACTER(LEN=7),PARAMETER      :: Prog='MakeRho'
-  REAL(DOUBLE)                    :: Coeff,TraceD
-!---------------------------------------------------------------------------------------
-! Start up macro
+  CHARACTER(LEN=*),PARAMETER      :: Prog='MakeRho'
+
+#ifdef PARALLEL
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+#else
   CALL StartUp(Args,Prog)
+#endif
+
 #ifdef MMech
 !---------------------------------------------------------------
   IF(HasMM())THEN
@@ -77,6 +90,11 @@ PROGRAM MakeRho
         ! Compute a sparse matrix blocking scheme for the old BS
         CALL BlockBuild(GM,BS,BSiz,OffS)
         NBasF=BS%NBasF
+#ifdef PARALLEL
+        CALL BCast(BSiz)
+        CALL BCast(OffS)
+        CALL BCast(NBasF)
+#endif
 !       Close the old hdf up 
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(OldFileID)
@@ -104,24 +122,10 @@ PROGRAM MakeRho
            CALL Get(Dmat,TrixFile('D',Args,1))
         ELSEIF(SCFActn=='StartResponse')THEN
            CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
-           !CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
-           !DO I=1,NAtoms
-           !   BlkP%D(:,I)=Zero
-           !ENDDO
-           !CALL New(DMat)
-           !CALL SetToI(DMat,BlkP)
-           !CALL Delete(BlkP)
-           !CALL Put(DMat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
         ELSEIF(SCFActn=='DensityPrime')THEN
-           !write(*,*) TRIM(Args%C%C(1))
-           !write(*,*) TRIM(Args%C%C(2))
-           !write(*,*) TRIM(Args%C%C(3))
-           !write(*,*) TRIM(Args%C%C(4))
-           !write(*,*) TRIM(Args%C%C(5))
            CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(3)),Args,0))
-           !CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
         ELSEIF(SCFActn/='Core')THEN
-           ! Default, stupid.
+           ! Default
            CALL Get(Dmat,TrixFile('D',Args,0))
         ENDIF
      ENDIF
@@ -134,9 +138,16 @@ PROGRAM MakeRho
      NDist = 0
      NCoef = 0
 !    Loop over atoms and count primatives
+#ifdef PARALLEL
+     DO LocalAtom = 1, Dmat%NAtms
+        AtA  = Beg%I(MyID)+(LocalAtom-1)
+        Pbeg = Dmat%RowPt%I(LocalAtom)
+        Pend = Dmat%RowPt%I(LocalAtom+1)-1
+#else
      DO AtA=1,NAtoms
         Pbeg = Dmat%RowPt%I(AtA)
         Pend = Dmat%RowPt%I(AtA+1)-1
+#endif
         DO P = Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN            
@@ -158,9 +169,17 @@ PROGRAM MakeRho
 !    Initailize  Counters
      NDist        = 0
      NCoef        = 0
+
+#ifdef PARALLEL
+     DO LocalAtom = 1, Dmat%NAtms
+        AtA  = Beg%I(MyID)+(LocalAtom-1)
+        Pbeg = Dmat%RowPt%I(LocalAtom)
+        Pend = Dmat%RowPt%I(LocalAtom+1)-1
+#else
      DO AtA=1,NAtoms
         Pbeg = Dmat%RowPt%I(AtA)
         Pend = Dmat%RowPt%I(AtA+1)-1
+#endif
         DO P=Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
            R   = Dmat%BlkPt%I(P)
@@ -183,7 +202,11 @@ PROGRAM MakeRho
      IF(SCFActn/='InkFok'.AND.        &
         SCFActn/='StartResponse'.AND. &
         SCFActn/='DensityPrime') THEN
+#ifdef PARALLEL
+        CALL AddDist(RhoA,GM,NuclearExpnt,Beg%I(MyID),End%I(MyID))
+#else
         CALL AddDist(RhoA,GM,NuclearExpnt,1,GM%NAtms)
+#endif
      ENDIF
 #ifdef MMech
   ELSE
@@ -223,12 +246,41 @@ PROGRAM MakeRho
   ENDIF
 #else
 ! Compute integrated electron and nuclear densities
+#ifdef PARALLEL
+  NumAtoms = End%I(MyID)-Beg%I(MyID)+1
+  RSumE    = Integrate_HGRho_new(RhoA,1,RhoA%NDist-NumAtoms)
+  RSumN    = Integrate_HGRho_new(RhoA,RhoA%NDist-NumAtoms+1,RhoA%NDist)
+  TotRSumE = AllReduce(RSumE)
+  TotRSumN = AllReduce(RSumN)
+  RSumE = TotRSumE
+  RSumN = TotRSumN
+#else
   RSumE  =  Integrate_HGRho_new(RhoA,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
+#endif
 ! Calculate dipole and quadrupole moments
   CALL New(MP)
+
+
   CALL CalRhoPoles_new(MP,RhoA,GM)
+#ifdef PARALLEL
+  CALL New(SMP)
+  CALL MPI_Reduce(MP%Dpole%D(1),SMP%Dpole%D(1),3,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  CALL MPI_Reduce(MP%Qpole%D(1),SMP%Qpole%D(1),6,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == 0) THEN
+    MP%Dpole%D(1:3) = SMP%Dpole%D(1:3)
+    MP%Qpole%D(1:6) = SMP%Qpole%D(1:6)
+#ifdef DIAG_QCTC
+    write(*,'(A,3F20.15)') 'MP%Dpole%D(1:3) = ',MP%Dpole%D(1:3)
+    write(*,'(A,6F20.15)') 'MP%Qpole%D(1:6) = ',MP%Qpole%D(1:6)
 #endif
+  ENDIF
+#endif
+#endif
+
+!   write(*,'(A,3F20.15)') 'MP%Dpole%D(1:3) = ',MP%Dpole%D(1:3)
+!   write(*,'(A,6F20.15)') 'MP%Qpole%D(1:6) = ',MP%Qpole%D(1:6)
+
 !
 !  Convert to the old format
 !
@@ -298,23 +350,41 @@ PROGRAM MakeRho
            MP%QPole%D(1)+MP%QPole%D(2)+MP%QPole%D(3)))
   ! Output pruning and multipole stats
   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
      I=OpenPU()
      WRITE(*,*)TRIM(Mssg1)
      WRITE(*,*)TRIM(Mssg2)
      WRITE(I,*)TRIM(Mssg1)
      WRITE(I,*)TRIM(Mssg2)
      CALL ClosePU(I)
+#ifdef PARALLEL
+  ENDIF
+#endif
   ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
      I=OpenPU()
      WRITE(I,*)TRIM(Mssg1)
      WRITE(I,*)TRIM(Mssg2)
      CALL ClosePU(I)
+#ifdef PARALLEL
+  ENDIF
+#endif
   ENDIF
   ! Check error
   IF(RelRhoErr>Thresholds%Dist*5.D3.AND.SCFActn/='NumForceEvaluation')THEN
+#ifdef PARALLEL
+  IF(MyID == ROOT) THEN
+#endif
         CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
              //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
              //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
+#ifdef PARALLEL
+  ENDIF
+#endif
   ENDIF
 !------------------------------------------------------------------------------------
 ! Put Rho and MPs to disk
@@ -341,13 +411,24 @@ PROGRAM MakeRho
   ENDIF
 #else
   IF(SCFActn=='ForceEvaluation')THEN
+#ifdef PARALLEL
+     CALL Put_HGRho(Rho,'Rho'//IntToChar(MyID),Args,1)
+#else
      CALL Put_HGRho(Rho,'Rho',Args,1)
+#endif
      CALL Put(MP)  
   ELSEIF(SCFActn=='InkFok')THEN
+#ifdef PARALLEL
+#else
      CALL Put_HGRho(Rho,'DeltaRho',Args,0)
+#endif
      CALL Put(MP,'Delta'//TRIM(SCFCycl))
   ELSE                                                      
+#ifdef PARALLEL
+     CALL Put_HGRho(Rho,'Rho'//IntToChar(MyID),Args,0)
+#else
      CALL Put_HGRho(Rho,'Rho',Args,0)
+#endif
      CALL Put(MP)  
   ENDIF
 #endif
@@ -370,4 +451,3 @@ PROGRAM MakeRho
   CALL Delete_HGRho_new(RhoA)
   CALL ShutDown(Prog)
 END PROGRAM MakeRho
-

@@ -93,7 +93,12 @@ PROGRAM JForce
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+
+#ifdef PARALLEL
+  CALL GetDistrRho('Rho',Args,1)
+#else
   CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)  
+#endif
   CALL Get(RhoPoles)
 #endif   
 ! Set thresholds local to JForce (for PAC and MAC)
@@ -103,7 +108,11 @@ PROGRAM JForce
 ! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
+#ifdef PARALLEL
+  CALL ParaRhoToPoleTree
+#else
   CALL RhoToPoleTree
+#endif
 #ifdef MMech 
 ! Set the electrostatic background
   IF(HasMM()) THEN

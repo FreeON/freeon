@@ -36,18 +36,17 @@ ObjsU     = UBlok.o     MakeU.o
 ObjsS     = SBlok.o     MakeS.o 
 ObjsT     = TBlok.o     MakeT.o 
 ObjsR     = RhoTools.o  RhoBlok.o  MakeRho.o 
-ObjsParaR = RhoTools.o  RhoBlok.o  ParaMakeRho.o
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o
 ObjTH = BlokTrPd2T.o THess.o
 ObjUF = UBlok.o UForce.o
 
 ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
-               RhoTools.x   RhoBlok.x MakeRho.x ParaMakeRho.x   \
+               RhoTools.x   RhoBlok.x MakeRho.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x  TForce.x       \
                UForce.x MakeM.x MBlok.x BlokTrPd2T.x THess.x
 #
-all: 	 MakeM MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce UForce THess
+all: 	 MakeM MakeU MakeS MakeT MakeRho SForce TForce UForce THess
 #
 MakeM:	 $(ObjsM)
 	 $(LD) $(LDFLAGS) MakeM $(ObjsM) $(F90_LIBRARIES)
@@ -64,10 +63,6 @@ MakeS:	 $(ObjsS)
 MakeT:	 $(ObjsT)
 	 $(LD) $(LDFLAGS) MakeT $(ObjsT) $(F90_LIBRARIES)
 	 mv MakeT $(MONDO_EXEC)/MakeT
-#
-ParaMakeRho: $(ObjsParaR)
-	 $(LD) $(LDFLAGS) ParaMakeRho $(ObjsParaR) $(F90_LIBRARIES)
-	 mv ParaMakeRho $(MONDO_EXEC)/ParaMakeRho
 #
 MakeRho: $(ObjsR)
 	 $(LD) $(LDFLAGS) MakeRho $(ObjsR) $(F90_LIBRARIES)
@@ -104,7 +99,6 @@ clean:
 	rm -f $(MONDO_EXEC)/SForce
 	rm -f $(MONDO_EXEC)/TForce
 	rm -f $(MONDO_EXEC)/THess
-	rm -f $(MONDO_EXEC)/ParaMakeRho
 	ln -s /dev/null core
 	ls -l
 #

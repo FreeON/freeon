@@ -540,13 +540,8 @@ CONTAINS
        CALL Invoke('P2Use',N,S,M)
     ENDIF
     ! Build some density ...
-    ! Hold on, this is fucked up--we have got to unify MakeRho!!!!!!
-    ! Chee Kwan and CJ, please, pretty please....
     IF(S%Action%C(1)/=CPSCF_START_RESPONSE) THEN
        CALL Invoke('MakeRho',N,S,M)
-#ifdef PARALLEL
-       CALL Invoke('ParaMakeRho',N,S,M) 
-#endif
     ENDIF
   END SUBROUTINE DensityBuild
   !===============================================================================
@@ -864,9 +859,6 @@ CONTAINS
     ENDIF
     ! Build density with last DM
     CALL Invoke('MakeRho',N,S,M)
-#ifdef PARALLEL
-    CALL Invoke('ParaMakeRho',N,S,M)
-#endif
     ! Coulomb part
     CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
