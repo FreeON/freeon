@@ -374,7 +374,6 @@ CONTAINS
 #endif
     ENDDO ! End AtC
     !
-    write(*,*) 'ONX2ComputK: CS_OUT%NCells',CS_OUT%NCells,' NBasF',NBasF
     WRITE(*,100) NInts,CS_OUT%NCells**2*DBLE(NBasF)**4, &
          &       NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
 100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
