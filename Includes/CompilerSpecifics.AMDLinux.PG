@@ -6,7 +6,8 @@ CPP       =/lib/cpp -P -C \
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS   =
+CPPOPTS   = -DPERIODIC
+
 #           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
@@ -36,7 +37,7 @@ F90_OPTIMIZE = -O1 -tp athlon
 #
 #F_PROF       = -Mprof=lines
 #
-F90_MISC     = $(F_LIST) $(F_PROF) 
+F90_MISC     = $(F_LIST) $(F_PROF) -Mbackslash 
 #
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
