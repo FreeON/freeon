@@ -1,5 +1,5 @@
 MODULE NEB
-#ifdef NEB
+#ifdef NEB2
   !===============================================================================
   ! Module for calculating reaction (minimum energy) paths between known 
   ! reactant and product states.  This module impliments the climbing image
@@ -84,7 +84,7 @@ MODULE NEB
   SUBROUTINE NEBForce(G,O)
     TYPE(Geometries) :: G
     TYPE(Options)    :: O
-    INTEGER          :: I,j,UMaxI,NAtms
+    INTEGER          :: I,j,UMaxI,NAtms,IAts
     LOGICAL          :: UPm,UPp
     REAl(DOUBLE)     :: UMin,UMax,Um,Up,Rm,Rp,Dist,FProj
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: N
@@ -196,6 +196,14 @@ MODULE NEB
          //' D = '//TRIM(FltToShrtChar(Dist)) &
          //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal)) 
     WRITE(*,*)TRIM(Mssg) 
+!      Constrain the Gradients
+       DO iCLONE=1,G%Clones
+	  DO iATS=1,G%Clone(iCLONE)%NAtms
+             IF(G%Clone(iCLONE)%CConstrain%I(iATS)/=0)THEN
+                G%Clone(iCLONE)%Gradients%D(:,iATS)=Zero
+             ENDIF
+          ENDDO
+       ENDDO
   END SUBROUTINE NEBForce
 
   !===============================================================================
