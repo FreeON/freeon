@@ -1,3 +1,48 @@
+2001-12-14 15:30  mchalla
+
+	* XForm/LowdinO.F90: Put in checking of cond(S), with appropriate
+	(perhaps) logic to warn or stop when cond(S) gets too large.
+
+2001-12-14 15:29  mchalla
+
+	* MondoMods/: BoundingBox.F90, Thresholding.F90: Modified Bounding
+	box BoxOutSideOfBox to nolonger take extent as an argument.  Fixed
+	GaussianExtent to now take the log of the amplitude.  Works very
+	well now for protecting the expensive Extent in the double sum of
+	HiCu.
+
+2001-12-14 15:27  mchalla
+
+	* HiCu/Makefile: Removed regeneration of explicit source with each
+	make.  Now, if you need to regenerate source, use "make VR".
+
+2001-12-14 15:27  mchalla
+
+	* HiCu/: KxcGen.F90, dXCBlok.F90: Fixed double sum bottleneck by
+	making preliminary estimate of a primitives bounding box using
+	GaussianExtent, then simply checking if this box touches the
+	CubeRoot%Box.  Need a fudge factor for safety, but seems to work
+	quite well.
+
+2001-12-12 08:20  mchalla
+
+	* MondoSCF/ParseInput.F90: Changed default ordering back to none
+	instead of a halt.
+
+2001-12-12 07:35  mchalla
+
+	* MondoMods/DerivedTypes.F90: Added Eric's ISpc type back in which
+	had gotten lost due to backwards revision. 
+	-------------------------------------------------------------------
+	---
+
+2001-12-11 17:16  schwegle
+
+	* ONX/NONX/: ComputeKe.F90, ComputeKg.F90, Digest.F90,
+	DisOrder.F90, GetIntSpace.F90, HRRKet.F, Makefile, MemInit.F90,
+	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
+	with the array dimensions in the 2-e code.
+
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -14,10 +59,6 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
-
-2001-12-07 12:17  mchalla
-
-	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
