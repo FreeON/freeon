@@ -31,20 +31,23 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 CPPMISC=#-DFULL_ON_FRONT_END_DEBUG
 #
-ObjectFiles = GetPID.o Spawn.o \
-	      ControlStructures.o NEB.o Numerics.o ParseCommands.o OptionKeys.o ConflictDetect.o ParseOptions.o \
-              DynamicsKeys.o ParseDynamics.o GeometryKeys.o ParseProperties.o\
-              InCoords.o ParseGeometries.o \
-              PeriodicKeys.o ParsePeriodic.o ParseBasis.o                     \
-              ParallelKeys.o ParseParallel.o Massage.o \
-              GeomOptKeys.o ParseGeomOpt.o ParseExtraCoords.o \
-              ParseInput.o  \
-              PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o \
-              SCFs.o MLP.o Response.o GDIIS.o Hessian.o Optimizer.o \
+ObjectFiles = GetPID.o Spawn.o  ControlStructures.o NEB.o Numerics.o ParseCommands.o  \
+              OptionKeys.o ConflictDetect.o ParseOptions.o DynamicsKeys.o             \
+              ParseDynamics.o GeometryKeys.o ParseProperties.o InCoords.o             \
+              ParseGeometries.o PeriodicKeys.o ParsePeriodic.o ParseBasis.o           \
+              ParallelKeys.o ParseParallel.o Massage.o GeomOptKeys.o ParseGeomOpt.o   \
+              ParseExtraCoords.o ParseInput.o PunchHDF.o Overlay.o PrintParsed.o      \
+              SCFKeys.o SCFs.o MLP.o Response.o GDIIS.o Hessian.o Optimizer.o         \
 	      ZippyQuote.o MondoSCF.o
 #
-ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
-              ParseGeometries.x ParseProperties.x
+ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseCommands.x  \
+              OptionKeys.x ConflictDetect.x ParseOptions.x DynamicsKeys.x             \
+              ParseDynamics.x GeometryKeys.x ParseProperties.x InCoords.x             \
+              ParseGeometries.x PeriodicKeys.x ParsePeriodic.x ParseBasis.x           \
+              ParallelKeys.x ParseParallel.x Massage.x GeomOptKeys.x ParseGeomOpt.x   \
+              ParseExtraCoords.x ParseInput.x PunchHDF.x Overlay.x PrintParsed.x      \
+              SCFKeys.x SCFs.x MLP.x Response.x GDIIS.x Hessian.x Optimizer.x         \
+	      ZippyQuote.x MondoSCF.x
 #
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)
