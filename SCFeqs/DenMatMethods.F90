@@ -40,7 +40,7 @@ MODULE DenMatMethods
   END INTERFACE
 
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
-  REAL(DOUBLE) :: CurThresh
+  REAL(DOUBLE)            :: CurThresh
 CONTAINS
 !-------------------------------------------------------------------------------
 
@@ -427,19 +427,19 @@ CONTAINS
         CnvrgCmmnt='Met dE/dP goals'
      ENDIF
      ! Test in the asymptotic regime for stall out
-     IF(RelErrE<1D2*Thresholds%Trix**2)THEN
-!    IF(RelErrE<Thresholds%ETol)THEN
-        ! Check for increasing /P
-        IF(AbsErrP>OldAEP)THEN
-           CnvrgChck_BCSR=.TRUE.
-           CnvrgCmmnt='Hit dP increase'
-        ENDIF
-        ! Check for an increasing energy
-        IF(Energy>OldE)THEN
-           CnvrgChck_BCSR=.TRUE.
-           CnvrgCmmnt='Hit dE increase'
-        ENDIF
-     ENDIF
+!!$     IF(RelErrE<1D2*Thresholds%Trix**2)THEN
+!!$!    IF(RelErrE<Thresholds%ETol)THEN
+!!$        ! Check for increasing /P
+!!$        IF(AbsErrP>OldAEP)THEN
+!!$           CnvrgChck_BCSR=.TRUE.
+!!$           CnvrgCmmnt='Hit dP increase'
+!!$        ENDIF
+!!$        ! Check for an increasing energy
+!!$        IF(Energy>OldE)THEN
+!!$           CnvrgChck_BCSR=.TRUE.
+!!$           CnvrgCmmnt='Hit dE increase'
+!!$        ENDIF
+!!$     ENDIF
 
 !     IF(NPur<35)CnvrgChck_BCSR=.FALSE.
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
@@ -581,25 +581,25 @@ CONTAINS
          CALL Filter(P,Tmp1)
       ENDIF
     END SUBROUTINE SP2
-
-    SUBROUTINE AOSP2(P,S,P2,T1,Norm)
+!
+    SUBROUTINE AOSP2(P,S,T1,T2,Action)
 #ifdef PARALLEL
-      TYPE(DBCSR)   :: P,S,P2,T1
+      TYPE(DBCSR)   :: P,S,T1,T2
 #else
-      TYPE(BCSR)   :: P,S,P2,T1
+      TYPE(BCSR)    :: P,S,T1,T2
 #endif
-      REAL(DOUBLE) :: Norm,CR
+      LOGICAL       :: Action
 !-------------------------------------------------------------------------------
-      CALL Multiply(S,P,T1)             ! T1=S.P
-      CALL Multiply(P,T1,P2)            ! P2=P.S.P
-      TrP=Trace(T1)                     ! Tr(S.P)
-      CR=TrP-Norm                       ! CR = Occupation error criteria
-      IF(CR>0)THEN                      ! Over occupied
-         CALL Filter(P,P2)              ! P = P.S.P
-      ELSE                              ! Under occupied
+      CALL Multiply(S,P ,T1)            ! T1=S.P
+      CALL Multiply(P,T1,T2)            ! T2=P.S.P
+      TrP  = Trace(T1)
+      TrP2 = Trace(T2) 
+      IF(Action) THEN
+         CALL Filter(P,T2)              ! P = P.S.P
+      ELSE
          CALL Multiply(P,Two) 
-         CALL Multiply(P2,-One)
-         CALL Add(P,P2,T1)              ! P = 2P-P.S.P
+         CALL Multiply(T2,-One)
+         CALL Add(P,T2,T1)              ! P = 2P-P.S.P
          CALL Filter(P,T1)
       ENDIF
     END SUBROUTINE AOSP2
