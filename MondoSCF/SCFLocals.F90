@@ -74,8 +74,8 @@ MODULE SCFLocals
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose,Good,Tight,VeryTight):
 
-   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9/)
-   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-5, 1.D-6, 1.D-7,  1.D-8 /)
+   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9 /)
+   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-8 /)
    REAL(DOUBLE),DIMENSION(4) :: TwoENeglect=(/1.D-6, 1.D-8, 1.D-10, 1.D-12/)
    REAL(DOUBLE),DIMENSION(4) :: DistNeglect=(/1.D-8, 1.D-10,1.D-12, 1.D-14/)
    REAL(DOUBLE),DIMENSION(4) :: ETol       =(/1.D-5, 1.D-7, 1.D-9,  1.D-11/)
