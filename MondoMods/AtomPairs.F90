@@ -12,6 +12,7 @@ MODULE AtomPairs
   USE BoundingBox
   USE Thresholding
   USE CellSets
+  USE LinAlg
   IMPLICIT NONE
 !-------------------------------------------------------------------------------
 ! Global variables
@@ -406,6 +407,41 @@ CONTAINS
   END FUNCTION LaticeForce
 !-------------------------------------------------------------------------------
 ! Make GM Periodic
+!-------------------------------------------------------------------------------
+  SUBROUTINE PBCInfoFromNewCarts(PBC)
+    TYPE(PBCInfo)             :: PBC
+    REAL(DOUBLE),DIMENSION(3) :: VectAux,A,B,C
+    !
+    ! this routine rebuilds PBC data based on PBC%BoxShape
+    !
+    A=PBC%BoxShape%D(1,1:3)
+    B=PBC%BoxShape%D(2,1:3)
+    C=PBC%BoxShape%D(3,1:3)
+    CALL CROSS_PRODUCT(A,B,VectAux)
+    PBC%CellVolume=ABS(DOT_PRODUCT(VectAux,C))
+    !
+    PBC%CellCenter%D = CellCenter(PBC%BoxShape%D,PBC%AutoW%I)
+    PBC%InvBoxSh%D = InverseMatrix(PBC%BoxShape%D)
+  END SUBROUTINE PBCInfoFromNewCarts
+!-------------------------------------------------------------------------------
+  FUNCTION CellCenter(BoxShape,AutoW)
+    REAL(DOUBLE),DIMENSION(3)   :: CellCenter
+    REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+    INTEGER,DIMENSION(3)        :: AutoW
+    INTEGER                     :: I,J
+    !
+!   Find the center of the cell     
+    DO I=1,3
+       CellCenter(I)=Zero
+       IF(AutoW(I)==1)THEN           
+          DO J=1,3
+             IF(AutoW(J)==1) THEN
+                CellCenter(I)=CellCenter(I)+Half*BoxShape(I,J)
+             ENDIF
+          ENDDO
+       ENDIF
+    ENDDO
+  END FUNCTION CellCenter
 !-------------------------------------------------------------------------------
   SUBROUTINE MakeGMPeriodic(GM,WP_O)
     TYPE(CRDS)                     :: GM

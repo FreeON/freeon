@@ -3117,4 +3117,21 @@ MODULE LinAlg
         ENDDO
         FNorm_BCSR = SQRT(FNorm_BCSR)
       END FUNCTION FNorm_BCSR
+!
+!------------------------------------------------------------------
+!
+      SUBROUTINE CROSS_PRODUCT(V1,V2,CrossProd,Add_O)
+        REAL(DOUBLE),DIMENSION(:) :: V1,V2,CrossProd
+        LOGICAL,OPTIONAL          :: Add_O
+        REAL(DOUBLE),DIMENSION(3) :: VectAux
+        !
+        VectAux(1)=V1(2)*V2(3)-V1(3)*V2(2)
+        VectAux(2)=V1(3)*V2(1)-V1(1)*V2(3)
+        VectAux(3)=V1(1)*V2(2)-V1(2)*V2(1)
+        IF(PRESENT(Add_O)) THEN
+          IF(Add_O) CrossProd=CrossProd+VectAux
+        ELSE
+          CrossProd=VectAux
+        ENDIF
+      END SUBROUTINE CROSS_PRODUCT
 END MODULE
