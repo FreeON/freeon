@@ -1,0 +1,103 @@
+  /usr/users/vweber/MONDO_BIN/MakePFFT tmp-_27045 OneElectronMatrices 0 1 1 0 1 
+ 1
+  /usr/users/vweber/MONDO_BIN/MakeS tmp-_27045 OneElectronMatrices 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/AInv tmp-_27045 OneElectronMatrices 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/MakeT tmp-_27045 OneElectronMatrices 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/P2Use tmp-_27045 DensitySuperposition 0 1 1 0 1 1
+ ... ning Warning  Warning  Warning Wa ...
+In P2Use, TrP = 0.1550000000000000D+0
+ 2
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensitySuperposition 0 1 1 0 1 
+ 1
+ ... ning Warning  Warning  Warning Wa ...
+MakeRho                :: relative er
+ ror in density = 0.31D-01. Distribution threshold
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensitySuperposition 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensitySuperposition 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensitySuperposition 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensitySuperposition 0 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensitySuperposition 0 1 1 0 1
+  1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 1 1 1 0 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 2 1 1 1 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 3 1 1 2 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 4 1 1 3 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 5 1 1 4 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 6 1 1 5 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 7 1 1 6 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 8 1 1 7 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 9 1 1 8 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 10 1 1 9 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/QCTC tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/ONX tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/FBuild tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/DIIS tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/TS4 tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/SCFstats tmp-_27045 DensityNormal 11 1 1 10 1 1
+  /usr/users/vweber/MONDO_BIN/SForce tmp-_27045 ForceEvaluation 11 1 1 11 1 1
+  /usr/users/vweber/MONDO_BIN/TForce tmp-_27045 ForceEvaluation 11 1 1 11 1 1
+  /usr/users/vweber/MONDO_BIN/MakeRho tmp-_27045 ForceEvaluation 11 1 1 11 1 1
+  /usr/users/vweber/MONDO_BIN/JForce tmp-_27045 ForceEvaluation 11 1 1 11 1 1
+  /usr/users/vweber/MONDO_BIN/GONX tmp-_27045 ForceEvaluation 11 1 1 11 1 1
+ K<DimU in GetPBCProj.

@@ -1,0 +1,13 @@
+This is a serial GeoOpt of CH3CO2-. The code halts in InCoords
+at the first geometry. Seems to have comflict with PBC dimension,
+but it is a gas phase calculation!
+
+The error:
+K<DimU in GetPBCProj.
+
+Setting:
+chimpc17 and Intel(R) Fortran Compiler for 32-bit applications, 
+Version 8.0   Build 20031016Z Package ID: l_fc_p_8.0.034
+
+SV 24.12.04
+------------------------------------------------------------------
