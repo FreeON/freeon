@@ -9,7 +9,7 @@ MODULE DynamicsKeys
   CHARACTER(LEN=8),  PARAMETER :: MD_ATOMWRAP      ='AtomWrap'
   CHARACTER(LEN=7),  PARAMETER :: MD_CLOBBER       ='Clobber'
   ! Number of replicas to use (requires parallel code)
-  CHARACTER(LEN=7),  PARAMETER :: MD_REPLICAS      ='Replicas'      
+  CHARACTER(LEN=8),  PARAMETER :: MD_REPLICAS      ='Replicas'      
   ! restart input 
   CHARACTER(LEN=8),  PARAMETER :: MD_INPUTS        ='MDinputs'      
   ! integration timestep

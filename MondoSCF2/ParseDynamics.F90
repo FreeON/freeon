@@ -8,7 +8,7 @@ CONTAINS
   !========================================================================================
   ! PARSE FOR MOLECULAR DYNAMICS DIRECTIVES AND VALUES
   !========================================================================================
-  SUBROUTINE ParseDynamics(N,O,G,D)
+  SUBROUTINE LoadDynamics(N,O,G,D)
     TYPE(FileNames)  :: N
     TYPE(Options)    :: O
     TYPE(Geometries) :: G
@@ -21,7 +21,7 @@ CONTAINS
        D%MDAlgorithm=MD_SERIAL_VERLET
     ELSEIF(OptKeyQ(Inp,MOLDYNE,MD_PTEMPER))THEN
        D%MDAlgorithm=MD_PARALLEL_REP
-       IF(.NOT.OptIntQ(Inp,MD_REPLICAS,G%Images))THEN
+       IF(.NOT.OptIntQ(Inp,MD_REPLICAS,G%Klones))THEN
           CALL MondoHalt(PRSE_ERROR,'Did not find input number of parallel replicas to run ')
        ENDIF
     ENDIF
@@ -66,5 +66,5 @@ CONTAINS
     D%DT   = D%DT   * 1.0D-15 * SecondsToInternalTime
     D%TTAU = D%TTAU * 1.0D-15 * SecondsToInternalTime
     D%PTAU = D%PTAU * 1.0D-15 * SecondsToInternalTime
-  END SUBROUTINE ParseDynamics
+  END SUBROUTINE LoadDynamics
 END MODULE ParseDynamics

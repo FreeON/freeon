@@ -2,6 +2,7 @@ MODULE ParseGeometries
   USE Parse
   USE InOut
   USE OptionKeys
+  USE DynamicsKeys
   USE GeometryKeys
   USE ControlStructures
 CONTAINS
@@ -14,7 +15,7 @@ CONTAINS
   ! 
   !                THIS MEANS THAT VELOCITIES, FORCES, AND GEOMETRIES SHOULD BE ARCHIVED INTO THE HDF FILE. 
   !
-  !                THIS SHOULD NOT BE UNDERTAKEN UNTILL WE HAVE HDF GROUPS ENABLED FOR EACH IMAGE
+  !                THIS SHOULD NOT BE UNDERTAKEN UNTILL WE HAVE HDF GROUPS ENABLED FOR EACH KLONE
   !
   ! <<README GRAME, HUGH AND KAROLY>> <<README GRAME, HUGH AND KAROLY>> <<README GRAME, HUGH AND KAROLY>> <<README GRAME, HUGH AND KAROLY>>
   !
@@ -28,35 +29,35 @@ CONTAINS
     TYPE(Geometries) :: G
     !--------------------------------------------------------------------------------------------------------------!
     IF(O%GradOpt==GRAD_TS_SEARCH_NEB)THEN
-       CALL MondoHalt(PRSE_ERROR,' To here, G%Images has not been parsed, needs some more work ')
-       ALLOCATE(G%Image(1:G%Images))
+       CALL MondoHalt(PRSE_ERROR,' To here, G%Klones has not been parsed, needs some more work ')
+       ALLOCATE(G%Klone(1:G%Klones))
        IF(O%Guess==GUESS_EQ_RESTART)THEN
        ELSE
-          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Image(1))        ! Read in the reactants geometry
-          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Image(G%Images))   ! Read in the products geometry
+          CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Klone(1))        ! Read in the reactants geometry
+          CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Klone(G%Klones))   ! Read in the products geometry
        ENDIF
        !
-       ! GRAEME PUTS A SUBROUTINE HERE TO ALLOCATE AND SET THE REMAINING (G%Images-2) IMAGES ?
+       ! GRAEME PUTS A SUBROUTINE HERE TO ALLOCATE AND SET THE REMAINING (G%Klones-2) KLONES ?
        !
     ELSEIF(O%GradOpt==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
 #ifdef !defined(PARALLEL)
        CALL MondoHalt(PRSE_ERROR,' MondoSCF must be compiled in parallel for replica exchange to be active.')
 #endif
-       ALLOCATE(G%Image(1:G%Images))
+       ALLOCATE(G%Klone(1:G%Klones))
        IF(O%Guess==GUESS_EQ_RESTART)THEN
        ELSE       
-          ! HUGH PUTS A ROUTINE TO GENERATE (G%Images) PERTURBED TRAJECTORIES AND VELOCITIES?
+          ! HUGH PUTS A ROUTINE TO GENERATE (G%Klones) PERTURBED TRAJECTORIES AND VELOCITIES?
        ENDIF
     ELSE
-       G%Images=1
-       ALLOCATE(G%Image(1))
+       G%Klones=1
+       ALLOCATE(G%Klone(1))
        IF(O%Guess==GUESS_EQ_RESTART)THEN
           HDFFileID=OpenHDFFile(N%RFile)
-          CALL Get(G%Image(1),TAG_O=GeoTag(O%RestartState))
+          CALL Get(G%Klone(1),TAG_O=GeoTag(O%RestartState))
           CALL CloseHDF(HDFFileID)
           HDFFileID=N%NewFileID          
        ELSE       
-          CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Image(1))
+          CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Klone(1))
        ENDIF
     ENDIF
 
@@ -150,7 +151,6 @@ CONTAINS
        G%NElec=G%NElec+G%AtNum%D(I)
     ENDDO
     G%NElec=G%NElec-G%TotCh
-
     NUnPEl=G%Multp-1
     IF(NUnPEl.NE.0) &
          CALL MondoHalt(PRSE_ERROR,'Open shell not supported yet.'   &
@@ -169,35 +169,36 @@ CONTAINS
   SUBROUTINE MassageCoordinates(G,P)
     TYPE(Geometries) :: G
     TYPE(Periodics)  :: P
+    INTEGER          :: I
     !-------------------------------------------------------------------------!
-       DO I=1,G%Images
+       DO I=1,G%Klones
 #ifdef PERIODIC
           IF(P%InAtomCrd)THEN
              ! Convert coordinates and unit cell to AU
-             IF(.NOT.G%Image(I)%InAU) &
-                G%Image(I)%Carts%D=AngstromsToAU*G%Image(I)%Carts%D           
-             G%Image(I)%AbCarts%D=G%Image(I)%Carts%D
+             IF(.NOT.G%Klone(I)%InAU) &
+                G%Klone(I)%Carts%D=AngstromsToAU*G%Klone(I)%Carts%D           
+             G%Klone(I)%AbCarts%D=G%Klone(I)%Carts%D
              ! Don't really compute fractional coordinates as they are never actually used!
-!             CALL CalFracCarts( G%Image(I) )
+!             CALL CalFracCarts( G%Klone(I) )
           ELSE
              CALL MondoHalt(PRSE_ERROR,' Need to get rid of box carts etc and just overwrite carts in AtomCarts ' &
                                        //' since they are only used in input' )
              ! CALL CalAtomCarts(GM)
           ENDIF
           IF(P%Trans_COM) &
-             CALL CalTransVec(G%Image(I))
-          CALL Translate(G%Image(I),G%Image(I)%PBC%TransVec)
-          CALL WrapAtoms(G%Image(I))
+             CALL CalTransVec(G%Klone(I))
+          CALL Translate(G%Klone(I),G%Klone(I)%PBC%TransVec)
+          CALL WrapAtoms(G%Klone(I))
 #else
           ! Convert to AU
-          IF(.NOT.G%Image(I)%InAU) &
-              G%Image(I)%Carts%D=AngstromsToAU*G%Image(I)%Carts%D           
+          IF(.NOT.G%Klone(I)%InAU) &
+              G%Klone(I)%Carts%D=AngstromsToAU*G%Klone(I)%Carts%D           
           ! Find the box bounding the atomic positions after conversion to AU
-          G%Image(I)%BndBox%D(:,1)=+1.D8
-          G%Image(I)%BndBox%D(:,2)=-1.D8
-          DO J=1,G%Image(I)%NAtms
-             G%Image(I)%BndBox%D(:,1)=MIN(G%Image(I)%BndBox%D(:,1),G%Image(I)%Carts%D(:,J) )
-             G%Image(I)%BndBox%D(:,2)=MAX(G%Image(I)%BndBox%D(:,2),G%Image(I)%Carts%D(:,J))
+          G%Klone(I)%BndBox%D(:,1)=+1.D8
+          G%Klone(I)%BndBox%D(:,2)=-1.D8
+          DO J=1,G%Klone(I)%NAtms
+             G%Klone(I)%BndBox%D(:,1)=MIN(G%Klone(I)%BndBox%D(:,1),G%Klone(I)%Carts%D(:,J) )
+             G%Klone(I)%BndBox%D(:,2)=MAX(G%Klone(I)%BndBox%D(:,2),G%Klone(I)%Carts%D(:,J))
           ENDDO
        ENDIF
 #endif

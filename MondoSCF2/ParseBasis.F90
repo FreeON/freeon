@@ -21,16 +21,19 @@ CONTAINS
    !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
     CALL ParseBasisNames(B)
-    ALLOCATE(B%BSets(1:B%NBSets,1:G%Images))
-    ALLOCATE(B%BSiz(1:B%NBSets,1:G%Images))
-    ALLOCATE(B%OffS(1:B%NBSets,1:G%Images))
+    ALLOCATE(B%BSiz(1:B%NBSets,1:G%Klones))
+    ALLOCATE(B%OffS(1:B%NBSets,1:G%Klones))
+    ALLOCATE(B%BSets(1:B%NBSets,1:G%Klones))
+    ALLOCATE(B%LnDex(1:B%NBSets,1:G%Klones))
+    ALLOCATE(B%DExpt(1:B%NBSets,1:G%Klones))
     DO J=1,B%NBSets
        BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
        CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
-       DO I=1,G%Images
-          IF(.NOT.ParseBasis(G%Image(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
-               CALL MondoHalt(PRSE_ERROR,'ParseBasis failed for basis set file ' &
+       DO I=1,G%Klones
+          IF(.NOT.ParseBasisSets(G%Klone(I),B%BSets(I,J),B%BSiz(I,J),B%OffS(I,J)))   &
+               CALL MondoHalt(PRSE_ERROR,'ParseBasisSets failed for basis set file ' &
                               //RTRN//TRIM(BaseFile))
+          CALL PrimitiveReDistribution(B%BSets(I,J),B%NExpt(J),B%DExpt(I,J),B%Lndex(I,J))
        ENDDO
        CLOSE(Bas,STATUS='KEEP')
     ENDDO
@@ -40,13 +43,13 @@ CONTAINS
   ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 
   ! COMPUTE BLOCKING FOR SPARSE BLOCKED LINEAR ALGEBRA
   !============================================================================
-  FUNCTION ParseBasis(G,B,BlkSiz,OffSet)
+  FUNCTION ParseBasisSets(G,B,BlkSiz,OffSet)
     TYPE(BSET)                 :: BS,B
     TYPE(CRDS)                 :: G
     TYPE(INT_VECT)             :: BlkSiz,OffSet
     REAL(DOUBLE),    &
        DIMENSION(1:MaxASymt+2) :: Dbls
-    LOGICAL                    :: ParseBasis
+    LOGICAL                    :: ParseBasisSets
     CHARACTER(LEN=DCL)         :: Line
     INTEGER                    :: I,J,K,L,N,NC,NK,NP,NS,MinL,MaxL,KFound
     !-------------------------------------------------------------------------!
@@ -168,8 +171,8 @@ CONTAINS
     CALL New(BlkSiz,B%NAtms)
     CALL New(OffSet,B%NAtms)
     CALL BlockBuild(G,B,BlkSiz,OffSet)
-    ParseBasis=.TRUE.
-  END FUNCTION ParseBasis
+    ParseBasisSets=.TRUE.
+  END FUNCTION ParseBasisSets
 
   SUBROUTINE ReNormalizePrimitives(A)
     TYPE(BSET)       :: A
@@ -249,10 +252,92 @@ CONTAINS
        IF(OptKeyLocQ(Inp,BASIS_SETS,TRIM(CSets(1,I)),MaxSets,NLoc,Location))THEN
           B%NBSets=B%NBSets+NLoc
           DO ILoc=1,NLoc 
-             B%BName(Loc(ILoc))=ADJUSTL(CSets(2,I))
+             B%BName(Location(ILoc))=ADJUSTL(CSets(2,I))
           ENDDO
        ENDIF
     ENDDO
     IF(B%NBSets==0)CALL MondoHalt(PRSE_ERROR,TRIM(BASIS_SETS)//' not found in input.')
   END SUBROUTINE ParseBasisNames
+  !=============================================================================
+  ! PRECOMPUTE PRIMITIVE DISTRIBUTION INFORMATION
+  !=============================================================================
+  SUBROUTINE PrimitiveReDistribution(BS,NExpt,DExpt,Lndex)
+    TYPE(BSET),     INTENT(INOUT):: BS
+    TYPE(DBL_VECT), INTENT(OUT)  :: DExpt
+    TYPE(INT_VECT), INTENT(OUT)  :: Lndex
+    INTEGER,        INTENT(OUT)  :: NExpt
+    TYPE(INT_VECT)               :: ITmp,IPnt
+    INTEGER                      :: I,K,KA,KB,CFA,CFB,PFA,PFB,NPB
+    !---------------------------------------------------------------------------!
+    ! First count the types of primitive distributions(K=1), then compute 
+    ! their primitive distribution exponents and associated values of 
+    ! angular symmetry (K=2)
+    DO K=1,2
+       IF(K==1)THEN
+          NExpt=1
+       ELSE
+          CALL New(DExpt,NExpt)
+          CALL New(Lndex,NExpt)
+          NExpt=1
+       ENDIF
+       DO KA=1,BS%NKind
+          DO KB=1,KA-1
+             DO CFA=1,BS%NCFnc%I(KA)
+                DO CFB=1,BS%NCFnc%I(KB)
+                   DO PFA=1,BS%NPFnc%I(CFA,KA)
+                      DO PFB=1,BS%NPFnc%I(CFB,KB)
+                         IF(K==2)THEN
+                            DExpt%D(NExpt)=BS%Expnt%D(PFA,CFA,KA)  &
+                                 +BS%Expnt%D(PFB,CFB,KB)  
+                            Lndex%I(NExpt)=BS%ASymm%I(2,CFA,KA)    &
+                                 +BS%ASymm%I(2,CFB,KB)
+                         ENDIF
+                         NExpt=NExpt+1          
+                      ENDDO
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+       DO KA=1,BS%NKind
+          DO CFA=1,BS%NCFnc%I(KA)
+             DO CFB=1,CFA
+                DO PFA=1,BS%NPFnc%I(CFA,KA)
+                   NPB=BS%NPFnc%I(CFB,KA)
+                   IF(CFA.EQ.CFB)NPB=PFA
+                   DO PFB=1,NPB
+                      IF(K==2)THEN 
+                         DExpt%D(NExpt)=BS%Expnt%D(PFA,CFA,KA)  &
+                              +BS%Expnt%D(PFB,CFB,KA)  
+                         Lndex%I(NExpt)=BS%ASymm%I(2,CFA,KA)    &
+                              +BS%ASymm%I(2,CFB,KA)
+                      ENDIF
+                      NExpt=NExpt+1 
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+    ! Add exponent for nuclear delta function
+    DExpt%D(NExpt)=NuclearExpnt
+    Lndex%I(NExpt)=0
+    ! Sort the exponents in assending order and carry
+    ! allong angular symetry indecies
+    CALL New(IPnt,NExpt)
+    CALL New(ITmp,NExpt)
+    DO I=1,NExpt
+       IPnt%I(I)=I
+    ENDDO
+    CALL Sort(DExpt,IPnt,NExpt,2)   
+    DO I=1,NExpt
+       ITmp%I(I)=Lndex%I(IPnt%I(I))
+    ENDDO
+    DO I=1,NExpt
+       Lndex%I(I)=ITmp%I(I)
+    ENDDO
+    ! Tidy up
+    CALL Delete(ITmp)
+    CALL Delete(IPnt)
+  END SUBROUTINE PrimitiveReDistribution    
 END MODULE ParseBasis

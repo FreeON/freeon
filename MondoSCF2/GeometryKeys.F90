@@ -2,10 +2,12 @@ MODULE GeometryKeys
   ! Coordinate input delemeters
   CHARACTER(LEN=15), PARAMETER :: GEOMETRY_BEGIN ='<BeginGeometry>'
   CHARACTER(LEN=13), PARAMETER :: GEOMETRY_END   ='<EndGeometry>'  
+
   CHARACTER(LEN=15), PARAMETER :: PRODUCTS_BEGIN ='<BeginProducts>'
   CHARACTER(LEN=13), PARAMETER :: PRODUCTS_END   ='<EndProducts>'
-  CHARACTER(LEN=15), PARAMETER :: REACTANTS_BEGIN='<BeginReactants>'
-  CHARACTER(LEN=13), PARAMETER :: REACTANTS_END  ='<EndReactants>'
+
+  CHARACTER(LEN=16), PARAMETER :: REACTANTS_BEGIN='<BeginReactants>'
+  CHARACTER(LEN=14), PARAMETER :: REACTANTS_END  ='<EndReactants>'
   ! Geometry=
   CHARACTER(LEN=8),  PARAMETER :: GEOMETRY          ='Geometry' 
   CHARACTER(LEN=8),  PARAMETER :: IN_AU             ='InAu'

@@ -26,7 +26,7 @@ MODULE ControlStructures
      INTEGER                        :: NThrsh
      INTEGER                        :: NSteps
      INTEGER                        :: Guess
-     INTEGER                        :: GradOpt
+     INTEGER                        :: Grad
      INTEGER                        :: Coordinates
      INTEGER,   DIMENSION(MaxSets)  :: Methods
      INTEGER,   DIMENSION(MaxSets)  :: Models
@@ -36,6 +36,13 @@ MODULE ControlStructures
      TYPE(TOLS),DIMENSION(MaxSets)  :: Thresholds
      TYPE(DEBG)                     :: PFlags
   END TYPE Options
+
+  TYPE Parallel
+     INTEGER                        :: NProc
+     INTEGER                        :: NTime
+     INTEGER                        :: NSpace
+     CHARACTER(LEN=DCL)             :: MPIRun
+  END TYPE Parallel
 
   TYPE Dynamics
      INTEGER                         :: MDAlgorithm
@@ -65,65 +72,59 @@ MODULE ControlStructures
   END TYPE Dynamics
 
   TYPE Geometries
-     INTEGER                         :: Images
-     TYPE(INT_VECT)                  :: State
-     TYPE(CRDS),POINTER,DIMENSION(:) :: Image
+     INTEGER                         :: Klones
+     TYPE(CRDS),POINTER,DIMENSION(:) :: Klone
   END TYPE Geometries
 
-#ifdef PERIODIC
-  ! << CJ README >><< CJ README >><< CJ README >><< CJ README >><< CJ README >><< CJ README >>
-  !
-  ! >>>>>>>>>THESE SORT OF ITEMS DO NOT NEED TO BE ATTATCHED TO EACH AND EVERY GEOMETRY.<<<<<<  
-  ! >>>>>>>>>THEY SHOULD BE DEFINED HERE ONCE AND FOR ALL FOR THE ENTIRE SIMMULATION. <<<<<<<< 
-  !
-  ! >>>>>>>>> ALSO, DOESNT LOOK LIKE BOX CARTS OR BOX VECT ARE USED FOR ANYTHING. <<<<<<<<<<<<
-  ! >>>>>>>>> DO WE REALLY NEED TO KEEP THEM AROUND ? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  !
-  !<< CJ README >><< CJ README >><< CJ README >><< CJ README >><< CJ README >><< CJ README >>
-
-
-  !
-  !<<CJ, HUGH AND GRAME README>> <<CJ, HUGH AND GRAME README>> <<CJ, HUGH AND GRAME README>> 
-  !
-  !    >>>>>>>>>DO WE WANT TO KEEP THE UNIT CELL CONSTANT FOR ALL IMAGES?<<<<<<<<<<<<<<<
-  !
-  !<<CJ, HUGH AND GRAME README>> <<CJ, HUGH AND GRAME README>> <<CJ, HUGH AND GRAME README>> 
-  !
-  TYPE Periodics
-     INTEGER                         :: Dimen      !-- Dimension of the System
-     LOGICAL                         :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
-     LOGICAL                         :: PFFOvRide  !-- Override of Automatic PFF stuff     
-     LOGICAL                         :: InVecForm  !-- What form are the Lattice vectors in
-     LOGICAL                         :: InAtomCrd  !-- Atomic or Fractional Coordinates
-     LOGICAL                         :: Translate  !-- Should the Atomic Coordinated be Translated 
-     LOGICAL                         :: Trans_COM  !-- Weither to Translate to The center of The Box
-     LOGICAL,DIMENSION(3)            :: AutoW      !-- Periodic in X, Y and or Z  direction
-     REAL(DOUBLE)                    :: Epsilon    !-- Epsilon at Infinity (Metal == Infinity)
-  END TYPE Periodics
-#endif
+  TYPE State
+     CHARACTER                       :: Action
+     CHARACTER                       :: SubAction
+     TYPE(INT_VECT)                  :: Current
+     TYPE(INT_VECT)                  :: Previous
+  END TYPE State
 
   TYPE BasisSets
-     INTEGER                           ::NBSets
+     INTEGER                           :: NBSets
+     INTEGER,  DIMENSION(MaxSets)      :: NExpt
      CHARACTER(LEN=BASESET_CHR_LEN),&
-                  DIMENSION(MaxSets)   :: BName  
-     TYPE(INT_VECT),POINTER,        &
-                DIMENSION(:,:)         :: OffS,BSiz
+                DIMENSION(MaxSets)     :: BName  
      TYPE(BSET),POINTER,            &
                 DIMENSION(:,:)         :: BSets
+     TYPE(INT_VECT),POINTER,        &
+                DIMENSION(:,:)         :: OffS,BSiz,LnDex
+     TYPE(DBL_VECT),POINTER,        &
+                DIMENSION(:,:)         :: DExpt
   END TYPE BasisSets
+
+#ifdef PERIODIC
+  TYPE Periodics
+     INTEGER                           :: Dimen      !-- Dimension of the System
+     LOGICAL                           :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
+     LOGICAL                           :: PFFOvRide  !-- Override of Automatic PFF stuff     
+     LOGICAL                           :: InVecForm  !-- What form are the Lattice vectors in
+     LOGICAL                           :: InAtomCrd  !-- Atomic or Fractional Coordinates
+     LOGICAL                           :: Translate  !-- Should the Atomic Coordinated be Translated 
+     LOGICAL                           :: Trans_COM  !-- Weither to Translate to The center of The Box
+     LOGICAL,DIMENSION(3)              :: AutoW      !-- Periodic in X, Y and or Z  direction
+     REAL(DOUBLE)                      :: Epsilon    !-- Epsilon at Infinity (Metal == Infinity)
+  END TYPE Periodics
+#endif
 
   TYPE Controls
      TYPE(FileNames)  :: Nams
      TYPE(Options)    :: Opts
      TYPE(Dynamics)   :: Dyns
      TYPE(Geometries) :: Geos
-
+#ifdef PERIODIC
      TYPE(Periodics)  :: PBCs
+#endif
      TYPE(BasisSets)  :: Sets
-!     TYPE(Parallel)   :: MPIs
 !     TYPE(MMechanics) :: QMMM
+#ifdef PARALLEL
+     TYPE(Parallel)   :: MPIs
+#endif
+     TYPE(State)      :: Stat
   END TYPE Controls
-  
 
   INTEGER                     :: NLoc
   INTEGER, DIMENSION(MaxSets) :: Location

@@ -66,19 +66,5 @@ CONTAINS
        N%LFile=TRIM(N%M_PWD)//TRIM(Args%C%C(3))
        N%GFile=TRIM(N%M_PWD)//TRIM(Args%C%C(4))
     ENDIF
-    ! HDF archival and restart file 
-    N%HFile=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//InfF                
-    ! clean up memory
-    CALL Delete(Args)
-    ! Initialize and open the new HDF file
-    CALL InitHDF(N%HFile)
-    N%NewFileID=OpenHDFFile(N%HFile)
-    ! Set globally accesable HDFFileID 
-    HDFFileID=N%NewFileID
-    ! Put current working file names to HDF
-    CALL Put(N%IFile,'inputfile')
-    CALL Put(N%HFile,'infofile')
-    CALL Put(N%LFile,'logfile')
-    CALL Put(N%OFile,'outPutfile')
   END SUBROUTINE LoadCommands
 END MODULE ParseCommands

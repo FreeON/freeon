@@ -24,18 +24,18 @@ CONTAINS
     TYPE(Options)   :: O
     !-------------------------------------------------------------------------!  
     CALL OpenASCII(N%IFile,Inp)
-    ! Check for restart, copy the current state the old to the new HDF file
+    ! Check for restart, and extract the current state from the restart HDF file
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
     ! Parse print output options, load global object PrintFlags
     CALL ParsePrintFlags(O%PFlags)
-    ! Parse for accuracy levels, set thresholds and put to HDF
+    ! Parse for accuracy levels and set thresholds
     CALL ParseThresholds(O%NThrsh,O%AccuracyLevels,O%Thresholds)
     ! Parse for SCF methods to use in solution of SCF equations and put to HDF
     CALL ParseSCFMethods(O%NMthds,O%Methods)
-    ! Parse for model chemistries and put to HDF
+    ! Parse for model chemistries 
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for gradient options.  
-    CALL ParseGradients(O%NSteps,O%Coordinates,O%GradOpt,O%OneBase,O%DoGDIIS)
+    CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%OneBase,O%DoGDIIS)
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -157,10 +157,6 @@ CONTAINS
          MODEL_B88x//', '//MODEL_VWN3xc//', '//MODEL_VWN5xc//', '//      &
          MODEL_PW91xc//', '//MODEL_PBExc//', '//MODEL_BLYPxc//', '//     &
          MODEL_B3LYP_VWN3xc//', '//MODEL_B3LYP_PW91xc//', and '//MODEL_PBE0xc)
-    ! Put model chemistry
-    DO I=1,NModls
-       CALL Put(Models(I),'ModelChemistry',Tag_O=IntToChar(I))
-    ENDDO
   END SUBROUTINE ParseModelChems
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS
@@ -212,7 +208,7 @@ CONTAINS
          //'Options include '//SCF_SDMM//', '//SCF_PM//', '//SCF_SP2//', '//SCF_TS4//', and '//SCF_RHHF)
   END SUBROUTINE ParseSCFMethods
   !===============================================================================================
-  ! PARSE FOR ACCURACY LEVELS, SET THRESHOLDS AND PUT THEN TO HDF
+  ! PARSE FOR ACCURACY LEVELS AND SET THRESHOLDS
   !===============================================================================================
   SUBROUTINE ParseThresholds(NThrsh,AccuracyLevels,Thresholds)
     INTEGER                       :: NThrsh,I
@@ -258,7 +254,7 @@ CONTAINS
          CALL MondoHalt(PRSE_ERROR,'Option '//ACCURACY_OPTION//' not set in input.'//RTRN   &
          //'Options include '//ACCURACY_CHEEZY//', '//ACCURACY_GOOD//', '   &
          //ACCURACY_TIGHT//', and '//ACCURACY_RETENTIVE)
-    ! Put thresholds to HDF
+    ! Set thresholds
     DO I=1,NThrsh
        Thresholds(I)%Cube=CubeNeglect(AccuracyLevels(I))
        Thresholds(I)%Trix=TrixNeglect(AccuracyLevels(I))
@@ -266,7 +262,6 @@ CONTAINS
        Thresholds(I)%TwoE=TwoENeglect(AccuracyLevels(I))
        Thresholds(I)%ETol=ETol(AccuracyLevels(I))
        Thresholds(I)%DTol=DTol(AccuracyLevels(I))
-       CALL Put(Thresholds(I),Tag_O=IntToChar(I))
     ENDDO
   END SUBROUTINE ParseThresholds
   !===============================================================================================
@@ -285,7 +280,6 @@ CONTAINS
        ! Check for absolute path 
        IF(INDEX(RestartHDF,'/')==0)  &
             RestartHDF=TRIM(M_PWD)//RestartHDF       
-       CALL Put(RestartHDF,'oldinfo')
        CALL New(RestartState,3)
        ! Open the old restart HDF file
        HDFFileID=OpenHDFFile(RestartHDF)
@@ -303,8 +297,7 @@ CONTAINS
     ENDIF
   END SUBROUTINE ParseRestart
   !===============================================================================================
-  ! PARSE THE PRINT OUT OPTIONS AND LOAD THE GLOBAL PRINT FLAGS OBJECT, DO NOT PUT TO HDF TO ALLOW
-  ! THEM TO CHANGE DYNAMICALLY WHEN READ FROM THE INPUT
+  ! PARSE THE PRINT OUT OPTIONS AND LOAD THE GLOBAL PRINT FLAGS OBJECT.
   !===============================================================================================
   SUBROUTINE ParsePrintFlags(PFlags)
     TYPE(DEBG)         :: PFlags
@@ -361,8 +354,8 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseGradients(NSteps,Coordinates,GradOpt,OneBase,DoGDIIS)
-    INTEGER NSteps,Coordinates,GradOpt
+  SUBROUTINE ParseGradients(NSteps,Coordinates,Grad,OneBase,DoGDIIS)
+    INTEGER NSteps,Coordinates,Grad
     LOGICAL OneBase,DoGDIIS
     !-----------------------------------------------------------------------------------------------
     ! Default max geometry steps is 100
@@ -389,22 +382,22 @@ CONTAINS
     ENDIF
     ! Parse macro gradient options
     IF(OptKeyQ(Inp,GRADIENTS,GRAD_FORCE))THEN
-       GradOpt=GRAD_ONE_FORCE
+       Grad=GRAD_ONE_FORCE
        NSteps=1
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_DYNAMICS))THEN
        DoGDIIS=.FALSE.            ! Meaningless here
        Coordinates=GRAD_CART_OPT  ! Only in Cartesians for now
-       GradOpt=GRAD_DO_DYNAMICS   ! Do molecular dynamics
+       Grad=GRAD_DO_DYNAMICS   ! Do molecular dynamics
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_QUNEW))THEN
        DoGDIIS=.FALSE.            ! 
        Coordinates=GRAD_CART_OPT  ! Only in Cartesians for now
-       GradOpt=GRAD_QNEW_OPT      ! Do explicit inverse BFGS Quasi-Newton optimization
+       Grad=GRAD_QNEW_OPT      ! Do explicit inverse BFGS Quasi-Newton optimization
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_SDESCENT))THEN
-       GradOpt=GRAD_SDESCENT_OPT  ! First order minimization
+       Grad=GRAD_SDESCENT_OPT  ! First order minimization
     ELSEIF(OptKeyQ(Inp,GRADIENTS,GRAD_TS_SEARCH))THEN
-       GradOpt=GRAD_TS_SEARCH_NEB ! Transition state search with NEB
+       Grad=GRAD_TS_SEARCH_NEB ! Transition state search with NEB
     ELSE
-       GradOpt=GRAD_NO_GRAD       ! Default is do nothing
+       Grad=GRAD_NO_GRAD       ! Default is do nothing
     ENDIF
   END SUBROUTINE ParseGradients
 END MODULE ParseOptions

@@ -31,7 +31,9 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 ObjectFiles = ControlStructures.o ParseCommands.o OptionKeys.o ParseOptions.o \
               DynamicsKeys.o ParseDynamics.o GeometryKeys.o ParseGeometries.o \
-              PeriodicKeys.o ParsePeriodic.o ParseBasis.o ParseInput.o 
+              PeriodicKeys.o ParsePeriodic.o ParseBasis.o ParseInput.o        \
+              MondoSCF.o
+
 #
 ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
               ParseGeometries.x
