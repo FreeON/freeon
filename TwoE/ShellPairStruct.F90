@@ -26,7 +26,7 @@ MODULE ShellPairStruct
   END TYPE ShellPairG
   !
   TYPE AtomInfo
-     INTEGER      :: K1,K2,NCell
+     INTEGER      :: K1,K2,NFPair
      REAL(DOUBLE) :: Atm1X,Atm1Y,Atm1Z
      REAL(DOUBLE) :: Atm2X,Atm2Y,Atm2Z
      REAL(DOUBLE) :: R12
@@ -43,6 +43,10 @@ MODULE ShellPairStruct
   TYPE AtomPr
      TYPE(ShellPair) :: SP
   END TYPE AtomPr
+
+  TYPE AtomPrG
+     TYPE(ShellPairG) :: SP
+  END TYPE AtomPrG
 
   TYPE ONX2OffSt
      INTEGER :: A,B,C,D

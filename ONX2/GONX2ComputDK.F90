@@ -249,13 +249,13 @@ CONTAINS
              NBFA=BSc%BfKnd%I(KA)
              NCFncA=BSc%NCFnc%I(KA)
              !
-             ACAtmInfo%NCell=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
+             ACAtmInfo%NFPair=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
              & )
 #else
              & *(-1d0))
 #endif
-             IF(ACAtmInfo%NCell.EQ.0) EXIT RnOvA
+             IF(ACAtmInfo%NFPair.EQ.0) EXIT RnOvA
              !
              ACAtmInfo%Atm1X=GMc%Carts%D(1,AtA)
              ACAtmInfo%Atm1Y=GMc%Carts%D(2,AtA)
@@ -314,13 +314,13 @@ CONTAINS
                    Dab=DGetAbsMax(NBFA*NBFB,D%MTrix%D(iPtrD2))
 #endif
                    !
-                   BDAtmInfo%NCell=GetNonNFPair(AtBList,AtAList%RInt(1)*Dab*Dcd*Half,Thresholds%TwoE &
+                   BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dab*Dcd*Half,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
 #else
                    & *(-1d0))
 #endif
-                   IF(BDAtmInfo%NCell.EQ.0) EXIT RnOvB
+                   IF(BDAtmInfo%NFPair.EQ.0) EXIT RnOvB
                    !
                    BDAtmInfo%Atm1X=GMc%Carts%D(1,AtB)
                    BDAtmInfo%Atm1Y=GMc%Carts%D(2,AtB)
@@ -352,7 +352,7 @@ CONTAINS
                    !StressStressStressStressStressStressStress
                    !C_=0.0d0
                    !StressStressStressStressStressStressStress
-                   DO iFAC=1,ACAtmInfo%NCell
+                   DO iFAC=1,ACAtmInfo%NFPair
 #ifdef GTRESH
                       IF(Dcd*Dab*Half*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT
 #endif
@@ -361,7 +361,7 @@ CONTAINS
                       OffSet%A=OffArr%I(CFA,KA)
                       OffSet%C=OffArr%I(CFC,KC)
                       !
-                      DO iFBD=1,BDAtmInfo%NCell 
+                      DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
                          CFD=AtBList%Indx(2,iFBD)
 #ifdef GTRESH
@@ -529,7 +529,7 @@ CONTAINS
     AtmPair(:)%SP%IntType=BIG_INT
 #endif
     !
-    DO iNFPair=1,AtmInfo%NCell
+    DO iNFPair=1,AtmInfo%NFPair
        CF1 =List%Indx(1,iNFPair) !A,B
        CF2 =List%Indx(2,iNFPair) !C,D
        Cell=List%Indx(3,iNFPair)

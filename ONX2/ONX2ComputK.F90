@@ -215,13 +215,13 @@ CONTAINS
              KA=GMc%AtTyp%I(AtA)
              NBFA=BSc%BfKnd%I(KA)
              !
-             ACAtmInfo%NCell=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
+             ACAtmInfo%NFPair=GetNonNFPair(AtAList,AtBListTmp%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
              & )
 #else
              & *(-1d0))
 #endif
-             IF(ACAtmInfo%NCell.EQ.0) EXIT RnOvA
+             IF(ACAtmInfo%NFPair.EQ.0) EXIT RnOvA
              !
              ! Find the row in Kx.
 #ifdef ONX2_PARALLEL
@@ -247,13 +247,13 @@ CONTAINS
                 !
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
                    !
-                   BDAtmInfo%NCell=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
+                   BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
 #else
                    & *(-1d0))
 #endif
-                   IF(BDAtmInfo%NCell.EQ.0) EXIT RnOvB
+                   IF(BDAtmInfo%NFPair.EQ.0) EXIT RnOvB
                    !
                    KB=GMc%AtTyp%I(AtB)
                    NBFB=BSc%BfKnd%I(KB)
@@ -274,7 +274,7 @@ CONTAINS
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(NIntBlk,C(1),0.0d0)
                    !
-                   RnOvFAC: DO iFAC=1,ACAtmInfo%NCell
+                   RnOvFAC: DO iFAC=1,ACAtmInfo%NFPair
 #ifdef GTRESH
                       IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT RnOvFAC
 #endif
@@ -283,7 +283,7 @@ CONTAINS
                       OffSet%A=OffArrC%I(CFA,KA)
                       OffSet%C=OffArrP%I(CFC,KC)
                       !
-                      RnOvFBD: DO iFBD=1,BDAtmInfo%NCell 
+                      RnOvFBD: DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
                          CFD=AtBList%Indx(2,iFBD)
 #ifdef GTRESH
@@ -421,7 +421,7 @@ CONTAINS
     AtmPair(:)%SP%IntType=BIG_INT
 #endif
     !
-    DO iNFPair=1,AtmInfo%NCell
+    DO iNFPair=1,AtmInfo%NFPair
        CF1 =List%Indx(1,iNFPair) !A,B
        CF2 =List%Indx(2,iNFPair) !C,D
        Cell=List%Indx(3,iNFPair)
