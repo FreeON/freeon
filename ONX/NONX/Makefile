@@ -51,7 +51,7 @@ Libs =  $(F90_LIBRARIES) $(LAPACK)
 #
 NONX:	$(Objects)
 	$(LD) $(LDFLAGS) NONX $(Objects) $(LibOpts) $(Libs)
-	mv NONX $(MONDO_HOME)/Exec/NONX
+	mv NONX $(MONDO_HOME)/Exec/ONX
 #
 release:clean $(RELEASEFILES)
 #
