@@ -74,16 +74,15 @@ pbs:
 release:  purge 
 	rm -rf BALA-PERIODIC
 	rm -rf MgO-PERIODIC
-	rm -rf CVS
 #
 purge:	clean 
 	rm -f $(REMOVESRCE)
 	rm -f Test
 	rm -f \#*
-	rm -f *.out
+	rm -f *.out 
 	rm -f *.log
 	rm -f *.car
-	rm -f *.xsf *.xyz *.pdb*
+	rm -f *.xsf *.xyz *.pdb* *.MDO
 #
 clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
