@@ -22,7 +22,7 @@ MODULE AtomPairs
 ! Global variables
 !-------------------------------------------------------------------------------
 #ifdef PERIODIC
-  TYPE(CellSet)                :: CS,CSMM1,CSMM2
+  TYPE(CellSet)                :: CS_OUT,CS_IN
 #endif
 CONTAINS
 !-------------------------------------------------------------------------------
@@ -36,12 +36,10 @@ CONTAINS
     TYPE(BSet)                :: BS
 #ifdef PERIODIC
     REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
-
+!
     NRgn = 0
-    DO K=1,3
-       IF(GM%AutoW(K)) NRgn(K) = 1
-    ENDDO
-
+    DO K=1,3;IF(GM%PBC%AutoW(K)) NRgn(K) = 1;ENDDO
+!
     Pair%AB2 = 1.D16
     DO N1 = -NRgn(1),NRgn(1)
        DO N2 = -NRgn(2),NRgn(2)
@@ -102,6 +100,66 @@ CONTAINS
        ENDDO
     ENDDO
   END FUNCTION VectToBlock
+!========================================================================================
+! From HG Coefs, calculate the Dipole
+!========================================================================================
+  FUNCTION CalculateDiPole(LQ,Expt,RX,RY,RZ,Coef)
+    INTEGER                   :: LQ
+    REAL(DOUBLE)              :: RX,RY,RZ,Expt,PiExpt
+    REAL(DOUBLE),DIMENSION(3) :: CalculateDiPole
+    REAL(DOUBLE),DIMENSION(:) :: Coef
+!
+    PiExpt = (Pi/Expt)**1.5D0
+    SELECT CASE(LQ)
+    CASE (0)
+       CalculateDiPole(1) = -PiExpt*Coef(1)*RX
+       CalculateDiPole(2) = -PiExpt*Coef(1)*RY
+       CalculateDiPole(3) = -PiExpt*Coef(1)*RZ
+    CASE(1:)
+       CalculateDiPole(1) = -PiExpt*(Coef(2)+Coef(1)*RX)
+       CalculateDiPole(2) = -PiExpt*(Coef(3)+Coef(1)*RY)
+       CalculateDiPole(3) = -PiExpt*(Coef(4)+Coef(1)*RZ)
+    END SELECT
+!
+  END FUNCTION CalculateDiPole
+!========================================================================================
+! From HG Coefs, calculate the Quadrupole
+!========================================================================================
+  FUNCTION CalculateQuadruPole(LQ,Expt,RX,RY,RZ,Coef)
+    INTEGER                   :: LQ
+    REAL(DOUBLE)              :: RX,RY,RZ,PiExpt,Expt,RX2,RY2,RZ2
+    REAL(DOUBLE),DIMENSION(6) :: CalculateQuadruPole
+    REAL(DOUBLE),DIMENSION(:) :: Coef
+!
+    PiExpt = (Pi/Expt)**1.5D0
+    RX2 = Half/Expt + RX*RX 
+    RY2 = Half/Expt + RY*RY    
+    RZ2 = Half/Expt + RZ*RZ 
+    SELECT CASE(LQ)
+    CASE(0)
+       CalculateQuadruPole(1) = PiExpt*Coef(1)*RX2
+       CalculateQuadruPole(2) = PiExpt*Coef(1)*RY2
+       CalculateQuadruPole(3) = PiExpt*Coef(1)*RZ2
+       CalculateQuadruPole(4) = PiExpt*Coef(1)*RX*RY
+       CalculateQuadruPole(5) = PiExpt*Coef(1)*RX*RZ
+       CalculateQuadruPole(6) = PiExpt*Coef(1)*RY*RZ
+    CASE(1)
+       CalculateQuadruPole(1) = PiExpt*(Coef(1)*RX2 + Two*Coef(2)*RX)
+       CalculateQuadruPole(2) = PiExpt*(Coef(1)*RY2 + Two*Coef(3)*RY)
+       CalculateQuadruPole(3) = PiExpt*(Coef(1)*RZ2 + Two*Coef(4)*RZ)
+       CalculateQuadruPole(4) = PiExpt*(Coef(1)*RX*RY + Coef(2)*RY + Coef(3)*RX)
+       CalculateQuadruPole(5) = PiExpt*(Coef(1)*RX*RZ + Coef(2)*RZ + Coef(4)*RX)
+       CalculateQuadruPole(6) = PiExpt*(Coef(1)*RY*RZ + Coef(3)*RZ + Coef(4)*RY)
+    CASE(2:)
+       CalculateQuadruPole(1) = PiExpt*(Coef(1)*RX2 + Two*Coef(2)*RX + Two*Coef(5))
+       CalculateQuadruPole(2) = PiExpt*(Coef(1)*RY2 + Two*Coef(3)*RY + Two*Coef(7))
+       CalculateQuadruPole(3) = PiExpt*(Coef(1)*RZ2 + Two*Coef(4)*RZ + Two*Coef(10))
+       CalculateQuadruPole(4) = PiExpt*(Coef(1)*RX*RY + Coef(2)*RY + Coef(3)*RX + Coef(6))
+       CalculateQuadruPole(5) = PiExpt*(Coef(1)*RX*RZ + Coef(2)*RZ + Coef(4)*RX + Coef(8))
+       CalculateQuadruPole(6) = PiExpt*(Coef(1)*RY*RZ + Coef(3)*RZ + Coef(4)*RY + Coef(9))
+    END SELECT
+!  
+  END FUNCTION CalculateQuadruPole
 #ifdef PERIODIC
 !-------------------------------------------------------------------------------
 ! Set up the lattice vecters to sum over 
@@ -116,17 +174,16 @@ CONTAINS
     B0 = Zero
     C0 = Zero
     DO I=1,3
-       A0 = A0 + (GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)+GM%BoxShape%D(I,3))**2
-       B0 = B0 + (GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
-       C0 = C0 + (GM%BoxShape%D(I,1)-GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
+       A0 = A0 + (GM%PBC%BoxShape(I,1)+GM%PBC%BoxShape(I,2)+GM%PBC%BoxShape(I,3))**2
+       B0 = B0 + (GM%PBC%BoxShape(I,1)+GM%PBC%BoxShape(I,2)-GM%PBC%BoxShape(I,3))**2
+       C0 = C0 + (GM%PBC%BoxShape(I,1)-GM%PBC%BoxShape(I,2)-GM%PBC%BoxShape(I,3))**2
     ENDDO
     Radd = MAX(SQRT(A0),SQRT(B0))
     Radd = MAX(Radd,SQRT(C0))
 
     Radius = Radd+SQRT(AtomPairDistanceThreshold)
-    CALL New_CellSet_Sphere(CS,GM%AutoW,GM%BoxShape%D,Radius)
-
-    WRITE(*,*) 'THE NUMBER OF CELLS  in CS = ',CS%NCells 
+    CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+!
   END SUBROUTINE SetCellNumber
 !-------------------------------------------------------------------------------
 ! Convert from Atomic Coordinates  to Fractional Coordinates
@@ -135,9 +192,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 
-    VecF(1) = VecA(1)*GM%InvBoxSh%D(1,1) + VecA(2)*GM%InvBoxSh%D(1,2) + VecA(3)*GM%InvBoxSh%D(1,3)
-    VecF(2) = VecA(1)*GM%InvBoxSh%D(2,1) + VecA(2)*GM%InvBoxSh%D(2,2) + VecA(3)*GM%InvBoxSh%D(2,3)
-    VecF(3) = VecA(1)*GM%InvBoxSh%D(3,1) + VecA(2)*GM%InvBoxSh%D(3,2) + VecA(3)*GM%InvBoxSh%D(3,3)
+    VecF(1) = VecA(1)*GM%PBC%InvBoxSh(1,1) + VecA(2)*GM%PBC%InvBoxSh(1,2) + VecA(3)*GM%PBC%InvBoxSh(1,3)
+    VecF(2) = VecA(1)*GM%PBC%InvBoxSh(2,1) + VecA(2)*GM%PBC%InvBoxSh(2,2) + VecA(3)*GM%PBC%InvBoxSh(2,3)
+    VecF(3) = VecA(1)*GM%PBC%InvBoxSh(3,1) + VecA(2)*GM%PBC%InvBoxSh(3,2) + VecA(3)*GM%PBC%InvBoxSh(3,3)
 
   END FUNCTION AtomToFrac
 !-------------------------------------------------------------------------------
@@ -147,9 +204,9 @@ CONTAINS
     TYPE(CRDS)                 :: GM
     REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF
 
-    VecA(1) = VecF(1)*GM%BoxShape%D(1,1) + VecF(2)*GM%BoxShape%D(1,2) + VecF(3)*GM%BoxShape%D(1,3)
-    VecA(2) = VecF(1)*GM%BoxShape%D(2,1) + VecF(2)*GM%BoxShape%D(2,2) + VecF(3)*GM%BoxShape%D(2,3)
-    VecA(3) = VecF(1)*GM%BoxShape%D(3,1) + VecF(2)*GM%BoxShape%D(3,2) + VecF(3)*GM%BoxShape%D(3,3)
+    VecA(1) = VecF(1)*GM%PBC%BoxShape(1,1) + VecF(2)*GM%PBC%BoxShape(1,2) + VecF(3)*GM%PBC%BoxShape(1,3)
+    VecA(2) = VecF(1)*GM%PBC%BoxShape(2,1) + VecF(2)*GM%PBC%BoxShape(2,2) + VecF(3)*GM%PBC%BoxShape(2,3)
+    VecA(3) = VecF(1)*GM%PBC%BoxShape(3,1) + VecF(2)*GM%PBC%BoxShape(3,2) + VecF(3)*GM%PBC%BoxShape(3,3)
 
   END FUNCTION FracToAtom
 !-------------------------------------------------------------------------------
@@ -161,7 +218,7 @@ CONTAINS
     INTEGER                    :: I,N      
 
     DO I=1,3
-       IF(GM%AutoW(I)) THEN
+       IF(GM%PBC%AutoW(I)) THEN
           DO 
              IF(VecF(I) > One) THEN
                 VecF(I) = VecF(I) - One
@@ -202,7 +259,7 @@ CONTAINS
 
     InFracBox = .TRUE.
     DO I=1,3
-       IF(GM%AutoW(I)) THEN
+       IF(GM%PBC%AutoW(I)) THEN
           IF(VecF(I) < zero .OR. VecF(I) > one) THEN
              InFracBox = .FALSE.
              RETURN
@@ -224,5 +281,5 @@ CONTAINS
 
   END FUNCTION InAtomBox
 #endif
-
+!
 END MODULE AtomPairs
