@@ -485,13 +485,17 @@ tt=tt+t2-t1
                 AtmPair(iNFPair)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
                 AtmPair(iNFPair)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*Cnt
                 IF((Type1.NE.2.AND.Type2==2).OR.(Type2.NE.2.AND.Type1==2))THEN
-                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1) * &
+                                                 BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
                    AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
                    AtmPair(iNFPair)%SP%Cst(8,IJ)=BIG_DBL
                 ELSEIF(Type1==2.AND.Type2==2)THEN
-                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
-                   AtmPair(iNFPair)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
-                   AtmPair(iNFPair)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1) * &
+                                                 BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1) * &
+                                                 BSp%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(iNFPair)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1) * &
+                                                 BSp%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
                 ELSE
                    AtmPair(iNFPair)%SP%Cst(6,IJ)=BIG_DBL
                    AtmPair(iNFPair)%SP%Cst(7,IJ)=BIG_DBL
