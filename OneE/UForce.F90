@@ -33,7 +33,7 @@ PROGRAM UForce
   TYPE(DBL_VECT)              :: UFrc,Frc
   REAL(DOUBLE)                :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,UFrcChk,F1a,F2a,F3a,f11,f10
  
-  CHARACTER(LEN=6),PARAMETER  :: Prog='TForce'
+  CHARACTER(LEN=6),PARAMETER  :: Prog='UForce'
 !------------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -69,6 +69,7 @@ PROGRAM UForce
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
+
                  ! Go over ECP centers
                  DO AtC=1,NAtoms
                     C1=3*(AtC-1)+1
