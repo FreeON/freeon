@@ -227,9 +227,11 @@ PROGRAM MakeRho
      CALL AddNukes(GM_MM,Rho,(/QMOffSetQ,QMOffSetR/))
   ENDIF
 #endif
-#ifdef PERIODIC 
-  !  Fold the Distributions back into the Cell
-!   CALL Fold_Rho(GM,Rho)
+#ifdef PERIODIC
+#ifdef WRAPDIST
+  ! Fold the Distributions back into the Cell
+  CALL Fold_Rho(GM,Rho)
+#endif
 #endif
   ! Prune negligible distributions from the electronic density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
