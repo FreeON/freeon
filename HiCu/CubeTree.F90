@@ -19,6 +19,9 @@ MODULE CubeTree
 !  Hierarchical cubature node
 !====================================================================================
    TYPE CubeNode
+#ifdef PARALLEL 
+      REAL(DOUBLE)                            :: LayGridCost
+#endif
       LOGICAL                                 :: Leaf
 !     Intermediate values
       INTEGER                                 :: ISplit
@@ -57,7 +60,9 @@ MODULE CubeTree
 !================================================================================
 !     Grid generation routine     
 !================================================================================
-      SUBROUTINE GridGen()
+      SUBROUTINE GridGen(WBox,SubVolRho,SubVolExc)
+         TYPE(BBox)                       :: WBox
+         REAL(DOUBLE)                     :: SubVolRho,SubVolExc
          REAL(DOUBLE),   DIMENSION(2)     :: TotalError,LocalError,GlobalError, &
                                              RelativeError,NewCubes,OldCubes
          REAL(DOUBLE)                     :: MaxError,BoxSep,Delta,TargtThresh,IXact
@@ -74,8 +79,13 @@ MODULE CubeTree
          GlobalCubes=0
          GlobalError=Zero
          MaxLevel=0       
+         CubeNodes=0
 !        Initialize the CubeRoot and set thresholding
          CALL InitCubeRoot(CubeRoot)
+
+         CubeRoot%Box%BndBox(1:3,1:2) = WBox%BndBox(1:3,1:2)
+         CubeRoot%Box%Center(1:3) = (CubeRoot%Box%BndBox(1:3,1)+CubeRoot%Box%BndBox(1:3,2))*Half
+         CubeRoot%Box%Half(1:3) = (CubeRoot%Box%BndBox(1:3,2)-CubeRoot%Box%BndBox(1:3,1))*Half
 !        Compute total electron population in this box
          CALL SetBBox(CubeRoot%Box,Box)
 #ifdef PERIODIC
@@ -110,6 +120,8 @@ MODULE CubeTree
             PtsPerAtom=INT(DBLE(NGrid*LeafCount(CubeRoot))/DBLE(NAtoms))
             RelativeError(1)=ABS(IXact-NewCubes(1))/IXact
             Exc=NewCubes(2) 
+#ifdef PARALLEL 
+#else
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                Mssg=ProcessName('HiCu.GridGen')                    &
                   //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
@@ -121,8 +133,13 @@ MODULE CubeTree
                WRITE(Out,*)TRIM(Mssg)
                CLOSE(Out)
             ENDIF
+#endif
             OldCubes=NewCubes
          ENDDO
+         SubVolRho = NewCubes(1)
+         SubVolExc = Exc
+#ifdef PARALLEL 
+#else
          IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
             Mssg=ProcessName('HiCu.GridGen')                            &
                 //'TauRel = '//TRIM(DblToShrtChar(TauRel))              &
@@ -133,6 +150,7 @@ MODULE CubeTree
             WRITE(Out,*)TRIM(Mssg)
             CLOSE(Out)
          ENDIF
+#endif
          PU=OpenPU(); CALL PrintProtectR(PU); CLOSE(PU)
      END SUBROUTINE GridGen  
 !================================================================================
@@ -161,6 +179,7 @@ MODULE CubeTree
          REAL(DOUBLE),DIMENSION(3):: DD,MaxVar
          REAL(DOUBLE)             :: Q,MaxDir
          INTEGER                  :: J,ISplit
+         REAL(DOUBLE)             :: StartWTime,EndWTime
 !------------------------------------------------------------------------
 !        Stupid should be painfull...
          IF(.NOT.Cube%Leaf)CALL Halt(' Logic error in SplitCube ')
@@ -178,8 +197,20 @@ MODULE CubeTree
          Right=>Cube%Descend%Travrse
          CALL SplitBox(Cube%Box,Left%Box,Right%Box,ISplit)
 !        Compute approximate and exact integrals of the density
+#ifdef PARALLEL 
+         StartWTime = MPI_Wtime()
+#endif 
          CALL LayGrid(Left)
+#ifdef PARALLEL 
+         EndWTime = MPI_Wtime()
+         Left%LayGridCost = EndWTime - StartWTime
+         StartWTime = MPI_Wtime()
+#endif 
          CALL LayGrid(Right)
+#ifdef PARALLEL 
+         EndWTime = MPI_Wtime()
+         Right%LayGridCost = EndWTime - StartWTime
+#endif 
 !        Compute the exact cubature error for the density 
       END SUBROUTINE SplitCube
 #ifdef OLDSPLIT
@@ -455,6 +486,9 @@ MODULE CubeTree
          ALLOCATE(Node,STAT=Status)
          IF(Status/=SUCCEED) &
             CALL Halt(' ALLOCATE 1 FAILED IN NewCubeNode')
+#ifdef PARALLEL 
+         Node%LayGridCost = 0.0D0
+#endif
          Node%Box%Tier=Level
          Node%Box%Number=CubeNodes+1
          CubeNodes=CubeNodes+1

@@ -36,6 +36,8 @@ PROGRAM XCForce
   REAL(DOUBLE),DIMENSION(3)      :: A,B,F_nlm,nlm
   REAL(DOUBLE),DIMENSION(3,3)    :: LatFrc_XC
 #endif     
+  TYPE(BBox)::WBox
+  REAL(DOUBLE)::VolRho,VolExc 
 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
@@ -55,7 +57,8 @@ PROGRAM XCForce
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree 
-  CALL GridGen()
+  WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
+  CALL GridGen(WBox,VolRho,VolExc)
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
 ! More allocations 

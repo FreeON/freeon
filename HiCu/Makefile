@@ -35,13 +35,13 @@ CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 EXTRA_INCLUDES=-I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #
 CommonObjs = Grid.o Thresholds.o RhoTree.o CubeTree.o TreeWalk.o 
-HObjs      = $(CommonObjs) KxcGen.o HiCu.o 
+HObjs      = $(CommonObjs) ParaHiCu.o KxcGen.o HiCu.o 
 XFObjs     = $(CommonObjs) dXCBlok.o XCForce.o
 #
 VObjs  = VRhoMD.o 
 #
 ReleaseFiles=Grid.x Thresholds.x RhoTree.x    \
-             CubeTree.x TreeWalk.x KxcGen.x   \
+             ParaHiCu.x CubeTree.x TreeWalk.x KxcGen.x   \
              HiCu.x dXCBlok.x XCForce.x VRhoMD.x 
 #
 all:	HC XF
@@ -79,13 +79,15 @@ VR:	$(VObjs)
 CVR:	
 	rm -rf Explicit*.Inc
 #
+ParaHiCu.o:	CubeTree.o TreeWalk.o KxcGen.o    \
+		$(MONDO_HOME)/Libs/libMondoMods.a
 CubeTree.o:	Grid.o                      \
 		GeneralLeafPopulation.Inc   \
 		GeneralLeafContribution.Inc   $(MONDO_HOME)/Libs/libMondoMods.a
 Grid.o:		MMA/CubeRules/Rule5.Inc \
                 MMA/CubeRules/Rule7.Inc        $(MONDO_HOME)/Libs/libMondoMods.a
 HiCu.o:		KxcGen.o TreeWalk.o \
-                CubeTree.o RhoTree.o  \
+                ParaHiCu.o CubeTree.o RhoTree.o  \
 		$(MONDO_HOME)/Libs/libMondoMods.a
 XCForce.o:	dXCBlok.o TreeWalk.o \
 		CubeTree.o RhoTree.o \
