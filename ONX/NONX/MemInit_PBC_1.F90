@@ -16,8 +16,8 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
 !  write(*,*) "In MemInit: ",ErrorCode
 
   IF (ErrorCode==eInit) THEN
-    DB%MAXDis  = 1000
-    DB%MAXPrm  = 3000
+    DB%MAXDis  = 10000
+    DB%MAXPrm  = 30000
     DB%MAXD    = 100
     DB%MAXT    = 10
     DB%MAXK    = 10
