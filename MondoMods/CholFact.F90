@@ -193,12 +193,22 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE Perm1x1(Perm,IA,JA,AN)
+   SUBROUTINE Perm1x1(Perm,IA,JA,AN,Symb_O)
      INTEGER,DIMENSION(:)      :: Perm,IA,JA
      REAL(DOUBLE),DIMENSION(:) :: AN
      TYPE(INT_VECT)            :: IAT1,JAT1
      TYPE(DBL_VECT)            :: ANT1
      INTEGER                   :: I,J,NZ,N,K,L
+     CHARACTER(LEN=DCL)        :: Char    
+     LOGICAL,OPTIONAL          :: Symb_O
+     !
+     Char='full'
+     IF(PRESENT(Symb_O)) THEN
+       IF(Symb_O) THEN
+         Char='Symb'
+       ENDIF
+     ENDIF
+     !
      N=SIZE(IA)-1
      NZ=IA(N+1)-1
      DO I=1,N
@@ -210,14 +220,14 @@ CONTAINS
      CALL New(IAT1,N+1)
      CALL New(JAT1,NZ)
      CALL New(ANT1,NZ)
-     CALL TransPose1x1(IA,JA,AN,N,N,IAT1%I,JAT1%I,ANT1%D,'full')
+     CALL TransPose1x1(IA,JA,AN,N,N,IAT1%I,JAT1%I,ANT1%D,TRIM(Char))
      DO I=1,N
        DO J=IAT1%I(I),IAT1%I(I+1)-1
          K=JAT1%I(J)
          JAT1%I(J)=Perm(K)
        ENDDO
      ENDDO 
-     CALL TransPose1x1(IAT1%I,JAT1%I,ANT1%D,N,N,IA,JA,AN,'full')
+     CALL TransPose1x1(IAT1%I,JAT1%I,ANT1%D,N,N,IA,JA,AN,TRIM(Char))
      CALL Delete(IAT1)
      CALL Delete(JAT1)
      CALL Delete(ANT1)
@@ -420,6 +430,7 @@ CONTAINS
      ENDDO
      NZ=IA%I(Dim1+1)-1 
      CALL New(JA,NZ)
+     JA%I=0
      NZ=0
      DO I=1,Dim1 
        DO J=1,Top(I,1)
