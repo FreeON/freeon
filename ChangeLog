@@ -1,3 +1,44 @@
+2004-06-30 18:04  nemeth
+
+	* Docs/Optimizer/PRL/ProofLett.tex: Proof corrections added.
+
+2004-06-30 13:55  tymczak
+
+	* MondoMods/PBC.F90, MondoSCF2/PunchHDF.F90: [no log message]
+
+2004-06-30 10:40  tymczak
+
+	* MondoSCF2/MDynamics.F90, Validate/MDWater_10.inp,
+	Validate/MDWater_3.inp: [no log message]
+
+2004-06-30 10:39  tymczak
+
+	* SCFeqs/ODA.F90: Added ODALambda Override
+	
+	CJ
+
+2004-06-30 10:38  tymczak
+
+	* SCFeqs/: DenMatMethods.F90, P2Use.F90: Added the Density Matrix
+	Projector
+
+2004-06-30 10:37  tymczak
+
+	* MondoSCF2/SCFs.F90: Added a MaxSCF and MinSCF
+
+2004-06-30 10:34  tymczak
+
+	* MondoSCF2/: ControlStructures.F90, DynamicsKeys.F90,
+	ParseDynamics.F90, PunchHDF.F90: [no log message]
+
+2004-06-29 22:55  ckgan
+
+	* QCTC/QCTC.F90: [no log message]
+
+2004-06-29 18:02  ckgan
+
+	* ChangeLog: [no log message]
+
 2004-06-29 17:58  ckgan
 
 	* OneE/MakeRho.F90, OneE/Makefile, QCTC/JForce.F90,
