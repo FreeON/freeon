@@ -169,6 +169,7 @@ PScr:
 	rm  -rf $(MONDO_SCRATCH)/*.D	
 	rm  -rf $(MONDO_SCRATCH)/*.OrhtoD
 	rm  -rf $(MONDO_SCRATCH)/*.Kxc
+	rm  -rf $(MONDO_SCRATCH)/*.PFFT
 	rm  -rf $(MONDO_SCRATCH)/*
 #
 #       A RECURSIVELY GZIPED, DATE-TAGGED TARBALL
