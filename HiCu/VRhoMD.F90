@@ -7,7 +7,7 @@ MODULE WriteRoutines
   USE Parse
   CONTAINS
      SUBROUTINE WriteErf(Unit,NBlnks,Res,Arg,Mult)
-        INTEGER                 :: Unit,NBlnks
+        INTEGER                 :: Unit,NBlnks,I
         CHARACTER(LEN=NBlnks)   :: Tab1
         CHARACTER(LEN=NBlnks+3) :: Tab2
         CHARACTER(LEN=*)        :: Res,Arg,Mult
@@ -26,8 +26,9 @@ MODULE WriteRoutines
         WRITE(Unit,*)TRIM(BigStr)
         WRITE(Unit,*)Tab1,'ENDIF'
      END SUBROUTINE
+!
      SUBROUTINE WriteExpInv(Unit,NBlnks,Res,Arg)
-        INTEGER                 :: Unit,NBlnks
+        INTEGER                 :: Unit,NBlnks,I
         CHARACTER(LEN=NBlnks)   :: Tab1
         CHARACTER(LEN=NBlnks+3) :: Tab2
         CHARACTER(LEN=*)        :: Res,Arg
