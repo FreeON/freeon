@@ -1,5 +1,5 @@
 #!/bin/sh
-dbx90 $MONDO_HOME/Exec/$1  -I$MONDO_HOME/ONX/PONX  \
+dbx90 $MONDO_HOME/Exec/$1  -I$MONDO_HOME/ONX/NONX  \
                            -I$MONDO_HOME/MondoMods \
                            -I$MONDO_HOME/MondoSCF  \
                            -I$MONDO_HOME/OneE      \

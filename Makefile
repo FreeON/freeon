@@ -214,7 +214,8 @@ pPWD:
 tarball:
 	cd $(MONDO_HOME)/.. ;\
         mv $(MONDO_HOME) MONDO_`date '+%B'`_`date '+%d'`_`date +%y` ;\
-        tar -zcvf MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tgz  \
-                     MONDO_`date '+%B'`_`date '+%d'`_`date +%y`     ;\
+        tar -cvf MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar  \
+                    MONDO_`date '+%B'`_`date '+%d'`_`date +%y`     ;\
+	gzip MondoSCF_`date '+%B'`_`date '+%d'`_`date +%y`.tar     ;\
         mv  MONDO_`date '+%B'`_`date '+%d'`_`date +%y` $(MONDO_HOME) 
 #---------------------------------------------------------------------------------

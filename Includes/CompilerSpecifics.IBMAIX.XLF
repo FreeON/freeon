@@ -2,8 +2,12 @@
 # PREPROCESSOR OPTIONS: 
 #
 CPP=/usr/ccs/lib/cpp -P -C
-CPPINCLUDE=-I/usr/local/include
-CPPOPTS=-DPARALLEL -DNONBLOCKING -DAIX
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
+#
+# PREPROCESSING OPTIONS: 
+CPPOPTS   = -DPOINTERS_IN_DERIVED_TYPES
+#           -DPERIODIC
+#           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
 #
@@ -20,38 +24,35 @@ MOD_POSTFIX   = mod
 #---------------------------------------------------------------
 # Fortran Compilers, options and include files
 #
-F77 = mpxlf
-F90 = mpxlf90
-#------------------
-#F77 = mpif77
-#F90 = mpif90
-F90_NO_MPI = xlf90
+F90 = xlf95
 #
-#F77_FOPTIMIZE= -O3 -qcache=auto -qarch=auto -qtune=auto
-#F90_FOPTIMIZE=
+F90_OPTIMIZE = -O3 #-qcache=auto -qarch=auto -qtune=auto
 #
-F77_DEBUG = -g -C -qtbtable=full
-F90_DEBUG = -g -C -qtbtable=full
-
+#F90_DEBUG =  -qcheck -qdbg -qtbtable=full -qfullpath -qflag=I 
 #
 F_LIST        = -qlist -qsource 
-F_PROF        = 
-F77_MISC     = $(F_LIST) $(F_PROF) 
-F90_MISC     = $(F_LIST) $(F_PROF) 
 #
-F77_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
-               -I$(MONDO_HOME)/Gammas/   -I/usr/local/include 
-F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
-               -I$(MONDO_HOME)/MondoMods -I/usr/local/include 
+#F_PROF        = 
 #
-F77_FLAGS   = $(F77_MISC) $(F77_OPTIMIZE) $(F77_DEBUG) $(F77_INCLUDE)
+F90_MISC     = $(F_LIST) $(F_PROF) -qnoescape  -qlanglvl=95pure
+# 
+F77_EXTRAS    =  -qfixed -qsave -qnozerosize -qalias=intptr -qposition=appendol 
+#  -qxlf77=intarg:intxor:persistent:noleadzero:gedit77:noblankpad:oldboz:softeof
+#
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
+               -I$(MONDO_HOME)/MondoMods               \
+               -I/usr/local/include                    \
+#              -I$(MPI_INC) 
+#
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
 #
 LD      = $(F90)
-LDMISC  = -berok -qextchk 
-#-bnoquiet 
+#
+LDMISC  = -berok -qextchk #-bnoquiet 
+#
 LDFLAGS = -bmaxdata:1720000000 $(LDMISC) -o
 #---------------------------------------------------------------
 # LIBRARY ARCHIVAL
@@ -60,48 +61,17 @@ AR = ar
 ARFLAGS = -rcv
 RANLIB = ranlib
 #---------------------------------------------------------------
-# LIBRARY DEFINITIONS
+# DIRECTORIES TO SUSS FOR LIBRARIES
 #
-# Where the libraries are 
-#
-LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib  -L$(HDF_LIB) -L$(MPI_LIB)
-#---------------------------------------------------------------------
-# MPI LIBRARIES
+LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB) 
+#       -L$(LAPACK_LIB)
+#       -L$(MPI_LIB) 
 #
 #MPI_LIBS=-lmpi
-#---------------------------------------------------------------------
-#  HDF Libraries with compression and jpeg libs,
-#  needs f2c as it the fort77 version (unable to compile native
-#  source under linux so far)
 #
-HDF=-lmfhdf -ldf -ljpeg -lz
-#---------------------------------------------------------------------
+HDF_LIBS=-lhdf5 -ljpeg -lz 
 #
-#  'Nuff said
+F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
 #
 LAPACK = -llapack -lblas
-#---------------------------------------------------------------------
-#  The generic libs needed by most of the programs.  The F77 MondoMisc is
-#  being phased out in favor of the F90 MondoMods.
-#
-Libraries   = -lMondoMisc -lblas $(MPI_LIBS) $(HDF)
-F77_LIBRARIES = Libraries
-F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF) 
-F90_LIBRARIES_NO_MPI=-lMondoMods $(HDF) 
-
-LAPACK = /usr/local/lib/lapack.a
-#-llapack
-#----------------------------------------------------------------------
-#  Define main__ if needed to link libf2c (NOT!)
-#
-MAIN__=
-#----------------------------------------------------------------------
-#  Remove lists to tidy up
-#
-REMOVEALL77 = *.$(LIST_POSTFIX) core *.o a.out *~
-REMOVEALL90 = *.$(LIST_POSTFIX) *.$(F77_POSTFIX) *.$(F90_POSTFIX) *.$(MOD_POSTFIX) core *.o a.out *~   
-REMOVEALL   = $(REMOVEALL77)
-
-#/lib/crt0.o -lmpci -lmpi -lvtd -lxlf90 -lxlf -lc -lppe 
-#-L/usr/lpp/ppe.poe/lib -L/usr/lpp/ppe.poe/lib/us
-#LD_POE  = -binitfini:poe_remote_main -bnso -bI:/usr/lpp/ssp/css/libus/fs_ext.exp -bI:/lib/syscalls.exp
+#----------------------------------------------------------------------------
