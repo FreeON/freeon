@@ -145,6 +145,7 @@ MODULE PFFTen
       IF(GM%PBC%Dimen==0) RETURN
       ! Load Majik numbers from parameter statements	
       IF(GM%PBC%PFFMaxLay==1)THEN
+	 WRITE(*,*)' Loading exact WS=1 '
 	 K=0
 	 DO L=4,MIN(128,MaxL),2
 	    DO M=0,L,4
@@ -163,7 +164,7 @@ MODULE PFFTen
             ENDDO
          ENDDO
        ELSE
-	 CALL MondoHalt("Majik numbers not available for WS>2!")
+	 CALL Halt("Majik numbers not available for WS>2!")
        ENDIF	
 !
 !     Read the Tensor
