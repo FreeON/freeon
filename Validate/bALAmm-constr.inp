@@ -4,7 +4,7 @@ Butane
 
 <BeginOptions>
 Mechanics=(MM)
-OPT=StpDesc
+OPT=(DiagHess,NoGDIIS)
 Accuracy =(Good)
 DebugAll=(MaxDebug,GeOpDebug)
 Geometry=(InAngstroms,NoOrder)
