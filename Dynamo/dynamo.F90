@@ -56,10 +56,12 @@ CONTAINS
      REAL(DOUBLE) :: RI,RJ,R6,DIJ,DIJ2,DIJAu,DIJ2Au,Pref1,Pref2
      REAL(DOUBLE) :: QQI,QQI14,QQJ,QQJ14
      TYPE(DBL_RNK2),OPTIONAL :: GradLoc
+     TYPE(DBL_RNK2) :: AbsXYZ     
      TYPE(DBL_VECT) :: DVect     
      INTEGER :: ITop
 !
 ! WARNING! Input coordinates in Bohrs!
+! For PBC, input absolute coordinates from GMLoc%AbCarts       
 !
 ! If QMMM, distinquish QM and MM atoms
 !   
@@ -97,8 +99,18 @@ CONTAINS
        ENDDO
      ENDIF
 !
-! Rescale atomic parameters
+! Use absolute coordinates
 !
+     CALL New(AbsXYZ,(/3,GMLoc%Natms/))
+#ifdef PERIODIC
+     IF(GMLoc%PBC%Dimen==0) THEN
+       AbsXYZ%D=GMLoc%Carts%D
+     ELSE
+       AbsXYZ%D=GMLoc%AbCarts%D
+     ENDIF
+#else
+       AbsXYZ%D=GMLoc%AbCarts%D
+#endif
 !
 ! Now calculate Lennard-Jones and Coulomb exclusion energies
 ! Please note that all MM charges on the QM positions
@@ -137,8 +149,7 @@ CONTAINS
        J=Top_Loc%I(I,M+1)
      IF(J<=I) CYCLE !!!avoid double counting
      IF(AtmMark%I(I)/=0.AND.AtmMark%I(J)/=0) CYCLE !!! no QM-QM intr.act
-       DVect%D(:)=GMLoc%Carts%D(:,I)-GMLoc%Carts%D(:,J)
-       DVect%D(:)=DVect%D(:)
+       DVect%D(:)=AbsXYZ%D(:,I)-AbsXYZ%D(:,J)
        DIJ2=DOT_PRODUCT(DVect%D,DVect%D)
        DIJ=SQRT(DIJ2)
        IF(PRESENT(E_LJ_EXCL)) THEN
@@ -181,7 +192,7 @@ CONTAINS
                ENDIF
            ENDIF
          ELSE
-       write(*,*) 'd dij= ',i,j,dij,' x1= ',GMLoc%Carts%D(1:3,i),GMLoc%Carts%D(1:3,j) 
+       write(*,*) 'd dij= ',i,j,dij,' x1= ',AbsXYZ%D(1:3,i),AbsXYZ%D(1:3,j) 
   Call MondoHalt(QMMM_ERROR,'Atoms are too close to each other in MM set')
          ENDIF
      ENDDO
@@ -192,6 +203,7 @@ CONTAINS
 !
      CALL Delete(DVect)
      CALL Delete(AtmMark)
+     CALL Delete(AbsXYZ)
      IF(PRESENT(E_LJ_EXCL)) THEN
        CALL Delete(LJEps)
        CALL Delete(LJEps14)
