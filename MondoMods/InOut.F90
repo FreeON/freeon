@@ -27,7 +27,11 @@ MODULE InOut
 #ifdef PERIODIC
                        Get_PBCInfo,                              &
 #endif  
-                       Get_ARGMT,    Get_HGRho,    Get_CMPoles
+                       Get_ARGMT,    Get_HGRho,                  &
+#ifdef MMech
+                       Get_CHR_VECT, Get_LOG_VECT,               &
+#endif
+                       Get_CMPoles
 
    END INTERFACE     
    INTERFACE Put
@@ -43,6 +47,9 @@ MODULE InOut
                        Put_PBCInfo,                              &
 #endif 
                        Put_TOLS,     Put_BCSR,     Put_HGRho,    &
+#ifdef MMech
+                       Put_CHR_VECT, Put_LOG_VECT,               &
+#endif
                        Put_CMPoles
    END INTERFACE     
    TYPE META_DATA
@@ -1073,14 +1080,14 @@ MODULE InOut
 !-------------------------------------------------------------------
 !        Items that should not change with geometry...
 !
-         CALL Get(GM%NAtms,'natoms')
-         CALL Get(GM%Confg,'configuration')
-         CALL Get(GM%NElec,'nel')
-         CALL Get(GM%NAlph,'nelalpha')
-         CALL Get(GM%NBeta,'nelbeta')
-         CALL Get(GM%TotCh,'charge')
-         CALL Get(GM%NKind,'nkind')
-         CALL Get(GM%InAu, 'inau')
+         CALL Get(GM%NAtms,'natoms',Tag_O=Tag_O)
+         CALL Get(GM%Confg,'configuration',Tag_O=Tag_O)
+         CALL Get(GM%NElec,'nel',Tag_O=Tag_O)
+         CALL Get(GM%NAlph,'nelalpha',Tag_O=Tag_O)
+         CALL Get(GM%NBeta,'nelbeta',Tag_O=Tag_O)
+         CALL Get(GM%TotCh,'charge',Tag_O=Tag_O)
+         CALL Get(GM%NKind,'nkind',Tag_O=Tag_O)
+         CALL Get(GM%InAu, 'inau',Tag_O=Tag_O)
          CALL New(GM)
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
@@ -1107,14 +1114,14 @@ MODULE InOut
 !-------------------------------------------------------------------
 !        Items that should not change with geometry...
 !
-         CALL Put(GM%NAtms,'natoms')
-         CALL Put(GM%Confg,'configuration')
-         CALL Put(GM%NElec,'nel')
-         CALL Put(GM%NAlph,'nelalpha')
-         CALL Put(GM%NBeta,'nelbeta')
-         CALL Put(GM%TotCh,'charge')
-         CALL Put(GM%NKind,'nkind')
-         CALL Put(GM%InAu, 'inau')
+         CALL Put(GM%NAtms,'natoms',Tag_O=Tag_O)
+         CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
+         CALL Put(GM%NElec,'nel',Tag_O=Tag_O)
+         CALL Put(GM%NAlph,'nelalpha',Tag_O=Tag_O)
+         CALL Put(GM%NBeta,'nelbeta',Tag_O=Tag_O)
+         CALL Put(GM%TotCh,'charge',Tag_O=Tag_O)
+         CALL Put(GM%NKind,'nkind',Tag_O=Tag_O)
+         CALL Put(GM%InAu, 'inau',Tag_O=Tag_O)
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
 !
@@ -1595,6 +1602,122 @@ MODULE InOut
       11 CALL Halt(' OpenASCII ERROR: IOS='//TRIM(IntToChar(IOS))// &
                    ' on file '//TRIM(FileName)//'.') 
       END SUBROUTINE OpenASCII
+
+!--------------------------------------------------------------------------
+#ifdef MMech
+    SUBROUTINE Put_CHR_VECT(A,VarName,NN,Tag_O)
+       INTEGER                              :: I,N,II,NN
+    CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(IN) :: A
+       CHARACTER(LEN=*),         INTENT(IN) :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+       INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B  !=ICHAR(' ')
+       TYPE(META_DATA)                      :: Meta
+#ifdef PARALLEL 
+       IF(MyId==ROOT)THEN
+#endif 
+          N=LEN(A(II))
+          IF(N>DEFAULT_CHR_LEN)THEN
+             CALL Halt('Static strings overrun in Put_CHR_VECT')
+          ENDIF
+         DO II = 1, NN
+          DO I=1,N; B((II-1)*N+I)=ICHAR(A(II)(I:I)); ENDDO
+          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
+                       N*NN,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+         ENDDO
+#ifdef PARALLEL 
+       ENDIF       
+#endif 
+    END SUBROUTINE Put_CHR_VECT
+#endif
+
+!--------------------------------------------------------------------------
+#ifdef MMech
+    SUBROUTINE Get_CHR_VECT(A,VarName,NN,Tag_O)
+    CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(INOUT):: A
+       CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+       INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B !=ICHAR(' ')
+       INTEGER                                 :: I,N,II,NN
+       TYPE(META_DATA)                         :: Meta
+#ifdef PARALLEL 
+       IF(MyId==ROOT)THEN
+#endif 
+          NN=SIZE(A,1)
+          N=LEN(A)
+          IF(N>DEFAULT_CHR_LEN) &
+             CALL Halt('Static strings overrun in Get_CHR_VECT')
+          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
+                       N*NN,.FALSE.)
+          CALL OpenData(Meta)
+        DO II = 1, NN
+          CALL ReadIntegerVector(Meta,B)
+          DO I=1,N; A(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
+        ENDDO
+          CALL CloseData(Meta)
+#ifdef PARALLEL 
+       ENDIF       
+       IF(InParallel)CALL BCast(A)
+#endif 
+    END SUBROUTINE Get_CHR_VECT
+#endif 
+!--------------------------------------------------------------------------
+#ifdef MMech
+    SUBROUTINE Put_LOG_VECT(A,VarName,NN,Tag_O)
+       LOGICAL,DIMENSION(1:NN),  INTENT(IN) :: A
+       CHARACTER(LEN=*),         INTENT(IN) :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+       INTEGER,DIMENSION(1:NN)              :: ILog
+       TYPE(META_DATA)                      :: Meta
+       INTEGER                              :: I,NN
+#ifdef PARALLEL 
+       IF(MyId==ROOT)THEN
+#endif 
+       DO I = 1, NN
+         ILog(I)=0
+         IF(A(I))ILog(I)=1
+       ENDDO
+          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,ILog)
+          CALL CloseData(Meta)
+#ifdef PARALLEL 
+       ENDIF       
+#endif 
+    END SUBROUTINE Put_LOG_VECT
+#endif
+!--------------------------------------------------------------------------
+#ifdef MMech
+    SUBROUTINE Get_LOG_VECT(A,VarName,NN,Tag_O)
+       LOGICAL,DIMENSION(1:NN),INTENT(INOUT) :: A
+       CHARACTER(LEN=*),         INTENT(IN) :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+       INTEGER,DIMENSION(1:NN)              :: ILog
+       TYPE(META_DATA)                      :: Meta
+       INTEGER                              :: I,NN
+#ifdef PARALLEL 
+       IF(MyId==ROOT)THEN
+#endif 
+          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL ReadIntegerVector(Meta,ILog)
+          CALL CloseData(Meta)
+       DO I = 1, NN
+         IF(ILog(I)==1) Then
+           A(I) = .TRUE.
+         ELSE
+           A(I) = .FALSE.
+         ENDIF
+       ENDDO
+#ifdef PARALLEL 
+       ENDIF       
+#endif 
+    END SUBROUTINE Get_LOG_VECT
+#endif
+!------------------------------------------------------------------------
+
 
 END MODULE
 
