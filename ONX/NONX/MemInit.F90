@@ -29,7 +29,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     DB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
     DB%MInfo   = 0    
     SB%MAXSL   = 10000
-    IB%MAXI    = 100000
+    IB%MAXI    = 1000000
     IB%MaxInts = 1000
     IB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
     IB%Lval    = -1

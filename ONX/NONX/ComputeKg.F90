@@ -183,27 +183,27 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                   GOTO 9000
                 ENDIF
                 xNERIs=xNERIs+FLOAT(IS%L1*IS%L2*IS%L3*IS%L4*ISL)
-                CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
-                          DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
+                CALL RGen(ISL,Ltot,CBra,CKet,IB%CB%D(1,1),IB%CK%D(1,1,1),      &
+                          DB%DisBuf%D(IBD),DB%PrmBuf%D(IBP),IB%W1%D(1),        &
+                          DB,IB,SB)
                 CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                 &
                           Drv%VLOC%I(Drv%is),                                  &
                           Drv%VLOC%I(Drv%is+Drv%nr),IB,                        &
-                          IB%W2%D,IB%W1%D)
+                          IB%W2%D(1),IB%W1%D(1))
                 CALL Contract(ISL,CBra,CKet,IS%NVRR,iCL,Drv%CDrv%I(iCP+1),     &
-                              IB%CB%D,IB%CK%D,IB%W1%D,IB%W2%D)
+                              IB%CB%D(1,1),IB%CK%D,IB%W1%D(1),IB%W2%D(1))
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
                                         SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
                 IF (LBra>0) THEN
-                  CALL HRRBra(IB%W1%D,IB%W2%D,ACx,ACy,ACz,ISL,                 &
+                  CALL HRRBra(IB%W1%D(1),IB%W2%D(1),ACx,ACy,ACz,ISL,           &
                               IS%NB1,IS%L1*IS%L2,IS%L3*IS%L4,TBra)
-
                   CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
-                              IntSwitch,IB%W1%D,IB%W2%D,DA%D)
-                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D,K)
+                              IntSwitch,IB%W1%D(1),IB%W2%D(1),DA%D(1))
+                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D(1),K)
                 ELSE
                   CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
-                              IntSwitch,IB%W2%D,IB%W1%D,DA%D)
-                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D,K)
+                              IntSwitch,IB%W2%D(1),IB%W1%D(1),DA%D(1))
+                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D(1),K)
                 END IF
 
               END IF  ! ISL

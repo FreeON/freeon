@@ -184,70 +184,70 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                 SELECT CASE (IntCodeV)
                   CASE (01010101)  
                     CALL Int1111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (01010201)  
                     CALL Int1121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02010101) 
                     CALL Int2111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (01010202)  
                     CALL Int1122(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02010201)
                     CALL Int2121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02010202)  
                     CALL Int2122(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02020101)  
                     CALL Int2211(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02020201)  
                     CALL Int2221(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02020202)
                     CALL Int2222(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (01010601)
                     CALL Int1161(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (01010602)
                     CALL Int1162(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (01010606)
                     CALL Int1166(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02010601)
                     CALL Int2161(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02010602)
                     CALL Int2162(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (02020601)
                     CALL Int2261(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06010101)
                     CALL Int6111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06010201)
                     CALL Int6121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06010202)
                     CALL Int6122(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06010601)
                     CALL Int6161(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06020101)
                     CALL Int6211(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06020201)
                     CALL Int6221(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE (06060101)
                     CALL Int6611(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
-                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
                   CASE DEFAULT
                     WRITE(*,*) "IntCode=",IntCodeV,IntCodeC
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')
@@ -258,15 +258,15 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &
                                         SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
                 IF (LBra>0) THEN 
-                  CALL HRRBra(IB%W1%D,IB%W2%D,ACx,ACy,ACz,ISL,                 &
+                  CALL HRRBra(IB%W1%D(1),IB%W2%D(1),ACx,ACy,ACz,ISL,           &
                               IS%NB1,IS%L1*IS%L2,IS%L3*IS%L4,TBra)
                   CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
-                              IntSwitch,IB%W1%D,IB%W2%D,DA%D)
-                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D,K)
+                              IntSwitch,IB%W1%D(1),IB%W2%D(1),DA%D(1))
+                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D(1),K)
                 ELSE
                   CALL Digest(ISL,NA,NB,NC,ND,IS%L1,IS%L2,IS%L3,IS%L4,         &
-                              IntSwitch,IB%W2%D,IB%W1%D,DA%D)
-                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D,K)
+                              IntSwitch,IB%W2%D(1),IB%W1%D(1),DA%D(1))
+                  CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W2%D(1),K)
                 END IF
               END IF  ! ISL
 
