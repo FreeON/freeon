@@ -37,9 +37,9 @@ ReleaseFiles=Test.x
 #
 all:	test small 
 #
-full:	all big
+full:	all  big
 #
-pbs:	test small_pbs big_pbs
+pbs:	test small_pbs periodic_pbs big_pbs
 #------------------------------------------------------------------
 #       Code to parse *.ref and *.out, checking numbers for correctness
 test:	$(TstObjs)
@@ -47,7 +47,7 @@ test:	$(TstObjs)
 	rm -rf Validation.log
 #------------------------------------------------------------------
 #       Run validation suite sequentialy
-serial:	small big
+serial:	small periodic big
 #
 small:
 	m SiF4.inp    SiF4.out;              ./Test SiF4.out    SiF4.ref
@@ -55,8 +55,10 @@ small:
 	m Water.inp   Water.out;             ./Test Water.out   Water.ref 
 	m Biotin.inp  Biotin.out;            ./Test Biotin.out  Biotin.ref
 #
-big:	
+periodic:
 	m Mg0.inp          MgO.out;          ./Test MgO.out           MgO.ref
+#
+big:	
 	m Caffiene.inp     Caffiene.out;     ./Test Caffiene.out      Caffiene.ref
 	m BetaCarotene.inp BetaCarotene.out; ./Test BetaCarotene.out  BetaCarotene.ref 
 	m Chlorophyll.inp  Chlorophyll.out;  ./Test Chlorophyll.out   Chlorophyll.ref
@@ -71,8 +73,11 @@ small_pbs:
 	./sub_pbs Water
 	./sub_pbs Biotin
 #
-big_pbs:
+periodic_pbs:
+	chmod u+x sub_pbs
 	./sub_pbs MgO
+#
+big_pbs:
 	./sub_pbs Caffiene
 	./sub_pbs BetaCarotene
 	./sub_pbs Chlorophyll
