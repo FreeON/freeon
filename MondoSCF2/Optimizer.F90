@@ -1363,30 +1363,21 @@ CONTAINS
      TYPE(FileNames)      :: Nams
      TYPE(GeomOpt)        :: GOpt
      TYPE(CRDS)           :: GMLoc
-     LOGICAL              :: NoGDIIS,GDIISOn
-     INTEGER              :: InitGDIIS,iGEO
-     INTEGER              :: NConstr,NatmsLoc,NCart,iCLONE
+     INTEGER              :: iGEO,iCLONE
      CHARACTER(LEN=DCL)   :: SCRPath
      INTEGER,DIMENSION(:) :: Convgd
-     INTEGER              :: Print
      !
-     InitGDIIS=GOpt%GDIIS%Init
-     NoGDIIS  =GOpt%GDIIS%NoGDIIS
-     GDIISOn  =GOpt%GDIIS%On     
-     NConstr  =GOpt%Constr%NConstr
-     NatmsLoc =GMLoc%Natms
-     NCart    =3*NatmsLoc
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
-     Print    =Opts%PFlags%GeOp
      !
      IF(Convgd(iCLONE)/=1) THEN
        CALL OPENAscii(OutFile,Out)
-       IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
-           iGEO,Print,SCRPath,InitGDIIS)
+       IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On) THEN
+         CALL GeoDIIS(GMLoc%AbCarts%D,GOpt%Constr,GOpt%BackTrf, &
+           GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
+           iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
-         IF(Print>=DEBUG_GEOP_MIN) THEN
+         IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
            WRITE(*,200)
            WRITE(Out,200)
          ENDIF

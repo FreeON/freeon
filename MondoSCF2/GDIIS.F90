@@ -19,12 +19,16 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,GOpt,HFileIn,iCLONE, &
-                      iGEO,Print,SCRPath,InitGDIIS)
+   SUBROUTINE GeoDIIS(XYZ,GConstr,GBackTrf,GTrfCtrl,GCoordCtrl, &
+                      GDIISCtrl,HFileIn,iCLONE,iGEO,Print,SCRPath)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
-     TYPE(GeomOpt)               :: GOpt
-     INTEGER                     :: iCLONE,InitGDIIS,iGEO,ICount
+     TYPE(Constr)                :: GConstr
+     TYPE(BackTrf)               :: GBackTrf
+     TYPE(TrfCtrl)               :: GTrfCtrl
+     TYPE(CoordCtrl)             :: GCoordCtrl 
+     TYPE(GDIIS)                 :: GDIISCtrl  
+     INTEGER                     :: iCLONE,iGEO,ICount
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
      INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc
@@ -37,7 +41,7 @@ CONTAINS
      TYPE(INT_VECT)              :: VectI
      !
      GDIISMemory=MIN(6,iGEO)
-     IF(iGEO<InitGDIIS) RETURN
+     IF(iGEO<GDIISCtrl%Init) RETURN
      IStart=iGEO-GDIISMemory+1
      !
      HDFFileID=OpenHDF(HFileIn)
@@ -86,15 +90,13 @@ CONTAINS
      !
      ! Calculate new Cartesian coordinates 
      !
-     CALL BasicGDIIS(XYZ,GOpt%Constr,Print, &
+     CALL BasicGDIIS(XYZ,GConstr,Print, &
                      RefStruct,RefGrad,SRStruct,SRDispl)
-     !CALL PIntGDIIS(XYZ,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
-     !  GOpt%CoordCtrl,GOpt%Constr,SCRPath, &
-     !  RefStruct,RefGrad,SRStruct,SRDispl)
+     !CALL PIntGDIIS(XYZ,Print,GBackTrf,GTrfCtrl, &
+     !  GCoordCtrl,GConstr,SCRPath,RefStruct,RefGrad,SRStruct,SRDispl)
      !
      !CALL DelocGDIIS(SRStruct%D,RefStruct%D,RefGrad%D,SRDispl%D,&
-     !  XYZ,Print,SCRPath,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-     !  GOpt%BackTrf,GOpt%Constr)
+     !  XYZ,Print,SCRPath,GTrfCtrl,GCoordCtrl,GBackTrf,GConstr)
      !
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
