@@ -469,7 +469,7 @@ CONTAINS
      TYPE(INT_RNK2)                 :: TorsionIJKL
      INTEGER                        :: NTorsion
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ
-     TYPE(INTC)                     :: IntCs
+     TYPE(INTC)                     :: IntCs,IntC_Frag
      TYPE(ATOMBONDS)                :: AtmBCov,AtmBVDW,AtmBTot,AtmB
      TYPE(BONDDATA)                 :: BondCov,BondVDW,BondTot,Bond
      CHARACTER(LEN=*),OPTIONAL      :: HFileIn_O
@@ -732,7 +732,7 @@ CONTAINS
      IMPLICIT NONE
      TYPE(INTC)                  :: IntCs,IntC_Bas,IntC_VDW
      TYPE(INTC)                  :: IntC_Extra,IntC_New
-     TYPE(INTC)                  :: IntC_Cart
+     TYPE(INTC)                  :: IntC_Frag
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
      TYPE(PBCInfo)               :: PBC
@@ -745,7 +745,7 @@ CONTAINS
      INTEGER,OPTIONAL            :: iCLONE_O,iGEO_O
      INTEGER                     :: NIntC,NIntC_Bas,NIntC_VDW
      INTEGER                     :: NIntC_Extra,NNew,Nintc_New
-     INTEGER                     :: NIntC_Cart,MaxBonds,ArchMem
+     INTEGER                     :: NIntC_Frag,MaxBonds,ArchMem
      INTEGER                     :: I,J,K,Refresh,NatmsLoc,II,ILast,III
      INTEGER                     :: I1,I2,I3,I4,NMax12
      INTEGER                     :: NStreGeOp,NBendGeOp
@@ -761,7 +761,7 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
      !
-     NIntC_Cart=0
+     NIntC_Frag=0
      NIntC_Bas=0
      NIntC_VDW=0
      !
@@ -789,9 +789,6 @@ CONTAINS
        CALL Halt('Unknown Refresh option in GetIntCs') 
      ENDIF
      !
-!continue_here with filtering of internal coordinates 
-!continue_here OR do filtering in DefineIntCoos
-     !
      CALL Delete(CellA)
      CALL Delete(CellB)
      CALL Delete(CellC)
@@ -802,7 +799,7 @@ CONTAINS
      ! Merge INTC arrays
      !
      CtrlCoord%NCov=NIntC_Bas
-     NIntC=NIntC_Bas+NIntC_VDW+IntC_Extra%N+NIntC_Cart
+     NIntC=NIntC_Bas+NIntC_VDW+IntC_Extra%N+NIntC_Frag
      !
      CALL New(IntCs,NIntC)
      !
@@ -822,10 +819,10 @@ CONTAINS
        CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
      ENDIF
      !
-     IF(NIntC_Cart/=0) THEN
+     IF(NIntC_Frag/=0) THEN
        ILast=MAX(ILast+IntC_Extra%N,ILast+NIntC_VDW)
-       CALL Set_INTC_EQ_INTC(IntC_Cart,IntCs,1,NIntC_Cart,ILast+1)
-       CALL Delete(IntC_Cart)
+       CALL Set_INTC_EQ_INTC(IntC_Frag,IntCs,1,NIntC_Frag,ILast+1)
+       CALL Delete(IntC_Frag)
      ENDIF
      !
      IF(.NOT.(NIntC==0.OR.IntC_Extra%N==0.OR.Refresh==5)) THEN
@@ -917,7 +914,6 @@ CONTAINS
      CALL New(IEq,NCells*NatmsLoc)
      CALL New(AtNumRepl,NCells*NatmsLoc)
      CALL New(XYZBig,(/3,NCells*NatmsLoc/))
-!write(*,*) 'NA,NB,NC= ',NA,NB,NC  
      !
      II=0
      DO IA=-NA,NA
@@ -2553,8 +2549,8 @@ CONTAINS
      XYZWork%D=XYZ
      !
      ! Find two reference systems
-     CALL ThreeAtoms(XYZWork%D,IntCs,TOPS%Tot12, &
-                     GTrfCtrl%ThreeAt,GTrfCtrl%Linearity)
+     CALL ThreeAtoms(XYZWork%D,TOPS%Tot12, &
+                     GTrfCtrl%ThreeAt,GTrfCtrl%Linearity,IntCs_O=IntCs)
        At1=GTrfCtrl%ThreeAt(1)
        At2=GTrfCtrl%ThreeAt(2)
        At3=GTrfCtrl%ThreeAt(3)
@@ -2566,8 +2562,8 @@ CONTAINS
        TOPS%Tot12%I(At1,:)=0
        TOPS%Tot12%I(At2,:)=0
        TOPS%Tot12%I(At3,:)=0
-       CALL ThreeAtoms(XYZWork%D,IntCs,TOPS%Tot12, &
-                       GTrfCtrl%ThreeAt_2,GTrfCtrl%Linearity)
+       CALL ThreeAtoms(XYZWork%D,TOPS%Tot12,GTrfCtrl%ThreeAt_2, &
+                       GTrfCtrl%Linearity,IntCs_O=IntCs)
      ENDIF
      CALL CALC_XYZRot(XYZWork%D,GTrfCtrl%ThreeAt,&
                       GTrfCtrl%Linearity,GTrfCtrl%TranslAt1, &
@@ -2798,11 +2794,11 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE ThreeAtoms(XYZ,IntCs,Top12,ThreeAt,Linearity)
+   SUBROUTINE ThreeAtoms(XYZ,Top12,ThreeAt,Linearity,IntCs_O)
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
-     TYPE(INTC)                   :: IntCs
+     TYPE(INTC),OPTIONAL          :: IntCs_O
      TYPE(DBL_VECT)               :: DistVect
-     INTEGER                      :: I,J,NatmsLoc,NIntC
+     INTEGER                      :: I,J,NatmsLoc
      INTEGER                      :: At1,At2,At3,ThreeAt(1:3),ITop
      REAL(DOUBLE)                 :: D12,D13,D23,CX,CY,CZ
      REAL(DOUBLE)                 :: Dist,Sum,Dist12,Area2
@@ -2812,7 +2808,6 @@ CONTAINS
      TYPE(INT_RNK2)               :: Top12 
      !
      NatmsLoc=SIZE(XYZ,2)
-     NIntC=SIZE(IntCs%Def%C)
      CALL New(XYZRot,(/3,NatmsLoc/))
      CALL New(DistVect,NatmsLoc)
      DistVect%D=0
@@ -2823,7 +2818,9 @@ CONTAINS
      At1=0
      At2=0
      At3=0
-     CALL ThreeConstr(IntCs,Top12,NatmsLoc,At1,At2,At3)
+     IF(PRESENT(IntCs_O)) THEN
+       CALL ThreeConstr(IntCs_O,Top12,NatmsLoc,At1,At2,At3)
+     ENDIF
      !
      ! Find three atoms, which form a large triangle, 
      ! if molecule is not linear
@@ -4569,15 +4566,17 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE IntCBoxes(XYZ,Box)
+   SUBROUTINE IntCBoxes(XYZ,Box,BoxSize_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(IntCBox)               :: Box
      INTEGER                     :: NatmsLoc
      REAL(DOUBLE)                :: BXMIN,BYMIN,BZMIN
      REAL(DOUBLE)                :: BoxSize
+     REAL(DOUBLE),OPTIONAL       :: BoxSize_O
      !
      NatmsLoc=SIZE(XYZ,2)
      BoxSize=3.0D0*AngstromsToAU !in A
+     IF(PRESENT(BoxSize_O)) BoxSize=BoxSize_O
      CALL SORT_INTO_Box1(BoxSize,XYZ,NatmsLoc,&
                          Box%NX,Box%NY,Box%NZ,BXMIN,BYMIN,BZMIN)
      !
@@ -4596,7 +4595,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum
      INTEGER                     :: IntSet 
-     TYPE(BONDDATA)              :: Bond
+     TYPE(BONDDATA)              :: Bond,BondF,Bond1
      TYPE(ATOMBONDS)             :: AtmB
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(IntCBox)               :: Box 
@@ -4640,15 +4639,23 @@ CONTAINS
      ELSE
        DO I=1,6
          DoRepeat=.FALSE.
-         CALL BondList(XYZ,AtNum,IntSet,Box,Bond,TOPS, &
+         CALL BondList(XYZ,AtNum,IntSet,Box,Bond1,TOPS, &
                        CritRad,HBondMax,DoRepeat)
          IF(DoRepeat) THEN
-           CALL Delete(Bond)
+           CALL Delete(Bond1)
          ELSE
            EXIT
          ENDIF
          IF(I==6.AND.DoRepeat) CALL Halt('The 6th attempt of recognizing bonds to lonely atoms failed.')
        ENDDO
+       !
+       CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond1%IJ)
+       CALL ConnectFragments(XYZ,AtNum,BondF,TOPS)
+       CALL MergeBonds(Bond1,BondF,Bond)
+       CALL Delete(Bond1)
+       CALL Delete(BondF)
+       CALL Delete(TOPS%Tot12)
+       !
        CALL SortBonds(NatmsLoc,AtmB,Bond)
        CALL SortNonCov2(AtNum,XYZ,Bond,AtmB)
        CALL Delete(AtmB)
@@ -5780,6 +5787,166 @@ CONTAINS
        ENDIF
      ENDDO
    END SUBROUTINE IntCsConstr
+!
+!-------------------------------------------------------------------
+! 
+   SUBROUTINE ConnectFragments(XYZ,AtNum,BondF,TOPS)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(TOPOLOGY)              :: TOPS
+     TYPE(INT_VECT)              :: ITop,JTop,Perm,IPerm
+     TYPE(INT_VECT)              :: Center,CenterT,Mark
+     TYPE(DBL_VECT)              :: ATop
+     TYPE(DBL_RNK2)              :: XYZf
+     INTEGER                     :: NZ,NAtmsLoc,I,J,II,K,L,M,N
+     INTEGER                     :: TAtoms(4),ColMax
+     REAL(DOUBLE)                :: CT(3),CTX(3),V1(3),V2(3)
+     INTEGER,DIMENSION(:)        :: AtNum
+     TYPE(BONDDATA)              :: BondF
+     LOGICAL                     :: Linearity
+     REAL(DOUBLE)                :: Fact1,Fact2
+     ! 
+     ! Calculate sparse topology matrix
+     ! 
+     NatmsLoc=SIZE(XYZ,2)
+     CALL TopToSp1x1(TOPS%Tot12%I,ITop,JTop)
+     NZ=SIZE(JTop%I)
+     CALL New(Center,NatmsLoc)
+     CALL New(CenterT,NatmsLoc)
+     CALL New(ATop,NZ)
+     !
+     ! Calculate permutations, which make the tightest ordering
+     !
+     CALL New(Perm,NatmsLoc)
+     CALL New(IPerm,NatmsLoc)
+     CALL RCMOrder(IPerm%I,Perm%I,NatmsLoc,ITop%I,JTop%I)
+     CALL Perm1x1(Perm%I,ITop%I,JTop%I,ATop%D,Symb_O=.TRUE.)
+     !
+     ! Now, identify separate blocks in Top
+     ! It is easy, based on an ordered representation of the topology
+     !
+     II=1
+     Center%I(II)=IPerm%I(1)
+     K=ITop%I(1)
+     L=ITop%I(2)
+     CenterT%I(II)=L-K
+     ColMax=MAX(1,MAXVAL(JTop%I(K:L-1)))
+     DO I=2,NatmsLoc
+       K=ITop%I(I)
+       L=ITop%I(I+1)
+       M=IPerm%I(I)
+       IF(ColMax<I) THEN
+         II=II+1
+         Center%I(II)=M
+         CenterT%I(II)=L-K
+       ELSE IF(CenterT%I(II)<L-K) THEN
+         Center%I(II)=M
+         CenterT%I(II)=L-K
+       ENDIF
+       ColMax=MAX(ColMax,MAXVAL(JTop%I(K:L-1)))
+       ColMax=MAX(ColMax,I)
+     ENDDO 
+     !
+     ! Sort fragment centers into separate arrays
+     !
+     CALL New(XYZf,(/3,II/))
+     DO I=1,II
+       K=Center%I(I)
+       XYZf%D(1:3,I)=XYZ(1:3,K)
+     ENDDO
+     !
+     IF(II<4) THEN
+       K=(II*II-II)/2
+       CALL New(BondF,K)
+       K=0
+       DO I=1,II
+         DO J=I+1,II
+           K=K+1
+           M=Center%I(I)
+           N=Center%I(J)
+           BondF%IJ%I(1:2,K)=(/M,N/)
+           V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
+           Fact1=SQRT(DOT_PRODUCT(V1,V1))
+           BondF%Length%D(K)=Fact1
+           BondF%Type%C(K)(1:4)='Frag'
+         ENDDO
+       ENDDO
+     ELSE
+       !
+       ! Select largest triangle
+       !
+       CALL ThreeAtoms(XYZf%D,TOPS%Tot12,TAtoms(1:3),Linearity)
+       DO J=1,3
+         CT(J)=(XYZf%D(J,TAtoms(1))+XYZf%D(J,TAtoms(2))+ &
+            XYZf%D(J,TAtoms(3)))/3.D0
+         V1(J)=XYZf%D(J,TAtoms(1))-CT(J)
+         V2(J)=XYZf%D(J,TAtoms(2))-CT(J)
+       ENDDO
+       CALL CROSS_PRODUCT(V1,V2,CTX)
+       !
+       ! Select 4th atom, based on overlap with CTX
+       Fact1=Zero
+       TAtoms(4)=0
+       DO I=1,II
+         IF(ANY(TAtoms(1:3)==I)) CYCLE
+         DO J=1,3 ; V1(J)=XYZf%D(J,I)-CT(J) ; ENDDO
+         Fact2=ABS(DOT_PRODUCT(V1,CTX))+One
+         IF(Fact2>Fact1) THEN
+           TAtoms(4)=I
+           Fact1=Fact2
+         ENDIF
+       ENDDO
+       !
+       CALL New(Mark,II)
+       Mark%I=0
+       DO I=1,4 
+         Mark%I(TAtoms(I))=1
+       ENDDO
+       !
+       DO I=1,4
+         TAtoms(I)=Center%I(TAtoms(I))
+       ENDDO
+       !
+       K=6+(II-4)*4
+       CALL New(BondF,K)
+       K=0
+       DO I=1,4 
+         DO J=I+1,4 
+           K=K+1
+           L=TAtoms(I)
+           M=TAtoms(J)
+           BondF%IJ%I(1:2,K)=(/L,M/)
+           V1(1:3)=XYZ(1:3,L)-XYZ(1:3,M)
+           Fact1=SQRT(DOT_PRODUCT(V1,V1))
+           BondF%Length%D(K)=Fact1
+           BondF%Type%C(K)(1:4)='Frag'
+         ENDDO
+       ENDDO
+       DO I=1,II
+         IF(Mark%I(I)==0) THEN
+           DO L=1,4
+             K=K+1
+             M=Center%I(I)
+             N=TAtoms(L)
+             BondF%IJ%I(1:2,K)=(/M,N/)
+             V1(1:3)=XYZ(1:3,M)-XYZ(1:3,N)
+             Fact1=SQRT(DOT_PRODUCT(V1,V1))
+             BondF%Length%D(K)=Fact1
+             BondF%Type%C(K)(1:4)='Frag'
+           ENDDO
+         ENDIF
+       ENDDO
+       CALL Delete(Mark)
+     ENDIF
+     !
+     CALL Delete(XYZf)
+     CALL Delete(Center)
+     CALL Delete(CenterT)
+     CALL Delete(ITop)
+     CALL Delete(JTop)
+     CALL Delete(ATop)
+     CALL Delete(Perm)
+     CALL Delete(IPerm)
+   END SUBROUTINE ConnectFragments
 !
 !-------------------------------------------------------------------
 ! 

@@ -714,7 +714,7 @@ CONTAINS
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-                RangeT%D,NDegsT%I,Zero,.FALSE.)
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
@@ -1215,7 +1215,7 @@ CONTAINS
      !
      ! filtering based on weights
      IStart=1
-     ILeft=2
+     ILeft=3
      IF(NDim<ILeft+1) RETURN
      CALL ReorderI(RMSErr,IWork,NDim)
      NDim2=2*NDim
