@@ -60,8 +60,6 @@ legacy:
 	rm -rf LibTwoE
 	rm -rf IntCoo
 	rm -rf ChangeLog*
-	mv MondoSCF2 MondoSCF
-	mv ONX2 ONX
 #
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
@@ -84,13 +82,13 @@ cmm:
 #----------------------------------------------
 #   MondoSCF
  s:	
-	$(MAKE)    -C MondoSCF
+	$(MAKE)    -C MondoSCF2
 rs:	
-	$(MAKE) -i -C MondoSCF release
+	$(MAKE) -i -C MondoSCF2 release
 ps:	
-	$(MAKE) -i -C MondoSCF purge
+	$(MAKE) -i -C MondoSCF2 purge
 cs:	
-	$(MAKE) -i -C MondoSCF clean
+	$(MAKE) -i -C MondoSCF2 clean
 #----------------------------------------------
 #    Solving SCF Equations
  e:	
@@ -121,13 +119,13 @@ p2:	ph pq  pt po
 #----------------------------------------------
 #     ONX
  o:	
-	$(MAKE)    -C ONX
+	$(MAKE)    -C ONX2
 ro:	
-	$(MAKE) -i -C ONX release
+	$(MAKE) -i -C ONX2 release
 po:	
-	$(MAKE) -i -C ONX purge
+	$(MAKE) -i -C ONX2 purge
 co:	
-	$(MAKE) -i -C ONX clean 
+	$(MAKE) -i -C ONX2 clean 
 #----------------------------------------------
 #     TwoE
  t:	
