@@ -11,7 +11,7 @@ CONTAINS
     INTEGER         :: N,PU
     !------------------------------------------------------------------------------------------------------------------------!
     PU=6
-    N=Random((/1,42/),StringToASCII(C%Nams%SCF_NAME))
+    N=Random((/1,42/))
     SELECT CASE(N)
     CASE (1)
        WRITE(PU,*)"Are we having fun yet?"    

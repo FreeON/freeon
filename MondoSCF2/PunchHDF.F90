@@ -253,6 +253,7 @@ CONTAINS
     REAL(DOUBLE), OPTIONAL    :: Rad_O
     REAL(DOUBLE)              :: AtomPairThresh,Radius
     INTEGER                   :: IL
+    INTEGER,PARAMETER         :: MaxCell=5000
 !------------------------------------------------------------------------------
 !   CS_OUT
     IF(PRESENT(Rad_O)) THEN
@@ -260,7 +261,7 @@ CONTAINS
     ELSE
        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
-    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)   
+    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell)   
 !   CS_IN : Quick fix for now, we will need to address a much better fix, later
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
@@ -269,9 +270,9 @@ CONTAINS
     ENDIF
     IF(G%PBC%PFFOvRide) THEN
        IL = G%PBC%PFFMaxLay
-       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/))
+       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/),MaxCell_O=MaxCell)
     ELSE
-       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)
+       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell)
     ENDIF
 !
     CALL Sort_CellSet(CS_IN)

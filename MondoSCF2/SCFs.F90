@@ -371,7 +371,7 @@ CONTAINS
        ETest=ETol(O%AccuracyLevels(cBAS))
        DTest=DTol(O%AccuracyLevels(cBAS))
 !*******
-       IF(cSCF<1)THEN
+       IF(cSCF<10)THEN
           ConvergedQ=NOT_CONVERGE!.FALSE.
           RETURN
        ENDIF

@@ -20,7 +20,7 @@ MODULE MDynamics
 !--------------------------------------------------------------
  SUBROUTINE  MD(C)  
     TYPE(Controls)  :: C
-    INTEGER         :: iBAS,iGEO,iCLONE
+    INTEGER         :: iBAS,iGEO,iCLONE,I
     REAL(DOUBLE)    :: Temp 
 !--------------------------------------------------------------
 !   Do Molecular Dynamics:Loop over Time Steps
@@ -49,8 +49,8 @@ MODULE MDynamics
        CALL SCF(iBAS,iGEO,C)
     ELSE
 !      Hack, Give an intial Maxwell Boltzman Temp
-!!$       Temp=20.D0
-!!$       CALL SetTempMaxBoltDist(C,Temp)
+       Temp=20.D0
+       CALL SetTempMaxBoltDist(C,Temp)
 !      Init the Time
        MDTime%D(:) = Zero
        HDFFileID=OpenHDF(C%Nams%HFile)
@@ -100,13 +100,14 @@ MODULE MDynamics
           HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
           CALL Put(MDTime%D(iCLONE),"MDTime")
        ENDDO
-       IF(.FALSE.) THEN
-          C%Stat%Action%C(1)=SCF_GUESSEQCORE
+       IF(.TRUE.) THEN
+          C%Opts%Guess=GUESS_EQ_SUPR
           DO iBAS=1,C%Sets%NBSets
-             CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos) 
+             CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos) 
              CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-             CALL SCF(iBAS,iGEO,C)
+             CALL SCF(iBAS,iGEO+1,C)
           ENDDO
+          iBAS=C%Sets%NBSets
        ELSE
 !         Archive Geometry for next step
           CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
@@ -159,10 +160,10 @@ MODULE MDynamics
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE)+MDKin%D(iCLONE)
        MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
 !
-!!$       CALL OpenASCII("EnergiesMD.dat",99)
-!!$       WRITE(99,'(F12.4,F14.8,F14.8,F14.8)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-!!$       CLOSE(99)
-!!$       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
+       CALL OpenASCII("EnergiesMD.dat",99)
+       WRITE(99,'(F12.4,F14.8,F14.8,F14.8)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+       CLOSE(99)
+       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
 !
     ENDDO
   END SUBROUTINE MDVerlet_NVE
@@ -284,7 +285,6 @@ MODULE MDynamics
     REAL(DOUBLE)          :: Temp,Mass,TVel,VX,VY,VZ,SX,SY,SZ
     INTEGER               :: iCLONE,iATS,I,J,Jmax
 !
-!    VX   = Random((/-One,One/),StringToASCII(C%Nams%SCF_NAME))
     Jmax = 20
     DO iCLONE=1,C%Geos%Clones
        SX = Zero
