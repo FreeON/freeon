@@ -135,6 +135,7 @@ MODULE ControlStructures
     LOGICAL                            :: On
     INTEGER                            :: Init
     INTEGER                            :: MaxMem
+    INTEGER                            :: iGEOStart
   END TYPE GDIIS
   !
   TYPE Constr
@@ -168,7 +169,12 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: LinB
      REAL(DOUBLE)                       :: Tors
      INTEGER                            :: MaxGeOpSteps
-     LOGICAL                            :: DoBackTr
+     LOGICAL                            :: DoAtomBackTr
+     LOGICAL                            :: DoLattBackTr
+     LOGICAL                            :: DoLattStep
+     LOGICAL                            :: AlternLatt
+     LOGICAL                            :: UnCoupleLatt
+     LOGICAL                            :: ExplLatt    
   END TYPE GConvCrit 
   !
   TYPE GOptStat 

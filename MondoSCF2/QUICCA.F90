@@ -27,12 +27,13 @@ CONTAINS
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(GDIIS)                 :: GDIISCtrl  
      INTEGER                     :: Print,iCLONE,iGEO,I
-     INTEGER                     :: HDFFileID,NatmsLoc,Memory
+     INTEGER                     :: HDFFileID,NatmsLoc,Memory,MemAux
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
      CHARACTER(LEN=*)            :: Path
      !
      NatmsLoc=SIZE(XYZ,2)
-     Memory=MIN(GDIISCtrl%MaxMem,iGEO)
+     MemAux=MIN(GDIISCtrl%MaxMem,iGEO-GDIISCtrl%iGEOStart+1)
+     Memory=MIN(MemAux,iGEO)
      CALL Halt('GDIIS is under development, Displ array needs to be coolected for PBC from remembered steps!')
    ! CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
      !
@@ -168,7 +169,8 @@ CONTAINS
      !
      CALL New(DelocVals,(/NCart,NMem/))
      CALL CollectDelocs(DelocVals%D,IntCValues,LastIntCVals%D,IntCs, &
-                        XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl,SCRPath,Print,PBCDim)
+                        XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GConvCrit,&
+                        SCRPath,Print,PBCDim)
      CALL CollectDXVects(IntCValues,LastIntCVals%D, &
                          DXVects,Delocs_O=DelocVals%D)
     !CALL CollectDXVects(IntCValues,LastIntCVals%D,DXVects)
@@ -229,7 +231,8 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE CollectDelocs(DelocVals,IntCValues,LastIntCVals,IntCs, &
-                            XYZ,GTrfCtrl,GCoordCtrl,SCRPath,Print,PBCDim)
+                            XYZ,GTrfCtrl,GCoordCtrl,GConvCr,SCRPath,&
+                            Print,PBCDim)
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:,:) :: DelocVals,XYZ,IntCValues
      REAL(DOUBLE),DIMENSION(:)   :: LastIntCVals
@@ -240,10 +243,12 @@ CONTAINS
      TYPE(INT_VECT)              :: ISpB,JSpB
      TYPE(DBL_VECT)              :: ASpB,CartVect,IntCDispl
      TYPE(Cholesky)              :: CholData
+     TYPE(GConvCrit)             :: GConvCr
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl%LinCrit,&
+     CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GConvCr, &
+                          GCoordCtrl%LinCrit,&
                           GCoordCtrl%TorsLinCrit,PBCDim, &
-                          Print,SCRPath,.TRUE.)
+                          Print,SCRPath)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      NMem=SIZE(DelocVals,2)
@@ -312,9 +317,9 @@ CONTAINS
      CALL New(DXValues,(/NDim,NMem/))
      !
 !!! this routines should be used calculate proper overlaps
-  !  CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl, &
+  !  CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
   !                 GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit, &
-  !                       PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+  !                       PBCDim,Print,SCRPath,Gi_O=.TRUE.)
   !  CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
   !  CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1,IntA2, &
   !                 NCart,IntCsX%N) 
@@ -641,9 +646,9 @@ CONTAINS
          VectCG%D(J)=RefGrad(J,I)
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
-       CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
+       CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl,GOPt%GConvCrit,&
                      GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
-                     PBCDim,Print,SCRPath,.TRUE.)
+                     PBCDim,Print,SCRPath)
        CALL CartToInternal(IntCs,VectCG%D,VectI%D,XYZAux%D,PBCDim, &
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        CALL RedundancyOff(VectI%D,SCRPath,Print)
@@ -665,18 +670,15 @@ CONTAINS
 !----------------------------------------------------------------------
 !
    SUBROUTINE CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
-                              IntCs,GOpt,SCRPath,Print,PBCDim)
+                              IntCs,GOpt,PBCDim)
      REAL(DOUBLE),DIMENSION(:,:)  :: RefStruct,RefGrad
      TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
      TYPE(DBL_VECT)               :: VectC,VectI,VectCG,VectX
      INTEGER                      :: NMem,NatmsLoc,NCart
-     INTEGER                      :: Print,I,J,PBCDim
+     INTEGER                      :: I,J,PBCDim
      TYPE(INTC)                   :: IntCs
      TYPE(GeomOpt)                :: GOpt 
-     CHARACTER(LEN=*)             :: SCRPath
-     LOGICAL                      :: Print2
      !
-     Print2=(Print>=DEBUG_GEOP_MAX)
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectPBCPast')
      NCart=SIZE(RefStruct,1)
@@ -700,17 +702,11 @@ CONTAINS
          VectCG%D(J)=RefGrad(J,I)
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
-   !   CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
-   !                 GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
-   !                 PBCDim,Print,SCRPath,.TRUE.)
-    !  CALL CartToInternal(IntCs,VectCG%D,VectI%D,XYZAux%D,PBCDim, &
-    !    GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
-    !  CALL RedundancyOff(VectI%D,SCRPath,Print)
-    !! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)
        !
-       CALL GetLattGrads(VectCG%D,XYZAux%D,VectI%D,PBCDim)
-       !
+       CALL GetLattGrads(VectCG%D(NCart-8:NCart),XYZAux%D, &
+                         VectI%D,PBCDim)
        IntCGrads%D(:,I)=VectI%D
+       !
        CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value%D
@@ -727,8 +723,8 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath, &
-                          PBCGrads,USQ_O)
-     REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights,PBCGrads
+                          USQ_O,ExtraW_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
      INTEGER                     :: NCart,NZ,I,J,K1,K2,L1,L2,NMem
@@ -737,6 +733,7 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: ExtraW_O
      ! 
      ! Calculate Topology (connectivity) of internal coordinates
      ! 
@@ -767,13 +764,7 @@ CONTAINS
      ! Calculate RMS gradients for all internal coordinates
      ! touching a specific internal coord at a specific geometry
      ! 
-     NPBC=SIZE(PBCGrads,1)
      DO I=1,NMem
-       IF(NPBC>0) THEN
-         W=DOT_PRODUCT(PBCGrads(:,I),PBCGrads(:,I))
-       ELSE
-         W=Zero
-       ENDIF
        DO J=1,IntCs%N
          IF(.NOT.IntCs%Active%L(J)) THEN
            LWeight(J,I)=1.D99
@@ -802,7 +793,9 @@ CONTAINS
             IntCs%Def%C(J)(1:5)=='ALPHA'.OR. &
             IntCs%Def%C(J)(1:4)=='BETA'.OR. &
             IntCs%Def%C(J)(1:5)=='GAMMA') THEN
-           LWeight(J,I)=W
+           IF(.NOT.PRESENT(ExtraW_O)) &
+             CALL Halt('ExtraW_O is missing LocalWeight')
+           LWeight(J,I)=ExtraW_O(I)
          ENDIF
        ENDDO
      ENDDO
@@ -853,8 +846,9 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess, &
-                       PBCValues,PBCGrads,GCoordCtrl,&
-                       PredVals,Displ,Path,SCRPath,NCart,iGEO,MixMat_O)
+                       PBCValues,PBCGrads,GCoordCtrl, &
+                       PredVals,Displ,Path,SCRPath,NCart,iGEO, &
+                       MixMat_O,ExtraW_O,PrtFits_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
@@ -871,9 +865,21 @@ CONTAINS
      TYPE(INTC)                 :: IntCsT
      TYPE(INT_VECT)             :: NDegsT   
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL:: MixMat_O
+     TYPE(DBL_VECT)             :: ExtraW
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL  :: ExtraW_O
+     LOGICAL                    :: PrtFits
+     LOGICAL,OPTIONAL           :: PrtFits_O
      !
+     PrtFits=.FALSE.
+     IF(PRESENT(PrtFits_O)) PrtFits=PrtFits_O
      NIntC=IntCs%N   
      NDim=SIZE(IntCGrads,2)
+     CALL New(ExtraW,NDim)
+     IF(PRESENT(ExtraW_O)) THEN
+       ExtraW%D=ExtraW_O
+     ELSE
+       ExtraW%D=Zero
+     ENDIF
      IF(PRESENT(MixMat_O)) THEN
        NT=SIZE(MixMat_O,2)
        CALL New(USQ,(/NT,NT/))
@@ -917,15 +923,16 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,PBCGrads,IntCsT)
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT, &
+                    ExtraW_O=ExtraW%D)
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,PBCGrads,USQ_O=USQ%D)
+                        SCRPath,USQ_O=USQ%D,ExtraW_O=ExtraW%D)
      ELSE
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,PBCGrads)
+                        SCRPath,ExtraW_O=ExtraW%D)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
               ! RangeT%D,NDegsT%I,Zero,.TRUE.)
@@ -939,7 +946,9 @@ CONTAINS
      CALL SetConstraints(IntCsT,IntCsT%PredVal%D)
      DisplT%D=IntCsT%PredVal%D-IntCValuesT%D(:,NDim)
      !
-   ! CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+     IF(PRTFits) THEN
+       CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+     ENDIF
      PredVals%D=IntCsT%PredVal%D
      Displ%D=DisplT%D
      !
@@ -957,6 +966,7 @@ CONTAINS
      CALL Delete(IntCGradsT)
      CALL Delete(IntCValuesT)
      CALL Delete(LWeightT)
+     CALL Delete(ExtraW)
    END SUBROUTINE DisplFit
 !
 !---------------------------------------------------------------------
@@ -1104,19 +1114,19 @@ CONTAINS
      INTEGER                     :: I
      REAL(DOUBLE)                :: Stre,Bend,LinB,OutP,Tors
      !
-     Stre=1.0D0
-     Bend=0.1D0
-     LinB=0.1D0
-     OutP=0.1D0
-     Tors=0.01D0
-    !Stre=GHess%Stre
-    !Bend=GHess%Bend
-    !LinB=GHess%LinB
-    !OutP=GHess%OutP
-    !Tors=GHess%Tors
+    !Stre=1.0D0
+    !Bend=0.1D0
+    !LinB=0.1D0
+    !OutP=0.1D0
+    !Tors=0.01D0
+     Stre=GHess%Stre
+     Bend=GHess%Bend
+     LinB=GHess%LinB
+     OutP=GHess%OutP
+     Tors=GHess%Tors
      DO I=1,IntCs%N
        ABC(I,:)=Zero
-       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+       IF(IntCs%Def%C(I)(1:5)=='STRE ') THEN
          ABC(I,2)=Stre
        ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
          ABC(I,2)=Bend
@@ -1126,8 +1136,10 @@ CONTAINS
          ABC(I,2)=OutP
        ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
          ABC(I,2)=Tors
-       ELSE
+       ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN
          ABC(I,2)=Stre
+       ELSE
+         ABC(I,2)=5.D0 ! for lattice
        ENDIF
      ENDDO 
    END SUBROUTINE InitialABC
@@ -1331,12 +1343,13 @@ CONTAINS
        MaxX=MAXVAL(VectX%D)
        !
        IF(MaxX-MinX<1.D-6) THEN
-         ! Do steepest descent with empirical force constants if 
-         ! range is too small for fitting.
+         ! Do steepest descent with empirical force constants 
+         ! or  5.0D0 if range is too small for fitting.
          ! Control over stepsize is going to be modified to
          ! standard DiagHess range (0.3 a.u.)
-         Range(I,1)=VectX%D(NDim)-0.30D0
-         Range(I,2)=VectX%D(NDim)+0.30D0
+         Range(I,1)=VectX%D(NDim)-0.10D0
+         Range(I,2)=VectX%D(NDim)+0.10D0
+        !ABC(I,2)= 5.0D0
          ABC(I,1)=VectY%D(NDim)-ABC(I,2)*VectX%D(NDim)
          NDegs(I)=1      
          CYCLE  
@@ -1440,7 +1453,7 @@ CONTAINS
      !
      ! filtering based on weights
      IStart=1
-     ILeft=2
+     ILeft=3
      IF(NDim<ILeft+1) RETURN
      CALL ReorderI(RMSErr,IWork,NDim)
      NDim2=2*NDim
@@ -1472,8 +1485,8 @@ CONTAINS
      J=NDim-ILeft+1
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
-      !IF(Q>0.9999D0) THEN
-       IF(Q>0.999D0) THEN
+       IF(Q>0.9999D0) THEN
+      !IF(Q>0.90D0) THEN
          IStart=I+1
          EXIT
        ENDIF
@@ -1483,26 +1496,22 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE PrepPrimW(Weights,IntCGrads,PBCGrads,IntCs)
-     REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads,PBCGrads
+   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs,ExtraW_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE)                :: X,W
-     INTEGER                     :: NIntC,NDim,I,J,NPBC
+     INTEGER                     :: NIntC,NDim,I,J
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: ExtraW_O
      !
      NIntC=SIZE(IntCGrads,1)
      NDim=SIZE(IntCGrads,2)
-     NPBC=SIZE(PBCGrads,1)
      !
      DO I=1,NDim
-     ! IF(NPBC>0) THEN
-     !   W=DOT_PRODUCT(PBCGrads(:,I),PBCGrads(:,I))
-     ! ELSE
-     !   W=Zero
-     ! ENDIF
+       IF(PRESENT(ExtraW_O)) W=ExtraW_O(I)
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X  !+W
+           Weights(J,I)=X*X+W
          ELSE
            Weights(J,I)=1.D99
          ENDIF
@@ -1902,38 +1911,59 @@ CONTAINS
 !----------------------------------------------------------------------
 !
    SUBROUTINE LatticeFit(SRStruct,RefStruct,RefGrad,XYZ,PBCDim, &
-                         GOpt,Print,SCRPath,PWDPath,iGEO)
+                         PBCFit,GOpt,Print,SCRPath,PWDPath,iGEO)
      REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct,RefGrad,XYZ
      INTEGER                     :: Print,PBCDim,iGEO
      TYPE(INTC)                  :: IntC_L
      CHARACTER(LEN=*)            :: SCRPath,PWDPath
      TYPE(DBL_RNK2)              :: IntCValues,IntCGrads
+     TYPE(DBL_RNK2)              :: PBCRefStr,PBCRefGrd
+     TYPE(PBCFits)               :: PBCFit
      TYPE(GeomOpt)               :: GOpt
      INTEGER                     :: NatmsLoc,NCart,I,J,NDim
-     TYPE(DBL_VECT)              :: PredVals,Displ,VectCart
+     TYPE(DBL_VECT)              :: PredVals,Displ,VectCart,ExtraW
      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
-     REAL(DOUBLE),DIMENSION(3)   :: CartAux
+     REAL(DOUBLE),DIMENSION(3)   :: CartAux1,CartAux2
+     REAL(DOUBLE)                :: StreCrit,AngleCrit
      !
-     IF(.NOT.DoLatticeFit(GOpt)) RETURN
+     IF(.NOT.DoLatticeFit(GOpt,iGEO)) RETURN
+     CALL StepPBCFit(PBCFit,RefStruct,RefGrad)
+     CALL GetPBCMem(PBCFit,PBCRefStr,PBCRefGrd,ExtraW)
      !
-     NDim=SIZE(RefStruct,2)
+     NDim=SIZE(PBCRefStr%D,2)
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      CALL LatticeINTC(IntC_L,PBCDim)
      CALL New(VectCart,NCart)
-     CALL CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
-                          IntC_L,GOpt,SCRPath,Print,PBCDim)
-    !CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-    !           IntCValues%D,IntCGrads%D, &
-    !           GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-    !           iGEO)
-     CALL INTCValue(IntC_L,XYZ,GOpt%CoordCtrl%LinCrit, &
-                    GOpt%CoordCtrl%TorsLinCrit)
-     CALL New(Displ,IntC_L%N) 
-     CALL New(PredVals,IntC_L%N) 
+     CALL CollectPBCPast(PBCRefStr%D,PBCRefGrd%D,IntCValues,IntCGrads, &
+                         IntC_L,GOpt,PBCDim)
+
+     !
+     CALL RefreshBMatInfo(IntC_L,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
+                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+                    PBCDim,Print,SCRPath,DoCleanCol_O=.FALSE.)
+     !
+     CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+                IntCValues%D,IntCGrads%D, &
+                GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
+                iGEO,ExtraW_O=ExtraW%D)
+               !iGEO,ExtraW_O=ExtraW%D,PrtFits_O=.TRUE.)
+   ! CALL INTCValue(IntC_L,XYZ,GOpt%CoordCtrl%LinCrit, &
+   !                GOpt%CoordCtrl%TorsLinCrit)
+   ! CALL New(Displ,IntC_L%N) 
+   ! CALL New(PredVals,IntC_L%N) 
+   ! DO J=1,6
+   !   PredVals%D(J)=IntCValues%D(J,NDim)-0.5D0*IntCGrads%D(J,NDim)
+   ! ENDDO
+     !
+     StreCrit=0.15D0*AngstromsToAu
+     AngleCrit=1.0D0*PI/180.D0
+     CALL CutOffDispl(Displ%D,IntC_L,StreCrit,AngleCrit)
+                    ! GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
      DO J=1,6
-       PredVals%D(J)=IntCValues%D(J,NDim)-0.5D0*IntCGrads%D(J,NDim)
+       PredVals%D(J)=IntCValues%D(J,NDim)+Displ%D(J)
      ENDDO
+     !
      CALL SetLattValues(PredVals%D(1:6),GOpt%ExtIntCs)
      !
      DO I=1,3
@@ -1944,8 +1974,9 @@ CONTAINS
      ! Convert to Fractionals
      !
      DO I=1,NatmsLoc-3
-       CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,XYZ(1:3,I),CartAux)
-       XYZ(:,I)=CartAux
+       CartAux1=XYZ(1:3,I)
+       CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,CartAux1,CartAux2)
+       XYZ(:,I)=CartAux2
      ENDDO
      !
      ! Calculate new lattice vectors
@@ -1966,8 +1997,9 @@ CONTAINS
      ENDDO
      !
      DO I=1,NatmsLoc-3
-       CALL DGEMM_NNc(3,3,1,One,Zero,BoxShape,XYZ(1:3,I),CartAux)
-       XYZ(:,I)=CartAux
+       CartAux1=XYZ(:,I)
+       CALL DGEMM_NNc(3,3,1,One,Zero,BoxShape,CartAux1,CartAux2)
+       XYZ(:,I)=CartAux2
      ENDDO
      !
      CALL Delete(VectCart)
@@ -1976,24 +2008,85 @@ CONTAINS
      CALL Delete(IntCValues)
      CALL Delete(IntCGrads)
      CALL Delete(IntC_L)
+     CALL Delete(PBCRefStr)
+     CALL Delete(PBCRefGrd)
+     CALL Delete(ExtraW)
    END SUBROUTINE LatticeFit
 !
 !----------------------------------------------------------------------
 !
-   LOGICAL FUNCTION DoLatticeFit(GOpt)
+   LOGICAL FUNCTION DoLatticeFit(GOpt,iGEO)
      TYPE(GeomOpt)               :: GOpt
-     INTEGER                     :: J
+     INTEGER                     :: iGEO,J
      REAL(DOUBLE),DIMENSION(6)   :: AbsGrad
      !
-     DoLatticeFit=.FALSE.
-     DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad(J)) ; ENDDO
-     IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad) THEN 
-   ! IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
-   !    MAXVAL(AbsGrad)>10.D0*GOpt%GOptStat%MaxCGrad) THEN
-       ! 
+     IF(GOpt%GConvCrit%AlternLatt) THEN    
+       DoLatticeFit=.FALSE.
+       DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad(J)) ; ENDDO
+     ! IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad) THEN 
+       IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
+          MAXVAL(AbsGrad)>5.D0*GOpt%GOptStat%MaxCGrad) THEN
+         ! 
+         DoLatticeFit=.TRUE.
+       ENDIF
+       GOpt%GConvCrit%DoLattStep=.NOT.DoLatticeFit
+     ELSE
        DoLatticeFit=.TRUE.
      ENDIF
+     !
+     ! Increment iGEOStart to the next geometry
+     ! No data from previos lattice values will be used to determine 
+     ! atomic positions at new lattice
+     !
+     IF(GOpt%GConvCrit%AlternLatt) THEN
+       IF(DoLatticeFit) GOpt%GDIIS%iGEOStart=iGEO+1
+     ENDIF
    END FUNCTION 
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE StepPBCFit(PBCFit,RefStruct,RefGrad)
+     TYPE(PBCFits)               :: PBCFit
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad
+     INTEGER                     :: I,J,NDim,NCart
+     !
+     NDim=SIZE(RefGrad,2)
+     NCart=SIZE(RefGrad,1)
+     DO I=MIN(PBCFit%ActMem,PBCFit%MaxMem-1),1,-1
+       PBCFit%AWeights%D(I+1)=PBCFit%AWeights%D(I) 
+       PBCFit%PBCGrads%D(:,I+1)=PBCFit%PBCGrads%D(:,I) 
+       PBCFit%PBCValues%D(:,I+1)=PBCFit%PBCValues%D(:,I) 
+     ENDDO 
+       PBCFit%AWeights%D(1)= &
+           DOT_PRODUCT(RefGrad(1:NCart-9,NDim),RefGrad(1:NCart-9,NDim))
+     DO J=1,9
+       PBCFit%PBCGrads%D(J,1)=RefGrad(NCart-9+J,NDim) 
+       PBCFit%PBCValues%D(J,1)=RefStruct(NCart-9+J,NDim) 
+     ENDDO
+     PBCFit%ActMem=MIN(PBCFit%ActMem+1,PBCFit%MaxMem)
+     ! 
+   END SUBROUTINE StepPBCFit
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE GetPBCMem(PBCFit,PBCRefStr,PBCRefGrd,ExtraW)
+     TYPE(PBCFits)  :: PBCFit
+     TYPE(DBL_RNK2) :: PBCRefStr,PBCRefGrd
+     TYPE(DBL_VECT) :: ExtraW
+     INTEGER        :: I,J
+     !
+     CALL New(PBCRefStr,(/9,PBCFit%ActMem/))
+     CALL New(PBCRefGrd,(/9,PBCFit%ActMem/))
+     CALL New(ExtraW,PBCFit%ActMem)
+     DO I=1,PBCFit%ActMem
+       ExtraW%D(PBCFit%ActMem+1-I)=&
+         DOT_PRODUCT(PBCFit%PBCGrads%D(:,I),PBCFit%PBCGrads%D(:,I))
+       DO J=1,9
+         PBCRefStr%D(J,PBCFit%ActMem+1-I)=PBCFit%PBCValues%D(J,I)
+         PBCRefGrd%D(J,PBCFit%ActMem+1-I)=PBCFit%PBCGrads%D(J,I)
+       ENDDO
+     ENDDO
+   END SUBROUTINE GetPBCMem
 !
 !----------------------------------------------------------------------
 !
