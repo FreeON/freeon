@@ -307,14 +307,23 @@ CONTAINS
   !===============================================================================================
   SUBROUTINE ParseRestart(M_PWD,NewFileID,Guess,RestartHDF,RestartState)
     CHARACTER(LEN=*)                 :: M_PWD
-    CHARACTER(LEN=DCL)               :: RestartHDF
+    CHARACTER(LEN=DCL)               :: RestartHDF,CTmp
     TYPE(INT_VECT)                   :: RestartState
-    INTEGER                          :: Guess,NewFileID
+    INTEGER                          :: Guess,NewFileID,L1,L2,L3
     !-----------------------------------------------------------------------------------------------
     IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
        Guess=GUESS_EQ_RESTART
        IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF))  &
             CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
+       ! Check for relative path for HDF, and if relative, expand ...
+       IF(SCAN(RestartHDF,'$')/=0)THEN
+          L1=INDEX(RestartHDF,'$')
+          L2=INDEX(RestartHDF,'/')          
+          L3=LEN(RestartHDF)
+          ! get the relative env name
+          CALL GETENV(RestartHDF(L1+1:L2-1),CTmp)
+          RestartHDF=RestartHDF(1:L1-1)//TRIM(CTmp)//RestartHDF(L2:L3)
+       ENDIF
        ! Check for absolute path
        IF(RestartHDF(1:1)/='/')  &
             CALL MondoHalt(PRSE_ERROR,'Please use absolute path to the restart HDF file')

@@ -12,8 +12,10 @@ TwoELibs=$(F90_LIBRARIES) -lINT -lVRR -lHRR -lTwoEMisc
 #
 all:    Misc HRRs VRRs Ints Grad
 #
-clean:  cMisc cHRRs cVRRs cInts cGrad
+clean:  # cMisc cHRRs cVRRs cInts cGrad
 	rm -f N4K dN4K
+	rm -f $(MONDO_LIB)/libVRR.a $(MONDO_LIB)/libINT.a 
+	rm -f $(MONDO_LIB)/libGRD.a $(MONDO_LIB)/libHRR.a  
 #
 source: sHRRs sVRRs sInts sGrad
 #

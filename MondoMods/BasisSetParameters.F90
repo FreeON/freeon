@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=34
+   INTEGER, PARAMETER :: NSupSets=40
 
 ! Element 105-107  are ghost function with charge = 0. 
   
@@ -72,14 +72,21 @@ MODULE BasisSetParameters
 !               ECP BASIS SETS
                 'sbkjc           ' , 'SBKJC_VDZ_ECP   ',   &  ! 27
                 'lanl2           ' , 'LANL2_DZ_ECP    ',   &  ! 28
+!               SPLIT BASIS SETS
+                'sto-2g-split    ' , 'STO-2G-SPLIT    ',   &  ! 29
+                'sto-3g-split    ' , 'STO-3G-SPLIT    ',   &  ! 30
+                'sto-6g-split    ' , 'STO-6G-SPLIT    ',   &  ! 31
+                '3-21g-split     ' , '3-21G-SPLIT     ',   &  ! 32
+                '6-31g-split     ' , '6-31G-SPLIT     ',   &  ! 33
+                '6-31g**-split   ' , '6-31Gss-SPLIT   ',   &  ! 34
 !               USER DEFINED BASIS SETS
-                'user1           ' , 'User1           ',   &  ! 29
-                'user2           ' , 'User2           ',   &  ! 30
-                'user3           ' , 'User3           ',   &  ! 31
-                'user4           ' , 'User4           ',   &  ! 32
-                'user5           ' , 'User5           ',   &  ! 33
+                'user1           ' , 'User1           ',   &  ! 35
+                'user2           ' , 'User2           ',   &  ! 36
+                'user3           ' , 'User3           ',   &  ! 37
+                'user4           ' , 'User4           ',   &  ! 38
+                'user5           ' , 'User5           ',   &  ! 39
 !               Crystal Basis Set
-                'crystal98       ' , 'Crystal98       '    &  ! 34
+                'crystal98       ' , 'Crystal98       '    &  ! 40
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &

@@ -368,7 +368,7 @@ tt=tt+t2-t1
     DEALLOCATE(ACAtmPair,BDAtmPair,STAT=iErr)
     IF(iErr.NE.0) CALL Halt('In ComputK: Deallocation problem.')
     !
-    write(*,*) 'time',tt
+ !   write(*,*) 'time',tt
     !
 !!$#ifdef ONX2_PARALLEL
 !!$    NIntsTot=Reduce(NInts)

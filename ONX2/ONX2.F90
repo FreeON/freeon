@@ -147,7 +147,7 @@ PROGRAM ONX2
 #ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
-  WRITE(*,*) '-------- We are in ONX2 --------'
+!  WRITE(*,*) '-------- We are in ONX2 --------'
   !
   !
   SELECT CASE(SCFActn)
@@ -278,7 +278,7 @@ PROGRAM ONX2
   CALL CPU_TIME(Time2)
 #endif
   TmKx = Time2-Time1
-  WRITE(*,*) 'Compute Kx:ok',Time2-Time1
+  !WRITE(*,*) 'Compute Kx:ok',Time2-Time1
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
@@ -355,10 +355,24 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   ! Save on disc.
-  CALL Put(Kx,TrixFile('K',Args,0))
-  CALL PChkSum(Kx,'Kx['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
-  CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
+!  CALL Put(Kx,TrixFile('K',Args,0))
+!  CALL PChkSum(Kx,'Kx['//TRIM(SCFCycl)//']',Prog)
+!  CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
+!  CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
+
+  ! Save on disc.
+  IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
+     CALL Put(Kx,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))
+     CALL PChkSum(Kx,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( Kx,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   Kx,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']')
+  ELSE
+     CALL Put(Kx,TrixFile('K',Args,0))
+     CALL PChkSum(Kx,'Kx['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
+     CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
+  ENDIF
+
   !
   !------------------------------------------------
   ! Timing.
@@ -385,11 +399,11 @@ PROGRAM ONX2
      CALL PImbalance(TmKxArr ,NPrc,Prog_O='ComputeK')
      !CALL PImbalance(TmKTArr,NPrc,Prog_O='GONX'     )
      !
-     WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
-     WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
-     WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
-     WRITE(*,1004) SUM(TmKxArr%D )/DBLE(NPrc),MINVAL(TmKxArr%D ),MAXVAL(TmKxArr%D )
-     WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
+!     WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
+!     WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
+!     WRITE(*,1003) SUM(TmTMArr%D )/DBLE(NPrc),MINVAL(TmTMArr%D ),MAXVAL(TmTMArr%D )
+!     WRITE(*,1004) SUM(TmKxArr%D )/DBLE(NPrc),MINVAL(TmKxArr%D ),MAXVAL(TmKxArr%D )
+!     WRITE(*,1005) SUM(TmDLArr%D )/DBLE(NPrc),MINVAL(TmDLArr%D ),MAXVAL(TmDLArr%D )
      !WRITE(*,1006) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
      !
 1001 FORMAT(' ONX: Ave TmAL = ',F15.2,', Min TmAL = ',F15.2,', Max TmAL = ',F15.2)
@@ -408,11 +422,11 @@ PROGRAM ONX2
   !
 #else
   !
-  WRITE(*,1001) TmAL
-  WRITE(*,1002) TmML
-  WRITE(*,1003) TmTM
-  WRITE(*,1004) TmKx
-  WRITE(*,1005) TmDL
+!  WRITE(*,1001) TmAL
+!  WRITE(*,1002) TmML
+!  WRITE(*,1003) TmTM
+!  WRITE(*,1004) TmKx
+!  WRITE(*,1005) TmDL
   !WRITE(*,1006) ....
   !
 1001 FORMAT(' ONX: Ave TmAL = ',F15.2)

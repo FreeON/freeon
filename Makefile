@@ -30,7 +30,7 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e 1 2  #d #v 
+all:	legacy CatCpy mm s e 1 2  #d #v 
 #
 clean:	cmm cs ce c1 c2 cd cv
 	rm -f $(REMOVEALL)
@@ -39,11 +39,13 @@ clean:	cmm cs ce c1 c2 cd cv
 #
 purge:	pmm ps pe p1 p2 pd pv pMisc  
 #
-release: clean rmLegacy swREADME rmm rs re r1 r2 rd rv tarball
+release: clean legacy swREADME rmm rs re r1 r2 rd rv tarball
+	rm -rf Docs
 #
 backup:	purge rmLegacy tarball
+	rm -rf Docs
 #
-rmLegacy:
+legacy:
 	rm -rf DirectJ
 	rm -rf ONX
 	rm -rf XForm
@@ -55,10 +57,11 @@ rmLegacy:
 	rm -rf MondoSCF
 	rm -rf Dynamo
 	rm -rf Bader
-	rm -rf Docs
 	rm -rf LibTwoE
 	rm -rf IntCoo
 	rm -rf ChangeLog*
+	mv MondoSCF2 MondoSCF
+	mv ONX2 ONX
 #
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
@@ -81,13 +84,13 @@ cmm:
 #----------------------------------------------
 #   MondoSCF
  s:	
-	$(MAKE)    -C MondoSCF2
+	$(MAKE)    -C MondoSCF
 rs:	
-	$(MAKE) -i -C MondoSCF2 release
+	$(MAKE) -i -C MondoSCF release
 ps:	
-	$(MAKE) -i -C MondoSCF2 purge
+	$(MAKE) -i -C MondoSCF purge
 cs:	
-	$(MAKE) -i -C MondoSCF2 clean
+	$(MAKE) -i -C MondoSCF clean
 #----------------------------------------------
 #    Solving SCF Equations
  e:	
@@ -111,10 +114,10 @@ c1:
 #----------------------------------------------
 #     Two electron directories
 #
- 2:	q   h  t o2
-r2:	rq rh  rt ro2
-c2:	cq ch  ct co2
-p2:	ph pq  pt po2
+ 2:	 q  h   t  o
+r2:	rq rh  rt ro
+c2:	cq ch  ct co
+p2:	ph pq  pt po
 #----------------------------------------------
 #     ONX
  o:	
@@ -125,16 +128,6 @@ po:
 	$(MAKE) -i -C ONX purge
 co:	
 	$(MAKE) -i -C ONX clean 
-#----------------------------------------------
-#     ONX2
- o2:	
-	$(MAKE)    -C ONX2
-ro2:	
-	$(MAKE) -i -C ONX2 release
-po2:	
-	$(MAKE) -i -C ONX2 purge
-co2:	
-	$(MAKE) -i -C ONX2 clean 
 #----------------------------------------------
 #     TwoE
  t:	
