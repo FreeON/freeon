@@ -1,6 +1,28 @@
+2004-11-22 14:19  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, InCoords.F90, Optimizer.F90,
+	ParseGeomOpt.F90, QUICCA.F90, SCFs.F90: A new version of the
+	optimizer. Default maximum step length is set back to 0.3 as
+	before. An important error corrected for the PBC case, in the
+	calculation of the topology of internal coords. An additional
+	factor is added to primery weights: W/V, where W is lattice
+	gradient norm, V is cell-volume. Optimization can now include
+	volume and area related internal coordinated, ie, the cell volume
+	can be explicitely used as an optimization coordinate. This version
+	seems to run very well on various tests including IceIh (x2) and
+	PETN. I recommend the use of "ExplLatt" among the optimization
+	commands, as it seems to result in both fast and smooth
+	optimizations.
+
+2004-11-19 12:30  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, ParseGeomOpt.F90,
+	QUICCA.F90, SCFs.F90: An update of the PBC optimizer. XC force is
+	calculated numerically for parallel runs, see SCFs.F90.
+
 2004-11-17 15:11  mchalla
 
-	* Docs/DM_Papers/PERT_4/Makefile: [no log message]
+	* Docs/DM_Papers/PERT_4/Makefile, ChangeLog: [no log message]
 
 2004-11-17 15:03  mchalla
 
