@@ -210,7 +210,14 @@ CONTAINS
            WRITE(Out,*)TRIM(Mssg)
 
            Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps, ' &
-                //TRIM(IntToChar(MM))//' matrix multiplies, %Non0s = '//TRIM(IntToChar(PNon0))              
+                //TRIM(IntToChar(MM))//' matrix multiplies'
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           Mssg=ProcessName(Prog)//'Fractional occupation = '                     &
+                //TRIM(DblToShrtChar(Half*DBLE(NEl)/DBLE(NBasF)))                 &
+                //', %Non0s = '//TRIM(IntToChar(PNon0))              
            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               WRITE(*,*)TRIM(Mssg)
            ENDIF
