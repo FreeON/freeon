@@ -54,6 +54,12 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: FiveHalves   =Five/Two            ! 5/2
    REAL(DOUBLE), PARAMETER :: FiveFourths  =Five/Four           ! 5/4
    REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0 ! Angstronms -> AU
+#ifdef MMech
+! data from NIST home page
+   REAL(DOUBLE), PARAMETER :: JToHartree=2.29371276D17          ! Joul -> Hartree
+   REAL(DOUBLE), PARAMETER :: C_Avogadro=6.02214199D23          ! Avogadro const 
+   REAL(DOUBLE), PARAMETER :: e2PerAngstroemToKJPerMol=1389.3548461690 ! e2/A -> KJ/mol
+#endif
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
    REAL(DOUBLE), PARAMETER :: SMALL_DBL    =TINY(One)           ! smallest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 
