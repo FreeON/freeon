@@ -29,6 +29,8 @@ MODULE ParsingConstants
    CHARACTER(LEN=*),  PARAMETER :: DBG_GEOP_MIN ='MinGeOp'
    CHARACTER(LEN=*),  PARAMETER :: DBG_GEOP_MAX ='MaxGeOp'
    CHARACTER(LEN=*),  PARAMETER :: DBG_PRT_MM   ='MMDebug'
+   CHARACTER(LEN=*),  PARAMETER :: DBG_PRT_FRC  ='FrcDebug'
+   
 
    INTEGER, PARAMETER     :: SFC_NONE   =3480481
    INTEGER, PARAMETER     :: SFC_PEANO  =5308208
@@ -53,4 +55,5 @@ MODULE ParsingConstants
    INTEGER,           PARAMETER :: DEBUG_GEOP_MIN=568356  ! Print geometry optimization data 
    INTEGER,           PARAMETER :: DEBUG_GEOP_MAX=568357  ! Print geometry optimization data 
    INTEGER,           PARAMETER :: DEBUG_MM      =129462  ! Print molecular mechanics related data
+   INTEGER,           PARAMETER :: DEBUG_FRC     =680976  ! Print Forceses
 END MODULE
