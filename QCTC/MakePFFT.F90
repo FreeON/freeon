@@ -26,16 +26,20 @@ PROGRAM MakePFFT
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)
-! Get basis set and geometry
+! Get basis set and geometry and Set up and Store the outer cell sum
 #ifdef MMech
   IF(HasMM()) THEN
     CALL Get(GM,Tag_O='GM_MM'//CurGeom)
+    CALL SetCellNumber(GM,1.D-12)
   ELSE
     CALL Get(GM,Tag_O=CurGeom)
+    CALL SetCellNumber(GM)
   ENDIF
 #else
   CALL Get(GM,Tag_O=CurGeom)
+  CALL SetCellNumber(GM)
 #endif
+  CALL Put_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom) 
 ! Set Up the Multipoles  
   CALL MultipoleSetUp(FFEll2)
 ! Allocate memory
