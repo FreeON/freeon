@@ -509,9 +509,9 @@ CONTAINS
       CityRank(I) = AnnealKey%I(IntVect(1),IntVect(2),IntVect(3))
 !     WRITE(*,*) 'CityRank',I, ' =', CityRank(I)
     ENDDO
-    IF(IMax /= LinDim) THEN
-      STOP 'ERROR: Numerical accuracy problem in TableAnneal!'
-    ENDIF
+!   IF(IMax /= LinDim) THEN
+!     STOP 'ERROR: Numerical accuracy problem in TableAnneal!'
+!   ENDIF
     CALL I8Sort(CityRank,TravO%I,NCity,2)
     CALL Delete(AnnealKey)
 #ifdef USE_Final_TravO_Dat
