@@ -13,15 +13,9 @@ MODULE KxcGen
   IMPLICIT NONE
   LOGICAL PrintFlag
 !---------------------------------------
-!
 ! Global primitive 
-  TYPE(PrimPair)                           :: Prim
-
-   TYPE(BSET)                    :: BS              !  Global basis set
-   TYPE(CRDS)                    :: GM              !  Global molecular geometry
-   TYPE(DBL_RNK4)                :: MD             
-
-
+!
+  TYPE(PrimPair)                 :: Prim
 !----------!
   CONTAINS !
 !=============================================================================================

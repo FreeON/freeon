@@ -59,6 +59,10 @@ MODULE CubeTree
 !  Interpolation grid for fast evaluation of Exp[-x] and Erf[x]
    INCLUDE 'Exp.Inc'   
    INCLUDE 'Erf.Inc'
+!  Global Objects
+   TYPE(BSET)                     :: BS              !  Global basis set
+   TYPE(CRDS)                     :: GM              !  Global molecular geometry
+   TYPE(DBL_RNK4)                 :: MD              !  Global MD Coefs
 !-----------!
    CONTAINS !
 !================================================================================
@@ -184,7 +188,7 @@ MODULE CubeTree
 #ifdef PERIODIC 
          INTEGER                            :: NC
          REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
-         REAL(DOUBLE), DIMENSION(3,NGRID)   :: GridOld
+         REAL(DOUBLE), DIMENSION(NGRID,3)   :: GridOld
          REAL(DOUBLE)                       :: Rsum,PopOld
 #endif
 !--------------------------------------------------------------------------
@@ -200,6 +204,7 @@ MODULE CubeTree
          CALL SetBBox(Cube%Box,Box)
 !-------------------------------------------------------------------------
 !        Lay grid
+!
 #ifdef PERIODIC
          BoxCenter(:) = Box%Center(:)
          BoxBndLow(:) = Box%BndBox(:,1)
@@ -210,7 +215,7 @@ MODULE CubeTree
             Box%BndBox(:,1) = BoxBndLow(:)+CS%CellCarts%D(:,NC)
             Box%BndBox(:,2) = BoxBndHig(:)+CS%CellCarts%D(:,NC)        
             DO I=1,NGrid
-               Grid(I,:) = GridOld(I,:)+CS%CellCarts%D(NC,:)
+               Grid(I,:) = GridOld(I,:)+CS%CellCarts%D(:,NC)
             ENDDO
             CALL RhoOnGrid(RhoRoot)
          ENDDO
@@ -288,7 +293,7 @@ MODULE CubeTree
          IF(Ty>Node%Box%Half(2)+Box%Half(2))RETURN
          Tz=ABS(Node%Box%Center(3)-Box%Center(3))
          IF(Tz>Node%Box%Half(3)+Box%Half(3))RETURN
-         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
+!         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
          IF(Node%Leaf)THEN            
 #ifdef EXPLICIT_SOURCE           
             INCLUDE 'ExplicitLeafPopulation.Inc'       
@@ -326,7 +331,7 @@ MODULE CubeTree
          IF(Ty>Node%Box%Half(2)+Box%Half(2))RETURN
          Tz=ABS(Node%Box%Center(3)-Box%Center(3))
          IF(Tz>Node%Box%Half(3)+Box%Half(3))RETURN         
-         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
+!         IF(Node%MaxAmp+PenetratDistanceThreshold<Zero)RETURN
          IF(Node%Leaf)THEN            
 !           Intermediates for computation and thresholding of electron count contributions
             Pop=Zero
@@ -394,9 +399,6 @@ MODULE CubeTree
             MidSep=BisSep+DelSep
 !           Set the BBox over which to integrate the density,
             CubeRoot%Box=ExpandBox(CubeBox,MidSep)
-#ifdef PERIODIC
-            CALL MakeBoxPeriodic(CubeRoot%Box)
-#endif
 !           and the cooresponding penetration distance threshold
             PenetratDistanceThreshold=MidSep**2
 !           Expand native Rho BBox by this amount
@@ -410,8 +412,13 @@ MODULE CubeTree
 !           If still to the left, increment bisection point
             IF(FMid>Zero)BisSep=MidSep
          ENDDO
+#ifdef PERIODIC
+         CALL MakeBoxPeriodic(CubeRoot%Box)
+#endif
+!
 !        MidPop is now the most accurate evaluation of the integrated density
 !        that HiCu can achieve with current thresholds.
+!
          CubeRoot%IXact=MidPop
          CubeRoot%ISplit=1
          CubeRoot%Box%Tier=0
@@ -592,10 +599,10 @@ MODULE CubeTree
 !
         DO I = 1,3
            IF(GM%AutoW(I)) THEN
-              IF(Box%BndBox(I,1) < 1.D-9) THEN
+              IF(Box%BndBox(I,1) < Zero) THEN
                  Box%BndBox(I,1) = Zero
               ENDIF
-              IF(Box%BndBox(I,2) > GM%BoxShape%D(I,I)-1.D-9) THEN
+              IF(Box%BndBox(I,2) > GM%BoxShape%D(I,I)) THEN
                  Box%BndBox(I,2) = GM%BoxShape%D(I,I)
               ENDIF
            ENDIF
