@@ -44,7 +44,6 @@ GDIIS is not recommended.
 \subsection{Minimization vs Stationary points}
 \begin{itemize}
 \item[{\tt DoGradNorm}] :
-\end{itemize}
 The option {\tt DoGradNorm} when placed in the {\tt Grad} line
 will result in finding the nearest stationary point close to the
 input structure, independent from the type of the stationary point
@@ -54,6 +53,7 @@ while the default QUICCA optimizes the gradient curve so that
 the gradient curve will have a positiv derivative at the location of the
 optimized structure. This requirement on the slope of the gradient
 curve is omitted when {\tt DoGradNorm} is used.
+\end{itemize}
  
 \subsection{Constraints}
 
@@ -66,8 +66,8 @@ lattice parameters, internal coordinates and to their combinations.
 
 \subsubsection{Cartesian/fractional constraints}
 The input file contains Cartesian or fractional coordinates of atoms.
-If putting " C " at the end of the line that contains the coordinates
-of a certain atom the coordinate will be frozen during the optimization.
+Putting " C " at the end of the line (that contains the coordinates
+of a certain atom) freezes the coordinates pf the atom during the optimization.
 \\
 E.g. the line
 \\
@@ -179,6 +179,47 @@ CARTX 34 1145.98
 will constrain the X component of the atom 34 to 1145.98 angstroems.
 In case of crystal optimizations, the corresponding fractional
 coordinate will be fixed.
+
+\subsection{Alternating optimization}
+For crystal structure optimizations the alternation of atoms-only and
+lattice-only steps may be helpful.
+\begin{itemize}
+\item[{\tt Alternate}] :
+This option of the {\tt Grad} line turns on the alternating optimizer. 
+The default operation 
+of alternate is first to optimize the structure by moving only
+fractional coordinates of atoms. Once the gradients on the fractional 
+coordinates become smaller than the gradient accuracy threshold,
+the optimizer freezes the fractionals and releases the optimization of
+the lattice vectors. After a single step with the lattice vectors,
+the lattice becomes frozen again and the fractional coordinates are 
+relaxed. These procedure is repeated until both lattice and fractional
+coordinates are relaxed.
+\end{itemize}
+
+\begin{itemize}
+\item[{\tt LatticeStart}] :
+This option, when added to {\tt Alternate} in the {\tt Grad} line,
+forces the alternation to start with fixed fractionals and moving
+lattice vectors, otherwise "Alternate" works the same way as in the 
+default scheme.
+\end{itemize}
+
+\begin{itemize}
+\item[{\tt MaxAtoms}] :
+This option must be put into a separate line, e.g. {\tt MaxAtoms=3}
+forces the alternating optimizer to do a maximum of 3 steps 
+when in the fractionals-only phase.    
+\end{itemize}
+
+\begin{itemize}
+\item[{\tt MaxLattice}] :
+Similar to {\tt MaxAtoms}. E.g. {\tt MaxLattice=5} forces the optimizer
+to make no more than 5 steps when doing a lattice-only optimization.
+Any combination of {\tt MaxAtoms} and {\tt MaxLattice} is allowed.
+In the absence of these commands, the deafult operation works, i.e.
+{\tt MaxAtoms=10000} and {\tt MaxLattice=1}.
+\end{itemize}
 
 \subsection{Recognition of weak bonds}
 Weak bonds, such as the Van der Waals bonds can be recognized difficultly,
