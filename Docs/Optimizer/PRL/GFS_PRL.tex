@@ -1,15 +1,15 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\newcommand{\commentoutB}[1]{}
-\newcommand{\commentoutA}[1]{#1}
+%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-% \newcommand{\commentoutB}[1]{#1}
-% \newcommand{\commentoutA}[1]{}
-% \documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -149,8 +149,8 @@ This severely truncated Newton or  ``force relaxation'' method typically obtains
 It is worth noting that the landmark RHF/4-21G optimization of Crambin by Van Alsenoy \cite{van_alsenoy_98}
 was carried out in just 79 steps using the force relaxation approach of Sellers \cite{sellers}.
 In these algorithms, strong damping \cite{sellers} or line searching \cite{sclegel_linesearch}
-is required to avoid divergence. Another important technique to control and accelerate convergence of 
-geometry optimization is the geometric DIIS \cite{Pulay_GDIIS} (GDIIS). While geometric DIIS is a simple 
+is required to avoid divergence. Another important technique to accelerate convergence of 
+geometry optimization is the geometric DIIS (GDIIS) \cite{Pulay_GDIIS}. While geometric DIIS is a simple 
 technique, its successful application may require many intricate modifications \cite{Farkas_GDIIS}.  A 
 recent review and comparison of these algorithms and their technical details can be found in 
 Ref.~\onlinecite{bakken}.  
@@ -175,7 +175,7 @@ With infinitesimal steps, this independent coordinate approximation is formally 
 
 Realistically though, both eigenvectors and eigenvalues of the Hessian will change as the 
 algorithm takes the largest possible steps, leading to second (and higher) order coupling effects.  At this point, 
-we turn to an internal coordinate system to continue development of the independent curvilinear coordinate 
+we turn to an internal coordinate system to continue development of the independent coordinate 
 approximation.  In an internal coordinate system, the magnitude of harmonic and anharmonic coupling
 effects are small over the course of optimization.  On the other hand,
 in a static basis of normal modes anharmonic coupling effects are larger to begin with \cite{fogarasi_diaghess}, 
@@ -834,42 +834,42 @@ data-pairs, using the model function $E_{i}=E_{\rm opt}+A*e^{-f*i}$.}
 \clearpage
 
 \begin{center}
-Figure 1, Nemeth and Challacombe \\[1.cm]
+Figure 1, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{picture1_2.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
-Figure 2, Nemeth and Challacombe \\[1.cm]
+Figure 2, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{kinasepicture.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
-Figure 3, Nemeth and Challacombe \\[1.cm]
+Figure 3, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{R263logdata2.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
-Figure 4, Nemeth and Challacombe \\[1.cm]
+Figure 4, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{RMSCartData.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
-Figure 5, Nemeth and Challacombe \\[1.cm]
+Figure 5, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{RMSloglog.eps}}
 \end{center}
 
 \clearpage
 
 \begin{center}
-Figure 6, Nemeth and Challacombe \\[1.cm]
+Figure 6, N{\'e}meth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{convfact.eps}}
 \end{center}
 
