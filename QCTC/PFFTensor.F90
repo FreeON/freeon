@@ -17,17 +17,18 @@ MODULE PFFT
 !====================================================================================
 ! Globals
 !====================================================================================
-  INTEGER                           :: Dimen,Volume
+  INTEGER                           :: Dimen
+  REAL(DOUBLE)                      :: Volume
   REAL(DOUBLE), DIMENSION(0:FFLen2) :: TensorC,TensorS
   CONTAINS
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
-    SUBROUTINE PFFTensor(RMIN,Volume,MaxL_O)
+    SUBROUTINE PFFTensor(Rmin,MaxL_O)
       INTEGER,OPTIONAL    :: MaxL_O
       INTEGER             :: MaxL
       LOGICAL             :: HaveTensor
-      REAL(DOUBLE)        :: RMIN,Volume 
+      REAL(DOUBLE)        :: Rmin
 !   
       IF(PRESENT(MaxL_O)) THEN
          MaxL = MaxL_O
@@ -44,7 +45,7 @@ MODULE PFFT
 !
       IF(.NOT. HaveTensor) THEN
 !         WRITE(*,*) 'MAKING  TENSOR'
-         CALL MakePFFT(RMIN,Volume,MaxL)
+         CALL MakePFFT(MaxL,Rmin)
 !         WRITE(*,*) 'SAVEING TENSOR'
          CALL PutTensor(MaxL)
       ENDIF
@@ -117,13 +118,13 @@ MODULE PFFT
 !========================================================================================
 ! Calculate the PFFTensor
 !========================================================================================
-    SUBROUTINE MakePFFT(RMIN,Volume,MaxL)
+    SUBROUTINE MakePFFT(MaxL,Rmin)
       INTEGER                           :: MaxL
       INTEGER                           :: I,J,K,L,M,LM,NC
       INTEGER                           :: LSwitch
       REAL(DOUBLE),DIMENSION(3)         :: PQ
       REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
-      REAL(DOUBLE)                      :: RMIN,RMAX,Accuracy,LenScale,Volume
+      REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale
 !
 !     Initialize and Zero dimension
 !
@@ -157,14 +158,14 @@ MODULE PFFT
          LSwitch  = 10
          LenScale = Volume**(One/DBLE(Dimen))
          BetaSq   = (0.5D0/LenScale)**2
-         RMAX = RMIN+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
+         Rmax = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
 !           
 !        Sum the Real Space
 !
          DO
-            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%BoxShape%D,RMAX)
+            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%BoxShape%D,Rmax,Rmin)
             IF(CSMM2%NCells .GT. 400000) THEN
-               RMAX = 0.99*RMAX
+               Rmax = 0.99*Rmax
                CALL Delete_CellSet(CSMM2)
             ELSE
                EXIT
@@ -174,33 +175,31 @@ MODULE PFFT
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            IF(.NOT. InCell_CellSet(CSMM1,PQ(1),PQ(2),PQ(3))) THEN
-               CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
-               DO L = 1,MaxL
-                  IF(L .LE. LSwitch) THEN
-                     CFac = GScript(L,RadSq)
-                  ELSE
-                     CFac = One
-                  ENDIF
-                  DO M = 0,L
-                     LM = LTD(L)+M
-                     TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
-                     TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
-                  ENDDO
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
+            DO L = 1,MaxL
+               IF(L .LE. LSwitch) THEN
+                  CFac = GScript(L,RadSq)
+               ELSE
+                  CFac = One
+               ENDIF
+               DO M = 0,L
+                  LM = LTD(L)+M
+                  TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac
+                  TensorS(LM)=TensorS(LM)+Spq(LM)*CFac
                ENDDO
-            ENDIF
+            ENDDO
          ENDDO
          CALL Delete_CellSet(CSMM2)
-         IF(.TRUE.) RETURN
+
 !
 !        Sum the Reciprical Space 
 !
          ExpFac = (Pi/BetaSq)**2
-         RMAX = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
+         Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
          DO
-            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%InvBoxSh%D,RMAX)
-            IF(CSMM2%NCells .LT.27) THEN
-               RMAX = 1.01D0*RMAX
+            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%InvBoxSh%D,Rmax)
+            IF(CSMM2%NCells .LT. 27) THEN
+               Rmax = 1.01D0*Rmax
             ELSE
                EXIT
             ENDIF
