@@ -42,7 +42,7 @@ MODULE PrettyPrint
 
 
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
-   CHARACTER(LEN=*),PARAMETER    :: CheckEq=' CheckSum  = '
+   CHARACTER(LEN=*),PARAMETER     :: CheckEq=' CheckSum  = '
    CONTAINS 
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
@@ -808,7 +808,6 @@ MODULE PrettyPrint
    701  FORMAT(I5,10D16.8)
 !
    END SUBROUTINE Print_DBL_Rank2A
-!
 !==================================================================
 !
 !    Print Check Sums
@@ -954,17 +953,17 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------------------
-  SUBROUTINE Print_CheckSum_HGRho(A,Name,Proc_O,Unit_O)
+  SUBROUTINE Print_CheckSum_HGRho(A,Name,DistRho,Proc_O,Unit_O)
     TYPE(HGRho)                          :: A
     CHARACTER(LEN=*)                     :: Name   
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
+    LOGICAL                              :: DistRho
     INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet,NQ
-    REAL(DOUBLE)                         :: Chk,Expt
+    REAL(DOUBLE)                         :: ChkCoef,ChkExp,ChkLMN,Zt
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
-
 #ifdef PARALLEL
-    REAL(DOUBLE) :: SChk
+    REAL(DOUBLE)                         :: SChkCoef,SChkExp,SChkLMN
 #endif
 !----------------------------------------------------------------------------------------
     IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
@@ -974,8 +973,11 @@ MODULE PrettyPrint
        CALL Halt(' Density not allocated in Print_CheckSum_HGRho')
     ENDIF
 !
-    Chk=Zero
+    ChkCoef=Zero
+    ChkExp =Zero
+    ChkLMN =Zero
     DO zq=1,A%NExpt-1
+       Zt =A%Expt%D(zq)
        oq =A%OffQ%I(zq)
        orr=A%OffR%I(zq)
        Ell    = A%Lndx%I(zq) 
@@ -983,30 +985,44 @@ MODULE PrettyPrint
        DO iq=1,A%NQ%I(zq)
           jadd=orr+(iq-1)*LenKet
           DO LMN=1,LenKet  
-             Chk=Chk+ABS(A%Co%D(jadd+LMN))
+             ChkCoef=ChkCoef+ ABS(A%Co%D(jadd+LMN))
+             ChkExp =ChkExp + Zt*ABS(A%Co%D(jadd+LMN))
+             ChkLMN =ChkLMN + DBLE(LMN)*ABS(A%Co%D(jadd+LMN))
           ENDDO
        ENDDO
     ENDDO
 #ifdef PARALLEL
-
-    SChk = Reduce(Chk)
-    IF(MyID == ROOT) THEN
-      Chk = SChk
-    
+    SChkCoef = Reduce(ChkCoef)
+    SChkExp  = Reduce(ChkExp)
+    SChkLMN  = Reduce(ChkLMN)
+    IF(MyID == ROOT) THEN   
+       IF(DistRho) THEN
+          ChkCoef = SChkCoef
+          ChkExp  = SChkExp
+          ChkLMN  = SChkLMN
+       ENDIF
 #endif
-    ! Create check string
-    ChkStr=CheckSumString(Chk,Name,Proc_O)
-    PU=OpenPU(Unit_O=Unit_O)
-    WRITE(PU,'(1x,A)')TRIM(ChkStr)
-    CALL ClosePU(PU)
+!      Create check string
+       ChkStr=CheckSumString(ChkCoef,Name//TRIM("-Coef"),Proc_O)
+       PU=OpenPU(Unit_O=Unit_O)
+       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       CALL ClosePU(PU)
+       ChkStr=CheckSumString(ChkExp,Name//TRIM("-Expt"),Proc_O)
+       PU=OpenPU(Unit_O=Unit_O)
+       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       CALL ClosePU(PU)
+       ChkStr=CheckSumString(ChkLMN,Name//TRIM("-LMNs"),Proc_O)
+       PU=OpenPU(Unit_O=Unit_O)
+       WRITE(PU,'(1x,A)') TRIM(ChkStr)
+       CALL ClosePU(PU)
 #ifdef PARALLEL
     ENDIF
 #endif
   END SUBROUTINE Print_CheckSum_HGRho
-
+!----------------------------------------------------------------------------------------
 !
 !
-!
+!----------------------------------------------------------------------------------------
   FUNCTION CheckSumString(Chk,Name,Proc_O) RESULT(ChkStr)
     REAL(DOUBLE)                         :: Chk
     CHARACTER(LEN=*)                     :: Name
@@ -1194,51 +1210,73 @@ MODULE PrettyPrint
 !
   END SUBROUTINE Print_CMPoles
 !========================================================================================
-! Print The Gradients
+! Print The Forces
 !========================================================================================
-  SUBROUTINE Print_Force(GM,Frc_O,Name_O,Unit_O) 
+  SUBROUTINE Print_Force(GM,Frc,Name_O,Unit_O) 
     TYPE(CRDS)                     :: GM
-    TYPE(DBL_VECT),OPTIONAL        :: Frc_O
+    TYPE(DBL_VECT)                 :: Frc
     CHARACTER(LEN=*),OPTIONAL      :: Name_O
     INTEGER,OPTIONAL               :: Unit_O
     INTEGER                        :: AtA,A1,A2,PU,I,J
-!
+!----------------------------------------------------------------------------------------
+    IF(PrintFlags%Key /= DEBUG_MAXIMUM) RETURN
+#ifdef PARALLEL
+    IF(MyID /= ROOT) RETURN
+#endif
     PU=OpenPU(Unit_O=Unit_O)
     IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
     WRITE(PU,33)
     WRITE(PU,34)
     WRITE(PU,33) 
-    IF(PRESENT(Frc_O)) THEN
-       DO AtA = 1,GM%Natms
-          A1=3*(AtA-1)+1
-          A2=3*AtA
-          WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),Frc_O%D(A1:A2)
-       ENDDO
-    ELSE
-       DO AtA = 1,GM%Natms
-          WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Gradients%D(1:3,AtA)
-       ENDDO
-    ENDIF
+    DO AtA = 1,GM%Natms
+       A1=3*(AtA-1)+1
+       A2=3*AtA
+       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),-Frc%D(A1:A2)
+    ENDDO
     WRITE(PU,33) 
-    IF(GM%PBC%Dimen > 0) THEN
-       WRITE(PU,32) 
-       WRITE(PU,32) TRIM('                  Lattice Forces')
-       WRITE(PU,33)
-       DO I=1,3
-          WRITE(PU,40) GM%PBC%LatFrc%D(I,1:3)       
-       ENDDO
-       WRITE(PU,33) 
-    ENDIF
     CALL ClosePU(PU)
 !
 32  FORMAT(1X,A)
 33  FORMAT(56('-'))
 34  FORMAT('   Atom   Z                Forces (au) ')
 35  FORMAT(I6,'  ',I3,'  ',3(F14.10))
-!
 40  FORMAT(3(2X,F14.10))
 !
   END SUBROUTINE Print_Force
+!========================================================================================
+! Print The Lattice Forces
+!========================================================================================
+  SUBROUTINE Print_LatForce(GM,LFrc,Name_O,Unit_O) 
+    TYPE(CRDS)                     :: GM
+    REAL(DOUBLE),DIMENSION(3,3)    :: LFrc
+    CHARACTER(LEN=*),OPTIONAL      :: Name_O
+    INTEGER,OPTIONAL               :: Unit_O
+    INTEGER                        :: AtA,A1,A2,PU,I,J
+!----------------------------------------------------------------------------------------
+    IF(PrintFlags%Key /= DEBUG_MAXIMUM) RETURN
+    IF(GM%PBC%Dimen == 0) RETURN
+#ifdef PARALLEL
+    IF(MyID /= ROOT) RETURN
+#endif
+    PU=OpenPU(Unit_O=Unit_O)
+    IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
+    WRITE(PU,33)
+    IF(GM%PBC%Dimen > 0) THEN
+       WRITE(PU,32) TRIM('        div(a)            div(b)           div(c)')
+       WRITE(PU,33)
+       DO I=1,3
+          WRITE(PU,40) LFrc(I,1:3)
+       ENDDO
+       WRITE(PU,33) 
+    ENDIF
+    CALL ClosePU(PU)
+!
+32  FORMAT(1X,A)
+33  FORMAT(58('-'))
+35  FORMAT(I6,'  ',I3,'  ',3(F14.10))
+40  FORMAT(3(1X,E18.10))
+!
+  END SUBROUTINE Print_LatForce
 #ifdef EXTREME_DEBUG
 !========================================================================================
 ! Print The Gradients
