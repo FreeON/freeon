@@ -1,0 +1,369 @@
+SUBROUTINE Int6221(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
+  USE DerivedTypes
+  USE GlobalScalars
+  USE PrettyPrint
+  IMPLICIT NONE
+!--------------------------------------------------------------------------------
+! Distribution buffer stuff
+!--------------------------------------------------------------------------------
+  TYPE(DBuf),INTENT(IN)    :: DB            ! ONX distribution buffers
+  TYPE(IBuf),INTENT(INOUT) :: IB            ! ONX 2-e eval buffers
+  TYPE(DSL),INTENT(IN)     :: SB            ! ONX distribution pointers
+  INTEGER       :: N,IntCode,CBra,CKet
+  REAL(DOUBLE)  :: DisBufB(DB%MAXC)
+  REAL(DOUBLE)  :: PrmBufB(DB%MAXP,CBra+DB%MInfo)
+!--------------------------------------------------------------------------------
+! Temporary space for computing 2-e integrals
+!--------------------------------------------------------------------------------
+  REAL(DOUBLE)  :: U(97),C(N,94)
+  REAL(DOUBLE)  :: Cx,Cy,Cz
+  REAL(DOUBLE)  :: Zeta,Up,Px,Py,Pz,cp1,cp2,cp3
+  REAL(DOUBLE)  :: Eta, Uq,Qx,Qy,Qz,cq1,cq2,cq3
+  REAL(DOUBLE)  :: EtaQx,EtaQy,EtaQz
+  REAL(DOUBLE)  :: r1xZpE,ZpE,Rkk,r1xZ,r1x2Z,rpxZ
+  REAL(DOUBLE)  :: PAx,PAy,PAz,PQx,PQy,PQz
+  REAL(DOUBLE)  :: QBx,QBy,QBz,WQx,WQy,WQz
+  REAL(DOUBLE)  :: Wx,Wy,Wz,WPx,WPy,WPz
+  REAL(DOUBLE)  :: T1,T2,T3,TwoT
+  REAL(DOUBLE)  :: R1,R2,R3,R4,R5,G0,G1,G2,G3,G4,ET
+  REAL(DOUBLE)  :: Ts0,Ts1,r1xE,r1x2E,rpxE,r1x2ZE
+!--------------------------------------------------------------------------------
+! Misc. internal variables
+!--------------------------------------------------------------------------------
+  INTEGER       :: I,J,K,M,l
+  INTEGER       :: I0,I1,I2
+
+  IF(N.EQ.0) RETURN
+
+  C=0.0D0
+
+  Cx=DisBufB( 8)
+  Cy=DisBufB( 9)
+  Cz=DisBufB(10)
+
+  IF(IntCode.EQ.06020201) THEN
+
+  DO I=1,N
+    I0 = SB%SLPrm%I(I)
+    I2 = SB%SLDis%I(I)-4
+    DO J=1,CKet
+      I1=I0+(J-1)*DB%MAXP
+      Eta = DB%PrmBuf%D(I1)
+      Qx  = DB%PrmBuf%D(I1+1)
+      Qy  = DB%PrmBuf%D(I1+2)
+      Qz  = DB%PrmBuf%D(I1+3)
+      Uq  = DB%PrmBuf%D(I1+4)
+      cq1 = DB%PrmBuf%D(I1+5)
+      cq2 = DB%PrmBuf%D(I1+6)
+      cq3 = DB%PrmBuf%D(I1+7)
+      r1xE  = 1.0D0/Eta
+      r1x2E = 0.5D0*r1xE
+      EtaQx = Eta*Qx
+      EtaQy = Eta*Qy
+      EtaQz = Eta*Qz
+      QBx = Qx-DB%DisBuf%D(I2+7)
+      QBy = Qy-DB%DisBuf%D(I2+8)
+      QBz = Qz-DB%DisBuf%D(I2+9)
+      DO K=1,CBra
+        Zeta = PrmBufB(1,K)
+        Px   = PrmBufB(2,K)
+        Py   = PrmBufB(3,K)
+        Pz   = PrmBufB(4,K)
+        Up   = PrmBufB(5,K)
+        cp1  = PrmBufB(6,K)
+        cp2  = PrmBufB(7,K)
+        cp3  = PrmBufB(8,K)
+        ZpE  = Zeta+Eta
+        r1xZpE = 1.0D0/ZpE
+        r1x2ZE = 0.5D0*r1xZpE
+        r1xZ   = 1.0D0/Zeta
+        r1x2Z  = 0.5D0*r1xZ
+        rpxZ   = Eta*r1xZpE
+        rpxE   = Zeta*r1xZpE
+        Rkk = Up*Uq*DSQRT(r1xZpE)
+        PAx = Px-Cx
+        PAy = Py-Cy
+        PAz = Pz-Cz
+        Wx  = (Zeta*Px+EtaQx)*r1xZpE
+        Wy  = (Zeta*Py+EtaQy)*r1xZpE
+        Wz  = (Zeta*Pz+EtaQz)*r1xZpE
+        WPx = Wx-Px
+        WPy = Wy-Py
+        WPz = Wz-Pz
+        WQx = Wx-Qx
+        WQy = Wy-Qy
+        WQz = Wz-Qz
+        PQx = Px-Qx
+        PQy = Py-Qy
+        PQz = Pz-Qz
+        T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
+
+        IF (T1<IB%Switch) THEN
+          M=INT(T1*IB%Grid)
+          T2=T1*T1
+          T3=T2*T1
+          TwoT=2.0D0*T1
+          ET=IB%ET%D(0,M)+T1*IB%ET%D(1,M)+T2*IB%ET%D(2,M)+T3*IB%ET%D(3,M)
+          G4=IB%GT%D(0,M)+T1*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
+          G3=.142857142857143D+00*(TwoT*G4+ET)
+          G2=.200000000000000D+00*(TwoT*G3+ET)
+          G1=.333333333333333D+00*(TwoT*G2+ET)
+          G0=TwoT*G1+ET
+          R1=Rkk*G0
+          R2=Rkk*G1
+          R3=Rkk*G2
+          R4=Rkk*G3
+          R5=Rkk*G4
+        ELSE
+          T2=1.0D0/T1
+          T3=DSQRT(T2)
+          R1=Rkk*IB%GammaA%D(1)*T3
+          T3=T3*T2
+          R2=Rkk*IB%GammaA%D(2)*T3
+          T3=T3*T2
+          R3=Rkk*IB%GammaA%D(3)*T3
+          T3=T3*T2
+          R4=Rkk*IB%GammaA%D(4)*T3
+          T3=T3*T2
+          R5=Rkk*IB%GammaA%D(5)*T3
+        ENDIF
+
+      U(1)=R1
+      U(11)=R2
+      U(12)=R3
+      U(5)=R4
+      U(2)=R5
+      U(25)=QBx*U(1)+WQx*U(11)
+      U(49)=QBy*U(1)+WQy*U(11)
+      U(73)=QBz*U(1)+WQz*U(11)
+      U(13)=QBx*U(11)+WQx*U(12)
+      U(14)=QBy*U(11)+WQy*U(12)
+      U(15)=QBz*U(11)+WQz*U(12)
+      U(16)=QBx*U(12)+WQx*U(5)
+      U(17)=QBy*U(12)+WQy*U(5)
+      U(18)=QBz*U(12)+WQz*U(5)
+      U(6)=QBx*U(5)+WQx*U(2)
+      U(7)=QBy*U(5)+WQy*U(2)
+      U(8)=QBz*U(5)+WQz*U(2)
+      U(2)=PAx*U(1)+WPx*U(11)
+      U(3)=PAy*U(1)+WPy*U(11)
+      U(4)=PAz*U(1)+WPz*U(11)
+      U(19)=PAx*U(11)+WPx*U(12)
+      U(20)=PAy*U(11)+WPy*U(12)
+      U(21)=PAz*U(11)+WPz*U(12)
+      U(22)=PAx*U(12)+WPx*U(5)
+      U(23)=PAy*U(12)+WPy*U(5)
+      U(24)=PAz*U(12)+WPz*U(5)
+      U(26)=PAx*U(25)+WPx*U(13)+r1x2ZE*U(11)
+      U(27)=PAy*U(25)+WPy*U(13)
+      U(28)=PAz*U(25)+WPz*U(13)
+      U(50)=PAx*U(49)+WPx*U(14)
+      U(51)=PAy*U(49)+WPy*U(14)+r1x2ZE*U(11)
+      U(52)=PAz*U(49)+WPz*U(14)
+      U(74)=PAx*U(73)+WPx*U(15)
+      U(75)=PAy*U(73)+WPy*U(15)
+      U(76)=PAz*U(73)+WPz*U(15)+r1x2ZE*U(11)
+      U(35)=PAx*U(13)+WPx*U(16)+r1x2ZE*U(12)
+      U(38)=PAy*U(13)+WPy*U(16)
+      U(43)=PAz*U(13)+WPz*U(16)
+      U(45)=PAx*U(14)+WPx*U(17)
+      U(46)=PAy*U(14)+WPy*U(17)+r1x2ZE*U(12)
+      U(47)=PAz*U(14)+WPz*U(17)
+      U(48)=PAx*U(15)+WPx*U(18)
+      U(61)=PAy*U(15)+WPy*U(18)
+      U(64)=PAz*U(15)+WPz*U(18)+r1x2ZE*U(12)
+      U(36)=PAx*U(16)+WPx*U(6)+r1x2ZE*U(5)
+      U(37)=PAy*U(16)+WPy*U(6)
+      U(39)=PAz*U(16)+WPz*U(6)
+      U(40)=PAx*U(17)+WPx*U(7)
+      U(41)=PAy*U(17)+WPy*U(7)+r1x2ZE*U(5)
+      U(42)=PAz*U(17)+WPz*U(7)
+      U(44)=PAx*U(18)+WPx*U(8)
+      U(59)=PAy*U(18)+WPy*U(8)
+      U(60)=PAz*U(18)+WPz*U(8)+r1x2ZE*U(5)
+      U(5)=PAx*U(2)+WPx*U(19)+r1x2Z*(U(1)-rpxZ*U(11))
+      U(6)=PAx*U(3)+WPx*U(20)
+      U(7)=PAy*U(3)+WPy*U(20)+r1x2Z*(U(1)-rpxZ*U(11))
+      U(8)=PAx*U(4)+WPx*U(21)
+      U(9)=PAy*U(4)+WPy*U(21)
+      U(10)=PAz*U(4)+WPz*U(21)+r1x2Z*(U(1)-rpxZ*U(11))
+      U(63)=PAx*U(19)+WPx*U(22)+r1x2Z*(U(11)-rpxZ*U(12))
+      U(66)=PAx*U(20)+WPx*U(23)
+      U(69)=PAy*U(20)+WPy*U(23)+r1x2Z*(U(11)-rpxZ*U(12))
+      U(68)=PAx*U(21)+WPx*U(24)
+      U(70)=PAy*U(21)+WPy*U(24)
+      U(71)=PAz*U(21)+WPz*U(24)+r1x2Z*(U(11)-rpxZ*U(12))
+      U(29)=PAx*U(26)+WPx*U(35)+r1x2Z*(U(25)-rpxZ*U(13))+r1x2ZE*U(19)
+      U(30)=PAx*U(27)+WPx*U(38)+r1x2ZE*U(20)
+      U(31)=PAy*U(27)+WPy*U(38)+r1x2Z*(U(25)-rpxZ*U(13))
+      U(32)=PAx*U(28)+WPx*U(43)+r1x2ZE*U(21)
+      U(33)=PAy*U(28)+WPy*U(43)
+      U(34)=PAz*U(28)+WPz*U(43)+r1x2Z*(U(25)-rpxZ*U(13))
+      U(53)=PAx*U(50)+WPx*U(45)+r1x2Z*(U(49)-rpxZ*U(14))
+      U(54)=PAx*U(51)+WPx*U(46)
+      U(55)=PAy*U(51)+WPy*U(46)+r1x2Z*(U(49)-rpxZ*U(14))+r1x2ZE*U(20)
+      U(56)=PAx*U(52)+WPx*U(47)
+      U(57)=PAy*U(52)+WPy*U(47)+r1x2ZE*U(21)
+      U(58)=PAz*U(52)+WPz*U(47)+r1x2Z*(U(49)-rpxZ*U(14))
+      U(77)=PAx*U(74)+WPx*U(48)+r1x2Z*(U(73)-rpxZ*U(15))
+      U(78)=PAx*U(75)+WPx*U(61)
+      U(79)=PAy*U(75)+WPy*U(61)+r1x2Z*(U(73)-rpxZ*U(15))
+      U(80)=PAx*U(76)+WPx*U(64)
+      U(81)=PAy*U(76)+WPy*U(64)
+      U(82)=PAz*U(76)+WPz*U(64)+r1x2Z*(U(73)-rpxZ*U(15))+r1x2ZE*U(21)
+      U(62)=PAx*U(35)+WPx*U(36)+r1x2Z*(U(13)-rpxZ*U(16))+r1x2ZE*U(22)
+      U(65)=PAx*U(38)+WPx*U(37)+r1x2ZE*U(23)
+      U(72)=PAy*U(38)+WPy*U(37)+r1x2Z*(U(13)-rpxZ*U(16))
+      U(67)=PAx*U(43)+WPx*U(39)+r1x2ZE*U(24)
+      U(83)=PAy*U(43)+WPy*U(39)
+      U(85)=PAz*U(43)+WPz*U(39)+r1x2Z*(U(13)-rpxZ*U(16))
+      U(84)=PAx*U(45)+WPx*U(40)+r1x2Z*(U(14)-rpxZ*U(17))
+      U(86)=PAx*U(46)+WPx*U(41)
+      U(88)=PAy*U(46)+WPy*U(41)+r1x2Z*(U(14)-rpxZ*U(17))+r1x2ZE*U(23)
+      U(87)=PAx*U(47)+WPx*U(42)
+      U(90)=PAy*U(47)+WPy*U(42)+r1x2ZE*U(24)
+      U(91)=PAz*U(47)+WPz*U(42)+r1x2Z*(U(14)-rpxZ*U(17))
+      U(89)=PAx*U(48)+WPx*U(44)+r1x2Z*(U(15)-rpxZ*U(18))
+      U(93)=PAx*U(61)+WPx*U(59)
+      U(94)=PAy*U(61)+WPy*U(59)+r1x2Z*(U(15)-rpxZ*U(18))
+      U(95)=PAx*U(64)+WPx*U(60)
+      U(96)=PAy*U(64)+WPy*U(60)
+      U(97)=PAz*U(64)+WPz*U(60)+r1x2Z*(U(15)-rpxZ*U(18))+r1x2ZE*U(24)
+      U(35)=PAx*U(29)+WPx*U(62)+2.0D0*r1x2Z*(U(26)-rpxZ*U(35))+r1x2ZE*U(63)
+      U(36)=PAx*U(30)+WPx*U(65)+r1x2Z*(U(27)-rpxZ*U(38))+r1x2ZE*U(66)
+      U(37)=PAx*U(31)+WPx*U(72)+r1x2ZE*U(69)
+      U(39)=PAx*U(32)+WPx*U(67)+r1x2Z*(U(28)-rpxZ*U(43))+r1x2ZE*U(68)
+      U(40)=PAx*U(33)+WPx*U(83)+r1x2ZE*U(70)
+      U(42)=PAx*U(34)+WPx*U(85)+r1x2ZE*U(71)
+      U(62)=PAy*U(55)+WPy*U(88)+2.0D0*r1x2Z*(U(51)-rpxZ*U(46))+r1x2ZE*U(69)
+      U(65)=PAy*U(57)+WPy*U(90)+r1x2Z*(U(52)-rpxZ*U(47))+r1x2ZE*U(70)
+      U(67)=PAy*U(58)+WPy*U(91)+r1x2ZE*U(71)
+      U(92)=PAz*U(82)+WPz*U(97)+2.0D0*r1x2Z*(U(76)-rpxZ*U(64))+r1x2ZE*U(71)
+      U(11)=PAx*U(5)+WPx*U(63)+2.0D0*r1x2Z*(U(2)-rpxZ*U(19))
+      U(12)=PAx*U(6)+WPx*U(66)+r1x2Z*(U(3)-rpxZ*U(20))
+      U(14)=PAy*U(7)+WPy*U(69)+2.0D0*r1x2Z*(U(3)-rpxZ*U(20))
+      U(15)=PAx*U(8)+WPx*U(68)+r1x2Z*(U(4)-rpxZ*U(21))
+      U(17)=PAy*U(9)+WPy*U(70)+r1x2Z*(U(4)-rpxZ*U(21))
+      U(20)=PAz*U(10)+WPz*U(71)+2.0D0*r1x2Z*(U(4)-rpxZ*U(21))
+      U(38)=PAy*U(31)+WPy*U(72)+2.0D0*r1x2Z*(U(27)-rpxZ*U(38))
+      U(41)=PAy*U(33)+WPy*U(83)+r1x2Z*(U(28)-rpxZ*U(43))
+      U(44)=PAz*U(34)+WPz*U(85)+2.0D0*r1x2Z*(U(28)-rpxZ*U(43))
+      U(59)=PAx*U(53)+WPx*U(84)+2.0D0*r1x2Z*(U(50)-rpxZ*U(45))
+      U(60)=PAx*U(54)+WPx*U(86)+r1x2Z*(U(51)-rpxZ*U(46))
+      U(63)=PAx*U(56)+WPx*U(87)+r1x2Z*(U(52)-rpxZ*U(47))
+      U(68)=PAz*U(58)+WPz*U(91)+2.0D0*r1x2Z*(U(52)-rpxZ*U(47))
+      U(83)=PAx*U(77)+WPx*U(89)+2.0D0*r1x2Z*(U(74)-rpxZ*U(48))
+      U(84)=PAx*U(78)+WPx*U(93)+r1x2Z*(U(75)-rpxZ*U(61))
+      U(86)=PAy*U(79)+WPy*U(94)+2.0D0*r1x2Z*(U(75)-rpxZ*U(61))
+      U(87)=PAx*U(80)+WPx*U(95)+r1x2Z*(U(76)-rpxZ*U(64))
+      U(89)=PAy*U(81)+WPy*U(96)+r1x2Z*(U(76)-rpxZ*U(64))
+      U(13)=PAx*U(7)+WPx*U(69)
+      U(16)=PAx*U(9)+WPx*U(70)
+      U(18)=PAx*U(10)+WPx*U(71)
+      U(19)=PAy*U(10)+WPy*U(71)
+      U(43)=PAy*U(34)+WPy*U(85)
+      U(61)=PAx*U(55)+WPx*U(88)
+      U(64)=PAx*U(57)+WPx*U(90)
+      U(66)=PAx*U(58)+WPx*U(91)
+      U(85)=PAx*U(79)+WPx*U(94)
+      U(88)=PAx*U(81)+WPx*U(96)
+      U(90)=PAx*U(82)+WPx*U(97)
+      U(91)=PAy*U(82)+WPy*U(97)
+
+      C(I,1)=C(I,1)+U(5)*cp1*cq1
+      C(I,2)=C(I,2)+U(5)*cq1
+      C(I,3)=C(I,3)+U(6)*cq1
+      C(I,4)=C(I,4)+U(7)*cq1
+      C(I,5)=C(I,5)+U(6)*cp1*cq1
+      C(I,6)=C(I,6)+U(8)*cq1
+      C(I,7)=C(I,7)+U(9)*cq1
+      C(I,8)=C(I,8)+U(10)*cq1
+      C(I,9)=C(I,9)+U(7)*cp1*cq1
+      C(I,10)=C(I,10)+U(11)*cq1
+      C(I,11)=C(I,11)+U(12)*cq1
+      C(I,12)=C(I,12)+U(13)*cq1
+      C(I,13)=C(I,13)+U(8)*cp1*cq1
+      C(I,14)=C(I,14)+U(14)*cq1
+      C(I,15)=C(I,15)+U(15)*cq1
+      C(I,16)=C(I,16)+U(16)*cq1
+      C(I,17)=C(I,17)+U(9)*cp1*cq1
+      C(I,18)=C(I,18)+U(17)*cq1
+      C(I,19)=C(I,19)+U(18)*cq1
+      C(I,20)=C(I,20)+U(19)*cq1
+      C(I,21)=C(I,21)+U(10)*cp1*cq1
+      C(I,22)=C(I,22)+U(20)*cq1
+      C(I,25)=C(I,25)+U(29)*cp1
+      C(I,26)=C(I,26)+U(29)
+      C(I,27)=C(I,27)+U(30)
+      C(I,28)=C(I,28)+U(31)
+      C(I,29)=C(I,29)+U(30)*cp1
+      C(I,30)=C(I,30)+U(32)
+      C(I,31)=C(I,31)+U(33)
+      C(I,32)=C(I,32)+U(34)
+      C(I,33)=C(I,33)+U(31)*cp1
+      C(I,34)=C(I,34)+U(35)
+      C(I,35)=C(I,35)+U(36)
+      C(I,36)=C(I,36)+U(37)
+      C(I,37)=C(I,37)+U(32)*cp1
+      C(I,38)=C(I,38)+U(38)
+      C(I,39)=C(I,39)+U(39)
+      C(I,40)=C(I,40)+U(40)
+      C(I,41)=C(I,41)+U(33)*cp1
+      C(I,42)=C(I,42)+U(41)
+      C(I,43)=C(I,43)+U(42)
+      C(I,44)=C(I,44)+U(43)
+      C(I,45)=C(I,45)+U(34)*cp1
+      C(I,46)=C(I,46)+U(44)
+      C(I,49)=C(I,49)+U(53)*cp1
+      C(I,50)=C(I,50)+U(53)
+      C(I,51)=C(I,51)+U(54)
+      C(I,52)=C(I,52)+U(55)
+      C(I,53)=C(I,53)+U(54)*cp1
+      C(I,54)=C(I,54)+U(56)
+      C(I,55)=C(I,55)+U(57)
+      C(I,56)=C(I,56)+U(58)
+      C(I,57)=C(I,57)+U(55)*cp1
+      C(I,58)=C(I,58)+U(59)
+      C(I,59)=C(I,59)+U(60)
+      C(I,60)=C(I,60)+U(61)
+      C(I,61)=C(I,61)+U(56)*cp1
+      C(I,62)=C(I,62)+U(62)
+      C(I,63)=C(I,63)+U(63)
+      C(I,64)=C(I,64)+U(64)
+      C(I,65)=C(I,65)+U(57)*cp1
+      C(I,66)=C(I,66)+U(65)
+      C(I,67)=C(I,67)+U(66)
+      C(I,68)=C(I,68)+U(67)
+      C(I,69)=C(I,69)+U(58)*cp1
+      C(I,70)=C(I,70)+U(68)
+      C(I,73)=C(I,73)+U(77)*cp1
+      C(I,74)=C(I,74)+U(77)
+      C(I,75)=C(I,75)+U(78)
+      C(I,76)=C(I,76)+U(79)
+      C(I,77)=C(I,77)+U(78)*cp1
+      C(I,78)=C(I,78)+U(80)
+      C(I,79)=C(I,79)+U(81)
+      C(I,80)=C(I,80)+U(82)
+      C(I,81)=C(I,81)+U(79)*cp1
+      C(I,82)=C(I,82)+U(83)
+      C(I,83)=C(I,83)+U(84)
+      C(I,84)=C(I,84)+U(85)
+      C(I,85)=C(I,85)+U(80)*cp1
+      C(I,86)=C(I,86)+U(86)
+      C(I,87)=C(I,87)+U(87)
+      C(I,88)=C(I,88)+U(88)
+      C(I,89)=C(I,89)+U(81)*cp1
+      C(I,90)=C(I,90)+U(89)
+      C(I,91)=C(I,91)+U(90)
+      C(I,92)=C(I,92)+U(91)
+      C(I,93)=C(I,93)+U(82)*cp1
+      C(I,94)=C(I,94)+U(92)
+
+      END DO ! K
+    END DO ! J
+  END DO ! I
+
+  ELSE
+    CALL Halt('Illegal IntCode in Int6221')
+  ENDIF
+END SUBROUTINE Int6221

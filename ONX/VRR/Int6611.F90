@@ -26,7 +26,7 @@ SUBROUTINE Int6611(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   REAL(DOUBLE)  :: Wx,Wy,Wz,WPx,WPy,WPz
   REAL(DOUBLE)  :: T1,T2,T3,TwoT
   REAL(DOUBLE)  :: R1,R2,R3,R4,R5,G0,G1,G2,G3,G4,ET
-  REAL(DOUBLE)  :: Ts0,r1xE,r1x2E,rpxE,r1x2ZE
+  REAL(DOUBLE)  :: Ts0,Ts1,r1xE,r1x2E,rpxE,r1x2ZE
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
@@ -36,9 +36,12 @@ SUBROUTINE Int6611(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   IF(N.EQ.0) RETURN
 
   C=0.0D0
+
   Cx=DisBufB( 8)
   Cy=DisBufB( 9)
   Cz=DisBufB(10)
+
+  IF(IntCode.EQ.06060101) THEN
 
   DO I=1,N
     I0 = SB%SLPrm%I(I)
@@ -120,9 +123,9 @@ SUBROUTINE Int6611(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
           T3=T3*T2
           R3=Rkk*IB%GammaA%D(3)*T3
           T3=T3*T2
-          R4=Rkk*IB%GammaA%D(3)*T3
+          R4=Rkk*IB%GammaA%D(4)*T3
           T3=T3*T2
-          R5=Rkk*IB%GammaA%D(3)*T3
+          R5=Rkk*IB%GammaA%D(5)*T3
         ENDIF
 
       U(1)=R1
@@ -196,40 +199,44 @@ SUBROUTINE Int6611(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
       U(33)=PAx*U(20)+WPx*U(48)
       U(34)=PAy*U(20)+WPy*U(48)
 
-      C(I,1)=C(I,1)+U(5)                                             
-      C(I,2)=C(I,2)+U(6)                                             
-      C(I,3)=C(I,3)+U(7)                                             
-      C(I,4)=C(I,4)+U(8)                                             
-      C(I,5)=C(I,5)+U(9)                                             
-      C(I,6)=C(I,6)+U(10)                                            
-      C(I,7)=C(I,7)+U(11)                                            
-      C(I,8)=C(I,8)+U(12)                                            
-      C(I,9)=C(I,9)+U(13)                                            
-      C(I,10)=C(I,10)+U(14)                                          
-      C(I,11)=C(I,11)+U(15)                                          
-      C(I,12)=C(I,12)+U(16)                                          
-      C(I,13)=C(I,13)+U(17)                                          
-      C(I,14)=C(I,14)+U(18)                                          
-      C(I,15)=C(I,15)+U(19)                                          
-      C(I,16)=C(I,16)+U(20)                                          
-      C(I,17)=C(I,17)+U(21)                                          
-      C(I,18)=C(I,18)+U(22)                                          
-      C(I,19)=C(I,19)+U(23)                                          
-      C(I,20)=C(I,20)+U(24)                                          
-      C(I,21)=C(I,21)+U(25)                                          
-      C(I,22)=C(I,22)+U(26)                                          
-      C(I,23)=C(I,23)+U(27)                                          
-      C(I,24)=C(I,24)+U(28)                                          
-      C(I,25)=C(I,25)+U(29)                                          
-      C(I,26)=C(I,26)+U(30)                                          
-      C(I,27)=C(I,27)+U(31)                                          
-      C(I,28)=C(I,28)+U(32)                                          
-      C(I,29)=C(I,29)+U(33)                                          
-      C(I,30)=C(I,30)+U(34)                                          
-      C(I,31)=C(I,31)+U(35)            
+      C(I,1)=C(I,1)+U(5)
+      C(I,2)=C(I,2)+U(6)
+      C(I,3)=C(I,3)+U(7)
+      C(I,4)=C(I,4)+U(8)
+      C(I,5)=C(I,5)+U(9)
+      C(I,6)=C(I,6)+U(10)
+      C(I,7)=C(I,7)+U(11)
+      C(I,8)=C(I,8)+U(12)
+      C(I,9)=C(I,9)+U(13)
+      C(I,10)=C(I,10)+U(14)
+      C(I,11)=C(I,11)+U(15)
+      C(I,12)=C(I,12)+U(16)
+      C(I,13)=C(I,13)+U(17)
+      C(I,14)=C(I,14)+U(18)
+      C(I,15)=C(I,15)+U(19)
+      C(I,16)=C(I,16)+U(20)
+      C(I,17)=C(I,17)+U(21)
+      C(I,18)=C(I,18)+U(22)
+      C(I,19)=C(I,19)+U(23)
+      C(I,20)=C(I,20)+U(24)
+      C(I,21)=C(I,21)+U(25)
+      C(I,22)=C(I,22)+U(26)
+      C(I,23)=C(I,23)+U(27)
+      C(I,24)=C(I,24)+U(28)
+      C(I,25)=C(I,25)+U(29)
+      C(I,26)=C(I,26)+U(30)
+      C(I,27)=C(I,27)+U(31)
+      C(I,28)=C(I,28)+U(32)
+      C(I,29)=C(I,29)+U(33)
+      C(I,30)=C(I,30)+U(34)
+      C(I,31)=C(I,31)+U(35)
 
       END DO ! K
     END DO ! J
   END DO ! I
 
+  ELSE
+    WRITE(*,*) "IntCode = ",IntCode
+    CALL Halt('Illegal IntCode in Int6611')
+  ENDIF
 END SUBROUTINE Int6611
