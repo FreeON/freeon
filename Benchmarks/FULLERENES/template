@@ -6,10 +6,10 @@ Water Cluster Scaling
 Charge=0
 Multiplicity=1
 Guess=SuperPos
-SCFMethod=(NT4,NT4,RH)
-BasisSets=(STO-2G,6-31G**,6-31G**)
-ModelChem=(HF,HF,HF)
-Accuracy =(Loose,Loose,Tight)
+SCFMethod=(NT4)
+BasisSets=(STO-3G)
+ModelChem=(HF)
+Accuracy =(Loose)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,HOrder)
 BlokAInv=(Test,1.D20)

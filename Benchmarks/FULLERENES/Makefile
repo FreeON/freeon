@@ -18,15 +18,15 @@ run:
 lsf:
 #
 pbs:
-	sub_pbs c20
-	sub_pbs c30
-	sub_pbs c50
-	sub_pbs c60
-	sub_pbs c80
-	sub_pbs c180
-	sub_pbs c240
-#	sub_pbs c320
-#	sub_pbs c540
+	./sub_pbs c20
+	./sub_pbs c30
+	./sub_pbs c50
+	./sub_pbs c60
+	./sub_pbs c80
+	./sub_pbs c180
+	./sub_pbs c240
+#	./sub_pbs c320
+#	./sub_pbs c540
 #
 purge:	clean
 	rm -f *.inp
