@@ -1,3 +1,88 @@
+2002-07-25 13:46  tymczak
+
+	* SCFeqs/DenMatMethods.F90: New Addaptive Thresholding
+
+2002-07-23 14:02  mchalla
+
+	* Benchmarks/FULLERENES/XYZ/c180.xyz.gz: [no log message]
+
+2002-07-23 12:53  mchalla
+
+	* Benchmarks/FULLERENES/XYZ/: c20.xyz.gz, c30.xyz.gz: [no log
+	message]
+
+2002-07-23 12:48  mchalla
+
+	* Benchmarks/FULLERENES/: Makefile, template: [no log message]
+
+2002-07-23 12:45  mchalla
+
+	* Benchmarks/FULLERENES/XYZ/: c180.xyz.gz, c20.xyz.gz, c240.xyz.gz,
+	c30.xyz.gz, c320.xyz.gz, c50.xyz.gz, c540.xyz.gz, c60.xyz.gz,
+	c80.xyz.gz: Gzipped xyz geometries of small to large fullerenes.
+
+2002-07-23 12:44  mchalla
+
+	* Benchmarks/FULLERENES/: Makefile, core, end, mkinpts, sub_pbs,
+	template: New directory containing fullerene geometries for
+	benchmarking.
+
+2002-07-22 16:18  mchalla
+
+	* OneE/MakeRho.F90: Added warning for density error checking on
+	restart, since the DM may be severly pruned on addition to the HDF
+	file.
+
+2002-07-22 16:17  mchalla
+
+	* Benchmarks/WATER/sub_pbs: [no log message]
+
+2002-07-22 16:15  mchalla
+
+	* SCFeqs/: DenMatMethods.F90, NT4.F90, PM.F90, SP2.F90, SP4.F90:
+	Reprogrammed the density matrix methods.  Turned off variable
+	thresholding for now.  Added new convergence criteria and
+	convergence checker.  Added new PM routine.  Redid memory
+	management (got rid of global matrices).
+
+2002-07-19 10:34  ckgan
+
+	* MondoMods/FastMat.F90: IMPLICIT NONE statement is included.
+
+2002-07-18 16:19  mchalla
+
+	* QCTC/QCTC.F90, HiCu/HiCu.F90: fixed suss of inpfile.
+
+2002-07-18 16:18  mchalla
+
+	* SCFeqs/: DenMatMethods.F90, NT4.F90, PM.F90, SP2.F90, SP4.F90:
+	Changed program names AND added convergence checker that may give
+	linear scaling through the same number of MMs.	Also, greatly
+	simplified NT4, and removed variable thresholding.
+
+2002-07-18 11:30  nemeth
+
+	* IntCoo/IntCoo.F90: Declaration of Cartesian coord array now
+	follows declaration of atomnumbers.
+
+2002-07-17 16:32  mchalla
+
+	* MondoMods/FastMat.F90: Hopefully fixed setSRSTSkipPtrs to work
+	robustly.  What alot of PAIN.  -MC
+
+2002-07-15 15:55  mchalla
+
+	* HiCu/HiCu.F90, QCTC/QCTC.F90: Added options for modifiying
+	thresholds from command line and/or from the input file.
+
+2002-07-15 15:55  mchalla
+
+	* MondoSCF/MondoSCF.F90: Fixed lack of MMech ifdef s
+
+2002-07-14 09:55  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-07-14 09:50  mchalla
 
 	* MondoMods/FastMat.F90: Hopefully fixed SetSRSTSkipPtrs to have a
