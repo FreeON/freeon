@@ -35,21 +35,16 @@
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
 
 \begin{abstract}
-Periodic boundary conditions have been implemented in the linear scaling
-Quantum Chemistry code {\sc MondoSCF}. For the two-electron Coulomb
-matrix, this has been achieved with an exact multipole expansion of
-the long range Coulomb field. This yields a spherically summed boundary
-condition that is easily transformed to Ewald boundary conditions.
-In order to achieve linear scaling of the local Coulomb field, a Quantum
-Chemical Tree Code (QCTC) is used. Periodic boundary conditions have
-also been incorporated into calculations of the local exchange-correlation
-matrix and the exact-exchange matrix. A Hierarchical Cubature (HiCu),
-pure Cartesian adaptive grid is used for the local exchange-correlation
-matrix. This method achieves linear scaling through the use of advanced
-data structures (k-d trees) that maximally exploits locality of the
-density. Finally, the current capabilities of {\sc MondoSCF} for large condensed
-phases will be demonstrated.
-%
+Linear scaling quantum chemical methods for Density Functional Theory are extended to the condensed 
+phase at the $\Gamma$-point.  For the two-electron Coulomb matrix, this is achieved with a tree-code 
+algorithm for fast Coulomb summation [J.~Chem.~Phys., {\bf 106}, 5526 (1997)], together with  multipole representation 
+of the crystal field [J.~Chem.~Phys., {\bf 107}, 10131 (1997)].   A periodic version of the hierarchical cubature 
+algorithm [J.~Chem.~Phys., {\bf 113}, 10037 (2000)], which builds a telescoping adaptive grid for numerical 
+integration of the exchange-correlation matrix, is shown to be efficient when the problem is posed as integration over 
+the unit cell.  Commonalities between the Coulomb and exchange-correlation algorithms are discussed, with an emphasis on 
+achieving linear scaling through the use of modern data structures.  With these developments, convergence of the $\Gamma$-point 
+supercell approximation to the $\bf k$-space integration limit is demonstrated for MgO and NaCl.    Linear scaling 
+construction of the Fockian and control of error is demonstrated for RBLYP/6-21G* diamond up to 512 atoms.  \\
 \noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, tree-code, Gaussian-orbital
 %
 \end{abstract}
@@ -67,17 +62,16 @@ Quantum chemical methods that  employ Gaussian Type Atomic Orbitals (GTAOs)
 offer a number of advantages in materials science.  First, because they are local basis functions, it is possible 
 to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two
 electron integrals involving GTAOs are analytic, enabling the rapid evaluation of expectation values involving 
-complicated operators often involved in response properties \cite{}.
-%The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
-%offering a wide range of electric and magnetic molecular response properties.   
+complicated operators often involved in response properties \cite{MHonda91,THelgaker92,PStephens94}.
+The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
+offering a wide range of electric and magnetic molecular response properties.   
 The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
 approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{JLaerdahl97,IGrant00} 
 and Dirac-Kohn-Sham \cite{TYanai01} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
-correlated wavefunction methods \cite{MHaser93,MSchutz99}, the exact HF exchange is central to hybrid HF/DFT models 
-%\cite{}.
-The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group,
-demonstrating blah gnu snort for difficult problems \cite{Crystal98}.
+correlated wavefunction methods, the exact HF exchange is central to hybrid HF/DFT models \cite{}.
+The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group \cite{Crystal98},
+demonstrating blah gnu snort for difficult problems.
 
 Recently, we have developed linear scaling quantum chemical methods for gas phase Density Functional Theory 
 (DFT), including computation of the Coulomb matrix ${\bf J}$ \cite{MChallacombe97} and the exchange-correlation
@@ -87,15 +81,14 @@ periodic boundary conditions at the $\Gamma$-point.
 With periodic linear scaling quantum chemical algorithms, it is possible to begin bridging the gap between 
 methods developed for small molecule chemistry and large scale problems in the solid state.  Together with the 
 results presented here, $ {\cal O}(N)$ methods for solving the Self-Consistent-Field equations 
-%\cite{} 
-and linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04b}, it is now possible
-to perform condensed phase  HF/DFT calculations on systems larger than 500 atoms with a single processor.
+\cite{ANiklasson02A,ANiklasson03} and linear scaling algorithms for computing the periodic HF exchange \cite{CTymczak04b}, 
+it is now possible to perform condensed phase  HF/DFT calculations on systems larger than 500 atoms with a single processor.
 In addition, with the advent of linear scaling density matrix perturbation theory \cite{ANiklasson04,VWeber04},
 well developed quantum chemical methods for the analytic computation of response properties may be brought
 to bear on large solid state problems. 
 
 This paper is organized as follows:  In Section~\ref{pbcintro},  periodic boundary conditions and the $\Gamma$-point 
-approximation are introduced, and the avoidance linear dependencies is discused. Next, in 
+approximation are introduced, and the avoidance linear dependencies is discussed. Next, in 
 Section \ref{datastruct}, the relationship between the numerical error estimates and data structures that underly the 
 fast linear scaling algorithms for computation of the Coulomb and exchange-correlation matrix are outlined.  
 In Section~\ref{coulombsums}, we extend previous work on the Niboer and De Wette \cite{BNijboer57,BNijboer58a}  lattice sum 
@@ -151,7 +144,7 @@ more closely related to its quantum chemical counterpart via the transformation,
 \begin{equation}
 \sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r}),
 \end{equation}
-allowing use of conventional analytic integral technologies \cite{JWhitten73,LMcmurchie78,VSaunders83}.  
+allowing use of conventional analytic integral technologies.
 For example, elements of the periodic overlap matrix become
 \begin{equation}
 \label{Sab_pbc2}
@@ -188,7 +181,7 @@ criteria, they are typically a symptom of near linear dependence, often  due to 
 calculations in conjunction with small unit cells.  
 
 These considerations and others are discussed by Towler in an excellent overview of Gaussian basis sets for the condensed 
-phase \cite{MTowler00}.  Also, there are at least two (albiet related) libraries \cite{CRYSTALLib,TowlerLib} of Gaussian 
+phase \cite{MTowler00}.  Also, there are at least two (albeit related) libraries \cite{CRYSTALLib,TowlerLib} of Gaussian 
 basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
 still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
 by Gr{\"u}neich and Hess \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse 
@@ -223,7 +216,7 @@ For accepted clusters a second test, the multipole acceptability criterion (MAC)
 check translation errors in the multipole  expansion. This second test is critical to the overall accuracy of 
 the Coulomb matrix build.  We have recently developed a new MAC in Ref.~[\onlinecite{CTymczak04c}] that  has several 
 advantages.  First, it takes into account the magnitude or weight of the distribution within 
-the cluster.    Second, it correctly takes into account the angular symmetry  of the primative Gaussian distributions.   
+the cluster.    Second, it correctly takes into account the angular symmetry  of the primitive Gaussian distributions.   
 Third and most important, it  is always an exact bound to the translation error.   
 
 For each primitive bra distribution $\rho_{ab}$, a fast range query is performed on the $k$-d tree 
@@ -245,7 +238,7 @@ See Refs.~[\onlinecite{MChallacombe97,MChallacombe97D}] for further details on t
 A fundamental difference between QCTC and FMM based methods is that QCTC pushes the near/far-field partition to  the limit,  
 employing the PAC and MAC best case error estimates to resolve individual primitive distributions.  
 On the other hand, FMM based methods employ static, worst case error estimates.  
-While recuring down the density tree to the level of individual primitives precludes well developed technologies 
+While recurring down the density tree to the level of individual primitives precludes well developed technologies 
 for the integral evaluation of contracted functions, it accelerates the onset of linear scaling through early clustering.
 
 The Quantum Chemical Tree Code generally employs the total density, which simplifies the code, allows 
@@ -283,7 +276,7 @@ e^{-\zeta_q ({\bf r}-{\bf Q})^2}.
 This representation provides an intermediate form into which elements of the density matrix may be folded, and allows
 the use of McMurchie-Davidson recurrence relations  \cite{LMcmurchie78} 
 in analytic integral evaluation and density evaluation.
-For this form,  Cramer's inequality \cite{} 
+For this form,  Cramer's inequality  {\bf NEED A CITE HERE!!} \cite{} 
 provides a bound for the behavior of a Hermite-Gaussian distribution: 
 \begin{equation}
 \rho_q ({\bf r})  \leq C_q e^{ -\widetilde \zeta_q ({\bf r -Q})^2 },  
@@ -385,7 +378,7 @@ The inner cells that make up $V_{\rm In}$ provide a buffer region that guarantee
 expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
 periodic far-field region, $V_{\rm PFF}$, is the spherically ordered lattice extending
 to infinity but excluding $V_{\rm In}$.  For large cells and/or high order multipole 
-expansions, $V_{\rm In}$ includes just the unit cell's 27 nearest neighbors.  In FMM  notation this corresponds to WS=1.  
+expansions, $V_{\rm In}$ includes just the unit cell's 27 nearest neighbors.  In FMM  notation this corresponds to ws=1.  
 However, for smaller cells and/or lower order multipole expansions, $V_{\rm In}$ tends to a spherical distribution of 
 cells surrounding the unit cell.   Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  
 $S_{\infty}$, which must be be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with 
@@ -475,8 +468,8 @@ This static error is controlled by using the FMM-like error bound,
 \leq \tau_{\rm \scriptscriptstyle MAC} \;,
 \end{equation}
 to set the appropriate expansion order $p$.  In Eq.~(\ref{FMMError}),  $d_{\rm max}$ is the maximum translational distance, 
-${\cal C}$ is the asymtotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the threshold controlling the 
-translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  and further explenation of these parameters.
+${\cal C}$ is the asymptotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the threshold controlling the 
+translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  and further explanation of these parameters.
 
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
@@ -525,9 +518,12 @@ and density. The integration is then simply
 K^{\rm xc}_{ab} = \int _{V_{\Box}}\, d\mathbf{r}\, \rho_{ab}({\bf r}) v_{\rm \scriptscriptstyle xc}\left[\rho;{\bf r} \right]
 \label{Kxc_pbc_0}
 \end{equation}
-While we have written Eq.~\ref{Kxc_pbc_0} in terms of the exchange-correlation for simplicity, in practice 
-HiCu employs the Pople, Gill and Johnson formulation \cite{JPople92}. 
-%
+This approach should be contrasted with more conventional quantum chemical methods for computing the 
+exchange-correlation matrix, involving the ``Becke weights'' \cite{ABecke88}, which demand numerical integration 
+over $V_\infty$.  
+
+While we have written Eq.~\ref{Kxc_pbc_0} in terms of the exchange-correlation potential for simplicity, in practice 
+HiCu employs the Pople, Gill and Johnson formulation \cite{JPople92,MChallacombe00A}. 
 
 Because the distributions and density both involve a double sum over lattice vectors, 
 there will be a large number of atom-atom pairs that do not overlap with $V_\Box$.  A similar situation is 
@@ -540,6 +536,8 @@ The ray-AABB test has been modified into a cylinder-AABB test, where the radius 
 is a maximal overlap extent of the atom-atom pair.  In the case of a same center atom-atom pair,
 it is of course more appropriate to employ a sphere-AABB test.  In both cases, overlap
 between the HiCu integration volume and atom-atom pairs is established with a negligible prefactor when using these tests.
+
+
 
 \begin{table}
 \caption{Comparison of {\sc CRYSTAL98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
@@ -645,28 +643,28 @@ Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} o
 Gnu C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
 
-Thresholds controling the cost to accuracy ratio of HiCu and QCTC
+Thresholds controlling the cost to accuracy ratio of HiCu and QCTC
 are set by the accuracy levels {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT},
 which have been empirically chosen to deliver 4-5, 6-7 and 8-9 digits,  respectively,
 of relative accuracy in the energy.  Values of these thresholds are listed in Appendix A of Ref.~[\onlinecite{CTymczak04b}].
 The unmodified two-electron threshold $\tau_{\rm \scriptscriptstyle 2E}$ sets the 
 overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}) and the penetration extent $R^p_q$ in Eq.~(\ref{PotentialExtent}),
 both of which control the PAC.  As explained in Ref.~\cite{CTymczak04c}, the threshold $\tau_{\rm \scriptscriptstyle MAC}$
-controling the MAC is set as $\tau_{\rm \scriptscriptstyle MAC}=10^2 \tau_{\rm \scriptscriptstyle 2E}$.  
+controlling the MAC is set as $\tau_{\rm \scriptscriptstyle MAC}=10^2 \tau_{\rm \scriptscriptstyle 2E}$.  
 The HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ likewise sets two sub-thresholds.  The
 overlap extent $R^o_p$ in Eq.~(\ref{OverlapExtent}), defining accuracy of the density on the grid, is set using 
 $10^{-1} \tau_{\rm \scriptscriptstyle HICU}$ ($\tau_\rho$ in Ref.~[\onlinecite{MChallacombe00A}]). The
 target relative error defining accuracy of the HiCu grid is just $\tau_{\rm \scriptscriptstyle HICU}$ 
 ($\tau_r$ in Ref.~[\onlinecite{MChallacombe00A}]).  
-%It should be pointed out that of all the thresholding schemes,
-%those govererining HiCu are the loosest, generally delivering just 4, 6 and 8 digits of accuracy with 
-%{\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.  
+It should be pointed out that of all the thresholding schemes, those governing HiCu are the least conservative;
+It is a simple (and not too expensive) matter to simply tighten the HiCu threshold if intermediate accuracies
+are required. 
 
 The multipole interaction and contraction code used by QCTC in the near/far-field partition has been 
 highly optimized by symbolic manipulation and factorization, using real arithmetic and expansions through
 7'th order in the calculation of ${\bf J}^{\rm In}$. The computation of ${\bf J}^{\rm PFF}$ 
 employs a general code for multipole contraction, allowing expansion through $p=64$.
-Eigensolution of the self-consistent-field equations has been used throughout, with the cooresponding
+Eigensolution of the self-consistent-field equations has been used throughout, with the corresponding
 matrix and distribution thresholds given Appendix A of Ref.~[\onlinecite{CTymczak04b}].
 All calculations were performed with $C_1$ (no) symmetry, and all results are reported in atomic units.
 %
@@ -676,7 +674,7 @@ All calculations were performed with $C_1$ (no) symmetry, and all results are re
 \includegraphics{PFFMultipoles_water.ps}
 \caption{Error in the Coulomb energy computed with the 
 Nijboer and De Wette scheme relative to true Ewald summation.  Shown
-is the error in the Coulomb energy vers $p$ with one (ws=1) and two (ws=2) layers of
+is the error in the Coulomb energy versus $p$ with one (ws=1) and two (ws=2) layers of
 cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.}
 \label{ErrrorPFF}
 \end{figure}
@@ -742,165 +740,122 @@ source of error is the numerical integration performed by HiCu, as the QCTC thre
 
 \section{Conclusions}\label{conclude}
 
-We presented a systematic and efficient approach for incorporating periodic 
-boundary conditions into the linear scaling quantum chemistry code {\sc MondoSCF}.
-%
-For the one electron matrices we achieved this by a re-summation
-over periodic cell images, which because of locality leads to an efficient
-calculation of the one electron integrals. 
-%
-For the two-electron Coulomb
-matrix, we achieved this with an exact multipole expansion of
-the long range Coulomb field. 
-This yields a spherically summed boundary
-condition that is easily transformed to Ewald boundary conditions.
-In order to achieve linear scaling of the local Coulomb field, a Quantum
-Chemical Tree Code (QCTC) is implemented. 
-%
-For the calculation of the local exchange-correlation
-matrix, a Hierarchical Cubature (HiCu), pure Cartesian adaptive grid
-is used. 
-%
-This method achieves linear scaling through the use of advanced
-data structures (k-d trees) that maximally exploits locality of the
-density, and allows for an efficient treatment of the periodic effects.
-%
-We then showed the capabilities of {\sc MondoSCF} for three test condensed
-phases , Sodium Chloride, Magnesium Oxide and Carbon in the Diamond
-structure. We then compared these results to the periodic
-Gaussian code {\sc CRYSTAL}. 
-In all cases we achieved excellent comparison with the  {\sc CRYSTAL}
-results, including k-space summation in comparison with ever 
-increasing super-cells, to within the accuracy that {\sc CRYSTAL} can obtain.
-%
-Finally, we demonstrated that {\sc MondoSCF} achieves {\it true} linear scaling
-for the Coulomb and Exchange-correlation matrix builds for
-the dense periodic diamond system up to 512 atoms per unit cell. 
-%
-More Blah Blah Blah
+We have extended linear scaling quantum chemical methods for computation of exchange-correlation and Coulomb matrices to
+periodic boundary conditions at the $\Gamma$-point.  These methods have demonstrated an early onset of linear scaling and
+error control for diamond, allowing calculations up to 512 atoms at the RBLYP/6-21G* level of theory.  In both cases, this 
+early onset of linear scaling has been enabled by the use of modern data structures such as the $k$-d tree, together with 
+reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, demonstrating
+high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of state for 
+pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
+
+While this contribution has focused on demonstrating linear scaling for diamond system, 
+the methods presented here work for slabs and wires as well, using methods for computation 
+of the two- and one-dimensional the $\cal M$ tensor outlined in Appendix \ref{calMTen}.
+Our experience has shown that, for the same number of atoms, these lower dimensional systems 
+run much faster.  
 
 \section*{ACKNOWLEDGMENTS}
 
-We would like to acknowledge Tommy Sewell and Ed Kober for there advice
-and support. We would also like to thank Anders Niklasson for his help
-in preparation of this manuscript. 
+We would like to acknowledge Tommy Sewell and Ed Kober for their advice
+and support. We would also like to thank Chee Kwan Gan for a careful reading of this manuscript. 
 
 \bibliographystyle{apsrmp} 
 \bibliography{mondo_new}
+
+\newpage
 
 \appendix
 
 \section{Computation of the \protect\( {\cal M}\protect \) Tensor}\label{calMTen}
 
-Following the work of Nijboer-De Wette \cite{BNijboer57,BNijboer58a}.
-We start by first partitioning  
-
+Following Nijboer and De Wette \cite{BNijboer57,BNijboer58a}, and later 
+Challacombe, White and Head-Gordon \cite{MChallacombe97D} (CWHG), we begin with 
+the partition
 \begin{equation}
 \label{C1}
 \frac{1}{r^{l+1}}={\cal G}_{l}\left( \beta ,r\right) +{\cal F}_{l}\left( \beta ,r\right)
 \end{equation}
-where
-
+involving the functions 
 \begin{equation}
 \label{C2}
 {\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
 {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
+and 
 \begin{equation}
 \label{C3}
 {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
-\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}} \, ,
+%=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
+%\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
-and \( \beta  \) is a parameter which controls the convergence.
-This allows the lattice sum to be partitioned into rapidly convergent
-real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$ as
-%
+where $\gamma$ is the incomplete gamma function \cite{MAbramowitz87} and \( \beta  \) is a parameter controling the 
+partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, ${\cal M}^{m}_{l}$, 
+may be expressed as 
 %
 \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}\in V_{\rm PFF}}\, M_{l}^{m}[\mathbf{R}]
 \nonumber\\
- & = & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & = & \sum _{\mathbf{R}\in V_{\rm PFF}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\,  {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
- & + & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+ & + & \sum _{\mathbf{R}\in V_{\rm PFF}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
 \right) e^{im\phi _{\mathbf{R}}}\, 
-{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
+{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \;.
 \nonumber\\
 \label{C4a0}
 \end{eqnarray}
-which we can then partition into a real and reciprocal space summation 
+Following  CWHG, this expression can be further developed into real and reciprocal space terms:
 \begin{eqnarray}
-{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
+{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}\in V_{\rm PFF}}\, \widetilde{P}_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
  \mathbf{R}\right| \right) 
 \nonumber\\
-&-&\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
+&-&\sum _{\mathbf{R}\in V_{\rm In}}\widetilde{P}_{l}^{m}\left( \cos 
 \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| 
 \right) 
 \nonumber\\
-&+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+&+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
 \nonumber\\
 &&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
  \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
-\right) e^{im\phi _{\mathbf{G}}}
+\right) e^{im\phi _{\mathbf{G}}} \, .
 \nonumber\\
 \label{C4}
 \end{eqnarray}
-With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
-the periodic multipole interaction tensor can be computed. The only
-potential problem is the computation of the incomplete gamma functions.
-Previous approaches attempted to compute this function by the upward
-recurrence relation
-
+With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \),
+and summing terms from smallest to largest, the periodic multipole interaction tensor can be computed
+to high precision given an accurate representation of the incomplete gamma function.  In 
+previous work by CWHG, the upward recursion
 \begin{equation}
 \label{C5}
 \Gamma \left( m+1,\, x\right) =m\Gamma \left( m,\, x\right) +x^{m}e^{-x}
 \end{equation}
-which is started by
-
-\begin{equation}
-\label{erfc}
-\Gamma \left( \frac{1}{2},\, x\right) =\sqrt{\pi }\, {\rm erfc}\left( \sqrt{x}\right) 
-\end{equation}
-however, this leads a numerical instability in the calculation. For
-large values of \( x \) and \( m \) the calculation of the gamma
-function can quickly lose precision. We can remove this problem by
-analytically summing the gamma function, collecting terms, and then
-rewriting the gamma function as
+was used,  which results in a loss of precision for large values of \( x \) and \( m \),
+demanding extended precision arithmetic and precluding on the fly computation.
+This problem is overcome by analytically summing the gamma function, collecting terms, and then
+rewriting it  as
 \begin{eqnarray}
 \Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) 
 \qquad\qquad\qquad
 \nonumber\\
 \left\{ {\rm erfc}\left( \sqrt{x}\right) 
-+\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n} \right\}
++\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n} \right\} \, ,
 \label{C7}
 \end{eqnarray}
-where
-
+where the terms 
 \begin{equation}
 \label{SN}
 S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
-\right) ^{\frac{1}{max(n,1)}}
+\right) ^{\frac{1}{{\rm max}(n,1)}} \, ,
 \end{equation}
-Which are tabulated beforehand. We find that this version of the gamma
-function is both easy to program and numerically very precise, even
-at large \( x \) or \( m \). 
-We can also compute the \( {\cal M} \) tensor in one and two dimensions.
-The \( {\cal M} \) tensor in one dimension can be computed analytically
-%
-\begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
-\nonumber\\
-& = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
-\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
-\nonumber\\
-\label{C7a0}
-\end{eqnarray}
-which can be written as
+are simply pretabulated. This version of the gamma function is both easy to program and precise, even
+for large values of \( x \) or \( m \). 
+
+In one dimension, \( {\cal M} \) can be computed analytically as 
 \begin{eqnarray}
 {\cal M}^{m}_{l} & = & 
-\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
+\frac{\widetilde{P}_{l}^{m}\left( \cos \theta _{0} \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
 \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
 \nonumber\\
 &+&\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) 
@@ -917,41 +872,38 @@ e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
 where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
 initial box dimension and angles which are independent of the summation, and 
 $\zeta (l+1)$ is the Riemann zeta function.
-In two dimension, the Fourier integrals for the calculation of \( {\cal M} \)
-tensor become a lot more complicated, therefore we have chosen to
-use the three dimensional formula's and obtain the two dimensional
-moments via numerical integration, where we take the limit as the
-non-periodic direction goes to infinity,
 
+In two dimensions, the Fourier integrals for the calculation of \( {\cal M} \)
+become more complicated.  We have opted to obtain the two dimensional tensor 
+via numerical integration of three dimensional values. In this case, we take the limit as the
+non-periodic direction (the $z$ direction in the following) goes to infinity:
 \begin{eqnarray}
 {\cal M}^{m}_{l} 
- & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
-\left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
+ & = & \sum _{{\mathbf{R}}\in V_{\rm PFF}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
+\theta _{\mathbf{R}} \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
 \mathbf{R}\right| \right) 
 \nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
-\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
+ & - & \sum _{{\mathbf{R}'}\in V_{\rm In}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos  \theta _{
+\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
  & + & {\cal C}_2 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }
 \: dG_{z}\: \left| \mathbf{G}
 \right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, 
 \nonumber\\
 && \qquad \qquad \qquad \qquad  {\tilde P}_{l}^{m}
-\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+\left( \cos  \theta _{\mathbf{G}} \right) e^{im\phi _{\mathbf{G}}}
 \nonumber\\
 \label{C10}
 \end{eqnarray}
 %
 where,
 \begin{eqnarray}
-{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
-\nonumber\\
-{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{\rm UC}\Gamma \left( l+\frac{1}{2}\right) }
 \label{C10p}
 \end{eqnarray}
-and \( A_{cell} \) is the area of the cell along the non-periodic
-direction. We have found that we can obtain the \( {\cal M} \) tensor
-matrix elements to 8-10 digits of accuracy with this technique.
+and \( A_{\rm UC} \) is the area of the cell along the non-periodic
+direction.  {\bf USING A WHAT KIND OF METHOD??}, we are able to obtain  $\sim 8-10$ digit accuracy 
+in the two-dimensional  \( {\cal M} \).
 
 %\section{Coordinates of Validation Suite}\label{FracCoords}
 %
