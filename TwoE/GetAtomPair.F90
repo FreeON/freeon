@@ -14,7 +14,7 @@ CONTAINS
     INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
     INTEGER      :: StartL1,StopL1,StartL2,StopL2
-    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ
+    REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ,CNT
 
     RX=PBC(1)
     RY=PBC(2)
@@ -23,14 +23,6 @@ CONTAINS
     AtmInfo%Atm12X=AtmInfo%Atm1X-AtmInfo%Atm2X
     AtmInfo%Atm12Y=AtmInfo%Atm1Y-AtmInfo%Atm2Y
     AtmInfo%Atm12Z=AtmInfo%Atm1Z-AtmInfo%Atm2Z
-
-    !    WRITE(*,*)' 1x = ',AtmInfo%Atm1X,' ; '
-    !    WRITE(*,*)' 1y = ',AtmInfo%Atm1Y,' ; '
-    !    WRITE(*,*)' 1z = ',AtmInfo%Atm1Z,' ; '
-
-    !    WRITE(*,*)' 2x = ',AtmInfo%Atm2X,' ; '
-    !    WRITE(*,*)' 2y = ',AtmInfo%Atm2Y,' ; '
-    !    WRITE(*,*)' 2z = ',AtmInfo%Atm2Z,' ; '
 
     R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
     CF12=0
@@ -64,26 +56,23 @@ CONTAINS
                    AtmPair(CF12)%SP%Cst(2,IJ)=(Z1*AtmInfo%Atm1X+Z2*(AtmInfo%Atm2X+RX))*InvExpt
                    AtmPair(CF12)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                    AtmPair(CF12)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
-
-                   AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*     &
-                        BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*   &
-                        BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-                   IF (Type1==1.AND.Type2==2.OR.Type1==2.AND.Type2==1) THEN
-                      ! S*Sp/S*sP or Sp*S/sP*S
-                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
-                      AtmPair(CF12)%SP%Cst(7,IJ)=1.0D0 !AtmPair(CF12)%SP%Cst(6,IJ)
-                      AtmPair(CF12)%SP%Cst(8,IJ)=1.0D0 !AtmPair(CF12)%SP%Cst(6,IJ)
-                   ELSEIF (CType.EQ.22) THEN
-                      ! Sp*Sp/sP*sP
-                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2  ,CF2,AtmInfo%K2)/Cnt
-                      ! sP*Sp/sP*sP
-                      AtmPair(CF12)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2  ,CF2,AtmInfo%K2)/Cnt
-                      ! Sp*sP/sP*sP
-                      AtmPair(CF12)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2+1,CF2,AtmInfo%K2)/Cnt
+                   AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*  &
+                                             BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*   &
+                                             BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                   IF((Type1.NE.2.AND.Type2==2).OR.(Type2.NE.2.AND.Type1==2))THEN
+                      Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(7,IJ)=BIG_DBL
+                      AtmPair(CF12)%SP%Cst(8,IJ)=BIG_DBL
+                   ELSEIF(Type1==2.AND.Type2==2)THEN
+                      Cnt=BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BS%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(7,IJ)=BS%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2,  I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(8,IJ)=BS%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BS%CCoef%D(StartL2+1,I2,CF2,AtmInfo%K2)/Cnt
                    ELSE
-                      AtmPair(CF12)%SP%Cst(6,IJ)=1.0D0
-                      AtmPair(CF12)%SP%Cst(7,IJ)=1.0D0
-                      AtmPair(CF12)%SP%Cst(8,IJ)=1.0D0
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BIG_DBL
+                      AtmPair(CF12)%SP%Cst(7,IJ)=BIG_DBL
+                      AtmPair(CF12)%SP%Cst(8,IJ)=BIG_DBL
                    ENDIF
                 ENDDO
                 ! We can skipp out the loop because we did not get any significant primitives.
