@@ -39,7 +39,7 @@ CONTAINS
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
      CHARACTER(Len=*),OPTIONAL   :: PWD_O
-     INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc,NDim
+     INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc
      INTEGER                     :: IGeom,HDFFileID,IStart
      INTEGER                     :: SRMemory,RefMemory
      INTEGER                     :: CartGradMemory,GDIISMemory
@@ -63,14 +63,13 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     NDim=NCart
      !
      ! Get GDIIS memory of Cartesian coords and grads
      !
-     CALL New(SRStruct,(/NDim,GDIISMemory/))
-     CALL New(RefStruct,(/NDim,GDIISMemory/))
-     CALL New(RefGrad,(/NDim,GDIISMemory/))
-     CALL New(SRDispl,(/NDim,GDIISMemory/))
+     CALL New(SRStruct,(/NCart,GDIISMemory/))
+     CALL New(RefStruct,(/NCart,GDIISMemory/))
+     CALL New(RefGrad,(/NCart,GDIISMemory/))
+     CALL New(SRDispl,(/NCart,GDIISMemory/))
      CALL New(Energy,GDIISMemory+1)
      !
      CALL New(Vect,NCart)
@@ -486,11 +485,11 @@ CONTAINS
          DO K1=IGi%I(J),IGi%I(J+1)-1
            L1=JGi%I(K1)
            X1=IntCGrads(L1,I)
-          !Weight=Weight+X1*X1
-           Weight=Weight+X1*X1*ABS(IntCs%InvHess%D(J))
+         ! Weight=Weight+X1*X1
+           Weight=Weight+X1*X1*ABS(IntCs%InvHess%D(L1))
            NZ=NZ+1
          ENDDO
-         LWeight(J,I)=Weight/DBLE(NZ) !stores mean square gradients of environm.
+         LWeight(J,I)=Weight/DBLE(NZ) 
        ENDDO
      ENDDO
      ! 
@@ -541,9 +540,9 @@ CONTAINS
      REAL(DOUBLE)                :: FAngle,FTors,FStre
      INTEGER                     :: I,J
      !
-     FStre=One/0.8D0
-     FAngle=One/0.4D0
-     FTors=One/0.2D0
+     FStre=2.D0 ! One/0.5D0
+     FAngle=5.D0 ! One/0.2D0
+     FTors=10.D0 ! One/0.1D0
      !
      DO I=1,IntCs%N
        IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
@@ -633,15 +632,16 @@ CONTAINS
        ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
          CALL ChkBendLim(IntCValues(I,NDim),IntCs%PredVal%D(I),5.D0)
          CALL BendTo180(IntCs%PredVal%D(I))
-       ELSE IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-         CALL ChkStreLim(IntCValues(I,NDim),IntCs%PredVal%D(I),0.3D0)
        ENDIF
        Displ(I)=IntCs%PredVal%D(I)-IntCValues(I,NDim)
        CALL MapDAngle(IntCs%Def%C(I),IntCValues(I,NDim),Displ(I))
        !
-       CALL CtrlDispl(IntCs%Def%C(I),Displ(I))
-       CALL CtrlRange(Displ(I),Range)
+       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),One)
+       CALL CtrlRange(Displ(I),Range,NDim)
        IntCs%PredVal%D(I)=IntCValues(I,NDim)+Displ(I)
+       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+         CALL ChkStreLim(IntCValues(I,NDim),IntCs%PredVal%D(I),0.3D0)
+       ENDIF
        !
        IStart=MAX(IEnd-5,1)
      ! CALL PrtFits(VectX%D(IStart:IEnd),VectY%D(IStart:IEnd), &
@@ -912,41 +912,6 @@ CONTAINS
     END FUNCTION GammLN
 !
 !---------------------------------------------------------------------
-!
-   SUBROUTINE CutOffDispl(Displ,IntCs)
-     REAL(DOUBLE),DIMENSION(:) :: Displ
-     TYPE(INTC)                :: IntCs
-     INTEGER                   :: I
-     DO I=1,IntCs%N
-       CALL CtrlDispl(IntCs%Def%C(I),Displ(I))
-     ENDDO
-   END SUBROUTINE CutOffDispl
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE CtrlDispl(Def,Displ)
-     REAL(DOUBLE)     :: Displ,StreCrit,AngleCrit
-     CHARACTER(LEN=*) :: Def
-     !
-     StreCrit=0.15D0
-     AngleCrit=0.15D0
-     IF(Def=='STRE') THEN
-       IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
-     ELSE
-       IF(ABS(Displ)>AngleCrit) Displ=SIGN(AngleCrit,Displ)
-     ENDIF
-   END SUBROUTINE CtrlDispl
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE CtrlRange(Displ,Range)
-     REAL(DOUBLE) :: Displ,Range,StepMax
-     !
-     StepMax=2.D0*Range
-     IF(ABS(Displ)>StepMax) Displ=SIGN(StepMax,Displ)
-   END SUBROUTINE CtrlRange
-!
-!-------------------------------------------------------------------
 !
    SUBROUTINE Locate(XX,N,X,J)
      INTEGER      :: J,N
@@ -1332,20 +1297,24 @@ CONTAINS
        X0=-B/TwoC
        Y0=A+B*X0+C*X0*X0
        G0=Zero
-       IF(Det<Zero.OR.ABS(Y0)<ABS(LastY)) THEN
-         CALL AdjPred(PredGrad,AA,Det,A,B,C)
-       ENDIF
-       Det=SQRT(Det)
-       X1=(-B-Det)/TwoC
-       X2=(-B+Det)/TwoC
-       G1=B+TwoC*X1
-       G2=B+TwoC*X2
-       IF(G1>Zero) THEN !!! going for minimum
-         PredHess=G1
-         FitVal=X1
-       ELSE
-         PredHess=G2
-         FitVal=X2
+      !IF<Zero.OR.ABS(Y0)<ABS(LastY)) THEN
+       IF(Det<Zero) THEN
+         PredGrad=Zero
+         PredHess=G0
+         FitVal=X0
+       ELSE 
+         Det=SQRT(Det)
+         X1=(-B-Det)/TwoC
+         X2=(-B+Det)/TwoC
+         G1=B+TwoC*X1
+         G2=B+TwoC*X2
+         IF(G1>Zero) THEN !!! going for minimum
+           PredHess=G1
+           FitVal=X1
+         ELSE
+           PredHess=G2
+           FitVal=X2
+         ENDIF
        ENDIF
      ELSE                 !!! linear fit 
        IF(ABS(B)>1.D-6) THEN  !!! steep enough slope
@@ -1355,7 +1324,7 @@ CONTAINS
            B=-B
            A=LastY-B*LastX
            FitVal=(PredGrad-A)/B
-         ! FitVal=LastX-LastY/(-B)
+         ! FitVal=LastX-LastY/B
          ENDIF
          PredHess=B
        ELSE                   !!! barely any slope
@@ -1364,16 +1333,6 @@ CONTAINS
        ENDIF
      ENDIF
    END SUBROUTINE Predict
-!
-!---------------------------------------------------------------------
-!
-   SUBROUTINE AdjPred(PredGrad,AA,Det,A,B,C)
-     REAL(DOUBLE) :: PredGrad,AA,Det,A,B,C
-     !
-     PredGrad=Zero
-     AA=A-PredGrad
-     Det=B*B-4.D0*AA*C
-   END SUBROUTINE AdjPred
 !
 !---------------------------------------------------------------------
 !
@@ -1391,7 +1350,7 @@ CONTAINS
      INTEGER                   :: II,I,J,NDim,NFit
      INTEGER                   :: MaxDeg,NDeg,IStart,MaxDim
      REAL(DOUBLE)              :: X0,Y0,EPS,CritChi2V,CritChi2V2
-     LOGICAL                   :: Active,DoExplore
+     LOGICAL                   :: Active,DoTwoP
      !
      NDim=SIZE(VectX)
      LastX=VectX(NDim)
@@ -1403,7 +1362,7 @@ CONTAINS
      Range=MaxX-MinX
      CritChi2V=0.01D0
      CritChi2V2=0.03D0
-     DoExplore=.FALSE. 
+     DoTwoP=.FALSE. 
      IF(HasAngle(Def)) THEN
        Conv=180.D0/PI
      ELSE
@@ -1411,12 +1370,18 @@ CONTAINS
      ENDIF
      !
      NFit=NDim
-     IF(LastY*LastY2<Zero) NFit=2
+     IF(ABS(LastY)<ABS(LastY2).AND.LastY*LastY2<Zero) THEN
+       NFit=2
+       DoTwoP=.TRUE.
+     ENDIF
      !
      MaxDeg=MIN(2,NFit-2)
      IStart=NDim-NFit+1
      CALL FilterBow(VectX(IStart:NDim),VectY(IStart:NDim), &
                     MinX,MaxX,MaxDeg)
+     CALL DetPredGrad(VectX(IStart:NDim),VectY(IStart:NDim), &
+                      RMSErr(IStart:NDim),OldPGrad,OldPVal, &
+                      Def,DoTwoP,InvHess,PredGrad)
      IF(NFit>2) THEN
        DO II=1,2
          CALL Chi2Fit(VectX(IStart:NDim),VectY(IStart:NDim), &
@@ -1427,8 +1392,8 @@ CONTAINS
            Y0=A+B*X0+C*X0*X0
            IF(ABS(Y0)<ABS(LastY)) Chi2V=CritChi2V+One
          ENDIF
-         Det=B*B-4.D0*A*C
-         IF(Det<Zero.AND.Chi2V<CritChi2V) THEN
+         Det=B*B-4.D0*(A-PredGrad)*C
+         IF(Det>Zero.AND.Chi2V<CritChi2V) THEN
            EXIT
          ELSE
            MaxDeg=1
@@ -1442,9 +1407,6 @@ CONTAINS
        EPS=Zero
      ENDIF
      !
-     CALL DetPredGrad(VectX(IStart:NDim),VectY(IStart:NDim), &
-                      RMSErr(IStart:NDim),OldPGrad,OldPVal, &
-                      Chi2V,A,B,C,Def,PredGrad)
      CALL Predict(A,B,C,NDim,LastX,LastY,Def,MinX,Range, &
                   FitVal,PredGrad,PredHess,InvHess,EPS)
    END SUBROUTINE QuadraticFit
@@ -1474,47 +1436,39 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE DetPredGrad(VectX,VectY,RMSErr,OldPGrad,OldPVal, &
-                          Chi2V,A,B,C,Def,PredGrad)
+                          Def,DoTwoP,InvHess,PredGrad)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr
-     REAL(DOUBLE)              :: GradMean,PredGrad,Chi2V
+     REAL(DOUBLE)              :: GradMean,PredGrad,InvHess
      REAL(DOUBLE)              :: OldPGrad,OldPVal,X,X1,X2
-     REAL(DOUBLE)              :: DGPred,DGAct,Fact,A,B,C,H
+     REAL(DOUBLE)              :: DGPred,DGAct,Fact
      INTEGER                   :: NDim,I,J
      CHARACTER(LEN=*)          :: Def
+     LOGICAL                   :: DoTwoP
      !
      NDim=SIZE(VectY)
-    !IF(ABS(VectY(NDim))>0.003D0.OR.NDim==2) THEN
-     IF(NDim==2.AND.VectY(NDim)*VectY(NDim-1)<Zero) THEN
+     IF(DoTwoP) THEN
        PredGrad=Zero
        RETURN
      ENDIF
-   ! X=VectX(NDim)
-   ! H=ABS(B+Two*C*X)
-   ! Fact=MIN(0.008D0/H,0.25D0)
-   ! PredGrad=-Fact*VectY(NDim)
-   ! PredGrad=-0.25D0*VectY(NDim)
+     Fact=Zero  
      IF(Def(1:4)=='STRE') THEN
-       PredGrad=-0.15D0*VectY(NDim)
-     ELSE IF(Def(1:4)=='BEND'.OR. &
-             Def(1:4)=='LINB'.OR. &
-             Def(1:4)=='OUTP') THEN
-       PredGrad=-0.20D0*VectY(NDim)
+       Fact=0.15D0
+     ELSE IF(Def(1:4)=='BEND') THEN
+       Fact=0.20D0
+     ELSE IF(Def(1:4)=='OUTP'.OR. & 
+             Def(1:4)=='LINB') THEN
+       Fact=0.00D0
      ELSE IF(Def(1:4)=='TORS') THEN
-       PredGrad=-0.25D0*VectY(NDim)
+       Fact=0.25D0
      ENDIF
-   ! GradMean=Zero
-   ! DO I=1,NDim
-   !   GradMean=GradMean+RMSErr(I)*VectY(I)
-   ! ENDDO 
-   ! GradMean=GradMean/SUM(RMSErr)
-   ! DGPred=OldPVal-VectX(NDim-1)
-   ! DGAct=VectX(NDim)-VectX(NDim-1)
-   ! Fact=ABS(DGAct)/(ABS(DGPred)+1.D-10)
-   ! IF(Fact>One) Fact=One/Fact
-   ! Fact=One-Fact
-   ! PredGrad=-Fact*GradMean   
-   ! X=0.25D0*ABS(VectY(NDim))
-   ! IF(ABS(PredGrad)>X) PredGrad=SIGN(X,PredGrad)
+     GradMean=Zero
+     DO I=1,NDim
+       GradMean=GradMean+RMSErr(I)*VectY(I)
+     ENDDO 
+     GradMean=GradMean/SUM(RMSErr)
+     PredGrad=-Fact*GradMean
+    !PredGrad=MIN(ABS(VectY(NDim)),ABS(VectY(NDim-1)))
+    !PredGrad=Fact*SIGN(PredGrad,-VectY(NDim))
    END SUBROUTINE DetPredGrad
 !
 !---------------------------------------------------------------------

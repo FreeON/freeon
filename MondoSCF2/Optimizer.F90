@@ -453,7 +453,7 @@ CONTAINS
 !
    SUBROUTINE IntOpt(C)
      TYPE(Controls)            :: C
-     INTEGER                   :: iBAS,iGEO,iCLONE
+     INTEGER                   :: iBAS,iGEO,iGEOst,iCLONE
      INTEGER                   :: AccL 
      INTEGER                   :: FirstGeom,NatmsLoc
      INTEGER                   :: ConvgdAll,MaxSteps,IStart
@@ -463,11 +463,12 @@ CONTAINS
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams)
      ! initial geometry
      iGEO=C%Stat%Previous%I(3)
+     iGEOst=iGEO
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
        CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos,C%Opts)
+       CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -487,7 +488,7 @@ CONTAINS
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
        CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos,C%Opts)
+       CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -1165,8 +1166,8 @@ CONTAINS
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
-     GCrit=GTol(AccL)
-   ! GCrit=3.D-4
+   ! GCrit=GTol(AccL)
+     GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1301,12 +1302,12 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE ReDefIntCs(G,O)
+   SUBROUTINE ReDefIntCs(G,O,iGEO,iGEOst)
      TYPE(Geometries)   :: G
      TYPE(Options)      :: O
-     INTEGER            :: iCLONE
+     INTEGER            :: iCLONE,iGEO,iGEOst
      ! 
-     IF(O%Guess==GUESS_EQ_RESTART) THEN
+     IF(O%Guess==GUESS_EQ_RESTART.AND.iGEO==iGEOst) THEN
        RETURN
      ENDIF
      DO iCLONE=1,G%Clones
@@ -1315,6 +1316,7 @@ CONTAINS
        ENDIF
        G%Clone(iCLONE)%IntCs%N=IntCPerAtom*G%Clone(iCLONE)%Natms   
        CALL New(G%Clone(iCLONE)%IntCs,G%Clone(iCLONE)%IntCs%N)
+       G%Clone(iCLONE)%IntCs%Def%C='BLANK'
      ENDDO
    END SUBROUTINE ReDefIntCs
 !

@@ -609,11 +609,11 @@ CONTAINS
    !     ENDIF
    !   ENDIF
    ! ENDIF
-     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
-        LonelyAtom)) THEN
-       DoExclude=.TRUE.
-       RETURN
-     ENDIF
+!    IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+!       LonelyAtom)) THEN
+!      DoExclude=.TRUE.
+!      RETURN
+!    ENDIF
    END SUBROUTINE BondExcl
 !
 !----------------------------------------------------------------
@@ -1310,12 +1310,13 @@ CONTAINS
      TYPE(DBL_VECT)            :: VectCart
      TYPE(DBL_VECT)            :: VectCartAux,VectIntAux
      TYPE(DBL_VECT)            :: VectCartAux2
-     TYPE(DBL_VECT)            :: VectIntReq
+     TYPE(DBL_VECT)            :: VectIntReq,IntCValSt
      TYPE(DBL_RNK2)            :: ActCarts
      REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld
      REAL(DOUBLE)              :: Sum,ConstrMax,ConstrRMS
      REAL(DOUBLE)              :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
-     INTEGER                   :: NCart,I,IStep,J,NIntC,NConstr
+     INTEGER                   :: NCart,I,IStep,J
+     INTEGER                   :: NIntC,NConstr,IRep,RepMax
      INTEGER                   :: NatmsLoc,NCartConstr
      TYPE(INTC)                :: IntCs
      TYPE(INT_VECT)            :: ISpB,JSpB
@@ -1328,7 +1329,7 @@ CONTAINS
      TYPE(TrfCtrl)             :: GTrfCtrl
      TYPE(CoordCtrl)           :: GCoordCtrl
      CHARACTER(LEN=*)          :: SCRPath
-     LOGICAL                   :: DoClssTrf,Print2
+     LOGICAL                   :: DoClssTrf,Print2,DoRepeat
      INTEGER                   :: Print
      TYPE(INT_VECT)            :: ISpBD,JSpBD
      TYPE(DBL_VECT)            :: ASpBD
@@ -1339,6 +1340,8 @@ CONTAINS
      NIntC=SIZE(IntCs%Def%C)
      Print2=(Print>=DEBUG_GEOP_MAX)
      DoClssTrf=.TRUE.
+     DoRepeat=.FALSE.
+     RepMax=4
      IF(PRESENT(DoDeloc_O)) THEN
        DoDeloc=DoDeloc_O
      ELSE
@@ -1358,162 +1361,192 @@ CONTAINS
      CALL New(VectCartAux2,NCart)
      CALL New(VectIntAux,NIntC)
      CALL New(VectIntReq,NIntC)
-     !
-     ! The required new value of internal coordinates
-     !
+     CALL New(IntCValSt,NIntC)
      VectIntReq%D=VectInt
-     IF(DoDeloc) THEN
-       CALL ReadBMATR(ISpBD,JSpBD,ASpBD,TRIM(SCRPath)//'UMatr', &
-                      UMatr_O=UMatr)
-       CALL DelocP(VectIntReq%D,ISpBD,JSpBD,ASpBD,UMatr)
-     ELSE
-       CALL MapBackAngle(IntCs,VectIntReq%D) 
-     ENDIF
+     CALL INTCValue(IntCs,XYZ, &
+                    GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+     IntCValSt%D=IntCs%Value%D
      !
-     CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+     ! Repeat until convergence
      !
-     !initialization of new Cartesians
-     !
-    !IF(DoClssTrf) THEN
-       ActCarts%D=XYZ
-       CALL CartRNK2ToCartRNK1(VectCart%D,ActCarts%D)
-    !ELSE
-    !  CALL CartRNK2ToCartRNK1(VectCart%D,XYZ)
-    !  CALL TranslToAt1(VectCart%D,GTrfCtrl%ThreeAt)
-    !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt2ToX)
-    !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt3ToXY)
-    !  !transform Cartesian constraints!
-    !  CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-    !  CALL ReSetConstr(IntCs,ActCarts%D)
-    !ENDIF
-     !
-     ! Internal --> Cartesian transformation
-     !
-     IF(Print>=DEBUG_GEOP_MIN) THEN
-       WRITE(*,450) NIntC
-       WRITE(Out,450) NIntC
-     ENDIF
-     450 FORMAT('Iterative back-transformation, No. Int. Coords=',I7)
-     !
-     ConstrMax=GConstr%ConstrMaxCrit*10.D0
-     ConstrRMS=1.D0
-     ConstrRMSOld=2.D0
-     RMSD=1.D+9
-     !
-     DO IStep=1,GBackTrf%MaxIt_CooTrf
-      !IF(PRESENT(AtNum_O)) THEN
-      !  CALL PrtXYZ(Atnum_O,ActCarts%D,'backtrf',&
-      !              'Step='//TRIM(IntToChar(IStep)))
+     DO IRep=1,RepMax
+       IF(DoRepeat) THEN
+         RefreshAct=.TRUE.
+         VectIntAux%D=VectIntReq%D-IntCValSt%D  
+         CALL CutOffDispl(VectIntAux%D,IntCs,Fact_O=Half)
+         VectIntReq%D=IntCValSt%D+VectIntAux%D
+       ENDIF
+       !
+       ! The required new value of internal coordinates
+       !
+       IF(DoDeloc) THEN
+         CALL ReadBMATR(ISpBD,JSpBD,ASpBD,TRIM(SCRPath)//'UMatr', &
+                        UMatr_O=UMatr)
+         CALL DelocP(VectIntReq%D,ISpBD,JSpBD,ASpBD,UMatr)
+       ELSE
+         CALL MapBackAngle(IntCs,VectIntReq%D) 
+       ENDIF
+       !
+       !initialization of new Cartesians
+       !
+      !IF(DoClssTrf) THEN
+         ActCarts%D=XYZ
+         CALL CartRNK2ToCartRNK1(VectCart%D,ActCarts%D)
+      !ELSE
+      !  CALL CartRNK2ToCartRNK1(VectCart%D,XYZ)
+      !  CALL TranslToAt1(VectCart%D,GTrfCtrl%ThreeAt)
+      !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt2ToX)
+      !  CALL RotToAt(VectCart%D,GTrfCtrl%RotAt3ToXY)
+      !  !transform Cartesian constraints!
+      !  CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
+      !  CALL ReSetConstr(IntCs,ActCarts%D)
       !ENDIF
        !
-       ! Get B and refresh values of internal coords
-       !
-       CALL INTCValue(IntCs,ActCarts%D, &
-                      GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-       IF(RefreshB.AND.RefreshAct) THEN
-         CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
-                              GCoordCtrl,Print,SCRPath,.TRUE.)
-         CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
-        !IF(IStep>=4.AND..NOT.DoDeloc) THEN
-        !  VectIntAux%D=VectIntReq%D-IntCs%Value%D
-        !  CALL RedundancyOff(VectIntAux%D,SCRPath,Print)
-        !  CALL MapAngleDispl(IntCs,VectIntAux%D) 
-        !  VectIntReq%D=IntCs%Value%D+VectIntAux%D
-        !  CALL MapBackAngle(IntCs,VectIntReq%D) 
-        !ENDIF
-       ENDIF
-       !
-       ! Calculate difference between required and actual internals
-       !
-       VectIntAux%D=VectIntReq%D-IntCs%Value%D
-       IF(DoDeloc) CALL DelocP(VectIntAux%D,ISpBD,JSpBD,ASpBD,UMatr)
-       CALL MapAngleDispl(IntCs,VectIntAux%D) 
-       !
-       ! Check convergence on constraints
-       !
-       IF(GConstr%NConstr/=0) THEN
-         ConstrRMSOld=ConstrRMS
-         CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
-       ENDIF
-       !
-       ! Do transformation
-       ! 
-       ! Bt*[phi_r-phi_a]
-       !
-       CALL CALC_BxVect(ISpB,JSpB,ASpB,VectIntAux%D, &
-                        VectCartAux%D,Trp_O=.TRUE.)
-       !
-       ! GcInv*Bt*[phi_r-phi_a]
-       !
-       CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
-       !
-       ! Project out rotations and translations 
-       !
-       IF(DoClssTrf) THEN 
-         IF(GTrfCtrl%DoTranslOff) &
-           CALL TranslsOff(VectCartAux2%D,Print2)
-         IF(GTrfCtrl%DoRotOff) &
-           CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
-       ENDIF
-       !
-       ! Check convergence
-       !
-       RMSDOld=RMSD
-       CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
-                       DiffMax,RMSD) 
-       !
-       ! Refresh B matrix?  
-       !
-       IF(DiffMax>GBackTrf%DistRefresh) THEN
-         RefreshAct=.TRUE.
-       ELSE
-         RefreshAct=.FALSE.
-       ENDIF
-       !
-       ! Modify Cartesians
-       !
-       CALL SetCartConstr(VectCart%D,VectCartAux2%D, &
-                          IntCs,GConstr%NCartConstr)
-       VectCart%D=VectCart%D+VectCartAux2%D
-       CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
-       !
-       ! Review iteration
+       ! Internal --> Cartesian transformation
        !
        IF(Print>=DEBUG_GEOP_MIN) THEN
-         WRITE(*,210) IStep,DiffMax,RMSD
-         WRITE(Out,210) IStep,DiffMax,RMSD
+         WRITE(*,450) NIntC
+         WRITE(Out,450) NIntC
        ENDIF
-       210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
-       !      
-       CALL BackTrfConvg(GConstr,GBackTrf, &
-         DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
-         ConstrRMS,ConstrRMSOld,IStep,RefreshAct)
+       450 FORMAT('Iterative back-transformation, No. Int. Coords=',I7)
        !
-       IF(DoIterate) THEN
+       ConstrMax=GConstr%ConstrMaxCrit*10.D0
+       ConstrRMS=1.D0
+       ConstrRMSOld=2.D0
+       RMSD=1.D+9
+       !
+       DO IStep=1,GBackTrf%MaxIt_CooTrf
+        !IF(PRESENT(AtNum_O)) THEN
+        !  CALL PrtXYZ(Atnum_O,ActCarts%D,'backtrf',&
+        !              'Step='//TRIM(IntToChar(IStep)))
+        !ENDIF
+         !
+         ! Get B and refresh values of internal coords
+         !
+         CALL INTCValue(IntCs,ActCarts%D, &
+                        GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
          IF(RefreshB.AND.RefreshAct) THEN
+           CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
+                                GCoordCtrl,Print,SCRPath,.TRUE.)
+           CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
+         ENDIF
+         !
+         ! Calculate difference between required and actual internals
+         !
+         VectIntAux%D=VectIntReq%D-IntCs%Value%D
+         IF(DoDeloc) CALL DelocP(VectIntAux%D,ISpBD,JSpBD,ASpBD,UMatr)
+         CALL MapAngleDispl(IntCs,VectIntAux%D) 
+         !
+         ! Check convergence on constraints
+         !
+         IF(GConstr%NConstr/=0) THEN
+           ConstrRMSOld=ConstrRMS
+           CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
+         ENDIF
+         !
+         ! Do transformation
+         ! 
+         ! Bt*[phi_r-phi_a]
+         !
+         CALL CALC_BxVect(ISpB,JSpB,ASpB,VectIntAux%D, &
+                          VectCartAux%D,Trp_O=.TRUE.)
+         !
+         ! GcInv*Bt*[phi_r-phi_a]
+         !
+         CALL CALC_GcInvCartV(CholData,VectCartAux%D,VectCartAux2%D)
+         !
+         ! Project out rotations and translations 
+         !
+         IF(DoClssTrf) THEN 
+           IF(GTrfCtrl%DoTranslOff) &
+             CALL TranslsOff(VectCartAux2%D,Print2)
+           IF(GTrfCtrl%DoRotOff) &
+             CALL RotationsOff(VectCartAux2%D,ActCarts%D,Print2)
+         ENDIF
+         !
+         ! Check convergence
+         !
+         RMSDOld=RMSD
+         CALL ScaleDispl(VectCartAux2%D,GBackTrf%MaxCartDiff, &
+                         DiffMax,RMSD) 
+         !
+         ! Refresh B matrix?  
+         !
+         IF(DiffMax>GBackTrf%DistRefresh) THEN
+           RefreshAct=.TRUE.
+         ELSE
+           RefreshAct=.FALSE.
+         ENDIF
+         !
+         ! Modify Cartesians
+         !
+         CALL SetCartConstr(VectCart%D,VectCartAux2%D, &
+                            IntCs,GConstr%NCartConstr)
+         VectCart%D=VectCart%D+VectCartAux2%D
+         CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
+         !
+         ! Review iteration
+         !
+         IF(Print>=DEBUG_GEOP_MIN) THEN
+           WRITE(*,210) IStep,DiffMax,RMSD
+           WRITE(Out,210) IStep,DiffMax,RMSD
+         ENDIF
+         210  FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
+         !      
+         CALL BackTrfConvg(GConstr,GBackTrf, &
+           DoIterate,DiffMax,RMSD,RMSDOld,ConstrMax, &
+           ConstrRMS,ConstrRMSOld,IStep,RefreshAct)
+         !
+         IF(DoIterate) THEN
+           IF(RefreshB.AND.RefreshAct) THEN
+             CALL DeleteBMatInfo(ISpB,JSpB,ASpB,CholData)
+           ENDIF
+         ELSE
            CALL DeleteBMatInfo(ISpB,JSpB,ASpB,CholData)
+           EXIT
+         ENDIF
+       ENDDO          
+       !
+       IF(IStep>=GBackTrf%MaxIt_CooTrf) THEN
+         IF(RMSD>0.001D0) THEN
+           IF(Print>=DEBUG_GEOP_MIN) THEN
+             WRITE(*,*) 'Rescaling and Repeating back-transformation'
+             WRITE(Out,*) 'Rescaling and Repeating back-transformation'
+           ENDIF
+           DoRepeat=.TRUE.
+           IF(IRep==RepMax) THEN
+             CALL Halt('Iterative backtransformation did not converge')
+           ENDIF
+           CYCLE
+         ENDIF
+         IF(Print>=DEBUG_GEOP_MIN) THEN
+           WRITE(*,180) 
+           WRITE(Out,180) 
+           WRITE(*,190) 
+           WRITE(Out,190) 
+           EXIT 
          ENDIF
        ELSE
-         EXIT
+         IF(Print>=DEBUG_GEOP_MIN) THEN
+           CALL INTCValue(IntCs,ActCarts%D, &
+                          GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+           VectIntAux%D=IntCValSt%D-IntCs%Value%D
+           CALL MapAngleDispl(IntCs,VectIntAux%D) 
+           IF(IRep<RepMax) THEN
+             IF(ABS(MAXVAL(VectIntAux%D))>0.3D0.OR. &
+                ABS(MINVAL(VectIntAux%D))>0.3D0) THEN
+               DoRepeat=.TRUE.
+               CYCLE
+             ENDIF
+           ENDIF
+           WRITE(*,220) IStep
+           WRITE(Out,220) IStep
+           EXIT
+         ENDIF
        ENDIF
-     ENDDO          
+       !
+     ENDDO !!! Repeat
      !
-     IF(IStep>=GBackTrf%MaxIt_CooTrf) THEN
-       IF(RMSD>0.01D0) THEN
-         CALL Halt('Iterative backtransformation did not converge')
-       ENDIF
-       IF(Print>=DEBUG_GEOP_MIN) THEN
-         WRITE(*,180) 
-         WRITE(Out,180) 
-         WRITE(*,190) 
-         WRITE(Out,190) 
-       ENDIF
-     ELSE
-       IF(Print>=DEBUG_GEOP_MIN) THEN
-         WRITE(*,220) IStep
-         WRITE(Out,220) IStep
-       ENDIF
-     ENDIF
      180  FORMAT('Stop Coord Back-Trf, max. number of Iterations exceeded!')
      190  FORMAT('Use Current Geometry!')
      220  FORMAT('Coordinate back-transformation converged in ',&
@@ -1532,14 +1565,9 @@ CONTAINS
     !ENDIF
      XYZ=ActCarts%D
      !
-     ! Final internal coordinates
-     !
-     !CALL INTCValue(IntCs,XYZ, &
-     !               GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-     !CALL PrtIntCoords(IntCs,IntCs%Value%D,'Final Internals')
-     !
      ! Tidy up
      !
+     CALL Delete(IntCValSt)
      CALL Delete(VectIntReq)
      CALL Delete(VectIntAux)
      CALL Delete(VectCartAux2)
@@ -1552,7 +1580,6 @@ CONTAINS
        CALL Delete(ASpBD)
        CALL Delete(UMatr)
      ENDIF
-     CALL DeleteBMatInfo(ISpB,JSpB,ASpB,CholData)
    END SUBROUTINE InternalToCart
 !
 !----------------------------------------------------------
@@ -2181,7 +2208,7 @@ CONTAINS
      DoIterate=(DiffMax>GBackTrf%CooTrfCrit)
      IF(RMSD>RMSDOld*GBackTrf%RMSCrit) THEN 
        IF(DiffMax<GBackTrf%MaxCartDiff*GBackTrf%RMSCrit &
-          .AND.IStep>10) THEN
+          .AND.IStep>50) THEN
          DoIterate=.FALSE.
        ELSE 
          RefreshAct=.TRUE.
@@ -3422,10 +3449,12 @@ CONTAINS
      HAtm=0
      IF(NJJ1/=1.AND.NJJ2/=1) RETURN
      IF((NJJ1==1.AND.HasLigand(NJJ2))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ1)
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ1)
+       HasHBond=.TRUE.
        HAtm=JJ1
      ELSE IF((NJJ2==1.AND.HasLigand(NJJ1))) THEN
-       HasHBond=HasAttached(AtNum,Top12%I,JJ2)
+      !HasHBond=HasAttached(AtNum,Top12%I,JJ2)
+       HasHBond=.TRUE.
        HAtm=JJ2
      ENDIF
    END FUNCTION HasHBond
@@ -4406,7 +4435,7 @@ CONTAINS
      !now define bonding scheme, based on Slater or Van der Waals radii
      !
      NatmsLoc=SIZE(XYZ,2)
-     HBondMax=2.00D0*AngstromsToAu*MAX(GCoordCtrl%VDWFact,One) ! in Au 
+     HBondMax=2.40D0*AngstromsToAu*MAX(GCoordCtrl%VDWFact,One) ! in Au 
      !
      IF(IntSet==1) THEN
        N=SIZE(SLRadii,1)
@@ -5482,8 +5511,55 @@ CONTAINS
      CALL Delete(BondNew)      
      CALL Delete(AllAtms)      
    END SUBROUTINE MergeBondSets
-! 
+!
 !---------------------------------------------------------------------
 !
+   SUBROUTINE CutOffDispl(Displ,IntCs,Fact_O)
+     REAL(DOUBLE),DIMENSION(:) :: Displ
+     TYPE(INTC)                :: IntCs
+     INTEGER                   :: I
+     REAL(DOUBLE)              :: Fact  
+     REAL(DOUBLE),OPTIONAL     :: Fact_O
+     !
+     Fact=One
+     IF(PRESENT(Fact_O)) Fact=Fact_O
+     DO I=1,IntCs%N
+       CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact)
+     ENDDO
+   END SUBROUTINE CutOffDispl
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CtrlDispl(Def,Displ,Fact)
+     REAL(DOUBLE)     :: Displ,StreCrit,AngleCrit
+     REAL(DOUBLE)     :: Fact
+     CHARACTER(LEN=*) :: Def
+     !
+     IF(Def=='STRE') THEN
+       StreCrit=0.15D0*Fact
+       IF(ABS(Displ)>StreCrit) Displ=SIGN(StreCrit,Displ)
+     ELSE
+       AngleCrit=0.15D0*Fact
+       IF(ABS(Displ)>AngleCrit) Displ=SIGN(AngleCrit,Displ)
+     ENDIF
+   END SUBROUTINE CtrlDispl
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CtrlRange(Displ,Range,NDim)
+     REAL(DOUBLE) :: Displ,Range,StepMax
+     INTEGER      :: NDim
+     !
+     IF(NDim<=4) THEN
+       StepMax=3.D0*Range
+      !StepMax=Range
+     ELSE 
+       StepMax=Range
+     ENDIF
+     IF(ABS(Displ)>StepMax) Displ=SIGN(StepMax,Displ)
+   END SUBROUTINE CtrlRange
+!
+!-------------------------------------------------------------------
+! 
    END MODULE InCoords
 
