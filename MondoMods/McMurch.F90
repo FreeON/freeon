@@ -528,7 +528,7 @@ SUBROUTINE iPrint(Int,I,J,K,L,Mode,iOut)
   ENDIF
 101 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',F20.16)
 201 FORMAT(' (',I3,',',I3,'|',I3,',',I3,') = ',D22.16)
-301 FORMAT(1x,'Int[',I3,',',I3,',',I3,',',I3,'] = ',F19.16,'*2^(',I3,');')
+301 FORMAT(1x,'Int[[',I3,',',I3,',',I3,',',I3,']] = ',F19.16,'*2^(',I3,');')
 END SUBROUTINE iPrint
 
 
