@@ -119,7 +119,7 @@ CONTAINS
           RCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
 
           Power2(0) = 1
-          DO I = 1, 31
+          DO I = 1, 30 ! 31--this is an overflow on tru64
              Power2(I) = Power2(I-1)*2
           ENDDO
           SmallN = NInt( Log(NVol*1.0D0)/Log(2.0D0) )
@@ -939,7 +939,7 @@ CONTAINS
        !CLOSE(Out,STATUS='KEEP')
 
        Power2(0) = 1
-       DO I = 1, 31
+       DO I = 1, 30 ! 31--overflow
           Power2(I) = Power2(I-1)*2
        ENDDO
        SmallN = NINT(LOG(NVol*1.0D0)/LOG(2.0D0))
@@ -1321,7 +1321,7 @@ CONTAINS
        !CLOSE(Out,STATUS='KEEP')
        !ENDIF
        Power2(0) = 1
-       DO I = 1,31
+       DO I = 1,30 !31 is an overflow!  
           Power2(I) = Power2(I-1)*2
        ENDDO
        ! check if N is a power of 2
