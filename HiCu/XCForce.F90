@@ -50,10 +50,10 @@ PROGRAM XCForce
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube*1.D-1)
 #ifdef PERIODIC
-! Calculate the Number of Cells
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
+#endif 
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree 
