@@ -276,14 +276,14 @@ compared to Cartesian ones. Furthermore, the fitting process
 has an important averaging effect on the vibrational coupling
 that also strongly contributes to the success of QUICCA.
 A typical fitting process of a gradient curve is illustrated in 
-Fig. \ref{iceIh} on a hydrogen bond of the icosahedral (P63/MMC)
+Fig. \ref{iceIh} on a hydrogen bond of the hexagonal (P63/MMC)
 ice structure \cite{AGoto90}.
 
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{IceIhfit.eps}}
 \caption{
 Progression of gradients on a hydrogen bond coordinate
-of the icosahedral ice crystal.
+of the hexagonal ice crystal.
 Energies and forces have been obtained by the Hartree-Fock
 model in STO-3G basis set.
 The optimization was started from the crystallographic structure
@@ -433,7 +433,10 @@ Halite (NaCl) \cite{whbragg13},
 ammonium-chloride \cite{DBSirdeshmukh70},
 Ice \cite{AGoto90}, Urea \cite{SSwaminathan84}, 
 Benzene \cite{GJeffrey87}, Sulphure \cite{ACGallacher92}, 
-Quartz \cite{MGTucker01}.
+Quartz \cite{MGTucker01}. In addition to these structures
+we also demonstrate the power of our optimizer
+on PETN, a 50 atoms high-explosive \cite{Trotter_1963v16,Conant_1979}
+which forms hydrogen-bonded crystals.
 Most of the structures were
 taken either from the Inorganic Crystal Stuctures Database
 (ICSD) \cite{ICSD} or from Cambridge Crystallographic Data Center
@@ -441,9 +444,56 @@ taken either from the Inorganic Crystal Stuctures Database
 generated using Mercury \cite{Mercury}. 
 A brief description follows to provide data for the reproduction
 of input structures in case they cannot be found
-in the above mentioned data bases. 
+in the above mentioned data-bases or if extra handling was needed to 
+extract the starting structures from the literature data.
 
-\subsubsection{Polyacetilene}
+\subsubsection{Polyethylene}
+The quasi one-dimensional polyethylene has been defined 
+by the starting Cartesian coordinate set
+\\
+{\tt C    0.500   0.500   0.000} \\
+{\tt H    0.500   1.300   0.800} \\
+{\tt H    0.500   1.300  -0.800} \\
+{\tt C    1.500  -0.500   0.000} \\
+{\tt H    1.500  -1.300   0.800} \\
+{\tt H    1.500  -1.300  -0.800}, \\
+with a $2${\AA} long lattice vector along the $X$ axis. In test
+calculations the sixfold repeated supercell has been used.
+
+\subsubsection{Hexagonal boron-nitride}
+The two-dimensional hexagonal boron-nitride has been 
+defined by the starting fractional coordinates
+\\
+{\tt B 0.33333333333 0.1666666666 0.0000000000} \\
+{\tt N 0.66666666666 0.8400000000 0.0000000000}, \\
+and lattice parameters $a=2.420${\AA}, $b=2.420${\AA} and 
+$\gamma=120^{\rm o}$.
+
+\subsubsection{(10,0)carbon-nanotube}
+In the one-dimensional polymer, (10,0)carbon-nanotube,
+all bond-lengths that are parallel to the axis of the
+nanotube have been initially $1.480${\AA} long, while those
+running perpendicularly to the axis have been $1.402${\AA} long.
+The only cell parameter $a$ was initially $a=4.44${\AA}. The
+elementary cell contained 40 atoms. These data entirely determine
+the structure of the symmetric (10,0)carbon-nanotube.
+
+\subsubsection{ammonium chloide}
+The structure of ammonium-chloride have been 
+taken from the literature \cite{DBSirdeshmukh70} but the
+doubled cell has been used in order to maintain
+an even number of electrons in the simulation cell, as the elementary
+cell contains a nitrogen, a chlorine and only three hydrogen atoms.
+
+\subsubsection{Ice}
+Hexagonal ice is the most important natural occurance of ice.
+Its structure has been taken from the literature \cite{AGoto90}. 
+Since the literature provides two equilibrium position
+for each hydrogen atoms due to the tunneling of hydrogens in ice,
+our starting structure contained the average of these two positions
+for each hydrogen atom. The translational elementary cell contains
+four water molecules.
+
 
 \section{Conclusions} \label{Conclusions}
 
