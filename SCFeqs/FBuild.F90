@@ -28,18 +28,28 @@ PROGRAM FockNGrueven
   CHARACTER(LEN=2)               :: Cycl
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: XFile,DevFile,Mssg
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
-  LOGICAL                        :: Present,ExchangeShift
+  LOGICAL                        :: Present,ExchangeShift,HasECPs
 !------------------------------------------------------------------ 
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
   CALL New(F)
   CALL New(Tmp1)
-! Start with the Coulomb matrix
+  ! Start with the Coulomb matrix
   CALL Get(J,TrixFile('J',Args,0))                      ! J=J_Coulomb[Rho_Total(Nuc+El)]
-! Then add the kinetic energy to get a preliminary Fock matrix
+!  CALL PPrint(J,'V',Unit_O=6)
+  ! Then add the kinetic energy to get a preliminary Fock matrix
   CALL Get(T,TrixFile('T',Args))                        ! T=T_{Kinetic}
+!  CALL PPrint(T,'T',Unit_O=6)
   CALL Add(J,T,F)                                       ! F=J+T    
+  ! Check to see if we have ECPs
+  CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
+  IF(HasECPs)THEN
+     CALL SetEq(J,F)
+     ! Get the pseudopotential matrix U 
+     CALL Get(T,TrixFile('U',Args))                        ! T=U_{ECP}
+     CALL Add(T,J,F)     
+  ENDIF
   CALL Delete(T)
   CALL Delete(J)
   IF(SCFActn/='GuessEqCore')THEN
@@ -109,6 +119,7 @@ PROGRAM FockNGrueven
 !
   CALL Put(F,TrixFile('F',Args,0))
   CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
+!  CALL PPrint( F,'F['//TRIM(Cycl)//']',Unit_O=6)
   CALL PPrint( F,'F['//TRIM(Cycl)//']')
   CALL Plot(   F,'F['//TRIM(Cycl)//']')
 

@@ -16,16 +16,17 @@ PROGRAM SCFStatus
    IMPLICIT NONE
    TYPE(ARGMT)                     :: Args
 #ifdef PARALLEL
-   TYPE(DBCSR)                     :: P,Tmp1,Tmp2
+   TYPE(DBCSR)                     :: P,Tmp1,Tmp2,Tmp3
 #else
-   TYPE(BCSR)                      :: P,Tmp1,Tmp2
+   TYPE(BCSR)                      :: P,Tmp1,Tmp2,Tmp3
 #endif
-   REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,KinE,ExchE,Exc, &
+   REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc, &
                                       Gap,Etot,DMax,Virial,DIISErr
 #ifdef MMech
    REAL(DOUBLE)                    :: EBOND,EANGLE,ETorsion,ELJ,EOutOfPlane,MM_COUL,MM_ENERGY
    REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
 #endif
+   LOGICAL                         :: HasECPs
    CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
    CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'  
 !---------------------------------------------------------------------------------------
@@ -55,7 +56,20 @@ PROGRAM SCFStatus
 #else
    KinE=Two*Trace(P,Tmp1)    
 #endif 
-!  E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
+   CALL Get(HasECPs,'hasecps',Tag_O=CurBase)
+   IF(HasECPs)THEN
+      ! Get the pseudopotential matrix U 
+      CALL Get(Tmp1,TrixFile('U',Args))                        ! Tmp1=U_{ECP}
+#ifdef PARALLEL
+      CALL Multiply(P,Tmp1,Tmp2)
+      E_ECPs=Two*Trace(Tmp2)     
+#else
+      E_ECPs=Two*Trace(P,Tmp1)    
+#endif
+   ELSE
+      E_ECPs=Zero
+   ENDIF
+   ! E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
    CALL Get(Tmp1,TrixFile('J',Args,0))
 #ifdef PARALLEL
    CALL Multiply(P,Tmp1,Tmp2)
@@ -63,11 +77,9 @@ PROGRAM SCFStatus
 #else
    E_el_tot=Trace(P,Tmp1)    
 #endif
-#ifdef PARALLEL_CLONES
+   ! Total electrostatic energy icluding ECPs
+   E_el_tot=E_el_tot+E_ECPs
    CALL Put(E_el_tot,'E_ElectronicTotal')
-#else
-   CALL Put(E_el_tot,'E_ElectronicTotal',Tag_O=SCFCycl)
-#endif
    ExchE=Zero
    Exc=Zero
    IF(SCFActn/="GuessEqCore")THEN
@@ -90,13 +102,8 @@ PROGRAM SCFStatus
 #endif
    ENDIF
 !  Get E_nuc_tot =<Vnn+Vne> 
-#ifdef PARALLEL_CLONES
    CALL Get(E_nuc_tot,'E_NuclearTotal')
-#else
-   CALL Get(E_nuc_tot,'E_NuclearTotal',Tag_O=SCFCycl)
-#endif
 #ifdef MMech
-!
    IF(HasMM()) THEN
      CALL Get(EBOND,'MM_EBOND',Tag_O=Curgeom)
      CALL Get(EANGLE,'MM_EANGLE',Tag_O=Curgeom)
