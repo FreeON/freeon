@@ -1,0 +1,60 @@
+<BeginTitle>
+
+   >> Currently NEB will not converge without a constrained atom in common <<
+
+   >> Note, scratch dir must be globally accessible to run this job  << 
+   >> (each clone must open the hdf file in parallel)                <<
+
+<EndTitle>
+
+<BeginOptions>
+
+Charge=0
+Multiplicity=1
+
+Clones=5
+NEBSpring=0.001
+RSL=0.25
+Grad=(TSSearch,PrimInt,NoGDIIS,NoBackTr,BiSect)
+MaxSTRE=0.03
+MaxANGLE=0.6
+
+Out_Put=xyz
+DebugAll=(MinDebug,CheckSums)
+
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(STO-2G-SPLIT)
+ModelChem=(HF)
+Accuracy =(Tight)
+SCFConvergence=(DIIS)
+
+MPIInvoke="mpirun"
+MPIProcessors=6
+MPIProcFlag="-np"
+MPISpatialProc=2
+<EndOptions>
+
+<BeginReactants>
+ o   -1.24862018              0.00030000               -0.93963351
+ c   -1.17493452              0.00030000               0.42170768
+ c   -0.02412008              0.00030000               1.12632631
+ c   1.26746884               0.00030000               0.37069928
+ o   1.30739030               0.00030001               -0.86698376
+ h   -0.28024616              0.00030000               -1.22187741
+ h   -2.15606306              0.00029999               0.91804649
+ h   -0.01634707              0.00030001               2.21004427
+ h   2.19968192               0.00029998               0.97685065
+<EndReactants>
+
+<BeginProducts>
+ O   -1.24452369              20.00069736              -0.89427546
+ C   -1.23040171              20.00069737              0.34420158
+ C   0.04555417               20.00069737              1.12640947
+ C   1.21076440               20.00069737              0.44575787
+ O   1.31273758               20.00069738              -0.91382717
+ H   0.35018538               20.00069739              -1.21598512
+ H   -2.17510339              20.00069737              0.93069334
+ H   0.01554233               20.00069739              2.20970426
+ H   2.18139493               20.00069736              0.96247392
+<EndProducts>
