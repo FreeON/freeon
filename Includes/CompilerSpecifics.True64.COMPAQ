@@ -1,34 +1,33 @@
 #---------------------------------------------------------------
 # PREPROCESSOR OPTIONS: 
 #
-CPP       =/lib/cpp -P -C -traditional 
+CPP=/lib/cpp -P -C -traditional
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
-#
-# PREPROCESSING OPTIONS: 
-CPPOPTS   =  -DPERIODIC -DWRAPDIST
+CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES -DPERIODIC
 #---------------------------------------------------------------
 # C Compiler and options
 #
 CC        =  gcc
-#CDEBUG   = -g
-COPTIMIZE = -O1
-CFLAGS    = $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
+CDEBUG    = 
+COPTIMIZE = 
+CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
 #---------------------------------------------------------------
 # Fortran postfixes for compiler peculiarities
 #
-LIST_POSTFIX  = lst
+LIST_POSTFIX  = l
 F77_POSTFIX   = f
 F90_POSTFIX   = f90
 MOD_POSTFIX   = mod
 #---------------------------------------------------------------
 # Fortran Compilers, options and include files
 #
-F90          = pgf90
-F90_OPTIMIZE = -O1 
-#F90_DEBUG    =  -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr -Ktrap=fp
-#F_LIST        = -Mlist 
-#F_PROF       = -Mprof=lines
-F90_MISC     = $(F_LIST) $(F_PROF) -Mbackslash 
+F90          = f95
+F90_OPTIMIZE = -O4
+#F90_DEBUG    = -g3 -C -check bounds -check overflow -assume gfullpath 
+#F_LIST       = -V -source_listing
+#F_PROF       = -pg 
+F90_MISC     = -static -fpe1 $(F_LIST) $(F_PROF) 
+F77_EXTRAS   = -f77rtl 
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
                -I$(MONDO_HOME)/Dynamo                  \
@@ -39,16 +38,16 @@ F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
 #
-LD          = $(F90) 
-LDMISC      = $(F_PROF) -v -Wl,-Bstatic # make statically linked executables
-LDFLAGS     = $(LDMISC) -o 
+LD        = $(F90) 
+LDMISC    = $(F_PROF) 
+LDFLAGS   = $(LDMISC) -o 
 #---------------------------------------------------------------
-# Archive
+# ARCHIVAL STUFF
 #
 AR      = ar
 ARFLAGS = -rcv
 RANLIB  = ranlib
-#--------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 # MPI libraries
 #
 # For linking with old style MPI1 (default if only using -DPARALLEL)
@@ -60,7 +59,7 @@ RANLIB  = ranlib
 #---------------------------------------------------------------------
 #  HDF5 libraries with compression and jpeg libs. 
 #
-HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz 
+HDF_LIBS = -L$(HDF_LIB) -lhdf5 -lz #-ljpeg -L/usr/local/lib -lz 
 #---------------------------------------------------------------------
 #  Mondo libraries
 #
@@ -72,6 +71,8 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = $(LAPACK_LIB) -llapack -lblas
+#LAPACK = -L$(LAPACK_LIB) -llapack -lblas 
+LAPACK = -lcxml 
 #---------------------------------------------------------------------------
+
 
