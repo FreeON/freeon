@@ -351,16 +351,14 @@ equivalent.  However, with aggressive use of the multipole approximation as in Q
 critical. 
 
 \begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics{Extent.eps}}\label{extent}
+\includegraphics{Extent_2.ps}
 \caption{Behavior of the overlap extent $R^o$ and the penetration extent $R^p$ 
-	 as a function of $\tau/C$ for an $s$-type Gaussian with exponent $\zeta=0.1$.
-         For large $C$ and small $\tau$, $R^o$ and $R^p$ asymptote to the same value. However, 
-         for small $C$ (occurring for example due to a large atom-atom separation and/or small density 
+	 as a function of $\tau/C_q$ for an $s$-type Gaussian with exponent $\zeta=1$. 
+         For small $C_q$ (occurring for example due to a large atom-atom separation and/or small density 
          matrix prefactor), $R^o$ goes to zero at the origin and its distribution is eliminated, 
          while $R^p$ goes slowly to zero due to the Coulomb singularity.}
+\label{extent}
 \end{figure}
-
-\eject
 
 \section{Periodic Quantum Coulomb Sums}
 
@@ -371,7 +369,8 @@ d{\mathbf{r}'}{\rho _{ab}\left( {\mathbf{r}}\right) {\left| \mathbf{r}-\mathbf{r
 \rho_{\rm tot}\left( \mathbf{r}'\right) } \\
 &=& \frac{1}{2}\sum _{\mathbf{R}}\int\int
 d{\mathbf{r}}\, d{\mathbf{r}'}{\rho _{ab}^{\scriptscriptstyle \infty}\left( {\mathbf{r}}\right)  
-{\left| \mathbf{r}-\mathbf{r}'\right| }^{-1} \rho^{\scriptscriptstyle \infty}_{\rm tot}\left( {\mathbf{r}'}+{\mathbf{R}}\right) }
+{\left| \mathbf{r}-\mathbf{r}'\right| }^{-1} \rho^{\scriptscriptstyle \infty}_{\rm tot}
+\left( {\mathbf{r}'}+{\mathbf{R}}\right) }
 \nonumber 
 \end{eqnarray}
 where $\rho_{\rm tot}$ is the total, periodic density including both electronic and nuclear terms.  These integrals
@@ -382,16 +381,20 @@ tin foil (TF) boundary conditions, requires reciprocal and real space summation 
 and scales as $O(N^{3/2})$.  An alternative is the Ewald-like summation of the multipole interaction tensor,
 which was first described by Nijboer and De Wette (NDW) \cite{} and later reviewed and extended by us \cite{}
 to lattice summation of the irregular solid harmonic multipole interaction tensor. 
-This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, which is direct lattice summation excluding 
+This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, which is direct lattice summation 
+excluding 
 an inner region, $V_{\rm in}$, surrounding the unit cell.  This inner region has been subtracted to avoid penetration
 errors and to guarantee convergence of the multipole expansion.  Because the summed interaction tensors are cheaply 
-precomputed and reused, the cost of Coulomb summation over the PFF scales as as ${\cal O}(N p^2)$, where $p$ is the order 
-of the multipole expansion.  With this feature, achieving $N$-scaling periodic quantum Coulomb sums involves the contributions
+precomputed and reused, the cost of Coulomb summation over the PFF scales as as ${\cal O}(N p^2)$, where $p$ is the 
+order 
+of the multipole expansion.  With this feature, achieving $N$-scaling periodic quantum Coulomb sums involves the 
+contributions
 \begin{equation}
 {\bf J} = {\bf J}^{\rm in} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
 corresponding to the three separate regions shown in Fig.~\ref{regions}.   Here, ${\bf J}^{\rm in}$ is computed using 
-the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of ${\bf J}^{\rm PFF}$ 
+the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of 
+${\bf J}^{\rm PFF}$ 
 will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$ necessary to 
 introduce tin-foil boundary conditions is detailed.
 
@@ -475,14 +478,18 @@ is cheaply precomputed at the start of each Coulomb build.
 \newpage
 \newpage
 
-Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region, $V_{\rm in}$, sufficient 
+Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region, $V_{\rm in}$,
+ sufficient 
 to control penetration errors, subtracting effort from the computation of $J^{\rm in}$ via QCTC and replacing
-it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, a fixed inner region $V_{\rm in}$ is constructed 
+it with cheaper, multipole work in the computation of $J^{\rm PFF}$.  To this end, a fixed inner region $V_{\rm in}$ 
+is constructed 
 from neighboring cells that have simple Gaussian overlap with the unit cell, defined by the radius $R^{o}$.  
-As explained in Section~\ref{datastruct}, for the relatively large distances considered at this level the differences between the
+As explained in Section~\ref{datastruct}, for the relatively large distances considered at this level the differences 
+between the
 penetration and overlap extent are negligible. 
 With $V_{\rm in}$ fixed, the precision of ${\bf J}^{\rm PFF}$ is controlled entirely by the expansion order $p$.  
-In general $p \gtrsim 20$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of ${\bf J}^{\rm in}$.  
+In general $p \gtrsim 20$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of 
+${\bf J}^{\rm in}$.  
 With QCTC accuracy is controlled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
 computation of ${\bf J}^{\rm PFF}$ involves a static, worst case error dominated by the multipole expansion.  
 This static error is controlled by using the FMM-like error bound, 
