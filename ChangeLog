@@ -1,3 +1,18 @@
+2003-03-02 10:31  mchalla
+
+	* MondoMods/PrettyPrint.F90: fixed printing of CRDS in xyz.  PDB
+	needs to be reconciled with babel.  Currently, pdb to xyz by babel
+	is corrupted.
+
+2003-03-02 10:30  mchalla
+
+	* MondoSCF2/: ParseGeometries.F90, ParseOptions.F90: Fixed problem
+	with constraints (low vs up case).  Also changed to xyz printing.
+
+2003-02-28 12:21  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-02-28 12:13  mchalla
 
 	* OneE/MakeRho.F90: Commented out write statement.
