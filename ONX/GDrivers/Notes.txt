@@ -13,3 +13,19 @@ the final size of the bra integral class that is being computed.
 
            - Done
 
+
+4. Item #1 above appears to be all messed up. Did I make a mistake here???
+
+           - No, these are fine.
+           - Done
+
+5. The G4 files now need to be made consistent with the rest of the
+addressing. 
+
+          - Not true
+          - Done
+
+6. It's the G1 files that are messed up, they need to be regenerated with 
+the correct amount of space that comes out of the VRR space. This means that 
+the locations in the G2 and G3 files will need to be updated. Plus the values
+of NVRRg in GetIntSpace are wrong. 
