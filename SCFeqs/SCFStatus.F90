@@ -98,6 +98,7 @@ PROGRAM SCFStatus
   ENDIF
   E_es_tot = E_el_tot+E_nuc_tot
   Etot=KinE+E_es_tot+Exc+ExchE
+  CALL Put(Etot,'E_total',Tag_O=SCFCycl)
 !----------------------------------------------
 ! Calculate the Viraial Coefficient
   Virial=E_es_tot/KinE
