@@ -138,15 +138,20 @@ PROGRAM DDIIS
   IF(CPSCFCycl.LE.1) THEN
      DDIISBeg=1
      DDIISEnd=1
-     CALL Put(DDIISBeg,'DDIISBeg')
-     CALL Put(DDIISEnd,'DDIISEnd')
+     CALL Put(DDIISBeg,'DDIISBeg'//IntToChar(CPSCFCycl))
+     CALL Put(DDIISEnd,'DDIISEnd'//IntToChar(CPSCFCycl))
      !BTmp%D=Zero
      !CALL Put(BTmp,'DDIISBMtrix')
   ELSE
-     CALL Get(DDIISBeg,'DDIISBeg')
-     CALL Get(DDIISEnd,'DDIISEnd')
+     CALL Get(DDIISBeg,'DDIISBeg'//IntToChar(CPSCFCycl))
+     CALL Get(DDIISEnd,'DDIISEnd'//IntToChar(CPSCFCycl))
      !CALL Get(BTmp,'DDIISBMtrix')
   ENDIF
+#ifdef DDIIS_DBUG
+  WRITE(*,*) 'DDIISBeg ',DDIISBeg
+  WRITE(*,*) 'DDIISEnd ',DDIISEnd
+  WRITE(*,*) 'CPSCFCycl',CPSCFCycl
+#endif
   !CALL PrintMatrix(BTmp%D,BMax+1,BMax+1,2)
   !
   !-------------------------------------------------------------------
@@ -195,7 +200,7 @@ PROGRAM DDIIS
   CALL Put(EPrim,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))
   !
 #ifdef DDIIS_DBUG
-  WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))//'>'
+if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))//'>'
 #endif
   !
   ! Compute the DDIIS error.
@@ -220,7 +225,7 @@ PROGRAM DDIIS
      CALL New(B,(/N,N/))
      !
      ! Build the B matrix.
-     I0=DDIISBeg-CPSCFCycl
+     I0=DDIISBeg-CPSCFCycl   ! -1!I added that.
      DO I=1,N-1
 #ifdef DDIIS_DEBUG
         WRITE(*,*) 'Load <ei|=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,I0))//'>'
@@ -322,6 +327,7 @@ PROGRAM DDIIS
 #ifdef PARALLEL
      ENDIF
      CALL BCast(DIISCo)
+     CALL BCast(N)
 #endif
      Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
   CASE DEFAULT
@@ -390,7 +396,7 @@ PROGRAM DDIIS
   CALL Multiply(FPrim,Zero)
   !
   ! And do the summation
-  DO I=1,N-1
+  DO I=1,N-1    -5
      CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
      CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
      CALL Add(FPrim,Tmp1,EPrim)
@@ -411,8 +417,8 @@ PROGRAM DDIIS
   IF(DDIISCurDim.GT.BMax) DDIISBeg=DDIISBeg+1
   !
   ! Put in HDF Beg and End DDIIS variables.
-  CALL Put(DDIISBeg,'DDIISBeg')
-  CALL Put(DDIISEnd,'DDIISEnd')
+  CALL Put(DDIISBeg,'DDIISBeg'//IntToChar(CPSCFCycl+1))
+  CALL Put(DDIISEnd,'DDIISEnd'//IntToChar(CPSCFCycl+1))
   !CALL Put(BTmp,'DDIISBMtrix')
   !
   !-------------------------------------------------------------------
