@@ -250,8 +250,8 @@ MODULE ControlStructures
   END TYPE CoordCtrl
   
   TYPE LattInfo
-    REAL(DOUBLE),DIMENSION(6)           :: Grad
-    REAL(DOUBLE),DIMENSION(6)           :: Displ
+    TYPE(DBL_VECT)                      :: Grad
+    TYPE(DBL_VECT)                      :: Displ
   END TYPE LattInfo
 
   TYPE GeomOpt

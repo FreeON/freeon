@@ -600,6 +600,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(3) :: XYZO,XYZA,XYZB,XYZC
      LOGICAL                            :: Active
      REAL(DOUBLE),OPTIONAL              :: Value_O
+     REAL(DOUBLE)                       :: Value
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: BB_O                   
      REAL(DOUBLE),DIMENSION(3)          :: VA,VB,VC
      REAL(DOUBLE),DIMENSION(3)          :: AxB,BxC,CxA            
@@ -614,16 +615,17 @@ CONTAINS
      IF(PRESENT(BB_O)) THEN
        CALL CROSS_PRODUCT(VA,VB,AxB) 
        CALL CROSS_PRODUCT(VC,VA,CxA) 
-       BB_O(1:3)=BxC
-       BB_O(4:6)=CxA
-       BB_O(7:9)=AxB
+       BB_O(1:3)=-(BxC+CxA+AxB)
+       BB_O(4:6)=BxC
+       BB_O(7:9)=CxA
+       BB_O(10:12)=AxB
      ENDIF
    END SUBROUTINE VOLUME
 !
 !----------------------------------------------------------------
 !
    SUBROUTINE AREA(XYZO,XYZA,XYZB,Active,Value_O,BB_O)
-     REAL(DOUBLE),DIMENSION(3) :: XYZO,XYZA,XYZB
+     REAL(DOUBLE),DIMENSION(3) :: XYZO,XYZA,XYZB,XYZC
      LOGICAL                            :: Active
      REAL(DOUBLE),OPTIONAL              :: Value_O
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: BB_O                   
@@ -641,16 +643,16 @@ CONTAINS
        IF(PRESENT(BB_O)) BB_O=Zero
        RETURN
      ENDIF
-     Eab=AxB/AB
+     !
+     XYZC=AxB/AB
      IF(PRESENT(Value_O)) THEN
-       Value_O=DOT_PRODUCT(Eab,AxB)
+       CALL VOLUME(XYZO,XYZA,XYZB,XYZC,Active,Value_O=Value_O)
+     ELSE IF(PRESENT(BB_O)) THEN
+       CALL VOLUME(XYZO,XYZA,XYZB,XYZC,Active,BB_O=BB_O)
+       BB_O(1:3)=-(BB_O(4:6)+BB_O(7:9))
+       BB_O(10:12)=Zero
      ENDIF
-     IF(PRESENT(BB_O)) THEN
-       CALL CROSS_PRODUCT(VB,Eab,BE) 
-       CALL CROSS_PRODUCT(Eab,VA,EA) 
-       BB_O(1:3)=BE
-       BB_O(4:6)=EA
-     ENDIF
+     !
    END SUBROUTINE AREA
 !
 !----------------------------------------------------------------
@@ -1002,7 +1004,7 @@ CONTAINS
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
        IF(GConvCr%ExplLatt) THEN
-         CALL LatticeINTC(IntC_L,PBCDim)
+         CALL LatticeINTC(IntC_L,PBCDim,DoVolume_O=.TRUE.)
         !CALL ExtraLattice(IntC_L,PBCDim)
        ELSE
          IntC_L%N=0
@@ -1264,27 +1266,6 @@ CONTAINS
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
      ENDIF
    END SUBROUTINE LatticeINTC
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE AdjustLatt(iGEO,IntCE,IntCES,PBCDim)
-     INTEGER        :: iGEO,PBCDim,I
-     TYPE(INTC)     :: IntCES,IntCE 
-     !
-     IF(PBCDim<3) RETURN
-     !
-     CALL Delete(IntCE)
-     IF(iGEO==(iGEO/3)*3+1) THEN
-       DO I=1,IntCES%N
-         ! STRE_A , BETA, GAMMA constrained
-!CONTINUE_HERE         
-       ENDDO  
-     ELSE IF(iGEO==(iGEO/3)*3+2) THEN
-         ! STRE_B , ALPHA, GAMMA constrained
-     ELSE IF(iGEO==(iGEO/3)*3) THEN
-     ENDIF
-     !  
-   END SUBROUTINE AdjustLatt
 !
 !-------------------------------------------------------------------
 !
@@ -1624,7 +1605,7 @@ CONTAINS
        ELSE IF(IntCs%Def%C(I)(1:6)=='VOLM_L') THEN
          CALL VOLUME(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
            XYZAux(1:3,4),IntCs%Active%L(I),Value_O=IntCs%Value%D(I))
-       ELSE IF(IntCs%Def%C(I)(1:4)=='AREA_L') THEN
+       ELSE IF(IntCs%Def%C(I)(1:6)=='AREA_L') THEN
          CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
                    IntCs%Active%L(I),Value_O=IntCs%Value%D(I))
          !
@@ -2092,22 +2073,22 @@ CONTAINS
      !
      ! rotate lattice back to standard orientation
      !
-     IF(PBCDim>0) THEN
-       CALL New(RotCarts,(/3,NatmsLoc+1/))
-       DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
-       RotCarts%D(1:3,NatmsLoc+1)=Zero
-       GTrfCtrl%ThreeAt(1)=NatmsLoc+1
-       GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
-       GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
-       CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
-                        .FALSE.,GTrfCtrl%TranslAt1, &
-                        GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
-                        DoCopy_O=.TRUE.)
-       DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
-       XYZ(2:3,NatmsLoc-3+1)=Zero
-       XYZ(3,NatmsLoc-3+2)=Zero
-       CALL Delete(RotCarts)
-     ENDIF
+   ! IF(PBCDim>0) THEN
+   !   CALL New(RotCarts,(/3,NatmsLoc+1/))
+   !   DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
+   !   RotCarts%D(1:3,NatmsLoc+1)=Zero
+   !   GTrfCtrl%ThreeAt(1)=NatmsLoc+1
+   !   GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
+   !   GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
+   !   CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
+   !                    .FALSE.,GTrfCtrl%TranslAt1, &
+   !                    GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
+   !                    DoCopy_O=.TRUE.)
+   !   DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
+   !   XYZ(2:3,NatmsLoc-3+1)=Zero
+   !   XYZ(3,NatmsLoc-3+2)=Zero
+   !   CALL Delete(RotCarts)
+   ! ENDIF
      !
      ! Tidy up
      !
@@ -2370,6 +2351,10 @@ CONTAINS
        !
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          Crit=Fact*MaxStre
+       ELSE IF(IntCs%Def%C(I)(1:6)=='VOLM_L') THEN
+         Crit=1.D99        
+       ELSE IF(IntCs%Def%C(I)(1:6)=='AREA_L') THEN
+         Crit=1.D99        
        ELSE
          Crit=Fact*MaxAngle
        ENDIF
@@ -2386,11 +2371,19 @@ CONTAINS
      !
      IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
        Crit=Fact*MaxStre
-     ELSE
+     ELSE IF(IntCs%Def%C(IMax)(1:6)=='VOLM_L') THEN
+       Crit=1.D99        
+     ELSE IF(IntCs%Def%C(IMax)(1:6)=='AREA_L') THEN
+       Crit=1.D99        
+     ELSE 
        Crit=Fact*MaxAngle
      ENDIF
      IF(IntCs%Def%C(IMax)(1:4)=='STRE') THEN
        MaxConv=One/AngstromsToAu
+     ELSE IF(IntCs%Def%C(IMax)(1:6)=='VOLM_L') THEN
+       MaxConv=One/AngstromsToAu**3
+     ELSE IF(IntCs%Def%C(IMax)(1:6)=='AREA_L') THEN
+       MaxConv=One/AngstromsToAu**2
      ELSE
        MaxConv=180.D0/PI
      ENDIF
@@ -2404,10 +2397,13 @@ CONTAINS
      DReqAct%D=VectIntReq-IntCs%Value%D
      CALL MapAngleDispl(IntCs,DReq%D) 
      CALL MapAngleDispl(IntCs,DReqAct%D) 
+     DO I=1,IntCs%N
+       IF(.NOT.IntCs%Active%L(I)) THEN
+         DReq%D(I)=Zero
+         DReqAct%D(I)=Zero
+       ENDIF
+     ENDDO
      Rigid=DOT_PRODUCT(DReqAct%D,DReqAct%D)/DOT_PRODUCT(DReq%D,DReq%D)
-    !Rigid=DOT_PRODUCT(DReq%D,IntCDispl)/ &
-    !      (SQRT(DOT_PRODUCT(DReq%D,DReq%D))* &
-    !       SQRT(DOT_PRODUCT(IntCDispl,IntCDispl)))
      CALL Delete(DReq) 
      CALL Delete(DReqAct) 
      !
@@ -2417,11 +2413,11 @@ CONTAINS
        WRITE(*,*) 'Rigidity= ',Rigid
        WRITE(Out,*) 'Rigidity= ',Rigid
        IF(DoRepeat) THEN
-         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
-         WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl
+         WRITE(*,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         WRITE(Out,*) IRep,' Repeat from CheckBigStep MaxDispl= ',MaxConv*MaxDispl,' on ',IMax,IntCs%Def%C(IMax)(1:8)
        ELSE 
-         WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv
-         WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv
+         WRITE(*,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
+         WRITE(Out,*) IRep,'Maximum Displacement from Backtransform.= ',MaxDispl*MaxConv,' on ',IMax,IntCs%Def%C(IMax)(1:8)
        ENDIF
      ENDIF
    END SUBROUTINE CheckBigStep
@@ -2502,13 +2498,7 @@ CONTAINS
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          SUM=Value(I)*ConvC
          SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAu
-       ELSE IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
-               IntCs%Def%C(I)(1:4)=='LINB'.OR. &
-               IntCs%Def%C(I)(1:4)=='TORS'.OR. &
-               IntCs%Def%C(I)(1:4)=='OUTP'.OR. & 
-               IntCs%Def%C(I)(1:5)=='ALPHA'.OR. &
-               IntCs%Def%C(I)(1:4)=='BETA'.OR. &
-               IntCs%Def%C(I)(1:5)=='GAMMA') THEN
+       ELSE IF(HasAngle(IntCs%Def%C(I))) THEN
          SUM=Value(I)*Conv
          SUMConstr=IntCs%ConstrValue%D(I)*Conv
        ELSE IF(IntCs%Def%C(I)(1:6)=='VOLM_L') THEN 
@@ -3980,7 +3970,7 @@ CONTAINS
        NCoinc=0
        RETURN
      ENDIF
-     CALL LatticeINTC(IntCs,PBCDim)
+     CALL LatticeINTC(IntCs,PBCDim,DoVolume_O=.TRUE.)
      IntCs%Active%L=.FALSE.
      NCoinc=0
      DO I=1,IntCs%N
@@ -4454,19 +4444,6 @@ CONTAINS
        IF(XYZ(3,I)>BZMax) BZMax=XYZ(3,I)
      ENDDO
    END SUBROUTINE BoxBorders
-! 
-!-------------------------------------------------------------------
-!
-   SUBROUTINE SetMaxBlkS(Mat)
-     TYPE(BCSR) :: Mat
-     INTEGER    :: I,II
-     ! Set MaxNon0-s for overlap matrices
-     II=0
-     DO I=1,Mat%NAtms
-       II=II+(Mat%RowPt%I(I+1)-Mat%RowPt%I(I))**2
-     ENDDO
-     MaxBlkS=II+1
-   END SUBROUTINE SetMaxBlkS
 ! 
 !-------------------------------------------------------------------
 !
@@ -7187,12 +7164,7 @@ return
      Fact=One
      IF(PRESENT(Fact_O)) Fact=Fact_O
      DO I=1,IntCs%N
-      !IF(IntCs%Def%C(I)(1:6)=="STRE_A".OR. &
-      !   IntCs%Def%C(I)(1:6)=="STRE_B".OR. &
-      !   IntCs%Def%C(I)(1:6)=="STRE_C".OR. &
-      !   IntCs%Def%C(I)(1:5)=="ALPHA".OR. &
-      !   IntCs%Def%C(I)(1:4)=="BETA".OR. &
-      !   IntCs%Def%C(I)(1:5)=="GAMMA") CYCLE
+       IF(HasLattice(IntCs%Def%C(I))) CYCLE
        CALL CtrlDispl(IntCs%Def%C(I),Displ(I),Fact, &
                       StreCritIn,AngleCritIn)
      ENDDO
@@ -7659,12 +7631,12 @@ return
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE GetLattGrads(CartGrad,XYZ,LattGrad,PBCDim)
+   SUBROUTINE GetLattGrads(IntCL,CartGrad,XYZ,LattGrad,PBCDim)
      REAL(DOUBLE),DIMENSION(:)   :: CartGrad,LattGrad
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER                     :: NCart,NatmsLoc,NCoinc,NDim,PBCDim
      INTEGER                     :: I,J
-     TYPE(INTC)                  :: IntCs
+     TYPE(INTC)                  :: IntCL,IntCs
      TYPE(DBL_RNK2)              :: AL,BL
      !
      IF(PBCDim==0) THEN
@@ -7673,19 +7645,30 @@ return
      ENDIF
      NatmsLoc=SIZE(XYZ,2)
      ! 
-     CALL LatticeINTC(IntCs,PBCDim)
+     CALL New(IntCs,IntCL%N)
+     CALL SetEq(IntCL,IntCs,1,IntCL%N,1)
      IntCs%Constraint%L=.TRUE.
      CALL LatticeConstrAB(XYZ,IntCs,PBCDim,AL,BL,NCoinc)
      CALL Delete(BL)
-     IF(PBCDim==1) NDim=1
-     IF(PBCDim==2) NDim=3
-     IF(PBCDim==3) NDim=6
-     IF(NCoinc/=NDim) CALL Halt('NCoinc/=NDim in GetLattGrads')
      LattGrad=Zero
      CALL DGEMM_NNc(NCoinc,9,1,One,Zero,AL%D,CartGrad,LattGrad(1:NCoinc))
      CALL Delete(IntCs)
      CALL Delete(AL)
    END SUBROUTINE GetLattGrads
+!
+!----------------------------------------------------------------------
+!
+   FUNCTION HasLattice(Def)
+     LOGICAL          :: HasLattice
+     CHARACTER(LEN=*) :: Def
+     !
+     HasLattice= (Def(1:5)=='STRE_'.OR. &
+                  Def(1:5)=='ALPHA'.OR. &
+                  Def(1:4)=='BETA'.OR. &
+                  Def(1:5)=='GAMMA'.OR. &
+                  Def(1:6)=='AREA_L'.OR. &
+                  Def(1:6)=='VOLM_L')
+   END FUNCTION HasLattice
 !
 !-------------------------------------------------------------------
 !

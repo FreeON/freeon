@@ -684,6 +684,9 @@ CONTAINS
      !
      !----------------------------------------------------------------
      !
+     CALL LatticeINTC(IntCL,PBCDim,DoVolume_O=.TRUE.)
+     CALL New(Gopt%LattIntC%Grad,IntCL%N)
+     CALL New(Gopt%LattIntC%Displ,IntCL%N)
      CALL New(CartGrad,NCart)
      !
      ! Project out constraints, translations and rotations
@@ -692,7 +695,8 @@ CONTAINS
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
-     CALL GetLattGrads(CartGrad%D(NCart-8:NCart),XYZ,Gopt%LattIntC%Grad,PBCDim)
+     CALL GetLattGrads(IntCL,CartGrad%D(NCart-8:NCart), &
+                       XYZ,Gopt%LattIntC%Grad%D,PBCDim)
    ! CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
@@ -723,7 +727,6 @@ CONTAINS
                      HFileIn_O=HFileIn,iCLONE_O=iCLONE)
        IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
-       CALL LatticeINTC(IntCL,PBCDim,DoVolume_O=.TRUE.)
      ENDIF
      IF(IntCs%N/=0) THEN
        CALL INTCValue(IntCs,XYZ, &
@@ -776,6 +779,8 @@ CONTAINS
      CALL Delete(CartGrad)
      CALL Delete(LatOld)
      CALL Delete(IntCL)
+     CALL Delete(Gopt%LattIntC%Grad)
+     CALL Delete(Gopt%LattIntC%Displ)
      CALL Delete(IntOld)
      CALL Delete(TOPS)
    END SUBROUTINE ModifyGeom
@@ -841,7 +846,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: SRStruct,RefStruct,RefGrad,SRDispl
      TYPE(DBL_RNK2)              :: IntCValues,IntCGrads,MixMat
      TYPE(INT_VECT)              :: ISpB,JSpB
-     TYPE(DBL_VECT)              :: ASpB
+     TYPE(DBL_VECT)              :: ASpB,Volumes
      TYPE(DBL_RNK2)              :: FullB
      INTEGER                     :: I,J,NatmsLoc,NDim,NDimAux,NMem
      INTEGER                     :: HDFFileID,NCart,NMix
@@ -866,15 +871,7 @@ CONTAINS
        RefGrad%D(J,NDim)=CartGrad(J)
      ENDDO
      !
-     CALL New(LatticeW,NDim)
-     IF(PBCDim>0) THEN
-       DO I=1,NDim
-         LatticeW%D(I)= &
-         DOT_PRODUCT(RefGrad%D(NCart-8:NCart,I),RefGrad%D(NCart-8:NCart,I))
-       ENDDO
-     ELSE
-       LatticeW%D=One 
-     ENDIF
+     CALL PrepExtraW(PBCDim,LatticeW,Volumes,RefGrad%D,RefStruct%D)
      !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
@@ -893,11 +890,11 @@ CONTAINS
       !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                   iGEO,MixMat_O=MixMat%D)
+                  iGEO,LatticeW%D,Volumes%D,MixMat_O=MixMat%D)
      ELSE
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                  iGEO,ExtraW_O=LatticeW%D)
+                  iGEO,LatticeW%D,Volumes%D)
      ENDIF
      !
    ! CALL CleanConstrIntc(Displ%D,XYZ,GOpt%ExtIntCs,SCRPath,&
@@ -955,6 +952,7 @@ CONTAINS
      CALL Delete(RefPoints)
      CALL Delete(Displ)
      CALL Delete(LatticeW)
+     CALL Delete(Volumes)
    END SUBROUTINE RelaxBiSect
 !
 !-------------------------------------------------------
@@ -1098,10 +1096,9 @@ CONTAINS
      !
      IF(PBCDim>0) THEN
        CALL INTCValue(IntCL,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
-       LattIntC%Displ(1:6)=Zero
-      !DO J=1,MIN(IntCL%N,6)
+       LattIntC%Displ%D=Zero
        DO J=1,IntCL%N
-         LattIntC%Displ(J)=IntCL%Value%D(J)-LatOld%D(J)
+         LattIntC%Displ%D(J)=IntCL%Value%D(J)-LatOld%D(J)
        ENDDO
      ENDIF
      IF(CtrlStat%GeOpConvgd) THEN
@@ -1110,6 +1107,15 @@ CONTAINS
        WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
        WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
        IF(PBCDim>0) THEN
+         IF(ILMaxCGrad==NatmsLoc-2) THEN
+           ALatt='   A' 
+         ELSE IF(ILMaxCGrad==NatmsLoc-1) THEN
+           ALatt='   B' 
+         ELSE
+           ALatt='   C' 
+         ENDIF
+         WRITE(*,145) LMaxCGrad,ALAtt
+         WRITE(Out,145) LMaxCGrad,ALAtt
          CALL LattReview(IntCL,LatOld,LattIntC,PBCDim)
        ENDIF
        RETURN
@@ -1270,37 +1276,55 @@ CONTAINS
      REAL(DOUBLE)   :: Fact
      !
      IF(PBCDim>0) THEN
-       IF(PBCDim==1) NDim=1
-       IF(PBCDim==2) NDim=3
-       IF(PBCDim==3) NDim=6
        WRITE(*,1010) 
        WRITE(Out,1010) 
        Fact=One/AngstromsToAu
+       IF(PBCDim==1) NDim=1
+       IF(PBCDim==2) NDim=3
+       IF(PBCDim==3) NDim=6
        DO I=1,MIN(3,NDim)
-         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
-         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
+         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                       LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                       IntCL%Value%D(I)*Fact
+         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                         LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                         IntCL%Value%D(I)*Fact
        ENDDO
        Fact=180.D0/PI
        DO I=4,MIN(6,NDim)
-         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
-         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,LattIntC%Grad(I),LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
+         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                       LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                       IntCL%Value%D(I)*Fact
+         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                         LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                         IntCL%Value%D(I)*Fact
        ENDDO
        !
        IF(PBCDim==3.AND.IntCL%Def%C(7)(1:8)=='VOLM_L  ') THEN
          Fact=One/(AngstromsToAu**3)
-         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,Zero,LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
-         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,Zero,LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
+         I=7
+         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                       LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                       IntCL%Value%D(I)*Fact
+         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                         LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                         IntCL%Value%D(I)*Fact
        ENDIF
        !
        IF(PBCDim==2.AND.IntCL%Def%C(4)(1:8)=='AREA_L  ') THEN
          Fact=One/(AngstromsToAu**2)
-         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,Zero,LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
-         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact,Zero,LattIntC%Displ(I)*Fact,IntCL%Value%D(I)*Fact
+         I=4
+         WRITE(*,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                       LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                       IntCL%Value%D(I)*Fact
+         WRITE(Out,1020) IntCL%Def%C(I)(1:6),LatOld%D(I)*Fact, &
+                         LattIntC%Grad%D(I),LattIntC%Displ%D(I)*Fact, &
+                         IntCL%Value%D(I)*Fact
        ENDIF
      ENDIF
      !
-1010 FORMAT('Lattice Parameter        Old Value      Gradient    Displacement   New Value')
-1020 FORMAT(10X,A6,4X,4F14.6)
+     1010 FORMAT('Lattice Parameter        Old Value      Gradient    Displacement   New Value')
+     1020 FORMAT(10X,A6,4X,4F14.6)
      !
    END SUBROUTINE LattReview
 !

@@ -282,6 +282,7 @@ CONTAINS
      REAL(DOUBLE)                :: DX,DXP
      !
      DO I=1,IntCsT%N
+       IF(HasLattice(IntCsT%Def%C(I))) CYCLE
        DX=RangeT(I,2)-RangeT(I,1)
        DXP=IntCsT%PredVal%D(I)
        IF(DXP>RangeT(I,2)+DX) THEN
@@ -703,7 +704,7 @@ CONTAINS
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
        !
-       CALL GetLattGrads(VectCG%D(NCart-8:NCart),XYZAux%D, &
+       CALL GetLattGrads(IntCs,VectCG%D(NCart-8:NCart),XYZAux%D, &
                          VectI%D,PBCDim)
        IntCGrads%D(:,I)=VectI%D
        !
@@ -723,7 +724,7 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath, &
-                          USQ_O,ExtraW_O)
+                          ExtraW,USQ_O)
      REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
@@ -733,14 +734,14 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: ExtraW_O
+     REAL(DOUBLE),DIMENSION(:)   :: ExtraW
      ! 
      ! Calculate Topology (connectivity) of internal coordinates
      ! 
      NMem=SIZE(LWeight,2)
      CALL New(Vect1,IntCs%N)
      I=MAX(IntCs%N,NMem)
-     IF(PRESENT(ExtraW_O)) WSum=SUM(ExtraW_O)
+     WSum=SUM(ExtraW)
      !
      IF(PRESENT(USQ_O)) THEN
        K1=SIZE(USQ_O,1)
@@ -790,13 +791,8 @@ CONTAINS
          ELSE
            LWeight(J,I)=Weights(J,I)
          ENDIF
-         IF(IntCs%Def%C(J)(1:5)=='STRE_'.OR. &
-            IntCs%Def%C(J)(1:5)=='ALPHA'.OR. &
-            IntCs%Def%C(J)(1:4)=='BETA'.OR. &
-            IntCs%Def%C(J)(1:5)=='GAMMA') THEN
-           IF(.NOT.PRESENT(ExtraW_O)) &
-             CALL Halt('ExtraW_O is missing LocalWeight while explicite lattice coords are present.')
-           LWeight(J,I)=ExtraW_O(I)
+         IF(HasLattice(IntCs%Def%C(J))) THEN
+           LWeight(J,I)=ExtraW(I)
          ENDIF
        ENDDO
       !IF(PRESENT(ExtraW_O)) THEN
@@ -819,13 +815,25 @@ CONTAINS
      TYPE(INT_VECT)              :: IGi,JGi
      TYPE(INT_VECT)              :: ISpB,JSpB,ISpBt,JSpBt
      TYPE(DBL_VECT)              :: ASpB,ASpBt
-     INTEGER                     :: NZ,NIntC,NCart
+     INTEGER                     :: NZ,NIntC,NCart,I,J,K,L
      !
      IF(NIntC<=0) RETURN
      CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
      IF(NIntC/=SIZE(ISpB%I)-1) THEN
        CALL Halt('Dimensionality Error in GetPattern')
      ENDIF
+     !
+     ! Clean up connections via lattice parameters
+     !
+     L=NCart-9
+     DO I=1,NIntC
+       DO J=ISpB%I(I),ISpB%I(I+1)-1
+         K=JSpB%I(J)
+         IF(K>L) ASpB%D(J)=Zero 
+       ENDDO
+     ENDDO
+     CALL ThreshMatr(ISpB,JSpB,ASpB,1.D-7)
+     !
      NZ=ISpB%I(NIntC+1)-1
      CALL New(ISpBt,NCart+1)
      CALL New(JSpBt,NZ)
@@ -852,10 +860,11 @@ CONTAINS
 !
    SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl, &
                        PredVals,Displ,Path,SCRPath,NCart,iGEO, &
-                       MixMat_O,ExtraW_O,PrtFits_O)
+                       ExtraW,Volumes,MixMat_O,PrtFits_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
+     REAL(DOUBLE),DIMENSION(:)  :: ExtraW,Volumes
      INTEGER                    :: I,J,NIntC,NDim,iGEO
      INTEGER                    :: NCart,NT
      CHARACTER(LEN=*)           :: Path,SCRPath
@@ -868,8 +877,6 @@ CONTAINS
      TYPE(INTC)                 :: IntCsT
      TYPE(INT_VECT)             :: NDegsT   
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL:: MixMat_O
-     TYPE(DBL_VECT)             :: ExtraW
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL  :: ExtraW_O
      LOGICAL                    :: PrtFits
      LOGICAL,OPTIONAL           :: PrtFits_O
      !
@@ -877,12 +884,6 @@ CONTAINS
      IF(PRESENT(PrtFits_O)) PrtFits=PrtFits_O
      NIntC=IntCs%N   
      NDim=SIZE(IntCGrads,2)
-     CALL New(ExtraW,NDim)
-     IF(PRESENT(ExtraW_O)) THEN
-       ExtraW%D=ExtraW_O
-     ELSE
-       ExtraW%D=One 
-     ENDIF
      IF(PRESENT(MixMat_O)) THEN
        NT=SIZE(MixMat_O,2)
        CALL New(USQ,(/NT,NT/))
@@ -926,15 +927,15 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT,ExtraW_O=ExtraW%D)
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT,ExtraW,Volumes)
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,USQ_O=USQ%D,ExtraW_O=ExtraW%D)
+                        SCRPath,ExtraW,USQ_O=USQ%D)
      ELSE
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,ExtraW_O=ExtraW%D)
+                        SCRPath,ExtraW)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
               ! RangeT%D,NDegsT%I,Zero,.TRUE.)
@@ -968,7 +969,6 @@ CONTAINS
      CALL Delete(IntCGradsT)
      CALL Delete(IntCValuesT)
      CALL Delete(LWeightT)
-     CALL Delete(ExtraW)
    END SUBROUTINE DisplFit
 !
 !---------------------------------------------------------------------
@@ -983,12 +983,7 @@ CONTAINS
      NT=SIZE(DisplT)
      DO I=1,NT
        DisplT(I)=PredVal(I)-Values(I) 
-      !IF(IntCDef(I)(1:6)=="STRE_A".OR. &
-      !   IntCDef(I)(1:6)=="STRE_B".OR. &
-      !   IntCDef(I)(1:6)=="STRE_C".OR. &
-      !   IntCDef(I)(1:5)=="ALPHA".OR. &
-      !   IntCDef(I)(1:4)=="BETA".OR. &
-      !   IntCDef(I)(1:5)=="GAMMA") CYCLE 
+     ! IF(HasLattice(IntCDef(I))) CYCLE
        Range1=RangeT(I,1)
        Range2=RangeT(I,2)
        Range=Range2-Range1
@@ -1498,9 +1493,9 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs,ExtraW_O)
+   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs,ExtraW,Volumes)
      REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: ExtraW_O
+     REAL(DOUBLE),DIMENSION(:)   :: ExtraW,Volumes
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE)                :: X,W
      INTEGER                     :: NIntC,NDim,I,J
@@ -1509,11 +1504,7 @@ CONTAINS
      NDim=SIZE(IntCGrads,2)
      !
      DO I=1,NDim
-       IF(PRESENT(ExtraW_O)) THEN
-         W=ExtraW_O(I)
-       ELSE
-         W=Zero
-       ENDIF
+       W=ExtraW(I)/Volumes(I)
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
@@ -1928,6 +1919,7 @@ CONTAINS
      TYPE(GeomOpt)               :: GOpt
      INTEGER                     :: NatmsLoc,NCart,I,J,NDim
      TYPE(DBL_VECT)              :: PredVals,Displ,VectCart,ExtraW
+     TYPE(DBL_VECT)              :: LatticeW,Volumes
      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
      REAL(DOUBLE),DIMENSION(3)   :: CartAux1,CartAux2
      REAL(DOUBLE)                :: StreCrit,AngleCrit
@@ -1939,11 +1931,12 @@ CONTAINS
      NDim=SIZE(PBCRefStr%D,2)
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     CALL LatticeINTC(IntC_L,PBCDim)
+     CALL LatticeINTC(IntC_L,PBCDim,DoVolume_O=.TRUE.)
      CALL New(VectCart,NCart)
      CALL CollectPBCPast(PBCRefStr%D,PBCRefGrd%D,IntCValues,IntCGrads, &
                          IntC_L,GOpt,PBCDim)
 
+     CALL PrepExtraW(PBCDim,LatticeW,Volumes,PBCRefGrd%D,PBCRefStr%D)
      !
      CALL RefreshBMatInfo(IntC_L,XYZ,GOpt%TrfCtrl,GOpt%GConvCrit, &
                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
@@ -1951,8 +1944,7 @@ CONTAINS
      !
      CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
                 GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
-                iGEO,ExtraW_O=ExtraW%D)
-               !iGEO,ExtraW_O=ExtraW%D,PrtFits_O=.TRUE.)
+                iGEO,ExtraW%D,Volumes%D)
    ! CALL INTCValue(IntC_L,XYZ,GOpt%CoordCtrl%LinCrit, &
    !                GOpt%CoordCtrl%TorsLinCrit)
    ! CALL New(Displ,IntC_L%N) 
@@ -2016,6 +2008,8 @@ CONTAINS
      CALL Delete(PBCRefStr)
      CALL Delete(PBCRefGrd)
      CALL Delete(ExtraW)
+     CALL Delete(LatticeW)
+     CALL Delete(Volumes)
    END SUBROUTINE LatticeFit
 !
 !----------------------------------------------------------------------
@@ -2027,7 +2021,7 @@ CONTAINS
      !
      IF(GOpt%GConvCrit%AlternLatt) THEN    
        DoLatticeFit=.FALSE.
-       DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad(J)) ; ENDDO
+       DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad%D(J)) ; ENDDO
      ! IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad) THEN 
        IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
           MAXVAL(AbsGrad)>5.D0*GOpt%GOptStat%MaxCGrad) THEN
@@ -2094,6 +2088,36 @@ CONTAINS
        ENDDO
      ENDDO
    END SUBROUTINE GetPBCMem
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE PrepExtraW(PBCDim,LatticeW,Volumes,RefGrad,RefStruct)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefGrad,RefStruct
+     REAL(DOUBLE)                :: BoxShape(3,3)
+     TYPE(DBL_VECT)              :: LatticeW,Volumes
+     INTEGER                     :: I,J,NDim,PBCDim,NCart,AutoW(3)
+     !
+     NDim=SIZE(RefGrad,2)
+     NCart=SIZE(RefGrad,1)
+     CALL New(LatticeW,NDim)
+     CALL New(Volumes,NDim)
+     IF(PBCDim==1) AutoW=(/1,0,0/)
+     IF(PBCDim==2) AutoW=(/1,1,0/)
+     IF(PBCDim==3) AutoW=(/1,1,1/)
+     IF(PBCDim>0) THEN
+       DO I=1,NDim
+         LatticeW%D(I)= &
+         DOT_PRODUCT(RefGrad(NCart-8:NCart,I),RefGrad(NCart-8:NCart,I))
+         BoxShape(1:3,1)=RefStruct(NCart-8:NCart-6,I)
+         BoxShape(1:3,2)=RefStruct(NCart-5:NCart-3,I)
+         BoxShape(1:3,3)=RefStruct(NCart-2:NCart,I)
+         Volumes%D(I)=ABS(CellVolume(BoxShape,AutoW))
+       ENDDO
+     ELSE
+       LatticeW%D=Zero
+       Volumes%D=One 
+     ENDIF
+   END SUBROUTINE PrepExtraW
 !
 !----------------------------------------------------------------------
 !

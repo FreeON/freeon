@@ -882,7 +882,7 @@ TYPE(DBL_RNK2) :: AuxLatF
     CALL Invoke('JForce',N,S,M)
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
-#ifdef PARRALEL
+#ifdef PARALLEL 
 CALL New(AuxLatF,(/3,3/))
 HDFFileID=OpenHDF(N%HFile)
 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
@@ -891,7 +891,7 @@ CALL CloseHDFGroup(HDF_CurrentID)
 CALL CloseHDF(HDFFileID)
 #endif
        CALL Invoke('XCForce',N,S,M)
-#ifdef PARRALEL
+#ifdef PARALLEL 
 HDFFileID=OpenHDF(N%HFile)
 HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
 CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
@@ -903,18 +903,19 @@ CALL Delete(AuxLatF)
        CALL NLATTFORCE_XC(cBAS,cGEO,G,B,N,S,M)
 #endif
     ENDIF
-    !vw#ifdef NLATTFORCE    
-    !vw    ! Exact Hartree-Fock exchange component
-    !vw    IF(HasHF(O%Models(cBas)))THEN
-    !vw       CALL Invoke('GONX',N,S,M)       
-    !vw       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
-    !vw    ENDIF
-    !vw#else
+#ifdef NLATTFORCE    
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
+       CALL Invoke('GONX',N,S,M)       
+       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
+    ENDIF
+#else
+    ! Exact Hartree-Fock exchange component
+    IF(HasHF(O%Models(cBas)))THEN
+       !CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
-    !vw#endif
+#endif
 !
 !   Constraint the Gradients
 !
@@ -939,16 +940,16 @@ CALL Delete(AuxLatF)
 !!$          WRITE(*,*) (G%Clone(iCLONE)%PBC%LatFrc%D(I,J),J=1,3)
 !!$       ENDDO
 !      Close the group
-     ! DO I=1,G%Clone(iCLONE)%PBC%Dimen
-     !   DO J=1,G%Clone(iCLONE)%PBC%Dimen
-     !     DO iATS=1,G%Clone(iCLONE)%NAtms
-     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
-     !       G%Clone(iCLONE)%PBC%LatFrc%D(I,J)- &
-     !       G%Clone(iCLONE)%Gradients%D(I,iATS)* &
-     !       G%Clone(iCLONE)%BoxCarts%D(J,iATS)
-     !     ENDDO
-     !   ENDDO
-     ! ENDDO
+       DO I=1,G%Clone(iCLONE)%PBC%Dimen
+         DO J=1,G%Clone(iCLONE)%PBC%Dimen
+           DO iATS=1,G%Clone(iCLONE)%NAtms
+             G%Clone(iCLONE)%PBC%LatFrc%D(I,J)= &
+             G%Clone(iCLONE)%PBC%LatFrc%D(I,J)- &
+             G%Clone(iCLONE)%Gradients%D(I,iATS)* &
+             G%Clone(iCLONE)%BoxCarts%D(J,iATS)
+           ENDDO
+         ENDDO
+       ENDDO
        CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)

@@ -97,13 +97,13 @@ MODULE ParseGeomOpt
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN
       !GOpt%CoordCtrl%MaxAngle=Two*PI !default value
-       GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0
+       GOpt%CoordCtrl%MaxAngle=15.D0*PI/180.D0
      ELSE
        GOpt%CoordCtrl%MaxAngle=GOpt%CoordCtrl%MaxAngle*PI/180.D0
      ENDIF
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
       !GOpt%CoordCtrl%MaxStre=100.000D0 !default value
-       GOpt%CoordCtrl%MaxStre=0.10D0*AngstromsToAu
+       GOpt%CoordCtrl%MaxStre=0.15D0*AngstromsToAu
      ELSE
        GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAu
      ENDIF
