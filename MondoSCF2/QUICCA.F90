@@ -729,7 +729,7 @@ CONTAINS
      TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
      INTEGER                     :: NCart,NZ,I,J,K1,K2,L1,L2,NMem
      INTEGER                     :: NPBC
-     REAL(DOUBLE)                :: Weight,X1,X2,Y,W
+     REAL(DOUBLE)                :: Weight,X1,X2,Y,W,WSum
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
@@ -740,6 +740,7 @@ CONTAINS
      NMem=SIZE(LWeight,2)
      CALL New(Vect1,IntCs%N)
      I=MAX(IntCs%N,NMem)
+     IF(PRESENT(ExtraW_O)) WSum=SUM(ExtraW_O)
      !
      IF(PRESENT(USQ_O)) THEN
        K1=SIZE(USQ_O,1)
@@ -794,10 +795,14 @@ CONTAINS
             IntCs%Def%C(J)(1:4)=='BETA'.OR. &
             IntCs%Def%C(J)(1:5)=='GAMMA') THEN
            IF(.NOT.PRESENT(ExtraW_O)) &
-             CALL Halt('ExtraW_O is missing LocalWeight')
+             CALL Halt('ExtraW_O is missing LocalWeight while explicite lattice coords are present.')
            LWeight(J,I)=ExtraW_O(I)
          ENDIF
        ENDDO
+       IF(PRESENT(ExtraW_O)) THEN
+         W=EXP(ExtraW_O(I)/(WSum+1.D-10))
+         DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
+       ENDIF
      ENDDO
      ! 
      CALL Delete(Vect1)
@@ -845,14 +850,12 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess, &
-                       PBCValues,PBCGrads,GCoordCtrl, &
+   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl, &
                        PredVals,Displ,Path,SCRPath,NCart,iGEO, &
                        MixMat_O,ExtraW_O,PrtFits_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
-     REAL(DOUBLE),DIMENSION(:,:):: PBCGrads,PBCValues
      INTEGER                    :: I,J,NIntC,NDim,iGEO
      INTEGER                    :: NCart,NT
      CHARACTER(LEN=*)           :: Path,SCRPath
@@ -878,7 +881,7 @@ CONTAINS
      IF(PRESENT(ExtraW_O)) THEN
        ExtraW%D=ExtraW_O
      ELSE
-       ExtraW%D=Zero
+       ExtraW%D=One 
      ENDIF
      IF(PRESENT(MixMat_O)) THEN
        NT=SIZE(MixMat_O,2)
@@ -923,8 +926,7 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT, &
-                    ExtraW_O=ExtraW%D)
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT,ExtraW_O=ExtraW%D)
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
@@ -1498,20 +1500,24 @@ CONTAINS
 !
    SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs,ExtraW_O)
      REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: ExtraW_O
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE)                :: X,W
      INTEGER                     :: NIntC,NDim,I,J
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: ExtraW_O
      !
      NIntC=SIZE(IntCGrads,1)
      NDim=SIZE(IntCGrads,2)
      !
      DO I=1,NDim
-       IF(PRESENT(ExtraW_O)) W=ExtraW_O(I)
+       IF(PRESENT(ExtraW_O)) THEN
+         W=ExtraW_O(I)
+       ELSE
+         W=Zero
+       ENDIF
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X+W
+           Weights(J,I)=X*X !+W
          ELSE
            Weights(J,I)=1.D99
          ENDIF
@@ -1944,7 +1950,6 @@ CONTAINS
                     PBCDim,Print,SCRPath,DoCleanCol_O=.FALSE.)
      !
      CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
-                IntCValues%D,IntCGrads%D, &
                 GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
                 iGEO,ExtraW_O=ExtraW%D)
                !iGEO,ExtraW_O=ExtraW%D,PrtFits_O=.TRUE.)
@@ -2058,7 +2063,9 @@ CONTAINS
        PBCFit%PBCValues%D(:,I+1)=PBCFit%PBCValues%D(:,I) 
      ENDDO 
        PBCFit%AWeights%D(1)= &
-           DOT_PRODUCT(RefGrad(1:NCart-9,NDim),RefGrad(1:NCart-9,NDim))
+         ! DOT_PRODUCT(RefGrad(1:NCart-9,NDim),RefGrad(1:NCart-9,NDim))
+         ! DOT_PRODUCT(RefGrad(:,NDim),RefGrad(:,NDim))
+           DOT_PRODUCT(RefGrad(NCart-8:NCart,NDim),RefGrad(NCart-8:NCart,NDim))
      DO J=1,9
        PBCFit%PBCGrads%D(J,1)=RefGrad(NCart-9+J,NDim) 
        PBCFit%PBCValues%D(J,1)=RefStruct(NCart-9+J,NDim) 

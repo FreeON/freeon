@@ -1183,20 +1183,28 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LatticeINTC(IntC_L,PBCDim)
+   SUBROUTINE LatticeINTC(IntC_L,PBCDim,DoVolume_O)
      TYPE(INTC)                  :: IntC_L
-     INTEGER                     :: I,J,K,L,LL,LRef,II,KK,PBCDim
+     INTEGER                     :: I,J,K,L,LL,LRef,II,KK,PBCDim,IVol
+     LOGICAL,OPTIONAL            :: DoVolume_O
+     LOGICAL                     :: DoVolume
      !
      IF(PBCDim==0) THEN
        IntC_L%N=0
        RETURN
      ENDIF
+     DoVolume=.FALSE.
+     IF(PRESENT(DoVolume_O)) DoVolume=DoVolume_O
+     IVol=0
+     IF(DoVolume) IVol=1
      !
      LL=0
      LRef=1
      !
      IF(PBCDim==3) THEN
-       CALL New(IntC_L,6)
+       CALL New(IntC_L,6+IVol)
+       IntC_L%Constraint%L(:)=.FALSE.
+       IntC_L%Active%L(:)=.TRUE.
        IntC_L%Atoms%I(1:3,1:2)=LRef
          IntC_L%Def%C(1)(1:8)='STRE_A  '
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
@@ -1213,12 +1221,16 @@ CONTAINS
          IntC_L%Def%C(6)(1:8)='GAMMA   '
        IntC_L%Cells%I(6,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
-      ! !IntC_L%Def%C(7)(1:8)='VOLM_L  '
-      !  IntC_L%Def%C(7)(1:8)='BLANK   '
-      !IntC_L%Atoms%I(7,1:4)=LRef
-      !IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+       IF(DoVolume) THEN
+         IntC_L%Def%C(7)(1:8)='VOLM_L  '
+        !IntC_L%Def%C(7)(1:8)='BLANK   '
+         IntC_L%Atoms%I(7,1:4)=LRef
+         IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+       ENDIF
      ELSE IF(PBCDim==2) THEN
-       CALL New(IntC_L,3)
+       CALL New(IntC_L,3+IVol)
+       IntC_L%Constraint%L(:)=.FALSE.
+       IntC_L%Active%L(:)=.TRUE.
        IntC_L%Atoms%I(1:2,1:2)=LRef
          IntC_L%Def%C(1)(1:8)='STRE_A  '
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
@@ -1229,18 +1241,20 @@ CONTAINS
        IntC_L%Atoms%I(3,1:3)=LRef
        IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
-      ! !IntC_L%Def%C(4)(1:8)='AREA_L  '
-      !  IntC_L%Def%C(4)(1:8)='BLANK   '
-      !IntC_L%Atoms%I(4,1:3)=LRef
-      !IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+       IF(DoVolume) THEN
+           IntC_L%Def%C(4)(1:8)='AREA_L  '
+          !IntC_L%Def%C(4)(1:8)='BLANK   '
+         IntC_L%Atoms%I(4,1:3)=LRef
+         IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+       ENDIF
      ELSE IF(PBCDim==1) THEN
        CALL New(IntC_L,1)
          IntC_L%Def%C(1)(1:8)='STRE_A  '
+       IntC_L%Constraint%L(:)=.FALSE.
+       IntC_L%Active%L(:)=.TRUE.
        IntC_L%Atoms%I(1,1:2)=LRef
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
      ENDIF
-     IntC_L%Constraint%L(:)=.FALSE.
-     IntC_L%Active%L(:)=.TRUE.
    END SUBROUTINE LatticeINTC
 !
 !-------------------------------------------------------------------
@@ -1887,10 +1901,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-        !IF(PRESENT(iGEO_O)) THEN
-        !  CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-        !                  IRep,IStep,iGEO_O)
-        !ENDIF
+       ! IF(PRESENT(iGEO_O)) THEN
+       !   CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+       !                   IRep,IStep,iGEO_O)
+       ! ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1963,7 +1977,6 @@ CONTAINS
          ELSE
            RefreshAct=.FALSE.
          ENDIF
-RefreshAct=.TRUE.
          !
          ! Modify Cartesians
          !
