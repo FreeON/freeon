@@ -1913,8 +1913,8 @@ CONTAINS
        CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect1,Vect2)
        J=3*(I-1)
        IA=0
-       DO ALPHA=1,3
-         DO BETA=1,3
+       DO BETA=1,3
+         DO ALPHA=1,3
            IA=IA+1
            LattGrad(IA)=LattGrad(IA)+CartGrad(J+ALPHA)*Vect2(BETA)
          ENDDO
