@@ -495,10 +495,10 @@ CONTAINS
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
      CALL Set_AtmB_EQ_AtmB(AtmB,AtmBTot)
      !
-  !  IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
-  !     PRESENT(iGEO_O)) THEN
-  !    CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
-  !  ENDIF
+     IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
+        PRESENT(iGEO_O)) THEN
+       CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
+     ENDIF
      !
      ! Now define bond angles and torsions
      !
