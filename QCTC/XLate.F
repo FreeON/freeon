@@ -28,14 +28,16 @@ C
                   lkdx=lklk+mnabs
                   IF(m-n.LT.0)THEN
                      cmn=(-1.0D0)**mnabs
-                     smn=(-1.0D0)**(mnabs+1)
+                     ! smn=(-1.0D0)**(mnabs+1)
+                     smn = -cmn
                   ELSE
                      cmn=1.0D0
                      smn=1.0D0
                   ENDIF
                   IF(n.LT.0)THEN
                      cn=(-1.0D0)**nabs
-                     sn=(-1.0D0)**(nabs+1)
+                     ! sn=(-1.0D0)**(nabs+1)
+                     sn = -cn
                   ELSE
                      cn=1.0D0
                      sn=1.0D0
