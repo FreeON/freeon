@@ -32,7 +32,7 @@ CPPMISC =
 #
 EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/ -I$(MONDO_HOME)/HiCu/
 #
-VisDXObjs=PotMapRho.o 
+VisDXObjs=VisDX.o RhoUtil.o PotUtil.o  
 MisObjs=$(MONDO_HOME)/HiCu/CubeTree.o    \
 	$(MONDO_HOME)/HiCu/RhoTree.o     \
 	$(MONDO_HOME)/HiCu/Grid.o        \
@@ -47,15 +47,15 @@ MisObjs=$(MONDO_HOME)/HiCu/CubeTree.o    \
 	$(MONDO_HOME)/QCTC/Thresholds.o  \
 	$(MONDO_HOME)/QCTC/Globals.o   
 #
-ReleaseFiles=PotMapRho.x 
+ReleaseFiles=VisDX.x RhoUtil.x PotUtil.x 
 #
 all:	vis
 #
 release:clean $(ReleaseFiles)
 #
 vis:	$(VisDXObjs) 
-	$(LD) $(LDFLAGS) PotMapRho $(VisDXObjs) $(MisObjs) $(F90_LIBRARIES) 
-	mv PotMapRho $(MONDO_EXEC)/PotMapRho
+	$(LD) $(LDFLAGS) VisDX $(VisDXObjs) $(MisObjs) $(F90_LIBRARIES) 
+	mv VisDX $(MONDO_EXEC)/VisDX
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
@@ -64,5 +64,7 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_EXEC)/PotMapRho
+	rm -f $(MONDO_EXEC)/VisDX
 	ls 
+#
+VisDX.o:		RhoUtil.o PotUtil.o  $(MONDO_LIB)/libMondoMods.a
