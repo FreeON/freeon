@@ -33,6 +33,7 @@ CPPMISC=#-DWORK_ON_DEGENERACY #-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA
 #
 BlkAInvObjs = BlokAInv.o  DenMatMethods.o
 LowdinOObjs = LowdinO.o 
+IRInvObjs   = IRInv.o 
 #
 ODA_Objs   = ODA.o DenMatMethods.o
 MIX_Objs   = MIX.o DenMatMethods.o
@@ -52,7 +53,7 @@ DDIIS_Objs = DDIIS.o                #vw
 TC2Response_Objs = TC2Response.o DenMatMethods.o DenMatResponse.o   #vw
 Dev_Objs   = ToDev.o  
 #
-ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
+ReleaseFiles=BlokAInv.x LowdinO.x IRInv.x RHeqs.x    \
              SDMM.x SP2.x SP4.x TS4.x PM.x   \
              FillPBlok.x P2Use.x FillPBlok.x \
              SCFStatus.x FBuild.x DIIS.x ToDev.x \
@@ -60,7 +61,7 @@ ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              DenMatMethods.x DenMatResponse.x
 
 #
-all:	ODA RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
+all:	IR ODA RStat DDIIS FBuild TC2Response Blk Lwd RHEq SP2 TS4 Stat Gues DIIS  
 #
 release:clean $(ReleaseFiles)
 #
@@ -86,6 +87,7 @@ clean:
 	rm -f $(MONDO_EXEC)/PM
 	rm -f $(MONDO_EXEC)/AInv
 	rm -f $(MONDO_EXEC)/LowdinO
+	rm -f $(MONDO_EXEC)/IRInv	
 	ln -s /dev/null core
 #
 #       EXTRAPOLATIONATORS
@@ -115,6 +117,10 @@ Blk:	$(BlkAInvObjs)
 Lwd:	$(LowdinOObjs)
 	$(LD) $(LDFLAGS) LowdinO $(LowdinOObjs)  $(F90_LIBRARIES) $(LAPACK)
 	mv LowdinO $(MONDO_EXEC)/LowdinO
+#
+IR:	$(IRInvObjs)
+	$(LD) $(LDFLAGS) IRInv $(IRInvObjs)  $(F90_LIBRARIES) $(LAPACK)
+	mv IRInv $(MONDO_EXEC)/IRInv
 #
 #       SCF Solvers
 #
@@ -184,3 +190,4 @@ TS4.o:          DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
 PM.o:           DenMatMethods.o $(MONDO_LIB)/libMondoMods.a
 LowdinO.o:		    $(MONDO_LIB)/libMondoMods.a
 BlokAInv.o:		    $(MONDO_LIB)/libMondoMods.a
+IRInv.o:		    $(MONDO_LIB)/libMondoMods.a
