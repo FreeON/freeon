@@ -271,6 +271,7 @@ MODULE ParseExtraCoords
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)==1) NNewC=NNewC+3
      ENDDO
+     IF(NNewC==0) RETURN
      NConstr=NConstr+NNewC
      NCartConstr=NCartConstr+NNewC
      ! fill in old intcs
@@ -306,5 +307,4 @@ MODULE ParseExtraCoords
      CALL Set_INTC_EQ_INTC(IntC_New,IntC_Extra,1,NIntC_Extra,1)
      CALL Delete(IntC_New)
    END SUBROUTINE MergeConstr
-   !
 END MODULE ParseExtraCoords
