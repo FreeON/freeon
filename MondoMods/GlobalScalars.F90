@@ -209,6 +209,7 @@ MODULE GlobalScalars
 ! this is needed to estimate storage of IntCs in HDF
 !
    INTEGER :: IntCMax    
+   INTEGER,PARAMETER :: IntCPerAtom=30
 !
 ! SCF global arrays 
 !
