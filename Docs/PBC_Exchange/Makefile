@@ -1,7 +1,10 @@
-all: normal
+all:  normal
 
 normal:
 	latex LinearPBCExchange.tex
+	bibtex LinearPBCExchange
+	latex LinearPBCExchange.tex
+	bibtex LinearPBCExchange
 	latex LinearPBCExchange.tex
 	xdvi -s 2 LinearPBCExchange
 
