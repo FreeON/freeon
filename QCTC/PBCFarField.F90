@@ -51,8 +51,6 @@ MODULE PBCFarField
       CALL New(TensorS,LSP(2*MaxEll),0) 
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
-      TensorC%D=Zero
-      TensorS%D=Zero
 #else
       CALL Get(CS_IN,'CS_IN',Tag_O=CurBase)
       IF(GMLoc%PBC%Dimen==0) RETURN
@@ -62,7 +60,7 @@ MODULE PBCFarField
       CALL Get(TensorC,'PFFTensorC'//CurBase)
       CALL Get(TensorS,'PFFTensorS'//CurBase)
 #endif
-      ! Initialize Arrays
+!     Initialize Arrays
       CALL New(TenRhoC,LSP(MaxEll),0)
       CALL New(TenRhoS,LSP(MaxEll),0)
       CALL New(PFFBraC,LSP(MaxEll),0)
@@ -71,26 +69,26 @@ MODULE PBCFarField
       CALL New(PFFKetS,LSP(MaxELL),0)
       CALL New(RhoC,LSP(FFEll),0)  
       CALL New(RhoS,LSP(FFEll),0) 
-      ! Calculate the Box Moments and the BDist
+!     Calculate the Box Moments and the BDist
       CALL RhoToSP(GMLoc)
-      ! Contract TenRho 
+!     Contract TenRho 
       TenRhoC%D=Zero
       TenRhoS%D=Zero
-      CALL CTraX77(MaxELL,MaxEll,TenRhoC%D,TenRhoS%D,TensorC%D,TensorS%D,RhoC%D,RhoS%D)  
-      ! PACDist (From PoleRoot)
+      CALL CTraX77(MaxEll,MaxEll,TenRhoC%D,TenRhoS%D,TensorC%D,TensorS%D,RhoC%D,RhoS%D)  
+!     PACDist (From PoleRoot)
       Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
       Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1))   
       Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
       PDist = SQRT(Px*Px+Py*Py+Pz*Pz)
-      ! If Not Over Riden Calculate MaxEll 
+!     If Not Over Riden Calculate MaxEll 
       MaxEll=CalMaxEll(GMLoc)
-      WRITE(*,*)' NEW MAXELL = ',MaxEll
-      ! Calculate PFF  energy
+!     Calculate PFF  energy
+      E_PFF = Zero
       DO LM = 0,LSP(MaxELL)
          E_PFF = E_PFF + RhoC%D(LM)*TenRhoC%D(LM)+RhoS%D(LM)*TenRhoS%D(LM)
       ENDDO
       E_PFF = Two*E_PFF
-      ! Calculate Dipole energy
+!     Calculate Dipole energy
       IF(GMLoc%PBC%Dimen == 2) THEN
          IF(.NOT. GMLoc%PBC%AutoW(1) ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
          IF(.NOT. GMLoc%PBC%AutoW(2) ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
@@ -254,7 +252,7 @@ MODULE PBCFarField
       REAL(DOUBLE)                    :: Zeta,PiZ,Dist
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
-      !-----------------------------------------------------------------------------------!
+!-----------------------------------------------------------------------------------!
       BDist   = Zero
       RhoC%D  = Zero
       RhoS%D  = Zero
@@ -309,29 +307,42 @@ MODULE PBCFarField
 !=======================================================================================
     FUNCTION CalMaxEll(GMLoc) RESULT(ML1)
       TYPE(CRDS)                            :: GMLoc
-      INTEGER                               :: L,LP,ML1
-      REAL(DOUBLE)                          :: Radius,Dist
-      REAL(DOUBLE)                          :: PL,OL,FAC,NL,OL1,OL2,CQ
+      TYPE(CellSet)                         :: CStmp
+      INTEGER                               :: NC,L,LP,ML1
+      REAL(DOUBLE)                          :: Radius,MinRadius
+      REAL(DOUBLE)                          :: PL,OL,FAC,NL,OL1,CQ
       REAL(DOUBLE)                          :: PFFTau
-      !---------------------------------------------------------------------------------!
-      PFFTau = 100*TauMAC
-      ML1    = FFELL+1
-      Radius=CS_IN%Radius-BDist
-!      IF(BDist > Radius) THEN
-
-         WRITE(*,*)' CS_IN%Radius = ',CS_IN%Radius,' BDist = ',BDist
-
-!         CALL Halt('BDist Greater Then Radius increase PFFMaxLay')
-!      ENDIF
-      CQ=Zero
-      OL2 = Unsold1(HGEll+1,FFELL,RhoC%D,RhoS%D)
-      DO L=0,FFELL-1
-         OL1 = Unsold0(L,RhoC%D,RhoS%D)
-         CQ=MAX(CQ,OL1/BDist**DBLE(L))
+      REAL(DOUBLE),DIMENSION(3)             :: PQ
+!---------------------------------------------------------------------------------!
+      PFFTau = TauMAC
+!
+!     First, Determint the Distance to the Nearest Cell in the CellSet CS_inf-CS_IN 
+!
+      Radius = 1.25*CS_IN%Radius
+      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius) 
+!
+      MinRadius = 1.D16
+      DO NC=1,CStmp%NCells
+         PQ(:) = CStmp%CellCarts%D(:,NC)
+         IF(.NOT. InCell_CellSet(CS_IN,PQ(1),PQ(2),PQ(3))) THEN
+            MinRadius = MIN(MinRadius,SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2))
+         ENDIF
       ENDDO
-      DO L=0,GMLoc%PBC%PFFMaxEll
+!
+      IF(Two*BDist > MinRadius) THEN
+         CALL Halt('2*BDist Greater Then Radius increase PFFMaxLay')
+      ENDIF
+!
+      ML1 = FFEll+1
+      CQ  = Zero
+      DO L=SPEll,FFELL
+         OL1 = Unsold0(L,RhoC%D,RhoS%D)
+         CQ  = MAX(CQ,OL1/BDist**DBLE(L))
+      ENDDO
+!
+      DO L=SPEll,FFEll
          PL  = CQ*BDist**DBLE(L)
-         FAC = PL/(Radius*CS_IN%Radius**(DBLE(L)))
+         FAC = PL/((MinRadius-Two*BDist)*MinRadius**DBLE(L+1))
          IF(FAC .LT. PFFTau) THEN
             ML1 = L
             EXIT
@@ -340,17 +351,20 @@ MODULE PBCFarField
 !
       CALL OpenASCII(OutFile,Out)  
       IF(GMLoc%PBC%PFFOvRide) THEN
-         WRITE(Out,990) ML1
+         WRITE(Out,990) ML1,GMLoc%PBC%PFFMaxEll
+         WRITE(*,990) ML1,GMLoc%PBC%PFFMaxEll
+         ML1 = GMLoc%PBC%PFFMaxEll
       ELSE
-         MaxEll = ML1
-         IF(MaxEll > FFELL) THEN
-            WRITE(Out,991)
-            ML1=FFELL
+         IF(ML1 .GT. GMLoc%PBC%PFFMaxEll) THEN
+            WRITE(Out,991) ML1,GMLoc%PBC%PFFMaxEll
+            WRITE(*,991) ML1,GMLoc%PBC%PFFMaxEll
+            ML1=GMLoc%PBC%PFFMaxEll
          ENDIF      
       ENDIF
       CLOSE(Out)
-990   FORMAT(' OverRide is On: Optimal Ell ==> ',I3)
-991   FORMAT(' *** WARNING *** MaxEll > FFEll *** WARNING *** ')
+!
+990   FORMAT(' OverRide is On: Ell ==> ',I3,' PFFMaxEll ==> ',I3)
+991   FORMAT(' *** WARNING *** Ell > MaxEll *** WARNING *** : Ell ==> ',I3,' PFFMaxEll ==> ',I3)
     END FUNCTION CalMaxEll
 !========================================================================================
 ! If QP is < TOL, do not translate
