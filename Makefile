@@ -51,13 +51,13 @@ rmLegacy:
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
 	rm -rf Inpts
-	rm -f  README; touch README
+#	rm -f  README; touch README
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
 	sleep 1
 	cat $(MONDO_HOME)/README
-	sleep 5
+	sleep 15
 #----------------------------------------------
 #   MondoMods
  mm:	

@@ -1,16 +1,43 @@
 
-
-
-
-
         TO DO LIST FOR MondoSCF DEVELOPERS 
 
-    >> Release of Version 1.0b this November << 
+    >> Release of Version 1.0 beta 1 this November << 
 
 Items marked with an x need to be in place before the release!
 
+Chee Kwan:
+$ Get parallel code working as is to level of OneE
+$ Help redo front end to work with MPI-2 and MPI_COMM_SPAWN
+  as well as with old style serial spawning of mpirun
+o Check out load balance for large OneE jobs, start to think
+  about domain decomposition.  Examine performance for OneE
+  with and without PBCs.
+o Make sure MPI2 code works on SGIs, LINUX/LAM-MPI, IBM SP2, HP/Compaq?
+o Preliminary work on ordering algothim for load balancing
+  and locality: demonstrate scaling of OneE routines in 
+  both limits of Natoms/Nproc->0,Infinity
+
+Karoly:
+o Gradients only transition state theory
+o SCRF,Crystal field,QM/MM for boundary conditions
+o Applications to Protein Kinase
+o Internal coordinates geometry optimization
+o Accelerated MD/Parallel Tempering
+
+Matt:
+x Finish validation suite and checking accuracies
+x Get front end and output formatting cleaned
+  >> hostname, machtype, processor info etc to outfile <<
+x Add example CSHRCs to Scripts file
+$ Get QuNew geometry optimization working again
+$ Make sure density matrix extrapolation is working
+x Documentation
+o Get working under AIX.XLF, True64.COMPAQ, SUN? HP? 
+o Help with parallization
+$ Interface with OpenDX for isosurfacing and movies
+
 CJ:
-x Validation suite
+x PBC validation suite!
 x PBC Benchmark suite and scaling runs for HiCu, QCTC and SDMM
 o Write up PBC
 o Write up new MAC and PAC
@@ -20,39 +47,13 @@ o Help periodifiy ONX
   molecular environs
 
 Eric:  
-x Explicit code into NONX
+x Gradients
+x Explicit code
 o Switch over to new gammas
 o Help periodify ONX 
 o Help parallelize ONX
 
-Matt:
-x Finish validation suite and checking accuracies
-x Get front end and output formatting cleaned
-  >> hostname, machtype, processor info etc to outfile <<
-x Add example CSHRCs to Scripts file
-x Get geometry optimization working again
-x Make sure density matrix extrapolation is working
-x Documentation
-o Get working under AIX.XLF, True64.COMPAQ, SUN? HP? 
-o Help with parallization
-o HDF5 Interface with OpenDX for isosurfacing and movies
+    >> Release of Version 1.0 beta 1 this November << 
 
-Chee Kwan:
-o Get parallel code working as is to level of OneE
-o Help redo front end to work with MPI-2 and MPI_COMM_SPAWN
-  as well as with old style serial spawning of mpirun
-o Make sure MPI2 code works on SGIs, LINUX/LAM-MPI, IBM SP2, HP/Compaq?
-o Preliminary work on ordering algothim for load balancing
-  and locality: demonstrate scaling of OneE routines in 
-  both limits of Natoms/Nproc->0,Infinity
-
-Postdoc X:
-o Gradients only transition state theory
-o Geometry optimization
-o Density matrix extrapolation 
-o SCRF,Crystal field,QM/MM for boundary conditions
-o Accelerated MD/Parallel Tempering
-o Applications to Protein Kinase
-
-
+Items marked with an x need to be in place before the release!
 
