@@ -1,526 +1,6 @@
-!
+
 !    SORTING AND ORDERING (VIA SPACE FILLING CURVES)
 !    Author: Matt Challacombe
-MODULE TravelMan
-  USE DerivedTypes; USE MemMan
-  IMPLICIT NONE
-  CONTAINS
-  
-  SUBROUTINE Anneal(XCoor,YCoor,ZCoor,NCity,TravOrder)
-  IMPLICIT NONE
-  TYPE(DBL_VECT) :: XCoor,YCoor,ZCoor,XX,YY,ZZ
-  INTEGER::LeftCity,RightCity,NCity,I,J,K,NOver,NLimit,NSucc
-  TYPE(INT_VECT)::TravOrder,ChosenCity,NewTravOrder
-  REAL(DOUBLE) :: TFacR,T,MaxIncCost,TotCost1,TotCost,Dec,IncCost
-  REAL(DOUBLE),EXTERNAL::Random
-  LOGICAL::Ans
-
-  IF(NCity <= 4) THEN 
-    STOP 'Error in Anneal! Too few cities!'
-  ENDIF
-
-  CALL GetEndCities1(XCoor,YCoor,ZCoor,NCity,LeftCity,RightCity)
-  DO I = 1, NCity
-    TravOrder%I(I) = I
-  ENDDO  
-  TravOrder%I(1) = LeftCity
-  TravOrder%I(LeftCity) = 1
-  TravOrder%I(NCity) = RightCity
-  TravOrder%I(RightCity) = NCity
-
-  ! Calculate the length of the total path
-  TotCost = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
-  WRITE(*,*) 'TotCost = ',TotCost
-
-  CALL NEW(ChosenCity,6)
-  CALL NEW(XX,6); CALL NEW(YY,6); CALL NEW(ZZ,6)
-  CALL NEW(NewTravOrder,NCity)
-
-  MaxIncCost = -BIG_DBL
-  DO I = 1,5000
-    Dec = Random()
-    WRITE(*,*) 'Dec =', Dec
-    IF(Dec < 0.5) THEN
-      CALL RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
-        ChosenCity,XX,YY,ZZ,IncCost)
-      IF(IncCost > MaxIncCost) THEN
-        MaxIncCost = IncCost
-      ENDIF
-      CALL Revers(TravOrder,ChosenCity)
-      TotCost = TotCost + IncCost
-  
-      TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
-      WRITE(*,*) 'Rev: TotCost,TotCost1 =',TotCost,TotCost1
-      IF(abs(TotCost-TotCost1) > 1.0e-7) THEN
-        STOP 'TotCost and TotCost1 differ!!'
-      ENDIF
-    ELSE
-      CALL TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
-        XX,YY,ZZ,IncCost)
-      IF(IncCost > MaxIncCost) THEN
-        MaxIncCost = IncCost
-      ENDIF
-      CALL Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
-      TotCost = TotCost + IncCost
-      TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
-      WRITE(*,*) 'Trn: TotCost,TotCost1 =',TotCost,TotCost1
-      IF(abs(TotCost-TotCost1) > 1.0e-7) THEN
-        STOP 'TotCost and TotCost1 differ!!'
-      ENDIF
-    ENDIF
-  ENDDO      
-  WRITE(*,*) 'NCity,MaxIncCost =',NCity,MaxIncCost
-
-  NOver = 100*NCity
-  NLimit = 10*NCity
-  TFacR = 0.9
-  T = MaxIncCost*0.5
-  
-  DO J = 1, 100
-    NSucc = 0
-    DO K = 1,NOver
-      Dec = Random() 
-      IF(Dec < 0.5) THEN
-        CALL RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
-          ChosenCity,XX,YY,ZZ,IncCost)
-        Ans = (IncCost < 0.0) .OR. (Random().LT.EXP(-IncCost/T))
-        IF(Ans) THEN
-          NSucc = NSucc + 1
-          TotCost = TotCost + IncCost
-          CALL Revers(TravOrder,ChosenCity)
-        ENDIF
-      ELSE
-        CALL TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
-          XX,YY,ZZ,IncCost)
-        Ans = (IncCost < 0.0) .OR. (Random().LT.EXP(-IncCost/T))
-        IF(Ans) THEN
-          NSucc = NSucc + 1
-          TotCost = TotCost + IncCost
-          CALL Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
-        ENDIF
-      ENDIF
-      IF(NSucc .ge. NLimit) Exit  
-    ENDDO
-    T = T*TFacR
-    write(*,*) 'T = ', T
-    write(*,*) 'NSucc = ',NSucc
-    IF(NSucc == 0) EXIT
-  ENDDO
-  write(*,*) 'temperature index J = ', J
-  write(*,*) 'success number index K = ', K  
-  TotCost1 = CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
-  WRITE(*,*) 'Final cost: TotCost,TotCost1 =',TotCost,TotCost1
-  IF(ABS(TotCost-TotCost1) > 1.0e-7) THEN
-    STOP 'TotCost and TotCost1 differ!!'
-  ENDIF
-  
-  END SUBROUTINE Anneal
-
-!---------------------------------------------------------------------  
-  SUBROUTINE TrnCst(XCoor,YCoor,ZCoor,NCity,TravOrder,ChosenCity,&
-    XX,YY,ZZ,IncCost)
-    TYPE(DBL_VECT)::XCoor,YCoor,ZCoor,XX,YY,ZZ
-    INTEGER::Val,IP,NCity,ArrLen,I,J,RanIndex
-    TYPE(INT_VECT)::TravOrder,SubscrArr,ChosenCity
-    REAL(DOUBLE)::IncCost
-    REAL(DOUBLE),EXTERNAL::Random
- 
-    ArrLen = NCity-2 ! the first and the last cities are fixed
-    DO
-
-!   DO I = 1, ArrLen
-!     SubscrArr%I(I) = I+1
-!   ENDDO
-!   DO I = 1, 3
-!     RanIndex = 1 + ArrLen*Random()
-!     ChosenCity%I(I) = SubscrArr%I(RanIndex)
-!     ! remove RanIndex from SubscrArr
-!     SubscrArr%I(RanIndex) = SubscrArr%I(ArrLen)
-!     ArrLen = ArrLen-1
-!   ENDDO
-      ChosenCity%I(1) = 2+ArrLen*Random()
-      ChosenCity%I(2) = 2+ArrLen*Random()
-      ChosenCity%I(3) = 2+ArrLen*Random()
-
-      DO I = 2, 3
-        Val = ChosenCity%I(I); IP = I
-        DO 
-          IF(.NOT.(IP > 1 .AND. Val < ChosenCity%I(IP-1))) EXIT
-          ChosenCity%I(IP) = ChosenCity%I(IP-1)
-          IP = IP-1
-        ENDDO
-        ChosenCity%I(IP) = Val
-      ENDDO
-
-      IF(ChosenCity%I(1) /= ChosenCity%I(2) .AND. &
-         ChosenCity%I(2) /= ChosenCity%I(3)) EXIT
-    ENDDO
-    ChosenCity%I(4) = ChosenCity%I(3)+1
-    ChosenCity%I(5) = ChosenCity%I(1)-1
-    ChosenCity%I(6) = ChosenCity%I(2)+1
-
-!   DO I = 1, 6
-!     IF(ChosenCity%I(I) < 1 .OR. ChosenCity%I(I) > NCity) THEN
-!       WRITE(*,*) 'Wrong indices in TrnCst ! Something is wrong !'
-!       STOP
-!     ENDIF
-!   ENDDO
-
-    DO I = 1, 6
-      J = TravOrder%I(ChosenCity%I(I))
-      XX%D(I) = XCoor%D(J)
-      YY%D(I) = YCoor%D(J)
-      ZZ%D(I) = ZCoor%D(J)
-    ENDDO
-    IncCost = -ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(6),yy%D(6),zz%D(6)) &
-              -ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(5),yy%D(5),zz%D(5)) &
-              -ALen(xx%D(3),yy%D(3),zz%D(3),xx%D(4),yy%D(4),zz%D(4)) &
-              +ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(3),yy%D(3),zz%D(3)) &
-              +ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(4),yy%D(4),zz%D(4)) &
-              +ALen(xx%D(5),yy%D(5),zz%D(5),xx%D(6),yy%D(6),zz%D(6))
-
-  END SUBROUTINE TrnCst
-
-!---------------------------------------------------------------------  
-  SUBROUTINE Trnspt(TravOrder,ChosenCity,NCity,NewTravOrder)
-  TYPE(INT_VECT)::TravOrder,ChosenCity,NewTravOrder
-  INTEGER::NCity,NN,I,J,INDEX
-
-  NN = ChosenCity%I(5)
-  INDEX = 1
-  DO I = 1, NN
-    NewTravOrder%I(INDEX) = TravOrder%I(I)
-    INDEX = INDEX + 1
-  ENDDO
-
-  NN = ChosenCity%I(3)-ChosenCity%I(6)+1
-  J = ChosenCity%I(6)
-  DO I = 1,NN
-    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
-    INDEX = INDEX + 1
-  ENDDO
-
-  NN = ChosenCity%I(2)-ChosenCity%I(1)+1
-  J = ChosenCity%I(1)
-  DO I = 1,NN
-    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
-    INDEX = INDEX + 1
-  ENDDO
-
-  NN = NCity-ChosenCity%I(4)+1
-  J = ChosenCity%I(4)
-  DO I = 1, NN
-    NewTravOrder%I(INDEX) = TravOrder%I(J+I-1)
-    INDEX = INDEX + 1
-  ENDDO
-
-  IF(INDEX /= (NCity+1)) THEN
-    STOP 'missing cities !!'
-  ENDIF  
-
-  DO I = 1, NCity
-    TravOrder%I(I) = NewTravOrder%I(I)
-  ENDDO    
-  END SUBROUTINE TRNSPT
-  
-!----------------------------------------------------------------------
-  SUBROUTINE RevCst(XCoor,YCoor,ZCoor,NCity,TravOrder,&
-    ChosenCity,XX,YY,ZZ,IncCost)
-    TYPE(DBL_VECT)::XCoor,YCoor,ZCoor,XX,YY,ZZ
-    INTEGER::TmpInt,NCity,ArrLen,I,J,RanIndex1,RanIndex2
-    TYPE(INT_VECT)::TravOrder,SubscrArr,ChosenCity
-    REAL(DOUBLE)::IncCost
-    REAL(DOUBLE),EXTERNAL::Random
- 
-!   ArrLen = NCity-2 ! the first and the last cities are fixed
-!   DO I = 1, ArrLen
-!     SubscrArr%I(I) = I+1
-!   ENDDO
-!   DO I = 1, 2
-!     RanIndex = 1 + ArrLen*Random()
-!     ChosenCity%I(I) = SubscrArr%I(RanIndex)
-!     ! remove RanIndex from SubscrArr
-!     SubscrArr%I(RanIndex) = SubscrArr%I(ArrLen)
-!     ArrLen = ArrLen-1
-!   ENDDO
-!   ! WRITE(*,*) 'Chosen Cities : ',ChosenCity%I(1),ChosenCity%I(2)
-
-    ArrLen = NCity-2
-    DO 
-      RanIndex1 = 2 + ArrLen*Random()
-      RanIndex2 = 2 + ArrLen*Random()
-      IF(RanIndex1 /= RanIndex2) EXIT
-    ENDDO
-    IF(RanIndex1 > RanIndex2) THEN
-      TmpInt = RanIndex1
-      RanIndex1 = RanIndex2
-      RanIndex2 = TmpInt
-    ENDIF
-
-    ChosenCity%I(1) = RanIndex1
-    ChosenCity%I(2) = RanIndex2
-
-    ChosenCity%I(3) = ChosenCity%I(1)-1
-    ChosenCity%I(4) = ChosenCity%I(2)+1
-
-    DO I = 1, 4
-      IF(ChosenCity%I(I) < 1 .OR. ChosenCity%I(I) > NCity) THEN
-        WRITE(*,*) 'Wrong indices in RevCst ! Something is wrong !'
-        STOP
-      ENDIF
-    ENDDO
-    
-    DO I = 1, 4
-      J = TravOrder%I(ChosenCity%I(I))
-      XX%D(I) = XCoor%D(J)
-      YY%D(I) = YCoor%D(J)
-      ZZ%D(I) = ZCoor%D(J)
-    ENDDO
-
-    IncCost = -ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(3),yy%D(3),zz%D(3)) &
-              -ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(4),yy%D(4),zz%D(4)) &
-              +ALen(xx%D(1),yy%D(1),zz%D(1),xx%D(4),yy%D(4),zz%D(4)) &
-              +ALen(xx%D(2),yy%D(2),zz%D(2),xx%D(3),yy%D(3),zz%D(3))
-  END SUBROUTINE RevCst
-
-!----------------------------------------------------------------------
-  SUBROUTINE Revers(TravOrder,ChosenCity)
-  INTEGER::NN,I,TmpInt,Left,Right
-  TYPE(INT_VECT)::TravOrder,ChosenCity
-  
-  NN = (ChosenCity%I(2)-ChosenCity%I(1)+1)/2
-  DO I = 1,NN
-    Left = ChosenCity%I(1)+I-1
-    Right = ChosenCity%I(2)-I+1
-    TmpInt = TravOrder%I(Left)
-    TravOrder%I(Left) = TravOrder%I(Right)
-    TravOrder%I(Right) = TmpInt
-  ENDDO
-  END SUBROUTINE Revers
-
-!----------------------------------------------------------------------
-  ! the order is coordinates of 1, and followed by 2
-  FUNCTION ALen(x1,y1,z1,x2,y2,z2)
-    REAL(DOUBLE)::x1,y1,z1,x2,y2,z2,ALen,dx,dy,dz
-    dx = x1-x2; dy = y1-y2; dz = z1-z2
-    ALen = SQRT(dx*dx + dy*dy + dz*dz)
-  END FUNCTION ALen
-
-!----------------------------------------------------------------------
-  FUNCTION CalTotCost(XCoor,YCoor,ZCoor,TravOrder,NCity)
-  TYPE(DBL_VECT)::XCoor,YCoor,ZCoor
-  TYPE(INT_VECT)::TravOrder
-  INTEGER::NCity,I,J,K
-  REAL(DOUBLE)::CalTotCost
-  
-  CalTotCost = 0.0
-  DO I = 1,NCity-1
-    J = TravOrder%I(I)
-    K = TravOrder%I(I+1)
-    CalTotCost = CalTotCost + ALen(XCoor%D(J),YCoor%D(J),ZCoor%D(J),&
-      XCoor%D(K),YCoor%D(K),ZCoor%D(K))
-  ENDDO
-  END FUNCTION CalTotCost
-
-!----------------------------------------------------------------------
-  ! get the end cities using the tight bounding box
-  SUBROUTINE GetEndCities1(XCoor,YCoor,ZCoor,NCity,LeftCity,RightCity)
-  TYPE(DBL_VECT)::XCoor,YCoor,ZCoor
-  REAL(DOUBLE)::Dis,MinLDis,MinRDis,X,Y,Z,XLEx,YLEx,ZLEx,XREx,YREx,ZREx
-  INTEGER::NCity,I,LeftCity,RightCity
-  
-  XLEx = Big_DBL;  XREx = -Big_DBL
-  YLEx = Big_DBL;  YREx = -Big_DBL
-  ZLEx = Big_DBL;  ZREx = -Big_DBL
- 
-  DO I = 1, NCity
-    X = XCoor%D(I); Y = YCoor%D(I); Z = ZCoor%D(I)
-    IF(X < XLEx) XLEx = X; IF(X > XREx) XREx = X
-    IF(Y < YLEx) YLEx = Y; IF(Y > YREx) YREx = Y
-    IF(Z < ZLEx) ZLEx = Z; IF(Z > ZREx) ZREx = Z
-  ENDDO
-  WRITE(*,*) 'XEx : ',XLEx, XREx
-  WRITE(*,*) 'YEx : ',YLEx, YREx
-  WRITE(*,*) 'ZEx : ',ZLEx, ZREx
-    
-  MinLDis = Big_DBL; MinRDis = Big_DBL
- 
-  DO I = 1, NCity
-    Dis = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),XLEx,YLEx,ZLEx)
-    IF(Dis < MinLDis) THEN
-      MinLDis = Dis
-      LeftCity = I
-    ENDIF
-    Dis = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),XREx,YREx,ZREx)
-    IF(Dis < MinRDis) THEN
-      MinRDis = Dis
-      RightCity = I
-    ENDIF
-  ENDDO
-
-  WRITE(*,*) 'MinLDis = ',MinLDis
-  WRITE(*,*) 'MinRDis = ',MinRDis
-  WRITE(*,*) 'LeftCity,RightCity = ',LeftCity,RightCity
-  END SUBROUTINE GetEndCities1
-
-!----------------------------------------------------------------------
-  ! find out the largest end-to-end distance
-  SUBROUTINE GetEndCities2(XCOOR,YCOOR,ZCoor,NCity,LeftCity,RightCity)
-  TYPE(DBL_VECT) :: XCoor,YCoor,ZCoor
-  INTEGER::I,J,Ncity,leftcity,rightcity
-  REAL(DOUBLE)::DisIJ,MaxDis
-
-  MaxDis = 0.0
-  DO I = 1, NCity
-    DO J = I+1, NCity
-      DisIJ = ALen(XCoor%D(I),YCoor%D(I),ZCoor%D(I),&
-        XCoor%D(J),YCoor%D(J),ZCoor%D(J))
-      IF(DisIJ .GE. MaxDis) THEN
-        MaxDis = DisIJ
-        LeftCity = I
-        RightCity = J
-      ENDIF
-    ENDDO
-  ENDDO
-  END SUBROUTINE GetEndCities2
-
-END MODULE TravelMan
-
-
-!---------------------------------------------------------------------------
-MODULE AnnealMap
-  USE PrettyPrint
-  IMPLICIT NONE
-  INTEGER,PRIVATE::NCity
-CONTAINS
-!---------------------------------------------------------------------------
-  SUBROUTINE TableAnneal(RCoor,NCityV,TravO)
-    TYPE(DBL_RNK2)::RCoor
-    INTEGER(INT8),ALLOCATABLE::CityRank(:)
-    TYPE(INT_VECT)::TravO
-    TYPE(INT_RNK3)::AnnealKey
-    INTEGER::Imax,IntVect(3),NCityV,I,J,K,LinDim,LM1,ReadNCity,M,Rank,IndexInt
-    REAL(DOUBLE)::Ratio,RMin(3),Diff,MaxDiff
-
-!#define USE_Final_TravO_Dat
-#undef USE_Final_TravO_Dat
-
-#ifdef  USE_Final_TravO_Dat 
-    INTEGER,PARAMETER::ReadU=30
-    INTEGER,ALLOCATABLE::ReadTravO(:)
-#else
-    INCLUDE 'Final_TravO.Inc'
-#endif
-   
-#ifdef  USE_Final_TravO_Dat
-!   write(*,*) 'Final_TravO.dat is used.'
-#else
-!   write(*,*) 'Final_TravO.Inc is used.'  
-#endif
-
-    NCity = NCityV
-#ifdef USE_Final_TravO_Dat
-    CALL OpenASCII('Final_TravO.dat',ReadU,OldFileQ_O=.TRUE.,Rewind_O=.TRUE.)
-    Read(ReadU,*) ReadNCity
-    WRITE(*,*) 'TableAnneal, ReadNCity = ',ReadNCity
-#else ! assign ReadNCity
-    ReadNCity = NCity_Const
-#endif
-    LinDim = NINT(ReadNCity**(1.0d0/3.0d0))
-!   WRITE(*,*) 'LinDim = ', LinDim
-    IF(LinDim*LinDim*LinDim /= ReadNCity) THEN
-      STOP 'Error: Cube root problem in TableAnneal!'
-    ENDIF
-    LM1 = LinDim-1
-!   WRITE(*,*) 'LinDim = ', LinDim, ', Lm1=', LM1
-    CALL New(AnnealKey,(/LM1,LM1,LM1/),(/0,0,0/))
-
-#ifdef USE_Final_TravO_Dat
-    ALLOCATE(ReadTravO(ReadNCity))
-    Read(ReadU,*) (ReadTravO(I),I=1,ReadNCity)
-#endif
-
-    IndexInt = 0
-    DO I = 0,LM1
-      DO J = 0, LM1
-        DO K = 0, LM1
-          IndexInt = IndexInt + 1
-          Rank = 0
-          DO M = 1, ReadNCity
-            IF(ReadTravO(M) == IndexInt) THEN
-              Rank = M
-              EXIT
-            ENDIF
-          ENDDO
-          IF(Rank < 1 .OR. Rank > ReadNCity) THEN
-            WRITE(*,*) 'IndexInt = ',IndexInt
-            WRITE(*,*) 'Rank = ',Rank
-            STOP 'Error: Some serious problem in inverse mapping!'
-          ENDIF
-          AnnealKey%I(K,J,I) = Rank
-        ENDDO
-      ENDDO
-    ENDDO
-  
-    DO I = 0,LM1
-      DO J = 0, LM1
-        DO K = 0, LM1
-!         WRITE(*,*) 'AnnealKey',K,J,I,AnnealKey%I(K,J,I)
-        ENDDO
-      ENDDO
-    ENDDO
-#ifdef USE_Final_TravO_Dat
-    CLOSE(ReadU)
-#endif
-  
-    RMin(1) = Big_DBL
-    RMin(2) = Big_DBL
-    RMin(3) = Big_DBL
-    DO I = 1, NCity
-      DO J = 1,3
-        RMin(J) = DMin1(RMin(J),RCoor%D(J,I))
-      ENDDO
-      TravO%I(I) = I
-    ENDDO
-    ! any -ve value for MaxDiff is okay, since we deal with the 1st quadrant
-    MaxDiff = -1.0D0 
-    DO I = 1,NCity
-      DO J = 1,3
-        Diff = RCoor%D(J,I)-RMin(J)
-        MaxDiff = DMax1(MaxDiff,Diff)
-      ENDDO
-    ENDDO
-    RATIO = (LinDim*1.D0)/MaxDiff
-    IMax = -Big_Int
-    ALLOCATE(CityRank(1:NCity))
-    DO I = 1,NCity
-      DO J = 1, 3
-        ! IntVect(J) = DNINT( (RCoor%D(J,I)-RMin(J))*Ratio)
-        IntVect(J) =  (RCoor%D(J,I)-RMin(J))*Ratio ! truncate the fraction part.
-        IMax = Max(IMax,IntVect(J))
-        IF(IntVect(J) == LinDim) THEN
-          IntVect(J) = IntVect(J)-1
-        ENDIF
-        IF(IntVect(J) < 0 .OR. IntVect(J) .GE. LinDim) THEN
-          WRITE(*,*) 'IntVect',j, ' =',IntVect(j)
-          STOP 'ERROR: An error has occured! array bound problem'
-        ENDIF
-      ENDDO
-      CityRank(I) = AnnealKey%I(IntVect(1),IntVect(2),IntVect(3))
-!     WRITE(*,*) 'CityRank',I, ' =', CityRank(I)
-    ENDDO
-!   IF(IMax /= LinDim) THEN
-!     STOP 'ERROR: Numerical accuracy problem in TableAnneal!'
-!   ENDIF
-    CALL I8Sort(CityRank,TravO%I,NCity,2)
-    CALL Delete(AnnealKey)
-#ifdef USE_Final_TravO_Dat
-    DEALLOCATE(ReadTravO)
-#endif
-
-  END SUBROUTINE TableAnneal
-END MODULE AnnealMap
-
 MODULE Order
    USE DerivedTypes
    USE GlobalCharacters
@@ -528,7 +8,7 @@ MODULE Order
    USE GlobalObjects
    USE ProcessControl
    USE MemMan
-   USE TravelMan ; USE AnnealMap
+   USE Opt_Trav_Band ; USE AnnealMap
    USE Parse
    IMPLICIT NONE
    INTERFACE Sort
@@ -561,7 +41,7 @@ MODULE Order
        END FUNCTION Interleave
    END INTERFACE
    CONTAINS
-!
+
 !      FUNCTION RANDOM_INT(Limits)
 !         INTEGER                :: RANDOM_INT
 !         INTEGER, DIMENSION(2)  :: Limits
@@ -571,7 +51,7 @@ MODULE Order
 !         RANDOM_INT=Limits(1)+INT(Delta*Random())
 !         RANDOM_INT=Limits(1)+INT(Delta*RAND())
 !      END FUNCTION RANDOM_INT
-!
+
       FUNCTION RANDOM_DBL(Limits)
          REAL(DOUBLE)              :: RANDOM_DBL
          REAL(DOUBLE),DIMENSION(2) :: Limits
@@ -581,7 +61,7 @@ MODULE Order
          RANDOM_DBL=Limits(1)+Delta*Random()
 !         RANDOM_DBL=Limits(1)+Delta*Rand()
       END FUNCTION RANDOM_DBL
-!
+
       FUNCTION RANDOM_INT(Limits)
          INTEGER               :: RANDOM_INT,Delta
          INTEGER, SAVE         :: JRan=10408
@@ -597,7 +77,7 @@ MODULE Order
 !    F90 wrapper for SFCOrder77, which circumvents the lack
 !    of INTEGER(KIND=8) (INTEGER*8) support for cheazy 
 !    F90 compilers (pgf,nag...)
-!
+
      SUBROUTINE SFCOrder(N,R,Point,SFC_KEY)
         INTEGER,        INTENT(IN)    :: N,SFC_KEY
         TYPE(DBL_RNK2), INTENT(INOUT) :: R
@@ -606,9 +86,9 @@ MODULE Order
                          DIMENSION(:) :: IKey
         TYPE(DBL_VECT)                :: RKey
         INTEGER                       :: I
-        TYPE(DBL_VECT)                :: XCoor,YCoor,ZCoor
-        
-!
+        INTEGER::N_Neighbor
+        REAL(DOUBLE)::Gamma,Alpha,NLFac 
+
         IF(SFC_KEY==SFC_RANDOM)THEN
            CALL New(RKey,N)
            DO I=1,N
@@ -626,15 +106,25 @@ MODULE Order
            CALL SFCOrder77(N,R%D,Point%I,IKey,.TRUE.)
            DEALLOCATE(IKey)
         ELSEIF(SFC_KEY==SFC_TRAVEL)THEN
-           CALL NEW(XCoor,N)
-           CALL NEW(YCoor,N)
-           CALL NEW(ZCoor,N)
-           DO I = 1,N
-             XCoor%D(I) = R%D(1,I)
-             YCoor%D(I) = R%D(2,I)
-             ZCoor%D(I) = R%D(3,I)
-           ENDDO
-           CALL Anneal(XCoor,YCoor,ZCoor,N,Point)
+          CALL OpenASCII(InpFile,Inp)
+          IF(.NOT.OptDblQ(Inp,'Gamma',Gamma)) THEN
+            WRITE(*,*) 'Cannot find Gamma in ',InpFile
+            STOP
+          ENDIF
+          IF(.NOT.OptDblQ(Inp,'NLFac',NLFac)) THEN
+            WRITE(*,*) 'Cannot find NLFac in ',InpFile
+            STOP
+          ENDIF
+          IF(.NOT.OptDblQ(Inp,'Alpha',Alpha)) THEN
+            WRITE(*,*) 'Cannot find Alpha in ',InpFile
+            STOP
+          ENDIF
+          IF(.NOT.OptIntQ(Inp,'N_Neighbor',N_Neighbor)) THEN
+            WRITE(*,*) 'Cannot find N_Neighbor in ',InpFile
+            STOP
+          ENDIF
+          Close(Unit=Inp,STATUS='KEEP')
+          CALL Anneal(R,N,Point,Gamma,NLFac,N_Neighbor,Alpha)
         ELSEIF(SFC_KEY==SFC_TABLETRAV)THEN
           CALL TableAnneal(R,N,Point)
         ELSE
@@ -689,4 +179,162 @@ MODULE Order
     END SUBROUTINE Sort_INT_VECT
 
 
-END MODULE
+END MODULE Order
+
+!--------------------------------------------------------------
+  SUBROUTINE SFCOrder77(N,R,Point,Key,Hilbert)
+    Use DerivedTypes
+    IMPLICIT NONE
+    INTEGER,PARAMETER::BitNum=21 ! number of bits to represent an integer
+    INTEGER::IMax,I,J,N,Ix,Iy,Iz,Point(N)
+    INTEGER(INT8):: Key(N)
+    INTEGER(INT8),EXTERNAL:: Interleave,HilbertKey
+    REAL(DOUBLE)::R(3,N),RMin(3),Ratio,MaxDiff,Diff
+    LOGICAL::Hilbert
+    
+    RMin(1)=1.D10; RMin(2)=1.D10; RMin(3)=1.D10
+    
+    DO J=1,N
+       Point(J)=J
+       RMin(1)=DMIN1(RMin(1),R(1,J))
+       RMin(2)=DMIN1(RMin(2),R(2,J))
+       RMin(3)=DMIN1(RMin(3),R(3,J))
+    ENDDO
+
+    MaxDiff = -1.0D0 ! any negative value will do
+    DO J = 1,N
+      DO I = 1, 3
+        Diff = R(I,J) - RMin(I)
+        IF( Diff > MaxDiff ) THEN
+          MaxDiff = Diff
+        ENDIF
+      ENDDO
+    ENDDO
+
+    IF( MaxDiff .LE. 0) THEN
+      WRITE(*,*) 'MaxDiff = ',MaxDiff
+      STOP 'ERROR: MaxDiff must be positive!'
+    ENDIF
+    Ratio = (2**BitNum-1.0)/MaxDiff
+          
+    IMax = -Big_Int
+    IF(Hilbert)THEN
+       DO J=1,N
+          Ix=DNINT((R(1,J)-RMin(1))*Ratio)
+          IF(Ix > IMax) IMax = Ix
+          Iy=DNINT((R(2,J)-RMin(2))*Ratio)
+          IF(Iy > IMax) IMax = Iy
+          Iz=DNINT((R(3,J)-RMin(3))*Ratio)
+          IF(Iz > IMax) IMax = Iz
+          Key(J)=Interleave(BitNum,Ix,Iy,Iz)
+          Key(J)=HilbertKey(BitNum,Key(J))
+       END DO
+       
+       IF( IMax /= (2**BitNum-1)) THEN
+!        stop 'ERROR: numerical accuracy problem !!'
+       END IF
+    ELSE ! Peano option 
+       DO J=1,N
+          Ix=DNINT((R(1,J)-RMin(1))*Ratio)
+          Iy=DNINT((R(2,J)-RMin(2))*Ratio)
+          Iz=DNINT((R(3,J)-RMin(3))*Ratio)
+          Key(J)=Interleave(BitNum,Ix,Iy,Iz)
+       END DO
+    ENDIF
+    CALL I8Sort(Key,Point,N,2)
+  END SUBROUTINE SFCOrder77
+
+!-----------------------------------------------------------------
+!   Bit shuffle for a triple of integers
+  FUNCTION Interleave(BitNum,Ix,Iy,Iz)
+     USE DerivedTypes
+     IMPLICIT NONE
+     INTEGER I,K,Ix,Iy,Iz,BitNum,EndNum
+     INTEGER(INT8) Interleave
+     K=0
+     Interleave=0
+     EndNum = 3*(BitNum-1)
+     DO I=0,EndNum,3
+        IF(BTEST(Iz,K))Interleave=IBSET(Interleave,I  )
+        IF(BTEST(Iy,K))Interleave=IBSET(Interleave,I+1)
+        IF(BTEST(Ix,K))Interleave=IBSET(Interleave,I+2)
+        K=K+1
+     ENDDO
+  END FUNCTION Interleave
+
+!-----------------------------------------------------------------
+! Hilbert ordering for three-dimensional data, (3*BitNum)-bit
+! implementation (stored in 64-bit integer). 
+! Interleaved key based on Algortithm H2 of Faloutsos and Roseman, PODS 89.
+  FUNCTION HilbertKey(BitNum,Key)
+     USE DerivedTypes
+     IMPLICIT NONE
+     INTEGER I,J,K,L,BitNum,BeginNum
+     INTEGER(INT8) Key
+     INTEGER(INT8) HilbertKey
+     INTEGER SubKey(21)
+     INTEGER ToState(0:7,12)
+     INTEGER ToBinry(0:7,12)
+!--------------------------------------------------------------        
+!  State table, based on Fig 3 , T. Bially, 
+!  IEEE Trans. on Information Theory, 1969, pp. 658, vol. IT-15
+!                                 0, 1, 2, 3, 4, 5, 6, 7    
+     DATA (ToState(I,1 ),I=0,7) / 9,12, 2, 1, 2, 3, 9, 1/
+     DATA (ToBinry(I,1 ),I=0,7) / 0, 1, 3, 2, 7, 6, 4, 5/
+     DATA (ToState(I,2 ),I=0,7) / 5, 3, 2, 2, 3, 5, 1, 4/
+     DATA (ToBinry(I,2 ),I=0,7) / 4, 3, 5, 2, 7, 0, 6, 1/
+     DATA (ToState(I,3 ),I=0,7) / 2, 3, 6, 3, 1, 7, 7, 1/     
+     DATA (ToBinry(I,3 ),I=0,7) / 6, 5, 1, 2, 7, 4, 0, 3/
+     DATA (ToState(I,4 ),I=0,7) /10, 9, 4, 2, 5, 2, 4, 9/
+     DATA (ToBinry(I,4 ),I=0,7) / 6, 7, 5, 4, 1, 0, 2, 3/
+     DATA (ToState(I,5 ),I=0,7) / 5, 2, 5, 6, 8, 4, 4, 8/      
+     DATA (ToBinry(I,5 ),I=0,7) / 2, 1, 5, 6, 3, 0, 4, 7/
+     DATA (ToState(I,6 ),I=0,7) / 6, 6, 5, 3, 7, 8, 3, 5/
+     DATA (ToBinry(I,6 ),I=0,7) / 2, 5, 3, 4, 1, 6, 0, 7/
+     DATA (ToState(I,7 ),I=0,7) / 6, 7,11,12,11, 7, 6, 3/
+     DATA (ToBinry(I,7 ),I=0,7) / 4, 5, 7, 6, 3, 2, 0, 1/
+     DATA (ToState(I,8 ),I=0,7) / 8, 6,10,11, 8,11, 5, 6/
+     DATA (ToBinry(I,8 ),I=0,7) / 2, 3, 1, 0, 5, 4, 6, 7/
+     DATA (ToState(I,9 ),I=0,7) /12,10, 1, 4,10,12, 9, 9/ 
+     DATA (ToBinry(I,9 ),I=0,7) / 0, 7, 1, 6, 3, 4, 2, 5/
+     DATA (ToState(I,10),I=0,7) / 8, 4, 4, 8,10, 9,10,11/ 
+     DATA (ToBinry(I,10),I=0,7) / 4, 7, 3, 0, 5, 6, 2, 1/
+     DATA (ToState(I,11),I=0,7) / 7, 8,12,10,11,11,10,12/
+     DATA (ToBinry(I,11),I=0,7) / 6, 1, 7, 0, 5, 2, 4, 3/
+     DATA (ToState(I,12),I=0,7) / 1, 7, 7, 1, 9,12,11,12/
+     DATA (ToBinry(I,12),I=0,7) / 0, 3, 7, 4, 1, 2, 6, 5/
+
+! Form 3 bit SubKeys from left to right (Step 3 of H2)
+     DO I=1,BitNum
+        SubKey(I)=0
+     ENDDO
+     K=1
+     BeginNum=3*(BitNum-1)
+     DO I=BeginNum,0,-3
+        IF(BTEST(Key,I  ))SubKey(K)=IBSET(SubKey(K),0)
+        IF(BTEST(Key,I+1))SubKey(K)=IBSET(SubKey(K),1)
+        IF(BTEST(Key,I+2))SubKey(K)=IBSET(SubKey(K),2)
+        IF(K.GT.BitNum)STOP ' gt BitNum '
+        IF(I.LT.0)STOP ' lt 0 '
+        K=K+1
+     ENDDO
+! Change each 3 bit SubKey according to the output key
+! from the current state and move to a new state (Step 4 of H2)
+     I=1
+     DO K=1,BitNum
+        L=SubKey(K)
+        SubKey(K)=ToBinry(L,I)
+        I        =ToState(L,I)
+     ENDDO
+ 
+! Reassemble key from sub keys, with SubKey(21) 
+! the rightmost 3 bits (Step 5 of H2)
+     HilbertKey=0
+     I=0
+     DO K=BitNum,1,-1
+        IF(BTEST(SubKey(K),0))HilbertKey=IBSET(HilbertKey,I  )
+        IF(BTEST(SubKey(K),1))HilbertKey=IBSET(HilbertKey,I+1)
+        IF(BTEST(SubKey(K),2))HilbertKey=IBSET(HilbertKey,I+2)
+        I=I+3
+     ENDDO
+  END FUNCTION HilbertKey
