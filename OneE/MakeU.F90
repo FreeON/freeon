@@ -70,11 +70,11 @@ PROGRAM MakeU
                       + (Pair%A(2)-Pair%B(2))**2 &
                       + (Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
-                    U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlok(BS,GM,Pair)
+                    U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlock(BS,GM,Pair)
                  ENDIF
               ENDDO
 #else
-              U%MTrix%D(R:R+NN-1)=SBlok(BS,Pair)
+              U%MTrix%D(R:R+NN-1)=UBlock(BS,GM,Pair)
 #endif
               U%ColPt%I(P)=AtB
               U%BlkPt%I(P)=R
