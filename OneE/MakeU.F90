@@ -23,7 +23,7 @@ PROGRAM MakeU
 #else
   TYPE(BCSR)                 :: U,T1
 #endif
-  INTEGER                    :: NC
+  INTEGER                    :: NCB,NCC
   REAL(DOUBLE),DIMENSION(3)  :: B
   TYPE(AtomPair)             :: Pair
   TYPE(BSET)                 :: BS
@@ -60,22 +60,24 @@ PROGRAM MakeU
 #endif
         DO AtB=1,NAtoms
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-              NN = Pair%NA*Pair%NB
-              B = Pair%B
-              DO NC = 1,CS_OUT%NCells
-                 Pair%B = B+CS_OUT%CellCarts%D(:,NC)
-                 Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                      + (Pair%A(2)-Pair%B(2))**2 &
-                      + (Pair%A(3)-Pair%B(3))**2
+              NN=Pair%NA*Pair%NB
+              B=Pair%B
+              DO NCB=1,CS_OUT%NCells
+                 Pair%B=B+CS_OUT%CellCarts%D(:,NCB)
+                 Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
+                         +(Pair%A(2)-Pair%B(2))**2 &
+                         +(Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
                     ! Go over ECP centers
                     DO AtC=1,NAtoms
                        KC=GM%AtTyp%I(AtC)
                        IF(BS%NTyp1PF%I(KC)>0)THEN
-                          Cx=GM%Carts%D(1,AtC) 
-                          Cy=GM%Carts%D(2,AtC) 
-                          Cz=GM%Carts%D(3,AtC) 
-                          U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlock(BS,Pair,KC,Cx,Cy,Cz)
+	                 DO NCC=1,CS_OUT%NCells
+	                    Cx=GM%Carts%D(1,AtC)+CS_OUT%CellCarts%D(1,NCC)
+        	            Cy=GM%Carts%D(2,AtC)+CS_OUT%CellCarts%D(2,NCC)
+                            Cz=GM%Carts%D(3,AtC)+CS_OUT%CellCarts%D(3,NCC)
+                            U%MTrix%D(R:R+NN-1)=U%MTrix%D(R:R+NN-1)+UBlock(BS,Pair,KC,Cx,Cy,Cz)
+                         ENDDO
                        ENDIF
                     ENDDO
                  ENDIF
