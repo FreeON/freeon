@@ -1,8 +1,8 @@
-!    COMPUTE THE OVERLAP MATRIX S
-!    Authors: Matt Challacombe and C.J. Tymczak
+!    COMPUTE THE EFFECTIVE CORE POTENTIAL MATRIX U
+!    Author: Matt Challacombe 
 !------------------------------------------------------------
 PROGRAM MakeU
-  USE ECPs
+  USE UBlok
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters  
@@ -13,12 +13,10 @@ PROGRAM MakeU
   USE Macros
   USE LinAlg
   USE AtomPairs
-  USE OverlapBlock
 #ifdef PARALLEL
   USE MondoMPI
 #endif
   IMPLICIT NONE
-
 #ifdef LJDFLSJFLJSDF
 
 #ifdef PARALLEL
@@ -47,7 +45,5 @@ PROGRAM MakeU
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 #endif
-
-CALL Type2()
 
 END PROGRAM MakeU
