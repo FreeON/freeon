@@ -43,6 +43,186 @@ MODULE ParallelQCTC
 
 CONTAINS
 
+
+  SUBROUTINE GetDistrRho(Name,Args,SCFCycle)
+    TYPE(ARGMT) :: Args
+    INTEGER :: NNDist,TotNNDist,NDist,SCFCycle,IOS,I,LMNLen,ENExpt,TotENExpt,&
+               ENDist,TotENDist,ENCoef,TotENCoef,NewNExpt,TotNDistm,&
+               NNCoef,TotNNCoef,TotNCoef,NewNDist,NewNCoef,TotNDist,IErr,Sumi
+          
+    REAL(DOUBLE) :: SumECoef,TotSumECoef
+    CHARACTER(LEN=*) :: Name
+    CHARACTER(Len=DCL) :: Filename
+    TYPE(HGRho) :: Tmp
+    TYPE(INT_VECT) :: CSize,disp
+
+    Filename = TrixFile('Rho'//IntToChar(MyID),Args,SCFCycle)
+    Open(Unit=Seq,File=TRIM(Filename),Status='old',form='unformatted',access='sequential')
+
+    Read(Unit=Seq,Err=202,IOSTAT=IOS) Tmp%NExpt,Tmp%NDist,Tmp%NCoef
+    CALL New(Tmp%NQ  ,Tmp%NExpt)
+    CALL New(Tmp%OffQ,Tmp%NExpt)
+    CALL New(Tmp%OffR,Tmp%NExpt)
+    CALL New(Tmp%Lndx,Tmp%NExpt)
+    CALL New(Tmp%Expt,Tmp%NExpt)
+    CALL New(Tmp%Qx,  Tmp%NDist)
+    CALL New(Tmp%Qy,  Tmp%NDist)
+    CALL New(Tmp%Qz,  Tmp%NDist)
+    CALL New(Tmp%Co,  Tmp%NCoef)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%NQ%I  (i),i=1,Tmp%NExpt)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%OffQ%I(i),i=1,Tmp%NExpt)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%OffR%I(i),i=1,Tmp%NExpt)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Lndx%I(i),i=1,Tmp%NExpt)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Expt%D(i),i=1,Tmp%NExpt)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Qx%D  (i),i=1,Tmp%NDist)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Qy%D  (i),i=1,Tmp%NDist)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Qz%D  (i),i=1,Tmp%NDist)
+    Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Tmp%Co%D  (i),i=1,Tmp%NCoef)
+    Close(UNIT=Seq,STATUS='KEEP')
+
+#ifdef DIAG_QCTC
+IF(MyID == 0) THEN
+   write(*,*) 'Tmp%NQ%I(Tmp%NExpt) =', Tmp%NQ%I(Tmp%NExpt)
+   write(*,*) 'Tmp%Lndx%I(Tmp%NExpt) =', Tmp%Lndx%I(Tmp%NExpt)
+   LMNLen = LHGTF(Tmp%Lndx%I(Tmp%NExpt))
+   write(*,*) 'LMNLen =', LMNLen
+ENDIF
+#endif
+
+    ENExpt = Tmp%NExpt-1
+    ENDist = Sum(Tmp%NQ%I(1:ENExpt))
+    NNDist = Tmp%NQ%I(Tmp%NExpt)
+    NNCoef = LHGTF(Tmp%Lndx%I(Tmp%NExpt))*Tmp%NQ%I(Tmp%NExpt)
+    ENCoef = Tmp%NCoef-NNCoef
+    NDist = Sum(Tmp%NQ%I(1:Tmp%NExpt))
+    IF(NDist /= Tmp%NDist) THEN
+      STOP 'ERR: something is wrong!'
+    ENDIF
+
+    SumECoef = 0.0D0
+    DO I = 1, ENCoef
+      SumECoef = SumECoef + Tmp%Co%D(I)
+    ENDDO
+    
+    TotENExpt= AllReduce(ENExpt)
+    TotENDist = AllReduce(ENDist)
+    TotENCoef = AllReduce(ENCoef)
+    TotNNCoef = AllReduce(NNCoef)
+    TotNDist = AllReduce(NDist)
+    TotNCoef = AllReduce(Tmp%NCoef)
+    TotNNDist = AllReduce(NNDist)
+
+    TotSumECoef = AllReduce(SumECoef)
+#ifdef DIAG_QCTC
+IF(MyID ==0 ) THEN
+   write(*,*) 'TotENExpt = ',TotENExpt
+   write(*,*) 'TotENDist = ',TotENDist
+   write(*,*) 'TotENCoef = ',TotENCoef
+   write(*,*) 'TotNNCoef = ',TotNNCoef
+   write(*,*) 'TotNCoef = ',TotNCoef
+   write(*,*) 'TotSumECoef = ',TotSumECoef
+   write(*,*) 'TotNDist = ',TotNDist
+   write(*,*) 'TotNNDist = ',TotNNDist
+ENDIF
+#endif
+
+    !! electronic + 1
+    NewNExpt = TotENExpt + 1 
+    NewNDist = TotNDist
+    NewNCoef = TotNCoef
+#ifdef DIAG_QCTC
+IF(MyID == 0) THEN
+    write(*,*) 'NewNExpt,NewNDist,NewNCoef=',NewNExpt,NewNDist,NewNCoef
+ENDIF
+#endif
+    CALL New_HGRho(Rho,(/NewNExpt,NewNDist,NewNCoef/))
+
+    CALL New(CSize,NPrc-1,M_O=0)
+    CALL New(disp,NPrc-1,M_O=0)
+    CALL MPI_AllGather(ENExpt,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+#ifdef DIAG_QCTC
+IF(MyID == 1) THEN
+  sumi = 0
+  DO i = 0, NPrc-1
+    sumi  = sumi + Csize%I(i)
+  ENDDO
+  WRITE(*,*) 'sumi = ', sumi
+ENDIF
+#endif
+    disp%I(0) = 0
+    do i = 1, nprc-1
+      disp%i(i) = disp%i(i-1)+csize%i(i-1)
+    enddo
+    CALL MPI_AllGatherV(Tmp%NQ%I(1),ENExpt,MPI_INTEGER,Rho%NQ%I(1),Csize%I(0),disp%I(0),MPI_INTEGER, &
+                        MONDO_COMM,IErr)
+    CALL MPI_AllGatherV(Tmp%Lndx%I(1),ENExpt,MPI_INTEGER,Rho%Lndx%I(1),Csize%I(0),disp%I(0),MPI_INTEGER, &
+                        MONDO_COMM,IErr)
+    CALL MPI_AllGatherV(Tmp%Expt%d(1),ENExpt,MPI_DOUBLE_PRECISION,Rho%Expt%d(1),Csize%I(0),disp%I(0),MPI_DOUBLE_PRECISION, &
+                        MONDO_COMM,IErr)
+    Rho%NQ%i(NewNExpt) = TotNNDist
+    Rho%Lndx%i(NewNExpt) = Tmp%Lndx%i(Tmp%NExpt)
+    Rho%Expt%D(NewNExpt) = Tmp%expt%d(Tmp%NExpt)
+    if(Rho%Lndx%i(NewNExpt) /= 0) THEN
+      stop 'must be zero!!!'
+    endif
+    if(Rho%expt%d(newnexpt) /= nuclearexpnt) then
+      stop 'must be nuclearexpt!'
+    endif
+
+if(myid == 1) then 
+  do i = 1, totenexpt-1
+    ! write(*,*) 'totrho%nq%i(i=',i,') = ',totrho%nq%i(i)
+    ! write(*,*) 'totrho%lndx%i(i=',i,') = ',totrho%lndx%i(i)
+    ! write(*,*) 'totrho%expt%d(i=',i,') = ',totrho%expt%d(i)
+  enddo
+endif
+
+    CALL MPI_AllGather(ENDist,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    disp%I(0) = 0
+    do i = 1, nprc-1
+      disp%i(i) = disp%i(i-1)+csize%i(i-1)
+    enddo
+    call mpi_allgatherv(Tmp%Qx%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Qy%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Qz%d(1),ENDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+
+    CALL MPI_AllGather(NNDist,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+
+    disp%I(0) = 0
+    do i = 1, nprc-1
+      disp%i(i) = disp%i(i-1)+csize%i(i-1)
+    enddo
+    call mpi_allgatherv(tmp%Qx%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(tmp%Qy%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(tmp%Qz%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+
+    ! now Co
+    CALL MPI_AllGather(ENCoef,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    disp%I(0) = 0
+    do i = 1, nprc-1
+      disp%i(i) = disp%i(i-1)+csize%i(i-1)
+    enddo
+    call mpi_allgatherv(Tmp%Co%d(1),ENCoef,MPI_DOUBLE_PRECISION,Rho%Co%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    CALL MPI_AllGather(NNCoef,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
+    disp%I(0) = 0
+    do i = 1, nprc-1
+      disp%i(i) = disp%i(i-1)+csize%i(i-1)
+    enddo
+    call mpi_allgatherv(Tmp%Co%d(ENCoef+1),NNCoef,MPI_DOUBLE_PRECISION,Rho%Co%d(TotENCoef+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+
+    ! finally OffR and OffQ
+    Rho%OffQ%i(1) = 0
+    Rho%OffR%i(1) = 0
+    do i = 2, NewNExpt
+      Rho%OffQ%i(i) = Rho%OffQ%i(i-1)+Rho%NQ%i(i-1)
+      Rho%OffR%i(i) = Rho%OffR%i(i-1)+Rho%NQ%i(i-1)*LHGTF(Rho%Lndx%I(i-1))
+    ! write(*,*) 'i = ', i, ', Rho%OffQ%i(i) = ', Rho%OffQ%i(i), ', Rho%OffR%i(i) = ', Rho%OffR%i(i)
+    enddo
+    RETURN
+ 202 CALL Halt('Died in GetRho, IOSTAT='//TRIM(IntToChar(IOS)))
+  END SUBROUTINE GetDistrRho
+
+
   SUBROUTINE NukE_ENPart(GM_Loc)
     TYPE(CRDS),  INTENT(IN)  :: GM_Loc
     INTEGER :: NProc,NAtoms

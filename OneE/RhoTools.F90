@@ -340,10 +340,16 @@ MODULE RhoTools
           ENDIF
        ENDDO
        NExpt         = NExpt+1
+#ifdef PARALLEL
+         IE = NExpt
+#endif
        Expt%D(NExpt) = Zeta
        Lndx%I(NExpt) = Ell
 100    CONTINUE
+#ifdef PARALLEL
+#else
        IF(IE/=0)Lndx%I(IE) = MAX(Lndx%I(IE),Ell)
+#endif
     ENDDO
 !
 !   Count the number of distributions per  Exponents, the number of distibutions and coefs
