@@ -680,7 +680,7 @@ MODULE ParseInput
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
 !           Print the coordinates
-!            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
 !
             IF(LastConfig)EXIT
          ENDDO
