@@ -142,6 +142,7 @@ PROGRAM ONX2
 !!$#endif
 !!$  !ELSE
 !!$  CASE DEFAULT
+
 #ifdef ONX2_PARALLEL
      CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,0),'ONXPart',Args)
 #else
@@ -355,9 +356,6 @@ PROGRAM ONX2
   CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
   CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
   !
-
-
-
 #ifdef ONX2_PARALLEL
   !
   IF(MyID.EQ.ROOT) THEN

@@ -28,6 +28,7 @@ MODULE ONX2ComputK
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
+  USE Thresholding
   USE ONX2DataType
   USE InvExp
   USE ONXParameters
@@ -95,13 +96,14 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE), DIMENSION(MaxFuncPerAtmBlk**4              ) :: C
     TYPE(AtomPr), DIMENSION(MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
+    REAL(DOUBLE), DIMENSION(MaxShelPerAtmBlk**2) :: DMcd
     !-------------------------------------------------------------------
     INTEGER                    :: LocNInt
     REAL(DOUBLE)               :: NInts
     !-------------------------------------------------------------------
     TYPE(ONX2OffSt) :: OffSet
     !-------------------------------------------------------------------
-    REAL(DOUBLE), EXTERNAL :: DGetAbsMax
+    REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     !-------------------------------------------------------------------
     REAL(DOUBLE) :: TmBeg,TmEnd
 
@@ -113,14 +115,9 @@ CONTAINS
 
     integer :: iint,iprint,isize
     !
-    REAL(DOUBLE), PARAMETER :: ThresholdTwoE=-1.0D-15
-    !REAL(DOUBLE), PARAMETER :: ThresholdTwoE=1.0D-12
     !-------------------------------------------------------------------
     !
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
-!!$    do iint=1,size(D%MTrix%D)
-!!$    D%MTrix%D(iint)=dble(iint)
-!!$    enddo
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -137,6 +134,8 @@ CONTAINS
        STOP 'Incrase the size of ACAtmPair and BDAtmPair'
     endif
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
+    !write(*,*) 'CS_OUT%CellCarts=',CS_OUT%CellCarts%D(1,:)
+    !write(*,*) 'Thresholds%Dist',Thresholds%Dist,' Thresholds%TwoE',Thresholds%TwoE
     tmp1=0.0d0
     tmp4=0.0d0
     !Simple check Simple check Simple check Simple check
@@ -195,6 +194,19 @@ CONTAINS
 #else
           Dcd=DGetAbsMax(NBFC*NBFD,D%MTrix%D(iPtrD))
 #endif
+          !
+#ifdef ONX2_PARALLEL
+          CALL GetAbsDenBlk(U%MTrix(1,1),NBFC,NBFD,DMcd(1),    &
+               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
+               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
+               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+#else
+          CALL GetAbsDenBlk(D%MTrix%D(iPtrD),NBFC,NBFD,DMcd(1),&
+               &            BS%NCFnc%I(KC),BS%NCFnc%I(KD),     &
+               &            BS%LStrt%I(1,KC),BS%LStop%I(1,KC), &
+               &            BS%LStrt%I(1,KD),BS%LStop%I(1,KD)  )
+#endif
+          !
 #ifdef ONX2_DBUG
           WRITE(*,*) 'Max(Dcd)=',Dcd
 #endif
@@ -209,32 +221,8 @@ CONTAINS
              KA=GM%AtTyp%I(AtA)
              NBFA=BS%BfKnd%I(KA)
              !
-             !Skip out Dcd*sqrt(ac(R)|ac(R))*sqrt(b_1d(0)|b_1d(0))<Thresh
-             !write(*,*) '-----'
-!!$             IF(CS_OUT%NCells.EQ.1) THEN
-!!$                !write(*,'(A,2I4,E22.15,A,2I4,E22.15,E22.15)') '(ac|ac)',AtA,AtC,AtAList%SqrtInt(1),&
-!!$                !     &                                ' (bd|bd)',1,AtD,AtBListTmp%SqrtInt(1),&
-!!$                !     &                                 AtAList%SqrtInt(1)*AtBListTmp%SqrtInt(1)
-!!$                ACAtmInfo%NCell=1
-!!$                !IF(AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1).LT.ThresholdTwoE) THEN
-!!$                IF(AtAList%SqrtInt(1)*AtBListTmp%SqrtInt(1).LT.ThresholdTwoE) THEN
-!!$                   write(*,'(A,E22.15,A,E22.15)') 'We skip 1', &
-!!$                        !& AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1), &
-!!$                        & AtAList%SqrtInt(1)*AtBListTmp%SqrtInt(1), &
-!!$                        & '.LT.',ThresholdTwoE  
-!!$                   EXIT
-!!$                ENDIF
-!!$             ELSE
-             !ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1),Thresholds%TwoE)
-             ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1)*Dcd,ThresholdTwoE)
-             IF(ACAtmInfo%NCell.EQ.0) THEN
-                !write(*,'(A,E22.15,A,E22.15)') 'We skip 1', &
-                !     !& AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1), &
-                !     & AtAList%SqrtInt(1)*AtBListTmp%SqrtInt(1), &
-                !     & '.LT.',ThresholdTwoE  
-                EXIT
-             ENDIF
-!!$             ENDIF
+             ACAtmInfo%NCell=GetNonNeglCell(AtAList,AtBListTmp%SqrtInt(1)*Dcd,Thresholds%TwoE)
+             IF(ACAtmInfo%NCell.EQ.0) EXIT
              !
              ! Find the row in Kx.
 #ifdef ONX2_PARALLEL
@@ -263,36 +251,10 @@ CONTAINS
              DO ! Run over AtB
                 AtB=AtBList%Atom 
                 !
-                !if(AtB.eq.1.and.AtA.eq.2) then
-!                if(AtB.eq.1.and.AtD.eq.1.and.AtA.eq.2.and.AtC.eq.2) then
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
                    !
-                   !Skip out |Dcd|*sqrt(ac(0)|ac(0))*sqrt(bd(R')|bd(R'))<Thresh
-                   !write(*,*) '-----'
-!!$                   IF(CS_OUT%NCells.EQ.1) THEN
-!!$                      !write(*,'(A,2I4,E22.15,A,2I4,E22.15,E22.15)') &
-!!$                      !&                                ' (ac|ac)',AtA,AtC,AtAList%SqrtInt(1),&
-!!$                      !&                                ' (bd|bd)',AtB,AtD,AtBListTmp%SqrtInt(1),&
-!!$                      !&                                 AtAList%SqrtInt(1)*AtBListTmp%SqrtInt(1)
-!!$                      !IFasaa(AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1).LT.ThresholdTwoE) THEN
-!!$                      IF(AtAList%SqrtInt(1)*AtBList%SqrtInt(1).LT.ThresholdTwoE) THEN
-!!$                         write(*,'(A,E22.15,A,E22.15)') 'We skip 2', &
-!!$                              !& AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1), &
-!!$                              & AtAList%SqrtInt(1)*AtBList%SqrtInt(1), &
-!!$                              & '.LT.',ThresholdTwoE  
-!!$                         EXIT
-!!$                      ENDIF
-!!$                   ELSE
-                   !BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1),Thresholds%TwoE)
-                   BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1)*Dcd,ThresholdTwoE)
-                   IF(BDAtmInfo%NCell.EQ.0) THEN
-!                         write(*,'(A,E22.15,A,E22.15)') 'We skip 2', &
-!                              !& AtAList%SqrtInt(1)*Dcd*AtBListTmp%SqrtInt(1), &
-!                              & AtAList%SqrtInt(1)*AtBList%SqrtInt(1), &
-!                              & '.LT.',ThresholdTwoE  
-                      EXIT
-                   ENDIF
-!!$                   ENDIF
+                   BDAtmInfo%NCell=GetNonNeglCell(AtBList,AtAList%SqrtInt(1)*Dcd,Thresholds%TwoE)
+                   IF(BDAtmInfo%NCell.EQ.0) EXIT
                    !
                    KB=GM%AtTyp%I(AtB)
                    NBFB=BS%BfKnd%I(KB)
@@ -312,7 +274,6 @@ CONTAINS
                    call cpu_time(tmp6)
                    tmp4=tmp4+tmp6-tmp5
                    !
-                   !CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,C(1),BIG_DBL)
                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,C(1),0.0d0)
                    !
                    CFAC=0
@@ -335,13 +296,21 @@ CONTAINS
                             DO CFD=1,BS%NCFnc%I(KD) ! Run over blkfunc on D
                                CFBD=CFBD+1
                                !
-                               ! Compute integral type.
-                               IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
+                               !if(DMcd((CFC-1)*NCFncD+CFD)>Dcd) stop
+                               !if(DMab((CFA-1)*NCFncB+CFB)>Dab) stop
                                !
-                               ! The integral interface.
-                               INCLUDE 'ERIInterface.Inc'
+                               IF(DMcd((CFC-1)*BS%NCFnc%I(KD)+CFD)* &
+                                    & AtAList%SqrtInt(ACR)*AtBList%SqrtInt(BDR)>Thresholds%TwoE) THEN
+                                  !
+                                  ! Compute integral type.
+                                  IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
+                                  !
+                                  ! The integral interface.
+                                  INCLUDE 'ERIInterface.Inc'
+                                  !
+                                  NInts=NInts+DBLE(LocNInt)
+                               ENDIF
                                !
-                               NInts=NInts+DBLE(LocNInt)
                                OffSet%D=OffSet%D+BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
                             ENDDO ! End blkfunc on D
                             OffSet%B=OffSet%B+BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
@@ -366,7 +335,6 @@ CONTAINS
                    V => InsertSRSTNode(Q%RowRoot,AtB)
                    IF(.NOT.ASSOCIATED(V%MTrix)) THEN
                       ALLOCATE(V%MTrix(NBFA,NBFB),STAT=MemStatus)
-                      !CALL IncMem(MemStatus,0,NBFA*NBFB,'AddFASTMATBlok')
                       CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB,V%MTrix(1,1),0.0d0)
                    ENDIF
                    !
@@ -382,12 +350,7 @@ CONTAINS
                         &     Kx%MTrix%D(IPtrK),1)
 #endif
                    !
-                   !CALL PrintMatrix(Kx%MTrix%D(IPtrK),NBFA,NBFB,2,TEXT_O='Int matrix')
-                   !CALL Print_BCSR(Kx,'Kx',Unit_O=6)
-                   !
                 ENDIF
-                !
-!                endif
                 !
                 IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT
                 AtBList=>AtBList%AtmNext
@@ -411,20 +374,11 @@ CONTAINS
 #endif
     ENDDO ! End AtC
     !
-#ifdef ONX2_INFO
-#ifdef ONX2_PARALLEL
-    IF(MyID.EQ.ROOT) THEN
-#endif
-       WRITE(*,*) '-------------------------------------'
-       WRITE(*,*) 'ComputK Statistic.'
-       WRITE(*,'(A,F22.1)') ' Nbr ERI  =',NInts
-       WRITE(*,'(A,I4)') ' Max Prim =',INT(SQRT(DBLE(MaxCont)))
-       WRITE(*,*) '-------------------------------------'
-#ifdef ONX2_PARALLEL
-    ENDIF
-#endif
-#endif
-  !
+    write(*,*) 'ONX2ComputK: CS_OUT%NCells',CS_OUT%NCells,' NBasF',NBasF
+    WRITE(*,100) NInts,CS_OUT%NCells**2*DBLE(NBasF)**4, &
+         &       NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
+100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
+    !
   END SUBROUTINE ComputK
   !
   !

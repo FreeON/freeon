@@ -33,7 +33,6 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
 
   !write(*,*) 'intssss'
 
-  !C(1)=0.0D0
   DO J=1,LKet
      Eta = PrmBufK(1,J)
      Qx  = PrmBufK(2,J)
@@ -76,6 +75,7 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
      END DO ! K
      C(1)=C(1)+TwoE*Uq
   END DO ! J
+
 END SUBROUTINE IntSSSS5
 
 

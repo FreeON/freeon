@@ -73,7 +73,7 @@ CONTAINS
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
-    REAL(DOUBLE)                         :: RInt,AC2,NInts
+    REAL(DOUBLE)                         :: RInt,AC2,NInts,ThresholdDistance
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(CS_OUT%NCells) :: RIntCell
     INTEGER      , DIMENSION(CS_OUT%NCells) :: IndxCell
@@ -83,30 +83,28 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
-    REAL(DOUBLE), PARAMETER :: ThresholdIntegral=-1.0D-15
-    !REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
-    !REAL(DOUBLE), PARAMETER :: ThresholdIntegral=1.0D-12
-    REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
-    !-------------------------------------------------------------------
     !
     integer :: isize
-    !Simple check
+    !
+    !Simple check Simple check Simple check Simple check Simple check Simple check
     isize=0
     do i=1,natoms
        isize=MAX(isize,BS%BfKnd%I(GM%AtTyp%I(i)))
        IF((BS%BfKnd%I(GM%AtTyp%I(i)))**4.GT.SIZE(C)) THEN
           write(*,*) 'size',(BS%BfKnd%I(GM%AtTyp%I(i)))**4
-          STOP 'Incrase the size of C'
+          write(*,*) 'MaxShelPerAtmBlk',MaxShelPerAtmBlk
+          write(*,*) 'SIZE(ACAtmPair)=',MaxShelPerAtmBlk**2*CS_OUT%NCells
+          write(*,*) 'SIZE(C)',MaxFuncPerAtmBlk**4
+          STOP 'In MakeList: Incrase the size of C'
        ENDIF
     enddo
-#ifdef ONX2_PARALLEL
-  IF(MyID.EQ.ROOT) &
-#endif
-!    write(*,*) 'size C=',isize**4
-    !
+    !Simple check Simple check Simple check Simple check Simple check Simple check
     !
     NULLIFY(NodeA)
     NInts=0.0d0
+    !
+    !
+    ThresholdDistance=-10.d0*DLOG(Thresholds%Dist)
     !
 !#ifdef ONX2_PARALLEL
     ! TODO TODO TODO TODO TODO TODO TODO TODO
@@ -136,9 +134,6 @@ CONTAINS
           !
           ! Check the interatomic distance in the working box.
           AC2=(ACAtmInfo%Atm12X)**2+(ACAtmInfo%Atm12Y)**2+(ACAtmInfo%Atm12Z)**2
-          !
-          ! Cycle if needed.
-          IF(AC2.GT.ThresholdDistance) CYCLE
           !
           ! Set the range for range of exchange.
           DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
@@ -188,7 +183,7 @@ CONTAINS
              RInt=DSQRT(RInt)
              !
              ! Keep the cell if needed.
-             IF(RInt.GT.ThresholdIntegral) THEN
+             IF(RInt.GT.Thresholds%TwoE) THEN
                 NCell=NCell+1
                 RIntCell(NCell)=RInt
                 IndxCell(NCell)=iCell
@@ -556,7 +551,9 @@ CONTAINS
                 Expt=Z1+Z2
                 InvExpt=1.0d0/Expt
                 XiR12=Z2*Z1*InvExpt*R12
-                IF(XiR12<PrimPairDistanceThreshold) THEN
+
+                IF(TestPrimPair(Z2*Z1*InvExpt,R12)) THEN
+!                IF(XiR12<PrimPairDistanceThreshold) THEN
                    JJ=JJ+1
                    IJ=JJ+II
                    AtmPair(CF12)%SP%Cst(1,IJ)=Expt

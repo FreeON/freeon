@@ -288,16 +288,24 @@ PROGRAM GONX2
   !
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
   !
-  !write(*,*) 'Grad Kx'
-  !do i=1,natoms
-  !   write(*,100) i,GradX%D(:,i)
-  !enddo
+#ifdef 0
+  write(*,*) 'Grad Kx'
+  do i=1,natoms
+     write(*,100) i,GradX%D(:,i)
+  enddo
 
-  !write(*,*) 'Grad Tot'
-  !do i=1,natoms
-  !   write(*,100) i,GradAux%D(:,i)
-  !enddo
-  !100 format(I4,2X,3E24.16)
+  write(*,*) 'Grad before'
+  do i=1,natoms
+     write(*,100) i,GradAux%D(:,i)-GradX%D(:,i)
+  enddo
+
+  write(*,*) 'Grad Tot'
+  do i=1,natoms
+     write(*,100) i,GradAux%D(:,i)
+  enddo
+
+  100 format(I4,2X,3E24.16)
+#endif
   !
   !
   !------------------------------------------------
@@ -376,6 +384,8 @@ PROGRAM GONX2
   CALL Delete(BSp)
   CALL Delete(GMp)
   !
+!stop
+
   CALL ShutDown(Prog)
   !
 #ifdef ONX2_PARALLEL

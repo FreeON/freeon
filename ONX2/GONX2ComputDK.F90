@@ -380,7 +380,7 @@ CONTAINS
                                !
 #ifdef GTRESH
                                IF(DMcd((CFC-1)*NCFncD+CFD)*DMab((CFA-1)*NCFncB+CFB)*Half* &
-                                    & AtAList%SqrtInt(1)*AtBList%SqrtInt(1)>Thresholds%TwoE) THEN
+                                    & AtAList%SqrtInt(ACR)*AtBList%SqrtInt(BDR)>Thresholds%TwoE) THEN
 #endif
                                   !
                                   ! Compute integral type.
