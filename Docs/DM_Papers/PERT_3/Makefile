@@ -3,7 +3,7 @@ all:	latex #dvi
 new: 	clean links dvi
 
 links:
-	ln -s ../../Bib/mondo.bib ./mondo.bib 
+	ln -s ../../Bib/mondo_new.bib ./mondo_new.bib 
 	ln -s ../../RevTex/revtex4.cls ./revtex4.cls
 	ln -s ../../RevTex/apsrev.bst  ./apsrev.bst
 	ln -s ../../RevTex/apsrmp.bst  ./apsrmp.bst
@@ -28,4 +28,4 @@ latex:
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
-	rm -rf mondo.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
+	rm -rf mondo.bib mondo_new.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
