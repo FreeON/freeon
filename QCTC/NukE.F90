@@ -34,6 +34,7 @@ MODULE NuklarE
 !---------------------------------------------------------------------------------------------
        NukE=Zero 
        DO At=1,GM_Loc%Natms
+	IF(GM_Loc%AtNum%D(At)<105D0)THEN
 !         Initialize |BRA>
           HGBra(1) =-GM_Loc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
           SPBraC(0)=-GM_Loc%AtNum%D(At)
@@ -69,6 +70,7 @@ MODULE NuklarE
 !         Accumulate the atomic contribution
           NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0) 
 #endif
+	ENDIF
        ENDDO
      END FUNCTION NukE
 !
