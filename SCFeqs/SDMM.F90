@@ -258,9 +258,9 @@ PROGRAM SDMM
    CALL New(P2)
    CALL New(P3)
    CALL SetEq(T2,P)          
-   OldE=BIG_DBL
-   OldDeltaN=BIG_DBL
-   OldDeltaP=BIG_DBL
+   OldE=1.D20
+   OldDeltaN=1.D20
+   OldDeltaP=1.D20
    NPur=0
    FixedUVW=.FALSE.
    DO J=0,40
@@ -336,7 +336,7 @@ PROGRAM SDMM
 !             EXIT
           ENDIF
 !         Check for density matrix stall out 
-          IF(DeltaPQ<7.D-3)THEN
+          IF(DeltaPQ<1.D-3)THEN
 !             WRITE(*,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
 !             WRITE(Out,*)' SDMM EXIT 2, DeltaPQ = ',DeltaPQ
              ToExit=.TRUE.
