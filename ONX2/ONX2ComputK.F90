@@ -69,7 +69,7 @@ CONTAINS
     !
     !-------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-    TYPE(fastmat)              , POINTER :: DFM,KxFM
+    TYPE(FASTMAT)              , POINTER :: DFM,KxFM
     TYPE(FASTMAT)              , POINTER :: P,Q
     TYPE(SRST   )              , POINTER :: U,V
 #else
@@ -103,7 +103,7 @@ CONTAINS
     REAL(DOUBLE),EXTERNAL      :: MondoTimer
     !-------------------------------------------------------------------
     integer :: i,isize,aalen,bblen,cclen,ddlen
-    real(double) :: t1,t2,tt
+    real(double) :: t1,t2,tt,fac
     tt=0.0d0
     !
     ! Initialize.
@@ -241,10 +241,10 @@ CONTAINS
              ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
              !
              ! Get atom pair for BD.
-call cpu_time(t1)
+             !call cpu_time(t1)
              CALL GetAtomPair(ACAtmInfo,AtAList,ACAtmPair,BSc,BSp,CS_OUT)
-call cpu_time(t2)
-tt=tt+t2-t1
+             !call cpu_time(t2)
+             !tt=tt+t2-t1
              !
              AtBList=>AtBListTmp
              !
@@ -252,7 +252,6 @@ tt=tt+t2-t1
                 AtB=AtBList%Atom 
                 !
                 IF(AtB.LE.AtA) THEN ! Symmetry of the K matrix
-
                    BDAtmInfo%NFPair=GetNonNFPair(AtBList,AtAList%RInt(1)*Dcd,Thresholds%TwoE &
 #ifdef GTRESH
                    & )
@@ -274,10 +273,10 @@ tt=tt+t2-t1
                    BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
                    !
                    ! Get atom pair for BD.
-call cpu_time(t1)
+                   !call cpu_time(t1)
                    CALL GetAtomPair(BDAtmInfo,AtBList,BDAtmPair,BSc,BSp,CS_OUT)
-call cpu_time(t2)
-tt=tt+t2-t1
+                   !call cpu_time(t2)
+                   !tt=tt+t2-t1
                    !
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
@@ -301,11 +300,11 @@ tt=tt+t2-t1
                          BBLen=BSc%LStop%I(CFB,KB)-BSc%LStrt%I(CFB,KB)+1
                          DDLen=BSp%LStop%I(CFD,KD)-BSp%LStrt%I(CFD,KD)+1
 
-!#ifdef GTRESH
-!                         IF(DMcd((CFC-1)*NCFncD+CFD)* &
-!                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
-!                            IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(iFBD)<Thresholds%TwoE) EXIT RnOvFBD
-!#endif
+#ifdef GTRESH
+                         IF(DMcd((CFC-1)*NCFncD+CFD)* &
+                              & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
+                            IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(iFBD)<Thresholds%TwoE) EXIT RnOvFBD
+#endif
                             OffSet%B=OffArrC%I(CFB,KB)
                             OffSet%D=OffArrP%I(CFD,KD)
                             !
@@ -315,21 +314,27 @@ tt=tt+t2-t1
                             INCLUDE 'ERIInterfaceB.Inc'
 
                             NInts=NInts+DBLE(LocNInt)
-!#ifdef GTRESH
-!                         ENDIF
-!#endif
+#ifdef GTRESH
+                         ENDIF
+#endif
                       ENDDO RnOvFBD
                    ENDDO RnOvFAC
                    !
                    ! Get address for Kx and digest the block of integral.
 #ifdef ONX2_PARALLEL
+                   if(atb.le.0) stop 'In ComputK'
                    V => InsertSRSTNode(Q%RowRoot,AtB)
                    IF(.NOT.ASSOCIATED(V%MTrix)) THEN
                       ALLOCATE(V%MTrix(NBFA,NBFB),STAT=MemStatus)
                       CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB,V%MTrix(1,1),0.0d0)
                    ENDIF
                    !
-                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
+                   ! The variable -Fac- is needed to get the 
+                   ! right full K matrix when filling out in ONX.
+                   Fac=-1.0d0
+                   iF(AtA.EQ.AtB) Fac=-0.5d0
+                   !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,-1.0d0,C(1), &
+                   CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,Fac,C(1), &
                         &     NBFA*NBFB,U%MTrix(1,1),1,1.0d0, &
                         &     V%MTrix(1,1),1)
 #else
@@ -369,7 +374,12 @@ tt=tt+t2-t1
     DEALLOCATE(ACAtmPair,BDAtmPair,STAT=iErr)
     IF(iErr.NE.0) CALL Halt('In ComputK: Deallocation problem.')
     !
- !   write(*,*) 'time',tt
+#ifdef ONX2_PARALLEL
+    ! We need to remove the empty Row we may have created.
+    CALL FASTMAT_RmEmptyRow(KxFM)
+#endif
+    !
+    !write(*,*) 'time',tt
     !
 !!$#ifdef ONX2_PARALLEL
 !!$    NIntsTot=Reduce(NInts)
@@ -384,6 +394,32 @@ tt=tt+t2-t1
 !!$100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputK
+  !
+  !
+#ifdef ONX2_PARALLEL
+  SUBROUTINE FASTMAT_RmEmptyRow(A)
+    TYPE(FASTMAT), POINTER :: A
+    TYPE(FASTMAT), POINTER :: P,Q
+    TYPE(SRST   ), POINTER :: U
+    NULLIFY(P,Q,U)
+    P=>A%Next
+    Q=>A
+    DO
+       IF(.NOT.ASSOCIATED(P)) EXIT
+       U=>P%RowRoot
+       IF(.NOT.ASSOCIATED(U%Left).AND..NOT.ASSOCIATED(U%Right)) THEN
+          !write(*,*) 'The Row',P%Row,' MyID',MyID
+          Q%Next=>P%Next
+          CALL Delete_SRST_1(U)
+          DEALLOCATE(P)
+          P=>Q%Next
+       ELSE
+          Q=>P
+          P=>P%Next
+       ENDIF
+    ENDDO
+  END SUBROUTINE FASTMAT_RmEmptyRow
+#endif
   !
   !
   INTEGER FUNCTION GetNonNFPair(List,DFac,Trsh)

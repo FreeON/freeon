@@ -25,7 +25,7 @@ PROGRAM ONX2
   USE MondoMPI
   USE FastMatrices
   USE ONXRng    , ONLY: RangeOfExchangeFASTMAT
-  USE ONXFillOut, ONLY: FillOutFASTMAT
+  !oUSE ONXFillOut, ONLY: FillOutFASTMAT,FillOutBCSR
   USE ONXGet    , ONLY: Get_Essential_RowCol,GetOffArr
   USE PartDrv   , ONLY: PDrv_Initialize,PDrv_Finalize
 #else
@@ -40,7 +40,7 @@ PROGRAM ONX2
   TYPE(FASTMAT),POINTER          :: KxFM
   TYPE(FASTMAT),POINTER          :: DFM
   TYPE(DBCSR)                    :: D
-  TYPE(BCSR )                    :: Kx
+  TYPE(BCSR )                    :: Kx,T1,T2
 #else
   TYPE(BCSR)                     :: D
   TYPE(BCSR)                     :: Kx,T1,T2
@@ -147,8 +147,7 @@ PROGRAM ONX2
 #ifdef ONX2_PARALLEL
  !IF(MyID.EQ.ROOT) &
 #endif
-!  WRITE(*,*) '-------- We are in ONX2 --------'
-  !
+  !WRITE(*,*) '-------- We are in ONX2 --------'
   !
   SELECT CASE(SCFActn)
   CASE('StartResponse','FockPrimeBuild')
@@ -214,7 +213,6 @@ PROGRAM ONX2
   ! Make the distribution list(s).
   !WRITE(*,*) 'make List'
 #ifdef ONX2_PARALLEL
-  Time1 = MondoTimer()
   Time1 = MondoTimer()
   CALL MakeList(ListC,GMc,BSc,GMp,BSp,CS_OUT,CPt,CNbr,APt,ANbr)
   CALL MPI_Barrier(MONDO_COMM,IErr)
@@ -298,9 +296,9 @@ PROGRAM ONX2
   !------------------------------------------------
   ! 
 #ifdef ONX2_PARALLEL
-  time1 = MondoTimer()
-  CALL FillOutFastMat(BSc,GMc,KxFM)
-  time2 = MondoTimer()
+  !otime1 = MondoTimer()
+  !oCALL FillOutFastMat(BSc,GMc,KxFM)
+  !otime2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   CALL FillOutBCSR(BSc,GMc,Kx)
@@ -311,9 +309,9 @@ PROGRAM ONX2
   !------------------------------------------------
   ! Normilization.
 #ifdef ONX2_PARALLEL
-  time1 = MondoTimer()
-  CALL TrnMatBlk(BSc,GMc,KxFM)
-  time2 = MondoTimer()
+  !otime1 = MondoTimer()
+  !oCALL TrnMatBlk(BSc,GMc,KxFM)
+  !otime2 = MondoTimer()
 #else
   CALL CPU_TIME(time1)
   CALL TrnMatBlk(BSc,GMc,Kx)
@@ -337,8 +335,22 @@ PROGRAM ONX2
   IF(SCFActn == 'InkFok') CALL Halt('InkFok in PARALLEL ONX is not supported.')
   ! Collect the data on the root.
   CALL Redistribute_FASTMAT(KxFM)
-  CALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
+  !wok CALL Set_BCSR_EQ_DFASTMAT(Kx,KxFM)
+  CALL Set_BCSR_EQ_DFASTMAT(T1,KxFM)
   CALL Delete_FastMat1(KxFM)
+  !norm
+  !wok IF(MyID.EQ.ROOT) CALL TrnMatBlk(BSc,GMc,Kx)
+  !
+  !norm
+  IF(MyID.EQ.ROOT) THEN
+     ! The following needs the -Fac- variable 
+     ! in ComputK to take into account for the 
+     ! double counting of diag(K).
+     CALL XPose(T1,T2)
+     CALL Add(T1,T2,Kx)
+     CALL Delete(T1)
+     CALL Delete(T2)
+  ENDIF
   !
 #else
   ! Add in correction if incremental K build
@@ -355,12 +367,6 @@ PROGRAM ONX2
   !
   !------------------------------------------------
   ! Save on disc.
-!  CALL Put(Kx,TrixFile('K',Args,0))
-!  CALL PChkSum(Kx,'Kx['//TRIM(SCFCycl)//']',Prog)
-!  CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
-!  CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
-
-  ! Save on disc.
   IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
      CALL Put(Kx,TrixFile('KPrime'//TRIM(Args%C%C(3)),Args,0))
      CALL PChkSum(Kx,'Kx'//TRIM(Args%C%C(3))//'['//TRIM(SCFCycl)//']',Prog)
@@ -372,7 +378,6 @@ PROGRAM ONX2
      CALL PPrint( Kx,'Kx['//TRIM(SCFCycl)//']')
      CALL Plot(   Kx,'Kx['//TRIM(SCFCycl)//']')
   ENDIF
-
   !
   !------------------------------------------------
   ! Timing.

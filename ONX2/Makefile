@@ -38,16 +38,16 @@ all: ONX2 GONX2
 Objects = QSDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	  ONXFillOut.o Stats.o ONXRng.o \
 	  ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
-	  IntSSSS.o  ONX2List.o ONX2ComputK.o ONX2.o
+	  ONX2List.o ONX2ComputK.o ONX2.o
 #
 GObjects = QSDis.o PartDrv.o ONXParameters.o ONXGet.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
-	   IntSSSS.o  GONX2ComputDK.o GONX2.o ONX2List.o
+	   GONX2ComputDK.o GONX2.o ONX2List.o
 #
 ReleaseFiles=QSDis.x PartDrv.x ONXParameters.x ONXInit.x ONXGet.x   \
 	  ONXFillOut.x Stats.x ONXRng.x \
 	  ONX2F77.x ONX2DataType.x ONXCtrSclg.x \
-	  IntSSSS.x  ONX2List.x ONX2ComputK.x ONX2.x \
+	  ONX2List.x ONX2ComputK.x ONX2.x \
 	  ONX2F77.x  GONX2ComputDK.x GONX2.x ONX2List.x
 #
 #$(LAPACK)

@@ -130,6 +130,7 @@ CONTAINS
     TYPE(DBCSR  )                          :: A
     CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS,WhenPartS
     INTEGER                                :: Cycl,Basis,Geom,iGONXPartExist
+    INTEGER :: iErr
     !-------------------------------------------------------------------
     !
     ! Initialize some variables.
@@ -223,9 +224,11 @@ CONTAINS
     ! Get the partition and send the partitioned matrix to the Proc's.
     CALL Get_DBCSR_Part(A,Name,ParType,PFix_O)
     !
+    !CALL CheckSum_DBCSR2(A,'A')
     ! Copy the DBCSR to a FastMat.
     CALL New_FASTMAT(AFastMat,0,(/0,0/))
     CALL Set_DFASTMAT_EQ_DBCSR(AFastMat,A)
+    !CALL PChkSum_FASTMAT2(AFastMat,'AFastMat')
     CALL Delete(A)
     !
     ! Select the next partition if first.
@@ -302,6 +305,7 @@ CONTAINS
     TYPE(INT_VECT)                            :: PrcDist
     LOGICAL                                   :: InParTemp
     INTEGER                                   :: NBlks,NNon0
+    integer :: TotNBlks,TotNNon0
 #endif
     !-------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
@@ -359,6 +363,14 @@ CONTAINS
     !old CALL SetEq(A,B)
     CALL Set_DBCSR_EQ_BCSR_Part(A,B,PrcDist)
     A%Node = MyId
+    !
+    ! Checking if DM is well distributed.
+    TotNBlks=Reduce(A%NBlks)
+    TotNNon0=Reduce(A%NNon0)
+    IF(MyID.EQ.ROOT) THEN
+       IF(TotNBlks.NE.B%NBlks) STOP 'Err1: Not consitent distribution of the DM'
+       IF(TotNNon0.NE.B%NNon0) STOP 'Err2: Not consitent distribution of the DM'
+    ENDIF
     !
     ! Delete BCSR on Root.
     CALL Delete(B)
@@ -1525,6 +1537,85 @@ CONTAINS
   !
 #endif
   !
+#ifdef 0
+  SUBROUTINE PChkSum_FASTMAT2(A,Name,Unit_O,Proc_O,ChkInPar_O)
+!H---------------------------------------------------------------------------------
+!H SUBROUTINE  PChkSum_FASTMAT(A,Name,Unit_O,Proc_O,ChkInPar_O)
+!H
+!H---------------------------------------------------------------------------------
+    TYPE(FASTMAT)    , POINTER              :: A
+    CHARACTER(LEN=*) , INTENT(IN)           :: Name
+    CHARACTER(LEN=*) , INTENT(IN), OPTIONAL :: Proc_O
+    INTEGER          , INTENT(IN), OPTIONAL :: Unit_O
+    LOGICAL          , INTENT(IN), OPTIONAL :: ChkInPar_O
+    !-------------------------------------------------------------------
+    TYPE(FASTMAT)    , POINTER              :: R
+    TYPE(SRST   )    , POINTER              :: U
+    INTEGER                                 :: I,PU,J,M,N,iErr
+    REAL(DOUBLE)                            :: Chk
+    LOGICAL                                 :: InPara
+    CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+    REAL(DOUBLE), EXTERNAL               :: DDOT
+    NULLIFY(R,U)
+    Chk=Zero
+    !
+    ! Flatten A.
+    CALL FlattenAllRows(A)
+    !
+    R => A%Next
+    DO
+       IF(.NOT.ASSOCIATED(R)) EXIT
+       I = R%Row
+       if(myid==9)write(*,*) 'Row=',I
+       M = BSiz%I(I)
+       U => R%RowRoot
+       DO
+          IF(.NOT.ASSOCIATED(U)) EXIT
+          IF(U%L.EQ.U%R) THEN
+             IF(ASSOCIATED(U%MTrix)) THEN
+                J = U%L
+                if(myid==9)write(*,*) 'Col=',J
+                N = BSiz%I(J)
+                Chk=Chk+DDOT(M*N,U%MTrix(1,1),1,U%MTrix(1,1),1)
+             ENDIF
+          ENDIF
+          U => U%Next
+       ENDDO
+       R => R%Next
+    ENDDO
+    Chk=SQRT(Chk) 
+    ChkStr=CheckSumString(Chk,Name,Proc_O)
+    DO I=0,NPrc
+       IF(MyID.EQ.I) then 
+          WRITE(*,'(1X,A,1X,I4)')TRIM(ChkStr),I
+       ENDIF
+       DO J=1,10;CALL MPI_BARRIER(MONDO_COMM,iErr);ENDDO
+    ENDDO
+  END SUBROUTINE PChkSum_FASTMAT2
+  SUBROUTINE CheckSum_DBCSR2(A,Name,Proc_O,Unit_O)
+    TYPE(DBCSR), INTENT(IN)   :: A
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Proc_O
+    INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+    REAL(DOUBLE)              :: Chk
+    REAL(DOUBLE), EXTERNAL    :: DDot
+    REAL(DOUBLE)              :: DotPrd
+    CHARACTER(LEN=*)          :: Name
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: ChkStr
+    INTEGER :: I,PU,iErr,J
+    Chk=Zero
+    DO I=1,A%NNon0
+       Chk=Chk+A%MTrix%D(I)*A%Mtrix%D(I)
+    ENDDO
+    Chk=SQRT(Chk) 
+    ChkStr=CheckSumString(Chk,Name,Proc_O)
+    DO I=0,NPrc
+       IF(MyID.EQ.I) then 
+          WRITE(*,'(1X,A,1X,I4)')TRIM(ChkStr),I
+       ENDIF
+       DO J=1,10;CALL MPI_BARRIER(MONDO_COMM,iErr);ENDDO
+    ENDDO
+  END SUBROUTINE CheckSum_DBCSR2
+#endif
 END MODULE PartDrv
 
 

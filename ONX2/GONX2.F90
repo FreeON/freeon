@@ -590,65 +590,6 @@ CONTAINS
 !!$    !
 !!$  END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
   !
-  SUBROUTINE PChkSum_FASTMAT2(A,Name,Unit_O,Proc_O,ChkInPar_O)
-!H---------------------------------------------------------------------------------
-!H SUBROUTINE  PChkSum_FASTMAT(A,Name,Unit_O,Proc_O,ChkInPar_O)
-!H
-!H---------------------------------------------------------------------------------
-    TYPE(FASTMAT)    , POINTER              :: A
-    CHARACTER(LEN=*) , INTENT(IN)           :: Name
-    CHARACTER(LEN=*) , INTENT(IN), OPTIONAL :: Proc_O
-    INTEGER          , INTENT(IN), OPTIONAL :: Unit_O
-    LOGICAL          , INTENT(IN), OPTIONAL :: ChkInPar_O
-    !-------------------------------------------------------------------
-    TYPE(FASTMAT)    , POINTER              :: R
-    TYPE(SRST   )    , POINTER              :: U
-    INTEGER                                 :: I,PU,J,M,N
-    REAL(DOUBLE)                            :: Chk
-    LOGICAL                                 :: InPara
-    CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
-    !-------------------------------------------------------------------
-    REAL(DOUBLE), EXTERNAL               :: DDOT
-    !-------------------------------------------------------------------
-    !
-    ! IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
-    !  PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
-    !
-    NULLIFY(R,U)
-    Chk=Zero
-    !
-    ! Flatten A.
-    CALL FlattenAllRows(A)
-    !
-    R => A%Next
-    DO
-       IF(.NOT.ASSOCIATED(R)) EXIT
-       I = R%Row
-       M = BSiz%I(I)
-       U => R%RowRoot
-       DO
-          IF(.NOT.ASSOCIATED(U)) EXIT
-          IF(U%L.EQ.U%R) THEN
-             IF(ASSOCIATED(U%MTrix)) THEN
-                J = U%L
-                N = BSiz%I(J)
-                Chk=Chk+DDOT(M*N,U%MTrix(1,1),1,U%MTrix(1,1),1)
-             ENDIF
-          ENDIF
-          U => U%Next
-       ENDDO
-       R => R%Next
-    ENDDO
-    Chk=SQRT(Chk) 
-    ChkStr=CheckSumString(Chk,Name,Proc_O)
-    ! Write check string
-    ! PU=OpenPU(Unit_O=Unit_O)
-    ! WRITE(PU,'(1x,A)')TRIM(ChkStr)
-    WRITE(*,'(1x,A,I3)')TRIM(ChkStr),MyID
-    ! CALL ClosePU(PU)
-    !
-  END SUBROUTINE PChkSum_FASTMAT2
-
 #endif
 
 END PROGRAM GONX2
