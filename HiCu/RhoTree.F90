@@ -5,9 +5,6 @@ MODULE RhoTree
    USE ProcessControl
    USE Indexing
    USE InOut
-#ifdef USE_SPECFUN
-   USE SpecFun
-#endif
    USE Macros
    USE Thresholding
    USE BoundingBox
@@ -358,7 +355,6 @@ MODULE RhoTree
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qx%D  (i),i=1,Rho%NDist)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qy%D  (i),i=1,Rho%NDist)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Qz%D  (i),i=1,Rho%NDist)
-         Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Dummy        ,i=1,Rho%NDist)
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)(Rho%Co%D  (i),i=1,Rho%NCoef)
          Close(UNIT=Seq,STATUS='KEEP')
 !-------------------------------------------------------------
