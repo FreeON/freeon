@@ -390,7 +390,7 @@ MODULE InOut
 !
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL Bcast(A)
+       !! not supported yet. IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INTC
 !
@@ -465,7 +465,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL Bcast(A)
+       ! not supported yet. IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_BMATR
 !
@@ -1880,7 +1880,7 @@ MODULE InOut
          ENDDO
 #ifdef PARALLEL 
      ENDIF       
-         IF(InParallel)CALL Bcast(A)
+         ! not supported yet. IF(InParallel)CALL Bcast(A)
 #endif 
        END SUBROUTINE Get_CHR_VECT
 !--------------------------------------------------------------------------

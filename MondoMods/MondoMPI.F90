@@ -146,10 +146,12 @@ MODULE MondoMPI
             CALL HaltMPI(' MPI_BCAST failed in BCast_DBL',IErr)
       END SUBROUTINE BCast_DBL_SCLR
 
-      SUBROUTINE BCast_DBL_VECT(A)
+      SUBROUTINE BCast_DBL_VECT(A,N_O)
          TYPE(DBL_VECT),INTENT(INOUT) :: A
+         INTEGER,OPTIONAL,INTENT(IN) :: N_O
+
          INTEGER :: IErr,L
-         L=SIZE(A%D)
+         L=SIZE(A%D); IF(PRESENT(N_O)) L=N_O
          CALL MPI_BCAST(A%D,L,MPI_DOUBLE_PRECISION,ROOT,MONDO_COMM,IErr)
          IF(IErr/=MPI_SUCCESS) &
             CALL HaltMPI(' MPI_BCAST failed in BCast_DBL_VECT',IErr)
