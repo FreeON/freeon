@@ -7,11 +7,20 @@ MODULE OverlapBlock
   USE BraBloks
   IMPLICIT NONE
   CONTAINS
+#ifdef PARALLEL_DEVELOPMENT
+  FUNCTION SBlok(BS,Pair) RESULT(SBlk)
+#else
   FUNCTION SBlok(BS,Pair) RESULT(SVck)
+#endif
     TYPE(BSET)                              :: BS
     TYPE(AtomPair)                          :: Pair
     TYPE(PrimPair)                          :: Prim
+
+#ifdef PARALLEL_DEVELOPMENT
+#else
     REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: SVck
+#endif
+
     REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: SBlk
     INTEGER                                 :: NBFA,NBFB,KA,KB,KK
     REAL(DOUBLE)                            :: Ax,Ay,Az,Bx,By,Bz,AB2 
@@ -75,25 +84,10 @@ MODULE OverlapBlock
        ENDDO
     ENDDO
     ENDDO
+#ifdef PARALLEL_DEVELOPMENT
+    ! do nothing
+#else
     SVck = BlockToVect(Pair%NA,Pair%NB,SBlk)
+#endif
   END FUNCTION SBlok
 END MODULE OverlapBlock
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
