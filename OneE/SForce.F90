@@ -133,7 +133,7 @@ PROGRAM SForce
      ENDDO
   ENDDO
 !
-!
+! Print The Lattice Forces
 !
 !!$  WRITE(*,*) 'LatFrc_S'
 !!$  WRITE(*,*) 
