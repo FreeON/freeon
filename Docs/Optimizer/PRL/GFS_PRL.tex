@@ -1,15 +1,15 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-% \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-% \newcommand{\commentoutB}[1]{}
-% \newcommand{\commentoutA}[1]{#1}
+ \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+ \newcommand{\commentoutB}[1]{}
+ \newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-\newcommand{\commentoutB}[1]{#1}
-\newcommand{\commentoutA}[1]{}
-\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+%\newcommand{\commentoutB}[1]{#1}
+%\newcommand{\commentoutA}[1]{}
+%\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -571,7 +571,7 @@ to test the QUICCA optimizer.}\label{kinasepicture}
 \end{figure}
 
 \begin{figure}[h]
-\resizebox*{3.5in}{!}{\includegraphics{R263logdata2.eps}}
+\resizebox*{3.5in}{!}{\includegraphics{curve2_1.eps}}
 \caption{
 Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale for the 
 263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
@@ -585,6 +585,27 @@ with geometry step $i$ on a log$_{10}$-linear  scale for the
 263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
 \end{figure}
 
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{RMSloglog.eps}}
+\caption{
+Ratio of the relative error of the energy 
+in consecutive steps on a log$_{10}$-log$_{10}$ plot.
+The tangent of the fitted line is log$_{10}$(c), 
+the logarithm of the convergence factor, that is proportional
+to the rate of convergence.}
+\label{loglogplot}
+\end{figure}
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{convfact.eps}}
+\caption{
+The change of the rate of convergence $f$ during the optimization
+of the 263 atoms protein kinase A fragment. $f$ is modelled
+by a 10th order polynomial. The polynomial coefficients
+have been obtained from a non-linear fit to the $E_{i}$-$i$
+data-pairs, using the model function $E_{i}=E_{opt}+A*exp(-f*i)$.}
+\label{convfact} 
+\end{figure}
 }
 
 \subsection{Convergence}
@@ -618,15 +639,83 @@ optimization of a 263 atom fragment of crystallographic Protein Kinase A, involv
 two crystallographic waters, ATP and a fragment of the Protein Kinase Inhibitor to which phosphate 
 is transfered. This is a model reactant system obtained from Ref.~\onlinecite{graeme} and is shown in 
 Fig.~\ref{kinasepicture}.  Optimization was performed at the HF/STO-2G level of theory with an 
-approximate relative energy resolution of $10^{-9}$ hartree using MondoSCF \cite{MondoSCF} at the 
+approximate absolute energy resolution of $10^{-5}$ hartree using MondoSCF \cite{MondoSCF} at the 
 {\tt tight} accuracy level and with ten peripheral atoms  constrained to mimic steric effects of the enzyme.  
 Note that this minimal level of theory actually makes more work for the optimizer, as it will tend to 
-move away from the more correct crystallographic structure. The number of internal coordinates, generated 
+move away from the more correct crystallographic structure. 
+The maximum remaining Cartesian force had a magnitude less then
+$3\times10^{-4}$ au at convergence, the maximum predicted displacement
+at the final structure less then $4\times10^{-3}$ au.
+The number of internal coordinates, generated 
 for this structure was 1280 at convergence.  Figure~\ref{logn-logde} shows ${\rm log}_{10} \Delta E_i$ 
-vs $i$ for this system, and in Fig.~\ref{gradientpicture} the root mean square of the Cartesian gradient 
-at each step is shown.   In Fig.~\ref{logn-logde}, linear convergence is seen roughly from 
-$i \in [20,50]$, followed by an approximate downturn.  This downturn corresponds to an increase 
-in the rate of convergence $f$, sugesting superlinear convergence.
+vs $i$ for this system, Fig.~\ref{gradientpicture} the root mean square of the Cartesian gradient 
+at each step.
+
+The convergence of the energy was smooth, while the convergence of
+the Cartesian gradients were more scattered, especially close to 
+convergence. This is mainly due to the fact, that close to convergence
+frequent back-tracking was used. Back-tracking is not needed 
+for this molecule for converging the total energy to $10^{-3}$ Hartree
+accuracy or slightly beyond. However, for achieving higher accuracy,
+the independent coordinate model is not satisfactory without 
+backtracking.
+The main reason for the failure of the independent
+coordinate approximation, we believe, is
+the dominance of floppy modes in this phase of the optimization.
+These floppy modes, which are highly delocalized
+over the molecule, cannot be treated my means of local internal
+coordinates. We believe that there is a way for the
+{\it a priori} construction of the floppy modes and that the fitting 
+procedure as utilized in QUICCA can be applied to this case as well.
+Work along this direction is in progress in our group.
+Fortunately, the backtracking in Cartesian space can handle
+the problem of floppy modes, though on the price of extra
+energy evaluations.
+It is also important to note, that the effect of floppy
+modes is not the only important factor is this phase of the
+optimization. The rigidity of the internal coordinate
+system and its role in the inaccurate convergence 
+of the back-transformation is also important. 
+In our opinion, these two factors,
+which characterize the last phase of the optimization may be
+related to each other. 
+A recent work of Fernandez-Serra {\it et.al} \cite{Serra03} 
+calls the attention to the relationship of the rigidity
+of internal coordinate systems and the 
+phenomenon of floppy modes. This relationship may be
+discussed on the basis of the
+theory of rigidity \cite{Phillips85}.
+
+Fig.~\ref{loglogplot} shows the ratio of the absolute error
+of the energy for consecutive steps, during the optimization.
+This ratio is equivalent to the order of convergence, $n$, and it
+is constant, $n=1$ during the optimization. Thus, it is clear,
+that QUICCA has a first order (linear) convergence. 
+It may be possible to achieve superlinear or higher order 
+convergence with QUICCA, but it seems to depend on an improved
+treatment of floppy modes.
+
+In order to study the behaviour of the rate of convergence, $f$, during
+the optimization, an 11th order polynomial has been used to model
+$f$ as a function of $i$. The polynomial coefficients have been
+obtained from fitting 
+the model function $E_{i}=E_{opt}+A*exp(-f*i)$ 
+to the $E_{i}$-$i$ data pairs.
+Fig.~\ref{convfact} shows, how the rate of convergence changes
+with the number of optimization steps. This picture
+suggests that the optimization has three different phases. This
+observation is also in accordance with Fig.~\ref{logn-logde}.
+
+In the first phase (steps 1-10) there is a rapid refinement
+of the least-optimimal substructures. In the second phase
+(steps 10-60) the main optimization effort is still carried
+out on local internal coordinates, while the error of
+the absolute energy decreases to $\cal{O}$($10^{-3}$) hartrees.
+Finally, the third phase (60-120) 
+is dominated by the optimization of floppy modes and 
+frequent back-tracking happens. The rate of convergence becomes about
+$f=0.05$ in the third phase, which is the same value as what 
+obtained from the fitting in Fig.~\ref{logn-logde}.
 
 \section{Conclusions}
 
