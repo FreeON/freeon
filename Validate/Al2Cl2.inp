@@ -1,0 +1,24 @@
+<BeginTitle>
+          HF/CEP-31G* Na2Cl2
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+DebugAll =(MinDebug,CheckSums)
+Guess=Core
+SCFMethod=(RH)
+BasisSets=(User1)
+ModelChem=(HF)
+Accuracy =(VeryTight)
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+Na  0.0    1.705173   0.0
+Cl  0.0    0.0        1.99019
+Cl  0.0    0.0       -1.99019
+Na  0.0   -1.705173   0.0
+<EndGeometry>
+
+External refs: HF=-29.9608856
