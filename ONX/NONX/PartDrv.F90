@@ -123,7 +123,7 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(DBCSR  )                          :: A
     CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS
-    INTEGER                                :: Cycl,Basis,Geom
+    INTEGER                                :: Cycl,Basis,Geom,iONXPartExist
     !-------------------------------------------------------------------
     !
     ! Initialize some variables.
@@ -134,13 +134,15 @@ CONTAINS
     ! Open Input File
     CALL OpenASCII(InpFile,Inp)  
     !
-    ! Initialize semi-global variables.
-    IF(OptKeyQ(Inp,'Guess','Core')) THEN
-       !We use a Core Guess.
-       IsFirst = Cycl.LE.1.AND.Basis.LE.1!.AND.Geom.LE.1
-    ELSE
-       !We do not use a Core Guess.
-       IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+
+    iONXPartExist=0
+    CALL Get(iONXPartExist,'ONXPartExist')
+    IsFirst=iONXPartExist.LE.0
+    !
+    ! It is no more the first relative iteration.
+    IF(IsFirst) THEN
+       iONXPartExist=1
+       CALL Put(iONXPartExist,'ONXPartExist')
     ENDIF
     !
 #ifdef PARTDRV_DBUG

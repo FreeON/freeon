@@ -129,6 +129,7 @@ CONTAINS
        CALL Delete(ETDirArr)
        CALL Delete(ETRootArr)
        CALL Put(0,'GONXPartExist')
+       CALL Put(0,'ONXPartExist')
 #endif
        DO I=1,LEN(FailedProgram)
           FailedProgram(I:I)='X'
