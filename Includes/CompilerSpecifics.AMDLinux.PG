@@ -50,7 +50,8 @@ F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #
 LD          = $(F90) 
 #
-LDMISC      = $(F_PROF) -v 
+LDMISC      = $(F_PROF) -v  \
+                        -Wl,-Bstatic # make statically linked executables
 #
 LDFLAGS     = $(LDMISC) -o 
 #
@@ -64,7 +65,8 @@ RANLIB  = ranlib
 #---------------------------------------------------------------
 # DIRECTORIES TO SUSS FOR LIBRARIES
 #
-LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB) 
+LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib \
+                             -L$(HDF_LIB) 
 #       -L$(LAPACK_LIB)
 #       -L$(MPI_LIB) 
 #
