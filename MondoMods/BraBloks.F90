@@ -89,9 +89,9 @@ MODULE BraBloks
     Zeta=Prim%Zeta
     Xi=Prim%Xi
     ExpAB=EXP(-Xi*Prim%AB2)
-    Prim%P(:)=(ZA*Prim%A(:)+ZB*Prim%B(:))/Prim%Zeta
-    PA(:)=Prim%P(:)-Prim%A(:)
-    PB(:)=Prim%P(:)-Prim%B(:)
+    Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+    PA=Prim%P-Prim%A
+    PB=Prim%P-Prim%B
     IndexA  = CFBlokDex(BS,CFA,KA)
     IndexB  = CFBlokDex(BS,CFB,KB)
     StartLA = BS%LStrt%I(CFA,KA)        

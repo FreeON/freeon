@@ -18,7 +18,7 @@ PROGRAM SMTest
   INTEGER, PARAMETER             :: NNon0=10000*15**2
   REAL(DOUBLE),DIMENSION(NNon0)  :: A,B,C
   CHARACTER(LEN=6),PARAMETER     :: Prog='SMTest'
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
+!  CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
 !----------------------------------------------------------------------------------------------------------- 
 !
 !
