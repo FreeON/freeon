@@ -1,10 +1,4 @@
-!----------------------------------------------------------------------
-!                         May 13th 2002
-! Anders M. N. Niklasson: "Expansion Algorithm for the Density Matrix".
-! Constructs the density matrix from the Hamiltonian in terms of a
-! trace correcting purification expansion with 2nd order purifications.
-!----------------------------------------------------------------------
-PROGRAM NT4
+PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -32,14 +26,9 @@ PROGRAM NT4
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='NT4'
 !-------------------------------------------------------------------------
-! Start
-!-------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
-!-------------------------------------------------------------------------
-  CALL New(F)
-!-------------------------------------------------------------------------
 ! Get The Fock Matrix
-!-------------------------------------------------------------------------
+  CALL New(F)
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
   IF(Present)THEN
@@ -47,98 +36,33 @@ PROGRAM NT4
   ELSE
      CALL Get(F,TrixFile('OrthoF',Args,0))   
   ENDIF
-!-------------------------------------------------------------------------
-! Initialize                     
-!-------------------------------------------------------------------------
-  MM         = 0                        
-  Energy     = Zero
-  Nr_Max_It  = 50                   
-  Converged  = .FALSE.  
-  Ne         = Half*DBLE(NEl)    
-  Thresh_old = Thresholds%Trix
-!
+  ! Init
   CALL New(P)
   CALL New(Pold)
   CALL New(T)    
-!
   CALL New(P2)
   CALL New(P3)
   CALL New(Ptmp1)
   CALL New(Ptmp2)
-!   
-  CALL SetEq(Pold,P)    
-!-------------------------------------------------------------------------
-!  Set up the starting Density Matrix from the Fock Matrix
-!-------------------------------------------------------------------------
+  ! Guess P from P
   CALL FockGuess(F,P,Ne,1)
-!-------------------------------------------------------------------------
-! Main Loop: Iterate until convergence              
-!-------------------------------------------------------------------------
-  DO I = 1,Nr_Max_It
+  MM=0                        
+  Ne=Half*DBLE(NEl)    
+  CALL SetEq(Pold,P)    
+  DO I=1,100 ! Main Loop
      CALL SetEq(Pold,P)
-     Energy_old = Energy
-!--------------------------------------------------------------------------
-!    Set the Threshold for reduction of the error
-!--------------------------------------------------------------------------
-     IF(I==1) THEN
-        Thresholds%Trix = Thresh_old*FirstIter
-     ELSEIF(I >= 2) THEN
-        Thresholds%Trix = MIN(GrowFac*Thresholds%Trix,Thresh_old)
-     ENDIF
-!--------------------------------------------------------------------------
-!    One Step of the Algorithm
-!--------------------------------------------------------------------------
      CALL NT4(P,Ne,MM,.TRUE.)
-!--------------------------------------------------------------------------
-!    Output Convergence Infomation
-!--------------------------------------------------------------------------
-     Energy  = Trace(P,F)
-     PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-     ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
-     CALL Multiply(Pold,-One)
-     CALL Add(Pold,P,T)
-     ErrorP  = TwoNorm(T)/TwoNorm(P)
-     CALL MednOut(Prog,I,Energy,PNon0,ErrorE,ErrorP)
-!--------------------------------------------------------------------------
-!    Calculate Degeneracy, Occupancy, lumo_occ, and Gap
-!--------------------------------------------------------------------------
-!     CALL CalculateDegen(Ne,Degen,Occpan)
-!--------------------------------------------------------------------------
-!    Output Convergence Infomation
-!--------------------------------------------------------------------------
-     IF(ErrorP  < Thresh_old) Converged=.TRUE.
-     IF(ErrorE  < MAX(Thresh_old**2,1.D-14)) Converged=.TRUE.
-     IF(Converged) EXIT
+     IF(CnvrgChck(Prog,I,MM,F,P,POld))EXIT
   ENDDO
-!--------------------------------------------------------------------------
-! Normalize Trace
-!--------------------------------------------------------------------------
+  ! Normalize Trace
   CALL NormTrace(P,Ne,1)
-!--------------------------------------------------------------------------
-! Write Out Statisitcs
-!--------------------------------------------------------------------------
-  Energy  = Trace(P,F)
-  PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-  ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
-  ErrorN  = Trace(P)-Ne
-  CALL Add(Pold,P,T)
-  ErrorP  = TwoNorm(T)/TwoNorm(P)
-  CALL Commute(F,P,T)
-  ErrorFP = TwoNorm(T)/TwoNorm(F)
-  CALL FinalOut(Prog,Energy,ErrorE,ErrorN,ErrorP,ErrorFP,PNon0,MM)
-!=============================================================================
-!  TRANSFORMATION TO AN AO REPRESENTATION AND IO
-!=============================================================================
-!  IO for the orthogonal P
-!
+  ! IO for the orthogonal P
   CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
   CALL Put(P,TrixFile('OrthoD',Args,1))
   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
   CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Convert to AO representation
-!
+  ! Convert to AO representation
   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
   IF(Present)THEN
      CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
@@ -151,32 +75,26 @@ PROGRAM NT4
      CALL Multiply(T,Z,P)
   ENDIF
   CALL Filter(T,P)     ! Thresholding
-!----------------------------------------------------------------------------0-
-!  IO for the non-orthogonal P
-!
+  ! IO for the non-orthogonal P
   CALL Put(T,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL Put(T,TrixFile('D',Args,1))
   CALL Put(Zero,'homolumogap')
   CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(T,'P['//TRIM(NxtCycl)//']')
   CALL Plot(T,'P_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Tidy up
-! 
+  ! Tidy up
   CALL Delete(F)
   CALL Delete(P)
   CALL Delete(Pold)
   CALL Delete(T)
   CALL Delete(Z)
-!
   CALL Delete(P2)
   CALL Delete(P3)
   CALL Delete(Ptmp1)
   CALL Delete(Ptmp2)
 !
   CALL ShutDown(Prog)
-!
-END PROGRAM NT4
+END PROGRAM DMP_NT4
 
 
 

@@ -4,7 +4,7 @@
 ! Constructs the density matrix from the Hamiltonian in terms of a
 ! trace correcting purification expansion with 2nd order purifications.
 !----------------------------------------------------------------------
-PROGRAM SP2
+PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -171,7 +171,7 @@ PROGRAM SP2
 !
    CALL ShutDown(Prog)
 !
- END PROGRAM SP2
+ END PROGRAM DMP_SP2
 
 
 

@@ -162,6 +162,103 @@ MODULE DenMatMethods
      ENDIF
 !
    END SUBROUTINE ShrtOut
+   
+   FUNCTION CnvrgChck(Prog,NPur,MM,F,P,POld)
+     LOGICAL              :: CnvrgChck
+     TYPE(BCSR)           :: F,P,POld
+     REAL(DOUBLE)         :: Energy,AbsErrP,AveErrP,MedErrP,  &
+                             AbsErrE,RelErrE,AveErrE,MaxCommErr
+     REAL(DOUBLE),SAVE    :: OldE,OldAEP
+     INTEGER              :: MM,PNon0,NPur
+     CHARACTER(LEN=*)     :: Prog
+     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
+!---------------------------------------------------------------------
+     IF(NPur==0)THEN
+        OldE=BIG_DBL
+        OldAEP=BIG_DBL
+     ENDIF
+     PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+     ! Density matrix errors
+     CALL Multiply(Pold,-One)
+     CALL Add(Pold,P,PTmp1)
+     AbsErrP=ABS(Max(PTmp1)+1.D-20)
+     AveErrP=OneNorm(PTmp1)/DBLE(PNon0)
+     MedErrP=TwoNorm(PTmp1)/TwoNorm(P)
+     ! Energy errors
+#ifdef PARALLEL
+     CALL Multiply(P,F,PTmp1)
+     Energy=Trace(PTmp1)    
+#else
+     Energy=Trace(P,F)
+#endif     
+     AbsErrE=ABS(OldE-Energy)
+     RelErrE=AbsErrE/ABS(Energy)
+     ! Convergence check
+     CnvrgChck=.FALSE.
+     ! Absolute convergence test
+     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
+        AbsErrP<Thresholds%DTol*1D-1)CnvrgChck=.TRUE.           
+     ! Test in the asymptotic regime for stall out
+     IF(RelErrE<Thresholds%ETol)THEN
+        ! Check for increasing /P
+        IF(AbsErrP>OldAEP)CnvrgChck=.TRUE.
+        ! Check for an increasing energy
+        IF(Energy>OldE)CnvrgChck=.TRUE.
+     ENDIF
+     ! Updtate previous cycle values
+     OldE=Energy
+     OldAEP=AbsErrP
+     ! Print convergence stats
+     Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
+          //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
+          //', dP='//TRIM(DblToShrtChar(AbsErrP))                &
+          //', %Non0='//TRIM(IntToChar(PNon0))              
+#ifdef PARALLEL
+     IF(MyId==ROOT)THEN
+#endif
+        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(*,*)TRIM(Mssg)
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
+        ENDIF
+#ifdef PARALLEL
+     ENDIF
+#endif
+     IF(.NOT.CnvrgChck)RETURN
+     CALL Commute(F,P,PTmp1)      
+     MaxCommErr=Max(PTmp1)
+     ! Print summary stats
+#ifdef PARALLEL
+     IF(MyId==ROOT)THEN
+#endif
+        IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps, ' &
+                //TRIM(IntToChar(MM))//' matrix multiplies, %Non0s = '//TRIM(IntToChar(PNon0))              
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           Mssg=ProcessName(Prog)//'Tr{FP}='//TRIM(DblToMedmChar(Energy))//', '                    &
+                //'dE='//TRIM(DblToShrtChar(AbsErrP))//', '                      &
+                //'dP='//TRIM(DblToShrtChar(AbsErrP))//', '                 &
+                //'[F,P]='//TRIM(DblToShrtChar(MaxCommErr))
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
+        ENDIF
+#ifdef PARALLEL
+     ENDIF
+#endif
+
+   END FUNCTION CnvrgChck
 !----------------------------------------------------------------------------
    SUBROUTINE MednOut(ProgName,Iter,Energy,PNon0,ErrorE,ErrorP)
      REAL(DOUBLE)                   :: Energy,ErrorE,ErrorP
@@ -169,6 +266,8 @@ MODULE DenMatMethods
      CHARACTER(LEN=*)               :: ProgName
      CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !
+
+
      IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
         Mssg=TRIM(ProgName)//'   '//TRIM(IntToChar(Iter))          &
              //' Tr(P.F) = '//TRIM(DblToMedmChar(Energy))          &
@@ -378,9 +477,9 @@ MODULE DenMatMethods
      IF ( (G > Zero) .AND. (G < Six) ) THEN ! Check the bounds
         Count = Count+1
         IF(DoThresh) THEN
-           Thresholds%Trix = Thresholds%Trix*ThFAC1
+!          Thresholds%Trix = Thresholds%Trix*ThFAC1
            CALL Filter(Ptmp2,P2)
-           Thresholds%Trix = Thresholds%Trix*ThFAC2
+!           Thresholds%Trix = Thresholds%Trix*ThFAC2
         ELSE
            CALL  SetEq(Ptmp2,P2)
         ENDIF
@@ -391,9 +490,9 @@ MODULE DenMatMethods
         CALL Add(P,P2,Ptmp1)
         CALL Add(Ptmp1,G)
         IF(DoThresh) THEN
-           Thresholds%Trix = Thresholds%Trix*ThFAC1
+!           Thresholds%Trix = Thresholds%Trix*ThFAC1
            CALL Filter(P,Ptmp1)
-           Thresholds%Trix = Thresholds%Trix*ThFAC2
+!           Thresholds%Trix = Thresholds%Trix*ThFAC2
         ELSE
            CALL  SetEq(P,Ptmp1)
         ENDIF

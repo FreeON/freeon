@@ -1,10 +1,5 @@
 !----------------------------------------------------------------------
-!                         May 13th 2002
-! Anders M. N. Niklasson: "Expansion Algorithm for the Density Matrix".
-! Constructs the density matrix from the Hamiltonian in terms of a
-! trace correcting purification expansion with 2nd order purifications.
-!----------------------------------------------------------------------
-PROGRAM PM
+PROGRAM DMP_PM
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -171,7 +166,7 @@ PROGRAM PM
 !
   CALL ShutDown(Prog)
 !
-END PROGRAM PM
+END PROGRAM DMP_PM
 
 
 
