@@ -202,7 +202,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),&
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3)
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9)
                   ENDIF
                 ELSE
                   IF(INDEX(LineLowCase,'cell')==0) THEN
@@ -211,7 +211,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3),Value
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9),Value
                   ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
@@ -313,7 +313,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4) 
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12) 
                   ENDIF
                 ELSE
                   IF(INDEX(LineLowCase,'cell')==0) THEN
@@ -322,7 +322,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4),Value
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12),Value
                   ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
@@ -340,7 +340,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4)
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12)
                   ENDIF
                 ELSE
                   IF(INDEX(LineLowCase,'cell')==0) THEN
@@ -349,7 +349,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &   
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:4),Value
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12),Value
                   ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
@@ -372,7 +372,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3)
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9)
                   ENDIF
                 ELSE
                   IF(INDEX(LineLowCase,'cell')==0) THEN
@@ -381,7 +381,7 @@ MODULE ParseExtraCoords
                   ELSE
                     READ(LineLowCase,*) &
                     CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:3),Value
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9),Value
                   ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
@@ -433,6 +433,8 @@ MODULE ParseExtraCoords
        NIntCs=0
        CALL New(GOpt%ExtIntCs,NIntCs)
      ENDIF !!! key for extra internals found
+   ! CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
+   !                   'chk extra 1',PBCDim_O=1)
      ! 
      ! Fill in Cartesian constraints stored 
      ! in Geos%Clone(1)%CConstrain%I
@@ -453,7 +455,7 @@ MODULE ParseExtraCoords
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
    ! CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
-   !                   'chk extra 1',PBCDim_O=1)
+   !                   'chk extra 2',PBCDim_O=1)
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------
@@ -462,6 +464,8 @@ MODULE ParseExtraCoords
      TYPE(INTC)           :: IntCs
      INTEGER              :: NIntC,I,J
      INTEGER,DIMENSION(4) :: Atoms
+     !
+     ! Use similar ordering as in InCoords
      !
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
@@ -477,7 +481,7 @@ MODULE ParseExtraCoords
          ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
           Atoms(1:4)=IntCs%Atoms%I(I,1:4)
-          IF(Atoms(2)>Atoms(3)) THEN
+          IF(Atoms(1)>Atoms(4)) THEN
             DO J=1,4 ; IntCs%Atoms%I(I,J)=Atoms(5-J) ; ENDDO
           ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN

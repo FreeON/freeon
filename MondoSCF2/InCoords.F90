@@ -1037,10 +1037,13 @@ CONTAINS
        CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
        ILast=ILast+IntC_Extra%N
      ENDIF
+CALL PrtIntCoords(IntCs,IntCs%Value%D,'before merging',PBCDim_O=PBCDim)
      !
      IF(.NOT.(IntCs%N==0.OR.Refresh==5)) THEN
        CALL CleanINTC(IntCs,NIntC_Bas,NIntC_VDW,IntC_Extra%N)
      ENDIF             
+CALL PrtIntCoords(IntCs,IntCs%Value%D,'after merging',PBCDim_O=PBCDim)
+stop
      !
      ! Count number of different internal coord types
      !
@@ -1155,12 +1158,12 @@ CONTAINS
        DoAllow=.FALSE.
        K1=1
        K2=4
-       IF(IntCs%Def%C(I)(1:4)=='TORS'.OR. &
-          IntCs%Def%C(I)(1:4)=='OUTP') THEN
+       IF(IntCs%Def%C(I)(1:4)=='TORS') THEN 
          K1=2
          K2=3
        ENDIF
        IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
+          IntCs%Def%C(I)(1:4)=='OUTP'.OR. &
           IntCs%Def%C(I)(1:4)=='LINB') THEN
          K1=2
          K2=2
