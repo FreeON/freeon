@@ -241,7 +241,7 @@ MODULE MondoPoles
             Cosine(M)=TwoC*Cosine(M1)-Cosine(M2)
          ENDDO
 !        Associated Legendre Polynomials by recursion
-         Sq=SQRT(One-CoTan**2)
+         Sq=SQRT(ABS(One-CoTan**2))
          RS=One
          DO M=0,Ell
             MDex=LTD(M)+M
@@ -294,13 +294,14 @@ MODULE MondoPoles
          Cosine(0)=One
          Sine(  0)=Zero
          PQxy=SQRT(PQx2+PQy2)
-         IF(PQxy/=Zero)THEN
+         IF(PQxy .GT. 1.D-12)THEN
             Sine(1)=PQx/PQxy
             Cosine(1)=PQy/PQxy
          ELSE
             Sine(1)=0.70710678118654752D0         
             Cosine(1)=0.70710678118654752D0
          ENDIF
+!
          TwoC=Two*Cosine(1)
          DO M=2,Ell
             M1=M-1
@@ -309,7 +310,8 @@ MODULE MondoPoles
             Cosine(M)=TwoC*Cosine(M1)-Cosine(M2)
          ENDDO
 !        Associated Legendre Polynomials by recursion
-         Sq=SQRT(One-CoTan*CoTan)
+         Sq=SQRT(ABS(One-CoTan*CoTan))
+!
          RS=One
          DO M=0,Ell
             MDex=LTD(M)+M
