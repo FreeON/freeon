@@ -2393,8 +2393,9 @@ CONTAINS
      !
      ! Get B matrix and Bt*B inverse
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,B,CholData, &
-       DoClssTrf,Print,LinCrit,ThreeAt,SCRPath)
+     CALL RefreshBMatInfo(IntCs,XYZ,DoClssTrf,Print, &
+                          LinCrit,ThreeAt,SCRPath)
+     CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
      IF(.NOT.CtrlTrf%DoClssTrf) THEN
        I=CtrlTrf%ThreeAt(1)
        VectCart(3*(I-1)+1:3*I)=Zero
@@ -2600,8 +2601,9 @@ CONTAINS
        IF(IStep==0) THEN
          CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
        ELSE IF(RefreshB.AND.RefreshAct) THEN
-         CALL RefreshBMatInfo(IntCs,ActCarts%D,B,CholData, &
-           DoClssTrf,Print,LinCrit,ThreeAt,SCRPath)
+         CALL RefreshBMatInfo(IntCs,ActCarts%D,DoClssTrf, &
+                              Print,LinCrit,ThreeAt,SCRPath)
+         CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
        ELSE
          CALL INTCValue(IntCs,ActCarts%D,LinCrit)
        ENDIF
@@ -3592,8 +3594,8 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,B,CholData, &
-                              DoClssTrf,Print,LinCrit,ThreeAt,SCRPath)
+   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,DoClssTrf,Print, &
+                              LinCrit,ThreeAt,SCRPath)
      TYPE(INTC)     :: IntCs
      TYPE(Cholesky) :: CholData
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -3616,6 +3618,9 @@ CONTAINS
      CALL CholFact(B,NCart,CholData,DoClssTrf,Print2,ThreeAt)
      !
      CALL PutBMatInfo(SCRPath,B,CholData)
+     !
+     CALL Delete(CholData)
+     CALL Delete(B)
    END SUBROUTINE RefreshBMatInfo
 !
 !---------------------------------------------------------------------
