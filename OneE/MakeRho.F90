@@ -40,7 +40,7 @@ PROGRAM MakeRho
   TYPE(CRDS)          :: GM
   TYPE(DBL_RNK4)      :: MD
   TYPE(ARGMT)         :: Args
-  TYPE(HGRho)         :: Rho
+  TYPE(HGRho)         :: Rho,Rho2
   INTEGER             :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER             :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL             :: First
@@ -56,7 +56,7 @@ PROGRAM MakeRho
 !----------------------------------------------
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  CALL NewBraBlok(BS)
+  CALL NewBraBlok(BS)  
 !----------------------------------------------
 ! Set up the appropriate action
 !----------------------------------------------
@@ -65,9 +65,9 @@ PROGRAM MakeRho
   ELSEIF(Args%C%C(2)=='Direct') THEN
      iSwitch=1
   ELSEIF(Args%C%C(2)=='Switch') THEN
-     iSwitch=1
-  ELSEIF(Args%C%C(2)=='InkFok') THEN
      iSwitch=2
+  ELSEIF(Args%C%C(2)=='InkFok') THEN
+     iSwitch=3
   ELSE
      CALL MondoHalt(-100,' Inappropriate Action in MakeRho:'//Args%C%C(2))
   ENDIF
@@ -77,6 +77,8 @@ PROGRAM MakeRho
   IF(iSwitch==1) THEN
      CALL Get(Dmat,TrixFile('D',Args,0))
   ELSEIF(iSwitch==2) THEN
+     CALL Get(Dmat,TrixFile('D',Args,0))
+  ELSEIF(iSwitch==3) THEN
      CALL Get(Dmat,TrixFile('DeltaD',Args,0))
   ENDIF
 !---------------------------------------------- 
@@ -125,7 +127,7 @@ PROGRAM MakeRho
 !    Initailize  NQ
 !
      Rho%NQ%I = 0
-     IF(iSwitch == 1) Rho%NQ%I(Rho%NExpt) = NAtoms
+     IF(iSwitch == 1 .OR. iSwitch == 2) Rho%NQ%I(Rho%NExpt) = NAtoms
 !----------------------------------------------------
 !    Loop over atoms and count primatives
 !
@@ -212,20 +214,20 @@ PROGRAM MakeRho
 !---------------------------------------------------
 !    Add in the density for the nuclear centers
 !
-     IF(iSwitch == 1) CALL AddNukes(GM,Rho)
+     IF(iSwitch == 1 .OR. iSwitch == 2) CALL AddNukes(GM,Rho)
   ENDIF
+#ifdef PERIODIC
 !-----------------------------------------------------------
 !  Fold the Distributions back into the Cell
 !
-#ifdef PERIODIC
   CALL Fold_Rho(GM,Rho)
 #endif
 !------------------------------------------------------------
 !  Remove distribution which du not contibute to the density
 !
-!  DistThresh =  MAX(1.D-13,(1.0D-2)*NEl*Thresholds%Dist)
-!  DistThresh =  MIN(1.D-6,DistThresh)
-!  CALL Prune_Rho(DistThresh,Rho)
+  DistThresh =  Thresholds%Dist
+  CALL Prune_Rho(DistThresh,Rho,Rho2) 
+  CALL Integrate_HGRho(Rho)
 !------------------------------------------------------------
 ! Put Rho to disk
 ! 
@@ -236,6 +238,7 @@ PROGRAM MakeRho
   CALL PChkSum(Rho,'Rho',Prog)
 !  PrintFlags%Fmt=DEBUG_MMASTYLE
 !  CALL PPrint(Rho,'Rho',Unit_O=6)
+!  CALL PPrint(Rho2,'Rho2',Unit_O=6)
 !---------------------------------------------------
 ! Tidy up
 ! 
@@ -245,6 +248,7 @@ PROGRAM MakeRho
   CALL Delete(MD)
   CALL DeleteBraBlok()
   CALL Delete_HGRho(Rho)
+  CALL Delete_HGRho(Rho2)
   CALL ShutDown(Prog)
 !
 END PROGRAM MakeRho
