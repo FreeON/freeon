@@ -38,7 +38,7 @@ PROGRAM MakeRho
   INTEGER             :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER             :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL             :: First
-  REAL(DOUBLE)        :: DistThresh
+  REAL(DOUBLE)        :: DistThresh,RSumE,RSumN
 !
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
@@ -184,14 +184,16 @@ PROGRAM MakeRho
 !-----------------------------------------------------------
 !  Fold the Distributions back into the Cell
 !
-  CALL Fold_Rho(GM,Rho)
+!  CALL Fold_Rho(GM,Rho)
 #endif
 !------------------------------------------------------------
 !  Remove distribution which do not contibute significantly to the density
 !
-!  CALL Integrate_HGRho(Rho)
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
-  CALL Integrate_HGRho(Rho2)
+  CALL Integrate_HGRho(Rho2,RSumE,RSumN)
+  IF(ABS(RSumE+RSumN)>0.1) &
+       CALL Halt(' Density hosed! Rho_e = '//TRIM(DblToMedmChar(Two*RSumE)) &
+                              //',Rho_n = '//TRIM(DblToMedmChar(Two*RSumN)))
 !------------------------------------------------------------
 ! Put Rho to disk
 ! 
@@ -204,6 +206,7 @@ PROGRAM MakeRho
 ! Printing
 !
   CALL PChkSum(Rho2,'Rho',Prog)
+!
 !  PrintFlags%Fmt=DEBUG_MMASTYLE
 !  CALL PPrint(Rho,'Rho',Unit_O=6)
 !  CALL PPrint(Rho2,'Rho2',Unit_O=6)
