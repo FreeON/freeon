@@ -163,6 +163,11 @@ MODULE ParsingKeys
 !  Parsing keys for <Options.BasisSets=>
 !
    CHARACTER(LEN=9),  PARAMETER :: BASIS_SETS    ='BasisSets' 
+!-------------------------------------------------  
+!  Parsing keys for <Options.PopAnal=>
+!
+   CHARACTER(LEN=7),  PARAMETER :: POPULATION_ANALYSIS='PopAnalysis' 
+   CHARACTER(LEN=8),  PARAMETER :: OPT_MULLIKEN='Mulliken' 
 !---------------------------------------------------------
 !  Parsing keys for <Options.Accuracy=>
 !
