@@ -44,6 +44,8 @@ CONTAINS
     CALL ParseNEB(O%RSL,O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
     ! Parse SCF convergence overides and DMPOrder
     CALL ParseSCF(O%DMPOrder,O%MinSCF,O%MaxSCF)
+    ! Parse Misc
+    CALL ParseMISC(O%Pressure)
     ! close
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
@@ -539,6 +541,24 @@ CONTAINS
        MaxSCF = 256
     ENDIF
   END SUBROUTINE ParseSCF
+  !===============================================================================================
+  !
+  !===============================================================================================
+  SUBROUTINE ParseMISC(Pressure)
+    REAL(DOUBLE)           :: Pressure
+    ! Parse the Pressure, used in Optimizer, MD and MC routines
+    IF(.NOT. OptDblQ(Inp,Op_Pressure, Pressure)) THEN
+      Pressure = 0.0D0
+    ENDIF
+    ! Convert to Atomic Units
+    Pressure = Pressure*GPaToAU
+    !
+    IF(Pressure .NE. Zero) THEN
+       WRITE(*,*) "Pressure = ",Pressure," AU"
+       WRITE(*,*) "Pressure = ",Pressure/GPaToAU," GPa"
+    ENDIF
+    !
+  END SUBROUTINE ParseMISC
 !
 !
 !
