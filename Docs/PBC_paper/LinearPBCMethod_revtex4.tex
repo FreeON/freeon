@@ -58,16 +58,11 @@ phases will be demonstrated.
 
 \section{INTRODUCTION}
 
-Recently, quantum chemical methods for gas phase Density Functional Theory (DFT) 
-have been developed which scale linearly with system size, $N$.  In this contribution, 
-these methods are extended to periodic boundary conditions at the $\Gamma$-point.  
-
-Quantum chemical methods typically employ Gaussian Type Atomic Orbitals (GTAOs), 
-which offer a number of advantages. First, because they are local basis functions, it is possible 
-to achieve linear scaling in insulating systems for both construction of the effective Hamiltonian 
-or Fockian, as well as for solution of the density matrix.  Secondly,  almost all one and two electron integrals 
+Quantum chemical methods that  employ Gaussian Type Atomic Orbitals (GTAOs) 
+offer a number of advantages in materials science.  First, because they are local basis functions, it is possible 
+to achieve a linear scaling cost with system size for insulating systems.  Secondly,  almost all one and two electron integrals 
 involving GTAOs are analytic, enabling the 
-rapid evaluation of expectation values involving complicated operators often involved in response properties.
+rapid evaluation of expectation values involving complicated operators often involved in response properties \cite{}.
 The {\sc DALTON} quantum chemical program \cite{dalton} is a premier example of this capability, 
 offering a wide range of electric and magnetic molecular response properties.   
 The ability to treat core-states analytically also opens the ability to move beyond the pseudopotential 
@@ -75,6 +70,13 @@ approximation in computation of relativistic effects with the four-component Dir
 and Dirac-Kohn-Sham \cite{rel4d} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
 correlated wavefunction methods \cite{}, the exact HF exchange is central to hybrid HF/DFT models \cite{}.
+The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group \cite{},
+demonstrating blah gnu snort for difficult problems \cite{}.
+
+Recently, we have developed linear scaling quantum chemical methods for gas phase Density Functional Theory 
+(DFT), including computation of the Coulomb matrix $\bf J$ \cite{MChallacombe97} and the exchange-correlation
+matrix $\bf K_{\rm xc}$ \cite{MChallacombe00A}.   In this contribution, these linear scaling methods are extended to 
+periodic boundary conditions at the $\Gamma$-point.  
 
 With periodic linear scaling quantum chemical algorithms, it is possible to begin bridging the gap between 
 methods developed for small molecule chemistry and large scale problems in the solid state.  Together with the 
@@ -110,35 +112,26 @@ are often constructed from non-orthogonal functions local to the unit cell (UC).
 local function
 $\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
 sum on {\bf R} runs over the Bravais lattice defined by integer translates of the primitive 
-lattice vectors {\bf a}, {\bf b} and {\bf  c}, and {\bf k} are the reciprocal 
-Bravais Lattice vectors.
-These Bloch functions (crystal orbitals)
-yield all possible translational symmetries through variation of the reciprocal lattice vector 
-{\bf k}.     
-For small system sizes with high symmetry, a careful sampling of reciprocal space is required  
-for an accurate description of the periodic system.  An alternative approach to including these 
+lattice vectors {\bf a}, {\bf b} and {\bf  c}.  
+These Bloch functions (crystal orbitals) yield all possible translational symmetries through variation of the 
+reciprocal lattice vector {\bf k}.   Programs such as {\sc CRYSTAL98} perform a careful sampling of reciprocal space 
+to achieve an accurate description of the periodic system.  An alternative approach to including these 
 important symmetries is to set ${\bf k}=0$, and then use a larger supercell created through 
 replication and translation of the primitive unit cell.  
 This is the supercell $\Gamma$-point approximation, used
 primarily for the study of defects and vacancies rather than as a replacement for 
-${\bf k}$-space integration,
-perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
+${\bf k}$-space integration.
 
 In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the 
-$\Gamma$-point 
-approximation, allowing the use of large supercells in the case of high symmetry and large 
-primary unit cells
-in the case of disordered systems.  While the ${\bf k}$  dependence is avoided, lattice 
-summation and formal integration over 
-the unit cell volume, $V_{\rm UC}$ are retained. At first sight this would seem to make matrix 
-construction quite 
-different than in the gas phase,  where integrals are typically taken over all space, 
-$V_\infty$.  
-Thus, elements of the gas phase overlap matrix 
+$\Gamma$-point  approximation, allowing the use of large supercells in the case of high symmetry, as well as 
+large primary cells in the case of disordered systems.  While ${\bf k}$  dependence is avoided, lattice 
+summation and formal integration over the unit cell volume, $V_{\rm UC}$,  are retained.
+At first sight this would seem to make matrix construction quite different than in the gas phase,  
+where integrals are typically taken over all space, $V_\infty$.  Thus, elements of the gas phase overlap matrix,
 \begin{equation}
 \label{Sab_norm}
 S_{ab}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}({\mathbf{r}})\phi _{b}
-({\mathbf{r}})
+({\mathbf{r}}) \, ,
 \end{equation}
 become 
 \begin{equation}
@@ -146,9 +139,8 @@ become
 S_{ab}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{\rm UC}}\, d{\mathbf{r}}\, 
 \phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
 \end{equation}
-in the periodic regime.  
-However, this formalism can be changed via the 
-transformation,
+in the periodic $\Gamma$-point regime.  However, this formalism can brought into a form 
+more closely related to its quantum chemical counterpart via the transformation,
 \begin{equation}
 \sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r}),
 \end{equation}
@@ -162,13 +154,18 @@ S_{ab}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
 %
 %
 
-
-For compactness of notation, let us define the corresponding intermediate basis function products (distributions)
+For compactness of notation, let us define the 
+intermediate basis function products (distributions)
+$\rho _{ab}({\mathbf{r}})=\sum _{\mathbf{R} \mathbf{R}'}\phi _{a}({\mathbf{r}+\mathbf{R}})\phi _{b}({\mathbf{r}+\mathbf{R}'})
+$ associated with integration over $V_{\rm UC}$ and the corresponding distributions
 $\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
 ({\mathbf{r}+\mathbf{R}})
-$ associated with integration over $V_\infty$.  We likewise define an intermediate 
-electron density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} 
-\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$,
+$ associated with integration over $V_\infty$.
+ We likewise define the electron density 
+$\rho({\mathbf{r}})=\sum_{ab} P_{ab} \rho _{ab}({\mathbf{r}})
+$ associated with integration over $V_{\rm UC}$ and the corresponding density 
+density $\rho^{\scriptscriptstyle \infty}({\bf{r}})= \sum _{ab} P_{ab} 
+\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})$ associated with integration over $V_\infty$, 
 where $P_{ab}$ is the one-electron reduced density matrix.  
 In this convention, $V_\infty$ is the default volume of integration, and elements of the periodic overlap 
 matrix are expressed simply  as $S_{ab}=\int  d{\mathbf{r}}\, \rho^{\scriptscriptstyle \infty}_{ab}({\mathbf{r}})$,
@@ -179,17 +176,17 @@ It is worth noting that the complexity of $\rho^{\scriptscriptstyle \infty}$ is 
 exponential prefactor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ that enters each term in the sum 
 over {\bf A}, {\bf B} and {\bf R}.  Thus, $N$-scaling may be achieved {\em a priori} with a simple distance test.
 However, for small exponents, care must be exercised in  truncation of periodic sums to avoid overlap 
-matrices that are not positive definite.  While these situations can be avoided simply with tighter distance neglect 
-criteria, they are often due to the use of basis sets designed for gas phase calculations in conjunction with small 
-unit cells.  
+matrices that are not positive definite.  While these situations can often be ameliorated  with a  tighter distance neglect 
+criteria, they are typically a symptom of near linear dependence, often  due to the use of basis sets designed for gas phase 
+calculations in conjunction with small unit cells.  
 
 These considerations and others are discussed by Towler in an excellent overview of Gaussian basis sets for the condensed 
-phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CRYSTALLib,TowlerLib} of Gaussian 
+phase \cite{MTowler00}.  Also, there are at least two (albiet related) libraries \cite{CRYSTALLib,TowlerLib} of Gaussian 
 basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
 still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
 by Gr{\"u}neich and Hess \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse 
-square  of the lattice constant.  
-In many cases though, especially for large systems, standard quantum chemistry basis sets work well. 
+square  of the lattice constant.  In many cases though, especially for large systems, standard quantum chemical basis sets 
+work well. 
 
 %%\cite{}.
 %% CyrstalLib http://www.crystal.unito.it/Basis_Sets/ptable.html
@@ -197,21 +194,18 @@ In many cases though, especially for large systems, standard quantum chemistry b
 
 \section{data structures and error estimates}\label{datastruct}
 
-Both the Quantum Chemical Tree-Code (QCTC) 
-%\cite{} 
-for computing the Coulomb matrix and Hierarchical Cubature (HiCu)
+Both the Quantum Chemical Tree-Code (QCTC) \cite{MChallacombe97} 
+for computing the Coulomb matrix and Hierarchical Cubature (HiCu) \cite{MChallacombe00A}
 for computing the Exchange-Correlation matrix are fast ${\cal O}(N {\rm lg} N)$ algorithms whose performance
-is intimately coupled to underlying data structures and error estimates.  It is important to understand some 
+is coupled to underlying data structures and error estimates.  It is important to understand some 
 of these particulars first, before addressing their extension to periodic boundary conditions.
-Also, the current version of QCTC is quite different from previous descriptions \cite{MChallacombe96B}, and deserves some
-introduction.  
+Also, the current version of QCTC is quite different from previous descriptions, and deserves some introduction.  
 
 Both QCTC and HiCu are homeomorphic, involving $k$-d tree representation of the density.  
 In our implementations, $k$-d trees are doubly linked lists with axis aligned bounding boxes (AABBs) 
-containing the spatial {\em extent} of each node and its children.    This scheme is similar to
+delimiting the spatial {\em extent} of each node and its children.    This scheme is similar to
 well developed technologies for ray tracing and data base searches, allowing fast 
-${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests 
-%\cite{}. 
+${\cal O}({\rm lg} N)$ {\em range queries} of overlapping components through AABB intersection tests \cite{}. 
 In the case of QCTC, this fast look up constitutes the penetration acceptability criterion (PAC) 
 %\cite{}, 
 which identifies spatial clusters or agglomerations, $\rho_Q$, of the density that may be accurately 
@@ -558,7 +552,7 @@ overlap only a few of the many possible atom-atom pairs.
 The solution again comes from the ray tracing literature, in the form of a modified 
 ray-AABB \cite{MGomez99} and sphere-AABB test \cite{GGems}.  
 %     ! Modified Miguel Gomez' Ray-AABB test (Gamasutra '99) to work for Cylinder-AABB
-%     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems, pp. 247-250
+%     ! for Ray=Point, uses A Simple Method for Box-Sphere Intersection Testing, Graphics Gems,  pp. 247-250
 The ray-AABB test has been modified into a cylinder-AABB test, where the radius of the cylinder
 is a maximal overlap extent of the atom-atom pair.  In the case of a same center atom-atom pair,
 it is of coarse more appropriate to employ a sphere-AABB test.  In both cases, overlap

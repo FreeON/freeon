@@ -1,4 +1,4 @@
-all:	latex dvi
+all:	bib dvi
 
 latex:
 	latex LinearPBCMethod_revtex4.tex
@@ -11,7 +11,7 @@ bib:
 	bibtex LinearPBCMethod_revtex4
 	latex LinearPBCMethod_revtex4.tex
 	bibtex LinearPBCMethod_revtex4
-#	latex LinearPBCMethod_revtex4.tex	
+	latex LinearPBCMethod_revtex4.tex	
 #	latex LinearPBCMethod_revtex4.tex	
 
 links:
