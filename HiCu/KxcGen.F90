@@ -228,7 +228,7 @@ MODULE KxcGen
                       IB=IB+1
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
                       PExtent=MAX(PExtent, & 
-                                  Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauRho))
+                                  Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauRho,ExtraEll_O=1))
                    ENDDO
                 ENDDO
                 IF(PExtent>Zero)THEN

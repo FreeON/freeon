@@ -57,7 +57,7 @@ MODULE dXCBlok
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab,PNorm
+                                                   Pab
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,      &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
@@ -74,11 +74,11 @@ MODULE dXCBlok
        KB=Prim%KB
        Prim%AB2=Pair%AB2
        Vck=Zero
-       PNorm=Zero
-       DO IA=1,Pair%NA; DO IB=1,Pair%NB
-          PNorm=PNorm+P(IA,IB)**2
-       ENDDO; ENDDO
-       PNorm=SQRT(PNorm)
+!       PNorm=Zero
+!       DO IA=1,Pair%NA; DO IB=1,Pair%NB
+!          PNorm=PNorm+P(IA,IB)**2
+!       ENDDO; ENDDO
+!       PNorm=SQRT(PNorm)
 !----------------------------------
        IndexA=0                  
        DO CFA=1,BS%NCFnc%I(KA)    
@@ -114,6 +114,7 @@ MODULE dXCBlok
                 PBox%BndBox(1,:)=Prim%P(1)
                 PBox%BndBox(2,:)=Prim%P(2)
                 PBox%BndBox(3,:)=Prim%P(3)
+!-----------------------------------------------------------------------------------------
 !               Find the maximum extent of this primitive
                 PExtent=Zero
                 IA = IndexA
@@ -127,11 +128,10 @@ MODULE dXCBlok
                       Pab=P(IA,IB)
                       DO K=1,3
                          PExtent=MAX(PExtent, & 
-                                     Extent(EllA+EllB,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauRho))
+                                     Extent(EllA+EllB,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauRho,ExtraEll_O=2))
                       ENDDO
                    ENDDO
                 ENDDO
-!
                 IF(PExtent>Zero)THEN
                    PBox=ExpandBox(PBox,PExtent)
 !                  Walk the walk
