@@ -1248,20 +1248,19 @@ CONTAINS
                              ENDIF
                            ENDIF
                            IF(IntSet==2) THEN
+                             LonelyAtom=(Top12%I(JJ1,1)==0.OR.&
+                                         Top12%I(JJ2,1)==0)
                              IF(NJJ1==1.OR.NJJ2==1) THEN 
                                FoundHBond=HasHBond(NJJ1,NJJ2)
                              ENDIF
-                             IF(NJJ1==1.OR.NJJ2==1) THEN 
-                               LonelyAtom=(Top12%I(JJ1,1)==0.OR.&
-                                           Top12%I(JJ2,1)==0)
-                             ENDIF
+                             IF(LonelyAtom) FoundHBond=.TRUE.!for filter
                              CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2, &
                                            Top_Excl,Top12,Top13,Top14,&
                                            FoundHBond,FoundMetLig,&
                                            LonelyAtom,DoExclude)
                              IF(DoExclude) CYCLE
                            ENDIF
-                           IF(FoundHBond) THEN
+                           IF(FoundHBond.AND..NOT.LonelyAtom) THEN
                              CritDist=HBondMax
                            ELSE
                              CritDist=CritRad%D(NJJ1)+CritRad%D(NJJ2)
@@ -1285,7 +1284,9 @@ CONTAINS
                              BondIJAux%I(1,NBond)=JJ1
                              BondIJAux%I(2,NBond)=JJ2
                              BondLengthAux%D(NBond)=R12
-                             IF(FoundHBond) HBondMarkAux%I(NBond)=1
+                             IF(FoundHBond) THEN
+                               HBondMarkAux%I(NBond)=1
+                             ENDIF
                            ENDIF
                          ENDDO
                        ENDIF
@@ -4582,8 +4583,10 @@ CONTAINS
      INTEGER,DIMENSION(:)   :: AtNum    
      INTEGER                :: NatmsLoc,NBond,I,J,J1,J2,NI1,NI2,MaxHBond
      INTEGER                :: NBondNew,I1,I2,IB1,IB2,ISelect1,ISelect2
+     INTEGER                :: K,L,M,N,L1,L2
      TYPE(INT_RNK2)         :: BondIJ,BondIJNew,HBondList,Top12
      TYPE(INT_VECT)         :: CountHBonds,HBondMark,HBondMarkNew
+     TYPE(INT_VECT)         :: EraseBond,DeActivate
      TYPE(DBL_VECT)         :: BondLength,BondLengthNew
      REAL(DOUBLE)           :: DistMin,D1,D2,D12
      CHARACTER(LEN=*)       :: SCRPath
@@ -4595,6 +4598,8 @@ CONTAINS
      CALL New(BondIJNew,(/2,NBond/))
      CALL New(HBondMarkNew,NBond)
      CALL New(BondLengthNew,NBond)
+     CALL New(DeActivate,NBond)
+     DeActivate%I=0
      !
      ! Fill Non-H-bonds into new array
      !
@@ -4630,6 +4635,59 @@ CONTAINS
          ENDIF
        ENDIF
      ENDDO
+     !
+     ! Filter H-H bonds
+     !
+     CALL New(EraseBond,MaxHBond)
+     DO I=1,NatmsLoc
+       K=CountHBonds%I(I)
+       IF(K>=3) THEN
+         M=0
+         N=0
+         EraseBond%I=0
+         DO J=1,K
+           L=HBondList%I(I,J)
+           L1=BondIJ%I(1,L)
+           L2=BondIJ%I(2,L)
+           IF(L1/=I) THEN
+             IF(AtNum(L1)/=1) THEN
+               M=M+1 
+             ELSE
+               N=N+1 
+               EraseBond%I(J)=1
+             ENDIF
+           ELSE
+             IF(AtNum(L2)/=1) THEN
+               M=M+1 
+             ELSE
+               N=N+1 
+               EraseBond%I(J)=1
+             ENDIF
+           ENDIF
+         ENDDO 
+         IF(M>=2.AND.N/=0) THEN
+           DO J=1,K
+             IF(EraseBond%I(J)==1) THEN
+               DeActivate%I(HBondList%I(I,J))=1
+             ENDIF
+           ENDDO
+         ENDIF
+       ENDIF
+     ENDDO
+     DO I=1,NatmsLoc
+       EraseBond%I=0
+       K=CountHBonds%I(I)
+       L=0
+       DO J=1,K
+         IF(DeActivate%I(HBondList%I(I,J))/=1) THEN
+           L=L+1
+           EraseBond%I(L)=HBondList%I(I,J) 
+         ENDIF
+       ENDDO 
+       CountHBonds%I(I)=L
+       DO J=1,MaxHBond ; HBondList%I(I,J)=EraseBond%I(J) ; ENDDO
+     ENDDO
+     CALL Delete(EraseBond)
      !
      DO I=1,NatmsLoc
        IF(CountHBonds%I(I)/=0) THEN
@@ -4687,6 +4745,7 @@ CONTAINS
        BondLength%D(I)=BondLengthNew%D(I)
      ENDDO
      !
+     CALL Delete(DeActivate)
      CALL Delete(Top12)
      CALL Delete(HBondList)
      CALL Delete(CountHBonds)
