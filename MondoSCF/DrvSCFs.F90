@@ -72,11 +72,9 @@ MODULE DrvSCFs
       LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !---------------------------------------------------------------------------------------
 !
-      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1.AND. &
-         Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
-
+      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
+!	  .AND.Ctrl%Extrap>EXTRAP_GEOM_RSTRT)THEN
          ! Density projection is now the default guess for new geometries
-
 !         IF(Ctrl%Extrap==EXTRAP_GEOM_PRJCT)THEN
 !           Projection of density matrix between geometries
             CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
@@ -99,6 +97,8 @@ MODULE DrvSCFs
       ELSEIF(Ctrl%Rest)THEN
 !        Restart from a previous density
          CALL LogSCF(Ctrl%Current,'Restarting from '//TRIM(Ctrl%OldInfo),.TRUE.)
+         ! Make sure previous and current are set correctly.
+         Ctrl%Previous=Ctrl%Current
          CtrlVect=SetCtrlVect(Ctrl,'Restart')
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
