@@ -28,6 +28,7 @@ PROGRAM P2Use
   TYPE(BCSR)  & 
 #endif
                                 :: S,P,T0,T1,T2
+  TYPE(BCSR)  :: P2
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
                                    DeltaP,OldDeltaP,DensityDev
@@ -40,7 +41,7 @@ PROGRAM P2Use
 !--------------------------------------- 
 ! Start up macro
 !
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   Cycl=IntToChar(Args%I%I(1))
 !--------------------------------------- 
 ! Get basis set and geometry
@@ -170,9 +171,10 @@ PROGRAM P2Use
 !         structure occupancies--works only for minimal (STO) basis sets
           CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
           DO I=1,NAtoms
-             CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
+            CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
           ENDDO
-          CALL SetToI(P,BlkP)
+          CALL SetToI(P2,BlkP)
+          CALL SetEq(P,P2)
 !         Check for the correct elctron count
           TrP=Trace(P)
           IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
@@ -187,8 +189,15 @@ PROGRAM P2Use
   ENDIF
 ! Create density matrix in AO representation
   IF(SCFActn/='Extrapolate'.AND.SCFActn/='Restart')THEN
-     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-     IF(Present)THEN     
+#ifdef PARALLEL
+     IF(MyId==ROOT)THEN
+#endif
+        INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+#ifdef PARALLEL
+     ENDIF
+     CALL BCast(Present)
+#endif
+      IF(Present)THEN     
          CALL Get(T1,TrixFile('X',Args))   ! T1=S^(-1/2)
          CALL Multiply(T1,P,T2)            ! T2=S^(-1/2).DiagonalGuess
          CALL Multiply(T2,T1,T0)           ! P=S^(-1/2).DiagonalGuess.S^(-1/2)

@@ -26,7 +26,7 @@ PROGRAM SCFStatus
    CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'  
 !---------------------------------------------------------------------------------------
 !  Macro the start up
-   CALL StartUp(Args,Prog)
+   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !  Allocate some matrices
    CALL New(P)
    CALL New(Tmp1)

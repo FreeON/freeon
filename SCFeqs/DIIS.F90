@@ -36,7 +36,7 @@ PROGRAM DIIS
    CHARACTER(LEN=4),PARAMETER     :: Prog='DIIS'
 !-------------------------------------------------------------------------------------
 !  Initial setup
-   CALL StartUp(Args,Prog)
+   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
    ISCF=Args%I%I(1)
 !  Parse for DIIS options
    CALL OpenASCII(InpFile,Inp)  
@@ -150,11 +150,11 @@ PROGRAM DIIS
       ENDIF
       CALL BCast(DIISCo)
 #endif
-      IF(Sloshed)THEN
-         Mssg=ProcessName(Prog,'Multipole C1')//'DIISCo = '
-      ELSE
-         Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
-      ENDIF
+         IF(Sloshed)THEN
+            Mssg=ProcessName(Prog,'Multipole C1')//'DIISCo = '
+         ELSE
+            Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
+         ENDIF
    ELSE
       Mssg=ProcessName(Prog,'Damping')//'Co = '
       N=3
@@ -168,8 +168,6 @@ PROGRAM DIIS
 !  IO
    CALL Put(DIISErr,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
    IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
-      CALL OpenASCII(OutFile,Out)
-      CALL PrintProtectL(Out)
       DO I=1,N-2
          IF(MOD(I,4)==0)THEN
             Mssg=TRIM(Mssg)//RTRN//ProcessName() &
@@ -179,11 +177,19 @@ PROGRAM DIIS
          ENDIF
       ENDDO
       Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(N-1)))
-      IF(PrintFlags%Key==DEBUG_MAXIMUM) &
-      WRITE(*,*)TRIM(Mssg)
-      WRITE(Out,*)TRIM(Mssg)
-      CALL PrintProtectR(Out)
-      CLOSE(Out)
+#ifdef PARALLEL
+      IF(MyId==ROOT)THEN
+#endif
+         CALL OpenASCII(OutFile,Out)
+         CALL PrintProtectL(Out)
+         IF(PrintFlags%Key==DEBUG_MAXIMUM) &
+         WRITE(*,*)TRIM(Mssg)
+         WRITE(Out,*)TRIM(Mssg)
+         CALL PrintProtectR(Out)
+         CLOSE(Out)
+#ifdef PARALLEL
+      ENDIF
+#endif
   ENDIF
 !-------------------------------------------------------------------------------------
 ! Extrapolation or damping 

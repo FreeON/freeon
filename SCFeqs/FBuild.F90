@@ -27,9 +27,10 @@ PROGRAM FockNGrueven
   CHARACTER(LEN=12),PARAMETER    :: Prog='FockNGrueven'
   LOGICAL                        :: Present,ExchangeShift
 !------------------------------------------------------------------ 
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   ISCF=Args%I%I(1)
   Cycl=IntToChar(ISCF)
+
 !
   CALL New(F)
   CALL New(Tmp1)
@@ -67,9 +68,17 @@ PROGRAM FockNGrueven
   CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
   CALL PPrint( F,'F['//TRIM(Cycl)//']')
   CALL Plot(   F,'F['//TRIM(Cycl)//']')
+
 ! Now transform to an orthogonal representation
   XFile=TrixFile('X',Args)
-  INQUIRE(FILE=XFile,EXIST=Present)
+#ifdef PARALLEL
+  IF(MyId==ROOT)THEN
+#endif
+     INQUIRE(FILE=XFile,EXIST=Present)
+#ifdef PARALLEL
+  ENDIF
+  CALL BCast(Present)
+#endif
   IF(Present)THEN
      CALL Get(X,XFile)                ! X =S^{-1/2}
      CALL Multiply(X,F,Tmp1)          ! T1=S^{-1/2}.F
