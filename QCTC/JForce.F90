@@ -29,6 +29,7 @@ PROGRAM JForce
   INTEGER                      :: IErr,TotFrcComp,MyAtomNum,TotAtomNum
   REAL(DOUBLE)                 :: JFrcBegTm,JFrcEndTm,JFrcTm
   TYPE(DBL_VECT)               :: TmJFrcArr
+  TYPE(DBL_RNK2)               :: TmpLatFrc_J
 #else
   TYPE(BCSR)                   :: P
 #endif
@@ -339,7 +340,17 @@ PROGRAM JForce
      A2=3*AtA
      GMLoc%Gradients%D(1:3,AtA) = GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
   ENDDO
+
+#ifdef PARALLEL
+  CALL New(TmpLatFrc_J,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_J%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_J%D(1,1),TmpLatFrc_J%D(1,1),9,MPI_DOUBLE_PRECISION, &
+       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+  GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+TmpLatFrc_J%D
+  CALL Delete(TmpLatFrc_J)
+#else
   GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+#endif
   CALL Put(GMLoc,Tag_O=CurGeom)
 !
   CALL Delete(BS)
