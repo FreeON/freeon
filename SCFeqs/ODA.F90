@@ -14,18 +14,19 @@ PROGRAM ODA
   !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
 #ifdef PARALLEL
-  TYPE(DBCSR)                     ::  &
+  TYPE(DBCSR)                    ::  &
 #else
-  TYPE(BCSR)                      ::  &
+  TYPE(BCSR)                     ::  &
 #endif
-                                    P,PTilde,F,FTilde,T1,T2,S
-  REAL(DOUBLE)                   :: e0,e1,e0p,e1p,a3,b3,c3,d3,EMns,EPls,EMin, &
-       LMns,LPls,L,L1,ENucTot,ENucTotTilde,ExcTilde,Exc,DIISErr
+                                    P,PTilde,F,FTilde,T,K0,K1,T1,T2,T3
+  REAL(DOUBLE)                   :: e0,e1,e0p,e1p,a3,b3,c3,d3,EMns,EPls,EMin,        &
+                                    LMns,LPls,L,L1,ENucTotTilde,                     &
+                                    DIISErr,Enuc0,Enuc1,Exc0,Exc1
+  REAL(DOUBLE)                   :: Tmp1,Tmp2,Tmp3,Tmp4,alph
   INTEGER                        :: I,iSCF
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,MatFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='ODA'
-  INTEGER,PARAMETER              :: M=-1
   !-------------------------------------------------------------------------
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
@@ -33,55 +34,111 @@ PROGRAM ODA
   CALL StartUp(Args,Prog)
 #endif
   iSCF=Args%I%I(1)
-  ! Suss for matrix threshold overide
-  CALL SussTrix('ODA',Prog)  
-  ! Allocations 
+! Suss for matrix threshold overide
+!  CALL SussTrix('ODA',Prog)  
+! Allocate temp Matrices
   CALL New(T1)
-  CALL New(T2)
-  CALL New(S)
-  CALL New(P)
-  CALL New(F)
-  CALL New(PTilde)
-  CALL New(FTilde)
-#ifdef OrthogonalODA  
-  CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
-  CALL Get(FTilde,TrixFile('OrthoF',Args,M))   
-#else
-  CALL Get(PTilde,TrixFile('D',Args,M))   
-  CALL Get(FTilde,TrixFile('F',Args,M))   
-#endif
-  Current(1)=Current(1)+M
-  CALL Get(e0,'Etot',StatsToChar(Current))
-  Current(1)=Current(1)-M
-  ! Get the current (N) non-tilde values
-#ifdef OrthogonalODA  
-  CALL Get(P,TrixFile('OrthoD',Args,0))   
-  CALL Get(F,TrixFile('OrthoF',Args,0))   
-#else
-  CALL Get(P,TrixFile('D',Args,0))   
-!  CALL PPrint(P,'P??',Unit_O=6)
-  CALL Get(F,TrixFile('F',Args,0))   
-#endif
-  ! T1 = P_N-PTilde_{N-1}
-  CALL Multiply(PTilde,-One)
-  CALL Add(PTilde,P,T1)  
-  CALL Get(e1,'Etot',StatsToChar(Current))
-  ! Get the previous Fock matrix F[PTilde_(N-1)]
+  CALL New(T2)  
+  CALL New(T3)
+! Get the Matrices
+  CALL Get(PTilde,TrixFile('D',Args,-1))   
+  CALL Get(FTilde,TrixFile('F',Args,-1))  
+  CALL Get(P,TrixFile('D',Args,0))
+  CALL Get(F,TrixFile('F',Args,0))  
+  CALL Get(T,TrixFile('T',Args))
+! Calculate Exchange Asymmetry
+  IF(HasHF(ModelChem)) THEN
+     CALL Get(K0,TrixFile('K',Args,-1))
+     CALL Get(K1,TrixFile('K',Args,0))
+     CALL OpenASCII(OutFile,Out)
+     WRITE(Out,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
+     WRITE(*  ,'(a18,D10.5)') " Tr[P0*K1-P1*K0] = ",ABS(Trace(PTilde,K1)-Trace(P,K0))/ABS(Trace(P,K1))
+     CLOSE(Out)
+  ENDIF
+! Get Energies: E_nuc and E_xc and K_xc matrices
+  Current(1)=Current(1)-1
+  CALL Get(Enuc0,'E_NuclearTotal',StatsToChar(Current))
+  Current(1)=Current(1)+1
+  CALL Get(Enuc1,'E_NuclearTotal',StatsToChar(Current))
+  IF(HasDFT(ModelChem)) THEN
+     Current(1)=Current(1)-1
+     CALL Get(Exc0 ,'Exc'           ,StatsToChar(Current))
+     CALL Get(K0,TrixFile('Kxc',Args,-1))
+     Current(1)=Current(1)+1
+     CALL Get(Exc1 ,'Exc'           ,StatsToChar(Current))
+     CALL Get(K1,TrixFile('Kxc',Args,0))
+  ENDIF
+! Compute the Endpoint energies and Derivatives
 #ifdef PARALLEL
-  CALL Multiply(FTilde,T1,S)
-  e0p=Two*Trace(S)
-  CALL Multiply(F,T1,S)
-  e1p=Two*Trace(S)
+! e0
+  e0 = Enuc0
+  CALL Multiply(PTilde,T,T1)
+  e0 = e0 + Trace(T1)
+  CALL Multiply(PTilde,FTilde,T1)
+  e0 = e0 + Trace(T1) 
+  IF(HasDFT(ModelChem)) THEN
+     CALL Multiply(PTilde,K0,T1)
+     e0 = e0 + Exc0 - Trace(T1)
+  ENDIF
+! e1
+  e1 = Enuc1
+  CALL Multiply(P,T,T1)
+  e1 = e1 + Trace(T1)
+  CALL Multiply(P,F,T1)
+  e1 = e1 + Trace(T1) 
+  IF(HasDFT(ModelChem)) THEN
+     CALL Multiply(P,K1,T1)
+     e0 = e0 + Exc1 - Trace(T1)
+  ENDIF
+! e0p
+  e0p =  Enuc1-Enuc0
+  CALL Multiply(P,T,T1)
+  e0p = e0p + Trace(T1)
+  CALL Multiply(PTilde,T,T1)
+  e0p = e0p - Trace(T1)
+  CALL Multiply(P,FTilde,T1)
+  e0p = e0p + Trace(T1)
+  CALL Multiply(PTilde,F,T1)
+  e0p = e0p + Trace(T1)
+  CALL Multiply(PTilde,FTilde,T1)
+  e0p = e0p - Two*Trace(T1)
+! e1p
+  e1p =  Enuc1-Enuc0
+  CALL Multiply(P,T,T1)
+  e1p = e1p + Trace(T1)
+  CALL Multiply(PTilde,T,T1)
+  e1p = e1p - Trace(T1)
+  CALL Multiply(P,FTilde,T1)
+  e0p = e0p - Trace(T1)
+  CALL Multiply(PTilde,F,T1)
+  e0p = e0p - Trace(T1)
+  CALL Multiply(P,F,T1)
+  e0p = e0p + Two*Trace(T1)
+! add xc 
+  IF(HasDFT(ModelChem)) THEN
+     CALL Multiply(P,K0,T1)
+     e0p = e0p + Trace(T1)
+     e1p = e1p + Trace(T1)
+     CALL Multiply(PTilde,K1,T1)
+     e0p = e0p - Trace(T1)
+     e1p = e1p - Trace(T1)
+  ENDIF
 #else
-  e0p=Two*Trace(FTilde,T1)
-  e1p=Two*Trace(F,T1)
+  ! Avoid assumption of two electron integral symmetry which may be lost 
+  ! in the case of small cell PBC HF and also due to excesive thresholding. 
+  e0  = Trace(PTilde,T)+Trace(PTilde,FTilde) + Enuc0
+  e1  = Trace(P,T)     +Trace(P,F)           + Enuc1
+  e0p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Trace(P,FTilde)+Trace(PTilde,F)-Two*Trace(PTilde,FTilde)
+  e1p = Enuc1-Enuc0+Trace(P,T)-Trace(PTilde,T)+Two*Trace(P,F)-Trace(P,FTilde)-Trace(PTilde,F)
+  IF(HasDFT(ModelChem)) THEN
+     e0  = e0 + Exc0 - Trace(PTilde,K0)
+     e1  = e1 + Exc1 - Trace(P,K1)
+     e0p = e0p + (Trace(P,K0)-Trace(PTilde,K1))
+     e1p = e1p + (Trace(P,K0)-Trace(PTilde,K1))
+  ENDIF
 #endif
-   !WRITE(*,*)' e0 = ',e0
-   !WRITE(*,*)' e1 = ',e1
-   !WRITE(*,*)'e0p = ',e0p
-   !WRITE(*,*)'e1p = ',e1p
-  ! Find the mixing parameter L from the
-  ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
+! Find the mixing parameter L from the
+! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
   b3=e0p
   c3=-3D0*e0-2D0*e0p+3D0*e1-e1p
@@ -107,8 +164,7 @@ PROGRAM ODA
   ! End point checks
   IF(L<=Zero.OR.L>One)THEN
      IF(e0<e1)THEN
-        ! Mark of the beast
-        L=6.66D-3
+        L=1.D-6
         L1=One-L
         EMin=a3+b3*L+c3*L**2
      ELSE
@@ -122,7 +178,7 @@ PROGRAM ODA
 #endif
      Mssg=' Mix = '//TRIM(FltToShrtChar(L))
      Mssg=ProcessName(Prog,TRIM(Mssg))
-     Mssg=TRIM(Mssg)//" <SCF> ~ "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
+     Mssg=TRIM(Mssg)//" <SCF> = "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
      CALL OpenASCII(OutFile,Out)
      WRITE(*,*)TRIM(Mssg)
      WRITE(Out,*)TRIM(Mssg)
@@ -130,134 +186,93 @@ PROGRAM ODA
 #ifdef PARALLEL
   ENDIF
 #endif
-  ! PTilde_N=(1-L)*PTilde_(N-1)+L*P_N
-  CALL Multiply(P,L)
-  CALL Multiply(PTilde,-L1)
-  CALL Add(P,PTilde,T1)
-  CALL SetEq(PTilde,T1)
-  ! FTilde_N ~ (1-L)*FTilde_(N-1)+L*F_N
-  CALL Multiply(F,L)
-  CALL Multiply(FTilde,L1)
-  CALL Add(F,FTilde,T1)
-  CALL SetEq(FTilde,T1)
-#ifdef OrthogonalODA  
-  ! Compute the orthogonal DIIS error
-  CALL Multiply(FTilde,PTilde,T1)  
-  CALL Multiply(PTilde,FTilde,T1,-One)
-#else
-  CALL Get(S,TrixFile('S',Args))     
-  ! Compute the AO-DIIS error
-  CALL Multiply(FTilde,PTilde,T1)
-  CALL Multiply(T1,S,P)
-  ! F.P.S-S.P.F
-  CALL Multiply(S,PTilde,T1)
-  CALL Multiply(T1,FTilde,F)
-  CALL Multiply(F,-One)
-  CALL Add(P,F,T1)
-#endif
-  ! The DIIS error 
-  DIISErr=SQRT(Dot(T1,T1))/DBLE(NBasF)
-  CALL Put(DIISErr,'diiserr')
-  CALL Put(EMin,'ODAEnergy')
-  ! Orthogonal put and xform to AO rep and put of PTilde
-  ! Step on density from both this cycle and the next
-!   CALL Put(PTilde,TrixFile('OrthoD',Args,0))
-#ifdef OrthogonalODA  
-  ! Convert P to AO representation
-  INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-  IF(Present)THEN
-     CALL Get(P,TrixFile('X',Args))   ! Z=S^(-1/2)
-     CALL Multiply(P,PTilde,T1)
-     CALL Multiply(T1,P,PTilde)
-  ELSE
-     CALL Get(P,TrixFile('Z',Args))   ! Z=S^(-L)
-     CALL Multiply(P,PTilde,T1)
-     CALL Get(P,TrixFile('ZT',Args))
-     CALL Multiply(T1,P,PTilde)
-  ENDIF
-  CALL Put(FTilde,TrixFile('OrthoF',Args,0)) 
-  CALL Put(PTilde,TrixFile('D',Args,0))
-  CALL Put(PTilde,'CurrentDM',CheckPoint_O=.TRUE.)
-  CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
-  CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
-  IF(iSCF>1)THEN
-     ! Step on the orthogonal DM as well
-     CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
-     CALL Get(P,TrixFile('OrthoD',Args,0))   
-     CALL Multiply(P,L)
-     CALL Multiply(PTilde,L1)
-     CALL Add(P,PTilde,T1)
-     CALL Put(T1,TrixFile('OrthoD',Args,0))
-  ENDIF
-#else
-  CALL Put(FTilde,TrixFile('F',Args,0)) 
-  CALL PChkSum(FTilde,'Fao~['//TRIM(NxtCycl)//']',Prog)
-  ! Convert F to orthogonal representation
-  INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-  IF(Present)THEN
-     CALL Get(P,TrixFile('X',Args))   ! Z=S^(-1/2)
-     CALL Multiply(P,FTilde,T1)
-     CALL Multiply(T1,P,FTilde)
-  ELSE
-     CALL Get(P,TrixFile('ZT',Args))
-     CALL Multiply(P,FTilde,T1)
-     CALL Get(P,TrixFile('Z',Args))  ! Z=S^(-L)
-     CALL Multiply(T1,P,FTilde)
-  ENDIF
-  CALL Put(FTilde,TrixFile('OrthoF',Args,0)) 
-  CALL Put(PTilde,TrixFile('D',Args,0))
-  CALL Put(PTilde,'CurrentDM',CheckPoint_O=.TRUE.)
-  CALL PChkSum(FTilde,'For~['//TRIM(NxtCycl)//']',Prog)
-  CALL PChkSum(PTilde,'Pao~['//TRIM(NxtCycl)//']',Prog)
-  IF(iSCF>1)THEN
-     ! Step on the orthogonal DM as well
-     CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
-     CALL Get(P,TrixFile('OrthoD',Args,0))   
-     CALL Multiply(P,L)
-     CALL Multiply(PTilde,L1)
-     CALL Add(P,PTilde,T1)
-     CALL Put(T1,TrixFile('OrthoD',Args,0))
-  ENDIF
-#endif
-  ! JTilde_N ~ (1-L)*JTilde_(N-1)+L*J_N
-  CALL Get(PTilde,TrixFile('J',Args,M))
-  CALL Get(P,TrixFile('J',Args,0))
+! Compute PTilde_N=(1-L)*PTilde_(N-1)+L*P_N, then put bto disk
   CALL Multiply(P,L)
   CALL Multiply(PTilde,L1)
   CALL Add(P,PTilde,T1)
-  CALL Put(T1,TrixFile('J',Args,0))
-  ! KTilde_N ~ (1-L)*KTilde_(N-1)+L*K_N
+  CALL Filter(T2,T1)
+  CALL Put(T2,TrixFile('D',Args,0))
+  CALL Put(T2,'CurrentDM',CheckPoint_O=.TRUE.)
+  CALL PChkSum(T2,'Pao['//TRIM(NxtCycl)//']',Prog)
+! Compute FTilde_N ~ (1-L)*FTilde_(N-1)+L*F_N
+  CALL Multiply(F,L)
+  CALL Multiply(FTilde,L1)
+  CALL Add(F,FTilde,T1)
+  CALL Filter(T3,T1) 
+  CALL Put(T3,TrixFile('F',Args,0)) 
+  CALL PChkSum(T3,'Fao['//TRIM(NxtCycl)//']',Prog)
+!----------------------------------------------------------------------
+! Convert FTilde to ortho rep
+  INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+  IF(Present)THEN
+     CALL Get(K0,TrixFile('X',Args))         ! Z=S^(-1/2)
+!    F_ortho
+     CALL Multiply(K0,T3,T1)                 ! Z*F
+     CALL Multiply(T1,K0,T3)                 ! (Z*F)*Z
+     CALL Filter(T1,T3)                      ! Filter
+     CALL Put(T1,TrixFile('OrthoF',Args,0))  
+     CALL PChkSum(T1,'For['//TRIM(NxtCycl)//']',Prog)
+     CALL SetEq(FTilde,T1)
+  ELSE
+     CALL Get(K0,TrixFile('ZT',Args))        ! ZT=S^(L)
+     CALL Get(K1,TrixFile('Z',Args))         ! Z=S^(-L)
+!    F_ortho
+     CALL Multiply(K0,T3,T1)                 ! ZT*F
+     CALL Multiply(T1,K1,T3)                 ! (ZT*F)*Z
+     CALL Filter(T1,T3)                      ! Filter
+     CALL Put(T1,TrixFile('OrthoF',Args,0))  
+     CALL PChkSum(T1,'For['//TRIM(NxtCycl)//']',Prog)
+     CALL SetEq(FTilde,T1)
+  ENDIF
+! Convert PTilde to ortho rep
+  IF(iSCF>1)THEN
+     CALL Get(PTilde,TrixFile('OrthoD',Args,-1))   
+     CALL Get(P,TrixFile('OrthoD',Args,0))   
+     CALL Multiply(P,L)
+     CALL Multiply(PTilde,L1)
+     CALL Add(P,PTilde,T2)
+     CALL Filter(T1,T2)
+     CALL PChkSum(T1,'Por['//TRIM(NxtCycl)//']',Prog)
+     CALL Put(T1,TrixFile('OrthoD',Args,0))
+     CALL SetEq(PTilde,T1)
+!    Compute the DIIS error
+     CALL Multiply(FTilde,PTilde,T1)
+     CALL Multiply(PTilde,FTilde,T2)
+     CALL Multiply(T2,-One)
+     CALL Add(T1,T2,T3)
+     DIISErr=SQRT(Dot(T3,T3))/DBLE(NBasF)
+     CALL Put(DIISErr,'diiserr')
+  ELSE
+     DIISErr=One
+     CALL Put(DIISErr,'diiserr')
+  ENDIF
+! Store Emin
+  CALL Put(EMin   ,'ODAEnergy')
+! JTilde_N = (1-L)*JTilde_(N-1)+L*J_N
+  CALL Get(PTilde,TrixFile('J',Args,-1))
+  CALL Get(P,     TrixFile('J',Args,0))
+  CALL Multiply(P,L)
+  CALL Multiply(PTilde,L1)
+  CALL Add(P,PTilde,T1)
+  CALL Filter(T2,T1)
+  CALL Put(T2,TrixFile('J',Args,0))
+! KTilde_N = (1-L)*KTilde_(N-1)+L*K_N
   IF(HasHF(ModelChem))THEN
-     CALL Get(PTilde,TrixFile('K',Args,M))
-     CALL Get(P,TrixFile('K',Args,0))
+     CALL Get(PTilde,TrixFile('K',Args,-1))
+     CALL Get(P     ,TrixFile('K',Args,0))
      CALL Multiply(P,L)
      CALL Multiply(PTilde,L1)
      CALL Add(P,PTilde,T1)
-     CALL Put(T1,TrixFile('K',Args,0))
+     CALL Filter(T2,T1)
+     CALL Put(T2,TrixFile('K',Args,0))
   ENDIF
-  ! ENucTotTilde_N ~ (1-L)*ENucTotTilde_(N-1)+L*K_N
-  Current(1)=Current(1)+M
-  CALL Get(ENucTotTilde,'E_NuclearTotal',StatsToChar(Current))
-  Current(1)=Current(1)-M
-  CALL Get(ENucTot,'E_NuclearTotal',StatsToChar(Current))
-  ENucTotTilde=L*ENucTot+L1*ENucTotTilde
+! ENucTotTilde_N = (1-L)*ENucTotTilde_(N-1)+L*ENucTotTilde_N
+  ENucTotTilde=L*Enuc1+L1*Enuc0
   CALL Put(ENucTotTilde,'E_NuclearTotal',StatsToChar(Current))
-  ! Here is the big punt in Kohn-Sham ODA; we are 
-  ! doing linear interpolation of Exc.  This may suck worse than
-  ! the cubic approximation, and we should then recompute Kxc, Exc.
-  IF(HasDFT(ModelChem))THEN
-     Current(1)=Current(1)+M
-     CALL Get(ExcTilde,'Exc',StatsToChar(Current))
-     Current(1)=Current(1)-M
-     CALL Get(Exc,'Exc',StatsToChar(Current))
-     ExcTilde=L*Exc+L1*ExcTilde
-     CALL Put(ExcTilde,'Exc',StatsToChar(Current))
-  ENDIF
-  ! Tidy up
-  CALL Delete(P)
-  CALL Delete(PTilde)
-  CALL Delete(F)
-  CALL Delete(FTilde)
-  CALL Delete(T1)
+! Tidy up
+  CALL Delete(T1) 
+  CALL Delete(T2)
+  CALL Delete(T3)
   CALL ShutDown(Prog)
+!
 END PROGRAM ODA
