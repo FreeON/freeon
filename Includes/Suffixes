@@ -31,7 +31,7 @@ COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
 .C.o:   
 	rm -f $*.c
 	cp $(COPY_RIGHT_C) $*.c; cat $*.C >> $*.c
-	$(CC) $(CPPMISC) $(CFLAGS) -c $*.c
+	$(CC) $(CPPMISC) $(CPPINCLUDE) $(CFLAGS) -c $*.c
 #
 ################################################################
 #       RULES FOR MAKING A RELEASE
