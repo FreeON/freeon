@@ -636,7 +636,6 @@ CONTAINS
 !
    SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
                            TorsionIJKL,NTorsion)
-     !
      IMPLICIT NONE
      INTEGER                     :: NatmsLoc,I,I1,I2
      INTEGER                     :: N1,N2,J,J1,J2,NBond
@@ -4510,7 +4509,7 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      HAtm=0
      !
-     HBondMax=2.40D0*AngstromsToAu ! in Au 
+     HBondMax=2.20D0*AngstromsToAu ! in Au 
      !
      !  Go through all boxes and their neighbours
      !

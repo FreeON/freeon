@@ -787,7 +787,7 @@ CONTAINS
          EXIT
        ENDIF
      ENDDO
-   ! IF(NBigFit<NDim-1) NBigFit=NBigFit+1
+     IF(NBigFit<NDim-1) NBigFit=NBigFit+1
      NFitStart=NBigFit    
      NFitEnd=NFitStart+2
      IF(NFitEnd>NDim) NFitEnd=NDim
@@ -1198,7 +1198,7 @@ CONTAINS
          VectY%D(J)=DelocGrads(I,J)  
        ENDDO
      ! CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal,PredGrad,A,B,1.D-7)
-       NewDelocVals%D(I)=FitVal
+     ! NewDelocVals%D(I)=FitVal
      ENDDO 
      !
      CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'UMatr',UMatr_O=UMatr)
@@ -1251,12 +1251,9 @@ CONTAINS
      !
      MaxY=MAXVAL(VectY)
      MinY=MINVAL(VectY)
-     IF(ABS(MaxY)<GradCrit.AND.ABS(MinY)<GradCrit) THEN
+     IF(ABS(MaxY)<0.5D0*GradCrit.AND.ABS(MinY)<0.5D0*GradCrit) THEN
+       FitVal=SUM(VectX)/DBLE(NMem)
        PredGrad=Zero
-       DO I=1,NMem
-         FitVal=SUM(VectX)/DBLE(NMem)
-         PredGrad=Zero
-       ENDDO
      ENDIF
      !
      X1=VectX(NMem) ; G1=VectY(NMem) 
