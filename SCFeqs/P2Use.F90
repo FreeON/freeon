@@ -45,7 +45,6 @@ PROGRAM P2Use
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-
   ! Allocations 
   CALL New(P)
   CALL New(T0)
@@ -136,6 +135,7 @@ PROGRAM P2Use
   ELSE
      CALL Halt(' Unknown option '//TRIM(SCFActn))
   ENDIF
+
   IF(SCFActn/='GuessEqCore')THEN
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN

@@ -41,18 +41,22 @@ TS4_Objs   = FillPBlok.o TS4.o  DenMatMethods.o
 PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
-Stat_Objs  = SCFStatus.o          
+Stat_Objs  = SCFStatus.o 
+RStat_Objs = CPSCFStatus.o
 RHEq_Objs  = RHeqs.o  DenMatMethods.o
 FBuild_Objs= FBuild.o                   
 DIIS_Objs  = DIIS.o               
+DDIIS_Objs = DDIIS.o                #vw
+TC2Response_Objs = TC2Response.o DenMatMethods.o   #vw
 Dev_Objs   = ToDev.o  
 #
 ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
              SDMM.x SP2.x SP4.x TS4.x PM.x   \
              FillPBlok.x P2Use.x FillPBlok.x \
-             SCFStatus.x FBuild.x DIIS.x ToDev.x 
+             SCFStatus.x FBuild.x DIIS.x ToDev.x \
+	     DDIIS.x TC2Response.x CPSCFStatus.x
 #
-all:	Blk Lwd RHEq SDMM SP2 SP4 TS4 PM Stat Gues FBuild DIIS 
+all:	RStat DDIIS FBuild TC2Response Blk Lwd RHEq SDMM SP2 SP4 TS4 PM Stat Gues DIIS  
 #
 release:clean $(ReleaseFiles)
 #
@@ -68,7 +72,9 @@ clean:
 	rm -f $(MONDO_EXEC)/FBuild
 	rm -f $(MONDO_EXEC)/RHeqs
 	rm -f $(MONDO_EXEC)/SCFstats
+	rm -f $(MONDO_EXEC)/CPSCFStatus
 	rm -f $(MONDO_EXEC)/DIIS
+	rm -f $(MONDO_EXEC)/DDIIS     #vw
 	rm -f $(MONDO_EXEC)/ToDev
 	rm -f $(MONDO_EXEC)/SP2
 	rm -f $(MONDO_EXEC)/SP4
@@ -120,6 +126,10 @@ Stat:	$(Stat_Objs)
 	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs)  $(F90_LIBRARIES) 
 	mv SCFstats $(MONDO_EXEC)/SCFstats
 #
+RStat:	$(RStat_Objs)
+	$(LD) $(LDFLAGS) CPSCFStatus $(RStat_Objs)  $(F90_LIBRARIES) 
+	mv CPSCFStatus $(MONDO_EXEC)/CPSCFStatus
+#
 Gues:	$(Gues_Objs)
 	$(LD) $(LDFLAGS) P2Use $(Gues_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv P2Use $(MONDO_EXEC)/P2Use
@@ -132,11 +142,21 @@ DIIS:	$(DIIS_Objs)
 	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv DIIS $(MONDO_EXEC)/DIIS
 #
+DDIIS:	$(DDIIS_Objs)
+	$(LD) $(LDFLAGS) DDIIS $(DDIIS_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv DDIIS $(MONDO_EXEC)/DDIIS
+#
+TC2Response:	$(TC2Response_Objs)
+	$(LD) $(LDFLAGS) TC2Response  $(TC2Response_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv TC2Response $(MONDO_EXEC)/TC2Response
+#
 Dev:	$(Dev_Objs)
 	$(LD) $(LDFLAGS) ToDev $(Dev_Objs)  $(F90_LIBRARIES) 
 	mv ToDev $(MONDO_EXEC)/ToDev
 #
 DIIS.o:		            $(MONDO_LIB)/libMondoMods.a
+DDIIS.o:		    $(MONDO_LIB)/libMondoMods.a
+TC2Response.o: DenMatMethods.o	$(MONDO_LIB)/libMondoMods.a
 FBuild.o:	            $(MONDO_LIB)/libMondoMods.a
 P2Use.o:	FillPBlok.o $(MONDO_LIB)/libMondoMods.a
 FillPBlok.o:	            $(MONDO_LIB)/libMondoMods.a
