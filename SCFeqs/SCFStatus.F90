@@ -55,7 +55,6 @@ PROGRAM SCFStatus
 #else
    KinE=Two*Trace(P,Tmp1)    
 #endif 
-   CALL Put(KinE,'KineticEnergy',Tag_O=SCFCycl)
 !  E_el_tot=<Vee+Vne>=Tr{P.(Vee+Vne)}
    CALL Get(Tmp1,TrixFile('J',Args,0))
 #ifdef PARALLEL
@@ -64,7 +63,11 @@ PROGRAM SCFStatus
 #else
    E_el_tot=Trace(P,Tmp1)    
 #endif
+#ifdef PARALLEL_CLONES
+   CALL Put(E_el_tot,'E_ElectronicTotal')
+#else
    CALL Put(E_el_tot,'E_ElectronicTotal',Tag_O=SCFCycl)
+#endif
    ExchE=Zero
    Exc=Zero
    IF(SCFActn/="GuessEqCore")THEN
@@ -80,10 +83,18 @@ PROGRAM SCFStatus
       ENDIF     
       !  Get the exchange correlation energy
       IF(HasDFT(ModelChem)) &
+#ifdef PARALLEL_CLONES
+           CALL Get(Exc,'Exc')
+#else
            CALL Get(Exc,'Exc',Tag_O=SCFCycl)
+#endif
    ENDIF
 !  Get E_nuc_tot =<Vnn+Vne> 
+#ifdef PARALLEL_CLONES
+   CALL Get(E_nuc_tot,'E_NuclearTotal')
+#else
    CALL Get(E_nuc_tot,'E_NuclearTotal',Tag_O=SCFCycl)
+#endif
 #ifdef MMech
 !
    IF(HasMM()) THEN
@@ -115,12 +126,24 @@ PROGRAM SCFStatus
 #ifdef MMech
    IF(QMOnly()) THEN
 #endif
+#ifdef PARALLEL_CLONES
+     CALL Put(Etot,'Etot')
+#else
      CALL Put(Etot,'Etot',StatsToChar(Current))
+#endif
 #ifdef MMech
    ELSE IF(MMOnly()) THEN
+#ifdef PARALLEL_CLONES
+     CALL Put(MM_ENERGY,'Etot')
+#else
      CALL Put(MM_ENERGY,'Etot',StatsToChar(Current))
+#endif
    ELSE
+#ifdef PARALLEL_CLONES
+     CALL Put(Etot+MM_ENERGY,'Etot')
+#else
      CALL Put(Etot+MM_ENERGY,'Etot',StatsToChar(Current))
+#endif
    ENDIF
 #endif
 !  The Virial
@@ -137,7 +160,12 @@ PROGRAM SCFStatus
       CALL Add(Tmp1,Tmp2,P)
       DMax=Max(P)
    ENDIF
+#ifdef PARALLEL_CLONES
+   CALL Put(DMax,'DMax')
+#else
    CALL Put(DMax,'DMax',StatsToChar(Current))
+#endif
+
 !  IO for the delta density matrix
    IF(SCFActn=='InkFok')THEN
       CALL Put(P,TrixFile('DeltaD',Args,1))
@@ -151,7 +179,11 @@ PROGRAM SCFStatus
 !-----------------------------------------------------------
 !  Get DIIS Err and HOMO-LUMO Gap
    IF(Current(1)>=1.AND.SCFActn/='NumForceEvaluation')THEN
+#ifdef PARALLEL_CLONES      
+      CALL Get(DIISErr,'diiserr')
+#else
       CALL Get(DIISErr,'diiserr',StatsToChar(Current))
+#endif
    ELSE
       DIISErr=Zero
    ENDIF
