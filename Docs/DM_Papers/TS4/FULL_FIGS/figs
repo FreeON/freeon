@@ -11,7 +11,7 @@ set logscale x
 set xrange [0.02:0.000008]
 set yrange [4:20]
 plot	'c60converge.dat'  using 1:4 title "PM" with points,\
-	'c60converge.dat'  using 1:5 title "TS4" with points
+	'c60converge.dat'  using 1:5 title "TSR4" with points
 ################################################################################
 set output "ConvergedC60Errors.eps"
 set pointsize 1.5
@@ -33,5 +33,5 @@ set logscale y
 set yrange [0.000001:0.1]
 set xrange [0.002:0.000008]
 plot	'c60converge.dat'  using 1:(-(-2278.11645304-$2)) title "PM" with points,\
-	'c60converge.dat'  using 1:(-(-2278.11645304-$3)) title "TS4" with points,\
+	'c60converge.dat'  using 1:(-(-2278.11645304-$3)) title "TSR4" with points,\
 	'c60converge.dat'  using 1:(10**4.4*$1**2) title "{/Symbol=20 t}^2*10^{4.4}" with lines

@@ -1,6 +1,4 @@
-#set term jpeg transparent large
-set term postscript eps enhanced "Courrier-Bold" 18
-
+set term postscript eps enhanced "Courrier-Bold" 22
 #set pointsize .8
 ##
 ################################################################################
@@ -9,9 +7,9 @@ set size square 1.2, 1.6
 set xlabel "Water Molecules, N_{H_2O}"
 set ylabel "Energy per Water" -.5,0
 set xrange [10:150]
-plot	'ConvergedEnergies.dat'  using 1:2 title "RH" with linespoints,\
+plot	'ConvergedEnergies.dat'  using 1:2 title "ES" with linespoints,\
 	'ConvergedEnergies.dat'  using 1:3 title "PM(10^{-4})" with linespoints,\
-	'ConvergedEnergies.dat'  using 1:4 title "TS4(10^{-4})" with linespoints
+	'ConvergedEnergies.dat'  using 1:4 title "TRS4(10^{-4})" with linespoints
 ################################################################################
 set output "WaterTimings.eps"
 set size square 1.2, 1.6
@@ -19,21 +17,21 @@ set xlabel "Water Molecules, N_{H_2O}"
 set ylabel "CPU Seconds per SCF cycle" -.5,0
 set xrange [10:150]
 set yrange [0:1600]
-plot	'ConvergedEnergies.dat'  using 1:5 title "RH" with linespoints,\
+plot	'ConvergedEnergies.dat'  using 1:5 title "ES" with linespoints,\
 	'ConvergedEnergies.dat'  using 1:6 title "PM(10^{-4})" with linespoints,\
-	'ConvergedEnergies.dat'  using 1:7 title "TS4(10^{-4})" with linespoints
+	'ConvergedEnergies.dat'  using 1:7 title "TRS4(10^{-4})" with linespoints
 ################################################################################
 set autoscale
 set xrange [1:35]
 set output "WaterFillIn.eps"
 set size square 1.2, 1.6
 set key 31,58
-set xlabel "Purification cycle, N_{pur}"
+set xlabel "Purification cycle\n, N_{pur}"
 set ylabel "% Non Zeros" -.5,0
-plot	'TS4/CommErr_0.10D-02.dat'  using 1:7 title "TS4(10^{-3})" with linespoints,\
-	'TS4/CommErr_0.10D-03.dat'  using 1:7 title "TS4(10^{-4})" with linespoints,\
-	'TS4/CommErr_0.10D-04.dat'  using 1:7 title "TS4(10^{-5})" with linespoints,\
-	'TS4/CommErr_0.10D-05.dat'  using 1:7 title "TS4(10^{-6})" with linespoints,\
+plot	'TS4/CommErr_0.10D-02.dat'  using 1:7 title "TRS4(10^{-3})" with linespoints,\
+	'TS4/CommErr_0.10D-03.dat'  using 1:7 title "TRS4(10^{-4})" with linespoints,\
+	'TS4/CommErr_0.10D-04.dat'  using 1:7 title "TRS4(10^{-5})" with linespoints,\
+	'TS4/CommErr_0.10D-05.dat'  using 1:7 title "TRS4(10^{-6})" with linespoints,\
 	'PM/CommErr_0.10D-02.dat'  using 1:7 title "PM(10^{-3})" with linespoints,\
 	'PM/CommErr_0.10D-03.dat'  using 1:7 title "PM(10^{-4})" with linespoints,\
 	'PM/CommErr_0.10D-04.dat'  using 1:7 title "PM(10^{-5})" with linespoints,\
@@ -43,20 +41,22 @@ plot	'TS4/CommErr_0.10D-02.dat'  using 1:7 title "TS4(10^{-3})" with linespoints
 #	'TS4v/CommErr_0.10D-04.dat'  using 1:7 title "TS4v(10^{-5})" with linespoints,\
 #	'TS4v/CommErr_0.10D-05.dat'  using 1:7 title "TS4v(10^{-6})" with linespoints
 ################################################################################
-set output "TS4vsPMWaterCommutatorErrors.eps"
+set output "TRS4vsPMWaterCommutatorErrors.eps"
 set logscale y
-set key 31, 0.001
-set size square 1.2, 1.6
-set xlabel "Purification cycle, N_{pur}" 0,.25
-set ylabel "||[F,P]||_F" .25,0
-plot	'TS4/CommErr_0.10D-02.dat'  using 1:6 title "TS4(10^{-3})" with linespoints,\
-	'TS4/CommErr_0.10D-03.dat'  using 1:6 title "TS4(10^{-4})" with linespoints,\
-	'TS4/CommErr_0.10D-04.dat'  using 1:6 title "TS4(10^{-5})" with linespoints,\
-	'TS4/CommErr_0.10D-05.dat'  using 1:6 title "TS4(10^{-6})" with linespoints,\
+set xrange [1:30]
+#set key 36, 0.1 box
+set key below Left samplen 2 spacing 1.0 width -4 
+set size square 1.1, 1.6 
+set xlabel "Purification cycle, N_{pur}" 0,.25 
+set ylabel "Commutator Error" 1,0
+plot	'TS4/CommErr_0.10D-02.dat'  using 1:6 title "TRS4(10^{-3})" with linespoints,\
+	'TS4/CommErr_0.10D-03.dat'  using 1:6 title "TRS4(10^{-4})" with linespoints,\
+	'TS4/CommErr_0.10D-04.dat'  using 1:6 title "TRS4(10^{-5})" with linespoints,\
+	'TS4/CommErr_0.10D-05.dat'  using 1:6 title "TRS4(10^{-6})" with linespoints,\
 	'PM/CommErr_0.10D-02.dat'  using 1:6 title  "PM(10^{-3})" with linespoints,\
 	'PM/CommErr_0.10D-03.dat'  using 1:6 title  "PM(10^{-4})" with linespoints,\
 	'PM/CommErr_0.10D-04.dat'  using 1:6 title  "PM(10^{-5})" with linespoints,\
-	'PM/CommErr_0.10D-05.dat'  using 1:6 title "PM(10^{-6})" with linespoints,\
+	'PM/CommErr_0.10D-05.dat'  using 1:6 title  "PM(10^{-6})" with linespoints,\
 	0.124 notitle  with lines,\
 	0.0156 notitle  with lines,\
 	0.0018 notitle  with lines,\
@@ -72,10 +72,10 @@ set ylabel "max |X_{N+1}-X_N|" .25,0
 set key 31,0.4
 set yrange[0.000001:1]
 set logscale y
-plot	'TS4/CommErr_0.10D-02.dat'  using 1:3 title "TS4(10^{-3})" with linespoints,\
-	'TS4/CommErr_0.10D-03.dat'  using 1:3 title "TS4(10^{-4})" with linespoints,\
-	'TS4/CommErr_0.10D-04.dat'  using 1:3 title "TS4(10^{-5})" with linespoints,\
-	'TS4/CommErr_0.10D-05.dat'  using 1:3 title "TS4(10^{-6})" with linespoints,\
+plot	'TS4/CommErr_0.10D-02.dat'  using 1:3 title "TRS4(10^{-3})" with linespoints,\
+	'TS4/CommErr_0.10D-03.dat'  using 1:3 title "TRS4(10^{-4})" with linespoints,\
+	'TS4/CommErr_0.10D-04.dat'  using 1:3 title "TRS4(10^{-5})" with linespoints,\
+	'TS4/CommErr_0.10D-05.dat'  using 1:3 title "TRS4(10^{-6})" with linespoints,\
 	'PM/CommErr_0.10D-02.dat'  using 1:3 title "PM(10^{-3})" with linespoints,\
  	'PM/CommErr_0.10D-03.dat'  using 1:3 title "PM(10^{-4})" with linespoints,\
  	'PM/CommErr_0.10D-04.dat'  using 1:3 title "PM(10^{-5})" with linespoints,\
@@ -88,7 +88,7 @@ set ylabel "max |X_{N+1}-X_N|" .25,0
 set key 31,0.4
 set yrange[0.000001:1]
 set logscale y
-plot	'TS4/CommErr_0.10D-04.dat'  using 1:3 title "TS4(10^{-5})" with linespoints,\
+plot	'TS4/CommErr_0.10D-04.dat'  using 1:3 title "TRS4(10^{-5})" with linespoints,\
  	'PM/CommErr_0.10D-04.dat'  using 1:3 title "PM(10^{-5})" with linespoints,\
  	'PM/CommErrExactBoundsPM_0.10D-04.dat'  using 1:3 title "Correct Eigenbounds PM(10^{-5})" with linespoints
 
