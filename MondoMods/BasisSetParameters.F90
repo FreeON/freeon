@@ -8,9 +8,9 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxLTyps=10
    INTEGER, PARAMETER :: NSupSets=31
 
-   ! Element 105 is a ghost function with charge = 0. 
+! Element 105-107  are ghost function with charge = 0. 
   
-   CHARACTER(LEN=2),DIMENSION(105):: Ats=(/'h ','he','li','be','b ','c ', &
+   CHARACTER(LEN=2),DIMENSION(107):: Ats=(/'h ','he','li','be','b ','c ', &
         'n ','o ','f ','ne','na','mg','al','si','p ','s ','cl','ar','k ', &
         'ca','sc','ti','v ','cr','mn','fe','co','ni','cu','zn','ga','ge', & 
         'as','se','br','kr','rb','sr','y ','zr','nb','mo','tc','ru','rh', &
@@ -18,9 +18,9 @@ MODULE BasisSetParameters
         'pr','nd','pm','sm','eu','gd','tb','dy','ho','er','tm','yb','lu', &
         'hf','ta','w ','re','os','ir','pt','au','hg','tl','pb','bi','po', &
         'at','rn','fr','ra','ac','th','pa','u ','np','pu','am','cm','bk', &
-        'cf','es','fm','md','no','lr','ky','gh'/)  
+        'cf','es','fm','md','no','lr','ky','g0','g1','g2'/)  
 !
-   REAL(DOUBLE),DIMENSION(105)    :: AtsMss = (/ 1.007900D0,    4.0026D0,      6.941D0,     &  
+   REAL(DOUBLE),DIMENSION(107)    :: AtsMss = (/ 1.007900D0,    4.0026D0,      6.941D0,     &  
     9.01218D0,    10.81D0,       12.011D0,      14.00670D0,    15.9994D0,     18.998403D0,  & 
    20.179D0,      22.98977D0,    24.305D0,      26.98154D0,    28.0855D0,     30.97376D0,   & 
    32.06D0,       35.453D0,      39.948D0,      39.0983D0,     40.08D0,       44.9559D0,    & 
@@ -37,7 +37,8 @@ MODULE BasisSetParameters
   207.2D0,       208.9804D0,    209.0D0,       210.0D0,       222.0D0,       223.0197D0,    &
   226.0254D0,    227.0278D0,    232.03804D0,   231.03588D0,   238.029D0,     237.0482D0,    &
   244.0D0,       243.0D0,       247.0D0,       247.0D0,       251.0D0,       252.0D0,       &
-  257.0D0,       258.0D0,       259.0D0,       260.0D0,       261.0D0,       0.0D0/)
+  257.0D0,       258.0D0,       259.0D0,       260.0D0,       261.0D0,       0.0D0,         &
+    0.0D0,         0.0D0 /)
 !
    CHARACTER(LEN=BASESET_CHR_LEN), DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/           &
 !               ALL ELECTRON BASIS SETS
