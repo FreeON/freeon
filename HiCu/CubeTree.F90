@@ -565,15 +565,15 @@ MODULE CubeTree
 !================================================================================
 !     
 !================================================================================
-      RECURSIVE FUNCTION LeafCount(Cube) 
+      RECURSIVE FUNCTION LeafCount(Cube) RESULT(Count)
          TYPE(CubeNode), POINTER    :: Cube
-         INTEGER                    :: LeafCount
+         INTEGER                    :: Count
          INTEGER ::X
 !--------------------------------------------------------------------------
          IF(Cube%Leaf)THEN
-            LeafCount=1
+            Count=1
          ELSE
-            LeafCount=LeafCount(Cube%Descend)+LeafCount(Cube%Descend%Travrse)
+            Count=LeafCount(Cube%Descend)+LeafCount(Cube%Descend%Travrse)
          ENDIF
        END FUNCTION LeafCount
 !================================================================================
