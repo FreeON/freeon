@@ -31,7 +31,7 @@ F90_OPTIMIZE = -O2 -Oassumed=always_contig -Ounroll=1
 #
 #F90_DEBUG     =  -g -g90 -gline -C=all -mtrace=basic
 #
-F90_MISC      =  -u -v -w=unused -mismatch_all -maxcontin=1500 -ieee=full -nan 
+F90_MISC      =  -u -v -w=unused -mismatch_all -maxcontin=1500 -ieee=full -nan -save
 #
 F77_EXTRAS    = -132 -w -dusty 
 #
