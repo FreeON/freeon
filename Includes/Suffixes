@@ -3,19 +3,19 @@
 .F90.o:   
 	rm -f $*.$(F90_POSTFIX)
 	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F90 $*.$(F90_POSTFIX)
-	$(F90) $(F90_FLAGS) -c $*.$(F90_POSTFIX)
+	$(F90) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F90_POSTFIX)
 #	rm -f $*.$(F90_POSTFIX)
 #	rm -f $*.$(LIST_POSTFIX)
 
 .F.o:
 	rm -f $*.$(F77_POSTFIX)
 	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F $*.$(F77_POSTFIX)
-	$(F90) $(F77_EXTRAS) $(F90_FLAGS)  -c $*.$(F77_POSTFIX)
+	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F77_POSTFIX)
 #	rm -f $*.$(F77_POSTFIX)
 #	rm -f $*.$(LIST_POSTFIX)
 
 .f.o:   
-	$(F90) $(F77_EXTRAS) $(F90_FLAGS) -c $*.f
+	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.f
 #	rm -f $*.$(LIST_POSTFIX)
 
 .C.o:   

@@ -1,99 +1,116 @@
 #---------------------------------------------------------------
-# Preprocessor
+# PREPROCESSOR OPTIONS: 
 #
-CPP=/lib/cpp -P -C
+CPP       =/lib/cpp -P -C
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
+#
+# PREPROCESSING OPTIONS: 
+CPPOPTS=-DPOINTERS_IN_DERIVED_TYPES
+#           -DPARALLEL 
 #---------------------------------------------------------------
 # C Compiler and options
 #
-CC=gcc
-CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG)
+CC        =  gcc
+#CDEBUG   = -g
+COPTIMIZE = -O1
+CFLAGS    = $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
 #---------------------------------------------------------------
+# Fortran postfixes for compiler peculiarities
+#
+LIST_POSTFIX  = lst
+F77_POSTFIX   = f
+F90_POSTFIX   = f90
+MOD_POSTFIX   = mod
+#---------------------------------------------------------------
+#
 # Fortran Compilers, options and include files
 #
-F77          = f77
-F90          = f90
-
-#F77_OPTIMIZE = 
-#F90_OPTIMIZE = 
-
-F77_DEBUG    = -g
-F90_DEBUG    = -g
-
-F77_MISC     =  
-F90_MISC     =  
-
-F77_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
-               -I$(MONDO_HOME)/Gammas/   -I/usr/local/include 
-F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ -I$(MPI_INC) \
-               -I$(MONDO_HOME)/MondoMods -I/usr/local/include 
-
-F77_FLAGS   = $(F77_MISC) $(F77_OPTIMIZE) $(F77_DEBUG) $(F77_INCLUDE)
+F90          = absoftf95     
+#
+#F90_OPTIMIZE =  -O
+#
+F90_DEBUG    = -g  -B80 -Rs 
+#
+F_LIST        = 
+#
+#F_PROF       = -P
+#
+F90_MISC     = $(F_LIST) $(F_PROF) -s -B108 -YEXT_NAMES=LCS -t10000
+#
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
+               -p$(MONDO_HOME)/MondoMods               \
+               -I/usr/local/include                    \
+               -I$(MONDO_HOME)/MondoMods/MMA/Functions 
+#              -I$(MPI_INC) 
+#
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
 #
 LD          = $(F90) 
-LDFLAGS     =  -o 
-#---------------------------------------------------------------
-# LIBRARY ARCHIVAL
 #
-AR = ar
+LDMISC      = $(F_PROF) -v 
+#
+LDFLAGS     = $(LDMISC) -o 
+#
+#---------------------------------------------------------------
+# ARCHIVAL
+#
+AR      = ar
 ARFLAGS = -rcv
-RANLIB = ranlib
+RANLIB  = ranlib
+#
 #---------------------------------------------------------------
-# PREPROCESSOR OPTIONS: -DPARALLEL -DPERIODIC -DUSE_BLAS
+# DIRECTORIES TO SUSS FOR LIBRARIES
 #
-CPPINCLUDE=-I/usr/local/include
-CPPOPTS=-DNAGF90 -DPARALLEL 
-#---------------------------------------------------------------
-# LIBRARY DEFINITIONS
+LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(HDF_LIB) 
+#       -L$(LAPACK_LIB)
+#       -L$(MPI_LIB) 
 #
-# Where the libraries are 
+#-------------------------------------------------------------------------------------
 #
-LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib -L$(MPI_LIB)
-#---------------------------------------------------------------------
 # MPI LIBRARIES
 #
-# How MPICH was configured for debuging:
-# ./configure -memdebug -mpedbg -device=ch_p4 -cc=gcc -clinker=gcc -f95nag --disable-c++
+# How MPICH was configured for debuging :
+#
+#./configure -memdebug -device=ch_p4 -cc=gcc -clinker=gcc -fc=pgf77 -f90=pgf90 -fortnames=UNDERSCORE --disable-c++
 #
 # How MPICH was configured for production:
 #
+#               -cflags="-ffast-math -fexpensive-optimizations -fomit-frame-pointer -O3"
+#               -fflags="-O2 -tp p6 -pc 64"
 #
-# MPICH Notes: See Linux TCP fix for short messages, use -nodevdebug to speed up MPICH
+#  ROLAND STUMPH's additions:
 #
-MPI_LIBS=-lmpich
+# -comm=shared -fortnames=UNDERSCORE -noromio --noc++ -nompe 
+#
+#MPI_LIBS= -lmpich
+#MPI_LIBS=-lmpich -L/usr/local/myrinet/lib -lgm 
+#
 #---------------------------------------------------------------------
-#  HDF Libraries with compression and jpeg libs, 
-#  needs f2c as it the fort77 version (unable to compile native
-#  source under linux so far)
 #
-HDF=-lmfhdf -ldf -ljpeg -lz
+#  HDF5 Libraries with compression and jpeg libs. 
 #
-F77_LIBS = -lf2c
-F90_LIBS = -lf2c 
-#---------------------------------------------------------------------
-#  The generic libs needed by most of the programs.  The F77 MondoMisc is 
-#  being phased out in favor of the F90 MondoMods.
+#  How HDF5 was configured for production:
+#  ./configure --prefix=$HDF_HOME --enable-production --disable-debug
 #
-Libraries   = -lMondoMisc -lblas $(MPI_LIBS) $(HDF) $(F77_LIBS)
-F77_LIBRARIES = Libraries
-F90_LIBRARIES = -lMondoMods -lblas_g77 -ldgemm $(MPI_LIBS) $(HDF) $(F90_LIBS)
+#  How HDF5 was configured for debuging:
+#  setenv CFLAGS -g
+#  ./configure --prefix=$HDF_HOME --disable-production
+#   -j -l2 for parallel GNU make on dual SMP
+#  could go with either: --disable-static --disable-shared
 #
-#  'Nuff said
+HDF_LIBS=-lhdf5 -ljpeg -lz 
 #
-LAPACK = -llapack_g77 -lblas_g77
-#----------------------------------------------------------------------
-#  Define main__ if needed to link libf2c
+#-------------------------------------------------------------------------
+#  Libraries
 #
-MAIN__=MAIN.o
-#----------------------------------------------------------------------
-#  Remove lists to tidy up
+F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS)  -lU77 
 #
-REMOVEALL77 = *.$(LIST_POSTFIX)  core *.o *.g90 a.out fort.* *~
-REMOVEALL90 = *.$(LIST_POSTFIX) *.f *.f90 *.mod *.g90 core *.o a.out fort.* *~         
-REMOVEALL   =$(REMOVEALL77)
-
+LAPACK        = -llapack_ABSOFT -lblas_ABSOFT
+#
+#---------------------------------------------------------------------------
 
 
 

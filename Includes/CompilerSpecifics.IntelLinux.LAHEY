@@ -28,19 +28,22 @@ MOD_POSTFIX   = mod
 #
 F90           = lf95
 #
-F90_OPTIMIZE  = --o1
+#F90_OPTIMIZE  = --o1
 #
-#F90_DEBUG    = -g -chk -trace --trap diou -li
+#F90_DEBUG    = -g -chk --trace --trap diou -li
 #
 F_LIST        = -lst 
 #
 #F_PROF       = 
 #
-F90_MISC     = $(F_LIST) $(F_PROF) --quiet
+F90_MISC     = $(F_LIST) $(F_PROF) --quiet --staticlink  
+#                                  --verbose
 #
-F90_INCLUDE  = -I$(MONDO_HOME)/Includes/ \
-               -I$(MONDO_HOME)/MondoMods -I/usr/local/include \
-               -I$(MONDO_HOME)/MondoMods/FUNCTIONS
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
+               -I$(MONDO_HOME)/MondoMods               \
+               -I/usr/local/include                    \
+               -I$(MONDO_HOME)/MondoMods/MMA/Functions 
+#              -I$(MPI_INC) 
 #
 #-I$(MPI_INC) \
 #
