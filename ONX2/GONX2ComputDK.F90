@@ -141,7 +141,7 @@ CONTAINS
     !Simple check Simple check Simple check Simple check
     !call Print_BCSR(D,'Density matrix',Unit_O=6)
     !
-    CALL New(BColIdx,Natoms)
+    CALL New(BColIdx,NAtoms)
     !
     LocNInt=0
     NInts=0.0D0
@@ -689,11 +689,11 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    INTEGER       , INTENT(IN ) :: At
-    TYPE(BCSR)    , INTENT(IN ) :: D
-    TYPE(INT_VECT), INTENT(OUT) :: ColIdx
+    INTEGER, INTENT(IN) :: At
+    TYPE(BCSR)          :: D
+    TYPE(INT_VECT)      :: ColIdx
     !-------------------------------------------------------------------
-    INTEGER                     :: Ci
+    INTEGER             :: Ci
     !-------------------------------------------------------------------
     !
     CALL INT_VECT_EQ_INT_SCLR(NAtoms,ColIdx%I(1),0)
