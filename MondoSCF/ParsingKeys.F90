@@ -94,9 +94,12 @@ MODULE ParsingKeys
    CHARACTER(LEN=5),  PARAMETER :: OPT_QUNEW        ='QuNew'
    CHARACTER(LEN=7),  PARAMETER :: OPT_StpDesc      ='StpDesc'
    CHARACTER(LEN=8),  PARAMETER :: OPT_DiagHess     ='DiagHess'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_StpDescInvH  ='DiagHess'
    CHARACTER(LEN=8),  PARAMETER :: OPT_CartDIIS     ='CartDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_IntDIIS      ='IntDIIS'
    CHARACTER(LEN=7),  PARAMETER :: OPT_NoGDIIS      ='NoGDIIS'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
+   CHARACTER(LEN=11), PARAMETER :: OPT_NoTranslOff  ='NoTranslOff'
    CHARACTER(LEN=7),  PARAMETER :: OPT_ONE_BASE     ='OneBase'
    CHARACTER(LEN=2),  PARAMETER :: OPT_TSTATE       ='TS'
 !  Perform quasi-newton geometry optimization for each basis set in turn
@@ -178,6 +181,10 @@ MODULE ParsingKeys
     CHARACTER(LEN=9),  PARAMETER :: COORDTYPE='CoordType'
     CHARACTER(LEN=7),  PARAMETER :: CoordType_PrimInt='PrimInt'
     CHARACTER(LEN=9),  PARAMETER :: CoordType_Cartesian='Cartesian'
+!-------------------------------------------------
+!  Parsing keys for <Options.StpDescInvH=>
+!
+    CHARACTER(LEN=11),  PARAMETER :: STPDESCINVH='StpDescInvH'
 !---------------------------------------------------------
 !  Parsing keys for <Options.Accuracy=>
 !
