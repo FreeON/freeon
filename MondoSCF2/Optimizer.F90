@@ -2034,7 +2034,7 @@ CONTAINS
      !
      IF(LatticeOnly) THEN
        LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxLattice+1)
+                   (AltCount<MaxLattice)
        IF(LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
@@ -2042,7 +2042,7 @@ CONTAINS
        ENDIF
      ELSE
        LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxAtoms+1)
+                   (AltCount<MaxAtoms)
        IF(.NOT.LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
