@@ -1467,15 +1467,15 @@ MODULE ParseInPut
          Kinds%I(1)=GMLoc%AtNum%D(1)
          DO I=2,GMLoc%NAtms
             DO J=1,GMLoc%NKind
-               IF(Kinds%I(J)==INT(GMLoc%AtNum%D(I)))GOTO 3
+               IF(Kinds%I(J)==GMLoc%AtNum%D(I))GOTO 3
             ENDDO
             GMLoc%NKind=GMLoc%NKind+1
-            Kinds%I(GMLoc%NKind)=INT(GMLoc%AtNum%D(I))
+            Kinds%I(GMLoc%NKind)=GMLoc%AtNum%D(I)
          3 CONTINUE
          ENDDO
          DO K=1,GMLoc%NKind
             DO I=1,GMLoc%NAtms
-               IF(Kinds%I(K)==INT(GMLoc%AtNum%D(I)))GMLoc%AtTyp%I(I)=K
+               IF(Kinds%I(K)==GMLoc%AtNum%D(I)) GMLoc%AtTyp%I(I)=K
            ENDDO
          ENDDO
          CALL Delete(Kinds)
