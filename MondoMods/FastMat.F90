@@ -439,7 +439,7 @@ MODULE FastMatrices
       IF(.NOT. ASSOCIATED(P)) EXIT
         IF(ASSOCIATED(P%RowRoot)) THEN
           NULLIFY(GlobalP1)
-          CALL Flatten(P%RowRoot)
+          CALL Flatten1(P%RowRoot)
           !! Terminates the tail
           NULLIFY(GlobalP1%Next)
         ENDIF
