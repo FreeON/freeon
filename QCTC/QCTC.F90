@@ -49,13 +49,33 @@ PROGRAM QCTC
     CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
   ENDIF
 #endif
-  ! Get multipoles and density
-  IF(SCFActn=='InkFok')THEN
+! Get multipoles and density
+!
+  IF(SCFActn=='ForceEvaluation')THEN
+     CALL Get(Rho,'Rho',Args,1)
+#ifdef MMech
+     IF(MMOnly()) THEN
+       CALL Get(Rhopoles,CurGeom)
+     ELSE
+#endif
+       CALL Get(Rhopoles,SCFCycl)
+#ifdef MMech
+     ENDIF
+#endif
+  ELSE IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
   ELSE  
-     CALL Get(Rho,'Rho',Args,0)
-     CALL Get(RhoPoles,SCFCycl)
+#ifdef MMech
+     IF(MMOnly()) THEN
+       CALL Get(RhoPoles,CurGeom)
+     ELSE
+#endif
+       CALL Get(RhoPoles,SCFCycl)
+#ifdef MMech
+     ENDIF
+#endif
+       CALL Get(Rho,'Rho',Args,0)
   ENDIF
   ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
@@ -131,6 +151,7 @@ PROGRAM QCTC
      ELSE     
         E_Nuc_Tot=NukE(GM)
      ENDIF
+!
      CALL Put(E_Nuc_Tot,'E_NuclearTotal',Tag_O=SCFCycl)
 #ifdef MMech
   ENDIF !!!!  QM calculations
@@ -141,27 +162,27 @@ PROGRAM QCTC
 !
      IF(HasQM()) THEN
 !
-       CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
+         CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
 !
-     CALL OpenASCII(OutFile,UOut)
+       CALL OpenASCII(OutFile,UOut)
 !
-     CONVF=1000.D0*JtoHartree/C_Avogadro
+       CONVF=1000.D0*JtoHartree/C_Avogadro
 !
 ! Print energies 
 !
-     write(uout,*) 'Energies in KJ/mol'        
-     write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL/CONVF
-     write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL/CONVF
-     write(uout,*) 'E_MM_Coulomb         = ',(MM_COUL-E_C_EXCL)/CONVF
+       write(uout,*) 'Energies in KJ/mol'        
+       write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL/CONVF
+       write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL/CONVF
+       write(uout,*) 'E_MM_Coulomb         = ',(MM_COUL-E_C_EXCL)/CONVF
 !
-     write(uout,*) 'Energies in atomic unit'        
-     write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-     write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
-     write(uout,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
+       write(uout,*) 'Energies in atomic unit'        
+       write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+       write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
+       write(uout,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
 !
-     write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
+       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
 !
-     CLOSE(UNIT=UOut,STATUS='KEEP')
+       CLOSE(UNIT=UOut,STATUS='KEEP')
 !
      ELSE
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
