@@ -1122,6 +1122,7 @@ MODULE InOut
 !       Items that should not change with geometry
 !
         CALL Get(PBC%Dimen     ,'Dimension')
+        CALL Get(PBC%PFFMaxEll ,'PFFMaxEll')
         CALL Get(PBC%AtomW     ,'AtomWrap')
         CALL Get(PBC%InVecForm ,'VectorForm')
         CALL Get(PBC%InAtomCrd ,'AtomicCrd')
@@ -1178,6 +1179,7 @@ MODULE InOut
 !       Items that should not change with geometry
 !
         CALL Put(PBC%Dimen     ,'Dimension')
+        CALL Put(PBC%PFFMaxEll ,'PFFMaxEll')
         CALL Put(PBC%AtomW     ,'AtomWrap')
         CALL Put(PBC%InVecForm ,'VectorForm')
         CALL Put(PBC%InAtomCrd ,'AtomicCrd')
