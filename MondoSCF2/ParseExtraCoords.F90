@@ -369,20 +369,20 @@ MODULE ParseExtraCoords
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   IF(INDEX(LineLowCase,'cell')==0) THEN
                     READ(LineLowCase,*) &
-                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
                   ELSE
                     READ(LineLowCase,*) &
-                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9)
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12)
                   ENDIF
                 ELSE
                   IF(INDEX(LineLowCase,'cell')==0) THEN
                     READ(LineLowCase,*) &
-                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4),Value
                   ELSE
                     READ(LineLowCase,*) &
-                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3), &
-                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:9),Value
+                    CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4), &
+                    CharAux4,GOpt%ExtIntCs%Cells%I(NIntCs,1:12),Value
                   ENDIF
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
