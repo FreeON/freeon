@@ -65,11 +65,22 @@ MODULE TreeWalk
 !         MAC: 
           IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
 !            Evaluate multipoles
+#ifdef EXPLICIT_SOURCE
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
-             INCLUDE "IrRegulars.Inc"
-             INCLUDE "CTraX.Inc"
+!
+             SELECT CASE(Ell)
+                INCLUDE "IrRegulars.Inc"
+             CASE DEFAULT
+                CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in IrRegulars.Inc')
+             END SELECT
+!
+             SELECT CASE(LCode)
+                INCLUDE "CTraX.Inc"
+             CASE DEFAULT
+                CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
+             END SELECT
+!
 #else
              CALL CTrax(Prim,Q,SPKetC,SPKetS)
 #endif
@@ -84,10 +95,24 @@ MODULE TreeWalk
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
           Ell=Prim%Ell+Q%Ell
 #ifdef EXPLICIT_SOURCE
+          Ell=Prim%Ell+Q%Ell
           LCode=Prim%Ell*100+Q%Ell
-          INCLUDE 'AuxInt.Inc'
-          INCLUDE 'HGTraX.Inc'
+          J=AINT(T*Gamma_Grid)
+!
+          SELECT CASE(Ell)
+             INCLUDE 'AuxInt.Inc'
+          CASE DEFAULT
+             CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in AuxInt.Inc')
+          END SELECT
+!
+          SELECT CASE(LCode)
+             INCLUDE 'HGTraX.Inc'
+          CASE DEFAULT
+             CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in HGTraX.Inc')
+          END SELECT
+!
 #else
+          Ell=Prim%Ell+Q%Ell
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
           CALL MD3TRR(2*HGEll,Ell,MDR,AuxR,Upq,PQx,PQy,PQz)
           DO LP=0,Prim%Ell
@@ -146,11 +171,21 @@ MODULE TreeWalk
           IF((PQ2>Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN
              IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN
 !            Evaluate multipoles
+#ifdef EXPLICIT_SOURCE
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
-             INCLUDE "IrRegulars.Inc"
-             INCLUDE "CTraX.Inc"
+!
+             SELECT CASE(Ell)
+                INCLUDE "IrRegulars.Inc"
+             CASE DEFAULT
+                CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in IrRegulars.Inc')
+             END SELECT
+!
+             SELECT CASE(LCode)
+                INCLUDE "CTraX.Inc"
+             CASE DEFAULT
+                CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
+             END SELECT
 #else
             CALL CTrax(Prim,Q,SPKetC,SPKetS)
 #endif
@@ -166,12 +201,25 @@ MODULE TreeWalk
           PQx=-PQx; PQy=-PQy; PQz=-PQz
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
 !         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
-          Ell=Prim%Ell+Q%Ell
 #ifdef EXPLICIT_SOURCE
+          Ell=Prim%Ell+Q%Ell
           LCode=Prim%Ell*100+Q%Ell
-          INCLUDE 'AuxInt.Inc'          
-          INCLUDE 'HGTraX.Inc'
+          J=AINT(T*Gamma_Grid)
+!
+          SELECT CASE(Ell)
+             INCLUDE 'AuxInt.Inc'
+          CASE DEFAULT
+             CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in AuxInt.Inc')
+          END SELECT
+!
+          SELECT CASE(LCode)
+             INCLUDE 'HGTraX.Inc'
+          CASE DEFAULT
+             CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in HGTraX.Inc')
+          END SELECT
+!
 #else
+          Ell=Prim%Ell+Q%Ell
           CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
           CALL MD3TRR(2*HGEll,Ell,MDR,AuxR,Upq,PQx,PQy,PQz)
           DO LP=0,Prim%Ell
