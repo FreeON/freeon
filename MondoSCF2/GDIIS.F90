@@ -27,13 +27,14 @@ CONTAINS
      INTEGER                     :: iCLONE,InitGDIIS,iGEO,ICount
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
-     INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc
+     INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc
      INTEGER                     :: IGeom,HDFFileID,IStart
      INTEGER                     :: SRMemory,RefMemory
      INTEGER                     :: CartGradMemory,GDIISMemory
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
      TYPE(DBL_RNK2)              :: Aux
      TYPE(DBL_VECT)              :: Vect
+     TYPE(INT_VECT)              :: VectI
      !
      GDIISMemory=MIN(6,iGEO)
      IF(iGEO<InitGDIIS) RETURN
@@ -55,6 +56,7 @@ CONTAINS
      CALL New(RefGrad,(/NCart,GDIISMemory/))
      CALL New(SRDispl,(/NCart,GDIISMemory/))
      !
+     CALL New(VectI,NatmsLoc)
      CALL New(Vect,NCart)
      CALL New(Aux,(/3,NatmsLoc/))
      DO IGeom=IStart,iGEO
@@ -67,9 +69,19 @@ CONTAINS
        RefStruct%D(:,ICount)=Vect%D
        CALL Get(Vect,'grade',Tag_O=TRIM(IntToChar(IGeom)))
        RefGrad%D(:,ICount)=Vect%D
+       CALL Get(VectI,'constraints',Tag_O=TRIM(IntToChar(IGeom)))
+       DO J=1,NatmsLoc
+         IF(VectI%I(J)==1) THEN
+           JJ=3*(J-1)
+           DO K=1,3
+             RefGrad%D(JJ+K,ICount)=Zero
+           ENDDO
+         ENDIF
+       ENDDO
      ENDDO
      CALL Delete(Aux)
      CALL Delete(Vect)
+     CALL Delete(VectI)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
      ! Calculate new Cartesian coordinates 
@@ -81,7 +93,7 @@ CONTAINS
      !  RefStruct,RefGrad,SRStruct,SRDispl)
      !
      !CALL DelocGDIIS(SRStruct%D,RefStruct%D,RefGrad%D,SRDispl%D,&
-     !  XYZ,IntCs,Print,SCRPath,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+     !  XYZ,Print,SCRPath,GOpt%TrfCtrl,GOpt%CoordCtrl, &
      !  GOpt%BackTrf,GOpt%Constr)
      !
      CALL CloseHDFGroup(HDF_CurrentID)
@@ -97,11 +109,11 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE DelocGDIIS(SRStruct,RefStruct,RefGrad,SRDispl,XYZ,IntCs,&
+   SUBROUTINE DelocGDIIS(SRStruct,RefStruct,RefGrad,SRDispl,XYZ,&
      Print,SCRPath,CtrlTrf,CtrlCoord,CtrlBackTrf,CtrlConstr)
-     TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:,:) :: SRDispl,RefGrad
      REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct
+     TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(DBL_RNK2)              :: XYZRot
      INTEGER                     :: NatmsLoc,NCart,NIntC,GDIISMemory
@@ -111,7 +123,7 @@ CONTAINS
      REAL(DOUBLE)                :: LinCrit
      TYPE(DBL_RNK2)              :: DelocDispl
      TYPE(DBL_RNK2)              :: DelocSR,DelocRef
-     TYPE(DBL_VECT)              :: NewDelocs,NewPrims,Displ
+     TYPE(DBL_VECT)              :: NewDelocs,NewPrims,Displ,Coeffs
      TYPE(Cholesky)              :: CholData3
      TYPE(Constr)                :: CtrlConstr
      TYPE(CoordCtrl)             :: CtrlCoord
@@ -119,9 +131,13 @@ CONTAINS
      TYPE(TrfCtrl)               :: CtrlTrf
      CHARACTER(LEN=*)            :: SCRPath
      !
+     ! Read internal coord definitions from disk
+     !
+     CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
+     NIntC=SIZE(IntCs%Def)
+     !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     NIntC=SIZE(IntCs%Def)
      GDIISMemory=SIZE(SRDispl,2)
      LinCrit=CtrlCoord%LinCrit
      !
@@ -140,7 +156,7 @@ CONTAINS
      !
      CALL CholFact(B3,NCart,CholData3,.FALSE.,.FALSE.,ThreeAt)
      !
-     ! Transform prim.ints into delocalized internals
+     ! Transform Cartesian structures into delocalized internals
      !
      CALL New(DelocRef,(/NCart,GDIISMemory/))
      CALL New(DelocSR,(/NCart,GDIISMemory/))
@@ -151,8 +167,12 @@ CONTAINS
      !
      ! Calculate new set of delocalized internals
      !
+     CALL New(Coeffs,GDIISMemory)
+     CALL CalcGDCoeffs(RefGrad,Coeffs%D)
+     !
      CALL New(NewDelocs,NCart) 
-     CALL DelocStruct(DelocDispl%D,DelocSR%D,NewDelocs%D)
+     !CALL MixDeloc(Coeffs%D,DelocSR%D,NewDelocs%D) !!! continue here
+     !CALL DelocStruct(DelocDispl%D,DelocSR%D,NewDelocs%D)
      !
      ! Turn delocalized internals into primitive ints
      !
@@ -172,6 +192,7 @@ CONTAINS
      CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
        CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
      !
+     CALL Delete(Coeffs)
      CALL Delete(Displ)
      CALL Delete(NewPrims)
      CALL Delete(NewDelocs)
@@ -179,6 +200,7 @@ CONTAINS
      CALL Delete(DelocSR)
      CALL Delete(DelocRef)
      CALL Delete(XYZRot)
+     CALL Delete(IntCs)
    END SUBROUTINE DelocGDIIS
 ! 
 !-------------------------------------------------------------------
@@ -325,19 +347,19 @@ CONTAINS
      !
      CALL New(Coeffs,GDIISMemory)
      !
-     IF(CtrlConstr%NConstr/=0) THEN
-       IF(Print>=DEBUG_GEOP_MIN) THEN
-         WRITE(*,200) 
-         WRITE(Out,200) 
-       ENDIF
-       CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
-     ELSE
+!    IF(CtrlConstr%NConstr/=0) THEN
+!      IF(Print>=DEBUG_GEOP_MIN) THEN
+!        WRITE(*,200) 
+!        WRITE(Out,200) 
+!      ENDIF
+!      CALL CalcGDCoeffs(SRDispl%D,Coeffs%D)
+!    ELSE
        IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,300) 
          WRITE(Out,300) 
        ENDIF
        CALL CalcGDCoeffs(RefGrad%D,Coeffs%D)
-     ENDIF
+!    ENDIF
      200 FORMAT("Doing Geometric DIIS based on Cartesian displacements.")
      300 FORMAT("Doing Geometric DIIS based on Cartesian gradients.")
      !
@@ -438,7 +460,8 @@ CONTAINS
      ! Calculate GDIIS coeffs from internal coord displacements!
      !
      CALL New(Coeffs,GDIISMemory)
-     CALL CalcGDCoeffs(PrIDispl%D,Coeffs%D)
+     !CALL CalcGDCoeffs(PrIDispl%D,Coeffs%D)
+     CALL CalcGDCoeffs(RefGrad%D,Coeffs%D)
      !
      ! Calculate new geometry
      !

@@ -610,32 +610,35 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)      :: AtNum
      TYPE(DBL_VECT)                 :: Displ
-     REAL(DOUBLE)                   :: MaxGrad,RMSGrad
+     REAL(DOUBLE)                   :: MaxGrad,RMSGrad,MaxCGrad
      INTEGER                        :: IMaxGradNoConstr
      REAL(DOUBLE)                   :: MaxGradNoConstr
      REAL(DOUBLE)                   :: RMSGradNoConstr,Sum
      TYPE(DBL_VECT)                 :: IntGrad,Grad,CartGrad
      TYPE(INTC)                     :: IntCs
-     INTEGER                        :: I,J,NDim,IMaxGrad
+     INTEGER                        :: I,J,NDim,IMaxGrad,IMaxCGrad
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
      LOGICAL                        :: DoInternals
      CHARACTER(LEN=*)               :: SCRPath 
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     IF(AllocQ(IntCs%Alloc)) THEN
+     DoInternals=GOpt%TrfCtrl%DoInternals
+     IF(DoInternals) THEN
        NIntC=SIZE(IntCs%Def)
      ELSE
        NIntC=0
      ENDIF
        NDim =SIZE(Displ%D)
-     DoInternals=GOpt%TrfCtrl%DoInternals
      IF(NIntC/=NDim.AND.DoInternals) &
          CALL Halt('Dimensionality error in SRStep')
      !
      CALL New(Grad,NDim)
      CALL New(CartGrad,NCart)
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
+     !
+     CALL GetCGradMax(GOpt%Constr,CartGrad%D,NCart, &
+                      IntCs,IMaxCGrad,MaxCGrad)
      !
      ! If requested, compute internal coord. gradients
      !
@@ -654,10 +657,11 @@ CONTAINS
      !
      ! Check for gradient-convergence
      !
-     MaxGrad=Zero
-     DO I=1,NDim  
+     IMaxGrad=1
+     MaxGrad=ABS(Grad%D(1))
+     DO I=2,NDim
        Sum=ABS(Grad%D(I))
-       IF(MaxGrad<Sum) THEN
+       IF(Sum>MaxGrad) THEN
          IMaxGrad=I
           MaxGrad=Sum
        ENDIF
@@ -703,6 +707,8 @@ CONTAINS
      ! Tidy up
      !
      CALL Delete(Grad)
+     GOpt%GOptStat%IMaxCGrad=IMaxCGrad
+     GOpt%GOptStat%MaxCGrad=MaxCGrad
      GOpt%GOptStat%MaxGrad=MaxGrad
      GOpt%GOptStat%MaxGradNoConstr=MaxGradNoConstr
      GOpt%GOptStat%IMaxGrad=IMaxGrad
@@ -948,7 +954,7 @@ CONTAINS
      !                      
      INTEGER                    :: I,J,K,L
      INTEGER                    :: NCart,NIntC,NatmsLoc
-     REAL(DOUBLE)               :: RMSGrad,MaxGrad
+     REAL(DOUBLE)               :: RMSGrad,MaxGrad,MaxCGrad
      REAL(DOUBLE)               :: RMSGradNoConstr,MaxGradNoConstr
      REAL(DOUBLE)               :: Etot,Sum
      !                      
@@ -957,7 +963,7 @@ CONTAINS
      INTEGER                    :: MaxStre,MaxBend,MaxLinB
      INTEGER                    :: MaxOutP,MaxTors
      !                      
-     INTEGER                    :: IMaxGrad,IMaxGradNoConstr
+     INTEGER                    :: IMaxGrad,IMaxCGrad,IMaxGradNoConstr
      !
      IF(AllocQ(IntCs%Alloc)) THEN
        NIntC=SIZE(IntCs%Def)
@@ -971,8 +977,10 @@ CONTAINS
      RMSGrad=CtrlStat%RMSGrad
      RMSGradNoConstr=CtrlStat%RMSGradNoConstr
      MaxGrad=CtrlStat%MaxGrad
+     MaxCGrad=CtrlStat%MaxCGrad
      MaxGradNoConstr=CtrlStat%MaxGradNoConstr
      IMaxGrad=CtrlStat%IMaxGrad
+     IMaxCGrad=CtrlStat%IMaxCGrad
      IMaxGradNoConstr=CtrlStat%IMaxGradNoConstr
      !
      NStreGeOp=CtrlCoord%NStre
@@ -1069,8 +1077,10 @@ CONTAINS
      MaxTorsDispl=MaxTorsDispl*180.D0/PI
      !
      WRITE(*,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
+     WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(*,420) RMSGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
+     WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
        WRITE(*,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
@@ -1107,6 +1117,7 @@ CONTAINS
 400 FORMAT('Total Energy at Current Geometry = ',F20.8)
 401 FORMAT('                    Total Energy = ',F20.8)
 410 FORMAT('                        Max Grad = ',F12.6,' between atoms ',4I4)
+140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
 420 FORMAT('                        RMS Grad = ',F12.6)
 510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
 520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
@@ -1383,6 +1394,50 @@ CONTAINS
        CLOSE(Out,STATUS='KEEP')
      ENDIF
    END SUBROUTINE MixGeoms
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GetCGradMax(GConstr,CartGrad,NCart,IntCs, &
+                          IMaxCGrad,MaxCGrad)
+     TYPE(INTC)                :: IntCs
+     TYPE(Constr)              :: GConstr
+     REAL(DOUBLE),DIMENSION(:) :: CartGrad
+     REAL(DOUBLE)              :: MaxCGrad,Sum
+     INTEGER                   :: NCart,NIntC,I,JJ,J,IMaxCGrad
+     LOGICAL,DIMENSION(NCart)  :: ConstrGrad
+     !
+     ConstrGrad=.TRUE.
+     IF(GConstr%NCartConstr/=0) THEN
+       NIntC=SIZE(IntCs%Def)
+       DO I=1,NIntC
+         IF(IntCs%Constraint(I)) THEN 
+             JJ=IntCs%Atoms(I,1)
+           IF(IntCs%Def(I)(1:5)=='CARTX') THEN
+             J=3*(JJ-1)+1
+             ConstrGrad(J)=.FALSE.
+           ELSE IF(IntCs%Def(I)(1:5)=='CARTY') THEN
+             J=3*(JJ-1)+2
+             ConstrGrad(J)=.FALSE.
+           ELSE IF(IntCs%Def(I)(1:5)=='CARTZ') THEN
+             J=3*(JJ-1)+3
+             ConstrGrad(J)=.FALSE.
+           ENDIF
+         ENDIF
+       ENDDO
+     ENDIF
+     !
+     IMaxCGrad=1   
+     MaxCGrad=Zero
+     DO I=1,NCart
+       IF(ConstrGrad(I)) THEN
+         Sum=ABS(CartGrad(I))
+         IF(Sum>MaxCGrad) THEN
+           IMaxCGrad=I
+            MaxCGrad=Sum
+         ENDIF
+       ENDIF
+     ENDDO
+   END SUBROUTINE GetCGradMax
 !
 !-------------------------------------------------------------------
 !
