@@ -26,7 +26,8 @@ CONTAINS
   !=====================================================================================  
   SUBROUTINE SteepD(C)
     TYPE(Controls) :: C
-    INTEGER        :: iBAS,iGEO
+    INTEGER        :: iBAS,iGEO,iCLONE
+    REAL(DOUBLE),DIMENSION(C%Geos%Clones,C%Opts%NSteps) :: Energy
     !----------------------------------------------------------------------------------!
     ! Start with the first geometry
     iGEO=1
@@ -45,7 +46,19 @@ CONTAINS
     DO iGEO=1,C%Opts%NSteps
        ! Compute new gradients
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%MPIs)
-       IF(SteepStep(iBAS,iGEO,C))EXIT
+       IF(SteepStep(iBAS,iGEO,Energy(:,iGEO),C))THEN
+          DO iCLONE=1,C%Geos%Clones
+             IF(Energy(iCLONE,iGEO)<Energy(iCLONE,iGEO-1))THEN
+                ! On convergence only write the lowest energy geometry
+                CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             ENDIF  
+          ENDDO
+          EXIT
+       ELSE
+          DO iCLONE=1,C%Geos%Clones
+             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+          ENDDO
+       ENDIF
     ENDDO
   END SUBROUTINE SteepD
   !=====================================================================================
@@ -231,7 +244,7 @@ CONTAINS
   !=====================================================================================
   !
   !=====================================================================================  
-  FUNCTION SteepStep(cBAS,cGEO,C) RESULT(Converged)
+  FUNCTION SteepStep(cBAS,cGEO,Energies,C) RESULT(Converged)
     TYPE(Controls)                           :: C
     TYPE(DBL_RNK2), DIMENSION(C%Geos%Clones) :: Carts
     REAL(DOUBLE),   DIMENSION(C%Geos%Clones) :: Energies
@@ -325,6 +338,7 @@ CONTAINS
     ENDDO
     ! Keep geometry
     CALL GeomArchive(cBAS,cGEO,C%Nams,C%Sets,C%Geos)    
-    ! Print something 
+    ! Store the current minimum energies ...
+    Energies(:)=C%Geos%Clone(:)%ETotal
   END FUNCTION SteepStep
 END MODULE Optimizer

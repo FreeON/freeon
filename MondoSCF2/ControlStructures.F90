@@ -38,6 +38,7 @@ MODULE ControlStructures
      TYPE(DEBG)                     :: PFlags
      REAL(DOUBLE)                   :: NEBSpring
      LOGICAL                        :: NEBClimb 
+     CHARACTER(LEN=3)               :: GeomPrint
   END TYPE Options
 
   TYPE Dynamics
