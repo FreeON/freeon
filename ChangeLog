@@ -1,3 +1,26 @@
+2004-09-15 15:19  mchalla
+
+	* OneE/UBlok.F90: Hopefully fixed code so ECPs work with PBCs!
+	There may be a bug still in FBuild that needs working out.  Will
+	see to that later.
+
+2004-09-15 13:06  nemeth
+
+	* QCTC/QCTC.F90: A bug has been fixed. Now parallel calculations
+	are OK when numerical lattice forces are on.
+
+2004-09-15 12:37  tymczak
+
+	* QCTC/: DivPFFTensor.F90, PFFTensor.F90: [no log message]
+
+2004-09-15 12:36  tymczak
+
+	* QCTC/MakePFFT.F90: Makes the Derivative Arraays Anyaltically
+
+2004-09-15 12:08  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-09-14 18:58  nemeth
 
 	* MondoSCF2/: InCoords.F90, Optimizer.F90, PunchHDF.F90: A new
