@@ -190,44 +190,50 @@ CONTAINS
     !-------------------------------------------------------------------
     !
     MM=MM+1
-    !IF(MOD(MM,10).EQ.0) THEN
-    !IF(MM==10) THEN
-    !   write(*,*) 'loading new D',MM
-    !   CALL Delete(P)
-    !   CALL New(P)
-    !   CALL Get(P,TrixFile('OrthoD',Args,LastSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
-    !ENDIF
     N=Trace(P)
     IF(N>=Ne) THEN
        ! D3 = X0*D3 + D3*X0 + D1*D2+D2*D1;
-       ! D2 = X0*D2 + D2*X0 + D1*D1;
        !
+       ! D2 = X0*D2 + D2*X0 + D1*D1;
+       !IF(...) THEN
+       !   CALL Multiply(P,PPrm2,Tmp1)    !Tmp1=P*PPrm2
+       !   CALL Multiply(PPrm2,P,Tmp2)    !Tmp2=PPrm2*P
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   CALL Multiply(PPrim,PPrim,Tmp1)!Tmp1=P*PPrm2
+       !   CALL Add(Tmp1,Tmp3,Tmp2)       !Tmp2=Tmp1+Tmp3
+       !   !----------------------
+       !   CALL Filter(PPrm2,Tmp2)        !PPrm2=Tmp2
+       !ENDIF
+       !----------------------
        ! D1 = X0*D1 + D1*X0;
        CALL Multiply(P,PPrim,Tmp1)    !Tmp1=P*PPrim
        CALL Multiply(PPrim,P,Tmp2)    !Tmp2=PPrim*P
        CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2 !PPrim=P*PPrim+PPrim*P
        !----------------------
-!       IF(MOD(MM,3).NE.0) THEN
-!       IF(MM.LT.3) THEN
-!          CALL SetEq(PPrim,Tmp3)
-!       ELSE
-          CALL Filter(PPrim,Tmp3)        !PPrim=Tmp3
-!       ENDIF
+       CALL Filter(PPrim,Tmp3)        !PPrim=Tmp3
        !----------------------
-       ! X0 = X02;
+       ! X0 = X0^2;
        CALL Multiply(P,P,Tmp3)        !Tmp3=P*P
        !----------------------
-       !CALL SetEq(P,Tmp3)
-!       IF(MM.LT.1) THEN
-!          CALL SetEq(P,Tmp3)
-!       ELSE
-          CALL Filter(P,Tmp3)            !P=Tmp3
-!       ENDIF
+       CALL Filter(P,Tmp3)            !P=Tmp3
        !----------------------
     ELSE
        ! D3 = 2*D3 - (X0*D3+D3*X0) - (D1*D2+D2*D1);
        ! D2 = 2*D2 - (X0*D2+D2*X0) - (D1*D1);
-       !
+       !----------------------
+       !IF(...) THEN
+       !   CALL Multiply(P,PPrm2,Tmp1)    !Tmp1=P*PPrm2
+       !   CALL Multiply(PPrm2,P,Tmp2)    !Tmp2=PPrm2*P
+       !   CALL Add(Tmp1,Tmp2,Tmp3)       !Tmp3=Tmp1+Tmp2
+       !   CALL Multiply(PPrim,PPrim,Tmp1)!Tmp1=P*PPrm2
+       !   CALL Add(Tmp1,Tmp3,Tmp2)       !Tmp2=Tmp1+Tmp3          
+       !   CALL Multiply(Tmp2,-One)       !Tmp2=-Tmp2
+       !   CALL Multiply(PPrm2,Two)       !PPrm2=2*PPrm2
+       !   CALL Add(PPrm2,Tmp2,Tmp1)      !Tmp1=PPrm2+Tmp2
+       !   !----------------------
+       !   CALL Filter(PPrm2,Tmp1)        !D2=Tmp1
+       !ENDIF
+       !----------------------
        ! D1 = 2*D1 - (X0*D1+D1*X0);      
        CALL Multiply(P,PPrim,Tmp1)    !Tmp1=P*PPrim
        CALL Multiply(PPrim,P,Tmp2)    !Tmp2=PPrim*P
@@ -236,12 +242,7 @@ CONTAINS
        CALL Multiply(PPrim,Two)       !PPrim=2*PPrim
        CALL Add(PPrim,Tmp3,Tmp1)      !Tmp1=PPrim+Tmp3 
        !----------------------
-!       IF(MOD(MM,3).NE.0) THEN
-!       IF(MM.LT.3) THEN
-!          CALL SetEq(PPrim,Tmp1)
-!       ELSE
-          CALL Filter(PPrim,Tmp1)        !D1=Tmp1
-!       ENDIF
+       CALL Filter(PPrim,Tmp1)        !D1=Tmp1
        !----------------------
        ! X0 = 2*X0-X02;
        CALL Multiply(P,P,Tmp1)        !Tmp1=P*P
@@ -249,12 +250,7 @@ CONTAINS
        CALL Multiply(P,Two)           !P=2*P
        CALL Add(P,Tmp1,Tmp3)          !Tmp3=P+Tmp1
        !----------------------
-       !CALL SetEq(P,Tmp3)
-!       IF(MM.LT.1) THEN
-!          CALL SetEq(P,Tmp3)
-!       ELSE
-          CALL Filter(P,Tmp3)            !X0=Tmp3
-!       ENDIF
+       CALL Filter(P,Tmp3)            !X0=Tmp3
        !----------------------
     ENDIF
     !
