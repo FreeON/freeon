@@ -236,6 +236,7 @@ CONTAINS
 !
     DO I=1,GM%NAtms
        GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
+       GM%AbBoxCarts%D(:,I) = AtomToFrac(GM,GM%AbCarts%D(:,I))
        GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
     ENDDO
 !
@@ -251,6 +252,7 @@ CONTAINS
 !
     DO I=1,GM%NAtms
        GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
+       GM%AbCarts%D(:,I) = FracToAtom(GM,GM%AbBoxCarts%D(:,I))
        GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
     ENDDO
 !
@@ -284,8 +286,10 @@ CONTAINS
 !   Tranaslate The Atoms
 !
     DO I=1,GM%NAtms
-       GM%Carts%D(:,I)    = GM%Carts%D(:,I) + ATvec(:)
-       GM%BoxCarts%D(:,I) = GM%BoxCarts%D(:,I) + FTvec(:)
+       GM%Carts%D(:,I)      = GM%Carts%D(:,I)      + ATvec(:)
+       GM%AbCarts%D(:,I)    = GM%AbCarts%D(:,I)    + ATvec(:)
+       GM%BoxCarts%D(:,I)   = GM%BoxCarts%D(:,I)   + FTvec(:)
+       GM%AbBoxCarts%D(:,I) = GM%AbBoxCarts%D(:,I) + FTvec(:)
     ENDDO
 !
   END SUBROUTINE Translate
