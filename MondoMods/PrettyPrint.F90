@@ -11,7 +11,7 @@ MODULE PrettyPrint
    USE Parse
    USE SetXYZ
    USE InOut
-   USE Order
+!  USE Order
 #ifdef PARALLEL
    USE MondoMPI
 #endif
