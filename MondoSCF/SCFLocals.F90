@@ -65,6 +65,9 @@ MODULE SCFLocals
       LOGICAL,     DIMENSION(MaxSets)    :: Cnvrgd ! Convergence flag
       REAL(DOUBLE),DIMENSION(MaxSets)    :: EErr   ! Relative error in total energy
       REAL(DOUBLE),DIMENSION(0:MaxSCFs,5):: Stats  ! Statistics     
+!
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: ForceAction 
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GuessMethod
    END TYPE
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose,Good,Tight,VeryTight):
