@@ -7,7 +7,6 @@ MODULE PunchHDF
   USE PrettyPrint
   USE GlobalScalars
   USE ControlStructures
-  USE InCoords
   USE OptionKeys
   IMPLICIT NONE
 CONTAINS

@@ -2,14 +2,18 @@ MODULE ParseExtraCoords
    USE ControlStructures
    USE DerivedTypes
    USE GlobalScalars
-   USE Macros
+!  USE Macros
+   USE OptionKeys
+   USE GeometryKeys
+   USE ParseGeometries
+   USE Massage
    USE InCoords
    USE SetXYZ
    USE MemMan 
    IMPLICIT NONE
    CONTAINS
    !
-   SUBROUTINE LoadExtraCoords(GOpt,N,Geos)
+   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos)
      !
      ! This subroutine parses the inPut file for
      ! additional internal coordinate definitions
@@ -17,17 +21,39 @@ MODULE ParseExtraCoords
      ! WARNING! Constraint values must be given in 
      ! Angstroems and Degrees
      !
-     TYPE(FileNames)             :: N
+     TYPE(FileNames)             :: Nams
      TYPE(Geometries)            :: Geos
      TYPE(GeomOpt)               :: GOpt
      CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname
      TYPE(INTC)                  :: IntC_Extra
      CHARACTER(LEN=5)            :: CHAR
      INTEGER                     :: I1,I2,J,NIntC_Extra,SerNum,NConstr
+     INTEGER                     :: NatmsLoc
      INTEGER                     :: NCartConstr,iCLONE
      REAL(DOUBLE)                :: V,Value,DegToRad
+     TYPE(DBL_RNK2)              :: XYZ 
+     TYPE(INT_VECT)              :: CConstrain
+     TYPE(CRDS)                  :: GMLoc
+     TYPE(Options)               :: Opts
      !
-     CALL OpenASCII(N%IFile,Inp)
+     CALL OpenASCII(Nams%IFile,Inp)
+     !
+     NatmsLoc=Geos%Clone(1)%Natms
+     CALL New(XYZ,(/3,NatmsLoc/))
+     CALL New(CConstrain,NatmsLoc)
+     !
+     IF(Opts%Guess==GUESS_EQ_RESTART) THEN
+       ! reparse for values of constraints which have not been stored
+       ! in CRDS or which might have been modified
+       CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,GMLoc)
+       CALL ToAtomicUnits(GMLoc)
+       XYZ%D=GMLoc%AbCarts%D
+       CConstrain%I=GMLoc%CConstrain%I
+       CALL Delete(GMLoc)
+     ELSE
+       XYZ%D=Geos%Clone(1)%AbCarts%D
+       CConstrain%I=Geos%Clone(1)%CConstrain%I
+     ENDIF
      !
      DegToRad=PI/180.D0
      !
@@ -190,11 +216,11 @@ MODULE ParseExtraCoords
          !      DO iCLONE=1,Geos%Clones 
                   iCLONE=1
                   IntC_Extra%ConstrValue(NIntC_Extra+1)=&
-                       Geos%Clone(iCLONE)%AbCarts%D(1,SerNum)
+                       XYZ%D(1,SerNum)
                   IntC_Extra%ConstrValue(NIntC_Extra+2)=&
-                       Geos%Clone(iCLONE)%AbCarts%D(2,SerNum)
+                       XYZ%D(2,SerNum)
                   IntC_Extra%ConstrValue(NIntC_Extra+3)=&
-                       Geos%Clone(iCLONE)%AbCarts%D(3,SerNum)
+                       XYZ%D(3,SerNum)
          !      ENDDO
          !
                   NIntC_Extra=NIntC_Extra+3 
@@ -229,9 +255,9 @@ MODULE ParseExtraCoords
      !
      !DO iCLONE=1,Geos%Clones
         iCLONE=1
-        CALL MergeConstr(IntC_Extra,Geos%Clone(iCLONE),&
-          NIntC_Extra,NConstr,NCartConstr)
-        CALL ReNumbIntC(IntC_Extra,Geos%Clone(iCLONE)%CConstrain%I) 
+        CALL MergeConstr(IntC_Extra,XYZ%D,CConstrain%I, &
+                         NIntC_Extra,NConstr,NCartConstr)
+        CALL ReNumbIntC(IntC_Extra,CConstrain%I) 
      !ENDDO
      !
      ! Redefine size of Lagrangian arrays and save IntC_Extra to disk 
@@ -244,8 +270,8 @@ MODULE ParseExtraCoords
        CALL New(Geos%Clone(iCLONE)%LagrMult,NConstr)
        CALL New(Geos%Clone(iCLONE)%GradMult,NConstr)
        CALL New(Geos%Clone(iCLONE)%LagrDispl,NConstr)
-       CALL WriteIntCs(IntC_Extra,TRIM(N%M_SCRATCH)//&
-         TRIM(N%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))//'IntC_Extra')
+       CALL WriteIntCs(IntC_Extra,TRIM(Nams%M_SCRATCH)//&
+         TRIM(Nams%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))//'IntC_Extra')
      ENDDO
      !
      GOpt%CoordCtrl%NExtra=NIntC_Extra
@@ -253,7 +279,7 @@ MODULE ParseExtraCoords
      GOpt%Constr%NCartConstr=NCartConstr
      !
      !IF(NIntC_Extra>0) THEN
-     !  CALL OPENAscii(N%OFile,Out)
+     !  CALL OPENAscii(Nams%OFile,Out)
      !  CALL PrtIntCoords(IntC_Extra,IntC_Extra%Value, &
      !  'Extra Internals & Constraints')
      !  CLOSE(Out,STATUS='KEEP')
@@ -263,19 +289,24 @@ MODULE ParseExtraCoords
      !
      CLOSE(Inp,STATUS='KEEP')
      !
+     CALL Delete(XYZ)
+     CALL Delete(CConstrain)
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE MergeConstr(IntC_Extra,GMLoc,&
-          NIntC_Extra,NConstr,NCartConstr)
-     TYPE(INTC) :: IntC_Extra,IntC_New
-     TYPE(CRDS) :: GMLoc
-     INTEGER    :: NIntC_Extra,NConstr,NCartConstr,I,NNewC
+   SUBROUTINE MergeConstr(IntC_Extra,XYZ,CConstrain,&
+                          NIntC_Extra,NConstr,NCartConstr)
+     TYPE(INTC)                  :: IntC_Extra,IntC_New
+     INTEGER,DIMENSION(:)        :: CConstrain
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     INTEGER                     :: NIntC_Extra,NConstr,NCartConstr
+     INTEGER                     :: I,NNewC,NatmsLoc
      !
+     NatmsLoc=SIZE(XYZ,2)
      NNewC=0
-     DO I=1,GMLoc%Natms
-       IF(GMLoc%CConstrain%I(I)==1) NNewC=NNewC+3
+     DO I=1,NatmsLoc    
+       IF(CConstrain(I)==1) NNewC=NNewC+3
      ENDDO
      IF(NNewC==0) RETURN
      NConstr=NConstr+NNewC
@@ -285,8 +316,8 @@ MODULE ParseExtraCoords
      CALL Set_INTC_EQ_INTC(IntC_Extra,IntC_New,1,NIntC_Extra,1)
      ! fill in intcs related to Cartesian constraints
      NNewC=NIntC_Extra
-     DO I=1,GMLoc%Natms
-       IF(GMLoc%CConstrain%I(I)==1) THEN
+     DO I=1,NatmsLoc    
+       IF(CConstrain(I)==1) THEN
          IntC_New%Def(NNewC+1)='CARTX' 
          IntC_New%Def(NNewC+2)='CARTY' 
          IntC_New%Def(NNewC+3)='CARTZ' 
@@ -300,9 +331,9 @@ MODULE ParseExtraCoords
          IntC_New%Constraint(NNewC+2)=.TRUE.
          IntC_New%Constraint(NNewC+3)=.TRUE.
          !
-         IntC_New%ConstrValue(NNewC+1)=GMLoc%AbCarts%D(1,I)
-         IntC_New%ConstrValue(NNewC+2)=GMLoc%AbCarts%D(2,I)
-         IntC_New%ConstrValue(NNewC+3)=GMLoc%AbCarts%D(3,I)
+         IntC_New%ConstrValue(NNewC+1)=XYZ(1,I)
+         IntC_New%ConstrValue(NNewC+2)=XYZ(2,I)
+         IntC_New%ConstrValue(NNewC+3)=XYZ(3,I)
          NNewC=NNewC+3
        ENDIF
      ENDDO
