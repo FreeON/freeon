@@ -39,7 +39,9 @@ clean:	cmm cs ce c1 c2 cd cv
 #
 purge:	pmm ps pe p1 p2 pd pv pMisc  
 #
-release: clean legacy swREADME rmm rs re r1 r2 rd rv tarball
+release: clean rmDocs legacy swREADME rmm rs re r1 r2 rd rv tarball
+#
+rmDocs:
 	rm -rf Docs
 #
 backup:	purge rmLegacy tarball
