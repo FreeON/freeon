@@ -2980,7 +2980,7 @@ CONTAINS
       D1MACH = DMACH(I)
       RETURN
 !C
-      END
+      END FUNCTION
 !*DECK DCKDER
 !
 !----------------------------------------------------------------------
