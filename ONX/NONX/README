@@ -30,3 +30,11 @@ in vrr.  DONE
 6. Need to add the buffers BufT and SchT to DisOrder. DONE
 
 7. Need to add the code to stuff the distribution info into the buffers.
+
+      DONE
+
+8. The DisPtr arrays are all messed up. ONX and SONX do this in 
+very different ways... I think this version needs to be more like
+onx here...
+
+

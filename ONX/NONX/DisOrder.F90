@@ -268,7 +268,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)
           RETURN
         END IF
         CALL QuickSortDis(DB%SchT%D(1,J,I),DB%BufT%I(1,J,I),N,-2)
-        CALL PutDis(N,iDis,iPrm,I,J,IndexA,KonAC,DB)
+        CALL PutDis(N,iDis,iPrm,I,J,IndexC,KonAC,DB)
       END IF
     END DO
   END DO

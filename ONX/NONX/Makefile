@@ -8,7 +8,7 @@ Objects = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
           vrrl.o RGen1C.o CCDriver.o VRRDriver.o \
           DisOrder.o RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
           RangeOfExchange.o Tables.o GetTables.o \
-          ComputeK.o
+          ComputeK.o GetSubBlk.o SkipOut.o BSearch.o LSearch.o
 
 
 Libs =  $(F90_LIBRARIES) $(LAPACK) 
