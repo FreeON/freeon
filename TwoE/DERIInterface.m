@@ -153,6 +153,7 @@ Do[Do[Do[Do[
                   ArgString5="";
                   ArgString6="";
                   ArgString7="";
+                  ArgString8="";
 
                   If[braketswitch==0,
                       ArgString1="ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n";
@@ -164,9 +165,11 @@ Do[Do[Do[Do[
                           If[ketswitch==0,
                                ArgString6="                 OffSet%B-1,NBFA          ";
                                ArgString7="                 OffSet%D-1,NBFA*NBFB*NBFC";
+                               ArgString8="                 1,4,7,10";
                           ,
                                ArgString6="                 OffSet%D-1,NBFA*NBFB*NBFC";
                                ArgString7="                 OffSet%B-1,NBFA          ";
+                               ArgString8="                 1,4,10,7";
                           ];
                       ,
                           ArgString4="                 OffSet%C-1,NBFA*NBFB     ";
@@ -174,9 +177,11 @@ Do[Do[Do[Do[
                           If[ketswitch==0,
                                ArgString6="                 OffSet%B-1,NBFA          ";
                                ArgString7="                 OffSet%D-1,NBFA*NBFB*NBFC";
+                               ArgString8="                 4,1,7,10";
                           ,
                                ArgString6="                 OffSet%D-1,NBFA*NBFB*NBFC";
                                ArgString7="                 OffSet%B-1,NBFA          ";
+                               ArgString8="                 4,1,10,7";
                           ];
                       ];
                   ,
@@ -189,9 +194,11 @@ Do[Do[Do[Do[
                          If[braswitch==0,
                             ArgString6="                 OffSet%A  ,1             ";
                             ArgString7="                 OffSet%C-1,NBFA*NBFB     ";
+                            ArgString8="                 7,10,1,4";
                          ,
                             ArgString6="                 OffSet%C-1,NBFA*NBFB     ";
                             ArgString7="                 OffSet%A  ,1             ";
+                            ArgString8="                 7,10,4,1";
                          ];
                       ,
                          ArgString4="                 OffSet%D-1,NBFA*NBFB*NBFC";
@@ -199,16 +206,19 @@ Do[Do[Do[Do[
                          If[braswitch==0,
                             ArgString6="                 OffSet%A  ,1             ";
                             ArgString7="                 OffSet%C-1,NBFA*NBFB     ";
+                            ArgString8="                 10,7,1,4";
                          ,
                             ArgString6="                 OffSet%C-1,NBFA*NBFB     ";
                             ArgString7="                 OffSet%A  ,1             ";
+                            ArgString8="                 10,7,4,1";
                          ];
                       ];
                   ];
 
                   ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-                                       ArgString4,", & \n ",ArgString5,", & \n ",\
-                                       ArgString6,", & \n ",ArgString7,",NIntBlk,GM%PBC,C(1)"];
+                                       ArgString4,", & \n ",ArgString5,", & \n ", \
+                                       ArgString6,", & \n ",ArgString7,", & \n ", \
+                                       ArgString8,",NIntBlk,GM%PBC,C(1)"];
 
 
 
@@ -225,6 +235,8 @@ Do[Do[Do[Do[
 Print["We have ",LC*LC*LC*LC," integrals."];
 
 WS["CASE DEFAULT"];
+WS["   WRITE(*,*) 'We are in DERIInterface.Inc'"];
+WS["   WRITE(*,*) 'IntType=',IntType"];
 WS["   STOP 'MISS AN INTEGRAL'"];
 WS["END SELECT"];
 
@@ -300,8 +312,9 @@ Do[Do[
 
 
    ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-             ArgString4,",",ArgString5,",NIntBlk,GM%PBC,C(1)"];
-
+             ArgString4,",",ArgString5,",", \
+             ToString[(LEnd[imax]-LBegin[imin]+1)^2*(LEnd[jmax]-LBegin[jmin]+1)^2], \
+             ",GM%PBC,C(1)"];
 
    WS[StringJoin["  CALL dInt",ToString[ijklType],"(",ArgString,")"]];
 
