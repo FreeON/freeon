@@ -68,7 +68,6 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
    REAL(DOUBLE), PARAMETER :: SMALL_DBL    =TINY(One)           ! smallest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 
-   REAL(DOUBLE), PARAMETER :: LinCrit =1.D0  ! criterium for linearity of an angle in degree
 !-------------------------------------------------------------------------------
 !  Status keys
 !
