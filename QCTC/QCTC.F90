@@ -33,6 +33,7 @@ PROGRAM QCTC
   TYPE(FastMat),POINTER          :: J
   REAL(DOUBLE)::TmBegJ,TmEndJ,TmJ
   TYPE(DBL_VECT) :: TmJArr
+  INTEGER :: IErr
 #else
   TYPE(BCSR)                     :: J
 #endif
