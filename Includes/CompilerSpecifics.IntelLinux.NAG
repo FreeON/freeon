@@ -87,6 +87,7 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #  'Nuff said
 #
 LAPACK = -L$(LAPACK_LIB) -llapack_NAG -lblas_NAG
+#LAPACK = -llapack -lblas -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 -lg2c
 #---------------------------------------------------------------------------
 
 
