@@ -230,9 +230,9 @@ MODULE ChkSCFs
          IGeo=Ctrl%Current(3)
          Mthd=Ctrl%Method(IBas)
          NCyc=Ctrl%NCyc(IBas)
-         CALL OpenASCII(OutFile,Out)
-         CALL PrintProtectL(Out)
          IF(PrintFlags%Key<=DEBUG_MINIMUM)THEN
+            CALL OpenASCII(OutFile,Out)         
+            CALL PrintProtectL(Out)
             IF(IGeo==1.AND.IBas==1)THEN
                WRITE(Out,11)
                WRITE(Out,21)
@@ -240,19 +240,22 @@ MODULE ChkSCFs
                WRITE(Out,11)
             ENDIF
             WRITE(Out,23)IGeo,Ctrl%Stats(NCyc,1),NCyc+1,Ctrl%Stats(NCyc,3)
+            CALL PrintProtectR(Out)
+            CLOSE(UNIT=Out,STATUS='KEEP')            
          ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
-            CALL OpenHDF(InfFile)
-            CALL Get(GM,Tag_O=TRIM(IntToChar(IGeo)))
-            CALL CloseHDF()
-            CALL PPrint(GM)
-            CALL Delete(GM)
+ !           CALL OpenHDF(InfFile)
+ !           CALL Get(GM,Tag_O=TRIM(IntToChar(IGeo)))
+ !           CALL CloseHDF()
+ !           CALL PPrint(GM)
+ !           CALL Delete(GM)
          ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-            WRITE(Out,11)
-            CALL OpenHDF(InfFile)
-            CALL Get(GM,Tag_O=TRIM(IntToChar(IGeo)))
-            CALL CloseHDF()
-            CALL PPrint(GM)
-            CALL Delete(GM)
+!            CALL OpenHDF(InfFile)
+!            CALL Get(GM,Tag_O=TRIM(IntToChar(IGeo)))
+!            CALL CloseHDF()
+!            CALL PPrint(GM)
+!            CALL Delete(GM)
+            CALL OpenASCII(OutFile,Out)         
+            CALL PrintProtectL(Out)
             Mssg='Convergence statistics for R'         &
                //TRIM(FunctionalName(Ctrl%Model(IBas))) &
                //'/'//TRIM(Ctrl%BName(IBas))//':'       
@@ -264,9 +267,9 @@ MODULE ChkSCFs
                WRITE(Out,42)I,Ctrl%InkFok,(Ctrl%Stats(I,K),K=1,4)
             ENDDO
             WRITE(Out,11)
+            CALL PrintProtectR(Out)
+            CLOSE(UNIT=Out,STATUS='KEEP')            
          ENDIF
-         CALL PrintProtectR(Out)
-         CLOSE(UNIT=Out,STATUS='KEEP')            
       10 FORMAT(72('-'))
       11 FORMAT(72('='))
 !
