@@ -79,7 +79,8 @@ PROGRAM P2Use
 #endif
      ! Find the current orthogonal density matrix
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-!     CALL PPrint(P,'CURRENTDM',Unit_O=6)
+     !CALL PChkSum(P,'CurrentDM',Prog)
+     !CALL PPrint(P,'CURRENTDM',Unit_O=6)
      ! Close it up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)
@@ -136,7 +137,7 @@ PROGRAM P2Use
      CALL Halt(' Unknown option '//TRIM(SCFActn))
   ENDIF
 
-  IF(SCFActn/='GuessEqCore')THEN
+  IF(SCFActn/='GuessEqCore'.AND.SCFActn/='Restart')THEN
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
