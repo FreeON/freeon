@@ -38,12 +38,10 @@ MODULE DrvSCFs
                ENDIF
             ELSE
 !              Restricted SCF with geometry switch 
-               WRITE(*,*) '******************Switching Geometry*******************'
                CALL SwitchGeometryRSCF(Ctrl)
             ENDIF
          ELSE
 !            Restricted SCF with basis-set switch 
-            WRITE(*,*) '******************Switching Basis*******************'
             CALL SwitchBasisRSCF(Ctrl)
          ENDIF
       ELSE
