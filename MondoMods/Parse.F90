@@ -519,13 +519,14 @@ MODULE Parse
             //'*2^('//TRIM(IntToChar(EXPONENT(D)))//')'
      END FUNCTION DblToMMAChar
 ! 
-      FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O)
+      FUNCTION TrixFile(PostFix,Args_O,OffSet_O,Name_O,Stats_O,NoTags_O)
          CHARACTER(LEN=*),         INTENT(IN) :: PostFix 
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Name_O
          TYPE(ARGMT),     OPTIONAL,INTENT(IN) :: Args_O
          INTEGER,DIMENSION(3), &
                           OPTIONAL,INTENT(IN) :: Stats_O
          INTEGER,         OPTIONAL,INTENT(IN) :: OffSet_O        
+         LOGICAL,         OPTIONAL,INTENT(IN) :: NoTags_O
          INTEGER                              :: OffSet
          INTEGER, DIMENSION(3)                :: Stats
          CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Name,TrixFile,Cycl,Base,Geom
@@ -545,6 +546,10 @@ MODULE Parse
          ENDIF
          IF(PRESENT(OffSet_O))THEN
             Stats(1)=Stats(1)+OffSet_O
+            IF(Stats(1)<0)THEN
+!              Use previous if current < 0
+               Stats=Args_O%I%I(4:6)
+            ENDIF
             Cycl=IntToChar(Stats(1))
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
@@ -552,6 +557,8 @@ MODULE Parse
                                //'_Base#'//TRIM(Base) &
                                //'_Cycl#'//TRIM(Cycl) &
                                //'.'//TRIM(PostFix)            
+         ELSEIF(PRESENT(NoTags_O))THEN
+            TrixFile=TRIM(Name)//'.'//TRIM(PostFix)            
          ELSE
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
