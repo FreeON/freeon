@@ -10,7 +10,7 @@ latex:
 new: 	clean links dvi
 
 links:
-	ln -s /n/srv3/nemeth/MONDO/Docs/RevTex/revtex4.cls ./revtex4.cls
+	ln -s /n/srv3/nemeth/MONDO_TEST/Docs/RevTex/revtex4.cls ./revtex4.cls
 	ln -s ../../RevTex/apsrev.bst  ./apsrev.bst
 	ln -s ../../RevTex/apsrmp.bst  ./apsrmp.bst
 	ln -s ../../RevTex/revsymb.sty ./revsymb.sty

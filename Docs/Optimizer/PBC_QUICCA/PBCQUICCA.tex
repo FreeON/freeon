@@ -12,7 +12,6 @@
 \newcommand{\commentoutA}[1]{}
 %\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 \documentclass[prl,aps,preprint,superbib,12pt]{revtex4}
-
 \usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -97,7 +96,7 @@ to the displacement of lattice parameters, and not only those
 that cross the boundaries of the central cell. 
 In our opinion, the paper of Bu\v{c}ko, Hafner and {\'A}ngy{\'a}n
 provides the first complete determination of Wilson's B matrix
-for crystals. This definition of the B matrix will be used through
+for crystals. Their definition of the B matrix will be used through
 the present paper. 
 
 In the present article we want to assess the performance of our recently
@@ -105,7 +104,9 @@ developed optimization algorithm, the Quasi Independent Curvilinear
 Coordinate Approach (QUICCA) \cite{KNemeth04} 
 in crystal structure environment.
 QUICCA is based on a radical exploitation of the approximate decoupling
-of internal coordinate motions within a molecule and is very simple 
+of the harmonic and anharmonic vibrational couplings in
+internal coordinate representation.
+QUICCA is simple 
 to implement, robust and very efficient for isolated molecules while
 its computational cost scales linearly with the system-size for each 
 optimization step. However, nothing is known yet about the 
@@ -126,7 +127,7 @@ in that QUICCA is a very efficient method for optimizing both
 crystal structures and isolated molecules (Sec. \ref{Conclusions}).
 
 \section{Methodology}
-\subsection{Wilson's B matrix for crystals}
+\subsection{Wilson's B matrix for crystals} \label{crystalBmat}
 In this section we briefly review how the elements of Wilson's
 B matrix can be calculated for crystals. A more detailed discussion 
 of this issue can be found in Ref. \onlinecite{TBucko05}.
@@ -171,10 +172,13 @@ B_{il} =  \sum_{m=1}^{4}
 where $\frac{\partial \phi_{i}}{\partial r_{k}}$ and 
 $\frac{\partial \phi_{i}}{\partial r_{m}}$ are row-vectors and contain
 the partial derivative of the $i$-th internal coordinate
-with respect of the absolute Cartesian positions of 
+with respect to the absolute Cartesian positions of 
 the $k$-th and $m$-th atoms. $f_{ml}$ represents the
 $l$-th component of the fractional coordinates of the $m$-th atom.
-These partial derivatives are identical
+Note, that $f_{ml}$ can be greater then $1$ if the $m$-th atom is not 
+in the central cell.
+The partial derivatives $\frac{\partial \phi_{i}}{\partial r_{m}}$ 
+are identical
 with the B matrix elements of isolated molecules. The summation
 in Eq. \ref{Blattice} goes over all atoms that compose $\phi_{i}$,
 i.e. in case of primitive internal coordinates over maximum $4$ atoms. 
@@ -196,13 +200,14 @@ $\frac{d E}{d f_{k}}$ can easily be calculated as:
 \end{equation}
 For the sake of completeness the relationship between total and
 partial derivatives of the energy with respect of the lattice vectors
-is defined by    
+is defined by
 \begin{equation}
 \frac{d E}{d h_{l}} = \frac{\partial E}{\partial h_{l}} +
                       \sum_{n=1}^{N_{a}} 
                       \frac{\partial E}{\partial r_{n}} f_{nl} ,
 \end{equation}
-where $N_{a}$ is the number of atoms in the elementary cell.
+where $N_{a}$ is the number of atoms in the elementary cell 
+\cite{TBucko05}.
 
 
 
@@ -231,7 +236,8 @@ Thus the solution of Eq. \ref{solveintcgrads} can be carried out
 in a linear scaling fashion also for crystals.
 Note that the sparsity in the Cholesky factorization step cannot be
 preserved when an alternative solver, based on the $G_{i}=BB^{t}$
-matrix is used, thus this latter route is inefficient to carry out
+matrix is used, thus this latter kind of solver 
+is inefficient to carry out
 the coordinate transformation for large crystals.
 
 Once predictions are done for improved values of internal coordinates
@@ -243,10 +249,12 @@ linearly with the system-size. At each step of the iterative
 back-transformation fractional coordinates and lattice vectors
 are updated and the corresponding atomic Cartesian coordinates are
 generated to determine the updated values of internal coordinates
-at an updated crystal structure. The rest of the back-transformation
+at an updated lattice structure. The rest of the back-transformation
 is the same as what is used for isolated molecules.
 
-\subsection{The QUICCA algorithm for crystals}
+\section{Implementation}
+
+\subsection{The QUICCA algorithm for crystals} \label{QUICCAreview}
 Details of the QUICCA algorithm for geometry optimization 
 of isolated molecules are 
 described in our previous paper \cite{KNemeth04}. Here we provide 
@@ -256,7 +264,7 @@ QUICCA is based on the realization of the fact, that internal coordinate
 gradients show trends during geometry optimization.
 These trends can be formalized by weighted curve fitting for each 
 individual internal coordinate, over internal coordinate value and 
-gradient pairs.
+gradient data-pairs.
 In practice, this curve fitting is most robust with just a line-fit. 
 The root of the
 fitted curve (line) provides an improved estimate for the minimum
@@ -282,52 +290,27 @@ The optimization was started from the crystallographic structure
 \cite{AGoto90}.
 The numbers in the picture
 indicate the sequence of optimization steps. The dashed line represents
-a linear fit, the star the predicted location of the minimum.}
+a weighted linear fit, the star the predicted location of the minimum.}
 \label{iceIh}
 \end{figure}
 
-
-\section{Implementation}
+The only change that our recent implementation of QUICCA contains as 
+compared to the formerly described one (Ref. \onlinecite{KNemeth04})
+is that merging of the connectivities from recent optimization steps
+does not take place any more. Omitting the merger of connectivities
+does neither change results on Baker's test set as given 
+in Ref. \onlinecite{KNemeth04}, nor decreases efficiency of optimization
+on large protein fragments.
 
 \subsection{Data preparation}
-During the process of geometry optimization atomic positions
-of the central cell may be folded back to the opposite side of the 
-cell, for varios reasons, e.g. because the folded coordinates 
-are more convenient for energy and gradient evaluation. The folded
-atoms will be translated by a lattice vector.
-In geometry optimization this folding may cause a problem. 
-Say, we have a 
-bond with atoms $A_{1}$ and $A_{2}$, and the cell indices of the
-atoms are all zero. The optimizer supposes that this bond existed
-during the recent history of the optimization process with exactly
-the same lattice indices. If folding happens, in the history
-of the length of this bond a jump may occure: the length of the
-bond jumps by about the length of a lattice vector. 
-One way to avoid such artificial jumps is to keep track
-of the history of folding. Another way, which we prefer, is
-that Cartesian coordinates of past geometries, after retrieved from 
-disk, are compared to a reference geometry (e.g. with the     
-very first structure of the optimization process). If the
-distance between an atom in the reference geometry and its counterpart
-in a retrieved structure is bigger than a lattice vector 
-(taken again from the retrieved data set), the retrieved
-atomic position will be unfolded, by translating it back 
-to the position closest to the reference one.
-Then, internal coordinates of the crystal will be identified on the
-basis of the unfolded structures, and bonding schemes can easily
-be compared and merged if necessary.
-In our first paper about the QUICCA optimization algorithm 
-\cite{KNemeth04}, we suggested the merging of primary
-bonding schemes that come from the retrieved geometries to achieve
-a greater stability for larger molecules. Our recent experience tells
-us that this merging may not be necessary for achieving
-the same stability and efficiency as what was described in our
-previous paper \cite{KNemeth04}, though it may be beneficial
-for very large molecules. In the present paper,
-the internal coordinates used to construct the displaced geometries
-were determined solely on the basis of the Cartesian coordinates
-provided by the most recent optimization step and the unfolding 
-process.
+At the beginning of the fitting process of QUICCA
+Cartesian coordinates of past optimization steps are compared to a
+reference geometry and those Cartesian positions of the past 
+crystal structures are retrieved that are the closest ones
+to the reference geometry. This pre-caution is necessary
+to avoid sudden jumps in internal coordinate values due to the
+fact that atoms crossed the boundaries of the central cell during 
+the optimization.
 
 \subsection{Recognition of the internal coordinates}
 The Cartesian central cell is replicated so, that all $27$ 
@@ -339,39 +322,26 @@ of molecules at the boundaries of the central cell.
 Then, all internal coordinates are recognized in the supercell
 by means of the recognition algorithm described in our previous paper
 \cite{KNemeth04}, just as for isolated molecules.
-Then comes the selection of internal coordinates.
-First, all internal coordinates are discarded that do not touch 
-the central cell, i.e. do not contain at least one atom with
-cell indices $(000)$.
-Second, all remaining internal coordinates that have 
-negative lattice indices
-are translated by the smallest possible translation so that all 
-negative lattice indices become zero. If a translated 
-internal coordinate
-still contains an atom with cell indices $(000)$
-the coordinate will be discarded, as it should already have an existing
-replica among the non-translated internal ones.
-The internal coordinates that have negative
-lattice indices and survive the second selection may still
-contain translationally equivalent entities. A third selection
-filters the translationally unique ones out, by discarding
-the internal coordinates that are translated 
-by other than a $(100)$ translation vector.
-
-This simple selection scheme allowes for the fast and linear scaling 
-recognition of the translationally unique internal coordinates
-of the crystal that form the internal coordinate central 
-cell $\phi^{(000)}$.
-
+Finally, all internal coordinates will be discarded that do not 
+have at least one atom in the central cell. Note that the
+result of this procedure may contain symmetry equivalent
+internal coordinates, among those internal coordinates that cross
+the boundaries of the central cell. In present applications
+we did not filter out these equivalent coordinates since their
+presence has no major effect on the process of the optimization. 
+For each of the symmetry equivalent coordinates the gradient curve
+is exactly the same with the same root.
 
 \subsection{Treatment of constraints}
-Since the default convergence control of our optimizer
-depends only on the magnitude of the largest atomic Cartesian gradient  
-vector, the convergence control and the rest of the optimizer
-is provided with Cartesian gradients, that do not contain contribution
-from the space of constraints. To project out the constraint-space
-contribution from the genuine Cartesian gradients, we use the 
-projection scheme described in Ref.~\onlinecite{PPulay77}.
+In the presence of constraints, the constraint-space
+component of the Cartesian gradients is projected out 
+at the beginning of the optimization, as described
+in Ref.~\onlinecite{PPulay77}. Gradient based convergence criteria
+observe only these purified gradients. This purification 
+step is also meant to ensure that gradients on constrained
+internal coordinates be zero after the gradient transformation step
+(when Cartesian gradients are transformed into internal coordinate
+representation, \cite{PPulay77}).
 
 In the rest of the treatment of the constraints, we distinguish
 the soft and the hard constraints.
@@ -380,126 +350,90 @@ optimization process and will be set latest at the end of the
 optimization. Most internal coordinate constraints are such
 in our implementation. Hard constraints are set to their required
 value right at the beginning of the optimization process and keep their
-value through the entire optimization process. 
+value during the course of the optimization. 
 Cartesian constraints and lattice constraints are hard constraints 
-in our implementation. In the paper by Kudin {\it et.al} \cite{KKudin01}
-lattice constraints have been represented by explicite internal
-coordinates. This is disadvantageous, since these internal coordinates 
-are not local ones and do not refer to chemical entities, such as bond
-lengths and bond angles. Consequently, they are much stronger coupled
-to the rest of the optimization coordinates as the real local internal 
-coordinates.
+in our implementation. 
+The application of the soft constraints is
+useful in situations when it would be difficult to construct the 
+Cartesian coordinates that satisfy the required values of internal 
+coordinate constraints {\it prior} to the optimization. 
+Thus, the potentially laborous input construction
+is saved and all constraints related tasks are passed into the 
+optimizer.
 
-Our way of treating hard constraints, such as the lattice parameters
-is very simple and does not induce extra coupling effects. 
-First, those coulumns of the $B$ matrix that refer 
+Our way of treating hard constraints is similar to Baker's projection
+scheme \cite{JBaker96}.
+Those coulumns of the $B$ matrix that refer 
 to hard constraints are entirely zeroed. 
 The zeroing process in the B matrix reflects the simple fact 
 that the variation of any internal coordinate may not contain 
 contribution from a Cartesian coordinate or lattice parameter 
 that is constrained.
+Note, that if lattice parameters are constrained, the last 9 columns
+of the $B$ matrix ($\frac{d \phi_{i}}{d h_{l}}$) must be trasformed
+from lattice-vector representation into lattice-parameter 
+representation by using the generalized inverse of the lattice-parameter
+Jacobian. This transformation results in 6 columns referring to the 
+6 lattice parameters. 
+After zeroing the required columns, 
+this portion of the $B$ matrix is transformed back into the original
+9 columns representation.
 
 The zeroing of the selected colums of $B$ immediately
 ensures that during the iterative back-transformation 
 \cite{PPulay77} no displacements occure on hard constraints.
-The effect of the zeroing on the gradient transformation is that
-internal coordinate gradients will have 
-no contribution from 
-hard-constrained atoms or lattice parameters.
 
-A simple example to test this constraint-treatment is to optimize water
-with, say, one hydrogen atom fixed. The constrained optimization
-results exactly in the same optimum bondlengths and angle, 
-as the unconstrained optimization, as it should do.
-
-We treat soft constraints in a slightly different way. The rows
-of the $B$ matrix that referer to soft-constrained internal coordinates
-will not be zeroed. The internal coordinate force on this
-coordinates will always be zero, since the Cartesian forces have been
-purified from any constraint-space component, as described in the first
-paragraph of this subsection. During the iterative back-transformation
-the soft-constraints-related rows of the B matrix are needed to 
-move the actual value of the soft-constrained coordinate towards
-its required value.
-
-The traditional treatment of constraints is described in a review
-paper of Pulay \cite{PPulay77}. This traditional treatment
-involves the zeroing of the constraint-related columns and rows of the
-force constant matrix, but, to the best of our understanding,
-it does not involve any zeroing of the columns of the $B$ matrix.
-By observing the process of the gradient transformation 
+Soft constraints will be treated in a slightly different way. 
+Baker's projection algorithm recommends to purify each row
+of the B-matrix by essentially the same projector that is being used
+in the purification of the Cartesian gradients. 
+A computationally more efficient formulation of this step for the
+gradient transformation looks like
 \begin{equation}
-g_{i} = g_{c} G_{c}^{-1} B^{t},
+g_{i} = B P G_{c}^{-1} P g_{c} ,
 \end{equation}
-with $g_{c}$ being the constraints-purified Cartesian gradient,
-$g_{i}$ the internal coordinate gradient and $G_{c}^{-1}$ 
-the generalized inverse of $B^{t}B$, it should be clear,
-that even if the same $g_{c}$ vectors enter the process, the two
-constraint treatments will result in different internal coordinate 
-gradients, $g_{i}$.
-Of course, as the optimization proceeds $g_{c}$ and $g_{i}$ will
-decrease in both cases and the resulting optimum geometries
-should tend towards the same structure.
-To the best of our understanding our proposed treatment of constraints
-has not been used in the literature of internal coordinate
-geometry optimization so far.
+where $P$ is the purification projector that filters out the 
+constraint-space component of vectors \cite{PPulay77} and
+$G_{c}^{-1}$ is the generalized inverse of $G_{c}=B^{t}B$.
+The first step of 
+this projection, $g_{c}' = P g_{c}$ is already done at the initial
+purification of the Cartesian gradients. The second step would be
+$P G_{c}^{-1} g_{c}'$, which we currently skip in our implementation, 
+since as the purified Cartesian gradients converge this second
+purification step has less and less importance.
 
-If a lattice parameter is constrained, say 
-$a=|A|$, the corresponding subspace is projected out from the
-columns of the $B'^{(000)(A)}$, $B'^{(000)(B)}$ and $B'^{(000)(C)}$
-matrices. To do so, the corresponding Jacobian is needed.
-
-The Jacobian of the lattice parameters can easily be constructed,
-as they correspond to streches or bendings between translationally
-equivalent atoms. E.g. the lattice parameter $|A|$ can be represented
-by a stretching between atom nr. $1$ in the cell $(000)$ and 
-atom nr. $1$ in $(100)$. 
-
-The internal coordinates representing
-lattice parameters, will have
-a non-zero contribution only to the 
-$B'^{(000)(A)}$, $B'^{(000)(B)}$ and $B'^{(000)(C)}$
- matrices. Their contribution to $B'^{(000)}$
-is exactly zero, which reflects the fact, that no internal
-coordinate contributes to the translation or rotation of the
-molecule, and thus the vectorial sum of the atomic $B_{i,a_{ij}}$ 
-$B$ matrix components should be zero for any $i$-th internal coordinate:
-\begin{equation}
-\sum_{j=1}^{4} B_{i,a_{ij}} = 0 .
-\end{equation}
-
-For $a=|A|$ the corresponding Jacobian is given by 
-$\partial a / \partial A$, $\partial a / \partial B$ 
-and $\partial a / \partial C$.
-If the number of constrained lattice parameters is $N_{r}$,
-the corresponding Jacobian, $B_{r}$ is filled into a 
-$N_{r} \times 9$ matrix, and the purification of 
-$B'^{(000)(A)}$, $B'^{(000)(B)}$ and $B'^{(000)(C)}$
-goes like
-\begin{equation}
-\left[ B'^{(000)(A)} \oplus B'^{(000)(B)} \oplus B'^{(000)(C)} \right]^{\rm pur} =
-\left[ B'^{(000)(A)} \oplus B'^{(000)(B)} \oplus B'^{(000)(C)} \right]
-\left[ I-B_{r}^{t}(B_{r}B_{r}^{t})^{-1}B_{r} \right] ,
-\end{equation}
-where $I$ is the $9 \times 9$ identity matrix and the superscript  
-``${\rm pur}$'' refers to the result of the purification.
+The skipping of the second purification step is optional
+for the gradient transformation, but it is obligatory for the iterative
+back-transformation as the iterative back-transformation is
+expected to change the values of soft-constraints and
+put them as close as possible to their required (constrained) value.
+The required new values of the internal coordinates are constructed
+by by the QUICCA algorithm except for the constrained internals,
+whose value is determined by the input. The iterative 
+back-transformation takes these required values and finds the best fit
+in terms of Cartesian coordinates, as described in Refs. 
+\onlinecite{PPulay77} and \onlinecite{KNemeth00}.
 
 \subsection{Realization}
 The crystal structure optimizer has been implemented in the
 MondoSCF suite of linear scaling quantum chemistry codes 
-\cite{MondoSCF}, in the FORTRAN-90/95 programming language.
+\cite{MondoSCF}, in the object oriented 
+FORTRAN-90/95 programming language.
 Lattice forces have been calculated analytically, as described in 
 Ref.~\cite{CJTymczak04LatF}. Note, that all energies and gradients
 have been calculated by means of the gamma point approximation,
 i.e. there is no band structure calculation in our treatment.
 
-\section{Results and discussion}
+\section{Results and discussion} \label{ResDissc}
 \subsection{The test set}
-Our test set of crystal structures contains
+Our test set of crystal optimizations contains
 10 different systems:
-Polyacetilene, boron-nitride, diamond, (10,0)carbon-nanotube,
+Polyethylene, hexagonal boron-nitride , (10,0)carbon-nanotube,
+Halite (NaCl) \cite{whbragg13}, 
+ammonium-chloride \cite{DBSirdeshmukh70},
 Ice \cite{AGoto90}, Urea \cite{SSwaminathan84}, 
-Benzene \cite{GJeffrey87}, Halite, Sulphure, Quartz.
+Benzene \cite{GJeffrey87}, Sulphure \cite{ACGallacher92}, 
+Quartz \cite{MGTucker01}.
 Most of the structures were
 taken either from the Inorganic Crystal Stuctures Database
 (ICSD) \cite{ICSD} or from Cambridge Crystallographic Data Center
@@ -511,6 +445,7 @@ in the above mentioned data bases.
 
 \subsubsection{Polyacetilene}
 
+\section{Conclusions} \label{Conclusions}
 
 \bibliography{../../Bib/mondo_new}
 \end{document}
