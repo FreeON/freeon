@@ -488,6 +488,7 @@ MODULE DrvSCFs
       END SUBROUTINE SCFSummry
 !
 !-----------------------------------------------------------------------------
+#ifdef MMech
 !
       SUBROUTINE   MM_COULOMBENERGY(Ctrl)
       IMPLICIT NONE
@@ -509,7 +510,9 @@ MODULE DrvSCFs
        CALL Invoke('QCTC',CtrlVect)
 !
       END SUBROUTINE MM_COULOMBENERGY
+#endif
 !-------------------------------------------------------------
+#ifdef MMech
 
    SUBROUTINE MM_ENERG(Ctrl)
    IMPLICIT NONE
@@ -611,6 +614,7 @@ MODULE DrvSCFs
         CLOSE(UNIT=Out,STATUS='KEEP')
 !
    END SUBROUTINE MM_ENERG
+#endif
 
 !-----------------------------------------------------------------------------
 END MODULE
