@@ -290,7 +290,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 END SUBROUTINE Topology_14 
 !--------------------------------------------------------------
 !
-SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,CalcMins)
+SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
 ! sort the Atoms of a molecule into Boxes
 !
@@ -299,7 +299,6 @@ SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,CalcMi
 IMPLICIT NONE
 INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NAtoms_Loc
 REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NAtoms_Loc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
-LOGICAL :: CalcMins
 SAVE VBIG
 DATA VBIG/1.D+90/ 
 !
@@ -307,7 +306,6 @@ DATA VBIG/1.D+90/
 !
 !find borders of the global Box
 !
-  IF(CalcMins) THEN
       BXMIN= VBIG
       BXMax=-VBIG
       BYMIN= VBIG
@@ -322,7 +320,6 @@ DATA VBIG/1.D+90/
       IF(C(3,I)<BZMIN) BZMIN=C(3,I)
       IF(C(3,I)>BZMax) BZMax=C(3,I)
     ENDDO
-  ENDIF
 !
   NX=INT((BXMax-BXMIN)/BoxSize)+1
   NY=INT((BYMax-BYMIN)/BoxSize)+1
@@ -443,7 +440,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 TYPE(INT_VECT) :: BoxI1,BoxJ1
 REAL(DOUBLE),DIMENSION(1:3,1:NAtoms_Loc) :: C
 !
-CALL SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,.TRUE.)
+CALL SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
 NBox=NX*NY*NZ
 CALL New(BoxI1,NBox+1)
@@ -1344,7 +1341,7 @@ END SUBROUTINE Excl_LIST14
 !
    BoxSize=5.D0*AngstromsToAU !in A
    CALL SORT_INTO_Box1(BoxSize,XYZ,Natoms_Loc,&
-                   NX,NY,NZ,BXMIN,BYMIN,BZMIN,.TRUE.)
+                   NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
    NBox=NX*NY*NZ
    CALL New(BoxI,NBox+1)
@@ -2825,24 +2822,44 @@ END SUBROUTINE CoordTrf
 !
 #ifdef PERIODIC
 !
-     SUBROUTINE MultipleCell(GMLoc,LJCutOff,XYZLJCell,NAtomsLJCell)
+     SUBROUTINE LJCell(GMLoc,LJCutOff,AtmMark,LJEps,LJRad, &
+       XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
 !
 ! Calculate coordinates of multiples of the elementary cell
-! Not including the central cell, and store them in LJCellCarts.
+! including the central cell, and store them in XYZLJCell.
+! Storage is saved by filtering out replica atoms, which are
+! far from the LJ sphere of the central cell. It's worth
+! for the if statements, since later we can save at least 
+! the same amount of if-s.
+!
+! WARNING! Pass in coordinates in wrapped representation,
+! so that all coordinates be greater than zero for central cell !!!
+!
+! WARNING! Current implementation is optimal for cells with rectangular
+! lattice vectors! This is the case for large MD simulations.
+! For small elementary cells the LJ sum should be fast enough,
+! even with this technique.
 !
      TYPE(CRDS) :: GMLoc
-     REAL(DOUBLE) :: LJCutOff,MinCart,DX,DY,DZ
+     REAL(DOUBLE) :: LJCutOff,MaxCart,DX,DY,DZ
      REAL(DOUBLE) :: XTrans,YTrans,ZTrans
      INTEGER :: I,J,K,L,NX,NZ,NY,NAtomsLJCell
      INTEGER :: II,IA,IB,IC
+     TYPE(DBL_VECT) :: LJEps,LJRad
+     TYPE(INT_VECT) :: AtmMark
      TYPE(DBL_RNK2) :: XYZLJCell
+     TYPE(DBL_RNK2) :: XYZLJCell2
+     TYPE(DBL_VECT) :: LJEpsLJCell,LJRadLJCell
+     TYPE(INT_VECT) :: AtmMarkLJCell
+     TYPE(DBL_VECT) :: LJEpsLJCell2,LJRadLJCell2
+     TYPE(INT_VECT) :: AtmMarkLJCell2
 !
-! First, calculate minimum Cartesian extension of the elementary cell
+! First, calculate maximum Cartesian extension of the elementary cell
 !
-     DX=MIN(GMLoc%PBC%BoxShape(1,1),GMLoc%PBC%BoxShape(2,1),GMLoc%PBC%BoxShape(3,1))
-     DY=MIN(GMLoc%PBC%BoxShape(1,2),GMLoc%PBC%BoxShape(2,2),GMLoc%PBC%BoxShape(3,2))
-     DZ=MIN(GMLoc%PBC%BoxShape(1,3),GMLoc%PBC%BoxShape(2,3),GMLoc%PBC%BoxShape(3,3))
-     MinCart=MIN(DX,DY,DZ) 
+     DX=MAX(GMLoc%PBC%BoxShape(1,1),GMLoc%PBC%BoxShape(2,1),GMLoc%PBC%BoxShape(3,1))
+     DY=MAX(GMLoc%PBC%BoxShape(1,2),GMLoc%PBC%BoxShape(2,2),GMLoc%PBC%BoxShape(3,2))
+     DZ=MAX(GMLoc%PBC%BoxShape(1,3),GMLoc%PBC%BoxShape(2,3),GMLoc%PBC%BoxShape(3,3))
+     MaxCart=MAX(DX,DY,DZ) 
 !
      IF(LJCutOff<DX) THEN
        NX=1
@@ -2865,29 +2882,93 @@ END SUBROUTINE CoordTrf
 ! Calc. Number of atoms in the additional system
 ! and allocate XYZLJCell
 !
-     NAtomsLJCell=(NX*NY*NZ-1)*GMLoc%Natms
-     CALL New(XYZLJCell,(/3,NAtomsLJCell/))
+     NAtomsLJCell=(2*NX+1)*(2*NY+1)*(2*NZ+1)*GMLoc%Natms
+     CALL New(XYZLJCell2,(/3,NAtomsLJCell/))
+     CALL New(AtmMarkLJCell2,NAtomsLJCell)
+     CALL New(LJEpsLJCell2,NAtomsLJCell)
+     CALL New(LJRadLJCell2,NAtomsLJCell)
 !
-         II=0
+! First, copy central cell coordinates into new array
+!
+      DO I=1,GMLoc%Natms
+        XYZLJCell2%D(1:3,I)=GMLoc%Carts%D(1:3,I)
+        AtmMarkLJCell2%I(I)=AtmMark%I(I)
+        LJEpsLJCell2%D(I)=LJEps%D(I)
+        LJRadLJCell2%D(I)=LJRad%D(I)
+      ENDDO
+!
+! Now, copy atoms from LJ region of central cell
+!
+      II=GMLoc%Natms
       DO IA=-NX,NX
       DO IB=-NY,NY
       DO IC=-NZ,NZ
   IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
        DO I=1,GMLoc%Natms
-         II=II+1
          XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape(1,1)+IB*GMLoc%PBC%BoxShape(2,1)+IC*GMLoc%PBC%BoxShape(3,1)
+           IF(XTrans<-LJCutOff .OR. XTrans>DX+LJCutOff) CYCLE
          YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape(1,2)+IB*GMLoc%PBC%BoxShape(2,2)+IC*GMLoc%PBC%BoxShape(3,2)
+           IF(YTrans<-LJCutOff .OR. YTrans>DY+LJCutOff) CYCLE
          ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape(1,3)+IB*GMLoc%PBC%BoxShape(2,3)+IC*GMLoc%PBC%BoxShape(3,3)
-         XYZLJCell%D(1,II)=XTrans
-         XYZLJCell%D(2,II)=YTrans
-         XYZLJCell%D(3,II)=ZTrans
+           IF(ZTrans<-LJCutOff .OR. ZTrans>DZ+LJCutOff) CYCLE
+         II=II+1
+         XYZLJCell2%D(1,II)=XTrans
+         XYZLJCell2%D(2,II)=YTrans
+         XYZLJCell2%D(3,II)=ZTrans
+         AtmMarkLJCell2%I(II)=AtmMark%I(I)
+         LJEpsLJCell2%D(II)=LJEps%D(I)
+         LJRadLJCell2%D(II)=LJRad%D(I)
        ENDDO
      ENDDO
      ENDDO
      ENDDO
 !
-     END SUBROUTINE MultipleCell
+! Compress
+!
+     NAtomsLJCell=II 
+     CALL New(XYZLJCell,(/3,NAtomsLJCell/))
+     CALL New(AtmMarkLJCell,NAtomsLJCell)
+     CALL New(LJEpsLJCell,NAtomsLJCell)
+     CALL New(LJRadLJCell,NAtomsLJCell)
+     XYZLJCell%D(1:3,1:NAtomsLJCell)=XYZLJCell2%D(1:3,1:NAtomsLJCell)
+     AtmMarkLJCell%I(1:NAtomsLJCell)=AtmMarkLJCell2%I(1:NAtomsLJCell)
+     LJEpsLJCell%D(1:NAtomsLJCell)=LJEpsLJCell2%D(1:NAtomsLJCell)
+     LJRadLJCell%D(1:NAtomsLJCell)=LJRadLJCell2%D(1:NAtomsLJCell)
+!
+! Tidy up
+!
+     CALL Delete(XYZLJCell2)
+     CALL Delete(AtmMarkLJCell2)
+     CALL Delete(LJEpsLJCell2)
+     CALL Delete(LJRadLJCell2)
+!
+     END SUBROUTINE LJCell
+!
 #endif
+!
+!-------------------------------------------------------------------
+!
+     SUBROUTINE SetOneLJCell(GMLoc,AtmMark,LJEps,LJRad, &
+         XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
+!
+     TYPE(CRDS)     :: GMLoc
+     INTEGER        :: NAtomsLJCell
+     TYPE(DBL_VECT) :: LJEps,LJRad,LJEpsLJCell,LJRadLJCell
+     TYPE(INT_VECT) :: AtmMark,AtmMarkLJCell
+     TYPE(DBL_RNK2) :: XYZLJCell
+     REAL(DOUBLE)   :: LJCutOff
+!
+     NAtomsLJCell=GMLoc%Natms
+     CALL New(XYZLJCell,(/3,NAtomsLJCell/))
+     CALL New(AtmMarkLJCell,NAtomsLJCell)
+     CALL New(LJEpsLJCell,NAtomsLJCell)
+     CALL New(LJRadLJCell,NAtomsLJCell)
+     XYZLJCell%D=GMLoc%Carts%D
+     AtmMarkLJCell%I=AtmMark%I
+     LJEpsLJCell%D=LJEps%D
+     LJRadLJCell%D=LJRad%D
+!
+     END SUBROUTINE SetOneLJCell
 !
 #endif
 !-------------------------------------------------------
