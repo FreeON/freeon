@@ -1,11 +1,38 @@
 MODULE SCFLocals
    USE DerivedTypes
    USE GlobalCharacters
+   USE Parse
    IMPLICIT NONE
+!--------------------------------------------------
+!  Global status variables
+!
+   INTEGER,DIMENSION(3) :: Current
+   INTEGER,DIMENSION(3) :: Previous
+   CHARACTER(LEN=3)     :: SCFCycl
+   CHARACTER(LEN=3)     :: PrvCycl
+   CHARACTER(LEN=3)     :: NxtCycl
+   CHARACTER(LEN=3)     :: CurBase
+   CHARACTER(LEN=3)     :: PrvBase
+   CHARACTER(LEN=3)     :: CurGeom
+   CHARACTER(LEN=3)     :: PrvGeom
+   CHARACTER(LEN=3)     :: NxtGeom
+   CHARACTER(LEN=20)    :: SCFActn
+!-----------------------------------------------------------
+   INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
+   CHARACTER(LEN=DCL),    PARAMETER :: False  = '.FALSE.'   ! False flag
+   CHARACTER(LEN=DCL),    PARAMETER :: True   = '.TRUE.'    ! True flag
+   CHARACTER(LEN=DCL),    PARAMETER :: Direct = 'Direct'    ! Do direct SCF
+   CHARACTER(LEN=DCL),    PARAMETER :: Restart= 'Restart'   ! Restart from InfoFile
+   CHARACTER(LEN=DCL),    PARAMETER :: Switch = 'Switch'    ! Do a basis set switch
+   CHARACTER(LEN=DCL),    PARAMETER :: InkFok = 'InkFok'    ! Do incremental Fock build
+   CHARACTER(LEN=DCL),    PARAMETER :: Core   = 'Core'      ! Use core Hamiltontian guess
+   CHARACTER(LEN=DCL),    PARAMETER :: Minimal= 'Minimal'   ! Use superposition of AO DMs guess
+   CHARACTER(LEN=DCL),    PARAMETER :: Blank  =' '
+   CHARACTER(LEN=DCL),DIMENSION(9)  :: CtrlVect
 !-------------------------------------------------  
 !  SCF Dimensions
    INTEGER, PARAMETER         :: MaxSets=10
-   INTEGER, PARAMETER         :: MaxSCFs=50
+   INTEGER, PARAMETER         :: MaxSCFs=30
 !  Clean up control
    LOGICAL, PARAMETER         :: TidyFiles=.TRUE.
 !------------------------------------------------------------------------------------------------
@@ -19,8 +46,8 @@ MODULE SCFLocals
    TYPE SCFControls
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: Info   ! Info file 
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: Name   ! SCF name 
-      TYPE(INT_VECT)                     :: Previous
-      TYPE(INT_VECT)                     :: Current
+      INTEGER,DIMENSION(3)               :: Previous
+      INTEGER,DIMENSION(3)               :: Current
       INTEGER                            :: NSet   ! Number of basis sets 
       INTEGER                            :: NGeom  ! Number of configurations 
       INTEGER                            :: NCGC   ! Number of CG cycles
@@ -42,13 +69,12 @@ MODULE SCFLocals
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose,Good,Tight,VeryTight):
 
-   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-8 /)
-   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-2, 1.D-4, 1.D-5,  1.D-6 /)
-   REAL(DOUBLE),DIMENSION(4) :: TwoENeglect=(/1.D-5, 1.D-7, 1.D-8,  1.D-9 /)
-   REAL(DOUBLE),DIMENSION(4) :: DistNeglect=(/1.D-7, 1.D-9, 1.D-10, 1.D-12/)
-!
-   REAL(DOUBLE),DIMENSION(4) :: ETol       =(/1.D-6, 1.D-8, 1.D-10, 1.D-12/)
-   REAL(DOUBLE),DIMENSION(4) :: DTol       =(/1.D-2, 1.D-3, 1.D-4,   1.D-6/)
+   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-4, 1.D-5, 1.D-7,  1.D-8/)
+   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-3, 1.D-4, 1.D-5,  1.D-6 /)
+   REAL(DOUBLE),DIMENSION(4) :: TwoENeglect=(/1.D-6, 1.D-7, 1.D-9,  1.D-11/)
+   REAL(DOUBLE),DIMENSION(4) :: DistNeglect=(/1.D-8, 1.D-9, 1.D-11, 1.D-13/)
+   REAL(DOUBLE),DIMENSION(4) :: ETol       =(/1.D-5, 1.D-6, 1.D-8,  1.D-10/)
+   REAL(DOUBLE),DIMENSION(4) :: DTol       =(/1.D-2, 1.D-3, 1.D-4,  1.D-5 /)
 !-----------------------------------------------------------------------------------------------
 !  Asymptotic dimensioning parameters for memory limits (needs work)
    REAL(DOUBLE),DIMENSION(4) :: BandWidth=(/7.D2 ,7.D2 ,7.D2 ,7.D2 /)
@@ -67,6 +93,36 @@ MODULE SCFLocals
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MPI_INVOKE
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MPI_FLAGS
 #endif
-!  Globa 
+  CONTAINS
+     SUBROUTINE SetCtrlGlobs(Ctrl)
+        TYPE(SCFControls),        INTENT(IN) :: Ctrl
+        Previous=Ctrl%Previous
+        Current=Ctrl%Current
+        SCFCycl=TRIM(IntToChar(Current(1)))
+        PrvCycl=TRIM(IntToChar(Previous(1)))
+        NxtCycl=TRIM(IntToChar(Current(1)+1))
+        CurBase=TRIM(IntToChar(Current(2)))
+        PrvBase=TRIM(IntToChar(Previous(2)))
+        CurGeom=TRIM(IntToChar(Current(3)))
+        PrvGeom=TRIM(IntToChar(Previous(3)))
+        NxtGeom=TRIM(IntToChar(Current(3)+1))
+     END SUBROUTINE SetCtrlGlobs
+!
+     FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O) RESULT(CVect)
+        TYPE(SCFControls),        INTENT(IN) :: Ctrl
+        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Actn1_O,Actn2_O
+        CHARACTER(LEN=DCL),DIMENSION(10)     :: CVect
+        CVect(1)=Ctrl%Name
+        CVect(2)=" "
+        CVect(3)=" "
+        IF(PRESENT(Actn1_O))CVect(2)=Actn1_O
+        IF(PRESENT(Actn2_O))CVect(3)=Actn2_O
+        CVect(4:9)=(/(IntToChar(Ctrl%Current(1))), &
+                     (IntToChar(Ctrl%Current(2))), &
+                     (IntToChar(Ctrl%Current(3))), &
+                     (IntToChar(Ctrl%Previous(1))),&
+                     (IntToChar(Ctrl%Previous(2))),&
+                     (IntToChar(Ctrl%Previous(3))) /)              
+     END FUNCTION SetCtrlVect
 END MODULE
 
