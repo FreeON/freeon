@@ -54,7 +54,7 @@ CONTAINS
           D%RescaleInt   = 100
        ENDIF
     ELSE
-       D%Temp_Scaling = .TRUE.
+       D%Temp_Scaling = .FALSE.
        D%TargetTemp   = Zero
        D%RescaleInt   = 1          
     ENDIF
