@@ -1,3 +1,26 @@
+2004-03-03 20:00  nemeth
+
+	* Docs/Optimizer/PRL/1_7_6_Pred: Data file added to optimizer
+	paper.
+
+2004-03-03 19:30  nemeth
+
+	* Docs/Optimizer/PRL/: 1_7_6_Data, GFS_PRL.tex, mondo_new.bib,
+	prl.ps: A new version of the optimizer-paper.
+
+2004-03-03 18:05  nemeth
+
+	* Docs/Optimizer/PRL/picture1.gnu: A gnuplot picture added.
+
+2004-03-03 00:55  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib, prl.ps,
+	1_5_6_Data.eps: A new version of the optimizer-paper.
+
+2004-02-28 05:58  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-02-28 00:27  vweber
 
 	* SCFeqs/DIIS.F90: I may have fixed the 9th step bug (=size(B
