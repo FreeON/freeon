@@ -38,15 +38,16 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/MMA/CTraX   \
 #
 CommonObjs=XLate.o CTraX.o Globals.o MondoPoles.o Thresholds.o  \
            PoleTree.o PFFTensor.o PBCFarField.o TreeWalk.o 
-QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o
+QCTCObjs=$(CommonObjs) JGen.o NukE.o QCTC.o 
 JFrcObjs=$(CommonObjs) BlokTrPdJ.o JForce.o
+PFFTObjs=$(CommonObjs) MakePFFT.o
 #
 ReleaseFiles=XLate.x CTraX.x Globals.x MondoPoles.x \
              Thresholds.x PoleTree.x PFFTensor.x    \
              PBCFarField.x TreeWalk.x JGen.x NukE.x \
              QCTC.x BlokTrPdJ.x JForce.x
 #
-all:	QCTC JFrc 
+all:	QCTC JFrc PFFT
 #
 release:clean $(ReleaseFiles)
 	rm -rf MMA/Moments
@@ -67,6 +68,10 @@ JFrc:	$(JFrcObjs)
 	$(LD) $(LDFLAGS) JForce $(JFrcObjs) $(F90_LIBRARIES) 
 	mv JForce $(MONDO_EXEC)/JForce
 #
+PFFT:	$(PFFTObjs)
+	$(LD) $(LDFLAGS) MakePFFT $(PFFTObjs) $(F90_LIBRARIES) 
+	mv MakePFFT $(MONDO_EXEC)/MakePFFT
+#
 CQCTC:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
@@ -79,6 +84,13 @@ CJFrc:
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_EXEC)/JForce
+	ls 
+#
+CPFFT:
+	rm -f $(REMOVEMISC) $(REMOVEMODS)
+	rm -f \#*
+	rm -f *~
+	rm -f $(MONDO_EXEC)/MakePFFT
 	ls 
 #
 mma:	ctrax hgtosp hgtrax 
@@ -111,3 +123,4 @@ QCTC.o:		MondoPoles.o TreeWalk.o CTraX.o Globals.o Thresholds.o  $(MONDO_LIB)/li
 MPoles.o:	MMA/HGToSP/HGToSP.Inc $(MONDO_LIB)/libMondoMods.a
 TreeWalk.o:	MMA/HGTraX/HGTraX.Inc \
 		MMA/CTraX/CTraX.Inc MMA/CTraX/IrRegulars.Inc $(MONDO_LIB)/libMondoMods.a
+MakePFFT.o:	MondoPoles.o PFFTensor.o $(MONDO_LIB)/libMondoMods.a
