@@ -34,6 +34,8 @@ CONTAINS
     CALL ParseThresholds(O%NThrsh,O%AccuracyLevels,O%Thresholds)
     ! Parse for SCF methods to use in solution of SCF equations and put to HDF
     CALL ParseSCFMethods(O%NMthds,O%Methods)
+    ! Parse for Convergence Algorithms
+    CALL ParseConAls(O%NConAls,O%ConAls)
     ! Parse for model chemistries 
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for gradient options.
@@ -203,6 +205,56 @@ CONTAINS
          CALL MondoHalt(PRSE_ERROR,'Option '//SCF_OPTION//' not set in input.'//RTRN   &
          //'Options include '//SCF_SDMM//', '//SCF_PM//', '//SCF_SP2//', '//SCF_TS4//', and '//SCF_RHHF)
   END SUBROUTINE ParseSCFMethods
+  !============================================================================
+  !  PARSE THE CONVERGENCE ALGORITHMN'S USE TO SOLVE THE SCF EQUATIONS
+  !============================================================================
+  SUBROUTINE ParseConAls(NConAls,ConALs)
+    INTEGER                       :: NConAls,NLoc,I
+    INTEGER,   DIMENSION(MaxSets) :: ConAls
+  !----------------------------------------------------------------------------
+    NConAls=0
+    ConAls(:) = ODMIX_CONALS
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_DIIS,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=DIIS_CONALS
+       ENDDO
+    ENDIF
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_ODA,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=ODA_CONALS
+       ENDDO
+    ENDIF
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_ODMIX,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=ODMIX_CONALS
+       ENDDO
+    ENDIF
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_DOMIX,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=DOMIX_CONALS
+       ENDDO
+    ENDIF
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_SMIX,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=SMIX_CONALS
+       ENDDO
+    ENDIF
+    IF(OptKeyLocQ(Inp,CONALS_OPTION,CONALS_TEST,MaxSets,NLoc,Location))THEN
+       NConAls=NConAls+NLoc
+       DO I=1,NLoc 
+          ConAls(Location(I))=TEST_CONALS
+       ENDDO
+    ENDIF
+!
+    IF(NConAls==0) &
+         CALL MondoHalt(PRSE_ERROR,'Convergence Alogorithm '//SCF_OPTION//' not set in input.'//RTRN   &
+         //'Algorithms include '//CONALS_DIIS//', '//CONALS_ODA//', '//CONALS_ODMIX//' and '// CONALS_DOMIX)
+  END SUBROUTINE ParseConAls
   !===============================================================================================
   ! PARSE FOR ACCURACY LEVELS AND SET THRESHOLDS
   !===============================================================================================
