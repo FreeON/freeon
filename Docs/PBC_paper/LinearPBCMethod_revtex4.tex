@@ -844,41 +844,42 @@ thresholds are significantly more conservative.
 
 \section{Conclusions}
 
-\commentout{
-
-We have shown a systematic approach for incorporating periodic boundary conditions
-into the linear scaling quantum chemistry code {\bf MondoSCF}.
+We have shown a systematic and efficient approach for incorporating periodic 
+boundary conditions into the linear scaling quantum chemistry code {\bf MondoSCF}.
+%
 For the one electron matrices we achieved this by a re-summation
 over periodic cell images, which because of locality leads to an efficient
 calculation of the one electron integrals. 
+%
 For the two-electron Coulomb
 matrix, we achieved this with an exact multipole expansion of
 the long range Coulomb field. 
 This yields a spherically summed boundary
 condition that is easily transformed to Ewald boundary conditions.
 In order to achieve linear scaling of the local Coulomb field, a Quantum
-Chemical Tree Code (QCTC) is used. 
-We have also incorporated periodic
-boundary conditions into calculations of the local exchange-correlation
-matrix. 
-A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid
+Chemical Tree Code (QCTC) is implimented. 
+%
+For the calculation of the local exchange-correlation
+matrix, a Hierarchical Cubature (HiCu), pure Cartesian adaptive grid
 is used. 
+%
 This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects.
 %
 We then showed the capabilities of \textbf{MondoSCF} for three test condensed
 phases , Sodium Chloride, Magnesium Oxide and Carbon in the Diamond
-and graphite structures. We then compared these results to the periodic
+structure. We then compared these results to the periodic
 Gaussian code \textbf{Crystal98}. 
 In all cases we achieved excellent comparison with the  \textbf{Crystal98}
 results, including k-space summation in comparison with ever 
 increasing super-cells, to within the accuracy that \textbf{Crystal98} can obtain.
 %
-Next, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
+Filally, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
 for the Coulomb and Exchange-correlation matrix builds for
-the dense periodic diamond system.
-}
+the dense periodic diamond system up to 512 atoms per unit cell. 
+%
+More Blah Blah Blah
 
 \section*{ACKNOWLEDGMENTS}
 
