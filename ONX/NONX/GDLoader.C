@@ -49,7 +49,7 @@ void gdloader(int *GDrv1, int *GDrv2, int *GDrv3, int *GDrv4, int *GDrv5,
        exit( EXIT_FAILURE );
     }
     fread(L2,sizeof(int),1,InFile);
-    fread(GDrv2,sizeof(int),(*L2)*4,InFile);
+    fread(GDrv2,sizeof(int),(*L2)*5,InFile);
 
 /* G3 */
 
@@ -60,7 +60,7 @@ void gdloader(int *GDrv1, int *GDrv2, int *GDrv3, int *GDrv4, int *GDrv5,
        exit( EXIT_FAILURE );
     }
     fread(L3,sizeof(int),1,InFile);
-    fread(GDrv3,sizeof(int),(*L3)*4,InFile);
+    fread(GDrv3,sizeof(int),(*L3)*5,InFile);
  
 /* G4 */
 

@@ -198,8 +198,6 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
 
-      write(*,*) "C:iU=",iU
-
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet
           DO J=1,KBra
@@ -246,8 +244,6 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
-
-      write(*,*) "B:iU=",iU
 
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet

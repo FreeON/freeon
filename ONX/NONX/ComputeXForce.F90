@@ -207,6 +207,8 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
 
               IF (ISL>0) THEN
 
+       write(*,*) "ISL=",ISL
+
                 CALL RGen(ISL,LtotG,CBra,CKet,IB%CB%D(1,1),IB%CK%D(1,1,1), &
                           DB%DisBuf%D(IBD),DB%PrmBuf%D(IBP),IB%W1%D(1),    &
                           DB,IB,SB)
@@ -214,19 +216,26 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                 CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                &
                           Drv%VLOC%I(Drv%is),                              &
                           Drv%VLOC%I(Drv%is+Drv%nr),IB,                    &
-                          IB%W2%D(1),IB%W2%D(1))
+                          IB%W2%D(1),IB%W1%D(1))
+
 
                 CALL ContractG(ISL,CBra,CKet,IS%NVRR,IB%CB%D,IB%CK%D,IB%W1%D, &
                                IB%W2%D,DB%PrmBuf%D(IBP),DB,SB,GD)
+
 
                 DO IKet=1,GD%LG2
                   NT=GD%GDrv2%I(1,IKet)
                   N1=GD%GDrv2%I(2,IKet)
                   N2=GD%GDrv2%I(3,IKet)
                   N3=ISL*(GD%GDrv2%I(4,IKet)-1)+1
-                  N4=GD%GDrv2%I(4,IKet)
+                  N4=GD%GDrv2%I(5,IKet)
+
+     write(*,*) "Ket=",nt,n1,n2,n3,n4
+
                   CALL HrrKet(IB%W1%D(N3),DB%DisBuf%D,ISL,    &
                               SB%SLDis%I,N1,N1,N2,NT)
+
+
 !
 !   CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,SB%SLDis%I,IS%NB1,IS%NB2,IS%NK1,TKet)
 !   CALL HRRKetGrad(IB%W1%D(N3),DB%DisBuf%D,ISL,SB%SLDis%I,N1,NT)
@@ -238,17 +247,23 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                   N1=GD%GDrv3%I(2,IBra)
                   N2=GD%GDrv3%I(3,IBra)
                   N3=ISL*(GD%GDrv3%I(4,IBra)-1)+1
-                  N4=GD%GDrv3%I(4,IBra)
-                  CALL HrrBra(IB%W1%D(N3),ACx,ACy,ACz,ISL,N1,N4,N2,N3)
+                  N4=GD%GDrv3%I(5,IBra)
+
+     write(*,*) "Bra=",nt,n1,n2,n3,n4
+
+                  CALL HrrBra(IB%W1%D(N3),IB%W2%D(N3),ACx,ACy,ACz,ISL,N1,N4,N2,NT)
+!     call halt('enough')
 !
 !   CALL HRRBraGrad(IB%W1%D(N3),ACx,ACy,ACz,ISL,N1,N2,NT)
 !
                 END DO
 
-!                CALL GetGradient(ISL,GD,IB%W2%D,IB%W1%D)
-!                CALL DigestGradient(ISL,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,  &
-!                                    AtA,AtC,AtD,NBFA,RS,SB,DB,D,SubInd,     &
-!                                    NTmp,Dcd%D,Dab%D,XFrc,IB%W2%D)
+                CALL GetGradient(ISL,GD,IB%W1%D,IB%W2%D)
+
+!                write(*,*) "Calling DigestGradient"
+                CALL DigestGradient(ISL,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,  &
+                                    AtA,AtC,AtD,NBFA,RS,SB,DB,D,SubInd,     &
+                                    NTmp,Dcd%D,Dab%D,XFrc,IB%W1%D)
 
               END IF  ! ISL
 
