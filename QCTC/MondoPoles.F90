@@ -88,26 +88,30 @@ MODULE MondoPoles
 !====================================================================================
        SUBROUTINE HGToSP_PoleNode(Node)
          TYPE(PoleNode) :: Node
-         INTEGER        :: LQ,LenQ
+         INTEGER        :: LenHG,LenSP
          REAL(DOUBLE)   :: PiZ
-         LQ=Node%Ell
-         LenQ=LSP(LQ)
          PiZ=(Pi/Node%Zeta)**(ThreeHalves)
-         CALL HGToSP_Gen(Node%Ell,PiZ,Node%Co,Node%C,Node%S)
+         LenHG=LHGTF(Node%Ell)
+         LenSP=LSP(Node%Ell)
+         CALL HGToSP_Gen(Node%Ell,PiZ,Node%Co(1:LenHG), &
+                         Node%C(0:LenSP),Node%S(0:LenSP))
        END SUBROUTINE HGToSP_PoleNode
 !====================================================================================
 !
 !====================================================================================
        SUBROUTINE HGToSP_Bra(P,HGBra,SPBraC,SPBraS)
          TYPE(PrimPair)                    :: P
-         INTEGER                           :: L,Len
-         REAL(DOUBLE)                      :: PiZ,Zeta
-         REAL(DOUBLE), DIMENSION(:)        :: HGBra
+         INTEGER                           :: LenHG,LenSP
+         REAL(DOUBLE)                      :: PiZ
+         REAL(DOUBLE), DIMENSION(1:)       :: HGBra
          REAL(DOUBLE), DIMENSION(0:)       :: SPBraC,SPBraS
 !------------------------------------------------------------------------------------
 !        Transform <Bra| coefficients from HG to SP
          PiZ=(Pi/P%Zeta)**(ThreeHalves)
-         CALL HGToSP_Gen(P%Ell,PiZ,HGBra,SPBraC,SPBraS)   
+         LenHG=LHGTF(P%Ell)
+         LenSP=LSP(P%Ell)
+         CALL HGToSP_Gen(P%Ell,PiZ,HGBra(1:LenHG), &
+                         SPBraC(0:LenSP),SPBraS(0:LenSP))   
        END SUBROUTINE HGToSP_Bra
 !====================================================================================
 !
@@ -118,11 +122,10 @@ MODULE MondoPoles
           REAL(DOUBLE),DIMENSION(1:) :: HGCo      
           REAL(DOUBLE),DIMENSION(0:) :: C,S
           REAL(DOUBLE),DIMENSION(20) :: W
-!               
           SELECT CASE(L)
           INCLUDE 'HGToSP.Inc'
           CASE(6:) 
-             CALL Halt(' Bad logic in HGToSPX')
+             CALL Halt('Bad logic in HGToSP_Gen, time to remake HGToSP.Inc')
           END SELECT
        END SUBROUTINE HGToSP_Gen
 !====================================================================================
