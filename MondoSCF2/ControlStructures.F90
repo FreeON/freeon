@@ -257,6 +257,7 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: OutPCrit
      REAL(DOUBLE)                       :: MaxAngle
      REAL(DOUBLE)                       :: MaxStre
+     LOGICAL                            :: DoQFilter
   END TYPE CoordCtrl
   
   TYPE LattInfo

@@ -16,6 +16,7 @@ MODULE GeomOptKeys
    CHARACTER(LEN=8),  PARAMETER :: OPT_Pictures     ='Pictures'
    CHARACTER(LEN=9),  PARAMETER :: OPT_PrtBackTr    ='PrtBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
+   CHARACTER(LEN=9),  PARAMETER :: OPT_DoQFilter    ='DoQFilter'
    CHARACTER(LEN=9),  PARAMETER :: OPT_Alternate    ='Alternate'
    CHARACTER(LEN=12), PARAMETER :: OPT_LatticeStart ='LatticeStart'
    CHARACTER(LEN=8),  PARAMETER :: OPT_RatioABC     ='RatioABC'

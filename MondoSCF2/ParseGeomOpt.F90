@@ -151,6 +151,12 @@ MODULE ParseGeomOpt
        GOpt%GConvCrit%MaxLatticeSteps=1 !default value
      ENDIF
      !
+     ! Parse for filtering data points in fitting of QUICCA
+     !
+     GOpt%CoordCtrl%DoQFilter=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_DoQFilter)) THEN
+       GOpt%CoordCtrl%DoQFilter=.TRUE.
+     ENDIF
      !
      ! Parse for Maximum angle and maximum bondlength displacements
      !
