@@ -43,7 +43,8 @@ PROGRAM HaiKu
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
-#endif
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+#endif 
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)
 ! Begin local performance accumulator for grid generation

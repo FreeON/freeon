@@ -83,10 +83,10 @@ MODULE CubeTree
          BoxCenter(:) = Box%Center(:)
          BoxBndLow(:) = Box%BndBox(:,1)
          BoxBndHig(:) = Box%BndBox(:,2)
-         DO NC = 1,CS%NCells
-            Box%Center(:)   = BoxCenter(:)+CS%CellCarts%D(:,NC)
-            Box%BndBox(:,1) = BoxBndLow(:)+CS%CellCarts%D(:,NC)
-            Box%BndBox(:,2) = BoxBndHig(:)+CS%CellCarts%D(:,NC)        
+         DO NC = 1,CS_OUT%NCells
+            Box%Center(:)   = BoxCenter(:)+CS_OUT%CellCarts%D(:,NC)
+            Box%BndBox(:,1) = BoxBndLow(:)+CS_OUT%CellCarts%D(:,NC)
+            Box%BndBox(:,2) = BoxBndHig(:)+CS_OUT%CellCarts%D(:,NC)        
             IXact=IXact+PopInBox(RhoRoot)
          ENDDO
          Box%Center(:)   = BoxCenter(:)
@@ -249,12 +249,12 @@ MODULE CubeTree
          BoxBndLow(:) = Box%BndBox(:,1)
          BoxBndHig(:) = Box%BndBox(:,2)
          GridOld(:,:) = Grid(:,:)
-         DO NC = 1,CS%NCells
-            Box%Center(:)   = BoxCenter(:)+CS%CellCarts%D(:,NC)
-            Box%BndBox(:,1) = BoxBndLow(:)+CS%CellCarts%D(:,NC)
-            Box%BndBox(:,2) = BoxBndHig(:)+CS%CellCarts%D(:,NC)        
+         DO NC = 1,CS_OUT%NCells
+            Box%Center(:)   = BoxCenter(:)+CS_OUT%CellCarts%D(:,NC)
+            Box%BndBox(:,1) = BoxBndLow(:)+CS_OUT%CellCarts%D(:,NC)
+            Box%BndBox(:,2) = BoxBndHig(:)+CS_OUT%CellCarts%D(:,NC)        
             DO I=1,NGrid
-               Grid(I,:) = GridOld(I,:)+CS%CellCarts%D(:,NC)
+               Grid(I,:) = GridOld(I,:)+CS_OUT%CellCarts%D(:,NC)
             ENDDO
             CALL RhoOnGrid(RhoRoot)
          ENDDO
@@ -568,12 +568,12 @@ MODULE CubeTree
         INTEGER          :: I
 !
         DO I = 1,3
-           IF(GM%AutoW(I)) THEN
+           IF(GM%PBC%AutoW(I)) THEN
               IF(Box%BndBox(I,1) < Zero) THEN
                  Box%BndBox(I,1) = Zero
               ENDIF
-              IF(Box%BndBox(I,2) > GM%BoxShape%D(I,I)) THEN
-                 Box%BndBox(I,2) = GM%BoxShape%D(I,I)
+              IF(Box%BndBox(I,2) > GM%PBC%BoxShape(I,I)) THEN
+                 Box%BndBox(I,2) = GM%PBC%BoxShape(I,I)
               ENDIF
            ENDIF
         ENDDO

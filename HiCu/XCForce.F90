@@ -48,6 +48,7 @@ PROGRAM XCForce
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
@@ -76,10 +77,10 @@ PROGRAM XCForce
 #ifdef PERIODIC
            A=Pair%A
            B=Pair%B
-           DO NCA=1,CS%NCells
-              Pair%A=A+CS%CellCarts%D(:,NCA)
-              DO NCB=1,CS%NCells
-                 Pair%B=B+CS%CellCarts%D(:,NCB)
+           DO NCA=1,CS_OUT%NCells
+              Pair%A=A+CS_OUT%CellCarts%D(:,NCA)
+              DO NCB=1,CS_OUT%NCells
+                 Pair%B=B+CS_OUT%CellCarts%D(:,NCB)
                  Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2

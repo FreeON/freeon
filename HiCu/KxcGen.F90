@@ -31,9 +31,8 @@ MODULE KxcGen
       INTEGER                :: AtA,AtB
       INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
 #ifdef PERIODIC        
-      INTEGER                :: NCA,NCB
-      REAL(DOUBLE)           :: Ax,Ay,Az,Bx,By,Bz
-      LOGICAL                :: NotMakeBlock
+      INTEGER                   :: NCA,NCB
+      REAL(DOUBLE),DIMENSION(3) :: A,B
 #endif     
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
@@ -50,27 +49,17 @@ MODULE KxcGen
                IF(AtB<=AtA)THEN
 !              Compute only the lower triangle of symmetric Kxc
 #ifdef PERIODIC
-                  Ax = Pair%A(1)
-                  Ay = Pair%A(2)
-                  Az = Pair%A(3)
-                  Bx = Pair%B(1)
-                  By = Pair%B(2)           
-                  Bz = Pair%B(3)
-                  NotMakeBlock = .TRUE.
-                  DO NCA = 1,CS%NCells
-                     Pair%A(1) = Ax+CS%CellCarts%D(1,NCA)
-                     Pair%A(2) = Ay+CS%CellCarts%D(2,NCA)
-                     Pair%A(3) = Az+CS%CellCarts%D(3,NCA)
-                     DO NCB = 1,CS%NCells
-                        Pair%B(1) = Bx+CS%CellCarts%D(1,NCB)
-                        Pair%B(2) = By+CS%CellCarts%D(2,NCB)
-                        Pair%B(3) = Bz+CS%CellCarts%D(3,NCB)
+                  A = Pair%A
+                  B = Pair%B
+                  DO NCA = 1,CS_OUT%NCells
+                     Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
+                     DO NCB = 1,CS_OUT%NCells
+                        Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
                         Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                                   + (Pair%A(2)-Pair%B(2))**2 &
                                   + (Pair%A(3)-Pair%B(3))**2
                         IF(TestAtomPair(Pair)) THEN
                            Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
-                           NotMakeBlock = .FALSE.
                         ENDIF
                      ENDDO
                   ENDDO
@@ -85,10 +74,6 @@ MODULE KxcGen
                Kxc%RowPt%I(AtA+1)=P        
                IF(R>MaxNon0.OR.P>MaxBlks) &
                   CALL Halt(' BCSR dimensions blown in Kxc ')
-#ifdef PERIODIC
-               IF(NotMakeBlock) &
-                  CALL Halt(' Making a Zero Block in KxcGen ')
-#endif
             ENDIF
          ENDDO
       ENDDO
