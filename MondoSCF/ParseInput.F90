@@ -1813,6 +1813,7 @@ MODULE ParseInPut
         CHARACTER(LEN=DEFAULT_CHR_LEN)  :: QMMM_DATA
         TYPE(INT_VECT) :: ATMMARK,Active_Bond,Active_Angle
         TYPE(INT_VECT) :: MMAtNum
+        TYPE(CHR_VECT) :: MMAtNam
         TYPE(INT_VECT) :: Active_Torsion,Active_OutOfPlane
         TYPE(INT_VECT) :: GlobalQMNum
         TYPE(DBL_VECT) :: AuxVect     
@@ -2008,6 +2009,13 @@ MODULE ParseInPut
         MMAtNum%I=ATMNUM
         CALL Put(MMAtNum,'MMAtNum')
         CALL Delete(MMAtNum)
+!
+! Save MM atomic types of MM atoms
+!
+        CALL New(MMAtNam,MM_NATOMS)
+        MMAtNam%C=ATMNam
+        CALL Put(MMAtNam,'MMAtNam')
+        CALL Delete(MMAtNam)
 !
 ! Calculate topology matrices, which will be needed later
 ! for exclusion energy calculations. These matrices
