@@ -184,7 +184,7 @@ in what follows. Let us present some useful definitions:
 \rho ^{loc}({\mathbf{r}})=\sum _{\mathbf{R}}\sum _{ab}{\mathbf{P}}_{ab}\phi _{a}
 ({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})
 \end{equation}
-Where $P_{ab}$ is the density matrix, and $\rho^loc({\bf r})$ is the local density
+Where $P_{ab}$ is the density matrix, and $\rho^{loc}({\bf r})$ is the local density
 and because of periodicity,
 
 \begin{equation}
@@ -389,10 +389,9 @@ J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l
 %
 For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
 summation. 
-In reference 14 
-%\cite{PFFTensorMake} 
-we describe an efficient method which allows
-us to calculate these conditional summations. The only task remaining
+In Appendix A we describe an efficient method which allows
+us to calculate these conditional summations in one, two and three dimensions. 
+The only task remaining
 is to determine the region of the inner box summation or the multipole
 order \( L \) which we have to expand to. Using results obtained in reference {7}
 we can approximate  the error bound  as
@@ -605,7 +604,177 @@ in preparation of this manuscript.
 
 \bibliographystyle{plain}
 \bibliography{GaussianPapers}
-\eject
+
+
+\appendix
+
+\section{Computation of the \protect\( {\cal M}\protect \) Tensor}\label{calMTen}
+
+Following the work of Nijboer-De Wette \cite{Nijboer57,Nijboer58a}.
+We start by first partitioning  
+
+\begin{equation}
+\label{C1}
+\frac{1}{r^{l+1}}={\cal G}_{l}\left( \beta ,r\right) +{\cal F}_{l}\left( \beta ,r\right) 
+\end{equation}
+where
+
+\begin{equation}
+\label{C2}
+{\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
+\end{equation}
+\begin{equation}
+\label{C3}
+{\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
+{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
+\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}-
+\end{equation}
+where \( \beta  \) is a parameter which controls the convergence.
+This allows the lattice sum to be partitioned into rapidly convergent
+real and reciprocal space terms 
+%
+%
+\begin{eqnarray}
+{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
+\nonumber\\
+ & = & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+\right) e^{im\phi _{\mathbf{R}}}\,  {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
+\nonumber\\
+ & + & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
+\right) e^{im\phi _{\mathbf{R}}}\, 
+{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
+\nonumber\\
+&=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
+\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
+ \mathbf{R}\right| \right) 
+\nonumber\\
+&-&\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
+\theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| 
+\right) 
+\nonumber\\
+&+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+\nonumber\\
+&&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
+ \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
+\right) e^{im\phi _{\mathbf{G}}}
+\nonumber\\
+\label{C4}
+\end{eqnarray}
+With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
+the periodic multipole interaction tensor can be computed. The only
+potential problem is the computation of the incomplete gamma functions.
+Previous approaches attempted to compute this function by the upward
+recurrence relation
+
+\begin{equation}
+\label{C5}
+\Gamma \left( m+1,\, x\right) =m\Gamma \left( m,\, x\right) +x^{m}e^{-x}
+\end{equation}
+which is started by
+
+\begin{equation}
+\label{erfc}
+\Gamma \left( \frac{1}{2},\, x\right) =\sqrt{\pi }\, {\rm erfc}\left( \sqrt{x}\right) 
+\end{equation}
+however, this leads a numerical instability in the calculation. For
+large values of \( x \) and \( m \) the calculation of the gamma
+function can quickly lose precision. We can remove this problem by
+analytically summing the gamma function, collecting terms, and then
+rewriting the gamma function as
+\begin{eqnarray}
+\Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) 
+\qquad\qquad\qquad
+\nonumber\\
+\left\{ {\rm erfc}\left( \sqrt{x}\right) 
++\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n} \right\}
+\label{C7}
+\end{eqnarray}
+where
+
+\begin{equation}
+\label{SN}
+S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
+\right) ^{\frac{1}{max(n,1)}}
+\end{equation}
+Which are tabulated beforehand. We find that this version of the gamma
+function is both easy to program and numerically very precise, even
+at large \( x \) or \( m \). 
+We can also compute the \( {\cal M} \) tensor in one and two dimensions.
+The \( {\cal M} \) tensor in one dimension can be computed analytically
+%
+\begin{eqnarray}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
+\nonumber\\
+& = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
+\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
+\nonumber\\
+& = & 
+\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
+\sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
+\nonumber\\
+&+&\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) 
+e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
+\sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
+\nonumber\\
+& = & Q_{l}^{m}\left[ a_{0},\theta _{0},\phi _{0}\right] \left\{ \zeta (l+1)-
+\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}
+\right\}
+\nonumber\\
+\label{C9}
+\end{eqnarray}
+%
+where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
+initial box dimension and angles which are independent of the summation.
+In two dimension, the Fourier integrals for the calculation of \( {\cal M} \)
+tensor become a lot more complicated, therefore we have chosen to
+use the three dimensional formula's and obtain the two dimensional
+moments via numerical integration, where we take the limit as the
+non-periodic direction goes to infinity,
+
+\begin{eqnarray}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}
+\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}
+\left( \beta ,\left| \mathbf{R}\right| \right) 
+\nonumber\\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
+\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| 
+\mathbf{R}\right| \right) 
+\nonumber\\
+& + &  {\cal C}_1 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}
+e^{-\frac{\pi ^{2}\left|
+ \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, {\tilde P}_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}
+\right) \right) e^{im\phi _{\mathbf{G}}}
+\nonumber\\
+ & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
+\left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
+\mathbf{R}\right| \right) 
+\nonumber\\
+ & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
+\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
+\nonumber\\
+ & + & {\cal C}_2 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }
+\: dG_{z}\: \left| \mathbf{G}
+\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, 
+\nonumber\\
+&& \qquad \qquad \qquad \qquad  {\tilde P}_{l}^{m}
+\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
+\nonumber\\
+\label{C10}
+\end{eqnarray}
+%
+where,
+\begin{eqnarray}
+{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+\nonumber\\
+{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }
+\label{C10p}
+\end{eqnarray}
+and \( A_{cell} \) is the area of the cell along the non-periodic
+direction. We have found that we can obtain the \( {\cal M} \) tensor
+matrix elements to 8-10 digits of accuracy with this technique.
+
+
 \eject
 %
 % 
