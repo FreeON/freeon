@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm ic dy s e 1 n 2 d #v 
+all:	CatCpy rmLegacy mm dy s e 1 n 2 d #v 
 #
-clean:	cmm cic cdy cs ce c1 cn c2 cd cv 
+clean:	cmm cdy cs ce c1 cn c2 cd cv 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm pic pdy ps pe p1 pn p2 pd pv pMisc  
+purge:	pmm pdy ps pe p1 pn p2 pd pv pMisc  
 #
-release: rmLegacy swREADME rmm rdy ric rs re r1 rn r2 rd rv tarball
+release: rmLegacy swREADME rmm rdy  rs re r1 rn r2 rd rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -54,6 +54,8 @@ rmLegacy:
 	rm -rf Inpts
 	rm -rf Scratch
 	rm -rf Exec
+	rm -rf Libs
+	rm -rf IntCoo
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
@@ -62,16 +64,6 @@ CatCpy:
 	sleep 1
 	cat $(MONDO_HOME)/README
 	sleep 2
-#----------------------------------------------
-#   IntCoo
- ic:	
-	$(MAKE)    -C IntCoo
-ric:	
-	$(MAKE) -i -C IntCoo release
-pic:	
-	$(MAKE) -i -C IntCoo purge
-cic:	
-	$(MAKE) -i -C IntCoo clean
 #----------------------------------------------
 #   Dynamo
  dy:	
@@ -194,13 +186,7 @@ cv:
 #----------------------------------------------
 #   Cleaning of other directories 
 #
-pMisc:	pLib pInp pScr pPWD
-#
-pLib:	
-	rm -f $(MONDO_HOME)/Libs/*
-#
-pExec:	
-	rm -rf $(MONDO_HOME)/Exec/*
+pMisc:	pInp pScr pPWD
 #
 pInp:	
 	$(MAKE) -i -C $(MONDO_HOME)/Benchmarks/PROTEINS purge
