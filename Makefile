@@ -60,7 +60,7 @@ rmLegacy:
 	rm -rf Dynamo
 	rm -rf Bader
 	rm -rf Docs
-	rm -rf Changelog
+	rm -rf ChangeLog*
 #
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
