@@ -992,6 +992,7 @@ MODULE PrettyPrint
     CHARACTER(LEN=16)          :: Name
     CHARACTER(LEN=3 ),PARAMETER:: Colon =","
     CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
+    Tag=""
     IF(PRESENT(Misc_O))THEN
        Name=TRIM(ADJUSTL(Proc))//Colon//TRIM(Misc_O)
        Tag=Name//Colons
