@@ -35,6 +35,8 @@ PROGRAM QCTC
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)
+!
+  CALL Get(PBC_On,'PBCOn')
 ! Get basis set and geometry
 #ifdef MMech
   IF(HasQM()) THEN
@@ -111,13 +113,29 @@ PROGRAM QCTC
   CALL MultipoleSetUp(FFEll2)
   ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-#ifdef PERIODIC
+#ifdef PERIODIC !-----------------------------------
   ! Calculate the Number of Cells
-  CALL SetCellNumber(GM)
+#ifdef MMech
+  IF(HasMM()) THEN
+    CALL SetCellNumber(GM_MM)
+  ELSE
+#endif
+    CALL SetCellNumber(GM)
+#ifdef MMech
+  ENDIF
+#endif
   CALL PPrint(CS_OUT,'outer sum',Prog)
   ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(PoleRoot)
+#ifdef MMech 
+  IF(HasMM()) THEN
+    CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
+  ELSE
 #endif
+    CALL PBCFarFieldSetUp(PoleRoot,GM)
+#ifdef MMech 
+  ENDIF
+#endif
+#endif !-----------------------------------
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
@@ -190,8 +208,6 @@ PROGRAM QCTC
 !
   ENDIF
 #endif
-
-
 !---------------------------------------------------------------
 ! Printing
 #ifdef MMech
@@ -203,10 +219,17 @@ PROGRAM QCTC
 #ifdef MMech
   ENDIF
 #endif
-!  WRITE(*,*) 'NukE[',TRIM(SCFCycl),'] = ',E_Nuc_Tot
 #ifdef PERIODIC
 ! Print Periodic Info
-  CALL Print_Periodic()
+#ifdef MMech !---------------------
+  IF(HasMM()) THEN
+    CALL Print_Periodic(GMLoc=GM_MM)
+  ELSE
+#endif
+    CALL Print_Periodic(GMLoc=GM)
+#ifdef MMech
+  ENDIF
+#endif !---------------------------
 #endif
 ! Tidy up
 #ifdef MMech
