@@ -1,3 +1,45 @@
+2002-11-07 16:46  mchalla
+
+	* Docs/DM_Papers/TS4/TS4.tex: Redid the abstract.
+
+2002-11-07 12:28  nemeth
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2002-11-07 12:15  nemeth
+
+	* MondoSCF/: DrvSCFs.F90, ParseInput.F90: [no log message]
+
+2002-11-07 11:53  nemeth
+
+	* MondoSCF/: DrvFrcs.F90, ParseInput.F90: [no log message]
+
+2002-11-07 11:44  nemeth
+
+	* MondoSCF/: DrvFrcs.F90, ParseInput.F90, ParseInput.F90: [no log
+	message]
+
+2002-11-07 11:38  nemeth
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2002-11-07 11:34  nemeth
+
+	* MondoMods/: InOut.F90, MemMan.F90: [no log message]
+
+2002-11-07 11:15  nemeth
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90, MondoSCF.F90,
+	ParseInput.F90: [no log message]
+
+2002-11-07 11:05  nemeth
+
+	* MondoMods/InCoords.F90: [no log message]
+
+2002-11-06 21:35  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-11-06 21:22  mchalla
 
 	* Docs/DM_Papers/TS4/: Makefile, compile: [no log message]
