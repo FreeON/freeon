@@ -81,7 +81,7 @@ MODULE DrvSCFs
          ENDIF
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
-         CALL CleanScratch(Ctrl,'CleanLastGeom')
+!         CALL CleanScratch(Ctrl,'CleanLastGeom')
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
          CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &

@@ -28,7 +28,7 @@ PROGRAM PulayDIIS
    INTEGER                        :: I,J,K,N,ISCF,JSCF,KSCF
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=9),PARAMETER     :: Prog='PulayDIIS'
-   CHARACTER(LEN=3*DEFAULT_CHR_LEN) :: Mssg
+   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
    LOGICAL                        :: Present
 !------------------------------------------------------------------ 
 !
@@ -39,7 +39,8 @@ PROGRAM PulayDIIS
    NxtC=IntToChar(ISCF+1)
 !
    CALL OpenASCII(InpFile,Inp)  
-   IF(.NOT.OptDblQ(Inp,Prog,EigThresh))EigThresh=1.D-9
+   IF(.NOT.OptDblQ(Inp,'DIISThresh',EigThresh))EigThresh=1.D-10
+
    CLOSE(Inp)
 !
 !  Allocations
@@ -139,8 +140,9 @@ PROGRAM PulayDIIS
    IF(ISCF<=1)THEN
 !    Damping on the first cycle
      CALL OpenASCII(InpFile,Inp)  
-     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D0
+     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=0.1D0
      CLOSE(Inp)
+     WRITE(*,*)' DAMP = ',DAMP
      C0=One-Damp
      C1=Damp
 !    Damp current Fock matrix by C1
