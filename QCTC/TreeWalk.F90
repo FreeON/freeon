@@ -137,7 +137,7 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
-       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-6
+       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-8
 !---------------------------------------------------------------------------------------------------
 !      PAC:
        PQx=Prim%P(1)-Q%Box%Center(1)
@@ -170,7 +170,7 @@ MODULE TreeWalk
           ENDIF
        ELSEIF(Q%Leaf)THEN
 !         Check for self-interaction
-          IF(Q%Zeta==NuclearExpnt.AND.PQ2<1.D-3)RETURN
+          IF(Q%Zeta==NuclearExpnt .AND. PQ2<VTol) RETURN
 !         Flip sign...
           PQx=-PQx; PQy=-PQy; PQz=-PQz
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
