@@ -1,0 +1,19 @@
+Lattice-JForce differs for serial and parallel versions.
+
+MONDO version used:  2004-11-30 07:25
+Serial: Compiled on zinc with CompilerSpecifics.IntelLinux.NAG .
+Parallel: Compiled on Q by CompilerSpecifics.True64.COMPAQ.
+
+This is a urea molecule, 2x2x2 cell.
+HF/3-21G gives different JForces for the Lattice in parallel vs serial 
+runs.
+
+Printout in the output files refers to cumulated lattice forces. 
+Difference happens to JForce, but also, small difference (about 15%) 
+is also observed in ONX Forces.
+I'll print individual force components too for J and ONX lattice forces.
+SDCs.F90 as checked in here containes the printouts as compared 
+to version 2004-11-30 07:25 .
+
+K.N. 12/04/04.
+------------------------------------------------------------------
