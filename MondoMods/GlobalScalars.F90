@@ -85,6 +85,7 @@ MODULE GlobalScalars
 !-------------------------------------------------  IO Unit numbers 
    INTEGER, PARAMETER      :: Geo=22                 ! Unit for geometries
    INTEGER, PARAMETER      :: Bas=33                 ! Unit for basis file IO
+   INTEGER, PARAMETER      :: GBas=34                ! Unit for Ghost basis file IO
    INTEGER, PARAMETER      :: Seq=44                 ! Unit for sequential, binary IO
    INTEGER, PARAMETER      :: Tmp=55                 ! Unit for temp/scratch files
    INTEGER, PARAMETER      :: Plt=66                 ! Unit for EPS plotting
