@@ -20,7 +20,8 @@ PROGRAM MakeRho
   USE LinAlg
   USE AtomPairs
   USE BraBloks
-  USE RhoBlok  
+  USE RhoBlok
+  USE RhoTools
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -40,9 +41,10 @@ PROGRAM MakeRho
   TYPE(DBL_RNK4)      :: MD
   TYPE(ARGMT)         :: Args
   TYPE(HGRho)         :: Rho
-  INTEGER             :: P,R,AtA,AtB,NN,iSwitch
+  INTEGER             :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER             :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL             :: First
+  REAL(DOUBLE)        :: DistThresh
 !
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
@@ -91,7 +93,7 @@ PROGRAM MakeRho
 ! Get the Exponents and Angular Symmetries
 !
   CALL Get(NExpt,'nexpt',Tag_O=CurBase)
-  CALL New_HGRho(Rho,(/NExpt,0,0/),.TRUE.)
+  CALL New_HGRho(Rho,(/NExpt,0,0/))
   CALL Get(Rho%Expt,'dexpt',Tag_O=CurBase)
   CALL Get(Rho%Lndx ,'lndex',Tag_O=CurBase)
 !---------------------------------------------------
@@ -102,7 +104,7 @@ PROGRAM MakeRho
 !---------------------------------------------------
 !    Re-allocate the density
 !
-     CALL New_HGRho(Rho,(/NExpt,NAtoms,NAtoms/),.TRUE.)
+     CALL New_HGRho(Rho,(/NExpt,NAtoms,NAtoms/))
 !-----------------------------------------------------
 !    Initailize  NQ
 !
@@ -122,7 +124,7 @@ PROGRAM MakeRho
 !-----------------------------------------------------
 !    Initailize  NQ
 !
-     Rho%NQ%I            = 0
+     Rho%NQ%I = 0
      IF(iSwitch == 1) Rho%NQ%I(Rho%NExpt) = NAtoms
 !----------------------------------------------------
 !    Loop over atoms and count primatives
@@ -167,7 +169,7 @@ PROGRAM MakeRho
 !-----------------------------------------------------
 !    Re-allocate the density
 !
-     CALL New_HGRho(Rho,(/NExpt,NDist,NCoef/),.TRUE.)
+     CALL New_HGRho(Rho,(/NExpt,NDist,NCoef/))
 !-----------------------------------------------------
 !    Initailize  RhoCo and First
 !
@@ -212,10 +214,20 @@ PROGRAM MakeRho
 !
      IF(iSwitch == 1) CALL AddNukes(GM,Rho)
   ENDIF
+!-----------------------------------------------------------
+!  Fold the Distributions back into the Cell
+!
+  CALL Fold_Rho(GM,Rho)
+!------------------------------------------------------------
+!  Remove distribution which du not contibute to the density
+!
+!  DistThresh =  MAX(1.D-13,(1.0D-2)*NEl*Thresholds%Dist)
+!  DistThresh =  MIN(1.D-6,DistThresh)
+!  CALL Prune_Rho(DistThresh,Rho)
 !------------------------------------------------------------
 ! Put Rho to disk
 ! 
-  CALL Put_HGRho(Rho,'Rho',Args,0,.TRUE.)
+  CALL Put_HGRho(Rho,'Rho',Args,0)
 !------------------------------------------------------------
 ! Printing
 !
