@@ -123,11 +123,11 @@ CONTAINS
      ! Convergence check
      CnvrgChck=.FALSE.
      ! Absolute convergence test
-!     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
-!        AbsErrP<Thresholds%DTol*1D-1)THEN
-!        CnvrgChck=.TRUE.
-!        CnvrgCmmnt='Met dE/dP goals'
-!     ENDIF
+     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
+        AbsErrP<Thresholds%DTol*1D-1)THEN
+        CnvrgChck=.TRUE.
+        CnvrgCmmnt='Met dE/dP goals'
+     ENDIF
      ! Test in the asymptotic regime for stall out
      IF(RelErrE<1D1*Thresholds%Trix**2)THEN
 !    IF(RelErrE<Thresholds%ETol)THEN
