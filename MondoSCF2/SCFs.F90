@@ -631,8 +631,9 @@ CONTAINS
     CALL Invoke('JForce',N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL NXForce(cBAS,cGEO,N,G,B,S,M)
+    !  CALL NXForce(cBAS,cGEO,N,G,B,S,M)
     !  CALL Invoke('XForce',N,S,M)
+       CALL Invoke('GONX2',N,S,M)
     ENDIF
     ! DFT exchange corrleation term
     IF(HasDFT(O%Models(cBas))) THEN
