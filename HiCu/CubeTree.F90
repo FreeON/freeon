@@ -81,11 +81,11 @@ MODULE CubeTree
          MaxLevel=0       
          CubeNodes=0
 !        Initialize the CubeRoot and set thresholding
-         CALL InitCubeRoot(CubeRoot)
+         CALL InitCubeRoot(CubeRoot,WBox)
 
-         CubeRoot%Box%BndBox(1:3,1:2) = WBox%BndBox(1:3,1:2)
-         CubeRoot%Box%Center(1:3) = (CubeRoot%Box%BndBox(1:3,1)+CubeRoot%Box%BndBox(1:3,2))*Half
-         CubeRoot%Box%Half(1:3) = (CubeRoot%Box%BndBox(1:3,2)-CubeRoot%Box%BndBox(1:3,1))*Half
+!        CubeRoot%Box%BndBox(1:3,1:2) = WBox%BndBox(1:3,1:2)
+!        CubeRoot%Box%Center(1:3) = (CubeRoot%Box%BndBox(1:3,1)+CubeRoot%Box%BndBox(1:3,2))*Half
+!        CubeRoot%Box%Half(1:3) = (CubeRoot%Box%BndBox(1:3,2)-CubeRoot%Box%BndBox(1:3,1))*Half
 !        Compute total electron population in this box
          CALL SetBBox(CubeRoot%Box,Box)
 #ifdef PERIODIC
@@ -462,7 +462,8 @@ MODULE CubeTree
 !     Can now hopefully just use RhoTrees BBox, since this should now
 !     also change slowly and continously with geometry
 !=====================================================================
-      SUBROUTINE InitCubeRoot(CubeRoot)
+      SUBROUTINE InitCubeRoot(CubeRoot,WBox)
+         TYPE(BBox)                       :: WBox
          TYPE(CubeNode),POINTER           :: CubeRoot
          REAL(DOUBLE)                     :: BoxSep,Delta,MidPop,TargetError, &
                                              REl,MidSep,BisSep,DelSep,FMid
@@ -473,12 +474,13 @@ MODULE CubeTree
 !        Allocate cube node
          CALL NewCubeNode(CubeRoot,0) 
 !        Use the RhoTrees BBox
-         CALL SetBBox(RhoRoot%Box,CubeRoot%Box)
+!        CALL SetBBox(RhoRoot%Box,CubeRoot%Box)
+         CALL SetBBox(WBox,CubeRoot%Box)
 #ifdef PERIODIC
          CALL MakeBoxPeriodic(CubeRoot%Box)
 #endif
 !        Set global Cube BBox
-         CALL SetBBox(CubeRoot%Box,Box)
+!        CALL SetBBox(CubeRoot%Box,Box)
          CubeRoot%ISplit=1
          CubeRoot%Box%Tier=0
          CubeRoot%ECube=BIG_DBL

@@ -21,6 +21,7 @@ PROGRAM HaiKu
   USE CubeTree
   USE Functionals
   USE KxcGen
+  USE BoundingBox
 #ifdef PARALLEL 
   USE ParallelHiCu
 #endif
@@ -76,8 +77,8 @@ PROGRAM HaiKu
 
 #else
 ! Generate the CubeTree (a 3-D BinTree) 
-  WBox%BndBox(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
-  WBox%BndBox(1:3,2) = RhoRoot%Box%BndBox(1:3,2)
+  WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
+  CALL CalCenterAndHalf(WBox)
   CALL GridGen(WBox,VolRho,VolExc)
   CALL Elapsed_TIME(TimeRhoToGrid,'Accum')
   IF(PrintFlags%Key>DEBUG_MEDIUM)THEN

@@ -99,6 +99,7 @@ MODULE ParallelHiCu
     
     WBox%BndBox(1:3,1) = LCoor%D(1:3,1)
     WBox%BndBox(1:3,2) = RCoor%D(1:3,1)
+    CALL CalCenterAndHalf(WBox)
     TmBegM = MPI_WTime()
     CALL GridGen(WBox,SubVolRho,SubVolExc)
     MyLeavesTm = LeavesTmCount(CubeRoot)
