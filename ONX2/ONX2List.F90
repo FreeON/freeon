@@ -65,9 +65,9 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(CList2) , DIMENSION(:), POINTER :: List
-    TYPE(CRDS)   , INTENT(IN)            :: GM
-    TYPE(BSET)   , INTENT(IN)            :: BS
-    TYPE(CellSet), INTENT(IN)            :: CS_OUT
+    TYPE(CRDS)                           :: GM
+    TYPE(BSET)                           :: BS
+    TYPE(CellSet)                        :: CS_OUT
     !-------------------------------------------------------------------
     TYPE(ANode2) , POINTER               :: NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
@@ -251,34 +251,40 @@ CONTAINS
     IMPLICIT NONE
     !-------------------------------------------------------------------
     TYPE(CList2) , DIMENSION(:), POINTER :: List
-    TYPE(CRDS)   , INTENT(IN)            :: GM
-    TYPE(BSET)   , INTENT(IN)            :: BS
-    TYPE(CellSet), INTENT(IN)            :: CS_OUT
+    TYPE(CRDS)                           :: GM
+    TYPE(BSET)                           :: BS
+    TYPE(CellSet)                        :: CS_OUT
     !-------------------------------------------------------------------
     TYPE(ANode2) , POINTER               :: NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
+    INTEGER                              :: iErr
     REAL(DOUBLE)                         :: RInt,AC2,NInts,ThresholdDistance
     !-------------------------------------------------------------------
     REAL(DOUBLE) , DIMENSION(CS_OUT%NCells) :: RIntCell
     INTEGER      , DIMENSION(CS_OUT%NCells) :: IndxCell
     !-------------------------------------------------------------------
-    TYPE(AtomPr) , DIMENSION(   MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair
     REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
+    TYPE(AtomPr) , DIMENSION(:), ALLOCATABLE :: ACAtmPair
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-    TYPE(INT_VECT), INTENT(IN ) :: Ptr1
+    TYPE(INT_VECT)              :: Ptr1
+    TYPE(INT_VECT)              :: Ptr2
     INTEGER       , INTENT(IN ) :: Nbr1
-    TYPE(INT_VECT), INTENT(OUT) :: Ptr2
     INTEGER       , INTENT(OUT) :: Nbr2
     TYPE(INT_VECT)              :: Tmp2
     INTEGER                     :: iC,Idx2
 #endif
     !
     integer :: isize
+    !
+    ! Allocate arrays.
+    ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In MakeGList: Allocation problem. File <' &
+                  & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
     !
     !Simple check Simple check Simple check Simple check Simple check Simple check
     isize=0
@@ -369,7 +375,6 @@ CONTAINS
              RInt=0.0D0
              !
              CFAC=0
-             !DO CFAC=1,BS%NCFnc%I(KA)*BS%NCFnc%I(KC)
              DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
              DO CFC=1,BS%NCFnc%I(KC) ! Run over blkfunc on C
                 !
@@ -475,6 +480,11 @@ CONTAINS
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL    
     !
+    ! DeAllocate arrays.
+    DEALLOCATE(ACAtmPair,STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In MakeGList: DeAllocation problem. File <' &
+                  & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    !
 #ifdef GONX2_INFO
 #ifdef ONX2_PARALLEL
     IF(MyID.EQ.ROOT) THEN
@@ -500,12 +510,12 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(AtomInfo)              , INTENT(IN   ) :: AtmInfo
-    TYPE(AtomPr)  , DIMENSION(:), INTENT(INOUT) :: AtmPair
-    TYPE(BSET)                  , INTENT(IN   ) :: BS
-    REAL(DOUBLE)  , DIMENSION(3), INTENT(IN   ) :: PBC
+    TYPE(AtomInfo)                           :: AtmInfo
+    TYPE(AtomPr)  , DIMENSION(:)             :: AtmPair
+    TYPE(BSET)                               :: BS
+    REAL(DOUBLE)  , DIMENSION(3), INTENT(IN) :: PBC
     !-------------------------------------------------------------------
-    INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell
+    INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell,MAXII
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
     INTEGER      :: StartL1,StopL1,StartL2,StopL2
     REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ
@@ -519,6 +529,7 @@ CONTAINS
     ! Then we add the PBC's to have the right interatomic distance.
     R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
     !
+    MAXII=0
     CF12=0
     DO CF1=1,BS%NCFnc%I(AtmInfo%K1)
        MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
@@ -552,8 +563,8 @@ CONTAINS
                 InvExpt=1.0d0/Expt
                 XiR12=Z2*Z1*InvExpt*R12
 
-                IF(TestPrimPair(Z2*Z1*InvExpt,R12)) THEN
-!                IF(XiR12<PrimPairDistanceThreshold) THEN
+!                IF(TestPrimPair(Z2*Z1*InvExpt,R12)) THEN
+                IF(XiR12<PrimPairDistanceThreshold) THEN
                    JJ=JJ+1
                    IJ=JJ+II
                    AtmPair(CF12)%SP%Cst(1,IJ)=Expt
@@ -582,6 +593,7 @@ CONTAINS
              !
           ENDDO
           !
+          MAXII=MAX(MAXII,II)
           AtmPair(CF12)%SP%L=II
           !
           ! We reorder the atomic positions if Type2 > Type1.
@@ -617,7 +629,8 @@ CONTAINS
        ENDDO
     ENDDO
     !
-    IF(CF12.GT.SIZE(AtmPair)) STOP 'Increase the size of -AtmPair-'
+    IF(CF12.GT.SIZE(AtmPair,DIM=1)) STOP 'Increase the size of -AtmPair-'
+    IF(MAXII.GT.SIZE(AtmPair(1)%SP%Cst,DIM=2)) STOP 'Increase the size of -AtmPair(1)%SP%Cst-'
     !
   END SUBROUTINE GetAtomPair
   !
@@ -631,10 +644,10 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(AtomInfo)              , INTENT(IN   ) :: AtmInfo
-    TYPE(AtomPr)  , DIMENSION(:), INTENT(INOUT) :: AtmPair
-    TYPE(BSET)                  , INTENT(IN   ) :: BS
-    REAL(DOUBLE)  , DIMENSION(3), INTENT(IN   ) :: PBC
+    TYPE(AtomInfo)                           :: AtmInfo
+    TYPE(AtomPr)  , DIMENSION(:)             :: AtmPair
+    TYPE(BSET)                               :: BS
+    REAL(DOUBLE)  , DIMENSION(3), INTENT(IN) :: PBC
     !-------------------------------------------------------------------
     INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2
@@ -868,11 +881,19 @@ CONTAINS
        DO
           IF(.NOT.ASSOCIATED(ListA)) EXIT
           !
+#ifdef POINTERS_IN_DERIVED_TYPES
           IF(.NOT.ASSOCIATED(ListA%CellIdx).OR. &
                & .NOT.ASSOCIATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
           !
           IF(ASSOCIATED(ListA%CellIdx)) DEALLOCATE(ListA%CellIdx)
           IF(ASSOCIATED(ListA%SqrtInt)) DEALLOCATE(ListA%SqrtInt)
+#else
+          IF(.NOT.ALLOCATED(ListA%CellIdx).OR. &
+               & .NOT.ALLOCATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
+          !
+          IF(ALLOCATED(ListA%CellIdx)) DEALLOCATE(ListA%CellIdx)
+          IF(ALLOCATED(ListA%SqrtInt)) DEALLOCATE(ListA%SqrtInt)
+#endif
           !
           ListATmp=>ListA
           ListA=>ListA%AtmNext
@@ -927,8 +948,15 @@ CONTAINS
 #else
              WRITE(*,'(2(A,I4))') 'AtC',I,', AtA',ListA%Atom
 #endif
+             !
+#ifdef POINTERS_IN_DERIVED_TYPES
              IF(.NOT.ASSOCIATED(ListA%CellIdx).OR. &
                   & .NOT.ASSOCIATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
+#else
+             IF(.NOT.ALLOCATED(ListA%CellIdx).OR. &
+                  & .NOT.ALLOCATED(ListA%SqrtInt)) STOP 'Array not allocate for the list.'
+#endif
+             !
              DO J=1,SIZE(ListA%CellIdx,DIM=1)
                 WRITE(*,'(A,I4,A,E22.15)') 'CellIdx=',ListA%CellIdx(J),' SqrtInt=',ListA%SqrtInt(J)
              ENDDO

@@ -19,8 +19,13 @@ MODULE ONX2DataType
   TYPE ANode2
      INTEGER :: Atom
      INTEGER :: NCell
+#ifdef POINTERS_IN_DERIVED_TYPES
      INTEGER     , DIMENSION(:), POINTER :: CellIdx
      REAL(DOUBLE), DIMENSION(:), POINTER :: SqrtInt
+#else
+     INTEGER     , DIMENSION(:), ALLOCATABLE :: CellIdx
+     REAL(DOUBLE), DIMENSION(:), ALLOCATABLE :: SqrtInt
+#endif
      TYPE(ANode2), POINTER :: AtmNext
   END TYPE ANode2
   !
@@ -36,25 +41,9 @@ MODULE ONX2DataType
      TYPE(ShellPairG) :: SP
   END TYPE AtomPrG
   !
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#if 0
-  TYPE ShellPair
-     INTEGER :: N1
-     INTEGER :: N2
-     REAL(DOUBLE) :: At1x,At1y,At1z
-     REAL(DOUBLE) :: At2x,At2y,At2z
-     REAL(DOUBLE) :: R12
-     REAL(DOUBLE), DIMENSION(10) :: Expt1
-     REAL(DOUBLE), DIMENSION(10) :: Expt2
-     REAL(DOUBLE), DIMENSION(10) :: Coef1
-     REAL(DOUBLE), DIMENSION(10) :: Coef2
-  END TYPE ShellPair
-#endif
-
   INTEGER, PUBLIC :: MaxFuncPerAtmBlk=0
   INTEGER, PUBLIC :: MaxShelPerAtmBlk=0
-
+  !
 CONTAINS
   !
   SUBROUTINE GetBufferSize(GM,BS)

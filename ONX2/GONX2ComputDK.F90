@@ -91,7 +91,7 @@ CONTAINS
     TYPE(AtomInfo)             :: ACAtmInfo,BDAtmInfo
     INTEGER                    :: AtA,AtB,AtC,AtD,KA,KB,KC,KD,CFA,CFB,CFC,CFD
     INTEGER                    :: ci,iPtrD,iPtrD2,iPtrK,NBFC,NBFD,NBFA,NBFB
-    INTEGER                    :: CFAC,CFBD
+    INTEGER                    :: CFAC,CFBD,iErr
     INTEGER                    :: NCFncA,NCFncB,NCFncC,NCFncD
     INTEGER                    :: Off,Ind,LocNInt,IntType
     INTEGER                    :: ACR,BDR,IXYZ,NIntBlk,Indx
@@ -101,11 +101,11 @@ CONTAINS
     REAL(DOUBLE)               :: TmpGradA,TmpGradC,TmpGradB,TmpGradD
     REAL(DOUBLE)               :: Dcd,Dab,NInts
     !-------------------------------------------------------------------
-    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
     REAL(DOUBLE) , DIMENSION(   MaxFuncPerAtmBlk**2) :: Work
-    TYPE(AtomPrG), DIMENSION(   MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
-    REAL(DOUBLE), DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
-    !REAL(DOUBLE), DIMENSION(100) :: DMcd,DMab
+    REAL(DOUBLE) , DIMENSION(   MaxShelPerAtmBlk**2) :: DMcd,DMab
+    REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C
+    !TYPE(AtomPrG), DIMENSION(   MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair,BDAtmPair
+    TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair
     !-------------------------------------------------------------------
     TYPE(ONX2OffSt)            :: OffSet
     TYPE(INT_VECT )            :: BColIdx
@@ -116,12 +116,18 @@ CONTAINS
     !
     integer :: isize,i
     !
-    !
     ! Initialize.
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
 #ifdef ONX2_PARALLEL
     NULLIFY(P,Q,U,V)
 #endif
+    !
+    ! Allocate arrays.
+    ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells), &
+         &   BDAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ComputDK: Allocation problem. File <' &
+         & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    !
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -138,6 +144,7 @@ CONTAINS
        STOP 'Incrase the size of ACAtmPair and BDAtmPair'
     endif
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
+    !write(*,*) 'CS_OUT%CellCarts=',CS_OUT%CellCarts%D(2,1:CS_OUT%NCells)
     !Simple check Simple check Simple check Simple check
     !call Print_BCSR(D,'Density matrix',Unit_O=6)
     !
@@ -276,10 +283,6 @@ CONTAINS
              CALL GetColIdx(AtA,D,BColIdx)
 #endif
              !
-             !#ifdef ONX2_PARALLEL   !I may not need
-             !V => Q%RowRoot         !I may not need
-             !#endif                 !I may not need
-             !
              RnOvB: DO ! Run over AtB
                 AtB=AtBList%Atom 
                 KB=GM%AtTyp%I(AtB)
@@ -305,7 +308,6 @@ CONTAINS
                    ENDIF
                    V => V%Next
                 ENDDO
-                !if(myid==1)
                 !write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'AtB',AtB,'MyID',MyID
 #else
                 Ind=BColIdx%I(AtB)
@@ -499,6 +501,12 @@ CONTAINS
     !
     CALL Delete(BColIdx)
     !
+    ! DeAllocate arrays.
+    DEALLOCATE(ACAtmPair,BDAtmPair,STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem. File <' &
+         & //__FILE__//'>, line <'//IntToChar(__LINE__)//'>.')
+    !
+    !
     WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2, &
          &       NInts/(12D0*CS_OUT%NCells**2*DBLE(MaxNon0-1)**2)*100D0
 100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
@@ -514,11 +522,11 @@ CONTAINS
     !
     IMPLICIT NONE
     !-------------------------------------------------------------------
-    TYPE(AtomInfo)              , INTENT(IN   ) :: AtmInfo
-    TYPE(ANode2  ), POINTER                     :: List
-    TYPE(AtomPrG ), DIMENSION(:), INTENT(INOUT) :: AtmPair
-    TYPE(BSET)                  , INTENT(IN   ) :: BS
-    TYPE(CellSet)               , INTENT(IN   ) :: CS_OUT
+    TYPE(AtomInfo)               :: AtmInfo
+    TYPE(ANode2  ), POINTER      :: List
+    TYPE(AtomPrG ), DIMENSION(:) :: AtmPair
+    TYPE(BSET)                   :: BS
+    TYPE(CellSet)                :: CS_OUT
     !-------------------------------------------------------------------
     INTEGER      :: CF12,CF1,CF2,I1,I2,II,JJ,IJ,iCell,Cell
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2

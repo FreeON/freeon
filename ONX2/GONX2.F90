@@ -52,7 +52,7 @@ PROGRAM GONX2
   INTEGER                        :: CMin,CMax,DMin,DMax,IErr
   INTEGER                        :: ANbr,BNbr,CNbr,DNbr
 #endif
-  INTEGER                        :: OldFileID
+  INTEGER                        :: OldFileID,I
   REAL(DOUBLE)                   :: Time1,Time2
   REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
@@ -60,9 +60,6 @@ PROGRAM GONX2
 !--------------------------------------------------------------------------------
   TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
 !--------------------------------------------------------------------------------
-  !
-  integer :: i
-  !
   !
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -111,6 +108,11 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Initialization and allocations.
+#ifdef ONX2_PARALLEL
+  NULLIFY(ListC,ListD)
+#else
+  NULLIFY(ListC)
+#endif
   !
   TmTM=Zero;TmML=Zero;TmGx=Zero;TmAL=Zero;TmDL=Zero
   CALL New(GradX,(/3,NAtoms/))
@@ -207,9 +209,7 @@ PROGRAM GONX2
   ! Get the second density matrix and normalization.
   !
 #ifdef ONX2_PARALLEL
-
   CALL GetDab(DFMab,APt,ANbr,BPt,BNbr,Args)
-
   Time1 = MPI_WTIME()
   CALL TrnMatBlk(BSp,GMp,DFMab)
   Time2 = MPI_WTIME()
@@ -233,7 +233,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
-!!$  WRITE(*,*) 'deallocate List'
+  !WRITE(*,*) 'deallocate List'
 #ifdef ONX2_PARALLEL
   Time1 = MPI_WTIME()
   CALL DeAllocList(ListC)
@@ -245,7 +245,7 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 #endif
   TmDL = Time2-Time1
-!!$  WRITE(*,*) 'deallocate List:ok',Time2-Time1
+  !WRITE(*,*) 'deallocate List:ok',Time2-Time1
   !
   !------------------------------------------------
   ! Redistribute partition informations.
@@ -286,27 +286,32 @@ PROGRAM GONX2
   !
 #endif
   !
-  CALL Put(GradAux,'gradients',Tag_O=CurGeom)
-  !
-#ifdef 0
-  write(*,*) 'Grad Kx'
-  do i=1,natoms
-     write(*,100) i,GradX%D(:,i)
-  enddo
+!#ifdef 0
+  !write(*,*) 'Grad Kx'
+  !do i=1,natoms
+  !   write(*,100) i,GradX%D(:,i)
+  !enddo
 
-  write(*,*) 'Grad before'
-  do i=1,natoms
-     write(*,100) i,GradAux%D(:,i)-GradX%D(:,i)
-  enddo
+  !write(*,*) 'Grad before'
+  !do i=1,natoms
+  !   write(*,100) i,GradAux%D(:,i)-GradX%D(:,i)
+  !enddo
+
+  !write(*,*) 'Grad Tot'
+  !do i=1,natoms
+  !   write(*,100) i,GradAux%D(:,i)
+  !enddo
 
   write(*,*) 'Grad Tot'
   do i=1,natoms
+     !if(abs(GradAux%D(2,i)).LT.1d-6) GradAux%D(2,i)=0d0
      write(*,100) i,GradAux%D(:,i)
   enddo
 
   100 format(I4,2X,3E24.16)
-#endif
+!#endif
   !
+  CALL Put(GradAux,'gradients',Tag_O=CurGeom)
   !
   !------------------------------------------------
   ! Timing.
@@ -384,8 +389,6 @@ PROGRAM GONX2
   CALL Delete(BSp)
   CALL Delete(GMp)
   !
-!stop
-
   CALL ShutDown(Prog)
   !
 #ifdef ONX2_PARALLEL
