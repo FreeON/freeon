@@ -1,15 +1,9 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
-!    COMPUTES A GUESS NON-ORTHOGONAL DENSITY MATRIX EITHER FROM
-!    A SUPERPOSITION OF DIAGONAL, ATOMIC LEWIS STRUCTURE BLOCKS (Action=Direct)
-!    OR FROM A ORTHOGONAL DENSITY MATRIX COORESPONDING TO A DIFFERENT GEOMETRY (Action=Switch) 
-!
+!    COMPUTES AN ORTHOGONAL GUESS DENSITY MATRIX EITHER FROM
+!    A SUPERPOSITION OF DIAGONAL, ATOMIC LEWIS STRUCTURE BLOCKS 
+!    OR FROM A ORTHOGONAL DENSITY MATRIX COORESPONDING TO A DIFFERENT 
+!    (HOPEFULLY CLOSE) GEOMETRY OR LEVEL OF ACCURACY 
+!    Author: Matt Challacombe
+!-------------------------------------------------------------------------
 PROGRAM P2Use
   USE DerivedTypes
   USE GlobalScalars
@@ -57,8 +51,6 @@ PROGRAM P2Use
   CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
 !
   IF(SCFActn=='Direct')THEN
-
-!    WRITE(*,*)' In P2Use, using SuperPos Guess'
 !   Compute a diagonal guess as the superposition of 
 !   atomic lewis structure occupancies 
     DO I=1,NAtoms
@@ -75,15 +67,10 @@ PROGRAM P2Use
     CALL PPrint( P,'OrthoP['//TRIM(Cycl)//']')
     CALL Plot(   P,'OrthoP_'//TRIM(Cycl))
   ELSEIF(SCFActn=='Switch')THEN
-!    WRITE(*,*)' In P2Use, using previous density matrix from file: '
-!    WRITE(*,*)' =  ',TrixFile('OrthoD',Args,-1)
-!    CALL Get(P,TrixFile('OrthoD',Args,-1))
-
     WRITE(*,*)' In P2Use, using previous density matrix from info file '
     CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
     CALL Put(P,TrixFile('OrthoD',Args,0)) 
   ELSEIF(SCFActn=='Restart')THEN
-!    WRITE(*,*)' In P2Use, using previous density matrix from info file '
     CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
     CALL Put(P,TrixFile('OrthoD',Args,0)) 
   ENDIF    

@@ -1,18 +1,9 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 !    Matt Challacombe,  "A simplified density matrix minimization for linear 
 !    scaling SCF theory", Journal of Chemical Physics,  110, 2332 (1999) 
-!
 !    Major hack by MatCha on 12/10/00:
 !    Modified to use the Parser-Manopulis purification scheme.
 !    Suss of CG convergence with P-M value c
-!
+!---------------------------------------------------------------------
 PROGRAM SDMM
   USE DerivedTypes
   USE GlobalScalars
@@ -187,7 +178,7 @@ PROGRAM SDMM
         CALL Add(H,P,T1)                ! T1=P[N+1,I+1]=P[N+1,I]+StepL[I]*H[I]   
         CALL Multiply(H,One/StepL)      ! H=H/StepL 
      ENDIF
-     CALL Filter(P,T1)                ! P=Filter[P[N+1,I+1]]
+     CALL Filter(P,T1)                  ! P=Filter[P[N+1,I+1]]
 !-----------------------------------------------------------------------------
 !    COMPUTE CONVERGENCE STATS
 !

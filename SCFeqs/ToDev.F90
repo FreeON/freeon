@@ -1,14 +1,7 @@
-!
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
 ! Read in and output intermediates for the development
 ! of new methods for solving the SCF equations
-!
+! Author: Matt Challacombe
+!-----------------------------------------------------------
 PROGRAM ToDev
   USE DerivedTypes
   USE GlobalScalars
