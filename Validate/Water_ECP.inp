@@ -7,10 +7,10 @@ Charge=0
 Multiplicity=1
 DebugAll =(MaxDebug,CheckSums)
 Guess=Core
-SCFMethod=(RH)
-BasisSets=(SBKJC)
-ModelChem=(HF)
-Accuracy =(Tight)
+SCFMethod=(RH,RH)
+BasisSets=(SBKJC,SBKJC)
+ModelChem=(HF,BLYPxc)
+Accuracy =(Good,Tight)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
@@ -20,5 +20,8 @@ h              0.000000    0.000000    1.949000
 h              1.803234    0.000000   -0.739560
 <EndGeometry>
 
-External reference number RPBE/STO-3G        -75.222866 0852  
-BENCHMARK PBE/STO-3G            <SCF>     = -.75 22286613 134627E+02 
+External reference m RHF/CEP-31G HF=-16.411968
+External reference g RHF/CEP-31G HF=-16.413968
+MondoSCF benchmark # RHF/CEP-31G HF=-16.412239
+External reference g RBLYP/CEP-31G HF=-16.82735
+MondoSCF benchmark # RBLYP/CEP-31G HF=-16.82497
