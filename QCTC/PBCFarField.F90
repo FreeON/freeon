@@ -105,7 +105,10 @@ MODULE PBCFarField
       E_QP = ABS(GM%NElec)*QFAC*Quadripole
 !         
       CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*) '==================================Periodic================================'      
+      WRITE(Out,*) '==================================Periodic================================' 
+      WRITE(Out,*) 'Volume = ',Volume
+      WRITE(Out,*) 'DFac   = ',DFac
+      WRITE(Out,*) 'QFac   = ',QFac
       WRITE(Out,*) 'CellCenterX = ',CellCenter(1)
       WRITE(Out,*) 'CellCenterY = ',CellCenter(2)
       WRITE(Out,*) 'CellCenterZ = ',CellCenter(3)
@@ -336,13 +339,13 @@ MODULE PBCFarField
        IRMax = 2
     ELSEIF(Dimen==1) THEN
        IRmin = 1
-       IRMax = 10
+       IRMax = 50
     ELSEIF(Dimen==2) THEN
        IRmin = 7
-       IRMax = 100
+       IRMax = 500
     ELSEIF(Dimen==3) THEN
        IRmin = 26
-       IRMax = 1000
+       IRMax = 5000
     ENDIF
 !
 !   PAC Distance (From PoleRoot)
@@ -376,7 +379,6 @@ MODULE PBCFarField
           CALL Delete_CellSet(CSMM1)
           CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
        ENDIF
-       WRITE(*,*) Radius,CSMM1%NCells
     ENDDO
 !
     DO 
