@@ -3967,28 +3967,6 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE SpMatrEigs(Gc,NDim)
-     TYPE(BCSR)     :: Gc
-     TYPE(DBL_RNK2) :: Aux2
-     INTEGER        :: Info,I,J,NDim,NatmsLoc
-     !
-     CALL New(Aux2,(/NDim,NDim/))
-     CALL Set_RNK2_EQ_BCSR_Dim(Aux2,Gc,NDim)
-     CALL SetDSYEVWork(NDim)
-     BLKVECT%D=Aux2%D
-     CALL DSYEV('V','U',NDim,BLKVECT%D,BIGBLOK,BLKVALS%D, &
-       BLKWORK%D,BLKLWORK,INFO)
-     IF(INFO/=SUCCEED) &
-       CALL Halt('DSYEV hosed in spmatreigs. INFO='&
-         //TRIM(IntToChar(INFO)))
-     write(*,*) 'eigenvalues= '
-     write(*,*) BLKVALS%D
-     CALL Delete(Aux2)
-     CALL UnSetDSYEVWork()
-   END SUBROUTINE SpMatrEigs
-!
-!-------------------------------------------------------
-!
    SUBROUTINE WriteINT_RNK2(Top,FileName)
      INTEGER,DIMENSION(:,:) :: Top
      CHARACTER(LEN=*)       :: FileName
