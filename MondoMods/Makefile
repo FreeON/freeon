@@ -69,6 +69,7 @@ purge:	clean
 	rm -f $(REMOVESRCE)
 #
 release:$(MModRel)
+	rm -rf MMA/Functions
 #
 Mods:	$(MModObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libMondoMods.a $(?:.F90=.o)
@@ -222,4 +223,7 @@ SpecFun.o: 		MMA/LookUpTables/Exp.Inc \
 #
 Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
 			DerivedTypes.o InOut.o SpecFun.o Mechanics.o
+#
+InCoords.o:             DerivedTypes.o GlobalScalars.o GlobalObjects.o InOut.o \
+	                MemMan.o SetEq.o ProcessControl.o PrettyPrint.o ParsingConstants.o 
 #------------------------------------------------------------------------------
