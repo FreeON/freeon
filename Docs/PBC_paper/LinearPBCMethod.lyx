@@ -102,7 +102,7 @@ MondoSCF
 .
  For the one electron matrix this has been achieved by a re-summation over
  periodic cell images, which because of locality leads to an efficient calculati
-on of the one electron matices.
+on of the one electron matrices.
  For the two electron matrices various methods are employed.
  For the two-electron Coulomb matrix, we achieve this via an exact multipole
  expansion of the long range Coulomb field 
@@ -125,13 +125,13 @@ on of the one electron matices.
  This method achieves linear scaling through the use of advanced data structures
  (k-d trees) that maximally exploits locality of the density, and allows
  for an efficient treatment of the periodic effects [ref].
- And finally we exploit the locallity of the basis functions to calculate
+ And finally we exploit the locality of the basis functions to calculate
  the exact exchange matrix.
  
 \layout Standard
 
 To demonstrate the capabilities of MondoSCF, we show results for three test
- condensed phases, Sodium Cloride, Magnesium Oxide and Carbon in the diamond
+ condensed phases, Sodium Chloride, Magnesium Oxide and Carbon in the diamond
  structure.
  We then compare these results to the periodic Gaussian code 
 \series bold 
@@ -279,7 +279,7 @@ S_{ab}^{PBC}=\int _{V_{\infty }}\, d{\mathbf{r}}\, \rho ^{loc}_{ab}({\mathbf{r}}
 
 \end_inset 
 
-Finally, we can rewrite the kinectic energy matrix as
+Finally, we can rewrite the kinetic energy matrix as
 \layout Standard
 
 
@@ -299,7 +299,7 @@ The Two-Electron matrices
 The Coulomb matrix
 \layout Standard
 
-In order to calculate the coulomb matix effiencintly, we transform the two-elect
+In order to calculate the coulomb matrix efficiently, we transform the two-elect
 ron Coulomb integrals into integrals over all space with local distributions
  via PLT transformation and equations (
 \begin_inset LatexCommand \ref{rho_pbc}
@@ -325,7 +325,7 @@ J_{ab}^{PBC} & = & \frac{1}{2}\int _{V_{cell}}\int _{V_{\infty }}\, d{\mathbf{r}
 
 \end_inset 
 
-However, this is still a long ranged intergral.
+However, this is still a long ranged integral.
  Let us separate the Coulomb integral into three pieces 
 \begin_inset Formula \[
 J_{ab}^{PBC}=J_{ab}^{QCTC}+J_{ab}^{PFF}+J_{ab}^{EC}\]
@@ -338,7 +338,7 @@ J_{ab}^{QCTC} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\inft
 \\
 
 \end{array}\label{Jqctc} \\
-J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, \mathbf{Q}d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
+J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\begin{array}{c}
 \\
 
 \end{array}\label{Jpff} \\
@@ -398,7 +398,7 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 
 ,
 \begin_inset Formula \[
-\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\approx \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
+\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
 \\
 
 \end{array}\]
@@ -407,7 +407,7 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 
 
 \begin_inset Formula \[
-\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \begin{array}{c}
+\approx \frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \begin{array}{c}
 \\
 
 \end{array}\]
@@ -417,11 +417,20 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 
 \begin_inset Formula \begin{equation}
 \label{QCTC}
-+\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}\left[ \mathbf{Q}(\mathbf{R})\right] \, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, \widetilde{\Lambda }_{l'}^{m'}[\mathbf{P}]\begin{array}{c}
++\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad \qquad \qquad \begin{array}{c}
 \\
 
 \end{array}
 \end{equation}
+
+\end_inset 
+
+
+\begin_inset Formula \[
+\, \qquad \left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}(\mathbf{R})\right] \, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde{\Lambda }^{\left\langle j\right\rangle };\mathbf{P}]\begin{array}{c}
+\\
+
+\end{array}\]
 
 \end_inset 
 
@@ -430,8 +439,8 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 
 
 \begin_inset Formula \begin{equation}
-\label{sp_rho_ab}
-\rho _{ab,l}^{m}\left[ \mathbf{Q}(\mathbf{R})\right] =\int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ \mathbf{r}-\mathbf{Q}(\mathbf{R})\right] \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}),
+\label{sp_rho_loc}
+O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}\left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
 \end{equation}
 
 \end_inset 
@@ -444,7 +453,7 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 \begin_inset Formula \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
 \end_inset 
 
- (therefore these integrals must be done explicitely) , 
+ (therefore these integrals must be done explicitly) , 
 \begin_inset Formula \( \mathbf{Q}(\mathbf{R}) \)
 \end_inset 
 
@@ -456,26 +465,18 @@ In-order to achieve linear scaling, we use a quantum chemical tree code
 \begin_inset Formula \( \widetilde{\Lambda }^{\left\langle j\right\rangle } \)
 \end_inset 
 
-are the set of distributuions of the local density which do not overlap
- 
+are the set of distributions of the local density which do not overlap 
 \begin_inset Formula \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
 \end_inset 
 
-, are organized on a tree, allow us to achieve linear scaling, and 
-\begin_inset Formula \begin{equation}
-\label{sp_rho_loc}
-\widetilde{\Lambda }^{m}_{l}\left[ \mathbf{P}\right] =\sum _{\left\langle j\neq i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{x}}\, O_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \widetilde{\Lambda }^{\left\langle j\right\rangle }\left( {\mathbf{x}}\right) 
-\end{equation}
-
-\end_inset 
-
-are the multipoles of these densities.
- The multipoles are are defined as
+, are organized on a tree, allow us to achieve linear scaling, and are the
+ multipoles of these densities.
+ The multipole operators are are defined as
 \layout Standard
 
 
 \begin_inset Formula \begin{eqnarray}
-O_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\begin{array}{c}
+\widehat{O}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\begin{array}{c}
 \\
 
 \end{array}\label{sp_mult_O} \\
@@ -488,10 +489,10 @@ M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}
 \end_inset 
 
  In Appendix A we give a short derivation of the overlap, or penetration
- error bound that we use and a more detail analyisis will be given in refference
+ error bound that we use and a more detail analysis will be given in reference
  [ref].
- In Appendix B we also give a short derivation of the multipole error bound
- that we use, where also a more detailed analyisis will be given in reference
+ In Appendix B we also give a derivation of the multipole error bound that
+ we use, where also a more detailed analysis will be given in reference
  [ref].
  
 \layout Subsubsection
@@ -514,8 +515,8 @@ J_{ab}^{PFF} & = & \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int
 \\
 
 \end{array}\label{jpff_2} \\
- & = & \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\label{sp_jpff} \\
- &  & \qquad \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{R}_{0}}]\, M_{l+l'}^{m+m'}[{\mathbf{R}}]\, \rho _{loc,l'}^{m'}[{\mathbf{R}_{0}}]
+ & = & \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \label{sp_jpff} \\
+ &  & \qquad \qquad \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\, M_{l+l'}^{m+m'}[\mathbf{R}]\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
 \end{eqnarray}
 
 \end_inset 
@@ -537,7 +538,7 @@ where
 Which allow us to rewrite
 \begin_inset Formula \begin{equation}
 \label{sp_jpff_2}
-J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{Q}}]\, {\cal M}_{l+l'}^{m+m'}\, \rho _{loc,l'}^{m'}[{\mathbf{Q}}]
+J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\, {\cal M}_{l+l'}^{m+m'}\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
 \end{equation}
 
 \end_inset 
@@ -550,7 +551,7 @@ J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\,
 \begin_inset Formula \( 2 \)
 \end_inset 
 
- euqtion (
+ equation (
 \begin_inset LatexCommand \ref{ScriptM}
 
 \end_inset 
@@ -564,21 +565,24 @@ J_{ab}^{PFF}=\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\,
 \end_inset 
 
  which we have to expand to.
- Using equation (? ) from refernce [ref] we obtain for the error bound
-\begin_inset Formula \[
-\tau \leq \frac{{\cal O}_{L+1}\left[ \mathbf{R}_{0}\right] }{\left| \left| \mathbf{R}_{max}\right| ^{2}-\left| \mathbf{d}_{max}\right| ^{2}\right| ^{\frac{L+2}{2}}}\]
+ Using equation (
+\begin_inset LatexCommand \ref{B30}
 
 \end_inset 
 
-where 
-\begin_inset Formula \( \mathbf{d}_{max} \)
+) from Appendix B we obtain for the error bound
+\begin_inset Formula \begin{equation}
+\label{Rmax}
+\tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}\right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -\left| \mathbf{d}_{max}\right| \right| }
+\end{equation}
+
 \end_inset 
 
- is the distance from farthest distibution in the simulation cell to 
-\begin_inset Formula \( \mathbf{R}_{0} \)
+where we are assuming a 
+\begin_inset Formula \( l_{0}=0 \)
 \end_inset 
 
-, and 
+ distribution of unit weight, and 
 \begin_inset Formula \( \mathbf{R}_{max} \)
 \end_inset 
 
@@ -592,7 +596,7 @@ where
 \layout Standard
 
 In the next section we describe the corrections to the Coulomb matrix which
- allow us to obtain Ewald boundary conditions inorder to obtain translational
+ allows us to obtain Ewald boundary conditions in order to obtain translational
  invariance in the matrix elements, and also allows us to compare directly
  to 
 \series bold 
@@ -680,7 +684,7 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 \end_inset 
 
 are the dipole and quadrapole moments.
- In appendix B we give a short derivation of these terms
+ In appendix D we give a short derivation of these terms
 \layout Subsection
 
 The DFT exchange correlation matrix
@@ -689,23 +693,16 @@ The DFT exchange correlation matrix
 To calculate the DFT exchange correlation matrix in the periodic case, we
  take advantage of the periodicity of the functions being integrated and
  the locality of the basis functions [ref],
-\layout Standard
+\begin_inset Formula \[
+K_{ab}^{PBC}=\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V^{1}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) +\nabla \rho _{ab}^{PBC}\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \]
+
+\end_inset 
 
 
-\begin_inset Formula \begin{eqnarray}
-K_{ab}^{PBC} & = & \int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
-\\
-
-\end{array}\label{Kab_pbc_1} \\
- & = & \int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) \begin{array}{c}
-\\
-
-\end{array}\label{Kab_pbc_2} \\
- & = & \sum _{RR'}\int _{V_{HiCu}}\, d\mathbf{x}\, \phi _{a}(\mathbf{x}+R)\phi _{b}(\mathbf{x}+R')\, V_{xc}\left( \sum _{R''}\, \rho ^{loc}\left( \mathbf{x}+R''\right) \right) \begin{array}{c}
-\\
-
-\end{array}\label{Kab_pbc_3} 
-\end{eqnarray}
+\begin_inset Formula \begin{equation}
+\label{Kxc_pbc}
+\qquad =\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) +\nabla \rho _{ab}^{PBC}\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
+\end{equation}
 
 \end_inset 
 
@@ -721,7 +718,7 @@ where
 .
  This transformation is allowable because of the periodicity of the function,
  and it is ideally suited for the method we use to calculate our exchange-correl
-ation matrix, which is based on a cartesian 
+ation matrix, which is based on a Cartesian 
 \begin_inset Quotes eld
 \end_inset 
 
@@ -732,7 +729,7 @@ Gaussian quadrature
  integration of a rectangular region.
  To calculate the exchange correlation matrix in periodic system we need
  to use equation (
-\begin_inset LatexCommand \ref{Kab_pbc_3}
+\begin_inset LatexCommand \ref{Kxc_pbc}
 
 \end_inset 
 
@@ -754,7 +751,7 @@ First, we calculate the exchange-correlation potential on the HiCu grid
 \layout Itemize
 
 Next, we directly calculate the integral of equation (
-\begin_inset LatexCommand \ref{Kab_pbc_3}
+\begin_inset LatexCommand \ref{Kxc_pbc}
 
 \end_inset 
 
@@ -764,6 +761,23 @@ on of the atomic orbitals.
 \layout Subsection
 
 The exact exchange matrix
+\layout Standard
+
+To calculate the exact exchange correlation matrix in the periodic case,
+ we take advantage of the periodicity of the functions being integrated
+ and the locality of the basis functions [ref], this allows us to show that
+ the exact exchange matrix can be calculated as
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{Kx_pbc}
+K_{ab}=\sum _{\mathbf{RR}'}\sum _{cd}\int d{\mathbf{r}}\, d{\mathbf{r}'}\, \frac{\phi _{a}\left( \mathbf{r}\right) \phi _{c}\left( \mathbf{r}+\mathbf{R}\right) \, P_{cd}\, \phi _{b}\left( \mathbf{r}'+\mathbf{R}'\right) \phi _{d}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'+\mathbf{R}'\right| }
+\end{equation}
+
+\end_inset 
+
+
 \layout Section
 
 Verification
@@ -779,14 +793,14 @@ Table
 
 \end_inset 
 
- displays our results for several test systems, Sodium Cloride, Magnesium
- oxide , Diamond and Graphite.
+ displays our results for several test systems, Sodium Chloride, Magnesium
+ oxide and Diamond.
  We chose these systems because they are well studied and form a distributions
- of the many bounding mechanisms which are possible, from Ionic to covallent
+ of the many bounding mechanisms which are possible, from Ionic to covalent
  [ref].
 \layout Subsubsection
 
-Sodium Cloride
+Sodium Chloride
 \layout Standard
 
 Table 
@@ -794,21 +808,16 @@ Table
 
 \end_inset 
 
- shows our results for the total energy for Sodium Cloride as compared to
- results obtained from 
+ shows our results for the total energy for Sodium Chloride as compared
+ to results obtained from 
 \series bold 
 Crystal98
 \series default 
 .
  We test this system in two different cell geometries, one cubic and the
- other orthorombic.
- Also we use three different basis sets STO-3G, 3-21G and 6-31G**.
- We only use the Slater-Dirac functional because of convergence issues with
- 
-\series bold 
-Crystal98
-\series default 
-.
+ other orthorhombic.
+ Also we use two different basis sets , STO-3G and 3-21G, and two different
+ theory levels, SlaterDirac and B3LYP .
  We obtain excellent agreement with 
 \series bold 
 Crystal98
@@ -823,6 +832,14 @@ Crystal98
 \series default 
  because we do not use fitting functions in the calculations of the Coulomb
  or the exchange-correlation energies.
+ Also,in Table 
+\begin_inset LatexCommand \ref{table: ConvegOfNaCl}
+
+\end_inset 
+
+ we show the convergence of the energy per atom of a Sodium Cloride test
+ system for increasing system size.
+ This shows convergence with system size, and is akin to k-space integration.
  
 \layout Subsubsection
 
@@ -844,14 +861,15 @@ Crystal98
 \series bold 
 Crystal98
 \series default 
- does substantially better then for sodium Cloride.
+ does substantially better then for sodium Chloride.
  This allows for a much closer scrutiny of the energies then for the previous
  system.
  Again, we obtain excellent agreement with 
 \series bold 
 Crystal98 
 \series default 
-for three different basis sets to within the accuracy of these results.
+for two different basis sets anf theory levels to within the accuracy of
+ these results.
 \layout Subsubsection
 
 Diamond
@@ -862,40 +880,29 @@ Table
 
 \end_inset 
 
- shows our results for the total energy for Diamond and Graphite as compared
- to results obtained from 
+ shows our results for the total energy for Diamond as compared to results
+ obtained from 
 \series bold 
 Crystal98
 \series default 
 .
+ Agian we obtain excellent agreement to within the accuracy of the 
+\series bold 
+Crystal98 
+\series default 
+results.
 \layout Section
 
 Scaling
 \layout Standard
 
-For testing of linear scaling, we us a set of dense molecular nitrogen systems
- obtained from molecular dynamics simulations.
- Figure 
-\begin_inset LatexCommand \ref{figure:DenseNitrogen}
-
-\end_inset 
-
- shows a Iso-surface potential plot for the largest test system, a dense
- gas of 100 
-\begin_inset Formula \( N_{2} \)
-\end_inset 
-
- nitrogen molecules.
- The electronic iso-surface is at a density of 0.4, and the colors represent
- the Coulomb potential projected upon this surface, yellow being positive
- and blue being negative.
+For testing of linear scaling, we us a set of periodic diamond systems.
  Figure 
 \begin_inset LatexCommand \ref{figure: Scaling_Matrix_Build}
 
 \end_inset 
 
- shows our scaling results of the dense nitrogen periodic system for both
- the 
+ shows our scaling results of diamond periodic system for both the 
 \begin_inset Formula \( J_{QCTC} \)
 \end_inset 
 
@@ -903,23 +910,20 @@ For testing of linear scaling, we us a set of dense molecular nitrogen systems
 \begin_inset Formula \( K_{xc} \)
 \end_inset 
 
- matrix builds for two different error thresholds.
+ matrix builds for two different error thresholds and two different basis
+ sets.
+ Even in this very dense periodic system, linear scaling for the matrix
+ build commences very early.
  Figure 
-\begin_inset LatexCommand \ref{figure:Scaling_Diag}
+\begin_inset LatexCommand \ref{figure: Scaling_Diag}
 
 \end_inset 
 
- also shows scaling results, for these same system and thresholds, for the
- overlap matrix inverter and the density matrix calculator.
- Even in this dense periodic system, linear scaling commences very early,
- around twenty molecules.
- Also, we mention the fact that the crossover for linear scaling for the
- density matrix solver, as opposed to the eigen-solver, is around 50 molecules
- even for these small basis set systems.
- 
-\layout Subsection
-
-Zeolite
+ show our results for the density matrix solver (TRS4) [ref] for two different
+ thresholds and basis sets.
+ Again we see the comencement of linear scaling early, where we see crossover
+ with an eigen-solver around ?? carbon atoms.
+ Figure 
 \layout Section
 
 CONCLUSIONS
@@ -949,15 +953,15 @@ MondoSCF
  (k-d trees) that maximally exploits locality of the density, and allows
  for an efficient treatment of the periodic effects.
  Next, we show the capabilities of MondoSCF for three test condensed phases
- , Sodium Cloride, Magnesium Oxide and Carbon in the Diamond and graphite
+ , Sodium Chloride, Magnesium Oxide and Carbon in the Diamond and graphite
  structures.
  We then compare these results to the periodic Gaussian code 
 \series bold 
 Crystal98.
  
 \series default 
-Next we demonstrate the utility of the code on very large systems such as
- zeolite.
+Next we demonstrate the utility of the code on very large systems such 256
+ diamond.
  Finally we give some conclusion concerning the accuracy and utility of
  MondoSCF and future research directions.
 \layout Section*
@@ -1003,10 +1007,10 @@ Appendix A
 }
 \layout Subsection*
 
-The Penetration Acceptibility Criterion (PAC)
+The Penetration Acceptability Criterion (PAC)
 \layout Standard
 
-Let us consider a generized distribution centered at 
+Let us consider a generalized distribution centered at 
 \begin_inset Formula \( \mathbf{P} \)
 \end_inset 
 
@@ -1014,8 +1018,10 @@ Let us consider a generized distribution centered at
 \layout Standard
 
 
-\begin_inset Formula \[
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \]
+\begin_inset Formula \begin{equation}
+\label{A1}
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) 
+\end{equation}
 
 \end_inset 
 
@@ -1023,14 +1029,18 @@ where
 \layout Standard
 
 
-\begin_inset Formula \[
-\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left( \mathbf{x}-\mathbf{P}\right) ^{2}\right) \]
+\begin_inset Formula \begin{equation}
+\label{A2}
+\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\end{equation}
 
 \end_inset 
 
 Using Cramer's Inequality we can show
-\begin_inset Formula \[
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left( \mathbf{x}-\mathbf{P}\right) ^{2}\right) \]
+\begin_inset Formula \begin{equation}
+\label{A3}
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\end{equation}
 
 \end_inset 
 
@@ -1038,30 +1048,66 @@ where
 \layout Standard
 
 
-\begin_inset Formula \[
-C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}\right) ^{l+m+n}}\]
+\begin_inset Formula \begin{equation}
+\label{A4}
+C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}\right) ^{l+m+n}}
+\end{equation}
 
 \end_inset 
 
 
-\begin_inset Formula \[
+\begin_inset Formula \begin{equation}
+\label{A5}
 \widetilde{\xi }_{\mathbf{P}}=\left\{ \begin{array}{c}
 \xi _{\mathbf{P}}\\
 \xi _{\mathbf{P}}/2
 \end{array}\right. \begin{array}{c}
 \quad L=0\\
 \quad {\rm otherwise}
-\end{array}\]
+\end{array}
+\end{equation}
 
 \end_inset 
 
-This allow us to treat all distributions as if they where s-type gausians,
- which allows us to easilly calculate the penetration error as,
+This allow us to treat all distributions as if they where s-type Gaussian,
+ which allows us to easily calculate the penetration error as,
+\begin_inset Formula \[
+\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) C_{\mathbf{Q}}\exp \left( -\widetilde{\xi }_{\mathbf{Q}}\left| \mathbf{x}-\mathbf{Q}\right| ^{2}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
 \layout Standard
 
 
-\begin_inset Formula \[
-\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}-\mathbf{Q}\right| \right) \geq \tau \]
+\begin_inset Formula \begin{equation}
+\label{A6}
+\qquad \qquad \qquad =\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}-\mathbf{Q}\right| \right) \geq \tau 
+\end{equation}
+
+\end_inset 
+
+However, this is prohibitively expensive to evaluate for a tree code.
+ Inorder to eliminate this computational expense we instead evaluate for
+ each distribution the penetration error considering the other distribution
+ as a delta function of weight one.
+ This leads to two distances which are tabulated beforehand, 
+\begin_inset Formula \( \mathbf{P}_{max} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( \mathbf{Q}_{max} \)
+\end_inset 
+
+.
+ Then our test simply becomes
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A7}
+\left| \mathbf{P}-\mathbf{Q}\right| \leq \left| \mathbf{P}_{max}\right| +\left| \mathbf{Q}_{max}\right| 
+\end{equation}
 
 \end_inset 
 
@@ -1081,90 +1127,229 @@ Appendix B
  
 \layout Subsection*
 
-The Multipole Acceptibility Criterion (MAC)
+The Multipole Acceptability Criterion (MAC)
 \layout Standard
 
-Let us start with the exact expansion of the coulomb intergral into the
- multipole basis
-\begin_inset Formula \[
-\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l}^{m}[{\mathbf{P}}]\, M_{l+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\]
+Let us start by defining some useful quantities
+\begin_inset Formula \begin{equation}
+\label{B1}
+\widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
+\end{equation}
 
 \end_inset 
 
-Let us now assume that the primitive distributiion is of a single algular
- momentum type, 
+
+\begin_inset Formula \begin{equation}
+\label{B2}
+M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
+\end{equation}
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B3}
+{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d{\mathbf{r}}\, \widehat{O}_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
+\end{equation}
+
+\end_inset 
+
+The error in the calculation in the multipole contraction (equation (
+\begin_inset LatexCommand \ref{QCTC}
+
+\end_inset 
+
+)) is the multipoles that we do not sum
+\begin_inset Formula \begin{equation}
+\label{B7}
+\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
+\end{equation}
+
+\end_inset 
+
+ Let us define for the unsold operator
+\begin_inset Formula \[
+{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| \widehat{O}_{l}^{m}\left[ \mathbf{P}\right] \right| ^{2}}\]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B8}
+\qquad \qquad \qquad \quad =\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}\left| P_{l}^{m}(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}\geq 0
+\end{equation}
+
+\end_inset 
+
+and similarly the unsold weights
+\begin_inset Formula \begin{equation}
+\label{B9}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}
+\end{equation}
+
+\end_inset 
+
+Using equations (
+\begin_inset LatexCommand \ref{B1}
+
+\end_inset 
+
+), (
+\begin_inset LatexCommand \ref{B2}
+
+\end_inset 
+
+), (
+\begin_inset LatexCommand \ref{B3}
+
+\end_inset 
+
+), definition (
+\begin_inset LatexCommand \ref{B9}
+
+\end_inset 
+
+) and the iniqualities (ref) 
+\begin_inset Formula \begin{equation}
+\label{B13}
+\left| P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \right| \leq 1
+\end{equation}
+
+\end_inset 
+
+and
+\begin_inset Formula \[
+\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B15}
+\left| \sum _{n}a_{n}\, b_{n}\right| \leq \sqrt{\sum _{n}\left| a_{n}\right| ^{2}\sum _{n'}\left| b_{n'}\right| ^{2}}
+\end{equation}
+
+\end_inset 
+
+we can rewrite this error bound, equation (
+\begin_inset LatexCommand \ref{B7}
+
+\end_inset 
+
+) very compactly as 
+\begin_inset Formula \begin{equation}
+\label{B17}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}[\rho _{1};\left| \mathbf{P}\right| ]\: N\left[ l_{0},l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
+\end{equation}
+
+\end_inset 
+
+where
+\begin_inset Formula \begin{equation}
+\label{B18}
+N\left[ l,l'\right] =\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
+\end{equation}
+
+\end_inset 
+
+However, we still have to eliminate the infinite sum over 
+\begin_inset Formula \( l' \)
+\end_inset 
+
+ within our error expression.
+ Let us consider the limit of
 \layout Standard
 
 
-\begin_inset Formula \[
-\rho _{ab,l}^{m}[{\mathbf{P}}]=\rho _{ab,l}^{m}[{\mathbf{P}}]\delta _{l\, l_{p}}\]
+\begin_inset Formula \begin{equation}
+\label{B24}
+\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}=\lim _{l\rightarrow \infty }\left\{ \left| c_{I}\right| \, \left| \mathbf{d}_{max}\right| ^{l}\right\} ^{1/l}=\left| \mathbf{d}_{max}\right| 
+\end{equation}
 
 \end_inset 
 
-which gives us
-\begin_inset Formula \[
-\frac{1}{2}\sum _{l'=0}^{L'}\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\]
+where 
+\begin_inset Formula \( \left| \mathbf{d}_{max}\right|  \)
+\end_inset 
+
+is the maximum distance of a distribution to the contraction center 
+\begin_inset Formula \( \left| \mathbf{P}\right|  \)
+\end_inset 
+
+.
+ This allows us to deterimine the upper bound to 
+\begin_inset Formula \( {\cal O}_{l}\left[ \rho _{1};\left| \mathbf{Q}\right| \right]  \)
+\end_inset 
+
+.
+ Analyizing equation (
+\begin_inset LatexCommand \ref{B24}
 
 \end_inset 
 
-The error in the calculation then is
-\begin_inset Formula \[
-\varepsilon _{l_{p}}=\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\right| \]
+) we can show that
+\begin_inset Formula \begin{equation}
+\label{B28}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\leq C_{\rho }\left| \mathbf{d}_{max}\right| ^{l}
+\end{equation}
 
 \end_inset 
 
-First let us define
-\begin_inset Formula \[
-{\cal O}_{l}\left[ \left| \mathbf{r}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| O_{l}^{m}(\mathbf{r})\right| ^{2}}=\left| \mathbf{r}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}\left| P_{l}^{m}(\mathbf{r})\right| ^{2}}\approx \left| \mathbf{r}\right| ^{l}\geq 0\]
+Where 
+\begin_inset Formula \( C_{\rho } \)
+\end_inset 
+
+ can be determined from
+\begin_inset Formula \begin{equation}
+\label{B28B}
+C_{\rho }\equiv \max \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| \mathbf{d}_{max}\right| ^{l}}\right) 
+\end{equation}
 
 \end_inset 
 
-Let us rewrite the error bound as
-\layout Standard
+ Next, analyzing the behavior of 
+\begin_inset Formula \( N\left[ l,l'\right]  \)
+\end_inset 
 
+ for large 
+\begin_inset Formula \( l' \)
+\end_inset 
 
-\begin_inset Formula \begin{eqnarray*}
-\varepsilon _{l_{p}} & \leq  & \left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \rho _{ab,l_{p}}^{m}[{\mathbf{P}}]\, M_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, \Lambda ^{m'}_{l'}[{\mathbf{Q}}]\right| \\
- & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}+m_{p})!(l'+m')!}\\
- &  & \qquad \qquad \left| \frac{\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\, P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, P_{l'}^{m'}[{\mathbf{Q}}]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\right| 
-\end{eqnarray*}
+ we find that
+\begin_inset Formula \begin{equation}
+\label{B26}
+N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots \left( l+l'\right) \right) }{l!}=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
+\end{equation}
 
 \end_inset 
 
-which we can rewrite as
-\begin_inset Formula \begin{eqnarray*}
-\varepsilon _{l_{p}} & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
- &  & \left| \frac{\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m_{p})!}{(l_{p}+m_{p})!}P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\, P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m')!}{(l'+m')!}P_{l'}^{m'}[{\mathbf{Q}}]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\right| \\
- & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
- &  & \frac{\left| \int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m_{p})!}{(l_{p}+m_{p})!}P_{l_{p}}^{m_{p}}[{\mathbf{P}}]\right| \left| P_{l_{p}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\right| \left| \int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m')!}{(l'+m')!}P_{l'}^{m'}[{\mathbf{Q}}]\right| }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}
-\end{eqnarray*}
+ Using equations (
+\begin_inset LatexCommand \ref{B26}
 
 \end_inset 
 
-using the inequalities
-\layout Standard
-
-
-\begin_inset Formula \[
-\begin{array}{c}
-\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| \\
-\left| P_{l}^{m}(\mathbf{R})\right| \leq 1\\
-\sum _{m}\frac{(l-m)!}{(l+m)!}\left| \mathbf{r}\right| ^{l}\, P^{m}_{l}(\mathbf{r})\leq \sqrt{\sum \frac{(l-m)!}{(l+m)!}\left| \mathbf{r}\right| ^{2l}\, \left| P^{m}_{l}(\mathbf{r})\right| ^{2}}={\cal O}_{l}[\left| \mathbf{r}\right| ]
-\end{array}\]
+) and (
+\begin_inset LatexCommand \ref{B28}
 
 \end_inset 
 
-this gives us
-\begin_inset Formula \begin{eqnarray*}
-\varepsilon _{l_{p}} & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\\
- &  & \frac{\left| \sum _{m_{p}'}\int \, d^{3}\mathbf{r}\, \rho _{ab}(\mathbf{r})\left| \mathbf{r}-\mathbf{P}\right| ^{l_{p}}\, \frac{(l_{p}-m'_{p})!}{(l_{p}+m'_{p})!}P_{l_{p}}^{m'_{p}}[{\mathbf{P}}]\right| \left| \sum _{m''}\int \, d^{3}\mathbf{r}\, \Lambda (\mathbf{r})\left| \mathbf{r}-\mathbf{Q}\right| ^{l'}\, \frac{(l'-m'')!}{(l'+m'')!}P_{l'}^{m''}[{\mathbf{Q}}]\right| }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\\
- & \leq  & \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{p}}^{l_{p}}\, \sum _{m'=-l'}^{l'}\, \frac{(l_{p}+l'-m_{p}-m')!}{(l_{p}-m_{p})!(l'-m')!}\frac{{\cal O}_{l_{p}}[\mathbf{P},\, \rho ]\, {\cal O}_{l'}[\mathbf{Q},\, \Lambda ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l'+1}}\\
- & \leq  & \frac{1}{2}\sum _{l=L+1}^{\infty }\frac{{\cal O}_{l_{p}}[\mathbf{P},\, \rho ]\, {\cal N}[l_{p},l]\, {\cal O}_{l}[\mathbf{Q},\, \Lambda ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{p}+l+1}}
-\end{eqnarray*}
+) the error bound can be summed to leading order to give 
+\begin_inset Formula \begin{equation}
+\label{B30}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{L'+1}\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}}
+\end{equation}
 
 \end_inset 
 
+In practice we find that 
+\begin_inset Formula \begin{equation}
+\label{B31}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| \right| ^{L'+l_{0}+2}}
+\end{equation}
 
+\end_inset 
+
+is easier to test for.
 \layout Section*
 
 
@@ -1196,6 +1381,7 @@ Following the work of Nijboer-De Wette
 
 
 \begin_inset Formula \begin{equation}
+\label{C1}
 \frac{1}{r^{l+1}}={\cal G}_{l}\left( \beta ,r\right) +{\cal F}_{l}\left( \beta ,r\right) 
 \end{equation}
 
@@ -1206,13 +1392,15 @@ where
 
 
 \begin_inset Formula \begin{equation}
+\label{C2}
 {\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 
 \end_inset 
 
-and
+
 \begin_inset Formula \begin{equation}
+\label{C3}
 {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 
@@ -1225,28 +1413,24 @@ where
  is a parameter which controls the convergence.
  This allows the lattice sum to be partitioned into rapidly convergent real
  and reciprocal space terms 
-\layout Standard
+\begin_inset Formula \begin{eqnarray*}
+{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
+ & = & \sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, \left\{ {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) +{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \right\} \qquad \qquad \qquad \qquad 
+\end{eqnarray*}
+
+\end_inset 
 
 
-\begin_inset Formula \begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\begin{array}{c}
-\\
+\begin_inset Formula \[
+\qquad \; \; \; \: \: \: \, =\sum _{\mathbf{R}'\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) -\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \]
 
-\end{array}\nonumber \\
- & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) +{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \right\} \begin{array}{c}
-\\
+\end_inset 
 
-\end{array}\nonumber \\
- & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \begin{array}{c}
-\\
 
-\end{array}\nonumber \\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \begin{array}{c}
-\\
-
-\end{array}\nonumber \\
- & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
-\end{eqnarray}
+\begin_inset Formula \begin{equation}
+\label{C4}
++\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}\right) e^{im\phi _{\mathbf{G}}}
+\end{equation}
 
 \end_inset 
 
@@ -1262,6 +1446,7 @@ With an appropriate choice of
 
 
 \begin_inset Formula \begin{equation}
+\label{C5}
 \Gamma \left( m+1,\, x\right) =m\Gamma \left( m,\, x\right) +x^{m}e^{-x}
 \end{equation}
 
@@ -1291,6 +1476,7 @@ however, this leads a numerical instability in the calculation.
  We can remove this problem by analytically summing the gamma function,
  collecting terms, and then rewriting the gamma function as
 \begin_inset Formula \begin{equation}
+\label{C7}
 \Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) \left\{ {\rm erfc}\left( \sqrt{x}\right) +\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n}\right\} 
 \end{equation}
 
@@ -1334,15 +1520,22 @@ Which are tabulated beforehand.
 \end_inset 
 
  tensor in one dimension can be computed analytically
+\begin_inset Formula \begin{eqnarray*}
+{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
+ & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \widetilde{P}_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
+ & = & \left\{ \frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}+\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}\right\} \left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}\right\} 
+\end{eqnarray*}
+
+\end_inset 
+
+
 \layout Standard
 
 
-\begin_inset Formula \begin{eqnarray*}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]\\
- & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} \\
- & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}\left\{ \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}\right\} \\
- & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{o}^{l+1}}\left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} 
-\end{eqnarray*}
+\begin_inset Formula \begin{equation}
+\label{C9}
+=Q_{l}^{m}\left[ a_{0},\theta _{0},\phi _{0}\right] \left\{ \zeta (l+1)-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}\right\} \qquad \qquad \qquad \qquad \quad \; \; 
+\end{equation}
 
 \end_inset 
 
@@ -1358,14 +1551,14 @@ where
 \begin_inset Formula \( \phi _{0} \)
 \end_inset 
 
- are the intial box dimension and angles which are independent of the summation.
- In two dimension, the foureier integrals for the calculation of 
+ are the initial box dimension and angles which are independent of the summation.
+ In two dimension, the Fourier integrals for the calculation of 
 \begin_inset Formula \( {\cal M} \)
 \end_inset 
 
  tensor become a lot more complicated, therefore we have chosen to use the
  three dimensional formula's and obtain the two dimensional moments via
- numerical integration, where we take the limit as the nonperiodic direction
+ numerical integration, where we take the limit as the non-periodic direction
  goes to infinity,
 \layout Standard
 
@@ -1374,7 +1567,7 @@ where
 {\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
  & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
  & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}\\
- & \Rightarrow  & \\
+ &  & \\
  & = & \sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
  & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right) \\
  & + & \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }\: \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }\: dG_{z}\: \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
@@ -1382,16 +1575,24 @@ where
 
 \end_inset 
 
+
+\begin_inset Formula \begin{equation}
+\label{C10}
+\, 
+\end{equation}
+
+\end_inset 
+
 where 
 \begin_inset Formula \( A_{cell} \)
 \end_inset 
 
- is the area of the cell along the nonperiodic direction.
+ is the area of the cell along the non-periodic direction.
  We have found that we can obtain the 
 \begin_inset Formula \( {\cal M} \)
 \end_inset 
 
- tensor matrix elements to 8-10 digets of accuracy with this technique.
+ tensor matrix elements to 8-10 digits of accuracy with this technique.
 \layout Section*
 
 
@@ -1413,7 +1614,7 @@ Following the work of Redlack and Grindley
 
 \end_inset 
 
- we show the corrections needed inorder to obtain ewald boundry conditions.
+ we show the corrections needed in order to obtain Ewald boundary conditions.
  These corrections exist in both two and three directions and are due the
  the field induced in the box from the surface at infinity, 
 \begin_inset Formula \( S_{\infty } \)
@@ -1425,7 +1626,7 @@ Following the work of Redlack and Grindley
 
 
 \begin_inset Formula \begin{equation}
-\label{BN}
+\label{D1}
 \Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\: d{\mathbf{x}'}\frac{\rho ^{loc}\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| }
 \end{equation}
 
@@ -1433,7 +1634,7 @@ Following the work of Redlack and Grindley
 
 which if we write this as a multipole expansion
 \begin_inset Formula \begin{equation}
-\label{BN}
+\label{D2}
 \Phi _{S_{\infty }}({\mathbf{x}})=\sum _{{\mathbf{R}'}\in S_{\infty }}\, \left[ \frac{{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) }{\left| {\mathbf{x}-\mathbf{R}'}\right| ^{3}}+\frac{1}{2}\sum _{i,j}Q_{ij}\frac{\left( {\mathbf{x}-\mathbf{R}'}\right) _{i}\left( {\mathbf{x}-\mathbf{R}'}\right) _{j}}{\left| \left( {\mathbf{x}-\mathbf{R}'}\right) \right| ^{5}}+\ldots \right] 
 \end{equation}
 
@@ -1447,17 +1648,19 @@ where
 \begin_inset Formula \( Q_{ij} \)
 \end_inset 
 
- are the dipole and quaripole moments of 
+ are the dipole and quadrapole moments of 
 \begin_inset Formula \( \rho ^{loc}\left( {\mathbf{x}}\right)  \)
 \end_inset 
 
  .
- Both the dipole and the quadripole terms contribute to the potential in
- the cell, the dipole directly and the quaripole conditionally.
- Upon summation over the surface, the dipole and quadripole contributions
+ Both the dipole and the quadrapole terms contribute to the potential in
+ the cell, the dipole directly and the quadrupole conditionally.
+ Upon summation over the surface, the dipole and quadrupole contributions
  become
-\begin_inset Formula \[
-\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .\]
+\begin_inset Formula \begin{equation}
+\label{D3}
+\Phi ^{3D}_{S_{\infty }}({\mathbf{x}})=-\frac{4\pi }{3V_{cell}}{\mathbf{p}}\cdot \left( {\mathbf{x}-\mathbf{R}'}\right) +\frac{2\pi }{3V_{cell}}\left( Q_{11}+Q_{22}+Q_{33}\right) .
+\end{equation}
 
 \end_inset 
 
@@ -1466,8 +1669,10 @@ For two dimensions only the dipole contributes to the potential within the
 \layout Standard
 
 
-\begin_inset Formula \[
-\Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) \]
+\begin_inset Formula \begin{equation}
+\label{D4}
+\Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) 
+\end{equation}
 
 \end_inset 
 
@@ -1489,12 +1694,12 @@ eject
 
 \end_inset 
 
- Comparison of Sodium Cloride test systems to Crystal98
+ Comparison of Sodium Chloride test systems to Crystal98
 \layout Standard
 \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="13" columns="6">
+<lyxtabular version="2" rows="9" columns="6">
 <features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
@@ -1584,7 +1789,7 @@ Slater-Dirac
 
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =3.974\\
+\left| a\right| =\left| b\right| =\left| c\right| =3.97394011\\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)
 \end_inset 
@@ -1606,7 +1811,7 @@ MondoSCF
 \layout Standard
 
 
-\begin_inset Formula \( -610.9751176 \)
+\begin_inset Formula \( -610.9753547 \)
 \end_inset 
 
 
@@ -1684,7 +1889,7 @@ Crystal98
 
 \layout Standard
 
-STO-6G
+3-21G
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -1692,115 +1897,7 @@ STO-6G
 
 \layout Standard
 
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-3G**
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
+BLYP
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -1830,6 +1927,11 @@ MondoSCF
 \begin_inset Text
 
 \layout Standard
+
+
+\begin_inset Formula \( -619.3921931 \)
+\end_inset 
+
 
 \end_inset 
 </cell>
@@ -1919,7 +2021,7 @@ Slater-Dirac
 
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =5.630\\
+\left| a\right| =\left| b\right| =\left| c\right| =5.62000000\\
 \alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
 \end{array}\right\}  \)
 \end_inset 
@@ -2019,7 +2121,7 @@ Crystal98
 
 \layout Standard
 
-STO-6G
+3-21G
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2027,115 +2129,7 @@ STO-6G
 
 \layout Standard
 
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-3G**
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
+BLYP
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2165,6 +2159,11 @@ MondoSCF
 \begin_inset Text
 
 \layout Standard
+
+
+\begin_inset Formula \( -2478.1517235 \)
+\end_inset 
+
 
 \end_inset 
 </cell>
@@ -2243,7 +2242,7 @@ Crystal98
 \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="13" columns="6">
+<lyxtabular version="2" rows="9" columns="6">
 <features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
@@ -2333,7 +2332,7 @@ Slater-Dirac
 
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =2.9777\\
+\left| a\right| =\left| b\right| =\left| c\right| =2.97776807\\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)
 \end_inset 
@@ -2355,7 +2354,7 @@ MondoSCF
 \layout Standard
 
 
-\begin_inset Formula \( -268.6324824 \)
+\begin_inset Formula \( -268.6324805 \)
 \end_inset 
 
 
@@ -2433,7 +2432,7 @@ Crystal98
 
 \layout Standard
 
-STO-6G
+3-21G
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2441,120 +2440,7 @@ STO-6G
 
 \layout Standard
 
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( -269.384298 \)
-\end_inset 
-
-9
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-3G**
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
+BLYP
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2584,6 +2470,11 @@ MondoSCF
 \begin_inset Text
 
 \layout Standard
+
+
+\begin_inset Formula \( -273.6929852 \)
+\end_inset 
+
 
 \end_inset 
 </cell>
@@ -2673,7 +2564,7 @@ Slater-Dirac
 
 
 \begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =4.2112\\
+\left| a\right| =\left| b\right| =\left| c\right| =4.21120000\\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)
 \end_inset 
@@ -2695,7 +2586,7 @@ MondoSCF
 \layout Standard
 
 
-\begin_inset Formula \( -1076.2137742 \)
+\begin_inset Formula \( -1076.2137787 \)
 \end_inset 
 
 
@@ -2773,7 +2664,7 @@ Crystal98
 
 \layout Standard
 
-STO-6G
+3-21G
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2781,115 +2672,7 @@ STO-6G
 
 \layout Standard
 
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-3G**
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
+BLYP
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -2919,6 +2702,11 @@ MondoSCF
 \begin_inset Text
 
 \layout Standard
+
+
+\begin_inset Formula \( -1096.1329162 \)
+\end_inset 
+
 
 \end_inset 
 </cell>
@@ -2997,7 +2785,7 @@ Crystal98
 \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="13" columns="6">
+<lyxtabular version="2" rows="3" columns="6">
 <features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
@@ -3077,7 +2865,7 @@ STO-3G
 
 \layout Standard
 
-Slater-Dirac
+BLYP
 \end_inset 
 </cell>
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
@@ -3111,222 +2899,6 @@ MondoSCF
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-6G
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-3-21G
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
 <row topline="true" bottomline="true" newpage="false">
 <cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
 \begin_inset Text
@@ -3377,330 +2949,10 @@ Crystal98
 
 \layout Standard
 
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
 
-\layout Standard
-
-Graphite
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-STO-3G
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =\\
-\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=6
-\end{array}\right\}  \)
+\begin_inset Formula \( -300.6006 \)
 \end_inset 
 
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-3-21G
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-6-31G**
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Slater-Dirac
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-MondoSCF
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-</row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-
-\begin_inset Formula \( \begin{array}{c}
-\\
-
-\end{array} \)
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-Crystal98
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
 
 \end_inset 
 </cell>
@@ -3721,8 +2973,8 @@ Crystal98
 
 \end_inset 
 
- Total energy per atom for the sodium cloride system for increasing system
- size
+ Total energy per atom for sodium chloride for increasing size for the STO-3G/BL
+YPxc system
 \layout Standard
 \align center 
 
@@ -4042,6 +3294,168 @@ Energy (
 
 
 \end_float 
+\begin_float tab 
+\layout Caption
+
+
+\begin_inset LatexCommand \label{ConvergMgO}
+
+\end_inset 
+
+Total energy per atom for magnesium oxide system for increasing size for
+ 8-511G/HF system.
+ The reference Energy from Crystal98 is 
+\begin_inset Formula \( E=-137.3380172921 \)
+\end_inset 
+
+.
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="4" columns="3">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+System Size (
+\begin_inset Formula \( N) \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Energy (
+\begin_inset Formula \( E \)
+\end_inset 
+
+)
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( \frac{E}{N} \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( 8 \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( -1111.67421583 \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( -138.9592770 \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( 64 \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+
+\begin_inset Formula \( 216 \)
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\end_float 
 \layout Standard
 
 \begin_float tab 
@@ -4060,11 +3474,11 @@ Energy (
 \begin_inset Formula \( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2}\right\}  \)
 \end_inset 
 
- and an ortho-rombic simulation cell 
+ and an orthorhombic simulation cell 
 \begin_inset Formula \( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{2\pi }{3},\beta =\frac{2\pi }{3}\right\}  \)
 \end_inset 
 
- where the central cell is substracted.
+ where the central cell is subtracted.
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
@@ -5709,28 +5123,6 @@ flags 5
 
 
 \end_float 
-\begin_float fig 
-\layout Caption
-
-
-\begin_inset LatexCommand \label{figure:DenseNitrogen}
-
-\end_inset 
-
- Iso-surface potential of a 100 molecule Dense Nitrogen system
-\layout Standard
-\align center 
-
-\begin_inset Figure size 476 420
-file N2.eps
-width 3 80
-height 3 50
-flags 15
-
-\end_inset 
-
-
-\end_float 
 \layout Standard
 
 \begin_float fig 
@@ -5749,7 +5141,17 @@ flags 15
 \begin_inset Formula \( K_{xc} \)
 \end_inset 
 
- for the dense molecular nitrogen periodic system.
+ for the dense diamond periodic system for the basis set STO-3G and 3-21G.
+\layout Standard
+
+
+\begin_inset Figure size 500 360
+file Timing_sto3g_321g.ps
+flags 9
+
+\end_inset 
+
+
 \end_float 
 \layout Standard
 
@@ -5757,24 +5159,41 @@ flags 15
 \layout Caption
 
 
-\begin_inset LatexCommand \label{figure:Scaling_Diag}
+\begin_inset LatexCommand \label{figure: Scaling_Diag}
 
 \end_inset 
 
- Scaling results for the overlap matrix inverter and the density matrix
- solver.
- 
-\end_float 
+ Scaling Results for the Density matix solver (TRS4) for the dense diamond
+ periodic for the basis set STO-3G and 3-21G
 \layout Standard
 
+system
+\begin_inset Figure size 500 360
+flags 9
+
+\end_inset 
+
+
+\end_float 
 \begin_float fig 
 \layout Caption
 
 
-\begin_inset LatexCommand \label{figure: Iso_zeolite}
+\begin_inset LatexCommand \label{figure:Dense64diamond}
 
 \end_inset 
 
- Iso-surface plot of zeolite.
+ Iso-surface potential if a 64 carbon atom diamond system
+\layout Standard
+\align center 
+
+\begin_inset Figure size 476 420
+width 3 80
+height 3 50
+flags 15
+
+\end_inset 
+
+
 \end_float 
 \the_end

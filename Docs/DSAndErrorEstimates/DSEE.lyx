@@ -1,0 +1,554 @@
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 218
+\textclass article
+\language english
+\inputencoding auto
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Date
+
+
+\latex latex 
+
+\backslash 
+today
+\layout Title
+
+Data structures and error estimates for O(N) quantum chemistry
+\layout Author
+
+Matt Challacombe and C.
+ J.
+ Tymczak
+\layout Address
+
+Theoretical Division, Los Alamos National Laboratory, Los Alamos, NM 87545,
+ USA
+\layout Abstract
+
+gnu snort fubar
+\layout Section
+
+The Penetration Acceptability Criterion (PAC)
+\layout Standard
+
+Let us consider a generalized distribution centered at 
+\begin_inset Formula \( \mathbf{P} \)
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A1}
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) 
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A2}
+\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) =\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}\left( z-P_{z}\right) ^{n}\exp \left( -\xi _{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\end{equation}
+
+\end_inset 
+
+Using Cramer's Inequality we can show
+\begin_inset Formula \begin{equation}
+\label{A3}
+\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) \leq C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
+\end{equation}
+
+\end_inset 
+
+where
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A4}
+C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde{\xi }_{\mathbf{P}}\right) ^{l+m+n}}
+\end{equation}
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{A5}
+\widetilde{\xi }_{\mathbf{P}}=\left\{ \begin{array}{c}
+\xi _{\mathbf{P}}\\
+\xi _{\mathbf{P}}/2
+\end{array}\right. \begin{array}{c}
+\quad L=0\\
+\quad {\rm otherwise}
+\end{array}
+\end{equation}
+
+\end_inset 
+
+This allow us to treat all distributions as if they where s-type Gaussian,
+ which allows us to easily calculate the penetration error as,
+\begin_inset Formula \[
+\int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) C_{\mathbf{Q}}\exp \left( -\widetilde{\xi }_{\mathbf{Q}}\left| \mathbf{x}-\mathbf{Q}\right| ^{2}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A6}
+\qquad \qquad \qquad =\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}-\mathbf{Q}\right| \right) \geq \tau 
+\end{equation}
+
+\end_inset 
+
+However, this is prohibitively expensive to evaluate for a tree code.
+ Inorder to eliminate this computational expense we instead evaluate for
+ each distribution the penetration error considering the other distribution
+ as a delta function of weight one.
+ This leads to two distances which are tabulated beforehand, 
+\begin_inset Formula \( \mathbf{P}_{max} \)
+\end_inset 
+
+ and 
+\begin_inset Formula \( \mathbf{Q}_{max} \)
+\end_inset 
+
+.
+ Then our test simply becomes
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{A7}
+\left| \mathbf{P}-\mathbf{Q}\right| \leq \left| \mathbf{P}_{max}\right| +\left| \mathbf{Q}_{max}\right| 
+\end{equation}
+
+\end_inset 
+
+
+\layout Section
+
+The Multipole Acceptability Criterion (MAC)
+\layout Standard
+
+Let us start by defining some useful quantities
+\begin_inset Formula \begin{equation}
+\label{B1}
+\widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
+\end{equation}
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B2}
+M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
+\end{equation}
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B3}
+{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d{\mathbf{r}}\, \widehat{O}_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
+\end{equation}
+
+\end_inset 
+
+Next, let us consider the expansion of the coulomb integral into the multipole
+ basis
+\begin_inset Formula \[
+\int \, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{1}\left( \mathbf{r}\right) \: \rho _{2}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B4}
+\approx \frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]M_{l+l'}^{m+m'}[\mathbf{P}-\mathbf{Q}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]
+\end{equation}
+
+\end_inset 
+
+Let us now assume that the primitive distribution 
+\begin_inset Formula \( \rho _{1} \)
+\end_inset 
+
+ is of a single angular momentum type and expanded about its center, 
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{B5}
+{\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]={\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]\delta _{l\, l_{0}}
+\end{equation}
+
+\end_inset 
+
+this gives us
+\begin_inset Formula \[
+\int \, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{1}\left( \mathbf{r}\right) \: \rho _{2}\left( \mathbf{r}'\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B6}
+\approx \frac{1}{2}\sum _{l'=0}^{L'}\, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]
+\end{equation}
+
+\end_inset 
+
+The error in the calculation is then the multipoles that we do not sum
+\begin_inset Formula \begin{equation}
+\label{B7}
+\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
+\end{equation}
+
+\end_inset 
+
+ Let us define for the unsold operator
+\begin_inset Formula \[
+{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!\left| \widehat{O}_{l}^{m}\left[ \mathbf{P}\right] \right| ^{2}}\]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B8}
+\qquad \qquad \qquad \quad =\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}\left| P_{l}^{m}(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}\geq 0
+\end{equation}
+
+\end_inset 
+
+and similarly the unsold weights
+\begin_inset Formula \begin{equation}
+\label{B9}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}
+\end{equation}
+
+\end_inset 
+
+Let us rewrite the error bound as
+\begin_inset Formula \begin{equation}
+\label{B10}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\left| \, \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}{\cal O}_{l_{0}}^{m}[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, {\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]\right| 
+\end{equation}
+
+\end_inset 
+
+Let us also, for compactness of notation, define 
+\begin_inset Formula \begin{equation}
+\label{B11}
+{\cal O}_{l}^{m}\equiv {\cal O}_{l}^{m}[\rho _{1};\mathbf{P}]
+\end{equation}
+
+\end_inset 
+
+where the placement will indicate which distribution it is derived from.
+ Using equations (
+\begin_inset LatexCommand \ref{B2}
+
+\end_inset 
+
+) and (
+\begin_inset LatexCommand \ref{B3}
+
+\end_inset 
+
+) we can write this as
+\begin_inset Formula \[
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \left| \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{(l_{0}+l'-(m+m'))!}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}}\right. \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B12}
+\qquad \left. \frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}{\cal O}_{l_{0}}^{m}\, P_{l_{0}+l'}^{m+m'}\left( \cos \theta _{\mathbf{PQ}}\right) \, \sqrt{(l'+m')!(l'-m')!}{\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}\right| 
+\end{equation}
+
+\end_inset 
+
+for reasons which will become apparent in what follows.
+ Let us use the inequalities (ref)
+\begin_inset Formula \begin{equation}
+\label{B13}
+\left| P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \right| \leq 1
+\end{equation}
+
+\end_inset 
+
+to simplify
+\begin_inset Formula \[
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \left| \sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{(l_{0}+l'-(m+m'))!}{\sqrt{(l_{0}+m)!(l_{0}-m)!}\: \sqrt{(l'+m')!(l'-m')!}}\right. \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B14}
+\qquad \qquad \left. \frac{\sqrt{(l_{0}+m)!(l_{0}-m)!}\, {\cal O}_{l_{0}}^{m}\, \sqrt{(l'+m')!(l'-m')!}\, {\cal O}_{l'}^{m'}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}\right| 
+\end{equation}
+
+\end_inset 
+
+ Now, let use the inequality (ref)
+\begin_inset Formula \[
+\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B15}
+\left| \sum _{n}a_{n}\, b_{n}\right| \leq \sqrt{\sum _{n}\left| a_{n}\right| ^{2}\sum _{n'}\left| b_{n'}\right| ^{2}}
+\end{equation}
+
+\end_inset 
+
+to get
+\begin_inset Formula \[
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}\qquad \qquad \qquad \qquad \qquad \]
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B16}
+\frac{\sqrt{\sum ^{l_{0}}_{m''=-l_{0}}\sum _{m'''=-l'}^{l'}(l_{0}+m'')!(l_{0}-m'')!\left| {\cal O}_{l_{0}}^{m''}\right| ^{2}\: (l'+m''')!(l'-m''')!\left| {\cal O}_{l'}^{m'''}\right| ^{2}}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
+\end{equation}
+
+\end_inset 
+
+Which we can rewrite very compactly as 
+\begin_inset Formula \begin{equation}
+\label{B17}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}[\rho _{1};\left| \mathbf{P}\right| ]\: N\left[ l_{0},l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
+\end{equation}
+
+\end_inset 
+
+where
+\begin_inset Formula \begin{equation}
+\label{B18}
+N\left[ l,l'\right] =\sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
+\end{equation}
+
+\end_inset 
+
+However, we still have to eliminate the infinite sum over 
+\begin_inset Formula \( l' \)
+\end_inset 
+
+ within our error expression.
+ Let us consider the limit of
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{B19}
+\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}
+\end{equation}
+
+\end_inset 
+
+ Considering the density as a sum of delta functions with arbitrary weights.
+ 
+\layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\label{B20}
+\rho \left( \mathbf{r}\right) =\sum _{i}c_{i}\, \delta \left( \mathbf{r}-\mathbf{r}_{i}\right) 
+\end{equation}
+
+\end_inset 
+
+ then for the multipoles
+\begin_inset Formula \begin{equation}
+\label{B21}
+{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}\left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) =\sum _{i}c_{i}\, \widehat{O}_{l}^{m}\left[ \mathbf{r}_{i}-\mathbf{P}\right] 
+\end{equation}
+
+\end_inset 
+
+and for the unsold weights
+\begin_inset Formula \begin{eqnarray*}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ] & = & \sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}\\
+ & = & \sqrt{\sum _{m}(l-m)!(l+m)!\left| \sum _{i}c_{i}\, \widehat{O}_{l}^{m}\left[ \mathbf{r}_{i}-\mathbf{P}\right] \right| ^{2}}
+\end{eqnarray*}
+
+\end_inset 
+
+
+\begin_inset Formula \begin{equation}
+\label{B22}
+\; 
+\end{equation}
+
+\end_inset 
+
+which we can rewrite using the addition therom of anglular momentum as (ref)
+\begin_inset Formula \begin{equation}
+\label{B23}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{ij}c_{i}\, c_{j}^{*}\, \left| \mathbf{r}_{i}-\mathbf{P}\right| ^{l}\left| \mathbf{r}_{j}-\mathbf{P}\right| ^{l}\, P_{l}\left[ \cos \gamma _{ij}\right] }
+\end{equation}
+
+\end_inset 
+
+which allows us to take the limit
+\begin_inset Formula \begin{equation}
+\label{B24}
+\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l}=\lim _{l\rightarrow \infty }\left\{ \left| c_{I}\right| \, \left| \mathbf{d}_{max}\right| ^{l}\right\} ^{1/l}=\left| \mathbf{d}_{max}\right| 
+\end{equation}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( \left| \mathbf{d}_{max}\right|  \)
+\end_inset 
+
+is the maximum distance of a distribution to the contraction center 
+\begin_inset Formula \( \left| \mathbf{P}\right|  \)
+\end_inset 
+
+.
+ Let us rewrite equation (
+\begin_inset LatexCommand \ref{B17}
+
+\end_inset 
+
+) as
+\begin_inset Formula \begin{equation}
+\label{B25}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{N\left[ l_{0},l+L'+1\right] {\cal O}_{l+L'+1}\left[ \rho _{1};\left| \mathbf{Q}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l}}
+\end{equation}
+
+\end_inset 
+
+Analyzing the behavior of 
+\begin_inset Formula \( N\left[ l,l'\right]  \)
+\end_inset 
+
+ for large 
+\begin_inset Formula \( l' \)
+\end_inset 
+
+ we find that
+\begin_inset Formula \begin{equation}
+\label{B26}
+N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots \left( l+l'\right) \right) }{l!}=\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
+\end{equation}
+
+\end_inset 
+
+where 
+\begin_inset Formula \( \alpha _{l}\leq \sqrt{2} \)
+\end_inset 
+
+.
+ Using equation (
+\begin_inset LatexCommand \ref{B26}
+
+\end_inset 
+
+) this can be written as
+\begin_inset Formula \begin{equation}
+\label{B27}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{n\left[ l_{0},l+L'+1\right] {\cal O}_{l+L'+1}\left[ \rho _{1};\left| \mathbf{Q}\right| \right] }{\left| \mathbf{P}-\mathbf{Q}\right| ^{l}}
+\end{equation}
+
+\end_inset 
+
+What remains is to deterimine the upper bound to 
+\begin_inset Formula \( {\cal O}_{l}\left[ \rho _{1};\left| \mathbf{Q}\right| \right]  \)
+\end_inset 
+
+.
+ Analyizing equation (
+\begin_inset LatexCommand \ref{B23}
+
+\end_inset 
+
+) we can show that
+\begin_inset Formula \begin{equation}
+\label{B28}
+{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\leq C_{\rho }\left| \mathbf{d}_{max}\right| ^{l}
+\end{equation}
+
+\end_inset 
+
+Where 
+\begin_inset Formula \( C_{\rho } \)
+\end_inset 
+
+ can be determined from
+\begin_inset Formula \begin{equation}
+\label{B28B}
+C_{\rho }\equiv \max \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| \mathbf{d}_{max}\right| ^{l}}\right) 
+\end{equation}
+
+\end_inset 
+
+Using equation (
+\begin_inset LatexCommand \ref{B28}
+
+\end_inset 
+
+) the error bound can be rewritten as
+\begin_inset Formula \begin{equation}
+\label{B29}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{n\left[ l_{0},l+L'+1\right] \left| \mathbf{d}_{max}\right| ^{l}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l}}
+\end{equation}
+
+\end_inset 
+
+This can then be summed to
+\begin_inset Formula \begin{equation}
+\label{B29B}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{l_{0}+L'+2}}n\left[ l_{0},L'+1\right] \, _{2}F_{1}\left[ 1,\, l_{0}+L'+2,\, L'+2;\, \frac{\left| \mathbf{d}_{max}\right| }{\left| \mathbf{P}-\mathbf{Q}\right| }\right] 
+\end{equation}
+
+\end_inset 
+
+To leading order, this can be simplified to
+\begin_inset Formula \begin{equation}
+\label{B30}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| \mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}\right| ^{L'+1}}{\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}\left| \mathbf{P}-\mathbf{Q}\right| ^{L'+1}}
+\end{equation}
+
+\end_inset 
+
+which bounds equation (
+\begin_inset LatexCommand \ref{B29B}
+
+\end_inset 
+
+).
+\the_end
