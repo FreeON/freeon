@@ -86,7 +86,6 @@ PROGRAM ONX
   TYPE(DBL_VECT)                 :: TmKArr,NERIsArr,TmDOArr,TmREArr,TmFOArr,TmTMArr,TmKTArr
 #endif
   INTEGER                        :: I,NCC,NCD       !per
-  CHARACTER(100)                 :: User
 !--------------------------------------------------------------------------------
 ! vw comments:
 ! o clean up the code.
@@ -98,9 +97,6 @@ PROGRAM ONX
 #else
   CALL StartUp(Args,Prog)
 #endif
-!
-!CALL GetEnv('USER',User)
-!IF(TRIM(User).EQ.'tymczak') WRITE(*,*)'    CJ, The ONX Ghost is back!'
 !
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
@@ -190,6 +186,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Compute and sort the distribution buffers
 !--------------------------------------------------------------------------------
+  !
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   CALL Get_Essential_RowCol(DFastMat,RowPt,NbrRow,ColPt,NbrCol)
@@ -199,7 +196,7 @@ PROGRAM ONX
   !write(*,*) 'List',time2-time1,MyID
 #else
   CALL CPU_TIME(time1)
-  CALL InitBfnInd(DBC,BSp,GMp,BfnInd)
+  IF(CS_OUT%NCells.NE.1) CALL InitBfnInd(DBC,BSp,GMp,BfnInd)
   CALL InitBfnInd(DBD,BSp,GMp,BfnInd)
   CALL CPU_TIME(time2)
   !write(*,*) 'List',time2-time1
@@ -226,18 +223,18 @@ PROGRAM ONX
   CALL CPU_TIME(time1)
 !    Have to bump both buffers 1 and 2, otherwise if buffer2 is to
 !    small, buffer 1 gets bumped infinately untill you run out of memory!
-  ErrorCodeTmp=ErrorCode
-  DO WHILE (ErrorCode/=eAOK) 
-     CALL MemInit(DBC,IB,SB,Drv,BSc,BSp,SchT,BufT,BufN)
-     CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN)
-  ENDDO
-!new if(CS_OUT%NCells.NE.1) THEN
-  ErrorCode=ErrorCodeTmp
+  IF(CS_OUT%NCells.NE.1) THEN
+     ErrorCodeTmp=ErrorCode
+     DO WHILE (ErrorCode/=eAOK) 
+        CALL MemInit(DBC,IB,SB,Drv,BSc,BSp,SchT,BufT,BufN)
+        CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN)
+     ENDDO
+     ErrorCode=ErrorCodeTmp
+  ENDIF
   DO WHILE (ErrorCode/=eAOK) 
      CALL MemInit(DBD,IB,SB,Drv,BSc,BSp,SchT,BufT,BufN)
      CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN)
   ENDDO
-!new endif
   CALL CPU_TIME(time2)
   ! write(*,*) 'DisOrder',time2-time1
 #endif
@@ -291,35 +288,38 @@ PROGRAM ONX
 #ifdef PARALLEL
   TmK  = Zero
   TmDO = Zero
+  !
+#else
+  ! Set this variable for the 
+  ! serial+gaz phase calculations,
+  ! this avoids the skip out of the NCD-loop.
+  IF(CS_OUT%NCells.EQ.1) DBC%LenTC = -1
 #endif
+  !
   xTotNERIs = Zero                                                                            !per
   ! Periodic double sum over R and Rprime                                                     !per
   DO NCC = 1,CS_OUT%NCells                                                                    !per
      PBC%D(:) = CS_OUT%CellCarts%D(:,NCC)                                                     !per
 #ifdef PARALLEL
      time1 = MPI_WTIME()
-     CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN,RowPt,NBrRow)
+     IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN,RowPt,NBrRow)
      time2 = MPI_WTIME()
 #else
      CALL CPU_TIME(time1)
-!new if(CS_OUT%NCells.NE.1) THEN
-     CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN)
-!new endif
+     IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBC,IB,SB,Drv,SchT,BufT,BufN)
      CALL CPU_TIME(time2)
 #endif
      TmDO = TmDO+time2-time1
      IF(DBC%LenTC.EQ.0) CYCLE
-     DO NCD = 1,CS_OUT%NCells                                                                 !per
-        PBC%D(:) = CS_OUT%CellCarts%D(:,NCD)                                                  !per
+     DO NCD = 1,CS_OUT%NCells
+        PBC%D(:) = CS_OUT%CellCarts%D(:,NCD)
 #ifdef PARALLEL
         time1 = MPI_WTIME()
-        CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN,ColPt,NBrCol)
+        IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN,ColPt,NBrCol)
         time2 = MPI_WTIME()
 #else
         CALL CPU_TIME(time1)
-!new if(CS_OUT%NCells.NE.1) THEN
-        CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN)
-!new endif
+        IF(CS_OUT%NCells.NE.1) CALL DisOrder(PBC,BSc,GMc,BSp,GMp,DBD,IB,SB,Drv,SchT,BufT,BufN)
         CALL CPU_TIME(time2)
 #endif
         TmDO = TmDO+time2-time1
@@ -333,11 +333,13 @@ PROGRAM ONX
         time2 = MPI_WTIME()
         TmK = TmK+time2-time1
 #else
-!new if(CS_OUT%NCells.EQ.1) THEN
-!       CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBC,DBC,IB,SB,IS,Drv,SubInd,BfnInd)
-!new then
-        CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
-!new endif
+        IF(CS_OUT%NCells.EQ.1) THEN
+           !serial+gas phase.
+           CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBD,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
+        ELSE
+           !serial+periodic.
+           CALL ComputeK(BSc,GMc,BSp,GMp,D       ,K       ,DBC,DBD,IB,SB,IS,Drv,SubInd,BfnInd)
+        ENDIF
         IF(ErrorCode/=eAOK) THEN
            CALL Delete(K)
            CALL Delete(SubInd)
@@ -373,7 +375,7 @@ PROGRAM ONX
 #else
   CALL Delete(D     )
 #endif
-  CALL Delete(DBC   )
+  IF(CS_OUT%NCells.NE.1) CALL Delete(DBC   )
   CALL Delete(DBD   )
   CALL Delete(PBC   )
   !
@@ -536,3 +538,5 @@ PROGRAM ONX
   CALL ShutDown(Prog)
   !
 END PROGRAM ONX
+
+
