@@ -11,7 +11,7 @@ all:	$(ObjectFiles)
 	$(RANLIB) $(MONDO_HOME)/Libs/libMondoMods.a	
 #
 clean:
-	rm -f $(REMOVEALL)
+	rm -f $(REMOVEMODS) $(REMOVEMISC)
 	rm -f \#*
 	rm -f *~
 	ln -s /dev/null core
