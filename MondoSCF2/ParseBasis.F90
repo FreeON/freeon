@@ -18,7 +18,7 @@ CONTAINS
     TYPE(BasisSets)    :: B
     INTEGER            :: I,J
     CHARACTER(LEN=DCL) :: BaseFile,GhostFile
-   !-------------------------------------------------------------------------!    
+    !-------------------------------------------------------------------------!    
     CALL OpenASCII(N%IFile,Inp)
     ! Find out how many basis sets we are going over, and their names
     CALL ParseBasisNames(B)
@@ -359,12 +359,12 @@ CONTAINS
        B%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2Exp%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
        B%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)=BS%Typ2CCo%D(1:B%Typ2Fnk,0:B%MxProjL,1:B%NKind)
     ENDIF
-
-    WRITE(*,*)' HASECPS = ',B%HasECPs
-
-    PrintFlags%Set=DEBUG_BASISSET
-    CALL PPrint(B,Unit_O=6)
+    IF(B%HasECPs)THEN
+       PrintFlags%Set=DEBUG_BASISSET
+       CALL PPrint(B,Unit_O=6)
+    ENDIF
     ! Done with the temp BS
+    BS%HasECPs=.TRUE.
     CALL Delete(BS)
     ! Compute blocking for sparse matrix methods
     CALL New(BlkSiz,B%NAtms)
