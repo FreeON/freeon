@@ -32,7 +32,8 @@ PROGRAM BFGSHess
                                  AB2,AB2Max,GradEDotDeltaX
    REAL(DOUBLE),DIMENSION(6)  :: AA
 #ifdef PERIODIC
-    REAL(DOUBLE),DIMENSION(3) :: VecF,VecA,NRgn
+   REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
+   INTEGER,     DIMENSION(3) :: NRgn
 #endif
 !----------------------------------------------------------------------------
    CALL StartUp(Args,Prog)
