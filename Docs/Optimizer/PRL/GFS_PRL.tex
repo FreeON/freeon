@@ -53,8 +53,8 @@ binding motifs.\\[.1cm]
 
 \section{Introduction}
 
-Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  have 
-realized their promise, delivering energies and forces on nuclei for large systems at 
+Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  are begining to 
+realize their promise, delivering energies and forces on nuclei for large systems at 
 both a numerical accuracy and theoretical level suitable to begin addressing many complex 
 problems.  For example, it is now possible to routinely apply hybrid Hartree-Fock/Density 
 Functional theory to fragment models in molecular biophysics involving 
@@ -171,7 +171,7 @@ we turn to an internal coordinate system to continue development of the independ
 approximation.  In an internal coordinate system, the magnitude of harmonic and anharmonic coupling
 effects are minimized over the course of optimization, remaining roughly constant.  On the other hand,
 in a static basis of normal modes anharmonic coupling effects are larger to begin with \cite{fogarasi_diaghess}, 
-and second order coupling will increase during the course of optimization unless the normal modes are 
+and coupling will increase during the course of optimization unless the normal modes are 
 periodically recomputed, incurring an unacceptable cost for large systems.  
 
 Extending the independent coordinate approximation, it is clear that a differencing scheme will be inaccurate 
@@ -547,21 +547,21 @@ an approximate Newton step taken with the {\em fitted} gradient.   Thus, the ful
 QUICCA algorithm is successful not only because it generates up-to-date curvature information, 
 but because it achieves stability through smoothing effects derived from the weighted fit.
 
-\begin{figure}[t]
-%\resizebox*{3.5in}{!}{\includegraphics{kinasepicture.ps}}
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{kinasepicture.eps}}
 \caption{
 The structure of a 263 atom protein kinase A fragment used
 to test the QUICCA optimizer.}\label{kinasepicture} 
 \end{figure}
 
-\begin{figure}[b]
+\begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{R263logdata2.eps}}
 \caption{
 Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale for the 
 263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
 \end{figure}
 
-\begin{figure}[b]
+\begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{RMSCartData.eps}}
 \caption{
 Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
@@ -580,7 +580,7 @@ of convergence through conditioning of the stepsize.   While methods that render
 number of geometry steps independent of system size do exist\cite{SGoedecker01}, they apply (so far) 
 only to homogeneous systems.  In general though, the number of steps required to minimize to within
 a certain tolerance increases with system size, roughly as ${\cal O}(N_{\rm atoms}^{1/3})$ 
-according to Ref.~\ref{Schlegel_plasminogen_opt}.  Therefore, the rate of linear convergence achieved by an 
+according to Ref.~\onlinecite{Schlegel_plasminogen_opt}.  Therefore, the rate of linear convergence achieved by an 
 optimization algorithm is perhaps a good  measure of performance for large systems.  
 
 An optimization algorithm may be characterized by the ratio $ {\Delta E_{i+1}}/{\Delta E_{i}^n} =c$,
@@ -598,7 +598,7 @@ $\lim_{i \to \infty} c_i = 0$.
 To investigate the convergence properties of QUICCA in a large application, we have carried out
 optimization of a 263 atom fragment of crystallographic Protein Kinase A, involving two Magnesiums,
 two crystallographic waters, ATP and a fragment of the Protein Kinase Inhibitor to which phosphate 
-is transfered. This is a model reactant system obtained from Ref.~\onlinecite{grame} and is shown in 
+is transfered. This is a model reactant system obtained from Ref.~\onlinecite{graeme} and is shown in 
 Fig.~\ref{kinasepicture}.  Optimization was performed at the HF/STO-2G level of theory with an 
 approximate relative energy resolution of $10^{-9}$ hartree using MondoSCF \cite{MondoSCF} at the 
 {\tt tight} accuracy level and with ten peripheral atoms  constrained to mimic steric effects of the enzyme.  
@@ -655,3 +655,4 @@ Alamos National Laboratory is acknowledged.
 
 \bibliography{mondo_new}
 \end{document}
+

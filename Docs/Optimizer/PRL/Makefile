@@ -4,6 +4,7 @@ latex:
 	latex GFS_PRL.tex
 	bibtex GFS_PRL
 	latex GFS_PRL.tex
+	bibtex GFS_PRL
 	latex GFS_PRL.tex
 
 new: 	clean links dvi
