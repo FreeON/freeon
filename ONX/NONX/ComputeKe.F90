@@ -245,6 +245,68 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                   CASE (06060101)
                     CALL Int6611(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+
+                  CASE (02010606)
+                    CALL Int2166(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+
+                  CASE (02020602)
+                    CALL Int2262(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (02020606)
+                    CALL Int2266(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06010602)
+                    CALL Int6162(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06010606)
+                    CALL Int6166(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06020202)
+                    CALL Int6222(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06020601)
+                    CALL Int6261(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06020602)
+                    CALL Int6262(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06020606)
+                    CALL Int6266(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06060201)
+                    CALL Int6621(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06060202)
+                    CALL Int6622(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06060601)
+                    CALL Int6661(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06060602)
+                    CALL Int6662(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+                  CASE (06060606)
+                    CALL Int6666(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D(1),IB%W2%D(1))
+
+
+
+
                   CASE DEFAULT
                     WRITE(*,*) "IntCode=",IntCodeV,IntCodeC
                     CALL Halt(' Illegal integral type in ONX:ComputeKe')

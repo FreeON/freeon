@@ -1,11 +1,12 @@
   SUBROUTINE GetIntCode(LTot,TBra,TKet,IntCodeV,IntCodeC,Explicit)
     USE DerivedTypes
+    USE PrettyPrint
     IMPLICIT NONE
     INTEGER           :: LTot,TBra,TKet,IntCodeV,IntCodeC
     INTEGER           :: TB,TK
     LOGICAL           :: Explicit
 
-    IF(LTot.GT.4) THEN
+    IF(LTot.GT.8) THEN
       Explicit=.FALSE.
       RETURN
     ELSE
@@ -25,6 +26,7 @@
 
     IntCodeC = TBra*10000+TKet
     IntCodeV = TB*10000+TK
+
 !
 ! L=1 exceptions
 !
