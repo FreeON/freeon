@@ -59,7 +59,7 @@ PROGRAM ParaMakeRho
      CALL Get(OffS,'atoff',PrvBase)
      CALL Get(NBasF,'nbasf',PrvBase)
      CALL Get(Dmat,TrixFile('D',Args,-1))
-  ELSEIF(SCFActn=='Restart')THEN
+  ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
      CALL Get(GM,CurGeom)
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
@@ -77,8 +77,10 @@ PROGRAM ParaMakeRho
      CALL Get(BS,CurBase)
      ! Compute a sparse matrix blocking scheme for the old BS
      CALL BlockBuild(GM,BS,BSiz,OffS)
+     NBasF=BS%NBasF
      CALL BCast(BSiz)
      CALL BCast(OffS)
+     CALL BCast(NBasF)
      ! Close the old hdf up 
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(OldFileID)

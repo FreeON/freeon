@@ -29,21 +29,42 @@ PROGRAM MakeS
   TYPE(BSET)                 :: BS
   TYPE(CRDS)                 :: GM
   TYPE(DBL_RNK4)             :: MD
+  TYPE(INT_VECT)             :: Stat
   TYPE(ARGMT)                :: Args
-  INTEGER                    :: P,R,AtA,AtB,NN                         
+  INTEGER                    :: P,R,AtA,AtB,NN,OldFileID                        
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeS'
-!--------------------------------------- 
+!----------------------------------------------
 ! Start up macro
-
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 !----------------------------------------------
 ! Get basis set and geometry
-
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
+  IF(SCFActn=='RestartGeomSwitch') THEN
+     CALL Get(BS,Tag_O=CurBase)
+     ! Close current HDF group 
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! Open the old group and HDF
+     HDF_CurrentID=OpenHDF(Restart)
+     OldFileID=HDF_CurrentID
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get old basis set stuff
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     CALL Get(GM,Tag_O=CurGeom)
+     ! Close the old hdf up 
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+  ELSE
+     CALL Get(BS,Tag_O=CurBase)
+     CALL Get(GM,Tag_O=CurGeom)
+  ENDIF
 !---------------------------------------------- 
 ! Allocations 
-
   CALL NewBraBlok(BS)
   CALL New(S)
 !-----------------------------------------------
@@ -105,19 +126,18 @@ PROGRAM MakeS
   Thresholds%Trix = Thresholds%Trix*1.D-2
   CALL Filter(T1,S)
   Thresholds%Trix = Thresholds%Trix*1.D2
-! the following line gives a problem!!
-!  CALL PPrint(T1,'S',Unit_O=6)
-! write(*,*) 'MakeS: TrixFile(S,Args)=<'//trim(TrixFile('S',Args))//'>'
-  CALL Put(T1,TrixFile('S',Args))
+  IF(SCFActn=='RestartGeomSwitch') THEN
+     CALL Put(T1,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
+  ELSE
+     CALL Put(T1,TrixFile('S',Args))
+  ENDIF
 !-----------------------------------------------------------
 ! Printing
-
   CALL PChkSum(T1,'S',Prog)
   CALL PPrint( T1,'S')
   CALL Plot(   T1,'S')
 !------------------------------------------------------------
 ! Tidy up
-
   CALL Delete(S)
   CALL Delete(T1)
   CALL Delete(BS)

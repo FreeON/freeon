@@ -94,7 +94,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 !
   type(dbcsr) :: Ddbcsr
-  type(bcsr) :: Dbcsr2
+  type(bcsr)  :: Dbcsr2
 
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -103,7 +103,9 @@ PROGRAM ONX
 #endif
 !
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
-  IF(SCFActn=='Restart')THEN
+  IF(SCFActn=='Restart'.OR.             &
+     SCFActn=='RestartBasisSwitch' .OR. &
+    (SCFActn=='Extrapolate' .AND. PrvGeom==CurGeom))THEN
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
      CALL CloseHDF(HDFFileID)

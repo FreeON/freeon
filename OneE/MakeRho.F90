@@ -36,7 +36,7 @@ PROGRAM MakeRho
                                      QMCharge,dQMCharge,MMCharge,dMMCharge,PcntCharge
   CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=7),PARAMETER      :: Prog='MakeRho'
-  REAL(DOUBLE) :: Coeff,TraceD
+  REAL(DOUBLE)                    :: Coeff,TraceD
 !---------------------------------------------------------------------------------------
 ! Start up macro
   CALL StartUp(Args,Prog)
@@ -57,7 +57,7 @@ PROGRAM MakeRho
         CALL Get(OffS,'atoff',PrvBase)
         CALL Get(NBasF,'nbasf',PrvBase)
         CALL Get(Dmat,TrixFile('D',Args,-1))
-     ELSEIF(SCFActn=='Restart')THEN
+     ELSEIF(SCFActn=='Restart'.OR. SCFActn=='RestartBasisSwitch')THEN
         ! Get the current geometry from the current HDF first
         CALL Get(GM,CurGeom)
         ! ... then close current group and HDF
@@ -76,6 +76,7 @@ PROGRAM MakeRho
         CALL Get(BS,CurBase)
         ! Compute a sparse matrix blocking scheme for the old BS
         CALL BlockBuild(GM,BS,BSiz,OffS)
+        NBasF=BS%NBasF
 !       Close the old hdf up 
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(OldFileID)
