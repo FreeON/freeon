@@ -754,7 +754,7 @@ CONTAINS
      ! Now define bond angles and torsions
      !
      CALL AngleList(AtmBTot,BondTot,TOPS,XYZ,Angle,OutP,Cells,IEq)
-     CALL TorsionList(NatmsLoc,TOPS%Tot12,BondTot%IJ,XYZ, &
+     CALL TorsionList(NatmsLoc,AtmBTot,BondTot,XYZ, &
                       AtNum,TorsionIJKL,NTorsion,IEq)
      !
      ! Fill Data into IntCs
@@ -877,15 +877,15 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
+   SUBROUTINE TorsionList(NatmsLoc,AtmB,Bond,XYZ, &
                           AtNum,TorsionIJKL,NTorsion,IEq)
      IMPLICIT NONE
      INTEGER                     :: NatmsLoc,I,I1,I2
      INTEGER                     :: N1,N2,J,J1,J2,NBond
      INTEGER                     :: NTorsion
      INTEGER                     :: I1Num,I2Num,JJ,I3,N3,JJ1,JJ2,NTIni
-     TYPE(INT_RNK2)              :: Top12   
-     TYPE(INT_RNK2)              :: BondIJ  
+     TYPE(ATOMBONDS)             :: AtmB
+     TYPE(BONDDATA)              :: Bond
      TYPE(INT_RNK2)              :: TorsionIJKL,TorsionIJKLAux
      LOGICAL                     :: SelectTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -893,17 +893,20 @@ CONTAINS
      REAL(DOUBLE)                :: Sum1,Sum2
      INTEGER,DIMENSION(1:4)      :: Atoms
      INTEGER,DIMENSION(:)        :: AtNum,IEq
+     INTEGER                     :: I1JJ1,I2JJ2
+     LOGICAL                     :: ExcludeVDW
      !    
+     ExcludeVDW=.TRUE.
      PIHalf=PI*Half
     !SelectTors=.FALSE.
      SelectTors=.TRUE.
-     NBond=SIZE(BondIJ%I,2)
+     NBond=SIZE(Bond%IJ%I,2)
      NTorsion=0
      DO I=1,NBond
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
+       I1=Bond%IJ%I(1,I)
+       I2=Bond%IJ%I(2,I)
+       N1=AtmB%Count%I(I1)
+       N2=AtmB%Count%I(I2)
        NTorsion=NTorsion+N1*N2
      ENDDO
      !    
@@ -911,27 +914,32 @@ CONTAINS
      !    
      NTorsion=0
      DO I=1,NBond 
-       I1=BondIJ%I(1,I)
-       I2=BondIJ%I(2,I)
-       N1=Top12%I(I1,1)
-       N2=Top12%I(I2,1)
+       IF(ExcludeVDW.AND.Bond%Type%C(I)(1:3)/='COV') CYCLE 
+       I1=Bond%IJ%I(1,I)
+       I2=Bond%IJ%I(2,I)
+       N1=AtmB%Count%I(I1)
+       N2=AtmB%Count%I(I2)
        NTIni=NTorsion
        Crit=Zero
        Atoms=0 
        DO J1=1,N1
-         JJ1=Top12%I(I1,J1+1)
+         JJ1=AtmB%Atoms%I(I1,J1)
+         I1JJ1=AtmB%Bonds%I(I1,J1)
+         IF(ExcludeVDW.AND.Bond%Type%C(I1JJ1)(1:3)/='COV') CYCLE 
          IF(SelectTors) THEN
            CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
                      Value_O=Alph1)
-           Sum1=DBLE((Top12%I(JJ1,1)+1)*AtNum(JJ1))/ABS(Alph1-PIHalf+1.D-10)
+           Sum1=DBLE((AtmB%Count%I(JJ1)+1)*AtNum(JJ1))/ABS(Alph1-PIHalf+1.D-10)
          ENDIF
          DO J2=1,N2
-           JJ2=Top12%I(I2,J2+1)
+           JJ2=AtmB%Atoms%I(I2,J2)
+           I2JJ2=AtmB%Bonds%I(I2,J2)
+           IF(ExcludeVDW.AND.Bond%Type%C(I2JJ2)(1:3)/='COV') CYCLE 
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
            IF(SelectTors) THEN
              CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
                        Value_O=Alph2)
-             Sum2=DBLE((Top12%I(JJ2,1)+1)*AtNum(JJ2))/ABS(Alph2-PIHalf+1.D-10)
+             Sum2=DBLE((AtmB%Count%I(JJ2)+1)*AtNum(JJ2))/ABS(Alph2-PIHalf+1.D-10)
              SumU=Sum1+Sum2
              IF(SumU>Crit) THEN
                Crit=SumU
@@ -6266,6 +6274,7 @@ return
        ENDDO
        !
        CALL VDWTop(TOPS%Tot12,TOPS%Cov12,Bond1%IJ,Bond1%N)
+       !
        CALL ConnectFragments(XYZ,AtNum,BondF,TOPS,Cells,IEq)
        !
        CALL SortBonds(NatmsLoc,AtmBF,BondF)
@@ -6273,8 +6282,9 @@ return
        CALL Delete(AtmBF)
        !
        CALL MergeBonds(Bond1,BondF,Bond)
-       CALL Delete(Bond1)
        CALL Delete(BondF)
+       !
+       CALL Delete(Bond1)
        CALL Delete(TOPS%Tot12)
        !
      ! CALL SortBonds(NatmsLoc,AtmB,Bond)
@@ -6956,7 +6966,9 @@ return
      TYPE(TOPOLOGY)                :: TOPS
      TYPE(INT_VECT)                :: Mark
      INTEGER                       :: NDim,IBonds(3),I1,I2,IM
+     LOGICAL                       :: ExcludeVDW
      !
+     ExcludeVDW=.TRUE.
      IF(NDimens==2.AND.TOPS%Tot12%I(IAt,1)>2) THEN
        NDim=AtmB%Count%I(IAt)
        CALL New(Mark,NDim)
@@ -6966,6 +6978,7 @@ return
          DMax=1.D99
          DO J=1,NDim
            K=AtmB%Bonds%I(IAt,J)
+           IF(ExcludeVDW.AND.Bond%Type%C(K)(1:3)/='COV') CYCLE
            D=Bond%Length%D(K) 
            IF(D<DMax.AND.Mark%I(J)==0) THEN
              IBonds(L)=K
@@ -6976,6 +6989,7 @@ return
          Mark%I(IM)=1
        ENDDO 
        CALL Delete(Mark)
+       IF(ANY(IBonds==0)) RETURN !!! no outp
        !
        DO L=1,3
          I1=Bond%IJ%I(1,IBonds(L))
@@ -7063,9 +7077,12 @@ return
      TYPE(TOPOLOGY)         :: TOPS
      INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2,TopDim
      INTEGER,DIMENSION(:)   :: IEq
+     LOGICAL                :: ExcludeVDW
      !
+     ExcludeVDW=.TRUE.
      DO J=1,AtmB%Count%I(IAt)
        B1=AtmB%Bonds%I(IAt,J)
+       IF(ExcludeVDW.AND.Bond%Type%C(B1)(1:3)/='COV') CYCLE
        I1B1=Bond%IJ%I(1,B1)
        I2B1=Bond%IJ%I(2,B1)
        IF(I1B1==IAt) THEN
@@ -7075,6 +7092,7 @@ return
        ENDIF
        DO K=J+1,AtmB%Count%I(IAt)
          B2=AtmB%Bonds%I(IAt,K) 
+         IF(ExcludeVDW.AND.Bond%Type%C(B2)(1:3)/='COV') CYCLE
          I1B2=Bond%IJ%I(1,B2)
          I2B2=Bond%IJ%I(2,B2)
          IF(I1B2==IAt) THEN
@@ -7912,6 +7930,63 @@ return
                   Def(1:6)=='AREA_L'.OR. &
                   Def(1:6)=='VOLM_L')
    END FUNCTION HasLattice
+!
+!----------------------------------------------------------------------
+!
+   SUBROUTINE CleanBLRatio(XYZ,Aux9,PBCDim,GConstr,ProjOut_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:,:) :: Aux9
+     TYPE(BMATR)                 :: BL
+     INTEGER                     :: PBCDim,I,J
+     TYPE(Constr)                :: Gconstr
+     TYPE(INTC)                  :: INTC_L
+     REAL(DOUBLE)                :: Vect1(9),Vect2(9),Proj(9,9)
+     REAL(DOUBLE)                :: V(9,2),U(9,2),S(2,2),SI(2,2)
+     LOGICAL,OPTIONAL            :: ProjOut_O
+     LOGICAL                     :: ProjOut
+     !
+     ProjOut=.FALSE.
+     IF(PRESENT(ProjOut_O)) ProjOut=ProjOut_O
+     IF(PBCDim==0) RETURN
+     IF(ALL(GConstr%RatioABC<Zero).AND. &
+        ALL(GConstr%RatioAlpBetGam<Zero)) RETURN
+     !
+     CALL LatticeINTC(IntC_L,PBCDim)
+     CALL BMatrix(XYZ,IntC_L,BL,PBCDim,1.D0,1.D0)
+     !
+     Vect1=Zero
+     Vect2=Zero
+     DO I=1,3
+       IF(GConstr%RatioABC(I)>Zero) &
+         Vect1=Vect1+GConstr%RatioABC(I)*BL%BL%D(I,:)
+       IF(GConstr%RatioAlpBetGam(I)>Zero) &
+         Vect2=Vect2+GConstr%RatioAlpBetGam(I)*BL%BL%D(I+3,:)
+     ENDDO
+     !
+     DO J=1,9
+       V(J,1)=Vect1(J)
+       V(J,2)=Vect2(J)
+     ENDDO
+     !
+     CALL DGEMM_TNc(2,9,2,One,Zero,V,V,S)
+     CALL SetDSYEVWork(2*2)
+     CALL FunkOnSqMat(2,Inverse,S,SI)
+     CALL UnSetDSYEVWork()
+     !
+     CALL DGEMM_NNc(9,2,2,One,Zero,V,SI,U)
+     CALL DGEMM_NTc(9,2,9,One,Zero,U,V,Proj)
+   ! Proj=-Proj
+   ! DO I=1,9 ; Proj(I,I)=Proj(I,I)+One ; ENDDO
+     !
+     DO I=1,SIZE(Aux9,1)
+       DO J=1,9 ; Vect1(J)=Aux9(I,J) ; ENDDO
+       CALL DGEMM_NNc(9,9,1,One,One,Proj,Vect1,Vect2)
+       DO J=1,9 ; Aux9(I,J)=Vect2(J) ; ENDDO
+     ENDDO
+     !
+     CALL Delete(BL) 
+     CALL Delete(IntC_L)
+   END SUBROUTINE CleanBLRatio
 !
 !-------------------------------------------------------------------
 !
