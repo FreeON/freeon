@@ -6893,7 +6893,11 @@ return
          BondF%Type%C(K)(1:4)='Frag'
        ENDDO
      ENDDO
-     BondF%N=K
+     IF(K==0) THEN
+       CALL Delete(BondF)
+     ELSE
+       BondF%N=K
+     ENDIF
      !
      CALL Delete(CenterFrag)
      CALL Delete(FragID)
