@@ -105,7 +105,7 @@ PROGRAM JForce
 #endif
     CALL PPrint(CS_OUT,'outer sum',Prog)
 ! Set the electrostatic background 
-    CALL PBCFarFieldSetUp(PoleRoot)
+    CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
 #endif
 ! Delete the auxiliary density arrays
     CALL DeleteRhoAux
@@ -136,12 +136,12 @@ PROGRAM JForce
                       +(Pair%A(2)-Pair%B(2))**2 &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair))THEN
-                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
+                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
                  JFrc%D(A1:A2) = JFrc%D(A1:A2) + F_nlm(1:3)
               ENDIF
            ENDDO
 #else
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
+           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
 #endif
         ENDIF
      ENDDO

@@ -615,7 +615,20 @@ MODULE DrvSCFs
      MM_COUL=MM_COUL/CONVF
    ENDIF
 !
-! Do MM Covalent terms !!!!caution!!! rewrite covalent terms, new will be based on GM_MM!!!
+! Temporary for PBC
+!
+#ifdef PERIODIC
+  IF(PBC_On) THEN
+       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
+       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
+       MM_COUL=MM_COUL*CONVF
+       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
+       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
+    RETURN
+  ENDIF
+#endif
+!
+! Do MM Covalent terms
 !
        EBond=Zero
        EAngle=Zero

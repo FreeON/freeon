@@ -44,9 +44,11 @@ PROGRAM MakeRho
   ! Start up macro
   CALL StartUp(Args,Prog)
 #ifdef MMech
+!---------------------------------------------------------------
   IF(HasMM())THEN
      CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
   ENDIF
+!---------------------------------------------------------------
   IF(HasQM())THEN
 #endif
      IF(SCFActn=='BasisSetSwitch')THEN
@@ -111,7 +113,15 @@ PROGRAM MakeRho
      CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
 #ifdef PERIODIC
      ! Calculate the Number of Cells
+#ifdef MMech
+     IF(HasMM()) THEN
+       CALL SetCellNumber(GM_MM)
+     ELSE
+       CALL SetCellNumber(GM)
+     ENDIF
+#else
      CALL SetCellNumber(GM)
+#endif
      CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
      !--------------------------------------------------------------
@@ -153,9 +163,13 @@ PROGRAM MakeRho
      Rho%NQ%I=0
      Rho%Lndx%I=0
      Rho%Expt%D=NuclearExpnt
+#ifdef PERIODIC
+     CALL SetCellNumber(GM_MM)
+#endif
   ELSE
      CALL Halt(' Logic problem in MakeRho ')
   ENDIF !!!! Mechanics
+!---------------------------------------------------------------
   IF(HasMM()) THEN
      ! In case of MM, append MM atoms to nuclear-exponent list 
      ! and update counters and offsets
@@ -164,7 +178,7 @@ PROGRAM MakeRho
      Rho%NQ%I(Rho%NExpt)=QMOffSetQ+GM_MM%Natms
   ENDIF
 #endif
-  ! Calculate NDist and NCoef from NQ and Lndx
+! Calculate NDist and NCoef from NQ and Lndx
   NDist = CalNDist(Rho)
   NCoef = CalNCoef(Rho)
   Rho%OffQ%I=CalOffQ(Rho)
@@ -236,7 +250,6 @@ PROGRAM MakeRho
 #ifdef PERIODIC
 #ifdef MMech
   IF(HasMM()) THEN
-     CALL Warn(' PBCs and QM/MM not yet hacked together...')
      Center(:) = GM_MM%PBC%CellCenter(:)
   ELSE
 #endif
@@ -255,7 +268,17 @@ PROGRAM MakeRho
   ENDIF
 #endif
 #endif
-  CALL CalRhoPoles(MP,Center,Rho2)
+!
+#ifdef MMech
+  IF(HasMM()) THEN
+    CALL CalRhoPoles(MP,Center,Rho2,GM_MM)
+  ELSE
+#endif
+    CALL CalRhoPoles(MP,Center,Rho2,GM)
+#ifdef MMech
+  ENDIF
+#endif
+!
   ! Format output for pruning and multipole stats
 #ifdef MMech
   IF(HasQM()) THEN

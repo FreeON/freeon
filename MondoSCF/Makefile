@@ -40,7 +40,7 @@ ReleaseFiles= SCFLocals.x ParsingKeys.x Spawn.x   \
               DrvFrcs.x  MondoSCF.x 
 #
 all:	$(ObjectFiles) 
-	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)
 	mv MondoSCF $(MONDO_EXEC)/MondoSCF
 #
 release:$(ReleaseFiles) 

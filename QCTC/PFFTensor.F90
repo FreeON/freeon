@@ -25,18 +25,19 @@ MODULE PFFT
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
-    SUBROUTINE PFFTensor(MaxL,Rmin)
+    SUBROUTINE PFFTensor(MaxL,Rmin,GMLoc)
       INTEGER             :: MaxL
       LOGICAL             :: HaveTensor
       REAL(DOUBLE)        :: Rmin
+      TYPE(CRDS)          :: GMLoc
 !
       TensorC = Zero
       TensorS = Zero
-      IF(GM%PBC%Dimen==0) RETURN
+      IF(GMLoc%PBC%Dimen==0) RETURN
 !
       IF(.NOT. GetTensor(MaxL)) THEN
-         CALL MakePFFT(MaxL,Rmin)
-         CALL PutTensor(MaxL)
+         CALL MakePFFT(MaxL,Rmin,GMLoc)
+         CALL PutTensor(MaxL,GMLoc)
       ENDIF
 !
     END SUBROUTINE PFFTensor
@@ -77,17 +78,18 @@ MODULE PFFT
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE PutTensor(MaxL)
+    SUBROUTINE PutTensor(MaxL,GMLoc)
       INTEGER             :: MaxL,IMin,JMin,KMin,L,M,LM
       CHARACTER(LEN=120)  :: FileName
       CHARACTER(LEN=1)     :: AWX,AWY,AWZ
+      TYPE(CRDS)           :: GMLoc
 !
       AWX = '0'
       AWY = '0'
       AWZ = '0'
-      IF(GM%PBC%AutoW(1)) AWX = '1'
-      IF(GM%PBC%AutoW(2)) AWY = '1'      
-      IF(GM%PBC%AutoW(3)) AWZ = '1'
+      IF(GMLoc%PBC%AutoW(1)) AWX = '1'
+      IF(GMLoc%PBC%AutoW(2)) AWY = '1'      
+      IF(GMLoc%PBC%AutoW(3)) AWZ = '1'
       FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
                 "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
                 "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
@@ -107,7 +109,7 @@ MODULE PFFT
 !========================================================================================
 ! Calculate the PFFTensor
 !========================================================================================
-    SUBROUTINE MakePFFT(MaxL,Rmin)
+    SUBROUTINE MakePFFT(MaxL,Rmin,GMLoc)
       INTEGER                           :: MaxL
       INTEGER                           :: I,J,K,L,M,LM,NC
       INTEGER                           :: LSwitch
@@ -119,6 +121,7 @@ MODULE PFFT
       REAL(DOUBLE)                      :: LenMax,Delt,IntFac
       REAL(DOUBLE),DIMENSION(3)         :: Vec
       REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
+      TYPE(CRDS)                        :: GMLoc
 !
 !     Initialize 
 !
@@ -128,19 +131,19 @@ MODULE PFFT
 !
       DO I = 1,3
          DO J = 1,3
-            RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
-            LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+            RecpLatVec(I,J) = GMLoc%PBC%InvBoxSh(J,I)
+            LatVec(I,J)     = GMLoc%PBC%BoxShape(I,J)
          ENDDO
       ENDDO
 !
 !     One Dimension
 !
-      IF(GM%PBC%Dimen==1) THEN
-         IF(GM%PBC%AutoW(1)) THEN
+      IF(GMLoc%PBC%Dimen==1) THEN
+         IF(GMLoc%PBC%AutoW(1)) THEN
             CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
-         ELSEIF(GM%PBC%AutoW(2)) THEN
+         ELSEIF(GMLoc%PBC%AutoW(2)) THEN
             CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
-         ELSEIF(GM%PBC%AutoW(3)) THEN      
+         ELSEIF(GMLoc%PBC%AutoW(3)) THEN      
             CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
          ENDIF
          NC = (CS_IN%NCells-1)/2
@@ -154,16 +157,17 @@ MODULE PFFT
 !
 !     Two Dimension
 !
-      IF(GM%PBC%Dimen == 2) THEN
+      IF(GMLoc%PBC%Dimen == 2) THEN
          LSwitch  = 10
-         LenScale = GM%PBC%CellVolume**(Half)
+         LenScale = GMLoc%PBC%CellVolume**(Half)
          Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
          BetaSq   = One/(LenScale)**2
 !           
 !        Sum the Real Space
 !
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax,Rmin)
+            CALL New_CellSet_Sphere(CSMM,GMLoc%PBC%AutoW,LatVec,Rmax,Rmin)
+write(*,*) 'CSMM%NCells= ',CSMM%NCells
             IF(CSMM%NCells .GT. 500000) THEN
                Rmax = 0.99*Rmax
                CALL Delete_CellSet(CSMM)
@@ -196,7 +200,7 @@ MODULE PFFT
          ExpFac = Pi*Pi/BetaSq
          Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+            CALL New_CellSet_Sphere(CSMM,GMLoc%PBC%AutoW,RecpLatVec,Rmax)
             IF(CSMM%NCells .LT. 9) THEN
                Rmax = 1.01D0*Rmax
             ELSE
@@ -209,17 +213,17 @@ MODULE PFFT
          Delt    = LenMax/DBLE(NDiv)
          DO I=-NDiv,NDiv
             Vec(:) = Zero
-            IF(.NOT.GM%PBC%AutoW(1)) Vec(1) = I*Delt
-            IF(.NOT.GM%PBC%AutoW(2)) Vec(2) = I*Delt
-            IF(.NOT.GM%PBC%AutoW(3)) Vec(3) = I*Delt
+            IF(.NOT.GMLoc%PBC%AutoW(1)) Vec(1) = I*Delt
+            IF(.NOT.GMLoc%PBC%AutoW(2)) Vec(2) = I*Delt
+            IF(.NOT.GMLoc%PBC%AutoW(3)) Vec(3) = I*Delt
             DO NC = 1,CSMM%NCells
                PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
                Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
                IF(Rad .GT. 1.D-14) THEN
                   CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
                   DO L = 1,LSwitch
-                     CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                     SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                     CFac = Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
+                     SFac = Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
                      DO M = 0,L
                         LM = LTD(L)+M
                         TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
@@ -233,14 +237,14 @@ MODULE PFFT
 !        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
 !
          DO I=1,3
-            IF(.NOT. GM%PBC%AutoW(I)) THEN
+            IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
                PQ(:) = Zero
                PQ(I) = 1.D-10
                Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
                L     = 2
                CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
+               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume           
                DO M = 0,L
                   LM = LTD(L)+M
                   TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
@@ -251,8 +255,8 @@ MODULE PFFT
                Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
                L     = 2
                CALL IrRegular(L,PQ(1),PQ(2),PQ(3))
-               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume           
+               CFac = Half*Delt*FT_FScriptC_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
+               SFac = Half*Delt*FT_FScriptS_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume           
                DO M = 0,L
                   LM = LTD(L)+M
                   TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac
@@ -283,16 +287,16 @@ MODULE PFFT
 !
 !     Three Dimension
 !
-      IF(GM%PBC%Dimen == 3) THEN
+      IF(GMLoc%PBC%Dimen == 3) THEN
          LSwitch  = 10
-         LenScale = GM%PBC%CellVolume**(One/Three)
+         LenScale = GMLoc%PBC%CellVolume**(One/Three)
          Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
          BetaSq   = One/(LenScale)**2
 !           
 !        Sum the Real Space
 !
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax,Rmin)
+            CALL New_CellSet_Sphere(CSMM,GMLoc%PBC%AutoW,LatVec,Rmax,Rmin)
             IF(CSMM%NCells .GT. 500000) THEN
                Rmax = 0.99*Rmax
                CALL Delete_CellSet(CSMM)
@@ -325,7 +329,7 @@ MODULE PFFT
          ExpFac = Pi*Pi/BetaSq
          Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
          DO
-            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+            CALL New_CellSet_Sphere(CSMM,GMLoc%PBC%AutoW,RecpLatVec,Rmax)
             IF(CSMM%NCells .LT. 27) THEN
                Rmax = 1.01D0*Rmax
             ELSE
@@ -339,8 +343,8 @@ MODULE PFFT
             IF(Rad .GT. 1.D-14) THEN 
                CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
                DO L = 1,LSwitch
-                  CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
-                  SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GM%PBC%CellVolume
+                  CFac = FT_FScriptC_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
+                  SFac = FT_FScriptS_3D(L,ExpFac,Rad)/GMLoc%PBC%CellVolume
                   DO M = 0,L
                      LM = LTD(L)+M
                       TensorC(LM)=TensorC(LM)+Cpq(LM)*CFac-Spq(LM)*SFac

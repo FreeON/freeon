@@ -203,17 +203,18 @@ CONTAINS
 !========================================================================================
 ! Calculate the total Dipole of Rho
 !========================================================================================
-  SUBROUTINE CalRhoPoles(MP,Center,Rho)
+  SUBROUTINE CalRhoPoles(MP,Center,Rho,GMLoc)
     TYPE(CMPoles)             :: MP
     TYPE(HGRho)               :: Rho
     INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
     REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt
     REAL(DOUBLE),DIMENSION(3) :: Center
+    TYPE(CRDS)                :: GMLoc
 !
 !#ifdef PERIODIC
-!    Center(:) = GM%PBC%CellCenter(:)
+!    Center(:) = GMLoc%PBC%CellCenter(:)
 !#else
-!    Center(:) = Half*(GM%BndBox%D(:,2)+GM%BndBox%D(:,1))
+!    Center(:) = Half*(GMLoc%BndBox%D(:,2)+GMLoc%BndBox%D(:,1))
 !#endif
 !
     MP%DPole%D = Zero

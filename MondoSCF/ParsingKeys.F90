@@ -168,6 +168,12 @@ MODULE ParsingKeys
 !
    CHARACTER(LEN=7),  PARAMETER :: POPULATION_ANALYSIS='PopAnalysis' 
    CHARACTER(LEN=8),  PARAMETER :: OPT_MULLIKEN='Mulliken' 
+!-------------------------------------------------
+!  Parsing keys for <Options.CoordType=>
+!
+    CHARACTER(LEN=9),  PARAMETER :: CoordinateType='CoordType'
+    CHARACTER(LEN=7),  PARAMETER :: CoordType_PrimInt='PrimInt'
+    CHARACTER(LEN=9),  PARAMETER :: CoordType_Cartesian='Cartesian'
 !---------------------------------------------------------
 !  Parsing keys for <Options.Accuracy=>
 !

@@ -61,7 +61,7 @@ MODULE NuklarE
           NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
 !         Add in the Far Field, Dipole and Quadripole  Correction
           IF(GM_Loc%PBC%Dimen > 0) THEN
-             NukE = NukE + CTraxFF(Prim,HGBra)
+             NukE = NukE + CTraxFF(Prim,HGBra,GM_Loc)
           ENDIF
 #else
 !         Walk the walk

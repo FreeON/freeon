@@ -243,7 +243,7 @@ MODULE JGen
                               IB=IndexB
                               DO LMNB=StartLB,StopLB  
                                  IB=IB+1
-                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB))
+                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB),GM)
                               ENDDO
                            ENDDO
                         ENDIF

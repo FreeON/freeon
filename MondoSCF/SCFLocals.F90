@@ -1,20 +1,21 @@
 MODULE SCFLocals
    USE DerivedTypes
    USE GlobalCharacters
+   USE GlobalScalars, Only : Current,Previous
    USE Parse
    IMPLICIT NONE
 !--------------------------------------------------
 !  Global status variables
 !
-   INTEGER,DIMENSION(3) :: Current
-   INTEGER,DIMENSION(3) :: Previous
+!  INTEGER,DIMENSION(3) :: Current
+!  INTEGER,DIMENSION(3) :: Previous
    INTEGER              :: PCyc,CCyc,NCyc   
-   CHARACTER(LEN=3)     :: PrvCycl,CurCycl,SCFCycl,NxtCycl
+!  CHARACTER(LEN=3)     :: PrvCycl,CurCycl,SCFCycl,NxtCycl
    INTEGER              :: PBas,CBas
-   CHARACTER(LEN=3)     :: PrvBase,CurBase
+!  CHARACTER(LEN=3)     :: PrvBase,CurBase
    INTEGER              :: PGeo,CGeo,NGeo
-   CHARACTER(LEN=3)     :: PrvGeom,CurGeom,NxtGeom
-   CHARACTER(LEN=20)    :: SCFActn
+!  CHARACTER(LEN=6)     :: PrvGeom,CurGeom,NxtGeom
+!  CHARACTER(LEN=20)    :: SCFActn
 !-----------------------------------------------------------
    INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
    CHARACTER(LEN=DCL),    PARAMETER :: False  = '.FALSE.'   ! False flag
@@ -71,9 +72,6 @@ MODULE SCFLocals
       CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    DIMENSION(MaxSets)    :: BName  ! Basis set name
       INTEGER,     DIMENSION(MaxSets)    :: Method ! SCF method
-#ifdef MMech
-      INTEGER,     DIMENSION(MaxSets)    :: MMMethod ! MM method
-#endif
       INTEGER,     DIMENSION(MaxSets)    :: Model  ! Model chemistry
       INTEGER,     DIMENSION(MaxSets)    :: AccL   ! Accuracy level to use 
       INTEGER,     DIMENSION(MaxSets)    :: NCyc   ! Number of SCF cycles taken for each set
@@ -89,6 +87,7 @@ MODULE SCFLocals
       TYPE(MDControls)                   :: MDC
 !
       CHARACTER(LEN=DEFAULT_CHR_LEN)     :: PopAnalysis
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType ! Coord. type for optimization
 !
    END TYPE
 
