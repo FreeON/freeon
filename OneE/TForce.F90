@@ -24,7 +24,7 @@ PROGRAM TForce
   TYPE(BCSR)                  :: P
 #endif
   INTEGER                     :: NC,I,J
-  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3)   :: A,B,F_nlm,nlm
   TYPE(DBL_RNK2)              :: LatFrc_T
   TYPE(AtomPair)              :: Pair
   TYPE(BSET)                  :: BS
@@ -70,25 +70,50 @@ PROGRAM TForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
+           A=Pair%A
            B=Pair%B
            DO NC=1,CS_OUT%NCells
+              Pair%A=A
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
                  F_nlm(1:3)    = TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
-                 IF(.NOT. Pair%SameAtom) THEN
-                    TFrc%D(A1:A2) = TFrc%D(A1:A2) + Four*F_nlm(1:3)
-                 ENDIF
+                 TFrc%D(A1:A2) = TFrc%D(A1:A2) + Two*F_nlm(1:3)
 !                Lattice Forces
-                 nlm        = AtomToFrac(GM,Pair%B-Pair%A)
+                 nlm        = AtomToFrac(GM,Pair%A)
                  LatFrc_T%D = LatFrc_T%D - Two*LaticeForce(GM,nlm,F_nlm)
+              ENDIF
+              Pair%A=A+CS_OUT%CellCarts%D(:,NC)
+              Pair%B=B
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
+                      +(Pair%A(2)-Pair%B(2))**2  &
+                      +(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 F_nlm(1:3)    = TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 TFrc%D(A1:A2) = TFrc%D(A1:A2) + Two*F_nlm(1:3)
+!                Lattice Forces
+                 nlm        = AtomToFrac(GM,Pair%A)
+                 LatFrc_T%D = LatFrc_T%D + Two*LaticeForce(GM,nlm,F_nlm)
               ENDIF
            ENDDO
         ENDIF
      ENDDO
   ENDDO
+!
+!
+!
+!!$  WRITE(*,*) 'T'
+!!$  DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,TFrc%D(A1:A2)
+!!$  ENDDO
+!!$  WRITE(*,*) 
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
+!!$  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms

@@ -18,7 +18,6 @@ PROGRAM SForce
 
 #ifdef PARALLEL
   USE MondoMPI
-!  TYPE(BCSR)                 :: T1,F,P
   TYPE(DBCSR)                :: T1,F,P_DBCSR
   TYPE(BCSR)                 :: P
   TYPE(DBL_VECT)             :: TotSFrc
@@ -34,9 +33,9 @@ PROGRAM SForce
   TYPE(HGRho)                :: Rho
   TYPE(DBL_VECT)             :: SFrc
   REAL(DOUBLE)               :: SFrcChk
-
+!
   INTEGER                    :: NC,I,J
-  REAL(DOUBLE),DIMENSION(3)  :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3)  :: A,B,F_nlm,nlm
   TYPE(DBL_RNK2)             :: LatFrc_S
   CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
 !---------------------------------------------- 
@@ -100,20 +99,32 @@ PROGRAM SForce
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
-           MN1=MA*NB-1
+           MN1=MA*NB-1           
+           A=Pair%A
            B=Pair%B
            DO NC=1,CS_OUT%NCells
+              Pair%A=A
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
                  F_nlm(1:3)    = TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
-                 IF(.NOT. Pair%SameAtom) THEN
-                    SFrc%D(A1:A2) = SFrc%D(A1:A2) - Four*F_nlm(1:3)
-                 ENDIF
+                 SFrc%D(A1:A2) = SFrc%D(A1:A2) - Two*F_nlm(1:3)
 !                Lattice Forces
-                 nlm        = AtomToFrac(GM,Pair%A-Pair%B)
+                 nlm        = AtomToFrac(GM,Pair%A)
+                 LatFrc_S%D = LatFrc_S%D + Two*LaticeForce(GM,nlm,F_nlm)
+              ENDIF
+              Pair%A=A+CS_OUT%CellCarts%D(:,NC) 
+              Pair%B=B
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
+                      +(Pair%A(2)-Pair%B(2))**2  &
+                      +(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 F_nlm(1:3)    = TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 SFrc%D(A1:A2) = SFrc%D(A1:A2) - Two*F_nlm(1:3)
+!                Lattice Forces
+                 nlm        = AtomToFrac(GM,Pair%A)
                  LatFrc_S%D = LatFrc_S%D - Two*LaticeForce(GM,nlm,F_nlm)
               ENDIF
            ENDDO
@@ -121,6 +132,19 @@ PROGRAM SForce
         ENDIF
      ENDDO
   ENDDO
+!
+!
+!
+!!$  WRITE(*,*) 'S'
+!!$  DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     WRITE(*,'(I3,2x,3(D23.16,2X))') AtA,SFrc%D(A1:A2)
+!!$  END DO
+!!$  WRITE(*,*) 
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
+!!$  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
