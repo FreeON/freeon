@@ -1,11 +1,33 @@
-%\documentstyle[preprint,aps]{revtex}
-\documentstyle[prl,aps]{revtex}
-
-\draft
-\tighten
-\twocolumn
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\commentoutA{\documentclass[superbib,aps,prb,epsfig,floats,twocolumn]{revtex4}}
+\commentoutB{\documentclass[aps,nobibnotes,superbib,byrevtex,preprint]{revtex4}}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{epsfig}
 \begin{document}
+%%
+%%
+
+
+%\documentstyle[preprint,aps]{revtex4}
+%\documentstyle[prl,aps]{revtex4}
+
+%\draft
+%\tighten
+%\twocolumn
+
+%\begin{document}
 
 \date{\today}
 
@@ -17,7 +39,6 @@
 Theoretical Division, Los Alamos National Laboratory,
 Los Alamos, NM 87545, USA}
 
-\maketitle
 
 \begin{abstract}
 A scheme for the construction of the density matrix in terms of
@@ -46,6 +67,7 @@ spectral projection, degeneracy}
 
 \end{abstract}
 
+\maketitle
 
 \section{Introduction}
 
