@@ -27,6 +27,7 @@ SUBROUTINE ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,MB,Drv)
   TYPE(IDrv)               :: Drv       ! VRR/contraction drivers
 
   CALL GetGammaTable(0,IB)
+  CALL GetExpTable(IB)
 
   CALL Halt('enough for now')
 
