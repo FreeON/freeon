@@ -3088,34 +3088,18 @@ MODULE LinAlg
 !
       END SUBROUTINE SpectralBounds
 !---------------------------------------------------------------------
-! One Norm of the Matrix
+!      Frobenious Norm 
 !---------------------------------------------------------------------
-      FUNCTION OneNorm(M)
+      FUNCTION FNorm(M)
         TYPE(BCSR)       :: M
         INTEGER          :: I
-        REAL(DOUBLE)     :: OneNorm
-!
-        OneNorm = Zero
+        REAL(DOUBLE)     :: FNorm
+        FNorm = Zero
         DO I = 1, M%NNon0
-           OneNorm = OneNorm + ABS(M%MTrix%D(I))
+           FNorm = FNorm + (M%MTrix%D(I))**2
         ENDDO
-!
-      END FUNCTION OneNorm
-!---------------------------------------------------------------------
-! Two Norm of the Matrix
-!---------------------------------------------------------------------
-      FUNCTION TwoNorm(M)
-        TYPE(BCSR)       :: M
-        INTEGER          :: I
-        REAL(DOUBLE)     :: TwoNorm
-!
-        TwoNorm = Zero
-        DO I = 1, M%NNon0
-           TwoNorm = TwoNorm + (M%MTrix%D(I))**2
-        ENDDO
-        TwoNorm = SQRT(TwoNorm)
-!
-      END FUNCTION TwoNorm
+        FNorm = SQRT(FNorm)
+      END FUNCTION FNorm
 END MODULE
 
 
