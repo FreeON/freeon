@@ -105,8 +105,21 @@ MODULE PoleTree
                P%Box%BndBox(K,1)=MIN(LeftQ%Box%BndBox(K,1),RightQ%Box%BndBox(K,1))
                P%Box%BndBox(K,2)=MAX(LeftQ%Box%BndBox(K,2),RightQ%Box%BndBox(K,2))
             ENDDO
-            P%Box%Half(:)=Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
-            P%Box%Center(:)=Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
+            P%Box%Half(:)  = Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
+            P%Box%Center(:)= Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
+!           Compute new nodes DBox
+            DO K=1,3
+               P%DBox%BndBox(K,1)=MIN(LeftQ%DBox%BndBox(K,1),RightQ%DBox%BndBox(K,1))
+               P%DBox%BndBox(K,2)=MAX(LeftQ%DBox%BndBox(K,2),RightQ%DBox%BndBox(K,2))
+            ENDDO
+            P%DBox%Half(:)  = Half*(P%DBox%BndBox(:,2)-P%DBox%BndBox(:,1))
+            P%DBox%Center(:)= Half*(P%DBox%BndBox(:,2)+P%DBox%BndBox(:,1))
+!           Compute DMax
+            P%DMax2 = Zero
+            DO K=1,3
+               P%DMax2 = P%DMax2+(P%DBox%Center(K)-P%DBox%BndBox(K,2))**2
+            ENDDO
+!           Compute Zeta
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
 !-----------------------------------------------------------------------------
 !           Translate Left and Right with SPEll+1
@@ -118,17 +131,7 @@ MODULE PoleTree
             IF(.NOT.LeftQ%Leaf)   LeftQ%Ell=SPell
             IF(.NOT.RightQ%Leaf) RightQ%Ell=SPell
 !           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
-            P%Strength=UnsoldO(SPEll+1,P%C,P%S)**UnsoldExp
-            ! Compute DMax.  Way overly pesimistic.  Could be
-            ! improved alot, but would have to store vectors.  Probably
-            ! worth it at some point.
-            LeftDist  = ( LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
-                      + ( LeftQ%Box%Center(2)-P%Box%Center(2))**2 &
-                      + ( LeftQ%Box%Center(3)-P%Box%Center(3))**2 
-            RightDist = (RightQ%Box%Center(1)-P%Box%Center(1))**2 & 
-                      + (RightQ%Box%Center(2)-P%Box%Center(2))**2 &
-                      + (RightQ%Box%Center(3)-P%Box%Center(3))**2  
-            P%DMax2 = MAX(LeftQ%DMax2+LeftDist,RightQ%DMax2+RightDist)
+            P%Strength=Unsold1(SPEll+1,P%C,P%S)**UnsoldExp
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -159,6 +162,13 @@ MODULE PoleTree
          Node%Box%BndBox(2,:)=Rho%Qy%D(KQ)
          Node%Box%BndBox(3,:)=Rho%Qz%D(KQ)
          Node%Box=ExpandBox(Node%Box,Ext(KQ))
+!        Set this nodes DBBox
+         Node%DBox%BndBox(1,:)=Rho%Qx%D(KQ)
+         Node%DBox%BndBox(2,:)=Rho%Qy%D(KQ)
+         Node%DBox%BndBox(3,:)=Rho%Qz%D(KQ)
+         Node%DBox%Half(:)    =Zero
+         Node%DBox%Center(:)  =Node%DBox%BndBox(:,1)     
+         Node%DMax2           =Zero
 !        Allocate and fill HGTF coefficients
          LMNLen=LHGTF(Node%Ell)
          ALLOCATE(Node%Co(1:LMNLen),STAT=Status)
