@@ -36,12 +36,10 @@ PROGRAM QCTC
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-! Get Dipole and Quadripole
-  CALL Get(RhoPoles,'RhoPoles',Args,0)
-  CALL PPrint(RhoPoles,'Rho',Unit_O=6)
 ! Allocations 
   CALL NewBraBlok(BS)
-! Get the Density for Poletree
+! Get multipoles and density
+  CALL Get(RhoPoles,SCFCycl)
   CALL Get(Rho,'Rho',Args,0)
 ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
@@ -54,7 +52,7 @@ PROGRAM QCTC
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 ! Set the electrostatic background 
   CALL PBCFarFieldSetUp(PoleRoot)
 #endif

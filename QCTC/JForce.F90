@@ -43,13 +43,12 @@ PROGRAM JForce
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-! Get Dipole and Quadripole
-  CALL Get(RhoPoles,'RhoPoles',Args,0)
 ! Allocations 
   CALL New(JFrc,3*NAtoms)
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL Get(P,TrixFile('D',Args,1))
-! Get the Density for Poletree
+! Get multipoles and density
+  CALL Get(RhoPoles,NxtCycl)
   CALL Get(Rho,'Rho',Args,1)
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
@@ -62,7 +61,7 @@ PROGRAM JForce
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 ! Set the electrostatic background 
   CALL PBCFarFieldSetUp(PoleRoot)
 #endif
@@ -120,8 +119,8 @@ PROGRAM JForce
   CALL Delete(P)
   CALL Delete(Frc)
   CALL Delete(JFrc)
-  CALL DeleteBraBlok(Gradients_O=.TRUE.)
   CALL Delete(RhoPoles)
+  CALL DeleteBraBlok(Gradients_O=.TRUE.)
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
