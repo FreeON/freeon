@@ -19,7 +19,7 @@ MODULE ONXRng
   USE ONXParameters
   USE MemMan
   USE Stats
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   USE MondoMPI
   USE FastMatrices
 #endif
@@ -30,7 +30,7 @@ MODULE ONXRng
 !--------------------------------------------------------------------------------- 
 ! PUBLIC DECLARATIONS
 !--------------------------------------------------------------------------------- 
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   PUBLIC  :: RangeOfExchangeFASTMAT
 #else
   PUBLIC  :: RangeOfExchangeBCSR
@@ -46,7 +46,7 @@ MODULE ONXRng
   !
 CONTAINS
   !
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   SUBROUTINE RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,D)
 !H--------------------------------------------------------------------------------- 
 !H SUBROUTINE RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,D)

@@ -30,7 +30,7 @@ MODULE ONXGet
   PUBLIC :: GetIntSpace
   PUBLIC :: GetAdrB
   PUBLIC :: GetSubBlk
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   PUBLIC :: Get_Essential_RowCol
 #endif
   !
@@ -265,7 +265,7 @@ CONTAINS
   END SUBROUTINE GetSubBlk
   !
   !
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   SUBROUTINE Get_Essential_RowCol(A,RowPt,NRow,ColPt,NCol)
     IMPLICIT NONE
     !-------------------------------------------------------------------

@@ -12,12 +12,13 @@ MODULE ONXDOrder
   USE ONXParameters
   USE ONXMemory
   USE Stats
-  USE ONXRGen, ONLY: RGen1C
-  USE ONXGet , ONLY: GetIntSpace
-  USE ONXPut , ONLY: PutDis
-  USE ONXHrr , ONLY: HrrKet,HrrBra
-  USE ONXVrr , ONLY: VRRs  ,VRRl
-#ifdef PARALLEL_ONX
+  USE ONXRGen  , ONLY: RGen1C
+  USE ONXGet   , ONLY: GetIntSpace
+  USE ONXPut   , ONLY: PutDis
+  USE ONXHrr   , ONLY: HrrKet,HrrBra
+  USE ONXVrr   , ONLY: VRRs  ,VRRl
+  USE ONXInLoop, ONLY: Contract
+#ifdef PARALLEL
   USE MondoMPI
   USE FastMatrices
 #endif
@@ -30,30 +31,23 @@ MODULE ONXDOrder
 !---------------------------------------------------------------------------------
   PUBLIC :: DisOrder
   !
-  !
-  ! Ultra messy !
-  REAL(DOUBLE), PUBLIC, DIMENSION(3) :: PBC                     !per
-!  Local buffers allocated in MemInit outside of periodic loops !per
-  TYPE(DBL_RNK3), PUBLIC :: SchT                                !per
-  TYPE(INT_RNK3), PUBLIC :: BufT                                !per
-  TYPE(INT_RNK2), PUBLIC :: BufN                                !per
-  !
 CONTAINS
   !
-#ifdef PARALLEL_ONX
-  SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,RCPtr,RCNBr)
+#ifdef PARALLEL
+  SUBROUTINE DisOrder(PBC,BSc,GMc,BSp,GMp,DB,IB,SB,Drv,SchT,BufT,BufN,RCPtr,RCNBr)
 #else
-  SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv)
+  SUBROUTINE DisOrder(PBC,BSc,GMc,BSp,GMp,DB,IB,SB,Drv,SchT,BufT,BufN)
 #endif
 !H--------------------------------------------------------------------------------- 
-!H SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv)
-!H SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,RCPtr,RCNBr)
+!H SUBROUTINE DisOrder(PBC,BSc,GMc,BSp,GMp,DB,IB,SB,Drv)
+!H SUBROUTINE DisOrder(PBC,BSc,GMc,BSp,GMp,DB,IB,SB,Drv,RCPtr,RCNBr)
 !H
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Basis set, coordinates, ect...
 !--------------------------------------------------------------------------------
+    TYPE(DBL_VECT), INTENT(IN) :: PBC
     TYPE(BSET)    , INTENT(IN) :: BSc,BSp   ! basis set info
     TYPE(CRDS)    , INTENT(IN) :: GMc,GMp   ! geometry info
     TYPE(DBuf)                 :: DB        ! ONX distribution buffers
@@ -61,7 +55,10 @@ CONTAINS
     TYPE(DSL )                 :: SB        ! ONX distribution pointers
     TYPE(ISpc)                 :: IS
     TYPE(IDrv)                 :: Drv       ! VRR/contraction drivers
-#ifdef PARALLEL_ONX
+    TYPE(DBL_RNK3) :: SchT                                !per
+    TYPE(INT_RNK3) :: BufT                                !per
+    TYPE(INT_RNK2) :: BufN                                !per
+#ifdef PARALLEL
     TYPE(INT_VECT), INTENT(IN) :: RCPtr
     INTEGER       , INTENT(IN) :: RCNbr
     INTEGER                    :: iRC,GlbIndC
@@ -69,9 +66,6 @@ CONTAINS
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-!old    TYPE(DBL_RNK3)           :: SchT  !These buffers are allocate somewhere else.
-!old    TYPE(INT_RNK3)           :: BufT  !These buffers are allocate somewhere else.
-!old    TYPE(INT_RNK2)           :: BufN  !These buffers are allocate somewhere else.
     REAL(DOUBLE)             :: Test,VSAC
     REAL(DOUBLE)             :: ACx,ACy,ACz,AC2,x,y,z
     REAL(DOUBLE)             :: Zeta,Za,Zc,Cnt,rInt,XiAB
@@ -93,11 +87,6 @@ CONTAINS
 !--------------------------------------------------------------------------------
     INTEGER                  :: NFinal,iT
     !
-!old    CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
-!old    CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-!old    CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-
-    !
     DB%LenCC=0
     DB%LenTC=0
     !
@@ -118,22 +107,22 @@ CONTAINS
     SB%SLDis%I(1)=5
     IndexC=0
     !
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
     DO iRC = 1,RCNbr
        AtC = RCPtr%I(iRC)
 #else
     DO AtC=1,NAtoms
 #endif
 
-       Cx=GMp%Carts%D(1,AtC)+PBC(1)              !per
-       Cy=GMp%Carts%D(2,AtC)+PBC(2)              !per
-       Cz=GMp%Carts%D(3,AtC)+PBC(3)              !per
+       Cx=GMp%Carts%D(1,AtC)+PBC%D(1)              !per
+       Cy=GMp%Carts%D(2,AtC)+PBC%D(2)              !per
+       Cz=GMp%Carts%D(3,AtC)+PBC%D(3)              !per
 
        KC=GMp%AtTyp%I(AtC)
        NBFC=BSp%BfKnd%I(KC)
        DO CFC=1,BSp%NCFnc%I(KC)
           IndexC=IndexC+1
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
           GlbIndC = IndexC!BfnInd%I(AtC)+CFC            !new_para !I do not understand!
           !if(myid==0)write(*,*) 'IndexC',IndexC,'BfnInd%I(AtC)+CFC',BfnInd%I(AtC)+CFC
 #endif
@@ -157,31 +146,13 @@ CONTAINS
           DO AtA=1,NAtoms
              KA=GMc%AtTyp%I(AtA)
              NBFA=BSc%BfKnd%I(KA)
-
-!old#ifdef PERIODIC                                        !per
              Ax=GMc%Carts%D(1,AtA)                     !per
              Ay=GMc%Carts%D(2,AtA)                     !per
              Az=GMc%Carts%D(3,AtA)                     !per
-!moved             Cx=GMp%Carts%D(1,AtC)+PBC(1)              !per
-!moved             Cy=GMp%Carts%D(2,AtC)+PBC(2)              !per
-!moved             Cz=GMp%Carts%D(3,AtC)+PBC(3)              !per
-!old#else                                                  !per
-!old             Ax=GMc%Carts%D(1,AtA)                     !per
-!old             Ay=GMc%Carts%D(2,AtA)                     !per
-!old             Az=GMc%Carts%D(3,AtA)                     !per
-!old             Cx=GMp%Carts%D(1,AtC)                     !per
-!old             Cy=GMp%Carts%D(2,AtC)                     !per
-!old             Cz=GMp%Carts%D(3,AtC)                     !per
-!old#endif                                                 !per
              ACx=Ax-Cx                                 !per
              ACy=Ay-Cy                                 !per
              ACz=Az-Cz                                 !per
              AC2=ACx*ACx+ACy*ACy+ACz*ACz               !per
-!old             ACx=GMc%Carts%D(1,AtA)-GMp%Carts%D(1,AtC)
-!old             ACy=GMc%Carts%D(2,AtA)-GMp%Carts%D(2,AtC) 
-!old             ACz=GMc%Carts%D(3,AtA)-GMp%Carts%D(3,AtC) 
-!old             AC2=ACx*ACx+ACy*ACy+ACz*ACz    
-
 !
 ! Need to call something like SetAtomPair here, the problem 
 ! is that it assumes a single basis set (as in J) but I need 
@@ -201,7 +172,7 @@ CONTAINS
                    NICase=MaxLA-MinLA+1
                    StrideA=StopLA-StartLA+1  
                    CType=NICase*10+NKCase 
-#ifdef PARALLEL_ONX                                                  !new_para
+#ifdef PARALLEL                                                  !new_para
                    ! It seems those things are not used anywhere.
                    II=-1!test MAX(IndexA,GlbIndC)                    !new_para
                    JJ=-1!test MIN(IndexA,GlbIndC)                    !new_para
@@ -214,7 +185,7 @@ CONTAINS
                       IKType=IType*100+KType
                       DB%TBufC%D( 1,iBf)=DBLE(IJ)+Small
                       DB%TBufC%D( 2,iBf)=-DBLE(IndexA)-Small
-#ifdef PARALLEL_ONX                                          !new_para
+#ifdef PARALLEL                                          !new_para
                       DB%TBufC%D( 3,iBf)=DBLE(GlbIndC)+Small !new_para
 #else                                                        !new_para
                       DB%TBufC%D( 3,iBf)=DBLE(IndexC)+Small
@@ -233,7 +204,7 @@ CONTAINS
                       IKType=KType*100+IType
                       DB%TBufC%D( 1,iBf)=DBLE(IJ)+Small
                       DB%TBufC%D( 2,iBf)=DBLE(IndexA)+Small
-#ifdef PARALLEL_ONX                                             !new_para
+#ifdef PARALLEL                                             !new_para
                       DB%TBufC%D( 3,iBf)=DBLE(GlbIndC)+Small    !new_para
 #else                                                           !new_para
                       DB%TBufC%D( 3,iBf)=DBLE(IndexC)+Small
@@ -328,9 +299,6 @@ CONTAINS
                          rInt = DSQRT(GetAbsMax(NInts,IB%W1))
                       ENDIF
                       
-!write(*,*) 'x',x,'y',y,'z',z
-!          write(*,*) 'rInt',rInt
-
                       IF(rInt>Thresholds%Dist) THEN 
                          DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
                          DB%TBufC%D(11,iBf)=rInt
@@ -412,10 +380,6 @@ CONTAINS
     END DO ! Atc
     ErrorCode=eAOK
 9000 CONTINUE
-
-!old    CALL Delete(BufN) !must remove these buffers somewhere.
-!old    CALL Delete(BufT) !must remove these buffers somewhere.
-!old    CALL Delete(SchT) !must remove these buffers somewhere.
     !
   END SUBROUTINE DisOrder
   !

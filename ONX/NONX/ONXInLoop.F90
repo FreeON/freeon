@@ -5,6 +5,7 @@ MODULE ONXInLoop
 !H  PUBLIC:
 !H  o SUB Scatter
 !H  o SUB Digest
+!H  o SUB Contract
 !H
 !H  PRIVATE:
 !H
@@ -18,7 +19,7 @@ MODULE ONXInLoop
   USE ONXMemory
   USE ONXGet , ONLY: GetAdrB
   USE ONXPut , ONLY: PutSubBlk
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
   USE FastMatrices
 #endif
   !
@@ -30,6 +31,7 @@ MODULE ONXInLoop
 !--------------------------------------------------------------------------------- 
   PUBLIC :: Scatter
   PUBLIC :: Digest
+  PUBLIC :: Contract
   !
 CONTAINS
   !
@@ -40,7 +42,7 @@ CONTAINS
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
     !-------------------------------------------------------------------------------
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
     TYPE(FASTMAT ), POINTER       :: K
 #else
     TYPE(BCSR    ), INTENT(INOUT) :: K
@@ -51,7 +53,7 @@ CONTAINS
     INTEGER       , INTENT(IN   ) :: N,NA,NB,IndexA
     REAL(DOUBLE)  , INTENT(IN   ) :: KB(N,NA,NB)
     !-------------------------------------------------------------------------------
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
     TYPE(FASTMAT ), POINTER       :: C
     TYPE(SRST    ), POINTER       :: P
 #endif
@@ -63,7 +65,7 @@ CONTAINS
     AtA  = SubInd%I(1,IndexA)
     NBFA = SubInd%I(2,IndexA)
     RS   = SubInd%I(3,IndexA)
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
     C => FindFastMatRow_1(K,AtA)    ! Should be improved.
 #endif
     !
@@ -74,7 +76,7 @@ CONTAINS
        NBFB   = SubInd%I(2,IndexB)
        CS     = SubInd%I(3,IndexB)
        !
-#ifdef PARALLEL_ONX
+#ifdef PARALLEL
        SRSTCount = C%Nodes
        P => InsertSRSTNode(C%RowRoot,AtB)
        IF(.NOT.ASSOCIATED(P%MTrix)) THEN
@@ -173,5 +175,94 @@ CONTAINS
     END SELECT
     !
   END SUBROUTINE Digest
+  !
+  !
+  SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
+!H--------------------------------------------------------------------------------- 
+!H SUBROUTINE Contract(N,KBra,KKet,NVRR,LngDrv,CDrv,CB,CK,C,U)
+!H
+!H---------------------------------------------------------------------------------
+    IMPLICIT NONE
+    !-------------------------------------------------------------------------------
+    INTEGER, INTENT(IN)        :: N,KBra,KKet,NVRR,LngDrv
+    INTEGER, INTENT(IN)        :: CDrv(4,LngDrv)
+    REAL(DOUBLE), INTENT(IN)   :: CB(KBra,3)
+    REAL(DOUBLE), INTENT(IN)   :: CK(N,KKet,3)
+    REAL(DOUBLE), INTENT(OUT)  :: C(N,NVRR)
+    REAL(DOUBLE), INTENT(IN)   :: U(N,KBra,KKet,NVRR)
+    !-------------------------------------------------------------------------------
+    INTEGER                    :: I,J,K,L,iC,iP,iQ,iU
+    !-------------------------------------------------------------------------------
+    IF (KBra==1.AND.KKet==1) THEN
+       DO L=1,LngDrv
+          iC  = CDrv(1,L)
+          iP  = CDrv(2,L)
+          iQ  = CDrv(3,L)
+          iU  = CDrv(4,L)
+          IF (iP==0.AND.iQ==0) THEN
+             DO I=1,N
+                C(I,iC) = U(I,1,1,iU)
+             END DO
+          ELSEIF(iP.GT.0.AND.iQ.EQ.0) THEN
+             DO I=1,N
+                C(I,iC) = U(I,1,1,iU)*CB(1,iP)
+             END DO
+          ELSEIF(iP.EQ.0.AND.iQ.GT.0) THEN
+             DO I=1,N
+                C(I,iC) = U(I,1,1,iU)*CK(I,1,iQ)
+             END DO
+          ELSE
+             DO I=1,N
+                C(I,iC) = U(I,1,1,iU)*CB(1,iP)*CK(I,1,iQ)
+             END DO
+          END IF
+       END DO ! L
+    ELSE
+       DO L=1,LngDrv
+          iC  = CDrv(1,L)
+          iP  = CDrv(2,L)
+          iQ  = CDrv(3,L)
+          iU  = CDrv(4,L)
+    
+          DO I=1,N
+             C(I,iC)=0.0D0
+          END DO
+          IF(iP.EQ.0.AND.iQ.EQ.0) THEN
+             DO K=1,KKet
+                DO J=1,KBra
+                   DO I=1,N
+                      C(I,iC) = C(I,iC) + U(I,J,K,iU)
+                   END DO
+                END DO
+             END DO
+          ELSEIF(iP.GT.0.AND.iQ.EQ.0) THEN
+             DO K=1,KKet
+                DO J=1,KBra
+                   DO I=1,N
+                      C(I,iC) = C(I,iC) + U(I,J,K,iU)*CB(J,iP)
+                   END DO
+                END DO
+             END DO
+          ELSEIF(iP.EQ.0.AND.iQ.GT.0) THEN
+             DO K=1,KKet
+                DO J=1,KBra
+                   DO I=1,N
+                      C(I,iC) = C(I,iC) + U(I,J,K,iU)*CK(I,K,iQ)
+                   END DO
+                END DO
+             END DO
+          ELSE
+             DO K=1,KKet
+                DO J=1,KBra
+                   DO I=1,N
+                      C(I,iC) = C(I,iC) + U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)
+                   END DO
+                END DO
+             END DO
+          END IF
+       END DO
+    END IF
+    !
+  END SUBROUTINE Contract
   !
 END MODULE ONXInLoop

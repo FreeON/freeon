@@ -13,7 +13,6 @@ MODULE ONXMemInit
   USE PrettyPrint
   USE ONXParameters
   USE ONXMemory
-  USE ONXDOrder  !just need that for the buffer BufN, BufT, SchT.
   !
   IMPLICIT NONE
   PRIVATE
@@ -25,7 +24,7 @@ MODULE ONXMemInit
   !
 CONTAINS
   !
-  SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
+  SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp,SchT,BufT,BufN)
 !H--------------------------------------------------------------------------------- 
 !H SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
 !H
@@ -36,6 +35,11 @@ CONTAINS
     TYPE(DSL ),INTENT(INOUT) :: SB
     TYPE(IDrv),INTENT(INOUT) :: Drv
     TYPE(BSet),INTENT(IN   ) :: BSc,BSp
+
+    TYPE(DBL_RNK3) :: SchT                                !per
+    TYPE(INT_RNK3) :: BufT                                !per
+    TYPE(INT_RNK2) :: BufN                                !per
+
     INTEGER                  :: LR
 !
     IF (ErrorCode==eInit) THEN
@@ -82,7 +86,6 @@ CONTAINS
        CALL Delete(BufT) !per
        CALL Delete(SchT) !per
 
-!old       DB%MAXD = DB%MAXD * 2
        DB%MAXD = DB%MAXD * 2 !1.3D0 !per
 
        CALL New(DB)
