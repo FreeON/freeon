@@ -26,7 +26,7 @@ pentaerythritol tetranitrate (PETN)}
 
 \affiliation{ Theoretical Division, Los Alamos
               National Laboratory,\\ Los Alamos, New Mexico 87545}
-\date{July 30, 2003}
+\date{July 31, 2003}
 
 \begin{abstract}
 All-electron calculations of the hydrostatic compression of
@@ -108,7 +108,8 @@ conclusive due to the lack of rate-dependent information.
 Theoretical predictions of PETN crystal structure, thermal expansion,
 and hydrostatic compression were reported by Sorescu {\it et
 al.}~\cite{Sorescu_1999v103A, Sorescu_1999v103} They used an
-intermolecular potential function in conjunction with a rigid-molecule 
+intermolecular potential function developed in their laboratory
+in conjunction with a rigid-molecule 
 approximation for the molecular structure. Agreement to within one percent 
 of experiment was obtained for the crystal lattice parameters at 300~K, although
 the calculated thermal expansion coefficient was three times smaller than the
@@ -155,7 +156,7 @@ electronic states in the fundamental band gap of the crystal.
 
 In this contribution, we report condensed phase electronic-structure
 calculations of the hydrostatic compression of PETN at absolute zero
-and pressures up to 25 GPa.  We employ an all-electron
+and pressures up to 25~GPa.  We employ an all-electron
 density-functional method using the PBE~\cite{Perdew_96v77} functional
 in conjunction with the 6-31G** Gaussian basis set.  Complete
 optimization of the cell contents and $c/a$ ratio of the lattice
@@ -182,7 +183,7 @@ Calculations were performed using a parallelized version of
 MondoSCF,~\cite{MondoSCF} a suite of programs for linear scaling
 electronic-structure theory and {\it ab initio} molecular dynamics.
 Periodic boundary conditions~\cite{CTymczak03} were used to study the
-PETN crystal.  The MondoSCF code employs a number of advanced $O(N)$
+PETN crystal.  The MondoSCF code employs a number of advanced ${\cal O}(N)$
 techniques such as the quantum chemistry tree code (QCTC) for the
 Coulomb matrix
 build~\cite{MChallacombe96,MChallacombe96B,MChallacombe97} and the
@@ -191,27 +192,35 @@ matrix build.~\cite{MChallacombe00A} Parallelization of MondoSCF has
 been carried out, where an exemplary success is the efficient
 data-parallel algorithm for the HiCu method~\cite{CGan03} with an
 equal-time partitioning scheme that exploits the temporal locality of
-SCF calculations to achieve excellent load balance.  It should be
-pointed out that parallel $O(N)$ methods are a crucial enabling 
-technology for calculations of the type presented here.  We used 
-a cluster of 256 4-CPU HP/Compaq Alphaserver ES45s with the Quadrics 
+SCF calculations to achieve excellent load balance.  
+We used a cluster of 256 4-CPU HP/Compaq Alphaserver ES45s with the Quadrics 
 QsNet High Speed Interconnect to perform the calculations in this work.  
 Most calculations were performed using 32 processors.
 
 \section{Computational Protocol}
 \label{sec:protocol}
-The results described below are for pure, three-dimensionally periodic,
+The results described below are for three-dimensionally periodic,
 gradient-corrected density-functional theory (GGA), using the PBE
-functional.~\cite{Perdew_96v77} A variety of split-valence Gaussian
-basis sets were considered, although all of the calculations reported
-here were performed with the 6-31G** basis set.
-
-For $k$-point sampling, we primarily used the $\Gamma$ point, which is
-sufficient for the purpose in this work, as confirmed by repeating
-some calculations with a larger $1 \times 1 \times 2 $ supercell.
-Thus, unless otherwise stated, all calculations were performed for a
-primary simulation cell corresponding to one crystallographic unit
-cell; i.e., a $1\times 1\times 1 $ system containing two molecules.
+functional~\cite{Perdew_96v77}. The small 3-21G split-valence Gaussian 
+basis set was tried first, but found to be inadequate relative to the
+larger 6-31G** basis set.  Thus, the 6-31G** basis set was used
+for all results reported here. The $\Gamma$-point for the Brillouin zone sampling was 
+used throughout with a $1 \times 1 \times 1 $ crystallographic unit 
+cell containing two molecules (58 atoms).  However, a number of calculations 
+were carried out using a $1 \times 1 \times 2 $ supercell to verify 
+convergence of the $\Gamma$-point sampling (as shown in 
+Fig.~\ref{fig:volume_compress}(a)).  
+%Because PETN has a number of soft modes and we are attempting to resolve 
+%energy differences at the milihartree level, a ``good'' level of numerical 
+%thresholding was used throughout, achieving a relative accuracy of 6-7 digits 
+%in the total energy.  
+Because of the necessity to resolve milihartree energy differences,
+a ``good'' level of numerical approximation was used throughout to
+achieve the required 7-8 digits of accuracy in the total energy,
+which was approximately $-$2600 Hartree.
+The combination of large basis set and accurate numerical
+approximation was mastered through parallel ${\cal O}(N)$ algorithms, a 
+key enabling technology for these types of calculations. 
 
 Starting with the experimental x-ray crystal structure reported by
 Conant {\it et al.},~\cite{Conant_1979} we calculated the zero
@@ -222,12 +231,11 @@ lattice parameters, and fitting the results to a cubic polynomial in
 $a$ and $c$.  A subsequent calculation on a $3 \times 3$ grid centered
 at the minimum predicted from the preceding step was used to obtain an
 improved prediction of the optimized crystal structure.  These
-correspond to $a_0$, $c_0$, and $V_0=a_0^2c_0$.  Verification that the
-resulting tetragonal structure is stable to non-tetragonal variations
-in cell shape were performed by computing energy-minimized
-orthorhombic structures, i.e., $a\neq b\neq c$, in the neighborhood of
-the tetragonal minimum; these tests confirmed that the tetragonal
-structure is favored energetically over nearby orthorhombic ones.
+correspond to $a_0$, $c_0$ and $V_0=a_0^2c_0$.  Stability of the 
+tetragonal structure was checked by energy minimization of nearby
+orthorhombic structures ($a\neq b\neq c$) in the vicinity of the tetragonal 
+minimum; these tests confirmed that the tetragonal structure is favored 
+energetically over neighboring orthorhombic ones.
 
 Energy-minimized structures for a given volume ratio $V/V_0$ were
 obtained by scanning a set of $c/a$ ratios consistent with the desired
@@ -267,18 +275,18 @@ relative to experiment of $-$3.5\%, $-$0.7\%, and 0.1\%, respectively.
 The volumetric hydrostatic compression is summarized in
 Fig.~\ref{fig:volume_compress}.  The variation of the energy with
 volume ratio is shown in Fig.~\ref{fig:volume_compress}(a).  The line
-is a sixth-degree polynomial fit, from which the pressure shown in
+is a sixth degree polynomial fit, from which the pressure shown in
 Fig.~\ref{fig:volume_compress}(b) is obtained as $P=-dE/dV$.  The open
 circles in Fig.~\ref{fig:volume_compress}(b) are the experimental data
 of Olinger {\it et al.}, with experimental uncertainties comparable to
 the symbol sizes.  The calculated volumetric compression is in
 remarkably good agreement with experiment.  The effects of temperature
 would be expected to ``soften'' the calculated isotherm at low
-pressures; however, this effect should diminish quickly with
-increasing compression. This expectation is borne out, based measured 
-and calculated isotherms for 
+pressures;  however, this effect should diminish quickly with
+increasing compression. While perhaps obvious, it is worth pointing out
+that this behavior has been observed for similar systems, including 
 $\beta$-octahydro-1,3,5,7-tetranitro-1,3,5,7-tetrazocine
-($\beta$-HMX).\cite{Gump_2003,Sewell03_unpublished}
+($\beta$-HMX)\cite{Gump_2003,Sewell03_unpublished}.
 
 %\begin{figure}
 %\resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_EDiff_Press.eps}}
@@ -336,16 +344,28 @@ pressure of about 7~GPa.
 %\label{fig:intramolecular}
 %\end{figure}
 
+%In Figs.~\ref{fig:intramolecular}(a) and (b), we show the changes in
+%intramolecular bond lengths and three-center angles as PETN is
+%compressed.  For clarity of presentation, we only include coordinates that
+%undergo significant changes.  Dihedral angles are not shown, as they
+%only exhibit small changes.  (We note that Dick and von
+%Dreele~\cite{Dick_1997} observed variations of up to several degrees
+%in some of the dihedral angles in deuterated PETN between zero
+%and 4.28~GPa.)  It is observed that the bond lengths and angles remain
+%almost constant for $ 0.8 \leq V/V_0 \leq 1.0$, with the onset of
+%sizable changes for higher compressions.
 In Figs.~\ref{fig:intramolecular}(a) and (b), we show the changes in
 intramolecular bond lengths and three-center angles as PETN is
 compressed.  For clarity of presentation, we only include coordinates that
-undergo significant changes.  Dihedral angles are not shown, as they
-only exhibit small changes.  (We note that Dick and von
-Dreele~\cite{Dick_1997} observed variations of up to several degrees
-in some of the dihedral angles in deuterated PETN between zero
-and 4.28 GPa.)  It is observed that the bond lengths and angles remain
-almost constant for $ 0.8 \leq V/V_0 \leq 1.0$, with the onset of
-sizable changes for higher compressions.
+undergo significant changes.  It is observed that the bond lengths and angles
+remain almost constant for $ 0.8 \leq V/V_0 \leq 1.0$, with the onset of
+sizable changes for higher compressions.  Backbone dihedral angles (not shown)
+exhibit qualitatively similar behavior, with changes of 2--5 degrees beginning
+at $V/V_0=0.8$. (We note that Dick and von Dreele~\cite{Dick_1997} observed
+nonmonotonic variations of up to several degrees in some of the dihedral
+angles in deuterated PETN between zero and 4.28~GPa.  We do not see any
+evidence for this in our calculations, based on the four compressions in
+our study that correspond to this pressure interval.)
 Figure~\ref{fig:intramolecular}(c) depicts the pressure response of 
 the three sets of intermolecular distances that are below 3 \AA\/ at zero
 pressure; each of these corresponds to an O$\cdot\cdot\cdot$H
@@ -362,8 +382,8 @@ entirely to reduction of intermolecular distances.  At higher
 pressures, the energetic cost of further reduction of intermolecular
 distances becomes comparable to that associated with distortions of
 intramolecular degrees of freedom.  From our calculations, we conclude
-that this transition occurs at approximately 7~GPa (see
-Fig.~\ref{fig:volume_compress}(b)).  Interestingly, Sorescu {\it et
+that this transition occurs at approximately 7~GPa [see
+Fig.~\ref{fig:volume_compress}(b)].  Interestingly, Sorescu {\it et
 al.}~\cite{Sorescu_1999v103} observed that the deviations under
 hydrostatic compression of their simulated lattice parameters from the
 experimental values increased rapidly for pressures above 6~GPa.  They
@@ -477,9 +497,8 @@ Hydrostatic compression of pentaerythritol tetranitrate (PETN) crystal
 has been studied using all-electron density-functional theory with the
 PBE functional and 6-31G** basis set. Even though our all-electron
 studies are computationally more demanding than a pseudopotential
-approach, the obvious advantage is that the results are free from
-errors that might result from the pseudopotential approximation,
-especially for highly compressed structures.  Optimized molecular
+approach, they are free from associated errors that may arise 
+at high compression.  Optimized molecular
 geometries and tetragonal lattice parameters were obtained at eight
 levels of compression corresponding to pressures between zero and
 25~GPa.  Predictions of the lattice parameters and pressure as a
@@ -497,12 +516,13 @@ forms to the calculated zero Kelvin isotherm are in reasonably good
 agreement with values obtained by application of those same fitting
 forms to the experimental data.  In both cases, the choice of fitting
 form can change the predicted bulk modulus by $\approx$10--25\%.  The
-average theoretical bulk modulus, which corresponds to zero Kelvins,
+average theoretical bulk modulus, which corresponds to zero Kelvin,
 is 32\% larger than the corresponding average experimental value based
-on the room-temperature isotherm.  The success of our all-electron
-approach for PETN suggests that it may be practical to undertake 
-calculations of more challenging properties such as vibrational spectra 
-or to study condensed phase chemistry for PETN and other explosives.
+on the room-temperature isotherm.  The success of these all-electron
+calculations for PETN demonstrates the precision of our ${\cal O}(N)$ 
+algorithms, and suggests that it may be practical to undertake 
+similar calculations on significantly larger, more complicated systems 
+that are well outside the capabilities of conventional algorithms. 
 
 \begin{acknowledgments}
 This work has been carried out under the auspices of the
@@ -526,8 +546,8 @@ $a$(\AA) & $c$(\AA) & $V$(\AA$^3$) & Source \\
 9.383  & 6.711  &  590.8  & Olinger {\it et al.}~\cite{Olinger_1975v62}\\
 9.3776 & 6.7075 &  589.9  & Conant {\it et al.}~\cite{Conant_1979} \\
 %9.117  & 6.721  &  558.6  & Bunte and Sun~\cite{Bunte_2000v104} \\
-9.35   & 6.67   &  583    & Bunte and Sun~\cite{Bunte_2000v104} (NPT-MD, 293K) \\
 9.3348 & 6.6500 &  579.47 & Sorescu {\it et al.}~\cite{Sorescu_1999v103} (NPT-MD, 293K) \\
+9.35   & 6.67   &  583    & Bunte and Sun~\cite{Bunte_2000v104} (NPT-MD, 293K) \\
 % wrong values 9.2836 & 6.5995 &  569.79 & Sorescu {\it et al.}\/ (energy minimization, rigid molecules) \\
 % 9.3471 & 6.6571 &  581.5  & Sorescu {\it et al.}\/ (NPT-MD, 300K, rigid molecules) \\
 \hline\hline
@@ -604,7 +624,7 @@ derivative $\BPrime$ for PETN.
 \begin{figure}
 \resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_EDiff_Press.eps}}
 \caption{Volumetric hydrostatic compression for PETN.
-(a) Relative energy difference. The solid line is a sixth-degree
+(a) Energy difference $\Delta E$. The solid line is a sixth degree
 polynomial fit to the $1\times 1\times 1$ predictions.  Crosses are
 calculations for a $1\times 1\times 2$ supercell, and indicate that
 finite-size effects are minimal.  (b) Pressure-volume relationship
@@ -641,4 +661,5 @@ correspond to O$\cdot\cdot\cdot$H contacts.}
 \label{fig:intramolecular}
 \end{figure}
 \end{document}
+
 
