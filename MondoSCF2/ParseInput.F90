@@ -8,9 +8,7 @@ MODULE ParseInput
   USE ParseGeometries
   USE ControlStructures
   USE PrettyPrint
-#ifdef PARALLEL
   USE ParseParallel
-#endif
 CONTAINS 
   !===============================================================
   ! 'NUFF SAID
@@ -38,9 +36,7 @@ CONTAINS
     CALL MassageCoordinates(C%Geos,C%PBCs)
     ! Load basis sets  
     CALL LoadBasisSets(C%Nams,C%Opts,C%Geos,C%Sets) 
-#ifdef PARALLEL    
     ! Parse in parallel info
     CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-#endif
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput

@@ -31,18 +31,19 @@ CONTAINS
     TYPE(FileNames)      :: N
     INTEGER,DIMENSION(2) :: Clump
     INTEGER              :: NSpace
-#ifdef PARALLEL
     TYPE(INT_VECT)   :: ST
-#endif
     !---------------------------------------------------------------------------!
-#ifdef PARALLEL
     HDF_CurrentID=OpenHDF(N%HFile)
+#ifdef PARALLEL    
     CALL New(ST,3)
     ST%I=(/NSpace,Clump(1),Clump(2)/)
+    WRITE(*,*)' SPACETIME = ',ST%I
     CALL Put(ST,'SpaceTime')
     CALL Delete(ST)
-    CALL CloseHDF(HDF_CurrentID)
+#else
+    CALL Put(Clump(2),'SpaceTime')
 #endif
+    CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE MPIsArchive
 
   SUBROUTINE StateArchive(N,S)
@@ -96,22 +97,12 @@ CONTAINS
        CALL Put(FailedProgram,'failedprogram')
        MaxEll=G%Clone(iCLONE)%PBC%PFFMaxEll
        CALL Put(MaxEll,'MaxEll')
-
-       WRITE(*,*)' SIZE OF TENSORS = ',LSP(2*MaxEll)+1
        CALL New(DoubleVect,LSP(2*MaxEll),0)
        DoubleVect%D=BIG_DBL
        CALL Put(DoubleVect,'PFFTensorC')
        CALL Put(DoubleVect,'PFFTensorS')
        CALL Delete(DoubleVect)
        CALL CloseHDFGroup(HDF_CurrentID)
-
-!  CREATING DATA = cs_in%radius1
-!  CREATING DATA = cs_in1%ncells
-!  CREATING DATA = cs_in1%cellcarts
-!  CREATING DATA = maxell1
-!  CREATING DATA = pfftensorc1
-!  CREATING DATA = pfftensors1
-
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
@@ -132,12 +123,13 @@ CONTAINS
        ! Set the correct PBC cell set list
        CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
        ! Make sure everything is wrapped correctly
-       ! CALL WrapAtoms....
+       CALL WrapAtoms(G%Clone(iCLONE))
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Put the geometry to this group ...
        CALL Put(G%Clone(iCLONE),chGEO)
-       ! ... and the corresponding lattice vectors with resize priviliges, 
-       CALL Put(CS,Unlimit_O=.TRUE.)
+       ! ... and the corresponding lattice vectors which for now ONLY DEPEND
+       ! ON THE BASIS SET.  THIS WILL HAVE TO BE CHANGED WHEN WE ADD BOX FORCES! 
+       CALL Put(CS,Tag_O=IntToChar(cBAS))
        ! Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
        ! And free memory for the the lattice vectors 
@@ -149,17 +141,24 @@ CONTAINS
   ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
   !==============================================================================
   SUBROUTINE SetLatticeVectors(G,C,AtomPairThresh,Rad_O)
-    TYPE(CRDS)              :: G
-    TYPE(CellSet)           :: C
-    REAL(DOUBLE), OPTIONAL  :: Rad_O
-    REAL(DOUBLE)            :: AtomPairThresh,Radius
+    TYPE(CRDS)                :: G
+    TYPE(CellSet)             :: C
+    REAL(DOUBLE), OPTIONAL    :: Rad_O
+    REAL(DOUBLE)              :: AtomPairThresh,Radius,MinBoxDim
     !---------------------------------------------------------------------------!
     ! This is the radius of Gaussian infulence
     IF(PRESENT(Rad_O)) THEN
        C%Radius=Rad_O
     ELSE
+       ! WANT THE MIN DISTANCE FROM CENTER TO EDGE OF CELL 
+       ! MaxBoxDim IS CERTAINLY NOT THE RIGHT ALGORITHM 
+       ! COMMENT OUT FOR NOW 
+       WRITE(*,*)' NEED HELP WITH BOX ONLY PERIODIC ALGORITHM : '
+       WRITE(*,*)' MaxBoxDim   = ',MaxBoxDim(G)
+       WRITE(*,*)' MaxAtomDist = ',MaxAtomDist(G)
        ! GOT RID OF FACTOR OF TWO!!!!!
-       C%Radius=MaxAtomDist(G)+SQRT(AtomPairThresh)
+       ! MUST MUST GET RID OF ATOM DEPENDENCE !!!! 
+       C%Radius=SQRT(AtomPairThresh)+MaxAtomDist(G) 
     ENDIF
     CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,C%Radius)
     CALL Sort_CellSet(C)
@@ -192,14 +191,16 @@ CONTAINS
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Put(B%NExpt(cBAS),'nexpt',chBAS)
        CALL Put(O%Thresholds(cBAS),chBAS)
-       CALL Put(M%Beg(iCLONE,cBAS),'beg',Tag_O=chBAS)
-       CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
-       CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
        CALL Put(B%BSets(iCLONE,cBAS),Tag_O=chBAS)
        CALL Put(B%BSiz(iCLONE,cBAS),'atsiz',Tag_O=chBAS)
        CALL Put(B%OffS(iCLONE,cBAS),'atoff',Tag_O=chBAS)
        CALL Put(B%DExpt(iCLONE,cBAS),'dexpt',Tag_O=chBAS)
        CALL Put(B%Lndex(iCLONE,cBAS),'lndex',Tag_O=chBAS)
+#ifdef PARALLEL
+       CALL Put(M%Beg(iCLONE,cBAS),'beg',Tag_O=chBAS)
+       CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
+       CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
+#endif
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)

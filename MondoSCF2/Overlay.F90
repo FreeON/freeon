@@ -26,10 +26,11 @@ CONTAINS
     END INTERFACE
     !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
-       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
 #ifdef PARALLEL
+       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
        CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
-#else
+#else 
+       CALL MPIsArchive(N,1,M%Clump%I(:,iCLUMP))
        CALL SetArgV(Ex,N,S,M,NArg,ArgV)
 #endif
        ! This is the command line we are going to execute 
@@ -37,7 +38,7 @@ CONTAINS
        DO I=1,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
        ENDDO
-       WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
+       !WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
        ! Log this run
        CALL Logger(CmndLine,.FALSE.)
        ! Create ASCII integer array to beat F9x/C incompatibility
@@ -92,7 +93,7 @@ CONTAINS
     NArg=10
     CALL New(ArgT,NArg)
     ArgT%C(1) =Ex
-    ArgT%C(2) =S%Action
+    ArgT%C(2) =N%SCF_NAME
     ArgT%C(3) =S%Action
     ArgT%C(4) =S%SubAction
     ArgT%C(5) =IntToChar(S%Current%I(1))

@@ -290,12 +290,10 @@ CONTAINS
 #ifdef PERIODIC
     IF(pBAS/=cBAS)DoPFFT=.TRUE.
     IF(DoPFFT)THEN
-       ! CALL LogSCF(Current,'Peridic Far-Field Tensor',.TRUE.)
        CALL Invoke('MakePFFT',N,S,M)
        DoPFFT=.FALSE.
     ENDIF
 #endif
-    WRITE(*,*)' INVOKING MAKES '
     CALL Invoke('MakeS',N,S,M)
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
        CALL Invoke('LowdinO',N,S,M)
@@ -369,7 +367,7 @@ CONTAINS
              Converged(iCLONE)=.TRUE.
           ENDIF
           ! Accept convergence from wrong side if DM thresholds are tightend.
-         IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest)THEN
+         IF(DMaxB<dTest*1D-1.AND.ETotQ<ETest*1D-1)THEN
              Converged(iCLONE)=.TRUE.
           ENDIF
           ! Look for non-decreasing errors due to incomplete numerics
@@ -389,7 +387,9 @@ CONTAINS
        ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
-    ConvergedQ=.TRUE.
+    IF(cSCF>6) &
+       ConvergedQ=.TRUE.
+       
     DO iCLONE=1,G%Clones
        ConvergedQ=ConvergedQ.AND.Converged(iCLONE)
     ENDDO

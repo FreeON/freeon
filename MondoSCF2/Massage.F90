@@ -47,6 +47,8 @@ CONTAINS
     G%PBC%InvBoxSh=G%PBC%InvBoxSh/AngstromsToAU
     G%PBC%CellVolume=G%PBC%CellVolume*AngstromsToAU**G%PBC%Dimen
     G%PBC%CellCenter=G%PBC%CellCenter*AngstromsToAU
+    G%PBC%DipoleFac=G%PBC%DipoleFac/AngstromsToAU**G%PBC%Dimen
+    G%PBC%QupoleFac=G%PBC%QupoleFac/AngstromsToAU**G%PBC%Dimen
 #endif
   END SUBROUTINE ToAtomicUnits
   !============================================================================

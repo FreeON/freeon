@@ -17,6 +17,7 @@ CONTAINS
     TYPE(Parallel)     :: M
     INTEGER            :: I,J
     CHARACTER(LEN=DCL) :: MFile
+#ifdef PARALLEL
     !-------------------------------------------------------------------------!  
     CALL OpenASCII(N%IFile,Inp)
 #if !defined(MPI2)
@@ -74,6 +75,9 @@ CONTAINS
     M%MxAtsNode=MIN(B%MxAts,CEILING(Two*DBLE(B%MxAts)/DBLE(M%NSpace)))
     M%MxBlkNode=MIN(B%MxBlk,CEILING(Two*DBLE(B%MxBlk)/DBLE(M%NSpace)))
     M%MxN0sNode=MIN(B%MxN0s,CEILING(Two*DBLE(B%MxN0s)/DBLE(M%NSpace)))
+#else
+    CALL SpaceTimeSetUp(1,1,G%Clones,M%Clumps,M%Clump)
+#endif
   END SUBROUTINE LoadParallel
   !============================================================================
   ! BREAK PARALLELSIM IN SPACE AND TIME INTO GROUPS OF CLONES 

@@ -103,23 +103,21 @@ MODULE ControlStructures
   END TYPE Periodics
 #endif
 
-#ifdef PARALLEL
   TYPE Parallel
+#ifdef PARALLEL
      CHARACTER(LEN=DCL)                :: Invoking
      CHARACTER(LEN=DCL)                :: ProcFlag
      CHARACTER(LEN=DCL)                :: MachFlag
      CHARACTER(LEN=DCL)                :: MachFile
      INTEGER                           :: NProc
      INTEGER                           :: NSpace
-     INTEGER                           :: Clumps
      INTEGER, DIMENSION(MaxSets)       :: MxAtsNode,MxBlkNode,MxN0sNode
-     TYPE(INT_RNK2)                    :: Clump
      TYPE(INT_VECT),POINTER,        &
           DIMENSION(:,:)         :: Beg,End,GLO
-     
-
+#endif     
+     INTEGER                           :: Clumps
+     TYPE(INT_RNK2)                    :: Clump
   END TYPE Parallel
-#endif
 
   TYPE State
      CHARACTER(LEN=DCL)              :: Action
@@ -200,10 +198,7 @@ MODULE ControlStructures
      TYPE(Periodics)  :: PBCs
 #endif
      TYPE(BasisSets)  :: Sets
-     !     TYPE(MMechanics) :: QMMM
-#ifdef PARALLEL
      TYPE(Parallel)   :: MPIs
-#endif
      TYPE(State)      :: Stat
   END TYPE Controls
 

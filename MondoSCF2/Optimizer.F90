@@ -57,7 +57,7 @@ CONTAINS
     REAL(DOUBLE)           :: DIISErr,GRMSQ,GMAXQ
     REAL(DOUBLE),PARAMETER :: StepLength=3D-1 ! Open issues about this and normalization in GDIIS
     INTEGER                :: iBAS,iGEO,iCLONE,AccL    
-    INTEGER                :: Relaxations=4   ! This should be an input variable at some point
+    INTEGER                :: Relaxations=3   ! This should be an input variable at some point
     LOGICAL                :: Converged
     CHARACTER(LEN=DCL)     :: Mssg
     !----------------------------------------------------------------------------------!
@@ -87,13 +87,12 @@ CONTAINS
        GradMax%D(iGEO)=Zero
        GradRMS%D(iGEO)=Zero
        DO iCLONE=1,C%Geos%Clones
-          WRITE(*,*)'iCLONE = ',iCLONE,' GRADMAX = ',C%Geos%Clone(iCLONE)%GradMax
           GradMAX%D(iGEO)=MAX(GradMax%D(iGEO),C%Geos%Clone(iCLONE)%GradMax)
           GradRMS%D(iGEO)=MAX(GradRMS%D(iGEO),C%Geos%Clone(iCLONE)%GradRMS)
        ENDDO
        ! Gradient quotients
-       GRMSQ=ABS(GradMax%D(iGEO)-GradMax%D(iGEO-1))/ABS(GradMax%D(iGEO)+1.D-50)    
-       GMAXQ=ABS(GradRMS%D(iGEO)-GradRMS%D(iGEO-1))/ABS(GradRMS%D(iGEO)+1.D-50)    
+       !GRMSQ=ABS(GradMax%D(iGEO)-GradMax%D(iGEO-1))/ABS(GradMax%D(iGEO)+1.D-50)    
+       !GMAXQ=ABS(GradRMS%D(iGEO)-GradRMS%D(iGEO-1))/ABS(GradRMS%D(iGEO)+1.D-50)    
        Mssg='Gmax='//TRIM(DblToShrtChar(GradMAX%D(iGEO)))//', Grms='//TRIM(DblToShrtChar(GradRMS%D(iGEO)))
        ! Go downhill by following the gradient or with GDIIS
        IF(iGEO>Relaxations)THEN
@@ -107,11 +106,11 @@ CONTAINS
           IF(GradMAX%D(iGEO)<GTol(AccL).AND.GradRMS%D(iGEO)<GTol(AccL))THEN
              Converged=.TRUE.
              Mssg=ProcessName('GDicer',' Converged!')//TRIM(Mssg)     
-          ELSEIF(GRMSQ<2D-1.AND.GMAXQ<2.D-1.AND.DIISerr<1D-10)THEN  ! Look for non-decreasing errors (stall out)
+!          ELSEIF(GRMSQ<2D-1.AND.GMAXQ<2.D-1.AND.DIISerr<1D-10)THEN  ! Look for non-decreasing errors (stall out)
              ! This part needs more work!!!
 !             Converged=.TRUE.
-             Mssg=ProcessName('GDicer',' Stalled ')//TRIM(Mssg)     
-          ELSE
+!             Mssg=ProcessName('GDicer',' Stalled ')//TRIM(Mssg)     
+!          ELSE
              Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)          
           ENDIF
           CALL OpenASCII(C%Nams%OFile,Out)
@@ -121,7 +120,7 @@ CONTAINS
        ELSE
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Carts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
+             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%AbCarts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
           ENDDO
           ! Put the geometries to HDF
           CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -152,7 +151,7 @@ CONTAINS
     REAL(DOUBLE)           :: DIISError,CoNo
     INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K
     INTEGER,     PARAMETER :: MaxCoef=8
-    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D7
+    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D6
     !----------------------------------------------------------------------------------!
     ! Initial dimension of the A matrix
     nDIIS=MIN(cGEO+1,MaxCoef+1)
@@ -209,23 +208,19 @@ CONTAINS
        ELSEIF(nDIIS>3)THEN
           ! Extrapolate
           iDIIS=1
-          G%Clone(iCLONE)%Carts%D=Zero
           G%Clone(iCLONE)%AbCarts%D=Zero
           CALL New(Carts,(/3,G%Clone(iCLONE)%NAtms/))
-          ! DIIS extrapolation of the position
+          ! DIIS extrapolation of the position ...
           DO iGEO=mGEO,cGEO
-             ! These are the unwrapped Cartesian coordinates
-             !          CALL Get(Carts,'abcarts',Tag_O=IntToChar(iGEO))
-             CALL Get(Carts,'cartesians',Tag_O=IntToChar(iGEO))
-             !          G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D+DIISCo%D(iDIIS)*Carts%D
-             G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D+DIISCo%D(iDIIS)*Carts%D
+             ! ... using the unwrapped Cartesian coordinates
+             CALL Get(Carts,'abcartesians',Tag_O=IntToChar(iGEO))
+             G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D+DIISCo%D(iDIIS)*Carts%D
              iDIIS=iDIIS+1
           ENDDO
           CALL Delete(Carts)
-          WRITE(*,*)iCLONE,' DIISCo = ',DIISCo%D
        ELSE
           ! Stalled, freshen things up with a steepest descent move
-          G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D-5D-1*G%Clone(iCLONE)%Vects%D          
+          G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Vects%D          
        ENDIF
        ! Clean up a bit 
        CALL Delete(GradI)
@@ -260,27 +255,17 @@ CONTAINS
     MAXGrad=Zero
     DO iCLONE=1,C%Geos%Clones
        CALL New(Carts(iCLONE),(/3,C%Geos%Clone(iCLONE)%NAtms/))
-!       Carts(iCLONE)%D=C%Geos%Clone(iCLONE)%abCarts%D
-       Carts(iCLONE)%D=C%Geos%Clone(iCLONE)%Carts%D
+       Carts(iCLONE)%D=C%Geos%Clone(iCLONE)%AbCarts%D
        MAXGrad=MAX(MAXGrad,C%Geos%Clone(iCLONE)%GradMax)
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
-    WRITE(*,*)'-------------------------------------------------------------- '
-    WRITE(*,*)' '
-    WRITE(*,*)' '
-    WRITE(*,*)cGEO,' CurrentSt = ',RMSGrad,MAXGrad
-    WRITE(*,*)' '
-    WRITE(*,*)' '
-    WRITE(*,*)'-------------------------------------------------------------- '
     ! Take some steps 
     StepLength=One
     DO iSTEP=1,MaxSTEP
        StepLength=StepLength/Two
-       ! Step the absolute positions, and wrap to get the Carts array
+       ! Step the absolute positions
        DO iCLONE=1,C%Geos%Clones
-!          C%Geos%Clone(iCLONE)%abCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
-          C%Geos%Clone(iCLONE)%Carts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
-          !          CALL WrapAtoms(C%Geos%Clone(iCLONE))
+          C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
        ENDDO
        ! Archive geometries
        CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -324,7 +309,7 @@ CONTAINS
                //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
                //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
                //', Step= '//TRIM(DblToShrtChar(StepLength))
-          WRITE(*,*)TRIM(Mssg)             
+          !    WRITE(*,*)TRIM(Mssg)             
           CALL OpenASCII(OutFile,Out)
           WRITE(Out,*)TRIM(Mssg)             
           CLOSE(Out)
@@ -334,7 +319,7 @@ CONTAINS
          //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        & 
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &
          //', Step= '//TRIM(DblToShrtChar(StepLength))
-    WRITE(*,*)TRIM(Mssg)             
+    !    WRITE(*,*)TRIM(Mssg)             
     CALL OpenASCII(OutFile,Out)
     WRITE(Out,*)TRIM(Mssg)             
     CLOSE(Out)

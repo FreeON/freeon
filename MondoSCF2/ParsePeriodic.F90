@@ -31,7 +31,7 @@ CONTAINS
   !=========================================================================
   SUBROUTINE LoadPeriodicOptions(PBC)
     TYPE(PBCInfo)    :: PBC
-    INTEGER          :: I
+    INTEGER          :: I,MaxEll
     !-----------------------------------------------------------------------!
     ! Parse the coordinate type 
     IF(OptKeyQ(Inp,PBOUNDRY,CRT_FRAC))THEN
@@ -53,13 +53,14 @@ CONTAINS
        IF(.NOT.OptIntQ(Inp,PFFMXELL,PBC%PFFMaxEll))THEN
           CALL MondoHalt(PRSE_ERROR,'PFFOverRide is on, please provide PFFMaxEll')
        ENDIF
-    ELSE
+    ELSE      
        PBC%PFFMaxLay=1
-       PBC%PFFMaxEll=32
+       ! Look for MaxEll in periodic boundary options
+       IF(.NOT.OptIntQ(Inp,PBOUNDRY,PBC%PFFMaxEll))PBC%PFFMaxEll=16
     ENDIF
     ! Parse permeability 
     IF(.NOT.OptDblQ(Inp,EpsILON,PBC%Epsilon))THEN
-       PBC%Epsilon=1.D32
+       PBC%Epsilon=BIG_DBL !1.D32
     ENDIF
   END SUBROUTINE LoadPeriodicOptions
   !============================================================================
@@ -69,11 +70,12 @@ CONTAINS
     TYPE(PBCInfo)                   :: PBC
     INTEGER                         :: NLvec,NTvec,Dimen,I,J
     CHARACTER(LEN=2)                :: At
-    CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
+    CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LowLine
     REAL(DOUBLE),PARAMETER          :: DegToRad =  1.745329251994329576923D-2
     REAL(DOUBLE),DIMENSION(6)       :: Vec
     REAL(DOUBLE)                    :: AngAB,AngAC,AngBC,Error
     !
+    PBC%Dimen=0
     PBC%TransVec=Zero
     PBC%BoxShape=Zero
     NLvec=0 
@@ -89,20 +91,23 @@ CONTAINS
     DO 
        READ(Inp,DEFAULT_CHR_FMT,END=1) Line
        IF(INDEX(Line,END_PERIODIC)==0) THEN
-          CALL LineToGeom(Line,At,Vec)
-          IF(At==TRAN_VEC) THEN
-             NTvec = NTvec + 1
-             PBC%TransVec(1:3)=Vec(1:3)
-          ELSEIF(At==ALAT_VEC) THEN
-             NLvec = NLvec+1
-             PBC%BoxShape(1:3,1)=Vec(1:3)
-          ELSEIF(At==BLAT_VEC) THEN
-             NLvec = NLvec+1
-             PBC%BoxShape(1:3,2)=Vec(1:3)
-          ELSEIF(At==CLAT_VEC) THEN
-             NLvec = NLvec+1
-             PBC%BoxShape(1:3,3)=Vec(1:3)
+          LowLine=Line
+          CALL LowCase(LowLine) 
+          J=SCAN(LowLine,Lower)
+          IF(J/=0)THEN
+             CALL LineToGeom(Line,At,Vec)
+             IF(At==ALAT_VEC) THEN
+                NLvec = NLvec+1
+                PBC%BoxShape(1:3,1)=Vec(1:3)
+             ELSEIF(At==BLAT_VEC) THEN
+                NLvec = NLvec+1
+                PBC%BoxShape(1:3,2)=Vec(1:3)
+             ELSEIF(At==CLAT_VEC) THEN
+                NLvec = NLvec+1
+                PBC%BoxShape(1:3,3)=Vec(1:3)
+             ENDIF
           ELSE
+             CALL LineToDbls(Line,6,Vec)
              J=0
              DO I=1,6
                 IF(Vec(I)==Zero)EXIT
@@ -163,13 +168,11 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
-    !
     DO I=1,3
        DO J=1,3
           IF(ABS(PBC%BoxShape(I,J)).LT. 1.D-12) PBC%BoxShape(I,J)=Zero
        ENDDO
     ENDDO
-    !
     RETURN
 1   CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
          //TRIM(END_PERIODIC)//'. You may be missing blank '  &
@@ -205,7 +208,6 @@ CONTAINS
   SUBROUTINE UnitCellSetUp(PBC)
     TYPE(PBCInfo)       :: PBC
     INTEGER             :: I,J,K,NLvec,NTvec
-
     !CalculatetheBoxVolume
     PBC%CellVolume=One
     DO I=1,3
