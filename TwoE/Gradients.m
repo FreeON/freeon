@@ -198,7 +198,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeTimes->True];
+SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeNull->{dI,OffSet},OptimizeTimes->True];
 SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
@@ -213,7 +213,50 @@ SetAttributes[MBarN,NHoldAll];
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
 
+
 PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
+						 oList={" "->""};
+						 IList={};
+                                                 sList={};
+						 Kount = 0;
+                                                 Do[Do[
+                                                       If[lx[i]+my[i]+nz[i]+lx[k]+my[k]+nz[k]<=BraEll+KetEll+1,
+                                                       Kount = Kount + 1;
+                                                       a = {lx[i], my[i], nz[i]};
+                                                       c = {lx[k], my[k], nz[k]};
+							  (*
+                                                       IList=Append[IList,VRR[a,c,0]+o[Kount]];
+						       MBarString=StringJoin["I",ToString[i],"Bar",ToString[k]];
+                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->MBarString];
+							   *)
+
+
+						       RawString=StringJoin["RawI",ToString[i],"Bar",ToString[k]];
+						       dMBarString  =StringJoin["I",ToString[i],"Bar",ToString[k]];
+
+                                                       IList=Append[IList,VRR[a,c,0]];
+                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->RawString];
+
+                                                       Kount=Kount+1;
+                                                       IList=Append[IList,o[Kount]+o[Kount-1]];
+                                                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->dMBarString];
+
+
+
+                                                       ];
+                                                 ,{i,1,LEnd[BraEll+1]}];
+                                                 ,{k,1,LEnd[KetEll+1]}];
+
+							   Print[" IList = ",IList];
+							   Print[" oList = ",oList];
+
+                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+
+
+                                                 ];
+
+
+PunchVRRClass2[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
 						 oList={" "->""};
 						 IList={};
                                                  sList={};
@@ -317,7 +360,79 @@ Gammas[LTot];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
 
+
 PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
+						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
+						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
+						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
+						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
+						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
+						 IList={};
+						 NullTemp=NullList;
+						 Kount = 0;
+                                                 Do[Do[Do[Do[
+                                                 Do[Do[Do[Do[
+
+                                                             a = {lx[i], my[i], nz[i]};
+                                                             b = {lx[j], my[j], nz[j]};
+                                                             c = {lx[k], my[k], nz[k]};
+                                                             d = {lx[l], my[l], nz[l]};
+
+                                                  OffSetString=StringJoin["(OA+",ToString[i-LBegin[il]],")*LDA",
+                                                                         "+(OB+",ToString[j-LBegin[jl]],")*LDB",
+                                                                         "+(OC+",ToString[k-LBegin[kl]],")*LDC",
+                                                                         "+(OD+",ToString[l-LBegin[ll]],")*LDD"];
+                                              Do[ 
+
+                                                  plus={0,0,0}; plus[[cart]]=+1;
+                                                  mnus={0,0,0}; mnus[[cart]]=-1;
+
+						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
+						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
+						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
+
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpA+dI[0+cart,OffSet]];
+						  If[cart==1,
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString,"\n",
+                                                                                                                "      dI(",ToString[0 + cart],",OffSet)"]];
+						     ,
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["      dI(",ToString[0 + cart],",OffSet)"]];
+						  ];
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpB+dI[3+cart,OffSet]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[3 + cart],",OffSet)"]];
+
+                                                  Kount = Kount + 1;
+                                                  IList=Append[IList,TmpC+dI[6+cart,OffSet]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[6 + cart],",OffSet)"]];
+
+                                                  Kount = Kount + 1;
+						  recurstring=StringJoin["-(dI(",ToString[cart],",OffSet)+dI(",ToString[3+cart],",OffSet)+dI(",ToString[6+cart],",OffSet))+dI(",ToString[9+cart],",OffSet)"];
+                                                  IList=Append[IList,Tmp];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["Tmp=",recurstring,"\n",
+                                                                                                                 "      dI(",ToString[9 + cart],",OffSet)"]];
+
+,{cart,1,3}]; 
+
+                                                ,{i,LBegin[il],LEnd[il]}]
+                                                ,{j,LBegin[jl],LEnd[jl]}]
+                                                ,{k,LBegin[kl],LEnd[kl]}]
+                                                ,{l,LBegin[ll],LEnd[ll]}]
+                                                ,{il,imin,imax}]
+                                                ,{jl,jmin,jmax}]
+                                                ,{kl,kmin,kmax}]
+                                                ,{ll,lmin,lmax}];
+						 olist=Append[olist,{" "->"","u"->"(","v"->",","w"->")"}];
+                                                 olist=Flatten[olist];
+                                                Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
+                                                 Print["IList = ",IList];
+                                                 Print["OList = ",oList];
+
+                                               ];
+
+
+PunchHRRClass2[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
 						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
 						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
@@ -740,7 +855,7 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
 
            PunchFront[Subroutine,imax,jmax,kmax,lmax,ijklType,GNeeds]; 
 
-           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->300, \
+           SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200, \
            AssignBreak->{132," & \n          "},AssignIndent->"            ",\
            AssignTemporary->{W,Sequence}];
 
