@@ -871,11 +871,11 @@ CONTAINS
     ! Coulomb part
 #ifdef NLATTFORCE
     CALL Invoke('JForce',N,S,M)
-    CALL NLATTFORCE_J()
+    CALL NLATTFORCE_J(cBAS,cGEO,N,G,B,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
        CALL Invoke('GONX',N,S,M)
-       CALL NLATTFORCE_X()
+       CALL NLATTFORCE_X(cBAS,cGEO,N,G,B,S,M)
     ENDIF
 #else
     CALL Invoke('JForce',N,S,M)
