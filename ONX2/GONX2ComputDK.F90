@@ -145,6 +145,15 @@ CONTAINS
     endif
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
     !write(*,*) 'CS_OUT%CellCarts=',CS_OUT%CellCarts%D(2,1:CS_OUT%NCells)
+    !Check for wrong InvBoxSh and BoxShape
+    IF(    ABS(GMc%PBC%InvBoxSh%D(2,1)).GT.1D-15.OR.ABS(GMc%PBC%InvBoxSh%D(3,1)).GT.1D-15.OR.&
+         & ABS(GMc%PBC%InvBoxSh%D(3,2)).GT.1D-15.OR.ABS(GMc%PBC%BoxShape%D(2,1)).GT.1D-15.OR.&
+         & ABS(GMc%PBC%BoxShape%D(3,1)).GT.1D-15.OR.ABS(GMc%PBC%BoxShape%D(3,2)).GT.1D-15) THEN
+       WRITE(*,*) 'The following guys MUST be ZERO!'
+       WRITE(*,*) 'InvBoxSh:',GMc%PBC%InvBoxSh%D(2,1),GMc%PBC%InvBoxSh%D(3,1),GMc%PBC%InvBoxSh%D(3,2)
+       WRITE(*,*) 'BoxShape:',GMc%PBC%BoxShape%D(2,1),GMc%PBC%BoxShape%D(3,1),GMc%PBC%BoxShape%D(3,2)
+       STOP 'STOP in GONX2ComputDK.F90'
+    ENDIF
     !Simple check Simple check Simple check Simple check
     !
     CALL New(BColIdx,NAtoms)

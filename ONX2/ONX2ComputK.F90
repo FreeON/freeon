@@ -135,6 +135,15 @@ CONTAINS
     !write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
     !write(*,*) 'CS_OUT%CellCarts=',CS_OUT%CellCarts%D(1,:)
     !write(*,*) 'Thresholds%Dist',Thresholds%Dist,' Thresholds%TwoE',Thresholds%TwoE
+    !Check for wrong InvBoxSh and BoxShape
+    IF(    ABS(GMc%PBC%InvBoxSh%D(2,1)).GT.1D-15.OR.ABS(GMc%PBC%InvBoxSh%D(3,1)).GT.1D-15.OR.&
+         & ABS(GMc%PBC%InvBoxSh%D(3,2)).GT.1D-15.OR.ABS(GMc%PBC%BoxShape%D(2,1)).GT.1D-15.OR.&
+         & ABS(GMc%PBC%BoxShape%D(3,1)).GT.1D-15.OR.ABS(GMc%PBC%BoxShape%D(3,2)).GT.1D-15) THEN
+       WRITE(*,*) 'The following guys MUST be ZERO!'
+       WRITE(*,*) 'InvBoxSh:',GMc%PBC%InvBoxSh%D(2,1),GMc%PBC%InvBoxSh%D(3,1),GMc%PBC%InvBoxSh%D(3,2)
+       WRITE(*,*) 'BoxShape:',GMc%PBC%BoxShape%D(2,1),GMc%PBC%BoxShape%D(3,1),GMc%PBC%BoxShape%D(3,2)
+       STOP 'STOP in ONX2ComputK.F90'
+    ENDIF
     !Simple check Simple check Simple check Simple check
     !
     LocNInt=0
@@ -496,11 +505,16 @@ CONTAINS
        StartL1=BSc%LStrt%I(CF1,AtmInfo%K1)
        StopL1=BSc%LStop%I(CF1,AtmInfo%K1)
        !
+       if(Type1==2) stop 'SP shell not yet supported.'
+       !
        MinL2=BSp%ASymm%I(1,CF2,AtmInfo%K2)
        MaxL2=BSp%ASymm%I(2,CF2,AtmInfo%K2)
        Type2=MaxL2*(MaxL2+1)/2+MinL2+1
        StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
        StopL2=BSp%LStop%I(CF2,AtmInfo%K2)
+       !
+       if(Type2==2) stop 'SP shell not yet supported.'
+       !
        !>>>>>
        Switch=Type1.LT.Type2
        AtmPair(iNFPair)%SP%Switch=Switch
