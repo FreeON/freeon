@@ -355,17 +355,13 @@ PROGRAM SDMM
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
          CALL OpenASCII(OutFile,Out)
-         IF(DeltaP<20.D0*Thresholds%Trix.AND.DeltaEQ<1.D-6)THEN
-!            Check for non-decreasing /P
-             IF(DeltaP>OldDeltaP)THEN
-                ToExit=.TRUE.
-              ENDIF
-         ENDIF
-!        Check for density matrix stall out 
-         IF(DeltaPQ<1.D-3)THEN
-            ToExit=.TRUE.
-         ENDIF
-         CLOSE(Out)
+         IF(DeltaEQ<1.D-7)THEN
+!           Check for non-decreasing /P
+            IF(DeltaP>OldDeltaP)ToExit=.TRUE.
+        ENDIF
+!       Check for absolute convergence in total energy
+        IF(DeltaEQ<1.D-11)ToExit=.TRUE.
+        CLOSE(Out)
       ENDIF
 !     Updtate previous cycle values
       OldE=NewE
@@ -385,8 +381,8 @@ PROGRAM SDMM
             CALL PrintProtectL(Out)
             Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
                //'Tr(P.F) = '//TRIM(DblToMedmChar(NewE))               &
-               //', %Non0= '//TRIM(IntToChar(PcntPNon0))         &
-!               //', c = '//TRIM(DblToShrtChar(c))                      &
+               //', %Non0= '//TRIM(IntToChar(PcntPNon0))               &
+!               //', c = '//TRIM(DblToShrtChar(c))                     &
                //', MAX(/P) = '//TRIM(DblToShrtChar(DeltaP)) 
             WRITE(*,*)TRIM(Mssg)
             WRITE(Out,*)TRIM(Mssg)
@@ -398,9 +394,6 @@ PROGRAM SDMM
 #endif
       IF(ToExit)EXIT
    ENDDO
-!  Check for failure
-   IF(DeltaN>1.0D-2)CALL Halt(' Convergence failure in SDMM, lost /N = ' &
-                            //TRIM(DblToMedmChar(DeltaN))//' electrons.')
 !  Clean up a bit ...
    CALL Delete(F)
    CALL Delete(P2)
@@ -441,6 +434,8 @@ PROGRAM SDMM
 !  IO for the orthogonal P 
 !
    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
+   CALL PChkSum(P,'OrthoP['//TRIM(NxtC)//']',Prog,Unit_O=6)
+
    CALL Put(P,TrixFile('OrthoD',Args,1))
    CALL PChkSum(P,'OrthoP['//TRIM(NxtC)//']',Prog)
    CALL PPrint( P,'OrthoP['//TRIM(NxtC)//']')
