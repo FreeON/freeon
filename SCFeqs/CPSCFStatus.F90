@@ -1,4 +1,21 @@
 PROGRAM CPSCFSts
+!H=================================================================================
+!H PROGRAM CPSCFSts
+!H
+!H  OPTIONS:
+!H  DEBUGING: Use -DCPSCFSTS_DBUG to print some stuff.
+!H  INFO    : Use -DCPSCFSTS_INFO to print some stuff.
+!H
+!H Comment:
+!H
+!H Ref:
+!H
+!H=================================================================================
+  !
+#ifdef CPSCFSTS_DBUG
+#define CPSCFSTS_INFO
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -9,7 +26,6 @@ PROGRAM CPSCFSts
   USE Parse
   USE Macros
   USE LinAlg
-  USE Functionals
 #ifdef PARALLEL
   USE MondoMPI
 #endif
@@ -17,17 +33,15 @@ PROGRAM CPSCFSts
   !-------------------------------------------------------------------
   TYPE(ARGMT)                      :: Args
 #ifdef PARALLEL
-  TYPE(DBCSR)                      :: PPrim,T,Tmp1,Tmp2,Tmp3
+  TYPE(DBCSR)                      :: PPrim,T,P,Tmp1,Tmp2
 #else
-  TYPE(BCSR )                      :: PPrim,T,Tmp1,Tmp2,Tmp3
+  TYPE(BCSR )                      :: PPrim,T,P,Tmp1,Tmp2
 #endif
   !-------------------------------------------------------------------
-  REAL(DOUBLE)                     :: E_el_tot,E_nuc_tot,E_es_tot,E_ECPs,KinE,ExchE,Exc
-  REAL(DOUBLE)                     :: Gap,Etot,DPrimMax,Virial,DIISErr,Prop
-  REAL(DOUBLE), DIMENSION(3)       :: Tensor
-  LOGICAL                          :: HasECPs
-  INTEGER                          :: I,iXYZ,CPSCFCycl
-  CHARACTER(LEN=DEFAULT_CHR_LEN)   :: PostFix
+  REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop
+  REAL(DOUBLE)    , DIMENSION(3)   :: Tensor
+  INTEGER                          :: I,iXYZ,CPSCFCycl,LastSCFCycle
+  CHARACTER(LEN=  DEFAULT_CHR_LEN) :: PostFix
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: CPSCFMessage
   CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCFSts'  
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
@@ -38,27 +52,41 @@ PROGRAM CPSCFSts
   !
   CPSCFCycl = Args%I%I(1)
   !
+  ! Get Last SCF cycle.
+  CALL Get(LastSCFCycle,'lastscfcycle')
+  !
+  !-------------------------------------------------------------------
   ! Allocate some matrices.
+  !-------------------------------------------------------------------
+  !
   CALL New(T    )
+  CALL New(P    )
   CALL New(Tmp1 )
   CALL New(Tmp2 )
   CALL New(PPrim)
   !
-  ! Get the density matrix.
-  IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN 
+  !-------------------------------------------------------------------
+  ! Get the density matrices.
+  !-------------------------------------------------------------------
+  !
+  SELECT CASE(SCFActn)
+  CASE('BasisSetSwitch','Restart')
      ! If switching the density matrix or using a previous one from 
      ! restart use i+1 density matrix--its all that is available
      CALL Get(PPrim,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,1))
-  ELSE
-     !IF(SCFActn=='StartResponse') THEN
+  CASE('StartResponse','CPSCFSolving')
      CALL Get(PPrim,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,1))
-     !ELSE
-     !   CALL Get(PPrim,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
-     !ENDIF
-  ENDIF
+  CASE DEFAULT
+     CALL Halt('Do not know this argument <'//TRIM(SCFActn)//'>.')
+  END SELECT
   !
+  ! Get groud state density matrix.
+  CALL Get(P,TrixFile('D',Args,LastSCFCycle-Args%I%I(1)))
+  !     
+  !-------------------------------------------------------------------
   ! Compute expectation values.
-  Tensor(:)=BIG_DBL
+  !-------------------------------------------------------------------
+  !
   Prop=BIG_DBL
   !
   DO iXYZ=1,3
@@ -90,6 +118,10 @@ PROGRAM CPSCFSts
   ! Save Prop.
   CALL Put(Prop,'Prop')
   !
+  !-------------------------------------------------------------------
+  ! Get max Density block.
+  !-------------------------------------------------------------------
+  !
   ! Find the largest block of the delta density matrix
   ! Allows for checking between extrapolated or projected DMs
   IF(CPSCFCycl.GT.0) THEN
@@ -108,6 +140,7 @@ PROGRAM CPSCFSts
   CALL Put(DPrimMax,'dprimmax')
   !
   ! Delete some arrays.
+  CALL Delete(P    )
   CALL Delete(PPrim)
   CALL Delete(Tmp1 )
   CALL Delete(Tmp2 )
@@ -119,7 +152,10 @@ PROGRAM CPSCFSts
      DIISErr=Zero
   ENDIF
   !
+  !-------------------------------------------------------------------
   ! Print statistics.
+  !-------------------------------------------------------------------
+  !
   CPSCFMessage=''
   IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
      !
@@ -144,7 +180,7 @@ PROGRAM CPSCFSts
   ELSEIF(PrintFlags%Key>=DEBUG_NONE) THEN
      !
      ! Fancy output.
-     CPSCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','                           &
+     CPSCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','                         &
           &           //TRIM(CurBase)//','                                         &
           &           //TRIM(CurGeom)//']') 
      !IF(SCFActn=='BasisSetSwitch')THEN
@@ -154,8 +190,8 @@ PROGRAM CPSCFSts
      !   SCFMessage=TRIM(SCFMessage)//' Restarting ... '       &
      !                              //' MxD = '//TRIM(DblToShrtChar(DMax)) 
      !ELSE
-     CPSCFMessage=TRIM(CPSCFMessage)//' T = '//TRIM(FltToShrtChar(Tensor(1))) &
-          &                         //', '   //TRIM(FltToShrtChar(Tensor(2))) &
+     CPSCFMessage=TRIM(CPSCFMessage)//' T = '//TRIM(FltToShrtChar(Tensor(1)))      &
+          &                         //', '   //TRIM(FltToShrtChar(Tensor(2)))      &
           &                         //', '   //TRIM(FltToShrtChar(Tensor(3))) 
 
      IF(CPSCFCycl.GT.0) &
@@ -167,8 +203,8 @@ PROGRAM CPSCFSts
      !ENDIF
      !
      ! Add in DIIS error.
-     IF(DIISErr/=Zero)                                            &
-          &       CPSCFMessage=TRIM(CPSCFMessage)                 &
+     IF(DIISErr/=Zero)                                                             &
+          &       CPSCFMessage=TRIM(CPSCFMessage)                                  &
           &           //', DDIIS = '//TRIM(DblToShrtChar(DIISErr)) !//RTRN
      !
   ENDIF

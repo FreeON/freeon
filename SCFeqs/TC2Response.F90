@@ -60,41 +60,19 @@ PROGRAM TC2R
 #endif
   !-------------------------------------------------------------------
   !
-#ifdef PARALLEL
+  ! Initial setup.
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
-#else
-  CALL StartUp(Args,Prog)
-#endif
   !
   ! Get Last SCF cycle.
   CALL Get(LastSCFCycle,'lastscfcycle')
   !
-  ! Load Fock Matrix.
-  CALL New(F)
-  CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
-  !CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)))
+  !-------------------------------------------------------------------
+  ! Allocations.
+  !-------------------------------------------------------------------
   !
-  ! Load FockPrim Matrix.
-  CALL New(FPrim)
-  FFile=TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0)
-  INQUIRE(FILE=FFile,EXIST=IsPresent)
-  IF(IsPresent) THEN
-     CALL Get(FPrim,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0),BCast_O=.FALSE.)
-     !CALL Get(FPrim,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0))
-  ELSE
-     CALL Get(FPrim,TrixFile('OrthoFPrime' //TRIM(Args%C%C(4)),Args,0),BCast_O=.FALSE.)
-     !CALL Get(FPrim,TrixFile('OrthoFPrime' //TRIM(Args%C%C(4)),Args,0))
-  ENDIF
-  !
-  ! Load perturbation (dipole moment at this moment).
-  CALL New(T)
-  FFile=''
-  DO I=3,4!Args%NC
-     FFile=TRIM(FFile)//TRIM(Args%C%C(I))
-  ENDDO
-  CALL Get(T,TrixFile(FFile,Args))
-  !
-  ! Allocate some arrays.
+  CALL New(F       )
+  CALL New(T       )
+  CALL New(FPrim   )
   CALL New(P       )
   CALL New(Tmp1    )
   CALL New(Tmp2    )
@@ -102,9 +80,36 @@ PROGRAM TC2R
   CALL New(PPrim   )
   CALL New(PPrimOld)
   !
+  !-------------------------------------------------------------------
+  ! Loading matrices.
+  !-------------------------------------------------------------------
+  !
+  ! Load Fock Matrix.
+  CALL Get(F,TrixFile('OrthoF',Args,LastSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
+  !
+  ! Load FockPrim Matrix.
+  FFile=TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0)
+  INQUIRE(FILE=FFile,EXIST=IsPresent)
+  IF(IsPresent) THEN
+     CALL Get(FPrim,TrixFile('FPrime_DDIIS'//TRIM(Args%C%C(4)),Args,0),BCast_O=.FALSE.)
+  ELSE
+     CALL Get(FPrim,TrixFile('OrthoFPrime' //TRIM(Args%C%C(4)),Args,0),BCast_O=.FALSE.)
+  ENDIF
+  !
+  ! Load perturbation (dipole moment at this moment).
+  FFile=''
+  DO I=3,4!Args%NC
+     FFile=TRIM(FFile)//TRIM(Args%C%C(I))
+  ENDDO
+  CALL Get(T,TrixFile(FFile,Args))
+  !
   ! Initialize some variables.
   MM=0
   Ne=Half*DBLE(NEl)
+  !
+  !-------------------------------------------------------------------
+  ! Get Density matrix guess.
+  !-------------------------------------------------------------------
   !
   ! Guess P, PPrim from F, FPrim.
   CALL FockPrimGuess(F,FPrim,P,PPrim)
@@ -115,6 +120,10 @@ PROGRAM TC2R
   !
   ! Set PPrimOld.
   CALL SetEq(PPrimOld,PPrim)
+  !
+  !-------------------------------------------------------------------
+  ! Let's TC2R.
+  !-------------------------------------------------------------------
   !
   ! Do TC2R iterations.
   DO I=1,100
@@ -137,10 +146,17 @@ PROGRAM TC2R
   CALL Delete(Work)
 #endif
   !
+  !-------------------------------------------------------------------
+  ! Save the matrices.
+  !-------------------------------------------------------------------
+  !
   ! Orthogonal put and xform to AO rep and put.
   CALL PutXFormPrim(Prog,Args,PPrim,Tmp1,Tmp2)
   !
-  ! Tidy up.
+  !-------------------------------------------------------------------
+  ! Deallocations the matrices.
+  !-------------------------------------------------------------------
+  !
   CALL Delete(P       )
   CALL Delete(T       )
   CALL Delete(Tmp1    )
