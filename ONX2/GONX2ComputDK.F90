@@ -272,7 +272,9 @@ CONTAINS
                             !
 !if(IntType.ne.1010103) goto 20
                             ! The integral interface.
+                            !write(*,*) 'before',IntType
                             INCLUDE 'DERIInterface.Inc'
+                            !write(*,*) 'after'
                             !---------------------------------------------------------
 !!$                            CALL dInt1111_(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & 
 !!$                                 BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & 
