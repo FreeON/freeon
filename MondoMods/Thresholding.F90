@@ -8,6 +8,7 @@ MODULE Thresholding
   USE GlobalObjects
   USE InOut
   USE SpecFun
+  USE Parse
   USE McMurchie
 !-------------------------------------------------  
 !  Primary thresholds
@@ -80,12 +81,30 @@ MODULE Thresholding
            TestPrimPair = .TRUE.
         ENDIF
      END FUNCTION TestPrimPair
+!
+     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+       INTEGER                         :: Ell
+       REAL(DOUBLE)                    :: Zeta
+       REAL(DOUBLE),DIMENSION(:)       :: HGTF
+       REAL(DOUBLE),OPTIONAL           :: Tau_O
+       INTEGER,OPTIONAL                :: ExtraEll_O
+       LOGICAL,OPTIONAL                :: Potential_O
+       REAL(DOUBLE)                    :: R,R0,R1,R2
+!       R0=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+!       R1=Extent1(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+       R=Extent2(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+!       WRITE(*,*)TRIM(IntToChar(Ell)) & 
+!                 //', '//TRIM(DblToShrtChar(Zeta)) & 
+!                 //','//TRIM(DblToShrtChar(R0))    &
+!                 //','//TRIM(DblToShrtChar(R1))    &
+!                 //','//TRIM(DblToShrtChar(R2)) 
+    END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     outside of which its contribution is less than Tau (default) or outside 
 !     of which the error made using the classical potential is less than Tau (Potential option) 
 !===================================================================================================
-     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+     FUNCTION Extent0(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell
        REAL(DOUBLE)                    :: Zeta
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -117,34 +136,47 @@ MODULE Thresholding
        ELSE
           Potential=.FALSE.
        ENDIF
-!      Compute universal prefactor based on Cramers inequality:
-!      H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-!      See papers by J.Strain on Fast Gauss Transform for details.
-       UniP=Zero
-       DO L=0,Ell
-          DO M=0,Ell-L
-             DO N=0,Ell-L-M
-                LMN=LMNDex(L,M,N)
-                MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
-                MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
-                MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
-                UniP=UniP+K3*(Two*Zeta)**(Half*DBLE(L+M+N+ExtraEll))*ABS(HGTF(LMN))*MixMax
-             ENDDO
-          ENDDO       
-       ENDDO
-       UniP=ABS(UniP)+1D-50
-!      Now just use expresions based on spherical symmetry ...
-       IF(Potential)THEN
-!         Solution gives the boundry of quantum/classical approximation
-!         to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
-          UniP=UniP*(Two*Pi/Zeta)
-          T=PFunk(0,Tau/UniP)
-          R=SQRT(Two*T/Zeta)     
+       IF(Ell+ExtraEll==0)THEN
+          IF(Potential)THEN
+!            Solution gives the boundry of quantum/classical approximation
+!            to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
+             UniP=ABS(HGTF(1))*(Two*Pi/Zeta)
+             T=PFunk(0,Tau/UniP)
+             R=SQRT(T/Zeta)     
+          ELSE
+!            Gaussian solution gives rho_000(R)<=Tau
+             R=SQRT(MAX(Zero,-(One/Zeta)*LOG(Tau/UniP)))
+          ENDIF
        ELSE
-!         Gaussian solution gives Sum_LMN rho_LMN(R)<=Tau
-          R=SQRT(MAX(Zero,-(Two/Zeta)*LOG(Tau/UniP)))
+!         Compute universal prefactor based on Cramers inequality:
+!         H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+!         See papers by J.Strain on Fast Gauss Transform for details.
+          UniP=Zero
+          DO L=0,Ell
+             DO M=0,Ell-L
+                DO N=0,Ell-L-M
+                   LMN=LMNDex(L,M,N)
+                   MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
+                   MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
+                   UniP=UniP+K3*(Two*Zeta)**(Half*DBLE(L+M+N+ExtraEll))*ABS(HGTF(LMN))*MixMax
+                ENDDO
+             ENDDO       
+          ENDDO
+          UniP=ABS(UniP)+1D-50
+!         Now just use expresions based on spherical symmetry ...
+          IF(Potential)THEN
+!            Solution gives the boundry of quantum/classical approximation
+!            to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
+             UniP=UniP*(Two*Pi/Zeta)
+             T=PFunk(0,Tau/UniP)
+             R=SQRT(Two*T/Zeta)     
+          ELSE
+!            Gaussian solution gives Sum_LMN rho_LMN(R)<=Tau
+             R=SQRT(MAX(Zero,-(Two/Zeta)*LOG(Tau/UniP)))
+          ENDIF
        ENDIF
-     END FUNCTION Extent
+     END FUNCTION Extent0
 !====================================================================================================
 !    COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
 !    THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
@@ -164,23 +196,20 @@ MODULE Thresholding
 !    Recursive bisection to determine largest extent for this distribution
 !    outside of which its contribution to the density and gradient is less than Tau
 !===================================================================================================
-     FUNCTION Extent2(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
+     FUNCTION Extent1(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell,ExtraEll
-       REAL(DOUBLE)                    :: Zeta,Tau
+       REAL(DOUBLE)                    :: Zeta
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
-       INTEGER,OPTIONAL                :: Digits_O,ExtraEll_O
+       REAL(DOUBLE),OPTIONAL           :: Tau_O
+       INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
        REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,HGPot
-       REAL(DOUBLE)                    :: FUN,F0,F1
+       REAL(DOUBLE)                    :: Tau,FUN,F0,F1
        INTEGER                         :: J,L,K,M,N,LMN,SN,LL
        REAL(DOUBLE)                    :: ConvergeTo,RMIN,RMAX,R,RErr
        LOGICAL                         :: Potential
 !
-       IF(PRESENT(Digits_O))THEN
-          ConvergeTo=10.D0**(-Digits_O)
-       ELSE 
-          ConvergeTo=10.D0**(-8)
-       ENDIF
+       ConvergeTo=1D-8
 !
        IF(PRESENT(ExtraEll_O))THEN
           ExtraEll = ExtraEll_O
@@ -193,13 +222,18 @@ MODULE Thresholding
        ELSE
           Potential = .FALSE.
        ENDIF
+!
+       IF(PRESENT(Tau_O)) THEN
+          Tau=Tau_O
+       ELSE
+          Tau=Thresholds%Dist
+       ENDIF
 !      Take the spherical average of HGTF coefficients      
        DO L=0,Ell
           Co(L)=Zero
           DO LMN=LBegin(L),LEnd(L)
-             Co(L)=Co(L)+HGTF(LMN)**2
+             Co(L)=Co(L)+ABS(HGTF(LMN))
           ENDDO
-          Co(L)=SQRT(Co(L))
        ENDDO
 !
 !      Compute extent of a Hermite Gaussian overlap
@@ -297,17 +331,18 @@ MODULE Thresholding
           CALL MondoHalt(-100,'Potential Overlap did not converge in 200 iterations')
 200       CONTINUE                     
        ENDIF
-     END FUNCTION Extent2
+     END FUNCTION Extent1
 !===================================================================================
 !     Recursive bisection to determine largest extent for this distribution, outside
 !     outside of which its contribution to the density and gradient is less than Tau
 !     Has the possible drawback of finding zeros (roots) in HG functions.  
 !===================================================================================
-      FUNCTION Extent1(Ell,Zeta,HGTF,Tau,Digits_O,ExtraEll_O,Potential_O) RESULT (R)
+      FUNCTION Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
          INTEGER                         :: Ell
-         REAL(DOUBLE)                    :: Zeta,Tau
+         REAL(DOUBLE)                    :: Zeta
+         REAL(DOUBLE),OPTIONAL           :: Tau_O
          REAL(DOUBLE),DIMENSION(:)       :: HGTF
-         INTEGER,OPTIONAL                :: Digits_O,ExtraEll_O
+         INTEGER,OPTIONAL                :: ExtraEll_O
          LOGICAL,OPTIONAL                :: Potential_O
          REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,ErrR
          REAL(DOUBLE),DIMENSION(0:HGEll, &
@@ -315,28 +350,30 @@ MODULE Thresholding
          REAL(DOUBLE),DIMENSION(0:20)    :: LambdaR
          REAL(DOUBLE)                    :: R
          INTEGER                         :: J,L,K,M,N,LMN,ExtraEll,LTot,n1,n2,j1
-         REAL(DOUBLE)                    :: ConvergeTo,R2,DelR,BisR,CTest, &
+         REAL(DOUBLE)                    :: ConvergeTo,Tau,R2,DelR,BisR,CTest, &
                                             RhoR,dRho,MidRho,Xpt,TwoZ, &
                                             Omega,RPE,RTE,T,upq
          LOGICAL                         :: PotentialQ
 !----------------------------------------------------------------------------------
-         IF(PRESENT(Digits_O))THEN
-            ConvergeTo=10.D0**(-Digits_O)
-         ELSE
-            ConvergeTo=10.D0**(-5)
-         ENDIF
+         ConvergeTo=1D-8
+!
          IF(PRESENT(ExtraEll_O))THEN
             ExtraEll=ExtraEll_O
          ELSE
             ExtraEll=1
          ENDIF
-!        Take the spherical average of HGTF coefficients
+
+         IF(PRESENT(Tau_O)) THEN
+            Tau=Tau_O
+         ELSE
+            Tau=Thresholds%Dist
+         ENDIF
+!        Take the spherical max of HGTF coefficients
          DO L=0,Ell
             Co(L)=Zero
             DO LMN=LBegin(L),LEnd(L)
-               Co(L)=Co(L)+HGTF(LMN)**2
+               Co(L)=Co(L)+ABS(HGTF(LMN))
             ENDDO
-            Co(L)=SQRT(Co(L))
          ENDDO
 !        Zero extent check
          IF(SUM(Co(0:L))==Zero)THEN
@@ -347,9 +384,6 @@ MODULE Thresholding
          IF(.NOT.PRESENT(Potential_O))THEN
             DelR=SQRT(EXP_SWITCH/Zeta)*4D0
             BisR=Zero
-!            WRITE(*,*)' Zeta  = ',Zeta
-!            WRITE(*,*)' Omega = ',Omega
-!            WRITE(*,*)' UPQ   = ',Upq
             DO J=1,200
 !              Half the step size
                DelR=Half*DelR
@@ -371,7 +405,6 @@ MODULE Thresholding
                   dRho=dRho+Co(L)*LambdaR(L+ExtraEll)
                ENDDO
                MidRho=MAX(ABS(dRho),ABS(RhoR))
-!               WRITE(*,*)BisR,' MidRho = ',MidRho
 !              Convergence test
                CTest=(MidRho-Tau)/Tau
                IF(R<1.D-30)THEN
@@ -395,11 +428,6 @@ MODULE Thresholding
             DelR=SQRT(GAMMA_SWITCH/Zeta)
             LTot=Ell+ExtraEll
             BisR=Zero
-!            WRITE(*,*)' Zeta  = ',Zeta
-!            WRITE(*,*)' Omega = ',Omega
-!            WRITE(*,*)' UPQ   = ',Upq
-!            WRITE(*,*)' Ell   = ',Ell
-!            WRITE(*,*)' Co    = ',Co(0)
             DO K=1,200
 !              Half the step size
                DelR=Half*DelR
@@ -444,7 +472,7 @@ MODULE Thresholding
             ENDDO
             CALL Halt(' Faild in Extent of Potential ')
          ENDIF
-       END FUNCTION Extent1
+       END FUNCTION Extent2
 !===================================================================================
 !    Norm*Gamma[L/2+3/2,Zeta*R*R]
 !===================================================================================

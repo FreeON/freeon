@@ -196,7 +196,7 @@ MODULE BraBloks
                 ENDDO
              ENDDO
           ENDDO
-          Ext=MAX(Ext,Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O))
+          Ext=MAX(Ext,Extent0(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O))
        ENDDO
     ELSE
 !      Compute McMurchie Davidson E coefficients for HG Primitives
@@ -244,7 +244,7 @@ MODULE BraBloks
              ENDDO          
           ENDDO
        ENDDO
-       Ext=Extent(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O) 
+       Ext=Extent0(Ell,Zeta,HGSum%D(1:Len),Tau_O=Tau_O,ExtraEll_O=ExtraEll_O) 
     ENDIF
   END FUNCTION SetBraBlok
 END MODULE BraBloks
