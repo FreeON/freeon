@@ -32,6 +32,7 @@ PROGRAM NewStep
                                  StepSz,GradEDotNewStep,GMAX,GRMS,XMAX,XRMS
    REAL(DOUBLE),DIMENSION(18) :: NGrad
 !----------------------------------------------------------------------------
+   ! Temporarily overide current geometry
    CALL StartUp(Args,Prog)
    IGeom=Args%I%I(3)
 !  Override default blocking...
@@ -48,13 +49,13 @@ PROGRAM NewStep
    CALL New(G1,N3)
    CALL New(X1,N3)
    CALL New(X2,N3)!
-   CALL Get(GM,Tag_O=PrvGeom)
+   CALL Get(GM,Tag_O=CurGeom)
 !
-!  WRITE(*,*)' NewStep: OLD GEOMETRY # ',PrvGeom
+!  WRITE(*,*)' NewStep: OLD GEOMETRY # ',CurGeom
 !  CALL PPrint(GM,Unit_O=6,PrintGeom_O='PDB')
 !
    CALL Get(StepSz,'StepSize')
-   CALL Get(G1,'GradE',Tag_O=PrvGeom)
+   CALL Get(G1,'GradE',Tag_O=CurGeom)
 !   WRITE(*,*)' NewStep: NEW GRADIENT # ',CurGeom
 !   CALL PPrint(G1,'GradE',Unit_O=6)
    K=0
@@ -79,10 +80,10 @@ PROGRAM NewStep
    DO I=1,N3;XMAX=MAX(XMAX,ABS(X1%D(I)-X2%D(I)));ENDDO
    DO I=1,N3;GMAX=MAX(GMAX,ABS(G1%D(I)));ENDDO
    CALL Put(GradEDotNewStep,'GradEDotNewStep')
-   CALL Put(XRMS,'RMSDisp',CurGeom)
-   CALL Put(GRMS,'RMSGrad',CurGeom)
-   CALL Put(XMAX,'MaxDisp',CurGeom)
-   CALL Put(GMAX,'MaxGrad',CurGeom)
+   CALL Put(XRMS,'RMSDisp',NxtGeom)
+   CALL Put(GRMS,'RMSGrad',NxtGeom)
+   CALL Put(XMAX,'MaxDisp',NxtGeom)
+   CALL Put(GMAX,'MaxGrad',NxtGeom)
 !  Morph back to CRDS array
    K=0
    DO I=1,NAtoms
@@ -98,8 +99,8 @@ PROGRAM NewStep
       GM%BoxCarts%D(:,I)=AtomToFrac(GM,GM%Carts%D(:,I)) 
    ENDDO
 #endif   
-   CALL Put(GM,CurGeom)   
-!   WRITE(*,*)' NewStep: NEW GEOMETRY # ',CurGeom
+   CALL Put(GM,NxtGeom)   
+!   WRITE(*,*)' NewStep: NEW GEOMETRY # ',NxtGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='PDB')
 !   WRITE(*,*)NxtGeom,'GradStats ',GRMS,GMAX
    CALL Shutdown(Prog)

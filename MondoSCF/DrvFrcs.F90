@@ -104,8 +104,8 @@ MODULE DrvFrcs
        CALL OpenHDF(InfFile)
        CALL Put(One,'StepSize')
        CALL CloseHDF()
-!      Take a step
-       CtrlVect=SetCtrlVect(Ctrl,'QuNew')
+!      Take a step 
+       CtrlVect=SetCtrlVect(Ctrl,'QuNew',NoAdvance_O=.TRUE.)
        CALL Invoke('NewStep',CtrlVect)
 !      Loop over geometries
        JGeo=CGeo
@@ -138,8 +138,8 @@ MODULE DrvFrcs
              Ctrl%Previous=Ctrl%Current
              RETURN
           ENDIF
-!         Take another step 
-          CtrlVect=SetCtrlVect(Ctrl,'QuNew')
+          ! Take another step 
+          CtrlVect=SetCtrlVect(Ctrl,'QuNew',NoAdvance_O=.TRUE.)
           CALL Invoke('NewStep',CtrlVect)
        ENDDO
        CLOSE(Geo)

@@ -144,21 +144,30 @@ MODULE SCFLocals
         NxtGeom=TRIM(IntToChar(NGeo))
      END SUBROUTINE SetGlobalCtrlIndecies
 !
-     FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O) RESULT(CVect)
+     FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O,NoAdvance_O) RESULT(CVect)
         TYPE(SCFControls),        INTENT(IN) :: Ctrl
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Actn1_O,Actn2_O
         CHARACTER(LEN=DCL),DIMENSION(9)      :: CVect
+        LOGICAL, OPTIONAL                    :: NoAdvance_O
         CVect(1)=Ctrl%Name
         CVect(2)=" "
         CVect(3)=" "
         IF(PRESENT(Actn1_O))CVect(2)=Actn1_O
         IF(PRESENT(Actn2_O))CVect(3)=Actn2_O
-        CVect(4:9)=(/(IntToChar(Ctrl%Current(1))), &
-                     (IntToChar(Ctrl%Current(2))), &
-                     (IntToChar(Ctrl%Current(3))), &
-                     (IntToChar(Ctrl%Previous(1))),&
-                     (IntToChar(Ctrl%Previous(2))),&
-                     (IntToChar(Ctrl%Previous(3))) /)              
+        CVect(4:9)=(/IntToChar(Ctrl%Current(1)), &
+                     IntToChar(Ctrl%Current(2)), &
+                     IntToChar(Ctrl%Current(3)), &
+                     IntToChar(Ctrl%Previous(1)),&
+                     IntToChar(Ctrl%Previous(2)),&
+                     IntToChar(Ctrl%Previous(3)) /)              
+        IF(PRESENT(NoAdvance_O))THEN
+           CVect(4:9)=(/IntToChar(Ctrl%Previous(1)), &
+                        IntToChar(Ctrl%Previous(2)), &
+                        IntToChar(Ctrl%Previous(3)), &
+                        IntToChar(Ctrl%Previous(1)), &
+                        IntToChar(Ctrl%Previous(2)), &
+                        IntToChar(Ctrl%Previous(3)) /)              
+        ENDIF
      END FUNCTION SetCtrlVect
 !
 END MODULE
