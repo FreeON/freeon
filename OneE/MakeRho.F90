@@ -218,13 +218,10 @@ PROGRAM MakeRho
 #endif
 ! Prune negligible distributions from the electronic density
   NDist_old = RhoA%NDist
-!  CALL Prune_Rho_new(Thresholds%Dist,RhoA)
+  CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
-! Fold distributions back into the box 
-! For ForceEvaluation, rho is not foldes
-  IF(SCFActn .NE. 'ForceEvaluation') THEN 
-     CALL Fold_Rho_new(GM,RhoA)
-  ENDIF
+! Fold distributions back into the box; For ForceEvaluation, rho is not foldes
+  IF(SCFActn .NE. 'ForceEvaluation') CALL Fold_Rho_new(GM,RhoA)
 #ifdef MMech
 ! Compute integrated electron and nuclear densities
   IF(HasQM()) THEN
@@ -259,7 +256,6 @@ PROGRAM MakeRho
 #else
   RSumE  =  Integrate_HGRho_new(RhoA,1                    ,RhoA%NDist-GM%NAtms)
   RSumN  =  Integrate_HGRho_new(RhoA,RhoA%NDist-GM%NAtms+1,RhoA%NDist         )
-!
 #endif
 ! Calculate dipole and quadrupole moments
   CALL New(MP)
