@@ -1526,11 +1526,13 @@ CONTAINS
      ! Go over clones and do backtracking whenever necessary
      TYPE(Controls)   :: C
      INTEGER          :: iBAS,iGEO,iCLONE
+     INTEGER          :: NatmsLoc,NCart
      INTEGER          :: MaxBStep,IBStep
      CHARACTER(LEN=DCL):: chGEO
      TYPE(CRDS)       :: GMOld
      LOGICAL          :: DoBackTrack
-     REAL(DOUBLE)     :: EOld,ENew
+     REAL(DOUBLE)     :: EOld,ENew,MeanDist
+     TYPE(DBL_VECT)   :: DistVect1,DistVect2
      !
      IF(.NOT.C%GOpt%GConvCrit%DoBackTr) THEN
        RETURN
@@ -1541,21 +1543,33 @@ CONTAINS
        HDFFileID=OpenHDF(C%Nams%HFile)
        DO iCLONE=1,C%Geos%Clones
          HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-                       "Clone #"//TRIM(IntToChar(iCLONE)))
+                     "Clone #"//TRIM(IntToChar(iCLONE)))
          chGEO=IntToChar(iGEO-1)
          CALL Get(GMOld,chGEO)
          CALL CloseHDFGroup(HDF_CurrentID)
          EOld=GMOld%ETotal
          ENew=C%Geos%Clone(iCLONE)%ETotal
+         !
+         NatmsLoc=GMOld%Natms
+         NCart=3*NatmsLoc
+         CALL New(DistVect1,NCart)
+         CALL CartRNK2ToCartRNK1(DistVect1%D,GMOld%AbCarts%D)
+         CALL New(DistVect2,NCart)
+         CALL CartRNK2ToCartRNK1(DistVect2%D,C%Geos%Clone(iCLONE)%AbCarts%D)
+         DistVect2%D=DistVect2%D-DistVect1%D
+         MeanDist=SQRT(DOT_PRODUCT(DistVect2%D,DistVect2%D))/NatmsLoc
+         CALL Delete(DistVect1)
+         CALL Delete(DistVect2)
+         !
          IF(EOld<ENew) DoBackTrack=.TRUE.
          !
          IF(iBStep>1.OR.DoBackTrack) THEN  
            CALL OPENAscii(OutFile,Out)
-             WRITE(*,200) iBStep-1,EOld,ENew
-             WRITE(Out,200) iBStep-1,EOld,ENew
+             WRITE(*,200) iBStep-1,EOld,ENew,MeanDist
+             WRITE(Out,200) iBStep-1,EOld,ENew,MeanDist
            CLOSE(Out,STATUS='KEEP')
-           200 FORMAT('Backtracking step= ',I3,' Old Energy= ', &
-                       F14.8,' Backtracking Energy= ',F14.8)
+           200 FORMAT('Backtr. step= ',I3,' Old Energy= ', &
+                       F14.8,' New Energy= ',F14.8,' Dist= ',F14.8)
          ENDIF
          !
          IF(DoBackTrack) THEN  
@@ -1565,8 +1579,8 @@ CONTAINS
            C%Geos%Clone(iCLONE)%AbCarts%D= &
              (C%Geos%Clone(iCLONE)%AbCarts%D+GMOld%AbCarts%D)*Half
          ENDIF
+         CALL CloseHDF(HDFFileID)
        ENDDO
-       CALL CloseHDF(HDFFileID)
        !
        IF(DoBackTrack) THEN
          IF(iBStep>MaxBStep) THEN
@@ -1847,7 +1861,7 @@ CONTAINS
      !
      ! Calculate constraint B-matrix
      !
-  !  CALL BMatrConstr(IBc,JBc,ABc,IntCs,SCRPath,NLagr,NCart)
+   ! CALL BMatrConstr(IBc,JBc,ABc,IntCs,SCRPath,NLagr,NCart)
      !
      ! Calculate new values of Lagrange multipliers 
      ! on internal coord constraints
@@ -1892,9 +1906,9 @@ CONTAINS
      !
      CALL Delete(CartGrad)
      CALL Delete(IntGrad)
-     CALL Delete(IBc)
-     CALL Delete(JBc)
-     CALL Delete(ABc)
+!    CALL Delete(IBc)
+!    CALL Delete(JBc)
+!    CALL Delete(ABc)
    END SUBROUTINE CalcLagrMult
 !
 !-------------------------------------------------------------------
