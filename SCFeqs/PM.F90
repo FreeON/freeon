@@ -4,7 +4,7 @@
 ! Constructs the density matrix from the Hamiltonian in terms of a
 ! trace correcting purification expansion with 2nd order purifications.
 !----------------------------------------------------------------------
-PROGRAM PM
+PROGRAM PMp
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -158,8 +158,4 @@ PROGRAM PM
   CALL Delete(Z)
   CALL ShutDown(Prog)
   !
-END PROGRAM PM
-
-
-
-
+END PROGRAM PMp

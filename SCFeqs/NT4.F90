@@ -4,7 +4,7 @@
 ! Constructs the density matrix from the Hamiltonian in terms of a
 ! trace correcting purification expansion with 2nd order purifications.
 !----------------------------------------------------------------------
-PROGRAM NT4
+PROGRAM NT4p
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -177,8 +177,4 @@ PROGRAM NT4
   CALL Delete(Z)
   CALL ShutDown(Prog)
   !
-END PROGRAM NT4
-
-
-
-
+END PROGRAM NT4p
