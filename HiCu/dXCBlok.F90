@@ -76,37 +76,38 @@ MODULE dXCBlok
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
-                MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
+                PExtent=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom, &
+                                   Tau_O=TauRho,ExtraEll_O=1)
 #ifdef PERIODIC
-!               Quick check to see if primitive touches the grid
-                PExtent=GaussianExtent(Prim%Zeta,1.D4*MaxAmp)
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)
-                IF(.NOT.BoxOutSideBox(PBox,CubeRoot%Box))THEN
+!               Quick check to see if primitive touches the grid
+                IF(PExtent>Zero.AND.(.NOT.BoxOutSideBox(PBox,CubeRoot%Box)))THEN
+#else
+                IF(PExtent>Zero)THEN
 #endif
 !-----------------------------------------------------------------------------------------
-!               Find the maximum extent of this primitive
-                PExtent=Zero
-                IA = IndexA
-                DO LMNA=StartLA,StopLA
-                   IA=IA+1
-                   IB=IndexB
-                   EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                      Pab=P(IA,IB)
-                      EllAB=EllA+EllB+1
-                      LenAB=LHGTF(EllAB)
-                      DO K=1,3
-                         PExtent=MAX(PExtent,Extent(EllAB,Prim%Zeta,  &
-                                     Pab*dHGBra%D(1:LenAB,IA,IB,K),   &
-                                     TauRho,ExtraEll_O=1))
+!                  Find the extent of this primitive again, now factoring in the density matrix
+                   PExtent=Zero
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+                         Pab=P(IA,IB)
+                         EllAB=EllA+EllB+1
+                         LenAB=LHGTF(EllAB)
+                         DO K=1,3
+                            PExtent=MAX(PExtent,Extent(EllAB,Prim%Zeta,  &
+                                        Pab*dHGBra%D(1:LenAB,IA,IB,K),   &
+                                        TauRho,ExtraEll_O=1))
+                         ENDDO
                       ENDDO
                    ENDDO
-                ENDDO
-                IF(PExtent>Zero)THEN
                    Ket=Zero
 !                  Set BBox for this primitive
                    PBox%BndBox(:,1)=Prim%P
@@ -132,9 +133,6 @@ MODULE dXCBlok
                          ENDDO
                       ENDDO
                    ENDDO
-#ifdef PERIODIC
-                ENDIF
-#endif
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF 

@@ -171,33 +171,36 @@ real(double):: Pextent_Old
              IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
-!               Set primitive values
-                MaxAmp=SetBraBlok(Prim,BS)
+!               Set primitive bra blok, find its extent
+                PExtent=SetBraBlok(Prim,BS,Tau_O=TauRho,ExtraEll_O=1)
 #ifdef PERIODIC
-!               Quick check to see if primitive touches the grid
-!               add in fudge factor for safety
-                PExtent=GaussianExtent(Prim%Zeta,1.D4*MaxAmp)
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)
-                IF(.NOT.BoxOutSideBox(PBox,CubeRoot%Box))THEN
-#endif
-!               Find the maximum extent of this primitive
-                PExtent=Zero
-                IA = IndexA
-                DO LMNA=StartLA,StopLA
-                   IA=IA+1
-                   IB=IndexB
-                   EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
-                      LenHG=LHGTF(EllA+EllB)
-                      PExtent=MAX(PExtent,Extent(EllA+EllB,Prim%Zeta, &
-                                  HGBra%D(1:LenHG,IA,IB),TauRho,ExtraEll_O=1))
-                   ENDDO
-                ENDDO
+!               Quick check to see if primitive touches the grid
+                IF(PExtent>Zero.AND.(.NOT.BoxOutSideBox(PBox,CubeRoot%Box)))THEN
+#else
                 IF(PExtent>Zero)THEN
+#endif
+!                  Recompute extent now on case by case basis
+!                  Perhaps using a better extent
+                   PExtent=Zero
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+                         LenHG=LHGTF(EllA+EllB)
+!                        Using Extent1 here halves cpu time of Kxc build
+!                        Numbers for loose seem somewhat less robust though
+!                        Need alot more testing (leave for now unitll forces are 100%).
+                         PExtent=MAX(PExtent,Extent(EllA+EllB,Prim%Zeta, &
+                                     HGBra%D(1:LenHG,IA,IB),TauRho,ExtraEll_O=1))
+                      ENDDO
+                   ENDDO
 !                  Set BBox for this primitive
                    PBox%BndBox(:,1)=Prim%P
                    PBox%BndBox(:,2)=Prim%P
@@ -219,9 +222,6 @@ real(double):: Pextent_Old
                          ENDDO
                       ENDDO
                    ENDDO
-#ifdef PERIODIC
-                ENDIF
-#endif
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF
