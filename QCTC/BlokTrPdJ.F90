@@ -62,12 +62,12 @@ MODULE BlokTrPdJ
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
                                                    MDx,MDxy,MDxyz,Amp2,MaxAmp, &
-                                                   Pab,JNorm,Tau,OmegaMin
+                                                   Pab,JNorm,Tau,OmegaMin, PExtent,PStrength
        INTEGER                                  :: KA,KB,CFA,CFB,PFA,PFB,AtA,ATB,    &
                                                    IndexA,IndexB,              &
                                                    StartLA,StartLB,            &
                                                    StopLA,StopLB
-       INTEGER                                  :: I,J,K,MaxLA,MaxLB,IA,IB,  &
+       INTEGER                                  :: I,J,K,L,MaxLA,MaxLB,IA,IB,  &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LM,LMN, &
                                                    Ell,EllA,EllB,HGLenEll,SPLenEll
