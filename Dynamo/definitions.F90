@@ -49,7 +49,7 @@ INTEGER, PARAMETER :: DEFAULT_OUTPUT = 6
 
 ! . The default precision parameter for real numbers.
 !INTEGER, PARAMETER :: DP = DOUBLE ! NAG compiler.
-INTEGER, PARAMETER :: DP = 8      ! Cray T3E, DEC, PG and SGI compilers.
+INTEGER, PARAMETER :: DP = KIND(0.D0) ! 8      ! Cray T3E, DEC, PG and SGI compilers.
 
 ! . The module library force field.
 CHARACTER ( LEN = 16 ), PARAMETER :: FORCE_FIELD = "OPLS_AA"
@@ -65,7 +65,7 @@ INTEGER, PARAMETER :: MAX_UNITS = 100
 
 ! . The single precision parameter for real numbers.
 !INTEGER, PARAMETER :: SP = SINGLE ! NAG compiler.
-INTEGER, PARAMETER :: SP = 4      ! Cray T3E, DEC, PG and SGI compilers.
+INTEGER, PARAMETER :: SP = KIND(0.0) !4      ! Cray T3E, DEC, PG and SGI compilers.
 
 ! . The version number of the module library.
 REAL ( KIND = DP ), PARAMETER :: VERSION = 2.0_DP
