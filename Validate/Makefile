@@ -41,7 +41,7 @@ small:
 	m Water.inp         Water.out         Water.log
 	m NH3.inp           NH3.out           NH3.log
 	m Biotin.inp        Biotin.out        Biotin.log    
-        m Graphite.inp      Graphite.out      Graphite.log
+	m Graphite.inp      Graphite.out      Graphite.log
 	m Na2Cl2.inp        Na2Cl2.out        Na2Cl2.log
 	m PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
 	m Histidine.inp     Histidine.out     Histidine.log 
