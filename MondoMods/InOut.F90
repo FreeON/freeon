@@ -1491,8 +1491,24 @@ MODULE InOut
          CHARACTER(LEN=*),         INTENT(IN)    :: Name
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
          TYPE(BCSR)                              :: B                          
+#ifdef PARALLEL
+         LOGICAL                                 :: InParTemp
+#endif
 !----------------------------------------------------------------------------
+#ifdef PARALLEL
+         IF(PRESENT(Checkpoint_O))THEN
+            InParTemp=InParallel
+            ! We must turn off the parallel broadcast at this point
+            ! so that we only gather from HDF to the ROOT node
+            InParallel=.FALSE.
+          ENDIF
+#endif
          CALL Get_BCSR(B,Name,PFix_O,CheckPoint_O)
+#ifdef PARALLEL
+         IF(PRESENT(Checkpoint_O))THEN
+            InParallel=InParTemp
+          ENDIF
+#endif
          CALL SetEq(A,B) 
          CALL Delete(B)
          A%Node=MyId
