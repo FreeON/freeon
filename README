@@ -253,3 +253,10 @@ o I've added a Thresholding module in MondoMods.  This should now be a unified
 o Any Mathematica files should now go in an appropriate subdirectory called MMA
   in the relavent directory.  For example, the notebook that generates special functions
   is now in MONDO/MondoMods/MMA/Functions.  
+!-------------------------------------------------------------------------------
+MS Change log 2/5/01:
+o Committed gradients to the repository along with Makefiles
+o Updated GlobalScalars.F90 to include:
+  INTEGER,      PARAMETER :: dHGLen=(HGEll+2)*(HGEll+3)*(HGEll+4)/6,
+  which is needed by GradXCBlok.F90
+
