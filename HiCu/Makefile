@@ -58,14 +58,14 @@ clean:	CHC CXF
 	ls -lS
 #-----------------------------------------------------------------------
 HC:	$(HObjs)
-	$(LD) $(LDFLAGS) HiCu $(HObjs) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) HiCu $(HObjs) $(F90_LIBRARIES) $(LAPACK)
 	mv HiCu $(MONDO_EXEC)
 #
 CHC:	
 	rm -f $(MONDO_EXEC)/HiCu
 #-----------------------------------------------------------------------
 XF:     $(XFObjs)
-	$(LD) $(LDFLAGS) XCForce $(XFObjs) $(F90_LIBRARIES)
+	$(LD) $(LDFLAGS) XCForce $(XFObjs) $(F90_LIBRARIES) $(LAPACK)
 	mv XCForce $(MONDO_EXEC)
 #
 CXF:
