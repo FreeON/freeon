@@ -1210,117 +1210,36 @@ CONTAINS
    SUBROUTINE CholFact(B,NCart,CholData,DoClssTrf,Print,ThreeAt)
      TYPE(BMATR)    :: B 
      TYPE(Cholesky) :: CholData
-     TYPE(INT_VECT) :: BorderLine
      TYPE(INT_VECT) :: ISpB,JSpB
      TYPE(DBL_VECT) :: ASpB
-     TYPE(INT_VECT) :: ChColPt1
-     TYPE(DBL_VECT) :: ChDiag,ChFact
      TYPE(INT_VECT) :: IGc,JGc
-     TYPE(INT_VECT) :: IGcU,JGcU
-     TYPE(DBL_VECT) :: DGc,AGc
-     TYPE(DBL_VECT) :: DGcU,AGcU
-     INTEGER        :: N,I,J,K,I1,I2,J1,J2,K1,K2,R,S,NZ
-     INTEGER        :: NCart,GcSNon0,ChFillEst,NatmsLoc,NIntC
+     TYPE(DBL_VECT) :: AGc
+     INTEGER        :: NCart
      REAL(DOUBLE)   :: SparsitySpB,SparsityGc,SparsityCh
      INTEGER        :: NZSpB,NZGc,NZCh
-     INTEGER        :: ThreeAt(1:3)
+     INTEGER        :: ThreeAt(1:3),NIntC
      LOGICAL        :: DoClssTrf,Print
      !
-     NatmsLoc=NCart/3
      NIntC=SIZE(B%IB,1)
      ! 
      ! Compute Gc=Bt*B
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
-     NZSpB=SIZE(JSpB%I)
+       NZSpB=ISpB%I(NIntC+1)-1
      CALL GetGc(NCart,ISpB,JSpB,ASpB,IGc,JGc,AGc)
-     NZGc=SIZE(JGc%I)
      CALL Delete(ISpB)
      CALL Delete(JSpB)
      CALL Delete(ASpB)
      !
-     ! Find RCM ordering
-     !
-     CALL New(CholData%Perm,NCart)
-     CALL New(CholData%IPerm,NCart)
-     CALL RCMOrder(CholData%IPerm%I,CholData%Perm%I,NCart,IGc%I,JGc%I)
-     !
-     ! Permute Gc
-     !
-     CALL Perm1x1(CholData%Perm%I,IGc%I,JGc%I,AGc%D)
-     !
-     ! Determine profile of Gc
-     !
-     CALL New(BorderLine,NCart)
-     CALL GetBorders(BorderLine%I,IGc%I,JGc%I,NCart)
-     !
-     ! Reduce Gc to upper triangle
-     !
-     NZ=(IGc%I(NCart+1)-1-NCart)/2
-     CALL New(IGcU,NCart+1) 
-     CALL New(JGcU,NZ) 
-     CALL New(AGcU,NZ) 
-     CALL New(DGcU ,NCart) 
-       CALL UpperTr(IGc%I,JGc%I,AGc%D,IGcU%I,JGcU%I,AGcU%D,DGcU%D)
-     CALL Delete(IGc)
-     CALL Delete(JGc)
-     CALL Delete(AGc)
-     !
-     ! Shift spectrum or complete diagonals 
-     !
      IF(DoClssTrf) THEN
-       DO I=1,NCart
-         DGcU%D(I)=DGcU%D(I)+1.D-4
-       ENDDO
+       CALL SpectrShift_1x1(IGc,JGc,AGc,1.D-4) 
      ELSE
-       K=3*(ThreeAt(1)-1)
-       DGcU%D(CholData%Perm%I(K+1))=One
-       DGcU%D(CholData%Perm%I(K+2))=One
-       DGcU%D(CholData%Perm%I(K+3))=One
-       K=3*(ThreeAt(2)-1)
-       DGcU%D(CholData%Perm%I(K+2))=One
-       DGcU%D(CholData%Perm%I(K+3))=One
-       K=3*(ThreeAt(3)-1)
-       DGcU%D(CholData%Perm%I(K+3))=One
+       CALL CompleteDiag_1x1(IGc,JGc,AGc,ThreeAt) 
      ENDIF
+       NZGc=IGc%I(NCart+1)-1
      !
-     ! Scale matrix
-     !
-     CALL New(CholData%GcScale,NCart)
-     DO I=1,NCart
-       CholData%GcScale%D(I)=One/SQRT(DGcU%D(I))
-     ENDDO
-     CALL Scale1x1(CholData%GcScale%D,IGcU%I,JGcU%I,AGcU%D,DGcU%D,NCart)
-     !
-     ! Allocate storage for symbolic Cholesky factor
-     !
-     ChFillEst=NCart*500         
-     CALL New(CholData%ChRowPt,NCart+1)
-     CALL New(ChColPt1,ChFillEst)
-     !
-     ! Determine symbolic structure of the Cholesky factor 
-     !
-     CALL SymbCholComplete(BorderLine%I,NCart,&
-               CholData%ChRowPt%I,ChColPt1%I)
-     NZCh=CholData%ChRowPt%I(NCart+1)-1
-     !
-     CALL New(CholData%ChColPt,NZCh)
-     CholData%ChColPt%I(1:NZCh)=ChColPt1%I(1:NZCh)
-     CALL Delete(ChColPt1)
-     !
-     ! Numeric Cholesky factorization
-     !
-     CALL New(CholData%ChDiag,NCart)
-     CALL New(CholData%ChFact,NZCh)
-     CALL NumCholFact(IGcU%I,JGcU%I,AGcU%D, &
-       DGcU%D,CholData%ChRowPt%I,CholData%ChColPt%I,NCart, &
-       CholData%ChFact%D,CholData%ChDiag%D,.FALSE.)
-     !
-     CALL Delete(JGcU)
-     CALL Delete(IGcU)
-     CALL Delete(AGcU)
-     CALL Delete(DGcU)
-     CALL Delete(BorderLine)
+     CALL TriangFact(IGc,JGc,AGc,CholData)
+       NZCh=CholData%ChRowPt%I(NCart+1)-1
      !
      IF(Print) THEN
        SparsitySpB=DBLE(NZSpB)/DBLE(NIntC*NCart)*100.D0
@@ -1980,6 +1899,179 @@ CONTAINS
      CALL Delete(JGc2)
      CALL Delete(AGc2)
    END SUBROUTINE ThreshMatr
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE SpectrShift_1x1(IGc,JGc,AGc,Shift) 
+     TYPE(INT_VECT)      :: IGc,JGc,IUnit,JUnit,IC,JC
+     TYPE(DBL_VECT)      :: AGc,AUnit,CN
+     REAL(DOUBLE)        :: Shift
+     INTEGER             :: NDim,I,J,NZ
+     !
+     NDim=SIZE(IGc%I)-1
+     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
+     AUnit%D=Shift*AUnit%D 
+     CALL AddMat_1x1(IGc%I,JGc%I,AGc%D,IUnit%I,JUnit%I,AUnit%D,IC,JC,CN,NDim,NDim)
+     CALL Delete(IGc)
+     CALL Delete(JGc)
+     CALL Delete(AGc)
+     NZ=IC%I(NDim+1)-1
+     CALL New(IGc,NDim+1)
+     CALL New(JGc,NZ)
+     CALL New(AGc,NZ)
+     IGc%I(1:NDim+1)=IC%I(1:NDim+1)
+     JGc%I(1:NZ)=JC%I(1:NZ)
+     AGc%D(1:NZ)=CN%D(1:NZ)
+     !
+     CALL Delete(IC)
+     CALL Delete(JC)
+     CALL Delete(CN)
+     CALL Delete(IUnit)
+     CALL Delete(JUnit)
+     CALL Delete(AUnit)
+   END SUBROUTINE SpectrShift_1x1
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
+     TYPE(INT_VECT)      :: IUnit,JUnit
+     TYPE(DBL_VECT)      :: AUnit
+     INTEGER             :: NDim,I,J
+     !
+     CALL New(IUnit,NDim+1)
+     CALL New(JUnit,NDim)
+     CALL New(AUnit,NDim)
+     !
+     IUnit%I(1)=1
+     DO I=1,NDim
+       IUnit%I(I+1)=I+1
+       JUnit%I(I)=I
+       AUnit%D(I)=One
+     ENDDO
+   END SUBROUTINE GetUnit_1x1
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE CompleteDiag_1x1(IGc,JGc,AGc,ThreeAt) 
+     TYPE(INT_VECT)      :: IGc,JGc,IUnit,JUnit,IC,JC
+     TYPE(DBL_VECT)      :: AGc,AUnit,CN
+     REAL(DOUBLE)        :: Shift
+     INTEGER             :: NDim,I,J,NZ,K
+     INTEGER,DIMENSION(3):: ThreeAt
+     !
+     NDim=SIZE(IGc%I)-1
+     CALL GetUnit_1x1(IUnit,JUnit,AUnit,NDim) 
+     AUnit%D=Zero
+     K=3*(ThreeAt(1)-1)
+     AUnit%D(K+1:K+3)=One 
+     K=3*(ThreeAt(2)-1)
+     AUnit%D(K+2:K+3)=One 
+     K=3*(ThreeAt(3)-1)
+     AUnit%D(K+3)=One 
+     !
+     CALL AddMat_1x1(IGc%I,JGc%I,AGc%D,IUnit%I,JUnit%I,AUnit%D,IC,JC,CN,NDim,NDim)
+     CALL Delete(IGc)
+     CALL Delete(JGc)
+     CALL Delete(AGc)
+     NZ=IC%I(NDim+1)-1
+     CALL New(IGc,NDim+1)
+     CALL New(JGc,NZ)
+     CALL New(AGc,NZ)
+     IGc%I(1:NDim+1)=IC%I(1:NDim+1)
+     JGc%I(1:NZ)=JC%I(1:NZ)
+     AGc%D(1:NZ)=CN%D(1:NZ)
+     !
+     CALL Delete(IC)
+     CALL Delete(JC)
+     CALL Delete(CN)
+     CALL Delete(IUnit)
+     CALL Delete(JUnit)
+     CALL Delete(AUnit)
+   END SUBROUTINE CompleteDiag_1x1
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE TriangFact(IGc,JGc,AGc,CholData)
+     TYPE(Cholesky) :: CholData
+     TYPE(INT_VECT) :: BorderLine
+     TYPE(INT_VECT) :: ChColPt1
+     TYPE(DBL_VECT) :: ChDiag,ChFact
+     TYPE(INT_VECT) :: IGc,JGc
+     TYPE(INT_VECT) :: IGcU,JGcU
+     TYPE(DBL_VECT) :: DGc,AGc
+     TYPE(DBL_VECT) :: DGcU,AGcU
+     INTEGER        :: N,I,J,K,I1,I2,J1,J2,K1,K2,R,S,NZ
+     INTEGER        :: NCart,GcSNon0,ChFillEst,NIntC
+     INTEGER        :: NZSpB,NZGc,NZCh
+     ! 
+     NZGc=SIZE(JGc%I)
+     NCart=SIZE(IGc%I)-1
+     !
+     ! Find RCM ordering
+     !
+     CALL New(CholData%Perm,NCart)
+     CALL New(CholData%IPerm,NCart)
+     CALL RCMOrder(CholData%IPerm%I,CholData%Perm%I,NCart,IGc%I,JGc%I)
+     !
+     ! Permute Gc
+     !
+     CALL Perm1x1(CholData%Perm%I,IGc%I,JGc%I,AGc%D)
+     !
+     ! Determine profile of Gc
+     !
+     CALL New(BorderLine,NCart)
+     CALL GetBorders(BorderLine%I,IGc%I,JGc%I,NCart)
+     !
+     ! Reduce Gc to upper triangle
+     !
+     NZ=(IGc%I(NCart+1)-1-NCart)/2
+     CALL New(IGcU,NCart+1) 
+     CALL New(JGcU,NZ) 
+     CALL New(AGcU,NZ) 
+     CALL New(DGcU ,NCart) 
+       CALL UpperTr(IGc%I,JGc%I,AGc%D,IGcU%I,JGcU%I,AGcU%D,DGcU%D)
+     CALL Delete(IGc)
+     CALL Delete(JGc)
+     CALL Delete(AGc)
+     !
+     ! Scale matrix
+     !
+     CALL New(CholData%GcScale,NCart)
+     DO I=1,NCart
+       CholData%GcScale%D(I)=One/SQRT(DGcU%D(I))
+     ENDDO
+     CALL Scale1x1(CholData%GcScale%D,IGcU%I,JGcU%I,AGcU%D,DGcU%D,NCart)
+     !
+     ! Allocate storage for symbolic Cholesky factor
+     !
+     ChFillEst=NCart*500         
+     CALL New(CholData%ChRowPt,NCart+1)
+     CALL New(ChColPt1,ChFillEst)
+     !
+     ! Determine symbolic structure of the Cholesky factor 
+     !
+     CALL SymbCholComplete(BorderLine%I,NCart,&
+               CholData%ChRowPt%I,ChColPt1%I)
+     NZCh=CholData%ChRowPt%I(NCart+1)-1
+     !
+     CALL New(CholData%ChColPt,NZCh)
+     CholData%ChColPt%I(1:NZCh)=ChColPt1%I(1:NZCh)
+     CALL Delete(ChColPt1)
+     !
+     ! Numeric Cholesky factorization
+     !
+     CALL New(CholData%ChDiag,NCart)
+     CALL New(CholData%ChFact,NZCh)
+     CALL NumCholFact(IGcU%I,JGcU%I,AGcU%D, &
+       DGcU%D,CholData%ChRowPt%I,CholData%ChColPt%I,NCart, &
+       CholData%ChFact%D,CholData%ChDiag%D,.FALSE.)
+     !
+     CALL Delete(JGcU)
+     CALL Delete(IGcU)
+     CALL Delete(AGcU)
+     CALL Delete(DGcU)
+     CALL Delete(BorderLine)
+   END SUBROUTINE TriangFact
 !
 !--------------------------------------------------------------------
 !
