@@ -1444,7 +1444,9 @@ MODULE GeomOpt
 ! by compressing the range of the GDIIS matrix
 !
           GMTag=''
+#ifdef MMech
         IF(HasMM()) GMTag='GM_MM'
+#endif
 !
         CALL Get(GMPrev,TRIM(GMTag)//PrvGeom)
 !

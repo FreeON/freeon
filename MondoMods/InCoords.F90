@@ -1866,7 +1866,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 ! Get atomnames (numbers) from HDF 
 !
       CALL New(MMAtNum,NatmsLoc)
-
+#ifdef MMech
       IF(HasMM()) THEN
         CALL Get(MMAtNum,'MMATNUM')
       ELSE
@@ -1875,6 +1875,12 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
         CALL Delete(NuclCharge)
       ENDIF
+#else
+        CALL New(NuclCharge,NatmsLoc)
+        CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+        DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+        CALL Delete(NuclCharge)
+#endif
 
 !
       IF(Refresh==1) Then !!! Total refresh
@@ -2833,7 +2839,9 @@ END SUBROUTINE CoordTrf
       ENDIF
 !
     GMTag=''
+#ifdef MMech
     IF(HasMM()) GMTag='GM_MM'
+#endif
 !
 ! Get Displacements from geometries, stored in HDF
 ! and fill them into SRDispl columns.
@@ -4561,7 +4569,7 @@ END SUBROUTINE ChkBendToLinB
         ENDIF
         CALL New(MMAtNum,NatmsLoc) 
 !
-
+#ifdef MMech
         IF(HasMM()) THEN
           CALL Get(MMAtNum,'MMAtNum')
         ELSE
@@ -4570,6 +4578,12 @@ END SUBROUTINE ChkBendToLinB
           DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
           CALL Delete(NuclCharge)
         ENDIF
+#else
+          CALL New(NuclCharge,NatmsLoc)
+          CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+          DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+          CALL Delete(NuclCharge)
+#endif
 
 !
         CALL New(XYZPrint,(/3,NatmsLoc/))
@@ -5109,7 +5123,9 @@ END SUBROUTINE ChkBendToLinB
       ENDIF
 !
     GMTag=''
+#ifdef MMech
     IF(HasMM()) GMTag='GM_MM'
+#endif
 !
 ! Get Displacements from geometries, stored in HDF
 ! and fill them into SRDispl columns.
