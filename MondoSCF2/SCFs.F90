@@ -17,29 +17,34 @@ MODULE SCFs
   IMPLICIT NONE 
   INTEGER HDFFileID,H5GroupID
 CONTAINS
-  !===============================================================================
-  !
-  !===============================================================================
+!===============================================================================
+!
+!===============================================================================
   SUBROUTINE SinglePoints(C)
     TYPE(Controls) :: C
-    INTEGER        :: iBAS,iGEO
-    !----------------------------------------------------------------------------!
-    ! Just one geometry
-    iGEO=1
-    ! Init previous state
-    C%Stat%Previous%I=(/0,1,1/)
-    ! Loop over basis sets 
-    DO iBAS=1,C%Sets%NBSets
-       ! Archive 
-       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
-       CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-       ! Converge an SCF
-       CALL SCF(iBAS,iGEO,C)
+    INTEGER        :: iBAS,iGEO,iBBegin
+!----------------------------------------------------------------------------!
+!   Loop over geometry
+    DO iGEO = 1,1 !C%Geos%NGeom
+!      Init previous state
+       C%Stat%Previous%I=(/0,1,1/)
+!      Init iBBegin
+       iBBegin = 1
+       IF(iGEO > 1) iBBegin = C%Sets%NBSets
+!      Loop over basis sets 
+       DO iBAS=iBBegin,C%Sets%NBSets
+!         Archive 
+          CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
+          CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+!         Converge an SCF
+          CALL SCF(iBAS,iGEO,C)
+       ENDDO
     ENDDO
+!
   END SUBROUTINE SinglePoints
-  !===============================================================================
-  !
-  !===============================================================================
+!===============================================================================
+!
+!===============================================================================
   SUBROUTINE SCF(cBAS,cGEO,C)
     TYPE(Controls)    :: C
     TYPE(DBL_RNK2)    :: ETot,DMax,DIIS
