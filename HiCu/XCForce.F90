@@ -130,7 +130,10 @@ PROGRAM XCForce
                        XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + Four*F_nlm(1:3)
                     ENDIF
                     nlm = AtomToFrac(GM,Pair%A)
-                    LatFrc_XC%D =  LatFrc_XC%D + Four*LaticeForce(GM,nlm,F_nlm(1:3))
+                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,F_nlm(1:3))
+!
+                    nlm = AtomToFrac(GM,Pair%B)
+                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,F_nlm(4:6)-F_nlm(1:3))
                  ENDIF
               ENDDO
            ENDDO
@@ -138,15 +141,16 @@ PROGRAM XCForce
      ENDDO
   ENDDO
 !--------------------------------------------------------------------------------
-! Calculate the Surface term for the X
+! Calculate the Surface term for the X Force
 !--------------------------------------------------------------------------------
 ! Set the Thresholds
-  DelBox = 1.D-3
+  DelBox = 1.D-4
   CALL SetLocalThresholds(Thresholds%Cube*1.D-4)
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree
   DO I = 1,3 
+     Exc=Zero
      IF(GM%PBC%AutoW%I(I)==1) THEN
         WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
         WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
@@ -156,19 +160,18 @@ PROGRAM XCForce
         LatFrc_XC%D(I,I) = LatFrc_XC%D(I,I)+Exc/(Two*DelBox)
      ENDIF
   ENDDO
-! Delete the density
-  CALL DeleteRhoTree(RhoRoot)
-!---------------------------------------------------------------------------------
+! Write Out Lattice Force       
 !!$  WRITE(*,*) 'LatFrc_XC'
 !!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_XC%D(I,J),J=1,3)  
+!!$     WRITE(*,*) (LatFrc_XC%D(I,J),J=1,3)
 !!$  ENDDO
+! Delete the density
+  CALL DeleteRhoTree(RhoRoot)
 #ifdef PARALLEL
   XCFrcEndTm = MondoTimer()
   XCFrcTm = XCFrcEndTm-XCFrcBegTm
 #endif
 ! Do some checksumming, resumming and IO 
-
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotXCFrc,TotFrcComp)
