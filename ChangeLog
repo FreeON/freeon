@@ -1,3 +1,17 @@
+2004-04-01 14:58  tymczak
+
+	* SCFeqs/ODA.F90: Fixed Bugs
+	
+	CJ
+
+2004-04-01 13:52  tymczak
+
+	* SCFeqs/ODA.F90: [no log message]
+
+2004-04-01 13:20  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-01 11:03  tymczak
 
 	* MondoSCF2/: ParseOptions.F90, SCFs.F90: Fixed Bugs
