@@ -23,11 +23,12 @@ PROGRAM QCTC
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)         :: J,S,T1,P
+  TYPE(DBCSR)                :: J,S,T1,P
 #else
-  TYPE(BCSR)          :: J,S,T1,P
+  TYPE(BCSR)                 :: J,S,T1,P
 #endif
-  REAL(DOUBLE)        :: E_Nuc_Tot
+  REAL(DOUBLE)               :: E_Nuc_Tot
+  TYPE(TIME)                 :: TimeMakeJ
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
 !-------------------------------------------------------------------------------- 
 ! Start up macro
@@ -45,14 +46,14 @@ PROGRAM QCTC
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp(FFEll2)
+! Build the global PoleTree representation of the total density
+  CALL RhoToPoleTree
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
 ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(FFEll)
+  CALL PBCFarFieldSetUp(FFEll,PoleRoot)
 #endif
-! Build the global PoleTree representation of the total density
-  CALL RhoToPoleTree
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
@@ -60,7 +61,10 @@ PROGRAM QCTC
 ! Allocate J
   CALL New(J)
 ! Compute the Coulomb matrix J in O(N Lg N)
+  CALL Elapsed_Time(TimeMakeJ,'Init')
   CALL MakeJ(J)
+  CALL Elapsed_TIME(TimeMakeJ,'Accum')
+  CALL PPrint(TimeMakeJ,'QCTC.MakeJ',Unit_O=6)
 ! Put J to disk
 !  CALL PPrint(J,'J',Unit_O=6)
   CALL Filter(T1,J)
