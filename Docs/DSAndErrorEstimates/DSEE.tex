@@ -1,0 +1,108 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. use
+% \newcommand{\commentoutA}[1]{}
+% \newcommand{\commentoutB}[1]{#1}
+% instead of the following
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\commentoutA{\documentclass[superbib,prb,epsfig,floats,twocolumn]{revtex4}}
+\commentoutB{\documentclass[aps,nobibnotes,superbib,byrevtex,preprint]{revtex4}}
+\usepackage{graphics}
+\usepackage{amsfonts}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{epsfig}
+\begin{document}
+%%
+%%
+
+
+%\documentstyle[preprint,aps]{revtex4}
+%\documentstyle[prl,aps]{revtex4}
+
+%\draft
+%\tighten
+%\twocolumn
+
+%\begin{document}
+
+\date{\today}
+
+\title{Data structures and error estimates for O(N) quantum chemistry}
+
+\author{Matt Challacombe and  C.~J.~Tymczak}
+
+\address{
+Theoretical Division, Los Alamos National Laboratory,
+Los Alamos, NM 87545, USA}
+
+
+\begin{abstract}
+gnu snort fubar
+
+\keywords{linear scaling, electronic structure, data structures, error estimates}
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Error estimates}
+
+\begin{equation}
+\rho_q = \sum_{lmn} d_{lmn} \Lambda^q_{lmn}
+\end{equation}
+
+\begin{equation}
+\Lambda^q_{lmn}({\bf r})=\lambda^q_l(x)\lambda^q_m(y) \lambda^q_l(z) e^{-\zeta_q ({\bf r -Q})^2}
+\end{equation}
+
+\begin{equation}
+\lambda^q_l(x)= \zeta^{l/2}_q H_l \left[ \sqrt{\zeta_q} \left( x-Q_x \right)\right]
+\end{equation}
+
+\begin{equation}
+\lambda^q_l(x) \leq K \sqrt{ 2^l ~ l!~ \zeta^l_q  } ~ e^{\frac{\zeta_q}{2} (x-Q_x)^2 } 
+\end{equation}
+
+\begin{equation}
+\rho_q \leq C_q e^{ -\frac{\zeta_q}{2} ({\bf r -Q})^2 }  
+\end{equation}
+
+\begin{equation}
+C_q=\sum_{lmn} \left|d_{lmn}\right| K^3 \left[ 2^{l+m+n} ~ l! m! n! ~ \zeta^{l+m+n}_q \right]^{1/2} 
+\end{equation}
+
+\begin{equation}
+C_q=\max_{lmn} \left|d_{lmn}\right| K^3 \left[ 2^{l+m+n} ~ l! m! n! ~ \zeta^{l+m+n}_q \right]^{1/2} 
+\end{equation}
+
+
+\subsection{Gaussian extent}
+
+\begin{equation}
+C_q e^{-\zeta_q ' R^2 } < \tau 
+\end{equation}
+
+\subsection{Potential extent}
+
+\begin{equation}
+\left(\frac{\pi}{\zeta_q'} \right)^{3/2} \frac{C_q}{R} {\rm erfc}\left({\sqrt{\zeta_q '} R }\right) \ll \tau
+\end{equation}
+
+
+
+\section{Acknowledgement}
+
+
+\bibliographystyle{apsrmp}
+\bibliography{mondo}
+
+\begin{references}
+
+\end{references}
+
+\end{document}

@@ -1,0 +1,10 @@
+#cp ../Bib/mondo.bib ./mondo.bib
+#cp ../RevTex/* ./
+latex DSEE
+bibtex DSEE
+latex DSEE
+bibtex DSEE
+latex DSEE
+bibtex DSEE
+xdvi DSEE
+#dvips -o DSEE.ps DSEE
