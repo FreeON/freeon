@@ -291,12 +291,12 @@ PROGRAM P2Use
      ENDIF
      ! Initial Trace Error
 #ifdef PARALLEL
+     CALL Multiply(P0,S0,Tmp1)
+     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
+     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TError0
      CALL Multiply(P0,S1,Tmp1)
      TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
-     WRITE(*,*) "Trace Error: Tr[P0,S0] = ",TError0
-     CALL Multiply(P0,S1,Tmp1)
-     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
-     WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TError0 
+     IF(MyID.EQ.ROOT)WRITE(*,*) "Trace Error: Tr[P0,S1] = ",TError0 
 #else
      TError0 = ABS(Trace(P0,S1)-Half*DBLE(NEl))
      WRITE(*,*) "Trace Error: Tr[P0,S0] = ",ABS(Trace(P0,S0)-Half*DBLE(NEl))
