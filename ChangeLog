@@ -1,3 +1,63 @@
+2004-07-07 11:36  mchalla
+
+	* TwoE/: INT/BRAHRR.m, INT/CNTRCT.m, INT/FRONTM.m, INT/GAMMAS.m,
+	INT/INT.m, INT/KETHRR.m, INT/Makefile, INT/core,
+	MSC/GetAtomPair.F90, MSC/InitDbl.F, MSC/Makefile, MSC/Scratch.F90,
+	MSC/ShellPairStruct.F90, MSC/core, GRD/BRAHRR.m, GRD/CNTRCT.m,
+	GRD/FRONTM.m, GRD/GAMMAS.m, GRD/GRD.m, GRD/Gradients.m,
+	GRD/KETHRR.m, GRD/Makefile, GRD/core: [no log message]
+
+2004-07-06 23:50  nemeth
+
+	* MondoSCF2/InCoords.F90: Cut-off modified for back-transformation.
+
+2004-07-06 17:19  nemeth
+
+	* MondoMods/: AtomPairs.F90, LinAlg.F90: New subroutine in
+	AtomPairs does transformations necessary after a geom opt step.
+	CROSS_PRODUCT has been moved into LinAlg from InCoords.
+
+2004-07-06 13:48  tymczak
+
+	* SCFeqs/P2Use.F90: [no log message]
+
+2004-07-06 13:47  tymczak
+
+	* MondoSCF2/: MDynamics.F90, SCFs.F90: Fixed Bugs
+
+2004-07-05 23:32  nemeth
+
+	* MondoSCF2/InCoords.F90: Iterative backtransformation is modified
+	to take smaller steps while the series of steps can lead to an
+	arbitrarily large displacement. This makes backtransformations much
+	more stable for large molecules.
+
+2004-07-02 16:23  nemeth
+
+	* MondoSCF2/InCoords.F90: Cross_product has been moved to LinAlg
+	from InCoords. New subroutines are added to AtomPairs to construct
+	PBCInfo after CellShape is modified by geom. opt.
+
+2004-07-01 13:28  mchalla
+
+	* TwoE/GetAtomPair.F90: [no log message]
+
+2004-07-01 13:20  mchalla
+
+	* TwoE/: InitDbl.F, IntegralsE.m, N4K.F90, ShellPairStruct.F90,
+	VScratchB.F90: [no log message]
+
+2004-07-01 10:50  tymczak
+
+	* SCFeqs/P2Use.F90, MondoSCF2/DynamicsKeys.F90,
+	MondoSCF2/OptionKeys.F90, MondoSCF2/ParseDynamics.F90,
+	MondoSCF2/ParseOptions.F90, MondoSCF2/MDynamics.F90: [no log
+	message]
+
+2004-07-01 10:14  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-06-30 18:04  nemeth
 
 	* Docs/Optimizer/PRL/ProofLett.tex: Proof corrections added.
