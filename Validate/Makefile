@@ -41,20 +41,22 @@ test:	$(TstObjs)
 	$(LD) $(LDFLAGS) Test $(TstObjs) $(LibOpts) $(Libs) 
 	rm -rf Validation.log
 #------------------------------------------------------------------
+#       Run validation suite sequentialy
+serial:	small big
 #
 small:
-	$(MONDO_HOME)/Exec/MondoSCF SiF4.inp    SiF4.out;  \
-                             ./Test SiF4.out    SiF4.ref
-	$(MONDO_HOME)/Exec/MondoSCF Urea.inp    Urea.out;  \
-                             ./Test Urea.out    Urea.ref
-#	$(MONDO_HOME)/Exec/MondoSCF Water.inp   Water.out;  \
-#                             ./Test Water.out   Water.ref 
-	$(MONDO_HOME)/Exec/MondoSCF Biotin.inp  Biotin.out; \
-                             ./Test Biotin.out  Biotin.ref
+	m SiF4.inp    SiF4.out;              ./Test SiF4.out    SiF4.ref
+	m Urea.inp    Urea.out;              ./Test Urea.out    Urea.ref
+	m Water.inp   Water.out;             ./Test Water.out   Water.ref 
+	m Biotin.inp  Biotin.out;            ./Test Biotin.out  Biotin.ref
 #
-big:	small	
-#----------------------------------------------
-#       Submit validation suite to pbs queing 
+big:	
+	m Caffiene.inp Caffiene.out;         ./Test Caffiene.out Caffiene.ref
+	m BetaCarotene.inp BetaCarotene.out; ./Test BetaCarotene.out BetaCarotene.ref 
+	m Chlorophyll.inp Chlorophyll.out;   ./Test Chlorophyll.out Chlorophyll.ref
+	m Vancomycin.inp Vancomycin.out;     ./Test Vancomycin.out Vancomycin.ref
+#-----------------------------------------------------------------------------------
+#       Submit validation suite to pbs queing system 
 #
 pbs:	small_pbs big_pbs
 #
@@ -62,17 +64,15 @@ small_pbs:
 	chmod u+x sub_pbs
 	./sub_pbs SiF4
 	./sub_pbs Urea 
-#	./sub_pbs Water
+	./sub_pbs Water
 	./sub_pbs Biotin
 #
-big_pbs:small_pbs
+big_pbs:
 	./sub_pbs Caffiene
 	./sub_pbs BetaCarotene
 	./sub_pbs Chlorophyll
 	./sub_pbs Vancomycin
-#
 #--------------------------------------------
-#
 release:purge $(ReleaseFiles) 
 #
 purge:	clean 

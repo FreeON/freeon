@@ -8,7 +8,7 @@ Multiplicity=1
 DebugAll =(MinDebug,CheckSums)
 SCFMethod=(SDMM,SDMM)
 BasisSets=(3-21G,3-21G)
-ModelChem=(HF,B3LYP/VWN3)
+ModelChem=(BLYPxc,BLYPxc)
 Accuracy =(Loose,Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>
