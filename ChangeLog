@@ -1,3 +1,64 @@
+2003-09-02 15:01  mchalla
+
+	* Docs/PBC_paper/: Extent.eps, Extent.sxd,
+	LinearPBCMethod_revtex4.tex: Latest and greatest...
+
+2003-09-02 14:03  nemeth
+
+	* Makefile: Removind Dynamo related abreviations from Makefile.
+
+2003-09-01 14:49  vweber
+
+	* MondoSCF2/ParseGeometries.F90: Changed name GeoConflictCheck1
+	into GeoConflictCheck.
+
+2003-09-01 14:45  vweber
+
+	* MondoSCF2/ConflictDetect.F90: Activated the 
+	models/methods/accuracies/basissets check (which can lead to
+	problems see comments). Changed some names.
+
+2003-09-01 14:36  vweber
+
+	* MondoSCF2/ParseInput.F90: Added GlbConflictCheck for global
+	conflict check.
+
+2003-09-01 14:35  vweber
+
+	* MondoSCF2/ParseOptions.F90: Changed name ConflictCheck into
+	OptConflictCheck.
+
+2003-09-01 13:43  vweber
+
+	* OneE/MakeS.F90: Added printing stuff MaxNon0 and MaxBlks.
+
+2003-09-01 13:29  vweber
+
+	* MondoMods/Parse.F90:	Added the function
+	CHARACTER(LEN=DEFAULT_CHR_LEN) FUNCTION RmBegChr(Chr,ChrToRm)
+	 Which removes the first char <ChrToRm> in a the string <Chr>.
+	 Added the function RmBegChr to remove some spaces in the function
+	 OptGetKeyArg.
+
+2003-08-29 16:15  ckgan
+
+	* MondoMods/: Makefile, TimerWrapper.C: A new wrapper for timer in
+	MONDO.
+
+2003-08-29 16:13  ckgan
+
+	* Includes/: CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.AlphaLinux.COMPAQ, CompilerSpecifics.IBMAIX.XLF,
+	CompilerSpecifics.IntelLinux.ABSOFT,
+	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG,
+	CompilerSpecifics.SGIIrix.MIPS, CompilerSpecifics.True64.COMPAQ:
+	Added -I$(MPI_INC) to the variable CPPINCLUDE. Intended for the
+	inclusion of TimerWrapper.C into MONDO.
+
+2003-08-28 16:19  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-08-28 16:17  mchalla
 
 	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex, Regions.eps,
