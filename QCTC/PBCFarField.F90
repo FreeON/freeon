@@ -15,7 +15,7 @@ MODULE PBCFarField
   USE PoleTree
   USE SpecFun
   USE Globals
-  USE PFFTensor 
+  USE PFFT
   IMPLICIT NONE
 !====================================================================================
 ! Global Array intermediates for multipole opperations
@@ -27,11 +27,12 @@ MODULE PBCFarField
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
-    SUBROUTINE PBCFarFieldSetUp(FFL)
+    SUBROUTINE PBCFarFieldSetUp(FFL,Q)
       INTEGER                         :: FFL,I,J,K,IMin,KMin,JMin,NC,LM
       REAL(DOUBLE),DIMENSION(3)       :: PQ
-      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP
+      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP,MACDist,PACDist,AA,BB,CC,RR,d1,d2,d3,RMIN
       REAL(DOUBLE), DIMENSION(0:FFLen):: FarFC,FarFS
+      TYPE(PoleNode)                  :: Q
 !
 !     Calculate the Dimension
 !
@@ -55,36 +56,40 @@ MODULE PBCFarField
 !
 !     Calculate the Center of the Cell
 !
-      CellCenter=Zero
-      DO I = 1,3
+      CellCenter = Zero
+      DO I=1,3
          IF(GM%AutoW(I)) THEN
-            CellCenter(1) = CellCenter(1)+Half*GM%BoxShape%D(I,1)
-            CellCenter(2) = CellCenter(2)+Half*GM%BoxShape%D(I,2)
-            CellCenter(3) = CellCenter(3)+Half*GM%BoxShape%D(I,3)
+            DO J=1,3
+               IF(GM%AutoW(J)) THEN
+                  CellCenter(I) =  CellCenter(I) + Half*GM%BoxShape%D(I,J)
+               ENDIF
+            ENDDO
+         ELSE
+            CellCenter(I) = Q%Box%Center(I)
          ENDIF
       ENDDO
-!
-!     Calculate the Size of the Box Needed  for the Direct J
-!
-      CALL BoxBounds(IMin,JMin,KMin)
-!
-!     Generate the Cells for the Inner Box
-!  
-      CALL New_CellSet_Cube(CSMM1,GM%BoxShape%D,(/IMin,JMin,KMin/))
 !
 !     Calculate the Box Moments
 !
       CALL RhoToSP(RhoC,RhoS)
 !
-!     Calculate the PBC FarField Tensor
-!
-      CALL PFFTensor(IMin,JMin,KMin)
-!
-!     CALCULATE THE DIPOLE AND QUADRIPOLE MOMENTS
-!
+!     Calculate the Dipole and Quadripole Moments
+!  
       CALL RhoToQ2(Quadripole,Dipole(1),Dipole(2),Dipole(3))
 !
-!     Calculate PFF    energy
+!     Calculate the Size of the Box Needed  for the Direct J
+!
+      CALL BoxBounds(IMin,JMin,KMin,MACDist,PACDist,Q)
+!
+!     Generate the Cells for the Inner Box
+!  
+      CALL New_CellSet_Cube(CSMM1,GM%BoxShape%D,(/IMin,JMin,KMin/))
+!
+!     Calculate the PBC FarField Tensor
+!
+      CALL PFFTensor(IMin,JMin,KMin) 
+!
+!     Calculate PFF  energy
 !
       E_PFF  = Zero
       FarFC  = Zero
@@ -102,10 +107,34 @@ MODULE PBCFarField
 !     Calculate Quad   energy
 !
       E_QP = ABS(GM%NElec)*QFAC*Quadripole
+!         
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) '==================================Periodic================================'      
+      WRITE(Out,*) 'CellCenterX = ',CellCenter(1)
+      WRITE(Out,*) 'CellCenterY = ',CellCenter(2)
+      WRITE(Out,*) 'CellCenterZ = ',CellCenter(3)
+      WRITE(Out,*) 'Pac Dist    = ',PACDist
+      WRITE(Out,*) 'Mac Dist    = ',MACDist
+      WRITE(Out,*) 'IMin        = ',IMin
+      WRITE(Out,*) 'JMin        = ',JMin
+      WRITE(Out,*) 'KMin        = ',KMin
+      WRITE(Out,*) 'D(1)        = ',Dipole(1)
+      WRITE(Out,*) 'D(2)        = ',Dipole(2)
+      WRITE(Out,*) 'D(3)        = ',Dipole(3)
+      WRITE(Out,*) 'Quadripole  = ',Quadripole
+      WRITE(Out,*) ' '
+      WRITE(Out,*) 'Correction to the Energy: PFF        = ',E_PFF
+      WRITE(Out,*) 'Correction to the Energy: Dipole     = ',E_DP
+      WRITE(Out,*) 'Correction to the Energy: Quadripole = ',E_QP  
+      WRITE(Out,*) '=========================================================================='
+      CLOSE(Out)
 !
+      WRITE(*,*) '==================================Periodic================================'      
       WRITE(*,*) 'CellCenterX = ',CellCenter(1)
       WRITE(*,*) 'CellCenterY = ',CellCenter(2)
       WRITE(*,*) 'CellCenterZ = ',CellCenter(3)
+      WRITE(*,*) 'Pac Dist    = ',PACDist
+      WRITE(*,*) 'Mac Dist    = ',MACDist
       WRITE(*,*) 'IMin        = ',IMin
       WRITE(*,*) 'JMin        = ',JMin
       WRITE(*,*) 'KMin        = ',KMin
@@ -116,7 +145,8 @@ MODULE PBCFarField
       WRITE(*,*) ' '
       WRITE(*,*) 'Correction to the Energy: PFF        = ',E_PFF
       WRITE(*,*) 'Correction to the Energy: Dipole     = ',E_DP
-      WRITE(*,*) 'Correction to the Energy: Quadripole = ',E_QP
+      WRITE(*,*) 'Correction to the Energy: Quadripole = ',E_QP  
+      WRITE(*,*) '=========================================================================='
 !
     END SUBROUTINE PBCFarFieldSetUp
 !====================================================================================
@@ -144,13 +174,13 @@ MODULE PBCFarField
          SPKetS = Zero
          FarFC  = Zero
          FarFS  = Zero
-         CALL Regular(FFELL,PQ)
+         CALL Regular(FFELL,PQ(1),PQ(2),PQ(3))
          CALL XLate77(FFELL,FFEll,SPKetC,SPKetS,Cpq,Spq,RhoC,RhoS)
-         CALL CTraX77(FFELL,FFEll,FarFC,FarFS,TensorC,TensorS,SPKetC,SPKetS)
+         CALL CTraX77(Prim%ELL,FFEll,FarFC,FarFS,TensorC,TensorS,SPKetC,SPKetS)
       ELSE
          FarFC  = Zero
          FarFS  = Zero
-         CALL CTraX77(FFELL,FFEll,FarFC,FarFS,TensorC,TensorS,RhoC,RhoS)
+         CALL CTraX77(Prim%ELL,FFEll,FarFC,FarFS,TensorC,TensorS,RhoC,RhoS)
       ENDIF
 !
 !     Contrax the <Bra|Ket> FF corection
@@ -172,25 +202,11 @@ MODULE PBCFarField
                            + (-PiZ*HGBra(1)*PQ(3)+PiZ*HGBra(4))*(DFAC*Dipole(3))
       END SELECT
 !
-    END FUNCTION CTraxFF
-!====================================================================================
-!   Calculate the Q of the Coulomb Matrix
-!====================================================================================
-    FUNCTION CTraxQ(Prim,HGBra)
-      TYPE(PrimPair)                   :: Prim
-      REAL(DOUBLE)                     :: PiZ,CTraxQ
-      REAL(DOUBLE), DIMENSION(1:)      :: HGBra
-!
-      CTraxQ = Zero
-!      IF(.TRUE.) RETURN
-!
-      PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
-!
 !     INCLUDE THE QUADRIPOLE correction 
 !
-      CTraxQ = CTraxQ + PiZ*HGBra(1)*QFAC*Quadripole
+      CTraxFF = CTraxFF + PiZ*HGBra(1)*QFAC*Quadripole
 !
-    END FUNCTION CTraxQ
+    END FUNCTION CTraxFF
 !========================================================================================
 ! Calculate Quadripole = Q(2,0,0)+Q(0,2,0)+Q(0,0,2) of the local density
 !========================================================================================
@@ -253,9 +269,9 @@ MODULE PBCFarField
 ! Calculate the SP Moments of Rho_Loc
 !========================================================================================
   SUBROUTINE RhoToSP(Cp,Sp)
-      INTEGER                         :: LP,LQ,LPQ,LenP,LenQ,LenPQ,LKet
+      INTEGER                         :: LP,LQ,LPQ,LenP,LenQ,LenPQ,LKet,I
       INTEGER                         :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LM
-      REAL(DOUBLE)                    :: Zeta,PiZ
+      REAL(DOUBLE)                    :: Zeta,PiZ,SUM1,SUM2
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       REAL(DOUBLE),DIMENSION(0:FFLen) :: Cp,Sp,Cq,Sq
 !
@@ -269,31 +285,29 @@ MODULE PBCFarField
 !
          LQ    = Rho%Lndx%I(zq)
          LP    = FFEll
-         LPQ   = LP+LQ
+         LPQ   = MAX(LP,LQ)
          LenQ  = LSP(LQ)  
          LenP  = LSP(LP)  
          LenPQ = LSP(LPQ) 
          LKet  = LHGTF(LQ)
 !
          IF(NQ > 0) THEN
-            DO iq = 1,NQ
+            DO iq=1,NQ
                iadd = Rho%OffQ%I(zq)+iq
                jadd = Rho%OffR%I(zq)+(iq-1)*LKet+1
                PQ(1)  = Rho%Qx%D(iadd)-CellCenter(1)
                PQ(2)  = Rho%Qy%D(iadd)-CellCenter(2)
                PQ(3)  = Rho%Qz%D(iadd)-CellCenter(3)
-!
                PiZ=(Pi/Zeta)**(ThreeHalves)
-               CALL HGToSP_Gen(LQ,PiZ,Rho%Co%D(jadd:),Cq,Sq) 
-!
+               CALL HGToSP_Gen(LQ,PiZ,Rho%Co%D(jadd:jadd+LKet-1),Cq(0:SPLen),Sq(0:SPLen)) 
                IF(NoTranslate(PQ))THEN
                   DO LM = 0,LenQ
                      Cp(LM) =  Cp(LM) + Cq(LM)   
                      Sp(LM) =  Sp(LM) + Sq(LM)
                   ENDDO
                ELSE
-                  CALL Regular(LPQ,PQ)
-                  CALL XLate90(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
+                  CALL Regular(LPQ,PQ(1),PQ(2),PQ(3))
+                  CALL XLate77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
                ENDIF
             ENDDO
          ENDIF
@@ -303,52 +317,51 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate the Box Bounds Needed for the Direct Sum
 !========================================================================================
-  SUBROUTINE BoxBounds(I,J,K) 
-    INTEGER                         :: I,J,K,iadd,iq,zq,NQ
-    REAL(DOUBLE)                    :: PacMin,MacMin,BoxR,RMin
+  SUBROUTINE BoxBounds(I,J,K,MACDist,PACDist,Q) 
+    INTEGER                          :: I,J,K
+    TYPE(PoleNode)                   :: Q
+    REAL(DOUBLE)                     :: Px,Py,Pz,O_LP,O_FFEll,NFac,Dist,MACDist,PACDist
+    INTEGER                          :: I_PAC,J_PAC,K_PAC,I_MAC,J_MAC,K_MAC,LP
 !
-!   Box Size
+!   PAC Distance (From PoleRoot)
 !
-    BoxR = Two*SQRT(CellCenter(1)**2+CellCenter(2)**2+CellCenter(3)**2)
-!
-!   PAC Distance (Approx)
-!
-    PacMin = PFunk(2*BS%NAsym,Thresholds%TwoE)
-    PacMin = SQRT(Two*PacMin/Rho%Expt%D(1))
+    Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1)-GM%BoxShape%D(1,1))
+    Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1)-GM%BoxShape%D(2,2))   
+    Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1)-GM%BoxShape%D(3,3))
+    I_PAC  = Px/GM%BoxShape%D(1,1)+1
+    J_PAC  = Py/GM%BoxShape%D(2,2)+1
+    K_PAC  = Pz/GM%BoxShape%D(3,3)+1
 !
 !   MAC DISTANCE
 !
-    MacMin = ( (BoxR**(DBLE(FFEll+1)))/Thresholds%TwoE )**(One/DBLE(FFEll+2))
-!
-!   Inner Box Distance: MAC AND PAC
-!
-    RMin  = MAX(PacMin,MacMin)
-    I  = RMin/GM%BoxShape%D(1,1)
-    J  = RMin/GM%BoxShape%D(2,2)
-    K  = RMin/GM%BoxShape%D(3,3)
+    MACDist = Zero
+    DO LP=0,BS%NASym 
+       O_LP     = UnsoldO(LP,RhoC,RhoS)/(UnsoldO(0,RhoC,RhoS)*Thresholds%TwoE)
+       O_FFELL  = UnsoldO(FFEll,RhoC,RhoS)
+       NFac     = FudgeFactorial(LP,FFELL)
+       Dist     = (O_LP*NFac*O_FFEll)**(One/DBLE(FFEll+LP+2))
+       MACDist = MAX(MACDist,Dist)
+    ENDDO
+    I_MAC  = MACDist/GM%BoxShape%D(1,1)+1
+    J_MAC  = MACDist/SQRT(GM%BoxShape%D(1,2)**2+GM%BoxShape%D(2,2)**2)+1
+    K_MAC  = MACDist/SQRT(GM%BoxShape%D(1,3)**2+GM%BoxShape%D(2,3)**2+GM%BoxShape%D(3,3)**2)+1
 !
 !   Threshold
 !
-    I = MIN(I,5)
-    J = MIN(J,5)
-    K = MIN(K,5)
-    I = MAX(I,1)
-    J = MAX(J,1)
-    K = MAX(K,1)
+    I = MIN(4,MAX(I_PAC,I_MAC))
+    J = MIN(4,MAX(J_PAC,J_MAC))
+    K = MIN(4,MAX(K_PAC,K_MAC))
 !
 !   Impose BCs
 !
     IF(.NOT. GM%AutoW(1)) I = 0
     IF(.NOT. GM%AutoW(2)) J = 0
     IF(.NOT. GM%AutoW(3)) K = 0
-!
-    WRITE(*,*) 'BoxR   = ',BoxR
-    WRITE(*,*) 'PacMin = ',PacMin
-    WRITE(*,*) 'MacMin = ',MacMin
+    PACDist = MAX(Px,MAX(Py,Pz))
 !
   END SUBROUTINE BoxBounds
 !========================================================================================
-! Calculate the Box Bounds Needed for the Direct Sum
+! If QP is < TOL, do not translate
 !========================================================================================
   FUNCTION NoTranslate(X) 
     REAL(DOUBLE),DIMENSION(3) :: X
@@ -455,7 +468,8 @@ MODULE PBCFarField
              OCC(J+JMAX+1) = 0
           ENDIF
        ENDDO                
-       WRITE(*,'20(I2)') (OCC(J),J=1,2*JMAX+1)
+       WRITE(*,100) (OCC(J),J=1,2*JMAX+1)
+ 100   FORMAT(20I3)
     ENDDO
 !
   END SUBROUTINE Print_Occ

@@ -1,4 +1,4 @@
-MODULE PFFTensor
+MODULE PFFT
 #ifdef PERIODIC  
   USE Derivedtypes
   USE GlobalScalars   
@@ -154,7 +154,6 @@ MODULE PFFTensor
 ! Calculate the PFFTensor
 !========================================================================================
     SUBROUTINE MakePFFT(IMin,JMin,KMin,MaxL)
-      INTEGER                           :: MaxL  
       INTEGER                           :: IMin,JMin,KMin,MaxL
       INTEGER                           :: I,J,K,L,M,LM,NC
       INTEGER                           :: IMax,JMax,KMax,IJKMax,LSwitch
@@ -171,13 +170,13 @@ MODULE PFFTensor
       IF(Dimen==1) THEN
          IF(GM%AutoW(1)) THEN
             NC = IMin
-            CALL IrRegular(MaxL,(/GM%BoxShape%D(1,1),Zero,Zero/))
+            CALL IrRegular(MaxL,GM%BoxShape%D(1,1),Zero,Zero)
          ELSEIF(GM%AutoW(2)) THEN
             NC = JMin
-            CALL IrRegular(MaxL,(/Zero,GM%BoxShape%D(2,2),Zero/))
+            CALL IrRegular(MaxL,Zero,GM%BoxShape%D(2,2),Zero)
          ELSEIF(GM%AutoW(3)) THEN  
             NC = KMin       
-            CALL IrRegular(MaxL,(/Zero,Zero,GM%BoxShape%D(3,3)/))
+            CALL IrRegular(MaxL,Zero,Zero,GM%BoxShape%D(3,3))
          ENDIF
          DO L=1,MaxL
             DO M = 0,L
@@ -208,7 +207,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN
                   CFac = GScript(L,RadSq)
@@ -237,7 +236,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN             
                   CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
@@ -267,7 +266,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN
                   CFac = FScript(L,RadSq)
@@ -299,7 +298,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN
                   CFac = GScript(L,RadSq)
@@ -322,7 +321,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN        
                   CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
@@ -346,7 +345,7 @@ MODULE PFFTensor
          DO NC = 1,CSMM2%NCells
             PQ(:) = CSMM2%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
-            CALL IrRegular(MaxL,PQ)
+            CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
                IF(L .LE. LSwitch) THEN
                   CFac = FScript(L,RadSq)
@@ -542,5 +541,5 @@ MODULE PFFTensor
 !
     END FUNCTION RZeta
 #endif
-  END MODULE PFFTensor
+  END MODULE PFFT
 
