@@ -1,3 +1,15 @@
+2004-01-05 05:46  mchalla
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-01-05 05:46  mchalla
+
+	* SCFeqs/ODA.F90: More tweeking to allow rebuild/norebild post ODA.
+
+2004-01-04 20:06  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-01-04 19:40  mchalla
 
 	* MondoSCF2/SCFs.F90: A bit more tweeking.

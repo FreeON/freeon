@@ -78,7 +78,7 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS,CPSCF_O) 
+  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS,CPSCF_O)
     TYPE(FileNames)  :: N
     TYPE(State)      :: S
     TYPE(Options)    :: O
@@ -99,7 +99,7 @@ CONTAINS
        Automatic1=.TRUE.
        Automatic2=.TRUE.
        ! Switching on/off rebuild doesn't work so well.  Lets be conservative for now
-       RebuildPostODA=.TRUE.
+       RebuildPostODA=.FALSE.
     ENDIF
 
     IF(PRESENT(CPSCF_O))THEN
@@ -115,7 +115,7 @@ CONTAINS
     IF(DoCPSCF)THEN
        CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O=.TRUE.)
        CALL DensityBuild(N,S,M)
-       S%Action%C(1)=CPSCF_FOCK_BUILD 
+       S%Action%C(1)=CPSCF_FOCK_BUILD
        CALL Invoke('QCTC',N,S,M)
        Modl=O%Models(cBAS)
        IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
@@ -204,14 +204,11 @@ CONTAINS
        SCFCycle=.FALSE.
        Automatic2=.FALSE.
        RebuildPostODA=.TRUE.
-    ELSEIF(WhatsUp==DID_CONVERGE.OR. &
-          (WhatsUp==SCF_STALLED.AND.DoODA))THEN
+    ELSEIF(WhatsUp==DID_CONVERGE)THEN
        SCFCycle=.TRUE.
     ELSE
        SCFCycle=.FALSE.
     ENDIF
-
-
   END FUNCTION SCFCycle
   !===============================================================================
   !
@@ -230,7 +227,7 @@ CONTAINS
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
-         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST
+         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ
     INTEGER,DIMENSION(G%Clones) :: Converged
     INTEGER                     :: ConvergedQ,iSCF
     CHARACTER(LEN=DCL)            :: chGEO
@@ -262,12 +259,17 @@ CONTAINS
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
           CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr' )
+          IF(DoODA.AND.cSCF>1)THEN
+             CALL Get(ETotO,'ODAEnergy')
+          ELSE
+             ETotO=1D10
+          ENDIF
        ENDIF
        CALL CloseHDFGroup(HDF_CurrentID)
        ! Load current energies
        G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
        Converged(iCLONE)=NOT_CONVERGE
-       IF(cSCF>1)THEN          
+       IF(cSCF>1)THEN
           ETotA=ETot%D(cSCF-1,iCLONE)
           ETotB=ETot%D(cSCF  ,iCLONE)
           DMaxA=DMax%D(cSCF-1,iCLONE)
@@ -287,13 +289,20 @@ CONTAINS
           dETot=ABS(ETotA-ETotB)
           dDMax=ABS(DMaxA-DMaxB)
           dDIIS=ABS(DIISA-DIISB)
-          ! Relative numbers 
+          ! Relative numbers
           ETotQ=dETot/ABS(ETotB)
           DMaxQ=dDMax/ABS(DMaxB+1.D-50)
           DIISQ=dDIIS/ABS(DIISB+1.D-50)
+          IF(DoODA)THEN
+             ODAQ=ABS(ETotB-ETotO)/ABS(ETotB)
+          ELSE
+             ODAQ=Zero
+          ENDIF
+!          WRITE(6,*)'ODAQ = ',ODAQ
 !          WRITE(6,*)'ETotQ = ',ETotQ
 !          WRITE(6,*)'DIISQ = ',DIISQ
 !          WRITE(6,*)'DMaxQ = ',DMaxQ
+!          WRITE(*,*)'ETOTO = ',ETotO
 !          WRITE(6,*)'ETOTA = ',ETOTA
 !          WRITE(6,*)'ETOTB = ',ETOTB
 !          WRITE(6,*)'DIISA = ',DIISA
@@ -308,17 +317,17 @@ CONTAINS
           ! Exceeded density criteria
           DLogic=DMaxB<65D-2*DTest
           ! Exceeded energy criteria
-          ELogic=ETotQ<3D-2*ETest  
-          ! Quasi convergence from below (bad) 
+          ELogic=ETotQ<3D-2*ETest
+          ! Quasi convergence from below (bad)
           QLogic=(.NOT.ALogic).AND.DLogic.AND.ELogic
           ! Going to wrong state with DIIS
           ILogic=DoDIIS.AND.DLogic.AND.(.NOT.ELogic)
-          ! DIIS is oscillating 
+          ! DIIS is oscillating
           OLogic=DoDIIS.AND.(.NOT.ALogic).AND.ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)
-          ! Maybe DIIS would be a good idea 
-          GLogic=DoODA.AND.DIISB<8D-4.AND.ETotQ<4D-5.AND.DMaxB<3D-1
-          ! Turn on KS recomputation if ODA is not strictly decreasing 
-          RLogic=DoODA.AND.(.NOT.ALogic)
+          ! Maybe DIIS would be a good idea
+          GLogic=DoODA.AND.DIISB<8D-4.AND.ETotQ<2D-5.AND.DMaxB<2D-1
+          ! Turn on KS recomputation if ODA is not strictly decreasing
+          RLogic=DoODA.AND.cSCF>2.AND.ODAQ>1D-4 !1D1*ETotQ
           ! Sort through logic hopefully in the conditionally correct order ...
           IF(ALogic.AND.CLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
@@ -332,19 +341,19 @@ CONTAINS
           ELSEIF(QLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
              Mssg='Quasi convergence from wrong side.'
-          ELSEIF(ILogic)THEN             
+          ELSEIF(ILogic)THEN
              Converged(iCLONE)=SCF_STALLED
              Mssg='DIIS converging to wrong state'
-          ELSEIF(OLogic)THEN             
+          ELSEIF(OLogic)THEN
              Converged(iCLONE)=SCF_STALLED
              Mssg='DIIS oscillation'
           ELSEIF(GLogic)THEN
-             Mssg='Maybe DIIS ?'
+             Mssg='Turning DIIS on'
              Converged(iCLONE)=DIIS_NOPATH
-!          ELSEIF(RLogic)THEN
-!             Mssg='ODA stalled'
-!             Converged(iCLONE)=SCF_STALLED
-          ENDIF             
+          ELSEIF(RLogic)THEN
+             Mssg='Rebuilding Fockian post ODA'
+             Converged(iCLONE)=SCF_STALLED
+          ENDIF
        ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
