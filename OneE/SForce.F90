@@ -59,7 +59,7 @@ PROGRAM SForce
 ! Compute W=P.F.P
 #ifdef PARALLEL
   CALL Get(P_DBCSR,TrixFile('D',Args,1))
-#else
+#else 
   CALL Get(P,TrixFile('D',Args,1))
 #endif
 ! Is this a bug if we don't use the extrapolated Fockian?
@@ -157,20 +157,9 @@ PROGRAM SForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_S%D(I,J)   = Zero
+           LatFrc_S%D(I,J) = 1.D8
         ENDDO
      ENDDO
-     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-!       Print The Lattice Forces
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*) 'LatFrc_S'
-        WRITE(*,*)   'LatFrc_S'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_S%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_S%D(I,J),J=1,3) 
-        ENDDO
-        CLOSE(Out)
-     ENDIF
 !    Sum in the S contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -182,6 +171,11 @@ PROGRAM SForce
 #ifdef PARALLEL 
   ENDIF
 #endif
+! Do some printing
+  CALL Print_Force(GM,SFrc,'S Force')
+  CALL Print_Force(GM,SFrc,'S Force',Unit_O=6)
+  CALL Print_LatForce(GM,LatFrc_S%D,'S Lattice Force')
+  CALL Print_LatForce(GM,LatFrc_S%D,'S Lattice Force',Unit_O=6)
 ! Do some checksumming and IO 
   CALL PChkSum(SFrc,    'dS/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_S,'LFrcS',Proc_O=Prog)  
