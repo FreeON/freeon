@@ -64,6 +64,11 @@ PROGRAM MakeRho
         CALL Get(BSiz,'atsiz',PrvBase)
         CALL Get(OffS,'atoff',PrvBase)
         CALL Get(NBasF,'nbasf',PrvBase)
+#ifdef PERIODIC
+	! Get the Outer Cell Set
+     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+     	CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif
         CALL Get(Dmat,TrixFile('D',Args,-1))
      ELSEIF(SCFActn=='Restart')THEN
         ! Get the old information
@@ -81,6 +86,11 @@ PROGRAM MakeRho
         CALL New_HGRho(Rho,(/NExpt,0,0/))
         CALL Get(Rho%Expt,'dexpt',CurBase)
         CALL Get(Rho%Lndx ,'lndex',CurBase)
+#ifdef PERIODIC
+	! Get the Outer Cell Set
+     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+     	CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif
         CALL CloseHDF()
         CALL OpenHDF(InfFile)     
         CALL Get(Dmat,TrixFile('D',Args,0))
@@ -89,6 +99,11 @@ PROGRAM MakeRho
         CALL Get(BS,CurBase)
         CALL Get(GM,CurGeom)
         CALL Get(NExpt,'nexpt',CurBase)
+#ifdef PERIODIC
+	! Get the Outer Cell Set
+     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
+     	CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif
         CALL New_HGRho(Rho,(/NExpt,0,0/))
         CALL Get(Rho%Expt,'dexpt',CurBase)
         CALL Get(Rho%Lndx ,'lndex',CurBase)
@@ -112,12 +127,6 @@ PROGRAM MakeRho
      ! Allocations and precalculations
      CALL NewBraBlok(BS)  
      CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
-
-#ifdef PERIODIC
-!    Get the Outer Cell Set
-     CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-     CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
      !--------------------------------------------------------------
      ! Main loops: First pass calculates the size.
      !             Second pass calculates the density
