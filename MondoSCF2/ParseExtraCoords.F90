@@ -78,6 +78,9 @@ MODULE ParseExtraCoords
        !
        IF(INDEX(LineLowCase,'stre')/=0.OR.&
           INDEX(LineLowCase,'bend')/=0.OR.&
+          INDEX(LineLowCase,'alpha')/=0.OR.&
+          INDEX(LineLowCase,'beta')/=0.OR.&
+          INDEX(LineLowCase,'gamma')/=0.OR.&
           INDEX(LineLowCase,'tors')/=0.OR.&
           INDEX(LineLowCase,'outp')/=0.OR.&
           INDEX(LineLowCase,'linb1')/=0.OR.&
@@ -96,6 +99,7 @@ MODULE ParseExtraCoords
        ! Generate an addition to the IntC set!
        !
        CALL New(GOpt%ExtIntCs,NIntCs)
+       GOpt%ExtIntCs%Active%L=.TRUE.
        !
        ! Parse again and fill GOpt%ExtIntCs!
        !
@@ -109,7 +113,7 @@ MODULE ParseExtraCoords
          IF(INDEX(LineLowCase,'stre_a')/=0) THEN
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_A' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_A  ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -126,7 +130,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_B' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_B  ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -143,7 +147,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_C' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_C  ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -190,7 +194,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen<2) CALL Halt('Extra coord gamma while PBC dimension is 1')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='GAMMA' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='GAMMA   ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -240,7 +244,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord beta while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:4)='BETA' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='BETA    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -257,7 +261,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord alpha while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='ALPHA' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='ALPHA   ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -394,6 +398,8 @@ MODULE ParseExtraCoords
      CLOSE(Inp,STATUS='KEEP')
      CALL Delete(XYZ)
      CALL Delete(CConstrain)
+    !CALL PrtIntCoords(GOPt%ExtIntCs,GOpt%ExtIntCs%Value%D,&
+    !                  'chk extra ')
    END SUBROUTINE LoadExtraCoords
 !
 !------------------------------------------------------------------

@@ -22,8 +22,8 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,Path)   
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+   SUBROUTINE GeoDIIS(XYZ,RefXYZ,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,Path)   
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(GDIIS)                 :: GDIISCtrl  
      INTEGER                     :: Print,iCLONE,iGEO,I
@@ -38,7 +38,7 @@ CONTAINS
      !
      ! Get GDIIS memory
      !
-     CALL CollectPast(SRStruct,RefStruct,RefGrad,SRDispl, &
+     CALL CollectPast(RefXYZ,SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,Memory,iGEO,iCLONE)
      !
      ! Do fitting in step-directions
@@ -107,7 +107,7 @@ CONTAINS
      CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CtlrCartRange(IntCsT,RangeT%D)
-     CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
+    !CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
      !
      ! Now, compose the new geometry
      !
@@ -200,7 +200,7 @@ CONTAINS
      CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CtlrCartRange(IntCsT,RangeT%D)
-     CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
+    !CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
      !
      ! Now, compose the new geometry
      !
@@ -424,68 +424,6 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE CollectPast(SRStruct,RefStruct,RefGrad,SRDispl, &
-                          HFileIn,NatmsLoc,Mem,iGEO,iCLONE)
-     TYPE(DBL_RNK2)   :: SRStruct,RefStruct,RefGrad,SRDispl
-     TYPE(DBL_RNK2)   :: Aux
-     TYPE(PBCInfo)    :: PBC
-     TYPE(DBL_VECT)   :: Vect
-     INTEGER          :: NatmsLoc,Mem,iGEO,iCLONE,NCartS,NatmsS
-     CHARACTER(LEN=*) :: HFileIn
-     INTEGER          :: HDFFileID,ICount,I,J,IStart,NCart,IGeom,K,L
-     !
-     NCart=3*NatmsLoc
-     NatmsS=NatmsLoc-3
-     NCartS=3*NatmsS
-     IStart=iGEO-Mem+1
-     !
-     ! Get GDIIS memory of Cartesian coords and grads
-     !
-     CALL New(SRStruct,(/NCart,Mem/))
-     CALL New(RefStruct,(/NCart,Mem/))
-     CALL New(RefGrad,(/NCart,Mem/))
-     CALL New(SRDispl,(/NCart,Mem/))
-     !
-     CALL New(Vect,NCartS)
-     CALL New(Aux,(/3,NatmsS/))
-     CALL New(PBC)
-     !
-     HDFFileID=OpenHDF(HFileIn)
-     HDF_CurrentID= &
-       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-     !
-     DO IGeom=IStart,iGEO
-       ICount=IGeom-IStart+1
-       CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
-       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCartS ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
-       CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
-       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCartS ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
-       CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
-       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCartS ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
-       CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
-       L=NCartS
-       DO J=1,3
-         DO K=1,3
-           L=L+1
-           RefStruct%D(L,ICount)=PBC%BoxShape%D(J,K)
-           RefGrad%D(L,ICount)=PBC%LatFrc%D(1,J)
-         ENDDO
-       ENDDO
-     ENDDO
-     CALL Delete(Aux)
-     CALL Delete(Vect)
-     CALL Delete(PBC)
-       SRDispl%D=SRStruct%D-RefStruct%D
-     !
-     CALL CloseHDFGroup(HDF_CurrentID)
-     CALL CloseHDF(HDFFileID)
-   END SUBROUTINE CollectPast
-! 
-!-------------------------------------------------------------------
-!
    SUBROUTINE BasicGDIIS(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc
@@ -675,7 +613,9 @@ CONTAINS
      TYPE(INTC)                   :: IntCs
      TYPE(GeomOpt)                :: GOpt 
      CHARACTER(LEN=*)             :: SCRPath
+     LOGICAL                      :: Print2
      !
+     Print2=(Print>=DEBUG_GEOP_MAX)
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectINTCPast')
      NCart=SIZE(RefStruct,1)
@@ -703,6 +643,8 @@ CONTAINS
                           GOpt%CoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
        CALL CartToInternal(IntCs,VectCG%D,VectI%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
+       CALL RedundancyOff(VectI%D,SCRPath,Print)
+     ! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)
        IntCGrads%D(:,I)=VectI%D
        CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
@@ -1195,7 +1137,7 @@ CONTAINS
      CALL New(VectY,NDim)
      DO I=1,NIntC
        IF(.NOT.IntCs%Active%L(I)) THEN
-         IntCs%PredVal%D(I)=Zero
+         IntCs%PredVal%D(I)=IntCValues(I,NDim)
          CYCLE
        ENDIF
        DO J=1,NDim 
@@ -1862,51 +1804,6 @@ CONTAINS
      !
    END SUBROUTINE GrdConvrgd
 !
-!----------------------------------------------------------------------------
-!
-   SUBROUTINE GcInvIter(CartVect,ISpB,JSpB,ASpB,CholData,NIntC) 
-     REAL(DOUBLE),DIMENSION(:) :: CartVect
-     TYPE(INT_VECT)            :: ISpB,JSpB
-     TYPE(DBL_VECT)            :: ASpB,CartVect2,cartVect3,CartVect4,IntVect2
-     TYPE(Cholesky)            :: CholData
-     INTEGER                   :: I,J,NIntC,NCart,MaxIter
-     REAL(DOUBLE)              :: Fact,Tol 
-     CHARACTER(LEN=DCL)        :: Messg
-     !
-     MaxIter=20
-     Tol=1.D-8
-     NCart=SIZE(CartVect)
-     CALL New(CartVect2,NCart)
-     CALL New(CartVect3,NCart)
-     CALL New(CartVect4,NCart)
-     CALL New(IntVect2,NIntC)
-     !
-     Cartvect2%D=Zero
-     DO I=1,MaxIter
-       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntVect2%D,CartVect2%D)
-       CALL CALC_BxVect(ISpB,JSpB,ASpB,IntVect2%D,CartVect3%D,Trp_O=.TRUE.)
-       CartVect3%D=CartVect-CartVect3%D
-       CALL CALC_GcInvCartV(CholData,CartVect3%D,CartVect4%D) 
-       CartVect2%D=Cartvect2%D+CartVect4%D 
-       Fact=DOT_PRODUCT(CartVect4%D,CartVect4%D)
-       Fact=SQRT(Fact/DBLE(NCart))
-       IF(Fact<Tol) EXIT
-     ENDDO 
-     IF(Fact>Tol) THEN
-       Messg='WARNING! '// &
-             'Gc V = V0 has not been solved exactly , Fact= '// &
-              TRIM(DblToChar(Fact))//' Tol= '//TRIM(DblToChar(Tol))
-       WRITE(*,*) Messg
-       WRITE(Out,*) Messg
-     ENDIF
-     CartVect=CartVect2%D
-     !
-     CALL Delete(CartVect4)
-     CALL Delete(CartVect3)
-     CALL Delete(CartVect2)
-     CALL Delete(Intvect2)
-   END SUBROUTINE GcInvIter
-!
-!----------------------------------------------------------------------------
+!----------------------------------------------------------------------
 !
 END MODULE GDIISMod

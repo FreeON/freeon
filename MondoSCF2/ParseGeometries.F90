@@ -158,7 +158,7 @@ CONTAINS
     IF(Coordinates==GRAD_CART_OPT) THEN
       IntCMax=1
     ELSE
-      IntCMax=30*G%NAtms
+      IntCMax=IntCPerAtom*G%NAtms
     ENDIF
     G%IntCs%N=IntCMax
     N=0
