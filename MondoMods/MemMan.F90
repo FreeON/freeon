@@ -465,8 +465,8 @@ MODULE MemMan
         TYPE(GradD),INTENT(INOUT)       :: A
         CALL AllocChk(A%Alloc)
         CALL New(A%GDrv1,(/4,2250/))
-        CALL New(A%GDrv2,(/4,10/))
-        CALL New(A%GDrv3,(/4,10/))
+        CALL New(A%GDrv2,(/5,10/))
+        CALL New(A%GDrv3,(/5,10/))
         CALL New(A%GDrv4,(/4,2500/))
         CALL New(A%GDrv5,(/6,10/))
         A%Alloc=ALLOCATED_TRUE
