@@ -231,15 +231,23 @@ MODULE JGen
                          CALL SetKet(Prim,PExtent)
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
                          CALL AtomCyclic(GM,Prim%P)
-                         PTmp=Prim%P
+                         PTmp(1)=Prim%P(1)
+                         PTmp(2)=Prim%P(2)
+                         PTmp(3)=Prim%P(3)
 !                        Sum over cells
                          DO NC=1,CS_IN%NCells
-                            Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
-                            PBox%Center=Prim%P
+                            Prim%P(1)=PTmp(1)+CS_IN%CellCarts%D(1,NC)
+                            Prim%P(2)=PTmp(2)+CS_IN%CellCarts%D(2,NC)
+                            Prim%P(3)=PTmp(3)+CS_IN%CellCarts%D(3,NC)
+                            PBox%Center(1)=Prim%P(1)
+                            PBox%Center(2)=Prim%P(2)
+                            PBox%Center(3)=Prim%P(3)
 !                           Walk the walk
                             CALL JWalk(PoleRoot) 
                          ENDDO
-                         Prim%P=PTmp
+                         Prim%P(1)=PTmp(1)
+                         Prim%P(2)=PTmp(2)
+                         Prim%P(3)=PTmp(3)
 !-------------------------------------------------------------------------------
 !                        <BRA|KET>
                          IA = IndexA
