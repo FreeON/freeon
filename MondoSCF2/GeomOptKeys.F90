@@ -16,6 +16,7 @@ MODULE GeomOptKeys
    CHARACTER(LEN=8),  PARAMETER :: OPT_Pictures     ='Pictures'
    CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
    CHARACTER(LEN=9),  PARAMETER :: OPT_Alternate    ='Alternate'
+   CHARACTER(LEN=15), PARAMETER :: OPT_FixedAtomsFirst='FixedAtomsFirst'
    CHARACTER(LEN=9),  PARAMETER :: OPT_DoThreeAt    ='DoThreeAt' 
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'    
    CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'

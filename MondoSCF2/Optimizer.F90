@@ -1389,12 +1389,16 @@ CONTAINS
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
-     IF(iGEO==1) GMLoc%LatticeOnly=.TRUE.
+     IF(iGEO==1) THEN
+       GMLoc%LatticeOnly=.TRUE.
+       IF(GOpt%GConvCrit%FixedAtomsFirst) GMLoc%LatticeOnly=.FALSE.
+       GMLoc%AltCount=1
+     ENDIF
      !
      CALL OpenASCII(OutFile,Out)
      CALL OpenAlternate(GOpt,XYZNew%D,GradNew%D,Opts%PFlags%GeOp, &
-                        GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,&
-                        EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly) 
+                       GMLoc%BoxCarts%D,GMLoc%PBC%Dimen,GMLoc%AltCount,&
+                       EIntcSave,ConstrSave,SCRPath,GMLoc%LatticeOnly) 
      !
      !--------------------------------------------
      !
@@ -1407,7 +1411,7 @@ CONTAINS
      !--------------------------------------------
      !
      CALL CloseAlternate(GOpt%ExtIntCs,GOpt%GConvCrit%Alternate, &
-                        GOpt%Constr,EIntcSave,ConstrSave) 
+                        GOpt%Constr,EIntcSave,ConstrSave)  
      CLOSE(Out,STATUS='KEEP')
      ! Put back modified geometry into GMLoc array
      !
@@ -1989,7 +1993,8 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE OpenAlternate(GOpt,XYZ,GradIn,Print,BoxCarts,PBCDim, &
-                            EIntcSave,ConstrSave,SCRPath,LatticeOnly)
+                            AltCount,EIntcSave,ConstrSave,SCRPath, &
+                            LatticeOnly)
      TYPE(GeomOpt)               :: GOpt
      TYPE(INTC)                  :: EIntcSave
      TYPE(Constr)                :: ConstrSave
@@ -2000,11 +2005,14 @@ CONTAINS
      INTEGER                     :: II,I,J,PBCDim,NCart,Print
      TYPE(DBL_VECT)              :: CartGrad,Carts
      CHARACTER(LEN=*)            :: SCRPath
+     INTEGER                     :: MaxLattice,MaxAtoms,AltCount
      !
      IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
      Print2= Print>=DEBUG_GEOP_MAX
      NatmsLoc=SIZE(BoxCarts,2)
      NCart=3*NatmsLoc+9
+     MaxLattice=1
+     MaxAtoms=1
      !
      ! Clean gradients from input constraints
      !
@@ -2024,9 +2032,21 @@ CONTAINS
      CALL Delete(CartGrad)
      !
      IF(LatticeOnly) THEN
-       LatticeOnly=.NOT.(GOpt%GOptStat%LMaxCGrad<GOpt%GConvCrit%Grad)
+       LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
+                   (AltCount<MaxLattice)
+       IF(LatticeOnly) THEN
+         AltCount=AltCount+1
+       ELSE
+         AltCount=1
+       ENDIF
      ELSE
-       LatticeOnly=(GOpt%GOptStat%MaxCGrad>GOpt%GConvCrit%Grad)
+       LatticeOnly=(GOpt%GOptStat%MaxCGrad>GOpt%GConvCrit%Grad).AND. &
+                   (AltCount<MaxAtoms)
+       IF(.NOT.LatticeOnly) THEN
+         AltCount=AltCount+1
+       ELSE
+         AltCount=1
+       ENDIF
      ENDIF
      !
      OldDim=GOpt%ExtIntCs%N
