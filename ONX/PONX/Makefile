@@ -6,7 +6,7 @@ Objects = ONXParameters.o ContractionScaling.o InitExchangeMatrix.o \
           MinMax.o MatFilter.o ONX.o ONXBuf.o ONXSch.o RLoader.o   \
           MMML.o Misc.o hgtftosp.o onxsort2.o AddDis.o GetID.o     \
           onxio.o RangeOfExchange.o ONXLoop.o CCDriver.o           \
-          VRRDriver.o ErrorF.o BuffTbl.o GetSubBlk.o CalcK.o       \
+          VRRDriver.o  BuffTbl.o GetSubBlk.o CalcK.o       \
           skipout.o BSearch.o LSearch.o $(MAIN__)                  \
           onx1111.o onx1121.o onx1122.o onx1161.o onx1162.o        \
           onx1166.o onx2111.o onx2121.o onx2122.o onx2161.o        \
@@ -20,7 +20,7 @@ Objects = ONXParameters.o ContractionScaling.o InitExchangeMatrix.o \
           RangeOfDensity.o GatherK.o XPose.o Fillout.o 
 
 
-Libs =  $(F90_LIBRARIES) $(LAPACK) -lPONXMults
+Libs =  $(F90_LIBRARIES) -lPONXMults
 
 ONX:	$(Objects)
 	$(LD) $(LDFLAGS) ONX $(Objects) $(LibOpts) $(Libs)

@@ -5,6 +5,7 @@ SUBROUTINE ONXLoop(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
   USE PrettyPrint
   USE ONXParameters
   USE Thresholding
+  USE SpecFun
   IMPLICIT NONE
   TYPE(BSET),INTENT(IN)      :: BSc,BSp
   TYPE(CRDS),INTENT(IN)      :: GMc,GMp
@@ -71,7 +72,7 @@ SUBROUTINE ONXLoop(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
 
   DO i=10,22
     T=SQRT(FLOAT(i))
-    TE=ErrorFC(T)
+    TE=ERFC(T)
     IF (TE.LE.Thresholds%TwoE) THEN
       ESw=FLOAT(i)
       EXIT
