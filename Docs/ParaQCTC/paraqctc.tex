@@ -6,7 +6,7 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \commentoutA{\documentclass[prl,aps,twocolumn,twocolumngrid,superbib]{revtex4}}
 \commentoutB{\documentclass[11pt,prb,aps,nobibnotes,superbib,preprint]{revtex4}}
-\commentoutB{\renewcommand{\baselinestretch}{1.9}}
+%\commentoutB{\renewcommand{\baselinestretch}{1.9}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -21,7 +21,7 @@
 
 \begin{document}
 \title[Short Title]{
-Linear scaling computation of the Fock matrix. VII. \\
+Linear scaling computation of the Fock matrix. IX. \\
 Parallel computation of the Coulomb matrix}
 
 \author{Chee Kwan Gan\footnotemark[1]}
@@ -31,7 +31,7 @@ Parallel computation of the Coulomb matrix}
 \affiliation{ Theoretical Division,\\ Los Alamos
               National Laboratory,\\ Los Alamos, New Mexico 87545}
 
-\date{May 11, 2004}
+\date{May 24, 2004}
 
 \begin{abstract}
 We present parallelization of a quantum chemistry tree code
@@ -81,32 +81,30 @@ load balance, parallel computation
 
 \section{Introduction}
 \label{sec:intro}
-Self-consistent field (SCF) theories such as the density functional
-theory and hybrid Hartree-Fock/density functional theory are accurate
-and computationally efficient. The traditional Gaussian-orbital
-quantum chemistry codes that use the conventional methods\cite{ASzabo}
-are usually restricted to small systems since the methods have steep
-scaling (of order $O(N^{2-3})$) with respect to the system size $N$.
-Recently significant progress has been made in the development of
-$O(N)$ methods that overcome the bottlenecks of the conventional
-methods, where the computation time scales linearly with the system
-size $N$.  These methods include the computation of the Hartree--Fock
-exchange matrix
+Self-consistent field (SCF) theories such as Density Functional Theory
+and hybrid Hartree-Fock/Density Functional Theory are accurate and
+computationally efficient. Traditional Gaussian-orbital quantum
+chemistry codes that use conventional methods\cite{ASzabo89} are
+usually restricted to small systems since these methods have steep
+scaling (of order ${\cal O}(N^{2-3})$) with respect to system size
+$N$.  Recently, significant progress has been made in the development
+of ${\cal O}(N)$ methods that overcome these bottlenecks.  These
+methods include computation of the Hartree--Fock exchange matrix
 % COchsenfeld98
-\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00},
+\cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler99,ESchwegler00,CTymczak04b},
 the Coulomb
-matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,MChallacombe97},
+matrix~\cite{CWhite94B,CWhite96A,MChallacombe96,MChallacombe96B,MStrain96,JPerezjorda97,MChallacombe97,CTymczak04a},
 the exchange-correlation
-matrix~\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A}, and
-density matrix alternatives to eigensolutions of the SCF
-equations~\cite{XLi93,MDaw93,SQiu94,Hernandez96,ADaniels97,APalser98,MChallacombe99,ANiklasson02A,ANiklasson03}.
+matrix~\cite{Jorda95,RStratmann96,CGuerra98,MChallacombe00A,CTymczak04a},
+and iterative alternatives to eigensolution of the SCF
+equations~\cite{XLi93,MDaw93,SQiu94,EHernandez96,ADaniels97,APalser98,MChallacombe99,ANiklasson02A,ANiklasson03}.
 
-With the advent of parallel multi-processor computers that come with
-decreasing cost but increasing power, there has been a great effort in
+With the advent of parallel multi-processor computers, especially
+those based on commodity processors, there has been a great effort in
 the community to parallelize the quantum chemistry
-codes\cite{Harrison_94v45,Guerra_95,Sosa_98v19,Stephan_98v108,Furlani_00v128,Sosa_00v26,Yoshihiro_01v346,Baker_02v23,HTakashima02}.
-Successful parallelization of $O(N)$ methods should be fruitful given
-the fact that with parallel linear scaling methods, an $n$-fold
+codes\cite{Harrison_94v45,Guerra_95,Sosa_98v19,Stephan_98v108,Furlani_00v128,Sosa_00v26,Yoshihiro_01v346,Baker_02v23,JBaker04}.
+Successful parallelization of ${\cal O}(N)$ methods should be fruitful
+given the fact that with parallel linear scaling methods, an $n$-fold
 increase in processors should lead approximately an $n$-fold increase
 in simulation capability. However, this holds only for scalable
 algorithms.
@@ -116,51 +114,84 @@ algorithms.
 %$|{\bf r}-{\bf r }'| \rightarrow \infty$.
 
 Two of the most computationally demanding parts in a density
-functional application are the calculations of the
-exchange-correlation matrix and the Coulomb matrix. The $O(N)$
-exchange-correlation matrix calculation has been efficiently
-parallelized through the concept of equal time (ET)
-partition\cite{CGan03}.  In this work, the equal time partition will
-be further employed in parallelizing the Coulomb matrix calculation.
+functional application are the calculation of the exchange-correlation
+matrix and the Coulomb matrix. The ${\cal O}(N)$ exchange-correlation
+matrix calculation has been efficiently parallelized through the
+concept of equal time (ET) partition\cite{CGan03}.  In this work, the
+equal time partition will be further extended to load balancing the
+Coulomb matrix calculation.
 
-The linear scaling computation of the Coulomb matrix has been achieved
-via the quantum chemistry tree code
-(QCTC)\cite{MChallacombe96,MChallacombe96B,MChallacombe97} and fast
-multipole moment based
-methods\cite{CWhite94B,CWhite96A,MStrain96,Perezjorda97}.  Both the
-tree codes and the fast multipole methods are originally proposed to
-handle the $N$-body problem\cite{JBarnes86,LGreengard87}.
-Parallelization of these $N$-body algorithms has been rather active in
-the computer science
-communities\cite{warren:92_article,Grama94_article,Warren95b,Singh93,Singh_95v27,Grama_98v24,Gibbon_2002,Antonuccio-Delogu03}.
+Linear scaling computation of the Coulomb matrix has been achieved via
+the quantum chemical tree-code
+(QCTC)\cite{MChallacombe96,MChallacombe96B,MChallacombe97} and Fast
+Multipole Methods (FMM)\cite{CWhite94B,CWhite96A,MStrain96}.  Both the
+tree-codes\cite{JBarnes86} and the Fast Multipole
+Methods\cite{LGreengard87,CRAnderson92} were originally proposed to
+handle the astrophysical $N$-body problem.  Parallelization of these
+$N$-body algorithms has an active area of research in the computer
+science
+community\cite{MWarren92,AGrama94,MWarren95b,Singh93,Singh_95v27,YHu96,Grama_98v24,PGibbon02,Antonuccio-Delogu03}.
 Even though both the $N$-body problem and the Coulomb matrix
-calculation share a lot of similarities, especially in handling the
-far field contribution, little work has been done on the parallel
-Coulomb matrix calculation, except the master-slave
-approach\cite{Furlani_00v128,Sosa_98v19,Sosa_00v26}.  However, it
-should be pointed out that since the computation of $O(N)$ Coulomb
-matrix (or most other $O(N)$ methods) is highly irregular for parallel
-computation due to the way $O(N)$ methods exploit the quantum locality
-of the system.  It is well known that master-slave approach faces
-potential contention and load imbalance
-problems\cite{BWilkinson99,GWilson95}, especially for a fine grained
-parallelism (a small work load but a large number of processors).
-This has indeed been observed\cite{Guerra_95}, so other alternatives
-need to be sought.  We have noticed the smooth variation of the work
-(e.g. due to the change in the electron density) between successive
-cycles during the SCF calculation (so called temporal
-locality\cite{JPilkington96}) and this may be used to load balance the
-work load among the processors. A measurement based load balance
-scheme called equal time partition\cite{CGan03} had been proposed to
-parallelize the exchange-correlation matrix. Excellent speedups had
-been obtained for several test systems.
-%For example, we have obtained a speedup of
-%113 out of 128 for a 110 molecule water cluster at a standard density
-%and with the 3-21G basis set. 
-Since the Coulomb matrix is dependent on the the electron density just
-as the exchange-correlation matrix, we expect that equal time
-partition should also deliver good speedups for the parallelization of
-the Coulomb matrix.
+calculation share many similarities, especially in handling the far
+field contribution, little work has been done on the parallel Coulomb
+matrix calculation beyond the simple master-slave
+approach\cite{Sosa_98v19,Furlani_00v128,Sosa_00v26}.  However, it
+should be pointed out that since the computation of ${\cal O}(N)$
+Coulomb matrix (or most other ${\cal O}(N)$ methods) is highly
+irregular for parallel computation due to the way ${\cal O}(N)$
+methods exploit the quantum locality of the system.  It is well known
+that master-slave approach faces potential contention and load
+imbalance problems\cite{BWilkinson99,GWilson95}, especially for fine
+grained parallelism (a small ratio of work load to number of
+processors).  This has indeed been observed\cite{Guerra_95,CGan03}, so
+other alternatives need to be sought.  One may use the idea of
+counting the number of interactions in parallel $N$-body codes to load
+balance computation
+\cite{MWarren95b,Singh93,Singh_95v27,MWarren93}.
+However, due to high irregularities associated with different Gaussian
+extents, angular symmetries, and non-uniform access pattern, simple
+counting is not a good approach to load balance Coulomb matrix
+computation. Rather, it is found to be useful to use timing to capture
+the load information in one SCF cycle to load balance computation in
+the next SCF cycle. This is possible because in general there is a
+smooth variation of the work (e.g. due to the slight change in the
+electron density) between successive cycles during the SCF calculation
+(so called temporal locality\cite{JPilkington96}).  A measurement
+based load balance scheme called equal time (ET) partition
+\cite{CGan03} had been proposed to parallelize the
+exchange-correlation matrix. Excellent speedups were obtained for
+several test systems.  Since the Coulomb matrix is dependent on the
+the electron density as the exchange-correlation matrix does, we
+expect that equal time partition should also deliver good speedups for
+the parallelization of the Coulomb matrix.
+
+Equal time partition works by recording the time spent in a
+computational domain during one SCF cycle. At the end of the
+calculation, the time spent in the domain is used to predict a new
+domain decomposition for the next SCF cycle where each decomposed
+domain carries ideally the same amount of workload.  In this way,
+temporal locality\cite{JPilkington96} of the problem is exploited to
+achieve a continuously improved load balance.
+
+Apart from the load balancing issue, Amdahl's law dictates that the
+performance of a massively parallel program is ultimately determined
+by its unparallelized parts.  The most important serial part that need
+to be considered is the building the density tree on each processor.
+Again, ideas from $N$-body parallel codes may be useful.  The
+construction of locally essential trees\cite{MWarren92} solved the
+problem of replicating the total density tree on each processor.
+Hashed oct-trees\cite{MWarren93,MWarren95b} also solved the problem of
+total density tree replication where the hash tables were used to
+allow the program to access data in an efficient manner across
+multiple processors. However, due to fact that these approaches entail
+significant code restructuring, for the present case, we have chosen a
+simple total density tree replication approach.  It should be pointed
+out that even with this simple approach, we are able to perform
+routine efficient parallel periodic all-electron calculations on a
+224-atom per simulation cell system for the hydrostatic compression of
+$\beta$-phase of octahydro-1,3,5,7-tetranitro-1,3,5,7-tetrazocine
+($\beta$-HMX)
+\cite{CGan04C}.
 
 The remainder of this paper is organized as follows: In
 Sec.~\ref{ParaQCTC} we discuss our strategies to efficiently
@@ -173,11 +204,11 @@ the main conclusions of the paper.
 
 \section{Parallelization of QCTC}
 \label{ParaQCTC}
-The quantum chemistry tree code (QCTC) for the $O(N)$ calculation of
-the Coulomb matrix has been fully described in
-Ref.\cite{MChallacombe97} and Ref.\cite{CJ2004}.  Here we only
-highlight the essential aspects of the algorithm so that discussions
-of parallelization of QCTC may be made.
+The quantum chemistry tree code (QCTC) for the ${\cal O}(N)$
+calculation of the Coulomb matrix has been fully described in
+Refs.~\onlinecite{MChallacombe97} and \onlinecite{CTymczak04a}.  Here
+we only highlight the essential aspects of the algorithm so that
+discussions of parallelization of QCTC may be made.
 
 The Coulomb matrix element in a finite (or gas phase) case is given by
 \begin{equation}
@@ -193,9 +224,9 @@ QCTC, a hierarchical multipole representation of the electron density
 is stored in an advanced data structure called a $k$-d
 tree\cite{Bentley79,Bentley80,Gaede98}.  A compact representation of
 the density in terms of Hermite-Gaussian
-(HG)\cite{Ahmadi95,MChallacombe97,MChallacombe00A} basis has been
+(HG)\cite{MChallacombe97,MChallacombe00A,GAhmadi95} basis has been
 used.  With the help of the density tree, QCTC represses the matrix
-element in Eq.~(\ref{eq:Jab}) as a sum of two terms\cite{CJ2004}
+element in Eq.~(\ref{eq:Jab}) as a sum of two terms\cite{CTymczak04a}
 \begin{eqnarray}
 J_{ab} &=& \sum_{Q\in \rm FF} \sum_{l} \sum_{m} O^l_m[\rho_{ab}]
 \sum_{l'} \sum_{m'} M^{l+l'}_{m+m'} O^{l'}_{m'}[\rho_Q]
@@ -203,69 +234,51 @@ J_{ab} &=& \sum_{Q\in \rm FF} \sum_{l} \sum_{m} O^l_m[\rho_{ab}]
 &+& \sum_{q\in \rm NF} \int d {\bf r} \int d {\bf r'} \rho_{ab} ({\bf
 r}) \left|{\bf r}-{\bf r'} \right|^{-1}
 \rho_q({\bf r})
+\label{eq:JabTree}
 \end{eqnarray}
 where $M^l_m$ is the irregular solid harmonics interaction tensor,
 $O^l_m[f]=\int d{\bf r} O^l_m({\bf r}) f({\bf r})$ is a moment of the
 regular solid harmonics, $Q$ runs over the all nodes in the density
-tree as determined by PAC (penetration admissibility criterion) and
-MAC (multipole admissibility criterion)\cite{MChallacombe97} and $q$
+tree as determined by penetration admissibility criterion (PAC) and
+multipole admissibility criterion (MAC)\cite{MChallacombe97} and $q$
 runs on the left over near-field primitive distributions in the
-density.
+density. For the periodic case, a periodic far field term and a
+tin-foil boundary condition term\cite{MChallacombe97D,CTymczak04a}
+should be added to the RHS of Eq.~(\ref{eq:JabTree}).
 
 Essential to QCTC is the construction of the electron density tree.
-Once the density tree is built, the calculation of the Coulomb matrix
+Once the density tree is built, calculation of the Coulomb matrix
 elements proceeds by transversing the tree and checking the PAC and
 MAC. When both PAC and MAC are met, the far-field contribution is
 calculated.  The near-field contribution, however, is calculated
 analytically.  Since most of time spent in QCTC is mainly in
-traversing of the density tree for the matrix element calculations, we
-have emphasized the efficient parallelization of the tree traversal of
-the code with the equal time partition, to be described fully
-below. However, the Amdahl's law dictates that the performance of a
-massively parallel program is ultimately determined by its
-unparallelized parts, hence we also consider parallelization of other
-serial parts of the code. This includes the building of the density
-tree on each processor.  
-%The subsequent subsections will deal with parallelization 
-%of various parts in QCTC.
+traversing the density tree for the matrix element calculations, we
+have emphasized efficient parallelization of the tree traversal with
+the equal time partition.
 
 \subsection{Load balancing matrix element calculations}
 \label{ETPartition}
-For a serial program, the time to traverse the density tree, denoted
-by $\tTT$, for the evaluation of the matrix elements of the $J$
-matrix, constitutes the largest portion of the total time spent in
-QCTC.  Hence it is important to load balance the tree traversal part
-as efficient as possible in the parallel QCTC.  Since excellent load
-balance has been achieved in the parallel calculation of the
-exchange-correlation matrix using the concept of equal time
-partition\cite{CGan03}, it is only natural to extend the capability of
-equal time partition to parallel QCTC.
+For a serial QCTC, the time to traverse the density tree, denoted by
+$\tTT$, for the evaluation of the matrix elements of the $J$ matrix,
+constitutes the largest portion of the total time spent in QCTC.
+Hence it is important to load balance the tree traversal part as
+efficient as possible in the parallel QCTC.
 
-Equal time partition works by recording the time spent in a
-computational domain during one SCF cycle. At the end of the
-calculation, the time spent in each domain is used to predict a new
-domain decomposition for the next SCF cycle where each decomposed
-domain carries ideally the same amount of workload. Since the work
-pattern usually varies slowly between SCF cycles (the so called
-temporal locality\cite{JPilkington96}), we expect that the predicted
-domain decomposition should deliver a good load balance in the next
-SCF cycle.
 
 To facilitate ET partition, it is important to decide what work load
-information to keep without incurring too much overheads which include
-the timing process itself.  For this purpose, we record the time to
-traverse the tree for each possible distribution. The time and
-position of each distribution are stored in an array to facilitate
-partitioning of the 3-D bounding box which encloses all
-distributions. Equal time partition is performed on the bounding box
-in a manner similar to that outlined in Ref.\cite{CGan03} to achieve
-equal time (hence the name ``equal time'' partition) or cost in all
-subboxes.  It is important to point out the main difference between
-our scheme and other classical $N$-body
-codes\cite{warren:92_article,Singh93} is that we use an exact load
-timing information rather than counting the number of interactions as
-in the orthogonal recursive bisection (ORB)\cite{warren:92_article}
-and Costzone methods\cite{Singh93}.
+information to keep without incurring too much overhead, including the
+timing process itself.  For this purpose, we record the time to
+traverse the tree for each distribution. The time and position of each
+distribution are stored in an array to facilitate partitioning of the
+3-D bounding box which encloses all distributions. Equal time
+partition is performed on the bounding box in a manner similar to that
+outlined in Ref.~\onlinecite{CGan03} to achieve equal time or cost in
+all subboxes.  It is important to point out the main difference
+between our scheme and other classical $N$-body
+codes\cite{MWarren92,Singh93} is that we use an exact load timing
+information rather than counting the number of interactions as in the
+orthogonal recursive bisection (ORB)\cite{MWarren92} and Costzone
+methods\cite{Singh93}.
 
 A working hypothesis of the ET partition applied to QCTC is that the
 sum of distribution time for each ET subbox is almost constant
@@ -275,12 +288,12 @@ distribution time in a subbox.  This non-conservation of work load may
 increase the load imbalance, which we have experienced in the
 exchange-correlation matrix parallelization\cite{CGan03}.
 
-In the first cycle, there is no ET partition from a previous cycle. In
-such case we have used a reasonable heuristic where each processor
-handles an almost equal number of distributions (the total number of
-distributions may not be divisible by the number of processors). Since
-this serves to start an ET partition, we do not consider its
-performance in this work.
+In the first cycle, there is no previous timing on which to base the
+ET. In such a case, we use a reasonable heuristic where each processor
+handles an approximately (the total number of distributions may not be
+exactly divisible by the number of processors) equal number of
+distributions Since this only serves to start an ET partition, we do
+not consider its performance in this work.
 
 \subsection{Parallel density tree build} 
 \label{sec:parallelTB}
@@ -288,67 +301,69 @@ In the serial QCTC, the time to build the electron density tree
 constitutes about 2\% or less of the total time spent in
 QCTC. However, as we increase number of processors (say, 128), the
 time to build a density tree, denoted by $\tTB$, will be large
-compared to $\tTT$, the time to traverse the density tree discussed in
-subsection~\ref{ETPartition}.  Hence it is also important to
+compared to $\tTT$ (the time to traverse the density tree discussed in
+subsection~\ref{ETPartition}).  Hence it is also important to
 parallelize the building of the density tree.
 
-In principle, an efficient parallelization of tree build should make
-use of the fact that each processor is handling only a part of the
-total distributions.  Hence depending on the collection of
-distributions on each processor, a locally essential tree may be
-constructed which is just sufficient for the tree traversals of all
-the distributions on a processor\cite{CGan03}.  If a locally essential
-tree is available, then efficient tree traversals of the trees are
-possible.  However, without an extensive programming task,
-it may be difficult to predetermine which part of
-the entire density tree is needed for the construction of the locally
-essential tree. As a first attempt, we have chosen a simple approach
-where the entire density will be built on each processor.
+In principle, an efficient parallelization of the tree build should
+make use of the fact that each processor is handling only a part of
+the total distributions in the Equal Time box.  Depending on the
+collection of distributions on each processor, a locally essential
+tree may be constructed which is just sufficient for the tree
+traversals of all the distributions on a processor\cite{CGan03}.  If a
+locally essential tree is available, then efficient tree traversals of
+the trees are possible.  However, without an extensive programming
+task, it may be difficult to predetermine which part of the entire
+density tree is needed for the construction of the locally essential
+tree. As a first attempt, we have chosen a simple approach where the
+entire density will be built on each processor.
 
-For simplicity of programming we have assumed that the number of
-processors is $2^k$. We observe that there are $2^k$ subtrees at the
-$k$th tier in the entire density tree in the serial case, our current
-implementation adopts a simple scheme where each processor is
-responsible to build one of $k$-tiered subtrees in the total density
-tree. When all the processors have built the $k$-tiered subtrees, an
-all-to-all exchange is carried out where all processors get the rest
-of the $k$-tiered subtrees so that a final ``merging'' up of the
-subtrees\cite{MChallacombe97,CJ2004} is performed to obtain an entire
-density tree.
+For simplicity of programming we assume the number of processors to be
+$2^k$. Observing that there are $2^k$ subtrees at the $k$th tier in
+the entire density tree in the serial case, our current implementation
+adopts a simple scheme where each processor builds one of $k$th-tier
+subtrees in the total density tree. When all the processors have built
+the $k$th-tier subtrees, an all-to-all exchange is carried out where
+all processors get the rest of the $k$th-tier subtrees so that a final
+``merging'' up of the subtrees\cite{MChallacombe97,CTymczak04a} is
+performed to obtain an entire density tree.
 
-The inefficiency of the current implementation of the parallel density
+Inefficiency of the current implementation of the parallel density
 tree build in the limit of a large number of processors is expected.
-The all-to-all exchange of data between processors is expensive,
-which does not scale with the number of processors. Also, after
-collecting the subtrees from all other processors, a processor has to
-``merge'' more subtrees as the number of processors is increased. This
-will inevitably introduced more overheads as we use more processors.
-Even if one can overcome the all-to-all exchange problem, one still
-faces a problem where it may be rather wasteful in the use of memory
-to store the entire density tree for each processor.  However, while
-the present parallel density tree build may be replaced by a more
-sophisticated scheme, the current implementation delivers very good
-speedups even at the 128-processor level.
+The all-to-all exchange of data between processors is expensive and
+does not scale with the number of processors. Also, after collecting
+the subtrees from all other processors, a processor has to ``merge''
+more subtrees as the number of processors is increased. This will
+inevitably introduce more overhead as we use more processors.  Even if
+one can overcome the all-to-all exchange problem, one still faces a
+problem where it may be wasteful in the use of memory to store the
+entire density tree for each processor.  However, while the present
+parallel density tree build may be replaced by a more sophisticated
+schemes where locally essential trees are built\cite{MWarren92} or
+hashed trees are used\cite{MWarren93,MWarren95b}, the current
+implementation delivers very good speedups even at the 128-processor
+level.
 
 As a side note, our first implementation of ET parallel QCTC tries to
-avoid the problem mentioned above by partitioning the density of the entire
-systems into disjoint local densities. Each processor then builds a
-local tree based on the local density. However, since a distribution
-in a processor does not ``see'' other local density trees, every
-processor has to loop through all distributions and the partial
-Coulomb matrices have to be row-wise summed (through the use a FastMat
-data structure, see \cite{CGan03}) at the end of the calculation. This
-turns out to be practical only for below 64-processor level. However,
-the speedup does not increase with more processors because the
-total intrinsic cost (i.e. the amount of useful work) of QCTC {\it increases}
-rather rapidly with the number of processors. The rapid increase in
-the intrinsic cost has its root in the non-optimal use of the
-multipole expansion approximation since too many local trees have been
-created. For the periodic systems, where one has to visit the density
-tree many more times than for the finite case, the speedup
-stagnants once we pass a certain number of processors. Since
-this version of the parallel QCTC does not scale with the number of
-processors, we do not consider it further in this work.
+avoid the problem mentioned above by partitioning the density of the
+entire systems into disjoint local densities. Each processor then
+builds a local tree based on the local density. However, since a
+distribution in a processor does not ``see'' other local density
+trees, every processor has to loop through all distributions and the
+partial Coulomb matrices have to be row-wise summed (through the use a
+FastMat data structure, see \cite{CGan03}) at the end of the
+calculation. This turns out to be practical only for below
+64-processor level. However, the speedup does not increase with more
+processors because the total intrinsic cost (i.e. the amount of useful
+work) of QCTC {\it increases} rather rapidly with the number of
+processors. The rapid increase in the intrinsic cost has its root in
+the non-optimal use of the multipole expansion approximation since too
+many local trees have been created. For the periodic systems, where
+one has to visit the density tree many more times than for the finite
+case, the speedup stagnants once we pass a certain number of
+processors. Since this version of the parallel QCTC does not scale
+with the number of processors, we do not consider it further in this
+work.
 
 \section{Implementation}
 \label{sec:implementation}
@@ -365,13 +380,13 @@ We have performed scaling tests on both finite and periodic
 systems. For the finite systems, we have chosen taxol
 (C$_{47}$H$_{51}$NO$_{14}$) and 2 water clusters as test cases. For
 the periodic systems, we have chosen pentaerythritol tetranitrate
-(PETN)\cite{Gan_2004} and $\delta$- phase of
-octahydro-1,3,5,7-tetranitro-1,3,5,7-tetrazocine
-(HMX)\cite{Lewis_00v104} as representative test cases. These systems
-are chosen because they are highly inhomogeneous, three-dimensional
-(and two are periodic) systems posing a challenge to parallel
-QCTC. All runs were performed on a cluster of 256 4 CPU HP/Compaq
-Alphaserver ES45s with the Quadrics QsNet High Speed Interconnect.
+(PETN)\cite{CGan04A} and $\delta$- phase of
+octahydro-1,3,5,7-tetranitro-1,3,5,7-tetrazocine (HMX)\cite{JPLewis00}
+as representative test cases. These systems are chosen because they
+are highly inhomogeneous, three-dimensional (and two are periodic)
+systems posing a challenge to parallel QCTC. All runs were performed
+on a cluster of 256 4 CPU HP/Compaq Alphaserver ES45s with the
+Quadrics QsNet High Speed Interconnect.
 
 For the purpose of performing the scaling tests, we start the
 calculation with the STO-3G basis set and a low accuracy, and switch
@@ -539,29 +554,28 @@ better compared to the 110-molecule (a speedup of 80.3) or
 due to the smaller $\tTB/\tTT$ ratio (see Fig.~\ref{fig:time_ratio})
 for the periodic cases compared to the finite cases, which mainly
 results from the increase in the time spent in the tree traversal part
-(e.g. 87.7 and 64.0 secs for the $2\times 1 \times 2$ PETN and 200-molecule
-water clusters, respectively).
+(e.g. 87.7 and 64.0 secs for the $2\times 1 \times 2$ PETN and
+200-molecule water clusters, respectively).
 
 \section{Conclusions}
 \label{conclusions}
 We have proposed an efficient method of parallelizing the calculation
-of the Coulomb matrix. The concept of equal time has been proven to be
+of the Coulomb matrix. The concept of equal time has been proved to be
 fruitful for load balancing the most time consuming part of QCTC,
 which is the traversal of the density tree for the matrix element
-calculation. 
-Equal time exploits the temporal locality between SCF iterations 
-to overcome strong spatial irregularities. It is expected that equal
-time should exploit this property between geometry steps in an
-optimization or molecular dynamics run.
-The efficiency of the equal time partition ranges from 91
--- 98 \% for all the test case presented in this work at a
-128-processor level. The overall QCTC speedup, however, ranges from 63
--- 81 \% overall efficiency on a 128-processor level. The slight
-decrease in efficiency is mainly due to the parallel tree build
-process.  While the current simple implementation of the parallel tree
-build should eventually replaced by a more sophisticated data-parallel
-version, the current implement implementation has enable us to run
-routine calculations to address a wide range of interesting problems.
+calculation.  Equal time exploits the temporal locality between SCF
+iterations to overcome strong spatial irregularities. It is expected
+that equal time should exploit this property between geometry steps in
+an optimization or molecular dynamics run.  The efficiency of the
+equal time partition ranges from 91 -- 98 \% for all the test case
+presented in this work at a 128-processor level. The overall QCTC
+speedup, however, ranges from 63 -- 81 \% overall efficiency on a
+128-processor level. The slight decrease in efficiency is mainly due
+to the parallel tree build process.  While the current simple
+implementation of the parallel tree build should eventually replaced
+by a more sophisticated data-parallel version, the current implement
+implementation has enable us to run routine calculations to address a
+wide range of interesting problems.
 
 \begin{acknowledgments}
 This work has been carried out under the auspices of the
@@ -570,6 +584,6 @@ ASCI project.  Most work was performed on the computing resources at
 the Advanced Computing Laboratory of Los Alamos National Laboratory.
 \end{acknowledgments}
 
-\bibliographystyle{apsrmp} \bibliography{mondo}
+\bibliographystyle{apsrmp} \bibliography{mondo_new}
 
 \end{document}
