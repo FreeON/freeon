@@ -5,8 +5,8 @@
 Charge=0
 Guess=SuperPos
 Multiplicity=1
-DebugAll =(MinDebug,CheckSums)
-SCFMethod=(SP2,SP4)
+DebugAll =(MaxDebug,CheckSums)
+SCFMethod=(TC2,TC2)
 BasisSets=(STO-2G,3-21G)
 ModelChem=(HF,PBE0)
 Accuracy =(Loose,Good)

@@ -9,24 +9,23 @@ MPIRun=" mpirun -np 4 -machinefile machfile "
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
-Opt=(QuNew,OneBase)
-SCFMethod=(RH,RH) 
-BasisSets=(STO-3G,User1)
-ModelChem=(BLYPxc,PBExc) 
-Accuracy =(loose,good)
+SCFMethod=(RH) 
+BasisSets=(User1)
+ModelChem=(HF)
+Accuracy =(loose)
 Geometry=(InAngstroms,NoOrder) 
-Periodic=(On-XYZ,AtomWrap,AngFormat)
+PBC=(T,T,T)
 <EndOptions>
 
 <BeginPeriodic>
-d3   4.5940    4.5940    2.9590   90.0000   90.0000   90.0000 
+4.5940    4.5940    2.9590   90.0000   90.0000   90.0000 
 <EndPeriodic>
 
 <BeginGeometry>   
-TI      0.000000000    0.000000000    0.000000000
+Ti      0.000000000    0.000000000    0.000000000
 O       1.400249958    1.400249958    0.000000000
 O       3.193749905    3.193749905    0.000000000
-TI      2.296999931    2.296999931    1.479500055
+Ti      2.296999931    2.296999931    1.479500055
 O       0.896749973    3.697249889    1.479500055
 O       3.697249889    0.896749973    1.479500055
 <EndGeometry>

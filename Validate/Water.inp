@@ -5,7 +5,7 @@
 <BeginOptions>
 Charge=0
 Multiplicity=1
-DebugAll =(MinDebug,CheckSums)
+DebugAll =(MaxDebug,CheckSums)
 Guess=SuperPos
 Opt=QuNew
 Extrap=Proj
@@ -17,9 +17,8 @@ Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>
-O    0.000000000     0.0     0.369372944 
-H    0.783975899     0.0    -0.184686472 
-H   -0.783975899     0.0    -0.184686472 
+H  0.0 0.0 -1.0
+H  0.0 0.0 1.0
 <EndGeometry>
 
 External reference number RPBE/STO-3G        -75.222866 0852  

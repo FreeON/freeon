@@ -8,10 +8,10 @@ Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 Guess=SuperPos
 DIISDamp=0.3
-SCFMethod=(RH,TS4)
+SCFMethod=(RH,TRS4)
 BasisSets=(STO-3G,3-21G)
 ModelChem=(HF,B3LYP/VWN5)
-Accuracy =(Loose,Good)
+Accuracy=(Loose,Good)
 Geometry=(InAngstroms,NoOrder)
 <EndOptions>
 
