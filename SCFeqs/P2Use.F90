@@ -27,11 +27,11 @@ PROGRAM P2Use
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: S,P,X,T0,T1,T2
+                                :: S,P,X,T0,T1,T2,S1,P0,dP,dS
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
   REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
-       DeltaP,OldDeltaP,DensityDev
+       DeltaP,OldDeltaP,DensityDev,dN
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA, &
        NPur,PcntPNon0,OldFileID
   CHARACTER(LEN=2)              :: Cycl
@@ -50,9 +50,67 @@ PROGRAM P2Use
   CALL New(T0)
   CALL New(T1)
   CALL New(T2)
-
   IF(SCFActn=='Extrapolate')THEN
-     CALL Halt(' Extrapolation turned off, need non-orthogonal SP2 or TS4... ')
+     CALL Delete(P)
+     CALL New(dS)
+     CALL New(dP)
+     CALL SetToI(dP)
+     CALL Multiply(dP,Zero)
+     CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
+     CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
+     CALL Multiply(T0,-One)
+!    dS=S1-S0
+     CALL Add(S1,T0,dS)        
+!    Get previous non-orthogonal density matrix 
+     CALL Get(P0,TrixFile('D',Args,-1))     
+     DO I=1,10
+        ! T0=P0*[dS*P0+S1*dP]
+        CALL Multiply(dS,P0,T0)
+        CALL Multiply(S1,dP,T1)
+        CALL Add(T0,T1,T2)
+        CALL Multiply(P0,T2,T0)
+        ! T1=dP*S1*[P0+dP]
+        CALL Add(P0,dP,T1)
+        CALL Multiply(S1,T1,T2)
+        CALL Multiply(dP,T2,T1)
+        ! T2=T0+T1=P0*[dS*P0+S1*dP]+dP*S1*[P0+dP]
+        CALL Add(T1,T0,T2)
+        ! P1~P0+dP; dN~Tr(P1.S1)
+        CALL Add(P0,dP,T1)
+        dN=Two*Trace(T1,S1)-NEl
+        WRITE(*,*)'dN = ',dN
+        IF(I>2.AND.ABS(dN)<1D-8)EXIT
+        IF(MOD(I,2)==0.AND.I<4)THEN
+           CALL Multiply(dP,Two)
+           CALL Multiply(T2,-One)
+           CALL Add(dP,T2,T1)
+           CALL Filter(dP,T1)
+        ELSEIF(I<4)THEN
+           CALL Filter(dP,T2)
+        ELSEIF(dN<0)THEN
+           CALL Multiply(dP,Two)
+           CALL Multiply(T2,-One)
+           CALL Add(dP,T2,T1)
+           CALL Filter(dP,T1)
+        ELSE
+           CALL Filter(dP,T2)
+        ENDIF
+
+!        CALL Add(dp,P0,T0)        
+!        CALL Multiply(T0,S1,T1)
+!        CALL Multiply(T1,T0,T2)
+!        CALL Multiply(T2,-One)
+!        CALL Add(T0,T2,T1)
+!        WRITE(*,*)' MAX PSP-P = ',Max(T1)
+        ! P1~P0+dP; dN~Tr(P1.S1)
+!        CALL Add(P0,dP,T1)
+!        dN=Two*Trace(T1,S1)-NEl
+!        WRITE(*,*)'B I = ',I,' dN = ',dN
+
+     ENDDO 
+     CALL Add(dp,P0,T0)
+     CALL Put(T0,TrixFile('D',Args,0))     
+     CALL ShutDown(Prog)
   ELSEIF(SCFActn=='Restart')THEN  
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
