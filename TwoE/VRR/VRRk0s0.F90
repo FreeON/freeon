@@ -1,3 +1,4 @@
+ 
    SUBROUTINE VRRk0s0(LB,LK,VRR0,VRR1) 
       USE DerivedTypes
       USE VScratchB
