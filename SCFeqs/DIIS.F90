@@ -78,7 +78,15 @@ PROGRAM DIIS
   !  and if pure damping flag is not on (DIISDimension=0)
   IF(DoDIIS==1)THEN
      N=MIN(ISCF,BMax)
-     M=MAX(2,ISCF-BMax+1)
+     !
+     ! If we always do an ODA step at the first SCF cycle, then 
+     ! we can immediatly set up the B matrix.
+     M=MAX(1,ISCF-BMax+1)!M=MAX(2,ISCF-BMax+1)
+     !write(*,*) 'DIIS: ISCF',ISCF
+     !write(*,*) 'DIIS: BMax',BMax
+     !write(*,*) 'DIIS: M=MAX(2,ISCF-BMax+1)',M
+     !write(*,*) 'DIIS: N=MIN(ISCF,BMax)',N
+     !
      CALL New(B,(/N,N/))
      ! Pulays most excellent B matrix
      I0=M-ISCF
