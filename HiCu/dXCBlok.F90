@@ -24,7 +24,7 @@ MODULE dXCBlok
 !=======================================================================================
      FUNCTION dXC(Pair,P) RESULT(Vck)
        TYPE(AtomPair)                           :: Pair
-       REAL(DOUBLE),DIMENSION(3)                :: Vck
+       REAL(DOUBLE),DIMENSION(6)                :: Vck
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: P
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
@@ -38,7 +38,7 @@ MODULE dXCBlok
        INTEGER                                  :: I,J,K,MaxLA,MaxLB,IA,IB,  &
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,    &
-                                                   EllA,EllB,EllAB,LenAB
+                                                   EllA,EllB,EllAB,LenAB,KI
 !-------------------------------------------------------------------------------------- 
        Prim%A=Pair%A
        Prim%B=Pair%B
@@ -76,17 +76,12 @@ MODULE dXCBlok
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
 !               Set primitive values, find distributions wheight
-                PExtent=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom, &
-                                   Tau_O=TauRho,ExtraEll_O=1)
-#ifdef PERIODIC
+                PExtent=SetBraBlok(Prim,BS,Gradients_O=.FALSE.,Tau_O=TauRho,ExtraEll_O=1)
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)
 !               Quick check to see if primitive touches the grid
                 IF(PExtent>Zero.AND.(.NOT.BoxOutSideBox(PBox,CubeRoot%Box)))THEN
-#else
-                IF(PExtent>Zero)THEN
-#endif
 !-----------------------------------------------------------------------------------------
 !                  Find the extent of this primitive again, now factoring in the density matrix
                    PExtent=Zero
@@ -115,7 +110,7 @@ MODULE dXCBlok
                    PBox=ExpandBox(PBox,PExtent)
 !                  Walk the walk
                    CALL KxcWalk(CubeRoot)
-!                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc
+!                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc:  SameAtom=.FALSE.
                    IA = IndexA
                    DO LMNA=StartLA,StopLA
                       IA=IA+1
@@ -127,12 +122,34 @@ MODULE dXCBlok
                           Pab=P(IA,IB)
                           LenAB=LHGTF(EllA+EllB+1)
                           DO K=1,3
+                             KI = K
                              DO LMN=1,LenAB
-                                Vck(K)=Vck(K)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                                Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
                              ENDDO
                          ENDDO
                       ENDDO
                    ENDDO
+!                  Contract <Bra|Ket> bloks to compute matrix elements of Kxc:  SameAtom=.TRUE.
+                   PExtent=SetBraBlok(Prim,BS,Gradients_O=.TRUE.,Tau_O=TauRho,ExtraEll_O=1)
+                   IA = IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                          EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
+                          Pab=P(IA,IB)
+                          LenAB=LHGTF(EllA+EllB+1)
+                          DO K=1,3
+                             KI = K+3
+                             DO LMN=1,LenAB
+                                Vck(KI)=Vck(KI)+Pab*dHGBra%D(LMN,IA,IB,K)*Ket(LMN)
+                             ENDDO
+                         ENDDO
+                      ENDDO
+                   ENDDO
+!
                 ENDIF
 !---------------------------------------------------------------------------
              ENDIF 
@@ -140,11 +157,7 @@ MODULE dXCBlok
           ENDDO
        ENDDO
        ENDDO
-       IF(.NOT.Pair%SameAtom)THEN
-          Vck=Four*Vck
-       ELSE
-          Vck=Two*Vck
-       ENDIF
+!
      END FUNCTION dXC
 
 !====================================================================================================

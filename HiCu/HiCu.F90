@@ -26,39 +26,33 @@ PROGRAM HaiKu
   USE FastMatrices
 #endif
   IMPLICIT NONE
-  TYPE(ARGMT)                 :: Args
+  TYPE(ARGMT)                    :: Args
 #ifdef PARALLEL
   INTEGER::I
-  REAL(DOUBLE) :: StartTm,EndTm,TotTm,CumuTm
+  REAL(DOUBLE)                   :: StartTm,EndTm,TotTm,CumuTm
 #endif
 #ifdef PARALLEL
-  TYPE(FastMat),POINTER       :: Kxc
+  TYPE(FastMat),POINTER          :: Kxc
 #else
-  TYPE(BCSR)                  :: Kxc
+  TYPE(BCSR)                     :: Kxc
 #endif
-  TYPE(BCSR)                  :: T1
-  TYPE(TIME)                  :: TimeRhoToGrid,TimeGridToMat
-  REAL(DOUBLE)                :: Electrons
-  CHARACTER(LEN=3)            :: SCFCycle
-  CHARACTER(LEN=4),PARAMETER  :: Prog='HiCu'
-  CHARACTER(LEN=12),PARAMETER :: Sub1='HiCu.RhoTree' 
-  CHARACTER(LEN=12),PARAMETER :: Sub2='HiCu.GridGen' 
-  CHARACTER(LEN=12),PARAMETER :: Sub3='HiCu.MakeKxc' 
+  TYPE(BCSR)                     :: T1
+  TYPE(TIME)                     :: TimeRhoToGrid,TimeGridToMat
+  REAL(DOUBLE)                   :: Electrons
+  CHARACTER(LEN=3)               :: SCFCycle
+  CHARACTER(LEN=4),PARAMETER     :: Prog='HiCu'
+  CHARACTER(LEN=12),PARAMETER    :: Sub1='HiCu.RhoTree' 
+  CHARACTER(LEN=12),PARAMETER    :: Sub2='HiCu.GridGen' 
+  CHARACTER(LEN=12),PARAMETER    :: Sub3='HiCu.MakeKxc' 
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
-  TYPE(BBox)::WBox
-  REAL(DOUBLE)::VolRho,VolExc
+  TYPE(BBox)                     ::WBox
+  REAL(DOUBLE)                   ::VolRho,VolExc
 !-------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
   NEl=GM%NElec
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)
@@ -127,9 +121,7 @@ PROGRAM HaiKu
 #else
 ! Generate the CubeTree (a 3-D BinTree) 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
-#ifdef PERIODIC
   CALL MakeBoxPeriodic(WBox)
-#endif
   CALL CalCenterAndHalf(WBox)
   CALL GridGen(WBox,VolRho,VolExc)
   CALL Elapsed_TIME(TimeRhoToGrid,'Accum')
@@ -146,16 +138,11 @@ PROGRAM HaiKu
      CALL PPrint(TimeGridToMat,Sub3)
      CALL PPrint(TimeGridToMat,Sub3,Unit_O=6)
   ENDIF
-
 #endif
-
-
 ! Delete the RhoTree
   CALL DeleteRhoTree(RhoRoot)
   CALL DeleteBraBlok()
-
 ! Put Kxc to disk
-
 #ifdef PARALLEL
   CALL Redistribute_FASTMAT(Kxc)
   CALL AlignNodes()
@@ -169,8 +156,6 @@ PROGRAM HaiKu
 #else
   CALL Put(Kxc,TrixFile('Kxc',Args,0))
 #endif
-
-
 ! Put Exc to Info
 #ifdef PARALLEL
   IF(MyID == 0) THEN

@@ -18,52 +18,42 @@ PROGRAM XCForce
   USE CubeTree
   USE Functionals
   USE dXCBlok
-
 #ifdef PARALLEL
   USE ParallelHiCu
   USE FastMatrices
 #endif
-
   IMPLICIT NONE
   TYPE(ARGMT)                    :: Args
 
 #ifdef PARALLEL
   TYPE(BCSR)                     :: P
-  TYPE(DBL_VECT)      :: TotXCFrc
-  INTEGER :: IErr,TotFrcComp
-  REAL(DOUBLE) :: XCFrcBegTm,XCFrcEndTm,XCFrcTm
-  TYPE(DBL_VECT) :: TmXCFrcArr
+  TYPE(DBL_VECT)                 :: TotXCFrc
+  INTEGER                        :: IErr,TotFrcComp
+  REAL(DOUBLE)                   :: XCFrcBegTm,XCFrcEndTm,XCFrcTm
+  TYPE(DBL_VECT)                 :: TmXCFrcArr
 #else
   TYPE(BCSR)                     :: P
 #endif
-
   TYPE(TIME)                     :: TimeRhoToTree,TimeGridGen
   TYPE(DBL_VECT)                 :: XCFrc,Frc
   TYPE(AtomPair)                 :: Pair
   REAL(DOUBLE)                   :: Electrons,XCFrcChk
-  INTEGER                        :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q
+  INTEGER                        :: AtA,AtB,MA,NB,MN1,A1,A2,JP,Q,I
   CHARACTER(LEN=3)               :: SCFCycle
   CHARACTER(LEN=7),PARAMETER     :: Prog='XCForce'
   CHARACTER(LEN=15),PARAMETER    :: Sub1='XCForce.RhoTree' 
   CHARACTER(LEN=15),PARAMETER    :: Sub2='XCForce.GridGen' 
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
-#ifdef PERIODIC        
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg         
   INTEGER                        :: NCA,NCB
-  REAL(DOUBLE),DIMENSION(3)      :: A,B,F_nlm,nlm
-  REAL(DOUBLE),DIMENSION(3,3)    :: LatFrc_XC
-#endif     
-  TYPE(BBox)::WBox
-  REAL(DOUBLE)::VolRho,VolExc 
+  REAL(DOUBLE),DIMENSION(3)      :: A,B,nlm
+  REAL(DOUBLE),DIMENSION(6)      :: F_nlm
+  TYPE(DBL_RNK2)                 :: LatFrc_XC   
+  TYPE(BBox)                     :: WBox,WBoxTmp
+  REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old
 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
@@ -76,31 +66,24 @@ PROGRAM XCForce
   CALL SendBBox()
   CALL DistDist()
   CALL ParaRhoToTree()
+  CALL ParaGridGen()
 #else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
-#endif
-
-#ifdef PARALLEL
-  CALL ParaGridGen()
-#else
 ! Generate the grid as a 3-D BinTree 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
-#ifdef PERIODIC
+! Make Box Periodic
   CALL MakeBoxPeriodic(WBox)
-#endif
   CALL CalCenterAndHalf(WBox)
+
   CALL GridGen(WBox,VolRho,VolExc)
-
 #endif
-
-
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
-
 ! More allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL New(XCFrc,3*NAtoms)
+  CALL New(LatFrc_XC,(/3,3/))
 #ifdef PARALLEL
   CALL New(P,OnAll_O=.TRUE.)
 #endif
@@ -109,6 +92,7 @@ PROGRAM XCForce
 ! Compute the exchange-correlation contribution to the force in O(N)
 !
   XCFrc%D=Zero
+  LatFrc_XC%D=Zero
 #ifdef PARALLEL
   XCFrcBegTm = MPI_Wtime()
 #endif
@@ -122,7 +106,6 @@ PROGRAM XCForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
-#ifdef PERIODIC
            A=Pair%A
            B=Pair%B
            DO NCA=1,CS_OUT%NCells
@@ -133,24 +116,43 @@ PROGRAM XCForce
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2
                   IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-                  ! IF(TestAtomPair(Pair)) THEN
-                    F_nlm(1:3)     = dXC(Pair,P%MTrix%D(Q:Q+MN1))
-                    XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + F_nlm(1:3)
-#ifdef THIS_IS_NOT_WELL_POSED_FOR_DIMEN_ZERO
-                    nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCA))+AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCB))
-                    LatFrc_XC(1,1:3) = LatFrc_XC(1,1:3) + Half*nlm(1)*F_nlm(1:3)
-                    LatFrc_XC(2,1:3) = LatFrc_XC(2,1:3) + Half*nlm(2)*F_nlm(1:3)
-                    LatFrc_XC(3,1:3) = LatFrc_XC(3,1:3) + Half*nlm(3)*F_nlm(1:3)
-#endif
+                    F_nlm = dXC(Pair,P%MTrix%D(Q:Q+MN1))
+                    IF(Pair%SameAtom) THEN
+                       XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + Two*F_nlm(4:6)
+                    ELSE
+                       XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + Four*F_nlm(1:3)
+                    ENDIF
+                    nlm = AtomToFrac(GM,Pair%A)
+                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,F_nlm(1:3))
+                    nlm = AtomToFrac(GM,Pair%B)
+                    LatFrc_XC%D =  LatFrc_XC%D + Two*LaticeForce(GM,nlm,(F_nlm(4:6)-F_nlm(1:3)))
                  ENDIF
               ENDDO
            ENDDO
-#else
-           XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
-#endif
         ENDIF
      ENDDO
   ENDDO
+!--------------------------------------------------------------------------------
+! Calculate the Surface term for the X
+!--------------------------------------------------------------------------------
+! Set the Thresholds
+  DelBox = 1.D-3
+  CALL SetLocalThresholds(Thresholds%Cube*1.D-4)
+! Convert density to a 5-D BinTree
+  CALL RhoToTree(Args)
+! Generate the grid as a 3-D BinTree
+  DO I = 1,1
+     IF(GM%PBC%AutoW(I)) THEN
+        WBox%BndBox(I,1) = GM%PBC%BoxShape(I,I)-DelBox
+        WBox%BndBox(I,2) = GM%PBC%BoxShape(I,I)+DelBox
+        CALL GridGen(WBox,VolRho,VolExc)
+        WBox%BndBox(I,1) = Zero
+        WBox%BndBox(I,2) = GM%PBC%BoxShape(I,I)
+        LatFrc_XC%D(I,I) = LatFrc_XC%D(I,I)+Exc/(Two*DelBox)
+     ENDIF
+  ENDDO
+! Delete the density
+  CALL DeleteRhoTree(RhoRoot)
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   XCFrcEndTm = MPI_Wtime()
@@ -175,6 +177,9 @@ PROGRAM XCForce
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+XCFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
+!
+  CALL Put(LatFrc_XC,'LatFrc_XC',Tag_O=CurGeom)
+  CALL Delete(LatFrc_XC)
 !--------------------------------------------------------------------------------
 ! Tidy up
 !--------------------------------------------------------------------------------
