@@ -577,8 +577,13 @@ CONTAINS
   !
   !
   SUBROUTINE Order0(P0,Tmp1,Tmp2,Tmp3,N,Ne)
-    TYPE(BCSR)  , INTENT(OUT  ) :: P0
-    TYPE(BCSR)  , INTENT(INOUT) :: Tmp1,Tmp2,Tmp3
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(OUT  ) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(OUT  ) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: Tmp1,Tmp2,Tmp3
+#endif
     REAL(DOUBLE), INTENT(IN   ) :: N,Ne
     IF(N.GE.Ne) THEN
        CALL Multiply(P0,P0,Tmp3)       !Tmp3=P*P
@@ -596,8 +601,13 @@ CONTAINS
   !
   !
   SUBROUTINE Order1(P0,P1_1,Tmp1,Tmp2,Tmp3,N,Ne)
-    TYPE(BCSR)  , INTENT(IN   ) :: P0
-    TYPE(BCSR)  , INTENT(INOUT) :: P1_1,Tmp1,Tmp2,Tmp3
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(IN   ) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(IN   ) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,Tmp1,Tmp2,Tmp3
+#endif
     REAL(DOUBLE), INTENT(IN   ) :: N,Ne
     IF(N.GE.Ne) THEN
        CALL Multiply(P0,P1_1,Tmp1)   !Tmp1=P*PPrim
@@ -619,8 +629,13 @@ CONTAINS
   !
   !
   SUBROUTINE Order2(P0,P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-    TYPE(BCSR)  , INTENT(IN   ) :: P0
-    TYPE(BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(IN   ) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(IN   ) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3
+#endif
     REAL(DOUBLE), INTENT(IN   ) :: N,Ne
     IF(N.GE.Ne) THEN
        CALL Multiply(P0,P2_1,Tmp1)     !Tmp1=P*PPrm2
@@ -654,8 +669,13 @@ CONTAINS
   !
   !
   SUBROUTINE Order3(P0,P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
-    TYPE(BCSR)  , INTENT(IN   ) :: P0
-    TYPE(BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(IN   ) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(IN   ) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3
+#endif
     REAL(DOUBLE), INTENT(IN   ) :: N,Ne
     IF(N.GE.Ne) THEN
        ! Daac = Daac*X0 + X0*Daac + 1/3(Daa*Dc + Dc*Daa) + 2/3(Dac*Da + Da*Dac)
