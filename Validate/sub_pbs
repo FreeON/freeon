@@ -1,0 +1,9 @@
+rm -f $1.pbs
+echo "#!/bin/tcsh "                                   >  $1.pbs
+echo "#PBS -joe -N $1"                                >> $1.pbs
+echo "rm $MONDO_SCRATCH/$1*"                          >> $1.pbs
+echo "cd $PWD"                                        >> $1.pbs
+echo "$MONDO_HOME/Exec/MondoSCF $1"                   >> $1.pbs
+echo "rm $MONDO_SCRATCH/$1* "                         >> $1.pbs
+chmod u+x $1.pbs
+qsub $1.pbs
