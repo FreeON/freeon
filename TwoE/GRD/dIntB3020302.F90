@@ -23,11 +23,14 @@ SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE), DIMENSION(20) :: HRRTmp 
       REAL(DOUBLE), DIMENSION(13,13,4) :: HRR 
       REAL(DOUBLE), DIMENSION(20,13,4) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(13,20,4) :: HRRC 
+      REAL(DOUBLE), DIMENSION(20,20,4) :: HRRC 
       REAL(DOUBLE)  :: VRR(20,20,0:5)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
       CALL InitDbl(13*13,HRR(1,1,1))
+      CALL InitDbl(20*13,HRRA(1,1,1))
+      CALL InitDbl(20*13,HRRB(1,1,1))
+      CALL InitDbl(20*20,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -220,10 +223,13 @@ SUBROUTINE dIntB3020302(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL DBLAXPZY(400,HRRC(1,1,1),Gamma,VRR(1,1,0)) 
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Dont need to generate (spd,0|p,sp)
-      ! Dont need to generate (spdf,0|p,sp)^a
-      ! Dont need to generate (spdf,0|p,sp)^b
-      ! Dont need to generate (spd,0|d,sp)^c
+      ! Generating (spd,0|p,sp)
+      CALL KetHRR32(13,HRR) 
+      ! Generating (spdf,0|p,sp)^a
+      CALL KetHRR32(20,HRRA) 
+      ! Generating (spdf,0|p,sp)^b
+      CALL KetHRR32(20,HRRB) 
+      ! Generating (spd,0|d,sp)^c
       CALL KetHRR62(13,HRRC) 
       DO L=1,4
       

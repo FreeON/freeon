@@ -23,11 +23,14 @@ SUBROUTINE dIntB3030301(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE), DIMENSION(20) :: HRRTmp 
       REAL(DOUBLE), DIMENSION(10,4,1) :: HRR 
       REAL(DOUBLE), DIMENSION(20,4,1) :: HRRA,HRRB 
-      REAL(DOUBLE), DIMENSION(10,10,1) :: HRRC 
+      REAL(DOUBLE), DIMENSION(20,10,1) :: HRRC 
       REAL(DOUBLE)  :: VRR(20,10,0:4)
       INTEGER       :: OffSet,OA,LDA,GOA,OB,LDB,GOB,OC,LDC,GOC,OD,LDD,GOD,I,J,K,L
       EXTERNAL InitDbl
       CALL InitDbl(10*4,HRR(1,1,1))
+      CALL InitDbl(20*4,HRRA(1,1,1))
+      CALL InitDbl(20*4,HRRB(1,1,1))
+      CALL InitDbl(20*10,HRRC(1,1,1))
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -184,7 +187,6 @@ SUBROUTINE dIntB3030301(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       ! Dont need to generate (f,0|p,s)^a
       ! Dont need to generate (f,0|p,s)^b
       ! Dont need to generate (d,0|d,s)^c
-      CALL KetHRR61(10,HRRC) 
       DO L=1,1
       
          !K = 2
