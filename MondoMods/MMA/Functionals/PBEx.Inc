@@ -12,4 +12,4 @@
         VTmp(1)=-1.2407009817988d0*R**(1.d0/3.d0)*UTmp(7)
         VTmp(2)=8.96328655897011d-3*A*R**(-7.d0/3.d0)*UTmp(10)
         dEdRhoi=VTmp(1)+VTmp(2)
-        dEdAbsGradRho2i=(-6.72246491922758d-3*UTmp(10))/UTmp(8)
+        dEdGami=(-6.72246491922758d-3*UTmp(10))/UTmp(8)

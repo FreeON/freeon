@@ -43,7 +43,8 @@
         VTmp(1)=3.10907d-2*UTmp(27)
         VTmp(2)=-1.66666666666667d-1/R+UTmp(36)
         VTmp(3)=8.71839026983609d-1*UTmp(32)*UTmp(38)*UTmp(41)
-        VTmp(4)=3.11676086789438d-2*((-1.16948767382387d-1*UTmp(32))/UTmp(11)+UTmp(36)+8.22729900584398d-1*UTmp(32)*UTmp(38)*UTmp(41 & 
-          ))
-        dEdRhoi=VTmp(1)+6.21814d-2*R*(VTmp(2)+VTmp(3)+VTmp(4))
-        dEdAbsGradRho2i=0
+        VTmp(4)=(-1.16948767382387d-1*UTmp(32))/UTmp(11)
+        VTmp(5)=UTmp(36)+8.22729900584398d-1*UTmp(32)*UTmp(38)*UTmp(41)
+        VTmp(6)=R*(VTmp(2)+VTmp(3)+3.11676086789438d-2*(VTmp(4)+VTmp(5)))
+        dEdRhoi=VTmp(1)+6.21814d-2*VTmp(6)
+        dEdGami=0
