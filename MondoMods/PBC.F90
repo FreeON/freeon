@@ -13,25 +13,14 @@ MODULE CellSets
 #ifdef PERIODIC
   CONTAINS
 !--------------------------------------------------------------------------
-! Delete the CellSet
+! Create the CellSet
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCELL,Dimen_O)
+  SUBROUTINE New_CellSet(CS,NCELL)
     TYPE(CellSet)                    :: CS   
-    INTEGER                          :: NCELL,Dimen
-    INTEGER,OPTIONAL                 :: Dimen_O
+    INTEGER                          :: NCELL
 !
-    IF(Present(Dimen_O)) THEN
-       Dimen = Dimen_O
-    ELSE
-       Dimen = 3
-    ENDIF
     CS%NCells = NCELL
-    IF(AllocQ(CS%Alloc)) THEN
-       CALL Delete(CS%CellCarts)
-       CALL New(CS%CellCarts,(/Dimen,CS%NCells/))    
-    ELSE
-       CALL New(CS%CellCarts,(/Dimen,CS%NCells/))    
-    ENDIF
+    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
     CS%Alloc=ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet
@@ -48,6 +37,31 @@ MODULE CellSets
     ENDIF
 !
   END SUBROUTINE Delete_CellSet
+
+!--------------------------------------------------------------------------
+! Put the CellSet to Disk
+!--------------------------------------------------------------------------
+  SUBROUTINE Put_CellSet(CS,Name)
+    TYPE(CellSet)                  :: CS
+    CHARACTER(Len=*)               :: Name
+!
+    CALL Put(CS%NCells   ,TRIM(Name)//'%NCells')
+    CALL Put(CS%CellCarts,TRIM(Name)//'%CellCarts')
+!
+  END SUBROUTINE Put_CellSet
+!--------------------------------------------------------------------------
+! Get the CellSet to Disk
+!--------------------------------------------------------------------------
+  SUBROUTINE Get_CellSet(CS,Name)
+    TYPE(CellSet)                  :: CS
+    CHARACTER(Len=*)               :: Name
+    INTEGER                        :: NC
+!
+    CALL Get(NC          ,TRIM(Name)//'%NCells')
+    CALL New_CellSet(CS,NC)
+    CALL Get(CS%CellCarts,TRIM(Name)//'%CellCarts')
+!
+  END SUBROUTINE Get_CellSet
 !--------------------------------------------------------------------------
 ! Print the CellSet
 !--------------------------------------------------------------------------
@@ -174,8 +188,6 @@ MODULE CellSets
        ENDDO
     ENDDO
 !
-    CALL Sort_CellSet(CS)
-!
   END SUBROUTINE New_CellSet_Cube
 !--------------------------------------------------------------------------
 ! Set up the set of cells out to some radius R
@@ -239,8 +251,6 @@ MODULE CellSets
        ENDDO
     ENDDO
 !
-    CALL Sort_CellSet(CS)
-!  
   END SUBROUTINE New_CellSet_Sphere
 !--------------------------------------------------------------------------
 ! Sort the Cells From Large R to Small R
