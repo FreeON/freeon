@@ -46,69 +46,63 @@ PROGRAM MakeRho
 !----------------------------------------------
   CALL StartUp(Args,Prog)
 !----------------------------------------------
-! Get basis set and geometry
-!----------------------------------------------
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
-  CALL NewBraBlok(BS)  
-!----------------------------------------------
-! Get the Density Matrix
-!----------------------------------------------
-  IF(SCFActn=='InkFok')THEN
-     CALL Get(Dmat,TrixFile('DeltaD',Args,0))
-  ELSEIF(SCFActn/='Core')THEN
-     CALL Get(Dmat,TrixFile('D',Args,0))
+  IF(SCFActn=='BasisSetSwitch')THEN
+!    Get the previous information
+     CALL Get(BS,PrvBase)
+     CALL Get(GM,PrvGeom)
+     CALL Get(NExpt,'nexpt',PrvBase)
+     CALL New_HGRho(Rho,(/NExpt,0,0/))
+     CALL Get(Rho%Lndx ,'lndex',PrvBase)
+     CALL Get(Rho%Expt,'dexpt',PrvBase)
+     CALL Get(BSiz,'atsiz',PrvBase)
+     CALL Get(OffS,'atoff',PrvBase)
+     CALL Get(NBasF,'nbasf',PrvBase)
+     CALL Get(Dmat,TrixFile('D',Args,-1))
+  ELSE
+!    Get the current information
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
+     CALL Get(NExpt,'nexpt',CurBase)
+     CALL New_HGRho(Rho,(/NExpt,0,0/))
+     CALL Get(Rho%Expt,'dexpt',CurBase)
+     CALL Get(Rho%Lndx ,'lndex',CurBase)
+     IF(SCFActn=='InkFok')THEN
+        CALL Get(Dmat,TrixFile('DeltaD',Args,0))
+     ELSEIF(SCFActn=='ForceEvaluation')THEN
+        CALL Get(Dmat,TrixFile('D',Args,1))
+     ELSEIF(SCFActn/='Core')THEN
+        CALL Get(Dmat,TrixFile('D',Args,0))
+     ENDIF
   ENDIF
-!---------------------------------------------- 
-! Allocations 
-!
+! Allocations and precalculations
+  CALL NewBraBlok(BS)  
   CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
+!
 #ifdef PERIODIC
-!-----------------------------------------------
 ! Calculate the Number of Cells
-!-----------------------------------------------
   CALL SetCellNumber(GM)
 #endif
-!---------------------------------------------------
-! Get the Exponents and Angular Symmetries
-!
-  CALL Get(NExpt,'nexpt',Tag_O=CurBase)
-  CALL New_HGRho(Rho,(/NExpt,0,0/))
-  CALL Get(Rho%Expt,'dexpt',Tag_O=CurBase)
-  CALL Get(Rho%Lndx ,'lndex',Tag_O=CurBase)
 !---------------------------------------------------
 ! Main loops: First pass calculates the size.
 !             Second pass calculates the density
 !---------------------------------------------------
-  IF(SCFActn=='Core') THEN
-!---------------------------------------------------
+  IF(SCFActn=='Core')THEN
 !    Re-allocate the density
-!
      CALL New_HGRho(Rho,(/NExpt,NAtoms,NAtoms/))
-!-----------------------------------------------------
 !    Initailize  NQ
-!
      Rho%NQ%I            = 0
      Rho%NQ%I(Rho%NExpt) = NAtoms
-!-----------------------------------------------------
 !    Initailize  OffQ,OffR and RhoCo
-!
      Rho%OffQ%I=CalOffQ(Rho)
      Rho%OffR%I=CalOffR(Rho)
      Rho%Co%D=Zero
-!---------------------------------------------------
 !    Add in the density for the nuclear centers
-!
      CALL AddNukes(GM,Rho)
   ELSE
-!-----------------------------------------------------
 !    Initailize  NQ
-!
      Rho%NQ%I = 0
      IF(SCFActn/='InkFok')Rho%NQ%I(Rho%NExpt)=NAtoms
-!----------------------------------------------------
 !    Loop over atoms and count primatives
-!
      DO AtA=1,NAtoms
         Pbeg = Dmat%RowPt%I(AtA)
         Pend = Dmat%RowPt%I(AtA+1)-1
@@ -136,23 +130,15 @@ PROGRAM MakeRho
            ENDIF
         ENDDO
      ENDDO
-!----------------------------------------------------
 !    Calculate NDist and NCoef from NQ and Lndx
-!
      NDist = CalNDist(Rho)
      NCoef = CalNCoef(Rho)
-!-----------------------------------------------------
 !    Initailize  OffQ,OffR and RhoCo
-!
      Rho%OffQ%I=CalOffQ(Rho)
      Rho%OffR%I=CalOffR(Rho)
-!-----------------------------------------------------
 !    Re-allocate the density
-!
      CALL New_HGRho(Rho,(/NExpt,NDist,NCoef/))
-!-----------------------------------------------------
 !    Initailize  RhoCo and First
-!
      First = .TRUE.
      Rho%Co%D=zero
 !-----------------------------------------------------
@@ -209,7 +195,11 @@ PROGRAM MakeRho
 !------------------------------------------------------------
 ! Put Rho to disk
 ! 
-  CALL Put_HGRho(Rho2,'Rho',Args,0)
+  IF(SCFActn=='ForceEvaluation')THEN
+     CALL Put_HGRho(Rho2,'Rho',Args,1)
+  ELSE
+     CALL Put_HGRho(Rho2,'Rho',Args,0)
+  ENDIF
 !------------------------------------------------------------
 ! Printing
 !
@@ -220,7 +210,8 @@ PROGRAM MakeRho
 !---------------------------------------------------
 ! Tidy up
 ! 
-  IF( iSwitch /= 0) CALL Delete(Dmat)
+  IF(SCFActn/='Core') &
+  CALL Delete(Dmat)
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(MD)

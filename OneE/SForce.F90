@@ -48,8 +48,7 @@ PROGRAM SForce
   CALL New(T1)
 !--------------------------------------
 ! Compute W=P.F.P
-  CALL Get(P,TrixFile('D',Args,0))
-!
+  CALL Get(P,TrixFile('D',Args,1))
   CALL Get(F,TrixFile('F',Args,0))
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
@@ -70,6 +69,7 @@ PROGRAM SForce
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
+     MA=BSiz%I(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN

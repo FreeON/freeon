@@ -42,7 +42,7 @@ PROGRAM TForce
 !
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  CALL Get(P,TrixFile('D',Args,0))
+  CALL Get(P,TrixFile('D',Args,1))
   CALL New(TFrc,3*NAtoms)
 #ifdef PERIODIC
 !-----------------------------------------------
