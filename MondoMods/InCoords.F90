@@ -2703,12 +2703,12 @@ END SUBROUTINE CoordTrf
 !
 !-------------------------------------------------------
 !
-    SUBROUTINE GDIIS(CurStat,GDIISMemoryIn,GMLoc)
+    SUBROUTINE GDIIS(CurGeom,GDIISMemoryIn,GMLoc)
     IMPLICIT NONE
     TYPE(CRDS) :: GMLoc
     INTEGER :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
     INTEGER :: LastStruct,ILow,NCart,GDIISMemory
-    INTEGER,DIMENSION(3) :: CurStat
+    INTEGER :: CurGeom
     TYPE(DBL_RNK2) :: Displacements,AMat,InvAMat,Structures,ActCarts
     TYPE(DBL_VECT) :: Coeffs,AuxVect
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
@@ -2716,13 +2716,16 @@ END SUBROUTINE CoordTrf
 !
 ! Current implementation runs on Cartesian displacements only
 ! Input GMLoc contains the actual geometry
+! CurGeom is set to the last (simple relaxation) structure
 !
     NCart=3*GMLoc%Natms
     DimGDIIS=NCart   !!! later dimeension may become NIntC
-    LastStruct=CurStat(3) ! number of geometries stored in HDF, does not include newest geometry
+    LastStruct=CurGeom-1 ! number of geometries stored in HDF, does not include newest geometry
     ILow=LastStruct-GDIISMemoryIn   ! latest geometry not considered
     IF(ILow<0) ILow=0
     GDIISMemory=LastStruct-ILow
+write(*,*) 'curgeom= ',curgeom
+write(*,*) 'gdiismemory= ',gdiismemory
 !
     GMTag=''
 #ifdef MMech
@@ -2735,6 +2738,7 @@ END SUBROUTINE CoordTrf
     CALL New(Displacements,(/DimGDIIS,GDIISMemory/))
     CALL New(Structures,(/DimGDIIS,GDIISMemory+1/))
     CALL New(ActCarts,(/3,GMLoc%Natms/))
+    Structures%D=Zero
 !
 ! Get last GDIISMemory pieces of structures
 !
@@ -2748,8 +2752,9 @@ END SUBROUTINE CoordTrf
         Structures%D(J+3,K)=ActCarts%D(3,I)
       ENDDO
     ENDDO
+call pprint(Structures%D,'structures 1',unit_o=6)
 !
-! Fill in present single relaxation structure
+! Fill in present simple relaxation structure
 !
     DO I=1,GMLoc%Natms
       J=3*(I-1)
@@ -2757,51 +2762,64 @@ END SUBROUTINE CoordTrf
       Structures%D(J+2,GDIISMemory+1)=GMLoc%Carts%D(2,I)
       Structures%D(J+3,GDIISMemory+1)=GMLoc%Carts%D(3,I)
     ENDDO
+ call pprint(Structures%D,'structures 2',unit_o=6)
 !
 ! Get displacements ('error vectors')
 !
     DO I=1,GDIISMemory    
       Displacements%D(:,I)=Structures%D(:,I+1)-Structures%D(:,I)
     ENDDO
+!call pprint(Displacements%D,'Displacements',unit_o=6)
 !
 ! Now calculate overlap ('A' matrix). Presently only non-sparse representation is available
 ! dimension of overlap is GDIISMemory+1
 !
-    CALL New(AMat,(/GDIISMemory+1,GDIISMemory+1/))
+    CALL New(AMat,(/GDIISMemory,GDIISMemory/))
 !
     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
-		   Displacements%D,Displacements%D, &
-		   AMat%D(1:GDIISMemory,1:GDIISMemory))
-!
-! Add 'surface' terms to overlap
-!
-    AMat%D(1:GDIISMemory,GDIISMemory+1)=One
-    AMat%D(GDIISMemory+1,1:GDIISMemory)=One
-    AMat%D(GDIISMemory+1,GDIISMemory+1)=Zero 
+		   Displacements%D,Displacements%D,AMat%D)
+!call pprint(AMat%D,'AMat',unit_o=6)
 !
 ! Now, Calculate SVD inverse of the Overlap
 !
-    CALL New(InvAMat,(/GDIISMemory+1,GDIISMemory+1/))
+    CALL New(InvAMat,(/GDIISMemory,GDIISMemory/))
 !
-    CALL SetDSYEVWork(GDIISMemory+1)
-    CALL FunkOnSqMat(GDIISMemory+1,Inverse,AMat%D,InvAMat%D)
+    CALL SetDSYEVWork(GDIISMemory)
+    CALL FunkOnSqMat(GDIISMemory,Inverse,AMat%D,InvAMat%D)
     CALL UnSetDSYEVWork()
+!call pprint(InvAMat%D,'InvAMat',unit_o=6)
 !
 ! Solve for linear combination coeffs 
 !
-    CALL New(Coeffs,GDIISMemory+1)
-    CALL New(AuxVect,GDIISMemory+1)
-    AuxVect%D=Zero
-    AuxVect%D(GDIISMemory+1)=One
-    CALL DGEMM_NNc(GDIISMemory+1,GDIISMemory+1,1,One,Zero,  &
+    CALL New(Coeffs,GDIISMemory)
+    CALL New(AuxVect,GDIISMemory)
+    AuxVect%D=One 
+    CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
 		   InvAMat%D,AuxVect%D,Coeffs%D)
+    CALL Delete(AuxVect)
+write(*,*) 'coeffs 1= '
+write(*,*) (Coeffs%D(i),i=1,GDIISMemory)
+!
+! Calculate length of GDIIS vector, and
+! rescale coeffs
+!
+    Sum=One/SQRT(DOT_PRODUCT(Coeffs%D,Coeffs%D))
+    Coeffs%D=Sum*Coeffs%D
+write(*,*) 'length= ',sqrt(sum)
+write(*,*) 'coeffs 2= '
+write(*,*) (Coeffs%D(i),i=1,GDIISMemory)
 !
 ! Calculate new geometry, linearcombine previous steps 
 !
+    CALL New(AuxVect,DimGDIIS)
+!
       AuxVect%D=Zero
     DO I=1,GDIISMemory
-      AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I+1)
+!     AuxVect%D=AuxVect%D+Coeffs%D(I)*Displacements%D(:,I)
+      AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I)
+!     AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I+1)
     ENDDO
+write(*,*) 'obsvd length= ',SQRT(DOT_PRODUCT(AuxVect%D,AuxVect%D))
 !
 ! Fill new geometry into GM array
 !
@@ -2812,9 +2830,12 @@ END SUBROUTINE CoordTrf
       GMLoc%Carts%D(3,I)=AuxVect%D(J+3)
     ENDDO
 !
+    CALL Delete(AuxVect)
+write(*,*) GMLoc%Carts%D
+call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
+!
 ! Tidy up
 !
-    CALL Delete(AuxVect)
     CALL Delete(Coeffs)
     CALL Delete(InvAMat)
     CALL Delete(AMat)
@@ -3229,17 +3250,24 @@ END SUBROUTINE CoordTrf
     TYPE(DBL_VECT)            :: VectCartAux2,VectIntAux2
     TYPE(DBL_VECT)            :: VectIntReq
     TYPE(DBL_RNK2)            :: FullB,FullBt,FullGcInv,ActCarts
-    REAL(DOUBLE)              :: DiffMax,RMSD,TrixThresh
+    REAL(DOUBLE)              :: DiffMax,RMSD,RMSDOld,TrixThresh
     REAL(DOUBLE)              :: CooTrfCrit,MaxCartDiff,Sum
     REAL(DOUBLE)              :: DistRefresh
     REAL(DOUBLE)              :: SumX,SumY,SumZ
-    INTEGER                   :: NCart,I,II,J,NIntC
+    REAL(DOUBLE)              :: ConstrMax,ConstrRMS
+    REAL(DOUBLE)              :: ConstrRMSOld
+    REAL(DOUBLE)              :: ConstrMaxCrit,RMSCrit
+    INTEGER                   :: NCart,I,IStep,J,NIntC,NConstr
     INTEGER                   :: MaxIt_CooTrf,NatmsLoc
+    INTEGER                   :: NCartConstr
     TYPE(INTC)                :: IntCs
     TYPE(BMATR)               :: B
     LOGICAL                   :: RefreshB,RefreshAct
+    LOGICAL                   :: DoIterate
     TYPE(INT_VECT)            :: MMAtNum
 !
+      CALL Get(NConstr,'NConstraints')
+      CALL Get(NCartConstr,'NCartConstr')
       CooTrfCrit=1.D-3 !!! For Backtransformation
       MaxIt_CooTrf=30
       NatmsLoc=SIZE(XYZ,2)
@@ -3247,6 +3275,8 @@ END SUBROUTINE CoordTrf
       NIntC=SIZE(IntCs%Def)
       MaxCartDiff=0.5D0  !!! In atomic units. No larger cartesian displacements in a back-trf step are allowed
       DistRefresh=MaxCartDiff*0.75D0
+      ConstrMaxCrit=CooTrfCrit*1.D-2 !!! Convrgn criterium on constrts
+      RMSCrit=0.90D0 !!! at least 10 percent decrease in RMS at a step
 !
 ! Refresh B matrix during iterative back-trf, if displacements are too large?
 !
@@ -3298,12 +3328,17 @@ END SUBROUTINE CoordTrf
         CLOSE(Out,STATUS='KEEP')
       ENDIF
 !
-      II=0
+      ConstrMax=ConstrMaxCrit*10.D0
+      ConstrRMS=1.D0
+      ConstrRMSOld=2.D0
+      RMSD=1.D+9
+!
+      IStep=0
 200   CONTINUE
 !
 ! Get B and GcInv
 !
-       IF(II==0) THEN
+       IF(IStep==0) THEN
          CALL Get(FullB,'FullB')
          CALL Get(FullBt,'FullBt')
          CALL Get(FullGcInv,'FullGcInv')
@@ -3314,13 +3349,20 @@ END SUBROUTINE CoordTrf
 !
 ! Compute actual value of internals 
 !
-      IF(II>0) CALL INTCValue(IntCs,ActCarts%D)
+      IF(IStep>0) CALL INTCValue(IntCs,ActCarts%D)
 !
 ! Calculate difference between required and actual internals
 ! Calc [phi_r-phi_a]
 !
       VectIntAux%D=VectIntReq%D-IntCs%Value
       CALL MapDisplTors(IntCs,NIntC,VectIntAux%D) 
+!
+! Check convergence on constraints
+!
+      IF(NConstr/=0) THEN
+        ConstrRMSOld=ConstrRMS
+        CALL ConstrConv(IntCs,VectIntAux%D,ConstrMax,ConstrRMS)
+      ENDIF
 !
 ! Do transformation
 ! 
@@ -3339,21 +3381,11 @@ END SUBROUTINE CoordTrf
 !
 ! Check convergence
 !
-      II=II+1
-        DiffMax=Zero
-      DO I=1,NCart     
-        DiffMax=MAX(DiffMax,ABS(VectCartAux2%D(I)))
-      ENDDO
+      IStep=IStep+1
 !
-! Scale Displacements
-!
-      IF(DiffMax>MaxCartDiff) THEN
-        VectCartAux2%D=MaxCartDiff/DiffMax*VectCartAux2%D
-        DiffMax=MaxCartDiff
-      ENDIF
-!
-      RMSD=DOT_PRODUCT(VectCartAux2%D,VectCartAux2%D)
-      RMSD=SQRT(RMSD/DBLE(NCart))
+      RMSDOld=RMSD
+      CALL CartConv(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD, &
+                    IntCs,NCartConstr)
 !
 ! Refresh B matrix?  
 !
@@ -3368,28 +3400,22 @@ END SUBROUTINE CoordTrf
       VectCart%D=VectCart%D+VectCartAux2%D
       CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
 !
-!write(11,*) NatmsLoc        
-!write(11,*) 
-!call new(mmatnum,NatmsLoc)
-!call get(mmatnum,'mmatnum')
-!DO I=1,NatmsLoc 
-!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)/AngstromsToAu
-!!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)
-!ENDDO
-!call delete(mmatnum)
-!215 format(I4,3F20.14)
-!
 ! Review iteration
 !
       IF(PrintFlags%Geop==DEBUG_GEOP) THEN
-        WRITE(*,210) II,DiffMax,RMSD
+        WRITE(*,210) IStep,DiffMax,RMSD
         CALL OpenAscii(OutFile,Out)
-        WRITE(Out,210) II,DiffMax,RMSD
+        WRITE(Out,210) IStep,DiffMax,RMSD
         CLOSE(Out,STATUS='KEEP')
       ENDIF
 210   FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
 !      
-      IF(DiffMax>CooTrfCrit .AND. II<=MaxIt_CooTrf) THEN 
+      CALL BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
+        RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
+        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,IStep)
+!
+      IF(DoIterate) THEN
+!
 !       IF(RefreshB.AND.RefreshAct) THEN
 !         CALL Delete(FullB)
 !         CALL Delete(FullBt)
@@ -3397,7 +3423,7 @@ END SUBROUTINE CoordTrf
 !       ENDIF
         GO TO 200
       ELSE
-          IF(II>MaxIt_CooTrf) THEN
+          IF(IStep>MaxIt_CooTrf) THEN
             IF(RMSD>0.01D0) THEN
               CALL Halt('Iterative backtransformation did not converge')
             ENDIF
@@ -3419,8 +3445,8 @@ END SUBROUTINE CoordTrf
 !
       IF(PrintFlags%Geop==DEBUG_GEOP) THEN
         CALL OpenAscii(OutFile,Out)
-        WRITE(*,220) II
-        WRITE(Out,220) II
+        WRITE(*,220) IStep
+        WRITE(Out,220) IStep
         CLOSE(Out,STATUS='KEEP')
       ENDIF
 220   FORMAT('Coordinate back-transformation converged in ',I3,' steps')
@@ -4177,5 +4203,147 @@ END SUBROUTINE ChkBendToLinB
       END SUBROUTINE SetConstraint
 !
 !-------------------------------------------------------
+!
+      SUBROUTINE ConstrConv(IntCs,IntDiff,ConstrMax,ConstrRMS)
+      TYPE(INTC) :: IntCs
+      REAL(DOUBLE),DIMENSION(:) :: IntDiff
+      REAL(DOUBLE) :: ConstrMax,ConstrRMS,Sum
+      INTEGER      :: I,J,NIntC,NConstr
+!
+      NIntC=SIZE(IntCs%Def)
+!
+      ConstrMax=Zero
+      ConstrRMS=Zero
+      NConstr=0
+      DO I=1,NIntC 
+        IF(IntCs%Constraint(I)) THEN
+          NConstr=NConstr+1
+          Sum=ABS(IntDiff(I))
+          IF(Sum>ConstrMax) ConstrMax=Sum
+          ConstrRMS=ConstrRMS+Sum*Sum
+        ENDIF
+      ENDDO
+      ConstrRMS=SQRT(ConstrRMS/DBLE(NConstr))
+!
+      END SUBROUTINE ConstrConv
+!
+!-------------------------------------------------------------
+!
+      SUBROUTINE CartConv(CartDispl,MaxCartDiff,DiffMax,RMSD,&
+                          IntCs,NConstr)
+!
+      REAL(DOUBLE),DIMENSION(:) :: CartDispl 
+      REAL(DOUBLE)              :: MaxCartDiff,DiffMax,RMSD,Sum
+      INTEGER                   :: I,J,JJ,NCart,NIntC,NConstr
+      TYPE(INTC)                :: IntCs
+!
+      NCart=SIZE(CartDispl)
+      NIntC=SIZE(IntCs%Def)
+!
+! Make constraints on Cartesians 'hard'
+!
+      IF(NConstr>0) THEN
+        DO I=1,NIntC
+          IF(IntCs%Def(I)(1:4)=='CART'.AND.IntCs%Constraint(I)) THEN
+            J=IntCs%Atoms(I,1) 
+            JJ=(J-1)*3
+            IF(IntCs%Def(I)(5:5)=='X') THEN
+              JJ=JJ+1
+            ELSE IF(IntCs%Def(I)(5:5)=='Y') THEN
+              JJ=JJ+2
+            ELSE IF(IntCs%Def(I)(5:5)=='Z') THEN
+              JJ=JJ+3
+            ENDIF
+            CartDispl(JJ)=Zero
+          ENDIF
+        ENDDO
+      ENDIF      
+!
+      DiffMax=Zero
+      DO I=1,NCart     
+        DiffMax=MAX(DiffMax,ABS(CartDispl(I)))
+      ENDDO
+!
+! Scale Displacements
+!
+      IF(DiffMax>MaxCartDiff) THEN
+        Sum=MaxCartDiff/DiffMax
+        CartDispl=Sum*CartDispl
+        DiffMax=MaxCartDiff
+      ENDIF
+!
+      RMSD=DOT_PRODUCT(CartDispl,CartDispl)
+      RMSD=SQRT(RMSD/DBLE(NCart))
+!
+      END SUBROUTINE CartConv
+!
+!-------------------------------------------------------
+      SUBROUTINE BackTrfConvg(DoIterate,DiffMax,CooTrfCrit, &
+        RMSD,RMSDOld,RMSCrit,ConstrMax,ConstrMaxCrit, &
+        ConstrRMS,ConstrRMSOld,NConstr,MaxIt_CooTrf,IStep)
+!
+        REAL(DOUBLE) :: DiffMax,CooTrfCrit,RMSD,RMSDOld,RMSCrit
+        REAL(DOUBLE) :: ConstrMax,ConstrMaxCrit,ConstrRMS
+        REAL(DOUBLE) :: ConstrRMSOld            
+        INTEGER      :: NConstr,MaxIt_CooTrf,IStep
+        LOGICAL      :: DoIterate
+        LOGICAL      :: ConvConstr
+!
+        DoIterate=.TRUE.
+        ConvConstr=.TRUE.
+!
+        IF(NConstr==0) THEN
+          ConvConstr=(ConstrMax>ConstrMaxCrit.AND. &
+          ConstrRMS<ConstrRMSOld*RMSCrit) 
+        ENDIF
+!
+        DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf)
+        DoIterate=DoIterate.AND.ConvConstr
+!
+      END SUBROUTINE BackTrfConvg
+!
+!----------------------------------------------------------------------
+      SUBROUTINE PrtXYZ(XYZ,Unit_O,Title_O)
+        REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+        INTEGER,OPTIONAL            :: Unit_O
+        INTEGER                     :: I,J,NatmsLoc,Unit
+        TYPE(INT_VECT)              :: MMAtNum
+        TYPE(DBL_VECT)              :: NuclCharge
+        CHARACTER(LEN=*),OPTIONAL   :: Title_O
+!
+        NatmsLoc=SIZE(XYZ,2)
+        Unit=6
+        IF(PRESENT(Unit_O)) Unit=Unit_O
+        CALL New(MMAtNum,NatmsLoc) 
+!
+#ifdef MMech
+        IF(HasMM()) THEN
+          CALL Get(MMAtNum,'MMAtNum')
+        ELSE
+          CALL New(NuclCharge,NatmsLoc)
+          CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+          DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+          CALL Delete(NuclCharge)
+        ENDIF
+#else
+          CALL New(NuclCharge,NatmsLoc)
+          CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+          DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+          CALL Delete(NuclCharge)
+#endif
+!
+          IF(PRESENT(Title_O)) WRITE(Unit,*) Title_O
+!         IF(Unit/=6) OpenPU(Unit_O=Unit)
+        DO I=1,NatmsLoc
+          WRITE(Unit,100) MMAtNum%I(I),XYZ(1:3,I)
+        ENDDO
+100     FORMAT(I4,3X,3F12.6)
+!         IF(Unit/=6) CALL ClosePU(Unit_O=Unit)
+!
+        CALL Delete(MMAtNum) 
+!
+      END SUBROUTINE PrtXYZ
+!----------------------------------------------------------------------
+!
 END MODULE InCoords
 
