@@ -181,7 +181,7 @@ MODULE JGen
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
 !                           Extent (for PAC)
-                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.FALSE.)
+                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
                             CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)

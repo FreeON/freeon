@@ -112,7 +112,7 @@ MODULE BlokTrPdJ
                       LenAB=LHGTF(EllAB)
 !                     Extent (for PAC)
                       DO K=1,3
-                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenAB,IA,IB,K),TauPAC)
+                         Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenAB,IA,IB,K),TauPAC,Potential_O=.TRUE.)
                          PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
                          CALL HGToSP(Prim,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)

@@ -143,28 +143,12 @@ MODULE Thresholding
            TestPrimPair = .TRUE.
         ENDIF
      END FUNCTION TestPrimPair
-!
-     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
-       INTEGER                         :: Ell
-       REAL(DOUBLE)                    :: Zeta
-       REAL(DOUBLE),DIMENSION(:)       :: HGTF
-       REAL(DOUBLE),OPTIONAL           :: Tau_O
-       INTEGER,OPTIONAL                :: ExtraEll_O
-       LOGICAL,OPTIONAL                :: Potential_O
-       REAL(DOUBLE)                    :: R,R0,R1,R2
-       IF(Zeta>=(NuclearExpnt-1D1))THEN
-          ! Quick turn around for nuclei
-          R=1.D-10
-       ELSE
-          R=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-       ENDIF
-    END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
 !     outside of which its value at a point is less than Tau (default) or outside 
 !     of which the error made using the classical potential is less than Tau (Potential option) 
 !===================================================================================================
-     FUNCTION Extent0(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
+     FUNCTION Extent(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
        INTEGER                         :: Ell
        REAL(DOUBLE)                    :: Zeta
        REAL(DOUBLE),DIMENSION(:)       :: HGTF
@@ -173,12 +157,18 @@ MODULE Thresholding
        LOGICAL,OPTIONAL                :: Potential_O
        INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
        LOGICAL                         :: Potential
-       REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq
+       REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq,TMP
        REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
        REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
                                                         720D0,5040D0,40320D0,362880D0,   &
                                                         3628800D0,39916800D0,479001600D0/)
 !------------------------------------------------------------------------------------------------------------------
+       ! Quick turn around for nuclei
+       IF(Zeta>=(NuclearExpnt-1D1))THEN
+          R=1.D-10
+          RETURN
+       ENDIF
+       ! Misc options....
        IF(PRESENT(ExtraEll_O))THEN 
           ExtraEll=ExtraEll_O
        ELSE 
@@ -194,6 +184,7 @@ MODULE Thresholding
        ELSE
           Potential=.FALSE.
        ENDIF
+       ! Spherical symmetry check
        IF(Ell+ExtraEll==0)THEN
           ! For S functions we can use tighter bounds (no halving of exponents)
           ScaledTau=Tau/(ABS(HGTF(1))+SMALL_DBL)
@@ -217,8 +208,7 @@ MODULE Thresholding
                    MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
                    MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
                    HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
-                   CramCo=MAX(CramCo,ABS(HGInEq))
-                   ! CramCo=CramCo+ABS(HGInEq)
+                   CramCo=CramCo+ABS(HGInEq)
                 ENDDO
              ENDDO       
           ENDDO
@@ -235,393 +225,56 @@ MODULE Thresholding
              R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
           ENDIF
        ENDIF
-     END FUNCTION Extent0
+     END FUNCTION Extent
 !====================================================================================================
 !    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau 
 !====================================================================================================
      FUNCTION PFunk(Zeta,Tau) RESULT(R)
-        REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Ec,R,BisR,DelR,X,CTest
+        REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Val,Ec,R,BisR,DelR,X,CTest
         INTEGER       :: J,K              
+        LOGICAL :: pp
 !---------------------------------------------------------------------- 
         SqZ=SQRT(Zeta)
-        NewTau=(Pi/Zeta)**(-1.5D0)*Tau
-        DelR=Erf_Switch/(Two*SqZ)
+        NewTau=Tau*(Zeta/Pi)**(1.5D0)
+        ! Quick check for max resolution of Erfc approx
+        IF(1D-13*SqZ/Erf_Switch>NewTau)THEN
+           R=Erf_Switch/SqZ
+           RETURN
+        ENDIF
+        !WRITE(*,*)'=-=========================================='
+        ! Ok, within resolution--do root finding...
+        DelR=Erf_Switch/SqZ
         BisR=Zero
-        ! Root finding 
-        DO K=1,1000
-           ! Half the step size
-           DelR=Half*DelR
+        DO K=1,100
            ! New midpoint
            R=BisR+DelR
            X=SqZ*R
            ! Compute Erfc[Sqrt(Zeta)*R]
-           IF(X>Erf_Switch)THEN
+           IF(X>=Erf_Switch)THEN
               Ec=Zero
            ELSE
               J=AINT(X*Erf_Grid)
               Ec=One-(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
-           ENDIF
+           ENDIF           
            Val=Ec/R
            CTest=(Val-NewTau)/Tau
-           IF(R<1.D-30)THEN
-              R=SMALL_DBL
-              RETURN
-           ELSEIF(ABS(CTest)<1D-8)THEN
-              RETURN
-           ELSEIF(DelR<Two*SMALL_DBL)THEN
-              WRITE(*,*)' Tau= ',Tau
-              WRITE(*,*)' Zeta = ',Zeta
-              WRITE(*,*)' R    = ',R
-              WRITE(*,*)' DelR = ',DelR
-              CALL Halt(' Faild in Extent of Overlap ')
+           !WRITE(*,33)R,DelR,X,CTest; 33 format(5(2x,D12.6))
+           IF(ABS(CTest)<1D-4)THEN
+              ! Converged
+              RETURN           
+           ELSEIF(DelR<1D-40)THEN
+              ! This is unacceptable
+              EXIT
            ENDIF
            ! If still to the left, increment bisection point
            IF(CTest>Zero)BisR=R
+           DelR=Half*DelR
         ENDDO
+        CALL Halt(' Failed to converge in PFunk: Tau = '//TRIM(DblToShrtChar(NewTau))//RTRN &
+                                           //' CTest = '//TRIM(DblToShrtChar(CTest))//RTRN &
+                                           //' Zeta = '//TRIM(DblToShrtChar(Zeta))//RTRN &
+                                           //' Ec = '//TRIM(DblToShrtChar(Ec))//RTRN &
+                                           //' dR = '//TRIM(DblToShrtChar(DelR))//RTRN &
+                                           //' SqZ*R = '//TRIM(DblToMedmChar(X)))
      END FUNCTION PFunk    
-!===================================================================================================
-!    Recursive bisection to determine largest extent for this distribution
-!    outside of which its contribution to the density and gradient is less than Tau
-!===================================================================================================
-     FUNCTION Extent1(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
-       INTEGER                         :: Ell,ExtraEll
-       REAL(DOUBLE)                    :: Zeta
-       REAL(DOUBLE),DIMENSION(:)       :: HGTF
-       REAL(DOUBLE),OPTIONAL           :: Tau_O
-       INTEGER,OPTIONAL                :: ExtraEll_O
-       LOGICAL,OPTIONAL                :: Potential_O
-       REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,HGPot
-       REAL(DOUBLE)                    :: Tau,FUN,F0,F1
-       INTEGER                         :: J,L,K,M,N,LMN,SN,LL
-       REAL(DOUBLE)                    :: ConvergeTo,RMIN,RMAX,R,RErr
-       LOGICAL                         :: Potential
-!
-       ConvergeTo=1D-8
-!
-       IF(PRESENT(ExtraEll_O))THEN
-          ExtraEll = ExtraEll_O
-       ELSE 
-          ExtraEll = 0
-       ENDIF
-!
-       IF(PRESENT(Potential_O)) THEN
-          Potential = Potential_O
-       ELSE
-          Potential = .FALSE.
-       ENDIF
-!
-       IF(PRESENT(Tau_O)) THEN
-          Tau=Tau_O
-       ELSE
-          Tau=Thresholds%Dist
-       ENDIF
-!      Take the spherical average of HGTF coefficients      
-
-       DO L=0,Ell
-          Co(L)=Zero
-          DO LMN=LBegin(L),LEnd(L)
-!             Co(L)=MAX(Co(L),ABS(HGTF(LMN)))
-             Co(L)=Co(L)+ABS(HGTF(LMN))
-          ENDDO
-       ENDDO
-!
-!      Compute extent of a Hermite Gaussian overlap
-!
-       IF(.NOT. Potential )THEN
-          RMIN = Zero
-          RMAX = SQRT(EXP_SWITCH/Zeta)
-!
-          F0 = Zero
-          DO L=ExtraELL,Ell+ExtraEll
-             F0 = F0 + Co(L-ExtraEll)*AsymHGTF(L,Zeta,RMIN)
-          ENDDO
-          IF(F0 < Zero) THEN
-             CALL MondoHalt(-100,'F0 < 0')
-          ENDIF
-          IF(F0 < Tau) THEN
-             R = Zero
-             RETURN
-          ENDIF
-!
-          F1 = Zero
-          DO L=ExtraELL,Ell+ExtraEll
-             F1 = F1 + Co(L-ExtraEll)*AsymHGTF(L,Zeta,RMAX)
-          ENDDO
-          IF(F1>Tau) THEN
-             R = RMAX
-             RETURN
-          ENDIF
-!
-          R = Half*(RMIN+RMAX)
-          DO J=1,200
-             FUN  = Zero
-             DO L=ExtraEll,Ell+ExtraEll             
-                FUN  = FUN +Co(L-ExtraEll)*AsymHGTF(L,Zeta,R)
-             ENDDO
-             FUN = FUN-Tau
-             IF(FUN < Zero) THEN
-                RMAX = R
-             ELSEIF(FUN > Zero) THEN
-                RMIN = R
-             ENDIF
-             RErr = ABS(R-Half*(RMIN+RMAX))
-             R = Half*(RMIN+RMAX)
-             IF(RErr < ConvergeTo) GOTO 100
-          ENDDO
-          CALL MondoHalt(-100,'Overlap did not converge in 200 iterations')
-100       CONTINUE
-!
-!      Do a Potential overlap
-!
-       ELSEIF( Potential ) THEN
-          RMIN = 1.D-14
-          RMAX = SQRT(GAMMA_SWITCH/Zeta)
-!
-          F0    = Zero
-          HGPot = AsymPot(Ell+ExtraEll,Zeta,RMIN)
-          DO L=ExtraELL,Ell+ExtraEll
-             F0 = F0 + Co(L-ExtraEll)*ABS(HGPot(L))
-          ENDDO
-          IF(F0 < Zero) THEN
-             CALL MondoHalt(-100,'F0 < 0')
-          ENDIF
-          IF(F0 < Tau) THEN
-             R = Zero
-             RETURN
-          ENDIF
-!
-          F1 = Zero
-          HGPot = AsymPot(Ell+ExtraEll,Zeta,RMAX)
-          DO L=ExtraELL,Ell+ExtraEll
-             F1 = F1 + Co(L-ExtraEll)*ABS(HGPot(L))
-          ENDDO
-          IF(F1>Tau) THEN
-             R = RMAX
-             RETURN
-          ENDIF
-!
-          R = Half*(RMIN+RMAX)
-          DO J=1,200
-             FUN  = Zero
-             HGPot = AsymPot(Ell+ExtraEll+1,Zeta,R)
-             DO L=ExtraELL,Ell+ExtraEll 
-                FUN  = FUN +Co(L-ExtraEll)*ABS(HGPot(L))
-             ENDDO
-             FUN = FUN-Tau
-             IF(FUN < Zero) THEN
-                RMAX = R
-             ELSEIF(FUN > Zero) THEN
-                RMIN = R
-             ENDIF
-             RErr = ABS(R-Half*(RMIN+RMAX))
-             R = Half*(RMIN+RMAX)
-             IF(RErr < ConvergeTo) GOTO 200
-          ENDDO
-          CALL MondoHalt(-100,'Potential Overlap did not converge in 200 iterations')
-200       CONTINUE                     
-       ENDIF
-     END FUNCTION Extent1
-!===================================================================================
-!     Recursive bisection to determine largest extent for this distribution, outside
-!     outside of which its contribution to the density and gradient is less than Tau
-!     Has the possible drawback of finding zeros (roots) in HG functions.  
-!===================================================================================
-      FUNCTION Extent2(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
-         INTEGER                         :: Ell
-         REAL(DOUBLE)                    :: Zeta
-         REAL(DOUBLE),OPTIONAL           :: Tau_O
-         REAL(DOUBLE),DIMENSION(:)       :: HGTF
-         INTEGER,OPTIONAL                :: ExtraEll_O
-         LOGICAL,OPTIONAL                :: Potential_O
-         REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,ErrR
-         REAL(DOUBLE),DIMENSION(0:HGEll, &
-                                0:HGEll) :: HGErr
-         REAL(DOUBLE),DIMENSION(0:20)    :: LambdaR
-         REAL(DOUBLE)                    :: R
-         INTEGER                         :: J,L,K,M,N,LMN,ExtraEll,LTot,n1,n2,j1
-         REAL(DOUBLE)                    :: ConvergeTo,Tau,R2,DelR,BisR,CTest, &
-                                            RhoR,dRho,MidRho,Xpt,TwoZ, &
-                                            Omega,RPE,RTE,T,upq
-         LOGICAL                         :: PotentialQ
-!----------------------------------------------------------------------------------
-         ConvergeTo=1D-8
-!
-         IF(PRESENT(ExtraEll_O))THEN
-            ExtraEll=ExtraEll_O
-         ELSE
-            ExtraEll=1
-         ENDIF
-
-         IF(PRESENT(Tau_O)) THEN
-            Tau=Tau_O
-         ELSE
-            Tau=Thresholds%Dist
-         ENDIF
-!        Take the spherical max of HGTF coefficients
-         DO L=0,Ell
-            Co(L)=Zero
-            DO LMN=LBegin(L),LEnd(L)
-               Co(L)=Co(L)+ABS(HGTF(LMN))
-            ENDDO
-         ENDDO
-!        Zero extent check
-         IF(SUM(Co(0:L))==Zero)THEN
-            R=Zero
-            RETURN
-         ENDIF
-!        Do straight overlap type extent
-         IF(.NOT.PRESENT(Potential_O))THEN
-            DelR=SQRT(EXP_SWITCH/Zeta)*4D0
-            BisR=Zero
-            DO J=1,200
-!              Half the step size
-               DelR=Half*DelR
-!              New midpoint
-               R=BisR+DelR
-!              Compute radial HGTF[R]
-               RhoR=Zero
-               dRho=Zero
-               R2=R*R
-               Xpt=EXP(-Zeta*R2)
-               TwoZ=Two*Zeta
-               LambdaR(0)=Xpt
-               LambdaR(1)=TwoZ*R*Xpt
-               DO L=2,Ell+ExtraEll
-                  LambdaR(L)=TwoZ*(R*LambdaR(L-1)-DBLE(L-1)*LambdaR(L-2))
-               ENDDO
-               DO L=0,Ell
-                  RhoR=RhoR+Co(L)*LambdaR(L)
-                  dRho=dRho+Co(L)*LambdaR(L+ExtraEll)
-               ENDDO
-               MidRho=MAX(ABS(dRho),ABS(RhoR))
-!              Convergence test
-               CTest=(MidRho-Tau)/Tau
-               IF(R<1.D-30)THEN
-                  R=Zero
-                  RETURN
-               ELSEIF(ABS(CTest)<ConvergeTo)THEN
-                  RETURN
-               ELSEIF(DelR<1.D-32)THEN
-                  RETURN
-               ENDIF
-!              If still to the left, increment bisection point
-               IF(CTest>Zero)BisR=R
-            ENDDO
-            CALL Halt(' Faild in Extent of Overlap ')
-          ELSE
-            RTE=Zeta*NuclearExpnt
-            RPE=Zeta+NuclearExpnt
-            Omega=RTE/RPE
-            Upq=TwoPi5x2/(RTE*SQRT(RPE)) &
-               *(NuclearExpnt/Pi)**(ThreeHalves) ! add on moment for delta function...
-            DelR=SQRT(GAMMA_SWITCH/Zeta)
-            LTot=Ell+ExtraEll
-            BisR=Zero
-            DO K=1,200
-!              Half the step size
-               DelR=Half*DelR
-!              New midpoint
-               R=BisR+DelR
-               T=Omega*R*R
-               CALL ErrInts(HGEll,LTot,ErrR,Omega,T)
-               DO J=0,LTot
-                  HGErr(0,J)=Upq*ErrR(J)
-               ENDDO
-               DO J=0,LTot-1
-                  J1=J+1
-                  HGErr(1,J)=HGErr(0,J1)*R
-               ENDDO
-               DO N=2,LTot
-                  N1=N-1
-                  N2=N-2
-                  DO J=0,LTot-N
-                     J1=J+1
-                     HGErr(N,J)=HGErr(N1,J1)*R+HGErr(N2,J1)*DBLE(N1)
-                  ENDDO
-               ENDDO
-               RhoR=Zero
-               dRho=Zero
-               DO L=0,Ell
-                  RhoR=RhoR+Co(L)*HGErr(L,0)
-                  dRho=dRho+Co(L)*HGErr(L+ExtraEll,0)
-               ENDDO
-               MidRho=MAX(ABS(dRho),ABS(RhoR))
-!              Convergence test
-               CTest=(MidRho-Tau)/Tau
-               IF(R<1.D-30)THEN
-                  R=Zero
-                  RETURN
-               ELSEIF(ABS(CTest)<ConvergeTo)THEN
-                  RETURN
-               ELSEIF(DelR<1.D-32)THEN
-                  RETURN
-               ENDIF
-!              If still to the left, increment bisection point
-               IF(CTest>Zero)BisR=R
-            ENDDO
-            CALL Halt(' Faild in Extent of Potential ')
-         ENDIF
-       END FUNCTION Extent2
-!===================================================================================
-!    Norm*Gamma[L/2+3/2,Zeta*R*R]
-!===================================================================================
-     FUNCTION AsymHGTF(L,Zeta,R)
-       INTEGER                      :: L,N,LL
-       REAL(DOUBLE)                 :: Zeta,R,AsymHGTF,Norm
-       REAL(DOUBLE),DIMENSION(0:16) :: NFactor = (/ 1.00000000000000000D0,&
-                              1.12837916709551257D0,2.00000000000000000D0,&
-                              4.51351666838205030D0,1.20000000000000000D1,&
-                              3.61081333470564024D1,1.20000000000000000D2,&
-                              4.33297600164676828D2,1.68000000000000000D3,&
-                              6.93276160263482925D3,3.02400000000000000D4,&
-                              1.38655232052696585D5,6.65280000000000000D5,&
-                              3.32772556926471804D6,1.72972800000000000D7,&
-                              9.31763159394121052D7,5.18918400000000000D8 /)
-       N    = (-1)**L
-       Norm = (Zeta**(Half*DBLE(L)))*NFactor(L)
-       LL   = (L+3)/2
-       IF(L == 0) THEN
-          AsymHGTF = EXP(-Zeta*R*R)
-       ELSE
-          IF(N == 1) THEN
-             AsymHGTF = Norm*GammaHalf(LL,Zeta*R*R)
-          ELSE
-             AsymHGTF = Norm*GammaOne(LL,Zeta*R*R)
-          ENDIF
-       ENDIF
-     END FUNCTION AsymHGTF
-!===================================================================================
-!
-!===================================================================================
-     FUNCTION AsymPot(L,Zeta,R)
-       INTEGER                                 :: L,J,N1,N2,N,J1
-       REAL(DOUBLE)                            :: Zeta,R
-       REAL(DOUBLE)                            :: Upq,T
-       REAL(DOUBLE),DIMENSION(0:HGEll)         :: ErrR,AsymPot
-       REAL(DOUBLE),DIMENSION(0:HGEll,0:HGEll) :: HGErr
-!---------------------------------------------------------------------------------- 
-       Upq=Two*Pi/Zeta
-       T=Zeta*R*R
-       CALL ErrInts(HGEll,L,ErrR,Zeta,T)
-       DO J=0,L
-          HGErr(0,J)=Upq*ErrR(J)
-       ENDDO
-       DO J=0,L-1
-          J1=J+1
-          HGErr(1,J)=HGErr(0,J1)*R
-       ENDDO
-       DO N=2,L
-          N1=N-1
-          N2=N-2
-          DO J=0,L-N
-             J1=J+1
-             HGErr(N,J)=HGErr(N1,J1)*R+HGErr(N2,J1)*DBLE(N1)
-          ENDDO
-       ENDDO
-       AsymPot=Zero
-       DO J=0,L
-          AsymPot(J) = HGErr(J,0)
-       ENDDO
-     END FUNCTION AsymPot
-
 END MODULE Thresholding
