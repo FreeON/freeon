@@ -36,7 +36,7 @@ PROGRAM ONX
   TYPE(IBuf)          :: IB        ! 2-e eval buffers
   TYPE(DSL)           :: SB        ! distribution pointers
   TYPE(IDrv)          :: Drv       ! VRR/contraction drivers
-  TYPE(INT_VECT)      :: NameBuf
+  TYPE(INT_VECT)      :: NameBuf,Stat
   TYPE(INT_RNK2)      :: SubInd
   TYPE(INT_RNK2)      :: BfnInd
 !--------------------------------------------------------------------------------
@@ -50,19 +50,38 @@ PROGRAM ONX
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
   INTEGER                :: iSwitch
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile,RestartHDF
   CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
+  IF(SCFActn=='Restart')THEN
+!    Get the old information
+     CALL Get(RestartHDF,'OldInfo')
+     CALL CloseHDF()
+     CALL OpenHDF(RestartHDF)
+     CALL New(Stat,3)
+     CALL Get(Stat,'current')
+     PrvCycl=TRIM(IntToChar(Stat%I(1)))
+     PrvBase=TRIM(IntToChar(Stat%I(2)))
+     PrvGeom=TRIM(IntToChar(Stat%I(3)))
+     CALL Get(BSp,Tag_O=PrvBase)
+     CALL Get(GMp,Tag_O=PrvGeom)
+     CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
+     CALL Get(OffS,'atoff',Tag_O=PrvBase)
+     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+     CALL CloseHDF()
+     CALL OpenHDF(InfFile)     
+  ELSE
+     CALL Get(BSp,Tag_O=PrvBase)
+     CALL Get(GMp,Tag_O=PrvGeom)
+     CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
+     CALL Get(OffS,'atoff',Tag_O=PrvBase)
+     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+  ENDIF
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
-  CALL Get(BSp,Tag_O=PrvBase)
-  CALL Get(GMp,Tag_O=PrvGeom)
   CALL New(NameBuf,NAtoms)
-  CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
-  CALL Get(OffS,'atoff',Tag_O=PrvBase)
-  CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
 !----------------------------------------------
 ! Get the Density Matrix
 !----------------------------------------------

@@ -36,11 +36,12 @@ PROGRAM MakeRho
   TYPE(ARGMT)               :: Args
   TYPE(HGRho)               :: Rho,Rho2
   TYPE(CMPoles)             :: MP,PrvMP
+  TYPE(INT_VECT)            :: Stat
   INTEGER                   :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                   :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL                   :: First
   REAL(DOUBLE)              :: DistThresh,RSumE,RSumN,RelRhoErr
-  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg1,Mssg2
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg1,Mssg2,RestartHDF
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
 ! Start up macro
@@ -60,6 +61,27 @@ PROGRAM MakeRho
      CALL Get(OffS,'atoff',PrvBase)
      CALL Get(NBasF,'nbasf',PrvBase)
      CALL Get(Dmat,TrixFile('D',Args,-1))
+  ELSEIF(SCFActn=='Restart')THEN
+!    Get the old information
+     CALL Get(RestartHDF,'OldInfo')
+     CALL CloseHDF()
+     CALL OpenHDF(RestartHDF)
+     CALL New(Stat,3)
+     CALL Get(Stat,'current')
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     CALL Get(BS,CurBase)
+     CALL Get(GM,CurGeom)
+     CALL Get(NExpt,'nexpt',CurBase)
+     CALL New_HGRho(Rho,(/NExpt,0,0/))
+     CALL Get(Rho%Expt,'dexpt',CurBase)
+     CALL Get(Rho%Lndx ,'lndex',CurBase)
+     CALL CloseHDF()
+     CALL OpenHDF(InfFile)     
+     CALL Get(Dmat,TrixFile('D',Args,0))
+!     WRITE(*,*)TRIM(TrixFile('D',Args,0))
+!     CALL PChkSum(DMat,'RestartDM',Prog,Unit_O=6)
   ELSE
 !    Get the current information
      CALL Get(BS,CurBase)
@@ -230,7 +252,7 @@ PROGRAM MakeRho
      CALL Put(MP,'Delta'//TRIM(SCFCycl))
   ELSE
      CALL Put_HGRho(Rho2,'Rho',Args,0) 
-     CALL Put(MP,SCFCycl)
+     CALL Put(MP,IntToChar(Current(1))) 
   ENDIF
   CALL PChkSum(Rho2,'Rho',Prog)
 ! Tidy up
