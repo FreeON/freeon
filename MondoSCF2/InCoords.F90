@@ -78,7 +78,7 @@ CONTAINS
          K=IntCs%Atoms(IntCoo,3) !!! Def plane
          L=IntCs%Atoms(IntCoo,4) !!! Def plane
          CALL OutP(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),&
-           IntCs%Active(IntCoo),BB_O=B%B(IntCoo,1:12))
+           TorsLinCrit,IntCs%Active(IntCoo),BB_O=B%B(IntCoo,1:12))
        ! write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
        !  B%B(IntCoo,1:12)*AngstromsToAu
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
@@ -214,7 +214,7 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE OutP(XI,XJ,XK,XL,Active,BB_O,Value_O)
+   SUBROUTINE OutP(XI,XJ,XK,XL,LinCrit,Active,BB_O,Value_O)
      !
      !  i is the end atom (atom wagged with respect to j-k-l plane).
      !  j is the apex atom (Atoms i, k and l are attached to j).
@@ -225,12 +225,13 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(1:3) :: C1,SMI,SMK,SML
      REAL(DOUBLE)          :: DJK,DJI,DJL,CosI,CosK,CosL
      REAL(DOUBLE)          :: SinSin,SinI,Dot,SinT,CosT,TanT,CosSin
-     REAL(DOUBLE)          :: SinJ
+     REAL(DOUBLE)          :: SinJ,Conv,LinCrit
      INTEGER               :: I,J
      REAL(DOUBLE),OPTIONAL :: BB_O(1:12),Value_O
      LOGICAL               :: Active
      !
      Active=.TRUE.
+     Conv=180.D0/PI
      RJI=XI-XJ
      RJK=XK-XJ
      RJL=XL-XJ
@@ -247,15 +248,18 @@ CONTAINS
      CosI=DOT_PRODUCT(RJK,RJL)
      CosK=DOT_PRODUCT(RJI,RJL)
      CosL=DOT_PRODUCT(RJI,RJK)
-     IF(ABS(CosI) > 0.99995D0) RETURN  !!!! GO TO 70
+     IF(ABS(180.D0-Conv*ACOS(CosI)) < LinCrit) THEN
+       Active=.FALSE.
+       RETURN  
+     ENDIF
      SinSin=One-CosI*CosI
      SinI=SQRT(SinSin)
      CALL CROSS_PRODUCT(RJK,RJL,C1)
-     Dot=DOT_PRODUCT(RJI,C1) ! this may be +-
-     IF(ABS(SinI)<1.D-4) THEN
+     IF(SinI<1.D-4) THEN
        Active=.FALSE.
        RETURN
      ENDIF
+     Dot=DOT_PRODUCT(RJI,C1) ! this may be +-
      SinT=Dot/SinI
      IF(ABS(SinT)>0.99995D0) THEN
        Active=.FALSE.
@@ -541,11 +545,6 @@ CONTAINS
      ! tidy up
      !
      CALL Delete(TorsionIJKL)
-     !
-     ! Check for bending - lin.bending transions
-     ! also for long range torsions!
-     !
-     CALL ChkBendToLinB(IntCs,NIntC,XYZ,AtNum,GCoordCtrl,TOPS)
      !
      CALL Delete(AtmBTot)
      CALL Delete(AtmBCov)
@@ -856,6 +855,11 @@ CONTAINS
      !
      IntCs%Active=.TRUE.
      !
+     ! Check for bending - lin.bending transions
+     ! also for long range torsions!
+     !
+     CALL ChkBendToLinB(IntCs,NIntC,XYZ,AtNum%I,CtrlCoord,TOPS)
+     !
      ! Count number of different internal coord types
      !
      NStreGeOp=0;NBendGeOp=0;NLinBGeOp=0;NOutPGeOp=0;NTorsGeOp=0
@@ -987,7 +991,7 @@ CONTAINS
          !
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
          CALL OUTP(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I4),&
-           XYZ(1:3,I3),IntCs%Active(I),Value_O=IntCs%Value(I))
+           XYZ(1:3,I3),TorsLinCrit,IntCs%Active(I),Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:5)=='CARTX') THEN
          IntCs%Value(I)=XYZ(1,I1)
@@ -1912,7 +1916,7 @@ CONTAINS
      TYPE(INT_VECT)              :: LinAtom,MarkLinb,MarkLongR
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER,DIMENSION(:)        :: AtNum
-     REAL(DOUBLE)                :: Value,Conv
+     REAL(DOUBLE)                :: Value,Value2,Conv
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
      INTEGER                     :: I,J,K,L,NatmsLoc
      TYPE(INT_RNK2)              :: LinBBridge

@@ -765,16 +765,15 @@ CONTAINS
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
-        !CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-        !              IntCs,AtNum,iGEO,XYZ)
-        !CALL CutOffDispl(Displ%D,IntCs)
-        !CALL RedundancyOff(Displ%D,SCRPath,Print)
-         CALL PrepBiSect(Grad%D,IntCs,Displ)
-        !CALL RedundancyOff(Displ%D,SCRPath,Print)
+         CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+                       IntCs,AtNum,iGEO,XYZ)
+         CALL CutOffDispl(Displ%D,IntCs)
+         CALL RedundancyOff(Displ%D,SCRPath,Print)
+       ! CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
          CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
            GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
-           HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
+           GOpt%GConvCrit,HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
            Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
            PWD_O=PWDPath)
         !CALL RedundancyOff(Displ%D,SCRPath,Print)
@@ -1357,8 +1356,8 @@ CONTAINS
            iGEO>=GOpt%GDIIS%Init) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D, &
            GOpt%Constr,GOpt%BackTrf,GOpt%GrdTrf, &
-           GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
-           iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
+           GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,GOpt%GConvCrit, &
+           Nams%HFile,iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
            WRITE(*,200)
@@ -1656,20 +1655,25 @@ CONTAINS
      Tol=1.D-8
      !
      DStre=0.010D0 ! in atomic units 
-     DAngle=5.D0*Conv ! in radians      
-     DTors=5.D0*Conv
-     DOutP=5.D0*Conv
+     DAngle=7.D0*Conv ! in radians      
+     DTors=7.D0*Conv
+     DOutP=7.D0*Conv
      DO I=1,NIntC
        IF(IntCs%Def(I)(1:4)=='STRE') THEN
-         D=RANDOM_DBL((/-DStre,DStre/))
+       ! D=RANDOM_DBL((/-DStre,DStre/))
+         D=DStre
        ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
-         D=RANDOM_DBL((/-DTors,DTors/))
+       ! D=RANDOM_DBL((/-DTors,DTors/))
+         D=DTors
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
-         D=RANDOM_DBL((/-DOutP,DOutP/))
+       ! D=RANDOM_DBL((/-DOutP,DOutP/))
+         D=DOutP
        ELSE IF(HasAngle(IntCs%Def(I))) THEN
-         D=RANDOM_DBL((/-DAngle,DAngle/))
+       ! D=RANDOM_DBL((/-DAngle,DAngle/))
+         D=DAngle
        ELSE
-         D=RANDOM_DBL((/-DStre,DStre/))
+       ! D=RANDOM_DBL((/-DStre,DStre/))
+         D=DStre
        ENDIF
        IF(ABS(Grad(I))>Tol) THEN
          Displ%D(I)=SIGN(ABS(D),-Grad(I))
