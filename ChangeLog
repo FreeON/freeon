@@ -1,3 +1,82 @@
+2002-06-14 13:56  mchalla
+
+	* Dynamo/dynamo.F90, MondoMods/Macros.F90, MondoMods/Mechanics.F90,
+	MondoMods/SpecFun.F90, MondoSCF/ParseInput.F90: Began fighting
+	against QM/MM lack of #ifdef MMech, but then gave up when I hit
+	MakeRho, which appears now intractable.  Opting instead to hard
+	wire QMOnly etc in Mechanics.F90 in the case that MMech is not
+	defined.
+
+2002-06-14 13:53  mchalla
+
+	* ONX/NONX/MemInit_PBC_1.F90, QCTC/QCTC.F90: Removed onerous print
+	statment.
+
+2002-06-14 12:26  mchalla
+
+	* Docs/Bib/mondo.bib: Expanded bib file substatially.
+
+2002-06-14 12:26  mchalla
+
+	* MondoMods/: MMA/LookUpTables/GammaAssymptotics.Inc,
+	MMA/LookUpTables/GammaFunctions.m, SpecFun.F90: Added assymptotic
+	constants to allow entire domain.
+
+2002-06-14 12:25  mchalla
+
+	* ONX/VRR/Int1111.F90: Fixed indexing bug.
+
+2002-06-14 10:06  nemeth
+
+	* Dynamo/dynamo.F90: New, compact routine calculates Coulomb and LJ
+	exclusion energies and gradients, LJ full energy calculation
+	modified, LJ gradients tested, seem to be OK.
+
+2002-06-14 10:04  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Calculation of LJ full and exclusion and
+	Coulomb exclusion energies, and the corresponding gradients is done
+	now by a new compact routine.
+
+2002-06-14 10:02  nemeth
+
+	* MondoSCF/ParseInput.F90: Some test output printing changed in
+	parsemm.
+
+2002-06-12 21:06  nemeth
+
+	* SCFeqs/SCFStatus.F90: Printout of SCF and and total energies
+	changed.
+
+2002-06-12 19:46  nemeth
+
+	* Dynamo/dynamo.F90: Gradients added to full LJ terms. To be added
+	for exclusion as well.	aVS:
+	-------------------------------------------------------------------
+	---
+
+2002-06-12 13:15  mchalla
+
+	* MondoMods/Functionals.F90: Added http site for functionals
+	repository.
+
+2002-06-12 10:55  mchalla
+
+	* Makefile: Removed the -r from purging Libs directory, to avoid
+	wacking cvs dir.
+
+2002-06-12 10:53  mchalla
+
+	* MondoMods/Macros.F90, MondoMods/Makefile,
+	MondoMods/Mechanics.F90, MondoMods/Thresholding.F90,
+	MondoSCF/MondoSCF.F90: Added Mechanics module which will contain
+	centralized routines and globals for combinined QM/MM calculations
+	as well as for pure MM calcs.
+
+2002-06-12 09:41  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-06-11 20:44  nemeth
 
 	* OneE/MakeRho.F90: SetMMThresholds is not called directly, only
@@ -61,6 +140,9 @@
 	* Dynamo/dynamo.F90: O(N) Lennard Jones energy evaluation (with
 	distance cutoff) added.
 
+2002-06-11 13:01  mchalla
+
+	* ChangeLog: New ChangeLog!
 
 2002-06-11 12:12  nemeth
 
@@ -651,6 +733,9 @@
 	Docs/PBC_paper/GaussianPapers.bib, MondoSCF/DrvFrcs.F90: [no log
 	message]
 
+2002-03-05 13:52  mchalla
+
+	* ChangeLog: [no log message]
 
 2002-03-05 13:51  mchalla
 
@@ -664,6 +749,9 @@
 	* Examples/: lizardite-1T_332.inp, lizardite-1T_332d.inp: Example
 	input files of large 2-d periodic jobs.
 
+2002-02-28 13:35  mchalla
+
+	* ChangeLog: [no log message]
 
 2002-02-28 13:30  mchalla
 
@@ -766,6 +854,10 @@
 	* Includes/Suffixes: a trivial bug for the suffix rule for
 	Fortran77 code is fixed.
 
+2002-02-11 12:10  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-02-11 11:58  mchalla
 
 	* MondoMods/Thresholding.F90: Fixed bug in LineBoxOverlap for
@@ -830,6 +922,10 @@
 	* Docs/BWR_paper/: anneal_s.eps, compare_all.eps, hilbert_s.eps,
 	morton_s.eps: add a paper bwr.tex to the repository.
 
+2002-02-01 13:51  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-02-01 13:18  mchalla
 
 	* MondoSCF/ParseInput.F90: Added Karoly to the author list.  Good
@@ -840,6 +936,9 @@
 	* MondoMods/LinAlg.F90: Fixed bug with uninitialized value of N in
 	SetToI.  Silly me.
 
+2002-02-01 11:55  mchalla
+
+	* ChangeLog: [no log message]
 
 2002-01-30 13:40  tymczak
 
@@ -1076,6 +1175,9 @@
 	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
 	This needs a change in MemMan.F90 in MondoMods.
 
+2001-12-14 15:33  mchalla
+
+	* ChangeLog: [no log message]
 
 2001-12-14 15:30  mchalla
 
@@ -1122,6 +1224,10 @@
 	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
 	with the array dimensions in the 2-e code.
 
+2001-12-10 11:57  mchalla
+
+	* ChangeLog: [no log message]
+
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -1138,6 +1244,10 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
+
+2001-12-07 12:17  mchalla
+
+	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
