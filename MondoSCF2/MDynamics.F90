@@ -266,11 +266,11 @@ MODULE MDynamics
                         Carts0%D(1:3,iATS,iCLONE),   &
                         C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)
        ENDDO
-!!$       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
-!!$          WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
-!!$                        Carts0%D(1:3,iATS,iCLONE)/AngstromsToAU,   &
-!!$                        C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)/AngstromsToAU
-!!$       ENDDO
+       DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
+          WRITE(Out,99) TRIM(C%Geos%Clone(iCLONE)%AtNam%C(iATS)),  &
+                        Carts0%D(1:3,iATS,iCLONE)/AngstromsToAU,   &
+                        C%Geos%Clone(iCLONE)%Velocity%D(1:3,iATS)/AngstromsToAU
+       ENDDO
        CLOSE(Out)
     ENDDO
 97  FORMAT(a128)
