@@ -2333,7 +2333,6 @@ MODULE ParseInPut
 !
       END SUBROUTINE ParseThresholds
 !----------------------------------------------------------
-#ifdef MMech
       SUBROUTINE ParseIntCoo(Ctrl)
 !
 ! This subroutine parses the inPut file for
@@ -2564,7 +2563,6 @@ MODULE ParseInPut
       CLOSE(Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseIntCoo
-#endif
 !
 !-----------------------------------------------------------------------
 !
