@@ -215,7 +215,7 @@ PROGRAM MakeRho
 #endif
 #ifdef PERIODIC 
   !  Fold the Distributions back into the Cell
-  CALL Fold_Rho(GM,Rho)
+!   CALL Fold_Rho(GM,Rho)
 #endif
   ! Prune negligible distributions from the electronic density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
@@ -326,9 +326,9 @@ PROGRAM MakeRho
   ! Check error
   IF(RelRhoErr>Thresholds%Dist*5.D3.AND.SCFActn/='NumForceEvaluation')THEN
      IF(SCFActn=='Restart')THEN
-        CALL Warn('In MakeRho, relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)))
+        CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)))
      ELSE
-        CALL Halt('In MakeRho, relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
+        CALL Halt(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
              //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
              //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
      ENDIF
