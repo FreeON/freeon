@@ -74,12 +74,15 @@ MODULE DrvFrcs
 !
 !========================================================================================
     SUBROUTINE NextMDGeometry(Ctrl)
-      TYPE(SCFControls)     :: Ctrl
-      INTEGER               :: ICyc,IBas,IGeo,AtA,A1
-      TYPE(CRDS)            :: GM,GMOLD,GMNEW
-      TYPE(DBL_VECT)        :: Frc
-      REAL(DOUBLE)          :: DELT,DELT2,D1MASS,D2MASS,E_MD_KIN,E_TOT_EL,VSCALE
-      CHARACTER(LEN=50)     :: MDFile
+      TYPE(SCFControls)            :: Ctrl
+      INTEGER                      :: ICyc,IBas,IGeo,AtA,A1,I,J,K
+      TYPE(CRDS)                   :: GM,GMOLD,GMNEW
+      TYPE(DBL_VECT)               :: Frc
+      REAL(DOUBLE)                 :: DELT,DELT2,D1MASS,D2MASS,E_MD_KIN,E_TOT_EL,VSCALE
+      REAL(DOUBLE)                 :: MSS,X,Y,Z,VX,VY,VZ,AngM_X,AngM_Y,AngM_Z
+      REAL(DOUBLE)                 :: RX,RY,RZ,MTOT,Volume
+      REAL(DOUBLE),DIMENSION(3,3)  :: PTensor
+      CHARACTER(LEN=50)            :: MDFile
 !
       ICyc=Ctrl%Current(1)
       IBas=Ctrl%Current(2)
@@ -92,7 +95,6 @@ MODULE DrvFrcs
       DELT2 = DELT*DELT
       CALL New(Frc,3*NAtoms)
 !
-      E_MD_KIN = Zero
       IF(IGeo==1) THEN
          CALL OpenHDF(InfFile)
          CALL Get(GM     ,Tag_O=IntToChar(IGeo))  
@@ -115,9 +117,6 @@ MODULE DrvFrcs
             GMNEW%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
             GMNEW%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
             GMNEW%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
-!
-            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
-!
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
             CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
@@ -150,9 +149,6 @@ MODULE DrvFrcs
             GMNEW%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
             GMNEW%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
             GMNEW%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
-!
-            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
-!
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
             CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
@@ -175,9 +171,6 @@ MODULE DrvFrcs
             GM%Vects%D(1,AtA)=VSCALE*GM%Vects%D(1,AtA)       
             GM%Vects%D(2,AtA)=VSCALE*GM%Vects%D(2,AtA)
             GM%Vects%D(3,AtA)=VSCALE*GM%Vects%D(3,AtA)
-!
-            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
-!
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
             CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
@@ -190,8 +183,78 @@ MODULE DrvFrcs
       CALL Put(GMNEW  ,Tag_O=IntToChar(IGeo+1))
       CALL CloseHDF()
       CALL Delete(Frc)
+
 !
-!     Compile Statisics and Store thr Energies
+!     Calculate Center of Mass
+!
+      RX   = Zero
+      RY   = Zero
+      RZ   = Zero
+      MTOT = Zero
+      DO AtA=1,NAtoms
+         RX   = RX   + GM%AtMss%D(AtA)*GM%Carts%D(1,AtA)
+         RY   = RY   + GM%AtMss%D(AtA)*GM%Carts%D(2,AtA)
+         RZ   = RZ   + GM%AtMss%D(AtA)*GM%Carts%D(3,AtA)
+         MTOT = MTOT + GM%AtMss%D(AtA)
+      ENDDO
+      RX = RX/MTOT
+      RY = RY/MTOT
+      RZ = RZ/MTOT
+!
+!     Calculate Angular Momentum and Kinectic Energy
+!
+      E_MD_KIN = Zero
+      AngM_X = Zero
+      AngM_Y = Zero
+      AngM_Z = Zero
+      DO AtA=1,NAtoms
+         X   = GM%Carts%D(1,AtA)-RX
+         Y   = GM%Carts%D(2,AtA)-RY
+         Z   = GM%Carts%D(3,AtA)-RZ
+         VX  = GM%Vects%D(1,AtA)
+         VY  = GM%Vects%D(2,AtA)
+         VZ  = GM%Vects%D(3,AtA)
+         MSS = GM%AtMss%D(AtA)
+         E_MD_KIN = E_MD_KIN+Half*MSS*(VX*VX+VY*VY+VZ*VZ)
+         AngM_X = AngM_X+MSS*(Y*VZ-Z*VY)
+         AngM_Y = AngM_Y+MSS*(Z*VX-X*VZ)
+         AngM_Z = AngM_Z+MSS*(X*VY-Y*VX)
+      ENDDO
+#ifdef PERIODIC
+!
+!     Calculate the Presure tensor (Need Work of 1 & 2 dim)
+!
+      PTensor = Zero 
+!
+      Volume = One
+      DO I=1,3;IF(GM%AutoW(I)) Volume = Volume*GM%BoxShape%D(I,I);ENDDO
+
+
+      DO AtA=1,NAtoms
+         A1  = 3*(AtA-1)+1
+         MSS = GM%AtMss%D(AtA)
+         DO I=1,3
+            DO J=1,3     
+               IF(GM%AutoW(I) .AND. GM%AutoW(J) ) THEN
+                  PTensor(I,J) = PTensor(I,J) + MSS*GM%Vects%D(I,AtA)*GM%Vects%D(J,AtA) &
+                                              + GM%Carts%D(I,AtA)*Frc%D(A1+J-1)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      PTensor = PTensor/Volume
+!
+!     Store the Pressure Tensor
+!
+      MDFile   = 'MDPTensor_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
+      OPEN(UNIT=30,FILE=MDFile,POSITION='APPEND',STATUS='UNKNOWN')
+      WRITE(30,11) IGeo
+      WRITE(30,12) PTensor(1,1),PTensor(1,2),PTensor(1,3)
+      WRITE(30,12) PTensor(2,1),PTensor(2,2),PTensor(2,3)
+      WRITE(30,12) PTensor(3,1),PTensor(3,2),PTensor(3,3)
+#endif
+!
+!     Store the Energies and Angular Momentum
 !
       CALL OpenHDF(InfFile)
       CALL Get(E_TOT_EL,'E_total',Tag_O=IntToChar(ICyc))
@@ -199,13 +262,11 @@ MODULE DrvFrcs
 !
       MDFile   = 'MDEnergy_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
       OPEN(UNIT=30,FILE=MDFile,POSITION='APPEND',STATUS='UNKNOWN')
-      WRITE(30,10) IGeo,E_MD_KIN,E_TOT_EL,E_MD_KIN+E_TOT_EL
+      WRITE(30,10) IGeo,E_MD_KIN,E_TOT_EL,E_MD_KIN+E_TOT_EL,AngM_X,AngM_Y,AngM_Z
       CLOSE(30)
-10    FORMAT(2X,I6,2X,F22.16,2X,F22.16,2X,F22.16)
-!
-!      WRITE(*,*) 'E_MD_KIN = ',E_MD_KIN
-!      WRITE(*,*) 'E_TOT_EL = ',E_TOT_EL
-!      WRITE(*,*) 'E_TOTAL  = ',E_MD_KIN+E_TOT_EL
+10    FORMAT(2X,I6,2X,F22.16,2X,F22.16,2X,F22.16,4X,F14.8,2X,F14.8,2X,F14.8)
+11    FORMAT(2X,I6)
+12    FORMAT(2X,F22.16,2X,F22.16,2X,F22.16)
 !
     END SUBROUTINE NextMDGeometry
 !========================================================================================
