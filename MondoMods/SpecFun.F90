@@ -1,110 +1,116 @@
 !    SPECIAL (AND NOT SO-SPECIAL) FUNCTIONS
 !    Authors: Matt Challacombe and C.J. Tymczak
 !==============================================================================
+MODULE SpecFunMesh
+   USE DerivedTypes
+   INCLUDE "GammaGrid.Inc"
+   INCLUDE "GammaDimensions.Inc"
+END MODULE SpecFunMesh
+
 MODULE GammaF0
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF0
-   INCLUDE "GammaDimensions.Inc"
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F0_0,F0_1,F0_2,F0_3,F0_4
    INCLUDE 'F0.Inc'
 END MODULE 
 
 MODULE GammaF1
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF1
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F1_0,F1_1,F1_2,F1_3,F1_4
    INCLUDE 'F1.Inc'
 END MODULE 
 
 MODULE GammaF2
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF2
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F2_0,F2_1,F2_2,F2_3,F2_4
    INCLUDE 'F2.Inc'
 END MODULE 
 
 MODULE GammaF3
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF3
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F3_0,F3_1,F3_2,F3_3,F3_4
    INCLUDE 'F3.Inc'
 END MODULE 
 
 MODULE GammaF4
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF4
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F4_0,F4_1,F4_2,F4_3,F4_4
    INCLUDE 'F4.Inc'
 END MODULE 
 
 MODULE GammaF5
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF5
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F5_0,F5_1,F5_2,F5_3,F5_4
    INCLUDE 'F5.Inc'
 END MODULE 
 
 MODULE GammaF6
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF6
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F6_0,F6_1,F6_2,F6_3,F6_4
    INCLUDE 'F6.Inc'
 END MODULE 
 
 MODULE GammaF7
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF7
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F7_0,F7_1,F7_2,F7_3,F7_4
    INCLUDE 'F7.Inc'
 END MODULE 
 
 MODULE GammaF8
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF8
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F8_0,F8_1,F8_2,F8_3,F8_4
    INCLUDE 'F8.Inc'
 END MODULE 
 
 MODULE GammaF9
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF9
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F9_0,F9_1,F9_2,F9_3,F9_4
    INCLUDE 'F9.Inc'
 END MODULE 
 
 MODULE GammaF10
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF10
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F10_0,F10_1,F10_2,F10_3,F10_4
    INCLUDE 'F10.Inc'
 END MODULE 
 
 MODULE GammaF11
    USE DerivedTypes
+   USE SpecFunMesh
    IMPLICIT NONE
    INTEGER :: IF11
-   INCLUDE 'GammaDimensions.Inc'
    REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F11_0,F11_1,F11_2,F11_3,F11_4
    INCLUDE 'F11.Inc'
 END MODULE 
@@ -202,7 +208,6 @@ MODULE GammaFunctions
    USE ErfFunk
    USE ProcessControl
    IMPLICIT NONE
-   INCLUDE "GammaGrid.Inc"
    CONTAINS
       FUNCTION GammaF(M,T)   
          INTEGER,      INTENT(IN) :: M

@@ -1,6 +1,7 @@
 SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   USE DerivedTypes
   USE GlobalScalars
+  USE GammaF0
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
@@ -23,7 +24,7 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  INTEGER       :: I,J,K,M
+  INTEGER       :: I,J,K,MG
   INTEGER       :: I0,I1
 
   IF(N.EQ.0) RETURN
@@ -47,11 +48,9 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         Up   = PrmBufB(5,K)
         r1xZpE = 1.0D0/(Zeta+Eta)
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
-        IF (T1<IB%Switch) THEN
-          M=INT(T1*IB%Grid)
-          T2=T1*T1
-          T3=T2*T1
-          R1=IB%GT%D(0,M)+T1*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
+        IF (T1<Gamma_Switch)THEN
+          MG=AINT(T1*Gamma_Grid)
+          R1=F0_0(J)+T1*(F0_1(MG)+T1*(F0_2(MG)+T1*(F0_3(MG)+T1*F0_4(MG))))
         ELSE
           R1=IB%GammaA%D(1)/DSQRT(T1)
         ENDIF

@@ -2,6 +2,8 @@ SUBROUTINE Int6221(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
+  USE GammaF4
+  USE InvExp
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
@@ -24,13 +26,13 @@ SUBROUTINE Int6221(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   REAL(DOUBLE)  :: PAx,PAy,PAz,PQx,PQy,PQz
   REAL(DOUBLE)  :: QBx,QBy,QBz,WQx,WQy,WQz
   REAL(DOUBLE)  :: Wx,Wy,Wz,WPx,WPy,WPz
-  REAL(DOUBLE)  :: T1,T2,T3,TwoT
+  REAL(DOUBLE)  :: T1,T2,T3,T4,TwoT
   REAL(DOUBLE)  :: R1,R2,R3,R4,R5,G0,G1,G2,G3,G4,ET
   REAL(DOUBLE)  :: Ts0,Ts1,r1xE,r1x2E,rpxE,r1x2ZE
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  INTEGER       :: I,J,K,M,l
+  INTEGER       :: I,J,K,ME,MG,l
   INTEGER       :: I0,I1,I2
 
   IF(N.EQ.0) RETURN
@@ -98,13 +100,15 @@ SUBROUTINE Int6221(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         PQz = Pz-Qz
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
 
-        IF (T1<IB%Switch) THEN
-          M=INT(T1*IB%Grid)
+        IF (T1<Gamma_Switch)THEN
+          MG=AINT(T1*Gamma_Grid)
+          ME=AINT(T1*Exp_Grid)
           T2=T1*T1
           T3=T2*T1
+          T4=T2*T2
           TwoT=2.0D0*T1
-          ET=IB%ET%D(0,M)+T1*IB%ET%D(1,M)+T2*IB%ET%D(2,M)+T3*IB%ET%D(3,M)
-          G4=IB%GT%D(0,M)+T1*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
+          ET=Exp_0(ME)+T1*Exp_1(ME)+T2*Exp_2(ME)+T3*Exp_3(ME)+T4*Exp_4(ME)
+          G4=F4_0(MG) +T1*F4_1(MG) +T2*F4_2(MG) +T3*F4_3(MG) +T4*F4_4(MG)
           G3=.142857142857143D+00*(TwoT*G4+ET)
           G2=.200000000000000D+00*(TwoT*G3+ET)
           G1=.333333333333333D+00*(TwoT*G2+ET)

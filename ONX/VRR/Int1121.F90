@@ -2,6 +2,8 @@ SUBROUTINE Int1121(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
+  USE GammaF1
+  USE GammaF0
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Distribution buffer stuff
@@ -24,12 +26,12 @@ SUBROUTINE Int1121(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
   REAL(DOUBLE)  :: PAx,PAy,PAz,PQx,PQy,PQz
   REAL(DOUBLE)  :: QBx,QBy,QBz,WQx,WQy,WQz
   REAL(DOUBLE)  :: Wx,Wy,Wz,WPx,WPy,WPz
-  REAL(DOUBLE)  :: T1,T2,T3
+  REAL(DOUBLE)  :: T1,T2,T3,T4
   REAL(DOUBLE)  :: R1,R2,G0,G1,ET
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
-  INTEGER       :: I,J,K,M
+  INTEGER       :: I,J,K,ME,MG
   INTEGER       :: I0,I1,I2
 
   IF(N.EQ.0) RETURN
@@ -75,13 +77,13 @@ SUBROUTINE Int1121(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         PQz = Pz - Qz
 
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
-        IF (T1<IB%Switch) THEN
-          M=INT(T1*IB%Grid)
+        IF (T1<Gamma_Switch)THEN
+          MG=AINT(T1*Gamma_Grid)
           T2=T1*T1
           T3=T2*T1
-          ET=IB%ET%D(0,M)+T1*IB%ET%D(1,M)+T2*IB%ET%D(2,M)+T3*IB%ET%D(3,M)
-          G1=IB%GT%D(0,M)+T1*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
-          G0=2.0D0*T1*G1+ET
+          T4=T2*T2
+          G1=F1_0(MG) +T1*F1_1(MG) +T2*F1_2(MG) +T3*F1_3(MG) +T4*F1_4(MG)
+          G0=F0_0(MG) +T1*F0_1(MG) +T2*F0_2(MG) +T3*F0_3(MG) +T4*F0_4(MG)
           R1=Rkk*G0
           R2=Rkk*G1
         ELSE
@@ -147,13 +149,13 @@ SUBROUTINE Int1121(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         PQz = Pz - Qz
 
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
-        IF (T1<IB%Switch) THEN
-          M=INT(T1*IB%Grid)
+        IF (T1<Gamma_Switch)THEN
+          MG=AINT(T1*Gamma_Grid)
           T2=T1*T1
           T3=T2*T1
-          ET=IB%ET%D(0,M)+T1*IB%ET%D(1,M)+T2*IB%ET%D(2,M)+T3*IB%ET%D(3,M)
-          G1=IB%GT%D(0,M)+T1*IB%GT%D(1,M)+T2*IB%GT%D(2,M)+T3*IB%GT%D(3,M)
-          G0=2.0D0*T1*G1+ET
+          T4=T2*T2
+          G1=F1_0(MG) +T1*F1_1(MG) +T2*F1_2(MG) +T3*F1_3(MG) +T4*F1_4(MG)
+          G0=F0_0(MG) +T1*F0_1(MG) +T2*F0_2(MG) +T3*F0_3(MG) +T4*F0_4(MG)
           R1=Rkk*G0
           R2=Rkk*G1
         ELSE
