@@ -7,6 +7,7 @@ MODULE PunchHDF
   USE PrettyPrint
   USE GlobalScalars
   USE ControlStructures
+  USE InCoords
   IMPLICIT NONE
 CONTAINS
   !==============================================================================
@@ -170,6 +171,82 @@ CONTAINS
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE GDIISArch(Nams,iCLONE,XYZ_O,Vect_O,Tag_O)
+     TYPE(FileNames)                      :: Nams
+     INTEGER                              :: iCLONE
+     INTEGER                              :: IGeom,NCart
+     INTEGER                              :: NatmsLoc,J,I
+     REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O 
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL   :: Vect_O
+     CHARACTER(LEN=*),OPTIONAL            :: Tag_O
+     TYPE(DBL_RNK2)                       :: XYZ 
+     TYPE(DBL_VECT)                       :: AuxVect
+     TYPE(DBL_VECT)                       :: Vect
+     INTEGER                              :: GDIISMemory
+     INTEGER                              :: SRMemory
+     INTEGER                              :: RefMemory
+     INTEGER                              :: CartGradMemory
+     INTEGER                              :: IntGradMemory
+     INTEGER                              :: HDFFileID
+     !
+     HDFFileID=OpenHDF(Nams%HFile)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     ! Increment GDIISMemory
+     !
+     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='SR') THEN
+       CALL Get(SrMemory,'SRMemory')
+       SRMemory=SRMemory+1
+       IGeom=SRMemory
+       CALL Put(SRMemory,'SRMemory')
+     ENDIF
+     !
+     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='Ref') THEN
+       CALL Get(RefMemory,'RefMemory')
+       RefMemory=RefMemory+1
+       IGeom=RefMemory
+       CALL Put(RefMemory,'RefMemory')
+     ENDIF
+     !
+     IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='CartGrad') THEN
+       CALL Get(CartGradMemory,'CartGradMemory')
+       CartGradMemory=CartGradMemory+1
+       IGeom=CartGradMemory
+       CALL Put(CartGradMemory,'CartGradMemory')
+     ENDIF
+     !
+     IF(PRESENT(XYZ_O)) THEN
+       NatmsLoc=SIZE(XYZ_O,2)
+       NCart=3*NatmsLoc
+       !
+       ! Put Geometry of simple relaxation set into HDF, for GDIIS.
+       !
+       CALL New(AuxVect,NCart)
+         CALL CartRNK2ToCartRNK1(AuxVect%D,XYZ_O)
+         CALL Put(AuxVect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+       CALL Delete(AuxVect)
+       !
+     ELSE IF(PRESENT(Vect_O)) THEN
+       !
+       NCart=SIZE(Vect_O)
+       CALL New(Vect,NCart)
+       Vect%D=Vect_O
+         CALL Put(Vect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
+       CALL Delete(Vect)
+     ELSE
+       CALL Halt('No input coordinates in GDIISArch')
+     ENDIF
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+   END SUBROUTINE GDIISArch
+!
+!---------------------------------------------------------------------
+!
 !==============================================================================
 ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
 !==============================================================================
