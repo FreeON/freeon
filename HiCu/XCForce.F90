@@ -70,14 +70,11 @@ PROGRAM XCForce
   CALL ParaRhoToTree()
   CALL ParaGridGen()
 ! Redue the Energy to reflect a more accurate calculation of Exc
-  IF(MyID==ROOT) THEN
-     CALL Get(Exc_old, 'Exc')
-     CALL Get(Etot_old,'Etot')
-!
-     Etot = Etot_old-Exc_old+TotExc
-     CALL Put(TotExc, 'Exc')
-     CALL Put(Etot,'Etot')
-  ENDIF
+  CALL Get(Exc_old, 'Exc')
+  CALL Get(Etot_old,'Etot')
+  Etot = Etot_old-Exc_old+TotExc
+  CALL Put(TotExc, 'Exc')
+  CALL Put(Etot,'Etot')
 #else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
