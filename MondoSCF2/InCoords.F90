@@ -233,11 +233,11 @@ CONTAINS
      !
      ! Clean BL for fixed lattice orientation
      !
-     DO IInt=1,IntCs%N
-       B%BL%D(IInt,2)=Zero
-       B%BL%D(IInt,3)=Zero
-       B%BL%D(IInt,6)=Zero
-     ENDDO
+   ! DO IInt=1,IntCs%N
+   !   B%BL%D(IInt,2)=Zero
+   !   B%BL%D(IInt,3)=Zero
+   !   B%BL%D(IInt,6)=Zero
+   ! ENDDO
      !
    END SUBROUTINE BMatrix
 !
@@ -1004,7 +1004,8 @@ CONTAINS
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
        IF(GConvCr%ExplLatt) THEN
-         CALL LatticeINTC(IntC_L,PBCDim,DoVolume_O=.TRUE.)
+         CALL LatticeINTC(IntC_L,PBCDim)
+        !CALL LatticeINTC(IntC_L,PBCDim,VolumeOnly_O=.TRUE.)
         !CALL ExtraLattice(IntC_L,PBCDim)
        ELSE
          IntC_L%N=0
@@ -1193,11 +1194,12 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LatticeINTC(IntC_L,PBCDim,DoVolume_O)
+   SUBROUTINE LatticeINTC(IntC_L,PBCDim,DoVolume_O,VolumeOnly_O)
      TYPE(INTC)                  :: IntC_L
      INTEGER                     :: I,J,K,L,LL,LRef,II,KK,PBCDim,IVol
-     LOGICAL,OPTIONAL            :: DoVolume_O
-     LOGICAL                     :: DoVolume
+     INTEGER                     :: NDim
+     LOGICAL,OPTIONAL            :: DoVolume_O,VolumeOnly_O
+     LOGICAL                     :: DoVolume,VolumeOnly
      !
      IF(PBCDim==0) THEN
        IntC_L%N=0
@@ -1205,6 +1207,8 @@ CONTAINS
      ENDIF
      DoVolume=.FALSE.
      IF(PRESENT(DoVolume_O)) DoVolume=DoVolume_O
+     VolumeOnly=.FALSE.
+     IF(PRESENT(VolumeOnly_O)) VolumeOnly=VolumeOnly_O
      IVol=0
      IF(DoVolume) IVol=1
      !
@@ -1212,50 +1216,67 @@ CONTAINS
      LRef=1
      !
      IF(PBCDim==3) THEN
-       CALL New(IntC_L,6+IVol)
-       IntC_L%Constraint%L(:)=.FALSE.
-       IntC_L%Active%L(:)=.TRUE.
-       IntC_L%Atoms%I(1:3,1:2)=LRef
-         IntC_L%Def%C(1)(1:8)='STRE_A  '
-       IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
-         IntC_L%Def%C(2)(1:8)='STRE_B  '
-       IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
-         IntC_L%Def%C(3)(1:8)='STRE_C  '
-       IntC_L%Cells%I(3,1:6)=(/0,0,0,0,0,1/)
-       !
-       IntC_L%Atoms%I(4:6,1:3)=LRef
-         IntC_L%Def%C(4)(1:8)='ALPHA   '
-       IntC_L%Cells%I(4,1:9)=(/0,1,0,0,0,0,0,0,1/)
-         IntC_L%Def%C(5)(1:8)='BETA    '
-       IntC_L%Cells%I(5,1:9)=(/1,0,0,0,0,0,0,0,1/)
-         IntC_L%Def%C(6)(1:8)='GAMMA   '
-       IntC_L%Cells%I(6,1:9)=(/1,0,0,0,0,0,0,1,0/)
-       !
-       IF(DoVolume) THEN
-         IntC_L%Def%C(7)(1:8)='VOLM_L  '
-        !IntC_L%Def%C(7)(1:8)='BLANK   '
-         IntC_L%Atoms%I(7,1:4)=LRef
-         IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+       IF(.NOT.VolumeOnly) THEN
+         CALL New(IntC_L,6+IVol)
+         IntC_L%Constraint%L(:)=.FALSE.
+         IntC_L%Active%L(:)=.TRUE.
+         IntC_L%Atoms%I(1:3,1:2)=LRef
+           IntC_L%Def%C(1)(1:8)='STRE_A  '
+         IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+           IntC_L%Def%C(2)(1:8)='STRE_B  '
+         IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
+           IntC_L%Def%C(3)(1:8)='STRE_C  '
+         IntC_L%Cells%I(3,1:6)=(/0,0,0,0,0,1/)
+         !
+         IntC_L%Atoms%I(4:6,1:3)=LRef
+           IntC_L%Def%C(4)(1:8)='ALPHA   '
+         IntC_L%Cells%I(4,1:9)=(/0,1,0,0,0,0,0,0,1/)
+           IntC_L%Def%C(5)(1:8)='BETA    '
+         IntC_L%Cells%I(5,1:9)=(/1,0,0,0,0,0,0,0,1/)
+           IntC_L%Def%C(6)(1:8)='GAMMA   '
+         IntC_L%Cells%I(6,1:9)=(/1,0,0,0,0,0,0,1,0/)
+         !
+         IF(DoVolume) THEN
+           IntC_L%Def%C(7)(1:8)='VOLM_L  '
+           IntC_L%Atoms%I(7,1:4)=LRef
+           IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+         ENDIF
+       ELSE
+         CALL New(IntC_L,1)
+         IntC_L%Constraint%L(:)=.FALSE.
+         IntC_L%Active%L(:)=.TRUE.
+         IntC_L%Def%C(1)(1:8)='VOLM_L  '
+         IntC_L%Atoms%I(1,1:4)=LRef
+         IntC_L%Cells%I(1,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
        ENDIF
      ELSE IF(PBCDim==2) THEN
-       CALL New(IntC_L,3+IVol)
-       IntC_L%Constraint%L(:)=.FALSE.
-       IntC_L%Active%L(:)=.TRUE.
-       IntC_L%Atoms%I(1:2,1:2)=LRef
-         IntC_L%Def%C(1)(1:8)='STRE_A  '
-       IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
-         IntC_L%Def%C(2)(1:8)='STRE_B  '
-       IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
-       !
-         IntC_L%Def%C(3)(1:8)='GAMMA   '
-       IntC_L%Atoms%I(3,1:3)=LRef
-       IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
-       !
-       IF(DoVolume) THEN
-           IntC_L%Def%C(4)(1:8)='AREA_L  '
-          !IntC_L%Def%C(4)(1:8)='BLANK   '
-         IntC_L%Atoms%I(4,1:3)=LRef
-         IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+       IF(.NOT.VolumeOnly) THEN
+         CALL New(IntC_L,3+IVol)
+         IntC_L%Constraint%L(:)=.FALSE.
+         IntC_L%Active%L(:)=.TRUE.
+         IntC_L%Atoms%I(1:2,1:2)=LRef
+           IntC_L%Def%C(1)(1:8)='STRE_A  '
+         IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+           IntC_L%Def%C(2)(1:8)='STRE_B  '
+         IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
+         !
+           IntC_L%Def%C(3)(1:8)='GAMMA   '
+         IntC_L%Atoms%I(3,1:3)=LRef
+         IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
+         !
+         IF(DoVolume) THEN
+             IntC_L%Def%C(4)(1:8)='AREA_L  '
+            !IntC_L%Def%C(4)(1:8)='BLANK   '
+           IntC_L%Atoms%I(4,1:3)=LRef
+           IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+         ENDIF
+       ELSE
+         CALL New(IntC_L,1)
+         IntC_L%Constraint%L(:)=.FALSE.
+         IntC_L%Active%L(:)=.TRUE.
+           IntC_L%Def%C(1)(1:8)='AREA_L  '
+         IntC_L%Atoms%I(1,1:3)=LRef
+         IntC_L%Cells%I(1,1:9)=(/0,0,0,1,0,0,0,1,0/)
        ENDIF
      ELSE IF(PBCDim==1) THEN
        CALL New(IntC_L,1)
@@ -2073,22 +2094,22 @@ CONTAINS
      !
      ! rotate lattice back to standard orientation
      !
-   ! IF(PBCDim>0) THEN
-   !   CALL New(RotCarts,(/3,NatmsLoc+1/))
-   !   DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
-   !   RotCarts%D(1:3,NatmsLoc+1)=Zero
-   !   GTrfCtrl%ThreeAt(1)=NatmsLoc+1
-   !   GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
-   !   GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
-   !   CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
-   !                    .FALSE.,GTrfCtrl%TranslAt1, &
-   !                    GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
-   !                    DoCopy_O=.TRUE.)
-   !   DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
-   !   XYZ(2:3,NatmsLoc-3+1)=Zero
-   !   XYZ(3,NatmsLoc-3+2)=Zero
-   !   CALL Delete(RotCarts)
-   ! ENDIF
+     IF(PBCDim>0) THEN
+       CALL New(RotCarts,(/3,NatmsLoc+1/))
+       DO J=1,NatmsLoc ; RotCarts%D(1:3,J)=XYZ(1:3,J) ; ENDDO
+       RotCarts%D(1:3,NatmsLoc+1)=Zero
+       GTrfCtrl%ThreeAt(1)=NatmsLoc+1
+       GTrfCtrl%ThreeAt(2)=NatmsLoc-3+1
+       GTrfCtrl%ThreeAt(3)=NatmsLoc-3+2
+       CALL CALC_XYZRot(RotCarts%D,GTrfCtrl%ThreeAt,&
+                        .FALSE.,GTrfCtrl%TranslAt1, &
+                        GTrfCtrl%RotAt2ToX,GTrfCtrl%RotAt3ToXY, &
+                        DoCopy_O=.TRUE.)
+       DO J=1,NatmsLoc ; XYZ(1:3,J)=RotCarts%D(1:3,J) ; ENDDO
+       XYZ(2:3,NatmsLoc-3+1)=Zero
+       XYZ(3,NatmsLoc-3+2)=Zero
+       CALL Delete(RotCarts)
+     ENDIF
      !
      ! Tidy up
      !
@@ -2398,7 +2419,15 @@ CONTAINS
      CALL MapAngleDispl(IntCs,DReq%D) 
      CALL MapAngleDispl(IntCs,DReqAct%D) 
      DO I=1,IntCs%N
-       IF(.NOT.IntCs%Active%L(I)) THEN
+       IF(IntCs%Active%L(I)) THEN
+         IF(HasAngle(IntCs%Def%C(I))) THEN
+           DReq%D(I)=DReq%D(I)/PI
+           DReqAct%D(I)=DReqAct%D(I)/PI
+         ELSE
+           DReq%D(I)=DReq%D(I)/(IntCs%Value%D(I)+1.D-6)
+           DReqAct%D(I)=DReqAct%D(I)/(IntCs%Value%D(I)+1.D-6)
+         ENDIF
+       ELSE
          DReq%D(I)=Zero
          DReqAct%D(I)=Zero
        ENDIF
@@ -2408,7 +2437,7 @@ CONTAINS
      CALL Delete(DReqAct) 
      !
      IF(ABS(MaxDispl)>Crit) DoRepeat=.TRUE.
-   ! IF(Rigid>0.05D0) DoRepeat=.TRUE.
+   ! IF(Rigid>0.10D0) DoRepeat=.TRUE.
      IF(Print2) THEN
        WRITE(*,*) 'Rigidity= ',Rigid
        WRITE(Out,*) 'Rigidity= ',Rigid

@@ -795,10 +795,10 @@ CONTAINS
            LWeight(J,I)=ExtraW(I)
          ENDIF
        ENDDO
-      !IF(PRESENT(ExtraW_O)) THEN
-      !  W=EXP(ExtraW_O(I)/(WSum+1.D-10))
-      !  DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
-      !ENDIF
+      !W=EXP(ExtraW(I)/(WSum+1.D-10))
+      !DO J=1,IntCs%N ; LWeight(J,I)=W*LWeight(J,I) ; ENDDO
+      !W=ExtraW(I)
+      !DO J=1,IntCs%N ; LWeight(J,I)=LWeight(J,I)+W ; ENDDO
      ENDDO
      ! 
      CALL Delete(Vect1)
@@ -938,8 +938,8 @@ CONTAINS
                         SCRPath,ExtraW)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-              ! RangeT%D,NDegsT%I,Zero,.TRUE.)
-                RangeT%D,NDegsT%I,Zero,.FALSE.)
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
+              ! RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCs%Def%C,IntCsT%PredVal%D, &
@@ -1482,8 +1482,8 @@ CONTAINS
      J=NDim-ILeft+1
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
-       IF(Q>0.9999D0) THEN
-      !IF(Q>0.90D0) THEN
+      !IF(Q>0.9999D0) THEN
+       IF(Q>0.99D0) THEN
          IStart=I+1
          EXIT
        ENDIF
@@ -1508,7 +1508,7 @@ CONTAINS
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X+W
+           Weights(J,I)=X*X !+W
          ELSE
            Weights(J,I)=1.D99
          ENDIF

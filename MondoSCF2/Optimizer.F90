@@ -998,10 +998,9 @@ CONTAINS
      CALL SetConstraints(IntCs,IntCs%PredVal%D)
      Displ%D=IntCs%PredVal%D-IntCs%Value%D
      !
-   ! CALL CutOffDispl(Displ%D,IntCs, &
-   !                  GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
-    !CALL CutOffDispl(Displ%D,IntCs,0.05D0,0.05D0)
-     CALL CutOffDispl(Displ%D,IntCs,0.30D0,0.30D0)
+    !CALL CutOffDispl(Displ%D,IntCs, &
+    !                 GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
+     CALL CutOffDispl(Displ%D,IntCs,0.10D0,0.10D0)
    ! CALL RedundancyOff(Displ%D,SCRPath,Print)  
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Displ%D,SCRPath,Print2)
      ! 
@@ -1714,7 +1713,7 @@ CONTAINS
                    "Clone #"//TRIM(IntToChar(iCLONE)))
        CALL Get(EOld,'gm_etot'      ,Tag_O=ChGEO)
        ENew=C%Geos%Clone(iCLONE)%ETotal
-       NeedBackTr%L(iCLONE)=(ENew>EOld+2.D0*ETol(AccL))
+       NeedBackTr%L(iCLONE)=((ENew-EOld)/ABS(EOld)>10.D0*ETol(AccL))
        CALL CloseHDFGroup(HDF_CurrentID)
      ENDDO
      CALL CloseHDF(HDFFileID)
@@ -1785,7 +1784,7 @@ CONTAINS
          CALL Delete(DistVect1)
          CALL Delete(DistVect2)
          !
-         IF(EOld<ENew) DoBackTrack=.TRUE.
+         DoBackTrack=((ENew-EOld)/ABS(EOld)>10.D0*ETol(AccL))
          !
          IF(iBStep>1.OR.DoBackTrack) THEN  
              CALL OPENAscii(OutFile,Out)
@@ -1801,13 +1800,22 @@ CONTAINS
            IF(DoLineS) THEN
              CALL LineSearch(C%Geos%Clone(iCLONE),GMOld)
            ELSE
+             !
+             ! Set up new box-coordinates
+             !
+             IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
+               C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
+                 (C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
+                                 GMOld%PBC%BoxShape%D)*Half
+               CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
+             ENDIF
+             !
+             ! Set up new atomic positions (fractionals+Carts)
+             !
              IF(C%GOpt%GConvCrit%DoAtomBackTr) THEN
-               FactO=ENew/(ENew+EOld)
-               FactN=EOld/(ENew+EOld)
                !
                C%Geos%Clone(iCLONE)%BoxCarts%D= &
-                 (FactN*C%Geos%Clone(iCLONE)%BoxCarts%D+ &
-                           FactO*GMOld%BoxCarts%D)
+                 Half*(C%Geos%Clone(iCLONE)%BoxCarts%D+GMOld%BoxCarts%D)
                !
                DO I=1,NatmsLoc
                  CALL DGEMM_NNc(3,3,1,One,Zero, &
@@ -1820,12 +1828,6 @@ CONTAINS
                C%Geos%Clone(iCLONE)%Carts%D
              ENDIF
              !
-             IF(C%GOpt%GConvCrit%DoLattBackTr) THEN
-               C%Geos%Clone(iCLONE)%PBC%BoxShape%D= &
-                 (C%Geos%Clone(iCLONE)%PBC%BoxShape%D+ &
-                                 GMOld%PBC%BoxShape%D)*Half
-               CALL PBCInfoFromNewCarts(C%Geos%Clone(iCLONE)%PBC)
-             ENDIF
            ENDIF
          ENDIF
        ENDDO
@@ -1859,6 +1861,7 @@ CONTAINS
      CALL Delete(GMOld)
      CALL Delete(NeedBackTr)
    END SUBROUTINE BackTrack
+!
 !
 !-------------------------------------------------------------------
 !

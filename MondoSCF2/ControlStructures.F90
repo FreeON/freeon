@@ -169,6 +169,7 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: LinB
      REAL(DOUBLE)                       :: Tors
      INTEGER                            :: MaxGeOpSteps
+     LOGICAL                            :: NoBackTr
      LOGICAL                            :: DoAtomBackTr
      LOGICAL                            :: DoLattBackTr
      LOGICAL                            :: DoLattStep

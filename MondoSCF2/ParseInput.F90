@@ -45,7 +45,7 @@ CONTAINS
     ! Parse in parallel info
     CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
     ! Load control of internal coord. optimizer
-    CALL LoadGeomOpt(C%Nams,C%GOpt)
+    CALL LoadGeomOpt(C%Nams,C%GOpt,C%Geos%Clone(1)%PBC%Dimen)
     ! Load constraints and extra internal coords
     CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos)
     ! Load CPSCF options.

@@ -9,10 +9,11 @@ MODULE ParseGeomOpt
    !
    CONTAINS
    !
-   SUBROUTINE LoadGeomOpt(N,GOpt)
+   SUBROUTINE LoadGeomOpt(N,GOpt,PBCDim)
      TYPE(FileNames)                :: N
      TYPE(GeomOpt)                  :: GOpt  
      CHARACTER(LEN=DCL)             :: Max_Steps = 'Max_Steps'
+     INTEGER                        :: PBCDim
      !
      CALL OpenASCII(N%IFile,Inp)
      ! maximum number of optimization steps
@@ -41,13 +42,19 @@ MODULE ParseGeomOpt
      !
      ! Parse for energy-back-tracking
      !
-     GOpt%GConvCrit%DoAtomBackTr=.FALSE.
+     GOpt%GConvCrit%DoAtomBackTr=.TRUE.
      IF(OptKeyQ(Inp,GRADIENTS,OPT_DoAtomBackTr)) THEN
        GOpt%GConvCrit%DoAtomBacktr=.TRUE.
      ENDIF
-     GOpt%GConvCrit%DoLattBackTr=.FALSE.
+     GOpt%GConvCrit%DoLattBackTr=.TRUE.
      IF(OptKeyQ(Inp,GRADIENTS,OPT_DoLattBackTr)) THEN
        GOpt%GConvCrit%DoLattBacktr=.TRUE.
+     ENDIF
+     GOpt%GConvCrit%NoBackTr=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoBackTr)) THEN
+       GOpt%GConvCrit%NoBackTr=.TRUE.
+       GOpt%GConvCrit%DoLattBacktr=.FALSE.
+       GOpt%GConvCrit%DoAtomBacktr=.FALSE.
      ENDIF
      !
      ! Parse for Sequencial optimization: 
@@ -96,14 +103,18 @@ MODULE ParseGeomOpt
      ! Parse for Maximum angle and maximum bondlength displacements
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN
-      !GOpt%CoordCtrl%MaxAngle=Two*PI !default value
-       GOpt%CoordCtrl%MaxAngle=15.D0*PI/180.D0
+       GOpt%CoordCtrl%MaxAngle=Two*PI !default value
+      !IF(PBCDim==3) THEN
+      !  GOpt%CoordCtrl%MaxAngle=5.D0*PI/180.D0
+      !ELSE
+      !  GOpt%CoordCtrl%MaxAngle=15.D0*PI/180.D0
+      !ENDIF
      ELSE
        GOpt%CoordCtrl%MaxAngle=GOpt%CoordCtrl%MaxAngle*PI/180.D0
      ENDIF
      IF(.NOT.OptDblQ(Inp,MaxStre,GOpt%CoordCtrl%MaxStre)) THEN
-      !GOpt%CoordCtrl%MaxStre=100.000D0 !default value
-       GOpt%CoordCtrl%MaxStre=0.15D0*AngstromsToAu
+       GOpt%CoordCtrl%MaxStre=100.000D0 !default value
+      !GOpt%CoordCtrl%MaxStre=0.15D0*AngstromsToAu
      ELSE
        GOpt%CoordCtrl%MaxStre=GOpt%CoordCtrl%MaxStre*AngstromsToAu
      ENDIF

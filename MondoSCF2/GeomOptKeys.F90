@@ -16,6 +16,7 @@ MODULE GeomOptKeys
    CHARACTER(LEN=12), PARAMETER :: OPT_UnCoupleLatt ='UnCoupleLatt'
    CHARACTER(LEN=10), PARAMETER :: OPT_AlternLatt   ='AlternLatt'
    CHARACTER(LEN=8),  PARAMETER :: OPT_ExplLatt     ='ExplLatt'
+   CHARACTER(LEN=8),  PARAMETER :: OPT_NoBackTr     ='NoBackTr'    
    CHARACTER(LEN=12), PARAMETER :: OPT_DoAtomBackTr ='DoAtomBackTr'
    CHARACTER(LEN=12), PARAMETER :: OPT_DoLattBackTr ='DoLattBackTr'
    CHARACTER(LEN=8),  PARAMETER :: OPT_NoRotOff     ='NoRotOff'
