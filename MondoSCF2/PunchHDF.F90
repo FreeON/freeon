@@ -221,10 +221,10 @@ CONTAINS
     DO iCLONE=1,G%Clones
       ! Reachive very first geometry, as it serves 
       ! as a reference for PBC optimizations
-      CALL RearchIGEO(N,O,G,1) 
+      CALL RearchIGEO(N,O,G,iCLONE,1) 
       ! Reachive GMLoc-s 
       DO iGEO=iGEOStart,LastGeo
-        CALL RearchIGEO(N,O,G,iGEO)
+        CALL RearchIGEO(N,O,G,iCLONE,iGEO)
       ENDDO
 !      ! Rearchive CS 
 !      HDFFileID=OpenHDF(N%RFile)
@@ -245,7 +245,7 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE RearchIGEO(N,O,G,iGEO)
+   SUBROUTINE RearchIGEO(N,O,G,iCLONE,iGEO)
      TYPE(FileNames)  :: N
      TYPE(Options)    :: O
      TYPE(Geometries) :: G    
