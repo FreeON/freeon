@@ -713,8 +713,11 @@ CONTAINS
      !
      ! Print current set of internals for debugging
      !
-     IF(Print==DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs, &
+     IF(Print==DEBUG_GEOP_MAX) THEN
+       CALL PrtIntCoords(IntCs, &
        IntCs%Value%D,'Internals at step #'//TRIM(IntToChar(iGEO)))
+       IF(PBCDim>0) CALL PrtPBCs(XYZ)
+     ENDIF
      !
      CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
      !
@@ -844,11 +847,12 @@ CONTAINS
      IF(DoMix) THEN
        CALL InternalToCart(XYZ,AtNum,IntCs,PredVals%D,RefPoints%D,Print, &
                            GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-                           GOpt%Constr,PBCDim,SCRPath,PWDPath,Mixmat_O=MixMat%D)
+                           GOpt%Constr,PBCDim,SCRPath,PWDPath, &
+                           GOpt%ExtIntCs,Mixmat_O=MixMat%D)
      ELSE
        CALL InternalToCart(XYZ,AtNum,IntCs,PredVals%D,RefPoints%D,Print, &
                            GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
-                           GOpt%Constr,PBCDim,SCRPath,PWDPath)
+                           GOpt%Constr,PBCDim,SCRPath,PWDPath,GOpt%ExtIntCs)
      ENDIF
      ! 
      IF(DoMix) THEN
@@ -863,7 +867,7 @@ CONTAINS
  !                  Print)
  !     CALL InternalToCart(XYZ,IntCs,PredVals%D,RefPoints%D,Print, &
  !                         GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
- !                         GOpt%Constr,PBCDim,SCRPath,PWDPath)
+ !                         GOpt%Constr,PBCDim,SCRPath,PWDPath,GOpt%ExtIntCs)
  !   ENDIF
      ! 
      CALL Delete(IntCGrads)
@@ -915,7 +919,8 @@ CONTAINS
      IntCs%Value%D=IntCs%Value%D+Displ%D
      CALL InternalToCart(XYZ,AtNum,IntCs,IntCs%Value%D, &
                          RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
-                         GOpt%CoordCtrl,GOpt%Constr,PBCDim,SCRPath,PWDPath)  
+                         GOpt%CoordCtrl,GOpt%Constr,PBCDim,SCRPath, &
+                         PWDPath,GOpt%ExtIntCs)  
      ! 
      CALL Delete(RefPoints)
      CALL Delete(Displ)

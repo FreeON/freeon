@@ -41,6 +41,7 @@ CONTAINS
      REAL(DOUBLE)                :: LinCrit,TorsLinCrit
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
+     CHARACTER(LEN=DCL)          :: Char
      !
      NatmsLoc=SIZE(XYZ,2)-3
      NCart=3*NatmsLoc
@@ -59,30 +60,40 @@ CONTAINS
      DO IInt=1,IntCs%N   
        CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
        IF(.NOT.IntCs%Active%L(IInt)) CYCLE
+       Char=IntCs%Def%C(IInt)
+       IF(PBCDim>0) THEN
+         IF(Char(1:5)=='ALPHA') THEN
+           Char(1:5)='BEND '
+         ELSE IF(Char(1:4)=='BETA') THEN
+           Char(1:5)='BEND '
+         ELSE IF(Char(1:5)=='GAMMA') THEN
+           Char(1:5)='BEND '
+         ENDIF
+       ENDIF
        !
-       IF(IntCs%Def%C(IInt)(1:4)=='STRE') THEN
+       IF(Char(1:4)=='STRE') THEN
          ! stre
          B%IB%I(IInt,1:2)=IntCs%Atoms%I(IInt,1:2)
          CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),BB_O=B%B%D(IInt,1:12))
-        !write(*,100) IntCs%Def%C(IInt)(1:5), &
+        !write(*,100) Char(1:5), &
         !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
          !
-       ELSE IF(IntCs%Def%C(IInt)(1:4)=='BEND') THEN
+       ELSE IF(Char(1:4)=='BEND') THEN
          ! bend
          B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
          CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
                    BB_O=B%B%D(IInt,1:12))
-        !write(*,100) IntCs%Def%C(IInt)(1:5), &
+        !write(*,100) Char(1:5), &
         !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
-       ELSE IF(IntCs%Def%C(IInt)(1:4)=='OUTP') THEN
+       ELSE IF(Char(1:4)=='OUTP') THEN
          ! out of plane
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
          CALL OutP(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
                    XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IInt), &
                    BB_O=B%B%D(IInt,1:12))
-       ! write(*,100) IntCs%Def%C(IInt)(1:5),B%IB%I(IInt,1:4), &
+       ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
        !  B%B%D(IInt,1:12)*AngstromsToAu
-       ELSE IF(IntCs%Def%C(IInt)(1:4)=='TORS') THEN
+       ELSE IF(Char(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
          CALL TORS(XYZAux(1:3,1),XYZAux(1:3,2), &
@@ -90,17 +101,17 @@ CONTAINS
                    TorsLinCrit,IntCs%Active%L(IInt), &
                    BB_O=B%B%D(IInt,1:12))
         !write(*,*) IInt
-        !write(*,100) IntCs%Def%C(IInt)(1:5),B%IB%I(IInt,1:4), &
+        !write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
         !B%B%D(IInt,1:12)
-       ELSE IF(IntCs%Def%C(IInt)(1:6)=='VOLM_L') THEN
+       ELSE IF(Char(1:6)=='VOLM_L') THEN
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
          CALL VOLUME(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
            XYZAux(1:3,4),IntCs%Active%L(IInt),BB_O=B%B%D(IInt,1:12))
-       ELSE IF(IntCs%Def%C(IInt)(1:6)=='AREA_L') THEN
+       ELSE IF(Char(1:6)=='AREA_L') THEN
          B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
          CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
                    IntCs%Active%L(IInt),BB_O=B%B%D(IInt,1:12))
-       ELSE IF(IntCs%Def%C(IInt)(1:5)=='LINB1') THEN
+       ELSE IF(Char(1:5)=='LINB1') THEN
          ! linear bendig of i-j-k
          IF(IntCs%Def%C(IInt+1)(1:5)/='LINB2') &
             CALL Halt('LINB2 Definitions are not paired!')
@@ -110,21 +121,21 @@ CONTAINS
          CALL LinB(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4),L, &
                    BB1=B%B%D(IInt,1:12),BB2=B%B%D(IInt+1,1:12))  
-        !write(*,100) IntCs%Def%C(IInt)(1:5), &
+        !write(*,100) Char(1:5), &
         ! B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
-        !write(*,100) IntCs%Def%C(IInt)(1:5), &
+        !write(*,100) Char(1:5), &
         ! B%IB%I(IInt+1,1:4),B%B%D(IInt+1,1:12)
-       ELSE IF(IntCs%Def%C(IInt)(1:5)=='LINB2') THEN
+       ELSE IF(Char(1:5)=='LINB2') THEN
          CYCLE
-       ELSE IF(IntCs%Def%C(IInt)(1:5)=='CARTX' ) THEN
+       ELSE IF(Char(1:5)=='CARTX' ) THEN
          I=IntCs%Atoms%I(IInt,1)
          B%IB%I(IInt,1)=I
          CALL BCART('X',B%B%D(IInt,1:12),IntCs%Constraint%L(I))
-       ELSE IF(IntCs%Def%C(IInt)(1:5)=='CARTY' ) THEN
+       ELSE IF(Char(1:5)=='CARTY' ) THEN
          I=IntCs%Atoms%I(IInt,1)
          B%IB%I(IInt,1)=I
          CALL BCART('Y',B%B%D(IInt,1:12),IntCs%Constraint%L(I))
-       ELSE IF(IntCs%Def%C(IInt)(1:5)=='CARTZ' ) THEN
+       ELSE IF(Char(1:5)=='CARTZ' ) THEN
          I=IntCs%Atoms%I(IInt,1)
          B%IB%I(IInt,1)=I
          CALL BCART('Z',B%B%D(IInt,1:12),IntCs%Constraint%L(I))
@@ -916,14 +927,6 @@ IntC_L%N=0
        CALL Delete(IntC_L)
        ILast=ILast+IntC_L%N
      ENDIF
-     IF(IntC_Extra%N/=0) THEN
-       CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
-       ILast=ILast+IntC_Extra%N
-     ENDIF
-     !
-     IF(.NOT.(IntCs%N==0.OR.Refresh==5)) THEN
-       CALL CleanINTC(IntCs,NIntC_Bas,NIntC_VDW,IntC_Extra%N)
-     ENDIF             
      !
      ! Set active all internal coords defd so far.
      ! 'Linear torsions will be deactivated later when 
@@ -933,6 +936,15 @@ IntC_L%N=0
      ! during the process of optimization.
      !
      IntCs%Active%L=.TRUE.
+     !
+     IF(IntC_Extra%N/=0) THEN
+       CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,IntC_Extra%N,ILast+1)
+       ILast=ILast+IntC_Extra%N
+     ENDIF
+     !
+     IF(.NOT.(IntCs%N==0.OR.Refresh==5)) THEN
+       CALL CleanINTC(IntCs,NIntC_Bas,NIntC_VDW,IntC_Extra%N)
+     ENDIF             
      !
      ! Count number of different internal coord types
      !
@@ -976,16 +988,20 @@ IntC_L%N=0
      !
      IF(PBCDim==3) THEN
        CALL New(IntC_L,7)
-         IntC_L%Def%C(1:3)(1:6)='STRE_L'
        IntC_L%Atoms%I(1:3,1:2)=LRef
+         IntC_L%Def%C(1)(1:6)='STRE_A'
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+         IntC_L%Def%C(2)(1:6)='STRE_B'
        IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
+         IntC_L%Def%C(3)(1:6)='STRE_C'
        IntC_L%Cells%I(3,1:6)=(/0,0,0,0,0,1/)
        !
-         IntC_L%Def%C(4:6)(1:6)='BEND_L'
        IntC_L%Atoms%I(4:6,1:3)=LRef
+         IntC_L%Def%C(4)(1:5)='ALPHA'
        IntC_L%Cells%I(4,1:9)=(/0,1,0,0,0,0,0,0,1/)
+         IntC_L%Def%C(5)(1:4)='BETA'
        IntC_L%Cells%I(5,1:9)=(/1,0,0,0,0,0,0,0,1/)
+         IntC_L%Def%C(6)(1:5)='GAMMA'
        IntC_L%Cells%I(6,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
          IntC_L%Def%C(7)(1:6)='VOLM_L'
@@ -993,12 +1009,13 @@ IntC_L%N=0
        IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
      ELSE IF(PBCDim==2) THEN
        CALL New(IntC_L,4)
-         IntC_L%Def%C(1:2)(1:6)='STRE_L'
        IntC_L%Atoms%I(1:2,1:2)=LRef
+         IntC_L%Def%C(1)(1:6)='STRE_A'
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+         IntC_L%Def%C(2)(1:6)='STRE_B'
        IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
        !
-         IntC_L%Def%C(3)(1:6)='BEND_L'
+         IntC_L%Def%C(3)(1:5)='GAMMA'
        IntC_L%Atoms%I(3,1:3)=LRef
        IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
@@ -1007,7 +1024,7 @@ IntC_L%N=0
        IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
      ELSE IF(PBCDim==1) THEN
        CALL New(IntC_L,1)
-         IntC_L%Def%C(1)(1:6)='STRE_L'
+         IntC_L%Def%C(1)(1:6)='STRE_A'
        IntC_L%Atoms%I(1,1:2)=LRef
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
      ENDIF
@@ -1422,7 +1439,7 @@ IntC_L%N=0
 !
    SUBROUTINE InternalToCart(XYZ,AtNum,IntCs,PredVals,RefPoints,Print, &
                              GBackTrf,GTrfCtrl,GCoordCtrl,GConstr, &
-                             PBCDim,SCRPath,PWDPath,MixMat_O)
+                             PBCDim,SCRPath,PWDPath,IntCsE,MixMat_O)
      REAL(DOUBLE),DIMENSION(:,:)          :: XYZ
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: MixMat_O
      REAL(DOUBLE),DIMENSION(:)            :: PredVals,RefPoints,AtNum
@@ -1438,7 +1455,7 @@ IntC_L%N=0
      INTEGER                    :: NCart,I,IStep,J,NT
      INTEGER                    :: NIntC,NConstr,IRep,RepMax
      INTEGER                    :: NatmsLoc,NCartConstr,PBCDim
-     TYPE(INTC)                 :: IntCs
+     TYPE(INTC)                 :: IntCs,IntCsE
      TYPE(INT_VECT)             :: ISpB,JSpB
      TYPE(DBL_VECT)             :: ASpB
      LOGICAL                    :: RefreshB,RefreshAct
@@ -1602,6 +1619,7 @@ IntC_L%N=0
          CALL SetFixedCartesians(VectCart%D,VectCartAux2%D, &
                             IntCs,GConstr%NCartConstr)
          VectCart%D=VectCart%D+VectCartAux2%D
+         CALL SetFixedLattice(VectCart%D,IntCsE)
          CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
          !
          ! Review iteration
@@ -1953,6 +1971,37 @@ IntC_L%N=0
 !
 !----------------------------------------------------------
 !
+   SUBROUTINE PrtPBCs(XYZ)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(6)   :: Vec
+     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+     INTEGER                     :: I,J,NatmsLoc
+     !
+     NatmsLoc=SIZE(XYZ,2)-3
+     DO I=1,3
+       BoxShape(1:3,I)=XYZ(1:3,NatmsLoc+I)
+     ENDDO
+     CALL CalcBoxPars(Vec,BoxShape)
+     !
+     WRITE(*,111) 'STRE_A  ',Vec(1)/AngstromsToAu
+     WRITE(*,111) 'STRE_B  ',Vec(2)/AngstromsToAu
+     WRITE(*,111) 'STRE_C  ',Vec(3)/AngstromsToAu
+     WRITE(*,111) 'ALPHA   ',Vec(4)*180.D0/PI
+     WRITE(*,111) 'BETA    ',Vec(5)*180.D0/PI
+     WRITE(*,111) 'GAMMA   ',Vec(6)*180.D0/PI
+     !
+     WRITE(Out,111) 'STRE_A  ',Vec(1)/AngstromsToAu
+     WRITE(Out,111) 'STRE_B  ',Vec(2)/AngstromsToAu
+     WRITE(Out,111) 'STRE_C  ',Vec(3)/AngstromsToAu
+     WRITE(Out,111) 'ALPHA   ',Vec(4)*180.D0/PI
+     WRITE(Out,111) 'BETA    ',Vec(5)*180.D0/PI
+     WRITE(Out,111) 'GAMMA   ',Vec(6)*180.D0/PI
+     !
+     111 FORMAT('LATTICE  ',A8,2X,20X,2X,F12.6,L5,F12.6,L5)
+   END SUBROUTINE PrtPBCs
+!
+!----------------------------------------------------------
+!
    SUBROUTINE RotationsOff(DCarts,Carts,Print,PBCDim)
      REAL(DOUBLE),DIMENSION(:) :: DCarts,Carts
      INTEGER                   :: PBCDim,NCart
@@ -1976,8 +2025,10 @@ IntC_L%N=0
      LOGICAL                     :: Print
      REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE)                :: Fact,Norm
+     TYPE(INTC)                  :: IntCsE
      !
-     CALL GetPBCProj(Carts,PBCDim,P)
+     IntCsE%N=0
+     CALL GetPBCProj(Carts,PBCDim,IntCsE,P)
      CALL DGEMM_NNc(9,9,1,One,Zero,P,DCarts,DCarts2)
      Norm=DOT_PRODUCT(DCarts,DCarts)
      Fact=DOT_PRODUCT(DCarts2,DCarts2)
@@ -1997,10 +2048,11 @@ IntC_L%N=0
 !
 !----------------------------------------------------------
 !
-   SUBROUTINE GetPBCProj(Carts,PBCDim,P)
+   SUBROUTINE GetPBCProj(Carts,PBCDim,IntCsE,P)
      REAL(DOUBLE),DIMENSION(:)   :: Carts
-     INTEGER                     :: PBCDim,NCart,I,J,K,L,Info,Dim
-     TYPE(INTC)                  :: IntCs
+     INTEGER                     :: PBCDim,NCart,I,J,K,L
+     INTEGER                     :: NCoinc,Info,Dim
+     TYPE(INTC)                  :: IntCs,IntCsE
      REAL(DOUBLE),DIMENSION(3,4) :: XYZ
      REAL(DOUBLE),DIMENSION(9,9) :: S,P,P1
      REAL(DOUBLE),DIMENSION(9)   :: Eigs
@@ -2014,6 +2066,22 @@ IntC_L%N=0
        XYZ(1:3,I+1)=Carts(K:L)
      ENDDO 
      CALL LatticeINTC(IntCs,PBCDim)
+     !
+     ! Clean constraints
+     !
+     NCoinc=0
+     DO I=1,IntCs%N
+       DO J=1,IntCsE%N
+         IF(IntCsE%Constraint%L(J)) THEN
+           IF(IntCsE%Def%C(J)(1:8)==IntCs%Def%C(I)(1:8)) THEN
+             IntCs%Active%L(I)=.FALSE.
+             NCoinc=NCoinc+1
+             EXIT 
+           ENDIF
+         ENDIF
+       ENDDO 
+     ENDDO 
+     !
      CALL BMatrix(XYZ,IntCs,B,1.D0,1.D0)
      CALL DGEMM_TNc(9,IntCs%N,9,One,Zero,B%BL%D,B%BL%D,S)
      !
@@ -2028,9 +2096,15 @@ IntC_L%N=0
        DO I=1,9 ; Eigs(I)=BLKVALS%D(I) ; ENDDO
      CALL UnSetDSYEVWork()
      !
-     IF(PBCDim==1) Dim=1
-     IF(PBCDim==2) Dim=3
-     IF(PBCDim==3) Dim=6
+     IF(PBCDim==1) Dim=1-NCoinc
+     IF(PBCDim==2) Dim=3-NCoinc
+     IF(PBCDim==3) Dim=6-NCoinc
+     IF(Dim<0) CALL Halt('Dim<0 in GetPBCProj.') 
+     K=0
+     DO I=1,9 
+       IF(Eigs(I)>1.D-6) K=K+1
+     ENDDO
+     IF(K<Dim) CALL Halt('K<Dim in GetPBCProj.')
      Eigs(1:9-Dim)=Zero
      Eigs(9-Dim+1:9)=One
      DO I=1,9 ; P1(1:9,I)=Eigs(I)*S(1:9,I) ; ENDDO
@@ -2491,6 +2565,40 @@ IntC_L%N=0
 !
 !-------------------------------------------------------------
 !
+   SUBROUTINE SetFixedLattice(VectCart,IntCs)
+     REAL(DOUBLE),DIMENSION(:)   :: VectCart
+     TYPE(INTC)                  :: IntCs
+     INTEGER                     :: I,J,K,L,NCart
+     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape
+     REAL(DOUBLE),DIMENSION(6)   :: Vec
+     !
+     NCart=SIZE(VectCart)-9
+     DO I=1,3
+       K=NCart+3*(I-1)+1
+       L=K+2
+       BoxShape(1:3,I)=VectCart(K:L)
+     ENDDO
+     CALL CalcBoxPars(Vec,BoxShape)
+     DO I=1,IntCs%N
+       IF(.NOT.IntCs%Constraint%L(I)) CYCLE
+       IF(IntCs%Def%C(I)(1:6)=='STRE_A') Vec(1)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='STRE_B') Vec(2)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='STRE_C') Vec(3)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='ALPHA')  Vec(4)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='BETA ')  Vec(5)=IntCs%ConstrValue%D(I)
+       IF(IntCs%Def%C(I)(1:6)=='GAMMA')  Vec(6)=IntCs%ConstrValue%D(I)
+     ENDDO
+     CALL BoxParsToCart(Vec,BoxShape)
+     DO I=1,3
+       K=NCart+3*(I-1)+1
+       L=K+2
+       VectCart(K:L)=BoxShape(1:3,I)
+     ENDDO
+     !
+   END SUBROUTINE SetFixedLattice
+!
+!----------------------------------------------------------------------
+!
    SUBROUTINE SetFixedCartesians(Carts,CartDispl,IntCs,NConstr)
      REAL(DOUBLE),DIMENSION(:) :: CartDispl,Carts
      INTEGER                   :: I,J,JJ,NIntC,NConstr
@@ -2933,7 +3041,7 @@ IntC_L%N=0
          L=K+2
          AuxBL(K:L)=XYZ(1:3,NatmsLoc-3+I)
        ENDDO
-       CALL GetPBCProj(AuxBL,PBCDim,P)
+       CALL GetPBCProj(AuxBL,PBCDim,IntCs,P)
        DO I=1,IntCs%N
          IF(B%BLI%I(I)/=0) THEN
            CALL DGEMM_NNc(9,9,1,One,Zero,P,B%BL%D(I,1:9),AuxBL)
