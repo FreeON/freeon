@@ -592,7 +592,7 @@ MODULE DrvSCFs
 !
    CONVF=1000.D0*JtoHartree/C_Avogadro
    CONVF2=1000.D0*JtoHartree/C_Avogadro/AngstromsToAU
-   LJCutOff=14.D0 !!! in Angstroms
+   LJCutOff=10.D0 !!! in Angstroms
    CurG=IntToChar(Ctrl%Current(3)) !!! Current Geom
 !
    IF(Ctrl%Grad==GRAD_NO_GRAD) THEN
@@ -622,8 +622,8 @@ MODULE DrvSCFs
 ! MM coulombenergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
 !
-!mm_coul=0.d0
-!call put(mm_coul,'mm_coul',Tag_O=CurG)
+! mm_coul=0.d0
+! call put(mm_coul,'mm_coul',Tag_O=CurG)
  IF(MMOnly()) Then
    CALL MM_COULOMBENERGY(Ctrl)
    CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
@@ -645,6 +645,8 @@ MODULE DrvSCFs
   GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
 #ifdef PERIODIC
   GMLoc%PBC%BoxShape=GMLoc%PBC%BoxShape/AngstromsToAU
+  GMLoc%AbCarts%D=GMLoc%AbCarts%D/AngstromsToAU
+  GMLoc%AbBoxCarts%D=GMLoc%AbBoxCarts%D/AngstromsToAU
 #endif
 !
      IF(CalcMMForce) THEN
@@ -674,6 +676,8 @@ MODULE DrvSCFs
   GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 #ifdef PERIODIC
   GMLoc%PBC%BoxShape=AngstromsToAU*GMLoc%PBC%BoxShape
+  GMLoc%AbCarts%D=AngstromsToAU*GMLoc%AbCarts%D
+  GMLoc%AbBoxCarts%D=AngstromsToAU*GMLoc%AbBoxCarts%D
 #endif
    IF(CalcMMForce) THEN
 !

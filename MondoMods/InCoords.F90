@@ -339,7 +339,7 @@ SUBROUTINE SORT_INTO_Box2(BoxSize,C,NatmsLoc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI1,Bo
 ! BoxSize: linear Box Size
 !
 IMPLICIT NONE
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 INTEGER,OPTIONAL :: ISET 
 TYPE(INT_VECT),OPTIONAL :: BoxI1,BoxJ1
 TYPE(INT_VECT) :: BoxI,BoxJ
@@ -459,8 +459,8 @@ SUBROUTINE Topologies_MM(NatmsLoc,NBond,BondI,BondJ,InfFile,Top12OUT)
 !
 ! Set up a table which shows the atom numbers of Atoms 
 ! connected to a certain atom by the input bonds (Topology mtr)
-! Here, the generation of the Topology mtr is based on input list
-! of bonds
+! Here, the generation of the Topology mtr is based 
+! EXCLUSIVELY on input list of bonds
 ! WARNING! This subroutine is mainly used to set up the
 ! topology files necessary for the calculation of 
 ! MM exclusion energies!!!

@@ -1256,7 +1256,6 @@ MODULE InOut
          CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
          CALL Get(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
          CALL Get(GM%Carts,  'cartesians',Tag_O=Tag_O)
-         CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
          CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
          CALL Get(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
@@ -1264,6 +1263,7 @@ MODULE InOut
          CALL Get(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
          CALL Get(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
          CALL Get(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
+         CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Get_CRDS
 !---------------------------------------------------------------------
@@ -1291,7 +1291,6 @@ MODULE InOut
          CALL Put(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
          CALL Put(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
          CALL Put(GM%Carts,  'cartesians',Tag_O=Tag_O)
-         CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
          CALL Put(GM%Vects,  'velocities',Tag_O=Tag_O)
          CALL Put(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
@@ -1299,6 +1298,7 @@ MODULE InOut
          CALL Put(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
          CALL Put(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
          CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
+         CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
       END SUBROUTINE Put_CRDS
 !---------------------------------------------------------------------

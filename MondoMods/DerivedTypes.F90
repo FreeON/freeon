@@ -254,8 +254,9 @@ MODULE DerivedTypes
 !     Perodic Stuff
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
-      TYPE(DBL_RNK2)   :: AbBoxCarts!-- Lattice coordinates
+      TYPE(DBL_RNK2)   :: AbBoxCarts!-- Abosolute coords in fractional
       TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
+      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute coords in Cartesian
 #endif 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
@@ -264,7 +265,6 @@ MODULE DerivedTypes
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
-      TYPE(DBL_RNK2)   :: AbCarts   !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Velocity Cartesian coordinates 
    END TYPE 
 !-------------------------------------------------------------------------------------
