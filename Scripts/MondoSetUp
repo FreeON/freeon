@@ -1,5 +1,5 @@
 #
-cat $MONDO_HOME/README
+#cat $MONDO_HOME/README
 #
 # make other scripts executable
 #
@@ -48,9 +48,20 @@ alias gj    'cd ${MONDO_HOME}/DirectJ;   ls -l; pwd'
 alias go    'cd ${MONDO_HOME}/ONX;       ls -l; pwd'
 alias g1    'cd ${MONDO_HOME}/OneE;      ls -l; pwd'
 alias gx    'cd ${MONDO_HOME}/XForm;     ls -l; pwd'
+alias gn    'cd ${MONDO_HOME}/QuNew;     ls -l; pwd'
 alias gd    'cd ${MONDO_DGEMMS};         ls -l; pwd'
 #
+# cvs shortcuts
 #
+alias ai    'add Includes  $1'
+alias amm   'add MondoMods $1'
+alias as    'add MondoSCF  $1'
+alias a1    'add OneE      $1'
+alias ah    'add HiCu      $1'
+alias aq    'add QCTC      $1'
+alias an    'add QuNew     $1'
+alias ae    'add SCFeqs    $1'
+alias ao    'add ONX       $1'
 #
 set OP_SYSTM = `/bin/uname -s`  
 set OP_VRSN  = `/bin/uname -r`  
