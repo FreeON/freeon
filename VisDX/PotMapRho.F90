@@ -40,8 +40,8 @@ MODULE RhoUtil
 #endif
        CALL PPrint(GMLoc,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
 #ifdef PERIODIC
-!      Calculate the Number of Cells
-       CALL SetCellNumber(GMLoc)
+!      Get the Outer Cell Set
+       CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
 #endif
 !      SET DENSITY THRESHOLDS (LOOSE)
        Del=3.D-1
@@ -216,8 +216,8 @@ MODULE PotUtil
 !        Build the global PoleTree representation of the total density
          CALL RhoToPoleTree
 #ifdef PERIODIC
-!        Calculate the Number of Cells
-         CALL SetCellNumber(GMLoc)
+!        Get the Outer Cell Set
+         CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
 !        Set the electrostatic background 
          CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
 #endif
