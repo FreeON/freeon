@@ -884,7 +884,6 @@ CONTAINS
     IF(HasDFT(O%Models(cBas))) THEN
        CALL Invoke('XCForce',N,S,M)
     ENDIF
-!
 !   Constraint the Gradients
 !
     chGEO=IntToChar(cGEO)
@@ -902,6 +901,8 @@ CONTAINS
        ENDIF
 !      Get Lattice Forces
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!      Get the new SCF Energy
+       CALL Get(G%Clone(iCLONE)%ETotal,'Etot')
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
