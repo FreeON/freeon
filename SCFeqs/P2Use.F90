@@ -75,7 +75,7 @@ PROGRAM P2Use
      CALL Filter(P,T1)
      CALL Multiply(S,-One)
      NPur=0
-     DO I=1,40
+     DO I=1,30
         NPur=NPur+1
 !       P.S
         CALL Multiply(P,S,T1)
@@ -117,9 +117,13 @@ PROGRAM P2Use
 #ifdef PARALLEL
       ENDIF
 #endif
-        IF(DensityDev<1.D-7)EXIT
+        IF(DensityDev<1.D-7)GOTO 999
      ENDDO
+     CALL Halt('In P2Use, failed to converge McWeeny purification.'//RTRN    &
+              //'   Still missing '//TRIM(DblToShrtChar(DensityDev))//' electrons.'//RTRN &
+              //'   Try projection instead of interpolation.')
 
+999 CONTINUE
 #ifdef PARALLEL
     IF(MyId==ROOT)THEN
 #endif

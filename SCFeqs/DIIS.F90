@@ -1,4 +1,4 @@
-PROGRAM PulayDIIS
+PROGRAM DIIS
    USE DerivedTypes
    USE GlobalScalars
    USE GlobalCharacters
@@ -19,110 +19,146 @@ PROGRAM PulayDIIS
 #else
    TYPE(BCSR)  & 
 #endif
-                                 :: F,P,E,Tmp1,Tmp2
+                                  :: F,P,E,Tmp1,Tmp2
    TYPE(ARGMT)                    :: Args
    TYPE(INT_VECT)                 :: IWork
    TYPE(DBL_VECT)                 :: V,DIISCo
-   TYPE(DBL_RNK2)                 :: B,BOld,BInv,BTmp
-   REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh
-   INTEGER                        :: I,J,K,N,ISCF,JSCF,KSCF
+   TYPE(DBL_RNK2)                 :: B,BB,BInv,BTmp
+   TYPE(CMPoles),DIMENSION(2)     :: MP
+   REAL(DOUBLE),DIMENSION(3)      :: AvDP,DeltaDPi,DeltaDPj
+   REAL(DOUBLE),DIMENSION(6)      :: AvQP,DeltaQPi,DeltaQPj
+   REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh, &
+                                     RelDevDP,RelDevQP,Sellers
+   INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax
    CHARACTER(LEN=2)               :: Cycl,NxtC
-   CHARACTER(LEN=9),PARAMETER     :: Prog='PulayDIIS'
    CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
-   LOGICAL                        :: Present
-!------------------------------------------------------------------ 
-!
-!
+   LOGICAL                        :: Present,Sloshed
+   CHARACTER(LEN=4),PARAMETER     :: Prog='DIIS'
+!-------------------------------------------------------------------------------------
+!  Initial setup
    CALL StartUp(Args,Prog)
    ISCF=Args%I%I(1)
-   Cycl=IntToChar(ISCF)
-   NxtC=IntToChar(ISCF+1)
-!
+!  Parse for DIIS options
    CALL OpenASCII(InpFile,Inp)  
+!  Threshold for projection of small eigenvalues
    IF(.NOT.OptDblQ(Inp,'DIISThresh',EigThresh))EigThresh=1.D-10
-
+!  Damping coefficient for first cycle
+   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D-1
+!  Dont allow damping below 0.05, as this can cause false convergence
+   Damp=MAX(Damp,5D-2)
+!  Max number of equations to keep in DIIS 
+   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=10
    CLOSE(Inp)
-!
+!-------------------------------------------------------------------------------------
 !  Allocations
    CALL New(P)
    CALL New(F)
    CALL New(E)
    CALL New(Tmp1)
-!------------------------------------------------
+   CALL New(MP(1))
+   CALL New(MP(2))
+!-------------------------------------------------------------------------------------
 !  Create a new error vector E=[F_(i+1),P_i]
-!
-   CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix 
-   CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonalized Density matrix
+   CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonal Fock matrix 
+   CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonal density matrix
    CALL Multiply(F,P,E)  
    CALL Multiply(P,F,E,-One)
 !  We didnt filter E for obvious reasons 
    CALL Put(E,TrixFile('E',Args,0))
 !  The DIIS Error 
    DIISErr=SQRT(Dot(E,E))/DBLE(NBasF)
-!----------------------------------------------
-!  Build a new B matrix
-!
-   N=ISCF+1 
-   CALL New(B,(/N,N/))
-!  Start with the last cycles B
+!  Build the B matrix
    IF(ISCF>1)THEN
-      CALL New(BOld,(/ISCF,ISCF/))
-      CALL Get(BOld,'bmat_diis')
-      B%D(1:ISCF,1:ISCF)=BOld%D(1:ISCF,1:ISCF)
-      CALL Delete(BOld)
-   ENDIF
-!  Add new elements 
-   DO JSCF=ISCF-1,1,-1
-      KSCF=JSCF-ISCF
-      CALL Get(Tmp1,TrixFile('E',Args,KSCF))
-      B%D(ISCF,JSCF)=Dot(Tmp1,E)
-      B%D(JSCF,ISCF)=B%D(ISCF,JSCF)
-   ENDDO       
-   B%D(ISCF,ISCF)=Dot(E,E)
-   B%D(N,1:N)=One
-   B%D(1:N,N)=One
-   B%D(N,N)=Zero
-!  Save for next cycle
-   CALL Put(B,'bmat_diis',UnLimit_O=.TRUE.)
-!---------------------------------------------------------------
-!  Solve the least squares problem via eigensolution to obtain
-!  new DIIS (mixing) coeficients.
-   CALL New(DIISCo,N)
+      N=MIN(ISCF+1,BMax+1)
+      M=MAX(1,ISCF-BMax+1)
+      CALL New(B,(/N,N/))
+!-------------------------------------------------------------------------------------
+!     Check for charge sloshing
+      IF(ISCF>BMax.AND.DIISErr>1.D-1)THEN
+         Sloshed=.TRUE.
+      ELSE
+         Sloshed=.FALSE.
+      ENDIF
+      Sloshed=.FALSE.
+!-------------------------------------------------------------------------------------
+!     Build the B matrix, possibly with Sellers multipole modification
+      I0=M-ISCF
+      DO I=1,N-1
+         IF(Sloshed)THEN
+            CALL Get(MP(1),IntToChar(M+I-2))
+            CALL Get(MP(2),IntToChar(M+I-1))
+            DeltaDPi=MP(1)%DPole%D-MP(2)%DPole%D
+            DeltaQPi=MP(1)%QPole%D-MP(2)%QPole%D
+         ENDIF
+         CALL Get(Tmp1,TrixFile('E',Args,I0))
+         J0=I0
+         DO J=I,N-1
+            CALL Get(E,TrixFile('E',Args,J0))
+            B%D(I,J)=Dot(Tmp1,E)
+            IF(Sloshed)THEN
+               CALL Get(MP(1),IntToChar(M+J-2))
+               CALL Get(MP(2),IntToChar(M+J-1))
+               DeltaDPj=MP(1)%DPole%D-MP(2)%DPole%D
+               DeltaQPj=MP(1)%QPole%D-MP(2)%QPole%D
+!              Add in Sellers anti charge sloshing terms
+               Sellers=0.1D0*DOT_PRODUCT(DeltaDPi,DeltaDPj) &
+                      +0.1D0*DOT_PRODUCT(DeltaQPi,DeltaQPj)
+               B%D(I,J)=B%D(I,J)+Sellers
+            ENDIF
+            B%D(J,I)=B%D(I,J)
+            J0=J0+1
+         ENDDO
+         I0=I0+1
+      ENDDO
+      B%D(N,1:N)=One
+      B%D(1:N,N)=One
+      B%D(N,N)=Zero
+!-------------------------------------------------------------------------------------
+!     Solve the least squares problem to obtain new DIIS coeficients.
+      CALL New(DIISCo,N)
 #ifdef PARALLEL
-   IF(MyId==ROOT)THEN
+      IF(MyId==ROOT)THEN
 #endif
-     CALL New(BInv,(/N,N/))
-     CALL New(V,N)
-     V%D=Zero
-     V%D(N)=One
-     CALL SetDSYEVWork(N)
-     BInv%D=Zero
-     IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
-        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh, &
-                         PrintCond_O=.TRUE.,Prog_O=Prog)
-     ELSE
-        CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh)
-     ENDIF
-     CALL UnSetDSYEVWork()
-     CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
-     CALL Delete(V)
-     CALL Delete(BInv)
+         CALL New(BInv,(/N,N/))
+         CALL New(V,N)
+         V%D=Zero
+         V%D(N)=One
+         CALL SetDSYEVWork(N)
+         BInv%D=Zero
+         IF(PrintFlags%Key>DEBUG_MEDIUM)THEN
+            CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh, &
+                             PrintCond_O=.TRUE.,Prog_O=Prog)
+         ELSE
+           CALL FunkOnSqMat(N,Inverse,B%D,BInv%D,EigenThresh_O=EigThresh)
+         ENDIF
+         CALL UnSetDSYEVWork()
+         CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
+         CALL Delete(V)
+         CALL Delete(BInv)
 #ifdef PARALLEL
-   ENDIF
-   CALL BCast(DIISCo)
+      ENDIF
+      CALL BCast(DIISCo)
 #endif
-!---------------------------------------------------------------
+      IF(Sloshed)THEN
+         Mssg=ProcessName(Prog,'Multipole C1')//'DIISCo = '
+      ELSE
+         Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
+      ENDIF
+   ELSE
+      Mssg=ProcessName(Prog,'Damping')//'Co = '
+      N=3
+      CALL New(DIISCo,2)
+!     Damping on the second cycle
+      DIISCo%D(1)=One-Damp
+      DIISCo%D(2)=Damp
+   ENDIF
+!-------------------------------------------------------------------------------------
 !  IO
-! 
    CALL Put(DIISErr,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
-   IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+   IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
       CALL OpenASCII(OutFile,Out)
       CALL PrintProtectL(Out)
-      Mssg=ProcessName(Prog)//'DIISErr = '//TRIM(DblToShrtChar(DIISErr))
-      WRITE(*,*)TRIM(Mssg)
-      WRITE(Out,*)TRIM(Mssg)
-      Mssg=ProcessName(Prog)//'DIISCo = '
-      DO I=1,ISCF-1
+      DO I=1,N-2
          IF(MOD(I,4)==0)THEN
             Mssg=TRIM(Mssg)//RTRN//ProcessName() &
                //'          '//TRIM(DblToShrtChar(DIISCo%D(I)))//','
@@ -130,62 +166,44 @@ PROGRAM PulayDIIS
             Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(I)))//','
          ENDIF
       ENDDO
-      Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(ISCF)))
+      Mssg=TRIM(Mssg)//' '//TRIM(DblToShrtChar(DIISCo%D(N-1)))
+      IF(PrintFlags%Key==DEBUG_MAXIMUM) &
       WRITE(*,*)TRIM(Mssg)
       WRITE(Out,*)TRIM(Mssg)
       CALL PrintProtectR(Out)
       CLOSE(Out)
   ENDIF
-!--------------------------------------------------------------------------------
-   IF(ISCF<=1)THEN
-!    Damping on the first cycle
-     CALL OpenASCII(InpFile,Inp)  
-     IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=0.3D0
-     CLOSE(Inp)
-     C0=One-Damp
-     C1=Damp
-!    Damp current Fock matrix by C1
-     CALL Multiply(F,C1)
-!    Damp previous Fock matrix by C0
-     CALL Get(Tmp1,TrixFile('OrthoF',Args,-1))
-     CALL Multiply(Tmp1,C0)
+!-------------------------------------------------------------------------------------
+! Extrapolation with DIIS coefficients
+  CALL Multiply(F,DIISCo%D(N-1))     
+  I0=N-2
+  DO I=ISCF-1,M,-1
+     CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
+     CALL Multiply(Tmp1,DIISCo%D(I0))
      CALL Add(F,Tmp1,E)
-     CALL Filter(F,E)
-   ELSE
-!    Extrapolation with the DIIS coefficients after first cycle
-     CALL Multiply(F,DIISCo%D(ISCF))     
-      DO JSCF=iSCF-1,1,-1 
-         KSCF=JSCF-ISCF
-         CALL Get(Tmp1,TrixFile('OrthoF',Args,KSCF))
-         CALL Multiply(Tmp1,DIISCo%D(JSCF))
-         CALL Add(F,Tmp1,E)
-         IF(JSCF==1)THEN
-!           Only filter the end product
-            CALL Filter(F,E)
-         ELSE
-            CALL SetEq(F,E)
-         ENDIF
-      ENDDO
-   ENDIF
-!--------------------------------------------------------------------
+     IF(I==1)THEN
+!       Only filter the end product
+        CALL Filter(F,E)
+     ELSE
+        CALL SetEq(F,E)
+     ENDIF
+     I0=I0-1
+  ENDDO
+!-------------------------------------------------------------------------------------
 !  IO for the orthogonal, extrapolated F 
-!
    CALL Put(F,TrixFile('F_DIIS',Args,0)) 
    CALL PChkSum(F,'F_DIIS['//TRIM(Cycl)//']',Prog)
    CALL PPrint(F,'F_DIIS['//TRIM(Cycl)//']')
    CALL Plot(F,'F_DIIS_'//TRIM(Cycl))
-!------------------------------
+!-------------------------------------------------------------------------------------
 !  Tidy up 
-!
    CALL Delete(F)
    CALL Delete(DIISCo)
    CALL Delete(P)
    CALL Delete(E)
    CALL Delete(Tmp1)
-!
    CALL ShutDown(Prog)   
-!
-END PROGRAM !PulayDIIS
+END PROGRAM DIIS
 
 
 

@@ -36,6 +36,7 @@ SDMM_Objs  = FillPBlok.o SDMM.o
 Stat_Objs  = SCFStatus.o          
 RHEq_Objs  = RHeqs.o              
 FBuild_Objs= FBuild.o       
+#DIIS_Objs  = DIIS_Saved.o               
 DIIS_Objs  = DIIS.o               
 Dev_Objs   = ToDev.o               
 #
@@ -62,7 +63,6 @@ clean:
 	rm -f $(MONDO_EXEC)/DIIS
 	rm -f $(MONDO_EXEC)/ToDev
 	ln -s /dev/null core
-	ls -l
 #
 Stat:	$(Stat_Objs)
 	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs) $(LibOpts) $(F90_LIBRARIES) 
