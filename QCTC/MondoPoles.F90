@@ -146,35 +146,10 @@ CONTAINS
              TwoTimes=TwoTimes+Two
              Sgn=-Sgn
           ENDDO
-!         FudgeFactorial(LP,LQ)=[Sum_(MP,MQ) (LP+LQ-MP-MQ)!/((LP+MP)!(LQ+MQ)!)]/{
-!         [Sum_MP (LP-MP)!/(LP+MP)!]*[Sum_MQ (LQ-MQ)!/(LQ+MQ)!]}
+!         FudgeFactorial(LP,LQ)= (LP+LQ)!/(LP! LQ!)
           DO LP=0,SPEll+1
-             DO LQ=0,FFEll
-                DenomP=One
-                DenomQ=One
-                DO MP=1,LP
-                   DenomP=DenomP+Two*Factorial(LP-MP)/Factorial(LP+MP)
-                ENDDO
-                DO MQ=1,LQ
-                   DenomQ=DenomQ+Two*Factorial(LQ-MQ)/Factorial(LQ+MQ)
-                ENDDO
-                NumPQ=Zero
-                DO MP=0,LP
-                   IF(MP==0)THEN
-                      DegenP=One
-                   ELSE
-                      DegenP=Two
-                   ENDIF
-                   DO MQ=0,LQ
-                      IF(MQ==0)THEN
-                         DegenQ=One
-                      ELSE
-                         DegenQ=Two
-                      ENDIF
-                      NumPQ=NumPQ+DegenP*DegenQ*Factorial(LP+LQ-MP-MQ)/(Factorial(LP+MP)*Factorial(LQ+MQ))
-                   ENDDO
-                ENDDO
-                FudgeFactorial(LP,LQ)=NumPQ/(DenomP*DenomQ)
+             DO LQ=0,FFELL
+                FudgeFactorial(LP,LQ)=Factorial(LP+LQ)/(Factorial(LP)*Factorial(LQ))
              ENDDO
           ENDDO
       END SUBROUTINE MultipoleSetup
@@ -342,21 +317,16 @@ CONTAINS
 !====================================================================================
 !     Compute a multipole strength O_L based on Unsolds theorem
 !====================================================================================
-      FUNCTION Unsold1(L,C,S)
-        INTEGER                     :: L,LL
+      FUNCTION Unsold1(Llow,Lhig,C,S)
+        INTEGER                     :: Llow,Lhig,LL
         REAL(DOUBLE)                :: Unsold1,U,Exp
         REAL(DOUBLE), DIMENSION(0:) :: C,S
 !
         Unsold1=Zero
-        DO LL=0,L
-           IF(LL==0) THEN 
-              U   = Unsold0(LL,C,S)
-              Unsold1=MAX(Unsold1,U)
-           ELSE
-              Exp = DBLE(L)/DBLE(LL) 
-              U   = Unsold0(LL,C,S)**Exp
-              Unsold1=MAX(Unsold1,U)
-           ENDIF
+        DO LL=Llow,Lhig
+           Exp = One/DBLE(MAX(1,LL)) 
+           U   = Unsold0(LL,C,S)**Exp
+           Unsold1=MAX(Unsold1,U)
         ENDDO
 !
       END FUNCTION Unsold1
