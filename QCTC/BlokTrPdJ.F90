@@ -91,6 +91,7 @@ MODULE BlokTrPdJ
              IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
                 Prim%PFA=PFA 
                 Prim%PFB=PFB
+!
                 MaxAmp=SetBraBlok(Prim,BS,Gradients_O=Pair%SameAtom)
 !---------------------------------------------------------------------------------------------
 !               Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
@@ -114,19 +115,23 @@ MODULE BlokTrPdJ
                    EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
                    DO LMNB=StartLB,StopLB
                       IB=IB+1
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)    
                       Pab=P(IA,IB)
 !                     Extent (for PAC)
-                      PExtent=MAX(PExtent, & 
-                                   Extent(EllA+EllB,Prim%Zeta,Pab*HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=1))
-!                     Strength (for MAC)
-                      CALL HGToSP(Prim,Pab*HGBra%D(:,IA,IB),SPBraC,SPBraS)
-                      DO L=0,EllA+EllB
-                         PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
-                         DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(2+SPELL+L)))
+                      DO K=1,3
+                         PExtent=MAX(PExtent, & 
+                                     Extent(EllA+EllB,Prim%Zeta,Pab*dHGBra%D(:,IA,IB,K),TauPAC,ExtraEll_O=1))
+!                        Strength (for MAC)
+           
+                         CALL HGToSP(Prim,Pab*dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                         DO L=0,EllA+EllB
+                            PStrength = FudgeFactorial(L,SPEll+1)*UnsoldO(L,SPBraC,SPBraS)
+                            DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
+                         ENDDO
                       ENDDO
                    ENDDO
                 ENDDO
+                DP2 = MAX(1.D10,DP2)
 !-----------------------------------------------------------------------------------------
                 IF(PExtent>Zero)THEN ! Evaluate this primitives Ket contribution
 !                  Zero the Acumulators
@@ -188,8 +193,7 @@ MODULE BlokTrPdJ
                          DO LMNB=StartLB,StopLB  
                             IB=IB+1                      
                             DO K=1,3
-                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF(Prim,dHGBra%D(:,IA,IB,K)) &
-                                                       + CTraxQ(Prim,dHGBra%D(:,IA,IB,K))                                 
+                               dJ(IA,IB,K)=dJ(IA,IB,K) + CTraxFF(Prim,dHGBra%D(:,IA,IB,K))                           
                             ENDDO
                          ENDDO
                       ENDDO
@@ -268,8 +272,7 @@ MODULE BlokTrPdJ
 !      Add in the Far Field, Dipole and Quadripole Correction
        IF(Dimen > 0) THEN
           DO K=1,3
-             Vct(K)=Vct(K) + CTraxFF(Prim,dHGBra%D(:,1,1,K)) &
-                           + CTraxQ(Prim,dHGBra%D(:,1,1,K))
+             Vct(K)=Vct(K) + CTraxFF(Prim,dHGBra%D(:,1,1,K))
           ENDDO
        ENDIF
 #else
