@@ -54,6 +54,8 @@ PROGRAM CPSCFSts
   TYPE(CRDS)                 :: GM
   !-------------------------------------------------------------------
   !
+  type(bcsr) :: tmp3
+
   ! Macro the start up.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
   !
@@ -127,24 +129,19 @@ PROGRAM CPSCFSts
      !
      ! Compute tensor elements.
 #ifdef PARALLEL
-     !old CALL Multiply(PPrm,T,Tmp1)
-     !old Tensor(iXYZ)=-Two*Trace(Tmp1)
-     CALL Multiply(PPrm,T,Tmp1)
-     TmpP=Trace(Tmp1)
-     SELECT CASE(RespOrder)
-     CASE(1); Tensor(iXYZ)=-Two*TmpP
-     CASE(2); Tensor(iXYZ)=-Four*TmpP
-     CASE(3); Tensor(iXYZ)=-12.0d0*TmpP
-     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
-     END SELECT
-     !
      IF(CPSCFCycl.LE.0) THEN
         CALL Multiply(P,T,Tmp1)
         MltE(iXYZ)=-Two*Trace(Tmp1)
      ENDIF
+     !
+     CALL Multiply(PPrm,T,Tmp1)
+     TmpP=Trace(Tmp1)
 #else
-     !old Tensor(iXYZ)=-Two*Trace(PPrm,T)
+     IF(CPSCFCycl.LE.0) MltE(iXYZ)=-Two*Trace(P,T)
+     !
      TmpP=Trace(PPrm,T)
+#endif
+     !
      SELECT CASE(RespOrder)
      CASE(1); Tensor(iXYZ)=-Two*TmpP
      CASE(2); Tensor(iXYZ)=-Four*TmpP
@@ -152,8 +149,17 @@ PROGRAM CPSCFSts
      CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
      END SELECT
      !
-     IF(CPSCFCycl.LE.0) MltE(iXYZ)=-Two*Trace(P,T)
-#endif
+     !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!!$     CALL New(Tmp3)
+!!$     CALL Multiply(PPrm,P,Tmp1)
+!!$     CALL Multiply(P,PPrm,Tmp2)
+!!$     CALL Multiply(Tmp2,-One)
+!!$     CALL Add(Tmp1,Tmp2,Tmp3)
+!!$     CALL Multiply(Tmp3,PPrm,Tmp1)
+!!$     CALL Multiply(Tmp1,T,Tmp2)
+!!$     write(*,*) '2n+1=',Trace(Tmp2)
+!!$     CALL Delete(Tmp3)
+     !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
      !
      IF('X'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(1)
      IF('Y'.EQ.TRIM(Args%C%C(5))) Prop=Tensor(2)

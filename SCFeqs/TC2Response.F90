@@ -68,14 +68,12 @@ PROGRAM TC2R
   TYPE(DBL_RNK2)                 :: PPrimA
 #endif
   !-------------------------------------------------------------------
-!!$  type(bcsr) :: work2
   !
   ! Initial setup.
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
   !
   ! Get the response order.
   RespOrder=LEN(TRIM(Args%C%C(3)))
-  !write(*,*) 'RespOrder',RespOrder
   !
   ! Get Last SCF cycle.
   LastSCFCycle=0
@@ -200,7 +198,6 @@ PROGRAM TC2R
   CASE(3)
      ! Load FockPrime Matrix.
      IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
-        ! A.EQ.B.EQ.C
         ! PPrm3_1 <-> aaa
         ! PPrm2_1 <-> aa
         ! PPrm1_1 <-> a
@@ -212,7 +209,6 @@ PROGRAM TC2R
         CALL Get(FPrm2_1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(1:2)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
      ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
-        ! A.EQ.B.NE.C
         ! PPrm3_1 <-> aac
         ! PPrm2_1 <-> aa
         ! PPrm2_2 <-> ac
@@ -234,7 +230,6 @@ PROGRAM TC2R
         CALL Get(FPrm2_2,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
      ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
-        ! A.NE.B.EQ.C
         ! PPrm3_1 <-> abb
         ! PPrm2_1 <-> ab
         ! PPrm2_3 <-> bb
@@ -256,7 +251,6 @@ PROGRAM TC2R
         CALL Get(FPrm2_3,TrixFile('OrthoFPrime'//TRIM(Args%C%C(3)(2:3)), &
              &   Args,LastCPSCFCycle-Args%I%I(1)),BCast_O=.FALSE.)
      ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
-        ! A.NE.B.NE.C
         ! PPrm3_1 <-> abc
         ! PPrm2_1 <-> ab
         ! PPrm2_2 <-> ac
@@ -448,7 +442,7 @@ CONTAINS
        &              Tmp1,Tmp2,Tmp3,Ne,MM,RespOrder,Args)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE TC2R_DMP(P,PPrim,Tmp1,Tmp2,Tmp3,Ne,MM)
-!H  This routine does the linear TC2Response scheme.
+!H  This routine does the linear, quadratic and cubic TC2Response.
 !H
 !H---------------------------------------------------------------------------------
     IMPLICIT NONE
@@ -479,77 +473,63 @@ CONTAINS
     !
     MM=MM+1
     N=Trace(P)
-    !----------------------
-    ! Daaa = Daaa*X0 + X0*Daaa + Daa*Da + Da*Daa
-    ! Daab = Daab*X0 + X0*Daab + 1/3(Daa*Db + Db*Daa) + 2/3(Dab*Da + Da*Dab)
-    ! Dabc = Dabc*X0 + X0*Dabc + 1/3(Dab*Dc + Dc*Dab + Dac*Db + Db*Dac + Dbc*Da + Da*Dbc)
-    !! Dabc = Dabc*X0 + X0*Dabc + 0.25(Dac*Db + Db*Dac + Dbc*Da + Da*Dbc)
-    ! PPrm3_1 <-> abc
-    ! PPrm2_1 <-> ac
-    ! PPrm2_2 <-> bc
-    ! PPrm1_1 <-> a
-    ! PPrm1_2 <-> b
-    ! PPrm1_3 <-> c
-    !----------------------
-    !----------------------
-    ! D1 = X0*D1 + D1*X0;
-    ! PPrm1_1 <-> a
-    ! PPrm1_2 <-> b
-    ! PPrm1_3 <-> c
-    !----------------------
+    !
     SELECT CASE(RespOrder)
     CASE(1)
-       CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+       ! Da = {Da,X0}
+       ! PPrm1_1 <-> a
+       CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
     CASE(2)
        IF(Chr1.EQ.Chr2) THEN
+          ! Daa = {Daa,X0} + Da*Da
           ! PPrm2_1 <-> aa
           ! PPrm1_1 <-> a
-          CALL Order2(P,PPrm1_1,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AA(P,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
        ELSE
+          ! Dab = {Dab,X0} + 1/2{Da,Db}
           ! PPrm2_1 <-> ab
           ! PPrm1_1 <-> a
           ! PPrm1_2 <-> b
-          CALL Order2(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
        ENDIF
     CASE(3)
        IF(Chr1.EQ.Chr2.AND.Chr1.EQ.Chr3) THEN
-          ! A.EQ.B.EQ.C
+          ! Daaa = {Dabc,X0} + {Daa,Da}
           ! PPrm3_1 <-> aaa
           ! PPrm2_1 <-> aa
           ! PPrm1_1 <-> a
-          !if(MM==1)write(*,*) 'A.EQ.B.EQ.C'
-          CALL Order3(P,PPrm1_1,PPrm1_1,PPrm1_1,PPrm2_1,PPrm2_1,PPrm2_1,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order3_AAA(P,PPrm1_1,PPrm2_1,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AA(P,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
        ELSEIF(Chr1.EQ.Chr2.AND.Chr1.NE.Chr3) THEN
-          ! A.EQ.B.NE.C
+          ! Daac = {Daac,X0} + 1/3{Daa,Dc} + 2/3{Dac,Da}
           ! PPrm3_1 <-> aac
           ! PPrm2_1 <-> aa
           ! PPrm2_2 <-> ac
           ! PPrm1_1 <-> a
           ! PPrm1_3 <-> c
-          CALL Order3(P,PPrm1_1,PPrm1_1,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_2,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_3,PPrm2_2,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_3,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order3_AAC(P,PPrm1_1,PPrm1_3,PPrm2_1,PPrm2_2,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AA(P,PPrm1_1,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_1,PPrm1_3,PPrm2_2,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_3,Tmp1,Tmp2,Tmp3,N,Ne)
        ELSEIF(Chr1.NE.Chr2.AND.Chr2.EQ.Chr3) THEN
-          ! A.NE.B.EQ.C
+          ! Dabb = {Dabb,X0} + 2/3{Dab,Db} + 1/3{Dbb,Da}
           ! PPrm3_1 <-> abb
           ! PPrm2_1 <-> ab
           ! PPrm2_3 <-> bb
           ! PPrm1_1 <-> a
           ! PPrm1_2 <-> b
-          CALL Order3(P,PPrm1_1,PPrm1_2,PPrm1_2,PPrm2_1,PPrm2_1,PPrm2_3,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_2,PPrm1_2,PPrm2_3,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order3_ABB(P,PPrm1_1,PPrm1_2,PPrm2_1,PPrm2_3,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AA(P,PPrm1_2,PPrm2_3,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
        ELSEIF(Chr1.NE.Chr2.AND.Chr1.NE.Chr3.AND.Chr2.NE.Chr3) THEN
-          ! A.NE.B.NE.C
+          ! Dabc = {Dabc,X0} + 1/3{Dab,Dc} + 1/3{Dac,Db} + 1/3{Dbc,Da}
           ! PPrm3_1 <-> abc
           ! PPrm2_1 <-> ab
           ! PPrm2_2 <-> ac
@@ -557,21 +537,20 @@ CONTAINS
           ! PPrm1_1 <-> a
           ! PPrm1_2 <-> b
           ! PPrm1_3 <-> c
-          CALL Order3(P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_1,PPrm1_3,PPrm2_2,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order2(P,PPrm1_2,PPrm1_3,PPrm2_3,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
-          CALL Order1(P,PPrm1_3,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order3_ABC(P,PPrm1_1,PPrm1_2,PPrm1_3,PPrm2_1,PPrm2_2,PPrm2_3,PPrm3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_1,PPrm1_2,PPrm2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_1,PPrm1_3,PPrm2_2,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order2_AB(P,PPrm1_2,PPrm1_3,PPrm2_3,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_2,Tmp1,Tmp2,Tmp3,N,Ne)
+          CALL Order1_A(P,PPrm1_3,Tmp1,Tmp2,Tmp3,N,Ne)
        ELSE
           CALL Halt('Response: unknown symmetry <'//Chr1//Chr2//Chr3//'>.')
        ENDIF
     CASE DEFAULT; CALL Halt('Response order unknown! RespOrder='//TRIM(IntToChar(RespOrder)))
     END SELECT
-    !----------------------
+    !
     CALL Order0(P,Tmp1,Tmp2,Tmp3,N,Ne)
-    !----------------------
     !
   END SUBROUTINE TC2R_DMP
   !
@@ -584,23 +563,21 @@ CONTAINS
     TYPE( BCSR)  , INTENT(INOUT) :: P0
     TYPE( BCSR)  , INTENT(INOUT) :: Tmp1,Tmp2,Tmp3
 #endif
-    REAL(DOUBLE), INTENT(IN   ) :: N,Ne
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    !
+    CALL Multiply(P0,P0,Tmp3)
     IF(N.GE.Ne) THEN
-       CALL Multiply(P0,P0,Tmp3)       !Tmp3=P*P
-       !----------------------
-       CALL Filter(P0,Tmp3)            !P=Tmp3
+       CALL Filter(P0,Tmp3)
     ELSE
-       CALL Multiply(P0,P0,Tmp1)       !Tmp1=P*P
-       CALL Multiply(Tmp1,-One)        !Tmp1=-Tmp1
-       CALL Multiply(P0,Two)           !P=2*P
-       CALL Add(P0,Tmp1,Tmp3)          !Tmp3=P+Tmp1
-       !----------------------
-       CALL Filter(P0,Tmp3)            !X0=Tmp3
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P0,Two)
+       CALL Add(P0,Tmp3,Tmp1)
+       CALL Filter(P0,Tmp1)
     ENDIF
   END SUBROUTINE Order0
   !
   !
-  SUBROUTINE Order1(P0,P1_1,Tmp1,Tmp2,Tmp3,N,Ne)
+  SUBROUTINE Order1_A(P0,P1_1,Tmp1,Tmp2,Tmp3,N,Ne)
 #ifdef PARALLEL
     TYPE(DBCSR)  , INTENT(INOUT) :: P0
     TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,Tmp1,Tmp2,Tmp3
@@ -608,27 +585,24 @@ CONTAINS
     TYPE( BCSR)  , INTENT(INOUT) :: P0
     TYPE( BCSR)  , INTENT(INOUT) :: P1_1,Tmp1,Tmp2,Tmp3
 #endif
-    REAL(DOUBLE), INTENT(IN   ) :: N,Ne
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Da = {Da,X0}
+    !
+    CALL Multiply(P0,P1_1,Tmp1)
+    CALL Multiply(P1_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
     IF(N.GE.Ne) THEN
-       CALL Multiply(P0,P1_1,Tmp1)   !Tmp1=P*PPrim
-       CALL Multiply(P1_1,P0,Tmp2)   !Tmp2=PPrim*P
-       CALL Add(Tmp1,Tmp2,Tmp3)      !Tmp3=Tmp1+Tmp2 !PPrim=P*PPrim+PPrim*P
-       !----------------------
-       CALL Filter(P1_1,Tmp3)        !PPrim=Tmp3
+       CALL Filter(P1_1,Tmp3)
     ELSE
-       CALL Multiply(P0,P1_1,Tmp1)   !Tmp1=P*PPrim
-       CALL Multiply(P1_1,P0,Tmp2)   !Tmp2=PPrim*P
-       CALL Add(Tmp1,Tmp2,Tmp3)      !Tmp3=Tmp1+Tmp2
-       CALL Multiply(Tmp3,-One)      !Tmp3=-Tmp3
-       CALL Multiply(P1_1,Two)       !PPrim=2*PPrim
-       CALL Add(P1_1,Tmp3,Tmp1)      !Tmp1=PPrim+Tmp3
-       !----------------------
-       CALL Filter(P1_1,Tmp1)        !D1=Tmp1
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P1_1,Two)
+       CALL Add(P1_1,Tmp3,Tmp1)
+       CALL Filter(P1_1,Tmp1)
     ENDIF
-  END SUBROUTINE Order1
+  END SUBROUTINE Order1_A
   !
   !
-  SUBROUTINE Order2(P0,P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+  SUBROUTINE Order2_AB(P0,P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3,N,Ne)
 #ifdef PARALLEL
     TYPE(DBCSR)  , INTENT(INOUT) :: P0
     TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3
@@ -636,39 +610,57 @@ CONTAINS
     TYPE( BCSR)  , INTENT(INOUT) :: P0
     TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,Tmp1,Tmp2,Tmp3
 #endif
-    REAL(DOUBLE), INTENT(IN   ) :: N,Ne
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Dab = {Dab,X0} + 1/2{Da,Db}
+    !
+    CALL Multiply(P0,P2_1,Tmp1)
+    CALL Multiply(P2_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    CALL Multiply(P1_1,P1_2,Tmp1)
+    CALL Multiply(Tmp1,0.5d0)
+    CALL Add(Tmp1,Tmp3,Tmp2)
+    CALL Multiply(P1_2,P1_1,Tmp1)
+    CALL Multiply(Tmp1,0.5d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
     IF(N.GE.Ne) THEN
-       CALL Multiply(P0,P2_1,Tmp1)     !Tmp1=P*PPrm2
-       CALL Multiply(P2_1,P0,Tmp2)     !Tmp2=PPrm2*P
-       CALL Add(Tmp1,Tmp2,Tmp3)        !Tmp3=Tmp1+Tmp2
-       CALL Multiply(P1_1,P1_2,Tmp1)   !
-       CALL Multiply(Tmp1,0.5d0)       !
-       CALL Add(Tmp1,Tmp3,Tmp2)        !Tmp2=Tmp1+Tmp3
-       CALL Multiply(P1_2,P1_1,Tmp1)   !
-       CALL Multiply(Tmp1,0.5d0)       !
-       CALL Add(Tmp1,Tmp2,Tmp3)        !Tmp3=Tmp1+Tmp2
-       !----------------------
-       CALL Filter(P2_1,Tmp3)          !PPrm2=Tmp3
+       CALL Filter(P2_1,Tmp3)
     ELSE
-       CALL Multiply(P,P2_1,Tmp1)      !Tmp1=P*PPrm2
-       CALL Multiply(P2_1,P,Tmp2)      !Tmp2=PPrm2*P
-       CALL Add(Tmp1,Tmp2,Tmp3)        !Tmp3=Tmp1+Tmp2
-       CALL Multiply(P1_1,P1_2,Tmp1)   !
-       CALL Multiply(Tmp1,0.5d0)       !
-       CALL Add(Tmp1,Tmp3,Tmp2)        !Tmp2=Tmp1+Tmp3
-       CALL Multiply(P1_2,P1_1,Tmp1)   !
-       CALL Multiply(Tmp1,0.5d0)       !
-       CALL Add(Tmp1,Tmp2,Tmp3)        !Tmp3=Tmp1+Tmp2
-       CALL Multiply(Tmp3,-One)        !Tmp2=-Tmp2
-       CALL Multiply(P2_1,Two)         !PPrm2=2*PPrm2
-       CALL Add(P2_1,Tmp3,Tmp1)        !Tmp1=PPrm2+Tmp2
-       !----------------------
-       CALL Filter(P2_1,Tmp1)          !PPrm2=Tmp2
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P2_1,Two)
+       CALL Add(P2_1,Tmp3,Tmp1)
+       CALL Filter(P2_1,Tmp1)
     ENDIF
-  END SUBROUTINE Order2
+  END SUBROUTINE Order2_AB
   !
   !
-  SUBROUTINE Order3(P0,P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+  SUBROUTINE Order2_AA(P0,P1_1,P2_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Daa = {Daa,X0} + Da*Da
+    !
+    CALL Multiply(P0,P2_1,Tmp1)
+    CALL Multiply(P2_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    CALL Multiply(P1_1,P1_1,Tmp1)
+    CALL Add(Tmp1,Tmp3,Tmp2)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P2_1,Tmp2)
+    ELSE
+       CALL Multiply(Tmp2,-One)
+       CALL Multiply(P2_1,Two)
+       CALL Add(P2_1,Tmp2,Tmp1)
+       CALL Filter(P2_1,Tmp1)
+    ENDIF
+  END SUBROUTINE Order2_AA
+  !
+  !
+  SUBROUTINE Order3_ABC(P0,P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
 #ifdef PARALLEL
     TYPE(DBCSR)  , INTENT(INOUT) :: P0
     TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3
@@ -676,85 +668,158 @@ CONTAINS
     TYPE( BCSR)  , INTENT(INOUT) :: P0
     TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P1_3,P2_1,P2_2,P2_3,P3_1,Tmp1,Tmp2,Tmp3
 #endif
-    REAL(DOUBLE), INTENT(IN   ) :: N,Ne
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Dabc = {Dabc,X0} + 1/3({Dab,Dc} + {Dac,Db} + {Dbc,Da})
+    ! D0*Dabc+Dabc*D0
+    CALL Multiply(P0,P3_1,Tmp1)
+    CALL Multiply(P3_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Da*Dbc
+    CALL Multiply(P1_1,P2_3,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! Dbc*Da
+    CALL Multiply(P2_3,P1_1,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Db*Dac
+    CALL Multiply(P1_2,P2_2,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp3,Tmp2,Tmp1)
+    ! Dac*Db
+    CALL Multiply(P2_2,P1_2,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Dc*Dab
+    CALL Multiply(P1_3,P2_1,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp3,Tmp2,Tmp1)
+    ! Dab*Dc
+    CALL Multiply(P2_1,P1_3,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
     IF(N.GE.Ne) THEN
-       ! Daac = Daac*X0 + X0*Daac + 1/3(Daa*Dc + Dc*Daa) + 2/3(Dac*Da + Da*Dac)
-       ! Dabc = Dabc*X0 + X0*Dabc + 1/3(Dab*Dc + Dc*Dab + Dac*Db + Db*Dac + Dbc*Da + Da*Dbc)
-       ! P3_1 <-> abc
-       ! P2_1 <-> ab
-       ! P2_2 <-> ac
-       ! P2_3 <-> bc
-       ! P1_1 <-> a
-       ! P1_2 <-> b
-       ! P1_3 <-> c
-       !
-       ! D0*Dabc+Dabc*D0
-       CALL Multiply(P0,P3_1,Tmp1)           !Tmp1=P*PPrm3
-       CALL Multiply(P3_1,P0,Tmp2)           !Tmp2=PPrm3*P
-       CALL Add(Tmp1,Tmp2,Tmp3)              !Tmp3=Tmp1+Tmp2
-       ! Da*Dbc
-       CALL Multiply(P1_1,P2_3,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp2,Tmp3,Tmp1)
-       ! Dbc*Da
-       CALL Multiply(P2_3,P1_1,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       ! Db*Dac
-       CALL Multiply(P1_2,P2_2,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp3,Tmp2,Tmp1)
-       ! Dac*Db
-       CALL Multiply(P2_2,P1_2,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       ! Dc*Dab
-       CALL Multiply(P1_3,P2_1,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp3,Tmp2,Tmp1)
-       ! Dab*Dc
-       CALL Multiply(P2_1,P1_3,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       !
        CALL Filter(P3_1,Tmp3)
     ELSE
-       ! D0*Dabc+Dabc*D0
-       CALL Multiply(P0,P3_1,Tmp1)           !Tmp1=P*PPrm3
-       CALL Multiply(P3_1,P0,Tmp2)           !Tmp2=PPrm3*P
-       CALL Add(Tmp1,Tmp2,Tmp3)              !Tmp3=Tmp1+Tmp2
-       ! Da*Dbc
-       CALL Multiply(P1_1,P2_3,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp2,Tmp3,Tmp1)
-       ! Dbc*Da
-       CALL Multiply(P2_3,P1_1,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       ! Db*Dac
-       CALL Multiply(P1_2,P2_2,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp3,Tmp2,Tmp1)
-       ! Dac*Db
-       CALL Multiply(P2_2,P1_2,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       ! Dc*Dab
-       CALL Multiply(P1_3,P2_1,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp3,Tmp2,Tmp1)
-       ! Dab*Dc
-       CALL Multiply(P2_1,P1_3,Tmp2)
-       CALL Multiply(Tmp2,1.0d0/3.0d0)
-       CALL Add(Tmp1,Tmp2,Tmp3)
-       !
        CALL Multiply(Tmp3,-One)
        CALL Multiply(P3_1,Two)
        CALL Add(P3_1,Tmp3,Tmp1)
-       !
        CALL Filter(P3_1,Tmp1)
     ENDIF
-  END SUBROUTINE Order3
+  END SUBROUTINE Order3_ABC
+  !
+  !
+  SUBROUTINE Order3_AAA(P0,P1_1,P2_1,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P2_1,P3_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Daaa = {Dabc,X0} + {Daa,Da}
+    ! D0*Daaa+Daaa*D0
+    CALL Multiply(P0,P3_1,Tmp1)
+    CALL Multiply(P3_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Da*Daa
+    CALL Multiply(P1_1,P2_1,Tmp2)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! Daa*Da
+    CALL Multiply(P2_1,P1_1,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P3_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P3_1,Two)
+       CALL Add(P3_1,Tmp3,Tmp1)
+       CALL Filter(P3_1,Tmp1)
+    ENDIF
+  END SUBROUTINE Order3_AAA
+  !
+  !
+  SUBROUTINE Order3_AAC(P0,P1_1,P1_3,P2_1,P2_2,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_3,P2_1,P2_2,P3_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_3,P2_1,P2_2,P3_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Daac = {Daac,X0} + 1/3{Daa,Dc} + 2/3{Dac,Da}
+    ! D0*Daac+Daac*D0
+    CALL Multiply(P0,P3_1,Tmp1)
+    CALL Multiply(P3_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Da*Dac
+    CALL Multiply(P1_1,P2_2,Tmp2)
+    CALL Multiply(Tmp2,2.0d0/3.0d0)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! Dac*Da
+    CALL Multiply(P2_2,P1_1,Tmp2)
+    CALL Multiply(Tmp2,2.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Dc*Daa
+    CALL Multiply(P1_3,P2_1,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp3,Tmp2,Tmp1)
+    ! Daa*Dc
+    CALL Multiply(P2_1,P1_3,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P3_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P3_1,Two)
+       CALL Add(P3_1,Tmp3,Tmp1)
+       CALL Filter(P3_1,Tmp1)
+    ENDIF
+  END SUBROUTINE Order3_AAC
+  !
+  !
+  SUBROUTINE Order3_ABB(P0,P1_1,P1_2,P2_1,P2_3,P3_1,Tmp1,Tmp2,Tmp3,N,Ne)
+#ifdef PARALLEL
+    TYPE(DBCSR)  , INTENT(INOUT) :: P0
+    TYPE(DBCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,P2_3,P3_1,Tmp1,Tmp2,Tmp3
+#else
+    TYPE( BCSR)  , INTENT(INOUT) :: P0
+    TYPE( BCSR)  , INTENT(INOUT) :: P1_1,P1_2,P2_1,P2_3,P3_1,Tmp1,Tmp2,Tmp3
+#endif
+    REAL(DOUBLE) , INTENT(IN   ) :: N,Ne
+    ! Dabb = {Dabb,X0}+2/3{Dab,Db}+1/3{Dbb,Da}
+    ! D0*Dabb+Dabb*D0
+    CALL Multiply(P0,P3_1,Tmp1)
+    CALL Multiply(P3_1,P0,Tmp2)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Db*Dab
+    CALL Multiply(P1_2,P2_1,Tmp2)
+    CALL Multiply(Tmp2,2.0d0/3.0d0)
+    CALL Add(Tmp2,Tmp3,Tmp1)
+    ! Dab*Db
+    CALL Multiply(P2_1,P1_2,Tmp2)
+    CALL Multiply(Tmp2,2.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    ! Da*Dbb
+    CALL Multiply(P1_1,P2_3,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp3,Tmp2,Tmp1)
+    ! Dbb*Da
+    CALL Multiply(P2_3,P1_1,Tmp2)
+    CALL Multiply(Tmp2,1.0d0/3.0d0)
+    CALL Add(Tmp1,Tmp2,Tmp3)
+    IF(N.GE.Ne) THEN
+       CALL Filter(P3_1,Tmp3)
+    ELSE
+       CALL Multiply(Tmp3,-One)
+       CALL Multiply(P3_1,Two)
+       CALL Add(P3_1,Tmp3,Tmp1)
+       CALL Filter(P3_1,Tmp1)
+    ENDIF
+  END SUBROUTINE Order3_ABB
   !
   !
   SUBROUTINE PutXFormPrim(Prog,Args,PPrm,Z,Tmp)
