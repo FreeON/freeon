@@ -213,7 +213,6 @@ MODULE DerivedTypes
       TYPE(DBL_RNK3)   :: Typ2Exp
       TYPE(DBL_RNK3)   :: Typ2CCo
    END TYPE  
-#ifdef PERIODIC
 !------------------------------------------------------------------------------------
 ! The Set of Cells needed to sum over: CellSet
 !
@@ -247,8 +246,8 @@ MODULE DerivedTypes
      REAL(DOUBLE),DIMENSION(3)   :: TransVec   !-- Origin Translate Vector
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShape   !-- Box Shape Vectors
      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh   !-- Inverse of the Box Shape Vectors
-  END TYPE PBCInfo
-#endif                                    
+     REAL(DOUBLE),DIMENSION(3,3) :: LatFrc     !-- Lattice Forces
+  END TYPE PBCInfo                               
 !----------------------------------------------------------------
 !  Coordinates
 !
@@ -271,13 +270,11 @@ MODULE DerivedTypes
       REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
       LOGICAL          :: Unstable  !-- SCF is unstable at this geometry 
       TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
-#ifdef PERIODIC
 !     Perodic Stuff
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
       TYPE(DBL_RNK2)   :: AbBoxCarts!-- Abosolute coords in fractional
       TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
-#endif 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
       INTEGER          :: Nkind     !-- Number of atom kinds or types

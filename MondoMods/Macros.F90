@@ -297,13 +297,9 @@ CONTAINS
     CALL InitMMech()
     ! Load global thresholding values
     CALL SetThresholds(CurBase)
-#ifdef PERIODIC
-#ifdef PARALLEL_CLONES
-    ! Load the outer set of lattice vectors 
-    ! WILL HAVE TO CHANGE WHEN BOX FORCES ARE ADDED
-    CALL Get(CS_OUT,Tag_O=CurBase)
-#endif
-#endif
+    ! Load the outer and inner set of lattice vectors 
+    CALL Get(CS_IN ,'CS_IN' ,Tag_O=CurBase)
+    CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
   END SUBROUTINE LoadGroupGlobals
   !=========================================================
   ! MARK FAILURE OF PROG

@@ -10,7 +10,6 @@ MODULE CellSets
   USE Order
   USE MemMan
   IMPLICIT NONE
-#ifdef PERIODIC
   CONTAINS
 !--------------------------------------------------------------------------
 ! Print the CellSet
@@ -239,5 +238,4 @@ MODULE CellSets
 !
   END SUBROUTINE Sort_CellSet
 !
-#endif
 END MODULE CellSets

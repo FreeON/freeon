@@ -319,11 +319,9 @@ MODULE MemMan
          CALL New(A%Carts,(/3,A%NAtms/))
          CALL New(A%AbBoxCarts,(/3,A%NAtms/))
          CALL New(A%Vects,(/3,A%NAtms/))
-#ifdef PERIODIC
          CALL New(A%BoxCarts,(/3,A%NAtms/))
          CALL New(A%BoxVects,(/3,A%NAtms/))
          CALL New(A%AbCarts,(/3,A%NAtms/))
-#endif
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%LagrMult,A%NLagr)
          CALL New(A%LagrDispl,A%NLagr)
@@ -682,12 +680,10 @@ MODULE MemMan
          CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
          CALL Delete(A%Vects)
-#ifdef PERIODIC
          CALL Delete(A%BoxCarts)
          CALL Delete(A%AbBoxCarts)
          CALL Delete(A%BoxVects)
          CALL Delete(A%AbCarts)
-#endif 
          CALL Delete(A%Displ)
          A%NLagr=0
          CALL Delete(A%LagrMult)

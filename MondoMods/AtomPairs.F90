@@ -1,10 +1,8 @@
 !--  This source code is part of the MondoSCF suite of 
 !--  linear scaling electronic structure codes.  
-
 !--  Matt Challacombe and  C. J. Tymczak
 !--  Los Alamos National Laboratory
 !--  Copyright 2000, The University of California
-
 !    Compute the Atom Pair and the Cells for PBC
 
 MODULE AtomPairs
@@ -14,16 +12,12 @@ MODULE AtomPairs
   USE GlobalObjects
   USE BoundingBox
   USE Thresholding
-#ifdef PERIODIC
   USE CellSets
-#endif
   IMPLICIT NONE
 !-------------------------------------------------------------------------------
 ! Global variables
 !-------------------------------------------------------------------------------
-#ifdef PERIODIC
   TYPE(CellSet)                :: CS_OUT,CS_IN
-#endif
 CONTAINS
 !-------------------------------------------------------------------------------
 ! Test to see if the atomic overlap is above tolerance and create pair
@@ -35,13 +29,7 @@ CONTAINS
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
     TYPE(BBox),OPTIONAL       :: Box_O
-#ifdef PERIODIC
     Pair%AB2 = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
-#else
-    Pair%AB2 = (GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
-             + (GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
-             + (GM%Carts%D(3,I)-GM%Carts%D(3,J))**2 
-#endif
     Pair%KA   = GM%AtTyp%I(I)
     Pair%KB   = GM%AtTyp%I(J)
     Pair%NA   = BS%BFKnd%I(Pair%KA)
@@ -147,7 +135,6 @@ CONTAINS
     END SELECT
 !  
   END FUNCTION CalculateQuadruPole
-#ifdef PERIODIC
 !-------------------------------------------------------------------------------
 ! Set up the lattice vecters to sum over 
 ! Also, Added a Factor that Takes into Account the Box Size and Shape
@@ -414,24 +401,96 @@ CONTAINS
     MaxAtomDist = Two*MaxAtomDist
 !
   END FUNCTION MaxAtomDist
-#endif
+!-------------------------------------------------------------------------------
+!   Calculate Inverse Matrix
+!-------------------------------------------------------------------------------
+  FUNCTION InverseMatrix(Mat) RESULT(InvMat)
+    REAL(DOUBLE)                    :: Det,Norm
+    REAL(DOUBLE),DIMENSION(3,3)     :: Mat,InvMat
+
+!
+    Det  = Mat(1,1)*Mat(2,2)*Mat(3,3) + Mat(1,2)*Mat(2,3)*Mat(3,1) + Mat(1,3)*Mat(2,1)*Mat(3,2) &
+         - Mat(1,3)*Mat(2,2)*Mat(3,1) - Mat(1,1)*Mat(2,3)*Mat(3,2) - Mat(1,2)*Mat(2,1)*Mat(3,3)
+    Norm = One/Det
+    InvMat(1,1) = Norm*(Mat(2,2)*Mat(3,3) - Mat(2,3)*Mat(3,2))
+    InvMat(1,2) = Norm*(Mat(1,3)*Mat(3,2) - Mat(1,2)*Mat(3,3))
+    InvMat(1,3) = Norm*(Mat(1,2)*Mat(2,3) - Mat(1,3)*Mat(2,2))
+    InvMat(2,1) = Norm*(Mat(2,3)*Mat(3,1) - Mat(2,1)*Mat(3,3))
+    InvMat(2,2) = Norm*(Mat(1,1)*Mat(3,3) - Mat(1,3)*Mat(3,1))
+    InvMat(2,3) = Norm*(Mat(1,3)*Mat(2,1) - Mat(1,1)*Mat(2,3))
+    InvMat(3,1) = Norm*(Mat(2,1)*Mat(3,2) - Mat(2,2)*Mat(3,1))
+    InvMat(3,2) = Norm*(Mat(1,2)*Mat(3,1) - Mat(1,1)*Mat(3,2))
+    InvMat(3,3) = Norm*(Mat(1,1)*Mat(2,2) - Mat(1,2)*Mat(2,1))
+!
+  END FUNCTION InverseMatrix
+!-------------------------------------------------------------------------------
+!  Do the Latice Force Contraction
+!-------------------------------------------------------------------------------
+  FUNCTION LaticeForce(GM,nlm,F) RESULT(LatF)
+    TYPE(CRDS)                     :: GM
+    INTEGER                        :: I,J
+    REAL(DOUBLE),DIMENSION(3)      :: nlm,F
+    REAL(DOUBLE),DIMENSION(3,3)    :: LatF
+!
+    LatF=Zero
+    DO I=1,3
+       DO J=1,3
+          IF(GM%PBC%AutoW(I).AND.GM%PBC%AutoW(J)) THEN
+             LatF(I,J)= nlm(I)*F(J)
+          ENDIF
+       ENDDO
+    ENDDO
+!
+  END FUNCTION LaticeForce
+!-------------------------------------------------------------------------------
+! Make GM Periodic
+!-------------------------------------------------------------------------------
+  SUBROUTINE MakeGMPeriodic(GM,WP_O)
+    TYPE(CRDS)                     :: GM
+    INTEGER                        :: K
+    LOGICAL,OPTIONAL,DIMENSION(3)  :: WP_O
+    LOGICAL,DIMENSION(3)           :: WP
+!
+!   Calculate the Cell Volume
+!
+    IF(PRESENT(WP_O)) THEN
+       WP = WP_O
+    ELSE
+       WP = (/.true.,.true.,.true./)
+    ENDIF
+!   Calculate the Volume and Dipole term
+    IF(WP(1)) THEN
+       GM%PBC%CellVolume = One
+       DO K=1,3
+          IF(GM%PBC%AutoW(K)) THEN
+             GM%PBC%CellVolume = GM%PBC%CellVolume*GM%PBC%BoxShape(K,K)
+          ENDIF
+       ENDDO
+!      Calculate the Dipole and Quadripole Factors
+       IF(GM%PBC%Dimen < 2) THEN
+          GM%PBC%DipoleFAC = Zero
+          GM%PBC%QupoleFAC = Zero
+       ELSEIF(GM%PBC%Dimen ==2) THEN
+          GM%PBC%DipoleFAC = (Four*Pi/GM%PBC%CellVolume)*(One/(GM%PBC%Epsilon+One))
+          GM%PBC%QupoleFAC =  Zero
+          IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
+       ELSEIF(GM%PBC%Dimen ==3) THEN
+          GM%PBC%DipoleFAC = -(Four*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One))
+          GM%PBC%QupoleFAC =  (Two*Pi/GM%PBC%CellVolume)*(One/Three - One/(Two*GM%PBC%Epsilon+One))
+          IF(ABS(GM%PBC%DipoleFAC) .LT. 1.D-14) GM%PBC%DipoleFAC = Zero
+          IF(ABS(GM%PBC%QupoleFAC) .LT. 1.D-14) GM%PBC%QupoleFAC = Zero
+       ENDIF
+    ENDIF
+!   Calculate The Inverse of BoxShape  InvBoxSh = [BoxShape]^(-1)
+    IF(WP(2)) THEN
+       GM%PBC%InvBoxSh = InverseMatrix(GM%PBC%BoxShape)
+    ENDIF
+!   Calculate Atom Positions
+    IF(WP(3)) THEN
+       CALL CalAtomCarts(GM)
+    ENDIF
+!
+  END SUBROUTINE MakeGMPeriodic
 !
 END MODULE AtomPairs
-!!$!===================================================================================
-!!$!
-!!$!===================================================================================
-!!$      SUBROUTINE VecFormatToAngFormat(GM,A,B,C,Alpha,Beta,Gamma)
-!!$        TYPE(CRDS)                  :: GM
-!!$        REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
-!!$        REAL(DOUBLE),PARAMETER      :: DegToRad =  1.745329251994329576923D-2
-!!$!
-!!$        A = SQRT(GM%PBC%BoxShape(1,1)**2 + GM%PBC%BoxShape(2,1)**2+ GM%PBC%BoxShape(3,1)**2)
-!!$        B = SQRT(GM%PBC%BoxShape(1,2)**2 + GM%PBC%BoxShape(2,2)**2+ GM%PBC%BoxShape(3,2)**2)
-!!$        C = SQRT(GM%PBC%BoxShape(1,3)**2 + GM%PBC%BoxShape(2,3)**2+ GM%PBC%BoxShape(3,3)**2)
-!!$!
-!!$        Gamma = ACOS((GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,2))/(A*B))/DegToRad
-!!$        Beta  = ACOS((GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(1,3))/(A*C))/DegToRad
-!!$        Alpha = GM%PBC%BoxShape(1,2)*GM%PBC%BoxShape(1,3)+GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(2,3)   
-!!$        Alpha = ACOS(Alpha/(B*C))/DegToRad
-!!$!
-!!$      END SUBROUTINE VecFormatToAngFormat
+

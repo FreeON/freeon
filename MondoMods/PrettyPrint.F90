@@ -25,9 +25,7 @@ MODULE PrettyPrint
 #ifdef PARALLEL
                        Print_DBCSR,                       &
 #endif
-#ifdef PERIODIC
                        Print_PBCInfo,    Print_CellSet,   &
-#endif
                        Print_MEMS,       Print_TIME,      &
                        Print_HGRho
    END INTERFACE
@@ -389,11 +387,10 @@ MODULE PrettyPrint
 1006    FORMAT(1x,I2,6x,8(1x,D14.8))
 1007    FORMAT(60('='))
       END SUBROUTINE Print_BSET
-#ifdef PERIODIC
 !----------------------------------------------------------------PRINT PBC
 !
 !----------------------------------------------------------------PRINT PBC
-     SUBROUTINE Print_PBCInfo(PBC,FileName_O,Unit_O)
+      SUBROUTINE Print_PBCInfo(PBC,FileName_O,Unit_O)
         TYPE(PBCInfo)                        :: PBC         
         INTEGER                              :: I,K,PU
         LOGICAL                              :: Opened
@@ -403,118 +400,50 @@ MODULE PrettyPrint
 !
         PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
 
-           IF(PBC%PFFOvRide)THEN
-              Mssg='PFFOvRide = .TRUE., PFFMaxEll = '//TRIM(IntToChar(PBC%PFFMaxEll))  &
-                   //', PFFMaxLay = '//TRIM(IntToChar(PBC%PFFMaxLay))
-              WRITE(PU,*)TRIM(Mssg)
-           ENDIF
+        IF(PBC%PFFOvRide)THEN
+           Mssg='PFFOvRide = .TRUE., PFFMaxEll = '//TRIM(IntToChar(PBC%PFFMaxEll))  &
+                //', PFFMaxLay = '//TRIM(IntToChar(PBC%PFFMaxLay))
+           WRITE(PU,*)TRIM(Mssg)
+        ENDIF
            
-           Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
-           WRITE(PU,*)TRIM(Mssg)
+        Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
+        WRITE(PU,*)TRIM(Mssg)
 
-           Mssg=' TransVec = ('//TRIM(DblToMedmChar(PBC%TransVec(1)))//', ' &
-                               //TRIM(DblToMedmChar(PBC%TransVec(2)))//', ' &
-                               //TRIM(DblToMedmChar(PBC%TransVec(3)))//'} '
-           WRITE(PU,*)TRIM(Mssg)
-           Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter(1)))//', ' &
-                                 //TRIM(DblToMedmChar(PBC%CellCenter(2)))//', ' &
-                                 //TRIM(DblToMedmChar(PBC%CellCenter(3)))//'} '
-           WRITE(PU,*)TRIM(Mssg)
-           WRITE(PU,*)' Lattice Vectors: '
-           Mssg=' a = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,1)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(2,1)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(3,1)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-           Mssg=' b = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,2)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(2,2)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(3,2)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-           Mssg=' c = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,3)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(2,3)))//', ' &
-                        //TRIM(DblToMedmChar(PBC%BoxShape(3,3)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-           WRITE(PU,*)' Inverse Lattice Vectors: '
-           Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,1)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,1)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,1)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-           Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,2)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,2)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,2)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-           Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,3)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,3)))//', ' &
-                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,3)))//'} '                
-           WRITE(PU,*)TRIM(Mssg)
-
-
-
-
-
-#ifdef LDKFJLSDFJLDSFJ
-111     FORMAT(1x,'  a  = (',F14.10,',',F14.10,',',F14.10,')')
-
-              
-              WRITE(PU,100)
-              WRITE(PU,101) PBC%Dimen,PBC%CellVolume,PBC%Dimen
-              WRITE(PU,102) PBC%AutoW(1),PBC%AutoW(2),PBC%AutoW(3)
-              WRITE(PU,103) PBC%CellCenter(1),PBC%CellCenter(2),PBC%CellCenter(3)
-              WRITE(PU,104) PBC%TransVec(1),PBC%TransVec(2),PBC%TransVec(3)
-              WRITE(PU,110)  
-              IF(PBC%Dimen==1) THEN
-                 IF(PBC%AutoW(1)) WRITE(PU,121) PBC%BoxShape(1,1)
-                 IF(PBC%AutoW(2)) WRITE(PU,122) PBC%BoxShape(2,2)                 
-                 IF(PBC%AutoW(3)) WRITE(PU,123) PBC%BoxShape(3,3)
-              ELSEIF(PBC%Dimen==2) THEN
-                 IF(.NOT. PBC%AutoW(1) ) THEN
-                    WRITE(PU,132) PBC%BoxShape(2,2), PBC%BoxShape(3,2)
-                    WRITE(PU,133) PBC%BoxShape(2,3), PBC%BoxShape(3,3)
-                 ENDIF
-                 IF(.NOT. PBC%AutoW(2) ) THEN
-                    WRITE(PU,131) PBC%BoxShape(1,1), PBC%BoxShape(3,1)
-                    WRITE(PU,133) PBC%BoxShape(1,3), PBC%BoxShape(3,3)
-                 ENDIF
-                 IF(.NOT. PBC%AutoW(3) ) THEN
-                    WRITE(PU,131) PBC%BoxShape(1,1), PBC%BoxShape(2,1)
-                    WRITE(PU,132) PBC%BoxShape(1,2), PBC%BoxShape(2,2)
-                 ENDIF
-              ELSEIF(PBC%Dimen==3) THEN
-                 WRITE(PU,111) PBC%BoxShape(1,1),PBC%BoxShape(2,1),PBC%BoxShape(3,1)
-                 WRITE(PU,112) PBC%BoxShape(1,2),PBC%BoxShape(2,2),PBC%BoxShape(3,2)
-                 WRITE(PU,113) PBC%BoxShape(1,3),PBC%BoxShape(2,3),PBC%BoxShape(3,3)
-              ENDIF  
-              WRITE(PU,51)
-           ELSE
-              WRITE(PU,200)
-              WRITE(PU,51)
-           ENDIF
-!        ENDIF
-#endif
-
+        Mssg=' TransVec = ('//TRIM(DblToMedmChar(PBC%TransVec(1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%TransVec(2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%TransVec(3)))//'} '
+        WRITE(PU,*)TRIM(Mssg)
+        Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter(1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%CellCenter(2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%CellCenter(3)))//'} '
+        WRITE(PU,*)TRIM(Mssg)
+        WRITE(PU,*)' Lattice Vectors: '
+        Mssg=' a = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(2,1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(3,1)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
+        Mssg=' b = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(2,2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(3,2)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
+        Mssg=' c = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,3)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(2,3)))//', ' &
+             //TRIM(DblToMedmChar(PBC%BoxShape(3,3)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
+        WRITE(PU,*)' Inverse Lattice Vectors: '
+        Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,1)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,1)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
+        Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,2)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,2)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
+        Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,3)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,3)))//', ' &
+             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,3)))//'} '                
+        WRITE(PU,*)TRIM(Mssg)
         CALL ClosePU(PU)
-!
-50      FORMAT(72('='))
-51      FORMAT(72('-'))
-100     FORMAT(1x,'Representation of the Lattice:')
-101     FORMAT(1x,' Dimension = ',I1,'  Cell Volume = ',F14.8, ' AU^',I1)
-102     FORMAT(1x,' Periodic Boundry Conditions (x,y,z) => {',L1,',',L1,',',L1,'}')
-103     FORMAT(1x,' Cell Center Vector = (',F14.10,',',F14.10,',',F14.10,')')
-104     FORMAT(1x,' Translation Vector = (',F14.10,',',F14.10,',',F14.10,')')
-110     FORMAT(1x,' Lattice Vectors: ')
-!
-111     FORMAT(1x,'  a  = (',F14.10,',',F14.10,',',F14.10,')')
-112     FORMAT(1x,'  b  = (',F14.10,',',F14.10,',',F14.10,')')
-113     FORMAT(1x,'  c  = (',F14.10,',',F14.10,',',F14.10,')')
-!
-121     FORMAT(1x,'  a  = (',F14.10,')')
-122     FORMAT(1x,'  b  = (',F14.10,')')
-123     FORMAT(1x,'  c  = (',F14.10,')')
-!
-131     FORMAT(1x,'  a  = (',F14.10,',',F14.10,')')
-132     FORMAT(1x,'  b  = (',F14.10,',',F14.10,')')
-133     FORMAT(1x,'  c  = (',F14.10,',',F14.10,')')
-!
-200     FORMAT(1x,' *** Periodic is Off *** ')
 !
      END SUBROUTINE Print_PBCInfo
 !--------------------------------------------------------------------------
@@ -545,7 +474,6 @@ MODULE PrettyPrint
    ENDIF
 #endif
   END SUBROUTINE Print_CellSet
-#endif   
 !----------------------------------------------------------------PRINT COORDINATES
 !
 !----------------------------------------------------------------PRINT COORDINATES
@@ -559,9 +487,7 @@ MODULE PrettyPrint
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
         CHARACTER(LEN=DCL)                   :: AuxChar
         REAL(DOUBLE)                         :: AA
-#ifdef PERIODIC
         REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
-#endif
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
@@ -611,13 +537,11 @@ MODULE PrettyPrint
                  Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <ETotal> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,22)Mssg
               22 FORMAT('REMARK   1  ',A60)
-#ifdef PERIODIC
                  IF(GM%PBC%Dimen/=0)THEN
                     CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
                     WRITE(PU,33)a*AA,b*AA,c*AA,alpha,beta,gamma
                  33 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
                  ENDIF
-#endif                 
                  DO I=1,GM%NAtms
                     WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
                  44 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
@@ -1171,64 +1095,39 @@ MODULE PrettyPrint
 !========================================================================================
 ! Print The Gradients
 !========================================================================================
-  SUBROUTINE Print_Force(GM_Loc,Frc,Name,FileName_O,Unit_O,Fmat_O)
-    TYPE(CRDS)                     :: GM_Loc
+  SUBROUTINE Print_Force(GM,Name_O,Unit_O)
+    TYPE(CRDS)                     :: GM
     TYPE(DBL_VECT)                 :: Frc
-    CHARACTER(LEN=*)               :: Name
-    CHARACTER(LEN=*),OPTIONAL      :: FileName_O
-    INTEGER,OPTIONAL               :: Unit_O,Fmat_O
-    INTEGER                        :: AtA,A1,PU,Fmat
+    CHARACTER(LEN=*),OPTIONAL      :: Name_O
+    INTEGER,OPTIONAL               :: Unit_O
+    INTEGER                        :: AtA,A1,PU,I,J
 !
-    IF(Present(Fmat_O)) THEN
-       Fmat=Fmat_O
-    ELSE
-       Fmat=1
-    ENDIF
-!
-    IF(Fmat==0) THEN
-       IF(PrintFlags%Key/=DEBUG_MAXIMUM) RETURN
-       PU=OpenPU(FileName_O,Unit_O)
-       WRITE(PU,32) TRIM(Name)
-       DO AtA = 1,GM_Loc%Natms
-          A1 = 3*(AtA-1)+1
-          WRITE(PU,36) AtA,Frc%D(A1:A1+2)
-       ENDDO
-       CALL ClosePU(PU)
-    ELSEIF(Fmat==1) THEN
-       PU=OpenPU(FileName_O,Unit_O)
+    PU=OpenPU(Unit_O=Unit_O)
+    IF(PRESENT(Name_O)) WRITE(PU,32) TRIM(Name_O)
+    WRITE(PU,33)
+    WRITE(PU,34)
+    WRITE(PU,33) 
+    DO AtA = 1,GM%Natms
+       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Vects%D(1:3,AtA)
+    ENDDO
+    WRITE(PU,33) 
+    IF(GM%PBC%Dimen > 0) THEN
+       WRITE(PU,32) 
+       WRITE(PU,32) TRIM('                  Lattice Forces')
        WRITE(PU,33)
-       WRITE(PU,32) TRIM(Name)
-       WRITE(PU,34)
-       WRITE(PU,33) 
-       DO AtA = 1,GM_Loc%Natms
-          A1 = 3*(AtA-1)+1
-          WRITE(PU,35) AtA,INT(GM_Loc%AtNum%D(AtA)),Frc%D(A1:A1+2)
+       DO I=1,3
+          WRITE(PU,40) GM%PBC%LatFrc(I,1:3)       
        ENDDO
        WRITE(PU,33) 
-       CALL ClosePU(PU)
-    ELSEIF(Fmat==2) THEN
-       PU=OpenPU(FileName_O,Unit_O)
-       WRITE(PU,42)
-       WRITE(PU,32) TRIM(Name)
-       WRITE(PU,40)
-       WRITE(PU,42) 
-       DO AtA = 1,GM_Loc%Natms
-          A1 = 3*(AtA-1)+1
-          WRITE(PU,41) AtA,INT(GM_Loc%AtNum%D(AtA)),GM_Loc%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
-       ENDDO
-       WRITE(PU,42) 
-       CALL ClosePU(PU)
     ENDIF
+    CALL ClosePU(PU)
 !
 32  FORMAT(1X,A)
-33  FORMAT(54('-'))
-34  FORMAT('  Atom      Z                Forces (au) ')
-35  FORMAT('  ',I6,'  ',I3,'  ',3(F16.8))
-36  FORMAT(I4,3(F20.12))
+33  FORMAT(56('-'))
+34  FORMAT('   Atom   Z                Forces (au) ')
+35  FORMAT(I6,'  ',I3,'  ',3(F14.10))
 !
-40  FORMAT('  Atom      Z                Positions(au)                           Forces (au) ')
-41  FORMAT(' ',I4,'     ',I3,6(F16.8))
-42  FORMAT(95('-'))
+40  FORMAT(3(2X,F14.10))
 !
   END SUBROUTINE Print_Force
 #ifdef EXTREME_DEBUG

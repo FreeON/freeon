@@ -22,8 +22,8 @@ MODULE BraBloks
 !
   SUBROUTINE NewBraBlok(BS,Gradients_O)
     TYPE(BSET),OPTIONAL :: BS
-    INTEGER    :: K,NBF,L,M,N,LMN,N_NAsym
-    LOGICAL, OPTIONAL :: Gradients_O
+    INTEGER             :: K,NBF,L,M,N,LMN,N_NAsym
+    LOGICAL, OPTIONAL   :: Gradients_O
 !-------------------------------------------------------------------------------
 #ifdef MMech
   CALL InitMMech()
@@ -109,29 +109,29 @@ MODULE BraBloks
     REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,Fx,Fy,Fz
     INTEGER           :: N_NAsym
 !-------------------------------------------------------------------------------
-      KA=Prim%KA
-      KB=Prim%KB
-      CFA=Prim%CFA
-      CFB=Prim%CFB
-      PFA=Prim%PFA
-      PFB=Prim%PFB
-      ZA=Prim%ZA
-      ZB=Prim%ZB
-      Zeta=Prim%Zeta
-      Xi=Prim%Xi
-      ExpAB=EXP(-Xi*Prim%AB2)
-      Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
-      PA=Prim%P-Prim%A
-      PB=Prim%P-Prim%B
-      IndexA  = CFBlokDex(BS,CFA,KA)
-      IndexB  = CFBlokDex(BS,CFB,KB)
-      StartLA = BS%LStrt%I(CFA,KA)        
-      StopLA  = BS%LStop%I(CFA,KA)
-      StartLB = BS%LStrt%I(CFB,KB)        
-      StopLB  = BS%LStop%I(CFB,KB)
-      MaxLA=BS%ASymm%I(2,CFA,KA)
-      MaxLB=BS%ASymm%I(2,CFB,KB)
-      N_NAsym=BS%NASym
+    KA=Prim%KA
+    KB=Prim%KB
+    CFA=Prim%CFA
+    CFB=Prim%CFB
+    PFA=Prim%PFA
+    PFB=Prim%PFB
+    ZA=Prim%ZA
+    ZB=Prim%ZB
+    Zeta=Prim%Zeta
+    Xi=Prim%Xi
+    ExpAB=EXP(-Xi*Prim%AB2)
+    Prim%P=(ZA*Prim%A+ZB*Prim%B)/Prim%Zeta
+    PA=Prim%P-Prim%A
+    PB=Prim%P-Prim%B
+    IndexA  = CFBlokDex(BS,CFA,KA)
+    IndexB  = CFBlokDex(BS,CFB,KB)
+    StartLA = BS%LStrt%I(CFA,KA)        
+    StopLA  = BS%LStop%I(CFA,KA)
+    StartLB = BS%LStrt%I(CFB,KB)        
+    StopLB  = BS%LStop%I(CFB,KB)
+    MaxLA=BS%ASymm%I(2,CFA,KA)
+    MaxLB=BS%ASymm%I(2,CFB,KB)
+    N_NAsym=BS%NASym
 !
     IF(PRESENT(Gradients_O))THEN
 !-------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ MODULE BraBloks
                    Fy=Two*ZA*E%D(2,MA+1,MB,MAB)-DBLE(MA)*E%D(2,MA-1,MB,MAB)
                 ENDIF
                 dHGBra%D(LMN,IA,IB,2)=dHGBra%D(LMN,IA,IB,2)+CAB*Fy*E%D(1,LA,LB,LAB)*E%D(3,NA,NB,NAB)
-          ENDDO;ENDDO;ENDDO;
+             ENDDO;ENDDO;ENDDO;
              DO LAB=0,LA+LB
              DO MAB=0,MA+MB
              DO NAB=0,NA+NB+1

@@ -33,9 +33,9 @@ MODULE SetXYZ
 !
    EXTERNAL bcsr_to_dens
    CONTAINS
-!
-
-#ifdef PERIODIC
+!======================================================================
+!    Set Vector to
+!======================================================================
      SUBROUTINE VecToAng(PBC,A,B,C,Alpha,Beta,Gamma)
         TYPE(PBCInfo)               :: PBC
         REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
@@ -48,7 +48,6 @@ MODULE SetXYZ
         Alpha = PBC%BoxShape(1,2)*PBC%BoxShape(1,3)+PBC%BoxShape(2,2)*PBC%BoxShape(2,3)   
         Alpha = ACOS(Alpha/(B*C))/DegToRad
       END SUBROUTINE VecToAng
-#endif
 !======================================================================
 !     Copy a Timer
 !======================================================================

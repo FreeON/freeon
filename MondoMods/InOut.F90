@@ -24,12 +24,10 @@ MODULE InOut
 #ifdef PARALLEL
           Get_DBCSR,                                &
 #endif
-#ifdef PERIODIC
-         Get_PBCInfo,Get_CellSet,                   &
-#endif  
+          Get_PBCInfo,  Get_CellSet,                &
           Get_ARGMT,    Get_HGRho,                  &
-          Get_CHR_VECT, Get_LOG_VECT,     &
-          Get_INTC,     Get_BMATR,        &
+          Get_CHR_VECT, Get_LOG_VECT,               &
+          Get_INTC,     Get_BMATR,                  &
           Get_CMPoles
 
   END INTERFACE
@@ -42,12 +40,10 @@ MODULE InOut
 #ifdef PARALLEL
           Put_DBCSR,                                &
 #endif
-#ifdef PERIODIC
-          Put_PBCInfo,Put_CellSet,                  &
-#endif 
+          Put_PBCInfo,  Put_CellSet,                &
           Put_TOLS,     Put_BCSR,     Put_HGRho,    &
-          Put_CHR_VECT, Put_LOG_VECT,        &
-          Put_INTC, Put_BMATR,               &
+          Put_CHR_VECT, Put_LOG_VECT,               &
+          Put_INTC, Put_BMATR,                      &
           Put_CMPoles
   END INTERFACE
 
@@ -1232,10 +1228,8 @@ CONTAINS
                    CALL Put(BS%Typ2CCo,'typetwocoefficients',Tag_O=Tag_O)
                 ENDIF
               END SUBROUTINE Put_BSET
-#ifdef PERIODIC
               !-------------------------------------------------------------------------------
               !     Get the Periodic Info
-
               SUBROUTINE Get_PBCInfo(PBC,Tag_O)
                 TYPE(PBCInfo),            INTENT(OUT) :: PBC 
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
@@ -1290,6 +1284,16 @@ CONTAINS
                 CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape31',Tag_O=Tag_O)
                 CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
                 CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
+
+                CALL Get(PBC%LatFrc(1,1),'LatFrc11',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(1,2),'LatFrc12',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(1,3),'LatFrc13',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(2,1),'LatFrc21',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(2,2),'LatFrc22',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(2,3),'LatFrc23',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(3,1),'LatFrc31',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(3,2),'LatFrc32',Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc(3,3),'LatFrc33',Tag_O=Tag_O)      
 
               END SUBROUTINE Get_PBCInfo
               !-------------------------------------------------------------------------------
@@ -1350,8 +1354,17 @@ CONTAINS
                 CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
                 CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
 
+                CALL Put(PBC%LatFrc(1,1),'LatFrc11',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(1,2),'LatFrc12',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(1,3),'LatFrc13',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(2,1),'LatFrc21',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(2,2),'LatFrc22',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(2,3),'LatFrc23',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(3,1),'LatFrc31',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(3,2),'LatFrc32',Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc(3,3),'LatFrc33',Tag_O=Tag_O)      
+
               END SUBROUTINE Put_PBCInfo
-#endif
               !-------------------------------------------------------------------------------
               !     Get some coordinates
 
@@ -1387,13 +1400,11 @@ CONTAINS
                 CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
                 CALL Get(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
                 CALL Get(GM%CConstrain,'constraints',Tag_O=Tag_O)
-#ifdef PERIODIC
                 CALL Get(GM%PBC,Tag_O=Tag_O)
                 CALL Get(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
                 CALL Get(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
                 CALL Get(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
                 CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
-#endif
                 CALL Get(GM%Displ,'Displ',Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Get(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
@@ -1434,13 +1445,11 @@ CONTAINS
                 CALL Put(GM%Vects,  'velocities',Tag_O=Tag_O)
                 CALL Put(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
                 CALL Put(GM%CConstrain,'constraints',Tag_O=Tag_O)
-#ifdef PERIODIC
                 CALL Put(GM%PBC,Tag_O=Tag_O)
                 CALL Put(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
                 CALL Put(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
                 CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
                 CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
-#endif
                 CALL Put(GM%Displ,   'Displ',Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Put(GM%LagrMult,'LagrMult',Tag_O=Tag_O)

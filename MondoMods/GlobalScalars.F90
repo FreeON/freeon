@@ -29,7 +29,8 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: Zero=0.0D0, One  =1.0D0, &
                               Two =2.0D0, Three=3.0D0, &
                               Four=4.0D0, Five =5.0D0, &
-                              Six =6.0D0
+                              Six =6.0D0, Seven=7.0D0, &
+                              Eight=8.0D0
 !-------------------------------------------------------------------------------
 !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
 !   
