@@ -900,6 +900,8 @@ CONTAINS
             ENDIF
          ENDDO
        ENDIF
+!      Get Lattice Forces
+       CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
