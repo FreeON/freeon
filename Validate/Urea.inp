@@ -1,6 +1,31 @@
 <BeginTitle>
 
-** Urea **
+        ** Urea **
+
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+SCFMethod=(RH,RH)
+BasisSets=(STO-2G,6-31G**)
+ModelChem=(HF,BLYPxc)
+Accuracy =(Loose,Tight)
+DebugAll =(MaxDebug)
+Geometry=(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+H   -0.707   -1.226    1.618
+H    0.457    0.052    1.712
+N   -0.171   -0.509    1.173
+H    0.360    0.842   -1.712
+H    1.060    1.226   -0.175
+O   -1.060   -0.982   -0.822
+N    0.438    0.672   -0.729
+C   -0.297   -0.302   -0.155
+<EndGeometry>
 
 ==========================================================
 
@@ -88,41 +113,10 @@ Forces:
 7    0.020217316    0.019024020    0.013834299
 8   -0.016578773   -0.015023692   -0.013540664
 --------------------------------------------------
-
-<EndTitle>
-
-<BeginOptions>
-Charge=0
-Multiplicity=1
-Guess=SuperPos
-SCFMethod=(RH,RH)
-BasisSets=(STO-2G,6-31G**)
-ModelChem=(HF,BLYPxc)
-Accuracy =(Loose,Tight)
-DebugAll =(MaxDebug)
-Geometry=(InAngstroms,NoOrder)
-<EndOptions>
-
-<BeginGeometry>
-H   -0.707   -1.226    1.618
-H    0.457    0.052    1.712
-N   -0.171   -0.509    1.173
-H    0.360    0.842   -1.712
-H    1.060    1.226   -0.175
-O   -1.060   -0.982   -0.822
-N    0.438    0.672   -0.729
-C   -0.297   -0.302   -0.155
-<EndGeometry>
-
-
-  Followed by a restricted Roothaan-Hall solution of the SCF using
-  a very tight accuracy level6-31Gss and the B88x/LYPc model.
- 
-  Accuracy level 4 for the 6-31Gss basis set:
-  TrixNeglect = 0.10D-06, CubeNeglect = 0.10D-09,
-  TwoENeglect = 0.10D-11, DistNeglect = 0.10D-13                                                                                                                  
-Convergence statistics for RB88x/LYPc/6-31Gss:
 ========================================================================
+
+Convergence statistics for RB88x/LYPc/6-31Gss:
+
 SCF    Ink       Total             Delta       Max         DIIS   
 Cycle  Fok       Energy            E_Tot       Delta P     Error  
   0,    F,        -213.05403422, 0.4794D+02, 0.1798+309, 0.1000D+02, 

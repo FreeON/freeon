@@ -1,10 +1,7 @@
 <BeginTitle>
 
- ** SiliconTetraFluride **
+    ** Silicontetrafluride **
 
-RBLYPxc/STO-3G  -679.5923 93168
-RBLYPxc/3-21G   -685.2888 37466 
-RBLYPxc/6-31G** -689.0441 09253 
 <EndTitle>
 
 <BeginOptions>
@@ -27,9 +24,13 @@ F   1.141    1.029   -0.199
 F  -1.141    0.775    0.818  
 <EndGeometry>
 
+RBLYPxc/STO-3G  -679.5923 93168
+RBLYPxc/3-21G   -685.2888 37466 
+RBLYPxc/6-31G** -689.0441 09253 
+========================================================================
 
 Convergence statistics for RB88x/LYPc/6-31Gss:
-========================================================================
+
 SCF    Ink       Total             Delta       Max         DIIS
 Cycle  Fok       Energy            E_Tot       Delta P     Error
   0,    F,        -655.67670334, 0.1625D+02, 0.1798+309, 0.1000D+02,
@@ -42,9 +43,7 @@ Cycle  Fok       Energy            E_Tot       Delta P     Error
   7,    F,        -689.04411003, 0.5154D-10, 0.5445D-04, 0.9104D-06,
   8,    F,        -689.04411003, 0.2432D-11, 0.1447D-04, 0.4778D-07,
   9,    F,        -689.04411003, 0.3465D-14, 0.1254D-06, 0.2714D-07,
-========================================================================
 
-------------------------------------------------------
       Nuclear gradients for geometry #1
  
   Atom      Z                Forces (au)

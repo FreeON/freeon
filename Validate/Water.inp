@@ -1,6 +1,7 @@
 <BeginTitle>
-RPBE/STO-3G        -75.222866 0852  
-      <SCF>     = -.75 22286613 134627E+02 
+
+    ** Water **
+
 <EndTitle>
 
 <BeginOptions>
@@ -20,3 +21,6 @@ O    0.000000000     0.0     0.369372944
 H    0.783975899     0.0    -0.184686472 
 H   -0.783975899     0.0    -0.184686472 
 <EndGeometry>
+
+External reference number RPBE/STO-3G        -75.222866 0852  
+BENCHMARK PBE/STO-3G            <SCF>     = -.75 22286613 134627E+02 
