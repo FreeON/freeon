@@ -1,4 +1,5 @@
 #---------------------------------------------------------------
+#
 # PREPROCESSOR OPTIONS: 
 #
 CPP       =/lib/cpp -P -C \
@@ -6,9 +7,14 @@ CPP       =/lib/cpp -P -C \
 CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include
 #
 # PREPROCESSING OPTIONS: 
-CPPOPTS   =  -DPERIODIC
-#            -DPARALLEL 
+#
+# Currently, -DPERIODIC does not work with -DPARALLEL.
+# When using -DPARALLEL, uncomment options for F90_INCLUDE and MPI_LIBS
+#
+CPPOPTS = -DPERIODIC
+#-DPARALLEL  -DMPI2
 #---------------------------------------------------------------
+#
 # C Compiler and options
 #
 CC        =  gcc
@@ -26,26 +32,26 @@ MOD_POSTFIX   = mod
 #
 # Fortran Compilers, options and include files
 #
-F90          = pgf90
+F90           = pgf90
 #
-F90_OPTIMIZE = -O1 -tp athlon 
+F90_OPTIMIZE  = -O1 -tp athlon 
 #
 #F90_DEBUG    = -g -C -Mbounds -Minfo=all -Minform=inform -Mchkptr 
 #
-#F_LIST        = -Mlist 
+#F_LIST       = -Mlist 
 #
 #F_PROF       = -Mprof=lines
 #
-F90_MISC     = $(F_LIST) $(F_PROF) -Mbackslash 
+F90_MISC      = $(F_LIST) $(F_PROF) -Mbackslash 
 #
-F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
-               -I$(MONDO_HOME)/MondoMods               \
-               -I/usr/local/include                    \
-#              -I$(MPI_INC) 
+F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
+                -I$(MONDO_HOME)/MondoMods               \
+                -I/usr/local/include                    \
+#                -I$(MPI_INC) 
 #
-F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
-#
+F90_FLAGS     = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
+#
 # LINK/LOADER DIRECTIVES
 #
 LD          = $(F90) 
@@ -54,65 +60,38 @@ LDMISC      = $(F_PROF) -v  \
                         -Wl,-Bstatic # make statically linked executables
 #
 LDFLAGS     = $(LDMISC) -o 
-#
 #---------------------------------------------------------------
+#
 # ARCHIVAL
 #
 AR      = ar
 ARFLAGS = -rcv
 RANLIB  = ranlib
-#
-#---------------------------------------------------------------
-# DIRECTORIES TO SUSS FOR LIBRARIES
-#
-LibOpts=-L$(MONDO_HOME)/Libs -L/usr/local/lib \
-                             -L$(HDF_LIB) 
-#       -L$(LAPACK_LIB)
-#       -L$(MPI_LIB) 
-#
 #-------------------------------------------------------------------------------------
-# MPI LIBRARIES
 #
-# How MPICH was configured for debuging :
+# For linking with old style MPI1 (default if only using -DPARALLEL)
 #
-#./configure -memdebug -device=ch_p4 -cc=gcc -clinker=gcc -fc=pgf77 -f90=pgf90 -fortnames=UNDERSCORE --disable-c++
+#MPI_LIBS = -lmpich -L$(GM_LIB) -lgm 
 #
-# How MPICH was configured for production:
+# For new style MPI2 (use -DPARALLEL -DMPI2)
 #
-#               -cflags="-ffast-math -fexpensive-optimizations -fomit-frame-pointer -O3"
-#               -fflags="-O2 -tp p6 -pc 64"
-#
-#  ROLAND STUMPH's additions:
-#
-# -comm=shared -fortnames=UNDERSCORE -noromio --noc++ -nompe 
-#
-#MPI_LIBS= -lmpich
-#MPI_LIBS=-lmpich -L/usr/local/myrinet/lib -lgm 
+#MPI_LIBS = -L$(MPI_LIB) -llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam \
+#           -L$(GM_LIB) -lgm
 #---------------------------------------------------------------------
+#
 #  HDF5 Libraries with compression and jpeg libs. 
-#  How HDF5 was configured for production:
-#  ./configure --prefix=$HDF_HOME --enable-production --disable-debug
-#  How HDF5 was configured for debuging:
-#  setenv CFLAGS -g
-#  ./configure --prefix=$HDF_HOME --disable-production
-#   -j -l2 for parallel GNU make on dual SMP
-#  could go with either: --disable-static --disable-shared
 #
-HDF_LIBS=-lhdf5 -ljpeg -lz 
-#
+HDF_LIBS = -L$(HDF_LIB) -lhdf5 -ljpeg -lz 
 #-------------------------------------------------------------------------
+#
 #  The generic libs needed by most of the programs.  
 #
-F90_LIBRARIES = -lMondoMods $(MPI_LIBS) $(HDF_LIBS) 
-#
+F90_LIBRARIES = -L$(MONDO_HOME)/Libs -lMondoMods \
+                -L/usr/local/lib $(MPI_LIBS) $(HDF_LIBS) 
 #--------------------------------------------------------------------------
+#
 #  'Nuff said
 #
 LAPACK = -llapack -lblas
-#
-#---------------------------------------------------------------------------
-#  Define main__ if needed to link libf2c
-#
-#MAIN__= MAIN.o
 #---------------------------------------------------------------------------
 

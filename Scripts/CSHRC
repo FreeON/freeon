@@ -1,4 +1,14 @@
 #===============================================================
+# Set MPI related direcories if compiling MONDO with -DPARALLEL
+# Note, you will need to modify the Includes/CompilerSpecifics
+# file set the MPI includes etc
+#
+#setenv MPI_HOME        /usr/local/lib/lam-6.6b1
+#setenv MPI_LIB         $MPI_HOME/lib
+#setenv MPI_INC         $MPI_HOME/include
+#setenv MPI_BIN         $MPI_HOME/bin
+#setenv GM_LIB          /usr/local/rels/gm-1.4pre48/binary/lib
+#===============================================================
 # Set MONDO related enviromental variables 
 #
 setenv MONDO_PLAT        AMDLinux.PG
@@ -16,6 +26,7 @@ setenv MONDO_WORK         $MONDO_HOME/Inpts/DEVELOP
 #===============================================================
 # Set MAKE (use gnumake if your make does not support -C)
 #
+setenv MAKE make
 #setenv MAKE /usr/local/bin/gnumake
 #===============================================================
 # Set up MONDO 
@@ -42,17 +53,3 @@ setenv HDF_INC         $HDF_HOME/include
 setenv HDF_LIB         $HDF_HOME/lib
 setenv LD_LIBRARY_PATH $HDF_LIB
 setenv LD_RUN_PATH     $HDF_LIB
-#===============================================================
-# Set MPI related direcories if compiling MONDO with -DPARALLEL
-# Note, you will need to modify the Includes/CompilerSpecifics
-# file set the MPI includes etc
-#
-#setenv MPI_INC /usr/local/lib/mpi/include
-#setenv MPI_LIB /usr/local/lib/mpi/lib/IRIX64/ch_shmem
-#setenv MPI_BIN /usr/local/lib/mpi/bin
-#setenv MPI_HOST  earth
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-#setenv MPI_LIB    /usr/local/mpich-1.1.2_PG_SHMEM/build/LINUX/ch_shmem/lib
-#setenv MPI_INC    /usr/local/mpich-1.1.2_PG_SHMEM/include
-#setenv MPI_BIN    /usr/local/mpich-1.1.2_PG_SHMEM/bin
-#setenv MPI_HOST   zinc0 
