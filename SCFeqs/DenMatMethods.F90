@@ -10,6 +10,35 @@ MODULE DenMatMethods
   USE Macros
   USE LinAlg
   IMPLICIT NONE
+
+  INTERFACE NormTrace
+    MODULE PROCEDURE NormTrace_BCSR
+#ifdef PARALLEL
+    MODULE PROCEDURE NormTrace_DBCSR
+#endif
+  END INTERFACE
+
+  INTERFACE FockGuess
+    MODULE PROCEDURE FockGuess_BCSR
+#ifdef PARALLEL
+    MODULE PROCEDURE FockGuess_DBCSR
+#endif
+  END INTERFACE
+
+  INTERFACE CnvrgChck
+#ifdef PARALLEL
+    MODULE PROCEDURE CnvrgChck_DBCSR
+#endif
+    MODULE PROCEDURE CnvrgChck_BCSR
+  END INTERFACE
+
+  INTERFACE PutXForm
+#ifdef PARALLEL
+    MODULE PROCEDURE PutXForm_DBCSR
+#endif
+    MODULE PROCEDURE PutXForm_BCSR
+  END INTERFACE
+
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
   REAL(DOUBLE) :: CurThresh
 CONTAINS
@@ -36,13 +65,10 @@ CONTAINS
   END SUBROUTINE SussTrix
 !-------------------------------------------------------------------------------
 
+#ifdef PARALLEL
 !-------------------------------------------------------------------------------
-  SUBROUTINE PutXForm(Prog,Args,P,Z,Tmp1)
-#ifdef DM_PARALLEL
+  SUBROUTINE PutXForm_DBCSR(Prog,Args,P,Z,Tmp1)
     TYPE(DBCSR)       :: P,Z,Tmp1
-#else
-    TYPE(BCSR)       :: P,Z,Tmp1
-#endif
     CHARACTER(LEN=*) :: Prog
     TYPE(ARGMT)      :: Args
     LOGICAL          :: Present
@@ -73,7 +99,43 @@ CONTAINS
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
-  END SUBROUTINE PutXForm
+  END SUBROUTINE PutXForm_DBCSR
+#endif
+
+!-------------------------------------------------------------------------------
+  SUBROUTINE PutXForm_BCSR(Prog,Args,P,Z,Tmp1)
+    TYPE(BCSR)       :: P,Z,Tmp1
+    CHARACTER(LEN=*) :: Prog
+    TYPE(ARGMT)      :: Args
+    LOGICAL          :: Present
+!-------------------------------------------------------------------------------
+    ! IO for the orthogonal P
+    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
+    CALL Put(P,TrixFile('OrthoD',Args,1))
+    CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
+    CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
+    CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
+    ! Convert to AO representation
+    INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+    IF(Present)THEN
+       CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
+       CALL Multiply(Z,P,Tmp1)
+       CALL Multiply(Tmp1,Z,P)
+    ELSE
+       CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
+       CALL Multiply(Z,P,Tmp1)
+       CALL Get(Z,TrixFile('ZT',Args))
+       CALL Multiply(Tmp1,Z,P)
+    ENDIF
+    CALL Filter(Tmp1,P)     ! Thresholding
+    ! IO for the non-orthogonal P
+    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
+    CALL Put(Tmp1,TrixFile('D',Args,1))
+    CALL Put(Zero,'homolumogap')
+    CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
+    CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
+    CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
+  END SUBROUTINE PutXForm_BCSR
 !-------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -93,14 +155,11 @@ CONTAINS
   END SUBROUTINE SetVarThresh
 !-------------------------------------------------------------------------------
 
+#ifdef PARALLEL
 !-------------------------------------------------------------------------------
-  FUNCTION CnvrgChck(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
-    LOGICAL              :: CnvrgChck
-#ifdef DM_PARALLEL
+  FUNCTION CnvrgChck_DBCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
+    LOGICAL              :: CnvrgChck_DBCSR
     TYPE(DBCSR)          :: F,P,POld,Tmp1,Tmp2
-#else
-    TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
-#endif
     REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
          AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
 
@@ -153,20 +212,18 @@ CONTAINS
      AbsErrP=ABS(Max(Tmp1)+1.D-20)
      FNormErrP=FNorm(Tmp1)
      ! Energy errors
-#ifdef DM_PARALLEL
+
      CALL Multiply(P,F,Tmp1)
      Energy=Trace(Tmp1)    
-#else
-     Energy=Trace(P,F)
-#endif     
+
      AbsErrE=ABS(OldE-Energy)
      RelErrE=AbsErrE/ABS(Energy)
      ! Convergence check
-     CnvrgChck=.FALSE.
+     CnvrgChck_DBCSR=.FALSE.
      ! Absolute convergence test
      IF(RelErrE<Thresholds%ETol*1D-2.AND. &
         AbsErrP<Thresholds%DTol*1D-1)THEN
-        CnvrgChck=.TRUE.
+        CnvrgChck_DBCSR=.TRUE.
         CnvrgCmmnt='Met dE/dP goals'
      ENDIF
      ! Test in the asymptotic regime for stall out
@@ -174,25 +231,20 @@ CONTAINS
 !    IF(RelErrE<Thresholds%ETol)THEN
         ! Check for increasing /P
         IF(AbsErrP>OldAEP)THEN
-           CnvrgChck=.TRUE.
+           CnvrgChck_DBCSR=.TRUE.
            CnvrgCmmnt='Hit dP increase'
         ENDIF
         ! Check for an increasing energy
         IF(Energy>OldE)THEN
-           CnvrgChck=.TRUE.
+           CnvrgChck_DBCSR=.TRUE.
            CnvrgCmmnt='Hit dE increase'
         ENDIF
      ENDIF
 
-#ifdef DM_PARALLEL
-     CALL BCast(CnvrgChck)
-#endif
 
+     CALL BCast(CnvrgChck_DBCSR)
 
-
-
-
-!     IF(NPur<35)CnvrgChck=.FALSE.
+!     IF(NPur<35)CnvrgChck_DBCSR=.FALSE.
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
 !     CErr=CommutatorErrors(F,P)
@@ -209,9 +261,9 @@ CONTAINS
           //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
           //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
           //', %Non0='//TRIM(DblToShrtChar(PNon0))              
-#ifdef DM_PARALLEL
+
      IF(MyId==ROOT)THEN
-#endif
+
         IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
            CALL OpenASCII(OutFile,Out)
            CALL PrintProtectL(Out)
@@ -220,13 +272,13 @@ CONTAINS
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
-#ifdef DM_PARALLEL
+
      ENDIF
-#endif
+
      ! Set thresholding for next cycle
      CALL SetVarThresh(MM)
      ! Look for convergence
-     IF(.NOT.CnvrgChck)THEN
+     IF(.NOT.CnvrgChck_DBCSR)THEN
         CALL SetEq(Pold,P)
         RETURN
      ENDIF
@@ -246,9 +298,9 @@ CONTAINS
 #endif
      ! Print summary stats
      TraceP = Trace(P)
-#ifdef DM_PARALLEL
+
      IF(MyId==ROOT)THEN
-#endif
+
         IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
            CALL OpenASCII(OutFile,Out)
            CALL PrintProtectL(Out)
@@ -297,10 +349,193 @@ CONTAINS
            CALL PrintProtectR(Out)
            CLOSE(UNIT=Out,STATUS='KEEP')
         ENDIF
-#ifdef DM_PARALLEL
+
      ENDIF
+
+   END FUNCTION CnvrgChck_DBCSR
 #endif
-   END FUNCTION CnvrgChck
+
+!-------------------------------------------------------------------------------
+  FUNCTION CnvrgChck_BCSR(Prog,NPur,Ne,MM,F,P,POld,Tmp1,Tmp2)
+    LOGICAL              :: CnvrgChck_BCSR
+    TYPE(BCSR)           :: F,P,POld,Tmp1,Tmp2
+    REAL(DOUBLE)         :: Ne,Energy,AbsErrP,FNormErrP,TwoNP,N2F,  &
+         AbsErrE,RelErrE,AveErrE,MaxCommErr,FNormCommErr,PNon0,TraceP
+
+    REAL(DOUBLE),DIMENSION(2) :: CErr
+    REAL(DOUBLE),SAVE    :: OldE,OldAEP
+    INTEGER              :: MM,NPur
+    CHARACTER(LEN=*)     :: Prog
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg,CnvrgCmmnt
+#ifdef PRINT_PURE_EVALS
+        INTERFACE DSYEV
+           SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+             USE GlobalScalars
+             CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+             INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+             INTEGER,          INTENT(OUT)   :: INFO
+             REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+             REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+             REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+           END SUBROUTINE DSYEV
+        END INTERFACE
+        TYPE(DBL_RNK2)                 :: dP
+        TYPE(DBL_VECT)                 :: EigenV,Work
+        TYPE(INT_VECT)                 :: IWork
+        INTEGER                        :: LWORK,LIWORK,Info
+
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        PrintFlags%Fmt=DEBUG_MMASTYLE
+        CALL Print_DBL_VECT(EigenV,'Values['//TRIM(IntToChar(NPur))//']',Unit_O=6)
+        PrintFlags%Fmt=DEBUG_DBLSTYLE
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
+
+     IF(NPur==0)THEN
+        OldE=BIG_DBL
+        OldAEP=BIG_DBL
+     ENDIF
+     PNon0=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+     ! Density matrix errors
+     CALL Multiply(Pold,-One)
+     CALL Add(Pold,P,Tmp1)
+     AbsErrP=ABS(Max(Tmp1)+1.D-20)
+     FNormErrP=FNorm(Tmp1)
+     ! Energy errors
+
+     Energy=Trace(P,F)
+
+     AbsErrE=ABS(OldE-Energy)
+     RelErrE=AbsErrE/ABS(Energy)
+     ! Convergence check
+     CnvrgChck_BCSR=.FALSE.
+     ! Absolute convergence test
+     IF(RelErrE<Thresholds%ETol*1D-2.AND. &
+        AbsErrP<Thresholds%DTol*1D-1)THEN
+        CnvrgChck_BCSR=.TRUE.
+        CnvrgCmmnt='Met dE/dP goals'
+     ENDIF
+     ! Test in the asymptotic regime for stall out
+     IF(RelErrE<1D2*Thresholds%Trix**2)THEN
+!    IF(RelErrE<Thresholds%ETol)THEN
+        ! Check for increasing /P
+        IF(AbsErrP>OldAEP)THEN
+           CnvrgChck_BCSR=.TRUE.
+           CnvrgCmmnt='Hit dP increase'
+        ENDIF
+        ! Check for an increasing energy
+        IF(Energy>OldE)THEN
+           CnvrgChck_BCSR=.TRUE.
+           CnvrgCmmnt='Hit dE increase'
+        ENDIF
+     ENDIF
+
+!     IF(NPur<35)CnvrgChck_BCSR=.FALSE.
+!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
+!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
+!     CErr=CommutatorErrors(F,P)
+!     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
+!                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+!     22 FORMAT(I3,8(1x,F20.14))
+!     CLOSE(77)
+
+     ! Updtate previous cycle values
+     OldE=Energy
+     OldAEP=AbsErrP
+     ! Print convergence stats
+     Mssg=ProcessName(Prog,'Pure '//TRIM(IntToChar(NPur)))      &
+          //'dE='//TRIM(DblToShrtChar(RelErrE))                 &
+          //', dP='//TRIM(DblToShrtChar(AbsErrP))               &
+          //', %Non0='//TRIM(DblToShrtChar(PNon0))              
+        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(*,*)TRIM(Mssg)
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
+        ENDIF
+     ! Set thresholding for next cycle
+     CALL SetVarThresh(MM)
+     ! Look for convergence
+     IF(.NOT.CnvrgChck_BCSR)THEN
+        CALL SetEq(Pold,P)
+        RETURN
+     ENDIF
+     ! Normalize Trace
+     CALL NormTrace(P,Tmp2,Tmp1,Ne,1)
+     MM=MM+1
+#ifdef COMPUTE_COMMUTATOR
+     ! Commutator [F,P] 
+     N2F=FNorm(F)
+     CALL Multiply(F,P,Tmp1)
+     CALL Multiply(P,F,POld)
+     CALL Multiply(POld,-One)
+     CALL Add(Tmp1,POld,F) 
+     MM=MM+2
+     FNormCommErr=FNorm(F)
+     MaxCommErr=Max(F)
+#endif
+     ! Print summary stats
+     TraceP = Trace(P)
+        IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           Mssg=ProcessName(Prog,CnvrgCmmnt) &
+                //'Tr{FP}='//TRIM(DblToChar(Energy)) &
+                //', dNel = '//TRIM(DblToShrtChar(Two*ABS(TraceP-Ne))) 
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+
+           Mssg=ProcessName(Prog)//TRIM(IntToChar(NPur))//' purification steps, ' &
+                //TRIM(IntToChar(MM))//' matrix multiplies'
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           Mssg=ProcessName(Prog)//'Fractional occupation = '              &
+                //TRIM(DblToShrtChar(Half*DBLE(NEl)/DBLE(NBasF)))          &
+                //', ThrX='//TRIM(DblToShrtChar(Thresholds%Trix))          &
+                //', %Non0s = '//TRIM(DblToShrtChar(PNon0))              
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           Mssg=ProcessName(Prog,'Max abs errors') &
+                //'dE='//TRIM(DblToShrtChar(AbsErrE))//', '                 &
+                //'dP='//TRIM(DblToShrtChar(AbsErrP))
+#ifdef COMPUTE_COMMUTATORS
+           Mssg=TRIM(Mssg)//', '//'[F,P]='//TRIM(DblToShrtChar(MaxCommErr))
+#endif
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           Mssg=ProcessName(Prog) &
+                //'Rel dE='//TRIM(DblToShrtChar(RelErrE))//', '                &
+                //'||dP||_F='//TRIM(DblToShrtChar(FNormErrP))
+#ifdef COMPUTE_COMMUTATORS
+           Mssg=TRIM(Mssg)//', '//'||[F,P]||_F='//TRIM(DblToShrtChar(FNormCommErr))
+#endif
+           IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+              WRITE(*,*)TRIM(Mssg)
+           ENDIF
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(UNIT=Out,STATUS='KEEP')
+        ENDIF
+   END FUNCTION CnvrgChck_BCSR
 
    FUNCTION CommutatorErrors(F,P) RESULT(CErrs)
      REAL,DIMENSION(2) :: CErrs
@@ -323,7 +558,7 @@ CONTAINS
 
 !-------------------------------------------------------------------------------
     SUBROUTINE SP2(P,P2,Tmp1,Norm,MMMs)
-#ifdef DM_PARALLEL
+#ifdef PARALLEL
       TYPE(DBCSR)   :: P,P2,Tmp1
 #else
       TYPE(BCSR)   :: P,P2,Tmp1
@@ -531,14 +766,11 @@ WRITE(*,*)' C = ',C
 !-------------------------------------------------------------------------------
 
 
+#ifdef PARALLEL
 !-------------------------------------------------------------------------------
-    SUBROUTINE FockGuess(F,P,Norm,Order)
-#ifdef DM_PARALLEL
+    SUBROUTINE FockGuess_DBCSR(F,P,Norm,Order)
       TYPE(DBCSR)                    :: P
       TYPE(BCSR),INTENT(IN)          :: F
-#else
-      TYPE(BCSR)                     :: F,P
-#endif
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
@@ -563,10 +795,10 @@ WRITE(*,*)' C = ',C
 !     Estimate spectral bounds 
       IF(MyId==ROOT) &
         CALL SpectralBounds(F,Fmin,Fmax)
-#ifdef DM_PARALLEL
+
       CALL BCast(FMin)
       CALL BCast(FMax)
-#endif
+
 !     Set up the Density Matrix
      IF(Order==1) THEN
          Call SetEq(P,F)
@@ -624,7 +856,96 @@ WRITE(*,*)' C = ',C
       ELSE
          CALL MondoHalt(99,'Wrong Order in FockGuess')
       ENDIF
-    END SUBROUTINE FockGuess
+    END SUBROUTINE FockGuess_DBCSR
+#endif
+
+!-------------------------------------------------------------------------------
+    SUBROUTINE FockGuess_BCSR(F,P,Norm,Order)
+      TYPE(BCSR)                     :: F,P
+      REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
+                                        Lmbd2,Norm
+      INTEGER                        :: Order
+#ifdef PRINT_GUESS_EVALS
+        INTERFACE DSYEV
+           SUBROUTINE DSYEV(JOBZ,UPLO,N,A,LDA,W,WORK,LWORK,INFO)
+             USE GlobalScalars
+             CHARACTER(LEN=1), INTENT(IN)    :: JOBZ, UPLO
+             INTEGER,          INTENT(IN)    :: LDA,  LWORK, N
+             INTEGER,          INTENT(OUT)   :: INFO
+             REAL(DOUBLE),     INTENT(INOUT) :: A(LDA,*)
+             REAL(DOUBLE),     INTENT(OUT)   :: W(*)
+             REAL(DOUBLE),     INTENT(OUT)   :: WORK(*)
+           END SUBROUTINE DSYEV
+        END INTERFACE
+        TYPE(DBL_RNK2)                 :: dP
+        TYPE(DBL_VECT)                 :: EigenV,Work
+        TYPE(INT_VECT)                 :: IWork
+        INTEGER                        :: LWORK,LIWORK,Info
+#endif
+!-------------------------------------------------------------------------------
+!     Estimate spectral bounds 
+      IF(MyId==ROOT) &
+        CALL SpectralBounds(F,Fmin,Fmax)
+
+!     Set up the Density Matrix
+     IF(Order==1) THEN
+         Call SetEq(P,F)
+         DF = (Fmax - Fmin)
+         CALL Add(P,-Fmax)
+         Coeff = -One/DF
+         CALL Multiply(P,Coeff)          ! P = (I*F_max-F)/DF
+#ifdef PRINT_GUESS_EVALS
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        CALL Print_DBL_VECT(EigenV,'Guess1Values',Unit_O=6)
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
+      ELSEIF(Order==2) THEN
+         Mu    = Trace(F)/DBLE(NBasF)
+         Lmbd1 = Norm/(Fmax-Mu)
+         Lmbd2 = (DBLE(NBasF)-Norm)/(Mu-Fmin)
+         IF(Lmbd1 < Lmbd2) THEN
+            CALL SetEq(P,F)
+            CALL Add(P,-Mu)
+            Coeff = -Lmbd1/DBLE(NBasF)
+            CALL Multiply(P,Coeff) 
+            Coeff = Norm/DBLE(NBasF)
+            CALL Add(P,Coeff) 
+         ELSE
+            CALL SetEq(P,F)
+            CALL Add(P,-Mu)
+            Coeff = -Lmbd2/DBLE(NBasF)
+            CALL Multiply(P,Coeff) 
+            Coeff = Norm/DBLE(NBasF)
+            CALL Add(P,Coeff)
+         ENDIF
+#ifdef PRINT_GUESS_EVALS
+        CALL New(dP,(/NBasF,NBasF/))
+        CALL SetEq(dP,P)
+        CALL New(EigenV,NBasF)
+        CALL SetEq(EigenV,Zero)
+        LWORK=MAX(1,3*NBasF+10)
+        CALL New(Work,LWork)
+        CALL DSYEV('V','U',NBasF,dP%D,NBasF,EigenV%D,Work%D,LWORK,Info)
+        IF(Info/=SUCCEED)CALL Halt('DSYEV flaked in FockGuess. INFO='//TRIM(IntToChar(Info)))
+        CALL Print_DBL_VECT(EigenV,'Guess2Values',Unit_O=6)
+        CALL Delete(EigenV)
+        CALL Delete(Work)
+        CALL Delete(dP)
+#endif
+      ELSE
+         CALL MondoHalt(99,'Wrong Order in FockGuess')
+      ENDIF
+    END SUBROUTINE FockGuess_BCSR
+
 !-------------------------------------------------------------------------------
 ! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
 !-------------------------------------------------------------------------------
@@ -706,13 +1027,10 @@ WRITE(*,*)' C = ',C
       END SUBROUTINE SpectralBounds
 !-------------------------------------------------------------------------------
 
+#ifdef PARALLEL
 !-------------------------------------------------------------------------------
-   SUBROUTINE NormTrace(P,P2,Tmp1,Norm,Order)
-#ifdef DM_PARALLEL
+   SUBROUTINE NormTrace_DBCSR(P,P2,Tmp1,Norm,Order)
      TYPE(DBCSR)    :: P,P2,Tmp1
-#else
-     TYPE(BCSR)    :: P,P2,Tmp1
-#endif
      REAL(DOUBLE)  :: Norm,CR,C1,C2
      INTEGER       :: Order
 !-------------------------------------------------------------------------------
@@ -735,9 +1053,37 @@ WRITE(*,*)' C = ',C
      ELSE
         CALL MondoHalt(99,'Wrong Order in NormTrace')
      ENDIF
-   END SUBROUTINE NormTrace
+   END SUBROUTINE NormTrace_DBCSR
 !-------------------------------------------------------------------------------
+#endif
 
+!-------------------------------------------------------------------------------
+   SUBROUTINE NormTrace_BCSR(P,P2,Tmp1,Norm,Order)
+     TYPE(BCSR)    :: P,P2,Tmp1
+     REAL(DOUBLE)  :: Norm,CR,C1,C2
+     INTEGER       :: Order
+!-------------------------------------------------------------------------------
+     IF(Order==0) THEN
+        TrP  = Trace(P)
+        CR   = Norm/TrP
+        CALL Multiply(P,CR)
+     ELSEIF(Order==1) THEN
+        CALL Multiply(P,P,P2)
+        TrP  = Trace(P)
+        TrP2 = Trace(P2)
+        CR   = TrP - TrP2
+        IF(CR==Zero) RETURN
+        C1   = (Norm - TrP2)/CR
+        C2   = (TrP- Norm)/CR
+        CALL Multiply(P  ,C1)
+        CALL Multiply(P2 ,C2)
+        CALL Add(P,P2,Tmp1)
+        CALL Filter(P,Tmp1)
+     ELSE
+        CALL MondoHalt(99,'Wrong Order in NormTrace')
+     ENDIF
+   END SUBROUTINE NormTrace_BCSR
+!-------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
    SUBROUTINE CalculateDegen(Norm,Degen,Occpan)

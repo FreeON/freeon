@@ -17,7 +17,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   USE LinAlg
   USE DenMatMethods
   IMPLICIT NONE
-#ifdef DM_PARALLEL
+#ifdef PARALLEL
   TYPE(DBCSR)                     :: F,P,Pold,Tmp1,Tmp2
   TYPE(BCSR)                      :: F_BCSR
 #else
@@ -33,7 +33,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='SP2'
 !-------------------------------------------------------------------------------
-#ifdef DM_PARALLEL
+#ifdef PARALLEL
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
 #else
   CALL StartUp(Args,Prog)
@@ -56,7 +56,7 @@ PROGRAM DMP_SP2 ! Density matrix purification, SP2 variation
   MM=0                        
   Ne=Half*DBLE(NEl)    
   ! Guess P from F
-#ifdef DM_PARALLEL
+#ifdef PARALLEL
   CALL SetEq(F_BCSR,F)
   CALL FockGuess(F_BCSR,P,Ne,1)
   CALL Delete(F_BCSR)
