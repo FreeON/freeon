@@ -266,59 +266,6 @@ MODULE DrvSCFs
          CALL SYSTEM('/bin/rm '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
-#ifdef NEEDS_LOTS_OF_WORK
-!------------------------------------------------------------------------------------
-!       Delete files from previous SCF cycle that are no longer needed 
-!       (Needs work to figure out why /bin/rm sometimes does not work when Invoked)
-!
-        IF(TidyFiles.AND.Ctrl%Current(1)>1)THEN
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.ExtrapF*'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-!           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.J'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-!           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.K'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-!           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.Rho'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-!           CALL SYSTEM('/bin/ls -l '//TRIM(MONDO_SCRATCH)//  &
-!                       TRIM(SCFName)//'*.* >> '//TRIM(LogFile))
-        ELSEIF(TidyFiles.AND.Ctrl%Current(1)==0)THEN
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.F'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.J'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.K'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.Rho'
-!           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
-           CALL Logger('/bin/rm '//TRIM(RmFile))
-           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-!           CALL SYSTEM('/bin/ls -l '//TRIM(MONDO_SCRATCH)//  &
-!                       TRIM(SCFName)//'*.* >> '//TRIM(LogFile))
-        ENDIF
-!
-!        IF(TidyFiles)THEN
-!              RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)-1))//'*'
-!              CALL Logger('/bin/rm '//TRIM(RmFile))
-!              CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-!              CALL SYSTEM('/bin/ls -l '//TRIM(MONDO_SCRATCH)//  &
-!                          TRIM(SCFName)//'*.* >> '//TRIM(LogFile))
-!           ENDIF
-#endif
 !========================================================================================
 !
 !========================================================================================
