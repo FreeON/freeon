@@ -159,4 +159,13 @@ MODULE ParsingKeys
 !
    CHARACTER(LEN=6),  PARAMETER :: MPI_OPTION    ='MPIRun'
 #endif 
+#ifdef MMech
+!-------------------------------------------------  
+!  Parsing keys for <Options.QMMM=>
+!
+   CHARACTER(LEN=9),  PARAMETER :: Mechanics_option    ='Mechanics'
+   CHARACTER(LEN=2),  PARAMETER :: pureMM  ='MM'
+   CHARACTER(LEN=2),  PARAMETER :: pureQM  ='QM'
+   CHARACTER(LEN=4),  PARAMETER :: QMandMM  ='QMMM'
+#endif 
 END MODULE
