@@ -18,13 +18,16 @@ MODULE InOut
       MODULE PROCEDURE Get_INT_SCLR, Get_INT_VECT, Get_INT_RNK2, &
                        Get_INT_RNK3, Get_INT_RNK4, Get_DBL_SCLR, &
                        Get_DBL_VECT, Get_DBL_RNK2, Get_DBL_RNK3, &
-                       Get_DBL_RNK4, Get_CHR_SCLR,  &
+                       Get_DBL_RNK4, Get_CHR_SCLR,               &
                        Get_LOG_SCLR, Get_BSET,     Get_CRDS,     &
                        Get_TOLS,     Get_BCSR,                   & 
 #ifdef PARALLEL
                        Get_DBCSR,                                &
 #endif
-                       Get_ARGMT,    Get_HGRho
+#ifdef PERIODIC
+                       Get_PBCInfo,                              &
+#endif  
+                       Get_ARGMT,    Get_HGRho,    Get_CMPoles
 
    END INTERFACE     
    INTERFACE Put
@@ -36,7 +39,11 @@ MODULE InOut
 #ifdef PARALLEL
                        Put_DBCSR,                                &
 #endif
-                       Put_TOLS,     Put_BCSR,     Put_HGRho
+#ifdef PERIODIC
+                       Put_PBCInfo,                              &
+#endif 
+                       Put_TOLS,     Put_BCSR,     Put_HGRho,    &
+                       Put_CMPoles
    END INTERFACE     
    TYPE META_DATA
       INTEGER            :: Dimension
@@ -942,6 +949,116 @@ MODULE InOut
          CALL Put(BS%LyDex,'lydex',Tag_O=Tag_O)
          CALL Put(BS%LzDex,'lzdex',Tag_O=Tag_O)
       END SUBROUTINE Put_BSET
+#ifdef PERIODIC
+!-------------------------------------------------------------------
+!     Get the Periodic Info
+!
+      SUBROUTINE Get_PBCInfo(PBC,Tag_O)
+        TYPE(PBCInfo),            INTENT(OUT) :: PBC 
+        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
+!-------------------------------------------------------------------
+!       Items that should not change with geometry
+!
+        CALL Get(PBC%Dimen     ,'Dimension')
+        CALL Get(PBC%AtomW     ,'AtomWrap')
+        CALL Get(PBC%InVecForm ,'VectorForm')
+        CALL Get(PBC%InAtomCrd ,'AtomicCrd')
+        CALL Get(PBC%NoTransVec,'NoTranVec')
+!
+        CALL Get(PBC%AutoW(1)  ,'AutoWrap(1)')        
+        CALL Get(PBC%AutoW(2)  ,'AutoWrap(2)')
+        CALL Get(PBC%AutoW(3)  ,'AutoWrap(3)')
+!----------------------------------------------------------------
+!       Items that can change with geometry ...   
+!
+        CALL Get(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
+        CALL Get(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
+        CALL Get(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
+!
+        CALL Get(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
+!
+        CALL Get(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
+        CALL Get(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
+        CALL Get(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
+!
+        CALL Get(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
+        CALL Get(PBC%BoxShape(2,1),'Boxshape(2,1)'       ,Tag_O=Tag_O)       
+        CALL Get(PBC%BoxShape(2,2),'Boxshape(2,2)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(2,3),'Boxshape(2,3)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
+        CALL Get(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
+!
+        CALL Get(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(2,1),'InverseBoxshape(2,1)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(2,2),'InverseBoxshape(2,2)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(2,3),'InverseBoxshape(2,3)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
+        CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
+!
+      END SUBROUTINE Get_PBCInfo
+!-------------------------------------------------------------------
+!     Put the Periodic Info
+!
+      SUBROUTINE Put_PBCInfo(PBC,Tag_O)
+        TYPE(PBCInfo),            INTENT(IN)  :: PBC 
+        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
+!-------------------------------------------------------------------
+!       Items that should not change with geometry
+!
+        CALL Put(PBC%Dimen     ,'Dimension')
+        CALL Put(PBC%AtomW     ,'AtomWrap')
+        CALL Put(PBC%InVecForm ,'VectorForm')
+        CALL Put(PBC%InAtomCrd ,'AtomicCrd')
+        CALL Put(PBC%NoTransVec,'NoTranVec')
+!
+        CALL Put(PBC%AutoW(1)  ,'AutoWrap(1)')        
+        CALL Put(PBC%AutoW(2)  ,'AutoWrap(2)')
+        CALL Put(PBC%AutoW(3)  ,'AutoWrap(3)')
+!----------------------------------------------------------------
+!       Items that can change with geometry ...   
+!
+        CALL Put(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
+        CALL Put(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
+        CALL Put(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
+!
+        CALL Put(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
+!
+        CALL Put(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
+        CALL Put(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
+        CALL Put(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
+!
+        CALL Put(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
+        CALL Put(PBC%BoxShape(2,1),'Boxshape(2,1)'       ,Tag_O=Tag_O)       
+        CALL Put(PBC%BoxShape(2,2),'Boxshape(2,2)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(2,3),'Boxshape(2,3)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
+        CALL Put(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
+!
+        CALL Put(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(2,1),'InverseBoxshape(2,1)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(2,2),'InverseBoxshape(2,2)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(2,3),'InverseBoxshape(2,3)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
+        CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
+!
+      END SUBROUTINE Put_PBCInfo
+#endif
 !-------------------------------------------------------------------
 !     Get some coordinates
 !
@@ -960,15 +1077,6 @@ MODULE InOut
          CALL Get(GM%TotCh,'charge')
          CALL Get(GM%NKind,'nkind')
          CALL Get(GM%InAu, 'inau')
-#ifdef PERIODIC
-         CALL Get(GM%AtomW     ,'AtomWrap')
-         CALL Get(GM%AutoW(1)  ,'AutoWrapX')
-         CALL Get(GM%AutoW(2)  ,'AutoWrapY')
-         CALL Get(GM%AutoW(3)  , 'AutoWrapZ')
-         CALL Get(GM%InVecForm ,'VectorForm')
-         CALL Get(GM%InAtomCrd ,'AtomicCrd')
-         CALL Get(GM%NoTransVec,'NoTranVec')
-#endif
          CALL New(GM)
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
@@ -981,9 +1089,7 @@ MODULE InOut
          CALL Get(GM%Vects,'velocities',Tag_O=Tag_O)
          CALL Get(GM%BndBox,'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
-         CALL Get(GM%TransVec,'Originvector',Tag_O=Tag_O)
-         CALL Get(GM%BoxShape,'Boxshape',Tag_O=Tag_O)
-         CALL Get(GM%InvBoxSh,'InverseBoxshape',Tag_O=Tag_O)
+         CALL Get(GM%PBC,Tag_O=Tag_O)
          CALL Get(GM%BoxCarts,'LatticeCoord',Tag_O=Tag_O)
          CALL Get(GM%BoxVects,'LatticeVeloc',Tag_O=Tag_O)
 #endif
@@ -1005,15 +1111,6 @@ MODULE InOut
          CALL Put(GM%TotCh,'charge')
          CALL Put(GM%NKind,'nkind')
          CALL Put(GM%InAu, 'inau')
-#ifdef PERIODIC
-         CALL Put(GM%AtomW     ,'AtomWrap')
-         CALL Put(GM%AutoW(1)  ,'AutoWrapX')
-         CALL Put(GM%AutoW(2)  ,'AutoWrapY')
-         CALL Put(GM%AutoW(3)  ,'AutoWrapZ')
-         CALL Put(GM%InVecForm ,'VectorForm')
-         CALL Put(GM%InAtomCrd ,'AtomicCrd')
-         CALL Put(GM%NoTransVec,'NoTranVec')
-#endif
 !----------------------------------------------------------------
 !        Items that can change with geometry ...       
 !
@@ -1025,9 +1122,7 @@ MODULE InOut
          CALL Put(GM%Vects,'velocities',Tag_O=Tag_O)
          CALL Put(GM%BndBox,'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
-         CALL Put(GM%TransVec,'Originvector',Tag_O=Tag_O)
-         CALL Put(GM%BoxShape,'Boxshape',Tag_O=Tag_O)
-         CALL Put(GM%InvBoxSh,'InverseBoxshape',Tag_O=Tag_O)
+         CALL Put(GM%PBC,Tag_O=Tag_O)
          CALL Put(GM%BoxCarts,'LatticeCoord',Tag_O=Tag_O)
          CALL Put(GM%BoxVects,'LatticeVeloc',Tag_O=Tag_O)
 #endif
@@ -1353,7 +1448,9 @@ MODULE InOut
          ENDIF
 #endif
       END SUBROUTINE Get_ARGMT
-
+!
+!
+!
   SUBROUTINE Get_HGRho(A,Name,Args,SCFCycle)
     TYPE(HGRho)                      :: A
     TYPE(ARGMT)                      :: Args
@@ -1428,10 +1525,62 @@ MODULE InOut
     RETURN
 100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Put_HGRho.')
   END SUBROUTINE Put_HGRho
-
-
-
-
+!========================================================================================
+! Allocate the Multipoles
+!========================================================================================
+  SUBROUTINE Get_CMPoles(A,Name,Args,SCFCycle)
+    TYPE(CMPoles)                    :: A
+    TYPE(ARGMT)                      :: Args
+    INTEGER                          :: SCFCycle,IOS,I
+    REAL(DOUBLE)                     :: Dummy
+    CHARACTER(LEN=*)                 :: Name 
+    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
+    LOGICAL                          :: Exists
+!
+    FileName=TrixFile(Name,Args,SCFCycle)
+    INQUIRE(FILE=FileName,EXIST=Exists)
+    IF(Exists) THEN
+       OPEN(UNIT=Seq,FILE=FileName,STATUS='OLD',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+    ELSE
+       CALL Halt(' Get_CMPoles could not find '//TRIM(FileName))
+    ENDIF
+    CALL New_CMPoles(A)
+!
+    READ(UNIT=Seq,Err=100,IOSTAT=IOS) (A%DPole%D(I),I=1,3)
+    READ(UNIT=Seq,Err=100,IOSTAT=IOS) (A%QPole%D(I),I=1,6)
+!   
+    CLOSE(UNIT=Seq,STATUS='KEEP')
+    RETURN
+100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_CMPoles.')
+!
+  END SUBROUTINE Get_CMPoles
+!========================================================================================
+! Delete the Multipoles
+!========================================================================================
+  SUBROUTINE Put_CMPoles(A,Name,Args,SCFCycle)
+    TYPE(CMPoles)                    :: A
+    TYPE(ARGMT)                      :: Args
+    INTEGER                          :: SCFCycle,IOS,I
+    REAL(DOUBLE)                     :: Dummy
+    CHARACTER(LEN=*)                 :: Name 
+    CHARACTER(LEN=DEFAULT_CHR_LEN)   :: FileName
+    LOGICAL                          :: Exists
+!
+    FileName=TrixFile(Name,Args,SCFCycle)
+    INQUIRE(FILE=FileName,EXIST=Exists)
+    IF(Exists) THEN
+       OPEN(UNIT=Seq,FILE=FileName,STATUS='REPLACE',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+    ELSE
+       OPEN(UNIT=Seq,FILE=FileName,STATUS='NEW',FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+    ENDIF
+!
+    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) (A%DPole%D(I),I=1,3)
+    WRITE(UNIT=Seq,Err=100,IOSTAT=IOS) (A%QPole%D(I),I=1,6)
+!   
+    CLOSE(UNIT=Seq,STATUS='KEEP')
+    RETURN
+100 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_CMPoles.')
+  END SUBROUTINE Put_CMPoles
 !------------------------------------------------------------------
 !     Open an ASCII file   
 ! 
