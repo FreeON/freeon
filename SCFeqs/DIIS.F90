@@ -74,19 +74,12 @@ PROGRAM DIIS
   ELSEIF(BMax==0)THEN
      DoDIIS=0   ! We are purely damping, using previously extrapolated Fock matrices
   ENDIF
+  WRITE(*,*) 'DoDIIS = ',DoDIIS,"  ISCF = ",ISCF
   !  Build the B matrix if on second SCF cycle (starting from 0)
   !  and if pure damping flag is not on (DIISDimension=0)
   IF(DoDIIS==1)THEN
-     N=MIN(ISCF,BMax)
-     !
-     ! If we always do an ODA step at the first SCF cycle, then 
-     ! we can immediatly set up the B matrix.
-     M=MAX(1,ISCF-BMax+1)!M=MAX(2,ISCF-BMax+1)
-     !write(*,*) 'DIIS: ISCF',ISCF
-     !write(*,*) 'DIIS: BMax',BMax
-     !write(*,*) 'DIIS: M=MAX(2,ISCF-BMax+1)',M
-     !write(*,*) 'DIIS: N=MIN(ISCF,BMax)',N
-     !
+     N=MIN(ISCF+1,BMax+1)
+     M=MAX(1,ISCF-BMax+1)
      CALL New(B,(/N,N/))
      ! Pulays most excellent B matrix
      I0=M-ISCF
@@ -95,15 +88,13 @@ PROGRAM DIIS
         CALL Get(P,TrixFile('OrthoD',Args,I0))    
         CALL Multiply(F,P,EI)  
         CALL Multiply(P,F,EI,-One)
-        !  We dont filter E for obvious reasons 
-!        CALL Get(Tmp1,TrixFile('E',Args,I0))
+!       We dont filter E for obvious reasons 
         J0=I0
         DO J=I,N-1
            CALL Get(F,TrixFile('OrthoF',Args,J0))    
            CALL Get(P,TrixFile('OrthoD',Args,J0))    
            CALL Multiply(F,P,EJ)  
            CALL Multiply(P,F,EJ,-One)
-!           CALL Get(E,TrixFile('E',Args,J0))
            B%D(I,J)=Dot(EI,EJ)
            B%D(J,I)=B%D(I,J)
            J0=J0+1
