@@ -51,6 +51,7 @@ PROGRAM MakeRho
 !    Get the previous information
      CALL Get(BS,PrvBase)
      CALL Get(GM,CurGeom)
+     CALL SetThresholds(PrvBase)
      CALL Get(NExpt,'nexpt',PrvBase)
      CALL New_HGRho(Rho,(/NExpt,0,0/))
      CALL Get(Rho%Lndx ,'lndex',PrvBase)
