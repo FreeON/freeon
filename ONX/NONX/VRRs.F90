@@ -1,18 +1,17 @@
-  SUBROUTINE VRRs(LBra,LKet,id,is,nr,ns,SLoc)
+  SUBROUTINE VRRs(LBra,LKet,Drv)
     USE DerivedTypes
     USE InOut
     IMPLICIT NONE
-    TYPE(INT_RNK2),INTENT(IN)  :: SLoc
+    TYPE(IDrv),INTENT(IN)      :: Drv
     INTEGER,INTENT(IN)         :: LBra,LKet
-    INTEGER,INTENT(OUT)        :: id,is,nr,ns
     INTEGER                    :: LMAX=4      ! Maximum distribution angular
                                               ! symmetry that is included in 
                                               ! the VRR driver files.
     IF (LBra>LMAX.OR.LKet>LMAX) THEN
       CALL Halt(' LBra or LKet too large in ONX')
     END IF
-    id = LBra+1+LKet*(LMAX+1)
-    is = SLoc%I(1,id)
-    nr = SLoc%I(2,id)
-    ns = SLoc%I(3,id)
+    Drv%id = LBra+1+LKet*(LMAX+1)
+    Drv%is = Drv%SLoc%I(1,Drv%id)
+    Drv%nr = Drv%SLoc%I(2,Drv%id)
+    Drv%ns = Drv%SLoc%I(3,Drv%id)
   END SUBROUTINE VRRs

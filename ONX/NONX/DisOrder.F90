@@ -1,4 +1,4 @@
-SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)  
+SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf)  
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
@@ -8,59 +8,44 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
   USE Stats
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
-! Basis set, coordinates, ect.
+! Basis set, coordinates, ect...
 !--------------------------------------------------------------------------------
-  TYPE(BSET),INTENT(IN)    :: BSc,BSp
-  TYPE(CRDS),INTENT(IN)    :: GMc,GMp
-  TYPE(DBuf)               :: DB
-  TYPE(IBuf)               :: IB
-  TYPE(IDrv)               :: Drv
-  TYPE(INT_VECT)           :: NameBuf
-!--------------------------------------------------------------------------------
-! Temporary buffers to hold the distribution data
-!--------------------------------------------------------------------------------
-  TYPE(DBL_RNK2)           :: TBufC
-  TYPE(DBL_RNK3)           :: TBufP
-  TYPE(INT_RNK2)           :: BufN
-!--------------------------------------------------------------------------------
-! Temporary space for computing 2-e integrals
-!--------------------------------------------------------------------------------
-  TYPE(INT_VECT)           :: MLDis
+  TYPE(BSET),INTENT(IN)    :: BSc,BSp   ! basis set info
+  TYPE(CRDS),INTENT(IN)    :: GMc,GMp   ! geometry info
+  TYPE(DBuf)               :: DB        ! ONX distribution buffers
+  TYPE(IBuf)               :: IB        ! ONX 2-e eval buffers
+  TYPE(DML)                :: MB        ! ONX distribution pointers
+  TYPE(IDrv)               :: Drv       ! VRR/contraction drivers
+  TYPE(INT_VECT)           :: NameBuf   ! for parallel implementation
 !--------------------------------------------------------------------------------
 ! Misc. internal variables
 !--------------------------------------------------------------------------------
   REAL(DOUBLE)           :: Test,VSAC
   REAL(DOUBLE)           :: ACx,ACy,ACz,AC2,x,y,z
   REAL(DOUBLE)           :: Zeta,Za,Zc,Cnt,rInt,XiAB
-  INTEGER                :: LngVRR,LngLoc,LngDrv
-  INTEGER                :: id,is,nr,ns,i
+  INTEGER                :: Lng,i,j,n
   INTEGER                :: KonAC,LDis,NLOCD2,NLOCD3,NInts,NVRR
-  INTEGER                :: iBf,I0,I1,NPrim,iCP,iCL,IKType
+  INTEGER                :: iBf,I0,I1,iCP,iCL,IKType
   INTEGER                :: AtA,CFA,PFA,StartLA,StopLA,StrideA
   INTEGER                :: AtC,CFC,PFC,StartLC,StopLC,StrideC
   INTEGER                :: KA,NBFA,MinLA,MaxLA,IType,NICase,IndexA
   INTEGER                :: KC,NBFC,MinLC,MaxLC,KType,NKCase,IndexC
-  INTEGER                :: CType,II,JJ,IJ,LngTmp
-  INTEGER                :: LenCC,LenTC,iKonAC,iIKType
+  INTEGER                :: CType,II,JJ,IJ
+  INTEGER                :: iKonAC,iIKType
+  INTEGER                :: iDis,iPrm
   LOGICAL                :: Found
 !--------------------------------------------------------------------------------
 ! Function calls
 !--------------------------------------------------------------------------------
   INTEGER                :: NFinal,iT
 
-  NPrim=MAX(BSc%NPrim,BSp%NPrim)
-  CALL New(TBufC,(/DB%MAXC,DB%MAXD/))
-  CALL New(TBufP,(/DB%MAXP,NPrim*NPrim+MInfo,DB%MAXD/))
-  CALL New(MLDis,1)
-  CALL New(BufN,(/DB%MAXT,NPrim*NPrim/))
-
-
+  DB%LenCC=0
+  DB%LenTC=0
+  iDis=1
+  iPrm=1
   Test=-10.d0*DLOG(Thresholds%Dist) 
-  MLDis%I(1)=5
-  BufN%I=0
+  MB%MLDis%I(1)=5
   IndexC=0
-  LenCC=0
-  LenTC=0
   DO AtC=1,NAtoms
 #ifdef PARALLEL
     IF (NameBuf%I(AtC)==1) THEN
@@ -77,6 +62,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
       NKCase=MaxLC-MinLC+1
       StrideC=StopLC-StartLC+1         
 
+      DB%BufN%I=0
       iBf=1 
       IndexA=0  
 
@@ -108,31 +94,31 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
         II=MAX(IndexA,IndexC)
         JJ=MIN(IndexA,IndexC)
         IJ=II*(II-1)/2+JJ 
-        TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-        TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
+        DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
+        DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
         IF(IType.GE.KType) THEN
           IKType=IType*100+KType
-          TBufC%D( 3,iBf)=DFLOAT(IndexA)+Small
-          TBufC%D( 4,iBf)=DFLOAT(IndexC)+Small
-          TBufC%D( 5,iBf)=ACx
-          TBufC%D( 6,iBf)=ACy
-          TBufC%D( 7,iBf)=ACz
-          TBufC%D( 8,iBf)=GMc%Carts%D(1,AtA)
-          TBufC%D( 9,iBf)=GMc%Carts%D(2,AtA)
-          TBufC%D(10,iBf)=GMc%Carts%D(3,AtA)
+          DB%TBufC%D( 3,iBf)=DFLOAT(IndexA)+Small
+          DB%TBufC%D( 4,iBf)=DFLOAT(IndexC)+Small
+          DB%TBufC%D( 5,iBf)=ACx
+          DB%TBufC%D( 6,iBf)=ACy
+          DB%TBufC%D( 7,iBf)=ACz
+          DB%TBufC%D( 8,iBf)=GMc%Carts%D(1,AtA)
+          DB%TBufC%D( 9,iBf)=GMc%Carts%D(2,AtA)
+          DB%TBufC%D(10,iBf)=GMc%Carts%D(3,AtA)
           x=ACx
           y=ACy
           z=ACz
         ELSE 
           IKType=KType*100+IType
-          TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
-          TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
-          TBufC%D( 5,iBf)=-ACx
-          TBufC%D( 6,iBf)=-ACy
-          TBufC%D( 7,iBf)=-ACz
-          TBufC%D( 8,iBf)=GMp%Carts%D(1,AtC)
-          TBufC%D( 9,iBf)=GMp%Carts%D(2,AtC)
-          TBufC%D(10,iBf)=GMp%Carts%D(3,AtC)
+          DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
+          DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
+          DB%TBufC%D( 5,iBf)=-ACx
+          DB%TBufC%D( 6,iBf)=-ACy
+          DB%TBufC%D( 7,iBf)=-ACz
+          DB%TBufC%D( 8,iBf)=GMp%Carts%D(1,AtC)
+          DB%TBufC%D( 9,iBf)=GMp%Carts%D(2,AtC)
+          DB%TBufC%D(10,iBf)=GMp%Carts%D(3,AtC)
           x=-ACx
           y=-ACy
           z=-ACz
@@ -149,27 +135,27 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
           XiAB=Za*Zc/Zeta
           IF (TestPrimPair(XiAB,AC2)) THEN
             I0=I0+1
-            TBufP%D(1,I0,iBf)=Zeta
-            TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta
-            TBufP%D(3,I0,iBf)=(Za*GMc%Carts%D(2,AtA)+Zc*GMp%Carts%D(2,AtC))/Zeta
-            TBufP%D(4,I0,iBf)=(Za*GMc%Carts%D(3,AtA)+Zc*GMp%Carts%D(3,AtC))/Zeta
-            TBufP%D(5,I0,iBf)=VSAC
+            DB%TBufP%D(1,I0,iBf)=Zeta
+            DB%TBufP%D(2,I0,iBf)=(Za*GMc%Carts%D(1,AtA)+Zc*GMp%Carts%D(1,AtC))/Zeta
+            DB%TBufP%D(3,I0,iBf)=(Za*GMc%Carts%D(2,AtA)+Zc*GMp%Carts%D(2,AtC))/Zeta
+            DB%TBufP%D(4,I0,iBf)=(Za*GMc%Carts%D(3,AtA)+Zc*GMp%Carts%D(3,AtC))/Zeta
+            DB%TBufP%D(5,I0,iBf)=VSAC
             IF (CType.EQ.11) THEN
-              TBufP%D(6,I0,iBf)=1.0D0
-              TBufP%D(7,I0,iBf)=1.0D0
-              TBufP%D(8,I0,iBf)=1.0D0
+              DB%TBufP%D(6,I0,iBf)=1.0D0
+              DB%TBufP%D(7,I0,iBf)=1.0D0
+              DB%TBufP%D(8,I0,iBf)=1.0D0
             ELSEIF (CType.EQ.12.OR.CType.EQ.21) THEN
-              TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                               BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
-              TBufP%D(7,I0,iBf)=TBufP%D(6,I0,iBf)
-              TBufP%D(8,I0,iBf)=TBufP%D(6,I0,iBf)
+              DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(7,I0,iBf)=DB%TBufP%D(6,I0,iBf)
+              DB%TBufP%D(8,I0,iBf)=DB%TBufP%D(6,I0,iBf)
             ELSEIF (CType.EQ.22) THEN
-              TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                               BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
-              TBufP%D(7,I0,iBf)=BSc%CCoef%D(StartLA+1,PFA,CFA,KA) * &
-                               BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
-              TBufP%D(8,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
-                               BSp%CCoef%D(StartLC+1,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(6,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(7,I0,iBf)=BSc%CCoef%D(StartLA+1,PFA,CFA,KA) * &
+                                   BSp%CCoef%D(StartLC,PFC,CFC,KC) / Cnt
+              DB%TBufP%D(8,I0,iBf)=BSc%CCoef%D(StartLA,PFA,CFA,KA) * &
+                                   BSp%CCoef%D(StartLC+1,PFC,CFC,KC) / Cnt
             ELSE
               WRITE(*,*) 'CType=',CType
               CALL Halt(' Illegal CType in ONX:DisOrder')
@@ -185,6 +171,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
           NLOCD3=NFinal(IType)*NFinal(KType)
           NVRR =NLOCD2*NLOCD2
           NInts=NLOCD3*NLOCD3
+
           I0=iT(MIN(IType,KType),MAX(IType,KType))
           I1=11*I0-10
           iCP=Drv%CDrv%I(I1)
@@ -192,22 +179,23 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
 
           IF (KonAC*KonAC*NVRR>IB%MAXI.OR.NInts>IB%MAXI) THEN
             ErrorCode=eMAXI
-            GO TO 1000
+            RETURN
           ENDIF
 
           CALL RGen1C(2*LDis,iBf,KonAC,IB%CD%D(1,1),IB%WR,IB%WZ, &
-                      IB%W1%D(1),TBufP,TBufC)
-          CALL VRRs(LDis,LDis,id,is,nr,ns,Drv%SLOC)
-          CALL VRRl(KonAC*KonAC,NVRR,nr,ns,Drv%VLOC%I(is),Drv%VLOC%I(is+nr), &
+                      IB%W1%D(1),DB%TBufP,DB%TBufC)
+          CALL VRRs(LDis,LDis,Drv)
+          CALL VRRl(KonAC*KonAC,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),  &
+                    Drv%VLOC%I(Drv%is+Drv%nr),                          &
                     IB%W2%D(1),IB%W1%D(1),IB%WR%D(1,1),IB%WZ%D(1,1))
           CALL Contract(1,KonAC,KonAC,NVRR,iCL,Drv%CDrv%I(iCP+1), &
                         IB%CD%D(1,1),IB%CD%D(1,1),IB%W1%D(1),IB%W2%D(1))
           IF(LDis.NE.0) THEN
-            CALL HRRKet(IB%W1%D(1),TBufC%D(1,iBf),1,MLDis%I(1),NLOCD2,DB%MAXC,IKType)
+            CALL HRRKet(IB%W1%D(1),DB%TBufC%D(1,iBf),1,MB%MLDis%I(1),NLOCD2,DB%MAXC,IKType)
             CALL HRRBra(IB%W1%D(1),IB%W2%D(1),x,y,z,1,NLOCD2,NLOCD3,NLOCD3,IKType)
-            rInt = DSQRT(AbsMax(NInts,IB%W2))
+            rInt = DSQRT(GetAbsMax(NInts,IB%W2))
           ELSE
-            rInt = DSQRT(AbsMax(NInts,IB%W1))
+            rInt = DSQRT(GetAbsMax(NInts,IB%W1))
           ENDIF
 
           write(*,*) "NONX: rInt = ",rint
@@ -216,10 +204,10 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
             iBf=iBf+1
             IF (iBf>DB%MAXD) THEN
               ErrorCode=eMAXD
-              GO TO 1000
+              RETURN
             ENDIF
             Found=.FALSE.
-            DO I=1,LenCC       ! look for the contraction type
+            DO I=1,DB%LenCC       ! look for the contraction type
               IF (KonAC==DB%CCode%I(I)) THEN
                 iKonAC=I
                 Found=.TRUE.
@@ -227,43 +215,63 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
               END IF
             END DO
             IF (.NOT.Found) THEN  ! if not found make a new CC type
-              LenCC=LenCC+1
-              iKonAC=LenCC
-              IF (LenCC>DB%MAXC) THEN
+              DB%LenCC=DB%LenCC+1
+              iKonAC=DB%LenCC
+              IF (DB%LenCC>DB%MAXC) THEN
                 ErrorCode=eMAXC
-                GO TO 1000
+                RETURN
               END IF
-              DB%CCode%I(LenCC)=KonAC
+              DB%CCode%I(DB%LenCC)=KonAC
             END IF
             Found=.FALSE.
-            DO I=1,LenTC       ! look for the angular symmetry type
+            DO I=1,DB%LenTC       ! look for the angular symmetry type
               IF (IKType==DB%TCode%I(I)) THEN
                 iIKType=I
                 Found=.TRUE.
                 EXIT
-              ENDIF
-            ENDDO
-            IF (.NOT.Found) THEN  ! if not found make a new L type
-              LenTC=LenTC+1
-              iIKType=LenTC
-              IF (LenTC.GT.DB%MAXT) THEN
-                ErrorCode=eMAXT
-                GO TO 1000
               END IF
-              DB%TCode%I(LenTC)=IKType
+            END DO
+            IF (.NOT.Found) THEN  ! if not found make a new L type
+              DB%LenTC=DB%LenTC+1
+              iIKType=DB%LenTC
+              IF (DB%LenTC.GT.DB%MAXT) THEN
+                ErrorCode=eMAXT
+                RETURN
+              END IF
+              DB%TCode%I(DB%LenTC)=IKType
             END IF
-            BufN%I(iIKType,iKonAC)=BufN%I(iIKType,iKonAC)+1
+            N=DB%BufN%I(iIKType,iKonAC)+1
+            IF (N>DB%MAXD) THEN
+              ErrorCode=eMAXD
+              RETURN
+            END IF
+            DB%BufN%I(iIKType,iKonAC)=N
+            DB%BufT%I(N,iIKType,iKonAC)=iBf-1
+            DB%SchT%D(N,iIKType,iKonAC)=rInt
           END IF ! rInt
-
         END IF ! I0
-      ENDDO ! CFA
+      END DO ! CFA
     END IF ! test on AC2
-  ENDDO ! AtA
+  END DO ! AtA
 
-! sort the distributions
-
-! call adddis
-
+  DO I=1,DB%LenCC
+    DO J=1,DB%LenTC
+      N=DB%BufN%I(J,I)
+      IF (N>0) THEN
+        DB%TCPop%I(J,I)=1
+        IF (iDis+N*DB%MAXC>DB%MAXDis) THEN
+          ErrorCode=eMAXDis
+          RETURN
+        END IF
+        IF (iPrm+N*(KonAC+MInfo)*DB%MAXP>DB%MAXPrm) THEN
+          ErrorCode=eMAXPrm
+          RETURN
+        END IF
+        CALL QuickSortDis(DB%SchT%D(1,J,I),DB%BufT%I(1,J,I),N,-2)
+        CALL PutDis(N,iDis,iPrm,I,J,IndexA,KonAC,DB)
+      END IF
+    END DO
+  END DO
 
     END DO ! CFC
 #ifdef PARALLEL
@@ -272,11 +280,5 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf)
   END DO ! Atc
 
   ErrorCode=eAOK
-1000 CONTINUE
-  CALL Delete(MLDis)
-  CALL Delete(TBufP)
-  CALL Delete(TBufC)
-  CALL Delete(BufN)
-
 END SUBROUTINE DisOrder
  

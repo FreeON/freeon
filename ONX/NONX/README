@@ -25,3 +25,8 @@ deallocate memory at the end of DisOrder.
 the sonx style. This is a better way to do it because you can 
 use standard math operations to find out which one should be raised
 in vrr.  DONE
+
+
+6. Need to add the buffers BufT and SchT to DisOrder. DONE
+
+7. Need to add the code to stuff the distribution info into the buffers.

@@ -1,4 +1,4 @@
-      SUBROUTINE HRRKetOld(W,BD,N,MLDis,LenB,NumB,IType)
+      SUBROUTINE HRRKet(W,BD,N,MLDis,LenB,NumB,IType)
 c----------------------------------------------------------------------
 c  Input:
 c     W      Contracted (p|q) integrals (from VRR+contraction steps)

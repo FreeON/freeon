@@ -1,4 +1,4 @@
-      SUBROUTINE HRRBraOld(W1,W2,x,y,z,N,LenBi,LenBf,NumK,IType)
+      SUBROUTINE HRRBra(W1,W2,x,y,z,N,LenBi,LenBf,NumK,IType)
 c----------------------------------------------------------------------
 c  Input:
 c     W1     Contracted (p|Ket) integrals (from HRRKet step)

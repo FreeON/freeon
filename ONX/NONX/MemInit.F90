@@ -1,13 +1,16 @@
-SUBROUTINE MemInit(DB,IB,Drv,BSc,BSp)
+SUBROUTINE MemInit(DB,IB,MB,Drv,BSc,BSp)
   USE InOut
   USE ONXMemory
   IMPLICIT NONE
   TYPE(DBuf),INTENT(INOUT) :: DB
   TYPE(IBuf),INTENT(INOUT) :: IB
+  TYPE(DML),INTENT(INOUT)  :: MB
   TYPE(IDrv),INTENT(INOUT) :: Drv
   TYPE(BSet),INTENT(IN)    :: BSc,BSp
   write(*,*) "In MemInit: ErrorCode=",ErrorCode
   IF (ErrorCode==eInit) THEN
+    DB%MAXDis  = 1000
+    DB%MAXPrm  = 3000
     DB%MAXD    = 100
     DB%MAXC    = 10
     DB%MAXT    = 10
@@ -15,12 +18,17 @@ SUBROUTINE MemInit(DB,IB,Drv,BSc,BSp)
     DB%NShells = 20   !  fix this
     DB%NTypes  = 20   !  fix this 
     DB%NCnts   = 20   !  fix this
-    IB%MAXI    = 1000
+    DB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
+    DB%MInfo   = 0    
+    MB%MAXML   = 10000
+    IB%MAXI    = 30000
     IB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
+    IB%Mesh    = 968
     Drv%LngCC  = 60000
     CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
     CALL New(DB)
     CALL New(IB)
+    CALL New(MB)
     CALL New(Drv)
     CALL CCDriver(Drv%CDrv%I(1),Drv%LngDrv)
     CALL VRRDriver(Drv%VLOC%I(1),Drv%SLOC%I(1,1),Drv%LngVRR,Drv%LngLoc)
@@ -40,9 +48,21 @@ SUBROUTINE MemInit(DB,IB,Drv,BSc,BSp)
     CALL Delete(DB)
     DB%MAXT = DB%MAXT + 1
     CALL New(DB)
+  ELSEIF (ErrorCode==eMAXDis) THEN
+    CALL Delete(DB)
+    DB%MAXDis = DB%MAXDis * 5
+    CALL New(DB)
+  ELSEIF (ErrorCode==eMAXPrm) THEN
+    CALL Delete(DB)
+    DB%MAXPrm = DB%MAXPrm * 5
+    CALL New(DB)
+  ELSEIF (ErrorCode==eMAXML) THEN
+    CALL Delete(MB)
+    MB%MAXML = MB%MAXML * 2
+    CALL New(MB)
   ELSE
     write(*,*) "Error code = ",ErrorCode
-    CALL Halt(' Unknown error code in ONX')
+    CALL Halt(' Sorry, fatal error in ONX')
   END IF
-
+  write(*,*) "Leaving MemInit"
 END SUBROUTINE MemInit

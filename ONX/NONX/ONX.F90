@@ -34,6 +34,7 @@ PROGRAM ONX
   TYPE(ARGMT)         :: Args
   TYPE(DBuf)          :: DB
   TYPE(IBuf)          :: IB
+  TYPE(DML)           :: MB
   TYPE(IDrv)          :: Drv
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
@@ -70,8 +71,8 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   CALL RangeOfDensity(D,NameBuf)
   DO WHILE (ErrorCode/=eAOK) 
-    CALL MemInit(DB,IB,Drv,BSc,BSp)
-    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,Drv,NameBuf) 
+    CALL MemInit(DB,IB,MB,Drv,BSc,BSp)
+    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,MB,Drv,NameBuf) 
   END DO
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
@@ -80,28 +81,23 @@ PROGRAM ONX
 ! should be set to some hard cut-off, and KThresh in CalcK will need to 
 ! be set to 1 instead of 0 (and possibly other things need to be changed...)
 !--------------------------------------------------------------------------------
-!  CALL RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
-!  CALL New(K,(/NRows+1,NCols,NElem/))
-!  CALL New(SubInd,(/3,NBasF/))
-!  CALL InitK(BSc,GMc,K,NameBuf,SubInd)
+  CALL RangeOfExchange(BSc,GMc,BSp,GMp,D,NameBuf)
+  CALL New(K,(/NRows+1,NCols,NElem/))
+  CALL New(SubInd,(/3,NBasF/))
+  CALL InitK(BSc,GMc,K,NameBuf,SubInd)
 !--------------------------------------------------------------------------------
-! All set to loop over Ltypes and contraction types
+! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-!  CALL Looper(BSc,GMc,BSp,GMp,D,K,PrmBuf,DisBuf,CBuf,SBuf,VecBuf,BfnBuf, &
-!               iSA,iSrt,SubInd)
+!  CALL ComputeK( )
 !--------------------------------------------------------------------------------
-! Free up some space.
+! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
-!  CALL Delete(D)
-!  CALL Delete(PrmBuf)
-!  CALL Delete(DisBuf)
-!  CALL Delete(CBuf)
-!  CALL Delete(SBuf)
-!  CALL Delete(VecBuf)
-!  CALL Delete(BfnBuf)
-!  CALL Delete(iSA)
-!  CALL Delete(iSrt)
-!  CALL Delete(SubInd)
+  CALL Delete(D)
+  CALL Delete(DB)
+  CALL Delete(IB)
+  CALL Delete(MB)
+  CALL Delete(Drv)
+  CALL Delete(SubInd)
 !--------------------------------------------------------------------------------
 ! Collect the distributed exchange matrices on the root node.
 !--------------------------------------------------------------------------------
@@ -124,12 +120,12 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------
-!  CALL Delete(K)
-!  CALL Delete(NameBuf)
-!  CALL Delete(BSc)
-!  CALL Delete(GMc)
-!  CALL Delete(BSp)
-!  CALL Delete(GMp)
+  CALL Delete(K)
+  CALL Delete(NameBuf)
+  CALL Delete(BSc)
+  CALL Delete(GMc)
+  CALL Delete(BSp)
+  CALL Delete(GMp)
   CALL ShutDown(Prog)
 END PROGRAM ONX
 
