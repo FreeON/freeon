@@ -25,7 +25,8 @@
 !    a suite of programs for linear scaling electronic structure theory and
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
-!    
+!    Author: Matt Challacombe
+!    Local QCTC thresholds for tuning MAC and PAC
 !------------------------------------------------------------------------------
 MODULE QCTCThresholds
    USE Derivedtypes
@@ -44,9 +45,9 @@ MODULE QCTCThresholds
    CONTAINS
       SUBROUTINE SetLocalThresholds(Tau)
          REAL(DOUBLE) :: Tau
-!        Local penetration thresholds 
-!        NEEDS TUNING...
+!        Penetration Acceptability Criterion (PAC) threshold
          TauPAC=Tau*1.D-2
-         TauMAC=Tau*1.D-6
+!        Multipole Acceptability Criterion (MAC) threshold
+         TauMAC=Tau*1.D-2
       END SUBROUTINE SetLocalThresholds
 END MODULE
