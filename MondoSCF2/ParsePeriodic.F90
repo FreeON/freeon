@@ -19,9 +19,14 @@ CONTAINS
     INTEGER          :: I
 !-----------------------------------------------------------------------!
     ! If we are restarting, just use values read from HDF ...
-    IF(O%Guess==GUESS_EQ_RESTART)RETURN
-    ! ... otherwise do some parsing
     CALL OpenASCII(N%IFile,Inp)
+    IF(O%Guess==GUESS_EQ_RESTART.AND. &
+          .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN
+       CLOSE(Inp)
+       RETURN
+    ENDIF
+    WRITE(*,*)' reparsing periodics '
+    ! ... otherwise do some parsing
     CALL LoadPeriodicOptions(PBC)
     CALL LoadLattice(PBC)
     CALL UnitCellSetUp(PBC)

@@ -28,8 +28,6 @@ CONTAINS
     iGEO=1
     ! Init previous state
     C%Stat%Previous%I=(/0,1,1/)
-    ! Init groups
-    CALL InitClones(C%Nams,C%MPIs,C%Sets,C%Geos)
     ! Loop over basis sets 
     DO iBAS=1,C%Sets%NBSets
        ! Archive 
