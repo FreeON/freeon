@@ -857,6 +857,7 @@ CONTAINS
     CALL Invoke('SForce',N,S,M)
     ! Kinetic energy piece
     CALL Invoke('TForce',N,S,M)
+    !CALL NTHessian(cBAS,cGEO,N,G,B,S,M)
     IF(B%BSets(1,cBAS)%HasECPs)THEN
        ! Compute ECP component of the force
        CALL Invoke('UForce',N,S,M)
@@ -1050,6 +1051,9 @@ CONTAINS
           ENDDO
        ENDDO
     ENDDO
+    !
+    CALL GeomArchive(cBAS,cGEO,N,B,G)
+    !
 #ifdef NGONX_INFO!vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw
     DO iCLONE=1,G%Clones
        WRITE(*,'(A,I3,A,E20.12)') ' Total XForce(',iCLONE,') =',SUM(FX(iCLONE,:))
@@ -1079,6 +1083,130 @@ CONTAINS
     CALL Delete(K)
   END SUBROUTINE NXForce
 !
+  SUBROUTINE NTHessian(cBAS,cGEO,N,G,B,S,M)
+    TYPE(FileNames)  :: N
+    TYPE(Options)    :: O
+    TYPE(State)      :: S
+    TYPE(Geometries) :: G
+    TYPE(BasisSets)  :: B
+    TYPE(Parallel)   :: M
+    TYPE(DBL_RNK2)   :: HT
+    INTEGER          :: cBAS,cGEO,J,iATS,iCLONE
+    CHARACTER(LEN=DCL) :: chGEO,chBAS,chSCF
+    TYPE(BCSR) :: P
+    TYPE(CRDS) :: GTmp
+    REAL(DOUBLE),DIMENSION(3,G%Clone(1)%NAtms*3,2)        :: FT
+    INTEGER                          :: AtA,AtB,IX,II,IA,IB,A1,A2,IS
+    REAL(DOUBLE),PARAMETER           :: DDelta = 1.D-3
+    CHARACTER(LEN=DCL)               :: TrixName
+    !------------------------------------------------------------------------------
+    write(*,*) 'NTHessian NTHessian NTHessian NTHessian NTHessian NTHessian'
+    chGEO=IntToChar(cGEO)
+    chBAS=IntToChar(cBAS)
+    chSCF=IntToChar(S%Current%I(1)+1)
+    CALL New(BSiz,G%Clone(1)%NAtms)
+    CALL New(OffS,G%Clone(1)%NAtms)
+    CALL New(HT,(/G%Clone(1)%NAtms*3,G%Clone(1)%NAtms*3/))
+    HT%D=0.0D0
+    !
+    ! Load current gradients, we need that, cause we save the geo through
+    ! GeoArchive and G%..%Gradients have been set to BIG_DBL previously.
+    !
+    HDFFileID=OpenHDF(N%HFile)
+    HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+    CALL Get(G%Clone(1)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+    CALL Get(G%Clone(1)%Gradients,'Gradients',Tag_O=chGEO)
+    CALL CloseHDFGroup(HDF_CurrentID)
+    CALL CloseHDF(HDFFileID)
+    !
+    ! Load globals 
+    NAToms=G%Clone(1)%NAtms
+    MaxAtms=B%MxAts(cBAS)
+    MaxBlks=B%MxN0s(cBAS)
+    MaxNon0=B%MxBlk(cBAS)
+    NBasF=B%BSets(1,cBAS)%NBasF
+    BSiz%I=B%BSiz(1,cBAS)%I
+    OffS%I=B%OffS(1,cBAS)%I
+    MaxBlkSize=0
+    DO II=1,NAtoms
+       MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II))
+    ENDDO
+    ! Set temporary geometries
+    GTmp%NAtms=G%Clone(1)%NAtms
+    CALL New_CRDS(GTmp)
+    GTmp%AbCarts%D=G%Clone(1)%AbCarts%D
+    GTmp%Gradients%D=G%Clone(1)%Gradients%D
+    ! Get the density matrix for this clone
+    TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS)//'_Cycl#'//TRIM(chSCF) &
+         //'_Clone#'//TRIM(IntToChar(1))//'.D'
+    CALL Get(P,TrixName)
+    chSCF=IntToChar(S%Current%I(1))
+    DO AtA=1,NAtoms
+       DO IX=1,3
+          DO II=1,2
+             !
+             ! Move the atom.
+             IF(II==1) THEN
+                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)+DDelta
+             ELSEIF(II==2) THEN
+                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)-DDelta
+             ENDIF
+             !
+             G%Clone(1)%Gradients%D=0.0D0
+             CALL GeomArchive(cBAS,cGEO,N,B,G)
+             ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw>>>
+             ! Move back the atom.
+             IF(II==1) THEN
+                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)
+             ELSEIF(II==2) THEN
+                G%Clone(1)%AbCarts%D(IX,AtA)=GTmp%AbCarts%D(IX,AtA)
+             ENDIF
+             ! vwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvwvw<<<
+             CALL Invoke('TForce',N,S,M)
+             ! Get the T Gradient
+             HDFFileID=OpenHDF(N%HFile)
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+             CALL Get(G%Clone(1)%Gradients,'Gradients',Tag_O=chGEO)
+             CALL CloseHDFGroup(HDF_CurrentID)
+             CALL CloseHDF(HDFFileID)
+             !copy grad
+             FT(:,:,II)=0.0D0
+             FT(:,:,II)=G%Clone(1)%Gradients%D(:,:)
+             !             DO IA=1,NAtoms
+             !                write(*,91919) 'G2(',1,',',IA,')=',G%Clone(1)%Gradients%D(1,IA),';'
+             !                write(*,91919) 'G2(',2,',',IA,')=',G%Clone(1)%Gradients%D(2,IA),';'
+             !                write(*,91919) 'G2(',3,',',IA,')=',G%Clone(1)%Gradients%D(3,IA),';'
+             !91919        format(A,I2,A,I2,A,E26.15,A)
+             !             ENDDO
+          ENDDO
+          IB=0
+          IA=3*(AtA-1)+IX
+          DO AtB=1,NAtoms
+             IB=IB+1
+             HT%D(IA,IB)=(FT(1,AtB,1)-FT(1,AtB,2))/(Two*DDelta)
+             IB=IB+1
+             HT%D(IA,IB)=(FT(2,AtB,1)-FT(2,AtB,2))/(Two*DDelta)
+             IB=IB+1
+             HT%D(IA,IB)=(FT(3,AtB,1)-FT(3,AtB,2))/(Two*DDelta)
+          ENDDO
+       ENDDO
+    ENDDO
+    !
+    !
+    G%Clone(1)%AbCarts%D=GTmp%AbCarts%D
+    G%Clone(1)%Gradients%D=GTmp%Gradients%D
+    !
+    CALL GeomArchive(cBAS,cGEO,N,B,G)
+    !
+    CALL Print_DBL_RNK2(HT,'THessian',Unit_O=6)
+
+    CALL Delete(HT)
+    CALL Delete(GTmp)
+    CALL Delete(P)
+    CALL Delete(BSiz)
+    CALL Delete(OffS)
+  END SUBROUTINE NTHessian
+
 END MODULE SCFs
 
 
