@@ -60,7 +60,7 @@ MODULE TreeWalk
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
           T>Gamma_Switch)THEN
 !         MAC: 
-          IF(PQ2>Q%Strength*DP2.OR.Q%Leaf)THEN 
+          IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
@@ -139,8 +139,7 @@ MODULE TreeWalk
           ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
                  T>Gamma_Switch) THEN
 !         MAC:
-          IF(PQ2>Q%Strength*DP2.OR.Q%Leaf)THEN
-!             IF(PQ2==Zero)RETURN
+          IF(PQ2>(Q%Strength*DP2+Q%DMax2) .OR. Q%Leaf)THEN
 !            Evaluate multipoles
              Ell=Prim%Ell+Q%Ell
              LCode=100*Prim%Ell+Q%Ell
@@ -158,7 +157,6 @@ MODULE TreeWalk
        ELSEIF(Q%Leaf)THEN
 !         Check for self-interaction
           IF(Q%BDex==At)RETURN
-!
 !         or use this bit o code...
 !         IF(Q%Leaf.AND.Q%Zeta==NuclearExpnt.AND.PQ2<VTol)THEN
 !            RETURN
