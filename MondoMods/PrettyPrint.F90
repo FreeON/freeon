@@ -365,128 +365,105 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
-!          
           PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              WRITE(PU,*)LeftParenStar
-              WRITE(PU,43)
-           ELSE
-              WRITE(PU,44)
-           ENDIF
-           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
-           IF(GM%ETotal/=BIG_DBL)THEN
-              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal)) 
-              WRITE(PU,*)TRIM(Mssg)
-              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradRMS)) 
-              WRITE(PU,*)TRIM(Mssg)
-              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradMax)) 
-              WRITE(PU,*)TRIM(Mssg)
+
+!           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
+!           IF(GM%ETotal/=BIG_DBL)THEN
+!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal)) 
+!              WRITE(PU,*)TRIM(Mssg)
+!              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradRMS)) 
+!              WRITE(PU,*)TRIM(Mssg)
+!              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradMax)) 
+!              WRITE(PU,*)TRIM(Mssg)
 !              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%ETotal))//';' 
 !              WRITE(PU,*)TRIM(Mssg)
 !              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradRMS))//';' 
 !              WRITE(PU,*)TRIM(Mssg)
 !              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradMax))//';' 
 !              WRITE(PU,*)TRIM(Mssg)
-           ENDIF
-           IF(PRESENT(PrintGeom_O))THEN
-              IF(PrintGeom_O=='XYZ')THEN
-               AA=One/AngstromsToAU
-               DO I=1,GM%NAtms
-                 Mssg=Ats(GM%AtNum%I(I))                    &
-                 //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA) &
-                 //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA) &
-                 //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA) 
-                 WRITE(PU,*)TRIM(Mssg)
+!           ENDIF
+
+           IF(PrintGeom_O=='XYZ')THEN
+!             Print XYZ format
+              CALL PrintProtectL(PU)
+              WRITE(PU,*)TRIM(IntToChar(GM%NAtms))
+              Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))//' 0.0 '
+              WRITE(PU,*)TRIM(Mssg)
+              AA=One/AngstromsToAU
+              DO I=1,GM%NAtms
+                  Mssg=Ats(GM%AtNum%I(I))                         &
+                    //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
+                    //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
+                    //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
+                  WRITE(PU,*)TRIM(Mssg)
               ENDDO
-              ENDIF
-           ELSEIF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
+!             Print MMA format
+              Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'                  
+              WRITE(PU,*)TRIM(Mssg)
+              WRITE(PU,*)'(* Coordinates are in AU *)'
+              DO I=1,GM%NAtms
+#ifdef PERIODIC
+                 Mssg='R['//TRIM(IntToChar(I))//']={'              &
+                          //DblToMMAChar(GM%BoxCarts%D(1,I))//','  &
+                          //DblToMMAChar(GM%BoxCarts%D(2,I))//','  &
+                          //DblToMMAChar(GM%BoxCarts%D(3,I))//'};'  
+#else
+                 Mssg='R['//TRIM(IntToChar(I))//']={'           &
+                          //DblToMMAChar(GM%Carts%D(1,I))//','  &
+                          //DblToMMAChar(GM%Carts%D(2,I))//','  &
+                          //DblToMMAChar(GM%Carts%D(3,I))//'};'  
+#endif
+                  WRITE(PU,*)TRIM(Mssg)
+              ENDDO
+           ELSE
+!             Default is the full dump of the internal representation
+              CALL PrintProtectL(PU)
+              WRITE(PU,3)
+              WRITE(PU,*)'Internal representation of the geometry:'
               IF(GM%InAU)THEN
-                 WRITE(PU,45)
+                 WRITE(PU,*)'Geometry originally in AU has not been rescaled.'
               ELSE
-                 WRITE(PU,46)
+                 WRITE(PU,*)'Geometry originally in Angstroms has been converted to AU.'
               ENDIF
               IF(GM%Ordrd==SFC_HILBERT)THEN
-                 WRITE(PU,17)
+                 WRITE(PU,*)'Geometry has been reordered using the Hilbert curve.'
               ELSEIF(GM%Ordrd==SFC_PEANO)THEN
-                 WRITE(PU,27)
+                 WRITE(PU,*)'Geometry has been reordered using the Peano curve.'
               ELSEIF(GM%Ordrd==SFC_RANDOM)THEN
-                 WRITE(PU,47)
+                 WRITE(PU,*)'Geometry has been randomly reordered.'
               ELSE
-                 WRITE(PU,37)
+                 WRITE(PU,*)'Geometry has not been reordered.'
               ENDIF
-              WRITE(PU,49)
-           ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-              WRITE(PU,*)RightParenStar
-              DO I=1,GM%NAtms
-                 WRITE(PU,54)I,GM%AtNum%I(I)
-              ENDDO
-              DO I=1,GM%NAtms
-                 WRITE(PU,53)I,(FRACTION(GM%Carts%D(K,I)), &
-                                 EXPONENT(GM%Carts%D(K,I)),K=1,3)
-              ENDDO
-           ENDIF
-              DO I=1,GM%NAtms
-                 WRITE(PU,52)I,Ats(GM%AtNum%I(I)),(GM%Carts%D(K,I),K=1,3)
-              ENDDO
-!              WRITE(PU,42) GM%ENucN
-              WRITE(PU,444)GM%NElec
-              WRITE(PU,43) 
+              Mssg='Number of electrons = '//TRIM(IntToChar(GM%NElec))
+              WRITE(PU,*)TRIM(Mssg)
+              WRITE(PU,2)
 #ifdef PERIODIC
-              IF(GM%AutoW(1) .OR. GM%AutoW(2) .OR. GM%AutoW(3)) THEN
-                 WRITE(PU,55)
-                 WRITE(PU,56) GM%AutoW(1),GM%AutoW(2),GM%AutoW(3)
-                 WRITE(PU,57) GM%TransVec%D(1),GM%TransVec%D(2),GM%TransVec%D(3)
-                 WRITE(PU,58)  
-                 WRITE(PU,59) GM%BoxShape%D(1,1),GM%BoxShape%D(2,1),GM%BoxShape%D(3,1)
-                 WRITE(PU,60) GM%BoxShape%D(1,2),GM%BoxShape%D(2,2),GM%BoxShape%D(3,2)
-                 WRITE(PU,61) GM%BoxShape%D(1,3),GM%BoxShape%D(2,3),GM%BoxShape%D(3,3)
-                 WRITE(PU,62)  
-                 DO I=1,GM%NAtms
-                    WRITE(PU,63) I, Ats(GM%AtNum%I(I)),(GM%BoxCarts%D(K,I),K=1,3)
-                 ENDDO
-                 WRITE(PU,43)
-              ELSE
-                 WRITE(PU,64)
-                 WRITE(PU,43)
-              ENDIF
-#endif
-!           ENDIF
+              WRITE(PU,*)' Periodic geometry has been wrapped into box coordinates '
+#endif              
+              DO I=1,GM%NAtms
+#ifdef PERIODIC
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
+#else
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
+                    //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
+                    //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
+                    //'   '//DblToMedmChar(GM%Carts%D(3,I)) 
+#endif 
+                   WRITE(PU,*)TRIM(Mssg)
+              ENDDO
+              WRITE(PU,2)
+              CALL PrintProtectR(PU)
+           ENDIF
            CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
 #endif
-        IF(PrintFlags%Fmt==DEBUG_MMASTYLE) &
-        CALL PPrint(GM%NElec,'NEl',Protect_O=.FALSE.)
-!
-   43   FORMAT(72('='))
-   44   FORMAT(72('='))
-   41   FORMAT(' ENucN=',F19.16,'*2^(',I4,');')
-   42   FORMAT(2x,' E_{nn} = ',D22.14,' (AU).')
-  444   FORMAT(2x,' N_{el} = ',I8)
-   45   FORMAT(2x,' Geometry, originally in AU, has not been rescaled.')
-   46   FORMAT(2x,' Geometry, originally in Angstroms, has been converted to AU.')
-
-   17   FORMAT(2x,' Geometry has been reordered using the Hilbert curve.')
-   27   FORMAT(2x,' Geometry has been reordered using the Peano curve.')
-   47   FORMAT(2x,' Geometry has been randomly reordered.')
-   37   FORMAT(2x,' Geometry has not been reordered.')
-
-   49   FORMAT(2x,' Internal representation of geometry: ')
-   52   FORMAT(1x,I5,1x,A2,3(1x,D16.8))
-   53   FORMAT(' R[',I4,']={',F19.16,'*2^(',I4,')', &
-                          ',',F19.16,'*2^(',I4,')', &
-                          ',',F19.16,'*2^(',I4,')};')
-   54   FORMAT(' Z[',I4,']=',I3,';')
-   55   FORMAT(2x,' Representation of the Lattice')
-   56   FORMAT(2x,' Periodic Boundry Conditions (x,y,z) => {',L1,',',L1,',',L1,'}')
-   57   FORMAT(2x,' Translation Vector = (',D14.8,', ',D14.8,', ',D14.8,')')
-   58   FORMAT(2x,' Lattice Vectors: ')
-   59   FORMAT(2x,'  a  = (',D14.8,', ',D14.8,', ',D14.8,')')
-   60   FORMAT(2x,'  b  = (',D14.8,', ',D14.8,', ',D14.8,')')
-   61   FORMAT(2x,'  c  = (',D14.8,', ',D14.8,', ',D14.8,')')
-   62   FORMAT(2x,' Internal representation of geometry in Fractional Coordinates: ')
-   63   FORMAT(1x,I5,1x,A2,3(1x,F16.10))
-   64   FORMAT(2x,' *** Periodic is Off *** ')
+     2 FORMAT(72('-'))
+     3 FORMAT(72('='))
      END SUBROUTINE Print_CRDS
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
