@@ -13,7 +13,7 @@
          Table(3,I)=F9_3(I)
       ENDDO
 
-      CALL GDump(9,4*(Mesh+1),Table)
+      CALL GDump(9,4*(Mesh+1),F9Asymp,Table)
 
       RETURN
       END

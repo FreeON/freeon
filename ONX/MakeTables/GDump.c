@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void GDump(int *L, int *Length, int *Table)
+void GDump(int *L, int *Length, int *Asymp, int *Table)
 {
     char* GammaHome;
     char SL[3];
@@ -25,17 +25,18 @@ void GDump(int *L, int *Length, int *Table)
        exit( EXIT_FAILURE );
     }
 
+     fwrite(Asymp,sizeof(double),1,InFile);
      fwrite(Table,sizeof(double),(*Length),InFile);
      fclose(InFile);
 }
 
-void gdump_(int *L, int *Length, int *Table)
+void gdump_(int *L, int *Length, int *Asymp, int *Table)
 {
-    GDump(L, Length, Table);
+    GDump(L, Length, Asymp, Table);
 }
 
-void gdump(int *L, int *Length, int *Table)
+void gdump(int *L, int *Length, int *Asymp, int *Table)
 {
-    GDump(L, Length, Table);
+    GDump(L, Length, Asymp, Table);
 }
 

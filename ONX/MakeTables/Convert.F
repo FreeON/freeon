@@ -2,6 +2,7 @@
       IMPLICIT REAL*8 (a-h,o-z)
       INCLUDE "Mesh.Inc"
       REAL*8 Table(0:3,0:Mesh)
+      INCLUDE "Gamma_Asymptotics.Inc"
 
       CALL ConvertG0()
       CALL ConvertG1()
@@ -17,7 +18,8 @@
       CALL ConvertG11()
       CALL ConvertG12()
       CALL ConvertE()
-
+      CALL HDump(Mesh,Switch,Grid)
+c
 c      CALL GetGammaTable(0,4*(Mesh+1),Table)
 c      DO I=0,Mesh
 c      WRITE(77,9000) I,Table(0,I),Table(1,I),Table(2,I),Table(3,I)

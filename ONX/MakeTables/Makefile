@@ -5,7 +5,7 @@ include $(MONDO_HOME)/Includes/RemoveAll
 EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions 
 
 LD=$(F90)
-Objects = Convert.o GDump.o EDump.o GetGammaTable.o \
+Objects = Convert.o GDump.o EDump.o HDump.o GetGammaTable.o \
           ConvertG0.o  ConvertG1.o  ConvertG2.o  ConvertG3.o ConvertG4.o \
           ConvertG5.o  ConvertG6.o  ConvertG7.o  ConvertG8.o ConvertG9.o \
           ConvertG10.o ConvertG11.o ConvertG12.o \

@@ -13,7 +13,7 @@
          Table(3,I)=F6_3(I)
       ENDDO
 
-      CALL GDump(6,4*(Mesh+1),Table)
+      CALL GDump(6,4*(Mesh+1),F6Asymp,Table)
 
       RETURN
       END
