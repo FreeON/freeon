@@ -1,49 +1,47 @@
 
-<BeginTitle>
-
     P-Ice (2 Waters molecules)
 
-
-    This input file demonstrates using a larger UC to precondition
-    a calculation with a smaller UC.  The larger UC density matrix 
-    is in the HDF file, and is used as a guess on restart.
-
-    Unsquoze: STO-2G/PBE = -146.04107139
-    Squeezed: STO-2G/PBE = -145.63463741
-    Other numbers at a=7.328, b=7.820, c=4.400
-    Crystal/RHF-MIC :  <SCF>=-152.03025091
-    STO-3G/PBE0     :  <SCF>=-150.50493695 
-
-<EndTitle>
+    This input file demonstrates 
+    (1) lattice constrained optimization of atomic coordinates
+    (2) Use of the ECP basis CEP-31G with periodic boundaries.
+        Note that PBC ECP lattice forces are not yet implemented
 
 <BeginOptions>
+
+OutPut=XYZ
+Grad=(Optimize,PrimInt,NoGDIIS,BiSect,HBondOnly,NoFragmConnect,NonCovBend,NonCovTors)
 Charge=0
 Multiplicity=1
-Guess=(Restart,Reparse)
-HDFFile=$MONDO_HOME/Validate/Ice.hdf
-DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+DebugAll=(MinDebug,CheckSums)
 SCFMethod=(RH)
-BasisSets=(STO-2G)
-ModelChem=(PBE0) 
-Accuracy =(Loose)
+BasisSets=(User5)
+ModelChem=(B3LYP)
+SCFConvergence=(DIIS)
+Accuracy =(Good)
 Geometry=(InAnstroms,NoOrder) 
-Periodic=(FracCoord)
+Periodic=(AtomCoord)
 PBC=(T,T,T)
 <EndOptions>
 
 <BeginPeriodic>
-    5.8624  6.2560  3.5200   90.000  90.000   90.000
-<EndPeriodic>
  7.328  7.820   4.400  90.000  90.000   90.000
+<EndPeriodic>
 
-<BeginGeometry>  
-O         0.06373700000000    0.58344300000000    0.00000000000000
-O         0.93626300000000    0.91655700000000    0.00000000000000
-H         0.19610600000000    0.58344300000000    0.00000000000000
-H         0.01846500000000    0.52417300000000    0.17757600000000
-H         0.98044300000000    0.80110500000000    0.00000000000000
-H         0.98153500000000    0.97582700000000    0.82242400000000
+<BeginGeometry> 
+ O   0.46706474               4.56252426               0.00000000
+ O   6.86093526               7.16747574               0.00000000
+ H   1.43706477               4.56252426               0.00000000
+ H   0.13531152               4.09903286               0.78133440
+ H   7.18468630               6.26464110               0.00000000
+ H   7.19268848               7.63096714               3.61866560
 <EndGeometry>
 
-
-
+<Begin_Add_Internals>
+STRE_A  7.328  
+STRE_B  7.820   
+STRE_C  4.400  
+ALPHA 90.000  
+BETA  90.000   
+GAMMA 90.000
+<End_Add_Internals>
