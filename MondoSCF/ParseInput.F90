@@ -186,7 +186,13 @@ MODULE ParseInPut
             Ctrl%SuperP=.FALSE.
             Ctrl%Rest=.FALSE.
          ELSE
+#ifdef MMech
+            IF(HasQM()) THEN
+              CALL MondoHalt(PRSE_ERROR,'Unrecognised guess')
+            ENDIF
+#else
             CALL MondoHalt(PRSE_ERROR,'Unrecognised guess')
+#endif
          ENDIF
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !----------------------------------------------------------------------------
