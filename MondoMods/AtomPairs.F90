@@ -148,8 +148,6 @@ CONTAINS
 !  
   END FUNCTION CalculateQuadruPole
 #ifdef PERIODIC
-#ifdef PARALLEL_CLONES
-#else
 !-------------------------------------------------------------------------------
 ! Set up the lattice vecters to sum over 
 ! Also, Added a Factor that Takes into Account the Box Size and Shape
@@ -169,8 +167,8 @@ CONTAINS
     ENDIF
     CALL New_CellSet_Sphere(CS,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
     CALL Sort_CellSet(CS)
+!
   END SUBROUTINE SetCellNumber
-#endif
 !-------------------------------------------------------------------------------
 ! Convert from Atomic Coordinates  to Fractional Coordinates
 !-------------------------------------------------------------------------------
@@ -235,9 +233,9 @@ CONTAINS
     VecA = FracToAtom(GM,VecF)
 !
   END SUBROUTINE AtomCyclic
-  !===================================================================================
-  !
-  !===================================================================================
+!===================================================================================
+!
+!===================================================================================
   SUBROUTINE  WrapAtoms(G)
     TYPE(CRDS)                         :: G
     REAL(DOUBLE),DIMENSION(3,G%NAtms) :: BoxCarts
@@ -262,7 +260,9 @@ CONTAINS
        G%Carts%D(:,I)=FracToAtom(G,BoxCarts(:,I))
     ENDDO
   END SUBROUTINE WrapAtoms
-
+!===================================================================================
+!
+!===================================================================================
   SUBROUTINE  CalFracCarts(GM)
     TYPE(CRDS)                 :: GM
     INTEGER                    :: I
@@ -393,7 +393,6 @@ CONTAINS
     MaxBoxDim = MAX(MaxBoxDim,SQRT(C(1)**2+C(2)**2+C(3)**2))
 !
   END FUNCTION MaxBoxDim
-!
 !-------------------------------------------------------------------------------
 ! Calculate the Minmiun Image Distance Between Atoms I and J via Atom Positions
 !-------------------------------------------------------------------------------
@@ -412,6 +411,7 @@ CONTAINS
        ENDDO
        MaxAtomDist = MAX(MaxAtomDist,SQRT(Dist))
     ENDDO
+    MaxAtomDist = Two*MaxAtomDist
 !
   END FUNCTION MaxAtomDist
 #endif
