@@ -42,13 +42,12 @@ MODULE ParsingKeys
    INTEGER, PARAMETER :: EDMM_U_SCF=40834070 ! Unrestricted ExtrapolatedDensity Matrix Minimization 
 !  <Options.Guess=>
    CHARACTER(LEN=5),  PARAMETER :: GUESS_OPTION   ='Guess'
-   CHARACTER(LEN=4),  PARAMETER :: GUESS_CORE     ='Core'
    CHARACTER(LEN=8),  PARAMETER :: GUESS_SUPER    ='SuperPos'
    CHARACTER(LEN=7),  PARAMETER :: GUESS_RESTART  ='Restart'
-   CHARACTER(LEN=8),  PARAMETER :: RESTART_INFO   ='InfoFile'
+   CHARACTER(LEN=7),  PARAMETER :: RESTART_INFO   ='HDFFile'
 !  <Options.InkFok=>
    CHARACTER(LEN=6),  PARAMETER :: INKFOCK_OPTION ='InkFok'
-   CHARACTER(LEN=3),  PARAMETER :: INKFOCK_OFF    ='Off'
+   CHARACTER(LEN=2),  PARAMETER :: INKFOCK_ON     ='On'
 !  Guess keys
    INTEGER, PARAMETER :: GUESS_EQ_CORE=14334 ! Density matrix from core Hamiltonian
    INTEGER, PARAMETER :: GUESS_EQ_SUPR=40823 ! Density matrix from superposition of 

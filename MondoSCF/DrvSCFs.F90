@@ -29,6 +29,7 @@ MODULE DrvSCFs
            Ctrl%Current(1)=ICyc
            CALL SetGlobalCtrlIndecies(Ctrl)
            IF(ICyc==0)CALL OneEMats(Ctrl)
+!          Do an SCF cycle
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
@@ -83,6 +84,13 @@ MODULE DrvSCFs
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
          CALL CleanScratch(Ctrl,'CleanLastGeom')
+      ELSEIF(Ctrl%Rest)THEN
+!        Restart from a previous density
+         CALL LogSCF(Ctrl%Current,'Restarting from '//TRIM(Ctrl%OldInfo),.TRUE.)
+         CtrlVect=SetCtrlVect(Ctrl,'Restart')
+         CALL Invoke('P2Use',CtrlVect)
+         CALL Invoke('MakeRho',CtrlVect)
+         Ctrl%Rest=.FALSE.
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
          CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &
@@ -300,13 +308,19 @@ MODULE DrvSCFs
                               DMaxA,DMaxB,dDMax,DMaxQ, &
                               DIISA,DIISB,dDIIS,DIISQ, &
                               ETest,DTest
+         TYPE(INT_VECT)    :: Stat
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !-----------------------------------------------------------------------
          ConvergedQ=.FALSE.
          IF(CCyc==0)RETURN
 !-----------------------------------------------------------------------
-!        Gather convergence parameters
          CALL OpenHDF(Ctrl%Info)
+!        Mark the current status
+         CALL New(Stat,3)
+         Stat%I=Ctrl%Current
+         CALL Put(Stat,'current')
+         CALL Delete(Stat)
+!        Gather convergence parameters
          CALL Get(EtotA,'Etot',StatsToChar(Ctrl%Previous))
          CALL Get(EtotB,'Etot',StatsToChar(Ctrl%Current))
          CALL Get(DMaxA,'DMax',StatsToChar(Ctrl%Previous))

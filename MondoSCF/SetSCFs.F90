@@ -24,36 +24,20 @@ MODULE SetSCFs
          INTEGER                         :: ISet
          TYPE(INT_VECT)                  :: Stat
          CALL OpenHDF(Ctrl%Info)         
-         IF(Ctrl%Rest)THEN
-            CALL New(Stat,3)
-            CALL Get(Stat,'PreviousStatus')
-            Ctrl%Previous=Stat%I
-            CALL Get(Stat,'CurrentStatus')
-            Ctrl%Current=Stat%I
-            CALL Delete(Stat)
-            CALL Get(Ctrl%NSet,'NumberOfSets')
-            CALL Get(Ctrl%NGeom,'NumberOfGeometries')
-            DO ISet=1,Ctrl%NSet
-               CALL Get(Ctrl%AccL(ISet),  'SCFAccuracy',   Tag_O=IntToChar(ISet))
-               CALL Get(Ctrl%Model(ISet) ,'ModelChemistry',Tag_O=IntToChar(ISet))
-               CALL Get(Ctrl%Method(ISet),'SCFMethod'     ,Tag_O=IntToChar(ISet))
-            ENDDO
-         ELSE
-            DO ISet=1,Ctrl%NSet
-               Ctrl%Current(2)=ISet
-               CSet=TRIM(IntToChar(ISet))
-               CALL Get(Base,Tag_O=CSet)
-!              Matrix limits to HDF InfFile
-               CALL SetLimits(Ctrl)
-!              Primitive distribution stuff to HDF InfFile
-               CALL SetDist(Ctrl)   
+         DO ISet=1,Ctrl%NSet
+            Ctrl%Current(2)=ISet
+            CSet=TRIM(IntToChar(ISet))
+            CALL Get(Base,Tag_O=CSet)
+!           Matrix limits to HDF InfFile
+            CALL SetLimits(Ctrl)
+!           Primitive distribution stuff to HDF InfFile
+            CALL SetDist(Ctrl)   
 #ifdef PARALLEL
-!              Compute a more sophisticated domain decomposition
-!              CALL SetDomainD(Ctrl)
+!           Compute a more sophisticated domain decomposition
+!           CALL SetDomainD(Ctrl)
 #endif
-               CALL Delete(Base)
-            ENDDO
-         ENDIF
+            CALL Delete(Base)
+         ENDDO
          CALL CloseHDF()
       END SUBROUTINE SetSCF
 !=============================================================

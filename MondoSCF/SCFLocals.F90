@@ -63,6 +63,7 @@ MODULE SCFLocals
       LOGICAL                            :: ShudInk! To do or not to do incremental Fock builds
 !
       LOGICAL                            :: Rest   ! Restart from a specified Info file
+      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: OldInfo! Old hdf file from which to restart
       INTEGER                            :: Fail   ! SCF convergence key
       CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    DIMENSION(MaxSets)    :: BName  ! Basis set name

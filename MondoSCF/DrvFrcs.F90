@@ -114,9 +114,10 @@ MODULE DrvFrcs
        Ctrl%Current=(/0,CBas,CGeo+1/)
        CrntState=Ctrl%Current
        CALL SetGlobalCtrlIndecies(Ctrl)           
-!      Set starting stepsize to unity
+!      Set starting stepsize to fraction:
+!      Damp steps untill we build up a reasonable Hessian
        CALL OpenHDF(InfFile)
-       CALL Put(One,'StepSize')
+       CALL Put(1D-1,'StepSize')
        CALL CloseHDF()
 !      Take a step
        CtrlVect=SetCtrlVect(Ctrl,'QuNew')
@@ -166,7 +167,7 @@ MODULE DrvFrcs
          TYPE(SCFControls)  :: Ctrl
          TYPE(CRDS)         :: GM
          INTEGER            :: AccL
-         REAL(DOUBLE)       :: StepSz,E0,E1,ET,RelErrE,EUncert, &
+         REAL(DOUBLE)       :: StepSz,OldStep,E0,E1,ET,RelErrE,EUncert, &
                                RMSGrad,MAXGrad,RMSDisp,MaxDisp
          LOGICAL            :: ECnvrgd,GCnvrgd,XCnvrgd
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
@@ -175,6 +176,7 @@ MODULE DrvFrcs
          CALL OpenHDF(Ctrl%Info)
 !        Get the current step size
          CALL Get(StepSz,'StepSize')
+         OldStep=StepSz
 !        Get the previous and current total energy
          CALL Get(E0,'Etot',Tag_O=StatsToChar(Ctrl%Previous))
          CALL Get(E1,'Etot',Tag_O=StatsToChar(Ctrl%Current))
@@ -196,8 +198,16 @@ MODULE DrvFrcs
             KeepStep=-1
             Mssg=ProcessName('QuNew','Converged #'//TRIM(CurGeom))
           ELSEIF(RelErrE<Zero)THEN
-!           If energy is going down, keep taking unit steps
-            StepSz=One 
+            IF(CGeo<6)THEN
+!              If we are early in the geometry optimization,
+!              take small steps untill we get an approximate Hessian                
+!              built up.
+               StepSz=1D-1
+            ELSE
+!              If energy is going down, and we have some sort of 
+!              Hessian built up, keep taking unit steps
+               StepSz=One 
+            ENDIF
 !           Dont back track
             KeepStep=1
             Mssg=ProcessName('QuNew','Descent   #'//TRIM(CurGeom))
@@ -213,11 +223,12 @@ MODULE DrvFrcs
             KeepStep=0
          ENDIF
          CALL Put(StepSz,'StepSize')
-         Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))      &
+         Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))    &
                         //', Grms= '//TRIM(DblToShrtChar(RMSGrad)) &
                         //', Gmax= '//TRIM(DblToShrtChar(MAXGrad)) &
                         //', Xrms= '//TRIM(DblToShrtChar(RMSDisp)) &
-                        //', Xmax= '//TRIM(DblToShrtChar(MAXDisp))
+                        //', Xmax= '//TRIM(DblToShrtChar(MAXDisp)) &
+                        //', Step= '//TRIM(DblToShrtChar(OldStep))
 
          WRITE(*,*)TRIM(Mssg)             
          CALL OpenASCII(OutFile,Out)

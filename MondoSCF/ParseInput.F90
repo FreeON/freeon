@@ -33,7 +33,6 @@ MODULE ParseInput
          TYPE(SCFControls), INTENT(INOUT) :: Ctrl
 !        Read comand line, environement variables, create file names, init files etc
          CALL ParseCmndLine(Ctrl)
-         IF(Ctrl%Rest)RETURN
 !        Read geometry and lattice variables, reorder, rescale etc  
          CALL ParseGeometry(Ctrl)  
 !        Read in the basis sets
@@ -119,28 +118,31 @@ MODULE ParseInput
 !        Set SCF and InfoFile names
          Ctrl%Info=InfFile
          Ctrl%Name=TRIM(SCF_NAME)
+         CALL InitHDF(Ctrl%Info)
+         CALL OpenHDF(Ctrl%Info)
 !------------------------------------------------------------------------------------
-!        Check for a restart; link old HDF5 to new one if restarting
+!        Check for guess, restart. Initialize HDF file
 !
          CALL OpenASCII(InpFile,Inp,OldFileQ_O=.TRUE.)
          IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
-            Ctrl%Rest=.TRUE.
-            IF(OptCharQ(Inp,RESTART_INFO,OldInfo))THEN
-!              Set link from old info file to new info file
-               SoftLinks=(/Soft,OldInfo,Ctrl%Info/)
-               CALL Invoke('/bin/ln',SoftLinks,AbsPath_O=.TRUE.)
-            ELSE
-               CALL Halt('Restart requested, but no Info file specified.')
+            Ctrl%Rest=.TRUE.            
+            Ctrl%SuperP=.FALSE.
+            IF(.NOT.OptCharQ(Inp,RESTART_INFO,Ctrl%OldInfo))  &
+               CALL Halt('Restart requested, but no hdf file specified.')
+!           Check for absolute path 
+            IF(INDEX(Ctrl%OldInfo,'/')==0)THEN
+               Ctrl%OldInfo=TRIM(MONDO_PWD)//Ctrl%OldInfo
+               WRITE(*,*)' OldInfo ',Ctrl%OldInfo
             ENDIF
+            CALL Put(Ctrl%OldInfo,'oldinfo')
          ELSE
-            CALL InitHDF(Ctrl%Info)
+            Ctrl%SuperP=.TRUE.
             Ctrl%Rest=.FALSE.
          ENDIF
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !---------------------------------------------------------------------------------------
 !        Initialize and open info file 
 !
-         CALL OpenHDF(InfFile)
          CALL Put(InpFile,'inputfile')
          CALL Put(InfFile,'infofile')
          CALL Put(LogFile,'logfile')
@@ -241,14 +243,38 @@ MODULE ParseInput
 !==================================================================================
       SUBROUTINE ParsePrint(Ctrl)
          TYPE(SCFControls)                :: Ctrl
-         INTEGER                          :: I
-         CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Method,Accuracy,Chemistry 
+         INTEGER                          :: I,RestAccL,RestMeth,RestModl
+         TYPE(INT_VECT)                   :: Stat
+         TYPE(CRDS)                       :: GM
+         CHARACTER(LEN=8)                 :: Cur
+         CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Method,Accuracy,Chemistry
+         CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
          CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !---------------------------------------------------------------------------------
 !        Open input file
          CALL OpenASCII(OutFile,Out)
          CALL PrintProtectL(Out)
-         WRITE(Out,*)'HDF file :: ',TRIM(Ctrl%Info)
+         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
+         IF(Ctrl%Rest)THEN
+            WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
+            CALL OpenHDF(Ctrl%OldInfo)
+            CALL New(Stat,3)
+            CALL Get(Stat,'current')
+            Cur=IntToChar(Stat%I(2))
+            CALL Get(RestAccL,'SCFAccuracy',Cur)
+            CALL Get(RestMeth,'SCFMethod',Cur)
+            CALL Get(RestModl,'ModelChemistry',Cur)
+            CALL Get(BName,'bsetname',Cur)
+            Cur=IntToChar(Stat%I(3)) 
+!            CALL Get(GM,Cur)
+            CALL CloseHDF()
+            Mssg='Restart using '//TRIM(BName)//'/'//TRIM(FunctionalName(RestModl)) &
+               //' density from previous geometry #'//TRIM(Cur)
+            WRITE(Out,*)TRIM(Mssg)
+            CALL Delete(Stat)
+!            CALL Delete(GM)
+         ENDIF
+         WRITE(Out,*)
 !        Print the accuracy, method and model chemistry for each basis set
          WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
          DO I=1,Ctrl%NSet
@@ -258,13 +284,13 @@ MODULE ParseInput
                Method='restricted Roothaan-Hall solution of the SCF using '
             ENDIF
             IF(Ctrl%AccL(I)==1)THEN
-               Accuracy='  a loose accuracy level'
+               Accuracy='  a loose accuracy level, '
             ELSEIF(Ctrl%AccL(I)==2)THEN
-               Accuracy='  a good accuracy level'
+               Accuracy='  a good accuracy level, '
             ELSEIF(Ctrl%AccL(I)==3)THEN
-               Accuracy='  a tight accuracy level'
+               Accuracy='  a tight accuracy level, '
             ELSEIF(Ctrl%AccL(I)==4)THEN
-               Accuracy='  a very tight accuracy level'      
+               Accuracy='  a very tight accuracy level, '      
             ENDIF
             Chemistry=' and the '//TRIM(FunctionalName(Ctrl%Model(I)))//' model.'
             IF(I==1)THEN
@@ -299,10 +325,10 @@ MODULE ParseInput
 !-------------------------------------------------------------------------------
 !        Parse <OPTIONS.SCF>
 !
-         IF(OptKeyQ(Inp,INKFOCK_OPTION,INKFOCK_OFF))THEN
-            Ctrl%ShudInk=.FALSE.
-         ELSE
+         IF(OptKeyQ(Inp,INKFOCK_OPTION,INKFOCK_ON))THEN
             Ctrl%ShudInk=.TRUE.
+         ELSE
+            Ctrl%ShudInk=.FALSE.
          ENDIF       
 !
          NOpts=0
@@ -1529,12 +1555,6 @@ MODULE ParseInput
          CALL OpenHDF(InfFile)
 !        Parse basis sets from input file
          CALL OpenASCII(InpFile,Inp) 
-!        Parse <OPTIONS.GUESS>
-         IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
-            Ctrl%SuperP=.FALSE.
-         ELSE
-            Ctrl%SuperP=.TRUE.
-         ENDIF       
 !        Parse <OPTIONS.BASIS_SETS>
          Ctrl%NSet=0
          Base(:)%BType=0
