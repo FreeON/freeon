@@ -2558,10 +2558,6 @@ MODULE ParseInPut
 500   CONTINUE
       CLOSE(Inp,STATUS='KEEP')
 !
-500   CONTINUE
-      CLOSE(Out,STATUS='KEEP')
-      CLOSE(Inp,STATUS='KEEP')
-!
       END SUBROUTINE ParseIntCoo
 !
 !-----------------------------------------------------------------------
