@@ -108,12 +108,12 @@ PROGRAM SForce
               IF(TestAtomPair(Pair)) THEN
                  F_nlm(1:3)    = -Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
                  SFrc%D(A1:A2) = SFrc%D(A1:A2) + F_nlm(1:3)
- 
+#ifdef THIS_IS_NOT_WELL_POSED_FOR_DIMEN_ZERO
                  nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
                  LatFrc_S(1,1:3) = LatFrc_S(1,1:3) + nlm(1)*F_nlm(1:3)
                  LatFrc_S(2,1:3) = LatFrc_S(2,1:3) + nlm(2)*F_nlm(1:3)
                  LatFrc_S(3,1:3) = LatFrc_S(3,1:3) + nlm(3)*F_nlm(1:3)
- 
+#endif 
               ENDIF
            ENDDO
 #else
