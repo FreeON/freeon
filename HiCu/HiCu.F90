@@ -68,18 +68,17 @@ PROGRAM HaiKu
   CALL PPrint(TimeGridToMat,Sub3,Unit_O=6)
   CALL DeleteBraBlok()
 ! Put Kxc to disk
-!  Now filtering only after orthogonal Fock build...
-!  CALL Filter(T1,Kxc)
+  CALL Filter(T1,Kxc)
   CALL Put(Kxc,TrixFile('Kxc',Args,0))
 ! Put Exc to Info
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
 ! Printing
-!  CALL PChkSum(Kxc,'Kxc['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
-  CALL PChkSum(Kxc,'Kxc['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( Kxc,'Kxc['//TRIM(SCFCycl)//']')
-  CALL Plot(   Kxc,'Kxc['//TRIM(SCFCycl)//']')
+  CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
+  CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
 ! Tidy up
   CALL Delete(Kxc)
+  CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
 ! Shutdown 
