@@ -121,8 +121,8 @@ up to 512 atoms in the unit cell.
 %
 % Example system
 %
-To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
-of the Silicon (111) surface with a step.
+%To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
+%of the Silicon (111) surface with a step.
 %
 Finally we give some conclusion concerning the accuracy and utility of \textbf{MondoSCF}
 and future research directions.
@@ -174,7 +174,7 @@ For small system sizes with high symmetry, a careful sampling of reciprocal spac
 for an accurate description of the periodic system.  An alternative approach to including these 
 important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through 
 replication 
-and translation of the primitive UC.  This is the supercell $\Gamma$-point approximation, used
+and translation of the primitive unit cell.  This is the supercell $\Gamma$-point approximation, used
 primarily for the study of defects and vacancies rather than as a replacement for 
 ${\bf k}$-space integration,
 perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
@@ -182,7 +182,7 @@ perhaps due to the expense of conventional algorithms and slow convergence for s
 In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the 
 $\Gamma$-point 
 approximation, allowing the use of large supercells in the case of high symmetry and large 
-primary UCs 
+primary unit cells
 in the case of disordered systems.  While the ${\bf k}$  dependence is avoided, lattice 
 summation and formal integration over 
 the unit cell volume, $V_{\rm UC}$ are retained. At first sight this would seem to make matrix 
@@ -207,14 +207,18 @@ transformation,
 \begin{equation}
 \sum_{\bf R} \int_{V_{\rm UC}} d {\bf r} f({\bf r+R}) \rightarrow \int_{V_\infty} d {\bf r} f({\bf r}),
 \end{equation}
-allowing use of conventional analytic integral technologies \cite{twoels}.  For example, 
-elements of the periodic overlap matrix become
+allowing use of conventional analytic integral technologies \cite{JWhitten73,LMcmurchie78,VSaunders83}.  
+For example, elements of the periodic overlap matrix become
 \begin{equation}
 \label{Sab_pbc2}
 S_{ab}=\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\, \phi _{a}
 ({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}).
 \end{equation}
-It is convenient to define the corresponding intermediate basis function products (distributions)
+%
+%
+
+
+For compactness of notation, let us define the corresponding intermediate basis function products (distributions)
 $\rho _{ab}^{\scriptscriptstyle \infty}({\mathbf{r}})=\sum _{\mathbf{R}}\phi _{a}({\mathbf{r}})\phi _{b}
 ({\mathbf{r}+\mathbf{R}})
 $ associated with integration over $V_\infty$.  We likewise define an intermediate 
@@ -231,15 +235,16 @@ exponential prefactor $e^{- \chi_{ab} ({\bf A}-{\bf B}-{\bf R})^2}$ that enters 
 over {\bf A}, {\bf B} and {\bf R}.  Thus, $N$-scaling may be achieved {\em a priori} with a simple distance test.
 However, for small exponents, care must be exercised in  truncation of periodic sums to avoid overlap 
 matrices that are not positive definite.  While these situations can be avoided simply with tighter distance neglect 
-criteria, they are often due to the use of basis sets designed for gas phase calculations in conjunction with small UCs.  
+criteria, they are often due to the use of basis sets designed for gas phase calculations in conjunction with small 
+unit cells.  
+
 These considerations and others are discussed by Towler in an excellent overview of Gaussian basis sets for the condensed 
 phase \cite{MTowler00}.  Also, there are at least two libraries\cite{CrystalLib,TowlerLib} of Gaussian 
 basis sets appropriate for materials at standard densities. For high densities though, these basis sets may 
 still encounter problems with linear dependence and sensitivity to truncation.  One solution to this problem, suggested 
 by Gr{\"u}neich and Hess \cite{AGruneich98} for even tempered basis sets, is to scale the exponents by the inverse 
-square 
-of the lattice constant.  In many cases though, especially for large systems, standard quantum chemistry basis sets
-work well 
+square  of the lattice constant.  
+In many cases though, especially for large systems, standard quantum chemistry basis sets work well. 
 
 %%\cite{}.
 %% CyrstalLib http://www.crystal.unito.it/Basis_Sets/ptable.html
@@ -285,9 +290,10 @@ is a moment of the regular solid harmonic,
 %\cite{}, 
 $Q$ runs over the  highest possible nodes in the density-tree as determined by PAC and MAC and 
 $q$ runs on the left over near-field primitive distributions in the density.
-The QCTC near/far-field partition pushes the multipole approximation to the limit, employing best case error estimates 
-that depend on the magnitude and extent of both bra and ket and allowing tree traversal to the resolution of 
-primitive distributions.  While resolving individual primitives forgoes well developed technologies for the 
+The QCTC near/far-field partition pushes the multipole approximation to the limit, employing a new   
+error estimates that depend on the magnitude and extent of both bra and ket \cite{CTymczak03c} 
+and allowing tree traversal to the resolution of primitive distributions.  
+While resolving individual primitives forgoes well developed technologies for the 
 integral evaluation of contracted functions, it accelerates the onset of linear scaling through the early
 clustering of close distributions.
 
@@ -370,11 +376,14 @@ moments are also translated to a common center and recursively merged up the tre
 matrix elements of $\bf J$, the primitive bra AABB is computed with $R^{\rm o}_q$, while  $R^{\rm p}_q$ are 
 used to construct AABBs of the density-tree.
 
-In Fig.~\ref{extent}, differences between the penetration and overlap extent are shown for a diffuse $s$-type
+In Fig.~1, differences between the penetration and overlap extent are shown for a diffuse $s$-type
 Gaussian.  For large extents, such as those encountered in a static FMM-type error bound, the two extents are 
 equivalent.  However, with aggressive use of the multipole approximation as in QCTC, the distinction becomes
 critical. 
 
+%
+% Figure 1
+%
 \begin{figure}
 \includegraphics{Extent_2.ps}
 \caption{Behavior of the overlap extent $R^o$ and the penetration extent $R^p$ 
@@ -421,15 +430,16 @@ contributions
 \begin{equation}
 {\bf J} = {\bf J}^{\rm in} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
-corresponding to the three separate regions shown in Fig.~\ref{regions}.   Here, ${\bf J}^{\rm in}$ is computed using 
+corresponding to the three separate regions shown in Fig.~2.   Here, ${\bf J}^{\rm in}$ is computed using 
 the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of 
 ${\bf J}^{\rm PFF}$ 
 will be developed in the following section, while in Section~\ref{tinfoil} the term ${\bf J}^{\rm TF}$ necessary to 
 introduce tin-foil boundary conditions is detailed.
-
-
+%
+% Figure 2
+%
 \begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics{Regions.eps}}\label{regions}
+\includegraphics{Regions.eps}
 \caption{Schematic of the regions contributing to $N$-scaling summation of the Coulomb matrix.
 The inner cells that make up $V_{\rm in}$ provide a buffer region that guarantees convergence of the multipole 
 expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
@@ -440,8 +450,8 @@ method notation this corresponds to a well-separated index of unity.  However, f
 order multipole expansions, $V_{\rm in}$ tends to a spherical distribution of cells surrounding the unit cell.   
 Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  $S_{\infty}$, which must be
 be canceled by tin-foil (conducting) boundary conditions to achieve equivalence with Ewald summation.}
+\label{regions}
 \end{figure}
-
 
 \subsection{The Periodic Far Field}\label{pff}
 
@@ -453,7 +463,7 @@ J_{ab}^{\rm PFF} = \sum _{{\bf R}\in {\rm PFF}} \int \int d {\bf r} d {\bf r'}  
 \label{PFFOne}
 \end{equation}
 involves charge distributions that are well separated with respect to both penetration and the
-convergence of multipole expansion errors, as outlined in Fig.~\ref{regions} and discussed in the following. 
+convergence of multipole expansion errors, as outlined in Fig.~2 and discussed in the following. 
 
 With these conditions, and assuming the unit cell is centered at the origin, the bipolar multipole expansion 
 employing the regular and irregular solid harmonics, $O^l_m$ and $M^l_m$ respectively, 
@@ -531,7 +541,6 @@ ${\cal C}$ will fluctuate slightly with the density between self-consistent-fiel
 expansion order~$p$.  
 
 
-
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
 The surface charges created by direct summation over $V_{\rm PFF}$ must be canceled
@@ -557,13 +566,15 @@ J_{ab}^{TF}  = \frac{2\pi }{3V_{\rm UC}} \left(  Q\, S_{ab}-2 \, \mathbf{d}_{ab}
 with  $S_{ab}$ an element of the overlap matrix, and ${\bf d}_{ab}$ the
 dipole moment of the distribution $\rho^\infty_{ab}$.  
 
-
-\begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics{BoxUC.eps}}
-\label{BoxUC}
+%
+% Figure 3
+%
+\begin{figure} 
+\includegraphics{BoxUC.eps}
 \caption{Transformation between the rectangular integration volume $V_\Box$ employed by 
 HiCu and the unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a}, 
 {\bf b} and {\bf c}.}
+\label{boxuc}
 \end{figure}
 
 
@@ -572,7 +583,7 @@ HiCu and the unit cell with volume $V_{\rm UC}$, described by the vectors {\bf a
 The HiCu algorithm is ideally suited for periodic boundary conditions, 
 as the unit-cell $V_{\rm UC}$ can be simply transformed into an equivalent rectangular 
 integration domain $V_\Box$ which is the cube-tree's AABB.  These volumes,
-shown in Fig.~\ref{BoxUC},  are equivalent due to full periodicity of the distributions 
+shown in Fig.~3,  are equivalent due to full periodicity of the distributions 
 and the density. The integration is then simply,
 %
 \begin{equation}
@@ -612,7 +623,7 @@ But because of the periodicity and locality of the density
 V_{cell} \rightarrow V_{HiCu}
 \end{equation}
 %
-where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure:SimCell}.
+where \( V_{HiCu} \) is the cubic region shown in Fig.~3.
 This transformation is ideally suited for the method we use to calculate
 our exchange-correlation matrix, which is based on a Cartesian ``Gaussian
 quadrature'' integration of a rectangular region. To calculate the
@@ -743,21 +754,23 @@ Eigensolution of the self-consistent-field equations has been used throughout, w
 matrix thresholds and other thresholds given in Table \ref{Table:AccurLevels}.
 All calculations were performed with $C_1$ (no) symmetry.
 
-
+%
+% Figure 4
+%
 \begin{figure}
 \includegraphics{PFFMultipoles_water.ps}
-\caption{\label{ErrorPFF} Error in the Coulomb energy computed with the 
+\caption{Error in the Coulomb energy computed with the 
 Nijboer and De Wette scheme relative to true Ewald summation.  Shown
 is the error in the Coulomb energy vers $p$ with one (ws=1) and two (ws=2) layers of
-cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.
-}
+cells in $V_{\rm PFF}$ for a periodic system of 64 classical water molecules.}
+\label{ErrrorPFF}
 \end{figure}
 
 
 \section{Validation}
 
 The ability of our implimentation to reproduce true Ewald summation is shown in 
-Fig.~\ref{ErrorPFF} for a periodic system of 64 classical water molecules.
+Fig.~4 for a periodic system of 64 classical water molecules.
 Note that with both the Ewald sum and the Nijboer and De Wette approach,  ordering the
 real and reciprocal space sums is critical; high order agreement is achieved only when
 the summation proceeds from the smallest to the largest terms.
@@ -800,26 +813,32 @@ employs 5-$d$ and 7-$f$, we were not able to make a direct comparison.
 
 \section{Scaling}
 
+%
+% Figure 5
+%
 \begin{figure}
 \includegraphics{Timing_Diamond_512_log.ps} 
-\label{Scaling_Matrix_Build}
 \caption{Computational complexity for the $\bf J$ and $\bf K_{\rm xc}$ matrix builds
 of cubic diamond at the 6-21G*/BLYP level of theory using a {\it good} (6 digit) level of precision}
+\label{Scaling_Matrix_Build}
 \end{figure}
 
+%
+% Figure 6
+%
 \begin{figure}
-\centering \includegraphics{ErrorVsNumber_Diamond512.ps} 
-\label{ErrorPerN} 
+\includegraphics{ErrorVsNumber_Diamond512.ps}
 \caption{Relative error with system size for 6-21G*/BLYP diamond targeting a precision 
-         of 6 digits in the total energy.}
+of 6 digits in the total energy.}
+\label{ErrorPerN} 
 \end{figure}
 
-Demonstrating perfect linear scaling at the outset,  Fig.~\ref{Scaling_Matrix_Build} shows the CPU time for 
+Demonstrating perfect linear scaling at the outset,  Fig.~5 shows the CPU time for 
 $\bf J$ and $\bf K_{\rm xc}$
 builds with  6-21G*/BLYP diamond at its standard density.  These timings coorespond to a {\it good} level of accuracy, 
 targeting 6 digits in the total energy and corresponding to the values listed in Table\ref{DiamondGammaPt}.
-Shown in Fig.~\ref{} is the precision of the computed energies, obtained by performing a second set of calculations with
-all thresholds reduced by an order of magnitude.
+Shown in Fig.~6 is the precision of the computed energies, obtained by performing a second set 
+of calculations with all thresholds reduced by an order of magnitude.
 For these calculations, the largest source of error is the numerical integration performed by HiCu, as the QCTC 
 thresholds are significantly more conservative. 
 
