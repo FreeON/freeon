@@ -38,7 +38,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            ProcessControl.o Trap.o MemMan.o Clock.o  Seconds.o  \
            ParsingConstants.o Parse.o MondoMPI.o                \
            Indexing.o SetEq.o SetEq77.o InOut.o HDF5Wrap.o      \
-           Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
+           Anneal.o Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
            LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Thresholding.o Functionals.o PBC.o AtomPairs.o       \
@@ -49,7 +49,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            ProcessControl.x Trap.x MemMan.x Clock.x  Seconds.x  \
            ParsingConstants.x Parse.x  MondoMPI.x               \
            Indexing.x SetEq.x SetEq77.x InOut.x HDF5Wrap.x      \
-           Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
+           Anneal.x Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
            LinAlg.x LinAlg77.x MatFunk.x SMWrap.x SpecFun.x     \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Thresholding.x Functionals.x PBC.x AtomPairs.x       \
@@ -175,6 +175,8 @@ MemMan.o: 		ProcessControl.o GlobalObjects.o GlobalCharacters.o\
 #
 MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o Parse.o \
 			GlobalObjects.o GlobalScalars.o DerivedTypes.o 
+#
+Anneal:o                PrettyPrint.o MemMan.o
 #
 Order.o: 		PrettyPrint.o Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
 			GlobalScalars.o GlobalCharacters.o DerivedTypes.o 
