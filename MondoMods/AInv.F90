@@ -5,10 +5,7 @@ MODULE AInv
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
-  USE InOut
-  USE PrettyPrint
   USE MemMan
-  USE Macros
   USE LinAlg
   USE MatFunk
   IMPLICIT NONE
