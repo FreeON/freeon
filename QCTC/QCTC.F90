@@ -1,6 +1,6 @@
 !    FAST O(N lg N) COMPUTATION OF THE COULOMB MATRIX
 !    Authors:  Matt Challacombe and CJ Tymczak
-!==============================================================================
+!===============================================================================
 PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
@@ -17,12 +17,24 @@ PROGRAM QCTC
   USE QCTCThresholds
   USE PoleTree
   USE Globals
+
+#ifdef PARALLEL
+  USE FastMatrices
+#endif
+
 #ifdef PERIODIC
   USE PBCFarField
 #endif
   USE JGen
   USE NuklarE
-  TYPE(BCSR)                     :: J,T1,T2
+
+#ifdef PARALLEL
+  TYPE(FastMat),POINTER          :: J
+#else
+  TYPE(BCSR)                     :: J
+#endif
+  TYPE(BCSR)                     :: T1,T2
+
   REAL(DOUBLE)                   :: E_Nuc_Tot
   TYPE(TIME)                     :: TimeMakeJ
   CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
@@ -32,9 +44,9 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
   INTEGER                        :: UOUT !!!!
 #endif
-!-------------------------------------------------------------------------------- 
+!------------------------------------------------------------------------------- 
 ! Start up macro
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 ! Get basis set and geometry
 #ifdef MMech
   IF(HasQM()) THEN
@@ -79,7 +91,7 @@ PROGRAM QCTC
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
   ELSE 
-     CALL Get(Rho,'Rho',Args,0)
+     CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)
      CALL Get(RhoPoles,SCFCycl)
   ENDIF
 #endif
@@ -137,18 +149,30 @@ PROGRAM QCTC
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
-!----------------------------------------------------------------------------------
-!
-!----------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------------
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
      ! Allocate J
+#ifdef PARALLEL
+     CALL New_FASTMAT(J,0,(/0,0/))
+#else
      CALL New(J)
+#endif
      ! Compute the Coulomb matrix J in O(N Lg N)
      CALL Elapsed_Time(TimeMakeJ,'Init')
      CALL MakeJ(J)
      CALL Elapsed_TIME(TimeMakeJ,'Accum')
+
+#ifdef PARALLEL
+  IF(SCFActn=='InkFok') THEN
+    STOP 'InkFok in PARALLEL QCTC is not supported.'
+  ENDIF
+  CALL Redistribute_FASTMAT(J)
+  CALL Set_BCSR_EQ_DFASTMAT(T1,J) ! T1 is allocated in Set_BCSR...
+#else
      IF(SCFActn=='InkFok')THEN
         !    Add in correction if incremental J build
         CALL New(T1)
@@ -160,6 +184,7 @@ PROGRAM QCTC
      ELSE
         CALL Filter(T1,J)
      ENDIF
+#endif
      ! Put J to disk
      CALL Put(T1,TrixFile('J',Args,0))
      ! Compute the nuclear-total electrostatic energy in O(N Lg N)
@@ -169,48 +194,48 @@ PROGRAM QCTC
      ELSE     
         E_Nuc_Tot=NukE(GM)
      ENDIF
-!
+
      CALL Put(E_Nuc_Tot,'E_NuclearTotal',Tag_O=SCFCycl)
 #ifdef MMech
   ENDIF 
-!-----------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! QM calculations
   IF(HasMM()) THEN
-!
+
      MM_COUL = NukE(GM_MM)
      CALL Put(MM_COUL,'MM_COUL',Tag_O=CurGeom)
-!
+
      IF(HasQM()) THEN
-!
+
          CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=CurGeom)
-!
+
        CALL OpenASCII(OutFile,UOut)
-!
+
        CONVF=1000.D0*JtoHartree/C_Avogadro
-!
+
 ! Print energies 
-!
+
        write(uout,*) 'Energies in KJ/mol'        
        write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL/CONVF
        write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL/CONVF
        write(uout,*) 'E_MM_Coulomb         = ',(MM_COUL-E_C_EXCL)/CONVF
-!
+
        write(uout,*) 'Energies in atomic unit'        
        write(uout,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
        write(uout,*) 'E_MM_Coulomb EXCLUDED= ',E_C_EXCL
        write(uout,*) 'E_MM_Coulomb         = ',MM_COUL-E_C_EXCL
-!
+
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
-!
+
        CLOSE(UNIT=UOut,STATUS='KEEP')
-!
+
      ELSE
        write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL
      ENDIF
-!
+
   ENDIF
 #endif
-!---------------------------------------------------------------
+!-------------------------------------------------------------------------------
 ! Printing
 #ifdef MMech
   IF(HasQM()) THEN
@@ -226,7 +251,7 @@ PROGRAM QCTC
     CALL Print_Periodic(GMLoc=GM)
   ENDIF
 #endif
-! Tidy up
+
   IF(HasQM()) THEN
      CALL Delete(J)
      CALL Delete(T1)
@@ -243,7 +268,12 @@ PROGRAM QCTC
 ! Print Periodic Info
   CALL Print_Periodic(GMLoc=GM)
 #endif    
+
+#ifdef PARALLEL
+  CALL Delete_FastMat1(J)
+#else
   CALL Delete(J)
+#endif
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)

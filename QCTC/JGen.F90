@@ -1,6 +1,6 @@
 !    Authors: Matt Challacombe and C.J. Tymczak
 !    COMPUTE THE COULOMB MATRIX IN O(N Lg N) CPU TIME
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 MODULE JGen
   USE DerivedTypes
   USE GlobalScalars   
@@ -17,15 +17,22 @@ MODULE JGen
 #ifdef PERIODIC
   USE PBCFarField
 #endif
+#ifdef PARALLEL
+  USE FastMatrices
+#endif
   IMPLICIT NONE
   LOGICAL PrintFlag
-!----------!
-  CONTAINS !
-!=============================================================================================
-!
-!=============================================================================================
+!-------------------------------------------------------------------------------
+  CONTAINS
+!===============================================================================
+
+!===============================================================================
     SUBROUTINE MakeJ(J)
+#ifdef PARALLEL
+      TYPE(FastMat),POINTER     :: J
+#else
       TYPE(BCSR)                :: J
+#endif
       TYPE(DBL_RNK2)            :: Temp
       TYPE(AtomPair)            :: Pair
       INTEGER                   :: AtA,AtB
@@ -34,33 +41,58 @@ MODULE JGen
       INTEGER                   :: NC
       REAL(DOUBLE),DIMENSION(3) :: B
 #endif    
-!---------------------------------------------- 
+!------------------------------------------------------------------------------- 
 !     Initialize the matrix and associated indecies
+#ifdef PARALLEL
+#else
       P=1
       R=1
       J%RowPt%I(1)=1
       CALL SetEq(J%MTrix,Zero)
-!     Loop over atom pairs
       J%NAtms= NAtoms
+#endif
+      ! Loop over atom pairs
+#ifdef PARALLEL
+      DO AtA=Beg%I(MyId),End%I(MyId)
+#else
       DO AtA=1,NAtoms            
+#endif
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
+#ifndef PARALLEL
+               ! Compute only the lower triangle of symmetric J
                IF(AtB<=AtA)THEN  
-!              Compute only the lower triangle of symmetric J
+#endif
 #ifdef PERIODIC
                   B = Pair%B
                   DO NC=1,CS_OUT%NCells
                      Pair%B   = B+CS_OUT%CellCarts%D(:,NC)
                      Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
                      IF(TestAtomPair(Pair)) THEN
+#ifdef PARALLEL
+                        CALL AddFASTMATBlok(J,AtA,AtB,Two*JBlock(Pair,PoleRoot))
+#else
                         J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot)
+#endif
                      ENDIF
                   ENDDO
 #else
+
+#ifdef PARALLEL
+                  CALL AddFASTMATBlok(J,AtA,AtB,Two*JBlock(Pair,PoleRoot))
+#else
                   J%MTrix%D(R:R+NAB-1)=Two*JBlock(Pair,PoleRoot)
 #endif
+
+#endif
+
+#ifndef PARALLEL
                ENDIF
+#endif
+
+#ifdef PARALLEL
+#else
                J%ColPt%I(P)=AtB
                J%BlkPt%I(P)=R
                R=R+NAB
@@ -68,12 +100,16 @@ MODULE JGen
                J%RowPt%I(AtA+1)=P        
                IF(R>MaxNon0.OR.P>MaxBlks) &
                   CALL Halt(' BCSR dimensions blown in J ')
+#endif
             ENDIF
          ENDDO
       ENDDO
+#ifdef PARALLEL
+#else
       J%NBlks=P-1
       J%NNon0=R-1
-!     Fill the upper triangle of J
+
+      ! Fill the upper triangle of J
       DO I=1,NAtoms
          DO JP=J%RowPt%I(I),J%RowPt%I(I+1)-1
             L=J%ColPt%I(JP)
@@ -92,11 +128,12 @@ MODULE JGen
             ENDIF
          ENDDO
       ENDDO
-!
+#endif
+
     END SUBROUTINE MakeJ
-!=============================================================================================
-!
-!=============================================================================================
+!===============================================================================
+
+!===============================================================================
      SUBROUTINE XPose(M,N,A,AT)
        INTEGER                      :: I,J,M,N,IDex,JDex
        REAL(DOUBLE), DIMENSION(M*N) :: A,AT
@@ -108,15 +145,21 @@ MODULE JGen
           ENDDO
        ENDDO
      END SUBROUTINE XPose
-!=======================================================================================
-!
-!=======================================================================================
+!===============================================================================
+
+!===============================================================================
+#ifdef PARALLEL
+     FUNCTION JBlock(Pair,PoleRoot) RESULT(JBlk)
+#else
      FUNCTION JBlock(Pair,PoleRoot) RESULT(Jvct)
+#endif
        TYPE(AtomPair)                           :: Pair
        TYPE(PoleNode), POINTER                  :: PoleRoot
-!
+
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: JBlk
+#ifndef PARALLEL
        REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Jvct
+#endif
        REAL(DOUBLE),DIMENSION(0:SPLen)          :: SPBraC,SPBraS 
        REAL(DOUBLE),DIMENSION(3)                :: PTmp
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
@@ -133,7 +176,7 @@ MODULE JGen
                                                    LMNB,LA,LB,MA,MB,NA,NB,LAB, &
                                                    MAB,NAB,LM,LMN,Ell,EllA,    &
                                                    EllB,NC,L,M
-!-------------------------------------------------------------------------------------- 
+!------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
        KB=Pair%KB
@@ -166,7 +209,7 @@ MODULE JGen
                       Prim%PFA=PFA 
                       Prim%PFB=PFB
                       MaxAmp=SetBraBlok(Prim,BS)
-!---------------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !                     Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !                     looping over all angular symmetries
 
@@ -192,7 +235,7 @@ MODULE JGen
                          ENDDO
                       ENDDO 
                       DP2=MIN(1.D10,DP2)
-!--------------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !                     If finite compute ...
                       IF(PExtent>Zero.AND.PStrength>Zero)THEN
 !                        Initialize <KET|
@@ -215,7 +258,7 @@ MODULE JGen
 !                        Walk the walk
                          CALL JWalk(PoleRoot)
 #endif
-!---------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !                        <BRA|KET>
                          IA = IndexA
                          DO LMNA=StartLA,StopLA
@@ -258,8 +301,11 @@ MODULE JGen
              ENDDO
           ENDDO
        ENDDO
+#ifdef PARALLEL
+#else
        Jvct=BlockToVect(Pair%NA,Pair%NB,Jblk)
-!
+#endif
+
      END FUNCTION JBlock 
 END MODULE JGen
 
