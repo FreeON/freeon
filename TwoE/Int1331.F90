@@ -1,21 +1,22 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (S P|P S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int1331(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I) 
+   SUBROUTINE Int1331(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
       USE DerivedTypes
       USE GlobalScalars
+      USE ShellPairStruct
       USE GammaF2
-      USE ONX2DataType
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(1,4,4,1) :: I
+      REAL(DOUBLE),DIMENSION(:) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      INTEGER       :: J,K,L
+      INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L
       I1Bar1=Zero
       I2Bar1=Zero
       I3Bar1=Zero
@@ -146,13 +147,13 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I(1,2,2,1)=ABx*I1Bar2+I2Bar2
-      I(1,3,2,1)=ABy*I1Bar2+I3Bar2
-      I(1,4,2,1)=ABz*I1Bar2+I4Bar2
-      I(1,2,3,1)=ABx*I1Bar3+I2Bar3
-      I(1,3,3,1)=ABy*I1Bar3+I3Bar3
-      I(1,4,3,1)=ABz*I1Bar3+I4Bar3
-      I(1,2,4,1)=ABx*I1Bar4+I2Bar4
-      I(1,3,4,1)=ABy*I1Bar4+I3Bar4
-      I(1,4,4,1)=ABz*I1Bar4+I4Bar4
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=ABx*I1Bar2+I2Bar2
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD)=ABy*I1Bar2+I3Bar2
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+1)*LDD)=ABz*I1Bar2+I4Bar2
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD)=ABx*I1Bar3+I2Bar3
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD)=ABy*I1Bar3+I3Bar3
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+2)*LDC+(OD+1)*LDD)=ABz*I1Bar3+I4Bar3
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+3)*LDC+(OD+1)*LDD)=ABx*I1Bar4+I2Bar4
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+3)*LDC+(OD+1)*LDD)=ABy*I1Bar4+I3Bar4
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+3)*LDC+(OD+1)*LDD)=ABz*I1Bar4+I4Bar4
    END SUBROUTINE Int1331

@@ -53,7 +53,15 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
-Classes = { {0,0},{1,1}}
+(* Minimal 
+
+ *)
+   Classes = { {0,0},{1,1}} 
+
+(* Maximal 
+   Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
+ *)
+
 CType[1]  = "S";
 CType[2]  = "SP";
 CType[3]  = "P";
@@ -197,14 +205,11 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                                 WS["IF(T<Gamma_Switch)THEN"];
                                 WS["  L=AINT(T*Gamma_Grid)"];			
          If[EllTot==1,
-	    Print[" EllTot= ",EllTot];
                      WS[StringJoin["  AuxR0=Upq*",FStr[0]]];
                      WS[StringJoin["  AuxR1=Upq*",FStr[1]]];
-
             ];
           If[EllTot>1,
              LSt=ToString[EllTot];
-
                      WS["  ET=EXP(-T)"];
                      WS["  TwoT=Two*T"];
           WS[StringJoin["  W",LSt,"=",FStr[LTot]]];
@@ -254,7 +259,12 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
                                                              IList=Append[IList,HRR[a,b,c,d]];
-                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
+                                                             oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->                     \
+                                                                                StringJoin["I((OA+",ToString[i-LBegin[il]+1],")*LDA",     \
+                                                                                            "+(OB+",ToString[j-LBegin[jl]+1],")*LDB",     \
+                                                                                            "+(OC+",ToString[k-LBegin[kl]+1],")*LDC",     \
+                                                                                            "+(OD+",ToString[l-LBegin[ll]+1],")*LDD)"]];
+
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
                                                 ,{k,LBegin[kl],LEnd[kl]}]
@@ -275,18 +285,18 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 (*
 
  *)
-           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I) \n"]];
+           WriteString[Subroutine,StringJoin["   SUBROUTINE Int",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
+                                             "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) \n"]];
 
 	   WS[String_]:=WriteString[Subroutine,"      ",String,"\n"];
 
 	   WS["USE DerivedTypes"];
 	   WS["USE GlobalScalars"];
+	   WS["USE ShellPairStruct"];
 	   If[LBra+LKet==1,
               WS["USE GammaF0"];
               WS["USE GammaF1"];,
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
-
-	   WS["USE ONX2DataType"];
 
            WS["IMPLICIT REAL(DOUBLE) (A,I,V,W)"];
            WS["INTEGER        :: LBra,LKet"];
@@ -295,17 +305,14 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 	   LenBra=LEnd[LBra];
            LenKet=LEnd[LKet];
 
-           WS[StringJoin["REAL(DOUBLE),DIMENSION(",ToString[LEnd[IMax]],",", \
-                                                   ToString[LEnd[JMax]],",",
-                                                   ToString[LEnd[KMax]],",",
-                                                   ToString[LEnd[LMax]],") :: I"]];
+           WS[StringJoin["REAL(DOUBLE),DIMENSION(:) :: I"]];
 
            WS["REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz"];
            WS["REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   "];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
 
-           WS["INTEGER       :: J,K,L"];
+           WS["INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L"];
 
            Do[Do[
                  WS[StringJoin["I",ToString[i],"Bar",ToString[k],"=Zero"]];

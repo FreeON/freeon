@@ -1,21 +1,22 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (S P|S P) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int1313(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I) 
+   SUBROUTINE Int1313(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
       USE DerivedTypes
       USE GlobalScalars
+      USE ShellPairStruct
       USE GammaF2
-      USE ONX2DataType
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(1,4,1,4) :: I
+      REAL(DOUBLE),DIMENSION(:) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      INTEGER       :: J,K,L
+      INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L
       I1Bar1=Zero
       I2Bar1=Zero
       I3Bar1=Zero
@@ -152,13 +153,13 @@
       V4=I1Bar3+V3
       V5=CDz*I1Bar1
       V6=I1Bar4+V5
-      I(1,2,1,2)=CDx*I2Bar1+I2Bar2+ABx*V2
-      I(1,3,1,2)=CDx*I3Bar1+I3Bar2+ABy*V2
-      I(1,4,1,2)=CDx*I4Bar1+I4Bar2+ABz*V2
-      I(1,2,1,3)=CDy*I2Bar1+I2Bar3+ABx*V4
-      I(1,3,1,3)=CDy*I3Bar1+I3Bar3+ABy*V4
-      I(1,4,1,3)=CDy*I4Bar1+I4Bar3+ABz*V4
-      I(1,2,1,4)=CDz*I2Bar1+I2Bar4+ABx*V6
-      I(1,3,1,4)=CDz*I3Bar1+I3Bar4+ABy*V6
-      I(1,4,1,4)=CDz*I4Bar1+I4Bar4+ABz*V6
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I2Bar1+I2Bar2+ABx*V2
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I3Bar1+I3Bar2+ABy*V2
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I4Bar1+I4Bar2+ABz*V2
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I2Bar1+I2Bar3+ABx*V4
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I3Bar1+I3Bar3+ABy*V4
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I4Bar1+I4Bar3+ABz*V4
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I2Bar1+I2Bar4+ABx*V6
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I3Bar1+I3Bar4+ABy*V6
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I4Bar1+I4Bar4+ABz*V6
    END SUBROUTINE Int1313

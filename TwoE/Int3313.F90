@@ -1,21 +1,22 @@
 ! ---------------------------------------------------------- 
 ! COMPUTES THE INTEGRAL CLASS (P P|S P) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3313(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo,I) 
+   SUBROUTINE Int3313(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+                              OA,LDA,OB,LDB,OC,LDC,OD,LDD) 
       USE DerivedTypes
       USE GlobalScalars
+      USE ShellPairStruct
       USE GammaF3
-      USE ONX2DataType
       IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
       TYPE(AtomInfo) :: ACInfo,BDInfo
-      REAL(DOUBLE),DIMENSION(4,4,1,4) :: I
+      REAL(DOUBLE),DIMENSION(:) :: I
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      INTEGER       :: J,K,L
+      INTEGER       :: OA,LDA,OB,LDB,LC,LDC,OD,LDD,J,K,L
       I1Bar1=Zero
       I2Bar1=Zero
       I3Bar1=Zero
@@ -319,31 +320,31 @@
       V25=I4Bar4+V24
       V26=CDz*I8Bar1
       V27=CDz*I9Bar1
-      I(2,2,1,2)=CDx*I5Bar1+I5Bar2+ABx*V2
-      I(3,2,1,2)=I6Bar2+ABx*V4+V5
-      I(4,2,1,2)=I8Bar2+ABx*V7+V8
-      I(2,3,1,2)=I6Bar2+ABy*V2+V5
-      I(3,3,1,2)=CDx*I7Bar1+I7Bar2+ABy*V4
-      I(4,3,1,2)=I9Bar2+ABy*V7+V9
-      I(2,4,1,2)=I8Bar2+ABz*V2+V8
-      I(3,4,1,2)=I9Bar2+ABz*V4+V9
-      I(4,4,1,2)=CDx*I10Bar1+I10Bar2+ABz*V7
-      I(2,2,1,3)=CDy*I5Bar1+I5Bar3+ABx*V11
-      I(3,2,1,3)=I6Bar3+ABx*V13+V14
-      I(4,2,1,3)=I8Bar3+ABx*V16+V17
-      I(2,3,1,3)=I6Bar3+ABy*V11+V14
-      I(3,3,1,3)=CDy*I7Bar1+I7Bar3+ABy*V13
-      I(4,3,1,3)=I9Bar3+ABy*V16+V18
-      I(2,4,1,3)=I8Bar3+ABz*V11+V17
-      I(3,4,1,3)=I9Bar3+ABz*V13+V18
-      I(4,4,1,3)=CDy*I10Bar1+I10Bar3+ABz*V16
-      I(2,2,1,4)=CDz*I5Bar1+I5Bar4+ABx*V20
-      I(3,2,1,4)=I6Bar4+ABx*V22+V23
-      I(4,2,1,4)=I8Bar4+ABx*V25+V26
-      I(2,3,1,4)=I6Bar4+ABy*V20+V23
-      I(3,3,1,4)=CDz*I7Bar1+I7Bar4+ABy*V22
-      I(4,3,1,4)=I9Bar4+ABy*V25+V27
-      I(2,4,1,4)=I8Bar4+ABz*V20+V26
-      I(3,4,1,4)=I9Bar4+ABz*V22+V27
-      I(4,4,1,4)=CDz*I10Bar1+I10Bar4+ABz*V25
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I5Bar1+I5Bar2+ABx*V2
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I6Bar2+ABx*V4+V5
+      I((OA+3)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I8Bar2+ABx*V7+V8
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I6Bar2+ABy*V2+V5
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I7Bar1+I7Bar2+ABy*V4
+      I((OA+3)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I9Bar2+ABy*V7+V9
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I8Bar2+ABz*V2+V8
+      I((OA+2)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+1)*LDD)=I9Bar2+ABz*V4+V9
+      I((OA+3)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+1)*LDD)=CDx*I10Bar1+I10Bar2+ABz*V7
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I5Bar1+I5Bar3+ABx*V11
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I6Bar3+ABx*V13+V14
+      I((OA+3)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I8Bar3+ABx*V16+V17
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I6Bar3+ABy*V11+V14
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I7Bar1+I7Bar3+ABy*V13
+      I((OA+3)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I9Bar3+ABy*V16+V18
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I8Bar3+ABz*V11+V17
+      I((OA+2)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+2)*LDD)=I9Bar3+ABz*V13+V18
+      I((OA+3)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+2)*LDD)=CDy*I10Bar1+I10Bar3+ABz*V16
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I5Bar1+I5Bar4+ABx*V20
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I6Bar4+ABx*V22+V23
+      I((OA+3)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I8Bar4+ABx*V25+V26
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I6Bar4+ABy*V20+V23
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I7Bar1+I7Bar4+ABy*V22
+      I((OA+3)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I9Bar4+ABy*V25+V27
+      I((OA+1)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I8Bar4+ABz*V20+V26
+      I((OA+2)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+3)*LDD)=I9Bar4+ABz*V22+V27
+      I((OA+3)*LDA+(OB+3)*LDB+(OC+1)*LDC+(OD+3)*LDD)=CDz*I10Bar1+I10Bar4+ABz*V25
    END SUBROUTINE Int3313
