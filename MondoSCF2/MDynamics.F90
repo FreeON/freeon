@@ -159,10 +159,10 @@ MODULE MDynamics
        MDEtot%D(iCLONE) = MDEpot%D(iCLONE)+MDKin%D(iCLONE)
        MDTemp%D(iCLONE)= (Two/Three)*MDKin%D(iCLONE)/DBLE(C%Geos%Clone(iCLONE)%NAtms)*HartreesToKelvin
 !
-       CALL OpenASCII("EnergiesMD.dat",99)
-       WRITE(99,'(F12.4,F14.8,F14.8,F14.8)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
-       CLOSE(99)
-       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
+!!$       CALL OpenASCII("EnergiesMD.dat",99)
+!!$       WRITE(99,'(F12.4,F14.8,F14.8,F14.8)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
+!!$       CLOSE(99)
+!!$       WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
 !
     ENDDO
   END SUBROUTINE MDVerlet_NVE
