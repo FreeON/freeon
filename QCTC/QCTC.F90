@@ -22,15 +22,15 @@ PROGRAM QCTC
 #endif
   USE JGen
   USE NuklarE
-  TYPE(BCSR)                 :: J,T1,T2
-  REAL(DOUBLE)               :: E_Nuc_Tot
-  TYPE(TIME)                 :: TimeMakeJ
-  CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
+  TYPE(BCSR)                     :: J,T1,T2
+  REAL(DOUBLE)                   :: E_Nuc_Tot
+  TYPE(TIME)                     :: TimeMakeJ
+  CHARACTER(LEN=4),PARAMETER     :: Prog='QCTC'
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 #ifdef MMech
-  TYPE(CRDS)                 :: GM_MM
-  REAL(DOUBLE)               :: MM_COUL,E_C_EXCL,CONVF  
-  INTEGER                    :: UOUT !!!!
+  TYPE(CRDS)                     :: GM_MM
+  REAL(DOUBLE)                   :: MM_COUL,E_C_EXCL,CONVF  
+  INTEGER                        :: UOUT !!!!
 #endif
 !-------------------------------------------------------------------------------- 
 ! Start up macro
@@ -38,48 +38,54 @@ PROGRAM QCTC
 ! Get basis set and geometry
 #ifdef MMech
   IF(HasQM()) THEN
-#endif
+!    Get basis set and geometry
+     CALL Get(BS,Tag_O=CurBase)
+     CALL Get(GM,Tag_O=CurGeom)
+!    Allocations 
+     CALL NewBraBlok(BS)
+  ELSEIF(HasMM()) THEN
+    CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
+  ENDIF
+! Get multipoles and density
+  IF(SCFActn=='ForceEvaluation')THEN
+     CALL Get(Rho,'Rho',Args,1)
+     IF(MMOnly()) THEN
+        CALL Get(Rhopoles,CurGeom)
+     ELSE
+        CALL Get(Rhopoles,SCFCycl)
+     ENDIF
+  ELSEIF(SCFActn=='InkFok')THEN
+     CALL Get(Rho,'DeltaRho',Args,0)
+     CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
+  ELSE
+     CALL Get(Rho,'Rho',Args,0)
+     IF(MMOnly()) THEN
+       CALL Get(RhoPoles,CurGeom)
+     ELSE
+       CALL Get(RhoPoles,SCFCycl)
+     ENDIF
+  ENDIF
+#else
+! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 ! Allocations 
   CALL NewBraBlok(BS)
-#ifdef MMech
-  ENDIF
-  IF(HasMM()) THEN
-    CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
-  ENDIF
-#endif
 ! Get multipoles and density
-!
   IF(SCFActn=='ForceEvaluation')THEN
      CALL Get(Rho,'Rho',Args,1)
-#ifdef MMech
-     IF(MMOnly()) THEN
-       CALL Get(Rhopoles,CurGeom)
-     ELSE
-#endif
-       CALL Get(Rhopoles,SCFCycl)
-#ifdef MMech
-     ENDIF
-#endif
-  ELSE IF(SCFActn=='InkFok')THEN
+     CALL Get(Rhopoles,SCFCycl)
+  ELSEIF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
-  ELSE  
-#ifdef MMech
-     IF(MMOnly()) THEN
-       CALL Get(RhoPoles,CurGeom)
-     ELSE
-#endif
-       CALL Get(RhoPoles,SCFCycl)
-#ifdef MMech
-     ENDIF
-#endif
-       CALL Get(Rho,'Rho',Args,0)
+  ELSE 
+     CALL Get(Rho,'Rho',Args,0)
+     CALL Get(RhoPoles,SCFCycl)
   ENDIF
-  ! Set thresholds local to QCTC (for PAC and MAC)
+#endif
+! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
-  ! Potentially overide local QCTC thresholds
+! Potentially overide local QCTC thresholds
   IF(Args%NI==8)THEN
      TauPAC=1D1**(-Args%I%I(7))
      TauMAC=1D1**(-Args%I%I(8))
@@ -105,39 +111,40 @@ PROGRAM QCTC
      ENDIF
      CLOSE(Inp)
   ENDIF
-  ! Initialize the auxiliary density arrays
+! Initialize the auxiliary density arrays
   CALL InitRhoAux
-  ! Setup global arrays for computation of multipole tensors
+! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp(FFEll2)
-  ! Build the global PoleTree representation of the total density
+! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-#ifdef PERIODIC !-----------------------------------
-  ! Calculate the Number of Cells
-#ifdef MMech
+#ifdef MMech 
+#ifdef PERIODIC
+! Calculate the Number of Cells
+! and Set the electrostatic background
   IF(HasMM()) THEN
-    CALL SetCellNumber(GM_MM)
+     CALL SetCellNumber(GM_MM)
+     CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
   ELSE
-#endif
-    CALL SetCellNumber(GM)
-#ifdef MMech
+     CALL SetCellNumber(GM)
+     CALL PBCFarFieldSetUp(PoleRoot,GM)
   ENDIF
 #endif
+#else
+#ifdef PERIODIC
+! Calculate the Number of Cells
+! and Set the electrostatic background
+  CALL SetCellNumber(GM)
+  CALL PBCFarFieldSetUp(PoleRoot,GM)
   CALL PPrint(CS_OUT,'outer sum',Prog)
-  ! Set the electrostatic background 
-#ifdef MMech 
-  IF(HasMM()) THEN
-    CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
-  ELSE
 #endif
-    CALL PBCFarFieldSetUp(PoleRoot,GM)
-#ifdef MMech 
-  ENDIF
 #endif
-#endif !-----------------------------------
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
+!----------------------------------------------------------------------------------
+!
+!----------------------------------------------------------------------------------
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
@@ -170,7 +177,9 @@ PROGRAM QCTC
 !
      CALL Put(E_Nuc_Tot,'E_NuclearTotal',Tag_O=SCFCycl)
 #ifdef MMech
-  ENDIF !!!!  QM calculations
+  ENDIF 
+!-----------------------------------------------------------------------------------
+! QM calculations
   IF(HasMM()) THEN
 !
      MM_COUL = NukE(GM_MM)
@@ -210,38 +219,39 @@ PROGRAM QCTC
 ! Printing
 #ifdef MMech
   IF(HasQM()) THEN
-#endif
-    CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
-    CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
-    CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
-#ifdef MMech
+     CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
   ENDIF
-#endif
 #ifdef PERIODIC
 ! Print Periodic Info
-#ifdef MMech !---------------------
   IF(HasMM()) THEN
     CALL Print_Periodic(GMLoc=GM_MM)
   ELSE
-#endif
     CALL Print_Periodic(GMLoc=GM)
-#ifdef MMech
   ENDIF
-#endif !---------------------------
 #endif
 ! Tidy up
-#ifdef MMech
   IF(HasQM()) THEN
-#endif
-    CALL Delete(J)
-    CALL Delete(T1)
-    CALL Delete(BS)
-    CALL Delete(GM)
-#ifdef MMech
+     CALL Delete(J)
+     CALL Delete(T1)
+     CALL Delete(BS)
+     CALL Delete(GM)
+  ELSEIF(HasMM()) THEN
+     CALL Delete(GM_MM)
   ENDIF
-  IF(HasMM()) THEN
-    CALL Delete(GM_MM)
-  ENDIF
+#else
+  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
+  CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
+  CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
+#ifdef PERIODIC
+! Print Periodic Info
+  CALL Print_Periodic(GMLoc=GM)
+#endif    
+  CALL Delete(J)
+  CALL Delete(T1)
+  CALL Delete(BS)
+  CALL Delete(GM)
 #endif
   CALL Delete(Args)
   CALL Delete(RhoPoles)
