@@ -104,7 +104,7 @@ S_{ab}^{PBC}=\sum _{\mathbf{R},\mathbf{R}'}\int _{V_{cell}}\, d{\mathbf{r}}\,
 \end{equation}
 where, \( V_{cell} \) is the integration over the simulation cell,
 and \( \{\mathbf{R},\mathbf{R}'\} \) are the brava lattice vectors,
-this is illustrated in figure \ref{figure: SimCell}, where \( \left\{ {\mathbf{a},
+this is illustrated in figure \ref{figure:SimCell}, where \( \left\{ {\mathbf{a},
 \mathbf{b},\mathbf{c}}\right\}  \)
 are the primitive lattice vectors. Because of the locality of the
 atomic orbitals, we can remove the double sum over lattice vectors
@@ -289,11 +289,8 @@ M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}
 
 \end{array}\label{sp_mult_M} 
 \end{eqnarray}
-In Appendix A we give a short derivation of the overlap, or penetration
-error bound that we use and a more detail analysis will be given in
-reference \cite{MChallacombe03A}. In Appendix B we also give a derivation of the
-multipole error bound that we use, where also a more detailed analysis
-will also be given in reference \cite{MChallacombe03A}. 
+A detail analysis of the penetration error, and also the multipole error, is given in
+reference \cite{MChallacombe03A}. 
 
 
 \subsubsection{The Periodic Far Field Coulomb matrix}
@@ -334,11 +331,11 @@ J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l
 \end{eqnarray}
 %
 For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
-summation. In Appendix C we describe an efficient method which allow
-us calculate these conditional summations. The only task remaining
+summation. In \cite{PFFTensorMake} we describe an efficient method which allow
+us to calculate these conditional summations. The only task remaining
 is to determine the region of the inner box summation or the multipole
-order \( L \) which we have to expand to. Using equation (\ref{B30})
-from Appendix B we obtain for the error bound
+order \( L \) which we have to expand to. Using results obtained in reference {7}
+we can approximate  the error bound  as
 \begin{equation}
 \label{Rmax}
 \tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}
@@ -351,12 +348,7 @@ the sum in equation (\ref{ScriptM}).
 In the next section we describe the corrections to the Coulomb matrix
 which allows us to obtain Ewald boundary conditions in order to obtain
 translational invariance in the matrix elements, and also allows us
-to compare directly to \textbf{Crystal98}. Figure \ref{figure: ErrorPFF}
-shows the error of the energy as we increase \( L \) from \( 4 \)
-to \( 64 \) for two different inner cell sums for a classical system
-of \( 64 \) water molecules. As can be seen we obtain very rapid
-convergence.
-
+to compare directly to \textbf{Crystal98}. 
 
 \subsubsection{The Ewald Correction matrix}
 
@@ -394,7 +386,7 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 \rho ^{loc}\left( \mathbf{x}\right) 
 \label{Q} 
 \end{eqnarray}
-are the dipole and quadrapole moments. In appendix D we give a short
+are the dipole and quadrapole moments. In appendix \ref{DipC} we give a short
 derivation of these terms
 
 
@@ -423,7 +415,7 @@ K_{ab}^{PBC}&=&\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x
 \label{Kxc_pbc}
 \end{eqnarray}
 %
-where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure: SimCell}.
+where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure:SimCell}.
 This transformation is allowable because of the periodicity of the
 function, and it is ideally suited for the method we use to calculate
 our exchange-correlation matrix, which is based on a Cartesian {}``Gaussian
@@ -501,7 +493,7 @@ for the matrix build commences very early. Figure \ref{figure:Scaling_Diag}
 show our results for the density matrix solver (TRS4) \cite{ANiklasson03} for
 two different thresholds and basis sets. Again we see the comencement
 of linear scaling early, where we see crossover with an eigen-solver
-around ?? carbon atoms. Figure 
+around ?? carbon atoms.
 
 
 \section{CONCLUSIONS}
@@ -541,392 +533,6 @@ and support.
 
 \appendix
 
-\section{The Penetration Acceptability Criterion (PAC)}\label{PAC}
-
-Let us consider a generalized guassian distribution centered at \( \mathbf{P} \)
-
-\begin{equation}
-\label{A1}
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{l+m+n=L}d_{lmn}
-\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) 
-\end{equation}
-where
-%
-\begin{eqnarray}
-\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}\right) = \qquad\qquad\qquad\qquad\qquad
-\qquad\qquad\qquad\qquad
-\nonumber\\
-\left( x-P_{x}\right) ^{l}\left( y-P_{y}\right) ^{m}
-\left( z-P_{z}\right) ^{n}
-\exp \left( -\xi _{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}\right| ^{2}\right) 
-\nonumber\\
-\label{A2}
-\end{eqnarray}
-%
-Using Cramer's Inequality we can show
-\begin{eqnarray}
-\rho _{\mathbf{P}}\left( \mathbf{r}\right) =\sum _{lmn}d_{lmn}\Lambda ^{\mathbf{P}}_{lmn}\left( \mathbf{r}
-\right) 
-&\leq& C_{\mathbf{P}}\exp \left( -\widetilde{\xi }_{\mathbf{P}}\left| \mathbf{x}-\mathbf{P}
-\right| ^{2}\right) 
-\nonumber\\
-&\leq & {\tilde\rho}_{\mathbf{P}}\left( \mathbf{r}\right)
-\label{A3}
-\end{eqnarray}
-where
-\begin{equation}
-\label{A4}
-C_{\mathbf{P}}=\sum _{lmn}\left| d_{lmn}\right| \sqrt{l!\, m!\, n!\, \left( 2\, \widetilde
-{\xi }_{\mathbf{P}}
-\right) ^{l+m+n}}
-\end{equation}
-\begin{equation}
-\label{A5}
-\widetilde{\xi }_{\mathbf{P}}=\left\{ \begin{array}{c}
-\xi _{\mathbf{P}}\\
-\xi _{\mathbf{P}}/2
-\end{array}\right. \begin{array}{c}
-\quad L=0\\
-\quad {\rm otherwise} 
-\end{array}
-\qquad\qquad\,\,\,\,\,
-\end{equation}
-This allow us to treat all distributions as if they where s-type Gaussian,
-which allows us to easily calculate the penetration error as,
-\begin{eqnarray}
-&& \int _{V_{\infty }}\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}
-\frac{
-{\tilde\rho}_{\mathbf{P}}\left( \mathbf{r}\right)
-{\tilde\rho}_{\mathbf{Q}}\left( \mathbf{r}\right) }
-{\left| \mathbf{r}-\mathbf{r}'\right| } =
-\nonumber\\
-&&\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{P}}}\right) ^{\frac{3}{2}}
-\left( \frac{\pi }{\widetilde{\xi }_{\mathbf{Q}}}\right) ^{\frac{3}{2}}\frac{C_{\mathbf{P}}
-C_{\mathbf{Q}}}{\left| \mathbf{P}-\mathbf{Q}\right| }{\rm erfc}\left( \sqrt{\frac{\widetilde
-{\xi }_{\mathbf{P}}\widetilde{\xi }_{\mathbf{Q}}}{\widetilde{\xi }_{\mathbf{P}}+\widetilde
-{\xi }_{\mathbf{Q}}}}\left| \mathbf{P}
--\mathbf{Q}\right| \right) 
-\nonumber\\
-&&\geq \tau 
-\nonumber\\
-\label{A6}
-\end{eqnarray}
-However, this is prohibitively expensive to evaluate for a tree code.
-Inorder to eliminate this computational expense we instead evaluate
-for each distribution the penetration error considering the other
-distribution as a delta function of weight one. This leads to two
-distances which are tabulated beforehand, \( \mathbf{P}_{max} \)
-and \( \mathbf{Q}_{max} \). Then our test simply becomes
-
-\begin{equation}
-\label{A7}
-\left| \mathbf{P}-\mathbf{Q}\right| \leq \left| \mathbf{P}_{max}\right| +\left| \mathbf{Q}_{max}\right| 
-\end{equation}
-
-
-\section{The Multipole Acceptability Criterion (MAC)}\label{MAC}
-
-Let us start by defining some useful quantities\begin{equation}
-\label{B1}
-\widehat{O}_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left| \mathbf{R}\right| ^{l}P_{l}^{m}
-\left( \cos \theta _{\mathbf{R}}\right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}\quad \; \; 
-\end{equation}
-\begin{equation}
-\label{B2}
-M_{l}^{m}\left[ \mathbf{R}\right] =\frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos 
-\theta _{\mathbf{R}}\right)
- \, e^{-im\phi _{\mathbf{R}}}}{\left| \mathbf{R}\right| ^{l+1}}
-\end{equation}
-\begin{equation}
-\label{B3}
-{\cal O}_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-\widehat{O}_{l}^{m}\left[ {\mathbf{r}-\mathbf{P}}\right] \, \rho \left( \mathbf{r}\right) \qquad \; \; \; 
-\end{equation}
-The error in the calculation in the multipole contraction (equation
-(\ref{QCTC})) is the multipoles that we do not sum
-%
-\begin{eqnarray}
-\varepsilon \left( l_{0}\right) = 
-\biggl| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, \sum _{m=-l_{0}}^{l_{0}}\, 
-\sum _{m'=-l'}^{l'} 
-\qquad\qquad\qquad\qquad
-\nonumber\\
-\left( -1\right)^{l} \, {\cal O}_{l_{0}}^{m}
-[\rho _{1};\mathbf{P}]\, M_{l_{0}+l'}^{m+m'}[{\mathbf{P}-\mathbf{Q}}]\, 
-{\cal O}_{l'}^{m'}[\rho _{2};\mathbf{Q}]
-\biggr|
-\nonumber\\
-\label{B7}
-\end{eqnarray}
-%
-Let us define for the unsold operator
-\begin{eqnarray}
-{\cal \widehat{O}}_{l}\left[ \left| \mathbf{P}\right| \right] &=&\sqrt{\sum _{m}(l-m)!(l+m)!\left| 
-\widehat{O}_{l}^{m}\left[ \mathbf{P}\right] \right| ^{2}}
-\nonumber\\
-& =&\left| \mathbf{P}\right| ^{l}\sqrt{\sum _{m}\frac{(l-m)!}{(l+m)!}
-\left| P_{l}^{m}(\mathbf{P})\right| ^{2}}=\left| \mathbf{P}\right| ^{l}
-\nonumber\\
-&\geq& 0
-\label{B8}
-\end{eqnarray}
-
-and similarly the unsold weights
-\begin{equation}
-\label{B9}
-{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]=\sqrt{\sum _{m}(l-m)!(l+m)!\left| {\cal O}_{l}^{m}
-\left[ \rho ;\left| \mathbf{P}\right| \right] \right| ^{2}}
-\end{equation}
-Using equations (\ref{B1}), (\ref{B2}), (\ref{B3}), definition
-(\ref{B9}) and the iniqualities (ref) 
-\begin{equation}
-\label{B13}
-\left| P_{l}^{m}\left( \cos \theta _{\mathbf{R}}\right) \right| \leq 1
-\end{equation}
-and\[
-\left| \mathbf{a}\cdot \mathbf{b}\right| \leq \left| \mathbf{a}\right| \left| \mathbf{b}\right| 
-\qquad \qquad \]
-\begin{equation}
-\label{B15}
-\left| \sum _{n}a_{n}\, b_{n}\right| \leq \sqrt{\sum _{n}\left| a_{n}\right| ^{2}\sum _{n'}
-\left| b_{n'}\right| ^{2}}
-\end{equation}
-we can rewrite this error bound, equation (\ref{B7}) very compactly
-as 
-\begin{equation}
-\label{B17}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\sum _{l'=L'+1}^{\infty }\frac{{\cal O}_{l_{0}}[\rho _{1};
-\left| \mathbf{P}\right| ]\: N\left[ l_{0},l'\right] \: {\cal O}_{l'}[\rho _{2};\left| \mathbf{Q}\right| ]}
-{\left| \mathbf{P}-\mathbf{Q}\right| ^{l'+l_{0}+1}}
-\end{equation}
-where
-\begin{eqnarray}
-&&N\left[ l,l'\right] =
-\nonumber\\
-&&\,\,\, \sqrt{\sum _{m=-l_{0}}^{l_{0}}\, \sum _{m'=-l'}^{l'}\frac{\left[ (l_{0}+l'-(m+m'))!
-\right] ^{2}}{(l_{0}+m)!(l_{0}-m)!\, (l'+m')!(l'-m')!}}
-\nonumber\\
-\label{B18}
-\end{eqnarray}
-However, we still have to eliminate the infinite sum over \( l' \)
-within our error expression. Let us consider the limit of
-\begin{eqnarray}
-\lim _{l\rightarrow \infty }\left\{ {\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\right\} ^{1/l} &=&
-\lim _{l\rightarrow \infty }\left\{ \left| c_{I}\right| \, \left| \mathbf{d}_{max}\right| ^{l}\right\} 
-^{1/l}
-\nonumber\\
-&=&\left| \mathbf{d}_{max}\right| 
-\nonumber\\
-\label{B24}
-\end{eqnarray}
-%
-where \( \left| \mathbf{d}_{max}\right|  \)is the maximum distance
-of a distribution to the contraction center \( \left| \mathbf{P}\right|  \).
-This allows us to deterimine the upper bound to \( {\cal O}_{l}\left[ \rho _{1};\left| \mathbf{Q}\right| 
-\right]  \).
-Analyizing equation (\ref{B24}) we can show that\begin{equation}
-\label{B28}
-{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]\leq C_{\rho }\left| \mathbf{d}_{max}\right| ^{l}
-\end{equation}
-Where \( C_{\rho } \) can be determined from\begin{equation}
-\label{B28B}
-C_{\rho }\equiv \max \left( \frac{{\cal O}_{l}[\rho ;\left| \mathbf{P}\right| ]}{\left| \mathbf{d}_{max}
-\right| ^{l}}\right) 
-\end{equation}
-Next, analyzing the behavior of \( N\left[ l,l'\right]  \) for large
-\( l' \) we find that
-\begin{eqnarray}
-N\left[ l,l'\right] &\leq& \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots 
-\left( l+l'\right) \right) }{l!}
-\nonumber\\
-&=&\alpha _{l}\frac{(l+l')!}{l!\, l'!}\equiv n\left[ l,l'\right] 
-\label{B26}
-\end{eqnarray}
-%
-Using equations (\ref{B26}) and (\ref{B28}) the error bound can
-be summed to leading order to give \begin{equation}
-\label{B30}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
-\mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}
-\right| ^{L'+1}}{\left| \mathbf{P}-\mathbf{Q}\right| ^{L'+1}\left| \left| \mathbf{P}-\mathbf{Q}
-\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}}
-\end{equation}
-In practice we find that \begin{equation}
-\label{B31}
-\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
-\mathbf{P}\right| \right] \, n\left[ l_{0},L'+1\right] \, C_{\rho _{2}}\left| \mathbf{d}_{max}
-\right| ^{L'+1}}{\left| \left| \mathbf{P}-\mathbf{Q}\right| -\left| \mathbf{d}_{max}\right| 
-\right| ^{L'+l_{0}+2}}
-\end{equation}
-is easier to test for.
-
-
-\section{Computation of the \protect\( {\cal M}\protect \) Tensor}\label{calM}
-
-Following the work of Nijboer-De Wette \cite{Nijboer57,Nijboer58a}.
-We start by first partitioning  
-
-\begin{equation}
-\label{C1}
-\frac{1}{r^{l+1}}={\cal G}_{l}\left( \beta ,r\right) +{\cal F}_{l}\left( \beta ,r\right) 
-\end{equation}
-where
-
-\begin{equation}
-\label{C2}
-{\cal G}_{l}\left( \beta ,r\right) =\frac{\Gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
-\end{equation}
-\begin{equation}
-\label{C3}
-{\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
-{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
-\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
-\end{equation}
-where \( \beta  \) is a parameter which controls the convergence.
-This allows the lattice sum to be partitioned into rapidly convergent
-real and reciprocal space terms 
-%
-%
-\begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{\mathbf{R}'\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
-\nonumber\\
- & = & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
-\right) e^{im\phi _{\mathbf{R}}}\,  {\cal G}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
-\nonumber\\
- & + & \sum _{\mathbf{R}'\in V_{out}}\widetilde{P}_{l}^{m}\left( \cos \theta _{\mathbf{R}}
-\right) e^{im\phi _{\mathbf{R}}}\, 
-{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
-\nonumber\\
-&=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
-\left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
- \mathbf{R}\right| \right) 
-\nonumber\\
-&-&\sum _{\mathbf{R}'\in V_{in}}\widetilde{P}_{l}^{m}\left( \cos 
-\theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| 
-\right) 
-\nonumber\\
-&+&\frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
-\nonumber\\
-&&\sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}e^{-\frac{\pi ^{2}\left|
- \mathbf{G}\right| ^{2}}{\beta ^{2}}}\widetilde{P_{l}}^{m}\left( \cos \theta _{\mathbf{G}}
-\right) e^{im\phi _{\mathbf{G}}}
-\nonumber\\
-\label{C4}
-\end{eqnarray}
-With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{cell}\right) ^{\frac{1}{3}} \)
-the periodic multipole interaction tensor can be computed. The only
-potential problem is the computation of the incomplete gamma functions.
-Previous approaches attempted to compute this function by the upward
-recurrence relation
-
-\begin{equation}
-\label{C5}
-\Gamma \left( m+1,\, x\right) =m\Gamma \left( m,\, x\right) +x^{m}e^{-x}
-\end{equation}
-which is started by
-
-\begin{equation}
-\label{erfc}
-\Gamma \left( \frac{1}{2},\, x\right) =\sqrt{\pi }\, {\rm erfc}\left( \sqrt{x}\right) 
-\end{equation}
-however, this leads a numerical instability in the calculation. For
-large values of \( x \) and \( m \) the calculation of the gamma
-function can quickly lose precision. We can remove this problem by
-analytically summing the gamma function, collecting terms, and then
-rewriting the gamma function as
-\begin{eqnarray}
-\Gamma \left( m+\frac{1}{2},\, x\right) =\Gamma \left( m+\frac{1}{2}\right) 
-\qquad\qquad\qquad
-\nonumber\\
-\left\{ {\rm erfc}\left( \sqrt{x}\right) 
-+\sqrt{\frac{x}{\pi }}\sum _{n=0}^{m-1}(S_{n}\, x\, e^{-\frac{x}{n}})^{n} \right\}
-\label{C7}
-\end{eqnarray}
-where
-
-\begin{equation}
-\label{SN}
-S_{n}=\left( \frac{\Gamma \left( \frac{1}{2}\right) }{\Gamma \left( n+\frac{3}{2}\right) }
-\right) ^{\frac{1}{max(n,1)}}
-\end{equation}
-Which are tabulated beforehand. We find that this version of the gamma
-function is both easy to program and numerically very precise, even
-at large \( x \) or \( m \). Table \ref{table:CubicMlm} shows the
-matrix coefficients calculated for different cell shapes. We have
-also computed the \( {\cal M} \) tensor in one and two dimensions.
-The \( {\cal M} \) tensor in one dimension can be computed analytically
-%
-\begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, M_{l}^{m}[\mathbf{R}]
-\nonumber\\
-& = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
-\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
-\nonumber\\
-& = & 
-\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
-\sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
-\nonumber\\
-&+&\frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}+\frac{\pi }{2}\right) \right) 
-e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
-\sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
-\nonumber\\
-& = & Q_{l}^{m}\left[ a_{0},\theta _{0},\phi _{0}\right] \left\{ \zeta (l+1)-
-\sum _{n=1}^{n_{0}-1}\frac{1}{n^{l+1}}
-\right\}
-\nonumber\\
-\label{C9}
-\end{eqnarray}
-%
-where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
-initial box dimension and angles which are independent of the summation.
-In two dimension, the Fourier integrals for the calculation of \( {\cal M} \)
-tensor become a lot more complicated, therefore we have chosen to
-use the three dimensional formula's and obtain the two dimensional
-moments via numerical integration, where we take the limit as the
-non-periodic direction goes to infinity,
-
-\begin{eqnarray}
-{\cal M}^{m}_{l} & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}
-\left( \cos \left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}
-\left( \beta ,\left| \mathbf{R}\right| \right) 
-\nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
-\theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| 
-\mathbf{R}\right| \right) 
-\nonumber\\
-& + &  {\cal C}_1 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \left| \mathbf{G}\right| ^{l-2}
-e^{-\frac{\pi ^{2}\left|
- \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, {\tilde P}_{l}^{m}\left( \cos \left( \theta _{\mathbf{G}}
-\right) \right) e^{im\phi _{\mathbf{G}}}
-\nonumber\\
- & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos 
-\left( \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left| 
-\mathbf{R}\right| \right) 
-\nonumber\\
- & - & \sum _{{\mathbf{R}'}\in V_{in}}\, \left( l-m\right) !\, P_{l}^{m}\left( \cos \left( \theta _{
-\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}{\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
-\nonumber\\
- & + & {\cal C}_2 \sum _{\mathbf{G}\neq \left\{ \emptyset \right\} }\, \int _{-\infty }^{\infty }
-\: dG_{z}\: \left| \mathbf{G}
-\right| ^{l-2}e^{-\frac{\pi ^{2}\left| \mathbf{G}\right| ^{2}}{\beta ^{2}}}\, 
-\nonumber\\
-&& \qquad \qquad \qquad \qquad  {\tilde P}_{l}^{m}
-\left( \cos \left( \theta _{\mathbf{G}}\right) \right) e^{im\phi _{\mathbf{G}}}
-\nonumber\\
-\label{C10}
-\end{eqnarray}
-%
-where,
-\begin{eqnarray}
-{\cal C}_1 = \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{V_{cell}\Gamma \left( l+\frac{1}{2}\right) }
-\nonumber\\
-{\cal C}_2 =  \frac{4\pi ^{\frac{3}{2}}(\frac{i}{2})^{l}}{A_{cell}\Gamma \left( l+\frac{1}{2}\right) }
-\label{C10p}
-\end{eqnarray}
-and \( A_{cell} \) is the area of the cell along the non-periodic
-direction. We have found that we can obtain the \( {\cal M} \) tensor
-matrix elements to 8-10 digits of accuracy with this technique.
 
 \section{Computation of the Dipole and Quadrapole Corrections }\label{DipC}
 
@@ -968,7 +574,7 @@ the cell as
 \label{D4}
 \Phi ^{2D}_{S_{\infty }}(z)=-\frac{2\pi }{A_{cell}}p_{z}\, \left( z-R'_{z}\right) 
 \end{equation}
-
+\vfill
 
 \eject
 
@@ -1261,216 +867,12 @@ Energy (\( E \))&
 \end{tabular}\par}
 \end{table*}
 
-
-
-\begin{table*}
-
-\caption{\label{table:CubicMlm} \protect\( {\cal M}_{l}^{m}\protect \) for
-a cubic simulation cell \protect\( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{\pi }{2},\beta =\frac{\pi }{2}\right\} \protect \)
-and an orthorhombic simulation cell \protect\( \left\{ \left| a\right| =1,\left| b\right| =1,\left| c\right| =1,\alpha =\frac{2\pi }{3},\beta =\frac{2\pi }{3}\right\} \protect \)
-where the central cell is subtracted.}
-
-\vspace{0.3cm}
-{\centering \begin{tabular}{|c|c|c||c|c|c|}
-\hline 
-\multicolumn{2}{|c|}{}&
-Cubic &
-\multicolumn{2}{c|}{ }&
-Ortho-rombic\\
-\hline
-\( \: \:  \)\( l \)\( \: \:  \)&
-\( \:  \)\( m \)\( \:  \)&
-\( \qquad \qquad  \)\( \quad  \)\( {\cal M}^{m}_{l} \)\( \qquad  \)\( \qquad  \)\( \quad  \)&
-\( \: \:  \)\( l \)\( \: \:  \)&
-\( \:  \)\( m \)\( \:  \)&
-\( \qquad  \)\( \qquad  \)\( \quad  \)\( {\cal M}^{m}_{l} \)\( \qquad  \)\( \qquad  \)\( \quad  \)\\
-\hline
-4&
-0&
-0.3095492436410130D+01&
-4&
-0&
-0.8832776225626217D+00 \\
-&
-4&
-0.1547746218205053D+02&
-&
-3&
-0.3122857982921809D+01 \\
-\hline 
-6&
-0&
-0.4796724494609411D+01&
-6&
-0&
--0.3501580359498343D+02\\
-&
-4&
--0.3357707146226664D+02&
-&
-3&
-0.4332984629874099D+02\\
-&
-&
-&
-&
-6&
--0.6740542192034350D+03\\
-\hline 
-8&
-0&
-0.4276164638449980D+03&
-8&
-0&
-0.1394780314659910D+03\\
-&
-4&
-0.4276164638450001D+03 &
-&
-3&
-0.4931293093807656D+03\\
-&
-8&
-0.2779507014992490D+05 &
-&
-6&
-0.4931293093807656D+03\\
-\hline 
-10&
-0&
-0.3337055302939225D+04&
-10&
-0&
-0.1760026471909184D+03\\
-&
-4&
--0.7341521666466320D+04&
-&
-3&
-0.3422448296725441D+02\\
-&
-8&
--0.1248058683299270D+06&
-&
-6&
--0.5324080077525265D+03\\
-&
-&
-&
-&
-9&
-0.1105450799842411D+05\\
-\hline 
-12&
-0&
-0.3533770670774835D+06&
-12&
-0&
-0.3441656356582020D+06\\
-&
-4&
-0.2089749967040276D+06&
-&
-3&
--0.2988963294769746D+06\\
-&
-8&
-0.2086201911558935D+07&
-&
-6&
-0.1981829408275373D+07\\
-&
-12&
-0.3193240788535041D+09&
-&
-9&
-0.1399645778709430D+07\\
-&
-&
-&
-&
-12&
-0.4855992637030970D+09\\
-\hline 
-14&
-0&
-0.7186127463179821D+07&
-14&
-0&
--0.1057046901404442D+08\\
-&
-4&
--0.9239306738374122D+07&
-&
-3&
--0.1094473082593862D+08\\
-&
-8&
--0.5851560934303580D+08 &
-&
-6&
-0.7172818259530190D+07\\
-&
-12&
--0.2243098358149698D+10&
-&
-9&
-0.1166548139252476D+09\\
-&
-&
-&
-&
-12&
--0.3299496399383880D+10\\
-\hline 
-16&
-0&
-0.1168988444587698D+10&
-16&
-0&
--0.1553204312146170D+09\\
-&
-4&
-0.5469289478144757D+09&
-&
-3&
-0.2790914628186657D+09\\
-&
-8&
-0.2661931236843469D+10&
-&
-6&
-0.1592904788101633D+10\\
-&
-12&
-0.5130698388451003D+11&
-&
-9&
-0.9241099613788853D+10\\
-&
-16&
-0.1540161278003348D+14 &
-&
-12&
-0.8723232135625955D+11 \\
-&
-&
-&
-&
-15&
-0.3299919999077370D+10\\
-\hline
-\end{tabular}\par}
-\vspace{0.3cm}
-\end{table*}
-
-
 \eject
 
 
 \begin{figure*}
 
-\caption{\label{figure: SimCell} Simulation cell and interior region.}
+\caption{\label{figure:SimCell} Simulation cell and interior region.}
 
 {\centering \includegraphics{UnitCell.eps} \par}
 \end{figure*}
@@ -1484,19 +886,6 @@ Matrix}
 
 {\centering \includegraphics{RepCell.eps} \par}
 \end{figure*}
-
-
-
-\begin{figure*}
-
-\caption{\label{figure: ErrorPFF} Error in the Periodic Far Field approximation
-with increasing \protect\( \mathbf{L}_{max}\protect \) for two different
-inner cell sums for \protect\( 64\protect \) molecules of water.}
-
-{\centering \includegraphics{PFFMultipoles_water.ps} \par}
-\end{figure*}
-
-
 
 \begin{figure*}
 

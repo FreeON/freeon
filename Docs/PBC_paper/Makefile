@@ -35,5 +35,5 @@ ps:
 	dvips -o LinearPBCMethod_revtex4.ps LinearPBCMethod_revtex4
 
 clean:
-	rm -rf *.log *.ps *.aux *.bbl *.blg *.dvi *~
+	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
 	rm -rf mondo.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst
