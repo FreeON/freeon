@@ -1,3 +1,50 @@
+2004-11-17 15:11  mchalla
+
+	* Docs/DM_Papers/PERT_4/Makefile: [no log message]
+
+2004-11-17 15:03  mchalla
+
+	* Docs/DM_Papers/PERT_5/: Makefile, Makefile: [no log message]
+
+2004-11-17 14:57  mchalla
+
+	* Docs/DM_Papers/PERT_5/: Conv_Ex_T29_2nd_1st.eps, DMX.ps, DMX.tex,
+	EnergyConv29.eps, EnergyError.eps, Local_Global_XTRP_Comp.eps,
+	PP.bib: [no log message]
+
+2004-11-17 14:52  mchalla
+
+	* Docs/DM_Papers/PERT_4/: H2_Ion_4_noneq.eps, PP.bib, SPRT.ps,
+	SPRT.tex: non-orthogonal density matrix perturbation theory paper.
+
+2004-11-17 06:31  vweber
+
+	* TwoE/MSC/ShellPairStruct.F90: Reduced the MaxSPairs from 1000 to
+	100 (=10 primitives per function).  This avoids allocation problem
+	for small 3D-periodic cells (e.g (NaCl)_1).  Please K, give me your
+	pardon for all my sins. I'm just a poor sinner who will burn in
+	hell for the eternity.
+
+2004-11-17 02:33  vweber
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: Removed the last trace
+	of -DNLATTFORCE.
+
+2004-11-17 02:31  vweber
+
+	* MondoSCF2/SCFs.F90: Removed the #ifdef NLATTFORCE condition for
+	numerical XStress.
+
+2004-11-16 12:07  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: Weights
+	modified, temporarily exp function of lattice-forces expression
+	added into weigths in QUICCA.
+
+2004-11-16 09:49  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-11-15 05:21  vweber
 
 	* ONX2/: GONX2.F90, ONXGet.F90: Moved GetDab form GONX to ONXGet.
