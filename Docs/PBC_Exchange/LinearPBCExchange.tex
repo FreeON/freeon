@@ -151,6 +151,17 @@ P_{cd} \,
 \label{MinImageKab}
 \end{equation}
 where $\cal MID$ is a function which shifts the distributions to there nearest image.
+In pseudocode,
+\begin{itemize}
+\item[] {{\bf Input[}$\psi_a({\bf r})\psi_c({\bf r+R})$,$\psi_b({\bf r'})\psi_d({\bf r'+R'})${\bf ]}}
+\item[] {{\hskip 0.2 in}${\bf D}\,\,\,\,={\bf AC} - {\bf BD} $}
+\item[] {{\hskip 0.2 in}${\bf FD}=frac[{\bf D}$]}
+\item[] {{\hskip 0.2 in}${\bf FD}={\bf FD}-aint[{\bf FD}]$}
+\item[] {{\hskip 0.2 in}${\bf D}\,\,\,\,=atom[{\bf FD}]$}
+\item[] {{\hskip 0.2 in}$I\,\,\,\,\,\,=(ac|bd)$  }
+\item[] {{\bf Output[}$I${\bf ]}}
+\end{itemize}
+Which we have implimented into our integral code.
 
 The problem with the ${\bf k}$-space convergence, which is extreme for the Gamma point, 
 will also exist for any finite set of lattice vectors ${\bf n}$. Consider 
