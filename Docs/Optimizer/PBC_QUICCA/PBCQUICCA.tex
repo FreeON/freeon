@@ -379,7 +379,7 @@ B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
 \end{equation}
 Furthermore, to satisfy the above conditions, 
 the matrix $B^{(klm)(A)}$ must take the form
-\begin{equation} \label{matba}
+\begin{equation} 
 B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)} .
 \end{equation}
 Similar definitions must hold for $B^{(klm)(B)}$ and
@@ -509,6 +509,46 @@ recognition of the translationally unique internal coordinates
 of the crystal that form the internal coordinate central 
 cell $\phi^{(000)}$.
 
+\subsection{The optimizer}
+Details of the QUICCA algorithm for geometry optimization are 
+described in our previous paper \cite{KNemeth04}. Here we provide 
+only a very brief summary of the most important features of the 
+optimizer.
+QUICCA is based on the realization of the fact, that internal coordinate
+gradients show trends during geometry optimization.
+These trends can be formalized by weighted curve fitting for each 
+individual internal coordinate, over internal coordinate value and 
+gradient pairs.
+In practice, this curve fitting is most robust with just a line-fit. 
+The root of the
+fitted curve (line) provides an improved estimate for the minimum
+along the internal coordinate. Collectively, these minima determine
+the optimization step at the actual geometry.
+QUICCA works well, because internal coordinates exhibit  
+highly reduced harmonic and anharmonic vibrational coupling, as
+compared to Cartesian ones. Furthermore, the fitting process
+has an important averaging effect on the vibrational coupling
+that also strongly contributes to the success of QUICCA.
+A typical fitting process of a gradient curve is illustrated in 
+Fig. \ref{iceIh} on a hydrogen bond of the icosahedral (P63/MMC)
+ice structure \cite{AGoto90}.
+
+\begin{figure}[h]
+\resizebox*{3.5in}{!}{\includegraphics{IceIhfit.eps}}
+\caption{
+Progression of gradients on a hydrogen bond coordinate
+of the icosahedral ice crystal.
+Energies and forces have been obtained by the Hartree-Fock
+model in STO-3G basis set.
+The optimization was started from the crystallographic structure
+\cite{AGoto90}.
+The numbers in the picture
+indicate the sequence of optimization steps. The dashed line represents
+a linear fit, the star the predicted location of the minimum.}
+\label{iceIh}
+\end{figure}
+
+\subsection{Treatment of constraints}
 
 
 \bibliography{../../Bib/mondo_new}
