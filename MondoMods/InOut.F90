@@ -29,7 +29,8 @@ MODULE InOut
 #endif  
                        Get_ARGMT,    Get_HGRho,                  &
 #ifdef MMech
-                       Get_CHR_VECT, Get_LOG_VECT,               &
+                       Get_CHR_VECT, Get_LOG_VECT,     &
+                       Get_INTC,     Get_BMATR,        &
 #endif
                        Get_CMPoles
 
@@ -48,7 +49,8 @@ MODULE InOut
 #endif 
                        Put_TOLS,     Put_BCSR,     Put_HGRho,    &
 #ifdef MMech
-                       Put_CHR_VECT, Put_LOG_VECT,               &
+                       Put_CHR_VECT, Put_LOG_VECT,        &
+                       Put_INTC, Put_BMATR,               &
 #endif
                        Put_CMPoles
    END INTERFACE     
@@ -346,7 +348,160 @@ MODULE InOut
 #endif 
     END SUBROUTINE Get_INT_VECT
 !--------------------------------------------------------------------
+#ifdef MMech
 !
+    SUBROUTINE Get_INTC(A,VarName,Tag_O)
+       TYPE(INTC),               INTENT(INOUT) :: A
+       CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+       INTEGER,ALLOCATABLE,DIMENSION(:)   :: B !=ICHAR(' ')
+       TYPE(META_DATA)                         :: Meta
+       INTEGER :: II,NN,N,I
+#ifdef PARALLEL 
+       IF(MyId==ROOT) THEN
+#endif 
+        NN=SIZE(A%DEF,1)
+         N=5  !!! LEN(A%DEF(1))
+          Meta=SetMeta(NameTag(Trim(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
+          ALLOCATE(B(NN*N))
+          CALL OpenData(Meta)
+          CALL ReadIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+        DO II = 1, NN
+          DO I=1,N; A%DEF(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
+        ENDDO
+          DEALLOCATE(B)
+!
+          Meta=SetMeta(NameTag(Trim(VarName)//'Atoms',Tag_O),NATIVE_INT32,NN*4,.FALSE.)
+          CALL OpenData(Meta)
+          CALL ReadIntegerVector(Meta,A%ATOMS)
+          CALL CloseData(Meta)
+!
+          Meta=SetMeta(NameTag(Trim(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
+          CALL OpenData(Meta)
+          CALL ReadDoubleVector(Meta,A%Value)
+          CALL CloseData(Meta)
+!
+          Meta=SetMeta(NameTag(Trim(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
+          ALLOCATE(B(NN))
+          CALL OpenData(Meta)
+          CALL ReadIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+              A%Constraint=.FALSE.
+            DO I=1,NN
+              IF(B(I)==1) A%Constraint(I)=.TRUE.
+            ENDDO
+          DEALLOCATE(B)
+!
+#ifdef PARALLEL 
+       ENDIF
+       IF(InParallel)CALL BCast(A)
+#endif 
+    END SUBROUTINE Get_INTC
+!
+!------------------------------------------------------------
+!
+    SUBROUTINE Put_INTC(A,VarName,Tag_O)
+       INTEGER  :: I,N,II,NN
+       TYPE(INTC),               INTENT(IN) :: A
+       CHARACTER(LEN=*),         INTENT(IN) :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+       INTEGER,ALLOCATABLE,DIMENSION(:)   :: B  !=ICHAR(' ')
+       TYPE(META_DATA)                      :: Meta
+#ifdef PARALLEL 
+       IF(MyId==ROOT)THEN
+#endif 
+          N=5 !!! LEN(A%DEF(1))
+          NN=SIZE(A%DEF,1)
+          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_INTC')
+          ALLOCATE(B(N*NN))
+       DO II = 1, NN
+         DO I=1,N; B((II-1)*N+I)=ICHAR(A%DEF(II)(I:I)); ENDDO
+       ENDDO
+          Meta=SetMeta(NameTag(TRIM(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+          DEALLOCATE(B)
+!
+          Meta=SetMeta(NameTag(TRIM(VarName)//'Atoms',Tag_O),NATIVE_INT32,4*NN,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,A%ATOMS)
+          CALL CloseData(Meta)
+!
+          Meta=SetMeta(NameTag(TRIM(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteDoubleVector(Meta,A%Value)
+          CALL CloseData(Meta)
+!
+          ALLOCATE(B(NN))
+          B=0
+          DO I=1,NN
+            IF(A%Constraint(I)) B(I)=1
+          ENDDO
+          Meta=SetMeta(NameTag(TRIM(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+          DEALLOCATE(B)
+!
+#ifdef PARALLEL 
+       ENDIF       
+#endif 
+!
+    END SUBROUTINE Put_INTC
+!
+    SUBROUTINE Get_BMATR(A,VarName,Tag_O)
+       TYPE(BMATR),           INTENT(INOUT) :: A
+       CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+       TYPE(META_DATA)                         :: Meta
+#ifdef PARALLEL 
+       IF(MyId==ROOT) THEN
+#endif 
+          Meta=SetMeta(NameTag(TRIM(VarName)//'IB',Tag_O),NATIVE_INT32,SIZE(A%IB,1)*SIZE(A%IB,2),.FALSE.)
+          CALL OpenData(Meta)
+          CALL ReadIntegerVector(Meta,A%IB)
+          CALL CloseData(Meta)
+!
+          Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
+          CALL OpenData(Meta)
+          CALL ReadDoubleVector(Meta,A%B)
+          CALL CloseData(Meta)
+#ifdef PARALLEL 
+       ENDIF
+       IF(InParallel)CALL BCast(A)
+#endif 
+    END SUBROUTINE Get_BMATR
+!
+    SUBROUTINE Put_BMATR(A,VarName,Tag_O)
+       TYPE(BMATR),           INTENT(INOUT) :: A
+       CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+       TYPE(META_DATA)                         :: Meta
+#ifdef PARALLEL 
+       IF(MyId==ROOT) THEN
+#endif 
+          Meta=SetMeta(NameTag(TRIM(VarName)//'IB',Tag_O),NATIVE_INT32,SIZE(A%IB,1)*SIZE(A%IB,2),.FALSE.)
+          CALL OpenData(Meta)
+          CALL WriteIntegerVector(Meta,A%IB)
+          CALL CloseData(Meta)
+!
+          Meta=SetMeta(NameTag(TRIM(VarName)//'B',Tag_O),NATIVE_DOUBLE,SIZE(A%B,1)*SIZE(A%B,2),.FALSE.)
+          CALL OpenData(Meta)
+          CALL WriteDoubleVector(Meta,A%B)
+          CALL CloseData(Meta)
+#ifdef PARALLEL 
+       ENDIF
+#endif 
+    END SUBROUTINE Put_BMATR
+!
+#endif
+!
+!--------------------------------------------------------------------
+!
+!
+!----------------------------------------------------------
 !
     SUBROUTINE Get_INT_RNK2(A,VarName,Tag_O)
        TYPE(INT_RNK2),           INTENT(INOUT) :: A
@@ -1615,10 +1770,8 @@ MODULE InOut
 #ifdef PARALLEL 
        IF(MyId==ROOT)THEN
 #endif 
-          N=LEN(A(II))
-          IF(N>DEFAULT_CHR_LEN)THEN
-             CALL Halt('Static strings overrun in Put_CHR_VECT')
-          ENDIF
+          N=LEN(A(1))
+          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
          DO II = 1, NN
           DO I=1,N; B((II-1)*N+I)=ICHAR(A(II)(I:I)); ENDDO
           Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
@@ -1636,12 +1789,12 @@ MODULE InOut
 !--------------------------------------------------------------------------
 #ifdef MMech
     SUBROUTINE Get_CHR_VECT(A,VarName,NN,Tag_O)
-      INTEGER                                 :: I,N,II,NN      
-      CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(INOUT):: A
-      CHARACTER(LEN=*),         INTENT(IN)    :: VarName
-      CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-      INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B !=ICHAR(' ')
-      TYPE(META_DATA)                         :: Meta
+       INTEGER                              :: I,N,II,NN
+    CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(INOUT):: A
+       CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+       CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+       INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B !=ICHAR(' ')
+       TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
       IF(MyId==ROOT)THEN
 #endif 
@@ -1666,7 +1819,7 @@ MODULE InOut
 !--------------------------------------------------------------------------
 #ifdef MMech
     SUBROUTINE Put_LOG_VECT(A,VarName,NN,Tag_O)
-       INTEGER                              :: I,NN
+       INTEGER                              :: I,N,II,NN
        LOGICAL,DIMENSION(1:NN),  INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
