@@ -31,7 +31,7 @@ F77_EXTRAS   = -f77rtl
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
                -I/usr/local/include   $(MPI_COMPILE_FLAGS) \
-#              -I$(MPI_INC) 
+               -I$(MPI_INC) 
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
 # LINK/LOADER DIRECTIVES
@@ -67,8 +67,8 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-#LAPACK = -L$(LAPACK_LIB) -llapack -lblas 
-LAPACK = -lcxml 
+LAPACK = -L$(LAPACK_LIB) -llapack_ALPHA -lblas_ALPHA 
+#LAPACK = -lcxml 
 #---------------------------------------------------------------------------
 
 
