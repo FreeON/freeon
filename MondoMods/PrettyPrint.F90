@@ -45,22 +45,22 @@ MODULE PrettyPrint
       SUBROUTINE TimeStamp(Mssg,Enter_O)
          CHARACTER(LEN=*),INTENT(IN) :: Mssg
          LOGICAL,OPTIONAL,INTENT(IN) :: Enter_O
-         CHARACTER(LEN=8)            :: Date,Day,HMS
-         CHARACTER(LEN=10)           :: Time
+         CHARACTER(LEN=8)            :: DDate,DDay,HMS
+         CHARACTER(LEN=10)           :: TTime
          CHARACTER(LEN=5)            :: Zone
          INTEGER, DIMENSION(8)       :: Values
          LOGICAL                     :: Enter 
          Enter=.TRUE.; IF(PRESENT(Enter_O))Enter=Enter_O
-         CALL DATE_AND_TIME(Date,Time,Zone,Values)
-         Day=Date(5:6)//'/'//Date(7:8)//'/'//Date(3:4)
-         HMS=Time(1:2)//':'//Time(3:4)//':'//Time(5:6)
+         CALL DATE_AND_TIME(DDate,TTime,Zone,Values)
+         DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
+         HMS=TTime(1:2)//':'//TTime(3:4)//':'//TTime(5:6)
          CALL OpenASCII(OutFile,Out)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
-            WRITE(Out,'(A)')'(*'//TRIM(Mssg)//' '//Day//' @ '//HMS//'*)'
+            WRITE(Out,'(A)')'(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)'
          ELSEIF(Enter)THEN
-            WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//Day//' @ '//HMS//'>>'
+            WRITE(Out,'(A)')'<<'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'>>'
          ELSE
-            WRITE(Out,'(A)')' - - - - - - - - done '//Day//' @ '//HMS//' - - - - - - - - '
+            WRITE(Out,'(A)')' - - - - - - - - done '//DDay//' @ '//HMS//' - - - - - - - - '
 !            WRITE(Out,22)
 !            22 FORMAT(72('-'))
          ENDIF
@@ -600,15 +600,19 @@ MODULE PrettyPrint
            WRITE(Unit,99)
         ELSE
            WRITE(Unit,401)TRIM(Name)
-           DO I=1,N,7
-              K=MIN(I+6,N)
+!
+           DO I=1,N,10
+              K=MIN(I+9,N)
               WRITE(Unit,501)(J,J=I,K)  
               DO L=1,M
-                WRITE(Unit,701)L,(A(L,J),J=I,K)
+                WRITE(Unit,701) L,(A(L,J),J=I,K)
               ENDDO
            ENDDO
+!
         ENDIF
-        CLOSE(Out)
+        IF(Out/=6) CLOSE(Out)
+        RETURN
+!
    100  FORMAT(' (*',65('='),'*)')
     99  FORMAT(' mv[m_List]:=MatrixForm[ N[ Chop[m,0.001],4]]; ')
    101  FORMAT(1x,'Ap[x_List,y_List]:=Append[x,y];')
@@ -623,10 +627,10 @@ MODULE PrettyPrint
                        '{',1(F19.16,'*2^(',I4,'),'), &
                              F19.16,'*2^(',I4,')}];')
    401  FORMAT(2x,A,':')
-   501  FORMAT(T3,7I10)
-   601  FORMAT(I5,7F10.5)
-   701  FORMAT(I5,7D12.5)
-
+   501  FORMAT(T2,10I16)
+   601  FORMAT(I5,10F10.5)
+   701  FORMAT(I5,10D16.8)
+!
    END SUBROUTINE Print_DBL_Rank2A
 !
 !==================================================================
@@ -723,7 +727,7 @@ MODULE PrettyPrint
     CHARACTER(LEN=*)                 :: Name   
     INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
     CHARACTER(LEN=*),OPTIONAL            :: Proc_O
-    INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,or,Ell,LenKet
+    INTEGER                              :: PU,I,L,M,N,LMN,jadd,zq,iq,oq,orr,Ell,LenKet
     REAL(DOUBLE)                         :: Chk
     CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: ChkStr
     IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
@@ -734,12 +738,12 @@ MODULE PrettyPrint
     ENDIF
 !
     DO zq=1,A%NExpt-1
-       oq=A%OffQ%I(zq)
-       or=A%OffR%I(zq)
+       oq =A%OffQ%I(zq)
+       orr=A%OffR%I(zq)
        Ell    = A%Lndx%I(zq) 
        LenKet = LHGTF(Ell)
        DO iq=1,A%NQ%I(zq)
-          jadd=or+(iq-1)*LenKet
+          jadd=orr+(iq-1)*LenKet
           DO LMN=1,LenKet  
              Chk=Chk+ABS(A%Co%D(jadd+LMN))
           ENDDO
@@ -776,12 +780,8 @@ MODULE PrettyPrint
     CHARACTER(LEN=*),OPTIONAL        :: FileName_O
     INTEGER,OPTIONAL                 :: Unit_O
     INTEGER                          :: PU
-    INTEGER                          :: L,M,N,LMN,NPrim,iadd,jadd,zq,iq,oq,or,Ell,LenKet
+    INTEGER                          :: L,M,N,LMN,NPrim,iadd,jadd,zq,iq,oq,orr,Ell,LenKet
     CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Strng
-!   
-!    RETURN
-!    PrintFlags%Rho=DEBUG_DENSITY
-!    IF(PrintFlags%Rho/=DEBUG_DENSITY)RETURN
 !
     IF(.NOT. AllocQ(A%Alloc)) THEN
        CALL Halt(' Density not allocated in PPrint_HGRho')
@@ -795,8 +795,8 @@ MODULE PrettyPrint
        WRITE(PU,*)'Rho[R_List]:=Module[{zeta,zs,Q,RQ,ExpRQ,Lx,Ly,Lz,RhoSum},'
        WRITE(PU,*)'RhoSum=0;'
        DO zq=1,A%NExpt-1
-          oq=A%OffQ%I(zq)
-          or=A%OffR%I(zq)
+          oq =A%OffQ%I(zq)
+          orr=A%OffR%I(zq)
           Ell=A%Lndx%I(zq) 
           LenKet=LHGTF(Ell)
           Strng=Squish('zeta='//DblToMMAChar(A%Expt%D(zq))//';')
@@ -806,7 +806,7 @@ MODULE PrettyPrint
              DO iq=1,A%NQ%I(zq)
                 NPrim=NPrim+1
                 iadd=oq+iq
-                jadd=or+(iq-1)*LenKet
+                jadd=orr+(iq-1)*LenKet
                 Strng=Squish('Q={'//DblToMMAChar(A%Qx%D(iadd))   &
                              //','//DblToMMAChar(A%Qy%D(iadd))   &  
                              //','//DblToMMAChar(A%Qz%D(iadd))//'};')
@@ -842,19 +842,16 @@ MODULE PrettyPrint
        WRITE(PU,31)
        IF(PrintFlags%Key==DEBUG_MAXIMUM .AND. A%NDist .LT. 100) THEN
           DO zq=1,A%NExpt
-             oq=A%OffQ%I(zq)
-             or=A%OffR%I(zq)
+             oq =A%OffQ%I(zq)
+             orr=A%OffR%I(zq)
              Ell    = A%Lndx%I(zq) 
              LenKet = LHGTF(Ell)
              IF(A%NQ%I(zq).NE.0) THEN
                 DO iq=1,A%NQ%I(zq)
                    NPrim=NPrim+1
                    iadd=oq+iq
-                   jadd=or+(iq-1)*LenKet
+                   jadd=orr+(iq-1)*LenKet
                    WRITE(PU,20) NPrim,Ell,A%Expt%D(zq)
-                   IF(AllocQ(A%AllocRE)) THEN
-                      WRITE(PU,26) A%Est%D(iadd)
-                   ENDIF
                    WRITE(PU,21) A%Qx%D(iadd),A%Qy%D(iadd),A%Qz%D(iadd)
                    WRITE(PU,22)
                    DO L=0,Ell
@@ -872,7 +869,9 @@ MODULE PrettyPrint
           ENDDO
        ENDIF
     ENDIF
-    CLOSE(PU)
+!
+    CALL ClosePU(PU)
+!
     RETURN
 !
 10  FORMAT(' zeta[',I4,']=SetPrecision[',F19.16,'*2^(' ,I4, ')},50];')
@@ -885,7 +884,6 @@ MODULE PrettyPrint
 !
 20  FORMAT(2x,'Primative #',I4,2x,' Max L = ',I4,2x,' EXPONENT = ',D14.8)
 21  FORMAT(2x,'QR     = (',D14.8,', ',D14.8,', ',D14.8,')')
-26  FORMAT(2x,'RhoEst =  ',D14.8)
 22  FORMAT(2x,'=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=')
 24  FORMAT(3x,'L=',I4,' M=',I4,' N=',I4)
 25  FORMAT(3x,'RhoCo(L,M,N) = ',D14.8)
@@ -895,307 +893,325 @@ MODULE PrettyPrint
 33  FORMAT(1x,' Number of Distribution = ',I8,2x)
 34  FORMAT(1x,' Number of Coeffients   = ',I8,2x)
   END SUBROUTINE Print_HGRho
-
-
-
-     FUNCTION BlockIndexString(Name,I,K,J,Id)
-        INTEGER                         :: I,K
-        INTEGER, OPTIONAL               :: J,Id
-        CHARACTER(LEN=*)                :: Name
-        CHARACTER(LEN=INTERNAL_INT_LEN) :: cI,cJ,cK,cId
-        CHARACTER(LEN=64)               :: BlockIndexString
-        cI=IntToChar(I)
-        cK=IntToChar(K)
-        IF(PRESENT(J).AND.PRESENT(Id))THEN
-           cJ=IntToChar(J)
-           cId=IntToChar(Id)
-           BlockIndexString=TRIM(Name)//'(Id='//TRIM(cId)//',I='// &
-                            TRIM(cI)//',J='//TRIM(cK)//',K='//TRIM(cJ)//')'
-        ELSEIF(PRESENT(J))THEN
-           cJ=IntToChar(J)
-           BlockIndexString=TRIM(Name)//'('// &
-                            TRIM(cI)//',J='//TRIM(cJ)//','//TRIM(cK)//')'
-        ELSEIF(PRESENT(Id))THEN
-           cId=IntToChar(Id)
-           BlockIndexString=TRIM(Name)//'(Id='//TRIM(cId)//','// &
-                            TRIM(cI)//','//TRIM(cK)//')'
-        ELSE
-           BlockIndexString=TRIM(Name)//'('//TRIM(cI)//','//TRIM(cK)//')'
-        ENDIF
-     END FUNCTION BlockIndexString
+!---------------------------------------------------------------------
+!
+!---------------------------------------------------------------------
+  FUNCTION BlockIndexString(Name,I,K,J,Id)
+    INTEGER                         :: I,K
+    INTEGER, OPTIONAL               :: J,Id
+    CHARACTER(LEN=*)                :: Name
+    CHARACTER(LEN=INTERNAL_INT_LEN) :: cI,cJ,cK,cId
+    CHARACTER(LEN=64)               :: BlockIndexString
+    cI=IntToChar(I)
+    cK=IntToChar(K)
+    IF(PRESENT(J).AND.PRESENT(Id))THEN
+       cJ=IntToChar(J)
+       cId=IntToChar(Id)
+       BlockIndexString=TRIM(Name)//'(Id='//TRIM(cId)//',I='// &
+            TRIM(cI)//',J='//TRIM(cK)//',K='//TRIM(cJ)//')'
+    ELSEIF(PRESENT(J))THEN
+       cJ=IntToChar(J)
+       BlockIndexString=TRIM(Name)//'('// &
+            TRIM(cI)//',J='//TRIM(cJ)//','//TRIM(cK)//')'
+    ELSEIF(PRESENT(Id))THEN
+       cId=IntToChar(Id)
+       BlockIndexString=TRIM(Name)//'(Id='//TRIM(cId)//','// &
+            TRIM(cI)//','//TRIM(cK)//')'
+    ELSE
+       BlockIndexString=TRIM(Name)//'('//TRIM(cI)//','//TRIM(cK)//')'
+    ENDIF
+  END FUNCTION BlockIndexString
 !---------------------------------------------------------------------
 !     
 !---------------------------------------------------------------------
-     SUBROUTINE Elapsed_TIME(T,Init_O,Proc_O)
-        TYPE(TIME),           INTENT(INOUT)  :: T
-        REAL(DOUBLE)                         :: WallTm,CPUSTm,TimeTot,TimeMax, &
-                                                TimeMin,TimeAve,Imb
-        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Init_O,Proc_O
-        CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
-        CHARACTER(LEN=10)                    :: Mssg10
-        INTEGER                              :: I,PU
-        IF(PRESENT(Init_O))THEN
-           IF(Init_O=='Init')THEN
-              T%FLOP=0
-              T%Wall=Zero
-              T%CPUS=Zero
-              T%WStrt=WallSec()
-              T%CStrt=CPUSec()
-           ELSEIF(Init_O=='Start')THEN
-              T%WStrt=WallSec()
-              T%CStrt=CPUSec()
-           ELSEIF(Init_O=='Accum')THEN
-              WallTm=WallSec()
-              CPUSTm=CPUSec()
-              T%Wall=T%Wall+(WallTm-T%WStrt)
-              T%CPUS=T%CPUS+(CPUSTm-T%CStrt)
-              T%WStrt=WallTm
-              T%CStrt=CPUSTm
-           ELSE
-              CALL Halt('Unknown option '//TRIM(Init_O)//' in Print_Elapsed_TIME')
-           ENDIF
-        ENDIF
+  SUBROUTINE Elapsed_TIME(T,Init_O,Proc_O)
+    TYPE(TIME),           INTENT(INOUT)  :: T
+    REAL(DOUBLE)                         :: WallTm,CPUSTm,TimeTot,TimeMax, &
+         TimeMin,TimeAve,Imb
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Init_O,Proc_O
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN)     :: Mssg
+    CHARACTER(LEN=10)                    :: Mssg10
+    INTEGER                              :: I,PU
+    IF(PRESENT(Init_O))THEN
+       IF(Init_O=='Init')THEN
+          T%FLOP=0
+          T%Wall=Zero
+          T%CPUS=Zero
+          T%WStrt=WallSec()
+          T%CStrt=CPUSec()
+       ELSEIF(Init_O=='Start')THEN
+          T%WStrt=WallSec()
+          T%CStrt=CPUSec()
+       ELSEIF(Init_O=='Accum')THEN
+          WallTm=WallSec()
+          CPUSTm=CPUSec()
+          T%Wall=T%Wall+(WallTm-T%WStrt)
+          T%CPUS=T%CPUS+(CPUSTm-T%CStrt)
+          T%WStrt=WallTm
+          T%CStrt=CPUSTm
+       ELSE
+          CALL Halt('Unknown option '//TRIM(Init_O)//' in Print_Elapsed_TIME')
+       ENDIF
+    ENDIF
 #ifdef PARALLEL
-        IF(PRESENT(Proc_O))THEN
-           IF(InParallel)THEN
-              TimeTot=Reduce(T%Wall,MPI_SUM)
-              TimeMax=Reduce(T%Wall,MPI_MAX)
-              TimeMin=Reduce(T%Wall,MPI_MIN)
-           ENDIF
-           IF(MyId==ROOT.AND.InParallel.AND. &
-              PrintFlags%Key>=DEBUG_MEDIUM)THEN
-!             Compute relative imbalance 
-              TimeAve=TimeTot/DBLE(NPrc)
-              IF(TimeTot/=Zero)THEN
-                 Imb=ABS(TimeMax-TimeAve)/TimeAve
-              ELSE
-                 Imb=Zero
-              ENDIF 
-              Mssg=ProcessName(Proc_O)//'Parallel Statistics '
-              PU=OpenPU()
-              WRITE(PU,*)TRIM(Mssg)
-              Mssg=       '                    Imblnce = '//TRIM(DblToShrtChar(Imb))      &
-                  //Rtrn//'                     MinTime = '//TRIM(DblToShrtChar(TimeMin)) &
-                  //Rtrn//'                     AvgTime = '//TRIM(DblToShrtChar(TimeAve)) &
-                  //Rtrn//'                     MaxTime = '//TRIM(DblToShrtChar(TimeMax)) 
-              WRITE(PU,*)TRIM(Mssg)
-              CLOSE(Out)          
-           ENDIF
-        ENDIF
+    IF(PRESENT(Proc_O))THEN
+       IF(InParallel)THEN
+          TimeTot=Reduce(T%Wall,MPI_SUM)
+          TimeMax=Reduce(T%Wall,MPI_MAX)
+          TimeMin=Reduce(T%Wall,MPI_MIN)
+       ENDIF
+       IF(MyId==ROOT.AND.InParallel.AND. &
+            PrintFlags%Key>=DEBUG_MEDIUM)THEN
+          !             Compute relative imbalance 
+          TimeAve=TimeTot/DBLE(NPrc)
+          IF(TimeTot/=Zero)THEN
+             Imb=ABS(TimeMax-TimeAve)/TimeAve
+          ELSE
+             Imb=Zero
+          ENDIF
+          Mssg=ProcessName(Proc_O)//'Parallel Statistics '
+          PU=OpenPU()
+          WRITE(PU,*)TRIM(Mssg)
+          Mssg=       '                    Imblnce = '//TRIM(DblToShrtChar(Imb))      &
+               //Rtrn//'                     MinTime = '//TRIM(DblToShrtChar(TimeMin)) &
+               //Rtrn//'                     AvgTime = '//TRIM(DblToShrtChar(TimeAve)) &
+               //Rtrn//'                     MaxTime = '//TRIM(DblToShrtChar(TimeMax)) 
+          WRITE(PU,*)TRIM(Mssg)
+          CLOSE(Out)          
+       ENDIF
+    ENDIF
 #endif
-     END SUBROUTINE Elapsed_TIME
-     
-     FUNCTION ProcessName(Proc,Misc_O) RESULT (Tag)
-        CHARACTER(LEN=*)           :: Proc
-        CHARACTER(LEN=*), OPTIONAL :: Misc_O
-        CHARACTER(LEN=20)          :: Tag
-        CHARACTER(LEN=16)          :: Name
-        CHARACTER(LEN=3 ),PARAMETER:: Colon =","
-        CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
-        IF(PRESENT(Misc_O))THEN
-           Name=TRIM(ADJUSTL(Proc))//Colon//TRIM(Misc_O)
-           Tag=Name//Colons
-        ELSE
-           Name=ADJUSTL(TRIM(Proc))
-           Tag=Name//Colons
-        ENDIF
-     END FUNCTION ProcessName                 
+  END SUBROUTINE Elapsed_TIME
+!---------------------------------------------------------------------
 !
-     SUBROUTINE Print_TIME(T,Proc_O,FileName_O,Unit_O,BareBones_O)
-        TYPE(TIME),               INTENT(INOUT) :: T
-        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Proc_O,FileName_O
-        INTEGER, OPTIONAL                       :: Unit_O
-        REAL(DOUBLE)                            :: Elapsed_CPUS,Elapsed_WALL,FLOPS
-        LOGICAL, OPTIONAL                       :: BareBones_O
-        CHARACTER(LEN=DEFAULT_CHR_LEN)          :: Mssg,Proc
-        INTEGER                                 :: PU
+!---------------------------------------------------------------------
+  FUNCTION ProcessName(Proc,Misc_O) RESULT (Tag)
+    CHARACTER(LEN=*)           :: Proc
+    CHARACTER(LEN=*), OPTIONAL :: Misc_O
+    CHARACTER(LEN=20)          :: Tag
+    CHARACTER(LEN=16)          :: Name
+    CHARACTER(LEN=3 ),PARAMETER:: Colon =","
+    CHARACTER(LEN=4 ),PARAMETER:: Colons=" :: "
+    IF(PRESENT(Misc_O))THEN
+       Name=TRIM(ADJUSTL(Proc))//Colon//TRIM(Misc_O)
+       Tag=Name//Colons
+    ELSE
+       Name=ADJUSTL(TRIM(Proc))
+       Tag=Name//Colons
+    ENDIF
+  END FUNCTION ProcessName
+!---------------------------------------------------------------------
+!
+!---------------------------------------------------------------------
+  SUBROUTINE Print_TIME(T,Proc_O,FileName_O,Unit_O,BareBones_O)
+    TYPE(TIME),               INTENT(INOUT) :: T
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Proc_O,FileName_O
+    INTEGER, OPTIONAL                       :: Unit_O
+    REAL(DOUBLE)                            :: Elapsed_CPUS,Elapsed_WALL,FLOPS
+    LOGICAL, OPTIONAL                       :: BareBones_O
+    CHARACTER(LEN=DEFAULT_CHR_LEN)          :: Mssg,Proc
+    INTEGER                                 :: PU
 !------------------------------------------------------------------------------------
 #ifdef PARALLEL
-        IF(InParallel)  &
-           CALL AlignNodes()
-        IF(MyId==ROOT)THEN
+    IF(InParallel)  &
+         CALL AlignNodes()
+    IF(MyId==ROOT)THEN
 #endif
-           Elapsed_CPUS=T%CPUS
-           Elapsed_Wall=T%Wall
-           PU=OpenPU(FileName_O,Unit_O)
-           CALL PrintProtectL(PU)
+       Elapsed_CPUS=T%CPUS
+       Elapsed_Wall=T%Wall
+       PU=OpenPU(FileName_O,Unit_O)
+       CALL PrintProtectL(PU)
 #ifdef PARALLEL
-        ENDIF
-        IF(InParallel)THEN
-           FLOPS=Reduce(T%FLOP)
-        ELSE
+    ENDIF
+    IF(InParallel)THEN
+       FLOPS=Reduce(T%FLOP)
+    ELSE
 #endif
-           FLOPS=T%FLOP
+       FLOPS=T%FLOP
 #ifdef PARALLEL
-       ENDIF
+    ENDIF
 #endif
 !----------------------------------------------------
-        IF(PRESENT(Proc_O))THEN
-           Proc=Proc_O
-        ELSE
-           Proc=Blnk
-        ENDIF
+    IF(PRESENT(Proc_O))THEN
+       Proc=Proc_O
+    ELSE
+       Proc=Blnk
+    ENDIF
 !-------------------------------------------------------------------------
-        IF(PRESENT(BareBones_O))THEN
-           IF(.NOT.BareBones_O)  &
-              CALL Halt(' Logic error in Print_TIME')
+    IF(PRESENT(BareBones_O))THEN
+       IF(.NOT.BareBones_O)  &
+            CALL Halt(' Logic error in Print_TIME')
 #ifdef PARALLEL
-           IF(MyId==ROOT)THEN
-              WRITE(PU,10)NPrc,Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
-           10 FORMAT(I4,' ',D12.6,' ',I10)
-           ENDIF
+       IF(MyId==ROOT)THEN
+          WRITE(PU,10)NPrc,Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
+10        FORMAT(I4,' ',D12.6,' ',I10)
+       ENDIF
 #else
-           WRITE(PU,10)Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
-        10 FORMAT(' ',D12.6,' ',I10)
+       WRITE(PU,10)Elapsed_Wall,MFlops(FLOPS,Elapsed_Wall)
+10     FORMAT(' ',D12.6,' ',I10)
 #endif
-           CALL PrintProtectR(PU)
-           CLOSE(Out)
-           RETURN
-        ENDIF
+       CALL PrintProtectR(PU)
+       CLOSE(Out)
+       RETURN
+    ENDIF
 !-------------------------------------------------------------------------
 #ifdef PARALLEL
-        IF(MyID==ROOT)THEN
+    IF(MyID==ROOT)THEN
 #endif
-           IF(FLOPS>Zero)THEN
-              IF(Elapsed_CPUS/=Zero)THEN
+       IF(FLOPS>Zero)THEN
+          IF(Elapsed_CPUS/=Zero)THEN
 #ifdef PARALLEL
-                 Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
-                    //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                    //'), WALL (Sec,MFLOPS) = ('                  &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
-                    //'), NProc = '//TRIM(IntToChar(NPrc))
+             Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
+                  //'), WALL (Sec,MFLOPS) = ('                  &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
+                  //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-                 Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
-                    //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
-                    //'), WALL (Sec,MFLOPS) = ('                  &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
-                    //')'
+             Mssg=ProcessName(Proc)//'CPU (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))//', '     &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_CPUS))) &
+                  //'), WALL (Sec,MFLOPS) = ('                  &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '     &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall))) &
+                  //')'
 #endif
-              ELSE
+          ELSE
 #ifdef PARALLEL
-                 Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
-                    //'), NProc = '//TRIM(IntToChar(NPrc))
+             Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
+                  //'), NProc = '//TRIM(IntToChar(NPrc))
 #else
-                 Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
-                    //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
-                    //')'
+             Mssg=ProcessName(Proc)//'WALL (Sec,MFLOPS) = (' &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))//', '      &
+                  //TRIM(IntToChar(MFlops(FLOPS,Elapsed_Wall)))  &
+                  //')'
 #endif
-              ENDIF
-           ELSE
-              IF(Elapsed_CPUS>Zero)THEN
+          ENDIF
+       ELSE
+          IF(Elapsed_CPUS>Zero)THEN
 #ifdef PARALLEL
-                 Mssg=ProcessName(Proc)//'CPU Sec = '   &
-                    //TRIM(DblToMedmChar(Elapsed_CPUS))   &
-                    //', WALL (Sec) = '                   &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))   &
-                    //', NProc = '//TRIM(IntToChar(NPrc))
+             Mssg=ProcessName(Proc)//'CPU Sec = '   &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))   &
+                  //', WALL (Sec) = '                   &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))   &
+                  //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-                 Mssg=ProcessName(Proc)//'CPU Sec = '  &
-                    //TRIM(DblToMedmChar(Elapsed_CPUS))  &
-                    //', WALL Sec = '                    &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))   
+             Mssg=ProcessName(Proc)//'CPU Sec = '  &
+                  //TRIM(DblToMedmChar(Elapsed_CPUS))  &
+                  //', WALL Sec = '                    &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))   
 #endif
-              ELSE
+          ELSE
 #ifdef PARALLEL
-                 Mssg=ProcessName(Proc)//'WALL Sec = '  &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))      &
-                    //', NProc = '//TRIM(IntToChar(NPrc))
+             Mssg=ProcessName(Proc)//'WALL Sec = '  &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))      &
+                  //', NProc = '//TRIM(IntToChar(NPrc))
 #else
-                 Mssg=ProcessName(Proc)//'WALL (Sec) = '  &
-                    //TRIM(DblToMedmChar(Elapsed_Wall))
+             Mssg=ProcessName(Proc)//'WALL (Sec) = '  &
+                  //TRIM(DblToMedmChar(Elapsed_Wall))
 #endif
-              ENDIF
-           ENDIF
-           WRITE(PU,*)TRIM(Mssg)
-           CALL PrintProtectR(PU)
-           CLOSE(Out)
+          ENDIF
+       ENDIF
+       WRITE(PU,*)TRIM(Mssg)
+       CALL PrintProtectR(PU)
+       CLOSE(Out)
 #ifdef PARALLEL
-        ENDIF
+    ENDIF
 #endif
-     END SUBROUTINE Print_TIME
+  END SUBROUTINE Print_TIME
 !---------------------------------------------------------------------
 !
-!     
-     FUNCTION MFlops(Flops,Sec)
-        REAL(DOUBLE), INTENT(IN) :: Flops,Sec
-        INTEGER                  :: MFlops
-        IF(Sec<=Zero.OR.Flops<=Zero)THEN
-           MFlops=0
-        ELSE
-           MFlops=INT(Flops*1.0D-6/Sec)         
-        ENDIF
-     END FUNCTION MFlops        
+!---------------------------------------------------------------------     
+  FUNCTION MFlops(Flops,Sec)
+    REAL(DOUBLE), INTENT(IN) :: Flops,Sec
+    INTEGER                  :: MFlops
+    IF(Sec<=Zero.OR.Flops<=Zero)THEN
+       MFlops=0
+    ELSE
+       MFlops=INT(Flops*1.0D-6/Sec)         
+    ENDIF
+  END FUNCTION MFlops
 !---------------------------------------------------------------------
 !    PRINT MEMORY STATISTICS
-!      
-     SUBROUTINE Print_MEMS(A,Proc)
-        TYPE(MEMS),INTENT(IN)       :: A
-        CHARACTER(LEN=*),INTENT(IN) :: Proc
-        INTEGER                     :: I,L,PU
-        CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
-        IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
-        L=LEN(TRIM(Proc))
+!---------------------------------------------------------------------     
+  SUBROUTINE Print_MEMS(A,Proc)
+    TYPE(MEMS),INTENT(IN)       :: A
+    CHARACTER(LEN=*),INTENT(IN) :: Proc
+    INTEGER                     :: I,L,PU
+    CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
+    IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
+    L=LEN(TRIM(Proc))
 #ifdef PARALLEL
-        IF(InParallel)THEN
-           IF(MyId==ROOT)THEN
-              PU=OpenPU()
-              CALL PrintProtectL(PU)
-              CLOSE(PU)
-           ENDIF
-           DO I=0,NPrc-1
-              IF(InParallel)CALL AlignNodes()
-              IF(MyId==I)THEN
-                 Mssg=TRIM(Proc)//'#'//TRIM(IntToChar(I))                    &
-                    //' :: Allocs='//TRIM(IntToChar(A%Allocs))               &
-                    //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
-                    //', '//TRIM(IntToChar(A%MemTab ))                       &
-                    //' bytes are presently allocated.'//Rtrn                    &
-                    //Blanks(1:L+3)//' A max of '//TRIM(IntToChar(A%MaxMem)) &
-                    //' bytes were allocated.'
-                 PU=OpenPU() 
-                 WRITE(PU,*)Mssg 
-                 CLOSE(PU) 
-              ENDIF
-           ENDDO
-           CALL AlignNodes()
-           IF(MyId==ROOT)THEN
-              PU=OpenPU()
-              CALL PrintProtectR(PU)
-              CLOSE(PU)
-           ENDIF
-        ELSE
+    IF(InParallel)THEN
+       IF(MyId==ROOT)THEN
+          PU=OpenPU()
+          CALL PrintProtectL(PU)
+          CLOSE(PU)
+       ENDIF
+       DO I=0,NPrc-1
+          IF(InParallel)CALL AlignNodes()
+          IF(MyId==I)THEN
+             Mssg=TRIM(Proc)//'#'//TRIM(IntToChar(I))                    &
+                  //' :: Allocs='//TRIM(IntToChar(A%Allocs))               &
+                  //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
+                  //', '//TRIM(IntToChar(A%MemTab ))                       &
+                  //' bytes are presently allocated.'//Rtrn                    &
+                  //Blanks(1:L+3)//' A max of '//TRIM(IntToChar(A%MaxMem)) &
+                  //' bytes were allocated.'
+             PU=OpenPU() 
+             WRITE(PU,*)Mssg 
+             CLOSE(PU) 
+          ENDIF
+       ENDDO
+       CALL AlignNodes()
+       IF(MyId==ROOT)THEN
+          PU=OpenPU()
+          CALL PrintProtectR(PU)
+          CLOSE(PU)
+       ENDIF
+    ELSE
 #endif
-           PU=OpenPU()
-           CALL PrintProtectL(PU)
-           Mssg=ProcessName(Proc)                                      &
-              //'Allocs='//TRIM(IntToChar(A%Allocs))                   &
-              //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
-              //', '//TRIM(IntToChar(A%MemTab ))                       &
-              //' bytes are presently allocated.'//Rtrn                &
-              //Blanks(1:20)//' A max of '//TRIM(IntToChar(A%MaxMem))  &
-              //' bytes were allocated.'
-           WRITE(PU,*)TRIM(Mssg)
-           CALL PrintProtectR(PU)
-           CLOSE(PU) 
+       PU=OpenPU()
+       CALL PrintProtectL(PU)
+       Mssg=ProcessName(Proc)                                      &
+            //'Allocs='//TRIM(IntToChar(A%Allocs))                   &
+            //',  DeAllocs='//TRIM(IntToChar(A%DeAllocs))            &
+            //', '//TRIM(IntToChar(A%MemTab ))                       &
+            //' bytes are presently allocated.'//Rtrn                &
+            //Blanks(1:20)//' A max of '//TRIM(IntToChar(A%MaxMem))  &
+            //' bytes were allocated.'
+       WRITE(PU,*)TRIM(Mssg)
+       CALL PrintProtectR(PU)
+       CLOSE(PU) 
 #ifdef PARALLEL
-        ENDIF
+    ENDIF
 #endif
-     END SUBROUTINE Print_MEMS
+  END SUBROUTINE Print_MEMS
+!---------------------------------------------------------------------
+!
+!---------------------------------------------------------------------
+  SUBROUTINE PrintProtectL(Unit)
+    INTEGER :: Unit
+    IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.Unit/=6) &
+         WRITE(Unit,*)LeftParenStar
+  END SUBROUTINE PrintProtectL
+!---------------------------------------------------------------------
+!
+!---------------------------------------------------------------------
+  SUBROUTINE PrintProtectR(Unit)
+    INTEGER :: Unit
+    IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.Unit/=6) &
+         WRITE(Unit,*)RightParenStar
+  END SUBROUTINE PrintProtectR
 !
 !==================================================================
 !
 !    PLOT A BCSR MATRIX
 !      
-!===============================================================
-!
-
+!==================================================================
 !      FUNCTION Dot(N,V1,V2)
 !         REAL(DOUBLE) :: Dot
 !         REAL(DOUBLE), DIMENSION(:)  :: V1,V2
@@ -1205,17 +1221,5 @@ MODULE PrettyPrint
 !            Dot=Dot+V1(I)*V2(I)
 !         ENDDO
 !      END FUNCTION Dot
-
-      SUBROUTINE PrintProtectL(Unit)
-         INTEGER :: Unit
-         IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.Unit/=6) &
-            WRITE(Unit,*)LeftParenStar
-      END SUBROUTINE PrintProtectL
-
-      SUBROUTINE PrintProtectR(Unit)
-         INTEGER :: Unit
-         IF(PrintFlags%Fmt==DEBUG_MMASTYLE.AND.Unit/=6) &
-            WRITE(Unit,*)RightParenStar
-      END SUBROUTINE PrintProtectR
 !
 END MODULE 
