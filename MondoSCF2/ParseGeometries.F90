@@ -104,8 +104,7 @@ CONTAINS
           ENDIF
        ENDIF
     ELSE ! Not doing any fancy shmancy with clones ...
-       IF(O%Guess==GUESS_EQ_RESTART.AND. &
-          .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN      
+       IF(O%Guess==GUESS_EQ_RESTART .AND. .NOT. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN      
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
           CALL Get(G%Clones,'clones')
@@ -117,10 +116,12 @@ CONTAINS
           ENDDO
           CALL CloseHDF(HDFFileID)          
        ELSE       
-          !          WRITE(*,*)' REPARSING GEOMETRY ON RESTART!!!!'
           G%Clones=1
           ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1))
+          IF(O%Guess==GUESS_EQ_RESTART .AND. OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM)) THEN
+!             WRITE(*,*)' REPARSING GEOMETRY ON RESTART'
+          ENDIF
        ENDIF
     ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')
