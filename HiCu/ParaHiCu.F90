@@ -67,7 +67,9 @@ MODULE ParallelHiCu
       GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
     ENDDO
     IF(MyID == 0) THEN
-      WRITE(*,*) 'MyID = 0, GRhoBBox = ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2), ', GRhoBBoxVol = ',GRhoBBoxVol
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'MyID = 0, GRhoBBox = ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2), ', GRhoBBoxVol = ',GRhoBBoxVol
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     CALL AlignNodes()
   END SUBROUTINE ParaInitRho
@@ -101,7 +103,9 @@ MODULE ParallelHiCu
 
     IF(Exist) THEN
       IF(MyID == 0) THEN
-        WRITE(*,*) 'LineLoc.dat exists. To be opened..'
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LineLoc.dat exists. To be opened..'
+        CLOSE(Out,STATUS='KEEP')
         OPEN(UNIT=54,FILE='LineLoc.dat',FORM='formatted',Status='unknown')
         READ(54,*) NVol
         IF(NVol /= NPrc) THEN
@@ -156,7 +160,9 @@ MODULE ParallelHiCu
     ELSE
       ! assign the first box
       IF(MyID == 0) THEN
-        WRITE(*,*) 'LineLoc.dat does not exist.'
+        CALL OpenASCII(OutFile,Out)
+        WRITE(Out,*) 'LineLoc.dat does not exist.'
+        CLOSE(Out,STATUS='KEEP')
 
         ! use the GRhoBBox information rather than RhoRoot 
         ! because RhoRoot is not assigned yet
@@ -189,7 +195,7 @@ MODULE ParallelHiCu
     LocalRhoBBox%Half(1:3) = (LocalRhoBBox%BndBox(1:3,2)-LocalRhoBBox%BndBox(1:3,1))*Half
     LocalRhoBBox%Center(1:3) = (LocalRhoBBox%BndBox(1:3,2)+LocalRhoBBox%BndBox(1:3,1))*Half
     CALL AlignNodes()
-    !! write(*,*) 'Finding out what new rho bounding box is : MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
+    !! WRITE(*,*) 'Finding out what new rho bounding box is : MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
     CALL AlignNodes()
 
   END SUBROUTINE GetNewLocalRhoBoundingBox
@@ -217,7 +223,7 @@ MODULE ParallelHiCu
     LocalRhoBBox%Half(1:3) = (LocalRhoBBox%BndBox(1:3,2)-LocalRhoBBox%BndBox(1:3,1))*Half
     LocalRhoBBox%Center(1:3) = (LocalRhoBBox%BndBox(1:3,2)+LocalRhoBBox%BndBox(1:3,1))*Half
     !! CALL AlignNodes()
-    !! write(*,*) 'MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
+    !! WRITE(*,*) 'MyID = ', MyID, 'LocalRhoBBox = ',LocalRhoBBox%BndBox(1:3,1),LocalRhoBBox%BndBox(1:3,2)
     CALL AlignNodes()
   END SUBROUTINE GetLocalBoundingBox
 
@@ -253,7 +259,9 @@ MODULE ParallelHiCu
     
     StartTm = MPI_Wtime()
     IF(MyID == 0) THEN
-      WRITE(*,*) 'DistDist is entered...'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'DistDist is entered...'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
 
     IF(MyID == 0) THEN
@@ -281,7 +289,7 @@ MODULE ParallelHiCu
       NodeBox%BndBox(1:3,2) = (/Rho%Qx%D(KQ),Rho%Qy%D(KQ),Rho%Qz%D(KQ)/)
       NodeBox=ExpandBox(NodeBox,Ext(KQ))
       !! Distribution box obtained
-      !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+      !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
       DO J = 0, NPrc-1
 #if !defined(PERIODIC)
         BoxL(1:3) = LCoor%D(1:3,J+1)
@@ -295,7 +303,7 @@ MODULE ParallelHiCu
         ELSE
           !! Put KQ into the list
           !! first go the pointer that has is pointing to J
-          !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+          !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
           !! J is the proc to send
           IndexToSend%I(J) = IndexToSend%I(J) + 1
           IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell 
@@ -317,7 +325,7 @@ MODULE ParallelHiCu
           ELSE
             !! Put KQ into the list
             !! first go the pointer that has is pointing to J
-            !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+            !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
             !! J is the proc to send
             IndexToSend%I(J) = IndexToSend%I(J) + 1
             IntToSend%I(J) = IntToSend%I(J) + 1 !! Ell
@@ -359,7 +367,7 @@ MODULE ParallelHiCu
         ELSE
           !! Put KQ into the list
           !! first go the pointer that has is pointing to J
-          !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+          !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
           !! J is the proc to send
           IndexToSend%I(J) = IndexToSend%I(J) + 1
           HeadArr(J)%LS(IndexToSend%I(J)) = I
@@ -377,7 +385,7 @@ MODULE ParallelHiCu
           ELSE
             !! Put KQ into the list
             !! first go the pointer that has is pointing to J
-            !! write(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
+            !! WRITE(*,*) 'Distribution with index KQ = ',KQ, ' is to be inserted.'
             !! J is the proc to send
             IndexToSend%I(J) = IndexToSend%I(J) + 1
             HeadArr(J)%LS(IndexToSend%I(J)) = I
@@ -389,7 +397,7 @@ MODULE ParallelHiCu
     ENDDO
     CALL AlignNodes()
     IF(MyID == 0) THEN
-      !! write(*,*) 'MyID = ',MyID, ' done with storing indices'
+      !! WRITE(*,*) 'MyID = ',MyID, ' done with storing indices'
     ENDIF
     CALL AlignNodes()
     
@@ -402,7 +410,7 @@ MODULE ParallelHiCu
       LocalDblSendMaxSize = Max(LocalDblSendMaxSize,DblToSend%I(I)+1) !! 1 for dummy
     ENDDO
     CALL AlignNodes()
-    !! write(*,*) 'MyID = ',MyID, ', LocalIntSendMaxSize=',LocalIntSendMaxSize,' ,LocalDblSendMaxSize = ',LocalDblSendMaxSize
+    !! WRITE(*,*) 'MyID = ',MyID, ', LocalIntSendMaxSize=',LocalIntSendMaxSize,' ,LocalDblSendMaxSize = ',LocalDblSendMaxSize
     CALL AlignNodes()
     !! GIntSendMaxSize and GDblSendMaxSize determine the sizes of the receive buffers. Of course
     !! this may be smaller on some processors, but for simplicity we assume it is the same for all.
@@ -410,7 +418,9 @@ MODULE ParallelHiCu
     CALL MPI_AllReduce(LocalDblSendMaxSize,GDblSendMaxSize,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,IErr)
     !! 
     IF(MyID == 0) THEN
-      write(*,*) 'MyID=0, GIntSendMaxSize=',GIntSendMaxSize,' ,GDblSendMaxSize = ',GDblSendMaxSize
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'MyID=0, GIntSendMaxSize=',GIntSendMaxSize,' ,GDblSendMaxSize = ',GDblSendMaxSize
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     IntSendToOthers = 0
     DblSendToOthers = 0
@@ -419,7 +429,7 @@ MODULE ParallelHiCu
       IntSendToOthers = IntSendToOthers + IntToSend%I(I)
       DblSendToOthers = DblSendToOthers + DblToSend%I(I)
     ENDDO
-    !! write(*,*) 'MYID = ',MyID,', IntSendToOthers = ',IntSendToOthers,', DblSendToOthers = ',DblSendToOthers
+    !! WRITE(*,*) 'MYID = ',MyID,', IntSendToOthers = ',IntSendToOthers,', DblSendToOthers = ',DblSendToOthers
     CALL New(TotIntSendFromProc,NPrc,0)
     CALL New(TotDblSendFromProc,NPrc,0)
     CALL MPI_GATHER(IntSendToOthers,1,MPI_INTEGER,TotIntSendFromProc%I(0),1,MPI_INTEGER,0,MPI_COMM_WORLD,IErr)
@@ -431,12 +441,14 @@ MODULE ParallelHiCu
       DO I = 0, NPrc-1
        Tot = Tot + TotIntSendFromProc%I(I)
       ENDDO
-      WRITE(*,*) 'Gather on MyID = 0, total number of Int to pass around is ',Tot
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'DistDist: Gather on ROOT, Tot Int to pass around is ',Tot
       Tot = 0  
       DO I = 0, NPrc-1
         Tot = Tot + TotDblSendFromProc%I(I)
       ENDDO
-      WRITE(*,*) 'Gather on MyID = 0, total number of Dbl to pass around is ',Tot
+      WRITE(Out,*) 'DistDist: Gather on ROOT, Tot Dbl to pass around is ',Tot
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
 
     !! allocate memory enough for packing and sending
@@ -480,7 +492,7 @@ MODULE ParallelHiCu
       NewCo(CoFillIndex+1:CoFillIndex+LMNLen) = Rho%Co%D(CD:CD+LMNLen-1)
       CoFillIndex = CoFillIndex + LMNLen
     ENDDO
-    !! write(*,*) 'MyID = ',MyID, ', EllFillIndex = ',EllFillIndex,', CoFillIndex = ',CoFillIndex, ', IndexToSend%I(MyID) = ', IndexToSend%I(MyID), ', CoToSend%I(MyID) = ', CoToSend%I(MyID)
+    !! WRITE(*,*) 'MyID = ',MyID, ', EllFillIndex = ',EllFillIndex,', CoFillIndex = ',CoFillIndex, ', IndexToSend%I(MyID) = ', IndexToSend%I(MyID), ', CoToSend%I(MyID) = ', CoToSend%I(MyID)
 
     IntAmtRecv = GIntSendMaxSize
     DblAmtRecv = GDblSendMaxSize
@@ -632,7 +644,9 @@ MODULE ParallelHiCu
     IF(NumOfCo /= CoFillIndex) STOP 'ERR: NumOfCo /= CoFillIndex!'
     CALL AlignNodes()
     IF(MyID == 0) THEN
-      WRITE(*,*) 'MyID=0, end of DistDist.'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'MyID=0, end of DistDist.'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     CALL Delete(IndexToSend)
     CALL Delete(CoToSend)
@@ -652,7 +666,9 @@ MODULE ParallelHiCu
     EndTm = MPI_Wtime()
     TotTm = EndTm - StartTm
     IF(MyID == ROOT) THEN
-      WRITE(*,*) 'Total time to do DistDist is ', TotTm
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Total time to do DistDist is ', TotTm
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
   END SUBROUTINE DistDist
 
@@ -821,17 +837,18 @@ MODULE ParallelHiCu
     
     CALL CalCenterAndHalf(WBox)
     IF(MyID == 0) THEN
-      WRITE(*,*) 'Calling GridGen...'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Calling GridGen...'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     CALL GridGen(WBox,SubVolRho,SubVolExc)
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
     IF(MyID == ROOT) THEN
-      WRITE(*,*) 'TotRho = ',TotRho
-      WRITE(*,*) 'TotExc = ',TotExc
-    ENDIF
-    IF(MyID == 0) THEN
-      WRITE(*,*) 'GridGen is done.'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'ParaGridGen: TotRho = ',TotRho, ', TotExc = ',TotExc
+      WRITE(Out,*) 'ParaGridGen is done.'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     
   END SUBROUTINE ParaGridGen
@@ -851,17 +868,19 @@ MODULE ParallelHiCu
     CALL CalCenterAndHalf(WBox)
     HiCuBegTm = MPI_WTime()
     IF(MyID == 0) THEN
-      WRITE(*,*) 'Calling GridGen...'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Calling GridGen...'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     CALL GridGen(WBox,SubVolRho,SubVolExc)
     TotRho = Reduce(SubVolRho)
     TotExc = Reduce(SubVolExc)
-    IF(MyID == ROOT) THEN
-      WRITE(*,*) 'TotRho = ',TotRho,', TotExc = ',TotExc
-    ENDIF
     MyLeavesTm = LeavesTmCount(CubeRoot)
-    IF(MyID == 0) THEN
-      WRITE(*,*) 'GridGen is done. Calling MakeKxc...'
+    IF(MyID == ROOT) THEN
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'GridGen: TotRho = ',TotRho,', TotExc = ',TotExc
+      WRITE(Out,*) 'GridGen is done. Calling MakeKxc...'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
     CALL MakeKxc(Kxc,CubeRoot)
     HiCuEndTm = MPI_WTime()
@@ -902,18 +921,22 @@ MODULE ParallelHiCu
 
     Busy = .TRUE.
     IF(MyID == 0) THEN
-      write(*,*) 'RhoRoot Box  ',RhoRoot%Box%BndBox(1:3,1),RhoRoot%Box%BndBox(1:3,2)
-      write(*,*) 'GRhoBBox   Box  ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2)
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'RepartitionVol: RhoRoot Box  ',RhoRoot%Box%BndBox(1:3,1),RhoRoot%Box%BndBox(1:3,2)
+      WRITE(Out,*) 'RepartitionVol: GRhoBBox   Box  ',GRhoBBox%BndBox(1:3,1),GRhoBBox%BndBox(1:3,2)
+      CLOSE(Out,STATUS='KEEP')
       RepLCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,1)
       RepRCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
       !! RepLeavesTm%D(1) = Sum(VolLeavesTm%D(:))
       RepLeavesTm%D(1) = AllLeavesTm
-      WRITE(*,*) 'The total leave times is ',RepLeavesTm%D(1)
       NewVol = 1.0D0
       DO I = 1, 3
         NewVol = NewVol*(RepRCoor%D(I,1)-RepLCoor%D(I,1))
       ENDDO
-      WRITE(*,*) 'The initial volume to start with is ',NewVol
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'The total leave times is ',RepLeavesTm%D(1)
+      WRITE(Out,*) 'The initial volume to start with is ',NewVol
+      CLOSE(Out,STATUS='KEEP')
       
       Power2(0) = 1
       DO I = 1, 31
@@ -928,10 +951,14 @@ MODULE ParallelHiCu
 
 #undef REGULA_FALSI
 #ifdef REGULA_FALSI
-      WRITE(*,*) 'REGULA_FALSI is defined!'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'REGULA_FALSI is defined!'
+      CLOSE(Out,STATUS='KEEP')
 #else
-      WRITE(*,*) 'REGULA_FALSI is not defined. Bisection search is used.'
-      WRITE(*,*) 'TauBeg = ',TauBeg,' ,TauEnd = ', TauEnd
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'REGULA_FALSI is not defined. Bisection search is used.'
+      WRITE(Out,*) 'TauBeg = ',TauBeg,' ,TauEnd = ', TauEnd
+      CLOSE(Out,STATUS='KEEP')
 #endif
 
 #ifdef REGULA_FALSI
@@ -946,7 +973,11 @@ MODULE ParallelHiCu
         DO I  = 1, SmallN
           lnTau = lnTauBeg + (I-1)*lnTauH
           TauArr%D(I) = EXP(lnTau)
-          WRITE(*,*) 'TauArr%D(Stage=',I,')=',TauArr%D(I)
+          IF(I == 1 .OR. I == SmallN) THEN
+            CALL OpenASCII(OutFile,Out)
+            WRITE(Out,*) 'TauArr%D(Stage=',I,')=',TauArr%D(I)
+            CLOSE(Out,STATUS='KEEP')
+          ENDIF
         ENDDO
       ENDIF
 #endif
@@ -991,6 +1022,7 @@ MODULE ParallelHiCu
             IF(RootFindIter > 100) THEN 
               WRITE(*,*) 'Stage = ',Stage,', PIndex = ',PIndex,', CIndex =',CIndex
               WRITE(*,*) 'ERROR: Regula-falsi does not converged.'
+              STOP
             ENDIF
             x2 = x1 - f1*(x1-x0)/(f1-f0)
             !! calculate f2 now
@@ -1100,8 +1132,10 @@ MODULE ParallelHiCu
         NewVol = NewVol + ThisVol
       ENDDO
       DIFF = NewVol-OldVol
-      WRITE(*,*) 'OldVol = ',OldVol, ', NewVol = ', NewVol
-      WRITE(*,*) 'DIFF = ',DIFF
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'OldVol = ',OldVol, ', NewVol = ', NewVol
+      WRITE(Out,*) 'DIFF = ',DIFF
+      CLOSE(Out,STATUS='KEEP')
       IF(ABS(DIFF) > 1.0D-2) THEN
         STOP 'ERR: DIFF in Vol (RepartionVol) is wrong!'
       ENDIF
@@ -1130,7 +1164,9 @@ MODULE ParallelHiCu
     EndTm = MPI_Wtime()
     TotTm = EndTm - StartTm
     IF(MyID == 0) THEN
-      WRITE(*,*) 'Time to repartition the total volume is ',TotTm
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Time to repartition the total volume is ',TotTm
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
   END SUBROUTINE RepartitionVol
   
@@ -1272,9 +1308,9 @@ MODULE ParallelHiCu
     TYPE(DBL_VECT)::DLCoor,DRCoor
 
     IF(MyID == 0) THEN
-      WRITE(*,*) 'ThreeDFracZ_p2_partition is implemented...'
+      WRITE(*,*) 'Center of Mass Partition is implemented...'
       CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*) 'ThreeDFracZ_p2_partition is implemented...'
+      WRITE(Out,*) 'Center of Mass Partition is implemented...'
       CLOSE(Out,STATUS='KEEP')
     ENDIF
     Power2(0) = 1
