@@ -17,6 +17,9 @@ CONTAINS
     TYPE(CHR_VECT),SAVE  :: ArgV
     TYPE(INT_VECT),SAVE  :: IChr 
     CHARACTER(LEN=2*DCL) :: CmndLine
+#if PARALLEL && MPI2
+    INTEGER              :: SPAWN,ALL
+#else
     INTERFACE 
        FUNCTION Spawn(NC,MaxLen,IChr)
          INTEGER                         :: NC,MaxLen
@@ -24,6 +27,7 @@ CONTAINS
          INTEGER                                     :: Spawn
        END FUNCTION Spawn
     END INTERFACE
+#endif
     !------------------------------------------------------------!
     DO iCLUMP=1,M%Clumps
 #ifdef PARALLEL
@@ -37,15 +41,23 @@ CONTAINS
        CmndLine=' '
        DO I=1,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
+          !          WRITE(*,*)I,' <',TRIM(ArgV%C(I)),">"
        ENDDO
-       ! WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
+       !       WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
        ! Log this run
        CALL Logger(CmndLine,.FALSE.)
+#if PARALLEL && MPI2
+       CALL MPI_COMM_SPAWN(ArgV%C(1),ArgV%C(2:NArg),M%NProc,MPI_INFO_NULL, &
+            ROOT,MPI_COMM_SELF,SPAWN,MPI_ERRCODES_IGNORE,IErr)
+       IF(IErr/=MPI_SUCCESS)& 
+          CALL MondoHalt(MPIS_ERROR,' Could not spawn <'//TRIM(CmndLine)//'>')
+       ! Merge the spawned and current local communicators
+       CALL MPI_INTERCOMM_MERGE(SPAWN,.TRUE.,ALL,IErr)
+       ! Wait for the kiddies to be done
+       CALL MPI_BARRIER(ALL,IErr)
+#else
        ! Create ASCII integer array to beat F9x/C incompatibility
        CALL CVToIV(NArg,ArgV,MaxLen,IChr)
-#ifdef PARALLEL
-       !        CALL Wait(1D0)
-#endif
        ! Spawn a sub process 
        IErr=Spawn(NArg,MaxLen,IChr%I)
        ! Bring this run down if not successful
@@ -56,6 +68,7 @@ CONTAINS
        CALL CloseHDF(HDF_CurrentID)
        IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
        CALL Delete(IChr)
+#endif
        CALL Delete(ArgV)
     ENDDO
   END SUBROUTINE Invoke
@@ -75,7 +88,7 @@ CONTAINS
     INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
     SNC=SIZE(S%Action%C)
-#ifdef PARALLEL 
+#ifdef defined(PARALLEL) && !defined(MPI2)
     NArg=13+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
@@ -118,6 +131,10 @@ CONTAINS
           NArg=NArg+1
        ENDIF
     ENDDO
+#ifdef MPI2
+    ! Add space for a trailing blank	
+    NArg=NArg+1	
+#endif
     CALL New(ArgV,NArg)
     NArg=0
     DO I=1,K
@@ -126,6 +143,11 @@ CONTAINS
           ArgV%C(NArg)=ArgT%C(I)
        ENDIF
     ENDDO    
+#ifdef MPI2
+    ! Here is the trailing blank MPI_COMMM_SPAWN wants
+    NArg=NArg+1	
+    ArgV%C(NArg)= " "
+#endif
     CALL Delete(ArgT)
   END SUBROUTINE SetArgV
   !===============================================================

@@ -16,6 +16,8 @@ PROGRAM MondoSCF
   CALL Init(MemStats)
 #if defined(PARALLEL) && defined(MPI2)
   CALL InitMPI()
+  InParallel=.FALSE.
+  IF(MyID==0)THEN
 #endif
   CALL ParseTheInput(C)  
 ! Initialize controls
@@ -43,13 +45,15 @@ PROGRAM MondoSCF
   CASE(GRAD_DO_NHESSIAN)
      CALL NHessian(C)
   END SELECT
-#if defined(PARALLEL) && defined(MPI2)
-  CALL FiniMPI()
-#endif
   ! Something surreal to celebrate this run
   CALL ZippySez(C)
   !--------------------------------------------------------
   CALL TimeStamp('Successful MondoSCF run',.FALSE.)   
   !--------------------------------------------------------
+#if defined(PARALLEL) && defined(MPI2)
+  ENDIF
+  CALL AlignNodes("MONDOSCF")
+  CALL FiniMPI()
+#endif
 END PROGRAM MondoSCF
 
