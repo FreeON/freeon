@@ -13,7 +13,7 @@ MODULE ParseExtraCoords
    IMPLICIT NONE
    CONTAINS
    !
-   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos)
+   SUBROUTINE LoadExtraCoords(GOpt,Opts,Nams,Geos,PBCs)
      !
      ! This subroutine parses the inPut file for
      ! additional internal coordinate definitions
@@ -25,6 +25,7 @@ MODULE ParseExtraCoords
      TYPE(Options)               :: Opts
      TYPE(Geometries)            :: Geos
      TYPE(GeomOpt)               :: GOpt
+     TYPE(Periodics)             :: PBCs
      CHARACTER(LEN=DCL)          :: Line,LineLowCase,Atomname,chGEO
      CHARACTER(LEN=5)            :: CHAR
      INTEGER                     :: I1,I2,J,NIntCs,SerNum,NConstr
@@ -106,8 +107,56 @@ MODULE ParseExtraCoords
          LineLowCase = Line
          Call LowCase(LineLowCase)
          !
-         IF(INDEX(LineLowCase,'stre')/=0) THEN
-
+         IF(INDEX(LineLowCase,'stre_a')/=0) THEN
+         !--------------------
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+write(*,*) 'chk 1'
+                ELSE
+write(*,*) 'chk 2'
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'stre_b')/=0) THEN
+         !--------------------
+                IF(PBCs%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'stre_c')/=0) THEN
+         !--------------------
+                IF(PBCs%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='STRE_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu
+                  NConstr=NConstr+1
+                ENDIF
+         ELSE IF(INDEX(LineLowCase,'stre')/=0) THEN
+         !--------------------
                 NIntCs=NIntCs+1 
                 GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='STRE ' 
          !--------------------
@@ -132,6 +181,87 @@ MODULE ParseExtraCoords
                 ELSE
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3),Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'bend_ab')/=0) THEN 
+         !--------------------
+                IF(PBCs%Dimen<2) CALL Halt('Extra coord bend_ab while PBC dimension is 1')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='BEND_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'area_l')/=0) THEN 
+         !--------------------
+                IF(PBCs%Dimen/=2) CALL Halt('Extra coord area_l while PBC dimension is 1')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='AREA_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,0,0,1,0,0,0,1,0/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)= &
+                                             Value*AngstromsToAu**2
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'volm_l')/=0) THEN 
+         !--------------------
+                IF(PBCs%Dimen/=3) CALL Halt('Extra coord volm_l while PBC dimension is /= 3')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='VOLM_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*AngstromsToAu**3
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'bend_ac')/=0) THEN 
+         !--------------------
+                IF(PBCs%Dimen/=3) CALL Halt('Extra coord bend_ac while PBC dimension is /= 3')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='BEND_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
+                  GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
+                  GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
+                  NConstr=NConstr+1
+                ENDIF
+         !--------------------
+         ELSE IF(INDEX(LineLowCase,'bend_bc')/=0) THEN 
+         !--------------------
+                IF(PBCs%Dimen/=3) CALL Halt('Extra coord bend_bc while PBC dimension is /= 3')
+                NIntCs=NIntCs+1 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='BEND_L' 
+                GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
+                GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
+                IF(INDEX(LineLowCase,'.')==0) THEN
+                ELSE
+                  READ(LineLowCase,*) &
+                  CHAR,Value
                   GOpt%ExtIntCs%Constraint%L(NIntCs)=.TRUE.
                   GOpt%ExtIntCs%ConstrValue%D(NIntCs)=Value*DegToRad 
                   NConstr=NConstr+1

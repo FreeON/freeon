@@ -33,6 +33,7 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      Memory=MIN(GDIISCtrl%MaxMem,iGEO)
+     CALL Halt('GDIIS is under development, Displ array needs to be coolected for PBC from remembered steps!')
    ! CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
      !
      ! Get GDIIS memory
@@ -136,16 +137,15 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE ModeFit(IntCs,IntCGrads,IntCValues,RefPoints,PBC,GOpt, &
+   SUBROUTINE ModeFit(IntCs,IntCGrads,IntCValues,RefPoints,PBCDim,GOpt, &
                       PredVals,PWDPath,SCRPath,XYZ,NCart,iGEO,Print)
      TYPE(INTC)                  :: IntCs,IntCsT
      REAL(DOUBLE),DIMENSION(:,:) :: IntCGrads,IntCValues,XYZ
      REAL(DOUBLE),DIMENSION(:)   :: PredVals,RefPoints
-     TYPE(PBCInfo)               :: PBC
      CHARACTER(LEN=*)            :: PWDPath,SCRPath
      CHARACTER(LEN=DCL)          :: Path2
      INTEGER                     :: iGEO,NMem,NDim,I,J,Print
-     INTEGER                     :: NCart,NatmsLoc
+     INTEGER                     :: NCart,NatmsLoc,PBCDim
      TYPE(DBL_VECT)              :: LastIntCVals,LastIntcGrads
      TYPE(DBL_RNK2)              :: DXVects,DXValues,DXGrads,DelocVals
      TYPE(DBL_RNK2)              :: RangeT,ABCT,LWeightT
@@ -158,7 +158,7 @@ CONTAINS
      NCart=3*NatmsLoc
      CALL New(LastIntCVals,IntCs%N)
      CALL New(LastIntCGrads,IntCs%N)
-     CALL INTCValue(IntCs,XYZ,PBC,GOpt%CoordCtrl%LinCrit, &
+     CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit, &
                     GOpt%CoordCtrl%TorsLinCrit)
      LastIntCVals%D=IntCs%Value%D
      CALL SetBackToRefs(LastIntCVals%D,IntCs,RefPoints)
@@ -168,7 +168,7 @@ CONTAINS
      !
      CALL New(DelocVals,(/NCart,NMem/))
      CALL CollectDelocs(DelocVals%D,IntCValues,LastIntCVals%D,IntCs, &
-                        XYZ,PBC,GOpt%TrfCtrl,GOpt%CoordCtrl,SCRPath,Print)
+                        XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl,SCRPath,Print,PBCDim)
      CALL CollectDXVects(IntCValues,LastIntCVals%D, &
                          DXVects,Delocs_O=DelocVals%D)
     !CALL CollectDXVects(IntCValues,LastIntCVals%D,DXVects)
@@ -229,20 +229,20 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE CollectDelocs(DelocVals,IntCValues,LastIntCVals,IntCs, &
-                            XYZ,PBC,GTrfCtrl,GCoordCtrl,SCRPath,Print)
+                            XYZ,GTrfCtrl,GCoordCtrl,SCRPath,Print,PBCDim)
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:,:) :: DelocVals,XYZ,IntCValues
      REAL(DOUBLE),DIMENSION(:)   :: LastIntCVals
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(CoordCtrl)             :: GCoordCtrl
      TYPE(TrfCtrl)               :: GTrfCtrl
-     INTEGER                     :: I,J,NMem,NCart,Print
+     INTEGER                     :: I,J,NMem,NCart,Print,PBCDim
      TYPE(INT_VECT)              :: ISpB,JSpB
      TYPE(DBL_VECT)              :: ASpB,CartVect,IntCDispl
      TYPE(Cholesky)              :: CholData
-     TYPE(PBCInfo)               :: PBC
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,PBC,GTrfCtrl,GCoordCtrl,Print,SCRPath,.TRUE.)
+     CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl,PBCDim, &
+                          Print,SCRPath,.TRUE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      NMem=SIZE(DelocVals,2)
@@ -251,7 +251,9 @@ CONTAINS
      CALL New(CartVect,NCart)
      !
      DO I=1,NMem
-       DO J=1,IntCs%N ; IntCDispl%D(J)=IntCValues(J,I)-LastIntCVals(J) ; ENDDO
+       DO J=1,IntCs%N 
+         IntCDispl%D(J)=IntCValues(J,I)-LastIntCVals(J) 
+       ENDDO
        CALL CALC_BxVect(ISpB,JSpB,ASpB,IntCDispl%D,CartVect%D,Trp_O=.TRUE.)
        CALL GcInvIter(CartVect%D,ISpB,JSpB,ASpB,CholData,IntCs%N) 
        DO J=1,NCart ; DelocVals(J,I)=CartVect%D(J) ; ENDDO
@@ -309,8 +311,8 @@ CONTAINS
      CALL New(DXValues,(/NDim,NMem/))
      !
 !!! this routines should be used calculate proper overlaps
-  !  CALL RefreshBMatInfo(IntCsX,XYZ,PBC,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-  !                       Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+  !  CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+  !                       PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
   !  CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
   !  CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1,IntA2, &
   !                 NCart,IntCsX%N) 
@@ -424,14 +426,17 @@ CONTAINS
 !
    SUBROUTINE CollectPast(SRStruct,RefStruct,RefGrad,SRDispl, &
                           HFileIn,NatmsLoc,Mem,iGEO,iCLONE)
-     TYPE(DBL_RNK2) :: SRStruct,RefStruct,RefGrad,SRDispl
-     TYPE(DBL_RNK2) :: Aux
-     TYPE(DBL_VECT) :: Vect
-     INTEGER        :: NatmsLoc,Mem,iGEO,iCLONE
+     TYPE(DBL_RNK2)   :: SRStruct,RefStruct,RefGrad,SRDispl
+     TYPE(DBL_RNK2)   :: Aux
+     TYPE(PBCInfo)    :: PBC
+     TYPE(DBL_VECT)   :: Vect
+     INTEGER          :: NatmsLoc,Mem,iGEO,iCLONE,NCartS,NatmsS
      CHARACTER(LEN=*) :: HFileIn
-     INTEGER        :: HDFFileID,ICount,I,J,IStart,NCart,IGeom
+     INTEGER          :: HDFFileID,ICount,I,J,IStart,NCart,IGeom,K,L
      !
      NCart=3*NatmsLoc
+     NatmsS=NatmsLoc-3
+     NCartS=3*NatmsS
      IStart=iGEO-Mem+1
      !
      ! Get GDIIS memory of Cartesian coords and grads
@@ -441,8 +446,9 @@ CONTAINS
      CALL New(RefGrad,(/NCart,Mem/))
      CALL New(SRDispl,(/NCart,Mem/))
      !
-     CALL New(Vect,NCart)
-     CALL New(Aux,(/3,NatmsLoc/))
+     CALL New(Vect,NCartS)
+     CALL New(Aux,(/3,NatmsS/))
+     CALL New(PBC)
      !
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
@@ -452,16 +458,26 @@ CONTAINS
        ICount=IGeom-IStart+1
        CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCart ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
+       DO J=1,NCartS ; SRStruct%D(J,ICount)=Vect%D(J) ; ENDDO
        CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCart ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
+       DO J=1,NCartS ; RefStruct%D(J,ICount)=Vect%D(J) ; ENDDO
        CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
-       DO J=1,NCart ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
+       DO J=1,NCartS ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
+       CALL Get(PBC,Tag_O=TRIM(IntToChar(IGeom)))
+       L=NCartS
+       DO J=1,3
+         DO K=1,3
+           L=L+1
+           RefStruct%D(L,ICount)=PBC%BoxShape%D(J,K)
+           RefGrad%D(L,ICount)=PBC%LatFrc%D(1,J)
+         ENDDO
+       ENDDO
      ENDDO
      CALL Delete(Aux)
      CALL Delete(Vect)
+     CALL Delete(PBC)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
      CALL CloseHDFGroup(HDF_CurrentID)
@@ -650,15 +666,15 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE CollectINTCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
-                              IntCs,PBC,GOpt,SCRPath,Print)
+                              IntCs,GOpt,SCRPath,Print,PBCDim)
      REAL(DOUBLE),DIMENSION(:,:)  :: RefStruct,RefGrad
      TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
      TYPE(DBL_VECT)               :: VectC,VectI,VectCG,VectX
-     INTEGER                      :: NMem,NatmsLoc,NCart,Print,I,J
+     INTEGER                      :: NMem,NatmsLoc,NCart
+     INTEGER                      :: Print,I,J,PBCDim
      TYPE(INTC)                   :: IntCs
      TYPE(GeomOpt)                :: GOpt 
      CHARACTER(LEN=*)             :: SCRPath
-     TYPE(PBCInfo)                :: PBC
      !
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectINTCPast')
@@ -683,12 +699,12 @@ CONTAINS
          VectCG%D(J)=RefGrad(J,I)
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
-       CALL RefreshBMatInfo(IntCs,XYZAux%D,PBC,GOpt%TrfCtrl, &
-                          GOpt%CoordCtrl,Print,SCRPath,.TRUE.)
-       CALL CartToInternal(XYZAux%D,IntCs,VectCG%D,VectI%D,&
+       CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
+                          GOpt%CoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
+       CALL CartToInternal(IntCs,VectCG%D,VectI%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        IntCGrads%D(:,I)=VectI%D
-       CALL INTCValue(IntCs,XYZAux%D,PBC,GOpt%CoordCtrl%LinCrit, &
+       CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
                       GOpt%CoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value%D
      ENDDO

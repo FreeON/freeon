@@ -517,7 +517,7 @@ CONTAINS
      TYPE(INT_VECT)            :: BPrev,BCur
      !
      ! Set geometry optimization controls
-     CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams)
+     CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,C%PBCs)
      ! initial geometry
      iGEO=C%Stat%Previous%I(3)
      iGEOst=iGEO
@@ -591,7 +591,7 @@ CONTAINS
        ! Fill in new geometries
        !
        DO iCLONE=1,C%Geos%Clones
-         CALL NewGeomFill(C%Geos%Clone(iCLONE))
+         CALL NewGeomFill(C%Geos%Clone(iCLONE),C%PBCs%AutoW)
        ENDDO
        !
        ! Do GDIIS and print geometries
@@ -652,23 +652,22 @@ CONTAINS
 !------------------------------------------------------------------
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,IntCs,GradIn, &
-                  Bond,AtmB,Convgd,ETot,PBC,iGEO,iCLONE, &
+                  Bond,AtmB,Convgd,ETot,PBCDim,iGEO,iCLONE, &
                   SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
-     TYPE(PBCInfo)               :: PBC
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
      TYPE(BONDDATA)              :: Bond
      TYPE(ATOMBONDS)             :: AtmB
      REAL(DOUBLE)                :: ETot
      INTEGER,DIMENSION(:)        :: Convgd
-     INTEGER                     :: NIntC,NCart
+     INTEGER                     :: NCart,K
      INTEGER                     :: NatmsLoc,iGEO,iCLONE
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: IntOld,CartGrad
      INTEGER                     :: Refresh
      CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath
-     INTEGER                     :: Print
+     INTEGER                     :: Print,PBCDim
      LOGICAL                     :: DoNEB,Print2
      TYPE(TOPOLOGY)              :: TOPS
      !
@@ -690,17 +689,17 @@ CONTAINS
      ! Get internal coord defs.
      !
      IF(Refresh/=0) THEN
-       CALL GetIntCs(XYZ,AtNum,IntCs,NIntC,Refresh,SCRPath, &
+       CALL GetIntCs(XYZ,AtNum,IntCs,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GDIIS%MaxMem, &
-                     GOpt%ExtIntCs,TOPS,Bond,AtmB,PBC, &
+                     GOpt%ExtIntCs,TOPS,Bond,AtmB,PBCDim, &
                      HFileIn_O=HFileIn,iCLONE_O=iCLONE,iGEO_O=iGEO)
-       IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
+       IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
      ENDIF
-     IF(NIntC/=0) THEN
-       CALL INTCValue(IntCs,XYZ,PBC, &
+     IF(IntCs%N/=0) THEN
+       CALL INTCValue(IntCs,XYZ, &
                       GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
-       CALL New(IntOld,NIntC)
+       CALL New(IntOld,IntCs%N)
        IntOld%D=IntCs%Value%D
      ENDIF
      !
@@ -708,8 +707,8 @@ CONTAINS
      !
    ! CALL GetMixedBMat(IntCs,XYZ,PBE,GOpt%TrfCtrl,GOpt%CoordCtrl,TOPS, &
    !                   GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
-     CALL RefreshBMatInfo(IntCs,XYZ,PBC,GOpt%TrfCtrl, &
-                          GOpt%CoordCtrl,Print,SCRPath,.TRUE.)
+     CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
+                          GOpt%CoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
    ! CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
@@ -722,8 +721,8 @@ CONTAINS
      ! Calculate simple relaxation step from an inverse Hessian
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
-       CALL RelaxGeom(GOpt,XYZ,AtNum,PBC,CartGrad%D,iCLONE,ETot, &
-                  IntCs,iGEO,SCRPath,PWDPath,Print,HFileIn,Refresh)
+       CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,iCLONE,ETot, &
+               IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn,Refresh)
      ELSE
        WRITE(*,200) iCLONE,iGEO
        WRITE(Out,200) iCLONE,iGEO
@@ -731,7 +730,7 @@ CONTAINS
        Convgd(iCLONE)=1
      ENDIF
      CALL GeOpReview(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
-                     GOpt%GConvCrit,XYZ,PBC,ETot,IntCs,IntOld, &
+                     GOpt%GConvCrit,XYZ,ETot,IntCs,IntOld, &
                      iCLONE,iGEO,DoNEB)
      CALL DoRestartBas(GOpt%RestartBas,GOpt%GOptStat)
      CALL TurnOnGDIIS(GOpt%GOptStat%MaxCGrad,GOpt%GDIIS%On)
@@ -755,32 +754,31 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,PBC,CartGrad,iCLONE, &
+   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,iCLONE, &
                     ETot,IntCs,IGEO,SCRPath,PWDPath, &
-                    Print,HFileIn,Refresh)
+                    PBCDim,Print,HFileIn,Refresh)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
      REAL(DOUBLE)                :: ETot     
      TYPE(INTC)                  :: IntCs
-     INTEGER                     :: iGEO,iCLONE,Refresh,Print
+     INTEGER                     :: iGEO,iCLONE,Refresh,Print,PBCDim
      CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath 
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
-     TYPE(PBCInfo)               :: PBC
      !
      ! Relax geometry
      !
      SELECT CASE(GOpt%Optimizer)
      CASE(GRAD_DIAGHESS_OPT)
-       CALL RelaxDiagHess(GOpt,SCRPath,CartGrad,IntCs,AtNum,PBC, &
-                          iGEO,XYZ,Print)
+       CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
+                          iGEO,XYZ,Print,PBCDim)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
-         CALL RelaxDiagHess(GOpt,SCRPath,CartGrad,IntCs,AtNum,PBC, &
-                            iGEO,XYZ,Print)
+         CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
+                            iGEO,XYZ,Print,PBCDim)
        ELSE
          CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
-                          AtNum,PBC,iGEO,iCLONE,XYZ,Print)
+                          AtNum,PBCDim,iGEO,iCLONE,XYZ,Print)
        ENDIF
      END SELECT
    END SUBROUTINE RelaxGeom
@@ -788,12 +786,11 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
-                          AtNum,PBC,iGEO,iCLONE,XYZ,Print)
+                          AtNum,PBCDim,iGEO,iCLONE,XYZ,Print)
      TYPE(GeomOpt)               :: GOpt
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
-     TYPE(PBCInfo)               :: PBC
-     INTEGER                     :: iGEO,iCLONE,Print
+     INTEGER                     :: iGEO,iCLONE,Print,PBCDim
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: SCRPath,PWDPath,HFileIn
      TYPE(DBL_VECT)              :: Displ,RefPoints,PredVals
@@ -813,12 +810,11 @@ CONTAINS
      !
      ! calculate internal coord gradients
      !
-!!!! include new array for PBCPast
      CALL CollectPast(SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,NDim,iGEO,iCLONE)
      !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
-                          IntCs,PBC,GOpt,SCRPath,Print)
+                          IntCs,GOpt,SCRPath,Print,PBCDim)
      CALL Delete(SRStruct)
      CALL Delete(RefStruct)
      CALL Delete(RefGrad)
@@ -846,13 +842,13 @@ CONTAINS
      ENDIF
      !
      IF(DoMix) THEN
-       CALL InternalToCart(XYZ,IntCs,PBC,PredVals%D,RefPoints%D,Print, &
-                           GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
-                           GOpt%Constr,SCRPath,Mixmat_O=MixMat%D)
+       CALL InternalToCart(XYZ,AtNum,IntCs,PredVals%D,RefPoints%D,Print, &
+                           GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+                           GOpt%Constr,PBCDim,SCRPath,PWDPath,Mixmat_O=MixMat%D)
      ELSE
-       CALL InternalToCart(XYZ,IntCs,PBC,PredVals%D,RefPoints%D,Print, &
+       CALL InternalToCart(XYZ,AtNum,IntCs,PredVals%D,RefPoints%D,Print, &
                            GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
-                           GOpt%Constr,SCRPath)
+                           GOpt%Constr,PBCDim,SCRPath,PWDPath)
      ENDIF
      ! 
      IF(DoMix) THEN
@@ -862,12 +858,12 @@ CONTAINS
      ! Now, add fitting along correlation coordinates
      ! 
  !   IF(NDim>2) THEN
- !     CALL ModeFit(IntCs,IntCGrads%D,IntCValues%D,RefPoints%D,PBC, &
+ !     CALL ModeFit(IntCs,IntCGrads%D,IntCValues%D,RefPoints%D,PBCDim, &
  !                  GOpt,PredVals%D,PWDPath,SCRPath,XYZ,NCart,iGEO, &
  !                  Print)
- !     CALL InternalToCart(XYZ,IntCs,PBC,PredVals%D,RefPoints%D,Print, &
+ !     CALL InternalToCart(XYZ,IntCs,PredVals%D,RefPoints%D,Print, &
  !                         GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
- !                         GOpt%Constr,SCRPath)
+ !                         GOpt%Constr,PBCDim,SCRPath,PWDPath)
  !   ENDIF
      ! 
      CALL Delete(IntCGrads)
@@ -879,24 +875,27 @@ CONTAINS
 !
 !-------------------------------------------------------
 !
-   SUBROUTINE RelaxDiagHess(GOpt,SCRPath,CartGrad,IntCs,AtNum,PBC, &
-                            iGEO,XYZ,Print)
+   SUBROUTINE RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
+                            iGEO,XYZ,Print,PBCDim)
      TYPE(GeomOpt)               :: GOpt
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
-     INTEGER                     :: iGEO,Print,I,J
+     INTEGER                     :: iGEO,Print,I,J,PBCDim
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     CHARACTER(LEN=*)            :: SCRPath
+     CHARACTER(LEN=*)            :: SCRPath,PWDPath
      TYPE(DBL_VECT)              :: Grad,Displ,RefPoints
-     TYPE(PBCInfo)               :: PBC
      !
      CALL New(Grad,IntCs%N)
      CALL New(Displ,IntCs%N)
      CALL New(RefPoints,IntCs%N)
      !
+     CALL INTCValue(IntCs,XYZ, &
+                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
+     RefPoints%D=IntCs%Value%D
+     !
      ! calculate internal coord gradients
      !
-     CALL CartToInternal(XYZ,IntCs,CartGrad,Grad%D,&
+     CALL CartToInternal(IntCs,CartGrad,Grad%D,&
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
      !CALL RedundancyOff(Grad%D,SCRPath,Print)
      !
@@ -913,13 +912,10 @@ CONTAINS
                       GOpt%CoordCtrl%MaxStre,GOpt%CoordCtrl%MaxAngle)
      !CALL RedundancyOff(Displ%D,SCRPath,Print)  
      ! 
-     CALL INTCValue(IntCs,XYZ,PBC, &
-                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
      IntCs%Value%D=IntCs%Value%D+Displ%D
-     RefPoints%D=IntCs%Value%D
-     CALL InternalToCart(XYZ,IntCs,PBC,IntCs%Value%D,RefPoints%D, &
-                         Print,GOpt%BackTrf,GOpt%TrfCtrl, &
-                         GOpt%CoordCtrl,GOpt%Constr,SCRPath)  
+     CALL InternalToCart(XYZ,AtNum,IntCs,IntCs%Value%D, &
+                         RefPoints%D,Print,GOpt%BackTrf,GOpt%TrfCtrl, &
+                         GOpt%CoordCtrl,GOpt%Constr,PBCDim,SCRPath,PWDPath)  
      ! 
      CALL Delete(RefPoints)
      CALL Delete(Displ)
@@ -943,37 +939,10 @@ CONTAINS
      ENDIF
    END SUBROUTINE IntCReDef
 !
-!------------------------------------------------------------------
-!
-   SUBROUTINE SteepestDesc(CoordC,Hess,Grad,Displ,XYZ,IntCs)
-     TYPE(CoordCtrl)             :: CoordC
-     TYPE(Hessian)               :: Hess  
-     TYPE(DBL_VECT)              :: Grad,Displ 
-     INTEGER                     :: NCart
-     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(INTC)                  :: IntCs
-     !
-     NCart=3*SIZE(XYZ,2)
-     IF(CoordC%CoordType==CoordType_Cartesian) THEN
-       Displ%D=-Hess%StpDescInvH*Grad%D 
-       !!! take translations and rotations off
-       CALL TranslsOff(Displ%D,.FALSE.)
-       CALL RotationsOff(Displ%D,XYZ,.FALSE.)
-     ELSE IF(CoordC%CoordType==CoordType_PrimInt) THEN
-       Displ%D=-2.D0*Grad%D 
-       !CALL RedundancyOff(Displ%D,XYZ,DoSet_O=.TRUE.)
-     ELSE
-       Displ%D=-0.5D0*Grad%D 
-     ENDIF 
-     !
-     IntCs%PredGrad%D=Zero
-     IntCs%PredVal%D=IntCs%Value%D+Displ%D
-   END SUBROUTINE SteepestDesc
-!
 !-------------------------------------------------------
 !
    SUBROUTINE GeOpReview(CtrlConstr,CtrlStat,CtrlCoord,GConvCr, &
-                       XYZ,PBC,Etot,IntCs,IntOld,iCLONE,iGEO,DoNEB)
+                       XYZ,Etot,IntCs,IntOld,iCLONE,iGEO,DoNEB)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(CoordCtrl)            :: CtrlCoord  
@@ -983,7 +952,6 @@ CONTAINS
      TYPE(DBL_VECT)             :: IntOld,AuxVect
      INTEGER                    :: iCLONE,iGEO
      LOGICAL                    :: DoNEB
-     TYPE(PBCInfo)              :: PBC
      !
      REAL(DOUBLE)               :: MaxStreDispl,MaxBendDispl
      REAL(DOUBLE)               :: MaxLinBDispl,MaxOutPDispl
@@ -1037,7 +1005,7 @@ CONTAINS
      !
      ! Size of internal coordinate changes
      !
-     CALL INTCValue(IntCs,XYZ,PBC,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
+     CALL INTCValue(IntCs,XYZ,CtrlCoord%LinCrit,CtrlCoord%TorsLinCrit)
      IntOld%D=IntCs%Value%D-IntOld%D
      CALL MapAngleDispl(IntCs,IntOld%D)
      MaxStre=0
@@ -1162,13 +1130,14 @@ CONTAINS
 !
 !---------------------------------------------------------------
 !
-   SUBROUTINE SetGeOpCtrl(GOpt,Geos,Opts,Sets,Nams)
+   SUBROUTINE SetGeOpCtrl(GOpt,Geos,Opts,Sets,Nams,PBCs)
      !
      TYPE(GeomOpt)    :: GOpt
      TYPE(Options)    :: Opts
      TYPE(BasisSets)  :: Sets
      TYPE(Geometries) :: Geos
      TYPE(FileNames)  :: Nams
+     TYPE(Periodics)  :: PBCs
      INTEGER          :: NatmsLoc,NCart
      REAL(DOUBLE)     :: Sum,GCrit
      INTEGER          :: AccL
@@ -1185,7 +1154,7 @@ CONTAINS
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
      CALL   SetBackTrf(GOpt%BackTrf,GOpt%GConvCrit)
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
-     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr)
+     CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,PBCs%Dimen)
    END SUBROUTINE SetGeOpCtrl
 !
 !---------------------------------------------------------------
@@ -1197,7 +1166,7 @@ CONTAINS
      TYPE(Options)        :: Opts
      TYPE(CRDS)           :: GMLoc
      INTEGER,DIMENSION(:) :: Convgd
-     INTEGER              :: I,iGEO,iCLONE,NatmsNew
+     INTEGER              :: I,J,K,iGEO,iCLONE,NatmsNew
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
      LOGICAL              :: NoGDIIS,GDIISOn,DoNEB
      CHARACTER(LEN=DCL)   :: SCRPath,PWDPath
@@ -1217,6 +1186,7 @@ CONTAINS
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) NatmsNew=NatmsNew+1
      ENDDO
+     NatmsNew=NatmsNew+3 ! Added place for PBC data
      CALL New(XYZNew,(/3,NatmsNew/))
      CALL New(AtNumNew,NatmsNew)
      CALL New(GradNew,(/3,NatmsNew/))
@@ -1230,12 +1200,19 @@ CONTAINS
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
+     DO K=1,3
+       DO J=1,3
+         XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
+         GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
+       ENDDO
+     ENDDO
+     AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GMLoc%IntCs,GradNew%D, &
                        GMLoc%Bond,GMLoc%AtmB,Convgd,GMLoc%Etotal, &
-                       GMLoc%PBC,iGEO,iCLONE,SCRPath, &
+                       GMLoc%PBC%Dimen,iGEO,iCLONE,SCRPath, &
                        PWDPath,DoNEB,Opts%PFlags%GeOp,Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
@@ -1249,6 +1226,12 @@ CONTAINS
          GMLoc%Displ%D(1:3,I)=XYZNew%D(1:3,NatmsNew)
          GMLoc%Gradients%D(1:3,I)=GradNew%D(1:3,NatmsNew)
        ENDIF
+     ENDDO
+     DO K=1,3
+       DO J=1,3
+         GMLoc%PBCDispl%BoxShape%D(J,K)=XYZNew%D(J,NatmsNew+K)
+         GMLoc%PBC%LatFrc%D(J,K)=GradNew%D(J,NatmsNew+K)
+       ENDDO
      ENDDO
      !
      CALL Delete(XYZNew)
@@ -1328,17 +1311,17 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE SetTrfCtrl(TrfC,CoordC,GConstr)
+   SUBROUTINE SetTrfCtrl(TrfC,CoordC,GConstr,Dimen)
      TYPE(TrfCtrl)   :: TrfC
      TYPE(CoordCtrl) :: CoordC
      TYPE(Constr)    :: GConstr
+     INTEGER         :: Dimen
      !
-    !IF(.NOT.TrfC%DoClssTrf) THEN
-    !  TrfC%DoTranslOff=.FALSE.
-    !  TrfC%DoRotOff=.FALSE.
-    !ENDIF
-     IF(GConstr%NCartConstr>0) TrfC%DoTranslOff=.FALSE.
-     IF(GConstr%NCartConstr>12) TrfC%DoRotOff=.FALSE.
+     TrfC%DoTranslOff=.TRUE.
+     TrfC%DoRotOff=.TRUE.
+     IF(GConstr%NCartConstr>3) TrfC%DoTranslOff=.FALSE.
+     IF(GConstr%NCartConstr>12.AND.Dimen==0) TrfC%DoRotOff=.FALSE.
+     !
      IF(CoordC%CoordType/=CoordType_Cartesian) THEN
        TrfC%DoInternals=.TRUE.
      ELSE
@@ -1358,10 +1341,13 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE NewGeomFill(GMLoc)
-     TYPE(CRDS) :: GMLoc
+   SUBROUTINE NewGeomFill(GMLoc,AutoW)
+     TYPE(CRDS)           :: GMLoc
+     LOGICAL,DIMENSION(3) :: AutoW
      !
      GMLoc%AbCarts%D=GMLoc%Displ%D
+     GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%BoxShape%D
+     CALL PBCInfoFromNewCarts(GMLoc%PBC)
    END SUBROUTINE NewGeomFill
 !
 !-------------------------------------------------------------------
@@ -1468,8 +1454,8 @@ CONTAINS
      CALL New(IntA1,IntCsX%N)
      CALL New(IntA2,IntCsX%N)
      !
-     CALL RefreshBMatInfo(IntCsX,XYZ,PBC,GOpt%TrfCtrl,GOpt%CoordCtrl, &
-                          Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
+     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+                          PBC%Dimen,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
      CALL CALC_BxVect(ISpB,JSpB,ASpB,IntA1%D,CartGrad)
@@ -1795,8 +1781,6 @@ CONTAINS
          WRITE(Out,100) MaxGrad,SetMax
          100 FORMAT('Internal Gradients have been rescaled from ',F10.5,' to ',F10.5)
        ENDIF
-      !CALL TranslsOff(Grad,Print2)
-      !CALL RotationsOff(Grad,XYZ,Print2)
      ENDIF
    END SUBROUTINE RescaleGrad
 !
@@ -1873,28 +1857,47 @@ CONTAINS
 !
    SUBROUTINE ProjectGrads(C)
      TYPE(Controls)            :: C
-     INTEGER                   :: iCLONE,NCart
+     INTEGER                   :: iCLONE,NCart,I,J,K,L,NatmsLoc
      CHARACTER(LEN=DCL)        :: SCRPath
      LOGICAL                   :: Print2
-     TYPE(DBL_VECT)            :: CartGrad
+     TYPE(DBL_VECT)            :: CartGrad,Carts
+     TYPE(DBL_RNK2)            :: ActCarts
      !
      NCart=3*SIZE(C%Geos%Clone(1)%AbCarts%D,2)
+     NatmsLoc=NCart/3
      Print2= C%Opts%PFlags%GeOp>=DEBUG_GEOP_MAX
-     CALL New(CartGrad,NCart)
+     CALL New(CartGrad,NCart+9)
+     CALL New(Carts,NCart+9)
+     CALL New(ActCarts,(/3,NatmsLoc+3/))
      CALL OpenASCII(OutFile,Out)
      DO iCLONE=1,C%Geos%Clones
        SCRPath  =TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)// &
                  '.'//TRIM(IntToChar(iCLONE))
        CALL CartRNK2ToCartRNK1(CartGrad%D,C%Geos%Clone(iCLONE)%Gradients%D)
-       CALL TranslsOff(CartGrad%D,Print2)
-       CALL RotationsOff(CartGrad%D,C%Geos%Clone(iCLONE)%AbCarts%D,Print2)
-       CALL CleanConstrGrad(C%Geos%Clone(iCLONE)%AbCarts%D, &
-                            C%Geos%Clone(iCLONE)%PBC, &
+       CALL CartRNK2ToCartRNK1(Carts%D(1:NCart),C%Geos%Clone(iCLONE)%AbCarts%D)
+       DO I=1,3
+         K=NCart+3*(I-1)+1 ; L=K+2
+         CartGrad%D(K:L)=C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1:3,I)
+         Carts%D(K:L)=C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1:3,I)
+       ENDDO
+       IF(C%GOpt%TrfCtrl%DoTranslOff) &
+         CALL TranslsOff(CartGrad%D(1:NCart),Print2)
+       IF(C%GOpt%TrfCtrl%DoRotOff) &
+         CALL RotationsOff(CartGrad%D,Carts%D,Print2, &
+                           C%Geos%Clone(iCLONE)%PBC%Dimen)
+       CALL CartRNK1ToCartRNK2(Carts%D,ActCarts%D)
+       CALL CleanConstrGrad(ActCarts%D,C%Geos%Clone(iCLONE)%PBC, &
                             CartGrad%D,C%GOpt,SCRPath)
-       CALL CartRNK1ToCartRNK2(CartGrad%D,C%Geos%Clone(iCLONE)%Gradients%D)
+       CALL CartRNK1ToCartRNK2(CartGrad%D(1:NCart),C%Geos%Clone(iCLONE)%Gradients%D)
+       DO I=1,3
+         K=NCart+3*(I-1)+1 ; L=K+2
+         C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1:3,I)=CartGrad%D(K:L)
+       ENDDO
      ENDDO
      CLOSE(Out,STATUS='KEEP')
      CALL Delete(CartGrad)
+     CALL Delete(Carts)
+     CALL Delete(ActCarts)
    END SUBROUTINE ProjectGrads
 !
 !-------------------------------------------------------------------
