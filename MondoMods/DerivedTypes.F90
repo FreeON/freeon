@@ -273,6 +273,7 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
+      TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density

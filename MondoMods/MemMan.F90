@@ -323,6 +323,7 @@ MODULE MemMan
          CALL New(A%BoxVects,(/3,A%NAtms/))
          CALL New(A%AbCarts,(/3,A%NAtms/))
 #endif
+         CALL New(A%Displ,(/3,A%NAtms/))
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -670,6 +671,7 @@ MODULE MemMan
          CALL Delete(A%BoxVects)
          CALL Delete(A%AbCarts)
 #endif 
+         CALL Delete(A%Displ)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 

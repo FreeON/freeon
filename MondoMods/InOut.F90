@@ -1330,6 +1330,7 @@ CONTAINS
                 CALL Get(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
                 CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
+                CALL Get(GM%Displ,'Displ',Tag_O=Tag_O)
               END SUBROUTINE Get_CRDS
               !-------------------------------------------------------------------------------
               !     Put a coordinate set
@@ -1369,6 +1370,7 @@ CONTAINS
                 CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
                 CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
+                CALL Put(GM%Displ,'Displ',Tag_O=Tag_O)
               END SUBROUTINE Put_CRDS
               !-------------------------------------------------------------------------------
               !     Get a BCSR matrix
