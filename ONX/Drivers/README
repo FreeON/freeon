@@ -1,0 +1,35 @@
+These are the driver files for the "general" version of the VRR code and the 
+"general" version of the contraction step. 
+
+The structure of VRRLoc is:
+
+Line  Desc.
+----------------
+ 1    LngDrv
+ 2    LngLoc
+ 3    is = location in the VRRDriver where the memory locations are that tell where
+           to put the intrgrals generated in the RGen step into the temp. integral
+           space.
+ 4    nr = The number of integrals from the RGen step to transfer
+ 5    ns = The number of VRR steps that we need to do, the first VRR step starts at 
+           location in+nr in the VRRDriver file.
+ 6    is
+ 7    nr  (continues on for each integral class)
+ 8    ns
+  ...
+ 
+The correct set of is,nr, and ns in the VRRLoc file to use is determined by 
+
+  id = lbra+1+lket*(lmax+1)
+
+Note: The above description is for the ascii version of the driver file. The 
+binary version that is created by the code is *different*. See the code for the 
+exact format. 
+
+
+The structure of CDriver is:
+
+I will add this description later. For now, just take a look at the contraction 
+part of the code to see the format.
+
+
