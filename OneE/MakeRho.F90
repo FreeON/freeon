@@ -367,13 +367,9 @@ PROGRAM MakeRho
   ENDIF
   ! Check error
   IF(RelRhoErr>Thresholds%Dist*5.D3.AND.SCFActn/='NumForceEvaluation')THEN
-     IF(SCFActn=='Restart')THEN
-        CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)))
-     ELSE
-        CALL Halt(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
+        CALL Warn(ProcessName(Prog)//'relative error in density = '//TRIM(DblToShrtChar(RelRhoErr)) &
              //'. Distribution threshold = '//TRIM(DblToShrtChar(Thresholds%Dist))      &
              //'. Total charge lost = '//TRIM(DblToShrtChar(dQMCharge+dMMCharge)))
-     ENDIF
   ENDIF
   ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN

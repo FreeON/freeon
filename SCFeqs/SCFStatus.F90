@@ -65,26 +65,25 @@ PROGRAM SCFStatus
    E_el_tot=Trace(P,Tmp1)    
 #endif
    CALL Put(E_el_tot,'E_ElectronicTotal',Tag_O=SCFCycl)
-!  ExchE=<Kx>=Tr{P.K}
-   IF(HasHF(ModelChem))THEN
-      CALL Get(Tmp1,TrixFile('K',Args,0))
+   ExchE=Zero
+   Exc=Zero
+   IF(SCFActn/="GuessEqCore")THEN
+      ! ExchE=<Kx>=Tr{P.K}
+      IF(HasHF(ModelChem))THEN
+         CALL Get(Tmp1,TrixFile('K',Args,0))
 #ifdef PARALLEL
-      CALL Multiply(P,Tmp1,Tmp2)
-      ExchE=ExactXScale(ModelChem)*Trace(Tmp2)     
+         CALL Multiply(P,Tmp1,Tmp2)
+         ExchE=ExactXScale(ModelChem)*Trace(Tmp2)     
 #else
-      ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)    
+         ExchE=ExactXScale(ModelChem)*Trace(P,Tmp1)    
 #endif
-   ELSE
-      ExchE=Zero
+      ENDIF     
+      !  Get the exchange correlation energy
+      IF(HasDFT(ModelChem)) &
+           CALL Get(Exc,'Exc',Tag_O=SCFCycl)
    ENDIF
 !  Get E_nuc_tot =<Vnn+Vne> 
    CALL Get(E_nuc_tot,'E_NuclearTotal',Tag_O=SCFCycl)
-!  Get the exchange correlation energy
-   IF(HasDFT(ModelChem))THEN      
-      CALL Get(Exc,'Exc',Tag_O=SCFCycl)
-   ELSE
-      Exc=Zero
-   ENDIF
 #ifdef MMech
 !
    IF(HasMM()) THEN

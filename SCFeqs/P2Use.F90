@@ -61,7 +61,6 @@ PROGRAM P2Use
      CALL New(T2)
      ! Get previous geometries orthogonal density matrix 
      CALL Get(P,TrixFile('OrthoD',Args,-1))     
- 
 #ifdef PARALLEL
      IF(MyId==ROOT)THEN
 #endif
@@ -154,14 +153,15 @@ PROGRAM P2Use
         CALL Delete(T1)
         CALL Delete(T2)
 #endif
-
-     ELSE
-        CALL Halt(' Invalid guess, suggest starting with minimal STO-2G! ')
-        !         Evenly wheigted diagonal guess (better than core ;)
-        !          CALL SetToI(P)
-        !          Scale=Half*DBLE(NEl)/DBLE(NBasF)
-        !          CALL Multiply(P,Scale)
      ENDIF
+  ELSE
+     ! Guess == Core
+     CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
+     DO I=1,NAtoms
+        BlkP%D(:,I)=Zero
+     ENDDO
+     CALL SetToI(P,BlkP)
+     CALL Delete(BlkP)
   ENDIF
   ! IO for the non-orthogonal P 
   CALL Put(P,TrixFile('D',Args,0))

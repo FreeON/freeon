@@ -41,28 +41,30 @@ PROGRAM FockNGrueven
   CALL Add(J,T,F)                                       ! F=J+T    
   CALL Delete(T)
   CALL Delete(J)
-  CALL New(K)
-  IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
-!    Add in Hartree-Fock exact exchange 
-     CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-     KScale=ExactXScale(ModelChem)
-     CALL Multiply(K,KScale)                               ! K=KScale*K_hf
-     CALL Add(F,K,Tmp1)                                    ! F=J+T+K
-!    Now add in exchange-correlation
-     CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
-     CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
-  ELSEIF(HasHF(ModelChem))THEN
-!    Add in Hartree-Fock exact exchange 
-     CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
-     CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
-     CALL SetEq(F,Tmp1)
-  ELSEIF(HasDFT(ModelChem))THEN
-!    Add in exchange-correlation
-     CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_{xc}
-     CALL Add(K,F,Tmp1)                                    ! F=J+T+K_xc
-     CALL SetEq(F,Tmp1)
+  IF(SCFActn/='GuessEqCore')THEN
+     CALL New(K)
+     IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
+        ! Add in Hartree-Fock exact exchange 
+        CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+        KScale=ExactXScale(ModelChem)
+        CALL Multiply(K,KScale)                               ! K=KScale*K_hf
+        CALL Add(F,K,Tmp1)                                    ! F=J+T+K
+        ! Now add in exchange-correlation
+        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
+        CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
+     ELSEIF(HasHF(ModelChem))THEN
+        !  Add in Hartree-Fock exact exchange 
+        CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+        CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
+        CALL SetEq(F,Tmp1)
+     ELSEIF(HasDFT(ModelChem))THEN
+        !  Add in exchange-correlation
+        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_{xc}
+        CALL Add(K,F,Tmp1)                                    ! F=J+T+K_xc
+        CALL SetEq(F,Tmp1)
+     ENDIF
+     CALL Delete(K)
   ENDIF
-  CALL Delete(K)
 !
   CALL Put(F,TrixFile('F',Args,0))
   CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
