@@ -4,7 +4,7 @@ include $(MONDO_HOME)/Includes/RemoveAll
 
 EXTRA_INCLUDES = -I$(MONDO_HOME)/ONX/NONX
 
-Objects = Int1111.o
+Objects = Int1111.o Int2111.o Int1121.o
 
 all:	$(Objects)
 	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libVRR.a $(?:.F90=.o)
