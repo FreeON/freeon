@@ -11,7 +11,7 @@
 PROGRAM MakeS
   USE DerivedTypes
   USE GlobalScalars
-  USE GlobalCharacters
+  USE GlobalCharacters  
   USE InOut
   USE PrettyPrint
   USE MemMan
@@ -42,7 +42,7 @@ PROGRAM MakeS
   TYPE(DBL_RNK4)      :: MD
 !
   TYPE(ARGMT)         :: Args
-  INTEGER             :: P,R,AtA,AtB,NN                          
+  INTEGER             :: P,R,AtA,AtB,NN                         
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeS'
 !--------------------------------------- 
 ! Start up macro
