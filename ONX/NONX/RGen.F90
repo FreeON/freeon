@@ -71,23 +71,45 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
         Ty     = (Zeta*Py+Eta*Qy)*r1xZpE
         Tz     = (Zeta*Pz+Eta*Qz)*r1xZpE
 
-        IB%WR%D( 1,Ind) = Px-Cx
-        IB%WR%D( 2,Ind) = Qx-DB%DisBuf%D(I2+7)
-        IB%WR%D( 3,Ind) = Py-Cy
-        IB%WR%D( 4,Ind) = Qy-DB%DisBuf%D(I2+8)
-        IB%WR%D( 5,Ind) = Pz-Cz
-        IB%WR%D( 6,Ind) = Qz-DB%DisBuf%D(I2+9)
-        IB%WR%D( 7,Ind) = Tx-Px
-        IB%WR%D( 8,Ind) = Tx-Qx
-        IB%WR%D( 9,Ind) = Ty-Py
-        IB%WR%D(10,Ind) = Ty-Qy
-        IB%WR%D(11,Ind) = Tz-Pz
-        IB%WR%D(12,Ind) = Tz-Qz
-        IB%WZ%D( 1,Ind) = Half/Eta
-        IB%WZ%D( 2,Ind) = Half/Zeta
-        IB%WZ%D( 3,Ind) = Zeta*r1xZpE
-        IB%WZ%D( 4,Ind) = Eta*r1xZpE
-        IB%WZ%D( 5,Ind) = Half*r1xZpE
+!        IB%WR%D( 1,Ind) = Px-Cx
+!        IB%WR%D( 2,Ind) = Qx-DB%DisBuf%D(I2+7)
+!        IB%WR%D( 3,Ind) = Py-Cy
+!        IB%WR%D( 4,Ind) = Qy-DB%DisBuf%D(I2+8)
+!        IB%WR%D( 5,Ind) = Pz-Cz
+!        IB%WR%D( 6,Ind) = Qz-DB%DisBuf%D(I2+9)
+!        IB%WR%D( 7,Ind) = Tx-Px
+!        IB%WR%D( 8,Ind) = Tx-Qx
+!        IB%WR%D( 9,Ind) = Ty-Py
+!        IB%WR%D(10,Ind) = Ty-Qy
+!        IB%WR%D(11,Ind) = Tz-Pz
+!        IB%WR%D(12,Ind) = Tz-Qz
+!        IB%WZ%D( 1,Ind) = Half/Eta
+!        IB%WZ%D( 2,Ind) = Half/Zeta
+!        IB%WZ%D( 3,Ind) = Zeta*r1xZpE
+!        IB%WZ%D( 4,Ind) = Eta*r1xZpE
+!        IB%WZ%D( 5,Ind) = Half*r1xZpE
+
+        IB%WR%D(Ind, 1) = Px-Cx
+        IB%WR%D(Ind, 2) = Qx-DB%DisBuf%D(I2+7)
+        IB%WR%D(Ind, 3) = Py-Cy
+        IB%WR%D(Ind, 4) = Qy-DB%DisBuf%D(I2+8)
+        IB%WR%D(Ind, 5) = Pz-Cz
+        IB%WR%D(Ind, 6) = Qz-DB%DisBuf%D(I2+9)
+        IB%WR%D(Ind, 7) = Tx-Px
+        IB%WR%D(Ind, 8) = Tx-Qx
+        IB%WR%D(Ind, 9) = Ty-Py
+        IB%WR%D(Ind,10) = Ty-Qy
+        IB%WR%D(Ind,11) = Tz-Pz
+        IB%WR%D(Ind,12) = Tz-Qz
+        IB%WZ%D(Ind, 1) = Half/Eta
+        IB%WZ%D(Ind, 2) = Half/Zeta
+        IB%WZ%D(Ind, 3) = Zeta*r1xZpE
+        IB%WZ%D(Ind, 4) = Eta*r1xZpE
+        IB%WZ%D(Ind, 5) = Half*r1xZpE
+
+
+
+
         PQx=Px-Qx
         PQy=Py-Qy
         PQz=Pz-Qz

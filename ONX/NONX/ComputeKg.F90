@@ -187,8 +187,8 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,IS,Drv,SubInd,BfnInd)
                           DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
                 CALL VRRl(ISL*CBra*CKet,IS%NVRR,Drv%nr,Drv%ns,                 &
                           Drv%VLOC%I(Drv%is),                                  &
-                          Drv%VLOC%I(Drv%is+Drv%nr),                           &
-                          IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+                          Drv%VLOC%I(Drv%is+Drv%nr),IB,                        &
+                          IB%W2%D,IB%W1%D)
                 CALL Contract(ISL,CBra,CKet,IS%NVRR,iCL,Drv%CDrv%I(iCP+1),     &
                               IB%CB%D,IB%CK%D,IB%W1%D,IB%W2%D)
                 IF (LKet>0) CALL HRRKet(IB%W1%D,DB%DisBuf%D,ISL,               &

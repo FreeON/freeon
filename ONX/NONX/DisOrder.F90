@@ -196,8 +196,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
           CALL VRRs(LDis,LDis,Drv)
           CALL VRRl(KonAC*KonAC,IS%NVRR,Drv%nr,Drv%ns,                  &
                     Drv%VLOC%I(Drv%is),                                 &
-                    Drv%VLOC%I(Drv%is+Drv%nr),                          &
-                    IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+                    Drv%VLOC%I(Drv%is+Drv%nr),IB,                       &
+                    IB%W2%D,IB%W1%D)
           CALL Contract(1,KonAC,KonAC,IS%NVRR,iCL,Drv%CDrv%I(iCP+1),    &
                         IB%CB%D,IB%CB%D,IB%W1%D,IB%W2%D)
 

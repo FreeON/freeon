@@ -34,7 +34,7 @@ all: NONX XForce
 Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            InitExchangeMatrix.o Sizes.o Stats.o MemInit.o \
            ONX.o Contract.o HRRBra.o HRRKet.o \
-           vrrl.o RGen1C.o CCDriver.o VRRDriver.o \
+           VRRl.o RGen1C.o CCDriver.o VRRDriver.o \
            DisOrder.o RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
            RangeOfExchange.o Tables.o GetTables.o \
            GetSubBlk.o XPose.o InitSubInd.o \
@@ -43,7 +43,7 @@ Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
 
 Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
-           HRRBra.o HRRKet.o vrrl.o RGen1C.o CCDriver.o            \
+           HRRBra.o HRRKet.o VRRl.o RGen1C.o CCDriver.o            \
            VRRDriver.o DisOrderGrad.o RangeOfDensity.o VRRs.o      \
            QuickSortDis.o PutDis.o Tables.o GetTables.o GDLoader.o \
            GDrivers.o ComputeXForce.o ContractG.o RGen.o           \
@@ -53,7 +53,7 @@ Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
 ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
              InitExchangeMatrix.x Sizes.x Stats.x MemInit.x \
              ONX.x GradONX.x Contract.x HRRBra.x HRRKet.x \
-             vrrl.x RGen1C.x CCDriver.x VRRDriver.x \
+             VRRl.x RGen1C.x CCDriver.x VRRDriver.x \
              DisOrder.x RangeOfDensity.x VRRs.x QuickSortDis.x PutDis.x \
              RangeOfExchange.x Tables.x GetTables.x \
              GetSubBlk.x XPose.x InitSubInd.x \
