@@ -31,19 +31,22 @@ PROGRAM FockForce
   CALL New(Tmp3    )
   CALL New(PPrimOld)
   !-------------------------------------------------------------------
-  ! F_(n-3)
-  CALL Get(FnMns2,TrixFile('OrthoF',Args,-3),BCast_O=.FALSE.)
   ! F_(n-2)
-  CALL Get(FnMns1,TrixFile('OrthoF',Args,-2),BCast_O=.FALSE.)
+  CALL Get(FnMns2,TrixFile('OrthoF',Args,-2),BCast_O=.FALSE.)
+  ! F_(n-1)
+  CALL Get(FnMns1,TrixFile('OrthoF',Args,-1),BCast_O=.FALSE.)
   ! First expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=0
   ! via E_n(L=0) ~ E_(n-1)(0)+Tr{ F_(n-2) PPrime(0) }
+
+  !WRITE(*,*)' F0 is ',TRIM(TrixFile('OrthoF',Args,-2))
   !CALL PPrint(FnMns2,'F0',Unit_O=6)
+  !WRITE(*,*)' F1 is ',TRIM(TrixFile('OrthoF',Args,-1))
   !CALL PPrint(FnMns1,'F1',Unit_O=6)
 
   Current(1)=Current(1)-1
   CALL Get(e0,'Etot',StatsToChar(Current))
 
-  CALL FockPrimGuess(FnMns1,FnMns2,P,PPrime)
+  CALL FockPrimGuess(FnMns2,FnMns1,P,PPrime)
   CALL SetEq(PPrimOld,PPrime)
   MM=0
   Ne=Half*DBLE(NEl)
@@ -51,31 +54,28 @@ PROGRAM FockForce
      CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
 !     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  !CALL PPrint(PPrime,'PPrime',Unit_O=6)
-  e0p=Two*Trace(PPrime,FnMns2)
+  !CALL PPrint(PPrime,'PPrime0',Unit_O=6)
+  e0p=Two*Trace(PPrime,FnMns1)
 
   ! Now switch around and expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=1
   ! as E_n(L=1) ~ E_n(1)+Tr{ F_(n-1) PPrime(1) }
   Current(1)=Current(1)+1
   CALL Get(e1,'Etot',StatsToChar(Current))
 !  Current(1)=Current(1)+1
-  CALL FockPrimGuess(FnMns2,FnMns1,P,PPrime)
+  CALL FockPrimGuess(FnMns1,FnMns2,P,PPrime)
   CALL SetEq(PPrimOld,PPrime)
   DO I=1,30
      CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
 !     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  !CALL PPrint(PPrime,'PPrime',Unit_O=6)
-  ! F_(n-1)
-  CALL Get(FnMns1,TrixFile('OrthoF',Args,0),BCast_O=.FALSE.)
-  !CALL PPrint(FnMns1,' F111 = ',Unit_O=6)
-  e1p=-Two*Trace(PPrime,FnMns1)
-
-  WRITE(*,*)' e0 = ',e0
-  WRITE(*,*)' e1 = ',e1
-  WRITE(*,*)'e0p = ',e0p
-  WRITE(*,*)'e1p = ',e1p
-
+  !CALL PPrint(PPrime,'PPrime1',Unit_O=6)
+  ! Get F_n
+  CALL Get(Tmp1,TrixFile('OrthoF',Args,0),BCast_O=.FALSE.)
+  e1p=-Two*Trace(PPrime,Tmp1)
+  !WRITE(*,*)' e0 = ',e0
+  !WRITE(*,*)' e1 = ',e1
+  !WRITE(*,*)'e0p = ',e0p
+  !WRITE(*,*)'e1p = ',e1p
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
@@ -116,9 +116,9 @@ PROGRAM FockForce
   Mssg=ProcessName(Prog,TRIM(Mssg))
   Mssg=TRIM(Mssg)//" <SCF~>= "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
   WRITE(*,*)TRIM(Mssg)
-  ! F(L) = Lambda*F_(n-2)+(1-Lambda)*F_(n-1)
-  CALL Multiply(FnMns2,L)
-  CALL Multiply(FnMns1,L1)
+  ! F(L) = (1-Lambda)*F_(n-2)+Lambda*F_(n-1)
+  CALL Multiply(FnMns2,L1)
+  CALL Multiply(FnMns1,L)
   ! Tmp1 is the new, mixed Fock matrix that hopefully 
   ! minimizes the energy.        
   CALL Add(FnMns2,FnMns1,Tmp1)
@@ -133,7 +133,10 @@ PROGRAM FockForce
      CALL SP2(P,Tmp1,Tmp2,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,Tmp1,P,PPrimOld,FnMns2,Tmp2))EXIT
   ENDDO
+  ! CALL PPrint(P,' PNEW = ',Unit_O=6)
   ! Orthogonal put and xform to AO rep and put
+  Args%I%I(1)=Args%I%I(1)-1
+  Args%I%I(4)=Args%I%I(4)-1
   CALL PutXForm(Prog,Args,P,PPrimOld,Tmp1)
   ! Tidy up
   CALL ShutDown(Prog)

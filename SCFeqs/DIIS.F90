@@ -19,7 +19,7 @@ PROGRAM DIIS
 #else
   TYPE(BCSR)  & 
 #endif
-                                 :: F,P,E,Tmp1,Tmp2
+                                 :: F,P,EI,EJ,Tmp1,Tmp2
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: IWork,Idx,SCFOff
   TYPE(DBL_VECT)                 :: V,DIISCo,AbsDIISCo
@@ -50,27 +50,23 @@ PROGRAM DIIS
   !  Dont allow damping above 0.5, as this is silly (DIIS would certainly work better)
   Damp=MIN(Damp,5D-1)
   !  Max number of equations to keep in DIIS 
-  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=40
+  IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=20
   CLOSE(Inp)
-  !  
-  !-------------------------------------------------------------------------------------
   !  Allocations
   CALL New(P)
   CALL New(F)
-  CALL New(E)
+  CALL New(EI)
+  CALL New(EJ)
   CALL New(Tmp1)
   CALL New(MP(1))
   CALL New(MP(2))
-  !-------------------------------------------------------------------------------------
-  !  Create a new error vector E=[F_(i+1),P_i]
-  CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonal Fock matrix 
-  CALL Get(P,TrixFile('OrthoD',Args,0))    ! the orthogonal density matrix
-  CALL Multiply(F,P,E)  
-  CALL Multiply(P,F,E,-One)
-  !  We dont filter E for obvious reasons 
-  CALL Put(E,TrixFile('E',Args,0))
-  !  The DIIS Error 
-  DIISErr=SQRT(Dot(E,E))/DBLE(NBasF)
+  !  The current DIIS error 
+  CALL Get(F,TrixFile('OrthoF',Args,0))  
+  CALL Get(P,TrixFile('OrthoD',Args,0))  
+  CALL Multiply(F,P,EI)  
+  CALL Multiply(P,F,EI,-One)
+  DIISErr=SQRT(Dot(EI,EI))/DBLE(NBasF)
+  ! Consider just damping, certainly on first go through
   IF(ISCF<=1)THEN
      DoDIIS=-1  ! No DIIS, but damp non-extrapolated Fock matrices
   ELSEIF(BMax/=0)THEN
@@ -84,45 +80,23 @@ PROGRAM DIIS
      N=MIN(ISCF+1,BMax+1)
      M=MAX(1,ISCF-BMax+1)
      CALL New(B,(/N,N/))
-     !-------------------------------------------------------------------------------------
-     ! Check for charge sloshing
-#ifdef PARALLEL_CLONES
-     CALL Get(DMax,'DMax')
-#else
-     CALL Get(DMax,'DMax',StatsToChar(Previous))
-#endif
-     IF(DMax>1.D-1.AND.ISCF>5)THEN
-        Sloshed=.TRUE.
-     ELSE
-        Sloshed=.FALSE.
-     ENDIF
-     ! Charge sloshing DIIS seems to be broken. Leave off for now...
-     Sloshed=.FALSE.
-     !-------------------------------------------------------------------------------------
-     ! Build the B matrix, possibly with Sellers multipole modification
+     ! Pulays most excellent B matrix
      I0=M-ISCF
      DO I=1,N-1
-        IF(Sloshed)THEN
-           CALL Get(MP(1),IntToChar(M+I-2))
-           CALL Get(MP(2),IntToChar(M+I-1))
-           DeltaDPi=MP(1)%DPole%D-MP(2)%DPole%D
-           DeltaQPi=MP(1)%QPole%D-MP(2)%QPole%D
-        ENDIF
-        CALL Get(Tmp1,TrixFile('E',Args,I0))
+        CALL Get(F,TrixFile('OrthoF',Args,I0))    
+        CALL Get(P,TrixFile('OrthoD',Args,I0))    
+        CALL Multiply(F,P,EI)  
+        CALL Multiply(P,F,EI,-One)
+        !  We dont filter E for obvious reasons 
+!        CALL Get(Tmp1,TrixFile('E',Args,I0))
         J0=I0
         DO J=I,N-1
-           CALL Get(E,TrixFile('E',Args,J0))
-           B%D(I,J)=Dot(Tmp1,E)
-           IF(Sloshed)THEN
-              CALL Get(MP(1),IntToChar(M+J-2))
-              CALL Get(MP(2),IntToChar(M+J-1))
-              DeltaDPj=MP(1)%DPole%D-MP(2)%DPole%D
-              DeltaQPj=MP(1)%QPole%D-MP(2)%QPole%D
-              ! Add in Sellers anti charge sloshing terms
-              Sellers=1D-1*DOT_PRODUCT(DeltaDPi,DeltaDPj) &
-                     +1D-1*DOT_PRODUCT(DeltaQPi,DeltaQPj)
-              B%D(I,J)=B%D(I,J)+Sellers
-           ENDIF
+           CALL Get(F,TrixFile('OrthoF',Args,J0))    
+           CALL Get(P,TrixFile('OrthoD',Args,J0))    
+           CALL Multiply(F,P,EJ)  
+           CALL Multiply(P,F,EJ,-One)
+!           CALL Get(E,TrixFile('E',Args,J0))
+           B%D(I,J)=Dot(EI,EJ)
            B%D(J,I)=B%D(I,J)
            J0=J0+1
         ENDDO
@@ -131,7 +105,6 @@ PROGRAM DIIS
      B%D(N,1:N)=One
      B%D(1:N,N)=One
      B%D(N,N)=Zero
-     !-------------------------------------------------------------------------------------
      ! Solve the least squares problem to obtain new DIIS coeficients.
      CALL New(DIISCo,N)
 #ifdef PARALLEL
@@ -158,11 +131,7 @@ PROGRAM DIIS
      ENDIF
      CALL BCast(DIISCo)
 #endif
-     IF(Sloshed)THEN
-        Mssg=ProcessName(Prog,'Multipole C1')//'DIISCo = '
-     ELSE
-        Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
-     ENDIF
+     Mssg=ProcessName(Prog,'Pulay C1')//'DIISCo = '
   ELSE
      Mssg=ProcessName(Prog,'Damping')//'Co = '
      N=3
@@ -172,13 +141,8 @@ PROGRAM DIIS
      DIISCo%D(1)=One-Damp
      DIISCo%D(2)=Damp
   ENDIF
-  !-------------------------------------------------------------------------------------
   !  IO
-#ifdef PARALLEL_CLONES
   CALL Put(DIISErr,'diiserr')
-#else
-  CALL Put(DIISErr,'diiserr',Tag_O='_'//TRIM(CurGeom)//'_'//TRIM(CurBase)//'_'//TRIM(SCFCycl))
-#endif
   IF(PrintFlags%Key>=DEBUG_MEDIUM)THEN
      DO I=1,N-2
         IF(MOD(I,4)==0)THEN
@@ -222,8 +186,8 @@ PROGRAM DIIS
   DO I=1,N-1
      CALL Get(Tmp1,TrixFile('OrthoF',Args,SCFOff%I(Idx%I(I))))
      CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
-     CALL Add(F,Tmp1,E)
-     CALL SetEq(F,E)
+     CALL Add(F,Tmp1,EI)
+     CALL SetEq(F,EI)
   ENDDO
   ! IO for the orthogonal, extrapolated F 
   CALL Put(F,TrixFile('F_DIIS',Args,0)) 
@@ -237,11 +201,20 @@ PROGRAM DIIS
   CALL Delete(F)
   CALL Delete(DIISCo)
   CALL Delete(P)
-  CALL Delete(E)
+  CALL Delete(EI)
+  CALL Delete(EJ)
   CALL Delete(Tmp1)
   CALL ShutDown(Prog)   
 END PROGRAM DIIS
 
+! SCFStatus : [0,1,1]    :: <SCF> = 8.51823858, dD = 0.24D+01
+! SCFStatus : [1,1,1]    :: <SCF> = -71.64537636, dD = 0.15D-01, DIIS = 0.15D+00
+! SCFStatus : [2,1,1]    :: <SCF> = -71.69892926, dD = 0.20D+00, DIIS = 0.14D+00
+! SCFStatus : [3,1,1]    :: <SCF> = -72.27825158, dD = 0.16D+00, DIIS = 0.70D-01
+! SCFStatus : [4,1,1]    :: <SCF> = -72.41620275, dD = 0.27D-01, DIIS = 0.72D-02
+! SCFStatus : [5,1,1]    :: <SCF> = -72.41719223, dD = 0.80D-02, DIIS = 0.36D-02
+! SCFStatus : [6,1,1]    :: <SCF> = -72.41750179, dD = 0.94D-03, DIIS = 0.36D-03
+! SCFStatus : [7,1,1]    :: <SCF> = -72.41750493, dD = 0.45D-04, DIIS = 0.23D-04
 
 
 
