@@ -530,6 +530,7 @@ MODULE PrettyPrint
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+        CHARACTER(LEN=DCL)                   :: AuxChar
         REAL(DOUBLE)                         :: AA
 #ifdef PERIODIC
         REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
@@ -564,17 +565,17 @@ MODULE PrettyPrint
                  WRITE(PU,*)TRIM(Mssg)
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
-                    IF(GM%CConstrain%I(I)==1)THEN
-                       Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
-                            //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
-                            //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
-                            //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)//'  C '
+                    IF(GM%CConstrain%I(I)==1) THEN
+                      AuxChar='  C '
+                    ELSE IF(GM%CConstrain%I(I)==2) THEN
+                      AuxChar='  R '
                     ELSE
-                       Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
-                            //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
-                            //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
-                            //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)
+                      AuxChar='    '
                     ENDIF
+                    Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
+                           //'   '//DblToMedmChar(GM%Carts%D(1,I)*AA)    &
+                           //'   '//DblToMedmChar(GM%Carts%D(2,I)*AA)    &
+                           //'   '//DblToMedmChar(GM%Carts%D(3,I)*AA)//TRIM(AuxChar)
                     WRITE(PU,*)TRIM(Mssg)
                  ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
