@@ -60,17 +60,30 @@ CONTAINS
   ! IN ORDER TO AVOID CHANGING THE DATA SPACE WHEN THE HDF FILE HAS BEEN OPENED
   ! SIMULTANEOUSLY BY EACH CLONE
   !==============================================================================
-  SUBROUTINE InitClones(N,G)
+  SUBROUTINE InitClones(N,B,G)
     TYPE(FileNames)  :: N
     TYPE(Geometries) :: G    
+    TYPE(BasisSets)  :: B
     TYPE(DBL_VECT)   :: DoubleVect
+    TYPE(BCSR)       :: DM
     CHARACTER(LEN=DCL) :: FailedProgram
-    INTEGER          :: iGEO,iCLONE,HDFFileID,I,MaxEll
+    INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s
     CHARACTER(LEN=2) :: chGEO
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
     HDF_CurrentID=HDFFileID
+    ! Find max dimensions for BCSR matrices
+    MaxAtoms=0
+    MaxBloks=0
+    MaxNon0s=0
+    DO iBAS=1,B%NBSets
+       MaxAtoms=MAX(MaxAtoms,B%MxAts(iBAS))
+       MaxBloks=MAX(MaxBloks,B%MxBlk(iBAS))
+       MaxNon0s=MAX(MaxNon0s,B%MxN0s(iBAS))
+    ENDDO
+    CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
+    !
     CALL Put(G%Clones,'clones')
     DO iCLONE=1,G%Clones
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
@@ -103,8 +116,10 @@ CONTAINS
        CALL Put(DoubleVect,'PFFTensorC')
        CALL Put(DoubleVect,'PFFTensorS')
        CALL Delete(DoubleVect) 
+       CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
+    CALL Delete(DM)
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
 !==============================================================================
@@ -175,7 +190,6 @@ CONTAINS
     TYPE(Geometries) :: G
     TYPE(BasisSets)  :: B
     TYPE(Parallel)   :: M
-    TYPE(BCSR)       :: DM
     INTEGER          :: cBAS,iCLONE,HDFFileID
     CHARACTER(LEN=2) :: chBAS
     !---------------------------------------------------------------------------!
@@ -205,9 +219,6 @@ CONTAINS
        CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
        CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
 #endif
-       CALL New(DM,(/B%MxAts(cBAS),B%MxBlk(cBAS),B%MxN0s(cBAS)/))
-       CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
-       CALL Delete(DM)
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)

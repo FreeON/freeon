@@ -34,7 +34,7 @@ CONTAINS
     ! Initialize the previous state
     C%Stat%Previous%I=(/0,1,1/)
     ! Initialize HDF groups
-    CALL InitClones(C%Nams,C%Geos)
+    CALL InitClones(C%Nams,C%Sets,C%Geos)
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
@@ -80,7 +80,7 @@ CONTAINS
     ! Initialize the previous state
     C%Stat%Previous%I=(/0,1,1/)
     ! Initialize HDF groups Archive MPIs and Geos 
-    CALL InitClones(C%Nams,C%Geos)
+    CALL InitClones(C%Nams,C%Sets,C%Geos)
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
