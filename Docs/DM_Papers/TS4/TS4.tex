@@ -36,20 +36,20 @@ Los Alamos, NM 87545, USA}
 
 \begin{abstract}
 A new approach to linear scaling construction of the density matrix is proposed,
-based on Trace Re-Setting purification of an effective Hamiltonian.  In this approach,
-trace conservation is not strictly enforced, allowing greater flexibility in the
-choice of purification polynomial.  However, optimal polynomials may in some cases 
-admit unstable solutions, requiring ``Trace Re-Setting'' mechanisms to bring the 
-solution back into the domain of convergent purification.  Trace Re-Setting is related 
-to the trace preserving canonical purification scheme of Palser and Manolopoulos 
+based on Trace Re-Setting purification of an effective Hamiltonian.  Trace Re-Setting 
+is related to the trace preserving canonical purification scheme of Palser and Manolopoulos 
 [Phys.~Rev.~B, {\bf 58} 12704 (1999)] in that they both work with a predefined 
 occupation number and do not require adjustment or prior knowledge of the chemical 
-potential.  In the Trace Re-Setting method, use of an optimal polynomial allows greatly 
+potential.  In the Trace Re-Setting approach, trace conservation is not strictly enforced, allowing 
+greater flexibility in the choice of purification polynomial.  However, optimal polynomials 
+may in some cases admit unstable solutions, requiring ``Trace Re-Setting'' mechanisms 
+to bring the solution back into the domain of convergent purification.  
+In the Trace Re-Setting method, use of an optimal polynomial allows greatly 
 improved performance for Hamiltonian systems with high or low filling 
 $f_{\rm occ}$.  A quartic Trace Re-Setting method is developed, along with analysis of 
 stability and error accumulation due to incomplete sparse-matrix methods that employ a threshold $\tau$ 
 to achieve sparsity.  It is argued that threshold induced purification errors in the 
-density matrix scale as $\tau \Delta g^{-1}$ at worst, where $\Delta g$ is the gap at 
+density matrix scale ${\cal O}(\tau \Delta g^{-1})$ at worst, where $\Delta g$ is the gap at 
 the chemical potential.  In the low filling regime,  purification derived total energies 
 are shown to converge smoothly with $\tau^2$ for RPBE/STO-6G C60 and a RPBE0/STO-3G Ti 
 substituted zeolite.  For the zeolite, the quartic Trace Re-Setting method is found to be 
@@ -57,7 +57,8 @@ both faster and over an order of magnitude more accurate than the Palser-Manolop
 filling limit, true linear scaling is demonstrated for RHF/6-31G**  water clusters, and the 
 Trace-Re-Setting method is found to be both faster and an order of magnitude more accurate 
 than the Palser-Manolopoulos scheme.  Basis set progression of RPBE chlorophyll reveals the quartic 
-Trace Re-Setting to be up to four orders of magnitude more accurate than the Palser-Manolopoulos algorithm.
+Trace Re-Setting to be up to four orders of magnitude more accurate than the Palser-Manolopoulos algorithm
+in the limit of low filling.
 
 \smallskip
 \noindent{\bf Keywords}: Self-Consistent-Field, Density Functional Theory, Hartree-Fock, Gaussian-Orbital, 
@@ -81,7 +82,7 @@ For non-metallic systems it is now possible to solve the Self-Consistent-Field (
 equations for systems with thousands of atoms using linear scaling methods. These methods 
 achieve a reduced ${\cal O}(N)$ computational complexity, where $N$ is the number of basis 
 functions assumed proportional to system size. In contrast, conventional formulations of 
-Self-Consistent-Field theory, such as the Roothaan-Hall\cite{CRoothaan51,GHall51} and Kohn-Sham\cite{WKohn65} 
+Self-Consistent-Field theory, such as the Roothaan-Hall \cite{CRoothaan51,GHall51} and Kohn-Sham \cite{WKohn65} 
 method, involve ${\cal O}(N^3)$ eigensolution of the effective single-particle Hamiltonian or Fockian 
 $\bf F$ in an orthogonal representation;
 \begin{equation}\label{EigenvalueProblem}
@@ -148,7 +149,7 @@ such as density matrix purification,
 this approximate sparse-matrix algebra leads to an {\em accumulated error} in the density matrix 
 that is separate from and additional to the {\em truncation error}.  We define truncation error as the 
 error resulting simply from dropping elements of the exact density matrix.  Density matrix 
-minimization methods such as the Li-Nunes-Vanderbilt\cite{XLi93,DBowler99} (LNV) approach are able to 
+minimization methods such as the Li-Nunes-Vanderbilt \cite{XLi93,DBowler99} (LNV) approach are able to 
 avoid accumulation errors through continued use of gradient expressions that contain the Fockian, 
 as implied by Eq.~(\ref{DMMPoly}). On the other hand, polynomial expansion methods lose contact 
 with the Fockian after the first iteration, allowing repeated iterations with 
@@ -166,7 +167,7 @@ There are a number density matrix purification schemes worth differentiating amo
 {\it 4)} {\it Trace Re-Setting} algorithms (this article), where trace is not rigorously conserved,
           requiring a resetting  mechanism if the domain of convergence is exceeded.
 There are also various hybrid approaches that mix both density matrix minimization and 
-purification together.  For example Challacombe\cite{MChallacombe99} used a commuting 
+purification together.  For example Challacombe \cite{MChallacombe99} used a commuting 
  minimization scheme to precondition a grand canonical purification scheme,
 while Bowler \cite{DBowler99} suggests the use of the LNV density matrix minimization 
 after purification to reduce accumulation errors.
@@ -183,10 +184,10 @@ The PM scheme has an excellent performance compared to other methods \cite{APals
 able to deal with degenerate eigensystems and fractional occupancy.  However, application of PM has failed 
 in the case of semi-empirical methods, most notably for C60, where convergence to excited states and 
 other problems were encountered \cite{ADaniels99}.   Also, due to accumulation errors, PM is 
-not variational when applied to non-self-consistent theories such as tight binding\cite{APalser99,DBowler99}.
+not variational when applied to non-self-consistent theories such as tight binding \cite{APalser99,DBowler99}.
 Relevant to {\it ab initio} SCF methods, trace conservation leads to  inefficiencies at low 
 and high filling, $f_{occ}=N_e/N$, due to the unfavorable behavior of ${\cal P}_{\rm PM}$ near 
-its endpoints.  Low filling $f_{occ}\lesssim .2$  is encountered 
+its endpoints \cite{APalser99,ANiklasson02A}.  Low filling $f_{occ}\lesssim .2$  is encountered 
 with a large basis set, while high filling $f_{occ} \gtrsim .8$ corresponds to a small basis set.
 
 In this paper, we introduce a new Trace Re-Setting purification scheme (TRS) 
@@ -244,7 +245,7 @@ or $\mu$ can be adjusted until the correct trace (occupancy or population) is re
 
 Another purification approach, that avoids the problem with the usually unknown chemical potential,
 involves inclusion of $\mu$ into the polynomial expansion.  This is the basis of the 
-Palser-Manolopoulos\cite{APalser99} (PM) method.
+Palser-Manolopoulos \cite{APalser99} (PM) method.
 The PM method starts with a correctly normalized guess ${\bf X}_0$, as in Eq.\ (\ref{Pur2}),
 but with the following parameters
 \begin{subequations}
@@ -337,13 +338,13 @@ for different values of the adjustment factor $\gamma \in [0,6]$.} \label{Fig_F_
 Trace Re-Setting (TRS) purification begins with an initial guess ${\bf X}_0$ 
 with the reversed eigenvalues of ${\bf F}$ normalized to the interval $[0,1]$.
 Estimates of the spectral bounds,  i.e. $\varepsilon_0({\bf F})$ and $\varepsilon_N({\bf F})$, can be computed 
-by the Gersgorin bound\cite{APalser99} or more precisely with the Lanczos method\cite{ADaniels99}.  
+by the Gersgorin bound \cite{APalser99} or more precisely with the Lanczos method \cite{ADaniels99}.  
 %While the Laczos method may not be computationally expensive when carefully implemented, doing so 
 %requires additional programming effort.
 It is possible that due to numerical errors the Laczos estimates may not be exact bounds on
 the eigenvalues, leading to instabilities in application of the SP2 functions Eq.~(\ref{sp2}) a problem
 avoided with the Gersgorin upper and lower bound limits.
-%In addition, the Gersgorin bound is the choice most commonly used in the literature\cite{APalser99,ADaniels99,DBowler99}.  
+%In addition, the Gersgorin bound is the choice most commonly used in the literature \cite{APalser99,ADaniels99,DBowler99}.  
 The slightly less efficient, but safe Gersgorin estimate has been used in the present work 
 as in several in previous studies \cite{APalser99,ADaniels99,DBowler99}.
 The reader should be aware however, that this approach can lead to reduced efficiencies relative 
@@ -381,13 +382,14 @@ different from unity, allowing a wider choice of polynomials.  The price
 of this increased flexibility is mandatory resetting should the primary polynomial 
 stray from its domain of convergence.  Here, we have chosen 
 as the primary polynomial the quartic defined by Eq.~(\ref{FG}), with the reset
-mappings supplied by the SP2 functions, Eq.~(\ref{sp2}).  However the
-Trace Re-Setting method is quite general.  We note, for example, that a higher order
-generalizations can be given with ${\cal F}_m({\bf X}) = {\bf X}^m[{\bf I} + m({\bf I} - {\bf X})]$
-(for $m>2$) with ${\cal G}_m({\bf X}) = {\bf I} -{\cal F}_m(\bf{I}-{\bf X})-{\cal F}_m({\bf X})$
+mappings supplied by the SP2 functions, Eq.~(\ref{sp2}).  However, the
+Trace Re-Setting scheme presented here is a quite general framework.  We note, 
+for example, that higher order generalizations can be given with 
+${\cal F}_m({\bf X}) = {\bf X}^m[{\bf I} + m({\bf I} - {\bf X})]$
+(for $m>2$) with ${\cal G}_m({\bf X}) = {\bf I} -{\cal F}_m({\bf I}-{\bf X})-{\cal F}_m({\bf X})$
 and $\gamma \in [0,1]$. 
 %
-If the re-deistribution step of the spectral projection SP2 is removed and if
+If the re-distribution step of the spectral projection SP2 is removed and if
 ${\cal G}({\bf X}_n)=0$, we recover grand canonical purification.
 In this case the starting guess ${\bf X}_0$ must be modified with the nomalized
 chemical potential $\mu({\bf X}_0) \in [0,1]$ at the inflection point of ${\cal F}(x)$.
@@ -402,7 +404,7 @@ in various regions.
 While not unique, it is more efficient to work with quartic polynomials than the cubics
 encountered in the Mc Weeny or PM scheme, as one extra inflection may be obtained at the 
 fixed points for the same number of matrix-matrix multiplications.  Optimality seems to be 
-associated with polynomials of order 2, 4 and 9\cite{ANiklasson02A}, and with achieving the 
+associated with polynomials of order 2, 4 and 9 \cite{ANiklasson02A}, and with achieving the 
 steepest possible slope at inflection points, which is favored by 
 an asymmetric polynomial \cite{ANiklasson02B}.  In the case of TRS4, the combination of 
 ${\cal F}$ and ${\cal G}$ is initially asymmetric, becoming symmetric at convergence as 
@@ -422,7 +424,7 @@ X_{\bf AB}&=&X_{\bf AB} ~~\mbox{\rm iff} ~~|{\bf A -B}| < R_{cut}\\
 \end{eqnarray}
 \end{subequations}
 allowing all matrices to employ the same graph. This technique has not been used
-in the present study. Instead we use a sparse atom-blocked linear algebra\cite{MChallacombe99,MChallacombe00B},
+in the present study. Instead we use a sparse atom-blocked linear algebra \cite{MChallacombe99,MChallacombe00B},
 with thresholding at the level of atom-atom blocks:
 \begin{subequations}
 \begin{eqnarray}
@@ -433,7 +435,8 @@ with thresholding at the level of atom-atom blocks:
 where $||\cdot||_F$ is the Frobenious norm and $\tau \in [10^{-3},10^{-6}]$ is the threshold or 
 ``drop tolerance''.   
 
-A filter operation is applied after every sparse matrix-matrix multiply to avoid fill in,
+A filter operation of atom-atom block thresholding is applied after every sparse matrix-matrix 
+multiply to avoid fill in,
 \begin{eqnarray}
 { \widetilde{ \bf X}}&=&\mbox{\tt Filter} [\bf X,\tau ] \label{filter} \\
 	      &=&{\bf X}+\bm{\epsilon},\nonumber 
@@ -447,8 +450,8 @@ is that it avoids discontinuities in the potential energy surface associated wit
 of the cut-off radius.  Thresholding also allows for an accurate representation of the density matrix 
 for systems with multiple quantum length scales, such as a nano-tube in solution or a porphyrin in a protein.
 With atom-blocking, $N$-scaling is approached almost as rapidly as with element by element 
-methods\cite{JMillam97,ADaniels97,ADaniels99}, while  atom-atom operations admit the use of 
-dense matrix kernels such as the {\tt DGEMM}\cite{Lapack}, minimizing inefficiencies associated 
+methods \cite{JMillam97,ADaniels97,ADaniels99}, while  atom-atom operations admit the use of 
+dense matrix kernels such as the {\tt DGEMM} \cite{Lapack}, minimizing inefficiencies associated 
 with indirect addressing and symbolic matrix overheads.  
 
 After one matrix-matrix multiply with thresholding we have
@@ -485,7 +488,7 @@ accumulation errors in {\bf P} are ${\cal O}(\tau \Delta g^{-1})$.
 While we can expect the deviation from idempotence, ${\bf P} - {\bf P}^2$, to be small at 
 convergence, accumulation errors corrupt the commutator $[ {\bf F},{\bf P} ]$.  In addition
 to raising the total energy, these commutator errors have consequences for the 
-DIIS\cite{PPulay80,PPulay82} algorithm, which tries to extrapolate {\em inter-SCF} commutator 
+DIIS \cite{PPulay80,PPulay82} algorithm, which tries to extrapolate {\em inter-SCF} commutator 
 errors to zero.  Here, incomplete sparse linear algebra leads to {\em intra-SCF} commutator 
 errors that if too large can seriously corrupt the DIIS extrapolation.
 
@@ -541,18 +544,18 @@ mapped with the electrostatic potential. The unit cell contains the ball and sti
 \section{Methods}
 
 The PM and TRS4 algorithms were implemented in the {\sc MondoSCF}v1.0$\alpha$4, a suite of 
-linear scaling Quantum Chemistry codes\cite{MondoSCF}.   All sparse matrix computations 
-employed the same blocked compressed sparse row (BCSR)\cite{MChallacombe99,MChallacombe00B,MChallacombe03B} 
+linear scaling Quantum Chemistry codes \cite{MondoSCF}.   All sparse matrix computations 
+employed the same blocked compressed sparse row (BCSR) \cite{MChallacombe99,MChallacombe00B,MChallacombe03B} 
 data structure.  With the BCSR data structure, the cost of recomputing the symbolic matrix 
 is negligible, allowing dynamic fill-in.  The BCSR-BCSR multiplies are carried with 
-small dense matrix-matrix multiplies ({\tt DGEMM}s) that have been written in highly optimized on
-platform specific C by {\sc PHiPAC}\cite{Bilmes96a,Bilmes97b,PHiPAC} for blocks in the range 
+small dense matrix-matrix multiplies ({\tt DGEMM}s) that have been written in highly optimized 
+platform specific C by {\sc PHiPAC} \cite{Bilmes96a,Bilmes97b,PHiPAC} for blocks in the range 
 3x3x3 to 15x15x15. 
 
 The code was compiled using the Portland Group F90 compiler {\sc pgf90}v3.2.4 \cite{pgf90} with 
 the {\tt -O1 -tp athlon} options  and with the gnu C compiler {\sc gcc}v2.96 using the {\tt -O1} flag.  
 All calculations were carried out on a 1.2GHz AMD Athlon Thunderbird running RedHat 
-{\sc Linux}v7.3\cite{RedHat73}.  Exact eigensolution (ES) was carried out with the native
+{\sc Linux}v7.3 \cite{RedHat73}.  Exact eigensolution (ES) was carried out with the native
 {\sc DSYEV} and {\sc BLAS} {\sc LAPACK} routines supplied with {\sc pgf90}.
 
 Filter operations were carried out after every matrix-matrix multiply, unless the product
@@ -570,7 +573,7 @@ In Eq.~(\ref{trs4filter}), truncation occurs post-summation with a tilde indicat
 
 All ES calculations employed L{\"o}wdin symmetric orthogonalization \cite{PLowdin50,PLowdin56}, 
 while all TRS4 and PM calculations used the congruence transformation provided by incomplete 
-inverse Cholesky factors calculated with sparse atom-blocked AINV\cite{MChallacombe99,MBenzi01,MChallacombe03B}.
+inverse Cholesky factors calculated with sparse atom-blocked AINV \cite{MChallacombe99,MBenzi01,MChallacombe03B}.
 The exception is chlorophyll, which due to severe ill-conditioning in the largest basis sets, demanded symmetric 
 orthogonalization.
 
@@ -579,8 +582,8 @@ truncation of the density matrix with $\tau=10^{-6}$.  This is taken as a refere
 referred to in the following as eigensolution (ES).  No variable thresholding, fitting functions,
 fixed-form sparse matrices or incremental Fock builds were used in any experiments.  Thresholds 
 controlling other linear scaling approximations, such as 
-AINV\cite{MChallacombe99,MBenzi01,MChallacombe03B}, 
-HiCu\cite{MChallacombe00A,CGan03},  
+AINV \cite{MChallacombe99,MBenzi01,MChallacombe03B}, 
+HiCu \cite{MChallacombe00A,CGan03},  
 QCTC \cite{MChallacombe96,MChallacombe96B,MChallacombe97,MChallacombe03A}, or
 ONX \cite{ESchwegler96,ESchwegler97,ESchwegler98A,ESchwegler98C,ESchwegler99,ESchwegler00}
 were set to ``tight''  which, in the absence of accumulation errors, allow SCF convergence to within 
@@ -593,9 +596,9 @@ the code, leading to termination of the SCF.
 
 \section{Results}
 
-A comparison is made between quartic Trace Re-Setting (TRS4), Palser-Manolopoulos\cite{APalser99}  
-(PM) and eigensolution (ES) in both the high and low filling regimes, where we expect TRS4 to have a 
-significant advantage over PM.
+A comparison is made between quartic Trace Re-Setting (TRS4), Palser-Manolopoulos \cite{APalser99}  
+(PM) and exact truncated eigensolution (ES) in both the high and low filling regimes, where we expect 
+TRS4 to have a significant advantage over PM.
 
 \smallskip
 Atomic units are used throughout. 
@@ -609,7 +612,7 @@ This concern is underscored by Ref.~\onlinecite{ADaniels99}, in which Daniels an
 found the PM method to be unstable for semi-empirical calculations on C60 requiring  
 $\approx 100$ SCF cycles and level shifting to avoid excited state solutions.
 Also, Bowler has found that by itself, the PM method with the radial cut-off approximation 
-is encumbered by an error too large for non-self-consistent tight-binding calculations\cite{DBowler99}.  
+is encumbered by an error too large for non-self-consistent tight-binding calculations \cite{DBowler99}.  
 In the following,  convergence of PM and TRS4 with $\tau$ is explored for self-consistent model 
 chemistries applied to minimal basis C60 and a Ti substituted zeolite.
 
@@ -665,9 +668,9 @@ in the density matrix scale as $||{\bm\epsilon}||\sim \tau$. This is clearly dem
 Fig.~\ref{commerrors}, which shows decade by decade control over the commutator error 
 $||[{\bf F,P}]||_F$ for PM, TRS4 and truncated eigensolution (pure truncation error) with $\tau$. 
 In each case, the TRS4 errors are approximately one order of magnitude larger than those due to 
-truncation, while the PM errors are about two orders larger.  Also, note the initial exponential  
-increase in the errors followed by stabilization (and a small linear rise detectable only with the 
-most liberal threshold).
+truncation, while the PM errors are about two orders larger.  Also, note an initial exponential  
+increase in the errors, as discussed in Section~\ref{Error}, followed by stabilization at
+idempotency convergence (and a small linear rise detectable only with the most liberal threshold).
 
 \subsubsection{Chlorophyll}
  
@@ -743,7 +746,7 @@ is reached the iterations to idempotence and the graph of the density matrix sta
 convergence, yielding a well defined variational approximation.
 
 One concern with purification methods is that toward idempotence, the electronic energy 
-fails to decrease monotonically\cite{DBowler99,APalser99} due to incomplete linear algebra.  
+fails to decrease monotonically \cite{DBowler99,APalser99} due to incomplete linear algebra.  
 This corresponds to fixed point convergence of the density matrix, as given 
 by Eq.~(\ref{LinearDrift}), followed by a weak linear increase in error.  However, this small 
 linear error growth is of little concern as the initial exponential accumulation of errors 
