@@ -268,6 +268,8 @@ CONTAINS
        B%PSExpt%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)=BS%PSExpt%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)
        B%PSCoef%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)=BS%PSCoef%D(1:B%PSPrim,1:B%PSCtrt,1:B%NKind)
     ENDIF
+    ! Cheezy fix for allocation of ECP elements
+    BS%PSCtrt=1
     ! Done with the temp BS
     CALL Delete(BS)
     ! Compute blocking for sparse matrix methods

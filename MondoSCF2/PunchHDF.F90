@@ -195,9 +195,7 @@ CONTAINS
     LastGeo=O%RestartState%I(3)
     LastBas=O%RestartState%I(2)
     DO iCLONE=1,G%Clones
-      !
       ! Reachive GMLoc-s and GradE-s
-      !
       DO iGEO=1,LastGeo
         HDFFileID=OpenHDF(N%RFile)
         HDF_CurrentID=OpenHDFGroup(HDFFileID, &
@@ -218,23 +216,20 @@ CONTAINS
         CALL CloseHDF(HDFFileID)
         CALL Delete(GMLoc)
       ENDDO
-      !
-      ! Rearchive CS 
-      !
-      HDFFileID=OpenHDF(N%RFile)
-      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-                    "Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Get(CS,Tag_O=IntToChar(LastBAS))
-      CALL CloseHDFGroup(HDF_CurrentID)
-      CALL CloseHDF(HDFFileID)
-      !
-      HDFFileID=OpenHDF(N%HFile)
-      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
-                    "Clone #"//TRIM(IntToChar(iCLONE)))
-        CALL Put(CS,Tag_O=IntToChar(LastBAS))
-      CALL CloseHDFGroup(HDF_CurrentID)
-      CALL CloseHDF(HDFFileID)
-      CALL Delete(CS)
+!      ! Rearchive CS 
+!      HDFFileID=OpenHDF(N%RFile)
+!      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+!                    "Clone #"//TRIM(IntToChar(iCLONE)))
+!        CALL Get(CS,Tag_O=IntToChar(LastBAS))
+!      CALL CloseHDFGroup(HDF_CurrentID)
+!      CALL CloseHDF(HDFFileID)
+!      HDFFileID=OpenHDF(N%HFile)
+!      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
+!                    "Clone #"//TRIM(IntToChar(iCLONE)))
+!        CALL Put(CS,Tag_O=IntToChar(LastBAS))
+!      CALL CloseHDFGroup(HDF_CurrentID)
+!      CALL CloseHDF(HDFFileID)
+!      CALL Delete(CS)
     ENDDO
     CALL Delete(GradE)
     !
