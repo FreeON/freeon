@@ -374,6 +374,7 @@ MODULE MDynamics
   SUBROUTINE OutputMD(C,iGEO)
     TYPE(Controls)                 :: C
     INTEGER                        :: iGEO,iCLONE,iATS
+    REAL(DOUBLE)                   :: Pressure,a12,a13,a23
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: File,Line
 !
     DO iCLONE=1,C%Geos%Clones
@@ -432,6 +433,10 @@ MODULE MDynamics
           Line = "##########################################################################"
           WRITE(Out,97) Line
           WRITE(Out,*)
+!         Set to Zero Stuff that has not been Calculated
+          MDEpot%D(iCLONE) = C%Geos%Clone(iCLONE)%ETotal
+          MDEtot%D(iCLONE) = MDEpot%D(iCLONE) + MDKin%D(iCLONE)
+          C%Geos%Clone(iCLONE)%PBC%LatFrc%D = Zero
        ENDIF
 !      Add MD Timestep Configuration
        Line = "-------------------------------------------MD-"//TRIM(IntToChar(iGEO))// &
@@ -507,6 +512,12 @@ MODULE MDynamics
              WRITE(Out,85) 
           ENDIF
        ELSEIF(C%Geos%Clone(iCLONE)%PBC%Dimen==3) THEN
+          a12 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)
+          a23 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,2)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+          a13 = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1)*C%Geos%Clone(iCLONE)%PBC%BoxShape%D(3,3)
+          Pressure = - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,1)/a23 &
+                     - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,2)/a13 &
+                     - C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)/a12 
           WRITE(Out,85) 
           WRITE(Out,82) "       a       = ",C%Geos%Clone(iCLONE)%PBC%BoxShape%D(1,1), & 
                                             C%Geos%Clone(iCLONE)%PBC%BoxShape%D(2,1), &
@@ -527,6 +538,7 @@ MODULE MDynamics
           WRITE(Out,82) "     div(c)    = ",C%Geos%Clone(iCLONE)%PBC%LatFrc%D(1,3),   &
                                             C%Geos%Clone(iCLONE)%PBC%LatFrc%D(2,3),   &
                                             C%Geos%Clone(iCLONE)%PBC%LatFrc%D(3,3)
+          WRITE(Out,82) "    Pressure   = ",Pressure 
           WRITE(Out,85) 
        ENDIF
        DO iATS=1,C%Geos%Clone(iCLONE)%NAtms
@@ -585,6 +597,58 @@ MODULE MDynamics
     ENDIF
 !
   END SUBROUTINE RenameDensityMatrix
+!
+!
+!
+  SUBROUTINE OptimizeLattice(C)
+    TYPE(Controls)  :: C
+    INTEGER         :: iBAS,iGEO,iCLONE,I,J
+!
+    iBAS   = C%Sets%NBSets
+    iCLONE = 1
+    DO iGEO = 1,50
+!      Determine a New Lattice
+       CALL OpenASCII("LatticeOpt.dat",77)
+       WRITE(77,*) 'Geom   = ',iGEO
+       WRITE(77,*) "Energy = ",C%Geos%Clone(iCLONE)%ETotal
+       WRITE(77,*) 'Lattice'
+       DO I=1,3
+          WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*BohrsToAngstroms,J=1,3)
+       ENDDO
+       WRITE(77,*) 'LatFrc'
+       DO I=1,3
+          WRITE(77,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*BohrsToAngstroms,J=1,3)
+       ENDDO
+       CLOSE(77)
+!
+       WRITE(*,*) 'Geom   = ',iGEO
+       WRITE(*,*) "Energy = ",C%Geos%Clone(iCLONE)%ETotal
+       WRITE(*,*) 'Lattice'
+       DO I=1,3
+          WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)*BohrsToAngstroms,J=1,3)
+       ENDDO
+       WRITE(*,*) 'LatFrc'
+       DO I=1,3
+          WRITE(*,*) (C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)*BohrsToAngstroms,J=1,3)
+       ENDDO
+!
+       DO I=1,3
+          DO J=I,3
+             C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J) = C%Geos%Clone(iCLONE)%PBC%BoxShape%D(I,J)    &
+                                                      - 5.0D0*C%Geos%Clone(iCLONE)%PBC%LatFrc%D(I,J)
+          ENDDO
+       ENDDO
+!      Archive Geometry for next step
+       CALL MakeGMPeriodic(C%Geos%Clone(iCLONE))
+       C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(iCLONE)%Carts%D
+       CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)     
+!      Evaluate energies at the new geometry
+       CALL SCF(iBAS,iGEO+1,C)
+!      Calculate Force
+       CALL Force(iBAS,iGEO+1,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
+    ENDDO
+!
+  END SUBROUTINE OptimizeLattice
 !
 !
 !
