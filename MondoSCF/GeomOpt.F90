@@ -383,7 +383,6 @@ MODULE GeomOpt
 !
 #ifdef MMech
    If(MMOnly()) Then
-     Ctrl%Current=(/0,0,1/)
      CALL SetGlobalCtrlIndecies(Ctrl)           
      CALL MM_ENERG(Ctrl)
    ENDIF
