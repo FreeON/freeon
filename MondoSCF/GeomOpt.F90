@@ -727,10 +727,15 @@ MODULE GeomOpt
 !
        CALL OpenAscii(OutFile,Out)
 !
-       WRITE(*,460) ActStep
-       WRITE(Out,460) ActStep
-       WRITE(*,470) Etot
-       WRITE(Out,470) Etot
+       IF(ActStep<GeOpCtrl%MaxGeOpSteps) THEN
+         WRITE(*,460) ActStep
+         WRITE(Out,460) ActStep
+         WRITE(*,470) Etot
+         WRITE(Out,470) Etot
+       ELSE
+         CALL Halt('Maximum number of optimization steps exceeded, optimization did not converge.')
+       ENDIF
+       
 460  FORMAT('Geometry Optimization converged in ',I6,' steps.')
 470  FORMAT('Total Energy at optimum structure= ',F20.8)
 !
@@ -1204,13 +1209,14 @@ MODULE GeomOpt
 !
         IF(GeOpCtrl%NConstr/=0) THEN
 !  constraints
-          GeOpCtrl%GeOpConvgd=(RMSGradNoConstr<GeOpCtrl%GradCrit.AND. &
-                              MaxGradNoConstr<GeOpCtrl%GradCrit).OR. &
+!          GeOpCtrl%GeOpConvgd=(RMSGradNoConstr<GeOpCtrl%GradCrit.AND. &
+!                              MaxGradNoConstr<GeOpCtrl%GradCrit).OR. &
+          GeOpCtrl%GeOpConvgd=(&
                               MaxStreDispl<GeOpCtrl%StreConvCrit.AND. &
                               MaxBendDispl<GeOpCtrl%BendConvCrit.AND. &
                               MaxLinBDispl<GeOpCtrl%LinBConvCrit.AND. &
                               MaxOutPDispl<GeOpCtrl%OutPConvCrit.AND. &
-                              MaxTorsDispl<GeOpCtrl%TorsConvCrit
+                              MaxTorsDispl<GeOpCtrl%TorsConvCrit)
         ELSE
 ! no constraints
           GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
@@ -1378,7 +1384,7 @@ MODULE GeomOpt
 !
 ! iterative back trf.
 !
-        GeOpCtrl%MaxIt_CooTrf = 20
+        GeOpCtrl%MaxIt_CooTrf = 40
         GeOpCtrl%CooTrfCrit = MIN(GeOpCtrl%StreConvCrit, &
                                   GeOpCtrl%BendConvCrit, &
                                   GeOpCtrl%LinBConvCrit, &
