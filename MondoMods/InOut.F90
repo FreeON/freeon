@@ -963,7 +963,8 @@ MODULE InOut
         CALL Get(PBC%AtomW     ,'AtomWrap')
         CALL Get(PBC%InVecForm ,'VectorForm')
         CALL Get(PBC%InAtomCrd ,'AtomicCrd')
-        CALL Get(PBC%NoTransVec,'NoTranVec')
+        CALL Get(PBC%Translate ,'Translate')
+        CALL Get(PBC%Trans_COM ,'Trans_COM')
 !
         CALL Get(PBC%AutoW(1)  ,'AutoWrap(1)')        
         CALL Get(PBC%AutoW(2)  ,'AutoWrap(2)')
@@ -1017,7 +1018,8 @@ MODULE InOut
         CALL Put(PBC%AtomW     ,'AtomWrap')
         CALL Put(PBC%InVecForm ,'VectorForm')
         CALL Put(PBC%InAtomCrd ,'AtomicCrd')
-        CALL Put(PBC%NoTransVec,'NoTranVec')
+        CALL Put(PBC%Translate ,'Translate')
+        CALL Put(PBC%Trans_COM ,'Trans_COM')
 !
         CALL Put(PBC%AutoW(1)  ,'AutoWrap(1)')        
         CALL Put(PBC%AutoW(2)  ,'AutoWrap(2)')
