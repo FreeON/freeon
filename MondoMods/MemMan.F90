@@ -19,7 +19,7 @@ MODULE MemMan
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
                        New_IDrv,     New_DSL,      &
-                       New_GradD
+                       New_GradD,    New_CMPoles
    END INTERFACE
    INTERFACE Delete
       MODULE PROCEDURE Delete_INT_VECT, Delete_INT_RNK2, &
@@ -35,7 +35,7 @@ MODULE MemMan
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
                        Delete_IDrv,     Delete_DSL,      &
-                       Delete_GradD
+                       Delete_GradD,    Delete_CMPoles
    END INTERFACE
 !
    INTERFACE SetToBig
@@ -235,19 +235,16 @@ MODULE MemMan
       SUBROUTINE New_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
-#ifdef PERIODIC
-         CALL New(A%TransVec,3)
-         CALL New(A%BoxShape,(/3,3/))
-         CALL New(A%InvBoxSh,(/3,3/))
-         CALL New(A%BoxCarts,(/3,A%NAtms/))
-         CALL New(A%BoxVects,(/3,A%NAtms/))
-#endif
          CALL New(A%BndBox,(/3,2/))
          CALL New(A%AtTyp,A%NAtms)
          CALL New(A%AtNum,A%NAtms)
          CALL New(A%AtMss,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
          CALL New(A%Vects,(/3,A%NAtms/))
+#ifdef PERIODIC
+         CALL New(A%BoxCarts,(/3,A%NAtms/))
+         CALL New(A%BoxVects,(/3,A%NAtms/))
+#endif
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -555,19 +552,16 @@ MODULE MemMan
 !
       SUBROUTINE Delete_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
-#ifdef PERIODIC
-         CALL Delete(A%TransVec)
-         CALL Delete(A%BoxShape)
-         CALL Delete(A%InvBoxSh)
-         CALL Delete(A%BoxCarts)
-         CALL Delete(A%BoxVects)
-#endif 
          CALL Delete(A%BndBox)
          CALL Delete(A%AtTyp)
          CALL Delete(A%AtNum)
          CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
          CALL Delete(A%Vects)
+#ifdef PERIODIC
+         CALL Delete(A%BoxCarts)
+         CALL Delete(A%BoxVects)
+#endif 
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
@@ -715,9 +709,32 @@ MODULE MemMan
          CALL Delete(A%C)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_ARGMT
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!========================================================================================
+! Allocate the Multipoles
+!========================================================================================
+  SUBROUTINE New_CMPoles(A)
+    TYPE(CMPoles)                  :: A
 !
+    CALL AllocChk(A%Alloc)
+    CALL New(A%DPole,3)
+    CALL New(A%QPole,6)
+    A%Alloc=ALLOCATED_TRUE
 !
+  END SUBROUTINE New_CMPoles
+!========================================================================================
+! Delete the Multipoles
+!========================================================================================
+  SUBROUTINE Delete_CMPoles(A)
+    TYPE(CMPoles)                  :: A
+!
+    CALL Delete(A%DPole)
+    CALL Delete(A%QPole)
+    A%Alloc=ALLOCATED_FALSE
+!
+  END SUBROUTINE Delete_CMPoles
+!========================================================================================
+! Allocate the Density
+!========================================================================================
   SUBROUTINE New_HGRho(A,N_O)
     TYPE(HGRho)                     :: A
     INTEGER,OPTIONAL,DIMENSION(3)   :: N_O
