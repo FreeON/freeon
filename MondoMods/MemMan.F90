@@ -16,6 +16,7 @@ MODULE MemMan
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
                        New_INTC,     New_BMATR, &
+                       New_Chol, &
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
@@ -35,6 +36,7 @@ MODULE MemMan
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
                        Delete_INTC,     Delete_BMATR, &
+                       Delete_Chol, & 
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
@@ -251,6 +253,7 @@ MODULE MemMan
          ALLOCATE(A%Atoms(M:N,1:4),STAT=MemStatus)
          ALLOCATE(A%Value(M:N),STAT=MemStatus)
          ALLOCATE(A%Constraint(M:N),STAT=MemStatus)
+         ALLOCATE(A%ConstrValue(M:N),STAT=MemStatus)
          ALLOCATE(A%Active(M:N),STAT=MemStatus)
          CALL IncMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_TRUE
@@ -265,11 +268,40 @@ MODULE MemMan
          INTEGER                      :: M
          CALL AllocChk(A%Alloc)
          M=1; IF(PRESENT(M_O))M=M_O
-         ALLOCATE(A%IB(M:N,1:12),STAT=MemStatus)
+         ALLOCATE(A%IB(M:N,1:4),STAT=MemStatus)
          ALLOCATE(A%B(M:N,1:12),STAT=MemStatus)
          CALL IncMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BMATR
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_Chol(A,NCart,ChNon0)
+         INTEGER NCart,ChNon0
+         TYPE(Cholesky) :: A
+         CALL New(A%GcScale,NCart)
+         CALL New(A%Perm,NCart)
+         CALL New(A%IPerm,NCart)
+         CALL New(A%ChRowPt,NCart+1)
+         CALL New(A%ChColPt,ChNon0)
+         CALL New(A%ChDiag,NCart)
+         CALL New(A%ChFact,ChNon0)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_Chol
+!     
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_Chol(A)
+         TYPE(Cholesky) :: A
+         CALL Delete(A%GcScale)
+         CALL Delete(A%Perm)
+         CALL Delete(A%IPerm)
+         CALL Delete(A%ChRowPt)
+         CALL Delete(A%ChColPt)
+         CALL Delete(A%ChDiag)
+         CALL Delete(A%ChFact)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE Delete_Chol
 !     
 !-----------------------------------------------------
 !     
@@ -596,6 +628,7 @@ MODULE MemMan
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CHR_VECT
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!
       SUBROUTINE Delete_INTC(A)
          TYPE(INTC)     :: A
          INTEGER        :: MemStatus
@@ -603,6 +636,7 @@ MODULE MemMan
          DEALLOCATE(A%Atoms,STAT=MemStatus)
          DEALLOCATE(A%Value,STAT=MemStatus)
          DEALLOCATE(A%Constraint,STAT=MemStatus)
+         DEALLOCATE(A%ConstrValue,STAT=MemStatus)
          DEALLOCATE(A%Active,STAT=MemStatus)
          CALL DecMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_FALSE
