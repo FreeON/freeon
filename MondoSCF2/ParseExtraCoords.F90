@@ -239,8 +239,10 @@ MODULE ParseExtraCoords
        Geos%Clone(iCLONE)%NLagr=NConstr
        CALL Delete(Geos%Clone(iCLONE)%LagrMult)
        CALL Delete(Geos%Clone(iCLONE)%GradMult)
+       CALL Delete(Geos%Clone(iCLONE)%LagrDispl)
        CALL New(Geos%Clone(iCLONE)%LagrMult,NConstr)
        CALL New(Geos%Clone(iCLONE)%GradMult,NConstr)
+       CALL New(Geos%Clone(iCLONE)%LagrDispl,NConstr)
        CALL WriteIntCs(IntC_Extra,TRIM(N%M_SCRATCH)//&
          TRIM(N%SCF_NAME)//'.'//TRIM(IntToChar(iCLONE))//'IntC_Extra')
      ENDDO

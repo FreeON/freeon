@@ -555,6 +555,9 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath
      INTEGER                     :: Print
      !
+!write(*,*) 'lagrmult 1= ',LagrMult
+!write(*,*) 'gradmult 1= ',GradMult
+!write(*,*) 'lagrdispl1= ',LagrDispl
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
@@ -587,10 +590,14 @@ CONTAINS
      !
      ! Overwrite Cartesian Energy gradients with Lagrangian ones.
      !
+!write(*,*) 'GOpt%Constr%DoLagr= ',GOpt%Constr%DoLagr
      IF(GOpt%Constr%DoLagr) THEN
+!write(*,*) 'gradin 1= ',GradIn     
        CALL LagrGradCart(GradIn,IntCs,LagrMult,SCRPath,iGEO)
+!write(*,*) 'gradin 2= ',GradIn     
        CALL LagrGradMult(GradMult,XYZ,IntCs, &
          GOpt%CoordCtrl%LinCrit,GOpt%Constr%NConstr)
+!write(*,*) 'GradMult= ',GradMult   
      ENDIF
      !
      ! Calculate simple relaxation step from an inverse Hessian
@@ -611,6 +618,9 @@ CONTAINS
      !
      CALL Delete(IntOld)
      CALL Delete(IntCs)
+!write(*,*) 'lagrmult 2= ',LagrMult
+!write(*,*) 'gradmult 2= ',GradMult
+!write(*,*) 'lagrdispl2= ',LagrDispl
    END SUBROUTINE ModifyGeom
 !
 !--------------------------------------------------------------------
@@ -664,7 +674,7 @@ CONTAINS
      !
      CALL GrdConvrgd(GOpt%GOptStat,IntCs,Grad%D)
      !
-     ! Use Hessian matrix to calculate step
+     ! Use Hessian matrix to calculate displacement
      !
      SELECT CASE(GOpt%Optimizer)
        CASE(GRAD_STPDESC_OPT) 
@@ -688,8 +698,8 @@ CONTAINS
      ENDIF
      CALL Delete(Grad)
      !
-     ! Construct new structure either by Cartesian or by internal
-     ! displacements
+     ! Add Cartesian or internal coord. displacements 
+     ! to current structure
      !
      IF(GOpt%TrfCtrl%DoInternals) THEN 
        CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
@@ -1245,9 +1255,9 @@ CONTAINS
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GradNew%D, &
-                       GMLoc%LagrMult%D,GMLoc%GradMult%D,GMLoc%LagrDispl%D, &
-                       Convgd,GMLoc%Etotal,IGeo,iCLONE,SCRPath, &
-                       Opts%PFlags%GeOp)
+                       GMLoc%LagrMult%D,GMLoc%GradMult%D, &
+                       GMLoc%LagrDispl%D,Convgd,GMLoc%Etotal, &
+                       IGeo,iCLONE,SCRPath,Opts%PFlags%GeOp)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
      !
@@ -1419,8 +1429,8 @@ CONTAINS
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D,GMLoc%CConstrain%I, &
-           GOpt%Constr,GOpt%BackTrf, &
-           GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
+           GMLoc%LagrMult%D,GOpt%Constr,GOpt%BackTrf,GOpt%TrfCtrl, &
+           GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
            iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN

@@ -19,8 +19,9 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,CConstr,GConstr,GBackTrf,GTrfCtrl, &
-              GCoordCtrl,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,SCRPath)
+   SUBROUTINE GeoDIIS(XYZ,CConstr,LagrMult,GConstr,GBackTrf, &
+              GTrfCtrl,GCoordCtrl,GDIISCtrl, &
+              HFileIn,iCLONE,iGEO,Print,SCRPath)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(Constr)                :: GConstr
@@ -32,15 +33,15 @@ CONTAINS
      INTEGER                     :: iCLONE,iGEO,ICount,NLagr
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
-     INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc
+     INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc,NDim
      INTEGER                     :: IGeom,HDFFileID,IStart
      INTEGER                     :: SRMemory,RefMemory
      INTEGER                     :: CartGradMemory,GDIISMemory
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad
      TYPE(DBL_RNK2)              :: RefStruct,SRDispl
-     TYPE(DBL_RNK2)              :: LagrMult,GradMult
      TYPE(DBL_RNK2)              :: Aux
      TYPE(DBL_VECT)              :: Vect,VectLagr
+     REAL(DOUBLE),DIMENSION(:)   :: LagrMult
      !
      GDIISMemory=MIN(6,iGEO)
      IF(iGEO<GDIISCtrl%Init) RETURN
@@ -55,15 +56,14 @@ CONTAINS
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      CALL Get(NLagr,'nlagr',Tag_O=TRIM(IntToChar(1)))
+     NDim=NCart+NLagr
      !
      ! Get GDIIS memory of Cartesian coords and grads
      !
-     CALL New(SRStruct,(/NCart,GDIISMemory/))
-     CALL New(RefStruct,(/NCart,GDIISMemory/))
-     CALL New(RefGrad,(/NCart,GDIISMemory/))
-     CALL New(SRDispl,(/NCart,GDIISMemory/))
-     CALL New(LagrMult,(/NLagr,GDIISMemory/))
-     CALL New(GradMult,(/NLagr,GDIISMemory/))
+     CALL New(SRStruct,(/NDim,GDIISMemory/))
+     CALL New(RefStruct,(/NDim,GDIISMemory/))
+     CALL New(RefGrad,(/NDim,GDIISMemory/))
+     CALL New(SRDispl,(/NDim,GDIISMemory/))
      !
      CALL New(Vect,NCart)
      CALL New(VectLagr,NLagr)
@@ -85,10 +85,12 @@ CONTAINS
          ENDIF
        ENDDO
        IF(NLagr/=0) THEN
+         CALL Get(VectLagr,'LagrDispl',Tag_O=TRIM(IntToChar(IGeom)))
+         DO J=1,NLagr ; SRStruct%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
          CALL Get(VectLagr,'LagrMult',Tag_O=TRIM(IntToChar(IGeom)))
-         DO J=1,NLagr ; LagrMult%D(J,ICount)=VectLagr%D(J) ; ENDDO
+         DO J=1,NLagr ; RefStruct%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
          CALL Get(VectLagr,'GradMult',Tag_O=TRIM(IntToChar(IGeom)))
-         DO J=1,NLagr ; GradMult%D(J,ICount)=VectLagr%D(J) ; ENDDO
+         DO J=1,NLagr ; RefGrad%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
        ENDIF
      ENDDO
      CALL Delete(Aux)
@@ -96,10 +98,10 @@ CONTAINS
      CALL Delete(VectLagr)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
-     ! Calculate new Cartesian coordinates 
+     ! Calculate new Cartesian coordinates and Lagr. multipliers
      !
-     CALL BasicGDIIS(XYZ,GConstr,Print, &
-                     RefStruct,RefGrad,SRStruct,SRDispl)
+     CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
+                     SRStruct,SRDispl,LagrMult_O=LagrMult)
      !CALL PIntGDIIS(XYZ,Print,GBackTrf,GTrfCtrl, &
      !  GCoordCtrl,GConstr,SCRPath,RefStruct,RefGrad,SRStruct,SRDispl)
      !
@@ -111,8 +113,6 @@ CONTAINS
      !
      ! Tidy up
      !
-     CALL Delete(GradMult)
-     CALL Delete(LagrMult)
      CALL Delete(RefGrad)
      CALL Delete(RefStruct)
      CALL Delete(SRStruct)
@@ -336,7 +336,7 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE BasicGDIIS(XYZ,CtrlConstr,Print, &
-     RefStruct,RefGrad,SRStruct,SRDispl)
+     RefStruct,RefGrad,SRStruct,SRDispl,LagrMult_O)
      !
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(Constr)                :: CtrlConstr
@@ -348,6 +348,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: Vect,Coeffs
      REAL(DOUBLE)                :: Sum
      INTEGER                     :: Print
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: LagrMult_O
      !
      NCart=SIZE(XYZ,2)
      DimGDIIS=SIZE(RefStruct%D,1)
@@ -357,7 +358,7 @@ CONTAINS
      !
      CALL New(Coeffs,GDIISMemory)
      !
-     IF(CtrlConstr%NConstr/=0) THEN
+     IF(CtrlConstr%NConstr/=0.AND..NOT.CtrlConstr%DoLagr) THEN
        IF(Print>=DEBUG_GEOP_MIN) THEN
          WRITE(*,200) 
          WRITE(Out,200) 
@@ -375,7 +376,11 @@ CONTAINS
      !
      ! Calculate new geometry
      !
-     CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
+     IF(PRESENT(LagrMult_O)) THEN
+       CALL XYZSum(XYZ,SRStruct%D,Coeffs%D,LagrMult_O=LagrMult_O)
+     ELSE
+       CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
+     ENDIF
      !
      ! Tidy up
      !
@@ -568,11 +573,13 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE XYZSum(XYZ,SRStruct,Coeffs)
-     REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,XYZ
-     REAL(DOUBLE),DIMENSION(:)   :: Coeffs
-     INTEGER                     :: I,J,GDIISMemory,DimGDIIS
-     TYPE(DBL_VECT)              :: Vect
+   SUBROUTINE XYZSum(XYZ,SRStruct,Coeffs,LagrMult_O)
+     REAL(DOUBLE),DIMENSION(:,:)        :: SRStruct,XYZ
+     REAL(DOUBLE),DIMENSION(:)          :: Coeffs
+     INTEGER                            :: I,J,GDIISMemory,DimGDIIS
+     INTEGER                            :: NCart,NLagr
+     TYPE(DBL_VECT)                     :: Vect,Vect2
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: LagrMult_O
      !
      GDIISMemory=SIZE(SRStruct,2)
      DimGDIIS=SIZE(SRStruct,1)
@@ -582,7 +589,18 @@ CONTAINS
      DO I=1,GDIISMemory
        Vect%D=Vect%D+Coeffs(I)*SRStruct(1:DimGDIIS,I) 
      ENDDO
-     CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
+     IF(PRESENT(LagrMult_O)) THEN
+       NLagr=SIZE(LagrMult_O)
+       NCart=DimGDIIS-NLagr
+       IF(NCart/=3*(NCart/3)) CALL Halt('Dimesion error in XYZSum.')
+       CALL New(Vect2,NCart)
+       Vect2%D(1:NCart)=Vect%D(1:NCart)
+       CALL CartRNK1ToCartRNK2(Vect2%D,XYZ)
+       LagrMult_O(1:NLagr)=Vect%D(NCart+1:DimGDIIS)
+       CALL Delete(Vect2)
+     ELSE
+       CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
+     ENDIF
      !
      CALL Delete(Vect)
    END SUBROUTINE XYZSum

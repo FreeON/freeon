@@ -2642,8 +2642,10 @@ CONTAINS
        ! Check convergence
        !
        RMSDOld=RMSD
-       CALL CartConv(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD, &
-                      IntCs,NCartConstr)
+       CALL ScaleDispl(VectCartAux2%D,MaxCartDiff,DiffMax,RMSD) 
+       IF(.NOT.CtrlConstr%DoLagr) THEN
+         CALL SetCartConstr(VectCartAux2%D,IntCs,NCartConstr)
+       ENDIF
        !
        ! Refresh B matrix?  
        !
@@ -3257,11 +3259,7 @@ CONTAINS
      REAL(DOUBLE) :: ConstrMax,ConstrRMS,Sum
      INTEGER      :: I,J,NIntC,NConstr
      !
-     IF(AllocQ(IntCs%Alloc)) THEN
-       NIntC=SIZE(IntCs%Def)
-     ELSE
-       NIntC=0
-     ENDIF
+     NIntC=SIZE(IntCs%Def)
      !
      ConstrMax=Zero
      ConstrRMS=Zero
@@ -3279,19 +3277,12 @@ CONTAINS
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE CartConv(CartDispl,MaxCartDiff,DiffMax,RMSD,&
-                          IntCs,NConstr)
+   SUBROUTINE SetCartConstr(CartDispl,IntCs,NConstr)
      REAL(DOUBLE),DIMENSION(:) :: CartDispl 
-     REAL(DOUBLE)              :: MaxCartDiff,DiffMax,RMSD,Sum
-     INTEGER                   :: I,J,JJ,NCart,NIntC,NConstr
+     INTEGER                   :: I,J,JJ,NIntC,NConstr
      TYPE(INTC)                :: IntCs
      !
-     NCart=SIZE(CartDispl)
-     IF(AllocQ(IntCs%Alloc)) THEN
-       NIntC=SIZE(IntCs%Def)
-     ELSE
-       NIntC=0
-     ENDIF
+     NIntC=SIZE(IntCs%Def)
      !
      ! Make constraints on Cartesians 'hard'
      !
@@ -3311,7 +3302,16 @@ CONTAINS
          ENDIF
        ENDDO
      ENDIF      
+   END SUBROUTINE SetCartConstr
+!
+!---------------------------------------------------------------
+!
+   SUBROUTINE ScaleDispl(CartDispl,MaxCartDiff,DiffMax,RMSD)
+     REAL(DOUBLE),DIMENSION(:) :: CartDispl 
+     REAL(DOUBLE)              :: MaxCartDiff,DiffMax,RMSD,Sum
+     INTEGER                   :: I,NCart
      !
+     NCart=SIZE(CartDispl)
      DiffMax=Zero
      DO I=1,NCart     
        DiffMax=MAX(DiffMax,ABS(CartDispl(I)))
@@ -3327,7 +3327,7 @@ CONTAINS
      !
      RMSD=DOT_PRODUCT(CartDispl,CartDispl)
      RMSD=SQRT(RMSD/DBLE(NCart))
-   END SUBROUTINE CartConv
+   END SUBROUTINE ScaleDispl
 !
 !-------------------------------------------------------
 !
