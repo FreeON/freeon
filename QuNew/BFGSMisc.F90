@@ -1,34 +1,3 @@
-!------------------------------------------------------------------------------
-!--  This source code is part of the MondoSCF suite of programs for 
-!    linear scaling electronic structure theory and ab initio molecular 
-!    dynamics.
-!
-!--  Matt Challacombe
-!    Los Alamos National Laboratory
-!
-!--  Copyright (c) 2001, the Regents of the University of California.  
-!    This SOFTWARE has been authored by an employee or employees of the 
-!    University of California, operator of the Los Alamos National Laboratory 
-!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
-!    The U.S. Government has rights to use, reproduce, and distribute this 
-!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
-!    and publicly display this SOFTWARE without charge, provided that this 
-!    Notice and any statement of authorship are reproduced on all copies.  
-!    Neither the Government nor the University makes any warranty, express 
-!    or implied, or assumes any liability or responsibility for the use of 
-!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
-!    such modified SOFTWARE should be clearly marked, so as not to confuse 
-!    it with the version available from LANL.  The return of derivative works
-!    to the primary author for integration and general release is encouraged. 
-!    The first publication realized with the use of MondoSCF shall be
-!    considered a joint work.  Publication of the results will appear
-!    under the joint authorship of the researchers nominated by their
-!    respective institutions. In future publications of work performed
-!    with MondoSCF, the use of the software shall be properly acknowledged,
-!    e.g. in the form "These calculations have been performed using MondoSCF, 
-!    a suite of programs for linear scaling electronic structure theory and
-!    ab initio molecular dynamics", and given appropriate citation.
-!------------------------------------------------------------------------------
 !    SUPPORTING ROUTINES FOR BFGSHess
 !    Author(s):  Matt Challacombe
 !------------------------------------------------------------------------------
@@ -59,7 +28,7 @@ MODULE BFGSMisc
          REAL(DOUBLE),DIMENSION(3,3) :: AdBlk
          REAL(DOUBLE)                :: D1,D2,MinDiagEl
          INTEGER                     :: AtA,JP,JG,KP,KG, &
-                                        PDXB,QDXB,PB,OA,OB
+                                        PDXB,QDXB,PB,OA,OB,I 
 !-------------------------------------------------------------------
 !        Find minimum diagonal element of B
 !-------------------------------------------------------------------
@@ -92,10 +61,11 @@ MODULE BFGSMisc
          REAL(DOUBLE)                :: D1,D2,MinDiagEl
          INTEGER                     :: AtA,AtB,JP,JG,KP,KG, &
                                         PDXB,QDXB,PB,OA,OB, &
-                                        P,Q,R,S,M,N,MN,MN1
+                                        P,Q,R,S,M,N,MN,MN1,KL
          TYPE(INT_VECT)              :: Flag
          REAL(DOUBLE),DIMENSION(3,3) :: AdBlk
-         TYPE(AtomPair)            :: Pair
+         TYPE(AtomPair)              :: Pair
+         REAL(DOUBLE),EXTERNAL       :: DBL_DOT
 !---------------------------------------------------------------------
          Q=1
          R=1
@@ -161,6 +131,7 @@ MODULE BFGSMisc
          REAL(DOUBLE),DIMENSION(:)   :: DGA,DGB,DXBA,DXBB
          REAL(DOUBLE),DIMENSION(3,3) :: BFGSBlk
          REAL(DOUBLE),DIMENSION(3,3),OPTIONAL :: B_O
+         INTEGER :: I,J
 !-----------------------------------------------------------------
          IF(PRESENT(B_O))THEN
             DO I=1,3
