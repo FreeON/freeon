@@ -201,7 +201,8 @@ MODULE BlokTrPdJ
 !====================================================================================================
 !
 !====================================================================================================
-    FUNCTION dNukE(At) RESULT(Vct)
+    FUNCTION dNukE(GMLoc,At) RESULT(Vct)
+       TYPE(CRDS)                      :: GMLoc
        REAL(DOUBLE)                    :: Tau,NukeCo,NukePole,PExtent
        REAL(DOUBLE),DIMENSION(4)       :: dBra
        REAL(DOUBLE),DIMENSION(3)       :: Vct
@@ -213,7 +214,7 @@ MODULE BlokTrPdJ
 #endif
 !---------------------------------------------------------------------------------------------
 !      Initialize |dBRA>
-       NukeCo=-GM%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
+       NukeCo=-ABS(GMLoc%AtNum%D(At))*(NuclearExpnt/Pi)**(ThreeHalves)
        DO K=1,3
           dHGBra%D(1:4,1,1,K)=Zero
        ENDDO
@@ -222,10 +223,10 @@ MODULE BlokTrPdJ
        dHGBra%D(4,1,1,3)=NukeCo
 !      Initialize the primitive          
        Prim%Ell=1
-       Prim%P=GM%Carts%D(:,At)
+       Prim%P=GMLoc%Carts%D(:,At)
        Prim%Zeta=NuclearExpnt
 !      Set the MAC
-       DP2=((FudgeFactorial(1,SPEll+1)*GM%AtNum%D(At))/TauMAC)**(Two/DBLE(SPEll+3))
+       DP2=((FudgeFactorial(1,SPEll+1)*ABS(GMLoc%AtNum%D(At)))/TauMAC)**(Two/DBLE(SPEll+3))
        DP2=MIN(1.D10,DP2)
 !      Set the PAC
        PExtent=Extent(1,NuclearExpnt,dHGBra%D(:,1,1,1),TauPAC)
@@ -235,7 +236,7 @@ MODULE BlokTrPdJ
        SPLenEll=LSP(1)
        HGLenEll=LHGTF(1)
 #ifdef PERIODIC
-       PTmp=GM%Carts%D(:,At)
+       PTmp=GMLoc%Carts%D(:,At)
        DO NC=1,CS_IN%NCells
 !         Set atomic "primitive"
           Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
@@ -256,7 +257,7 @@ MODULE BlokTrPdJ
           ENDDO
        ENDDO
 !      Add in the Far Field, Dipole and Quadripole Correction
-       IF(GM%PBC%Dimen>0) THEN
+       IF(GMLoc%PBC%Dimen>0) THEN
           DO K=1,3
              Vct(K)=Vct(K)+CTraxFF_Grad(Prim,dHGBra%D(:,1,1,K))
           ENDDO
