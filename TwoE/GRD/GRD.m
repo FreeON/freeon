@@ -68,7 +68,9 @@ Classes = { {0,0},{0,1},{1,1}};
 CType[1]  = "s";
 CType[2]  = "sp";
 CType[3]  = "p";
+CType[4]  = "spd";
 CType[6]  = "d";
+CType[7]  = "spdf";
 CType[10] = "f";
 CType[15] = "g";
 CType[21] = "h";
@@ -122,7 +124,6 @@ Get["FRONTM.m"];
 MakeList={};
 RelsList={};
 
-PunchHRRKet;
 PunchHRRBra;
 
 IncludeFile="dERIInclude.Inc";

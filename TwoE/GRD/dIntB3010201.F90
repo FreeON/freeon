@@ -153,14 +153,14 @@ SUBROUTINE dIntB3010201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
             CALL DBLAXPZY(100,HRRC(1,1,1),Gamma,VRR(1,1,0)) 
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (p,0|p,s)
+      ! Generating (p,0|sp,s)
       CALL KetHRR21(4,HRR) 
-      ! Generating (d,0|p,s)^a
+      ! Generating (d,0|sp,s)^a
       CALL KetHRR21(4,HRRA) 
-      ! Generating (d,0|p,s)^b
+      ! Generating (d,0|sp,s)^b
       CALL KetHRR21(4,HRRB) 
-      ! Generating (p,0|d,s)^c
-      CALL KetHRR51(4,HRRC) 
+      ! Generating (p,0|spd,s)^c
+      CALL KetHRR41(4,HRRC) 
       DO L=1,1
       
          !K = 1

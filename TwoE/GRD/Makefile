@@ -37,11 +37,7 @@ dIntB3030201.o\
 dIntB3030202.o\
 dIntB3030301.o\
 dIntB3030302.o\
-dIntB3030303.o\
-KetHRR21.o\
-KetHRR22.o\
-KetHRR32.o\
-KetHRR33.o
+dIntB3030303.o
 #
 IntRels=BraHRR11.x\
 BraHRR12.x\
@@ -72,11 +68,7 @@ dIntB3030201.x\
 dIntB3030202.x\
 dIntB3030301.x\
 dIntB3030302.x\
-dIntB3030303.x\
-KetHRR21.x\
-KetHRR22.x\
-KetHRR32.x\
-KetHRR33.x
+dIntB3030303.x
 #
 all:    GRD
 #
