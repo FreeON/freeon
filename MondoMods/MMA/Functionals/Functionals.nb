@@ -1,0 +1,733 @@
+(***********************************************************************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used on any computer system with Mathematica 4.0,
+MathReader 4.0, or any compatible application. The data for the notebook 
+starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do one of 
+the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing the 
+word CacheID, otherwise Mathematica-compatible applications may try to 
+use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+***********************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     20614,        569]*)
+(*NotebookOutlinePosition[     21634,        601]*)
+(*  CellTagsIndexPosition[     21590,        597]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Closed Shell Density Functionals", "Title"],
+
+Cell["\<\
+This source code is part of the MondoSCF suite of 
+linear scaling electronic structure codes.
+    
+Matt Challacombe
+Los Alamos National Laboratory
+Copyright 2000, The University of California\
+\>", "Text",
+  FontFamily->"Courier new"],
+
+Cell[CellGroupData[{
+
+Cell["SetUp ", "Subtitle"],
+
+Cell[CellGroupData[{
+
+Cell["Clear variables, define working precision", "Subsubtitle"],
+
+Cell[BoxData[{
+    \(ClearAll[\[Rho], AbsGrad\[Rho], 
+      AbsGrad\[Rho]2]\), "\[IndentingNewLine]", 
+    \(\(SP[x_] := SetPrecision[x, 50];\)\)}], "Input",
+  PageWidth->Infinity]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Load and set options for optimize and format packages", "Subsubtitle"],
+
+Cell["\<\
+Needs the Format.m and Optimize.m packages available from \
+MathSource\
+\>", "Text",
+  FontFamily->"Courier new"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(MondoHome = 
+        Environment["\<MONDO_HOME\>"];\)\), "\[IndentingNewLine]", 
+    \(\(If[MondoHome \[Equal] $FAILED, 
+        Print["\<COULD NOT FIND $MONDO_HOME! CHECK YOUR .cshrc \>"]; \
+\[IndentingNewLine]Abort[];];\)\), "\[IndentingNewLine]", 
+    \(\(Get[
+        StringJoin[
+          MondoHome, "\</MMA/FixedNumberForm.m\>"]];\)\), \
+"\[IndentingNewLine]", 
+    \(\(Get[
+        StringJoin[
+          MondoHome, "\</MMA/Format.m\>"]];\)\), "\[IndentingNewLine]", 
+    \(\(Get[StringJoin[MondoHome, "\</MMA/Optimize.m\>"]];\)\)}], "Input",
+  PageWidth->Infinity],
+
+Cell[BoxData[
+    \(Attributes::"attnf" \(\(:\)\(\ \)\) 
+      "\!\(NProtectedAll\) is not a known attribute."\)], "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(SetOptions[Optimize, 
+        OptimizeVariable \[Rule] {UTmp, Array}];\)\), "\[IndentingNewLine]", 
+    \(\(SetOptions[FortranAssign, 
+          AssignOptimize \[Rule] 
+            True, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AssignMaxSiz\
+e \[Rule] 
+            500, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AssignBreak \
+\[Rule] {132, "\< & \n          \>"}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ AssignTemporary \[Rule] {VTmp, 
+              Array}] \.18;\)\), "\[IndentingNewLine]", 
+    \(\(SetOptions[OpenWrite, 
+        PageWidth \[Rule] 200];\)\), "\[IndentingNewLine]", 
+    \(\(MegaMunch[f_] := 
+        Chop[PowerExpand[f], 
+          10^\((\(-30\))\)];\)\[IndentingNewLine]\)}], "Input",
+  PageWidth->Infinity],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(VTmp\)\" is similar to \
+existing symbol \"\!\(UTmp\)\"."\)], "Message"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Functional grinder:  Takes functionals and their derivatives, \
+simplifies, and writes optimized FORTRAN to file.  \
+\>", "Subsubtitle"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(Grinder[Exc_, FileName_\ , RepList_List: {}] := 
+        Block[{}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ ClearAll[R, A, G, 
+            Ra, Rb, Gaa, Gbb, 
+            Gab]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ PreList\ \  = \
+{\[Rho] \[Rule] Ra + Rb, \[Rho]\[Alpha] \[Rule] Ra, \[Rho]\[Beta] \[Rule] 
+                Rb, \[Gamma]\[Alpha]\[Alpha] \[Rule] 
+                Gaa, \[Gamma]\[Alpha]\[Beta] \[Rule] 
+                Gab, \[Gamma]\[Beta]\[Beta] \[Rule] 
+                Gbb}; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ PostList = {Ra \
+\[Rule] R, Rb \[Rule] R, Gaa \[Rule] A, Gbb \[Rule] A, 
+              Gab \[Rule] A}; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ Exc2 = 
+            MegaMunch[
+              Exc /. PreList]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+\[Delta]Exc\[Delta]\[Rho]\[Alpha]\ \  = 
+            MegaMunch[\((\[PartialD]\_Ra\ Exc2)\) /. 
+                PostList]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+GammaContrib = 
+            2 \((\[PartialD]\_Gaa\ Exc2)\) + \((\[PartialD]\_Gab\ 
+                  Exc2)\); \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+GammaContrib = 
+            MegaMunch[
+              GammaContrib /. 
+                PostList]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ Exc2 = 
+            MegaMunch[
+              Exc2 /. PostList]; \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \
+FortranAssign[{Ei, dEdRhoi, 
+              dEdAbsGradRho2i}, {Exc2\ , \[Delta]Exc\[Delta]\[Rho]\[Alpha], 
+              GammaContrib}, \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ AssignToFile \[Rule] 
+              FileName];\[IndentingNewLine]\ \ \ \ \ \ \ \ ];\)\)], "Input",
+  PageWidth->Infinity,
+  FontSize->14],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(\[Rho]\[Beta]\)\" is \
+similar to existing symbol \"\!\(\[Rho]\[Alpha]\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(\[Gamma]\[Alpha]\[Beta]\
+\)\" is similar to existing symbol \"\!\(\[Gamma]\[Alpha]\[Alpha]\)\"."\)], \
+"Message"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \
+\"\!\(\[Gamma]\[Beta]\[Beta]\)\" is similar to existing symbol \"\!\(\[Gamma]\
+\[Alpha]\[Beta]\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"stop" \(\(:\)\(\ \)\) 
+      "Further output of \!\(General :: \"spell1\"\) will be suppressed \
+during this calculation."\)], "Message"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Intermediate variables", "Subsubtitle"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(\[Rho] = \[Rho]\[Alpha] + \[Rho]\[Beta];\)\), "\[IndentingNewLine]", 
+    \(\(AbsGrad\[Rho]\[Alpha] = \@\[Gamma]\[Alpha]\[Alpha];\)\), "\
+\[IndentingNewLine]", 
+    \(\(AbsGrad\[Rho]\[Beta] = \@\[Gamma]\[Beta]\[Beta];\)\), "\
+\[IndentingNewLine]", 
+    \(\(AbsGrad\[Rho] = \@\(\[Gamma]\[Alpha]\[Alpha] + 2  \[Gamma]\[Alpha]\
+\[Beta] + \[Gamma]\[Beta]\[Beta]\);\)\), "\[IndentingNewLine]", 
+    \(\(k\_F = \((3 \( \[Pi]\^2\) \[Rho])\)\^\(1/3\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(s = \@\(\[Gamma]\[Alpha]\[Alpha] + 2  \[Gamma]\[Alpha]\[Beta] + \
+\[Gamma]\[Beta]\[Beta]\)\/\(2  k\_F\ \[Rho]\);\)\), "\[IndentingNewLine]", 
+    \(\(ASinh[x_] := ArcSinh[x];\)\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \
+\"\!\(AbsGrad\[Rho]\[Beta]\)\" is similar to existing symbol \"\!\(AbsGrad\
+\[Rho]\[Alpha]\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(ASinh\)\" is similar to \
+existing symbol \"\!\(Sinh\)\"."\)], "Message"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Define and Grind Exchange functionals", "Subtitle"],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Slater-Dirac exchange, so called  Uniform Electronon Gas  (UEG) \
+approximation.\
+\>", "Subsection",
+  PageWidth->Infinity,
+  FontSize->13],
+
+Cell[BoxData[{
+    \(\(A\_x = 
+        SP[\ \ \(-\(3\/4\)\)\[Times]\((3\/\[Pi])\)\^\(1/3\)\ \ ];\)\), "\
+\[IndentingNewLine]", 
+    \(\(\[Epsilon]\_\(Unif, x\) = 
+        A\_x\ \[Rho]\^\(1/3\);\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(SD, x\) = \[Rho]\ \[Epsilon]\_\(Unif, x\)\ ;\)\), "\
+\[IndentingNewLine]", 
+    \(Grinder[E\_\(SD, x\), "\<SDx.Inc\>"\ ]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+LDA or LSD exchange,  X- \[Alpha]  approximation with  \[Alpha]=2/3\
+\
+\>", "Subsection",
+  PageWidth->Infinity,
+  FontSize->13],
+
+Cell[BoxData[{
+    \(\(C\_x = 
+        SP[\ \ \(-\(3\/2\)\)\[Times]\((3\/\(4  \[Pi]\))\)\^\(1/3\)\ \ ];\)\), \
+"\[IndentingNewLine]", 
+    \(\(E\_\(LDA, x\) = \ \(C\_x\) \((\ \[Rho]\[Alpha]\^\(4/3\)\  + \ \ \
+\[Rho]\[Beta]\^\(4/3\))\);\)\), "\[IndentingNewLine]", 
+    \(Grinder[E\_\(LDA, x\), "\<XAx.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["B88x [ Eq.8, PRA v.36 p.3098]", "Subsection",
+  PageWidth->Infinity],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(beta = SP[42*10^\((\(-4\))\)];\)\), "\[IndentingNewLine]", 
+    \(\[Chi]\[Alpha] = 
+      AbsGrad\[Rho]\[Alpha]\/\[Rho]\[Alpha]\^\(4/3\); \[Chi]\[Beta] = 
+      AbsGrad\[Rho]\[Beta]\/\[Rho]\[Beta]\^\(4/3\);\), "\[IndentingNewLine]", \
+
+    \(\(E\_\(B88, x\) = 
+        E\_\(LDA, x\) - \ 
+          beta\ \((\(\[Rho]\[Alpha]\^\(4/
+                        3\)\) \[Chi]\[Alpha]\^2\/\(1 + 6\ beta\ \
+\[Chi]\[Alpha]\ ASinh[\[Chi]\[Alpha]]\) + \(\[Rho]\[Beta]\^\(4/
+                        3\)\) \[Chi]\[Beta]\^2\/\(1 + 6\ beta\ \[Chi]\[Beta]\ \
+ASinh[\[Chi]\[Beta]]\))\);\)\), "\[IndentingNewLine]", 
+    \(Grinder[E\_\(B88, x\), "\<B88x.Inc\>"\ ]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(beta\)\" is similar to \
+existing symbol \"\!\(Beta\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(\[Chi]\[Alpha]\)\" is \
+similar to existing symbol \"\!\(\[Rho]\[Alpha]\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"spell" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(\[Chi]\[Beta]\)\" is \
+similar to existing symbols \!\({\[Rho]\[Beta], \[Chi]\[Alpha]}\)."\)], \
+"Message"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["PW91,  GGA-II [Eq.8; PRB  v.46, p. 6671 (1992)]", "Subsection",
+  PageWidth->Infinity],
+
+Cell[BoxData[{
+    \(\(F\_x = \((1 + 
+              SP[ .19645] 
+                s\ ASinh[
+                  SP[7.7956]\ s] + \((SP[0.2743] - 
+                    SP[0.1508]\ \[ExponentialE]\^\(\(-100\)\ s\^2\))\) 
+                s\^2)\)\[IndentingNewLine]/\((1 + 
+              SP[ .19645] s\ ASinh[SP[7.7956]\ s] + 
+              SP[0.004]\ s\^4)\);\)\), "\[IndentingNewLine]", 
+    \(\(\[Epsilon]\_\(PW91, x\) = \[Epsilon]\_\(Unif, x\)\[Times]
+          F\_x;\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(PW91, x\) = \[Rho]\ \[Epsilon]\_\(PW91, x\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(Eval[E\_\(PW91, x\)];\)\), "\[IndentingNewLine]", 
+    \(Grinder[E\_\(PW91, x\), "\<PW91x.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["PBE GGA exchange energy functional PBE (PBE, PRL'97)\.18\.13", \
+"Subsection",
+  PageWidth->Infinity,
+  FontSize->13],
+
+Cell[BoxData[{
+    \(\(\[Kappa] = SP[0.8040];\)\), "\[IndentingNewLine]", 
+    \(\(\[Mu] = SP[0.2195149727645171];\)\), "\[IndentingNewLine]", 
+    \(\(F\_x = 
+        1 + \[Kappa] - \[Kappa]\/\((1 + \(\[Mu]\ s\^2\)\/\[Kappa])\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(\[Epsilon]\_\(PBE, x\) = \[Epsilon]\_\(Unif, x\)\[Times]
+          F\_x;\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(PBE, x\) = \[Rho]\ \[Epsilon]\_\(PBE, x\)\ ;\)\), "\
+\[IndentingNewLine]", 
+    \(Grinder[E\_\(PBE, x\), "\<PBEx.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Define and Grind Correlation functionals", "Subtitle"],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+VWN( III) LSD correlation functional.   [Can J. Phys, 58 p.1200 \
+(1980),  paramagnetic parameters from the middle of the first coloumn on page \
+1207.]\
+\>", "Subsection",
+  PageWidth->Infinity],
+
+Cell[BoxData[{
+    \(r\_s = \((3\/\(4  \[Pi]\ \[Rho]\))\)\^\(1/3\); \ 
+    x = Sqrt[r\_s];\), "\[IndentingNewLine]", 
+    \(\(A = SP[0.0621814\/2];\)\), "\[IndentingNewLine]", 
+    \(\(x0 = SP[\(-0.409286\)];\)\), "\[IndentingNewLine]", 
+    \(\(b = SP[13.0720];\)\), "\[IndentingNewLine]", 
+    \(\(c = SP[42.7198];\)\), "\[IndentingNewLine]", 
+    \(\(X[x_] := x\^2\  + b\ x\  + \ c;\)\), "\[IndentingNewLine]", 
+    \(\(Q = \@\(4\ c\  - b\^2\);\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(VWN3, c\) = \[Rho]\ A \((\ 
+            Log[x\^2\/X[x]] + \(2\ b\)\/Q\ ArcTan[
+                  Q\/\(2\ x\  + \ b\)]\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \  - \(\(b\ x0\)\/X[x0]\) \((\ 
+                  Log[\((x - x0)\)\^2\/X[x]] + \(2\ \((b + 2\ x0)\)\)\/Q\ \
+ArcTan[Q\/\(2\ x\  + \ b\)]\ )\)\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ )\);\)\), "\[IndentingNewLine]", 
+    \(Grinder[E\_\(VWN3, c\), "\<VWN3c.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+VWN( V) LSD correlation functional.    [Can J. Phys, 58 p.1200 \
+(1980),  paramagnetic parameters from Table 5 on page 1207]\
+\>", "Subsection",\
+
+  PageWidth->Infinity],
+
+Cell[BoxData[{
+    \(\(r\_s = \((3\/\(4  \[Pi]\ \[Rho]\))\)\^\(1/3\);\)\), "\
+\[IndentingNewLine]", 
+    \(\ \(x = Sqrt[r\_s];\)\), "\[IndentingNewLine]", 
+    \(\(A = SP[0.0621814/2];\)\ \), "\[IndentingNewLine]", 
+    \(\(x0 = SP[\(-0.10498\)];\)\), "\[IndentingNewLine]", 
+    \(\(b = SP[3.72744];\)\ \), "\[IndentingNewLine]", 
+    \(\(c = SP[12.9352];\)\), "\[IndentingNewLine]", 
+    \(\(X[x_] := x\^2\  + b\ x\  + \ c;\)\), "\[IndentingNewLine]", 
+    \(\(Q = \@\(4\ c\  - b\^2\);\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(VWN5, c\) = \[Rho]\ A \((\ 
+            Log[x\^2\/X[x]] + \(2\ b\)\/Q\ ArcTan[
+                  Q\/\(2\ x\  + \ b\)]\ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ \ \ \  - \(\(b\ x0\)\/X[x0]\) \((\ 
+                  Log[\((x - x0)\)\^2\/X[x]] + \(2\ \((b + 2\ x0)\)\)\/Q\ \
+ArcTan[Q\/\(2\ x\  + \ b\)]\ )\)\[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \ \ \ \
+\ \ \ \ \ \ \ \ )\);\)\), "\[IndentingNewLine]", 
+    \(Grinder[E\_\(VWN5, c\), "\<VWN5c.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+PW91 LSD correlation functional for \[Zeta]=0, beyond RPA [Perdew \
+Wang, PRB 45, p.13244 (1992)]\
+\>", "Subsection",
+  PageWidth->Infinity],
+
+Cell[BoxData[{
+    \(\(A = SP[0.0310907];\)\), "\[IndentingNewLine]", 
+    \(\(\[Alpha]\_1 = SP[0.21370];\)\), "\[IndentingNewLine]", 
+    \(\(\[Beta]\_1 = SP[7.5957];\)\), "\[IndentingNewLine]", 
+    \(\(\[Beta]\_2 = SP[3.5876];\)\), "\[IndentingNewLine]", 
+    \(\(\[Beta]\_3 = SP[1.6382];\)\), "\[IndentingNewLine]", 
+    \(\(\[Beta]\_4 = SP[0.49294];\)\), "\[IndentingNewLine]", 
+    \(\(p = 1;\)\), "\[IndentingNewLine]", 
+    \(\(r\_s = \((3\/\(4  \[Pi]\ \[Rho]\))\)\^\(1/3\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(\[Epsilon]\_\(Unif, \ c\) = \(-2\)\ A \((1 + \[Alpha]\_1\ r\_s)\)\
+\[Times]Log[
+            1 + 1\/\(2\ A \((\(\[Beta]\_1\) r\_s\^\(1/2\) + \ \(\[Beta]\_2\) \
+r\_s + \(\[Beta]\_3\) r\_s\^\(3/2\) + \(\[Beta]\_4\) r\_s\^\(p + 1\))\)\)];\)\
+\), "\[IndentingNewLine]", 
+    \(\(E\_\(PW92, c\) = \[Rho]\ \[Epsilon]\_\(Unif, c\)\ ;\)\), "\
+\[IndentingNewLine]", 
+    \(Grinder[E\_\(PW92, \ c\), "\<PW91c.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+LYP GGA correlation functional for \[Zeta]=0: LYP [PRB '88,   Eq. 2 \
+CPL v.157 p.200 (1989),  Eq. A22 JCP v.98 p.5612]\
+\>", "Subsection",
+  PageWidth->Infinity],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(C\_F = 
+        SP[\(3\/10\) \((3\ \[Pi]\^2)\)\^\(2/3\)];\)\), "\[IndentingNewLine]", \
+
+    \(\(aa = SP[0.04918];\)\), "\[IndentingNewLine]", 
+    \(\(bb = SP[0.132];\)\), "\[IndentingNewLine]", 
+    \(\(cc = SP[0.2533];\)\), "\[IndentingNewLine]", 
+    \(\(dd = SP[0.349];\)\ \), "\[IndentingNewLine]", 
+    \(\[Omega] = \(\[ExponentialE]\^\(\(-cc\)\ \[Rho]\^\(\(-1\)/3\)\)\/\(1 + 
+              dd\ \[Rho]\^\(\(-1\)/3\)\)\) \[Rho]\^\(\(-11\)/3\); \ \ \ \ \ \ \
+\ \ \ \ \ \ \[Delta] = 
+      cc\ \[Rho]\^\(\(-1\)/3\) + \(dd\ \[Rho]\^\(\(-1\)/3\)\)\/\(1 + dd\ \
+\[Rho]\^\(\(-1\)/3\)\);\), "\[IndentingNewLine]", 
+    \(\(LYP\[Alpha]\[Alpha] = \ \(-aa\)\ \ bb\ \ \[Omega]\ \((\(1\/9\) \[Rho]\
+\[Alpha]*\[Rho]\[Beta] \((1 - 
+                    3  \[Delta] - \((\[Delta] - 
+                          11)\) \[Rho]\[Alpha]\/\[Rho])\) - \[Rho]\[Beta]*\
+\[Rho]\[Beta])\)\ ;\)\), "\[IndentingNewLine]", 
+    \(\(LYP\[Alpha]\[Beta] = \ \(-aa\)\ \ bb\ \ \[Omega]\ \((\(1\/9\) \[Rho]\
+\[Alpha]*\[Rho]\[Beta] \((47 - 
+                    7  \[Delta])\) - \(4\/3\) \[Rho]\^2)\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(LYP\[Beta]\[Beta] = \ \(-aa\)\ \ bb\ \ \[Omega]\ \((\(1\/9\) \[Rho]\
+\[Alpha]*\[Rho]\[Beta] \((1 - 
+                    3  \[Delta] - \((\[Delta] - 
+                          11)\) \[Rho]\[Beta]\/\[Rho])\) - \[Rho]\[Alpha]*\
+\[Rho]\[Alpha])\);\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(LYP, \ c\) = \((\ 
+          LYP\[Alpha]\[Alpha]*\[Gamma]\[Alpha]\[Alpha]\  + \ \ LYP\[Alpha]\
+\[Beta]\ *\[Gamma]\[Alpha]\[Beta]\ \  + \ \ LYP\[Beta]\[Beta]*\[Gamma]\[Beta]\
+\[Beta]\ \ \[IndentingNewLine]\ \ \ \ \ \ \ \ \ \ \  - \ \ \(\(4  aa\)\/\(1 + 
+                    dd\ \[Rho]\^\(\(-1\)/3\)\)\) \(\[Rho]\[Alpha]*\[Rho]\
+\[Beta]\)\/\[Rho] - \ \(2\^\(11/3\)\) 
+              C\_F\ aa\ \ bb\ \ \[Omega]\ \[Rho]\[Alpha]*\[Rho]\[Beta]\ \((\
+\[Rho]\[Alpha]\^\(8/3\) + \[Rho]\[Beta]\^\(8/3\))\))\);\)\), "\
+\[IndentingNewLine]", 
+    \(Grinder[E\_\(LYP, \ c\)\ , "\<LYPc.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(LYP\[Alpha]\[Beta]\)\" \
+is similar to existing symbol \"\!\(LYP\[Alpha]\[Alpha]\)\"."\)], "Message"],
+
+Cell[BoxData[
+    \(General::"spell1" \(\(:\)\(\ \)\) 
+      "Possible spelling error: new symbol name \"\!\(LYP\[Beta]\[Beta]\)\" \
+is similar to existing symbol \"\!\(LYP\[Alpha]\[Beta]\)\"."\)], "Message"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+PBE GGA correlation functional for \[Zeta]=0  ( PBE PRL '97)\
+\>", \
+"Subsection",
+  PageWidth->Infinity],
+
+Cell[BoxData[{
+    \(\(k\_F = \((3 \( \[Pi]\^2\) \[Rho])\)\^\(1/3\);\)\), "\
+\[IndentingNewLine]", 
+    \(\(k\_s = \@\(\(4  k\_F\)\/\[Pi]\);\)\), "\[IndentingNewLine]", 
+    \(\(t = 
+        AbsGrad\[Rho]\/\(2 \( k\_s\) \[Rho]\);\)\), "\[IndentingNewLine]", 
+    \(\(\[Beta] = SP[0.06672455060314922];\)\), "\[IndentingNewLine]", 
+    \(\(\[Gamma] = SP[\(1 - Log[2]\)\/\[Pi]\^2];\)\), "\[IndentingNewLine]", 
+    \(\(A\_PBE = \[Beta]\/\[Gamma]\[Times]1\/\(Exp[\(-\(\[Epsilon]\_\(Unif, \ \
+c\)\/\[Gamma]\)\)] - 1\);\)\), "\[IndentingNewLine]", 
+    \(\(H = \[Gamma]\[Times]
+          Log[1 + \[Beta]\/\[Gamma]\[Times]\(\(t\^2\) \((1 + A\_PBE\ \
+t\^2)\)\)\/\(1 + A\_PBE\ t\^2 + A\_PBE\^2\ t\^4\)];\)\), \
+"\[IndentingNewLine]", 
+    \(\(\[Epsilon]\_\(PBE, \ c\) = \[Epsilon]\_\(Unif, \ c\) + 
+          H;\)\), "\[IndentingNewLine]", 
+    \(\(E\_\(PBE, \ c\) = \[Rho]\ \[Epsilon]\_\(PBE, \ c\);\)\), "\
+\[IndentingNewLine]", 
+    \(Grinder[E\_\(PBE, c\)\ , "\<PBEc.Inc\>"]\)}], "Input",
+  PageWidth->Infinity,
+  FontSize->16]
+}, Closed]]
+}, Open  ]]
+}, Open  ]]
+},
+FrontEndVersion->"4.0 for X",
+ScreenRectangle->{{0, 1024}, {0, 768}},
+CellGrouping->Manual,
+WindowSize->{802, 709},
+WindowMargins->{{90, Automatic}, {Automatic, 0}},
+PrintingPageRange->{Automatic, Automatic},
+PrintingOptions->{"PaperSize"->{612, 792},
+"PaperOrientation"->"Landscape",
+"PostScriptOutputFile":>FrontEnd`FileName[{$RootDirectory, "ice", "mchalla", \
+"MONDO", "HiCu", "CodeOptimization"}, "ClosedShellFunctionals.nb.ps", \
+CharacterEncoding -> "ISO8859-1"],
+"Magnification"->1},
+StyleDefinitions -> "Classic.nb"
+]
+
+
+(***********************************************************************
+Cached data follows.  If you edit this Notebook file directly, not using
+Mathematica, you must remove the line containing CacheID at the top of 
+the file.  The cache data will then be recreated when you save this file 
+from within Mathematica.
+***********************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1739, 51, 49, 0, 58, "Title"],
+Cell[1791, 53, 244, 8, 126, "Text"],
+
+Cell[CellGroupData[{
+Cell[2060, 65, 26, 0, 59, "Subtitle"],
+
+Cell[CellGroupData[{
+Cell[2111, 69, 64, 0, 57, "Subsubtitle"],
+Cell[2178, 71, 180, 4, 51, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[2395, 80, 76, 0, 51, "Subsubtitle"],
+Cell[2474, 82, 123, 4, 31, "Text"],
+
+Cell[CellGroupData[{
+Cell[2622, 90, 594, 14, 115, "Input"],
+Cell[3219, 106, 125, 2, 30, "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[3381, 113, 1010, 19, 147, "Input"],
+Cell[4394, 134, 181, 3, 30, "Message"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[4624, 143, 146, 3, 57, "Subsubtitle"],
+
+Cell[CellGroupData[{
+Cell[4795, 150, 1719, 32, 246, "Input"],
+Cell[6517, 184, 200, 3, 70, "Message"],
+Cell[6720, 189, 222, 4, 70, "Message"],
+Cell[6945, 195, 220, 4, 70, "Message"],
+Cell[7168, 201, 167, 3, 70, "Message"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[7384, 210, 45, 0, 51, "Subsubtitle"],
+
+Cell[CellGroupData[{
+Cell[7454, 214, 735, 14, 241, "Input"],
+Cell[8192, 230, 216, 4, 70, "Message"],
+Cell[8411, 236, 182, 3, 70, "Message"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[8654, 246, 57, 0, 59, "Subtitle"],
+
+Cell[CellGroupData[{
+Cell[8736, 250, 149, 5, 31, "Subsection"],
+Cell[8888, 257, 409, 10, 138, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[9334, 272, 138, 5, 23, "Subsection"],
+Cell[9475, 279, 361, 8, 114, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[9873, 292, 74, 1, 22, "Subsection"],
+
+Cell[CellGroupData[{
+Cell[9972, 297, 718, 15, 175, "Input"],
+Cell[10693, 314, 181, 3, 70, "Message"],
+Cell[10877, 319, 201, 3, 70, "Message"],
+Cell[11081, 324, 215, 4, 70, "Message"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[11345, 334, 92, 1, 22, "Subsection"],
+Cell[11440, 337, 740, 16, 169, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[12217, 358, 123, 3, 23, "Subsection"],
+Cell[12343, 363, 557, 12, 199, "Input"]
+}, Closed]]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[12949, 381, 60, 0, 33, "Subtitle"],
+
+Cell[CellGroupData[{
+Cell[13034, 385, 205, 5, 30, "Subsection"],
+Cell[13242, 392, 1004, 18, 446, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[14283, 415, 179, 5, 22, "Subsection"],
+Cell[14465, 422, 1044, 19, 446, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[15546, 446, 150, 4, 22, "Subsection"],
+Cell[15699, 452, 980, 19, 338, "Input"]
+}, Closed]],
+
+Cell[CellGroupData[{
+Cell[16716, 476, 172, 4, 22, "Subsection"],
+
+Cell[CellGroupData[{
+Cell[16913, 484, 2047, 38, 484, "Input"],
+Cell[18963, 524, 210, 3, 30, "Message"],
+Cell[19176, 529, 208, 3, 30, "Message"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[19433, 538, 115, 4, 30, "Subsection"],
+Cell[19551, 544, 1023, 20, 420, "Input"]
+}, Closed]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+
+
+
+(***********************************************************************
+End of Mathematica Notebook file.
+***********************************************************************)
+
