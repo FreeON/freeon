@@ -520,16 +520,16 @@ MODULE DerivedTypes
 !  Debuging flags
 !
    TYPE DEBG                                       
-      INTEGER :: Key  !-- Debug level
-      INTEGER :: Chk  !-- Debug check sums
-      INTEGER :: Mat  !-- Debug matrices      
-      INTEGER :: Set  !-- Debug basis set
-      INTEGER :: Int  !-- Debug integrals
-      INTEGER :: Rho  !-- Debug density
-      INTEGER :: Fmt  !-- Debug formating
-      INTEGER :: GeOp !-- Debug geometry optimizer
-      INTEGER :: GeOpSpInfo !--Debug sparsity info in geometry optimizer
-      INTEGER :: MM   !-- Debug molecular mechanics energies and forces
+      INTEGER :: Key        !-- Debug level
+      INTEGER :: Chk        !-- Debug check sums
+      INTEGER :: Mat        !-- Debug matrices      
+      INTEGER :: Set        !-- Debug basis set
+      INTEGER :: Int        !-- Debug integrals
+      INTEGER :: Rho        !-- Debug density
+      INTEGER :: Fmt        !-- Debug formating
+      INTEGER :: GeOp       !-- Debug geometry optimizer
+      INTEGER :: GeOpSpInfo !-- Debug sparsity info in geometry optimizer
+      INTEGER :: MM         !-- Debug molecular mechanics energies and forces
    END TYPE                                      
 !------------------------------------------------------------
 !  Timing/performance statistics
