@@ -37,7 +37,7 @@ LowdinOObjs = LowdinO.o
 SDMM_Objs  = FillPBlok.o SDMM.o DenMatMethods.o
 SP2_Objs   = FillPBlok.o SP2.o  DenMatMethods.o
 SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
-NT4_Objs   = FillPBlok.o NT4.o  DenMatMethods.o
+TS4_Objs   = FillPBlok.o TS4.o  DenMatMethods.o
 PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
@@ -48,11 +48,11 @@ DIIS_Objs  = DIIS.o
 Dev_Objs   = ToDev.o  
 #
 ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
-             SDMM.x SP2.x SP4.x NT4.x PM.x   \
+             SDMM.x SP2.x SP4.x TS4.x PM.x   \
              FillPBlok.x P2Use.x FillPBlok.x \
              SCFStatus.x FBuild.x DIIS.x ToDev.x 
 #
-all:	Blk Lwd RHEq SDMM SP2 SP4 NT4 PM Stat Gues FBuild DIIS 
+all:	Blk Lwd RHEq SDMM SP2 SP4 TS4 PM Stat Gues FBuild DIIS 
 #
 release:clean $(ReleaseFiles)
 #
@@ -72,7 +72,7 @@ clean:
 	rm -f $(MONDO_EXEC)/ToDev
 	rm -f $(MONDO_EXEC)/SP2
 	rm -f $(MONDO_EXEC)/SP4
-	rm -f $(MONDO_EXEC)/NT4
+	rm -f $(MONDO_EXEC)/TS4
 	rm -f $(MONDO_EXEC)/PM
 	rm -f $(MONDO_EXEC)/AInv
 	rm -f $(MONDO_EXEC)/LowdinO
@@ -106,9 +106,9 @@ SP4:	$(SP4_Objs)
 	$(LD) $(LDFLAGS) SP4  $(SP4_Objs)  $(F90_LIBRARIES) $(LAPACK)
 	mv SP4 $(MONDO_EXEC)/SP4
 #
-NT4:	$(NT4_Objs)
-	$(LD) $(LDFLAGS) NT4  $(NT4_Objs)  $(F90_LIBRARIES) $(LAPACK)
-	mv NT4 $(MONDO_EXEC)/NT4
+TS4:	$(TS4_Objs)
+	$(LD) $(LDFLAGS) TS4  $(TS4_Objs)  $(F90_LIBRARIES) $(LAPACK)
+	mv TS4 $(MONDO_EXEC)/TS4
 #
 PM:	$(PM_Objs)
 	$(LD) $(LDFLAGS) PM  $(PM_Objs)  $(F90_LIBRARIES) $(LAPACK)
@@ -145,7 +145,7 @@ SCFStatus.o:                $(MONDO_LIB)/libMondoMods.a
 SDMM.o:		            $(MONDO_LIB)/libMondoMods.a
 SP2.o:                      $(MONDO_LIB)/libMondoMods.a
 SP4.o:                      $(MONDO_LIB)/libMondoMods.a
-NT4.o:                      $(MONDO_LIB)/libMondoMods.a
+TS4.o:                      $(MONDO_LIB)/libMondoMods.a
 PM.o:                       $(MONDO_LIB)/libMondoMods.a
 LowdinO.o:		    $(MONDO_LIB)/libMondoMods.a
 BlokAInv.o:		    $(MONDO_LIB)/libMondoMods.a

@@ -180,9 +180,9 @@ MODULE DrvSCFs
       ELSEIF(Ctrl%Method(CBas)==SP4_R_SCF) THEN
          CALL LogSCF(Current,'Solving SCF equations with SP4')
          CALL Invoke('SP4',CtrlVect,MPIRun_O=.TRUE.) 
-      ELSEIF(Ctrl%Method(CBas)==NT4_R_SCF) THEN
-         CALL LogSCF(Current,'Solving SCF equations with NT4')
-         CALL Invoke('NT4',CtrlVect,MPIRun_O=.TRUE.) 
+      ELSEIF(Ctrl%Method(CBas)==TS4_R_SCF) THEN
+         CALL LogSCF(Current,'Solving SCF equations with TS4')
+         CALL Invoke('TS4',CtrlVect,MPIRun_O=.TRUE.) 
       ELSE
          CALL MondoHalt(99,'No Method Chosen')
       ENDIF
@@ -420,7 +420,7 @@ MODULE DrvSCFs
                ENDIF
             ENDIF
 !           Look for convergence stall-outs 
-            IF(DIISQ<1.D-3)THEN
+            IF(DIISQ<1.D-3.AND.CCyc>2)THEN
                Mssg='SCF convergence due to DIIS stagnation.'
                ConvergedQ=.TRUE.
             ENDIF 

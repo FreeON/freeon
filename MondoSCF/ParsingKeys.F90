@@ -35,7 +35,7 @@ MODULE ParsingKeys
    CHARACTER(LEN=2),  PARAMETER :: SCF_PM    ='PM' 
    CHARACTER(LEN=3),  PARAMETER :: SCF_SP2   ='SP2'
    CHARACTER(LEN=3),  PARAMETER :: SCF_SP4   ='SP4'
-   CHARACTER(LEN=3),  PARAMETER :: SCF_NT4   ='NT4'
+   CHARACTER(LEN=3),  PARAMETER :: SCF_TS4   ='TS4'
    CHARACTER(LEN=2),  PARAMETER :: SCF_RHHF  ='RH'
 !  SCF keys
    INTEGER, PARAMETER :: RH_R_SCF  =10982348 ! Restricted Roothaan-Hall 
@@ -44,17 +44,17 @@ MODULE ParsingKeys
    INTEGER, PARAMETER :: SDMM_R_SCF=58638502 ! Restricted Simplified Density Matrix Minimization 
    INTEGER, PARAMETER :: SDMM_U_SCF=92874018 ! Unrestricted Simplified Density Matrix Minimization 
 !
-   INTEGER, PARAMETER :: PM_R_SCF  =58638503 ! Restricted PM Density Matrix Minimization 
-   INTEGER, PARAMETER :: PM_U_SCF  =92874019 ! Unrestricted PM Density Matrix Minimization 
+   INTEGER, PARAMETER :: PM_R_SCF  =58638503 ! Restricted PM Density Matrix Purification 
+   INTEGER, PARAMETER :: PM_U_SCF  =92874019 ! Unrestricted PM Density Matrix Purification 
 !
-   INTEGER, PARAMETER :: SP2_R_SCF =58638504 ! Restricted SP2 Density Matrix Minimization 
-   INTEGER, PARAMETER :: SP2_U_SCF =92874020 ! Unrestricted SP2 Density Matrix Minimization 
+   INTEGER, PARAMETER :: SP2_R_SCF =58638504 ! Restricted SP2 Density Matrix Purification 
+   INTEGER, PARAMETER :: SP2_U_SCF =92874020 ! Unrestricted SP2 Density Matrix Purification 
 !
-   INTEGER, PARAMETER :: SP4_R_SCF =58638505 ! Restricted SP4  Density Matrix Minimization 
-   INTEGER, PARAMETER :: SP4_U_SCF =92874021 ! Unrestricted SP4  Density Matrix Minimization 
+   INTEGER, PARAMETER :: SP4_R_SCF =58638505 ! Restricted SP4  Density Matrix Purification 
+   INTEGER, PARAMETER :: SP4_U_SCF =92874021 ! Unrestricted SP4  Density Matrix Purification 
 !
-   INTEGER, PARAMETER :: NT4_R_SCF =58638506 ! Restricted NT4 Density Matrix Minimization 
-   INTEGER, PARAMETER :: NT4_U_SCF =92874022 ! Unrestricted NT4 Density Matrix Minimization 
+   INTEGER, PARAMETER :: TS4_R_SCF =58638506 ! Restricted TS4 Density Matrix Purification 
+   INTEGER, PARAMETER :: TS4_U_SCF =92874022 ! Unrestricted TS4 Density Matrix Purification 
 !
    INTEGER, PARAMETER :: EDMM_R_SCF=48530687 ! Restricted Extrapolated Density Matrix Minimization 
    INTEGER, PARAMETER :: EDMM_U_SCF=40834070 ! Unrestricted ExtrapolatedDensity Matrix Minimization 

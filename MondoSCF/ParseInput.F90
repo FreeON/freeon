@@ -410,9 +410,9 @@ MODULE ParseInPut
             DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=SP4_R_SCF; ENDDO             
          ENDIF
 !
-         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_NT4,MaxSets,NLoc,Loc))THEN
+         IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_TS4,MaxSets,NLoc,Loc))THEN
             NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=NT4_R_SCF; ENDDO             
+            DO ILoc=1,NLoc; Ctrl%Method(Loc(ILoc))=TS4_R_SCF; ENDDO             
          ENDIF
 !
          IF(OptKeyLocQ(Inp,SCF_OPTION,SCF_RHHF,MaxSets,NLoc,Loc))THEN

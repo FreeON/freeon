@@ -1,4 +1,4 @@
-PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
+PROGRAM DMP_TS4 ! Density matrix purification, TS4 variation
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -12,7 +12,7 @@ PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   USE DenMatMethods
   IMPLICIT NONE
 !-------------------------------------------------------------------------------------
-! Trace purserving NT4
+! Trace purserving TS4
 !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
   TYPE(BCSR)                     :: F,P,POld,Tmp1,Tmp2,Tmp3
@@ -20,7 +20,7 @@ PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   INTEGER                        :: I,MM
   LOGICAL                        :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
-  CHARACTER(LEN=3),PARAMETER     :: Prog='NT4'
+  CHARACTER(LEN=3),PARAMETER     :: Prog='TS4'
 !-------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   ! Suss for matrix threshold overide
@@ -45,9 +45,9 @@ PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   ! Guess P from F
   CALL FockGuess(F,P,Ne,1)
   CALL SetEq(Pold,P)    
-  ! Do NT4 iterations
+  ! Do TS4 iterations
   DO I=1,100 
-     CALL NT4(P,Tmp1,Tmp2,Tmp3,Ne,MM)
+     CALL TS4(P,Tmp1,Tmp2,Tmp3,Ne,MM)
      IF(CnvrgChck(Prog,I,Ne,MM,F,P,POld,Tmp1,Tmp2))EXIT
   ENDDO
   ! Delete some obsolete matrices
@@ -60,7 +60,7 @@ PROGRAM DMP_NT4 ! Density matrix purification, NT4 variation
   CALL Delete(Tmp2)
   CALL Delete(Tmp3)
   CALL ShutDown(Prog)
-END PROGRAM DMP_NT4
+END PROGRAM DMP_TS4
 
 
 

@@ -349,7 +349,7 @@ CONTAINS
 !----------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------
-   SUBROUTINE NT4(P,P2,Tmp1,Tmp2,Norm,MMMs)
+   SUBROUTINE TS4(P,P2,Tmp1,Tmp2,Norm,MMMs)
      TYPE(BCSR)                     :: P,P2,Tmp1,Tmp2
      REAL(DOUBLE)                   :: CR,Norm,Gt,Gn,G,Coeff
      INTEGER                        :: MMMs
@@ -391,7 +391,7 @@ CONTAINS
            CALL Filter(P,Tmp1)
         ENDIF
      ENDIF
-   END SUBROUTINE NT4
+   END SUBROUTINE TS4
 !----------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------
