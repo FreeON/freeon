@@ -904,9 +904,9 @@ MODULE PrettyPrint
            ENDIF
 !--------------------------------------------------------------------------
 !          Write BlockError string
-           PU=OpenPU(Unit_O=Unit_O)
-           WRITE(PU,'(1x,A)')TRIM(ChkStr)
-           CALL ClosePU(PU)
+!           PU=OpenPU(Unit_O=Unit_O)
+!           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+!           CALL ClosePU(PU)
 #endif
 #ifdef PARALLEL
         ENDIF

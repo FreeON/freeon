@@ -152,14 +152,16 @@ MODULE Thresholding
        INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
        REAL(DOUBLE)                    :: R,R0,R1,R2
-!       R0=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-!       R1=Extent1(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-       R=Extent2(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-!       WRITE(*,*)TRIM(IntToChar(Ell)) & 
-!                 //', '//TRIM(DblToShrtChar(Zeta)) & 
-!                 //','//TRIM(DblToShrtChar(R0))    &
-!                 //','//TRIM(DblToShrtChar(R1))    &
-!                 //','//TRIM(DblToShrtChar(R2)) 
+       IF(Zeta==NuclearExpt)THEN
+          ! Quick turn around for nuclei
+          R=1.D-10
+       ELSE
+          ! Find the worst case extent
+          ! R=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+          ! Find the extent using CJ and MCs method
+          R=Extent1(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+          ! R=Extent2(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+       ENDIF
     END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
