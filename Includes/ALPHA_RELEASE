@@ -11,7 +11,8 @@ Find compiler flags in MONDO/Includes/CompilerSpecifics.X.Y
 To make MondoSCF, set up your .cshrc.  Edit your
 CompilerSpecifics file.  Go the the main directory
 and type "make all".  To invoke MondoSCF, you type
-"m x.inp", or "m x.inp y.out", or "m x.inp y.out z.log"
+"mondo x.inp", or "mondo x.inp y.out", or 
+"mondo x.inp y.out z.log"
 
 Short cuts for making and changing to different 
 directories may be found in MONDO/Scripts/MondoSetUp 
@@ -28,11 +29,7 @@ o No documentation.
 o The F90 ONX code for exact exchange is not stable.
   Currently, matrix builds only work under Intel or 
   AMD Linux. Matrix builds may be slow and forces 
-  incorrect.  
-
-o Periodic boundary conditions with small exponent
-  ~1.D-2 basis sets may result in instabilities.
-  Periodics do not work yet with exact exchange.
+  incorrect.   Periodic ONX does not exist.
 
 o Clean up of scratch files less than perfect.
   Want to "mk pScr" after big runs to clean scratch.
