@@ -73,17 +73,17 @@ SUBROUTINE Int6261(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U,PBC)
  PQx = Px - Qx
  PQy = Py - Qy
  PQz = Pz - Qz
-#ifdef PERIODIC
- FPQx = PQx*PBC%InvBoxSh(1,1) + PQy*PBC%InvBoxSh(1,2) + PQz*PBC%InvBoxSh(1,3)
- FPQy = PQy*PBC%InvBoxSh(2,2) + PQz*PBC%InvBoxSh(2,3)
- FPQz = PQz*PBC%InvBoxSh(3,3)
- IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)
- IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)
- IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)
- PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2) + FPQz*PBC%BoxShape(1,3)
- PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)
- PQz  = FPQz*PBC%BoxShape(3,3)
-#endif
+!
+ FPQx = PQx*PBC%InvBoxSh%D(1,1) + PQy*PBC%InvBoxSh%D(1,2) + PQz*PBC%InvBoxSh%D(1,3)
+ FPQy = PQy*PBC%InvBoxSh%D(2,2) + PQz*PBC%InvBoxSh%D(2,3)
+ FPQz = PQz*PBC%InvBoxSh%D(3,3)
+ IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
+ IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
+ IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+ PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2) + FPQz*PBC%BoxShape%D(1,3)
+ PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+ PQz  = FPQz*PBC%BoxShape%D(3,3)
+!
  WPx = -Eta*PQx*r1xZpE
  WPy = -Eta*PQy*r1xZpE
  WPz = -Eta*PQz*r1xZpE
@@ -627,17 +627,17 @@ SUBROUTINE Int6261(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U,PBC)
  PQx = Px - Qx
  PQy = Py - Qy
  PQz = Pz - Qz
-#ifdef PERIODIC
- FPQx = PQx*PBC%InvBoxSh(1,1) + PQy*PBC%InvBoxSh(1,2) + PQz*PBC%InvBoxSh(1,3)
- FPQy = PQy*PBC%InvBoxSh(2,2) + PQz*PBC%InvBoxSh(2,3)
- FPQz = PQz*PBC%InvBoxSh(3,3)
- IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)
- IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)
- IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)
- PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2) + FPQz*PBC%BoxShape(1,3)
- PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)
- PQz  = FPQz*PBC%BoxShape(3,3)
-#endif
+!
+ FPQx = PQx*PBC%InvBoxSh%D(1,1) + PQy*PBC%InvBoxSh%D(1,2) + PQz*PBC%InvBoxSh%D(1,3)
+ FPQy = PQy*PBC%InvBoxSh%D(2,2) + PQz*PBC%InvBoxSh%D(2,3)
+ FPQz = PQz*PBC%InvBoxSh%D(3,3)
+ IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
+ IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
+ IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+ PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2) + FPQz*PBC%BoxShape%D(1,3)
+ PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
+ PQz  = FPQz*PBC%BoxShape%D(3,3)
+!
  WPx = -Eta*PQx*r1xZpE
  WPy = -Eta*PQy*r1xZpE
  WPz = -Eta*PQz*r1xZpE

@@ -142,12 +142,12 @@ PROGRAM XCForce
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree
   DO I = 1,1
-     IF(GM%PBC%AutoW(I)) THEN
-        WBox%BndBox(I,1) = GM%PBC%BoxShape(I,I)-DelBox
-        WBox%BndBox(I,2) = GM%PBC%BoxShape(I,I)+DelBox
+     IF(GM%PBC%AutoW%I(I)==1) THEN
+        WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
+        WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
         CALL GridGen(WBox,VolRho,VolExc)
         WBox%BndBox(I,1) = Zero
-        WBox%BndBox(I,2) = GM%PBC%BoxShape(I,I)
+        WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)
         LatFrc_XC%D(I,I) = LatFrc_XC%D(I,I)+Exc/(Two*DelBox)
      ENDIF
   ENDDO
@@ -169,25 +169,23 @@ PROGRAM XCForce
   ENDIF
   CALL Delete(TotXCFrc)
 #endif
-! CALL PPrint(XCFrc,'dXC/dR')
-
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
-  CALL New(Frc,3*NAtoms)
-  CALL Get(Frc,'GradE',Tag_O=CurGeom)
-  Frc%D=Frc%D+XCFrc%D
-  CALL Put(Frc,'GradE',Tag_O=CurGeom)
-!
-  CALL Put(LatFrc_XC,'LatFrc_XC',Tag_O=CurGeom)
-  CALL Delete(LatFrc_XC)
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+XCFrc%D(A1:A2)
+  ENDDO
+  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
+  CALL Put(GM,Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
 ! Tidy up
 !--------------------------------------------------------------------------------
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(P)
-  CALL Delete(Frc)
   CALL Delete(XCFrc)
+  CALL Delete(LatFrc_XC)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(TmXCFrcArr,NPrc)

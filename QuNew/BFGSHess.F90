@@ -85,7 +85,7 @@ PROGRAM BFGSHess
 #ifdef PERIODIC
     NRgn=0
     DO K=1,3
-      IF(GM1%PBC%AutoW(K))NRgn(K)=1
+      IF(GM1%PBC%AutoW%I(K)==1)NRgn(K)=1
     ENDDO
 #endif
    K=0

@@ -164,20 +164,20 @@ CONTAINS
              Ty     = (Zeta*Py+Eta*Qy)*r1xZpE
              Tz     = (Zeta*Pz+Eta*Qz)*r1xZpE
 
-             PQx=Px-Qx                                                                           !per
-             PQy=Py-Qy                                                                           !per
-             PQz=Pz-Qz                                                                           !per
-#ifdef PERIODIC                                                                                  !per
-             FPQx = PQx*PBC%InvBoxSh(1,1)+PQy*PBC%InvBoxSh(1,2)+PQz*PBC%InvBoxSh(1,3)            !per
-             FPQy = PQy*PBC%InvBoxSh(2,2)+PQz*PBC%InvBoxSh(2,3)                                  !per
-             FPQz = PQz*PBC%InvBoxSh(3,3)                                                        !per
-             IF(PBC%AutoW(1)) FPQx = FPQx-ANINT(FPQx)                                            !per
-             IF(PBC%AutoW(2)) FPQy = FPQy-ANINT(FPQy)                                            !per
-             IF(PBC%AutoW(3)) FPQz = FPQz-ANINT(FPQz)                                            !per
-             PQx  = FPQx*PBC%BoxShape(1,1)+FPQy*PBC%BoxShape(1,2)+FPQz*PBC%BoxShape(1,3)         !per
-             PQy  = FPQy*PBC%BoxShape(2,2)+FPQz*PBC%BoxShape(2,3)                                !per
-             PQz  = FPQz*PBC%BoxShape(3,3)                                                       !per
-#endif                                                                                           !per
+             PQx=Px-Qx                                                                           
+             PQy=Py-Qy                                                                           
+             PQz=Pz-Qz                                                                           
+!                                                                                                !per
+             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)      !per
+             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)                              !per
+             FPQz = PQz*PBC%InvBoxSh%D(3,3)                                                      !per
+             IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)                                       !per
+             IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)                                       !per
+             IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)                                       !per
+             PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)   !per
+             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)                            !per
+             PQz  = FPQz*PBC%BoxShape%D(3,3)                                                     !per
+!                                                                                                !per
              IB%WR%D(Ind, 1) = Px-Cx
              IB%WR%D(Ind, 2) = Qx-DB%DisBuf%D(I2+7)
              IB%WR%D(Ind, 3) = Py-Cy

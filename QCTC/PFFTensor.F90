@@ -128,8 +128,8 @@ CONTAINS
     TenS%D=Zero
     DO I = 1,3
        DO J = 1,3
-          RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
-          LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
+          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
 !
@@ -139,11 +139,11 @@ CONTAINS
 !
 !   One Dimension: Right
 !
-    IF(GM%PBC%AutoW(1)) THEN
+    IF(GM%PBC%AutoW%I(1)==1) THEN
        CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
-    ELSEIF(GM%PBC%AutoW(2)) THEN
+    ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
        CALL IrRegular(MaxL,Zero,LatVec(2,2),Zero)
-    ELSEIF(GM%PBC%AutoW(3)) THEN      
+    ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
        CALL IrRegular(MaxL,Zero,Zero,LatVec(3,3))
     ENDIF
     DO L=1,MaxL
@@ -155,11 +155,11 @@ CONTAINS
 !
 !   One Dimension: Left
 !
-    IF(GM%PBC%AutoW(1)) THEN
+    IF(GM%PBC%AutoW%I(1)==1) THEN
        CALL IrRegular(MaxL,-LatVec(1,1),Zero,Zero)
-    ELSEIF(GM%PBC%AutoW(2)) THEN
+    ELSEIF(GM%PBC%AutoW%I(2)==1) THEN
        CALL IrRegular(MaxL,Zero,-LatVec(2,2),Zero)
-    ELSEIF(GM%PBC%AutoW(3)) THEN      
+    ELSEIF(GM%PBC%AutoW%I(3)==1) THEN      
        CALL IrRegular(MaxL,Zero,Zero,-LatVec(3,3))
     ENDIF
     NC = (CS%NCells-1)/2
@@ -203,8 +203,8 @@ CONTAINS
 !
     DO I = 1,3
        DO J = 1,3
-          RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
-          LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
+          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
 !
@@ -218,7 +218,7 @@ CONTAINS
 !   Sum the Real Space
 !
     DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmin)
+       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmin)
        IF(CSMM%NCells .GT. 500000) THEN
           Rmax = 0.99*Rmax
           CALL Delete_CellSet(CSMM)
@@ -249,12 +249,12 @@ CONTAINS
     ENDDO
     CALL Delete_CellSet(CSMM)
 !
-!     Sum the Reciprical Space 
+!   Sum the Reciprical Space 
 !
     ExpFac = Pi*Pi/BetaSq
     Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
     DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,RecpLatVec,Rmax)
        IF(CSMM%NCells .LT. 9) THEN
           Rmax = 1.01D0*Rmax
           CALL Delete_CellSet(CSMM)
@@ -269,9 +269,9 @@ CONTAINS
     Delt    = LenMax/DBLE(NDiv)
     DO I=-NDiv,NDiv
        Vec(:) = Zero
-       IF(.NOT.GM%PBC%AutoW(1)) Vec(1) = I*Delt
-       IF(.NOT.GM%PBC%AutoW(2)) Vec(2) = I*Delt
-       IF(.NOT.GM%PBC%AutoW(3)) Vec(3) = I*Delt
+       IF(GM%PBC%AutoW%I(1)==0) Vec(1) = I*Delt
+       IF(GM%PBC%AutoW%I(2)==0) Vec(2) = I*Delt
+       IF(GM%PBC%AutoW%I(3)==0) Vec(3) = I*Delt
        DO NC = 1,CSMM%NCells
           PQ(:) = CSMM%CellCarts%D(:,NC)+Vec(:)
           Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
@@ -293,7 +293,7 @@ CONTAINS
 !   Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
 !
     DO I=1,3
-       IF(.NOT. GM%PBC%AutoW(I)) THEN
+       IF(GM%PBC%AutoW%I(I)==0) THEN
           PQ(:) = Zero
           PQ(I) = 1.D-10
           Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
@@ -373,8 +373,8 @@ CONTAINS
 !
     DO I = 1,3
        DO J = 1,3
-          RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
-          LatVec(I,J)     = GM%PBC%BoxShape(I,J)
+          RecpLatVec(I,J) = GM%PBC%InvBoxSh%D(J,I)
+          LatVec(I,J)     = GM%PBC%BoxShape%D(I,J)
        ENDDO
     ENDDO
 !
@@ -388,7 +388,7 @@ CONTAINS
 !   Sum the Real Space
 !
     DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmax)
+       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,LatVec,Rmax)
        IF(CSMM%NCells .GT. 600000) THEN
           Rmax = 0.99*Rmax
           CALL Delete_CellSet(CSMM)
@@ -424,7 +424,7 @@ CONTAINS
     ExpFac = Pi*Pi/BetaSq
     Rmax   = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
     DO
-       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,RecpLatVec,Rmax)
+       CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW%I,RecpLatVec,Rmax)
        IF(CSMM%NCells .LT. 27) THEN
           Rmax = 1.01D0*Rmax
           CALL Delete_CellSet(CSMM)
@@ -489,12 +489,12 @@ CONTAINS
     AdotC = Zero
     BdotC = Zero
     DO I=1,3
-       MagA  = MagA+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,1)
-       MagB  = MagB+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,2)
-       MagC  = MagC+GM%PBC%BoxShape(I,3)*GM%PBC%BoxShape(I,3)
-       AdotB = AdotB+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,2)
-       AdotC = AdotC+GM%PBC%BoxShape(I,1)*GM%PBC%BoxShape(I,3)
-       BdotC = BdotC+GM%PBC%BoxShape(I,2)*GM%PBC%BoxShape(I,3)
+       MagA  = MagA+GM%PBC%BoxShape%D(I,1)*GM%PBC%BoxShape%D(I,1)
+       MagB  = MagB+GM%PBC%BoxShape%D(I,2)*GM%PBC%BoxShape%D(I,2)
+       MagC  = MagC+GM%PBC%BoxShape%D(I,3)*GM%PBC%BoxShape%D(I,3)
+       AdotB = AdotB+GM%PBC%BoxShape%D(I,1)*GM%PBC%BoxShape%D(I,2)
+       AdotC = AdotC+GM%PBC%BoxShape%D(I,1)*GM%PBC%BoxShape%D(I,3)
+       BdotC = BdotC+GM%PBC%BoxShape%D(I,2)*GM%PBC%BoxShape%D(I,3)
     ENDDO
     MagA  = SQRT(MagA)
     MagB  = SQRT(MagB)      

@@ -75,9 +75,9 @@ MODULE PBCFarField
       E_PFF = Two*E_PFF
 !     Calculate Dipole energy
       IF(GMLoc%PBC%Dimen == 2) THEN
-         IF(.NOT. GMLoc%PBC%AutoW(1) ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
-         IF(.NOT. GMLoc%PBC%AutoW(2) ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
-         IF(.NOT. GMLoc%PBC%AutoW(3) ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
+         IF(GMLoc%PBC%AutoW%I(1)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
+         IF(GMLoc%PBC%AutoW%I(2)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
+         IF(GMLoc%PBC%AutoW%I(3)==0 ) E_DP = Two*GMLoc%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
       ELSEIF(GMLoc%PBC%Dimen == 3) THEN 
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
@@ -97,7 +97,7 @@ MODULE PBCFarField
 !     Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
-      PQ = Prim%P-GMLoc%PBC%CellCenter   
+      PQ = Prim%P-GMLoc%PBC%CellCenter%D   
 !     Contract
       IF(NoTranslate(PQ)) THEN
          DO LM = 0,LSP(Prim%Ell)
@@ -113,14 +113,14 @@ MODULE PBCFarField
          ENDDO
       ENDIF
 !     Include the Dipole correction to FarFC and FarFS
-      PQ=Prim%P-GMLoc%PBC%CellCenter 
+      PQ=Prim%P-GMLoc%PBC%CellCenter%D 
       IF(GMLoc%PBC%Dimen==1) THEN
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==2) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         IF(.NOT. GMLoc%PBC%AutoW(1)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
-         IF(.NOT. GMLoc%PBC%AutoW(2)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
-         IF(.NOT. GMLoc%PBC%AutoW(3)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         IF(GMLoc%PBC%AutoW%I(1)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
+         IF(GMLoc%PBC%AutoW%I(2)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(GMLoc%PBC%AutoW%I(3)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
@@ -146,7 +146,7 @@ MODULE PBCFarField
 !     Transform <Bra| coefficients from HG to SP
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
-      PQ = Prim%P-GMLoc%PBC%CellCenter   
+      PQ = Prim%P-GMLoc%PBC%CellCenter%D   
 !     Contract
       IF(NoTranslate(PQ)) THEN
          DO LM = 0,LSP(Prim%Ell)
@@ -162,14 +162,14 @@ MODULE PBCFarField
          ENDDO
       ENDIF
 !     Include the Dipole correction to FarFC and FarFS
-      PQ=Prim%P-GMLoc%PBC%CellCenter 
+      PQ=Prim%P-GMLoc%PBC%CellCenter%D
       IF(GMLoc%PBC%Dimen==1) THEN
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==2) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
-         IF(.NOT. GMLoc%PBC%AutoW(1)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
-         IF(.NOT. GMLoc%PBC%AutoW(2)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
-         IF(.NOT. GMLoc%PBC%AutoW(3)) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         IF(GMLoc%PBC%AutoW%I(1)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
+         IF(GMLoc%PBC%AutoW%I(2)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(GMLoc%PBC%AutoW%I(3)==0) CTFF  = CTFF + GMLoc%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
          RETURN
       ELSEIF(GMLoc%PBC%Dimen==3) THEN
          HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,PQ(1),PQ(2),PQ(3),HGBra(1:))
@@ -196,7 +196,7 @@ MODULE PBCFarField
 !    Transform <Bra| coefficients from HG to SP
      PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
      CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFKetC%D,PFFKetS%D)   
-     PQ = Prim%P-GMLoc%PBC%CellCenter   
+     PQ = Prim%P-GMLoc%PBC%CellCenter%D   
 !    Contract
 !***
 !    Have to construct the Tensors in MakePFFT    M[l,m,I] = Sum_[R] n_I M_[l,m,R]
@@ -289,9 +289,9 @@ MODULE PBCFarField
             DO iq=1,NQ
                iadd   = Rho%OffQ%I(zq)+iq
                jadd   = Rho%OffR%I(zq)+(iq-1)*LKet+1
-               PQ(1)  = Rho%Qx%D(iadd)-GMLoc%PBC%CellCenter(1)
-               PQ(2)  = Rho%Qy%D(iadd)-GMLoc%PBC%CellCenter(2)
-               PQ(3)  = Rho%Qz%D(iadd)-GMLoc%PBC%CellCenter(3)
+               PQ(1)  = Rho%Qx%D(iadd)-GMLoc%PBC%CellCenter%D(1)
+               PQ(2)  = Rho%Qy%D(iadd)-GMLoc%PBC%CellCenter%D(2)
+               PQ(3)  = Rho%Qz%D(iadd)-GMLoc%PBC%CellCenter%D(3)
                PiZ=(Pi/Zeta)**(ThreeHalves)  
                Dist = SQRT(PQ(1)**2+PQ(2)**2+PQ(3)**2)
                IF(Dist > BDist) THEN
@@ -336,7 +336,7 @@ MODULE PBCFarField
 !     First, Determint the Distance to the Nearest Cell in the CellSet CS_inf-CS_IN 
 !
       Radius = 1.25*CS_IN%Radius
-      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius) 
+      CALL New_CellSet_Sphere(CStmp,GMLoc%PBC%AutoW%I,GMLoc%PBC%BoxShape%D,Radius) 
 !
       MinRadius = 1.D16
       DO NC=1,CStmp%NCells

@@ -20,6 +20,7 @@ PROGRAM JForce
   USE BlokTrPdJ
   USE BlokTrWdS
   USE NuklarE
+  USE SetXYZ 
   IMPLICIT NONE
 
 #ifdef PARALLEL
@@ -47,6 +48,7 @@ PROGRAM JForce
   TYPE(INT_VECT)               :: GlobalQMNum
   TYPE(INT_VECT)               :: AtmMark    
   TYPE(CRDS)                   :: GMLocMM,GMLoc
+  TYPE(DBL_RNK2)               :: GradAux
 #else
   TYPE(CRDS)                   :: GMLoc
 #endif
@@ -196,7 +198,7 @@ PROGRAM JForce
   ENDDO
 ! Dipole Correction
   DO I=1,3
-     LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape(I,I)
+     LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
   ENDDO  
 #ifdef PARALLEL
   JFrcEndTm = MPI_Wtime()
@@ -242,7 +244,9 @@ PROGRAM JForce
     CALL Halt('No mechanics defined in JForce') 
   ENDIF
   CALL New(Frc,3*NatmsLoc)
-  CALL Get(Frc,'GradE',Tag_O=CurGeom)
+  CALL New(GradAux,(/3,NatmsLoc/))
+  CALL Get(GradAux,'gradients',Tag_O=CurGeom)
+  CALL CartRNK2ToCartRNK1(Frc%D,GradAux%D)
   CALL New(GlobalQMNum,NatmsLoc)
   IF(HasQM().AND.HasMM()) THEN
      CALL Get(GlobalQMNum,'GlobalQMNum')
@@ -265,9 +269,10 @@ PROGRAM JForce
         Frc%D=Frc%D+MMJFrc%D
         CALL PChkSum(MMJFrc,'MMJFrc bef dJ/dR added',Proc_O=Prog)  
      ENDIF
-     CALL PChkSum(Frc ,'Frc after dJ/dR added',Proc_O=Prog)  
-     CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
-     CALL Put(Frc,'GradE',Tag_O=CurGeom)
+     CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
+     CALL CartRNK1ToCartRNK2(Frc%D,GradAux%D)
+     CALL Put(GradAux,'gradients',Tag_O=CurGeom)
+     CALL Delete(GradAux)
      CALL Delete(Frc)
      CALL Delete(GlobalQMNum)
 ! Tidy up
@@ -294,18 +299,19 @@ PROGRAM JForce
   ENDIF
   CALL Delete(TotJFrc)
 #endif
-  CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
-  CALL New(Frc,3*GMLoc%Natms)
-  CALL Get(Frc,'GradE',Tag_O=CurGeom)
-  Frc%D=Frc%D+JFrc%D
-  CALL Put(Frc,'GradE',Tag_O=CurGeom)
+  CALL PChkSum(JFrc,'dXC/dR',Proc_O=Prog)  
+! Sum in contribution to total force
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GMLoc%Gradients%D(1:3,AtA) =  GMLoc%Gradients%D(1:3,AtA)+JFrc%D(A1:A2)
+  ENDDO
+  GMLoc%PBC%LatFrc%D = GMLoc%PBC%LatFrc%D+LatFrc_J%D
+  CALL Put(GMLoc,Tag_O=CurGeom)
 !
-  CALL Put(LatFrc_J,'LatFrc_J',Tag_O=CurGeom)
-  CALL Delete(LatFrc_J)
-!
-  CALL Delete(Frc)
   CALL Delete(BS)
   CALL Delete(GMLoc)
+  CALL Delete(LatFrc_J)
   CALL Delete(JFrc)
 #endif
   CALL Delete(RhoPoles)

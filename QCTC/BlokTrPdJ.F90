@@ -258,7 +258,7 @@ MODULE BlokTrPdJ
                             CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                             DO I=1,3
                                KI = K + 3*(I+1)
-                               IF(GMLoc%PBC%AutoW(I).AND.GMLoc%PBC%AutoW(K)) THEN
+                               IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN
                                   DO LMN=1,HGLenEll
                                      dJ(IA,IB,KI)=dJ(IA,IB,KI)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet_L(LMN,I)
                                   ENDDO  
@@ -371,7 +371,7 @@ MODULE BlokTrPdJ
           CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
           DO I=1,3
              KI = K + 3*(I+1)
-             IF(GMLoc%PBC%AutoW(I).AND.GMLoc%PBC%AutoW(K)) THEN
+             IF(GMLoc%PBC%AutoW%I(I)==1 .AND. GMLoc%PBC%AutoW%I(K)==1) THEN
                 DO LMN=1,HGLenEll
                    Vck(KI)=Vck(KI)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet_L(LMN,I)
                 ENDDO

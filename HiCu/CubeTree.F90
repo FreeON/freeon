@@ -631,7 +631,6 @@ MODULE CubeTree
 !         WRITE(*,*)' ICube = ',Node%ICube         
       55 FORMAT('Rho[',D8.2,', ',D8.2,', ',D8.2,']= ',D12.6)
       END SUBROUTINE PrintCube
-#ifdef PERIODIC
 !==========================================================================
 !
 !==========================================================================
@@ -640,14 +639,14 @@ MODULE CubeTree
         INTEGER          :: I
 !
         DO I = 1,3
-           IF(GM%PBC%AutoW(I)) THEN
+           IF(GM%PBC%AutoW%I(I)==1) THEN
               IF(Box%BndBox(I,1) < Zero) THEN
                  Box%BndBox(I,1) = Zero
-                 Box%BndBox(I,2) = GM%PBC%BoxShape(I,I)
+                 Box%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)
               ENDIF
-              IF(Box%BndBox(I,2) > GM%PBC%BoxShape(I,I)) THEN
+              IF(Box%BndBox(I,2) > GM%PBC%BoxShape%D(I,I)) THEN
                  Box%BndBox(I,1) = Zero
-                 Box%BndBox(I,2) = GM%PBC%BoxShape(I,I)
+                 Box%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)
               ENDIF
            ENDIF
         ENDDO
@@ -656,9 +655,6 @@ MODULE CubeTree
            Box%Center(I) = Half*(Box%BndBox(I,2)+Box%BndBox(I,1))
         ENDDO
      END SUBROUTINE MakeBoxPeriodic
-#endif
-!
-!
-!
+!==========================================================================
 END MODULE
 
