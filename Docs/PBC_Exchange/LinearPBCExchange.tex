@@ -1,5 +1,14 @@
-\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}
-%\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. USE:
+%
+%\newcommand{\commentoutA}[1]{}
+%\newcommand{\commentoutB}[1]{#1}
+
+\newcommand{\commentoutA}[1]{#1}
+\newcommand{\commentoutB}[1]{}
+
+\commentoutA{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -10,6 +19,7 @@
 \usepackage{graphicx}
 \makeatletter 
 \makeatother
+
 
 \begin{document}
 
@@ -36,7 +46,8 @@ is demonstrated for fully periodic magnesium oxide, ice and diamond.  Computatio
 lattice constant using the HF-MIC model together with the hybrid PBE0 density functional 
 [Theochem, {\bf 493} 145 (1999)] yields $a_0=3.569$\AA~ with the 6-21G* basis set and a 
 $3\times3\times3$ supercell.  Linear scaling computation of the HF-MIC exchange matrix is demonstrated 
-for diamond and ice in the condensed phase. \\
+for diamond and ice in the condensed phase.
+\\ \smallskip
 \noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, exact-exchange, minimum image convention
 \end{abstract}
 
@@ -44,7 +55,7 @@ for diamond and ice in the condensed phase. \\
 
 \maketitle
 
-\footnotetext[1]{\tt Preprint LA-UR 03-9043}
+\footnotetext[1]{\tt LA-UR 03-9043}
 \footnotetext[2]{\tt tymczak@lanl.gov}
 
 \section{INTRODUCTION}
@@ -295,10 +306,6 @@ for the endpoint derivatives that do not assume EKPS:
 where  ${\bf F}$ is the Fockian, ${\bf T}$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
 This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{Implementation}\label{implementation}
 
 A general treatment of $\Gamma$-point periodic boundary conditions has been implemented in the {\sc MondoSCF}\cite{MondoSCF}
@@ -321,6 +328,8 @@ linear scaling Quantum Chemistry codes.  The code was compiled using the Portlan
 Group F90 compiler {\sc pgf90} v4.2 \cite{pgf90} with the {\tt -O1 -tp athlon} options  and with the 
 GNU C compiler {\sc gcc} v3.2.2 using the {\tt -O1} flag.  All calculations were carried out on a 
 1.6GHz AMD Athlon running RedHat  {\sc Linux}v9.0 \cite{RedHat90}.   
+
+\commentoutA{
 
 \begin{table}[ht]
 \caption{Progression of Hartree-Fock $\Gamma$-point super-cell calculations 
@@ -345,7 +354,7 @@ Program         & $N_{\rm MgO}$              & Energy (au)    & Energy/$N_{\rm M
 %{\sc MondoSCF}       & 64$^g$   & -8789.2494     & -137.33202  \\
 %                     & 128$^f$  & -17578.502     & -137.33205  \\
 %                     & 216$^g$  & -29663.729     & -137.33208  \\ 
-{\sc MondoSCF}       & 2$^b$    & -274.530033     & -137.265017 \\
+{\sc MondoSCF}$^a$   & 2$^b$    & -274.530033     & -137.265017 \\
                      & 8$^c$    & -1098.43823     & -137.304778  \\
                      & 16$^b$   & -2197.05636     & -137.316023  \\
                      & 32$^c$   & -4394.48467     & -137.327646  \\
@@ -354,7 +363,7 @@ Program         & $N_{\rm MgO}$              & Energy (au)    & Energy/$N_{\rm M
                      & 128$^b$  & -17578.5022     & -137.332048  \\
                      & 216$^c$  & -29663.7291     & -137.332079  \\ 
 \hline
-{\sc CRYSTAL98}$^a$  & 2$^d$    & -274.664153     & -137.332077  \\ 
+{\sc CRYSTAL98}$^d$  & 2$^b$    & -274.664153     & -137.332077  \\ 
 \botrule 
 \end{tabular}\\}
 \raggedright{
@@ -411,7 +420,9 @@ Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptsc
 {\hskip 0.33in}$^a \Gamma$-point\\
 {\hskip 0.33in}$^b$ Taken from Ref.~[\onlinecite{ROrlando90}]\\}
 \end{table}
+}
 
+\commentoutA{
 
 \begin{figure}
 \caption{The relaxed, uniaxial lattice potential of proton ordered ice \cite{SCasassa97}.
@@ -421,6 +432,8 @@ cell using a~$6\times6\times6$ ${\bf k}$-space integration grid.}
 \label{IceEnergyVsLattice}
 {\center \includegraphics{pIce_En_vs_a.ps}\par}
 \end{figure}
+}
+
 
 \section{Validation} \label{validation}
 
@@ -471,6 +484,8 @@ the 8-51G basis for oxygen and the 5-11G${^*}$ basis for hydrogen.  The {\sc Mon
 option was used, delivering a relative accuracy of 6-7 digits. The potential minimum for the 
 {\sc CRYSTAL98} curve is $7.144$\AA~and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
+\commentoutA{
+
 \begin{figure}[h]
 \caption{CPU time for the exchange, Coulomb  and density 
 matrix build (scaled by 10) of diamond using {\tt LOOSE} thresholding 
@@ -486,6 +501,7 @@ thresholding at the RHF-MIC/8-51G/5-11G$^*$ level of theory.}
 \label{IceScaling}
 {\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
 \end{figure}
+}
 
 \section{Scaling}\label{scaling}
 
@@ -570,6 +586,8 @@ calibrated over a wide range of systems to yield a minimum of  4, 6 and 8 digits
 energy with {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.    Typically however, one additional digit is achieved for 
 models that contain Hartree-Fock exchange.
 
+\commentoutA{
+
 \begin{table}[h]
 \caption{Accuracy goals and corresponding thresholds that control precision of the {\sc MondoSCF} linear scaling algorithms.}
 \label{TableOfThresholds}
@@ -584,5 +602,144 @@ Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptsc
 \botrule
 \end{tabular}}
 \end{table}
+
+}
+ 
+\commentoutB{
+
+%
+% Tables
+%
+
+\clearpage 
+\begin{table}
+\caption{Progression of Hartree-Fock $\Gamma$-point super-cell calculations 
+for MgO using the periodic RHF-MIC and RHF 8-511G/8-51G level of theory.  
+Comparison is 
+made to a final value approaching the ${\bf k}$-space integration limit for 
+the primitive cell.}
+\label{MgOTable}
+\center{\begin{tabular}{lrll}
+\toprule
+Program         & $N_{\rm MgO}$              & Energy (au)    & Energy/$N_{\rm MgO}$\\ 
+\colrule
+{\sc MondoSCF}       & 2$^b$    & -274.530033     & -137.265017 \\
+                     & 8$^c$    & -1098.43823     & -137.304778  \\
+                     & 16$^b$   & -2197.05636     & -137.316023  \\
+                     & 32$^c$   & -4394.48467     & -137.327646  \\
+                     & 54$^b$   & -7415.89617     & -137.331411  \\
+                     & 64$^c$   & -8789.24941     & -137.332022  \\
+                     & 128$^b$  & -17578.5022     & -137.332048  \\
+                     & 216$^c$  & -29663.7291     & -137.332079  \\ 
+\hline
+{\sc CRYSTAL98}$^a$  & 2$^d$    & -274.664153     & -137.332077  \\ 
+\botrule 
+\end{tabular}\\}
+\raggedright{
+{\hskip 1.5in}$^a \Gamma$-point\\
+{\hskip 1.5in}$^b$Triclinic \\
+{\hskip 1.5in}$^c$Cubic \\
+{\hskip 1.5in}$^d 8\times8\times8$ ${\bf k}$-space integration grid  \\}
+\end{table}
+
+\clearpage 
+\begin{table}
+\caption{Progression of $\Gamma$-point super-cell calculations of proton ordered ice
+at the RHF-MIC/8-51G/5-11G$^*$ level of theory.   Comparison is made to a final value 
+approaching the ${\bf k}$-space integration limit for the primitive cell.}
+\label{PIceTable}
+\center{\begin{tabular}{lrccc}
+\toprule
+Program             & $N_{\rm H_20}$ & Energy (au)    & Energy/$N_{\rm H_2O}$ & DEKPS\\ 
+\colrule
+{\sc MondoSCF}$^a$  & 2              &  -152.03025  &  -76.01512  & $10^{-3}$\\
+                    & 16             &  -1216.3003  &  -76.01877  & $10^{-4}$ \\
+                    & 54             &  -4105.0163  &  -76.01882  & $10^{-5}$ \\
+                    & 128            &  -9730.4090  &  -76.01882  & $10^{-6}$ \\
+                    & 250            &  -19004.705  &  -76.01882  & $10^{-6}$ \\ 
+\hline
+{\sc CRYSTAL98}$^b$  & 2   &  -152.03765  &  -76.01882  \\ 
+\botrule
+\end{tabular}\\}
+\raggedright{
+{\hskip 1.23in}$^a \Gamma$-point\\
+{\hskip 1.23in}$^b 6\times6\times6$ ${\bf k}$-space integration grid \\}
+\end{table}
+
+\clearpage 
+\begin{table}
+\caption{Lattice constants in \AA~for diamond computed using different system sizes, 
+theory levels, and basis sets at a {\tt LOOSE} accuracy. For comparison, 
+the experimental value for diamond, extrapolated to $T = 0$K, is 
+${\rm a}_0 = 3.567$\AA, while ${\rm a}_0 = 3.583$\AA~is obtained 
+with both the RPBE/6-31G* GGA and the RTPSS/6-31G* meta-GGA level of theory \cite{VStaroverov04}.}
+\label{DiamondLC}
+\center{\begin{tabular}{crcccc}
+\toprule
+Program              &$N_{\rm at}$   & Basis         & ${\rm a}_0^{\rm \scriptscriptstyle HF}$ & ${\rm a}_0^{\rm \scriptscriptstyle PBE0}$ \\
+\colrule
+{\sc MondoSCF}$^a$   &~64~           & ~STO-3G~      & ~3.587~          &  ~3.601~    \\
+      --             &~216~          & ~STO-3G~      & ~3.582~          &  ~3.594~    \\
+{\sc CRYSTAL}$^b$    & ~2~           & ~STO-3G~      & ~3.581~          &   -- \\ 
+{\sc MondoSCF}$^a$   &~64~           & ~6-21G*~      & ~3.575~          &  ~3.571~    \\
+      --             &~216~          & ~6-21G*~      & ~3.571~          &  ~3.569~    \\
+{\sc CRYSTAL}$^b$    & ~2~           & ~6-21G*~      & ~3.574~          &   -- \\
+\hline
+\botrule
+\end{tabular}\\}
+\raggedright{
+{\hskip 1.6in}$^a \Gamma$-point\\
+{\hskip 1.6in}$^b$ Taken from Ref.~[\onlinecite{ROrlando90}]\\}
+\end{table}
+
+\clearpage 
+\begin{table}
+\caption{Accuracy goals and corresponding thresholds that control precision of the {\sc MondoSCF} linear scaling algorithms.}
+\label{TableOfThresholds}
+\center{
+\begin{tabular}{lllll}
+\toprule
+Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & 
+$\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
+\colrule
+{\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
+{\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
+{\tt TIGHT}     & $10^{-6}$ & $10^{-10}$ & $10^{-12}$ & $10^{-7}$ \\
+\botrule
+\end{tabular}}
+\end{table}
+%
+% Figures
+%
+
+\clearpage
+\begin{figure}
+\caption{The relaxed, uniaxial lattice potential of proton ordered ice \cite{SCasassa97}.
+Comparison is made between a RHF-MIC/8-51G/5-11G$^*$ 250 molecule $\Gamma$-point super-cell 
+calculation and a {\sc CRYSTAL98} calculation carried out with a two molecule primitive
+cell using a~$6\times6\times6$ ${\bf k}$-space integration grid.}
+\label{IceEnergyVsLattice}
+{\center \resizebox*{6in}{!}{\includegraphics{pIce_En_vs_a.ps}} \par}
+\end{figure}
+
+\clearpage
+\begin{figure}
+\caption{CPU time for the exchange, Coulomb  and density 
+matrix build (scaled by 10) of diamond using {\tt LOOSE} thresholding 
+at the RHF-MIC/STO-3G level of theory.}
+\label{DiamondScaling_1}
+{\centering  \resizebox*{6in}{!}{\includegraphics{Timing_Diamond_ONX_1.ps}} \par}
+\end{figure}
+
+\clearpage
+\begin{figure}
+\caption{CPU time for the exchange, Coulomb and density 
+matrix build (scaled by 10) of proton ordered ice using {\tt GOOD}
+thresholding at the RHF-MIC/8-51G/5-11G$^*$ level of theory.}
+\label{IceScaling}
+{\centering  \resizebox*{6in}{!}{\includegraphics{Timing_pIce_ONX_1.ps}} \par} 
+\end{figure}
+
+}
 
 \end{document}
