@@ -113,7 +113,7 @@ MODULE BlokTrWdS
     ENDDO
 !    WRITE(*,*)'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
 !    PrintFlags%Fmt=DEBUG_DBLSTYLE
-!    CALL  Print_DBL_Rank2A(dS(:,:,3),'dSz',Unit_O=6)
+!    CALL  Print_DBL_Rank2A(dS(:,:,1),'dSx',Unit_O=6)
 !    CALL  Print_DBL_Rank2A(W,'W',Unit_O=6)
 !    CALL  Print_DBL_Rank2A(MATMUL(W,dS(:,:,3)),'W.dS',Unit_O=6)
     DO K=1,3

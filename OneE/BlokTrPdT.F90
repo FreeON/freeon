@@ -37,7 +37,7 @@ MODULE BlokTrPdT
   IMPLICIT NONE
 
   CONTAINS
-     FUNCTION TrPdT(BS,Pair,P,AtA,AtB) RESULT(Vck)
+     FUNCTION TrPdT(BS,Pair,P) RESULT(Vck)
      TYPE(BSET)                                      :: BS
      TYPE(AtomPair)                                  :: Pair
      REAL(DOUBLE),DIMENSION(3)                       :: Vck
@@ -153,26 +153,6 @@ MODULE BlokTrPdT
                  MA=BS%LyDex%I(LMNA)
                  NA=BS%LzDex%I(LMNA)
                  CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
-!IF(AtA==1.AND.AtB==2.AND.CFA==1.AND.CFB==1)THEN
-!WRITE(*,*)' '
-!WRITE(*,*)' '
-!WRITE(*,*)' '
-!           WRITE(*,*)' CFA = ',CFA,' PFA = ',PFA,' CFB = ',CFB,' PFB = ',PFB
-!
-!WRITE(*,*)LA,MA,NA,LB,MB,NB
-! WRITE(77,22)AtA,AtB,LA,MA,NA,LB,MB,NB,  &
-!            BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB), &
-!            zetaa,zetab,Pair%A,Pair%B
-! WRITE(*,22)AtA,AtB,LA,MA,NA,LB,MB,NB,  &
-!            BS%CCoef%D(LMNA,PFA,CFA,KA),BS%CCoef%D(LMNB,PFB,CFB,KB), &
-!            zetaa,zetab,Pair%A,Pair%B
-!22 FORMAT('test[',I3,',',I3,']={ la->',I2,',ma->',I2,',na->',I2,           &
-!                               ',lb->',I2,',mb->',I2,',nb->',I2,           &
-!                               ',ca->',F10.7,',cb->',F10.7,               &
-!                               ',za->',F10.7,',zb->',F10.7,               &
-!                               ',ax->',F10.7,',ay->',F10.7,',az->',F10.7, &
-!                               ',bx->',F10.7,',by->',F10.7,',bz->',F10.7,'}; \n')
-
 !                dT/dAx
                  Txx=dT(1,LA,LB)*   E(2,MA,MB,0)* E(3,NA,NB,0)
                  Tyx=dE(1,LA,LB)*   T(2,MA,MB)*   E(3,NA,NB,0)
@@ -187,22 +167,10 @@ MODULE BlokTrPdT
                  Txz= T(1,LA,LB)*   E(2,MA,MB,0)*dE(3,NA,NB)
                  Tyz= E(1,LA,LB,0)* T(2,MA,MB)*  dE(3,NA,NB)
                  Tzz= E(1,LA,LB,0)* E(2,MA,MB,0)*dT(3,NA,NB)
-
-!WRITE(*,*)' ty = ',T(2,MA,MB)
-!WRITE(*,*)' f3 = ',dE(3,NA,NB)
-!WRITE(*,*)' dTxz = ',Txz
-!WRITE(*,*)' dTyz = ',Tyz
-!WRITE(*,*)' dTzz = ',Tzz
-
                  dTBlk(IA,IB,3)=dTBlk(IA,IB,3)+Half*CA*CB*Ov*(Txz+Tyz+Tzz)
-
-!ENDIF
+!
               ENDDO
            ENDDO
-!           CALL  Print_DBL_Rank2A(dTBlk(:,:,3),'dTz',Unit_O=6)
-
-
-
         ENDDO
         ENDDO
      ENDDO
