@@ -429,9 +429,9 @@ CONTAINS
              ! simply relative to previous energy
              A2Logic=ETot%D(cSCF  ,iCLONE)*(One+ETest)<ETot%D(cSCF-1,iCLONE)
              ! Met all criteria
-             CLogic=DMaxB<DTest.AND.ETotQ<ETest
+             CLogic=DMaxB<DTest.AND.ETotQ<ETest.AND.DMaxB.NE.Zero
              ! Exceeded density criteria
-             DLogic=DMaxB<5D-2*DTest
+             DLogic=DMaxB<5D-2*DTest.AND.DMaxB.NE.Zero
              ! Exceeded energy criteria
              ELogic=ETotQ<3D-2*ETest.AND.DMaxB<1D-2
              ! Quasi convergence from below (bad)
