@@ -24,20 +24,28 @@
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
 New Mexico 87545 }
 
-\affiliation{Larance Livermore}
+\affiliation{Lawrence Livermore National Lab, Livermore, California 94551}
 
 
 \date{\today}
 \begin{abstract}
-A translationally invariant formulation of the Hartree-Fock $\Gamma$-point approximation
-is achieved through introduction of the Minimum Image Convention.  This approximation is 
-implemented  in the ONX algorithm [J.~Chem Phys, ], extending it to linear scaling 
-computation of the periodic Hartree-Fock exchange matrix.  Convergence of the 
-$\Gamma$-point approximation to the ${\bf k}$-space limit is demonstrated for 
-magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamond and ice. 
+A translationally invariant formulation of the Hartree-Fock (HF) $\Gamma$-point approximation
+is presented.   This formulation is achieved through introduction of  the  Minimum Image Convention (MIC) at 
+the level of primitive two-electron integrals, and implemented in a periodic version of the 
+ONX algorithm [J.~Chem.~Phys, {\bf 106} 9708 (1997)] for linear scaling computation of the
+exchange matrix. Convergence of the HF-MIC $\Gamma$-point model to the HF ${\bf k}$-space limit 
+is demonstrated for fully periodic magnesium oxide, ice and diamond.  Computation of the diamond
+lattice constant using the HF-MIC model together with the hybrid PBE0 density functional 
+[Theochem, {\bf 499} 145 (1999)], yeilds $a_0=3.569$ with the 6-21G* basis set and a 
+$3\times3\times3$ supercell.  Linear scaling computation of the HF-MIC exchange matrix is demonstrated 
+for diamond and ice in the condensed phase. 
+%
+\vskip 0.07 in
+\noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, exact-exchange
+%
 \end{abstract}
 
-\pacs{}
+\pacs{71.15.-m,71.15.Ap,71.15.Mb,71.70.Gm}
 
 \maketitle
 
@@ -49,12 +57,12 @@ magnesium oxide, ice and diamond.  True linear scaling is demonstrated for diamo
 
 \section{INTRODUCTION}
 
-In a preceeding companion article \cite{CTymczak04A},  methods were introduced for constructing 
+In a preceding companion article \cite{CTymczak04a},  methods were introduced for constructing 
 the periodic Coulomb and Exchange-Correlation matrix in the $\Gamma$-point approximation that 
 achieve  a cost  scaling only linearly with system size, $N$.  In this paper, an $N$-scaling 
 algorithm is presented for computation of the periodic Hartree-Fock (HF) exchange matrix in the 
 $\Gamma$-point limit.   The Hartree-Fock approximation is often a fast, first 
-approximation and also a starting point for correlated ``wavefunction'' methods.  
+approximation and also a starting point for correlated ``wave-function'' methods.  
 Also, the hybrid Hartree-Fock/Density Functional Theory (HF/DFT) model chemistries are an important next 
 in step in accuracy beyond the pure Generalized Gradient Approximation \cite{Gill92,Becke93,VBarone96,CAdamo99}.
 Together with linear scaling methods for computing the density matrix \cite{ANiklasson02A,ANiklasson03}, these 
@@ -65,7 +73,7 @@ To date, condensed phase HF and HF/DFT calculations have been carried out almost
 exclusively with the {\em ab initio} solid state program {\sc Crystal} \cite{RDovesi00}, 
 which employs conventional (non-direct) ${\cal O}(N^4)$ algorithms for evaluation of the 
 HF exchange matrix.  The {\sc Crystal} program employs methods for ${\bf k}$-space integration, 
-which generate wavefunctions with the correct translational symmetries.   While the  
+which generate wave-functions with the correct translational symmetries.   While the  
 $\Gamma$-point approximation forgoes ${\bf k}$-space integration, it does recover the correct 
 symmetries in the limit of a large super-cell.  With a more tractable formulation and asymptotic 
 correctness in the limit of large systems,  the $\Gamma$-point  approximation would seem an 
@@ -83,7 +91,7 @@ exchange matrix is then described in Section \ref{implementation}.  In Section \
 we demonstrate convergence of the HF-MIC model chemistry to the $\bf k$-space integration 
 limit for a number of systems, and in Section \ref{scaling} we demonstrate linear scaling
 for both diamond and ice.  In Section \ref{discussion} we discuss these results,
-and then in Section \ref{conclusions} we sumarize our results.
+and then in Section \ref{conclusions} we summarize our results.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -157,7 +165,7 @@ is defined in real space, and the two-electron integrals, written in the chemist
 The formally infinite sums over lattice vectors in Eq.~(\ref{CryEq}) involve 
 many contributions that are in practice infinitesimal.  In part this is due to 
 the decay between local basis function products $\phi_a \phi_c $; the product of
-two Guassians centered at ${\bf A}$ and ${\bf C}$ decays also as a Gaussian with 
+two Gaussian centered at ${\bf A}$ and ${\bf C}$ decays also as a Gaussian with 
 $|{\bf A}-{\bf C}|$. 
 Truncation based purely on the overlap of Gaussian basis functions is reliable and
 well controlled, leading  to ${\cal O}(N)$ product terms.
@@ -167,8 +175,8 @@ interactions may be used to exploit this fall off {\em a priori} by confining su
 ${\bf N}$ \cite{RDovesi00,MCausa88,REuwema74,CPisani80,RDovesi80} to only those terms that 
 satisfy the imposed geometric constraints.  Methods equivalent to the radial cutoff have also 
 been used to achieve $N$-scaling of the exchange matrix in gas phase calculations, which set
-a maximal range allowed between atom-atom pairs $\bf C$ and $\bf D$ that 
-address elements of the density matrix $P_{cd}$ \cite{ESchwegler96,JBurant96}.  
+a maximal range allowed between atom-atom pairs ${\bf C}$ and ${\bf D}$ that 
+address elements of the density matrix $P_{cd}$  \cite{ESchwegler96,JBurant96}.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -177,8 +185,9 @@ address elements of the density matrix $P_{cd}$ \cite{ESchwegler96,JBurant96}.
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
 
 The $\Gamma$-point approximation limits {\bf k}-space sampling to just the central cell at
-${\bf k = G} = 0$.   In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equiv \delta_{\bf N,0} \, {\bf P} $,
-reducing Eq.~(\ref{CryEq}) to the less cumbersome relation
+${\bf k} = 0$. In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equiv \delta_{\bf N,0} \, {\bf P} $,
+reducing Eq.~(\ref{CryEq}) to the less cumbersome relation (note, we have re-ordered the lattice sums for 
+simplicity)
 \begin{equation}
 K_{ab}=
 \sum _{{\bf H G}, c d} P_{cd}
@@ -192,20 +201,21 @@ K_{ab}=
 \label{CryEq_2}
 \end{equation}
 However, there are significant problems with this naive model,  as  the exact exchange potential, 
-symmetric in the limit of infinite summation, has been truncated asymetrically.
+symmetric in the limit of infinite summation, has been truncated asymmetrically.
 This truncation leads to an energy expression 
 \begin{equation}
 E_x[{\bf P}^a,{\bf P}^b] = {\rm Tr} \left[  {\bf P}^a \cdot {\bf K}^b  \right] \, ,
 \end{equation}
-which violates permutational symetry of the exchange kernel; that is, in general, 
+which violates permutational symmetry of the exchange kernel; that is, in general, 
 $E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]$.   
 
-A more serious deffect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
+A more serious defect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
 This translational variance has a well understood analogue in classical molecular dynamics 
-\cite{NMetropolis53,DTheodorou85,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials also leads 
-to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored by introducing the Minimum Image Convention (MIC), 
-which ensures that the distance between neighboring images is always used in computing interactions. 
-In computation of the Hartree-Fock exchange matrix, the MIC $\Gamma$-point approximation is just
+\cite{NMetropolis53,DTheodorou85,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials 
+also leads to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored 
+by introducing the Minimum Image Convention (MIC), which ensures that the distance between neighboring images is 
+always used in computing interactions. In computation of the Hartree-Fock exchange matrix, the MIC 
+$\Gamma$-point approximation is just
 \begin{equation}
 K_{ab}=
 \sum _{{\bf H G} c d} P_{cd}
@@ -231,17 +241,19 @@ pq_i & =& pq_i - {\tt ANINT} \left( pq_i -{\tt SIGN}\left( \delta,pq_i\right) \r
 {\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
 \end{eqnarray}
 \end{subequations}
-where $\delta \approx 10^{-15}$ and is needed inorder to avoid wrapping errors \footnote{\bf could
-use some more explenation here.  Maybe a footnote would be appropriate?},   and 
-${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
-composed of the primative lattice vectors,
+where $\delta \approx 10^{-15}$.
+%
+%\footnote{\bf could use some more explanation here.  Maybe a footnote would be appropriate?}
+%
+, and ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
+composed of the primitive lattice vectors,
 \begin{equation}
 {\bf M} = \left( {\bf a}:{\bf b}:{\bf c} \right)
 \end{equation}
 This approach is completely general, and can be used at the primitive level with any modern approach
-to computing two-electron integrals. Imposing this condition recovers translational invariace of the
+to computing two-electron integrals. Imposing this condition recovers translational invariance of the
 exchange matrix. However, the MIC condition does not recover the Exchange Kernel Permutational Symmetry 
-(EKPS).  With greater expense, we could recover the EKPS by  explicitly sysmmetrizing the primitive Gaussian products 
+(EKPS).  With greater expense, we could recover the EKPS by  explicitly symmetrizing the primitive Gaussian products 
 within the kernel.  However, in the limit of large systems, where the range of the density matrix becomes 
 smaller then the system size the  EKPS is recovered as demonstrated in Section \ref{validation}.
 
@@ -250,13 +262,13 @@ exchange potential for periodic boundary conditions and the $\Gamma$-point appro
 effects related to asymmetric truncation may also manifest in methods that perform incomplete 
 ${\bf k}$-space sampling, which  may likewise benefit from employing the MIC.
 
-\section{Optimial damping and symmetry of the exchange kernel}
+\section{Optimal damping and symmetry of the exchange kernel}
 
-For difficult, unstable SCF problems, the Optinal Damping Algorithm (ODA) of Cances \cite{ECances00} is
-an efficient method that gaurantees convergence of the HF model.  
+For difficult, unstable SCF problems, the Optimal Damping Algorithm (ODA) of Cances \cite{ECances00} is
+an efficient method that guarantees convergence of the HF model.  
 However,  permutational symmetry of the exchange kernel is an implicit, simplifying assumption in formulation
 of the conventional ODA algorithm.   For small periodic systems, violation of the EKPS creates problems
-for the ODA, leading to a non-quadratic behavior (the HF model should yeild an exactly quadratic, convex 
+for the ODA, leading to a non-quadratic behavior (the HF model should yield an exactly quadratic, convex 
 minimization problem).   While the EKPS is restored with increasing system size, loose numerical thresholds
 in the linear scaling algorithms can also lead to loss of the EKPS in the limit of a large system.  
 In both cases, loss of EKPS can lead to incorrect determination of the ODA mixing parameter
@@ -282,9 +294,10 @@ for the endpoint derivatives that do not assume EKPS:
    -{\rm Tr}\left[ {\bf P}^0 {\bf F}^1 \right] 
    +2 {\rm Tr}\left[ {\bf P}^1 {\bf F}^1 \right] \, , \nonumber\\
 \end{eqnarray}
-{ \bf PLEASE DOUBLE CHECK THE ABOVE EQUATION.  IT DOESNT LOOK RIGHT TO ME }
-where  ${\bf F}$ is the Fockian, $\bf T$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
-This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
+
+where  ${\bf F}$ is the Fockian, ${\bf T}$ is the kinetic energy matrix  and $E_{\rm ne}$ is 
+the nuclear-electrostatic energy. This  modified ODA leads to the correct quadratic parameterization 
+and guarantees convergence of the HF-MIC model.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\newpage
@@ -294,7 +307,7 @@ This  modified ODA leads to the correct quadratic parameterization and guarantee
 
 A general treatment of $\Gamma$-point Periodic Boundary Conditions has been implemented in the MondoSCF
 suite of programs for linear scaling quantum chemistry.  A detailed account of these developments for 
-pure Density Functional Theory has been given in a companion paper \cite{CTymczak04A}, including the periodic 
+pure Density Functional Theory has been given in a companion paper \cite{CTymczak04a}, including the periodic 
 development of the Quantum Chemical Tree Code ({\sc QCTC}) for performing $N$-scaling Coulomb summation.  
 
 The Order N eXchange ({\sc ONX}) algorithm \cite{ESchwegler97} for computing the gas phase exchange matrix 
@@ -375,8 +388,8 @@ Program             & $N_{\rm H_20}$ & Energy (au)    & Energy/$N_{\rm H_2O}$ & 
 \end{table}
 
 \begin{table}[ht]
-\caption{Lattice Constants in angstoms for the Diamond System for different 
-system sizes, theory levels, and basis sets at a {\tt LOOSE} accuracy. For comparision, 
+\caption{Lattice Constants in angstroms for the Diamond System for different 
+system sizes, theory levels, and basis sets at a {\tt LOOSE} accuracy. For comparison, 
 the experimental value for diamond, extrapolated to $T = 0 K$, is 
 ${\rm a}_0 = 3.567$\AA, while ${\rm a}_0 = 3.583$\AA~is obtained 
 with both the RPBE/6-31G* GGA and the RTPSS/6-31G* meta-GGA level of theory \cite{JTao03}.}
@@ -443,8 +456,8 @@ super cell approach are listed for proton ordered ice \cite{SCasassa97}, using t
 for Oxygen and the 5-11G$^*$ basis for Hydrogen.  A comparison is made to a final 
 value obtained using {\sc Cyrstal98} with a $6\times6\times6$ ${\bf k}$-space integration grid
 as explained in Ref.~[\onlinecite{SCasassa97}].  The {\sc MondoSCF} values were obtained 
-using the {\tt GOOD} acuracy level, defining numerical thresholds that deliver total energies
-precise to the digits quoted ({\bf IS IT 6 or 7?? REALLY?? SHOULD WE REPORT 9 DIGITS FOR TIGHT??}).  
+using the {\tt GOOD} accuracy level, defining numerical thresholds that deliver total energies
+precise to the digits quoted.  
 The primitive cubic cell coordinates used in these ice calculations are listed in Appendix~\ref{Coordinates}.   
 Also shown in this table is a measure of the 
 Deviation from the Exchange Kernel Permutational Symmetry (DEKPS),
@@ -452,7 +465,7 @@ Deviation from the Exchange Kernel Permutational Symmetry (DEKPS),
 {\rm DEKPS} = || {\bf P}^0 {\bf K}^1-{\bf P}^1 {\bf K}^0 ||_2/|| {\bf P}^1 - {\bf P}^0||_2 \, ,
 \end{equation}
 where the superscripts refer simply to consecutive steps in the SCF cycle.  Because this measure
-is normalized, it yeilds a roughly consistent measure throughout the SCF.  As shown in Table \ref{PIceTable},
+is normalized, it yields a roughly consistent measure throughout the SCF.  As shown in Table \ref{PIceTable},
 the DEKPS decreases with system size to a constant value consistent with the numerical thresholds used to 
 discard matrix elements.   
 
@@ -466,7 +479,7 @@ Comparison is made between a 250 molecule RHF-MIC $\Gamma$-point super-cell calc
 with {\sc MondoSCF} and {\sc Crystal98} calculations carried out with a two molecule primitive
 cell using a~$6\times6\times6$ ${\bf k}$-space integration grid, the 8-51G basis for Oxygen and the 
 5-11G${^*}$ basis for Hydrogen.  The {\sc MondoSCF} {\tt good} option was used, delivering 
-a relative accuracy of 6-8 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
+a relative accuracy of 6-7 digits. The potential minimum for the {\sc Crystal98} curve is $7.144$\AA~
 and  for the {\sc MondoSCF} calculation $7.145$\AA.
 
 \begin{figure}[h]
@@ -594,13 +607,14 @@ in preparation of this manuscript.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \appendix
+\eject
 
 \section{Coordinates of Validation Suite and Threshold Definitions}\label{Coordinates}
 %
 %
 %
 \begin{table}[ht]
-\caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
+\caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, corresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
          $a=b=c=2.977776807$\AA $\,$ with angles $\alpha=\beta=\gamma=60^\circ$.}
 \center{
@@ -615,7 +629,7 @@ O   &    0.500 &   0.500 &  0.500  \\
 \end{table}
 
 \begin{table}[ht]
-\caption{Fractional coordinates for the cubic 8 atom unit cell of MgO, cooresponding to the 
+\caption{Fractional coordinates for the cubic 8 atom unit cell of MgO, corresponding to the 
          calculations reported in Table~\ref{MgOTable}.  Length of the unit cell is 
          $a=b=c=4.21121$\AA $\,$ with angles $\alpha=\beta=\gamma=90^\circ$.}
 \center{
@@ -640,7 +654,7 @@ O  &    0.500 &   0.500 &  0.500  \\
 %
 %
 \begin{table}[ht]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell 
+\caption{Fractional coordinates for the 8 atom unit cell of Diamond, corresponding to the supercell 
 calculations reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are 
 $a=b=c=3.5700$\AA, with angles  $\alpha=\beta=\gamma=90^\circ$.}
 \center{
@@ -663,7 +677,7 @@ C &     0.375 &    0.875 &    0.875  \\
 %
 
 \begin{table}[ht]
-\caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, cooresponding to 
+\caption{Fractional coordinates for the 2 molecule unit cell of proton ordered ice, corresponding to 
 the supercell calculations reported in Table~\ref{PIceTable}.  Dimensions of the cubic unit 
 cell are $a=7.328$\AA, $b=7.920$\AA $\,$ and $c=4.400$\AA $\,$ with angles  $\alpha=\beta=\gamma=90^\circ$. }
 \center{
@@ -680,23 +694,17 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 \botrule
 \end{tabular}}
 \end{table}
-\vfill
-\vfill
-\vskip 1.0in
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Threshold Definitions}\label{Thresholds}
 
 \begin{table}[ht]
-\caption{The various thresholds which enter into our three levels of accuracy}
+\caption{The various thresholds which enter into our three levels of accuracy. The loose accuracy
+will give approximately 4-5 digits in the SCF energy; the good accuracy will give approximately 6-7 digits 
+in the SCF energy; and the tight accuracy will give approximately 8-9 digits in the SCF energy }
 \label{Table:AccurLevels}
 \center{
 \begin{tabular}{ccccc}
 \toprule
-Level  & Matrix & Penatration & QCTC/ONX & Distrabution \\ 
+Level  & Matrix & Penetration & QCTC/ONX & Distribution \\ 
 \colrule
 loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
 good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
