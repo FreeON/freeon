@@ -768,6 +768,7 @@ CONTAINS
      !
      CALL MatMul_1x1(ISpBt%I,JSpBt%I,ASpBt%D,ISpB%I,JSpB%I,ASpB%D, &
                      IGc,JGc,AGc,NCart,NIntC,NCart)
+     CALL ThreshMatr(IGc,JGc,AGc,1.D-7)
      !
      CALL Delete(ISpBt) 
      CALL Delete(JSpBt) 
@@ -1269,7 +1270,7 @@ CONTAINS
      !
      IF(DoClssTrf) THEN
        DO I=1,NCart
-         DGcU%D(I)=DGcU%D(I)+1.D-6
+         DGcU%D(I)=DGcU%D(I)+1.D-4
        ENDDO
      ELSE
        K=3*(ThreeAt(1)-1)
@@ -1943,6 +1944,42 @@ CONTAINS
      100  CONTINUE
      CALL Delete(W)
    END SUBROUTINE AddNum
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE ThreshMatr(IGc,JGc,AGc,Thresh)
+     TYPE(INT_VECT)            :: IGc,JGc,IGc2,JGc2
+     TYPE(DBL_VECT)            :: AGc,AGc2
+     INTEGER                   :: I,J,NRow,NZ
+     REAL(DOUBLE)              :: Sum,Thresh
+     !
+     NRow=SIZE(IGc%I)-1
+     NZ=SIZE(JGc%I)
+     CALL New(IGc2,NRow+1)
+     CALL New(JGc2,NZ)
+     CALL New(AGc2,NZ)
+     NZ=0 
+     IGc2%I(1)=1
+     DO I=1,NRow
+       DO J=IGc%I(I),IGc%I(I+1)-1
+         Sum=AGc%D(J)
+         IF(ABS(Sum)>Thresh) THEN
+           NZ=NZ+1
+           JGc2%I(NZ)=JGc%I(J)
+           AGc2%D(NZ)=Sum
+         ENDIF
+       ENDDO
+       IGc2%I(I+1)=NZ+1
+     ENDDO
+     !
+     IGc%I=IGc2%I
+     JGc%I(1:NZ)=JGc2%I(1:NZ)
+     AGc%D(1:NZ)=AGc2%D(1:NZ)
+     !
+     CALL Delete(IGc2)
+     CALL Delete(JGc2)
+     CALL Delete(AGc2)
+   END SUBROUTINE ThreshMatr
 !
 !--------------------------------------------------------------------
 !
