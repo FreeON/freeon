@@ -3043,9 +3043,10 @@ CONTAINS
      INTEGER,DIMENSION(:,:)  :: Top12
      INTEGER                 :: I,J,K,L,I1,I2,I3,N1,N3,IC,N,II
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)            :: Val,ValM,Conv,Sum
+     REAL(DOUBLE)            :: Val,ValM,Conv,Sum,RefLinCrit
      !
      Conv=180.D0/PI
+     RefLinCrit=10.D0
      I1=Atoms(1)
      I2=Atoms(2)
      I3=Atoms(3)
@@ -3062,6 +3063,12 @@ CONTAINS
        IF(II==I2) II=Top12(I3,3)
        CALL BEND(XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,II),Value_O=ValM)
      ENDIF
+     !
+     IF(ABS(180.D0-ValM*Conv)<RefLinCrit) THEN
+       Atoms(4)=0 
+       RETURN
+     ENDIF
+     !
      ValM=ABS(120.D0-ValM*Conv)
      DO K=1,2 
        IF(K==1) THEN
