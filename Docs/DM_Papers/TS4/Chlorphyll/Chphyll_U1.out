@@ -1,0 +1,1490 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 4                                  
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, Eric Schwegler, C.J. Tymczak,      
+ Chee Kwan Gan, Karoly Nemeth and Anders Niklasson    
+ Los Alamos National Laboratory (LA-CC 01-2)          
+ Copywrite 2001, University of California.            
+
+ Compiled for AlphaLinux.Compaq, executing on platinum
+ a alpha machine running 
+ Linux 2.2.18smp
+ 
+6-311G(2df,2pd)                                                                                                                 
+  
+<<Starting MondoSCF 08/25/02 @ 18:53:17>>
+ ** Auto-Wraps at default value => (Off) **
+ ** Atom-Wrap at default value => (AtomWrap-Off) **
+ ** Lattice Vector Format at default value => (Vector Format) **
+ ** Coodinate Format at default value => (Atomic Coord) **
+========================================================================
+ Internal representation of the geometry:
+ Geometry originally in Angstroms has been converted to AU.
+ Geometry has not been reordered.
+ Number of electrons = 360
+------------------------------------------------------------------------
+  *** Periodic is Off *** 
+------------------------------------------------------------------------
+ 1   mg   0.00000000D+00   0.00000000D+00   0.00000000D+00
+ 2   n    0.17861879D+01   -.32896161D+01   -.10877263D+01
+ 3   n    0.91194397D+00   0.15996153D+01   -.35008686D+01
+ 4   n    -.27198637D+01   0.26785732D+01   0.14407271D+00
+ 5   n    -.20500503D+01   -.21629426D+01   0.28093422D+01
+ 6   o    -.92092584D+01   0.64001240D+01   0.47758856D+01
+ 7   o    -.45147444D+01   0.34771147D+01   0.90115174D+01
+ 8   o    -.86699306D+01   0.31222053D+01   0.95301527D+01
+ 9   o    -.10155992D+02   -.29941385D+01   0.10841188D+02
+ 10   o    -.69446485D+01   -.49185221D+01   0.12836531D+02
+ 11   o    0.23762548D+01   0.15008393D+01   0.26220515D+01
+ 12   o    0.52774378D+00   0.43342755D+01   0.66631927D+01
+ 13   c    0.18427285D+01   -.55103276D+01   0.26652695D+00
+ 14   c    -.16049443D+01   0.54952665D+01   -.33567959D+01
+ 15   c    -.30402668D+01   0.49612110D+01   -.11669625D+01
+ 16   c    -.49598315D+01   0.64528473D+01   -.36018177D-01
+ 17   c    -.58384218D+01   0.49829807D+01   0.19953617D+01
+ 18   c    -.44118110D+01   0.27195803D+01   0.20457796D+01
+ 19   c    -.50120258D+01   0.10438090D+01   0.39907044D+01
+ 20   c    -.39087092D+01   -.12472192D+01   0.44157038D+01
+ 21   c    -.44813907D+01   -.31096575D+01   0.65335197D+01
+ 22   c    -.23124577D+01   -.50750670D+01   0.62669928D+01
+ 23   c    -.12193079D+01   -.44070867D+01   0.36881593D+01
+ 24   c    0.35883062D+01   -.72296381D+01   -.96525314D+00
+ 25   c    0.51323068D+00   -.59497834D+01   0.24851786D+01
+ 26   c    0.42102717D+01   -.98203201D+01   -.21618465D-01
+ 27   c    0.63415047D+01   -.71869492D+01   -.48479219D+01
+ 28   c    0.80392534D+01   -.60778501D+01   -.61517384D+01
+ 29   c    0.47945561D+01   0.20198147D+01   -.94437167D+01
+ 30   c    0.10395194D+01   0.66202582D+01   -.84928632D+01
+ 31   c    -.11961021D+01   0.63775229D+01   -.10200079D+02
+ 32   c    -.57775349D+01   0.90092120D+01   -.87881707D+00
+ 33   c    -.75970575D+01   0.48900628D+01   0.40411223D+01
+ 34   c    -.71258732D+01   0.23462649D+01   0.54890304D+01
+ 35   c    0.45335849D+01   -.60929112D+01   -.30326512D+01
+ 36   c    -.70896283D+01   -.43476548D+01   0.62958111D+01
+ 37   c    -.77072474D+01   -.60150734D+01   0.85864992D+01
+ 38   c    -.35375671D+00   -.48766836D+01   0.83127723D+01
+ 39   c    -.65372425D+01   0.30058548D+01   0.81831182D+01
+ 40   c    -.84915971D+01   0.40706021D+01   0.12072968D+02
+ 41   c    -.83814072D+01   -.44422545D+01   0.10826769D+02
+ 42   c    -.75274778D+01   -.34804784D+01   0.15134437D+02
+ 43   c    -.55963101D+01   -.40295761D+01   0.17043344D+02
+ 44   c    0.34070815D+01   -.35440866D+01   -.31262871D+01
+ 45   c    0.37854802D+01   -.17502831D+01   -.49487577D+01
+ 46   c    0.26372260D+01   0.66210329D+00   -.51648668D+01
+ 47   c    0.30446320D+01   0.24274664D+01   -.72538644D+01
+ 48   c    0.14788240D+01   0.44229982D+01   -.68288650D+01
+ 49   c    0.17107689D+00   0.39341449D+01   -.44445221D+01
+ 50   h    -.18100173D+01   0.73530561D+01   -.41764834D+01
+ 51   h    0.37404291D+01   0.16599353D+00   0.33449284D+01
+ 52   h    0.18742113D+01   0.28532028D+01   0.40657644D+01
+ 53   h    0.13330316D+01   0.54001377D+01   0.82061729D+01
+ 54   h    -.14559016D+01   0.39221263D+01   0.69093295D+01
+ 55   h    -.45453390D+01   -.21556671D+01   0.83366207D+01
+ 56   h    -.28170901D+01   -.69600876D+01   0.56692536D+01
+ 57   h    0.94127251D+00   -.77310580D+01   0.33846882D+01
+ 58   h    0.62233779D+01   -.10145259D+02   0.62890081D-01
+ 59   h    0.34194781D+01   -.11262465D+02   -.12299849D+01
+ 60   h    0.34620158D+01   -.10147658D+02   0.18487567D+01
+ 61   h    0.61719963D+01   -.92156834D+01   -.49920513D+01
+ 62   h    0.93058989D+01   -.71005887D+01   -.73825169D+01
+ 63   h    0.82895098D+01   -.40621928D+01   -.59522022D+01
+ 64   h    0.61990760D+01   0.60565718D+00   -.90046577D+01
+ 65   h    0.56805352D+01   0.37560005D+01   -.10048656D+02
+ 66   h    0.37306970D+01   0.12721824D+01   -.11016800D+02
+ 67   h    0.26788189D+01   0.69577632D+01   -.96608273D+01
+ 68   h    0.74409851D+00   0.83019820D+01   -.73748824D+01
+ 69   h    -.77652620D+00   0.52065352D+01   -.11818120D+02
+ 70   h    -.18680697D+01   0.81549991D+01   -.10944556D+02
+ 71   h    -.27750815D+01   0.54871596D+01   -.92623408D+01
+ 72   h    -.76282947D+01   0.94282398D+01   -.12757540D+00
+ 73   h    -.59321333D+01   0.91038683D+01   -.29116331D+01
+ 74   h    -.45335660D+01   0.10490625D+02   -.22820331D+00
+ 75   h    -.86789068D+01   0.10321305D+01   0.53265140D+01
+ 76   h    -.71851162D+01   -.54439226D+01   0.45769919D+01
+ 77   h    -.85275019D+01   -.29021656D+01   0.62045373D+01
+ 78   h    -.60616174D+01   -.71519893D+01   0.89922800D+01
+ 79   h    -.92240549D+01   -.72921124D+01   0.81030128D+01
+ 80   h    0.36528403D-01   -.29220455D+01   0.87513966D+01
+ 81   h    0.13928792D+01   -.58072602D+01   0.78142248D+01
+ 82   h    -.10055610D+01   -.57297437D+01   0.10048523D+02
+ 83   h    -.76215673D+01   0.59136140D+01   0.11965291D+02
+ 84   h    -.73125026D+01   0.27982118D+01   0.13148165D+02
+ 85   h    -.10367150D+02   0.42318335D+01   0.12861381D+02
+ 86   h    -.93576207D+01   -.40001153D+01   0.15873226D+02
+ 87   h    -.74823512D+01   -.14800523D+01   0.14732493D+02
+ 88   h    -.38217251D+01   -.44928991D+01   0.16148105D+02
+ 89   h    -.61434992D+01   -.56255064D+01   0.18191787D+02
+ 90   h    -.52547233D+01   -.24095707D+01   0.18236744D+02
+ 91   h    0.51034885D+01   -.22490763D+01   -.64250306D+01
+========================================================================
+ ParseGeometry        :: Allocs=11,  DeAllocs=11, 0 bytes are presently allocate
+ d.
+                         A max of 10968 bytes were allocated.
+ Base(1)%BName   = User1
+ Opening BasFile = /n/srv1/mchalla/Desktop/MONDOf/BasisSets/User1.bas
+ Base(2)%BName   = User1
+ Opening BasFile = /n/srv1/mchalla/Desktop/MONDOf/BasisSets/User1.bas
+ Base(3)%BName   = User1
+ Opening BasFile = /n/srv1/mchalla/Desktop/MONDOf/BasisSets/User1.bas
+ ParseBaseSets        :: Allocs=300,  DeAllocs=299, 728 bytes are presently allo
+ cated.
+                         A max of 202944 bytes were allocated.
+ Current HDF file :: /n/scratch/mchalla/AlphaScratch/Chphyll_U1_19326.hdf
+ Restart HDF file :: /n/srv1/mchalla/Desktop/MONDOf/Validate/Chphyll_U1.hdf
+ Restart using User1/PBEx/PBEc density from previous geometry #1
+ 
+ PROGRAM OF CALCULATIONS:
+
+  A restricted Roothaan-Hall solution of the SCF using
+  a tight accuracy level,
+  User1 and the PBEx/PBEc model.
+
+  Followed by a  restricted Roothaan-Hall solution of the SCF using
+  a tight ac
+ curacy level,User1 and the PBEx/PBEc model.
+
+  Followed by a  restricted Roothaan-Hall solution of the SCF using
+  a tight ac
+ curacy level,User1 and the PBEx/PBEc model.
+
+ Accuracy level 3 for the User1 basis set:
+  TrixNeglect = 0.10D-05, CubeNeglect
+  = 0.10D-06,
+  TwoENeglect = 0.10D-09, DistNeglect = 0.10D-11
+ MaxAtms = 92, MaxBlks = 8282, MaxNon0 = 2595322, BndWdth = 91
+ Accuracy level 3 for the User1 basis set:
+  TrixNeglect = 0.10D-05, CubeNeglect
+  = 0.10D-06,
+  TwoENeglect = 0.10D-09, DistNeglect = 0.10D-11
+ MaxAtms = 92, MaxBlks = 8282, MaxNon0 = 2595322, BndWdth = 91
+ Accuracy level 3 for the User1 basis set:
+  TrixNeglect = 0.10D-05, CubeNeglect
+  = 0.10D-06,
+  TwoENeglect = 0.10D-09, DistNeglect = 0.10D-11
+ MaxAtms = 92, MaxBlks = 8282, MaxNon0 = 2595322, BndWdth = 91
+<<Entering MakeS 08/25/02 @ 18:53:19>>
+ MakeS                :: S CheckSum  = 0.7488291608588681D+02
+ MakeS                :: CPU Sec = 0.47D+01, WALL Sec = 0.11D+02
+ MakeS                :: Allocs=37,  DeAllocs=36, 24 bytes are presently allocat
+ ed.
+                         A max of 42440180 bytes were allocated.
+>-Exiting MakeS 08/25/02 @ 18:53:30-<
+<<Entering LowdinO 08/25/02 @ 18:53:31>>
+ ... ning Warning  Warning  Warning Wa ...
+Illconditioning detected in MakeS: Co
+ nd(S)=0.68D+06
+ LowdinO              :: X CheckSum  = 0.7250441304179280D+03
+ LowdinO              :: CPU Sec = 0.43D+03, WALL Sec = 0.44D+03
+ LowdinO              :: Allocs=20,  DeAllocs=20, 0 bytes are presently allocate
+ d.
+                         A max of 62301320 bytes were allocated.
+>-Exiting LowdinO 08/25/02 @ 19:00:55-<
+<<Entering MakeT 08/25/02 @ 19:00:55>>
+ MakeT                :: T CheckSum  = 0.3520384545319602D+03
+ MakeT                :: CPU Sec = 0.18D+02, WALL Sec = 0.24D+02
+ MakeT                :: Allocs=33,  DeAllocs=32, 24 bytes are presently allocat
+ ed.
+                         A max of 41710700 bytes were allocated.
+>-Exiting MakeT 08/25/02 @ 19:01:19-<
+<<Entering P2Use 08/25/02 @ 19:01:20>>
+ P2Use                :: P[0] CheckSum  = 0.6916590627103445D+01
+ P2Use                :: CPU Sec = 0.19D+01, WALL Sec = 0.20D+02
+ P2Use                :: Allocs=27,  DeAllocs=27, 0 bytes are presently allocate
+ d.
+                         A max of 20876660 bytes were allocated.
+>-Exiting P2Use 08/25/02 @ 19:01:39-<
+<<Entering MakeRho 08/25/02 @ 19:01:40>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.77D+00, -.46D+00, 0.85D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396097403815426D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.60D+02
+ MakeRho              :: Allocs=65,  DeAllocs=59, 19996 bytes are presently allo
+ cated.
+                         A max of 99515600 bytes were allocated.
+>-Exiting MakeRho 08/25/02 @ 19:02:40-<
+<<Entering QCTC 08/25/02 @ 19:02:40>>
+ QCTC                 :: J[0] CheckSum  = 0.4669313749149968D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776558,  DeAllocs=50, 91577072 bytes are present
+ ly allocated.
+                         A max of 133283044 bytes were allocated.
+>-Exiting QCTC 08/25/02 @ 21:25:30-<
+<<Entering HiCu 08/25/02 @ 21:25:31>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976619D+03, <Exc> = -.31798
+ 585D+03, Pts/Atom = 941
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998778D+03, <Exc> = -.31865
+ 827D+03, Pts/Atom = 1879
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.17999997D+03, <Exc> = -.31871
+ 511D+03, Pts/Atom = 3682
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31871
+ 391D+03, Pts/Atom = 7073
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31871
+ 287D+03, Pts/Atom = 13483
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31871
+ 279D+03, Pts/Atom = 25383
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.14D-06, <Exc> = -.3187127
+ 9D+03
+ HiCu.GridGen         :: CPU Sec = 0.99D+04, WALL Sec = 0.99D+04
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[0] CheckSum  = 0.5405279739347689D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551236,  DeAllocs=198038, 176054860 bytes are pr
+ esently allocated.
+                         A max of 217760736 bytes were alloc
+ ated.
+>-Exiting HiCu 08/26/02 @ 01:54:43-<
+<<Entering FockNGrueven 08/26/02 @ 01:54:44>>
+ FockNGrueven         :: F[0] CheckSum  = 0.2272147940249677D+03
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.3534561110530678D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.45D+02, 375),
+                   
+       WALL(Sec,MFLOPS) = (0.81D+02, 207)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/26/02 @ 01:56:04-<
+<<Entering RHEqs 08/26/02 @ 01:56:05>>
+ RHEqs                :: HOMO = -.16382230D+00, LUMO = -.10621236D+00
+ RHEqs                :: OrthoP[1] CheckSum  = 0.1341640786499647D+02
+ RHEqs                :: P[1] CheckSum  = 0.6899184494069639D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.49D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/26/02 @ 02:04:14-<
+<<Entering SCFStatus 08/26/02 @ 02:04:14>>
+ 
+= = = = = SCFCycle #0, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       MaxDelD = 0.21D-01
+       <T>     = 0.23710112D+04
+       <V>     = 
+ -.44312285D+04
+       <DFT>   = -.31871279D+03
+       <SCF>   = -2378.93012670
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.46D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.94D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/26/02 @ 02:04:24-<
+<<Entering MakeRho 08/26/02 @ 02:04:24>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.92D+00, -.62D+00, 0.82D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4395950712026343D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99510660 bytes were allocated.
+>-Exiting MakeRho 08/26/02 @ 02:05:19-<
+<<Entering QCTC 08/26/02 @ 02:05:19>>
+ QCTC                 :: J[1] CheckSum  = 0.4669322067521205D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776348,  DeAllocs=50, 91550240 bytes are present
+ ly allocated.
+                         A max of 133256212 bytes were allocated.
+>-Exiting QCTC 08/26/02 @ 04:28:29-<
+<<Entering HiCu 08/26/02 @ 04:28:30>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976933D+03, <Exc> = -.31799
+ 719D+03, Pts/Atom = 946
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998839D+03, <Exc> = -.31865
+ 971D+03, Pts/Atom = 1882
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000006D+03, <Exc> = -.31871
+ 205D+03, Pts/Atom = 3685
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000022D+03, <Exc> = -.31871
+ 131D+03, Pts/Atom = 7064
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31871
+ 021D+03, Pts/Atom = 13470
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000003D+03, <Exc> = -.31871
+ 013D+03, Pts/Atom = 25380
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.14D-06, <Exc> = -.3187101
+ 3D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[1] CheckSum  = 0.5405164804114669D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551158,  DeAllocs=198020, 176035820 bytes are pr
+ esently allocated.
+                         A max of 217741696 bytes were alloc
+ ated.
+>-Exiting HiCu 08/26/02 @ 09:00:10-<
+<<Entering FockNGrueven 08/26/02 @ 09:00:11>>
+ FockNGrueven         :: F[1] CheckSum  = 0.2272224716191167D+03
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.3534561018481389D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 378),
+                   
+       WALL(Sec,MFLOPS) = (0.80D+02, 210)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69397796 bytes were allocated.
+>-Exiting FockNGrueven 08/26/02 @ 09:01:30-<
+<<Entering DIIS 08/26/02 @ 09:01:31>>
+ DIIS : Damping       :: Co = 0.80D+00, 0.20D+00
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.3534560987515908D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.44D+02, 378),
+                   
+       WALL(Sec,MFLOPS) = (0.78D+02, 214)
+ DIIS                 :: Allocs=34,  DeAllocs=30, 144 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/26/02 @ 09:02:49-<
+<<Entering RHEqs 08/26/02 @ 09:02:50>>
+ RHEqs                :: HOMO = -.16376893D+00, LUMO = -.10604204D+00
+ RHEqs                :: OrthoP[2] CheckSum  = 0.1341640786499635D+02
+ RHEqs                :: P[2] CheckSum  = 0.6911535721569249D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.48D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/26/02 @ 09:10:53-<
+<<Entering SCFStatus 08/26/02 @ 09:10:54>>
+ 
+= = = = = SCFCycle #1, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.30D-04
+       MaxDelD = 0.15D-01
+       <T>     = 0.2370
+ 9783D+04
+       <V>     = -.44311975D+04
+       <DFT>   = -.31871013D+03
+      
+  <SCF>   = -2378.92923504
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.49D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.14D+02, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/26/02 @ 09:11:08-<
+<<Entering MakeRho 08/26/02 @ 09:11:09>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.82D+00, -.50D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4395986523291419D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.55D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99512564 bytes were allocated.
+>-Exiting MakeRho 08/26/02 @ 09:12:03-<
+<<Entering QCTC 08/26/02 @ 09:12:04>>
+ QCTC                 :: J[2] CheckSum  = 0.4669371242609317D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776428,  DeAllocs=50, 91560528 bytes are present
+ ly allocated.
+                         A max of 133266500 bytes were allocated.
+>-Exiting QCTC 08/26/02 @ 11:35:09-<
+<<Entering HiCu 08/26/02 @ 11:35:10>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976837D+03, <Exc> = -.31798
+ 259D+03, Pts/Atom = 945
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998741D+03, <Exc> = -.31864
+ 778D+03, Pts/Atom = 1880
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000007D+03, <Exc> = -.31870
+ 423D+03, Pts/Atom = 3682
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000021D+03, <Exc> = -.31870
+ 345D+03, Pts/Atom = 7067
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000004D+03, <Exc> = -.31870
+ 232D+03, Pts/Atom = 13477
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 225D+03, Pts/Atom = 25383
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187022
+ 5D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[2] CheckSum  = 0.5405195424263369D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551222,  DeAllocs=198044, 176057500 bytes are pr
+ esently allocated.
+                         A max of 217763376 bytes were alloc
+ ated.
+>-Exiting HiCu 08/26/02 @ 16:07:15-<
+<<Entering FockNGrueven 08/26/02 @ 16:07:15>>
+ FockNGrueven         :: F[2] CheckSum  = 0.2272212342117808D+03
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.3534544508401404D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 381),
+                   
+       WALL(Sec,MFLOPS) = (0.71D+02, 236)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69399108 bytes were allocated.
+>-Exiting FockNGrueven 08/26/02 @ 16:08:26-<
+<<Entering DIIS 08/26/02 @ 16:08:26>>
+ DIIS                 :: Cond# = 0.17D+04, MIN(E) = 0.84D-03
+ DIIS : Pulay C1      :: DIISCo = -.18D+00, 0.12D+01
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.3534541578004953D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.49D+02, 340),
+                   
+       WALL(Sec,MFLOPS) = (0.87D+02, 191)
+ DIIS                 :: Allocs=45,  DeAllocs=40, 216 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/26/02 @ 16:09:54-<
+<<Entering RHEqs 08/26/02 @ 16:09:54>>
+ RHEqs                :: HOMO = -.16347890D+00, LUMO = -.10579092D+00
+ RHEqs                :: OrthoP[3] CheckSum  = 0.1341640786499595D+02
+ RHEqs                :: P[3] CheckSum  = 0.6911748858780779D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.49D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/26/02 @ 16:18:01-<
+<<Entering SCFStatus 08/26/02 @ 16:18:02>>
+ 
+= = = = = SCFCycle #2, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.56D-05
+       MaxDelD = 0.23D-02
+       <T>     = 0.2370
+ 9279D+04
+       <V>     = -.44311558D+04
+       <DFT>   = -.31870225D+03
+      
+  <SCF>   = -2378.93020437
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.45D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.95D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/26/02 @ 16:18:11-<
+<<Entering MakeRho 08/26/02 @ 16:18:12>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.83D+00, -.57D+00, 0.86D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396082553404617D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99513668 bytes were allocated.
+>-Exiting MakeRho 08/26/02 @ 16:19:06-<
+<<Entering QCTC 08/26/02 @ 16:19:06>>
+ QCTC                 :: J[3] CheckSum  = 0.4669352636981659D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776488,  DeAllocs=50, 91567616 bytes are present
+ ly allocated.
+                         A max of 133273588 bytes were allocated.
+>-Exiting QCTC 08/26/02 @ 18:41:56-<
+<<Entering HiCu 08/26/02 @ 18:41:56>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976262D+03, <Exc> = -.31798
+ 703D+03, Pts/Atom = 941
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998750D+03, <Exc> = -.31865
+ 987D+03, Pts/Atom = 1879
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.17999993D+03, <Exc> = -.31871
+ 616D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000019D+03, <Exc> = -.31871
+ 514D+03, Pts/Atom = 7075
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31871
+ 415D+03, Pts/Atom = 13487
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31871
+ 406D+03, Pts/Atom = 25382
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.14D-06, <Exc> = -.3187140
+ 6D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[3] CheckSum  = 0.5405259048808849D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551216,  DeAllocs=198035, 176050756 bytes are pr
+ esently allocated.
+                         A max of 217756632 bytes were alloc
+ ated.
+>-Exiting HiCu 08/26/02 @ 23:13:33-<
+<<Entering FockNGrueven 08/26/02 @ 23:13:34>>
+ FockNGrueven         :: F[3] CheckSum  = 0.2272213474372841D+03
+ FockNGrueven         :: OrthoF[3] CheckSum  = 0.3534545377099507D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 378),
+                   
+       WALL(Sec,MFLOPS) = (0.72D+02, 232)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/26/02 @ 23:14:46-<
+<<Entering DIIS 08/26/02 @ 23:14:46>>
+ DIIS                 :: Cond# = 0.15D+05, MIN(E) = 0.12D-03
+ DIIS : Pulay C1      :: DIISCo = -.14D+00, 0.86D+00, 0.28D+00
+ DIIS                 :: F_DIIS[3] CheckSum  = 0.3534542456903760D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.54D+02, 312),
+                   
+       WALL(Sec,MFLOPS) = (0.87D+02, 192)
+ DIIS                 :: Allocs=49,  DeAllocs=44, 272 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/26/02 @ 23:16:13-<
+<<Entering RHEqs 08/26/02 @ 23:16:14>>
+ RHEqs                :: HOMO = -.16362944D+00, LUMO = -.10593620D+00
+ RHEqs                :: OrthoP[4] CheckSum  = 0.1341640786499630D+02
+ RHEqs                :: P[4] CheckSum  = 0.6912626736717153D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.48D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/26/02 @ 23:24:19-<
+<<Entering SCFStatus 08/26/02 @ 23:24:19>>
+ 
+= = = = = SCFCycle #3, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.78D-05
+       MaxDelD = 0.18D-02
+       <T>     = 0.2371
+ 0192D+04
+       <V>     = -.44312352D+04
+       <DFT>   = -.31871406D+03
+      
+  <SCF>   = -2378.93014033
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.46D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.95D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/26/02 @ 23:24:29-<
+<<Entering MakeRho 08/26/02 @ 23:24:29>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.80D+00, -.46D+00, 0.83D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396055310334192D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99514724 bytes were allocated.
+>-Exiting MakeRho 08/26/02 @ 23:25:24-<
+<<Entering QCTC 08/26/02 @ 23:25:24>>
+ QCTC                 :: J[4] CheckSum  = 0.4669320334122411D+03
+ QCTC                 :: CPU Sec = 0.85D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776508,  DeAllocs=50, 91571264 bytes are present
+ ly allocated.
+                         A max of 133277236 bytes were allocated.
+>-Exiting QCTC 08/27/02 @ 01:48:02-<
+<<Entering HiCu 08/27/02 @ 01:48:02>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976668D+03, <Exc> = -.31799
+ 032D+03, Pts/Atom = 942
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998773D+03, <Exc> = -.31865
+ 675D+03, Pts/Atom = 1880
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000002D+03, <Exc> = -.31871
+ 195D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31871
+ 083D+03, Pts/Atom = 7075
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 976D+03, Pts/Atom = 13488
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 968D+03, Pts/Atom = 25394
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187096
+ 8D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[4] CheckSum  = 0.5405239709322245D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551400,  DeAllocs=198125, 176127316 bytes are pr
+ esently allocated.
+                         A max of 217833192 bytes were alloc
+ ated.
+>-Exiting HiCu 08/27/02 @ 06:20:09-<
+<<Entering FockNGrueven 08/27/02 @ 06:20:10>>
+ FockNGrueven         :: F[4] CheckSum  = 0.2272165482726361D+03
+ FockNGrueven         :: OrthoF[4] CheckSum  = 0.3534563902441354D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 376),
+                   
+       WALL(Sec,MFLOPS) = (0.80D+02, 209)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/27/02 @ 06:21:30-<
+<<Entering DIIS 08/27/02 @ 06:21:30>>
+ DIIS                 :: Cond# = 0.11D+06, MIN(E) = 0.18D-04
+ DIIS : Pulay C1      :: DIISCo = -.93D-01, 0.56D+00, 0.24D+00, 0.29D+00
+ DIIS                 :: F_DIIS[4] CheckSum  = 0.3534548838006082D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.60D+02, 278),
+                   
+       WALL(Sec,MFLOPS) = (0.12D+03, 134)
+ DIIS                 :: Allocs=54,  DeAllocs=49, 344 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/27/02 @ 06:23:35-<
+<<Entering RHEqs 08/27/02 @ 06:23:35>>
+ RHEqs                :: HOMO = -.16370554D+00, LUMO = -.10597406D+00
+ RHEqs                :: OrthoP[5] CheckSum  = 0.1341640786499606D+02
+ RHEqs                :: P[5] CheckSum  = 0.6913265400294129D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 36),
+                    
+      WALL(Sec,MFLOPS) = (0.49D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/27/02 @ 06:31:46-<
+<<Entering SCFStatus 08/27/02 @ 06:31:47>>
+ 
+= = = = = SCFCycle #4, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.31D-05
+       MaxDelD = 0.77D-03
+       <T>     = 0.2370
+ 9867D+04
+       <V>     = -.44312072D+04
+       <DFT>   = -.31870968D+03
+      
+  <SCF>   = -2378.93022039
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.48D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.15D+02, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/27/02 @ 06:32:01-<
+<<Entering MakeRho 08/27/02 @ 06:32:02>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.50D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396038987802556D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99514996 bytes were allocated.
+>-Exiting MakeRho 08/27/02 @ 06:32:56-<
+<<Entering QCTC 08/27/02 @ 06:32:57>>
+ QCTC                 :: J[5] CheckSum  = 0.4669346626391616D+03
+ QCTC                 :: CPU Sec = 0.85D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776528,  DeAllocs=50, 91573456 bytes are present
+ ly allocated.
+                         A max of 133279428 bytes were allocated.
+>-Exiting QCTC 08/27/02 @ 08:55:30-<
+<<Entering HiCu 08/27/02 @ 08:55:30>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976626D+03, <Exc> = -.31798
+ 138D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 324D+03, Pts/Atom = 1878
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000001D+03, <Exc> = -.31870
+ 864D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 798D+03, Pts/Atom = 7070
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 688D+03, Pts/Atom = 13485
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 681D+03, Pts/Atom = 25389
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187068
+ 1D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[5] CheckSum  = 0.5405228482282497D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551326,  DeAllocs=198086, 176094732 bytes are pr
+ esently allocated.
+                         A max of 217800608 bytes were alloc
+ ated.
+>-Exiting HiCu 08/27/02 @ 13:27:58-<
+<<Entering FockNGrueven 08/27/02 @ 13:27:58>>
+ FockNGrueven         :: F[5] CheckSum  = 0.2272186529954033D+03
+ FockNGrueven         :: OrthoF[5] CheckSum  = 0.3534551967239686D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 378),
+                   
+       WALL(Sec,MFLOPS) = (0.71D+02, 235)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69399108 bytes were allocated.
+>-Exiting FockNGrueven 08/27/02 @ 13:29:09-<
+<<Entering DIIS 08/27/02 @ 13:29:09>>
+ DIIS                 :: Cond# = 0.11D+07, MIN(E) = 0.20D-05
+ DIIS : Pulay C1      :: DIISCo = -.55D-01, 0.34D+00, 0.15D+00,
+                
+                   0.22D+00, 0.34D+00
+ DIIS                 :: F_DIIS[5] CheckSum  = 0.3534550623927121D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.66D+02, 256),
+                   
+       WALL(Sec,MFLOPS) = (0.10D+03, 168)
+ DIIS                 :: Allocs=60,  DeAllocs=55, 432 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/27/02 @ 13:30:49-<
+<<Entering RHEqs 08/27/02 @ 13:30:50>>
+ RHEqs                :: HOMO = -.16366990D+00, LUMO = -.10594690D+00
+ RHEqs                :: OrthoP[6] CheckSum  = 0.1341640786499641D+02
+ RHEqs                :: P[6] CheckSum  = 0.6913077135828478D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.49D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/27/02 @ 13:38:56-<
+<<Entering SCFStatus 08/27/02 @ 13:38:56>>
+ 
+= = = = = SCFCycle #5, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.81D-06
+       MaxDelD = 0.23D-03
+       <T>     = 0.2370
+ 9656D+04
+       <V>     = -.44311891D+04
+       <DFT>   = -.31870681D+03
+      
+  <SCF>   = -2378.93023797
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.45D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.94D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/27/02 @ 13:39:05-<
+<<Entering MakeRho 08/27/02 @ 13:39:06>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396036081507084D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99515892 bytes were allocated.
+>-Exiting MakeRho 08/27/02 @ 13:40:00-<
+<<Entering QCTC 08/27/02 @ 13:40:00>>
+ QCTC                 :: J[6] CheckSum  = 0.4669355650094602D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776568,  DeAllocs=50, 91578544 bytes are present
+ ly allocated.
+                         A max of 133284516 bytes were allocated.
+>-Exiting QCTC 08/27/02 @ 16:03:27-<
+<<Entering HiCu 08/27/02 @ 16:03:27>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976624D+03, <Exc> = -.31798
+ 108D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 305D+03, Pts/Atom = 1878
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000000D+03, <Exc> = -.31870
+ 842D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 781D+03, Pts/Atom = 7069
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 671D+03, Pts/Atom = 13485
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 664D+03, Pts/Atom = 25388
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187066
+ 4D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[6] CheckSum  = 0.5405227261436686D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551328,  DeAllocs=198083, 176092916 bytes are pr
+ esently allocated.
+                         A max of 217798792 bytes were alloc
+ ated.
+>-Exiting HiCu 08/27/02 @ 20:36:22-<
+<<Entering FockNGrueven 08/27/02 @ 20:36:23>>
+ FockNGrueven         :: F[6] CheckSum  = 0.2272196838808984D+03
+ FockNGrueven         :: OrthoF[6] CheckSum  = 0.3534548235892245D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.44D+02, 377),
+                   
+       WALL(Sec,MFLOPS) = (0.79D+02, 210)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 20829184 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/27/02 @ 20:37:42-<
+<<Entering DIIS 08/27/02 @ 20:37:43>>
+ DIIS                 :: Cond# = 0.11D+08, MIN(E) = 0.22D-06
+ DIIS : Pulay C1      :: DIISCo = -.34D-01, 0.21D+00, 0.95D-01,
+                
+                   0.14D+00, 0.26D+00, 0.33D+00
+ DIIS                 :: F_DIIS[6] CheckSum  = 0.3534549993186704D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.74D+02, 227),
+                   
+       WALL(Sec,MFLOPS) = (0.16D+03, 105)
+ DIIS                 :: Allocs=67,  DeAllocs=62, 536 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/27/02 @ 20:40:24-<
+<<Entering RHEqs 08/27/02 @ 20:40:24>>
+ RHEqs                :: HOMO = -.16366975D+00, LUMO = -.10594771D+00
+ RHEqs                :: OrthoP[7] CheckSum  = 0.1341640786499558D+02
+ RHEqs                :: P[7] CheckSum  = 0.6913101878203631D+01
+ RHEqs                :: CPU (Sec,MFLOPS) = (0.45D+03, 37),
+                    
+      WALL(Sec,MFLOPS) = (0.49D+03, 34)
+ RHEqs                :: Allocs=31,  DeAllocs=29, 41525136 bytes are presently a
+ llocated.
+                         A max of 104013840 bytes were allocated.
+>-Exiting RHEqs 08/27/02 @ 20:48:31-<
+<<Entering SCFStatus 08/27/02 @ 20:48:32>>
+ 
+= = = = = SCFCycle #6, Basis #1, Geometry #1 = = = = =
+
+       Gap     = 0.58D
+ -01
+       DIISErr = 0.24D-06
+       MaxDelD = 0.48D-04
+       <T>     = 0.2370
+ 9641D+04
+       <V>     = -.44311877D+04
+       <DFT>   = -.31870664D+03
+      
+  <SCF>   = -2378.93023860
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.47D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.14D+02, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/27/02 @ 20:48:46-<
+ Normal SCF convergence.
+ Convergence statistics for RPBEx/PBEc/User1:
+========================================================================
+SCF    Ink       Total             Delta       Max         DIIS   
+Cycle  Fok       Energy            E_Tot       Delta P     Error  
+  0,    F,           0.00000000, 0.0000D+00, 0.0000D+00, 0.0000D+00, 
+  1,    F,       -2378.92923504, 0.3748D-06, 0.6680D-02, 0.0000D+00, 
+  2,    F,       -2378.93020437, 0.4075D-06, 0.1249D-01, 0.5612D-05, 
+  3,    F,       -2378.93014033, 0.2692D-07, 0.5251D-03, 0.7758D-05, 
+  4,    F,       -2378.93022039, 0.3365D-07, 0.9796D-03, 0.3143D-05, 
+  5,    F,       -2378.93023797, 0.7393D-08, 0.5467D-03, 0.8119D-06, 
+  6,    F,       -2378.93023860, 0.2618D-09, 0.1787D-03, 0.2432D-06, 
+========================================================================
+<<Entering MakeS 08/27/02 @ 20:48:48>>
+ MakeS                :: S CheckSum  = 0.7488291608588681D+02
+ MakeS                :: CPU Sec = 0.49D+01, WALL Sec = 0.11D+02
+ MakeS                :: Allocs=37,  DeAllocs=36, 24 bytes are presently allocat
+ ed.
+                         A max of 42440180 bytes were allocated.
+>-Exiting MakeS 08/27/02 @ 20:49:00-<
+<<Entering BlokAInv 08/27/02 @ 20:49:00>>
+ BlokAInv             :: CPU (Sec,MFLOPS) = (0.79D+01, 330),
+                   
+       WALL(Sec,MFLOPS) = (0.11D+02, 237)
+ BlokAInv             :: Max(Z^t.A.Z-I)=0.75D-04, TrixThrsh=0.10D-05
+ BlokAInv             :: Z CheckSum  = 0.7250419247481500D+03
+ BlokAInv             :: CPU (Sec,MFLOPS) = (0.26D+02, 380),
+                   
+       WALL(Sec,MFLOPS) = (0.38D+02, 256)
+ BlokAInv             :: Allocs=75,  DeAllocs=41, 62535076 bytes are presently a
+ llocated.
+                         A max of 104194580 bytes were allocated.
+>-Exiting BlokAInv 08/27/02 @ 20:49:39-<
+<<Entering MakeT 08/27/02 @ 20:49:39>>
+ MakeT                :: T CheckSum  = 0.3520384545319602D+03
+ MakeT                :: CPU Sec = 0.19D+02, WALL Sec = 0.25D+02
+ MakeT                :: Allocs=33,  DeAllocs=32, 24 bytes are presently allocat
+ ed.
+                         A max of 41710700 bytes were allocated.
+>-Exiting MakeT 08/27/02 @ 20:50:04-<
+<<Entering MakeRho 08/27/02 @ 20:50:05>>
+ MakeRho : Pruned Rho :: dNel = 0.29D-07, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396036311904193D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=65,  DeAllocs=60, 19984 bytes are presently allo
+ cated.
+                         A max of 99515780 bytes were allocated.
+>-Exiting MakeRho 08/27/02 @ 20:50:59-<
+<<Entering QCTC 08/27/02 @ 20:51:00>>
+ QCTC                 :: J[0] CheckSum  = 0.4669352015817177D+03
+ QCTC                 :: CPU Sec = 0.87D+04, WALL Sec = 0.88D+04
+ QCTC                 :: Allocs=776558,  DeAllocs=50, 91577488 bytes are present
+ ly allocated.
+                         A max of 133283460 bytes were allocated.
+>-Exiting QCTC 08/27/02 @ 23:17:03-<
+<<Entering HiCu 08/27/02 @ 23:17:03>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976626D+03, <Exc> = -.31798
+ 133D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 321D+03, Pts/Atom = 1878
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000000D+03, <Exc> = -.31870
+ 857D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 796D+03, Pts/Atom = 7069
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 687D+03, Pts/Atom = 13485
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 679D+03, Pts/Atom = 25391
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187067
+ 9D+03
+ HiCu.GridGen         :: CPU Sec = 0.10D+05, WALL Sec = 0.10D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.62D+04, WALL Sec = 0.62D+04
+ HiCu                 :: Kxc[0] CheckSum  = 0.5405227612381046D+02
+ HiCu                 :: CPU Sec = 0.16D+05, WALL Sec = 0.16D+05
+ HiCu                 :: Allocs=551374,  DeAllocs=198107, 176113012 bytes are pr
+ esently allocated.
+                         A max of 217818888 bytes were alloc
+ ated.
+>-Exiting HiCu 08/28/02 @ 03:48:54-<
+<<Entering FockNGrueven 08/28/02 @ 03:48:54>>
+ FockNGrueven         :: F[0] CheckSum  = 0.2272193313533591D+03
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.3534550035538639D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.26D+02, 322),
+                   
+       WALL(Sec,MFLOPS) = (0.62D+02, 136)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 10553104 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/28/02 @ 03:49:57-<
+<<Entering NT4 08/28/02 @ 03:49:58>>
+ NT4 : Pure 1         :: dE=0.10D+01, dP=0.14D+01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 2         :: dE=0.23D+01, dP=0.11D+01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 3         :: dE=0.48D+00, dP=0.61D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 4         :: dE=0.15D+01, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 5         :: dE=0.49D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 6         :: dE=0.21D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 7         :: dE=0.53D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 8         :: dE=0.80D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 9         :: dE=0.77D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 10        :: dE=0.22D+01, dP=0.58D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 11        :: dE=0.16D+01, dP=0.66D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 12        :: dE=0.84D+00, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 13        :: dE=0.35D+00, dP=0.72D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 14        :: dE=0.44D+00, dP=0.49D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 15        :: dE=0.22D+00, dP=0.83D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 16        :: dE=0.26D+00, dP=0.48D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 17        :: dE=0.90D-01, dP=0.90D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 18        :: dE=0.15D+00, dP=0.54D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 19        :: dE=0.46D-01, dP=0.40D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 20        :: dE=0.27D-01, dP=0.30D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 21        :: dE=0.14D-01, dP=0.25D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 22        :: dE=0.69D-02, dP=0.19D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 23        :: dE=0.30D-02, dP=0.12D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 24        :: dE=0.10D-02, dP=0.81D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 25        :: dE=0.27D-03, dP=0.58D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 26        :: dE=0.73D-04, dP=0.40D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 27        :: dE=0.23D-04, dP=0.16D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 28        :: dE=0.73D-05, dP=0.89D-02, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 29        :: dE=0.14D-05, dP=0.19D-02, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 30        :: dE=0.48D-07, dP=0.73D-04, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 31        :: dE=0.31D-09, dP=0.14D-05, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 32        :: dE=0.38D-09, dP=0.19D-05, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 33        :: dE=0.83D-12, dP=0.19D-05, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 34        :: dE=0.32D-13, dP=0.16D-06, ThrX=0.10D-05, %Non0=99
+ NT4 : Met dE/dP goals:: Tr{FP}=-.6660020385976226D+03, dNel = 0.57D-13
+ NT4                  :: 34 purification steps, 61 matrix multiplies
+ NT4                  :: Fractional occupation = 0.11D+00, %Non0s = 99
+ NT4 : Max abs errors :: dE=0.21D-10, dP=0.16D-06, [F,P]=0.61D-04
+ NT4                  :: Rel dE=0.32D-13, ||dP||_F=0.26D-06, ||[F,P]||_F=0.13D-0
+ 3
+ NT4                  :: OrthoP[1] CheckSum  = 0.1341640786499564D+02
+ NT4                  :: P[1] CheckSum  = 0.6913071070355622D+01
+ NT4                  :: CPU (Sec,MFLOPS) = (0.12D+04, 428),
+                   
+       WALL(Sec,MFLOPS) = (0.13D+04, 409)
+ NT4                  :: Allocs=363,  DeAllocs=359, 20829200 bytes are presently
+  allocated.
+                         A max of 124976304 bytes were allocated.
+>-Exiting NT4 08/28/02 @ 04:11:10-<
+<<Entering SCFStatus 08/28/02 @ 04:11:10>>
+ 
+= = = = = SCFCycle #0, Basis #2, Geometry #1 = = = = =
+
+       MaxDelD = 0.15D
+ +01
+       <T>     = 0.23709647D+04
+       <V>     = -.44311882D+04
+       <DFT
+ >   = -.31870679D+03
+       <SCF>   = -2378.93036961
+
+ SCFStatus            :: CPU Sec = 0.28D+01, WALL Sec = 0.14D+02
+ SCFStatus            :: Allocs=15,  DeAllocs=15, 0 bytes are presently allocate
+ d.
+                         A max of 62488328 bytes were allocated.
+>-Exiting SCFStatus 08/28/02 @ 04:11:25-<
+<<Entering MakeRho 08/28/02 @ 04:11:25>>
+ MakeRho : Pruned Rho :: dNel = -.11D-06, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396036180688290D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.54D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99515524 bytes were allocated.
+>-Exiting MakeRho 08/28/02 @ 04:12:20-<
+<<Entering QCTC 08/28/02 @ 04:12:20>>
+ QCTC                 :: J[1] CheckSum  = 0.4669353266417433D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.86D+04
+ QCTC                 :: Allocs=776558,  DeAllocs=50, 91577008 bytes are present
+ ly allocated.
+                         A max of 133282980 bytes were allocated.
+>-Exiting QCTC 08/28/02 @ 06:35:20-<
+<<Entering HiCu 08/28/02 @ 06:35:21>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976628D+03, <Exc> = -.31798
+ 141D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 318D+03, Pts/Atom = 1879
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000000D+03, <Exc> = -.31870
+ 855D+03, Pts/Atom = 3680
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 792D+03, Pts/Atom = 7070
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 684D+03, Pts/Atom = 13485
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 677D+03, Pts/Atom = 25391
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.14D-06, <Exc> = -.3187067
+ 7D+03
+ HiCu.GridGen         :: CPU Sec = 0.12D+05, WALL Sec = 0.12D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.66D+04, WALL Sec = 0.67D+04
+ HiCu                 :: Kxc[1] CheckSum  = 0.5405227985424759D+02
+ HiCu                 :: CPU Sec = 0.18D+05, WALL Sec = 0.18D+05
+ HiCu                 :: Allocs=551368,  DeAllocs=198104, 176110236 bytes are pr
+ esently allocated.
+                         A max of 217816112 bytes were alloc
+ ated.
+>-Exiting HiCu 08/28/02 @ 11:42:12-<
+<<Entering FockNGrueven 08/28/02 @ 11:42:12>>
+ FockNGrueven         :: F[1] CheckSum  = 0.2272194453135471D+03
+ FockNGrueven         :: OrthoF[1] CheckSum  = 0.3534549608907969D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.26D+02, 327),
+                   
+       WALL(Sec,MFLOPS) = (0.53D+02, 159)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 10553104 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/28/02 @ 11:43:05-<
+<<Entering DIIS 08/28/02 @ 11:43:06>>
+ DIIS : Damping       :: Co = 0.80D+00, 0.20D+00
+ DIIS                 :: F_DIIS[1] CheckSum  = 0.3534549950210008D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.45D+02, 374),
+                   
+       WALL(Sec,MFLOPS) = (0.79D+02, 211)
+ DIIS                 :: Allocs=34,  DeAllocs=30, 144 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/28/02 @ 11:44:25-<
+<<Entering NT4 08/28/02 @ 11:44:25>>
+ NT4 : Pure 1         :: dE=0.10D+01, dP=0.14D+01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 2         :: dE=0.23D+01, dP=0.11D+01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 3         :: dE=0.48D+00, dP=0.61D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 4         :: dE=0.15D+01, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 5         :: dE=0.49D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 6         :: dE=0.21D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 7         :: dE=0.53D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 8         :: dE=0.80D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 9         :: dE=0.77D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 10        :: dE=0.22D+01, dP=0.58D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 11        :: dE=0.16D+01, dP=0.66D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 12        :: dE=0.84D+00, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 13        :: dE=0.35D+00, dP=0.72D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 14        :: dE=0.44D+00, dP=0.49D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 15        :: dE=0.22D+00, dP=0.83D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 16        :: dE=0.26D+00, dP=0.48D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 17        :: dE=0.90D-01, dP=0.90D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 18        :: dE=0.15D+00, dP=0.54D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 19        :: dE=0.46D-01, dP=0.40D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 20        :: dE=0.27D-01, dP=0.30D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 21        :: dE=0.14D-01, dP=0.25D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 22        :: dE=0.69D-02, dP=0.19D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 23        :: dE=0.30D-02, dP=0.12D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 24        :: dE=0.10D-02, dP=0.81D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 25        :: dE=0.27D-03, dP=0.58D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 26        :: dE=0.73D-04, dP=0.40D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 27        :: dE=0.23D-04, dP=0.16D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 28        :: dE=0.73D-05, dP=0.89D-02, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 29        :: dE=0.14D-05, dP=0.19D-02, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 30        :: dE=0.48D-07, dP=0.73D-04, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 31        :: dE=0.31D-09, dP=0.14D-05, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 32        :: dE=0.38D-09, dP=0.19D-05, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 33        :: dE=0.83D-12, dP=0.19D-05, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 34        :: dE=0.37D-13, dP=0.18D-06, ThrX=0.10D-05, %Non0=99
+ NT4 : Hit dE increase:: Tr{FP}=-.6660021411015892D+03, dNel = 0.57D-13
+ NT4                  :: 34 purification steps, 61 matrix multiplies
+ NT4                  :: Fractional occupation = 0.11D+00, %Non0s = 99
+ NT4 : Max abs errors :: dE=0.24D-10, dP=0.18D-06, [F,P]=0.61D-04
+ NT4                  :: Rel dE=0.37D-13, ||dP||_F=0.76D-06, ||[F,P]||_F=0.13D-0
+ 3
+ NT4                  :: OrthoP[2] CheckSum  = 0.1341640786499519D+02
+ NT4                  :: P[2] CheckSum  = 0.6913088226336743D+01
+ NT4                  :: CPU (Sec,MFLOPS) = (0.12D+04, 424),
+                   
+       WALL(Sec,MFLOPS) = (0.13D+04, 404)
+ NT4                  :: Allocs=363,  DeAllocs=359, 20829200 bytes are presently
+  allocated.
+                         A max of 124976304 bytes were allocated.
+>-Exiting NT4 08/28/02 @ 12:05:51-<
+<<Entering SCFStatus 08/28/02 @ 12:05:51>>
+ 
+= = = = = SCFCycle #1, Basis #2, Geometry #1 = = = = =
+
+       DIISErr = 0.15D
+ -06
+       MaxDelD = 0.24D-04
+       <T>     = 0.23709647D+04
+       <V>     = 
+ -.44311881D+04
+       <DFT>   = -.31870677D+03
+       <SCF>   = -2378.93023865
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.45D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.97D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/28/02 @ 12:06:01-<
+<<Entering MakeRho 08/28/02 @ 12:06:01>>
+ MakeRho : Pruned Rho :: dNel = -.11D-06, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396036316090409D+04
+ MakeRho              :: CPU Sec = 0.48D+02, WALL Sec = 0.55D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99515412 bytes were allocated.
+>-Exiting MakeRho 08/28/02 @ 12:06:56-<
+<<Entering QCTC 08/28/02 @ 12:06:56>>
+ QCTC                 :: J[2] CheckSum  = 0.4669352418186805D+03
+ QCTC                 :: CPU Sec = 0.87D+04, WALL Sec = 0.87D+04
+ QCTC                 :: Allocs=776548,  DeAllocs=50, 91575952 bytes are present
+ ly allocated.
+                         A max of 133281924 bytes were allocated.
+>-Exiting QCTC 08/28/02 @ 14:32:24-<
+<<Entering HiCu 08/28/02 @ 14:32:25>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976627D+03, <Exc> = -.31798
+ 140D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 320D+03, Pts/Atom = 1879
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000000D+03, <Exc> = -.31870
+ 857D+03, Pts/Atom = 3680
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 797D+03, Pts/Atom = 7070
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 687D+03, Pts/Atom = 13486
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 679D+03, Pts/Atom = 25390
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.14D-06, <Exc> = -.3187067
+ 9D+03
+ HiCu.GridGen         :: CPU Sec = 0.12D+05, WALL Sec = 0.12D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.67D+04, WALL Sec = 0.67D+04
+ HiCu                 :: Kxc[2] CheckSum  = 0.5405227904446437D+02
+ HiCu                 :: CPU Sec = 0.19D+05, WALL Sec = 0.19D+05
+ HiCu                 :: Allocs=551348,  DeAllocs=198095, 176102612 bytes are pr
+ esently allocated.
+                         A max of 217808488 bytes were alloc
+ ated.
+>-Exiting HiCu 08/28/02 @ 19:41:12-<
+<<Entering FockNGrueven 08/28/02 @ 19:41:12>>
+ FockNGrueven         :: F[2] CheckSum  = 0.2272193614463351D+03
+ FockNGrueven         :: OrthoF[2] CheckSum  = 0.3534549924823949D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.26D+02, 322),
+                   
+       WALL(Sec,MFLOPS) = (0.55D+02, 155)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 10553104 bytes are presently a
+ llocated.
+                         A max of 69402724 bytes were allocated.
+>-Exiting FockNGrueven 08/28/02 @ 19:42:07-<
+<<Entering DIIS 08/28/02 @ 19:42:07>>
+ DIIS                 :: Cond# = 0.11D+09, MIN(E) = 0.13D-07
+ DIIS : Pulay C1      :: DIISCo = -.19D+00, 0.12D+01
+ DIIS                 :: F_DIIS[2] CheckSum  = 0.3534549983437846D+03
+ DIIS                 :: CPU (Sec,MFLOPS) = (0.50D+02, 338),
+                   
+       WALL(Sec,MFLOPS) = (0.89D+02, 187)
+ DIIS                 :: Allocs=45,  DeAllocs=40, 216 bytes are presently alloca
+ ted.
+                         A max of 83384652 bytes were allocated.
+>-Exiting DIIS 08/28/02 @ 19:43:37-<
+<<Entering NT4 08/28/02 @ 19:43:37>>
+ NT4 : Pure 1         :: dE=0.10D+01, dP=0.14D+01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 2         :: dE=0.23D+01, dP=0.11D+01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 3         :: dE=0.48D+00, dP=0.61D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 4         :: dE=0.15D+01, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 5         :: dE=0.49D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 6         :: dE=0.21D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 7         :: dE=0.53D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 8         :: dE=0.80D+01, dP=0.57D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 9         :: dE=0.77D+00, dP=0.63D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 10        :: dE=0.22D+01, dP=0.58D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 11        :: dE=0.16D+01, dP=0.66D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 12        :: dE=0.84D+00, dP=0.56D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 13        :: dE=0.35D+00, dP=0.72D+00, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 14        :: dE=0.44D+00, dP=0.49D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 15        :: dE=0.22D+00, dP=0.83D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 16        :: dE=0.26D+00, dP=0.48D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 17        :: dE=0.90D-01, dP=0.90D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 18        :: dE=0.15D+00, dP=0.54D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 19        :: dE=0.46D-01, dP=0.40D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 20        :: dE=0.27D-01, dP=0.30D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 21        :: dE=0.14D-01, dP=0.25D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 22        :: dE=0.69D-02, dP=0.19D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 23        :: dE=0.30D-02, dP=0.12D+00, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 24        :: dE=0.10D-02, dP=0.81D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 25        :: dE=0.27D-03, dP=0.58D-01, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 26        :: dE=0.73D-04, dP=0.40D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 27        :: dE=0.23D-04, dP=0.16D-01, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 28        :: dE=0.73D-05, dP=0.89D-02, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 29        :: dE=0.14D-05, dP=0.19D-02, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 30        :: dE=0.48D-07, dP=0.73D-04, ThrX=0.10D-05, %Non0=100
+ NT4 : Pure 31        :: dE=0.67D-10, dP=0.14D-05, ThrX=0.10D-05, %Non0=99
+ NT4 : Pure 32        :: dE=0.73D-13, dP=0.15D-06, ThrX=0.10D-05, %Non0=99
+ NT4 : Met dE/dP goals:: Tr{FP}=-.6660020483628342D+03, dNel = 0.11D-12
+ NT4                  :: 32 purification steps, 58 matrix multiplies
+ NT4                  :: Fractional occupation = 0.11D+00, %Non0s = 99
+ NT4 : Max abs errors :: dE=0.49D-10, dP=0.15D-06, [F,P]=0.61D-04
+ NT4                  :: Rel dE=0.73D-13, ||dP||_F=0.55D-06, ||[F,P]||_F=0.13D-0
+ 3
+ NT4                  :: OrthoP[3] CheckSum  = 0.1341640786499566D+02
+ NT4                  :: P[3] CheckSum  = 0.6913079866627264D+01
+ NT4                  :: CPU (Sec,MFLOPS) = (0.12D+04, 422),
+                   
+       WALL(Sec,MFLOPS) = (0.12D+04, 405)
+ NT4                  :: Allocs=344,  DeAllocs=340, 20829200 bytes are presently
+  allocated.
+                         A max of 124976304 bytes were allocated.
+>-Exiting NT4 08/28/02 @ 20:03:59-<
+<<Entering SCFStatus 08/28/02 @ 20:03:59>>
+ 
+= = = = = SCFCycle #2, Basis #2, Geometry #1 = = = = =
+
+       DIISErr = 0.86D
+ -07
+       MaxDelD = 0.12D-04
+       <T>     = 0.23709649D+04
+       <V>     = 
+ -.44311883D+04
+       <DFT>   = -.31870679D+03
+       <SCF>   = -2378.93023864
+
+ SCFStatus            :: CPU (Sec,MFLOPS) = (0.46D+01, 3),
+                     
+     WALL(Sec,MFLOPS) = (0.96D+01, 1)
+ SCFStatus            :: Allocs=16,  DeAllocs=16, 0 bytes are presently allocate
+ d.
+                         A max of 62488692 bytes were allocated.
+>-Exiting SCFStatus 08/28/02 @ 20:04:09-<
+ Normal SCF convergence.
+ Convergence statistics for RPBEx/PBEc/User1:
+========================================================================
+SCF    Ink       Total             Delta       Max         DIIS   
+Cycle  Fok       Energy            E_Tot       Delta P     Error  
+  0,    F,           0.00000000, 0.0000D+00, 0.0000D+00, 0.0000D+00, 
+  1,    F,       -2378.93023865, 0.5505D-07, 0.1508D+01, 0.8119D-06, 
+  2,    F,       -2378.93023864, 0.3957D-11, 0.1170D-04, 0.8627D-07, 
+========================================================================
+<<Entering MakeS 08/28/02 @ 20:04:10>>
+ MakeS                :: S CheckSum  = 0.7488291608588681D+02
+ MakeS                :: CPU Sec = 0.47D+01, WALL Sec = 0.11D+02
+ MakeS                :: Allocs=37,  DeAllocs=36, 24 bytes are presently allocat
+ ed.
+                         A max of 42440180 bytes were allocated.
+>-Exiting MakeS 08/28/02 @ 20:04:21-<
+<<Entering BlokAInv 08/28/02 @ 20:04:21>>
+ BlokAInv             :: CPU (Sec,MFLOPS) = (0.80D+01, 325),
+                   
+       WALL(Sec,MFLOPS) = (0.11D+02, 231)
+ BlokAInv             :: Max(Z^t.A.Z-I)=0.75D-04, TrixThrsh=0.10D-05
+ BlokAInv             :: Z CheckSum  = 0.7250419247481500D+03
+ BlokAInv             :: CPU (Sec,MFLOPS) = (0.26D+02, 373),
+                   
+       WALL(Sec,MFLOPS) = (0.39D+02, 251)
+ BlokAInv             :: Allocs=75,  DeAllocs=41, 62535076 bytes are presently a
+ llocated.
+                         A max of 104194580 bytes were allocated.
+>-Exiting BlokAInv 08/28/02 @ 20:05:01-<
+<<Entering MakeT 08/28/02 @ 20:05:01>>
+ MakeT                :: T CheckSum  = 0.3520384545319602D+03
+ MakeT                :: CPU Sec = 0.19D+02, WALL Sec = 0.26D+02
+ MakeT                :: Allocs=33,  DeAllocs=32, 24 bytes are presently allocat
+ ed.
+                         A max of 41710700 bytes were allocated.
+>-Exiting MakeT 08/28/02 @ 20:05:27-<
+<<Entering MakeRho 08/28/02 @ 20:05:27>>
+ MakeRho : Pruned Rho :: dNel = -.11D-06, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396036288018415D+04
+ MakeRho              :: CPU Sec = 0.49D+02, WALL Sec = 0.56D+02
+ MakeRho              :: Allocs=65,  DeAllocs=60, 19984 bytes are presently allo
+ cated.
+                         A max of 99515348 bytes were allocated.
+>-Exiting MakeRho 08/28/02 @ 20:06:23-<
+<<Entering QCTC 08/28/02 @ 20:06:23>>
+ QCTC                 :: J[0] CheckSum  = 0.4669351886826559D+03
+ QCTC                 :: CPU Sec = 0.87D+04, WALL Sec = 0.87D+04
+ QCTC                 :: Allocs=776538,  DeAllocs=50, 91575008 bytes are present
+ ly allocated.
+                         A max of 133280980 bytes were allocated.
+>-Exiting QCTC 08/28/02 @ 22:31:36-<
+<<Entering HiCu 08/28/02 @ 22:31:36>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976626D+03, <Exc> = -.31798
+ 135D+03, Pts/Atom = 943
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998770D+03, <Exc> = -.31865
+ 321D+03, Pts/Atom = 1878
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000000D+03, <Exc> = -.31870
+ 857D+03, Pts/Atom = 3681
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000020D+03, <Exc> = -.31870
+ 797D+03, Pts/Atom = 7069
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000005D+03, <Exc> = -.31870
+ 687D+03, Pts/Atom = 13485
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000002D+03, <Exc> = -.31870
+ 679D+03, Pts/Atom = 25391
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.13D-06, <Exc> = -.3187067
+ 9D+03
+ HiCu.GridGen         :: CPU Sec = 0.12D+05, WALL Sec = 0.12D+05
+ HiCu.MakeKxc         :: CPU Sec = 0.66D+04, WALL Sec = 0.66D+04
+ HiCu                 :: Kxc[0] CheckSum  = 0.5405227679585695D+02
+ HiCu                 :: CPU Sec = 0.18D+05, WALL Sec = 0.18D+05
+ HiCu                 :: Allocs=551370,  DeAllocs=198107, 176112676 bytes are pr
+ esently allocated.
+                         A max of 217818552 bytes were alloc
+ ated.
+>-Exiting HiCu 08/29/02 @ 03:36:27-<
+<<Entering FockNGrueven 08/29/02 @ 03:36:27>>
+ FockNGrueven         :: F[0] CheckSum  = 0.2272193214634185D+03
+ FockNGrueven         :: OrthoF[0] CheckSum  = 0.3534550191625208D+03
+ FockNGrueven         :: CPU (Sec,MFLOPS) = (0.26D+02, 324),
+                   
+       WALL(Sec,MFLOPS) = (0.62D+02, 137)
+ FockNGrueven         :: Allocs=41,  DeAllocs=37, 10553104 bytes are presently a
+ llocated.
+                         A max of 69399108 bytes were allocated.
+>-Exiting FockNGrueven 08/29/02 @ 03:37:29-<
+<<Entering PM 08/29/02 @ 03:37:30>>
+ PM : Pure 1          :: dE=0.10D+01, dP=0.45D-02, ThrX=0.10D-05, %Non0=99
+ PM : Pure 2          :: dE=0.11D-01, dP=0.49D-02, ThrX=0.10D-05, %Non0=99
+ PM : Pure 3          :: dE=0.12D-01, dP=0.53D-02, ThrX=0.10D-05, %Non0=99
+ PM : Pure 4          :: dE=0.13D-01, dP=0.59D-02, ThrX=0.10D-05, %Non0=98
+ PM : Pure 5          :: dE=0.14D-01, dP=0.65D-02, ThrX=0.10D-05, %Non0=98
+ PM : Pure 6          :: dE=0.15D-01, dP=0.74D-02, ThrX=0.10D-05, %Non0=98
+ PM : Pure 7          :: dE=0.16D-01, dP=0.84D-02, ThrX=0.10D-05, %Non0=98
+ PM : Pure 8          :: dE=0.18D-01, dP=0.98D-02, ThrX=0.10D-05, %Non0=97
+ PM : Pure 9          :: dE=0.20D-01, dP=0.12D-01, ThrX=0.10D-05, %Non0=97
+ PM : Pure 10         :: dE=0.21D-01, dP=0.14D-01, ThrX=0.10D-05, %Non0=96
+ PM : Pure 11         :: dE=0.24D-01, dP=0.17D-01, ThrX=0.10D-05, %Non0=96
+ PM : Pure 12         :: dE=0.26D-01, dP=0.21D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 13         :: dE=0.29D-01, dP=0.26D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 14         :: dE=0.32D-01, dP=0.34D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 15         :: dE=0.37D-01, dP=0.44D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 16         :: dE=0.42D-01, dP=0.59D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 17         :: dE=0.50D-01, dP=0.79D-01, ThrX=0.10D-05, %Non0=95
+ PM : Pure 18         :: dE=0.60D-01, dP=0.10D+00, ThrX=0.10D-05, %Non0=96
+ PM : Pure 19         :: dE=0.72D-01, dP=0.13D+00, ThrX=0.10D-05, %Non0=96
+ PM : Pure 20         :: dE=0.85D-01, dP=0.14D+00, ThrX=0.10D-05, %Non0=96
+ PM : Pure 21         :: dE=0.95D-01, dP=0.11D+00, ThrX=0.10D-05, %Non0=96
+ PM : Pure 22         :: dE=0.10D+00, dP=0.42D-01, ThrX=0.10D-05, %Non0=96
+ PM : Pure 23         :: dE=0.12D+00, dP=0.55D-01, ThrX=0.10D-05, %Non0=97
+ PM : Pure 24         :: dE=0.17D+00, dP=0.73D-01, ThrX=0.10D-05, %Non0=97
+ PM : Pure 25         :: dE=0.26D+00, dP=0.97D-01, ThrX=0.10D-05, %Non0=97
+ PM : Pure 26         :: dE=0.46D+00, dP=0.12D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 27         :: dE=0.11D+01, dP=0.14D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 28         :: dE=0.57D+01, dP=0.12D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 29         :: dE=0.85D+00, dP=0.13D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 30         :: dE=0.47D+00, dP=0.13D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 31         :: dE=0.34D+00, dP=0.11D+00, ThrX=0.10D-05, %Non0=98
+ PM : Pure 32         :: dE=0.27D+00, dP=0.13D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 33         :: dE=0.21D+00, dP=0.13D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 34         :: dE=0.12D+00, dP=0.85D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 35         :: dE=0.43D-01, dP=0.29D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 36         :: dE=0.20D-01, dP=0.38D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 37         :: dE=0.19D-01, dP=0.47D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 38         :: dE=0.20D-01, dP=0.58D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 39         :: dE=0.21D-01, dP=0.75D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 40         :: dE=0.22D-01, dP=0.97D-01, ThrX=0.10D-05, %Non0=99
+ PM : Pure 41         :: dE=0.22D-01, dP=0.12D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 42         :: dE=0.24D-01, dP=0.16D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 43         :: dE=0.25D-01, dP=0.18D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 44         :: dE=0.25D-01, dP=0.18D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 45         :: dE=0.26D-01, dP=0.19D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 46         :: dE=0.27D-01, dP=0.23D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 47         :: dE=0.29D-01, dP=0.25D+00, ThrX=0.10D-05, %Non0=99
+ PM : Pure 48         :: dE=0.30D-01, dP=0.21D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 49         :: dE=0.31D-01, dP=0.15D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 50         :: dE=0.32D-01, dP=0.17D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 51         :: dE=0.33D-01, dP=0.19D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 52         :: dE=0.32D-01, dP=0.17D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 53         :: dE=0.29D-01, dP=0.16D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 54         :: dE=0.26D-01, dP=0.16D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 55         :: dE=0.22D-01, dP=0.17D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 56         :: dE=0.18D-01, dP=0.18D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 57         :: dE=0.14D-01, dP=0.17D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 58         :: dE=0.95D-02, dP=0.13D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 59         :: dE=0.57D-02, dP=0.13D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 60         :: dE=0.31D-02, dP=0.12D+00, ThrX=0.10D-05, %Non0=100
+ PM : Pure 61         :: dE=0.18D-02, dP=0.92D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 62         :: dE=0.11D-02, dP=0.72D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 63         :: dE=0.68D-03, dP=0.82D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 64         :: dE=0.44D-03, dP=0.74D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 65         :: dE=0.28D-03, dP=0.39D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 66         :: dE=0.19D-03, dP=0.15D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 67         :: dE=0.13D-03, dP=0.11D-01, ThrX=0.10D-05, %Non0=100
+ PM : Pure 68         :: dE=0.61D-04, dP=0.58D-02, ThrX=0.10D-05, %Non0=100
+ PM : Pure 69         :: dE=0.12D-04, dP=0.15D-02, ThrX=0.10D-05, %Non0=100
+ PM : Pure 70         :: dE=0.56D-06, dP=0.80D-04, ThrX=0.10D-05, %Non0=100
+ PM : Pure 71         :: dE=0.14D-08, dP=0.21D-06, ThrX=0.10D-05, %Non0=100
+ PM : Pure 72         :: dE=0.48D-14, dP=0.14D-11, ThrX=0.10D-05, %Non0=100
+ PM : Met dE/dP goals :: Tr{FP}=-.6660006975387348D+03, dNel = 0.00D+00
+ PM                   :: 72 purification steps, 147 matrix multiplies
+ PM                   :: Fractional occupation = 0.11D+00, %Non0s = 100
+ PM : Max abs errors  :: dE=0.32D-11, dP=0.14D-11, [F,P]=0.56D-02
+ PM                   :: Rel dE=0.48D-14, ||dP||_F=0.15D-10, ||[F,P]||_F=0.75D-0
+ 1
+ PM                   :: OrthoP[1] CheckSum  = 0.1341640786676514D+02
+ PM                   :: P[1] CheckSum  = 0.6956730174609830D+01
+ PM                   :: CPU (Sec,MFLOPS) = (0.28D+04, 428),
+                   
+       WALL(Sec,MFLOPS) = (0.29D+04, 419)
+ PM                   :: Allocs=973,  DeAllocs=965, 41658400 bytes are presently
+  allocated.
+                         A max of 145805504 bytes were allocated.
+>-Exiting PM 08/29/02 @ 04:25:39-<
+<<Entering SCFStatus 08/29/02 @ 04:25:40>>
+ 
+= = = = = SCFCycle #0, Basis #3, Geometry #1 = = = = =
+
+       MaxDelD = 0.15D
+ +01
+       <T>     = 0.23709592D+04
+       <V>     = -.44311852D+04
+       <DFT
+ >   = -.31870679D+03
+       <SCF>   = -2378.93282941
+
+ SCFStatus            :: CPU Sec = 0.28D+01, WALL Sec = 0.15D+02
+ SCFStatus            :: Allocs=15,  DeAllocs=15, 0 bytes are presently allocate
+ d.
+                         A max of 62488328 bytes were allocated.
+>-Exiting SCFStatus 08/29/02 @ 04:25:54-<
+<<Entering MakeRho 08/29/02 @ 04:25:55>>
+ MakeRho : Pruned Rho :: dNel = -.13D-06, kept 17% of distributions.
+ MakeRho : Moments    :: <r> = (0.81D+00, -.49D+00, 0.84D+00), <r^2> = 0.31D+03
+ MakeRho              :: Rho CheckSum  = 0.4396105974373399D+04
+ MakeRho              :: CPU Sec = 0.49D+02, WALL Sec = 0.55D+02
+ MakeRho              :: Allocs=64,  DeAllocs=59, 19984 bytes are presently allo
+ cated.
+                         A max of 99552260 bytes were allocated.
+>-Exiting MakeRho 08/29/02 @ 04:26:50-<
+<<Entering QCTC 08/29/02 @ 04:26:50>>
+ QCTC                 :: J[1] CheckSum  = 0.4669378342675953D+03
+ QCTC                 :: CPU Sec = 0.86D+04, WALL Sec = 0.87D+04
+ QCTC                 :: Allocs=779368,  DeAllocs=50, 91882032 bytes are present
+ ly allocated.
+                         A max of 133588004 bytes were allocated.
+>-Exiting QCTC 08/29/02 @ 06:51:13-<
+<<Entering HiCu 08/29/02 @ 06:51:13>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.17976230D+03, <Exc> = -.31795
+ 448D+03, Pts/Atom = 945
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.17998817D+03, <Exc> = -.31865
+ 766D+03, Pts/Atom = 1877
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.18000016D+03, <Exc> = -.31870
+ 708D+03, Pts/Atom = 3686
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.18000018D+03, <Exc> = -.31870
+ 607D+03, Pts/Atom = 7076
+ HiCu.GridGen         :: Tau = 0.10D-05, <Rho> = 0.18000003D+03, <Exc> = -.31870
+ 502D+03, Pts/Atom = 13456
+ HiCu.GridGen         :: Tau = 0.10D-06, <Rho> = 0.18000001D+03, <Exc> = -.31870
+ 493D+03, Pts/Atom = 25369
+ HiCu.GridGen         :: TauRel = 0.10D-06, RhoErr = 0.54D-07, <Exc> = -.3187049
+ 3D+03
+ HiCu.GridGen         :: CPU Sec = 0.97D+04, WALL Sec = 0.97D+04
