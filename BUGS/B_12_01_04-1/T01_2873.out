@@ -1,0 +1,183 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 10 "Gyokuro"                       
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, C.J. Tymczak,                      
+ Chee Kwan Gan, Karoly Nemeth, Valery Weber,          
+ Eric Schwegler and Anders Niklasson                  
+ Los Alamos National Laboratory                       
+ LA-CC-04-086 (formerly 01-2)                         
+ Compiled for AMDLinux.PG, executing on gold
+ a i686 machine running Linux 2.4.21-20.ELsmp
+
+ Current HDF :: /scratch/nemeth/T01_2873.hdf
+<<Starting MondoSCF 12/06/04 @ 18:57:15>>
+ SCFStatus : [0,1,1]    :: <SCF> = -72.90241489, dD = 0.85D+00
+ SCFStatus : [1,1,1]    :: <SCF> = -74.89417767, dD = 0.30D-01, DIIS = 0.45D-01
+ SCFStatus : [2,1,1]    :: <SCF> = -74.91142581, dD = 0.18D+00, DIIS = 0.39D-01
+ SCFStatus : [3,1,1]    :: <SCF> = -74.96066248, dD = 0.71D-02, DIIS = 0.76D-03
+ SCFStatus : [4,1,1]    :: <SCF> = -74.96069971, dD = 0.21D-02, DIIS = 0.19D-03
+ SCFStatus : [5,1,1]    :: <SCF> = -74.96070242, dD = 0.29D-03, DIIS = 0.29D-04
+ SCFStatus : [6,1,1]    :: <SCF> = -74.96070248, dD = 0.19D-04, DIIS = 0.25D-05
+ SCFStatus : [7,1,1]    :: <SCF> = -74.96070248, dD = 0.76D-08, DIIS = 0.28D-08
+ Normal SCF convergence.
+ Atomic SForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc SForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic TForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc TForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic JForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc JForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic ONXForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc ONXForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+ Internals at step #1
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      0.960000    F    0.000000    T
+      2  STRE          1    3    0    0      0.960000    F    0.000000    T
+      3  BEND          2    1    3    0    109.499997    F    0.000000    T
+Gradient transformation, No. Int. Coords=       3
+Grad Trf, step=   1 MaxChange=     0.041404 ChangeNorm=     0.034777
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      3
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+Step=   1   Max_DX=     0.073188  X_RMSD=     0.021136
+Step=   2   Max_DX=     0.003556  X_RMSD=     0.001209
+Step=   3   Max_DX=     0.000126  X_RMSD=     0.000045
+Step=   4   Max_DX=     0.000004  X_RMSD=     0.000002
+ Rigidity=    2.6495566246353533E-11
+ 1 Maximum Displacement from Backtransform.=   -5.7295946817434711  on  3 BEND    
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      1 Total Energy =         -74.96070248
+                   Max intl Grad =     0.041404 between atoms    2   1   3   0
+     Max Unconstrained Cart Grad =     0.072984      on atom     1
+                   RMS intl Grad =     0.034777
+                  Max STRE Displ =     0.032740 between atoms    1   3
+                  Max BEND Displ =     5.729595 between atoms    2   1   3
+                       RMS Displ =     0.076715
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.10D-02, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.18D-05, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.65D-11, %Non0=0.10D+03
+ SCFStatus : [0,1,2]    :: <SCF> = -74.96430397, dD = 0.26D-01
+ SCFStatus : [1,1,2]    :: <SCF> = -74.96510439, dD = 0.87D-03, DIIS = 0.13D-02
+ SCFStatus : [2,1,2]    :: <SCF> = -74.96511793, dD = 0.14D-01, DIIS = 0.12D-02
+ SCFStatus : [3,1,2]    :: <SCF> = -74.96522519, dD = 0.73D-03, DIIS = 0.74D-04
+ SCFStatus : [4,1,2]    :: <SCF> = -74.96522557, dD = 0.60D-04, DIIS = 0.98D-05
+ SCFStatus : [5,1,2]    :: <SCF> = -74.96522557, dD = 0.40D-06, DIIS = 0.12D-06
+ Convergence of density only
+ Atomic SForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc SForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic TForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc TForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic JForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc JForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Atomic ONXForce
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ NaN                      NaN                      NaN                     
+ LatFrc ONXForce
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+  0.0000000000000000E+000  0.0000000000000000E+000  0.0000000000000000E+000
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+ Internals at step #2
+INTERNAL COORDINATES
+       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE
+      1  STRE          1    2    0    0      0.992740    F    0.000000    T
+      2  STRE          1    3    0    0      0.992740    F    0.000000    T
+      3  BEND          2    1    3    0    103.770402    F    0.000000    T
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+Gradient transformation, No. Int. Coords=       3
+Grad Trf, step=   1 MaxChange=     0.041404 ChangeNorm=     0.034777
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+Gradient transformation, No. Int. Coords=       3
+Grad Trf, step=   1 MaxChange=     0.019273 ChangeNorm=     0.012233
+Grad Trf, step=   2 MaxChange=     0.000000 ChangeNorm=     0.000000
+Gradient transformation converged in   2 steps
+Iterative back-transformation, No. Int. Coords=      3
+ Sparsity of B=  24.07 % # of SpB%NNon0        13
+Sparsity of Gc=  14.20 % # of  Gc%NNon0        46
+Sparsity of Ch=   9.15 % # of  Ch%NNon0        14
+Step=   1   Max_DX=     0.058572  X_RMSD=     0.022477
+Step=   2   Max_DX=     0.001159  X_RMSD=     0.000473
+Step=   3   Max_DX=     0.000060  X_RMSD=     0.000022
+Step=   4   Max_DX=     0.000002  X_RMSD=     0.000001
+ Rigidity=    4.0448931663832236E-12
+ 1 Maximum Displacement from Backtransform.=   -4.9894326527017663  on  3 BEND    
+Coordinate back-transformation converged in   4 steps
+       Clone =      1 GeOp step =      2 Total Energy =         -74.96522557
+                   Max intl Grad =     0.019273 between atoms    2   1   3   0
+     Max Unconstrained Cart Grad =     0.012012      on atom     3
+                   RMS intl Grad =     0.012233
+                  Max STRE Displ =     0.005484 between atoms    1   3
+                  Max BEND Displ =     4.989433 between atoms    2   1   3
+                       RMS Displ =     0.050984
+No Geometric DIIS is being done in this step.
+ P2Use : AO-DMX         ::  Nstep  = 1 Lambda = 0.10000000D+01
+ P2Use : AO-DMX 1       ::  dN=-.69D-03, %Non0=0.10D+03
+ P2Use : AO-DMX 2       ::  dN=-.94D-06, %Non0=0.10D+03
+ P2Use : AO-DMX 3       ::  dN=-.18D-11, %Non0=0.10D+03

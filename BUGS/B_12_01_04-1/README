@@ -1,16 +1,25 @@
-Sever problem with SCF convergence on a simple system.
+Messed up forces, seems like things are uninitialized.
 
-MONDO version used:  2004-11-30 07:25
-Compiled on zinc with CompilerSpecifics.IntelLinux.NAG .
+MONDO version used:  2004-12-06 08:02
+Compiled on zinc with CompilerSpecifics.IntelLinux.NAG ,
+and on pink.
 
-This is a polyethilene molecule.
-HF/3-21G could not converge with the default SCF convergence algorithm.
-The initial STO-2G phase converged well, but the forthcoming 3-21G 
-did not, at all.
-Starting from 3-21G did not converge either. 
-SCFConvergence=(DIIS) was cathasrophic.
+PROBLEM: 
+When running code on T01.water.inp and printing force conponents
+lots of NaN-s appear, e.g. in S-Force. For CH2x-6.inp
+instead of NaN-s, the run produces very large numbers like 10^+270 
+or so. While the NaN-s do not mess up atomic forces for water,
+they do for CH2x-6.inp. See output for water in T01_2873.out,
+output for CH2x-6.inp is in CH2x-6_23449.out-2. For the CH2x-6.inp
+the restart hdf is CH2x-6_11756.hdf.gz.
 
-For such a simple saturated alkane SCF convergence sould be 
-absolutely smooth in any basis set.
-K.N. 12/01/04.
+Printouts of forces are in the output files as produced by the SCFs.F90
+given in the present directory. This SCFs.F90 is the same with version
+2004-12-06 08:02, but some printing is added.
+
+Also, why was SCF convergence for such a simple electronic structure
+as polyethylene such a struggle (see CH2x-6_9156.out-1)?
+
+NaN-forces need to be fixed.
+K.N. 12/06/04.
 ------------------------------------------------------------------
