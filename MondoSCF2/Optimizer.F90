@@ -161,7 +161,7 @@ CONTAINS
     TYPE(FileNames)        :: N
     TYPE(Geometries)       :: G
     TYPE(BasisSets)        :: B
-    TYPE(DBL_RNK2)         :: A,AInv,Carts
+    TYPE(DBL_RNK2)         :: A,AInvM,Carts
     TYPE(DBL_VECT)         :: V,DIISCo,GradI,GradJ
     REAL(DOUBLE)           :: DIISError,CoNo,Ratio,AMax
     INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K,Info
@@ -183,7 +183,7 @@ CONTAINS
        CALL SetDSYEVWork(nDIIS**2)
        CALL New(A,(/nDIIS,nDIIS/))
        CALL New(DIISCo,nDIIS)
-       CALL New(AInv,(/nDIIS,nDIIS/))
+       CALL New(AInvM,(/nDIIS,nDIIS/))
        CALL New(V,nDIIS)
        DO I=1,nDIIS-1
           iDIIS=mGEO+I-1
@@ -203,17 +203,17 @@ CONTAINS
        ! Set up the eigensystem
        V%D=Zero
        V%D(nDIIS)=One
-       AInv%D=Zero
+       AInvM%D=Zero
        ! Solve the inverse least squares problem
-       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInv%D,CoNo_O=CoNo,Unit_O=6)
-       CALL DGEMV('N',nDIIS,nDIIS,One,AInv%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
+       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInvM%D,CoNo_O=CoNo,Unit_O=6)
+       CALL DGEMV('N',nDIIS,nDIIS,One,AInvM%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
        ! Here is the DIIS error (resdiual)       
        DIISError=MAX(DIISError,ABS(DIISCo%D(nDIIS)))
        IF(CoNo>MaxCoNo)THEN
           ! Clean up ...
           CALL Delete(V)
           CALL Delete(A)
-          CALL Delete(AInv)
+          CALL Delete(AInvM)
           CALL Delete(DIISCo)
           CALL UnSetDSYEVWork()
           ! ... and start over with a smaller subspace
@@ -242,7 +242,7 @@ CONTAINS
        CALL Delete(GradJ)
        CALL Delete(V)
        CALL Delete(A)
-       CALL Delete(AInv)
+       CALL Delete(AInvM)
        CALL Delete(DIISCo)
        CALL UnSetDSYEVWork()
     ENDDO
@@ -303,7 +303,7 @@ CONTAINS
        ENDIF
     ELSE
        ! Take some steps 
-       StepLength=1D0
+       StepLength=2D0
        DO iSTEP=1,MaxSTEP
           StepLength=StepLength/Two
           ! Step the absolute positions
@@ -1071,16 +1071,15 @@ CONTAINS
      TYPE(BasisSets)  :: Sets
      TYPE(Geometries) :: Geos
      TYPE(FileNames)  :: Nams
-     INTEGER          :: NatmsLoc
+     INTEGER          :: NatmsLoc,NCart
      REAL(DOUBLE)     :: Sum,GCrit
      INTEGER          :: AccL
-     LOGICAL          :: GRestart
      !
      AccL    =Opts%AccuracyLevels(Sets%NBSets)
      NatmsLoc=Geos%Clone(1)%Natms
-     GRestart=(Opts%Guess==GUESS_EQ_RESTART)
+     NCart=3*NatmsLoc
      !
-     IF(.NOT.GRestart) CALL InitGDIIS(Nams%HFile,Geos%Clones)
+     CALL InitGDIIS(Nams%HFile,Nams%RFile,Geos%Clones,Opts%Guess,NCart)
      !
      CALL SetCoordCtrl(GOpt%CoordCtrl)
      CALL   SetHessian(GOpt%Hessian)
@@ -1165,23 +1164,29 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE InitGDIIS(HFileIn,NClones)
-     INTEGER         :: iCLONE,NClones
-     CHARACTER(LEN=*):: HFileIn
-
-
-WRITE(*,*)' IN INITGDIIS !!!!!!!!!!!!!!!!!!!'
+   SUBROUTINE InitGDIIS(HFileIn,RFileIn,NClones,Guess,NCart)
+     INTEGER         :: iCLONE,NClones,Guess,NCart
+     CHARACTER(LEN=*):: HFileIn,RFileIn
+     LOGICAL         :: GRestart
      !
-     HDFFileID=OpenHDF(HFileIn)
-     DO iCLONE=1,NClones
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//&
-                              TRIM(IntToChar(iCLONE)))
-       CALL Put(0,'RefMemory')
-       CALL Put(0,'SRMemory')
-       CALL Put(0,'CartGradMemory')
-       CALL CloseHDFGroup(HDF_CurrentID)
-     ENDDO
-     CALL CloseHDF(HDFFileID)
+     GRestart =(Guess==GUESS_EQ_RESTART)
+     !
+     IF(GRestart) THEN
+       DO iCLONE=1,NClones
+         CALL GDIISRestart(HFileIn,RFileIn,iCLONE,NCart)
+       ENDDO
+     ELSE
+       HDFFileID=OpenHDF(HFileIn)
+       DO iCLONE=1,NClones
+         HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//&
+                                TRIM(IntToChar(iCLONE)))
+         CALL Put(0,'RefMemory')
+         CALL Put(0,'SRMemory')
+         CALL Put(0,'CartGradMemory')
+         CALL CloseHDFGroup(HDF_CurrentID)
+       ENDDO
+       CALL CloseHDF(HDFFileID)
+     ENDIF
    END SUBROUTINE InitGDIIS
 !
 !-------------------------------------------------------------------
@@ -1193,32 +1198,32 @@ WRITE(*,*)' IN INITGDIIS !!!!!!!!!!!!!!!!!!!'
      TYPE(CRDS)           :: GMLoc
      INTEGER,DIMENSION(:) :: Convgd
      INTEGER              :: IGeo,iCLONE
-     INTEGER              :: InitGDIIS,NConstr
-     LOGICAL              :: NoGDIIS,GDIISOn,Print,GRestart
+     INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
+     LOGICAL              :: NoGDIIS,GDIISOn,Print
      CHARACTER(LEN=DCL)   :: SCRPath
      !
      InitGDIIS=GOpt%GDIIS%Init
      NoGDIIS  =GOpt%GDIIS%NoGDIIS
      GDIISOn  =GOpt%GDIIS%On     
      NConstr  =GOpt%Constr%NConstr
+     NatmsLoc =SIZE(GMLoc%AbCarts%D,2)
+     NCart    =3*NatmsLoc
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
-     GRestart =(Opts%Guess==GUESS_EQ_RESTART)
      Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
      !
-!     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='Ref')
-!     CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%Vects%D,Tag_O='CartGrad') 
+     CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='Ref')
+     CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%Vects%D,Tag_O='CartGrad') 
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,GMLoc,IGeo,iCLONE,SCRPath,Print)
        !
-!       CALL GDIISArch(Nams,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
+       CALL GDIISArch(Nams%HFile,iCLONE,XYZ_O=GMLoc%AbCarts%D,Tag_O='SR')
        !
        IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
-         IF((.NOT.NoGDIIS).AND.( &
-            (IGeo>InitGDIIS.AND.GDIISOn).OR.GRestart)) THEN
-           CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams,iCLONE, &
+         IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
+           CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
              Print,SCRPath,InitGDIIS)
          ENDIF
        ENDIF

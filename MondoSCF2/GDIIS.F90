@@ -19,9 +19,9 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,GOpt,Nams,iCLONE,Print,SCRPath,InitGDIIS)
+   SUBROUTINE GeoDIIS(XYZ,GOpt,HFileIn,iCLONE,Print,SCRPath,InitGDIIS)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(FileNames)             :: Nams
+     CHARACTER(LEN=*)            :: HFileIn
      TYPE(GeomOpt)               :: GOpt
      INTEGER                     :: iCLONE,InitGDIIS
      LOGICAL                     :: Print
@@ -33,7 +33,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
      TYPE(DBL_VECT)              :: Vect
      !
-     HDFFileID=OpenHDF(Nams%HFile)
+     HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
      !
@@ -95,9 +95,9 @@ CONTAINS
        II=0
      DO I=J,GDIISMemory
        II=II+1
-       CALL GDIISArch(Nams,iCLONE,Vect_O=SRStruct%D(:,I),Tag_O='SR')
-       CALL GDIISArch(Nams,iCLONE,Vect_O=RefStruct%D(:,I),Tag_O='Ref')
-       CALL GDIISArch(Nams,iCLONE,Vect_O=RefGrad%D(:,I),Tag_O='CartGrad')
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=SRStruct%D(:,I),Tag_O='SR')
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=RefStruct%D(:,I),Tag_O='Ref')
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=RefGrad%D(:,I),Tag_O='CartGrad')
      ENDDO
      !
      ! Tidy up
@@ -252,14 +252,12 @@ CONTAINS
      ! B3^t * PrimDispl
      !
      DO I=1,GDIISMemory
-       VectCart%D(1:NCart)=CartStruct(1:NCart,I)
+       VectCart%D=CartStruct(1:NCart,I)
        CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
        CALL INTCValue(IntCs,ActCarts%D,LinCrit)
        VectInt%D=IntCs%Value
        CALL PrimToDeloc(VectInt%D,VectCart%D,B3,CholData3)
-       DO J=1,NCart
-          DelocStruct(J,I)=VectCart%D(J)
-       ENDDO
+       DelocStruct(1:NCart,I)=VectCart%D
      ENDDO
      !
      CALL Delete(ActCarts)
@@ -582,6 +580,86 @@ CONTAINS
        Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
      CALL Delete(Vect)
    END SUBROUTINE IntCSum
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE GDIISRestart(HFileIn,RFileIn,iCLONE,NCart)
+     CHARACTER(LEN=*)            :: HFileIn,RFileIn
+     TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct
+     TYPE(DBL_VECT)              :: Vect
+     INTEGER                     :: I,II,J,K,L,iCLONE,NCart
+     INTEGER                     :: OldFileID,HDFFileID
+     INTEGER                     :: GDIISMemory,IGeom
+     INTEGER                     :: SRMemory,RefMemory,CartGradMemory
+     !
+     ! Open restart HDF-file
+     !
+     HDFFileID=OpenHDF(RFileIn)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     ! Get GDIIS memory from old HDF
+     !
+     CALL Get(SRMemory,'SRMemory')
+     CALL Get(RefMemory,'RefMemory')
+     CALL Get(CartGradMemory,'CartGradMemory')
+     !
+     IF(SRMemory<RefMemory) CALL Halt('SRMemory<RefMemory in GDIISRestart')
+     IF(RefMemory/=CartGradMemory) &
+                        CALL Halt('RefMemory/=CartGradMemory in GDIISRestart')
+     GDIISMemory=RefMemory
+     !
+     ! Get GDIIS memory of Cartesian coords and grads
+     !
+     CALL New(SRStruct,(/NCart,GDIISMemory/))
+     CALL New(RefStruct,(/NCart,GDIISMemory/))
+     CALL New(RefGrad,(/NCart,GDIISMemory/))
+     !
+     CALL New(Vect,NCart)
+     DO IGeom=1,GDIISMemory
+       CALL Get(Vect,'SR'//TRIM(IntToChar(IGeom)))
+       SRStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'Ref'//TRIM(IntToChar(IGeom)))
+       RefStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'CartGrad'//TRIM(IntToChar(IGeom)))
+       RefGrad%D(:,IGeom)=Vect%D
+     ENDDO
+     !
+     ! Close restart HDF
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     ! Open new HDF
+     !
+     HDFFileID=OpenHDF(HFileIn)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     ! Put back GDIIS memory into HDF
+     !
+     CALL Put(0,'SrMemory')
+     CALL Put(0,'RefMemory')
+     CALL Put(0,'CartGradMemory')
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     J=MAX(1,GDIISMemory-5)
+       II=0
+     DO I=J,GDIISMemory
+       II=II+1
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=SRStruct%D(:,I),Tag_O='SR')
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=RefStruct%D(:,I),Tag_O='Ref')
+       CALL GDIISArch(HFileIn,iCLONE,Vect_O=RefGrad%D(:,I),Tag_O='CartGrad')
+     ENDDO
+     !
+     ! Tidy up
+     !
+     CALL Delete(RefGrad)
+     CALL Delete(RefStruct)
+     CALL Delete(SRStruct)
+   END SUBROUTINE GDIISRestart
 !
 !-------------------------------------------------------------------
 !
