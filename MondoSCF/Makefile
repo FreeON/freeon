@@ -32,12 +32,12 @@ include $(MONDO_HOME)/Includes/RemoveAll
 ObjectFiles = SCFLocals.o ParsingKeys.o Spawn.o   \
               GetPID.o Overlay.o ParseInput.o     \
               SetSCFs.o DrvSCFs.o                 \
-              DrvFrcs.o  MondoSCF.o 
+              DrvFrcs.o  MondoSCF.o GeomOpt.o
 #
 ReleaseFiles= SCFLocals.x ParsingKeys.x Spawn.x   \
               GetPID.x Overlay.x ParseInput.x     \
               SetSCFs.x DrvSCFs.x                 \
-              DrvFrcs.x  MondoSCF.x 
+              DrvFrcs.x  MondoSCF.x GeomOpt.x
 #
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)
@@ -45,12 +45,13 @@ all:	$(ObjectFiles)
 #
 release:$(ReleaseFiles) 
 #
-MondoSCF.o:	DrvSCFs.o SetSCFs.o ParseInput.o Overlay.o \
+MondoSCF.o:	DrvSCFs.o DrvFrcs.o GeomOpt.o SetSCFs.o ParseInput.o Overlay.o \
                 $(MONDO_LIB)/libMondoMods.a
 
 ChkSCFs.o:	SCFLocals.o                                $(MONDO_LIB)/libMondoMods.a
 DrvSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_LIB)/libMondoMods.a 
 DrvFrcs.o:      SCFLocals.o Overlay.o                      $(MONDO_LIB)/libMondoMods.a
+GeomOpt.o:      SCFLocals.o Overlay.o DrvFrcs.o            $(MONDO_LIB)/libMondoMods.a
 ParseInput.o:	SCFLocals.o                                $(MONDO_LIB)/libMondoMods.a 
 SetSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_LIB)/libMondoMods.a
 

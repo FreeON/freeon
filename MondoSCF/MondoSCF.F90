@@ -13,6 +13,7 @@ PROGRAM MondoSCF
   USE SetSCFs
   USE DrvSCFs
   USE DrvFrcs
+  USE GeomOpt
   USE ProcessControl    
   USE InOut
 #ifdef MMech
