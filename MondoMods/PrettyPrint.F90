@@ -499,9 +499,12 @@ RETURN
                  CALL PrintProtectL(PU)
                  Mssg=IntToChar(GM%NAtms)
                  WRITE(PU,*)TRIM(Mssg)
-                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
-                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+!                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
+!                    //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+!                 WRITE(PU,*)TRIM(Mssg)
+                 Mssg = TRIM('FINAL HEAT OF FORMATION = ')//TRIM(FltToMedmChar(Zero)) 
                  WRITE(PU,*)TRIM(Mssg)
+!
                  AA=One/AngstromsToAU
                  DO I=1,GM%NAtms
                      Mssg=Ats(GM%AtNum%I(I))                         &
@@ -549,14 +552,25 @@ RETURN
               CALL ClosePU(PU)
               CALL Print_PBCInfo(GM%PBC,FileName_O,Unit_O)
               PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-#endif              
               DO I=1,GM%NAtms
                   Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
                     //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
                     //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
-                    //'   '//DblToMedmChar(GM%Carts%D(3,I)) 
+                    //'   '//DblToMedmChar(GM%Carts%D(3,I))          &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(1,I))       &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(2,I))       &
+                    //'   '//DblToMedmChar(GM%BoxCarts%D(3,I)) 
                    WRITE(PU,*)TRIM(Mssg)
               ENDDO
+#else
+              DO I=1,GM%NAtms
+                  Mssg=TRIM(IntToChar(I))//'   '//Ats(GM%AtNum%I(I)) &
+                    //'   '//DblToMedmChar(GM%Carts%D(1,I))          &
+                    //'   '//DblToMedmChar(GM%Carts%D(2,I))          &
+                    //'   '//DblToMedmChar(GM%Carts%D(3,I))          &
+                   WRITE(PU,*)TRIM(Mssg)
+              ENDDO
+#endif
               WRITE(PU,3)
               CALL PrintProtectR(PU)
            ENDIF
