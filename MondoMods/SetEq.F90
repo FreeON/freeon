@@ -14,6 +14,7 @@ MODULE SetXYZ
                        Set_BCSR_EQ_RNK2,          &
                        Set_DBL_VECT_EQ_BCSRColVect,&
                        Set_INTC_EQ_INTC,          &
+                       Set_AtmB_EQ_AtmB,          &
                        Set_BMATR_EQ_BMATR,          &
                        Set_Chol_EQ_Chol,          &
                        Set_BONDDATA_EQ_BONDDATA,  &
@@ -754,18 +755,26 @@ MODULE SetXYZ
 !
 !===============================================================
 !
-      SUBROUTINE Set_AtmB_EQ_AtmB(A,B)
-        TYPE(ATOMBONDS) :: A,B
+      SUBROUTINE Set_AtmB_EQ_AtmB(A,B,N2_O)
+        TYPE(ATOMBONDS)  :: A,B
+        INTEGER          :: N2,I,J
+        INTEGER,OPTIONAL :: N2_O
         !
+        N2=B%N2
+        IF(PRESENT(N2_O)) N2=N2_O
         IF(.NOT.AllocQ(A%Alloc)) THEN
-          CALL New(A,B%N1,B%N2)
+          CALL New(A,B%N1,N2)
         ELSE
           CALL Delete(A)
-          CALL New(A,B%N1,B%N2)
+          CALL New(A,B%N1,N2)
         ENDIF
         A%Count%I=B%Count%I
-        A%Bonds%I=B%Bonds%I
-        A%Atoms%I=B%Atoms%I
+        DO I=1,B%N1
+          DO J=1,B%N2
+            A%Bonds%I(I,J)=B%Bonds%I(I,J)
+            A%Atoms%I(I,J)=B%Atoms%I(I,J)
+          ENDDO
+        ENDDO
       END SUBROUTINE Set_AtmB_EQ_AtmB
 !
 !===============================================================
