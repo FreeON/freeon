@@ -1,3 +1,20 @@
+2004-02-16 07:50  mchalla
+
+	* Docs/Bib/mondo_new.bib: A few new entries, and some cleaning.
+
+2004-02-16 07:49  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: This entry details the
+	sad state of the diamond calculations.
+
+2004-02-15 18:58  vweber
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: [no log message]
+
+2004-02-15 16:23  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-02-15 14:16  vweber
 
 	* Docs/DM_Papers/PERT_3/: Alpha_h2o3D_6-31G_6-31Gss_G_T_t.eps,
