@@ -49,50 +49,71 @@ MODULE ParseInput
       SUBROUTINE ParseCmndLine(Ctrl)
          TYPE(SCFControls)          :: Ctrl
          TYPE(ARGMT)                    :: Args
-         INTEGER                        :: I,K,L   
+         INTEGER                        :: I,K,L,DotDex
          INTEGER,EXTERNAL               :: GetPID
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,MPILine,GenFile,OldInfo         
          CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    PARAMETER            :: Soft='-s'
          CHARACTER(LEN=DEFAULT_CHR_LEN), &
                    DIMENSION(3)         :: SoftLinks
+         CHARACTER(LEN=1)               :: S=CHAR(092)
          TYPE(CHR_VECT)                 :: TmpChars
 !---------------------------------------------------------------
 !        Get command line arguments and environment variables
+!
          CALL Get(Args)
          IF(Args%NC==0)CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')
+!
          CALL GetEnv('PWD',MONDO_PWD)   
          CALL GetEnv('MONDO_HOME',MONDO_HOME)
          CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
          IF(LEN(TRIM(MONDO_HOME))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_HOME) not set.')
          IF(LEN(TRIM(MONDO_SCRATCH))==0)CALL MondoHalt(PRSE_ERROR,' $(MONDO_SCRATCH) not set.')
-!        Set local path names
+!------------------------------------------------------------------------------------------------
+!        Set local path names etc
+!
          MONDO_PWD=TRIM(MONDO_PWD)//'/'
          MONDO_HOME=TRIM(MONDO_HOME)//'/'
          MONDO_SCRATCH=TRIM(MONDO_SCRATCH)//'/'
          MONDO_EXEC=TRIM(MONDO_HOME)//'Exec/'
-         SCF_NAME=Args%C%C(1)
          PROCESS_ID=IntToChar(GetPID())
-!        Create globally accesable file names
-         InpFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//InpF 
-         InfFile=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//InfF                
-         IF(Args%NC==1)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//OutF 
-            LogFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//LogF
-            GeoFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//GeoF
-         ELSEIF(Args%NC==2)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))
-            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//LogF
-            GeoFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//GeoF
-         ELSEIF(Args%NC==3)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))
-            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(3))
-            GeoFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//GeoF
+!------------------------------------------------------------------------------------------------
+!        Determine input and output names with full paths        
+         InpFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(1))
+!        Determine if input file has a '.' in it.  If so, create SCF name 
+!        from string up to the '.'
+         DotDex=INDEX(Args%C%C(1),'.')
+         IF(DotDex==0)THEN
+            SCF_NAME=TRIM(Args%C%C(1))//'_'//TRIM(PROCESS_ID)
+         ELSE
+            SCF_NAME=Args%C%C(1)(1:DotDex-1)//'_'//TRIM(PROCESS_ID)
          ENDIF
-!        SCF and InfoFile names
+!        Create user defined or implicit file names
+         IF(Args%NC==1)THEN
+            OutFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//OutF 
+            LogFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//LogF
+            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+         ELSEIF(Args%NC==2)THEN
+            OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
+            LogFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//LogF
+            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+         ELSEIF(Args%NC==3)THEN
+            OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
+            LogFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(3))
+            GeoFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//GeoF
+         ELSEIF(Args%NC==4)THEN
+            OutFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(2))
+            LogFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(3))
+            GeoFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(4))
+         ENDIF
+!        Name the HDF5 info file
+         InfFile=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)//InfF                
+!        Set SCF and InfoFile names
          Ctrl%Info=InfFile
-         Ctrl%Name=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)
-!        Check for a restart
+         Ctrl%Name=TRIM(MONDO_SCRATCH)//TRIM(SCF_NAME)
+!------------------------------------------------------------------------------------
+!        Check for a restart; link old HDF5 to new one if restarting
+!
          CALL OpenASCII(InpFile,Inp)
          IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
             Ctrl%Rest=.TRUE.
@@ -108,17 +129,9 @@ MODULE ParseInput
             Ctrl%Rest=.FALSE.
          ENDIF
          CLOSE(UNIT=Inp,STATUS='KEEP')
-!        Set links to current files
-!         GenFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//InfF
-!         SoftLinks=(/Soft,InfFile,GenFile/)
-!         CALL Invoke('/bin/ln',SoftLinks,AbsPath_O=.TRUE.)
-!         GenFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//OutF
-!         SoftLinks=(/Soft,OutFile,GenFile/)
-!         CALL Invoke('/bin/ln',SoftLinks,AbsPath_O=.TRUE.)
-!         GenFile=TRIM(MONDO_PWD)//TRIM(SCF_NAME)//LogF
-!         SoftLinks=(/Soft,LogFile,GenFile/)
-!         CALL Invoke('/bin/ln',SoftLinks,AbsPath_O=.TRUE.)
+!---------------------------------------------------------------------------------------
 !        Initialize and open info file 
+!
          CALL OpenHDF(InfFile)
          CALL Put(InpFile,'inputfile')
          CALL Put(InfFile,'infofile')
@@ -127,32 +140,54 @@ MODULE ParseInput
 !        Initialize ASCII files
          CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
+         CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
          CLOSE(UNIT=Out,STATUS='KEEP')
          CLOSE(UNIT=LgF,STATUS='KEEP')
+         CLOSE(UNIT=Geo,STATUS='KEEP')
 !--------------------------------------------------------------
-!        Parse <TITLE> for title
+!        Write banner and title to output file
 !
          CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(OutFile,Out)
+         CALL PrintProtectL(Out)
+         WRITE(Out,77)(Rtrn,I=1,15)
+         WRITE(*,77)(Rtrn,I=1,15)
+      77 FORMAT(A1,A1,                                                   &
+         ' __    __                 _       ____________ ______ ',A1,    &
+         '|  \  /  |               | |     /       /    |      |',A1,    & 
+         '|   \/   | ___  _ __   __| | ___/   ____/   __|  |--- ',A1,    &
+         "|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|",A1,    &
+         '|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    ',A1,    &
+         '|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    ',A1,A1, &
+         ' Version 1.0b1                                        ',A1,    &  
+         ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
+         ' Matt Challacombe, Eric Schwegler,                    ',A1,    &
+         ' C.J. Tymczak and Chee Kwan Gan                       ',A1,    &
+         ' Los Alamos National Laboratory                       ',A1,    & 
+         ' Copywrite 2001, University of California.            ',A1)
+!        Parse for title, put to output file
          CALL Align(BEGIN_TITLE,Inp)
          K=1
-         DO I=1,TITLE_LINES
+         DO I=1,1000
             READ(Inp,DEFAULT_CHR_FMT,END=1)Line
-            IF(INDEX(Line,END_TITLE)==0)THEN
-               L=LEN(TRIM(Line))
-               SCFTitle(K:K+L+1)=Line(1:L)//'\n'
-               K=K+L+1
-            ELSE
-               EXIT
-            ENDIF
+            IF(INDEX(Line,END_TITLE)/=0)GOTO 2
+            WRITE(Out,*)TRIM(Line)
          ENDDO
-       1 CONTINUE
+      1  CALL MondoHalt(PRSE_ERROR,' Found no <EndTitle> in input file '//TRIM(InpFile))
+      2  CONTINUE
+         WRITE(Out,*)' '
+         CALL PrintProtectR(Out)
+!        Close input and output
          CLOSE(UNIT=Inp,STATUS='KEEP')
+         CLOSE(UNIT=Out,STATUS='KEEP')
+!        TimeStamp
+         CALL TimeStamp('Starting MondoSCF')
 #ifdef PARALLEL
 !--------------------------------------------------------------
 !        Parse <OPTIONS> for mpirun invokation
 !
          CALL OpenASCII(InpFile,Inp)
-         IF(.NOT.OptCharQ(Inp,MPI_OPTION,MPILine))     & 
+         IF(.NOT.OptCharQ(Inp,MPI_OPTION,MPILine))          & 
             CALL Halt(' mpi invokation command not found. ' &
                     //' Check input for option '            &
                     //TRIM(MPI_OPTION))
@@ -181,21 +216,6 @@ MODULE ParseInput
             PrintFlags%Set=DEBUG_NONE
          ENDIF                       
          CLOSE(UNIT=Inp,STATUS='KEEP')
-!--------------------------------------------------------------
-!        Write banner and title to output file
-!
-         CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
-         IF(PrintFlags%Fmt==DEBUG_MMASTYLE)WRITE(Out,*)LeftParenStar
-         WRITE(Out,77)(Rtrn,I=1,6)
-      77 FORMAT(A1,A1,' << M o n d o S C F >>  ',A1,                       &
-                      '  Version 1.0 Beta  ',A1,                         &
-                      '  Matt Challacombe, Eric Schwegler, ',A1,           &
-                      '  and C.J. Tymczak                  ',A1,           &
-                      '  Los Alamos National Laboratory    ',A1,           & 
-                      '  Copywrite 2000, University of California.',A1)
-         IF(PrintFlags%Fmt==DEBUG_MMASTYLE)WRITE(Out,*)RightParenStar
-         CLOSE(UNIT=Out,STATUS='KEEP')
-         CALL TimeStamp('Starting MondoSCF')
 !--------------------------------------------------------------
 !        Tidy up 
 !
