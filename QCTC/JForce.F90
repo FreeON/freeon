@@ -45,7 +45,7 @@ PROGRAM JForce
   REAL(DOUBLE),DIMENSION(3,3)  :: LatFrc_J
 #endif
 #ifdef MMech
-  INTEGER                      :: NatomsLoc
+  INTEGER                      :: NatmsLoc,I,I1,I2
   TYPE(DBL_VECT)               :: MMJFrc
   TYPE(INT_VECT)               :: GlobalQMNum
   TYPE(INT_VECT)               :: AtmMark    
