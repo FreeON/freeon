@@ -1,5 +1,5 @@
 MODULE DenMatMethods
-  USE DerivedTypes
+  USE DerivedTypes 
   USE GlobalScalars
   USE GlobalCharacters
   USE GlobalObjects
@@ -581,7 +581,9 @@ CONTAINS
          CALL Filter(P,Tmp1)
       ENDIF
     END SUBROUTINE SP2
+!-------------------------------------------------------------------------------
 !
+!-------------------------------------------------------------------------------
     SUBROUTINE AOSP2(P,S,T1,T2,Action)
 #ifdef PARALLEL
       TYPE(DBCSR)   :: P,S,T1,T2
@@ -596,13 +598,40 @@ CONTAINS
       TrP2 = Trace(T2) 
       IF(Action) THEN
          CALL Filter(P,T2)              ! P = P.S.P
+!         CALL SetEq(P,T2)
       ELSE
          CALL Multiply(P,Two) 
          CALL Multiply(T2,-One)
          CALL Add(P,T2,T1)              ! P = 2P-P.S.P
          CALL Filter(P,T1)
+!         CALL SetEq(P,T1)
       ENDIF
     END SUBROUTINE AOSP2
+!-------------------------------------------------------------------------------
+!
+!-------------------------------------------------------------------------------
+    SUBROUTINE AOMcW(P,S,T1,T2,T3)
+#ifdef PARALLEL
+      TYPE(DBCSR)   :: P,S,T1,T2,T3
+#else
+      TYPE(BCSR)    :: P,S,T1,T2,T3
+#endif
+      CALL Multiply(S,P ,T1)            ! T1=S.P
+      TrP  = Trace(T1)
+      CALL Multiply(T1,T1,T2)           ! T2=S.P.S.P
+      CALL Multiply(P,T1,T3)            
+      TrP2 = Trace(T2)
+      CALL Filter(T1,T3)                ! T1=P.S.P.
+      CALL Multiply(P,T2,T3)
+      CALL Filter(T2,T3)                ! T2=P.S.P.S.P
+!
+      CALL Multiply(T1,Three)           ! T1=3*P.S.P.
+      CALL Multiply(T2,-Two)            ! T2=-2*P.S.P.S.P
+!
+      CALL Add(T1,T2,T3)
+      CALL Filter(P,T3)
+!
+    END SUBROUTINE AOMcW
 !-------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -968,7 +997,77 @@ WRITE(*,*)' C = ',C
          CALL MondoHalt(99,'Wrong Order in FockGuess')
       ENDIF
     END SUBROUTINE FockGuess_BCSR
-
+!-------------------------------------------------------------------------------
+! Calculate the Spectral Bounds via Lancho's
+!-------------------------------------------------------------------------------
+    SUBROUTINE EigenBounds(F,F_min,F_max)
+      TYPE(BCSR)       :: F
+      INTEGER          :: I,J
+      REAL(DOUBLE)     :: F_min,F_max,A11,A12,A22,Error,Eig0,Eig1
+      TYPE(DBL_VECT)   :: V1,V2
+!
+      CALL New(V1,NBasF)
+      CALL New(V2,NBasF)
+!
+      Eig1 = Zero
+      V1%D = One
+      DO I=1,5000
+         CALL Multiply(F,V1,V2)
+         A11 = Zero
+         A12 = Zero
+         A22 = Zero
+         DO J=1,NBasF
+            A11 = A11 + V1%D(J)*V1%D(J)
+            A12 = A12 + V1%D(J)*V2%D(J)
+            A22 = A22 + V2%D(J)*V2%D(J)
+         ENDDO
+!
+         Eig0  = A12/A11
+         Error = ABS(Eig0-Eig1)/ABS(Eig0)
+         IF(Error < 1.D-8) EXIT
+!
+         A22   = One/SQRT(A22)
+         DO J=1,NBasF
+            V1%D(J) = V2%D(J)*A22
+         ENDDO
+      ENDDO
+!
+      F_max = Eig0
+      CALL Add(F,-F_max)
+! 
+      Eig1 = Zero
+      V1%D = One
+      DO I=1,5000
+         CALL Multiply(F,V1,V2)
+         A11 = Zero
+         A12 = Zero
+         A22 = Zero
+         DO J=1,NBasF
+            A11 = A11 + V1%D(J)*V1%D(J)
+            A12 = A12 + V1%D(J)*V2%D(J)
+            A22 = A22 + V2%D(J)*V2%D(J)
+         ENDDO
+!
+         Eig0  = A12/A11
+         Error = ABS(Eig0-Eig1)/ABS(Eig0)
+         IF(Error < 1.D-8) EXIT
+!
+         A22 = One/SQRT(A22)
+         DO J=1,NBasF
+            V1%D(J) = V2%D(J)*A22
+         ENDDO
+      ENDDO
+      F_min = A12/A11+F_max
+      CALL Add(F,F_max)
+      IF(F_min > F_max) THEN
+         A11   = F_max
+         F_max = F_min
+         F_min = A11
+     ENDIF
+     CALL Delete(V1)
+     CALL Delete(V2)
+!
+    END SUBROUTINE EigenBounds
 !-------------------------------------------------------------------------------
 ! Estimate spectral bounds via Gersgorin approximation, [F_min-F_max].
 !-------------------------------------------------------------------------------
