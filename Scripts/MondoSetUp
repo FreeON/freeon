@@ -12,6 +12,7 @@ setenv PATH ${PATH}:${MONDO_HOME}/Scripts:${MONDO_HOME}/Exec
 #
 # aliasing 
 #
+alias m   ${MONDO_HOME}/Exec/MondoSCF
 alias ma  ${MAKE} -C ${MONDO_HOME} all 
 alias mk  ${MAKE} -C ${MONDO_HOME} $1
 #

@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e x 1 2 n v
+all:	CatCpy mm s e x 1 n 2 v 
 #
-clean:	cmm cs ce cx c1 c2 cn cv
+clean:	cmm cs ce cx c1 cn c2 cv 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pe px p1 p2 pn pv pMisc
+purge:	pmm ps pe px p1 pn p2 pv pMisc
 #
-release: rmLegacy rmm rs re rx r1 r2 rv rn tarball
+release: rmLegacy rmm rs re rx r1 rn r2 rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -51,7 +51,7 @@ rmLegacy:
 	rm -rf ONX/PONX*
 	rm -rf ONX/SONX
 	rm -rf Inpts
-#	rm -f  README; touch README
+	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt

@@ -1,4 +1,3 @@
-
         TO DO LIST FOR MondoSCF DEVELOPERS 
 
     >> Release of Version 1.0 beta 1 this November << 
@@ -17,10 +16,10 @@ o Preliminary work on ordering algothim for load balancing
   and locality: demonstrate scaling of OneE routines in 
   both limits of Natoms/Nproc->0,Infinity
 
-Karoly:
+Karoly/Susan:
 o Gradients only transition state theory
 o SCRF,Crystal field,QM/MM for boundary conditions
-o Applications to Protein Kinase
+o Applications to Protein Kinase and ?
 o Internal coordinates geometry optimization
 o Accelerated MD/Parallel Tempering
 
