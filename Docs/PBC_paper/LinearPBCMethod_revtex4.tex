@@ -232,7 +232,7 @@ increasing the most diffuse uncontracted exponent(s).
 
 \pagebreak
 
-\section{data structures and error estimates}
+\section{data structures and error estimates}\label{datastruct}
 
 Both the Quantum Chemical Tree-Code (QCTC) \cite{} for computing the Coulomb matrix and Hierarchical Cubature (HiCu)
 for computing the Exchange-Correlation matrix are fast ${\cal O}(N {\rm lg} N)$ algorithms that 
@@ -338,16 +338,22 @@ used to construct AABBs of the density-tree.
 \newpage
 
 \begin{figure}
-
-\caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
-matrix: $V_{cell}$ is the simulation cell which is periodically replicated, $V_{in}$ in the interior 
-region where the Coulomb matrix inner lattice sum is calculated, $V_{out}$ is the remaining region which 
-contributes to the Coulomb matrix which is calculated using the ewald like summation of the interaction
-temsor (see Appendix A) and $S_{\infty}$ is the surface at infinity which contributes a
-shape dependent potential to the Coulomb matrix}
-
-{\centering \includegraphics{RepCell_2.ps} \par}
+\resizebox*{3.5in}{!}{\includegraphics{Regions.eps}}\label{regions}
+\caption{\label{figure:ReplicateCells} Regions that contribute to $N$-scaling summation of the Coulomb matrix.
+The inner cells that make up $V_{\rm in}$ provide a buffer region that gaurantees convergence of the multipole 
+expansion of Coulomb interactions between the unit cell and all cells in $V_{\rm PFF}$.  The
+periodic far-field region, $V_{\rm PFF}$, is the spherically ordered lattice extending
+to infinity but excluding $V_{\rm in}$.  For large cells and high order multipole 
+expansions, $V_{\rm in}$ includes just the unit cell and its nearest 27 neigbors, in fast multipole method notation 
+corresponding to a well-seperated index of unity.  However, for smaller cells and lower 
+order multipole expansions, $V_{\rm in}$ tends to a spherical distribution of cells surrounding the unit cell.   
+Direct summation over $V_{\rm PFF}$ leads to charges at the infinite surface  $S_{\infty}$, which must be
+be cancelled by tin-foil (conducting) boundary conditions to achieve equivalence with Ewald summation}
 \end{figure}
+
+\newpage
+\newpage
+
 
 \section{Periodic Quantum Coulomb Sums}
 
@@ -361,209 +367,133 @@ d{\mathbf{r}}\, d{\mathbf{r}'}{\rho _{ab}^{\scriptscriptstyle \infty}\left( {\ma
 {\left| \mathbf{r}-\mathbf{r}'\right| }^{-1} \rho^{\scriptscriptstyle \infty}_{\rm tot}\left( {\mathbf{r}'}+{\mathbf{R}}\right) }
 \nonumber 
 \end{eqnarray}
-where $rho_{\rm tot}$ is the total, periodic density including both electronic and nuclear terms.  
-
-
-
-However, this is still a long ranged integral. Let us separate the
-Coulomb integral into three pieces 
+where $rho_{\rm tot}$ is the total, periodic density including both electronic and nuclear terms.  These integrals
+involve infinite summation over lattice vectors $\bf R$, and must be handled with care.  There are at least two
+main approaches to handling this summation:  Multipole expansion of the Ewald potential \cite{},
+or Ewald-like summation of the multipole expansion.    Expansion of the Ewald potential yeilds  
+tin foil (TF) boundary conditions, requires reciprocal and real space summation with every $\bf J$ build, 
+and scales as $O(N^{3/2})$.  An alternative is the ewald-like summation of the multipole interaction tensor,
+which was first described by Nijboer and De Wette (NDW) \cite{} and later reviewd and extended by us \cite{}
+to lattice summation of the irregular solid harmonic multipole interaction tensor. 
+This Ewald-like summation is taken over the periodic far field, $V_{\rm PFF}$, which is lattice summation excluding 
+an inner region, $V_{\rm in}$, surrounding the unit cell that has been subtracted to guarantee convergence of the 
+multipole expansion.  Because ${\cal M}^{m}_l$ maybe cheaply precomputed and reused, 
+the cost of Coulomb summation over the PFF scales as as ${\cal O}(N p^2)$ ({\bf CJ verify!!}), where $p$ is the order 
+of the multipole expansion.  With this feature, achieving $N$-scaling quantum Coulomb sums involves the contributions
 \begin{equation}
-J_{ab}^{PBC}=J_{ab}^{PNF}+J_{ab}^{PFF}+J_{ab}^{EC}
-\label{Jab_sum}
+{\bf J} = {\bf J}^{\rm In} + {\bf J}^{\rm PFF} + {\bf J}^{\rm TF} \, ,
 \end{equation}
-where 
-\begin{equation}
-J_{ab}^{QCTC}=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\, \int _{V_{\infty }}\, 
-\int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho ^{loc}_{ab}\left( {\mathbf{r}}\right)
- \: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
-\label{Jqctc}
-\end{equation}
-%
-\begin{equation}
-J_{ab}^{PFF}=\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{out}}\, \int _{V_{\infty }}
-\, \int _{V_{\infty }}\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) 
-\: \rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
-\label{Jpff}
-\end{equation}
-%
-\begin{equation}
-J_{ab}^{EC}=\frac{1}{2}\sum _{{\mathbf{R}'}\in S_{\infty }}\, \int _{V_{\infty }}\, \int _{S_{\infty }}
-\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: 
-\rho ^{loc}\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
-\label{Jec}
-\end{equation}
-and \( V_{in} \) is the volume which contains the inner cells, \( V_{\infty } \)
-is the total volume, \(V_{out}\) is the total volume minus \( V_{in} \), and \( S_{\infty } \) is 
-the surface at infinity which contributes a shape dependent potential to the center cell.
-This is depicted in figure \ref{figure:ReplicateCells}. Let us now
-discuss the calculation of each terms.
+corresponding to the three seperate regions shown in Fig.~\ref{}.   Here, $J_{\rm In}$ is computed using 
+the fast ${\cal O}(N {\rm lg} N)$ QCTC algorithm outlined previously in Section~\ref{datastruct}. Construction of ${\bf J}_{\rm PFF}$ 
+will be developed in the following section, while in Section~\ref{} the term ${\bf J}_{\rm TF}$ nessesary to 
+introduce tin-foil boundary conditions is detailed.
 
+\newpage
+\newpage
 
-\subsubsection{The Quantum Chemical Tree Code: The direct Coulomb matrix}
+\subsection{The Periodic Far Field}
 
-In-order to achieve linear scaling, we use a quantum chemical tree
-code \cite{WarSal93,WarSal95,Salmon:93,Challacombe96A} to compute the integrals in equation (\ref{Jqctc}).
-This requires that we replace the integrals in equation (\ref{Jqctc})
-with the approximate spherical multipole expansion to order \( L \)
-and \( L' \),
-%
+The periodic far field (PFF) term in the Coulomb matrix
+\begin{equation}
+J_{ab}^{\rm PFF} = \sum _{{\bf R}\in {\rm PFF}} \int \int d {\bf r} d {\bf r'}  \rho^\infty_{ab}({\bf r}) {\left| {\bf r}-{\bf r'}+{\bf R} \right|}^{-1}
+\rho^\infty_{\rm tot} ({\bf r'})
+\label{PFFOne}
+\end{equation}
+involves charge distributions that are well seperated with respect to both penetration and the
+convergence of multipole expansion errors, as outlined in Fig.~\ref{regions}. 
+
+With these conditions, and assuming the unit cell is centered at the origin, the multipole expansion \cite{} 
 \begin{eqnarray}
-J_{ab}^{QCTC}&=&\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
-\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
-\qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad 
-\nonumber\\
-%
-&\approx& \frac{1}{2}\sum _{\mathbf{R}'\in V_{in}}
-\sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-d{\mathbf{r}'}\frac{\rho _{ab}^{loc}({\mathbf{r}})\: 
-\rho_{NF} \left( {\mathbf{r}'+\mathbf{R}'}\right) }
-{\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad 
-\nonumber\\
-%
-&+&\frac{1}{2} \sum _{\mathbf{R}'\in V_{out}}\sum _{l=0}^{L}
-\sum _{l'=0}^{L'} \sum _{m=-l}^{l} \sum _{m'=-l'}^{l'}
-\nonumber
-\end{eqnarray}
-
-\begin{eqnarray}
-\quad\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho_{ab}^{loc},{\bf Q}\right] 
- M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\tilde \rho^{loc},{\bf P}]
-\nonumber\\
-\label{QCTC}
-\end{eqnarray}
-%
-where
-\begin{equation}
-\label{sp_rho_loc}
-O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}
-\left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
-\end{equation}
-and $\rho_{NF}({\bf r})$ is  the set of distributions
-of the local density which overlap \( \rho_{ab}^{loc}({\mathbf{r}})\)
-(therefore these integrals must be done explicitly) , $\mathbf{Q}$
-is the center of the distribution  \( \rho _{ab}({\mathbf{r}})\) and
-$\tilde \rho^{loc},{\bf P}$
-are the set of distributions of the local density which do not overlap  \( \rho _{ab}({\mathbf{r}})\) and 
-therefore the integrals can be done with the multipole approximation. 
-The multipole operators are are defined as
-
-\begin{eqnarray}
-\widehat{O}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left| {\mathbf{R}}\right| ^{l}P_{l}^{m}
-\left( \cos \left( \theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left( l+m\right) !}
-\begin{array}{c}
+{| {\bf r}-{\bf r}'+{\bf R}|}^{-1} &\approx&
+\sum^p_{l=0} (-1)^{l}  \,
+\sum^p_{l'=0} \Bigl[
 \\
-
-\end{array}\label{sp_mult_O} \\
-\widehat{M}_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}\left( \cos \left( 
-\theta _{\mathbf{R}}\right) \right) \, e^{-im\phi _{\mathbf{R}}}}{\left| {\mathbf{R}}\right| ^{l+1}}
-\begin{array}{c}
-\\
-
-\end{array}\label{sp_mult_M} 
+&&\sum^{l}_{m=-l} \,
+\sum^{l'}_{m=-l'} 
+O^{m}_{l}({\bf r})
+            \,M^{m+m'}_{l+l'}({\bf R})
+            \,O^{m'}_{l'}({\bf r}')  \Bigr] , \nonumber
 \end{eqnarray}
-A detail analysis of the penetration and  multipole error will be given in
-reference 7 
-%\cite{MChallacombe03A}. 
-
-
-\subsubsection{The Periodic Far Field Coulomb matrix}
-
-To obtain the periodic far field correction to the matrix elements
-we replace the integral in equation (\ref{Jpff}) with the multipole
-sum \cite{Challacombe97}
-%
+employing the regular and irregular solid harmonics, $O^l_m$ and $M^l_m$ respectively, 
+may be inserted into Eq.~(\ref{PFFOne}) yeilding
 \begin{eqnarray}
-J_{ab}^{PFF} &=& \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{out}}\, \int _{V_{\infty }}
-\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
-\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| } 
-\nonumber\\
-&=& \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, 
-\sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
-\nonumber\\
-& &\left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]
-\, M_{l+l'}^{m+m'}[\mathbf{R}]\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
-\nonumber\\
-& &\label{Jpff_2} 
+J_{ab}^{\rm PFF}& =&\sum _{{\bf R}\in {\rm PFF}} \sum^p_{l=0} (-1)^{l}  \, \sum^p_{l'=0} \sum^{l}_{m=-l} 
+\Bigl(  \\
+&&
+\sum^{l'}_{m=-l'} 
+O_{l}^{m}\left[ \rho^\infty_{ab}\right]\,M^{m+m'}_{l+l'}[{\bf R}] \, O_{l'}^{m'}\left[ \rho^\infty_{\rm tot}\right] 
+\Bigr) ,  \nonumber
 \end{eqnarray}
-%
-where \( \mathbf{R}_{0} \) is an arbitrary point in the simulation
-cell (usually the center of the cell). Let us define
+This expression decouples the complexity of $\rho^\infty_{ab}$ from $\rho^\infty_{\rm tot}$
+through the precomputed multipole moments
+$O_{l}^{m}\left[ \rho^\infty_{ab}\right] 
+=\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, \rho^\infty_{ab} \left( \mathbf{r}\right) $
+and 
+$O_{l}^{m}\left[ \rho^\infty_{\rm tot}\right] =\int  d\mathbf{r}\, {O}_{l}^{m} \left( \mathbf{r}\right) \, \rho^\infty_{\rm tot} \left( \mathbf{r}\right)$.
+Following Nijboer and De Wette, we introduce the effective multipole interaction tensor 
 \begin{equation}
-\label{ScriptM}
-{\cal M}_{l}^{m}=\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]
+{\cal M}^{m}_l=\sum_{{\bf R}\in V_{\rm PFF} } M^m_l[{\bf R}] \;,
 \end{equation}
-Which allow us to rewrite equation (\ref{Jpff_2}) as
-%
-\begin{eqnarray}
-J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
-\nonumber\\
-& & \left( -1\right) ^{l}\, {\cal O}_{l}^{m}[\rho _{ab}^{loc};\mathbf{R}_{0}]\,
- {\cal M}_{l+l'}^{m+m'}\, {\cal O}_{l'}^{m'}[\rho ^{loc};\mathbf{R}_{0}]
-\nonumber\\
-\label{sp_jpff_2}
-\end{eqnarray}
-%
-For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
-summation. 
-In Appendix A we describe an efficient method which allows
-us to calculate these conditional summations in one, two and three dimensions. 
-The only task remaining
-is to determine the region of the inner box summation or the multipole
-order \( L \) which we have to expand to. Using results obtained in reference {7}
-we can approximate  the error bound  as
+which can be efficiently computed on the fly for each new lattice, both to high accuracy and to high order (large $p$) 
+using the new methods detailed in Appendix~\ref{calMTen}.  With this simplification,  the 
+${\cal O}(p^2 N)$  working equation 
 \begin{equation}
-\label{Rmax}
-\tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}
-\right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -2\left| \mathbf{d}_{max}\right| \right| }
+\label{WorkingPFF}
+J_{ab}^{\rm PFF}= \sum^p_{l=0} \sum^{l}_{m=-l} O_{l}^{m}\left[ \rho^\infty_{ab}\right] {\cal J}^m_l \;,
 \end{equation}
-where we are assuming a distribution of unit weight, and \( \mathbf{R}_{max} \) 
-is the distance to the nearest cell in the sum in equation (\ref{ScriptM}). In figure 
-\ref{figure:ErrorPFF} we show the the relative error in the periodic far field energy verses
-expansion order $L$ for 27 and 125 inner box sums for a 64 water molecule system. 
-
-In the next section we describe the corrections to the Coulomb matrix
-which allows us to obtain Ewald boundary conditions in order to obtain
-translational invariance in the matrix elements, and also allows us
-to compare directly to \textbf{Crystal98}. 
-
-\subsubsection{The Ewald Correction matrix}
-
-The correction to the Coulomb matrix is strongly dependent on how
-the periodic multipole tensor is summed. If the matrix is a spherically
-ordered lattice sum, then the connection between the spherically ordered
-potential,$\Phi _{ss}$ and the Ewald potential, $\Phi _{Ew}$ is \cite{Redlack72}, 
+is obtained, where the intermediate tensor 
 \begin{equation}
-\Phi _{Ew}\left( \mathbf{r}\right) =\Phi _{ss}\left( \mathbf{r}\right) -\frac{4\pi }{3V}
-{\left( \mathbf{r}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3V}Q
+{\cal J}^l_m = (-1)^{l}\sum^p_{l'=0} \sum^{l'}_{m=-l'}  {\cal M}^{m+m'}_{l+l'} O_{l'}^{m'}\left[ \rho^\infty_{\rm tot}\right] 
+\end{equation}
+is cheaply precomputed at the start of each Coulomb build.
+
+\newpage
+\newpage
+
+Because Eq.~(\ref{WorkingPFF}) is inexpensive, our strategy is to define a minimal buffer region,  , sufficient 
+simply to control penetration errors, subtracting effort from the computation of $J^{\rm in}$ via QCTC and replacing
+it with higher order multipole work in the computation of $J^{\rm PFF}$.  Thus, the inner region $V^{\rm in}$ is constructed 
+from neighboring cells that have simple Gaussian overlap with the unit cell, defined by the radious $R^{o}$.  
+For the relatively large distances considered at this level, this is sufficient to avoid penetration errors;  it is 
+important to consider the true penetration extent, $R^p$, only in the close interactions with charge distribution achieved by QCTC.  
+With $V^{\rm in}$ fixed, the accuracy of ${\bf J}^{\rm PFF}$ is controled entirely by the expansion order $p$.  
+In general $p \gtrsim 20$ will be much higher than the expansion order ($\sim 5$) employed by QCTC in computation of ${\bf J}^{\rm in}$.  
+With QCTC accuracy is controled on the fly by the MAC and PAC, establishing a dynamic near/far-field partition, while 
+computation of ${\bf J}^{\rm PFF}$ involves a static, worst case error dominated by the multipole expansion.  
+This static error is controled by using the FMM-like error esitmate 
+\begin{equation}
+\frac{ {d}_{\rm max}^{2 p+1}}
+{({R}^o)^{2 p+1}\left| {R}^o -2 {d}_{\rm max} \right| } 
+> \epsilon \;,
+\end{equation}
+where $d_{\rm max}$ is the maximum translational distance, $R^o$ is the raidious eliminating Gaussian overlap 
+between the unit cell and $V_{\rm PFF}$, and $\epsilon$ is a target error.
+({\bf OK CJ, we have to get our shit together with this exitmate:  We don't really have an $C_\rho$ that
+we use when we pick $p$, right?.  Also, this is basically the FMM estimate, right? }).
+
+
+\newpage
+\newpage
+
+\subsection{Tin-Foil Boundary Conditions}
+
+The surface charges created by direct summation over $V_{\rm PFF}$ must be subtracted out
+to achieve equivalence with true Ewald summation.   Achieving this equivalence is more than
+semantic, since without tin-foil boundary conditions matrix elements lack translationonal
+invarience and often incur dramatic charge sloshing instabilities.   The correction is 
+strongly dependent on ordering of the direct sum, As the Nijboer and De Wette summation corresponds to 
+spherical summation, the appropriate correction is \cite{Redlack72} 
+\begin{equation}
+\Phi _{\rm Ew}\left( \mathbf{r}\right) =\Phi _{\rm SS}\left( \mathbf{r}\right) + \frac{2\pi }{3V_{\rm UC}} \left(  Q - 2 \, {\bf r } \cdot \mathbf{D} \right)
 \label{EW_pot}
 \end{equation}
-where $V$ is the volume of the simulation cell, $R_0$ is a arbitrary reference point in the cell, 
-${\bf D}$ is the dipole moment and $Q$ is the quadrupole moment.
-In terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
-the corrections
-\begin{eqnarray}
-J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \rho ^{loc}_{ab}\left( {\mathbf{r}}
-\right) \left\{ \frac{2\pi }{3V}Q-\frac{4\pi }{3V}\left( \mathbf{r}-\mathbf{R}_{0}\right) \cdot 
-\mathbf{D}\right\}
-\nonumber\\
- & = & \frac{2\pi }{3V}Q\, S_{ab}^{PBC}-\frac{4\pi }{3V}\mathbf{d}_{ab}\cdot \mathbf{D}
-\nonumber\\
-\label{Jab_ec_2} 
-\end{eqnarray}
-where we calculate
-%
-\begin{eqnarray}
-{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right)
- \rho ^{loc}_{ab}\left( \mathbf{r}\right)
-\label{dab} \\
-{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right) 
-\rho ^{loc}\left( \mathbf{r}\right) 
-\label{D} \\
-Q & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right) ^{2}
-\rho ^{loc}\left( \mathbf{r}\right) 
-\label{Q} 
-\end{eqnarray}
+where ${\bf D}$ is the system dipole moment and $Q$ is the trace of the system quadrupole, and we have assumed origen centering, 
+The tin-foil correction to the Coulomb matrix is then 
+\begin{equation}
+J_{ab}^{TC}  = \frac{2\pi }{3V_{\rm UC}} \left(  Q\, S_{ab}-2 \, \mathbf{d}_{ab}\cdot \mathbf{D} \right) \label{JTC}
+\end{equation}
+where $S_{ab}$ is an element of the overlap matrix, and ${\bf d}_{ab}$ is the origen centered
+dipole moment of the distribution $\rho^\infty_{ab}$.  
 
 
 \subsection{The exchange-correlation matrix}
@@ -603,7 +533,46 @@ Next, we directly calculate the integral of equation (\ref{Kxc_pbc_0}),
 where we obtain significant increase in efficacy by exploiting the
 localization of the atomic orbitals. 
 
-\section{Verification}
+\section{Validation}
+
+\begin{table}
+\caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
+         $k$-space integration with {\sc Crystal98} for NaCl at the STO-3G/LDA level
+         of theory.}\label{NaClGammaPt}
+
+\commentout{
+M        &    8-511G/BLYP   & $2^a$         &  -622.3910114  & -311.1955057\\
+C        &    8-511G/BLYP   & $2^a$         &  -622.3911     & -311.1955   \\\hline 
+M        &    8-511G/BLYP   & $8^b$         &  -2490.0016297 & -311.25020371 \\
+C        &    8-511G/BLYP   & $8^b$         &  -2490.0013    & -311.25016    \\\hline 
+}
+
+\tablenotetext[6]{Triclinic: $N_{\rm at}=2$, $a=b=c=$3.974 au, $\alpha=\beta=\gamma=60^\circ$}
+\tablenotetext[7]{Cubic: $N_{\rm at}=8$, $a=b=c=$5.620 au, $\alpha=\beta=\gamma=90^\circ$}    
+
+\begin{tabular}{ccll}
+\toprule
+
+Program         & $N_{\rm at}$              & Energy (hartree) & Energy/$N_{\rm at}$\\ 
+
+\colrule
+
+{\sc MondoSCF}  & 2$^f$    &   -610.975355  & -305.487677   \\
+                & 8$^g$    &  -2444.35836   & -305.544795   \\
+                & 16$^f$   &  -4888.70023   & -305.543765   \\
+                & 54$^f$   & -16499.4900    & -305.546111   \\
+                & 64$^g$   & -19554.9556    & -305.546181   \\
+                & 128$^f$  & -39109.9115    & -305.546184   \\
+                & 216$^g$  & -65997.9768    & -305.546185   \\ 
+\hline
+
+{\sc Crystal98}\footnote[8]{Calculation performed with a $6\times6\times6$
+                            $k$-space integration grid.  {\bf Some shit about fitting functions and itols}}
+                & 2$^f$    &  -611.09228    & -305.54614    \\ 
+
+\botrule
+\end{tabular}
+\end{table}
 
 Table \ref{table:ComToCrystal98_1}-\ref{table:ComToCrystal98_3}
 displays our results for several test systems, Sodium Chloride, Magnesium
@@ -884,100 +853,6 @@ direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
 \eject
 
-\begin{table}
-\caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
-Sodium Chloride test system. The \textbf{MondoSCF} calculations where done to
-the accuracy of the quoted digits. All calculations where done at the Gamma point
-for comparison except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
-The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
-functional \cite{Becke93}.}
-\label{table:ComToCrystal98_1}
- 
-\begin{tabular}{clcll}
-\hline 
-Prog&
-Basis/Theory&
-\( N \)&
-Energy  (au)&
-Energy/{\it N}\\
-\hline
-\hline 
-M &
-STO-3G/LDA&
-2\footnote[1]{Triclinic cell: for $N=2$, a=b=c=3.974 au, $\alpha=\beta=\gamma=60^{{\rm o}}$}&
--610.9753547&
--305.4876774\\
-C&
-STO-3G/LDA&
-$2^a$&
--610.9754&
--305.4877\\
-M&
-8-511G/BLYP&
-$2^a$&
--622.3910114&
--311.1955057\\
-C&
-8-511G/BLYP&
-$2^a$&
--622.3911&
--311.1955\\
-\hline 
-M&
-STO-3G/LDA&
-8\footnote[2]{Cubic cell: for $N=8$, a=b=c=5.620 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
--2444.3583560&
--305.54479450\\
-C&
-STO-3G/LDA&
-$8^b$&
--2444.358&
--305.5447\\
-M&
-8-511G/BLYP&
-$8^b$&
--2490.0016297&
--311.25020371\\
-C&
-8-511G/BLYP&
-$8^b$&
--2490.0013&
--311.25016 \\
-\hline 
-M&
-STO-3G/LDA&
-$16^a$&
--4888.70023&
--303.543765\\
-M&
-STO-3G/LDA&
-$54^a$&
--16499.4900&
--305.546111\\
-M&
-STO-3G/LDA&
-$64^b$&
--19554.9556&
--305.546181\\
-M&
-STO-3G/LDA&
-$128^a$&
--39109.9115&
--305.546184\\
-M&
-STO-3G/LDA&
-$216^b$ &
--65997.9768&
--305.546185\\
-\hline
-\,\,C\,\,&
-STO-3G/LDA\,\,&
-\,\,$2^a$\,\,&
--611.09228\,\,\,\,\,\,\,\,\,\,\,&
--305.54614\\
-\hline
-\end{tabular}
-\end{table}
 %
 %
 %
