@@ -14,8 +14,8 @@ Grad=(TSSearch,GDIIS)
 Clones=2
 MPIProcessors=4
 MPISpatialProc=2
-DebugAll =(MinDebug)
-,CheckSums)
+MakeS=MatDebug
+DebugAll =(MinDebug,CheckSums)
 Guess=SuperPos
 SCFMethod=(RH)
 BasisSets=(STO-2G)
@@ -31,15 +31,15 @@ H   -0.783975899     -0.50    -0.184686472
 <EndGeometry>
 
 <BeginReactants>
-O    0.000000000     0.0     0.369372944         
-H    0.5783975899     0.50    -0.184686472       
-H   -0.783975899     -0.50    -0.1384686472  
+O    0.000000000     0.0     0.369372944 
+H    0.783975899     0.50    -0.184686472    
+H   -0.783975899     -0.50    -0.184686472  
 <EndReactants>
 
 <BeginProducts>
 O    0.000000000     0.0     0.369372944 
-H    0.783975899     0.50    -0.184686472     
-H   -0.783975899     -0.50    -0.184686472    
+H    0.783975899     0.50    -0.184686472    
+H   -0.783975899     -0.50    -0.184686472  
 <EndProducts>
 
 

@@ -37,7 +37,6 @@ CONTAINS
 #ifdef PARALLEL    
     CALL New(ST,3)
     ST%I=(/NSpace,Clump(1),Clump(2)/)
-    WRITE(*,*)' SPACETIME = ',ST%I
     CALL Put(ST,'SpaceTime')
     CALL Delete(ST)
 #else
