@@ -227,6 +227,7 @@ PROGRAM MakeRho
      CALL Put(MP,NxtCycl)
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho2,'DeltaRho',Args,0)
+     CALL Put(MP,'Delta'//TRIM(SCFCycl))
   ELSE
      CALL Put_HGRho(Rho2,'Rho',Args,0) 
      CALL Put(MP,SCFCycl)

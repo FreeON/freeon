@@ -33,8 +33,6 @@ MODULE ParsingKeys
    CHARACTER(LEN=9),  PARAMETER :: SCF_OPTION='SCFMethod' 
    CHARACTER(LEN=4),  PARAMETER :: SCF_SDMM  ='SDMM' 
    CHARACTER(LEN=2),  PARAMETER :: SCF_RHHF  ='RH'
-   CHARACTER(LEN=6),  PARAMETER :: SCF_INKF  ='InkFok'
-   CHARACTER(LEN=4),  PARAMETER :: SCF_DIIS  ='DIIS'
 !  SCF keys
    INTEGER, PARAMETER :: RH_R_SCF  =10982348 ! Restricted Roothaan-Hall 
    INTEGER, PARAMETER :: RH_U_SCF  =43240823 ! Unrestricted Roothaan-Hall 
@@ -48,6 +46,9 @@ MODULE ParsingKeys
    CHARACTER(LEN=8),  PARAMETER :: GUESS_SUPER    ='SuperPos'
    CHARACTER(LEN=7),  PARAMETER :: GUESS_RESTART  ='Restart'
    CHARACTER(LEN=8),  PARAMETER :: RESTART_INFO   ='InfoFile'
+!  <Options.InkFok=>
+   CHARACTER(LEN=6),  PARAMETER :: INKFOCK_OPTION ='InkFok'
+   CHARACTER(LEN=3),  PARAMETER :: INKFOCK_OFF    ='Off'
 !  Guess keys
    INTEGER, PARAMETER :: GUESS_EQ_CORE=14334 ! Density matrix from core Hamiltonian
    INTEGER, PARAMETER :: GUESS_EQ_SUPR=40823 ! Density matrix from superposition of 

@@ -213,7 +213,6 @@ MODULE DrvSCFs
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Action,RemCur,RemPrv,RemoveFile
       INTEGER                        :: Modl
 !---------------------------------------------------------------------------------------      
-return
       IF(PRESENT(Action_O))THEN
          Action=Action_O
       ELSE
@@ -231,18 +230,16 @@ return
               //TRIM(PrvCycl)
          RemoveFile=TRIM(RemCur)//'.Rho'                                
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)
-         RemoveFile=TRIM(RemCur)//'.J'                                
+         RemoveFile=TRIM(RemPrv)//'.J'                                
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(HasDFT(Modl))THEN
             RemoveFile=TRIM(RemCur)//'.Kxc'                                
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          ENDIF
          IF(HasHF(Modl))THEN
-            RemoveFile=TRIM(RemCur)//'.K'                                
+            RemoveFile=TRIM(RemPrv)//'.K'                                
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          ENDIF
-         RemoveFile=TRIM(RemCur)//'.D'                                
-         CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(CCyc>0)THEN
             RemoveFile=TRIM(RemPrv)//'.OrthoD'                                
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)
@@ -255,9 +252,9 @@ return
          RemoveFile=TRIM(ScrName)//'*.E' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
          RemoveFile=TRIM(ScrName)//'*.OrthoF' 
-!         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
-!         RemoveFile=TRIM(ScrName)//'*.F' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
+         RemoveFile=TRIM(RemCur)//'.D'                                
+         CALL SYSTEM('/bin/rm -f  '//RemoveFile)
          IF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
             RemoveFile=TRIM(ScrName)//'*.Z' 
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
@@ -267,8 +264,6 @@ return
             RemoveFile=TRIM(ScrName)//'*.X' 
             CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
          ENDIF
-!         RemoveFile=TRIM(ScrName)//'*.S' 
-!         CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
          RemoveFile=TRIM(ScrName)//'*.T' 
          CALL SYSTEM('/bin/rm -f  '//RemoveFile)  
       ELSEIF(Action=='CleanLastGeom')THEN
@@ -347,7 +342,7 @@ return
             ConvergedQ=.TRUE.
          ENDIF
 !        Accept convergence from wrong side if thresholds are tightend.
-         IF(DMaxB<dTest*5.D-1.AND.ETotQ<ETest*1.D-1)THEN
+         IF(DMaxB<dTest*6D-1.AND.ETotQ<ETest*1D-1)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
@@ -372,14 +367,23 @@ return
 !           Turn on incremental Fock builds if we should, but havnt yet
             Ctrl%InkFok=.TRUE.
             Ctrl%BeenInkn=.TRUE.
+         ELSEIF(ETotB>ETotA.AND.Ctrl%InkFok)THEN
+!           If approaching convergence from the wrong direction, 
+!           turn off IncFok with possibility of later inkn again.
+            Ctrl%InkFok=.FALSE.
+            Ctrl%BeenInkn=.FALSE.
          ELSEIF(ConvergedQ.AND.Ctrl%InkFok)THEN
 !           Turn full builds back on if convergence reached
 !           with incremental methods.  
             ConvergedQ=.FALSE.
             Ctrl%InkFok=.FALSE.
             Ctrl%BeenInkn=.TRUE.
+         ELSEIF(ConvergedQ.AND.(.NOT.Ctrl%InkFok))THEN
+!           If truely converged after full Fock builds, then 
+!           we are done with benn inkn, so reset the flag.
+            Ctrl%BeenInkn=.FALSE.
          ENDIF            
-!
+!        Convergence announcement
          IF(ConvergedQ.AND.PrintFlags%Key>DEBUG_NONE)THEN
             WRITE(*,*)TRIM(Mssg)             
             IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
@@ -388,7 +392,6 @@ return
                CLOSE(Out)
             ENDIF
          ENDIF
-!--------------------------------------------------------
 !        Load statistics 
          Ctrl%NCyc(CBas)=CCyc
          Ctrl%Stats(CCyc,:)=(/ETotB,ETotQ,dDMax,DIISB,dETot/)

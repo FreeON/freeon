@@ -39,11 +39,12 @@ PROGRAM QCTC
 ! Allocations 
   CALL NewBraBlok(BS)
 ! Get multipoles and density
-  CALL Get(RhoPoles,SCFCycl)
   IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
+     CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
   ELSE  
      CALL Get(Rho,'Rho',Args,0)
+     CALL Get(RhoPoles,SCFCycl)
   ENDIF
 ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)

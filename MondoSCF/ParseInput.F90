@@ -299,11 +299,11 @@ MODULE ParseInput
 !-------------------------------------------------------------------------------
 !        Parse <OPTIONS.SCF>
 !
-!         IF(OptKeyQ(Inp,SCF_OPTION,SCF_InkF))THEN
+         IF(OptKeyQ(Inp,INKFOCK_OPTION,INKFOCK_OFF))THEN
+            Ctrl%ShudInk=.FALSE.
+         ELSE
             Ctrl%ShudInk=.TRUE.
-!         ELSE
-!            Ctrl%ShudInk=.FALSE.
-!         ENDIF       
+         ENDIF       
 !
          NOpts=0
          Ctrl%Method=RH_R_SCF ! default is restricted RH
