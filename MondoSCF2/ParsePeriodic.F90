@@ -25,7 +25,7 @@ CONTAINS
        CLOSE(Inp)
        RETURN
     ENDIF
-    !    WRITE(*,*)' reparsing periodics '
+    WRITE(*,*)' reparsing periodics '
     ! ... otherwise do some parsing
     CALL LoadPeriodicOptions(PBC)
     CALL LoadLattice(PBC)
@@ -101,7 +101,7 @@ CONTAINS
 !============================================================================
 !
 !============================================================================
-  SUBROUTINE LoadLattice(PBC)!,NLvec,NTvec)
+  SUBROUTINE LoadLattice(PBC)
     TYPE(PBCInfo)                   :: PBC
     INTEGER                         :: NLvec,NTvec,Dimen,I,J
     CHARACTER(LEN=2)                :: At
@@ -256,19 +256,8 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
-    PBC%InvBoxSh=Zero
-!   Compute the inverse box shape 
-    PBC%InvBoxSh(1,1)=One/PBC%BoxShape(1,1)
-    PBC%InvBoxSh(2,1)=Zero
-    PBC%InvBoxSh(3,1)=Zero
-    PBC%InvBoxSh(1,2)=-PBC%BoxShape(1,2)/(PBC%BoxShape(1,1)*PBC%BoxShape(2,2))
-    PBC%InvBoxSh(2,2)=One/PBC%BoxShape(2,2)
-    PBC%InvBoxSh(3,2)=Zero
-    PBC%InvBoxSh(1,3)=(PBC%BoxShape(1,2)*PBC%BoxShape(2,3)&
-         -PBC%BoxShape(2,2)*PBC%BoxShape(1,3))&
-         /(PBC%BoxShape(1,1)*PBC%BoxShape(2,2)*PBC%BoxShape(3,3))
-    PBC%InvBoxSh(2,3)=-PBC%BoxShape(2,3)/(PBC%BoxShape(2,2)*PBC%BoxShape(3,3))
-    PBC%InvBoxSh(3,3)=One/PBC%BoxShape(3,3)
+!   Compute the inverse box shape
+    PBC%InvBoxSh = InverseMatrix(PBC%BoxShape)
 !
   END SUBROUTINE UnitCellSetUp
 !=========================================================================

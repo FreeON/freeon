@@ -141,36 +141,36 @@ CONTAINS
 !
 !==============================================================================
   SUBROUTINE GeomArchive(cBAS,cGEO,N,B,G)
-    TYPE(FileNames)  :: N
-    TYPE(BasisSets)  :: B
-    TYPE(Geometries) :: G    
-    TYPE(CellSet)    :: CS
-    INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
+
+    TYPE(FileNames)    :: N
+    TYPE(BasisSets)    :: B
+    TYPE(Geometries)   :: G    
+    TYPE(CellSet)      :: CS_IN,CS_OUT
+    INTEGER            :: cBAS,cGEO,iCLONE,HDFFileID
     CHARACTER(LEN=DCL) :: chGEO
-    !---------------------------------------------------------------------------!
+!---------------------------------------------------------------------------!
     chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        G%Clone(iCLONE)%Confg=cGEO
-       ! Set the correct PBC cell set list
-       CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
-       ! Make sure everything is wrapped correctly
+!      Set the correct PBC cell set list
+       CALL SetLatticeVectors(G%Clone(iCLONE),B%AtomPairThresh(iCLONE,cBAS),CS_IN,CS_OUT)
+!      Make sure everything is wrapped correctly
        CALL WrapAtoms(G%Clone(iCLONE))
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       ! If we have ECPs, temporarily reset this geometries nuclear charges
+!      If we have ECPs, temporarily reset this geometries nuclear charges
        IF(B%BSets(iCLONE,cBAS)%HasECPs) &
           CALL SetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
 !      Put the geometry to this group ...
        CALL Put(G%Clone(iCLONE),chGEO)
-!      ... and the corresponding lattice vectors which for now ONLY DEPEND
-!      ON THE BASIS SET.  THIS WILL HAVE TO BE CHANGED WHEN WE ADD BOX FORCES! 
-       CALL Put(CS,Tag_O=IntToChar(cBAS))
-!!$       CALL Put(CS,'CS_OUT',Tag_O=IntToChar(cBAS))
-!!$       CALL Put(CS,'CS_IN' ,Tag_O=IntToChar(cBAS))
+!      Store the CellSets
+       CALL Put(CS_IN ,'CS_IN' ,Tag_O=IntToChar(cBAS))
+       CALL Put(CS_OUT,'CS_OUT',Tag_O=IntToChar(cBAS))
        ! Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
        ! And free memory for the the lattice vectors 
-       CALL Delete(CS%CellCarts)
+       CALL Delete(CS_IN%CellCarts)
+       CALL Delete(CS_OUT%CellCarts)
        ! And unset the nuclear charges in the case of ECPs
        IF(B%BSets(iCLONE,cBAS)%HasECPs) &
           CALL UnSetAtomCharges(G%Clone(iCLONE),B%BSets(iCLONE,cBAS))
@@ -237,38 +237,35 @@ CONTAINS
     CALL Delete(GradE)
     !
   END SUBROUTINE GeomReArchive
-!
 !==============================================================================
 ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
 !==============================================================================
-  SUBROUTINE SetLatticeVectors(G,C,AtomPairThresh,Rad_O)
+  SUBROUTINE SetLatticeVectors(G,AtomPairThresh,CS_IN,CS_OUT,Rad_O)
     TYPE(CRDS)                :: G
-    TYPE(CellSet)             :: C
+    TYPE(CellSet)             :: CS_IN,CS_OUT
     REAL(DOUBLE), OPTIONAL    :: Rad_O
     REAL(DOUBLE)              :: AtomPairThresh,Radius
     INTEGER                   :: IL
 !------------------------------------------------------------------------------
-!   First we create a CellSet with a Distance of MaxBoxDim+SQRT(AtomPairThresh)
-!   Some of these boxes will be to far away, next we determine how close the 
-!   closest Faces of each cell are, if they are within SQRT(AtomPairThresh), 
-!   then we keep them
-!------------------------------------------------------------------------------
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
-       CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
     ELSE
-       IF(G%PBC%PFFOvRide) THEN
-          IL = G%PBC%PFFMaxLay
-          CALL New_CellSet_Cube(C,G%PBC%AutoW,G%PBC%BoxShape,(/IL,IL,IL/))
-       ELSE
-!          Radius = (One+1.D-14)*MaxAtomDist(G)+SQRT(AtomPairThresh)
-          Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
-          CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,Radius)
-       ENDIF
+        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
 !
-    CALL Sort_CellSet(C)
-    C%Radius = SQRT(C%CellCarts%D(1,1)**2+C%CellCarts%D(2,1)**2+C%CellCarts%D(3,1)**2)
+    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW,G%PBC%BoxShape,Radius)   
+    IF(G%PBC%PFFOvRide) THEN
+       IL = G%PBC%PFFMaxLay
+       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW,G%PBC%BoxShape,(/IL,IL,IL/))
+    ELSE
+       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW,G%PBC%BoxShape,Radius)
+    ENDIF
+!
+    CALL Sort_CellSet(CS_IN)
+    CS_IN%Radius  = SQRT(CS_IN%CellCarts%D(1,1)**2 +CS_IN%CellCarts%D(2,1)**2 +CS_IN%CellCarts%D(3,1)**2)
+    CALL Sort_CellSet(CS_OUT)
+    CS_OUT%Radius = SQRT(CS_OUT%CellCarts%D(1,1)**2+CS_OUT%CellCarts%D(2,1)**2+CS_OUT%CellCarts%D(3,1)**2)
+!
   END SUBROUTINE SetLatticeVectors
 !==============================================================================
 !

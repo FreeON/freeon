@@ -16,21 +16,25 @@ PROGRAM MondoSCF
   CALL InitMPI()
 #endif
   CALL ParseTheInput(C)  
-  ! Initialize controls
+! Initialize controls
   CALL InitGlobal(C)
-  ! Print startup 
+! Print startup 
   CALL PrintsStartUp(C%Nams)
-  ! Much ado about gradients
+! Much ado about gradients
   SELECT CASE(C%Opts%Grad)
   CASE(GRAD_NO_GRAD)
      CALL SinglePoints(C)
   CASE(GRAD_GO_DOWNHILL)
      CALL Descender(C)
   CASE(GRAD_TS_SEARCH_NEB)
-     ! Place holder for whatever
+!    Place holder for whatever
      CALL Descender(C)
-   CASE(GRAD_DO_DYNAMICS)
-      ! Needs work...
+  CASE(GRAD_DO_DYNAMICS)
+     CALL SinglePoints(C)
+     CALL DoForce(C) 
+  CASE(GRAD_ONE_FORCE)
+     CALL SinglePoints(C)
+     CALL DoForce(C) 
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()
