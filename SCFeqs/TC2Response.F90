@@ -434,8 +434,8 @@ CONTAINS
     ENDIF
     !
     ! Test in the asymptotic regime for stall out
-    IF(RelErrProp<1D2*Thresholds%Trix**2)THEN
-       !    IF(RelErrE<Thresholds%ETol)THEN
+    !IF(RelErrProp<1D2*Thresholds%Trix**2)THEN
+    IF(RelErrProp<Thresholds%ETol)THEN
        ! Check for increasing /P
        IF(AbsErrPPrim>OldAEP)THEN
           CnvrgChckPrim=.TRUE.
