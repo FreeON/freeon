@@ -157,17 +157,20 @@ CONTAINS
 !     Regular Function
 !====================================================================================
       SUBROUTINE Regular(Ell,PQx,PQy,PQz)
-         INTEGER                   :: Ell
+         INTEGER                   :: Ell,LenSP
          INTEGER                   :: L,M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
          REAL(DOUBLE)              :: PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
                                       CoFact,PQToThPlsL,PQx,PQy,PQz
 !------------------------------------------------------------------------------------
-         Cpq=Zero
-         Spq=Zero
+         ! Cpq=Zero
+         ! Spq=Zero
          PQx2=PQx*PQx
          PQy2=PQy*PQy      
          PQ=SQRT(PQx2+PQy2+PQz*PQz)
          IF(PQ==Zero)THEN
+            LenSP=LSP(Ell)
+            CALL DBL_VECT_EQ_DBL_SCLR(LenSP+1,Cpq(0),Zero)
+            CALL DBL_VECT_EQ_DBL_SCLR(LenSP+1,Spq(0),Zero)
             Cpq(0) = One
             RETURN
          ENDIF
@@ -337,14 +340,16 @@ CONTAINS
         INTEGER                     :: I,K,L,M
         REAL(DOUBLE)                :: Unsold0
         REAL(DOUBLE), DIMENSION(0:) :: C,S
-!
+ 
         K=LTD(L)
-        Unsold0=(C(K)**2+S(K)**2)*Factorial(L)**2
+        ! Unsold0=(C(K)**2+S(K)**2)*Factorial(L)**2
+        Unsold0=(C(K)*C(K)+S(K)*S(K))*(Factorial(L)*Factorial(L))
         DO M=1,L
-           Unsold0=Unsold0+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)            
+           ! Unsold0=Unsold0+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)            
+           Unsold0=Unsold0+Two*(C(K+M)*C(K+M)+S(K+M)*S(K+M))*Factorial(L+M)*Factorial(L-M)
         ENDDO
         Unsold0 = SQRT(ABS(Unsold0))
-!
+ 
       END FUNCTION Unsold0
 !====================================================================================
 !
