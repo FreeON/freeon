@@ -423,7 +423,7 @@ MODULE PrettyPrint
                  WRITE(PU,53)I,(FRACTION(GM%Carts%D(K,I)), &
                                  EXPONENT(GM%Carts%D(K,I)),K=1,3)
               ENDDO
-           ELSE
+           ENDIF
               DO I=1,GM%NAtms
                  WRITE(PU,52)I,Ats(GM%AtNum%I(I)),(GM%Carts%D(K,I),K=1,3)
               ENDDO
@@ -444,7 +444,7 @@ MODULE PrettyPrint
               ENDDO
               WRITE(PU,43)
 #endif
-           ENDIF
+!           ENDIF
            CALL ClosePU(PU)
 #ifdef PARALLEL
         ENDIF
