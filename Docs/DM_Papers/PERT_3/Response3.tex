@@ -32,7 +32,6 @@
 %%\usepackage{dcolumn}% Align table columns on decimal point
 %%\usepackage{bm}% bold math
 
-
 \documentclass[prl,aps,letterpaper,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
 
 \usepackage{graphicx}
@@ -55,7 +54,7 @@
 \begin{document}
 
 
-\title{The Perturbed Projector for Higher Order Response in ${\cal O}(N)$} 
+\title{Higher Order Response in ${\cal O}(N)$ by Perturbed Projection} 
 
 \author{Val\'ery Weber}
 \email{valery.weber@unifr.ch}
@@ -67,29 +66,26 @@
 \date{\today}
 
 \begin{abstract}
-Perturbed projection  for linear scaling solution of the coupled perturbed 
-self consistent field equations 
+Perturbed projection  for linear scaling solution of the coupled-perturbed 
+self-consistent-field equations 
 [Weber, Niklasson and  Challacombe, Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)] 
 is extended to computation of higher order static response properties.
-Although generally applicable, perturbed projection is applied here specifically to the 
-self-consistent computation of the first and second electric hyperpolarizabilities 
+Although generally applicable, perturbed projection is developed here 
+in the context of the self-consistent first and second electric hyperpolarizabilities 
 of three dimensional water clusters at the Hartree-Fock level of theory. 
-Density matrix analogues of Wigner's $2n+1$ rule are given up to fourth order for 
-mixed perturbation terms, including non-orthogonal formulations.
+Non-orthogonal, density matrix analogues of Wigner's $2n+1$ rule are given up to fourth order.
 Linear scaling and locality of the higher order response densities under perturbation 
-by a global electric field are demonstrated.  Perturbed projection is also used to compute 
-response functions up to 10th order in the uncoupled approximation.  
+by a global electric field are demonstrated.  
 \end{abstract}
 
-%\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
-                             % Classification Scheme.
-%\keywords{Suggested keywords}%Use showkeys class option if keyword
-                              %display desired
+\keywords{Perturbed Projection, density matrix, perturbation theory, purification, linear scaling, 
+          CPHF, Hartree-Fock, electric polarization, hyperpolarizabilty}
+
+\pacs{02.70.-c, 71.15.Dx,31.15.Ar,31.15.Md,31.15.Ne,33.15.Kr,36.40.Cg}
+
 \maketitle
 
 \footnotetext[1]{LA-UR-04-5219} 
-
-
 
 \section{Introduction}
 First principles electronic structure theory has traditionally been limited 
@@ -102,16 +98,17 @@ allowing simulation capabilities to keep pace with hardware improvements.
 These linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
 non-metallic systems,  manifested in the approximate exponential decay of density matrix elements 
 with atom-atom separation through the effective use of sparse matrix methods. For small systems,
-linear scaling methods may be inefficient due to overhead.  However, these methods hold the promise 
-of major impact across materials science, chemistry and biology. 
+linear scaling methods may be inefficient due to overhead.  However, for large, complex systems
+these methods hold the promise of major impact across materials science, chemistry and biology. 
 
 So far, a majority of work in linear scaling electronic structure theory 
 has focused on methods and calculations involving the ground state, with little 
 attention devoted to the problem of response properties.  The calculation of static
 response within  Hartree-Fock or Density Functional Theory is obtained through solution 
 of the Coupled-Perturbed Self-Consistent-Field (CPSCF) equations, which yield properties 
-such as the electric polarizability and hyperpolarizability, the Born-effective charge, 
-the nuclear magnetic shielding tensor \cite{KWolinski90}, indirect spin-spin coupling
+such as the electric polarizability and hyperpolarizability \cite{HSekino86,SKarna91}, 
+the Born-effective charge \cite{}, the nuclear magnetic shielding tensor \cite{KWolinski90}, 
+indirect spin-spin coupling
 constant \cite{CPennington91,OMalkin96}, geometric derivatives (i.e.~higher order
 analytic force constants) \cite{RAmos89} and polarizability derivatives such as the Raman 
 intensity \cite{MLazzeri03,OQuinet01}.
@@ -119,42 +116,41 @@ intensity \cite{MLazzeri03,OQuinet01}.
 Conventional approaches to solution of the CPSCF equations 
 \cite{JPople79,HSekino86,SKarna91} are based on perturbation of the wave 
 function, requiring an $N^3$-scaling eigensolve which may need to be followed by an ${\cal O}(N^5)$ 
-transformation of two-electron integrals depending on the method used. 
+transformation of two-electron integrals, depending on the method used. 
 In addition to the formal scaling of these conventional methods, they do not admit exploitation 
 of quantum locality through the effective use of sparse matrix algebra.  
-More recently, schemes with the potential for a reduced complexity have been been put forward.
+More recently, schemes with the potential for reduced complexity have been been put forward.
 Ochsenfeld and Head-Gordon proposed a scheme based on the Li-Nunes-Vanderbilt 
 density matrix minimization \cite{Ochsenfeld97}.  Later, Larsen {\em et al.} \cite{HLarsen01a} 
-proposed iterative solution of the CPSCF equations derived from unitary operations
-involving approximations to the matrix exponential.    In both of these approaches, 
+proposed iterative solution of the CPSCF equations involving equations derived from 
+unitary operations and approximations to the matrix exponential.    In both of these approaches, 
 a linear system of equations containing commutation relations is obtained, which {\em implicitly}
 determines the response function.  However, the method of solution for these equations
 is not discussed, and computational results are not presented.  Recently though, 
-with an apparent reformulation of Ref.~\onlinecite{Ochsenfeld97},
+with an apparent reformulation of Ref.~[\onlinecite{Ochsenfeld97}],
 Ochsenfeld, Kussmann and Koziol~\cite{COchsenfeld04} have achieved near linear scaling computation
 of NMR chemical shifts for one-dimensional alcanes at the GIAO-HF/6-31G* level of theory,
 but likewise provide no details on their method of solution.  Such details are of interest
 because these approaches to solving the CPSCF equations, in which the response is posed implicitly
 as a commutation relation, are Sylvester-like.  A standard approach to solving the Sylvester equations 
-involves re-expression in standard form as the linear system $Ax=b$ using the Kronecker product 
+involves re-expression as the linear system $Ax=b$ using the Kronecker product 
 formalism \cite{JBrandts01}.  In this formalism, $A$ is a $N^2\times N^2$ matrix, $x$ is a $N^2$ vector that 
 contains the density matrix derivative and $b$ a $N^2$ vector that contains the inhomogeneous
 part of the response equations.  However, even if the matrix $A$ is strictly diagonal,
 solution of these equations with sparse iterative methods is at best ${\cal O}(N^2)$.  
-To achieve linear scaling then, the  $N^2\times N^2$ matrices $A$ must be hypersparse.
-The undocumented particulars for solving these implicit Sylvester-like formulations of the 
-CPSCF equations are therefore of special interest. 
+To achieve linear scaling with the Kronecker product scheme, it would appear that the 
+$N^2\times N^2$ matrix $A$ must be hypersparse.  Also, more sophisticated approaches to solving 
+these Sylvester-like formulations exist \cite{JBrandts01}, making their particulars of 
+special interest. 
 
-In contrast, the Perturbed Projection method is a simple explicit alternative for
+In contrast, the Perturbed Projection method is a simple and explicit alternative for
 $N$-scaling solution of the CPSCF equations.  Based on a recently developed density 
-matrix perturbation theory 
-\cite{ANiklasson04} and spectral projection \cite{ANiklasson02A,ANiklasson03}.   
-Perturbed Projection is able to achieve $N$-scaling by exploiting the direct relationship between 
-the density matrix $\mathcal{D}$ and the effective Hamiltonian or Fockian $\mathcal{F}$ provided by
-the spectral projector (Heaviside step function) $\mathcal{D}=\theta(\tilde{\mu}I-\mathcal{F})$, 
-in which the chemical potential $\tilde{\mu}$ determines the occupied states via Aufbau filling.   
-Spectral projection can be carried out in a number of ways 
-\cite{ANiklasson02A,ANiklasson03,RMcWeeny60,WClinton69,APalser98,GBeylkin99,KNemeth00,AHolas01}.
+matrix perturbation theory \cite{ANiklasson04}, Perturbed Projection exploits the explicit 
+relationship between the density matrix $\mathcal{D}$ and the effective Hamiltonian or 
+Fockian $\mathcal{F}$ via spectral projection; $\mathcal{D}=\theta(\tilde{\mu}I-\mathcal{F})$, 
+wherein $\theta$ is the Heaviside step function (spectral projector)  and the chemical potential 
+$\tilde{\mu}$ determines occupied states via Aufbau filling.   Spectral projection can be carried 
+out in a number of ways \cite{ANiklasson02A,ANiklasson03,RMcWeeny60,WClinton69,APalser98,GBeylkin99,KNemeth00,AHolas01}.
 Of special interest here are recursive polynomial expansions of the projector, including the second 
 order trace correcting (TC2) \cite{ANiklasson02A} and fourth order trace resetting (TRS4) 
 \cite{ANiklasson03} purification algorithms.  These new methods (TC2 and TRS4) have convergence 
@@ -162,10 +158,10 @@ properties that depend only weakly on the band gap, do not require knowledge of 
 and perform well for all occupation to state ratios. Perhaps most important to the current contribution, 
 these methods converge smoothly and monotonically to high order.      
 
-Prior to Ref.~\onlinecite{COchsenfeld04}, Perturbed Projection demonstrated linear scaling in 
+Prior to Ref.~[\onlinecite{COchsenfeld04}], Perturbed Projection demonstrated linear scaling in 
 computation of the first electric polarizability for three-dimensional water clusters with the 
 Hartree-Fock model. Also, in a preceding paper, we outlined a non-orthogonal density matrix
-perturbation theory \cite{ANiklasson05a} for the computation of response to a change in basis (ie.~as occurs in 
+perturbation theory \cite{ANiklasson05a} for response to a change in basis (i.e.~as occurs in 
 the evaluation of higher order geometric energy derivatives \cite{RAmos89}). 
  In this article, the Perturbed Projection method is extended to higher orders
  in the electric polarizability, up to fourth order in the total energy.  The
@@ -195,12 +191,13 @@ The Coupled-Perturbed Self-Consistent-Field (CPSCF) equations yield
 static response functions and properties in models including both the 
 Hartree-Fock (HF) and Density Functional Theory (DFT).  In the following
 we develop the CPSCF equations in the framework of polarization and 
-Hartree-Fock theory, but an extension to DFT and other static perturbations 
-is straightforward, but can be complicated in the case of properties that 
-perturb the non-orthogonal basis set.  In a preceding paper, we outline 
-a non-orthogonal perturbation theory suitable for extending Perturbed Projection
-to properties such as NMR shielding constants and the analytic computation of
-higher order force constants.
+Hartree-Fock theory.  In many cases, the extension of Perturbed Projection to
+the computation of other static perturbations is straightforward.  In
+the case of model chemistries that involve DFT, an extra programming effort well 
+beyond the HF is required to compute the derivative Hamiltonian \cite{Lee_1994,PSalek02}.
+Also, in the case of properties such as the NMR chemical shift and geometric derivatives 
+(force constants), perturbation of the non-orthogonal basis requires additional 
+considerations that we have detailed in a preceding paper \cite{ANiklasson05a}.
 
 \subsection{Notation}
 
@@ -214,8 +211,6 @@ congruence transformations \cite{JWilkinson65,GStewart73} provided
 by the approximate inverse (AINV) algorithm for computing  sparse 
 approximate inverse Cholesky factors with a computational complexity
 scaling linearly with the system size \cite{MBenzi95,MBenzi96,MBenzi01}.
-
-
 
 \subsection{Response expansions}
 
@@ -254,7 +249,7 @@ be developed in a Taylor expansion series around $\E = 0$ as
  The polarizability $\alpha_{ab}$ is the second order response 
  of the total energy with respect to variation in the electric field 
  while the higher derivatives, $\beta_{abc}$ and $\gamma_{abcd}$, give 
- rise to the first and second hyperpolarizabilities where \cite{HSekino86,SKarna91}
+ rise to the first and second hyperpolarizabilities \cite{HSekino86,SKarna91} where 
  \begin{subequations}\label{pol}
    \begin{gather}
      \alpha_{ab}=
@@ -275,11 +270,6 @@ be developed in a Taylor expansion series around $\E = 0$ as
 \end{subequations}
 Here $D^{a\ldots}$ denotes a density matrix derivative with respect to a field in directions $a\ldots$ 
 at $\mathcal{E} = 0$.  The  density matrix derivative or ``response function'' is given by 
-%{\bf times 1/m! on the right hand side? Is this consistent with all coefficients in 4a-c?}\\
-%\\
-%{\bf V: The factor N! can be moved from EQ 5 to EQ 4. The problem here is that Anders 
-%uses an expansion without the 1/N! factor and I use it (which is what we can find 
-%in other codes). Also we use TrD=N/2 and EQ 1 is then not correct. }
 \begin{equation}
 % \displaystyle\D^{a\ldots}=N!
  \displaystyle\D^{a\ldots}=
@@ -324,13 +314,13 @@ While the expansions above are given explicitly for Hartree-Fock Theory, similar
 hold also for Kohn-Sham and hybrid HF/DFT,  which involve variation of the  exchange-correlation 
 matrix $V_{xc}^{a\ldots}(D^0,D^a,\ldots)$ \cite{Lee_1994,PSalek02}.
 
-\subsection{Achieving Self-Consistence}\label{SelfConsistency}
+\subsection{Achieving self-consistence}\label{SelfConsistency}
 
 The derivative density matrices and derivative Fockians depend on 
 each other implicitly, and must be solved for self-consistently
-via the coupled-perturbed self-consistent-field (CPSCF) equations.
+via the CPSCF equations.
 The necessary and sufficient criteria for convergence of the 
-CPSCF equations involve an extension of the self-consistency conditions \cite{Furche_2001}:
+CPSCF equations involve generalized self-consistence conditions \cite{Furche_2001},
 \begin{gather}
     [\F^{0} ,\D^{0}]=0,\label{eq:commutators1}\\
     [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\label{eq:commutators2}\\
@@ -356,7 +346,7 @@ CPSCF equations involve an extension of the self-consistency conditions \cite{Fu
 %+[\F^{0},\D^{abc}]=0,\\
 %  \end{gather}
 %\end{subequations}
-and the idempotency-like constraints \cite{Furche_2001}:
+in addition to generalized idempotency-like constraints \cite{Furche_2001},
 \begin{gather}
   \D^{0} =\D^{0} \D^{0},\label{eq:anticommutators1}\\
   \D^{a} =\{\D^{a},\D^{0}\},\label{eq:anticommutators2}\\
@@ -378,11 +368,9 @@ and the idempotency-like constraints \cite{Furche_2001}:
 %\end{subequations}
 where the anti-commutator notation $\{A,B\} = AB+BA$ has been used.
 
-
-
 \section{Higher Order Perturbed Projection}
 
-Perturbed Projection was originally presented in Ref.~\onlinecite{Weber04}
+Perturbed Projection was originally presented in Ref.~[\onlinecite{Weber04}]
 for solution of the first order CPSCF equations.  Here, a higher order, generally applicable 
 extension of perturbed projection is outlined for self consistent solution 
 of the $N$-th order CPSCF equations, with specific application to the case of polarization and the
@@ -393,7 +381,7 @@ be accomplished in ${\cal O}(N)$ using a purification algorithm such as Niklasso
 second order trace correcting scheme (TC2) in conjunction with sparse atom-blocked linear algebra 
 \cite{ANiklasson03,MChallacombe00B}.  Linear scaling is achieved for insulating systems through 
 the dropping (filtering) of atom-atom blocks with Frobenious norm below a numerical threshold 
-($\sim 10^{-5}-10^{-6}$).  At SCF convergence the TC2 algorithm generates a polynomial sequence 
+($\tau \sim 10^{-4}-10^{-7}$).  At SCF convergence the TC2 algorithm generates a polynomial sequence 
 defining the ground state projector, from which the derivative density matrices are directly obtained.
 
 Having solved the groundstate SCF equations, solution of the CPSCF equations commences with a guess at the 
@@ -416,10 +404,8 @@ obtained directly through variation of the occupied subspace projector,
     \frac{\partial^N}{\partial\E^{a\ldots}}\theta(\tilde{\mu}I-
     \F_n(\E))\bigg|_{\E=0} \, , \label{DDeriv}
 \end{equation}
-which is accomplished via the Niklasson and Challacombe approach to 
-Density Matrix Perturbation Theory \cite{ANiklasson04}.  
-
-
+which is accomplished via the Niklasson and Challacombe approach to density matrix 
+perturbation theory \cite{ANiklasson04}.  
 
 After a few CPSCF cycles, the approach to self-consistency may be accelerated with 
 Weber and Daul's DDIIS algorithm \cite{VWeber03}, 
@@ -429,7 +415,7 @@ Weber and Daul's DDIIS algorithm \cite{VWeber03},
 in which the $c_k$ coefficients are chosen to minimize the 
 $N^{\rm th}$ order commutation 
 relations, as in Eqs.~(\ref{eq:commutators2})-(\ref{eq:commutators4}). The application of the
-DDIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
+DDIIS algorithm to acceleration of higher order CPSCF equations is developed further in Section \ref{DDIIS}.
 
 At self-consistency, the conditions given in Section \ref{SelfConsistency} have been met, and it is then 
 appropriate to compute response properties.   In general, we can use the expectation value 
@@ -438,15 +424,12 @@ E^{(\gamma)} = 2 (\gamma-1)! Tr(D^{(\gamma-1)} h^{(1)}), \label{Np1Rule}
 \end{equation}
 where in the case of polarization we have the (hyper)polarizabilities $\alpha_{ab}=-2\Tr[D^a\mu_b]$, 
 $\beta_{abc}=-4\Tr[D^{ab}\mu_c]$ or $\gamma_{abcd}=-12\Tr[D^{abc}\mu_d]$.
-%({\bf THIS DOESN'T LOOK RIGHT.  IS THERE A NORMALIZTION THING HERE??}).  
-Alternatively, it is possible to construct density matrix anologues of 
-Wigner's $2 N+1$ rule, which allows the evaluation of response properties up to order $2N+1$ from response 
-functions of order $N$.  These anologues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
+Alternatively, it is possible to construct density matrix analogues of 
+Wigner's $2 n+1$ rule, which allows the evaluation of response properties up to order $2 n+1$ from response 
+functions of order $N$.  These analogues are given in Section \ref{Wigner2Np1} through $4^{th}$ order in
 the energy.
 
-
-
-\subsubsection{Perturbed Projection}\label{ResponseFunctions}
+\subsection{Perturbed Projection}\label{ResponseFunctions}
 
 Although a number of analytic, asymptotically discontinuous representations exist for the Heaviside 
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv1}) 
@@ -461,11 +444,11 @@ Perturbed Projection, based on the recently developed Density Matrix Perturbatio
 Challacombe \cite{ANiklasson04}, is based on recursive purification, retaining the convergence and
 smoothness properties of the generating sequence.   In Perturbed Projection, each order of the response 
 is collected upon perturbative expansion of the purification polynomial,  leading to explicit, recursive 
-formulae for construction of density matrix derivatives.  This is in contrast to implicit methods wherein 
-density matrix derivatives are obtained as solutions to commuting operator equations of Sylvester 
+formulae for construction of density matrix derivatives.  This is in contrast to methods in which 
+the density matrix derivatives are implicitly defined as solutions to equations of Sylvester 
 type \cite{Ochsenfeld97,HLarsen01a,COchsenfeld04}.
 
-Sufficient to compute fourth order properties using the $2 N+1$ rule presented in Section \ref{Wigner2Np1}, 
+Sufficient to compute fourth order properties using the $2 n+1$ rule presented in Section \ref{Wigner2Np1}, 
 Perturbed Projection is outlined in the following for computation of the second order response function.  
 The Perturbed Projection sequence is started beginning with $\X^{a\ldots}_{0}$, which are 
 prepared from the Fockians $\F^0$, $\F^a$, and $\F^{ab}$ by  compressing their spectrum into the domain of 
@@ -511,17 +494,16 @@ As with the  TC2 generator, the response functions
 \begin{equation}
  \D^{a...} = N!\lim_{i\rightarrow\infty} \X_i^{a...},
 \end{equation}
-converge quadratically, reaching  convergence  when 
-the error $|\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
-the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$, or the change in the response, 
-becomes less than the matrix truncation threshold $\tau$, below which 
-atom-atom blocks are dropped as described in Ref.~\onlinecite{ANiklasson03}.
+converge quadratically, reaching  convergence when either 
+the error $\epsilon = |\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
+the change $\delta \X = |\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$ falls below $\tau$,
+the atom-atom block drop tolerance described in Ref.~[\onlinecite{ANiklasson03}].
 As described more completely in a preceding paper \cite{ANiklasson05a}, when the solution gets 
 close to convergence, i.e.~$|\Tr[\X^0_{i}]-N_e|< \epsilon$ with 
 $\epsilon \approx 10^{-1}-10^{-3}$, we alternate the projection at each step,
 which protects the convergence under the incomplete sparse linear algebra.
 
-\subsubsection{Derivative DIIS}\label{DDIIS}
+\subsection{Derivative DIIS}\label{DDIIS}
 
 Direct inversion in the iterative subspace (DIIS), introduced
 some time ago by Pulay \cite{Pulay80,Pulay82}, accelerates convergence toward 
@@ -538,14 +520,13 @@ minimization of the Frobenious norm of an error matrix %$\widetilde e_n^{a\ldots
   \widetilde e_n^{a\ldots}=\sum_{i=n-m}^{n}c_i e_i^{a\ldots},
 \end{equation}
 where the $e_i^{a\ldots}$'s are just the $N$-th order commutator relation
-of Eqs. (\ref{eq:commutators1}-\ref{eq:commutators4}) (e.g. the first order error matrix 
+of Eqs.~(\ref{eq:commutators1}-\ref{eq:commutators4}) (e.g. the first order error matrix 
 is given by $e_i^{a}=[\F^{a}_i ,\D^{0}]+[\F^{0},\D^{a}_i]$).
-The optimal coefficients $c_i$ are solution to the 
-quadratic programming problem
+The optimal coefficients $c_i$ are solutions to the quadratic programming problem
 \begin{equation}
   \inf \left \{-\frac{1}{2}\sum_{i,j=n-m}^nc_iB_{ij}c_j,\, \sum_{i=n-m}^n c_i=1 \right \},
 \end{equation}
-where the elements of the $\mathbf{B}$ matrix are given by 
+where elements of the $\mathbf{B}$ matrix are given by 
 $B_{ij}=\Tr[e_i^{a\ldots}(e_j^{a\ldots})^T]$.
 A working equation is then obtained through the associated Euler-Lagrange equation
 \begin{equation}\label{eq:diismatrix}
@@ -560,15 +541,15 @@ A working equation is then obtained through the associated Euler-Lagrange equati
   =  \left ( \begin{array}{c}
      \mathbf{0}      \\
          1  
-   \end{array}\right )
+   \end{array}\right ) \, ,
 \end{equation}
  where $\mathbf{0}=(0,\ldots,0)^{T}$ and $\mathbf{1}=(1,\ldots,1)^{T}$ are
- vectors whose all components are 0 and 1 respectively, 
+ vectors whose components are 0 and 1 respectively 
  and $\lambda$ is the Lagrange multiplier of the constraint 
  $\sum_{i=n-m}^{n}c_{i}=1$. The set of linear equations is solved
- by inverting the left-hand side matrix. The inverse matrix is iteratively 
- refined and thus if a linear set of equations is encountered, the oldest
- iterations are discarded until the system of equations becomes solvable.
+ by inverting the left-hand side matrix.  In the event of a singular or near singular
+ matrix, the rank of Eq.~(\ref{diismatrix}) is reduced by discarding the oldest entries 
+ until the linear system stabilizes.
 
 \subsection{Density matrix formulation of Wigner's $2n+1$ rule }\label{Wigner2Np1}
 
@@ -585,8 +566,8 @@ a more sparse structure.
 %in the AMN or McW 3th order response Eabc(2n+1) that H should be replace by F. For Eabcd(2n+1),
 %AMN formula does not take into account response of the 2e-terms (uncoupled or pseudo-uncoupled)] }
 
-The first and second order energy corrections are well known, cooresponding simply to expectation
-values as in Eq.~\ref{Np1Rule}.  Beyond second order, the $2 n+1$ rule offers a valuable alternative. 
+The first and second order energy corrections are well known, corresponding simply to expectation
+values as in Eq.~(\ref{Np1Rule}).  Beyond second order, the $2 n+1$ rule offers a valuable alternative. 
 The third order non-orthogonal contribution is 
 \begin{align}
 %  \begin{split}
@@ -599,9 +580,8 @@ The third order non-orthogonal contribution is
 where $P(a,b,c)$ stands for the permutation operator such that all
 permutations of $a$, $b$ and $c$ are made (e.g. $P(a,b,c)$ generates the sum of
 all the six terms: $(a,b,c)$, $(a,c,b)$, $(b,a,c)$, $(b,c,a)$, $(c,a,b)$ and $(c,b,a)$)
-and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix.
-
-A similar expression for the fourth order non-orthogonal contribution is 
+and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix.  Similarly,  the fourth order non-orthogonal 
+contribution is 
 \begin{align}
   \begin{split}
 %    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
@@ -616,12 +596,13 @@ can be reduced by taking advantage of indicial symmetry;
 $a,b,c,$ and $d$ represent the Cartesian directions $x,y,z$
 so that terms with indecies in the same direction simplify. 
 For example, $E^{aaaa}$ reduces to only one term requiring only 15 matrix multiplications.
-In the worst case, where all the directions are different i.e. $E^{aabc}$ 
+In the worst case, where all the directions are different, i.e. $E^{aabc}$ 
 (or any other permutation of $(a,a,b,c)$), the relation \eqref{eq:2n+1 fourth order} 
 reduces to include only 12 terms with 180 matrix multiplications. 
 Similar reductions of the computational cost also apply to 
 Eq. \eqref{eq:2n+1 third order}. The number of matrix-matrix multiplies can be further reduced
-if one uses an orthogonal representations of the matrices, but these are typically more dense. 
+if one uses an orthogonal representation, but this typically involves matrix-matrix multiplies 
+with more dense intermediates.
 
 
 
@@ -632,11 +613,11 @@ programs \cite{MondoSCF}.  The construction of the Fockian and derivative Fockia
 out using the linear scaling QCTC method for computation of the Coulomb matrix \cite{MChallacombe97,CTymczak04a} and the
 ONX algorithm \cite{ESchwegler97,CTymczak04b} for computation of the Hartree-Fock exchange matrix. 
 The CPSCF equations were solved in an entirely orthogonal representation,
-with higher order properties using the $2 N+1$ rule in with the non-orthogonal formulae given
+with higher order properties using the $2 n+1$ rule in with the non-orthogonal formulae given
 by Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).  Two different levels of numerical 
 accuracy have been used, {\tt GOOD} and {\tt TIGHT}.   Thresholds that define the {\tt GOOD} 
 accuracy level include a matrix threshold $\tau=10^{-5}$, as well as other numerical thresholds 
-detailed in Ref.~\onlinecite{CTymczak04a}, which deliver 6 digits of relative accuracy in the total 
+detailed in Ref.~[\onlinecite{CTymczak04a}], which deliver 6 digits of relative accuracy in the total 
 energy.  The {\tt TIGHT} option involves the matrix threshold $\tau=10^{-6}$ and delivers 8 
 digits of relative accuracy in the total energy.  
 
@@ -647,11 +628,9 @@ Convergence of the CPSCF equations for the water systems described in the follow
 are typically achieved in about 10 cycles, independent of cluster size, basis set,
 matrix threshold or order of the response calculated.
 
-All results are reported in atomic units.
-
-
-
-\subsection{One dimensional water chains}
+All results are reported in atomic units.  Also, unless otherwise noted, all timings and values 
+have been obtained by computing the $n^{\rm th}$ order response function and evaluation with the
+$n+1$ rule (expectation value), Eq.~(\ref{Np1Rule}).
 
 \begin{table}[h]
   \centering
@@ -662,7 +641,7 @@ All results are reported in atomic units.
   }\label{tab:Alpha_1D_Values}
   \begin{tabular}{cccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{{\sc GAMESS}}
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
         &\multicolumn{1}{c}{{\tt GOOD}}
         &\multicolumn{1}{c}{{\tt TIGHT}}\\
     \hline
@@ -698,7 +677,7 @@ All results are reported in atomic units.
   }\label{tab:Beta_1D_Values}
   \begin{tabular}{cccccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{{\sc GAMESS}}
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
     &\multicolumn{1}{c}{{\tt GOOD}}
     &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
     &\multicolumn{1}{c}{{\tt TIGHT}}
@@ -730,28 +709,27 @@ All results are reported in atomic units.
 \begin{table}[h]
   \centering
   \caption{\protect
-		{[\bf MAYBE WE SHOULD JUST LIST 8 TOTAL DIGITS HERE]}
     The longitudinal second hyperpolarizability, $\gamma_{zzzz}$,
     for water chains at the RHF/6-31G level of theory, computed with 
     {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
     and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Gamma_1D_Values}
-  \begin{tabular}{cccccc}
+  \begin{tabular}{rccccc}
     \toprule
-    $N$ &\multicolumn{1}{c}{{\sc GAMESS}}
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
     &\multicolumn{1}{c}{{\tt GOOD}}
     &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
     &\multicolumn{1}{c}{{\tt TIGHT}}
     &\multicolumn{1}{c}{{\tt TIGHT}$^a$} \\
     \hline
-     1 &  330.5753 &  330.543748 &  330.543185 &  330.571927 &  330.572391 \\
-     2 &  820.1398 &  820.192314 &  820.196669 &  820.147747 &  820.149334 \\
-     3 & 1008.5656 & 1008.585466 & 1008.607306 & 1008.575157 & 1008.576475 \\
-     4 & 1103.4813 & 1103.505309 & 1103.528026 & 1103.488253 & 1103.490194 \\
-     5 & 1168.9563 & 1169.210364 & 1169.253062 & 1169.063044 & 1169.075387 \\
-    10 & 1324.2906 & 1325.120848 & 1324.632059 & 1324.297519 & 1324.299857 \\
-    15 & 1381.8657 & 1383.080212 & 1382.232175 & 1381.875768 & 1381.873821 \\
-    20 & 1411.4264 & 1414.409224 & 1411.852777 & 1411.440956 & 1411.429186 \\
+     1 &  330.5753 & 330.54375 & 330.54319 & 330.57193 &  330.5724 \\
+     2 &  820.1398 & 820.19231 & 820.19667 & 820.14775 &  820.1493 \\
+     3 & 1008.5656 & 1008.5855 & 1008.6073 & 1008.5752 & 1008.5765 \\
+     4 & 1103.4813 & 1103.5053 & 1103.5280 & 1103.4883 & 1103.4902 \\
+     5 & 1168.9563 & 1169.2104 & 1169.2531 & 1169.0630 & 1169.0754 \\
+    10 & 1324.2906 & 1325.1208 & 1324.6321 & 1324.2975 & 1324.2999 \\
+    15 & 1381.8657 & 1383.0802 & 1382.2322 & 1381.8758 & 1381.8738 \\
+    20 & 1411.4264 & 1414.4092 & 1411.8528 & 1411.4410 & 1411.4292 \\
 %#GAMMA/N
 %#            LOOSE                   GOOD                    TIGHT                  VERYTIGHT      
 %#       SCF         2n+1        SCF         2n+1        SCF         2n+1        SCF         2n+1
@@ -766,6 +744,8 @@ All results are reported in atomic units.
     \botrule
   \end{tabular}
 \end{table}
+
+\subsection{One dimensional water chains}
 
 Perturbed Projection has been used to compute the (hyper)polarizabilities $\alpha_{zz}$, 
 $\beta_{zzz}$ and $\gamma_{zzzz}$ of linear water chains up to (H$_2$O)$_{20}$. 
@@ -786,7 +766,6 @@ $\alpha_{zz}=7.142422\,a.u.$, $\beta_{zzz}=-12.033362\,a.u.$ and $\gamma_{zzzz}=
 
 
 
-\subsection{Linear scaling: 3D water clusters}
 
 \begin{figure}[h]
   \caption{\protect
@@ -838,19 +817,9 @@ $\alpha_{zz}=7.142422\,a.u.$, $\beta_{zzz}=-12.033362\,a.u.$ and $\gamma_{zzzz}=
 
 \begin{figure}[h]
   \caption{Total CPU times with increasing order of the response for 
-           the fifth CPSCF cycle.}
+           the fifth CPSCF cycle.}\label{TimeWithOrder}
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Mix_h2o3D_6-31G_T.ps}}
 \end{figure}
-
-Linear scaling computation of the RHF/6-31G and RHF/6-31G** second hyperpolarizability,
-achieved with Perturbed Projection, is shown for three-dimensional water clusters 
-in Fig~\ref{fig:Gamma_scaling}.  These timings are the total CPU time for the fifth CPSCF cycle, 
-including build time for $\F^{abc}$ ({\sc ONX} and {\sc QCTC}), 
-iterative construction of $\D^{abc}$ (Perturbed Projection via {\sc TC2}) and all intermediate
-steps including the congruence transformation.
-A breakdown of the dominant contributions to these totals are given
-in Figs~\ref{fig:Gamma_QCTC_Timing}-\ref{fig:Gamma_ONX_Timing}, which show timings for Coulomb 
-summation ({\sc QCTC}), Perturbed Projection ({\sc TC2}), and exact exchange ({\sc ONX}).
 
 \begin{figure}[t]
   \caption{\protect
@@ -864,13 +833,24 @@ summation ({\sc QCTC}), Perturbed Projection ({\sc TC2}), and exact exchange ({\
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{DMix_40pts}}
 \end{figure}
 
-Figure \ref{fig:Superposition_Decay} shows the magnitude of atom-atom blocks 
+\subsection{Linear scaling: 3D water clusters}
+
+Linear scaling computation of the RHF/6-31G and RHF/6-31G** second hyperpolarizability,
+achieved with Perturbed Projection, is shown for three-dimensional water clusters 
+in Fig~\ref{fig:Gamma_scaling}.  These timings are the total CPU time for the fifth CPSCF cycle, 
+including build time for $\F^{abc}$ ({\sc ONX} and {\sc QCTC}), 
+iterative construction of $\D^{abc}$ (Perturbed Projection via {\sc TC2}) and all intermediate
+steps including the congruence transformation.
+A breakdown of the dominant contributions to these totals are given
+in Figs~\ref{fig:Gamma_QCTC_Timing}-\ref{fig:Gamma_ONX_Timing}, which show timings for Coulomb 
+summation ({\sc QCTC}), Perturbed Projection ({\sc TC2}), and exact exchange ({\sc ONX}).
+
+Figure \ref{TimeWithOrder} shows the increase in cost associated with computing  higher order response functions.
+Corresponding to this increase in cost, Fig.~\ref{fig:Superposition_Decay} shows the magnitude of atom-atom blocks 
 of density matrix derivatives up to third order as a function of atom-atom distance 
 when perturbed by a static electric field.  The density response shows an approximate 
-exponential decay as a function of internuclear distance with the rate of slowing decay
+exponential decay as a function of internuclear distance with the rate of  decay
 slowing slightly and the distribution shifted up with increasing order in the perturbation.
-
-
 
 \section{Discussion}
 
@@ -886,7 +866,7 @@ dominant work in its construction always involves multiplication with matrices t
 more sparse, as $\X^{abc}_i\X^{0}_i$ or $\X^{ab}_i\X^{c}_i$.   Likewise, $N$-scaling is achieved between 
 70 to 90 water molecules for construction of the Hartree-Fock exchange contribution.  In this case, 
 the approximate decay of the density matrix still leads to linear scaling through ordered skip out lists,
-as described in Ref.~\onlinecite{ESchwegler97}.  In both cases, the increase in response function magnitude
+as described in Ref.~[\onlinecite{ESchwegler97}].  In both cases, the increase in response function magnitude
 is equivalent to tightening numerical thresholds, which increases the cost and delays the onset of linear
 scaling. 
 
@@ -897,6 +877,12 @@ correct digits  independent of the response order.  We further observe about 1 e
 when using the $2n+1$ rule, which might be expected from a higher order error propagation resulting from 
 products of lower order response functions, relative to the expectation value, Eq.~(\ref{Np1Rule}), 
 which involves an error that is always linear in a higher order derivative density matrix.  
+
+As shown in Fig.~\ref{TimeWithOrder}, computing the second order response is significantly cheaper 
+than the third order response, and involves an earlier onset of linear scaling. Because evaluation 
+of properties with the $2 n+1$ rule is of negligible cost relative to solving the CPSCF equations, the cost 
+difference for evaluating $\gamma$ with the $2 n+1$ rule relative to the $n+1$ expectation is just the 
+difference (roughly 2:3) between the computation of $\beta$ and $\gamma$ shown in Fig.~\ref{TimeWithOrder}.  
 
 \section{Conclusions}
 
@@ -919,12 +905,13 @@ are unknown.
 We have shown that response functions (density matrix derivatives) through fourth 
 order are local upon {\em global} electric perturbation, corresponding to an 
 approximate exponential decay of matrix elements.  However, the magnitude of the 
-cooresponding response functions increases with increasing perturbation order, equivalent 
+corresponding response functions increases with increasing perturbation order, equivalent 
 to tightening of the matrix drop tolerance, $\tau$.   While we have not attempted to 
 work out a detailed analysis for the propagation of error, it may be possible 
-to develop a more effective thresholding scheme for high orders. In addition, 
-use of the $2 n+1$ rule appears to be somewhat more accurate, at least for the 
-systems and properties studied here.
+to develop a more effective thresholding scheme for high orders. In addition 
+to being somewhat more accurate, the $2 n+1$ rule also provides a significantly 
+cheaper alternative to the computation of expectation values and an earlier onset 
+of linear scaling. 
 
 A similar exponential decay in the first order response corresponding to a {\em local} nuclear 
 displacement has likewise been demonstrated by Ochsenfeld and Head-Gordon \cite{Ochsenfeld97}. 
