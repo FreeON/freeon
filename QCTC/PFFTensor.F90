@@ -25,9 +25,9 @@ MODULE PFFTen
   CHARACTER(LEN=7),PARAMETER          :: Cube122='Cube122'
   CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube222'
 CONTAINS
-  !========================================================================================
-  ! 
-  !========================================================================================
+!========================================================================================
+! 
+!========================================================================================
   SUBROUTINE CalculatePFFT(MaxEll,GM,Args,CS,TenC,TenS)
     TYPE(CRDS)             :: GM
     TYPE(ARGMT)            :: Args
@@ -37,10 +37,10 @@ CONTAINS
     INTEGER                :: Layers,NC
     REAL(DOUBLE)           :: Scale,R1,R2,Radius,Rx,Ry,Rz
     CHARACTER(LEN=7)       :: CellType
-    !-------------------------------------------------------------------------------------!
-    ! Determine Cell Type
+!-------------------------------------------------------------------------------------!
+!   Determine Cell Type
     CellType=DetCellType(GM,CS%NCells,Scale)
-    ! Read from Archive or Make the Tensor
+!   Read from Archive or Make the Tensor
     IF(CellType==Cube111) THEN
        CALL GetExactTensor1L3D(2*MaxEll,GM,Scale,TenC,TenS)
     ELSEIF(CellType==Cube222) THEN
@@ -55,24 +55,24 @@ CONTAINS
        ENDIF
     ENDIF
   END SUBROUTINE CalculatePFFT
-  !========================================================================================
-  ! 
-  !========================================================================================
+!========================================================================================
+! 
+!========================================================================================
   SUBROUTINE GetExactTensor1L3D(MaxL,GM,Scale,TenC,TenS)
     INTEGER              :: MaxL
     TYPE(CRDS)           :: GM
     TYPE(DBL_VECT)       :: TenC,TenS
     INTEGER              :: I,L,M,LM,K,NumberOfRecords
     REAL(DOUBLE)         :: Scale
-    !-------------------------------------------------------------------------------------!
-    !
+!-------------------------------------------------------------------------------------!
+!
     INCLUDE "PBCTensor/Majik_Kubic_WS1.Inc"	
-    !
+!
     TenC%D = Zero
     TenS%D = Zero 
-    !
-    !     Load Majik numbers from parameter statements	
-    !
+!
+!   Load Majik numbers from parameter statements	
+!
     K=0
     DO L=4,MIN(128,MaxL),2
        DO M=0,L,4
@@ -81,26 +81,26 @@ CONTAINS
           TenC%D(LM)=Majik1(K)/(Scale**(DBLE(L)+One))
        ENDDO
     ENDDO
-    !
+!
   END SUBROUTINE GetExactTensor1L3D
-  !========================================================================================
-  ! 
-  !========================================================================================
+!========================================================================================
+! 
+!========================================================================================
   SUBROUTINE GetExactTensor2L3D(MaxL,GM,Scale,TenC,TenS)
     INTEGER              :: MaxL
     TYPE(CRDS)           :: GM
     TYPE(DBL_VECT)       :: TenC,TenS
     INTEGER              :: I,L,M,LM,K,NumberOfRecords
     REAL(DOUBLE)         :: Scale
-    !-------------------------------------------------------------------------------------!
-    !
+!-------------------------------------------------------------------------------------!
+!
     INCLUDE "PBCTensor/Majik_Kubic_WS2.Inc"			
-    !
+!
     TenC%D = Zero
     TenS%D = Zero 
-    !
-    !     Load Majik numbers from parameter statements	
-    !
+!
+!     Load Majik numbers from parameter statements	
+!
     K=0
     DO L=4,MIN(128,MaxL),2
        DO M=0,L,4
@@ -109,11 +109,11 @@ CONTAINS
           TenC%D(LM)=Majik2(K)/(Scale**(DBLE(L)+One))
        ENDDO
     ENDDO
-    !
+!
   END SUBROUTINE GetExactTensor2L3D
-  !========================================================================================
-  ! Calculate the PFFTensor 1D
-  !========================================================================================
+!========================================================================================
+! Calculate the PFFTensor 1D
+!========================================================================================
   SUBROUTINE MakeTensor1D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,L,M,LM,NC
@@ -122,10 +122,10 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
-    !-------------------------------------------------------------------------------------!
-    !
-    !     Get The Lattice and Reciprocal Lattice Vectors
-    !
+!-------------------------------------------------------------------------------------!
+!
+!   Get The Lattice and Reciprocal Lattice Vectors
+!
     TenC%D=Zero
     TenS%D=Zero
     DO I = 1,3
@@ -134,13 +134,13 @@ CONTAINS
           LatVec(I,J)     = GM%PBC%BoxShape(I,J)
        ENDDO
     ENDDO
-    !
-    !     Number of Inner Boxes
-    !
+!
+!   Number of Inner Boxes
+!
     NC = (CS%NCells-1)/2
-    !
-    !     One Dimension: Right
-    !
+!
+!   One Dimension: Right
+!
     IF(GM%PBC%AutoW(1)) THEN
        CALL IrRegular(MaxL,LatVec(1,1),Zero,Zero)
     ELSEIF(GM%PBC%AutoW(2)) THEN
@@ -154,9 +154,9 @@ CONTAINS
           TenC%D(LM) = Cpq(LM)*RZeta(L+1,NC)
        ENDDO
     ENDDO
-    !
-    !     One Dimension: Left
-    !
+!
+!   One Dimension: Left
+!
     IF(GM%PBC%AutoW(1)) THEN
        CALL IrRegular(MaxL,-LatVec(1,1),Zero,Zero)
     ELSEIF(GM%PBC%AutoW(2)) THEN
@@ -173,9 +173,9 @@ CONTAINS
     ENDDO
     !
   END SUBROUTINE MakeTensor1D
-  !========================================================================================
-  ! Calculate the PFFTensor 2D
-  !========================================================================================
+!========================================================================================
+! Calculate the PFFTensor 2D
+!========================================================================================
   SUBROUTINE MakeTensor2D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
@@ -185,41 +185,40 @@ CONTAINS
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
     TYPE(CellSet)                       ::CS, CSMM
     REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
-    !
+!
     INTEGER                           :: NDiv
     REAL(DOUBLE)                      :: LenMax,Delt,IntFac
     REAL(DOUBLE),DIMENSION(3)         :: Vec
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
-    !-------------------------------------------------------------------------------------!
-    !
-    !     Initialize 
-    !
+!-------------------------------------------------------------------------------------!
+!
+!   Initialize 
+!
     TenC%D=Zero
     TenS%D=Zero
     Accuracy = 1.D-14
     Rmin     = SQRT(CS%CellCarts%D(1,1)**2+CS%CellCarts%D(2,1)**2+CS%CellCarts%D(3,1)**2)
-    !
-    !     Get The Lattice and Reciprocal Lattice Vectors
-    !
+!
+!   Get The Lattice and Reciprocal Lattice Vectors
+!
     DO I = 1,3
        DO J = 1,3
           RecpLatVec(I,J) = GM%PBC%InvBoxSh(J,I)
           LatVec(I,J)     = GM%PBC%BoxShape(I,J)
        ENDDO
     ENDDO
-
-    !
-    !     Two Dimension
-    !
+!
+!   Two Dimension
+!
     LSwitch  = 10
     LenScale = GM%PBC%CellVolume**(Half)
     Rmax     = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
     BetaSq   = 0.25D0/(LenScale)**2
-    !           
-    !     Sum the Real Space
-    !
+!           
+!   Sum the Real Space
+!
     DO
        CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,LatVec,Rmin)
        IF(CSMM%NCells .GT. 500000) THEN
@@ -229,7 +228,7 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
-    !
+!
     DO NC = 1,CSMM%NCells
        PQ(:) = CSMM%CellCarts%D(:,NC)
        IF(.NOT. InCell_CellSet(CS,PQ(1),PQ(2),PQ(3))) THEN
@@ -250,9 +249,9 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Delete_CellSet(CSMM)
-    !
-    !     Sum the Reciprical Space 
-    !
+!
+!     Sum the Reciprical Space 
+!
     ExpFac = Pi*Pi/BetaSq
     Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
     DO
@@ -263,7 +262,7 @@ CONTAINS
           EXIT
        ENDIF
     ENDDO
-    !
+!
     NDiv    = 1000
     LenMax  = SQRT(ABS(LOG(1.D-6))/ExpFac)
     Delt    = LenMax/DBLE(NDiv)
@@ -289,9 +288,9 @@ CONTAINS
           ENDIF
        ENDDO
     ENDDO
-    !
-    !        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
-    !
+!
+!        Add in the k=0 piece for the L=2 multipoles (Zero in 3D)
+!
     DO I=1,3
        IF(.NOT. GM%PBC%AutoW(I)) THEN
           PQ(:) = Zero
@@ -321,9 +320,9 @@ CONTAINS
        ENDIF
     ENDDO
     CALL Delete_CellSet(CSMM)
-    !
-    !        Substract the inner boxes
-    !
+!
+!   Substract the inner boxes
+!
     DO NC = 1,CS%NCells
        PQ(:) = CS%CellCarts%D(:,NC)
        RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
@@ -339,11 +338,11 @@ CONTAINS
           ENDDO
        ENDIF
     ENDDO
-    !
+!
   END SUBROUTINE MakeTensor2D
-  !========================================================================================
-  ! Calculate the PFFTensor 3D
-  !========================================================================================
+!========================================================================================
+! Calculate the PFFTensor 3D
+!========================================================================================
   SUBROUTINE MakeTensor3D(MaxL,GM,Args,CS,TenC,TenS)
     INTEGER                           :: MaxL
     INTEGER                           :: I,J,K,L,M,LM,NC
@@ -353,17 +352,17 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3)         :: PQ
     REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
     REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale,SUM
-    !
+!
     INTEGER                           :: NDiv
     REAL(DOUBLE)                      :: LenMax,Delt,IntFac
     REAL(DOUBLE),DIMENSION(3)         :: Vec
     REAL(DOUBLE),DIMENSION(3,3)       :: RecpLatVec,LatVec
     TYPE(CRDS)                        :: GM
     TYPE(ARGMT)                       :: Args
-    !-------------------------------------------------------------------------------------!
-    !
-    !     Initialize 
-    !
+!-------------------------------------------------------------------------------------!
+!
+!     Initialize 
+!
     TenC%D=Zero
     TenS%D=Zero
     Accuracy = 1.D-14
@@ -471,9 +470,9 @@ CONTAINS
        ENDIF
     ENDDO
   END SUBROUTINE MakeTensor3D
-  !========================================================================================
-  !   Determine Cell Type
-  !========================================================================================
+!========================================================================================
+!   Determine Cell Type
+!========================================================================================
   FUNCTION DetCellType(GM,NC,Scale)
     TYPE(CRDS)                   :: GM
     INTEGER                      :: I,NC
@@ -502,7 +501,7 @@ CONTAINS
     AdotB = SQRT(AdotB/(MagA*MagB))
     AdotC = SQRT(AdotC/(MagA*MagC))
     BdotC = SQRT(BdotC/(MagB*MagC))
-    !
+ !
     DetCellType=NonCube
     IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
        IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
@@ -522,9 +521,9 @@ CONTAINS
     ENDIF
     !
   END FUNCTION DetCellType
-  !========================================================================================
-  !   FT_FSCriptC
-  !========================================================================================
+!========================================================================================
+!   FT_FSCriptC
+!========================================================================================
   FUNCTION FT_FScriptC_3D(L,ExpFac,R)
     INTEGER                    :: L,IFac,Isgn
     REAL(DOUBLE)               :: ExpFac,R,FT_FScriptC_3D,Fac
@@ -553,9 +552,9 @@ CONTAINS
     ENDIF
     ! 
   END FUNCTION FT_FScriptC_3D
-  !========================================================================================
-  ! FT_FSCriptS
-  !========================================================================================
+!========================================================================================
+! FT_FSCriptS
+!========================================================================================
   FUNCTION FT_FScriptS_3D(L,ExpFac,R)
     INTEGER                    :: L,IFac,Isgn
     REAL(DOUBLE)               :: ExpFac,R,FT_FScriptS_3D,Fac
@@ -584,9 +583,9 @@ CONTAINS
     ENDIF
     !
   END FUNCTION FT_FScriptS_3D
-  !========================================================================================
-  !   FT_FSCriptC
-  !========================================================================================
+!========================================================================================
+!   FT_FSCriptC
+!========================================================================================
   FUNCTION GScript(L,R)
     INTEGER                    :: L,LS
     REAL(DOUBLE)               :: R,SqrtR,GScript,XSUM
@@ -617,9 +616,9 @@ CONTAINS
     ENDIF
     !
   END FUNCTION GScript
-  !========================================================================================
-  !   FT_FSCriptS
-  !========================================================================================
+!========================================================================================
+!   FT_FSCriptS
+!========================================================================================
   FUNCTION FScript(L,R)
     INTEGER                    :: L,LS
     REAL(DOUBLE)               :: R,SqrtR,FScript,XSUM
@@ -650,9 +649,9 @@ CONTAINS
     ENDIF
     !
   END FUNCTION FScript
-  !========================================================================================
-  ! Rieman Zeta Function
-  !========================================================================================
+!========================================================================================
+! Rieman Zeta Function
+!========================================================================================
   FUNCTION RZeta(N,M)
     INTEGER                    :: N,M,I
     REAL(DOUBLE)               :: RZeta,RSum
