@@ -148,12 +148,15 @@ CONTAINS
 !  
   END FUNCTION CalculateQuadruPole
 #ifdef PERIODIC
+#ifdef PARALLEL_CLONES
+#else
 !-------------------------------------------------------------------------------
 ! Set up the lattice vecters to sum over 
 ! Also, Added a Factor that Takes into Account the Box Size and Shape
 !-------------------------------------------------------------------------------
-  SUBROUTINE SetCellNumber(GM,Rad_O)
+  SUBROUTINE SetCellNumber(GM,CS,Rad_O)
     TYPE(CRDS)                     :: GM
+    TYPE(CellSet)                  :: CS
     REAL(DOUBLE)                   :: Radius
     REAL(DOUBLE), OPTIONAL         :: Rad_O
 !
@@ -164,14 +167,10 @@ CONTAINS
     ELSE
        Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
     ENDIF
-    CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
-    CALL Sort_CellSet(CS_OUT)
-!
-!   Sort the Cells
-!
-    CALL Sort_CellSet(CS_OUT)
-!
+    CALL New_CellSet_Sphere(CS,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+    CALL Sort_CellSet(CS)
   END SUBROUTINE SetCellNumber
+#endif
 !-------------------------------------------------------------------------------
 ! Convert from Atomic Coordinates  to Fractional Coordinates
 !-------------------------------------------------------------------------------
@@ -236,21 +235,39 @@ CONTAINS
     VecA = FracToAtom(GM,VecF)
 !
   END SUBROUTINE AtomCyclic
-!===================================================================================
-!
-!===================================================================================
+  !===================================================================================
+  !
+  !===================================================================================
+  SUBROUTINE  WrapAtoms(G)
+    TYPE(CRDS)                         :: G
+    REAL(DOUBLE),DIMENSION(3,G%NAtms) :: BoxCarts
+    INTEGER        :: I
+    !--------------------------------------------------------------------------------!
+    ! Generate fractional coordinates from unwrapped coordinates
+    DO I=1,G%NAtms
+       BoxCarts(:,I)=AtomToFrac(G,G%AbCarts%D(:,I))
+    ENDDO
+    ! Wrap fractional coordinates
+    IF(G%PBC%AtomW) THEN
+       DO I=1,G%NAtms
+          CALL FracCyclic(G,BoxCarts(:,I))
+       ENDDO
+    ENDIF
+    ! Here are the wrapped coordinates
+    DO I=1,G%NAtms
+       G%Carts%D(:,I)=FracToAtom(G,BoxCarts(:,I))
+    ENDDO
+  END SUBROUTINE WrapAtoms
+
   SUBROUTINE  CalFracCarts(GM)
     TYPE(CRDS)                 :: GM
     INTEGER                    :: I
-!
-!   Generate the Fractioanl Coordinates
-!
     DO I=1,GM%NAtms
+       ! Only compute fracts from unwrapped ab carts:
        GM%BoxCarts%D(:,I) = AtomToFrac(GM,GM%Carts%D(:,I))
+       ! This appears to be an incorrect algorithm why would we wrap AbBoxCarts????
        GM%AbBoxCarts%D(:,I) = AtomToFrac(GM,GM%AbCarts%D(:,I))
-       GM%BoxVects%D(:,I) = AtomToFrac(GM,GM%Vects%D(:,I))
     ENDDO
-!
   END SUBROUTINE CalFracCarts
 !===================================================================================
 !
@@ -258,32 +275,14 @@ CONTAINS
   SUBROUTINE  CalAtomCarts(GM)
     TYPE(CRDS)                 :: GM
     INTEGER                    :: I
-!
 !   Generate the Atomic Coordinates
-!
     DO I=1,GM%NAtms
+       ! Only wrap carts
        GM%Carts%D(:,I)   = FracToAtom(GM,GM%BoxCarts%D(:,I))
+       ! This appears to be an incorrect algorithm: Why would we wrap AbCarts????
        GM%AbCarts%D(:,I) = FracToAtom(GM,GM%AbBoxCarts%D(:,I))
-       GM%Vects%D(:,I)   = FracToAtom(GM,GM%BoxVects%D(:,I))
     ENDDO
-!
   END SUBROUTINE CalAtomCarts
-!===================================================================================
-!
-!===================================================================================
-  SUBROUTINE  WrapAtoms(GM)
-    TYPE(CRDS)     :: GM
-    INTEGER        :: I
-!
-    CALL CalFracCarts(GM)
-    IF(GM%PBC%AtomW) THEN
-       DO I=1,GM%NAtms
-          CALL FracCyclic(GM,GM%BoxCarts%D(:,I))
-       ENDDO
-    ENDIF
-    CALL CalAtomCarts(GM)
-!
-  END SUBROUTINE WrapAtoms
 !===================================================================================
 !
 !===================================================================================
@@ -372,7 +371,7 @@ CONTAINS
     INTEGER                     :: I
     REAL(DOUBLE)                :: MaxBoxDim
     REAL(DOUBLE),DIMENSION(3)   :: A,B,C
-! 
+    !
     MaxBoxDim = Zero
     A(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)+GM%PBC%BoxShape(:,3)
     B(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)-GM%PBC%BoxShape(:,3)

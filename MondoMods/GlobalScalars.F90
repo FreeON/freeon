@@ -33,8 +33,8 @@ MODULE GlobalScalars
 !-------------------------------------------------------------------------------
 !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
 !   
-   INTEGER,      PARAMETER :: HGEll=5
-   INTEGER,      PARAMETER :: SPEll=5
+   INTEGER,      PARAMETER :: HGEll=7
+   INTEGER,      PARAMETER :: SPEll=7
    INTEGER,      PARAMETER :: SPEll2=2*SPEll
 !
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
@@ -189,9 +189,9 @@ MODULE GlobalScalars
 !  MPI Scalars, default values
 !
    INTEGER, SAVE           :: MyID=ROOT
-   INTEGER, SAVE           :: MyKlone=1
-   INTEGER, SAVE           :: NPrc=1
+   INTEGER, SAVE           :: NPrc
    LOGICAL, SAVE           :: InParallel=.FALSE.
    INTEGER, PARAMETER      :: MaxProc=1024
 #endif
+   INTEGER, SAVE           :: MyClone
 END MODULE GlobalScalars

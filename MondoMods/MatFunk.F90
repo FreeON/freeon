@@ -32,7 +32,7 @@ MODULE MatFunk
       CALL Delete(BLKMAT2) 
    END SUBROUTINE UnSetDSYEVWork
 !
-   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PrintValues_O,EigenThresh_O,PrintCond_O,Prog_O,FileName_O,Unit_O)
+   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PrintValues_O,CoNo_O,EigenThresh_O,PrintCond_O,Prog_O,FileName_O,Unit_O)
       INTEGER,                    INTENT(IN)    :: N
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
@@ -43,6 +43,7 @@ MODULE MatFunk
       INTEGER,          OPTIONAL,INTENT(IN)     :: Unit_O
       LOGICAL                                   :: PrintCond,PrintValues
       INTEGER                                   :: I,INFO,PU
+      REAL(DOUBLE),OPTIONAL,INTENT(OUT)         :: CoNo_O
       REAL(DOUBLE)                              :: EigenThreshold
       REAL(DOUBLE)                              :: CondA,Mn,Mx
       REAL(DOUBLE), EXTERNAL                    :: Funk
@@ -78,14 +79,17 @@ MODULE MatFunk
          CALL PPrint(BLKVALS,'EigenValues',N,FileName_O=FileName_O,Unit_O=Unit_O)
       ENDIF
 
+      Mx=0.0D0
+      Mn=1.D30
+      DO I=1,N
+         Mx=MAX(Mx,ABS(BLKVALS%D(I)))
+         Mn=MIN(Mn,ABS(BLKVALS%D(I)))
+      ENDDO
+      CondA=Mx/Mn
+      
+      IF(PRESENT(CoNo_O))CoNo_O=CondA
+
       IF(PrintCond)THEN
-         Mx=0.0D0
-         Mn=1.D30
-         DO I=1,N
-            Mx=MAX(Mx,ABS(BLKVALS%D(I)))
-            Mn=MIN(Mn,ABS(BLKVALS%D(I)))
-         ENDDO
-         CondA=Mx/Mn
          String="Cond# = "//TRIM(DblToShrtChar(CondA)) &
              //', MIN(E) = '//TRIM(DblToShrtChar(Mn))
          IF(PRESENT(Prog_O))THEN

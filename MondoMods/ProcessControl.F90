@@ -60,6 +60,7 @@ MODULE ProcessControl
 
       SUBROUTINE Halt(String)
          CHARACTER (LEN=*) :: String
+         CHARACTER(LEN=50),PARAMETER :: Motto='Frango ut patefaciam -- I break in order to reveal'
          CALL Logger(String,.TRUE.)
 #ifdef PARALLEL
          IF(InParallel)THEN

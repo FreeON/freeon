@@ -74,28 +74,6 @@ MODULE MondoMPI
          InParallel=.TRUE.
       END SUBROUTINE InitMPI
 
-      FUNCTION CartCommSplit(Dims) RESULT(MyClone)
-        INTEGER               :: IErr,MyClone,CART_COMM
-        TYPE(INT_VECT)        :: Dims 
-        CHARACTER(LEN=10)     :: Sub='SpaceNTime'
-        INTEGER,DIMENSION(2)  :: Local
-        ! Create a Dims(1) x Dims(2) Cartesian communicator
-        CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,Dims%I,  & 
-             (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
-        CALL ErrChk(IErr,Sub)
-        ! Find out which row (group) this PE belongs to
-        CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local)
-        MyClone=Local(1)
-        ! Now split into Dims(1) rows. Each row has Dims(2) processors
-        ! parallel in the spatial domain and using MONDO_COMM as their
-        ! default communicator
-        CALL MPI_CART_SUB(CART_COMM,(/.FALSE.,.TRUE./),MONDO_COMM,IErr)
-        CALL ErrChk(IErr,Sub)
-        ! Reload local rank and PE number for split MONDO_COMM
-        MyID=MRank()
-        NPrc=MSize()
-      END FUNCTION CartCommSplit
-
       SUBROUTINE FiniMPI()
         INTEGER                    :: IErr
         CHARACTER(LEN=7),PARAMETER :: Sub='FiniMPI'
@@ -116,6 +94,57 @@ MODULE MondoMPI
          CALL MPI_COMM_SIZE(MONDO_COMM,MSize,IErr)
          CALL ErrChk(IErr,Sub)
       END FUNCTION MSize
+
+
+
+
+
+
+  FUNCTION CartCommSplit(SpaceTime,Serial_O) RESULT(MyClone)
+    INTEGER               :: IErr,MyClone,CART_COMM
+    TYPE(INT_VECT)        :: SpaceTime 
+    LOGICAL,OPTIONAL      :: Serial_O
+    CHARACTER(LEN=10)     :: Sub='SpaceNTime'
+    LOGICAl               :: AllButRootMustDie
+    INTEGER,DIMENSION(2)  :: Local
+    !-----------------------------------------------------------------------!
+    ! Create a SpaceTime%I(1) x SpaceTime%I(2) Cartesian communicator
+    CALL MPI_CART_CREATE(MPI_COMM_WORLD,2,(/SpaceTime%I(1),SpaceTime%I(2)/),  & 
+         (/.FALSE.,.FALSE./),.TRUE.,CART_COMM,IErr)
+    CALL ErrChk(IErr,Sub)
+    ! Find out which row (group) this PE belongs to
+    CALL MPI_CART_COORDS(CART_COMM,MyId,2,Local,IErr)
+    CALL ErrChk(IErr,Sub)
+    ! Offset the actuall clone 
+    MyClone=SpaceTime%I(3)+Local(2)
+    !    CALL AlignNodes("MyClone = "//TRIM(IntToChar(MyClone)))
+    ! Now split into SpaceTime%I(1) rows. Each row has SpaceTime%I(2) processors
+    ! parallel in the spatial domain and using MONDO_COMM as their
+    ! default communicator
+    CALL MPI_CART_SUB(CART_COMM,(/.TRUE.,.FALSE./),MONDO_COMM,IErr)
+    CALL ErrChk(IErr,Sub)
+    ! Reload local rank and PE number for split MONDO_COMM
+    MyID=MRank()
+    NPrc=MSize()
+    IF(PRESENT(Serial_O))THEN
+       IF(Serial_O)THEN
+          InParallel=.FALSE.
+       ELSE
+          InParallel=.TRUE.
+       ENDIF
+    ELSE
+       InParallel=.FALSE.
+    ENDIF
+    ! If not a parallel program, halt everything but the root node
+    IF(MyID/=ROOT.AND..NOT.InParallel)THEN
+       CALL FiniMPI()
+       STOP 
+    ENDIF
+    ! Righteous
+  END FUNCTION CartCommSplit
+
+
+
 !===============================================================================
 !     BCAST WRAPPERS
 !===============================================================================
@@ -780,7 +809,7 @@ MODULE MondoMPI
       END SUBROUTINE FreeType
 !===============================================================================
 
-!     NODE ALLINGMENT
+!     NODE ALLINGMENT FOR MONDO_COMM
 
       SUBROUTINE AlignNodes(String_O)
          INTEGER                        :: IErr
@@ -794,6 +823,25 @@ MODULE MondoMPI
             WRITE(*,*)TRIM(String)
          ENDIF
       END SUBROUTINE AlignNodes
+
+#ifdef PARALLEL_CLONES
+
+!     NODE ALLINGMENT FOR MPI_COMM_WORLD
+
+      SUBROUTINE AlignClones(String_O)
+         INTEGER                        :: IErr
+         CHARACTER(LEN=*),OPTIONAL      :: String_O
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: String 
+         CHARACTER(LEN=10),PARAMETER :: Sub='AlignNodes'
+         CALL MPI_BARRIER(MPI_COMM_WORLD,IErr)
+         CALL ErrChk(IErr,Sub)
+         IF(PRESENT(String_O))THEN
+            String="Node#"//TRIM(IntToChar(MyId))//' :: '//TRIM(String_O)
+            WRITE(*,*)TRIM(String)
+         ENDIF
+       END SUBROUTINE AlignClones
+
+#endif
 !===============================================================================
 
 !     Error checking

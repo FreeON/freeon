@@ -375,9 +375,59 @@ MODULE PrettyPrint
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
 !
         PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-!
-        IF(PrintFlags%Fmt .NE. DEBUG_MMASTYLE) THEN
-           IF(PBC%Dimen .NE. 0) THEN          
+
+           IF(PBC%PFFOvRide)THEN
+              Mssg='PFFOvRide = .TRUE., PFFMaxEll = '//TRIM(IntToChar(PBC%PFFMaxEll))  &
+                   //', PFFMaxLay = '//TRIM(IntToChar(PBC%PFFMaxLay))
+              WRITE(PU,*)TRIM(Mssg)
+           ENDIF
+           
+           Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
+           WRITE(PU,*)TRIM(Mssg)
+
+           Mssg=' TransVec = ('//TRIM(DblToMedmChar(PBC%TransVec(1)))//', ' &
+                               //TRIM(DblToMedmChar(PBC%TransVec(2)))//', ' &
+                               //TRIM(DblToMedmChar(PBC%TransVec(3)))//'} '
+           WRITE(PU,*)TRIM(Mssg)
+           Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter(1)))//', ' &
+                                 //TRIM(DblToMedmChar(PBC%CellCenter(2)))//', ' &
+                                 //TRIM(DblToMedmChar(PBC%CellCenter(3)))//'} '
+           WRITE(PU,*)TRIM(Mssg)
+           WRITE(PU,*)' Lattice Vectors: '
+           Mssg=' a = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,1)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(2,1)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(3,1)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+           Mssg=' b = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,2)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(2,2)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(3,2)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+           Mssg=' c = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,3)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(2,3)))//', ' &
+                        //TRIM(DblToMedmChar(PBC%BoxShape(3,3)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+           WRITE(PU,*)' Inverse Lattice Vectors: '
+           Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,1)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,1)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,1)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+           Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,2)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,2)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,2)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+           Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,3)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(2,3)))//', ' &
+                          //TRIM(DblToMedmChar(PBC%InvBoxSh(3,3)))//'} '                
+           WRITE(PU,*)TRIM(Mssg)
+
+
+
+
+
+#ifdef LDKFJLSDFJLDSFJ
+111     FORMAT(1x,'  a  = (',F14.10,',',F14.10,',',F14.10,')')
+
+              
               WRITE(PU,100)
               WRITE(PU,101) PBC%Dimen,PBC%CellVolume,PBC%Dimen
               WRITE(PU,102) PBC%AutoW(1),PBC%AutoW(2),PBC%AutoW(3)
@@ -411,7 +461,9 @@ MODULE PrettyPrint
               WRITE(PU,200)
               WRITE(PU,51)
            ENDIF
-        ENDIF
+!        ENDIF
+#endif
+
         CALL ClosePU(PU)
 !
 50      FORMAT(72('='))
@@ -521,6 +573,34 @@ MODULE PrettyPrint
                        //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
                      WRITE(PU,*)TRIM(Mssg)
                  ENDDO
+                 WRITE(PU,*)' OK, GET READY FOR A SILLY NUMBER OF EXTRA COORDINATES TO DRAG AROUND...'
+                 WRITE(PU,*)
+                 WRITE(PU,*)" HERE ARE THE ABS CARTS "
+                 DO I=1,GM%NAtms
+                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
+                       //'   '//FltToChar(GM%AbCarts%D(1,I)*AA)    &
+                       //'   '//FltToChar(GM%AbCarts%D(2,I)*AA)    &
+                       //'   '//FltToChar(GM%AbCarts%D(3,I)*AA) 
+                     WRITE(PU,*)TRIM(Mssg)
+                 ENDDO
+                 WRITE(PU,*)" HERE ARE THE ABS BOX CARTS "
+                 DO I=1,GM%NAtms
+                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
+                       //'   '//FltToChar(GM%AbBoxCarts%D(1,I)*AA)    &
+                       //'   '//FltToChar(GM%AbBoxCarts%D(2,I)*AA)    &
+                       //'   '//FltToChar(GM%AbBoxCarts%D(3,I)*AA) 
+                     WRITE(PU,*)TRIM(Mssg)
+                 ENDDO
+                 WRITE(PU,*)" HERE ARE THE ABS BOX CARTS "
+                 DO I=1,GM%NAtms
+                     Mssg=Ats(INT(GM%AtNum%D(I)))                   &  !!!! correct only for integer charged QM atoms
+                       //'   '//FltToChar(GM%AbBoxCarts%D(1,I)*AA)    &
+                       //'   '//FltToChar(GM%AbBoxCarts%D(2,I)*AA)    &
+                       //'   '//FltToChar(GM%AbBoxCarts%D(3,I)*AA) 
+                     WRITE(PU,*)TRIM(Mssg)
+                 ENDDO
+
+
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU

@@ -13,56 +13,6 @@ MODULE CellSets
 #ifdef PERIODIC
   CONTAINS
 !--------------------------------------------------------------------------
-! Create the CellSet
-!--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCELL)
-    TYPE(CellSet)                    :: CS   
-    INTEGER                          :: NCELL
-!
-    CS%NCells = NCELL
-    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
-    CS%Alloc=ALLOCATED_TRUE
-!
-  END SUBROUTINE New_CellSet
-!--------------------------------------------------------------------------
-! Delete the CellSet
-!--------------------------------------------------------------------------
-  SUBROUTINE Delete_CellSet(CS)
-    TYPE(CellSet)                  :: CS
-!
-    IF(AllocQ(CS%Alloc)) THEN
-       CS%Alloc  = ALLOCATED_FALSE
-       CS%NCells = 0
-       CALL Delete(CS%CellCarts)
-    ENDIF
-!
-  END SUBROUTINE Delete_CellSet
-
-!--------------------------------------------------------------------------
-! Put the CellSet to Disk
-!--------------------------------------------------------------------------
-  SUBROUTINE Put_CellSet(CS,Name)
-    TYPE(CellSet)                  :: CS
-    CHARACTER(Len=*)               :: Name
-!
-    CALL Put(CS%NCells   ,TRIM(Name)//'%NCells')
-    CALL Put(CS%CellCarts,TRIM(Name)//'%CellCarts')
-!
-  END SUBROUTINE Put_CellSet
-!--------------------------------------------------------------------------
-! Get the CellSet to Disk
-!--------------------------------------------------------------------------
-  SUBROUTINE Get_CellSet(CS,Name)
-    TYPE(CellSet)                  :: CS
-    CHARACTER(Len=*)               :: Name
-    INTEGER                        :: NC
-!
-    CALL Get(NC          ,TRIM(Name)//'%NCells')
-    CALL New_CellSet(CS,NC)
-    CALL Get(CS%CellCarts,TRIM(Name)//'%CellCarts')
-!
-  END SUBROUTINE Get_CellSet
-!--------------------------------------------------------------------------
 ! Print the CellSet
 !--------------------------------------------------------------------------
   SUBROUTINE PPrint_CellSet(CS,Name,FileName_O,Unit_O)

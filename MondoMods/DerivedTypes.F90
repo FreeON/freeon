@@ -204,6 +204,7 @@ MODULE DerivedTypes
   TYPE CellSet
      INTEGER                        :: Alloc
      INTEGER                        :: NCells
+     REAL(DOUBLE)                   :: Radius
      TYPE(DBL_RNK2)                 :: CellCarts
   ENDTYPE CellSet
 !------------------------------------------------------------------------------------
@@ -258,19 +259,20 @@ MODULE DerivedTypes
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
       TYPE(DBL_RNK2)   :: AbBoxCarts!-- Abosolute coords in fractional
-      TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
       TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute coords in Cartesian
+      TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
 #endif 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
       INTEGER          :: Nkind     !-- Number of atom kinds or types
       TYPE(DBL_VECT)   :: AtNum     !-- Atomic number per atom      
       TYPE(INT_VECT)   :: AtTyp     !-- Atom type or kind per atom 
+      TYPE(INT_VECT)   :: CConstrain!-- Atom type or kind per atom 
       TYPE(CHR_VECT)   :: AtNam     !-- Atomname
       TYPE(CHR_VECT)   :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
-      TYPE(DBL_RNK2)   :: Vects     !-- Velocity Cartesian coordinates 
+      TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartisian Multipoles of the Density

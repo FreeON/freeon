@@ -104,11 +104,11 @@ MODULE FastMatrices
     ENDIF
 
     CALL MPI_Gather(NAtms,1,MPI_INTEGER,CA%I(0),1,MPI_INTEGER,0,&
-           MPI_COMM_WORLD,IErr)
+           MONDO_COMM,IErr)
     CALL MPI_Gather(B%NBlks,1,MPI_INTEGER,CB%I(0),1,MPI_INTEGER,0,&
-           MPI_COMM_WORLD,IErr)
+           MONDO_COMM,IErr)
     CALL MPI_Gather(B%NNon0,1,MPI_INTEGER,CN%I(0),1,MPI_INTEGER,0,&
-           MPI_COMM_WORLD,IErr)
+           MONDO_COMM,IErr)
 
     IF(MyID == 0) THEN
       GBNBlks = 0
@@ -117,9 +117,10 @@ MODULE FastMatrices
         GBNBlks = GBNBlks + CB%I(I)
         GBNNon0 = GBNNon0 + CN%I(I)
       ENDDO
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*) 'Set_BCSR_EQ_DFASTMAT: GBNBlks = ', GBNBlks,', GBNNon0 = ', GBNNon0
-      CLOSE(Out,STATUS='KEEP')
+      ! Messy output is unsightly and unessesary.  Protect with if defs in future...
+      !      CALL OpenASCII(OutFile,Out)
+      !      WRITE(Out,*) 'Set_BCSR_EQ_DFASTMAT: GBNBlks = ', GBNBlks,', GBNNon0 = ', GBNNon0
+      !      CLOSE(Out,STATUS='KEEP')
       CALL New(C,(/NAtoms,GBNBlks,GBNNon0/))
       DispN%I(0) = 0
       DispB%I(0) = 0
@@ -134,21 +135,21 @@ MODULE FastMatrices
     IF(MyID == 0) THEN
       CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,&
              C%MTrix%D,CN%I(0),DispN%I(0),MPI_DOUBLE_PRECISION,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ELSE
       CALL MPI_GatherV(B%MTrix%D,B%NNon0,MPI_DOUBLE_PRECISION,&
              1.0D0,1,1,MPI_DOUBLE_PRECISION,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ENDIF
 
     IF(MyID == 0) THEN
       CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,&
              C%ColPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ELSE
       CALL MPI_GatherV(B%ColPt%I(1),B%NBlks,MPI_INTEGER,&
              1,1,1,MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ENDIF
  
 
@@ -162,7 +163,7 @@ MODULE FastMatrices
     IF(MyID == 0) THEN
       CALL MPI_GatherV(B%BlkPt%I(1),LocalNBlks,MPI_INTEGER,&
              C%BlkPt%I(1),CB%I(0),DispB%I(0),MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
       PrevBlkSize = C%BlkPt%I(1)
       C%BlkPt%I(1) = 1
       DO I = 2, GBNBlks
@@ -174,7 +175,7 @@ MODULE FastMatrices
     ELSE
       CALL MPI_GatherV(B%BlkPt%I(1),B%NBlks,MPI_INTEGER,&
              1,1,1,MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ENDIF
 
     DO I = 1, NAtms
@@ -183,7 +184,7 @@ MODULE FastMatrices
     IF(MyID == 0) THEN
       CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,&
              C%RowPt%I(1),CA%I(0),DispA%I(0),MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
       PrevColSize = C%RowPt%I(1)
       C%RowPt%I(1) = 1
       DO I = 2, NAtoms+1
@@ -194,7 +195,7 @@ MODULE FastMatrices
     ELSE
       CALL MPI_GatherV(B%RowPt%I(1),NAtms,MPI_INTEGER,&
              1,1,1,MPI_INTEGER,&
-             0,MPI_COMM_WORLD,IErr)
+             0,MONDO_COMM,IErr)
     ENDIF
     
     CALL Delete(CA)
@@ -481,11 +482,13 @@ MODULE FastMatrices
     INTEGER :: TotDblSent,DblSentMax,NumDblSent,LDblSendMaxSize,LDblRecvMaxSize,ActDblRecvAmt
 
     StartTm = MPI_Wtime()
-    IF(MyID == 0) THEN 
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*) 'MyID=0, FastMat_redistribute is entered...'
-      CLOSE(Out,STATUS='KEEP')
-    ENDIF
+
+    ! Messy output is unsightly and unessesary.  Protect with if defs in future...
+    !    IF(MyID == 0) THEN 
+    !     CALL OpenASCII(OutFile,Out)
+    !    WRITE(Out,*) 'MyID=0, FastMat_redistribute is entered...'
+    !   CLOSE(Out,STATUS='KEEP')
+    !ENDIF
 
     CALL FlattenAllRows(A)
 
@@ -509,7 +512,7 @@ MODULE FastMatrices
     AllToAllEndTm = MPI_Wtime()
     AllToAllTotTm = AllToAllEndTm - AllToAllBegTm
     CALL MPI_Allgather(AllToAllTotTm,1,MPI_DOUBLE_PRECISION,DimTmArr(0),1,&
-      MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IErr)
+      MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
     CALL ErrChk(IErr,Sub)            
 
     CALL New(SendToQ,NPrc-1,0)
@@ -535,11 +538,12 @@ MODULE FastMatrices
        CALL Delete(LocalDims)
        CALL Delete(RemoteDims)
        CALL AlignNodes()
-       IF(MyID == ROOT) THEN
-         CALL OpenASCII(OutFile,Out)
-         WRITE(Out,*) 'No sending and receiving needed in FastMat_redistribute!'
-         CLOSE(Out,STATUS='KEEP')
-       ENDIF
+       ! Messy output is unsightly and unessesary.  Protect with if defs in future...
+       !       IF(MyID == ROOT) THEN
+       !         CALL OpenASCII(OutFile,Out)
+       !         WRITE(Out,*) 'No sending and receiving needed in FastMat_redistribute!'
+       !         CLOSE(Out,STATUS='KEEP')
+       !       ENDIF
        RETURN
     ENDIF
 
@@ -716,7 +720,7 @@ MODULE FastMatrices
     ENDDO
 
     CALL MPI_Gather(NumDblSent,1,MPI_INTEGER,IntArr(0),1,MPI_INTEGER,0,&
-           MPI_COMM_WORLD,IErr)
+           MONDO_COMM,IErr)
     IF(MyID == 0) THEN
       DblSentMax = -1
       TotDblSent = 0
@@ -724,9 +728,10 @@ MODULE FastMatrices
         DblSentMax = Max(IntArr(I),DblSentMax)
         TotDblSent = TotDblSent + IntArr(I)
       ENDDO
-      CALL OpenASCII(OutFile,Out)
-      WRITE(Out,*) 'Redistribute : DblSentMax = ',DblSentMax, ', TotDblSent = ',TotDblSent
-      CLOSE(Out,STATUS='KEEP')
+      ! Messy output is unsightly and unessesary.  Protect with if defs in future...
+      !      CALL OpenASCII(OutFile,Out)
+      !      WRITE(Out,*) 'Redistribute : DblSentMax = ',DblSentMax, ', TotDblSent = ',TotDblSent
+      !      CLOSE(Out,STATUS='KEEP')
     ENDIF
 
     DEALLOCATE(SendBuffer,STAT=MemStatus)
@@ -757,11 +762,12 @@ MODULE FastMatrices
     CALL AlignNodes()
     EndTm = MPI_Wtime()
     TotTm = EndTm - StartTm
-    IF(MyID == ROOT) THEN
-       CALL OpenASCII(OutFile,Out)
-       WRITE(Out,*) 'Total time to Redistribute_FastMat is ', TotTm
-       CLOSE(Out,STATUS='KEEP')
-    ENDIF
+    ! Messy output is unsightly and unessesary.  Protect with if defs in future...
+    !    IF(MyID == ROOT) THEN
+    !       CALL OpenASCII(OutFile,Out)
+    !       WRITE(Out,*) 'Total time to Redistribute_FastMat is ', TotTm
+    !       CLOSE(Out,STATUS='KEEP')
+    !    ENDIF
   END SUBROUTINE Redistribute_FastMat
 
 !======================================================================

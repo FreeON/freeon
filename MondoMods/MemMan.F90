@@ -20,7 +20,9 @@ MODULE MemMan
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
                        New_IDrv,     New_DSL,      &
-                       New_GradD,    New_CMPoles
+                       New_GradD,    New_CMPoles,  &
+                       New_CellSet
+
    END INTERFACE
    INTERFACE Delete
       MODULE PROCEDURE Delete_INT_VECT, Delete_INT_RNK2, &
@@ -37,7 +39,8 @@ MODULE MemMan
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
                        Delete_IDrv,     Delete_DSL,      &
-                       Delete_GradD,    Delete_CMPoles
+                       Delete_GradD,    Delete_CMPoles,  &
+                       Delete_CellSet
    END INTERFACE
 !
    INTERFACE SetToBig
@@ -277,6 +280,7 @@ MODULE MemMan
          CALL New(A%AtTyp,A%NAtms)
          CALL New(A%AtNum,A%NAtms)
          CALL New(A%AtNam,A%NAtms)
+         CALL New(A%CConstrain,A%NAtms)
          CALL New(A%AtMMTyp,A%NAtms)
          CALL New(A%AtMss,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
@@ -621,6 +625,7 @@ MODULE MemMan
          CALL Delete(A%AtTyp)
          CALL Delete(A%AtNum)
          CALL Delete(A%AtNam)
+         CALL Delete(A%CConstrain)         
          CALL Delete(A%AtMMTyp)
          CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
@@ -1063,4 +1068,32 @@ MODULE MemMan
             A%NNon0=0
             A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE DeleteBCSR
+
+
+!--------------------------------------------------------------------------
+! Create the CellSet
+!--------------------------------------------------------------------------
+  SUBROUTINE New_CellSet(CS,NCELL)
+    TYPE(CellSet)                    :: CS   
+    INTEGER                          :: NCELL
+!
+    CS%NCells = NCELL
+    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
+    CS%Alloc=ALLOCATED_TRUE
+!
+  END SUBROUTINE New_CellSet
+!--------------------------------------------------------------------------
+! Delete the CellSet
+!--------------------------------------------------------------------------
+  SUBROUTINE Delete_CellSet(CS)
+    TYPE(CellSet)                  :: CS
+!
+    IF(AllocQ(CS%Alloc)) THEN
+       CS%Alloc  = ALLOCATED_FALSE
+       CS%NCells = 0
+       CALL Delete(CS%CellCarts)
+    ENDIF
+!
+  END SUBROUTINE Delete_CellSet
+
 END MODULE

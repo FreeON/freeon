@@ -511,7 +511,6 @@ MODULE Parse
 112      FORMAT(' K1 = ',I3,' S1 = ',I3,' K2 = ',I3, &
                 ' S2 = ',I3,'J = ',I3,' Chars = <',A,'>')
       END SUBROUTINE LineToChars
-
 !------------------------------------------------------------------
 !     Convert a character string into an integer
 !
@@ -633,18 +632,39 @@ MODULE Parse
             Cycl=IntToChar(Stats(1))
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
+#ifdef PARALLEL_CLONES
+            TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
+                               //'_Base#'//TRIM(Base) &
+                               //'_Cycl#'//TRIM(Cycl) &
+                               //'_Clone#'//TRIM(IntToChar(MyClone)) &
+                               //'.'//TRIM(PostFix)            
+#else
+
             TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
                                //'_Base#'//TRIM(Base) &
                                //'_Cycl#'//TRIM(Cycl) &
                                //'.'//TRIM(PostFix)            
+#endif
          ELSEIF(PRESENT(NoTags_O))THEN
+#ifdef PARALLEL_CLONES
+            TrixFile=TRIM(Name)//'_Clone#'//TRIM(IntToChar(MyClone))//'.'//TRIM(PostFix)            
+#else
             TrixFile=TRIM(Name)//'.'//TRIM(PostFix)            
+#endif
+
          ELSE
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
+#ifdef PARALLEL_CLONES
+            TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
+                               //'_Base#'//TRIM(Base) &
+                               //'_Clone#'//TRIM(IntToChar(MyClone)) &
+                               //'.'//TRIM(PostFix)            
+#else
             TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
                                //'_Base#'//TRIM(Base) &
                                //'.'//TRIM(PostFix)            
+#endif
          ENDIF
       END FUNCTION TrixFile
 !------------------------------------------------------------------

@@ -25,7 +25,7 @@ MODULE InOut
           Get_DBCSR,                                &
 #endif
 #ifdef PERIODIC
-         Get_PBCInfo,                              &
+         Get_PBCInfo,Get_CellSet,                   &
 #endif  
           Get_ARGMT,    Get_HGRho,                  &
           Get_CHR_VECT, Get_LOG_VECT,     &
@@ -43,7 +43,7 @@ MODULE InOut
           Put_DBCSR,                                &
 #endif
 #ifdef PERIODIC
-          Put_PBCInfo,                              &
+          Put_PBCInfo,Put_CellSet,                  &
 #endif 
           Put_TOLS,     Put_BCSR,     Put_HGRho,    &
           Put_CHR_VECT, Put_LOG_VECT,        &
@@ -1197,33 +1197,33 @@ CONTAINS
                 CALL Get(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
                 CALL Get(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
 
-                CALL Get(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
+                CALL Get(PBC%CellCenter(1),'CellCenter1'       ,Tag_O=Tag_O)
+                CALL Get(PBC%CellCenter(2),'CellCenter2'       ,Tag_O=Tag_O)
+                CALL Get(PBC%CellCenter(3),'CellCenter3'       ,Tag_O=Tag_O)
 
-                CALL Get(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
-                CALL Get(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
-                CALL Get(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
+                CALL Get(PBC%TransVec(1),  'Originvector1'     ,Tag_O=Tag_O)
+                CALL Get(PBC%TransVec(2),  'Originvector2'     ,Tag_O=Tag_O)
+                CALL Get(PBC%TransVec(3),  'Originvector3'     ,Tag_O=Tag_O)
 
-                CALL Get(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
-                CALL Get(PBC%BoxShape(2,1),'Boxshape(2,1)'       ,Tag_O=Tag_O)       
-                CALL Get(PBC%BoxShape(2,2),'Boxshape(2,2)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(2,3),'Boxshape(2,3)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(1,1),'Boxshape11'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(1,2),'Boxshape12'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(1,3),'Boxshape13'       ,Tag_O=Tag_O)       
+                CALL Get(PBC%BoxShape(2,1),'Boxshape21'       ,Tag_O=Tag_O)       
+                CALL Get(PBC%BoxShape(2,2),'Boxshape22'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(2,3),'Boxshape23'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(3,1),'Boxshape31'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(3,2),'Boxshape32'       ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape(3,3),'Boxshape33'       ,Tag_O=Tag_O)
 
-                CALL Get(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,1),'InverseBoxshape(2,1)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,2),'InverseBoxshape(2,2)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,3),'InverseBoxshape(2,3)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(1,1),'InverseBoxshape11',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(1,2),'InverseBoxshape12',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(1,3),'InverseBoxshape13',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(2,1),'InverseBoxshape21',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(2,2),'InverseBoxshape22',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(2,3),'InverseBoxshape23',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape31',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
 
               END SUBROUTINE Get_PBCInfo
               !-------------------------------------------------------------------------------
@@ -1255,34 +1255,34 @@ CONTAINS
                 CALL Put(PBC%Epsilon,      'Epsilon'             ,Tag_O=Tag_O)
                 CALL Put(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
                 CALL Put(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
+                
+                CALL Put(PBC%CellCenter(1),'CellCenter1'       ,Tag_O=Tag_O)
+                CALL Put(PBC%CellCenter(2),'CellCenter2'       ,Tag_O=Tag_O)
+                CALL Put(PBC%CellCenter(3),'CellCenter3'       ,Tag_O=Tag_O)
 
-                CALL Put(PBC%CellCenter(1),'CellCenter(1)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%CellCenter(2),'CellCenter(2)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%CellCenter(3),'CellCenter(3)'       ,Tag_O=Tag_O)
+                CALL Put(PBC%TransVec(1),  'Originvector1'     ,Tag_O=Tag_O)
+                CALL Put(PBC%TransVec(2),  'Originvector2'     ,Tag_O=Tag_O)
+                CALL Put(PBC%TransVec(3),  'Originvector3'     ,Tag_O=Tag_O)
 
-                CALL Put(PBC%TransVec(1),  'Originvector(1)'     ,Tag_O=Tag_O)
-                CALL Put(PBC%TransVec(2),  'Originvector(2)'     ,Tag_O=Tag_O)
-                CALL Put(PBC%TransVec(3),  'Originvector(3)'     ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(1,1),'Boxshape11'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(1,2),'Boxshape12'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(1,3),'Boxshape13'       ,Tag_O=Tag_O)       
+                CALL Put(PBC%BoxShape(2,1),'Boxshape21'       ,Tag_O=Tag_O)       
+                CALL Put(PBC%BoxShape(2,2),'Boxshape22'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(2,3),'Boxshape23'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(3,1),'Boxshape31'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(3,2),'Boxshape32'       ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape(3,3),'Boxshape33'       ,Tag_O=Tag_O)
 
-                CALL Put(PBC%BoxShape(1,1),'Boxshape(1,1)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(1,2),'Boxshape(1,2)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(1,3),'Boxshape(1,3)'       ,Tag_O=Tag_O)       
-                CALL Put(PBC%BoxShape(2,1),'Boxshape(2,1)'       ,Tag_O=Tag_O)       
-                CALL Put(PBC%BoxShape(2,2),'Boxshape(2,2)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(2,3),'Boxshape(2,3)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,1),'Boxshape(3,1)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,2),'Boxshape(3,2)'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,3),'Boxshape(3,3)'       ,Tag_O=Tag_O)
-
-                CALL Put(PBC%InvBoxSh(1,1),'InverseBoxshape(1,1)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(1,2),'InverseBoxshape(1,2)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(1,3),'InverseBoxshape(1,3)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,1),'InverseBoxshape(2,1)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,2),'InverseBoxshape(2,2)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,3),'InverseBoxshape(2,3)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,1),'InverseBoxshape(3,1)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape(3,2)',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape(3,3)',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(1,1),'InverseBoxshape11',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(1,2),'InverseBoxshape12',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(1,3),'InverseBoxshape13',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(2,1),'InverseBoxshape21',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(2,2),'InverseBoxshape22',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(2,3),'InverseBoxshape23',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(3,1),'InverseBoxshape31',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
 
               END SUBROUTINE Put_PBCInfo
 #endif
@@ -2043,6 +2043,45 @@ CONTAINS
                     END SUBROUTINE Get_LOG_VECT
                     !-------------------------------------------------------------------------------
 
+
+
+  SUBROUTINE Put_CellSet(CS,Name_O,Tag_O,Unlimit_O)
+    TYPE(CellSet)                  :: CS
+    CHARACTER(Len=*),Optional            :: Name_O
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+    LOGICAL,         OPTIONAL,INTENT(IN) :: UnLimit_O
+!
+    IF(PRESENT(Name_O))THEN
+       CALL Put(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
+       CALL Put(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
+       CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
+    ELSE
+       CALL Put(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
+       CALL Put(CS%NCells   ,'cell_number',Tag_O=Tag_O)
+       CALL Put(CS%CellCarts,'cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
+    ENDIF
+  END SUBROUTINE Put_CellSet
+
+  SUBROUTINE Get_CellSet(CS,Name_O,Tag_O)
+    TYPE(CellSet)                  :: CS
+    CHARACTER(Len=*),OPTIONAL      :: Name_O
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+    INTEGER                        :: NC
+!
+    IF(PRESENT(Name_O))THEN
+       CALL Get(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
+       CALL Get(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
+       CALL New_CellSet(CS,CS%NCells)
+       CALL Get(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O)
+    ELSE
+       CALL Get(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
+       CALL Get(CS%NCells   ,'cell_number',Tag_O=Tag_O)
+       CALL New_CellSet(CS,CS%NCells)
+       CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
+    ENDIF
+
+
+  END SUBROUTINE Get_CellSet
 
                   END MODULE
 
