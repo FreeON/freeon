@@ -181,8 +181,9 @@ address elements of the density matrix $P_{cd}$ \cite{ESchwegler96,JBurant96}.
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
 
 The $\Gamma$-point approximation limits {\bf k}-space sampling to just the central cell at
-${\bf k = G} = 0$.   In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equiv \delta_{\bf N,0} \, {\bf P} $,
-reducing Eq.~(\ref{CryEq}) to the less cumbersome relation
+${\bf k} = 0$.   In the naive $\Gamma$-point limit, we take ${\bf P[ N ] } \equiv \delta_{\bf N,0} \, {\bf P} $,
+reducing Eq.~(\ref{CryEq}) to the less cumbersome relation (note, we have re-labled the lattice sums 
+for simplicity):
 \begin{equation}
 K_{ab}=
 \sum _{{\bf H G}, c d} P_{cd}
@@ -206,7 +207,7 @@ $E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]$.
 
 A more serious deffect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
 This translational variance has a well understood analogue in classical molecular dynamics 
-\cite{NMetropolis53,DTheodorou85,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials also leads 
+\cite{NMetropolis53,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials also leads 
 to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored by introducing the Minimum Image Convention (MIC), 
 which ensures that the distance between neighboring images is always used in computing interactions. 
 In computation of the Hartree-Fock exchange matrix, the MIC $\Gamma$-point approximation is just
@@ -235,8 +236,10 @@ pq_i & =& pq_i - {\tt ANINT} \left( pq_i -{\tt SIGN}\left( \delta,pq_i\right) \r
 {\bf PQ}_{\rm MIC}&=&{\bf M} \cdot {\bf pq} 
 \end{eqnarray}
 \end{subequations}
-where $\delta \approx 10^{-15}$ and is needed inorder to avoid wrapping errors \footnote{\bf could
-use some more explenation here.  Maybe a footnote would be appropriate?},   and 
+where $\delta \approx 10^{-15}$ and is needed to avoid wrapping errors \footnote{
+This numerical $\delta$ is required to yeild a consistent wrapping when distributions lie 
+exactly at the cell boundary.  In effect, this implementation changes the wrapping condition
+from $|pq_i| \ge 1$ to $|pq_i| > 1$.},   and 
 ${\bf  M}$ is the $3 \times 3$ shape matrix of the unit cell, 
 composed of the primative lattice vectors,
 \begin{equation}
@@ -281,7 +284,6 @@ for the endpoint derivatives that do not assume EKPS:
    -{\rm Tr}\left[ {\bf P}^0 {\bf F}^1 \right] 
    +2 {\rm Tr}\left[ {\bf P}^1 {\bf F}^1 \right] \, , \nonumber\\
 \end{eqnarray}
-{ \bf PLEASE DOUBLE CHECK THE ABOVE EQUATION.  IT DOESNT LOOK RIGHT TO ME }
 where  ${\bf F}$ is the Fockian, $\bf T$ is the kinetic energy matrix  and $E_{\rm ne}$ is the nuclear-electrostatic energy.
 This  modified ODA leads to the correct quadratic parameterization and guarantees convergence of the HF-MIC model.  
 
@@ -552,8 +554,34 @@ in preparation of this manuscript.
 
 \appendix
 
+\begin{table}[h]
+\caption{Accuracy goals and corresponding thresholds that control precision of the {\sc MondoSCF} linear scaling algorithms.}
+\label{TableOfThresholds}
+\center{
+\begin{tabular}{lllll}
+\toprule
+Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & $\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
+\colrule
+{\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
+{\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
+{\tt TIGHT}     & $10^{-6}$ & $10^{-10}$ & $10^{-12}$ & $10^{-7}$ \\
+\botrule
+\end{tabular}}
+\end{table}
+
+\section{Thresholds}\label{Thresholds}
+
+There are four thresholds that control the numerical precision of the linear scaling algorithms
+in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
+described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
+the distribution threshold   $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref.~[\onlinecite{CTymczak04A}],
+and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
+Ref.~[\onlinecite{MChallacombe00A}]).   These thresholds, listed in Table~\ref{TableOfThresholds},  have been 
+calibrated over a wide range of systems to yeild a minimum of  4, 6 and 8 digits of relative accuracy in the total 
+energy with {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.    Typically however, 1 additional digit is achieved for 
+well behaved systems.  
+
 \section{Coordinates of Validation Suite and Threshold Definitions}\label{Coordinates}
-%
 %
 %
 \begin{table}[ht]
@@ -591,15 +619,10 @@ O  &    0.500 &   0.500 &  0.500  \\
 \botrule
 \end{tabular}}
 \end{table}
-
-
-%
-%
 %
 \begin{table}[ht]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell 
-calculations reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are 
-$a=b=c=3.5700$\AA, with angles  $\alpha=\beta=\gamma=90^\circ$.}
+\caption{Fractional coordinates for the 8 atom unit cell of Diamond.
+Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA, with angles  $\alpha=\beta=\gamma=90^\circ$.}
 \center{
 \begin{tabular}{cccc}
 \toprule
@@ -641,30 +664,6 @@ H &     0.981535 &  0.975827 &   0.822424 \\
 \vfill
 \vskip 1.0in
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Threshold Definitions}\label{Thresholds}
-
-\begin{table}[ht]
-\caption{The various thresholds which enter into our three levels of accuracy}
-\label{Table:AccurLevels}
-\center{
-\begin{tabular}{ccccc}
-\toprule
-Level  & Matrix & Penatration & QCTC/ONX & Distrabution \\ 
-\colrule
-loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
-good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
-tight     & $10^{-6}$ & $10^{-7}$ & $10^{-10}$ & $10^{-12}$ \\
-%verytight & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-14}$ \\
-\botrule
-\end{tabular}}
-\end{table}
-
-%
-%
 %
 %
 %
