@@ -181,6 +181,7 @@ PROGRAM SCFStatus
       SCFMessage=TRIM(SCFMessage)                                           &
                //'       <SCF>   = '//TRIM(FltToMedmChar(ETot))//RTRN
 !     Add in MM energies
+#ifdef MMech
       IF(HasMM()) THEN
          SCFMessage=TRIM(SCFMessage)                                        &
                //'     <EBOND>   = '//TRIM(DblToMedmChar(EBOND))//RTRN         
@@ -199,6 +200,7 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)                                        &
                //'<TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY))//RTRN         
       ENDIF
+#endif
    ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
       SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
                                      //TRIM(CurBase)//','  &
@@ -208,8 +210,12 @@ PROGRAM SCFStatus
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
          SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+#ifdef MMech
                                     //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
                                     //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
+#else
+                                    //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot)) &
+#endif
                                     //', dD = '//TRIM(DblToShrtChar(DMax))
       ENDIF
 !     Add in DIIS error
