@@ -601,7 +601,6 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
      ENDDO
      CALL Delete(Convgd)
-   ! CALL Delete(IntCES)
      !
      IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
