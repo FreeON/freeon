@@ -2055,7 +2055,7 @@ CONTAINS
        CALL Delete(GOpt%ExtIntCs)
        NewDim=OldDim+3*NatmsLoc
        CALL New(GOpt%ExtIntCs,NewDim)
-       CALL SetEq(GOpt%ExtIntCs,EIntcSave,1,OldDim,1)
+       CALL SetEq(EIntcSave,GOpt%ExtIntCs,1,OldDim,1)
        DO I=1,NatmsLoc
          II=OldDim+3*(I-1)
          GOpt%ExtIntCs%Def%C(II+1)(1:10)='CARTX     '
@@ -2074,7 +2074,7 @@ CONTAINS
        CALL Delete(GOpt%ExtIntCs)
        NewDim=OldDim+6
        CALL New(GOpt%ExtIntCs,NewDim)
-       CALL SetEq(GOpt%ExtIntCs,EIntcSave,1,OldDim,1)
+       CALL SetEq(EIntcSave,GOpt%ExtIntCs,1,OldDim,1)
        DO J=1,3
          BoxShapeT(J,1:3)=XYZ(1:3,NatmsLoc+J)
        ENDDO
