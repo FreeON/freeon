@@ -8,47 +8,60 @@
 include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
-
+#
 CPPMISC = -DEXPLICIT_SOURCE
-
+#
 EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/Functions  \
                 -I$(MONDO_HOME)/QCTC/MMA/Moments
-
+#
 QCTCObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o JGen.o NukE.o QCTC.o  
-
+#
 all:	QCTC
-
-clean:	CQCTC
-
-purge:	CQCTC
-
-mma:	ctrax hgtosp md3trr
-
-ctrax:
-	$(MAKE) -i -C MMA/CTraX
-hgtosp:
-	$(MAKE) -i -C MMA/HGToSP
-md3trr:
-	$(MAKE) -i -C MMA/MD3TRR
-
-cmma:	
-	rm -f HGToSP.Inc
-	rm -f CTraX.Inc 
-	rm -f MD3TRR.Inc
-
+#
+clean:	CQCTC cmma
+#
+purge:	CQCTC cmma 
+#
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
 	mv QCTC $(MONDO_HOME)/Exec/QCTC
-
+#
 CQCTC:
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 	rm -f $(MONDO_HOME)/Exec/QCTC
 	ls 
-
-CMD:	
-	$(MAKE) -i -C VMD clean
-
+#
+mma:	ctrax hgtosp pac md3trr
+#
+cmma:	cctrax chgtosp cpac cmd3trr 
+#
+pmma:	cmma
+	rm -f HGToSP.Inc
+	rm -f CTraX.Inc 
+	rm -f PFunk.Inc
+	rm -f MD3TRR.Inc
+#
+ctrax:
+	$(MAKE) -i -C MMA/CTraX
+cctrax:
+	$(MAKE) -i -C MMA/CTraX  clean
+#	
+hgtosp:
+	$(MAKE) -i -C MMA/HGToSP
+chgtosp:
+	$(MAKE) -i -C MMA/HGToSP clean
+#	
+pac:
+	$(MAKE) -i -C MMA/PAC
+cpac:
+	$(MAKE) -i -C MMA/PAC    clean
+#
+md3trr:
+	$(MAKE) -i -C MMA/MD3TRR
+cmd3trr:
+	$(MAKE) -i -C MMA/MD3TRR clean
+#
 MPoles.o:	HGToSP.Inc
 
