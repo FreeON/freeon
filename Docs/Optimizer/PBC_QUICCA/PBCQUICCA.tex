@@ -114,6 +114,7 @@ structure optimizations, with high efficiency and great robustness,
 while preserving an unparalleled simplicity in the implementation.
 
 \section{Lattice summation for Wilson's B matrix}
+\subsection{The effective $B$ matrix of the central cell}
 Let us consider a three-dimensional crystal with atomic 
 Cartesian positions $X$ that extend the range $[-\infty,\infty]$
 in all spacial directions. The periodicity of the crystal
@@ -189,7 +190,7 @@ for any $i$-th internal coordinate.
 The displacements of the Cartesian coordinates, however, do not equal
 for different cells: 
 \begin{equation} \label{cartdispl}
-\delta X^{(klm}_{a_{ij}} = \delta X^{(000)}_{ij}) + k \delta A 
+\delta X^{(klm)}_{a_{ij}} = \delta X^{(000)}_{ij} + k \delta A 
 + l \delta B + m \delta C ,
 \end{equation}
 with $\delta A$, $\delta B$ and $\delta C$
@@ -249,13 +250,14 @@ vector with three components referring to the Cartesian components
 of atom $a_{ij}$, {\it and} to the Cartesian components of the
 lattice vectors $A$, $B$ and $C$.
 
-Now, let us introduce the matrices $B^{(A)}$, $B^{(B)}$ and $B^{(C)}$.
-$B^{(A)}$ is constructed by
+Now, let us introduce the matrices 
+$B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$.
+$B^{(000)(A)}$ is constructed by
 \begin{equation} \label{matba}
-B^{(A)}_{i} = \sum_{j=1}^{4} k_{ij} B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} . 
+B^{(000)(A)}_{i} = \sum_{j=1}^{4} k_{ij} B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} . 
 \end{equation}
-$B^{(B)}_{i}$ and $B^{(C)}_{i}$ are given by the same formula 
-as $B^{(A)}_{i}$ except that
+$B^{(000)(B)}_{i}$ and $B^{(000)(C)}_{i}$ are given by the same formula 
+as $B^{(000)(A)}_{i}$ except that
 the multiplicativ factor $k_{ij}$ in Eqn. \ref{matba} is exchanged to 
 $l_{ij}$ and $m_{ij}$, respectively. Each of these three matrices
 are of the size $N_{i} \times 3$, where $N_{i}$ is the number of
@@ -263,58 +265,116 @@ internal coordinates in the central cell $\phi^{000}$.
 
 The displacements of the lattice vectors affect the displacements
 of the internal coordinates via the matrices 
-$B^{(A)}$, $B^{(B)}$ and $B^{(C)}$.
+$B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$.
 A certain $j$-th component atom of the $i$-th internal
 coordinate gives a nonzero contribution to those of these three
 matrices for which it has a nonzero corresponding lattice index.
 E.g. if the $j$-th atom is located in the cell $(100)$,
-it will contribute only to $B^{(A)}$. It may also happen that
+it will contribute only to $B^{(000)(A)}$. It may also happen that
 each of the four atoms of an internal coordinate contribute
-to all three matrices, $B^{(A)}$, $B^{(B)}$ and $B^{(C)}$,
+to all three matrices, $B^{(000)(A)}$, $B^{(000)(B)}$ and $B^{(000)(C)}$,
 when all cell-indices of all component-atoms differ from zero.
 
 Thus, Eqn. \ref{latsum1} can be rewritten to
 \begin{equation} \label{latsum2}
-\delta \phi^{(000)}_{i} = \left[ [\oplus_{j=1}^{4} 
-B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} 
-] \oplus B^{(A)}_{i} \oplus B^{(B)}_{i} \oplus B^{(C)}_{i}
-\right] 
+\delta \phi^{(000)}_{i} = 
+B'^{(000)}
 \left[
 [\oplus_{j=1}^{4} \delta X^{(000)}_{ia_{ij}} ] 
 \oplus \delta A 
 \oplus \delta B 
 \oplus \delta C 
-\right]^{t} .
+\right]^{t} ,
 \end{equation}
-The first term in the bracket on the right hand side of Eqn. 
-\ref{latsum2} provides $B^{\rm cr}$, the effective $B$ matrix for crystals:
-\begin{equation}
-B^{\rm cr}_{i} =
+where $B'^{(000)}$ denotes the effective $B$ matrix for crystals:
+\begin{equation} \label{latsum3}
+B'^{(000)}_{i} =
 [\oplus_{j=1}^{4}
 B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
-] \oplus B^{(A)}_{i} \oplus B^{(B)}_{i} \oplus B^{(C)}_{i} ,
+] \oplus B^{(000)(A)}_{i} \oplus B^{(000)(B)}_{i} \oplus B^{(000)(C)}_{i} ,
 \end{equation}
-while the second term provides the displacements of the atomic positions
+while the second term of Eqn. \ref{latsum2} 
+provides the displacements of the atomic positions
 and the lattice vectors.
-The description of the effective $B$ matrix, $B^{\rm cr}$, 
+The description of the effective $B$ matrix, $B'^{(000)}$, 
 as provided by Eqn. \ref{latsum2}, deals only with the
-nonzero elements of $B^{\rm cr}$. However, it should be clear from the
+nonzero elements of $B'^{(000)}$. However, it should be clear from the
 formalism, that
-$B^{\rm cr}$ has $3 \times (N+3)$ colums, where $N$ is the number of atoms
+$B'^{(000)}$ has $3N+9$ colums, where $N$ is the number of atoms
 in the central cell. This can be seen from the fact, that the subscript 
 $a_{ij}$ scans all atoms of the central cell.
 
-The only thing that has yet left out from the determination of $B^{\rm cr}$ is
-the computation of the values $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$.
+We still owe with the determination 
+of the values $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$.
 Whenever these values are to be computed, the absolute Cartesian positions
 of any $j$-th atom of the $i$-th internal coordinate are generated, based
 on the knowledge of the corresponding translationally unique atom $a_{ij}$
 and the cell indices $k_{ij}$, $l_{ij}$ and $m_{ij}$. Once the absolute
 Cartesian positions are recovered, $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
 is determined exactly as for isolated molecules \cite{EWilson55}. Thus,
-the derivation of $B^{\rm cr}$ is completed.
+the derivation of $B'^{(000)}$ is completed.
 
-\section{Lattice summation for the inverse B matrix}
+\subsection{The effective $B$ matrix of the entire crystal}
+
+Let us represent the displacements of the Cartesian
+positions of the entire crystal, $\delta X$ in a more
+compact way now. For each cell with cell indices
+$(klm)$ the atomic displacement $\delta X^{(klm)}_{a_{ij}}$
+can be decomposed to a translation-free term 
+$\delta X^{(000)}_{a_{ij}}$ and to a term $\delta T_{klm}$ that
+contains translation:
+\begin{equation}
+\delta T_{klm} = k \delta A + l \delta B + m \delta C ,
+\end{equation}
+as it has already been recognized in Eqn. \ref{cartdispl}.
+Thus, the total Cartesian displacement can be formulated also as
+\begin{equation} \label{newx}
+\delta X' = 
+\oplus_{k,l,m=-\infty}^{\infty}
+\left[ \oplus_{a_{ij}=1}^{N} \delta X^{000}_{a_{ij}} \right]
+\oplus
+\left[ 
+ k \delta A \oplus l \delta B \oplus m \delta C \right] ,
+\end{equation}
+where the symbol $a_{ij}$ is running over all $N$ atoms
+of the central cell. The prime over $X$ distinguishes
+the new $X'$ representation from the old $X$ one in the sense
+that the old representation had a $3N$ dimensional displacement
+vector for each cell, while in the new $X'$ representation
+the displacements of the atoms in a cell are represented by
+a $3N+9$ dimensional vector.
+
+The $B$ matrix in the new representation, $B'$ can be written
+as the direct-sum of $B'^{(klm)}$ matrices:
+\begin{equation}
+B' = \oplus_{k,l,m=-\infty}^{\infty} B'^{(klm)} ,
+\end{equation}
+where $B'^{(klm)}$ is defined by 
+\begin{equation} \label{latsum4}
+B'^{(klm)}_{i} =
+[\oplus_{j=1}^{4}
+B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
+] \oplus B^{(klm)(A)}_{i} \oplus B^{(klm)(B)}_{i} 
+\oplus B^{(klm)(C)}_{i} ,
+\end{equation}
+similarly to Eqn. \ref{latsum2}. Note, that each
+$B'^{(klm)}$ matrix has a part, 
+$B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
+that is independent of the lattice vectors and whose
+columns do not contribute to the translation 
+of the cell, but may contribute to the rotation of the
+atoms in the cell. This part is the same for each $(klm)$ cell
+and acts on the translation-free part of the displacement,
+$\delta X^{(000)}$. The matrix $B^{(klm)(A)}$ 
+does depend on the lattice vectors and is defined as
+\begin{equation} \label{matba}
+B^{(klm)(A)} = \frac{1}{k} B^{(000)(A)}
+\end{equation}
+Similar definitions are valid for $B^{(klm)(B)}$ and
+$B^{(klm)(C)}$.
+
+\subsection{The effective $A$ matrix of the entire crystal}
+
 
 \bibliography{../../Bib/mondo_new}
 \end{document}
