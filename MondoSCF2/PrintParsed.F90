@@ -7,23 +7,41 @@ MODULE PrintParsed
   USE ControlStructures
   IMPLICIT NONE
 CONTAINS
-  !===============================================================================================
-  ! PRINT THE MONDOSCF BANNER TO THE OUTPUT FILE
-  !===============================================================================================
+!===============================================================================================
+! PRINT THE MONDOSCF BANNER AND THE INPUT FILE TO THE OUTPUT FILE
+!===============================================================================================
   SUBROUTINE PrintsStartUp(N)
-    TYPE(FileNames) :: N
+    TYPE(FileNames)     :: N
     CHARACTER(LEN=DCL)  :: OFile,M_HOST,M_MACH,M_SYST,M_VRSN,M_PLAT
+    CHARACTER(LEN=100)  :: Line1,Line2
     INTEGER             :: I
-    !-----------------------------------------------------------------------------------------------         
+!-----------------------------------------------------------------------------------------------         
     CALL GetEnv('MONDO_HOST',M_HOST)
     CALL GetEnv('MONDO_MACH',M_MACH)
     CALL GetEnv('MONDO_SYST',M_SYST)
     CALL GetEnv('MONDO_VRSN',M_VRSN)
-    CALL GetEnv('MONDO_PLAT',M_PLAT)   
+    CALL GetEnv('MONDO_PLAT',M_PLAT)    
     CALL OpenASCII(N%OFile,Out)
     CALL PrintProtectL(Out)
-    ! Print MondoSCF banner and authorship
+!   Print the Input File to the Output File
+    OPEN(UNIT=Inp,FILE=N%IFile,STATUS='Old')
+    WRITE(Out,66) 
+    Line2="! INPUT FILE = "//TRIM(N%IFile)
+    Line2(99:100) =" !" 
+    WRITE(Out,'(A100)') Line2
+    DO 
+       READ(Inp,'(A100)',END=101) Line1 
+       DO I=1,98;Line2(I+2:I+2) = Line1(I:I);ENDDO
+       Line2(1:2)    ="! "
+       Line2(99:100) =" !" 
+       WRITE(Out,'(A100)') Line2
+    ENDDO
+101 CONTINUE
+    WRITE(Out,66) 
+    CLOSE(Inp)
+!   Print MondoSCF banner and authorship
     WRITE(Out,77)(Rtrn,I=1,15)
+66  FORMAT('!',98('-'),'!')
 77  FORMAT(A1,A1,                                                        &
          ' __    __                 _       ____________ ______ ',A1,    &
          '|  \  /  |               | |     /       /    |      |',A1,    & 
@@ -39,7 +57,7 @@ CONTAINS
          ' Los Alamos National Laboratory                       ',A1,    & 
          ' LA-CC-04-086 (formerly 01-2)                         ',A1,    & 
          ' Copyright 2001, University of California.            ',A1)
-    ! Write information on host, platform, etc
+!   Write information on host, platform, etc
     Mssg='Compiled for '//TRIM(M_PLAT)//', executing on '//TRIM(M_HOST)     &
          //Rtrn//' a '//TRIM(M_MACH)//' machine'//' running '//TRIM(M_SYST) &
          //' '//TRIM(M_VRSN)       
