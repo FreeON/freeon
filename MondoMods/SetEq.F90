@@ -198,7 +198,7 @@ MODULE SetXYZ
             MA=BSiz%I(I) 
             DO J=1,NAtoms
                NA=BSiz%I(J)
-               CALL BlockToBlock(NBasF,MA,NA,OI,OJ,A%D,B%MTrix%D(Q:))
+               CALL BlockToBlock(MA,NA,OI,OJ,A%D,B%MTrix%D(Q:))
                B%BlkPt%I(P)=Q
                B%ColPt%I(P)=J               
                Q=Q+MA*NA
@@ -212,13 +212,13 @@ MODULE SetXYZ
          B%NBlks=P-1
          B%NNon0=Q-1
       END SUBROUTINE Set_BCSR_EQ_RNK2
-
-      SUBROUTINE BlockToBlock(NBasF,M,N,OI,OJ,A,B)
+ 
+      SUBROUTINE BlockToBlock(M,N,OI,OJ,A,B)
          IMPLICIT NONE
-         INTEGER,                             INTENT(IN)    :: NBasF,M,N,OI,OJ
-         REAL(DOUBLE),DIMENSION(NBasF,NBasF), INTENT(IN)    :: A
-         REAL(DOUBLE),DIMENSION(M,N),         INTENT(INOUT) :: B
-         INTEGER                                            :: I,J
+         INTEGER,                     INTENT(IN)    :: M,N,OI,OJ
+         REAL(DOUBLE),DIMENSION(:,:), INTENT(IN)    :: A
+         REAL(DOUBLE),DIMENSION(M,N), INTENT(INOUT) :: B
+         INTEGER                                    :: I,J
 
          DO J=1,N
             DO I=1,M
@@ -226,7 +226,74 @@ MODULE SetXYZ
             ENDDO
          ENDDO
       END SUBROUTINE BlockToBlock
+
+      SUBROUTINE Set_BCSR_EQ_VECT(B,A)
+         TYPE(DBL_VECT), INTENT(INOUT) :: A        
+         TYPE(BCSR),     INTENT(INOUT) :: B        
+         INTEGER                       :: I,J,P,Q,OI,OJ,MA,NA
+         IF(AllocQ(B%Alloc))  &
+         CALL Delete(B)
+         CALL New(B)
+         P=1
+         Q=1
+         B%RowPt%I(1)=1 
+         DO I=1,NAtoms
+            OI=OffS%I(I)
+            MA=BSiz%I(I) 
+            NA=BSiz%I(1)
+            CALL VectToBlock2(MA,NA,A%D(OI:),B%MTrix%D(Q:))
+            B%BlkPt%I(P)=Q
+            B%ColPt%I(P)=1 
+            Q=Q+MA*NA
+            P=P+1
+            B%RowPt%I(I+1)=P
+         ENDDO
+         B%NAtms=NAtoms
+         B%NBlks=P-1
+         B%NNon0=Q-1
+      END SUBROUTINE Set_BCSR_EQ_VECT
+
+      SUBROUTINE VectToBlock2(M,N,A,B)
+         IMPLICIT NONE
+         INTEGER,                     INTENT(IN)    :: M,N
+         REAL(DOUBLE),DIMENSION(:),   INTENT(IN)    :: A
+         REAL(DOUBLE),DIMENSION(M,N), INTENT(INOUT) :: B
+         INTEGER                                    :: I,J
+         B=Zero
+         DO I=1,M
+            B(I,1)=A(I)
+         ENDDO
+      END SUBROUTINE VectToBlock2
 !
+      SUBROUTINE Set_VECT_EQ_BCSR(B,A)
+         TYPE(BCSR),     INTENT(INOUT) :: A        
+         TYPE(DBL_VECT), INTENT(INOUT) :: B        
+         INTEGER                       :: I,J,P,Q,OI,JP,MA,NA
+         DO I=1,NAtoms
+            OI=OffS%I(I)
+            MA=BSiz%I(I) 
+            NA=BSiz%I(1)
+            DO JP=A%RowPt%I(I),A%RowPt%I(I+1)-1
+               J=A%ColPt%I(JP)
+               IF(J==1)THEN
+                  Q=A%BlkPt%I(JP)
+                  CALL BlockToVect2(MA,NA,B%D(OI:),A%MTrix%D(Q:))
+               ENDIF
+            ENDDO
+         ENDDO
+      END SUBROUTINE Set_VECT_EQ_BCSR
+
+      SUBROUTINE BlockToVect2(M,N,A,B)
+         IMPLICIT NONE
+         INTEGER,                     INTENT(IN)    :: M,N
+         REAL(DOUBLE),DIMENSION(:),   INTENT(INOUT) :: A
+         REAL(DOUBLE),DIMENSION(M,N), INTENT(IN)    :: B
+         INTEGER                                    :: I,J
+         DO I=1,M
+            A(I)=B(I,1)
+         ENDDO
+      END SUBROUTINE BlockToVect2
+
 #ifdef PARALLEL
 !===================================================================
 !     Load the Global Row Pointer from the local Row Pointer
