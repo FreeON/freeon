@@ -217,7 +217,9 @@ PROGRAM MakeRho
 !-----------------------------------------------------------
 !  Fold the Distributions back into the Cell
 !
+#ifdef PERIODIC
   CALL Fold_Rho(GM,Rho)
+#endif
 !------------------------------------------------------------
 !  Remove distribution which du not contibute to the density
 !
