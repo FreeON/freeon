@@ -80,6 +80,11 @@ MODULE ParsingKeys
    CHARACTER(LEN=17), PARAMETER :: MOLDYN       ='MolecularDynamics'
    CHARACTER(LEN=20), PARAMETER :: GEOOPT       ='GeometryOptimization'
    CHARACTER(LEN=5 ), PARAMETER :: FORCE        ='Force'
+!-----------------------------------------------------------------------------------------------------  
+!  Parsing keys for <Options.Force.MOLDYN=>
+   CHARACTER(LEN=11), PARAMETER :: MOLDYN_NS     ='MD_NumSteps' 
+   CHARACTER(LEN=11), PARAMETER :: MOLDYN_TS     ='MD_TimeStep' 
+   CHARACTER(LEN=11), PARAMETER :: MOLDYN_VS     ='MD_VelScale' 
 !---------------------------------------------------------------
 !  Parsing keys for <Options.Periodic=>
 !
