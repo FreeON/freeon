@@ -52,7 +52,8 @@ RANLIB  = ranlib
 # MPI libraries
 #
 # For linking with old style MPI1 (default if only using -DPARALLEL)
-#MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm 
+#MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) 
+#MPI_LIBS = -L$(MPI_LIB) -lpmpich -lmpich -lpmpich -L$(GM_LIB) -lgm # myrinet
 #
 # For new style MPI2 (use -DPARALLEL -DMPI2)
 #MPI_LIBS = -L$(MPI_LIB) -llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam \
