@@ -36,7 +36,7 @@ CONTAINS
 !
 !--------------------------------------------------------
 !
-   SUBROUTINE EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,Grad_Loc)
+   SUBROUTINE EXCL(GMLoc,E_LJ_EXCL,E_C_EXCL,GradLoc)
 !
 ! Calculate the Coulomb and Lennard-Jones exclusion 
 ! energies and gradients for MM and QMMM calculations
@@ -55,7 +55,7 @@ CONTAINS
      REAL(DOUBLE) :: XI,YI,ZI,XJ,YJ,ZJ,QI,QJ,CONVF,CONVF2,QI14,QJ14
      REAL(DOUBLE) :: RI,RJ,R6,DIJ,DIJ2,DIJAu,DIJ2Au,Pref1,Pref2
      REAL(DOUBLE) :: QQI,QQI14,QQJ,QQJ14
-     TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+     TYPE(DBL_RNK2),OPTIONAL :: GradLoc
      TYPE(DBL_VECT) :: DVect     
      INTEGER :: ITop
 !
@@ -96,6 +96,9 @@ CONTAINS
          IF(DABS(GMLoc%AtNum%D(I))<1.D-5) Charge14%D(I)=Zero
        ENDDO
      ENDIF
+!
+! Rescale atomic parameters
+!
 !
 ! Now calculate Lennard-Jones and Coulomb exclusion energies
 ! Please note that all MM charges on the QM positions
@@ -138,8 +141,6 @@ CONTAINS
        DVect%D(:)=DVect%D(:)/AngstromsToAU !!!work in angstroems
        DIJ2=DOT_PRODUCT(DVect%D,DVect%D)
        DIJ=SQRT(DIJ2)
-       DIJAu=DIJ*AngstromsToAU
-       DIJ2Au=DIJAu*DIJAu
        IF(PRESENT(E_LJ_EXCL)) THEN
          QJ=LJEps%D(J)
          QJ14=LJEps14%D(J)
@@ -158,11 +159,11 @@ CONTAINS
                Pref1=QI*QJ*R6
              ENDIF
                E_LJ_EXCL=E_LJ_EXCL+Pref1*(R6-One)
-               IF(PRESENT(Grad_Loc)) THEN
+               IF(PRESENT(GradLoc)) THEN
              Pref2=Six*Pref1*(One-Two*R6)/DIJ2 
 !since it is about exclusion gradients, they get a negative sign
-             Grad_Loc%D(:,I)=Grad_Loc%D(:,I)+(-Pref2*DVect%D(:))
-             Grad_Loc%D(:,J)=Grad_Loc%D(:,J)-(-Pref2*DVect%D(:))
+             GradLoc%D(:,I)=GradLoc%D(:,I)+(-Pref2*DVect%D(:))
+             GradLoc%D(:,J)=GradLoc%D(:,J)-(-Pref2*DVect%D(:))
                ENDIF
            ENDIF
            IF(PRESENT(E_C_EXCL)) THEN
@@ -172,11 +173,11 @@ CONTAINS
                Pref1=QQI*QQJ/DIJ*CONVF
              ENDIF
                E_C_EXCL=E_C_EXCL+Pref1
-               IF(PRESENT(Grad_Loc)) THEN
+               IF(PRESENT(GradLoc)) THEN
              Pref2=-Pref1/DIJ2 
 !since it is about exclusion gradients, they get a negative sign
-             Grad_Loc%D(:,I)=Grad_Loc%D(:,I)+(-Pref2*DVect%D(:))
-             Grad_Loc%D(:,J)=Grad_Loc%D(:,J)-(-Pref2*DVect%D(:))
+             GradLoc%D(:,I)=GradLoc%D(:,I)+(-Pref2*DVect%D(:))
+             GradLoc%D(:,J)=GradLoc%D(:,J)-(-Pref2*DVect%D(:))
                ENDIF
            ENDIF
          ELSE
@@ -207,7 +208,7 @@ CONTAINS
    END SUBROUTINE EXCL
 !-------------------------------------------------------------- 
 !
-   SUBROUTINE ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,Grad_Loc)
+   SUBROUTINE ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,GradLoc)
 !
    IMPLICIT NONE
    INTEGER :: NBox,NX,NY,NZ,I,J,K
@@ -220,7 +221,7 @@ CONTAINS
    TYPE(DBL_VECT) :: LJEps,LJRad,DVect
    TYPE(DBL_VECT) :: LJEps2
    TYPE(CRDS) :: GMLoc
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    REAL(DOUBLE) :: ELJ,R12_2,Pref1,Pref2
    INTEGER      :: DU,NLocBox,ILocBox,II
    REAL(DOUBLE) :: DD,SUM
@@ -318,10 +319,6 @@ CONTAINS
 !
 ! Calculate LJ energy
 !
-write(*,*) 'XYZLJCell= '
-do i=1,NAtomsLJCell
-write(*,*) XYZLJCell%D(1:3,i)
-enddo
    ELJ=Zero
 !
 ! Scan all boxes 
@@ -383,10 +380,10 @@ enddo
                  Pref1=R6*Q1*Q2
                  ELJ=ELJ+Pref1*(R6-One)
 ! calculate gradient contribution
-                 IF(PRESENT(Grad_Loc)) THEN
+                 IF(PRESENT(GradLoc)) THEN
                    Pref2=Six*PREF1*(One-Two*R6)/R12_2
-                                        Grad_Loc%D(:,JJ1)=Grad_Loc%D(:,JJ1)+Pref2*DVect%D(:)
-                   IF(JJ2<=GMLoc%Natms) Grad_Loc%D(:,JJ2)=Grad_Loc%D(:,JJ2)-Pref2*DVect%D(:)
+                                        GradLoc%D(:,JJ1)=GradLoc%D(:,JJ1)+Pref2*DVect%D(:)
+                   IF(JJ2<=GMLoc%Natms) GradLoc%D(:,JJ2)=GradLoc%D(:,JJ2)-Pref2*DVect%D(:)
                  ENDIF
                ENDIF
 !
@@ -413,10 +410,10 @@ enddo
 !
 !------------------------------------------------------
 !
-   SUBROUTINE Bond_Energy(EBOND,XYZ,Grad_Loc)  
+   SUBROUTINE Bond_Energy(EBOND,XYZ,GradLoc)  
 !
    REAL(DOUBLE)  :: EBOND
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    INTEGER            :: I,J,IB,NBond
    LOGICAL            :: CalcGrad
    REAL(DOUBLE)       :: D_Force,D_Bond,RIJ
@@ -426,7 +423,7 @@ enddo
    REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
 !
    EBOND = Zero  
-   CalcGrad=PRESENT(Grad_Loc)
+   CalcGrad=PRESENT(GradLoc)
 !
    CALL Get(NBond,'MM_NBond')
    IF(NBond==0) RETURN
@@ -461,8 +458,8 @@ enddo
 ! bond gradient
 !
       D_Force=(Two*D_Force)/RIJ
-      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+(D_Force*DVect%D)
-      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)-(D_Force*DVect%D)
+      GradLoc%D(1:3,I)=GradLoc%D(1:3,I)+(D_Force*DVect%D)
+      GradLoc%D(1:3,J)=GradLoc%D(1:3,J)-(D_Force*DVect%D)
 !
    END DO
 !
@@ -476,10 +473,10 @@ enddo
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE Angle_Energy(EANGLE,XYZ,Grad_Loc)
+   SUBROUTINE Angle_Energy(EANGLE,XYZ,GradLoc)
 !
    REAL(DOUBLE) :: EANGLE
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    TYPE(INT_RNK2) :: AngleIJK
    INTEGER        :: NAngle,IA,I,J,K
    LOGICAL        :: CalcGrad
@@ -490,7 +487,7 @@ enddo
    REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
 !
    EANGLE = Zero   
-   CalcGrad=PRESENT(Grad_Loc)
+   CalcGrad=PRESENT(GradLoc)
 !
    CALL Get(NAngle,'MM_NAngle')
 !
@@ -555,9 +552,9 @@ enddo
       FCK%D=(DVectIJ%D-Cos_AngleIJK*DVectJK%D)/RJK
       FCJ%D=-(FCI%D+FCK%D)
 
-      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+D_Force*FCI%D
-      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)+D_Force*FCJ%D
-      Grad_Loc%D(1:3,K)=Grad_Loc%D(1:3,K)+D_Force*FCK%D
+      GradLoc%D(1:3,I)=GradLoc%D(1:3,I)+D_Force*FCI%D
+      GradLoc%D(1:3,J)=GradLoc%D(1:3,J)+D_Force*FCJ%D
+      GradLoc%D(1:3,K)=GradLoc%D(1:3,K)+D_Force*FCK%D
 !
    END DO
 !
@@ -573,10 +570,10 @@ enddo
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE Torsion_Energy(ETorsion,XYZ,Grad_Loc)
+   SUBROUTINE Torsion_Energy(ETorsion,XYZ,GradLoc)
 !
    REAL(DOUBLE) :: ETorsion
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    TYPE(INT_VECT) :: Active_Torsion
    TYPE(DBL_VECT) :: TorsionEQ,TorsionFC
    TYPE(INT_VECT) :: TorsionPeriod
@@ -601,7 +598,7 @@ enddo
    CALL Get(TorsionPeriod,'TorsionPeriod')
 !
    CALL TorsionalEnergy(NTorsion,TorsionIJKL,ETorsion,XYZ, &
-       Grad_Loc,Active_Torsion,TorsionEQ,TorsionFC,TorsionPeriod)
+       GradLoc,Active_Torsion,TorsionEQ,TorsionFC,TorsionPeriod)
 !
    CALL Delete(Active_Torsion)
    CALL Delete(TorsionIJKL)
@@ -613,10 +610,10 @@ enddo
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE OutOfPlane_Energy(EOutOfPlane,XYZ,Grad_Loc)
+   SUBROUTINE OutOfPlane_Energy(EOutOfPlane,XYZ,GradLoc)
 !
    REAL(DOUBLE) :: EOutOfPlane
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    TYPE(INT_VECT) :: Active_OutOfPlane
    TYPE(INT_RNK2) :: OutOfPlaneIJKL
    TYPE(DBL_VECT) :: OutOfPlaneEQ,OutOfPlaneFC
@@ -641,7 +638,7 @@ enddo
    CALL Get(OutOfPlanePeriod,'OutOfPlanePeriod')
 !
    CALL TorsionalEnergy(NOutOfPlane,OutOfPlaneIJKL,EOutOfPlane,XYZ, &
-        Grad_Loc,Active_OutOfPlane,OutOfPlaneEQ,OutOfPlaneFC,OutOfPlanePeriod)
+        GradLoc,Active_OutOfPlane,OutOfPlaneEQ,OutOfPlaneFC,OutOfPlanePeriod)
 !
    CALL Delete(Active_OutOfPlane)
    CALL Delete(OutOfPlaneIJKL)
@@ -653,11 +650,11 @@ enddo
 !
 !-------------------------------------------------------------
 !
-   SUBROUTINE TorsionalEnergy(NCoord,CoordIJKL,ECoord,XYZ,Grad_Loc,Active_Coord,CoordEQ,CoordFC,CoordPeriod)
+   SUBROUTINE TorsionalEnergy(NCoord,CoordIJKL,ECoord,XYZ,GradLoc,Active_Coord,CoordEQ,CoordFC,CoordPeriod)
 !
    IMPLICIT NONE
    REAL(DOUBLE) :: Energy_Coord
-   TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
+   TYPE(DBL_RNK2),OPTIONAL :: GradLoc
    TYPE(INT_VECT) :: Active_Coord
    TYPE(DBL_VECT) :: CoordEQ,CoordFC
    TYPE(INT_VECT) :: CoordPeriod
@@ -673,7 +670,7 @@ enddo
    TYPE(DBL_VECT) :: DGradI,DGradJ,DGradK,DGradL
 !
    ECoord=Zero   
-   CalcGrad=PRESENT(Grad_Loc)
+   CalcGrad=PRESENT(GradLoc)
 !
    CALL New(DVectIJ,3)
    CALL New(DVectJK,3)
@@ -784,10 +781,10 @@ DForce=CoordFC%D(ICoord)*CoordEQ%D(ICoord)*DCos
       DGradJ%D= DGradI%D*(Fact1-One)+Fact2*DGradL%D
       DGradK%D=-DGradL%D*(Fact2+One)-Fact1*DGradI%D
 !
-      Grad_Loc%D(1:3,I)=Grad_Loc%D(1:3,I)+DForce*DGradI%D
-      Grad_Loc%D(1:3,J)=Grad_Loc%D(1:3,J)+DForce*DGradJ%D
-      Grad_Loc%D(1:3,K)=Grad_Loc%D(1:3,K)+DForce*DGradK%D
-      Grad_Loc%D(1:3,L)=Grad_Loc%D(1:3,L)+DForce*DGradL%D
+      GradLoc%D(1:3,I)=GradLoc%D(1:3,I)+DForce*DGradI%D
+      GradLoc%D(1:3,J)=GradLoc%D(1:3,J)+DForce*DGradJ%D
+      GradLoc%D(1:3,K)=GradLoc%D(1:3,K)+DForce*DGradK%D
+      GradLoc%D(1:3,L)=GradLoc%D(1:3,L)+DForce*DGradL%D
 !
    END DO
 !
