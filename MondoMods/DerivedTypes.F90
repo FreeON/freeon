@@ -1,4 +1,3 @@
-!
 !--  This source code is part of the MondoSCF suite of 
 !--  linear scaling electronic structure codes.  
 !
@@ -249,7 +248,6 @@ MODULE DerivedTypes
 !
   TYPE HGRho
      INTEGER          :: Alloc   !-- Allocation key
-     INTEGER          :: AllocRE !-- Allocation key for RhoEst
      INTEGER          :: NExpt   !-- Number of exponents
      INTEGER          :: NDist   !-- Number of distributions 
      INTEGER          :: NCoef   !-- Number of coefficients
@@ -261,7 +259,6 @@ MODULE DerivedTypes
      TYPE(DBL_VECT)   :: Qx      !-- x-coordinates of distribution center (NDist)
      TYPE(DBL_VECT)   :: Qy      !-- y-coordinates of distribution center (NDist)
      TYPE(DBL_VECT)   :: Qz      !-- z-coordinates of distribution center (NDist)
-     TYPE(DBL_VECT)   :: Est     !-- Value of the Norm <rho_exp(r)|rho_exp(r)> (NDist)
      TYPE(DBL_VECT)   :: Co      !-- Density coefficients (NCoef)
   END TYPE HGRho
 !-------------------------------------------------------------------------------------
