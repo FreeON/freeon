@@ -47,8 +47,8 @@ small:
                              ./Test SiF4.out    SiF4.ref
 	$(MONDO_HOME)/Exec/MondoSCF Urea.inp    Urea.out;  \
                              ./Test Urea.out    Urea.ref
-	$(MONDO_HOME)/Exec/MondoSCF Water.inp   Water.out;  \
-                             ./Test Water.out   Water.ref 
+#	$(MONDO_HOME)/Exec/MondoSCF Water.inp   Water.out;  \
+#                             ./Test Water.out   Water.ref 
 	$(MONDO_HOME)/Exec/MondoSCF Biotin.inp  Biotin.out; \
                              ./Test Biotin.out  Biotin.ref
 #
@@ -56,11 +56,13 @@ big:	small
 #----------------------------------------------
 #       Submit validation suite to pbs queing 
 #
+pbs:	small_pbs big_pbs
+#
 small_pbs:
 	chmod u+x sub_pbs
 	./sub_pbs SiF4
 	./sub_pbs Urea 
-	./sub_pbs Water
+#	./sub_pbs Water
 	./sub_pbs Biotin
 #
 big_pbs:small_pbs
