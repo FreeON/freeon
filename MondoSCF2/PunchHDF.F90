@@ -205,7 +205,7 @@ CONTAINS
     INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc,iGEOStart
     INTEGER          :: iGEOMem
     CHARACTER(LEN=DCL) :: chGEO
-    TYPE(CRDS)       :: GMLoc
+    TYPE(CRDS)       :: GMLoc,GMAux
     !
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
@@ -233,6 +233,17 @@ CONTAINS
         HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                       "Clone #"//TRIM(IntToChar(iCLONE)))
           chGEO=IntToChar(iGEO)
+          ! re-initialize space in new HDF. 
+          IF(O%Coordinates==GRAD_CART_OPT) THEN
+            IntCMax=1
+          ELSE
+            IntCMax=IntCPerAtom*GMLoc%NAtms
+          ENDIF
+          GMAux%NAtms=GMLoc%NAtms
+          CALL New(GMAux)
+          CALL Put(GMAux,chGEO)
+          CALL Delete(GMAux)
+          !
           CALL Put(GMLoc,chGEO)
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)

@@ -1536,7 +1536,7 @@ IntC_L%N=0
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-         CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath,IRep,IStep)
+        !CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath,IRep,IStep)
          !
          ! Get B and refresh values of internal coords
          !
