@@ -228,41 +228,34 @@ MODULE DrvSCFs
 !   Clean the Scratch Directory
 !========================================================================================
     SUBROUTINE CleanScratch(Ctrl,Action)
-      TYPE(SCFControls)      :: Ctrl
-      CHARACTER(LEN=4)       :: Action
-      CHARACTER(LEN=120)     :: RemoveFile
-      INTEGER                :: IGeo,IBas,ICyc
-!      
+      TYPE(SCFControls)              :: Ctrl
+      CHARACTER(LEN=4)               :: Action
+      CHARACTER(LEN=DEFAULT_CHR_LEN) :: RemTag,RemoveFile
+      INTEGER                        :: IGeo,IBas,ICyc
+!---------------------------------------------------------------------------------------      
       ICyc=Ctrl%Current(1)
       IBas=Ctrl%Current(2)
       IGeo=Ctrl%Current(3)
       IF(Action=='Cycl') THEN
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
-                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.Rho'                                
+         RemTag=TRIM(ScrName)//'_Geom#'//TRIM(IntToChar(IGeo))  & 
+                             //'_Base#'//TRIM(IntToChar(IBas))  &
+                             //'_Cycl#'//TRIM(IntToChar(ICyc-1)) 
+         RemoveFile=TRIM(RemTag)//'.Rho'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
-                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.J'                                
+         RemoveFile=TRIM(RemTag)//'.J'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
-                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.K*'                                
+         RemoveFile=TRIM(RemTag)//'.K'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
-                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.D'                                
+         RemoveFile=TRIM(RemTag)//'.D'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))  & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas))  &
-                                    //'_Cycl#'//TRIM(INTTOCHAR(ICyc-1)) //'.F'                                
+         RemoveFile=TRIM(RemTag)//'.F'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
       ELSEIF(Action=='Base') THEN
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo))    & 
-                                    //'_Base#'//TRIM(INTTOCHAR(IBas-1)) //'*' 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(IntToChar(IGeo))    & 
+                                    //'_Base#'//TRIM(IntToChar(IBas-1)) //'*' 
          CALL SYSTEM('/bin/rm '//RemoveFile)  
       ELSEIF(Action=='Geom') THEN
-         RemoveFile=TRIM(Ctrl%Name) //'_Geom#'//TRIM(INTTOCHAR(IGeo-1))//'*' 
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(IntToChar(IGeo-1))//'*' 
          CALL SYSTEM('/bin/rm '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
