@@ -114,7 +114,7 @@ MODULE SCFLocals
      FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O) RESULT(CVect)
         TYPE(SCFControls),        INTENT(IN) :: Ctrl
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Actn1_O,Actn2_O
-        CHARACTER(LEN=DCL),DIMENSION(10)     :: CVect
+        CHARACTER(LEN=DCL),DIMENSION(9)      :: CVect
         CVect(1)=Ctrl%Name
         CVect(2)=" "
         CVect(3)=" "
