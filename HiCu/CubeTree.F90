@@ -278,7 +278,7 @@ MODULE CubeTree
       RECURSIVE SUBROUTINE RhoOnGrid(Node)
          TYPE(RhoNode), POINTER                     :: Node
          REAL(DOUBLE)                               :: Tx,Ty,Tz
-         REAL(DOUBLE), DIMENSION(0:MaxEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
+         REAL(DOUBLE), DIMENSION(0:HGEll+1)         :: LLambdaX,LLambdaY,LLambdaZ, &
                                                        ULambdaX,ULambdaY,ULambdaZ, &
                                                        LambdaX,LambdaY,LambdaZ
          REAL(DOUBLE)                               :: RQx,RQy,RQz,RQ2,Z,X,W,Sgn,Xpt,Co,        &
@@ -315,7 +315,7 @@ MODULE CubeTree
       RECURSIVE FUNCTION PopInBox(Node) RESULT(EPop)
          TYPE(RhoNode), POINTER                     :: Node
          REAL(DOUBLE)                               :: Tx,Ty,Tz
-         REAL(DOUBLE), DIMENSION(0:MaxEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
+         REAL(DOUBLE), DIMENSION(0:HGEll+1)         :: LLambdaX,LLambdaY,LLambdaZ, &
                                                        ULambdaX,ULambdaY,ULambdaZ, &
                                                        LambdaX,LambdaY,LambdaZ
          REAL(DOUBLE)                               :: RQx,RQy,RQz,RQ2,Z,X,W,Sgn,Xpt,Co,              &

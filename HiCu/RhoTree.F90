@@ -448,7 +448,7 @@ MODULE RhoTree
          IF(Node%Leaf)THEN
          ZMin=1.D12
          MaxAm=-1.D12
-         DO L=0,MaxEll
+         DO L=0,HGEll
            JQ=Node%Qdex(L)
            JC=Node%Cdex(L)
            LMNLen=LHGTF(L)

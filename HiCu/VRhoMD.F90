@@ -85,9 +85,9 @@ PROGRAM VectorRhoMD
   WRITE(*,*)' '
   WRITE(*,*)' Generating explicit source for density deposition'
   WRITE(*,*)' '
-  String(1,1)='      MaxEll = '//TRIM(IntToChar(MaxEll))  &
-            //'      MaxEll = '//TRIM(IntToChar(MaxEll))  &
-            //'      MaxEll = '//TRIM(IntToChar(MaxEll))
+  String(1,1)='   MaxEll = '//TRIM(IntToChar(HGEll))  &
+            //'   MaxEll = '//TRIM(IntToChar(HGEll))  &
+            //'   MaxEll = '//TRIM(IntToChar(HGEll))
   WRITE(*,*)String(1,1)
   WRITE(*,*)' '
   WRITE(*,*)' HiCu HiCu HiCu HiCu HiCu HiCu HiCu HiCu HiCu HiCu '
@@ -98,7 +98,7 @@ PROGRAM VectorRhoMD
   WRITE(Out,*)(Blnk,I=1,6),'Z=Prim%Z'
   WRITE(Out,*)(Blnk,I=1,6),'TwoZ=Two*Z'
   WRITE(Out,*)(Blnk,I=1,6),'SELECT CASE(Prim%Ell)'
-  DO Ell=0,MaxEll
+  DO Ell=0,HGEll
      ChEll   =IntToChar(Ell)
      ChLMNLen=IntToChar(LHGTF(Ell))
      String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
@@ -175,9 +175,9 @@ PROGRAM VectorRhoMD
      WRITE(Out,*)(Blnk,I=1,12),'ENDIF'
      WRITE(Out,*)(Blnk,I=1,9),'ENDDO'
   ENDDO
-  String(1,1)=Squish('CASE('//IntToChar(MaxEll+1)//':)')
+  String(1,1)=Squish('CASE('//IntToChar(HGEll+1)//':)')
   WRITE(Out,*)(Blnk,I=1,6),TRIM(String(1,1))
-  WRITE(Out,*)(Blnk,I=1,9),'CALL Halt("Increase MaxEll in MondoMods/GlobalScalars.F90 and remake")'
+  WRITE(Out,*)(Blnk,I=1,9),'CALL Halt("Increase HGEll in MondoMods/GlobalScalars.F90 and remake")'
   WRITE(Out,*)(Blnk,I=1,6),'END SELECT'
   CLOSE(Out)
 !=================================================================================
@@ -185,7 +185,7 @@ PROGRAM VectorRhoMD
 !==================================================================================
   CALL OpenASCII('ExplicitLeafContribution.Inc',Out,.TRUE.)
   WRITE(Out,*)(Blnk,I=1,6),'SELECT CASE(Node%Ell)'
-  DO Ell=0,MaxEll
+  DO Ell=0,HGEll
      ChEll   =IntToChar(Ell)
      ChLMNLen=IntToChar(LHGTF(Ell))
      String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
@@ -274,7 +274,7 @@ PROGRAM VectorRhoMD
    WRITE(Out,*)(Blnk,I=1,6),'LQ2=LQx*LQx+LQy*LQy+LQz*LQz'
    WRITE(Out,*)(Blnk,I=1,6),'UQ2=UQx*UQx+UQy*UQy+UQz*UQz'
    WRITE(Out,*)(Blnk,I=1,6),'SELECT CASE(Node%Ell)'
-   DO Ell=0,MaxEll
+   DO Ell=0,HGEll
       ChEll   =IntToChar(Ell)
       ChLMNLen=IntToChar(LHGTF(Ell))
       String(1,1)=Squish('CASE('//IntToChar(Ell)//')')
