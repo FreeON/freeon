@@ -1,3 +1,34 @@
+2004-02-08 06:42  mchalla
+
+	* ONX2/: GONX2.F90, Makefile: Added in scaling of exchange forces
+	so hybrids work.  Also, we now have the makefile create
+	MONDO_EXEC/GONX instead of GONX2.
+
+2004-02-07 13:52  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.ps, LinearPBCExchange.tex,
+	Timing_Diamond_ONX.dat, pIce_En_vs_a.ps: [no log message]
+
+2004-02-07 13:52  tymczak
+
+	* Docs/PBC_Exchange/Diamond_En_vs_V.ps: New Figure
+
+2004-02-06 16:34  mchalla
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2004-02-04 16:19  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-02-04 16:04  vweber
+
+	* Docs/DM_Papers/PERT_3/: Response3.tex, Makefile: [no log message]
+
+2004-02-03 14:21  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-02-03 12:43  mchalla
 
 	* MondoSCF2/SCFs.F90: Small tweak to convergence parameters.
