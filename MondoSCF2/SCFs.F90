@@ -152,15 +152,23 @@ CONTAINS
        CALL Get(GradE,'GradE',Tag_O=chGEO)
        K=0
        G%Clone(iCLONE)%Vects%D=Zero
-       DO iATS=1,G%Clone(iCLONE)%NAtms
-          IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
-             DO J=1,3;K=K+1
-                G%Clone(iCLONE)%Vects%D(J,iATS)=GradE%D(K)
-             ENDDO
-          ELSE
-             K=K+3
-          ENDIF
-       ENDDO
+       IF(O%Coordinates==GRAD_INTS_OPT) THEN
+         DO iATS=1,G%Clone(iCLONE)%NAtms
+           DO J=1,3;K=K+1
+             G%Clone(iCLONE)%Vects%D(J,iATS)=GradE%D(K)
+           ENDDO
+         ENDDO
+       ELSE
+         DO iATS=1,G%Clone(iCLONE)%NAtms
+            IF(G%Clone(iCLONE)%CConstrain%I(iATS)==0)THEN
+               DO J=1,3;K=K+1
+                  G%Clone(iCLONE)%Vects%D(J,iATS)=GradE%D(K)
+               ENDDO
+            ELSE
+               K=K+3
+            ENDIF
+         ENDDO
+       ENDIF
        ! Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
