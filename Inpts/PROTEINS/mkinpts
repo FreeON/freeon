@@ -4,6 +4,14 @@ cat template_inp         >  Endothelin.inp
 cat XYZ/Endothelin.xyz   >> Endothelin.inp
 cat end_inp              >> Endothelin.inp
 
+cat template_inp         >  Charybdotoxin.inp
+cat XYZ/Charybdotoxin.xyz>> Charybdotoxin.inp
+cat end_inp              >> Charybdotoxin.inp
+
+cat template_inp         >  P53Frag.inp
+cat XYZ/P53Frag.xyz      >> P53Frag.inp
+cat end_inp              >> P53Frag.inp
+
 cat template_inp         >  ChyInh2.inp
 cat XYZ/ChyInh2.xyz      >> ChyInh2.inp
 cat end_inp              >> ChyInh2.inp
@@ -19,14 +27,6 @@ cat end_inp              >> HIVProtease.inp
 cat template_inp         >  Lysozyme.inp
 cat XYZ/Lysozyme.xyz     >> Lysozyme.inp
 cat end_inp              >> Lysozyme.inp
-
-cat template_inp         >  Lysozyme.inp
-cat XYZ/Lysozyme.xyz     >> Lysozyme.inp
-cat end_inp              >> Lysozyme.inp
-
-cat template_inp         >  Conotoxin.inp
-cat XYZ/Conotoxin.xyz    >> Conotoxin.inp
-cat end_inp              >> Conotoxin.inp
 
 cat template_inp         >  FibroblastGF.inp
 cat XYZ/FibroblastGF.xyz >> FibroblastGF.inp

@@ -1,8 +1,10 @@
-./sub_pbs Endothelin     18
-./sub_pbs ChyInh2        19
-./sub_pbs CytB562        20
-./sub_pbs Lysozyme       21
-#./sub_pbs Interleukin    22
-#./sub_pbs FibroblastGF   23
-#./sub_pbs TyrPhos        23
-#./sub_pbs HIVProtease    24
+./sub_pbs Endothelin     
+./sub_pbs Charybdotoxin  
+./sub_pbs P53Frag      
+./sub_pbs ChyInh2        
+#./sub_pbs CytB562        
+#./sub_pbs Lysozyme       
+#./sub_pbs Interleukin
+#./sub_pbs FibroblastGF   
+#./sub_pbs TyrPhos        
+#./sub_pbs HIVProtease    
