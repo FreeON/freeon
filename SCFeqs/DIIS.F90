@@ -135,7 +135,12 @@ PROGRAM PulayDIIS
       CALL Get(Tmp1,TrixFile('OrthoF',Args,KSCF))
       CALL Multiply(Tmp1,DIISCo%D(JSCF))
       CALL Add(F,Tmp1,E)
-      CALL Filter(F,E)
+      IF(JSCF==1)THEN
+!        Only filter the end product
+         CALL Filter(F,E)
+      ELSE
+         CALL SetEq(F,E)
+      ENDIF
    ENDDO
 !--------------------------------------------------------------------
 !  IO for the orthogonal, extrapolated F 
