@@ -35,19 +35,10 @@ PROGRAM ODA
   CALL New(FTilde)
   ! Get the previous (N-M) tilde values where M is -1
   M=-1
-  MatFile=TrixFile('C2D',Args,M)
-  WRITE(*,*)' LOOKING FOR '//TRIM(MatFile)
-  INQUIRE(FILE=MatFile,EXIST=Present)
-  IF(Present)THEN
-     write(*,*)' getting C2DIIS EXTRAP P MAT '
-     CALL Put(PTilde,TrixFile('P_C2DIIS',Args,M)) 
-  ELSE
-     CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
-  ENDIF
+  CALL Get(PTilde,TrixFile('OrthoD',Args,M))   
   CALL Get(FTilde,TrixFile('OrthoF',Args,M))   
-  CALL PChkSum(PTilde,'P0Tilde',Unit_O=6)
-  CALL PChkSum(FTilde,'F0Tilde',Unit_O=6)
-
+  !CALL PChkSum(PTilde,'P0Tilde',Unit_O=6)
+  !CALL PChkSum(FTilde,'F0Tilde',Unit_O=6)
   Current(1)=Current(1)+M
   CALL Get(e0,'Etot',StatsToChar(Current))
   Current(1)=Current(1)-M
@@ -61,10 +52,10 @@ PROGRAM ODA
   ! Get the previous Fock matrix F[PTilde_(N-1)]
   e0p=Two*Trace(FTilde,T1)
   e1p=Two*Trace(F,T1)
-  WRITE(*,*)' e0 = ',e0
-  WRITE(*,*)' e1 = ',e1
-  WRITE(*,*)'e0p = ',e0p
-  WRITE(*,*)'e1p = ',e1p
+  !WRITE(*,*)' e0 = ',e0
+  !WRITE(*,*)' e1 = ',e1
+  !WRITE(*,*)'e0p = ',e0p
+  !WRITE(*,*)'e1p = ',e1p
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
@@ -103,9 +94,9 @@ PROGRAM ODA
   ENDIF
   Mssg=' Mix = '//TRIM(FltToShrtChar(L))
   Mssg=ProcessName(Prog,TRIM(Mssg))
-  Mssg=TRIM(Mssg)//" <SCF~>= "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
+  Mssg=TRIM(Mssg)//" <SCF> ~ "//TRIM(FltToMedmChar(EMin))//', d3 = '//TRIM(DblToShrtChar(d3))
   WRITE(*,*)TRIM(Mssg)
-  CALL Put(L,'ODAMixingParameter')
+  !  CALL Put(L,'ODAMixingParameter')
   ! PTilde_N=(1-L)*PTilde_(N-1)+L*P_N
   CALL Multiply(P,L)
   CALL Multiply(PTilde,-L1)
@@ -121,7 +112,7 @@ PROGRAM ODA
   CALL Multiply(FTilde,L1)
   CALL Add(F,FTilde,T1)
   CALL Put(T1,TrixFile('OrthoF',Args,0)) 
-!  CALL Put(T1,TrixFile('F_DIIS',Args,0)) 
+  !  CALL Put(T1,TrixFile('F_DIIS',Args,0)) 
   ! JTilde_N ~ (1-L)*JTilde_(N-1)+L*J_N
   CALL Get(PTilde,TrixFile('J',Args,M))
   CALL Get(P,TrixFile('J',Args,0))
@@ -145,8 +136,9 @@ PROGRAM ODA
   CALL Get(ENucTot,'E_NuclearTotal',StatsToChar(Current))
   ENucTotTilde=L*ENucTot+L1*ENucTotTilde
   CALL Put(ENucTotTilde,'E_NuclearTotal',StatsToChar(Current))
-  ! Ok, here is the big punt in Kohn-Sham ODA; we are 
-  ! doing linear interpolation of Exc, rather than recomputing it.  
+  ! Here is the big punt in Kohn-Sham ODA; we are 
+  ! doing linear interpolation of Exc.  This may suck worse than
+  ! the cubic approximation, and we should then recompute Kxc, Exc.
   IF(HasDFT(ModelChem))THEN
      Current(1)=Current(1)+M
      CALL Get(ExcTilde,'Exc',StatsToChar(Current))

@@ -96,64 +96,21 @@ PROGRAM SCFStatus
       ENDIF     
       !  Get the exchange correlation energy
       IF(HasDFT(ModelChem)) &
-#ifdef PARALLEL_CLONES
-           CALL Get(Exc,'Exc')
-#else
-           CALL Get(Exc,'Exc',Tag_O=SCFCycl)
-#endif
+         CALL Get(Exc,'Exc',StatsToChar(Current))
    ENDIF
 !  Get E_nuc_tot =<Vnn+Vne> 
-   CALL Get(E_nuc_tot,'E_NuclearTotal')
-#ifdef MMech
-   IF(HasMM()) THEN
-     CALL Get(EBOND,'MM_EBOND',Tag_O=Curgeom)
-     CALL Get(EANGLE,'MM_EANGLE',Tag_O=Curgeom)
-     CALL Get(ETorsion,'MM_ETorsion',Tag_O=Curgeom)
-     CALL Get(EOutOfPlane,'MM_EOutOfPlane',Tag_O=Curgeom)
-     CALL Get(ELJ,'MM_ELJ',Tag_O=Curgeom)
-     CALL Get(MM_COUL,'MM_COUL',Tag_O=Curgeom)
-     CALL Get(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=Curgeom)
-     CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=Curgeom)
-     MM_COUL=MM_COUL-E_C_EXCL
-     ELJ=ELJ-E_LJ_EXCL
-   ELSE
-     EBOND=Zero
-     EANGLE=Zero
-     ETorsion=Zero
-     EOutOfPlane=Zero
-     ELJ=Zero
-     MM_COUL=Zero
-     E_LJ_EXCL=Zero
-     E_C_EXCL=Zero
-   ENDIF
-     MM_ENERGY=EBOND+EANGLE+ETorsion+EOutOfPlane+ELJ+MM_COUL
-!
-#endif
-   E_es_tot = E_el_tot+E_nuc_tot
+   CALL Get(E_Nuc_Tot,'E_NuclearTotal',StatsToChar(Current))
+   ! Total electrostaic energy
+   E_es_tot=E_el_tot+E_nuc_tot
+   ! Total SCF energy
    Etot=KinE+E_es_tot+Exc+ExchE
-#ifdef MMech
-   IF(QMOnly()) THEN
-#endif
-#ifdef PARALLEL_CLONES
-     CALL Put(Etot,'Etot')
-#else
-     CALL Put(Etot,'Etot',StatsToChar(Current))
-#endif
-#ifdef MMech
-   ELSE IF(MMOnly()) THEN
-#ifdef PARALLEL_CLONES
-     CALL Put(MM_ENERGY,'Etot')
-#else
-     CALL Put(MM_ENERGY,'Etot',StatsToChar(Current))
-#endif
-   ELSE
-#ifdef PARALLEL_CLONES
-     CALL Put(Etot+MM_ENERGY,'Etot')
-#else
-     CALL Put(Etot+MM_ENERGY,'Etot',StatsToChar(Current))
-#endif
-   ENDIF
-#endif
+!   WRITE(*,*)' KinE = ',KinE
+!   WRITE(*,*)' Elec = ',E_es_tot
+!   WRITE(*,*)' Exc  = ',Exc
+!   WRITE(*,*)' Exch = ',ExchE
+!   WRITE(*,*)' ETot = ',ETot
+   CALL Put(Etot,'Etot')
+   CALL Put(Etot,'Etot',StatsToChar(Current))
 !  The Virial
    Virial=E_es_tot/KinE
 !--------------------------------------------------------
@@ -298,10 +255,12 @@ ENDIF
 #ifdef PARALLEL
   IF(MyId==ROOT)THEN
 #endif
+     IF(SCFActn/='Silent')THEN
         CALL OpenASCII(OutFile,Out)
         WRITE(*,* )TRIM(SCFMessage)
         WRITE(Out,* )TRIM(SCFMessage)
         CLOSE(Out)
+     ENDIF
 #ifdef PARALLEL
   ENDIF
 #endif

@@ -19,11 +19,10 @@ PROGRAM FockForce
   REAL(DOUBLE)                   :: Ne,e0,e1,e0p,e1p,L,L1,a3,b3,c3,d3
   REAL(DOUBLE)                   :: EMin,EPls,EMns,LMns,LPls
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: FFile,Mssg
-  CHARACTER(LEN=9), PARAMETER    :: Prog='FockForce'
+  CHARACTER(LEN=3), PARAMETER    :: Prog='MIX'
   LOGICAL                        :: EXIST,IsPresent
   !-------------------------------------------------------------------
   CALL StartUp(Args,Prog,SERIAL_O=.FALSE.)
-  CALL Get(LastSCFCycle,'lastscfcycle')
   ! Allocations.
   CALL New(P       )
   CALL New(PPrime  )
@@ -32,33 +31,51 @@ PROGRAM FockForce
   CALL New(Tmp3    )
   CALL New(PPrimOld)
   !-------------------------------------------------------------------
+  ! F_(n-3)
+  CALL Get(FnMns2,TrixFile('OrthoF',Args,-3),BCast_O=.FALSE.)
   ! F_(n-2)
-  CALL Get(FnMns2,TrixFile('OrthoF',Args,-2),BCast_O=.FALSE.)
-  ! F_(n-1)
-  CALL Get(FnMns1,TrixFile('OrthoF',Args,-1),BCast_O=.FALSE.)
+  CALL Get(FnMns1,TrixFile('OrthoF',Args,-2),BCast_O=.FALSE.)
   ! First expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=0
   ! via E_n(L=0) ~ E_(n-1)(0)+Tr{ F_(n-2) PPrime(0) }
+  CALL PPrint(FnMns2,'F0',Unit_O=6)
+  CALL PPrint(FnMns1,'F1',Unit_O=6)
+
+  Current(1)=Current(1)-1
+  CALL Get(e0,'Etot',StatsToChar(Current))
+
+  CALL FockPrimGuess(FnMns1,FnMns2,P,PPrime)
+  CALL SetEq(PPrimOld,PPrime)
+  MM=0
+  Ne=Half*DBLE(NEl)
+  DO I=1,30
+     CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
+!     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
+  ENDDO
+  CALL PPrint(PPrime,'PPrime',Unit_O=6)
+  e0p=Two*Trace(PPrime,FnMns2)
+
+  ! Now switch around and expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=1
+  ! as E_n(L=1) ~ E_n(1)+Tr{ F_(n-1) PPrime(1) }
+  Current(1)=Current(1)+1
+  CALL Get(e1,'Etot',StatsToChar(Current))
+!  Current(1)=Current(1)+1
   CALL FockPrimGuess(FnMns2,FnMns1,P,PPrime)
   CALL SetEq(PPrimOld,PPrime)
   DO I=1,30
      CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
 !     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
   ENDDO
-  Current(1)=Current(1)-2
-  CALL Get(e0,'Etot',StatsToChar(Current))
-  e0p=Trace(PPrime,FnMns2)
-  ! Now switch around and expand P_n=Theta[L*F_(n-2)+(1-L)*F_(n-1)] about L=1
-  ! as E_n(L=1) ~ E_n(1)+Tr{ F_(n-1) PPrime(1) }
-  CALL FockPrimGuess(FnMns1,FnMns2,P,PPrime)
-  CALL SetEq(PPrimOld,PPrime)
-  DO I=1,30
-     CALL TC2R_DMP(P,PPrime,Tmp1,Tmp2,Tmp3,Ne,MM)
-!     IF(CnvrgChckPrim(Prog,I,Ne,MM,T,PPrim,PPrimOld,Tmp1,Tmp2)) EXIT
-  ENDDO
-  Current(1)=Current(1)+1
-  CALL Get(e1,'Etot',StatsToChar(Current))
-  Current(1)=Current(1)+1
-  e1p=Trace(PPrime,FnMns2)
+  CALL PPrint(PPrime,'PPrime',Unit_O=6)
+  ! F_(n-1)
+  CALL Get(FnMns1,TrixFile('OrthoF',Args,0),BCast_O=.FALSE.)
+  CALL PPrint(FnMns1,' F111 = ',Unit_O=6)
+  e1p=-Two*Trace(PPrime,FnMns1)
+
+  WRITE(*,*)' e0 = ',e0
+  WRITE(*,*)' e1 = ',e1
+  WRITE(*,*)'e0p = ',e0p
+  WRITE(*,*)'e1p = ',e1p
+
   ! Find the mixing parameter L from the
   ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
   a3=e0
