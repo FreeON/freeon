@@ -105,9 +105,7 @@ PROGRAM MakeU
      U%NNon0=R-1
      !------------------------------------------------------------
      ! Put U to disk
-     Thresholds%Trix = Thresholds%Trix*1.D-2
      CALL Filter(T1,U)
-     Thresholds%Trix = Thresholds%Trix*1.D2
      CALL Put(T1,TrixFile('U',Args))
 !     CALL PPrint( T1,'U',Unit_O=6)
      !-----------------------------------------------------------
