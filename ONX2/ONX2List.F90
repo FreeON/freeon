@@ -69,7 +69,7 @@ CONTAINS
     TYPE(BSET)   , INTENT(IN)            :: BS
     TYPE(CellSet), INTENT(IN)            :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode2) , POINTER               :: AtAList,NodeA
+    TYPE(ANode2) , POINTER               :: NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
@@ -105,7 +105,7 @@ CONTAINS
 !    write(*,*) 'size C=',isize**4
     !
     !
-    NULLIFY(AtAList,NodeA)
+    NULLIFY(NodeA)
     NInts=0.0d0
     !
 !#ifdef ONX2_PARALLEL
@@ -260,7 +260,7 @@ CONTAINS
     TYPE(BSET)   , INTENT(IN)            :: BS
     TYPE(CellSet), INTENT(IN)            :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode2) , POINTER               :: AtAList,NodeA
+    TYPE(ANode2) , POINTER               :: NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
@@ -300,7 +300,7 @@ CONTAINS
     !Simple check Simple check Simple check Simple check Simple check Simple check
     !
     !
-    NULLIFY(AtAList,NodeA)
+    NULLIFY(NodeA)
     NInts=0.0D0
     !
 #ifdef ONX2_PARALLEL
@@ -902,12 +902,12 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(CList2), DIMENSION(:), POINTER :: List
     !-------------------------------------------------------------------
-    TYPE(ANode2)              , POINTER :: ListA,ListATmp
+    TYPE(ANode2)              , POINTER :: ListA
     INTEGER                             :: IdxMin,IdxMax,I,J
     INTEGER                             :: iPrc,IErr
     !-------------------------------------------------------------------
     !
-    NULLIFY(ListA,ListATmp)
+    NULLIFY(ListA)
     !
     IdxMin=LBOUND(List,DIM=1)
     IdxMax=UBOUND(List,DIM=1)
