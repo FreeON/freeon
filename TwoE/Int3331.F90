@@ -14,7 +14,7 @@
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
-      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
+      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
@@ -100,9 +100,6 @@
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
             Omega=Eta*Zeta*r1xZpE
-            !Wx=(Zeta*Px+Eta*Qx)*r1xZpE
-            !Wy=(Zeta*Py+Eta*Qy)*r1xZpE
-            !Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
             PAx=Px-Ax
             PAy=Py-Ay
             PAz=Pz-Az
@@ -120,19 +117,12 @@
             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz  = FPQz*PBC%BoxShape%D(3,3)
       !
-WPx = -Eta*PQx*r1xZpE
-WPy = -Eta*PQy*r1xZpE
-WPz = -Eta*PQz*r1xZpE
-WQx = Zeta*PQx*r1xZpE
-WQy = Zeta*PQy*r1xZpE
-WQz = Zeta*PQz*r1xZpE
-
-            !WPx=Wx-Px
-            !WPy=Wy-Py
-            !WPz=Wz-Pz
-            !WQx=Wx-Qx
-            !WQy=Wy-Qy
-            !WQz=Wz-Qz
+            WPx = -Eta*PQx*r1xZpE
+            WPy = -Eta*PQy*r1xZpE
+            WPz = -Eta*PQz*r1xZpE
+            WQx = Zeta*PQx*r1xZpE
+            WQy = Zeta*PQy*r1xZpE
+            WQz = Zeta*PQz*r1xZpE
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
@@ -313,31 +303,31 @@ WQz = Zeta*PQz*r1xZpE
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)+ABx*I2Bar2+I5Bar2
-      I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)+ABx*I3Bar2+I6Bar2
-      I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+OD*LDD)+ABx*I4Bar2+I8Bar2
-      I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)+ABy*I2Bar2+I6Bar2
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)+ABy*I3Bar2+I7Bar2
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+OD*LDD)+ABy*I4Bar2+I9Bar2
-      I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)+ABz*I2Bar2+I8Bar2
-      I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)+ABz*I3Bar2+I9Bar2
-      I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+OD*LDD)+I10Bar2+ABz*I4Bar2
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)+ABx*I2Bar3+I5Bar3
-      I((OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)+ABx*I3Bar3+I6Bar3
-      I((OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+OD*LDD)+ABx*I4Bar3+I8Bar3
-      I((OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)+ABy*I2Bar3+I6Bar3
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)+ABy*I3Bar3+I7Bar3
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+OD*LDD)+ABy*I4Bar3+I9Bar3
-      I((OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)+ABz*I2Bar3+I8Bar3
-      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)+ABz*I3Bar3+I9Bar3
-      I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+OD*LDD)+I10Bar3+ABz*I4Bar3
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)+ABx*I2Bar4+I5Bar4
-      I((OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)+ABx*I3Bar4+I6Bar4
-      I((OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+OD*LDD)+ABx*I4Bar4+I8Bar4
-      I((OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)+ABy*I2Bar4+I6Bar4
-      I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)+ABy*I3Bar4+I7Bar4
-      I((OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+OD*LDD)+ABy*I4Bar4+I9Bar4
-      I((OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)+ABz*I2Bar4+I8Bar4
-      I((OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)+ABz*I3Bar4+I9Bar4
-      I((OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)=I((OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+OD*LDD)+I10Bar4+ABz*I4Bar4
+      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I2Bar2+I5Bar2+I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I3Bar2+I6Bar2+I((OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABx*I4Bar2+I8Bar2+I((OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I2Bar2+I6Bar2+I((OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I3Bar2+I7Bar2+I((OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABy*I4Bar2+I9Bar2+I((OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABz*I2Bar2+I8Bar2+I((OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=ABz*I3Bar2+I9Bar2+I((OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I10Bar2+ABz*I4Bar2+I((OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABx*I2Bar3+I5Bar3+I((OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABx*I3Bar3+I6Bar3+I((OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABx*I4Bar3+I8Bar3+I((OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABy*I2Bar3+I6Bar3+I((OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABy*I3Bar3+I7Bar3+I((OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABy*I4Bar3+I9Bar3+I((OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABz*I2Bar3+I8Bar3+I((OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)=ABz*I3Bar3+I9Bar3+I((OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)=I10Bar3+ABz*I4Bar3+I((OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABx*I2Bar4+I5Bar4+I((OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABx*I3Bar4+I6Bar4+I((OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABx*I4Bar4+I8Bar4+I((OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABy*I2Bar4+I6Bar4+I((OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABy*I3Bar4+I7Bar4+I((OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABy*I4Bar4+I9Bar4+I((OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABz*I2Bar4+I8Bar4+I((OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)=ABz*I3Bar4+I9Bar4+I((OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)
+      I((OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)=I10Bar4+ABz*I4Bar4+I((OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD)
    END SUBROUTINE Int3331

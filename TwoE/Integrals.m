@@ -261,7 +261,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                              b = {lx[j], my[j], nz[j]};
                                                              c = {lx[k], my[k], nz[k]};
                                                              d = {lx[l], my[l], nz[l]};
-                                                             IList=Append[IList,HRR[a,b,c,d]];
+                                                             IList=Append[IList,HRR[a,b,c,d]+o[Kount]];
                                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]-> 
                                                                                 StringJoin["I((OA+",ToString[i-LBegin[il]],")*LDA",     \
                                                                                             "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \

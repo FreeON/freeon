@@ -14,7 +14,7 @@
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
-      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
+      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
@@ -61,9 +61,6 @@
             ExZpE=Eta*r1xZpE
             ZxZpE=Zeta*r1xZpE
             Omega=Eta*Zeta*r1xZpE
-            Wx=(Zeta*Px+Eta*Qx)*r1xZpE
-            Wy=(Zeta*Py+Eta*Qy)*r1xZpE
-            Wz=(Zeta*Pz+Eta*Qz)*r1xZpE
             PAx=Px-Ax
             PAy=Py-Ay
             PAz=Pz-Az
@@ -74,19 +71,19 @@
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
-            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
-            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
+            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
+            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
+            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
             PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz  = FPQz*PBC%BoxShape%D(3,3)
       !
-            WPx=Wx-Px
-            WPy=Wy-Py
-            WPz=Wz-Pz
-            WQx=Wx-Qx
-            WQy=Wy-Qy
-            WQz=Wz-Qz
+            WPx = -Eta*PQx*r1xZpE
+            WPy = -Eta*PQy*r1xZpE
+            WPz = -Eta*PQz*r1xZpE
+            WQx = Zeta*PQx*r1xZpE
+            WQy = Zeta*PQy*r1xZpE
+            WQz = Zeta*PQz*r1xZpE
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
@@ -99,5 +96,5 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I1Bar1
+      I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)=I1Bar1+I((OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD)
    END SUBROUTINE Int1111
