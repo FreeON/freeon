@@ -367,15 +367,8 @@ CONTAINS
           DoDIIS=.FALSE.
           DoODA =.FALSE.
        ENDIF
-!        
        ETest=ETol(O%AccuracyLevels(cBAS))
        DTest=DTol(O%AccuracyLevels(cBAS))
-!*******
-!!$       IF(cSCF<10)THEN
-!!$          ConvergedQ=NOT_CONVERGE
-!!$          RETURN
-!!$       ENDIF
-!*******
        ! Accumulate current statistics
        chGEO=IntToChar(iGEO)
        HDFFileID=OpenHDF(N%HFile)
@@ -501,6 +494,7 @@ CONTAINS
                 Converged(iCLONE)=DIIS_NOPATH
              ENDIF
           ENDIF
+          
           IF(DoDIIS.AND.DIISB<DIISA)THEN
              ! If DIIS is making progress, then turn on archivation of the density
              CALL Put(.TRUE.,'ArchiveDensity')
@@ -511,11 +505,20 @@ CONTAINS
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
-      !IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+!
        ConvergedQ=DID_CONVERGE
        DO iCLONE=1,G%Clones
           ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
+!
+       IF(cSCF .LT. O%MinSCF) THEN
+          ConvergedQ=NOT_CONVERGE
+          Mssg = " "
+       ENDIF
+       IF(cSCF .GE. O%MaxSCF) THEN
+          ConvergedQ=DID_CONVERGE
+          Mssg = "Forced SCF convergence"
+       ENDIF
        ! Convergence announcement
        IF(Mssg .NE. " " .AND. cSCF >2)THEN
           CALL OpenASCII(OutFile,Out)
@@ -1084,10 +1087,12 @@ CONTAINS
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: RemoveFile,chGEO
 !    
     chGEO = IntToChar(iGEO)
-    RemoveFile=TRIM(C%Nams%M_SCRATCH)//'*_Geom#'//TRIM(chGEO)//"_*.*"         
+    RemoveFile=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'*_Geom#'//TRIM(chGEO)//"_*.*"       
     CALL SYSTEM('/bin/rm -f  '//RemoveFile)
 !
   END SUBROUTINE CleanScratch
+!===============================================================================
+!
 !===============================================================================
   SUBROUTINE NTHessian(cBAS,cGEO,N,G,B,S,M)
     TYPE(FileNames)  :: N
