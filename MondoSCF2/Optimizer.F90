@@ -1235,12 +1235,12 @@ CONTAINS
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
+write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          RefXYZ%D(1:3,NatmsNew+K)=Zero
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
-write(*,*) 'lattice forces are temporarily hardwired to zero'
 GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
