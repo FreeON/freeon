@@ -24,7 +24,7 @@ PROGRAM GONX2
 #ifdef ONX2_PARALLEL
   USE MondoMPI
   USE FastMatrices
-  USE ONXGet       , ONLY: Get_Essential_RowCol,GetOffArr
+  USE ONXGet       , ONLY: Get_Essential_RowCol,GetOffArr,Set_DFASTMAT_EQ_DBCSR2
   USE PartDrv      , ONLY: PDrv_Initialize,PDrv_Finalize
 #else
   USE ONXGet       , ONLY: GetOffArr
@@ -550,44 +550,44 @@ CONTAINS
   END SUBROUTINE GetDab
   !
   !
-  SUBROUTINE Set_DFASTMAT_EQ_DBCSR2(B,A,RowPt,RowNbr)
-    TYPE(FASTMAT),POINTER :: B,C
-    TYPE(SRST),POINTER    :: S
-    TYPE(DBCSR)           :: A
-    TYPE(INT_VECT)        :: RowPt
-    INTEGER, INTENT(IN)   :: RowNbr
-    INTEGER               :: I,IRow,J,JP,P,N,M
-    !---------------------------------------------------------------------
-    !
-    ! Set some pointers.
-    NULLIFY(C,S)
-    !
-    ! Check for prior allocation
-    IF(ASSOCIATED(B))THEN
-       CALL Delete_FASTMAT1(B)
-       ! Begin with a new header Node     
-       CALL New_FASTMAT(B,0,(/0,0/))
-    ENDIF
-    !
-    DO I = 1,RowNbr
-       IRow=RowPt%I(I)
-       M = BSiz%I(IRow)
-       IF(A%RowPt%I(I+1)-A%RowPt%I(I)>1) THEN
-          ! Set current row link
-          C => FindFastMatRow_1(B,IRow)
-          DO JP = A%RowPt%I(I),A%RowPt%I(I+1)-1
-             J = A%ColPt%I(JP)
-             P = A%BlkPt%I(JP)
-             N = BSiz%I(J)
-             ! Add bloks to this sparse row search tree
-             CALL AddFASTMATBlok(C,IRow,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
-          ENDDO
-       ENDIF
-    ENDDO
-    !
-    CALL FlattenAllRows(B)
-    !
-  END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
+!!$  SUBROUTINE Set_DFASTMAT_EQ_DBCSR2(B,A,RowPt,RowNbr)
+!!$    TYPE(FASTMAT),POINTER :: B,C
+!!$    TYPE(SRST),POINTER    :: S
+!!$    TYPE(DBCSR)           :: A
+!!$    TYPE(INT_VECT)        :: RowPt
+!!$    INTEGER, INTENT(IN)   :: RowNbr
+!!$    INTEGER               :: I,IRow,J,JP,P,N,M
+!!$    !---------------------------------------------------------------------
+!!$    !
+!!$    ! Set some pointers.
+!!$    NULLIFY(C,S)
+!!$    !
+!!$    ! Check for prior allocation
+!!$    IF(ASSOCIATED(B))THEN
+!!$       CALL Delete_FASTMAT1(B)
+!!$       ! Begin with a new header Node     
+!!$       CALL New_FASTMAT(B,0,(/0,0/))
+!!$    ENDIF
+!!$    !
+!!$    DO I = 1,RowNbr
+!!$       IRow=RowPt%I(I)
+!!$       M = BSiz%I(IRow)
+!!$       IF(A%RowPt%I(I+1)-A%RowPt%I(I)>1) THEN
+!!$          ! Set current row link
+!!$          C => FindFastMatRow_1(B,IRow)
+!!$          DO JP = A%RowPt%I(I),A%RowPt%I(I+1)-1
+!!$             J = A%ColPt%I(JP)
+!!$             P = A%BlkPt%I(JP)
+!!$             N = BSiz%I(J)
+!!$             ! Add bloks to this sparse row search tree
+!!$             CALL AddFASTMATBlok(C,IRow,J,RESHAPE(A%MTrix%D(P:P+M*N-1),(/M,N/)))
+!!$          ENDDO
+!!$       ENDIF
+!!$    ENDDO
+!!$    !
+!!$    CALL FlattenAllRows(B)
+!!$    !
+!!$  END SUBROUTINE Set_DFASTMAT_EQ_DBCSR2
   !
   SUBROUTINE PChkSum_FASTMAT2(A,Name,Unit_O,Proc_O,ChkInPar_O)
 !H---------------------------------------------------------------------------------

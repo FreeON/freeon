@@ -102,6 +102,8 @@ CONTAINS
     REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     !-------------------------------------------------------------------
     integer :: i,isize
+    real(double) :: t1,t2,tt
+    tt=0.0d0
     !
     ! Initialize.
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
@@ -238,7 +240,10 @@ CONTAINS
              ACAtmInfo%Atm12Z=ACAtmInfo%Atm1Z-ACAtmInfo%Atm2Z
              !
              ! Get atom pair for BD.
+call cpu_time(t1)
              CALL GetAtomPair(ACAtmInfo,AtAList,ACAtmPair,BSc,BSp,CS_OUT)
+call cpu_time(t2)
+tt=tt+t2-t1
              !
              AtBList=>AtBListTmp
              !
@@ -268,7 +273,10 @@ CONTAINS
                    BDAtmInfo%Atm12Z=BDAtmInfo%Atm1Z-BDAtmInfo%Atm2Z
                    !
                    ! Get atom pair for BD.
+call cpu_time(t1)
                    CALL GetAtomPair(BDAtmInfo,AtBList,BDAtmPair,BSc,BSp,CS_OUT)
+call cpu_time(t2)
+tt=tt+t2-t1
                    !
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
@@ -355,6 +363,7 @@ CONTAINS
     DEALLOCATE(ACAtmPair,BDAtmPair,STAT=iErr)
     IF(iErr.NE.0) CALL Halt('In ComputK: Deallocation problem.')
     !
+    write(*,*) 'time',tt
     !
 !!$#ifdef ONX2_PARALLEL
 !!$    NIntsTot=Reduce(NInts)
