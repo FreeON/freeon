@@ -59,6 +59,7 @@ clean:
 	rm -f $(MONDO_HOME)/Exec/FBuild
 	rm -f $(MONDO_HOME)/Exec/RHeqs
 	rm -f $(MONDO_HOME)/Exec/SCFstats
+	rm -f $(MONDO_HOME)/Exec/DIIS
 	rm -f $(MONDO_HOME)/Exec/ToDev
 	ln -s /dev/null core
 	ls -l
