@@ -307,16 +307,19 @@ MODULE DerivedTypes
   TYPE IBuf
      INTEGER          :: Alloc   !-- Allocation key
      INTEGER          :: NPrim
-     INTEGER          :: MAXI
+     INTEGER          :: MAXI    !-- Size of W1 and W2
      INTEGER          :: Mesh    !-- Number of mesh point is the Gamma and Exp tables
      INTEGER          :: Lval    !-- Angular symmetry of Gamma table in memory
+     REAL(DOUBLE)     :: Switch  !-- Multipole switch for the Gamma tables
+     REAL(DOUBLE)     :: Grid    !-- Grid spacing in the Gamma and Exp tables
+     REAL(DOUBLE)     :: FAsymp  !-- Multipole asymptotics for current gamma
      TYPE(DBL_VECT)   :: W1
      TYPE(DBL_VECT)   :: W2
      TYPE(DBL_RNK2)   :: CD
      TYPE(DBL_RNK2)   :: WR
      TYPE(DBL_RNK2)   :: WZ
-     TYPE(DBL_RNK2)   :: GT      !-- Gamma function table
-     TYPE(DBL_RNK2)   :: ET      !-- Exp function table
+     TYPE(DBL_RNK2)   :: GT      !-- The current Gamma function table
+     TYPE(DBL_RNK2)   :: ET      !-- The Exp function table
   END TYPE IBuf
 !-------------------------------------------------------------------------------------
 !  ONX integral drivers

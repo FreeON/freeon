@@ -379,8 +379,8 @@ MODULE MemMan
          CALL New(A%CD,(/A%NPrim*A%NPrim,3/))
          CALL New(A%WR,(/12,A%NPrim*A%NPrim*A%NPrim*A%NPrim/))
          CALL New(A%WZ,(/5,A%NPrim*A%NPrim*A%NPrim*A%NPrim/))
-         CALL New(A%GT,(/0:3,0:A%Mesh/))
-         CALL New(A%ET,(/0:3,0:A%Mesh/))
+         CALL New(A%GT,(/3,A%Mesh/),(/0,0/))
+         CALL New(A%ET,(/3,A%Mesh/),(/0,0/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_IBuf
 !----------------------------------------------------------------------------
