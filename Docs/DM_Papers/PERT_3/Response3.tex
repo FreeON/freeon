@@ -76,7 +76,7 @@ A first principles linear scaling electronic structure scheme for high order
 response properties is proposed. The scheme solves the coupled perturbed self 
 consistent field equation by the perturbed projection method (Niklasson and Challacombe, 
 Phys.\ Rev.\ Lett. {\bf 92}, xxxx (2004); Weber, Niklasson and  Challacombe, 
-Phys.\ Rev.\ Lett. {\bf 92}, xxxx (2004)).  It is applied to the computation 
+Phys.\ Rev.\ Lett. {\bf 92}, xxxx (2004)). It is applied to the computation 
 of the first and second electric hyperpolarizabilities of three
 dimensional water clusters. Linear scaling and locality of the response
 densities under a global electric field perturbation are demonstrated. 
@@ -269,18 +269,20 @@ at $\mathcal{E} = 0$,
  \frac{\partial^N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
  \F(\E))\bigg|_{\E=0} \label{DDeriv}.
 \end{equation}
- The Fockian, 
+ The Fockian {\bf May need to choose between ortho and non-ortho rep}, 
 \begin{equation}
 \F(\E) = h^0+J(D)+K(D),
 \end{equation}
-may also be expanded by order of the density matrix response to give
-\begin{equation}
+may also be expanded by order in the perturbation to yield
+\begin{equation}\label{FockianTaylor}
   \begin{split}
     \F(\E)=\F^{0} & +\sum_a \F^{a}\E^{a}\\
     &+\frac{1}{2!}\sum_{ab} \F^{ab}\E^{a}\E^{b}\\
-    &+\frac{1}{3!}\sum_{abc} \F^{abc}\E^{a}\E^{b}\E^{c}+\dots ~.
+    &+\frac{1}{3!}\sum_{abc} \F^{abc}\E^{a}\E^{b}\E^{c}+\dots ~,
   \end{split}
 \end{equation}
+where $\F^{a}$ stands for $\partial\F(\E)/\partial\E^{a}$ 
+and so on for the higher terms.
 A similar expantion also holds for the density matrix $\D(\E)$.
 
 Within HF theory, the Fockian $F^0$ in the non-orthogonal 
@@ -459,107 +461,91 @@ to commuting operator equations of Sylvester type
 
 {\bf WE SHOULD SAY STG ABOUT THE SYM OF THE DERIVATVES}
 {\bf . That should be clear, but maybe as a brief note?}
-
-\subsection{algorithm}
-
-{\bf OUTLINE: To make things clear assume a Fockian F = F0 + ka*Fa + kb*Fb + ... .
-The DM derivatives as d/da... Theta(mu - (F0 + ka*Fa + ...)) can now be
-calculated by perturbed projection with the following algorithm (to second order or higher):
-Itemize: 1) Starting guess, 2) Perturbed projections, 3) Practical convergence critera}
-
-{\bf At convergence the commutator relations CITE EQ ABOVE are fullfilled: ..., where 
 \begin{equation}
   D^{ab\ldots}=D^{ba\ldots}=\ldots
-\end{equation}}
-
-{\bf The algorithm in the figure can be removed and be replaced by the itemized
-algortihm above given in full detail.}
-
-
-
-{\bf Already stated above!}
-
-\begin{subequations}
-  \begin{eqnarray}
-    && \D^{abc}=\{\D^{abc},\D_0\}+
-        \frac{1}{3}(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}+\{\D^{bc},\D^{a}\})\\
-    && \D^{ab }=\{\D^{ab},\D_0\}+\frac{1}{2}\{\D^{a},\D^{b}\}\\
-    && \D^{a  }=\{\D^{a},\D_0\}
-  \end{eqnarray}
-\end{subequations}
-
-
-\begin{equation}\label{PP1}
-  \left.
-  \begin{array}{ll}
-    \X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
-    \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
-    \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
-    \X^0_{i+1}&=(\X^0_{i})^2
-  \end{array} 
-  \right\}\quad \Tr[\X^0_{i}]\ge N_e 
-\end{equation}
-or 
-\begin{equation}\label{PP2}
-  \left.
-  \begin{array}{ll}
-    \X^a_{i+1}&=2 \X^a_{i}-{\X^a_{i},\X^0_{i}} \\
-    \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
-  \end{array} 
-  \right\}\quad \Tr[X^0_{i}]< N_e.
 \end{equation}
 
+\subsection{Algorithm}
+To make things clear assume the Fockian \eqref{FockianTaylor} up to second order
+$$
+\F(\E)=\F^0+\sum_a\F^a\E^a+\sum_{ab}\F^{ab}\E^a\E^b.
+$$
+The density matrix derivatives are given by Eq. \eqref{DDeriv} and can be
+calculated by perturbed projection with the following algorithm (up to second order)
+\begin{enumerate}
+\item 
+  The starting matrix guess initiating the sequence are obtained from $\F^0$,
+  and $\F^{a\ldots}$ by appropriately
+  compressing their spectrum into the domain of convergence
+  \cite{ANiklasson02A} using
+  \begin{align}
+    \X^0_{0}&=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}} \\
+    \intertext{and}
+    \X^{a\ldots}_{0}&=\frac{\F^{a\ldots}_{n}}{\F_{min}-\F_{max}},
+  \end{align}
+  where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
+  bounds of the eigenvalues of $\F^0$.
+\item Perturbed projections are applied.\\
+  If $\Tr[\X^0_{i}]\ge N_e$ then
+  \begin{align}\label{PP1}
+    \begin{split}
+      \X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
+      \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
+      \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
+      \X^0_{i+1}&=(\X^0_{i})^2
+    \end{split}
+    \intertext{else $\Tr[X^0_{i}]< N_e$}
+    \begin{split}
+      \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\})\\
+      \X^b_{i+1}&=2 \X^b_{i}-\{\X^b_{i},\X^0_{i}\} \\
+      \X^a_{i+1}&=2 \X^a_{i}-\{\X^a_{i},\X^0_{i}\} \\
+      \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
+    \end{split}
+  \end{align}
 
-The matrices initiating the sequence are obtained from $\F^0$,
-and $\F^{a\ldots}$ by appropriately
-compressing their spectrum into the domain of convergence
-\cite{ANiklasson02A} using
-\begin{equation}
-  \X^0_{0}=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}}~{\rm and}~
-  \X^{a\ldots}_{0}=\frac{\F^{a\ldots}_{n}}{\F_{min}-\F_{max}},
-\end{equation}
-where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
-bounds of the eigenvalues of $\F^0$.
-Recursion of the perturbed projection sequence is
-stopped when the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$
-becomes smaller than a given threshold.
+\item Recursion of the perturbed projection sequence is
+  stopped when the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$
+  becomes smaller than a given threshold.
+
+\end{enumerate}
 
 
-\subsubsection{Algorithm}
-.ANDERS SHOULD ADD STG..\\
-\begin{figure}[htbp]
-  \centering
-  \caption{\protect
-    ..............
-  }\label{fig:algo}
-\begin{verbatim}
- h = sort(eig(F))
- X = (h(N)*I-F)/(h(N)-h(1))
- D1 = -dF/(h(N)-h(1))
- D2 = 0
- D3 = 0
- Error = 1
- while Error > eps
-   if trace(X) > Ne
-     D3 = X*D3+D3*X+D1*D2+D2*D1
-     D2 = X*D2+D2*X+D1*D1
-     D1 = X*D1+D1*X
-     X = X*X
-   else
-     D3 = 2*D3-(X*D3+D3*X+D1*D2+D2*D1)
-     D2 = 2*D2-(X*D2+D2*X+D1*D1)
-     D1 = 2*D1-(X*D1+D1*X)
-     X = 2*X-X*X
-   end
-   Error = abs(trace(X)-Ne)+abs(trace(D3))
- end
- E0 = trace( X*F)
- E1 = trace( X*dF)/1
- E2 = trace(D1*dF)/2
- E3 = trace(D2*dF)/3
- E4 = trace(D3*dF)/4
-\end{verbatim}
-\end{figure}
+
+%\subsubsection{Algorithm}
+%.ANDERS SHOULD ADD STG..\\
+%\begin{figure}[htbp]
+%  \centering
+%  \caption{\protect
+%    ..............
+%  }\label{fig:algo}
+%\begin{verbatim}
+% h = sort(eig(F))
+% X = (h(N)*I-F)/(h(N)-h(1))
+% D1 = -dF/(h(N)-h(1))
+% D2 = 0
+% D3 = 0
+% Error = 1
+% while Error > eps
+%   if trace(X) > Ne
+%     D3 = X*D3+D3*X+D1*D2+D2*D1
+%     D2 = X*D2+D2*X+D1*D1
+%     D1 = X*D1+D1*X
+%     X = X*X
+%   else
+%     D3 = 2*D3-(X*D3+D3*X+D1*D2+D2*D1)
+%     D2 = 2*D2-(X*D2+D2*X+D1*D1)
+%     D1 = 2*D1-(X*D1+D1*X)
+%     X = 2*X-X*X
+%   end
+%   Error = abs(trace(X)-Ne)+abs(trace(D3))
+% end
+% E0 = trace( X*F)
+% E1 = trace( X*dF)/1
+% E2 = trace(D1*dF)/2
+% E3 = trace(D2*dF)/3
+% E4 = trace(D3*dF)/4
+%\end{verbatim}
+%\end{figure}
 
 
 \subsubsection{Higher order response via Wigner's $2n+1$ rule }
@@ -585,8 +571,8 @@ permutation operator and what it does exactly!}
 %\begin{equation}
 %\begin{split}
 %  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
-%                        &[\D^c,\D^0]\D^a\F^b+[\D^c,\D^0]\D^b\F^a+\\
-%                        &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
+%                         &[\D^c,\D^0]\D^a\F^b+[\D^c,\D^0]\D^b\F^a+\\
+%                         &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
 %\end{split}
 %\end{equation}
 %\begin{equation}
@@ -629,19 +615,12 @@ A similar expression can be derived for the fourth order
     &[\D^a,\D^0](\D^{bc} \F^d +\D^b \F^{cd})),
   \end{split}
 \end{equation}
-{\bf This is confusing!  Tr(AB) cost no multiplication, Tr(ABC) cost one!
-Another way to reduce multiplications, which I guess you are thinking
-about is by factorization in clever ways to minimize memory requirement
-and the number of multiplications. Simply, figure out the best way to do it
-and state the result, briefly mentioning how or in full detail. And, I guess
-that is what you do below.}
 This relation may seem to be very expansive to compute. But after further
 inspections, we see that the correction along the same direction $a$ e.g. $E^{aaaa}$,
-the relation reduces to only one term (9 matrix multipilcations 
-{\bf CAN BE REDUCED WITH THE TRACE}).
+the relation reduces to only one term (7 matrix multipilcations).
 In the worst case where all the directions are different e.g. $E^{aabc}$, the
 relation (\ref{eq:2n+1 fourth order}) simplifies to only 12 
-terms (108 matrix multiplications {\bf CAN BE REDUCED WITH THE TRACE}). 
+terms (84 matrix multiplications). 
 Similar reductions of the computational cost also apply to 
 Eq. (\ref{eq:2n+1 third order}).
 We can mention that those equations 
@@ -712,7 +691,7 @@ would be very very cumbersome with traditional methods}
 
 \begin{table}[t]
   \centering
-  \caption{\protect {\bf Not the correct numbers!}
+  \caption{\protect {\bf Numbers in paranthesis should read $10^{(...)}$}
     Polarizabilites along the $z$ axis of $\rm C_{60}$ up 
     to $10$-th order via UPSCF equations.
     The calculations have been done at the HF/6-31G level of 
@@ -832,8 +811,7 @@ would be very very cumbersome with traditional methods}
   \caption{\protect
     Longitudinal polarizabilities of water chains up to $10$-th order.
     The results have been obtained within the uncoupled perturbed formalism.
-    SHOULD REMOVE SOME DIGITS. TABLE OR GRAPH? {\bf Maybe a graph is better. No one actually
-    cares about the numbers in the uncoupled case?}
+    SHOULD REMOVE SOME DIGITS. TABLE OR GRAPH? {\bf Will be replace by a graph}
    }\label{tab:UCPHF_1D_h2o}
   \begin{tabular}{cccccc}
     \toprule
