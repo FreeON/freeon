@@ -11,6 +11,8 @@ MODULE PrettyPrint
    USE Parse
    USE SetXYZ
    USE InOut
+
+   USE ParsingConstants
 !   USE Order
 #ifdef PARALLEL
    USE MondoMPI
@@ -39,8 +41,7 @@ MODULE PrettyPrint
       MODULE PROCEDURE Print_CheckSum_DBCSR 
 #endif
    END INTERFACE
-
-
+!
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: String
    CHARACTER(LEN=*),PARAMETER     :: CheckEq=' CheckSum  = '
    CONTAINS 
@@ -1219,7 +1220,7 @@ MODULE PrettyPrint
     INTEGER,OPTIONAL               :: Unit_O
     INTEGER                        :: AtA,A1,A2,PU,I,J
 !----------------------------------------------------------------------------------------
-    IF(PrintFlags%Key /= DEBUG_MAXIMUM) RETURN
+    IF(PrintFlags%Key /= DEBUG_MAXIMUM .OR. PrintFlags%MM /= DEBUG_FRC) RETURN
 #ifdef PARALLEL
     IF(MyID /= ROOT) RETURN
 #endif
@@ -1253,7 +1254,7 @@ MODULE PrettyPrint
     INTEGER,OPTIONAL               :: Unit_O
     INTEGER                        :: AtA,A1,A2,PU,I,J
 !----------------------------------------------------------------------------------------
-    IF(PrintFlags%Key /= DEBUG_MAXIMUM) RETURN
+    IF(PrintFlags%Key /= DEBUG_MAXIMUM .OR. PrintFlags%MM /= DEBUG_FRC) RETURN
     IF(GM%PBC%Dimen == 0) RETURN
 #ifdef PARALLEL
     IF(MyID /= ROOT) RETURN
