@@ -371,8 +371,6 @@ MODULE PrettyPrint
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
-
-RETURN
 !
         PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
 !
@@ -462,6 +460,7 @@ RETURN
   END SUBROUTINE Print_CellSet
 #endif   
 !----------------------------------------------------------------PRINT COORDINATES
+!
 !----------------------------------------------------------------PRINT COORDINATES
      SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O)
         TYPE(CRDS) :: GM         
