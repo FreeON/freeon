@@ -76,59 +76,84 @@ CSM:
 	rm -f $(SMTestObjs)
 	rm -f ./SMTest
 #
-# nag_depend95 *.f90 > make.tmp
+#       DEPENDENCIES
 #
-AtomPairs.o : thresholding.mod cellsets.mod boundingbox.mod globalobjects.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-atompairs.mod : AtomPairs.o 
-BasisSetParameters.o : globalcharacters.mod 
-basissetparameters.mod : BasisSetParameters.o 
-BoundingBox.o : derivedtypes.mod 
-boundingbox.mod : BoundingBox.o 
-BraKetBloks.o : mcmurchie.mod prettyprint.mod globalscalars.mod derivedtypes.mod 
-braketbloks.mod : BraKetBloks.o 
-Clock.o : mondompi.mod derivedtypes.mod 
-clock.mod : Clock.o 
-DerivedTypes.o : globalcharacters.mod globalscalars.mod 
-derivedtypes.mod : DerivedTypes.o 
-Functionals.o : parse.mod processcontrol.mod derivedtypes.mod 
-functionals.mod : Functionals.o 
-GlobalCharacters.o : globalscalars.mod 
-globalcharacters.mod : GlobalCharacters.o 
-GlobalObjects.o : derivedtypes.mod 
-globalobjects.mod : GlobalObjects.o 
-globalscalars.mod : GlobalScalars.o 
-Indexing.o : derivedtypes.mod 
-indexing.mod : Indexing.o 
-InOut.o :   setxyz.mod parse.mod indexing.mod memman.mod processcontrol.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-inout.mod : InOut.o 
-LinAlg.o : thresholding.mod mondompi.mod clock.mod order.mod inout.mod setxyz.mod memman.mod prettyprint.mod processcontrol.mod globalobjects.mod globalscalars.mod derivedtypes.mod 
-linalg.mod common_debug.mod : LinAlg.o 
-Macros.o : atompairs.mod functionals.mod inout.mod clock.mod parse.mod prettyprint.mod parsingconstants.mod globalcharacters.mod globalobjects.mod globalscalars.mod derivedtypes.mod 
-macros.mod : Macros.o 
-MatFunk.o : prettyprint.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-matfunk.mod : MatFunk.o 
-McMurch.o : memman.mod globalscalars.mod derivedtypes.mod 
-mcmurchie.mod : McMurch.o 
-MemMan.o : processcontrol.mod globalobjects.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-memman.mod : MemMan.o 
-MondoMPI.o : memman.mod mpiinclude.mod processcontrol.mod globalobjects.mod globalscalars.mod derivedtypes.mod 
-mondompi.mod : MondoMPI.o 
-Order.o : memman.mod processcontrol.mod globalobjects.mod globalscalars.mod globalcharacters.mod derivedtypes.mod 
-order.mod : Order.o 
-Parse.o : memman.mod processcontrol.mod parsingconstants.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-parse.mod : Parse.o 
-ParsingConstants.o : globalscalars.mod 
-parsingconstants.mod : ParsingConstants.o 
-PBC.o : thresholding.mod prettyprint.mod globalobjects.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-cellsets.mod : PBC.o 
-PrettyPrint.o : order.mod inout.mod setxyz.mod parse.mod clock.mod basissetparameters.mod globalobjects.mod globalscalars.mod globalcharacters.mod derivedtypes.mod 
-prettyprint.mod : PrettyPrint.o 
-ProcessControl.o : mpiinclude.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-processcontrol.mod : ProcessControl.o 
-SetEq.o : mondompi.mod memman.mod globalobjects.mod globalscalars.mod derivedtypes.mod 
-setxyz.mod : SetEq.o 
-SMTest.o : order.mod memman.mod parse.mod prettyprint.mod inout.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-SpecFun.o : MMA/Functions/Exp.Inc MMA/Functions/Erf.Inc derivedtypes.mod 
-specfun.mod : SpecFun.o 
-Thresholding.o : globalobjects.mod globalcharacters.mod globalscalars.mod derivedtypes.mod 
-thresholding.mod : Thresholding.o 
+AtomPairs.o:		Thresholding.o PBC.o BoundingBox.o \
+			GlobalObjects.o GlobalCharacters.o \
+			GlobalScalars.o DerivedTypes.o 
+#
+BasisSetParameters.o: 	GlobalCharacters.o 
+#
+BoundingBox.o: 		DerivedTypes.o 
+#
+BraKetBloks.o: 		McMurch.o PrettyPrint.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+Clock.o: 		MondoMPI.o DerivedTypes.o 
+#
+DerivedTypes.o: 	GlobalCharacters.o GlobalScalars.o 
+#
+Functionals.o: 		Parse.o ProcessControl.o DerivedTypes.o 
+#
+GlobalCharacters.o: 	GlobalScalars.o 
+#
+GlobalObjects.o: 	DerivedTypes.o 
+#
+Indexing.o: 		DerivedTypes.o 
+#
+InOut.o:   		SetEq.o Parse.o Indexing.o MemMan.o \
+                        ProcessControl.o GlobalCharacters.o \
+                        GlobalScalars.o DerivedTypes.o 
+#
+LinAlg.o: 		Thresholding.o MondoMPI.o Clock.o Order.o \
+			InOut.o SetEq.o MemMan.o PrettyPrint.o \
+			ProcessControl.o GlobalObjects.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+Macros.o: 		AtomPairs.o Functionals.o InOut.o Clock.o \
+			Parse.o PrettyPrint.o ParsingConstants.o \
+			GlobalCharacters.o GlobalObjects.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+MatFunk.o: 		PrettyPrint.o GlobalCharacters.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+McMurch.o:	 	MemMan.o GlobalScalars.o DerivedTypes.o 
+#
+MemMan.o: 		ProcessControl.o GlobalObjects.o GlobalCharacters.o\
+			GlobalScalars.o DerivedTypes.o 
+#
+MondoMPI.o: 		MemMan.o MPIInclude.o ProcessControl.o \
+			GlobalObjects.o GlobalScalars.o DerivedTypes.o 
+#
+Order.o: 		Order77.o MemMan.o ProcessControl.o GlobalObjects.o \
+			GlobalScalars.o GlobalCharacters.o DerivedTypes.o 
+#
+Parse.o: 		MemMan.o ProcessControl.o ParsingConstants.o \
+			GlobalCharacters.o GlobalScalars.o DerivedTypes.o 
+#
+ParsingConstants.o: 	GlobalScalars.o 
+#
+PBC.o: 			Thresholding.o PrettyPrint.o GlobalObjects.o \
+			GlobalCharacters.o GlobalScalars.o DerivedTypes.o 
+#
+PrettyPrint.o: 		Order.o InOut.o SetEq.o Parse.o Clock.o \
+			BasisSetParameters.o GlobalObjects.o GlobalScalars.o\
+			GlobalCharacters.o DerivedTypes.o 
+#
+ProcessControl.o: 	MPIInclude.o GlobalCharacters.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+SetEq.o: 		MondoMPI.o MemMan.o GlobalObjects.o \
+			GlobalScalars.o DerivedTypes.o 
+#
+SMTest.o: 		Order.o MemMan.o Parse.o PrettyPrint.o \
+			InOut.o GlobalCharacters.o GlobalScalars.o \
+			DerivedTypes.o 
+#
+SpecFun.o: 		MMA/Functions/Exp.Inc MMA/Functions/Erf.Inc \
+			DerivedTypes.o 
+#
+Thresholding.o: 	GlobalObjects.o GlobalCharacters.o GlobalScalars.o \
+			DerivedTypes.o 
+#------------------------------------------------------------------------------
