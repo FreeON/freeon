@@ -25,7 +25,6 @@ MODULE PoleTree
    REAL(DOUBLE),DIMENSION(:),Allocatable :: RList      
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Ext
-!
 !-----------!
    CONTAINS !
 !=================================================================================
@@ -85,6 +84,7 @@ MODULE PoleTree
          TYPE(PoleNode)                   :: P
          TYPE(PoleNode),POINTER           :: LeftQ,RightQ
          INTEGER                          :: K
+         REAL(DOUBLE)                     :: RightDist,LeftDist
          REAL(DOUBLE),PARAMETER           :: SPEllPlus2=SPEll+2
          REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/SPEllPlus2
 !--------------------------------------------------------------
@@ -100,7 +100,7 @@ MODULE PoleTree
             P%S=Zero
             LeftQ=>P%Descend
             RightQ=>P%Descend%Travrse
-!           Compute new nodes BBox (could use smart center construction to minimize MAC)
+!           Compute new nodes BBox
             DO K=1,3
                P%Box%BndBox(K,1)=MIN(LeftQ%Box%BndBox(K,1),RightQ%Box%BndBox(K,1))
                P%Box%BndBox(K,2)=MAX(LeftQ%Box%BndBox(K,2),RightQ%Box%BndBox(K,2))
@@ -110,22 +110,25 @@ MODULE PoleTree
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
 !-----------------------------------------------------------------------------
 !           Translate Left and Right with SPEll+1, to accumulate 
-!           Unsold estimates with
+!           Unsold estimates
 !
 !           Translate LeftQ-> P
             CALL XLate(LeftQ,P)
 !           Translate RightQ-> P
             CALL XLate(RightQ,P)
 !           Reset Ell of Right and Left nodes if not leafs
-            IF(.NOT.LeftQ%Leaf)LeftQ%Ell=SPell
-            IF(.NOT.RightQ%Leaf)RightQ%Ell=SPell
+            IF(.NOT.LeftQ%Leaf)   LeftQ%Ell=SPell
+            IF(.NOT.RightQ%Leaf) RightQ%Ell=SPell
 !           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
             P%Strength = UnsoldO(SPEll+1,P%C,P%S)**UnsoldExp
-!           Compute DMax  (check and recheck this...)          
-            P%DMax2 = MAX(LeftQ%DMax2,RightQ%DMax2)            &
-                    + (LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
-                    + (LeftQ%Box%Center(2)-P%Box%Center(2))**2 &
-                    + (LeftQ%Box%Center(3)-P%Box%Center(3))**2    
+!           Compute DMax  (check and recheck this...) 
+            LeftDist  = ( LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
+                      + ( LeftQ%Box%Center(2)-P%Box%Center(2))**2 &
+                      + ( LeftQ%Box%Center(3)-P%Box%Center(3))**2 
+            RightDist = (RightQ%Box%Center(1)-P%Box%Center(1))**2 & 
+                      + (RightQ%Box%Center(2)-P%Box%Center(2))**2 &
+                      + (RightQ%Box%Center(3)-P%Box%Center(3))**2  
+            P%DMax2 = MAX(LeftQ%DMax2+LeftDist,RightQ%DMax2+RightDist)
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
