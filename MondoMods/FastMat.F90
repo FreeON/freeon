@@ -110,7 +110,9 @@ MODULE FastMatrices
         GBNBlks = GBNBlks + CB%I(I)
         GBNNon0 = GBNNon0 + CN%I(I)
       ENDDO
-      WRITE(*,*) 'Set_BCSR_EQ_DFASTMAT: GBNBlks = ', GBNBlks,', GBNNon0 = ', GBNNon0
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Set_BCSR_EQ_DFASTMAT: GBNBlks = ', GBNBlks,', GBNNon0 = ', GBNNon0
+      CLOSE(Out,STATUS='KEEP')
       CALL New(C,(/NAtoms,GBNBlks,GBNNon0/))
       DispN%I(0) = 0
       DispB%I(0) = 0
@@ -473,7 +475,9 @@ MODULE FastMatrices
 
     StartTm = MPI_Wtime()
     IF(MyID == 0) THEN 
-      WRITE(*,*) 'MyID=0, FastMat_redistribute is entered...'
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'MyID=0, FastMat_redistribute is entered...'
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
 
     CALL FlattenAllRows(A)
@@ -525,7 +529,9 @@ MODULE FastMatrices
        CALL Delete(RemoteDims)
        CALL AlignNodes()
        IF(MyID == ROOT) THEN
-         WRITE(*,*) 'No sending and receiving needed in FastMat_redistribute!'
+         CALL OpenASCII(OutFile,Out)
+         WRITE(Out,*) 'No sending and receiving needed in FastMat_redistribute!'
+         CLOSE(Out,STATUS='KEEP')
        ENDIF
        RETURN
     ENDIF
@@ -711,7 +717,9 @@ MODULE FastMatrices
         DblSentMax = Max(IntArr(I),DblSentMax)
         TotDblSent = TotDblSent + IntArr(I)
       ENDDO
-      WRITE(*,*) 'Redistribute : DblSentMax = ',DblSentMax, ', TotDblSent = ',TotDblSent
+      CALL OpenASCII(OutFile,Out)
+      WRITE(Out,*) 'Redistribute : DblSentMax = ',DblSentMax, ', TotDblSent = ',TotDblSent
+      CLOSE(Out,STATUS='KEEP')
     ENDIF
 
     DEALLOCATE(SendBuffer,STAT=MemStatus)
@@ -743,7 +751,9 @@ MODULE FastMatrices
     EndTm = MPI_Wtime()
     TotTm = EndTm - StartTm
     IF(MyID == ROOT) THEN
-       WRITE(*,*) 'Total time to Redistribute_FastMat is ', TotTm
+       CALL OpenASCII(OutFile,Out)
+       WRITE(Out,*) 'Total time to Redistribute_FastMat is ', TotTm
+       CLOSE(Out,STATUS='KEEP')
     ENDIF
   END SUBROUTINE Redistribute_FastMat
 

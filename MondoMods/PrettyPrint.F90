@@ -1253,15 +1253,17 @@ MODULE PrettyPrint
        ENDIF
     ENDIF
 #ifdef PARALLEL
+
+#ifdef NewPrint
+#else
     IF(PRESENT(Proc_O))THEN
        IF(InParallel)THEN
           TimeTot=Reduce(T%Wall,MPI_SUM)
           TimeMax=Reduce(T%Wall,MPI_MAX)
           TimeMin=Reduce(T%Wall,MPI_MIN)
        ENDIF
-       IF(MyId==ROOT.AND.InParallel.AND. &
-            PrintFlags%Key>=DEBUG_MEDIUM)THEN
-          !             Compute relative imbalance 
+       IF(MyId==ROOT.AND.InParallel.AND.PrintFlags%Key>=DEBUG_MEDIUM)THEN
+          ! Compute relative imbalance 
           TimeAve=TimeTot/DBLE(NPrc)
           IF(TimeTot/=Zero)THEN
              Imb=ABS(TimeMax-TimeAve)/TimeAve
@@ -1279,6 +1281,8 @@ MODULE PrettyPrint
           CLOSE(Out)          
        ENDIF
     ENDIF
+#endif
+
 #endif
   END SUBROUTINE Elapsed_TIME
 !---------------------------------------------------------------------
@@ -1449,6 +1453,10 @@ MODULE PrettyPrint
     INTEGER,OPTIONAL            :: Unit_O
     INTEGER                     :: I,L,PU
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
+#ifdef PARALLEL
+    INTEGER :: MaxAllocs,MaxDeAllocs,IErr,MaxMemTab,MaxMaxMem
+#endif
+
     IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
     L=LEN(TRIM(Proc))
 #ifdef PARALLEL
@@ -1458,6 +1466,22 @@ MODULE PrettyPrint
           CALL PrintProtectL(PU)
           CLOSE(PU)
        ENDIF
+
+#ifdef NewPrint
+       CALL MPI_Reduce(A%Allocs,MaxAllocs,1,MPI_INTEGER,MPI_MAX,ROOT,MPI_COMM_WORLD,IErr)
+       CALL MPI_Reduce(A%DeAllocs,MaxDeAllocs,1,MPI_INTEGER,MPI_MAX,ROOT,MPI_COMM_WORLD,IErr)
+       CALL MPI_Reduce(A%MemTab,MaxMemTab,1,MPI_INTEGER,MPI_MAX,ROOT,MPI_COMM_WORLD,IErr)
+       CALL MPI_Reduce(A%MaxMem,MaxMaxMem,1,MPI_INTEGER,MPI_MAX,ROOT,MPI_COMM_WORLD,IErr)
+       IF(MyID == ROOT) THEN
+         Mssg=TRIM(Proc)//' :: MaxAllocs='//TRIM(IntToChar(MaxAllocs)) &
+              //', MaxDeAllocs='//TRIM(IntToChar(MaxDeAllocs)) &
+             //', MaxMemTab='//TRIM(IntToChar(MaxMemTab)) &
+            //', MaxMaxMem='//TRIM(IntToChar(MaxMaxMem))//Rtrn
+         PU=OpenPU(Unit_O=Unit_O)
+         WRITE(PU,*) TRIM(Mssg)
+         CLOSE(PU)
+       ENDIF
+#else
        DO I=0,NPrc-1
           IF(InParallel)CALL AlignNodes()
           IF(MyId==I)THEN
@@ -1474,6 +1498,7 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        CALL AlignNodes()
+#endif
        IF(MyId==ROOT)THEN
           PU=OpenPU()
           CALL PrintProtectR(PU)
