@@ -13,6 +13,9 @@ MODULE Macros
 #ifdef PARALLEL
    USE MondoMPI
 #endif
+#ifdef NAG
+  USE F90_UNIX
+#endif
    IMPLICIT NONE
    INTERFACE Init
       MODULE PROCEDURE Init_TIME, Init_DEBG, Init_MEMS

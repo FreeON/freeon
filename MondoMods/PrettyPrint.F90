@@ -383,20 +383,23 @@ MODULE PrettyPrint
 !              WRITE(PU,*)TRIM(Mssg)
 !           ENDIF
 
-           IF(PrintGeom_O=='XYZ')THEN
-!             Print XYZ format
-              CALL PrintProtectL(PU)
-              WRITE(PU,*)TRIM(IntToChar(GM%NAtms))
-              Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))//' 0.0 '
-              WRITE(PU,*)TRIM(Mssg)
-              AA=One/AngstromsToAU
-              DO I=1,GM%NAtms
-                  Mssg=Ats(GM%AtNum%I(I))                         &
-                    //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
-                    //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
-                    //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
-                  WRITE(PU,*)TRIM(Mssg)
-              ENDDO
+           IF(PRESENT(PrintGeom_O))THEN
+              IF(PrintGeom_O=='XYZ')THEN
+!                Print XYZ format
+                 CALL PrintProtectL(PU)
+                 Mssg=IntToChar(GM%NAtms)
+                 WRITE(PU,*)TRIM(Mssg)
+                 Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))//' 0.0 '
+                 WRITE(PU,*)TRIM(Mssg)
+                 AA=One/AngstromsToAU
+                 DO I=1,GM%NAtms
+                     Mssg=Ats(GM%AtNum%I(I))                         &
+                       //'   '//FltToChar(GM%Carts%D(1,I)*AA)    &
+                       //'   '//FltToChar(GM%Carts%D(2,I)*AA)    &
+                       //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
+                     WRITE(PU,*)TRIM(Mssg)
+                 ENDDO
+              ENDIF
            ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
 !             Print MMA format
               Mssg=' NAtoms = '//IntToChar(GM%NAtms)//';'                  
@@ -1175,9 +1178,10 @@ MODULE PrettyPrint
 !---------------------------------------------------------------------
 !    PRINT MEMORY STATISTICS
 !---------------------------------------------------------------------     
-  SUBROUTINE Print_MEMS(A,Proc)
+  SUBROUTINE Print_MEMS(A,Proc,Unit_O)
     TYPE(MEMS),INTENT(IN)       :: A
     CHARACTER(LEN=*),INTENT(IN) :: Proc
+    INTEGER,OPTIONAL            :: Unit_O
     INTEGER                     :: I,L,PU
     CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
     IF(PrintFlags%Key/=DEBUG_MAXIMUM)RETURN
@@ -1185,7 +1189,7 @@ MODULE PrettyPrint
 #ifdef PARALLEL
     IF(InParallel)THEN
        IF(MyId==ROOT)THEN
-          PU=OpenPU()
+          PU=OpenPU(Unit_O=Unit_O)
           CALL PrintProtectL(PU)
           CLOSE(PU)
        ENDIF
@@ -1199,7 +1203,7 @@ MODULE PrettyPrint
                   //' bytes are presently allocated.'//Rtrn                    &
                   //Blanks(1:L+3)//' A max of '//TRIM(IntToChar(A%MaxMem)) &
                   //' bytes were allocated.'
-             PU=OpenPU() 
+             PU=OpenPU(Unit_O=Unit_O) 
              WRITE(PU,*)Mssg 
              CLOSE(PU) 
           ENDIF
