@@ -1,15 +1,15 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
- \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
- \newcommand{\commentoutB}[1]{}
- \newcommand{\commentoutA}[1]{#1}
+%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+%\newcommand{\commentoutB}[1]{}
+%\newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
-%\newcommand{\commentoutB}[1]{#1}
-%\newcommand{\commentoutA}[1]{}
-%\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+ \newcommand{\commentoutB}[1]{#1}
+ \newcommand{\commentoutA}[1]{}
+ \documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -39,21 +39,20 @@
 \begin{abstract}
 This article presents a new and efficient alternative to well established
 algorithms for molecular geometry optimization.   The new approach 
-exploits the approximate decoupling of molecular motions in a curvilinear 
+exploits the approximate decoupling of molecular energetics in a curvilinear 
 internal coordinate system,  allowing separation  of the 3$N$-dimensional
 optimization problem into an ${\cal{O}}(N)$ set of quasi-independent  
 one-dimensional problems.  Each  uncoupled optimization is developed by 
 a weighted least squares fit of energy gradients in the internal coordinate 
 system followed by extrapolation.  In construction of the weights, only an 
 implicit dependence on topologically connected internal coordinates is 
-present.   This new approach is competitive with the best geometry optimization 
-algorithms in the literature, achieves superlinear convergence and works well 
-for large biological problems with complicated hydrogen bond networks and ligand 
-binding motifs.\\[.1cm]
+present.   This new approach is competitive with the best internal coordinate
+geometry optimization algorithms in the literature and works well for large 
+biological problems with complicated hydrogen bond networks and ligand binding motifs.\\[.1cm]
 \noindent{\bf Keywords}: geometry optimization, linear scaling, curvilinear coordinates, robust estimation
 \end{abstract}
 
-\pacs{NEED SOME PACS}
+\pacs{31.15.-p,31.15.Ne,02.60.Pn, 45.10.Db, 02.40.Hw} 
 
 \maketitle
 
@@ -66,22 +65,21 @@ Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  
 realize their promise, delivering energies and forces on nuclei for large systems at 
 both a numerical accuracy and theoretical level suitable to begin addressing many complex 
 problems.  For example, it is now possible to routinely apply hybrid Hartree-Fock/Density 
-Functional theory to fragment models in molecular biophysics involving 
-%complicated networks of hydrogen bonds and metal-ligand binding motifs and 
+Functional theory to fragments of biological molecules involving 
 several hundred atoms using basis sets of triple-zeta plus polarization quality.  
-However, despite favorable scaling properties, ${\cal O}(N)$ 
-methods typically carry a larger cost prefactor than their conventional counterparts.  Thus, 
+Despite favorable scaling properties, however, ${\cal O}(N)$ methods typically carry a larger 
+cost prefactor than their conventional counterparts.  Thus, 
 in addition to parallelism, developing efficient algorithms to drive the core engines of 
 linear scaling electronic structure theory is paramount.  Of these, perhaps the most useful 
 driver of electronic structure theory is the molecular geometry optimizer, which follows 
 the energy gradient downhill to a local minimum.   
 
-This paper presents a new concept for the optimization of molecular geometries based on
+We present a new concept for the optimization of molecular geometries based on
 the approximate separability of molecular motions in curvilinear internal coordinate 
 systems, and the recent availability of fast transformations to and from these coordinate systems 
 for large molecules \cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2}.  
 Internal coordinates represent the internal motions of a molecule, involving  bond stretches, angle 
-bendings and dihedral torsions.  These different motions coorespond to different  energy and length 
+bendings and dihedral torsions.  These motions correspond to different  energy and length 
 scales, leading to strong diagonal dominance in the matrix of second order energy derivatives 
 (the Hessian) as well as in higher order anharmonic energy tensors.  Off diagonal elements of the 
 internal coordinate Hessian are typically an order of magnitude smaller than the diagonal ones
@@ -94,7 +92,7 @@ This is the basis for an approximate decoupling of molecular motions in terms of
 \resizebox*{3.5in}{!}{\includegraphics{picture1_2.eps}}
 \caption{
 Progression of gradients on a valence angle bending coordinate of
-ammonia. Energies and forces were obtained by the PBE 
+ammonia. Energies and forces have been obtained by the PBE 
 density functional model in STO-3G basis set.
 The optimization was started from near planar geometry, i.e.
 from the vicinity of a transition state, and converged to a local 
@@ -106,18 +104,18 @@ a linear fit, the star the predicted location of the minimum.}
 
 }
 
-An observation central to the present contribution is that internal coordinate gradients show recognizable trends 
-during optimization, and these trends can be captured by curve fitting and used to predict minima by 
+An observation central to the present contribution is that internal coordinate gradients show trends 
+during optimization that can be captured by curve fitting and used to predict minima by 
 one-dimensional extrapolation.  This is illustrated in Fig.~\ref{NH3outp6}, showing a typical progression of 
 internal coordinate gradients.  
 
 In the following, we review conventional methods of geometry optimization (Section \ref{conventional}), 
 and then  develop our new idea conceptually (Section \ref{concept}).  A practical implementation of this 
-concept is then then outlined (Section \ref{implementation}) in the context of linear scaling quantum 
+concept is then outlined (Section \ref{implementation}) in the context of linear scaling quantum 
 chemistry.  Next, this implementation is tested against Baker's small molecule test suite and applied to 
 a reaction model of Protein Kinase A (Section \ref{Sresults}).  
 
-\section{Conventional Methods}\label{conventional}
+\subsection{Conventional Methods}\label{conventional}
 
 Over the last three decades, internal coordinate geometry optimizers have become the standard 
 tools for finding local minima when energies and forces are calculated by electronic structure 
@@ -130,7 +128,7 @@ The reduced vibrational coupling achieved with internal coordinates provides an 
 in molecular geometry optimization \cite{pulay_review} and molecular dynamics \cite{pulay_dynamics}.
 Specifically, a full Newton step in Cartesian coordinates will typically generate a larger, 
 anharmonic coupling relative to a full Newton step carried out in internal coordinates.
-An excellent discussion of this issue can be found in the Introduction of Ref.~\cite{Pulay_natural_internals}.
+An excellent discussion of this issue can be found in the Introduction of Ref.~\onlinecite{Pulay_natural_internals}.
 
 Today, the most aggressive internal coordinate algorithms have been highly optimized for 
 small molecule quantum chemistry.  These methods typically generate a Cartesian Hessian,
@@ -155,7 +153,7 @@ is required to avoid divergence. Another important technique to control and acce
 geometry optimization is the geometric DIIS \cite{Pulay_GDIIS} (GDIIS). While geometric DIIS is a simple 
 technique, its successful application may require many intricate modifications \cite{Farkas_GDIIS}.  A 
 recent review and comparison of these algorithms and their technical details can be found in 
-Ref.~\cite{bakken}.  
+Ref.~\onlinecite{bakken}.  
 
 \section{A New Concept} \label{concept}
 
@@ -254,7 +252,7 @@ Cartesian coordinates and the corresponding Cartesian gradients of the $n_{\rm f
 most recent geometries are read from disk. Based on the most recent definition of the 
 bonding scheme they are transformed into the internal coordinate representation,
 determined by the merged bonding scheme.  The coordinate transformation is carried out as 
-described in Ref.~\cite{nemeth_coordtrf1}, while the necessary intermediate sparse matrices of 
+described in Ref.~\onlinecite{nemeth_coordtrf1}, while the necessary intermediate sparse matrices of 
 the coordinate transformation are re-generated. This is a very inexpensive step, due to the 
 extreme sparsity of the vibrational B matrix \cite{wilson}. 
 Thus the primary objects of the proposed geometry optimization,  the internal coordinates and their gradients,
@@ -289,7 +287,7 @@ Local sums of the gradient squares,
 w_{k}^{(i)} = \left[ \sum_{l} g_{l}^{(i)} \frac{1}{|H_{ll}^{}|} g_{l}^{(i)} \right]^{-1} ,
 \end{equation}
 incorporate this effect, where  $l$ indexes internal coordinates that have atoms in common with 
-the $k$-th internal coordinate, and $H_{ll}^{}$ is an approximate,static approximation to the 
+the $k$-th internal coordinate, and $H_{ll}^{}$ is an approximate, static approximation to the 
 diagonal Hessian.  The terms $H_{ll}$ yield dimensionally consistent sums, since each of the gradient 
 components  $g_{l}$ has a different measure and energy scale for stretches, bendings and torsions.  
 
@@ -325,7 +323,7 @@ employs a simple force relaxation step,
 \varphi_{k}^{(i+1)} = \varphi_{k}^{(i)} -g_{k}^{(i)}/|H_{kk}^{(i)}| ,
 \end{equation}
 where $i$ denotes the serial number of the optimization step,  $\varphi_{k}$ is the $k$-th internal coordinate,
- $H^i_{kk}$ is a diagonal element of the Hessian determined from local tangent of the curve fit, and
+ $H^{(i)}_{kk}$ is a diagonal element of the Hessian determined from local tangent of the curve fit, and
 $g_i$ is the local gradient at $i$ (not a fitted gradient).
 This avoids transition states that are well localized to just a few internal coordinates.
 The ability of the present implementation to treat delocalized transition states
@@ -397,7 +395,7 @@ typically requiring just one halving.
 
 Once predictions of internal coordinate displacements are made, they are passed to the 
 iterative back-transformation to generate a new set of Cartesian coordinates, as in 
-Ref.~\cite{pulay_review}.   However, there is no guarantee that there exists a set of 
+Ref.~\onlinecite{pulay_review}.   However, there is no guarantee that there exists a set of 
 Cartesian coordinates that can exactly realize the new, predicted internal coordinates.  
 For example, a prediction of angles in a triangular molecule can sum 
 to a value greater than or less than 180 degrees. Such conflicts are a consequence of 
@@ -442,7 +440,7 @@ transformations and the fitting process. The recognition of internal
 coordinates scales linearly, as described in Section \ref{recognition}.  
 The effort spent on fitting is $ {\cal O}(N_{\rm int})$ with $N_{\rm int} \propto N_{\rm atoms}$, as the number of 
 points employed by each fit is a constant.  Likewise, the coordinate transformations scale linearly with system 
-size as pointed out in Ref.~\cite{nemeth_coordtrf1}.
+size as pointed out in Ref.~\onlinecite{nemeth_coordtrf1}.
 
 \section{Results and Discussion} \label{Sresults}
 
@@ -509,11 +507,11 @@ The performance of the QUICCA optimizer has been tested on Baker's suite \cite{b
 small test molecules, and is listed in Table~\ref{Bakers_test}, along with values from more traditional 
 algorithms.  At convergence, the magnitude of the maximum Cartesian force vector is required to be less 
 than $3\times10^{-4}$ au for each atom.  This criterion is tighter than that employed in other studies 
-Ref. \cite{bakerstest}, which require only that the maximum Cartesian force component (X, Y or Z) be less 
+Ref. \onlinecite{bakerstest}, which require only that the maximum Cartesian force component (X, Y or Z) be less 
 than $3\times10^{-4}$ au.  In addition to this criterion,  an absolute energy change less than 
 $1\times10^{-6}$ au or a predicted internal coordinate displacement less than $3\times10^{-4}$ au at the last 
 geometry is required.  The energies of the optimized structures have been reproduced to all digits given 
-in Ref.~\cite{bakerstest}. 
+in Ref.~\onlinecite{bakerstest}. 
 
 The current implementation of QUICCA, achieving a total of 187 geometry steps for Baker's test suite, is 
 competitive with Bakken's algorithm, requiring 185.  
@@ -552,7 +550,7 @@ does not often overstep.
 
 We can understand the stability achieved by the core QUICCA
 algorithm by considering a hybrid force relaxation method, based on Eq.~\ref{tseq},
-in which the diagonal Hessian elements $H^i_{kk}$ are obtained from the 
+in which the diagonal Hessian elements $H^{(i)}_{kk}$ are obtained from the 
 curve fit, but the uncoupled Newton step is carried out with the {\em current} 
 gradient.  We have tested this alternative, but it turned out to be oscillatory 
 in many cases, requiring excessive backtracking.  This should be contrasted with the
@@ -590,9 +588,13 @@ with geometry step $i$ on a log$_{10}$-linear  scale for the
 \caption{
 Ratio of the relative error of the energy 
 in consecutive steps on a log$_{10}$-log$_{10}$ plot.
-The tangent of the fitted line is log$_{10}$(c), 
-the logarithm of the convergence factor, that is proportional
-to the rate of convergence.}
+The data points fit very well to a line of 
+$y=-0.04980+1.00111 x$. The tangent of this line ($1.00111$)
+is equivalent to the order of convergence, while the
+cross section with the y-axis ($-0.04980$) is the
+logarithm of the convergence factor, log$_{10}$(c), that is
+the negative rate of convergence.
+}
 \label{loglogplot}
 \end{figure}
 
@@ -616,13 +618,13 @@ when condition number of the Hessian is large, for example when low frequency ``
 are present.  In this case, steepest descents can be extremely slow, while second order 
 (Newton-Raphson) and approximate second order (quasi-Newton) methods achieve an accelerated rate 
 of convergence through conditioning of the stepsize.   While methods that render  the
-number of geometry steps independent of system size do exist\cite{SGoedecker01}, they apply (so far) 
+number of geometry steps independent of system size do exist \cite{SGoedecker01}, they apply (so far) 
 only to homogeneous systems.  In general though, the number of steps required to minimize to within
-a certain tolerance increases with system size, roughly as ${\cal O}(1/3 N_{\rm atoms})$ 
+a certain tolerance increases with system size, roughly as ${\cal O}(N_{\rm atoms}/3)$ 
 according to Ref.~\onlinecite{Schlegel_plasminogen_opt}.  Therefore, the rate of linear convergence achieved by an 
 optimization algorithm is perhaps a good  measure of performance for large systems.  
 
-An optimization algorithm may be characterized by the ratio $ {\Delta E_{i+1}}/{\Delta E_{i}^n} =c$,
+An optimization algorithm may be characterized by the ratio ${\Delta E_{i+1}}/{\Delta E_{i}^n} =c$,
 where $\Delta E_i = |E_{i}-E_{\rm opt}| $ is the absolute error at geometry step $i$,
 $E_{\rm opt}$ is the extremal value of the energy, $n$ is the order of convergence, 
 and $c$ is the convergence factor \cite{Quarteroni}.  With first order convergence $n=1$, and
@@ -636,97 +638,55 @@ $\lim_{i \to \infty} c_i = 0$.
 
 To investigate the convergence properties of QUICCA in a large application, we have carried out
 optimization of a 263 atom fragment of crystallographic Protein Kinase A, involving two Magnesiums,
-two crystallographic waters, ATP and a fragment of the Protein Kinase Inhibitor to which phosphate 
+three crystallographic waters, ATP and a fragment of the Protein Kinase Inhibitor to which phosphate 
 is transfered. This is a model reactant system obtained from Ref.~\onlinecite{graeme} and is shown in 
 Fig.~\ref{kinasepicture}.  Optimization was performed at the HF/STO-2G level of theory with an 
 approximate absolute energy resolution of $10^{-5}$ hartree using MondoSCF \cite{MondoSCF} at the 
 {\tt tight} accuracy level and with ten peripheral atoms  constrained to mimic steric effects of the enzyme.  
 Note that this minimal level of theory actually makes more work for the optimizer, as it will tend to 
-move away from the more correct crystallographic structure. 
-The maximum remaining Cartesian force had a magnitude less then
-$3\times10^{-4}$ au at convergence, the maximum predicted displacement
-at the final structure less then $4\times10^{-3}$ au.
-The number of internal coordinates, generated 
-for this structure was 1280 at convergence.  Figure~\ref{logn-logde} shows ${\rm log}_{10} \Delta E_i$ 
-vs $i$ for this system, Fig.~\ref{gradientpicture} the root mean square of the Cartesian gradient 
-at each step.
+move away from the more correct crystallographic structure.   This structure was optimized to within a 
+Cartesian force of $3\times10^{-4}$ au and a maximum predicted displacement less than $4\times10^{-3}$ au.
+The number of internal coordinates, generated for this structure was 1280 at convergence.  Figure~\ref{logn-logde} 
+shows ${\rm log}_{10} \Delta E_i$ vs $i$ for this system, Fig.~\ref{gradientpicture} the root mean square 
+of the Cartesian gradient at each step.
 
-The convergence of the energy was smooth, while the convergence of
-the Cartesian gradients were more scattered, especially close to 
-convergence. This is mainly due to the fact, that close to convergence
-frequent back-tracking was used. Back-tracking is not needed 
-for this molecule for converging the total energy to $10^{-3}$ Hartree
-accuracy or slightly beyond. However, for achieving higher accuracy,
-the independent coordinate model is not satisfactory without 
-backtracking.
-The main reason for the failure of the independent
-coordinate approximation, we believe, is
-the dominance of floppy modes in this phase of the optimization.
-These floppy modes, which are highly delocalized
-over the molecule, cannot be treated my means of local internal
-coordinates. We believe that there is a way for the
-{\it a priori} construction of the floppy modes and that the fitting 
-procedure as utilized in QUICCA can be applied to this case as well.
-Work along this direction is in progress in our group.
-Fortunately, the backtracking in Cartesian space can handle
-the problem of floppy modes, though on the price of extra
-energy evaluations.
-It is also important to note, that the effect of floppy
-modes is not the only important factor is this phase of the
-optimization. The rigidity of the internal coordinate
-system and its role in the inaccurate convergence 
-of the back-transformation is also important. 
-In our opinion, these two factors,
-which characterize the last phase of the optimization may be
-related to each other. 
-A recent work of Fernandez-Serra {\it et.al} \cite{Serra03} 
-calls the attention to the relationship of the rigidity
-of internal coordinate systems and the 
-phenomenon of floppy modes. This relationship may be
-discussed on the basis of the
-theory of rigidity \cite{Phillips85}.
+In Fig.~\ref{loglogplot}, a plot of ${\rm log}_{10}{\Delta E_{i+1}}$ vs ${\rm log }_{10} {\Delta E_{i}}$ 
+is shown, demonstrating only a first order convergence, with a rate
+of $\sim 0.05$.   To examine the rate of convergence
+in greater detail, we fit the the model function $E_{i}=E_{\rm opt}+A*e^{-i * f_i}$, using an 
+an 11th order polynomial to represent $f_i$.  The fitted rate of convergence shown in Fig.~\ref{convfact}
+suggests that the optimization has three different phases, in accordance with Fig.~\ref{logn-logde}.
+In the first phase (steps 1-10) there is a rapid refinement of the least-optimal substructures. In the 
+second phase (steps 10-60) the main optimization effort is still carried out on local internal coordinates, 
+while the error of the absolute energy decreases to $\sim 1$ mhartree.  Finally, the third phase (60-120) 
+occurs at a slower, constant rate of about $f=0.05$, which is a value 
+consistent from the fit characterizing the ratio ${\Delta E_{i+1}}/{\Delta E_{i}}$ in Fig.~\ref{loglogplot}.
 
-Fig.~\ref{loglogplot} shows the ratio of the absolute error
-of the energy for consecutive steps, during the optimization.
-This ratio is equivalent to the order of convergence, $n$, and it
-is constant, $n=1$ during the optimization. Thus, it is clear,
-that QUICCA has a first order (linear) convergence. 
-It may be possible to achieve superlinear or higher order 
-convergence with QUICCA, but it seems to depend on an improved
-treatment of floppy modes.
-
-In order to study the behaviour of the rate of convergence, $f$, during
-the optimization, an 11th order polynomial has been used to model
-$f$ as a function of $i$. The polynomial coefficients have been
-obtained from fitting 
-the model function $E_{i}=E_{opt}+A*exp(-f*i)$ 
-to the $E_{i}$-$i$ data pairs.
-Fig.~\ref{convfact} shows, how the rate of convergence changes
-with the number of optimization steps. This picture
-suggests that the optimization has three different phases. This
-observation is also in accordance with Fig.~\ref{logn-logde}.
-
-In the first phase (steps 1-10) there is a rapid refinement
-of the least-optimimal substructures. In the second phase
-(steps 10-60) the main optimization effort is still carried
-out on local internal coordinates, while the error of
-the absolute energy decreases to $\cal{O}$($10^{-3}$) hartrees.
-Finally, the third phase (60-120) 
-is dominated by the optimization of floppy modes and 
-frequent back-tracking happens. The rate of convergence becomes about
-$f=0.05$ in the third phase, which is the same value as what 
-obtained from the fitting in Fig.~\ref{loglogplot}.
+In the third phase, below 1 mhartree, backtracking becomes nessesary to achieve smooth 
+convergence of the energy and the rate of convergence decreases to a constant.  We believe
+that this decelleration is due to the presence of ``floppy'' low-frequency modes
+that are highly delocalized and not accounted for in the current local internal 
+coordinate system.  While QUICCA can certainly be used with a more delocalized 
+internal coordinate system, the construction of delocalized internal coordinates 
+is an important open problem in molecular geometry optimization.   It is also important to note that 
+the effect of floppy modes is not the only factor in the third phase of the optimization; the rigidity 
+of the internal coordinate system and its role in the inaccurate convergence of the back-transformation 
+is also important. In our opinion, these two factors, which characterize the last phase of the 
+optimization may be related to each other.  A recent work of Fernandez-Serra {\it et.al} \cite{Serra03} 
+calls attention to the relationship of the rigidity of internal coordinate systems and the 
+phenomenon of floppy modes. This relationship may be understood from the theory of 
+rigidity \cite{Phillips85}. In the present work, we do not 
+consider this relationship further.
 
 \section{Conclusions}
 
 We have presented a new concept for local optimization, the ``QUasi Independent Curvilinear 
 Coordinate Approximation'' or  QUICCA, and applied it to the geometry optimization of molecular 
-structures. Achieving superlinear convergence and competitive with the most aggressive geometry 
-optimizers in the literature, QUICCA has demonstrated that an efficient optimization algorithm 
-can be constructed without {\em explicit} coupling in local expansion of the energy.  
-However, coupling effects do enter QUICCA {\em implicitly} through the weighted curve fit, 
-providing an important averaging effect that compensates for irregularities related
-to the independent coordinate approximation.  
+structures. Competitive with the most aggressive internal coordinate geometry optimizers in the literature, 
+QUICCA has demonstrated that an efficient optimization algorithm can be constructed without 
+{\em explicit} coupling in local expansion of the energy.  However, coupling effects do enter 
+QUICCA {\em implicitly} through the weighted curve fit, providing an important averaging effect that 
+compensates for irregularities related to the independent coordinate approximation.  
 
 The implementation presented here is relatively simple, employing redundant primitive 
 internal coordinates, a weighted line fit and backtracking, allowing  substantial room for 
@@ -735,11 +695,15 @@ that may benefit from physical insight (such as the development of more precise 
 as well as from ideas in applied mathematics involving robust estimation, interpolation and 
 advanced methods of regression.  
 
-Developed in the context of quantum chemistry, QUICCA is enabling the large scale application of  
-linear scaling electronic structure theory to large scale problems in biology and materials science. 
-In addition, with the availability of fast linear scaling Cartesian/internal coordinate transforms 
-\cite{nemeth_coordtrf1}, the QUICCA algorithm may also present advantages in the optimization of 
-large systems employing classical forcefields.
+The primitive internal coordinate system employed in the present implementation does not include
+delocalized motions and suffers from slowdowns associated with floppy modes.  The construction of 
+delocalized internal coordinate systems that remain approximately
+decoupled is thus an outstanding problem in molecular geometry optimization.   Nevertheless, the
+preconditioning afforded by local stretchings, bendings and torsions is an important step, enabling 
+the large scale application of  linear scaling electronic structure theory to problems in biology and 
+materials science.   In addition, with the availability of fast linear scaling Cartesian/internal coordinate 
+transforms \cite{nemeth_coordtrf1}, the QUICCA algorithm may also present advantages in the optimization of 
+large systems employing classical forcefields.  
 
 The averaging scheme presented here, achieving an effective decoupled internal coordinate representation
 of the potential energy surface, may also be useful in on-the-fly construction of classical force fields.
@@ -855,6 +819,25 @@ Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale f
 Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
 with geometry step $i$ on a log$_{10}$-linear  scale for the 
 263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
+
+\caption{
+Ratio of the relative error of the energy 
+in consecutive steps on a log$_{10}$-log$_{10}$ plot.
+The data points fit very well to a line of 
+$y=-0.04980+1.00111 x$. The tangent of this line ($1.00111$)
+is equivalent to the order of convergence, while the
+cross section with the y-axis ($-0.04980$) is the
+logarithm of the convergence factor, log$_{10}$(c), that is
+the negative rate of convergence.
+} \label{loglogplot}
+
+\caption{
+The change of the rate of convergence $f$ during the optimization
+of the 263 atoms protein kinase A fragment. $f$ is modelled
+by a 10th order polynomial. The polynomial coefficients
+have been obtained from a non-linear fit to the $E_{i}$-$i$
+data-pairs, using the model function $E_{i}=E_{opt}+A*exp(-f*i)$.}
+\label{convfact} 
 
 \end{figure}
 
