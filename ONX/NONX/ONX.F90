@@ -54,7 +54,7 @@ PROGRAM ONX
   CHARACTER(LEN=3),PARAMETER     :: Prog='ONX'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
-  InFile=TRIM(SCFName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
+  InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   CALL Get(BSc,Tag_O=CurBase)
   CALL Get(GMc,Tag_O=CurGeom)
   CALL Get(BSp,Tag_O=PrvBase)
@@ -63,7 +63,6 @@ PROGRAM ONX
   CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
   CALL Get(OffS,'atoff',Tag_O=PrvBase)
   CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
-
 !----------------------------------------------
 ! Set up the appropriate action
 !----------------------------------------------
@@ -142,7 +141,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
   CALL Fillout_BCSR(BSc,GMc,K)
   CALL TrnMatBlk(BSc,GMc,K)
-!  CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
+  CALL ONXFilter(BSc,GMc,K,NameBuf,Thresholds%Trix)
   CALL Put(K,TrixFile('K',Args,0))!InFile,'.K')
   CALL Put(K%NBlks,'nki')
   CALL Put(K%NNon0,'nkm')

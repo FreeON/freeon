@@ -48,7 +48,7 @@ PROGRAM GradONX
   CHARACTER(LEN=6),PARAMETER     :: Prog='XForce'
 !--------------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
-  InFile=TRIM(SCFName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
+  InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
