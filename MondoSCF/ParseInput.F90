@@ -39,14 +39,10 @@ MODULE ParseInPut
          CHARACTER (LEN=DEFAULT_CHR_LEN) :: OPLS_DATABASE,MM_COORDS,MM_SEQ
 !
          TYPE(SCFControls), INTENT(INOUT) :: Ctrl
-logical :: opened
 !
 !        Read comand line, environement variables, create file names, init files etc
          CALL ParseCmndLine(Ctrl) 
-!
          CALL OpenHDF(InfFile)
-         CALL OpenASCII(InpFile,Inp)
-         CALL OpenASCII(OutFile,Out)
 !
 ! Read in the accuracies requested
 !
@@ -78,10 +74,8 @@ logical :: opened
          EndIf
 #endif
 !
-      CALL ParseThresholds(Ctrl)
+         CALL ParseThresholds(Ctrl)
 !
-      CLOSE(Out,STATUS='KEEP')
-      CLOSE(Inp,STATUS='KEEP')
       CALL CloseHDF()
 !
       END SUBROUTINE ParseInp
@@ -89,7 +83,7 @@ logical :: opened
 !     Parce The Command Lines
 !============================================================================
       SUBROUTINE ParseCmndLine(Ctrl)
-         TYPE(SCFControls)          :: Ctrl
+         TYPE(SCFControls)              :: Ctrl
          TYPE(ARGMT)                    :: Args
          TYPE(INT_VECT)                   :: Stat
          INTEGER                        :: I,K,L,DotDex
@@ -200,7 +194,7 @@ logical :: opened
 !
          CALL OpenASCII(InpFile,Inp)
          CALL OpenASCII(OutFile,Out)
-!         CALL PrintProtectL(Out)
+         CALL PrintProtectL(Out)
          WRITE(Out,77)(Rtrn,I=1,15)
          WRITE(*,77)(Rtrn,I=1,15)
       77 FORMAT(A1,A1,                                                   &
@@ -235,7 +229,7 @@ logical :: opened
       1  CALL MondoHalt(PRSE_ERROR,' Found no <EndTitle> in inPut file '//TRIM(InpFile))
       2  CONTINUE
          WRITE(Out,*)' '
-!         CALL PrintProtectR(Out)
+         CALL PrintProtectR(Out)
 !        Close inPut and outPut
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CLOSE(UNIT=Out,STATUS='KEEP')
@@ -274,6 +268,19 @@ logical :: opened
          ELSE
             PrintFlags%Set=DEBUG_NONE
          ENDIF                       
+!
+         IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_GEOP))THEN
+            PrintFlags%GeOp=DEBUG_GEOP    
+         ELSE
+            PrintFlags%GeOp=DEBUG_NONE
+         ENDIF                       
+!
+         IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM))THEN
+            PrintFlags%MM=DEBUG_MM    
+         ELSE
+            PrintFlags%MM=DEBUG_NONE
+         ENDIF                       
+!
          CLOSE(UNIT=Inp,STATUS='KEEP')
 !
 ! Parse options for Population Analylsis
@@ -298,6 +305,10 @@ logical :: opened
             Ctrl%Previous=Stat%I
             CALL Delete(Stat)
          ENDIF
+!
+         CLOSE(UNIT=Out,STATUS='KEEP')
+         CLOSE(UNIT=Inp,STATUS='KEEP')
+!
       END SUBROUTINE ParseCmndLine
 !============================================================================
 !     Print Out the Parsed Information
@@ -310,8 +321,8 @@ logical :: opened
         CHARACTER(LEN=BASESET_CHR_LEN)   :: BName   
         CHARACTER(LEN=2*DEFAULT_CHR_LEN) :: Mssg
 !----------------------------------------------------------------------------
-!       CALL PrintProtectL(Out)
-!       CALL OpenASCII(OutFile,Out)
+        CALL PrintProtectL(Out)
+        CALL OpenASCII(OutFile,Out)
         WRITE(Out,*)'Current HDF file :: ',TRIM(Ctrl%Info)
         IF(Ctrl%Rest)THEN
            WRITE(Out,*)'Restart HDF file :: ',TRIM(Ctrl%OldInfo)
@@ -377,8 +388,8 @@ logical :: opened
         ENDIF
 #endif
         ENDDO
-!   CALL CloseHDF() !!!!!!!! leave HDF open for main program
-!       CALL PrintProtectR(Out)
+        CALL PrintProtectR(Out)
+        CLOSE(Out,STATUS='KEEP')
 !
       END SUBROUTINE ParsePrint
 !============================================================================
@@ -388,6 +399,8 @@ logical :: opened
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
+         CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(OutFile,Out)
 !
 !        Parse <OPTIONS.SCF>
 !
@@ -525,6 +538,9 @@ logical :: opened
          DO I=1,Ctrl%NSet
             CALL Put(Ctrl%Model(I),'ModelChemistry',Tag_O=IntToChar(I))
          ENDDO
+!
+        CLOSE(Out,STATUS='KEEP')
+        CLOSE(Inp,STATUS='KEEP')
 !!----------------------------------------------------------------------------
       END SUBROUTINE ParseMethods
 !============================================================================
@@ -537,8 +553,10 @@ logical :: opened
          LOGICAL                         :: ReOrder,HilbertOrder
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
-logical :: opened
 !----------------------------------------------------------------------------
+         CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(OutFile,Out)
+!
          ! If restart, use previous geometry
          IF(Ctrl%Rest)THEN
             CALL OpenHDF(Ctrl%OldInfo)
@@ -547,7 +565,7 @@ logical :: opened
             CALL CloseHDF()
             CALL OpenHDF(InfFile)
             CALL Put(GM,Tag_O="1")
-!!!    CALL CloseHDF() !!!!!! leave HDF open for main program
+            CALL CloseHDF() 
             NAtoms=GM%NAtms
             CALL Delete(GM)
             RETURN
@@ -608,6 +626,8 @@ logical :: opened
 !----------------------------------------------------------------------------
 !        Parse <OPTIONS> for <GEOMETRY> format
 !
+         CLOSE(Out,STATUS='KEEP')
+!
          IF(OptKeyQ(Inp,GEOMETRY,MSI_FORMAT))THEN
             CALL ParseCoordinates_MSI(Ctrl,GM)
          ELSEIF(OptKeyQ(Inp,GEOMETRY,XMOL_FORMAT))THEN
@@ -615,6 +635,8 @@ logical :: opened
          ELSE
             CALL ParseCoordinates_MONDO(Ctrl,GM)
          ENDIF
+!
+         CLOSE(Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseGeometry
 !---------------------------------------------------------------------------- 
@@ -630,8 +652,9 @@ logical :: opened
          CHARACTER(LEN=2)                :: At
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line, LineLowCase
          LOGICAL                         :: LastConfig
-logical :: opened
 !---------------------------------------------------------------------------- 
+!        CALL OpenASCII(InpFile,Inp)
+!        CALL OpenASCII(OutFile,Out)
 !
 !        Find number of atoms and atom types
 !
@@ -705,8 +728,9 @@ logical :: opened
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
 !           Print the coordinates
             IF(PrintFlags%Key>DEBUG_NONE) THEN
-              CALL PPrint(GM,Filename_O=OutFile,Unit_O=Out)
-              CALL OpenASCII(OutFile,Out)
+!             CLOSE(Out,STATUS='KEEP')
+              CALL PPrint(GM)
+!             CALL OpenASCII(OutFile,Out)
             ENDIF
 !            CALL PPrint(GM,'Graphite_98.xyz',6,'XYZ')
 !            IF(.TRUE.) STOP
@@ -729,11 +753,13 @@ logical :: opened
          CALL Delete(GM)
          CALL Put(Ctrl%NGeom,'nconfig') 
          CALL PPrint(MemStats,'ParseGeometry')
+!
          RETURN
 !
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
                    //'line at the end of the inPut file.')
+!
       END SUBROUTINE ParseCoordinates_MONDO
 !---------------------------------------------------------------------------- 
 !
@@ -750,6 +776,9 @@ logical :: opened
          LOGICAL                         :: LastConfig
          TYPE(CHR_VECT)                  :: Chars
 !---------------------------------------------------------------------------- 
+!        CALL OpenASCII(InpFile,Inp)
+!        CALL OpenASCII(OutFile,Out)
+!
 !        Find number of atoms and atom types
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -836,12 +865,15 @@ logical :: opened
          CALL Delete(GM)
          CALL Put(Ctrl%NGeom,'nconfig')
          CALL PPrint(MemStats,'ParseGeometry')
+!
          RETURN
        1 CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. \n  You may be missing blank '  &
                    //'line at the end of the inPut file.')
 !
       END SUBROUTINE ParseCoordinates_XMOL
+!
+!---------------------------------------------------------------------------- 
 !
       SUBROUTINE ParseCoordinates_MSI(Ctrl,GM)
          TYPE(SCFControls),INTENT(INOUT) :: Ctrl
@@ -855,6 +887,9 @@ logical :: opened
          CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line
          LOGICAL                         :: LastConfig
 !---------------------------------------------------------------------------- 
+!        CALL OpenASCII(InpFile,Inp)
+!        CALL OpenASCII(OutFile,Out)
+!
 !        Find number of atoms and atom types
 !
          CALL Align(BEGIN_GEOMETRY,Inp)
@@ -946,6 +981,7 @@ logical :: opened
          CALL Delete(Chars)
          CALL Put(Ctrl%NGeom,'nconfig')
          CALL PPrint(MemStats,'ParseGeometry')
+!
          RETURN
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
                    //TRIM(END_GEOMETRY)//'. You may be missing blank '  &
@@ -961,6 +997,9 @@ logical :: opened
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,I,J,K
 !
+!       CALL OpenASCII(InpFile,Inp)
+!       CALL OpenASCII(OutFile,Out)
+!
         NLvec = 0
         NTvec = 0
         GM%PBC%TransVec = Zero
@@ -968,8 +1007,6 @@ logical :: opened
         GM%PBC%InvBoxSh = Zero
 !
         DO I=1,3
-!          GM%PBC%BoxShape(I,I) = Zero
-!          GM%PBC%InvBoxSh(I,I) = Zero
            GM%PBC%BoxShape(I,I) = One
            GM%PBC%InvBoxSh(I,I) = One
         ENDDO
@@ -1423,6 +1460,8 @@ logical :: opened
          INTEGER                               :: I,J,K,L,N,NS,NP,NC,NK, &
                                                   MinL,MaxL,ISet,KFound
 !----------------------------------------------------------------------------
+         CALL OpenASCII(InpFile,Inp)
+!
 !        Parse basis sets from inPut file
 !        Parse <OPTIONS.BASIS_SETS>
          Ctrl%NSet=0
@@ -1501,7 +1540,7 @@ logical :: opened
             BasFile=TRIM(MONDO_HOME)//'BasisSets/' &
                   //TRIM(CSets(2,Base(ISet)%BType))//BasF
             CALL OpenASCII(BasFile,Bas,Rewind_O=.TRUE.)
-            IF(PrintFlags%Key==DEBUG_MaxIMUM)THEN
+            IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                CALL PPrint('Base('//TRIM(IntToChar(ISet))       &
                         //')%BName   = '//TRIM(Base(ISet)%BName))
                CALL PPrint('Opening BasFile = '//TRIM(BasFile))
@@ -1589,8 +1628,11 @@ logical :: opened
             CALL Delete(Base(I))
          ENDDO
          CALL Put(Ctrl%NSet,'NumberOfSets')
-         IF(PrintFlags%Key==DEBUG_MaxIMUM)  &
-            CALL PPrint(MemStats,'ParseBaseSets')
+         IF(PrintFlags%Key==DEBUG_MAXIMUM)  &
+              CALL PPrint(MemStats,'ParseBaseSets')
+!
+        CLOSE(Inp,STATUS='KEEP')
+!
       END SUBROUTINE ParseBaseSets
 !============================================================================
       SUBROUTINE NormalizeBaseSets(A,B)
@@ -1726,9 +1768,11 @@ logical :: opened
         TYPE(DBL_VECT) :: GrdMM
         CHARACTER(LEN=6) :: CurG
         TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutOfPlaneIJKL
-!
         REAL(DOUBLE) :: SUM_OLD,XTrans,YTrans,ZTrans
         INTEGER :: IA,IB,IC,IAtTrans,IAtOrig
+!
+        CALL OpenASCII(InpFile,Inp)
+        CALL OpenASCII(OutFile,Out)
 !
           CALL New(Stat,3)
           Stat%I=Ctrl%Current
@@ -2032,7 +2076,10 @@ logical :: opened
           CALL Delete(Active_Torsion)
           CALL Delete(Active_OutOfPlane)
 !
-      CALL Delete(GM_MM)
+          CALL Delete(GM_MM)
+!
+        CLOSE(Out,STATUS='KEEP')
+        CLOSE(Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseMM
 #endif
@@ -2044,6 +2091,8 @@ logical :: opened
       SUBROUTINE ParseMech(Ctrl)
          TYPE(SCFControls)          :: Ctrl
 !----------------------------------------------------------------------------
+         CALL OpenASCII(InpFile,Inp)
+         CALL OpenASCII(OutFile,Out)
 !
 !        Parse <OPTIONS> for QM_MM
 !
@@ -2063,6 +2112,9 @@ logical :: opened
         CALL Put(Ctrl%Mechanics(1),'Ctrl_Mechanics1')
         CALL Put(Ctrl%Mechanics(2),'Ctrl_Mechanics2')
 !
+        CLOSE(Out,STATUS='KEEP')
+        CLOSE(Inp,STATUS='KEEP')
+!
       END SUBROUTINE ParseMech
 #endif
 !---------------------------------------------------------------------------- 
@@ -2070,10 +2122,11 @@ logical :: opened
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
+         CALL OpenASCII(OutFile,Out)
+         CALL OpenASCII(InpFile,Inp)
+!
 !        Parse <OPTIONS> for <Grad=>
 !     
-         Ctrl%CoordType=CoordType_PrimInt !!!default coordinate type
-!
          IF(OptKeyQ(Inp,GRADIENTS,FORCE))THEN
             Ctrl%Grad=GRAD_ONE_FORCE
             Ctrl%NGeom=1
@@ -2105,10 +2158,8 @@ logical :: opened
             IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
                Ctrl%NGeom=500
             ENDIF
-         ELSEIF(OptKeyQ(Inp,CoordinateType,CoordType_PrimInt)) THEN
-            Ctrl%CoordType=CoordType_PrimInt
-         ELSEIF(OptKeyQ(Inp,CoordinateType,CoordType_Cartesian)) THEN
-            Ctrl%CoordType=CoordType_Cartesian
+         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_StpDesc))THEN
+               Ctrl%Grad=GRAD_StpDesc_OPT
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_TSTATE))THEN
             Ctrl%Grad=GRAD_TS_SEARCH
             IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
@@ -2122,6 +2173,17 @@ logical :: opened
                Ctrl%NGeom=500
             ENDIF
          ENDIF
+!
+         IF(OptKeyQ(Inp,COORDTYPE,CoordType_PrimInt)) THEN
+            Ctrl%GeOp%CoordType=CoordType_PrimInt
+         ELSE IF(OptKeyQ(Inp,COORDTYPE,CoordType_Cartesian)) THEN
+            Ctrl%GeOp%CoordType=CoordType_Cartesian
+         ELSE
+            Ctrl%GeOp%CoordType=CoordType_PrimInt
+         ENDIF
+!
+        CLOSE(Out,STATUS='KEEP')
+        CLOSE(Inp,STATUS='KEEP')
 !
      END SUBROUTINE PARSEGRAD
 !
@@ -2197,6 +2259,8 @@ logical :: opened
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
+!        CALL OpenASCII(InpFile,Inp)
+!        CALL OpenASCII(OutFile,Out)
 !
 !        Parse <OPTIONS.THRESHOLDS> 
 !
@@ -2257,6 +2321,9 @@ logical :: opened
          ENDIF !!! MMonly
 #endif
 !
+!       CLOSE(Out,STATUS='KEEP')
+!       CLOSE(Inp,STATUS='KEEP')
+!
       END SUBROUTINE ParseThresholds
 !----------------------------------------------------------
 #ifdef MMech
@@ -2278,13 +2345,16 @@ logical :: opened
       INTEGER :: I1,I2,J,NIntC_Extra
       REAL(DOUBLE) :: V
 !
+      CALL OpenASCII(InpFile,Inp)
+      CALL OpenASCII(OutFile,Out)
+!
 ! Find extra internal coordinates and constraints
 !
         NIntC_Extra=0
 !
       IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        RETURN
+        GO TO 500
       ENDIF
 !
       CALL AlignLowCase('begin_add_internals',Inp)
@@ -2309,7 +2379,7 @@ logical :: opened
 !
       IF(NIntC_Extra==0) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        RETURN
+	GO TO 500
       ENDIF
 !
 ! Generate an addition to the IntC set!
@@ -2440,16 +2510,20 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
 !
       CALL Delete(IntC_Extra)
 !
+500   CONTINUE
+      CLOSE(Out,STATUS='KEEP')
+      CLOSE(Inp,STATUS='KEEP')
+!
       END SUBROUTINE ParseIntCoo
 #endif
 !
 !-----------------------------------------------------------------------
 !
 #ifdef PERIODIC
-SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
-      TYPE(CRDS)                 :: GMLoc
-      TYPE(SCFControls)          :: Ctrl
-      CHARACTER(LEN=6) :: CurG
+      SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
+      TYPE(CRDS)                      :: GMLoc
+      TYPE(SCFControls)               :: Ctrl
+      CHARACTER(LEN=6)                :: CurG
       CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Line,LineLowCase,AuxChar
 !
 !
@@ -2635,6 +2709,8 @@ END SUBROUTINE ParsePeriodic
          TYPE(SCFControls)          :: Ctrl
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
+      CALL OpenASCII(InpFile,Inp)
+      CALL OpenASCII(OutFile,Out)
 !
 !        Parse <OPTIONS.ACCURACY> 
 !
@@ -2666,6 +2742,8 @@ END SUBROUTINE ParsePeriodic
 #ifdef MMech
          ENDIF
 #endif        
+        CLOSE(Inp,STATUS='KEEP')
+        CLOSE(Out,STATUS='KEEP')
 !
       END SUBROUTINE ParseAcc
 !
