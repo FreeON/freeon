@@ -23,6 +23,7 @@ MODULE ControlStructures
 
   TYPE Options
      INTEGER                        :: NMthds
+     INTEGER                        :: NConAls
      INTEGER                        :: NModls
      INTEGER                        :: NThrsh
      INTEGER                        :: NSteps
@@ -31,6 +32,7 @@ MODULE ControlStructures
      INTEGER                        :: EndPts
      INTEGER                        :: Coordinates
      INTEGER,   DIMENSION(MaxSets)  :: Methods
+     INTEGER,   DIMENSION(MaxSets)  :: ConAls
      INTEGER,   DIMENSION(MaxSets)  :: Models
      INTEGER,   DIMENSION(MaxSets)  :: AccuracyLevels
      LOGICAL                        :: DoGDIIS,SteepStep
