@@ -30,6 +30,7 @@ PROGRAM QCTC
   REAL(DOUBLE)                   :: TmBegJ,TmEndJ,TmJ
   TYPE(DBL_VECT)                 :: TmJArr
   INTEGER                        :: IErr
+  REAL(DOUBLE)                   :: LE_Nuc_Tot
 #else
   TYPE(BCSR)                     :: J
 #endif
@@ -179,7 +180,13 @@ PROGRAM QCTC
         CALL Elapsed_Time(TimeNukE,'Accum')
      ELSE     
         CALL Elapsed_Time(TimeNukE,'Init')
-        E_Nuc_Tot=NukE(GM)        
+#ifdef PARALLEL
+        CALL NukE_ENPart(GM)
+        LE_Nuc_Tot=NukE(GM)
+        E_Nuc_Tot = Reduce(LE_Nuc_Tot)
+#else
+        E_Nuc_Tot=NukE(GM)
+#endif
         CALL Elapsed_Time(TimeNukE,'Accum')
      ENDIF
 

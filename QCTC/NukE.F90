@@ -14,6 +14,9 @@ MODULE NuklarE
   USE PoleTree 
   USE TreeWalk
   USE PBCFarField
+#ifdef PARALLEL
+  USE ParallelQCTC
+#endif
   IMPLICIT NONE
 !----------!
   CONTAINS !
@@ -30,6 +33,9 @@ MODULE NuklarE
 !---------------------------------------------------------------------------------------------
        NukE=Zero 
        DO At=1,GM_Loc%Natms
+#ifdef PARALLEL
+      IF(At >= BegAtInd%I(MyID) .AND. At <= EndAtInd%I(MyID)) THEN
+#endif
           IF(GM_Loc%AtNum%D(At)<105.D0)THEN
 !            Initialize |BRA>
              HGBra(1) =-GM_Loc%AtNum%D(At)*(NuclearExpnt/Pi)**(ThreeHalves)
@@ -62,6 +68,9 @@ MODULE NuklarE
                 NukE = NukE + CTraxFF(Prim,HGBra,GM_Loc)
              ENDIF
           ENDIF
+#ifdef PARALLEL
+       ENDIF
+#endif
        ENDDO
 !
      END FUNCTION NukE
