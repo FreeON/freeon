@@ -52,7 +52,7 @@ SUBROUTINE Int1111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
           MG=AINT(T1*Gamma_Grid)
           R1=F0_0(MG)+T1*(F0_1(MG)+T1*(F0_2(MG)+T1*(F0_3(MG)+T1*F0_4(MG))))
         ELSE
-          R1=IB%GammaA%D(1)/DSQRT(T1)
+          R1=GammAss(0)/DSQRT(T1)
         ENDIF
         TwoE=TwoE+R1*Up*DSQRT(r1xZpE)
       END DO ! K

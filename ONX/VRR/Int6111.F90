@@ -114,11 +114,11 @@ SUBROUTINE Int6111(N,IntCode,CBra,CKet,DisBufB,PrmBufB,DB,IB,SB,C,U)
         ELSE
           T2=1.0D0/T1
           T3=DSQRT(T2)
-          R1=Rkk*IB%GammaA%D(1)*T3
+          R1=Rkk*GammAss(0)*T3
           T3=T3*T2
-          R2=Rkk*IB%GammaA%D(2)*T3
+          R2=Rkk*GammAss(1)*T3
           T3=T3*T2
-          R3=Rkk*IB%GammaA%D(3)*T3
+          R3=Rkk*GammAss(2)*T3
         ENDIF
 
       U(1)=R1
