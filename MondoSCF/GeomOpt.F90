@@ -798,6 +798,12 @@ MODULE GeomOpt
 !
         CALL New(CartGrad,NCart)
         CALL Get(CartGrad,'GradE',Tag_O=TRIM(TagStep)) 
+!
+! Purify Cartesian gradients from rotations and translations
+!
+        CALL TranslsOff(CartGrad%D)
+        CALL RotationsOff(CartGrad%D,GMLoc%Carts%D)
+!
         IF(PRESENT(DoSave_O)) THEN
           IF(DoSave_O) THEN
             CALL PutSRStep(Vect_O=CartGrad,Tag_O='CartGrad')
@@ -853,7 +859,7 @@ MODULE GeomOpt
 !
         SELECT CASE(Ctrl%Grad)
         CASE(GRAD_STPDESC_OPT) 
-          CALL SteepestDesc(Ctrl,Grad,Displ,NCart)
+          CALL SteepestDesc(Ctrl,Grad,Displ,NCart,GMLoc%Carts%D)
         CASE(GRAD_DIAGHESS_OPT) 
           CALL DiagonalHess(Ctrl,Grad,Displ,IntCs,NCart)
 !         CALL DiagHessRFO(Ctrl,Grad,Displ,IntCs,NCart)
@@ -968,14 +974,18 @@ MODULE GeomOpt
 !
 !-------------------------------------------------------
 !
-      SUBROUTINE SteepestDesc(Ctrl,Grad,Displ,NCart)
+      SUBROUTINE SteepestDesc(Ctrl,Grad,Displ,NCart,XYZ)
 !
-      TYPE(SCFControls) :: Ctrl
-      TYPE(DBL_VECT)    :: Grad,Displ 
-      INTEGER           :: NCart
+      TYPE(SCFControls)           :: Ctrl
+      TYPE(DBL_VECT)              :: Grad,Displ 
+      INTEGER                     :: NCart
+      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
 !
         IF(Ctrl%GeOp%CoordType==CoordType_Cartesian) THEN
           Displ%D=-1.D0*Grad%D !!!! it oscillates with 2.D0
+          !!! take translations and rotations off
+          CALL TranslsOff(Displ%D)
+          CALL RotationsOff(Displ%D,XYZ)
         ELSE IF(Ctrl%GeOp%CoordType==CoordType_PrimInt) THEN
           Displ%D=-2.D0*Grad%D 
           CALL RedundancyOffFull(Displ%D,NCart)
