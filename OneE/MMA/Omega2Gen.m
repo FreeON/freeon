@@ -42,7 +42,9 @@ If[MondoHome==$FAILED,
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];
 Get[EllFile];
 
-Ell=(HGEll-1)/2;
+Ell=BFEll;
+
+Print[" BFEll  = ",BFEll];
 
 (* INDEXING OF HG ARRAY ELEMENTS *)
 
@@ -128,7 +130,7 @@ Do[Do[
 
      Write[FileName,FortranAssign[o,olist,AssignReplace->glist]];
 
-,{BFEll,0,2}],{ProjL,0,2}];
+,{BFEll,0,Ell}],{ProjL,0,2}];
 
 Close[FileName];          
 Print[" Closed ",FileName];

@@ -17,7 +17,7 @@ OpenWrite[FileName];
 
 Do[ 
 
-pw=GaussianQuadratureWeights[32,0,infinity,25];
+pw=GaussianQuadratureWeights[32,0,infinity,32];
 
 len = Length[pw];
 steps = 18;
