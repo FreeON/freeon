@@ -218,7 +218,6 @@ CONTAINS
      CALL DELETE(TOP12)
      CALL DELETE(TOP13)
      CALL DELETE(TOP14)
-     write(*,*) 'convf= ',convf           
      write(*,*) 'E_C_EXCL12= ',E_C_EXCL12
      write(*,*) 'E_C_EXCL13= ',E_C_EXCL13
      write(*,*) 'E_C_EXCL14= ',E_C_EXCL14
@@ -430,7 +429,6 @@ CONTAINS
      CALL DELETE(TOP12)
      CALL DELETE(TOP13)
      CALL DELETE(TOP14)
-     write(*,*) 'convf= ',convf           
      write(*,*) 'E_LJ_EXCL12= ',E_LJ_EXCL12
      write(*,*) 'E_LJ_EXCL13= ',E_LJ_EXCL13
      write(*,*) 'E_LJ_EXCL14= ',E_LJ_EXCL14
