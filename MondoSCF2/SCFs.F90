@@ -125,13 +125,26 @@ CONTAINS
     IF(DoCPSCF)THEN
        CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O=.TRUE.)
        CALL DensityBuild(N,S,M)
-       S%Action%C(1)=CPSCF_FOCK_BUILD
-       CALL Invoke('QCTC',N,S,M)
-       Modl=O%Models(cBAS)
-       IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
-       IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
+
+       IF(cSCF.EQ.0)S%Action%C(1)=CPSCF_START_RESPONSE
+       IF(cSCF.GT.0)S%Action%C(1)=CPSCF_FOCK_BUILD
+
+       IF(cSCF.GT.0)THEN
+          CALL Invoke('QCTC',N,S,M)
+          Modl=O%Models(cBAS)
+          IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
+          IF(HasDFT(Modl)) THEN
+             CALL Halt('SCFs: DFT-Response not yet supported!')
+             CALL Invoke('HiCu',N,S,M)
+          ENDIF
+       ENDIF
        CALL Invoke('FBuild',N,S,M)
-       CALL Invoke('DDIIS',N,S,M)
+       IF(cSCF.GT.0) CALL Invoke('DDIIS',N,S,M)
+       S%Action%C(1)=CPSCF_SOLVE_SCF
+       CALL SolveSCF(cBAS,N,S,O,M)
+       CALL Invoke('CPSCFStatus',N,S,M)
+       !ici
+
     ELSEIF(DoDIIS)THEN
        CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
        CALL DensityBuild(N,S,M)
@@ -231,7 +244,7 @@ CONTAINS
     TYPE(Parallel)              :: M
     TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
     LOGICAL,OPTIONAL            :: CPSCF_O
-    LOGICAL                     :: CPSCF,DoDIIS,DoODA,RebuildPostODA
+    LOGICAL                     :: DoCPSCF,DoDIIS,DoODA,RebuildPostODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic,A2Logic, &
                                    GLogic,QLogic,ILogic,OLogic,RLogic,FLogic
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
@@ -244,28 +257,117 @@ CONTAINS
     !----------------------------------------------------------------------------!
     !
     IF(PRESENT(CPSCF_O)) THEN
-       CPSCF=CPSCF_O
+       DoCPSCF=CPSCF_O
     ELSE
-       CPSCF=.FALSE.
+       DoCPSCF=.FALSE.
     ENDIF
     ! Convergence thresholds
-    ETest=ETol(O%AccuracyLevels(cBAS))
-    DTest=DTol(O%AccuracyLevels(cBAS))
-    IF(cSCF==0)THEN
-       ConvergedQ=.FALSE.
-       RETURN
-    ENDIF
-    ! Accumulate current statistics
-    chGEO=IntToChar(iGEO)
-    HDFFileID=OpenHDF(N%HFile)
-    DO iCLONE=1,G%Clones
-       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-       ! Gather convergence parameters
-       IF(CPSCF) THEN
+    IF(DoCPSCF) THEN
+       ETest=RTol(O%AccuracyLevels(cBAS))
+       DTest=DTol(O%AccuracyLevels(cBAS))
+       IF(cSCF==0)THEN
+          ConvergedQ=NOT_CONVERGE
+          RETURN
+       ENDIF
+       ! Accumulate current statistics
+       chGEO=IntToChar(iGEO)
+       HDFFileID=OpenHDF(N%HFile)
+       DO iCLONE=1,G%Clones
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Prop'    )
           CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax')
           CALL Get(DIIS%D(cSCF,iCLONE),'DDIISErr')
-       ELSE
+          CALL CloseHDFGroup(HDF_CurrentID)
+          ! Load current energies
+          G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
+          Converged(iCLONE)=NOT_CONVERGE
+          IF(cSCF>1)THEN          
+             ETotA=ETot%D(cSCF-1,iCLONE)
+             ETotB=ETot%D(cSCF  ,iCLONE)
+             DMaxA=DMax%D(cSCF-1,iCLONE)
+             DMaxB=DMax%D(cSCF  ,iCLONE)
+             DIISA=DIIS%D(cSCF-1,iCLONE)
+             DIISB=DIIS%D(cSCF  ,iCLONE)
+             ! Absolute numbers
+             dETot=ABS(ETotA-ETotB)
+             dDMax=ABS(DMaxA-DMaxB)
+             dDIIS=ABS(DIISA-DIISB)
+             ! Relative numbers (Quotients)
+             ETotQ=dETot/ABS(ETotB)
+             !IF(CPSCF) write(*,*) 'dETot',dETot,' ETest',ETest
+             !IF(CPSCF) write(*,*) 'DMaxB',DMaxB,' dTest',dTest
+             DMaxQ=dDMax/ABS(DMaxB+1.D-50)
+             DIISQ=dDIIS/ABS(DIISB+1.D-50)
+             CALL OpenASCII(OutFile,Out)
+             !          WRITE(Out,*)'ETest = ',ETest
+             !          WRITE(Out,*)'DTest = ',DTest
+             !          WRITE(Out,*)'ETotQ = ',ETotQ
+             !          WRITE(Out,*)'ETotA = ',ETotA
+             !          WRITE(Out,*)'ETotB = ',ETotB
+             !          WRITE(Out,*)'DIISQ = ',DIISQ
+             !          WRITE(Out,*)'DMaxQ = ',DMaxQ
+             !          WRITE(Out,*)'DIISA = ',DIISA
+             !          WRITE(Out,*)'DIISB = ',DIISB
+             !          WRITE(Out,*)'DMaxA = ',DMaxA
+             !          WRITE(Out,*)'DMaxB = ',DMaxB
+             CLOSE(Out)
+             ! Convergence tests
+             !         IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest))THEN
+             IF((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<dTest/10.0d0)THEN
+                Converged(iCLONE)=DID_CONVERGE
+                Mssg='Normal CPSCF convergence'
+             ENDIF
+             ! Look for stall out if we have at least one consecutive digit in the DM
+             IF(DMaxB<1.D-1.AND.DMaxA<1.D-1)THEN
+                ! Look for non-decreasing errors due to incomplete numerics
+                IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>6)THEN
+                   IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
+                      Mssg='CPSCF hit DDIIS & DMax increase.'
+                      Converged(iCLONE)=DID_CONVERGE
+                   ENDIF
+                ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>6)THEN
+                   IF(DIISB>DIISA)THEN
+                      Mssg='CPSCF hit DDIIS increase'
+                      Converged(iCLONE)=DID_CONVERGE
+                   ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
+                      Mssg='CPSCF hit DMax increase'
+                      Converged(iCLONE)=DID_CONVERGE
+                   ENDIF
+                ELSEIF((DIISQ<1D-4.OR.DMaxQ<1D-4).AND.cSCF>6)THEN
+                   Mssg='CPSCF convergence due to DDIIS stagnation.'
+                   Converged(iCLONE)=DID_CONVERGE
+                ENDIF
+             ENDIF
+          ENDIF
+       ENDDO
+       CALL CloseHDF(HDFFileID)
+       IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+       DO iCLONE=1,G%Clones
+          ConvergedQ=MAX(ConvergedQ,Converged(iCLONE))
+       ENDDO
+       ! Convergence announcement
+       IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
+          CALL OpenASCII(OutFile,Out)
+          WRITE(Out,*)TRIM(Mssg)
+          WRITE(*,*)TRIM(Mssg)
+          !WRITE(Out,*)'Normal CPSCF convergence.'
+          CLOSE(Out)
+       ENDIF
+       !
+    ELSE
+       ETest=ETol(O%AccuracyLevels(cBAS))
+       DTest=DTol(O%AccuracyLevels(cBAS))
+       IF(cSCF==0)THEN
+          ConvergedQ=.FALSE.
+          RETURN
+       ENDIF
+       ! Accumulate current statistics
+       chGEO=IntToChar(iGEO)
+       HDFFileID=OpenHDF(N%HFile)
+       DO iCLONE=1,G%Clones
+          HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+          ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
           CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr' )
@@ -274,146 +376,146 @@ CONTAINS
           ELSE
              ETotO=1D10
           ENDIF
-       ENDIF
-       ! Load current energies
-       G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
-       Converged(iCLONE)=NOT_CONVERGE
-       IF(cSCF>1)THEN
-          ETotA=ETot%D(cSCF-1,iCLONE)
-          ETotB=ETot%D(cSCF  ,iCLONE)
-          DMaxA=DMax%D(cSCF-1,iCLONE)
-          DMaxB=DMax%D(cSCF  ,iCLONE)
-          DIISA=DIIS%D(cSCF-1,iCLONE)
-          DIISB=DIIS%D(cSCF  ,iCLONE)
-          IF(cSCF>2)THEN
-             ETotA=1D10
-!             DMaxA=1D10
-             DIISA=1D10
-             DO iSCF=2,cSCF-1
-                ETotA=MIN(ETotA,ETot%D(iSCF,iCLONE))
-!                DMaxA=MIN(DMaxA,DMax%D(iSCF,iCLONE))
-                DIISA=MIN(DIISA,DIIS%D(iSCF,iCLONE))
-             ENDDO
-          ENDIF
-          dETot=ABS(ETotA-ETotB)
-          dDMax=ABS(DMaxA-DMaxB)
-          dDIIS=ABS(DIISA-DIISB)
-          ! Relative numbers
-          ETotQ=dETot/ABS(ETotB)
-          DMaxQ=dDMax/ABS(DMaxB+1.D-50)
-          DIISQ=dDIIS/ABS(DIISB+1.D-50)
-          IF(DoODA)THEN
-             ODAQ=ABS(ETotB-ETotO)/ABS(ETotB)
-          ELSE
-             ODAQ=Zero
-          ENDIF
-          CALL OpenASCII(OutFile,Out)
-          WRITE(Out,*)'ODAQ = ',ODAQ
-          WRITE(Out,*)'ETotQ = ',ETotQ
-          WRITE(Out,*)'DIISQ = ',DIISQ
-          WRITE(Out,*)'DMaxQ = ',DMaxQ
-          WRITE(Out,*)'ETOTO = ',ETotO
-          WRITE(Out,*)'ETOTA = ',ETOTA
-          WRITE(Out,*)'ETOTB = ',ETOTB
-          WRITE(Out,*)'DIISA = ',DIISA
-          WRITE(Out,*)'DIISB = ',DIISB
-          WRITE(Out,*)'DMaxA = ',DMaxA
-          WRITE(Out,*)'DMaxB = ',DMaxB
+          ! Load current energies
+          G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
           Converged(iCLONE)=NOT_CONVERGE
-          ! Convergence from above +/- expected delta
-          ! relative to historical minimum energy
-          ALogic=ETotB*(One+ETest)<ETotA
-          ! Convergence from above +/- expected delta
-          ! simply relative to previous energy
-          A2Logic=ETot%D(cSCF  ,iCLONE)*(One+ETest)<ETot%D(cSCF-1,iCLONE)
-          ! Met all criteria
-          CLogic=DMaxB<DTest.AND.ETotQ<ETest
-          ! Exceeded density criteria
-          DLogic=DMaxB<5D-2*DTest
-          ! Exceeded energy criteria
-          ELogic=ETotQ<3D-2*ETest
-          ! Quasi convergence from below (bad)
-          QLogic=(.NOT.ALogic).AND.DLogic.AND.ELogic
-          ! Going to wrong state with DIIS
-          ILogic=DoDIIS.AND.DLogic.AND.(.NOT.ELogic)
-          ! DIIS is oscillating
-          OLogic=DoDIIS.AND.(.NOT.ALogic).AND.( (ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)).OR. &
-                                                (ETotQ>2D-3.AND.(DMaxQ>1D0.OR.DIISQ>1D0)) )
-          ! Maybe DIIS would be a good idea
-          GLogic=DoODA.AND.cSCF>4.AND.DIISB<75D-5.AND.ETotQ<5D-5.AND.DMaxB<1D-1
-          ! Turn on KS recomputation if ODA is not strictly decreasing
-          RLogic=DoODA.AND.(cSCF>2.AND.ODAQ>1D-4.OR..NOT.ALogic) !1D1*ETotQ
-          ! If we are increasing with ODA and rebuild is on, we are well fucked.
-          FLogic=DoODA.AND.RebuildPostODA.AND..NOT.ALogic
-          ! Sort through logic hopefully in the conditionally correct order ...
+          IF(cSCF>1)THEN
+             ETotA=ETot%D(cSCF-1,iCLONE)
+             ETotB=ETot%D(cSCF  ,iCLONE)
+             DMaxA=DMax%D(cSCF-1,iCLONE)
+             DMaxB=DMax%D(cSCF  ,iCLONE)
+             DIISA=DIIS%D(cSCF-1,iCLONE)
+             DIISB=DIIS%D(cSCF  ,iCLONE)
+             IF(cSCF>2)THEN
+                ETotA=1D10
+!             DMaxA=1D10
+                DIISA=1D10
+                DO iSCF=2,cSCF-1
+                   ETotA=MIN(ETotA,ETot%D(iSCF,iCLONE))
+!                DMaxA=MIN(DMaxA,DMax%D(iSCF,iCLONE))
+                   DIISA=MIN(DIISA,DIIS%D(iSCF,iCLONE))
+                ENDDO
+             ENDIF
+             dETot=ABS(ETotA-ETotB)
+             dDMax=ABS(DMaxA-DMaxB)
+             dDIIS=ABS(DIISA-DIISB)
+             ! Relative numbers
+             ETotQ=dETot/ABS(ETotB)
+             DMaxQ=dDMax/ABS(DMaxB+1.D-50)
+             DIISQ=dDIIS/ABS(DIISB+1.D-50)
+             IF(DoODA)THEN
+                ODAQ=ABS(ETotB-ETotO)/ABS(ETotB)
+             ELSE
+                ODAQ=Zero
+             ENDIF
+             CALL OpenASCII(OutFile,Out)
+             WRITE(Out,*)'ODAQ = ',ODAQ
+             WRITE(Out,*)'ETotQ = ',ETotQ
+             WRITE(Out,*)'DIISQ = ',DIISQ
+             WRITE(Out,*)'DMaxQ = ',DMaxQ
+             WRITE(Out,*)'ETOTO = ',ETotO
+             WRITE(Out,*)'ETOTA = ',ETOTA
+             WRITE(Out,*)'ETOTB = ',ETOTB
+             WRITE(Out,*)'DIISA = ',DIISA
+             WRITE(Out,*)'DIISB = ',DIISB
+             WRITE(Out,*)'DMaxA = ',DMaxA
+             WRITE(Out,*)'DMaxB = ',DMaxB
+             Converged(iCLONE)=NOT_CONVERGE
+             ! Convergence from above +/- expected delta
+             ! relative to historical minimum energy
+             ALogic=ETotB*(One+ETest)<ETotA
+             ! Convergence from above +/- expected delta
+             ! simply relative to previous energy
+             A2Logic=ETot%D(cSCF  ,iCLONE)*(One+ETest)<ETot%D(cSCF-1,iCLONE)
+             ! Met all criteria
+             CLogic=DMaxB<DTest.AND.ETotQ<ETest
+             ! Exceeded density criteria
+             DLogic=DMaxB<5D-2*DTest
+             ! Exceeded energy criteria
+             ELogic=ETotQ<3D-2*ETest
+             ! Quasi convergence from below (bad)
+             QLogic=(.NOT.ALogic).AND.DLogic.AND.ELogic
+             ! Going to wrong state with DIIS
+             ILogic=DoDIIS.AND.DLogic.AND.(.NOT.ELogic)
+             ! DIIS is oscillating
+             OLogic=DoDIIS.AND.(.NOT.ALogic).AND.( (ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)).OR. &
+                  (ETotQ>2D-3.AND.(DMaxQ>1D0.OR.DIISQ>1D0)) )
+             ! Maybe DIIS would be a good idea
+             GLogic=DoODA.AND.cSCF>4.AND.DIISB<75D-5.AND.ETotQ<5D-5.AND.DMaxB<1D-1
+             ! Turn on KS recomputation if ODA is not strictly decreasing
+             RLogic=DoODA.AND.(cSCF>2.AND.ODAQ>1D-4.OR..NOT.ALogic) !1D1*ETotQ
+             ! If we are increasing with ODA and rebuild is on, we are well fucked.
+             FLogic=DoODA.AND.RebuildPostODA.AND..NOT.ALogic
+             ! Sort through logic hopefully in the conditionally correct order ...
 
 
-          WRITE(Out,*)' ETest  = ',ETest
-          WRITE(Out,*)' DTest  = ',DTest
-          WRITE(Out,*)' ALogic = ',ALogic
-          WRITE(Out,*)' A2Logic = ',A2Logic
-          WRITE(Out,*)' ELogic = ',ELogic
-          WRITE(Out,*)' CLogic = ',CLogic
-          WRITE(Out,*)' DLogic = ',DLogic
-          WRITE(Out,*)' QLogic = ',QLogic
-          WRITE(Out,*)' ILogic = ',ILogic
-          WRITE(Out,*)' GLogic = ',GLogic
-          WRITE(Out,*)' RLogic = ',RLogic
-          WRITE(Out,*)' FLogic = ',FLogic
+             WRITE(Out,*)' ETest  = ',ETest
+             WRITE(Out,*)' DTest  = ',DTest
+             WRITE(Out,*)' ALogic = ',ALogic
+             WRITE(Out,*)' A2Logic = ',A2Logic
+             WRITE(Out,*)' ELogic = ',ELogic
+             WRITE(Out,*)' CLogic = ',CLogic
+             WRITE(Out,*)' DLogic = ',DLogic
+             WRITE(Out,*)' QLogic = ',QLogic
+             WRITE(Out,*)' ILogic = ',ILogic
+             WRITE(Out,*)' GLogic = ',GLogic
+             WRITE(Out,*)' RLogic = ',RLogic
+             WRITE(Out,*)' FLogic = ',FLogic
 
-          CLOSE(Out)
+             CLOSE(Out)
 
-          IF(ALogic.AND.CLogic)THEN
-             Converged(iCLONE)=DID_CONVERGE
-             Mssg='Normal SCF convergence.'
-          ELSEIF(A2Logic.AND.DLogic)THEN
-             Converged(iCLONE)=DID_CONVERGE
-             Mssg='Convergence of density only'
-          ELSEIF(ALogic.AND.ELogic)THEN
-             Converged(iCLONE)=DID_CONVERGE
-             Mssg='Convergence of energy only'
-          ELSEIF(QLogic)THEN
-             Converged(iCLONE)=DID_CONVERGE
-             Mssg='Quasi convergence from wrong side.'
-          ELSEIF(FLogic)THEN
-             Mssg='ODA with rebuild not strictly decreasing, as good as we can do for now ...'
-             Converged(iCLONE)=DID_CONVERGE
-          ELSEIF(RLogic)THEN
-             Mssg='Rebuilding Fockian post ODA'
-             Converged(iCLONE)=SCF_STALLED
-             ! We may have a corrupted history here, rest...
-             ETot%D(0:iSCF-1,iCLONE)=BIG_DBL
-!          ELSEIF(ILogic)THEN
-!             Converged(iCLONE)=SCF_STALLED
-!             Mssg='DIIS converging to wrong state'
-          ELSEIF(OLogic)THEN
-             Converged(iCLONE)=SCF_STALLED
-             Mssg='DIIS oscillation'
-          ELSEIF(GLogic)THEN
-             Mssg='Turning DIIS on'
-             Converged(iCLONE)=DIIS_NOPATH
+             IF(ALogic.AND.CLogic)THEN
+                Converged(iCLONE)=DID_CONVERGE
+                Mssg='Normal SCF convergence.'
+             ELSEIF(A2Logic.AND.DLogic)THEN
+                Converged(iCLONE)=DID_CONVERGE
+                Mssg='Convergence of density only'
+             ELSEIF(ALogic.AND.ELogic)THEN
+                Converged(iCLONE)=DID_CONVERGE
+                Mssg='Convergence of energy only'
+             ELSEIF(QLogic)THEN
+                Converged(iCLONE)=DID_CONVERGE
+                Mssg='Quasi convergence from wrong side.'
+             ELSEIF(FLogic)THEN
+                Mssg='ODA with rebuild not strictly decreasing, as good as we can do for now ...'
+                Converged(iCLONE)=DID_CONVERGE
+             ELSEIF(RLogic)THEN
+                Mssg='Rebuilding Fockian post ODA'
+                Converged(iCLONE)=SCF_STALLED
+                ! We may have a corrupted history here, rest...
+                ETot%D(0:iSCF-1,iCLONE)=BIG_DBL
+                !          ELSEIF(ILogic)THEN
+                !             Converged(iCLONE)=SCF_STALLED
+                !             Mssg='DIIS converging to wrong state'
+             ELSEIF(OLogic)THEN
+                Converged(iCLONE)=SCF_STALLED
+                Mssg='DIIS oscillation'
+             ELSEIF(GLogic)THEN
+                Mssg='Turning DIIS on'
+                Converged(iCLONE)=DIIS_NOPATH
+             ENDIF
           ENDIF
+          IF(DoDIIS.AND.DIISB<DIISA)THEN
+             ! If DIIS is making progress, then turn on archivation of the density
+             CALL Put(.TRUE.,'ArchiveDensity')
+          ELSE
+             ! otherwise, dont archive a potential instability
+             CALL Put(.FALSE.,'ArchiveDensity')
+          ENDIF
+          CALL CloseHDFGroup(HDF_CurrentID)
+       ENDDO
+       CALL CloseHDF(HDFFileID)
+       IF(cSCF>1)ConvergedQ=NOT_CONVERGE
+       DO iCLONE=1,G%Clones
+          ConvergedQ=MAX(ConvergedQ,Converged(iCLONE))
+       ENDDO
+       ! Convergence announcement
+       IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN
+          CALL OpenASCII(OutFile,Out)
+          WRITE(Out,*)TRIM(Mssg)
+          WRITE(*,*)TRIM(Mssg)
+          CLOSE(Out)
        ENDIF
-       IF(DoDIIS.AND.DIISB<DIISA)THEN
-          ! If DIIS is making progress, then turn on archivation of the density
-          CALL Put(.TRUE.,'ArchiveDensity')
-       ELSE
-          ! otherwise, dont archive a potential instability
-          CALL Put(.FALSE.,'ArchiveDensity')
-       ENDIF       
-       CALL CloseHDFGroup(HDF_CurrentID)
-    ENDDO
-    CALL CloseHDF(HDFFileID)
-    IF(cSCF>1)ConvergedQ=NOT_CONVERGE
-    DO iCLONE=1,G%Clones
-       ConvergedQ=MAX(ConvergedQ,Converged(iCLONE))
-    ENDDO
-    ! Convergence announcement
-    IF(ConvergedQ.NE.NOT_CONVERGE.AND.cSCF>2)THEN
-       CALL OpenASCII(OutFile,Out)
-       WRITE(Out,*)TRIM(Mssg)
-       WRITE(*,*)TRIM(Mssg)
-       CLOSE(Out)
     ENDIF
   END FUNCTION ConvergedQ
   !===============================================================================
@@ -768,7 +870,6 @@ CONTAINS
 !!$#else
 !!$       IF(CPSCF) THEN
 !!$          CALL Get(Etot%D(cSCF,iCLONE),'Prop'    ,StatsToChar(S%Current%I))
-!!$          !Etot%D(cSCF,iCLONE)=0.0d0 !vw MUST BE CHANGED
 !!$          CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax',StatsToChar(S%Current%I))
 !!$          CALL Get(DIIS%D(cSCF,iCLONE),'DDIISErr',StatsToChar(S%Current%I))
 !!$       ELSE
@@ -780,7 +881,6 @@ CONTAINS
 !!$       CALL CloseHDFGroup(HDF_CurrentID)
 !!$       ! Load current energies
 !!$       G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
-!!$
 !!$       Converged(iCLONE)=.FALSE.
 !!$       IF(cSCF>1)THEN          
 !!$          ETotA=ETot%D(cSCF-1,iCLONE)
