@@ -1,4 +1,3 @@
-
 !    COMPUTES AN ORTHOGONAL GUESS DENSITY MATRIX EITHER FROM
 !    A SUPERPOSITION OF DIAGONAL, ATOMIC LEWIS STRUCTURE BLOCKS 
 !    OR FROM A ORTHOGONAL DENSITY MATRIX COORESPONDING TO A DIFFERENT 
@@ -32,14 +31,14 @@ PROGRAM P2Use
                                 :: P,P0,X,S,S0,S1,dS,Tmp1,Tmp2
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: MaxDS
+  REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
                                    Ipot_Error,Norm_Error,Lam,TError0
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
-                                   OldFileID,ICart,N,NStep
+                                   OldFileID,ICart,N,NStep,iGEO,DMPOrder
   CHARACTER(LEN=2)              :: Cycl
-  LOGICAL                       :: Present
+  LOGICAL                       :: Present,DoingMD
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
   !------------------------------------------------------------------------------- 
@@ -205,6 +204,12 @@ PROGRAM P2Use
      CALL Delete(P)
   ! Geometry Change 
   CASE('Extrapolate')
+     ! Allocate
+     CALL New(P)
+     CALL New(S)
+     CALL New(dS)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
      ! Get Marices
      IF(PrvGeom==CurGeom) THEN
         CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
@@ -232,24 +237,29 @@ PROGRAM P2Use
         HDFFileID=OpenHDF(H5File)
         H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
         HDF_CurrentID=H5GroupID
+        CALL SetEq(P,P0)
      ELSE
         CALL Get(S0,TrixFile('S',Args,Stats_O=Previous))
-        CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
+        CALL Get(S1,TrixFile('S',Args,Stats_O=Current ))
         CALL Get(P0,TrixFile('D',Args,-1))
+!
+        CALL Get(DoingMD ,'DoingMD')
+        CALL Get(DMPOrder,'DMPOrder')
+        IF(DMPorder > 4) THEN
+           CALL Halt('DMPOrder is only implimented up to 4th order')
+        ENDIF
+!
+        iGEO  = Args%I%I(3)
+        DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
+        CALL DMPProj(iGEO,DMPOrder,P,P0,Tmp1,Tmp2)
+!
      ENDIF
-     ! Allocate
-     CALL New(P)
-     CALL New(S)
-     CALL New(dS)
-     CALL New(Tmp1)
-     CALL New(Tmp2)
+
      ! Compute dS
      CALL Multiply(S1,-One)
      CALL Add(S1,S0,dS)
      CALL Multiply(S1,-One)
-     MaxDS = SQRT(Trace(dS,dS))
-     ! Initialize P
-     CALL SetEq(P,P0)
+     MaxDS = SQRT(Trace(dS,dS)) 
      ! Initial Trace Error
      TError0  = ABS(Trace(P,S1)-Half*DBLE(NEl))
      !Number of Steps
@@ -338,3 +348,4 @@ PROGRAM P2Use
   CALL ShutDown(Prog)   
 !
 END PROGRAM P2Use
+
