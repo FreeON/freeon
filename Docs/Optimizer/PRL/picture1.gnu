@@ -20,11 +20,11 @@
 #    	Send comments and requests for help to <info-gnuplot-beta@dartmouth.edu>
 #    	Send bugs, suggestions and mods to <info-gnuplot-beta@dartmouth.edu>
 #    
-# set terminal postscript eps enhanced color blacktext \
+ set terminal postscript eps enhanced color blacktext \
    dashed dashlength 1.0 linewidth 2.2 defaultplex \
    palfuncparam 2000,0.003 \
    butt "Times Roman" 26
-# set output '1_7_6_Data.eps'
+set output '1_7_6_Data.eps'
 unset clip points
 set clip one
 unset clip two
@@ -95,7 +95,8 @@ set mztics default
 set mx2tics default
 set my2tics default
 set mcbtics default
-set xtics border mirror norotate 5
+#set xtics border mirror norotate 5
+set xtics border mirror norotate 100,5
 set ytics border mirror norotate autofreq 
 set ztics border nomirror norotate autofreq 
 set nox2tics
@@ -115,7 +116,8 @@ set timefmt y2 "%d/%m/%y,%H:%M"
 set timefmt cb "%d/%m/%y,%H:%M"
 set xlabel "angle (degree)" 0.000000,0.000000  font ""
 set x2label "" 0.000000,0.000000  font ""
-set xrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
+#set xrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
+set xrange [98:120] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set x2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set ylabel "gradient (a.u.)" 0.000000,0.000000  font ""
 set y2label "" 0.000000,0.000000  font ""
@@ -139,5 +141,5 @@ set colorbox default
 set colorbox vertical origin 0.9,0.2 size 0.1,0.63 bdefault
 set loadpath 
 set fontpath 
-plot "QUADR/1_7_6_Data" u 2:3 w points pointtype 4 pointsize 3,-1.20106251+0.02112388*x+-0.00009116*x*x, "QUADR/1_7_6_Pred" u 1:2 w points pointtype 3 pointsize 3
+plot "QUADR/1_7_6_Data" u 2:3 w points pointtype 4 pointsize 3,-.1781331503+.0017985874*x, "QUADR/1_7_6_Pred2" u 1:2 w points pointtype 3 pointsize 3
 #    EOF
