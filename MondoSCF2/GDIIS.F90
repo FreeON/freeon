@@ -216,10 +216,10 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE DelocIntValues(CartStruct,DelocStruct,B3,CholData3, &
+   SUBROUTINE DelocIntValues(CartStruct,DStruct,B3,CholData3, &
                             IntCs,LinCrit)
      TYPE(BMatr) :: B3
-     REAL(DOUBLE),DIMENSION(:,:) :: CartStruct,DelocStruct
+     REAL(DOUBLE),DIMENSION(:,:) :: CartStruct,DStruct
      REAL(DOUBLE)                :: LinCrit
      INTEGER                     :: NCart,NIntC,GDIISMemory
      INTEGER                     :: I,J,NatmsLoc
@@ -228,7 +228,7 @@ CONTAINS
      TYPE(DBL_RNK2)              :: ActCarts
      TYPE(INTC)                  :: IntCs
      !
-     NCart=SIZE(DelocStruct,1)
+     NCart=SIZE(DStruct,1)
      NatmsLoc=NCart/3
      NIntC=SIZE(B3%IB,1)
      GDIISMemory=SIZE(CartStruct,2)
@@ -244,7 +244,7 @@ CONTAINS
        CALL INTCValue(IntCs,ActCarts%D,LinCrit)
        VectInt%D=IntCs%Value
        CALL PrimToDeloc(VectInt%D,VectCart%D,B3,CholData3)
-       DelocStruct(1:NCart,I)=VectCart%D
+       DStruct(1:NCart,I)=VectCart%D
      ENDDO
      !
      CALL Delete(ActCarts)
