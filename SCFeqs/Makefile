@@ -29,7 +29,16 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC=#-DNODIIS
+CPPMISC=#-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA
+#
+BlkAInvObjs = BlokAInv.o  
+LowdinOObjs = LowdinO.o 
+#
+SDMM_Objs  = FillPBlok.o SDMM.o DenMatMethods.o
+SP2_Objs   = FillPBlok.o SP2.o  DenMatMethods.o
+SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
+NT4_Objs   = FillPBlok.o NT4.o  DenMatMethods.o
+PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
 Stat_Objs  = SCFStatus.o          
@@ -38,17 +47,12 @@ FBuild_Objs= FBuild.o
 DIIS_Objs  = DIIS.o               
 Dev_Objs   = ToDev.o  
 #
-SDMM_Objs  = FillPBlok.o SDMM.o DenMatMethods.o
-SP2_Objs   = FillPBlok.o SP2.o  DenMatMethods.o
-SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
-NT4_Objs   = FillPBlok.o NT4.o  DenMatMethods.o
-PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
+ReleaseFiles=BlokAInv.x LowdinO.x RHeqs.x    \
+             SDMM.x SP2.x SP4.x NT4.x PM.x   \
+             FillPBlok.x P2Use.x FillPBlok.x \
+             SCFStatus.x FBuild.x DIIS.x ToDev.x 
 #
-ReleaseFiles=FillPBlok.x P2Use.x FillPBlok.x \
-             SDMM.x SCFStatus.x RHeqs.x \
-             FBuild.x DIIS.x ToDev.x 
-#
-all:	Stat Gues FBuild DIIS RHEq SDMM SP2 SP4 NT4 PM
+all:	Blk Lwd RHEq SDMM SP2 SP4 NT4 PM Stat Gues FBuild DIIS 
 #
 release:clean $(ReleaseFiles)
 #
@@ -70,33 +74,25 @@ clean:
 	rm -f $(MONDO_EXEC)/SP4
 	rm -f $(MONDO_EXEC)/NT4
 	rm -f $(MONDO_EXEC)/PM
+	rm -f $(MONDO_EXEC)/AInv
+	rm -f $(MONDO_EXEC)/LowdinO
 	ln -s /dev/null core
 #
-Stat:	$(Stat_Objs)
-	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv SCFstats $(MONDO_EXEC)/SCFstats
+#	Orthogonalization transforms
 #
-Gues:	$(Gues_Objs)
-	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv P2Use $(MONDO_EXEC)/P2Use
+Blk:	$(BlkAInvObjs)
+	$(LD) $(LDFLAGS) AInv $(BlkAInvObjs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv AInv $(MONDO_EXEC)/AInv
+#
+Lwd:	$(LowdinOObjs)
+	$(LD) $(LDFLAGS) LowdinO $(LowdinOObjs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv LowdinO $(MONDO_EXEC)/LowdinO
+#
+#       SCF Solvers
 #
 RHEq:	$(RHEq_Objs)
 	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv RHeqs $(MONDO_EXEC)/RHeqs 
-#
-FBuild:	$(FBuild_Objs)
-	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv FBuild $(MONDO_EXEC)/FBuild
-#
-DIIS:	$(DIIS_Objs)
-	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv DIIS $(MONDO_EXEC)/DIIS
-#
-Dev:	$(Dev_Objs)
-	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
-	mv ToDev $(MONDO_EXEC)/ToDev
-#
-#       Methods
 #
 SDMM:	$(SDMM_Objs)
 	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
@@ -118,6 +114,28 @@ PM:	$(PM_Objs)
 	$(LD) $(LDFLAGS) PM  $(PM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv PM $(MONDO_EXEC)/PM
 #
+#	Misc
+#
+Stat:	$(Stat_Objs)
+	$(LD) $(LDFLAGS) SCFstats $(Stat_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	mv SCFstats $(MONDO_EXEC)/SCFstats
+#
+Gues:	$(Gues_Objs)
+	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv P2Use $(MONDO_EXEC)/P2Use
+#
+FBuild:	$(FBuild_Objs)
+	$(LD) $(LDFLAGS) FBuild $(FBuild_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	mv FBuild $(MONDO_EXEC)/FBuild
+#
+DIIS:	$(DIIS_Objs)
+	$(LD) $(LDFLAGS) DIIS $(DIIS_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv DIIS $(MONDO_EXEC)/DIIS
+#
+Dev:	$(Dev_Objs)
+	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
+	mv ToDev $(MONDO_EXEC)/ToDev
+#
 DIIS.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
 FBuild.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
 P2Use.o:	FillPBlok.o $(MONDO_HOME)/Libs/libMondoMods.a
@@ -129,3 +147,5 @@ SP2.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
 SP4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
 NT4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
 PM.o:                       $(MONDO_HOME)/Libs/libMondoMods.a
+LowdinO.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
+BlokAInv.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
