@@ -18,7 +18,7 @@
 %  4)  latex apssamp.tex
 %
 %\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
+%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 %\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
 
 % Some other (several out of many) possibilities
@@ -26,9 +26,25 @@
 %\documentclass[preprint,aps,draft]{revtex4}
 %\documentclass[prb]{revtex4}% Physical Review B
 
-\usepackage{graphicx}% Include figure files
-\usepackage{dcolumn}% Align table columns on decimal point
-\usepackage{bm}% bold math
+%%\usepackage{amsmath}
+%%\usepackage{amssymb}
+%%\usepackage{graphicx}% Include figure files
+%%\usepackage{dcolumn}% Align table columns on decimal point
+%%\usepackage{bm}% bold math
+
+
+\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+
+
 
 %\nofiles
 
@@ -164,6 +180,17 @@ The coupled perturbed self concistent field equations occur in Hartree-Fock
 and density functional theory for the computation of material response
 properties. Here, we discuss the CPSCF equation in the framework of
 HF theory, however an extension to DFT is straightforward.
+
+
+\begin{eqnarray}
+  E_{\rm tot}(\mathcal{E})= E_{\rm tot}(0) && +\sum_a\mu_a\mathcal{E}^a\\
+  &&+\frac{1}{2}\sum_{ab}\alpha_{ab}\mathcal{E}^a\mathcal{E}^b\\
+  &&+\frac{1}{6}\sum_{abc}\beta_{abc}\mathcal{E}^a\mathcal{E}^b\mathcal{E}^c\\
+  &&+\frac{1}{24}\sum_{abcd}\gamma_{abcd}\mathcal{E}^a\mathcal{E}^b\mathcal{E}^c\mathcal{E}^d\\
+  &&+\dots,
+\end{eqnarray}
+
+
 
 \begin{equation}
   \mathcal{F}=\mathcal{F}^{0}+\sum_a \mathcal{E}^{a}\mathcal{F}^{a}+
@@ -329,7 +356,9 @@ E^{abcd}=\frac{1}{24}Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
 \end{split}
 \end{equation}
 
-
+\begin{equation}
+  E^{abcd}=\frac{1}{24}P(a,b,c,d)Tr([P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd}))
+\end{equation}
 
 \begin{equation}
   \alpha_{ab}=-2Tr[D^a\mu_b]
@@ -397,37 +426,37 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 \end{figure}
 
 
-\begin{table}
+\begin{table}[t]
   \centering
   \caption{\protect
     Longitudinal polarizability $\alpha_{zz}$
     for different water chain lengths with the 6-31G and 6-31G** basis sets
-    and $Tight$ accuracy (See text) and the results obtained with
+    and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
   }\label{tab:Alpha_1D_Values}
-  \begin{ruledtabular}
-    \begin{tabular}{cccc}
-      $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-      &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-      &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
-      \hline
-      1 & 5.8136 & 5.813589 & 6.318837     \\
-      2 & 6.3448 & 6.344830 & 7.047412     \\
-      3 & 6.5844 & 6.584449 & 7.399737     \\
-      4 & 6.7276 & 6.727684 & 7.609261     \\
-      5 & 6.8226 & 6.822640 & 7.746704     \\
-     10 & 7.0308 & 7.030870 & 8.045561     \\
-     15 & 7.1047 & 7.104780 & 8.151306     \\
-     20 & 7.1424 & 7.142433 & 8.205162     \\
-     25 & 7.1652 & 7.165231 & 8.237774     \\
-     30 & 7.1805 & 7.180514 & 8.259633     \\
-     35 & 7.1914 & 7.191468 & 8.275303     \\
-     40 & 7.1996 & 7.199704 & 8.287090     \\
-    \end{tabular}
-  \end{ruledtabular}
- \footnotetext[1]{GAMESS calculations.}
- \footnotetext[2]{MondoSCF calculations.}
+  \begin{tabular}{cccc}
+    \toprule
+    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
+    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
+    &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+    \hline
+    1 & 5.8136 & 5.813589 & 6.318837     \\
+    2 & 6.3448 & 6.344830 & 7.047412     \\
+    3 & 6.5844 & 6.584449 & 7.399737     \\
+    4 & 6.7276 & 6.727684 & 7.609261     \\
+    5 & 6.8226 & 6.822640 & 7.746704     \\
+    10 & 7.0308 & 7.030870 & 8.045561     \\
+    15 & 7.1047 & 7.104780 & 8.151306     \\
+    20 & 7.1424 & 7.142433 & 8.205162     \\
+    25 & 7.1652 & 7.165231 & 8.237774     \\
+    30 & 7.1805 & 7.180514 & 8.259633     \\
+    35 & 7.1914 & 7.191468 & 8.275303     \\
+    40 & 7.1996 & 7.199704 & 8.287090     \\
+    \botrule
+  \end{tabular}
+  \footnotetext[1]{GAMESS calculations.}
+  \footnotetext[2]{MondoSCF calculations.}
 \end{table}
 
 
@@ -436,70 +465,70 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
   \caption{\protect
     Longitudinal first hyperpolarizability $\beta_{zzz}$
     for different water chain lengths with the 6-31G and 6-31G** basis sets
-    and $Tight$ accuracy (See text) and the results obtained with
+    and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
   }\label{tab:Beta_1D_Values}
-  \begin{ruledtabular}
-    \begin{tabular}{ccccc}
-      $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-      &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-      &\multicolumn{1}{c}{6-31G\footnotemark[2]\footnotemark[3]}
-      &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
-      \hline
-      1 & -30.6125 & -30.612178 & -30.612274 & -25.232854 \\
-      2 & -29.5444 & -29.545096 & -29.545207 & -23.454776 \\
-      3 & -25.3696 & -25.370516 & -25.370628 & -19.611398 \\
-      4 & -22.1411 & -22.141553 & -22.141869 & -16.713840 \\
-      5 & -19.8925 & -19.893306 & -19.893441 & -14.683861 \\
-     10 & -14.8063 & -14.807203 & -14.807392 & -10.065481 \\
-     15 & -12.9713 & -12.972171 & -12.972379 &  -8.396753 \\
-     20 & -12.0334 & -12.034259 & -12.034505 &  -7.544200 \\
-     25 & -11.4648 & -11.465624 & -11.465915 &  -7.027523 \\
-     30 & -11.0834 & -11.084234 & -11.084569 &  -6.680997 \\
-     35 & -10.8099 & -10.810645 & -10.811061 &  -6.432514 \\
-     40 & -10.6042 & -10.604860 & -10.605360 &  -6.245644 \\
-    \end{tabular}
-  \end{ruledtabular}
- \footnotetext[1]{GAMESS calculations.}
- \footnotetext[2]{MondoSCF calculations.}
- \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
+  \begin{tabular}{ccccc}
+    \toprule
+    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
+    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
+    &\multicolumn{1}{c}{6-31G\footnotemark[2]\footnotemark[3]}
+    &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+    \hline
+    1 & -30.6125 & -30.612178 & -30.612274 & -25.232854 \\
+    2 & -29.5444 & -29.545096 & -29.545207 & -23.454776 \\
+    3 & -25.3696 & -25.370516 & -25.370628 & -19.611398 \\
+    4 & -22.1411 & -22.141553 & -22.141869 & -16.713840 \\
+    5 & -19.8925 & -19.893306 & -19.893441 & -14.683861 \\
+    10 & -14.8063 & -14.807203 & -14.807392 & -10.065481 \\
+    15 & -12.9713 & -12.972171 & -12.972379 &  -8.396753 \\
+    20 & -12.0334 & -12.034259 & -12.034505 &  -7.544200 \\
+    25 & -11.4648 & -11.465624 & -11.465915 &  -7.027523 \\
+    30 & -11.0834 & -11.084234 & -11.084569 &  -6.680997 \\
+    35 & -10.8099 & -10.810645 & -10.811061 &  -6.432514 \\
+    40 & -10.6042 & -10.604860 & -10.605360 &  -6.245644 \\
+    \botrule
+  \end{tabular}
+  \footnotetext[1]{GAMESS calculations.}
+  \footnotetext[2]{MondoSCF calculations.}
+  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
 
 
 \begin{table}
   \centering
   \caption{\protect
-    Longitudinal seconf hyperpolarizability $\gamma_{zzzz}$
+    Longitudinal second hyperpolarizability $\gamma_{zzzz}$
     for different water chain lengths with the 6-31G and 6-31G** basis sets
-    and $Tight$ accuracy (See text) and the results obtained with
+    and {\tt TIGHT} accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
   }\label{tab:Gamma_1D_Values}
-  \begin{ruledtabular}
-    \begin{tabular}{ccccc}
-      $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
-      &\multicolumn{1}{c}{6-31G\footnotemark[2]}
-      &\multicolumn{1}{c}{6-31G\footnotemark[2]\footnotemark[3]}
-      &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
-      \hline
-      1 &  330.5753 &  330.577009 &  330.572592 &  278.898509 \\
-      2 &  820.1398 &  820.160650 &  820.153734 &  663.493200 \\
-      3 & 1008.5656 & 1008.580733 & 1008.582556 &  836.073966 \\
-      4 & 1103.4813 & 1103.494950 & 1103.497148 &  935.378474 \\
-      5 & 1168.9563 & 1168.972479 & 1168.975145 & 1004.896120 \\
-     10 & 1324.2906 & 1324.304700 & 1324.307818 & 1169.020999 \\
-     15 & 1381.8657 & 1381.882600 & 1381.882180 & 1229.747000 \\
-     20 & 1411.4264 & 1411.448699 & 1411.437607 & 1260.928449 \\
-     25 & 1429.3767 & 1428.980999 & 1429.379837 & 1279.877079 \\
-     30 & 1441.4261 & 1441.474333 & 1441.418800 & 1292.603933 \\
-     35 & 1450.0713 & 1450.143685 & 1450.043351 & 1301.746485 \\
-     40 & 1456.5756 & 1456.682800 & 1456.520170 & 1308.644675 \\
-    \end{tabular}
-  \end{ruledtabular}
- \footnotetext[1]{GAMESS calculations.}
- \footnotetext[2]{MondoSCF calculations.}
- \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
+  \begin{tabular}{ccccc}
+    \toprule
+    $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
+    &\multicolumn{1}{c}{6-31G\footnotemark[2]}
+    &\multicolumn{1}{c}{6-31G\footnotemark[2]\footnotemark[3]}
+    &\multicolumn{1}{c}{6-31G**\footnotemark[2]}\\
+    \hline
+    1 &  330.5753 &  330.577009 &  330.572592 &  278.898509 \\
+    2 &  820.1398 &  820.160650 &  820.153734 &  663.493200 \\
+    3 & 1008.5656 & 1008.580733 & 1008.582556 &  836.073966 \\
+    4 & 1103.4813 & 1103.494950 & 1103.497148 &  935.378474 \\
+    5 & 1168.9563 & 1168.972479 & 1168.975145 & 1004.896120 \\
+    10 & 1324.2906 & 1324.304700 & 1324.307818 & 1169.020999 \\
+    15 & 1381.8657 & 1381.882600 & 1381.882180 & 1229.747000 \\
+    20 & 1411.4264 & 1411.448699 & 1411.437607 & 1260.928449 \\
+    25 & 1429.3767 & 1428.980999 & 1429.379837 & 1279.877079 \\
+    30 & 1441.4261 & 1441.474333 & 1441.418800 & 1292.603933 \\
+    35 & 1450.0713 & 1450.143685 & 1450.043351 & 1301.746485 \\
+    40 & 1456.5756 & 1456.682800 & 1456.520170 & 1308.644675 \\
+    \botrule
+  \end{tabular}
+  \footnotetext[1]{GAMESS calculations.}
+  \footnotetext[2]{MondoSCF calculations.}
+  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
 
 
@@ -576,14 +605,39 @@ responses.
 
 \begin{figure}[t]
   \caption{\protect
-    Magnitudes of the RHF/6-31G density matrix derivative elements 
-    along the z axis with the separation of basis function centers
+    Magnitudes of the RHF/6-31G density matrix derivative elements $D^{x}_{cd}$
+    along the $x$ axis with the separation of basis function centers
     for the $(H_2O)_{150}$ water cluster. The density matrix 
-    derivative has been converged to within Tight (e.g. 
+    derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
   }\label{fig:Alpha_Decay}
-%  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Alpha_Decay_Z_6-31G}}
+  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
 \end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    Magnitudes of the RHF/6-31G density matrix second derivative elements $D^{xx}_{cd}$
+    along the $x$ axis with the separation of basis function centers
+    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    derivative has been converged to within {\tt TIGHT} (e.g. 
+    matrix threshold of $10^{-6}$ $[a.u.]$).
+  }\label{fig:Alpha_Decay}
+  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    Magnitudes of the RHF/6-31G density matrix third derivative elements $D^{xxx}_{cd}$
+    along the $x$ axis with the separation of basis function centers
+    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    derivative has been converged to within {\tt TIGHT} (e.g. 
+    matrix threshold of $10^{-6}$ $[a.u.]$).
+  }\label{fig:Alpha_Decay}
+  %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+\end{figure}
+
 
 
 

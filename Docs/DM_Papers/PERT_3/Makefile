@@ -1,4 +1,4 @@
-all:	latex dvi
+all:	latex #dvi
 
 new: 	clean links dvi
 
