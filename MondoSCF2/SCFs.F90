@@ -88,7 +88,7 @@ CONTAINS
     INTEGER          :: cSCF,cBAS,cGEO,iCLONE,Modl,WhatsUp
     LOGICAL,OPTIONAL :: CPSCF_O
     LOGICAL          :: DoDIIS,SCFCycle,DoCPSCF,DoODA,RebuildPostODA, &
-                        DoMIX,RebuildPostMIX,Automatic
+                        DoMIX,RebuildPostMIX,Automatic1,Automatic2
     CHARACTER(LEN=128) :: Tmp
     !----------------------------------------------------------------------------!
 
@@ -96,7 +96,10 @@ CONTAINS
        DoODA=.TRUE.
        DoMIX=.FALSE.
        DoDIIS=.FALSE.
-       Automatic=.TRUE.
+       Automatic1=.TRUE.
+       Automatic2=.TRUE.
+       ! Switching on/off rebuild doesn't work so well.  Lets be conservative for now
+       RebuildPostODA=.TRUE.
     ENDIF
 
     IF(PRESENT(CPSCF_O))THEN
@@ -148,8 +151,7 @@ CONTAINS
           CALL Invoke('SCFstats',N,S,M)
        ENDIF
     ELSEIF(DoODA)THEN
-       RebuildPostODA=.TRUE.
-       IF(cSCF>1)THEN
+        IF(cSCF>1)THEN
           CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
           CALL DensityBuild(N,S,M)
           CALL FockBuild(cSCF,cBAS,N,S,O,M)
@@ -165,7 +167,7 @@ CONTAINS
              CALL DensityBuild(N,S,M)
              CALL Invoke('HiCu',N,S,M)
              CALL Invoke('FBuild',N,S,M)
-             ! CALL FockBuild(cSCF,cBAS,N,S,O,M)
+             !CALL FockBuild(cSCF,cBAS,N,S,O,M)
           ENDIF
           CALL SolveSCF(cBAS,N,S,O,M)
           CALL Invoke('SCFstats',N,S,M)
@@ -184,23 +186,32 @@ CONTAINS
     WhatsUp=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,DoDIIS,DoODA,CPSCF_O)
     S%Previous%I=S%Current%I
     !
-    IF(.NOT.DoCPSCF.AND.Automatic.AND.DoDIIS.AND.WhatsUp==SCF_STALLED)THEN
+    IF(.NOT.DoCPSCF.AND.Automatic1.AND.DoDIIS.AND.WhatsUp==SCF_STALLED)THEN
        ! DIIS didnt work, dont try it again ...
        DoDIIS=.FALSE.
        DoODA=.TRUE.
        SCFCycle=.FALSE.
-       Automatic=.FALSE.
-    ELSEIF(.NOT.DoCPSCF.AND.Automatic.AND.DoODA.AND.WhatsUp==DIIS_NOPATH)THEN
+       Automatic1=.FALSE.
+    ELSEIF(.NOT.DoCPSCF.AND.Automatic1.AND.DoODA.AND.WhatsUp==DIIS_NOPATH)THEN
        ! DIIS might be ok, try it just once
        DoDIIS=.TRUE.
        DoODA=.FALSE.
        SCFCycle=.FALSE.
+    ELSEIF(.NOT.DoCPSCF.AND.Automatic2.AND.DoODA.AND.WhatsUp==SCF_STALLED)THEN
+       ! Mixing the KS energy and matrix didnt work, must rebuild KS from scratch
+       DoDIIS=.FALSE.
+       DoODA=.TRUE.
+       SCFCycle=.FALSE.
+       Automatic2=.FALSE.
+       RebuildPostODA=.TRUE.
     ELSEIF(WhatsUp==DID_CONVERGE.OR. &
           (WhatsUp==SCF_STALLED.AND.DoODA))THEN
        SCFCycle=.TRUE.
     ELSE
        SCFCycle=.FALSE.
     ENDIF
+
+
   END FUNCTION SCFCycle
   !===============================================================================
   !
@@ -215,7 +226,7 @@ CONTAINS
     LOGICAL,OPTIONAL            :: CPSCF_O
     LOGICAL                     :: CPSCF,DoDIIS,DoODA
     LOGICAL                     :: ALogic,BLogic,CLogic,DLogic,ELogic, &
-                                   GLogic,QLogic,ILogic,OLogic
+                                   GLogic,QLogic,ILogic,OLogic,RLogic
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
@@ -297,16 +308,17 @@ CONTAINS
           ! Exceeded density criteria
           DLogic=DMaxB<65D-2*DTest
           ! Exceeded energy criteria
-          ELogic=ETotQ<1D-1*ETest  
-          WRITE(*,*)ALogic,ELogic,ETotQ,1D-1*ETest
+          ELogic=ETotQ<3D-2*ETest  
           ! Quasi convergence from below (bad) 
           QLogic=(.NOT.ALogic).AND.DLogic.AND.ELogic
           ! Going to wrong state with DIIS
           ILogic=DoDIIS.AND.DLogic.AND.(.NOT.ELogic)
           ! DIIS is oscillating 
-          OLogic=DoDIIS.AND.(.NOT.ALogic).AND.ETotQ>ETest*1D2.AND.(DMaxQ>1D0.AND.DIISQ>1D0)
+          OLogic=DoDIIS.AND.(.NOT.ALogic).AND.ETotQ>1D-4.AND.(DMaxQ>1D0.AND.DIISQ>1D0)
           ! Maybe DIIS would be a good idea 
-          GLogic=DoODA.AND.DIISB<1D-3.AND.ETotQ<1D-5.AND.DMaxB<1.D-1
+          GLogic=DoODA.AND.DIISB<8D-4.AND.ETotQ<4D-5.AND.DMaxB<3D-1
+          ! Turn on KS recomputation if ODA is not strictly decreasing 
+          RLogic=DoODA.AND.(.NOT.ALogic)
           ! Sort through logic hopefully in the conditionally correct order ...
           IF(ALogic.AND.CLogic)THEN
              Converged(iCLONE)=DID_CONVERGE
@@ -327,8 +339,11 @@ CONTAINS
              Converged(iCLONE)=SCF_STALLED
              Mssg='DIIS oscillation'
           ELSEIF(GLogic)THEN
-             Mssg='Domain of DIIS ...'
+             Mssg='Maybe DIIS ?'
              Converged(iCLONE)=DIIS_NOPATH
+!          ELSEIF(RLogic)THEN
+!             Mssg='ODA stalled'
+!             Converged(iCLONE)=SCF_STALLED
           ENDIF             
        ENDIF
     ENDDO
