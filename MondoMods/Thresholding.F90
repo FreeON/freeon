@@ -184,24 +184,30 @@ MODULE Thresholding
        ELSE 
           ExtraEll=0
        ENDIF
-!
        IF(PRESENT(Tau_O)) THEN
           Tau=Tau_O
        ELSE
           Tau=Thresholds%Dist
        ENDIF
-!
        IF(PRESENT(Potential_O)) THEN
           Potential=Potential_O
        ELSE
           Potential=.FALSE.
        ENDIF
-!
        IF(Ell+ExtraEll==0)THEN
-          CramCo=ABS(HGTF(1))+SMALL_DBL
+          ! For S functions we can use tighter bounds (no halving of exponents)
+          ScaledTau=Tau/(ABS(HGTF(1))+SMALL_DBL)
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! HGTF(1)*Int dr [(Pi/Zeta)^3/2 delta(r)-Exp(-Zeta r^2)]/|r-R| < Tau
+             R=PFunk(Zeta,ScaledTau)
+          ELSE
+             ! Gaussian solution gives HGTF(1)*Exp[-Zeta*R^2] <= Tau
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/Zeta))
+          ENDIF
        ELSE
-!         Compute universal prefactor based on Cramers inequality (Cramers coefficient),
-!         based on the enequality H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+          ! Universal prefactor based on Cramers inequality:
+          ! H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
           CramCo=SMALL_DBL
           DO L=0,Ell
              DO M=0,Ell-L
@@ -212,22 +218,22 @@ MODULE Thresholding
                    MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
                    HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
                    CramCo=MAX(CramCo,ABS(HGInEq))
-!                   CramCo=CramCo+ABS(HGInEq)
+                   ! CramCo=CramCo+ABS(HGInEq)
                 ENDDO
              ENDDO       
           ENDDO
-       ENDIF
-       ! Now we just use expresions based on spherical symmetry but with half the exponent ...
-       ZetaHalf=Half*Zeta
-       ! and the threshold rescaled by the Cramer coefficient:
-       ScaledTau=Tau/CramCo
-       IF(Potential)THEN
-          ! R is the boundary of the quantum/classical approximation
-          ! to the potential: CCo*Int dr [(Pi/Zeta)^3/2 delta(r)-Exp(-Zeta r^2)]/|r-R| < Tau
-          R=PFunk(ZetaHalf,ScaledTau)
-       ELSE
-          ! Gaussian solution gives CCo*Exp[-Zeta*R^2/2] <= Tau
-          R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
+          ! Now we just use expresions based on spherical symmetry but with half the exponent ...
+          ZetaHalf=Half*Zeta
+          ! and the threshold rescaled by the Cramer coefficient:
+          ScaledTau=Tau/CramCo
+          IF(Potential)THEN
+             ! R is the boundary of the quantum/classical potential approximation
+             ! CCo*Int dr [(2 Pi/Zeta)^3/2 delta(r)-Exp(-Zeta/2 r^2)]/|r-R| < Tau
+             R=PFunk(ZetaHalf,ScaledTau)
+          ELSE
+             ! Gaussian solution gives CCo*Exp[-Zeta*R^2/2] <= Tau
+             R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
+          ENDIF
        ENDIF
      END FUNCTION Extent0
 !====================================================================================================
