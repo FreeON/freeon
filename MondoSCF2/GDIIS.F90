@@ -12,6 +12,7 @@ MODULE GDIISMod
    USE ControlStructures
    USE InCoords
    USE PunchHDF
+   USE SetXYZ  
 !
 IMPLICIT NONE
 !
@@ -19,7 +20,7 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,CConstr,LagrMult,GConstr,GBackTrf, &
+   SUBROUTINE GeoDIIS(XYZ,GConstr,GBackTrf, &
               GGrdTrf,GTrfCtrl,GCoordCtrl,GDIISCtrl, &
               HFileIn,iCLONE,iGEO,Print,SCRPath,Displ_O,Grad_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
@@ -30,8 +31,7 @@ CONTAINS
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl 
      TYPE(GDIIS)                 :: GDIISCtrl  
-     INTEGER,DIMENSION(:)        :: CConstr
-     INTEGER                     :: iCLONE,iGEO,ICount,NLagr
+     INTEGER                     :: iCLONE,iGEO,ICount
      INTEGER                     :: Print
      CHARACTER(Len=*)            :: SCRPath
      INTEGER                     :: I,II,J,JJ,K,L,NCart,NatmsLoc,NDim
@@ -41,12 +41,14 @@ CONTAINS
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad
      TYPE(DBL_RNK2)              :: RefStruct,SRDispl
      TYPE(DBL_RNK2)              :: Aux
-     TYPE(DBL_VECT)              :: Vect,VectLagr
+     TYPE(DBL_VECT)              :: Vect
      REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Displ_O,Grad_O
-     REAL(DOUBLE),DIMENSION(:)   :: LagrMult
      !
-     GDIISMemory=MIN(6,iGEO)
-     IF(iGEO<GDIISCtrl%Init) RETURN
+     IF(PRESENT(Displ_O)) THEN
+       GDIISMemory=MIN(4,iGEO)
+     ELSE
+       GDIISMemory=MIN(6,iGEO)
+     ENDIF
      IStart=iGEO-GDIISMemory+1
      !
      HDFFileID=OpenHDF(HFileIn)
@@ -57,8 +59,7 @@ CONTAINS
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
-     CALL Get(NLagr,'nlagr',Tag_O=TRIM(IntToChar(1)))
-     NDim=NCart+NLagr
+     NDim=NCart
      !
      ! Get GDIIS memory of Cartesian coords and grads
      !
@@ -68,7 +69,6 @@ CONTAINS
      CALL New(SRDispl,(/NDim,GDIISMemory/))
      !
      CALL New(Vect,NCart)
-     CALL New(VectLagr,NLagr)
      CALL New(Aux,(/3,NatmsLoc/))
      DO IGeom=IStart,iGEO
        ICount=IGeom-IStart+1
@@ -81,34 +81,19 @@ CONTAINS
        CALL Get(Aux,'gradients',Tag_O=TRIM(IntToChar(IGeom)))
        CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        DO J=1,NCart ; RefGrad%D(J,ICount)=Vect%D(J) ; ENDDO
-       DO I=1,NatmsLoc
-         IF(CConstr(I)==2) THEN
-           K=3*(I-1)
-           DO J=K+1,K+3; RefGrad%D(J,ICount)=Zero ; ENDDO
-         ENDIF
-       ENDDO
-       IF(NLagr/=0) THEN
-         CALL Get(VectLagr,'LagrDispl',Tag_O=TRIM(IntToChar(IGeom)))
-         DO J=1,NLagr ; SRStruct%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
-         CALL Get(VectLagr,'LagrMult',Tag_O=TRIM(IntToChar(IGeom)))
-         DO J=1,NLagr ; RefStruct%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
-         CALL Get(VectLagr,'GradMult',Tag_O=TRIM(IntToChar(IGeom)))
-         DO J=1,NLagr ; RefGrad%D(NCart+J,ICount)=VectLagr%D(J) ; ENDDO
-       ENDIF
      ENDDO
      CALL Delete(Aux)
      CALL Delete(Vect)
-     CALL Delete(VectLagr)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
-     ! Calculate new Cartesian coordinates and Lagr. multipliers
+     ! Calculate new Cartesian coordinates 
      !
      IF(PRESENT(Displ_O).AND.PRESENT(Grad_O)) THEN
        CALL IntCFit(XYZ,Grad_O,RefStruct%D,RefGrad%D,SCRPath,Displ_O, &
                     GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
      ELSE
        CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
-                       SRStruct,SRDispl,LagrMult_O=LagrMult)
+                       SRStruct,SRDispl)
        !CALL PIntGDIIS(XYZ,Print,GBackTrf,GTrfCtrl, &
        !  GCoordCtrl,GConstr,SCRPath,RefStruct,RefGrad,SRStruct,SRDispl)
        !
@@ -357,7 +342,7 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE BasicGDIIS(XYZ,CtrlConstr,Print, &
-     RefStruct,RefGrad,SRStruct,SRDispl,LagrMult_O)
+     RefStruct,RefGrad,SRStruct,SRDispl)
      !
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      TYPE(Constr)                :: CtrlConstr
@@ -369,7 +354,6 @@ CONTAINS
      TYPE(DBL_VECT)              :: Vect,Coeffs
      REAL(DOUBLE)                :: Sum
      INTEGER                     :: Print
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: LagrMult_O
      !
      NCart=SIZE(XYZ,2)
      DimGDIIS=SIZE(RefStruct%D,1)
@@ -379,7 +363,7 @@ CONTAINS
      !
      CALL New(Coeffs,GDIISMemory)
      !
-!    IF(CtrlConstr%NConstr/=0.AND..NOT.CtrlConstr%DoLagr) THEN
+!    IF(CtrlConstr%NConstr/=0) THEN
 !      IF(Print>=DEBUG_GEOP_MIN) THEN
 !        WRITE(*,200) 
 !        WRITE(Out,200) 
@@ -397,11 +381,7 @@ CONTAINS
      !
      ! Calculate new geometry
      !
-     IF(PRESENT(LagrMult_O)) THEN
-       CALL XYZSum(XYZ,SRStruct%D,Coeffs%D,LagrMult_O=LagrMult_O)
-     ELSE
-       CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
-     ENDIF
+     CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
      !
      ! Tidy up
      !
@@ -597,13 +577,12 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE XYZSum(XYZ,SRStruct,Coeffs,LagrMult_O)
+   SUBROUTINE XYZSum(XYZ,SRStruct,Coeffs)
      REAL(DOUBLE),DIMENSION(:,:)        :: SRStruct,XYZ
      REAL(DOUBLE),DIMENSION(:)          :: Coeffs
      INTEGER                            :: I,J,GDIISMemory,DimGDIIS
-     INTEGER                            :: NCart,NLagr
+     INTEGER                            :: NCart
      TYPE(DBL_VECT)                     :: Vect,Vect2
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: LagrMult_O
      !
      GDIISMemory=SIZE(SRStruct,2)
      DimGDIIS=SIZE(SRStruct,1)
@@ -613,18 +592,7 @@ CONTAINS
      DO I=1,GDIISMemory
        Vect%D=Vect%D+Coeffs(I)*SRStruct(1:DimGDIIS,I) 
      ENDDO
-     IF(PRESENT(LagrMult_O)) THEN
-       NLagr=SIZE(LagrMult_O)
-       NCart=DimGDIIS-NLagr
-       IF(NCart/=3*(NCart/3)) CALL Halt('Dimesion error in XYZSum.')
-       CALL New(Vect2,NCart)
-       Vect2%D(1:NCart)=Vect%D(1:NCart)
-       CALL CartRNK1ToCartRNK2(Vect2%D,XYZ)
-       LagrMult_O(1:NLagr)=Vect%D(NCart+1:DimGDIIS)
-       CALL Delete(Vect2)
-     ELSE
-       CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
-     ENDIF
+     CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
      !
      CALL Delete(Vect)
    END SUBROUTINE XYZSum
@@ -832,6 +800,7 @@ CONTAINS
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
      !
+write(*,*) 'chk 1'
      NMem=SIZE(RefStruct,2)
      IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in IntCFit')
      NatmsLoc=SIZE(XYZ,2)
@@ -840,6 +809,7 @@ CONTAINS
      !
      CALL New(XYZAux,(/3,NatmsLoc/))
      CALL New(VectC,NCart)
+     CALL New(VectCG,NCart)
      !
      CALL ReadIntCs(IntCs,TRIM(SCRPath)//'IntCs')
      NIntC=SIZE(IntCs%Def)
@@ -851,20 +821,32 @@ CONTAINS
      ! Calculate IntC gradients using the latest IntC-s     
      !
      DO I=1,NMem
-       VectC%D=RefStruct(:,I)
-       VectCG%D=RefGrad(:,I)
+       DO J=1,NCart
+         VectC%D(J)=RefStruct(J,I)
+         VectCG%D(J)=RefGrad(J,I)
+       ENDDO
+write(*,*) I,'VectC = ',VectC%D/AngstromsToAu
+write(*,*) I,'VectCG= ',VectCG%D
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
+       CALL RefreshBMatInfo(IntCs,XYZAux%D,GTrfCtrl, &
+                          GCoordCtrl,Print,SCRPath,.TRUE.)
        CALL CartToInternal(XYZAux%D,IntCs,VectCG%D,VectI%D,&
          GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
+write(*,*) I,'internal gradients= ',VectI%D
        IntCGrads%D(:,I)=VectI%D
        CALL INTCValue(IntCs,XYZAux%D,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        IntCValues%D(:,I)=IntCs%Value
+write(*,*) I,'internal values= ',IntCValues%D(:,I)
      ENDDO
-       CALL CartToInternal(XYZ,IntCs,Grad,VectI%D,&
-         GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
-       IntCGrads%D(:,NMem+1)=VectI%D
+       CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl, &
+                          GCoordCtrl,Print,SCRPath,.TRUE.)
+     ! CALL CartToInternal(XYZ,IntCs,Grad,VectI%D,&
+     !   GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
+       IntCGrads%D(:,NMem+1)=Grad
+write(*,*) NMem+1,'internal gradients= ',IntCGrads%D(:,NMem+1)
        CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        IntCValues%D(:,NMem+1)=IntCs%Value
+write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
      !
      ! Calculate new values of internals by fitting
      !
@@ -874,6 +856,7 @@ CONTAINS
      CALL Delete(IntCValues) 
      CALL Delete(VectI) 
      CALL Delete(VectC) 
+     CALL Delete(VectCG) 
      CALL Delete(XYZAux) 
      CALL Delete(IntCs) 
    END SUBROUTINE IntCFit
@@ -884,11 +867,13 @@ CONTAINS
      TYPE(INTC)                 :: IntCs
      REAL(DOUBLE),DIMENSION(:)  :: Displ
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
+     REAL(DOUBLE)               :: Center
      INTEGER                    :: I,J,NIntC,NDim
-     TYPE(DBL_VECT)             :: FitVal,VectX,VectY
+     TYPE(DBL_VECT)             :: FitVal,VectX,VectY,Sig
      !
      NIntC=SIZE(IntCs%Def)
      NDim=SIZE(IntCGrads,2)
+     CALL New(Sig,NDim)
      CALL New(VectX,NDim)
      CALL New(VectY,NDim)
      CALL New(FitVal,NIntC)
@@ -899,34 +884,226 @@ CONTAINS
          CYCLE
        ENDIF
        DO J=1,NDim 
-         VectX%D=IntCValues(I,J) 
-         VectY%D=IntCGrads(I,J) 
+         VectX%D(J)=IntCValues(I,J) 
+         VectY%D(J)=IntCGrads(I,J) 
        ENDDO
-       CALL Reorder(VectY%D,VectX%D) 
-       IF(IntCs%Def(I)=='STRE') THEN
-         CALL FitInt(VectX%D,VectY%D,FitVal%D(I),'Morse')
-       ELSE IF(HasAngle(IntCs%Def(I))) THEN
-         CALL FitInt(VectX%D,VectY%D,FitVal%D(I),'Trigon')
+write(*,*) I,IntCs%Def(I)
+write(*,*) 'data points= '
+do j=1,ndim
+write(*,*) vectx%d(j),vecty%d(j)
+enddo
+       IF(HasAngle(IntCs%Def(I))) THEN
+         CALL FilterAngles(VectX,VectY)
+         CALL AngleToCenter(VectX%D,Center)
+       ENDIF
+       CALL FitInt(VectX%D,VectY%D,Sig%D,FitVal%D(I))
+       IF(HasAngle(IntCs%Def(I))) THEN
+         FitVal%D(I)=Center+FitVal%D(I)
        ENDIF
        Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
+write(*,*) 'fit= ',FitVal%D(I)
      ENDDO
      !
      CALL Delete(VectY)
      CALL Delete(VectX)
      CALL Delete(FitVal)
+     CALL Delete(Sig)
    END SUBROUTINE DisplFit
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE FitInt(VectX,VectY,FitVal,Char)
-     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY
+   SUBROUTINE FitInt(VectX,VectY,Sig,FitVal)
+     REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal
-     INTEGER                   :: I,J,NDim
-     CHARACTER(LEN=*)          :: Char
+     INTEGER                   :: I,J,NDim,MWT
+     REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q
+     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin
      !
-     
-     !
+     NDim=SIZE(VectX)
+     MWT=0
+write(*,*) 'VectX= ',VectX
+     XMin=MINVAL(VectX)
+     XMax=MAXVAL(VectX)
+write(*,*) 'xmin= ',xmin,' xmax= ',xmax
+     IF(ABS(XMin-XMax)<1.D-7) THEN
+       YMin=MINVAL(VectY)
+       YMax=MAXVAL(VectY)
+       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4) THEN
+         CALL Halt('Grad too big in FitInt, while coordinate does not move.')
+       ELSE
+         FitVal=VectX(NDim)-VectY(NDim)
+         RETURN
+       ENDIF
+     ENDIF
+     CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
+     ! B refers to the harmonic force constant
+write(*,*) 'line= ',a,b     
+     IF(ABS(B)>1.D-7) THEN
+       FitVal=-A/B
+     ELSE
+       FitVal=VectX(NDim)
+     ENDIF
    END SUBROUTINE FitInt
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE fit(x,y,ndata,sig,mwt,a,b,siga,sigb,chi2,q)
+      INTEGER      :: mwt,ndata
+      REAL(DOUBLE) :: a,b,chi2,q,siga,sigb,sig(ndata),x(ndata),y(ndata)
+      INTEGER      :: i
+      REAL(DOUBLE) :: sigdat,ss,st2,sx,sxoss,sy,t,wt
+!U    USES gammq
+      sx=Zero
+      sy=Zero
+      st2=Zero
+      b=Zero
+      if(mwt.ne.0) then
+        ss=Zero
+        do 11 i=1,ndata
+          wt=One/(sig(i)**2)
+          ss=ss+wt
+          sx=sx+x(i)*wt
+          sy=sy+y(i)*wt
+11      continue
+      else
+        do 12 i=1,ndata
+          sx=sx+x(i)
+          sy=sy+y(i)
+12      continue
+        ss=float(ndata)
+      endif
+      sxoss=sx/ss
+      if(mwt.ne.0) then
+        do 13 i=1,ndata
+          t=(x(i)-sxoss)/sig(i)
+          st2=st2+t*t
+          b=b+t*y(i)/sig(i)
+13      continue
+      else
+        do 14 i=1,ndata
+          t=x(i)-sxoss
+          st2=st2+t*t
+          b=b+t*y(i)
+14      continue
+      endif
+write(*,*) 'st2= ',st2
+write(*,*) 'ss = ',ss 
+      b=b/st2
+      a=(sy-sx*b)/ss
+      siga=sqrt((One+sx*sx/(ss*st2))/ss)
+      sigb=sqrt(One/st2)
+      chi2=Zero
+      if(mwt.eq.0) then
+        do 15 i=1,ndata
+          chi2=chi2+(y(i)-a-b*x(i))**2
+15      continue
+        q=One
+        sigdat=sqrt(chi2/(ndata-2))
+        siga=siga*sigdat
+        sigb=sigb*sigdat
+      else
+        do 16 i=1,ndata
+          chi2=chi2+((y(i)-a-b*x(i))/sig(i))**2
+16      continue
+        q=gammq(Half*(ndata-2),half*chi2)
+      endif
+    END SUBROUTINE Fit
+!
+!---------------------------------------------------------------------
+!
+    FUNCTION GammQ(a,x)
+      REAL(DOUBLE) :: a,gammq,x
+      REAL(DOUBLE) :: gammcf,gamser,gln
+!U    USES gcf,gser
+      if(x.lt.Zero.or.a.le.Zero) CALL Halt('bad arguments in gammq')
+      if(x.lt.a+One)then
+        call gser(gamser,a,x,gln)
+        gammq=One-gamser
+      else
+        call gcf(gammcf,a,x,gln)
+        gammq=gammcf
+      endif
+    END Function GammQ
+!
+!---------------------------------------------------------------------
+!
+    SUBROUTINE gcf(gammcf,a,x,gln)
+      INTEGER      :: ITMAX
+      REAL(DOUBLE) :: a,gammcf,gln,x,EPS,FPMIN
+      PARAMETER (ITMAX=100,EPS=3.e-7,FPMIN=1.e-30)
+      INTEGER      :: i
+      REAL(DOUBLE) :: an,b,c,d,del,h
+!U    USES gammln
+      gln=gammln(a)
+      b=x+One-a
+      c=One/FPMIN
+      d=One/b
+      h=d
+      do 11 i=1,ITMAX
+        an=-i*(i-a)
+        b=b+2.
+        d=an*d+b
+        if(abs(d).lt.FPMIN)d=FPMIN
+        c=b+an/c
+        if(abs(c).lt.FPMIN)c=FPMIN
+        d=One/d
+        del=d*c
+        h=h*del
+        if(abs(del-One).lt.EPS)goto 1
+11    continue
+      CALL Halt('a too large, ITMAX too small in gcf')
+1     gammcf=exp(-x+a*log(x)-gln)*h
+    END SUBROUTINE GCF
+!
+!---------------------------------------------------------------------
+!
+    SUBROUTINE GSer(gamser,a,x,gln)
+      INTEGER      :: ITMAX
+      REAL(DOUBLE) :: a,gamser,gln,x,EPS
+      PARAMETER (ITMAX=100,EPS=3.e-7)
+      INTEGER      :: n
+      REAL(DOUBLE) :: ap,del,sum
+!U    USES gammln
+      gln=gammln(a)
+      if(x.le.Zero)then
+        if(x.lt.Zero) CALL Halt('x < 0 in gser')
+        gamser=Zero
+        return
+      endif
+      ap=a
+      sum=One/a
+      del=sum
+      do 11 n=1,ITMAX
+        ap=ap+One
+        del=del*x/ap
+        sum=sum+del
+        if(abs(del).lt.abs(sum)*EPS)goto 1
+11    continue
+      CALL Halt('a too large, ITMAX too small in gser')
+1     gamser=sum*exp(-x+a*log(x)-gln)
+    END SUBROUTINE GSer
+!
+!---------------------------------------------------------------------
+!
+    FUNCTION gammln(xx)
+      REAL(DOUBLE) :: gammln,xx
+      INTEGER      :: j
+      REAL(DOUBLE) :: ser,stp,tmp,x,y,cof(6)
+      SAVE cof,stp
+      DATA cof,stp/76.18009172947146d0,-86.50532032941677d0,&
+        24.01409824083091d0,-1.231739572450155d0,.1208650973866179d-2, &
+         -.5395239384953d-5,2.5066282746310005d0/
+      x=xx
+      y=x
+      tmp=x+5.5d0
+      tmp=(x+0.5d0)*log(tmp)-tmp
+      ser=1.000000000190015d0
+      do 11 j=1,6
+        y=y+1.d0
+        ser=ser+cof(j)/y
+11    continue
+      gammln=tmp+log(stp*ser/x)
+    END FUNCTION GammLN
 !
 !---------------------------------------------------------------------
 !

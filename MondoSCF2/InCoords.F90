@@ -833,7 +833,6 @@ CONTAINS
      !
      IF(PRESENT(Value_O)) THEN
        Sum=DOT_PRODUCT(WKL,VIJ)
-write(*,*) 'sum= ',sum
        IF(ABS(Sum)>One-1.D-7) Sum=SIGN(One-1.D-7,Sum)
        Value_O=PI-ACOS(Sum)
      ENDIF
@@ -5227,6 +5226,101 @@ write(*,*) 'sum= ',sum
      BB1(7:9)=Aux2
    END SUBROUTINE LinBGen
 !
+!------------------------------------------------------------------
+!
+   SUBROUTINE FilterAngles(VectX,VectY)
+     TYPE(DBL_VECT) :: VectX,VectY,VectX2,VectY2
+     INTEGER        :: I,J,NDim,NDim2
+     TYPE(INT_VECT) :: Mark
+     REAL(DOUBLE)   :: Center
+     !
+     NDim=SIZE(VectX%D)
+     CALL New(Mark,NDim)
+     !
+     Center=Sum(VectX%D)/DBLE(NDim)
+     CALL Loose2PIs(Center)
+     CALL AngleTo180(Center)
+     !
+     CALL Delete(Mark) 
+   END SUBROUTINE FilterAngles
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE AngleToCenter(VectX,Center)
+     REAL(DOUBLE),DIMENSION(:) :: VectX
+     REAL(DOUBLE)              :: Center,ToCenter
+     INTEGER                   :: I,J,NDim
+     !
+     NDim=SIZE(VectX)
+     Center=VectX(1)
+     DO I=1,NDim
+       ToCenter=VectX(I)-Center
+       CALL AngleTo180(ToCenter)
+       VectX(I)=ToCenter
+     ENDDO
+   END SUBROUTINE AngleToCenter
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE AngleOffCenter(VectX,FitVal,Center)
+     REAL(DOUBLE),DIMENSION(:) :: VectX
+     REAL(DOUBLE)              :: FitVal,Center
+     INTEGER                   :: I,J,NDim
+     !
+     NDim=SIZE(VectX)
+     FitVal=Center+FitVal
+     DO I=1,NDim
+       VectX(I)=Center+VectX(I)
+     ENDDO
+   END SUBROUTINE AngleOffCenter
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE AngleTo360(Angle)
+     REAL(DOUBLE)              :: Angle
+     INTEGER                   :: I,J
+     ! Input Angles are supposed to be from [-2*PI:2*PI]
+     ! Output angles are in                 [0:2*PI]
+     IF(Angle<Zero) Angle=TwoPi+Angle
+   END SUBROUTINE AngleTo360
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE AngleTo180(Angle)
+     REAL(DOUBLE)              :: Angle
+     INTEGER                   :: I,J
+     ! Input Angles are supposed to be from [0:2*PI]
+     ! Output angles are in                 [-PI:PI]
+     IF(Angle>PI) Angle=Angle-TwoPI
+   END SUBROUTINE AngleTo180
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE BendTo180(Angle) 
+     REAL(DOUBLE) :: Angle
+     ! Input Angles are supposed to be from [-2*PI:2*PI]
+     ! Output angles are in                 [0:PI]
+     IF(Angle<Zero) Angle=TwoPI+Angle
+     IF(Angle>PI) Angle=TwoPI-Angle
+   END SUBROUTINE BendTo180
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE LinBTo180(Angle) 
+     REAL(DOUBLE) :: Angle
+     ! Input Angles are supposed to be from [-2*PI:2*PI]
+     ! Output angles are in                 [-PI:PI]
+     ! also for torsions and out-of-planes
+     IF(Angle>PI) Angle=Angle-TwoPi
+     IF(Angle<-PI) Angle=TwoPI+Angle
+   END SUBROUTINE LinBTo180
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE Loose2PIs(Angle)
+     REAL(DOUBLE) :: Angle
+     Angle=Angle-TwoPi*INT(Angle/TwoPi)
+   END SUBROUTINE Loose2PIs
 !------------------------------------------------------------------
 !
    END MODULE InCoords

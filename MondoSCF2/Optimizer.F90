@@ -536,12 +536,8 @@ CONTAINS
        CLOSE(Out,STATUS='KEEP')
      ENDIF
      !
-     ! Convergence is reached at this point, calculate final energy
+     ! Convergence is reached at this point, print final energy
      ! and finish optimization.
-     !
-    !CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-    !CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
-    !CALL SCF(iBAS,iGEO,C)
      !
      CALL OpenASCII(OutFile,Out)
      WRITE(Out,500)  
@@ -566,7 +562,7 @@ CONTAINS
 !
    SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,LagrMult,GradMult, &
                   LagrDispl,Convgd,ETot,ELagr,iGEO,iCLONE, &
-                  SCRPath,DoNEB,Print)
+                  SCRPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,LagrMult,GradMult,LagrDispl
@@ -577,7 +573,7 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: IntOld,CartGrad
      INTEGER                     :: Refresh
-     CHARACTER(LEN=*)            :: SCRPath
+     CHARACTER(LEN=*)            :: SCRPath,HFileIn
      INTEGER                     :: Print
      LOGICAL                     :: DoNEB,Print2
      !
@@ -647,7 +643,7 @@ CONTAINS
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult,iCLONE, &
-                      LagrMult,LagrDispl,IntCs,iGEO,SCRPath,Print) 
+                  LagrMult,LagrDispl,IntCs,iGEO,SCRPath,Print,HFileIn) 
      ELSE
        WRITE(*,200) iCLONE
        WRITE(Out,200) iCLONE
@@ -686,7 +682,7 @@ CONTAINS
 !--------------------------------------------------------------------
 !
    SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult,iCLONE, &
-                        LagrMult,LagrDispl,IntCs,IGEO,SCRPath,Print)
+                    LagrMult,LagrDispl,IntCs,IGEO,SCRPath,Print,HFileIn)
      !
      ! Simple Relaxation step
      !
@@ -699,7 +695,7 @@ CONTAINS
      TYPE(INTC)                     :: IntCs
      INTEGER                        :: I,J,NDim,iGEO,iCLONE
      INTEGER                        :: NatmsLoc,NCart,NIntC,Print
-     CHARACTER(LEN=*)               :: SCRPath 
+     CHARACTER(LEN=*)               :: SCRPath,HFileIn 
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -732,20 +728,22 @@ CONTAINS
      ! Use Hessian matrix to calculate displacement
      !
      SELECT CASE(GOpt%Optimizer)
-       CASE(GRAD_STPDESC_OPT) 
-         CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
-                           Grad,Displ,XYZ)
-       CASE(GRAD_DIAGHESS_OPT) 
-        !IF(GOpt%Constr%DoLagr.AND.GOpt%Constr%NConstr/=0) THEN
-        !  CALL DiagHessLagr(GOpt%CoordCtrl,GOpt%Hessian,Grad%D,Displ%D,&
-        !             IntCs,XYZ,SCRPath,LagrMult,GradMult,LagrDispl)
-        !ELSE
-           CALL RescaleGrad(Grad%D,Print)
-           CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-                         IntCs,AtNum,iGEO,XYZ)
-           CALL CutOffDispl(Displ%D,IntCs)
-           CALL RedundancyOff(Displ%D,SCRPath,Print)
-        !ENDIF
+     CASE(GRAD_STPDESC_OPT) 
+       CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
+                         Grad,Displ,XYZ)
+     CASE(GRAD_DIAGHESS_OPT) 
+     ! IF(iGEO<3) THEN
+         CALL RescaleGrad(Grad%D,Print)
+         CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+                       IntCs,AtNum,iGEO,XYZ)
+     ! ELSE
+     !   CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
+     !     GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
+     !     HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
+     !     Displ_O=Displ%D,Grad_O=Grad%D)
+     ! ENDIF
+       CALL CutOffDispl(Displ%D,IntCs)
+       CALL RedundancyOff(Displ%D,SCRPath,Print)
      END SELECT
      !
      ! Set constraints on the displacements
@@ -1162,7 +1160,7 @@ CONTAINS
                        GMLoc%LagrMult%D,GMLoc%GradMult%D, &
                        GMLoc%LagrDispl%D,Convgd,GMLoc%Etotal, &
                        GMLoc%ELagr,IGeo,iCLONE,SCRPath, &
-                       DoNEB,Opts%PFlags%GeOp)
+                       DoNEB,Opts%PFlags%GeOp,Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
      !
@@ -1315,9 +1313,10 @@ CONTAINS
      !
      IF(Convgd(iCLONE)/=1) THEN
        CALL OPENAscii(OutFile,Out)
-       IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On) THEN
-         CALL GeoDIIS(GMLoc%AbCarts%D,GMLoc%CConstrain%I, &
-           GMLoc%LagrMult%D,GOpt%Constr,GOpt%BackTrf,GOpt%GrdTrf, &
+       IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
+           iGEO>=GOpt%GDIIS%Init) THEN
+         CALL GeoDIIS(GMLoc%AbCarts%D, &
+           GOpt%Constr,GOpt%BackTrf,GOpt%GrdTrf, &
            GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS,Nams%HFile, &
            iCLONE,iGEO,Opts%PFlags%GeOp,SCRPath)
        ELSE
