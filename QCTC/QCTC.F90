@@ -137,7 +137,6 @@ PROGRAM QCTC
   ENDIF
   CALL Redistribute_FASTMAT(J)
   CALL Set_BCSR_EQ_DFASTMAT(T1,J) ! T1 is allocated in Set_BCSR...
-  CALL PPrint(T1,'J',Unit_O=6)
 #else
      IF(SCFActn=='InkFok')THEN
         !    Add in correction if incremental J build
@@ -170,7 +169,7 @@ PROGRAM QCTC
   ENDIF
 !-------------------------------------------------------------------------------
 ! Printing
-  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
+!  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
   CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
