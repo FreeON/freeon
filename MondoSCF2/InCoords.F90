@@ -1156,6 +1156,10 @@ CONTAINS
        K1=1
        K2=4
        IF(IntCs%Def%C(I)(1:4)=='LINB') K2=3
+       IF(IntCs%Def%C(I)(1:5)=='TORSL') THEN
+         K1=2
+         K2=3
+       ENDIF
        Tr=0
        DO J=K1,K2
          K=IntCs%Atoms%I(I,J)
@@ -1234,7 +1238,7 @@ CONTAINS
      INTEGER,DIMENSION(:)        :: AtNum
      TYPE(INT_RNK2)              :: Cells
      TYPE(INT_RNK3)              :: CellEq
-     INTEGER                     :: NDim,NA1,NB1,NC1
+     INTEGER                     :: NDim,NA1,NB1,NC1,NA2,NB2,NC2
      REAL(DOUBLE)                :: XTrans,YTrans,ZTrans
      INTEGER                     :: NatmsLoc,I,J,II,NA,NB,NC
      INTEGER                     :: NCells,IA,IB,IC,PBCDim
@@ -1274,14 +1278,14 @@ CONTAINS
          NA=0 ; NB=0 ; NC=1
        ENDIF
      ENDIF
-     NA1=-NA
-     NB1=-NB
-     NC1=-NC
+     NA1=-NA ; NA2=NA
+     NB1=-NB ; NB2=NB
+     NC1=-NC ; NC2=NC
      IF(PRESENT(NDim_O)) THEN
        IF(NDim_O<0) THEN
-         NA1=0 
-         NB1=0 
-         NC1=0 
+         NA1=0 ; NA2=1
+         NB1=0 ; NB2=1
+         NC1=0 ; NC2=1
        ELSE
          NA1=-NDim_O
          NB1=-NDim_O
@@ -1289,7 +1293,7 @@ CONTAINS
        ENDIF
      ENDIF
      !
-     NCells=(NA-NA1+1)*(NB-NB1+1)*(NC-NC1+1)
+     NCells=(NA2-NA1+1)*(NB2-NB1+1)*(NC2-NC1+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
      Cells%I=0
      CALL New(IEq,NCells*NatmsLoc)
@@ -1309,9 +1313,9 @@ CONTAINS
        AtNumRepl%I(II)=AtNum(I) 
      ENDDO
      !
-     DO IA=NA1,NA
-       DO IB=NB1,NB
-         DO IC=NC1,NC
+     DO IA=NA1,NA2
+       DO IB=NB1,NB2
+         DO IC=NC1,NC2
            IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
            CellEq%I(IA,IB,IC)=II+1
            DO I=1,NatmsLoc
@@ -1425,7 +1429,6 @@ CONTAINS
      !
      DO I=1,NIntCs
        IF(.NOT.IntCs%Active%L(I)) THEN
-      !IF(.NOT.IntCs%Active%L(I).AND..NOT.IntCs%Constraint%L(I)) THEN
          IntCs%Value%D(I)=Zero 
          CYCLE
        ENDIF
@@ -1699,8 +1702,8 @@ CONTAINS
        ValSt%D=IntCs%Value%D
        !
        IntCDispl%D=VectIntReq%D-ValSt%D
-       CALL CutOffDispl(IntCDispl%D,IntCs, &
-                      GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
+     ! CALL CutOffDispl(IntCDispl%D,IntCs, &
+     !                GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
        VectIntReq%D=ValSt%D+IntCDispl%D
        CALL MapBackAngle(IntCs,VectIntReq%D)
      ENDIF
@@ -2667,6 +2670,7 @@ CONTAINS
          CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value_O=Value)
          IF((ABS(Value-PI)*Conv < CtrlCoord%LinCrit)) THEN  
            IF(TOPS%Tot12%I(I2,1)>2) THEN
+            !IntCs%Def%C(I)(1:5)='BLANK'
              IntCs%Active%L(I)=.FALSE.
              CYCLE
            ENDIF
@@ -2930,7 +2934,8 @@ CONTAINS
      DoIterate=(DiffMax>GBackTrf%CooTrfCrit)
      IF(RMSD>RMSDOld*GBackTrf%RMSCrit) THEN 
        IF(DiffMax<GBackTrf%MaxCartDiff*GBackTrf%RMSCrit &
-          .AND.IStep>20) THEN
+          .AND.IStep>GBackTrf%MaxIt_CooTrf) THEN
+         !.AND.IStep>20) THEN
          DoIterate=.FALSE.
        ELSE 
          RefreshAct=.TRUE.
@@ -4207,7 +4212,8 @@ B%BL%D=Zero
      INTEGER                     :: NIntC,NIntc_New
      TYPE(INT_VECT)              :: LinAtom,LinCenter
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)                :: Value,Conv,Dist12
+     REAL(DOUBLE)                :: Value,Conv,Dist12,Angle123,Angle234
+     REAL(DOUBLE)                :: Angle123S,Angle234S,PiHalf
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
      INTEGER                     :: II1,II4
      INTEGER                     :: I,J,K,NatmsLoc,III
@@ -4219,6 +4225,7 @@ B%BL%D=Zero
      !
      AllTors=.FALSE.
      Conv=180.D0/PI
+     PiHalf=Half*PI
      NatmsLoc=SIZE(Top12%I,1)
      !
      NMax12=SIZE(Top12%I,2)-1
@@ -4321,25 +4328,35 @@ B%BL%D=Zero
        II4=0
        I2=LinBBridge%I(1,I)
        I3=LinBBridge%I(2,I)
+       Angle123S=Zero
+       Angle234S=Zero
        DO J=1,Top12%I(I2,1)
          I1=Top12%I(I2,1+J)
          IF(LinCenter%I(I)==I1) CYCLE
+         CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value_O=Angle123)
          DO K=1,Top12%I(I3,1)
            I4=Top12%I(I3,1+K)
            IF(LinCenter%I(I)==I4) CYCLE
+           CALL BEND(XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,I4),Value_O=Angle234)
            IF(I1/=I4.AND.I1/=I3.AND.I2/=I4) THEN
              IF(.NOT.Found) THEN
                II1=I1
                II4=I4
                Found=.TRUE.
              ELSE
-               IF(AtNum(I1)>AtNum(II1)) II1=I1
-               IF(AtNum(I4)>AtNum(II4)) II4=I4
+               IF(ABS(PiHalf-Angle123)<ABS(PiHalf-Angle123S)) THEN
+                 Angle123S=Angle123
+                 II1=I1
+               ENDIF
+               IF(ABS(PiHalf-Angle234)<ABS(PiHalf-Angle234S)) THEN
+                 Angle234S=Angle234
+                 II4=I4
+               ENDIF
+              !IF(AtNum(I1)>AtNum(II1)) II1=I1
+              !IF(AtNum(I4)>AtNum(II4)) II4=I4
              ENDIF
              !
              IF(AllTors) THEN
-               I1=II1
-               I4=II4
                NIntC=NIntC+1
                IntC_New%Def%C(NIntC)(1:10)='TORSL     '
                IntC_New%Atoms%I(NIntC,1)=I1
