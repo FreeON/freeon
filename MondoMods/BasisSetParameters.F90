@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=28
+   INTEGER, PARAMETER :: NSupSets=30
 
    ! Element 105 is a ghost function with charge = 0. 
   
@@ -41,6 +41,7 @@ MODULE BasisSetParameters
 !
    CHARACTER(LEN=BASESET_CHR_LEN), &
      DIMENSION(2,NSupSets)     :: CSets=RESHAPE( (/        &
+     ! ALL ELECTRON BASIS SETS
                 'sto-2g          ' , 'STO-2G          ',   &  ! 1
                 'sto-3g          ' , 'STO-3G          ',   &  ! 2
                 'sto-6g          ' , 'STO-6G          ',   &  ! 3
@@ -67,8 +68,12 @@ MODULE BasisSetParameters
                 'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 24
                 'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 25
                 'wtbs            ' , 'WTBS            ',   &  ! 26
-                'user1           ' , 'User1           ',   &  ! 27
-                'user2           ' , 'User2           '    &  ! 28
+                ! ECP BASIS SETS
+                'sbkjc           ' , 'SBKJC_VDZ_ECP   ',   &  ! 27
+                'lanl2           ' , 'LANL2_DZ_ECP    ',   &  ! 28
+                ! USER DEFINED BASIS SETS
+                'user1           ' , 'User1           ',   &  ! 29
+                'user2           ' , 'User2           '    &  ! 30
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &

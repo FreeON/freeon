@@ -1129,6 +1129,8 @@ CONTAINS
                 CALL Get(BS%NPrim,'nprim',Tag_O=Tag_O)
                 CALL Get(BS%NASym,'nasym',Tag_O=Tag_O)
                 CALL Get(BS%LMNLen,'lmnlen',Tag_O=Tag_O)
+                CALL Get(BS%PSCtrt,'ecpcontractions',Tag_O=Tag_O)
+                CALL Get(BS%PSPrim,'ecpprimitives',Tag_O=Tag_O)
                 CALL New(BS)
                 CALL Get(BS%Kinds,'kind',Tag_O=Tag_O)
                 CALL Get(BS%NCFnc,'ncfuncs',Tag_O=Tag_O)
@@ -1142,6 +1144,14 @@ CONTAINS
                 CALL Get(BS%LxDex,'lxdex',Tag_O=Tag_O)
                 CALL Get(BS%LyDex,'lydex',Tag_O=Tag_O)
                 CALL Get(BS%LzDex,'lzdex',Tag_O=Tag_O)
+                IF(BS%PSCtrt/=0)THEN                   
+                   CALL Get(BS%NECPs,'ecpnumber',Tag_O=Tag_O)
+                   CALL Get(BS%NCoreE,'ecpcoreelectrons',Tag_O=Tag_O)
+                   CALL Get(BS%PSFncs,'ecpprimfumctions',Tag_O=Tag_O)
+                   CALL Get(BS%PSSymm,'ecpsymmetries',Tag_O=Tag_O)
+                   CALL Get(BS%PSCoef,'ecpcoefficients',Tag_O=Tag_O)
+                   CALL Get(BS%PSExpt,'ecpexponents',Tag_O=Tag_O)
+                ENDIF
               END SUBROUTINE Get_BSET
               !-------------------------------------------------------------------------------
               !     Put a  basis set
@@ -1157,6 +1167,8 @@ CONTAINS
                 CALL Put(BS%NPrim,'nprim',Tag_O=Tag_O)
                 CALL Put(BS%NASym,'nasym',Tag_O=Tag_O)
                 CALL Put(BS%LMNLen,'lmnlen',Tag_O=Tag_O)
+                CALL Put(BS%PSCtrt,'ecpcontractions',Tag_O=Tag_O)
+                CALL Put(BS%PSPrim,'ecpprimitives',Tag_O=Tag_O)
                 CALL Put(BS%Kinds,'kind',Tag_O=Tag_O)
                 CALL Put(BS%BFKnd,'basfperkind',Tag_O=Tag_O)
                 CALL Put(BS%NCFnc,'ncfuncs',Tag_O=Tag_O)
@@ -1169,6 +1181,14 @@ CONTAINS
                 CALL Put(BS%LxDex,'lxdex',Tag_O=Tag_O)
                 CALL Put(BS%LyDex,'lydex',Tag_O=Tag_O)
                 CALL Put(BS%LzDex,'lzdex',Tag_O=Tag_O)
+                IF(BS%PSCtrt/=0)THEN                   
+                   CALL Put(BS%NECPs,'ecpnumber',Tag_O=Tag_O)
+                   CALL Put(BS%NCoreE,'ecpcoreelectrons',Tag_O=Tag_O)
+                   CALL Put(BS%PSFncs,'ecpprimfumctions',Tag_O=Tag_O)
+                   CALL Put(BS%PSSymm,'ecpsymmetries',Tag_O=Tag_O)
+                   CALL Put(BS%PSCoef,'ecpcoefficients',Tag_O=Tag_O)
+                   CALL Put(BS%PSExpt,'ecpexponents',Tag_O=Tag_O)
+                ENDIF
               END SUBROUTINE Put_BSET
 #ifdef PERIODIC
               !-------------------------------------------------------------------------------
