@@ -3,17 +3,16 @@ Water Cluster Scaling
 <EndTitle>
 
 <BeginOptions>
-MPIRun="/usr/local/mpich-1.1.2_PG_SHMEM/bin/mpirun -np 4"
 Charge=0
 Multiplicity=1
-Guess=Core
-SCFMethod=(SDMM)
-BasisSets=(WTBS)
-ModelChem=(BLYPxc)
-Accuracy =(Good)
+Guess=SuperPos
+SCFMethod=(SDMM,SDMM)
+BasisSets=(STO-2G,6-31G**)
+ModelChem=(BLYPxc,BLYPxc)
+Accuracy =(Loose,Good)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,HOrder)
-BlokAInv=(Test,4.D2)
+BlokAInv=(Test,1.D20)
 <EndOptions>
 
 <BeginGeometry>

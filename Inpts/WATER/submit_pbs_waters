@@ -1,12 +1,12 @@
-./sub_pbs h2o_10
-./sub_pbs h2o_30
-./sub_pbs h2o_50
-./sub_pbs h2o_70
-./sub_pbs h2o_90
-#sub_pbs h2o_110
-#sub_pbs h2o_130
-#sub_pbs h2o_150
-#sub_pbs h2o_200
-#sub_pbs h2o_250
-#sub_pbs h2o_300
-#sub_pbs h2o_350
+./sub_pbs h2o_10 17
+./sub_pbs h2o_30 18
+./sub_pbs h2o_50 19
+./sub_pbs h2o_70 20
+./sub_pbs h2o_90 21
+./sub_pbs h2o_110 22
+./sub_pbs h2o_130 23
+./sub_pbs h2o_150 24
+#./sub_pbs h2o_200
+#./sub_pbs h2o_250
+#./sub_pbs h2o_300
+#./sub_pbs h2o_350
