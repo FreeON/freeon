@@ -101,9 +101,6 @@ E_{\rm el} &=& \sum_{i=1}^{N_{\rm el}} e_i \label{EigenEnergy}  \\
 \end{eqnarray}
 \end{subequations}
 with $N_{\rm el}$ the number of occupied electronic states.
-This approach to solving the SCF equations using hybrid Hartree-Fock/Density Functional Theory,
-Hartree-Fock (Roothaan-Hall) or  pure Density Functional Theory (Kohn-Sham) will, in the following, 
-be referred to interchangeably as eigensolution (ES).
 
 Many of the linear scaling methods involve iterative construction of the density matrix 
 in a local, non-orthogonal basis, exploiting the approximately exponential decay 
@@ -172,23 +169,23 @@ minimization  to precondition a grand canonical purification scheme,
 while Bowler \cite{DBowler99} suggests the use of LNV density matrix minimization 
 after purification to reduce accumulation errors.
 
-Perhaps most closely related to the present work, a canonical trace 
-conserving purification scheme was recently constructed by Palser and Manolopoulos 
+Perhaps most closely related to the present work is the canonical trace 
+conserving purification scheme recently introduced by Palser and Manolopoulos 
 (PM) in Ref.~\onlinecite{APalser99}. 
 By using a starting guess ${\bf X}_0$ with the trace equal to 
 the occupation number and thereafter performing trace-conserving
 spectral projections, ${\bf X}_n$ converges to the correct density matrix without
 prior knowledge of the chemical potential. 
 
-The PM scheme has an excellent performance compared to other methods \cite{APalser99,ADaniels99,GBerghold02,YShao02}, and is also
-able to deal with degenerate eigensystems and fractional occupancy.  However, application of PM has failed 
+The PM scheme has an excellent performance compared to other methods \cite{ADaniels99,APalser99,GBerghold02,YShao02}, 
+and is also able to deal with degenerate eigensystems and fractional occupancy.  However, application of PM has failed 
 in the case of semi-empirical methods, most notably for C60, where convergence to excited states and 
 other problems were encountered \cite{ADaniels99}.   Also, it has been argued that variational properties 
 are lost when PM is applied to non-self-consistent theories such as tight binding\cite{APalser99}.
 Relevant to {\it ab initio} SCF methods, trace conservation leads to  inefficiencies at low 
-and high filling, $f_{occ}=N_e/N$, due to the unfavorable behavior of ${\cal P}_{\rm PM}$ near 
-its endpoints.  Low filling $f_{occ}\lesssim .2$  is encountered with a large basis set, while high 
-filling $f_{occ} \gtrsim .8$ corresponds to a small basis set.
+and high filling, $f_{occ}=N_e/N$, due to the unfavorable behavior of the trace conserving purification polynomial
+${\cal P}_{\rm PM}$ near its endpoints.  Low filling $f_{occ}\lesssim .2$  is encountered with a large basis set, 
+while high filling $f_{occ} \gtrsim .8$ corresponds to a small basis set.
 
 In this paper, we introduce a new Trace Re-Setting purification scheme (TRS) 
 that is efficient at high and low filling.  This new method is 
@@ -205,7 +202,6 @@ algorithm is compared to the PM scheme and exact eigensolution on the basis of a
 convergence in Section \ref{results}, followed by discussion in Section \ref{discuss}.  Finally,
 in Appendix \ref{Degen} we discuss the ability of Trace Re-Setting methods to cope with degenerate 
 eigensystems and fractional occupancy.  
-
 
 \section{Purification}\label{TSP}
 
@@ -337,9 +333,9 @@ Trace Re-Setting (TRS) purification begins with an initial guess ${\bf X}_0$,
 with the reversed eigenvalues of ${\bf F}$ normalized to the interval $[0,1]$.
 Estimates of the spectral bounds,  i.e. $\varepsilon_0({\bf F})$ and $\varepsilon_N({\bf F})$, can be computed 
 by the Gersgorin bound\cite{APalser99} or more precisely with the Lanczos method\cite{ADaniels99}.  
-%While the Laczos method may not be computationally expensive when carefully implemented, doing so 
+%While the Lanczos method may not be computationally expensive when carefully implemented, doing so 
 %requires additional programming effort.
-It is possible that due to numerical errors the Laczos estimates may not be exact bounds on
+It is possible that due to numerical errors the Lanczos estimates may not be exact bounds on
 the eigenvalues, leading to instabilities in application of the SP2 functions, Eq.~(\ref{sp2}), a problem
 avoided with the Gersgorin upper and lower bound limits.  We favor the use of the Gresgorin estimates because 
 they are safer, and because they have been used in a number of other linear scaling studies\cite{DBowler99,ADaniels99,APalser99}
@@ -553,7 +549,9 @@ for blocks in the range 3x3x3 to 15x15x15.
 The code was compiled using the Portland Group F90 compiler {\sc pgf90} v3.2.4 \cite{pgf90} with 
 the {\tt -O1 -tp athlon} options  and with the Gnu C compiler {\sc gcc} v2.96 using the {\tt -O1} flag.  
 All calculations were carried out on a 1.2GHz AMD Athlon Thunderbird running RedHat 
-{\sc Linux}v7.3 \cite{RedHat73}.  Exact eigensolution (ES) was carried out with the native
+{\sc Linux}v7.3 \cite{RedHat73}. Solving the SCF equations using hybrid Hartree-Fock/Density Functional Theory,
+Hartree-Fock (Roothaan-Hall) or  pure Density Functional Theory (Kohn-Sham) will, in the following, 
+be referred to interchangeably as eigensolution (ES).  Calculations employing ES were carried out with the native
 {\sc DSYEV} and {\sc BLAS} {\sc LAPACK} routines supplied with {\sc pgf90}.
 
 Filter operations were carried out after every matrix-matrix multiply, unless the product
@@ -798,26 +796,25 @@ from the density matrix.
 Consider the density matrix ${\bf P}$  with a $\nu$ fold degeneracy
 and $n_d$ occupied degenerate states. The trace of the density matrix can be written
 \begin{equation}
-Tr [ {\bf P}  ] = N_e = N_e-n_d + \nu \sigma,
+Tr [ {\bf P}  ] = N_e-n_d + \nu \sigma,
 \end{equation}
 where $\sigma = n_d/\nu$ is the filling of the degenerate states.
 In the case of fractional filling of a non-degenerate state at the
-chemical potential $\nu = 1$ and $\sigma = n_d < 1$,
-the density matrix is, by analogy with Eq. (\ref{DensityFromMOs}),
+chemical potential, we have $\nu = 1$ and $\sigma = n_d < 1$.  In general, the density matrix is
 \begin{equation}\label{Density}
 {\bf P} = \sum_{k=1}^{N_{\rm el}-n_d} {\bf c}^{\rm T}_{k} {\bf c}_{k} +
  \sum_{k=N_{\rm el}-n_d +1}^{N_{\rm el}- n_d + \nu } \sigma {\bf c}^{\rm T}_{k} {\bf c}_{k}
 \end{equation}
-and with an orthogonal representation we have that
+by analogy with Eq. (\ref{DensityFromMOs}). Taking advantage of orthogonality, powers of the density matrix are
 \begin{equation}
 {\bf P}^m = \sum_{k=1}^{N_{\rm el}-n_d} {\bf c}^{\rm T}_{k} {\bf c}_{k} +
- \sum_{k=N_{\rm el}-n_d +1}^{N_{\rm el}- n_d + \nu } \sigma^m {\bf c}^{\rm T}_{k} {\bf c}_{k}.
+ \sum_{k=N_{\rm el}-n_d +1}^{N_{\rm el}- n_d + \nu } \sigma^m {\bf c}^{\rm T}_{k} {\bf c}_{k},
 \end{equation}
-For powers of the density matrix we thus have that
+leading to the trace condition
 \begin{equation} \label{Rhom}
 {\rm Tr} [ {\bf P}^m  ] = N_{\rm el} - n_d + \nu \sigma^m \neq Tr  [ {\bf P} ] = N_{\rm el}.
 \end{equation}
->From Eq.\ (\ref{Rhom}) we see that idempotence is not
+From Eq.\ (\ref{Rhom}) we see that idempotence is not
 fulfilled (when $m>1$) in the case of degeneracy or fractional filling. 
 This means, for example, that grand canonical purification does not work and
 that the McWeeny constraint in conjugate gradient
