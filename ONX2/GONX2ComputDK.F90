@@ -53,9 +53,9 @@ CONTAINS
   !
   !
 #ifdef ONX2_PARALLEL
-  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
+  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,BoxX,DoStrs,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #else
-  SUBROUTINE ComputDK(D,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
+  SUBROUTINE ComputDK(D,GradX,BoxX,DoStrs,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #endif
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE ComputDK(D,GradX,ListC,ListD,GMc,BSc,CS_OUT)
@@ -81,6 +81,7 @@ CONTAINS
     TYPE(CRDS)                           :: GMc
     TYPE(BSET)                           :: BSc
     TYPE(CellSet)                        :: CS_OUT
+    LOGICAL, INTENT(IN)                  :: DoStrs
     !-------------------------------------------------------------------
     TYPE(ANode), POINTER       :: AtAListTmp,AtAList,AtBListTmp,AtBList
     TYPE(AtomInfo)             :: ACAtmInfo,BDAtmInfo
@@ -115,8 +116,6 @@ CONTAINS
     !-------------------------------------------------------------------
     !
     integer :: isize,i
-    logical :: DoStress
-    DoStress=.FALSE.
     !
     ! Initialize.
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
@@ -247,7 +246,6 @@ CONTAINS
                 ENDIF
                 Q => Q%Next
              ENDDO
-             !if(myid==0)write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'MyID',MyID
 #endif
              !
              KA=GMc%AtTyp%I(AtA)
@@ -341,7 +339,6 @@ CONTAINS
                       V=>V%Right
                    ENDIF
                 ENDDO
-                !write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'AtB',AtB,'MyID',MyID
 #else
                 Ind=BColIdx%I(AtB)
                 IF(Ind.GT.0) THEN ! Skip out if no density matrix element.
@@ -391,7 +388,7 @@ CONTAINS
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0D0)
                    !STRESS STRESS STRESS STRESS STRESS STRESS STRESS
-                   IF(DoStress) CALL DBL_VECT_EQ_DBL_SCLR(9*NIntBlk,CC(1),0.0D0)
+                   IF(DoStrs) CALL DBL_VECT_EQ_DBL_SCLR(9*NIntBlk,CC(1),0.0D0)
                    !STRESS STRESS STRESS STRESS STRESS STRESS STRESS
                    DO iFAC=1,ACAtmInfo%NFPair
 #ifdef GTRESH
@@ -456,25 +453,28 @@ CONTAINS
                    ENDDO
                    !
                    !STRESS STRESS STRESS STRESS STRESS STRESS
-                   IF(DoStress) THEN
-                      DO IXYZ=1,3
-                         DO JXYZ=1,3
-                            Indx=3*NIntBlk*(IXYZ-1)+NIntBlk*(JXYZ-1)+1
-                            ! Compute Stress Components.
+                   IF(DoStrs) THEN
+                      DO JXYZ=1,3
+                         DO IXYZ=1,3
+                            IF(GMc%PBC%AutoW%I(IXYZ).EQ.1.AND.GMc%PBC%AutoW%I(JXYZ).EQ.1) THEN
+                               Indx=3*NIntBlk*(JXYZ-1)+NIntBlk*(IXYZ-1)+1
+                               ! Compute Stress Components.
 #ifdef ONX2_PARALLEL
-                            CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
-                                 &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,   &
-                                 &     Work(1),1)
-                            BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
-                                 & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+                                    &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,   &
+                                    &     Work(1),1)
+                               BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                    & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
 #else
-                            CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
-                                 &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
-                                 &     Work(1),1)
-                            BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
-                                 & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+                               !write(*,*) 'CC(Indx)',CC(Indx)
+                               CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+                                    &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
+                                    &     Work(1),1)
+                               BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                    & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
 #endif
                             !
+                            ENDIF
                          ENDDO
                       ENDDO
                    ENDIF

@@ -33,31 +33,32 @@ PROGRAM GONX2
   IMPLICIT NONE
   !
 #ifdef ONX2_PARALLEL
-  TYPE(FASTMAT), POINTER         :: DFMcd,DFMab,KxFM
+  TYPE(FASTMAT), POINTER     :: DFMcd,DFMab,KxFM
 #else
-  TYPE(BCSR)                     :: D
+  TYPE(BCSR)                 :: D
 #endif
-  TYPE(BSET)                     :: BSc
-  TYPE(CRDS)                     :: GMc
-  TYPE(ARGMT)                    :: Args
+  TYPE(BSET)                 :: BSc
+  TYPE(CRDS)                 :: GMc
+  TYPE(ARGMT)                :: Args
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-  TYPE(DBL_RNK2)                 :: GradTmp
-  TYPE(INT_VECT)                 :: APt,BPt,CPt,DPt
+  TYPE(DBL_RNK2)             :: GradTmp
+  TYPE(INT_VECT)             :: APt,BPt,CPt,DPt
 #endif
-  TYPE(DBL_RNK2)                 :: GradX,GradAux,BoxX
-  TYPE(DBL_VECT)                 :: GTmp
-  REAL(DOUBLE)                   :: KScale
+  TYPE(DBL_RNK2)             :: GradX,GradAux,BoxX
+  TYPE(DBL_VECT)             :: GTmp
+  REAL(DOUBLE)               :: KScale
 !--------------------------------------------------------------------------------
 #ifdef ONX2_PARALLEL
-  TYPE(DBL_VECT)                 :: TmGxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr
-  INTEGER                        :: CMin,CMax,DMin,DMax,IErr
-  INTEGER                        :: ANbr,BNbr,CNbr,DNbr
+  TYPE(DBL_VECT)             :: TmGxArr,TmMLArr,TmTMArr,TmALArr,TmDLArr
+  INTEGER                    :: CMin,CMax,DMin,DMax,IErr
+  INTEGER                    :: ANbr,BNbr,CNbr,DNbr
 #endif
-  REAL(DOUBLE)                   :: Time1,Time2
-  REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
-  CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
-  REAL(DOUBLE), EXTERNAL         :: MondoTimer
+  REAL(DOUBLE)               :: Time1,Time2
+  REAL(DOUBLE)               :: TmTM,TmML,TmGx,TmAL,TmDL
+  CHARACTER(LEN=*),PARAMETER :: Prog='GONX2'
+  LOGICAL                    :: DoStrs
+  REAL(DOUBLE), EXTERNAL     :: MondoTimer
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArr
 #ifdef ONX2_PARALLEL
@@ -65,8 +66,8 @@ PROGRAM GONX2
 #else
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
-  LOGICAL :: DoStrs
 !--------------------------------------------------------------------------------
+  integer :: ixyz,jxyz
   DoStrs=.FALSE.
   !
 #ifdef ONX2_PARALLEL
@@ -84,6 +85,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Initialization and allocations.
+  !
 #ifdef ONX2_PARALLEL
   NULLIFY(ListC,ListD)
 #else
@@ -110,11 +112,6 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Get denstiy matrix.
-  !
-#ifdef ONX2_PARALLEL
-  !IF(MyID.EQ.ROOT) &
-#endif
-  !WRITE(*,*) '-------- We are in GONX2 --------'
   !
   SELECT CASE(SCFActn)
   CASE('ForceEvaluation')
@@ -143,7 +140,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Allocate the list(s) and get the buffer sizes.
-  !WRITE(*,*) 'allocate List'
+  !
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
   CALL Get_Essential_RowCol(DFMcd,CPt,CNbr,CMin,CMax,DPt,DNbr,DMin,DMax)
@@ -159,11 +156,10 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 #endif
   TmAL = Time2-Time1
-  !WRITE(*,*) 'allocate List: ok',Time2-Time1
   !
   !------------------------------------------------
   ! Make the distribution list(s).
-  !WRITE(*,*) 'make List'
+  !
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
   CALL MakeGList(ListC,GMc,BSc,CS_OUT,CPt,CNbr,APt,ANbr)
@@ -177,20 +173,17 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 #endif
   TmML = Time2-Time1
-  !WRITE(*,*) 'make List: ok',Time2-Time1
   !
   !------------------------------------------------
   ! Print list.
   !
 #ifdef ONX2_DBUG
-  !WRITE(*,*) 'Print List'
 #ifdef ONX2_PARALLEL
   CALL PrintList(ListC)
   CALL PrintList(ListD)
 #else
   CALL PrintList(ListC)
 #endif
-  !WRITE(*,*) 'Print List:ok'
 #endif
   !
   !------------------------------------------------
@@ -206,22 +199,21 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Compute Exchange Forces.
-  !WRITE(*,*) 'DKx'
+  !
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
-  CALL ComputDK(DFMcd,DFMab,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
+  CALL ComputDK(DFMcd,DFMab,GradX,BoxX,DoStrs,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
   Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
-  CALL ComputDK(D,GradX,BoxX,ListC,ListC,OffArr,GMc,BSc,CS_OUT)
+  CALL ComputDK(D,GradX,BoxX,DoStrs,ListC,ListC,OffArr,GMc,BSc,CS_OUT)
   CALL CPU_TIME(Time2)
 #endif
   TmGx = Time2-Time1
-  !WRITE(*,*) 'DKx:ok',Time2-Time1
   !
   !------------------------------------------------
   ! Free up some space. Deallocate the list(s).
-  !WRITE(*,*) 'deallocate List'
+  !
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
   CALL DeAllocList(ListC)
@@ -233,10 +225,10 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 #endif
   TmDL = Time2-Time1
-  !WRITE(*,*) 'deallocate List:ok',Time2-Time1
   !
   !------------------------------------------------
   ! Redistribute partition informations.
+  !
 #ifdef ONX2_PARALLEL
   CALL PDrv_Finalize(DFMcd,CollectInPar_O=.TRUE.)
   CALL Delete_FastMat1(DFMcd)
@@ -246,7 +238,7 @@ PROGRAM GONX2
 #endif
   !
   !------------------------------------------------
-  ! Add Exchange Gradient and save.
+  ! Add Exchange Gradient.
   !
   CALL Get(GradAux,'gradients',Tag_O=CurGeom)
   KScale=ExactXScale(ModelChem)
@@ -286,15 +278,13 @@ PROGRAM GONX2
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   IF(DoStrs) THEN
-     !write(*,'(A,E26.15)') 'BoxX%D(1,1)',BoxX%D(1,1)!+GMc%PBC%LatFrc%D(1,1)
-     !write(*,'(A,E26.15)') 'BoxX%D(2,1)',BoxX%D(2,1)
-     !write(*,'(A,E26.15)') 'BoxX%D(3,1)',BoxX%D(3,1)
-     !write(*,'(A,E26.15)') 'BoxX%D(1,2)',BoxX%D(1,2)
-     !write(*,'(A,E26.15)') 'BoxX%D(2,2)',BoxX%D(2,2)
-     !write(*,'(A,E26.15)') 'BoxX%D(3,2)',BoxX%D(3,2)
-     !write(*,'(A,E26.15)') 'BoxX%D(1,3)',BoxX%D(1,3)
-     !write(*,'(A,E26.15)') 'BoxX%D(2,3)',BoxX%D(2,3)
-     !write(*,'(A,E26.15)') 'BoxX%D(3,3)',BoxX%D(3,3)
+     do jxyz=1,3
+        do ixyz=1,3
+!           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
+              write(*,'(A,I1,A,I1,A,E26.15)') 'BoxX%D(',ixyz,',',jxyz,')',BoxX%D(ixyz,jxyz)
+!           endif
+        enddo
+     enddo
      !
      CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
   ENDIF
@@ -302,35 +292,13 @@ PROGRAM GONX2
   !
 #endif
   !
-#ifdef 0
-!StressStressStressStressStressStressStressStress
-!  write(*,*) 'CS_OUT%NCells=',CS_OUT%NCells
-!  write(*,*) 'LatFrc(1,1)',GMc%PBC%LatFrc%D(1,1)
-!  write(*,*) 'XBox',BoxX%D(1,1)
-!  write(*,*) 'Tot Stress',GMc%PBC%LatFrc%D(1,1)+BoxX%D(1,1)
-!StressStressStressStressStressStressStressStress
-  write(*,*) 'Grad Kx'
-  do i=1,natoms
-     write(*,100) i,GradX%D(:,i)
-  enddo
-
-  !write(*,*) 'Grad before'
-  !do i=1,natoms
-  !   write(*,100) i,GradAux%D(:,i)-GradX%D(:,i)
-  !enddo
-
-  !write(*,*) 'Grad Tot'
-  !do i=1,natoms
-  !   write(*,100) i,GradAux%D(:,i)
-  !enddo
-
-100 format(I4,2X,3E24.16)
-#endif
+  !------------------------------------------------
+  ! Save Exchange Gradients and Stress.
   !
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
   !
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
-  IF(DoStrs) CALL Put(GMc,Tag_O=CurGeom)
+  IF(DoStrs) CALL Put(GMc%PBC%LatFrc,'latfrc',Tag_O=CurGeom)
   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
   !------------------------------------------------
@@ -356,7 +324,6 @@ PROGRAM GONX2
      !
      ! Imbalance stuff.
      CALL PImbalance(TmGxArr ,NPrc,Prog_O='ComputeGK')
-     !CALL PImbalance(TmKTArr,NPrc,Prog_O='GONX'     )
      !
      WRITE(*,1001) SUM(TmALArr%D )/DBLE(NPrc),MINVAL(TmALArr%D ),MAXVAL(TmALArr%D )
      WRITE(*,1002) SUM(TmMLArr%D )/DBLE(NPrc),MINVAL(TmMLArr%D ),MAXVAL(TmMLArr%D )
