@@ -21,7 +21,7 @@ MODULE WriteRoutines
         WRITE(Unit,*)Tab2,TRIM(Res),'=',TRIM(Mult),'*Sgn'
         WRITE(Unit,*)Tab1,'ELSE'
         WRITE(Unit,*)Tab2,'J=AINT(X*Erf_Grid)'
-        BigStr=TRIM(Res)//'='//TRIM(Mult)//'*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*Erf_3(J))))' 
+        BigStr=TRIM(Res)//'='//TRIM(Mult)//'*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))' 
         BigStr=Tab2//BigStr
         WRITE(Unit,*)TRIM(BigStr)
         WRITE(Unit,*)Tab1,'ENDIF'
@@ -95,8 +95,8 @@ PROGRAM VectorRhoMD
 !
 !==================================================================================
   CALL OpenASCII('ExplicitBraElements.Inc',Out,.TRUE.)
-  WRITE(Out,*)(Blnk,I=1,6),'Z=Prim%Z'
-  WRITE(Out,*)(Blnk,I=1,6),'TwoZ=Two*Z'
+  WRITE(Out,*)(Blnk,I=1,6),'Z=Prim%Zeta'
+  WRITE(Out,*)(Blnk,I=1,6),'TwoZ=Two*Prim%Zeta'
   WRITE(Out,*)(Blnk,I=1,6),'SELECT CASE(Prim%Ell)'
   DO Ell=0,HGEll
      ChEll   =IntToChar(Ell)
@@ -158,7 +158,7 @@ PROGRAM VectorRhoMD
                                      //')*LambdaZ('//IntToChar(N+1)//')'
               String(5,K)='GradBraRhoDot=GradRhoX*GradPrimDistX &'
               String(6,K)='+GradRhoY*GradPrimDistY+GradRhoZ*GradPrimDistZ'
-              String(7,K)='Prim%Ket('//IntToChar(LMN)//')=Prim%Ket('//IntToChar(LMN)//') & '
+              String(7,K)='Ket('//IntToChar(LMN)//')=Ket('//IntToChar(LMN)//') & '
               String(8,K)='+Wght*(dEdRho*PrimDist+dEdAbsGradRho2*GradBraRhoDot)'
         WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(1,K)))
         WRITE(Out,*)(Blnk,I=1,15),TRIM(Squish(String(2,K)))

@@ -12,6 +12,7 @@ MODULE CubeTree
    USE Functionals
    USE Thresholding
    USE AtomPairs
+   USE SpecFun
    IMPLICIT NONE
 !====================================================================================
 !  Hierarchical cubature node
@@ -57,19 +58,16 @@ MODULE CubeTree
    REAL(DOUBLE),DIMENSION(NGrid,4):: RhoV            !  Global Vals, set to current Cube%Vals
    REAL(DOUBLE)                   :: Pop             !  Global Pop,  set to current Cube%IXact
 !  Interpolation grid for fast evaluation of Exp[-x] and Erf[x]
-   INCLUDE 'Exp.Inc'   
-   INCLUDE 'Erf.Inc'
 !  Global Objects
    TYPE(BSET)                     :: BS              !  Global basis set
    TYPE(CRDS)                     :: GM              !  Global molecular geometry
-   TYPE(DBL_RNK4)                 :: MD              !  Global MD Coefs
+   TYPE(CubeNode), POINTER        :: CubeRoot
 !-----------!
    CONTAINS !
 !================================================================================
 !     Grid generation routine     
 !================================================================================
-      SUBROUTINE GridGen(CubeRoot)
-         TYPE(CubeNode), POINTER          :: CubeRoot
+      SUBROUTINE GridGen()
          REAL(DOUBLE),   DIMENSION(3)     :: TotalError,LocalError,GlobalError, &
                                              RelativeError,NewCubes,OldCubes
          REAL(DOUBLE)                     :: MaxError,BoxSep,Delta,TargtThresh
@@ -408,9 +406,9 @@ MODULE CubeTree
 !           Find the exact electron density in the expanded BBox
             MidPop=PopInBox(RhoRoot)
 !           Achieved-target errors         
-            FMid=ABS((MidPop-REl)/REl)-TauRel
+            FMid=ABS((MidPop-REl)/REl)-TauRel*1.D-1
 !           Convergence test
-            IF(DelSep<TauRel*1.D1)EXIT
+            IF(DelSep<TauRel)EXIT
 !           If still to the left, increment bisection point
             IF(FMid>Zero)BisSep=MidSep
          ENDDO
@@ -468,36 +466,6 @@ MODULE CubeTree
          NULLIFY(Node%Wght)
          NULLIFY(Node%Vals)
       END SUBROUTINE DeleteCubeGrid
-!========================================================================================
-!     Compute the erf function
-!========================================================================================
-      FUNCTION ERF(W)
-         REAL(DOUBLE),INTENT(IN) :: W
-         REAL(DOUBLE)            :: ERF,X,Sgn
-         INTEGER                 :: I,J
-         Sgn=One; IF(W<0.0D0)Sgn=-One
-         X=Sgn*W
-         IF(X>Erf_Switch)THEN
-            Erf=Sgn*1.0D0
-         ELSE
-            J=AINT(X*Erf_Grid)
-            Erf=Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*Erf_3(J))))
-         ENDIF
-      END FUNCTION ERF
-!========================================================================================
-!     Compute the inverse exponential function, EXP(-X)
-!========================================================================================
-      FUNCTION ExpInv(X)
-         REAL(DOUBLE), INTENT(IN) :: X
-         REAL(DOUBLE)             :: EXPInv
-         INTEGER                  :: J ,I
-         IF(X.GE.Exp_Switch)THEN
-            Expinv=0.0D0
-         ELSE
-            J=AINT(X*Exp_Grid)
-            Expinv=Exp_0(J)+X*(Exp_1(J)+X*(Exp_2(J)+X*(Exp_3(J)+X*Exp_4(J))))
-         ENDIF
-      END FUNCTION ExpInv
 !================================================================================
 !     
 !================================================================================
