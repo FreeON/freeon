@@ -832,6 +832,17 @@ CONTAINS
     CALL New(GradAux1,(/3,G%Clone(1)%NAtms/))
     CALL New(GradAux2,(/3,G%Clone(1)%NAtms/))
     DO iCLONE=1,G%Clones
+       !
+       ! Load current gradients, we need that, cause we save the geo through
+       ! GeoArchive and G%..%Gradients have been det to BIG_DBL previously.
+       !
+       HDFFileID=OpenHDF(N%HFile)
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+       CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+       CALL Get(G%Clone(iCLONE)%Gradients,'Gradients',Tag_O=chGEO)
+       CALL CloseHDFGroup(HDF_CurrentID)
+       CALL CloseHDF(HDFFileID)
+       !
        ! Load globals 
        NAToms=G%Clone(1)%NAtms
        MaxAtms=B%MxAts(cBAS)
