@@ -459,59 +459,57 @@ This is in contrast to implicit proposed algorithms for $N$-scaling solution of 
 wherein density matrix derivatives are obtained as solutions to commuting operator equations of Sylvester type 
 \cite{Ochsenfeld97,Helgaker_2001}.
 
-Sufficient to compute fourth order properties with the $2 N+1$ rule presented in 
-Section \ref{Wigner2Np1}, Perturbed Projection is outlined in the following for computation of the second order 
-response function:  With the Fockians $\F^0$, $\F^a$,  and $\F^{ab}$ in hand,  the purification sequence is
-prepared by appropriatley compressing their spectrum into the domain of  convergence
-\cite{ANiklasson02A} using
-  \begin{align}
-    \X^0_{0}&=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}} \\
-    \intertext{and}
-    \X^{a\ldots}_{0}&=\frac{\F^{a\ldots}_{n}}{\F_{min}-\F_{max}},
-  \end{align}
-  where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
-  bounds of the eigenvalues of $\F^0$.
+Sufficient to compute fourth order properties using the $2 N+1$ rule presented in Section \ref{Wigner2Np1}, 
+Perturbed Projection is outlined in the following for computation of the second order response function.  
+The Perturbed Projection sequence is started begining with $\X^{a\ldots}_{0}$, which are 
+prepared from the Fockians $\F^0$, $\F^a$,  and $\F^{ab}$ by  compressing their spectrum into the domain of 
+convergence \cite{ANiklasson02A} using
+\begin{equation}
+    \X^0_{0}=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}} 
+\end{equation}
+and 
+\begin{equation}
+    \X^{a\ldots}_{0}=\frac{\F^{a\ldots}_{n}}{\F_{min}-\F_{max}},
+\end{equation}
+where $\F_{min}$ and $\F_{max}$ are upper and lower bounds to the eigenvalues of $\F^0$.  
 
-
-Perturbed projections are then applied:\\
-  If $\Tr[\X^0_{i}]\ge N_e$ then (for $i = 0,1,\ldots$)
-\\
-\\
-%{\bf Why not? Cause, then you need Faa, Fbb and Fab to start 
-%the sequence and Daa, Dbb and Dab may not converge in the same CPSCF iterations. It
-%does not reflect the actual implementation.}
-  \begin{align}
-    ~~~\begin{split}\label{PP1}
-%      \X^{aa}_{i+1}&=\{\X^{aa}_{i},\X^0_{i}\}+\X^{a}_{i}\X^{a}_{i} \text{\bf Why not? See above} \\
-%      \X^{bb}_{i+1}&=\{\X^{bb}_{i},\X^0_{i}\}+\X^{b}_{i}\X^{b}_{i} \text{\bf Why not? }\\
-      \X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
-      \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
-      \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
-      \X^0_{i+1}&=(\X^0_{i})^2,
-    \end{split}
-    \intertext{else if $\Tr[X^0_{i}]< N_e$,}
-    ~~~\begin{split}\label{PP2}
-%      \X^{aa}_{i+1}&=2\X^{aa}_{i} - (\{\X^{aa}_{i},\X^0_{i}\}+\X^{a}_{i}\X^{a}_{i}) \\
-%      \X^{bb}_{i+1}&=2\X^{bb}_{i} - (\{\X^{bb}_{i},\X^0_{i}\}+\X^{b}_{i}\X^{b}_{i}) \\
+While Perturbed Projection can be formulated within any purification scheme, we focous here on the
+simple and efficient TC2 method \cite{ANiklasson02}.  Briefly, TC2 
+constructs a ground state projector through a series of trace correcting projections;  
+when the trace is larger than $N_{\rm el}$, $x^2$ is used to reduce the trace, and 
+when the trace is less than  $N_{\rm el}$, $2 x-x^2$ is used to increase the trace.  
+The resulting sequence of correcting projections yeilds a step at the correct chemical potential. 
+Within this framework, Perturbed Projection through second order is the sequence
+\begin{equation}\label{PP1}
+\left.
+\begin{array}{ll}
+\X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
+\X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
+\X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
+\X^0_{i+1}&=(\X^0_{i})^2 
+\end{array} 
+\right\}\,  {\rm Tr}[\mathcal{X}^0_{i}]\ge N_e 
+\end{equation}
+or 
+\begin{equation}\label{PP2}
+\left.
+\begin{array}{ll}
       \X^{ab}_{i+1}&=2 \X^{ab}_{i}-(\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\})\\
       \X^b_{i+1}&=2 \X^b_{i}-\{\X^b_{i},\X^0_{i}\} \\
       \X^a_{i+1}&=2 \X^a_{i}-\{\X^a_{i},\X^0_{i}\} \\
-      \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2.
-    \end{split}
-  \end{align}
-
-The recursion of the perturbed projection sequence is
-  stopped at convergence, which is reached when the error
-  $|\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
-  the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$,
-  becomes smaller than a given threshold. We then have that 
-\begin{equation}
-  \D^{a...} = N!\lim_{i\rightarrow\infty} \X_i^{a...}.
+      \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
+\end{array} 
+\right\}\, {\rm Tr}[\mathcal{X}^0_{i}]< N_e.
 \end{equation}
+As with the  TC2 generator, the response functions
+\begin{equation}
+ \D^{a...} = N!\lim_{i\rightarrow\infty} \X_i^{a...},
+\end{equation}
+converge quadratically, reaching  convergence  when the error $|\Tr[\X^0_{i}]-N_e| + |\Tr[\X^{a}_{i}]| + \ldots$, or 
+the change $|\X^{a\ldots}_{i+1}-\X^{a\ldots}_{i}|$,  becomes less than a given threshold 
+({\bf CAN WE BE MORE SPECIFIC HERE?  CAN WE GIVE A NAME TO THE THRESHOLD? }).
+
 %{\bf Here it is important that we have the right normalization!}
-
-
-
 %\subsubsection{Algorithm}
 %.ANDERS SHOULD ADD STG..\\
 %\begin{figure}[htbp]
