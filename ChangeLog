@@ -1,3 +1,19 @@
+2002-03-05 13:51  mchalla
+
+	* ONX/NONX/ONX.F90: Changed get of GMp to CurBasis in case of a
+	non-restart.  This was a serious, serious bug when switching
+	geomtries.  As an asside, we should only use a previous geometry
+	with a NON-extrapolated DM on RESTART.
+
+2002-02-28 14:27  mchalla
+
+	* Examples/: lizardite-1T_332.inp, lizardite-1T_332d.inp: Example
+	input files of large 2-d periodic jobs.
+
+2002-02-28 13:35  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-02-28 13:30  mchalla
 
 	* SCFeqs/SDMM.F90: Fixed bug with temporary matrices in computation
