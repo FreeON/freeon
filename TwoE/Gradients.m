@@ -601,7 +601,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["INTEGER       :: CrtSet7,CrtSet8,CrtSet9,CrtSet10,CrtSet11,CrtSet12"];
            WS["INTEGER       :: OffSet,GOA,GOB,GOC,GOD"];
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
-           WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
+           WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz,Dum"];
 
            WS["CrtSet1=GOA"];           
            WS["CrtSet2=GOA+1"];           
@@ -739,10 +739,10 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
-(*           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"]; *)
-(*           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"]; *)
-(*           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"]; *)
-           WS["     IF(PBC%AutoW%I(1)==1) THEN"];
+           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"];
+           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"];
+(*           WS["     IF(PBC%AutoW%I(1)==1) THEN"];
            WS["         Dum = FPQx-ANINT(FPQx)"];
            WS["         IF(ABS(Dum)-0.5d0 > 1d-10) FPQx = Dum"];
            WS["     ENDIF"];
@@ -756,7 +756,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["     ENDIF"];
            WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
            WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
-           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
+           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];*)
            WS["!"];
 
 

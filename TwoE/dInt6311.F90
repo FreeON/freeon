@@ -24,7 +24,7 @@
       INTEGER       :: CrtSet7,CrtSet8,CrtSet9,CrtSet10,CrtSet11,CrtSet12
       INTEGER       :: OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
-      REAL(DOUBLE)  :: FPQx,FPQy,FPQz
+      REAL(DOUBLE)  :: FPQx,FPQy,FPQz,Dum
       CrtSet1=GOA
       CrtSet2=GOA+1
       CrtSet3=GOA+2
@@ -290,21 +290,9 @@
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
-           IF(PBC%AutoW%I(1)==1) THEN
-               Dum = FPQx-ANINT(FPQx)
-               IF(ABS(Dum)-0.5d0 > 1d-10) FPQx = Dum
-           ENDIF
-           IF(PBC%AutoW%I(2)==1) THEN
-               Dum = FPQy-ANINT(FPQy)
-               IF(ABS(Dum)-0.5d0 > 1d-10) FPQy = Dum
-           ENDIF
-           IF(PBC%AutoW%I(3)==1) THEN
-               Dum = FPQz-ANINT(FPQz)
-               IF(ABS(Dum)-0.5d0 > 1d-10) FPQz = Dum
-           ENDIF
-            PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
-            PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
-            PQz  = FPQz*PBC%BoxShape%D(3,3)
+            IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)
+            IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)
+            IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)
       !
             WPx = -Eta*PQx*r1xZpE
             WPy = -Eta*PQy*r1xZpE
