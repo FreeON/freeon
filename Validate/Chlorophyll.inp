@@ -14,7 +14,7 @@ DIISDamp=0.05
 Guess=SuperPos
 SCFMethod=(TC2,TRS4)
 BasisSets=(STO-2G-SPLIT,3-21G-SPLIT)
-ModelChem=(HF,B3LYP/VWN3)
+ModelChem=(HF,B3LYP)
 Accuracy =(Loose,Good)
 
 MPIInvoke="mpirun"

@@ -15,7 +15,7 @@ SCFMethod=(TRS4)
 BasisSets=(STO-3G-SPLIT)
 ModelChem=(B3LYP/VWN5)
 Accuracy =(Loose)
-SCFConvergences=(DIIS)
+SCFConvergence=(DIIS)
 
 MPIInvoke="mpirun"
 MPIProcessors=8
