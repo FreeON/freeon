@@ -19,6 +19,9 @@ MODULE InOut
           Get_INT_RNK3, Get_INT_RNK4, Get_DBL_SCLR, &
           Get_DBL_VECT, Get_DBL_RNK2, Get_DBL_RNK3, &
           Get_DBL_RNK4, Get_CHR_SCLR,               &
+          Get_BMATR,    Get_Sp1x1,                  &
+          Get_BondD,    Get_AtmB,                   &
+          Get_CHR_VECT, Get_LOG_VECT, Get_INTC,     &
           Get_LOG_SCLR, Get_BSET,     Get_CRDS,     &
           Get_TOLS,     Get_BCSR,                   & 
 #ifdef PARALLEL
@@ -26,10 +29,6 @@ MODULE InOut
 #endif
           Get_PBCInfo,  Get_CellSet,                &
           Get_ARGMT,    Get_HGRho,                  &
-          Get_CHR_VECT, Get_LOG_VECT,               &
-          Get_INTC,     Get_BMATR,                  &
-          Get_Sp1x1,    Get_BondD,                  &
-          Get_AtmB,                                 &
           Get_CMPoles
 
   END INTERFACE
@@ -38,16 +37,15 @@ MODULE InOut
           Put_INT_RNK3, Put_INT_RNK4, Put_DBL_SCLR, &
           Put_DBL_VECT, Put_DBL_RNK2, Put_DBL_RNK3, &
           Put_DBL_RNK4, Put_DBL_RNK6, Put_CHR_SCLR, &
+          Put_CHR_VECT, Put_LOG_VECT,               &
+          Put_BMATR,    Put_Sp1x1,    Put_BondD,    &
+          Put_AtmB,     Put_INTC,                   &
           Put_LOG_SCLR, Put_BSET,     Put_CRDS,     &
 #ifdef PARALLEL
           Put_DBCSR,                                &
 #endif
           Put_PBCInfo,  Put_CellSet,                &
           Put_TOLS,     Put_BCSR,     Put_HGRho,    &
-          Put_CHR_VECT, Put_LOG_VECT,               &
-          Put_INTC, Put_BMATR,                      &
-          Put_Sp1x1, Put_BondD,                     &
-          Put_AtmB,                                 &
           Put_CMPoles
   END INTERFACE
 
@@ -390,158 +388,56 @@ CONTAINS
     TYPE(INTC),               INTENT(INOUT) :: A
     CHARACTER(LEN=*),         INTENT(IN)    :: VarName
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-    INTEGER,ALLOCATABLE,DIMENSION(:)   :: B !=ICHAR(' ')
-    TYPE(META_DATA)                         :: Meta
-    INTEGER :: II,NN,N,I
+    !
 #ifdef PARALLEL 
     IF(MyId==ROOT) THEN
 #endif 
-       NN=SIZE(A%DEF,1)
-       N=5  !!! LEN(A%DEF(1))
-       Meta=SetMeta(NameTag(Trim(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
-       ALLOCATE(B(NN*N))
-       CALL OpenData(Meta)
-       CALL ReadIntegerVector(Meta,B)
-       CALL CloseData(Meta)
-       DO II = 1, NN
-         DO I=1,N; A%DEF(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
-       ENDDO
-       DEALLOCATE(B)
-       !
-       NN=SIZE(A%FCType,1)
-       N=1  !!! LEN(A%FCType(1))
-       Meta=SetMeta(NameTag(Trim(VarName)//'FCType',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
-       ALLOCATE(B(NN*N))
-       CALL OpenData(Meta)
-       CALL ReadIntegerVector(Meta,B)
-       CALL CloseData(Meta)
-       DO II = 1, NN
-         DO I=1,N; A%FCType(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
-       ENDDO
-       DEALLOCATE(B)
-       !
-
-          Meta=SetMeta(NameTag(Trim(VarName)//'Atoms',Tag_O),NATIVE_INT32,NN*4,.FALSE.)
-          CALL OpenData(Meta)
-          CALL ReadIntegerVector(Meta,A%ATOMS)
-          CALL CloseData(Meta)
-
-          Meta=SetMeta(NameTag(Trim(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
-          CALL OpenData(Meta)
-          CALL ReadDoubleVector(Meta,A%Value)
-          CALL CloseData(Meta)
-
-          Meta=SetMeta(NameTag(Trim(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
-          ALLOCATE(B(NN))
-          CALL OpenData(Meta)
-          CALL ReadIntegerVector(Meta,B)
-          CALL CloseData(Meta)
-          A%Constraint=.FALSE.
-          DO I=1,NN
-             IF(B(I)==1) A%Constraint(I)=.TRUE.
-          ENDDO
-          DEALLOCATE(B)
-
-          Meta=SetMeta(NameTag(Trim(VarName)//'ConstrValue',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
-          CALL OpenData(Meta)
-          CALL ReadDoubleVector(Meta,A%ConstrValue)
-          CALL CloseData(Meta)
-
-          Meta=SetMeta(NameTag(Trim(VarName)//'Active',Tag_O),NATIVE_INT32,NN,.FALSE.)
-          ALLOCATE(B(NN))
-          CALL OpenData(Meta)
-          CALL ReadIntegerVector(Meta,B)
-          CALL CloseData(Meta)
-          A%Active=.FALSE.
-          DO I=1,NN
-             IF(B(I)==1) A%Active(I)=.TRUE.
-          ENDDO
-          DEALLOCATE(B)
-
+    IF(AllocQ(A%Alloc)) CALL Delete(A)         
+    CALL Get(A%N,                    'N'//TRIM(VarName),Tag_O=Tag_O)
+    CALL New(A,A%N)                                           
+    CALL Get(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
+    CALL Get(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
 #ifdef PARALLEL 
        ENDIF
        !! IF(InParallel)CALL Bcast(A)
        !! STOP 'ERROR : Bcast in Get_INTC (InOut.F90) not supported!'
 #endif 
-     END SUBROUTINE Get_INTC
+  END SUBROUTINE Get_INTC
 
      !-------------------------------------------------------------------------------
 
      SUBROUTINE Put_INTC(A,VarName,Tag_O)
-       INTEGER  :: I,N,II,NN
        TYPE(INTC),               INTENT(IN) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-       INTEGER,ALLOCATABLE,DIMENSION(:)   :: B  !=ICHAR(' ')
-       TYPE(META_DATA)                      :: Meta
+       !
+       IF(A%N<=0) RETURN
 #ifdef PARALLEL 
        IF(MyId==ROOT)THEN
 #endif 
-          N=5 !!! LEN(A%DEF(1))
-          NN=SIZE(A%DEF,1)
-          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_INTC')
-          ALLOCATE(B(N*NN))
-          DO II = 1, NN
-            DO I=1,N; B((II-1)*N+I)=ICHAR(A%DEF(II)(I:I)); ENDDO
-          ENDDO
-          Meta=SetMeta(NameTag(TRIM(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
-          CALL OpenData(Meta,.TRUE.)
-          CALL WriteIntegerVector(Meta,B)
-          CALL CloseData(Meta)
-          DEALLOCATE(B)
-          !
-          N=1 !!! LEN(A%FCType(1))
-          NN=SIZE(A%FCType,1)
-          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_INTC')
-          ALLOCATE(B(N*NN))
-          DO II = 1, NN
-            DO I=1,N; B((II-1)*N+I)=ICHAR(A%FCType(II)(I:I)); ENDDO
-          ENDDO
-          Meta=SetMeta(NameTag(TRIM(VarName)//'FCType',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
-          CALL OpenData(Meta,.TRUE.)
-          CALL WriteIntegerVector(Meta,B)
-          CALL CloseData(Meta)
-          DEALLOCATE(B)
-          !
-
-             Meta=SetMeta(NameTag(TRIM(VarName)//'Atoms',Tag_O),NATIVE_INT32,4*NN,.FALSE.)
-             CALL OpenData(Meta,.TRUE.)
-             CALL WriteIntegerVector(Meta,A%ATOMS)
-             CALL CloseData(Meta)
-
-             Meta=SetMeta(NameTag(TRIM(VarName)//'Value',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
-             CALL OpenData(Meta,.TRUE.)
-             CALL WriteDoubleVector(Meta,A%Value)
-             CALL CloseData(Meta)
-
-             ALLOCATE(B(NN))
-             B=0
-             DO I=1,NN
-                IF(A%Constraint(I)) B(I)=1
-             ENDDO
-             Meta=SetMeta(NameTag(TRIM(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
-             CALL OpenData(Meta,.TRUE.)
-             CALL WriteIntegerVector(Meta,B)
-             CALL CloseData(Meta)
-             DEALLOCATE(B)
-!
-             ALLOCATE(B(NN))
-             B=0
-             DO I=1,NN
-                IF(A%Active(I)) B(I)=1
-             ENDDO
-             Meta=SetMeta(NameTag(TRIM(VarName)//'Active',Tag_O),NATIVE_INT32,NN,.FALSE.)
-             CALL OpenData(Meta,.TRUE.)
-             CALL WriteIntegerVector(Meta,B)
-             CALL CloseData(Meta)
-             DEALLOCATE(B)
-
+          CALL Put(A%N,                    'N'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%Def,                'Def'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%Atoms,            'Atoms'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%Value,            'Value'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%ConstrValue,'ConstrValue'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%Active,          'Active'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%PredVal,        'PredVal'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%PredGrad,      'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
+          CALL Put(A%InvHess,       'PredGrad'//TRIM(VarName),Tag_O=Tag_O)
 #ifdef PARALLEL 
-          ENDIF       
+       ENDIF       
 #endif 
 
         END SUBROUTINE Put_INTC
-
+!
+!---------------------------------------------------------------------
+!
         SUBROUTINE Get_BMATR(A,VarName,Tag_O)
           TYPE(BMATR),           INTENT(INOUT) :: A
           CHARACTER(LEN=*),         INTENT(IN)    :: VarName
@@ -1297,12 +1193,10 @@ CONTAINS
                 CALL Get(GM%TotCh,'charge'       ,Tag_O=Tag_O)
                 CALL Get(GM%NKind,'nkind'        ,Tag_O=Tag_O)
                 CALL Get(GM%InAu, 'inau'         ,Tag_O=Tag_O)
-                CALL Get(GM%NLagr,'nlagr'        ,Tag_O=Tag_O)
                 CALL New(GM)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
                 CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
-                CALL Get(GM%ELagr     ,'gm_elagr'     ,Tag_O=Tag_O)
                 CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
                 CALL Get(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
                 CALL Get(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
@@ -1318,13 +1212,9 @@ CONTAINS
                 CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Get(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+                CALL Get(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
-                IF(GM%NLagr/=0) THEN
-                  CALL Get(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
-                  CALL Get(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
-                  CALL Get(GM%GradMult,'GradMult',Tag_O=Tag_O)
-                ENDIF
               END SUBROUTINE Get_CRDS
               !-------------------------------------------------------------------------------
               !     Put a coordinate set
@@ -1342,11 +1232,9 @@ CONTAINS
                 CALL Put(GM%TotCh,'charge'       ,Tag_O=Tag_O)
                 CALL Put(GM%NKind,'nkind'        ,Tag_O=Tag_O)
                 CALL Put(GM%InAu, 'inau'         ,Tag_O=Tag_O)
-                CALL Put(GM%NLagr,'nlagr'        ,Tag_O=Tag_O)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
                 CALL Put(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
-                CALL Put(GM%ELagr     ,'gm_elagr'     ,Tag_O=Tag_O)
                 CALL Put(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
                 CALL Put(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
                 CALL Put(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
@@ -1362,13 +1250,9 @@ CONTAINS
                 CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Put(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
+                CALL Put(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
-                IF(GM%NLagr/=0) THEN
-                  CALL Put(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
-                  CALL Put(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
-                  CALL Put(GM%GradMult,'GradMult',Tag_O=Tag_O)
-                ENDIF
               END SUBROUTINE Put_CRDS
               !-------------------------------------------------------------------------------
               !     Get a BCSR matrix
@@ -2099,50 +1983,58 @@ CONTAINS
 #endif 
                     END SUBROUTINE Get_CHR_VECT
                     !-------------------------------------------------------------------------------
-                    SUBROUTINE Put_LOG_VECT(A,VarName,NN,Tag_O)
+                    SUBROUTINE Put_LOG_VECT(A,VarName,Tag_O)
                       INTEGER                              :: I,N,II,NN
-                      LOGICAL,DIMENSION(1:NN),  INTENT(IN) :: A
+                      TYPE(LOG_VECT)                       :: A
                       CHARACTER(LEN=*),         INTENT(IN) :: VarName
                       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-                      INTEGER,DIMENSION(1:NN)              :: ILog
-                      TYPE(META_DATA)                      :: Meta
+                      TYPE(INT_VECT)                       :: ILog
 #ifdef PARALLEL 
                       IF(MyId==ROOT)THEN
 #endif 
+                      !
+                         NN=SIZE(A%L)
+                         CALL New(ILog,NN)
                          DO I = 1, NN
-                            ILog(I)=0
-                            IF(A(I))ILog(I)=1
+                            ILog%I(I)=0
+                            IF(A%L(I)) ILog%I(I)=1
                          ENDDO
-                         Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
-                         CALL OpenData(Meta,.TRUE.)
-                         CALL WriteIntegerVector(Meta,ILog)
-                         CALL CloseData(Meta)
+                         IF(PRESENT(Tag_O)) THEN
+                           CALL Put_INT_VECT(ILog,VarName//Tag_O)
+                         ELSE
+                           CALL Put_INT_VECT(ILog,VarName)
+                         ENDIF
+                         CALL Delete(ILog)
 #ifdef PARALLEL 
                       ENDIF
 #endif 
                     END SUBROUTINE Put_LOG_VECT
                     !-------------------------------------------------------------------------------
-                    SUBROUTINE Get_LOG_VECT(A,VarName,NN,Tag_O)
+                    SUBROUTINE Get_LOG_VECT(A,VarName,Tag_O)
                       INTEGER                              :: I,NN
-                      LOGICAL,DIMENSION(1:NN),INTENT(INOUT) :: A
+                      TYPE(LOG_VECT)                       :: A
                       CHARACTER(LEN=*),         INTENT(IN) :: VarName
                       CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-                      INTEGER,DIMENSION(1:NN)              :: ILog
+                      TYPE(INT_VECT)                       :: ILog
                       TYPE(META_DATA)                      :: Meta
 #ifdef PARALLEL 
                       IF(MyId==ROOT)THEN
 #endif 
-                         Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32,1,.FALSE.)
-                         CALL OpenData(Meta,.TRUE.)
-                         CALL ReadIntegerVector(Meta,ILog)
-                         CALL CloseData(Meta)
+                         NN=SIZE(A%L)
+                         CALL New(ILog,NN)
+                         IF(PRESENT(Tag_O)) THEN
+                           CALL Get_INT_VECT(ILog,VarName,Tag_O)
+                         ELSE
+                           CALL Get_INT_VECT(ILog,VarName)
+                         ENDIF
                          DO I = 1, NN
-                            IF(ILog(I)==1) Then
-                               A(I) = .TRUE.
+                            IF(ILog%I(I)==1) Then
+                               A%L(I) = .TRUE.
                             ELSE
-                               A(I) = .FALSE.
+                               A%L(I) = .FALSE.
                             ENDIF
                          ENDDO
+                         CALL Delete(ILog)
 #ifdef PARALLEL 
                       ENDIF
 #endif 

@@ -901,19 +901,20 @@ MODULE SetXYZ
         TYPE(INTC) :: Intcs,IntcsCopy
         INTEGER    :: I,J,From,To,Start,NSize,To2
 !
-        NSize=SIZE(IntcsCopy%Def)
+        NSize=IntcsCopy%N
         IF(NSize<Start+(To-From)) THEN
           CALL Halt('Dimensionality error in IntCCopy')
         ENDIF
 !
          To2=Start+(To-From)
-        IntCsCopy%Def(Start:To2)       =IntCs%Def(From:To)
-        IntCsCopy%FCType(Start:To2)       =IntCs%FCType(From:To)
-        IntCsCopy%Atoms(Start:To2,1:4) =IntCs%Atoms(From:To,1:4)
-        IntCsCopy%Value(Start:To2)     =IntCs%Value(From:To)
-        IntCsCopy%Constraint(Start:To2)=IntCs%Constraint(From:To)
-        IntCsCopy%ConstrValue(Start:To2)=IntCs%ConstrValue(From:To)
-        IntCsCopy%Active(Start:To2)    =IntCs%Active(From:To)
+        IntCsCopy%Def%C(Start:To2)        =IntCs%Def%C(From:To)
+        IntCsCopy%Atoms%I(Start:To2,1:4)  =IntCs%Atoms%I(From:To,1:4)
+        IntCsCopy%Value%D(Start:To2)      =IntCs%Value%D(From:To)
+        IntCsCopy%Constraint%L(Start:To2) =IntCs%Constraint%L(From:To)
+        IntCsCopy%ConstrValue%D(Start:To2)=IntCs%ConstrValue%D(From:To)
+        IntCsCopy%Active%L(Start:To2)     =IntCs%Active%L(From:To)
+        IntCsCopy%PredVal%D(Start:To2)    =IntCs%PredVal%D(From:To)
+        IntCsCopy%PredGrad%D(Start:To2)   =IntCs%PredGrad%D(From:To)
 !
       END SUBROUTINE Set_INTC_EQ_INTC
 !===============================================================

@@ -129,6 +129,17 @@ MODULE DerivedTypes
 #endif
    END TYPE                                      
 !
+!----------------------------------------------------------------------
+!
+   TYPE LOG_VECT
+      INTEGER                           :: Alloc  !-- Allocation key (TRUE, TEMP, FALSE)
+#ifdef POINTERS_IN_DERIVED_TYPES
+      LOGICAL,POINTER,DIMENSION(:) :: L      !-- Vector of logicals
+#else
+      LOGICAL,ALLOCATABLE,DIMENSION(:) :: L      !-- Vector of logicals
+#endif
+   END TYPE                                      
+!
 !==================================================================================
 !
 !  OBJECTS DERIVED THROUGH COMPOSITION: BASIS SETS, MATRICES, ETC. 
@@ -269,6 +280,20 @@ MODULE DerivedTypes
      TYPE(INT_RNK2) :: Atoms 
    END TYPE ATOMBONDS
 !
+   TYPE INTC
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N 
+     TYPE(CHR_VECT) :: Def 
+     TYPE(INT_RNK2) :: Atoms
+     TYPE(DBL_VECT) :: Value
+     TYPE(LOG_VECT) :: Constraint
+     TYPE(DBL_VECT) :: ConstrValue
+     TYPE(LOG_VECT) :: Active
+     TYPE(DBL_VECT) :: PredVal 
+     TYPE(DBL_VECT) :: PredGrad
+     TYPE(DBL_VECT) :: InvHess 
+   END TYPE INTC
+!
 !----------------------------------------------------------------------
 !
 !  Coordinates
@@ -287,7 +312,6 @@ MODULE DerivedTypes
       INTEGER          :: NBeta     !-- Number of beta electrons
 !     Misc
       REAL(DOUBLE)     :: ETotal    !-- Total SCF Energy at this geometry
-      REAL(DOUBLE)     :: ELagr     !-- Constraint Energy at this geometry
       REAL(DOUBLE)     :: GradRMS   !-- RMS error in gradient at this geometry
       REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
       LOGICAL          :: Unstable  !-- SCF is unstable at this geometry 
@@ -310,12 +334,8 @@ MODULE DerivedTypes
 !
       TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
-!     Constraints and Lagrangians
-      INTEGER          :: NLagr     !-- Number of geometric Constrts
-      TYPE(DBL_VECT)   :: LagrDispl !-- Displaced Lagrange multipl.
-      TYPE(DBL_VECT)   :: LagrMult  !-- Lagrange multipliers
-      TYPE(DBL_VECT)   :: GradMult  !-- Gradients on LagrMult
-!     Bonding scheme for internal coordinates
+!     Internal coordinates related arrays
+      TYPE(INTC)       :: IntCs
       TYPE(BONDDATA)   :: Bond
       TYPE(ATOMBONDS)  :: AtmB
    END TYPE 
@@ -527,20 +547,8 @@ MODULE DerivedTypes
    END TYPE
 !
 !---------------------------------------------------------------
-! B-Matrix related types
 !
 #ifdef POINTERS_IN_DERIVED_TYPES
-!
-   TYPE INTC
-     INTEGER          :: Alloc     !-- Allocation key
-     CHARACTER(LEN=5),POINTER,DIMENSION(:) :: Def 
-     CHARACTER(LEN=1),POINTER,DIMENSION(:) :: FCType
-     INTEGER,POINTER,DIMENSION(:,:) :: Atoms
-     REAL(DOUBLE),POINTER,DIMENSION(:) :: Value
-     LOGICAL,POINTER,DIMENSION(:) :: Constraint 
-     REAL(DOUBLE),POINTER,DIMENSION(:) :: ConstrValue
-     LOGICAL,POINTER,DIMENSION(:) :: Active 
-   END TYPE INTC
 !
    TYPE BMATR
      INTEGER        :: Alloc     !-- Allocation key
@@ -548,17 +556,6 @@ MODULE DerivedTypes
      REAL(DOUBLE),POINTER,DIMENSION(:,:) :: B
    END TYPE BMATR
 #else
-!
-   TYPE INTC
-     INTEGER          :: Alloc     !-- Allocation key
-     CHARACTER(LEN=5),ALLOCATABLE,DIMENSION(:) :: Def 
-     CHARACTER(LEN=1),ALLOCATABLE,DIMENSION(:) :: FCType
-     INTEGER,ALLOCATABLE,DIMENSION(:,:) :: Atoms
-     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: Value
-     LOGICAL,ALLOCATABLE,DIMENSION(:) :: Constraint 
-     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: ConstrValue
-     LOGICAL,ALLOCATABLE,DIMENSION(:) :: Active 
-   END TYPE INTC
 !
    TYPE BMATR
      INTEGER        :: Alloc     !-- Allocation key

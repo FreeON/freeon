@@ -195,6 +195,11 @@ MODULE GlobalScalars
    INTEGER,DIMENSION(10)  :: HBondList
    DATA HBondList(1:9) /5,7,8,9,16,34,17,35,53/
 !
+! Maximum number of internal coords per atom
+! this is needed to estimate storage of IntCs in HDF
+!
+   INTEGER, PARAMETER :: IntCPerAtom=30
+!
 ! SCF global arrays 
 !
    INTEGER,DIMENSION(3),SAVE :: Current

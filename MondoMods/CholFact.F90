@@ -225,6 +225,49 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
+   SUBROUTINE ITransPose1x1(IA,JA,AN,N,M,IAT,JAT,ANT,Char)
+     INTEGER,DIMENSION(:) :: IA,JA,IAT,JAT
+     INTEGER,DIMENSION(:) :: AN,ANT
+     INTEGER :: N,M,I,J,K,L,MH,NH,IAB,IAA,JP
+     CHARACTER(LEN=*) :: Char
+     ! transpose an NxM matrix 'A'
+     MH=M+1
+     NH=N+1
+     IAT(:)=0       
+     IAB=IA(NH)-1
+     DO 20 I=1,IAB
+       J=JA(I)+2
+       IF(J.LE.MH) IAT(J)=IAT(J)+1
+     20 CONTINUE
+     IAT(1)=1
+     IAT(2)=1
+     IF(M.EQ.1) GO TO 40
+     DO 30 I=3,MH
+     30 IAT(I)=IAT(I)+IAT(I-1)
+     40 DO 60 I=1,N
+     IAA=IA(I)
+     IAB=IA(I+1)-1
+     IF(IAB.LT.IAA) GO TO 60
+     IF(Char=='full') THEN
+       DO 50 JP=IAA,IAB !!!! symbolic and numeric 
+         J=JA(JP)+1
+         K=IAT(J)
+         JAT(K)=I
+         ANT(K)=AN(JP)
+       50 IAT(J)=K+1
+     ELSE
+       DO 51 JP=IAA,IAB !!!! symbolic only
+         J=JA(JP)+1
+         K=IAT(J)
+         JAT(K)=I
+       51 IAT(J)=K+1
+     ENDIF
+     60 CONTINUE
+     !        
+   END SUBROUTINE ITransPose1x1
+!
+!---------------------------------------------------------------------
+!
    SUBROUTINE TransPose1x1(IA,JA,AN,N,M,IAT,JAT,ANT,Char)
      INTEGER,DIMENSION(:) :: IA,JA,IAT,JAT
      REAL(DOUBLE),DIMENSION(:) :: AN,ANT
@@ -297,6 +340,23 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
+   SUBROUTINE IShow1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M)
+     INTEGER,DIMENSION(:)   :: GcSRowPt,GcSColPt
+     INTEGER,DIMENSION(:)   :: GcSMTrix
+     INTEGER                :: I,J,N,NDim,K,L,M
+     TYPE(INT_RNK2)         :: Aux
+     CHARACTER(LEN=*)       :: Char
+     !
+     CALL ISp1x1ToFull(GcSRowPt,GcSColPt,GcSMTrix,N,M,Aux)
+     DO I=1,N
+       WRITE(6,100) (Aux%I(I,J),J=1,M) 
+     ENDDO
+     100 FORMAT(100I5)
+     CALL Delete(Aux)
+   END SUBROUTINE IShow1x1
+!
+!----------------------------------------------------------------------
+!
    SUBROUTINE Show1x1(GcSRowPt,GcSColPt,GcSMTrix,Char,N,M)
      INTEGER,DIMENSION(:)   :: GcSRowPt,GcSColPt
      REAL(DOUBLE),DIMENSION(:) :: GcSMTrix
@@ -308,6 +368,24 @@ CONTAINS
      CALL PPrint(Aux,Char,Unit_O=6)
      CALL Delete(Aux)
    END SUBROUTINE Show1x1
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE ISp1x1ToFull(IA,JA,AN,N,M,FullMat)
+     INTEGER,DIMENSION(:)      :: IA,JA
+     INTEGER,DIMENSION(:)      :: AN
+     INTEGER                   :: I,J,N,L,M
+     TYPE(INT_RNK2)            :: FullMat
+     !
+     CALL New(FullMat,(/N,M/))
+     FullMat%I=Zero
+     DO I=1,N
+       DO J=IA(I),IA(I+1)-1
+         L=JA(J)
+         FullMat%I(I,L)=AN(J)
+       ENDDO
+     ENDDO
+   END SUBROUTINE ISp1x1ToFull
 !
 !------------------------------------------------------------------
 !
@@ -337,11 +415,10 @@ CONTAINS
      Dim1=SIZE(Top,1)
      CALL New(IA,Dim1+1)
      IA%I(1)=1
-     NZ=0
      DO I=1,Dim1 
-       NZ=NZ+Top(I,1) 
        IA%I(I+1)=IA%I(I)+Top(I,1)
      ENDDO
+     NZ=IA%I(Dim1+1)-1 
      CALL New(JA,NZ)
      NZ=0
      DO I=1,Dim1 
@@ -351,6 +428,31 @@ CONTAINS
        ENDDO
      ENDDO
    END SUBROUTINE TopToSp1x1
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE IntCToTop(IntCs,Top)
+     INTEGER,DIMENSION(:,:) :: Top
+     TYPE(INTC)             :: IntCs
+     INTEGER                :: I,J
+     !
+     DO I=1,IntCs%N
+       IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
+         Top(I,1)=2
+       ELSE IF(IntCs%Def%C(I)(1:4)=='BEND') THEN
+         Top(I,1)=3
+       ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
+         Top(I,1)=4
+       ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
+         Top(I,1)=4
+       ELSE IF(IntCs%Def%C(I)(1:4)=='LINB') THEN
+         Top(I,1)=3
+       ENDIF
+       DO J=1,Top(I,1)
+         Top(I,J+1)=IntCs%Atoms%I(I,J)
+       ENDDO
+     ENDDO
+   END SUBROUTINE IntCToTop
 !
 !---------------------------------------------------------------------
 !
@@ -876,6 +978,29 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
+   SUBROUTINE IMatMul_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,NP,NQ,NR,SymbOnly_O)
+     INTEGER,DIMENSION(:) :: IA,JA,IB,JB
+     INTEGER,DIMENSION(:) :: AN,BN
+     TYPE(INT_VECT)       :: IC,JC
+     TYPE(INT_VECT)       :: CN
+     INTEGER              :: I,J,K,L,NP,NQ,NR,NZC
+     LOGICAL,OPTIONAL     :: SymbOnly_O
+     ! C=A*B
+     ! A : NP x NQ matrix
+     ! B : NQ x NR matrix
+     ! C : NP x NR matrix
+     !
+     CALL MatMulSymbDriver(IA,JA,IB,JB,NP,NQ,NR,IC,JC)
+     IF(PRESENT(SymbOnly_O)) THEN
+       IF(SymbOnly_O) RETURN
+     ENDIF
+     NZC=IC%I(NP+1)-1
+     CALL New(CN,NZC)
+     CALL IMatMulNum(IA,JA,AN,IB,JB,BN,IC%I,JC%I,NP,NR,CN%I)
+   END SUBROUTINE IMatMul_1x1
+!
+!--------------------------------------------------------------------
+!
    SUBROUTINE MatMul_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,NP,NQ,NR,SymbOnly_O)
      INTEGER,DIMENSION(:) :: IA,JA,IB,JB
      REAL(DOUBLE),DIMENSION(:) :: AN,BN
@@ -971,6 +1096,51 @@ CONTAINS
      IC(NP+1)=IP
      CALL Delete(IX)
    END SUBROUTINE MatMulSymb 
+!
+!--------------------------------------------------------------------
+!
+   SUBROUTINE IMatMulNum(IA,JA,AN,IB,JB,BN,IC,JC,NP,NR,CN)
+     !
+     ! Numerical multiplication of two matrices: C = A*B
+     ! all numbers are integer
+     !
+     ! NP: the number of rows of the first and result matrices
+     ! NR: the number of coulumns of the result matrix 
+     ! from matrix size data
+     ! X: scratch array
+     !
+     INTEGER,DIMENSION(:)      :: IA,JA,IB,JB,IC,JC
+     INTEGER,DIMENSION(:)      :: AN,BN,CN
+     INTEGER                   :: I,J,K,L
+     INTEGER                   :: NP,NR,ICA,ICB,IAA,IAB,JP,IBA,IBB,KP
+     INTEGER                   :: A
+     TYPE(INT_VECT)            :: X 
+     ! 
+     CALL New(X,NR)
+     DO 50 I=1,NP
+     ICA=IC(I)
+     ICB=IC(I+1)-1
+     IF(ICB.LT.ICA) GO TO 50
+     DO 10 J=ICA,ICB
+10   X%I(JC(J))=Zero
+     IAA=IA(I)
+     IAB=IA(I+1)-1
+     DO 30 JP=IAA,IAB
+     J=JA(JP)
+     A=AN(JP)
+     IBA=IB(J)
+     IBB=IB(J+1)-1
+     IF(IBB<IBA) GO TO 30
+     DO 20 KP=IBA,IBB
+     K=JB(KP)
+     X%I(K)=X%I(K)+A*BN(KP)
+20   CONTINUE
+30   CONTINUE
+     DO 40 J=ICA,ICB
+40   CN(J)=X%I(JC(J))
+50   CONTINUE
+     CALL Delete(X)
+   END SUBROUTINE IMatMulNum
 !
 !--------------------------------------------------------------------
 !
