@@ -1,4 +1,5 @@
 MODULE PBCFarField
+#ifdef PERIODIC
   USE Derivedtypes
   USE GlobalScalars   
   USE GlobalObjects
@@ -23,7 +24,6 @@ MODULE PBCFarField
   REAL(DOUBLE), DIMENSION(3)        :: CellCenter,Dipole
   REAL(DOUBLE), DIMENSION(0:FFLen)  :: RhoC,RhoS
   CONTAINS
-#ifdef PERIODIC
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
@@ -460,8 +460,5 @@ MODULE PBCFarField
 !
   END SUBROUTINE Print_Occ
 #endif
-!
-!
-!
 END MODULE PBCFarField
 

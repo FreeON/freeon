@@ -1,4 +1,5 @@
 MODULE PFFTensor
+#ifdef PERIODIC  
   USE Derivedtypes
   USE GlobalScalars   
   USE GlobalObjects
@@ -19,7 +20,6 @@ MODULE PFFTensor
   INTEGER                           :: Dimen,Volume
   REAL(DOUBLE), DIMENSION(0:FFLen2) :: TensorC,TensorS
   CONTAINS
-#ifdef PERIODIC  
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
