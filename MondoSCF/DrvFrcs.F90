@@ -28,7 +28,7 @@ MODULE DrvFrcs
       INTEGER            :: ICyc,IGeo,IBas,AtA,A1
       TYPE(CRDS)         :: GM
       TYPE(DBL_VECT)     :: Frc
-      CHARACTER(LEN=30)  :: ForceFile
+      CHARACTER(LEN=50)  :: ForceFile
 !
       ICyc=Ctrl%Current(1)
       IBas=Ctrl%Current(2)
@@ -53,7 +53,7 @@ MODULE DrvFrcs
 !      
       CALL New(Frc,3*NAtoms)
       CALL OpenHDF(InfFile)
-      CALL Get(Frc    ,'GradE'    ,Tag_O=IntToChar(IGeo))
+      CALL Get(Frc,'GradE',Tag_O=IntToChar(IGeo))
       CALL CloseHDF()
 !
       ForceFile   = 'Force_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
@@ -66,7 +66,7 @@ MODULE DrvFrcs
       CLOSE(30)
       CALL Delete(Frc)
 !
-11    FORMAT('ATOM#',I6,6(2X,D12.5))
+11    FORMAT('ATOM#',I6,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12)
 12    FORMAT('Geometry #',I6)
 !
     END SUBROUTINE Forces
@@ -79,7 +79,7 @@ MODULE DrvFrcs
       TYPE(CRDS)            :: GM,GMOLD,GMNEW
       TYPE(DBL_VECT)        :: Frc
       REAL(DOUBLE)          :: DELT,DELT2,D1MASS,D2MASS,E_MD_KIN,E_TOT_EL,VSCALE
-      CHARACTER(LEN=30)     :: MDFile
+      CHARACTER(LEN=50)     :: MDFile
 !
       ICyc=Ctrl%Current(1)
       IBas=Ctrl%Current(2)
@@ -120,6 +120,7 @@ MODULE DrvFrcs
 !
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+            CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
 #endif
          ENDDO
 !
@@ -154,7 +155,8 @@ MODULE DrvFrcs
 !
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
-#endif
+            CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
+#endif          
          ENDDO
       ELSEIF(IGeo .EQ. Ctrl%NGeom) THEN
          CALL OpenHDF(InfFile)
@@ -178,7 +180,8 @@ MODULE DrvFrcs
 !
 #ifdef PERIODIC
             CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
-#endif
+            CALL FracCyclic(GMNEW,GMNEW%BoxCarts%D(:,AtA))
+#endif    
          ENDDO
       ENDIF 
 !
@@ -199,7 +202,6 @@ MODULE DrvFrcs
       WRITE(30,10) IGeo,E_MD_KIN,E_TOT_EL,E_MD_KIN+E_TOT_EL
       CLOSE(30)
 10    FORMAT(2X,I6,2X,F22.16,2X,F22.16,2X,F22.16)
-
 !
 !      WRITE(*,*) 'E_MD_KIN = ',E_MD_KIN
 !      WRITE(*,*) 'E_TOT_EL = ',E_TOT_EL
@@ -242,44 +244,33 @@ MODULE DrvFrcs
       TYPE(BCSR)                       :: S,P,F,T1,T2
       INTEGER                          :: ICyc,IGeo,IBas
       INTEGER                          :: AtA,IX,II,A1,A2,IS
+      INTEGER, DIMENSION(3)            :: Begin
       REAL(DOUBLE)                     :: DDelta
       REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EX,EXC 
       REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_XC,F_X,F_TOT
       TYPE(DBL_VECT)                   :: Frc_Num
+      CHARACTER(LEN=50)                :: ForceFile
 !
       ICyc=Ctrl%Current(1)
       IBas=Ctrl%Current(2)
       IGeo=Ctrl%Current(3)
       CtrlVect=SetCtrlVect(Ctrl,'Force')
+      Begin = (/ICyc,IBas,IGeo/)
 !
       CALL OpenHDF(InfFile)
       CALL Get(GM   ,Tag_O=IntToChar(IGeo))
       CALL Get(GMOLD,Tag_O=IntToChar(IGeo))
       CALL CloseHDF()
 !
-!     Load globals 
-!
-      CALL OpenHDF(InfFile)
-      CALL Get(MaxAtms,  'maxatms',   Tag_O=IntToChar(IBas))
-      CALL Get(MaxBlks,  'maxblks',   Tag_O=IntToChar(IBas))
-      CALL Get(MaxNon0,  'maxnon0',   Tag_O=IntToChar(IBas))
-      CALL Get(NBasF,    'nbasf',     Tag_O=IntToChar(IBas))
-      CALL New(BSiz,NAtoms)
-      CALL New(OffS,NAtoms)
-      CALL Get(BSiz,'atsiz',          Tag_O=IntToChar(IBas))
-      CALL Get(OffS,'atoff',          Tag_O=IntToChar(IBas))
-      MaxBlkSize=0
-      DO II=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(II)); ENDDO
-      CALL SetThresholds(IntToChar(IBas))
-      CALL CloseHDF() 
-!     
-      CALL OpenHDF(InfFile)
-      CALL Get(F,TrixFile('F',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-      CALL CloseHDF()
+      F_T   = Zero
+      F_J   = Zero
+      F_N   = Zero
+      F_XC  = Zero
+      F_TOT = Zero
 !
       DDelta = 1.D-6
-      DO AtA = 1,Natoms
-         DO IX = 1,3
+      DO AtA = 1,1!Natoms
+         DO IX = 1,1
             DO II=1,2
 !              Change the Geometry
                IF(II==1) THEN
@@ -293,34 +284,26 @@ MODULE DrvFrcs
 !======================================================================================
 !              SCF
 ! 
-               DO IS = 1,2
+               DO IS = 1,3
                   Ctrl%Current(1) = Ctrl%Current(1)+1
                   IF(IS .EQ. 1) CALL OneEMats(Ctrl)
-!                  CALL SCFCycle(Ctrl)
+                  CALL SCFCycle(Ctrl,Begin)
                   IF(ConvergedQ(Ctrl))GOTO 999
 999               CONTINUE 
                ENDDO
 !======================================================================================
-!              Calculate the Overlap: Tr[F.dP]
-               CALL OpenHDF(InfFile)
-               CALL Get(P,TrixFile('D',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
-               CALL CloseHDF()  
-               ES(II) = Trace(F,P)
-!======================================================================================
 !              GET ENERGIES
+!
                CALL OpenHDF(InfFile)
                CALL Get(ET(II), 'Kin'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EJ(II), 'ene+eee' ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EN(II), 'enn+ene' ,Tag_O=IntToChar(Ctrl%Current(1)))
-               CALL Get(EX(II), 'Ex'      ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EXC(II),'Exc'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL CloseHDF() 
             ENDDO
-            F_S(AtA,IX)  = (ES(1)-ES(2))/(Two*DDelta)
             F_T(AtA,IX)  = (ET(1)-ET(2))/(Two*DDelta)
             F_J(AtA,IX)  = (EJ(1)-EJ(2))/(Two*DDelta)
             F_N(AtA,IX)  = (EN(1)-EN(2))/(Two*DDelta)
-            F_X(AtA,IX)  = (EX(1)-EX(2))/(Two*DDelta)
             F_XC(AtA,IX) = (EXC(1)-EXC(2))/(Two*DDelta)
             F_TOT(AtA,IX) =  F_T(AtA,IX)+F_J(AtA,IX)+F_N(AtA,IX)+F_XC(AtA,IX)
          ENDDO
@@ -333,10 +316,19 @@ MODULE DrvFrcs
          Frc_Num%D(A1+1) = F_TOT(AtA,2)
          Frc_Num%D(A1+2) = F_TOT(AtA,3)
       ENDDO
-!      
-      CALL OpenHDF(InfFile)
-      CALL Put(Frc_Num,'GradE_Num',Tag_O=IntToChar(IGeo))
-      CALL CloseHDF()
+!
+      ForceFile   = 'Force_Num_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
+      OPEN(UNIT=30,FILE=ForceFile,POSITION='APPEND',STATUS='UNKNOWN')
+      WRITE(30,12) IGeo
+      DO AtA = 1,NAtoms
+         A1 = 3*(AtA-1)+1
+         WRITE(30,11) AtA,GM%Carts%D(:,AtA),Frc_Num%D(A1:A1+2)
+      ENDDO
+      CLOSE(30)
+      CALL Delete(Frc_Num)
+!
+11    FORMAT('ATOM#',I6,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12,2X,D20.12)
+12    FORMAT('Geometry #',I6)
 !
     END SUBROUTINE Force_Num_1
 !========================================================================================
@@ -465,9 +457,6 @@ MODULE DrvFrcs
       WRITE(*,*) ' '
       WRITE(*,*)'Total Force = ',F_TOT(1,1)
       WRITE(*,*)' --------------------------------------------------'
-
-
-
 !
       CALL New(Frc_Num,3*NAtoms)
       DO AtA = 1,NAtoms
