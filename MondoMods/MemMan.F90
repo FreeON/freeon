@@ -248,6 +248,7 @@ MODULE MemMan
          ALLOCATE(A%Atoms(M:N,1:4),STAT=MemStatus)
          ALLOCATE(A%Value(M:N),STAT=MemStatus)
          ALLOCATE(A%Constraint(M:N),STAT=MemStatus)
+         ALLOCATE(A%Active(M:N),STAT=MemStatus)
          CALL IncMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_INTC
@@ -275,6 +276,8 @@ MODULE MemMan
          CALL New(A%BndBox,(/3,2/))
          CALL New(A%AtTyp,A%NAtms)
          CALL New(A%AtNum,A%NAtms)
+         CALL New(A%AtNam,A%NAtms)
+         CALL New(A%AtMMTyp,A%NAtms)
          CALL New(A%AtMss,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
          CALL New(A%Vects,(/3,A%NAtms/))
@@ -596,6 +599,7 @@ MODULE MemMan
          DEALLOCATE(A%Atoms,STAT=MemStatus)
          DEALLOCATE(A%Value,STAT=MemStatus)
          DEALLOCATE(A%Constraint,STAT=MemStatus)
+         DEALLOCATE(A%Active,STAT=MemStatus)
          CALL DecMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_INTC
@@ -616,6 +620,8 @@ MODULE MemMan
          CALL Delete(A%BndBox)
          CALL Delete(A%AtTyp)
          CALL Delete(A%AtNum)
+         CALL Delete(A%AtNam)
+         CALL Delete(A%AtMMTyp)
          CALL Delete(A%AtMss)
          CALL Delete(A%Carts)
          CALL Delete(A%Vects)
