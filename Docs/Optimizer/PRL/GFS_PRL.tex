@@ -329,7 +329,7 @@ of the fitted curves can be found analytically. In practice,
 exclusively linear fit was recommended by the F-test during
 the test calculations.
 
-The topology matrix, neded to determine which internal coordinates
+The topology matrix, needed to determine which internal coordinates
 are neighbouring each other, is given by the symbolic structure of 
 the sparse $G_{i}=BB^{t}$ matrix that is easy to compute from the
 sparse vibrational $B$ matrix. We have considered more delocalized 
@@ -352,7 +352,18 @@ principle. In the present article we restrict the discussion
 to the localization of minima. Whenever the local tangent  
 of the gradient curve
 is negative, the optimizer moves the actual geometry away from 
-the transition state. This way those transition states 
+the transition state.
+This step is constructed by dividing the actual force
+$-g_{k}^{(i)}$ by the 
+absolute value of the local tangent
+$H_{kk}^{(i)}$ from the weighted fit:
+\begin{equation}
+\label{tseq}
+\varphi_{k}^{(i+1)} = \varphi_{k}^{(i)} -g_{k}^{(i)}/|H_{kk}^{(i)}| ,
+\end{equation}
+where $i$ denotes the serial number of the optimization step and
+$\varphi_{k}$ the $k$-th internal coordinate.
+This way those transition states 
 can be avoided, which are localized well on a few internal coordinates. 
 In the present paper we do not consider the case of more 
 delocalized transition states which are in principle possible,
@@ -364,11 +375,15 @@ gradient fitting technique. The analysis of Wales {\it et.al.}
 \cite{Wales_saddlepoint}
 gives a numerical insight into the problems of controlling
 convergence to a minimum without an accurate Hessian.
-Even with the knowledge of modern Hessian update techniques, such 
-as BFGS \cite{RFletcher} there is no strict garantee to converge into
-a minimum, instead of a transition state. The only certain source
+Even with fairly good Hessian updates, such 
+as BFGS \cite{RFletcher} there is no garantee to converge into
+a minimum instead of a transition state. This is so, because
+the positive definiteness of an approximate Hessian does not garantee
+the positive definiteness of the exact Hessian.
+Thus, the
+exact Hessian remains the only source of certainty
 of determining whether an extremal point of the potential energy surface
-is minimum, is the exact Hessian \cite{fogarasi_diaghess}.
+is a true minimum \cite{fogarasi_diaghess}.
 
 \subsection{Initial steps}
 In the very first step of the optimization,
@@ -503,6 +518,13 @@ Total                  & 190    & 185    &  196    &  215   & 240     \\
 \botrule
 \end{tabular}
 \end{table}
+
+It is also possible, to use Eq. \ref{tseq} in 
+each step of the optimization,
+to construct the new geometry. We have tested this alternative,
+but it turned out to be oscillatory in many cases. This shows the 
+importance of the averaging provided by the fitting process in the
+determination of the next geometry.
 
 While retaining the same efficiency for small molecules, our technique
 is fully linear scaling as opposed to any other internal 
