@@ -33,8 +33,10 @@ PROGRAM XCForce
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg 
 #ifdef PERIODIC        
   INTEGER                        :: NCA,NCB
-  REAL(DOUBLE),DIMENSION(3)      :: A,B
+  REAL(DOUBLE),DIMENSION(3)      :: A,B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3,3)    :: LatFrc_XC
 #endif     
+
 !---------------------------------------------------------------------------------------
 ! Macro the start up
   CALL StartUp(Args,Prog,Serial_O=.TRUE.)
@@ -85,7 +87,14 @@ PROGRAM XCForce
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
-                    XCFrc%D(A1:A2)=XCFrc%D(A1:A2)+dXC(Pair,P%MTrix%D(Q:Q+MN1))
+                    F_nlm(1:3)     = dXC(Pair,P%MTrix%D(Q:Q+MN1))
+                    XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + F_nlm(1:3)
+!
+                    nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCA))+AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCB))
+                    LatFrc_XC(1,1:3) = LatFrc_XC(1,1:3) + Half*nlm(1)*F_nlm(1:3)
+                    LatFrc_XC(2,1:3) = LatFrc_XC(2,1:3) + Half*nlm(2)*F_nlm(1:3)
+                    LatFrc_XC(3,1:3) = LatFrc_XC(3,1:3) + Half*nlm(3)*F_nlm(1:3)
+!
                  ENDIF
               ENDDO
            ENDDO
@@ -99,6 +108,9 @@ PROGRAM XCForce
 ! Do some checksumming, resumming and IO 
   CALL PPrint(XCFrc,'dXC/dR')
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
+! Print The XCForce
+  CALL Print_Force(GM,XCFrc,' dXC/dR ')
+  CALL Print_CheckSum_Force(XCFrc,' dXC/dR ')
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
