@@ -417,14 +417,44 @@ CONTAINS
 !-------------------------------------------------------------------------------
 ! Make GM Periodic
 !-------------------------------------------------------------------------------
-  SUBROUTINE PBCInfoFromNewCarts(PBC)
+  SUBROUTINE PBCInfoFromNewCarts(PBC,WP_O)
     TYPE(PBCInfo)             :: PBC
+    LOGICAL,DIMENSION(3)      :: WP
+    LOGICAL,DIMENSION(3),OPTIONAL      :: WP_O
 !
 !   This routine rebuilds PBC data based on PBC%BoxShape
 !
-    PBC%CellVolume   = ABS(CellVolume(PBC%BoxShape%D,PBC%AutoW%I))
+    PBC%CellVolume   = CellVolume(PBC%BoxShape%D,PBC%AutoW%I)
     PBC%CellCenter%D = CellCenter(PBC%BoxShape%D,PBC%AutoW%I)
     PBC%InvBoxSh%D   = InverseMatrix(PBC%BoxShape%D)
+!
+    IF(PRESENT(WP_O)) THEN
+       WP = WP_O
+    ELSE
+       WP = (/.true.,.true.,.true./)
+    ENDIF
+!
+    IF(WP(1)) THEN
+       PBC%CellVolume = CellVolume(PBC%BoxShape%D,PBC%AutoW%I)
+!      Calculate the Dipole and Quadripole Factors
+       IF(PBC%Dimen < 2) THEN
+          PBC%DipoleFAC = Zero
+          PBC%QupoleFAC = Zero
+       ELSEIF(PBC%Dimen ==2) THEN
+          PBC%DipoleFAC = (Four*Pi/PBC%CellVolume)*(One/(PBC%Epsilon+One))
+          PBC%QupoleFAC =  Zero
+          IF(ABS(PBC%DipoleFAC) .LT. 1.D-14) PBC%DipoleFAC = Zero
+       ELSEIF(PBC%Dimen ==3) THEN
+          PBC%DipoleFAC = -(Four*Pi/PBC%CellVolume)*(One/Three - One/(Two*PBC%Epsilon+One))
+          PBC%QupoleFAC =  ( Two*Pi/PBC%CellVolume)*(One/Three - One/(Two*PBC%Epsilon+One))
+          IF(ABS(PBC%DipoleFAC) .LT. 1.D-14) PBC%DipoleFAC = Zero
+          IF(ABS(PBC%QupoleFAC) .LT. 1.D-14) PBC%QupoleFAC = Zero
+       ENDIF
+    ENDIF
+!   Calculate The Inverse of BoxShape  InvBoxSh = [BoxShape]^(-1)
+    IF(WP(2)) THEN
+       PBC%InvBoxSh%D = InverseMatrix(PBC%BoxShape%D)
+    ENDIF
 !
   END SUBROUTINE PBCInfoFromNewCarts
 !-------------------------------------------------------------------------------
