@@ -278,15 +278,7 @@ PROGRAM MakeRho
   IF(HasQM())THEN
 #endif
      QMCharge=Two*(RSumE+RSumN)
-     IF(ABS(QMCharge+GM%TotCh)>1.D-2)THEN
-        CALL Halt(' Wrong charge state in MakeRho: '//Rtrn &
-	          //' Integrated electron population = '   &
-                  //TRIM(DblToShrtChar(RSumE))//Rtrn       &
-	          //', Integrated nuclear population = '   &
-                  //TRIM(DblToShrtChar(RSumN))//Rtrn       &
-                  //TRIM(DblToShrtChar(GM%TotCh)) )
-     ENDIF
-     dQMCharge=Two*RSumE-NEl
+     dQMCharge=QMCharge+GM%TotCh 
      PcntDist=FLOOR(1.D2*DBLE(Rho2%NDist)/DBLE(Rho%NDist))
 #ifdef MMech
   ENDIF
@@ -296,7 +288,7 @@ PROGRAM MakeRho
   ENDIF
   IF(MMOnly())THEN
      Mssg1=TRIM(Mssg1)//' dMMChg = ' //TRIM(DblToShrtChar(dMMCharge))
-     RelRhoErr=ABS(MMCharge)/DBLE(GM_MM%Natms)
+     RelRhoErr=ABS(dMMCharge)/DBLE(GM_MM%Natms)
   ELSEIF(QMOnly())THEN
 #endif
      Mssg1=TRIM(Mssg1)//' dNel = '//TRIM(DblToShrtChar(dQMCharge))//', kept '  &
@@ -304,11 +296,11 @@ PROGRAM MakeRho
      RelRhoErr=ABS(dQMCharge)/DBLE(NEl)
 #ifdef MMech
   ELSE
-     Mssg1=TRIM(Mssg1)//' QMChg = '//TRIM(DblToShrtChar(QMCharge))//', '       &
-          //'MMChg = '//TRIM(DblToShrtChar(MMCharge))//', '       &
-          //'dNel = '//TRIM(DblToShrtChar(dQMCharge))//', kept '  &
-          //TRIM(IntToChar(PcntDist))//'% of distributions.'
-     RelRhoErr=ABS(QMCharge+MMCharge)/DBLE(NEl) 
+     Mssg1=TRIM(Mssg1)//' QMChg = '//TRIM(DblToShrtChar(QMCharge))//', '   &
+          //'MMChg = '//TRIM(DblToShrtChar(MMCharge))//', '                &
+          //'dNel = '//TRIM(DblToShrtChar(dQMCharge))//','//Rtrn           &
+          //'                         kept '//TRIM(IntToChar(PcntDist))//'% of distributions.'
+     RelRhoErr=ABS(dQMCharge+dMMCharge)/DBLE(NEl) 
   ENDIF
 #endif
   Mssg2=TRIM(Mssg2)                                      &
