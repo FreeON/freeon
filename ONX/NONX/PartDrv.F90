@@ -121,16 +121,23 @@ CONTAINS
     !-------------------------------------------------------------------
     TYPE(DBCSR  )                          :: A
     CHARACTER(LEN=DEFAULT_CHR_LEN)         :: FirstPartS,PartS
-    INTEGER                                :: Cycl,Basis
+    INTEGER                                :: Cycl,Basis,Geom
     !-------------------------------------------------------------------
     !
     ! Initialize some variables.
     Cycl  = Args%I%I(1)
     Basis = Args%I%I(2)
-    !Geom  = Args%I%I(3)
+    Geom  = Args%I%I(3)
     !
     ! Initialize semi-global variables.
     IsFirst = Cycl.LE.0.AND.Basis.LE.1!.AND.Geom.LE.1
+    !
+#ifdef PARTDRV_DBUG
+    WRITE(*,*) 'Cycl',Cycl
+    WRITE(*,*) 'Basis',Basis
+    WRITE(*,*) 'Geom',Geom
+    WRITE(*,*) 'IsFirst',IsFirst
+#endif
     !
     IF(PRESENT(FirstPartS_O)) THEN
        FirstPartS = FirstPartS_O
@@ -1013,7 +1020,7 @@ CONTAINS
           iPrcT1=iPrcT1+1
        ENDDO
 #ifdef PARTDRV_DBUG
-       WRITE(*,*) 'TI',TI%I
+       WRITE(*,*) 'PrcDist',PrcDist%I
        WRITE(*,*) 'OpB',OpB,iPrt
 #endif
        !
