@@ -1,0 +1,17 @@
+MONDO version approx beginning of nov, compiled on zinc with NAG.
+
+BASIC PROBLEM:
+The bug appears when running MONDO on halite-2-repeat.inp.
+The symptom is that forces are enormously large at this geometry,
+see in halite-2_8229-repeat.out .
+A list of all Cartesian forces can be found at "GradNew%D"
+in halite-2_8229-repeat.out. 
+
+ADDITIONAL INFO:
+Note, that the energy looks reasonable. The input geometry was 
+created by an optimization step in halite_28022.out-1 .
+While energies change reasonably, the force makes a huge jump at 
+the second geometry. In forthcoming geometries gradients are OK again.
+
+K.N. 12/03/04
+------------------------------------------------------------------------
