@@ -77,7 +77,7 @@ CONTAINS
                 MD%D(1,0,0,1)=0.00D+00
                 MD%D(2,0,0,1)=0.00D+00
                 MD%D(3,0,0,1)=0.00D+00
-                CALL MD2TRR(BS%NASym+1,-1,MaxLA,MaxLB,EtaAB,MD%D, &
+                CALL MD2TRR(BS%NASym+2,-1,MaxLA+1,MaxLB+1,EtaAB,MD%D, &
                      &      PAx,PBx,PAy,PBy,PAz,PBz)
                 !vw--->
                 POx = Px-COrig%D(1)

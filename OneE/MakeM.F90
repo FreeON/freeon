@@ -51,7 +51,7 @@ PROGRAM MakeM
 !---------------------------------------------- 
 ! Allocations 
 !
-  CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
+  CALL New(MD,(/3,BS%NASym+2,BS%NASym+2,2*BS%NASym+4/),(/1,-1,-1,-1/))
   CALL New(M)
 !-----------------------------------------------
 ! Run over cartisian componants 
