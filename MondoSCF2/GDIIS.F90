@@ -187,10 +187,8 @@ CONTAINS
      CALL New(Displ,NIntC) 
      Displ%D=NewPrims%D-IntCs%Value
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,B3,CholData3, &
+     CALL RefreshBMatInfo(IntCs,XYZ, &
        CtrlTrf%DoClssTrf,Print,LinCrit,CtrlTrf%ThreeAt,SCRPath)
-     CALL Delete(B3)
-     CALL Delete(CholData3)
      CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
        CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
      !
