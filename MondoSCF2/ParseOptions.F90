@@ -26,6 +26,7 @@ CONTAINS
     !-------------------------------------------------------------------------!  
     CALL OpenASCII(N%IFile,Inp)
     ! Check for restart, and extract the current state from the restart HDF file
+	WRITE(*,*) N%IFile
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
     ! Parse print output options, load global object PrintFlags
     CALL ParsePrintFlags(O%PFlags,O%GeomPrint)
@@ -35,7 +36,7 @@ CONTAINS
     CALL ParseSCFMethods(O%NMthds,O%Methods)
     ! Parse for model chemistries 
     CALL ParseModelChems(O%NModls,O%Models)
-    ! Parse for gradient options.  
+    ! Parse for gradient options.
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
     CALL ParseNEB(O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
@@ -226,7 +227,7 @@ CONTAINS
     ENDIF
     IF(OptKeyLocQ(Inp,ACCURACY_OPTION,ACCURACY_GOOD,MaxSets,NLoc,Location))THEN
        NThrsh=NThrsh+NLoc
-       DO I=1,NLoc 
+       DO I=1,NLoc
           AccuracyLevels(Location(I))=2
        ENDDO
     ENDIF
@@ -264,17 +265,17 @@ CONTAINS
     CHARACTER(LEN=DCL)               :: RestartHDF
     TYPE(INT_VECT)                   :: RestartState
     INTEGER                          :: Guess,NewFileID
-    !-----------------------------------------------------------------------------------------------         
+    !-----------------------------------------------------------------------------------------------
     IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_RESTART))THEN
        Guess=GUESS_EQ_RESTART
        IF(.NOT.OptCharQ(Inp,RESTART_INFO,RestartHDF))  &
             CALL MondoHalt(PRSE_ERROR,'Restart requested, but no HDF file specified.')
-       ! Check for absolute path 
+       ! Check for absolute path
        IF(RestartHDF(1:1)/='/')  &
             CALL MondoHalt(PRSE_ERROR,'Please use absolute path to the restart HDF file')
        CALL New(RestartState,3)
        ! Open the old restart HDF file
-       HDF_CurrentID=OpenHDF(RestartHDF)       
+       HDF_CurrentID=OpenHDF(RestartHDF)
        ! Get the current state to restart from
        CALL Get(RestartState,'current_state')
        ! Now close the old file...
@@ -286,6 +287,7 @@ CONTAINS
     ELSE
        CALL MondoHalt(PRSE_ERROR,'No guess specified in input file')
     ENDIF
+    WRITE(*,*) RestartHDF
   END SUBROUTINE ParseRestart
   !===============================================================================================
   ! PARSE THE PRINT OUT OPTIONS AND LOAD THE GLOBAL PRINT FLAGS OBJECT.
@@ -333,19 +335,24 @@ CONTAINS
        PFlags%Set=DEBUG_NONE
     ENDIF
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_GEOP_MIN))THEN
-       PFlags%GeOp=DEBUG_GEOP_MIN 
+       PFlags%GeOp=DEBUG_GEOP_MIN
     ELSE IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_GEOP_MAX))THEN
-       PFlags%GeOp=DEBUG_GEOP_MAX 
+       PFlags%GeOp=DEBUG_GEOP_MAX
     ELSE
        PFlags%GeOp=DEBUG_NONE
     ENDIF
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM))THEN
-       PFlags%MM=DEBUG_MM    
+       PFlags%MM=DEBUG_MM
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
-!    GeomPrint='PDB' ! hard set for now
-    GeomPrint='XYZ' ! hard set for now
+    IF(OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_PDB)) THEN
+	GeomPrint='PDB'
+    ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XYZ)) THEN
+    	GeomPrint='XYZ'
+    ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XCD)) THEN
+        GeomPrint='XSF'
+    ENDIF
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
