@@ -379,7 +379,7 @@ MODULE DrvSCFs
             ConvergedQ=.TRUE.
          ENDIF
 !        Accept convergence from wrong side if thresholds are tightend.
-         IF(DMaxB<dTest*6D-1.AND.ETotQ<ETest*1D-1)THEN
+         IF(DMaxB<dTest*75D-1.AND.ETotQ<ETest*3D-1)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
