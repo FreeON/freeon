@@ -299,7 +299,6 @@ CONTAINS
            JJ2=BoxJ%I(I2)
        IF(JJ2<=JJ1) CYCLE !!!avoid double counting
        IF(AtmMark%I(JJ1)/=0.AND.AtmMark%I(JJ2)/=0) CYCLE 
-         IF(AtmMark%I(JJ2)==0) THEN
            R2=LJRad%D(JJ2)
            Q2=LJEps%D(JJ2)
            DVect%D(:)=GM_Loc%Carts%D(:,JJ1)-GM_Loc%Carts%D(:,JJ2)
@@ -317,7 +316,6 @@ CONTAINS
            Grad_Loc%D(:,JJ2)=Grad_Loc%D(:,JJ2)-Pref2*DVect%D(:)
              ENDIF
            ENDIF
-         ENDIF
          ENDDO
 !
        ENDIF
