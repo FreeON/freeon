@@ -40,25 +40,34 @@ Theoretical Division, Los Alamos National Laboratory,
 Los Alamos, NM 87545, USA}
 
 \begin{abstract}
-A scheme for the construction of the density matrix in terms of
-a purification expansion of the Hamiltonian operator is proposed. The scheme
-works with a predefined occupation number and does not need
-the additional adjustment or prior knowledge of the chemical potential.
-In this sense the method is related to the trace preserving canonical 
-purification scheme by Palser and Manolopoulos \cite{RMcWeeny60,APalser99}, 
-but instead of a fixed trace criteria we only require the correct
-occupation at convergence. The two methods are
-compared within the MondoSCF suite of linear scaling self-consistent total energy
-programs \cite{MondoSCF} for different materials, and we find an overall 
-improved performance, especially at low and high occupancies. In comparison
-with some variational methods the two schemes has the major advantage of
-dealing also with degenerate eigenstates and fractional occupancy. 
-Formulas for calculating the fractional filling and degeneracy from 
-the density matrix are derived, and alternative criteria to impotence
-in the case of degeneracy and fractional filling are suggested.
-Thresholding is analyzed regarding numerical stability and error.
-Quadratic convergence in total energy as a function of thresholding
-is demonstrated.
+A new approach to linear scaling construction of the density matrix is proposed,
+based on Trace Re-Setting purification of an effective Hamiltonian.  In this approach,
+trace conservation is not strictly enforced, allowing greater flexibility in the
+choice of purification polynomials.  However, optimal polynomials may in some cases 
+admit unstable solutions, requiring ``Trace Re-Setting'' mechanisms that bring the 
+solution back into the domain of convergent purification.  Trace Re-Setting is related 
+to the trace preserving canonical purification scheme of Palser and Manolopoulos 
+[Phys. Rev. B, {\bf 58}, 12704 (1999)] in that they both work with a predefined 
+occupation number and do not require adjustment or prior knowledge of the chemical 
+potential.  In the Trace Re-Setting method, use of an optimal polynomial allows greatly 
+improved performance for Hamiltonian systems with high or low filling 
+$f_{\rm occ}=N_{\rm el}/N_{\rm basis}$.  A quartic Trace Re-Setting method is developed, 
+along with analysis of error accumulation due to incomplete sparse-matrix methods that 
+employ a threshold $\tau$ to achieve sparsity.  It is argued that errors in the density matrix
+scale as $\tau \Delta g^{-1}$, where $\Delta g$ is the gap at the chemical potential.  
+In the low filling regime,  purification derived total energies are shown to converge 
+smoothly with $\tau^2$ for RPBE/STO-6G C60 and a RPBE0/STO-3G titanium substituted zeolite.  
+For the zeolite, the quartic Trace Re-Setting method is found to be {\bf XX} order of magnitude 
+more accurate than the Palser-Manolopoulos scheme while being computationally faster.  
+In the high filling regime, RHF/6-31G** water clusters and basis set progression of RPBE 
+chlorophyll are used to compare the two purification methods. True linear scaling is demonstrated 
+for RHF/6-31G**  water clusters, and the Trace-Re-Setting method is found to be an order of 
+magnitude more accurate than the Palser-Manolopoulos method while requiring less computational 
+effort.  The ability of $\tau$ to control density matrix errors over 4 decades is demonstrated 
+for the largest water cluster, (H$_2$O)$_{150}$.  While the basis set progression of RPBE 
+chlorophyll employed a tight numerical threshold $\tau=10^{-6}$, pathologies 
+associated with the Palser-Manolopoulos method in the low filling regime led to mhartree errors, 
+while errors in the quartic Trace Re-Setting method remained sub-$\mu$hartree.
 
 \smallskip
 \noindent{\bf Keywords}: Self-Consistent-Field, Density Functional Theory, Hartree-Fock, Gaussian-Orbital, 
@@ -774,7 +783,7 @@ For powers of the density matrix we thus have that
 \begin{equation} \label{Rhom}
 {\rm Tr} [ {\bf P}^m  ] = N_{\rm el} - n_d + \nu \tau^m \neq Tr  [ {\bf P} ] = N_{\rm el}.
 \end{equation}
-From Eq.\ (\ref{Rhom}) we see that idempotence is not
+>From Eq.\ (\ref{Rhom}) we see that idempotence is not
 fulfilled (when $m>1$) in the case of degeneracy or fractional filling. 
 This means, for example, that grand canonical purification does not work and
 that the McWeeny constraint in conjugate gradient
