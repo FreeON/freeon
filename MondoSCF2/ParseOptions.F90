@@ -38,7 +38,7 @@ CONTAINS
     ! Parse for gradient options.  
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
     ! Parse for NEB options.
-    CALL ParseNEB(O%NEBSpring,O%NEBClimb)
+    CALL ParseNEB(O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -342,8 +342,8 @@ CONTAINS
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
-!    GeomPrint='PDB' ! hard set for now
-    GeomPrint='XYZ' ! hard set for now
+    GeomPrint='PDB' ! hard set for now
+!    GeomPrint='XYZ' ! hard set for now
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
@@ -402,19 +402,32 @@ CONTAINS
   !===============================================================================================
   !
   !===============================================================================================
-  SUBROUTINE ParseNEB(NEBSpring,NEBClimb)
+  SUBROUTINE ParseNEB(NEBSpring,NEBClimb,EndPts,ReactantsFile,ProductsFile)
     !-----------------------------------------------------------------------------------------------
     REAL(DOUBLE) :: NEBSpring
     Logical      :: NEBClimb
+    INTEGER      :: EndPts
+    CHARACTER(Len=DCL) :: ReactantsFile,ProductsFile
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
        NEBSpring=1.0
     ENDIF
     ! Use the climbing image?
-    IF(OptKeyQ(Inp,NEB_CLIMB,NEB_DO_CLIMB))THEN
+    IF(OptKeyQ(Inp,NEB_OPTION,NEB_CLIMB))THEN
        NEBClimb=.TRUE.
     ELSE
        NEBClimb=.FALSE.
+    ENDIF    
+    IF(OptKeyQ(Inp,NEB_OPTION,NEB_READ_HDF))THEN
+       EndPts=ENDPOINTS_FROM_HDF
+       ! Read in the reactants file name
+       IF(.NOT.OptCharQ(Inp,NEB_REACTANTS_HDF,ReactantsFile))  &
+            CALL MondoHalt(PRSE_ERROR,' NEB reactants file missing from input ')
+       ! Read in the products file name
+       IF(.NOT.OptCharQ(Inp,NEB_PRODUCTS_HDF,ProductsFile))  &
+            CALL MondoHalt(PRSE_ERROR,' NEB products file missing from input ')
+    ELSE
+       EndPts=ENDPOINTS_FROM_INP
     ENDIF    
   END SUBROUTINE ParseNEB
 END MODULE ParseOptions

@@ -17,6 +17,7 @@ CONTAINS
     TYPE(Options)    :: O
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
+    TYPE(Int_Vect)   :: CurrentState
     INTEGER          :: I,iCLONE,HDFFileID
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
@@ -30,22 +31,67 @@ CONTAINS
           ENDIF
        ENDIF
        IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
-          ALLOCATE(G%Clone(0:G%Clones+1))
           IF(O%Guess==GUESS_EQ_RESTART)THEN
-             ! Implement a routine to read in NEB images
-          ELSE
-             ! Read in the reactants geometry
+             ! Overide any potential change in the number of clones ...
+             HDFFileID=OpenHDF(N%RFile)
+             HDF_CurrentID=HDFFileID
+             CALL Get(G%Clones,'clones')
+             CALL CloseHDF(HDFFileID)          
+          ENDIF
+          ! Allocate Clones+2 geometries for NEB
+          ALLOCATE(G%Clone(0:G%Clones+1))
+          ! Get left and right endpoints
+          IF(O%EndPts==ENDPOINTS_FROM_HDF)THEN            
+             CALL New(CurrentState,3)
+             ! Get the left endpoint from reactants HDF
+             HDFFileID=OpenHDF(N%ReactantsFile)
+             HDF_CurrentID=HDFFileID
+             ! Get the current reactants state 
+             CALL Get(CurrentState,'current_state')
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+             CALL Get(G%Clone(0),TAG_O=GTag(CurrentState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+             CALL CloseHDF(HDFFileID)          
+             ! Get the right endpoint from products HDF
+             HDFFileID=OpenHDF(N%ProductsFile)
+             HDF_CurrentID=HDFFileID
+             ! Get the current reactants state 
+             CALL Get(CurrentState,'current_state')
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+             CALL Get(G%Clone(G%Clones+1),TAG_O=GTag(CurrentState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+             CALL CloseHDF(HDFFileID)          
+             CALL Delete(CurrentState)
+             ! CALL PPrint(G%Clone(0),Unit_O=6)
+             ! CALL PPrint(G%Clone(G%Clones+1),Unit_O=6)
+          ELSE 
+             ! Read in the reactants geometry from input
              CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0))          
-             ! Read in the products geometry
+             ! Read in the products geometry from input
              CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1))   
           ENDIF
-          ! Initialize the clones to optimize 
-          DO iCLONE=1,G%Clones
-             G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
-             G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
-             CALL New(G%Clone(iCLONE))
-          ENDDO
-          CALL NEBInit(G)
+          IF(O%Guess==GUESS_EQ_RESTART)THEN
+             ! Get midpoints from HDF
+             HDFFileID=OpenHDF(N%RFile)
+             HDF_CurrentID=HDFFileID
+             DO iCLONE=1,G%Clones
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
+                CALL CloseHDFGroup(HDF_CurrentID)
+             ENDDO
+             CALL CloseHDF(HDFFileID)          
+             ! DO I=0,G%Clones+1
+             !    CALL PPrint(G%Clone(I),Unit_O=6)
+             ! ENDDO
+          ELSE
+             ! Initialize midpoints via interpolation
+             DO iCLONE=1,G%Clones
+                G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
+                G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
+                CALL New(G%Clone(iCLONE))
+             ENDDO
+             CALL NEBInit(G)
+          ENDIF
        ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
 #ifdef !defined(PARALLEL)
           CALL MondoHalt(PRSE_ERROR,'Compile with -DPARALLEL to activate replica exchange.')
@@ -77,7 +123,7 @@ CONTAINS
     CLOSE(UNIT=Inp,STATUS='KEEP')
 #ifdef FULL_ON_FRONT_END_DEBUG
     DO I=1,G%Clones
-!       CALL Print_CRDS(G%Clone(I),UNIT_O=6)
+       !       CALL Print_CRDS(G%Clone(I),UNIT_O=6)
     ENDDO
 #endif
   END SUBROUTINE LoadCoordinates
@@ -103,7 +149,6 @@ CONTAINS
     DO 
        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
        LineLowCase = Line
-!       Call LowCase(LineLowCase)
        IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
        N=N+1
     ENDDO
@@ -115,21 +160,24 @@ CONTAINS
     DO 
        READ(Inp,DEFAULT_CHR_FMT,END=1)Line
        LineLowCase = Line
-!       Call LowCase(LineLowCase)
        IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
+       Call LowCase(LineLowCase)
        N=N+1
-       CALL LineToGeom(Line,At,Carts)
-       G%AbCarts%D(:,N)=Carts(1:3) 
+       CALL LineToChars(LineLowCase,C)
+       IF(SIZE(C%C)<4)CALL MondoHalt(PRSE_ERROR,' bad data on parsing goemetry at line = <<' &
+                                      //TRIM(LineLowCase)//'>>')
+       At=TRIM(ADJUSTL(C%C(1)))
+       G%AbCarts%D(1,N)=CharToDbl(C%C(2))
+       G%AbCarts%D(2,N)=CharToDbl(C%C(3))
+       G%AbCarts%D(3,N)=CharToDbl(C%C(4))
        G%CConstrain%I(N)=0
-       CALL LineToChars(Line,C)
        IF(SIZE(C%C)==5)THEN
           IF(TRIM(C%C(5))=='C')THEN
              G%CConstrain%I(N)=1
           ENDIF
        ENDIF
        CALL Delete(C)
-       !       G%Vects%D(:,N)=Carts(4:6)
-       ! Find the atom number (element 105 is a ghost function) 
+       ! Find the atom number (elements >105 are ghost functions) 
        DO J=1,105
           IF(At==Ats(J))THEN
              G%AtNum%D(N)=J

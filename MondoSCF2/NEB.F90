@@ -61,6 +61,7 @@ CONTAINS
   !===============================================================================
   SUBROUTINE SetEq_CRDS(G1,G2)
     TYPE(CRDS) :: G1,G2
+    G2%InAU=G1%InAU
     G2%NElec=G1%NElec
     G2%Ordrd=G1%Ordrd
     G2%Multp=G1%Multp
@@ -113,6 +114,8 @@ CONTAINS
 !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
     write(*,*)'NEB: Distance, Energies, and Forces'
 
+
+    write(*,'(A,I5,3F13.5)') 'NEB: ',0,Dist,G%Clone(0)%ETotal
     DO I=1,G%Clones
        ! Are the neighboring images higher in energy?
        IF(I==1)THEN
@@ -185,6 +188,9 @@ CONTAINS
        Dist=Dist+Rm
        write(*,'(A,I5,3F13.5)') 'NEB: ',I,Dist,G%Clone(I)%ETotal,FProj
     ENDDO
+    Rm=SQRT(SUM((G%Clone(G%Clones+1)%AbCarts%D-G%Clone(G%Clones)%AbCarts%D)**2))
+    Dist=Dist+Rm
+    write(*,'(A,I5,3F13.5)') 'NEB: ',G%Clones+1,Dist,G%Clone(G%Clones+1)%ETotal
     write(*,*)'NEB: Done NEBForce'
 
   END SUBROUTINE NEBForce

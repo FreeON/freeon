@@ -187,9 +187,6 @@ CONTAINS
 !
     CALL Sort_CellSet(C)
     C%Radius = SQRT(C%CellCarts%D(1,1)**2+C%CellCarts%D(2,1)**2+C%CellCarts%D(3,1)**2)
-    WRITE(*,*)' C%Radius = ',C%Radius
-    WRITE(*,*)' C%NCells = ',C%NCells
-!
   END SUBROUTINE SetLatticeVectors
 !==============================================================================
 !

@@ -164,7 +164,6 @@ CONTAINS
        CALL NEBForce(G,O)
     ENDIF
     ! Zero forces on contrained atoms and compute stats with projected forces
-
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))

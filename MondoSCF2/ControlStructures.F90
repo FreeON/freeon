@@ -19,6 +19,8 @@ MODULE ControlStructures
      CHARACTER(LEN=DCL)             :: GFile        !-- Geometry file
      CHARACTER(LEN=DCL)             :: HFile        !-- HDF5 file
      CHARACTER(LEN=DCL)             :: RFile        !-- Restart HDF5 file
+     CHARACTER(LEN=DCL)             :: ReactantsFile!-- HDF5 with optimized reactants state
+     CHARACTER(LEN=DCL)             :: ProductsFile !-- HDF5 with optimized products state
   END TYPE FileNames
 
   TYPE Options
@@ -28,16 +30,17 @@ MODULE ControlStructures
      INTEGER                        :: NSteps
      INTEGER                        :: Guess
      INTEGER                        :: Grad
+     INTEGER                        :: EndPts
      INTEGER                        :: Coordinates
      INTEGER,   DIMENSION(MaxSets)  :: Methods
      INTEGER,   DIMENSION(MaxSets)  :: Models
      INTEGER,   DIMENSION(MaxSets)  :: AccuracyLevels
      LOGICAL                        :: DoGDIIS,SteepStep
-     TYPE(INT_VECT)                 :: RestartState
+     TYPE(INT_VECT)                 :: RestartState,ProductsState,ReactantsState
      TYPE(TOLS),DIMENSION(MaxSets)  :: Thresholds
      TYPE(DEBG)                     :: PFlags
      REAL(DOUBLE)                   :: NEBSpring
-     LOGICAL                        :: NEBClimb 
+     LOGICAL                        :: NEBClimb      
      CHARACTER(LEN=3)               :: GeomPrint
   END TYPE Options
 
