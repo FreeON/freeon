@@ -1255,6 +1255,8 @@ MODULE InOut
          CALL Put(NGLCT%Trix,'trixneglect',Tag_O=Tag_O)
          CALL Put(NGLCT%Dist,'distneglect',Tag_O=Tag_O)
          CALL Put(NGLCT%TwoE,'twoeneglect',Tag_O=Tag_O)
+         CALL Put(NGLCT%ETol,'enregyneglect',Tag_O=Tag_O)
+         CALL Put(NGLCT%DTol,'densityneglect',Tag_O=Tag_O)
       END SUBROUTINE Put_TOLS
 
 !------------------------------------------------------------------
@@ -1273,6 +1275,8 @@ MODULE InOut
          CALL Get(NGLCT%Trix,'trixneglect',Tag_O=Tag_O)
          CALL Get(NGLCT%Dist,'distneglect',Tag_O=Tag_O)
          CALL Get(NGLCT%TwoE,'twoeneglect',Tag_O=Tag_O)
+         CALL Get(NGLCT%ETol,'enregyneglect',Tag_O=Tag_O)
+         CALL Get(NGLCT%DTol,'densityneglect',Tag_O=Tag_O)
       END SUBROUTINE Get_TOLS
 !--------------------------------------------------------------------
 !     Get arguments from the command line

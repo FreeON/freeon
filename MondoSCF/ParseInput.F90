@@ -402,33 +402,31 @@ MODULE ParseInput
 !        Set thresholds
          IF(NOpts==Ctrl%NSet)THEN
 !           All thresholds are user determined
-
             DO I=1,Ctrl%NSet
                Thrsh%Cube=CubeNeglect(Ctrl%AccL(I))
                Thrsh%Trix=TrixNeglect(Ctrl%AccL(I))
                Thrsh%Dist=DistNeglect(Ctrl%AccL(I))
                Thrsh%TwoE=TwoENeglect(Ctrl%AccL(I))
-
-            WRITE(*,*)' Dist = ',Thrsh%Dist
-            WRITE(*,*)' USER DEFINED !? Accl = ',Ctrl%Accl(I)
-
+               Thrsh%ETol=ETol(Ctrl%AccL(I))
+               Thrsh%DTol=DTol(Ctrl%AccL(I))
                CALL Put(Thrsh,Tag_O=IntToChar(I))
             ENDDO
          ELSE ! Default, cheezy for all sets except last, which is good or user defined.
-
-            WRITE(*,*)' Cheezy !? '
-
             DO I=1,Ctrl%NSet-1
                Thrsh%Cube=CubeNeglect(1)
                Thrsh%Trix=TrixNeglect(1)
                Thrsh%Dist=DistNeglect(1)
                Thrsh%TwoE=TwoENeglect(1)
+               Thrsh%ETol=ETol(1)
+               Thrsh%DTol=DTol(1)
                CALL Put(Thrsh,Tag_O=IntToChar(I))
             ENDDO
             Thrsh%Cube=CubeNeglect(Ctrl%AccL(1))
             Thrsh%Trix=TrixNeglect(Ctrl%AccL(1))
             Thrsh%Dist=DistNeglect(Ctrl%AccL(1))
             Thrsh%TwoE=TwoENeglect(Ctrl%AccL(1))
+            Thrsh%ETol=ETol(Ctrl%AccL(1))
+            Thrsh%DTol=DTol(Ctrl%AccL(1))
             CALL Put(Thrsh,Tag_O=IntToChar(Ctrl%NSet))
          ENDIF
 !        Close files

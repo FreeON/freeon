@@ -312,6 +312,8 @@ MODULE DerivedTypes
       REAL(DOUBLE) :: Dist  !-- Distribution threshold
       REAL(DOUBLE) :: TwoE  !-- Two electron integral threshold
       REAL(DOUBLE) :: Trix  !-- Matrix threshold
+      REAL(DOUBLE) :: ETol  !-- Relative error in total energy sought
+      REAL(DOUBLE) :: DTol  !-- Max difference in density matrix sought
    END TYPE 
 !------------------------------------------------------------
 !  Debuging flags

@@ -318,13 +318,16 @@ PROGRAM SDMM
 !     CHECK CONVERGENCE
 !
 !     Test when in the asymptotic regime
-      IF(DeltaEQ<1.D-6.AND.NPur>3)THEN
+      IF(DeltaEQ<Thresholds%ETol*1.D2.AND.NPur>3)THEN
 !        Check for low digit rebound in the energy
          IF(NewE-OldE>Zero)EXIT
 !        Check for low digit rebound in the density matrix
          IF(DeltaP-OldDeltaP>Zero)EXIT
 !        Check for stallout in convergence of the energy 
          IF(DeltaEQ-OldDeltaEQ>0)EXIT
+!        Check for exceeding target accuracies
+         IF(DeltaEQ<Thresholds%ETol*1.D-1.AND. &
+            DeltaP<Thresholds%DTol*5.D-1)EXIT
       ENDIF  
 !     Updtate previous cycle values
       OldE=NewE
