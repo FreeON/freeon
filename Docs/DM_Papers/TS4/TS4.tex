@@ -43,31 +43,27 @@ Los Alamos, NM 87545, USA}
 A new approach to linear scaling construction of the density matrix is proposed,
 based on Trace Re-Setting purification of an effective Hamiltonian.  In this approach,
 trace conservation is not strictly enforced, allowing greater flexibility in the
-choice of purification polynomials.  However, optimal polynomials may in some cases 
-admit unstable solutions, requiring ``Trace Re-Setting'' mechanisms that bring the 
+choice of purification polynomial.  However, optimal polynomials may in some cases 
+admit unstable solutions, requiring ``Trace Re-Setting'' mechanisms to bring the 
 solution back into the domain of convergent purification.  Trace Re-Setting is related 
 to the trace preserving canonical purification scheme of Palser and Manolopoulos 
-[Phys. Rev. B, {\bf 58}, 12704 (1999)] in that they both work with a predefined 
+[Phys.~Rev.~B, {\bf 58} 12704 (1999)] in that they both work with a predefined 
 occupation number and do not require adjustment or prior knowledge of the chemical 
 potential.  In the Trace Re-Setting method, use of an optimal polynomial allows greatly 
 improved performance for Hamiltonian systems with high or low filling 
-$f_{\rm occ}=N_{\rm el}/N_{\rm basis}$.  A quartic Trace Re-Setting method is developed, 
-along with analysis of error accumulation due to incomplete sparse-matrix methods that 
-employ a threshold $\tau$ to achieve sparsity.  It is argued that errors in the density matrix
-scale as $\tau \Delta g^{-1}$, where $\Delta g$ is the gap at the chemical potential.  
+$f_{\rm occ}$.  A quartic Trace Re-Setting method is developed, along with analysis of 
+error accumulation due to incomplete sparse-matrix methods that employ a threshold $\tau$ 
+to achieve sparsity.  It is argued that threshold induced purification errors in the 
+density matrix scale as $\tau \Delta g^{-1}$, where $\Delta g$ is the gap at the chemical potential.  
 In the low filling regime,  purification derived total energies are shown to converge 
-smoothly with $\tau^2$ for RPBE/STO-6G C60 and a RPBE0/STO-3G titanium substituted zeolite.  
-For the zeolite, the quartic Trace Re-Setting method is found to be {\bf XX} order of magnitude 
-more accurate than the Palser-Manolopoulos scheme while being computationally faster.  
-In the high filling regime, RHF/6-31G** water clusters and basis set progression of RPBE 
-chlorophyll are used to compare the two purification methods. True linear scaling is demonstrated 
-for RHF/6-31G**  water clusters, and the Trace-Re-Setting method is found to be an order of 
-magnitude more accurate than the Palser-Manolopoulos method while requiring less computational 
-effort.  The ability of $\tau$ to control density matrix errors over 4 decades is demonstrated 
-for the largest water cluster, (H$_2$O)$_{150}$.  While the basis set progression of RPBE 
-chlorophyll employed a tight numerical threshold $\tau=10^{-6}$, pathologies 
-associated with the Palser-Manolopoulos method in the low filling regime led to mhartree errors, 
-while errors in the quartic Trace Re-Setting method remained sub-$\mu$hartree.
+smoothly with $\tau^2$ for RPBE/STO-6G C60 and a RPBE0/STO-3G Ti substituted zeolite.  
+For the zeolite, the quartic Trace Re-Setting method is found to be both faster and an order of 
+magnitude more accurate than Palser-Manolopoulos.  In the low filling limit, true linear 
+scaling is demonstrated for RHF/6-31G**  water clusters, and the Trace-Re-Setting method is 
+found to be both faster and an order of magnitude more accurate than Palser-Manolopoulos.  
+Basis set progression of RPBE chlorophyll with $\tau=10^{-6}$ revealed low filling pathologies 
+in Palser-Manolopoulos resulting in mhartree errors, while quartic Trace Re-Setting 
+was able to achieve sub-$\mu$hartree accuracies. 
 
 \smallskip
 \noindent{\bf Keywords}: Self-Consistent-Field, Density Functional Theory, Hartree-Fock, Gaussian-Orbital, 
@@ -302,7 +298,7 @@ is trace preserving when
 \end{equation}
 is within the domain of applicability, $\gamma_n \in [\gamma_{\rm min},\gamma_{\rm max}]$.  
 The price paid for being able to chose the best polynomial is that $\gamma_n$ is not guaranteed
-to remain in the domain of convergence.  When a non-convergent mapping is encountered, an 
+always yield a trace conserving solution.  When a non-convergent mapping is encountered, an 
 auxiliary mechanism is used to reset the solution, bringing it back into a trace conserving regime.
 The reseting is carried out with the quadratic spectral projection (SP2) functions  
 \begin{subequations}
@@ -384,7 +380,7 @@ of this increased flexibility is mandatory resetting should the primary polynomi
 stray from its domain of convergence.  Here, we have chosen 
 as the primary polynomial the quartic defined by Eq.~(\ref{FG}), with the reset
 mappings supplied by the SP2 functions, Eq.~(\ref{sp2}).  However the
- Trace Re-Setting method is quite general.  We note that the stand alone SP2 method
+Trace Re-Setting method is quite general.  We note that the stand alone SP2 method
 of Ref.~\cite{ANiklasson02B} can be viewed as a subset of Trace Re-Setting.  One could 
 also consider a more involved hierarchy of projectors, each with properties optimal in various regions.  
 While not unique, it is more efficient to work with quartic polynomials than the cubics
@@ -410,8 +406,7 @@ X_{\bf AB}&=&X_{\bf AB} ~~\mbox{\rm iff} ~~|{\bf A -B}| < R_{cut}\\
 \end{eqnarray}
 \end{subequations}
 allowing all matrices to employ the same graph. This technique has not been used
-in the present study. Instead we use a sparse 
-atom-blocked linear algebra\cite{MChallacombe99,MChallacombe00B},
+in the present study. Instead we use a sparse atom-blocked linear algebra\cite{MChallacombe99,MChallacombe00B},
 with thresholding at the level of atom-atom blocks:
 \begin{subequations}
 \begin{eqnarray}
@@ -420,16 +415,25 @@ with thresholding at the level of atom-atom blocks:
 \end{eqnarray}
 \end{subequations}
 where $||\cdot||_F$ is the Frobenious norm and $\tau \in [10^{-3},10^{-6}]$ is the threshold or 
-``drop tolerance''. An alternative to blocking is to drop element by element\cite{ADaniels97}, 
-which generates maximum sparsity. In either case, we assume a filter 
-operation is applied after every sparse matrix-matrix multiply to avoid fill in,
+``drop tolerance''.   
+
+A filter operation is applied after every sparse matrix-matrix multiply to avoid fill in,
 \begin{eqnarray}
 { \widetilde{ \bf X}}&=&\mbox{\tt Filter} [\bf X,\tau ] \label{filter} \\
 	      &=&{\bf X}+\bm{\epsilon},\nonumber 
 \end{eqnarray}
 leading to the approximate matrix $\widetilde{ \bf X}$ which is in error by $\bm \epsilon$.
-This approach is somewhat similar to a change in the machine epsilon, i.e. the numerical resolution.  
+This can be veiwed simply as a change in machine epsilon, i.e. the numerical resolution.  
 In the following, we assume this error is a constant with $||\bm{\epsilon}|| \sim \tau$.
+
+Relative to the cut-off approach, a major advantage of threshold metered sparse linear algebra 
+is that it avoids discontinuities in the potential energy surface associated with atoms moving in and out 
+of the cut-off radius.  Thresholding also allows for an accurate representation of the density matrix 
+for systems with multiple quantum length scales, such as a nano-tube in solution or a porphyrin in a protein.
+With atom-blocking, $N$-scaling is approached almost as rapidly as with element by element 
+methods\cite{JMillam97,ADaniels97,ADaniels99}, while  atom-atom operations admit the use of 
+dense matrix kernels such as the {\tt DGEMM}\cite{Lapack}, minimizing ineficiencies associated 
+with indirect addressing and symbolic matrix overheads.  
 
 After one matrix-matrix multiply with thresholding we have
 \begin{equation}
@@ -447,6 +451,7 @@ close to idempotence leads to the following fixed point with weak linear drift:
 \begin{equation}
 {\bf P}={\bf P}+\bm{\epsilon} \cdot {\bf Q}+ (m-1){\bf P}\cdot \bm{\epsilon} \cdot{\bf Q} 
 + {\cal O}(\bm{\epsilon}^2),
+\label{LinearDrift}
 \end{equation}
 where ${\bf Q}={\bf I}-{\bf P}$ is the virtual projector.  Thus, it is the early accumulation of 
 errors preceding idempotence that are of special concern, although the  total number of 
@@ -466,7 +471,7 @@ convergence, accumulation errors corrupt the commutator $[ {\bf F},{\bf P} ]$.  
 to raising the total energy, these commutator errors have consequences for the 
 DIIS\cite{PPulay80,PPulay82} algorithm, which tries to extrapolate {\em inter-SCF} commutator 
 errors to zero.  Here, incomplete sparse linear algebra leads to {\em intra-SCF} commutator 
-errors that if too large can seriously corrupt the DIIS method. 
+errors that if too large can seriously corrupt the DIIS extrapolation.
 
 \section{Methods}
 
@@ -475,8 +480,9 @@ linear scaling Quantum Chemistry codes\cite{MondoSCF}.   All sparse matrix compu
 employed the same blocked compressed sparse row (BCSR)\cite{MChallacombe99,MChallacombe00B,MChallacombe03B} 
 data structure.  With the BCSR data structure, the cost of recomputing the symbolic matrix 
 is negligible, allowing dynamic fill-in.  The BCSR-BCSR multiplies are carried with 
-small dense matrix-matrix multiplies ({\tt DGEMM}s) that have been highly optimized platform specific C by 
-{\sc PHiPAC}\cite{Bilmes96a,Bilmes97b,PHiPAC} for block sizes in the range 3x3 to 15x15. 
+small dense matrix-matrix multiplies ({\tt DGEMM}s) that have been written in highly optimized,
+platform specific C by {\sc PHiPAC}\cite{Bilmes96a,Bilmes97b,PHiPAC} for blocks in the range 
+3x3x3 to 15x15x15. 
 
 The code was compiled using the Portland Group F90 compiler {\sc pgf90}v3.2.4 \cite{pgf90} with 
 the {\tt -O1 -tp athlon} options  and with the gnu C compiler {\sc gcc}v2.96 using the {\tt -O1} flag.  
@@ -512,8 +518,8 @@ controlling other linear scaling approximations, such as AINV, HiCu, QCTC or ONX
 $\delta E < 10^{-9}$ (relative error in the total energy ) and 
 $\Delta{\bf P} < 10^{-5}$ (maximum absolute error in a density matrix element). In the following, all 
 experiments seek to meet these accuracy goals.  However, tweaking $\tau$  can lead to intra-SCF commutator 
-errors (discussed in Section{Error}), possibly corrupting DIIS extrapolation \cite{PPulay80,PPulay82} and 
-causing it to stall before meeting the accuracy goals.  Stagnation of the DIIS is recognized by 
+errors (discussed in Section~\ref{Error}), possibly corrupting DIIS extrapolation \cite{PPulay80,PPulay82} and 
+causing it to stall before meeting the accuracy goals.  Stagnation of the DIIS is detected by 
 the code, leading to termination of the SCF.
 
 \section{Results}
@@ -535,7 +541,7 @@ found the PM method to be unstable for semi-empirical calculations on C60 requir
 $\approx 100$ SCF cycles and level shifting to avoid excited state solutions.
 Also, Bowler has found that by itself, the PM method is encumbered by a non-variational error 
 too large for molecular dynamics when using the non-self-consistent tight-binding method\cite{DBowler99}.  
-In the following,  convergence of PM and TRS4 with $\tau$ is explored for {\em self-consistent} model 
+In the following,  convergence of PM and TRS4 with $\tau$ is explored for self-consistent model 
 chemistries applied to minimal basis C60 and a Ti substituted zeolite.
 
 \subsubsection{C60}
@@ -553,19 +559,17 @@ Convergence of the total energy with matrix threshold is shown in Fig.~\ref{c60c
 the signed absolute errors $\Delta E$ relative to the ES total energy $E_{\rm ES}=-2278.116$ 
 and the fit $10^{4.4} \tau^2$.  While more SCF cycles were required for loose thresholds ($\tau > 10^{-4}$), 
 all calculations converged in less than 16 cycles and the PM and TRS4 energies approach 
-smoothly from above as $\tau$ is tightened.  Consistent with the filling $f_{\rm occ}=0.62$, no dramatic
+quadratically from above as $\tau$ is tightened.  Consistent with the filling $f_{\rm occ}=0.62$, no dramatic
 differences are found between the two methods; $M_{\rm PM}/M_{\rm TRS4} \approx 1.2$ and 
-$M_{\rm TRS4}=38$ for $\tau=10^{-5}$.   While we did not expect a dramatic difference between 
-PM and TRS4 in this case, we felt it important to address general concerns about purification methods applied 
-to C60.    The much higher filling encountered in semi-empirical methods may have led to the difficulties 
-faced by Daniels and Scuseria\cite{ADaniels99}.
+$M_{\rm TRS4}=38$ for $\tau=10^{-5}$.   
 
 \subsubsection{Titanium Substituted Zeolite}
 
 \begin{figure}[t]
 \resizebox*{3.5in}{!}{\includegraphics{XE_FIGS/XeErrors.eps}}
-\caption{\bf REDOING THESE NUMBERS, SHOULD SEE QUADRATIC CONVERGENCE.  FOR C60
-ALL THE OTHER NUMBERS WERE ``TIGHT'', HERE THEY ARE ``GOOD''.  AM REDOING WITH TIGHT.}\label{xeerrors}
+\caption{\bf Not sure what to make of these numbers still.  0.001 is basically the
+same error of 0.0005, even though one is 30 pcnt sparse and the other 50 pcnt.  
+Tried with tight and also pure DFT, same result.}\label{xeerrors}
 \end{figure}
 
 
@@ -586,7 +590,7 @@ ALL THE OTHER NUMBERS WERE ``TIGHT'', HERE THEY ARE ``GOOD''.  AM REDOING WITH T
 \caption{The PM and TRS4 commutator errors $||[{\bf F ,P }]||_F$ with iteration
          at $\tau=10^{-3}, \tau=10^{-4}, \tau=10^{-5}$ and $\tau=10^{-6}$ for  
          RHF/6-31G** (H$_2$O)$_{150}$. Also shown (straight lines) are errors 
-         corresponding to {\em truncated eigensolution} over the same 
+         corresponding to truncated eigensolution over the same 
          range of thresholds.}\label{commerrors}
 \end{figure}
 
@@ -597,10 +601,8 @@ The zeolite geometry was relaxed using TRS4 with $\tau = 10^{-5}$ at the PBE/STO
 in Fig.\ref{xefig.eps}. Calculations on this zeolite were then carried out at the PBE0/STO-3G level of theory,  
 converging the SCF using PM and TRS4 with matrix thresholds $\tau \in [10^{-2},10^{-5}]$.  
 Convergence of the total energy with matrix threshold is shown in Fig.~\ref{xeerrors}.  The inset contains 
-the signed absolute errors $\Delta E$ relative to the ES total energy $E_{\rm ES}=-42253.194$ 
-and the fit $10^{XX} \tau^2$.  For the loose thresholds $\tau \gtrsim 10^{-3}$, the PM calculations were
-did not converge using DIIS alone.  Instead, a few (4-7) cycles of damped SCF were employed before
-shifting to DIIS.  With a larger filling factor, the differences between PM and TRS4 are more significant than 
+the signed absolute errors $\Delta E$ relative to the ES total energy $E_{\rm ES}=-42253.194$ and the fit $10^{XX} \tau^2$.  
+With a larger filling factor, the differences between PM and TRS4 are more significant than 
 in the case of C60, with $M_{\rm PM}/M_{\rm TRS4} \approx 2.2$ and $M_{\rm TRS4}=35$ for $\tau=10^{-5}$.  
 Also, differences in errors between the two methods are more pronounced as shown in Fig.~\ref{xeerrors}
 
@@ -613,11 +615,11 @@ system of water clusters at the RHF/6-31G** level of theory, and basis set progr
 
 \subsubsection{Water}
 
-Differences between PM, TRS4 and ES were explored using a sequence of water clusters\cite{WaterCluster},
-(H$_2$O)$_{10}$ through (H$_2$O)$_{150}$, at the RHF/6-31G** level of theory.  The ability to
-reach the regime of true linear linear scaling with this basis set is demonstrated in Fig.~\ref{cputimes}.
-Crossover with ES occurs at about 50 water molecules, with {\sc TRS4} and {\sc PM} achieving sustained 
-performance above 400 Mflop/s.  Despite low filling, $f_{\rm occ}=0.2$, and the fact that PM 
+Differences between PM, TRS4 and ES were explored using a sequence of water clusters\cite{WaterCluster}, 
+(H$_2$O)$_{10}$ through (H$_2$O)$_{150}$, at the RHF/6-31G** level of theory.  The ability to reach the regime 
+of true linear linear scaling with this basis set is demonstrated in Fig.~\ref{cputimes}.
+Crossover with ES occurs at about 50 water molecules, with {\sc TRS4} and {\sc PM} achieving a sustained 
+performance better than 400 Mflop/s.  Despite low filling, $f_{\rm occ}=0.2$, and the fact that PM 
 requires 30 iterations to converge while TRS4 takes only 18, the ratio of cpu times is only 1.2.  
 This is because the PM method involves intermediate matrices that fill-in more slowly, leading to 
 faster sparse matrix-matrix multiplies and a fairly dramatic difference in errors.  
@@ -629,7 +631,7 @@ $||[{\bf F,P}]||_F$ for PM, TRS4 and truncated eigensolution (pure truncation er
 In each case, the TRS4 errors are approximately one order of magnitude larger than those due to 
 truncation, while the PM errors are about two orders larger.  Also, note the initial exponential  
 increase in the errors followed by stabilization (and a small linear rise detectable only with the 
-most liberal threshold) as discussed in Section~\ref{Error}.
+most liberal threshold).
 
 \subsubsection{Chlorophyll}
  
@@ -649,7 +651,7 @@ than a $m$hartree even with quite a tight threshold ($\tau=10^{-6}$).  On the ot
 the TRS4 accumulated error remains stable at about 0.1 $\mu$hartree.
 
 \begin{table}[h]
-\caption{Progression of ES, PM and TRS4 values for RPBE chlorophyll with $\tau = 10^{-6}$, including 
+\caption{Basis set progression of ES, PM and TRS4 values for RPBE chlorophyll with $\tau = 10^{-6}$, including 
 matrix-matrix multiplies $M$ to convergence, order of the signed absolute error in the converged total 
 energy $\Delta E$, and the ES total energy.}
 \label{ChlorophyllConvergence}
@@ -669,80 +671,59 @@ Ahlrichs VTZ    &  0.21      & -2378.400  & 107     & 57       & $ 10^{-3}$   & 
 \end{tabular}
 \end{table}
 
+
+\pagebreak
+
 \section{Discussion}
 
-In a recent World Technology Evaluation Center report molecular modeling \cite{WTECMM02}, Stechel noted that 
-when it comes to the success of linear scaling  methods {\em the devils are in the details}.
-These details include interplay between the iterative density matrix solver, the underlying incomplete sparse 
-linear algebra, basis set approximations and methods for convergence acceleration.   
-Despite these complexities, TRS4 is a clear improvement relative to PM, arguably the best 
-PE approach to date.  
-In particular,  for RHF/6-31G** water clusters accumulated errors in the TRS4 total energy 
-were shown to be an order of magnitude smaller than PM with $\tau=10^{-4}$.  
-For larger basis sets, PM was shown to behave pathologically even 
-for a small system and with tight numerical thresholds, while TRS4 was able to maintain
-sub-$\mu$hartree accuracy.  This pathology stems from domination of the inspectorate
-by the virtual space, skewing the PM polynomial to form a step close to $0$
-where it looses efficiency since the polynomials initially become close
-to identity. Improving on the starting guess, using the
-exact spectral bounds instead of the Gersgorin estimate, as used in the present study, 
-may partly shift the occupation limit where the PM scheme gives large errors, however the
-basic deficiency still remains. Having relaxed the trace-preserving constraint, TRS4
-does not suffer this problem.
-%One approach to avoiding these difficulties might be to employ 
-%{\em in situ} basis set optimization \cite{Conquest,JTalman00,GBerghold02}, allowing 
-%high accuracy with a reduced representation.
-At the same time it is still possible to deal with degeneracy and fractional occupancy.
+\pagebreak
+\pagebreak
+\pagebreak
 
-Under thresholding intra-SCF errors corrupt DIIS, preventing 
-extrapolation of the inter-SCF commutator to zero.  For thresholds $\tau \lesssim 10^{-4}$
-this is not a problem, and for larger thresholds other convergence 
-accelerators may be more stable under perturbation.  Nevertheless,
-the use of auxiliary SCF convergence criteria 
-to detect DIIS stagnation does allow robust application of PE methods
-under severe thresholding ($\tau \approx 10^{-2})$.
-In particular, no intrinsic problems (excited states, non-convergence, etc) were
-found in application to RPBE/STO-6G C60, although extra SCF cycles were sometimes required. 
-In all cases the approximate PE total energies were found to approach the ES values
-from above, and for C60 were shown to converge quadratically with $\tau$.
-Clearly the effect of both accumulated and truncation errors is to move 
-$[\bf P,F]$ away from zero.  Of special concern is smoothness
-of the energy surface of non-self-consistent-field methods subject to these errors.  
-As pointed out by Bowler \cite{DBowler99} the accumulation errors can be reduced 
-(at least to the level of truncation) by following PE with DMM. 
-It is also possible to achieve the same effect with PE only, but with a tighter matrix threshold.  
-Here again there may be differences between numerical thresholds and radial cutoffs 
-that are not yet fully appreciated. It is certain though that the faster convergence of TRS4 can 
-lead to faster CPU times in the small and large basis set limit with the static graphs 
-that are obtained using radial cut-offs. Note, that even if TRS4 and the PM scheme are 
-non-variational formulation of the single particle density matrix, the self-consistent
-total energy formulation is still variational. Thresholding limits the variational space
-both in the  DMM schemes and the PE methods, generally giving rise to a slightly
-higher total energy compared to exact arithmetics.
+\pagebreak
 
-\section{Conclusions}
+In a recent World Technology Evaluation Center report on molecular modeling \cite{WTECMM02}, 
+Stechel noted that when it comes to the success of linear scaling  methods 
+``the devils are in the details''.  This paper has tried to articulate these details for
+purification methods, making clear the interplay between iterative density matrix solver and
+incomplete sparse linear algebra, consequences of high and low filling basis sets and the 
+impact of commutator errors on SCF acceleration. 
 
-In summary we have proposed a general, simple, and efficient 
-Trace Re-Setting density-matrix expansion algorithm that converges 
-to the correct occupation without prior knowledge of the chemical
-potential. The scheme was shown to compare favorably with the
-similar canonical trace conserving PM method, especially at
-low and high occupancies. The methods ability to give the
-correct expansion also for degenerate systems or for problems
-with a fractional occupancy was discussed
-and formulas for calculating the degeneracy and filling factors
-from the density matrix were derived. 
-The numerical stability in the case of thresholding
-was discussed and analyzed. The method was implemented in
-{\sc MondoSCF} suite of {\it ab initio} linear scaling electronic structure
-programs and compared to the PM scheme and the
-truncated exact solution and the numerical stability
-and error was analyzed.
+Minimizing the number of matrix-matrix multiplies to achieve idempotence is a key factor in reducing
+accumulation errors, with TRS4 a clear improvement over PM for basis sets in both the high and 
+low filling regime where PM behaves poorly.  This poor behavior stems from domination by 
+either the virtual or occupied space, skewing the PM polynomial to form a step close to 0
+or 1 where it looses efficiency.  In some cases, this effect is undoubtedly magnified by the 
+inaccurate Gersgorin estimate, which may shift the gap away from the correct chemical potential
+through compression of the eigenspectrum.  We have chosen not to explore this latter effect
+as the basic deficiency in PM remains, and TRS4 does not suffer from either problem, while also
+overcomming potential problems with degeneracy and fractional occupancy.
 
-total accumulated error of the converged density matrix is independent
-of the number of matrix multiplications. The main error 
-is instead due to the size of the inverse band gap which, however,
-may lead to problems for large metallic systems.
+With TRS4 and $\tau=10^{-4}$, early crosovers with eigensolution and true linear scaling are 
+obtained at an energetic cost of about 0.1 mhartree per heavy atom for large gap systems. 
+This cost is akin to a change of basis, as matrix truncation limits the variational space, 
+corrrupting the commutator $[{\bf F,P}]$ and raising the total energy.  While accumulation 
+errors due to purification are distinct from truncation errors, their combined effect is the 
+same, leading to corruption of the commutator and a $\tau^2$-scaling energetic penalty that 
+approaches zero from above.
+
+One concern with purification methods is that towards idempotence, the electronic energy 
+fails to decrease monotonically\cite{DBowler99,APalser99} due to incomplete linear algebra.  
+This corresponds to fixed point convergence of the density matrix error, as given 
+by Eq.~(\ref{LinearDrift}), followed by a weak linear increase.  However, this small linear 
+error growth is of no concern as {\bf \em the initial exponential accumulation of errors 
+completely dominates}.  Also, as self-consistency is reached the interations to idempotence 
+and the graph of the density matrix stabilize at convergence.  Thus, for SCF theory 
+purification with thresholding yields a well defined variational approximation.  However,
+with the radial cut-off approximation the linear growth may become large, an effect 
+exacerbated in non-self-consistent methods where energies are linear in this error, 
+rather than second order.  
+
+Another concern with linear scaling methods, and purification methods in particular, is 
+the 
+something about DIIS
+
+Something about family of methods, SP2, etc.
 
 \begin{acknowledgments}
 This work has been carried out under the auspices of the US Department 
