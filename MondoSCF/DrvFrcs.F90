@@ -26,7 +26,7 @@
 !    ab initio molecular dynamics", and given appropriate citation.  
 !------------------------------------------------------------------------------
 !    DRIVER ROUTINES FOR DYNAMICS, OPTIMIZATION AND TS METHODS
-!    Author:  Matt Challacombe
+!    Author:  Matt Challacombe and C. J. Tymczak
 !------------------------------------------------------------------------------
 MODULE DrvFrcs
   USE DerivedTypes
@@ -43,6 +43,7 @@ MODULE DrvFrcs
   USE ChkSCFs
   USE ProcessControl    
   USE InOut
+  USE AtomPairs
   USE LinALg
   IMPLICIT NONE 
   CONTAINS
@@ -85,20 +86,149 @@ MODULE DrvFrcs
       CALL CloseHDF()
 !
       ForceFile   = 'Force_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
-      OPEN(UNIT=30,FILE=ForceFile,STATUS='NEW')
+      OPEN(UNIT=30,FILE=ForceFile,POSITION='APPEND',STATUS='UNKNOWN')
       WRITE(30,12) IGeo
       DO AtA = 1,NAtoms
          A1 = 3*(AtA-1)+1
-         WRITE(30,10) AtA
-         WRITE(30,11) GM%Carts%D(1,AtA),GM%Carts%D(2,AtA),GM%Carts%D(3,AtA)
-         WRITE(30,11) Frc%D(A1),Frc%D(A1+1),Frc%D(A1+2)
+         WRITE(30,11) AtA,GM%Carts%D(1,AtA),GM%Carts%D(2,AtA),GM%Carts%D(3,AtA),Frc%D(A1),Frc%D(A1+1),Frc%D(A1+2)
       ENDDO
       CLOSE(30)
-10    FORMAT('ATOM#',I5)
-11    FORMAT(2X,F20.16,2X,F20.16,2X,F20.16)
-12    FORMAT('Geometry #',I5)
+      CALL Delete(Frc)
+!
+11    FORMAT('ATOM#',I6,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16,2X,F20.16)
+12    FORMAT('Geometry #',I6)
 !
     END SUBROUTINE Forces
+!========================================================================================
+!
+!========================================================================================
+    SUBROUTINE NextMDGeometry(Ctrl)
+      TYPE(SCFControls)     :: Ctrl
+      INTEGER               :: ICyc,IBas,IGeo,AtA,A1
+      TYPE(CRDS)            :: GM,GMOLD,GMNEW
+      TYPE(DBL_VECT)        :: Frc
+      REAL(DOUBLE)          :: DELT,DELT2,D1MASS,D2MASS,E_MD_KIN,E_TOT_EL,VSCALE
+      CHARACTER(LEN=30)     :: MDFile
+!
+      ICyc=Ctrl%Current(1)
+      IBas=Ctrl%Current(2)
+      IGeo=Ctrl%Current(3)
+      CtrlVect=SetCtrlVect(Ctrl,'MD')
+!
+      DELT   = Ctrl%MDControls(1)
+      VSCALE = Ctrl%MDControls(2)
+!
+      DELT2 = DELT*DELT
+      CALL New(Frc,3*NAtoms)
+!
+      E_MD_KIN = Zero
+      IF(IGeo==1) THEN
+         CALL OpenHDF(InfFile)
+         CALL Get(GM     ,Tag_O=IntToChar(IGeo))  
+         CALL Get(GMNEW  ,Tag_O=IntToChar(IGeo+1))
+         CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
+         CALL CloseHDF()
+         DO AtA=1,NAtoms
+            A1  = 3*(AtA-1)+1
+            D1MASS =  DELT/(GM%AtMss%D(AtA))
+            D2MASS = DELT2/(GM%AtMss%D(AtA))
+!
+            GM%Vects%D(1,AtA)=VSCALE*GM%Vects%D(1,AtA)       
+            GM%Vects%D(2,AtA)=VSCALE*GM%Vects%D(2,AtA)
+            GM%Vects%D(3,AtA)=VSCALE*GM%Vects%D(3,AtA)
+!
+            GMNEW%Carts%D(1,AtA)=GM%Carts%D(1,AtA)+DELT*GM%Vects%D(1,AtA)-Half*D2MASS*Frc%D(A1)           
+            GMNEW%Carts%D(2,AtA)=GM%Carts%D(2,AtA)+DELT*GM%Vects%D(2,AtA)-Half*D2MASS*Frc%D(A1+1)
+            GMNEW%Carts%D(3,AtA)=GM%Carts%D(3,AtA)+DELT*GM%Vects%D(3,AtA)-Half*D2MASS*Frc%D(A1+2)
+!
+            GMNEW%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
+            GMNEW%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
+            GMNEW%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
+!
+            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
+!
+            CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+         ENDDO
+!
+      ELSEIF(IGeo .LT. Ctrl%NGeom) THEN
+         CALL OpenHDF(InfFile)
+         CALL Get(GM     ,Tag_O=IntToChar(IGeo))
+         CALL Get(GMNEW  ,Tag_O=IntToChar(IGeo+1))
+         CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
+         CALL CloseHDF()
+         DO AtA=1,NAtoms
+            A1  = 3*(AtA-1)+1
+            D1MASS =  DELT/GM%AtMss%D(AtA)
+            D2MASS = DELT2/GM%AtMss%D(AtA)
+!
+            GM%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
+            GM%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
+            GM%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
+!
+            GM%Vects%D(1,AtA)=VSCALE*GM%Vects%D(1,AtA)       
+            GM%Vects%D(2,AtA)=VSCALE*GM%Vects%D(2,AtA)
+            GM%Vects%D(3,AtA)=VSCALE*GM%Vects%D(3,AtA)
+!
+            GMNEW%Carts%D(1,AtA)=GM%Carts%D(1,AtA)+DELT*GM%Vects%D(1,AtA)-Half*D2MASS*Frc%D(A1)           
+            GMNEW%Carts%D(2,AtA)=GM%Carts%D(2,AtA)+DELT*GM%Vects%D(2,AtA)-Half*D2MASS*Frc%D(A1+1)
+            GMNEW%Carts%D(3,AtA)=GM%Carts%D(3,AtA)+DELT*GM%Vects%D(3,AtA)-Half*D2MASS*Frc%D(A1+2)
+!
+            GMNEW%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
+            GMNEW%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
+            GMNEW%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
+!
+            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
+!
+            CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+         ENDDO
+      ELSEIF(IGeo .EQ. Ctrl%NGeom) THEN
+         CALL OpenHDF(InfFile)
+         CALL Get(GM     ,Tag_O=IntToChar(IGeo))
+         CALL Get(Frc    ,'GradE' ,Tag_O=IntToChar(IGeo))
+         CALL CloseHDF()
+         DO AtA=1,NAtoms
+            A1  = 3*(AtA-1)+1
+            D1MASS =  DELT/GM%AtMss%D(AtA)
+            D2MASS = DELT2/GM%AtMss%D(AtA)
+!
+            GM%Vects%D(1,AtA)=GM%Vects%D(1,AtA)-Half*D1MASS*Frc%D(A1)            
+            GM%Vects%D(2,AtA)=GM%Vects%D(2,AtA)-Half*D1MASS*Frc%D(A1+1)
+            GM%Vects%D(3,AtA)=GM%Vects%D(3,AtA)-Half*D1MASS*Frc%D(A1+2)
+!
+            GM%Vects%D(1,AtA)=VSCALE*GM%Vects%D(1,AtA)       
+            GM%Vects%D(2,AtA)=VSCALE*GM%Vects%D(2,AtA)
+            GM%Vects%D(3,AtA)=VSCALE*GM%Vects%D(3,AtA)
+!
+            E_MD_KIN = E_MD_KIN+Half*GM%AtMss%D(AtA)*(GM%Vects%D(1,AtA)**2+GM%Vects%D(2,AtA)**2+GM%Vects%D(3,AtA)**2)
+!
+            CALL AtomCyclic(GMNEW,GMNEW%Carts%D(:,AtA))
+         ENDDO
+      ENDIF 
+!
+      CALL OpenHDF(InfFile)
+      CALL Put(GM     ,Tag_O=IntToChar(IGeo))
+      CALL Put(GMNEW  ,Tag_O=IntToChar(IGeo+1))
+      CALL CloseHDF()
+      CALL Delete(Frc)
+!
+!     Compile Statisics and Store thr Energies
+!
+      CALL OpenHDF(InfFile)
+      CALL Get(E_TOT_EL,'E_total',Tag_O=IntToChar(ICyc))
+      CALL CloseHDF()
+!
+      MDFile   = 'MDEnergy_'// TRIM(SCF_NAME)// "_" // TRIM(PROCESS_ID) // '.out'
+      OPEN(UNIT=30,FILE=MDFile,POSITION='APPEND',STATUS='UNKNOWN')
+      WRITE(30,10) IGeo,E_MD_KIN,E_TOT_EL,E_MD_KIN+E_TOT_EL
+      CLOSE(30)
+10    FORMAT(2X,I6,2X,F22.16,2X,F22.16,2X,F22.16)
+
+!
+!      WRITE(*,*) 'E_MD_KIN = ',E_MD_KIN
+!      WRITE(*,*) 'E_TOT_EL = ',E_TOT_EL
+!      WRITE(*,*) 'E_TOTAL  = ',E_MD_KIN+E_TOT_EL
+!
+    END SUBROUTINE NextMDGeometry
 !========================================================================================
 !
 !========================================================================================
@@ -121,7 +251,7 @@ MODULE DrvFrcs
          IF(HasHF(Ctrl%Model(Ctrl%Current(2))))THEN
 !              CALL Invoke('XForce',     CtrlVect)       
             CALL MondoHalt(-999,'ONX Gradients not in yet, soon... ')
-         ENDIF
+         ENDIF 
          CALL Invoke('BFGSHess',   CtrlVect)
       ENDIF
       CALL Invoke('NewStep',    CtrlVect)
@@ -136,7 +266,7 @@ MODULE DrvFrcs
       INTEGER                          :: ICyc,IGeo,IBas
       INTEGER                          :: AtA,IX,II,A1,A2,IS
       REAL(DOUBLE)                     :: DDelta
-      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EXC
+      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EXC 
       REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_XC,F_TOT
       TYPE(DBL_VECT)                   :: Frc_Num
 !
