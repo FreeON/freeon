@@ -5,46 +5,17 @@ MODULE RhoBlok
   USE McMurchie
   USE AtomPairs
   USE BraBloks
+  USE RhoTools
   IMPLICIT NONE
-CONTAINS
-!--------------------------------------------------------------
-! Add nuclear centers to the density
-!--------------------------------------------------------------
-  SUBROUTINE AddNukes(GM,Rho,IOff_O)
-    TYPE(CRDS)                    :: GM
-    TYPE(HGRho)                   :: Rho
-    INTEGER                       :: IA,Iq,Ir,IOffQ,IOffR
-    INTEGER,DIMENSION(2),OPTIONAL :: IOff_O
-    REAL(DOUBLE)                  :: DDelta
-!---------------------------------------------------
-    ! Initialize the Nuclear centers and Constants
-    DDelta = Half*(Rho%Expt%D(Rho%NExpt)/Pi)**(ThreeHalves)
-    IF(PRESENT(IOff_O))THEN
-       IOffQ=IOff_O(1)
-       IOffR=IOff_O(2)
-    ELSE
-       IOffQ=Rho%OffQ%I(Rho%NExpt)
-       IOffR=Rho%OffR%I(Rho%NExpt)
-    ENDIF
-
-    DO IA = 1,GM%Natms       
-       Iq=IOffQ+IA
-       Ir=IOffR+IA
-       Rho%Qx%D(Iq)=GM%Carts%D(1,IA)
-       Rho%Qy%D(Iq)=GM%Carts%D(2,IA)
-       Rho%Qz%D(Iq)=GM%Carts%D(3,IA)
-       Rho%Co%D(Ir)=-GM%AtNum%D(IA)*DDelta
-    ENDDO
-  END SUBROUTINE AddNukes
+  CONTAINS
 !--------------------------------------------------------------
 ! Count the Number of Primative basis funtions contained in atom A and B
 !--------------------------------------------------------------
-  SUBROUTINE PrimCount(BS,Pair,Rho)
+  SUBROUTINE PrimCount(BS,Pair,NDist,NCoef)
     TYPE(BSET)                 :: BS
     TYPE(AtomPair)             :: Pair
-    TYPE(HGRho)                :: Rho
 !
-    INTEGER                    :: KA,KB,CFA,CFB,PFA,PFB,IE,Endex
+    INTEGER                    :: KA,KB,CFA,CFB,PFA,PFB,MaxLA,MaxLB,NDist,NCoef
     REAL(DOUBLE)               :: AB2,ZetaA,ZetaB,ZetaAB,XiAB,ExpAB
     LOGICAL                    :: AEQB
 !      
@@ -60,22 +31,13 @@ CONTAINS
                 ZetaA = BS%Expnt%D(PFA,CFA,KA)
                 ZetaB = BS%Expnt%D(PFB,CFB,KB)
                 ZetaAB= ZetaA+ZetaB 
-!
-!               Determine the Exponent Index
-!
-                Endex=0
-                DO IE=1,Rho%NExpt
-                   IF(ABS(ZetaAB-Rho%Expt%D(IE))<1.D-8) THEN
-                      Endex = IE
-                      EXIT
-                   ENDIF
-                ENDDO
-                IF(Endex == 0) THEN
-                   CALL MondoHalt(-100,' Problem in PrimCount, No Exponent found ') 
-                ELSE
-                   Rho%NQ%I(Endex) = Rho%NQ%I(Endex) + 1
+                XiAB  = ZetaA*ZetaB/ZetaAB
+                IF(TestPrimPair(XiAB,AB2))THEN
+                   MaxLA   = BS%ASymm%I(2,CFA,KA)
+                   MaxLB   = BS%ASymm%I(2,CFB,KB)
+                   NDist   = NDist + 1
+                   NCoef   = NCoef + LHGTF(MaxLA+MaxLB)
                 ENDIF
-!
              ENDDO
           ENDDO
        ENDDO
@@ -85,39 +47,28 @@ CONTAINS
 !--------------------------------------------------------------
 ! Calculate the Primative Distributions Generated from atom A and B
 !--------------------------------------------------------------
-  SUBROUTINE RhoBlk(BS,MD,Dmat,Pair,First,Rho)
+  SUBROUTINE RhoBlk(BS,Dmat,Pair,NDist,NCoef,Rho)
     TYPE(BSET)                              :: BS
-    TYPE(DBL_RNK4)                          :: MD
     TYPE(AtomPair)                          :: Pair
     TYPE(PrimPair)                          :: Prim
-    TYPE(HGRho)                             :: Rho
-    REAL(DOUBLE)                            :: FacAtom
+    TYPE(HGRho_new)                         :: Rho
+    INTEGER                                 :: NDist,NCoef
 !
     REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: Dmat
     REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: DD
     INTEGER                                 :: KA,KB,NBFA,NBFB,CFA,CFB,PFA,PFB, &
                                                IndexA,StartLA,StopLA,MaxLA, &
                                                IndexB,StartLB,StopLB,MaxLB, &
-                                               IE,Endex,Qndex,Rndex,LMN,LMNA,LMNB, &
-                                               IA,IB,LA,MA,NA,LB,MB,NB,LAB,MAB,NAB, &
+                                               IE,OffCo,LMN,LMNA,LMNB, &
+                                               IA,IB,EllA,EllB,LAB,MAB,NAB, &
                                                LenKet,AtA,AtB
     REAL(DOUBLE)                            :: ZetaA,ZetaB,ZetaAB,ZetaIn,XiAB,ExpAB, &
                                                AB2,Ax,Ay,Az,Bx,By,Bz, &
                                                Px,Py,Pz,PAx,PAy,PAz,PBx,PBy,PBz, &
                                                Ex,Exy,Exyz,CA,CB,MaxAmp
 !
-    TYPE(INT_VECT),SAVE                     :: OffQ,OffR
-    LOGICAL                                 :: First,AEQB
-!
-    IF(First) THEN
-       CALL New(OffQ,Rho%NExpt)
-       CALL New(OffR,Rho%NExpt)
-       DO IA = 1,Rho%NExpt
-          OffQ%I(IA) = Rho%OffQ%I(IA)
-          OffR%I(IA) = Rho%OffR%I(IA)
-       ENDDO
-       First = .FALSE.
-    ENDIF
+
+    LOGICAL                                 :: AEQB
 !
     KA   = Pair%KA
     KB   = Pair%KB  
@@ -147,118 +98,86 @@ CONTAINS
           Prim%Ell=MaxLA+MaxLB
           DO PFA=1,BS%NPFnc%I(CFA,KA)                ! 
              Prim%PFA=PFA 
-             DO PFB=1,BS%NPFnc%I(CFB,KB)           
+             DO PFB=1,BS%NPFnc%I(CFB,KB) 
+                Prim%PFB=PFB
                 Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                 Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                 Prim%Zeta=Prim%ZA+Prim%ZB
                 Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-                Prim%PFB=PFB
+                IF(TestPrimPair(Prim%Xi,Prim%AB2)) THEN
 !--------------------------------------------------------------
-!               Set primitive values
-!               Primitive coefficients in a HG representation
+!                  Set primitive values
+!                  Primitive coefficients in a HG representation
 !--------------------------------------------------------------
-                MaxAmp=SetBraBlok(Prim,BS)
-                Endex = 0
-                DO IE=1,Rho%NExpt-1
-                   IF(ABS(Prim%Zeta-Rho%Expt%D(IE))<1.0D-8) THEN
-                      Endex = IE
-                      GOTO 100
-                   ENDIF
-                ENDDO
-100             CONTINUE
-                IF(Endex .EQ. 0) THEN
-                   CALL MondoHalt(-100,' Problem in RhoBlok, No Exponent found ') 
-                ENDIF
+                   MaxAmp=SetBraBlok(Prim,BS)
+                   LenKet = LHGTF(Prim%Ell)
 !
-                Qndex  = OffQ%I(Endex)+1
-                Rndex  = OffR%I(Endex)
-                LenKet = LHGTF(Rho%Lndx%I(Endex))
+!                  Update the Counters
 !
-                OffQ%I(Endex) = OffQ%I(Endex) + 1 
-                OffR%I(Endex) = OffR%I(Endex) + LenKet
+                   NDist = NDist+1
+                   NCoef = NCoef+LenKet
+                   OffCo = NCoef-LenKet+1
 !
-!               Store the position of the distribution
+!                  Store the distribution
 !
-                Rho%Qx%D(Qndex)=Prim%P(1)
-                Rho%Qy%D(Qndex)=Prim%P(2)
-                Rho%Qz%D(Qndex)=Prim%P(3)
+                   Rho%Ell%I(NDist)   = Prim%Ell
+                   Rho%Zeta%D(NDist)  = Prim%Zeta
+                   Rho%Qx%D(NDist)    = Prim%P(1)
+                   Rho%Qy%D(NDist)    = Prim%P(2)
+                   Rho%Qz%D(NDist)    = Prim%P(3)
+                   Rho%OffCo%I(NDist) = OffCo
 !
-!               Calculate and Store the Coefficients of the Distribution
+!                  Calculate and Store the Coefficients of the Distribution
 !
-                IA=IndexA
-                DO LMNA=StartLA,StopLA
-                   IA=IA+1
-                   IB=IndexB
-                   LA=BS%LxDex%I(LMNA)
-                   MA=BS%LyDex%I(LMNA)
-                   NA=BS%LzDex%I(LMNA)
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      LB=BS%LxDex%I(LMNB)
-                      MB=BS%LyDex%I(LMNB)
-                      NB=BS%LzDex%I(LMNB)
-                      DO LMN=1,LHGTF(LA+MA+NA+LB+MB+NB)
-                         Rho%Co%D(Rndex+LMN)=Rho%Co%D(Rndex+LMN)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
+                   Rho%Co%D(OffCo:OffCo+LenKet) = Zero 
+                   IA=IndexA
+                   DO LMNA=StartLA,StopLA
+                      IA=IA+1
+                      IB=IndexB
+                      EllA = BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)
+                      DO LMNB=StartLB,StopLB
+                         IB=IB+1
+                         EllB = BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)
+                         DO LMN=1,LHGTF(EllA+EllB)
+                            Rho%Co%D(OffCo+LMN-1)=Rho%Co%D(OffCo+LMN-1)+HGBra%D(LMN,IA,IB)*DD(IA,IB)
+                         ENDDO
                       ENDDO
-                   ENDDO
-                ENDDO
+                   ENDDO                  
+                ENDIF
              ENDDO
           ENDDO
        ENDDO
     ENDDO
   END SUBROUTINE RhoBlk
 !--------------------------------------------------------------
-! Calculate the Number of Distributions from NQ
+! Add nuclear centers to the density
 !--------------------------------------------------------------
-  FUNCTION  CalNDist(Rho)
-    TYPE(HGRho)                :: Rho
-    INTEGER                    :: I,CalNDist
-    CalNDist = 0
-    DO I=1,Rho%NExpt
-       CalNDist = CalNDist+Rho%NQ%I(I)
+  SUBROUTINE AddNukes(GM,Rho,IOff_O)
+    TYPE(CRDS)                    :: GM
+    TYPE(HGRho)                   :: Rho
+    INTEGER                       :: IA,Iq,Ir,IOffQ,IOffR
+    INTEGER,DIMENSION(2),OPTIONAL :: IOff_O
+    REAL(DOUBLE)                  :: DDelta
+!---------------------------------------------------
+! Initialize the Nuclear centers and Constants
+    DDelta = Half*(Rho%Expt%D(Rho%NExpt)/Pi)**(ThreeHalves)
+    IF(PRESENT(IOff_O))THEN
+       IOffQ=IOff_O(1)
+       IOffR=IOff_O(2)
+    ELSE
+       IOffQ=Rho%OffQ%I(Rho%NExpt)
+       IOffR=Rho%OffR%I(Rho%NExpt)
+    ENDIF
+
+    DO IA = 1,GM%Natms       
+       Iq=IOffQ+IA
+       Ir=IOffR+IA
+       Rho%Qx%D(Iq)= GM%Carts%D(1,IA)
+       Rho%Qy%D(Iq)= GM%Carts%D(2,IA)
+       Rho%Qz%D(Iq)= GM%Carts%D(3,IA)
+       Rho%Co%D(Ir)=-GM%AtNum%D(IA)*DDelta
     ENDDO
-  END FUNCTION CalNDist
-!--------------------------------------------------------------
-! Calculate the Number of Coefficients  from NQ and Lndx
-!--------------------------------------------------------------
-  FUNCTION CalNCoef(Rho)
-    TYPE(HGRho)                :: Rho
-    INTEGER                    :: I,CalNCoef
-    CalNCoef = 0
-    DO I=1,Rho%NExpt
-       CalNCoef = CalNCoef+Rho%NQ%I(I)*LHGTF(Rho%Lndx%I(I))
-    ENDDO
-  END FUNCTION CalNCoef
-!--------------------------------------------------------------
-! Calculate OffQ from NQ
-!--------------------------------------------------------------
-  FUNCTION CalOffQ(Rho)
-    TYPE(HGRho)                  :: Rho
-    INTEGER,DIMENSION(Rho%NExpt) :: CalOffQ   
-    INTEGER                      :: I,J,Iq
-!
-    DO I = 1,Rho%NExpt
-       Iq = 0
-       DO J = 1,I-1
-          Iq = Iq + Rho%NQ%I(J)
-       ENDDO
-       CalOffQ(I) = Iq
-    ENDDO
-  END FUNCTION CalOffQ
-!--------------------------------------------------------------
-! Calculate OffR from NQ and Lndx
-!--------------------------------------------------------------
-  FUNCTION CalOffR(Rho)
-    TYPE(HGRho)                  :: Rho
-    INTEGER,DIMENSION(Rho%NExpt) :: CalOffR   
-    INTEGER                      :: I,J,Ir
-    DO I = 1,Rho%NExpt
-       Ir = 0
-       DO J = 1,I-1
-          Ir = Ir + Rho%NQ%I(J)*LHGTF(Rho%Lndx%I(J))
-       ENDDO
-       CalOffR(I) = Ir
-    ENDDO
-  END FUNCTION CalOffR
+  END SUBROUTINE AddNukes
+
 !
 END MODULE RhoBlok
