@@ -45,6 +45,7 @@ int hdf5createfile_(int* NC, int* IChr)
    return FileID;
 }
 int hdf5createfile(int* NC, int* IChr){return hdf5createfile_(NC,IChr);}
+int hdf5createfile__(int* NC, int* IChr){return hdf5createfile_(NC,IChr);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -66,6 +67,7 @@ int hdf5openfile_(int* NC, int* IChr)
    return FileID;
 }
 int hdf5openfile(int* NC, int* IChr){return hdf5openfile_(NC,IChr);}
+int hdf5openfile__(int* NC, int* IChr){return hdf5openfile_(NC,IChr);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -98,6 +100,7 @@ int hdf5closefile_(int* FileID)
    return STATUS;
 }
 int hdf5closefile(int* FileID){return hdf5closefile_(FileID);}
+int hdf5closefile__(int* FileID){return hdf5closefile_(FileID);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -123,6 +126,8 @@ void hdf5opendata_(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
    *DataSpc=dspc;
 }
 void hdf5opendata(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
+{hdf5opendata_(FileID,NC,IChr,DataId,DataSpc);}
+void hdf5opendata__(int* FileID, int* NC, int* IChr, int* DataId, int* DataSpc)
 {hdf5opendata_(FileID,NC,IChr,DataId,DataSpc);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
@@ -150,6 +155,8 @@ void hdf5extenddata_(int* DataId, int* DataSpc, int* N)
 }
 void hdf5extenddata(int* DataId, int* DataSpc, int* N)
 {hdf5extenddata_(DataId,DataSpc,N);}
+void hdf5extenddata__(int* DataId, int* DataSpc, int* N)
+{hdf5extenddata_(DataId,DataSpc,N);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -165,6 +172,8 @@ void hdf5selectdata_(int* DataId, int* DataSpc, int* NewSize)
    H5Sselect_hyperslab(dspc,H5S_SELECT_SET,off,NULL,cnt,NULL);
 }
 void hdf5selectdata(int* DataId, int* DataSpc, int* NewSize)
+{hdf5selectdata_(DataId,DataSpc,NewSize);}
+void hdf5selectdata__(int* DataId, int* DataSpc, int* NewSize)
 {hdf5selectdata_(DataId,DataSpc,NewSize);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
@@ -188,6 +197,7 @@ int hdf5closedata_(int* DataId,int* DataSpc)
    return STATUS;
 }
 int hdf5closedata(int* DataId,int* DataSpc){return hdf5closedata_(DataId,DataSpc);}
+int hdf5closedata__(int* DataId,int* DataSpc){return hdf5closedata_(DataId,DataSpc);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -242,6 +252,8 @@ void hdf5createdata_(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit,
 }
 void hdf5createdata(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
 {hdf5createdata_(FileID,Type,N,NC,IChr,ULimit,DataId,DataSpc);}
+void hdf5createdata__(int* FileID,int* Type,int* N,int* NC,int* IChr,int* ULimit, int* DataId, int* DataSpc)
+{hdf5createdata_(FileID,Type,N,NC,IChr,ULimit,DataId,DataSpc);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -267,6 +279,8 @@ int hdf5sizeofdata_(int* DataSpc)
 }
 int hdf5sizeofdata(int* DataSpc)
 {return hdf5sizeofdata_(DataSpc);}
+int hdf5sizeofdata__(int* DataSpc)
+{return hdf5sizeofdata_(DataSpc);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -282,6 +296,8 @@ int hdf5writeintegervector_(int* DataId, int* DataSpc, int* Data)
    return STATUS;
 }
 int hdf5writeintegervector(int* DataId, int* DataSpc, int* Data)
+{return hdf5writeintegervector_(DataId,DataSpc,Data);}
+int hdf5writeintegervector__(int* DataId, int* DataSpc, int* Data)
 {return hdf5writeintegervector_(DataId,DataSpc,Data);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
@@ -299,6 +315,8 @@ int hdf5writedoublevector_(int* DataId, int* DataSpc, double* Data)
 }
 int hdf5writedoublevector(int* DataId, int* DataSpc, double* Data)
 {return hdf5writedoublevector_(DataId,DataSpc,Data);}
+int hdf5writedoublevector__(int* DataId, int* DataSpc, double* Data)
+{return hdf5writedoublevector_(DataId,DataSpc,Data);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -315,6 +333,8 @@ int hdf5readintegervector_(int* DataId, int* DataSpc, int* Data)
 }
 int hdf5readintegervector(int* DataId, int* DataSpc, int* Data)
 {return hdf5readintegervector_(DataId,DataSpc,Data);}
+int hdf5readintegervector__(int* DataId, int* DataSpc, int* Data)
+{return hdf5readintegervector_(DataId,DataSpc,Data);}
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
 /*                                                                           */
 /*+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+*/
@@ -330,4 +350,6 @@ int hdf5readdoublevector_(int* DataId, int* DataSpc, double* Data)
    return STATUS;
 }
 int hdf5readdoublevector(int* DataId, int* DataSpc, double* Data)
+{return hdf5readdoublevector_(DataId,DataSpc,Data);}
+int hdf5readdoublevector__(int* DataId, int* DataSpc, double* Data)
 {return hdf5readdoublevector_(DataId,DataSpc,Data);}

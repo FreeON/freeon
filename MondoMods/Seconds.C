@@ -11,6 +11,7 @@ double cpu_seconds_(void)
  return CLOCKS*CPS;
 }
 double cpu_seconds(void){return cpu_seconds_();}
+double cpu_seconds__(void){return cpu_seconds_();}
 
 double wall_seconds_(void)
 {
@@ -20,3 +21,4 @@ double wall_seconds_(void)
  return WALL*CTK;
 }
 double wall_seconds(void){return wall_seconds_();}
+double wall_seconds__(void){return wall_seconds_();}
