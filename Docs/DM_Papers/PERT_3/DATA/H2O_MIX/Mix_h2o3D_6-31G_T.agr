@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Fri Feb 13 17:33:39 2004"
+@timestamp def "Sun Feb 22 16:08:02 2004"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -298,7 +298,7 @@
 @    s0 errorbar riser clip off
 @    s0 errorbar riser clip length 0.100000
 @    s0 comment "/n/srv2/vweber/MONDO/Docs/DM_Papers/PERT_3/DATA/H2O_GAMMA/Alpha_h2o3D_6-31G_6-31Gss_G_T.dat"
-@    s0 legend  "Alpha"
+@    s0 legend  "\f{Symbol}a\f{Times-Roman}\sxx"
 @    s1 hidden false
 @    s1 type xy
 @    s1 symbol 8
@@ -347,7 +347,7 @@
 @    s1 errorbar riser clip off
 @    s1 errorbar riser clip length 0.100000
 @    s1 comment "/n/srv2/vweber/MONDO/Docs/DM_Papers/PERT_3/DATA/H2O_GAMMA/Alpha_h2o3D_6-31G_6-31Gss_G_T.dat"
-@    s1 legend  "Beta"
+@    s1 legend  "\f{Symbol}b\f{Times-Roman}\sxxx"
 @    s2 hidden false
 @    s2 type xy
 @    s2 symbol 10
@@ -396,7 +396,7 @@
 @    s2 errorbar riser clip off
 @    s2 errorbar riser clip length 0.100000
 @    s2 comment "/n/srv2/vweber/MONDO/Docs/DM_Papers/PERT_3/DATA/H2O_GAMMA/Alpha_h2o3D_6-31G_6-31Gss_G_T.dat"
-@    s2 legend  "Gamma"
+@    s2 legend  "\f{Symbol}g\f{Times-Roman}\sxxxx"
 @    s3 hidden false
 @    s3 type xy
 @    s3 symbol 0

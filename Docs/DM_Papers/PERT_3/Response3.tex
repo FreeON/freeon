@@ -44,7 +44,11 @@
 
 \pagestyle{fancy}
 
-
+\def\Tr{{\rm Tr}}
+\def\F{\mathcal{F}}
+\def\D{\mathcal{D}}
+\def\X{\mathcal{X}}
+\def\E{\mathcal{E}}
 
 %\nofiles
 
@@ -52,8 +56,8 @@
 
 %\preprint{APS/123-QED}
 
-\title{The linear scaling self-consistent perturbed projection method 
-for high order response}
+\title{MATT, ANDERS AND I KNOW THAT YOU HAVE A NICE HUGE BIG SCREEN THEN THINK ABOUT US!\\
+The linear scaling self-consistent perturbed projection method for high order response}
 %\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
 
 \author{Val\'ery Weber}
@@ -62,22 +66,20 @@ for high order response}
 \author{Anders M. N. Niklasson}%
 \author{Matt Challacombe}%
 
-\affiliation{
-Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.\\
-}%
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
 
 \date{\today}% It is always \today, today,
              %  but any date may be explicitly specified
 
 \begin{abstract}
 A first principles linear scaling electronic structure scheme for high order 
-response properties is proposed. The sheme solves the coupled perturbed self 
+response properties is proposed. The scheme solves the coupled perturbed self 
 consistent field equation by the perturbed projection method. It is applied to 
 the computation of the first and second electric hyperpolarizabilities of three
 dimensional water clusters. Linear scaling and locality of the response
 densities are demonstrated. 
-% Linear scaling self consisitent sheme for high order response peoperties
-% is proposed. The sheme solves the coupled perturbed self consitent field 
+% Linear scaling self consisitent scheme for high order response peoperties
+% is proposed. The scheme solves the coupled perturbed self consitent field 
 % equation by the perturbed projection method. It is applied to the computation
 % of the first and second electric hyperpolarizabilities of three
 % dimensional water clusters. Linear scaling and locality of the response
@@ -93,7 +95,7 @@ densities are demonstrated.
 
 \section{Introduction}
  Electronic structure theory based on the first principle 
- of physics was for long time limitied to the study of small 
+ of physics was for long time limited to the study of small 
  systems with only a small number of nonequivalent atoms. 
  Despite a tremendous increase in computational power
  of digital computers this would still be a severe limitation
@@ -116,9 +118,9 @@ densities are demonstrated.
  theory has been focused on total energy calculations and little
  attention has been devoted to the problem of materials response
  properties, such as magnetic and electric responses or nuclear
- displacement. However, the locality principle is extandable
+ displacement. However, the locality principle is extensible
  also to response properties. In previous studies linear scaling 
- for the calculation of response propertie was demonstrated for one
+ for the calculation of response properties was demonstrated for one
  dimensional linear chain systems (CHECK IT)
  \cite{Ochsenfeld_1997,Ochsenfeld_1998,chintoc}. Recently
  a perturbed projection algorithm was proposed for low order
@@ -129,7 +131,7 @@ densities are demonstrated.
  Hartree-Fock or density functional theory the electronic
  response is given from self-consistent solutions of both
  the ground state density and its perturbative response functions,
- refered to as the solutions to the coupled perturbed self consistent 
+ referred to as the solutions to the coupled perturbed self consistent 
  field (CPSCF) equations.
  Standard non-linear scaling approaches to solutions of the CPSCF equations 
  \cite{Pople_1979,Sekino_1986,Dupuis_1991} do not admit full exploitation 
@@ -144,7 +146,7 @@ densities are demonstrated.
  Li-Nunes-Vanderbilt density matrix functional \cite{Ochsenfeld_1997}
  and later Larsen {\em et al.} \cite{Helgaker_2001} proposed iterative 
  solutions to the CPSCF equations based on unitary operations
- invovling matrix exponentials. In both of these approaches, a linear 
+ involving matrix exponentials. In both of these approaches, a linear 
  system of equations containing commutation relations must be solved.
  Another very interesting approach was demonstrated by Chintoc, who
  derived the frequency response of one dimensional molecular chains
@@ -159,63 +161,104 @@ densities are demonstrated.
  computations for the first electric polarizability of three-dimensional 
  water clusters.
 
- In this article, we present a linear scaling self consisitent sheme
- for higher order response peoperties up fourth order in energy.
+ In this article, we present a linear scaling self consistent scheme
+ for higher order response properties up fourth order in energy.
  First we give a general description through the solution of the CPSCF equations.
  Then we describe the perturbed projection approach for the calculation
  of the density matrix derivatives and present
  an algorithm for derivatives up to third order.
  Thereafter, we derive a density matrix analogy to Wigner's 2n+1
  rule for nonorthogonal representations. We also briefly discuss the
- self concistent accelaration technique by Weber and ... . In the next section,
+ self consistent acceleration technique by Weber and ... . In the next section,
  we first show the saturation of the hyperpolarizabilities up to fourth order
- for a series of 1D chain of water molecules. Thereafter, we demonstate
+ for a series of 1D chain of water molecules. Thereafter, we demon state
  linear scaling computation of the higher order electric response properties
  for 3D water clusters.
 
 
-
 \section{CPSCF equations}
-The coupled perturbed self concistent field equations occur in Hartree-Fock
+The coupled perturbed self consistent field equations occur in Hartree-Fock
 and density functional theory for the computation of material response
 properties. Here, we discuss the CPSCF equation in the framework of
 HF theory, however an extension to DFT is straightforward.
 
+Superscripts and subscripts refer to perturbation order and 
+iteration count respectively. The symbols $\mathcal{D},\mathcal{F},\dots$
+are matrices in an orthogonal representation, while
+$D,F,\dots$ are the corresponding matrices in a non-orthogonal basis.
+The transformation between orthogonal and non-orthogonal 
+representations is carried out in ${\cal O}(N)$ using
+congruence transformations \cite{JWilkinson65,GStewart73} provided 
+by the AINV algorithm for computing sparse approximate inverse 
+Cholesky factors \cite{MBenzi95,MBenzi96,MBenzi01}.
 
-\begin{eqnarray}
-  E_{\rm tot}(\mathcal{E})= E_{\rm tot}(0) && +\sum_a\mu_a\mathcal{E}^a\\
-  &&+\frac{1}{2}\sum_{ab}\alpha_{ab}\mathcal{E}^a\mathcal{E}^b\\
-  &&+\frac{1}{6}\sum_{abc}\beta_{abc}\mathcal{E}^a\mathcal{E}^b\mathcal{E}^c\\
-  &&+\frac{1}{24}\sum_{abcd}\gamma_{abcd}\mathcal{E}^a\mathcal{E}^b\mathcal{E}^c\mathcal{E}^d\\
-  &&+\dots,
-\end{eqnarray}
-
-
+The total energy may be developed in a Taylor expansion as
+\begin{equation}
+  \begin{split}
+    E_{\rm tot}(\E)= E_{\rm tot}(0) & +\sum_a\mu_a\E^a\\
+    &+\frac{1}{2!}\sum_{ab}\alpha_{ab}\E^a\E^b\\
+    &+\frac{1}{3!}\sum_{abc}\beta_{abc}\E^a\E^b\E^c\\
+    &+\frac{1}{4!}\sum_{abcd}\gamma_{abcd}\E^a\E^b\E^c\E^d\\
+    &+\dots,
+  \end{split}
+\end{equation}
+ where $\alpha_{ab}$, $\beta_{abc}$ and $\gamma_{abcd}$ are 
+ the first polarizability and the first and second 
+ hyperpolarizabilities respectively, $\mu_a$ is the dipole 
+ moment and $\E_a$ is the electric field in direction $a$. 
 
 \begin{equation}
-  \mathcal{F}=\mathcal{F}^{0}+\sum_a \mathcal{E}^{a}\mathcal{F}^{a}+
-  \sum_{ab} \mathcal{E}^{a}\mathcal{E}^{b}\mathcal{F}^{ab}+
-  \sum_{abc} \mathcal{E}^{a}\mathcal{E}^{b}\mathcal{E}^{c}\mathcal{F}^{abc}+\dots
+  \begin{split}
+    \F(\E)=\F^{0} & +\sum_a \F^{a}\E^{a}\\
+    &+\frac{1}{2!}\sum_{ab} \F^{ab}\E^{a}\E^{b}\\
+    &+\frac{1}{3!}\sum_{abc} \F^{abc}\E^{a}\E^{b}\E^{c}+\dots
+  \end{split}
 \end{equation}
 
-The following schematic algorithm is a higher order generalization of the
-SC scheme for the solution of the CPSCF equations descibe in \cite{SV} 
-based on perturbed pronjection:
+The derivative density matrix and derivative Fockian depend on 
+each other implicitly and must be solved for self-consistently 
+via the coupled-perturbed self-consistent-field (CPSCF) equations.
+The necessary and sufficient criteria for convergence of the 
+CPSCF equations involve an extension to the SCF equations \cite{Furche_2001}
 \begin{subequations}
-\begin{eqnarray}
-&&  F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
-&&  F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild} \\
-&& \displaystyle\widetilde{F}^{ab\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{ab\ldots}_{k} \label{DDIIS} \\
-&& \displaystyle\mathcal{D}^{ab\ldots}_{n+1}=
-  \frac{\partial^N}{\partial\mathcal{E}^a \partial\mathcal{E}^b\ldots}
-     \theta(\tilde{\mu}I-(\mathcal{F}^{0}
-     +\sum_c\mathcal{E}^{c}\widetilde{\mathcal{F}}^{c}_n
-     +\ldots))
-     \bigg|_{\mathcal{E}=0} \label{DDeriv}
-\end{eqnarray} 
+  \begin{gather}
+    [\F^{0} ,\D^{0}]=0,\\
+    [\F^{a} ,\D^{0}]+[\F^{0},\D^{a}]=0,\\
+    [\F^{ab},\D^{0}]+[\F^{a},\D^{b}]+[\F^{b} ,\D^{a}]+[\F^{0},\D^{ab}]=0,\\
+    \text{May be the third order???}
+  \end{gather}
 \end{subequations}
+and the idempotency-like constraint \cite{Furche_2001}
+\begin{subequations}
+  \begin{gather}
+    \D^{0} =\D^{0} \D^{0},\\
+    \D^{a} =\D^{a} \D^{0}+\D^{0}\D^{a},\\
+    \D^{ab}=\D^{ab}\D^{0}+\D^{0}\D^{ab}+\D^{a}\D^{b}+\D^{b}\D^{a}\\
+    \text{May be the third order???}
+  \end{gather}
+\end{subequations}
+The following schematic algorithm is a higher order generalization of the
+self consistent scheme for the solution of the CPSCF equations describe in \cite{SV} 
+based on perturbed projection:
+\begin{subequations}
+  \begin{gather}
+    F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
+    F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild2} \\
+    \displaystyle\widetilde{F}^{a\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{a\ldots}_{k} \label{DDIIS} \\
+    \displaystyle\D^{a\ldots}_{n+1}=
+    \frac{\partial^N}{\partial\E^a\ldots}\theta(\tilde{\mu}I-
+    \F(\E))\bigg|_{\E=0} \label{DDeriv}
+%    (\F^{0}+\sum_c\E^{c}\widetilde{\F}^{c}_n+\ldots))\bigg|_{\E=0} \label{DDeriv}
+  \end{gather} 
+\end{subequations}
+with starting points $D^{a\ldots}_0=0$. In step~(\ref{FockBuild}),  $F^a_n$ is constructed in
+${\cal O}(N)$ using algorithms \cite{MChallacombe97,ESchwegler97} in
+the {\sc MondoSCF} \cite{MondoSCF} suite of linear scaling quantum chemistry programs.  Next,
+Weber and Daul's DDIIS algorithm for convergence acceleration of the CPSCF equation
+\cite{Weber_2003} is used to optimize the $c_k$ coefficients in step~(\ref{DDIIS}).
 
-The scheme solves for the self concistent density response, \\
+
+The scheme solves for the self consistent density response, \\
 first... Linear scaling construction of the Fockian expansion follows in
 the same way as the O(N) construction of the Fockian cite{Matt...}\\
 second... DDIIS optimizing scheme based on DIIS.\\
@@ -238,10 +281,10 @@ construction of the density matrix...
 
 \begin{subequations}
   \begin{eqnarray}
-    && D^{abc}=\{D^{abc},D_0\}+
-        \frac{1}{3}(\{D^{ab},D^{c}\}+\{D^{ac},D^{b}\}+\{D^{bc},D^{a}\})\\
-    && D^{ab }=\{D^{ab},D_0\}+\frac{1}{2}\{D^{a},D^{b}\}\\
-    && D^{a  }=\{D^{a},D_0\}
+    && \D^{abc}=\{\D^{abc},\D_0\}+
+        \frac{1}{3}(\{\D^{ab},\D^{c}\}+\{\D^{ac},\D^{b}\}+\{\D^{bc},\D^{a}\})\\
+    && \D^{ab }=\{\D^{ab},\D_0\}+\frac{1}{2}\{\D^{a},\D^{b}\}\\
+    && \D^{a  }=\{\D^{a},\D_0\}
   \end{eqnarray}
 \end{subequations}
 
@@ -249,22 +292,34 @@ construction of the density matrix...
 \begin{equation}\label{PP1}
   \left.
   \begin{array}{ll}
-    X^{ab}_{i+1}&=\{X^{ab}_{i},X^0_{i}\}+\frac{1}{2}\{X^a_{i},X^b_{i}\}\\
-    X^a_{i+1}&=\{X^a_{i},X^0_{i}\}\\
-    X^b_{i+1}&=\{X^b_{i},X^0_{i}\}\\
-    X^0_{i+1}&=(X^0_{i})^2
+    \X^{ab}_{i+1}&=\{\X^{ab}_{i},\X^0_{i}\}+\frac{1}{2}\{\X^a_{i},\X^b_{i}\}\\
+    \X^a_{i+1}&=\{\X^a_{i},\X^0_{i}\}\\
+    \X^b_{i+1}&=\{\X^b_{i},\X^0_{i}\}\\
+    \X^0_{i+1}&=(\X^0_{i})^2
   \end{array} 
-  \right\}\quad {\rm Tr}[X^0_{i}]\ge N_e 
+  \right\}\quad \Tr[\X^0_{i}]\ge N_e 
 \end{equation}
 or 
 \begin{equation}\label{PP2}
   \left.
   \begin{array}{ll}
-    X^a_{i+1}&=2 X^a_{i}-{X^a_{i},X^0_{i}} \\
-    X^0_{i+1}&=2 X^0_{i}-(X^0_{i})^2
+    \X^a_{i+1}&=2 \X^a_{i}-{\X^a_{i},\X^0_{i}} \\
+    \X^0_{i+1}&=2 \X^0_{i}-(\X^0_{i})^2
   \end{array} 
-  \right\}\quad {\rm Tr}[X^0_{i}]< N_e.
+  \right\}\quad \Tr[X^0_{i}]< N_e.
 \end{equation}
+
+
+The matrices initiating the sequence are obtained from $\F^0$,
+and $\F^{a\ldots}$ by appropriately
+compressing their spectrum into the domain of convergence
+\cite{ANiklasson02A} using
+\begin{equation}
+  \X^0_{0}=\frac{\F_{max}-\F^0}{\F_{max}-\F_{min}}~{\rm and}~
+  \X^{a\ldots}_{0}=\frac{\F^{a\ldots}_{n}}{\F_{min}-\F_{max}},
+\end{equation}
+where $\F_{min}$ and $\F_{max}$ are approximate upper and lower 
+bounds of the eigenvalues of $\F^0$.
 
 
 
@@ -310,66 +365,66 @@ Higher order energy derivatives can be calculated from the lower
 order response. Wigner's 2n+1 rule gives a general way to calculate the 2n+1
 energy response from the n-th order response. A density matrix analogy to
 the Wigner's 2n+1 rule was given in cite{...}, here we will present
-a generalization to the non orthogonal case for mixte derivatives 
+a generalization to the non orthogonal case for mixed derivatives 
 up to fourth order....
 
 
 
 \begin{equation}
 \begin{split}
-  E^{abc}=\frac{1}{6}Tr(&[P^a,P]P^bF^c+[P^a,P]P^cF^b+\\
-                        &[P^c,P]P^aF^b+[P^c,P]P^bF^a+\\
-                        &[P^b,P]P^aF^c+[P^b,P]P^cF^a)
+  E^{abc}=\frac{1}{6}\Tr(&[\D^a,\D^0]\D^b\F^c+[\D^a,\D^0]\D^c\F^b+\\
+                        &[\D^c,\D^0]\D^a\F^b+[\D^c,\D^0]\D^b\F^a+\\
+                        &[\D^b,\D^0]\D^a\F^c+[\D^b,\D^0]\D^c\F^a)
 \end{split}
 \end{equation}
 
 
 \begin{equation}
 \begin{split}
-E^{abcd}=\frac{1}{24}Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
-                        &[P^{ab},P] P^d F^c +[P^a,P](P^{bd} F^c + P^b F^{dc})+\\
-                        &[P^{ac},P] P^b F^d +[P^a,P](P^{cb} F^d + P^c F^{bd})+\\
-                        &[P^{ac},P] P^d F^b +[P^a,P](P^{cd} F^b + P^c F^{db})+\\
-                        &[P^{ad},P] P^b F^c +[P^a,P](P^{db} F^c + P^d F^{bc})+\\
-                        &[P^{ad},P] P^c F^b +[P^a,P](P^{dc} F^b + P^d F^{cb})+\\
+E^{abcd}=\frac{1}{24}\Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
+                         &[P^{ab},P] P^d F^c +[P^a,P](P^{bd} F^c + P^b F^{dc})+\\
+                         &[P^{ac},P] P^b F^d +[P^a,P](P^{cb} F^d + P^c F^{bd})+\\
+                         &[P^{ac},P] P^d F^b +[P^a,P](P^{cd} F^b + P^c F^{db})+\\
+                         &[P^{ad},P] P^b F^c +[P^a,P](P^{db} F^c + P^d F^{bc})+\\
+                         &[P^{ad},P] P^c F^b +[P^a,P](P^{dc} F^b + P^d F^{cb})+\\
 %
-                        &[P^{ba},P] P^c F^d +[P^b,P](P^{ac} F^d + P^a F^{cd})+\\
-                        &[P^{ba},P] P^d F^c +[P^b,P](P^{ad} F^c + P^a F^{dc})+\\
-                        &[P^{bc},P] P^a F^d +[P^b,P](P^{ca} F^d + P^c F^{ad})+\\
-                        &[P^{bc},P] P^d F^a +[P^b,P](P^{cd} F^a + P^c F^{da})+\\
-                        &[P^{bd},P] P^a F^c +[P^b,P](P^{da} F^c + P^d F^{ac})+\\
-                        &[P^{bd},P] P^c F^a +[P^b,P](P^{dc} F^a + P^d F^{ca})+\\
+                         &[P^{ba},P] P^c F^d +[P^b,P](P^{ac} F^d + P^a F^{cd})+\\
+                         &[P^{ba},P] P^d F^c +[P^b,P](P^{ad} F^c + P^a F^{dc})+\\
+                         &[P^{bc},P] P^a F^d +[P^b,P](P^{ca} F^d + P^c F^{ad})+\\
+                         &[P^{bc},P] P^d F^a +[P^b,P](P^{cd} F^a + P^c F^{da})+\\
+                         &[P^{bd},P] P^a F^c +[P^b,P](P^{da} F^c + P^d F^{ac})+\\
+                         &[P^{bd},P] P^c F^a +[P^b,P](P^{dc} F^a + P^d F^{ca})+\\
 %
-                        &[P^{ca},P] P^b F^d +[P^c,P](P^{ab} F^d + P^a F^{bd})+\\
-                        &[P^{ca},P] P^d F^b +[P^c,P](P^{ad} F^b + P^a F^{db})+\\
-                        &[P^{cb},P] P^a F^d +[P^c,P](P^{ba} F^d + P^b F^{ad})+\\
-                        &[P^{cb},P] P^d F^a +[P^c,P](P^{bd} F^a + P^b F^{da})+\\
-                        &[P^{cd},P] P^a F^b +[P^c,P](P^{da} F^b + P^d F^{ab})+\\
-                        &[P^{cd},P] P^b F^a +[P^c,P](P^{db} F^a + P^d F^{ba})+\\
+                         &[P^{ca},P] P^b F^d +[P^c,P](P^{ab} F^d + P^a F^{bd})+\\
+                         &[P^{ca},P] P^d F^b +[P^c,P](P^{ad} F^b + P^a F^{db})+\\
+                         &[P^{cb},P] P^a F^d +[P^c,P](P^{ba} F^d + P^b F^{ad})+\\
+                         &[P^{cb},P] P^d F^a +[P^c,P](P^{bd} F^a + P^b F^{da})+\\
+                         &[P^{cd},P] P^a F^b +[P^c,P](P^{da} F^b + P^d F^{ab})+\\
+                         &[P^{cd},P] P^b F^a +[P^c,P](P^{db} F^a + P^d F^{ba})+\\
 %
-                        &[P^{da},P] P^b F^c +[P^d,P](P^{ab} F^c + P^a F^{bc})+\\
-                        &[P^{da},P] P^c F^b +[P^d,P](P^{ac} F^b + P^a F^{cb})+\\
-                        &[P^{db},P] P^a F^c +[P^d,P](P^{ba} F^c + P^b F^{ac})+\\
-                        &[P^{db},P] P^c F^a +[P^d,P](P^{bc} F^a + P^b F^{ca})+\\
-                        &[P^{dc},P] P^a F^b +[P^d,P](P^{ca} F^b + P^c F^{ab})+\\
-                        &[P^{dc},P] P^b F^a +[P^d,P](P^{cb} F^a + P^c F^{ba}))\\
+                         &[P^{da},P] P^b F^c +[P^d,P](P^{ab} F^c + P^a F^{bc})+\\
+                         &[P^{da},P] P^c F^b +[P^d,P](P^{ac} F^b + P^a F^{cb})+\\
+                         &[P^{db},P] P^a F^c +[P^d,P](P^{ba} F^c + P^b F^{ac})+\\
+                         &[P^{db},P] P^c F^a +[P^d,P](P^{bc} F^a + P^b F^{ca})+\\
+                         &[P^{dc},P] P^a F^b +[P^d,P](P^{ca} F^b + P^c F^{ab})+\\
+                         &[P^{dc},P] P^b F^a +[P^d,P](P^{cb} F^a + P^c F^{ba}))\\
 \end{split}
 \end{equation}
-
+OR A LITTLE BIT SHORTER
 \begin{equation}
-  E^{abcd}=\frac{1}{24}P(a,b,c,d)Tr([P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd}))
+  E^{abcd}=\frac{1}{24}P(a,b,c,d)\Tr([\D^{ab},\D^0] \D^c \F^d +[\D^a,\D^0](\D^{bc} \F^d + \D^b \F^{cd}))
 \end{equation}
 
 \begin{equation}
-  \alpha_{ab}=-2Tr[D^a\mu_b]
+  \alpha_{ab}=-2\Tr[D^a\mu_b]
 \end{equation}
 
 \begin{equation}
-  \beta_{abc}=-4Tr[D^{ab}\mu_c]
+  \beta_{abc}=-4\Tr[D^{ab}\mu_c]
 \end{equation}
 
 \begin{equation}
-  \gamma_{abcd}=-12Tr[D^{abc}\mu_d]
+  \gamma_{abcd}=-12\Tr[D^{abc}\mu_d]
 \end{equation}
 
 
@@ -388,9 +443,16 @@ figures ... show the saturation ....
 table shows comparison to 2n+1 and n+1.
 10-th order (at least +2n+1 til 21-th order in E (for Anders)).
 
-The static $\alpha_{zz}$, $\beta_{zzz}$ and $\gamma_{zzzz}$ 
-of water chains have been evaluated by using the same geometry as
-Otto et al \cite{POtto00}.
+We have computed the (hyper)polarizabilities $\alpha_{zz}$, 
+$\beta_{zzz}$ and $\gamma_{zzzz}$ of water oligomers containing
+up to fourty water molecules. These calculations have been carried out at
+both the RHF/6-31G and RHF/6-31G** levels of
+theory and at the {\tt TIGHT} thresholding parameter 
+that control precision of the linear scaling algorithms.
+The static properties of water chains have been evaluated
+by using the same geometry as Otto et al \cite{POtto00}. We also
+present the results obtained with the density matrix based 2n+1 rule.
+
 
 Figures (\ref{fig:Alpha_1D},\ref{fig:Beta_1D},\ref{fig:Gamma_1D})
 Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Values})
@@ -402,7 +464,9 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Alpha_1D}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Alpha_All}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                       {Alpha_all}}
+%                       {Alpha_All}}
 \end{figure}
 
 
@@ -412,7 +476,9 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Beta_1D}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Beta_All}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                       {Beta_all}}
+%                       {Beta_All}}
 \end{figure}
 
 
@@ -422,7 +488,9 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
   }\label{fig:Gamma_1D}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Gamma_All}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                       {Gamma_all}}
+%                       {Gamma_All}}
 \end{figure}
 
 
@@ -533,8 +601,25 @@ Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Val
 
 
 \subsection{Linear scaling: 3D water clusters}
-3D water clusters show an early onset of linear scaling for accrurate
-basis set and low tresholds and higher order response.
+We have performed polarizability calculations on a series of water 
+clusters at standard liquid density \cite{MChallacombe97,ESchwegler97},
+up to (H$_2$O)$_{150}$. 
+Calculations have been carried out at both the RHF/6-31G and RHF/6-31G** levels of
+theory and at both the {\tt GOOD} and {\tt TIGHT} thresholding parameter 
+sets that control precision of the linear scaling algorithms, corresponding 
+to matrix thresholds of $10^{-5}$ and $10^{-6}$, respectively.
+Calculations were carried out on a single Intel Xeon 2.4GHz processor 
+running RedHat Linux 8.0 and  executables compiled
+with Portland Group Fortran Compiler pgf90 4.0-2 \cite{PGF90}.
+
+
+Figure \ref{fig:Superposition_Decay} shows the superposition 
+of the magnitude of density matrix derivative atom-atom blocks up to 
+third order as a function of atom-atom distance when perturbed by 
+a static electric field.
+
+3D water clusters show an early onset of linear scaling for accurate
+basis set and low thresholds and higher order response.
 
 The density responses matrices show an exponential decay as a function
 of the internuclear distance, however the decay is slower and the locality
@@ -553,8 +638,9 @@ responses.
     precision of the result. The lines are fits to the 
     last three and four points, respectively.
   }\label{Alpha_scaling}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
-                        {Alpha_h2o3D_6-31G_6-31Gss_G_T_t}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                        {Alpha_h2o3D_6-31G_6-31Gss_G_T}}
+%                        {Alpha_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
 
 
@@ -567,8 +653,9 @@ responses.
     precision of the result. The lines are fits to the 
     last three and four points, respectively.
   }\label{Beta_scaling}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
-                        {Beta_h2o3D_6-31G_6-31Gss_G_T_t}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                        {Beta_h2o3D_6-31G_6-31Gss_G_T}}
+%                        {Beta_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
 
 
@@ -581,8 +668,9 @@ responses.
     precision of the result. The lines are fits to the 
     last three and four points, respectively.
   }\label{Gamma_scaling}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
-                        {Gamma_h2o3D_6-31G_6-31Gss_G_T_t}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                        {Gamma_h2o3D_6-31G_6-31Gss_G_T}}
+%                        {Gamma_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
 
 
@@ -591,13 +679,54 @@ responses.
   \caption{\protect
     Total WALL time of the fifth first, second and third order
     CPSCF iteration for the water cluster sequence with the 6-31G
-    basis set and the {\tt GOOD} numerical threshold (see text) 
+    basis set and the {\tt TIGHT} numerical threshold (see text) 
     controlling numerical precision of the result. The lines
     are fits to the last three and four points, respectively.
   }\label{Mix_scaling}
-  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
-                        {Mix_h2o3D_6-31G_6-31Gss_G_T_t}}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]
+                        {Mix_h2o3D_6-31G_T}}
+%                        {Mix_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    TC2R WALL time of the fifth third order CPSCF iteration for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_TC2R_Timing}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_TC2R_T}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    QCTC WALL time of the fifth third order CPSCF iteration for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_QCTC_Timing}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_QCTC_T}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    ONX WALL time of the fifth third order CPSCF iteration for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_ONX_Timing}
+  \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Gamma_ONX_T}}
+\end{figure}
+
 
 
 
@@ -605,6 +734,7 @@ responses.
 
 \begin{figure}[t]
   \caption{\protect
+    WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix derivative elements $D^{x}_{cd}$
     along the $x$ axis with the separation of basis function centers
     for the $(H_2O)_{150}$ water cluster. The density matrix 
@@ -617,25 +747,40 @@ responses.
 
 \begin{figure}[t]
   \caption{\protect
+    WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix second derivative elements $D^{xx}_{cd}$
     along the $x$ axis with the separation of basis function centers
     for the $(H_2O)_{150}$ water cluster. The density matrix 
     derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
-  }\label{fig:Alpha_Decay}
+  }\label{fig:Beta_Decay}
   %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
 \end{figure}
 
 
 \begin{figure}[t]
   \caption{\protect
+    WE MAY REMOVE THIS!
     Magnitudes of the RHF/6-31G density matrix third derivative elements $D^{xxx}_{cd}$
     along the $x$ axis with the separation of basis function centers
     for the $(H_2O)_{150}$ water cluster. The density matrix 
     derivative has been converged to within {\tt TIGHT} (e.g. 
     matrix threshold of $10^{-6}$ $[a.u.]$).
-  }\label{fig:Alpha_Decay}
+  }\label{fig:Beta_Decay}
   %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \caption{\protect
+    Superposition of the magnitudes of the RHF/6-31G density matrix
+    derivative elements $D_{cd}$, $D^{x}_{cd}$, $D^{xx}_{cd}$ and $D^{xxx}_{cd}$
+    along the $x$ axis with the separation of basis function centers
+    for the $(H_2O)_{150}$ water cluster. The density matrix 
+    derivatives have been converged to within {\tt TIGHT} (e.g. 
+    matrix threshold of $10^{-6}$ $[a.u.]$).
+  }\label{fig:Superposition_Decay}
+  \resizebox*{3.5in}{!}{\includegraphics[angle=0.00]{DPrimeMix2}}
 \end{figure}
 
 
@@ -646,10 +791,33 @@ responses.
 \section{Summary and Conclusion}
 
 
- We have proposed and demonstreted a linear scaling self
- consisitent sheme for high order response peoperties.
- The sheme solves the coupled perturbed self consitent field 
+ We have proposed and demonstrated a linear scaling self
+ consistent scheme for high order response properties.
+ The scheme solves the coupled perturbed self consistent field 
  equation by the perturbed projection method.
+
+
+We have presented a simple and efficient algorithm for solution 
+of the coupled-perturbed self-consistent-field (CPSCF) equations 
+in the context of spectral projection and static
+electric polarizabilities. Unique features of the perturbed 
+projection algorithm include linear scaling, simplicity, numerical 
+stability and quadratic convergence in computation of the derivative
+density matrix.
+
+We have shown that the density matrix response is local 
+upon {\em global} electric perturbation, corresponding to an approximate 
+exponential decay of matrix elements. A similar exponential decay
+in the first order response corresponding to the {\em local} nuclear 
+displacement has previously been demonstrated by Ochsenfeld and 
+Head-Gordon \cite{Ochsenfeld_1997}. These key observations are expected to
+hold generally for both local and global perturbations to insulating systems.  
+We note also that the method is not unique to the TC2 generator or 
+{\sc MondoSCF} $N$-scaling algorithms, but can be straightforwardly 
+extended to other purification schemes such as TRS4 \cite{ANiklasson03} as
+well as other electronic structure programs.
+
+
 
 
 % It is applied to the computation

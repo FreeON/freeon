@@ -26,6 +26,9 @@ latex:
 	bibtex Response3
 	latex Response3
 
+spell:
+	aspell --mode=tex -c Response3.tex
+
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~
 	rm -rf mondo.bib mondo_new.bib revtex4.cls revsymb.sty aps.rtx 10pt.rtx 11pt.rtx 12pt.rtx apsrev.bst apsrmp.bst

@@ -54,7 +54,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Thu Feb 12 17:43:34 2004"
+@timestamp def "Sun Feb 22 14:59:26 2004"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -181,7 +181,7 @@
 @    yaxis  bar color 1
 @    yaxis  bar linestyle 1
 @    yaxis  bar linewidth 1.0
-@    yaxis  label "Longitudinal polarizability [a.u.]"
+@    yaxis  label "\f{Symbol}a\f{Times-Roman}\szz\N [a.u.]"
 @    yaxis  label layout para
 @    yaxis  label place auto
 @    yaxis  label char size 1.400000
