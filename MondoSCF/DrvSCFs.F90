@@ -204,8 +204,10 @@ MODULE DrvSCFs
          CALL Invoke('AInv',CtrlVect)
       ENDIF
       CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
+#ifdef PERIODIC
       CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
       CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+#endif
     END SUBROUTINE OneEMats
 !========================================================================================
 !
@@ -551,6 +553,11 @@ MODULE DrvSCFs
        CALL Put(Stat,'current')
        Call Delete(Stat)
 !
+#ifdef PERIODIC
+       CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
+       CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+#endif
+!
        IF(CalcMMForce) THEN
          CtrlVect=SetCtrlVect(Ctrl,'ForceEvaluation')
          CALL Invoke('MakeRho',CtrlVect)
@@ -619,21 +626,6 @@ MODULE DrvSCFs
      MM_COUL=MM_COUL/CONVF
    ENDIF
 !
-! Temporary for PBC
-!
-#ifdef PERIODIC
-! IF(PBC_On) THEN
-     CALL OpenASCII(OutFile,Out)
-       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
-       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' KJ/mol'
-       MM_COUL=MM_COUL*CONVF
-       write(out,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
-       write(*,*) 'E_MM_Coulomb    TOTAL= ',MM_COUL,' Hartree'
-     CLOSE(Out)
-    RETURN
-! ENDIF
-#endif
-!
 ! Do MM Covalent terms
 !
        EBond=Zero
@@ -649,14 +641,14 @@ MODULE DrvSCFs
        GrdMM%D(:,:)=Zero
 !
        GMLoc%Carts%D=GMLoc%Carts%D/AngstromsToAU
-CALL Bond_Energy(EBond,GMLoc%Carts%D,Grad_Loc=GrdMM)
-CALL Angle_Energy(EAngle,GMLoc%Carts%D,Grad_Loc=GrdMM)
-CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,Grad_Loc=GrdMM)
-CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,Grad_Loc=GrdMM)
+         CALL Bond_Energy(EBond,GMLoc%Carts%D,Grad_Loc=GrdMM)
+         CALL Angle_Energy(EAngle,GMLoc%Carts%D,Grad_Loc=GrdMM)
+         CALL Torsion_Energy(ETorsion,GMLoc%Carts%D,Grad_Loc=GrdMM)
+         CALL OutOfPlane_Energy(EOutOfPlane,GMLoc%Carts%D,Grad_Loc=GrdMM)
        GMLoc%Carts%D=AngstromsToAU*GMLoc%Carts%D
 !
-       CALL ENERGY_LENNARD_JONES(ELJ,CurG,14.D0,GrdMM)
-       CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL,GrdMM)
+         CALL ENERGY_LENNARD_JONES(ELJ,CurG,14.D0,GrdMM)
+         CALL EXCL(MM_Natoms,CurG,InfFile,E_LJ_EXCL,E_C_EXCL,GrdMM)
 !
      ELSE
 !

@@ -1132,7 +1132,7 @@ MODULE DrvFrcs
 !
 ! Get Energy and Cartesian gradient at current geometry
 !
-       CALL CALC_GRAD_ONE_FORCE(Ctrl)
+       CALL CALC_GRAD_ONE_FORCE_NEW(Ctrl)
        CALL Get(VectCart,'GradE',Tag_O=CurGeom)       
 !
 ! Get gradient in internal coordinates
@@ -1231,7 +1231,7 @@ enddo
 ! Convergence is reached at this point, calculate final energy
 ! and finish optimization
 !
-       CALL CALC_GRAD_NO_GRAD(Ctrl)
+       CALL CALC_GRAD_NO_GRAD_NEW(Ctrl)
        CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
        WRITE(*,460) II
        WRITE(*,470) Etot

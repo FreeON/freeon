@@ -26,17 +26,19 @@ IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12,InfFile)
+SUBROUTINE Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12,InfFile,Tag_O)
+!
 ! Set up a table which shows the atom numbers of Atoms 
 ! connected to a certain atom by the input bonds (Topology mtr)
 ! Here, the generation of the Topology mtr is based on input list
 ! of bonds
+!
 IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top12
 TYPE(INT_RNK2) :: Top12_2
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NAtoms_Loc,NMax12
 INTEGER,DIMENSION(1:NBond) :: BondI,BondJ
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     NMax12=5
     CALL New(Top12,(/NAtoms_Loc,NMax12+1/))
@@ -94,8 +96,13 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
     ENDDO
 !
     IF(PRESENT(InfFile)) THEN
-      CALL Put(NMax12,'NMax12')
-      CALL Put(Top12,'Top12')
+      IF(PRESENT(Tag_O)) THEN
+        CALL Put(NMax12,'NMax12'//TRIM(Tag_O))
+        CALL Put(Top12,'Top12'//TRIM(Tag_O))
+      ELSE
+        CALL Put(NMax12,'NMax12')
+        CALL Put(Top12,'Top12')
+      ENDIF
     ENDIF
 !
     IF(.NOT.PRESENT(Top12)) CALL Delete(Top12)
@@ -103,7 +110,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 END SUBROUTINE Topology_12 
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_13(NAtoms_Loc,Top12,Top13,InfFile)
+SUBROUTINE Topology_13(NAtoms_Loc,Top12,Top13,InfFile,Tag_O)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -112,7 +119,7 @@ TYPE(INT_RNK2),OPTIONAL :: Top12
 TYPE(INT_RNK2),OPTIONAL :: Top13
 TYPE(INT_RNK2) :: Top13_2
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NAtoms_Loc,NMax13,NMax12,KK,IN12,JN12
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
     IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
@@ -176,8 +183,13 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
     IF(.NOT.PRESENT(Top12)) CALL Delete(Top12)
 !
     IF(PRESENT(InfFile)) THEN
-      CALL Put(NMax13,'NMax13')
-      CALL Put(Top13,'Top13')
+      IF(PRESENT(Tag_O)) THEN
+        CALL Put(NMax13,'NMax13'//TRIM(Tag_O))
+        CALL Put(Top13,'Top13'//TRIM(Tag_O))
+      ELSE
+        CALL Put(NMax13,'NMax13')
+        CALL Put(Top13,'Top13')
+      ENDIF
     ENDIF
 !
     IF(.NOT.PRESENT(Top13)) CALL Delete(Top13)
@@ -185,7 +197,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 END SUBROUTINE Topology_13 
 !--------------------------------------------------------------
 !
-SUBROUTINE Topology_14(NAtoms_Loc,Top12,Top14,InfFile)
+SUBROUTINE Topology_14(NAtoms_Loc,Top12,Top14,InfFile,Tag_O)
 ! Set up a table which shows the atom numbers of Atoms 
 ! beeing second neighbours of a certain atom.
 !
@@ -195,7 +207,7 @@ TYPE(INT_RNK2),OPTIONAL:: Top14
 TYPE(INT_RNK2) :: Top14_2
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,KK,LL
 INTEGER :: NAtoms_Loc,NMax14,NMax12,IN12,JN12,KN12
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 !
      IF(.NOT.PRESENT(Top12)) THEN
       IF(PRESENT(InfFile)) THEN
@@ -263,8 +275,13 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
     ENDDO !!!! II
 !
     IF(PRESENT(InfFile)) THEN
-      CALL Put(NMax14,'NMax14')
-      CALL Put(Top14,'Top14')
+      IF(PRESENT(Tag_O)) THEN
+        CALL Put(NMax14,'NMax14'//TRIM(Tag_O))
+        CALL Put(Top14,'Top14'//TRIM(Tag_O))
+      ELSE
+        CALL Put(NMax14,'NMax14')
+        CALL Put(Top14,'Top14')
+      ENDIF
     ENDIF
 !
     IF(.NOT.PRESENT(Top12)) CALL Delete(Top12)
@@ -273,7 +290,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 END SUBROUTINE Topology_14 
 !--------------------------------------------------------------
 !
-SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,CalcMins)
 !
 ! sort the Atoms of a molecule into Boxes
 !
@@ -282,6 +299,7 @@ SUBROUTINE SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 IMPLICIT NONE
 INTEGER :: I,J,JJ,NX,NY,NZ,NBox,IX,IY,IZ,IORD,IADD,NAtoms_Loc
 REAL(DOUBLE) :: BoxSize,VBIG,C(1:3,NAtoms_Loc),BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
+LOGICAL :: CalcMins
 SAVE VBIG
 DATA VBIG/1.D+90/ 
 !
@@ -289,20 +307,22 @@ DATA VBIG/1.D+90/
 !
 !find borders of the global Box
 !
-    BXMIN= VBIG
-    BXMax=-VBIG
-    BYMIN= VBIG
-    BYMax=-VBIG
-    BZMIN= VBIG
-    BZMax=-VBIG
-  DO I=1,NAtoms_Loc
-    IF(C(1,I)<BXMIN) BXMIN=C(1,I)
-    IF(C(1,I)>BXMax) BXMax=C(1,I)
-    IF(C(2,I)<BYMIN) BYMIN=C(2,I)
-    IF(C(2,I)>BYMax) BYMax=C(2,I)
-    IF(C(3,I)<BZMIN) BZMIN=C(3,I)
-    IF(C(3,I)>BZMax) BZMax=C(3,I)
-  ENDDO
+  IF(CalcMins) THEN
+      BXMIN= VBIG
+      BXMax=-VBIG
+      BYMIN= VBIG
+      BYMax=-VBIG
+      BZMIN= VBIG
+      BZMax=-VBIG
+    DO I=1,NAtoms_Loc
+      IF(C(1,I)<BXMIN) BXMIN=C(1,I)
+      IF(C(1,I)>BXMax) BXMax=C(1,I)
+      IF(C(2,I)<BYMIN) BYMIN=C(2,I)
+      IF(C(2,I)>BYMax) BYMax=C(2,I)
+      IF(C(3,I)<BZMIN) BZMIN=C(3,I)
+      IF(C(3,I)>BZMax) BZMax=C(3,I)
+    ENDDO
+  ENDIF
 !
   NX=INT((BXMax-BXMIN)/BoxSize)+1
   NY=INT((BYMax-BYMIN)/BoxSize)+1
@@ -423,7 +443,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 TYPE(INT_VECT) :: BoxI1,BoxJ1
 REAL(DOUBLE),DIMENSION(1:3,1:NAtoms_Loc) :: C
 !
-CALL SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+CALL SORT_INTO_Box1(BoxSize,C,NAtoms_Loc,NX,NY,NZ,BXMIN,BYMIN,BZMIN,.TRUE.)
 !
 NBox=NX*NY*NZ
 CALL New(BoxI1,NBox+1)
@@ -438,10 +458,15 @@ END SUBROUTINE SORT_INTO_Box
 !----------------------------------------------------------------
 !
 SUBROUTINE Topologies_MM(NAtoms_Loc,NBond,BondI,BondJ,InfFile,Top12OUT)
+!
 ! Set up a table which shows the atom numbers of Atoms 
 ! connected to a certain atom by the input bonds (Topology mtr)
 ! Here, the generation of the Topology mtr is based on input list
 ! of bonds
+! WARNING! This subroutine is mainly used to set up the
+! topology files necessary for the calculation of 
+! MM exclusion energies!!!
+!
 IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top12OUT
 TYPE(INT_RNK2) :: Top12OUT_2
@@ -449,12 +474,15 @@ TYPE(INT_RNK2) :: Top12,Top13,Top14
 INTEGER :: I,J,K,L,N,M,II,JJ,NI,NJ,NBond,NAtoms_Loc
 INTEGER,DIMENSION(1:NBond) :: BondI,BondJ
 CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN) :: Tag_O
 !
-   CALL Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12,InfFile)
-   CALL Topology_13(NAtoms_Loc,Top12,Top13,InfFile)
-   CALL Topology_14(NAtoms_Loc,Top12,Top14,InfFile)
-   CALL Excl_List(NAtoms_Loc,Top12,Top13,Top14,InfFile=InfFile)
-   CALL Excl_List14(NAtoms_Loc,Top12,Top13,Top14,InfFile=InfFile)
+   Tag_O='MMTop'
+!
+   CALL Topology_12(NAtoms_Loc,NBond,BondI,BondJ,Top12=Top12,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Topology_13(NAtoms_Loc,Top12,Top13=Top13,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Topology_14(NAtoms_Loc,Top12,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Excl_List(NAtoms_Loc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
+   CALL Excl_List14(NAtoms_Loc,Top12,Top13,Top14=Top14,InfFile=InfFile,Tag_O=Tag_O)
 !
    IF(PRESENT(Top12OUT)) THEN
      IF(AllocQ(Top12OUT%Alloc)) CALL Delete(Top12OUT)
@@ -476,7 +504,7 @@ CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
 END SUBROUTINE Topologies_MM
 !----------------------------------------------------------------
 !
-SUBROUTINE Excl_List(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile)
+SUBROUTINE Excl_List(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
 !
 ! This subroutine merges Topological information
 ! to get the list for Exclusion energy calculation
@@ -484,7 +512,7 @@ SUBROUTINE Excl_List(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile)
 IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
 TYPE(INT_RNK2) :: Top_Excl,Top_New
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 INTEGER :: NAtoms_Loc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
 INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
 !
@@ -576,15 +604,25 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ
       Top_Excl_Out%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=&
       Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
-        CALL Put(NMax_Excl_Out,'NMax_Excl')
-        CALL Put(Top_Excl_Out,'TOP_Excl')
+        IF(PRESENT(Tag_O)) THEN
+          CALL Put(NMax_Excl_Out,'NMax_Excl'//TRIM(Tag_O))
+          CALL Put(Top_Excl_Out,'TOP_Excl'//TRIM(Tag_O))
+        ELSE
+          CALL Put(NMax_Excl_Out,'NMax_Excl')
+          CALL Put(Top_Excl_Out,'TOP_Excl')
+        ENDIF
       ENDIF
     ELSE IF(PRESENT(InfFile)) THEN
       CALL New(Top_New,(/NAtoms_Loc,NMax_Excl_Out+1/))
       Top_New%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=&
       Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
-        CALL Put(NMax_Excl_Out,'NMax_Excl')
-        CALL Put(Top_New,'TOP_Excl')
+        IF(PRESENT(Tag_O)) THEN
+          CALL Put(NMax_Excl_Out,'NMax_Excl'//TRIM(Tag_O))
+          CALL Put(Top_New,'TOP_Excl'//TRIM(Tag_O))
+        ELSE
+          CALL Put(NMax_Excl_Out,'NMax_Excl')
+          CALL Put(Top_New,'TOP_Excl')
+        ENDIF
         CALL Delete(Top_New)
     ELSE
         CALL Halt('Do not know where to put exclusion topology')
@@ -599,7 +637,7 @@ END SUBROUTINE Excl_LIST
 !
 !----------------------------------------------------------------
 !
-SUBROUTINE Excl_List14(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile)
+SUBROUTINE Excl_List14(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile,Tag_O)
 !
 ! This subroutine merges Topological information
 ! to get the list for Exclusion energy calculation
@@ -609,7 +647,7 @@ SUBROUTINE Excl_List14(NAtoms_Loc,Top12,Top13,Top14,Top_Excl_Out,InfFile)
 IMPLICIT NONE
 TYPE(INT_RNK2),OPTIONAL :: Top_Excl_Out,Top12,Top13,Top14
 TYPE(INT_RNK2) :: Top_Excl,Top_New
-CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile
+CHARACTER(LEN=DefAULT_CHR_LEN),OPTIONAL :: InfFile,Tag_O
 INTEGER :: NAtoms_Loc,NMax12,NMax13,NMax14,NMax_Excl,NNew,NOLD
 INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
 !
@@ -686,15 +724,25 @@ INTEGER :: NMax_Excl_Out,I,J,K,KK,JJ,NExcl,N12,N13
       CALL New(Top_Excl_Out,(/NAtoms_Loc,NMax_Excl_Out+1/))
       Top_Excl_Out%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
-        CALL Put(NMax_Excl_Out,'NMax_Excl14')
-        CALL Put(Top_Excl_Out,'TOP_Excl14')
+        IF(PRESENT(Tag_O)) THEN
+          CALL Put(NMax_Excl_Out,'NMax_Excl14'//TRIM(Tag_O))
+          CALL Put(Top_Excl_Out,'TOP_Excl14'//TRIM(Tag_O))
+        ELSE
+          CALL Put(NMax_Excl_Out,'NMax_Excl14')
+          CALL Put(Top_Excl_Out,'TOP_Excl14')
+        ENDIF
       ENDIF
     ELSE
       CALL New(Top_New,(/NAtoms_Loc,NMax_Excl_Out+1/))
       Top_New%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)=Top_Excl%I(1:NAtoms_Loc,1:NMax_Excl_Out+1)
       IF(PRESENT(InfFile)) THEN
-        CALL Put(NMax_Excl_Out,'NMax_Excl14')
-        CALL Put(Top_New,'TOP_Excl14')
+        IF(PRESENT(Tag_O)) THEN
+          CALL Put(NMax_Excl_Out,'NMax_Excl14'//TRIM(Tag_O))
+          CALL Put(Top_New,'TOP_Excl14'//TRIM(Tag_O))
+        ELSE
+          CALL Put(NMax_Excl_Out,'NMax_Excl14')
+          CALL Put(Top_New,'TOP_Excl14')
+        ENDIF
       ENDIF
     ENDIF
 !
@@ -1296,7 +1344,7 @@ END SUBROUTINE Excl_LIST14
 !
    BoxSize=5.D0*AngstromsToAU !in A
    CALL SORT_INTO_Box1(BoxSize,XYZ,Natoms_Loc,&
-                   NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+                   NX,NY,NZ,BXMIN,BYMIN,BZMIN,.TRUE.)
 !
    NBox=NX*NY*NZ
    CALL New(BoxI,NBox+1)
@@ -2772,6 +2820,74 @@ END SUBROUTINE CoordTrf
 !!
 !!
 !    END SUBROUTINE FoldBMatrix
+!
+!-------------------------------------------------------
+!
+#ifdef PERIODIC
+!
+     SUBROUTINE MultipleCell(GMLoc,LJCutOff,XYZLJCell,NAtomsLJCell)
+!
+! Calculate coordinates of multiples of the elementary cell
+! Not including the central cell, and store them in LJCellCarts.
+!
+     TYPE(CRDS) :: GMLoc
+     REAL(DOUBLE) :: LJCutOff,MinCart,DX,DY,DZ
+     REAL(DOUBLE) :: XTrans,YTrans,ZTrans
+     INTEGER :: I,J,K,L,NX,NZ,NY,NAtomsLJCell
+     INTEGER :: II,IA,IB,IC
+     TYPE(DBL_RNK2) :: XYZLJCell
+!
+! First, calculate minimum Cartesian extension of the elementary cell
+!
+     DX=MIN(GMLoc%PBC%BoxShape(1,1),GMLoc%PBC%BoxShape(2,1),GMLoc%PBC%BoxShape(3,1))
+     DY=MIN(GMLoc%PBC%BoxShape(1,2),GMLoc%PBC%BoxShape(2,2),GMLoc%PBC%BoxShape(3,2))
+     DZ=MIN(GMLoc%PBC%BoxShape(1,3),GMLoc%PBC%BoxShape(2,3),GMLoc%PBC%BoxShape(3,3))
+     MinCart=MIN(DX,DY,DZ) 
+!
+     IF(LJCutOff<DX) THEN
+       NX=1
+     ELSE
+       NX=INT(LJCutOff/DX)+1
+     ENDIF
+!
+     IF(LJCutOff<DY) THEN
+       NY=1
+     ELSE
+       NY=INT(LJCutOff/DY)+1
+     ENDIF
+!
+     IF(LJCutOff<DZ) THEN
+       NZ=1
+     ELSE
+       NZ=INT(LJCutOff/DZ)+1
+     ENDIF
+!
+! Calc. Number of atoms in the additional system
+! and allocate XYZLJCell
+!
+     NAtomsLJCell=(NX*NY*NZ-1)*GMLoc%Natms
+     CALL New(XYZLJCell,(/3,NAtomsLJCell/))
+!
+         II=0
+      DO IA=-NX,NX
+      DO IB=-NY,NY
+      DO IC=-NZ,NZ
+  IF(IA==0.AND.IB==0.AND.IC==0) CYCLE
+       DO I=1,GMLoc%Natms
+         II=II+1
+         XTrans=GMLoc%Carts%D(1,I)+IA*GMLoc%PBC%BoxShape(1,1)+IB*GMLoc%PBC%BoxShape(2,1)+IC*GMLoc%PBC%BoxShape(3,1)
+         YTrans=GMLoc%Carts%D(2,I)+IA*GMLoc%PBC%BoxShape(1,2)+IB*GMLoc%PBC%BoxShape(2,2)+IC*GMLoc%PBC%BoxShape(3,2)
+         ZTrans=GMLoc%Carts%D(3,I)+IA*GMLoc%PBC%BoxShape(1,3)+IB*GMLoc%PBC%BoxShape(2,3)+IC*GMLoc%PBC%BoxShape(3,3)
+         XYZLJCell%D(1,II)=XTrans
+         XYZLJCell%D(2,II)=YTrans
+         XYZLJCell%D(3,II)=ZTrans
+       ENDDO
+     ENDDO
+     ENDDO
+     ENDDO
+!
+     END SUBROUTINE MultipleCell
+#endif
 !
 #endif
 !-------------------------------------------------------

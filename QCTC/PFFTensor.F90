@@ -27,9 +27,8 @@ MODULE PFFTen
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE CalculatePFFT(MaxEll,GM,BS,Args)
+    SUBROUTINE CalculatePFFT(MaxEll,GM,Args)
       TYPE(CRDS)             :: GM
-      TYPE(BSET)             :: BS
       TYPE(ARGMT)            :: Args
 !-------------------------------------------------------------------------------- 
       INTEGER                :: I,IR,Layers,MaxEll
@@ -91,6 +90,7 @@ MODULE PFFTen
 !
 !     Store the Tensor
 !
+      CALL Put(MaxEll,'MaxEll')
       CALL Put(TensorC,'PFFTensorC')
       CALL Put(TensorS,'PFFTensorS')
 !

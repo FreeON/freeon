@@ -30,17 +30,9 @@ MODULE PBCFarField
 !====================================================================================
     SUBROUTINE PBCFarFieldSetUp(Q,GMLoc)
       TYPE(PoleNode)                  :: Q
-      INTEGER                         :: I,J,K,NC,LM,LP
+      INTEGER                         :: I,J,K,NC,LM,LP,Layers
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
-!
-!     Test MaxELL
-!
-      LP     = BS%NASym+1
-      MaxEll = GMLoc%PBC%PFFMaxEll
-      IF(MaxELL+LP > FFELL) THEN
-         CALL MondoHalt(0,'MaxELL+LP > FFELL Halting in PBCFarFieldSetUp')
-      ENDIF
 !
 !     Calculate the Box Moments
 !
@@ -60,10 +52,18 @@ MODULE PBCFarField
 !
 !     Get Tensors
 ! 
-      CALL New(TensorC,LSP(MaxEll),0)
-      CALL New(TensorS,LSP(MaxEll),0) 
+      Layers = GMLoc%PBC%PFFMaxLay
+      CALL New_CellSet_Cube(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,(/Layers,Layers,Layers/))
+!
+      CALL Get(MaxEll,'MaxEll')
+      CALL New(TensorC,LSP(2*MaxEll),0)
+      CALL New(TensorS,LSP(2*MaxEll),0) 
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
+      DO LM = 0,LSP(MaxELL)	
+        WRITE(*,111) LM,TensorC%D(LM),TensorS%D(I)
+      ENDDO	
+111 format(I5,4D14.6)
 !
 !     Calculate PFF  energy
 !
@@ -86,7 +86,9 @@ MODULE PBCFarField
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
 !
-      WRITE(*,*) 'GML%PBC%Dimen = ',GMLoc%PBC%Dimen 
+      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
+      WRITE(*,*) 'GM%PFFMaxLay  = ',Layers
       WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
       WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
       WRITE(*,*) 'MACDist       = ',MACDist

@@ -58,8 +58,6 @@ MODULE ParseInPut
          CALL ParseBaseSets(Ctrl) 
          ! Read in the SCF options
          CALL ParseMethods(Ctrl)
-         ! Read in the accuracies requested
-         Call ParseAcc(Ctrl)
          ! Print Parsed options 
          CALL ParsePrint(Ctrl)
 #ifdef MMech
@@ -71,6 +69,9 @@ MODULE ParseInPut
            CALL ParseMM(Ctrl)
          EndIf
 #endif
+         ! Read in the accuracies requested
+         Call ParseAcc(Ctrl)
+!
       END SUBROUTINE ParseInp
 !============================================================================
 !     Parce The Command Lines
@@ -1056,8 +1057,6 @@ MODULE ParseInPut
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,I,J,K
 !
-!       CALL OpenHDF(InfFile)
-!
         NLvec = 0
         NTvec = 0
         GM%PBC%TransVec = Zero
@@ -1065,6 +1064,8 @@ MODULE ParseInPut
         GM%PBC%InvBoxSh = Zero
 !
         DO I=1,3
+!          GM%PBC%BoxShape(I,I) = Zero
+!          GM%PBC%InvBoxSh(I,I) = Zero
            GM%PBC%BoxShape(I,I) = One
            GM%PBC%InvBoxSh(I,I) = One
         ENDDO
@@ -1877,7 +1878,6 @@ MODULE ParseInPut
       CALL MM_SYSTEM_CONSTRUCT ( "tmp_opls_bin", MM_SEQ(1:N2) )
       CALL COORDINATES_READ ( MM_COORDS(1:N3) )
 !
-!     CALL SORT_INTO_BOX(7.D0,ATMCRD,MM_NATOMS) !!!
       CALL New(ATMMARK,MM_NATOMS)
       CALL New(Active_Bond,NBonds)
       CALL New(Active_Angle,NAngles)
@@ -1901,7 +1901,7 @@ MODULE ParseInPut
 !
       ENDIF
 !
-! SAVE 14 Charges and other parameters
+! SAVE 14Charges and other parameters
 !
         CALL Put(NBonds,'MM_NBond')
         CALL Put(NAngles,'MM_NAngle')
@@ -2009,12 +2009,13 @@ MODULE ParseInPut
         CALL Put(MMAtNum,'MMAtNum')
         CALL Delete(MMAtNum)
 !
-! Calculate topology information (currently only 
-! for MM and QMMM calculations available), because
-! of lack of Bondlist for QM ones
+! Calculate topology matrices, which will be needed later
+! for exclusion energy calculations. These matrices
+! are based only on the topology given by the force-field.
+! They do not involve any extra bonds, angles, etc.
 !
-        CALL TOPOLOGIES_MM(MM_NATOMS,NBonds, &
-             Bonds(:)%I,Bonds(:)%J,Ctrl%Info)
+      CALL TOPOLOGIES_MM(MM_NATOMS,NBonds, &
+          Bonds(:)%I,Bonds(:)%J,Ctrl%Info)
 !
 ! Calculate total MM Charge
 !
@@ -2058,9 +2059,9 @@ MODULE ParseInPut
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(1,1:2)/Angstromstoau
-!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(2,1:2)/Angstromstoau
-!write(*,*) 'GM_MM%BndBox%D= ',GM_MM%BndBox%D(3,1:2)/Angstromstoau
+!write(*,*) 'X GM_MM%BndBox%D= ',GM_MM%BndBox%D(1,1:2)/Angstromstoau
+!write(*,*) 'Y GM_MM%BndBox%D= ',GM_MM%BndBox%D(2,1:2)/Angstromstoau
+!write(*,*) 'Z GM_MM%BndBox%D= ',GM_MM%BndBox%D(3,1:2)/Angstromstoau
 !! translate coordinates into 'positive' box
 !Sum=MAX((GM_MM%BndBox%D(1,2)-GM_MM%BndBox%D(1,1)),(GM_MM%BndBox%D(2,2)-GM_MM%BndBox%D(2,1)),(GM_MM%BndBox%D(3,2)-GM_MM%BndBox%D(3,1)))
 !sum=sum+1.d0
@@ -2195,21 +2196,21 @@ MODULE ParseInPut
           CALL Delete(Active_Angle)
           CALL Delete(Active_Torsion)
           CALL Delete(Active_OutOfPlane)
-!!
-!! test coulomb energy
-!!
-!        SUM=zero
-!      Do i=1,MM_NATOMS
-!      Do j=i+1,MM_NATOMS
-!        DX=GM_MM%Carts%D(1,i)-GM_MM%Carts%D(1,j)
-!        DY=GM_MM%Carts%D(2,i)-GM_MM%Carts%D(2,j)
-!        DZ=GM_MM%Carts%D(3,i)-GM_MM%Carts%D(3,j)
-!        DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
-!        SUM=SUM+GM_MM%AtNum%D(i)*GM_MM%AtNum%D(j)/DD
-!      enddo
-!      enddo
-!        write(*,*) 'coulomb energy= ',sum 
-!        write(out,*) 'coulomb energy= ',sum 
+!
+! test coulomb energy
+!
+!       SUM=zero
+!     Do i=1,MM_NATOMS
+!     Do j=i+1,MM_NATOMS
+!       DX=GM_MM%Carts%D(1,i)-GM_MM%Carts%D(1,j)
+!       DY=GM_MM%Carts%D(2,i)-GM_MM%Carts%D(2,j)
+!       DZ=GM_MM%Carts%D(3,i)-GM_MM%Carts%D(3,j)
+!       DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
+!       SUM=SUM+GM_MM%AtNum%D(i)*GM_MM%AtNum%D(j)/DD
+!     enddo
+!     enddo
+!       write(*,*) 'exact coulomb energy= ',sum 
+!       write(out,*) 'exact coulomb energy= ',sum 
 !
 ! Test periodic Coulomb energy by O(N2) scheme
 !
@@ -2850,7 +2851,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
             GMLoc%PBC%Trans_COM = .FALSE.
          ENDIF
 !--------------------------------------------------------------------
-!        IntPut permability
+!        IntPut permeability
 !
          IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
             GMLoc%PBC%Epsilon = 1.D32
@@ -2865,7 +2866,7 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
 !        IntPut The Number of Box Layers
 !
          IF(.NOT. OptIntQ(Inp,PFFMXLAY,GMLoc%PBC%PFFMaxLay)) THEN
-            GMLoc%PBC%PFFMaxLay=0
+            GMLoc%PBC%PFFMaxLay=1
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
