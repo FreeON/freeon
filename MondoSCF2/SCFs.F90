@@ -946,8 +946,8 @@ CONTAINS
                 ENDDO
              ENDDO
           ENDIF
-!         Print  the Forces
-          IF(.TRUE.) THEN
+          IF(.FALSE.) THEN
+!            Force printing should be wired off!!
              CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
              DO iATS=1,G%Clone(iCLONE)%NAtms
                 A1=3*(iATS-1)+1
