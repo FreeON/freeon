@@ -720,7 +720,8 @@ CONTAINS
    ! CALL GetMixedBMat(IntCs,XYZ,PBE,GOpt%TrfCtrl,GOpt%CoordCtrl,TOPS, &
    !                   GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
-                          GOpt%CoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
+                    GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+                    PBCDim,Print,SCRPath,.TRUE.)
    ! CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
@@ -1377,8 +1378,8 @@ GradNew%D(J,NatmsNew+K)=Zero
    SUBROUTINE SetCoordCtrl(CoordC)
      TYPE(CoordCtrl) :: CoordC
      !
-     CoordC%LinCrit = 20.D0
-     CoordC%TorsLinCrit = 20.D0     
+     CoordC%LinCrit = 5.D0 
+     CoordC%TorsLinCrit = 5.D0      
      CoordC%OutPCrit=CoordC%LinCrit
    END SUBROUTINE SetCoordCtrl
 !

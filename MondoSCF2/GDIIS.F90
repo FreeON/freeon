@@ -241,7 +241,8 @@ CONTAINS
      TYPE(DBL_VECT)              :: ASpB,CartVect,IntCDispl
      TYPE(Cholesky)              :: CholData
      !
-     CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl,PBCDim, &
+     CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl%LinCrit,&
+                          GCoordCtrl%TorsLinCrit,PBCDim, &
                           Print,SCRPath,.TRUE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !
@@ -311,7 +312,8 @@ CONTAINS
      CALL New(DXValues,(/NDim,NMem/))
      !
 !!! this routines should be used calculate proper overlaps
-  !  CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+  !  CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl, &
+  !                 GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit, &
   !                       PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
   !  CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
   !  CALL GiInvIter(ISpB,JSpB,ASpB,CholData,IntA1,IntA2, &
@@ -640,7 +642,8 @@ CONTAINS
        ENDDO
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
        CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
-                          GOpt%CoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
+                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+                     PBCDim,Print,SCRPath,.TRUE.)
        CALL CartToInternal(IntCs,VectCG%D,VectI%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        CALL RedundancyOff(VectI%D,SCRPath,Print)
@@ -1137,7 +1140,7 @@ CONTAINS
      CALL New(VectY,NDim)
      DO I=1,NIntC
        IF(.NOT.IntCs%Active%L(I)) THEN
-         IntCs%PredVal%D(I)=IntCValues(I,NDim)
+         IntCs%PredVal%D(I)=Zero
          CYCLE
        ENDIF
        DO J=1,NDim 

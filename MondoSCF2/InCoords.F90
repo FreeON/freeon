@@ -416,12 +416,6 @@ CONTAINS
      SinPhiV=SQRT(One-CosPhiV*CosPhiV)
      SinPhiU2=SinPhiU*SinPhiU
      SinPhiV2=SinPhiV*SinPhiV
-    !IF(Conv*ASIN(SinPhiU)<TorsCrit) THEN
-    !  
-    !  IF(PRESENT(Value_O)) Value_O=Zero
-    !  IF(PRESENT(BB_O)) BB_O=Zero
-    !  RETURN
-    !ENDIF
      IF(Conv*ASIN(SinPhiU)<TorsCrit.OR.Conv*ASIN(SinPhiV)<TorsCrit) THEN
        Active=.FALSE.
        IF(PRESENT(Value_O)) Value_O=Zero
@@ -488,6 +482,7 @@ CONTAINS
      ! Set up reference coordinate system
      !
     !IF(ABS(ACOS(CosAlpha)*180.D0/PI-180.D0)>1.D0) THEN
+    !IF(SelfRerefence) THEN
     !  VectRef=RIJJK
     !  CALL CROSS_PRODUCT(VectRef,EZ,EY)
     !  Sum=SQRT(DOT_PRODUCT(EY,EY))
@@ -716,22 +711,22 @@ CONTAINS
        !
          ILast=0
        DO I=1,BondTot%N
-         IntCs%Def%C(ILast+I)='STRE '
+         IntCs%Def%C(ILast+I)(1:10)='STRE      '
          IntCs%Atoms%I(ILast+I,1:2)=BondTot%IJ%I(1:2,I)
        ENDDO
          ILast=BondTot%N
        DO I=1,Angle%N
-         IntCs%Def%C(ILast+I)='BEND '
+         IntCs%Def%C(ILast+I)(1:10)='BEND      '
          IntCs%Atoms%I(ILast+I,1:3)=Angle%IJK%I(1:3,I)
        ENDDO
          ILast=ILast+Angle%N
        DO I=1,NTorsion
-         IntCs%Def%C(ILast+I)='TORS '
+         IntCs%Def%C(ILast+I)(1:10)='TORS      '
          IntCs%Atoms%I(ILast+I,1:4)=TorsionIJKL%I(1:4,I)
        ENDDO
        ILast=ILast+NTorsion
        DO I=1,OutP%N
-         IntCs%Def%C(ILast+I)='OUTP '
+         IntCs%Def%C(ILast+I)(1:10)='OUTP      '
          IntCs%Atoms%I(ILast+I,1:4)=OutP%IJKL%I(1:4,I)
        ENDDO
      ENDIF
@@ -1044,8 +1039,6 @@ CONTAINS
      IF(.NOT.(IntCs%N==0.OR.Refresh==5)) THEN
        CALL CleanINTC(IntCs,NIntC_Bas,NIntC_VDW,IntC_Extra%N)
      ENDIF             
-!CALL PrtIntCoords(IntCs,IntCs%Value%D,'cleaned Internals')
-!stop
      !
      ! Count number of different internal coord types
      !
@@ -1340,10 +1333,10 @@ CONTAINS
      IntCs%Value%D=Zero 
      !
      DO I=1,NIntCs
-      !IF(.NOT.IntCs%Active%L(I)) THEN
-      !  IntCs%Value%D(I)=Zero 
-      !  CYCLE
-      !ENDIF
+       IF(.NOT.IntCs%Active%L(I)) THEN
+         IntCs%Value%D(I)=Zero 
+         CYCLE
+       ENDIF
        CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,I)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
          CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),Value_O=IntCs%Value%D(I))
@@ -1559,6 +1552,7 @@ CONTAINS
      REAL(DOUBLE)               :: DiffMax,RMSD,RMSDOld
      REAL(DOUBLE)               :: Sum,ConstrMax,ConstrRMS,Fact,Crit
      REAL(DOUBLE)               :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
+     REAL(DOUBLE)               :: BackLinCrit,BackTLinCrit
      INTEGER                    :: NCart,I,IStep,J,NT
      INTEGER                    :: NIntC,NConstr,IRep,RepMax
      INTEGER                    :: NatmsLoc,NCartConstr,PBCDim
@@ -1576,6 +1570,8 @@ CONTAINS
      LOGICAL                    :: Print2,DoRepeat
      INTEGER                    :: Print
      !
+     BackLinCrit=1.D-8
+     BackTLinCrit=1.D-8
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc   
      NIntC=SIZE(IntCs%Def%C)
@@ -1600,7 +1596,7 @@ CONTAINS
      CALL New(ValSt,NT)
      !
      VectIntReq%D=PredVals
-     CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+     CALL INTCValue(IntCs,XYZ,BackLinCrit,BackTLinCrit)
      CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
      CALL SetBackToRefs(VectIntReq%D,IntCs,RefPoints)
      !
@@ -1614,6 +1610,7 @@ CONTAINS
        CALL CutOffDispl(IntCDispl%D,IntCs, &
                       GCoordCtrl%MaxStre,GCoordCtrl%MaxAngle)
        VectIntReq%D=ValSt%D+IntCDispl%D
+       CALL MapBackAngle(IntCs,VectIntReq%D)
      ENDIF
      !
      ! Repeat until convergence
@@ -1649,8 +1646,7 @@ CONTAINS
          !
          ! Get B and refresh values of internal coords
          !
-         CALL INTCValue(IntCs,ActCarts%D, &
-                        GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         CALL INTCValue(IntCs,ActCarts%D,BackLinCrit,BackTLinCrit)
          CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
          !
          IF(PRESENT(MixMat_O)) THEN
@@ -1670,15 +1666,14 @@ CONTAINS
            IntCDispl%D=VectIntAux%D
          ENDIF
          !
+         CALL MapAngleDispl(IntCs,IntCDispl%D) 
          !
          IF(RefreshB.AND.RefreshAct) THEN
            CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl, &
-                                GCoordCtrl,PBCDim,Print,SCRPath,.TRUE.)
+                                BackLinCrit,BackTLinCrit,PBCDim, &
+                                Print,SCRPath,.TRUE.)
            CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
          ENDIF
-         !
-         !
-         CALL MapAngleDispl(IntCs,IntCDispl%D) 
          !
          ! Check convergence on constraints
          !
@@ -1762,12 +1757,6 @@ CONTAINS
              EXIT            
            ENDIF
            !
-         ! CALL INTCValue(IntCs,ActCarts%D, &
-         !                GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-         ! CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
-         ! IntCDispl%D=IntCs%Value%D-ValSt%D
-         ! CALL MapAngleDispl(IntCs,IntCDispl%D) 
-           ! 
            VectIntAux%D=VectIntReq%D-ValSt%D  
            CALL MapAngleDispl(IntCs,VectIntAux%D)
            VectIntReq%D=ValSt%D+0.50D0*VectIntAux%D
@@ -1782,8 +1771,7 @@ CONTAINS
          ENDIF
          EXIT 
        ELSE
-         CALL INTCValue(IntCs,ActCarts%D, &
-                        GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         CALL INTCValue(IntCs,ActCarts%D,BackLinCrit,BackTLinCrit)
          CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
          IntCDispl%D=IntCs%Value%D-ValSt%D
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
@@ -1871,7 +1859,8 @@ CONTAINS
      CALL New(IntAux,IntCsAux%N)
      CALL New(CartAux,NCart)
      !
-     CALL RefreshBMatInfo(IntCsAux,XYZ,GTrfCtrl,GCoordCtrl, &
+     CALL RefreshBMatInfo(IntCsAux,XYZ,GTrfCtrl,GCoordCtrl%LinCrit, &
+                          GCoordCtrl%TorsLinCrit, &
                           PBCDim,Print,SCRPath,.TRUE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)    
      !
@@ -3110,13 +3099,13 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,GCoordCtrl,&
+   SUBROUTINE RefreshBMatInfo(IntCs,XYZ,GTrfCtrl,LinCrit,TorsLinCrit,&
                               PBCDim,Print,SCRPath,DoCleanB,Gi_O)
      TYPE(INTC)                   :: IntCs
      TYPE(Cholesky)               :: CholData
-     TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
+     REAL(DOUBLE)                 :: LinCrit,TorsLinCrit
      INTEGER                      :: PBCDim,I,K,L,J
      INTEGER                      :: NatmsLoc,NCart,NIntC,NZ
      TYPE(BMATR)                  :: B
@@ -3136,8 +3125,7 @@ CONTAINS
      NIntC=SIZE(IntCs%Def%C)
      Print2=(Print>=DEBUG_GEOP_MAX)
      !
-     CALL BMatrix(XYZ,IntCs,B,PBCDim, &
-                  GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+     CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL CleanBConstr(IntCs,B,NatmsLoc)
   !  CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
 write(*,*) 'B%BL hardwired to zero'
@@ -7063,7 +7051,8 @@ return
      CALL New(IntA1,IntCsX%N)
      CALL New(IntA2,IntCsX%N)
      !
-     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+     CALL RefreshBMatInfo(IntCsX,XYZ,GOpt%TrfCtrl,GOpt%CoordCtrl%LinCrit, &
+                          GOpt%CoordCtrl%TorsLinCrit, &
                           PBCDim,Print,SCRPath,.TRUE.,Gi_O=.TRUE.)
      CALL GetBMatInfo(SCRPath,ISpB,JSpB,ASpB,CholData)
      !

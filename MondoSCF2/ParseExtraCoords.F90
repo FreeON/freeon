@@ -113,7 +113,7 @@ MODULE ParseExtraCoords
          IF(INDEX(LineLowCase,'stre_a')/=0) THEN
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_A  ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_A    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,1,0,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -130,7 +130,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen==1) CALL Halt('Extra coord stre_b while PBC dimension is 1')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_B  ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_B    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,1,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -147,7 +147,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen<3) CALL Halt('Extra coord stre_c while PBC dimension is < 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='STRE_C  ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE_C    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:2)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:6)=(/0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -162,7 +162,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'stre')/=0) THEN
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='STRE ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='STRE      ' 
          !--------------------
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
@@ -178,7 +178,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'bend')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='BEND ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BEND      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
@@ -194,7 +194,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen<2) CALL Halt('Extra coord gamma while PBC dimension is 1')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='GAMMA   ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='GAMMA     ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,1,0/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -211,7 +211,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=2) CALL Halt('Extra coord area_l while PBC dimension is 1')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='AREA_L' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='AREA_L    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,0,0,1,0,0,0,1,0/)
                 IF(INDEX(LineLowCase,'.')==0) THEN
@@ -228,7 +228,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord volm_l while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:6)='VOLM_L' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='VOLM_L    ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
                 IF(INDEX(LineLowCase,'.')==0) THEN
@@ -244,7 +244,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord beta while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='BETA    ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='BETA      ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/1,0,0,0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -261,7 +261,7 @@ MODULE ParseExtraCoords
          !--------------------
                 IF(Geos%Clone(1)%PBC%Dimen/=3) CALL Halt('Extra coord alpha while PBC dimension is /= 3')
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:8)='ALPHA   ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='ALPHA     ' 
                 GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)=1
                 GOpt%ExtIntCs%Cells%I(NIntCs,1:9)=(/0,1,0,0,0,0,0,0,1/)
                 GOpt%ExtIntCs%Active%L(NIntCs)=.FALSE.
@@ -277,7 +277,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'tors')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='TORS ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='TORS      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
@@ -292,7 +292,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'outp')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='OUTP ' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='OUTP      ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:4)
@@ -307,7 +307,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'linb1')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='LINB1' 
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB1     ' 
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
@@ -322,7 +322,7 @@ MODULE ParseExtraCoords
          ELSE IF(INDEX(LineLowCase,'linb2')/=0) THEN 
          !--------------------
                 NIntCs=NIntCs+1 
-                GOpt%ExtIntCs%Def%C(NIntCs)(1:5)='LINB2'
+                GOpt%ExtIntCs%Def%C(NIntCs)(1:10)='LINB2     '
                 IF(INDEX(LineLowCase,'.')==0) THEN
                   READ(LineLowCase,*) &
                   CHAR,GOpt%ExtIntCs%Atoms%I(NIntCs,1:3)
@@ -336,9 +336,9 @@ MODULE ParseExtraCoords
          !--------------------
          ELSE IF(INDEX(LineLowCase,'cart')/=0) THEN
          !--------------------
-                GOpt%ExtIntCs%Def%C(NIntCs+1)(1:5)='CARTX' 
-                GOpt%ExtIntCs%Def%C(NIntCs+2)(1:5)='CARTY' 
-                GOpt%ExtIntCs%Def%C(NIntCs+3)(1:5)='CARTZ' 
+                GOpt%ExtIntCs%Def%C(NIntCs+1)(1:10)='CARTX     ' 
+                GOpt%ExtIntCs%Def%C(NIntCs+2)(1:10)='CARTY     ' 
+                GOpt%ExtIntCs%Def%C(NIntCs+3)(1:10)='CARTZ     ' 
          !
                 READ(LineLowCase,*) CHAR,SerNum  
          !
@@ -461,9 +461,9 @@ MODULE ParseExtraCoords
      NNewC=NIntCs
      DO I=1,NatmsLoc    
        IF(CConstrain(I)==1) THEN
-         IntC_New%Def%C(NNewC+1)(1:5)='CARTX' 
-         IntC_New%Def%C(NNewC+2)(1:5)='CARTY' 
-         IntC_New%Def%C(NNewC+3)(1:5)='CARTZ' 
+         IntC_New%Def%C(NNewC+1)(1:10)='CARTX     ' 
+         IntC_New%Def%C(NNewC+2)(1:10)='CARTY     ' 
+         IntC_New%Def%C(NNewC+3)(1:10)='CARTZ     ' 
          !
          IntC_New%Atoms%I(NNewC+1:NNewC+3,1:4)=0
          IntC_New%Atoms%I(NNewC+1,1)=I
