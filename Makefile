@@ -55,6 +55,8 @@ rmLegacy:
 	rm -rf Scratch
 	rm -rf Exec
 	rm -rf Libs
+	rm -rf QuNew
+	rm -rf MondoSCF
 swREADME:
 	rm -f  README; cp $(MONDO_HOME)/Includes/ALPHA_RELEASE README
 #
