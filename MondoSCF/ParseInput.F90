@@ -1121,7 +1121,7 @@ MODULE ParseInput
            CALL MondoHalt(PRSE_ERROR,'Number of Translate Vectors is Incorrect')
         ENDIF
 !
-        IF(NLvec .NE. Dimen) THEN
+        IF(NLvec .LT. Dimen) THEN
            CALL MondoHalt(PRSE_ERROR,'Number of Lattice Vectors is Incorrect')      
         ENDIF
 !----------------------------------------------------------- 
@@ -1221,40 +1221,42 @@ MODULE ParseInput
               IF(At==TRAN_VEC) THEN
                  NTvec = NTvec + 1
                  GM%TransVec%D(:)=Vec(:)
-              ELSE
-                 NLvec = Dimen
-                 IF(Dimen == 1) THEN
-                    IF(GM%AutoW(1)) THEN
-                       GM%BoxShape%D(1,1)=Vec(1)            
-                    ELSEIF(GM%AutoW(2)) THEN
-                       GM%BoxShape%D(2,2)=Vec(1)
-                    ELSEIF(GM%AutoW(3)) THEN                             
-                       GM%BoxShape%D(3,3)=Vec(1)
-                    ENDIF
-                 ELSEIF(Dimen == 2) THEN
-                    IF(GM%AutoW(1) .AND. GM%AutoW(2)) THEN
-                       GM%BoxShape%D(1,1)=Vec(1)
-                       GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(3))
-                       GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
-                    ELSEIF(GM%AutoW(1) .AND. GM%AutoW(3)) THEN
-                       GM%BoxShape%D(1,1)=Vec(1)
-                       GM%BoxShape%D(1,3)=Vec(2)*COS(DegToRad*Vec(3))
-                       GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
-                    ELSEIF(GM%AutoW(2) .AND. GM%AutoW(3)) THEN
-                       GM%BoxShape%D(2,2)=Vec(1)
-                       GM%BoxShape%D(2,3)=Vec(2)*COS(DegToRad*Vec(3))
-                       GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
-                    ENDIF
-                 ELSEIF(Dimen == 3) THEN
-                    GM%BoxShape%D(1,1)=Vec(1)
-!
-                    GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Ang(3))
-                    GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Ang(3))
-!
-                    GM%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Ang(2))
-                    GM%BoxShape%D(2,3)=Vec(3)*COS(DegToRad*Ang(1))*SIN(DegToRad*Ang(3))
-                    GM%BoxShape%D(3,3)=SQRT(Vec(3)**2-GM%BoxShape%D(1,3)**2-GM%BoxShape%D(2,3)**2)
+              ELSEIF(At=='d1') THEN
+                 NLvec = 1
+                 IF(GM%AutoW(1)) THEN
+                    GM%BoxShape%D(1,1)=Vec(1)            
+                 ELSEIF(GM%AutoW(2)) THEN
+                    GM%BoxShape%D(2,2)=Vec(1)
+                 ELSEIF(GM%AutoW(3)) THEN                             
+                    GM%BoxShape%D(3,3)=Vec(1)
                  ENDIF
+              ELSEIF(At=='d2') THEN                 
+                 NLvec = 2
+                 IF(GM%AutoW(1) .AND. GM%AutoW(2)) THEN
+                    GM%BoxShape%D(1,1)=Vec(1)
+                    GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Vec(3))
+                    GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Vec(3)) 
+                 ELSEIF(GM%AutoW(1) .AND. GM%AutoW(3)) THEN
+                    GM%BoxShape%D(1,1)=Vec(1)
+                    GM%BoxShape%D(1,3)=Vec(2)*COS(DegToRad*Vec(3))
+                    GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                 ELSEIF(GM%AutoW(2) .AND. GM%AutoW(3)) THEN
+                    GM%BoxShape%D(2,2)=Vec(1)
+                    GM%BoxShape%D(2,3)=Vec(2)*COS(DegToRad*Vec(3))
+                    GM%BoxShape%D(3,3)=Vec(2)*SIN(DegToRad*Vec(3))
+                 ENDIF
+              ELSEIF(At=='d3') THEN
+                 NLvec = 3
+                 GM%BoxShape%D(1,1)=Vec(1)
+!
+                 GM%BoxShape%D(1,2)=Vec(2)*COS(DegToRad*Ang(3))
+                 GM%BoxShape%D(2,2)=Vec(2)*SIN(DegToRad*Ang(3))
+!
+                 GM%BoxShape%D(1,3)=Vec(3)*COS(DegToRad*Ang(2))
+                 GM%BoxShape%D(2,3)=Vec(3)*COS(DegToRad*Ang(1))*SIN(DegToRad*Ang(3))
+                 GM%BoxShape%D(3,3)=SQRT(Vec(3)**2-GM%BoxShape%D(1,3)**2-GM%BoxShape%D(2,3)**2)
+              ELSE
+                 CALL MondoHalt(PRSE_ERROR,'Need to Supply (d1,d2,or d3)')
               ENDIF
            ELSE
               EXIT
