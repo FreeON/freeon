@@ -1,41 +1,17 @@
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-%   This file is part of the APS files in the REVTeX 4 distribution.
-%   Version 4.0 of REVTeX, August 2001
+% \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+% \newcommand{\commentoutB}[1]{}
+% \newcommand{\commentoutA}[1]{#1}
 %
-%   Copyright (c) 2001 The American Physical Society.
+% INSTEAD OF THE FOLLOWING:
 %
-%   See the REVTeX 4 README file for restrictions and more information.
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 %
-% TeX'ing this file requires that you have AMS-LaTeX 2.0 installed
-% as well as the rest of the prerequisites for REVTeX 4.0
-%
-% See the REVTeX 4 README file
-% It also requires running BibTeX. The commands are as follows:
-%
-%  1)  latex apssamp.tex
-%  2)  bibtex apssamp
-%  3)  latex apssamp.tex
-%  4)  latex apssamp.tex
-%
-%\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
-%%\documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-
-% Some other (several out of many) possibilities
-%\documentclass[preprint,aps]{revtex4}
-%\documentclass[preprint,aps,draft]{revtex4}
-%\documentclass[prb]{revtex4}% Physical Review B
-
-%%\usepackage{amsmath}
-%%\usepackage{amssymb}
-%%\usepackage{graphicx}% Include figure files
-%%\usepackage{dcolumn}% Align table columns on decimal point
-%%\usepackage{bm}% bold math
-
-\documentclass[prl,aps,letterpaper,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-
 \usepackage{graphicx}
-\usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{bm}
 \usepackage{alltt}
@@ -49,10 +25,7 @@
 \def\X{\mathcal{X}}
 \def\E{\mathcal{E}}
 
-%\nofiles
-
 \begin{document}
-
 
 \title{Higher Order Response in ${\cal O}(N)$ by Perturbed Projection} 
 
@@ -578,6 +551,8 @@ if one uses an orthogonal representation, but this typically involves matrix-mat
 with more dense intermediates.
 
 
+\commentoutA{
+
 \begin{table}[h]
   \centering
   \caption{\protect
@@ -759,6 +734,8 @@ with more dense intermediates.
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{DMix_40pts}}
 \end{figure}
 
+}
+
 \section{Results} \label{RESULTS}
 
 We have implemented these methods in the MondoSCF suite of linear scaling quantum chemistry 
@@ -899,5 +876,203 @@ second derivatives, which are important in computation of the Hessian matrix.
 \end{acknowledgments}
 
 \bibliography{mondo_new}
+
+
+\commentoutB{
+
+\clearpage
+
+\begin{center}
+\bf  TABLES\\[1.cm]
+\end{center}
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    The longitudinal polarizability, $\alpha_{zz}$, for water chains at the RHF/6-31G level
+    of theory, computed with {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+   and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
+  }\label{tab:Alpha_1D_Values}
+  \begin{tabular}{cccc}
+    \toprule
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
+        &\multicolumn{1}{c}{{\tt GOOD}}
+        &\multicolumn{1}{c}{{\tt TIGHT}}\\
+    \hline
+    1 & 5.8136 & 5.813620 & 5.813588 \\
+    2 & 6.3448 & 6.345037 & 6.344822 \\
+    3 & 6.5844 & 6.584658 & 6.584435 \\
+    4 & 6.7276 & 6.727905 & 6.727672 \\
+    5 & 6.8226 & 6.823290 & 6.822857 \\
+   10 & 7.0308 & 7.031056 & 7.030858 \\
+   15 & 7.1047 & 7.104904 & 7.104770 \\
+   20 & 7.1424 & 7.142580 & 7.142422 \\
+    \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    The longitudinal first hyperpolarizability, $\beta_{zzz}$,
+    for water chains at the RHF/6-31G level of theory, computed with 
+    {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+    and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
+  }\label{tab:Beta_1D_Values}
+  \begin{tabular}{cccccc}
+    \toprule
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
+    &\multicolumn{1}{c}{{\tt GOOD}}
+    &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
+    &\multicolumn{1}{c}{{\tt TIGHT}}
+    &\multicolumn{1}{c}{{\tt TIGHT}$^a$} \\
+    \hline
+     1 & -30.6125 & -30.611029 & -30.612627 & -30.612163 & -30.612256 \\
+     2 & -29.5444 & -29.547427 & -29.548504 & -29.544907 & -29.544994 \\
+     3 & -25.3696 & -25.372208 & -25.373615 & -25.370297 & -25.370381 \\
+     4 & -22.1411 & -22.143436 & -22.145040 & -22.141494 & -22.141603 \\
+     5 & -19.8925 & -19.902088 & -19.904449 & -19.896462 & -19.897141 \\
+    10 & -14.8063 & -14.807075 & -29.617990 & -14.806973 & -14.807119 \\
+    15 & -12.9713 & -12.969238 & -12.972227 & -12.971940 & -12.972124 \\
+    20 & -12.0334 & -12.028709 & -12.033633 & -12.034014 & -12.034238 \\
+    \botrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+
+\begin{table}[h]
+  \centering
+  \caption{\protect
+    The longitudinal second hyperpolarizability, $\gamma_{zzzz}$,
+    for water chains at the RHF/6-31G level of theory, computed with 
+    {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
+    and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
+  }\label{tab:Gamma_1D_Values}
+  \begin{tabular}{rccccc}
+    \toprule
+    $N_{\rm H_2 O}$ &\multicolumn{1}{c}{{\sc GAMESS}}
+    &\multicolumn{1}{c}{{\tt GOOD}}
+    &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
+    &\multicolumn{1}{c}{{\tt TIGHT}}
+    &\multicolumn{1}{c}{{\tt TIGHT}$^a$} \\
+    \hline
+     1 &  330.5753 & 330.54375 & 330.54319 & 330.57193 &  330.5724 \\
+     2 &  820.1398 & 820.19231 & 820.19667 & 820.14775 &  820.1493 \\
+     3 & 1008.5656 & 1008.5855 & 1008.6073 & 1008.5752 & 1008.5765 \\
+     4 & 1103.4813 & 1103.5053 & 1103.5280 & 1103.4883 & 1103.4902 \\
+     5 & 1168.9563 & 1169.2104 & 1169.2531 & 1169.0630 & 1169.0754 \\
+    10 & 1324.2906 & 1325.1208 & 1324.6321 & 1324.2975 & 1324.2999 \\
+    15 & 1381.8657 & 1383.0802 & 1382.2322 & 1381.8758 & 1381.8738 \\
+    20 & 1411.4264 & 1414.4092 & 1411.8528 & 1411.4410 & 1411.4292 \\
+    \botrule
+  \end{tabular}
+\end{table}
+
+
+
+\clearpage
+
+\begin{figure}[h]
+\begin{center}
+\bf  FIGURES\\[1.cm]
+\end{center}
+
+  \caption{\protect
+    Total CPU time of the fifth CPSCF iteration of fourth order for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_scaling}
+
+  \caption{\protect
+    QCTC CPU time of the fifth CPSCF iteration of fourth order for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_QCTC_Timing}
+
+  \caption{\protect
+    TC2 CPU time of the fifth CPSCF iteration of fourth order for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_TC2R_Timing}
+
+  \caption{\protect
+    ONX CPU time of the fifth CPSCF iteration of fourth order for
+    the water cluster sequence with the 6-31G and 6-31G** 
+    basis sets and the {\tt GOOD} and {\tt TIGHT} 
+    numerical thresholds (see text) controlling numerical
+    precision of the result. The lines are fits to the 
+    last three and four points, respectively.
+  }\label{fig:Gamma_ONX_Timing}
+
+  \caption{Total CPU times with increasing order of the response for 
+           the fifth CPSCF cycle computed as the $n+1$ expectation value, Eq.~(\ref{Np1Rule}).}\label{TimeWithOrder}
+
+  \caption{\protect
+    Superposition of the magnitudes of the RHF/6-31G density matrix
+    derivative elements $D_{cd}$, $D^{x}_{cd}$, $D^{xx}_{cd}$ and $D^{xxx}_{cd}$
+    along the $x$ axis with the separation of basis function centers
+    for $\rm (H_2O)_{150}$. The density matrix 
+    derivatives have been converged to within {\tt TIGHT} (e.g. 
+    a matrix threshold $\tau=10^{-6}$ $[a.u.]$).
+  }\label{fig:Superposition_Decay}
+
+
+\end{figure}
+
+\clearpage
+
+\begin{center}
+Figure 1, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics[angle=-90.00]{figure1.ps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 2, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics[angle=-90.00]{figure2.ps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 3, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics[angle=-90.00]{figure3.ps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 4, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics[angle=-90.00]{figure4.ps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 5, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics[angle=-90.00]{figure5.ps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 6, V.~Weber, A.~Niklasson,  and M.~Challacombe \\[1.cm]
+\resizebox*{6in}{!}{\includegraphics[angle=-90.00]{figure6.ps}}
+\end{center}
+
+}
 
 \end{document}
