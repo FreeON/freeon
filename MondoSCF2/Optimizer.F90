@@ -1284,9 +1284,9 @@ CONTAINS
    SUBROUTINE SetCoordCtrl(CoordC)
      TYPE(CoordCtrl) :: CoordC
      !
-     CoordC%LinCrit =10.D0
-     CoordC%TorsLinCrit =10.D0
-     CoordC%OutPCrit=10.D0
+     CoordC%LinCrit =20.D0
+     CoordC%TorsLinCrit =20.D0
+     CoordC%OutPCrit=20.D0
    END SUBROUTINE SetCoordCtrl
 !
 !-------------------------------------------------------------------
@@ -1520,7 +1520,7 @@ CONTAINS
      LOGICAL       :: On
      !
      On=.FALSE.
-     IF(MaxCGrad<0.009D0) THEN
+     IF(MaxCGrad<0.010D0) THEN
        On=.TRUE.
      ENDIF
    END SUBROUTINE TurnOnGDIIS
@@ -1586,10 +1586,11 @@ CONTAINS
 !
    SUBROUTINE CutOffDispl(Displ,IntCs)
      REAL(DOUBLE),DIMENSION(:) :: Displ
-     REAL(DOUBLE)              :: Sum   
+     REAL(DOUBLE)              :: Sum,A,B,R2,D2,DA,DB
      TYPE(INTC)                :: IntCs
      INTEGER                   :: I,NIntC
-     !
+     ! at this point it is supposed, that IntCs%Value holds
+     ! the actual values of internals
      NIntC=SIZE(IntCs%Def)
      DO I=1,NIntC
        Sum=Displ(I)

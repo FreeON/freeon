@@ -507,7 +507,7 @@ CONTAINS
      ! allocate B matrix
      !
      CALL NEW(B,NIntC)
-     B%IB=IntCs%Atoms
+     B%IB=0
      B%B=Zero
      !
      DO IntCoo=1,NIntC     
@@ -516,66 +516,76 @@ CONTAINS
        !
        IF(IntCs%Def(IntCoo)(1:4)=='STRE') THEN
          ! stre
+         B%IB(IntCoo,1:2)=IntCs%Atoms(IntCoo,1:2)
          I=IntCs%Atoms(IntCoo,1)
          J=IntCs%Atoms(IntCoo,2)
-         CALL STRE(XYZ(1:3,I),XYZ(1:3,J),B%B(IntCoo,1:12))
-         !   write(*,100) IntCs%Def(IntCoo)(1:5), &
-         !   B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
+         CALL STRE(XYZ(1:3,I),XYZ(1:3,J),BB_O=B%B(IntCoo,1:12))
+        !write(*,100) IntCs%Def(IntCoo)(1:5), &
+        !B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
          !
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='BEND') THEN
          ! bend
+         B%IB(IntCoo,1:3)=IntCs%Atoms(IntCoo,1:3)
          I=IntCs%Atoms(IntCoo,1)
          J=IntCs%Atoms(IntCoo,2) !!! central atom
          K=IntCs%Atoms(IntCoo,3) 
-         CALL BEND(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),B%B(IntCoo,1:12))
-         !         write(*,100) IntCs%Def(IntCoo)(1:5), &
-         !           B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
+         CALL BEND(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
+                   BB_O=B%B(IntCoo,1:12))
+        !write(*,100) IntCs%Def(IntCoo)(1:5), &
+        !B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='OUTP') THEN
          ! out of plane
+         B%IB(IntCoo,1:4)=IntCs%Atoms(IntCoo,1:4)
          I=IntCs%Atoms(IntCoo,1) !!! end atom
          J=IntCs%Atoms(IntCoo,2) !!! central atom
          K=IntCs%Atoms(IntCoo,3) !!! Def plane
          L=IntCs%Atoms(IntCoo,4) !!! Def plane
          CALL OutP(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ(1:3,L),&
            B%B(IntCoo,1:12))
-         !write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
-         ! B%B(IntCoo,1:12)*AngstromsToAu
+        !write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
+        ! B%B(IntCoo,1:12)*AngstromsToAu
        ELSE IF(IntCs%Def(IntCoo)(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
+         B%IB(IntCoo,1:4)=IntCs%Atoms(IntCoo,1:4)
          I=IntCs%Atoms(IntCoo,1)
          J=IntCs%Atoms(IntCoo,2) 
          K=IntCs%Atoms(IntCoo,3) 
          L=IntCs%Atoms(IntCoo,4) 
          CALL TORS(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
-           XYZ(1:3,L),B%B(IntCoo,1:12),IntCs%Active(IntCoo))
-         !write(*,*) IntCoo
-         !write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
-         !B%B(IntCoo,1:12)
+           XYZ(1:3,L),TorsLinCrit,IntCs%Active(IntCoo), &
+           BB_O=B%B(IntCoo,1:12))
+        !write(*,*) IntCoo
+        !write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:4), &
+        !B%B(IntCoo,1:12)
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='LINB1') THEN
          ! linear bendig of i-j-k
          IF(IntCs%Def(IntCoo+1)(1:5)/='LINB2') &
-            CALL Halt('LINB Definitions are not paired!')
+            CALL Halt('LINB2 Definitions are not paired!')
+         B%IB(IntCoo,1:3)=IntCs%Atoms(IntCoo,1:3)
+         B%IB(IntCoo+1,1:3)=IntCs%Atoms(IntCoo+1,1:3)
          I=IntCs%Atoms(IntCoo,1)
          J=IntCs%Atoms(IntCoo,2) 
          K=IntCs%Atoms(IntCoo,3) 
-         CALL LinB3(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),&
-                    BB1=B%B(IntCoo,1:12),BB2=B%B(IntCoo+1,1:12))
-        !CALL LINB(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
-        !  B%B(IntCoo,1:12),B%B(IntCoo+1,1:12))
-        ! write(*,100) IntCs%Def(IntCoo)(1:5), &
-        !  B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
-        ! write(*,100) IntCs%Def(IntCoo)(1:5), &
-        !  B%IB(IntCoo+1,1:4),B%B(IntCoo+1,1:12)
+         L=IntCs%Atoms(IntCoo,4)  ! reference atom
+         CALL LinB3(XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K),XYZ,L, &
+                    BB1=B%B(IntCoo,1:12),BB2=B%B(IntCoo+1,1:12))  
+        !write(*,100) IntCs%Def(IntCoo)(1:5), &
+        ! B%IB(IntCoo,1:4),B%B(IntCoo,1:12)
+        !write(*,100) IntCs%Def(IntCoo)(1:5), &
+        ! B%IB(IntCoo+1,1:4),B%B(IntCoo+1,1:12)
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='LINB2') THEN
          CYCLE
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTX' ) THEN
          I=IntCs%Atoms(IntCoo,1)
+         B%IB(IntCoo,1)=I
          CALL BCART('X',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTY' ) THEN
          I=IntCs%Atoms(IntCoo,1)
+         B%IB(IntCoo,1)=I
          CALL BCART('Y',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ELSE IF(IntCs%Def(IntCoo)(1:5)=='CARTZ' ) THEN
          I=IntCs%Atoms(IntCoo,1)
+         B%IB(IntCoo,1)=I
          CALL BCART('Z',B%B(IntCoo,1:12),IntCs%Constraint(I))
        ENDIF
        !
@@ -586,99 +596,86 @@ CONTAINS
 !
 !-----------------------------------------------------------------------
 !
-   SUBROUTINE Stre(XI,XJ,BB)
+   SUBROUTINE Stre(XI,XJ,BB_O,Value_O)
      !
-     !  Calculate the B matrix elements for a bond stretch as Defined
-     !  by Wilson.
+     REAL(DOUBLE),DIMENSION(1:12),OPTIONAL :: BB_O      
+     REAL(DOUBLE),DIMENSION(1:3)           :: XI,XJ,U   
+     REAL(DOUBLE),OPTIONAL                 :: Value_O      
+     REAL(DOUBLE)                          :: RU           
      !
-     IMPLICIT NONE
-     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,RIJ
-     REAL(DOUBLE) :: dijsq,t,dij
-     INTEGER :: I,J,K,L,M,N
-     REAL(DOUBLE) :: BB(1:12)
+     U=XI-XJ
+     RU=SQRT(DOT_PRODUCT(U,U))
+     U=U/RU
      !
-     DijSq = 0.0d0
-     !  
-     DO M=1,3
-        T=XJ(M)-XI(M)
-        Rij(M)=T
-        DijSq=DijSq+T*T
-     ENDDO 
-     !
-     Dij = SQRT(DijSq)
-     !
-     DO M=1,3
-       T=Rij(M)
-       T=T/Dij
-       BB(M)=-T
-       BB(3+M)=T
-     ENDDO 
+     IF(PRESENT(Value_O)) Value_O=RU
+     IF(PRESENT(BB_O)) THEN
+       BB_O(1:3)=U
+       BB_O(4:6)=-U
+     ENDIF
    END SUBROUTINE STRE
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE Bend(XI,XJ,XK,BB)
+   SUBROUTINE Bend(XI,XJ,XK,BB_O,Value_O,W_O)
+     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,W,U,V,Ref,Aux
+     REAL(DOUBLE),DIMENSION(1:3),OPTIONAL :: W_O
+     REAL(DOUBLE),DIMENSION(1:12),OPTIONAL:: BB_O
+     REAL(DOUBLE)                :: Sum,Sum2,RU,RV,RW
+     REAL(DOUBLE),OPTIONAL       :: Value_O
+     INTEGER                     :: I,J
      !
-     !  This subroutine computes the b matrix elements of a valence
-     !  angle bending coordinate as defined by Wilson.
-     !  i and k are the numbers of the end Atoms.
-     !  j is the number of the central atom.
-     !  noat: number of Atoms
-     !  ic: serial number of internal coordinate
+     U=XI-XJ
+     V=XK-XJ
+     IF(PRESENT(W_O)) THEN
+       RW=SQRT(DOT_PRODUCT(W_O,W_O))
+       W_O=W_O/RW
+       U=U-W_O*DOT_PRODUCT(W_O,U)
+       V=V-W_O*DOT_PRODUCT(W_O,V)
+     ENDIF
+     RU=SQRT(DOT_PRODUCT(U,U))
+     RV=SQRT(DOT_PRODUCT(V,V))
+     U=U/RU
+     V=V/RV
      !
-     IMPLICIT NONE
-     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,RJI,RJK,EJI,EJK
-     REAL(DOUBLE) :: DIJSq,Tp,T,DJKSq,DxSq,Dx,DOtj,DJK,DJI
-     REAL(DOUBLE) :: SinJ,SMI,SMK,SUM
-     INTEGER  :: I,J,K,L,M,N,II,JJ,KK,IER
-     REAL(DOUBLE) :: BB(1:12)
+     IF(PRESENT(Value_O)) THEN
+       Sum=DOT_PRODUCT(U,V)
+       IF(ABS(Sum)>One-1.D-8) THEN
+         Value_O=PI
+       ELSE
+         Value_O=ACOS(Sum)
+       ENDIF
+       IF(PRESENT(W_O)) THEN
+         CALL CROSS_PRODUCT(U,V,Aux)
+         Sum2=DOT_PRODUCT(Aux,W_O)
+         IF(ABS(Sum2)>1.D-8) THEN
+           Value_O=SIGN(Value_O,Sum2)
+         ENDIF
+       ENDIF
+     ENDIF
      !
-     DijSq=Zero 
-     DjkSq=Zero 
-     DO 20 M=1,3
-       Tp=XJ(M)
-       T=XI(M)-Tp
-       Rji(M)=T
-       DijSq=DijSq+T*T
-       T=XK(M)-Tp
-       Rjk(m)=T
-       DjkSq=DjkSq+T*T
-     20 Continue
-     Dji=SQRT(DIJSq)
-     Djk=SQRT(DJKSq)
-     DX=One 
-     DotJ=Zero 
-     DO 30 M=1,3
-       T=RJI(M)/DJI
-       Eji(M)=T
-       Tp=Rjk(M)/Djk
-       Ejk(M)=Tp
-       DotJ=DotJ+T*Tp
-     30 CONTINUE      
-     IF(ABS(DotJ) > 0.99995D0) RETURN    !!!! colinearity
-     SinJ=SQRT(One-DotJ*DotJ)
-     DO 40 M=1,3
-       SMI=Dx*(DotJ*Eji(M)-Ejk(M))/(Dji*SinJ)
-       BB(M) = SMI
-       SMK=DX*(DotJ*Ejk(M)-Eji(M))/(DJK*SinJ)
-       BB(6+M) = SMK
-       Sum=SMI+SMK
-       BB(3+M) = -Sum
-     40 CONTINUE
-     RETURN
-     50 IER=1
-     RETURN
-     60 IER=-1
-     !WRITE(6,1000)
-       BB(:)=Zero 
-     RETURN
-     !
-     1000 format(' i-j-k is colinear - use linear bend!'//&
-       'For this bending the row of the B matrix will be deleted!')
-     !
-   END SUBROUTINE BEND
+     IF(PRESENT(BB_O)) THEN
+       IF(PRESENT(W_O)) THEN
+         W=W_O
+       ELSE
+         CALL CROSS_PRODUCT(U,V,W)
+         RW=SQRT(DOT_PRODUCT(W,W))
+         IF(RW<0.01D0) THEN
+           Ref=(/One,-One,One/)
+           CALL CROSS_PRODUCT(U,Ref,W)
+           RW=SQRT(DOT_PRODUCT(W,W))
+           IF(RW<0.01D0) THEN
+             Ref=(/-One,One,One/)
+             CALL CROSS_PRODUCT(U,Ref,W)
+             RW=SQRT(DOT_PRODUCT(W,W))
+           ENDIF
+         ENDIF
+         W=W/RW
+       ENDIF
+       CALL LinBGen(BB_O,W,U,V,RU,RV)
+     ENDIF
+   END SUBROUTINE Bend
 !
-!---------------------------------------------------------------------
+!----------------------------------------------------------------
 !
    SUBROUTINE OutP(XI,XJ,XK,XL,BB)
      !
@@ -777,152 +774,89 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE Tors(XI,XJ,XK,XL,BB,Active)
-     !...
-     !...  Calculate the B matrix elements for torsion as Defined by
-     !...  R.L. Hildebrandt, J. Mol. Spec., 44 (1972) 599.
-     !...
-     !...  i-j-k-l : torsion around j-k bond
-     !... 
+   SUBROUTINE Tors(XI,XJ,XK,XL,TorsCrit,Active,BB_O,Value_O)
+     REAL(DOUBLE),DIMENSION(1:12),OPTIONAL :: BB_O
+     REAL(DOUBLE),DIMENSION(1:3)  :: XI,XJ,XK,XL,U,W,V,UxW,VxW,UxV
+     REAL(DOUBLE),DIMENSION(1:3)  :: Term1,Term2,Term3
+     REAL(DOUBLE),OPTIONAL        :: Value_O
+     REAL(DOUBLE)                 :: TorsCrit 
+     REAL(DOUBLE)                 :: CosPhiU,CosPhiV
+     REAL(DOUBLE)                 :: SinPhiU,SinPhiV
+     REAL(DOUBLE)                 :: SinPhiU2,SinPhiV2
+     LOGICAL                      :: Active
+     REAL(DOUBLE)                 :: RU,RV,RW,Sum,Conv
+     INTEGER                      :: I,J,K,L
      !
-     IMPLICIT NONE
-     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,XL,rij,rjk,rlk
-     REAL(DOUBLE),DIMENSION(1:3) :: eij,ejk,elk,cr,sj,sk
-     REAL(DOUBLE) :: SMI,SMK,dij,dijsq,dx,DJK,t,dxsq,DJKSq
-     REAL(DOUBLE) :: cosj,sin2j,smj,dlksq,dlk,cosk,sin2k,sml 
-     INTEGER :: I,J,K,L,M,N,II,JJ,KK,LL,IER
-     REAL(DOUBLE) :: BB(1:12)
-     LOGICAL      :: Active
-     !
-     DjkSq=Zero 
-     DxSq=Zero 
-     !
-     DO M=1,3
-       Sj(M) = Zero 
-       Sk(M) = Zero 
-       T=XK(M)-XJ(M)
-       Rjk(M)=T
-       DjkSq=DjkSq+T*T
-     ENDDO 
-     !
-     DJK=One/SQRT(DjkSq)
-     Dx=One  
-     !
-     DO M=1,3
-       Ejk(M)=Rjk(M)*Djk
-     ENDDO 
-     !
-     DijSq=Zero 
-     DO 40 M=1,3
-       T=XJ(M)-XI(M)
-       Rij(M)=T
-       DijSq=DijSq+T*T
-     40 CONTINUE        
-       Dij=One/SQRT(DijSq)
-       CosJ=Zero
-     DO 50 M=1,3
-       T=Rij(M)*Dij
-       Eij(M)=T
-       CosJ=CosJ-T*Ejk(M)
-     50 CONTINUE
-     IF(ABS(CosJ)>0.99995d0) THEN   !!!! GO TO 120
-       BB(:)=Zero
+     Conv=180.D0/PI
+     U=XI-XJ
+     V=XL-XK
+     W=XK-XJ 
+     RU=SQRT(DOT_PRODUCT(U,U))
+     RV=SQRT(DOT_PRODUCT(V,V))
+     RW=SQRT(DOT_PRODUCT(W,W))
+     U=U/RU
+     V=V/RV
+     W=W/RW
+     CosPhiU=DOT_PRODUCT(U,W)
+     CosPhiV=DOT_PRODUCT(V,-W)
+     SinPhiU=SQRT(One-CosPhiU*CosPhiU)
+     SinPhiV=SQRT(One-CosPhiV*CosPhiV)
+     SinPhiU2=SinPhiU*SinPhiU
+     SinPhiV2=SinPhiV*SinPhiV
+     IF(Conv*ASIN(SinPhiU)<TorsCrit.OR.Conv*ASIN(SinPhiV)<TorsCrit) THEN
        Active=.FALSE.
+       IF(PRESENT(Value_O)) Value_O=Zero
+       IF(PRESENT(BB_O)) BB_O=Zero
        RETURN
      ENDIF
-     Sin2J=(One-CosJ*CosJ)
-     Cr(1)=Eij(2)*Ejk(3)-Eij(3)*Ejk(2)
-     Cr(2)=Eij(3)*Ejk(1)-Eij(1)*Ejk(3)
-     Cr(3)=Eij(1)*Ejk(2)-Eij(2)*Ejk(1)
-     DO 60 M=1,3
-       T=Cr(M)/Sin2J
-       SMI=T*Dij
-       BB(M) = -Dx*SMI
-       SMK=T*CosJ*DJK
-       SK(M)=SK(M)+SMK
-       SMJ=SMI-SMK
-       SJ(M)=SJ(M)+SMJ
-     60 CONTINUE
      !
-     DlkSq=Zero
-     DO 70 M=1,3
-       T=XK(M)-XL(M)
-       Rlk(M)=T
-       DlkSq=DlkSq+T*T
-     70 CONTINUE          
-     Dlk=One/SQRT(DlkSq)
-     CosK=Zero
-     DO 80 M=1,3
-       T=Rlk(M)*Dlk
-       Elk(m)=T
-     CosK=CosK+Ejk(M)*T
-     80 CONTINUE
-     IF(ABS(CosK)>0.99995d0) THEN !!!! GO TO 120
-       BB(:)=Zero
-       Active=.FALSE.
-       RETURN
+     CALL CROSS_PRODUCT(U,W,UxW)
+     CALL CROSS_PRODUCT(V,W,VxW)
+     CALL CROSS_PRODUCT(U,V,UxV)
+     !
+     IF(PRESENT(Value_O)) THEN
+       Sum=DOT_PRODUCT(UxW,VxW)/(SinPhiU*SinPhiV)
+       IF(ABS(Sum)>One-1.D-8) THEN
+         Value_O=PI
+       ELSE
+         Value_O=ACOS(Sum)
+       ENDIF
+       Sum=DOT_PRODUCT(W,UxV)
+       IF(ABS(Sum)>1.D-8) THEN
+         Value_O=SIGN(Value_O,Sum)
+       ENDIF
      ENDIF
-     Sin2K=(One-CosK*CosK)
-     Cr(1)=Elk(3)*Ejk(2)-Elk(2)*Ejk(3)
-     Cr(2)=Elk(1)*Ejk(3)-Elk(3)*Ejk(1)
-     Cr(3)=Elk(2)*Ejk(1)-Elk(1)*Ejk(2)
-     DO 90 M=1,3
-       T=Cr(M)/Sin2K
-       SML=T*Dlk
-         BB(9+M) = -Dx*SML
-       SMJ=T*CosK*DJK
-       SJ(M)=SJ(M)+SMJ
-       SMK=SML-SMJ
-       SK(M)=SK(M)+SMK
-     90 CONTINUE
-     DO 100 M=1,3
-       SMJ=SJ(M)
-       BB(3+M) = Dx*SMJ
-       SMK=SK(M)
-       BB(6+M) = Dx*SMK
-     100 CONTINUE
-     RETURN
-     110 CONTINUE
-     IEr=1
-     RETURN
-     120 CONTINUE
-     IEr=-1
-     !WRITE(6,1030)
-     ! colinear bonds in torsion, delete the 
-     !corresponding row of the B matrix!
-     BB(:)=Zero
-     Active=.FALSE.
-     RETURN
      !
-     1030 format(' i-j-k or j-k-l is colinear (no torsion'//&
-     'possibble), this row of the B matrix will be deleted.')
+     IF(PRESENT(BB_O)) THEN
+       Term1=UxW/(RU*SinPhiU2) 
+       Term2=VxW/(RV*SinPhiV2) 
+       Term3=UxW*CosPhiU/(RW*SinPhiU2)+VxW*CosPhiV/(RW*SinPhiV2)
+       BB_O(1:3)=Term1
+       BB_O(4:6)=-Term1+Term3
+       BB_O(7:9)=Term2-Term3
+       BB_O(10:12)=-Term2
+     ENDIF
      !
-   END SUBROUTINE TORS
+   END SUBROUTINE Tors
 !
-!---------------------------------------------------------------------
+!----------------------------------------------------------------------
 !
-   SUBROUTINE LinB3(XI,XJ,XK,BB1,BB2,Value1,Value2)
+   SUBROUTINE LinB3(XI,XJ,XK,XYZ,IRef,BB1,BB2,Value1,Value2)
      !
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(1:12),OPTIONAL:: BB1,BB2
-     INTEGER                     :: I,J,K,L,M,N,KK
-     REAL(DOUBLE)                :: Sum,ValChk,Prefact,RJI,RJK,RKI
+     INTEGER                     :: I,J,K,L,M,N,KK,IRef
+     REAL(DOUBLE)                :: Sum,CosAlpha,SinAlpha,RJI,RJK,RKI
      REAL(DOUBLE),OPTIONAL       :: Value1,Value2
-     REAL(DOUBLE),DIMENSION(1:3) :: VectJI,VectJK,VectKI,VectO1,VectO2
-     REAL(DOUBLE),DIMENSION(1:3) :: VectAux,EY,EX,RIJJK
+     REAL(DOUBLE),DIMENSION(1:3) :: VectJI,VectJK,VectKI,Aux1,Aux2
+     REAL(DOUBLE),DIMENSION(1:3) :: VectAux,EZ,EY,EX,RIJJK,VectRef
      REAL(DOUBLE),DIMENSION(3,3) :: Rot   
      LOGICAL                     :: Active
      !
      VectJI=XI-XJ
      VectJK=XK-XJ
      VectKI=XK-XI
-     VectO1=(/1.D0,-1.D0,1.D0/)
-     Sum=SQRT(DOT_PRODUCT(VectO1,VectO1))
-     VectO1=VectO1/Sum
-     VectO2=(/-1.D0,1.D0,1.D0/)
-     Sum=SQRT(DOT_PRODUCT(VectO2,VectO2))
-     VectO2=VectO2/Sum
-     !
      RJI=SQRT(DOT_PRODUCT(VectJI,VectJI))
      RJK=SQRT(DOT_PRODUCT(VectJK,VectJK))
      RKI=SQRT(DOT_PRODUCT(VectKI,VectKI))
@@ -930,40 +864,48 @@ CONTAINS
      VectJK=VectJK/RJK
      VectKI=VectKI/RKI
      !
-     ! Set up EY vector
-     !
      CALL CROSS_PRODUCT(VectJI,VectJK,RIJJK)
-    !EY=RIJJK
-     CALL CROSS_PRODUCT(-VectKI,VectO1,EY)
-     Sum=DOT_PRODUCT(EY,EY)
-     IF(Sum<1.D-4) THEN
-       !set up auxiliary vector not parallel with I-J-K line
-       CALL CROSS_PRODUCT(-VectKI,VectO2,EY)
-     ENDIF
-     Sum=DOT_PRODUCT(EY,EY)
-     Sum=One/SQRT(Sum)
-     EY=Sum*EY
+     CosAlpha=DOT_PRODUCT(VectJI,VectJK)
+     SinAlpha=SQRT(One-CosAlpha*CosAlpha)
      !
-     ! Set up EX
+     ! Set up reference coordinate system
      !
-     CALL CROSS_PRODUCT(EY,-VectKI,EX)
-     Sum=DOT_PRODUCT(EX,EX)
-     Sum=One/SQRT(Sum)
-     EX=Sum*EX
+    !IF(SinAlpha>0.001D0) THEN
+    !  VectRef=RIJJK
+    !ELSE
+       IF(IRef==0) THEN
+         VectAux=(/One,Zero,Zero/)
+         CALL CROSS_PRODUCT(VectKI,VectAux,VectRef)
+         Sum=SQRT(DOT_PRODUCT(VectRef,VectRef))
+         IF(Sum<0.01D0) THEN
+           VectAux=(/Zero,One,Zero/)
+           CALL CROSS_PRODUCT(VectKI,VectAux,VectRef)
+         ENDIF           
+       ELSE
+         VectRef=XYZ(1:3,IRef)-XK
+       ENDIF
+    !ENDIF
+     EZ=VectKI
+     CALL CROSS_PRODUCT(VectRef,EZ,EY)
+     Sum=SQRT(DOT_PRODUCT(EY,EY))
+     EY=EY/Sum
+     CALL CROSS_PRODUCT(EY,EZ,EX)
+     Sum=SQRT(DOT_PRODUCT(EX,EX))
+     EX=EX/Sum
      !
      IF(PRESENT(Value1)) THEN
-       Value1=DOT_PRODUCT(EY,RIJJK)
+       CALL BEND(XI,XJ,XK,Value_O=Value1,W_O=-EX)
      ENDIF
      IF(PRESENT(Value2)) THEN
-       Value2=DOT_PRODUCT(-EX,RIJJK)
+       CALL BEND(XI,XJ,XK,Value_O=Value2,W_O=EY)
      ENDIF
      !
      IF(PRESENT(BB1)) THEN
-       CALL LinBGen(BB1,-EY,VectJI,VectJK,RJI,RJK)
+       CALL BEND(XI,XJ,XK,BB_O=BB1,W_O=-EX)
      ENDIF
      !
      IF(PRESENT(BB2)) THEN
-       CALL LinBGen(BB2,EX,VectJI,VectJK,RJI,RJK)
+       CALL BEND(XI,XJ,XK,BB_O=BB2,W_O=EY)
      ENDIF
      !
    END SUBROUTINE LinB3
@@ -1019,28 +961,30 @@ CONTAINS
      !
      IMPLICIT NONE
      INTEGER :: I,J,N,NatmsLoc,NBond,NIntC,IntSet
-     INTEGER :: NMax_Excl,NMax12,ILast,NOutP
+     INTEGER :: NMax_Excl,NMax12,ILast,NOutP,NHAngle
      REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
      TYPE(INT_RNK2) :: BondIJ 
-     TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutPIJKL
+     TYPE(INT_RNK2) :: AngleIJK,TorsionIJKL,OutPIJKL,HAngleIJKL
      INTEGER        :: NX,NY,NZ,NBOX,NAngle,NTorsion,NLinb,Refresh
      REAL(DOUBLE)   :: BXMIN,BYMIN,BZMIN,BoxSize,Fact,Value
      TYPE(DBL_VECT) :: CritRad,BondLength   
      TYPE(INT_RNK2) :: Top12,Top13,Top14,Top_Excl,Top_VDW
      TYPE(INTC)                     :: IntCs
      TYPE(INT_VECT)                 :: BoxI,BoxJ,HBondCenter
-     TYPE(INT_VECT)                 :: HBondMark,HAngleMark,HTorsMark
+     TYPE(INT_VECT)                 :: HBondMark
      INTEGER,DIMENSION(:)           :: AtNum
      TYPE(CoordCtrl)                :: CtrlCoord
      CHARACTER(LEN=*)               :: SCRPath
      CHARACTER(LEN=1)               :: LongRangeTag
      LOGICAL                        :: HBondOnly
+     TYPE(CHR_VECT)                 :: AngleMark
      !
      NIntC=0
      NBond=0
      NAngle=0
      NTorsion=0
      NOutP=0
+     NHAngle=0
      !
      ! first sort atoms into boxes      
      !
@@ -1100,26 +1044,26 @@ CONTAINS
      ! Now define bond angles and torsions
      !
      IF(IntSet==1) THEN
-       !
-       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,&
-                        BondIJ,NBond,HBondMark,.FALSE.)
-       !
-       CALL TorsionList(NatmsLoc,Top12,BondIJ, &
+       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
+                      NBond,HBondMark%I,HBondCenter%I,.FALSE.)
+       CALL TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
                         TorsionIJKL,NTorsion,HBondMark)
+       CALL OutPList(XYZ,Top12,CtrlCoord%OutPCrit,NOutP,OutPIJKL)
      ELSE
        CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
          NMax12=J-1
        CALL VDWTop(Top12,BondIJ)
-       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,&
-                        BondIJ,NBond,HBondMark,.TRUE.)
-       CALL TorsionList(NatmsLoc,Top12,BondIJ, &
+       CALL AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
+                      NBond,HBondMark%I,HBondCenter%I,.TRUE.)
+       CALL TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
                         TorsionIJKL,NTorsion,HBondMark)
-       CALL OutPList(XYZ,Top12,CtrlCoord%OutPCrit,NOutP,OutPIJKL)
+      !CALL HBondAngles(NatmsLoc,Top12,HAngleIJKL,NHAngle, &
+      !                 BondIJ,NBond,AngleMark,HBondMark%I,AtNum)
      ENDIF
      !
      ! Fill Data into IntCs
      !
-     NIntC=NBond+NAngle+NTorsion+NOutP
+     NIntC=NBond+NAngle+NTorsion+NOutP+NHAngle
      IF(NIntC/=0) THEN          
        CALL New(IntCs,NIntC)
        IntCs%Def='     '
@@ -1135,8 +1079,8 @@ CONTAINS
        ENDDO
          ILast=NBond
        DO I=1,NAngle
-           IntCs%Def(ILast+I)='BEND '
-           IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
+         IntCs%Def(ILast+I)='BEND '
+         IntCs%Atoms(ILast+I,1:3)=AngleIJK%I(1:3,I)
        ENDDO
          ILast=NBond+NAngle
        DO I=1,NTorsion
@@ -1148,6 +1092,11 @@ CONTAINS
          IntCs%Def(ILast+I)='OUTP '
          IntCs%Atoms(ILast+I,1:4)=OutPIJKL%I(1:4,I)
        ENDDO
+     ! ILast=NBond+NAngle+NTorsion+NOutP
+     ! DO I=1,NHAngle
+     !   IntCs%Def(ILast+I)(1:5)=AngleMark%C(I)(1:5)
+     !   IntCs%Atoms(ILast+I,1:4)=HAngleIJKL%I(1:4,I)
+     ! ENDDO
 !      ! Put FCType
 !      IF(IntSet==1) THEN
 !        IntCs%FCType(:)='C' ! Covalent bonding scheme
@@ -1170,9 +1119,12 @@ CONTAINS
      ENDIF
      !
      ! tidy up
-     IF(IntSet==2) CALL Delete(OutPIJKL)
+     IF(IntSet==1) CALL Delete(OutPIJKL)
+     IF(IntSet==2) THEN
+      !CALL Delete(HAngleIJKL)
+      !CALL Delete(AngleMark)
+     ENDIF
      CALL Delete(HBondMark)
-  !  CALL Delete(HAngleMark)
      CALL Delete(TorsionIJKL)
      CALL Delete(AngleIJK)
      CALL Delete(CritRad)
@@ -1255,16 +1207,17 @@ CONTAINS
      INTEGER                     :: NBOX,IORD,IORDD
      INTEGER                     :: IZD,IXD,IYD,NX,NY,NZ,NJJ1,NJJ2
      INTEGER                     :: NMax12,JJ,IntSet,IDimExcl,NBondEst
-     INTEGER                     :: IDim14
+     INTEGER                     :: IDim14,IDim12,IDim13
      LOGICAL                     :: HBondOnly
      LOGICAL                     :: FillBondIJ
      TYPE(INT_RNK2)              :: BondIJ,BondIJAux
      TYPE(DBL_VECT)              :: DVect,BondLength,BondLengthAux
      INTEGER,DIMENSION(:)        :: AtNum,HBondCenter
      TYPE(INT_VECT)              :: BoxI,BoxJ,HBondMark,HBondMarkAux
-     TYPE(INT_RNK2)              :: Top_Excl,TopCharge,Top14
+     TYPE(INT_RNK2)              :: Top_Excl,Top12,Top13,Top14
      CHARACTER(LEN=*)            :: SCRPath
      LOGICAL                     :: FoundHBond,FoundMetLig,DoSelect
+     LOGICAL                     :: LonelyAtom,DoExclude
      !     
      NBondEst=NatmsLoc*20 ! estimate
      NBond=NBondEst
@@ -1278,18 +1231,13 @@ CONTAINS
      IF(IntSet==2) THEN
        CALL ReadINT_RNK2(Top_Excl,TRIM(SCRPath)//'TOP_Excl',I,J)
        IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
-       CALL ReadINT_RNK2(TopCharge,TRIM(SCRPath)//'Top12',I,J)
+       CALL ReadINT_RNK2(Top12,TRIM(SCRPath)//'Top12',I,J)
        IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
        CALL ReadINT_RNK2(Top14,TRIM(SCRPath)//'Top14',I,J)
        IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
+       CALL ReadINT_RNK2(Top13,TRIM(SCRPath)//'Top13',I,J)
+       IF(I/=NatmsLoc) CALL Halt('Dimension error in BondList.')
        !
-       NMax12=J-1
-       DO I=1,NatmsLoc
-         DO J=1,TopCharge%I(I,1)
-           JJ=TopCharge%I(I,1+J)
-           TopCharge%I(I,1+J)=AtNum(JJ)
-         ENDDO
-       ENDDO
      ENDIF
      !     
      CALL New(DVect,3)
@@ -1319,6 +1267,7 @@ CONTAINS
                            NJJ2=AtNum(JJ2)
                            FoundHBond=.FALSE.
                            FoundMetLig=.FALSE.
+                           LonelyAtom=.FALSE.
                            IF(JJ2<=JJ1) CYCLE !!!avoid double counting
                            IF(HasMetal(NJJ1).OR.HasMetal(NJJ2)) THEN
                              IF(HasLigand(NJJ1).OR.HasLigand(NJJ2)) THEN
@@ -1328,30 +1277,20 @@ CONTAINS
                              ENDIF
                            ENDIF
                            IF(IntSet==2) THEN
-                             IDimExcl=Top_Excl%I(JJ1,1)
-                             IF(ANY(Top_Excl%I(JJ1,2:1+IDimExcl)==JJ2) &
-                               .AND.IDimExcl/=0) THEN
-                               CYCLE
+                             IF(NJJ1==1.OR.NJJ2==1) THEN 
+                               FoundHBond=HasHBond(NJJ1,NJJ2)
                              ENDIF
-                             IF(HBondOnly) THEN !!! only true H-bonds survive
-                               IF(HasHBond(NJJ1,NJJ2)) THEN
-                                 FoundHBond=.TRUE.
-                               ELSE
-                                 CYCLE
-                               ENDIF
-                             ELSE !!! VdW and true H-bonds survive
-                               IF(NJJ1==1.OR.NJJ2==1) THEN 
-                                 IF(HasHBond(NJJ1,NJJ2)) THEN
-                                   FoundHBond=.TRUE.
-                                 ELSE 
-                                   CYCLE
-                                 ENDIF
-                               ENDIF
+                             IF(NJJ1==1.OR.NJJ2==1) THEN 
+                               LonelyAtom=(Top12%I(JJ1,1)==0.OR.&
+                                           Top12%I(JJ2,1)==0)
                              ENDIF
-                             IF(DoSelect.AND. &
-                                .NOT.(FoundHBond.OR.FoundMetLig)) CYCLE
+                             CALL BondExcl(JJ1,JJ2,NJJ1,NJJ2, &
+                                           Top_Excl,Top12,Top13,Top14,&
+                                           FoundHBond,FoundMetLig,&
+                                           LonelyAtom,DoExclude)
+                             IF(DoExclude) CYCLE
                            ENDIF
-                           IF(FoundHBond.AND.DoSelect) THEN
+                           IF(FoundHBond) THEN
                              CritDist=HBondMax
                            ELSE
                              CritDist=CritRad%D(NJJ1)+CritRad%D(NJJ2)
@@ -1360,11 +1299,11 @@ CONTAINS
                            R12_2=DOT_PRODUCT(DVect%D,DVect%D)
                            R12=SQRT(R12_2)
                            IF(R12<CritDist) THEN
-                             NBond=NBond+1
-                             IF(NBond>NBondEst) THEN
-                               CALL ResizeBonds(BondIJAux,BondLengthAux,&
+                             IF(NBond+1>NBondEst) THEN
+                               CALL MoreBondArray(BondIJAux,BondLengthAux,&
                                     HBondMarkAux,NBondEst,NatmsLoc)
                              ENDIF 
+                             NBond=NBond+1
                              IF(FoundHBond) THEN
                                IF(NJJ1==1) THEN
                                  HBondCenter(JJ1)=1
@@ -1404,14 +1343,55 @@ CONTAINS
      CALL Delete(DVect)      
      IF(IntSet==2) THEN
        CALL Delete(Top_Excl)
-       CALL Delete(TopCharge)
+       CALL Delete(Top12)
+       CALL Delete(Top13)
        CALL Delete(Top14)
      ENDIF
    END SUBROUTINE BondList
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE ResizeBonds(BondIJ,BondLength,HBondMark,NBond,NatmsLoc)
+   SUBROUTINE BondExcl(JJ1,JJ2,NJJ1,NJJ2,TopExcl,Top12,Top13,Top14, &
+                       FoundHBond,FoundMetLig,LonelyAtom,DoExclude)
+     INTEGER             :: JJ1,JJ2,NJJ1,NJJ2
+     INTEGER             :: IDimExcl,IDim12,IDim13,IDim14
+     TYPE(INT_RNK2)      :: TopExcl,Top12,Top13,Top14 
+     LOGICAL             :: FoundHBond,FoundMetLig,LonelyAtom,DoExclude
+     !
+     IDimExcl=TopExcl%I(JJ1,1)
+     DoExclude=.FALSE.
+     IF(ANY(TopExcl%I(JJ1,2:1+IDimExcl)==JJ2) &
+       .AND.IDimExcl/=0) THEN
+       IF(.NOT.(FoundHBond.OR.FoundMetLig)) THEN
+         DoExclude=.TRUE.
+         RETURN
+       ELSE
+         IDim12=Top12%I(JJ1,1)
+         IDim13=Top13%I(JJ1,1)
+         IF(ANY(Top12%I(JJ1,2:1+IDim12)==JJ2) &
+           .OR.ANY(Top13%I(JJ1,2:1+IDim13)==JJ2)) THEN
+           DoExclude=.TRUE.
+           RETURN
+         ENDIF
+         IDim14=Top14%I(JJ1,1)
+         IF(.NOT. &
+           (ANY(Top14%I(JJ1,2:1+IDim14)==JJ2) &
+           .AND.IDim14/=0)) THEN
+           DoExclude=.TRUE.
+           RETURN
+         ENDIF
+       ENDIF
+     ENDIF
+     IF(.NOT.(FoundHBond.OR.FoundMetLig.OR.&
+        LonelyAtom)) THEN
+       DoExclude=.TRUE.
+       RETURN
+     ENDIF
+   END SUBROUTINE BondExcl
+!
+!----------------------------------------------------------------
+!
+   SUBROUTINE MoreBondArray(BondIJ,BondLength,HBondMark,NBond,NatmsLoc)
      TYPE(INT_RNK2)     :: BondIJ,BOndIJ2
      TYPE(DBL_VECT)     :: BondLength,BondLength2
      TYPE(INT_VECT)     :: HBondMark,HBondMark2
@@ -1437,12 +1417,11 @@ CONTAINS
        BondLength%D(I)=BondLength2%D(I)
        HBondMark%I(I)=HBondMark2%I(I)
      ENDDO 
-     NBond=NBondNew
      !
      CALL Delete(BondIJ2) 
      CALL Delete(BondLength2) 
      CALL Delete(HBondMark2) 
-   END SUBROUTINE ResizeBonds
+   END SUBROUTINE MoreBondArray
 !
 !----------------------------------------------------------------
 !
@@ -1520,7 +1499,7 @@ CONTAINS
 !
 !------------------------------------------------------------
 !
-   SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ, &
+   SUBROUTINE TorsionList(NatmsLoc,Top12,BondIJ,XYZ, &
                            TorsionIJKL,NTorsion,HBondMark)
      !
      IMPLICIT NONE
@@ -1532,8 +1511,13 @@ CONTAINS
      TYPE(INT_RNK2)       :: BondIJ  
      TYPE(INT_RNK2)       :: TorsionIJKL,TorsionIJKLAux
      LOGICAL              :: DoSelect
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE)                :: Crit,Alph1,Alph2,Sum,PIHalf
+     INTEGER,DIMENSION(1:4)      :: Atoms
      !    
-     DoSelect=.FALSE.
+     PIHalf=PI*Half
+     !DoSelect=.FALSE.
+      DoSelect=.TRUE.
      NBond=SIZE(BondIJ%I,2)
      NTorsion=0
      DO I=1,NBond
@@ -1555,20 +1539,34 @@ CONTAINS
        N1=Top12%I(I1,1)
        N2=Top12%I(I2,1)
        NTIni=NTorsion
+       Crit=PI  
+       Atoms=0 
        DO J1=1,N1
          JJ1=Top12%I(I1,J1+1)
          DO J2=1,N2
            JJ2=Top12%I(I2,J2+1)
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
-           NTorsion=NTorsion+1
-           TorsionIJKLAux%I(1,NTorsion)=JJ1
-           TorsionIJKLAux%I(2,NTorsion)=I1
-           TorsionIJKLAux%I(3,NTorsion)=I2
-           TorsionIJKLAux%I(4,NTorsion)=JJ2
-           IF(DoSelect) EXIT
+           IF(DoSelect) THEN
+             CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
+                       Value_O=Alph1)
+             CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
+                       Value_O=Alph2)
+             Sum=ABS(Alph1-PIHalf)+ABS(Alph2-PiHalf)
+             IF(Sum<Crit) THEN
+               Crit=Sum
+               Atoms=(/JJ1,I1,I2,JJ2/)
+             ENDIF
+           ELSE
+             NTorsion=NTorsion+1
+             TorsionIJKLAux%I(1:4,NTorsion)=(/JJ1,I1,I2,JJ2/)
+           ENDIF
          ENDDO
-         IF(DoSelect.AND.NTIni/=NTorsion) EXIT
+        !IF(DoSelect.AND.NTIni/=NTorsion) EXIT
        ENDDO
+       IF(DoSelect.AND.Atoms(1)/=0) THEN
+         NTorsion=NTorsion+1
+         TorsionIJKLAux%I(1:4,NTorsion)=Atoms(1:4)
+       ENDIF
      ENDDO
      !
      CALL New(TorsionIJKL,(/4,NTorsion/))
@@ -1578,21 +1576,21 @@ CONTAINS
      CALL Delete(TorsionIJKLAux)
    END SUBROUTINE TorsionList
 !
-!-------------------------------------------------
+!-----------------------------------------------------------------------
 !
-   SUBROUTINE AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,&
-                        BondIJ,NBond,HBondMark,DoVDW)
+   SUBROUTINE AngleList(NatmsLoc,Top12,AngleIJK,NAngle,AtNum,BondIJ, &
+                        NBond,HBondMark,HBondCenter,DoVDW)
      !
      ! this routine generates bond-angles associated with WDV bonds
      !
      IMPLICIT NONE
      INTEGER              :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
-     INTEGER              :: JJ,II1,II2,K,IC,N,IC2,IntSet
-     INTEGER,DIMENSION(:) :: AtNum
+     INTEGER              :: JJ,II1,II2,K,IC,ICC,NDim,N,IC2
+     INTEGER,DIMENSION(:) :: AtNum,HBondMark,HBondCenter
      TYPE(INT_RNK2)       :: Top12   
      TYPE(INT_RNK2)       :: AngleIJK,AngleIJKAux
      TYPE(INT_RNK2)       :: BondIJ
-     TYPE(INT_VECT)       :: Sign,HBondMark   
+     TYPE(INT_VECT)       :: Sign
      LOGICAL              :: DoVDW
      !    
      CALL New(Sign,NatmsLoc)
@@ -1603,51 +1601,46 @@ CONTAINS
        I2=BondIJ%I(2,I)
        N1=Top12%I(I1,1)
        N2=Top12%I(I2,1)
-       NAngle=NAngle+N1+N2
+      !IF(HBondMark(I)==0) THEN
+         NAngle=NAngle+N1+N2
+      !ENDIF
      ENDDO
      !    
      CALL New(AngleIJKAux,(/3,NAngle/))
      !    
      NAngle=0
      DO I=1,NBond
+      !IF(HBondMark(I)/=0) CYCLE
        I1=BondIJ%I(1,I)
        I2=BondIJ%I(2,I)
        N1=Top12%I(I1,1)
        N2=Top12%I(I2,1)
-      !IF(HBondMark%I(I)/=0) THEN
-      !  IF(AtNum(I1)==1.AND.AtNum(I2)==1) CYCLE
-      !ENDIF
-       IF(Sign%I(I1)==0) THEN
-         DO J1=1,N1
-           II1=Top12%I(I1,J1+1)
-           DO J2=J1+1,N1
-             II2=Top12%I(I1,J2+1)
-             IF(DoVDW.AND.(II1/=I2.AND.II2/=I2)) CYCLE
-             NAngle=NAngle+1
-             AngleIJKAux%I(1,NAngle)=II1
-             AngleIJKAux%I(2,NAngle)=I1
-             AngleIJKAux%I(3,NAngle)=II2
+       DO JJ=1,2
+         IF(JJ==1) THEN
+           IC=I1
+           NDim=N1
+           ICC=I2
+         ELSE
+           IC=I2
+           NDim=N2
+           ICC=I1
+         ENDIF
+         IF(Sign%I(IC)==0) THEN
+           DO J1=1,NDim
+             II1=Top12%I(IC,J1+1)
+             DO J2=J1+1,NDim
+               II2=Top12%I(IC,J2+1)
+               IF(DoVDW.AND.(II1/=ICC.AND.II2/=ICC)) CYCLE
+               IF(HBondCenter(II1)/=0.OR.HBondCenter(II2)/=0) CYCLE
+               NAngle=NAngle+1
+               AngleIJKAux%I(1,NAngle)=II1
+               AngleIJKAux%I(2,NAngle)=IC
+               AngleIJKAux%I(3,NAngle)=II2
+             ENDDO
            ENDDO
-         ENDDO
-        !IF(N1>=4) NAngle=NAngle-1
-         Sign%I(I1)=1
-       ENDIF
-       !
-       IF(Sign%I(I2)==0) THEN
-         DO J1=1,N2
-           II1=Top12%I(I2,J1+1)
-           DO J2=J1+1,N2
-             II2=Top12%I(I2,J2+1)
-             IF(DoVDW.AND.(II1/=I1.AND.II2/=I1)) CYCLE
-             NAngle=NAngle+1
-             AngleIJKAux%I(1,NAngle)=II1
-             AngleIJKAux%I(2,NAngle)=I2
-             AngleIJKAux%I(3,NAngle)=II2
-           ENDDO
-         ENDDO
-        !IF(N2>=4) NAngle=NAngle-1
-         Sign%I(I2)=1
-       ENDIF
+           Sign%I(IC)=1
+         ENDIF
+       ENDDO
      ENDDO
      !
      CALL New(AngleIJK,(/3,NAngle/))
@@ -1658,7 +1651,133 @@ CONTAINS
      CALL Delete(AngleIJKAux)
    END SUBROUTINE AngleList
 !
-!-------------------------------------------------
+!----------------------------------------------------------------------
+!
+   SUBROUTINE HBondAngles(NatmsLoc,Top12,AngleIJKL,NAngle, &
+                    BondIJ,NBond,AngleMark,HBondMark,AtNum)
+     !
+     ! this routine generates bond-angles associated with WDV bonds
+     !
+     IMPLICIT NONE
+     INTEGER              :: NatmsLoc,I,I1,I2,N1,N2,J,J1,J2,NBond,NAngle
+     INTEGER              :: JJ,II1,II2,K,IC,ICC,NDim,N,IC2
+     INTEGER              :: III1,III2,III,ICN
+     INTEGER,DIMENSION(:) :: AtNum,HBondMark
+     TYPE(INT_RNK2)       :: Top12   
+     TYPE(INT_RNK2)       :: AngleIJKL,AngleIJKLAux
+     TYPE(INT_RNK2)       :: BondIJ
+     TYPE(INT_VECT)       :: Sign
+     TYPE(CHR_VECT)       :: AngleMark,AngleMarkAux
+     !    
+     CALL New(Sign,NatmsLoc)
+     Sign%I=0
+     NAngle=0
+     DO I=1,NBond
+       I1=BondIJ%I(1,I)
+       I2=BondIJ%I(2,I)
+       N1=Top12%I(I1,1)
+       N2=Top12%I(I2,1)
+       IF(HBondMark(I)/=0) THEN
+         NAngle=NAngle+4+N1+N2
+       ENDIF
+     ENDDO
+     !    
+     CALL New(AngleIJKLAux,(/4,NAngle/))
+     AngleIJKLAux%I=0
+     CALL New(AngleMarkAux,NAngle)
+     !    
+     NAngle=0
+     DO I=1,NBond
+       IF(HBondMark(I)==0) CYCLE
+       I1=BondIJ%I(1,I)
+       I2=BondIJ%I(2,I)
+       N1=Top12%I(I1,1)
+       N2=Top12%I(I2,1)
+       IF(AtNum(I1)==1) THEN
+         II1=I2
+         IC=I1
+       ELSE
+         II1=I1
+         IC=I2
+       ENDIF
+       IF(Sign%I(IC)/=0) CYCLE
+       II2=0 
+       DO J=1,Top12%I(IC,1)
+         II2=Top12%I(IC,1+J)
+         IF(II2/=II1) EXIT 
+       ENDDO
+       IF(II2==II1.OR.II2==0) CALL Halt('II2 error in HBondAngles')
+       !
+       DO JJ=1,2
+         IF(JJ==1) THEN
+           ICN=II1
+           ICC=II2
+           III1=0
+         ELSE
+           ICN=II2
+           ICC=II1
+           III2=0
+         ENDIF
+         DO J=1,Top12%I(ICN,1)
+           III=Top12%I(ICN,1+J)
+           IF(III/=IC.AND.III/=ICC) THEN
+             NAngle=NAngle+1
+             AngleIJKLAux%I(1,NAngle)=III
+             AngleIJKLAux%I(2,NAngle)=ICN
+             AngleIJKLAux%I(3,NAngle)=ICC
+             AngleMarkAux%C(NAngle)(1:5)='BEND '
+             IF(JJ==1) THEN
+               IF(III1==0) THEN
+                 III1=III
+               ELSE
+                 IF(AtNum(III)>AtNum(III1)) III1=III
+               ENDIF
+             ELSE
+               IF(III2==0) THEN
+                 III2=III
+               ELSE
+                 IF(III/=III1.AND.AtNum(III)>AtNum(III2)) III2=III
+               ENDIF
+             ENDIF
+           ENDIF
+         ENDDO
+       ENDDO
+       !
+       IF(III1/=0.AND.III2/=0) THEN
+         NAngle=NAngle+1
+         AngleIJKLAux%I(1,NAngle)=III1
+         AngleIJKLAux%I(2,NAngle)=II1
+         AngleIJKLAux%I(3,NAngle)=II2
+         AngleIJKLAux%I(4,NAngle)=III2
+         AngleMarkAux%C(NAngle)(1:5)='TORS '
+       ENDIF
+       NAngle=NAngle+1
+       AngleIJKLAux%I(1,NAngle)=II1
+       AngleIJKLAux%I(2,NAngle)=IC
+       AngleIJKLAux%I(3,NAngle)=II2
+       AngleIJKLAux%I(4,NAngle)=III2
+       AngleMarkAux%C(NAngle)(1:5)='LINB1'
+       NAngle=NAngle+1
+       AngleIJKLAux%I(1,NAngle)=II1
+       AngleIJKLAux%I(2,NAngle)=IC
+       AngleIJKLAux%I(3,NAngle)=II2
+       AngleIJKLAux%I(4,NAngle)=III2
+       AngleMarkAux%C(NAngle)(1:5)='LINB2'
+       Sign%I(IC)=1
+     ENDDO
+     !
+     CALL New(AngleIJKL,(/4,NAngle/))
+     CALL New(AngleMark,NAngle)
+     DO I=1,NAngle
+       DO J=1,4 ; AngleIJKL%I(J,I)=AngleIJKLAux%I(J,I) ; ENDDO
+       AngleMark%C(I)=AngleMarkAux%C(I)
+     ENDDO
+     CALL Delete(Sign)
+     CALL Delete(AngleIJKLAux)
+     CALL Delete(AngleMarkAux)
+   END SUBROUTINE HBondAngles
+!
+!----------------------------------------------------------------------
 !
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,& 
                        SCRPath,CtrlCoord,CtrlConstr)
@@ -1818,6 +1937,7 @@ CONTAINS
      !
      CALL WriteIntCs(IntCs,TRIM(SCRPath)//'IntCs')
      CALL Delete(AtNum)
+    !CALL PrtIntCoords(IntCs,IntCs%Value,'GetIntC Internals')
    END SUBROUTINE GetIntCs
 !
 !-------------------------------------------------------------------
@@ -1905,19 +2025,20 @@ CONTAINS
        I3=IntCs%Atoms(I,3)
        I4=IntCs%Atoms(I,4)
        IF(IntCs%Def(I)(1:4)=='STRE') THEN
-         CALL STREValue(XYZ(1:3,I1),XYZ(1:3,I2),IntCs%Value(I))
+         CALL STRE(XYZ(1:3,I1),XYZ(1:3,I2),Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
-         CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3), &
-           IntCs%Value(I))
+         CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3), &
+                   Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:5)=='LINB1') THEN
-         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),&
-           Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))
+         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,I4,&
+           Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))  
          !
        ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
-         CALL TORSValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),&
-           XYZ(1:3,I4),TorsLinCrit,IntCs%Value(I),IntCs%Active(I))
+         CALL TORS(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),&
+           XYZ(1:3,I4),TorsLinCrit,IntCs%Active(I), &
+           Value_O=IntCs%Value(I))
          !
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
          CALL OUTPValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I4),&
@@ -1936,75 +2057,12 @@ CONTAINS
 !
 !------------------------------------------------------------
 !
-   SUBROUTINE STREValue(XI,XJ,RIJ)
-     !    
-     IMPLICIT NONE
-     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,DV
-     REAL(DOUBLE) :: RIJ,RIJ2
-     INTEGER :: I,J,K,L,M,N
-     !
-     DV=XI-XJ
-     RIJ2=DOT_PRODUCT(DV,DV)
-     RIJ=SQRT(RIJ2)
-     !
-   END SUBROUTINE STREValue
-!
-!-------------------------------------------------------
-!
-   SUBROUTINE BENDValue(XI,XJ,XK,AIJK)
-     !
-     ! Calculate bond angle in radians
-     !
-     IMPLICIT NONE
-     REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,RJI,RJK,EJI,EJK
-     REAL(DOUBLE) :: DIJSq,Tp,t,DJKSq,dxsq,dx,DOtj,DJK,DJI
-     REAL(DOUBLE) :: sinj,SMI,SMK,SUM,AIJK
-     INTEGER  :: I,J,K,L,M,N,II,JJ,KK,IER
-     !
-     10 DIJSq=Zero
-     DJKSq=Zero
-     DO M=1,3
-       Tp=XJ(M)
-       T=XI(M)-Tp
-       RJI(M)=T
-       DIJSq=DIJSq+T*T
-       T=XK(M)-Tp
-       RJK(M)=T
-       DJKSq=DJKSq+T*T
-     ENDDO              
-       DJI=SQRT(DIJSq)
-       DJK=SQRT(DJKSq)
-       DX=One  
-       DotJ=Zero 
-     DO M=1,3
-       T=RJI(M)/DJI
-       EJI(M)=T
-       Tp=RJK(M)/DJK
-       EJK(M)=Tp
-       Dotj=Dotj+T*Tp
-     ENDDO
-     !
-     IF(ABS(DotJ)>0.999999D0) THEN
-       DotJ=SIGN(ABS(DotJ),DotJ)
-     ENDIF
-     IF(ABS(DotJ-One)<1.D-6) THEN
-       AIJK=0.D0
-     ELSE IF(ABS(DotJ+One)<1.D-6) THEN
-       AIJK=PI  
-     ELSE
-       AIJK=ACOS(DotJ)
-     ENDIF
-     !
-   END SUBROUTINE BENDValue
-!
-!-------------------------------------------------------------
-!
    SUBROUTINE OUTPValue(XIin,XJin,XKin,XLin,LinCrit,VOutP,Active)
      REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
      REAL(DOUBLE)                :: LinCrit,VOutP,Sum
      LOGICAL                     :: Active
      !
-     CALL TORSValue(XIin,XJin,XKin,XLin,LinCrit,VOutP,Active)
+     CALL TORS(XIin,XJin,XKin,XLin,LinCrit,Active,Value_O=VOutP)
      !
      IF(VOutP>Zero) THEN
        VOutP=PI-VOutP
@@ -2014,143 +2072,6 @@ CONTAINS
    END SUBROUTINE OUTPValue
 !
 !-------------------------------------------------------------
-!
-   SUBROUTINE TORSValue(XIin,XJin,XKin,XLin,LinCrit,VTors,Active)
-     !
-     REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
-     TYPE(DBL_VECT)              :: XI,XJ,XK,XL,V1,V2
-     TYPE(DBL_RNK2)              :: Rot
-     REAL(DOUBLE)                :: VTors,CosPhi,Sum,Conv
-     REAL(DOUBLE)                :: V1ABS,V2ABS,LinCrit,TwoPi
-     INTEGER                     :: I,J,K,L
-     LOGICAL                     :: Active,ActiveIn,NonLinear
-     !
-     Conv=180.D0/PI
-     TwoPi=Two*PI
-     ActiveIn=Active
-     NonLinear=.TRUE.
-     !
-     CALL New(XI,3)
-     CALL New(XJ,3)
-     CALL New(XK,3)
-     CALL New(XL,3)
-     CALL New(Rot,(/3,3/))
-     CALL New(V1,3)
-     CALL New(V2,3)
-     !
-     XI%D=XIin
-     XJ%D=XJin
-     XK%D=XKin
-     XL%D=XLin
-     !
-     ! Check for linearity of I-J-K
-     !
-     V1%D=XI%D-XJ%D
-     V2%D=XJ%D-XK%D
-     V1ABS=SQRT(DOT_PRODUCT(V1%D,V1%D))
-     V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
-     IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
-       Active=.FALSE. 
-       NonLinear=.FALSE.
-     ENDIF
-     SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
-     SUM=ACOS(SUM)*Conv
-     IF(Sum<LinCrit) THEN
-       Active=.FALSE. 
-       NonLinear=.FALSE.
-     ENDIF
-     ! 
-     ! Check for linearity of J-K-L
-     !
-     V1%D=XL%D-XK%D
-     V2%D=XK%D-XJ%D
-     V1ABS=SQRT(DOT_PRODUCT(V1%D,V1%D))
-     V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
-     IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
-       Active=.FALSE. 
-       NonLinear=.FALSE.
-     ENDIF
-     SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
-     SUM=ACOS(SUM)*Conv
-     IF(Sum<LinCrit) THEN
-       Active=.FALSE. 
-       NonLinear=.FALSE.
-     ENDIF
-     !
-     IF(NonLinear) THEN
-       !
-       ! Translate, so that XK be in the origin
-       !
-       XI%D=XI%D-XK%D 
-       XJ%D=XJ%D-XK%D 
-       XL%D=XL%D-XK%D 
-       XK%D=Zero        
-       !
-       ! Rotate system, such that J be on Z axis
-       !
-       V1%D=Zero
-       V1%D(3)=One 
-       V2%D=XJ%D
-       CALL Rotate(V1%D,V2%D,Rot%D)
-       !
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
-       XI%D=V2%D
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
-       XJ%D=V2%D
-       V2%D=Zero
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
-       XL%D=V2%D
-       !
-       ! Now, rotate system around z axis such, that IJ bond be 
-       ! parallel with x axis, I pointing to positive X
-       !
-       V1%D=Zero
-       V1%D(1)=One 
-       V2%D=Zero
-       V2%D(1)=XI%D(1)
-       V2%D(2)=XI%D(2)
-       CALL Rotate(V1%D,V2%D,Rot%D)
-       !
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XI%D,V2%D)
-       XI%D=V2%D
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XJ%D,V2%D)
-       XJ%D=V2%D
-       CALL DGEMM_NNc(3,3,1,One,Zero,Rot%D,XL%D,V2%D)
-       XL%D=V2%D
-       !
-       ! Now, calculate torsional angle
-       !
-       V1%D=Zero
-       V1%D(1)=One 
-       V2%D(1)=XL%D(1)
-       V2%D(2)=XL%D(2)
-       V2%D(3)=Zero   
-       Sum=SQRT(DOT_PRODUCT(V2%D,V2%D))
-       V2%D=V2%D/Sum
-       CosPhi=DOT_PRODUCT(V1%D,V2%D)
-       !
-       IF(ABS(CosPhi)>0.999999D0) THEN
-         CosPhi=SIGN(One,CosPhi)
-       ENDIF
-       VTors=ACOS(CosPhi)
-       !
-       ! Take orientation of torsional chain into account
-       !
-       IF(XL%D(2)>Zero) VTors=TwoPi-VTors
-       Sum=TwoPi-VTors
-       IF(Sum<VTors) VTors=-Sum
-       !
-     ENDIF
-     CALL Delete(V2)
-     CALL Delete(V1)
-     CALL Delete(Rot)
-     CALL Delete(XI)
-     CALL Delete(XJ)
-     CALL Delete(XK)
-     CALL Delete(XL)
-   END SUBROUTINE TORSValue
-!
-!--------------------------------------------------------------------
 !
    SUBROUTINE GetSpBMatr(XYZ,B,SpB) 
      !
@@ -2179,7 +2100,7 @@ CONTAINS
 !
 !---------------------------------------------------------
 !
-   SUBROUTINE MapBackAngle(IntCs,NIntC,VectAux)
+   SUBROUTINE MapBackAngle(IntCs,VectAux)
      IMPLICIT NONE
      TYPE(INTC) :: IntCs
      INTEGER :: I,J,NIntC
@@ -2189,6 +2110,7 @@ CONTAINS
      ! Map back angles into the ranges the iterative 
      ! back-transformation can cope with.
      TwoPi=Two*PI
+     NIntC=SIZE(IntCs%Def)
      !
      DO I=1,NIntC
        SUM=VectAux(I)
@@ -2198,6 +2120,7 @@ CONTAINS
          IF(SUM<Zero) SUM=TwoPi+SUM
          IF(SUM>PI) SUM=TwoPI-SUM
        ELSE IF(IntCs%Def(I)(1:4)=='TORS'.OR. &
+               IntCs%Def(I)(1:4)=='LINB'.OR. &
                IntCs%Def(I)(1:4)=='OUTP') THEN
          J=INT(SUM/TwoPi)
          SUM=SUM-J*TwoPi
@@ -2565,7 +2488,7 @@ CONTAINS
      ! The required new value of internal coordinates
      !
      VectIntReq%D=VectInt
-     CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
+     CALL MapBackAngle(IntCs,VectIntReq%D) 
      !
      CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
      !
@@ -2766,12 +2689,8 @@ CONTAINS
        IF(IntCs%Def(I)(1:4)=='STRE') THEN
          SUM=Value(I)/AngstromsToAu
          SUMConstr=IntCs%ConstrValue(I)/AngstromsToAu
-       ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
-         SUM=180.D0-ACOS(One-Value(I)**2)*Conv
-         IF(IntCs%Constraint(I)) THEN
-           SUMConstr=180.D0-ACOS(One-IntCs%ConstrValue(I)**2)*Conv
-         ENDIF
        ELSE IF(IntCs%Def(I)(1:4)=='BEND'.OR. &
+               IntCs%Def(I)(1:4)=='LINB'.OR. &
                IntCs%Def(I)(1:4)=='TORS'.OR. &
                IntCs%Def(I)(1:4)=='OUTP') THEN
          SUM=Value(I)*Conv
@@ -2788,7 +2707,6 @@ CONTAINS
      !      
      111 FORMAT(I7,2X,A5,2X,4I5,2X,F12.6,L5,F12.6,L5)
      222 FORMAT(I7,2X,A5,2X,4I5,2X,3F12.6,L5,F12.6,L5)
-     !
      !
    END SUBROUTINE PrtIntCoords
 !
@@ -3007,9 +2925,7 @@ CONTAINS
      V2=V2/V2N
      Step=1
      !
-     CrossProd%D(1)=V1(2)*V2(3)-V1(3)*V2(2)
-     CrossProd%D(2)=V1(3)*V2(1)-V1(1)*V2(3) 
-     CrossProd%D(3)=V1(1)*V2(2)-V1(2)*V2(1) 
+     CALL CROSS_PRODUCT(V1,V2,CrossProd%D)
      !
      Sum1=DOT_PRODUCT(CrossProd%D(1:3),CrossProd%D(1:3))
      !
@@ -3052,7 +2968,7 @@ CONTAINS
            SinPhi=-SinPhi
            Step=Step+1
            IF(Step > 2) THEN
-             Call Halt('Rotation unsuccesful for torsvalue')
+             Call Halt('Rotation unsuccesful')
            ENDIF
          ELSE
            ! write(*,*) 'rotation succesful'
@@ -3068,10 +2984,7 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE MapAngleDispl(IntCs,NIntC,VectInt) 
-     !
-     ! This routine maps displacements of angles:
      ! all angle displacements must be between -PI and +PI.
-     !
      TYPE(INTC)                :: IntCs
      INTEGER                   :: NIntC,I,II
      REAL(DOUBLE),DIMENSION(:) :: VectInt
@@ -3079,10 +2992,7 @@ CONTAINS
      !
      TwoPi=Two*PI
      DO I=1,NIntC
-       IF(IntCs%Def(I)(1:4)=='BEND'.OR. &
-        ! IntCs%Def(I)(1:4)=='LINB'.OR. &
-          IntCs%Def(I)(1:4)=='TORS'.OR. &
-          IntCs%Def(I)(1:4)=='OUTP') THEN
+       IF(HasAngle(IntCs%Def(I))) THEN
          Sum=VectInt(I)
          IF(Sum>PI) Sum=Sum-TwoPi
          IF(Sum<-PI) Sum=TwoPi+Sum
@@ -3161,7 +3071,7 @@ CONTAINS
      INTEGER,DIMENSION(:)        :: AtNum
      REAL(DOUBLE)                :: Value,Conv,Val1,Val2
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
-     INTEGER                     :: I,J,K,NatmsLoc
+     INTEGER                     :: I,J,K,L,NatmsLoc
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
      CHARACTER(LEN=*)            :: SCRPath
@@ -3169,6 +3079,7 @@ CONTAINS
      !
      ! Now check for bending -> linear bending transitions
      !
+     IF(NIntC==0) RETURN
      NatmsLoc=SIZE(XYZ,2)
      CALL New(MarkLinB,NIntC)
      Conv=180.D0/PI
@@ -3181,7 +3092,7 @@ CONTAINS
          I1=IntCs%Atoms(I,1) 
          I2=IntCs%Atoms(I,2) 
          I3=IntCs%Atoms(I,3) 
-         CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+         CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value_O=Value)
          IF((ABS(Value-PI)*Conv < CtrlCoord%LinCrit)) THEN  
            IF(Top12%I(I2,1)>2) THEN
              IntCs%Active(I)=.FALSE.
@@ -3230,8 +3141,9 @@ CONTAINS
          I1=IntCs%Atoms(I,1)
          I2=IntCs%Atoms(I,2)
          I3=IntCs%Atoms(I,3)
-         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),&
-           Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))
+         L =IntCs%Atoms(I,4)
+         CALL LinB3(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ,L,&
+           Value1=IntCs%Value(I),Value2=IntCs%Value(I+1))  
          Val1=180.D0-Conv*ACOS(One-IntCs%Value(I)**2)
          Val2=180.D0-Conv*ACOS(One-IntCs%Value(I+1)**2)
          MarkLongR%I(I)=1 
@@ -3246,7 +3158,7 @@ CONTAINS
      ! introduce long-range torsions. 
      !
      CALL LongRangeIntC(CtrlCoord,SCRPath,Top12,IntCs,NIntC, &
-                        XYZ,MarkLongR,LongRangeTag)
+                        XYZ,MarkLongR,LongRangeTag,AtNum)
      !
      CALL Delete(MarkLongR)
      CALL Delete(Top12)
@@ -3892,9 +3804,10 @@ CONTAINS
      TYPE(INTC)                   :: IntCs
      TYPE(DBL_VECT)               :: DistVect
      INTEGER                      :: I,J,NatmsLoc,NIntC
-     INTEGER                      :: At1,At2,At3,ThreeAt(1:3)
+     INTEGER                      :: At1,At2,At3,ThreeAt(1:3),ITop
      REAL(DOUBLE)                 :: D12,D13,D23,CX,CY,CZ
      REAL(DOUBLE)                 :: Dist,Sum,Dist12,Area2
+     REAL(DOUBLE)                 :: Vect1(1:3),Vect2(1:3),Vect3(1:3)
      LOGICAL                      :: Linearity
      TYPE(DBL_RNK2)               :: XYZRot
      TYPE(INT_RNK2)               :: Top12 
@@ -3924,7 +3837,8 @@ CONTAINS
        Dist=-One
        DO I=1,NatmsLoc
          Sum=XYZRot%D(1,I)**2+XYZRot%D(2,I)**2+XYZRot%D(3,I)**2
-         Sum=Sum*Top12%I(I,1)**2
+         ITop=MAX(Top12%I(I,1),1)
+         Sum=Sum*DBLE(ITop**2)
          IF(Sum>Dist) THEN
            Dist=Sum
            At1=I
@@ -3942,7 +3856,8 @@ CONTAINS
      IF(At2==0) THEN
        Dist=-One
        DO I=1,NatmsLoc
-         Sum=Top12%I(I,1)*DistVect%D(I)
+         ITop=MAX(Top12%I(I,1),1)
+         Sum=DBLE(ITop)*DistVect%D(I)
          IF(Sum>Dist) THEN
            Dist=Sum
            At2=I
@@ -3963,7 +3878,8 @@ CONTAINS
          D13=DistVect%D(I)
          Sum=0.5D0*(D12+D13+D23)
          Area2=Sum*(Sum-D12)*(Sum-D13)*(Sum-D23)
-         Area2=Top12%I(I,1)*Area2
+         ITop=MAX(Top12%I(I,1),1)
+         Area2=DBLE(ITop)*Area2
          IF(Area2>Dist) THEN
            Dist=Area2
            At3=I
@@ -3978,13 +3894,11 @@ CONTAINS
        At3=0
        Linearity=.TRUE.
      ELSE
-       D12=SQRT(DOT_PRODUCT(XYZRot%D(:,At1)-XYZRot%D(:,At2), &
-           XYZRot%D(:,At1)-XYZRot%D(:,At2)))
-       D13=SQRT(DOT_PRODUCT(XYZRot%D(:,At1)-XYZRot%D(:,At3), &
-           XYZRot%D(:,At1)-XYZRot%D(:,At3)))
-       D23=SQRT(DOT_PRODUCT(XYZRot%D(:,At2)-XYZRot%D(:,At3), &
-           XYZRot%D(:,At2)-XYZRot%D(:,At3)))
-       IF(ABS(D12-(D13+D23))<0.001D0) Linearity=.TRUE.
+     Vect1=XYZRot%D(:,At1)-XYZRot%D(:,At2)
+     Vect2=XYZRot%D(:,At1)-XYZRot%D(:,At3)
+     CALL CROSS_PRODUCT(Vect1,Vect2,Vect3)
+     D12=SQRT(DOT_PRODUCT(Vect3,Vect3))
+     IF(D12<0.001D0) Linearity=.TRUE.
      ENDIF
      ThreeAt(1)=At1
      ThreeAt(2)=At2
@@ -4336,21 +4250,23 @@ CONTAINS
 ! 
 !-------------------------------------------------------------------
 !
-   SUBROUTINE LongRangeIntC(CtrlCoord,SCRPath,Top12, &
-                            IntCs,NIntC,XYZ,MarkLongR,LongRangeTag)
+   SUBROUTINE LongRangeIntC(CtrlCoord,SCRPath,Top12,IntCs,NIntC, &
+                            XYZ,MarkLongR,LongRangeTag,AtNum)
      TYPE(INTC)                  :: IntCs,IntC_New
      INTEGER                     :: NIntC,NIntc_New
      TYPE(INT_VECT)              :: LinAtom,MarkLongR,LinCenter
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value,Conv,Dist12
      INTEGER                     :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
+     INTEGER                     :: II1,II4
      INTEGER                     :: I,J,K,NatmsLoc,III
      INTEGER                     :: NStreLinb,NBendLinb,JJ,IC,IEx
      TYPE(INT_RNK2)              :: LinBBridge,Top12
      TYPE(CoordCtrl)             :: CtrlCoord
      CHARACTER(LEN=*)            :: SCRPath
      CHARACTER(LEN=1)            :: LongRangeTag
-     LOGICAL                     :: RepeatChk,DoVdW
+     LOGICAL                     :: RepeatChk,DoVdW,Found
+     INTEGER,DIMENSION(:)        :: AtNum
      !
      Conv=180.D0/PI
      NIntC=SIZE(IntCs%Def)
@@ -4386,7 +4302,8 @@ CONTAINS
         !  RepeatChk=.FALSE.
         !  DO J=1,Top12%I(I2,1)
         !    I3=Top12%I(I2,1+J) 
-        !    CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+        !    CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3), &
+        !              Value_O=Value)
         !    IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
         !      LinBBridge%I(1,NLinB)=I3
         !      LinAtom%I(I3)=1
@@ -4405,7 +4322,8 @@ CONTAINS
         !  RepeatChk=.FALSE.
         !  DO J=1,Top12%I(I2,1)
         !    I3=Top12%I(I2,1+J) 
-        !    CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+        !    CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3), &
+        !              Value_O=Value)
         !    IF(ABS(Value-PI)*Conv<CtrlCoord%LinCrit) THEN 
         !      LinBBridge%I(2,NLinB)=I3
         !      LinAtom%I(I3)=1
@@ -4492,6 +4410,9 @@ CONTAINS
      ! torsions
      !
      DO I=1,NLinB
+       Found=.FALSE.
+       II1=0
+       II4=0
        I2=LinBBridge%I(1,I)
        I3=LinBBridge%I(2,I)
        DO J=1,Top12%I(I2,1)
@@ -4501,22 +4422,32 @@ CONTAINS
            I4=Top12%I(I3,1+K)
            IF(LinCenter%I(I)==I4) CYCLE
            IF(I1/=I4.AND.I1/=I3.AND.I2/=I4) THEN
-             NIntC=NIntC+1
-             IntC_New%Def(NIntC)='TORS '
-             IntC_New%FCType(NIntC)=LongRangeTag
-             IntC_New%Atoms(NIntC,1)=I1
-             IntC_New%Atoms(NIntC,2)=I2
-             IntC_New%Atoms(NIntC,3)=I3
-             IntC_New%Atoms(NIntC,4)=I4
-             IntC_New%Value(NIntC)=Zero
-             IntC_New%Constraint(NIntC)=.FALSE.
-             IntC_New%ConstrValue(NIntC)=Zero   
-             IntC_New%Active(NIntC)=.TRUE. 
-             EXIT
+             IF(.NOT.Found) THEN
+               II1=I1
+               II4=I4
+               Found=.TRUE.
+             ELSE
+               IF(AtNum(I1)>AtNum(II1)) II1=I1
+               IF(AtNum(I4)>AtNum(II4)) II4=I4
+             ENDIF
            ENDIF
          ENDDO
-         EXIT
        ENDDO
+       I1=II1
+       I4=II4
+       IF(Found) THEN
+         NIntC=NIntC+1
+         IntC_New%Def(NIntC)(1:5)='TORS '
+         IntC_New%FCType(NIntC)=LongRangeTag
+         IntC_New%Atoms(NIntC,1)=I1
+         IntC_New%Atoms(NIntC,2)=I2
+         IntC_New%Atoms(NIntC,3)=I3
+         IntC_New%Atoms(NIntC,4)=I4
+         IntC_New%Value(NIntC)=Zero
+         IntC_New%Constraint(NIntC)=.FALSE.
+         IntC_New%ConstrValue(NIntC)=Zero   
+         IntC_New%Active(NIntC)=.TRUE. 
+       ENDIF
      ENDDO
      !
      CALL Delete(Intcs)
@@ -4806,7 +4737,7 @@ CONTAINS
          ISelect1=HBondList%I(I,1)
          DistMin=BondLength%D(Iselect1)
          ISelect2=0
-         IF(HBondList%I(I,2)/=0) THEN
+         IF(Top12%I(I,1)==0.AND.HBondList%I(I,2)/=0) THEN
            ISelect2=HBondList%I(I,2)
            DistMin=DistMin+BondLength%D(Iselect2)
          ENDIF
@@ -5089,11 +5020,13 @@ CONTAINS
        I2=Top12%I(I1,J2+1)
        DO J3=J2+1,NDim
          I3=Top12%I(I1,J3+1)
-         CALL BENDValue(XYZ(1:3,I2),XYZ(1:3,I1),XYZ(1:3,I3),A1)
+         CALL BEND(XYZ(1:3,I2),XYZ(1:3,I1),XYZ(1:3,I3),Value_O=A1)
          DO J4=J3+1,NDim
            I4=Top12%I(I1,J4+1)
-           CALL BENDValue(XYZ(1:3,I2),XYZ(1:3,I1),XYZ(1:3,I4),A2)
-           CALL BENDValue(XYZ(1:3,I3),XYZ(1:3,I1),XYZ(1:3,I4),A3)
+           CALL BEND(XYZ(1:3,I2),XYZ(1:3,I1),XYZ(1:3,I4), &
+                          Value_O=A2)
+           CALL BEND(XYZ(1:3,I3),XYZ(1:3,I1),XYZ(1:3,I4), &
+                          Value_O=A3)
            Sum=A1+A2+A3
            ASum=ABS(TwoPI-Sum)
            IF(Planar>ASum) THEN
@@ -5158,11 +5091,15 @@ CONTAINS
        ENDDO 
      ENDIF
      J=3*(ThreeAt(1)-1)
-     DO K=1,3 ; CleanList%I(PermRef(J+K))=0 ; ENDDO
+     IF(J>=0) THEN
+       DO K=1,3 ; CleanList%I(PermRef(J+K))=0 ; ENDDO
+     ENDIF
      J=3*(ThreeAt(2)-1)
-     DO K=2,3 ; CleanList%I(PermRef(J+K))=0 ; ENDDO
+     IF(J>=0) THEN
+       DO K=2,3 ; CleanList%I(PermRef(J+K))=0 ; ENDDO
+     ENDIF
      J=3*(ThreeAt(3)-1)
-     CleanList%I(PermRef(J+3))=0
+     IF(J>=0) CleanList%I(PermRef(J+3))=0
      !
      III=0
      IPerm=0
@@ -5266,23 +5203,6 @@ CONTAINS
      BB1(4:6)=-Aux1-Aux2
      BB1(7:9)=Aux2
    END SUBROUTINE LinBGen
-!
-!------------------------------------------------------------------
-!
-   SUBROUTINE ResizeStep(Displ,IntCs)
-     REAL(DOUBLE),DIMENSION(:)    :: Displ
-     REAL(DOUBLE)                 :: CritD
-     TYPE(INTC)                   :: IntCs
-     INTEGER                      :: I,J,NIntC
-     !
-     CritD=0.3D0
-     NIntC=SIZE(IntCs%Def)
-     IF(NIntC/=SIZE(Displ)) CALL Halt('Dimension error in ResizeStep')
-     DO I=1,NIntC
-       IF(ABS(Displ(I))>CritD) Displ(I)=SIGN(Displ(I),CritD)
-     ENDDO
-     !
-   END SUBROUTINE ResizeStep
 !
 !------------------------------------------------------------------
 !
