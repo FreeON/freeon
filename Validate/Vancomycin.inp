@@ -7,7 +7,6 @@ Charge=0
 Multiplicity=1
 DebugAll=(MinDebug,CheckSums)
 SDMM=MaxDebug
-Grad=Force
 Guess=SuperPos
 SCFMethod=(SDMM)
 BasisSets=(STO-3G)

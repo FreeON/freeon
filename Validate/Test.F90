@@ -43,18 +43,18 @@ PROGRAM TestMondoSCFOutput
          IF(RD>1.D-10)THEN
             WRITE(*,*)' VALIDATION TEST FAILED! '
             CALL OpenASCII(LogFile,Log)
-            WRITE(Log,'Test failed on comparison of total energies: ')
-            WRITE(Log,TRIM(Line1)) 
-            WRITE(Log,TRIM(Line2))
+            WRITE(Log,*)'Test failed on comparison of total energies: '
+            WRITE(Log,*)TRIM(Line1) 
+            WRITE(Log,*)TRIM(Line2)
             CLOSE(Log)
             STOP
          ENDIF
       ELSEIF(I1/=0.AND.I2==0.OR.I1==0.AND.I2/=0)THEN
         WRITE(*,*)' VALIDATION TEST FAILED! '
         CALL OpenASCII(LogFile,Log)
-        WRITE(Log,'Test failed by lines out of sinc ')
-        WRITE(Log,TRIM(Line1)) 
-        WRITE(Log,TRIM(Line2))
+        WRITE(Log,*)'Test failed by lines out of sinc '
+        WRITE(Log,*)TRIM(Line1) 
+        WRITE(Log,*)TRIM(Line2)
         CLOSE(Log)
         STOP
       ENDIF
@@ -62,8 +62,8 @@ PROGRAM TestMondoSCFOutput
 !     Test check sums
 !
       I1=0;I2=0
-      IF(INDEX(Line1,'check')/=0)I1=INDEX(Line1,'=')
-      IF(INDEX(Line2,'check')/=0)I2=INDEX(Line2,'=')
+      IF(INDEX(Line1,'CheckSum')/=0)I1=INDEX(Line1,'=')
+      IF(INDEX(Line2,'CheckSum')/=0)I2=INDEX(Line2,'=')
       IF(I1/=0.AND.I2/=0)THEN
          D1=CharToDbl(TRIM(Line1(I1+1:)))
          D2=CharToDbl(TRIM(Line2(I2+1:)))
@@ -71,18 +71,18 @@ PROGRAM TestMondoSCFOutput
          IF(RD>1.D-8)THEN
             WRITE(*,*)' VALIDATION TEST FAILED! '
             CALL OpenASCII(LogFile,Log)
-            WRITE(Log,'Test failed on comparison of check sums: ')
-            WRITE(Log,TRIM(Line1)) 
-            WRITE(Log,TRIM(Line2))
+            WRITE(Log,*)'Test failed on comparison of check sums: '
+            WRITE(Log,*)TRIM(Line1) 
+            WRITE(Log,*)TRIM(Line2)
             CLOSE(Log)
             STOP
          ENDIF
       ELSEIF(I1/=0.AND.I2==0.OR.I1==0.AND.I2/=0)THEN
         WRITE(*,*)' VALIDATION TEST FAILED! '
         CALL OpenASCII(LogFile,Log)
-        WRITE(Log,'Test failed by lines out of sinc ')
-        WRITE(Log,TRIM(Line1)) 
-        WRITE(Log,TRIM(Line2))
+        WRITE(Log,*)'Test failed by lines out of sinc '
+        WRITE(Log,*)TRIM(Line1) 
+        WRITE(Log,*)TRIM(Line2)
         CLOSE(Log)
         STOP
       ENDIF

@@ -3,4 +3,16 @@ This is an alpha release of MondoSCF.  It is not
 perfect.  Please send your bug reports and 
 suggestions for improvements to MChalla@LANL.Gov 
 with the subject "MONDO_BUGS".  
+
+KNOWN:
+
+o The F90 ONX code for exact exchange is not 100%
+  Matrix builds may be slow, and forces incorrect
+
+o Periodic boundary conditions with small exponent
+  ~1.D-2 basis sets may result in instabilities
+
+o Clean up of scratch files less than perfect.
+  Want to "mk pScr" after big runs to clean scratch.
+
 **************************************************

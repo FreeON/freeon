@@ -30,16 +30,16 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e x 1 n 2 v 
+all:	CatCpy mm s e x 1 n 2 d #v 
 #
-clean:	cmm cs ce cx c1 cn c2 cv 
+clean:	cmm cs ce cx c1 cn c2 cd cv 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pe px p1 pn p2 pv pMisc
+purge:	pmm ps pe px p1 pn p2 pd pv pMisc
 #
-release: rmLegacy swREADME rmm rs re rx r1 rn r2 rv tarball
+release: rmLegacy swREADME rmm rs re rx r1 rn r2 rd rv tarball
 #
 backup:	purge rmLegacy tarball
 #
@@ -159,14 +159,26 @@ cn:
 	$(MAKE) -i -C QuNew clean
 #----------------------------------------------
 #     DX Visualization support
- v:	
+ d:	
 	$(MAKE)    -C VisDX
-rv:	
+rd:	
 	$(MAKE) -i -C VisDX release
-pv:	
+pd:	
 	$(MAKE) -i -C VisDX purge
-cv:	
+cd:	
 	$(MAKE) -i -C VisDX clean
+#----------------------------------------------
+#     Validation suite
+ v:	
+	$(MAKE)    -C Validate 
+vp:	
+	$(MAKE)    -C Validate pbs
+rv:	
+	$(MAKE) -i -C Validate release
+pv:	
+	$(MAKE) -i -C Validate purge
+cv:	
+	$(MAKE) -i -C Validate
 #----------------------------------------------
 #   Cleaning of other directories 
 #

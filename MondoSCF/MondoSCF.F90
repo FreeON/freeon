@@ -45,16 +45,6 @@ PROGRAM MondoSCF
   CALL SetGlobalCtrlIndecies(Ctrl)           
 ! Decide about forces
   SELECT CASE(Ctrl%Grad)
-  CASE(GRAD_ONE_FORCE)
-     DO IGeo=Begin(3),Ctrl%NGeom
-        Ctrl%Current(3)=IGeo
-        DO ISet=Begin(2),Ctrl%NSet
-           Ctrl%Current(2)=ISet
-           CALL OneSCF(Ctrl)
-           Ctrl%Current(1)=0
-        ENDDO
-        CALL Forces(Ctrl)
-     ENDDO
   CASE(GRAD_VERLET_MD)
      CALL MondoHalt(USUP_ERROR,' Look for MD in version 1.0b2. ')
   CASE(GRAD_QNEW_OPT)

@@ -37,6 +37,11 @@ ReleaseFiles=Test.x
 #
 all:	test small 
 #
+full:	all big
+#
+pbs:	test small_pbs big_pbs
+#------------------------------------------------------------------
+#       Code to parse *.ref and *.out, checking numbers for correctness
 test:	$(TstObjs)
 	$(LD) $(LDFLAGS) Test $(TstObjs) $(LibOpts) $(Libs) 
 	rm -rf Validation.log
@@ -57,8 +62,6 @@ big:
 	m Vancomycin.inp Vancomycin.out;     ./Test Vancomycin.out Vancomycin.ref
 #-----------------------------------------------------------------------------------
 #       Submit validation suite to pbs queing system 
-#
-pbs:	small_pbs big_pbs
 #
 small_pbs:
 	chmod u+x sub_pbs

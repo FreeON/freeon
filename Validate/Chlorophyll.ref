@@ -1,0 +1,1113 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 1                                  
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, Eric Schwegler,                    
+ C.J. Tymczak and Chee Kwan Gan                       
+ Los Alamos National Laboratory                       
+ Copywrite 2001, University of California.            
+
+ Compliled for AMDLinux.PG, executing on zinc18
+ a i686 machine running Linux 2.4.2-2
+
+               ** Chlorophyll **                                                                                                
+  
+<<Starting MondoSCF 10/28/01 @ 10:53:00>>
+========================================================================
+ Internal representation of the geometry:
+ Geometry originally in Angstroms has been converted to AU.
+ Geometry has not been reordered.
+ Number of electrons = 360
+------------------------------------------------------------------------
+ 1   mg   0.00000000D+00   0.00000000D+00   0.00000000D+00
+ 2   n    0.17861879D+01   -.32896161D+01   -.10877263D+01
+ 3   n    0.91194397D+00   0.15996153D+01   -.35008686D+01
+ 4   n    -.27198637D+01   0.26785732D+01   0.14407271D+00
+ 5   n    -.20500503D+01   -.21629426D+01   0.28093422D+01
+ 6   o    -.92092584D+01   0.64001240D+01   0.47758856D+01
+ 7   o    -.45147444D+01   0.34771147D+01   0.90115174D+01
+ 8   o    -.86699306D+01   0.31222053D+01   0.95301527D+01
+ 9   o    -.10155992D+02   -.29941385D+01   0.10841188D+02
+ 10   o    -.69446485D+01   -.49185221D+01   0.12836531D+02
+ 11   o    0.23762548D+01   0.15008393D+01   0.26220515D+01
+ 12   o    0.52774378D+00   0.43342755D+01   0.66631927D+01
+ 13   c    0.18427285D+01   -.55103276D+01   0.26652695D+00
+ 14   c    -.16049443D+01   0.54952665D+01   -.33567959D+01
+ 15   c    -.30402668D+01   0.49612110D+01   -.11669625D+01
+ 16   c    -.49598315D+01   0.64528473D+01   -.36018177D-01
+ 17   c    -.58384218D+01   0.49829807D+01   0.19953617D+01
+ 18   c    -.44118110D+01   0.27195803D+01   0.20457796D+01
+ 19   c    -.50120258D+01   0.10438090D+01   0.39907044D+01
+ 20   c    -.39087092D+01   -.12472192D+01   0.44157038D+01
+ 21   c    -.44813907D+01   -.31096575D+01   0.65335197D+01
+ 22   c    -.23124577D+01   -.50750670D+01   0.62669928D+01
+ 23   c    -.12193079D+01   -.44070867D+01   0.36881593D+01
+ 24   c    0.35883062D+01   -.72296381D+01   -.96525314D+00
+ 25   c    0.51323068D+00   -.59497834D+01   0.24851786D+01
+ 26   c    0.42102717D+01   -.98203201D+01   -.21618465D-01
+ 27   c    0.63415047D+01   -.71869492D+01   -.48479219D+01
+ 28   c    0.80392534D+01   -.60778501D+01   -.61517384D+01
+ 29   c    0.47945561D+01   0.20198147D+01   -.94437167D+01
+ 30   c    0.10395194D+01   0.66202582D+01   -.84928632D+01
+ 31   c    -.11961021D+01   0.63775229D+01   -.10200079D+02
+ 32   c    -.57775349D+01   0.90092120D+01   -.87881707D+00
+ 33   c    -.75970575D+01   0.48900628D+01   0.40411223D+01
+ 34   c    -.71258732D+01   0.23462649D+01   0.54890304D+01
+ 35   c    0.45335849D+01   -.60929112D+01   -.30326512D+01
+ 36   c    -.70896283D+01   -.43476548D+01   0.62958111D+01
+ 37   c    -.77072474D+01   -.60150734D+01   0.85864992D+01
+ 38   c    -.35375671D+00   -.48766836D+01   0.83127723D+01
+ 39   c    -.65372425D+01   0.30058548D+01   0.81831182D+01
+ 40   c    -.84915971D+01   0.40706021D+01   0.12072968D+02
+ 41   c    -.83814072D+01   -.44422545D+01   0.10826769D+02
+ 42   c    -.75274778D+01   -.34804784D+01   0.15134437D+02
+ 43   c    -.55963101D+01   -.40295761D+01   0.17043344D+02
+ 44   c    0.34070815D+01   -.35440866D+01   -.31262871D+01
+ 45   c    0.37854802D+01   -.17502831D+01   -.49487577D+01
+ 46   c    0.26372260D+01   0.66210329D+00   -.51648668D+01
+ 47   c    0.30446320D+01   0.24274664D+01   -.72538644D+01
+ 48   c    0.14788240D+01   0.44229982D+01   -.68288650D+01
+ 49   c    0.17107689D+00   0.39341449D+01   -.44445221D+01
+ 50   h    -.18100173D+01   0.73530561D+01   -.41764834D+01
+ 51   h    0.37404291D+01   0.16599353D+00   0.33449284D+01
+ 52   h    0.18742113D+01   0.28532028D+01   0.40657644D+01
+ 53   h    0.13330316D+01   0.54001377D+01   0.82061729D+01
+ 54   h    -.14559016D+01   0.39221263D+01   0.69093295D+01
+ 55   h    -.45453390D+01   -.21556671D+01   0.83366207D+01
+ 56   h    -.28170901D+01   -.69600876D+01   0.56692536D+01
+ 57   h    0.94127251D+00   -.77310580D+01   0.33846882D+01
+ 58   h    0.62233779D+01   -.10145259D+02   0.62890081D-01
+ 59   h    0.34194781D+01   -.11262465D+02   -.12299849D+01
+ 60   h    0.34620158D+01   -.10147658D+02   0.18487567D+01
+ 61   h    0.61719963D+01   -.92156834D+01   -.49920513D+01
+ 62   h    0.93058989D+01   -.71005887D+01   -.73825169D+01
+ 63   h    0.82895098D+01   -.40621928D+01   -.59522022D+01
+ 64   h    0.61990760D+01   0.60565718D+00   -.90046577D+01
+ 65   h    0.56805352D+01   0.37560005D+01   -.10048656D+02
+ 66   h    0.37306970D+01   0.12721824D+01   -.11016800D+02
+ 67   h    0.26788189D+01   0.69577632D+01   -.96608273D+01
+ 68   h    0.74409851D+00   0.83019820D+01   -.73748824D+01
+ 69   h    -.77652620D+00   0.52065352D+01   -.11818120D+02
+ 70   h    -.18680697D+01   0.81549991D+01   -.10944556D+02
+ 71   h    -.27750815D+01   0.54871596D+01   -.92623408D+01
+ 72   h    -.76282947D+01   0.94282398D+01   -.12757540D+00
+ 73   h    -.59321333D+01   0.91038683D+01   -.29116331D+01
+ 74   h    -.45335660D+01   0.10490625D+02   -.22820331D+00
+ 75   h    -.86789068D+01   0.10321305D+01   0.53265140D+01
+ 76   h    -.71851162D+01   -.54439226D+01   0.45769919D+01
+ 77   h    -.85275019D+01   -.29021656D+01   0.62045373D+01
+ 78   h    -.60616174D+01   -.71519893D+01   0.89922800D+01
+ 79   h    -.92240549D+01   -.72921124D+01   0.81030128D+01
+ 80   h    0.36528403D-01   -.29220455D+01   0.87513966D+01
+ 81   h    0.13928792D+01   -.58072602D+01   0.78142248D+01
+ 82   h    -.10055610D+01   -.57297437D+01   0.10048523D+02
+ 83   h    -.76215673D+01   0.59136140D+01   0.11965291D+02
+ 84   h    -.73125026D+01   0.27982118D+01   0.13148165D+02
+ 85   h    -.10367150D+02   0.42318335D+01   0.12861381D+02
+ 86   h    -.93576207D+01   -.40001153D+01   0.15873226D+02
+ 87   h    -.74823512D+01   -.14800523D+01   0.14732493D+02
+ 88   h    -.38217251D+01   -.44928991D+01   0.16148105D+02
+ 89   h    -.61434992D+01   -.56255064D+01   0.18191787D+02
+ 90   h    -.52547233D+01   -.24095707D+01   0.18236744D+02
+ 91   h    0.51034885D+01   -.22490763D+01   -.64250306D+01
+------------------------------------------------------------------------
+ HDF file :: /scratch/mchalla/Chlorophyll_19082.hdf
+ PROGRAM OF CALCULATIONS:
+
+  A restricted simplified density matrix minimization using
+  a loose accuracy level STO-2G and the HFx model.
+ 
+
+  Followed by a  restricted simplified density matrix minimization using
+  a good accuracy level3-21G and the B88x/LYPc model.
+ 
+
+ MakeS                :: S CheckSum = 0.2018029340055247D+02
+ BlokAInv             :: Z CheckSum = 0.2252979713570823D+02
+ MakeT                :: T CheckSum = 0.1442420857160771D+03
+ P2Use                :: P[0] CheckSum = 0.2622594245652500D+02
+ MakeRho              :: Rho CheckSum = 0.2348461432102578D+04
+ QCTC                 :: J[0] CheckSum = 0.2180336670821463D+03
+ ONX                  :: Kx[0] CheckSum = 0.3189416297957208D+02
+ FockNGrueven         :: F[0] CheckSum = 0.1097183491233564D+03
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.9821539273180204D+02
+<<Entering SDMM 10/28/01 @ 10:55:08>>
+ SDMM : CG 1          :: Tr(P.F) = -.51371240D+03, %Non0= 41, MAX[P,F]= 0.13D-03
+ SDMM : CG 2          :: Tr(P.F) = -.60746993D+03, %Non0= 42, MAX[P,F]= 0.20D-03
+ SDMM : CG 3          :: Tr(P.F) = -.60303629D+03, %Non0= 42, MAX[P,F]= 0.21D-03
+ SDMM : CG 4          :: Tr(P.F) = -.61522377D+03, %Non0= 42, MAX[P,F]= 0.22D-03
+ SDMM : CG 5          :: Tr(P.F) = -.64615370D+03, %Non0= 50, MAX[P,F]= 0.19D-03
+ SDMM : CG 6          :: Tr(P.F) = -.67226181D+03, %Non0= 54, MAX[P,F]= 0.66D-03
+ SDMM : CG 7          :: Tr(P.F) = -.67904289D+03, %Non0= 54, MAX[P,F]= 0.73D-03
+ SDMM : CG 8          :: Tr(P.F) = -.66317439D+03, %Non0= 56, MAX[P,F]= 0.61D-03
+ SDMM : CG 9          :: Tr(P.F) = -.66490869D+03, %Non0= 58, MAX[P,F]= 0.44D-03
+ SDMM : CG 10         :: Tr(P.F) = -.66297747D+03, %Non0= 60, MAX[P,F]= 0.31D-03
+ SDMM : CG 11         :: Tr(P.F) = -.67740824D+03, %Non0= 63, MAX[P,F]= 0.28D-03
+ SDMM : CG 12         :: Tr(P.F) = -.67876327D+03, %Non0= 63, MAX[P,F]= 0.29D-03
+ SDMM : CG 13         :: Tr(P.F) = -.68074081D+03, %Non0= 69, MAX[P,F]= 0.41D-03
+ SDMM : CG 14         :: Tr(P.F) = -.67593602D+03, %Non0= 69, MAX[P,F]= 0.41D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.67254641D+03, %Non0= 66, MAX(/P) = 0.19D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.67478198D+03, %Non0= 76, MAX(/P) = 0.89D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.67603686D+03, %Non0= 84, MAX(/P) = 0.78D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.67654339D+03, %Non0= 88, MAX(/P) = 0.70D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.67691878D+03, %Non0= 91, MAX(/P) = 0.90D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.67724989D+03, %Non0= 92, MAX(/P) = 0.96D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.67745966D+03, %Non0= 92, MAX(/P) = 0.63D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.67752963D+03, %Non0= 92, MAX(/P) = 0.21D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.67753896D+03, %Non0= 92, MAX(/P) = 0.28D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.67753914D+03, %Non0= 93, MAX(/P) = 0.21D-03
+ SDMM : Pure 11       :: Tr(P.F) = -.67753914D+03, %Non0= 93, MAX(/P) = 0.23D-03
+ SDMM                 :: 14 CG, and 11 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.23D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[1] CheckSum = 0.1341640919472346D+02
+ SDMM                 :: P[1] CheckSum = 0.1231816390194932D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.20D+02, 126),
+                         WALL(Sec,MFLOPS) = (0.20D+02, 126)
+ SDMM                 :: Allocs=794,  DeAllocs=790, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 10:55:28-<
+ SCFStatus : [0,1,1]  :: <SCF> = -2149.71736524, dD = 0.25D+01
+ MakeRho              :: Rho CheckSum = 0.2143100398160346D+04
+ QCTC                 :: J[1] CheckSum = 0.2206590930761949D+03
+ ONX                  :: Kx[1] CheckSum = 0.3316380800241942D+02
+ FockNGrueven         :: F[1] CheckSum = 0.1128001018072720D+03
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.1005908022272197D+03
+<<Entering PulayDIIS 10/28/01 @ 10:58:38>>
+ PulayDIIS            :: DIISErr = 0.63D-02
+ PulayDIIS            :: DIISCo = 0.10D+01
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.9832858341493473D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.61D+00, 114),
+                         WALL(Sec,MFLOPS) = (0.61D+00, 114)
+ PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
+                         A max of 3044012 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 10:58:39-<
+<<Entering SDMM 10/28/01 @ 10:58:39>>
+ SDMM : CG 1          :: Tr(P.F) = -.51519708D+03, %Non0= 41, MAX[P,F]= 0.13D-03
+ SDMM : CG 2          :: Tr(P.F) = -.60924780D+03, %Non0= 42, MAX[P,F]= 0.20D-03
+ SDMM : CG 3          :: Tr(P.F) = -.60467328D+03, %Non0= 42, MAX[P,F]= 0.21D-03
+ SDMM : CG 4          :: Tr(P.F) = -.61688135D+03, %Non0= 42, MAX[P,F]= 0.22D-03
+ SDMM : CG 5          :: Tr(P.F) = -.64851034D+03, %Non0= 50, MAX[P,F]= 0.19D-03
+ SDMM : CG 6          :: Tr(P.F) = -.67519496D+03, %Non0= 54, MAX[P,F]= 0.67D-03
+ SDMM : CG 7          :: Tr(P.F) = -.68156969D+03, %Non0= 54, MAX[P,F]= 0.73D-03
+ SDMM : CG 8          :: Tr(P.F) = -.66537401D+03, %Non0= 56, MAX[P,F]= 0.62D-03
+ SDMM : CG 9          :: Tr(P.F) = -.66752665D+03, %Non0= 58, MAX[P,F]= 0.45D-03
+ SDMM : CG 10         :: Tr(P.F) = -.66596002D+03, %Non0= 61, MAX[P,F]= 0.32D-03
+ SDMM : CG 11         :: Tr(P.F) = -.68012580D+03, %Non0= 64, MAX[P,F]= 0.29D-03
+ SDMM : CG 12         :: Tr(P.F) = -.68157699D+03, %Non0= 64, MAX[P,F]= 0.30D-03
+ SDMM : CG 13         :: Tr(P.F) = -.68362224D+03, %Non0= 69, MAX[P,F]= 0.39D-03
+ SDMM : CG 14         :: Tr(P.F) = -.67877240D+03, %Non0= 69, MAX[P,F]= 0.42D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.67530989D+03, %Non0= 66, MAX(/P) = 0.19D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.67735674D+03, %Non0= 76, MAX(/P) = 0.90D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.67857554D+03, %Non0= 84, MAX(/P) = 0.76D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.67906104D+03, %Non0= 88, MAX(/P) = 0.67D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.67942376D+03, %Non0= 90, MAX(/P) = 0.86D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.67975789D+03, %Non0= 92, MAX(/P) = 0.97D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.67999414D+03, %Non0= 92, MAX(/P) = 0.72D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.68010264D+03, %Non0= 92, MAX(/P) = 0.34D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.68012310D+03, %Non0= 92, MAX(/P) = 0.64D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.68012365D+03, %Non0= 92, MAX(/P) = 0.20D-03
+ SDMM : Pure 11       :: Tr(P.F) = -.68012365D+03, %Non0= 92, MAX(/P) = 0.23D-03
+ SDMM                 :: 14 CG, and 11 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.23D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[2] CheckSum = 0.1341640920767405D+02
+ SDMM                 :: P[2] CheckSum = 0.1226159208816599D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.20D+02, 127),
+                         WALL(Sec,MFLOPS) = (0.20D+02, 127)
+ SDMM                 :: Allocs=798,  DeAllocs=794, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 10:58:59-<
+ SCFStatus : [1,1,1]  :: <SCF> = -2266.29285730, dD = 0.35D-01, DIIS = 0.63D-02
+ MakeRho              :: Rho CheckSum = 0.2141622068055291D+04
+ QCTC                 :: J[2] CheckSum = 0.2206546705903245D+03
+ ONX                  :: Kx[2] CheckSum = 0.3316678001216517D+02
+ FockNGrueven         :: F[2] CheckSum = 0.1127845556532906D+03
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.1005898527010317D+03
+<<Entering PulayDIIS 10/28/01 @ 11:02:07>>
+ PulayDIIS            :: DIISErr = 0.58D-02
+ PulayDIIS            :: DIISCo = -.98D+01, 0.11D+02
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.1006183159015805D+03
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.63D+00, 109),
+                         WALL(Sec,MFLOPS) = (0.63D+00, 109)
+ PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
+                         A max of 3043964 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:02:08-<
+<<Entering SDMM 10/28/01 @ 11:02:08>>
+ SDMM : CG 1          :: Tr(P.F) = -.53688015D+03, %Non0= 50, MAX[P,F]= 0.14D-03
+ SDMM : CG 2          :: Tr(P.F) = -.63584472D+03, %Non0= 53, MAX[P,F]= 0.21D-03
+ SDMM : CG 3          :: Tr(P.F) = -.63006978D+03, %Non0= 53, MAX[P,F]= 0.22D-03
+ SDMM : CG 4          :: Tr(P.F) = -.64381985D+03, %Non0= 53, MAX[P,F]= 0.23D-03
+ SDMM : CG 5          :: Tr(P.F) = -.69344667D+03, %Non0= 65, MAX[P,F]= 0.20D-03
+ SDMM : CG 6          :: Tr(P.F) = -.72870463D+03, %Non0= 68, MAX[P,F]= 0.77D-03
+ SDMM : CG 7          :: Tr(P.F) = -.72601935D+03, %Non0= 68, MAX[P,F]= 0.74D-03
+ SDMM : CG 8          :: Tr(P.F) = -.70452947D+03, %Non0= 69, MAX[P,F]= 0.61D-03
+ SDMM : CG 9          :: Tr(P.F) = -.71456070D+03, %Non0= 74, MAX[P,F]= 0.39D-03
+ SDMM : CG 10         :: Tr(P.F) = -.71562729D+03, %Non0= 74, MAX[P,F]= 0.33D-03
+ SDMM : CG 11         :: Tr(P.F) = -.72352871D+03, %Non0= 74, MAX[P,F]= 0.30D-03
+ SDMM : CG 12         :: Tr(P.F) = -.72709756D+03, %Non0= 81, MAX[P,F]= 0.39D-03
+ SDMM : CG 13         :: Tr(P.F) = -.73090465D+03, %Non0= 81, MAX[P,F]= 0.46D-03
+ SDMM : CG 14         :: Tr(P.F) = -.72381416D+03, %Non0= 81, MAX[P,F]= 0.45D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.72383118D+03, %Non0= 75, MAX(/P) = 0.19D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.72485571D+03, %Non0= 79, MAX(/P) = 0.78D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.72533561D+03, %Non0= 81, MAX(/P) = 0.43D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.72552229D+03, %Non0= 83, MAX(/P) = 0.19D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.72561475D+03, %Non0= 83, MAX(/P) = 0.12D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.72564638D+03, %Non0= 83, MAX(/P) = 0.55D-02
+ SDMM : Pure 7        :: Tr(P.F) = -.72565059D+03, %Non0= 83, MAX(/P) = 0.97D-03
+ SDMM : Pure 8        :: Tr(P.F) = -.72565069D+03, %Non0= 83, MAX(/P) = 0.30D-03
+ SDMM : Pure 9        :: Tr(P.F) = -.72565069D+03, %Non0= 83, MAX(/P) = 0.14D-03
+ SDMM : Pure 10       :: Tr(P.F) = -.72565069D+03, %Non0= 83, MAX(/P) = 0.13D-03
+ SDMM : Pure 11       :: Tr(P.F) = -.72565069D+03, %Non0= 83, MAX(/P) = 0.25D-03
+ SDMM                 :: 14 CG, and 11 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.25D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[3] CheckSum = 0.1341640919614587D+02
+ SDMM                 :: P[3] CheckSum = 0.1167654822160051D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.25D+02, 126),
+                         WALL(Sec,MFLOPS) = (0.25D+02, 126)
+ SDMM                 :: Allocs=806,  DeAllocs=802, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:02:33-<
+ SCFStatus : [2,1,1]  :: <SCF> = -2266.67226341, dD = 0.34D+00, DIIS = 0.58D-02
+ MakeRho              :: Rho CheckSum = 0.2119244995255634D+04
+ QCTC                 :: J[3] CheckSum = 0.2206301975773848D+03
+ ONX                  :: Kx[3] CheckSum = 0.3319308749602627D+02
+ FockNGrueven         :: F[3] CheckSum = 0.1126735074981790D+03
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.1005928774466708D+03
+<<Entering PulayDIIS 10/28/01 @ 11:05:19>>
+ PulayDIIS            :: DIISErr = 0.12D-02
+ PulayDIIS            :: DIISCo = -.24D+01, 0.25D+01, 0.89D+00
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.1005979135392051D+03
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.53D+00, 110),
+                         WALL(Sec,MFLOPS) = (0.53D+00, 110)
+ PulayDIIS            :: Allocs=47,  DeAllocs=46, 128 bytes are presently allocated.
+                         A max of 3043108 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:05:20-<
+<<Entering SDMM 10/28/01 @ 11:05:20>>
+ SDMM : CG 1          :: Tr(P.F) = -.53720079D+03, %Non0= 46, MAX[P,F]= 0.14D-03
+ SDMM : CG 2          :: Tr(P.F) = -.63572991D+03, %Non0= 48, MAX[P,F]= 0.21D-03
+ SDMM : CG 3          :: Tr(P.F) = -.63021690D+03, %Non0= 48, MAX[P,F]= 0.23D-03
+ SDMM : CG 4          :: Tr(P.F) = -.64389918D+03, %Non0= 48, MAX[P,F]= 0.24D-03
+ SDMM : CG 5          :: Tr(P.F) = -.69346748D+03, %Non0= 62, MAX[P,F]= 0.26D-03
+ SDMM : CG 6          :: Tr(P.F) = -.72905161D+03, %Non0= 63, MAX[P,F]= 0.79D-03
+ SDMM : CG 7          :: Tr(P.F) = -.72742497D+03, %Non0= 63, MAX[P,F]= 0.77D-03
+ SDMM : CG 8          :: Tr(P.F) = -.70576032D+03, %Non0= 64, MAX[P,F]= 0.67D-03
+ SDMM : CG 9          :: Tr(P.F) = -.71451135D+03, %Non0= 69, MAX[P,F]= 0.49D-03
+ SDMM : CG 10         :: Tr(P.F) = -.71569527D+03, %Non0= 69, MAX[P,F]= 0.43D-03
+ SDMM : CG 11         :: Tr(P.F) = -.72476126D+03, %Non0= 70, MAX[P,F]= 0.35D-03
+ SDMM : CG 12         :: Tr(P.F) = -.72624719D+03, %Non0= 74, MAX[P,F]= 0.36D-03
+ SDMM : CG 13         :: Tr(P.F) = -.73098285D+03, %Non0= 76, MAX[P,F]= 0.43D-03
+ SDMM : CG 14         :: Tr(P.F) = -.72396475D+03, %Non0= 76, MAX[P,F]= 0.51D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.72411606D+03, %Non0= 73, MAX(/P) = 0.21D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.72461194D+03, %Non0= 77, MAX(/P) = 0.61D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.72529283D+03, %Non0= 80, MAX(/P) = 0.58D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.72554778D+03, %Non0= 81, MAX(/P) = 0.26D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.72565245D+03, %Non0= 82, MAX(/P) = 0.11D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.72568431D+03, %Non0= 82, MAX(/P) = 0.47D-02
+ SDMM : Pure 7        :: Tr(P.F) = -.72568840D+03, %Non0= 82, MAX(/P) = 0.78D-03
+ SDMM : Pure 8        :: Tr(P.F) = -.72568848D+03, %Non0= 82, MAX(/P) = 0.11D-03
+ SDMM : Pure 9        :: Tr(P.F) = -.72568848D+03, %Non0= 82, MAX(/P) = 0.13D-03
+ SDMM                 :: 14 CG, and 9 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.13D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[4] CheckSum = 0.1341640890066105D+02
+ SDMM                 :: P[4] CheckSum = 0.1163252833814138D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.21D+02, 129),
+                         WALL(Sec,MFLOPS) = (0.21D+02, 129)
+ SDMM                 :: Allocs=780,  DeAllocs=776, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:05:41-<
+ SCFStatus : [3,1,1]  :: <SCF> = -2268.93483261, dD = 0.78D-01, DIIS = 0.12D-02
+ MakeRho              :: Rho CheckSum = 0.2116507478066560D+04
+ QCTC                 :: J[4] CheckSum = 0.2206386222957876D+03
+ ONX                  :: Kx[4] CheckSum = 0.3319197289423756D+02
+ FockNGrueven         :: F[4] CheckSum = 0.1126700624014939D+03
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.1006000531575848D+03
+<<Entering PulayDIIS 10/28/01 @ 11:08:25>>
+ PulayDIIS            :: DIISErr = 0.34D-03
+ PulayDIIS            :: DIISCo = 0.24D+00, -.29D+00, 0.19D+00, 0.86D+00
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.1005982275320700D+03
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.55D+00, 104),
+                         WALL(Sec,MFLOPS) = (0.55D+00, 104)
+ PulayDIIS            :: Allocs=53,  DeAllocs=52, 200 bytes are presently allocated.
+                         A max of 3042964 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:08:26-<
+<<Entering SDMM 10/28/01 @ 11:08:26>>
+ SDMM : CG 1          :: Tr(P.F) = -.53767853D+03, %Non0= 46, MAX[P,F]= 0.15D-03
+ SDMM : CG 2          :: Tr(P.F) = -.63632312D+03, %Non0= 48, MAX[P,F]= 0.21D-03
+ SDMM : CG 3          :: Tr(P.F) = -.63063921D+03, %Non0= 48, MAX[P,F]= 0.23D-03
+ SDMM : CG 4          :: Tr(P.F) = -.64426171D+03, %Non0= 48, MAX[P,F]= 0.24D-03
+ SDMM : CG 5          :: Tr(P.F) = -.69379647D+03, %Non0= 60, MAX[P,F]= 0.21D-03
+ SDMM : CG 6          :: Tr(P.F) = -.72967881D+03, %Non0= 61, MAX[P,F]= 0.80D-03
+ SDMM : CG 7          :: Tr(P.F) = -.72732794D+03, %Non0= 61, MAX[P,F]= 0.78D-03
+ SDMM : CG 8          :: Tr(P.F) = -.70577271D+03, %Non0= 62, MAX[P,F]= 0.67D-03
+ SDMM : CG 9          :: Tr(P.F) = -.71502964D+03, %Non0= 67, MAX[P,F]= 0.48D-03
+ SDMM : CG 10         :: Tr(P.F) = -.71610721D+03, %Non0= 67, MAX[P,F]= 0.43D-03
+ SDMM : CG 11         :: Tr(P.F) = -.72457245D+03, %Non0= 69, MAX[P,F]= 0.34D-03
+ SDMM : CG 12         :: Tr(P.F) = -.72692038D+03, %Non0= 73, MAX[P,F]= 0.36D-03
+ SDMM : CG 13         :: Tr(P.F) = -.73114847D+03, %Non0= 73, MAX[P,F]= 0.49D-03
+ SDMM : CG 14         :: Tr(P.F) = -.72397680D+03, %Non0= 74, MAX[P,F]= 0.58D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.72427273D+03, %Non0= 72, MAX(/P) = 0.20D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.72511092D+03, %Non0= 77, MAX(/P) = 0.71D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.72564835D+03, %Non0= 80, MAX(/P) = 0.48D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.72585670D+03, %Non0= 81, MAX(/P) = 0.22D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.72594703D+03, %Non0= 82, MAX(/P) = 0.11D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.72597435D+03, %Non0= 82, MAX(/P) = 0.44D-02
+ SDMM : Pure 7        :: Tr(P.F) = -.72597757D+03, %Non0= 82, MAX(/P) = 0.64D-03
+ SDMM : Pure 8        :: Tr(P.F) = -.72597762D+03, %Non0= 82, MAX(/P) = 0.21D-03
+ SDMM : Pure 9        :: Tr(P.F) = -.72597762D+03, %Non0= 82, MAX(/P) = 0.12D-03
+ SDMM : Pure 10       :: Tr(P.F) = -.72597762D+03, %Non0= 82, MAX(/P) = 0.16D-03
+ SDMM                 :: 14 CG, and 10 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.16D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[5] CheckSum = 0.1341640915599806D+02
+ SDMM                 :: P[5] CheckSum = 0.1162476427371404D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.21D+02, 129),
+                         WALL(Sec,MFLOPS) = (0.21D+02, 129)
+ SDMM                 :: Allocs=787,  DeAllocs=783, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:08:47-<
+ SCFStatus : [4,1,1]  :: <SCF> = -2269.02810066, dD = 0.25D-01, DIIS = 0.34D-03
+ MakeRho              :: Rho CheckSum = 0.2116020700180563D+04
+ QCTC                 :: J[5] CheckSum = 0.2206468489228704D+03
+ ONX                  :: Kx[5] CheckSum = 0.3319148838034172D+02
+ FockNGrueven         :: F[5] CheckSum = 0.1126758904269008D+03
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.1006073037502703D+03
+<<Entering PulayDIIS 10/28/01 @ 11:11:31>>
+ PulayDIIS            :: DIISErr = 0.12D-03
+ PulayDIIS            :: DIISCo = 0.26D+00, -.27D+00, -.11D-01,
+                                  0.17D+00, 0.86D+00
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.1006057808137838D+03
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.58D+00, 99),
+                         WALL(Sec,MFLOPS) = (0.58D+00, 99)
+ PulayDIIS            :: Allocs=59,  DeAllocs=58, 288 bytes are presently allocated.
+                         A max of 3042996 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:11:32-<
+<<Entering SDMM 10/28/01 @ 11:11:32>>
+ SDMM : CG 1          :: Tr(P.F) = -.53774116D+03, %Non0= 46, MAX[P,F]= 0.15D-03
+ SDMM : CG 2          :: Tr(P.F) = -.63638441D+03, %Non0= 48, MAX[P,F]= 0.21D-03
+ SDMM : CG 3          :: Tr(P.F) = -.63070609D+03, %Non0= 48, MAX[P,F]= 0.23D-03
+ SDMM : CG 4          :: Tr(P.F) = -.64433304D+03, %Non0= 48, MAX[P,F]= 0.24D-03
+ SDMM : CG 5          :: Tr(P.F) = -.69385051D+03, %Non0= 60, MAX[P,F]= 0.21D-03
+ SDMM : CG 6          :: Tr(P.F) = -.72970312D+03, %Non0= 61, MAX[P,F]= 0.80D-03
+ SDMM : CG 7          :: Tr(P.F) = -.72740011D+03, %Non0= 61, MAX[P,F]= 0.78D-03
+ SDMM : CG 8          :: Tr(P.F) = -.70581283D+03, %Non0= 63, MAX[P,F]= 0.67D-03
+ SDMM : CG 9          :: Tr(P.F) = -.71522631D+03, %Non0= 68, MAX[P,F]= 0.48D-03
+ SDMM : CG 10         :: Tr(P.F) = -.71632423D+03, %Non0= 68, MAX[P,F]= 0.43D-03
+ SDMM : CG 11         :: Tr(P.F) = -.72482879D+03, %Non0= 69, MAX[P,F]= 0.34D-03
+ SDMM : CG 12         :: Tr(P.F) = -.72687592D+03, %Non0= 73, MAX[P,F]= 0.36D-03
+ SDMM : CG 13         :: Tr(P.F) = -.73128972D+03, %Non0= 73, MAX[P,F]= 0.49D-03
+ SDMM : CG 14         :: Tr(P.F) = -.72407055D+03, %Non0= 74, MAX[P,F]= 0.58D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.72437693D+03, %Non0= 72, MAX(/P) = 0.20D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.72514128D+03, %Non0= 77, MAX(/P) = 0.69D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.72571115D+03, %Non0= 80, MAX(/P) = 0.51D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.72593121D+03, %Non0= 81, MAX(/P) = 0.24D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.72602655D+03, %Non0= 82, MAX(/P) = 0.11D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.72605555D+03, %Non0= 82, MAX(/P) = 0.44D-02
+ SDMM : Pure 7        :: Tr(P.F) = -.72605899D+03, %Non0= 82, MAX(/P) = 0.65D-03
+ SDMM : Pure 8        :: Tr(P.F) = -.72605904D+03, %Non0= 82, MAX(/P) = 0.20D-03
+ SDMM : Pure 9        :: Tr(P.F) = -.72605904D+03, %Non0= 82, MAX(/P) = 0.15D-03
+ SDMM : Pure 10       :: Tr(P.F) = -.72605905D+03, %Non0= 82, MAX(/P) = 0.13D-03
+ SDMM : Pure 11       :: Tr(P.F) = -.72605905D+03, %Non0= 82, MAX(/P) = 0.13D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.72605905D+03, %Non0= 82, MAX(/P) = 0.14D-03
+ SDMM                 :: 14 CG, and 12 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.14D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[6] CheckSum = 0.1341640937562054D+02
+ SDMM                 :: P[6] CheckSum = 0.1162333906635714D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.22D+02, 128),
+                         WALL(Sec,MFLOPS) = (0.22D+02, 128)
+ SDMM                 :: Allocs=817,  DeAllocs=813, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:11:55-<
+ SCFStatus : [5,1,1]  :: <SCF> = -2269.03637846, dD = 0.11D-01, DIIS = 0.12D-03
+ MakeRho              :: Rho CheckSum = 0.2115975513668911D+04
+ QCTC                 :: J[6] CheckSum = 0.2206463805180706D+03
+ ONX                  :: Kx[6] CheckSum = 0.3319140523446271D+02
+ FockNGrueven         :: F[6] CheckSum = 0.1126752771801942D+03
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.1006068928978276D+03
+<<Entering PulayDIIS 10/28/01 @ 11:14:39>>
+ PulayDIIS            :: DIISErr = 0.64D-04
+ PulayDIIS            :: DIISCo = 0.40D-01, -.38D-01, -.23D-01,
+                                  -.88D-01, -.44D-01, 0.12D+01
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.1006076577334410D+03
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.62D+00, 93),
+                         WALL(Sec,MFLOPS) = (0.62D+00, 93)
+ PulayDIIS            :: Allocs=65,  DeAllocs=64, 392 bytes are presently allocated.
+                         A max of 3042948 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:14:39-<
+<<Entering SDMM 10/28/01 @ 11:14:39>>
+ SDMM : CG 1          :: Tr(P.F) = -.53768747D+03, %Non0= 46, MAX[P,F]= 0.15D-03
+ SDMM : CG 2          :: Tr(P.F) = -.63631602D+03, %Non0= 48, MAX[P,F]= 0.21D-03
+ SDMM : CG 3          :: Tr(P.F) = -.63065984D+03, %Non0= 48, MAX[P,F]= 0.23D-03
+ SDMM : CG 4          :: Tr(P.F) = -.64429411D+03, %Non0= 48, MAX[P,F]= 0.24D-03
+ SDMM : CG 5          :: Tr(P.F) = -.69380783D+03, %Non0= 60, MAX[P,F]= 0.26D-03
+ SDMM : CG 6          :: Tr(P.F) = -.72962646D+03, %Non0= 61, MAX[P,F]= 0.80D-03
+ SDMM : CG 7          :: Tr(P.F) = -.72742640D+03, %Non0= 61, MAX[P,F]= 0.78D-03
+ SDMM : CG 8          :: Tr(P.F) = -.70582061D+03, %Non0= 63, MAX[P,F]= 0.67D-03
+ SDMM : CG 9          :: Tr(P.F) = -.71517548D+03, %Non0= 68, MAX[P,F]= 0.48D-03
+ SDMM : CG 10         :: Tr(P.F) = -.71629252D+03, %Non0= 68, MAX[P,F]= 0.43D-03
+ SDMM : CG 11         :: Tr(P.F) = -.72488244D+03, %Non0= 69, MAX[P,F]= 0.34D-03
+ SDMM : CG 12         :: Tr(P.F) = -.72679246D+03, %Non0= 73, MAX[P,F]= 0.36D-03
+ SDMM : CG 13         :: Tr(P.F) = -.73128305D+03, %Non0= 74, MAX[P,F]= 0.40D-03
+ SDMM : CG 14         :: Tr(P.F) = -.72407472D+03, %Non0= 74, MAX[P,F]= 0.50D-03
+ SDMM : Pure 1        :: Tr(P.F) = -.72436562D+03, %Non0= 72, MAX(/P) = 0.21D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.72508869D+03, %Non0= 77, MAX(/P) = 0.68D-01
+ SDMM : Pure 3        :: Tr(P.F) = -.72567552D+03, %Non0= 80, MAX(/P) = 0.52D-01
+ SDMM : Pure 4        :: Tr(P.F) = -.72590095D+03, %Non0= 81, MAX(/P) = 0.24D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.72599824D+03, %Non0= 82, MAX(/P) = 0.11D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.72602780D+03, %Non0= 82, MAX(/P) = 0.45D-02
+ SDMM : Pure 7        :: Tr(P.F) = -.72603131D+03, %Non0= 82, MAX(/P) = 0.65D-03
+ SDMM : Pure 8        :: Tr(P.F) = -.72603137D+03, %Non0= 82, MAX(/P) = 0.25D-03
+ SDMM : Pure 9        :: Tr(P.F) = -.72603137D+03, %Non0= 82, MAX(/P) = 0.13D-03
+ SDMM : Pure 10       :: Tr(P.F) = -.72603137D+03, %Non0= 82, MAX(/P) = 0.13D-03
+ SDMM                 :: 14 CG, and 10 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.13D-03, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[7] CheckSum = 0.1341640912826860D+02
+ SDMM                 :: P[7] CheckSum = 0.1162243457177275D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.21D+02, 128),
+                         WALL(Sec,MFLOPS) = (0.21D+02, 128)
+ SDMM                 :: Allocs=795,  DeAllocs=791, 744080 bytes are presently allocated.
+                         A max of 5209664 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:15:01-<
+ SCFStatus : [6,1,1]  :: <SCF> = -2269.03732228, dD = 0.86D-02, DIIS = 0.64D-04
+ MakeS                :: S CheckSum = 0.3435099943834625D+02
+ BlokAInv             :: Z CheckSum = 0.9602537979142248D+02
+ MakeT                :: T CheckSum = 0.1611187626929374D+03
+ MakeRho              :: Rho CheckSum = 0.2115948410525686D+04
+ QCTC                 :: J[0] CheckSum = 0.2380021003140130D+03
+ HiCu                 :: Kxc[0] CheckSum = 0.2654544874399126D+02
+ FockNGrueven         :: F[0] CheckSum = 0.1117873582551666D+03
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.9824651106472768D+02
+<<Entering SDMM 10/28/01 @ 11:22:51>>
+ SDMM : CG 1          :: Tr(P.F) = -.35164256D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53645003D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51884747D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.53197707D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56551745D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.59076454D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60702804D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.63194964D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.64302032D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.64464046D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.64343668D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.66275350D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66927581D+03, %Non0= 99, MAX[P,F]= 0.33D-04
+ SDMM : CG 14         :: Tr(P.F) = -.66472910D+03, %Non0= 99, MAX[P,F]= 0.35D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65865176D+03, %Non0= 97, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.66328114D+03, %Non0= 97, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66593155D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66686342D+03, %Non0= 98, MAX(/P) = 0.96D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66712053D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66720534D+03, %Non0= 99, MAX(/P) = 0.41D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66723698D+03, %Non0= 99, MAX(/P) = 0.26D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66725127D+03, %Non0= 99, MAX(/P) = 0.16D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66725872D+03, %Non0= 99, MAX(/P) = 0.10D-01
+ SDMM : Pure 10       :: Tr(P.F) = -.66726177D+03, %Non0= 99, MAX(/P) = 0.49D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66726224D+03, %Non0= 99, MAX(/P) = 0.83D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66726225D+03, %Non0= 99, MAX(/P) = 0.19D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66726225D+03, %Non0= 99, MAX(/P) = 0.28D-04
+ SDMM                 :: 14 CG, and 13 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.28D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[1] CheckSum = 0.1341640786715430D+02
+ SDMM                 :: P[1] CheckSum = 0.1073887565780119D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.13D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.13D+03, 242)
+ SDMM                 :: Allocs=800,  DeAllocs=796, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:25:06-<
+ SCFStatus : [0,2,1]  :: Basis set switch ...  MxD = 0.23D+01
+ MakeRho              :: Rho CheckSum = 0.3547989571275098D+04
+ QCTC                 :: J[1] CheckSum = 0.2363051829197724D+03
+ HiCu                 :: Kxc[1] CheckSum = 0.2665632193425161D+02
+ FockNGrueven         :: F[1] CheckSum = 0.1103801363640599D+03
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.9695540497648507D+02
+<<Entering PulayDIIS 10/28/01 @ 11:37:43>>
+ PulayDIIS            :: DIISErr = 0.12D-02
+ PulayDIIS            :: DIISCo = 0.10D+01
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.9818151248594718D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.25D+01, 235),
+                         WALL(Sec,MFLOPS) = (0.25D+01, 235)
+ PulayDIIS            :: Allocs=39,  DeAllocs=38, 32 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:37:45-<
+<<Entering SDMM 10/28/01 @ 11:37:46>>
+ SDMM : CG 1          :: Tr(P.F) = -.35120837D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53593711D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51835888D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.53148226D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56499642D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.59025295D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60651270D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.63141107D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.64247466D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.64403371D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.64287383D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.66223517D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66866726D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.66414983D+03, %Non0= 99, MAX[P,F]= 0.35D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65810228D+03, %Non0= 97, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.66274180D+03, %Non0= 97, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66539330D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66632017D+03, %Non0= 98, MAX(/P) = 0.96D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66657733D+03, %Non0= 98, MAX(/P) = 0.53D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66666237D+03, %Non0= 99, MAX(/P) = 0.41D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66669414D+03, %Non0= 99, MAX(/P) = 0.26D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66670853D+03, %Non0= 99, MAX(/P) = 0.16D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66671605D+03, %Non0= 99, MAX(/P) = 0.10D-01
+ SDMM : Pure 10       :: Tr(P.F) = -.66671916D+03, %Non0= 99, MAX(/P) = 0.49D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66671964D+03, %Non0= 99, MAX(/P) = 0.82D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66671965D+03, %Non0= 99, MAX(/P) = 0.19D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66671965D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66671965D+03, %Non0= 99, MAX(/P) = 0.11D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.11D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[2] CheckSum = 0.1341640786740831D+02
+ SDMM                 :: P[2] CheckSum = 0.1073296255521440D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=811,  DeAllocs=807, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:40:03-<
+ SCFStatus : [1,2,1]  :: <SCF> = -2366.89615944, dD = 0.91D-02, DIIS = 0.12D-02
+ MakeRho              :: Rho CheckSum = 0.3548004837699419D+04
+ QCTC                 :: J[2] CheckSum = 0.2363583383843866D+03
+ HiCu                 :: Kxc[2] CheckSum = 0.2665383790737805D+02
+ FockNGrueven         :: F[2] CheckSum = 0.1104341836552416D+03
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.9698451173316310D+02
+<<Entering PulayDIIS 10/28/01 @ 11:52:40>>
+ PulayDIIS            :: DIISErr = 0.11D-02
+ PulayDIIS            :: DIISCo = -.67D+01, 0.77D+01
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.9718605996259454D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.25D+01, 235),
+                         WALL(Sec,MFLOPS) = (0.25D+01, 234)
+ PulayDIIS            :: Allocs=41,  DeAllocs=40, 72 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 11:52:43-<
+<<Entering SDMM 10/28/01 @ 11:52:43>>
+ SDMM : CG 1          :: Tr(P.F) = -.34767998D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53085350D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51349332D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52652244D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.55991011D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58536620D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60168047D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62638631D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63752023D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63884919D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63832136D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65780602D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66266368D+03, %Non0= 99, MAX[P,F]= 0.31D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65844419D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65258508D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65745008D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66014837D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66105615D+03, %Non0= 98, MAX(/P) = 0.96D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66131045D+03, %Non0= 98, MAX(/P) = 0.55D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66139060D+03, %Non0= 99, MAX(/P) = 0.36D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66142045D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66143595D+03, %Non0= 99, MAX(/P) = 0.15D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66144374D+03, %Non0= 99, MAX(/P) = 0.10D-01
+ SDMM : Pure 10       :: Tr(P.F) = -.66144633D+03, %Non0= 99, MAX(/P) = 0.43D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66144664D+03, %Non0= 99, MAX(/P) = 0.56D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66144664D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66144664D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 13 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[3] CheckSum = 0.1341640786692632D+02
+ SDMM                 :: P[3] CheckSum = 0.1064153743017026D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.13D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.13D+03, 242)
+ SDMM                 :: Allocs=800,  DeAllocs=796, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 11:54:58-<
+ SCFStatus : [2,2,1]  :: <SCF> = -2366.93430053, dD = 0.73D-01, DIIS = 0.11D-02
+ MakeRho              :: Rho CheckSum = 0.3549479113181516D+04
+ QCTC                 :: J[3] CheckSum = 0.2369534500958189D+03
+ HiCu                 :: Kxc[3] CheckSum = 0.2663041133486243D+02
+ FockNGrueven         :: F[3] CheckSum = 0.1110820417495856D+03
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.9729237504554446D+02
+<<Entering PulayDIIS 10/28/01 @ 12:07:40>>
+ PulayDIIS            :: DIISErr = 0.77D-03
+ PulayDIIS            :: DIISCo = -.52D+01, 0.58D+01, 0.35D+00
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.9724508854828491D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.26D+01, 226),
+                         WALL(Sec,MFLOPS) = (0.26D+01, 226)
+ PulayDIIS            :: Allocs=43,  DeAllocs=42, 128 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 12:07:42-<
+<<Entering SDMM 10/28/01 @ 12:07:43>>
+ SDMM : CG 1          :: Tr(P.F) = -.34916894D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53232573D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51491504D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52793668D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56137670D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58685980D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60325896D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62807401D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63925273D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.64067620D+03, %Non0= 99, MAX[P,F]= 0.23D-04
+ SDMM : CG 11         :: Tr(P.F) = -.64002391D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65943458D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66447590D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.66022551D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65415147D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65896141D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66167899D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66257197D+03, %Non0= 98, MAX(/P) = 0.91D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66282360D+03, %Non0= 98, MAX(/P) = 0.53D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66290944D+03, %Non0= 99, MAX(/P) = 0.40D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66294219D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66295604D+03, %Non0= 99, MAX(/P) = 0.14D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66296288D+03, %Non0= 99, MAX(/P) = 0.12D-01
+ SDMM : Pure 10       :: Tr(P.F) = -.66296545D+03, %Non0= 99, MAX(/P) = 0.51D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66296577D+03, %Non0= 99, MAX(/P) = 0.70D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66296577D+03, %Non0= 99, MAX(/P) = 0.15D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66296577D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 13 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[4] CheckSum = 0.1341640786724503D+02
+ SDMM                 :: P[4] CheckSum = 0.1068414935297870D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.13D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.13D+03, 242)
+ SDMM                 :: Allocs=800,  DeAllocs=796, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 12:09:58-<
+ SCFStatus : [3,2,1]  :: <SCF> = -2366.95094568, dD = 0.11D+00, DIIS = 0.77D-03
+ MakeRho              :: Rho CheckSum = 0.3549735019565456D+04
+ QCTC                 :: J[4] CheckSum = 0.2367223481455663D+03
+ HiCu                 :: Kxc[4] CheckSum = 0.2663495780704466D+02
+ FockNGrueven         :: F[4] CheckSum = 0.1107996850787021D+03
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.9721066117948715D+02
+<<Entering PulayDIIS 10/28/01 @ 12:22:36>>
+ PulayDIIS            :: DIISErr = 0.41D-03
+ PulayDIIS            :: DIISCo = -.28D+01, 0.31D+01, 0.32D+00, 0.39D+00
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.9724955389556899D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.27D+01, 218),
+                         WALL(Sec,MFLOPS) = (0.27D+01, 218)
+ PulayDIIS            :: Allocs=45,  DeAllocs=44, 200 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 12:22:39-<
+<<Entering SDMM 10/28/01 @ 12:22:39>>
+ SDMM : CG 1          :: Tr(P.F) = -.34889001D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53209566D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51467638D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52769140D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56112975D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58658924D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60296763D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62773037D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63888430D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.64032989D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63969723D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65910613D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66417656D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65992873D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65388590D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65869191D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66140660D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66229127D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66254239D+03, %Non0= 98, MAX(/P) = 0.55D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66262655D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66265895D+03, %Non0= 99, MAX(/P) = 0.24D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66267438D+03, %Non0= 99, MAX(/P) = 0.14D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66268220D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66268518D+03, %Non0= 99, MAX(/P) = 0.45D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66268558D+03, %Non0= 99, MAX(/P) = 0.67D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66268559D+03, %Non0= 99, MAX(/P) = 0.12D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66268559D+03, %Non0= 99, MAX(/P) = 0.11D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66268559D+03, %Non0= 99, MAX(/P) = 0.26D-05
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.26D-05, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[5] CheckSum = 0.1341640786746570D+02
+ SDMM                 :: P[5] CheckSum = 0.1067012514257577D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=807,  DeAllocs=803, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 12:24:57-<
+ SCFStatus : [4,2,1]  :: <SCF> = -2367.02635556, dD = 0.39D-01, DIIS = 0.41D-03
+ MakeRho              :: Rho CheckSum = 0.3549633443472150D+04
+ QCTC                 :: J[5] CheckSum = 0.2367930502617091D+03
+ HiCu                 :: Kxc[5] CheckSum = 0.2663454829417495D+02
+ FockNGrueven         :: F[5] CheckSum = 0.1108804850540211D+03
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.9722939121786510D+02
+<<Entering PulayDIIS 10/28/01 @ 12:37:37>>
+ PulayDIIS            :: DIISErr = 0.16D-03
+ PulayDIIS            :: DIISCo = -.13D+01, 0.14D+01, 0.20D+00,
+                                  0.31D+00, 0.38D+00
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.9724391362665672D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.28D+01, 211),
+                         WALL(Sec,MFLOPS) = (0.28D+01, 211)
+ PulayDIIS            :: Allocs=47,  DeAllocs=46, 288 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 12:37:39-<
+<<Entering SDMM 10/28/01 @ 12:37:40>>
+ SDMM : CG 1          :: Tr(P.F) = -.34864787D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53185705D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51444864D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52746786D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56089969D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58635880D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60272149D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62746516D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63860825D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.64002444D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63941799D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65884954D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66386699D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65962759D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65363651D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65846154D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66117461D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66205898D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66231056D+03, %Non0= 98, MAX(/P) = 0.55D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66239538D+03, %Non0= 99, MAX(/P) = 0.37D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66242792D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66244298D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66245080D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66245396D+03, %Non0= 99, MAX(/P) = 0.47D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66245442D+03, %Non0= 99, MAX(/P) = 0.75D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66245443D+03, %Non0= 99, MAX(/P) = 0.15D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66245443D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66245443D+03, %Non0= 99, MAX(/P) = 0.29D-05
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.29D-05, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[6] CheckSum = 0.1341640786749842D+02
+ SDMM                 :: P[6] CheckSum = 0.1066697433978849D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 243),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=811,  DeAllocs=807, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 12:39:57-<
+ SCFStatus : [5,2,1]  :: <SCF> = -2367.05466244, dD = 0.19D-01, DIIS = 0.16D-03
+ MakeRho              :: Rho CheckSum = 0.3549575135146299D+04
+ QCTC                 :: J[6] CheckSum = 0.2367931236629233D+03
+ HiCu                 :: Kxc[6] CheckSum = 0.2663349752044227D+02
+ FockNGrueven         :: F[6] CheckSum = 0.1108800897024566D+03
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.9723168955452229D+02
+<<Entering PulayDIIS 10/28/01 @ 12:52:37>>
+ PulayDIIS            :: DIISErr = 0.62D-04
+ PulayDIIS            :: DIISCo = -.55D+00, 0.59D+00, 0.99D-01,
+                                  0.17D+00, 0.29D+00, 0.40D+00
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.9723848935998061D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.29D+01, 204),
+                         WALL(Sec,MFLOPS) = (0.29D+01, 204)
+ PulayDIIS            :: Allocs=49,  DeAllocs=48, 392 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 12:52:40-<
+<<Entering SDMM 10/28/01 @ 12:52:40>>
+ SDMM : CG 1          :: Tr(P.F) = -.34849007D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53171244D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51431088D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52732839D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56074861D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58620763D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60256086D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62729015D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63842802D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63981687D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63922756D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65867763D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66367079D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65943384D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65347057D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65830092D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66101080D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66189785D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66214974D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66223428D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66226662D+03, %Non0= 99, MAX(/P) = 0.24D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66228168D+03, %Non0= 99, MAX(/P) = 0.14D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66228943D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66229249D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66229293D+03, %Non0= 99, MAX(/P) = 0.71D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66229293D+03, %Non0= 99, MAX(/P) = 0.14D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66229293D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66229293D+03, %Non0= 99, MAX(/P) = 0.21D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.21D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[7] CheckSum = 0.1341640786751863D+02
+ SDMM                 :: P[7] CheckSum = 0.1066832202693614D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 12:54:57-<
+ SCFStatus : [6,2,1]  :: <SCF> = -2367.05864802, dD = 0.86D-02, DIIS = 0.62D-04
+ MakeRho              :: Rho CheckSum = 0.3549559567281163D+04
+ QCTC                 :: J[7] CheckSum = 0.2368114993012022D+03
+ HiCu                 :: Kxc[7] CheckSum = 0.2663301480397693D+02
+ FockNGrueven         :: F[7] CheckSum = 0.1108995892233384D+03
+ FockNGrueven         :: OrthoF[7] CheckSum = 0.9724022097567479D+02
+<<Entering PulayDIIS 10/28/01 @ 13:07:37>>
+ PulayDIIS            :: DIISErr = 0.24D-04
+ PulayDIIS            :: DIISCo = -.18D+00, 0.19D+00, 0.36D-01,
+                                  0.64D-01, 0.14D+00, 0.30D+00, 0.44D+00
+ PulayDIIS            :: F_DIIS[7] CheckSum = 0.9723806217851217D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.30D+01, 198),
+                         WALL(Sec,MFLOPS) = (0.30D+01, 198)
+ PulayDIIS            :: Allocs=51,  DeAllocs=50, 512 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 13:07:40-<
+<<Entering SDMM 10/28/01 @ 13:07:40>>
+ SDMM : CG 1          :: Tr(P.F) = -.34847836D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53169513D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51429438D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52731412D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56073431D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58619295D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60254348D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62727521D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63841549D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63979880D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63921126D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65866549D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66365705D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65942016D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65345849D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65828882D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66099828D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66188623D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66213825D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66222276D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66225503D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66226999D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66227767D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66228069D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66228112D+03, %Non0= 99, MAX(/P) = 0.69D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66228112D+03, %Non0= 99, MAX(/P) = 0.13D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66228112D+03, %Non0= 99, MAX(/P) = 0.11D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66228112D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[8] CheckSum = 0.1341640786747021D+02
+ SDMM                 :: P[8] CheckSum = 0.1066731600821693D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 13:09:58-<
+ SCFStatus : [7,2,1]  :: <SCF> = -2367.05921175, dD = 0.34D-02, DIIS = 0.24D-04
+ MakeRho              :: Rho CheckSum = 0.3549559505891464D+04
+ QCTC                 :: J[8] CheckSum = 0.2368114877966821D+03
+ HiCu                 :: Kxc[8] CheckSum = 0.2663304110864111D+02
+ FockNGrueven         :: F[8] CheckSum = 0.1109002602804196D+03
+ FockNGrueven         :: OrthoF[8] CheckSum = 0.9723982582471363D+02
+<<Entering PulayDIIS 10/28/01 @ 13:22:39>>
+ PulayDIIS            :: DIISErr = 0.14D-04
+ PulayDIIS            :: DIISCo = -.45D-01, 0.47D-01, 0.10D-01,
+                                  0.19D-01, 0.61D-01, 0.17D+00, 0.37D+00, 0.37D+00
+ PulayDIIS            :: F_DIIS[8] CheckSum = 0.9723858285065231D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.31D+01, 192),
+                         WALL(Sec,MFLOPS) = (0.31D+01, 192)
+ PulayDIIS            :: Allocs=53,  DeAllocs=52, 648 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 13:22:42-<
+<<Entering SDMM 10/28/01 @ 13:22:42>>
+ SDMM : CG 1          :: Tr(P.F) = -.34850018D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53171739D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51431572D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52733473D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56075600D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58621496D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60256742D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62729914D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63843902D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63982608D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63923777D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65869006D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66368254D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65944554D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65348026D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65831046D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66102060D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66190821D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66216015D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66224461D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66227689D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66229189D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66229961D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66230265D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66230308D+03, %Non0= 99, MAX(/P) = 0.70D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66230309D+03, %Non0= 99, MAX(/P) = 0.13D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66230309D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66230309D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[9] CheckSum = 0.1341640786752764D+02
+ SDMM                 :: P[9] CheckSum = 0.1066750346444063D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 13:24:59-<
+ SCFStatus : [8,2,1]  :: <SCF> = -2367.05928377, dD = 0.17D-02, DIIS = 0.14D-04
+ MakeRho              :: Rho CheckSum = 0.3549561275693064D+04
+ QCTC                 :: J[9] CheckSum = 0.2368097476658919D+03
+ HiCu                 :: Kxc[9] CheckSum = 0.2663307806662790D+02
+ FockNGrueven         :: F[9] CheckSum = 0.1108982225753979D+03
+ FockNGrueven         :: OrthoF[9] CheckSum = 0.9723904699993892D+02
+<<Entering PulayDIIS 10/28/01 @ 13:37:39>>
+ PulayDIIS            :: DIISErr = 0.64D-05
+ PulayDIIS            :: DIISCo = -.88D-02, 0.89D-02, 0.22D-02,
+                                  0.45D-02, 0.26D-01, 0.90D-01, 0.23D+00,
+                                  0.31D+00, 0.34D+00
+ PulayDIIS            :: F_DIIS[9] CheckSum = 0.9723882490837227D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.32D+01, 186),
+                         WALL(Sec,MFLOPS) = (0.32D+01, 186)
+ PulayDIIS            :: Allocs=55,  DeAllocs=54, 800 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 13:37:42-<
+<<Entering SDMM 10/28/01 @ 13:37:43>>
+ SDMM : CG 1          :: Tr(P.F) = -.34851191D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53172893D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51432667D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52734540D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56076717D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58622614D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60257946D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62731205D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63845224D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63984166D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63925144D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65870157D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66369665D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65945935D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65349192D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65832143D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66103166D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66191896D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66217088D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66225540D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66228771D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66230272D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66231044D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66231349D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66231392D+03, %Non0= 99, MAX(/P) = 0.70D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66231393D+03, %Non0= 99, MAX(/P) = 0.13D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66231393D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66231393D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[10] CheckSum = 0.1341640786746318D+02
+ SDMM                 :: P[10] CheckSum = 0.1066764877312791D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 13:40:00-<
+ SCFStatus : [9,2,1]  :: <SCF> = -2367.05930859, dD = 0.69D-03, DIIS = 0.64D-05
+ MakeRho              :: Rho CheckSum = 0.3549563063132928D+04
+ QCTC                 :: J[10] CheckSum = 0.2368089875165787D+03
+ HiCu                 :: Kxc[10] CheckSum = 0.2663309526053814D+02
+ FockNGrueven         :: F[10] CheckSum = 0.1108972117665521D+03
+ FockNGrueven         :: OrthoF[10] CheckSum = 0.9723883845426387D+02
+<<Entering PulayDIIS 10/28/01 @ 13:52:39>>
+ PulayDIIS            :: DIISErr = 0.24D-05
+ PulayDIIS            :: DIISCo = -.23D-02, 0.23D-02, 0.56D-03,
+                                  0.13D-02, 0.13D-01, 0.49D-01, 0.13D+00,
+                                  0.19D+00, 0.26D+00, 0.35D+00
+ PulayDIIS            :: F_DIIS[10] CheckSum = 0.9723885680102843D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.33D+01, 182),
+                         WALL(Sec,MFLOPS) = (0.33D+01, 181)
+ PulayDIIS            :: Allocs=57,  DeAllocs=56, 968 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 13:52:43-<
+<<Entering SDMM 10/28/01 @ 13:52:43>>
+ SDMM : CG 1          :: Tr(P.F) = -.34851269D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53172916D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51432670D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52734555D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56076754D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58622625D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60257953D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62731257D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63845300D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63984322D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63925219D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65870155D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66369820D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65946078D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65349284D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65832197D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66103220D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66191939D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66217129D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66225581D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66228812D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66230314D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66231087D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66231391D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66231434D+03, %Non0= 99, MAX(/P) = 0.70D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66231435D+03, %Non0= 99, MAX(/P) = 0.13D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66231435D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66231435D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[11] CheckSum = 0.1341640786747818D+02
+ SDMM                 :: P[11] CheckSum = 0.1066763443916018D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 13:55:00-<
+ SCFStatus : [10,2,1] :: <SCF> = -2367.05929680, dD = 0.24D-03, DIIS = 0.24D-05
+ MakeRho              :: Rho CheckSum = 0.3549562869067247D+04
+ QCTC                 :: J[11] CheckSum = 0.2368090673979658D+03
+ HiCu                 :: Kxc[11] CheckSum = 0.2663309987057507D+02
+ FockNGrueven         :: F[11] CheckSum = 0.1108973425162257D+03
+ FockNGrueven         :: OrthoF[11] CheckSum = 0.9723885072525096D+02
+<<Entering PulayDIIS 10/28/01 @ 14:07:40>>
+ PulayDIIS            :: DIISErr = 0.14D-05
+ PulayDIIS            :: DIISCo = -.92D-03, 0.92D-03, 0.14D-03,
+                                  0.35D-03, 0.59D-02, 0.23D-01, 0.67D-01,
+                                  0.99D-01, 0.14D+00, 0.24D+00, 0.43D+00
+ PulayDIIS            :: F_DIIS[11] CheckSum = 0.9723885894401970D+02
+ PulayDIIS            :: CPU (Sec,MFLOPS) = (0.34D+01, 177),
+                         WALL(Sec,MFLOPS) = (0.34D+01, 177)
+ PulayDIIS            :: Allocs=59,  DeAllocs=58, 1152 bytes are presently allocated.
+                         A max of 9289148 bytes were allocated.
+>-Exiting PulayDIIS 10/28/01 @ 14:07:44-<
+<<Entering SDMM 10/28/01 @ 14:07:44>>
+ SDMM : CG 1          :: Tr(P.F) = -.34851230D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 2          :: Tr(P.F) = -.53172871D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 3          :: Tr(P.F) = -.51432622D+03, %Non0= 99, MAX[P,F]= 0.10D-04
+ SDMM : CG 4          :: Tr(P.F) = -.52734509D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 5          :: Tr(P.F) = -.56076715D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 6          :: Tr(P.F) = -.58622579D+03, %Non0= 99, MAX[P,F]= 0.11D-04
+ SDMM : CG 7          :: Tr(P.F) = -.60257907D+03, %Non0= 99, MAX[P,F]= 0.18D-04
+ SDMM : CG 8          :: Tr(P.F) = -.62731212D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 9          :: Tr(P.F) = -.63845249D+03, %Non0= 99, MAX[P,F]= 0.27D-04
+ SDMM : CG 10         :: Tr(P.F) = -.63984299D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 11         :: Tr(P.F) = -.63925186D+03, %Non0= 99, MAX[P,F]= 0.22D-04
+ SDMM : CG 12         :: Tr(P.F) = -.65870105D+03, %Non0= 99, MAX[P,F]= 0.24D-04
+ SDMM : CG 13         :: Tr(P.F) = -.66369795D+03, %Non0= 99, MAX[P,F]= 0.32D-04
+ SDMM : CG 14         :: Tr(P.F) = -.65946052D+03, %Non0= 99, MAX[P,F]= 0.34D-04
+ SDMM : Pure 1        :: Tr(P.F) = -.65349252D+03, %Non0= 98, MAX(/P) = 0.17D+00
+ SDMM : Pure 2        :: Tr(P.F) = -.65832159D+03, %Non0= 98, MAX(/P) = 0.14D+00
+ SDMM : Pure 3        :: Tr(P.F) = -.66103181D+03, %Non0= 98, MAX(/P) = 0.12D+00
+ SDMM : Pure 4        :: Tr(P.F) = -.66191901D+03, %Non0= 98, MAX(/P) = 0.94D-01
+ SDMM : Pure 5        :: Tr(P.F) = -.66217091D+03, %Non0= 98, MAX(/P) = 0.54D-01
+ SDMM : Pure 6        :: Tr(P.F) = -.66225543D+03, %Non0= 99, MAX(/P) = 0.38D-01
+ SDMM : Pure 7        :: Tr(P.F) = -.66228774D+03, %Non0= 99, MAX(/P) = 0.23D-01
+ SDMM : Pure 8        :: Tr(P.F) = -.66230276D+03, %Non0= 99, MAX(/P) = 0.13D-01
+ SDMM : Pure 9        :: Tr(P.F) = -.66231048D+03, %Non0= 99, MAX(/P) = 0.99D-02
+ SDMM : Pure 10       :: Tr(P.F) = -.66231353D+03, %Non0= 99, MAX(/P) = 0.46D-02
+ SDMM : Pure 11       :: Tr(P.F) = -.66231396D+03, %Non0= 99, MAX(/P) = 0.70D-03
+ SDMM : Pure 12       :: Tr(P.F) = -.66231397D+03, %Non0= 99, MAX(/P) = 0.13D-04
+ SDMM : Pure 13       :: Tr(P.F) = -.66231397D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM : Pure 14       :: Tr(P.F) = -.66231397D+03, %Non0= 99, MAX(/P) = 0.10D-04
+ SDMM                 :: 14 CG, and 14 purification steps taken.
+ SDMM                 :: MAX(/\P) = 0.10D-04, |Tr(P)-NEl| = 0.00D+00 .
+ SDMM                 :: OrthoP[12] CheckSum = 0.1341640786747827D+02
+ SDMM                 :: P[12] CheckSum = 0.1066763544672592D+02
+ SDMM                 :: CPU (Sec,MFLOPS) = (0.14D+03, 242),
+                         WALL(Sec,MFLOPS) = (0.14D+03, 242)
+ SDMM                 :: Allocs=815,  DeAllocs=811, 2305360 bytes are presently allocated.
+                         A max of 16138624 bytes were allocated.
+>-Exiting SDMM 10/28/01 @ 14:10:02-<
+ SCFStatus : [11,2,1] :: <SCF> = -2367.05929991, dD = 0.64D-04, DIIS = 0.14D-05
+>-Succesfull MondoSCF run 10/28/01 @ 14:10:02-<
