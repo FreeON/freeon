@@ -258,13 +258,19 @@ CONTAINS
     REAL(DOUBLE)              :: AtomPairThresh,Radius
     INTEGER                   :: IL
 !------------------------------------------------------------------------------
+!   CS_OUT
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
     ELSE
        Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
     ENDIF
-!
     CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius)   
+!   CS_IN
+    IF(PRESENT(Rad_O)) THEN
+       Radius = Rad_O
+    ELSE
+       Radius = (One+1.D-14)*MaxBoxDim(G)+2.0D0*SQRT(AtomPairThresh)
+    ENDIF
     IF(G%PBC%PFFOvRide) THEN
        IL = G%PBC%PFFMaxLay
        CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/))
