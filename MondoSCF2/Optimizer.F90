@@ -1390,8 +1390,8 @@ CONTAINS
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
      IF(iGEO==1) THEN
-       GMLoc%LatticeOnly=.TRUE.
-       IF(GOpt%GConvCrit%FixedAtomsFirst) GMLoc%LatticeOnly=.FALSE.
+       GMLoc%LatticeOnly=.FALSE.
+       IF(GOpt%GConvCrit%FixAtomsFirst) GMLoc%LatticeOnly=.TRUE.
        GMLoc%AltCount=0
      ENDIF
      !
