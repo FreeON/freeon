@@ -1,6 +1,6 @@
 rm -f $1.pbs
 echo "#!/bin/tcsh "                                   >  $1.pbs
-echo "#PBS -joe -N m[$1]"                             >> $1.pbs
+echo "#PBS -joe  -N  $1"                               >> $1.pbs
 #------------------------------------------------------------------
 # for AMD/Intel linux [zinc]
 echo "#PBS -q myri "                                  >> $1.pbs
