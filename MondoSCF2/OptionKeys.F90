@@ -65,7 +65,7 @@ MODULE OptionKeys
   CHARACTER(LEN=8),   PARAMETER :: GRAD_TS_SEARCH    ='TSSearch'
   INTEGER,            PARAMETER :: GRAD_TS_SEARCH_NEB= 3577711 
   ! GDIIS 
-  CHARACTER(LEN=8),   PARAMETER :: GRAD_GDIIS        ='GDIIS'
+  CHARACTER(LEN=5),   PARAMETER :: GRAD_GDIIS        ='GDIIS'
   ! Approximate diagonal Hessian in internal coordinates
   CHARACTER(LEN=13),  PARAMETER :: GRAD_APPRX_HESS    ='ApproxHessian'
   ! Coordinate types for gradient operations
@@ -74,4 +74,12 @@ MODULE OptionKeys
   CHARACTER(LEN=9),   PARAMETER  :: GRAD_CARTESIAN   ='Cartesian'
   INTEGER,            PARAMETER  :: GRAD_CART_OPT    =34243945
   !------------------------------------------------------------------------------
+  ! Options:NEB=
+  CHARACTER(LEN=9),   PARAMETER :: NEB_SPRING        ='NEBSpring'
+  ! Climbing Image
+  CHARACTER(LEN=8),   PARAMETER :: NEB_CLIMB         ='NEBClimb'
+  CHARACTER(LEN=4),   PARAMETER :: NEB_DO_CLIMB      ='True'
+
+  !------------------------------------------------------------------------------
+
 END MODULE OptionKeys

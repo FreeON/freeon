@@ -9,6 +9,7 @@ MODULE SCFs
   USE OptionKeys
   USE Functionals
   USE ControlStructures
+  USE NEB
   IMPLICIT NONE 
   INTEGER HDFFileID,H5GroupID
 CONTAINS
@@ -168,6 +169,10 @@ CONTAINS
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
        CALL Delete(GradE)
     ENDDO
+    IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
+       ! Do the NEB force projections
+       CALL NEBForce(G,O)
+    ENDIF
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE Force
   !===============================================================================

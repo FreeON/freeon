@@ -37,6 +37,8 @@ CONTAINS
     CALL ParseModelChems(O%NModls,O%Models)
     ! Parse for gradient options.  
     CALL ParseGradients(O%NSteps,O%Coordinates,O%Grad,O%DoGDIIS,O%SteepStep)
+    ! Parse for NEB options.
+    CALL ParseNEB(O%NEBSpring,O%NEBClimb)
     CLOSE(UNIT=Inp,STATUS='KEEP')
   END SUBROUTINE LoadOptions
   !============================================================================
@@ -394,4 +396,22 @@ CONTAINS
        SteepStep=.TRUE.
     ENDIF    
   END SUBROUTINE ParseGradients
+  !===============================================================================================
+  !
+  !===============================================================================================
+  SUBROUTINE ParseNEB(NEBSpring,NEBClimb)
+    !-----------------------------------------------------------------------------------------------
+    REAL(DOUBLE) :: NEBSpring
+    Logical      :: NEBClimb
+    ! Set the spring constant between NEB images
+    IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
+       NEBSpring=5.0
+    ENDIF
+    ! Use the climbing image?
+    IF(OptKeyQ(Inp,NEB_CLIMB,NEB_DO_CLIMB))THEN
+       NEBClimb=.TRUE.
+    ELSE
+       NEBClimb=.FALSE.
+    ENDIF    
+  END SUBROUTINE ParseNEB
 END MODULE ParseOptions

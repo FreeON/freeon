@@ -7,9 +7,6 @@ Charge=0
 Multiplicity=1
 MPIInvoke="mpirun"
 MPIProcFlag="-np"
-MPIMachineFlag="-machinefile"
-MPIMachineFile="machfile"
-"$PBS_NODEFILE"
 Grad=(TSSearch,GDIIS)
 Clones=2
 MPIProcessors=4

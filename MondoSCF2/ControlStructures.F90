@@ -36,6 +36,8 @@ MODULE ControlStructures
      TYPE(INT_VECT)                 :: RestartState
      TYPE(TOLS),DIMENSION(MaxSets)  :: Thresholds
      TYPE(DEBG)                     :: PFlags
+     REAL(DOUBLE)                   :: NEBSpring
+     LOGICAL                        :: NEBClimb 
   END TYPE Options
 
   TYPE Dynamics

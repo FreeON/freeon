@@ -6,6 +6,7 @@ MODULE ParseGeometries
   USE GeometryKeys
   USE PrettyPrint
   USE ControlStructures
+  USE NEB
 CONTAINS
   !================================================================================================================
   !
@@ -16,6 +17,7 @@ CONTAINS
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
     INTEGER          :: I,iCLONE
+    TYPE(CRDS)       :: Reac,Prod                                                   ! NEB Reactants and Products
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
     IF(O%Grad==GRAD_TS_SEARCH_NEB.OR.D%MDAlgorithm==MD_PARALLEL_REP)THEN
@@ -29,23 +31,23 @@ CONTAINS
        ENDIF
        IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
           ALLOCATE(G%Clone(1:G%Clones))
+!          ALLOCATE(Reac)
+!          ALLOCATE(Prod)
           IF(O%Guess==GUESS_EQ_RESTART)THEN
+             ! Implement a routine to read in NEB images
           ELSE
-             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(1))        ! Read in the reactants geometry
-             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones))   ! Read in the products geometry
-             ! CALL Print(G%Clone(1),Unit_O=6)
-             ! CALL Print(G%Clone(G%Clones),Unit_O=6)
+             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,Reac)              ! Read in the reactants geometry
+             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,Prod)                ! Read in the products geometry
+             DO iCLONE=1,G%Clones
+               G%Clone(iCLONE)%NAtms=Reac%NAtms
+               G%Clone(iCLONE)%NKind=Reac%NKind
+               CALL New(G%Clone(iCLONE))
+               G%Clone(iCLONE)=Reac
+             ENDDO
+             CALL NEBInit(G,Reac,Prod)                                              ! Interpolate the other images
           ENDIF
-          ! GRAEME PUTS A SUBROUTINE HERE TO ALLOCATE AND SET UP THE REMAINING (G%Clones-2) CLONES
-          ! Following is a place holder for testing purposes only...
-          DO iCLONE=2,G%Clones-1
-             G%Clone(iCLONE)%NAtms=G%Clone(1)%NAtms
-             G%Clone(iCLONE)%NKind=G%Clone(1)%NKind
-             CALL New(G%Clone(iCLONE))
-
-             G%Clone(iCLONE)=G%Clone(1)
-
-          ENDDO
+          CALL DELETE(Reac)
+          CALL DELETE(Prod)
        ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
 #ifdef !defined(PARALLEL)
           CALL MondoHalt(PRSE_ERROR,' MondoSCF must be compiled in parallel for replica exchange to be active.')

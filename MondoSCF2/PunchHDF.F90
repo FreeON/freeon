@@ -40,6 +40,7 @@ CONTAINS
     CALL Put(ST,'SpaceTime')
     CALL Delete(ST)
 #else
+    WRITE(*,*)' SPACETIME = ',Clump(2)
     CALL Put(Clump(2),'SpaceTime')
 #endif
     CALL CloseHDF(HDF_CurrentID)
