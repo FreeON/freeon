@@ -1,7 +1,0 @@
-#!/bin/sh
-dbx   $MONDO_HOME/Exec/$1 $PWD/$2
-                          -I$MONDO_HOME/MondoMods   \
-                          -I$MONDO_HOME/MondoSCF    \
-                          -I$MONDO_HOME/OneE        \
-                          -I$MONDO_HOME/SolveSCF    \
-                          -I$MONDO_HOME/Test  
