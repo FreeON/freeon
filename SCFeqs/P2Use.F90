@@ -151,7 +151,6 @@ PROGRAM P2Use
      HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      ! Get the old AO-DM
      CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-     WRITE(*,*) 'Trace(P) = ',Trace(P)
      ! Purify P
      CALL Get(S,TrixFile('S',Args))
      CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
@@ -174,7 +173,7 @@ PROGRAM P2Use
      CALL Delete(Tmp1)
      CALL Delete(Tmp2)
   !  Restarting with BasisSet Change
-  CASE('RestartBasisSwitch')
+  CASE('RestartBasisSwitch') 
      ! Close Current Group
      CALL CloseHDFGroup(H5GroupID)
      CALL CloseHDF(HDFFileID)
@@ -275,7 +274,12 @@ PROGRAM P2Use
      CALL Multiply(S1,-One)
      MaxDS = SQRT(Trace(dS,dS)) 
      ! Initial Trace Error
+#ifdef PARALLEL
+     CALL Multiply(P,S1,Tmp1)
+     TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
+#else
      TError0 = ABS(Trace(P,S1)-Half*DBLE(NEl))
+#endif
      WRITE(*,*) "Trace Error = ", TError0
      !Number of Steps
      NStep   =INT(TError0)/4+1
