@@ -871,11 +871,13 @@ CONTAINS
     ! Coulomb part
 #ifdef NLATTFORCE
     CALL Invoke('JForce',N,S,M)
-    CALL NLATTFORCE_J(cBAS,cGEO,N,G,B,S,M)
+    CALL NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)
-       CALL NLATTFORCE_X(cBAS,cGEO,N,G,B,S,M)
+       WRITE(*,*) 'Doing GONX'
+       CALL Invoke('GONX',N,S,M)       
+       WRITE(*,*) 'Doing Latt GONX'
+       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
     ENDIF
 #else
     CALL Invoke('JForce',N,S,M)
@@ -956,7 +958,7 @@ CONTAINS
 !===============================================================================
 ! Numerically compute Lattice Forces for J
 !===============================================================================
-  SUBROUTINE NLATTFORCE_J(cBAS,cGEO,N,G,B,S,M)
+  SUBROUTINE NLATTFORCE_J(cBAS,cGEO,G,B,N,S,M)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
@@ -977,7 +979,7 @@ CONTAINS
     DO iCLONE=1,G%Clones
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
-       chSCF=IntToChar(S%Current%I(1)+1)
+       chSCF=IntToChar(S%Current%I(1))
        CALL New(BSiz,G%Clone(iCLONE)%NAtms)
        CALL New(OffS,G%Clone(iCLONE)%NAtms)
 !
@@ -989,8 +991,8 @@ CONTAINS
 !
        NAToms=G%Clone(iCLONE)%NAtms
        MaxAtms=B%MxAts(cBAS)
-       MaxBlks=B%MxN0s(cBAS)
-       MaxNon0=B%MxBlk(cBAS)
+       MaxBlks=B%MxBlk(cBAS)
+       MaxNon0=B%MxN0s(cBAS)
        NBasF=B%BSets(iCLONE,cBAS)%NBasF
        BSiz%I=B%BSiz(iCLONE,cBAS)%I
        OffS%I=B%OffS(iCLONE,cBAS)%I
@@ -1003,42 +1005,58 @@ CONTAINS
        CALL New(J3)
 !
        TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-                //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.D'
+                                 //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.D'
        CALL Get(P,TrixName)
-       chSCF=IntToChar(S%Current%I(1))
 !
        DO I=1,3
           DO J=1,3
-             Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
+             IF(G%Clone(iCLONE)%PBC%AutoW%I(I) == 1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J) == 1) THEN 
+                Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
-             CALL GeomArchive(cBAS,cGEO,N,B,G)
-             CALL Invoke('MakePFFT',N,S,M)
-             CALL Invoke('MakeRho' ,N,S,M)
-             CALL Invoke('QCTC'    ,N,S,M)  
-             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-                //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
-             CALL Get(J1,TrixName)
-             CALL Get(E1,'E_NuclearTotal')
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('MakePFFT',N,S,M)
+                CALL Invoke('MakeRho' ,N,S,M)
+                CALL Invoke('QCTC'    ,N,S,M)  
+                TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
+                     //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
+                CALL Get(J1,TrixName)
+                HDFFileID=OpenHDF(N%HFile)
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(E1,'E_NuclearTotal')
+                CALL CloseHDFGroup(HDF_CurrentID)
+                CALL CloseHDF(HDFFileID)
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
-             CALL GeomArchive(cBAS,cGEO,N,B,G)
-             CALL Invoke('MakePFFT',N,S,M)
-             CALL Invoke('MakeRho' ,N,S,M)
-             CALL Invoke('QCTC',N,S,M)  
-             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-                //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
-             CALL Get(J2,TrixName)
-             CALL Get(E2,'E_NuclearTotal')
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('MakePFFT',N,S,M)
+                CALL Invoke('MakeRho' ,N,S,M)
+                CALL Invoke('QCTC',N,S,M)  
+                TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
+                     //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.J'
+                CALL Get(J2,TrixName)
+                HDFFileID=OpenHDF(N%HFile)
+                HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+                CALL Get(E2,'E_NuclearTotal')
+                CALL CloseHDFGroup(HDF_CurrentID)
+                CALL CloseHDF(HDFFileID)
 !
-             CALL Multiply(J2,-One)
-             CALL Add(J1,J2,J3)
-             CALL Multiply(P,J3,J1)
-             G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) &
-                                                 + Trace(J1)/(Two*DDelta) + (E1-E2)/(Two*DDelta) 
+                CALL Multiply(J2,-One)
+                CALL Add(J1,J2,J3)
+                CALL Multiply(P,J3,J1)
+                G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) &
+                     + Trace(J1)/(Two*DDelta) + (E1-E2)/(Two*DDelta) 
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
 !  
+             ENDIF
           ENDDO
        ENDDO
 !
@@ -1054,14 +1072,13 @@ CONTAINS
        CALL Delete(J1)
        CALL Delete(J2)
        CALL Delete(J3)
-!
     ENDDO
 !
   END SUBROUTINE NLATTFORCE_J
 !===============================================================================
 ! Numerically compute Lattice Forces for J
 !===============================================================================
-  SUBROUTINE NLATTFORCE_X(cBAS,cGEO,N,G,B,S,M)
+  SUBROUTINE NLATTFORCE_X(cBAS,cGEO,G,B,N,S,M)
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
@@ -1082,7 +1099,7 @@ CONTAINS
     DO iCLONE=1,G%Clones
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
-       chSCF=IntToChar(S%Current%I(1)+1)
+       chSCF=IntToChar(S%Current%I(1))
        CALL New(BSiz,G%Clone(iCLONE)%NAtms)
        CALL New(OffS,G%Clone(iCLONE)%NAtms)
 !
@@ -1094,8 +1111,8 @@ CONTAINS
 !
        NAToms=G%Clone(iCLONE)%NAtms
        MaxAtms=B%MxAts(cBAS)
-       MaxBlks=B%MxN0s(cBAS)
-       MaxNon0=B%MxBlk(cBAS)
+       MaxBlks=B%MxBlk(cBAS)
+       MaxNon0=B%MxN0s(cBAS)
        NBasF=B%BSets(iCLONE,cBAS)%NBasF
        BSiz%I=B%BSiz(iCLONE,cBAS)%I
        OffS%I=B%OffS(iCLONE,cBAS)%I
@@ -1114,29 +1131,38 @@ CONTAINS
 !
        DO I=1,3
           DO J=1,3
-             Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
+             IF(G%Clone(iCLONE)%PBC%AutoW%I(I) == 1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J) == 1) THEN 
+                Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
-             CALL GeomArchive(cBAS,cGEO,N,B,G)
-             CALL Invoke('ONX'    ,N,S,M)  
-             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-                //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
-             CALL Get(K1,TrixName)
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00+DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('ONX'    ,N,S,M)  
+                TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
+                     //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
+                CALL Get(K1,TrixName)
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
-             CALL GeomArchive(cBAS,cGEO,N,B,G)
-             CALL Invoke('ONX',N,S,M)  
-             TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
-                //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
-             CALL Get(K2,TrixName)
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00-DDelta
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+                CALL Invoke('ONX',N,S,M)  
+                TrixName=TRIM(N%M_SCRATCH)//TRIM(N%SCF_NAME)//'_Geom#'//TRIM(chGEO)//'_Base#'//TRIM(chBAS) &
+                     //'_Cycl#'//TRIM(chSCF)//'_Clone#'//TRIM(IntToChar(iCLONE))//'.K'
+                CALL Get(K2,TrixName)
 !
-             CALL Multiply(K2,-One)
-             CALL Add(K1,K2,K3)
-             CALL Multiply(P,K3,K1)
-             G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) +  Trace(K1)/(Two*DDelta)
+                CALL Multiply(K2,-One)
+                CALL Add(K1,K2,K3)
+                CALL Multiply(P,K3,K1)
+                G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) +  Trace(K1)/(Two*DDelta)
 !
-             G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
-!  
+                G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
+                CALL MakeGMPeriodic(G%Clone(iCLONE))
+                G%Clone(1)%AbCarts%D = G%Clone(iCLONE)%Carts%D
+                CALL GeomArchive(cBAS,cGEO,N,B,G)
+!
+             ENDIF
           ENDDO
        ENDDO
 !
@@ -1200,8 +1226,8 @@ CONTAINS
        ! Load globals 
        NAToms=G%Clone(1)%NAtms
        MaxAtms=B%MxAts(cBAS)
-       MaxBlks=B%MxN0s(cBAS)
-       MaxNon0=B%MxBlk(cBAS)
+       MaxBlks=B%MxBlk(cBAS)
+       MaxNon0=B%MxN0s(cBAS)
        NBasF=B%BSets(iCLONE,cBAS)%NBasF
        BSiz%I=B%BSiz(iCLONE,cBAS)%I
        OffS%I=B%OffS(iCLONE,cBAS)%I
@@ -1247,8 +1273,8 @@ CONTAINS
                 ! Load globals 
                 NAToms=G%Clone(1)%NAtms
                 MaxAtms=B%MxAts(cBAS)
-                MaxBlks=B%MxN0s(cBAS)
-                MaxNon0=B%MxBlk(cBAS)
+                MaxBlks=B%MxBlk(cBAS)
+                MaxNon0=B%MxN0s(cBAS)
                 NBasF=B%BSets(iCLONE,cBAS)%NBasF
                 BSiz%I=B%BSiz(iCLONE,cBAS)%I
                 OffS%I=B%OffS(iCLONE,cBAS)%I
@@ -1354,8 +1380,8 @@ CONTAINS
     ! Load globals 
     NAToms=G%Clone(1)%NAtms
     MaxAtms=B%MxAts(cBAS)
-    MaxBlks=B%MxN0s(cBAS)
-    MaxNon0=B%MxBlk(cBAS)
+    MaxBlks=B%MxBlk(cBAS)
+    MaxNon0=B%MxN0s(cBAS)
     NBasF=B%BSets(1,cBAS)%NBasF
     BSiz%I=B%BSiz(1,cBAS)%I
     OffS%I=B%OffS(1,cBAS)%I
