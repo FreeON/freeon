@@ -32,7 +32,7 @@ CONTAINS
      ! Defd as LINB1 and LINB2
      !
      IMPLICIT NONE
-     INTEGER :: I,J,K,L,NatmsLoc,IInt,KA,LA
+     INTEGER :: I,J,K,L,NatmsLoc,IIntC,KA,LA
      INTEGER :: II,IC1,IC2,M,N,NCart,PBCDim,III
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value
@@ -42,7 +42,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
      REAL(DOUBLE),DIMENSION(12)  :: Aux12
-     CHARACTER(LEN=DCL)          :: Char
+     CHARACTER(LEN=DCL)          :: CharU
      TYPE(DBL_VECT)              :: CartAux
      TYPE(INT_VECT)              :: AtmsAux
      !
@@ -59,102 +59,102 @@ CONTAINS
      B%IB%I=0
      B%B%D=Zero
      !
-     DO IInt=1,IntCs%N   
-       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
-       IF(.NOT.IntCs%Active%L(IInt)) CYCLE
-       Char=IntCs%Def%C(IInt)
+     DO IIntC=1,IntCs%N   
+       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IIntC)
+       IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
+       CharU=IntCs%Def%C(IIntC)
        IF(PBCDim>0) THEN
-         IF(Char(1:5)=='ALPHA') THEN
-           Char(1:5)='BEND '
-         ELSE IF(Char(1:4)=='BETA') THEN
-           Char(1:5)='BEND '
-         ELSE IF(Char(1:5)=='GAMMA') THEN
-           Char(1:5)='BEND '
+         IF(CharU(1:5)=='ALPHA') THEN
+           CharU(1:5)='BEND '
+         ELSE IF(CharU(1:4)=='BETA') THEN
+           CharU(1:5)='BEND '
+         ELSE IF(CharU(1:5)=='GAMMA') THEN
+           CharU(1:5)='BEND '
          ENDIF
        ENDIF
        !
-       IF(Char(1:4)=='STRE') THEN
+       IF(CharU(1:4)=='STRE') THEN
          ! stre
-         B%IB%I(IInt,1:2)=IntCs%Atoms%I(IInt,1:2)
-         Aux12=B%B%D(IInt,1:12)
+         B%IB%I(IIntC,1:2)=IntCs%Atoms%I(IIntC,1:2)
+         Aux12=B%B%D(IIntC,1:12)
          CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-        !write(*,100) Char(1:5), &
-        !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
+         B%B%D(IIntC,1:12)=Aux12
+        !write(*,100) CharU(1:5), &
+        !B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
          !
-       ELSE IF(Char(1:4)=='BEND'.OR. &
-               Char(1:5)=='ALPHA'.OR. &
-               Char(1:4)=='BETA'.OR. &
-               Char(1:5)=='GAMMA') THEN
+       ELSE IF(CharU(1:4)=='BEND'.OR. &
+               CharU(1:5)=='ALPHA'.OR. &
+               CharU(1:4)=='BETA'.OR. &
+               CharU(1:5)=='GAMMA') THEN
          ! bend
-         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
-         Aux12=B%B%D(IInt,1:12)
+         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
+         Aux12=B%B%D(IIntC,1:12)
          CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-        !write(*,100) Char(1:5), &
-        !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
-       ELSE IF(Char(1:4)=='OUTP') THEN
+         B%B%D(IIntC,1:12)=Aux12
+        !write(*,100) CharU(1:5), &
+        !B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
+       ELSE IF(CharU(1:4)=='OUTP') THEN
          ! out of plane
-         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
-         Aux12=B%B%D(IInt,1:12)
+         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
+         Aux12=B%B%D(IIntC,1:12)
          CALL OutP(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
-                   XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IInt), &
+                   XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IIntC), &
                    BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-       ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
-       !  B%B%D(IInt,1:12)*AngstromsToAu
-       ELSE IF(Char(1:4)=='TORS') THEN
+         B%B%D(IIntC,1:12)=Aux12
+       ! write(*,100) CharU(1:5),B%IB%I(IIntC,1:4), &
+       !  B%B%D(IIntC,1:12)*AngstromsToAu
+       ELSE IF(CharU(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
-         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
-         Aux12=B%B%D(IInt,1:12)
+         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
+         Aux12=B%B%D(IIntC,1:12)
          CALL TORS(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4), &
-                   TorsLinCrit,IntCs%Active%L(IInt), &
+                   TorsLinCrit,IntCs%Active%L(IIntC), &
                    BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-        !write(*,*) IInt
-        !write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
-        !B%B%D(IInt,1:12)
-       ELSE IF(Char(1:6)=='VOLM_L') THEN
-         B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
-         Aux12=B%B%D(IInt,1:12)
+         B%B%D(IIntC,1:12)=Aux12
+        !write(*,*) IIntC
+        !write(*,100) CharU(1:5),B%IB%I(IIntC,1:4), &
+        !B%B%D(IIntC,1:12)
+       ELSE IF(CharU(1:6)=='VOLM_L') THEN
+         B%IB%I(IIntC,1:4)=IntCs%Atoms%I(IIntC,1:4)
+         Aux12=B%B%D(IIntC,1:12)
          CALL VOLUME(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-           XYZAux(1:3,4),IntCs%Active%L(IInt),BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-       ELSE IF(Char(1:6)=='AREA_L') THEN
-         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
-         Aux12=B%B%D(IInt,1:12)
+           XYZAux(1:3,4),IntCs%Active%L(IIntC),BB_O=Aux12)
+         B%B%D(IIntC,1:12)=Aux12
+       ELSE IF(CharU(1:6)=='AREA_L') THEN
+         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
+         Aux12=B%B%D(IIntC,1:12)
          CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-                   IntCs%Active%L(IInt),BB_O=Aux12)
-         B%B%D(IInt,1:12)=Aux12
-       ELSE IF(Char(1:5)=='LINB1') THEN
+                   IntCs%Active%L(IIntC),BB_O=Aux12)
+         B%B%D(IIntC,1:12)=Aux12
+       ELSE IF(CharU(1:5)=='LINB1') THEN
          ! linear bendig of i-j-k
-         IF(IntCs%Def%C(IInt+1)(1:5)/='LINB2') &
+         IF(IntCs%Def%C(IIntC+1)(1:5)/='LINB2') &
             CALL Halt('LINB2 Definitions are not paired!')
-         B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
-         B%IB%I(IInt+1,1:3)=IntCs%Atoms%I(IInt+1,1:3)
-         L=IntCs%Atoms%I(IInt,4)  ! reference atom
+         B%IB%I(IIntC,1:3)=IntCs%Atoms%I(IIntC,1:3)
+         B%IB%I(IIntC+1,1:3)=IntCs%Atoms%I(IIntC+1,1:3)
+         L=IntCs%Atoms%I(IIntC,4)  ! reference atom
          CALL LinB(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4),L, &
-                   BB1=B%B%D(IInt,1:12),BB2=B%B%D(IInt+1,1:12))  
-        !write(*,100) Char(1:5), &
-        ! B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
-        !write(*,100) Char(1:5), &
-        ! B%IB%I(IInt+1,1:4),B%B%D(IInt+1,1:12)
-       ELSE IF(Char(1:5)=='LINB2') THEN
+                   BB1=B%B%D(IIntC,1:12),BB2=B%B%D(IIntC+1,1:12))  
+        !write(*,100) CharU(1:5), &
+        ! B%IB%I(IIntC,1:4),B%B%D(IIntC,1:12)
+        !write(*,100) CharU(1:5), &
+        ! B%IB%I(IIntC+1,1:4),B%B%D(IIntC+1,1:12)
+       ELSE IF(CharU(1:5)=='LINB2') THEN
          CYCLE
-       ELSE IF(Char(1:5)=='CARTX' ) THEN
-         I=IntCs%Atoms%I(IInt,1)
-         B%IB%I(IInt,1)=I
-         CALL BCART('X',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
-       ELSE IF(Char(1:5)=='CARTY' ) THEN
-         I=IntCs%Atoms%I(IInt,1)
-         B%IB%I(IInt,1)=I
-         CALL BCART('Y',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
-       ELSE IF(Char(1:5)=='CARTZ' ) THEN
-         I=IntCs%Atoms%I(IInt,1)
-         B%IB%I(IInt,1)=I
-         CALL BCART('Z',B%B%D(IInt,1:12),IntCs%Constraint%L(IInt))
+       ELSE IF(CharU(1:5)=='CARTX' ) THEN
+         I=IntCs%Atoms%I(IIntC,1)
+         B%IB%I(IIntC,1)=I
+         CALL BCART('X',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
+       ELSE IF(CharU(1:5)=='CARTY' ) THEN
+         I=IntCs%Atoms%I(IIntC,1)
+         B%IB%I(IIntC,1)=I
+         CALL BCART('Y',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
+       ELSE IF(CharU(1:5)=='CARTZ' ) THEN
+         I=IntCs%Atoms%I(IIntC,1)
+         B%IB%I(IIntC,1)=I
+         CALL BCART('Z',B%B%D(IIntC,1:12),IntCs%Constraint%L(IIntC))
        ENDIF
      ENDDO !!!! loop over internal coords
      100 FORMAT(A5,4I6,/,6F12.6,/,6F12.6)
@@ -162,22 +162,22 @@ CONTAINS
      ! Generate BL, the portion of the B matrix related to lattice
      ! distorsions
      !
-     DO IInt=1,IntCs%N
-       B%BLI%I(IInt)=0
-       B%BL%D(IInt,:)=Zero
-       IF(.NOT.IntCs%Active%L(IInt)) CYCLE
+     DO IIntC=1,IntCs%N
+       B%BLI%I(IIntC)=0
+       B%BL%D(IIntC,:)=Zero
+       IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
        DO J=1,4 ! loop over atoms
-         IF(IntCs%Atoms%I(IInt,J)==0) EXIT
+         IF(IntCs%Atoms%I(IIntC,J)==0) EXIT
          L=(J-1)*3+1
          K=L+2
          DO II=1,3  ! loop over cell indices
            IC1=(II-1)*3+1
            IC2=IC1+2
            M=(J-1)*3+II 
-           N=IntCs%Cells%I(IInt,M)
+           N=IntCs%Cells%I(IIntC,M)
            IF(N==0) CYCLE
-           B%BLI%I(IInt)=NCart-9
-           B%BL%D(IInt,IC1:IC2)=B%BL%D(IInt,IC1:IC2)+DBLE(N)*B%B%D(IInt,L:K)
+           B%BLI%I(IIntC)=NCart-9
+           B%BL%D(IIntC,IC1:IC2)=B%BL%D(IIntC,IC1:IC2)+DBLE(N)*B%B%D(IIntC,L:K)
          ENDDO
        ENDDO
      ENDDO 
@@ -187,13 +187,13 @@ CONTAINS
      IF(PBCDim>0) THEN
        CALL New(CartAux,NCart)
        CALL New(AtmsAux,NatmsLoc)
-       DO IInt=1,IntCs%N
-         IF(.NOT.IntCs%Active%L(IInt)) CYCLE
+       DO IIntC=1,IntCs%N
+         IF(.NOT.IntCs%Active%L(IIntC)) CYCLE
          !
          ! clean memory
          !
          DO J=1,4
-           I=IntCs%Atoms%I(IInt,J)
+           I=IntCs%Atoms%I(IIntC,J)
            IF(I==0) EXIT
             AtmsAux%I(I)=0
            KA=3*(I-1)+1   
@@ -204,39 +204,39 @@ CONTAINS
          ! do lattice sum
          !
          DO J=1,4
-           I=IntCs%Atoms%I(IInt,J)
+           I=IntCs%Atoms%I(IIntC,J)
            IF(I==0) EXIT
            K=3*(J-1)+1
            L=K+2
            KA=3*(I-1)+1   
            LA=KA+2
-            CartAux%D(KA:LA)=CartAux%D(KA:LA)+B%B%D(IInt,K:L)
+            CartAux%D(KA:LA)=CartAux%D(KA:LA)+B%B%D(IIntC,K:L)
             IF(AtmsAux%I(I)==0) THEN
               AtmsAux%I(I)=I
             ELSE
-              B%IB%I(IInt,J)=0
+              B%IB%I(IIntC,J)=0
             ENDIF
          ENDDO
          !
          ! fill back
          !
          II=0
-         B%B%D(IInt,1:12)=Zero
+         B%B%D(IIntC,1:12)=Zero
          DO J=1,4
-           I=IntCs%Atoms%I(IInt,J)
+           I=IntCs%Atoms%I(IIntC,J)
            IF(I==0) EXIT
-           IF(B%IB%I(IInt,J)==0) THEN
+           IF(B%IB%I(IIntC,J)==0) THEN
              CYCLE
            ELSE
-             B%IB%I(IInt,J)=0
+             B%IB%I(IIntC,J)=0
            ENDIF
            II=II+1
-           B%IB%I(IInt,II)=I
+           B%IB%I(IIntC,II)=I
            K=3*(II-1)+1
            L=K+2
            KA=3*(I-1)+1   
            LA=KA+2
-           B%B%D(IInt,K:L)=CartAux%D(KA:LA)
+           B%B%D(IIntC,K:L)=CartAux%D(KA:LA)
          ENDDO
        ENDDO
        CALL Delete(AtmsAux)
@@ -245,10 +245,10 @@ CONTAINS
      !
      ! Clean BL for fixed lattice orientation
      !
-   ! DO IInt=1,IntCs%N
-   !   B%BL%D(IInt,2)=Zero
-   !   B%BL%D(IInt,3)=Zero
-   !   B%BL%D(IInt,6)=Zero
+   ! DO IIntC=1,IntCs%N
+   !   B%BL%D(IIntC,2)=Zero
+   !   B%BL%D(IIntC,3)=Zero
+   !   B%BL%D(IIntC,6)=Zero
    ! ENDDO
      !
    END SUBROUTINE BMatrix
@@ -279,7 +279,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,W,U,V,Ref,Aux
      REAL(DOUBLE),DIMENSION(1:3),OPTIONAL :: W_O
      REAL(DOUBLE),DIMENSION(1:12),OPTIONAL:: BB_O
-     REAL(DOUBLE)                :: Sum,Sum2,RU,RV,RW
+     REAL(DOUBLE)                :: SumU,Sum2,RU,RV,RW
      REAL(DOUBLE),OPTIONAL       :: Value_O
      INTEGER                     :: I,J
      !
@@ -297,11 +297,11 @@ CONTAINS
      V=V/RV
      !
      IF(PRESENT(Value_O)) THEN
-       Sum=DOT_PRODUCT(U,V)
-       IF(ABS(Sum)>One-1.D-8) THEN
+       SumU=DOT_PRODUCT(U,V)
+       IF(ABS(SumU)>One-1.D-8) THEN
          Value_O=PI
        ELSE
-         Value_O=ACOS(Sum)
+         Value_O=ACOS(SumU)
        ENDIF
        IF(PRESENT(W_O)) THEN
          CALL CROSS_PRODUCT(U,V,Aux)
@@ -417,7 +417,7 @@ CONTAINS
      REAL(DOUBLE)                 :: SinPhiU,SinPhiV
      REAL(DOUBLE)                 :: SinPhiU2,SinPhiV2
      LOGICAL                      :: Active
-     REAL(DOUBLE)                 :: RU,RV,RW,Sum,Conv
+     REAL(DOUBLE)                 :: RU,RV,RW,SumU,Conv
      INTEGER                      :: I,J,K,L
      !
      Conv=180.D0/PI
@@ -448,14 +448,14 @@ CONTAINS
      CALL CROSS_PRODUCT(U,V,UxV)
      !
      IF(PRESENT(Value_O)) THEN
-       Sum=DOT_PRODUCT(UxW,VxW)/(SinPhiU*SinPhiV)
-       IF(ABS(Sum)>One) THEN
-         Sum=SIGN(One,Sum)
+       SumU=DOT_PRODUCT(UxW,VxW)/(SinPhiU*SinPhiV)
+       IF(ABS(SumU)>One) THEN
+         SumU=SIGN(One,SumU)
        ENDIF
-         Value_O=ACOS(Sum)
-       Sum=DOT_PRODUCT(W,UxV) ! orientation of torsion
-       IF(ABS(Sum)>Zero) THEN
-         Value_O=SIGN(Value_O,Sum)
+         Value_O=ACOS(SumU)
+       SumU=DOT_PRODUCT(W,UxV) ! orientation of torsion
+       IF(ABS(SumU)>Zero) THEN
+         Value_O=SIGN(Value_O,SumU)
        ENDIF
      ENDIF
      !
@@ -478,7 +478,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,X4
      REAL(DOUBLE),DIMENSION(1:12),OPTIONAL:: BB1,BB2
      INTEGER                     :: I,J,K,L,M,N,KK,IRef
-     REAL(DOUBLE)                :: Sum,CosAlpha,SinAlpha,RJI,RJK,RKI
+     REAL(DOUBLE)                :: SumU,CosAlpha,SinAlpha,RJI,RJK,RKI
      REAL(DOUBLE),OPTIONAL       :: Value1,Value2
      REAL(DOUBLE),DIMENSION(1:3) :: VectJI,VectJK,VectKI,Aux1,Aux2
      REAL(DOUBLE),DIMENSION(1:3) :: VectAux,EZ,EY,EX,RIJJK,VectRef
@@ -505,7 +505,7 @@ CONTAINS
     !IF(SelfRerefence) THEN
     !  VectRef=RIJJK
     !  CALL CROSS_PRODUCT(VectRef,EZ,EY)
-    !  Sum=SQRT(DOT_PRODUCT(EY,EY))
+    !  SumU=SQRT(DOT_PRODUCT(EY,EY))
     !ELSE
          IF(IRef==0) THEN
            VectRef=(/One,Zero,Zero/)
@@ -514,8 +514,8 @@ CONTAINS
            VectRef=VectRef/SQRT(DOT_PRODUCT(VectRef,VectRef))
          ENDIF
          CALL CROSS_PRODUCT(VectRef,EZ,EY)
-         Sum=SQRT(DOT_PRODUCT(EY,EY))
-         IF(Sum<0.01D0) THEN
+         SumU=SQRT(DOT_PRODUCT(EY,EY))
+         IF(SumU<0.01D0) THEN
            IF(IRef==0) THEN
              VectRef=(/Zero,One,Zero/)
            ELSE
@@ -523,8 +523,8 @@ CONTAINS
              VectRef=VectRef/SQRT(DOT_PRODUCT(VectRef,VectRef))
            ENDIF
            CALL CROSS_PRODUCT(VectRef,EZ,EY)
-           Sum=SQRT(DOT_PRODUCT(EY,EY))
-           IF(Sum<0.01D0) THEN
+           SumU=SQRT(DOT_PRODUCT(EY,EY))
+           IF(SumU<0.01D0) THEN
              IF(IRef==0) THEN
                VectRef=(/Zero,Zero,One/)
              ELSE
@@ -532,14 +532,14 @@ CONTAINS
                VectRef=VectRef/SQRT(DOT_PRODUCT(VectRef,VectRef))
              ENDIF
              CALL CROSS_PRODUCT(VectRef,EZ,EY)
-             Sum=SQRT(DOT_PRODUCT(EY,EY))
+             SumU=SQRT(DOT_PRODUCT(EY,EY))
            ENDIF           
          ENDIF           
     !ENDIF           
-     EY=EY/Sum
+     EY=EY/SumU
      CALL CROSS_PRODUCT(EY,EZ,EX)
-     Sum=SQRT(DOT_PRODUCT(EX,EX))
-     EX=EX/Sum
+     SumU=SQRT(DOT_PRODUCT(EX,EX))
+     EX=EX/SumU
      !
      IF(PRESENT(Value1)) THEN
       !CALL BEND(XI,XJ,XK,Value_O=Value1,W_O=EX)
@@ -574,14 +574,14 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE BCART(CHAR,B,Constraint)
+   SUBROUTINE BCART(CharU,B,Constraint)
      INTEGER :: I,J
      REAL(DOUBLE),DIMENSION(1:12) :: B
-     CHARACTER :: CHAR
+     CHARACTER :: CharU
      LOGICAL   :: Constraint
      !
      B=Zero
-     IF(CHAR=='X') THEN
+     IF(CharU=='X') THEN
        IF(Constraint) THEN
          B(1)=Zero 
        ELSE
@@ -589,7 +589,7 @@ CONTAINS
        ENDIF
      ENDIF
      !
-     IF(CHAR=='Y') THEN
+     IF(CharU=='Y') THEN
        IF(Constraint) THEN
          B(2)=Zero 
        ELSE
@@ -597,7 +597,7 @@ CONTAINS
        ENDIF
      ENDIF
      !
-     IF(CHAR=='Z') THEN
+     IF(CharU=='Z') THEN
        IF(Constraint) THEN
          B(3)=Zero 
        ELSE
@@ -857,7 +857,7 @@ CONTAINS
      TYPE(INT_RNK2)              :: TorsionIJKL,TorsionIJKLAux
      LOGICAL                     :: SelectTors
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)                :: Crit,Alph1,Alph2,Sum,PIHalf
+     REAL(DOUBLE)                :: Crit,Alph1,Alph2,SumU,PIHalf
      REAL(DOUBLE)                :: Sum1,Sum2
      INTEGER,DIMENSION(1:4)      :: Atoms
      INTEGER,DIMENSION(:)        :: AtNum,IEq
@@ -900,9 +900,9 @@ CONTAINS
              CALL BEND(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,JJ2), &
                        Value_O=Alph2)
              Sum2=DBLE((Top12%I(JJ2,1)+1)*AtNum(JJ2))/ABS(Alph2-PIHalf+1.D-10)
-             Sum=Sum1+Sum2
-             IF(Sum>Crit) THEN
-               Crit=Sum
+             SumU=Sum1+Sum2
+             IF(SumU>Crit) THEN
+               Crit=SumU
                Atoms=(/JJ1,I1,I2,JJ2/)
              ENDIF
            ELSE
@@ -1688,7 +1688,7 @@ CONTAINS
      TYPE(DBL_VECT)  :: VectCartAux,VectIntAux
      TYPE(DBL_VECT)  :: VectCartAux2,VectIntAux2
      REAL(DOUBLE)    :: DiffMax,RMSD
-     REAL(DOUBLE)    :: Sum
+     REAL(DOUBLE)    :: SumU
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      INTEGER         :: NCart,I,II,J,NIntC,PBCDim
      INTEGER         :: Print
@@ -1763,8 +1763,8 @@ CONTAINS
            WRITE(*,*) 'Rescale Step from ',DiffMax,' to ',TrfGrd%MaxGradDiff
            WRITE(Out,*) 'Rescale Step from ',DiffMax,' to ',TrfGrd%MaxGradDiff
          ENDIF
-         SUM=TrfGrd%MaxGradDiff/DiffMax
-         VectIntAux%D(:)=SUM*VectIntAux%D(:)
+         SumU=TrfGrd%MaxGradDiff/DiffMax
+         VectIntAux%D(:)=SumU*VectIntAux%D(:)
          DiffMax=TrfGrd%MaxGradDiff
        ENDIF
        !
@@ -1832,7 +1832,7 @@ CONTAINS
      TYPE(DBL_VECT)             :: ValSt
      TYPE(DBL_RNK2)             :: ActCarts,RotCarts
      REAL(DOUBLE)               :: DiffMax,RMSD,RMSDOld
-     REAL(DOUBLE)               :: Sum,ConstrMax,ConstrRMS,Fact,Crit
+     REAL(DOUBLE)               :: SumU,ConstrMax,ConstrRMS,Fact,Crit
      REAL(DOUBLE)               :: ConstrRMSOld,ConstrMaxCrit,RMSCrit
      REAL(DOUBLE)               :: BackLinCrit,BackTLinCrit
      INTEGER                    :: NCart,I,IStep,J,NT
@@ -2511,13 +2511,13 @@ CONTAINS
 !
 !----------------------------------------------------------
 !
-   SUBROUTINE PrtIntCoords(IntCs,Value,CHAR,PBCDim_O)
+   SUBROUTINE PrtIntCoords(IntCs,Value,CharU,PBCDim_O)
      !
      TYPE(INTC)       :: IntCs
      INTEGER          :: I,NIntC,J
      REAL(DOUBLE),DIMENSION(:) :: Value
-     REAL(DOUBLE)     :: SUM,SumConstr,Conv,ConvC
-     CHARACTER(LEN=*) :: CHAR   
+     REAL(DOUBLE)     :: SumU,SumConstr,Conv,ConvC
+     CHARACTER(LEN=*) :: CharU   
      INTEGER,OPTIONAL :: PBCDim_O
      LOGICAL          :: DoPrtCells
      !
@@ -2527,8 +2527,8 @@ CONTAINS
      DoPrtCells=.FALSE.
      IF(PRESENT(PBCDim_O)) DoPrtCells=(PBCDim_O>0)
      !
-     WRITE(*,*) TRIM(CHAR)
-     WRITE(Out,*) TRIM(CHAR)
+     WRITE(*,*) TRIM(CharU)
+     WRITE(Out,*) TRIM(CharU)
      WRITE(*,123) 
      WRITE(*,124) 
      WRITE(Out,123) 
@@ -2537,24 +2537,24 @@ CONTAINS
      124  FORMAT('       DEFINITION       ATOMS_INVOLVED      VALUE        CONSTRAINT    ACTIVE')
      DO I=1,NIntC
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-         SUM=Value(I)*ConvC
+         SumU=Value(I)*ConvC
          SUMConstr=IntCs%ConstrValue%D(I)/AngstromsToAu
        ELSE IF(HasAngle(IntCs%Def%C(I))) THEN
-         SUM=Value(I)*Conv
+         SumU=Value(I)*Conv
          SUMConstr=IntCs%ConstrValue%D(I)*Conv
        ELSE IF(IntCs%Def%C(I)(1:6)=='VOLM_L') THEN 
-         SUM=Value(I)*ConvC**3
+         SumU=Value(I)*ConvC**3
          SUMConstr=IntCs%ConstrValue%D(I)*ConvC**3
        ELSE IF(IntCs%Def%C(I)(1:6)=='AREA_L') THEN 
-         SUM=Value(I)*ConvC**2
+         SumU=Value(I)*ConvC**2
          SUMConstr=IntCs%ConstrValue%D(I)*ConvC**2
        ELSE IF(IntCs%Def%C(I)(1:4)=='CART') THEN 
-         SUM=Value(I)*ConvC
+         SumU=Value(I)*ConvC
          SUMConstr=IntCs%ConstrValue%D(I)*ConvC
        ENDIF
-       WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SUM, &
+       WRITE(*,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
          IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
-       WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SUM, &
+       WRITE(Out,111) I,IntCs%Def%C(I)(1:8),IntCs%Atoms%I(I,1:4),SumU, &
          IntCs%Constraint%L(I),SumConstr,IntCs%Active%L(I)
        IF(DoPrtCells) THEN
          IF(ANY(IntCs%Cells%I(I,1:12)/=0)) THEN
@@ -2663,7 +2663,7 @@ CONTAINS
 !
    SUBROUTINE GetPBCProj(PBCDim,P,Carts_O,XYZ_O)
      INTEGER                     :: PBCDim,NCart,I,J,K,L
-     INTEGER                     :: NCoinc,Info,Dim,NatmsLoc
+     INTEGER                     :: NCoinc,Info,DimU,NatmsLoc
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(3,4) :: XYZ
      REAL(DOUBLE),DIMENSION(9,9) :: S,P,P1
@@ -2711,17 +2711,17 @@ CONTAINS
      !
      ! Dim is the number of lattice parameters
      !
-     IF(PBCDim==1) Dim=1
-     IF(PBCDim==2) Dim=3
-     IF(PBCDim==3) Dim=6
-     IF(Dim<0) CALL Halt('Dim<0 in GetPBCProj.') 
+     IF(PBCDim==1) DimU=1
+     IF(PBCDim==2) DimU=3
+     IF(PBCDim==3) DimU=6
+     IF(DimU<0) CALL Halt('DimU<0 in GetPBCProj.') 
      K=0
      DO I=1,9 
        IF(Eigs(I)>1.D-6) K=K+1
      ENDDO
-     IF(K<Dim) CALL Halt('K<Dim in GetPBCProj.')
-     Eigs(1:9-Dim)=Zero
-     Eigs(9-Dim+1:9)=One
+     IF(K<DimU) CALL Halt('K<DimU in GetPBCProj.')
+     Eigs(1:9-DimU)=Zero
+     Eigs(9-DimU+1:9)=One
      DO I=1,9 ; P1(1:9,I)=Eigs(I)*S(1:9,I) ; ENDDO
      CALL DGEMM_NTc(9,9,9,One,Zero,P1,S,P)
      !
@@ -2735,7 +2735,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:) :: CartVect,Carts
      REAL(DOUBLE)                :: X,Y,Z,XX,YY,ZZ,XY,YZ,ZX
      REAL(DOUBLE)                :: CMX,CMY,CMZ
-     REAL(DOUBLE)                :: SUM,SUM1,SUM2,SUM3
+     REAL(DOUBLE)                :: SumU,SUM1,SUM2,SUM3
      REAL(DOUBLE)                :: V1X,V1Y,V1Z
      REAL(DOUBLE)                :: V2X,V2Y,V2Z
      REAL(DOUBLE)                :: V3X,V3Y,V3Z
@@ -2799,20 +2799,20 @@ CONTAINS
      !
      ! Normalize Rot vectors!
      !
-     SUM=SQRT(DOT_PRODUCT(Rot1%D,Rot1%D))
-     IF(Sum>1.D-6) THEN
-       Sum=One/Sum
-       Rot1%D=Sum*Rot1%D
+     SumU=SQRT(DOT_PRODUCT(Rot1%D,Rot1%D))
+     IF(SumU>1.D-6) THEN
+       SumU=One/SumU
+       Rot1%D=SumU*Rot1%D
      ENDIF
-     SUM=SQRT(DOT_PRODUCT(Rot2%D,Rot2%D))
-     IF(Sum>1.D-6) THEN
-       Sum=One/Sum
-       Rot2%D=Sum*Rot2%D
+     SumU=SQRT(DOT_PRODUCT(Rot2%D,Rot2%D))
+     IF(SumU>1.D-6) THEN
+       SumU=One/SumU
+       Rot2%D=SumU*Rot2%D
      ENDIF
-     SUM=SQRT(DOT_PRODUCT(Rot3%D,Rot3%D))
-     IF(Sum>1.D-6) THEN
-       Sum=One/Sum
-       Rot3%D=Sum*Rot3%D
+     SumU=SQRT(DOT_PRODUCT(Rot3%D,Rot3%D))
+     IF(SumU>1.D-6) THEN
+       SumU=One/SumU
+       Rot3%D=SumU*Rot3%D
      ENDIF
      !
      ! test orthogonalities
@@ -2820,22 +2820,22 @@ CONTAINS
      !      CALL TranslsOff(Rot1%D,.TRUE.)
      !      CALL TranslsOff(Rot2%D,.TRUE.)
      !      CALL TranslsOff(Rot3%D,.TRUE.)
-     !      SUM=DOT_PRODUCT(Rot1%D,Rot1%D)
-     !      write(*,*) 'rot test 1 1 ',sum
-     !      SUM=DOT_PRODUCT(Rot1%D,Rot2%D)
-     !      write(*,*) 'rot test 1 2 ',sum
-     !      SUM=DOT_PRODUCT(Rot1%D,Rot3%D)
-     !      write(*,*) 'rot test 1 3 ',sum
-     !      SUM=DOT_PRODUCT(Rot2%D,Rot2%D)
-     !      write(*,*) 'rot test 2 2 ',sum
-     !      SUM=DOT_PRODUCT(Rot2%D,Rot3%D)
-     !      write(*,*) 'rot test 2 3 ',sum
-     !      SUM=DOT_PRODUCT(Rot3%D,Rot3%D)
-     !      write(*,*) 'rot test 3 3 ',sum
+     !      SumU=DOT_PRODUCT(Rot1%D,Rot1%D)
+     !      write(*,*) 'rot test 1 1 ',SumU
+     !      SumU=DOT_PRODUCT(Rot1%D,Rot2%D)
+     !      write(*,*) 'rot test 1 2 ',SumU
+     !      SumU=DOT_PRODUCT(Rot1%D,Rot3%D)
+     !      write(*,*) 'rot test 1 3 ',SumU
+     !      SumU=DOT_PRODUCT(Rot2%D,Rot2%D)
+     !      write(*,*) 'rot test 2 2 ',SumU
+     !      SumU=DOT_PRODUCT(Rot2%D,Rot3%D)
+     !      write(*,*) 'rot test 2 3 ',SumU
+     !      SumU=DOT_PRODUCT(Rot3%D,Rot3%D)
+     !      write(*,*) 'rot test 3 3 ',SumU
      !
      ! Now, project out rotations from Cartesian displacement vector
      !
-     SUM=DOT_PRODUCT(CartVect(1:NCart),CartVect(1:NCart))
+     SumU=DOT_PRODUCT(CartVect(1:NCart),CartVect(1:NCart))
      SUM1=DOT_PRODUCT(Rot1%D(1:NCart),CartVect(1:NCart))
      SUM2=DOT_PRODUCT(Rot2%D(1:NCart),CartVect(1:NCart))
      SUM3=DOT_PRODUCT(Rot3%D(1:NCart),CartVect(1:NCart))
@@ -2845,10 +2845,10 @@ CONTAINS
      !
      ! Percentage of rotations
      !
-     IF(SUM>1.D-6) THEN
-       SUM1=SUM1*SUM1/SUM*100.D0
-       SUM2=SUM2*SUM2/SUM*100.D0
-       SUM3=SUM3*SUM3/SUM*100.D0
+     IF(SumU>1.D-6) THEN
+       SUM1=SUM1*SUM1/SumU*100.D0
+       SUM2=SUM2*SUM2/SumU*100.D0
+       SUM3=SUM3*SUM3/SumU*100.D0
      ENDIF
      IF(Print) THEN
        WRITE(*,100) SUM1,SUM2,SUM3
@@ -2868,7 +2868,7 @@ CONTAINS
 !
    SUBROUTINE TranslsOff(CartVect,Print)
      REAL(DOUBLE),DIMENSION(:) :: CartVect
-     REAL(DOUBLE)              :: SUM,SUM1,SUM2,SUM3
+     REAL(DOUBLE)              :: SumU,SUM1,SUM2,SUM3
      TYPE(DBL_VECT)            :: Tr1,Tr2,Tr3
      INTEGER                   :: I,J,NCart,NatmsLoc
      LOGICAL                   :: Print
@@ -2881,27 +2881,27 @@ CONTAINS
      Tr1%D=Zero
      Tr2%D=Zero
      Tr3%D=Zero
-     Sum=One/SQRT(DBLE(NatmsLoc))
+     SumU=One/SQRT(DBLE(NatmsLoc))
      DO I=1,NatmsLoc
        J=(I-1)*3
-       Tr1%D(J+1)=Sum
-       Tr2%D(J+2)=Sum
-       Tr3%D(J+3)=Sum
+       Tr1%D(J+1)=SumU
+       Tr2%D(J+2)=SumU
+       Tr3%D(J+3)=SumU
      ENDDO
      !
      ! Now, project out translations from CartVect
      !
-     SUM =DOT_PRODUCT(CartVect,CartVect)
-     IF(SQRT(SUM) > 1.D-12) THEN
+     SumU =DOT_PRODUCT(CartVect,CartVect)
+     IF(SQRT(SumU) > 1.D-12) THEN
        SUM1=DOT_PRODUCT(Tr1%D,CartVect)
          CartVect=CartVect-SUM1*Tr1%D
        SUM2=DOT_PRODUCT(Tr2%D,CartVect)
          CartVect=CartVect-SUM2*Tr2%D
        SUM3=DOT_PRODUCT(Tr3%D,CartVect)
          CartVect=CartVect-SUM3*Tr3%D
-       SUM1=SUM1*SUM1/SUM*100.D0
-       SUM2=SUM2*SUM2/SUM*100.D0
-       SUM3=SUM3*SUM3/SUM*100.D0
+       SUM1=SUM1*SUM1/SumU*100.D0
+       SUM2=SUM2*SUM2/SumU*100.D0
+       SUM3=SUM3*SUM3/SumU*100.D0
      ELSE
        SUM1=Zero
        SUM2=Zero
@@ -2930,7 +2930,7 @@ CONTAINS
      !
      REAL(DOUBLE),DIMENSION(1:3)      :: V1,V2
      REAL(DOUBLE),DIMENSION(1:3,1:3)  :: Rot  
-     REAL(DOUBLE)                 :: Sum,SumM,Sum1,Sum2,Sum3,V1N,V2N
+     REAL(DOUBLE)                 :: SumU,SumM,Sum1,Sum2,Sum3,V1N,V2N
      REAL(DOUBLE) :: PnX,PnY,PnZ
      REAL(DOUBLE) :: CosPhi,SinPhi
      INTEGER      :: I,J,Step,III
@@ -2951,30 +2951,30 @@ CONTAINS
      !
      IF(SQRT(Sum1) < 1.D-12) THEN  !!! V1 & V2 are parallel
        Rot=Zero
-       Sum=DOT_PRODUCT(V1,V2)
-       DO I=1,3 ; Rot(I,I)=Sum ; ENDDO
+       SumU=DOT_PRODUCT(V1,V2)
+       DO I=1,3 ; Rot(I,I)=SumU ; ENDDO
      ELSE      
-       Sum=One/SQRT(Sum1)
-       CrossProd%D=SUM*CrossProd%D
+       SumU=One/SQRT(Sum1)
+       CrossProd%D=SumU*CrossProd%D
        CosPhi=DOT_PRODUCT(V1,V2)     
        SinPhi=SQRT(SUM1)
-       Sum=One-CosPhi
+       SumU=One-CosPhi
        DO III=1,2    
-         Rot(1,1)=CosPhi + Sum*CrossProd%D(1)**2
-         Rot(2,2)=CosPhi + Sum*CrossProd%D(2)**2
-         Rot(3,3)=CosPhi + Sum*CrossProd%D(3)**2
+         Rot(1,1)=CosPhi + SumU*CrossProd%D(1)**2
+         Rot(2,2)=CosPhi + SumU*CrossProd%D(2)**2
+         Rot(3,3)=CosPhi + SumU*CrossProd%D(3)**2
          !
-         Sum1=Sum*CrossProd%D(1)*CrossProd%D(2)
+         Sum1=SumU*CrossProd%D(1)*CrossProd%D(2)
          Sum2=SinPhi*CrossProd%D(3)
          Rot(1,2)=Sum1-Sum2
          Rot(2,1)=Sum1+Sum2
          !
-         Sum1=Sum*CrossProd%D(1)*CrossProd%D(3)
+         Sum1=SumU*CrossProd%D(1)*CrossProd%D(3)
          Sum2=SinPhi*CrossProd%D(2)
          Rot(1,3)=Sum1+Sum2
          Rot(3,1)=Sum1-Sum2
          !
-         Sum1=Sum*CrossProd%D(2)*CrossProd%D(3)
+         Sum1=SumU*CrossProd%D(2)*CrossProd%D(3)
          Sum2=SinPhi*CrossProd%D(1)
          Rot(2,3)=Sum1-Sum2
          Rot(3,2)=Sum1+Sum2
@@ -3108,7 +3108,7 @@ CONTAINS
      INTEGER,DIMENSION(:,:)  :: Top12
      INTEGER                 :: I,J,K,L,I1,I2,I3,N1,N3,IC,N,II
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     REAL(DOUBLE)            :: Val,ValM,Conv,Sum,RefLinCrit
+     REAL(DOUBLE)            :: Val,ValM,Conv,SumU,RefLinCrit
      !
      Conv=180.D0/PI
      RefLinCrit=20.D0 
@@ -3147,10 +3147,10 @@ CONTAINS
          J=Top12(IC,I+1)
          IF(J==I2) CYCLE
          CALL BEND(XYZ(1:3,I2),XYZ(1:3,IC),XYZ(1:3,J),Value_O=Val)
-         Sum=ABS(120.D0-Val*Conv)
-         IF(Sum<ValM) THEN
+         SumU=ABS(120.D0-Val*Conv)
+         IF(SumU<ValM) THEN
            II=J
-           ValM=Sum 
+           ValM=SumU 
          ENDIF
        ENDDO
      ENDDO
@@ -3162,7 +3162,7 @@ CONTAINS
    SUBROUTINE ConstrConv(IntCs,IntDiff,ConstrMax,ConstrRMS)
      TYPE(INTC) :: IntCs
      REAL(DOUBLE),DIMENSION(:) :: IntDiff
-     REAL(DOUBLE) :: ConstrMax,ConstrRMS,Sum
+     REAL(DOUBLE) :: ConstrMax,ConstrRMS,SumU
      INTEGER      :: I,J,NIntC,NConstr
      !
      NIntC=SIZE(IntCs%Def%C)
@@ -3173,9 +3173,9 @@ CONTAINS
      DO I=1,NIntC 
        IF(IntCs%Constraint%L(I)) THEN
          NConstr=NConstr+1
-         Sum=ABS(IntDiff(I))
-         IF(Sum>ConstrMax) ConstrMax=Sum
-         ConstrRMS=ConstrRMS+Sum*Sum
+         SumU=ABS(IntDiff(I))
+         IF(SumU>ConstrMax) ConstrMax=SumU
+         ConstrRMS=ConstrRMS+SumU*SumU
        ENDIF
      ENDDO
      ConstrRMS=SQRT(ConstrRMS/DBLE(NConstr))
@@ -3258,7 +3258,7 @@ CONTAINS
 !
    SUBROUTINE ScaleDispl(CartDispl,MaxCartDiff,DiffMax,RMSD)
      REAL(DOUBLE),DIMENSION(:) :: CartDispl 
-     REAL(DOUBLE)              :: MaxCartDiff,DiffMax,RMSD,Sum
+     REAL(DOUBLE)              :: MaxCartDiff,DiffMax,RMSD,SumU
      INTEGER                   :: I,NCart
      !
      NCart=SIZE(CartDispl)
@@ -3270,8 +3270,8 @@ CONTAINS
      ! Scale Displacements
      !
      IF(DiffMax>MaxCartDiff) THEN
-       Sum=MaxCartDiff/DiffMax
-       CartDispl=Sum*CartDispl
+       SumU=MaxCartDiff/DiffMax
+       CartDispl=SumU*CartDispl
        DiffMax=MaxCartDiff
      ENDIF
      !
@@ -3443,7 +3443,7 @@ CONTAINS
      TYPE(DBL_VECT)            :: ASpB,ASpBt
      REAL(DOUBLE),DIMENSION(:) :: VectInt,VectCart
      INTEGER                   :: NCart,NIntC,I,J,JJ,K,KK,LL,NZSpB
-     REAL(DOUBLE)              :: Sum
+     REAL(DOUBLE)              :: SumU
      LOGICAL,OPTIONAL          :: Trp_O
      !
      NCart=SIZE(VectCart)
@@ -3646,7 +3646,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      REAL(DOUBLE)                 :: LinCrit,TorsLinCrit
      REAL(DOUBLE),OPTIONAL        :: Shift_O
-     REAL(DOUBLE)                 :: Shift
+     REAL(DOUBLE)                 :: ShiftU
      INTEGER                      :: PBCDim,I,K,L,J
      INTEGER                      :: NatmsLoc,NCart,NIntC,NZ
      TYPE(BMATR)                  :: B,BS
@@ -3668,9 +3668,9 @@ CONTAINS
      NCart=3*NatmsLoc
      NIntC=SIZE(IntCs%Def%C)
      Print2=(Print>=DEBUG_GEOP_MAX)
-     Shift=1.D-6
+     ShiftU=1.D-6
      IF(PRESENT(Shift_O)) THEN
-       Shift=Shift_O
+       ShiftU=Shift_O
      ENDIF
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
@@ -3694,10 +3694,10 @@ CONTAINS
      !
      IF(DoGi) THEN
        CALL CholFactGi(ISpB,JSpB,ASpB,NCart,NIntC, &
-                     CholData,Print2,Shift_O=Shift)
+                     CholData,Print2,Shift_O=ShiftU)
      ELSE
        CALL CholFact(ISpB,JSpB,ASpB,NCart,NIntC, &
-                     CholData,Print2,Shift_O=Shift)
+                     CholData,Print2,Shift_O=ShiftU)
      ENDIF
      CALL WriteChol(CholData,TRIM(SCRPath)//'CholFact')
      !
@@ -4163,7 +4163,7 @@ CONTAINS
      INTEGER                      :: I,J,NatmsLoc
      INTEGER                      :: At1,At2,At3,ThreeAt(1:3),ITop
      REAL(DOUBLE)                 :: D12,D13,D23,CX,CY,CZ
-     REAL(DOUBLE)                 :: Dist,Sum,Dist12,Area2
+     REAL(DOUBLE)                 :: Dist,SumU,Dist12,Area2
      REAL(DOUBLE)                 :: Vect1(1:3),Vect2(1:3),Vect3(1:3)
      LOGICAL                      :: Linearity
      TYPE(DBL_RNK2)               :: XYZRot
@@ -4194,11 +4194,11 @@ CONTAINS
      IF(At1==0) THEN
        Dist=-One
        DO I=1,NatmsLoc
-         Sum=XYZRot%D(1,I)**2+XYZRot%D(2,I)**2+XYZRot%D(3,I)**2
+         SumU=XYZRot%D(1,I)**2+XYZRot%D(2,I)**2+XYZRot%D(3,I)**2
          ITop=MAX(Top12%I(I,1),1)
-         Sum=Sum*DBLE(ITop**2)
-         IF(Sum>Dist) THEN
-           Dist=Sum
+         SumU=SumU*DBLE(ITop**2)
+         IF(SumU>Dist) THEN
+           Dist=SumU
            At1=I
          ENDIF
        ENDDO
@@ -4215,9 +4215,9 @@ CONTAINS
        Dist=-One
        DO I=1,NatmsLoc
          ITop=MAX(Top12%I(I,1),1)
-         Sum=DBLE(ITop)*DistVect%D(I)
-         IF(Sum>Dist) THEN
-           Dist=Sum
+         SumU=DBLE(ITop)*DistVect%D(I)
+         IF(SumU>Dist) THEN
+           Dist=SumU
            At2=I
          ENDIF
        ENDDO
@@ -4234,8 +4234,8 @@ CONTAINS
                   (XYZRot%D(2,I)-XYZRot%D(2,At2))**2+&
                   (XYZRot%D(3,I)-XYZRot%D(3,At2))**2)
          D13=DistVect%D(I)
-         Sum=0.5D0*(D12+D13+D23)
-         Area2=Sum*(Sum-D12)*(Sum-D13)*(Sum-D23)
+         SumU=0.5D0*(D12+D13+D23)
+         Area2=SumU*(SumU-D12)*(SumU-D13)*(SumU-D23)
          ITop=MAX(Top12%I(I,1),1)
          Area2=DBLE(ITop)*Area2
          IF(Area2>Dist) THEN
@@ -4410,7 +4410,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL   :: Vects_O,XYZL_O
      CHARACTER(LEN=*)              :: FileName
      CHARACTER(LEN=*)              :: Title
-     CHARACTER(LEN=1)              :: Char 
+     CHARACTER(LEN=1)              :: CharU 
      INTEGER                       :: I,NatmsLoc,II
      !
      NatmsLoc=SIZE(XYZ,2)
@@ -4418,7 +4418,7 @@ CONTAINS
      REWIND(99)
      II=0    
      DO 
-       READ(99,33,END=1) Char
+       READ(99,33,END=1) CharU
        II=II+1
      ENDDO
      1    CONTINUE
@@ -4426,7 +4426,7 @@ CONTAINS
      !
      REWIND(99)
      DO I=1,II
-       READ(99,33) Char 
+       READ(99,33) CharU 
      ENDDO
      IF(PRESENT(XYZL_O)) THEN
        WRITE(99,*) NatmsLoc+3+1
@@ -4899,31 +4899,31 @@ return
 !
 !----------------------------------------------------------------------
 !
-   LOGICAL FUNCTION HasAngle(Char)
-     CHARACTER(LEN=*) :: Char
-     HasAngle=(Char(1:4)=='BEND'.OR. &
-               Char(1:4)=='LINB'.OR. &
-               Char(1:4)=='OUTP'.OR. &
-               Char(1:4)=='TORS'.OR. &
-               Char(1:5)=='ALPHA'.OR. &
-               Char(1:4)=='BETA'.OR. &
-               Char(1:5)=='GAMMA')
+   LOGICAL FUNCTION HasAngle(CharU)
+     CHARACTER(LEN=*) :: CharU
+     HasAngle=(CharU(1:4)=='BEND'.OR. &
+               CharU(1:4)=='LINB'.OR. &
+               CharU(1:4)=='OUTP'.OR. &
+               CharU(1:4)=='TORS'.OR. &
+               CharU(1:5)=='ALPHA'.OR. &
+               CharU(1:4)=='BETA'.OR. &
+               CharU(1:5)=='GAMMA')
    END FUNCTION HasAngle
 !
 !----------------------------------------------------------------------
 !
-   LOGICAL FUNCTION HasBendLinB(Char)
-     CHARACTER(LEN=*) :: Char
-     HasBendLinB=(Char(1:4)=='BEND'.OR. &
-                  Char(1:4)=='LINB')
+   LOGICAL FUNCTION HasBendLinB(CharU)
+     CHARACTER(LEN=*) :: CharU
+     HasBendLinB=(CharU(1:4)=='BEND'.OR. &
+                  CharU(1:4)=='LINB')
    END FUNCTION HasBendLinB
 !
 !----------------------------------------------------------------------
 !
-   LOGICAL FUNCTION HasTorsOutP(Char)
-     CHARACTER(LEN=*) :: Char
-     HasTorsOutP=(Char(1:4)=='OUTP'.OR. &
-                  Char(1:4)=='TORS')
+   LOGICAL FUNCTION HasTorsOutP(CharU)
+     CHARACTER(LEN=*) :: CharU
+     HasTorsOutP=(CharU(1:4)=='OUTP'.OR. &
+                  CharU(1:4)=='TORS')
    END FUNCTION HasTorsOutP
 !
 !-------------------------------------------------------------------
@@ -5369,7 +5369,7 @@ return
      INTEGER                     :: I1,I2,I3,I4,NDim
      INTEGER                     :: II2,II3,II4
      INTEGER                     :: J2,J3,J4
-     REAL(DOUBLE)                :: AngleSum,Sum,Conv,Planar,ASum,TwoPi
+     REAL(DOUBLE)                :: AngleSum,SumU,Conv,Planar,ASum,TwoPi
      REAL(DOUBLE)                :: A1,A2,A3
      !
      AngleSum=-One
@@ -5391,11 +5391,11 @@ return
                           Value_O=A2)
            CALL BEND(XYZ(1:3,I3),XYZ(1:3,I1),XYZ(1:3,I4), &
                           Value_O=A3)
-           Sum=A1+A2+A3
-           ASum=ABS(TwoPI-Sum)
+           SumU=A1+A2+A3
+           ASum=ABS(TwoPI-SumU)
            IF(Planar>ASum) THEN
              Planar=ASum
-             AngleSum=Sum
+             AngleSum=SumU
              II2=I2
              II3=I3
              II4=I4
@@ -5687,9 +5687,9 @@ return
 !------------------------------------------------------------------
 !
    SUBROUTINE MapBendDispl(Angle,AngleDispl)
-     REAL(DOUBLE)  :: Angle,AngleDispl,Sum
-     Sum=Angle+AngleDispl
-     IF(Sum>PI) AngleDispl=(TwoPi-Sum)-Angle
+     REAL(DOUBLE)  :: Angle,AngleDispl,SumU
+     SumU=Angle+AngleDispl
+     IF(SumU>PI) AngleDispl=(TwoPi-SumU)-Angle
    END SUBROUTINE MapBendDispl
 !
 !------------------------------------------------------------------
@@ -6165,7 +6165,7 @@ return
      INTEGER                     :: IZD,IXD,IYD,NJJ1,NJJ2
      INTEGER                     :: NMax12,JJ,IntSet,IDimExcl,NBondEst
      INTEGER                     :: IDim14,IDim12,IDim13
-     INTEGER                     :: HAtm,LAtm,DDim,NBondOld
+     INTEGER                     :: HAtm,LAtm,DDimU,NBondOld
      INTEGER                     :: IChk,MaxBonds
      REAL(DOUBLE),DIMENSION(3)   :: DVect
      LOGICAL                     :: FoundHBond,FoundMetLig
@@ -6233,10 +6233,10 @@ return
                              R12=SQRT(R12_2)
                              IF(R12<CritDist) THEN
                                IF(NBond+1>NBondEst) THEN
-                                 DDim=NatmsLoc*10
-                                 CALL MoreBondArray(Bond,NBondEst+DDim, &
+                                 DDimU=NatmsLoc*10
+                                 CALL MoreBondArray(Bond,NBondEst+DDimU, &
                                                     NBondEst)
-                                 NBondEst=NBondEst+DDim
+                                 NBondEst=NBondEst+DDimU
                                ENDIF 
                                NBond=NBond+1
                                IF(IEq(JJ1)<IEq(JJ2)) THEN
@@ -6492,7 +6492,7 @@ return
      IMPLICIT NONE
      INTEGER,OPTIONAL :: ISET 
      TYPE(INT_VECT)   :: BoxI,BoxJ
-     TYPE(INT_RNK2)   :: ISign
+     TYPE(INT_RNK2)   :: ISignU
      TYPE(INT_RNK3)   :: BoxCounter 
      REAL(DOUBLE)     :: BoxSize,VBIG
      REAL(DOUBLE)     :: BXMIN,BXMax,BYMIN,BYMax,BZMIN,BZMax
@@ -6505,7 +6505,7 @@ return
      NBox=NX*NY*NZ
      CALL New(BoxI,NBox+1)
      CALL New(BoxJ,NatmsLoc)
-     CALL New(ISign,(/2,NatmsLoc/))
+     CALL New(ISignU,(/2,NatmsLoc/))
      CALL New(BoxCounter,(/NX,NY,NZ/))
      BoxCounter%I(1:NX,1:NY,1:NZ)=0
      BoxI%I(1:NBox+1)=0
@@ -6518,8 +6518,8 @@ return
        IZ=INT((XYZ(3,I)-BZMIN)/BoxSize)+1
        IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY !order parameter: ZXY
        BoxCounter%I(IX,IY,IZ)=BoxCounter%I(IX,IY,IZ)+1
-       ISign%I(1,I)=IORD
-       ISign%I(2,I)=BoxCounter%I(IX,IY,IZ) 
+       ISignU%I(1,I)=IORD
+       ISignU%I(2,I)=BoxCounter%I(IX,IY,IZ) 
      ENDDO
      !     
      ! Count pointers to individual Boxes within array A
@@ -6537,8 +6537,8 @@ return
      ! Set up contents of Boxes as represented in A, sparse row-wise
      !
      DO I=1,NatmsLoc
-       IORD=ISign%I(1,I)
-       IADD=ISign%I(2,I)
+       IORD=ISignU%I(1,I)
+       IADD=ISignU%I(2,I)
        BoxJ%I(BoxI%I(IORD)-1+IADD)=I
      ENDDO
      !
@@ -6549,7 +6549,7 @@ return
        BoxJ1%I(:)=BoxJ%I(:)
      ENDIF
      !
-     CALL Delete(ISign)
+     CALL Delete(ISignU)
      CALL Delete(BoxCounter)
      CALL Delete(BoxI)
      CALL Delete(BoxJ)
