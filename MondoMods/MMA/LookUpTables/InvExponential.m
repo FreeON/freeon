@@ -47,11 +47,11 @@ Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 
 (*                                          *)
 
-WP = 30;
+WP = 60;
 NTerms =  4;
 n = NTerms ;
-switch = 30;
-NInterps = 1200;
+switch = 33;
+NInterps = 1600;
 
 FunctionList[x_] := {Exp[-x]};
 

@@ -55,7 +55,7 @@ Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 FileName="GammaAssymptotics.Inc";
 Print[" Openned ",FileName];
 OpenWrite[FileName];
-WriteString[FileName,"      REAL(DOUBLE), PARAMETER :: GammAss(0:",ToString[NFunctions],")= (/& \n"];
+WriteString[FileName,"      REAL(DOUBLE), PARAMETER :: GammAss(0:",ToString[NFunctions-1],")= (/& \n"];
 Do[ 
 WriteString[FileName,"                                ",FF[Abs[2 n - 1]!!/(2 (2)^n) Sqrt[Pi]],", & \n"];
    ,{n,0,NFunctions-2}];
@@ -71,8 +71,8 @@ Abort[];
 WP = 30;
 NTerms =  4;
 n = NTerms ;
-switch = 32;
-NInterps = 700;
+switch = 33;
+NInterps = 800;
 
 FunctionList[x_] := {F[0,x],F[1,x],F[2,x],F[3,x],F[4,x],F[5,x],F[6,x],F[7,x],F[8,x],
                      F[9,x],F[10,x],F[11,x],F[12,x],F[13,x],F[14,x],F[15,x],F[16,x]};

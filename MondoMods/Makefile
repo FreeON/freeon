@@ -108,9 +108,9 @@ CSM:
 FTestObjs=  FTest.o 
 F:	$(FTestObjs)
 	$(LD) $(LDFLAGS) FTest $(FTestObjs) $(LibOpts) $(F90_LIBRARIES) 
-	./FTest>>Mods.log
-	rm -f $(FTestObjs) ./FTest
-	cat Mods.log
+#	./FTest>>Mods.log
+#	rm -f $(FTestObjs) ./FTest
+#	cat Mods.log
 #
 CF:	
 	rm -f $(FTestObjs)

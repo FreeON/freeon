@@ -164,8 +164,8 @@ CONTAINS
   !========================================================================================
   !     Compute the erf function
   !========================================================================================
-  FUNCTION ERF(W)
-    REAL(DOUBLE) :: ERF,W,X,Sgn
+  FUNCTION Erf(W)
+    REAL(DOUBLE) :: Erf,W,X,Sgn
     INTEGER      :: J
     IF(W<0.0D0)THEN
        Sgn=-1.0D0
@@ -180,13 +180,13 @@ CONTAINS
        Erf=Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J))))
     ENDIF
     Erf=Sgn*Erf
-  END FUNCTION ERF
+  END FUNCTION Erf
   !========================================================================================
   !     The complimentary error function 
   !========================================================================================
   FUNCTION ERFC(X)
     REAL(DOUBLE) :: ERFC,X
-    ERFC=1.0D0-ERF(X)
+    ERFC=1.0D0-Erf(X)
   END FUNCTION ERFC
   !========================================================================================
   !     The Funtion ==> -ProductLog[-1,-x] from [0,1/E]
@@ -301,13 +301,13 @@ CONTAINS
     IF(L > 64) CALL MondoHalt(-100,"L > 64 in GammaHalf")
     SqrtX      = SQRT(X)
     IF(L == 0) THEN
-       GammaHalf = (One-ERF(SqrtX))
+       GammaHalf = (One-Erf(SqrtX))
     ELSE
        XSUM = SFAC(1)*EXP(-X)
        DO LS = 2,L
           XSUM  = XSUM+(Sfac(LS)*X*EXP(-X/DBLE(LS-1)))**(LS-1)
        ENDDO
-       GammaHalf= (One-ERF(SqrtX))+(SqrtX/SqrtPi)*XSUM
+       GammaHalf= (One-Erf(SqrtX))+(SqrtX/SqrtPi)*XSUM
     ENDIF
   END FUNCTION GammaHalf
   !
