@@ -33,6 +33,8 @@ MODULE Macros
    CHARACTER(LEN=3)     :: CurGeom
    CHARACTER(LEN=3)     :: PrvGeom
    CHARACTER(LEN=3)     :: NxtGeom
+!  Global parameter for QM/MM
+   LOGICAL,DIMENSION(2) :: Mechanics
 !-------------------------------------------------------------------------------
    CONTAINS
       SUBROUTINE StartUp(Args,Prog,Serial_O)
@@ -99,32 +101,46 @@ MODULE Macros
          CALL Get(OutFile,'outputfile')
          CALL Get(InpFile,'inputfile')
 !        Load global scalars
-         CALL Get(NEl,      'nel')
-         CALL Get(NAtoms,   'natoms')
-         CALL Get(MaxAtms,  'maxatms',       Tag_O=CurBase)
-         CALL Get(MaxBlks,  'maxblks',       Tag_O=CurBase)
-         CALL Get(MaxNon0,  'maxnon0',       Tag_O=CurBase)
-         CALL Get(NBasF,    'nbasf',         Tag_O=CurBase)
-         CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+#ifdef MMech
+         CALL GET(Mechanics(1),'Ctrl_Mechanics1') 
+         CALL GET(Mechanics(2),'Ctrl_Mechanics2') 
+         IF(HasQM())THEN
+#endif
+            CALL Get(NEl,      'nel',           Tag_O=CurGeom)
+            CALL Get(NAtoms,   'natoms',        Tag_O=CurGeom)
+            CALL Get(MaxAtms,  'maxatms',       Tag_O=CurBase)
+            CALL Get(MaxBlks,  'maxblks',       Tag_O=CurBase)
+            CALL Get(MaxNon0,  'maxnon0',       Tag_O=CurBase)
+            CALL Get(NBasF,    'nbasf',         Tag_O=CurBase)
+            CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
 #ifdef PARALLEL
-         CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
-         CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
-         CALL Get(MaxNon0Node,'maxnon0node', Tag_O=CurBase)
+            CALL Get(MaxAtmsNode,'maxatmsnode', Tag_O=CurBase)
+            CALL Get(MaxBlksNode,'maxblksnode', Tag_O=CurBase)
+            CALL Get(MaxNon0Node,'maxnon0node', Tag_O=CurBase)
+#endif
+#ifdef MMech
+         ENDIF
 #endif
 !        Initialize global objects
          CALL Init(MemStats)
          CALL Init(PrintFlags,Prog)
          CALL Elapsed_Time(PerfMon,'Init')
 !        Load global objects
-         CALL New(BSiz,NAtoms)
-         CALL New(OffS,NAtoms)
-         CALL Get(BSiz,'atsiz',Tag_O=CurBase)
-         CALL Get(OffS,'atoff',Tag_O=CurBase)
-!        Load global value for max block size
-         MaxBlkSize=0
-         DO I=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)); ENDDO
-!        Load global thresholding values
-         CALL SetThresholds(CurBase)
+#ifdef MMech
+         IF(HasQM())THEN
+#endif
+            CALL New(BSiz,NAtoms)
+            CALL New(OffS,NAtoms)
+            CALL Get(BSiz,'atsiz',Tag_O=CurBase)
+            CALL Get(OffS,'atoff',Tag_O=CurBase)
+            ! Load global value for max block size
+            MaxBlkSize=0
+            DO I=1,NAtoms; MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I)); ENDDO
+               ! Load global thresholding values
+               CALL SetThresholds(CurBase)
+#ifdef MMech
+            ENDIF
+#endif
 #ifdef PARALLEL
          IF(InParallel)THEN        
             CALL New(OffSt,NPrc-1,0)
@@ -155,9 +171,18 @@ MODULE Macros
 !-------------------------------------------------------------------------------
       SUBROUTINE ShutDown(Prog)
          CHARACTER(LEN=*),INTENT(IN) :: Prog
+#ifdef MMech
+!        LOGICAL :: HasQM
+#endif
 !-------------------------------------------------------------------------------
+#ifdef MMech
+         IF(HasQM()) THEN
+#endif
          CALL Delete(BSiz)
          CALL Delete(OffS)
+#ifdef MMech
+         ENDIF
+#endif
 #ifdef PARALLEL
          IF(InParallel)THEN
             CALL Delete(Beg)
@@ -218,6 +243,28 @@ MODULE Macros
          A%CPUS=CPUSec()
          A%Wall=WallSec()
      END SUBROUTINE Init_TIME
+!-------------------------------------------------------------------------------
+ 
+!-------------------------------------------------------------------------------
+     FUNCTION HasMM() 
+       LOGICAL :: HasMM
+       HasMM=Mechanics(1)
+     END FUNCTION HasMM
+
+     FUNCTION HasQM() 
+       LOGICAL :: HasQM
+       HasQM=Mechanics(2)
+     END FUNCTION HasQM
+
+     FUNCTION MMOnly() 
+       LOGICAL :: MMOnly
+       MMOnly=Mechanics(1).AND..NOT.Mechanics(2)
+     END FUNCTION MMOnly
+
+     FUNCTION QMOnly() 
+       LOGICAL :: QMOnly
+       QMOnly=Mechanics(2).AND..NOT.Mechanics(1)
+     END FUNCTION QMOnly
 !-------------------------------------------------------------------------------
  
 !-------------------------------------------------------------------------------
