@@ -65,11 +65,14 @@ PROGRAM QCTC
   CALL MakeJ(J)
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
 ! Put J to disk
-  CALL Filter(T1,J)
+!
+! now skiping filtration until after orthogonal Fock is xformed
+!  CALL Filter(T1,J)
+
   IF(Args%C%C(2)=='Core')THEN
-     CALL Put(T1,TrixFile('V',Args))
+     CALL Put(J,TrixFile('V',Args))
   ELSE
-     CALL Put(T1,TrixFile('J',Args,0))
+     CALL Put(J,TrixFile('J',Args,0))
   ENDIF
 ! Compute the nuclear-total electrostatic energy
   E_Nuc_Tot=NukE()
@@ -78,17 +81,16 @@ PROGRAM QCTC
 ! Printing
   CALL PPrint(E_Nuc_Tot,'NukE['//TRIM(SCFCycl)//']')
   IF(Args%C%C(2)=='Core')THEN
-     CALL PChkSum(T1,'V',Prog)
-     CALL PPrint( T1,'V')
-     CALL Plot(   T1,'V')
+     CALL PChkSum(J,'V',Prog)
+     CALL PPrint( J,'V')
+     CALL Plot(   J,'V')
   ELSE
-     CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
-     CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
+     CALL PChkSum(J,'J['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( J,'J['//TRIM(SCFCycl)//']')
+     CALL Plot(   J,'J['//TRIM(SCFCycl)//']')
   ENDIF
 ! Tidy up
   CALL Delete(J)
-  CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(Args)
