@@ -30,8 +30,6 @@ F90_MISC     = -static -fpe1 $(F_LIST) $(F_PROF)
 F77_EXTRAS   = -f77rtl 
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
-               -I$(MONDO_HOME)/Dynamo                  \
-               -I$(MONDO_HOME)/IntCoo                  \
                -I/usr/local/include   $(MPI_COMPILE_FLAGS) \
 #              -I$(MPI_INC) 
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)

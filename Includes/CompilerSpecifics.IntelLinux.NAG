@@ -37,8 +37,6 @@ F77_EXTRAS    = -132 -w -dusty
 #
 F90_INCLUDE   = -I$(MONDO_HOME)/Includes/               \
                 -I$(MONDO_HOME)/MondoMods               \
-                -I$(MONDO_HOME)/Dynamo                  \
-                -I$(MONDO_HOME)/IntCoo                  \
                 -I/usr/local/include                    
 #               -I$(MPI_INC) 
 #

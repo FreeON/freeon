@@ -34,8 +34,6 @@ F_LIST =
 F90_MISC     = $(F_LIST) $(F_PROF) -mips4 -64 -extend_source
 F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
-               -I$(MONDO_HOME)/Dynamo               \
-               -I$(MONDO_HOME)/IntCoo               \
                -I/usr/local/include                    \
                -I$(MONDO_HOME)/MondoMods/MMA/Functions 
 #              -I$(MPI_INC) 
