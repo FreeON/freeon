@@ -64,7 +64,7 @@ MODULE ParseInput
          CALL Get(Args)
          IF(Args%NC==0)CALL MondoHalt(PRSE_ERROR,' No arguments to MondoSCF !')
 !
-         CALL GetEnv('PWD',MONDO_PWD)   
+         CALL GetEnv('PWD',MONDO_PWD)
          CALL GetEnv('MONDO_HOME',MONDO_HOME)
          CALL GetEnv('MONDO_SCRATCH',MONDO_SCRATCH)
          CALL GetEnv('MONDO_HOST',MONDO_HOST)
@@ -195,10 +195,10 @@ MODULE ParseInput
          CLOSE(UNIT=Out,STATUS='KEEP')
 !        TimeStamp
          CALL TimeStamp('Starting MondoSCF')
-#ifdef PARALLEL
+#if defined(PARALLEL) && !defined(MPI2)
 !--------------------------------------------------------------
 !        Parse <OPTIONS> for mpirun invokation
-!
+ 
          CALL OpenASCII(InpFile,Inp)
          IF(.NOT.OptCharQ(Inp,MPI_OPTION,MPILine))          & 
             CALL Halt(' mpi invokation command not found. ' &
