@@ -74,7 +74,7 @@ CONTAINS
     LOGICAL          :: Present
 !-------------------------------------------------------------------------------
     ! IO for the orthogonal P
-    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
+!    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
     CALL Put(P,TrixFile('OrthoD',Args,1))
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
@@ -101,7 +101,6 @@ CONTAINS
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
   END SUBROUTINE PutXForm_DBCSR
 #endif
-
 !-------------------------------------------------------------------------------
   SUBROUTINE PutXForm_BCSR(Prog,Args,P,Z,Tmp1)
     TYPE(BCSR)       :: P,Z,Tmp1
@@ -110,7 +109,7 @@ CONTAINS
     LOGICAL          :: Present
 !-------------------------------------------------------------------------------
     ! IO for the orthogonal P
-    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
+!    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
     CALL Put(P,TrixFile('OrthoD',Args,1))
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')

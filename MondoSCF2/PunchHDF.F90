@@ -40,7 +40,6 @@ CONTAINS
     CALL Put(ST,'SpaceTime')
     CALL Delete(ST)
 #else
-    WRITE(*,*)' SPACETIME = ',Clump(2)
     CALL Put(Clump(2),'SpaceTime')
 #endif
     CALL CloseHDF(HDF_CurrentID)
@@ -71,6 +70,8 @@ CONTAINS
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
+    HDF_CurrentID=HDFFileID
+    CALL Put(G%Clones,'clones')
     DO iCLONE=1,G%Clones
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Create data space for grouped objects to preserve structure of HDF5 
@@ -101,7 +102,7 @@ CONTAINS
        DoubleVect%D=BIG_DBL
        CALL Put(DoubleVect,'PFFTensorC')
        CALL Put(DoubleVect,'PFFTensorS')
-       CALL Delete(DoubleVect)
+       CALL Delete(DoubleVect) 
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)
@@ -172,6 +173,7 @@ CONTAINS
     TYPE(Geometries) :: G
     TYPE(BasisSets)  :: B
     TYPE(Parallel)   :: M
+    TYPE(BCSR)       :: DM
     INTEGER          :: cBAS,iCLONE,HDFFileID
     CHARACTER(LEN=2) :: chBAS
     !---------------------------------------------------------------------------!
@@ -201,6 +203,9 @@ CONTAINS
        CALL Put(M%End(iCLONE,cBAS),'end',Tag_O=chBAS)
        CALL Put(M%GLO(iCLONE,cBAS),'dbcsroffsets',Tag_O=chBAS)
 #endif
+       CALL New(DM,(/B%MxAts(cBAS),B%MxBlk(cBAS),B%MxN0s(cBAS)/))
+       CALL Put(DM,'CurrentDM',CheckPoint_O=.TRUE.)
+       CALL Delete(DM)
        CALL CloseHDFGroup(HDF_CurrentID)
     ENDDO
     CALL CloseHDF(HDFFileID)

@@ -17,7 +17,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB1,DB2,IB,SB,IS,Drv,SubInd,BfnInd)
 #else
   TYPE(BCSR)            :: D
   TYPE(BCSR)            :: K
-  INTEGER               :: MyID=0
+!  INTEGER               :: MyID=0
 #endif
   TYPE(BSET),INTENT(IN)     :: BSc,BSp   ! basis set info
   TYPE(CRDS),INTENT(IN)     :: GMc,GMp   ! geometry info

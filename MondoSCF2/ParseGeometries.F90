@@ -16,7 +16,7 @@ CONTAINS
     TYPE(Options)    :: O
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
-    INTEGER          :: I,iCLONE
+    INTEGER          :: I,iCLONE,HDFFileID
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
     IF(O%Grad==GRAD_TS_SEARCH_NEB.OR.D%MDAlgorithm==MD_PARALLEL_REP)THEN
@@ -56,13 +56,20 @@ CONTAINS
           ENDIF
        ENDIF
     ELSE
-       G%Clones=1
-       ALLOCATE(G%Clone(1))
        IF(O%Guess==GUESS_EQ_RESTART)THEN
-          HDF_CurrentID=OpenHDF(N%RFile)
-          CALL Get(G%Clone(1),TAG_O=GTag(O%RestartState))
-          CALL CloseHDF(HDF_CurrentID)
+          HDFFileID=OpenHDF(N%RFile)
+          HDF_CurrentID=HDFFileID
+          CALL Get(G%Clones,'clones')
+          ALLOCATE(G%Clone(1:G%Clones))          
+          DO iCLONE=1,G%Clones
+             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+             CALL Get(G%Clone(iCLONE),TAG_O=GTag(O%RestartState))
+             CALL CloseHDFGroup(HDF_CurrentID)
+          ENDDO
+          CALL CloseHDF(HDFFileID)          
        ELSE       
+          G%Clones=1
+          ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1))
        ENDIF
     ENDIF

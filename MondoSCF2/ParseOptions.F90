@@ -28,7 +28,7 @@ CONTAINS
     ! Check for restart, and extract the current state from the restart HDF file
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
     ! Parse print output options, load global object PrintFlags
-    CALL ParsePrintFlags(O%PFlags)
+    CALL ParsePrintFlags(O%PFlags,O%GeomPrint)
     ! Parse for accuracy levels and set thresholds
     CALL ParseThresholds(O%NThrsh,O%AccuracyLevels,O%Thresholds)
     ! Parse for SCF methods to use in solution of SCF equations and put to HDF
@@ -276,7 +276,7 @@ CONTAINS
        ! Open the old restart HDF file
        HDF_CurrentID=OpenHDF(RestartHDF)       
        ! Get the current state to restart from
-       CALL Get(RestartState,'current')
+       CALL Get(RestartState,'current_state')
        ! Now close the old file...
        CALL CloseHDF(HDF_CurrentID)
     ELSEIF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
@@ -290,8 +290,9 @@ CONTAINS
   !===============================================================================================
   ! PARSE THE PRINT OUT OPTIONS AND LOAD THE GLOBAL PRINT FLAGS OBJECT.
   !===============================================================================================
-  SUBROUTINE ParsePrintFlags(PFlags)
+  SUBROUTINE ParsePrintFlags(PFlags,GeomPrint)
     TYPE(DEBG)         :: PFlags
+    CHARACTER(LEN=3)   :: GeomPrint
     !-----------------------------------------------------------------------------------------------
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_NONE) )THEN
        PFlags%Key=DEBUG_NONE
@@ -341,6 +342,7 @@ CONTAINS
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
+    GeomPrint='PDB' ! hard set for now
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !

@@ -32,10 +32,10 @@ PROGRAM P2Use
   REAL(DOUBLE)                  :: Scale,TrP,Fact,ECount, &
        DeltaP,OldDeltaP,DensityDev
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA, &
-       NPur,PcntPNon0
+       NPur,PcntPNon0,OldFileID
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,RestartHDF
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
 !------------------------------------------------------------------------------- 
   ! Start up macro
@@ -46,13 +46,22 @@ PROGRAM P2Use
   CALL Get(GM,Tag_O=CurGeom)
   IF(SCFActn=='Extrapolate')THEN
      CALL Halt(' Extrapolation turned off, need non-orthogonal SP2 or TS4... ')
-  ELSEIF(SCFActn=='Restart')THEN
-     CALL Get(RestartHDF,'OldInfo')
-     CALL CloseHDF(HDF_CurrentID)
-     HDF_CurrentID=OpenHDF(RestartHDF)
-     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)   
-     CALL CloseHDF(HDF_CurrentID)
-     HDF_CurrentID=OpenHDF(InfFile)
+  ELSEIF(SCFActn=='Restart')THEN  
+     ! Close current group and HDF
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! Open old group and HDF
+     OldFileID=OpenHDF(Restart)
+     HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Find the current density matrix
+     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+     ! Close it up 
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
   ELSEIF(SCFActn=='Project')THEN
      ! Allocations 
      CALL New(P)

@@ -117,7 +117,7 @@ PROGRAM RHEqs
      CALL Multiply(sTmp1,sX,sP)          ! F=Z.P_Orthog.Z^t
   ENDIF
   CALL Filter(sTmp1,sP)                  ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
-!  CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)   
+  CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)   
   CALL Put(sTmp1,TrixFile('D',Args,1))
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')

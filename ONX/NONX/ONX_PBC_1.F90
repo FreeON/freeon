@@ -26,7 +26,7 @@ PROGRAM ONX
 #else
   TYPE(BCSR)          :: D
   TYPE(BCSR)          :: K,T1,T2
-  INTEGER             :: MyID=0
+!  INTEGER             :: MyID=0
 #endif
   TYPE(BSET)          :: BSc
   TYPE(CRDS)          :: GMc
@@ -55,7 +55,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
-  INTEGER                :: iSwitch,ErrorCodeTmp
+  INTEGER                :: iSwitch,ErrorCodeTmp,OldFileID
 #ifdef PERIODIC
   INTEGER                :: NC1,NC2
 #endif
@@ -69,6 +69,34 @@ PROGRAM ONX
 #endif
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
+#ifdef PARALLEL_CLONES
+     ! Close current group and HDF
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! Open old group and HDF
+     HDF_CurrentID=OpenHDF(Restart)
+     OldFileID=HDF_CurrentID
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     PrvCycl=TRIM(IntToChar(Stat%I(1)))
+     PrvBase=TRIM(IntToChar(Stat%I(2)))
+     PrvGeom=TRIM(IntToChar(Stat%I(3)))
+     HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
+     CALL Get(BSp,Tag_O=PrvBase)
+!    Get the previous geometry, ASSUMING that 
+!    we are not extrapolating the DM
+     CALL Get(GMp,Tag_O=PrvGeom)
+     CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
+     CALL Get(OffS,'atoff',Tag_O=PrvBase)
+     CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
+     ! Close the old hdf up 
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+#else
 !    Get the old information
      CALL Get(RestartHDF,'OldInfo')
      CALL CloseHDF(HDF_CurrentID)
@@ -79,12 +107,15 @@ PROGRAM ONX
      PrvBase=TRIM(IntToChar(Stat%I(2)))
      PrvGeom=TRIM(IntToChar(Stat%I(3)))
      CALL Get(BSp,Tag_O=PrvBase)
+!    Get the previous geometry, ASSUMING that 
+!    we are not extrapolating the DM
      CALL Get(GMp,Tag_O=PrvGeom)
      CALL Get(BSiz,'atsiz',Tag_O=PrvBase)
      CALL Get(OffS,'atoff',Tag_O=PrvBase)
      CALL Get(NBasF,'nbasf',Tag_O=PrvBase)
      CALL CloseHDF(HDF_CurrentID)
      HDF_CurrentID=OpenHDF(InfFile)     
+#endif
   ELSE
      CALL Get(BSp,Tag_O=PrvBase)
      CALL Get(GMp,Tag_O=PrvGeom)

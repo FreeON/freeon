@@ -85,9 +85,9 @@ CONTAINS
     IF(cSCF/=0) &
          S%Action=SCF_SOLVE_SCF
     CALL SolveSCF(cBAS,N,S,O,M)
+    CALL StateArchive(N,S)
     SCFCycle=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS)
     S%Previous%I=S%Current%I
-!    CALL StateArchive(N,S)
   END FUNCTION SCFCycle
   !===============================================================================
   ! COMPUTE AN ENERGY GRADIENT
@@ -229,7 +229,7 @@ CONTAINS
        S%Action=SCF_GUESSEQCORE
     ELSEIF(O%Guess==GUESS_EQ_RESTART)THEN
        O%Guess=0
-       S%Previous%I=S%Current%I
+       S%Previous%I=O%RestartState%I
        S%Action=SCF_RESTART
     ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
        S%Action=SCF_PROJECTION
@@ -290,7 +290,7 @@ CONTAINS
 !       CALL LogSCF(Current,'Solving SCF equations with TS4')
        CALL Invoke('TS4',N,S,M)
     ELSE
-       CALL MondoHalt(99,'No Method Chosen')
+       CALL MondoHalt(99,'Unknown method key = '//TRIM(IntToChar(O%Methods(cBAS))))
     ENDIF
     CALL Invoke('SCFstats',N,S,M)
   END SUBROUTINE SolveSCF

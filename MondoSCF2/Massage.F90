@@ -39,6 +39,7 @@ CONTAINS
   SUBROUTINE ToAtomicUnits(G)
     TYPE(CRDS) :: G
     IF(G%InAU)RETURN
+    G%InAU=.TRUE.
     G%Carts%D=AngstromsToAU*G%Carts%D               
     G%AbCarts%D=AngstromsToAU*G%AbCarts%D               
 #ifdef PERIODIC

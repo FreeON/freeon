@@ -32,7 +32,7 @@ PROGRAM MakeRho
   TYPE(INT_VECT)            :: Stat
   INTEGER                   :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                   :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
-  INTEGER                   :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist
+  INTEGER                   :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
   LOGICAL                   :: First
   REAL(DOUBLE)              :: DistThresh,RSumE,RSumN,RSumMM,RelRhoErr, &
                                QMCharge,dQMCharge,MMCharge,dMMCharge,PcntCharge
@@ -72,6 +72,34 @@ PROGRAM MakeRho
         CALL Get(NBasF,'nbasf',PrvBase)
         CALL Get(Dmat,TrixFile('D',Args,-1))
      ELSEIF(SCFActn=='Restart')THEN
+#ifdef PARALLEL_CLONES
+        ! Close current group and HDF
+        CALL CloseHDFGroup(H5GroupID)
+        CALL CloseHDF(HDFFileID)
+        ! Open old group and HDF
+        HDF_CurrentID=OpenHDF(Restart)
+        OldFileID=HDF_CurrentID
+        CALL New(Stat,3)
+        CALL Get(Stat,'current_state')
+        HDF_CurrentID=OpenHDFGroup(HDF_CurrentID,"Clone #"//TRIM(IntToChar(MyClone)))
+        ! Get old basis set stuff
+        SCFCycl=TRIM(IntToChar(Stat%I(1)))
+        CurBase=TRIM(IntToChar(Stat%I(2)))
+        CurGeom=TRIM(IntToChar(Stat%I(3)))
+        CALL Get(BS,CurBase)
+        CALL Get(GM,CurGeom)
+        CALL Get(NExpt,'nexpt',CurBase)
+        CALL New_HGRho(Rho,(/NExpt,0,0/))
+        CALL Get(Rho%Expt,'dexpt',CurBase)
+        CALL Get(Rho%Lndx ,'lndex',CurBase)
+        ! Close the old hdf up 
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(OldFileID)
+        ! Reopen current group and HDF
+        HDFFileID=OpenHDF(H5File)
+        H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID=H5GroupID
+#else
         ! Get the old information
         CALL Get(RestartHDF,'OldInfo')
         CALL CloseHDF(HDF_CurrentID)
@@ -89,6 +117,7 @@ PROGRAM MakeRho
         CALL Get(Rho%Lndx ,'lndex',CurBase)
         CALL CloseHDF(HDF_CurrentID)
         HDF_CurrentID=OpenHDF(InfFile)     
+#endif
         CALL Get(Dmat,TrixFile('D',Args,0))
      ELSE
         ! Get the current information
@@ -403,7 +432,7 @@ PROGRAM MakeRho
        CALL Put_HGRho(Rho2,'Rho',Args,0) 
   ENDIF
   CALL PChkSum(Rho2,'Rho',Prog)
-! CALL Print_HGRho(Rho2,'Rho2',Unit_O=6)
+!  CALL Print_HGRho(Rho2,'Rho2',Unit_O=6)
   ! Tidy up
 #ifdef MMech
   IF(HasMM()) THEN
