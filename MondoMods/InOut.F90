@@ -168,7 +168,7 @@ CONTAINS
 #endif
        STATUS=HDF5CloseGroup(GroupID)
        IF(STATUS==FAIL) &
-            CALL Halt(' Failed to close an Group file with GroupGroupID=' &
+            CALL Halt(' Failed to close a Group with GroupID=' &
             //'<'//TRIM(IntToChar(GroupID))//'>. ') 
 #ifdef PARALLEL
     ENDIF
@@ -181,6 +181,10 @@ CONTAINS
     TYPE(META_DATA) :: Meta
     INTEGER         :: NC
     NC=StringLen(Meta%VarName)
+
+
+!    IF(Meta%Unlimited==1)CALL Halt(' UNLIMIT! ')
+
     CALL HDF5CreateData(HDF_CurrentID,Meta%DataType,Meta%Dimension,          &
          NC,Char2Ints(NC,Meta%VarName),Meta%Unlimited, &
          Meta%DataId,Meta%DataSpc)
@@ -1543,9 +1547,15 @@ CONTAINS
                          CALL Put(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Put(A%NNon0,TRIM(Name)//'%NNon0')
                          CALL Put(A%RowPt,TRIM(Name)//'%RowPt',A%NAtms+1)
+#ifdef PARALLEL_CLONES
+                         CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks)!,UnLimit_O=.TRUE.)
+                         CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks)!,UnLimit_O=.TRUE.)
+                         CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0)!,UnLimit_O=.TRUE.)
+#else
                          CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks,UnLimit_O=.TRUE.)
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
+#endif
                          RETURN
                       ENDIF
                    ENDIF

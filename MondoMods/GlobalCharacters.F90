@@ -48,6 +48,8 @@ MODULE GlobalCharacters
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: GeoFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: LogFile
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: BasFile
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: Restart
+   CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: H5File
 !-------------------------------------------------  
 !  File postfixes 
 !

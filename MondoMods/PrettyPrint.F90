@@ -1072,7 +1072,7 @@ MODULE PrettyPrint
           ENDIF
        ENDDO
        WRITE(PU,*)'RhoSum];'
-    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM) THEN 
+    ELSEIF(PrintFlags%Key==DEBUG_MEDIUM .OR. PrintFlags%Key==DEBUG_MAXIMUM.OR.PU==6) THEN 
        NPrim=0
        WRITE(PU,30) Name
        WRITE(PU,31)

@@ -27,7 +27,6 @@ CONTAINS
   SUBROUTINE StartUp(Args,Prog,Serial_O)
     TYPE(ARGMT),INTENT(OUT)              :: Args
     CHARACTER(LEN=*),INTENT(IN)          :: Prog
-    CHARACTER(LEN=DCL)                   :: H5File
     LOGICAL,OPTIONAL                     :: Serial_O
     INTEGER                              :: I
 #ifdef PARALLEL_CLONES
@@ -201,7 +200,6 @@ CONTAINS
 #else
     IF(PrintFlags%Key>DEBUG_MEDIUM)  &
          CALL TimeStamp('Exiting '//TRIM(Prog),Enter_O=.FALSE.)
-
 #endif     
     STOP 
   END SUBROUTINE ShutDown
@@ -240,6 +238,9 @@ CONTAINS
     CALL Get(logFile,'logfile')
     CALL Get(OutFile,'outputfile')
     CALL Get(InpFile,'inputfile')
+#ifdef PARALLEL_CLONES
+    CALL Get(Restart,'OldInfo')
+#endif    
     CALL Get(MaxAtms,'maxatms',Tag_O=CurBase)
     CALL Get(MaxBlks,'maxblks',Tag_O=CurBase)
     CALL Get(MaxNon0,'maxnon0',Tag_O=CurBase)
