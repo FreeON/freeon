@@ -4186,7 +4186,7 @@ B%BL%D=Zero
          I4=II4
          IF(Found) THEN
            NIntC=NIntC+1
-           IntC_New%Def%C(NIntC)(1:5)='TORS '
+           IntC_New%Def%C(NIntC)(1:10)='TORS      '
            IntC_New%Atoms%I(NIntC,1)=I1
            IntC_New%Atoms%I(NIntC,2)=I2
            IntC_New%Atoms%I(NIntC,3)=I3
