@@ -332,6 +332,17 @@ MODULE DerivedTypes
      TYPE(INT_VECT)   :: CDrv
      TYPE(INT_RNK2)   :: SLOC
   END TYPE IDrv
+!-------------------------------------------------------------------------------------
+!  ONX gradient driver
+!
+  TYPE GradD
+     INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: LG1,LG2,LG3,LG4,LG5
+     INTEGER          :: LenDa,LenDc,LenDb,LenDn
+     INTEGER          :: NCON
+     INTEGER          :: NLOCB1,NLOCB2,NLOCB3,NLOCK2,NLOCK3
+     TYPE(INT_RNK2)   :: GDrv1,GDrv2,GDrv3,GDrv4,GDrv5
+  END TYPE IDrv
 !--------------------------------------------------------------------------
 !  Bounding Box Type
 !
