@@ -23,8 +23,9 @@ SUBROUTINE MemInit(DB,IB,MB,Drv,BSc,BSp)
     MB%MAXML   = 10000
     IB%MAXI    = 30000
     IB%NPrim   = MAX(BSc%NPrim,BSp%NPrim)
-    IB%Mesh    = 968
+    IB%Lval    = -1
     Drv%LngCC  = 60000
+    CALL GammaHeader(IB%Mesh,IB%Switch,IB%Grid)
     CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
     CALL New(DB)
     CALL New(IB)

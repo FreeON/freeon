@@ -32,10 +32,10 @@ PROGRAM ONX
   TYPE(BSET)          :: BSp
   TYPE(CRDS)          :: GMp
   TYPE(ARGMT)         :: Args
-  TYPE(DBuf)          :: DB
-  TYPE(IBuf)          :: IB
-  TYPE(DML)           :: MB
-  TYPE(IDrv)          :: Drv
+  TYPE(DBuf)          :: DB        ! distribution buffers
+  TYPE(IBuf)          :: IB        ! 2-e eval buffers
+  TYPE(DML)           :: MB        ! distribution pointers
+  TYPE(IDrv)          :: Drv       ! VRR/contraction drivers
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
 !--------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ PROGRAM ONX
 !--------------------------------------------------------------------------------
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
-!  CALL ComputeK( )
+  CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,MB,Drv)
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------
