@@ -1,5 +1,6 @@
       SUBROUTINE ConvertG3()
       IMPLICIT REAL*8 (a-h,o-z)
+      INTEGER Mesh,I
       INCLUDE "Mesh.Inc"
       REAL*8 F3_0(0:Mesh),F3_1(0:Mesh),F3_2(0:Mesh),F3_3(0:Mesh)
       REAL*8 Table(0:3,0:Mesh)

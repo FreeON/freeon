@@ -92,7 +92,7 @@ PROGRAM ONX
 ! All set to compute the exchange matrix
 !--------------------------------------------------------------------------------
   CALL ComputeK(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
-  write(*,*) "xNERIs=",xNERIs
+!  write(*,*) "xNERIs=",xNERIs
 !--------------------------------------------------------------------------------
 ! Free up some space that we dont need anymore.
 !--------------------------------------------------------------------------------

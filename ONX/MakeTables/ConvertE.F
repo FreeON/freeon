@@ -1,5 +1,6 @@
       SUBROUTINE ConvertE()
       IMPLICIT REAL*8 (a-h,o-z)
+      INTEGER Mesh,I
       INCLUDE "Mesh.Inc"
       REAL*8 EX_0(0:Mesh),EX_1(0:Mesh),EX_2(0:Mesh),EX_3(0:Mesh)
       REAL*8 Table(0:3,0:Mesh)

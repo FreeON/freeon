@@ -11,6 +11,8 @@ release:clean
 	rm -rf MakeTables PONXMults PONX GMEONX GSONX MEONX \
                Drivers GDrivers VRR VRRm ONX SONX MASONX
 #
+purge:	clean
+#
 clean:
 #	cd MakeTables ; $(MAKE) -i clean
 #	cd PONXMults  ; $(MAKE) -i clean

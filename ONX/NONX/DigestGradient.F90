@@ -15,7 +15,7 @@
   INTEGER                      :: I,I1,Ind,Ioff
   INTEGER                      :: IndexA,NBFA
   INTEGER                      :: IndexB,AtB,NBFB,CS
-  TYPE(INT_VECT),INTENT(IN)    :: NTmp
+  TYPE(INT_VECT),INTENT(INOUT) :: NTmp
   TYPE(DBL_RNK2),INTENT(INOUT) :: XFrc
   REAL(DOUBLE),INTENT(IN)      :: W(N,L2,L1,L4,L3,9)
   REAL(DOUBLE),INTENT(IN)      :: Dcd(NC,ND)

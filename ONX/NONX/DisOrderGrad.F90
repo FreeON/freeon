@@ -103,10 +103,10 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
         IJ=II*(II-1)/2+JJ 
         IF(IType.GE.KType) THEN
           IKType=IType*100+KType
-          DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-          DB%TBufC%D( 2,iBf)=-DFLOAT(IndexA)-Small
-          DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
-          DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
+          DB%TBufC%D( 1,iBf)=DBLE(IJ)+Small
+          DB%TBufC%D( 2,iBf)=-DBLE(IndexA)-Small
+          DB%TBufC%D( 3,iBf)=DBLE(IndexC)+Small
+          DB%TBufC%D( 4,iBf)=DBLE(IndexA)+Small
           DB%TBufC%D( 5,iBf)=ACx
           DB%TBufC%D( 6,iBf)=ACy
           DB%TBufC%D( 7,iBf)=ACz
@@ -118,10 +118,10 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
           z=ACz
         ELSE 
           IKType=KType*100+IType
-          DB%TBufC%D( 1,iBf)=DFLOAT(IJ)+Small
-          DB%TBufC%D( 2,iBf)=DFLOAT(IndexA)+Small
-          DB%TBufC%D( 3,iBf)=DFLOAT(IndexC)+Small
-          DB%TBufC%D( 4,iBf)=DFLOAT(IndexA)+Small
+          DB%TBufC%D( 1,iBf)=DBLE(IJ)+Small
+          DB%TBufC%D( 2,iBf)=DBLE(IndexA)+Small
+          DB%TBufC%D( 3,iBf)=DBLE(IndexC)+Small
+          DB%TBufC%D( 4,iBf)=DBLE(IndexA)+Small
           DB%TBufC%D( 5,iBf)=-ACx
           DB%TBufC%D( 6,iBf)=-ACy
           DB%TBufC%D( 7,iBf)=-ACz

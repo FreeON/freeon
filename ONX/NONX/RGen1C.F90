@@ -63,7 +63,7 @@ SUBROUTINE RGen1C(LDis,iB,Kon,CD,WR,WZ,R,TBufP,TBufC)
       WZ%D( 4,Ind) = Eta*r1xZpE
       WZ%D( 5,Ind) = Half*r1xZpE
       DO K=0,2*LDis
-        R(J,I,K+1)=Rkk/(1.0D0+2.0D0*DFLOAT(K))
+        R(J,I,K+1)=Rkk/(1.0D0+2.0D0*DBLE(K))
       ENDDO
     END DO ! J
   END DO ! I

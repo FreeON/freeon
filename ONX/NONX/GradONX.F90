@@ -1,3 +1,6 @@
+!  O(N) COMPUTATION OF GRADIENTS OF THE EXACT HARTREE-FOCK EXCHANGE ENERGY 
+!  Author: Eric Schwegler
+!==============================================================================
 PROGRAM GradONX
   USE DerivedTypes
   USE GlobalScalars
@@ -9,6 +12,7 @@ PROGRAM GradONX
   USE Parse
   USE Macros
   USE LinAlg
+  USE Functionals
   USE ONXParameters
   USE ContractionScaling
   USE ONXMemory
@@ -27,6 +31,7 @@ PROGRAM GradONX
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
   TYPE(INT_RNK2)      :: BfnInd
+  TYPE(DBL_VECT)      :: Frc,XFrc2
 !--------------------------------------------------------------------------------
 ! Large buffers to hold the sorted distribution and multipole data.
 !--------------------------------------------------------------------------------
@@ -37,6 +42,8 @@ PROGRAM GradONX
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
+  REAL(DOUBLE)           :: XScale
+  INTEGER                :: I
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: InFile
   CHARACTER(LEN=6),PARAMETER     :: Prog='XForce'
 !--------------------------------------------------------------------------------
@@ -69,7 +76,7 @@ PROGRAM GradONX
 !--------------------------------------------------------------------------------
   CALL ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
 !--------------------------------------------------------------------------------
-! Clean up...
+! Clean up some ...
 !--------------------------------------------------------------------------------
   CALL Delete(D)
   CALL Delete(DB)
@@ -81,7 +88,33 @@ PROGRAM GradONX
   CALL Delete(BfnInd)
   CALL Delete(BS)
   CALL Delete(GM)
-  call halt('enough for now')
+!--------------------------------------------------------------------------------
+! Do some checksumming, resumming and IO 
+!--------------------------------------------------------------------------------
+  CALL New(Frc,3*NAtoms)
+  CALL New(XFrc2,3*NAtoms)
+  DO I=1,NAtoms
+     XFrc2%D(1+3*(I-1):3*I)=XFrc%D(:,I)
+  ENDDO
+  CALL PChkSum(XFrc2,'XForce')  
+! for temp debuging....
+  CALL PPrint(XFrc2,'XForce',Unit_O=6)
+  CALL PPrint(XFrc2,'XForce')
+! Sum in contribution to total force
+  XFrc2%D=Zero
+  CALL Get(Frc,'GradE',Tag_O=CurGeom)
+  XScale=ExactXScale(ModelChem)
+  DO I=1,NAtoms
+     XFrc2%D(1+3*(I-1):3*I)=XScale*XFrc%D(:,I)+Frc%D(1+3*(I-1):3*I)
+  ENDDO
+  CALL Put(XFrc2,'GradE',Tag_O=CurGeom)
+!--------------------------------------------------------------------------------
+! Final tidy 
+!--------------------------------------------------------------------------------
+  CALL Delete(XFrc)
+  CALL Delete(XFrc2)
+  CALL Delete(Frc)
+!  call halt('enough for now')
   CALL ShutDown(Prog)
 END PROGRAM GradONX
 

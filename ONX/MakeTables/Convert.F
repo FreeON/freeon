@@ -1,5 +1,6 @@
       PROGRAM Convert
       IMPLICIT REAL*8 (a-h,o-z)
+      INTEGER Mesh,I
       INCLUDE "Mesh.Inc"
       INTEGER Ltot
       PARAMETER (Ltot=12)

@@ -10,6 +10,7 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
   TYPE(DBuf),INTENT(IN)    :: DB            ! ONX distribution buffers
   TYPE(IBuf),INTENT(INOUT) :: IB            ! ONX 2-e eval buffers
   TYPE(DSL),INTENT(IN)     :: SB            ! ONX distribution pointers
+  INTEGER       :: N,Ltot,CBra,CKet
   REAL(DOUBLE)  :: DisBufB(DB%MAXC)
   REAL(DOUBLE)  :: PrmBufB(DB%MAXP,CBra+DB%MInfo)
   REAL(DOUBLE)  :: CB(CBra,3)
@@ -17,7 +18,6 @@ SUBROUTINE RGen(N,Ltot,CBra,CKet,CB,CK,DisBufB,PrmBufB,R,DB,IB,SB)
 !--------------------------------------------------------------------------------
 ! Temporary space for computing 2-e integrals
 !--------------------------------------------------------------------------------
-  INTEGER       :: N,Ltot,CBra,CKet
   REAL(DOUBLE)  :: R(N,CBra,CKet,Ltot+1)
   REAL(DOUBLE)  :: Zeta,Up,Px,Py,Pz
   REAL(DOUBLE)  :: Eta, Uq,Qx,Qy,Qz
