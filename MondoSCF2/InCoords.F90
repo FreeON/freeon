@@ -41,6 +41,7 @@ CONTAINS
      REAL(DOUBLE)                :: LinCrit,TorsLinCrit
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
+     REAL(DOUBLE),DIMENSION(12)  :: Aux12
      CHARACTER(LEN=DCL)          :: Char
      TYPE(DBL_VECT)              :: CartAux
      TYPE(INT_VECT)              :: AtmsAux
@@ -57,7 +58,6 @@ CONTAINS
      CALL NEW(B,IntCs%N)
      B%IB%I=0
      B%B%D=Zero
-     B%BL%D=Zero
      !
      DO IInt=1,IntCs%N   
        CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
@@ -76,7 +76,9 @@ CONTAINS
        IF(Char(1:4)=='STRE') THEN
          ! stre
          B%IB%I(IInt,1:2)=IntCs%Atoms%I(IInt,1:2)
-         CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),BB_O=B%B%D(IInt,1:12))
+         Aux12=B%B%D(IInt,1:12)
+         CALL STRE(XYZAux(1:3,1),XYZAux(1:3,2),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
         !write(*,100) Char(1:5), &
         !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
          !
@@ -86,36 +88,45 @@ CONTAINS
                Char(1:5)=='GAMMA') THEN
          ! bend
          B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
-         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
-                   BB_O=B%B%D(IInt,1:12))
+         Aux12=B%B%D(IInt,1:12)
+         CALL BEND(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
         !write(*,100) Char(1:5), &
         !B%IB%I(IInt,1:4),B%B%D(IInt,1:12)
        ELSE IF(Char(1:4)=='OUTP') THEN
          ! out of plane
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL OutP(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3), &
                    XYZAux(1:3,4),TorsLinCrit,IntCs%Active%L(IInt), &
-                   BB_O=B%B%D(IInt,1:12))
+                   BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
        ! write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
        !  B%B%D(IInt,1:12)*AngstromsToAu
        ELSE IF(Char(1:4)=='TORS') THEN
          ! torsion of i-j-k-l
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL TORS(XYZAux(1:3,1),XYZAux(1:3,2), &
                    XYZAux(1:3,3),XYZAux(1:3,4), &
                    TorsLinCrit,IntCs%Active%L(IInt), &
-                   BB_O=B%B%D(IInt,1:12))
+                   BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
         !write(*,*) IInt
         !write(*,100) Char(1:5),B%IB%I(IInt,1:4), &
         !B%B%D(IInt,1:12)
        ELSE IF(Char(1:6)=='VOLM_L') THEN
          B%IB%I(IInt,1:4)=IntCs%Atoms%I(IInt,1:4)
+         Aux12=B%B%D(IInt,1:12)
          CALL VOLUME(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-           XYZAux(1:3,4),IntCs%Active%L(IInt),BB_O=B%B%D(IInt,1:12))
+           XYZAux(1:3,4),IntCs%Active%L(IInt),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
        ELSE IF(Char(1:6)=='AREA_L') THEN
          B%IB%I(IInt,1:3)=IntCs%Atoms%I(IInt,1:3)
+         Aux12=B%B%D(IInt,1:12)
          CALL AREA(XYZAux(1:3,1),XYZAux(1:3,2),XYZAux(1:3,3),&
-                   IntCs%Active%L(IInt),BB_O=B%B%D(IInt,1:12))
+                   IntCs%Active%L(IInt),BB_O=Aux12)
+         B%B%D(IInt,1:12)=Aux12
        ELSE IF(Char(1:5)=='LINB1') THEN
          ! linear bendig of i-j-k
          IF(IntCs%Def%C(IInt+1)(1:5)/='LINB2') &
@@ -153,6 +164,7 @@ CONTAINS
      !
      DO IInt=1,IntCs%N
        B%BLI%I(IInt)=0
+       B%BL%D(IInt,:)=Zero
        IF(.NOT.IntCs%Active%L(IInt)) CYCLE
        DO J=1,4 ! loop over atoms
          IF(IntCs%Atoms%I(IInt,J)==0) EXIT
