@@ -197,6 +197,13 @@ MODULE GlobalScalars
 ! Tabulated statistical Q-test values for 90% confidence
    REAL(DOUBLE),DIMENSION(10) :: QTest90
    DATA QTest90(1:10) /Zero,Zero,0.94D0,0.76D0,0.64D0,0.56D0,0.51D0,0.47D0,0.44D0,0.41D0/
+! Diagonals of tabulated statistical F-test values for 95% confidence
+! CAUTION! Values out of the 10x10 table may contain some inaccurate 
+! diagonals
+   REAL(DOUBLE),DIMENSION(30) :: FTest95D
+   DATA FTest95D( 1:10) /  Zero,19.00D0,9.28D0,6.39D0,5.05D0,4.28D0,3.79D0,3.44D0,3.18D0,2.98D0/
+   DATA FTest95D(11:20) /2.79D0,2.69D0,2.53D0,2.46D0,2.40D0,2.28D0,2.23D0,2.19D0,2.16D0,2.12D0/
+   DATA FTest95D(21:30) /2.10D0,2.07D0,2.05D0,2.02D0,1.99D0,1.96D0,1.93D0,1.90D0,1.87D0,1.84D0/
 !
 ! Maximum number of internal coords per atom
 ! this is needed to estimate storage of IntCs in HDF
