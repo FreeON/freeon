@@ -12,9 +12,7 @@ PROGRAM ONX
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
-#ifdef PERIODIC  !per
   USE AtomPairs  !per
-#endif           !per
   USE Clock
   USE InOut
   USE PrettyPrint
@@ -88,7 +86,6 @@ PROGRAM ONX
   TYPE(DBL_VECT)                 :: TmKArr,NERIsArr,TmDOArr,TmREArr,TmFOArr,TmTMArr,TmKTArr
 #endif
   INTEGER                        :: I,NCC,NCD       !per
-  TYPE(CellSet)                  :: CSTemp          !per
   CHARACTER(100)                 :: User
 !--------------------------------------------------------------------------------
 ! vw comments:
@@ -101,10 +98,10 @@ PROGRAM ONX
 #else
   CALL StartUp(Args,Prog)
 #endif
-  !
-  CALL GetEnv('USER',User)
-  IF(TRIM(User).EQ.'tymczak') WRITE(*,*)'    CJ, The ONX Ghost is back!'
-  !
+!
+!CALL GetEnv('USER',User)
+!IF(TRIM(User).EQ.'tymczak') WRITE(*,*)'    CJ, The ONX Ghost is back!'
+!
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
      ! Close current group and HDF
@@ -296,10 +293,6 @@ PROGRAM ONX
   TmDO = Zero
 #endif
   xTotNERIs = Zero                                                                            !per
-  !
-  ! Set up third sum                                                                          !per
-  CALL New_CellSet_Cube(CSTemp,GMc%PBC%AutoW,GMc%PBC%BoxShape,(/1,1,1/))                      !per
-  !
   ! Periodic double sum over R and Rprime                                                     !per
   DO NCC = 1,CS_OUT%NCells                                                                    !per
      PBC%D(:) = CS_OUT%CellCarts%D(:,NCC)                                                     !per
