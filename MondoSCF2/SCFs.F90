@@ -13,6 +13,7 @@ MODULE SCFs
   USE ControlStructures
   USE NEB
   USE SetXYZ 
+  USE PrettyPrint
   IMPLICIT NONE 
   INTEGER HDFFileID,H5GroupID
   INTEGER,PARAMETER :: NOT_CONVERGE=345632
@@ -850,9 +851,9 @@ CONTAINS
     TYPE(Geometries)   :: G
     TYPE(Parallel)     :: M
     TYPE(BasisSets)    :: B
-    INTEGER            :: cBAS,cGEO,K,I,J,iATS,iCLONE,A1,A2
+    INTEGER            :: cBAS,cGEO,I,J,K,iATS,iCLONE,A1,A2
     CHARACTER(LEN=DCL) :: chGEO,chBAS    
-    REAL(DOUBLE)       :: GradVal
+    REAL(DOUBLE)       :: GradVal,Pres,Vol,PMat
     TYPE(DBL_RNK2)     :: AuxLatF
     TYPE(DBL_VECT)     :: Ftmp
     !----------------------------------------------------------------------------!
@@ -928,6 +929,44 @@ CONTAINS
           ENDIF
 !         Get Lattice Forces
           CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
+!
+!         Include a Hydrostaic Presure into the lattice forces
+!          
+!            LFrc_ij = LFrc_ij + P*V*I_ii*(M^(-1))_ji
+! 
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,1)
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,2)
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,3)
+!!$          Pres = 0.1D0
+!!$          Vol  = G%Clone(iCLONE)%PBC%CellVolume
+!!$          DO I=1,3
+!!$             DO J=1,3
+!!$                IF(G%Clone(iCLONE)%PBC%AutoW%I(I)==1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J)==1) THEN
+!!$                   PMat = Pres*Vol*G%Clone(iCLONE)%PBC%InvBoxSh%D(J,I)
+!!$                   G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) + PMat
+!!$                   G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = PMat
+!!$                ENDIF
+!!$             ENDDO
+!!$          ENDDO 
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,1)
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,2)
+!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,3)
+!          IF(.TRUE.) STOP
+!         Print  the Forces
+          IF(.TRUE.) THEN
+             CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
+             DO iATS=1,G%Clone(iCLONE)%NAtms
+                A1=3*(iATS-1)+1
+                A2=3*iATS
+                Ftmp%D(A1:A2) = G%Clone(iCLONE)%Gradients%D(1:3,iATS)
+             ENDDO     
+             PrintFlags%Key=DEBUG_MAXIMUM
+             CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force')
+             CALL Print_Force(G%Clone(iCLONE),Ftmp,'Force',Unit_O=6)
+             CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force')
+             CALL Print_LatForce(G%Clone(iCLONE),G%Clone(iCLONE)%PBC%LatFrc%D,'Lattice Force',Unit_O=6)
+             CALL Delete(Ftmp)
+          ENDIF
 !         Put back to disk
           CALL Put(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
 !         Close the group
@@ -998,7 +1037,7 @@ CONTAINS
     DDelta = 1.D-4
     DO iCLONE=1,G%Clones
 !
-        LatFrc_J = Zero
+       LatFrc_J = Zero
 !
        chGEO=IntToChar(cGEO)
        chBAS=IntToChar(cBAS)
@@ -1176,8 +1215,8 @@ CONTAINS
 !
        BoxShape=G%Clone(iCLONE)%PBC%BoxShape%D
 
-       DO J=1,3
-          DO I=1,3
+       DO I=1,3
+          DO J=1,3
              IF(G%Clone(iCLONE)%PBC%AutoW%I(I) == 1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J) == 1) THEN 
                 G%Clone(iCLONE)%PBC%BoxShape%D=BoxShape
                 Lat00 = G%Clone(iCLONE)%PBC%BoxShape%D(I,J)
@@ -1209,7 +1248,6 @@ CONTAINS
                 CALL Add(K1,K2,K3)
                 CALL Multiply(P,K3,K1)
                 LatFrc_X(I,J) = Trace(K1)/(Two*DDelta)
-                write(*,'(A,I1,A,I1,A,E26.15)') 'LatFrc_X(',i,',',j,')',LatFrc_X(I,J)
 !
                 G%Clone(iCLONE)%PBC%BoxShape%D(I,J) =  Lat00
                 CALL MakeGMPeriodic(G%Clone(iCLONE))
@@ -1231,10 +1269,10 @@ CONTAINS
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
 !      Print X Lattice Forces
-!!$       WRITE(*,*) 'LatFrc_X NUM'
-!!$       DO I=1,3
-!!$          WRITE(*,*) (LatFrc_X(I,J),J=1,3)
-!!$       ENDDO
+       WRITE(*,*) 'LatFrc_X NUM'
+       DO I=1,3
+          WRITE(*,*) (LatFrc_X(I,J),J=1,3)
+       ENDDO
 !
        CALL Delete(BSiz)
        CALL Delete(OffS)
@@ -1328,10 +1366,7 @@ CONTAINS
           CALL GeomArchive(cBAS,cGEO,N,B,G)
        ENDDO
 !      Print J Lattice Forces
-       WRITE(*,*) 'LatFrc_XC NUM'
-       DO I=1,3
-          WRITE(*,*) (LatFrc_XC(I,J),J=1,3)
-       ENDDO
+!       CALL Print_LatForce(G,LatFrc_XC%D,'XC Lattice Force Numerical')
 !    
     ENDDO
 !
