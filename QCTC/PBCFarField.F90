@@ -30,30 +30,59 @@ MODULE PBCFarField
 !====================================================================================
     SUBROUTINE PBCFarFieldSetUp(Q,GMLoc)
       TYPE(PoleNode)                  :: Q
-      INTEGER                         :: I,J,K,NC,LM,LP
-      REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
+      INTEGER                         :: I,J,K,NC,L,LM,LP
+      REAL(DOUBLE)                    :: Radius,OL,NL,FAC,Px,Py,Pz
+      REAL(DOUBLE),DIMENSION(3)       :: PQ
 !
 !     Get the new Tensor and MaxEll
 !
-      CALL Get(MaxEll,'MaxEll')
+      CALL Get(MaxEll,'MaxEll'//CurGeom)
       CALL New(TensorC,LSP(2*MaxEll),0)
       CALL New(TensorS,LSP(2*MaxEll),0) 
-      CALL Get(TensorC,'PFFTensorC')
-      CALL Get(TensorS,'PFFTensorS')
+      CALL Get(TensorC,'PFFTensorC'//CurGeom)
+      CALL Get(TensorS,'PFFTensorS'//CurGeom)
 !
-!     Get CS_IN amd Number of Cells
+!     Get CS_IN and the Inner Cell Radius
 !
-      CALL Delete_CellSet(CS_IN)
-      CALL Get_CellSet(CS_IN,'CS_IN')
+      CALL Get(Radius,'CS_IN%Radius'//CurBase//CurGeom)
+      CALL Get_CellSet(CS_IN,'CS_IN'//CurBase//CurGeom)
 !
 !     Calculate the Box Moments
 !
       CALL RhoToSP(GMLoc)
 !
-!     Calculate the MACDist, PACDist and BDist
+!     Calculate BDist
 !
-      CALL CalMPB(Q,GMLoc)
+      BDist = SQRT(BOXDist(1)**2+BOXDist(2)**2+BOXDist(3)**2)
+
+      WRITE(*,*) 
+!
+!     PACDist (From PoleRoot)
+!
+      Px=Half*(Q%Box%BndBox(1,2)-Q%Box%BndBox(1,1))
+      Py=Half*(Q%Box%BndBox(2,2)-Q%Box%BndBox(2,1))   
+      Pz=Half*(Q%Box%BndBox(3,2)-Q%Box%BndBox(3,1))
+      PACDist = SQRT(Px*Px+Py*Py+Pz*Pz)
+!
+!     If Not Over Riden Calculate MaxEll (Still Needs Work)
+!
+      IF(.NOT. GMLoc%PBC%PFFOvRide) THEN
+         LP=BS%NAsym
+         DO L = GMLoc%PBC%PFFMaxEll,FFELL
+            OL = Unsold2(L/2,L,RhoC,RhoS)
+            NL = FudgeFactorial(LP,L)
+            FAC = OL*NL/((Radius-BDist)**(DBLE(L)+1))
+            IF(FAC .LT. TauMAC) THEN
+               MaxEll = L
+               EXIT
+            ENDIF
+         ENDDO
+      ENDIF
+      IF(MaxEll == FFELL) THEN
+         WRITE(*,*) ' *** WARNING *** MaxEll > FFEll *** WARNING *** '
+      ENDIF
+      RDist = SQRT(BDist**2+Radius**2)
 !
 !     Calculate PFF  energy
 !
@@ -78,27 +107,30 @@ MODULE PBCFarField
 !
 !     Output
 !
-!!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
-!!$      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
-!!$      WRITE(*,*) 'GM%PFFMaxLay  = ',GMLoc%PBC%PFFMaxLay
-!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-!!$      WRITE(*,*) 'MACDist       = ',MACDist
-!!$      WRITE(*,*) 'PACDist       = ',PACDist
-!!$      WRITE(*,*) 'BOXDist       = ',BDist
-!!$      WRITE(*,*) 'RDist         = ',RDist      
-!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-!!$      WRITE(*,*)
-!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
-!!$      WRITE(*,*) 'E_DP          = ',E_DP     
-!!$      WRITE(*,*)
+      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+      WRITE(*,*) 'MaxEll        = ',MaxEll
+      WRITE(*,*) 'MaxLay        = ',Radius/MaxBoxDim(GMLoc)
+      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+      WRITE(*,*) 'PACDist       = ',PACDist
+      WRITE(*,*) 'BOXDist       = ',BDist
+      WRITE(*,*) 'RDist         = ',RDist      
+      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      WRITE(*,*)
+      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+      WRITE(*,*) 'E_PFF         = ',E_PFF
+      WRITE(*,*) 'E_DP          = ',E_DP     
+      WRITE(*,*)
 !
 !!$!
 !!$!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
 !!$!
 !!$      CALL BoxBounds(GMLoc)
+!!$!
+!!$!     Calculate the MACDist, PACDist and BDist
+!!$!
+!!$      CALL CalMPB(Q,GMLoc)
 !!$!
 !!$!     Calculate the PBC FarField Tensor
 !!$!
@@ -125,7 +157,8 @@ MODULE PBCFarField
             WRITE(Unit,100)
             WRITE(Unit,101) MaxELL,GMLoc%PBC%Dimen
             WRITE(Unit,102) RhoPoles%DPole%D(1),RhoPoles%DPole%D(2),RhoPoles%DPole%D(3)
-            WRITE(Unit,103) MACDist,PACDIst,BDist,RDist
+            WRITE(Unit,103) PACDIst,BDist,RDist
+            WRITE(Unit,108) SQRT(RDist**2-BDist**2)/MaxBoxDim(GMLoc)
             WRITE(Unit,104) CS_OUT%NCells
             WRITE(Unit,110) CS_IN%NCells
             WRITE(Unit,105)
@@ -137,14 +170,14 @@ MODULE PBCFarField
 100   FORMAT('========================================Periodic Information======================================')
 101   FORMAT(' MaxEll             = ',I3,'     Dimension = ',I2)
 102   FORMAT(' Dipole Moment      = (',F12.6,',',F12.6,',',F12.6,')')
-103   FORMAT(' MAC Distance       = ',F6.2,' PAC Distance = ',F6.2,' BOX Distance = ',F6.2,' Total Distance = ',F6.2)
+103   FORMAT(' PAC Distance  = ',F6.2,' BOX Distance = ',F6.2,' Total Distance = ',F6.2)
+108   FORMAT(' No. of Layers = ',F6.2)
 104   FORMAT(' Outer No. of Cells = ',I4)
 110   FORMAT(' Inner No. of Cells = ',I4)
 105   FORMAT(' Correction to the Energy:')
 106   FORMAT('   PFF = ',E14.6,'  Dipole = ',E14.6)
 107   FORMAT('=========================================END======================================================')
 !
-
     END SUBROUTINE Print_Periodic
 !====================================================================================
 !   Calculate the FarField Component of the J matrix
@@ -375,6 +408,9 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate the Box Bounds Needed for the Direct Sum
 !========================================================================================
+!========================================================================================
+! Calculate the Box Bounds Needed for the Direct Sum
+!========================================================================================
   SUBROUTINE CalMPB(Q,GMLoc) 
     TYPE(PoleNode)                   :: Q
     INTEGER                          :: I,J,K,LP
@@ -407,7 +443,7 @@ MODULE PBCFarField
 !
              O_FFEll  = Unsold2(MaxEll-2,MaxELL,FarFC,FarFS)
              NFac     = FudgeFactorial(LP,MaxELL)
-             Dist     = (NFac*O_FFEll/TauMAC)**(One/DBLE(MaxELL+LP+2))
+             Dist     = (NFac*O_FFEll/TauMAC)**(One/DBLE(MaxELL+LP+1))
              MACDist  = MAX(MACDist,Dist)
 !
           ENDDO
