@@ -86,13 +86,13 @@ cmm:
 #----------------------------------------------
 #   MondoSCF
  s:	
-	$(MAKE)    -C MondoSCF
+	$(MAKE)    -C MondoSCF2
 rs:	
-	$(MAKE) -i -C MondoSCF release
+	$(MAKE) -i -C MondoSCF2 release
 ps:	
-	$(MAKE) -i -C MondoSCF purge
+	$(MAKE) -i -C MondoSCF2 purge
 cs:	
-	$(MAKE) -i -C MondoSCF clean
+	$(MAKE) -i -C MondoSCF2 clean
 #----------------------------------------------
 #    Solving SCF Equations
  e:	
