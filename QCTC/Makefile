@@ -42,7 +42,8 @@ JFrcObjs=XLate.o CTraX.o Globals.o MondoPoles.o PoleTree.o PBCFarField.o TreeWal
 #
 all:	QCTC JFrc 
 clean:	CQCTC CJFrc cmma 
-purge:	CQCTC CJFrc pmma 
+purge:	CQCTC CJFrc cmma 
+PURGE:  CQCTC CJFrc pmma 
 #
 QCTC:	$(QCTCObjs)
 	$(LD) $(LDFLAGS) QCTC $(QCTCObjs) $(LibOpts) $(F90_LIBRARIES) 
