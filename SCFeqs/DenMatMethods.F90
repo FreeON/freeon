@@ -884,8 +884,7 @@ WRITE(*,*)' C = ',C
 #endif
 !-------------------------------------------------------------------------------
 !     Estimate spectral bounds 
-      IF(MyId==ROOT) &
-        CALL SpectralBounds(F,Fmin,Fmax)
+      CALL SpectralBounds(F,Fmin,Fmax)
 
 !     Set up the Density Matrix
      IF(Order==1) THEN
