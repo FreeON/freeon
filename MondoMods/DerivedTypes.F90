@@ -220,7 +220,10 @@ MODULE DerivedTypes
       INTEGER          :: NAlph     !-- Number of alpha electrons      
       INTEGER          :: NBeta     !-- Number of beta electrons
 !     Misc
-      REAL(DOUBLE)     :: ENucN     !-- Nuclear-nuclear repulsion energy
+      REAL(DOUBLE)     :: ETotal    !-- Total SCF Energy at this geometry
+      REAL(DOUBLE)     :: GradRMS   !-- RMS error in gradient at this geometry
+      REAL(DOUBLE)     :: GradMax   !-- Max error in gradient at this geometry
+      LOGICAL          :: Unstable  !-- SCF is unstable at this geometry 
       TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
 #ifdef PERIODIC
 !     Perodic Stuff
@@ -345,17 +348,23 @@ MODULE DerivedTypes
       REAL(DOUBLE),   DIMENSION(3)       :: Half     ! Half each dimensions length
    END TYPE 
 !--------------------------------------------------------------------------
+! Primitive Pair Type
+!
+  TYPE PrimPair       
+     INTEGER                   :: Ell,KA,KB,CFA,CFB,PFA,PFB
+     REAL(DOUBLE)              :: ZA,ZB,Zeta,Xi,AB2
+     REAL(DOUBLE),DIMENSION(3) :: A,B,P
+  END TYPE
+!--------------------------------------------------------------------------
 ! Atom Pair Type
 !
   TYPE AtomPair
-     REAL(DOUBLE),DIMENSION(3)      :: A,B
-     REAL(DOUBLE)                   :: AB2
-     INTEGER                        :: KA
-     INTEGER                        :: KB
-     INTEGER                        :: NA
-     INTEGER                        :: NB
-     LOGICAL                        :: SameAtom
+     REAL(DOUBLE),DIMENSION(3) :: A,B
+     REAL(DOUBLE)              :: AB2
+     INTEGER                   :: KA,KB,NA,NB
+     LOGICAL                   :: SameAtom
   ENDTYPE AtomPair
+!
 #ifdef PERIODIC
 !-----------------------------------------------------------
 ! The Set of Cells needed to sum over: CellSet
