@@ -506,6 +506,7 @@ MODULE DerivedTypes
    TYPE INTC
      INTEGER          :: Alloc     !-- Allocation key
      CHARACTER(LEN=5),POINTER,DIMENSION(:) :: Def 
+     CHARACTER(LEN=1),POINTER,DIMENSION(:) :: FCType
      INTEGER,POINTER,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),POINTER,DIMENSION(:) :: Value
      LOGICAL,POINTER,DIMENSION(:) :: Constraint 
@@ -523,6 +524,7 @@ MODULE DerivedTypes
    TYPE INTC
      INTEGER          :: Alloc     !-- Allocation key
      CHARACTER(LEN=5),ALLOCATABLE,DIMENSION(:) :: Def 
+     CHARACTER(LEN=1),ALLOCATABLE,DIMENSION(:) :: FCType
      INTEGER,ALLOCATABLE,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: Value
      LOGICAL,ALLOCATABLE,DIMENSION(:) :: Constraint 

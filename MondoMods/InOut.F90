@@ -404,9 +404,22 @@ CONTAINS
        CALL ReadIntegerVector(Meta,B)
        CALL CloseData(Meta)
        DO II = 1, NN
-          DO I=1,N; A%DEF(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
-          ENDDO
-          DEALLOCATE(B)
+         DO I=1,N; A%DEF(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
+       ENDDO
+       DEALLOCATE(B)
+       !
+       NN=SIZE(A%FCType,1)
+       N=1  !!! LEN(A%FCType(1))
+       Meta=SetMeta(NameTag(Trim(VarName)//'FCType',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
+       ALLOCATE(B(NN*N))
+       CALL OpenData(Meta)
+       CALL ReadIntegerVector(Meta,B)
+       CALL CloseData(Meta)
+       DO II = 1, NN
+         DO I=1,N; A%FCType(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
+       ENDDO
+       DEALLOCATE(B)
+       !
 
           Meta=SetMeta(NameTag(Trim(VarName)//'Atoms',Tag_O),NATIVE_INT32,NN*4,.FALSE.)
           CALL OpenData(Meta)
@@ -469,13 +482,27 @@ CONTAINS
           IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_INTC')
           ALLOCATE(B(N*NN))
           DO II = 1, NN
-             DO I=1,N; B((II-1)*N+I)=ICHAR(A%DEF(II)(I:I)); ENDDO
-             ENDDO
-             Meta=SetMeta(NameTag(TRIM(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
-             CALL OpenData(Meta,.TRUE.)
-             CALL WriteIntegerVector(Meta,B)
-             CALL CloseData(Meta)
-             DEALLOCATE(B)
+            DO I=1,N; B((II-1)*N+I)=ICHAR(A%DEF(II)(I:I)); ENDDO
+          ENDDO
+          Meta=SetMeta(NameTag(TRIM(VarName)//'Def',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+          DEALLOCATE(B)
+          !
+          N=1 !!! LEN(A%FCType(1))
+          NN=SIZE(A%FCType,1)
+          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_INTC')
+          ALLOCATE(B(N*NN))
+          DO II = 1, NN
+            DO I=1,N; B((II-1)*N+I)=ICHAR(A%FCType(II)(I:I)); ENDDO
+          ENDDO
+          Meta=SetMeta(NameTag(TRIM(VarName)//'FCType',Tag_O),NATIVE_INT32,NN*N,.FALSE.)
+          CALL OpenData(Meta,.TRUE.)
+          CALL WriteIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+          DEALLOCATE(B)
+          !
 
              Meta=SetMeta(NameTag(TRIM(VarName)//'Atoms',Tag_O),NATIVE_INT32,4*NN,.FALSE.)
              CALL OpenData(Meta,.TRUE.)

@@ -857,6 +857,7 @@ MODULE SetXYZ
 !
          To2=Start+(To-From)
         IntCsCopy%Def(Start:To2)       =IntCs%Def(From:To)
+        IntCsCopy%FCType(Start:To2)       =IntCs%FCType(From:To)
         IntCsCopy%Atoms(Start:To2,1:4) =IntCs%Atoms(From:To,1:4)
         IntCsCopy%Value(Start:To2)     =IntCs%Value(From:To)
         IntCsCopy%Constraint(Start:To2)=IntCs%Constraint(From:To)

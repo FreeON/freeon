@@ -250,6 +250,7 @@ MODULE MemMan
          CALL AllocChk(A%Alloc)
          M=1; IF(PRESENT(M_O))M=M_O
          ALLOCATE(A%Def(M:N),STAT=MemStatus)
+         ALLOCATE(A%FCType(M:N),STAT=MemStatus)
          ALLOCATE(A%Atoms(M:N,1:4),STAT=MemStatus)
          ALLOCATE(A%Value(M:N),STAT=MemStatus)
          ALLOCATE(A%Constraint(M:N),STAT=MemStatus)
@@ -637,6 +638,7 @@ MODULE MemMan
          TYPE(INTC)     :: A
          INTEGER        :: MemStatus
          DEALLOCATE(A%Def,STAT=MemStatus)
+         DEALLOCATE(A%FCType,STAT=MemStatus)
          DEALLOCATE(A%Atoms,STAT=MemStatus)
          DEALLOCATE(A%Value,STAT=MemStatus)
          DEALLOCATE(A%Constraint,STAT=MemStatus)

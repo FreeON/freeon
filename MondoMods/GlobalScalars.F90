@@ -185,6 +185,9 @@ MODULE GlobalScalars
    DATA Lindh_R(1,1:3) /1.3500D0, 2.1000D0, 2.5300D0/
    DATA Lindh_R(2,1:3) /2.1000D0, 2.8700D0, 3.4000D0/
    DATA Lindh_R(3,1:3) /2.5300D0, 3.4000D0, 3.4000D0/
+!these are the elements considered for H-bridges
+   INTEGER,DIMENSION(7)  :: HBondList
+   DATA HBondList(1:7) /5,7,8,9,17,35,53/
 !
 ! SCF global arrays 
 !
