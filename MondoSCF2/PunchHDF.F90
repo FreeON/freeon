@@ -60,8 +60,9 @@ CONTAINS
   ! IN ORDER TO AVOID CHANGING THE DATA SPACE WHEN THE HDF FILE HAS BEEN OPENED
   ! SIMULTANEOUSLY BY EACH CLONE
   !==============================================================================
-  SUBROUTINE InitClones(N,B,G)
+  SUBROUTINE InitClones(N,P,B,G)
     TYPE(FileNames)  :: N
+    TYPE(Parallel)   :: P
     TYPE(Geometries) :: G    
     TYPE(BasisSets)  :: B
     TYPE(DBL_VECT)   :: DoubleVect
@@ -69,6 +70,8 @@ CONTAINS
     CHARACTER(LEN=DCL) :: FailedProgram
     INTEGER          :: iGEO,iCLONE,iBAS,HDFFileID,I,MaxEll,MaxAtoms,MaxBloks,MaxNon0s
     CHARACTER(LEN=2) :: chGEO
+    TYPE(INT_VECT)   :: ETDirArr
+    TYPE(DBL_VECT)   :: ETRootArr
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
@@ -105,6 +108,17 @@ CONTAINS
        CALL Put(BIG_DBL,'dmax')
        CALL Put(BIG_DBL,'diiserr')
        CALL Put(.TRUE.,'programfailed')
+
+       CALL Put(0,'LineLocExist')
+       CALL New(ETDirArr,P%NSpace-1)
+       CALL New(ETRootArr,P%NSpace-1)
+       ETDirArr%I(:) = 10
+       ETRootArr%D(:) = 10.0
+       CALL Put(ETDirArr,'ETDirArr')
+       CALL Put(ETRootArr,'ETRootArr')
+       CALL Delete(ETDirArr)
+       CALL Delete(ETRootArr)
+
        DO I=1,LEN(FailedProgram)
           FailedProgram(I:I)='X'
        ENDDO
