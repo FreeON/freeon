@@ -8,8 +8,8 @@
 \newcommand{\commentoutB}[1]{}
 %\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
-
-\commentoutA{\documentclass[prl,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutA{\documentclass[prb,aps,twocolumn,twocolumngrid,superbib]{revtex4}}
+%\commentoutA{\documentclass[prl,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
 \commentoutB{\documentclass[prl,aps,nobibnotes,superbib,showpacs,preprint]{revtex4}}
 
 \usepackage{graphicx}
@@ -69,9 +69,10 @@ The ability to treat core-states analytically also opens the ability to move bey
 approximation in computation of relativistic effects with the four-component Dirac-Hartree-Fock \cite{JLaerdahl97,IGrant00} 
 and Dirac-Kohn-Sham \cite{TYanai01} theories.  Perhaps most important though, the exact Hartree-Fock (HF) exchange
 may be computed efficiently with a GTAO basis set.  In addition to providing a reference for 
-correlated wavefunction methods, the exact HF exchange is central to hybrid HF/DFT models \cite{}.
-The use of hybrid methods in the condensed phase has been pioneered by the {\sc CRYSTAL} group \cite{Crystal98},
-demonstrating blah gnu snort for difficult problems.
+correlated wavefunction methods, the exact HF exchange is central to hybrid HF/DFT models \cite{Gill92,Becke93,VBarone96,CAdamo99}.
+The use of hybrid methods  in the condensed phase, pioneered by the {\sc CRYSTAL} group \cite{Crystal98},
+has proven to be a usefull improvement beyond the generalized gradient approximation for a number of properties, including
+bulk geometries, electronic properties \cite{TBredow00,JMuscat01} and absorbtion energies \cite{PBaranek01,AWander01}.
 
 Recently, we have developed linear scaling quantum chemical methods for gas phase Density Functional Theory 
 (DFT), including computation of the Coulomb matrix ${\bf J}$ \cite{MChallacombe97} and the exchange-correlation
@@ -276,7 +277,7 @@ e^{-\zeta_q ({\bf r}-{\bf Q})^2}.
 This representation provides an intermediate form into which elements of the density matrix may be folded, and allows
 the use of McMurchie-Davidson recurrence relations  \cite{LMcmurchie78} 
 in analytic integral evaluation and density evaluation.
-For this form,  Cramer's inequality  {\bf NEED A CITE HERE!!} \cite{} 
+For this form,  Cramer's inequality  \cite{EHille26} 
 provides a bound for the behavior of a Hermite-Gaussian distribution: 
 \begin{equation}
 \rho_q ({\bf r})  \leq C_q e^{ -\widetilde \zeta_q ({\bf r -Q})^2 },  
@@ -472,9 +473,8 @@ This static error is controlled by using the FMM-like error bound,
 \leq \tau_{\rm \scriptscriptstyle MAC} \;,
 \end{equation}
 to set the appropriate expansion order $p$.  In Eq.~(\ref{FMMError}),  $d_{\rm max}$ is the maximum translational distance, 
-${\cal C}$ is the asymptotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the 
-threshold controlling the translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  
-and further explanation of these parameters.
+${\cal C}$ is the asymptotic Uns{\"o}ld weight of the total density and $\tau_{\rm \scriptscriptstyle MAC}$ is the threshold controlling the 
+translation errors. See Ref.~\onlinecite{CTymczak04c} for development of this expression  and further explanation of these parameters.
 
 \subsection{Tin-Foil Boundary Conditions}\label{tinfoil}
 
@@ -586,7 +586,7 @@ Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ ${\bf k}$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
 \end{tabular}}
 \end{table}
 
@@ -614,7 +614,7 @@ Program         & $N_{\rm at}$              & Energy (au) & Energy/$N_{\rm at}$\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
-\multicolumn{4}{l}{$ ^h6\times6\times6$ ${\bf k}$-space grid.}
+\multicolumn{4}{l}{$ ^h6\times6\times6$ $\bf k$-space grid.}
 \end{tabular}}
 \end{table}
 
@@ -752,9 +752,9 @@ We have extended linear scaling quantum chemical methods for computation of exch
 periodic boundary conditions at the $\Gamma$-point.  These methods have demonstrated an early onset of linear scaling and
 error control for diamond, allowing calculations up to 512 atoms at the RBLYP/6-21G* level of theory.  In both cases, this 
 early onset of linear scaling has been enabled by the use of modern data structures such as the $k$-d tree, together with 
-reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, 
-demonstrating high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of 
-state for pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
+reliable error estimates for the Gaussian extent.  These algorithms have been parallelized \cite{CGan03,CGan04B}, demonstrating
+high efficiencies up to 128 processors, and have been used recently to determine the $T=0$K equation of state for 
+pentaerythritol tetranitrate \cite{CGan04A} at the RPBE/6-31G** level of theory, with a {\tt GOOD} accuracy level.
 
 While this contribution has focused on demonstrating linear scaling for diamond system, 
 the methods presented here work for slabs and wires as well, using methods for computation 
@@ -798,8 +798,8 @@ and
 %\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
 where $\gamma$ is the incomplete gamma function \cite{MAbramowitz87} and \( \beta  \) is a parameter controling the 
-partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, 
-${\cal M}^{m}_{l}$, may be expressed as 
+partition.  With this separation of length scales, the lattice sum defining the multipole interaction tensor, ${\cal M}^{m}_{l}$, 
+may be expressed as 
 %
 \begin{eqnarray}
 {\cal M}^{m}_{l} & = & \sum _{\mathbf{R}\in V_{\rm PFF}}\, M_{l}^{m}[\mathbf{R}]
@@ -831,7 +831,7 @@ Following  CWHG, this expression can be further developed into real and reciproc
 \nonumber\\
 \label{C4}
 \end{eqnarray}
-Where $\mathbf{G}$ are the reciprical lattice vectors.
+Where $\mathbf{G}$ are reciprical lattice vectors.
 With an appropriate choice of \( \beta \sim \sqrt{\pi }/\left( V_{\rm UC}\right) ^{\frac{1}{3}} \),
 and summing terms from smallest to largest, the periodic multipole interaction tensor can be computed
 to high precision given an accurate representation of the incomplete gamma function.  In 
