@@ -116,8 +116,8 @@ MODULE BlokTrPdJ
                          Ext=Extent(EllAB,Prim%Zeta,Pab*dHGBra%D(1:LenAB,IA,IB,K),TauPAC,Potential_O=.TRUE.)
                          PExtent=MAX(PExtent,Ext)
 !                        Strength (for MAC)
-                         CALL HGToSP(Prim,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
-                         DO L=0,EllA+EllB+1
+                         CALL HGToSP(Prim%Zeta,EllAB,Pab*dHGBra%D(1:LenAB,IA,IB,K),SPBraC,SPBraS)
+                         DO L=0,EllAB
                             PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(SPELL+L+2)))
                          ENDDO
@@ -163,7 +163,7 @@ MODULE BlokTrPdJ
                             DO LMN=1,HGLenEll
                                dJ(IA,IB,K)=dJ(IA,IB,K)+Phase%D(LMN)*dHGBra%D(LMN,IA,IB,K)*HGKet(LMN)
                             ENDDO
-                            CALL HGToSP(Prim,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
+                            CALL HGToSP(Prim%Zeta,Ell,dHGBra%D(:,IA,IB,K),SPBraC,SPBraS)
                             DO LM=0,SPLenEll
                                dJ(IA,IB,K)=dJ(IA,IB,K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                             ENDDO
@@ -256,7 +256,7 @@ MODULE BlokTrPdJ
           DO LMN=1,HGLenEll
              Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
           ENDDO
-          CALL HGToSP(Prim,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
+          CALL HGToSP(Prim%Zeta,1,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
           DO LM=0,SPLenEll
              Vct(K)=Vct(K)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
           ENDDO

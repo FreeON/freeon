@@ -41,7 +41,7 @@ PROGRAM MakePFFT
 #endif
   CALL Put_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom) 
 ! Set Up the Multipoles  
-  CALL MultipoleSetUp(FFEll2)
+  CALL MultipoleSetUp()
 ! Allocate memory
   MaxEll = GM%PBC%PFFMaxEll
   IF(MaxELL > FFELL) THEN

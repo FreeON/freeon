@@ -236,11 +236,25 @@ MODULE PBCFarField
 !---------------------------------------------------------------------------------------------- 
 !   Print out Periodic Info
 !----------------------------------------------------------------------------------------------  
-    SUBROUTINE Print_Periodic(Unit_O,GMLoc)
+    SUBROUTINE Print_Periodic(GMLoc,Prog,Unit_O)
+      CHARACTER(LEN=*)    :: Prog
+      CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
       INTEGER,OPTIONAL    :: Unit_O
       INTEGER             :: Unit
       TYPE(CRDS)          :: GMLoc
       REAL(DOUBLE)        :: Layers
+!      IF(GMLoc%PBC%Dimen==0.OR.PrintFlags%Key<=DEBUG_MINIMUM)RETURN
+
+      Unit=OpenPU(Unit_O=Unit_O)
+      Mssg=ProcessName(Prog,TRIM(IntToChar(GMLoc%PBC%Dimen))//'-D periodics') &
+         //'MxL = '//TRIM(IntToChar(MaxEll))                                  &
+         //', PAC Cells = '//TRIM(IntToChar(CS_OUT%NCells))                   &
+         //', MAC Cells = '//TRIM(IntToChar(CS_IN%NCells))                    
+      WRITE(Unit,*)TRIM(Mssg)
+      Mssg=ProcessName(Prog,'FF Energy')//'<FF> = '//TRIM(DblToChar(E_PFF))
+      WRITE(Unit,*)TRIM(Mssg)
+
+#ifdef LDJFLDJFLDJF
 !
       IF(PRESENT(Unit_O)) THEN
          Unit=Unit_O
@@ -249,7 +263,9 @@ MODULE PBCFarField
       ENDIF
 !     
       Layers = SQRT(CS_IN%CellCarts%D(1,1)**2+CS_IN%CellCarts%D(2,1)**2+CS_IN%CellCarts%D(3,1)**2)/MaxBoxDim(GMLoc)
-      IF(PrintFlags%Key>DEBUG_MINIMUM) THEN
+
+
+
          IF(GMLoc%PBC%Dimen > 0) THEN
             CALL OpenASCII(OutFile,Unit)  
             WRITE(Unit,100)
@@ -275,6 +291,9 @@ MODULE PBCFarField
 105   FORMAT(' Correction to the Energy:')
 106   FORMAT('   PFF = ',E14.6,'  Dipole = ',E14.6)
 107   FORMAT('=========================================END======================================================')
+#endif
+
+      CALL ClosePU(Unit)
 !
     END SUBROUTINE Print_Periodic
 !========================================================================================

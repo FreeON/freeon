@@ -92,7 +92,7 @@ PROGRAM JForce
 ! Setup global arrays for computation of multipole tensors
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp(FFEll2)
+  CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
 #ifdef PERIODIC

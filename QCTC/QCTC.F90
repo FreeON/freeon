@@ -59,14 +59,7 @@ PROGRAM QCTC
     CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
   ENDIF
 ! Get multipoles and density
-  IF(SCFActn=='ForceEvaluation')THEN
-     CALL Get(Rho,'Rho',Args,1)
-     IF(MMOnly()) THEN
-        CALL Get(Rhopoles,CurGeom)
-     ELSE
-        CALL Get(Rhopoles,SCFCycl)
-     ENDIF
-  ELSEIF(SCFActn=='InkFok')THEN
+  IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
   ELSE
@@ -126,7 +119,7 @@ PROGRAM QCTC
 ! Initialize the auxiliary density arrays
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp(FFEll2)
+  CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
 #ifdef PERIODIC
@@ -246,9 +239,9 @@ PROGRAM QCTC
 #ifdef PERIODIC
 ! Print Periodic Info
   IF(HasMM()) THEN
-    CALL Print_Periodic(GMLoc=GM_MM)
+    CALL Print_Periodic(GM_MM,Prog)
   ELSE
-    CALL Print_Periodic(GMLoc=GM)
+    CALL Print_Periodic(GM,Prog)
   ENDIF
 #endif
 
@@ -266,7 +259,7 @@ PROGRAM QCTC
   CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
 #ifdef PERIODIC
 ! Print Periodic Info
-  CALL Print_Periodic(GMLoc=GM)
+  CALL Print_Periodic(GM,Prog)
 #endif    
 
 #ifdef PARALLEL

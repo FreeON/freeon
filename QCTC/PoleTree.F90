@@ -292,7 +292,7 @@ MODULE PoleTree
             DO Q=1,Rho%NQ%I(z)
                QD=oq+Q
                CD=or+(Q-1)*LMNLen+1
-               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
+               EX=Extent(Ell,ZE,Rho%Co%D(CD:CD+LMNLen-1),Tau_O=TauPAC,Potential_O=.TRUE.,ExtraEll_O=0)
 !              Threshold out distributions with zero extent 
                IF(EX>Zero)THEN
                   Qdex(IQ)=QD

@@ -227,7 +227,7 @@ MODULE JGen
                             EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
-                            CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
+                            CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(:,IA,IB),SPBraC,SPBraS)
                             DO L=0,EllA+EllB
                                PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                                DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(2+SPELL+L)))
@@ -274,7 +274,7 @@ MODULE JGen
                                   JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                                ENDDO
 !                              Far field
-                               CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
+                               CALL HGToSP(Prim%Zeta,Ell,HGBra%D(:,IA,IB),SPBraC,SPBraS)
                                DO LM=0,LSP(Ell)
                                   JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM)+SPBraS(LM)*SPKetS(LM)
                                ENDDO
