@@ -1,0 +1,7 @@
+
+1. change the onx int looping structure so that for a given 
+batch of integrals ACx ACy ACz is held constant. This is the 
+last step needed to make hrrbra and hrrket the same in sonx 
+and onx. 
+
+
