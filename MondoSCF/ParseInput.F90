@@ -1767,7 +1767,7 @@ MODULE ParseInPut
         TYPE(INT_VECT) :: Active_Torsion,Active_OutOfPlane
         TYPE(INT_VECT) :: GlobalQMNum
         TYPE(DBL_VECT) :: AuxVect     
-        INTEGER :: I,J,K,L,N1,N2,N3,N4
+        INTEGER        :: I,J,K,L,M,N1,N2,N3,N4
         TYPE(DBL_VECT) :: Charge14,LJEps14,LJEps,LJRAD
         TYPE(DBL_VECT) :: BondEQ,BondFC
         TYPE(DBL_VECT) :: AngleEQ,AngleFC
@@ -1883,8 +1883,8 @@ MODULE ParseInPut
         AngleEQ%D(:)=ANGLES(:)%EQ
         AngleFC%D(:)=ANGLES(:)%FC
         CALL Put(AngleIJK,'MM_AngleIJK')
-        CALL Put(AngleEQ,'MM_AngleEQ')
-        CALL Put(AngleFC,'MM_AngleFC')
+        CALL Put(AngleEQ,'AngleEQ')
+        CALL Put(AngleFC,'AngleFC')
       CALL Delete(AngleIJK)
       CALL Delete(AngleEQ)
       CALL Delete(AngleFC)
@@ -1988,8 +1988,8 @@ MODULE ParseInPut
 ! Parse for periodic options, here logical options only
 !-----------------------------------------------------------
 !
-!     GM_MM%InAu = .FALSE. !!! for MM
       GM_MM%Carts%D(:,:) = ATMCRD(:,:)
+      GM_MM%Vects%D(:,:)=Zero !!!! temporary, vectors not yet read
 !
 #ifdef PERIODIC
         CALL ParsePeriodic(Ctrl,GM_MM)
@@ -2153,6 +2153,8 @@ MODULE ParseInPut
             ENDIF
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_StpDesc))THEN
                Ctrl%Grad=GRAD_StpDesc_OPT
+         ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_DiagHess))THEN
+               Ctrl%Grad=GRAD_DiagHess_OPT
          ELSEIF(OptKeyQ(Inp,OPTIMIZATION,OPT_TSTATE))THEN
             Ctrl%Grad=GRAD_TS_SEARCH
             IF(.NOT.OptIntQ(Inp,Max_Steps,Ctrl%NGeom))THEN
@@ -2166,6 +2168,18 @@ MODULE ParseInPut
                Ctrl%NGeom=500
             ENDIF
          ENDIF
+!
+! Parse for GDIIS coordinate type
+!
+         IF(OptKeyQ(Inp,OPTIMIZATION,OPT_CartDIIS)) THEN
+            Ctrl%GeOp%GDIISCoordType=OPT_CartDIIS
+         ELSE IF(OptKeyQ(Inp,OPTIMIZATION,OPT_IntDIIS)) THEN
+            Ctrl%GeOp%GDIISCoordType=OPT_IntDIIS
+         ELSE
+            Ctrl%GeOp%GDIISCoordType=OPT_CartDIIS
+         ENDIF
+!
+! Parse for coordtype
 !
          IF(OptKeyQ(Inp,COORDTYPE,CoordType_PrimInt)) THEN
             Ctrl%GeOp%CoordType=CoordType_PrimInt
@@ -2714,11 +2728,17 @@ END SUBROUTINE ParsePeriodic
                GMLoc%AbBoxCarts%D=GMLoc%BoxCarts%D
                CALL CalAtomCarts(GMLoc)
             ENDIF
+!
             IF(GMLoc%PBC%Trans_COM) THEN
                CALL CalTransVec(GMLoc)
             ENDIF
             CALL Translate(GMLoc,GMLoc%PBC%TransVec)
             CALL WrapAtoms(GMLoc)
+!
+! set boundary box
+!
+            GMLoc%BndBox%D=SetBox(GMLoc%Carts)
+!
 !           ReSet the Cell Center
             DO I=1,3
                IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
