@@ -425,6 +425,17 @@ CONTAINS
           ENDDO
           DEALLOCATE(B)
 
+          Meta=SetMeta(NameTag(Trim(VarName)//'Active',Tag_O),NATIVE_INT32,NN,.FALSE.)
+          ALLOCATE(B(NN))
+          CALL OpenData(Meta)
+          CALL ReadIntegerVector(Meta,B)
+          CALL CloseData(Meta)
+          A%Constraint=.FALSE.
+          DO I=1,NN
+             IF(B(I)==1) A%Active(I)=.TRUE.
+          ENDDO
+          DEALLOCATE(B)
+
 #ifdef PARALLEL 
        ENDIF
        !! not supported yet. IF(InParallel)CALL Bcast(A)
@@ -473,6 +484,17 @@ CONTAINS
                 IF(A%Constraint(I)) B(I)=1
              ENDDO
              Meta=SetMeta(NameTag(TRIM(VarName)//'Constraint',Tag_O),NATIVE_INT32,NN,.FALSE.)
+             CALL OpenData(Meta,.TRUE.)
+             CALL WriteIntegerVector(Meta,B)
+             CALL CloseData(Meta)
+             DEALLOCATE(B)
+!
+             ALLOCATE(B(NN))
+             B=0
+             DO I=1,NN
+                IF(A%Active(I)) B(I)=1
+             ENDDO
+             Meta=SetMeta(NameTag(TRIM(VarName)//'Active',Tag_O),NATIVE_INT32,NN,.FALSE.)
              CALL OpenData(Meta,.TRUE.)
              CALL WriteIntegerVector(Meta,B)
              CALL CloseData(Meta)
