@@ -68,7 +68,6 @@ MODULE ParseInput
 ! Parse accuracy
 !
          Call ParseAcc(Ctrl)
-!
 !        Print Parsed options
          CALL ParsePrint(Ctrl)
 !
@@ -309,18 +308,9 @@ MODULE ParseInput
         WRITE(Out,*)
         ! Print the accuracy, method and model chemistry for each basis set
         WRITE(Out,*)'PROGRAM OF CALCULATIONS:',Rtrn
+        CALL OpenHDF(InfFile)
         DO I=1,Ctrl%NSet
-#ifdef MMech
-           IF(HasQM()) THEN
-#endif
-              IF(Ctrl%Method(I)==SDMM_R_SCF)THEN
-                 Method='restricted simplified density matrix minimization using '
-              ELSE
-                 Method='restricted Roothaan-Hall solution of the SCF using '
-              ENDIF
-#ifdef MMech
-           ENDIF
-#endif
+!
            IF(Ctrl%AccL(I)==1)THEN
               Accuracy='  a loose accuracy level, '
            ELSEIF(Ctrl%AccL(I)==2)THEN
@@ -331,8 +321,14 @@ MODULE ParseInput
               Accuracy='  a very tight accuracy level, '      
            ENDIF
 #ifdef MMech
-           IF(HasQM()) THEN
+       IF(Ctrl%Mechanics(2)) THEN
 #endif
+              IF(Ctrl%Method(I)==SDMM_R_SCF)THEN
+                 Method='restricted simplified density matrix minimization using '
+              ELSE
+                 Method='restricted Roothaan-Hall solution of the SCF using '
+              ENDIF
+!
               Chemistry=' and the '//TRIM(FunctionalName(Ctrl%Model(I)))//' model.'
               IF(I==1)THEN
                  Mssg=' A '//TRIM(Method)//Rtrn//TRIM(Accuracy)//' '//TRIM(Ctrl%BName(1))//TRIM(Chemistry)
@@ -341,25 +337,20 @@ MODULE ParseInput
                       //TRIM(Ctrl%BName(I))//TRIM(Chemistry)
               ENDIF
               WRITE(Out,*)TRIM(Mssg),Rtrn
-#ifdef MMech
-           ENDIF
-#endif
-        ENDDO
-        CALL PrintProtectR(Out)
-        CLOSE(UNIT=Out,STATUS='KEEP')
-        ! Put SCF Method
-#ifdef MMech
-        IF(HasQM()) THEN
-#endif
-           CALL OpenHDF(InfFile)
-           DO I=1,Ctrl%NSet
+!
+! Put SCF Method
+!
               CALL Put(Ctrl%AccL(I),'SCFAccuracy',Tag_O=IntToChar(I))
               CALL Put(Ctrl%Method(I),'SCFMethod',Tag_O=IntToChar(I))
-           ENDDO
-           CALL CloseHDF()
+!
 #ifdef MMech
         ENDIF
 #endif
+        ENDDO
+        CALL CloseHDF()
+        CALL PrintProtectR(Out)
+        CLOSE(UNIT=Out,STATUS='KEEP')
+!
       END SUBROUTINE ParsePrint
 !============================================================================
 !     Parse The Methods
@@ -1911,9 +1902,7 @@ MODULE ParseInput
       CALL MM_SYSTEM_CONSTRUCT ( "tmp_opls_bin", MM_SEQ(1:N2) )
       CALL COORDINATES_READ ( MM_COORDS(1:N3) )
 !
-!     write(*,*) 'bef sort'
 !     CALL SORT_INTO_BOX(7.D0,ATMCRD,MM_NATOMS) !!!
-!     stop
       CALL NEW(ATMMARK,MM_NATOMS)
       CALL NEW(ACTIVE_BOND,NBONDS)
       CALL NEW(ACTIVE_ANGLE,NANGLES)
@@ -1983,7 +1972,8 @@ MODULE ParseInput
       GM_MM%Carts%D(:,:) = ATMCRD(:,:)*AngstromsToAU
       GM_MM%AtMss%D(:) = ATMMAS(:)
       GM_MM%AtNum%D(:) = ATMCHG(:)
-      IF(HasQm()) Then
+!     IF(Ctrl%Mechanics(2)) THEN
+      IF(HasQM()) THEN
         CALL Get(GM,Tag_O=IntToChar(Ctrl%NGeom))
         GM_MM%BndBox%D=SetBox(GM_MM%Carts,GM%Carts)
       ELSE
