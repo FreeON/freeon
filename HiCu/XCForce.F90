@@ -49,7 +49,7 @@ PROGRAM XCForce
   REAL(DOUBLE),DIMENSION(6)      :: F_nlm
   TYPE(DBL_RNK2)                 :: LatFrc_XC   
   TYPE(BBox)                     :: WBox,WBoxTmp
-  REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old
+  REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot
 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
@@ -75,8 +75,14 @@ PROGRAM XCForce
 ! Make Box Periodic
   CALL MakeBoxPeriodic(WBox)
   CALL CalCenterAndHalf(WBox)
-
   CALL GridGen(WBox,VolRho,VolExc)
+! Redue the Energy to reflect a more accurate calculation of Exc
+  CALL Get(Exc_old, 'Exc')
+  CALL Get(Etot_old,'Etot')
+!
+  Etot = Etot_old-Exc_old+Exc
+  CALL Put(Exc, 'Exc')
+  CALL Put(Etot,'Etot')
 #endif
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
