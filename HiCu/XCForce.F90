@@ -48,7 +48,7 @@ PROGRAM XCForce
   INTEGER                        :: NCA,NCB
   REAL(DOUBLE),DIMENSION(3)      :: A,B,nlm
   REAL(DOUBLE),DIMENSION(6)      :: F_nlm
-  TYPE(DBL_RNK2)                 :: LatFrc_XC   
+  TYPE(DBL_RNK2)                 :: LatFrc_XC,LatFrc_XC_S  
   TYPE(BBox)                     :: WBox,WBoxTmp
   REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot,dum0,dum1
   REAL(DOUBLE),EXTERNAL    :: MondoTimer
@@ -69,6 +69,15 @@ PROGRAM XCForce
   CALL DistDist()
   CALL ParaRhoToTree()
   CALL ParaGridGen()
+! Redue the Energy to reflect a more accurate calculation of Exc
+  IF(MyID==ROOT) THEN
+     CALL Get(Exc_old, 'Exc')
+     CALL Get(Etot_old,'Etot')
+!
+     Etot = Etot_old-Exc_old+TotExc
+     CALL Put(TotExc, 'Exc')
+     CALL Put(Etot,'Etot')
+  ENDIF
 #else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
@@ -99,7 +108,7 @@ PROGRAM XCForce
 !----------------------------------------------------------------------
 ! Compute the exchange-correlation contribution to the force in O(N)
 !
-  XCFrc%D=Zero
+  XCFrc%D    =Zero
   LatFrc_XC%D=Zero
 #ifdef PARALLEL
   XCFrcBegTm = MondoTimer()
@@ -149,92 +158,152 @@ PROGRAM XCForce
   CALL SetLocalThresholds(Thresholds%Cube*1.D-4)
 ! Convert density to a 5-D BinTree
 #ifdef PARALLEL
+! Convert density to a 5-D BinTree
   CALL Delete(LCoor)
   CALL Delete(RCoor)
-  !
+!
   CALL ParaInitRho(Args)
   CALL GetBBox()
   CALL SendBBox()
   CALL DistDist()
   CALL ParaRhoToTree()
-#else
-  CALL RhoToTree(Args)
-#endif
-! Generate the grid as a 3-D BinTree
+  CALL New(LatFrc_XC_S,(/3,3/))
+  LatFrc_XC_S%D=Zero
   DO I = 1,3 
-     Exc=Zero
      IF(GM%PBC%AutoW%I(I)==1) THEN
-#ifdef PARALLEL
+        Exc=Zero
         WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
         WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
-        CALL CalCenterAndHalf(WBox)
-#endif
-        WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
-        WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
-        CALL GridGen(WBox,VolRho,VolExc)
-#ifdef PARALLEL
-        WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
-        WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
-#else
-        WBox%BndBox(I,1) = Zero
-        WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)
-#endif
-        !write(*,'(A,I1,A,I1,A,E26.15,I3)') 'XC_Surface(',i,',',i,')',Exc/(Two*DelBox),MyID
-        LatFrc_XC%D(I,I) = LatFrc_XC%D(I,I)+Exc/(Two*DelBox)
+        IF(WBox%BndBox(I,2)+1.D-8 > GM%PBC%BoxShape%D(I,I))  THEN
+           CALL CalCenterAndHalf(WBox)
+           WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
+           WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
+           CALL GridGen(WBox,VolRho,VolExc)
+           WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
+           WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
+           LatFrc_XC_S%D(I,I) = LatFrc_XC_S%D(I,I)+Exc/(Two*DelBox)
+        ENDIF
      ENDIF
   ENDDO
-! Write Out Lattice Force       
-!!$  WRITE(*,*) 'LatFrc_XC'
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_XC%D(I,J),J=1,3)
-!!$  ENDDO
+#else
+  CALL RhoToTree(Args)
+! Generate the grid as a 3-D BinTree
+  CALL New(LatFrc_XC_S,(/3,3/))
+  LatFrc_XC_S%D=Zero
+  DO I = 1,3
+     Exc=Zero
+     IF(GM%PBC%AutoW%I(I)==1) THEN
+        WBox%BndBox(I,1)   = GM%PBC%BoxShape%D(I,I)-DelBox
+        WBox%BndBox(I,2)   = GM%PBC%BoxShape%D(I,I)+DelBox
+        CALL GridGen(WBox,VolRho,VolExc)
+        WBox%BndBox(I,1)   = Zero
+        WBox%BndBox(I,2)   = GM%PBC%BoxShape%D(I,I)
+        LatFrc_XC_S%D(I,I) = LatFrc_XC_S%D(I,I)+Exc/(Two*DelBox)
+     ENDIF 
+  ENDDO
+#endif
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
-
 #ifdef PARALLEL
+! Collect the timings
   XCFrcEndTm = MondoTimer()
-  XCFrcTm = XCFrcEndTm-XCFrcBegTm
-#endif
-! Do some checksumming, resumming and IO 
-#ifdef PARALLEL
+  XCFrcTm    = XCFrcEndTm-XCFrcBegTm
+! Collect the Forces
   TotFrcComp = 3*NAtoms
   CALL New(TotXCFrc,TotFrcComp)
   CALL MPI_Reduce(XCFrc%D(1),TotXCFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
-  IF(MyID == 0) THEN
+  IF(MyID == ROOT) THEN
     XCFrc%D(1:TotFrcComp) = TotXCFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotXCFrc)
-#endif
-  CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
+! Collect the Lattice Forces
+  CALL New(TmpLatFrc_XC,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
+  CALL MPI_REDUCE(LatFrc_XC%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION,MPI_SUM,ROOT,MONDO_COMM,IErr)
+  IF(MyID == ROOT) THEN
+     LatFrc_XC%D = LatFrc_XC%D+TmpLatFrc_XC%D 
+  ENDIF
+  CALL Delete(TmpLatFrc_XC)
+  IF(MyID == ROOT) THEN
+!!$!    Print The Lattice Forces
+!!$     CALL OpenASCII(OutFile,Out)
+!!$     WRITE(Out,*) 'LatFrc_XC'
+!!$     WRITE(*,*)   'LatFrc_XC'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$     WRITE(Out,*) 'LatFrc_XC_S'
+!!$     WRITE(*,*)   'LatFrc_XC_S'
+!!$     DO I=1,3
+!!$        WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
+!!$        WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
+!!$     ENDDO
+!!$!    Print the Forces
+!!$     WRITE(Out,*) 'XCforce'
+!!$     WRITE(*,*)   'XCForce'
+!!$     DO AtA=1,NAtoms
+!!$        A1=3*(AtA-1)+1
+!!$        A2=3*AtA
+!!$        WRITE(Out,*) XCFrc%D(A1:A2)
+!!$        WRITE(*,*) XCFrc%D(A1:A2)
+!!$     ENDDO
+!!$     CLOSE(Out)
+!    Sum in contribution to total force
+     DO AtA=1,NAtoms
+        A1=3*(AtA-1)+1
+        A2=3*AtA
+        GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+XCFrc%D(A1:A2)
+     ENDDO
+!    Sum in the J contribution to total lattice force
+     LatFrc_XC%D     = LatFrc_XC%D+LatFrc_XC_S%D
+     GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
+!    Tidy up
+     CALL Delete(LatFrc_XC_S)
+  ENDIF
+#else
+!!$! Print The Lattice Forces
+!!$  CALL OpenASCII(OutFile,Out)
+!!$  WRITE(Out,*) 'LatFrc_XC'
+!!$  WRITE(*,*)   'LatFrc_XC'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$  WRITE(Out,*) 'LatFrc_XC_S'
+!!$  WRITE(*,*)   'LatFrc_XC_S'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$! Print the Forces
+!!$  WRITE(Out,*) 'XCforce'
+!!$  WRITE(*,*)   'XCForce'
+!!$  DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     WRITE(Out,*) XCFrc%D(A1:A2)
+!!$     WRITE(*,*) XCFrc%D(A1:A2)
+!!$  ENDDO
+!!$  CLOSE(Out)
 ! Sum in contribution to total force
   DO AtA=1,NAtoms
      A1=3*(AtA-1)+1
      A2=3*AtA
      GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+XCFrc%D(A1:A2)
   ENDDO
-#ifdef PARALLEL
-  CALL New(TmpLatFrc_XC,(/3,3/))
-  CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
-  CALL MPI_REDUCE(LatFrc_XC%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION, &
-       &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+TmpLatFrc_XC%D 
-  !if(myid.eq.root) then
-  !   do j=1,3
-  !      do i=1,3
-  !         IF(GM%PBC%AutoW%I(I) == 1 .AND. GM%PBC%AutoW%I(J) == 1) THEN 
-  !            write(*,'(A,I1,A,I1,A,E26.15)') 'LatFrc_XC_t(',i,',',j,')=',TmpLatFrc_XC%D(i,j)
-  !         ENDIF
-  !      enddo
-  !   enddo
-  !endif
-  CALL Delete(TmpLatFrc_XC)
-#else
+! Sum in the J contribution to total lattice force
+  LatFrc_XC%D     = LatFrc_XC%D+LatFrc_XC_S%D
   GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
-#endif
-  CALL Put(GM,Tag_O=CurGeom)
-!--------------------------------------------------------------------------------
 ! Tidy up
-!--------------------------------------------------------------------------------
+  CALL Delete(LatFrc_XC_S)
+#endif
+! Do some checksumming and IO 
+  CALL PChkSum(XCFrc,    'dXC/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_XC,'LFrcXC',Proc_O=Prog)  
+! Save Forces to Disk
+  CALL Put(GM,Tag_O=CurGeom)
+! Tidy up
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(P)
@@ -244,9 +313,6 @@ PROGRAM XCForce
 #ifdef PARALLEL
   CALL New(TmXCFrcArr,NPrc)
   CALL MPI_Gather(XCFrcTm,1,MPI_DOUBLE_PRECISION,TmXCFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
-!  IF(MyID == ROOT) THEN
-!    CALL PImbalance(TmXCFrcArr,NPrc,Prog_O='XCFrc')
-!  ENDIF
   CALL Delete(TmXCFrcArr)
 #endif
 ! didn't count flops, any accumulation is residual
