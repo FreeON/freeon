@@ -61,20 +61,59 @@ PROGRAM HaiKu
 #endif 
 ! Set local integration thresholds 
   CALL SetLocalThresholds(Thresholds%Cube)
+  ! Potentially overide local HiCu thresholds
+  IF(Args%NI==8)THEN
+     TauRel=1D1**(-Args%I%I(7))
+     TauRho=1D1**(-Args%I%I(8))
+#ifdef PARALLEL
+     IF(MyId==0)THEN
+#endif
+     CALL OpenASCII(OutFile,Out)         
+     Mssg=TRIM(ProcessName('HiCu'))//' TauRel = '//TRIM(DblToShrtChar(TauRel))
+     WRITE(Out,*)TRIM(Mssg)
+     Mssg=TRIM(ProcessName('HiCu'))//' TauRho = '//TRIM(DblToShrtChar(TauRho))
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
+#ifdef PARALLEL
+     ENDIF
+#endif
+  ELSE
+     IF(OptDblQ(Inp,'TauRel',TauRel))THEN
+#ifdef PARALLEL
+        IF(MyId==0)THEN
+#endif
+           Mssg=TRIM(ProcessName('HiCu'))//' TauRel = '//TRIM(DblToShrtChar(TauRel))
+           CALL OpenASCII(OutFile,Out)         
+           WRITE(Out,*)TRIM(Mssg)
+           CLOSE(Out)
+#ifdef PARALLEL
+        ENDIF
+#endif           
+     ENDIF
+     IF(OptDblQ(Inp,'TauRho',TauRho))THEN
+#ifdef PARALLEL
+        IF(MyId==0)THEN
+#endif
+           Mssg=TRIM(ProcessName('HiCu'))//' TauRho = '//TRIM(DblToShrtChar(TauRho))
+           CALL OpenASCII(OutFile,Out)         
+           WRITE(Out,*)TRIM(Mssg)
+           CLOSE(Out)
+#ifdef PARALLEL
+        ENDIF
+#endif
+     ENDIF
+  ENDIF
 ! Begin local performance accumulator for grid generation
   CALL Elapsed_Time(TimeRhoToGrid,'Init')
 ! Create the RhoTree (a 4-D BinTree)
   CALL RhoToTree(Args)
-
 ! CALL New(Kxc)
 #ifdef PARALLEL_DEVELOPMENT
   CALL New_FASTMAT(Kxc,0,(/0,0/))
 #else
   CALL NewBCSR(Kxc)
 #endif
-
   CALL NewBraBlok(BS)
-
 #ifdef PARALLEL 
   ! get bounding boxes from static partitioning or read from a file
   CALL GetBBox()
@@ -86,7 +125,6 @@ PROGRAM HaiKu
   CALL CalImbalance()
   CALL CollectLeavesTime()
   CALL RepartitionVol()
-
 #else
 ! Generate the CubeTree (a 3-D BinTree) 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)

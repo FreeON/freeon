@@ -5,6 +5,7 @@ PROGRAM QCTC
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
+  USE ProcessControl
   USE InOut
   USE PrettyPrint
   USE MemMan
@@ -25,6 +26,7 @@ PROGRAM QCTC
   REAL(DOUBLE)               :: E_Nuc_Tot
   TYPE(TIME)                 :: TimeMakeJ
   CHARACTER(LEN=4),PARAMETER :: Prog='QCTC'
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 #ifdef MMech
   TYPE(CRDS)                 :: GM_MM
   REAL(DOUBLE)               :: MM_COUL,E_C_EXCL,CONVF  
@@ -47,7 +49,7 @@ PROGRAM QCTC
     CALL Get(GM_MM,Tag_O='GM_MM'//CurGeom)
   ENDIF
 #endif
-! Get multipoles and density
+  ! Get multipoles and density
   IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
@@ -55,19 +57,43 @@ PROGRAM QCTC
      CALL Get(Rho,'Rho',Args,0)
      CALL Get(RhoPoles,SCFCycl)
   ENDIF
-! Set thresholds local to QCTC (for PAC and MAC)
+  ! Set thresholds local to QCTC (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
-! Initialize the auxiliary density arrays
+  ! Potentially overide local QCTC thresholds
+  IF(Args%NI==8)THEN
+     TauPAC=1D1**(-Args%I%I(7))
+     TauMAC=1D1**(-Args%I%I(8))
+     CALL OpenASCII(OutFile,Out)         
+     Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
+     WRITE(Out,*)TRIM(Mssg)
+     Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
+     WRITE(Out,*)TRIM(Mssg)
+     CLOSE(Out)
+  ELSE
+     IF(OptDblQ(Inp,'TauPAC',TauPAC))THEN
+       Mssg=TRIM(ProcessName('QCTC'))//' TauPAC = '//TRIM(DblToShrtChar(TauPAC))
+       CALL OpenASCII(OutFile,Out)         
+       WRITE(Out,*)TRIM(Mssg)
+       CLOSE(Out)
+     ENDIF
+     IF(OptDblQ(Inp,'TauMAC',TauMAC))THEN
+       Mssg=TRIM(ProcessName('QCTC'))//' TauMAC = '//TRIM(DblToShrtChar(TauMAC))
+       CALL OpenASCII(OutFile,Out)         
+       WRITE(Out,*)TRIM(Mssg)
+       CLOSE(Out)
+     ENDIF
+  ENDIF
+  ! Initialize the auxiliary density arrays
   CALL InitRhoAux
-! Setup global arrays for computation of multipole tensors
+  ! Setup global arrays for computation of multipole tensors
   CALL MultipoleSetUp(FFEll2)
-! Build the global PoleTree representation of the total density
+  ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
 #ifdef PERIODIC
-! Calculate the Number of Cells
+  ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
   CALL PPrint(CS_OUT,'outer sum',Prog)
-! Set the electrostatic background 
+  ! Set the electrostatic background 
   CALL PBCFarFieldSetUp(PoleRoot)
 #endif
 ! Delete the auxiliary density arrays
