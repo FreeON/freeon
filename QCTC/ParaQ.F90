@@ -192,9 +192,13 @@ endif
     do i = 1, nprc-1
       disp%i(i) = disp%i(i-1)+csize%i(i-1)
     enddo
-    call mpi_allgatherv(tmp%Qx%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
-    call mpi_allgatherv(tmp%Qy%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
-    call mpi_allgatherv(tmp%Qz%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(TotENDist+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(tmp%Qx%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qx%d(TotENDist+1), &
+         & CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(tmp%Qy%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qy%d(TotENDist+1), &
+         & CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(tmp%Qz%d(ENDist+1),NNDist,MPI_DOUBLE_PRECISION,Rho%Qz%d(TotENDist+1), &
+         & CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+
 
     ! now Co
     CALL MPI_AllGather(ENCoef,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
@@ -202,13 +206,15 @@ endif
     do i = 1, nprc-1
       disp%i(i) = disp%i(i-1)+csize%i(i-1)
     enddo
-    call mpi_allgatherv(Tmp%Co%d(1),ENCoef,MPI_DOUBLE_PRECISION,Rho%Co%d(1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Co%d(1),ENCoef,MPI_DOUBLE_PRECISION,Rho%Co%d(1), &
+         & CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
     CALL MPI_AllGather(NNCoef,1,MPI_INTEGER,CSize%I(0),1,MPI_INTEGER,MONDO_COMM,IErr)
     disp%I(0) = 0
     do i = 1, nprc-1
       disp%i(i) = disp%i(i-1)+csize%i(i-1)
     enddo
-    call mpi_allgatherv(Tmp%Co%d(ENCoef+1),NNCoef,MPI_DOUBLE_PRECISION,Rho%Co%d(TotENCoef+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
+    call mpi_allgatherv(Tmp%Co%d(ENCoef+1),NNCoef,MPI_DOUBLE_PRECISION, &
+         & Rho%Co%d(TotENCoef+1),CSize%I(0),disp%i(0),MPI_DOUBLE_PRECISION,MONDO_COMM,IErr)
 
     ! finally OffR and OffQ
     Rho%OffQ%i(1) = 0
@@ -262,7 +268,9 @@ endif
   END SUBROUTINE TraverseTree
 
   SUBROUTINE ParaRhoToPoleTree
-    ALLOCATE(PA1(0:NPrc-1),PA2(0:NPrc-1))
+    INTEGER :: IErr
+    ALLOCATE(PA1(0:NPrc-1),PA2(0:NPrc-1),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaRhoToPoleTree: Allocation problem.')
     CALL MakeTree1
     CALL BuildLocalTrees
     CALL ConcatTrees
@@ -298,7 +306,7 @@ endif
 
   SUBROUTINE BuildLocalTrees
     TYPE(PoleNode),POINTER :: TP
-    INTEGER :: I,J,IErr,SendTo,RecvFr,ActIntRec,ActDblRec
+    INTEGER :: I,J,IErr,SendTo,RecvFr,ActIntRec,ActDblRec,IntSize,DblSize
     INTEGER,ALLOCATABLE :: SF(:),Dest(:),NodesNumArr(:),IntNumArr(:),DblNumArr(:)
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: IntStatus
     INTEGER,DIMENSION(MPI_STATUS_SIZE) :: DblStatus
@@ -310,6 +318,7 @@ endif
     TP%Edex = PA1(MyID)%Ptr%Edex
     TP%NQ = TP%Edex - TP%Bdex + 1
     CALL SplitPole(TP)
+
     DO CurrentTier = MaxTier,BranchTier, -1
       CALL MakePoleTree(TP)
     ENDDO
@@ -319,8 +328,10 @@ endif
     NodesVisit = 0
     CALL FindSize(TP)
 
-    ALLOCATE(IntArr(IntNum))
-    ALLOCATE(DblArr(DblNum))
+    ALLOCATE(IntArr(IntNum),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 100: Allocation problem.')
+    ALLOCATE(DblArr(DblNum),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 200: Allocation problem.')
 
     CALL PackTree(TP)
 
@@ -334,8 +345,10 @@ endif
       STOP 'ERR: Missing nodes ?'
     ENDIF
 
-    ALLOCATE(SF(0:NPrc-1),Dest(0:NPrc-1))
-    ALLOCATE(NodesNumArr(0:NPrc-1),IntNumArr(0:NPrc-1),DblNumArr(0:NPrc-1))
+    ALLOCATE(SF(0:NPrc-1),Dest(0:NPrc-1),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 300: Allocation problem.')
+    ALLOCATE(NodesNumArr(0:NPrc-1),IntNumArr(0:NPrc-1),DblNumArr(0:NPrc-1),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 400: Allocation problem.')
 
     ! WRITE(*,*) 'MyID = ',MyID, ', NodesVisit = ',NodesVisit, ', IntNum = ',IntNum,', DblNum = ',DblNum
     CALL MPI_AllGather(NodesVisit,1,MPI_INTEGER,NodesNumArr(0),1,MPI_INTEGER,MONDO_COMM,IErr)
@@ -359,62 +372,103 @@ endif
       ! WRITE(*,*) 'NodesNumArr = ',NodesNumArr(:)
     ENDIF
     
-    ALLOCATE(RecIntArr(GIntNum))
-    ALLOCATE(RecDblArr(GDblNum))
+    ALLOCATE(RecIntArr(GIntNum),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 700: Allocation problem.')
+    ALLOCATE(RecDblArr(GDblNum),STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 800: Allocation problem.')
 
-    DO I = 1, NPrc-1
-      DO J = 0, NPrc-1
-        SendTo = MODULO(J+I,NPrc)
-        Dest(J) = SendTo
-        SF(J) = 0
-      ENDDO
-      DO J = 0, NPrc-1
-        IF(SF(J) == 0 .AND. SF(Dest(J)) == 0) THEN
-          SF(J) = 1
-          SF(Dest(J)) = 2
-        ENDIF
-      ENDDO
-      SendTo = MODULO(MyID+I,NPrc)
-      RecvFr = MODULO(MyID-I,NPrc)
-      IF(SF(MyID) == 1) THEN
-        CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo,MyID,MONDO_COMM,IErr)
-        CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
-
-        CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
-        CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
-        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
-        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
-        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
-        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
-
-        CALL CopyTree(RecvFr)
-        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
-        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
-        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
-        
-        
-      ELSE
-        CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
-        CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
-        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
-        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
-        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
-        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
-
-        CALL CopyTree(RecvFr)
-        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
-        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
-        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
-
-        CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo,MyID,MONDO_COMM,IErr)
-        CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
-      ENDIF
+    !VWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVW
+    DO I=NPrc-1,0,-1
+       IntSize=IntNumArr(I)
+       DblSize=DblNumArr(I)
+       !Copy arrays
+       IF(MyID.EQ.I) CALL INT_VECT_EQ_INT_VECT(IntSize,RecIntArr(1),IntArr(1))
+       IF(MyID.EQ.I) CALL DBL_VECT_EQ_DBL_VECT(DblSize,RecDblArr(1),DblArr(1))
+       !BCast the arrays
+       CALL MPI_BCAST(RecIntArr(1),IntSize,MPI_INTEGER         ,I,MONDO_COMM,IErr)
+       CALL MPI_BCAST(RecDblArr(1),DblSize,MPI_DOUBLE_PRECISION,I,MONDO_COMM,IErr)
+       !Build tree
+       CALL CopyTree(I)
+       IF(IntIndex /= IntNumArr(I)) STOP 'ERR: should be the same!'
+       IF(DblIndex /= DblNumArr(I)) STOP 'ERR: should be the same!'
+       IF(NodesVisit /= NodesNumArr(I)) STOP 'ERR: should be the same!'
     ENDDO
+    !VWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVWVW
+!!$    DO I = 1, NPrc-1
+!!$      DO J = 0, NPrc-1
+!!$        SendTo = MODULO(J+I,NPrc)
+!!$        Dest(J) = SendTo
+!!$        SF(J) = 0
+!!$      ENDDO
+!!$      DO J = 0, NPrc-1
+!!$        IF(SF(J) == 0 .AND. SF(Dest(J)) == 0) THEN
+!!$          SF(J) = 1
+!!$          SF(Dest(J)) = 2
+!!$        ENDIF
+!!$      ENDDO
+!!$      SendTo = MODULO(MyID+I,NPrc)
+!!$      RecvFr = MODULO(MyID-I,NPrc)
+!!$
+!!$      IF(SF(MyID) == 1) THEN
+!!$         CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo         ,MyID,MONDO_COMM,IErr)
+!!$         CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
+!!$
+!!$         CALL MPI_Recv(RecIntArr(1),IntNumArr(RecvFr),MPI_INTEGER, &
+!!$              & RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
+!!$         CALL MPI_Recv(RecDblArr(1),DblNumArr(RecvFr),MPI_DOUBLE_PRECISION, &
+!!$              & RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
+!!$!orig         CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr         ,RecvFr, &
+!!$!orig              & MONDO_COMM,IntStatus,IErr) 
+!!$!orig         CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr, &
+!!$!orig              & MONDO_COMM,DblStatus,IErr) 
+!!$
+!!$        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
+!!$        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
+!!$        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
+!!$        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
+!!$
+!!$        CALL CopyTree(RecvFr)
+!!$
+!!$        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$       
+!!$      ELSE
+!!$
+!!$         CALL MPI_Recv(RecIntArr(1),IntNumArr(RecvFr),MPI_INTEGER, &
+!!$              & RecvFr,RecvFr,MONDO_COMM,IntStatus,IErr) 
+!!$         CALL MPI_Recv(RecDblArr(1),DblNumArr(RecvFr),MPI_DOUBLE_PRECISION, &
+!!$              & RecvFr,RecvFr,MONDO_COMM,DblStatus,IErr) 
+!!$!orig         CALL MPI_Recv(RecIntArr(1),GIntNum,MPI_INTEGER,RecvFr         ,RecvFr, &
+!!$!orig              & MONDO_COMM,IntStatus,IErr) 
+!!$!orig         CALL MPI_Recv(RecDblArr(1),GDblNum,MPI_DOUBLE_PRECISION,RecvFr,RecvFr, &
+!!$!orig              & MONDO_COMM,DblStatus,IErr) 
+!!$
+!!$        CALL MPI_Get_Count(IntStatus,MPI_INTEGER,ActIntRec,IErr)
+!!$        CALL MPI_Get_Count(DblStatus,MPI_DOUBLE_PRECISION,ActDblRec,IErr)
+!!$        IF(ActIntRec /= IntNumArr(RecvFr)) STOP 'ERR: 1: Missing int while receiving ?'
+!!$        IF(ActDblRec /= DblNumArr(RecvFr)) STOP 'ERR: 1: Missing dbl while receiving ?'
+!!$
+!!$        CALL CopyTree(RecvFr)
+!!$
+!!$        IF(IntIndex /= IntNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$        IF(DblIndex /= DblNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$        IF(NodesVisit /= NodesNumArr(RecvFr)) STOP 'ERR: should be the same!'
+!!$
+!!$        CALL MPI_Send(IntArr(1),IntNum,MPI_INTEGER,SendTo         ,MyID,MONDO_COMM,IErr)
+!!$        CALL MPI_Send(DblArr(1),DblNum,MPI_DOUBLE_PRECISION,SendTo,MyID,MONDO_COMM,IErr)
+!!$
+!!$     ENDIF
+!!$  ENDDO
 
-    DEALLOCATE(RecIntArr)
+    DEALLOCATE(RecIntArr,STAT=iErr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 900: DeAllocation problem.')
     DEALLOCATE(RecDblArr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 1000: DeAllocation problem.')
     DEALLOCATE(IntArr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 1100: DeAllocation problem.')
     DEALLOCATE(DblArr)
+    IF(iErr.NE.0) CALL Halt('In ParaQ 1200: DeAllocation problem.')
 
   END SUBROUTINE BuildLocalTrees
 
@@ -424,15 +478,18 @@ endif
     NodesVisit = 0
     IntIndex = 0
     DblIndex = 0
+    nullify(PA2(I)%Ptr)
     CALL RecurCopy(PA2(I)%Ptr)
   END SUBROUTINE CopyTree
  
   RECURSIVE SUBROUTINE RecurCopy(P)
     TYPE(PoleNode),POINTER :: P
     INTEGER :: SizeofSP,SizeofCo
+    integer :: ierr
 
     NodesVisit = NodesVisit + 1
     IntIndex = IntIndex + 1
+
     IF(RecIntArr(IntIndex) == 100) THEN
       CALL NewPoleNode(P,0)
       P%Leaf = .TRUE.
@@ -464,13 +521,18 @@ endif
       DblIndex = DblIndex + 3 
 
       SizeofCo = LHGTF(P%Ell)
-      ALLOCATE(P%Co(1:SizeofCo))
+      ALLOCATE(P%Co(1:SizeofCo),STAT=iErr)
+      IF(iErr.NE.0) CALL Halt('In RecurCopy 200: Allocation problem.')
+
       P%Co(1:SizeofCo) = RecDblArr(DblIndex+1:DblIndex+SizeofCo)
       DblIndex = DblIndex + SizeofCo
 
       SizeofSP = LSP(P%Ell)+1
-      ALLOCATE(P%S(0:SizeofSP-1))
-      ALLOCATE(P%C(0:SizeofSP-1))
+      ALLOCATE(P%S(0:SizeofSP-1),STAT=iErr)
+      IF(iErr.NE.0) CALL Halt('In RecurCopy 300: Allocation problem.')
+      ALLOCATE(P%C(0:SizeofSP-1),STAT=iErr)
+      IF(iErr.NE.0) CALL Halt('In RecurCopy 400: Allocation problem.')
+
       P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
       DblIndex = DblIndex + SizeofSP
       
@@ -510,8 +572,10 @@ endif
       DblIndex = DblIndex + 3 
 
       SizeofSP = LSP(SPEll+MaxUEll)+1 !!!
-      ALLOCATE(P%S(0:SizeofSP-1))
-      ALLOCATE(P%C(0:SizeofSP-1))
+      ALLOCATE(P%S(0:SizeofSP-1),STAT=iErr)
+      IF(iErr.NE.0) CALL Halt('In RecurCopy 600: Allocation problem.')
+      ALLOCATE(P%C(0:SizeofSP-1),STAT=iErr)
+      IF(iErr.NE.0) CALL Halt('In RecurCopy 700: Allocation problem.')
       P%C(0:SizeofSP-1) = RecDblArr(DblIndex+1:DblIndex+SizeofSP)
       DblIndex = DblIndex + SizeofSP
       
