@@ -10,6 +10,9 @@ It turns out that already S-Force contains extremely large
 component in 3-21G basis, while it did not, say, in STO-2G.
 See force components in CH2x-6_27129.out-2 .
 
+Running the calculation in RH instead of TC2 does not change the 
+forces at all, the same big forces are found.
+
 For printing, the attached SCFs.F90 was used. Beside the extra 
 printing it is identical to version 2004-12-06 08:02.
 
