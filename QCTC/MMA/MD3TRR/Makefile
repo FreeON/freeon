@@ -8,10 +8,9 @@
 include $(MONDO_HOME)/Includes/RemoveAll
 #
 all:	
-	math<HGToSP.m
+	echo "MD3TRR not yet implimented"
 #
 clean:
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
-
