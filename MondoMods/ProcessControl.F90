@@ -15,6 +15,8 @@ MODULE ProcessControl
    INTEGER, PARAMETER     :: PRSE_ERROR=-803484
    INTEGER, PARAMETER     :: MPIS_ERROR=-975239
    INTEGER, PARAMETER     :: USUP_ERROR=-993942
+   INTEGER, PARAMETER     :: INTC_ERROR=-135950
+   INTEGER, PARAMETER     :: QMMM_ERROR=-458391
    CONTAINS 
       SUBROUTINE MondoHalt(IErr,Mssg)
          CHARACTER (LEN=*) :: Mssg
@@ -43,6 +45,12 @@ MODULE ProcessControl
          ELSEIF(IErr==USUP_ERROR)THEN
             WRITE(*,*)  'Unsupported feature: '//TRIM(Mssg)
             CALL Logger('Unsupported feature: '//TRIM(Mssg),.TRUE.)
+         ELSEIF(IErr==INTC_ERROR)THEN
+            WRITE(*,*)  'Error in IntCoo: '//TRIM(Mssg)
+            CALL Logger('Error in IntCoo: '//TRIM(Mssg),.TRUE.)
+         ELSEIF(IErr==QMMM_ERROR)THEN
+            WRITE(*,*)  'Error in QMMM  : '//TRIM(Mssg)
+            CALL Logger('Error in QMMM  : '//TRIM(Mssg),.TRUE.)
          ELSE
             WRITE(*,*)  'Unknown error: '//TRIM(Mssg)
             CALL Logger('Unknown error: '//TRIM(Mssg),.TRUE.)
