@@ -1976,7 +1976,7 @@ MODULE ParseInput
         GM_MM%TotCh=SUM
         write(*,*) 'mm total charge ',GM_MM%TotCh
 !
-      GM_MM%NAtms = MM_NATOMS
+      GM_MM%NAtms = MM_Natoms
        CALL New(GM_MM)
       GM_MM%InAu = .true.
       GM_MM%Nkind = NTYPES
@@ -1989,6 +1989,16 @@ MODULE ParseInput
       ELSE
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
+!
+! Print out MM coorinates into output file
+!
+        WRITE(Out,*) 
+        WRITE(Out,*) 'MM system coordinates:'
+        WRITE(Out,*) 
+      DO I=1,MM_Natoms
+        WRITE(Out,110) I,ATMNAM(I),ATMCRD(1:3,I)
+      ENDDO
+110   FORMAT(I7,2X,A8,3F12.6)
 !
       CALL OpenHDF(Ctrl%Info)
         CALL Put(GM_MM,Tag_O='GM_MM'//'1')
