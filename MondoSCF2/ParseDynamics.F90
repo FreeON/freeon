@@ -20,7 +20,7 @@ CONTAINS
     CALL OpenASCII(N%IFile,Inp)       
 !   Initialize
     D%Initial_Temp   = .FALSE.
-    D%Velcty_Scaling = .FALSE.
+    D%Temp_Scaling   = .FALSE.
     D%Const_Temp     = .FALSE.
     D%Const_Press    = .FALSE.
     D%Parallel_Rep   = .FALSE.
@@ -44,7 +44,19 @@ CONTAINS
     IF(OptDblQ(Inp,MD_INIT_TEMP,D%TempInit))THEN
        D%Initial_Temp   = .TRUE.
     ELSE
+       D%Initial_Temp   = .FALSE.
        D%TempInit       = Zero
+    ENDIF
+!   Parse for Temperature Scaling
+    IF(OptDblQ(Inp,MD_TEMP_SCALE,D%TargetTemp)) THEN
+       D%Temp_Scaling = .TRUE.
+       IF(.NOT. OptIntQ(Inp,MD_TSCALE_INT,D%RescaleInt)) THEN
+          D%RescaleInt   = 100
+       ENDIF
+    ELSE
+       D%Temp_Scaling = .TRUE.
+       D%TargetTemp   = Zero
+       D%RescaleInt   = 1          
     ENDIF
 !
   END SUBROUTINE LoadDynamics

@@ -114,6 +114,13 @@ MODULE MDynamics
        IF(C%Dyns%Parallel_Rep) THEN
           CALL Halt('Parallel Replicate MD Not Implimented')
        ENDIF
+!      Theomstates
+       IF(C%Dyns%Temp_Scaling) THEN
+          IF(MOD(iGEO,C%Dyns%RescaleInt)==0) THEN
+             WRITE(*,*) 'Rescaling Temperature'
+             CALL RescaleTemp(C,C%Dyns%TargetTemp)
+          ENDIF   
+       ENDIF
 !      Generate Output
        CALL OutputMD(C,iGEO)
 !      Refresh the Time
@@ -185,11 +192,11 @@ MODULE MDynamics
           WRITE(99,'(F10.4,1x,F18.12,1x,F18.12,1x,F18.12)') MDTime%D(iCLONE),MDKin%D(iCLONE),MDEpot%D(iCLONE),MDEtot%D(iCLONE)
           CLOSE(99)
 !
-          CALL OpenASCII("PositionMD.dat",99)
-          Pos(1:3) = C%Geos%Clone(iCLONE)%AbCarts%D(1:3,1)-C%Geos%Clone(iCLONE)%AbCarts%D(1:3,2)
-          Dist =  SQRT(Pos(1)**2+Pos(2)**2+Pos(3)**2)
-          WRITE(99,'(F10.4,1x,F18.12)') MDTime%D(iCLONE),Dist
-          CLOSE(99) 
+!!$          CALL OpenASCII("PositionMD.dat",99)
+!!$          Pos(1:3) = C%Geos%Clone(iCLONE)%AbCarts%D(1:3,1)-C%Geos%Clone(iCLONE)%AbCarts%D(1:3,2)
+!!$          Dist =  SQRT(Pos(1)**2+Pos(2)**2+Pos(3)**2)
+!!$          WRITE(99,'(F10.4,1x,F18.12)') MDTime%D(iCLONE),Dist
+!!$          CLOSE(99) 
 !
           WRITE(*,*) "Time = ",MDTime%D(iCLONE)," Temperature = ",MDTemp%D(iCLONE)
        ENDIF
@@ -243,7 +250,7 @@ MODULE MDynamics
        CALL OpenASCII(File,Out)
 !      Add Header
        IF(iGEO==1) THEN
-          Line = "##################################################"
+          Line = "##########################################################################"
           WRITE(Out,97) Line
           Line = "# MD Clone No. = "//TRIM(IntToChar(iCLONE))
           WRITE(Out,97) Line
@@ -267,14 +274,17 @@ MODULE MDynamics
           WRITE(Out,97) Line
           Line = "# MD Max Step  = "//TRIM(IntToChar(C%Dyns%MDMaxSteps))
           WRITE(Out,97) Line
-          IF(C%Dyns%Velcty_Scaling) THEN
+          IF(C%Dyns%Temp_Scaling) THEN
+             Line = "# Temperature  : Scaling is On: Target Temp = "//TRIM(IntToChar(INT(C%Dyns%TargetTemp)))//&
+                    " K  Scaling Interval = "//TRIM(IntToChar(C%Dyns%RescaleInt))
+             WRITE(Out,97) Line
           ELSE
-             Line = "# Velocity     : Scaling is Off"
+             Line = "# Temperature  : Scaling is Off"
              WRITE(Out,97) Line
           ENDIF
           IF(C%Dyns%Const_Temp) THEN
           ELSE
-             Line = "# Temperature  : Scaling is Off"
+             Line = "# Anderson T.S.: Scaling is Off"
              WRITE(Out,97) Line
           ENDIF
           IF(C%Dyns%Const_Press) THEN
@@ -287,7 +297,7 @@ MODULE MDynamics
              Line = "# *** Parallel Replicates are Off ***"
              WRITE(Out,97) Line
           ENDIF
-          Line = "##################################################"
+          Line = "##########################################################################"
           WRITE(Out,97) Line
           WRITE(Out,*)
        ENDIF
@@ -395,9 +405,9 @@ MODULE MDynamics
        CLOSE(Out)
     ENDDO
 !
-80  FORMAT(a18,F14.8)
-81  FORMAT(a18,F14.8,1x,F14.8)
-82  FORMAT(a18,F14.8,1x,F14.8,1x,F14.8)
+80  FORMAT(a18,F16.10)
+81  FORMAT(a18,F16.10,1x,F16.10)
+82  FORMAT(a18,F16.10,1x,F16.10,1x,F16.10)
 85  FORMAT("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 !
 96  FORMAT(a18,3(F16.10,1x))

@@ -57,7 +57,9 @@ MODULE ControlStructures
      LOGICAL                        :: Initial_Temp
      REAL(DOUBLE)                   :: TempInit
 !
-     LOGICAL                        :: Velcty_Scaling
+     LOGICAL                        :: Temp_Scaling
+     INTEGER                        :: RescaleInt
+     REAL(DOUBLE)                   :: TargetTemp
 !
      LOGICAL                        :: Const_Temp
 !

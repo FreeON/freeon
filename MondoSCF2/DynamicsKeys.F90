@@ -13,5 +13,8 @@ MODULE DynamicsKeys
   CHARACTER(LEN=*),  PARAMETER :: MD_MAX_STEP        ='MaxMDStep' 
 ! Initial Temp
   CHARACTER(LEN=*),  PARAMETER :: MD_INIT_TEMP       ='InitTemp'
+! Temperature Rescaling
+  CHARACTER(LEN=*),  PARAMETER :: MD_TEMP_SCALE      ='TempScaling'
+  CHARACTER(LEN=*),  PARAMETER :: MD_TSCALE_INT      ='TempIntScaling'
 !
 END MODULE DynamicsKeys 
