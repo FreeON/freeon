@@ -61,6 +61,13 @@ MODULE ParseGeomOpt
        GOpt%TrfCtrl%PrtbackTr=.TRUE.
      ENDIF
      !
+     ! Parse for printing back-transformation of fits
+     !
+     GOpt%TrfCtrl%NoBTRep=.FALSE.
+     IF(OptKeyQ(Inp,GRADIENTS,OPT_NoBTRep)) THEN
+       GOpt%TrfCtrl%NoBTRep=.TRUE.
+     ENDIF
+     !
      ! Parse for addinging explicit lattice coordinates to the optimization
      !
      GOpt%GConvCrit%ExplLatt=.FALSE.

@@ -98,6 +98,7 @@ CONTAINS
 !----------------------------------------------------------------------------!
 !   Initailize
     SCFCycle=.FALSE.
+    CALL StateArchive(N,S)
     IF(cSCF==0) THEN
        SCF_STATUS = NOT_CONVERGE
        ODA_DONE   = .FALSE.

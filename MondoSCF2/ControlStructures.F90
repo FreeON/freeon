@@ -239,6 +239,7 @@ MODULE ControlStructures
      REAL(DOUBLE),DIMENSION(3,3)        :: RotAt2ToX_2
      REAL(DOUBLE),DIMENSION(3,3)        :: RotAt3ToXY_2
      LOGICAL                            :: PrtBackTr 
+     LOGICAL                            :: NOBTRep   
   END TYPE TrfCtrl
   !
   TYPE CoordCtrl

@@ -1436,9 +1436,9 @@ CONTAINS
          NC1=-NDim_O
        ENDIF
      ENDIF
-!NA1=0 ; NA2=3
-!NB1=0 ; NB2=3
-!NC1=0 ; NC2=3
+!NA1=0 ; NA2=2
+!NB1=0 ; NB2=2
+!NC1=0 ; NC2=2
      !
      NCells=(NA2-NA1+1)*(NB2-NB1+1)*(NC2-NC1+1)
      CALL New(Cells,(/NCells*NatmsLoc,3/))
@@ -1867,6 +1867,7 @@ CONTAINS
      ENDIF
      DoRepeat=.FALSE.
      RepMax=5 
+     IF(GTrfCtrl%NoBTRep) RepMax=1
      ! 
      ! Auxiliary arrays
      !
@@ -2080,7 +2081,7 @@ CONTAINS
          ENDIF
          EXIT 
        ELSE
-         IF(IRep<RepMax) THEN
+         IF(IRep<=RepMax) THEN
            CALL INTCValue(IntCs,ActCarts%D,PBCDim, &
                           BackLinCrit,BackTLinCrit)
            CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
