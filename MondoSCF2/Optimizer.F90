@@ -55,10 +55,11 @@ CONTAINS
     TYPE(Controls)         :: C
     TYPE(DBL_VECT)         :: GradMax,GradRMS,Grad
     REAL(DOUBLE)           :: DIISErr,GRMSQ,GMAXQ
-    REAL(DOUBLE),PARAMETER :: StepLength=3D-1 ! Open issues about this and normalization in GDIIS
+    ! Initial step 
+    REAL(DOUBLE),PARAMETER :: StepLength=5D0 
     INTEGER                :: iBAS,iGEO,iCLONE,AccL    
     INTEGER                :: Relaxations=3   ! This should be an input variable at some point
-    LOGICAL                :: Converged
+    LOGICAL                :: Converged,Steep
     CHARACTER(LEN=DCL)     :: Mssg
     !----------------------------------------------------------------------------------!
     ! Start with the first geometry
@@ -90,9 +91,6 @@ CONTAINS
           GradMAX%D(iGEO)=MAX(GradMax%D(iGEO),C%Geos%Clone(iCLONE)%GradMax)
           GradRMS%D(iGEO)=MAX(GradRMS%D(iGEO),C%Geos%Clone(iCLONE)%GradRMS)
        ENDDO
-       ! Gradient quotients
-       !GRMSQ=ABS(GradMax%D(iGEO)-GradMax%D(iGEO-1))/ABS(GradMax%D(iGEO)+1.D-50)    
-       !GMAXQ=ABS(GradRMS%D(iGEO)-GradRMS%D(iGEO-1))/ABS(GradRMS%D(iGEO)+1.D-50)    
        Mssg='Gmax='//TRIM(DblToShrtChar(GradMAX%D(iGEO)))//', Grms='//TRIM(DblToShrtChar(GradRMS%D(iGEO)))
        ! Go downhill by following the gradient or with GDIIS
        IF(iGEO>Relaxations)THEN
@@ -106,11 +104,7 @@ CONTAINS
           IF(GradMAX%D(iGEO)<GTol(AccL).AND.GradRMS%D(iGEO)<GTol(AccL))THEN
              Converged=.TRUE.
              Mssg=ProcessName('GDicer',' Converged!')//TRIM(Mssg)     
-!          ELSEIF(GRMSQ<2D-1.AND.GMAXQ<2.D-1.AND.DIISerr<1D-10)THEN  ! Look for non-decreasing errors (stall out)
-             ! This part needs more work!!!
-!             Converged=.TRUE.
-!             Mssg=ProcessName('GDicer',' Stalled ')//TRIM(Mssg)     
-!          ELSE
+          ELSE
              Mssg=ProcessName('GDicer',' GDIIS # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)          
           ENDIF
           CALL OpenASCII(C%Nams%OFile,Out)
@@ -120,7 +114,7 @@ CONTAINS
        ELSE
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%AbCarts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
+             C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%AbCarts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D             
           ENDDO
           ! Put the geometries to HDF
           CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
@@ -148,10 +142,10 @@ CONTAINS
     TYPE(BasisSets)        :: B
     TYPE(DBL_RNK2)         :: A,AInv,Carts
     TYPE(DBL_VECT)         :: V,DIISCo,GradI,GradJ
-    REAL(DOUBLE)           :: DIISError,CoNo
-    INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K
+    REAL(DOUBLE)           :: DIISError,CoNo,Ratio,AMax
+    INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K,Info
     INTEGER,     PARAMETER :: MaxCoef=8
-    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D6
+    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D5
     !----------------------------------------------------------------------------------!
     ! Initial dimension of the A matrix
     nDIIS=MIN(cGEO+1,MaxCoef+1)
@@ -190,7 +184,7 @@ CONTAINS
        V%D(nDIIS)=One
        AInv%D=Zero
        ! Solve the inverse least squares problem
-       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInv%D,CoNo_O=CoNo)
+       CALL FunkOnSqMat(nDIIS,Inverse,A%D,AInv%D,CoNo_O=CoNo,Unit_O=6)
        CALL DGEMV('N',nDIIS,nDIIS,One,AInv%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
        ! Here is the DIIS error (resdiual)       
        DIISError=MAX(DIISError,ABS(DIISCo%D(nDIIS)))
@@ -205,7 +199,8 @@ CONTAINS
           nDIIS=nDIIS-1
           ! Sometimes ya just gota have a goto
           GOTO 1
-       ELSEIF(nDIIS>3)THEN
+       ELSEIF(nDIIS>2)THEN
+          write(*,*)' gdiis co = ',diisco%d
           ! Extrapolate
           iDIIS=1
           G%Clone(iCLONE)%AbCarts%D=Zero
@@ -219,6 +214,7 @@ CONTAINS
           ENDDO
           CALL Delete(Carts)
        ELSE
+          WRITE(*,*)' STEEPEST DESCENTS ! '
           ! Stalled, freshen things up with a steepest descent move
           G%Clone(iCLONE)%AbCarts%D=G%Clone(iCLONE)%AbCarts%D-5D-1*G%Clone(iCLONE)%Vects%D          
        ENDIF
@@ -242,7 +238,7 @@ CONTAINS
     REAL(DOUBLE)                             :: StepLength,RelErrE,MAXGrad,RMSGrad, &
          ETest,GTest
     INTEGER                                  :: cBAS,cGEO,iSTEP,iCLONE,iATS,AL,K
-    INTEGER, PARAMETER                       :: MaxSTEP=6
+    INTEGER, PARAMETER                       :: MaxSTEP=8
     LOGICAL                                  :: Converged,ECnvrgd,XCnvrgd,GCnvrgd
     CHARACTER(LEN=3)                         :: chGEO
     !----------------------------------------------------------------------------------!
@@ -260,7 +256,7 @@ CONTAINS
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
     ! Take some steps 
-    StepLength=One
+    StepLength=1D1
     DO iSTEP=1,MaxSTEP
        StepLength=StepLength/Two
        ! Step the absolute positions
@@ -269,7 +265,6 @@ CONTAINS
        ENDDO
        ! Archive geometries
        CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
-       CALL PPrint(C%Geos%Clone(1),Unit_O=6)
        ! Evaluate energies at the new geometry
        CALL SCF(cBAS,cGEO+1,C)          
        ! Relative change in the total Energy
@@ -321,6 +316,7 @@ CONTAINS
          //', Step= '//TRIM(DblToShrtChar(StepLength))
     !    WRITE(*,*)TRIM(Mssg)             
     CALL OpenASCII(OutFile,Out)
+    WRITE(*,*)TRIM(Mssg)             
     WRITE(Out,*)TRIM(Mssg)             
     CLOSE(Out)
     ! Clean up
