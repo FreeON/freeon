@@ -15,34 +15,29 @@ PROGRAM SForce
   USE AtomPairs
   USE BraBloks
   USE BlokTrWdS
-
 #ifdef PARALLEL
   USE MondoMPI
-! TYPE(BCSR)         :: T1,F,P
-  TYPE(DBCSR)         :: T1,F,P_DBCSR
-  TYPE(BCSR)          :: P
-  TYPE(DBL_VECT)      :: TotSFrc
-  INTEGER :: IErr,TotFrcComp
+!  TYPE(BCSR)                  :: T1,F,P
+  TYPE(DBCSR)                 :: T1,F,P_DBCSR
+  TYPE(DBL_VECT)              :: TotSFrc
+  INTEGER                     :: IErr,TotFrcComp
 #else
-  TYPE(BCSR)          :: T1,F,P
+  TYPE(BCSR)                  :: T1,F,P
 #endif
-
-  TYPE(AtomPair)      :: Pair
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,A1,A2
-  TYPE(HGRho)         :: Rho
-  TYPE(DBL_VECT)      :: SFrc
-  REAL(DOUBLE)        :: SFrcChk
-
+  TYPE(AtomPair)              :: Pair
+  TYPE(BSET)                  :: BS
+  TYPE(CRDS)                  :: GM
+  TYPE(ARGMT)                 :: Args
+  INTEGER                     :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,A1,A2
+  TYPE(HGRho)                 :: Rho
+  TYPE(DBL_VECT)              :: SFrc
+  REAL(DOUBLE)                :: SFrcChk
 #ifdef PERIODIC 
   INTEGER                     :: NC
   REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
   REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_S
 #endif
-
-  CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
+  CHARACTER(LEN=6),PARAMETER  :: Prog='SForce'
 !---------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -52,44 +47,34 @@ PROGRAM SForce
   CALL Get(GM,Tag_O=CurGeom)
 !---------------------------------------------- 
 ! Allocations 
-
-#ifdef PARALLEL
-#else
   CALL New(P,OnAll_O=.TRUE.)
   CALL New(F)
   CALL New(T1)
-#endif
-
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 !--------------------------------------
 ! Compute W=P.F.P
-#ifdef PARALLEL
-  CALL Get(P_DBCSR,TrixFile('D',Args,1))
-#else
   CALL Get(P,TrixFile('D',Args,1))
-#endif
 ! Is this a bug if we don't use the extrapolated Fockian?
   CALL Get(F,TrixFile('F',Args,0))
 #ifdef PARALLEL
-  CALL Multiply(P_DBCSR,F,T1)       ! T1:=P.F
-  CALL Multiply(T1,P_DBCSR,F)       ! F:=P.F.P
-  CALL Filter(P_DBCSR,F)            ! P=Filter[P.F.P]      
-  CALL SetEq(P,P_DBCSR)
-  CALL BcastBCSR(P)
-  CALL Delete(P_DBCSR)
-
-#else
+  IF(MyID == ROOT) THEN
+#endif
   CALL Multiply(P,F,T1)       ! T1:=P.F
   CALL Multiply(T1,P,F)       ! F:=P.F.P
   CALL Filter(P,F)            ! P=Filter[P.F.P]      
+#ifdef PARALLEL
+  ENDIF
+  CALL BCastBCSR(P)
 #endif
   CALL Delete(F)
   CALL Delete(T1)
+#ifdef PERIODIC
+#ifdef PARALLEL_CLONES
+#else
+! Get the Outer Cell Set
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif 
+#endif
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------
@@ -139,7 +124,7 @@ PROGRAM SForce
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
-  CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
+  CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
   IF(MyID == 0) THEN
     SFrc%D(1:TotFrcComp) = TotSFrc%D(1:TotFrcComp)
   ENDIF

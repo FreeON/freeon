@@ -17,28 +17,27 @@ PROGRAM TForce
 
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(BCSR)         :: P
-  TYPE(DBL_VECT)      :: TotTFrc
-  INTEGER :: IErr,TotFrcComp
+  TYPE(BCSR)                   :: P
+  TYPE(DBL_VECT)               :: TotTFrc
+  INTEGER                      :: IErr,TotFrcComp
 #else
-  TYPE(BCSR)          :: P
+  TYPE(BCSR)                   :: P
 #endif
-
 #ifdef PERIODIC 
-  INTEGER                     :: NC
-  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
-  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_T
+  INTEGER                      :: NC
+  REAL(DOUBLE),DIMENSION(3)    :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3,3)  :: LatFrc_T
 #endif
-  TYPE(AtomPair)      :: Pair
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,R,AtA,AtB,JP,MB,MA,NB,MN1,A1,A2
-  TYPE(HGRho)         :: Rho
-  TYPE(DBL_VECT)      :: TFrc,Frc
-  REAL(DOUBLE)        :: TFrcChk
+  TYPE(AtomPair)               :: Pair
+  TYPE(BSET)                   :: BS
+  TYPE(CRDS)                   :: GM
+  TYPE(ARGMT)                  :: Args
+  INTEGER                      :: Q,R,AtA,AtB,JP,MB,MA,NB,MN1,A1,A2
+  TYPE(HGRho)                  :: Rho
+  TYPE(DBL_VECT)               :: TFrc,Frc
+  REAL(DOUBLE)                 :: TFrcChk
  
-  CHARACTER(LEN=6),PARAMETER :: Prog='TForce'
+  CHARACTER(LEN=6),PARAMETER   :: Prog='TForce'
 !------------------------------------------------------------------------------------- 
 ! Start up macro
  
@@ -48,23 +47,25 @@ PROGRAM TForce
  
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 #ifdef PARALLEL
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL New(TFrc,3*NAtoms)
+#ifdef PERIODIC
+#ifdef PARALLEL_CLONES
+#else
+! Get the Outer Cell Set
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif 
+#endif
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------
   LatFrc_T = Zero
- 
   TFrc%D=Zero
+!
 #ifdef PARALLEL
   DO AtA=Beg%I(MyId),End%I(MyId)
 #else
@@ -109,7 +110,7 @@ PROGRAM TForce
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotTFrc,TotFrcComp)
-  CALL MPI_Reduce(TFrc%D(1),TotTFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
+  CALL MPI_Reduce(TFrc%D(1),TotTFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
   IF(MyID == 0) THEN
     TFrc%D(1:TotFrcComp) = TotTFrc%D(1:TotFrcComp)
   ENDIF

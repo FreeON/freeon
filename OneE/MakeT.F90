@@ -18,33 +18,25 @@ PROGRAM MakeT
 #endif
   IMPLICIT NONE
 #ifdef PARALLEL
-  TYPE(DBCSR)         :: T,T2
+  TYPE(DBCSR)                :: T,T2
 #else
-  TYPE(BCSR)          :: T,T2
+  TYPE(BCSR)                 :: T,T2
 #endif
 #ifdef PERIODIC 
-  INTEGER                   :: NC
-  REAL(DOUBLE),DIMENSION(3) :: B
+  INTEGER                    :: NC
+  REAL(DOUBLE),DIMENSION(3)  :: B
 #endif
-  TYPE(AtomPair)      :: Pair
-!
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(DBL_RNK4)      :: MD
-!
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: P,R,AtA,AtB,NN                          
+  TYPE(AtomPair)             :: Pair
+  TYPE(BSET)                 :: BS
+  TYPE(CRDS)                 :: GM
+  TYPE(DBL_RNK4)             :: MD
+  TYPE(ARGMT)                :: Args
+  INTEGER                    :: P,R,AtA,AtB,NN                          
   CHARACTER(LEN=5),PARAMETER :: Prog='MakeT'
 !--------------------------------------- 
 ! Start up macro
 !
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 !----------------------------------------------
 ! Get basis set and geometry
 !
@@ -55,6 +47,14 @@ PROGRAM MakeT
 !
   CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(T)
+#ifdef PERIODIC
+#ifdef PARALLEL_CLONES
+#else
+! Get the Outer Cell Set
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
+#endif
+#endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
 !
