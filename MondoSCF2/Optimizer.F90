@@ -515,6 +515,7 @@ CONTAINS
      INTEGER                   :: ConvgdAll,MaxSteps,IStart
      TYPE(INT_VECT)            :: Convgd
      TYPE(INT_VECT)            :: BPrev,BCur
+     TYPE(INTC)                :: IntCES
      !
      ! Set geometry optimization controls
      CALL SetGeOpCtrl(C%GOpt,C%Geos,C%Opts,C%Sets,C%Nams,C%PBCs)
@@ -539,6 +540,7 @@ CONTAINS
          Geo,C%Opts%GeomPrint)
      ENDDO
      !
+     CALL SetEq(IntCES,C%GOpt%ExtIntCs,1,C%GOpt%ExtIntCs%N,1)
      CALL New(Convgd,C%Geos%Clones)
      Convgd%I=0
      !
@@ -550,6 +552,7 @@ CONTAINS
        CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+     ! CALL AdjustLatt(iGEO,C%GOpt%ExtIntCs,IntCES,C%Geos%Clone(1)%PBC%Dimen)
        !
        ! Calculate energy and force for all clones at once.
        !
@@ -611,6 +614,7 @@ CONTAINS
        IF(ConvgdAll==1) EXIT
      ENDDO
      CALL Delete(Convgd)
+     CALL Delete(IntCES)
      !
      IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
@@ -685,6 +689,9 @@ CONTAINS
      ! first constraints, then the rest.
      !
      CALL CartRNK2ToCartRNK1(CartGrad%D,GradIn)
+write(*,*) 'bef GetLattGrads'
+     CALL GetLattGrads(CartGrad%D(NCart-8:NCart),XYZ,Gopt%LattIntC%Grad,PBCDim)
+write(*,*) 'aft GetLattGrads'
    ! CALL SYMMSTRESS(CartGrad%D(NCart-8:NCart),XYZ,PBCDim)
      CALL CleanConstrCart(XYZ,PBCDim,CartGrad%D,GOpt,SCRPath)
      CALL New(Carts,NCart)
@@ -697,9 +704,9 @@ CONTAINS
      !
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
-     CALL GetLattGrads(CartGrad%D(NCart-8:NCart),XYZ,Gopt%LattIntC%Grad,PBCDim)
      !
-     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr,GOpt%LattIntC%Grad)
+write(*,*) 'chk 1'
      !
      ! Do we have to refresh internal coord defs?   
      !
@@ -710,12 +717,13 @@ CONTAINS
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GDIIS%MaxMem, &
-                     GOpt%ExtIntCs,TOPS,Bond,AtmB,PBCDim, &
-                     HFileIn_O=HFileIn,iCLONE_O=iCLONE,iGEO_O=iGEO)
+                     GOpt%ExtIntCs,TOPS,Bond,AtmB,PBCDim,iGEO, &
+                     HFileIn_O=HFileIn,iCLONE_O=iCLONE)
        IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
        CALL LatticeINTC(IntCL,PBCDim)
      ENDIF
+write(*,*) 'chk 2'
      IF(IntCs%N/=0) THEN
        CALL INTCValue(IntCs,XYZ, &
                       GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit)
@@ -731,9 +739,11 @@ CONTAINS
      !
    ! CALL GetMixedBMat(IntCs,XYZ,PBE,GOpt%TrfCtrl,GOpt%CoordCtrl,TOPS, &
    !                   GOpt%Constr%NCartConstr,Print,SCRPath,.TRUE.)
+write(*,*) 'chk 3'
      CALL RefreshBMatInfo(IntCs,XYZ,GOpt%TrfCtrl, &
                     GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
                     PBCDim,Print,SCRPath,.TRUE.)
+write(*,*) 'chk 4'
    ! CALL BuildUMatr(SCRPath,NCart)
      !
      ! Print current set of internals for debugging
@@ -772,12 +782,16 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr)
+   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr,LattGrad)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(GConvCrit)            :: GConvCr    
+     REAL(DOUBLE),DIMENSION(6)  :: LattGrad,AbsGrad
+     INTEGER                    :: J
      !
-     CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad) 
+     DO J=1,6 ; AbsGrad(J)=ABS(LattGrad(J)) ; ENDDO
+     CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad).AND. &
+                         (MAXVAL(AbsGrad)<GConvCr%Grad)
    END SUBROUTINE GradConv
 !
 !--------------------------------------------------------------------
@@ -802,8 +816,10 @@ CONTAINS
                           iGEO,XYZ,Print,PBCDim)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
+write(*,*) 'bef RelaxDiagHess'
          CALL RelaxDiagHess(GOpt,SCRPath,PWDPath,CartGrad,IntCs,AtNum,&
                             iGEO,XYZ,Print,PBCDim)
+write(*,*) 'aft RelaxDiagHess'
        ELSE
          CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
                           AtNum,PBCDim,iGEO,iCLONE,XYZ,RefXYZ,Print)
@@ -816,7 +832,7 @@ CONTAINS
    SUBROUTINE RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,CartGrad,IntCs, &
                           AtNum,PBCDim,iGEO,iCLONE,XYZ,RefXYZ,Print)
      TYPE(GeomOpt)               :: GOpt
-     TYPE(INTC)                  :: IntCs
+     TYPE(INTC)                  :: IntCs,IntC_L
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
      INTEGER                     :: iGEO,iCLONE,Print,PBCDim
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
@@ -824,6 +840,7 @@ CONTAINS
      TYPE(DBL_VECT)              :: Displ,RefPoints,PredVals
      TYPE(DBL_RNK2)              :: SRStruct,RefStruct,RefGrad,SRDispl
      TYPE(DBL_RNK2)              :: IntCValues,IntCGrads,MixMat
+     TYPE(DBL_RNK2)              :: PBCValues,PBCGrads
      TYPE(INT_VECT)              :: ISpB,JSpB
      TYPE(DBL_VECT)              :: ASpB
      TYPE(DBL_RNK2)              :: FullB
@@ -849,6 +866,12 @@ CONTAINS
        RefGrad%D(J,NDim)=CartGrad(J)
      ENDDO
      !
+     CALL LatticeINTC(IntC_L,PBCDim)
+write(*,*) 'bef CollectPBCPast'
+     CALL CollectPBCPast(RefStruct%D,RefGrad%D,PBCValues,PBCGrads, &
+                          IntC_L,GOpt,SCRPath,Print,PBCDim)
+write(*,*) 'aft CollectPBCPast'
+     !
      CALL CollectINTCPast(RefStruct%D,RefGrad%D,IntCValues,IntCGrads, &
                           IntCs,GOpt,SCRPath,Print,PBCDim)
      !
@@ -865,10 +888,12 @@ CONTAINS
        CALL Delete(FullB)
       !CALL UnitaryTR(IntCs,IntCGrads%D,IntCValues%D,MixMat,NMix)
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+                  PBCValues%D,PBCGrads%D, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
                    iGEO,MixMat_O=MixMat%D)
      ELSE
        CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+                  PBCValues%D,PBCGrads%D, &
                   GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
                   iGEO)
      ENDIF
@@ -898,8 +923,8 @@ CONTAINS
      ! Now, add correction by optimization of lattice only,
      ! while fractional coordinates of the atoms are fixed
      ! 
-  !  CALL LatticeFit(SRStruct%D,RefStruct%D,RefGrad%D,XYZ,PBCDim, &
-  !                  GOpt,Print,SCRPath,PWDPath,iGEO)
+   ! CALL LatticeFit(SRStruct%D,RefStruct%D,RefGrad%D,XYZ,PBCDim, &
+   !                 GOpt,Print,SCRPath,PWDPath,iGEO)
      ! 
      ! Now, add fitting along correlation coordinates
      ! 
@@ -920,6 +945,9 @@ CONTAINS
      ! 
      CALL Delete(IntCGrads)
      CALL Delete(IntCValues)
+     CALL Delete(IntC_L)
+     CALL Delete(PBCValues)
+     CALL Delete(PBCGrads)
      CALL Delete(PredVals)
      CALL Delete(RefPoints)
      CALL Delete(Displ)
@@ -1306,6 +1334,21 @@ CONTAINS
      CALL New(GradNew,(/3,NatmsNew/))
      CALL New(RefXYZ,(/3,NatmsNew/))
      ! fill atomic data
+do i=1,GMLoc%Natms
+write(*,*) INT(GMLoc%AtNum%D(I)),GMLoc%BoxCarts%D(1:3,i)
+enddo
+!write(*,*) 'GMLoc%Gradients%D = '
+!write(out,*) 'GMLoc%Gradients%D = '
+!do j=1,GMLoc%Natms
+!write(*,*) GMLoc%Gradients%D(1:3,j)
+!write(out,*) GMLoc%Gradients%D(1:3,j)
+!enddo
+!write(*,*) 'GMLoc%PBC%LatFrc%D = '
+!write(out,*) 'GMLoc%PBC%LatFrc%D = '
+!do j=1,3
+!write(*,*) GMLoc%PBC%LatFrc%D(J,1:3)
+!write(out,*) GMLoc%PBC%LatFrc%D(J,1:3)
+!enddo
      NatmsNew=0
      DO I=1,GMLoc%Natms
        IF(GMLoc%CConstrain%I(I)/=2) THEN
@@ -1316,6 +1359,7 @@ CONTAINS
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
+!write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
@@ -1325,11 +1369,24 @@ CONTAINS
        ENDDO
      ENDDO
      ! ensure proper orientation of (numerical) forces
+!write(*,*) 'forces orientation hardwired to zero'
     !GradNew%D(2:3,NatmsNew+1)=Zero
     !GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
+write(*,*) 'GradNew%D= '
+write(out,*) 'GradNew%D= '
+do i=natmsnew+1,natmsnew+3
+write(*,*) GradNew%D(1:3,i)
+write(out,*) GradNew%D(1:3,i)
+enddo
+write(*,*) 'XYZNew%D= '
+write(out,*) 'XYZNew%D= '
+do i=natmsnew+1,natmsnew+3
+write(*,*) XYZNew%D(1:3,i)
+write(out,*) XYZNew%D(1:3,i)
+enddo
      !
      !--------------------------------------------
      !
@@ -1339,6 +1396,7 @@ CONTAINS
                        SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
                        Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
+     !
      !--------------------------------------------
      !
      ! Put back modified geometry into GMLoc array

@@ -662,14 +662,78 @@ CONTAINS
      CALL Delete(XYZAux) 
    END SUBROUTINE CollectINTCPast
 !
+!----------------------------------------------------------------------
+!
+   SUBROUTINE CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
+                              IntCs,GOpt,SCRPath,Print,PBCDim)
+     REAL(DOUBLE),DIMENSION(:,:)  :: RefStruct,RefGrad
+     TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
+     TYPE(DBL_VECT)               :: VectC,VectI,VectCG,VectX
+     INTEGER                      :: NMem,NatmsLoc,NCart
+     INTEGER                      :: Print,I,J,PBCDim
+     TYPE(INTC)                   :: IntCs
+     TYPE(GeomOpt)                :: GOpt 
+     CHARACTER(LEN=*)             :: SCRPath
+     LOGICAL                      :: Print2
+     !
+     Print2=(Print>=DEBUG_GEOP_MAX)
+     NMem=SIZE(RefStruct,2)
+     IF(NMem/=SIZE(RefGrad,2)) CALL Halt('Dim err in CollectPBCPast')
+     NCart=SIZE(RefStruct,1)
+     NatmsLoc=NCart/3
+     IF(NCart/=3*NatmsLoc) CALL Halt('Dim err 2 in CollectPBCPast')
+     !
+     CALL New(XYZAux,(/3,NatmsLoc/))
+     CALL New(VectC,NCart)
+     CALL New(VectCG,NCart)
+     CALL New(VectX,NMem)
+     !
+     CALL New(IntCGrads,(/IntCs%N,NMem/))
+     CALL New(IntCValues,(/IntCs%N,NMem/))
+     CALL New(VectI,IntCs%N)
+     !
+     ! Calculate IntC gradients using the latest IntC-s     
+     !
+     DO I=1,NMem
+       DO J=1,NCart
+         VectC%D(J)=RefStruct(J,I)
+         VectCG%D(J)=RefGrad(J,I)
+       ENDDO
+       CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
+   !   CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
+   !                 GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
+   !                 PBCDim,Print,SCRPath,.TRUE.)
+    !  CALL CartToInternal(IntCs,VectCG%D,VectI%D,XYZAux%D,PBCDim, &
+    !    GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
+    !  CALL RedundancyOff(VectI%D,SCRPath,Print)
+    !! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)
+       !
+       CALL GetLattGrads(VectCG%D,XYZAux%D,VectI%D,PBCDim)
+       !
+       IntCGrads%D(:,I)=VectI%D
+       CALL INTCValue(IntCs,XYZAux%D,GOpt%CoordCtrl%LinCrit, &
+                      GOpt%CoordCtrl%TorsLinCrit)
+       IntCValues%D(:,I)=IntCs%Value%D
+     ENDDO
+   ! CALL GrdConvrgd(GOpt%GOptStat,IntCs,VectI%D)
+     !
+     CALL Delete(VectX)
+     CALL Delete(VectI) 
+     CALL Delete(VectC) 
+     CALL Delete(VectCG) 
+     CALL Delete(XYZAux) 
+   END SUBROUTINE CollectPBCPast
+!
 !---------------------------------------------------------------------
 !
-   SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath,USQ_O)
-     REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights
+   SUBROUTINE LocalWeight(LWeight,Weights,IntCs,NCart,SCRPath, &
+                          PBCGrads,USQ_O)
+     REAL(DOUBLE),DIMENSION(:,:) :: LWeight,Weights,PBCGrads
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(INT_VECT)              :: IGi,JGi,IGiT1,JGiT1,IGiT2,JGiT2
      INTEGER                     :: NCart,NZ,I,J,K1,K2,L1,L2,NMem
-     REAL(DOUBLE)                :: Weight,X1,X2,Y
+     INTEGER                     :: NPBC
+     REAL(DOUBLE)                :: Weight,X1,X2,Y,W
      TYPE(INTC)                  :: IntCs
      TYPE(DBL_VECT)              :: Vect1,AGi,AGiT1,AGiT2
      REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: USQ_O
@@ -703,7 +767,13 @@ CONTAINS
      ! Calculate RMS gradients for all internal coordinates
      ! touching a specific internal coord at a specific geometry
      ! 
+     NPBC=SIZE(PBCGrads,1)
      DO I=1,NMem
+       IF(NPBC>0) THEN
+         W=DOT_PRODUCT(PBCGrads(:,I),PBCGrads(:,I))
+       ELSE
+         W=Zero
+       ENDIF
        DO J=1,IntCs%N
          IF(.NOT.IntCs%Active%L(J)) THEN
            LWeight(J,I)=1.D99
@@ -728,6 +798,12 @@ CONTAINS
          ELSE
            LWeight(J,I)=Weights(J,I)
          ENDIF
+         IF(IntCs%Def%C(J)(1:5)=='STRE_'.OR. &
+            IntCs%Def%C(J)(1:5)=='ALPHA'.OR. &
+            IntCs%Def%C(J)(1:4)=='BETA'.OR. &
+            IntCs%Def%C(J)(1:5)=='GAMMA') THEN
+           LWeight(J,I)=W
+         ENDIF
        ENDDO
      ENDDO
      ! 
@@ -747,9 +823,10 @@ CONTAINS
      TYPE(DBL_VECT)              :: ASpB,ASpBt
      INTEGER                     :: NZ,NIntC,NCart
      !
+     IF(NIntC<=0) RETURN
      CALL ReadBMATR(ISpB,JSpB,ASpB,TRIM(SCRPath)//'B')
      IF(NIntC/=SIZE(ISpB%I)-1) THEN
-       CALL Halt('Dimensionality Error in LocalWeight')
+       CALL Halt('Dimensionality Error in GetPattern')
      ENDIF
      NZ=ISpB%I(NIntC+1)-1
      CALL New(ISpBt,NCart+1)
@@ -775,11 +852,13 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess,GCoordCtrl,&
+   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,GHess, &
+                       PBCValues,PBCGrads,GCoordCtrl,&
                        PredVals,Displ,Path,SCRPath,NCart,iGEO,MixMat_O)
      TYPE(INTC)                 :: IntCs
      TYPE(DBL_VECT)             :: PredVals,Displ,DisplT
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
+     REAL(DOUBLE),DIMENSION(:,:):: PBCGrads,PBCValues
      INTEGER                    :: I,J,NIntC,NDim,iGEO
      INTEGER                    :: NCart,NT
      CHARACTER(LEN=*)           :: Path,SCRPath
@@ -838,14 +917,17 @@ CONTAINS
        ABCT%D=ABC1T%D
      ENDIF
      !
-     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,IntCsT)
+write(*,*) 'bef primw'
+     CALL PrepPrimW(WeightsT%D,IntCGradsT%D,PBCGrads,IntCsT)
+write(*,*) 'aft primw',IntCsT%N
      CALL CalcHessian(FittedHessT%D,ABC1T%D)
      CALL SecondWeight(WeightsT%D,FittedHessT%D)
      IF(PRESENT(MixMat_O)) THEN
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
-                        SCRPath,USQ_O=USQ%D)
+                        SCRPath,PBCGrads,USQ_O=USQ%D)
      ELSE
-       CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
+       CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart, &
+                        SCRPath,PBCGrads)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
               ! RangeT%D,NDegsT%I,Zero,.TRUE.)
@@ -1403,20 +1485,26 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE PrepPrimW(Weights,IntCGrads,IntCs)
-     REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads
+   SUBROUTINE PrepPrimW(Weights,IntCGrads,PBCGrads,IntCs)
+     REAL(DOUBLE),DIMENSION(:,:) :: Weights,IntCGrads,PBCGrads
      TYPE(INTC)                  :: IntCs
-     REAL(DOUBLE)                :: X
-     INTEGER                     :: NIntC,NDim,I,J
+     REAL(DOUBLE)                :: X,W
+     INTEGER                     :: NIntC,NDim,I,J,NPBC
      !
      NIntC=SIZE(IntCGrads,1)
      NDim=SIZE(IntCGrads,2)
+     NPBC=SIZE(PBCGrads,1)
      !
      DO I=1,NDim
+     ! IF(NPBC>0) THEN
+     !   W=DOT_PRODUCT(PBCGrads(:,I),PBCGrads(:,I))
+     ! ELSE
+     !   W=Zero
+     ! ENDIF
        DO J=1,NIntC
          IF(IntCs%Active%L(J)) THEN
            X=IntCGrads(J,I)
-           Weights(J,I)=X*X
+           Weights(J,I)=X*X  !+W
          ELSE
            Weights(J,I)=1.D99
          ENDIF
@@ -1823,20 +1911,28 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath,PWDPath
      TYPE(DBL_RNK2)              :: IntCValues,IntCGrads
      TYPE(GeomOpt)               :: GOpt
-     INTEGER                     :: NatmsLoc,NCart,I,J
+     INTEGER                     :: NatmsLoc,NCart,I,J,NDim
      TYPE(DBL_VECT)              :: PredVals,Displ,VectCart
      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh,BoxShape
      REAL(DOUBLE),DIMENSION(3)   :: CartAux
      !
+   ! IF(.NOT.DoLatticeFit(GOpt)) RETURN
+write(*,*) 'doing latt fit'
+write(out,*) 'doing latt fit'
+     !
+     NDim=SIZE(RefStruct,2)
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      CALL LatticeINTC(IntC_L,PBCDim)
      CALL New(VectCart,NCart)
-     CALL CollectINTCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
+     CALL CollectPBCPast(RefStruct,RefGrad,IntCValues,IntCGrads, &
                           IntC_L,GOpt,SCRPath,Print,PBCDim)
      CALL DisplFit(IntC_L,IntCGrads%D,IntCValues%D,GOpt%Hessian, &
+                IntCValues%D,IntCGrads%D, &
                 GOpt%CoordCtrl,PredVals,Displ,PWDPath,SCRPath,NCart, &
                 iGEO)
+write(*,*) 'intcval= ',IntCValues%D(:,NDim)
+write(*,*) 'predvals= ',PredVals%D
      !
      DO I=1,3
        BoxShape(1:3,I)=XYZ(1:3,NatmsLoc-3+I)
@@ -1857,6 +1953,9 @@ CONTAINS
        IntC_L%ConstrValue%D(I)=PredVals%D(I)
      ENDDO
      CALL SetFixedLattice(VectCart%D,IntC_L)
+     XYZ(1:3,NatmsLoc-2)=VectCart%D(NCart-8:NCart-6) 
+     XYZ(1:3,NatmsLoc-1)=VectCart%D(NCart-5:NCart-3) 
+     XYZ(1:3,NatmsLoc  )=VectCart%D(NCart-2:NCart) 
      !
      ! Convert fractionals back to Cartesians
      !
@@ -1876,6 +1975,22 @@ CONTAINS
      CALL Delete(IntCGrads)
      CALL Delete(IntC_L)
    END SUBROUTINE LatticeFit
+!
+!----------------------------------------------------------------------
+!
+   LOGICAL FUNCTION DoLatticeFit(GOpt)
+     TYPE(GeomOpt)               :: GOpt
+     INTEGER                     :: J
+     REAL(DOUBLE),DIMENSION(6)   :: AbsGrad
+     !
+     DoLatticeFit=.FALSE.
+     DO J=1,6 ; AbsGrad(J)=ABS(GOpt%LattIntC%Grad(J)) ; ENDDO
+     IF(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad.OR. &
+        MAXVAL(AbsGrad)>10.D0*GOpt%GOptStat%MaxCGrad) THEN
+       ! 
+       DoLatticeFit=.TRUE.
+     ENDIF
+   END FUNCTION 
 !
 !----------------------------------------------------------------------
 !

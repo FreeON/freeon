@@ -910,7 +910,7 @@ CONTAINS
 !
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,Refresh,SCRPath, &
                        CtrlCoord,CtrlConstr,ArchMem,IntC_Extra, &
-                       TOPS,Bond,AtmB,PBCDim,HFileIn_O,iCLONE_O,iGEO_O)
+                       TOPS,Bond,AtmB,PBCDim,iGEO,HFileIn_O,iCLONE_O)
      !
      ! This subroutine constructs the IntCs array, which holds
      ! definitions of internal coordinates to be used in the 
@@ -933,8 +933,8 @@ CONTAINS
      LOGICAL                     :: DoFixMM
      REAL(DOUBLE),DIMENSION(:)   :: AtNumIn
      CHARACTER(LEN=*),OPTIONAL   :: HFileIn_O
-     INTEGER,OPTIONAL            :: iCLONE_O,iGEO_O
-     INTEGER                     :: PBCDim
+     INTEGER,OPTIONAL            :: iCLONE_O
+     INTEGER                     :: PBCDim,iGEO
      INTEGER                     :: NIntC,NIntC_Bas,NIntC_VDW
      INTEGER                     :: NIntC_Extra,NNew,Nintc_New
      INTEGER                     :: MaxBonds,ArchMem
@@ -978,7 +978,7 @@ CONTAINS
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
                             Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS, &
                             ArchMem_O=ArchMem,HFileIn_O=HFileIn_O, &
-                            iCLONE_O=iCLONE_O,iGEO_O=iGEO_O)
+                            iCLONE_O=iCLONE_O,iGEO_O=iGEO)
        ELSE
          CALL DefineIntCoos(XYZRepl%D,AtNumRepl%I,IntC_Bas,NIntC_Bas, &
                             Cells%I,IEq%I,CtrlCoord,Bond,AtmB,TOPS)
@@ -991,8 +991,9 @@ CONTAINS
                           CtrlCoord,TOPS,IEq%I)
        CALL CleanPBCIntCs(IntC_Bas,Cells%I,IEq%I)
        NIntC_Bas=IntC_Bas%N
-   !   CALL LatticeINTC(IntC_L,PBCDim)
-       IntC_L%N=0
+      !CALL LatticeINTC(IntC_L,PBCDim)
+       CALL ExtraLattice(IntC_L,PBCDim)
+      !IntC_L%N=0
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
        NIntC_Bas=0 
        NIntC_VDW=0 
@@ -1074,6 +1075,107 @@ CONTAINS
    ! CALL PrtIntCoords(IntCs,IntCs%Value%D,'GetIntC Internals',PBCDim_O=PBCDim)
    END SUBROUTINE GetIntCs
 !
+!---------------------------------------------------------------------
+!
+   SUBROUTINE ExtraLattice(IntC_L,PBCDim)
+     TYPE(INTC)                  :: IntC_L
+     INTEGER                     :: I,J,K,L,LL,LRef,II,KK,PBCDim
+     !
+     IF(PBCDim==0) THEN
+       IntC_L%N=0
+       RETURN
+     ENDIF
+     !
+     LL=0
+     LRef=1
+     II=0
+     !
+     IF(PBCDim==3) THEN
+       CALL New(IntC_L,16)
+       IntC_L%Atoms%I(1:16,1:2)=LRef
+       !
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_A1 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,0,1,0,0/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_A2 '
+       IntC_L%Cells%I(II,1:6)=(/0,1,0,1,1,0/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_A3 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,1,1,0,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_A4 '
+       IntC_L%Cells%I(II,1:6)=(/0,1,1,1,1,1/)
+       !
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_B1 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,0,0,1,0/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_B2 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,1,0,1,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_B3 '
+       IntC_L%Cells%I(II,1:6)=(/1,0,1,1,1,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_B4 '
+       IntC_L%Cells%I(II,1:6)=(/1,0,0,1,1,0/)
+       !
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_C1 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,0,0,0,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_C2 '
+       IntC_L%Cells%I(II,1:6)=(/1,0,0,1,0,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_C3 '
+       IntC_L%Cells%I(II,1:6)=(/1,1,0,1,1,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_C4 '
+       IntC_L%Cells%I(II,1:6)=(/0,1,0,0,1,1/)
+       !
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_X1 '
+       IntC_L%Cells%I(II,1:6)=(/0,0,0,1,1,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_X2 '
+       IntC_L%Cells%I(II,1:6)=(/1,0,0,0,1,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_X3 '
+       IntC_L%Cells%I(II,1:6)=(/1,1,0,0,0,1/)
+         II=II+1
+         IntC_L%Def%C(II)(1:8)='STRE_X4 '
+       IntC_L%Cells%I(II,1:6)=(/0,1,0,1,0,1/)
+       !
+      ! !IntC_L%Def%C(7)(1:8)='VOLM_L  '
+      !  IntC_L%Def%C(7)(1:8)='BLANK   '
+      !IntC_L%Atoms%I(7,1:4)=LRef
+      !IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+     ELSE IF(PBCDim==2) THEN
+       CALL New(IntC_L,3)
+       IntC_L%Atoms%I(1:2,1:2)=LRef
+         IntC_L%Def%C(1)(1:8)='STRE_A  '
+       IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+         IntC_L%Def%C(2)(1:8)='STRE_B  '
+       IntC_L%Cells%I(2,1:6)=(/0,0,0,0,1,0/)
+       !
+         IntC_L%Def%C(3)(1:8)='GAMMA   '
+       IntC_L%Atoms%I(3,1:3)=LRef
+       IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
+       !
+      ! !IntC_L%Def%C(4)(1:8)='AREA_L  '
+      !  IntC_L%Def%C(4)(1:8)='BLANK   '
+      !IntC_L%Atoms%I(4,1:3)=LRef
+      !IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+     ELSE IF(PBCDim==1) THEN
+       CALL New(IntC_L,1)
+         IntC_L%Def%C(1)(1:8)='STRE_A  '
+       IntC_L%Atoms%I(1,1:2)=LRef
+       IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
+     ENDIF
+     IntC_L%Constraint%L(:)=.FALSE.
+     IntC_L%Active%L(:)=.TRUE.
+   END SUBROUTINE ExtraLattice
+!
 !-------------------------------------------------------------------
 !
    SUBROUTINE LatticeINTC(IntC_L,PBCDim)
@@ -1089,7 +1191,7 @@ CONTAINS
      LRef=1
      !
      IF(PBCDim==3) THEN
-       CALL New(IntC_L,7)
+       CALL New(IntC_L,6)
        IntC_L%Atoms%I(1:3,1:2)=LRef
          IntC_L%Def%C(1)(1:8)='STRE_A  '
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
@@ -1106,12 +1208,12 @@ CONTAINS
          IntC_L%Def%C(6)(1:8)='GAMMA   '
        IntC_L%Cells%I(6,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
-        !IntC_L%Def%C(7)(1:8)='VOLM_L  '
-         IntC_L%Def%C(7)(1:8)='BLANK   '
-       IntC_L%Atoms%I(7,1:4)=LRef
-       IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
+      ! !IntC_L%Def%C(7)(1:8)='VOLM_L  '
+      !  IntC_L%Def%C(7)(1:8)='BLANK   '
+      !IntC_L%Atoms%I(7,1:4)=LRef
+      !IntC_L%Cells%I(7,1:12)=(/0,0,0,1,0,0,0,1,0,0,0,1/)
      ELSE IF(PBCDim==2) THEN
-       CALL New(IntC_L,4)
+       CALL New(IntC_L,3)
        IntC_L%Atoms%I(1:2,1:2)=LRef
          IntC_L%Def%C(1)(1:8)='STRE_A  '
        IntC_L%Cells%I(1,1:6)=(/0,0,0,1,0,0/)
@@ -1122,10 +1224,10 @@ CONTAINS
        IntC_L%Atoms%I(3,1:3)=LRef
        IntC_L%Cells%I(3,1:9)=(/1,0,0,0,0,0,0,1,0/)
        !
-        !IntC_L%Def%C(4)(1:8)='AREA_L  '
-         IntC_L%Def%C(4)(1:8)='BLANK   '
-       IntC_L%Atoms%I(4,1:3)=LRef
-       IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
+      ! !IntC_L%Def%C(4)(1:8)='AREA_L  '
+      !  IntC_L%Def%C(4)(1:8)='BLANK   '
+      !IntC_L%Atoms%I(4,1:3)=LRef
+      !IntC_L%Cells%I(4,1:9)=(/0,0,0,1,0,0,0,1,0/)
      ELSE IF(PBCDim==1) THEN
        CALL New(IntC_L,1)
          IntC_L%Def%C(1)(1:8)='STRE_A  '
@@ -1135,6 +1237,27 @@ CONTAINS
      IntC_L%Constraint%L(:)=.FALSE.
      IntC_L%Active%L(:)=.TRUE.
    END SUBROUTINE LatticeINTC
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE AdjustLatt(iGEO,IntCE,IntCES,PBCDim)
+     INTEGER        :: iGEO,PBCDim,I
+     TYPE(INTC)     :: IntCES,IntCE 
+     !
+     IF(PBCDim<3) RETURN
+     !
+     CALL Delete(IntCE)
+     IF(iGEO==(iGEO/3)*3+1) THEN
+       DO I=1,IntCES%N
+         ! STRE_A , BETA, GAMMA constrained
+!CONTINUE_HERE         
+       ENDDO  
+     ELSE IF(iGEO==(iGEO/3)*3+2) THEN
+         ! STRE_B , ALPHA, GAMMA constrained
+     ELSE IF(iGEO==(iGEO/3)*3) THEN
+     ENDIF
+     !  
+   END SUBROUTINE AdjustLatt
 !
 !-------------------------------------------------------------------
 !
@@ -1433,6 +1556,7 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
      !
+     IF(IntCs%N<=0) RETURN
      NIntCs=SIZE(IntCs%Def%C)
      NatmsLoc=SIZE(XYZ,2)-3
      DO J=1,3
@@ -1755,10 +1879,10 @@ CONTAINS
        RMSD=1.D+9
        !
        DO IStep=1,GBackTrf%MaxIt_CooTrf
-       ! IF(PRESENT(iGEO_O)) THEN
-       !   CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
-       !                   IRep,IStep,iGEO_O)
-       ! ENDIF
+         IF(PRESENT(iGEO_O)) THEN
+           CALL PrtBackTrf(AtNum,ActCarts%D,PBCDim,PWDPath, &
+                           IRep,IStep,iGEO_O)
+         ENDIF
          !
          ! Get B and refresh values of internal coords
          !
@@ -1830,6 +1954,7 @@ CONTAINS
          ELSE
            RefreshAct=.FALSE.
          ENDIF
+RefreshAct=.TRUE.
          !
          ! Modify Cartesians
          !
@@ -2009,6 +2134,8 @@ CONTAINS
      Crit=1.D-6
      CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
      Grad1=Grad
+write(*,*) 'original grad= '
+write(*,100) Grad(1:9)
      DO I=1,MaxStep
        CALL DGEMM_NNc(9,9,1,One,Zero,P,Grad1,Grad2)
        Delta=Grad1-Grad2
@@ -2021,6 +2148,9 @@ CONTAINS
          IF(Fact<Fact2) Fact=Fact2
        ENDDO
        Grad1=Grad2
+write(*,*) i,'fact= ',fact
+write(*,100) Grad2(1:9)
+100 format(9F8.4)
        IF(Fact<Crit) EXIT
      ENDDO
      IF(Fact>Crit) THEN
@@ -3412,13 +3542,13 @@ CONTAINS
      !
      CALL BMatrix(XYZ,IntCs,B,PBCDim,LinCrit,TorsLinCrit)
      CALL SetEq(BS,B)
-!    IF(DoCleanCol) THEN
+     IF(DoCleanCol) THEN
        CALL CleanBConstr(IntCs,B,NatmsLoc)
-!      CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
-!    ENDIF
-!    CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
-write(*,*) 'B%BL hardwired to zero'
-B%BL%D=Zero
+       CALL CleanBLConstr(XYZ,IntCs,B,PBCDim)
+     ENDIF
+     CALL CleanBLRot(XYZ,IntCs,B,PBCDim)
+!write(*,*) 'B%BL hardwired to zero'
+!B%BL%D=Zero
      !
      CALL BtoSpB_1x1(B,ISpB,JSpB,ASpB)
      !
@@ -3754,6 +3884,7 @@ B%BL%D=Zero
            IF(IntCsE%Def%C(J)(1:8)==IntCs%Def%C(I)(1:8)) THEN
              IntCs%Active%L(I)=.TRUE.
              NCoinc=NCoinc+1
+write(*,*) i,j,IntCsE%Def%C(J)(1:8),IntCs%Def%C(I)(1:8),ncoinc
              EXIT
            ENDIF
          ENDIF
@@ -4063,6 +4194,7 @@ B%BL%D=Zero
      INTEGER,OPTIONAL :: NConstr_O
      INTEGER          :: NConstr
      !
+     IF(IntCs%N<=0) RETURN
      Inv=.FALSE.
      IF(PRESENT(Inv_O)) Inv=Inv_O
      !
