@@ -535,6 +535,8 @@ MODULE PrettyPrint
 	      ! NJH: Only does a single configuration correctly for now
 	      ! NJH: Needs future hooks in Optimizer to produce animation files
                  ! MC got it working...
+                 ! NJH : made config number range 1- rather than 0-
+                 ! NJH : changed coordinates to non scientific format
                  AA=One/AngstromsToAU
                  IF(GM%PBC%Dimen/=0)THEN
                     IF(GM%PBC%Dimen<=2)THEN
@@ -543,7 +545,7 @@ MODULE PrettyPrint
                        Mssg='CRYSTAL'
                     ENDIF
                     WRITE(PU,*)TRIM(Mssg)
-		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg))
+		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg+1))
                     WRITE(PU,*)TRIM(Mssg)
                     ! Cell Vectors
                     Mssg=                                             &
@@ -557,16 +559,16 @@ MODULE PrettyPrint
                          FltToMedmChar(GM%PBC%BoxShape%D(3,2))//'  '// &
                          FltToMedmChar(GM%PBC%BoxShape%D(3,3))
                     WRITE(PU,*)TRIM(Mssg)
-                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg))
+                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg+1))
                     WRITE(PU,*)TRIM(Mssg)
                     WRITE(PU,*)GM%NAtms,1
                  ELSE
-                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg))
+                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg+1))
                     WRITE(PU,*)TRIM(Mssg)
                  ENDIF
                  DO I=1,GM%NAtms
 		    WRITE(PU,99)GM%AtNam%C(I),(GM%Carts%D(K,I)*AA,K=1,3)
-                 99 FORMAT(1x,A3,3(1x,E20.10))
+                 99 FORMAT(1x,A3,3(1x,F11.5))
 		 ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
