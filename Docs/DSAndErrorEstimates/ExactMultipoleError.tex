@@ -52,8 +52,8 @@ and the multipole tree-codes (MTC) \cite{Salmon94}.
 Of specific interest are the multipole tree-code methods. 
 Tree-codes have several important advantages over other methods [ref]. i) they are easy to parallize.
 ii) they allow easy and accurte calculation of the energies and the forces. iii) Periodic boundary
-conditions can be easilly included. iv) and because of this work they
-now have supierior error control as compared to other method.
+conditions can be easilly included [ref]. iv) and, because of this work, they
+now have excellent error control compared to other method.
 
 Previous work on tree-code algorithm's has been severly limited by the lack of
 a resonable error estimate [ref].  Most MTC's use the {\it opening criterian} as an error estimate.
@@ -95,8 +95,8 @@ Where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ and ${\cal O}_{l'}^{m'}[\mathbf{R}_{box
 the distribution $a$ and the distributions in the box, and 
 $M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ is the interaction tensor. This is exact in the 
 limit of $L$ and $L'$ approaching  infinity as long as 
-$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. However, in practical calculations 
-${\cal O}_{l}^{m}[\mathbf{R}_{a}$ is usually of a particular angular momentum type such that the sum over $L$ is 
+$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. In tree code calculations 
+${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ is usually of a particular angular momentum type such that the sum over $L$ is 
 removed, and also the value of $L'$ are usually fixed at some maxium value.
 However, fixing the value of $L'$ creates the problem of how to control the accuracy of the calculation 
 for the refference distribution $a$. A solution to this problem is presented in Figure {\ref{figure:TreeInBox}}. 
@@ -189,16 +189,43 @@ iii) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the 
 
 \subsection{Test of the Error Bound}
 
-Figure \ref{figure:MultipoleErrorWaterC512}
-Figure \ref{figure:MultipoleErrorWaterQ64}
+Figure \ref{figure:MultipoleErrorWaterC512} is a contour plot of the binned log of the error for a 
+512 molecule periodic classical water system with 125 nearest neighboor cells for decreasing threshold $\tau$. 
+On each node on the tree we first use our error bound to
+determine if we can contract on this node, then if we can contract we then determine the actual error that we are
+making by calculating the coloumb interaction exactly and then binning the result. 
+The red  line is $\tau=Error$. As can be seen in this figure, no error is ever above the red line, which shows that our
+error bound, at least for about one million node tests, is obeyed. 
+Figure \ref{figure:MultipoleErrorWaterQ64} shows the same test as figure \ref{figure:MultipoleErrorWaterC512} except
+that it is a 64 molecule periodic quantum water system with 125 nearest neighboor cells. Agian we see that no error
+ever falls above the  $\tau=Error$, which is exceptional for the quantum system where the distributuions weights can vary
+many orders of magnitude, and where in this case approximately ten million nodes where tested.  
 
-\subsection{How the Algorithm Scales}
+\subsection{Scaling}
 
-Figure \ref{figure:TimeVsNwater}
-Figure \ref{figure:TimeVsTauWater4096}
+In Figure \ref{figure:TimeVsNwater} we show the time to calculate all the forces and the time it takes
+to construct the tree, for increasing system size. The test system we used was classical water up to one quarter of a 
+million molecules. A very importent thing to note that at the  threshold level of $\tau=10^-8$, 
+we could obtain significant speedup by increasing the maximum multipole expansion order. Since this effect has 
+yet to be seen for the {\it openning criteria} error estimate, 
+we decided to investigate further. Figure \ref{figure:TimeVsTauWater4096} shows the timing results for 4096 classical waters 
+with 125 images for inceasing threshold and maxium multipole expansion order. As can be seen for a large threshold that
+a low maxium expansion order was faster, but as the threshold was lowered, the larger expansion orders became faster, the
+crossover happening around about $\tau=0.001$. To our knowlege, this effect has yet to be observed and we attribue it to
+the our error bound being very well behaved and exact. 
+
 
 \section{CONCLUSIONS}
 
+We have presented a new exact error estimate for the bounding of the error when the coulomb
+integrals are calculated via a tree-code algorithm. This is of significant importance 
+for quantum chemistry codes because the distributions 
+weights can span several orders of magnitude, but also this will have an impact on Astro-physical calculations
+where a better bound on the calculation of the forces is needed. We have also shown that for classical and 
+quantum simulations that our error bound, at least to about ten million tests, is obeyed. 
+We have also shown that we do achieve linear scaling for very large classicle system, up to one million particals, 
+when  our new error bound is used, and that we can achieve significant speedups for small tolerance calculations 
+by increasing the maxium multipole expansion order. 
 
 \section*{ACKNOWLEDGMENTS}
 
