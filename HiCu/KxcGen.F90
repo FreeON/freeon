@@ -21,6 +21,7 @@ MODULE KxcGen
       TYPE(BCSR)             :: Kxc
       TYPE(CubeNode),POINTER :: CubeRoot
 !
+      TYPE(DBL_RNK2)         :: Temp
       TYPE(AtomPair)         :: Pair
       INTEGER                :: AtA,AtB
       INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
@@ -207,7 +208,7 @@ MODULE KxcGen
                    ENDDO
                 ENDDO
 !---------------------------------------------------------------------------
-             ENDIF 
+             ENDIF
           ENDDO 
           ENDDO
        ENDDO
