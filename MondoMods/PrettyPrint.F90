@@ -53,7 +53,6 @@ MODULE PrettyPrint
          CHARACTER(LEN=5)            :: Zone
          INTEGER, DIMENSION(8)       :: Values
          LOGICAL                     :: Enter 
-         LOGICAL                     :: Opened
 #ifdef PARALLEL
          IF(MyID==0)THEN
 #endif
@@ -61,8 +60,7 @@ MODULE PrettyPrint
          CALL DATE_AND_TIME(DDate,TTime,Zone,Values)
          DDay=DDate(5:6)//'/'//DDate(7:8)//'/'//DDate(3:4)
          HMS=TTime(1:2)//':'//TTime(3:4)//':'//TTime(5:6)
-         INQUIRE(Unit=Out,OPENED=Opened)
-         IF(.NOT.Opened) CALL OpenASCII(OutFile,Out)
+         CALL OpenASCII(OutFile,Out)
          IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
             WRITE(Out,'(A)')'(*'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'*)'
          ELSEIF(Enter)THEN
@@ -70,7 +68,7 @@ MODULE PrettyPrint
          ELSE
             WRITE(Out,'(A)')'>-'//TRIM(Mssg)//' '//DDay//' @ '//HMS//'-<'
          ENDIF
-         IF(.NOT.Opened) CLOSE(UNIT=Out,STATUS='KEEP')
+         CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL
          ENDIF
 #endif
@@ -80,15 +78,12 @@ MODULE PrettyPrint
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
          INTEGER                              :: OpenPU,PU
-         LOGICAL                              :: Opened
          IF(PRESENT(FileName_O).AND.PRESENT(Unit_O))THEN
             PU=Unit_O
-            INQUIRE(Unit=Unit_O,OPENED=Opened)
-            IF(.NOT.Opened) CALL OpenASCII(TRIM(FileName_O),PU)
+            CALL OpenASCII(FileName_O,PU)
          ELSEIF(PRESENT(FileName_O).AND.(.NOT.PRESENT(Unit_O)))THEN
             PU=Tmp
-            INQUIRE(Unit=Unit_O,OPENED=Opened)
-            IF(.NOT.Opened) CALL OpenASCII(TRIM(FileName_O),PU)
+            CALL OpenASCII(FileName_O,PU)
          ELSEIF(PRESENT(Unit_O))THEN
             IF(Unit_O==6)THEN
                PU=Unit_O
@@ -97,7 +92,7 @@ MODULE PrettyPrint
             ENDIF
          ELSE
             PU=Out
-            CALL OpenASCII(OutFile,PU)  
+            CALL OpenASCII(OutFile,PU)
          ENDIF
          OpenPU=PU
       END FUNCTION OpenPU
@@ -484,10 +479,6 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
-!
-logical :: opened
-!
-!
           PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
 !
 !           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
@@ -558,7 +549,7 @@ logical :: opened
               ENDDO
            ELSE
 !             Default is the full dump of the internal representation
-!             CALL PrintProtectL(PU)
+              CALL PrintProtectL(PU)
               WRITE(PU,3)
               WRITE(PU,*)'Internal representation of the geometry:'
               IF(GM%InAU)THEN
@@ -602,7 +593,7 @@ logical :: opened
               ENDDO
 #endif
               WRITE(PU,3)
-!             CALL PrintProtectR(PU)
+              CALL PrintProtectR(PU)
            ENDIF
            CALL ClosePU(PU)
 #ifdef PARALLEL
@@ -699,7 +690,7 @@ logical :: opened
         IF(PRESENT(FileName_O).AND.Unit/=6)THEN
            CALL OpenASCII(FileName_O,Unit)
         ELSEIF(Unit/=6)THEN            
-!          CALL OpenASCII(OutFile,Unit)
+           CALL OpenASCII(OutFile,Unit)
         ENDIF
         M=SIZE(A,1); N=SIZE(A,2)        
         IF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
@@ -743,7 +734,7 @@ logical :: opened
            ENDDO
 !
         ENDIF
-!       IF(Out/=6) CLOSE(Out)
+        IF(Out/=6) CLOSE(Out)
         RETURN
 !
    100  FORMAT(' (*',65('='),'*)')
@@ -1285,7 +1276,7 @@ logical :: opened
                //Rtrn//'                     AvgTime = '//TRIM(DblToShrtChar(TimeAve)) &
                //Rtrn//'                     MaxTime = '//TRIM(DblToShrtChar(TimeMax)) 
           WRITE(PU,*)TRIM(Mssg)
-!         CLOSE(Out)          
+          CLOSE(Out)          
        ENDIF
     ENDIF
 #endif
@@ -1366,7 +1357,7 @@ logical :: opened
 10     FORMAT(' ',D12.6,' ',I10)
 #endif
        CALL PrintProtectR(PU)
-!      CLOSE(Out)
+       CLOSE(Out)
        RETURN
     ENDIF
 !-------------------------------------------------------------------------
@@ -1432,7 +1423,7 @@ logical :: opened
        ENDIF
        WRITE(PU,*)TRIM(Mssg)
        CALL PrintProtectR(PU)
-!      CLOSE(Out)
+       CLOSE(Out)
 #ifdef PARALLEL
     ENDIF
 #endif

@@ -26,6 +26,8 @@ MODULE ParsingConstants
    CHARACTER(LEN=8),  PARAMETER :: DBG_MMA_STYLE='MmaStyle'
    CHARACTER(LEN=8),  PARAMETER :: DBG_DBL_STYLE='DblStyle'
    CHARACTER(LEN=8),  PARAMETER :: DBG_FLT_STYLE='FltStyle'
+   CHARACTER(LEN=9),  PARAMETER :: DBG_PRT_GEOP ='GeOpDebug'
+   CHARACTER(LEN=7),  PARAMETER :: DBG_PRT_MM   ='MMDebug'
 
    INTEGER, PARAMETER     :: SFC_NONE   =3480481
    INTEGER, PARAMETER     :: SFC_PEANO  =5308208
@@ -47,4 +49,6 @@ MODULE ParsingConstants
    INTEGER,           PARAMETER :: DEBUG_MMASTYLE=848423  ! Print in Mathematica style
    INTEGER,           PARAMETER :: DEBUG_FLTSTYLE=480484  ! Print in float style
    INTEGER,           PARAMETER :: DEBUG_DBLSTYLE=504843  ! Print in scientific (D) style
+   INTEGER,           PARAMETER :: DEBUG_GEOP    =568356  ! Print geometry optimization data 
+   INTEGER,           PARAMETER :: DEBUG_MM      =129462  ! Print molecular mechanics related data
 END MODULE

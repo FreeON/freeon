@@ -436,6 +436,8 @@ MODULE DerivedTypes
       INTEGER :: Int  !-- Debug integrals
       INTEGER :: Rho  !-- Debug density
       INTEGER :: Fmt  !-- Debug formating
+      INTEGER :: GeOp !-- Debug geometry optimizer
+      INTEGER :: MM   !-- Debug molecular mechanics energies and forces
    END TYPE                                      
 !------------------------------------------------------------
 !  Timing/performance statistics

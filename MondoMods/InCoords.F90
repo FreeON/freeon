@@ -1429,6 +1429,7 @@ END SUBROUTINE Excl_LIST14
 ! Fill Data into IntCs
 !
       NIntC=NBond+NAngle+NTorsion
+      IF(NIntC==0) GO TO 300
       CALL New(IntCs,NIntC)
       IntCs%Def='     '
       IntCs%Atoms(1:NIntC,1:4)=0   
@@ -1449,6 +1450,8 @@ END SUBROUTINE Excl_LIST14
         IntCs%Def(ILast+I)='TORS '
         IntCs%Atoms(ILast+I,1:4)=TorsionIJKL%I(1:4,I)
       ENDDO
+!
+300   CONTINUE
 !
 ! tidy up
 !
@@ -1486,10 +1489,10 @@ END SUBROUTINE Excl_LIST14
 !
 ! Go through all boxes 
 !
-   NBond=0
-   DO IZ=1,NZ
-   DO IX=1,NX
-   DO IY=1,NY
+      NBond=0
+      DO IZ=1,NZ
+      DO IX=1,NX
+      DO IY=1,NY
 !
 ! indices of central and neighboring Boxes
 !
@@ -1759,31 +1762,39 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
       INTEGER :: I,J,K,Refresh,NatmsLoc,II,ILast
       INTEGER :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
       TYPE(INT_VECT) :: MMAtNum,LinAtom,MarkLinb
+      TYPE(DBL_VECT) :: NuclCharge
       TYPE(INT_RNK2) :: LinBBridge,Top12
       TYPE(CRDS) :: GMLoc
-      CHARACTER(LEN=DefAULT_CHR_LEN) :: InfFile
+      CHARACTER(LEN=DEFAULT_CHR_LEN) :: InfFile
       REAL(DOUBLE),DIMENSION(1:3,1:NatmsLoc) :: XYZ
       REAL(DOUBLE) :: Value
 !
 ! Get atomnames (numbers) from HDF 
 !
       CALL New(MMAtNum,NatmsLoc)
-      CALL Get(MMAtNum,'MMATNUM')
+#ifdef MMech
+      IF(HasMM()) THEN
+        CALL Get(MMAtNum,'MMATNUM')
+      ELSE
+        CALL New(NuclCharge,NatmsLoc)
+        CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+        DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+        CALL Delete(NuclCharge)
+      ENDIF
+#else
+        CALL New(NuclCharge,NatmsLoc)
+        CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
+        DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
+        CALL Delete(NuclCharge)
+#endif
 !
       IF(Refresh==1) Then !!! Total refresh
-!
 !define covalent bonding scheme
-        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1,IntC_Cov,NIntC_Cov)
+          CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1, &
+                             IntC_Cov,NIntC_Cov)
 !define Van der Waals bonding scheme
-        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!!    CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!NIntC_VDW=0 !!!! temporary, see same comment also a few lines below
-!get extra internal coordinates and constraints
-          CALL Get(NIntC_Extra,'NIntC_Extra')
-          IF(NIntC_Extra/=0) THEN
-            CALL New(IntC_Extra,NIntC_Extra)
-            CALL Get(IntC_Extra,'IntC_Extra')
-          ENDIF
+          CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2, &
+                             IntC_VDW,NIntC_VDW)
           CALL Put(NIntC_Cov,'NIntC_Cov')
           IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
           CALL Put(NIntC_VDW,'NIntC_VDW')
@@ -1793,28 +1804,15 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 !
 ! Refresh only the VDW terms
 !
-          CALL Get(NIntC_Extra,'NIntC_Extra')
-          IF(NIntC_Extra/=0) THEN
-            CALL New(IntC_Extra,NIntC_Extra)
-            CALL Get(IntC_Extra,'IntC_Extra')
-          ENDIF
           CALL Get(NIntC_Cov,'NIntC_Cov')
           CALL New(IntC_Cov,NIntC_Cov)
           CALL Get(IntC_Cov,'IntC_Cov')
-!       define Van der Waals bonding scheme
-        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!!!   CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2,IntC_VDW,NIntC_VDW)
-!!!!NIntC_VDW=0 !!!!! temporary !!!!
+          CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,2, &
+                             IntC_VDW,NIntC_VDW)
           CALL Put(NIntC_VDW,'NIntC_VDW')
           IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
 !
       ELSE IF(Refresh==3) THEN !!! no refresh, get everything from HDF
-!
-          CALL Get(NIntC_Extra,'NIntC_Extra')
-          IF(NIntC_Extra/=0) THEN
-            CALL New(IntC_Extra,NIntC_Extra)
-            CALL Get(IntC_Extra,'IntC_Extra')
-          ENDIF
           CALL Get(NIntC_Cov,'NIntC_Cov')
           CALL New(IntC_Cov,NIntC_Cov)
           CALL Get(IntC_Cov,'IntC_Cov')
@@ -1823,41 +1821,35 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
           CALL Get(IntC_VDW,'IntC_VDW')
 !
       ELSE IF(Refresh==4) THEN !!! refresh covalent bonds only
-!
-!define covalent bonding scheme
-        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1,IntC_Cov,NIntC_Cov)
+        CALL DefineIntCoos(NatmsLoc,XYZ,MMAtNum,InfFile,1, &
+                           IntC_Cov,NIntC_Cov)
         NIntC_VDW=0 
-!get extra internal coordinates and constraints
-          CALL Get(NIntC_Extra,'NIntC_Extra')
-          IF(NIntC_Extra/=0) THEN
-            CALL New(IntC_Extra,NIntC_Extra)
-            CALL Get(IntC_Extra,'IntC_Extra')
-          ENDIF
-          CALL Put(NIntC_Cov,'NIntC_Cov')
-          IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
-          CALL Put(NIntC_VDW,'NIntC_VDW')
-          IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
 !
       ELSE IF(Refresh==5) THEN !!! use only extra coords from input
-!
         NIntC_Cov=0 
         NIntC_VDW=0 
-!get extra internal coordinates and constraints
-          CALL Get(NIntC_Extra,'NIntC_Extra')
-          IF(NIntC_Extra/=0) THEN
-            CALL New(IntC_Extra,NIntC_Extra)
-            CALL Get(IntC_Extra,'IntC_Extra')
-          ENDIF
-          CALL Put(NIntC_Cov,'NIntC_Cov')
-          IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
-          CALL Put(NIntC_VDW,'NIntC_VDW')
-          IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
-!
       ENDIF
+!
+! Put Covalent terms
+!
+        CALL Put(NIntC_Cov,'NIntC_Cov')
+        IF(NIntC_Cov/=0) CALL Put(IntC_Cov,'IntC_Cov')
+        CALL Put(NIntC_VDW,'NIntC_VDW')
+        IF(NIntC_VDW/=0) CALL Put(IntC_VDW,'IntC_VDW')
+!
+! Get extra internal coordinates and constraints
+!
+        CALL Get(NIntC_Extra,'NIntC_Extra')
+        IF(NIntC_Extra/=0) THEN
+          CALL New(IntC_Extra,NIntC_Extra)
+          CALL Get(IntC_Extra,'IntC_Extra')
+        ENDIF
 !
 ! Merge INTC arrays
 !
         NIntC=NIntC_Cov+NIntC_VDW+NIntC_Extra
+!
+        IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
         CALL New(IntCs,NIntC)
 !
           ILast=0
@@ -1932,183 +1924,11 @@ IntCs%Constraint(ILast+1:ILast+NIntC_Extra)=IntC_Extra%Constraint(1:NIntC_Extra)
 !
       CALL Delete(MMAtNum)
 !
-! Now check for bending -> linear bending transitions
+! Check for bending - lin.bending transions
 !
-      CALL New(MarkLinB,NIntC)
+      CALL ChkBendToLinB(IntCs,NIntC,XYZ)
 !
-      MarkLinB%I=0
-          NLinB=0
-      DO I=1,NIntC 
-        IF(IntCs%Def(I)(1:4)=='BEND') THEN
-          I1=IntCs%Atoms(I,1) 
-          I2=IntCs%Atoms(I,2) 
-          I3=IntCs%Atoms(I,3) 
-          CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-          IF(ABS(Value-PI)*180.D0/PI < LinCrit) THEN  !!!linear within 1 degree
-            NLinB=NLinB+1
-            MarkLinB%I(I)=1
-          ENDIF
-        ENDIF
-      ENDDO
-!
-    IF(NLinB/=0) THEN
-!
-      NIntc_New=NIntc+NLinB
-      CALL NEW(IntC_New,NIntc_New)
-!
-        NLinB=0
-      DO I=1,NIntC
-        IF(MarkLinB%I(I)==0) THEN
-          IntC_New%Def(NLinB+I)=Intcs%Def(I)
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
-        ELSE
-          IntC_New%Def(NLinB+I)='LINB1'
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
-          NLinB=NLinB+1
-          IntC_New%Def(NLinB+I)='LINB2'
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
-        ENDIF
-      ENDDO
-!
-      CALL Delete(MarkLinB)
-!
-      CALL Delete(IntCs)
-      NIntC=NIntC_New
-      CALL New(IntCs,NIntC)
-          Intcs%Def(:)=IntC_New%Def(:)
-          Intcs%Atoms(:,:)=IntC_New%Atoms(:,:)
-          Intcs%Value(:)=IntC_New%Value(:)      
-          Intcs%Constraint(:)=IntC_New%Constraint(:)
-      CALL Delete(IntC_New)
-!
-! Now recognize colinear atoms of the molecule and 
-! introduce torsions. Introduction of extra bends is not done,
-! since it is supposed to be done in previous steps
-!
-        CALL Get(NMax12,'NMax12')
-        CALL New(Top12,(/NatmsLoc,NMax12+1/))
-        CALL Get(Top12,'TOP12')
-!
-        CALL NEW(LinBBridge,(/2,NIntc/))
-        CALL NEW(LinAtom,NIntc)
-        LinBBridge%I(1:2,:)=0
-        LinAtom%I(:)=0
-        NLinB=0
-      DO I=1,NIntc
-        IF(IntCs%Def(I)(1:5)=='LINB1'.AND.LinAtom%I(IntCs%Atoms(I,1))==0) THEN 
-          NLinB=NLinB+1 
-          LinAtom%I(IntCs%Atoms(I,1))=1
-          LinAtom%I(IntCs%Atoms(I,2))=1
-          LinAtom%I(IntCs%Atoms(I,3))=1
-          LinBBridge%I(1,NLinB)=IntCs%Atoms(I,1)
-          LinBBridge%I(2,NLinB)=IntCs%Atoms(I,2)
-! now, go on left side, use Top12, then go on right, then define torsions
-            I1=LinBBridge%I(2,NLinB)
-            I2=LinBBridge%I(1,NLinB)
-180         CONTINUE
-          DO J=1,Top12%I(I2,1)
-            I3=Top12%I(I2,1+J) 
-            CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-            IF(ABS(Value-PI)*180.D0/Pi<LinCrit) THEN !!!!linear within 1 degree
-              LinBBridge%I(1,NLinB)=I3
-              LinAtom%I(I3)=1
-              I1=I2
-              I2=I3
-              GO TO 180
-            ENDIF
-          ENDDO
-!
-            I1=LinBBridge%I(1,NLinB)
-            I2=LinBBridge%I(2,NLinB)
-120         CONTINUE
-          DO J=1,Top12%I(I2,1)
-            I3=Top12%I(I2,1+J) 
-            CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
-            IF(ABS(Value-PI)*180.D0/Pi<LinCrit) THEN !!!!linear within 1 degree
-              LinBBridge%I(2,NLinB)=I3
-              LinAtom%I(I3)=1
-              I1=I2
-              I2=I3
-              GO TO 120
-            ENDIF
-          ENDDO
-!
-        ENDIF
-      ENDDO 
-!
-! bridges are set now, add torsions
-! first, count number of torsions, to be added
-!
-      NTorsLinB=0
-      DO I=1,NLinB
-        I1=LinBBridge%I(1,I)
-        I2=LinBBridge%I(2,I)
-        NTorsLinB=NTorsLinB+Top12%I(I1,1)*Top12%I(I2,1)
-      ENDDO
-!
-! Now generate the INTCs for the new torsions
-!
-      NIntc_New=NIntC+NTorsLinB
-      CALL New(IntC_New,NIntc_New)
-        IntC_New%Def(1:NIntC)=Intcs%Def(1:NIntC)
-        IntC_New%Atoms(1:NIntC,1:4)=Intcs%Atoms(1:NIntC,1:4)
-        IntC_New%Value(1:NIntC)=Intcs%Value(1:NIntC)      
-        IntC_New%Constraint(1:NIntC)=Intcs%Constraint(1:NIntC)
-!
-          NTorsLinB=0
-        DO I=1,NLinB
-          I2=LinBBridge%I(1,I)
-          I3=LinBBridge%I(2,I)
-          DO J=1,Top12%I(I2,1)
-            I1=Top12%I(I2,1+J)
-            IF(LinAtom%I(I1)==0) THEN
-          DO K=1,Top12%I(I3,1)
-            I4=Top12%I(I3,1+K)
-            IF(LinAtom%I(I4)==0) THEN
-            IF(I1/=I4) THEN
-              NTorsLinB=NTorsLinB+1
-              IntC_New%Def(NIntC+NTorsLinB)='TORS '
-              IntC_New%Atoms(NIntC+NTorsLinB,1)=I1
-              IntC_New%Atoms(NIntC+NTorsLinB,2)=I2
-              IntC_New%Atoms(NIntC+NTorsLinB,3)=I3
-              IntC_New%Atoms(NIntC+NTorsLinB,4)=I4
-              IntC_New%Value(1:NIntC)=Zero
-              IntC_New%Constraint(1:NIntC)=.FALSE.
-            ENDIF
-            ENDIF
-          ENDDO
-            ENDIF
-          ENDDO
-        ENDDO
-!
-        CALL Delete(Intcs)
-        NIntC=NIntC+NTorsLinB
-        CALL New(Intcs,NIntC)
-        Intcs%Def(1:NIntC)=IntC_New%Def(1:NIntC)
-        Intcs%Atoms(1:NIntC,1:4)=IntC_New%Atoms(1:NIntC,1:4)
-        Intcs%Value(1:NIntC)=IntC_New%Value(1:NIntC)      
-        Intcs%Constraint(1:NIntC)=IntC_New%Constraint(1:NIntC)
-        CALL Delete(IntC_New)
-!
-        CALL Delete(LinAtom)
-        CALL Delete(LinBBridge)
-        CALL Delete(Top12)
-!
-! Put IntCs onto HDF
-!
-        CALL Put(NIntC,'NIntC')
-        CALL Put(IntCs,'IntCs')
-!
-    ENDIF
-!
-END SUBROUTINE GetIntCs   
-!
+END SUBROUTINE GetIntCs
 !-------------------------------------------------------
 !
 SUBROUTINE INTCValue(IntCs,XYZ,NatmsLoc)
@@ -2343,7 +2163,7 @@ END SUBROUTINE BENDValue
     TYPE(BMATR):: B
     LOGICAL :: RefreshB,RefreshAct
 !
-!   CALL OpenASCII(OutFile,Out)
+    CALL OpenASCII(OutFile,Out)
     GrdTrfCrit=TrixThresh*1.D0 !!! For Gradient transformation
 !   CooTrfCrit=TrixThresh*1.D0 !!! For Backtransformation
     CooTrfCrit=1.D-4 !!! For Backtransformation
@@ -2425,8 +2245,10 @@ END SUBROUTINE BENDValue
 !
     IF(TrfType==1) THEN
 !
-      WRITE(*,*) 'Gradient transformation, No. Int. Coords= ',NIntC
-      WRITE(Out,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        WRITE(*,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+        WRITE(Out,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+      ENDIF
 !
 ! Cartesian --> Internal transformation
 !
@@ -2464,7 +2286,7 @@ END SUBROUTINE BENDValue
         DiffMax=MAX(DiffMax,ABS(SpVectAux%MTrix%D(I)))
       ENDDO
         RMSD=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
-        RMSD=RMSD/DBLE(NIntC)
+        RMSD=SQRT(RMSD/DBLE(NIntC))
 !
 ! IF DiffMax is too large, eg. due to the 'bad' quality 
 ! of the preconditioner, rescale gradients
@@ -2574,7 +2396,7 @@ END SUBROUTINE BENDValue
         DiffMax=MAX(DiffMax,ABS(SpVectAux%MTrix%D(I)))
       ENDDO
         RMSD=DOT_PRODUCT(SpVectAux%MTrix%D(1:DiffLength),SpVectAux%MTrix%D(1:DiffLength))
-        RMSD=RMSD/DBLE(NCart)
+        RMSD=SQRT(RMSD/DBLE(NCart))
 !
 ! Scale Displacements
 !
@@ -2646,7 +2468,7 @@ END SUBROUTINE BENDValue
 !
     CALL Delete(VectAux)
 !
-!   Close(Out)
+    Close(Out)
 !
 END SUBROUTINE CoordTrf
 !-------------------------------------------------------
@@ -2790,33 +2612,43 @@ END SUBROUTINE CoordTrf
 !
 !-------------------------------------------------------
 !
-    SUBROUTINE GDIIS(CurStat,GDIISMemory,GMLoc)
+    SUBROUTINE GDIIS(CurStat,GDIISMemoryIn,GMLoc)
     IMPLICIT NONE
     TYPE(CRDS) :: GMLoc
-    INTEGER :: I,J,K,L,GDIISMemory,DimGDIIS,IGeom,DimOverl
-    INTEGER :: II,ILow
+    INTEGER :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
+    INTEGER :: LastStruct,ILow,NCart,GDIISMemory
     INTEGER,DIMENSION(3) :: CurStat
-    TYPE(DBL_RNK2) :: Displacements,OverlapOfDispl,Structures,ActCarts
+    TYPE(DBL_RNK2) :: Displacements,AMat,InvAMat,Structures,ActCarts
+    TYPE(DBL_VECT) :: Coeffs,AuxVect
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
     REAL(DOUBLE) :: Sum
 !
 ! Current implementation runs on Cartesian displacements only
+! Input GMLoc contains the actual geometry
 !
-    DimGDIIS=3*GMLoc%Natms
+    NCart=3*GMLoc%Natms
+    DimGDIIS=NCart   !!! later dimeension may become NIntC
+    LastStruct=CurStat(3) ! number of geometries stored in HDF, does not include newest geometry
+    ILow=LastStruct-GDIISMemoryIn   ! latest geometry not considered
+    IF(ILow<0) ILow=0
+    GDIISMemory=LastStruct-ILow
+!
+    GMTag=''
+#ifdef MMech
+    IF(HasMM()) GMTag='GM_MM'
+#endif
 !
 ! Get Displacements from geometries, stored in HDF
-! and fill into Displacements columns.
+! and fill them into Displacements columns.
 !
-    II=CurStat(3) ! number of geometries stored in HDF
-    CALL New(Displacements,(/DimGDIIS,II+1/))
-    CALL New(Structures,(/DimGDIIS,II+1/))
+    CALL New(Displacements,(/DimGDIIS,GDIISMemory/))
+    CALL New(Structures,(/DimGDIIS,GDIISMemory+1/))
     CALL New(ActCarts,(/3,GMLoc%Natms/))
 !
-! Later, tag geometries for basis sets, as well.
+! Get last GDIISMemory pieces of structures
 !
-    ILow=II-GDIISMemory
-    IF(ILow<0) ILow=0
-    DO IGeom=ILow+1,II
-      CALL Get(ActCarts,'cartesians',Tag_O=TRIM(IntToChar(IGeom)))
+    DO IGeom=ILow+1,LastStruct
+      CALL Get(ActCarts,'cartesians',Tag_O=TRIM(GMTag)//TRIM(IntToChar(IGeom)))
         K=IGeom-ILow
       DO I=1,GMLoc%Natms
         J=3*(I-1)
@@ -2825,49 +2657,76 @@ END SUBROUTINE CoordTrf
         Structures%D(J+3,K)=ActCarts%D(3,I)
       ENDDO
     ENDDO
-        K=II-ILow
-      DO I=1,GMLoc%Natms
-        J=3*(I-1)
-        Structures%D(J+1,K+1)=GMLoc%Carts%D(1,I)
-        Structures%D(J+2,K+1)=GMLoc%Carts%D(2,I)
-        Structures%D(J+3,K+1)=GMLoc%Carts%D(3,I)
-      ENDDO
 !
-! get displacements
+! Fill in present single relaxation structure
 !
-    DO I=1,II-ILow
-      IGeom=ILow+I
-      Displacements%D(1:DimGDIIS,I)=Structures%D(1:DimGDIIS,IGeom+1)-Structures%D(1:DimGDIIS,IGeom)
+    DO I=1,GMLoc%Natms
+      J=3*(I-1)
+      Structures%D(J+1,GDIISMemory+1)=GMLoc%Carts%D(1,I)
+      Structures%D(J+2,GDIISMemory+1)=GMLoc%Carts%D(2,I)
+      Structures%D(J+3,GDIISMemory+1)=GMLoc%Carts%D(3,I)
     ENDDO
 !
-! Now calculate overlap. Presently only non-sparse representation is available
-! dimension of overlap is (II-Ilow)+1
+! Get displacements ('error vectors')
 !
-    DimOverl=II-Ilow
-    CALL New(OverlapOfDispl,(/DimOverl+1,DimOverl+1/))
-!
-    DO I=1,DimOverl
-        SUM=DOT_PRODUCT(Displacements%D(1:DimGDIIS,I),Displacements%D(1:DimGDIIS,I))
-        OverlapOfDispl%D(I,I)=SUM
-      DO J=I+1,DimOverl
-        SUM=DOT_PRODUCT(Displacements%D(1:DimGDIIS,I),Displacements%D(1:DimGDIIS,J))
-        OverlapOfDispl%D(I,J)=SUM
-        OverlapOfDispl%D(J,I)=SUM
-      ENDDO
+    DO I=1,GDIISMemory    
+      Displacements%D(:,I)=Structures%D(:,I+1)-Structures%D(:,I)
     ENDDO
+!
+! Now calculate overlap ('A' matrix). Presently only non-sparse representation is available
+! dimension of overlap is GDIISMemory+1
+!
+    CALL New(AMat,(/GDIISMemory+1,GDIISMemory+1/))
+!
+    CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+		   Displacements%D,Displacements%D, &
+		   AMat%D(1:GDIISMemory,1:GDIISMemory))
 !
 ! Add 'surface' terms to overlap
 !
-    OverlapOfDispl%D(1:DimOverl,DimOverl+1)=One
-    OverlapOfDispl%D(DimOverl+1,1:DimOverl)=One
-    OverlapOfDispl%D(DimOverl+1,DimOverl+1)=Zero 
+    AMat%D(1:GDIISMemory,GDIISMemory+1)=One
+    AMat%D(GDIISMemory+1,1:GDIISMemory)=One
+    AMat%D(GDIISMemory+1,GDIISMemory+1)=Zero 
 !
 ! Now, Calculate SVD inverse of the Overlap
 !
+    CALL New(InvAMat,(/GDIISMemory+1,GDIISMemory+1/))
+!
+    CALL SetDSYEVWork(GDIISMemory+1)
+    CALL FunkOnSqMat(GDIISMemory+1,Inverse,AMat%D,InvAMat%D)
+    CALL UnSetDSYEVWork()
+!
+! Solve for linear combination coeffs 
+!
+    CALL New(Coeffs,GDIISMemory+1)
+    CALL New(AuxVect,GDIISMemory+1)
+    AuxVect%D=Zero
+    AuxVect%D(GDIISMemory+1)=One
+    CALL DGEMM_NNc(GDIISMemory+1,GDIISMemory+1,1,One,Zero,  &
+		   InvAMat%D,AuxVect%D,Coeffs%D)
+!
+! Calculate new geometry, linearcombine previous steps 
+!
+      AuxVect%D=Zero
+    DO I=1,GDIISMemory
+      AuxVect%D=AuxVect%D+Coeffs%D(I)*Structures%D(:,I+1)
+    ENDDO
+!
+! Fill new geometry into GM array
+!
+    DO I=1,GMLoc%Natms
+      J=(I-1)*3
+      GMLoc%Carts%D(1,I)=AuxVect%D(J+1)
+      GMLoc%Carts%D(2,I)=AuxVect%D(J+2)
+      GMLoc%Carts%D(3,I)=AuxVect%D(J+3)
+    ENDDO
 !
 ! Tidy up
 !
-    CALL Delete(OverlapOfDispl)
+    CALL Delete(AuxVect)
+    CALL Delete(Coeffs)
+    CALL Delete(InvAMat)
+    CALL Delete(AMat)
     CALL Delete(ActCarts)
     CALL Delete(Structures)
     CALL Delete(Displacements)
@@ -3050,39 +2909,6 @@ END SUBROUTINE CoordTrf
      END SUBROUTINE SetOneLJCell
 !
 !---------------------------------------------------------------------
-!
-    SUBROUTINE FullCoordTrf(GMLoc,IntCs,NIntC,VectCart,VectInt,TrfType)
-!
-! Routine to carry out coordinate transformations
-! Refresh controls refreshing of internal coordinate set
-! In case of Int-> Cartesian refresh is not allowed,
-! any refresh request will be overwritten
-! TrfType=1 : Cartesian -> Internal
-! TrfType=2 : Internal -> Cartesian
-!
-    TYPE(CRDS)     :: GMLoc
-    TYPE(DBL_VECT) :: VectCart
-    TYPE(DBL_VECT) :: VectInt
-    INTEGER        :: NIntC,TrfType,I
-    TYPE(INTC)     :: IntCs
-    REAL(DOUBLE)   :: SUM
-!
-    IF(TrfType==1) THEN
-      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
-      CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Starting Int. Coords')
-    ENDIF
-!
-! Perform Coordinate transformation on the input vectors
-!
-    IF(TrfType==1) THEN
-      CALL CartToInternal(GMLoc,IntCs,NIntC,VectCart,VectInt)
-    ELSE 
-      CALL InternalToCart(GMLoc,IntCs,NIntC,VectCart,VectInt)
-    ENDIF 
-!
-END SUBROUTINE FullCoordTrf
-!
-!-------------------------------------------------------------------
     SUBROUTINE GetFullBMatr(NatmsLoc,CartsLoc,IntCs,NIntC,FullB,FullBt)
 !
 ! Generate vibrational B matrix in quasi-sparse TYPE(BMATR) representation
@@ -3160,24 +2986,27 @@ END SUBROUTINE FullCoordTrf
     END SUBROUTINE GetFullGcInv
 !-------------------------------------------------------
 !
-    SUBROUTINE CartToInternal(GMLoc,IntCs,NIntC,VectCart,VectInt)
+    SUBROUTINE CartToInternal(XYZ,IntCs,VectCart,VectInt)
 !
-      TYPE(CRDS)     :: GMLoc
-      TYPE(DBL_VECT) :: VectCart
-      TYPE(DBL_VECT) :: VectInt
+      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ   
+      REAL(DOUBLE),DIMENSION(:)    :: VectCart,VectInt
       TYPE(DBL_VECT) :: VectCartAux,VectIntAux
       TYPE(DBL_VECT) :: VectCartAux2,VectIntAux2
       TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv
       REAL(DOUBLE)   :: DiffMax,RMSD,TrixThresh
       REAL(DOUBLE)   :: GrdTrfCrit,MaxGradDiff,Sum
       INTEGER        :: NCart,I,II,J,NIntC
-      INTEGER        :: MaxIt_GrdTrf
+      INTEGER        :: MaxIt_GrdTrf,NatmsLoc
       TYPE(INTC)     :: IntCs
+!
+      CALL OpenASCII(OutFile,Out)
 !
       TrixThresh=1.D-8
       GrdTrfCrit=TrixThresh*1.D0 !!! For Gradient transformation
       MaxIt_GrdTrf=10
-      NCart=3*GMLoc%Natms
+      NatmsLoc=SIZE(XYZ,2)
+      NIntC=SIZE(IntCs%Def)
+      NCart=3*NatmsLoc        
       MaxGradDiff=10000.D0
 !     MaxGradDiff=0.5D0
 !
@@ -3190,16 +3019,18 @@ END SUBROUTINE FullCoordTrf
       CALL New(VectIntAux,NIntC)
       CALL New(VectIntAux2,NIntC)
 !
-      VectInt%D=Zero
+      VectInt=Zero
 !
-      WRITE(*,*) 'Gradient transformation, No. Int. Coords= ',NIntC
-      WRITE(Out,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+        WRITE(Out,*) 'Gradient transformation, No. Int. Coords= ',NIntC
+      ENDIF
 !
 ! Cartesian --> Internal transformation
 !
 ! Get B matrix and Bt*B inverse
 !
-      CALL GetFullBMatr(GMLoc%Natms,GMLoc%Carts%D,IntCs,NIntC,FullB,FullBt)
+      CALL GetFullBMatr(NatmsLoc,XYZ,IntCs,NIntC,FullB,FullBt)
       CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
 !
       II=0
@@ -3209,8 +3040,8 @@ END SUBROUTINE FullCoordTrf
 !
 ! gc-Bt*gi
 !
-      CALL DGEMM_NNc(NCart,NIntC,1,One,Zero,FullBt%D,VectInt%D,VectCartAux%D)
-      VectCartAux%D=VectCart%D-VectCartAux%D
+      CALL DGEMM_NNc(NCart,NIntC,1,One,Zero,FullBt%D,VectInt,VectCartAux%D)
+      VectCartAux%D=VectCart-VectCartAux%D
 !
 ! GcInv*[gc-Bt*gi]
 !
@@ -3228,7 +3059,7 @@ END SUBROUTINE FullCoordTrf
         DiffMax=Zero
         DO I=1,NIntC ; DiffMax=MAX(DiffMax,ABS(VectIntAux%D(I))) ; ENDDO
         RMSD=DOT_PRODUCT(VectIntAux%D,VectIntAux%D)
-        RMSD=RMSD/DBLE(NIntC)
+        RMSD=SQRT(RMSD/DBLE(NIntC))
 !
 ! IF DiffMax is too large, eg. due to the 'bad' quality 
 ! of the preconditioner, rescale gradients
@@ -3243,30 +3074,38 @@ END SUBROUTINE FullCoordTrf
 !
 ! gi+B*GcInv*[gc-Bt*gi]
 !
-      VectInt%D=VectInt%D+VectIntAux%D
+      VectInt=VectInt+VectIntAux%D
 !
 ! Review iteration
 !
-      WRITE(*,110) II,DiffMax,RMSD
-      WRITE(Out,110) II,DiffMax,RMSD
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,110) II,DiffMax,RMSD
+        WRITE(Out,110) II,DiffMax,RMSD
+      ENDIF
 110   FORMAT('Grad Trf, step= ',I3,' MaxChange= ',F12.6,' ChangeNorm= ',F12.6)
 !      
       IF(DiffMax>GrdTrfCrit.AND.II<=MaxIt_GrdTrf) THEN
         GO TO 100      
       ELSE
         IF(II>MaxIt_GrdTrf) THEN
-          WRITE(*,*) 'Stop Gradient Trf, max. number of Iterations exceeded!'
-          WRITE(*,*) 'Use current gradient vector!'
-          WRITE(Out,*) 'Stop Gradient Trf, max. number of Iterations exceeded!'
-          WRITE(Out,*) 'Use current gradient vector!'
+          IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+            WRITE(*,*) 'Stop Gradient Trf, max. '//&
+                       'number of Iterations exceeded!'
+            WRITE(*,*) 'Use current gradient vector!'
+            WRITE(Out,*) 'Stop Gradient Trf, max. number '//&
+                         'of Iterations exceeded!'
+            WRITE(Out,*) 'Use current gradient vector!'
+          ENDIF
         ENDIF
           CALL Put(FullB,'FullB')
           CALL Put(FullBt,'FullBt')
           CALL Put(FullGcInv,'FullGcInv')
       ENDIF
 !
-      WRITE(*,120) II
-      WRITE(Out,120) II
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,120) II
+        WRITE(Out,120) II
+      ENDIF
 120   FORMAT('Gradient transformation converged in ',I3,' steps')
 !
 ! Tidy up
@@ -3279,33 +3118,39 @@ END SUBROUTINE FullCoordTrf
       CALL Delete(FullBt)
       CALL Delete(FullB)
 !
+      CLOSE(Out)
+!
     END SUBROUTINE CartToInternal
 !
-!-------------------------------------------------------
+!---------------------------------------------------------------------
 !
-    SUBROUTINE InternalToCart(GMLoc,IntCs,NIntC,VectCart,VectInt)
+    SUBROUTINE InternalToCart(XYZ,IntCs,VectInt)
 !
-    TYPE(CRDS) :: GMLoc
-    TYPE(DBL_VECT) :: VectCart
-    TYPE(DBL_VECT) :: VectInt
-    TYPE(DBL_VECT) :: VectCartAux,VectIntAux
-    TYPE(DBL_VECT) :: VectCartAux2,VectIntAux2
-    TYPE(DBL_VECT) :: VectIntReq
-    TYPE(DBL_RNK2) :: FullB,FullBt,FullGcInv,ActCarts
-    REAL(DOUBLE)   :: DiffMax,RMSD,TrixThresh
-    REAL(DOUBLE)   :: CooTrfCrit,MaxCartDiff,Sum
-    REAL(DOUBLE)   :: DistRefresh
-    REAL(DOUBLE)   :: SumX,SumY,SumZ
-    INTEGER        :: NCart,I,II,J,NIntC
-    INTEGER        :: MaxIt_CooTrf
-    TYPE(INTC)     :: IntCs
-    TYPE(BMATR)    :: B
-    LOGICAL        :: RefreshB,RefreshAct
-    TYPE(INT_VECT) :: MMAtNum
+    REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+    REAL(DOUBLE),DIMENSION(:) :: VectInt
+    TYPE(DBL_VECT)            :: VectCart
+    TYPE(DBL_VECT)            :: VectCartAux,VectIntAux
+    TYPE(DBL_VECT)            :: VectCartAux2,VectIntAux2
+    TYPE(DBL_VECT)            :: VectIntReq
+    TYPE(DBL_RNK2)            :: FullB,FullBt,FullGcInv,ActCarts
+    REAL(DOUBLE)              :: DiffMax,RMSD,TrixThresh
+    REAL(DOUBLE)              :: CooTrfCrit,MaxCartDiff,Sum
+    REAL(DOUBLE)              :: DistRefresh
+    REAL(DOUBLE)              :: SumX,SumY,SumZ
+    INTEGER                   :: NCart,I,II,J,NIntC
+    INTEGER                   :: MaxIt_CooTrf,NatmsLoc
+    TYPE(INTC)                :: IntCs
+    TYPE(BMATR)               :: B
+    LOGICAL                   :: RefreshB,RefreshAct
+    TYPE(INT_VECT)            :: MMAtNum
 !
-      CooTrfCrit=1.D-4 !!! For Backtransformation
+    CALL OpenASCII(OutFile,Out)
+!
+      CooTrfCrit=1.D-3 !!! For Backtransformation
       MaxIt_CooTrf=30
-      NCart=3*GMLoc%Natms
+      NatmsLoc=SIZE(XYZ,2)
+      NCart=3*NatmsLoc   
+      NIntC=SIZE(IntCs%Def)
       MaxCartDiff=0.5D0  !!! In atomic units. No larger cartesian displacements in a back-trf step are allowed
       DistRefresh=MaxCartDiff*0.75D0
 !
@@ -3316,11 +3161,12 @@ END SUBROUTINE FullCoordTrf
 !
 ! Auxiliary arrays
 !
-      CALL New(ActCarts,(/3,GMLoc%Natms/))
+      CALL New(ActCarts,(/3,NatmsLoc/))
       CALL New(FullB,(/NIntC,NCart/))
       CALL New(FullBt,(/NCart,NIntC/))
       CALL New(FullGcInv,(/NCart,NCart/))
 !
+      CALL New(VectCart,NCart)
       CALL New(VectCartAux,NCart)
       CALL New(VectCartAux2,NCart)
       CALL New(VectIntAux,NIntC)
@@ -3330,27 +3176,32 @@ END SUBROUTINE FullCoordTrf
 ! Calc values of internals in atomic unit, and add displacement,
 ! which is stored in VectInt. Then convert into Sparse matrx repr.
 !
-      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
+      CALL INTCValue(IntCs,XYZ,NatmsLoc)
 !
 ! The required new value of internal coordinates
 !
-      VectIntReq%D=VectInt%D+IntCs%Value
+      VectIntReq%D=VectInt+IntCs%Value
       CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
 !
 !initialization of new Cartesians
 !
-        ActCarts%D=GMLoc%Carts%D
-      DO I=1,GMLoc%Natms 
+        ActCarts%D=XYZ            
+      DO I=1,NatmsLoc
         J=3*(I-1)
-        VectCart%D(J+1)=GMLoc%Carts%D(1,I)
-        VectCart%D(J+2)=GMLoc%Carts%D(2,I)
-        VectCart%D(J+3)=GMLoc%Carts%D(3,I)
+        VectCart%D(J+1)=XYZ(1,I)
+        VectCart%D(J+2)=XYZ(2,I)
+        VectCart%D(J+3)=XYZ(3,I)
       ENDDO
 !
 ! Internal --> Cartesian transformation
 !
-      WRITE(*,*) 'Iterative back-transformation, No. Int. Coords= ',NIntC
-      WRITE(Out,*) 'Iterative back-transformation, No. Int. Coords= ',NIntC
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,*) 'Iterative back-transformation, '//&
+                   'No. Int. Coords= ',NIntC
+        WRITE(Out,*) 'Iterative back-transformation,'//&
+                     ' No. Int. Coords= ',NIntC
+      ENDIF
+!
       II=0
 200   CONTINUE
 !
@@ -3361,13 +3212,13 @@ END SUBROUTINE FullCoordTrf
          CALL Get(FullBt,'FullBt')
          CALL Get(FullGcInv,'FullGcInv')
        ELSE IF(RefreshB.AND.RefreshAct) THEN
-        CALL GetFullBMatr(GMLoc%Natms,ActCarts%D,IntCs,NIntC,FullB,FullBt)
+        CALL GetFullBMatr(NatmsLoc,ActCarts%D,IntCs,NIntC,FullB,FullBt)
         CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
        ENDIF
 !
 ! Compute actual value of internals 
 !
-      IF(II>0) CALL INTCValue(IntCs,ActCarts%D,GMLoc%Natms)
+      IF(II>0) CALL INTCValue(IntCs,ActCarts%D,NatmsLoc)
 !
 ! Calculate difference between required and actual internals
 ! Calc [phi_r-phi_a]
@@ -3418,26 +3269,26 @@ END SUBROUTINE FullCoordTrf
 !
 ! Modify Cartesians
 !
-write(11,*) GMLoc%Natms           
-write(11,*) 
-call new(mmatnum,GMLoc%Natms)
-call get(mmatnum,'mmatnum')
       VectCart%D=VectCart%D+VectCartAux2%D
-      DO I=1,GMLoc%Natms 
-        J=3*(I-1)
-        ActCarts%D(1,I)=VectCart%D(J+1)
-        ActCarts%D(2,I)=VectCart%D(J+2)
-        ActCarts%D(3,I)=VectCart%D(J+3)
-write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)/AngstromsToAu
-!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)
-      ENDDO
-call delete(mmatnum)
-215 format(I4,3F20.14)
+      CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
+!
+!write(11,*) NatmsLoc        
+!write(11,*) 
+!call new(mmatnum,NatmsLoc)
+!call get(mmatnum,'mmatnum')
+!DO I=1,NatmsLoc 
+!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)/AngstromsToAu
+!!write(11,215) mmatnum%I(i),ActCarts%D(1:3,I)
+!ENDDO
+!call delete(mmatnum)
+!215 format(I4,3F20.14)
 !
 ! Review iteration
 !
-      WRITE(*,210) II,DiffMax,RMSD
-      WRITE(Out,210) II,DiffMax,RMSD
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,210) II,DiffMax,RMSD
+        WRITE(Out,210) II,DiffMax,RMSD
+      ENDIF
 210   FORMAT('Step= ',I3,'   Max_DX= ',F12.6,'  X_RMSD= ',F12.6)
 !      
       IF(DiffMax>CooTrfCrit .AND. II<=MaxIt_CooTrf) THEN 
@@ -3452,10 +3303,12 @@ call delete(mmatnum)
             IF(RMSD>0.01D0) THEN
               CALL Halt('Iterative backtransformation did not converge')
             ENDIF
-            WRITE(*,180) 
-            WRITE(Out,180) 
-            WRITE(*,190) 
-            WRITE(Out,190) 
+            IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+              WRITE(*,180) 
+              WRITE(Out,180) 
+              WRITE(*,190) 
+              WRITE(Out,190) 
+            ENDIF
             GO TO 300
           ENDIF
       ENDIF
@@ -3464,20 +3317,22 @@ call delete(mmatnum)
 !
 ! At this point, convergence has been reached
 !
-      WRITE(*,220) II
-      WRITE(Out,220) II
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,220) II
+        WRITE(Out,220) II
+      ENDIF
 220   FORMAT('Coordinate back-transformation converged in ',I3,' steps')
 !
 300   CONTINUE
 !
-! Fill new Cartesians into GMLoc
+! Fill new Cartesians into XYZ  
 !
-      GMLoc%Carts%D=ActCarts%D
+      XYZ=ActCarts%D
 !
 ! Final internal coordinates
 !
-      CALL INTCValue(IntCs,GMLoc%Carts%D,GMLoc%Natms)
-      CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Final Internals')
+      CALL INTCValue(IntCs,XYZ,NatmsLoc)
+!     CALL PrtIntCoords(IntCs,NIntC,IntCs%Value,'Final Internals')
 !
 ! Tidy up
 !
@@ -3486,10 +3341,13 @@ call delete(mmatnum)
       CALL Delete(VectIntAux)
       CALL Delete(VectCartAux2)
       CALL Delete(VectCartAux)
+      CALL Delete(VectCart)
       CALL Delete(FullGcInv)
       CALL Delete(FullB)
       CALL Delete(FullBt)
       CALL Delete(ActCarts)
+!
+      CLOSE(Out)
 !
       END SUBROUTINE InternalToCart
 !
@@ -3925,8 +3783,237 @@ call delete(mmatnum)
 	ENDIF
       ENDDO
 !
-      END SUBROUTINE
+      END SUBROUTINE MapDisplTors
+!
+!--------------------------------------------------------------------
+!
+      SUBROUTINE CartRNK1ToCartRNK2(VectCart,ActCarts,Add_O)
+!
+      REAL(DOUBLE),DIMENSION(:)   :: VectCart
+      REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
+      INTEGER :: I,J,NatmsLoc
+      LOGICAL,OPTIONAL :: Add_O
+!
+      NatmsLoc=SIZE(ActCarts,2)
+!
+      IF(.NOT.PRESENT(Add_O)) THEN
+        DO I=1,NatmsLoc 
+          J=3*(I-1)
+          ActCarts(1,I)=VectCart(J+1)
+          ActCarts(2,I)=VectCart(J+2)
+          ActCarts(3,I)=VectCart(J+3)
+        ENDDO
+      ELSE IF(Add_O) THEN
+        DO I=1,NatmsLoc 
+          J=3*(I-1)
+          ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
+          ActCarts(2,I)=ActCarts(2,I)+VectCart(J+2)
+          ActCarts(3,I)=ActCarts(3,I)+VectCart(J+3)
+        ENDDO
+      ELSE
+        DO I=1,NatmsLoc 
+          J=3*(I-1)
+          ActCarts(1,I)=VectCart(J+1)
+          ActCarts(2,I)=VectCart(J+2)
+          ActCarts(3,I)=VectCart(J+3)
+        ENDDO
+      ENDIF
+!
+      END SUBROUTINE CartRNK1ToCartRNK2
 !-------------------------------------------------------
+!
+      SUBROUTINE ChkBendToLinB(IntCs,NIntC,XYZ)
+!
+      TYPE(INTC) :: IntCs,IntC_New
+      INTEGER    :: NIntC,Nintc_New
+      TYPE(INT_VECT) :: LinAtom,MarkLinb
+      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+      REAL(DOUBLE)                :: Value
+      INTEGER :: I1,I2,I3,I4,NMax12,NLinB,NtorsLinb
+      INTEGER :: I,J,K,NatmsLoc
+      TYPE(INT_RNK2) :: LinBBridge,Top12
+!
+! Now check for bending -> linear bending transitions
+!
+      CALL New(MarkLinB,NIntC)
+!
+      MarkLinB%I=0
+          NLinB=0
+      DO I=1,NIntC 
+        IF(IntCs%Def(I)(1:4)=='BEND') THEN
+          I1=IntCs%Atoms(I,1) 
+          I2=IntCs%Atoms(I,2) 
+          I3=IntCs%Atoms(I,3) 
+          CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+          IF(ABS(Value-PI)*180.D0/PI < LinCrit) THEN  !!!linear within 1 degree
+            NLinB=NLinB+1
+            MarkLinB%I(I)=1
+          ENDIF
+        ENDIF
+      ENDDO
+!
+    IF(NLinB/=0) THEN
+!
+      NIntc_New=NIntc+NLinB
+      CALL NEW(IntC_New,NIntc_New)
+!
+        NLinB=0
+      DO I=1,NIntC
+        IF(MarkLinB%I(I)==0) THEN
+          IntC_New%Def(NLinB+I)=Intcs%Def(I)
+          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
+          IntC_New%Value(NLinB+I)=Intcs%Value(I)
+          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
+        ELSE
+          IntC_New%Def(NLinB+I)='LINB1'
+          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
+          IntC_New%Value(NLinB+I)=Intcs%Value(I)
+          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
+          NLinB=NLinB+1
+          IntC_New%Def(NLinB+I)='LINB2'
+          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
+          IntC_New%Value(NLinB+I)=Intcs%Value(I)
+          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
+        ENDIF
+      ENDDO
+!
+!
+      CALL Delete(IntCs)
+      NIntC=NIntC_New
+      CALL New(IntCs,NIntC)
+          Intcs%Def(:)=IntC_New%Def(:)
+          Intcs%Atoms(:,:)=IntC_New%Atoms(:,:)
+          Intcs%Value(:)=IntC_New%Value(:)      
+          Intcs%Constraint(:)=IntC_New%Constraint(:)
+      CALL Delete(IntC_New)
+!
+! Now recognize colinear atoms of the molecule and 
+! introduce torsions. Introduction of extra bends is not done,
+! since it is supposed to be done in previous steps
+!
+        CALL Get(NMax12,'NMax12')
+        CALL New(Top12,(/NatmsLoc,NMax12+1/))
+        CALL Get(Top12,'TOP12')
+!
+        CALL NEW(LinBBridge,(/2,NIntc/))
+        CALL NEW(LinAtom,NIntc)
+        LinBBridge%I(1:2,:)=0
+        LinAtom%I(:)=0
+        NLinB=0
+      DO I=1,NIntc
+        IF(IntCs%Def(I)(1:5)=='LINB1'.AND.LinAtom%I(IntCs%Atoms(I,1))==0) THEN 
+          NLinB=NLinB+1 
+          LinAtom%I(IntCs%Atoms(I,1))=1
+          LinAtom%I(IntCs%Atoms(I,2))=1
+          LinAtom%I(IntCs%Atoms(I,3))=1
+          LinBBridge%I(1,NLinB)=IntCs%Atoms(I,1)
+          LinBBridge%I(2,NLinB)=IntCs%Atoms(I,2)
+! now, go on left side, use Top12, then go on right, then define torsions
+            I1=LinBBridge%I(2,NLinB)
+            I2=LinBBridge%I(1,NLinB)
+180         CONTINUE
+          DO J=1,Top12%I(I2,1)
+            I3=Top12%I(I2,1+J) 
+            CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+            IF(ABS(Value-PI)*180.D0/Pi<LinCrit) THEN !!!!linear within 1 degree
+              LinBBridge%I(1,NLinB)=I3
+              LinAtom%I(I3)=1
+              I1=I2
+              I2=I3
+              GO TO 180
+            ENDIF
+          ENDDO
+!
+            I1=LinBBridge%I(1,NLinB)
+            I2=LinBBridge%I(2,NLinB)
+120         CONTINUE
+          DO J=1,Top12%I(I2,1)
+            I3=Top12%I(I2,1+J) 
+            CALL BENDValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),Value)
+            IF(ABS(Value-PI)*180.D0/Pi<LinCrit) THEN !!!!linear within 1 degree
+              LinBBridge%I(2,NLinB)=I3
+              LinAtom%I(I3)=1
+              I1=I2
+              I2=I3
+              GO TO 120
+            ENDIF
+          ENDDO
+!
+        ENDIF
+      ENDDO 
+!
+! bridges are set now, add torsions
+! first, count number of torsions, to be added
+!
+      NTorsLinB=0
+      DO I=1,NLinB
+        I1=LinBBridge%I(1,I)
+        I2=LinBBridge%I(2,I)
+        NTorsLinB=NTorsLinB+Top12%I(I1,1)*Top12%I(I2,1)
+      ENDDO
+!
+! Now generate the INTCs for the new torsions
+!
+      NIntc_New=NIntC+NTorsLinB
+      CALL New(IntC_New,NIntc_New)
+        IntC_New%Def(1:NIntC)=Intcs%Def(1:NIntC)
+        IntC_New%Atoms(1:NIntC,1:4)=Intcs%Atoms(1:NIntC,1:4)
+        IntC_New%Value(1:NIntC)=Intcs%Value(1:NIntC)      
+        IntC_New%Constraint(1:NIntC)=Intcs%Constraint(1:NIntC)
+!
+          NTorsLinB=0
+        DO I=1,NLinB
+          I2=LinBBridge%I(1,I)
+          I3=LinBBridge%I(2,I)
+          DO J=1,Top12%I(I2,1)
+            I1=Top12%I(I2,1+J)
+            IF(LinAtom%I(I1)==0) THEN
+          DO K=1,Top12%I(I3,1)
+            I4=Top12%I(I3,1+K)
+            IF(LinAtom%I(I4)==0) THEN
+            IF(I1/=I4) THEN
+              NTorsLinB=NTorsLinB+1
+              IntC_New%Def(NIntC+NTorsLinB)='TORS '
+              IntC_New%Atoms(NIntC+NTorsLinB,1)=I1
+              IntC_New%Atoms(NIntC+NTorsLinB,2)=I2
+              IntC_New%Atoms(NIntC+NTorsLinB,3)=I3
+              IntC_New%Atoms(NIntC+NTorsLinB,4)=I4
+              IntC_New%Value(1:NIntC)=Zero
+              IntC_New%Constraint(1:NIntC)=.FALSE.
+            ENDIF
+            ENDIF
+          ENDDO
+            ENDIF
+          ENDDO
+        ENDDO
+!
+        CALL Delete(Intcs)
+        NIntC=NIntC+NTorsLinB
+        CALL New(Intcs,NIntC)
+        Intcs%Def(1:NIntC)=IntC_New%Def(1:NIntC)
+        Intcs%Atoms(1:NIntC,1:4)=IntC_New%Atoms(1:NIntC,1:4)
+        Intcs%Value(1:NIntC)=IntC_New%Value(1:NIntC)      
+        Intcs%Constraint(1:NIntC)=IntC_New%Constraint(1:NIntC)
+        CALL Delete(IntC_New)
+!
+        CALL Delete(LinAtom)
+        CALL Delete(LinBBridge)
+        CALL Delete(Top12)
+!
+! Put IntCs onto HDF
+!
+        CALL Put(NIntC,'NIntC')
+        CALL Put(IntCs,'IntCs')
+!
+    ENDIF
+!
+! Tidy up
+!
+        CALL Delete(MarkLinB)
+!
+END SUBROUTINE ChkBendToLinB    
+!
+!
 #endif
 !-------------------------------------------------------
 END MODULE InCoords
