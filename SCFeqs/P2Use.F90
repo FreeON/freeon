@@ -27,9 +27,9 @@ PROGRAM P2Use
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: P,T1,T2
+                                :: P,T0,T1,T2
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: TrP,Fact
+  REAL(DOUBLE)                  :: TrP,Fact,ECount,DensityDev
   INTEGER                       :: I,J,AtA,Q,R,KA,NBFA
   CHARACTER(LEN=2)              :: Cycl
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
@@ -50,67 +50,82 @@ PROGRAM P2Use
   CALL New(P)
   CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
 !
-  IF(SCFActn=='Direct')THEN
-!   Compute a diagonal guess as the superposition of 
-!   atomic lewis structure occupancies 
-    DO I=1,NAtoms
-       CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
-    ENDDO
-    CALL SetToI(P,BlkP)
-!   Check for the correct elctron count
-    TrP=Trace(P)
-    IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
-       CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
-!   IO for the orthogonal P 
-    CALL Put(P,TrixFile('OrthoD',Args,0)) 
-    CALL PChkSum(P,'OrthoP['//TRIM(Cycl)//']',Prog)
-    CALL PPrint( P,'OrthoP['//TRIM(Cycl)//']')
-    CALL Plot(   P,'OrthoP_'//TRIM(Cycl))
-  ELSEIF(SCFActn=='Switch')THEN
-    WRITE(*,*)' In P2Use, using previous density matrix from info file '
-    CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-    CALL Put(P,TrixFile('OrthoD',Args,0)) 
-  ELSEIF(SCFActn=='Restart')THEN
-    CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-    CALL Put(P,TrixFile('OrthoD',Args,0)) 
+  IF(SCFActn=='Extrapolate')THEN
+     CALL New(T0)
+     CALL New(T1)
+     CALL New(T2)
+     CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
+     CALL Get(T1,TrixFile('S',Args,Stats_O=Current))
+     CALL Multiply(T1,-One)
+!    dS=Sp-Sc 
+     CALL Add(T1,T0,T2)        
+!    Get previous density matrix 
+     CALL Get(P,TrixFile('D',Args,-1))     
+!    P.dS
+     CALL Multiply(P,T2,T1)
+!    dP=-P.dS.P
+     CALL Multiply(T1,P,T0)
+!    P'=P+dP
+!     CALL Multiply(T0,Zero)
+     CALL Add(T0,P,T1)
+!    Check for normalization in corrected DP
+     CALL Filter(P,T1)
+     CALL Get(T0,TrixFile('S',Args,Stats_O=Current))
+     ECount=Trace(T0,P)
+     DensityDev=DBLE(Nel)-Two*ECount
+!     WRITE(*,*)' Density Dev = ',DensityDev
+!    Renormalize corrected density matrix  (could purify here...)
+     CALL Multiply(P,DBLE(NEl)/(Two*ECount))
+  ELSE
+     IF(SCFActn=='Restart')THEN
+       CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
+       CALL Put(P,TrixFile('OrthoD',Args,0)) 
+     ELSEIF(SCFActn=='Project')THEN
+!      Get previous geometries orthogonal density matrix 
+       CALL Get(P,TrixFile('OrthoD',Args,-1))     
+     ELSE
+!      Compute a diagonal guess as the superposition of atomic lewis 
+!      structure occupancies--works only for minimal (STO) basis sets
+       DO I=1,NAtoms
+          CALL FillPBlok(BSiz%I(I),GM%AtNum%I(I),BlkP%D(:,I))
+       ENDDO
+       CALL SetToI(P,BlkP)
+!      Check for the correct elctron count
+       TrP=Trace(P)
+       IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
+          CALL Halt(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+       CALL Delete(BlkP)
+     ENDIF
+     CALL New(T0)
+     CALL New(T1)
+     CALL New(T2)
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+     IF(Present)THEN     
+         CALL Get(T1,TrixFile('X',Args))   ! T1=S^(-1/2)
+         CALL Multiply(T1,P,T2)            ! T2=S^(-1/2).DiagonalGuess
+         CALL Multiply(T2,T1,T0)           ! P=S^(-1/2).DiagonalGuess.S^(-1/2)
+         CALL Filter(P,T0)                 ! T1=Filter[S^(-1/2).DiagonalGuess.S^(-1/2)]
+      ELSE
+         CALL Get(T1,TrixFile('Z',Args))   ! T1=Z
+         CALL Multiply(T1,P,T2)            ! T2=Z.DiagonalGuess
+         CALL Get(T1,TrixFile('ZT',Args))  ! T1=Z^T
+         CALL Multiply(T2,T1,T0)           ! P=Z.DiagonalGuess.Z^T
+         CALL Filter(P,T0)                 ! T1=Filter[Z.DiagonalGuess.Z^T]
+      ENDIF     
   ENDIF    
-!
-  CALL Delete(BlkP)
-!---------------------------------------------
-!  Orthog to non-orthogonal xformation
-!
-  CALL New(T1)
-  CALL New(T2)
-!
-   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-   IF(Present)THEN     
-      CALL Get(T1,TrixFile('X',Args))   ! T1=S^(-1/2)
-      CALL Multiply(T1,P,T2)            ! T2=S^(-1/2).DiagonalGuess
-      CALL Multiply(T2,T1,P)            ! P=S^(-1/2).DiagonalGuess.S^(-1/2)
-      CALL Filter(T1,P)                 ! T1=Filter[S^(-1/2).DiagonalGuess.S^(-1/2)]
-   ELSE
-      CALL Get(T1,TrixFile('Z',Args))   ! T1=Z
-      CALL Multiply(T1,P,T2)            ! T2=Z.DiagonalGuess
-      CALL Get(T1,TrixFile('ZT',Args))  ! T1=Z^T
-      CALL Multiply(T2,T1,P)            ! P=Z.DiagonalGuess.Z^T
-      CALL Filter(T1,P)                 ! T1=Filter[Z.DiagonalGuess.Z^T]
-   ENDIF     
-!--------------------------------------------------------------------
-!  IO for the non-orthogonal P 
-!
-   CALL Put(T1,TrixFile('D',Args,0),        &
-            BlksName_O='ndi'//TRIM(Cycl),   &
-            Non0Name_O='ndm'//TRIM(Cycl)) 
+! IO for the non-orthogonal P 
+  CALL Put(P,TrixFile('D',Args,0))
 !----------------------------------------------
-   CALL PChkSum(T1,'P['//TRIM(Cycl)//']',Prog)
-   CALL PPrint( T1,'P['//TRIM(Cycl)//']')
-   CALL Plot(   T1,'P_'//TRIM(Cycl))
+   CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+   CALL PPrint( P,'P['//TRIM(Cycl)//']')
+   CALL Plot(   P,'P_'//TRIM(Cycl))
 !---------------------------------
 !  Tidy up ...
 !
    CALL Delete(GM)
    CALL Delete(BS)
    CALL Delete(P)
+   CALL Delete(T0)
    CALL Delete(T1)
    CALL Delete(T2)
    CALL ShutDown(Prog)   
