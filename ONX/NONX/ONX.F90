@@ -145,7 +145,15 @@ PROGRAM ONX
 !----------------------------------------------
 ! Get the Density Matrix
 !----------------------------------------------
-  IF(SCFActn=='InkFok')THEN
+  IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
+     !write(*,*) 'ONX: Start'
+     !write(*,*) 'ONX: File=<'//'DPrime'//Args%C%C(4)//'>'
+#ifndef PARALLEL
+     CALL Get(D,TrixFile('DPrime'//Args%C%C(4),Args,0))
+#else
+     CALL PDrv_Initialize(DFastMat,TrixFile('DPrime'//Args%C%C(4),Args,0),'ONXPart',Args)
+#endif
+  ELSEIF(SCFActn=='InkFok')THEN
 #ifndef PARALLEL
      CALL Get(D,TrixFile('DeltaD',Args,0))
 #else
@@ -521,10 +529,19 @@ PROGRAM ONX
 #endif !ONX_INFO
   !
   ! Save on disc.
-  CALL Put(K,TrixFile('K',Args,0))
-  CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
-  CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
+  IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
+     CALL Put(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))
+     !write(*,*) 'ONX: Name=','Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']'
+     CALL PChkSum(K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   K,'Kx'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     !write(*,*) 'ONX: End'
+  ELSE
+     CALL Put(K,TrixFile('K',Args,0))
+     CALL PChkSum(K,'Kx['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( K,'Kx['//TRIM(SCFCycl)//']')
+     CALL Plot(   K,'Kx['//TRIM(SCFCycl)//']')
+  ENDIF
 !--------------------------------------------------------------------------------
 ! Clean up...
 !--------------------------------------------------------------------------------

@@ -150,7 +150,11 @@ PROGRAM QCTC
      ENDIF
 #endif
      ! Put J to disk
-     CALL Put(T1,TrixFile('J',Args,0))
+     IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+        CALL Put(T1,TrixFile('JPrime'//TRIM(Args%C%C(4)),Args,0))
+     ELSE
+        CALL Put(T1,TrixFile('J',Args,0))
+     ENDIF
      ! Compute the nuclear-total electrostatic energy in O(N Lg N)
      IF(SCFActn=='InkFok')THEN
         CALL Get(E_Nuc_Tot,'E_NuclearTotal')
@@ -186,9 +190,15 @@ PROGRAM QCTC
 !-------------------------------------------------------------------------------
 ! Printing
 !  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
-  CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
-  CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
-  CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+     CALL PChkSum(T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'J'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+  ELSE
+     CALL PChkSum(T1,'J['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( T1,'J['//TRIM(SCFCycl)//']')
+     CALL Plot(   T1,'J['//TRIM(SCFCycl)//']')
+  ENDIF
 ! Print Periodic Info
   CALL Print_Periodic(GM,Prog)
 #ifdef PARALLEL

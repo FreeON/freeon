@@ -28,13 +28,15 @@ PROGRAM MakeRho
   TYPE(HGRho_new)                 :: RhoA
   TYPE(CMPoles)                   :: MP,PrvMP
   TYPE(INT_VECT)                  :: Stat
+  TYPE(DBL_RNK2)                  :: BlkP !vw
   INTEGER                         :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                         :: NExpt,NDist,NCoef,I,J,K,Iq,Ir,Pbeg,Pend,NDist_old,NDist_new
   INTEGER                         :: N1,N2,QMOffSetQ,QMOffSetR,PcntDist,OldFileID
   REAL(DOUBLE)                    :: DistThresh,RSumE,RSumN,RSumMM,RSum_TPS,RelRhoErr, &
                                      QMCharge,dQMCharge,MMCharge,dMMCharge,PcntCharge
-  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF
+  CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg1,Mssg2,RestartHDF,ResponsePostFix
   CHARACTER(LEN=7),PARAMETER      :: Prog='MakeRho'
+  REAL(DOUBLE) :: Coeff,TraceD
 !---------------------------------------------------------------------------------------
 ! Start up macro
   CALL StartUp(Args,Prog)
@@ -56,7 +58,6 @@ PROGRAM MakeRho
         CALL Get(NBasF,'nbasf',PrvBase)
         CALL Get(Dmat,TrixFile('D',Args,-1))
      ELSEIF(SCFActn=='Restart')THEN
-#ifdef PARALLEL_CLONES
         ! Get the current geometry from the current HDF first
         CALL Get(GM,CurGeom)
         ! ... then close current group and HDF
@@ -82,21 +83,6 @@ PROGRAM MakeRho
         HDFFileID=OpenHDF(H5File)
         H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
         HDF_CurrentID=H5GroupID
-#else
-!       Get the old information
-        CALL Get(RestartHDF,'OldInfo')
-        CALL CloseHDF(HDF_CurrentID)
-        HDF_CurrentID=OpenHDF(RestartHDF)
-        CALL New(Stat,3)
-        CALL Get(Stat,'current')
-        SCFCycl=TRIM(IntToChar(Stat%I(1)))
-        CurBase=TRIM(IntToChar(Stat%I(2)))
-        CurGeom=TRIM(IntToChar(Stat%I(3)))
-        CALL Get(BS,CurBase)
-        CALL Get(GM,CurGeom)
-        CALL CloseHDF(HDF_CurrentID)
-        HDF_CurrentID=OpenHDF(InfFile)     
-#endif
         CALL Get(Dmat,TrixFile('D',Args,0))
      ELSE
 !       Get the current information
@@ -115,16 +101,23 @@ PROGRAM MakeRho
            CALL Delete(D2)
         ELSEIF(SCFActn=='ForceEvaluation')THEN
            CALL Get(Dmat,TrixFile('D',Args,1))
+        ELSEIF(SCFActn=='StartResponse')THEN
+           CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
+           !CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
+           !DO I=1,NAtoms
+           !   BlkP%D(:,I)=Zero
+           !ENDDO
+           !CALL New(DMat)
+           !CALL SetToI(DMat,BlkP)
+           !CALL Delete(BlkP)
+           !CALL Put(DMat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
+        ELSEIF(SCFActn=='DensityPrime')THEN
+           CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))
         ELSEIF(SCFActn/='Core')THEN
+           ! Default, stupid.
            CALL Get(Dmat,TrixFile('D',Args,0))
         ENDIF
      ENDIF
-! Allocations and precalculations
-!***********************************************************************************
-!!$     CALL Get(S,TrixFile('S',Args))
-!!$     RSum_TPS = Trace(Dmat,S)
-!!$     WRITE(*,*) 'Trace[P_AO*S]  = ', RSum_TPS
-!***********************************************************************************
      CALL NewBraBlok(BS)  
 !--------------------------------------------------------------
 ! Main loops: First pass calculates the size.
@@ -179,10 +172,12 @@ PROGRAM MakeRho
            ENDIF
         ENDDO
      ENDDO
-     IF(SCFActn/='InkFok') THEN
+     ! Don't add in nuclear charges if incremental fock builds or CPSCF  
+     IF(SCFActn/='InkFok'.AND.        &
+        SCFActn/='StartResponse'.AND. &
+        SCFActn/='DensityPrime') THEN
         CALL AddDist(RhoA,GM,NuclearExpnt,1,GM%NAtms)
      ENDIF
-!
 #ifdef MMech
   ELSE
      CALL New_HGRho_new(RhoA,(/0,0/))
@@ -364,7 +359,17 @@ PROGRAM MakeRho
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho,'DeltaRho',Args,0)
      CALL Put(MP,'Delta'//TRIM(SCFCycl))
-  ELSE
+!-----------------------------------------------
+!  ELSE                                                    !vw             
+!  ELSEIF(SCFActn=='StartResponse'.OR.SCFActn=="DensityPrime") THEN!vw
+!     CALL Put_HGRho(Rho,'RhoPrim',Args,0)                    !vw
+!#ifdef PARALLEL_CLONES                                       !vw
+!      CALL Put(MP)                                           !vw
+!#else                                                        !vw
+!     CALL Put(MP,IntToChar(Current(1)))                      !vw
+!#endif                                                       !vw
+  ELSE                                                       !vw
+!-----------------------------------------------
      CALL Put_HGRho(Rho,'Rho',Args,0) 
 #ifdef PARALLEL_CLONES
        CALL Put(MP)  

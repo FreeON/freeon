@@ -104,6 +104,12 @@ PROGRAM ParaMakeRho
         CALL Delete(D2)
      ELSEIF(SCFActn=='ForceEvaluation')THEN
         CALL Get(Dmat,TrixFile('D',Args,1))
+     ELSEIF(SCFActn=='StartResponse') THEN                           !vw
+        CALL Halt('MakeRho: SCFActn cannot be equal to <StartResponse>')
+        !CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0)) !vw
+     ELSEIF(SCFActn=='DensityPrime') THEN                            !vw
+        ! this should not be used, it is set in SCFs.                !vw
+        CALL Get(Dmat,TrixFile('DPrime'//TRIM(Args%C%C(4)),Args,0))  !vw
      ELSEIF(SCFActn/='Core')THEN
         CALL Get(Dmat,TrixFile('D',Args,0))
      ENDIF

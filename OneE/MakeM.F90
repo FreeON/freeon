@@ -33,7 +33,7 @@ PROGRAM MakeM
   INTEGER             :: P,R,AtA,AtB,NN                          
   INTEGER             :: IXYZ                                       !vw
   CHARACTER(LEN=5)              , PARAMETER :: Prog='MakeM'         !vw
-  CHARACTER(LEN=1), DIMENSION(3), PARAMETER :: Cart=(/'x','y','z'/) !vw
+  CHARACTER(LEN=1), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/) !vw
 !--------------------------------------- 
 ! Start up macro
 !
@@ -47,6 +47,7 @@ PROGRAM MakeM
 ! Get Multipole origine. TODO
   CALL New(COrig,3)
   CALL SetEQ(COrig,Zero)
+  !COrig%D(3)=0.580836d0
 !---------------------------------------------- 
 ! Allocations 
 !
@@ -110,13 +111,13 @@ PROGRAM MakeM
 ! Put D to disk
 !  
      CALL Filter(M2,M)
-     CALL Put(M2,TrixFile('D'//Cart(IXYZ),Args))
+     CALL Put(M2,TrixFile('Dipole'//Cart(IXYZ),Args))
 !------------------------------------------------------------
 ! Printing
 !
-     CALL PChkSum(M2,'D'//Cart(IXYZ),Prog)
-     CALL PPrint( M2,'D'//Cart(IXYZ))
-     CALL Plot(   M2,'D'//Cart(IXYZ))
+     CALL PChkSum(M2,'Dipole'//Cart(IXYZ),Prog)
+     CALL PPrint( M2,'Dipole'//Cart(IXYZ))
+     CALL Plot(   M2,'Dipole'//Cart(IXYZ))
 !------------------------------------------------------------
   ENDDO ! End Loop over Cartesian Componants  !vw
 !------------------------------------------------------------
