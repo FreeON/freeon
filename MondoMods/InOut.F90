@@ -934,7 +934,6 @@ MODULE InOut
       SUBROUTINE Get_CRDS(GM,Tag_O)
          TYPE(CRDS),           INTENT(OUT)    :: GM
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Tag
          IF(AllocQ(GM%Alloc))CALL Delete(GM)
 !-------------------------------------------------------------------
 !        Items that should not change with geometry...
@@ -963,7 +962,6 @@ MODULE InOut
          CALL Get(GM%Ordrd,'reordered',Tag_O=Tag_O)
          CALL Get(GM%AtTyp,'atomtype',Tag_O=Tag_O)
          CALL Get(GM%AtNum,'atomicnumbers',Tag_O=Tag_O)
-         CALL Get(GM%ENucN,'enucnuc',Tag_O=Tag_O)
          CALL Get(GM%Carts,'cartesians',Tag_O=Tag_O)
          CALL Get(GM%BndBox,'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
@@ -1005,7 +1003,6 @@ MODULE InOut
          CALL Put(GM%Ordrd,'reordered',Tag_O=Tag_O)
          CALL Put(GM%AtNum,'atomicnumbers',Tag_O=Tag_O)
          CALL Put(GM%AtTyp,'atomtype',Tag_O=Tag_O)
-         CALL Put(GM%ENucN,'enucnuc',Tag_O=Tag_O)
          CALL Put(GM%Carts,'cartesians',Tag_O=Tag_O)
          CALL Put(GM%BndBox,'boundingbox',Tag_O=Tag_O)
 #ifdef PERIODIC
