@@ -55,32 +55,30 @@
 \begin{document}
 
 
-\title{High order response in ${\cal O}(N)$ by perturbed projection} 
-%\title{\emph{Ab-inito} hyperpolarizabilities by O(N) perturbed projection}% Force line breaks with \\
+\title{The Perturbed Projector for Higher Order Response in ${\cal O}(N)$} 
 
 \author{Val\'ery Weber}
 \email{valery.weber@unifr.ch}
-\affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}%
-% \altaffiliation[Also at ]{Physics Department, XYZ University.}%Lines break automatically or can be forced with \\
-\author{Anders M. N. Niklasson}%
-\author{Matt Challacombe}%
-
-\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}%
+\affiliation{Department of Chemistry, University of Fribourg, 1700 Fribourg, Switzerland.}
+\author{Anders M. N. Niklasson}
+\author{Matt Challacombe}
+\affiliation{Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexico, USA.}
 
 \date{\today}
 
 \begin{abstract}
-A framework for linear scaling evaluation of high order static response properties is 
-presented, based on the perturbed projection method [Niklasson and Challacombe, 
-Phys.\ Rev.\ Lett. {\bf 92}, 193001 (2004)]  for solving the coupled perturbed 
-self consistent field equations [Weber, Niklasson and  Challacombe, 
-Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)].  Perturbed projection is applied to 
-the self-consistent computation of the first and second electric hyperpolarizabilities 
-of three dimensional water clusters.  Density matrix analogues to Wigner's $2n+1$ rule 
-are given up to fourth order for mixed perturbation terms including non-orthogonal 
-representations. Linear scaling and locality of the response densities under a global 
-electric field perturbation are demonstrated.  Perturbed projection is also used to compute 
-response functions up to 10th order {\bf for what??} in the uncoupled approximation.  
+Perturbed projection  for linear scaling solution of the coupled perturbed 
+self consistent field equations 
+[Weber, Niklasson and  Challacombe, Phys.\ Rev.\ Lett. {\bf 92}, 193002 (2004)] 
+is extended to computation of higher order static response properties.
+Although generally applicable, perturbed projection is applied here specifically to the 
+self-consistent computation of the first and second electric hyperpolarizabilities 
+of three dimensional water clusters at the Hartree-Fock level of theory. 
+Density matrix analogues of Wigner's $2n+1$ rule are given up to fourth order for 
+mixed perturbation terms, including non-orthogonal formulations.
+Linear scaling and locality of the higher order response densities under perturbation 
+by a global electric field are demonstrated.  Perturbed projection is also used to compute 
+response functions up to 10th order in the uncoupled approximation.  
 \end{abstract}
 
 %\pacs{Valid PACS appear here}% PACS, the Physics and Astronomy
@@ -91,77 +89,92 @@ response functions up to 10th order {\bf for what??} in the uncoupled approximat
 
 \footnotetext[1]{LA-UR-04-5219} 
 
+\newpage
+
 \section{Introduction}
-First principles electronic structure theory  has  for a long time been limited to 
-the study of small  systems with  a limited number of nonequivalent atoms. 
-Despite a tremendous increase in computational power of digital computers this 
+First principles electronic structure theory has traditionally been limited 
+to the study of small systems with a limited number of nonequivalent atoms. 
+Despite the tremendous increase in computational power of digital computers this 
 has remained the case, untill the advent of reduced complexity algorithms over the
 last decade \cite{GGalli96,DBowler97,SGoedecker99,POrdejon00,VGogonea01,SWu02}. In the 
 best case, these reduced complexity algorithms scale only linearly with system size, 
 allowing simulation capabilities to keep pace with hardware improvements.
 These linear scaling algorithms exploit the quantum locality (or nearsightedness) of 
-non-metallic systems,  manifested in the approximate exponential decay of the density matrix 
-with atom-atom separation, through the effective use of sparse matrix methods. For small systems,
-linear scaling methods may be inefficient due to overheads.  However, these methods hold the promise 
+non-metallic systems,  manifested in the approximate exponential decay of density matrix elements 
+with atom-atom separation through the effective use of sparse matrix methods. For small systems,
+linear scaling methods may be inefficient due to overhead.  However, these methods hold the promise 
 of major impact, allowing a rigourous approach to large scale simmulation across materials science, 
 chemistry and biology. 
 
- So far, most attention in linear scaling electronic structure theory 
- has been focused on calculations of the ground state total energy and 
- little attention has been devoted to the problem of materials response properties, 
- such as the electric polarizability and hyperpolarizability, the Born-effective charge,
- the nuclear magnetic shilding tensor \cite{Pulay_1990}, indirect spin-spin coupling
- constant \cite{Pennington_1991,Malkin_1996}, and polarizability derivatives such as 
- Raman intensity \cite{Lazzeri_2003,Champagne_2001}.
-% However, the locality principle can be extended
-% also to higher order response properties as will be demonstrated
-% in this article.
+So far, a majority of work in linear scaling electronic structure theory 
+has focused on methods and calculations involving the ground state, with little 
+attention devoted to the problem of response properties.  The calculation of static
+response within  Hartree-Fock or density functional theory is obtained through solution 
+of the Coupled-Perturbed Self-Consistent-Field (CPSCF) equations, which yeild properties 
+such as the electric polarizability and hyperpolarizability, the Born-effective charge, 
+the nuclear magnetic shilding tensor \cite{Pulay_1990}, indirect spin-spin coupling
+constant \cite{Pennington_1991,Malkin_1996}, and polarizability derivatives such as 
+Raman intensity \cite{Lazzeri_2003,Champagne_2001}.
 
- In the calculation of materials response properties within 
- Hartree-Fock or density functional theory the electronic
- response is given from self-consistent solutions of both
- the ground state density and its perturbative response functions,
- referred to as the solutions to the coupled perturbed self consistent 
- field (CPSCF) equations.
- Standard non-linear scaling approaches to solutions of the CPSCF equations 
- \cite{Pople_1979,Sekino_1986,Dupuis_1991} do not admit full exploitation 
- of locality and sparse matrix algebra, as they are based on perturbation 
- of the wave functions, requiring a solution of the eigenvalue problem
- that scales as ${\cal O}(N^2)$ or ${\cal O}(N^3)$ and with transformation of two-electron
- integrals that typically scales as ${\cal O}(N^5)$ with system size.
- These problems are avoided in an orbital-free density matrix approach, 
- where both the density matrix and its derivatives are calculated directly.
- A few linear scaling response schemes have been proposed.
- Ochsenfeld and Head-Gordon developed a scheme based on the
- Li-Nunes-Vanderbilt density matrix functional \cite{Ochsenfeld97}
- and later Larsen {\em et al.} \cite{Helgaker_2001} proposed iterative 
- solutions to the CPSCF equations based on unitary operations
- involving matrix exponentials. In both of these approaches, a linear 
- system of equations containing commutation relations must be solved.
- Another very interesting approach was demonstrated by Yam {\em et al.}
- \cite{CYam03,CYam03a}, who derived the frequency response of one 
- dimensional molecular chains by calculating the time evolution of 
- the density matrix from the quantum-Liouville equation.
 
- Our approach to linear scaling response theory is quite different 
- from previous attempts. It is based on the perturbed projection
- method in density matrix perturbation theory, recently developed
- by the authors \cite{ANiklasson04,Weber04}. With this theory it
- was possible to demonstrate efficient linear scaling {\em ab initio}
- computations for the first electric polarizability of three-dimensional 
- water clusters. And in contrast to many alternative approaches, linear scaling 
- was achieved without assuming a predefined range of locality. Instead a 
- numerical threshold was used defining a desired numerical accuracy similar
- to a variable machine precision.
+\newpage
 
- In addition to response calculations the new approach to quantum perturbation
- theory provides an efficient technique for quantum embedding with a computational
- complexity scaling linearly with the size of the perturbed region ${\cal O}(N_{\rm pert.})$,
- {\em i. e.} as ${\cal O}(1)$ with the total system size \cite{ANiklasson04}.
+Standard non-linear scaling approaches to solution of the CPSCF equations 
+\cite{Pople_1979,Sekino_1986,Dupuis_1991} are based on perturbation of the wave 
+function, requiring an $N^3$-scaling eigensolve followed by an ${\cal O}(N^5)$ 
+transformation of two-electron integrals. In addition to the formal scaling of 
+these formulations of the CPSCF equations, they do not admit exploitation 
+of locality through the effective use of sparse matrix algebra.  More recently,
+schemes with potential for reduced complexity have been been proposed.
+Ochsenfeld and Head-Gordon proposed a scheme based on the Li-Nunes-Vanderbilt 
+density matrix minimization \cite{Ochsenfeld97}.  Later, Larsen {\em et al.} \cite{Helgaker_2001} 
+proposed iterative solution of the CPSCF equations based on unitary operations
+involving matrix exponentials.  Both of these approaches obtain a linear 
+system of equations involving commutation relations, and have yet to demonstrate 
+reduced complexity.  
 
- In this article, we present a linear scaling self consistent perturbed projection scheme
- for higher order response properties; up to fourth order in energy for
- the solution of the CPSCF equations and up to 10th order for the uncoupled response.
+Another interesting approach involves propigating the time evolution of 
+the density matrix with the quantum-Liouville equation.  If $N$-scaling
+methods are used to solve the self-consistent-field (SCF) equations, then
+this approach is ${\cal O}(N)$, as number of time-steps required to resolve
+the spectrum depends on the gap, rather than the system size.   
+{\bf HERE WE NEED TO GIVE MORE CREDIT 
+%demonstrated by Yam {\em et al.}
+%\cite{CYam03,CYam03a}, who derived the frequency response of one 
+% dimensional molecular chains by calculating 
+}
+Although static response properties can be obtained through the 
+long time limit, this is a costly proposition requiring thousands of 
+time steps.
+
+\newpage
+
+Recently, a formulation of density matrix perturbation theory has been proposed 
+by Niklasson and Challacombe (NC) \cite{ANiklasson04} that presents a new opportunity for 
+solving the CPSCF equations within the context of linear scaling spectral projection 
+\cite{ANiklasson02A,ANiklasson03}.  The new approach is based on the relationship between 
+the density matrix $\mathcal{D}$ and the effective Hamiltonian or Fockian $\mathcal{F}$ 
+through the spectral projector (Heaviside step function) $\mathcal{D}=\theta(\tilde{\mu}I-\mathcal{F})$, 
+where the chemical potential $\tilde{\mu}$ determines the occupied states via Aufbau filling.   
+Spectral projection can be carried out in a number of ways 
+\cite{ANiklasson02A,ANiklasson03,RMcWeeny60,WClinton69,APalser98,GBeylkin99,KNemeth00,AHolas01}.
+{\bf CITE ALSO MAZZIOTI}.  Of special interest here are recursive polynomial expansions of 
+the projector, including the second order trace correcting (TC2) \cite{ANiklasson02A} and 
+fourth order trace resetting (TRS4) \cite{ANiklasson03} purification algorithms.  
+These new methods (TC2 and TRS4) have convergence properties that depend only weakly on the 
+band gap, do not require knowledge of the chemical potential and perform well for all occupation 
+to state ratios. In the NC approach, the perturbation expansion is developed within the reference 
+groundstate projector allowing order by order collection of terms at each iteration, establishing 
+a quadratically convergent sequence for the response functions.  
+
+Recently, we have developed the perturbed projection method for 
+solution of the CPSCF equations \cite{Weber04}, based on the NC density matrix perturbation theory,
+and demonstrated linear scaling computation of the first electric polarizability for 
+three-dimensional water clusters with the Hartree-Fock model. In this article, the 
+perturbed projection method for linear scaling solution of the CPSCF equations
+is extended up to fourth order in the total energy, and up to 10th order in the uncoupled case.
+
+This paper is organized as follows: 
  First we give a general description through the solution of the CPSCF equations.
  Then we describe the perturbed projection approach for the calculation
  of the density matrix derivatives and present
@@ -172,20 +185,27 @@ chemistry and biology.
  for nonorthogonal representations with mixed perturbation terms within the
  coupled perturbed scheme.  In the following section we present several examples
  of calculated higher order response properties. First we show how up to 10th
- order response properties can be calculated for the uncouples SCF equations.
+ order response properties can be calculated for the uncoupled SCF equations.
  Thereafter we show the saturation of the hyperpolarizabilities up to 
  fourth order (i.e. up to the second hyperpolarizability $\gamma$) given from
  the solution of the CPSCF equations for a series of 1D chains of water molecules. 
  Thereafter, we demonstrate linear scaling complexity for the solution of the CPSCF
  equations for the higher order electric response properties of 3D water clusters.
 
-\section{Linear scaling perturbed projection approach to higher order response theory}
+
+\newpage
+
+\section{Density Matrix Perturbation Theory}
 
 
-The coupled perturbed self consistent field equations occur in Hartree-Fock (HF)
-and density functional theory (DFT) for the computation of material response
-properties. Here, we discuss the CPSCF equations in the framework of
-HF theory, however an extension to DFT is straightforward.
+\section{Higher order response by perturbed projection}
+
+The Coupled-Perturbed Self-Consistent-Field (CPSCF) equations yeild
+static response functions and properties in models including both the 
+Hartree-Fock (HF) and Density Functional Theory (DFT).  In the following
+we develop the CPSCF equations in the framework of polarization and 
+Hartree-Fock theory, but an extension to DFT and other perturbations 
+is straightforward.
 
 \subsection{Notation}
 
@@ -202,20 +222,22 @@ scaling linearly with the system size \cite{MBenzi95,MBenzi96,MBenzi01}.
 
 \subsection{Response expansions}
 
+\newpage
+
 Within HF theory, the total electronic energy $E_{\rm tot}$ of 
 a molecule in a static electric field $\mathcal{E}$ is
 \begin{equation}
   \begin{split}\label{totalE}
-   E_{\rm tot}(\E)&=Tr[D(h^0+\mu\E)]+\frac{1}{2}Tr[D(J(D)+K(D))] \\
-                  &=Tr[DF(D)]-\frac{1}{2}Tr[D(J(D)+K(D))],
+   E_{\rm tot}(\E)&=Tr \{ D \cdot (h^0+\mu\E) \}+\frac{1}{2}Tr \{ D \cdot (J[D]+K[D]) \} \\
+                  &=Tr \{ D \cdot F[D] \}-\frac{1}{2}Tr \{D \cdot (J[D]+K[D]) \},
   \end{split}
 \end{equation}
-where $D=D(\E)$ is the density matrix in the electric field $\mathcal{E}$, 
+where $D \equiv D[\E]$ is the density matrix in the electric field $\mathcal{E}$, 
 $h^0$ is the core Hamiltonian, $\mu$ is the dipole moment matrix, 
-$J(D)$ is the Coulomb matrix, $K(D)$ the exact HF exchange matrix
+$J[D]$ is the Coulomb matrix, $K[D]$ the exact HF exchange matrix
 and 
 \begin{equation}
-F=F(\E)=h^0+\mu\E+J(D(\E))+K(D(\E))
+F \equiv F[\E]=h^0+\mu\E+J[D(\E)]+K[D(\E)]
 \end{equation}
 is the Fockian.
 The total energy of a molecule in a homogenous electric field may 
@@ -703,10 +725,27 @@ Similar expressions can be derived for the fourth order
 %  \end{split}
 %\end{equation}
 
-Those relations may seem to be fairly expansive to compute. 
-However, in most cases the expressions can be reduced 
-thanks to symmetry. The expression above should thus be used
-explicitly in a calculation.
+These relations may seem fairly expensive. However, in most cases they
+can be reduced by taking advantage of indicial symmetry; 
+$a,b,c,$ and $d$ represent the Cartesian directions $x,y,z$
+so that terms with indecies in the same direction simplify. For example,
+$E^{aaaa}$ reduces to only one term requiring only 7 matrix multiplications.
+In the worst case, where all the directions are different i.e. $E^{aabc}$ 
+(or any other permutations of $(a,a,b,c)$), the relation \eqref{eq:2n+1 fourth order} 
+simplifies to include only 12 terms with 84 matrix multiplications. 
+Similar reductions of the computational cost also apply to 
+Eq. \eqref{eq:2n+1 third order}.  
+
+We mention that the equations 
+\eqref{eq:2n+1 third order} and \eqref{eq:2n+1 fourth order}
+do not depend on any parametrization of the wave function
+as the relations previously given \cite{Helgaker_2001,Dupuis_1991}.
+
+\section{Examples}
+
+
+
+
 %But after further
 %inspections, we see, for example in the orthogonal representation 
 %and $a,b,c,d$ represent the Cartesian directions $x,y,z$, that the 
