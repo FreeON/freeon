@@ -92,12 +92,12 @@ MODULE Thresholding
 !       Max extent of atom pair from the line AB 
         IF(ABS(Pair%AB2)<1D-20)THEN
 !          Line is a point: Exp[-MinZab*R^2]<Tau
-           PairExtent=PrimPairDistanceThreshold/MinZab
+           PairExtent=SQRT(PrimPairDistanceThreshold/MinZab)
            PairHlfWdt=Zero
            PairUntVct=Zero
         ELSE
 !          Exp[-MinXab*|A-B|^2]*Exp[-MinZab*R^2]<Tau
-           PairExtent=MAX(Zero,(PrimPairDistanceThreshold-MinXab*Pair%AB2/MinZab))
+           PairExtent=SQRT(MAX(Zero,(PrimPairDistanceThreshold-MinXab*Pair%AB2/MinZab)))
            PairUntVct=(Pair%A-Pair%B)*Half
 !          Half length (width) of AB
            PairHlfWdt=SQRT(PairUntVct(1)**2+PairUntVct(2)**2+PairUntVct(3)**2)
