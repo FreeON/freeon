@@ -26,6 +26,8 @@ PROGRAM MondoSCF
 
 #if defined(PARALLEL) && defined(MPI2)
   CALL InitMPI()
+  InParallel=.FALSE.
+  IF(MyID==0)THEN
 #endif
 ! Initialize
   CALL Init(PerfMon)
@@ -85,7 +87,8 @@ PROGRAM MondoSCF
      ENDIF
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
+  ENDIF
   CALL FiniMPI()
 #endif
- CALL TimeStamp('Succesfull MondoSCF run',.FALSE.)   
+  CALL TimeStamp('Succesfull MondoSCF run',.FALSE.)   
 END PROGRAM MondoSCF
