@@ -3321,6 +3321,7 @@ CONTAINS
      TYPE(INTC)                :: IntCs
      INTEGER                   :: I,IRef1,IRef2,IConstr(6)
      TYPE(Constr)              :: GConstr
+     REAL(DOUBLE)              :: SumIRef1,SumIRef2,SumR1,SumR2
      !
      IConstr=0
      IRef1=0
@@ -3352,28 +3353,38 @@ CONTAINS
          IF(GConstr%RatioABC(3)>Zero) IRef2=3
        ENDIF
      ENDDO
+     SumIRef1=Zero ; SumR1=Zero
      IF(IRef1==0) THEN
        DO I=1,3
          IF(GConstr%RatioABC(I)>Zero) THEN
-           IRef1=I
-           EXIT
+           SumIRef1=SumIRef1+Vec(I)
+           SumR1=SumR1+GConstr%RatioABC(I)
          ENDIF
        ENDDO 
      ENDIF
+     SumIRef2=Zero ; SumR2=Zero
      IF(IRef2==0) THEN
        DO I=1,3
          IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
-           IRef2=I
-           EXIT
+           SumIRef2=SumIRef2+Vec(3+I)
+           SumR2=SumR2+GConstr%RatioAlpBetGam(3+I)
          ENDIF
        ENDDO 
      ENDIF
      DO I=1,3
        IF(GConstr%RatioABC(I)>Zero) THEN
-         Vec(I)=Vec(IRef1)*GConstr%RatioABC(I)/GConstr%RatioABC(IRef1)
+         IF(IRef1/=0) THEN
+           Vec(I)=Vec(IRef1)*GConstr%RatioABC(I)/GConstr%RatioABC(IRef1)
+         ELSE
+           Vec(I)=GConstr%RatioABC(I)*SumIRef1/SumR1
+         ENDIF
        ENDIF
        IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
-         Vec(3+I)=Vec(3+IRef2)*GConstr%RatioAlpBetGam(I)/GConstr%RatioAlpBetGam(IRef2)
+         IF(IRef2/=0) THEN
+           Vec(3+I)=Vec(3+IRef2)*GConstr%RatioAlpBetGam(I)/GConstr%RatioAlpBetGam(IRef2)
+         ELSE
+           Vec(3+I)=GConstr%RatioAlpBetGam(I)*SumIRef2/SumR2
+         ENDIF
        ENDIF
      ENDDO 
    END SUBROUTINE SetLattValues
@@ -6256,7 +6267,6 @@ return
          Fact=GCoordCtrl%VDWFact !!! Scaling factor for VDW Radii
          DO I=1,NatmsLoc
            CritRad%D(I)=Fact*VDWRadii(AtNum(I))*AngstromsToAU
-          !CritRad%D(I)=Fact*1.6*SLRadii(AtNum(I))*AngstromsToAU
          ENDDO
        ENDIF
        StRad%D=CritRad%D
@@ -6268,6 +6278,7 @@ return
          NFrag=NatmsLoc
          !
          DO IFrags=1,10000
+          !CALL BondList2(XYZ,AtNum,Box,Bond,IEq)  
            CALL BondList(XYZ,AtNum,IntSet,Box,BondCov,TOPS, &
                          CritRad,HbondMax,GCoordCtrl%LinCrit, &
                          GConvCr,IEq,FragID%I,NFrag)
@@ -6554,6 +6565,166 @@ return
      CALL MoreBondArray(Bond,0,NBond)
      CALL Delete(Neighbors)
    END SUBROUTINE BondList
+!
+!--------------------------------------------------------------
+!
+   SUBROUTINE BondList2(XYZ,AtNum,Box,Bond,IEq)  
+     IMPLICIT NONE
+     INTEGER                     :: I,J,NatmsLoc,NBond
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(BONDDATA)              :: Bond
+     TYPE(IntCBox)               :: Box
+     INTEGER,DIMENSION(:)        :: AtNum,IEq
+     INTEGER                     :: IZ,IX,IY,I1,I2,JJ1,JJ2
+     INTEGER                     :: IORD,IORDD
+     INTEGER                     :: IZD,IXD,IYD,NJJ1,NJJ2
+     INTEGER                     :: JJ,NBondEst
+     INTEGER                     :: NBondOld,DDimU,AuxSize,ICount
+     INTEGER                     :: Info
+     REAL(DOUBLE),DIMENSION(3)   :: DVect
+     REAL(DOUBLE),DIMENSION(3,3) :: Theta
+     REAL(DOUBLE)                :: R12_2,R12,Fact,Q
+     TYPE(INT_VECT)              :: Atoms,IOrder
+     TYPE(DBL_Vect)              :: VectB
+     TYPE(DBL_RNK2)              :: Vects,Vects2
+     !     
+     NatmsLoc=SIZE(XYZ,2)
+     NBondEst=Bond%N
+     NBond=NBondEst
+     AuxSize=(1+(NatmsLoc-3)/(Box%NZ+Box%NX+Box%NY))*27*5
+     CALL New(Atoms,AuxSize)
+     CALL New(IOrder,AuxSize)
+     CALL New(Vects,(/AuxSize,3/))
+     CALL New(Vects2,(/AuxSize,3/))
+     CALL New(VectB,AuxSize)
+     CALL SetDSYEVWork(3)
+     !
+     !  Go through all boxes and their neighbours
+     !
+     DO IZ=1,Box%NZ
+       DO IX=1,Box%NX
+         DO IY=1,Box%NY
+           ! absolute index of a box
+           IOrd=Box%NX*Box%NY*(IZ-1)+Box%NY*(IX-1)+IY
+           DO I1=Box%I%I(IOrd),Box%I%I(IOrd+1)-1
+             JJ1=Box%J%I(I1) !!! atom in central box
+             NJJ1=AtNum(JJ1)
+             Theta=Zero
+             ICount=0
+               DO IZD=-1,1
+                 IF(IZ+IZD>0 .AND. IZ+IZD<=Box%NZ) THEN
+                   DO IXD=-1,1
+                     IF(IX+IXD>0 .AND. IX+IXD<=Box%NX) THEN
+                       DO IYD=-1,1
+                         IF(IY+IYD>0 .AND. IY+IYD<=Box%NY) THEN
+                           IOrdD=Box%NX*Box%NY*(IZ-1+IZD)+&
+                                 Box%NY*(IX-1+IXD)+IY+IYD
+                           DO I2=Box%I%I(IOrdD),Box%I%I(IOrdD+1)-1
+                             JJ2=Box%J%I(I2) !!! second atom
+                             NJJ2=AtNum(JJ2)
+                             IF(JJ1==JJ2) CYCLE
+                             ICount=ICount+1
+                             DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                             R12_2=DOT_PRODUCT(DVect,DVect)
+                             R12=SQRT(R12_2)
+                             DVect=DBLE(NJJ2)/(R12_2*R12)*DVect
+                             Atoms%I(ICount)=JJ2
+                             DO J=1,3 ; Vects%D(ICount,J)=DVect(J) ; ENDDO
+                             CALL DGEMM_NTc(3,1,3,One,One, &
+                                            DVect,DVect,Theta)
+                           ENDDO
+                         ENDIF
+                       ENDDO
+                     ENDIF
+                   ENDDO
+                 ENDIF
+               ENDDO
+               ! get principal directions
+               BLKVECT%D=Theta
+               CALL DSYEV('V','U',3,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+               BLKWORK%D,BLKLWORK,INFO)
+               !
+               DO J=1,3 
+                 IF(BLKVALS%D(J)/BLKVALS%D(3)>0.1D0) THEN
+                   BLKVALS%D(J)=One/SQRT(BLKVALS%D(J))
+                 ELSE
+                   BLKVALS%D(J)=Zero
+                 ENDIF 
+               ENDDO 
+               CALL DGEMM_NNc(ICount,3,3,One,Zero,Vects%D(1:icount,1:3),&
+                              BLKVECT%D,Vects2%D(1:icount,1:3))
+write(*,*) 'vects2 ',icount
+               DO I=1,ICount
+                 DO J=1,3
+                   Vects2%D(I,J)=Vects2%D(I,J)*BLKVALS%D(J)
+                 ENDDO
+write(*,*) atoms%i(i),vects2%d(i,1:3)
+               ENDDO
+               !
+               ! Recognize bonds
+               !
+write(*,*) 'recognition'
+               VectB%D=Zero
+               DO I=1,ICount
+                 DO J=1,3
+write(*,*) I,VectB%D(I),Vects2%D(I,J)**2,VectB%D(I)+Vects2%D(I,J)**2
+                   VectB%D(I)=VectB%D(I)+Vects2%D(I,J)**2 
+                 ENDDO
+               ENDDO
+               Fact=DOT_PRODUCT(VectB%D(1:ICount),VectB%D(1:ICount))
+write(*,*) jj1,'fact= ',fact
+               VectB%D=VectB%D/Fact
+write(*,*) jj1,'vectb ',vectb%d(1:icount)
+               !
+               CALL ReorderN(VectB%D,IOrder%I,ICount) 
+write(*,*) jj1,'reorder ',VectB%D(1:icount)
+write(*,*) jj1,'reorder ',IOrder%I(1:icount)
+               Q=Zero
+               DO I=1,ICount
+                 J=IOrder%I(I)
+write(*,*) I,' Q ',Q
+                 IF(Q<0.50D0) THEN
+                   IF(NBond+1>NBondEst) THEN
+                     DDimU=NatmsLoc*10
+                     CALL MoreBondArray(Bond,DDimU,NBondEst)
+                     NBondEst=NBondEst+DDimU
+                   ENDIF 
+                   JJ2=Atoms%I(J)
+write(*,*) 'jj1 jj2= ',jj1,jj2
+                   IF(JJ2>JJ1) THEN ! avoid double counting of bonds
+                     NBond=NBond+1
+                     IF(IEq(JJ1)<IEq(JJ2)) THEN
+                       Bond%IJ%I(1:2,NBond)=(/JJ1,JJ2/)
+                     ELSE
+                       Bond%IJ%I(1:2,NBond)=(/JJ2,JJ1/)
+                     ENDIF
+                     DVect(:)=XYZ(:,JJ1)-XYZ(:,JJ2)
+                     R12_2=DOT_PRODUCT(DVect,DVect)
+                     R12=SQRT(R12_2)
+                     Bond%Length%D(NBond)=R12
+write(*,*) nbond,'bond ',jj1,jj2,r12
+                     Bond%Type%C(NBond)(1:3)='COV'
+                   ENDIF
+                 ENDIF
+                 Q=Q+VectB%D(J)
+write(*,*) I,' QN',Q
+               ENDDO
+               !
+           ENDDO !!! central box atoms
+         ENDDO
+       ENDDO
+     ENDDO !!! ends on central box indices
+     CALL Delete(Atoms)
+     CALL Delete(IOrder)
+     CALL Delete(Vects)
+     CALL Delete(Vects2)
+     CALL Delete(VectB)
+     !
+     ! Compress Bond
+     !
+     CALL UnSetDSYEVWork()
+     CALL MoreBondArray(Bond,0,NBond)
+   END SUBROUTINE BondList2
 !
 !--------------------------------------------------------------
 !
@@ -7972,6 +8143,7 @@ return
      !
      ! Generate INTC of Constraints
      !
+     CALL CleanLattGradRatio(PBCDim,XYZ,GOpt%Constr,CartGrad)
      CALL IntCsConstr(GOpt%ExtIntCs,IntCsX,DoReturn)
      IF(DoReturn) RETURN
      !
@@ -8211,6 +8383,69 @@ return
        ENDIF
      ENDDO 
    END FUNCTION ConnectedF
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CleanLattGradRatio(PBCDim,XYZ,GConstr,CartGrad)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:)   :: CartGrad
+     REAL(DOUBLE)                :: LattGrad(6),Vect(9)
+     REAL(DOUBLE)                :: SumABC,SumAlpBetGam
+     REAL(DOUBLE)                :: GSumABC,GSumAlpBetGam
+     TYPE(Constr)                :: GConstr
+     INTEGER                     :: PBCDim,NatmsLoc,NCoinc,NCart,I,J
+     TYPE(INTC)                  :: IntC_L
+     TYPE(DBL_RNK2)              :: AL,BL
+     INTEGER                     :: IRefABC,IRefAlpBetGam
+     !
+     IF(.NOT.ANY(GConstr%RatioABC>Zero).AND. &
+        .NOT.ANY(GConstr%RatioAlpBetGam>Zero)) RETURN
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     CALL LatticeINTC(IntC_L,PBCDim)
+     IntC_L%Constraint%L=.TRUE.
+     CALL LatticeConstrAB(XYZ,IntC_L,PBCDim,AL,BL,NCoinc)
+     LattGrad=Zero
+     DO J=1,9 ; Vect(J)=CartGrad(NCart-9+J) ; ENDDO
+     CALL DGEMM_NNc(NCoinc,9,1,One,Zero,AL%D,Vect,LattGrad(1:NCoinc))       
+     !
+     ! Impose Ratios of lattice gradients
+     !
+     IRefABC=0
+     SumABC=Zero
+     GSumABC=Zero
+     IRefAlpBetGam=0
+     SumAlpBetGam=Zero
+     GSumAlpBetGam=Zero
+     DO I=1,3
+       IF(GConstr%RatioABC(I)>Zero) THEN
+         SumABC=SumABC+GConstr%RatioABC(I)
+         GSumABC=GSumABC+LattGrad(I)
+         IRefABC=I
+       ENDIF
+       IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
+         SumAlpBetGam=SumAlpBetGam+GConstr%RatioAlpBetGam(I)
+         GSumAlpBetGam=GSumAlpBetGam+LattGrad(3+I)
+         IRefAlpBetGam=I
+       ENDIF
+     ENDDO
+     DO I=1,3
+       IF(GConstr%RatioABC(I)>Zero) THEN
+         LattGrad(I)=GSumABC/SumABC*GConstr%RatioABC(I)
+       ENDIF
+       IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
+         LattGrad(3+I)=GSumAlpBetGam/SumAlpBetGam*GConstr%RatioAlpBetGam(I)
+       ENDIF
+     ENDDO
+     !
+     CALL DGEMM_NNc(1,NCoinc,9,One,Zero,LattGrad(1:NCoinc),BL%D,Vect)       
+     DO J=1,9 ; CartGrad(NCart-9+J)=Vect(J) ; ENDDO
+     !
+     CALL Delete(IntC_L)
+     CALL Delete(BL)
+     CALL Delete(AL)
+   END SUBROUTINE CleanLattGradRatio
 !
 !-------------------------------------------------------------------
 !
