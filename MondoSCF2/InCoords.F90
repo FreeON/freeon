@@ -3308,14 +3308,18 @@ CONTAINS
      LOGICAL      :: ConvConstr
      !
      DoIterate=.TRUE.
-     ConvConstr=.FALSE.
+     ConvConstr=.TRUE.
      !
-     IF(NConstr/=0)THEN
-       ConvConstr=(ConstrMax>ConstrMaxCrit.AND. &
-       ConstrRMS<ConstrRMSOld*RMSCrit) 
+     IF(NConstr/=0) THEN
+       IF(IStep>1) THEN
+         ConvConstr=(ConstrMax<ConstrMaxCrit.OR. &
+           (ConstrRMS>ConstrRMSOld*RMSCrit.AND.Istep>5)) 
+       ELSE
+         ConvConstr=.FALSE.
+       ENDIF
      ENDIF
      !
-     DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf)
+     DoIterate=(DiffMax>CooTrfCrit)
      IF(RMSD>RMSDOld*RMSCrit) THEN 
        IF(DiffMax<MaxCartDiff*RMSCrit.AND.IStep>10) THEN
          DoIterate=.FALSE.
@@ -3323,7 +3327,8 @@ CONTAINS
          RefreshAct=.TRUE.
        ENDIF
      ENDIF
-     DoIterate=DoIterate.AND.(.NOT.ConvConstr)
+     DoIterate=DoIterate.OR.(.NOT.ConvConstr)
+     DoIterate=(DoIterate.AND.IStep<=MaxIt_CooTrf)
      !
    END SUBROUTINE BackTrfConvg
 !
