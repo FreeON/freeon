@@ -65,6 +65,10 @@ MODULE CubeTree
          INTEGER                          :: I,J,K,NRes,ErrCount,PtsPerAtom,PU
          TYPE(BBox)                       :: CubeBox    
          CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
+#ifdef PERIODIC 
+         INTEGER                            :: NC
+         REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
+#endif
 !---------------------------------------------------------------------------------
 !        Initialize some global variables
          GlobalCubes=0
@@ -74,7 +78,23 @@ MODULE CubeTree
          CALL InitCubeRoot(CubeRoot)
 !        Compute total electron population in this box
          CALL SetBBox(CubeRoot%Box,Box)
+#ifdef PERIODIC
+         IXact=Zero
+         BoxCenter(:) = Box%Center(:)
+         BoxBndLow(:) = Box%BndBox(:,1)
+         BoxBndHig(:) = Box%BndBox(:,2)
+         DO NC = 1,CS%NCells
+            Box%Center(:)   = BoxCenter(:)+CS%CellCarts%D(:,NC)
+            Box%BndBox(:,1) = BoxBndLow(:)+CS%CellCarts%D(:,NC)
+            Box%BndBox(:,2) = BoxBndHig(:)+CS%CellCarts%D(:,NC)        
+            IXact=IXact+PopInBox(RhoRoot)
+         ENDDO
+         Box%Center(:)   = BoxCenter(:)
+         Box%BndBox(:,1) = BoxBndLow(:)
+         Box%BndBox(:,2) = BoxBndHig(:)  
+#else
          IXact=PopInBox(RhoRoot)
+#endif
 !        Seting parameters for grid generation with variable accuracy
          MaxRelError=BIG_DBL
          Delta=1.D-1 
@@ -92,12 +112,13 @@ MODULE CubeTree
             Exc=NewCubes(2) 
             IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
                Mssg=ProcessName('HiCu.GridGen')                    &
-                  //'Tau = ' //TRIM(DblToShrtChar(TauRel))      &
+                  //'Tau = ' //TRIM(DblToShrtChar(TauRel))         &
                   //', <Rho> = '//TRIM(DblToMedmChar(NewCubes(1))) &
                   //', <Exc> = '//TRIM(DblToMedmChar(Exc))         &
                   //', Pts/Atom = '//TRIM(IntToChar(PtsPerAtom))
                CALL OpenASCII(OutFile,Out)         
                WRITE(*,*)TRIM(Mssg)
+               WRITE(Out,*)' IXact = ',IXact
                WRITE(Out,*)TRIM(Mssg)
                CLOSE(Out)
             ENDIF
