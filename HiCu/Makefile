@@ -43,7 +43,7 @@ ReleaseFiles=Grid.x Thresholds.x RhoTree.x    \
              CubeTree.x TreeWalk.x KxcGen.x   \
              HiCu.x dXCBlok.x XCForce.x VRhoMD.x 
 #
-all:	VR HC XF
+all:	HC XF
 #
 release:clean $(ReleaseFiles)
 #
