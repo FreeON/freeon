@@ -125,7 +125,7 @@ MODULE ControlStructures
      TYPE(INT_VECT)                  :: Current,Previous
   END TYPE State
 
-  TYPE Optimizer
+  TYPE OptimizerType
      INTEGER                            :: AccL
      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
      LOGICAL                            :: DoInternals
@@ -186,12 +186,12 @@ MODULE ControlStructures
      LOGICAL                            :: GDIISOn
      LOGICAL                            :: GDIISMetricOn
      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
-  END TYPE Optimizer
+  END TYPE OptimizerType
 
   TYPE Controls
      TYPE(FileNames)  :: Nams
      TYPE(Options)    :: Opts
-     TYPE(Optimizer)  :: Mizr
+     TYPE(OptimizerType)  :: Mizr
      TYPE(Dynamics)   :: Dyns
      TYPE(Geometries) :: Geos
 #ifdef PERIODIC

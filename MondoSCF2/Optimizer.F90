@@ -3,7 +3,7 @@ MODULE Optimizer
   USE InOut
   USE MatFunk
   USE AtomPairs
-  USE Thresholds
+  USE ThresholdsMod
   USE ControlStructures  
   IMPLICIT NONE
 CONTAINS
