@@ -1,3 +1,26 @@
+2005-02-22 22:59  nemeth
+
+	* MondoSCF2/InCoords.F90: In case of lonely protons angles and
+	torsions are automatically added.
+
+2005-02-22 18:31  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GeomOptKeys.F90, InCoords.F90,
+	ParseGeomOpt.F90: New keyword "PrtBackTr" is added, prints the
+	steps of the back-transformation into separate files. Also, H-bond
+	recognition modified to be able to recognize non-linear H-bonds,
+	but these only for the case when H is between two strongly
+	electronegative atoms.
+
+2005-02-22 16:01  nemeth
+
+	* MondoSCF2/InCoords.F90: Recognition of isolated proton in extreme
+	H-bonded structures improved.
+
+2005-02-22 12:14  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-02-22 11:44  nemeth
 
 	* MondoSCF2/InCoords.F90: Recognition of H-bonds changed, for
