@@ -44,6 +44,12 @@ MODULE OptionKeys
   INTEGER,           PARAMETER :: GUESS_EQ_RESTART   =34344
   CHARACTER(LEN=7),  PARAMETER :: RESTART_INFO       ='HDFFile'
   !------------------------------------------------------------------------------
+  ! Options:Restart=
+  CHARACTER(LEN=7),  PARAMETER :: RESTART_OPTION     ='Restart'   
+  CHARACTER(LEN=9),  PARAMETER :: RESTART_NEWGEOM    ='ParseGeom'
+  CHARACTER(LEN=10), PARAMETER :: RESTART_TC2PERT    ='TC2Perturb'
+  CHARACTER(LEN=10), PARAMETER :: TC2PERT_OLDFOCK    ='OldFockMat'
+  !------------------------------------------------------------------------------
   ! Options:InkFok=
   CHARACTER(LEN=6),  PARAMETER :: INKFOCK_OPTION     ='InkFok'
   CHARACTER(LEN=2),  PARAMETER :: INKFOCK_ON         ='On'

@@ -102,8 +102,9 @@ CONTAINS
              ! HUGH PUTS A ROUTINE TO GENERATE (G%Clones) TRAJECTORIES AND VELOCITIES?
           ENDIF
        ENDIF
-    ELSE
-       IF(O%Guess==GUESS_EQ_RESTART)THEN
+    ELSE ! Not doing any fancy shmancy with clones ...
+       IF(O%Guess==GUESS_EQ_RESTART.AND. &
+          .NOT.OptKeyQ(Inp,RESTART_OPTION,RESTART_NEWGEOM))THEN      
           HDFFileID=OpenHDF(N%RFile)
           HDF_CurrentID=HDFFileID
           CALL Get(G%Clones,'clones')
@@ -115,6 +116,7 @@ CONTAINS
           ENDDO
           CALL CloseHDF(HDFFileID)          
        ELSE       
+          WRITE(*,*)' REPARSING GEOMETRY ON RESTART!!!!'
           G%Clones=1
           ALLOCATE(G%Clone(1))
           CALL ParseCoordinates(GEOMETRY_BEGIN,GEOMETRY_END,G%Clone(1))
