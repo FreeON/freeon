@@ -27,6 +27,11 @@ PROGRAM MondoSCF
      CALL SinglePoints(C)
   CASE(GRAD_GO_DOWNHILL)
       CALL Descender(C)
+  CASE(GRAD_TS_SEARCH_NEB)
+     ! Place holder for whatever
+      CALL Descender(C)
+   CASE(GRAD_DO_DYNAMICS)
+      ! Needs work...
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()

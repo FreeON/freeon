@@ -13,10 +13,13 @@ CONTAINS
   SUBROUTINE Descender(C)
     TYPE(Controls) :: C
     !----------------------------------------------------------------------------------!
-    ! Follow Cartesian gradient down hill
-!    CALL SteepD(C)
-    ! Follow extrapolated Cartesian gradient down hill
-    CALL GDicer(C)
+    IF(C%Opts%DoGDIIS)THEN
+       ! Follow extrapolated Cartesian gradient down hill
+       CALL GDicer(C)
+    ELSE
+       ! Follow Cartesian gradient down hill
+       CALL SteepD(C)
+    ENDIF
   END SUBROUTINE Descender
   !=====================================================================================
   !
@@ -29,12 +32,11 @@ CONTAINS
     iGEO=1
     ! Initialize the previous state
     C%Stat%Previous%I=(/0,1,1/)
-    ! Archive MPIs and Geos 
+    ! Initialize HDF groups
     CALL InitClones(C%Nams,C%Geos)
-    CALL MPIsArchive(C%Nams,C%Geos,C%MPIs)
-    CALL GeomArchive(iGEO,C%Nams,C%Geos)    
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -55,7 +57,7 @@ CONTAINS
     REAL(DOUBLE)           :: DIISErr,GRMSQ,GMAXQ
     REAL(DOUBLE),PARAMETER :: StepLength=3D-1 ! Open issues about this and normalization in GDIIS
     INTEGER                :: iBAS,iGEO,iCLONE,AccL    
-    INTEGER                :: Relaxations=3   ! This should be an input variable at some point
+    INTEGER                :: Relaxations=4   ! This should be an input variable at some point
     LOGICAL                :: Converged
     CHARACTER(LEN=DCL)     :: Mssg
     !----------------------------------------------------------------------------------!
@@ -63,12 +65,11 @@ CONTAINS
     iGEO=1
     ! Initialize the previous state
     C%Stat%Previous%I=(/0,1,1/)
-    ! Archive MPIs and Geos 
+    ! Initialize HDF groups Archive MPIs and Geos 
     CALL InitClones(C%Nams,C%Geos)
-    CALL MPIsArchive(C%Nams,C%Geos,C%MPIs)
-    CALL GeomArchive(iGEO,C%Nams,C%Geos)    
     ! Build the guess 
     DO iBAS=1,C%Sets%NBSets
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
     ENDDO
@@ -79,13 +80,14 @@ CONTAINS
     iBAS=C%Sets%NBSets
     AccL=C%Opts%AccuracyLevels(iBAS)
     ! Use simple Cartesian GDIIS to go down hill
-    DO iGEO=1,25  !C%Opts%NSteps
+    DO iGEO=1,C%Opts%NSteps
        ! Compute new gradients
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%MPIs)       
        ! Convergence statistics for the gradient
        GradMax%D(iGEO)=Zero
        GradRMS%D(iGEO)=Zero
        DO iCLONE=1,C%Geos%Clones
+          WRITE(*,*)'iCLONE = ',iCLONE,' GRADMAX = ',C%Geos%Clone(iCLONE)%GradMax
           GradMAX%D(iGEO)=MAX(GradMax%D(iGEO),C%Geos%Clone(iCLONE)%GradMax)
           GradRMS%D(iGEO)=MAX(GradRMS%D(iGEO),C%Geos%Clone(iCLONE)%GradRMS)
        ENDDO
@@ -96,7 +98,9 @@ CONTAINS
        ! Go downhill by following the gradient or with GDIIS
        IF(iGEO>Relaxations)THEN
           ! GDIIS extrapolation 
-          CALL ForceDStep(iBAS,iGEO,C%Nams,C%Geos,DIISErr)
+          CALL ForceDStep(iGEO,C%Nams,C%Geos,DIISErr)
+          ! Put the geometries to HDF
+          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
           Mssg=TRIM(Mssg)//', Ediis='//TRIM(DblToShrtChar(DIISErr))
           ! Check for absolute convergence
           Converged=.FALSE.
@@ -115,23 +119,13 @@ CONTAINS
           CLOSE(Out,STATUS='KEEP')
           IF(Converged)EXIT
        ELSE
-!          HDFFileID=OpenHDF(C%Nams%HFile)
           ! Take a few small steps along the gradient to start
           DO iCLONE=1,C%Geos%Clones
-             C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Carts%D &
-                  -StepLength*C%Geos%Clone(iCLONE)%Vects%D
-             !          CALL WrapAtoms(c%Geos%Clone(iCLONE))
-             ! Rescale the gradient by the step for use in GDIIS
-!             HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-!             CALL New(Grad,3*C%Geos%Clone(iCLONE)%NAtms)
-!             CALL Get(Grad,'grade',Tag_O=IntToChar(iGEO))
-!             Grad%D=Grad%D*StepLength
-!             CALL Put(Grad,'grade',Tag_O=IntToChar(iGEO))
-!             CALL Delete(Grad)
-!             CALL CloseHDFGroup(HDF_CurrentID)
+             C%Geos%Clone(iCLONE)%Carts%D=C%Geos%Clone(iCLONE)%Carts%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
           ENDDO
-!          CALL CloseHDF(HDFFileID)
-          CALL GeomArchive(iGEO+1,C%Nams,C%Geos)    
+          ! Put the geometries to HDF
+          CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
+          ! And here is some 
           Mssg=TRIM(Mssg)//', Step='//TRIM(DblToShrtChar(StepLength))
           Mssg=ProcessName('GDicer',' Relax # '//TRIM(IntToChar(iGEO)))//TRIM(Mssg)
           CALL OpenASCII(C%Nams%OFile,Out)
@@ -149,15 +143,16 @@ CONTAINS
   !=====================================================================================
   ! EXTRAPOLATED GEOMETRY STEP USEING GDIIS WITH CARTESIAN FORCE ERRORS
   !=====================================================================================  
-  SUBROUTINE ForceDStep(cBAS,cGEO,N,G,DIISError)
+  SUBROUTINE ForceDStep(cGEO,N,G,DIISError)
     TYPE(FileNames)        :: N
     TYPE(Geometries)       :: G
+    TYPE(BasisSets)        :: B
     TYPE(DBL_RNK2)         :: A,AInv,Carts
     TYPE(DBL_VECT)         :: V,DIISCo,GradI,GradJ
     REAL(DOUBLE)           :: DIISError,CoNo
-    INTEGER                :: cBAS,cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K
-    INTEGER,     PARAMETER :: MaxCoef=5
-    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D10
+    INTEGER                :: cGEO,iCLONE,iGEO,mGEO,iDIIS,jDIIS,nDIIS,iATS,I,J,K
+    INTEGER,     PARAMETER :: MaxCoef=8
+    REAL(DOUBLE),PARAMETER :: MaxCoNo=1D7
     !----------------------------------------------------------------------------------!
     ! Initial dimension of the A matrix
     nDIIS=MIN(cGEO+1,MaxCoef+1)
@@ -200,8 +195,6 @@ CONTAINS
        CALL DGEMV('N',nDIIS,nDIIS,One,AInv%D,nDIIS,V%D,1,Zero,DIISCo%D,1)
        ! Here is the DIIS error (resdiual)       
        DIISError=MAX(DIISError,ABS(DIISCo%D(nDIIS)))
-!       WRITE(*,*)' CoNo = ',DblToChar(CoNo)
-!       WRITE(*,*)' DIISCo = ',DIISCo%D
        IF(CoNo>MaxCoNo)THEN
           ! Clean up ...
           CALL Delete(V)
@@ -213,7 +206,7 @@ CONTAINS
           nDIIS=nDIIS-1
           ! Sometimes ya just gota have a goto
           GOTO 1
-       ELSE
+       ELSEIF(nDIIS>3)THEN
           ! Extrapolate
           iDIIS=1
           G%Clone(iCLONE)%Carts%D=Zero
@@ -228,21 +221,21 @@ CONTAINS
              G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D+DIISCo%D(iDIIS)*Carts%D
              iDIIS=iDIIS+1
           ENDDO
-          !       CALL WrapAtoms(G%Clone(iCLONE))
           CALL Delete(Carts)
+          WRITE(*,*)iCLONE,' DIISCo = ',DIISCo%D
+       ELSE
+          ! Stalled, freshen things up with a steepest descent move
+          G%Clone(iCLONE)%Carts%D=G%Clone(iCLONE)%Carts%D-5D-1*G%Clone(iCLONE)%Vects%D          
        ENDIF
-       ! Clean up a bit ...
+       ! Clean up a bit 
        CALL Delete(GradI)
        CALL Delete(GradJ)
+       CALL Delete(V)
+       CALL Delete(A)
+       CALL Delete(AInv)
+       CALL Delete(DIISCo)
+       CALL UnSetDSYEVWork()
     ENDDO
-    ! And clean up some more
-    CALL Delete(V)
-    CALL Delete(A)
-    CALL Delete(AInv)
-    CALL Delete(DIISCo)
-    CALL UnSetDSYEVWork()
-    ! Archive geometries
-    CALL GeomArchive(cGEO+1,N,G)    
   END SUBROUTINE ForceDStep
   !=====================================================================================
   !
@@ -290,7 +283,7 @@ CONTAINS
           !          CALL WrapAtoms(C%Geos%Clone(iCLONE))
        ENDDO
        ! Archive geometries
-       CALL GeomArchive(cGEO+1,C%Nams,C%Geos)    
+       CALL GeomArchive(cBAS,cGEO+1,C%Nams,C%Sets,C%Geos)    
        CALL PPrint(C%Geos%Clone(1),Unit_O=6)
        ! Evaluate energies at the new geometry
        CALL SCF(cBAS,cGEO+1,C)          
@@ -299,8 +292,7 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
           RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
                /C%Geos%Clone(iCLONE)%ETotal)
-       ENDDO
-       
+       ENDDO       
        ! Check for going downhill, convergence or stall  
        IF(MaxStep==1)THEN
           ECnvrgd=ABS(RelErrE)<1D1*ETol(AL)
@@ -351,7 +343,7 @@ CONTAINS
        CALL Delete(Carts(iCLONE))
     ENDDO
     ! Keep geometry
-    CALL GeomArchive(cGEO,C%Nams,C%Geos)    
+    CALL GeomArchive(cBAS,cGEO,C%Nams,C%Sets,C%Geos)    
     ! Print something 
   END FUNCTION SteepStep
 END MODULE Optimizer

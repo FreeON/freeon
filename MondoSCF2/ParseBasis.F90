@@ -28,6 +28,8 @@ CONTAINS
     ALLOCATE(B%BSets(1:G%Clones,1:B%NBSets))
     ALLOCATE(B%LnDex(1:G%Clones,1:B%NBSets))
     ALLOCATE(B%DExpt(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%AtomPairThresh(1:G%Clones,1:B%NBSets))
+    ALLOCATE(B%PrimPairThresh(1:G%Clones,1:B%NBSets))
     DO J=1,B%NBSets
        BaseFile=TRIM(N%M_HOME)//'BasisSets/'//TRIM(B%BName(J))//BasF
        CALL OpenASCII(BaseFile,Bas,OldFileQ_O=.TRUE.)
@@ -38,7 +40,11 @@ CONTAINS
           B%BSets(I,J)%BName=B%BName(J)
           CALL BCSRDimensions(G%Clone(I),B%BSets(I,J),O%AccuracyLevels(J), &
                               B%MxAts(J),B%MxBlk(J),B%MxN0s(J))
+          ! Compute primitive distribution statistics
           CALL PrimitiveReDistribution(B%BSets(I,J),B%NExpt(J),B%DExpt(I,J),B%Lndex(I,J))
+          ! Compute basis set dependent distance thresholds
+          CALL DistanceThresholdSetUp(O%Thresholds(J)%Dist,B%DExpt(I,J)%D(1), &
+                                       B%AtomPairThresh(I,J),B%PrimPairThresh(I,J))
 #ifdef FULL_ON_FRONT_END_DEBUG
           PrintFlags%Set=DEBUG_BASISSET
           CALL Print_BSET(B%BSets(I,J))
@@ -48,6 +54,20 @@ CONTAINS
     ENDDO
     CLOSE(Inp,STATUS='KEEP')
   END SUBROUTINE LoadBasisSets
+  !============================================================================
+  ! THIS ROUTINE IS A CLONE OF THOSE IN MONDOMODS/THRESHOLDING.F90, BUT DOES
+  ! NOT USE GLOBAL VARIABLES, WHICH ARE VERBOTEN IN THE FRONT END 
+  !============================================================================
+  SUBROUTINE DistanceThresholdSetUp(Tau,MinZab,AtomPairThresh,PrimPairThresh)
+    REAL(DOUBLE) :: Tau,MinZab,MinXab,AtomPairThresh,PrimPairThresh
+    !-------------------------------------------------------------------------!
+    ! MinXab=MinZa*MinZb/(MinZa+MinZb)=MinZab/4
+    MinXab=MinZab/Four
+    ! Set Atom-Atom thresholds
+    AtomPairThresh=-LOG(Tau)/MinXab
+    ! Set Prim-Prim thresholds
+    PrimPairThresh=-LOG(Tau)
+  END SUBROUTINE DistanceThresholdSetUp
   !============================================================================
   ! WEAK ATTEMPT TO ESTIMATE NUMBER OF NONZEROS FOR SPARSE MATRICES, NEADS TWIDDLING
   ! AND SHOULD BECOME OBSOLETE IN NEAR FURTURE AS FASTMAT TAKES OVER...
@@ -59,6 +79,7 @@ CONTAINS
     REAL(DOUBLE) :: BWEstim
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.D3, 1.3D3,1.6D3/)
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
+    !-------------------------------------------------------------------------!
     ! Use assymptotics to set the max matrix dimensions
     MaxAtms=1+G%NAtms
     BWEstim=MIN(G%NAtms,CEILING((DBLE(G%NAtms) &
@@ -168,7 +189,6 @@ CONTAINS
 100    CONTINUE
     ENDDO
 99  CONTINUE
-    CLOSE(UNIT=Bas,STATUS='KEEP')
     IF(KFound/=BS%NKind)RETURN
     ! Computing basis set indexing
     CALL BSetIndx(BS)

@@ -83,6 +83,8 @@ MODULE ControlStructures
           DIMENSION(:,:)         :: OffS,BSiz,LnDex
      TYPE(DBL_VECT),POINTER,        &
           DIMENSION(:,:)         :: DExpt
+     REAL(DOUBLE),POINTER,        &
+          DIMENSION(:,:)         :: AtomPairThresh,PrimPairThresh 
   END TYPE BasisSets
 
 #ifdef PERIODIC
@@ -109,9 +111,13 @@ MODULE ControlStructures
      CHARACTER(LEN=DCL)                :: MachFile
      INTEGER                           :: NProc
      INTEGER                           :: NSpace
+     INTEGER                           :: Clumps
      INTEGER, DIMENSION(MaxSets)       :: MxAtsNode,MxBlkNode,MxN0sNode
+     TYPE(INT_RNK2)                    :: Clump
      TYPE(INT_VECT),POINTER,        &
           DIMENSION(:,:)         :: Beg,End,GLO
+     
+
   END TYPE Parallel
 #endif
 

@@ -1,7 +1,11 @@
 MODULE PunchHDF
   USE InOut
   USE MemMan
+  USE CellSets
+  USE Indexing
+  USE AtomPairs
   USE PrettyPrint
+  USE GlobalScalars
   USE ControlStructures
   IMPLICIT NONE
 CONTAINS
@@ -23,18 +27,18 @@ CONTAINS
   !==============================================================================
   !
   !==============================================================================
-  SUBROUTINE MPIsArchive(N,G,M)
-    TYPE(FileNames)  :: N
-    TYPE(Geometries) :: G
-    TYPE(Parallel)   :: M
+  SUBROUTINE MPIsArchive(N,NSpace,Clump)
+    TYPE(FileNames)      :: N
+    INTEGER,DIMENSION(2) :: Clump
+    INTEGER              :: NSpace
 #ifdef PARALLEL
     TYPE(INT_VECT)   :: ST
 #endif
     !---------------------------------------------------------------------------!
 #ifdef PARALLEL
     HDF_CurrentID=OpenHDF(N%HFile)
-    CALL New(ST,2)
-    ST%I=(/M%NSpace,G%Clones/)
+    CALL New(ST,3)
+    ST%I=(/NSpace,Clump(1),Clump(2)/)
     CALL Put(ST,'SpaceTime')
     CALL Delete(ST)
     CALL CloseHDF(HDF_CurrentID)
@@ -52,39 +56,114 @@ CONTAINS
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE StateArchive
   !==============================================================================
-  !
+  ! THIS IS WHERE ALL SORTS OF MISC DATA SPACE IS INITIALIZED IN THE HDF5 FILE
+  ! IN ORDER TO AVOID CHANGING THE DATA SPACE WHEN THE HDF FILE HAS BEEN OPENED
+  ! SIMULTANEOUSLY BY EACH CLONE
   !==============================================================================
   SUBROUTINE InitClones(N,G)
     TYPE(FileNames)  :: N
     TYPE(Geometries) :: G    
-    INTEGER          :: iGEO,iCLONE,HDFFileID
+    TYPE(DBL_VECT)   :: DoubleVect
+    CHARACTER(LEN=DCL) :: FailedProgram
+    INTEGER          :: iGEO,iCLONE,HDFFileID,I,MaxEll
     CHARACTER(LEN=2) :: chGEO
     !---------------------------------------------------------------------------!
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       ! Create data space for grouped objects to preserve structure of HDF5 
+       ! to avoid multiple clones simultaneously creating new data
+       CALL New(DoubleVect,3)
+       DoubleVect%D=BIG_DBL
+       CALL Put(DoubleVect,'dipole')
+       CALL Delete(DoubleVect)
+       CALL New(DoubleVect,6)
+       DoubleVect%D=BIG_DBL
+       CALL Put(DoubleVect,'quadrupole')
+       CALL Delete(DoubleVect)
+       CALL Put(BIG_DBL,'e_nucleartotal')
+       CALL Put(BIG_DBL,'exc')
+       CALL Put(BIG_DBL,'homolumogap')
+       CALL Put(BIG_DBL,'e_electronictotal')
+       CALL Put(BIG_DBL,'etot')
+       CALL Put(BIG_DBL,'dmax')
+       CALL Put(BIG_DBL,'diiserr')
+       CALL Put(.TRUE.,'programfailed')
+       DO I=1,LEN(FailedProgram)
+          FailedProgram(I:I)='X'
+       ENDDO
+       CALL Put(FailedProgram,'failedprogram')
+       MaxEll=G%Clone(iCLONE)%PBC%PFFMaxEll
+       CALL Put(MaxEll,'MaxEll')
+
+       WRITE(*,*)' SIZE OF TENSORS = ',LSP(2*MaxEll)+1
+       CALL New(DoubleVect,LSP(2*MaxEll),0)
+       DoubleVect%D=BIG_DBL
+       CALL Put(DoubleVect,'PFFTensorC')
+       CALL Put(DoubleVect,'PFFTensorS')
+       CALL Delete(DoubleVect)
        CALL CloseHDFGroup(HDF_CurrentID)
+
+!  CREATING DATA = cs_in%radius1
+!  CREATING DATA = cs_in1%ncells
+!  CREATING DATA = cs_in1%cellcarts
+!  CREATING DATA = maxell1
+!  CREATING DATA = pfftensorc1
+!  CREATING DATA = pfftensors1
+
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE InitClones
-
-  SUBROUTINE GeomArchive(iGEO,N,G)
+  !==============================================================================
+  !
+  !==============================================================================
+  SUBROUTINE GeomArchive(cBAS,cGEO,N,B,G)
     TYPE(FileNames)  :: N
+    TYPE(BasisSets)  :: B
     TYPE(Geometries) :: G    
-    INTEGER          :: iGEO,iCLONE,HDFFileID
+    TYPE(CellSet)    :: CS
+    INTEGER          :: cBAS,cGEO,iCLONE,HDFFileID
     CHARACTER(LEN=2) :: chGEO
     !---------------------------------------------------------------------------!
-    chGEO=IntToChar(iGEO)
+    chGEO=IntToChar(cGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
+       ! Set the correct PBC cell set list
+       CALL SetLatticeVectors(G%Clone(iCLONE),CS,B%AtomPairThresh(iCLONE,cBAS))
+       ! Make sure everything is wrapped correctly
+       ! CALL WrapAtoms....
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
-!       CALL Print_CRDS(G%Clone(iCLONE))
+       ! Put the geometry to this group ...
        CALL Put(G%Clone(iCLONE),chGEO)
+       ! ... and the corresponding lattice vectors with resize priviliges, 
+       CALL Put(CS,Unlimit_O=.TRUE.)
+       ! Close this clones group
        CALL CloseHDFGroup(HDF_CurrentID)
+       ! And free memory for the the lattice vectors 
+       CALL Delete(CS%CellCarts)
     ENDDO
     CALL CloseHDF(HDFFileID)
   END SUBROUTINE GeomArchive
+  !==============================================================================
+  ! SET UP SUMMATION OF LATTICE VECTORS, ACCOUNTING FOR CELL SIZE AND SHAPE
+  !==============================================================================
+  SUBROUTINE SetLatticeVectors(G,C,AtomPairThresh,Rad_O)
+    TYPE(CRDS)              :: G
+    TYPE(CellSet)           :: C
+    REAL(DOUBLE), OPTIONAL  :: Rad_O
+    REAL(DOUBLE)            :: AtomPairThresh,Radius
+    !---------------------------------------------------------------------------!
+    ! This is the radius of Gaussian infulence
+    IF(PRESENT(Rad_O)) THEN
+       C%Radius=Rad_O
+    ELSE
+       ! GOT RID OF FACTOR OF TWO!!!!!
+       C%Radius=MaxAtomDist(G)+SQRT(AtomPairThresh)
+    ENDIF
+    CALL New_CellSet_Sphere(C,G%PBC%AutoW,G%PBC%BoxShape,C%Radius)
+    CALL Sort_CellSet(C)
+  END SUBROUTINE SetLatticeVectors
   !==============================================================================
   !
   !==============================================================================

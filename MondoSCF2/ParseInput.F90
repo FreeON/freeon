@@ -33,7 +33,7 @@ CONTAINS
     ! Parse geometry or get from restart HDF 
     CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
     ! Parse periodic info
-    CALL LoadPeriodic(C%Nams,C%Geos)
+    CALL LoadPeriodic(C%Nams,C%Geos,C%PBCs)
     ! Massage coodrinates, switch to AUs etc 
     CALL MassageCoordinates(C%Geos,C%PBCs)
     ! Load basis sets  
@@ -42,8 +42,5 @@ CONTAINS
     ! Parse in parallel info
     CALL LoadParallel(C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
 #endif
-    CALL Print_CRDS(C%Geos%Clone(1),Unit_O=6,PrintGeom_O='XYZ')
-    !STOP
-
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput

@@ -1,5 +1,6 @@
 MODULE Overlay
   USE InOut
+  USE PunchHDF
   USE ControlStructures
   IMPLICIT NONE
 CONTAINS 
@@ -11,15 +12,11 @@ CONTAINS
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Parallel)     :: M
-    INTEGER            :: I,J,K,L,IErr,NArg,MaxLen
+    INTEGER            :: I,J,K,L,iCLUMP,IErr,NArg,MaxLen
     LOGICAL            :: ProgramFailed
     TYPE(CHR_VECT)     :: ArgV
     TYPE(INT_VECT)     :: IChr
     CHARACTER(LEN=DCL) :: CmndLine
-#if PARALLEL && MPI2
-    CHARACTER(LEN=MPI_MAX_ERROR_STRING) :: ErrMsg
-    INTEGER                             :: Child_Inter
-#else
     INTERFACE 
        FUNCTION Spawn(NC,MaxLen,IChr)
          INTEGER,                         INTENT(IN) :: NC,MaxLen
@@ -27,62 +24,58 @@ CONTAINS
          INTEGER                                     :: Spawn
        END FUNCTION Spawn
     END INTERFACE
-#endif
     !------------------------------------------------------------!
-    CALL SetArgV(Ex,N,S,M,NArg,ArgV)
-    ! This is the command line we are going to execute 
-    CmndLine=' '
-    DO I=1,NArg
-       CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
-    ENDDO
-!    WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
-    ! Log this run
-    CALL Logger(CmndLine,.FALSE.)
-#if PARALLEL && MPI2
-    CALL New(ErrCodes,M%NProc)            
-    CALL MPI_COMM_SPAWN(Ex,ArgV%C,M%NProc,MPI_INFO_NULL, &
-         ROOT,MPI_COMM_SELF,child_inter,ErrCodes%I,IErr)
-    DO I=1,M%NProc
-       IF(ErrCodes%I(I)/=MPI_SUCCESS)THEN
-          CALL MPI_ERROR_STRING(ErrCodes%I(I),ErrMsg,LenMsg)
-          CALL MondoHalt(MPIS_ERROR,' MPI error = <'//TRIM(ErrMsg(1:LenMsg)) &
-               //'> executing <'//TRIM(CmndLine)//'>')
-       ENDIF
-    ENDDO
-    CALL Delete(ErrCodes)
+    DO iCLUMP=1,M%Clumps
+       CALL MPIsArchive(N,M%NSpace,M%Clump%I(:,iCLUMP))
+#ifdef PARALLEL
+       CALL SetArgV(Ex,N,S,M,iCLUMP,NArg,ArgV)
 #else
-    ! Create ASCII integer array to beat F9x/C incompatibility
-    CALL CVToIV(NArg,ArgV,MaxLen,IChr)
-    ! Spawn a sub process 
-    IErr=Spawn(NArg,MaxLen,IChr%I)
-    ! Bring this run down if not successful
-    IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
-    ! Double check success if a MONDO Exec ...        
-    HDF_CurrentID=OpenHDF(N%HFile)
-    CALL Get(ProgramFailed,'ProgramFailed')
-    CALL CloseHDF(HDF_CurrentID)
-    IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
-    CALL Delete(IChr)
-#endif 
-    CALL Delete(ArgV)
+       CALL SetArgV(Ex,N,S,M,NArg,ArgV)
+#endif
+       ! This is the command line we are going to execute 
+       CmndLine=' '
+       DO I=1,NArg
+          CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
+       ENDDO
+       WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
+       ! Log this run
+       CALL Logger(CmndLine,.FALSE.)
+       ! Create ASCII integer array to beat F9x/C incompatibility
+       CALL CVToIV(NArg,ArgV,MaxLen,IChr)
+       ! Spawn a sub process 
+       IErr=Spawn(NArg,MaxLen,IChr%I)
+       ! Bring this run down if not successful
+       IF(IErr/=SUCCEED)CALL MondoHalt(IErr,'<'//TRIM(CmndLine)//'>')
+       ! Double check success if a MONDO Exec ...        
+       HDF_CurrentID=OpenHDF(N%HFile)       
+       CALL Get(ProgramFailed,'ProgramFailed')
+       CALL CloseHDF(HDF_CurrentID)
+       IF(ProgramFailed)CALL MondoHalt(-999,'<'//TRIM(CmndLine)//'>')
+       CALL Delete(IChr)
+       CALL Delete(ArgV)
+    ENDDO
   END SUBROUTINE Invoke
   !===============================================================
   ! CREATE A CHARACTER ARRAY OF NON-BLANK STRINGS THAT WILL 
   ! BECOME THE ARGV ARRAY PASSED TO EXECVP BY SPAWN IF NOT MPI-2
   !===============================================================
+#ifdef PARALLEL
+  SUBROUTINE SetArgV(Ex,N,S,M,cCLUMP,NArg,ArgV)
+#else
   SUBROUTINE SetArgV(Ex,N,S,M,NArg,ArgV)
+#endif
     CHARACTER(LEN=*)   :: Ex
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Parallel)     :: M
-    INTEGER            :: I,K,NArg
+    INTEGER            :: I,K,NArg,cCLUMP
     TYPE(CHR_VECT)     :: ArgT,ArgV
-#if PARALLEL && !defined(MPI2)
+#if PARALLEL 
     NArg=15
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
     ArgT%C(2) =M%ProcFlag
-    ArgT%C(3) =IntToChar(M%NProc)
+    ArgT%C(3) =IntToChar(M%Clump%I(3,cCLUMP))
     ArgT%C(4) =M%MachFlag
     ArgT%C(5) =M%MachFile
     ArgT%C(6) =Ex

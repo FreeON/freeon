@@ -32,7 +32,7 @@ CONTAINS
     ! Obtain the total number of processors to employ (hard uper limit)
     IF(.NOT.OptIntQ(Inp,MPI_PROCESSOR_NUMBER,M%NProc))THEN
        M%NProc=2
-       CALL Warn(' Parallel code defaulting to 1 processor ')
+       CALL Warn(' Parallel code defaulting to 2 processors ')
     ENDIF
     ! Obtain the flag for the machine file; -machinefile, etc 
     IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FLAG,M%MachFlag))M%MachFlag=" "
@@ -49,9 +49,15 @@ CONTAINS
     ! COMPAQ MPI is just MPICH.  
     M%NProc=MSize()    
 #endif
+    ! Parse for the number of processors in the spatial dimension
+    IF(.NOT.OptIntQ(Inp,MPI_SPATIAL_PROC,M%NSpace))THEN
+       M%NSpace=M%NProc
+       CALL Warn(' # of spatial proc not specified, defaulting to NSpace=NProc='//TRIM(IntToChar(M%NSpace)))
+    ENDIF
     CLOSE(UNIT=Inp,STATUS='KEEP')    
-    ! Determine the space time partitioning
-    CALL SpaceTimePartition(G%Clones,M%NProc,M%NSpace)
+    ! Set up parallelism in space and time    
+    CALL SpaceTimeSetUp(M%NProc,M%NSpace,G%Clones,M%Clumps,M%Clump)
+    ! Space for parallel sparse matrix indecies
     ALLOCATE(M%Beg(1:G%Clones,1:B%NBSets))
     ALLOCATE(M%End(1:G%Clones,1:B%NBSets))
     ALLOCATE(M%GLO(1:G%Clones,1:B%NBSets))
@@ -69,17 +75,46 @@ CONTAINS
     M%MxBlkNode=MIN(B%MxBlk,CEILING(Two*DBLE(B%MxBlk)/DBLE(M%NSpace)))
     M%MxN0sNode=MIN(B%MxN0s,CEILING(Two*DBLE(B%MxN0s)/DBLE(M%NSpace)))
   END SUBROUTINE LoadParallel
-
-  SUBROUTINE SpaceTimePartition(NClone,NProc,NSpace)
-    INTEGER :: NClone,NProc,NSpace
-    IF(NClone==1)THEN
-       NSpace=NProc
-    ELSE
-       ! Almost certainly imperfect logic, would certainly be simplified if >>CHEE KWAN GAN<<
-       ! would redo HiCu etc to use arbitrary number of processors.
-       
+  !============================================================================
+  ! BREAK PARALLELSIM IN SPACE AND TIME INTO GROUPS OF CLONES 
+  !============================================================================
+  SUBROUTINE SpaceTimeSetUp(NProc,NSPace,Clones,Clumps,Clump)
+    TYPE(INT_RNK2) :: Clump
+    INTEGER        :: ClonesPerClump,LeftOvers,NProc,NSpace,Clones,Clumps,iCLUMP
+    !--------------------------------------------------------------------------!
+    ! Number of clones in a group (clump)
+    ClonesPerClump=NProc/NSpace
+    ! Number of groups
+    Clumps=Clones/ClonesPerClump
+    ! The remainder of NSpace proc jobs that dont fit evenly into a group
+    LeftOvers=MOD(Clones*NSpace,NProc)/NSpace
+    ! Include leftovers as a reduced clump
+    Clumps=Clumps+LeftOvers
+    ! Array to hold the grouping info
+    CALL New(Clump,(/3,Clumps/))
+    DO iCLUMP=1,Clumps
+       ! Number of clones in a clump
+       Clump%I(1,iCLUMP)=ClonesPerClump
+       ! Clone offset of this clump
+       Clump%I(2,iCLUMP)=(iCLUMP-1)*ClonesPerClump+1
+       ! Number of proc to use per clump
+       Clump%I(3,iCLUMP)=NSpace*ClonesPerClump
+    ENDDO
+    IF(LeftOvers>0)THEN
+       ! And here we add in the leftovers
+       Clump%I(1,Clumps)=LeftOvers
+       Clump%I(2,Clumps)=Clumps*ClonesPerClump+1
+       Clump%I(3,Clumps)=LeftOvers*NSpace
     ENDIF
-  END SUBROUTINE SpaceTimePartition
+!#ifdef FULL_ON_FRONT_END_DEBUG
+    WRITE(*,*)' Clumps         = ',Clumps
+    WRITE(*,*)' ClonesPerClump = ',ClonesPerClump
+    WRITE(*,*)' LeftOvers      = ',LeftOvers
+    DO iCLUMP=1,Clumps
+       WRITE(*,*)'CLUMP(',iCLUMP,')= ',Clump%I(:,iCLUMP)
+    ENDDO
+!#endif
+  END SUBROUTINE SpaceTimeSetUp
   !============================================================================
   ! GREEDY LOOK AHEAD DOMAIN DECOMPOSITION TO PARTITION DBCSR MATRICES
   !============================================================================      

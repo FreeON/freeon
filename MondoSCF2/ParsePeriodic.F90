@@ -1,7 +1,7 @@
 MODULE ParsePeriodic
   USE Parse
   USE InOut
-  USE AtomPairs ! Should be PBC for frac coord routines !!!!
+  USE AtomPairs 
   USE PrettyPrint
   USE PeriodicKeys
   USE ControlStructures
@@ -9,9 +9,10 @@ CONTAINS
   !=========================================================================
   !
   !=========================================================================
-  SUBROUTINE LoadPeriodic(N,G)
+  SUBROUTINE LoadPeriodic(N,G,P)
     TYPE(FileNames)  :: N
     TYPE(Geometries) :: G
+    TYPE(Periodics)  :: P
     TYPE(PBCInfo)    :: PBC
     INTEGER          :: I
     !-----------------------------------------------------------------------!
@@ -80,7 +81,7 @@ CONTAINS
     PBC%AutoW=.FALSE.  ! This is the inapropriatly named periodic is on flag
     PBC%TransVec=Zero
     PBC%BoxShape=Zero
-     DO I=1,3
+    DO I=1,3
        PBC%BoxShape(I,I)=One
     ENDDO
     IF(.NOT.FindKey(BEGIN_PERIODIC,Inp))RETURN
@@ -182,7 +183,6 @@ CONTAINS
     INTEGER    :: I
     !-----------------------------------------------------------------------!
     IF(G%PBC%InAtomCrd)THEN
-       WRITE(*,*)' GOING FROM ATOMIC TO FRAC'       
        ! These are the two Cartesian coordinate arrays       
        G%AbCarts%D=G%Carts%D
        DO I=1,G%NAtms
@@ -191,7 +191,6 @@ CONTAINS
           G%AbBoxCarts%D(:,I)=AtomToFrac(G,G%Carts%D(:,I))
        ENDDO
     ELSE
-       WRITE(*,*)' GOING FROM FRACT TO ATOMIC '
        ! These are the two fractional coordinate arrays ... 
        G%BoxCarts%D=G%Carts%D
        G%AbBoxCarts%D=G%Carts%D

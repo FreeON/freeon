@@ -4,6 +4,7 @@ MODULE ParseGeometries
   USE OptionKeys
   USE DynamicsKeys
   USE GeometryKeys
+  USE PrettyPrint
   USE ControlStructures
 CONTAINS
   !================================================================================================================
@@ -14,7 +15,7 @@ CONTAINS
     TYPE(Options)    :: O
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
-    INTEGER          :: I
+    INTEGER          :: I,iCLONE
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
     IF(O%Grad==GRAD_TS_SEARCH_NEB.OR.D%MDAlgorithm==MD_PARALLEL_REP)THEN
@@ -32,10 +33,19 @@ CONTAINS
           ELSE
              CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(1))        ! Read in the reactants geometry
              CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones))   ! Read in the products geometry
+             ! CALL Print(G%Clone(1),Unit_O=6)
+             ! CALL Print(G%Clone(G%Clones),Unit_O=6)
           ENDIF
-          !
-          ! GRAEME PUTS A SUBROUTINE HERE TO ALLOCATE AND SET THE REMAINING (G%Clones-2) CLONES ?
-          !
+          ! GRAEME PUTS A SUBROUTINE HERE TO ALLOCATE AND SET UP THE REMAINING (G%Clones-2) CLONES
+          ! Following is a place holder for testing purposes only...
+          DO iCLONE=2,G%Clones-1
+             G%Clone(iCLONE)%NAtms=G%Clone(1)%NAtms
+             G%Clone(iCLONE)%NKind=G%Clone(1)%NKind
+             CALL New(G%Clone(iCLONE))
+
+             G%Clone(iCLONE)=G%Clone(1)
+
+          ENDDO
        ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
 #ifdef !defined(PARALLEL)
           CALL MondoHalt(PRSE_ERROR,' MondoSCF must be compiled in parallel for replica exchange to be active.')
@@ -78,8 +88,7 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3) :: Carts(3)
     INTEGER                   :: J,N
     CHARACTER(LEN=2)          :: At
-    CHARACTER(LEN=DCL)        :: Line,LineLowCase
-    
+    CHARACTER(LEN=DCL)        :: Line,LineLowCase    
     !------------------------------------------------------------------------!
     ! Determine the number of atoms in this block
     N=0

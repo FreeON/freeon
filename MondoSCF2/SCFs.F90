@@ -13,7 +13,7 @@ MODULE SCFs
   INTEGER HDFFileID,H5GroupID
 CONTAINS
   !===============================================================================
-
+  !
   !===============================================================================
   SUBROUTINE SinglePoints(C)
     TYPE(Controls) :: C
@@ -23,29 +23,42 @@ CONTAINS
     iGEO=1
     ! Init previous state
     C%Stat%Previous%I=(/0,1,1/)
-    ! Archive MPIs and Geos 
-    CALL MPIsArchive(C%Nams,C%Geos,C%MPIs)
+    ! Init groups
     CALL InitClones(C%Nams,C%Geos)
-    CALL GeomArchive(iGEO,C%Nams,C%Geos)    
     ! Loop over basis sets 
     DO iBAS=1,C%Sets%NBSets
+       ! Archive 
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
+       ! Converge an SCF
        CALL SCF(iBAS,iGEO,C)
     ENDDO
   END SUBROUTINE SinglePoints
   !===============================================================================
-
+  !
   !===============================================================================
   SUBROUTINE SCF(cBAS,cGEO,C)
     TYPE(Controls)    :: C
+    TYPE(DBL_RNK2)    :: ETot,DMax,DIIS
     INTEGER,PARAMETER :: MaxSCFs=32
     INTEGER           :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
     ! Compute one-electron matrices
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%MPIs)
+    ! Allocate space for convergence statistics
+    CALL New(ETot,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
+    CALL New(DMax,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
+    CALL New(DIIS,(/MaxSCFs,C%Geos%Clones/),(/0,1/))
     DO iSCF=0,MaxSCFs
        ! Do an SCF cycle
-       IF(SCFCycle(iSCF,cBAS,cGEO,C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs))RETURN
+       IF(SCFCycle(iSCF,cBAS,cGEO, &
+            C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,DIIS))THEN
+          ! Free memory
+          CALL Delete(ETot)
+          CALL Delete(DMax)
+          CALL Delete(DIIS)
+          RETURN
+       ENDIF
     ENDDO
     CALL MondoHalt(DRIV_ERROR,'Failed to converge SCF in ' &
          //TRIM(IntToChar(MaxSCFs))//' SCF iterations.')
@@ -53,12 +66,13 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M) 
+  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS) 
     TYPE(FileNames)  :: N
     TYPE(State)      :: S
     TYPE(Options)    :: O
     TYPE(Geometries) :: G
     TYPE(Parallel)   :: M
+    TYPE(DBL_RNK2)   :: ETot,DMax,DIIS
     INTEGER          :: cSCF,cBAS,cGEO
     LOGICAL          :: SCFCycle
     !----------------------------------------------------------------------------!
@@ -70,11 +84,7 @@ CONTAINS
     IF(cSCF/=0) &
          S%Action=SCF_SOLVE_SCF
     CALL SolveSCF(cBAS,N,S,O,M)
-    IF(ConvergedQ(cSCF,cBAS,N,S,O,G))THEN
-       SCFCycle=.TRUE.
-    ELSE
-       SCFCycle=.FALSE.
-    ENDIF
+    SCFCycle=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS)
     S%Previous%I=S%Current%I
 !    CALL StateArchive(N,S)
   END FUNCTION SCFCycle
@@ -91,6 +101,22 @@ CONTAINS
     INTEGER          :: cBAS,cGEO,K,J,iATS,iCLONE
     CHARACTER(LEN=3) :: chGEO
     !----------------------------------------------------------------------------!
+    ! Initialize the force vector in HDF, clone by clone
+    chGEO=IntToChar(cGEO)
+    HDFFileID=OpenHDF(N%HFile)
+    DO iCLONE=1,G%Clones
+       HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+       CALL New(GradE,G%Clone(iCLONE)%NAtms*3)
+       GradE%D=BIG_DBL
+       ! Put the initialized forces back ...
+       CALL Put(GradE,'GradE',Tag_O=chGEO)
+       ! ... and close the group
+       CALL CloseHDFGroup(HDF_CurrentID)
+       G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
+       CALL Delete(GradE)
+    ENDDO
+    CALL CloseHDF(HDFFileID)
+    ! Now evaluate the forces
     S%Action='ForceEvaluation'
     ! The non-orthogonal response    
     CALL Invoke('SForce',N,S,M)
@@ -269,6 +295,7 @@ CONTAINS
        DoPFFT=.FALSE.
     ENDIF
 #endif
+    WRITE(*,*)' INVOKING MAKES '
     CALL Invoke('MakeS',N,S,M)
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
        CALL Invoke('LowdinO',N,S,M)
@@ -280,92 +307,96 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G)
-    TYPE(FileNames)  :: N
-    TYPE(State)      :: S
-    TYPE(Options)    :: O
-    TYPE(Geometries) :: G
-    TYPE(Parallel)   :: M
-    INTEGER          :: cSCF,cBAS,iGEO,iCLONE
-    REAL(DOUBLE)     :: DIISA,DIISB,DDIIS,DIISQ,       &
-                        DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
-                        DDMAX,DMAXA,DMAXB,DMAXQ,DTEST
-    LOGICAL          :: ConvergedQ
-    CHARACTER(LEN=3) :: chGEO
+  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS)
+    TYPE(FileNames)             :: N
+    TYPE(State)                 :: S
+    TYPE(Options)               :: O
+    TYPE(Geometries)            :: G
+    TYPE(Parallel)              :: M
+    TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
+    INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
+    REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
+                                   DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
+                                   DDMAX,DMAXA,DMAXB,DMAXQ,DTEST
+    LOGICAL,DIMENSION(G%Clones) :: Converged
+    LOGICAL                     :: ConvergedQ
+    CHARACTER(LEN=3)            :: chGEO
     !----------------------------------------------------------------------------!
-    ConvergedQ=.FALSE.
-    IF(cSCF==0)RETURN
-    ! Retrieve current statistics
+    ! Convergence thresholds
+    ETest=ETol(O%AccuracyLevels(cBAS))
+    DTest=DTol(O%AccuracyLevels(cBAS))
+    IF(cSCF==0)THEN
+       ConvergedQ=.FALSE.
+       RETURN
+    ENDIF
+    ! Accumulate current statistics
     chGEO=IntToChar(iGEO)
     HDFFileID=OpenHDF(N%HFile)
     DO iCLONE=1,G%Clones
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Gather convergence parameters
-       ! IN FUTURE CAN PROBABLY JUST GET AWAY WITH CURRENT AND PREVIOUS SCF CYCLE...
-       CALL Get(EtotA,'Etot',StatsToChar(S%Previous%I))
-       CALL Get(EtotB,'Etot',StatsToChar(S%Current%I))
-       CALL Get(DMaxA,'DMax',StatsToChar(S%Previous%I))
-       CALL Get(DMaxB,'DMax',StatsToChar(S%Current%I))
-       IF(CSCF==0)THEN
-          DIISA=1.D0
-          DIISB=1.D0
-       ELSEIF(CSCF==1)THEN
-          CALL Get(DIISB,'diiserr',StatsToChar(S%Current%I))
-          DIISA=DIISB
-       ELSE
-          CALL Get(DIISB,'diiserr',StatsToChar(S%Current%I))
-          CALL Get(DIISA,'diiserr',StatsToChar(S%Previous%I))
-       ENDIF
+#ifdef PARALLEL_CLONES
+       CALL Get(Etot%D(cSCF,iCLONE),'Etot')
+       CALL Get(DMax%D(cSCF,iCLONE),'DMax')
+       CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr')
+#else
+       CALL Get(Etot%D(cSCF,iCLONE),'Etot',StatsToChar(S%Current%I))
+       CALL Get(DMax%D(cSCF,iCLONE),'DMax',StatsToChar(S%Current%I))
+       CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr',StatsToChar(S%Current%I))
+#endif
        CALL CloseHDFGroup(HDF_CurrentID)
-       !  Absolute numbers
-       dETot=ABS(ETotA-ETotB)
-       dDMax=ABS(DMaxA-DMaxB)
-       dDIIS=ABS(DIISA-DIISB)
-       ! Quotients
-       ETotQ=dETot/ABS(ETotB)
-       DMaxQ=dDMax/ABS(DMaxB+1.D-50)
-       DIISQ=dDIIS/ABS(DIISB+1.D-50)
        ! Load current energies
-       G%Clone(iCLONE)%ETotal=ETotB
-       ! Uncertainty in total energy
-       !G%Clone(iCLONE)%DeltaE=ETotQ
+       G%Clone(iCLONE)%ETotal=ETot%D(cSCF,iCLONE)
+
+       Converged(iCLONE)=.FALSE.
+       IF(cSCF>1)THEN          
+          ETotA=ETot%D(cSCF-1,iCLONE)
+          ETotB=ETot%D(cSCF  ,iCLONE)
+          DMaxA=DMax%D(cSCF-1,iCLONE)
+          DMaxB=DMax%D(cSCF  ,iCLONE)
+          DIISA=DIIS%D(cSCF-1,iCLONE)
+          DIISB=DIIS%D(cSCF  ,iCLONE)
+          ! Absolute numbers
+          dETot=ABS(ETotA-ETotB)
+          dDMax=ABS(DMaxA-DMaxB)
+          dDIIS=ABS(DIISA-DIISB)
+          ! Relative numbers (Quotients)
+          ETotQ=dETot/ABS(ETotB)
+          DMaxQ=dDMax/ABS(DMaxB+1.D-50)
+          DIISQ=dDIIS/ABS(DIISB+1.D-50)
+          ! Convergence tests
+          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
+             Converged(iCLONE)=.TRUE.
+          ENDIF
+          ! Accept convergence from wrong side if DM thresholds are tightend.
+         IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest)THEN
+             Converged(iCLONE)=.TRUE.
+          ENDIF
+          ! Look for non-decreasing errors due to incomplete numerics
+          IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>2)THEN
+             IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
+                Converged(iCLONE)=.TRUE.
+             ENDIF
+          ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
+             IF(DIISB>DIISA)THEN
+                Converged(iCLONE)=.TRUE.
+             ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
+                Converged(iCLONE)=.TRUE.
+             ENDIF
+          ELSEIF((DIISQ<1D-3.OR.DMaxQ<1D-3).AND.cSCF>2)THEN
+             Converged(iCLONE)=.TRUE.
+          ENDIF
+       ENDIF
     ENDDO
     CALL CloseHDF(HDFFileID)
-    ! Convergence thresholds
-    ETest=ETol(O%AccuracyLevels(cBAS))
-    DTest=DTol(O%AccuracyLevels(cBAS))
-    ! Convergence tests
-    IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
-       Mssg='Normal SCF convergence.'
-       ConvergedQ=.TRUE.
-    ENDIF
-    ! Accept convergence from wrong side if thresholds are tightend.
-    IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest*3D-1)THEN
-       Mssg='Normal SCF convergence.'
-       ConvergedQ=.TRUE.
-    ENDIF
-    ! Look for non-decreasing errors due to incomplete numerics
-    IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.CSCF>2)THEN
-       IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
-          Mssg='SCF hit DIIS & DMax increase.'
-          ConvergedQ=.TRUE.
-       ENDIF
-    ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.CSCF>2)THEN
-       IF(DIISB>DIISA)THEN
-          Mssg='SCF hit DIIS increase.'
-          ConvergedQ=.TRUE.
-       ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
-          Mssg='SCF hit DMAX increase.'
-          ConvergedQ=.TRUE.
-       ENDIF
-    ELSEIF((DIISQ<1D-3.OR.DMaxQ<1D-3).AND.CSCF>2)THEN
-       Mssg='SCF convergence due to DIIS stagnation.'
-       ConvergedQ=.TRUE.
-    ENDIF
+    ConvergedQ=.TRUE.
+    DO iCLONE=1,G%Clones
+       ConvergedQ=ConvergedQ.AND.Converged(iCLONE)
+    ENDDO
     ! Convergence announcement
     IF(ConvergedQ)THEN!.AND.PrintFlags%Key>DEBUG_NONE)THEN
        CALL OpenASCII(OutFile,Out)
-       WRITE(Out,*)TRIM(Mssg)             
+       WRITE(Out,*)'Normal SCF convergence.'
        CLOSE(Out)
     ENDIF
   END FUNCTION ConvergedQ
