@@ -87,8 +87,13 @@ PROGRAM MakeS
            ENDIF
 #else  
            S%RowPt%I(AtA+1)=P        
-           IF(R>MaxNon0.OR.P>MaxBlks) &
-                CALL Halt(' BCSR dimensions blown in MakeS ')
+           IF(R>MaxNon0.OR.P>MaxBlks) THEN
+              WRITE(*,*) 'MakeS: MaxNon0=',MaxNon0
+              WRITE(*,*) 'MakeS: R=',R
+              WRITE(*,*) 'MakeS: MaxBlks=',MaxBlks
+              WRITE(*,*) 'MakeS: P=',P
+              CALL Halt(' BCSR dimensions blown in MakeS ')
+           ENDIF
 #endif
         ENDIF
      ENDDO
@@ -102,6 +107,7 @@ PROGRAM MakeS
   Thresholds%Trix = Thresholds%Trix*1.D2
 ! the following line gives a problem!!
 !  CALL PPrint(T1,'S',Unit_O=6)
+! write(*,*) 'MakeS: TrixFile(S,Args)=<'//trim(TrixFile('S',Args))//'>'
   CALL Put(T1,TrixFile('S',Args))
 !-----------------------------------------------------------
 ! Printing
