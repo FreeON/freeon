@@ -70,11 +70,11 @@ MODULE CubeTree
          GlobalCubes=0
          GlobalError=Zero
          MaxLevel=0       
-!        Set thresholding
-!        Compute total electron population in this box
-         IXact=PopInBox(RhoRoot)
 !        Initialize the CubeRoot and set thresholding
          CALL InitCubeRoot(CubeRoot)
+!        Compute total electron population in this box
+         CALL SetBBox(CubeRoot%Box,Box)
+         IXact=PopInBox(RhoRoot)
 !        Seting parameters for grid generation with variable accuracy
          MaxRelError=BIG_DBL
          Delta=1.D-1 
