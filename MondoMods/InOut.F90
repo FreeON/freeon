@@ -319,7 +319,7 @@ MODULE InOut
           A=B(1)
 #ifdef PARALLEL 
        ENDIF       
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_SCLR
 !--------------------------------------------------------------------
@@ -340,7 +340,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_VECT
 !--------------------------------------------------------------------
@@ -390,7 +390,7 @@ MODULE InOut
 !
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INTC
 !
@@ -465,7 +465,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_BMATR
 !
@@ -512,7 +512,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK2
 !--------------------------------------------------------------------
@@ -534,7 +534,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK3
 !--------------------------------------------------------------------
@@ -556,7 +556,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_INT_RNK4
 !
@@ -576,7 +576,7 @@ MODULE InOut
           A=B(1)
 #ifdef PARALLEL 
        ENDIF       
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_SCLR
 !
@@ -595,7 +595,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_VECT
 !
@@ -614,7 +614,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK2
 !
@@ -634,7 +634,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK3
 !
@@ -654,7 +654,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK4
 !
@@ -674,7 +674,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_DBL_RNK6
 !---------------------------------------------------------------------------------------
@@ -701,7 +701,7 @@ MODULE InOut
           CALL CloseData(Meta)
 #ifdef PARALLEL 
        ENDIF       
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_CHR_SCLR
 !---------------------------------------------------------------------------------------
@@ -729,7 +729,7 @@ MODULE InOut
           ENDIF
 #ifdef PARALLEL 
        ENDIF       
-       IF(InParallel)CALL BCast(A)
+       IF(InParallel)CALL Bcast(A)
 #endif 
     END SUBROUTINE Get_LOG_SCLR
 !---------------------------------------------------------------------------------------
@@ -1300,15 +1300,23 @@ MODULE InOut
 !---------------------------------------------------------------------
 !     Get a BCSR matrix
 !
-      SUBROUTINE Get_BCSR(A,Name,PFix_O,CheckPoint_O)
+      SUBROUTINE Get_BCSR(A,Name,PFix_O,CheckPoint_O,Bcast_O)
          TYPE(BCSR),               INTENT(INOUT) :: A     
          CHARACTER(LEN=*),         INTENT(IN)    :: Name
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: PFix_O
          LOGICAL,         OPTIONAL,INTENT(IN)    :: CheckPoint_O
+         LOGICAL,         OPTIONAL,INTENT(IN)    :: Bcast_O
          REAL(DOUBLE)                            :: Dummy
          CHARACTER(LEN=DEFAULT_CHR_LEN)          :: FileName          
          INTEGER                                 :: I,NAtms,NBlks,NNon0,IOS
          LOGICAL                                 :: Exists,LimitsQ
+         LOGICAL                                 :: Bcast
+
+         IF(PRESENT(Bcast_O)) THEN
+           Bcast = Bcast_O
+         ELSE
+           Bcast = .FALSE.
+         ENDIF
 #ifdef PARALLEL
          IF(MyId==0)THEN
 #endif
@@ -1334,6 +1342,11 @@ MODULE InOut
                   CALL Get(A%ColPt,TRIM(Name)//'%ColPt')
                   CALL Get(A%BlkPt,TRIM(Name)//'%BlkPt')
                   CALL Get(A%MTrix,TRIM(Name)//'%MTrix')
+#ifdef PARALLEL
+                  IF(Bcast) THEN
+                    CALL BcastBCSR(A)
+                  ENDIF
+#endif
                   RETURN
                ENDIF
             ENDIF
@@ -1396,10 +1409,49 @@ MODULE InOut
             CLOSE(UNIT=Seq,STATUS='KEEP')
 #ifdef PARALLEL
          ENDIF
+         IF(Bcast) THEN
+           CALL BcastBCSR(A)
+         ENDIF
 #endif
          RETURN
        1 CALL Halt('IO Error '//TRIM(IntToChar(IOS))//' in Get_BCSR.')
       END SUBROUTINE Get_BCSR
+
+
+!---------------------------------------------------------------------
+#ifdef PARALLEL
+  SUBROUTINE BcastBCSR(A)
+    TYPE(BCSR) :: A
+    INTEGER :: IErr,NAtms,NBlks,NNon0
+    LOGICAL :: LimitsQ
+    NAtms = A%NAtms
+    NBlks = A%NBlks
+    NNon0 = A%NNon0
+
+    CALL Bcast(NAtms)
+    CALL Bcast(NBlks)
+    CALL Bcast(NNon0)
+
+
+    IF(AllocQ(A%Alloc))THEN
+       LimitsQ=.NOT.                         &
+               (NAtms<=SIZE(A%RowPt%I)).AND. &
+               (NBlks<=SIZE(A%ColPt%I)).AND. &
+               (NBlks<=SIZE(A%BlkPt%I)).AND. &
+               (NNon0<=SIZE(A%MTrix%D))
+       IF(LimitsQ)THEN
+          CALL Delete(A)
+          CALL New(A,(/NAtms,NBlks,NNon0/))
+       ENDIF
+    ELSE
+       CALL New(A,(/NAtms,NBlks,NNon0/))
+    ENDIF
+    CALL Bcast(A%RowPt,N_O=NAtoms+1)
+    CALL Bcast(A%ColPt,N_O=NBlks)
+    CALL Bcast(A%BlkPt,N_O=NBlks)
+    CALL Bcast(A%MTrix,N_O=NNon0)
+  END SUBROUTINE BcastBCSR
+#endif
 !---------------------------------------------------------------------
 !     Put a BCSR matrix
 !
@@ -1586,8 +1638,8 @@ MODULE InOut
 #ifdef PARALLEL
          ENDIF
          IF(InParallel)THEN
-            CALL BCast(NInts)
-            CALL BCast(NChar)
+            CALL Bcast(NInts)
+            CALL Bcast(NChar)
          ENDIF
 #endif
         CALL New(A,(/NChar,NInts/))
@@ -1611,8 +1663,8 @@ MODULE InOut
 #ifdef PARALLEL
          ENDIF
          IF(InParallel)THEN
-            CALL BCast(A%I)
-            CALL BCast_CHR_VECT(A%C) 
+            CALL Bcast(A%I)
+            CALL Bcast_CHR_VECT(A%C) 
          ENDIF
 #endif
       END SUBROUTINE Get_ARGMT
@@ -1828,7 +1880,7 @@ MODULE InOut
          ENDDO
 #ifdef PARALLEL 
      ENDIF       
-         IF(InParallel)CALL BCast(A)
+         IF(InParallel)CALL Bcast(A)
 #endif 
        END SUBROUTINE Get_CHR_VECT
 !--------------------------------------------------------------------------
