@@ -97,7 +97,7 @@ CONTAINS
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
-    CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
+    ! CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']',Unit_O=6)
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
   END SUBROUTINE PutXForm_DBCSR
 #endif
@@ -109,8 +109,9 @@ CONTAINS
     LOGICAL          :: Present
 !-------------------------------------------------------------------------------
     ! IO for the orthogonal P
-!    CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
     CALL Put(P,TrixFile('OrthoD',Args,1))
+    ! Archive the orthogonal DM 
+    CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
     CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
@@ -127,10 +128,9 @@ CONTAINS
        CALL Multiply(Tmp1,Z,P)
     ENDIF
     CALL Filter(Tmp1,P)     ! Thresholding
-    ! IO for the non-orthogonal P
-    CALL Put(Tmp1,'CurrentDM',CheckPoint_O=.TRUE.)
     CALL Put(Tmp1,TrixFile('D',Args,1))
     CALL Put(Zero,'homolumogap')
+    ! CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']',Unit_O=6)
     CALL PChkSum(Tmp1,'P['//TRIM(NxtCycl)//']',Prog)
     CALL PPrint(Tmp1,'P['//TRIM(NxtCycl)//']')
     CALL Plot(Tmp1,'P_'//TRIM(NxtCycl))
