@@ -276,29 +276,20 @@ MODULE RhoTree
 !     Recusrively delete RhoTree
 !==========================================================================
       RECURSIVE SUBROUTINE DeleteRhoTree(Node)
-         TYPE(RhoNode), POINTER   :: Node,Left,Right
+         TYPE(RhoNode), POINTER   :: Node
          INTEGER :: Status
          IF(Node%Leaf)THEN
             DEALLOCATE(Node%Co,STAT=Status)
             CALL DecMem(Status,LHGTF(Node%Ell),0)
-            DEALLOCATE(Node,STAT=Status)
             IF(Status/=SUCCEED) &
                CALL Halt(' Leaf Node DEALLOCATE failed in DeleteRhoNode ')            
-         ELSEIF(ASSOCIATED(Node%Descend))THEN
+            NULLIFY(Node)
+         ELSEIF(ASSOCIATED(Node%Descend%Travrse))THEN
             CALL DeleteRhoTree(Node%Descend%Travrse)
-            IF(ASSOCIATED(Right))THEN
-               DEALLOCATE(Node%Descend%Travrse,STAT=Status)
-               IF(Status/=SUCCEED) &
-                  CALL Halt(' Left Node DEALLOCATE failed in DeleteRhoNode ')            
-               NULLIFY(Node%Descend%Travrse)
-            ENDIF
+            NULLIFY(Node%Descend%Travrse)
+         ELSEIF(ASSOCIATED(Node%Descend))THEN
             CALL DeleteRhoTree(Node%Descend)
-            IF(ASSOCIATED(Node%Descend))THEN
-               DEALLOCATE(Node%Descend,STAT=Status)
-               IF(Status/=SUCCEED) &
-                  CALL Halt(' Right Node DEALLOCATE failed in DeleteRhoNode ')            
-               NULLIFY(Node%Descend)
-            ENDIF
+            NULLIFY(Node%Descend)
          ENDIF
       END SUBROUTINE DeleteRhoTree
 !========================================================================================
