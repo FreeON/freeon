@@ -56,6 +56,12 @@ PROGRAM JForce
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 #ifdef MMech
   IF(HasQM()) THEN
 !    Get basis set and geometry
@@ -95,7 +101,11 @@ PROGRAM JForce
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
+#ifdef PARALLEL_CLONES  
+  CALL Get(RhoPoles)
+#else
   CALL Get(RhoPoles,NxtCycl)
+#endif
 #endif   
 ! Set thresholds local to JForce (for PAC and MAC)
   CALL SetLocalThresholds(Thresholds%TwoE)
@@ -106,9 +116,6 @@ PROGRAM JForce
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
 #ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
 #ifdef MMech 
 ! Set the electrostatic background
   IF(HasMM()) THEN
@@ -133,7 +140,7 @@ PROGRAM JForce
 #endif
 #ifdef PARALLEL
   MyAtomNum = End%I(MyId)-Beg%I(MyId)+1
-  CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IErr)
+  CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MONDO_COMM,IErr)
   IF(TotAtomNum /= GMLoc%Natms) THEN
     WRITE(*,*) 'TotAtomNum = ',TotAtomNum
     WRITE(*,*) 'GMLoc%Natms = ',GMLoc%Natms
@@ -264,13 +271,12 @@ PROGRAM JForce
 #ifdef PARALLEL
   TotFrcComp = 3*GMLoc%Natms
   CALL New(TotJFrc,TotFrcComp)
-  CALL MPI_Reduce(JFrc%D(1),TotJFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Reduce(JFrc%D(1),TotJFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
     JFrc%D(1:TotFrcComp) = TotJFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotJFrc)
 #endif
-
   CALL New(Frc,3*GMLoc%Natms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
@@ -285,9 +291,13 @@ PROGRAM JForce
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(TmJFrcArr,NPrc)
-  CALL MPI_Gather(JFrcTm,1,MPI_DOUBLE_PRECISION,TmJFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Gather(JFrcTm,1,MPI_DOUBLE_PRECISION,TmJFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
   IF(MyID == ROOT) THEN
-    CALL PImbalance(TmJFrcArr,NPrc,Prog_O='JFrc')
+     ! Output needs a lot of work, and should not go to STDOUT
+     ! Also, these statistics were written long ago by      
+     ! Elapsed_TIME(T,Init_O,Proc_O) in PrettyPrint.  Why create
+     ! another routine to do this????
+     ! CALL PImbalance(TmJFrcArr,NPrc,Prog_O='JFrc')
   ENDIF
   CALL Delete(TmJFrcArr)
 #endif

@@ -290,7 +290,8 @@ MODULE JGen
                               IB=IndexB
                               DO LMNB=StartLB,StopLB  
                                  IB=IB+1
-                                 JBlk(IA,IB) = JBlk(IA,IB) + CTraxFF(Prim,HGBra%D(:,IA,IB),GM)
+                                 ! ANOTHER PROBLEM WITH COPY IN COPY OUT HERE 
+                                 JBlk(IA,IB)=JBlk(IA,IB)+CTraxFF(Prim,HGBra%D(:,IA,IB),GM)
                               ENDDO
                            ENDDO
                         ENDIF

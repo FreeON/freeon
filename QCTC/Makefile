@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC =-DEXPLICIT_SOURCE
+CPPMISC = -DEXPLICIT_SOURCE
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/ -I./LibQCTC/
 #
@@ -55,7 +55,7 @@ release:clean $(ReleaseFiles)
 	rm -rf MMA/MD3TRR
 	rm -rf MMA/XLate
 #
-clean:	clQCTC cQCTC cJFrc cMMA cPFFT
+clean:	cQCTC cJFrc cMMA cPFFT
 #
 purge:	plQCTC cQCTC cJFrc pMMA cPFFT
 	rm -f $(REMOVESRCE)
