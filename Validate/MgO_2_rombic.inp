@@ -1,0 +1,42 @@
+<BeginTitle>
+STO-2G SlaterDirac
+MgO rhombic (2 atoms)
+ loose: <SCF> = -260.88335138
+  good: <SCF> = -260.88415659 
+ tight: <SCF> = -260.88402916  
+
+STO-3G SlaterDirac
+MgO rhombic (2 atoms)
+ loose: <SCF> = -268.64612653
+  good: <SCF> = -268.63248355 
+ tight: <SCF> = -268.63248240
+
+STO-6G SlaterDirac
+MgO rhombic (2 atoms)
+ loose: <SCF> = -269.34449598
+  good: <SCF> = -269.38425997
+ tight: <SCF> = -269.38429890
+<EndTitle>
+
+<BeginOptions>
+MPIRun="/usr/local/mpich-1.1.2_PG_SHMEM/bin/mpirun -np 4"
+Charge=0
+Multiplicity=1
+Guess=SuperP
+SCFMethod=(RH)
+BasisSets=(STO-2G)
+ModelChem=(SlaterDirac) 
+Accuracy =(tight)
+DebugAll =(MaxDebug,BasisSet)
+Geometry=(InAnstroms,NoOrder) 
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+<EndOptions>
+
+<BeginPeriodic>
+d3   2.97777    2.97777    2.97777   60.00000   60.00000   60.00000
+<EndPeriodic>
+
+<BeginGeometry>   
+MG    0.00000    0.00000    0.00000  
+O     0.50000    0.50000    0.50000  
+<EndGeometry>
