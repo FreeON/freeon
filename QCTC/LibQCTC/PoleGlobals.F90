@@ -10,4 +10,6 @@ MODULE PoleGlobals
   REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
   REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
   REAL(DOUBLE), DIMENSION(0:SPEll+1,0:FFELL)   :: FudgeFactorial
+!
+  INTEGER,PARAMETER                            :: MaxUEll=4
 END MODULE
