@@ -243,6 +243,10 @@ CONTAINS
     REAL(DOUBLE),DIMENSION(3,G%NAtms) :: BoxCarts
     INTEGER        :: I
     !--------------------------------------------------------------------------------!
+    ! First account for unwrapped dimensions
+    G%Carts%D=G%AbCarts%D
+    ! Check for no wrapping at all
+    IF(G%PBC%Dimen==0)RETURN
     ! Generate fractional coordinates from unwrapped coordinates
     DO I=1,G%NAtms
        BoxCarts(:,I)=AtomToFrac(G,G%AbCarts%D(:,I))

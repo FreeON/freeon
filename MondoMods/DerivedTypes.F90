@@ -259,7 +259,6 @@ MODULE DerivedTypes
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
       TYPE(DBL_RNK2)   :: AbBoxCarts!-- Abosolute coords in fractional
-      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute coords in Cartesian
       TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
 #endif 
 !     Atomic coordinates
@@ -271,6 +270,7 @@ MODULE DerivedTypes
       TYPE(CHR_VECT)   :: AtNam     !-- Atomname
       TYPE(CHR_VECT)   :: AtMMTyp   !-- Molecular Mechanics atomtype
       TYPE(DBL_VECT)   :: AtMss     !-- Atomic Mass per Atom
+      TYPE(DBL_RNK2)   :: AbCarts   !-- Absolute, unwrapped coordinates
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
    END TYPE 
