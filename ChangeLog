@@ -1,6 +1,296 @@
+2004-10-20 03:11  vweber
+
+	* TwoE/VRR/VRRp0p0.F90: [no log message]
+
+2004-10-20 02:30  vweber
+
+	* ONX2/GONX2.F90: [no log message]
+
+2004-10-19 19:23  nemeth
+
+	* Validate/: PBCBenzene.inp, PBCBenzene.ref: Geometry optimization
+	of benzene crystal. Goes similarly well as sulphure (checked in
+	before). Very small forces on the lattice.
+
+2004-10-19 18:16  mchalla
+
+	* TwoE/VRR/VRRg0g0.F90: Checking in for Captain V.
+
+2004-10-19 18:13  mchalla
+
+	* Validate/Ice.inp: just a test to check if CVS is broken.
+
+2004-10-19 13:32  nemeth
+
+	* Validate/: Sulphure.inp, Sulphure.ref: Geometry optimization of
+	monoclinic sulphure. Lattice is optimized simultaneously with
+	atomic positions. The quick convergence was probably due to the
+	fact that lattice forces have been very small. Also, the big size
+	of the cell may be beneficial for avoiding gamma-point effects seen
+	in small cells.
+
+2004-10-19 02:56  vweber
+
+	* TwoE/: GRD/BraHRR101.F90, GRD/BraHRR1010.F90, GRD/BraHRR102.F90,
+	GRD/BraHRR103.F90, GRD/BraHRR106.F90, GRD/BraHRR11.F90,
+	GRD/BraHRR110.F90, GRD/BraHRR12.F90, GRD/BraHRR13.F90,
+	GRD/BraHRR16.F90, GRD/BraHRR21.F90, GRD/BraHRR210.F90,
+	GRD/BraHRR22.F90, GRD/BraHRR23.F90, GRD/BraHRR26.F90,
+	GRD/BraHRR31.F90, GRD/BraHRR310.F90, GRD/BraHRR32.F90,
+	GRD/BraHRR33.F90, GRD/BraHRR36.F90, GRD/BraHRR61.F90,
+	GRD/BraHRR610.F90, GRD/BraHRR62.F90, GRD/BraHRR63.F90,
+	GRD/BraHRR66.F90, GRD/dERIInterfaceB.Inc, GRD/dIntB10010101.F90,
+	GRD/dIntB10010201.F90, GRD/dIntB10010202.F90,
+	GRD/dIntB10010301.F90, GRD/dIntB10010302.F90,
+	GRD/dIntB10010303.F90, GRD/dIntB10010601.F90,
+	GRD/dIntB10010602.F90, GRD/dIntB10010603.F90,
+	GRD/dIntB10010606.F90, GRD/dIntB10011001.F90,
+	GRD/dIntB10020101.F90, GRD/dIntB10020201.F90,
+	GRD/dIntB10020202.F90, GRD/dIntB10020301.F90,
+	GRD/dIntB10020302.F90, GRD/dIntB10020303.F90,
+	GRD/dIntB10020601.F90, GRD/dIntB10020602.F90,
+	GRD/dIntB10020603.F90, GRD/dIntB10020606.F90,
+	GRD/dIntB10021001.F90, GRD/dIntB10021002.F90,
+	GRD/dIntB10030101.F90, GRD/dIntB10030201.F90,
+	GRD/dIntB10030202.F90, GRD/dIntB10030301.F90,
+	GRD/dIntB10030302.F90, GRD/dIntB10030303.F90,
+	GRD/dIntB10030601.F90, GRD/dIntB10030602.F90,
+	GRD/dIntB10030603.F90, GRD/dIntB10030606.F90,
+	GRD/dIntB10031001.F90, GRD/dIntB10031002.F90,
+	GRD/dIntB10031003.F90, GRD/dIntB10060101.F90,
+	GRD/dIntB10060201.F90, GRD/dIntB10060202.F90,
+	GRD/dIntB10060301.F90, GRD/dIntB10060302.F90,
+	GRD/dIntB10060303.F90, GRD/dIntB10060601.F90,
+	GRD/dIntB10060602.F90, GRD/dIntB10060603.F90,
+	GRD/dIntB10060606.F90, GRD/dIntB10061001.F90,
+	GRD/dIntB10061002.F90, GRD/dIntB10061003.F90,
+	GRD/dIntB10061006.F90, GRD/dIntB10100101.F90,
+	GRD/dIntB10100201.F90, GRD/dIntB10100202.F90,
+	GRD/dIntB10100301.F90, GRD/dIntB10100302.F90,
+	GRD/dIntB10100303.F90, GRD/dIntB10100601.F90,
+	GRD/dIntB10100602.F90, GRD/dIntB10100603.F90,
+	GRD/dIntB10100606.F90, GRD/dIntB10101001.F90,
+	GRD/dIntB10101002.F90, GRD/dIntB10101003.F90,
+	GRD/dIntB10101006.F90, GRD/dIntB1010101.F90, GRD/dIntB10101010.F90,
+	GRD/dIntB2010101.F90, GRD/dIntB2010201.F90, GRD/dIntB2020101.F90,
+	GRD/dIntB2020201.F90, GRD/dIntB2020202.F90, GRD/dIntB3010101.F90,
+	GRD/dIntB3010201.F90, GRD/dIntB3010202.F90, GRD/dIntB3010301.F90,
+	GRD/dIntB3020101.F90, GRD/dIntB3020201.F90, GRD/dIntB3020202.F90,
+	GRD/dIntB3020301.F90, GRD/dIntB3020302.F90, GRD/dIntB3030101.F90,
+	GRD/dIntB3030201.F90, GRD/dIntB3030202.F90, GRD/dIntB3030301.F90,
+	GRD/dIntB3030302.F90, GRD/dIntB3030303.F90, GRD/dIntB6010101.F90,
+	GRD/dIntB6010201.F90, GRD/dIntB6010202.F90, GRD/dIntB6010301.F90,
+	GRD/dIntB6010302.F90, GRD/dIntB6010303.F90, GRD/dIntB6010601.F90,
+	GRD/dIntB6020101.F90, GRD/dIntB6020201.F90, GRD/dIntB6020202.F90,
+	GRD/dIntB6020301.F90, GRD/dIntB6020302.F90, GRD/dIntB6020303.F90,
+	GRD/dIntB6020601.F90, GRD/dIntB6020602.F90, GRD/dIntB6030101.F90,
+	GRD/dIntB6030201.F90, GRD/dIntB6030202.F90, GRD/dIntB6030301.F90,
+	GRD/dIntB6030302.F90, GRD/dIntB6030303.F90, GRD/dIntB6030601.F90,
+	GRD/dIntB6030602.F90, GRD/dIntB6030603.F90, GRD/dIntB6060101.F90,
+	GRD/dIntB6060201.F90, GRD/dIntB6060202.F90, GRD/dIntB6060301.F90,
+	GRD/dIntB6060302.F90, GRD/dIntB6060303.F90, GRD/dIntB6060601.F90,
+	GRD/dIntB6060602.F90, GRD/dIntB6060603.F90, GRD/dIntB6060606.F90,
+	VRR/VRRd0d0.F90, VRR/VRRd0f0.F90, VRR/VRRd0g0.F90, VRR/VRRd0h0.F90,
+	VRR/VRRd0i0.F90, VRR/VRRd0p0.F90, VRR/VRRd0s0.F90, VRR/VRRf0d0.F90,
+	VRR/VRRf0f0.F90, VRR/VRRf0g0.F90, VRR/VRRf0h0.F90, VRR/VRRf0i0.F90,
+	VRR/VRRf0p0.F90, VRR/VRRf0s0.F90, VRR/VRRg0d0.F90, VRR/VRRg0f0.F90:
+	Added X-stress.
+
+2004-10-18 22:23  nemeth
+
+	* MondoSCF2/QUICCA.F90: [no log message]
+
+2004-10-18 21:54  nemeth
+
+	* MondoSCF2/QUICCA.F90: Filtering of data points is turned on. Only
+	those points with the biggest weights that comprise 99% of the sum
+	of all weights will be used in fits.
+
+2004-10-18 14:13  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90: A few small
+	modifications in the projection of lattice rotations, they leave
+	polyethylene and BN results the same.
+
+2004-10-18 11:16  tymczak
+
+	* MondoSCF2/SCFs.F90: Put Back in the MD convergence Criteria to
+	ConvergeQ()
+
+2004-10-18 02:29  vweber
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: [no log message]
+
+2004-10-17 11:54  nemeth
+
+	* Validate/: BN_3x3.inp, BN_3x3.ref: A two-dimensional example for
+	simultaneous lattice and atomic relaxations.
+
+2004-10-16 21:19  nemeth
+
+	* Validate/: CH2x-6.inp, CH2x-6.ref: Simultaneous optimization of
+	atomic positions and lattice parameters for polyethylene with
+	PBExc/STO-2G/good. See the rapid convergence in the value of the
+	maximum Cartesian gradient and the lattice parameter.
+
+2004-10-16 21:11  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: A few small
+	modifications in the internal coordinate optimizer related
+	subroutines. This version of the optimizer works well in
+	PBE/STO-2G/good optimization of polyethylene (with 6-fold
+	supercell), when doing simultaneous lattice and atomic coordinates
+	optimization. More tests and improvements are coming, however the
+	code seems to be readily applicable as is.  WARNING! The default
+	algorithm from now on is the simultaneous optimization of lattice
+	and atomic coordinates! If you want to constrain lattice parameter
+	in one dimension, add the following line at the end of the input
+	file: <BEGIN_ADD_INTERNALS> STRE_A 12.0 <END_ADD_INTERNALS> this
+	fixes the length of "A" at 12.0 angstroems.
+	
+	In 3D, in case you want to constrain the whole lattice, add
+	<BEGIN_ADD_INTERNALS> STRE_A 5.565 STRE_B 5.565 STRE_C 4.684 ALPHA
+	90.0 BETA  90.0 GAMMA 90.0 <END_ADD_INTERNALS> The numbers refer to
+	the required values of the lattice parameters. In case you want to
+	constrain only a few of the lattice parameters, put only those
+	between the <BEGIN_ADD_INTERNALS> and <END_ADD_INTERNALS> lines. 
+	HF stress needs to be tested, but DFT seems to be OK.
+	
+	Don't forget to check the convergence of the internal coordinate
+	forces with supercell size, before doing any optimizations!
+	
+	Happy optimizations!
+
+2004-10-15 11:16  tymczak
+
+	* MondoSCF2/MDynamics.F90: [no log message]
+
+2004-10-15 08:25  vweber
+
+	* TwoE/GRD/: BRAHRR.m, CNTRCTG.m, FRONTM.m, GRD.m: Fixed a problem
+	with sp block.
+
+2004-10-15 06:01  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90: Added HF-Stress, not
+	activated yet.
+
+2004-10-15 05:53  vweber
+
+	* TwoE/GRD/: BRAHRR.m, CNTRCTG.m, DERIInterface.m, FRONTM.m,
+	GAMMAS.m, GRD.m, KETHRR.m: Added HF-Stress.
+
+2004-10-15 05:45  vweber
+
+	* TwoE/VRR/VRR.m: Added HF-Stress.
+
+2004-10-14 19:01  nemeth
+
+	* MondoSCF2/InCoords.F90: Projection of constraint forces improved
+	by improving numerical stability of preconditioner.
+
+2004-10-14 17:36  nemeth
+
+	* MondoSCF2/InCoords.F90: [no log message]
+
+2004-10-14 17:26  nemeth
+
+	* MondoSCF2/: InCoords.F90, ParseExtraCoords.F90: Some more
+	modifications in extra coordinates and filtering crystal internal
+	coordinates.
+
+2004-10-14 15:25  nemeth
+
+	* MondoSCF2/ParseExtraCoords.F90: A new feature added that allowes
+	constraints on internal coordinates that reach through cell
+	boundaries. Definition in input file is given between
+	<BEGIN_ADD_INTERNALS> and <END_ADD_INTERNALS> . For example: STRE 4
+	1  CELL 1 0 0	0 0 0  1.0 defines a stretching between atom 4 in
+	cell (1,0,0) and atom 1 of cell (0,0,0) and the length of the
+	coordinate is constrained to be 1.0 Angstroems.  Another example
+	for torsion is: TORS 4 1 1 2  CELL 1 0 0  1 0 0  1 0 0	0 -1 0 
+	30.0 , for a torsional angle fixed at 30 degrees.  In case all
+	atoms are in the central cell, use STRE 4 1  1.0 or TORS 4 1 3 2
+	30.0 .	If you want to add extra internal coordinates to the
+	optimization but you do not want to constrain it, use e.g.  TORS 4
+	1 1 2  CELL 1 0 0  1 0 0  1 0 0  0 -1 0 or TORS 4 1 3 2 , i.e. the
+	same definitions as for constraints but without any value given at
+	the end of the definition-line.
+
+2004-10-14 10:49  nemeth
+
+	* MondoSCF2/InCoords.F90: A small bug fixed in the filtering of
+	crystal internal coordinates (related to torsions in 4-atom-cell
+	CH2x).
+
+2004-10-13 13:54  mchalla
+
+	* Validate/AgCl_loose.ref: This is the first example in which PBC
+	ECPS seem to work.
+
+2004-10-13 13:53  mchalla
+
+	* Validate/AgCl_2x2x2.inp: [no log message]
+
+2004-10-13 13:42  mchalla
+
+	* Validate/AgCl.inp: [no log message]
+
+2004-10-13 09:31  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-10-13 09:21  tymczak
+
+	* QCTC/Thresholds.F90: [no log message]
+
+2004-10-12 14:41  tymczak
+
+	* QCTC/Thresholds.F90: [no log message]
+
+2004-10-12 14:36  tymczak
+
+	* QCTC/: MakePFFT.F90, NukE.F90, PBCFarField.F90: [no log message]
+
+2004-10-12 14:34  tymczak
+
+	* QCTC/JForce.F90: Fixed the JForce Lattice Forces
+
+2004-10-12 14:33  tymczak
+
+	* QCTC/DivPFFTensor.F90: Fixed Bugs in the Derivative of the
+	IrRegular Tensor
+
+2004-10-12 14:30  tymczak
+
+	* QCTC/BlokTrPdJ.F90: 
+	Fixed Bug in Lattice Forces
+
+2004-10-12 14:26  tymczak
+
+	* OneE/: SForce.F90, TForce.F90: [no log message]
+
+2004-10-12 14:25  tymczak
+
+	* OneE/MakeRho.F90: For force evalulation, rho is not folded
+	
+	CJ
+
+2004-10-12 14:23  tymczak
+
+	* MondoSCF2/SCFs.F90: [no log message]
+
+2004-10-12 14:18  tymczak
+
+	* MondoMods/AtomPairs.F90: [no log message]
+
+2004-10-12 14:15  tymczak
+
+	* Includes/CompilerSpecifics.IntelLinux.NAG: [no log message]
+
 2004-10-07 14:54  mchalla
 
-	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+	* Docs/DM_Papers/PERT_3/Response3.tex, ChangeLog: [no log message]
 
 2004-10-06 16:26  mchalla
 
@@ -14,9 +304,10 @@
 
 	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
 
-2004-10-04 15:29  nemeth
+2004-10-04 15:28  nemeth
 
-	* MondoSCF2/InCoords.F90: [no log message]
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex, MondoSCF2/InCoords.F90:
+	[no log message]
 
 2004-10-04 13:38  tymczak
 
@@ -30,11 +321,34 @@
 
 	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
 
+2004-09-30 19:37  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: PBCQUICCA.tex, mondo_new.bib: [no log
+	message]
+
 2004-09-30 07:55  vweber
 
 	* ONX2/ONX2.F90: Fixed problem with basis set switch. BSiz, OffS
 	and NBasF were set for the previous basis, need both sets previous
 	and current for Kcc and Dpp.
+
+2004-09-29 20:12  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: [no log message]
+
+2004-09-29 15:16  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: PBCQUICCA.tex, mondo_new.bib: [no log
+	message]
+
+2004-09-29 15:05  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/IceIhfit.eps: [no log message]
+
+2004-09-28 19:40  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: An update of the PBC
+	optimizer paper.
 
 2004-09-28 09:57  tymczak
 
@@ -52,6 +366,16 @@
 	function.  Now I need to add the stress-vrr to be general. Added
 	also a switch -DoStress- in GRD.m which permits to have or not the
 	stress.
+
+2004-09-27 19:36  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: Yet another update of
+	the PBC optimizer paper.
+
+2004-09-27 17:59  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: Additions to the PBC
+	optimizer paper.
 
 2004-09-27 08:53  vweber
 
@@ -73,6 +397,11 @@
 	* TwoE/: GRD/DERIInterface.m, GRD/dERIInterfaceB.Inc,
 	INT/ERIInterface.m, INT/ERIInterfaceB.Inc,
 	INT/ERIListInterfaceB.Inc: Added bra-ket symmetry in the interface.
+
+2004-09-26 00:02  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: An improved version of
+	the PBC optimizer paper.
 
 2004-09-25 22:11  nemeth
 
@@ -101,6 +430,10 @@
 
 	* Validate/AgCl.inp: Silver chloride demo with ECPs.
 
+2004-09-24 12:24  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/mondo_new.bib: [no log message]
+
 2004-09-24 10:34  vweber
 
 	* ONX2/: GONX2.F90, Makefile, ONX2.F90, ONX2ComputK.F90,
@@ -111,6 +444,33 @@
 	Also changed the parallel fill out stuff.
 	
 	Removed IntSSSS from Makefile, we don't need that any more.
+
+2004-09-24 00:12  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: [no log message]
+
+2004-09-23 23:55  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: [no log message]
+
+2004-09-23 23:52  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: [no log message]
+
+2004-09-23 23:51  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: Makefile, PBCQUICCA.tex: A few
+	additions to the PBC optimizer paper.
+
+2004-09-23 19:32  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: A new version of the PBC
+	optimizer paper.
+
+2004-09-22 19:33  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/PBCQUICCA.tex: An update of the PBC
+	optimizer paper.
 
 2004-09-22 16:27  tymczak
 
@@ -243,6 +603,11 @@
 	c] / m_ij
 	
 	CJ
+
+2004-09-13 23:28  nemeth
+
+	* Docs/Optimizer/PBC_QUICCA/: Makefile, PBCQUICCA.tex: A few files
+	added to begin with a paper.
 
 2004-09-13 16:44  tymczak
 
