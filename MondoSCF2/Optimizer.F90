@@ -272,10 +272,11 @@ CONTAINS
        RMSGrad=MAX(RMSGrad,C%Geos%Clone(iCLONE)%GradRMS)
     ENDDO
     ! Take some steps 
-    StepLength=2D0
-    DO iSTEP=1,MaxSTEP
-       StepLength=StepLength/Two
-       ! Step the absolute positions
+!GH    StepLength=2D0
+    StepLength=1D-1
+!GH    DO iSTEP=1,MaxSTEP
+!GH       StepLength=StepLength/Two
+      ! Step the absolute positions
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Vects%D
        ENDDO
@@ -284,48 +285,50 @@ CONTAINS
        ! Evaluate energies at the new geometry
        CALL SCF(cBAS,cGEO+1,C)          
        ! Relative change in the total Energy
-       RelErrE=-1D10
-       DO iCLONE=1,C%Geos%Clones
-          RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
-               /C%Geos%Clone(iCLONE)%ETotal)
-       ENDDO       
-       ! Check for going downhill, convergence or stall  
-       IF(MaxStep==1)THEN
-          ECnvrgd=ABS(RelErrE)<1D1*ETol(AL)
+!GH       RelErrE=-1D10
+!GH       DO iCLONE=1,C%Geos%Clones
+!GH          RelErrE=MAX(RelErrE,(Energies(iCLONE)-C%Geos%Clone(iCLONE)%ETotal) &
+!GH               /C%Geos%Clone(iCLONE)%ETotal)
+!GH       ENDDO       
+!GH       ! Check for going downhill, convergence or stall  
+!GH       IF(MaxStep==1)THEN
+!GH          ECnvrgd=ABS(RelErrE)<1D1*ETol(AL)
 !          XCnvrgd=RMSDisp<XTol(AL).AND.MaxDisp<XTol(AL)          
-       ELSE
-          ECnvrgd=.FALSE.
+!GH       ELSE
+!GH          ECnvrgd=.FALSE.
 !          XCnvrgd=.FALSE.
-       ENDIF
+!GH       ENDIF
        GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)
 !       IF(ECnvrgd.OR.(GCnvrgd.AND.XCnvrgd))THEN
-       IF(ECnvrgd.OR.GCnvrgd)THEN
+!GH       IF(ECnvrgd.OR.GCnvrgd)THEN
+       IF(GCnvrgd)THEN
           ! Cool, we are done
           Converged=.TRUE.   
           Mssg=ProcessName('SteepStep','Converged #'//TRIM(chGEO))
-          EXIT
-       ELSEIF(RelErrE<Zero)THEN
+!GH          EXIT
+!GH       ELSEIF(RelErrE<Zero)THEN
+       ELSE
           ! Went down hill but not converged
           Converged=.FALSE.  
           Mssg=ProcessName('SteepStep','Descent #'//TRIM(chGEO))
-          EXIT
-       ELSEIF(iSTEP==MaxSTEP)THEN
-          ! Probably need to readjust thresholds/accuracy goals 
-          CALL MondoHalt(DRIV_ERROR,' Reached max resolution in energy = '   &
-               //TRIM(DblToShrtChar(RelErrE))//' in SteepStep.')          
-       ELSE
-          ! Need to shorten the step length.  Try again ...
-          Mssg=ProcessName('SteepStep','BkTrack #'//TRIM(chGEO))          
-          Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))  &
-               //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
-               //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
-               //', Step= '//TRIM(DblToShrtChar(StepLength))
-          !    WRITE(*,*)TRIM(Mssg)             
-          CALL OpenASCII(OutFile,Out)
-          WRITE(Out,*)TRIM(Mssg)             
-          CLOSE(Out)
+!GH          EXIT
+!GH       ELSEIF(iSTEP==MaxSTEP)THEN
+!GH          ! Probably need to readjust thresholds/accuracy goals 
+!GH          CALL MondoHalt(DRIV_ERROR,' Reached max resolution in energy = '   &
+!GH               //TRIM(DblToShrtChar(RelErrE))//' in SteepStep.')          
+!GH       ELSE
+!GH          ! Need to shorten the step length.  Try again ...
+!GH         Mssg=ProcessName('SteepStep','BkTrack #'//TRIM(chGEO))          
+!GH          Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE))  &
+!GH               //', Grms= '//TRIM(DblToShrtChar(RMSGrad))         &
+!GH               //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))         &
+!GH               //', Step= '//TRIM(DblToShrtChar(StepLength))
+!GH          !    WRITE(*,*)TRIM(Mssg)             
+!GH          CALL OpenASCII(OutFile,Out)
+!GH          WRITE(Out,*)TRIM(Mssg)             
+!GH          CLOSE(Out)
        ENDIF
-    ENDDO
+!GH    ENDDO
     Mssg=TRIM(Mssg)//' dE= '//TRIM(DblToShrtChar(RelErrE)) &
          //', Grms= '//TRIM(DblToShrtChar(RMSGrad))        & 
          //', Gmax= '//TRIM(DblToShrtChar(MAXGrad))        &

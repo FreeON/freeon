@@ -160,7 +160,9 @@ CONTAINS
     CALL CloseHDF(HDFFileID)
 
     ! NEB force projections
-!    IF(O%Grad==GRAD_TS_SEARCH_NEB)CALL NEBForce(G,O)
+    IF(O%Grad==GRAD_TS_SEARCH_NEB) THEN
+       CALL NEBForce(G,O)
+    ENDIF
     ! Zero forces on contrained atoms and compute stats with projected forces
 
     HDFFileID=OpenHDF(N%HFile)

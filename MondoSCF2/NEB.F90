@@ -4,7 +4,7 @@ MODULE NEB
   ! reactant and product states.  This module impliments the climbing image
   ! NEB so that the highest energy image will converge to a saddle point.
   !
-  ! Module written by Graeme Henkelman
+  ! Module written by Graeme Henkelman and Matt Challacombe
   ! Email: graeme@lanl.gov
   !
   ! NEB References:
@@ -24,8 +24,8 @@ MODULE NEB
   SAVE
   PRIVATE
   PUBLIC :: NEBInit,NEBForce
-  TYPE(Crds) :: NEBReac,NEBProd      ! Reactant and Product structures for the NEB
 CONTAINS
+
   !===============================================================================
   ! Initialize the NEB by generating an linear interpolation between intial
   ! and final states. 
@@ -34,17 +34,31 @@ CONTAINS
     TYPE(Geometries) :: G
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: ReactionVector
     REAL(DOUBLE)     :: ImageFraction
-    INTEGER          :: iCLONE,I
+    INTEGER          :: iCLONE,j
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
-    ReactionVector=G%Clone(0)%AbCarts%D-G%Clone(G%Clones+1)%AbCarts%D
+    write(*,*)'NEB: Into NEBInit'
+    ReactionVector=G%Clone(G%Clones+1)%AbCarts%D-G%Clone(0)%AbCarts%D
+    iClone=0
+    write(*,'(1A7,I3)')'Image',iClone
+    write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
     DO iCLONE=1,G%Clones
-       ImageFraction=DBLE(iCLONE)/DBLE(G%Clones)
+       ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
        G%Clone(iCLONE)%AbCarts%D=G%Clone(0)%AbCarts%D+ImageFraction*ReactionVector
+       write(*,'(1A7,I3)')'Image',iClone
+       write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
     ENDDO
+    iClone=G%Clones+1
+    write(*,'(1A7,I3)')'Image',iClone
+    write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    write(*,*)'NEB: Done NEBInit'
   END SUBROUTINE NEBInit
 
+  !===============================================================================
+  ! Make a deep copy of the CRDS structure
+  ! (This should move.  Also figure out PBC issue.) 
+  !===============================================================================
   SUBROUTINE SetEq_CRDS(G1,G2)
     TYPE(CRDS) :: G1,G2
     G2%NElec=G1%NElec
@@ -54,7 +68,7 @@ CONTAINS
     G2%NAlph=G1%NAlph
     G2%NBeta=G1%NBeta
     G2%Carts%D=G1%Carts%D
-    G2%AbCarts%D=G2%AbCarts%D
+    G2%AbCarts%D=G1%AbCarts%D
     G2%NAtms=G1%NAtms      
     G2%Nkind=G1%Nkind 
     G2%AtNum%D=G1%AtNum%D 
@@ -64,18 +78,20 @@ CONTAINS
     G2%CConstrain%I=G1%CConstrain%I 
 !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
   END SUBROUTINE SetEq_CRDS
+
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
   !===============================================================================
   SUBROUTINE NEBForce(G,O)
     TYPE(Geometries) :: G
     TYPE(Options)    :: O
-    INTEGER          :: I,UMaxI,NAtms
+    INTEGER          :: I,j,UMaxI,NAtms
     LOGICAL          :: UPm,UPp
-    REAl(DOUBLE)     :: UMin,UMax,Um,Up,Rm,Rp
+    REAl(DOUBLE)     :: UMin,UMax,Um,Up,Rm,Rp,Dist,FProj
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: N
     !----------------------------------------------------------------------------
-    write(*,*)'Into NEBForce'
+    write(*,*)'NEB: Into NEBForce'
+    Dist=0
     ! Find the image with the maximum total energy
     UMax=G%Clone(1)%ETotal
     UMaxI=1
@@ -85,9 +101,18 @@ CONTAINS
           UMax=G%Clone(I)%ETotal
        ENDIF
     ENDDO
+    write(*,*)'NEB: Found max energy image, ',UMaxI
     ! Find the tangent to the path at each image
     ! Project out potential forces along the band
     ! Add spring forces along the band
+
+!GH    write(*,*)'React Crds'
+!GH    write(*,'(3F13.5)') (G%Clone(0)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+
+!GH    write(*,*)'Prod Crds'
+!GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    write(*,*)'NEB: Distance, Energies, and Forces'
+
     DO I=1,G%Clones
        ! Are the neighboring images higher in energy?
        IF(I==1)THEN
@@ -100,7 +125,7 @@ CONTAINS
        ELSEIF(I==G%Clones)THEN
           UPp=G%Clone(I+1)%ETotal>G%Clone(I)%ETotal
        ENDIF
-       IF((UPm.AND..NOT.UPp).OR.(.NOT.UPm.AND.UPp))THEN   ! IF(.NOT.(UPm==UPp))THEN 
+       IF(UPm.NEQV.UPp)THEN 
           ! If we are not at an extrema of energy, 
           ! the tangent is the vector to the lower energy neighbour
           IF(UPm)THEN
@@ -123,28 +148,47 @@ CONTAINS
              N=N+(G%Clone(I+1)%AbCarts%D-G%Clone(I)%AbCarts%D)*UMin
           ENDIF
        ENDIF
-       !????????????????????????
        N=N/SQRT(SUM(N**2))
-       ! Project out the force along the tangent
-       G%Clone(I)%AbCarts%D=G%Clone(I)%AbCarts%D-G%Clone(I)%AbCarts%D*SUM(G%Clone(I)%AbCarts%D*N)
-       ! Add spring forces along the band
-       IF(I==1)THEN
-          Rm=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(0)%AbCarts%D)**2))
-       ELSE
-          Rm=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D)**2))
-       ENDIF
-       IF(I==G%Clones)THEN
-          Rp=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(G%Clones+1)%AbCarts%D)**2))
-       ELSE
-          Rp=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I+1)%AbCarts%D)**2))
-       ENDIF
-       G%Clone(I)%Vects%D=G%Clone(I)%Vects%D+O%NEBSpring*N*(Rp-Rm)
-       ! If climbing image, zero forces along the band for that image
+
+!GH       write(*,*)'Crds'
+!GH       write(*,'(3F13.5)') (G%Clone(I)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+!GH       write(*,*)'Normal'
+!GH       write(*,'(3F13.5)') (N(:,j),j=1,G%Clone(0)%NAtms)
+!GH       write(*,*)'In Force'
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+
+       ! Project out the force along the tangent, unless this is the
+       ! climbing image, for which the force along the tangent is inverted
+       FProj=SUM(G%Clone(I)%Vects%D*N)
+!GH       write(*,*)'Prj Force'
        IF(O%NEBClimb.AND.I==UMaxI)THEN
-          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D-N*SUM(N*G%Clone(I)%Vects%D)
+!GH          write(*,*)'Climbing Image',I
+          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D-2.0*N*FProj
+       ELSE
+          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D-N*FProj
        ENDIF
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+
+       ! Add spring forces along the band (if we are not the climbing image)
+       Rm=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I-1)%AbCarts%D)**2))
+       Rp=SQRT(SUM((G%Clone(I)%AbCarts%D-G%Clone(I+1)%AbCarts%D)**2))
+!GH       write(*,*)'Rm,Rp',Rm,Rp
+       IF(O%NEBClimb.AND.I==UMaxI)THEN
+          ! Do nothing (no springs for the climbing image)
+       ELSE
+          G%Clone(I)%Vects%D=G%Clone(I)%Vects%D+O%NEBSpring*N*(Rp-Rm)
+       ENDIF
+
+!GH       write(*,*)'Out Force'
+!GH       write(*,'(3F13.5)') (G%Clone(I)%Vects%D(:,j),j=1,G%Clone(0)%NAtms)
+       ! Write distance, energies and forces
+       Dist=Dist+Rm
+       write(*,'(A,I5,3F13.5)') 'NEB: ',I,Dist,G%Clone(I)%ETotal,FProj
     ENDDO
+    write(*,*)'NEB: Done NEBForce'
+
   END SUBROUTINE NEBForce
+
   !===============================================================================
   ! Generate a cubic spline along the band and interpolate to find extrema
   !===============================================================================

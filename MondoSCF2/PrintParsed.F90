@@ -36,7 +36,7 @@ CONTAINS
          ' A program suite for O(N) SCF theory and ab initio MD ',A1,    &
          ' Matt Challacombe, Eric Schwegler, C.J. Tymczak,      ',A1,    &
          ' Chee Kwan Gan, Karoly Nemeth, Anders Niklasson,      ',A1,    &
-         ' Hugh Nymeyer, and Graeme Henkleman                   ',A1,    &
+         ' Hugh Nymeyer, and Graeme Henkelman                   ',A1,    &
          ' Los Alamos National Laboratory (LA-CC 01-2)          ',A1,    & 
          ' Copyright 2001, University of California.            ',A1)
     ! Write information on host, platform, etc

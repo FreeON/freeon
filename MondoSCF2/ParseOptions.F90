@@ -342,7 +342,8 @@ CONTAINS
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
-    GeomPrint='PDB' ! hard set for now
+!    GeomPrint='PDB' ! hard set for now
+    GeomPrint='XYZ' ! hard set for now
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
   !
@@ -407,7 +408,7 @@ CONTAINS
     Logical      :: NEBClimb
     ! Set the spring constant between NEB images
     IF(.NOT.OptDblQ(Inp,NEB_SPRING,NEBSpring))THEN
-       NEBSpring=5.0
+       NEBSpring=1.0
     ENDIF
     ! Use the climbing image?
     IF(OptKeyQ(Inp,NEB_CLIMB,NEB_DO_CLIMB))THEN
