@@ -2,8 +2,9 @@
 \usepackage{graphicx}
  
 \begin{document}
-\title{
-Preserving spatial locality of atoms in first-principles calculations}
+\title{The near sighted principle in acheiving scalable parallelism for linear scaling first-principles calculations
+%Preserving spatial locality of atoms in first-principles calculations
+}
 \author{Chee~K.~Gan and Matt~Challacombe
 }
 \affiliation{
@@ -12,73 +13,56 @@ B268, Los Alamos, NM 87545, USA
 }
  
 \begin{abstract}
-We present a new novel method to preserve spatial locality of atoms in
-first-principles calculations. This method relies on an ordering 
-of $L^3$ points in a regular 3-dimensional grid. This ordering, called 
-the bandwidth reduction (BWR) ordering,
-is obtained by performing simulated annealing with an objective
-function which enforces
-spatial locality to be preserved. We find that BWR ordering
-preserves spatial locality much better than the popular Hilbert or Morton 
-orderings. The efficiency of BWR ordering has been shown to 
-significantly reduce the bandwidth of matrices in 
-first-principles calculations. 
-We expect BWR ordering 
-to be very useful in and readily applied to many other applications. 
+A first approach to computing space filling curves with improved long-range 
+properties is presented and used to solve the bandwidth problem in linear scaling 
+electronic structure theory.  For matrices with elements that fall off to zero 
+with geometric seperation (the near sighted principle) reordering with the new space 
+filling curve yields a banded matrix with envelope reduction that is far better 
+than Hilbert or Morton ordering.  This is a key problem in many fields where geometric 
+seperation can be exploited to achieve scalable parallelism, but graph theory does not 
+apply, is too expensive, or fails altogether.
+
 \pacs{71.15.-m,71.15.Dx}
 \end{abstract}
 \maketitle
-In recent years there have been various efforts to implement linear-scaling
-(or $O(N)$) methods where the computation time and memory requirement scale
-linearly with the system size $N$ (for a comprehensive review,
-see \cite{Goedecker_99v71}). 
-Since the concept of locality is a key for the success of any
-linear-scaling methods\cite{Kohn_96v76},
-ways to preserve locality should be explored. In particular, with the advent of
-highly efficient $O(N)$ methods and 
-powerful parallel computers, it is even more important to consider
-the problem of preserving
-spatial locality of atoms so that the amount of communications between
-two processors can be greatly reduced.
 
-In this work, we consider the 
-ordering of atoms in a large system for first-principles electronic structure
-calculations.  The aim is to rearrange the atoms in a system in such a way
-that spatial locality can be preserved which significantly 
-reduces the bandwidth of 
-the matrices such as the overlap, 
-Hamiltonian, and density matrices. 
-Presently the ordering of the atoms 
-can be performed using one of the several ways:
-the reverse Cuthill-McKee algorithm\cite{Cuthill_69,Colombo_96v37}, 
-space-filling curve\cite{Sagan_94} methods such as
-Hilbert\cite{Bially_69v15,Challacombe_00v128} and Morton (also known as $Z$) 
-orderings\cite{Warren_95v87,Omeltchenko_00v131}, and 
-the ``x, y, z'' ordering\cite{Canning_96v94}.
-However, using most of these orderings, two atoms which are close in space 
-can sometimes be separated 
-very far (in terms of their indices) from one another in an 
-ordered list\cite{Perez_92,Gotsman_96v5}. If localized
-atom-centered basis functions such as Gaussians
-are used in a calculation, this
-results in significant nonzero off-diagonal 
-overlap matrix elements which are far 
-from the main diagonal
-and hence increases the bandwidth of the overlap matrix
-Here we have assumed that an overlap matrix element
-can be set to zero if the overlap
-between two localized basis functions is smaller than some threshold value.
-In an another example, the bandwidth of the Hamiltonian matrix 
-will be increased because of the same reason as for the overlap matrix
-even though the interaction
-may be restricted to near neighbors only (such as in the tight-binding
-model).
 
-In this letter, we
-propose a method to efficiently reorder the atoms so that two atoms
-which are close to one another in space will naturally come close in an 
+In recent years there has been substantial progress in linear scaling electronic structure methods
+that achieve a reduced $O(N)$ computational cost with system size $N$, such that several programs
+\cite{SIESTA,MONDO,Gaussian,?} are now able to routinely perform high quality calculations on thousands of atoms.
+These $O$($N$) methods achieve reduced computational complexity by exploiting the locality of quantum 
+interactions, the so called ``near sighted'' principle \cite{Kohn_96v76}.  However, in addition to 
+achieving linear scaling, this principle also holds the promise for truely scalable parallel 
+electronic structure algorithms.   It is this second, largely overlooked aspect of the near sighted
+principle that we address here. In this work we address this second,  largely overlooked aspect of the 
+near-sighted principle.   In particular, we consider the ordering of atoms in a large system for 
+first-principles electronic structure calculations.   The aim is to rearrange the atoms to maximize spatial 
+locality, thereby reducing the bandwidth of matrices such as the overlap,  Hamiltonian, and density matrices. 
+It is then possible to exploit this property in the design of algorithms with $O(1)$ communications costs.  
+
+Current ordering schemes involve graph theory, such as the the reverse Cuthill-McKee 
+algorithm\cite{Cuthill_69,Colombo_96v37}, or geometric algorithms based on variations of
+the space-filling curve (SFC) \cite{Sagan_94}.  Space-filling curves attemp to map points in space
+onto a line (the SFC) such that points close in space are also close on the line.  The SFC methods 
+include the Hilbert\cite{Bially_69v15,Challacombe_00v128} and Morton (also known as $Z$) 
+orderings\cite{Warren_95v87,Omeltchenko_00v131}, as well as the the ``x, y, z'' ordering\cite{Canning_96v94}.  
+Graph theoretic methods are very power full when addressing a single graph.  However, many electronic 
+structure algorithms compute matrix-matrix products involving matrices with quite disparate graphs 
+\cite{Challacombe,Hutter,Scuseria}.  Graph theory can also result in poor aspect ratios (non-uniform bandwidth), 
+and can lead to widely different orderings with small perturbations.  On the other hand, current geometric 
+algorithms suffer from ``loopback'', in which  two points close in space can sometimes be well separated 
+(in terms of their indices) from one another in an ordered list\cite{Perez_92,Gotsman_96v5}. If localized 
+atom-centered basis functions such as Gaussians are used in an electronic structure calculation, this loopback 
+problem results in significant nonzero off-diagonal overlap matrix elements which are far from the main diagonal, 
+increasing the bandwidth. 
+
+In this letter, we propose a geometric ordering scheme that avoids the loopback problem, achieving superior 
+``long range locality'' and band width reduction (BWR), while sacrificing ``short range locality''.  
+
+method to efficiently reorder the atoms so that two atoms which are close to one another in space will naturally come close in an 
 ordered list, so that the number of non-zero off-diagonal matrix elements
 can be reduced significantly, thereby reducing the bandwidth of the matrix.
+
 This method relies on an ordering, called the bandwidth reduction (BWR)
 ordering in this work, which visits $L^3$ points in a regular 3-dimensional
 grid in a certain order that spatial locality is preserved.
@@ -92,6 +76,8 @@ according $T$,
 and then sort the keys to obtain an ordering of the atoms.
 In what follows we shall concentrate 
 on how to obtain a BWR ordering $T$ of $L^3$ points.
+
+
 
 We consider a three-dimensional cube with $ N = L^3$ points where the position
 of a grid point is given by
