@@ -43,20 +43,19 @@ PROGRAM JForce
   USE AtomPairs
   USE BraBloks
   USE PoleTree
+  USE PBCFarField
   USE BlokTrPdJ
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(DBCSR)         :: P
+  TYPE(DBCSR)                :: P
 #else
-  TYPE(BCSR)          :: P
+  TYPE(BCSR)                 :: P
 #endif
-  TYPE(AtomPair)      :: Pair
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,AtA,AtB,A1,A2,iSwitch
-  REAL(DOUBLE)        :: E_Nuc_Tot
-  TYPE(DBL_VECT)      :: Frc,JFrc
-  REAL(DOUBLE),DIMENSION(3) :: FrcAB
+  INTEGER                    :: AtA,AtB,A1,A2,JP,Q
+  TYPE(AtomPair)             :: Pair
+  TYPE(DBL_VECT)             :: Frc,JFrc
+  REAL(DOUBLE),DIMENSION(3)  :: FrcAB
   CHARACTER(LEN=6),PARAMETER :: Prog='JForce'
 !-------------------------------------------------------------------------------- 
 ! Start up macro
@@ -70,11 +69,21 @@ PROGRAM JForce
   CALL New(JFrc,3*NAtoms)
   CALL Get(P,TrixFile('D',Args,1))
 ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp(SPell2)
-! Build the global PoleTree representation of the total density
-  CALL RhoToPoleTree(Args)
+  CALL InitRhoAux
+! Setup global arrays for computation of multipole tensors
+  CALL MultipoleSetUp(FFEll2)
+#ifdef PERIODIC
+! Calculate the Number of Cells
+  CALL SetCellNumber(GM)
 ! Set the electrostatic background 
-  CALL FarField(PoleRoot)
+  CALL PBCFarFieldSetUp(FFEll)
+#endif
+! Build the global PoleTree representation of the total density
+  CALL RhoToPoleTree
+! Delete the auxiliary density arrays
+  CALL DeleteRhoAux
+! Delete the Density
+  CALL Delete(Rho)
 !--------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !
