@@ -1311,6 +1311,8 @@ CONTAINS
                 CALL Get(GM%Ordrd,  'reordered',Tag_O=Tag_O)
                 CALL Get(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
                 CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
+                CALL Get(GM%AtNam,  'atomname',Tag_O=Tag_O)
+                CALL Get(GM%AtMMTyp,'mmtype',Tag_O=Tag_O)
                 CALL Get(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
                 CALL Get(GM%Carts,  'cartesians',Tag_O=Tag_O)
                 CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
@@ -1345,6 +1347,8 @@ CONTAINS
 
                 CALL Put(GM%Ordrd,  'reordered',Tag_O=Tag_O)
                 CALL Put(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
+                CALL Put(GM%AtNam,  'atomname',Tag_O=Tag_O)
+                CALL Put(GM%AtMMTyp,'mmtype',Tag_O=Tag_O)
                 CALL Put(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
                 CALL Put(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
                 CALL Put(GM%Carts,  'cartesians',Tag_O=Tag_O)
