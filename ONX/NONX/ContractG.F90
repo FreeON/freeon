@@ -17,7 +17,6 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
   REAL(DOUBLE)               :: Za2,Zb2,Zc2,Zd2
 
   IF (N.EQ.0) RETURN
-
 !----------------------------------------!
 ! Total contraction length of one        !
 !----------------------------------------!
@@ -32,6 +31,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
+
       IF (iP==0.AND.iQ==0) THEN
         DO I=1,N
           C(I,iC) = U(I,1,1,iU)*Za2
@@ -53,11 +53,12 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
 !----------------------------------------!
 ! Contract integrals and scale by 2 * Zc |
 !----------------------------------------!
-    DO L=1,GD%LenDa+1,GD%LenDc
+    DO L=GD%LenDa+1,GD%LenDc
       iC  = GD%GDrv1%I(1,L)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
+
       IF (iP==0.AND.iQ==0) THEN
         DO I=1,N
           C(I,iC) = U(I,1,1,iU)*Zc2
@@ -79,7 +80,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
 !----------------------------------------!
 ! Contract integrals and scale by 2 * Zb |
 !----------------------------------------!
-    DO L=1,GD%LenDc+1,GD%LenDb
+    DO L=GD%LenDc+1,GD%LenDb
       iC  = GD%GDrv1%I(1,L)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
@@ -113,7 +114,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
 !----------------------------------------!
 ! Contract integrals (no scale factors)  |
 !----------------------------------------!
-    DO L=1,GD%LenDc+1,GD%LenDn
+    DO L=GD%LenDb+1,GD%LenDn
       iC  = GD%GDrv1%I(1,L)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
@@ -149,12 +150,13 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
+
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet
           DO J=1,KBra
             Za2=PrmBufB(9,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*Za2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*Za2
             END DO
           END DO
         END DO
@@ -163,7 +165,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Za2=PrmBufB(9,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*Za2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*Za2
             END DO
           END DO
         END DO
@@ -172,7 +174,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Za2=PrmBufB(9,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CK(I,K,iQ)*Za2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CK(I,K,iQ)*Za2
             END DO
           END DO
         END DO
@@ -181,7 +183,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Za2=PrmBufB(9,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Za2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Za2
             END DO
           END DO
         END DO
@@ -195,12 +197,15 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
+
+      write(*,*) "C:iU=",iU
+
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet
           DO J=1,KBra
             Zc2=PrmBufB(10,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*Zc2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*Zc2
             END DO
           END DO
         END DO
@@ -209,7 +214,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Zc2=PrmBufB(10,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*Zc2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*Zc2
             END DO
           END DO
         END DO
@@ -218,7 +223,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Zc2=PrmBufB(10,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CK(I,K,iQ)*Zc2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CK(I,K,iQ)*Zc2
             END DO
           END DO
         END DO
@@ -227,7 +232,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
           DO J=1,KBra
             Zc2=PrmBufB(10,J)
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Zc2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Zc2
             END DO
           END DO
         END DO
@@ -241,6 +246,9 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
       iP  = GD%GDrv1%I(2,L)
       iQ  = GD%GDrv1%I(3,L)
       iU  = GD%GDrv1%I(4,L)
+
+      write(*,*) "B:iU=",iU
+
       IF (iP==0.AND.iQ==0) THEN
         DO K=1,KKet
           Ioff=DB%MAXP*(K-1)+8
@@ -248,7 +256,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
             DO I=1,N
               Ind=SB%SLPrm%I(I)+Ioff
               Zb2=DB%PrmBuf%D(Ind)
-              C(I,iC) = U(I,J,K,iU)*Zb2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*Zb2
             END DO
           END DO
         END DO
@@ -259,7 +267,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
             DO I=1,N
               Ind=SB%SLPrm%I(I)+Ioff
               Zb2=DB%PrmBuf%D(Ind)
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*Zb2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*Zb2
             END DO
           END DO
         END DO
@@ -270,7 +278,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
             DO I=1,N
               Ind=SB%SLPrm%I(I)+Ioff
               Zb2=DB%PrmBuf%D(Ind)
-              C(I,iC) = U(I,J,K,iU)*CK(I,K,iQ)*Zb2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CK(I,K,iQ)*Zb2
             END DO
           END DO
         END DO
@@ -281,7 +289,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
             DO I=1,N
               Ind=SB%SLPrm%I(I)+Ioff
               Zb2=DB%PrmBuf%D(Ind)
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Zb2
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)*Zb2
             END DO
           END DO
         END DO
@@ -299,7 +307,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
         DO K=1,KKet
           DO J=1,KBra
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)
             END DO
           END DO
         END DO
@@ -307,7 +315,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
         DO K=1,KKet
           DO J=1,KBra
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)
             END DO
           END DO
         END DO
@@ -315,7 +323,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
         DO K=1,KKet
           DO J=1,KBra
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CK(I,K,iQ)
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CK(I,K,iQ)
             END DO
           END DO
         END DO
@@ -323,7 +331,7 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
         DO K=1,KKet
           DO J=1,KBra
             DO I=1,N
-              C(I,iC) = U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)
+              C(I,iC) = C(I,iC)+U(I,J,K,iU)*CB(J,iP)*CK(I,K,iQ)
             END DO
           END DO
         END DO
@@ -331,5 +339,3 @@ SUBROUTINE ContractG(N,KBra,KKet,NVRR,CB,CK,C,U,PrmBufB,DB,SB,GD)
     END DO ! L
   END IF
 END SUBROUTINE ContractG
-
-

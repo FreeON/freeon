@@ -17,7 +17,7 @@ c
 c----------------------------------------------------------------------
       IMPLICIT NONE
       INTEGER LenBi,LenBf,NumK
-      INTEGER IType,N,I,J
+      INTEGER IType,N,I,J,l
       REAL*8 W1(N,LenBi,NumK)
       REAL*8 W2(N,LenBf,NumK)
       REAL*8 x,y,z

@@ -72,8 +72,9 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
 
     IntCode=TBra*10000+TKet
 
-!    IF (IntCode.eq.01010301) THEN
-    IF(LTot.GT.1) THEN
+    IF(LTot.GT.2) THEN
+!    if(IntCode.ne.02010201) then
+
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -93,7 +94,7 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     iCL=Drv%CDrv%I(iCP)           ! driver
 
     CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
-    CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
+    CALL VRRs(LBra,LKet,NVRR,Drv)      ! Get the pointers to the VRR table
 
   DO iCBra=1,DB%LenCC       ! Loop over contraction lengths on the Bra
     CBra=DB%CCode%I(iCBra)
@@ -204,6 +205,7 @@ SUBROUTINE ComputeKg(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                 IF (LBra>0) THEN 
                   CALL HRRBra(IB%W1%D,IB%W2%D,ACx,ACy,ACz,ISL,                 &
                               NB1,NB2,NK2,TBra)
+
                   CALL Digest(ISL,NA,NB,NC,ND,L1,L2,L3,L4,                     &
                               IntSwitch,IB%W1%D,IB%W2%D,DA%D)
                   CALL Scatter(ISL,NA,NB,IndexA,SB,SubInd,DB,IB%W1%D,K)

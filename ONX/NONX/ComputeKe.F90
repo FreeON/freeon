@@ -43,7 +43,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
   INTEGER               :: IBD,IBP,IKD,IKP
   INTEGER               :: NB1,NB2,NK1,NK2
   INTEGER               :: NA,NB,NC,ND
-  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode
+  INTEGER               :: L1,L2,L3,L4,IntSpace,IntCode,IntCodeV,IntCodeC
   INTEGER               :: BraSwitch,KetSwitch,IntSwitch
   REAL(DOUBLE)          :: Dcd,SchB,SchK,Test
   REAL(DOUBLE)          :: ACx,ACy,ACz
@@ -70,10 +70,22 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     LKet=LTotal(ITypeB)+LTotal(ITypeD)
     LTot=LBra+LKet
 
+!    IntCode=GetCode(TBra,TKet)
+
     IntCode=TBra*10000+TKet
 
-!    IF (IntCode.eq.01010201) THEN
-    IF (LTot.LE.1) THEN
+    IntCodeV=IntCode
+    IntCodeC=IntCode
+
+    if(IntCode.eq.01010301) IntCodeV=01010201
+    if(IntCode.eq.03010101) IntCodeV=02010101
+    if(IntCode.eq.01010302) IntCodeV=01010202
+    if(IntCode.eq.01010303) IntCodeV=01010202
+    if(IntCode.eq.03020101) IntCodeV=02020101
+    if(IntCode.eq.03030101) IntCodeV=02020101
+
+    IF (LTot.LE.2) THEN
+!    if(IntCode.eq.02010201) then
 
     NB1=IDmn(LBra)
     NK1=IDmn(LKet)
@@ -93,7 +105,7 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
     iCL=Drv%CDrv%I(iCP)           ! driver
 
     CALL GetGammaTable(LTot,IB)   ! Get the correct gamma fcn table
-    CALL VRRs(LBra,LKet,Drv)      ! Get the pointers to the VRR table
+    CALL VRRs(LBra,LKet,NVRR,Drv)      ! Get the pointers to the VRR table
 
   DO iCBra=1,DB%LenCC       ! Loop over contraction lengths on the Bra
     CBra=DB%CCode%I(iCBra)
@@ -191,24 +203,27 @@ SUBROUTINE ComputeKe(BSc,GMc,BSp,GMp,D,K,DB,IB,SB,Drv,SubInd,BfnInd)
                   GOTO 9000
                 ENDIF
 
-                SELECT CASE (IntCode)
+                SELECT CASE (IntCodeV)
                   CASE (01010101)  
-                    CALL Int1111(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                    CALL Int1111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
                   CASE (01010201)  
-                    CALL Int1121(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                    CALL Int1121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
                   CASE (02010101) 
-                    CALL Int2111(ISL,CBra,CKet,DB%DisBuf%D(IBD),  &
+                    CALL Int2111(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
                                  DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
-!                  CASE (00001010)  
-!                    CALL Int1122()
-!                  CASE (10001000)  
-!                    CALL Int2121()
+                  CASE (01010202)  
+                    CALL Int1122(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
+                  CASE (02010201)
+                    CALL Int2121(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (10001010)  
 !                    CALL Int2122()
-!                  CASE (10100000)  
-!                    CALL Int2211()
+                  CASE (02020101)  
+                    CALL Int2211(ISL,IntCodeC,CBra,CKet,DB%DisBuf%D(IBD),  &
+                                 DB%PrmBuf%D(IBP),DB,IB,SB,IB%W1%D,IB%W2%D)
 !                  CASE (10101000)  
 !                    CALL Int2221()
 !                  CASE (10101010) 

@@ -57,3 +57,19 @@
     END IF
   END FUNCTION LTotal
 
+  FUNCTION VRRSpace(LBra,LKet)
+    USE InOut
+    IMPLICIT NONE
+    INTEGER,INTENT(IN) :: LBra,LKet
+    INTEGER            :: VRRSpace,Ind
+    INTEGER,PARAMETER  :: VSpace(25) = (/   1,   4,   17,   24,   48, &
+                                            4,  16,   68,   97,  197, &
+                                           17,  68,  289,  408,  816, &
+                                           24,  80,  408,  493,  983, &
+                                           48, 140,  816,  863, 1708  /)
+    IF(LBra>4.OR.LKet>4) THEN
+      CALL Halt('Illegal LBra or LKet in VRRSpace')
+    ENDIF
+    Ind = (LBra+1)+LKet*5
+    VRRSpace=VSpace(Ind)
+  END FUNCTION VRRSpace

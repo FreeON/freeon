@@ -200,7 +200,7 @@ SUBROUTINE DisOrderGrad(BS,GM,DB,IB,SB,Drv,NameBuf)
 
           CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
                       IB%W1%D,DB%TBufP,DB%TBufC)
-          CALL VRRs(LDis,LDis,Drv)
+          CALL VRRs(LDis,LDis,NVRR,Drv)
 
           CALL VRRl(KonAC*KonAC,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),  &
                     Drv%VLOC%I(Drv%is+Drv%nr),                          &

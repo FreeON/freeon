@@ -15,6 +15,7 @@ SUBROUTINE Digest(N,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,K,W,D)
   REAL(DOUBLE)              :: Dcd
 
   K=0.0D0
+
   SELECT CASE (IntSwitch)
   CASE (11)
     DO IB=1,L3

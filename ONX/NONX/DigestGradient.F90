@@ -46,7 +46,7 @@
     DO IC=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = 0.5D0*Dcd(IC,ID)*Dab(I,IA,IB)
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
       FAx=Dabcd*W(I,IC,IA,ID,IB,1)
       FAy=Dabcd*W(I,IC,IA,ID,IB,2)
       FAz=Dabcd*W(I,IC,IA,ID,IB,3)
@@ -83,7 +83,7 @@
     DO IA=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = 0.5D0*Dcd(IC,ID)*Dab(I,IA,IB)
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
       FAx=Dabcd*W(I,IA,IC,ID,IB,1)
       FAy=Dabcd*W(I,IA,IC,ID,IB,2)
       FAz=Dabcd*W(I,IA,IC,ID,IB,3)
@@ -120,7 +120,7 @@
     DO IC=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = 0.5D0*Dcd(IC,ID)*Dab(I,IA,IB)
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
       FAx=Dabcd*W(I,IC,IA,IB,ID,1)
       FAy=Dabcd*W(I,IC,IA,IB,ID,2)
       FAz=Dabcd*W(I,IC,IA,IB,ID,3)
@@ -157,7 +157,7 @@
     DO IA=1,L2
     DO I=1,N
       AtB = NTmp%I(I)
-      Dabcd = 0.5D0*Dcd(IC,ID)*Dab(I,IA,IB)
+      Dabcd = -Dcd(IC,ID)*Dab(I,IA,IB)
       FAx=Dabcd*W(I,IA,IC,IB,ID,1)
       FAy=Dabcd*W(I,IA,IC,IB,ID,2)
       FAz=Dabcd*W(I,IA,IC,IB,ID,3)

@@ -54,7 +54,7 @@ PROGRAM GradONX
   CALL Get(BSiz,'atsiz',Tag_O=CurBase)
   CALL Get(OffS,'atoff',Tag_O=CurBase)
   CALL Get(NBasF,'nbasf',Tag_O=CurBase)
-  CALL Get(D,TrixFile('D',Args,1)) !InFile,'.D')
+  CALL Get(D,TrixFile('D',Args,0)) !InFile,'.D')
   CALL TrnMatBlk(BS,GM,D)
   Gradient=.TRUE.
   CALL New(NameBuf,NAtoms)
@@ -96,11 +96,10 @@ PROGRAM GradONX
   DO I=1,NAtoms
      XFrc2%D(1+3*(I-1):3*I)=XFrc%D(:,I)
   ENDDO
-!--------------------------------------------------------------------------------
-! Do some checksumming, resumming and IO 
-  CALL PChkSum(XFrc2,'dHF/dR',Proc_O=Prog)  
-!  CALL PPrint(XFrc2,'XForce',Unit_O=6)
-!  CALL PPrint(XFrc2,'XForce')
+  CALL PChkSum(XFrc2,'XForce')  
+! for temp debuging....
+  CALL PPrint(XFrc2,'XForce',Unit_O=6)
+  CALL PPrint(XFrc2,'XForce')
 ! Sum in contribution to total force
   XFrc2%D=Zero
   CALL Get(Frc,'GradE',Tag_O=CurGeom)

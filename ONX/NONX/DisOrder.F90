@@ -79,6 +79,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   DO AtA=1,NAtoms
     KA=GMc%AtTyp%I(AtA)
     NBFA=BSc%BfKnd%I(KA)
+
     ACx=GMc%Carts%D(1,AtA)-GMp%Carts%D(1,AtC)
     ACy=GMc%Carts%D(2,AtA)-GMp%Carts%D(2,AtC) 
     ACz=GMc%Carts%D(3,AtA)-GMp%Carts%D(3,AtC) 
@@ -196,7 +197,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
 
           CALL RGen1C(2*LDis,iBf,KonAC,IB%CB%D,IB%WR,IB%WZ, &
                       IB%W1%D,DB%TBufP,DB%TBufC)
-          CALL VRRs(LDis,LDis,Drv)
+          CALL VRRs(LDis,LDis,NVRR,Drv)
 
           CALL VRRl(KonAC*KonAC,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is),  &
                     Drv%VLOC%I(Drv%is+Drv%nr),                          &

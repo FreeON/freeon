@@ -10,7 +10,6 @@ c
 c IType = KType*100 + LType
 c  
       IF (N.EQ.0) RETURN
-
       NN=N*LenB
       IF(    IType.EQ.0101) THEN
          RETURN

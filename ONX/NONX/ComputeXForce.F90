@@ -52,7 +52,7 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   MaxInts = 500 ! This is a hack...
   CALL GetExpTable(IB)      ! Read in the Exp table
   CALL New(Dcd,BS%LMNLen*BS%LMNLen)
-  CALL New(Dab,BS%LMNLen*BS%LMNLen)  ! NEED TO INCLUDE THE MAX # OF INTEGRALS HERE
+  CALL New(Dab,MaxInts*BS%LMNLen*BS%LMNLen)  ! THIS NEEDS TO BE FIXED
   CALL New(GD)
   CALL New(NTmp,MaxInts)
 !
@@ -91,10 +91,13 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
     I1=iT(MIN(ITypeD,ITypeB),MAX(ITypeD,ITypeB))
     I2=I0+(I1-1)*10
     Ltot=LBra+LKet
-    LtotG=LBra+LKet+1
+    LtotG=LBra+LKet+2
 
     CALL GetGammaTable(LtotG,IB)    ! Get the correct gamma fcn table
-    CALL VRRs(LBraG,LKetG,Drv)      ! Get the pointers to the VRR table
+
+    write(*,*) "Getting the VRR table for LBra=",LBraG," and LKet=",LKetG
+
+    CALL VRRs(LBraG,LKetG,NVRR,Drv)      ! Get the pointers to the VRR table
     CALL GDrivers(TBra,TKet,GD)     ! Get the gradient driver files
 
 !    GD%NCON   = GD%GDrv1%I(GD%LG1-3)
@@ -103,17 +106,10 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
     GD%NLOCB3 = L1*L2
     GD%NLOCK2 = IDmn(LKetG)
     GD%NLOCK3 = L3*L4
-    NVRR      = GD%NLOCB2 * GD%NLOCK2
 !
 ! NVRR is not correct here. It is larger than what you get in 
 ! rgen.... For now fix this by computing more interals than needed
 ! in the VRR step.
-!
-!     write(*,*) "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-!     write(*,*) "TBra=",TBra," TKet=",TKet
-!     write(*,*) "NVRR=",NVRR,GD%NLOCB2,GD%NLOCK2
-!     write(*,*) "LBraG=",LBraG," LKetG=",LKetG
-!     write(*,*) "Ltot=",Ltot," LtotG=",LtotG
 !
   DO iCBra=1,DB%LenCC       ! Loop over contraction lengths on the Bra
     CBra=DB%CCode%I(iCBra)
@@ -197,23 +193,24 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
               DO J=1,LenKet
                 IKD=iDKet+(J-1)*DB%MAXC
                 IndexB=ABS(DB%DisBuf%D(IKD+1))
-                IF (IndexA>=IndexB) THEN     ! Symmetry of the K matrix THIS IS WRONG?
+!                IF (IndexA>=IndexB) THEN     ! Symmetry of the K matrix THIS IS WRONG?
                   SchK=DB%DisBuf%D(IKD+10)
-                  IF (SchK<=Test) EXIT       ! ONX skipout
+!                  IF (SchK<=Test) EXIT       ! ONX skipout
                   ISL=ISL+1
                   IKP=iPKet+(J-1)*DB%MAXP*CKet
                   SB%SLDis%I(ISL)=IKD+4
                   SB%SLPrm%I(ISL)=IKP
-                END IF
+!                END IF
               END DO ! J, LenKet
 
               IF (ISL>0) THEN
-
                 CALL RGen(ISL,LBraG+LKetG,CBra,CKet,IB%CB%D,IB%CK%D,DB%DisBuf%D(IBD), &
                           DB%PrmBuf%D(IBP),IB%W1%D,DB,IB,SB)
+
                 CALL VRRl(ISL*CBra*CKet,NVRR,Drv%nr,Drv%ns,Drv%VLOC%I(Drv%is), &
-                          Drv%VLOC%I(Drv%is+Drv%nr),                           &
-                          IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+                         Drv%VLOC%I(Drv%is+Drv%nr),                           &
+                         IB%W2%D,IB%W1%D,IB%WR%D,IB%WZ%D)
+
                 CALL ContractG(ISL,CBra,CKet,NVRR,IB%CB%D,IB%CK%D,IB%W1%D,     &
                                IB%W2%D,DB%PrmBuf%D(IBP),DB,SB,GD)
 
@@ -233,9 +230,9 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
                 END DO
 
                 CALL GetGradient(ISL,GD,IB%W2%D,IB%W1%D)
-                CALL DigestGradient(ISL,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,  &
-                                    AtA,AtC,AtD,NBFA,RS,SB,DB,D,SubInd,     &
-                                    NTmp,Dcd%D,Dab%D,XFrc,IB%W2%D)
+!                CALL DigestGradient(ISL,NA,NB,NC,ND,L1,L2,L3,L4,IntSwitch,  &
+!                                    AtA,AtC,AtD,NBFA,RS,SB,DB,D,SubInd,     &
+!                                    NTmp,Dcd%D,Dab%D,XFrc,IB%W2%D)
 
               END IF  ! ISL
 
@@ -255,18 +252,8 @@ SUBROUTINE ComputeXForce(BS,GM,D,XFrc,DB,IB,SB,Drv,SubInd,BfnInd)
   END DO ! iTKet
   END DO ! iTBra
 
-!  do i=1,NAtoms
-!  write(*,*) "Atom ",i
-!  write(*,*) "Fx=",XFrc%D(1,i)
-!  write(*,*) "Fy=",XFrc%D(2,i)
-!  write(*,*) "Fz=",XFrc%D(3,i)
-!  write(*,*) "----------------------------"
-!  enddo
-
-
   CALL Delete(Dcd)
   CALL Delete(Dab)
   CALL Delete(GD)
   CALL Delete(NTmp)
-!  call halt('aok for now')
 END SUBROUTINE ComputeXForce
