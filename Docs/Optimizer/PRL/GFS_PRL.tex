@@ -56,18 +56,19 @@ curvilinear internal coordinates, fitting
 
 \section{Introduction}
 
-The optimization of molecular structures is one of the most frequent
-tasks carried out by computational chemists. Structures of large molecules have been optimized so far
-only with the use of empirical force-fields, or at most with semi-empirical electronic structure theories 
-\cite{Stewart_crambin_opt,Schlegel_plasminogen_opt}. However, many important phenomena
-can be understood only poorly at these low levels of the theory.
-For example, many problems in molecular biophysics involve problems with complicated 
-metal-ligand binding motifs demanding more the more sophisticated hybrid Hartree-Fock/Density Functional
-(HF/DF) level of theory \cite{}.  Recently, the ability of linear scaling electronic structure algorithms 
-to address such large problems at the  HF/DF level of theory have been realized \cite{}. 
-However, the associated tools nessesary to efficiently drive these linear scaling engines 
-are generally less well developed.  Molecular geometry optimization, in which the energy is followed
-down hill to a local minimum,  is one of the simplest such tools.  In addition to providing a welth of 
+Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  have 
+realized their promise of delivering energies and forces on nuclei for 
+large systems at both a numerical accuracy and theoretical level suitable to begin 
+addressing many complex problems.  For example, many problems in molecular biophysics 
+involve complicated metal-ligand binding motifs demanding model chemistries at the 
+hybrid Hartree-Fock/Density Functional (HF/DF) level of theory together with a large 
+quantum descritiption of the environment ... need something more... 
+However, despite favorable scaling properties, ${\cal O}(N)$ methods often carry a larger 
+cost prefactor than their conventional counterparts.  Thus, in addition to parallelism, 
+developing $N$-scaling algorithms to drive core linear scaling electronic structure engines 
+is paramount.  Perhaps the most useful such algorithm is the molecular geometry optimizer, 
+which follows the energy gradient downhill to a local mininum.  
+In addition to providing a welth of 
 structural information, efficient techniques for geometry optimization can often be leveraged in the 
 determination of transition states and reaction paths \cite{nudged_elastic_band}.
 
