@@ -49,7 +49,7 @@ PROGRAM TForce
 ! Calculate the Number of Cells
 !
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)

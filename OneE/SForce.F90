@@ -59,7 +59,7 @@ PROGRAM SForce
 !-----------------------------------------------
 ! Calculate the number of Cells
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)

@@ -55,7 +55,7 @@ PROGRAM MakeS
 ! Calculate the Number of Cells
 !
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies

@@ -35,12 +35,12 @@ PROGRAM MakeRho
   TYPE(DBL_RNK4)            :: MD
   TYPE(ARGMT)               :: Args
   TYPE(HGRho)               :: Rho,Rho2
-  TYPE(CMPoles)             :: RhoPoles
+  TYPE(CMPoles)             :: MP
   INTEGER                   :: P,R,AtA,AtB,NN,iSwitch,IC1,IC2
   INTEGER                   :: NExpt,NDist,NCoef,I,J,Iq,Ir,Pbeg,Pend
   LOGICAL                   :: First
-  REAL(DOUBLE)              :: DistThresh,RSumE,RSumN
-!
+  REAL(DOUBLE)              :: DistThresh,RSumE,RSumN,RelRhoErr
+  CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=7),PARAMETER :: Prog='MakeRho'
 !----------------------------------------------
 ! Start up macro
@@ -50,7 +50,7 @@ PROGRAM MakeRho
   IF(SCFActn=='BasisSetSwitch')THEN
 !    Get the previous information
      CALL Get(BS,PrvBase)
-     CALL Get(GM,PrvGeom)
+     CALL Get(GM,CurGeom)
      CALL Get(NExpt,'nexpt',PrvBase)
      CALL New_HGRho(Rho,(/NExpt,0,0/))
      CALL Get(Rho%Lndx ,'lndex',PrvBase)
@@ -78,11 +78,11 @@ PROGRAM MakeRho
 ! Allocations and precalculations
   CALL NewBraBlok(BS)  
   CALL New(MD,(/3,BS%NASym,BS%NASym,2*BS%NASym/),(/1,0,0,0/))
-  CALL New(RhoPoles)
+  CALL New(MP)
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'CS_OUT',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 !---------------------------------------------------
 ! Main loops: First pass calculates the size.
@@ -189,22 +189,43 @@ PROGRAM MakeRho
 ! Halt if we lost to many electrons
 !
   CALL Integrate_HGRho(Rho2,RSumE,RSumN)
-  IF(ABS(RSumE+RSumN)>1.D-2) &
-       CALL Halt(' Density hosed! Rho_e = '//TRIM(DblToMedmChar(Two*RSumE)) &
-                              //',Rho_n = '//TRIM(DblToMedmChar(Two*RSumN)))
+  RelRhoErr=Two*ABS(RSumE+RSumN)/DBLE(NEl)
+  Mssg=ProcessName(Prog,'Pruned Rho')//'dNel = '    &
+       //TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
+       //', '//TRIM(IntToChar(FLOOR(1.D2*DBLE(Rho2%NDist)/DBLE(Rho%NDist)))) &
+       //'% of distributions retained'
+  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+     I=OpenPU()
+     WRITE(*,*)TRIM(Mssg)
+     WRITE(I,*)TRIM(Mssg)
+     CALL ClosePU(I)
+  ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
+     I=OpenPU()
+     WRITE(I,*)TRIM(Mssg)
+     CALL ClosePU(I)
+  ENDIF
+  IF(RelRhoErr>Thresholds%Dist*1.D3) &
+  CALL Halt('In MakeRho, missing '//TRIM(DblToShrtChar(Two*ABS(RSumE+RSumN)))   &
+           //' electrons after pruning.')
 !------------------------------------------------------------
 !  Calculate the DiPole and QuadruPole moments of Rho
 !
-  CALL CalRhoPoles(RhoPoles,GM,RHo2)
+  CALL CalRhoPoles(MP,GM,RHo2)
+  IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
+     CALL PPrint(MP,Prog,Unit_O=6)  
+     CALL PPrint(MP,Prog)  
+  ELSEIF(PrintFlags%Key==DEBUG_MEDIUM)THEN
+     CALL PPrint(MP,Prog)  
+  ENDIF
 !------------------------------------------------------------
-! Put Rho and RhoPoles to disk
+! Put Rho and MP to disk
 ! 
   IF(SCFActn=='ForceEvaluation')THEN
-     CALL Put_HGRho(Rho2,'Rho',Args,1)
-     CALL Put(RhoPoles,'RhoPoles',Args,1)
-  ELSE 
+     CALL Put_HGRho(Rho2,'Rho',Args,1) 
+     CALL Put(MP,NxtCycl)
+ ELSE 
      CALL Put_HGRho(Rho2,'Rho',Args,0)
-     CALL Put(RhoPoles,'RhoPoles',Args,0)
+     CALL Put(MP,SCFCycl)
   ENDIF
 !------------------------------------------------------------
 ! Printing
