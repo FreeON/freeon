@@ -228,23 +228,27 @@ MODULE JGen
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
                             CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(:,IA,IB),SPBraC,SPBraS)
+!
+                            PStrength = Zero
                             DO L=0,EllA+EllB
-                               PStrength = FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
-                               DP2       = MAX(DP2,(PStrength/TauMAC)**(Two/DBLE(2+SPELL+L)))
+                               PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             ENDDO
+                            PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                            IF(DP2 < PStrength) THEN
+                               DP2   = PStrength
+                            ENDIF
+!
                          ENDDO
                       ENDDO 
                       DP2=MIN(1.D10,DP2)
 !-------------------------------------------------------------------------------
 !                     If finite compute ...
-                      IF(PExtent>Zero.AND.PStrength>Zero)THEN
+                      IF(PExtent>Zero.AND.DP2>Zero)THEN
 !                        Initialize <KET|
                          CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC  
-#ifdef WRAPDIST
 !                        WRAP the center of Phi_A(r) Phi_B(r+R) back into the box
                          CALL AtomCyclic(GM,Prim%P)
-#endif
                          PTmp=Prim%P
 !                        Sum over cells
                          DO NC=1,CS_IN%NCells
