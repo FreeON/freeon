@@ -32,15 +32,16 @@ include $(MONDO_HOME)/Includes/RemoveAll
 ObjsS = SBlok.o     MakeS.o 
 ObjsT = TBlok.o     MakeT.o 
 ObjsR = RhoBlok.o RhoTools.o  MakeRho.o 
+ObjsParaR = RhoBlok.o RhoTools.o  ParaMakeRho.o
 ObjSF = BlokTrWdS.o SForce.o 
 ObjTF = BlokTrPdT.o TForce.o
 
 ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  \
-               RhoBlok.x RhoTools.x  MakeRho.x  \
+               RhoBlok.x RhoTools.x  MakeRho.x ParaMakeRho.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x \
                TForce.x 
 #
-all:	MakeS MakeT MakeRho SForce TForce
+all:	MakeS MakeT MakeRho ParaMakeRho SForce TForce
 #
 MakeS:	 $(ObjsS)
 	 $(LD) $(LDFLAGS) MakeS $(ObjsS) $(F90_LIBRARIES)
@@ -49,6 +50,10 @@ MakeS:	 $(ObjsS)
 MakeT:	 $(ObjsT)
 	 $(LD) $(LDFLAGS) MakeT $(ObjsT) $(F90_LIBRARIES)
 	 mv MakeT $(MONDO_EXEC)/MakeT
+#
+ParaMakeRho: $(ObjsParaR)
+	 $(LD) $(LDFLAGS) ParaMakeRho $(ObjsParaR) $(F90_LIBRARIES)
+	 mv ParaMakeRho $(MONDO_EXEC)/ParaMakeRho
 #
 MakeRho: $(ObjsR)
 	 $(LD) $(LDFLAGS) MakeRho $(ObjsR) $(F90_LIBRARIES)

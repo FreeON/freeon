@@ -176,7 +176,7 @@ PROGRAM MakeS
 ! Tidy up
 
 #ifdef PARALLEL_DEVELOPMENT
-  CALL Delete_FASTMAT(S)
+  CALL Delete_FastMat1(S)
 #else
   CALL Delete(S)
 #endif

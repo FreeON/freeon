@@ -7,6 +7,9 @@ MODULE RhoTools
   USE BraBloks
   USE RhoBlok
   USE AtomPairs
+#ifdef PARALLEL
+  USE MondoMPI
+#endif
   IMPLICIT NONE
 CONTAINS
 !--------------------------------------------------------------
@@ -200,6 +203,96 @@ CONTAINS
     ENDIF
 !
   END SUBROUTINE Integrate_HGRho
+
+#ifdef PARALLEL
+!---------------------------------------------------------------------
+!  Parallel Integrate Rho
+!---------------------------------------------------------------------
+  SUBROUTINE ParaIntegrate_HGRho(Rho,RhoSumE,RhoSumN,RhoSumMM,MM_NATOMS,QM_NATOMS)
+    TYPE(HGRho)                      :: Rho
+    INTEGER                          :: zq,iq,oq,orr,NQ,jadd,LenKet,LL
+    INTEGER                          :: MM_NATOMS,QM_NATOMS
+    REAL(DOUBLE)                     :: RhoSumE,RhoSumN,RhoSumMM,Expt,Weig
+    LOGICAL                          :: HasQMI,HasMMI
+!
+    HasMMI=.FALSE. 
+    HasQMI=.FALSE. 
+    IF(MM_NATOMS/=0) HasMMI=.TRUE. 
+    IF(QM_NATOMS/=0) HasQMI=.TRUE. 
+!
+    RhoSumE = Zero
+    RhoSumN = Zero
+    RhoSumMM= Zero
+!
+    IF(HasQMI) THEN
+!
+    DO zq = 1,Rho%NExpt-1
+       Expt   = Rho%Expt%D(zq)
+       NQ     = Rho%NQ%I(zq)
+       oq     = Rho%OffQ%I(zq)
+       orr    = Rho%OffR%I(zq)
+       LL     = Rho%Lndx%I(zq) 
+       LenKet = LHGTF(LL)
+       DO iq = 1,NQ
+          jadd = orr+(iq-1)*LenKet+1
+          Weig = Rho%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
+          RhoSumE = RhoSumE + Weig
+       ENDDO
+    ENDDO
+!
+! Nuclear integration
+!
+    zq     = Rho%NExpt
+    Expt   = Rho%Expt%D(zq)
+    IF(HasMMI) THEN 
+      NQ=QM_NATOMS !!!! MM charges may have been pruned, however this is very unlikely for QM nuclear charges
+!     NQ=NQ-MM_NATOMS
+    ELSE
+      NQ=Rho%NQ%I(zq)
+    ENDIF
+    oq     = Rho%OffQ%I(zq)
+    orr    = Rho%OffR%I(zq)
+    LL     = Rho%Lndx%I(zq) 
+    LenKet = LHGTF(LL)
+#ifdef PARALLEL
+    DO iq = Beg%I(MyID),End%I(MyID)
+#else
+    DO iq = 1,NQ
+#endif
+       jadd = orr+(iq-1)*LenKet+1
+       Weig = Rho%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
+       RhoSumN = RhoSumN + Weig
+    ENDDO
+!
+    ENDIF
+!
+    IF(HasMMI) THEN
+!
+! MM integration
+!
+    zq     = Rho%NExpt
+    Expt   = Rho%Expt%D(zq)
+!     NQ=MM_NATOMS
+      NQ=Rho%NQ%I(zq)-QM_NATOMS
+      oq     = Rho%OffQ%I(zq)
+      orr    = Rho%OffR%I(zq)
+    IF(HasQMI) THEN
+      oq     = oq+QM_NATOMS
+      orr    = orr+QM_NATOMS 
+    ENDIF
+    LL     = Rho%Lndx%I(zq) 
+    LenKet = LHGTF(LL)
+    DO iq = 1,NQ
+       jadd = orr+(iq-1)*LenKet+1
+       Weig = Rho%Co%D(jadd)*((Pi/Expt)**ThreeHalves)
+       RhoSumMM= RhoSumMM+ Weig
+    ENDDO
+!
+    ENDIF
+!
+  END SUBROUTINE ParaIntegrate_HGRho
+
+#endif
 !========================================================================================
 ! Calculate the total Dipole of Rho
 !========================================================================================
