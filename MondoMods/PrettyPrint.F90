@@ -471,6 +471,9 @@ MODULE PrettyPrint
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
         REAL(DOUBLE)                         :: AA
+#ifdef PERIODIC
+        REAL(DOUBLE)                         :: A,B,C,Alpha,Beta,Gamma
+#endif
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
@@ -491,11 +494,9 @@ MODULE PrettyPrint
 !              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradMax))//';' 
 !              WRITE(PU,*)TRIM(Mssg)
 !           ENDIF
-
            IF(PRESENT(PrintGeom_O))THEN
               IF(PrintGeom_O=='XYZ')THEN
 !                Print XYZ format
-                 CALL PrintProtectL(PU)
                  Mssg=IntToChar(GM%NAtms)
                  WRITE(PU,*)TRIM(Mssg)
 !                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
@@ -512,6 +513,25 @@ MODULE PrettyPrint
                        //'   '//FltToChar(GM%Carts%D(3,I)*AA) 
                      WRITE(PU,*)TRIM(Mssg)
                  ENDDO
+              ELSEIF(PrintGeom_O=='PDB')THEN
+!                Print PDB format
+                 AA=One/AngstromsToAU
+                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
+                 WRITE(PU,22)Mssg
+              22 FORMAT('REMARK   1  ',A60)
+#ifdef PERIODIC
+                 IF(GM%PBC%Dimen/=0)THEN
+                    CALL VecToAng(GM%PBC,a,b,c,alpha,beta,gamma)
+                    WRITE(PU,33)a*AA,b*AA,c*AA,alpha,beta,gamma
+                 33 FORMAT('CRYST1',3F9.3,3F7.2,1x,11A1,I4)
+                 ENDIF
+#endif                 
+                 DO I=1,GM%NAtms
+                    WRITE(PU,44)I,Ats(GM%AtNum%I(I)),'UNK',1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero
+                 44 FORMAT('ATOM  ',I5,1X,A4,A4,2X,I4,4X,3F8.3,2F6.2)
+                 ENDDO
+                 WRITE(PU,55)
+              55 FORMAT('END')
               ENDIF
            ELSEIF(PrintFlags%Fmt==DEBUG_MMASTYLE)THEN
 !             Print MMA format
@@ -580,6 +600,9 @@ MODULE PrettyPrint
      2 FORMAT(72('-'))
      3 FORMAT(72('='))
      END SUBROUTINE Print_CRDS
+
+
+
 !-----------------------------------------------------------------------------
 !    Print a BCSR matrix
 !

@@ -26,6 +26,21 @@ MODULE SetXYZ
    EXTERNAL bcsr_to_dens
    CONTAINS
 !
+#ifdef PERIODIC
+     SUBROUTINE VecToAng(PBC,A,B,C,Alpha,Beta,Gamma)
+        TYPE(PBCInfo)               :: PBC
+        REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
+        REAL(DOUBLE),PARAMETER      :: DegToRad =  1.745329251994329576923D-2
+        A = SQRT(PBC%BoxShape(1,1)**2 + PBC%BoxShape(2,1)**2+ PBC%BoxShape(3,1)**2)
+        B = SQRT(PBC%BoxShape(1,2)**2 + PBC%BoxShape(2,2)**2+ PBC%BoxShape(3,2)**2)
+        C = SQRT(PBC%BoxShape(1,3)**2 + PBC%BoxShape(2,3)**2+ PBC%BoxShape(3,3)**2)
+        Gamma = ACOS((PBC%BoxShape(1,1)*PBC%BoxShape(1,2))/(A*B))/DegToRad
+        Beta  = ACOS((PBC%BoxShape(1,1)*PBC%BoxShape(1,3))/(A*C))/DegToRad
+        Alpha = PBC%BoxShape(1,2)*PBC%BoxShape(1,3)+PBC%BoxShape(2,2)*PBC%BoxShape(2,3)   
+        Alpha = ACOS(Alpha/(B*C))/DegToRad
+      END SUBROUTINE VecToAng
+#endif
+!
    SUBROUTINE SetToI(A,B)
       TYPE(BCSR)              :: A
       TYPE(DBL_RNK2),OPTIONAL :: B
