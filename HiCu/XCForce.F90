@@ -50,7 +50,7 @@ PROGRAM XCForce
   REAL(DOUBLE),DIMENSION(6)      :: F_nlm
   TYPE(DBL_RNK2)                 :: LatFrc_XC   
   TYPE(BBox)                     :: WBox,WBoxTmp
-  REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot
+  REAL(DOUBLE)                   :: VolRho,VolExc,DelBox,Exc_old,Etot_old,Etot,dum0,dum1
   REAL(DOUBLE),EXTERNAL    :: MondoTimer
 
 !---------------------------------------------------------------------------------------
@@ -148,16 +148,38 @@ PROGRAM XCForce
   DelBox = 1.D-4
   CALL SetLocalThresholds(Thresholds%Cube*1.D-4)
 ! Convert density to a 5-D BinTree
+#ifdef PARALLEL
+  CALL Delete(LCoor)
+  CALL Delete(RCoor)
+  !
+  CALL ParaInitRho(Args)
+  CALL GetBBox()
+  CALL SendBBox()
+  CALL DistDist()
+  CALL ParaRhoToTree()
+#else
   CALL RhoToTree(Args)
+#endif
 ! Generate the grid as a 3-D BinTree
   DO I = 1,3 
      Exc=Zero
      IF(GM%PBC%AutoW%I(I)==1) THEN
+#ifdef PARALLEL
+        WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
+        WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
+        CALL CalCenterAndHalf(WBox)
+#endif
         WBox%BndBox(I,1) = GM%PBC%BoxShape%D(I,I)-DelBox
         WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)+DelBox
         CALL GridGen(WBox,VolRho,VolExc)
+#ifdef PARALLEL
+        WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
+        WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
+#else
         WBox%BndBox(I,1) = Zero
         WBox%BndBox(I,2) = GM%PBC%BoxShape%D(I,I)
+#endif
+        !write(*,'(A,I1,A,I1,A,E26.15,I3)') 'XC_Surface(',i,',',i,')',Exc/(Two*DelBox),MyID
         LatFrc_XC%D(I,I) = LatFrc_XC%D(I,I)+Exc/(Two*DelBox)
      ENDIF
   ENDDO
@@ -168,6 +190,7 @@ PROGRAM XCForce
 !!$  ENDDO
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
+
 #ifdef PARALLEL
   XCFrcEndTm = MondoTimer()
   XCFrcTm = XCFrcEndTm-XCFrcBegTm
@@ -194,7 +217,16 @@ PROGRAM XCForce
   CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_XC%D(1,1),0.0d0)
   CALL MPI_REDUCE(LatFrc_XC%D(1,1),TmpLatFrc_XC%D(1,1),9,MPI_DOUBLE_PRECISION, &
        &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+TmpLatFrc_XC%D
+  GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+TmpLatFrc_XC%D 
+  !if(myid.eq.root) then
+  !   do j=1,3
+  !      do i=1,3
+  !         IF(GM%PBC%AutoW%I(I) == 1 .AND. GM%PBC%AutoW%I(J) == 1) THEN 
+  !            write(*,'(A,I1,A,I1,A,E26.15)') 'LatFrc_XC_t(',i,',',j,')=',TmpLatFrc_XC%D(i,j)
+  !         ENDIF
+  !      enddo
+  !   enddo
+  !endif
   CALL Delete(TmpLatFrc_XC)
 #else
   GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
@@ -222,3 +254,10 @@ PROGRAM XCForce
   PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
 END PROGRAM XCForce
+
+
+
+
+
+
+
