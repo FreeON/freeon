@@ -1,3 +1,54 @@
+2004-11-06 03:11  vweber
+
+	* ONX2/: ONXGet.F90, PartDrv.F90: Added the reduce_FASTMAT
+	routines, not acctive yet.
+
+2004-11-04 14:47  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: [no log message]
+
+2004-11-04 14:05  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, Optimizer.F90: Convergence
+	criteion for lattice optimization is set to magnitude of Cartesian
+	force on lattice vectors. Extra printing added.
+
+2004-11-03 20:26  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: A few
+	modifications that make lattice constraints working for the case of
+	uncoupled lattice/atomic optimizations.
+
+2004-11-03 17:41  nemeth
+
+	* MondoSCF2/: InCoords.F90, Optimizer.F90, QUICCA.F90: A new
+	version of the optimizer. The default is set to uncoupled lattice
+	and atomic postions optimization for 3D systems. Lattice
+	displacements are done by means of internal coordinate steepest
+	descent on lattice parameters only, once atomic positions converged
+	to the required (good, tight, etc) accuracy.  For 1D and 2D systems
+	the implicit, simultaneous optimization is still the default. Other
+	modifications include explicite lattice coordinates for fully
+	relaxed simultaneous optimization, but these latter kind of
+	optimization is not yet available for the users.
+
+2004-11-01 09:52  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-10-31 07:13  vweber
+
+	* MondoMods/MemMan.F90: Added the option OnAll_O to Delete_BSCR,
+	needed for the reduce_FASTMAT.
+
+2004-10-27 22:37  nemeth
+
+	* MondoSCF2/Optimizer.F90: A printing bug fixed.
+
+2004-10-27 20:36  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-10-27 14:50  nemeth
 
 	* MondoSCF2/: ControlStructures.F90, InCoords.F90, Optimizer.F90,
