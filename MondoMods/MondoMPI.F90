@@ -637,7 +637,7 @@ MODULE MondoMPI
          REAL(DOUBLE),INTENT(INOUT) :: Rec
          INTEGER,INTENT(IN)         :: From,Tag
          INTEGER                    :: IRecv_DBL_SCLR,IErr
-         CHARACTER(LEN=14)          :: Sub='IRecv_DBL_SCLR'
+         CHARACTER(LEN=14),PARAMETER:: Sub='IRecv_DBL_SCLR'
          CALL MPI_IRECV(Rec,1,MPI_DOUBLE_PRECISION,From,Tag, &
                         MONDO_COMM,IRecv_DBL_SCLR,IErr)
          CALL ErrChk(IErr,Sub)
@@ -650,7 +650,7 @@ MODULE MondoMPI
          INTEGER,INTENT(IN)            :: From,N,Tag
          INTEGER                       :: IRecv_DBL_VECT,L,M,IErr
          INTEGER,INTENT(IN),OPTIONAL   :: M_O
-         CHARACTER(LEN=14)             :: Sub='IRecv_DBL_VECT'
+         CHARACTER(LEN=14),PARAMETER   :: Sub='IRecv_DBL_VECT'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
          CALL MPI_IRECV(Rec%D(M:N),L,MPI_DOUBLE_PRECISION,From,Tag, &
                         MONDO_COMM,IRecv_DBL_VECT,IErr)
@@ -663,7 +663,7 @@ MODULE MondoMPI
          INTEGER,INTENT(INOUT) :: Rec
          INTEGER,INTENT(IN)    :: From,Tag
          INTEGER               :: IRecv_INT_SCLR,IErr
-         CHARACTER(LEN=14)     :: Sub='IRecv_INT_SCLR'
+         CHARACTER(LEN=14),PARAMETER  :: Sub='IRecv_INT_SCLR'
 !         WRITE(*,*)' irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv '
 !         WRITE(*,*)' MyId = ',MyId,' From = ',From,' Tag = ',Tag
          CALL MPI_IRECV(Rec,1,MPI_INTEGER,From,Tag, &
@@ -678,7 +678,7 @@ MODULE MondoMPI
          INTEGER,INTENT(IN)            :: From,N,Tag
          INTEGER                       :: IRecv_INT_VECT,L,M,IErr
          INTEGER,INTENT(IN),OPTIONAL   :: M_O
-         CHARACTER(LEN=14)             :: Sub='IRecv_INT_VECT'
+         CHARACTER(LEN=14),PARAMETER   :: Sub='IRecv_INT_VECT'
          M=1; IF(PRESENT(M_O))M=M_O; L=N-M+1
 !if(myid==root)then
 !         WRITE(*,*)' irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv irecv '
@@ -698,7 +698,7 @@ MODULE MondoMPI
          TYPE(INT_RNK2)                  :: Stats
          INTEGER                         :: I,J,N,IErr
          CHARACTER(LEN=*), OPTIONAL      :: Mssg
-         CHARACTER(LEN=8)                :: Sub='MWaitAll'
+         CHARACTER(LEN=8),PARAMETER      :: Sub='MWaitAll'
 !-------------------------------------------------------------------------------
          IF(PRESENT(Mssg))THEN
             WRITE(*,*)' WAITALL:'
@@ -758,7 +758,7 @@ MODULE MondoMPI
       SUBROUTINE FreeType(Type)
          INTEGER, INTENT(INOUT) :: Type
          INTEGER                :: IErr
-         CHARACTER(LEN=8)       :: Sub='FreeType'
+         CHARACTER(LEN=8),PARAMETER  :: Sub='FreeType'
          IF(Type/=MPI_DATATYPE_NULL)THEN
             CALL MPI_TYPE_FREE(Type,IErr)
             CALL ErrChk(IErr,Sub)
