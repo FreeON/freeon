@@ -1,3 +1,58 @@
+2004-04-08 02:09  vweber
+
+	* OneE/: MBlok.F90, MakeM.F90: Fixed an array size problem.
+
+2004-04-07 11:07  tymczak
+
+	* SCFeqs/ODA.F90: Fixed, I hope, Parallel Bugs
+	
+	CJ
+
+2004-04-06 23:47  nemeth
+
+	* Docs/Optimizer/PRL/: curve3_1.gnu, logn-logde10, curve3_1.eps,
+	curve2_1.eps: [no log message]
+
+2004-04-05 23:41  nemeth
+
+	* MondoSCF2/Optimizer.F90: Backtracking problem fixed.
+
+2004-04-05 15:50  ckgan
+
+	* MondoSCF2/PunchHDF.F90: Put in array information in the HDF.
+
+2004-04-05 15:28  ckgan
+
+	* SCFeqs/ODA.F90: CJ fixed a minor bug in PARALLEL.
+
+2004-04-05 07:53  vweber
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Added Anders 10th order
+	response for c60.
+
+2004-04-02 16:57  nemeth
+
+	* Docs/Optimizer/PRL/mondo_new.bib: New literature data added.
+
+2004-04-02 11:48  nemeth
+
+	* MondoSCF2/Optimizer.F90: Geometry convergence criterium is set
+	back to accuracy level.
+
+2004-04-02 01:11  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib, prl.ps: Another
+	iteration on the optimizer paper.
+
+2004-04-01 16:50  mchalla
+
+	* MondoSCF2/Optimizer.F90: Fixed AGAIN!!! a copy problem involving
+	NEB endpoints.
+
+2004-04-01 15:13  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-01 14:58  tymczak
 
 	* SCFeqs/ODA.F90: Fixed Bugs
