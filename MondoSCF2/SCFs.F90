@@ -67,7 +67,6 @@ CONTAINS
        IF(SCFCycle(iSCF,cBAS,cGEO, &
             C%Nams,C%Stat,C%Opts,C%Geos,C%MPIs,ETot,DMax,DIIS))THEN
           ! Free memory
-
           CALL Delete(ETot)
           CALL Delete(DMax)
           CALL Delete(DIIS)
@@ -707,8 +706,8 @@ CONTAINS
     TYPE(FileNames)    :: N
     TYPE(Options)      :: O
     TYPE(State)        :: S
-    TYPE(BSET)         :: BS,BS_rs
-    TYPE(CRDS)         :: GM,GM_rs
+    TYPE(BSET),SAVE    :: BS,BS_rs
+    TYPE(CRDS),SAVE    :: GM,GM_rs
     REAL(DOUBLE)       :: MaxDiff
     CHARACTER(LEN=DCL) :: chBAS,chGEO    
     INTEGER            :: I,J,cBAS,cGEO,pBAS,pGEO
@@ -722,7 +721,6 @@ CONTAINS
     S%SameGeom  = .TRUE.
     S%SameBasis = .TRUE.
 !
-
     IF(O%Guess==GUESS_EQ_RESTART) THEN
        HDFFileID=OpenHDF(N%HFile)
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
@@ -770,7 +768,6 @@ CONTAINS
        CALL Get(GM_rs,Tag_O=chGEO)
        CALL CloseHDFGroup(HDF_CurrentID)
        CALL CloseHDF(HDFFileID)
-!
        IF(BS%BName /= BS_rs%BName) S%SameBasis=.FALSE.
        MaxDiff=Zero
        DO I=1,GM%Natms
@@ -787,7 +784,6 @@ CONTAINS
        IF(.NOT. S%SameCrds)        S%SameGeom=.FALSE. 
        IF(.NOT. S%SameLatt)        S%SameGeom=.FALSE. 
     ENDIF
-!
   END SUBROUTINE SameBasisSameGeom
   !===============================================================================
   !
@@ -1409,8 +1405,8 @@ CONTAINS
 !
    CALL Multiply_DR2(NBasF,F,T3,T1)
    TracePFPdS = -Two*Trace_DR2(NBasF,T1)
-   WRITE(*,*) 'LatFrc_S'
-   WRITE(*,*) '(',I1,',',I2,')=',TracePFPdS
+!   WRITE(*,*) 'LatFrc_S'
+!   WRITE(*,*) '(',I1,',',I2,')=',TracePFPdS
 !
 !  Calculate 2*Trace[P*dT]
 ! 
@@ -1443,8 +1439,8 @@ CONTAINS
    T3%D = (T2%D-T1%D)/(Two*DDelta)
    CALL Multiply_DR2(NBasF,P,T3,T1)
    TracePdT = Two*Trace_DR2(NBasF,T1)
-   WRITE(*,*) 'LatFrc_T '
-   WRITE(*,*) '(',I1,',',I2,')=',TracePdT
+!   WRITE(*,*) 'LatFrc_T '
+!   WRITE(*,*) '(',I1,',',I2,')=',TracePdT
 !
 !  Calculate d(Exc)
 !

@@ -8,14 +8,14 @@ CONTAINS
   !
   !===============================================================
   SUBROUTINE Invoke(Ex,N,S,M)
-    CHARACTER(LEN=*)   :: Ex
-    TYPE(FileNames)    :: N
-    TYPE(State)        :: S
-    TYPE(Parallel)     :: M
-    INTEGER            :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
-    LOGICAL            :: ProgramFailed
-    TYPE(CHR_VECT)     :: ArgV
-    TYPE(INT_VECT),SAVE :: IChr ! Save needed for NAG
+    CHARACTER(LEN=*)     :: Ex
+    TYPE(FileNames)      :: N
+    TYPE(State)          :: S
+    TYPE(Parallel)       :: M
+    INTEGER              :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
+    LOGICAL              :: ProgramFailed
+    TYPE(CHR_VECT),SAVE  :: ArgV
+    TYPE(INT_VECT),SAVE  :: IChr 
     CHARACTER(LEN=2*DCL) :: CmndLine
     INTERFACE 
        FUNCTION Spawn(NC,MaxLen,IChr)
