@@ -18,7 +18,7 @@ MODULE InOut
      MODULE PROCEDURE Get_INT_SCLR, Get_INT_VECT, Get_INT_RNK2, &
           Get_INT_RNK3, Get_INT_RNK4, Get_DBL_SCLR, &
           Get_DBL_VECT, Get_DBL_RNK2, Get_DBL_RNK3, &
-          Get_DBL_RNK4, Get_CHR_SCLR,               &
+          Get_DBL_RNK4, Get_CHR_SCLR, Get_CHR10_VECT,&
           Get_Sp1x1,                                &
           Get_BondD,    Get_AtmB,                   &
           Get_CHR_VECT, Get_LOG_VECT, Get_INTC,     &
@@ -37,7 +37,7 @@ MODULE InOut
           Put_INT_RNK3, Put_INT_RNK4, Put_DBL_SCLR, &
           Put_DBL_VECT, Put_DBL_RNK2, Put_DBL_RNK3, &
           Put_DBL_RNK4, Put_DBL_RNK6, Put_CHR_SCLR, &
-          Put_CHR_VECT, Put_LOG_VECT,               &
+          Put_CHR_VECT, Put_LOG_VECT, Put_CHR10_VECT,&
           Put_Sp1x1,    Put_BondD,                  &
           Put_AtmB,     Put_INTC,                   &
           Put_LOG_SCLR, Put_BSET,     Put_CRDS,     &
@@ -1072,9 +1072,10 @@ CONTAINS
                 ENDIF
               END SUBROUTINE Put_BSET
 !-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !             Get the Periodic Info
               SUBROUTINE Get_PBCInfo(PBC,Tag_O)
-                TYPE(PBCInfo)                         :: PBC 
+                TYPE(PBCInfo)                         :: PBC
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
                 CALL Get(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
                 CALL Get(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
@@ -1086,7 +1087,7 @@ CONTAINS
                 CALL Get(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
                 CALL Get(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
                 CALL Get(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
-                CALL Get(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)        
+                CALL Get(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
                 CALL Get(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
                 CALL Get(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
                 CALL Get(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
@@ -1096,10 +1097,11 @@ CONTAINS
                 CALL Get(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
               END SUBROUTINE Get_PBCInfo
 !-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !             Put the Periodic Info
-
+                                                                                                 
               SUBROUTINE Put_PBCInfo(PBC,Tag_O)
-                TYPE(PBCInfo),            INTENT(IN)  :: PBC 
+                TYPE(PBCInfo),            INTENT(IN)  :: PBC
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
                 CALL Put(PBC%Dimen     ,'Dimension' ,Tag_O=Tag_O)
                 CALL Put(PBC%PFFMaxEll ,'PFFMaxEll' ,Tag_O=Tag_O)
@@ -1111,7 +1113,7 @@ CONTAINS
                 CALL Put(PBC%Translate ,'Translate' ,Tag_O=Tag_O)
                 CALL Put(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
                 CALL Put(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
-                CALL Put(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)        
+                CALL Put(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)
                 CALL Put(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
                 CALL Put(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
                 CALL Put(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
@@ -1155,7 +1157,7 @@ CONTAINS
                 CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Get(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
-                CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//Tag_O)
+                CALL Get(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
                 CALL Get(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
@@ -1194,7 +1196,7 @@ CONTAINS
                 CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
                 CALL Put(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
                 CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
-                CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//Tag_O)
+                CALL Put(GM%PBCDispl  ,Tag_O='PBCDispl'//TRIM(Tag_O))
                 CALL Put(GM%IntCs     ,'IntCs'        ,Tag_O=Tag_O)
                 CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
@@ -1943,6 +1945,143 @@ CONTAINS
                       !! STOP 'ERROR : Bcast in Get_Chr_vect (InOut.F90) not supported!'
 #endif 
                     END SUBROUTINE Get_CHR_VECT
+                    !-------------------------------------------------------------------------------
+              SUBROUTINE Put_CHR10_VECT(A,VarName,Tag_O)
+                INTEGER                              :: I,N,II,NN
+                TYPE(CHR10_VECT) :: A
+                CHARACTER(LEN=*),         INTENT(IN) :: VarName
+                CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
+                TYPE(META_DATA)                      :: Meta
+
+#ifdef OLD_CHR10_VECT
+                INTEGER,DIMENSION(DCL)   :: B  !=ICHAR(' ')
+#else
+                INTEGER,ALLOCATABLE :: B(:)
+                INTEGER :: RunInd,BufSize
+#endif
+
+#ifdef PARALLEL
+                IF(MyId==ROOT)THEN
+#endif
+
+#ifdef OLD_CHR10_VECT
+                   NN=SIZE(A%C)
+                   DO II = 1, NN
+                      N=LEN(A%C(II))
+                      IF(N>DCL) CALL Halt('Static strings overrun in Put_CHR10_VECT')
+                      DO I=1,N; B(I)=ICHAR(A%C(II)(I:I)); ENDDO
+                         Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))// &
+                              TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
+                         CALL OpenData(Meta,.TRUE.)
+                         CALL WriteIntegerVector(Meta,B)
+                         CALL CloseData(Meta)
+                   ENDDO
+#else
+                   NN = SIZE(A%C)
+                   BufSize = 1
+                   DO II = 1, NN
+                     N = LEN(TRIM(A%C(II)))
+                     IF(N>DCL) CALL Halt('Static strings overrun in Put_CHR10_VECT')
+                     BufSize = BufSize + N + 1
+                   ENDDO
+                   
+                   ALLOCATE(B(BufSize))
+                   RunInd = 1
+                   B(RunInd) = NN
+                   RunInd = RunInd + 1
+                   DO II = 1, NN
+                     N = LEN(TRIM(A%C(II)))
+                     DO I = 1, N
+                       B(RunInd) = ICHAR(A%C(II)(I:I))
+                       RunInd = RunInd + 1
+                     ENDDO
+                     B(RunInd) = -1000
+                     RunInd = RunInd + 1
+                   ENDDO
+                   IF(BufSize /= RunInd - 1) STOP 'ERR: Index problem in Put_CHR10_VECT !'
+                   CALL Put(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+                   Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))// &
+                        TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                   CALL OpenData(Meta,.TRUE.)
+                   CALL WriteIntegerVector(Meta,B)
+                   CALL CloseData(Meta)
+                   DEALLOCATE(B)
+#endif
+#ifdef PARALLEL
+                   ENDIF
+#endif
+                 END SUBROUTINE Put_CHR10_VECT
+
+                 !-------------------------------------------------------------------------------
+                 SUBROUTINE Get_CHR10_VECT(A,VarName,Tag_O)
+                   INTEGER                                 :: I,N,II,NN
+                   TYPE(CHR10_VECT),           INTENT(INOUT) :: A
+                   CHARACTER(LEN=*),         INTENT(IN)    :: VarName
+                   CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
+#ifdef OLD_CHR10_VECT
+                   INTEGER,DIMENSION(DEFAULT_CHR_LEN)      :: B !=ICHAR(' ')
+#else
+                   INTEGER,ALLOCATABLE :: B(:)
+                   INTEGER :: RunInd,StrInd,StrLen,BufSize
+                   CHARACTER(LEN=DCL) :: TEMP
+#endif
+                   TYPE(META_DATA)                         :: Meta
+
+#ifdef OLD_CHR10_VECT
+#else
+                   CALL Get(BufSize,NameTag(VarName,TRIM(IntToChar(0))//TRIM(Tag_O)))
+#endif
+
+#ifdef PARALLEL 
+
+                   IF(MyId==ROOT)THEN
+#endif 
+
+#ifdef OLD_CHR10_VECT
+                      NN=SIZE(A%C)
+                      DO II = 1, NN
+                        N=LEN(A%C(II))
+                        IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Get_CHR10_VECT')
+                        Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))//TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
+
+                        CALL OpenData(Meta)
+                        CALL ReadIntegerVector(Meta,B(1))
+                        CALL CloseData(Meta)
+                        DO I=1,N; A%C(II)(I:I)=CHAR(B(I)); ENDDO
+                      ENDDO
+#else
+                      NN = SIZE(A%C)
+                      Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(1))//TRIM(Tag_O)),NATIVE_INT32,BufSize,.FALSE.)
+                      CALL OpenData(Meta)
+                      ALLOCATE(B(BufSize))
+                      CALL ReadIntegerVector(Meta,B(1))
+                      IF(NN /= B(1)) STOP 'ERR: SIZE problem in Get_CHR10_VECT'
+                      RunInd = 2
+                      DO II = 1, NN
+                        TEMP = ' '
+                        StrInd = 1
+                        DO 
+                          IF(B(RunInd) == -1000) THEN
+                            RunInd = RunInd + 1
+                            EXIT
+                          ELSE
+                            TEMP(StrInd:StrInd) = CHAR(B(RunInd))
+                            StrInd = StrInd + 1
+                            RunInd = RunInd+1
+                          ENDIF
+                        ENDDO
+                        A%C(II) = TEMP
+                      ENDDO
+                      IF(BufSize /= RunInd -1 ) STOP 'ERR: Index problem in Get_CHR10_VECT'
+                      DEALLOCATE(B)
+#endif
+
+#ifdef PARALLEL 
+                      ENDIF       
+                      ! not supported yet. IF(InParallel)CALL Bcast(A)
+                      !! STOP 'ERROR : Bcast in Get_Chr10_vect (InOut.F90) not supported!'
+#endif 
+                    END SUBROUTINE Get_CHR10_VECT
                     !-------------------------------------------------------------------------------
                     SUBROUTINE Put_LOG_VECT(A,VarName,Tag_O)
                       INTEGER                              :: I,N,II,NN
