@@ -9,8 +9,8 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
 ! Distribution buffer stuff
 !--------------------------------------------------------------------------------
   INTEGER :: LBra,LKet
-  REAL(DOUBLE) :: PrmBufB(5,LBra)
-  REAL(DOUBLE) :: PrmBufK(5,LKet)
+  REAL(DOUBLE) :: PrmBufB(7,LBra)
+  REAL(DOUBLE) :: PrmBufK(7,LKet)
   REAL(DOUBLE) :: C(1)
 !--------------------------------------------------------------------------------
 ! Temporary space for computing 2-e integrals
@@ -30,6 +30,9 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
   TYPE(PBCInfo) :: PBC
   REAL(DOUBLE)  :: FPQx,FPQy,FPQz
 !
+
+  !write(*,*) 'intssss'
+
   !C(1)=0.0D0
   DO J=1,LKet
      Eta = PrmBufK(1,J)
@@ -57,6 +60,12 @@ SUBROUTINE IntSSSS5(PrmBufB,LBra,PrmBufK,LKet,C,PBC)
 !
         r1xZpE = 1.0D0/(Zeta+Eta)
         T1=(PQx*PQx+PQy*PQy+PQz*PQz)*Zeta*Eta*r1xZpE
+
+        !write(*,*) 'r1xZpE',r1xZpE
+!write(*,*) 'Zeta',Zeta
+!write(*,*) 'Eta',Eta
+        !write(*,*) 'T1',T1
+
         IF(T1<Gamma_Switch) THEN
            MG=AINT(T1*Gamma_Grid)
            R1=F0_0(MG)+T1*(F0_1(MG)+T1*(F0_2(MG)+T1*(F0_3(MG)+T1*F0_4(MG))))
