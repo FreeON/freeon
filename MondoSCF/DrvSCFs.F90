@@ -521,6 +521,8 @@ MODULE DrvSCFs
    REAL(DOUBLE)       :: EBOND,EELECT,ELJ  
    CHARACTER(LEN=3)   :: Cur
    TYPE(INT_VECT)     :: Stat
+!  TYPE(DBL_RNK2)     :: Grd1,Grd2
+   INTEGER :: I
 !
        CONVF=1000.D0*JtoHartree/C_Avogadro
        CALL New(Stat,3)
@@ -547,14 +549,26 @@ MODULE DrvSCFs
        CALL ENERGY_ANGLE ( EANGLE ,InfFile=InfFile)
        CALL ENERGY_DIHEDRAL ( EDIHEDRAL ,InfFile=InfFile)
        CALL ENERGY_IMPROPER ( EIMPROPER ,InfFile=InfFile)
-!      CALL ENERGY_NON_BONDING_CALCULATE( EELECT, ELJ, VIRIAL)
-!      write(*,*) 'elj aft traditional= ',elj,Ctrl%Current(2)
        CALL ENERGY_LENNARD_JONES(ELJ,Ctrl%Current(2),7.D0)
 !
 ! calculate exclusion energies
 !
-       CALL COULOMB_EXCL(MM_NATOMS,E_C_EXCL,InfFile,Cur)
-       CALL LJ_EXCL(MM_NATOMS,E_LJ_EXCL,InfFile,Cur)
+       CALL EXCL(MM_Natoms,Cur,InfFile,E_LJ_EXCL,E_C_EXCL)
+!
+!        call new(grd1,(/3,MM_Natoms/))
+!        call new(grd2,(/3,MM_Natoms/))
+!        grd1%d(:,:)=zero
+!        grd2%d(:,:)=zero
+!      CALL ENERGY_NON_BONDING_CALCULATE( EELECT, ELJ, VIRIAL,grd1%D(:,:))
+!      write(*,*) 'elj aft traditional= ',elj,Ctrl%Current(2)
+!
+!   do i=1,mm_Natoms
+!     write(*,*) 'grd= ',i,grd1%D(1,i),grd2%D(1,i),grd1%D(1,i)-grd2%D(1,i)
+!     write(*,*) 'grd= ',i,grd1%D(2,i),grd2%D(2,i),grd1%D(2,i)-grd2%D(2,i)
+!     write(*,*) 'grd= ',i,grd1%D(3,i),grd2%D(3,i),grd1%D(3,i)-grd2%D(3,i)
+!   enddo
+!        call delete(grd1)
+!        call delete(grd2)
 !
        CALL OpenASCII(OutFile,Out)
 !
@@ -600,7 +614,7 @@ MODULE DrvSCFs
        write(out,*) 'E_Total= ',MM_COUL+ebond+eangle+edihedral+eimproper+ELJ-E_LJ_EXCL-E_C_EXCL
        ENDIF
 !
-       GM_MM%NAtms = MM_NATOMS
+       GM_MM%NAtms = MM_Natoms
 !
         CALL OpenHDF(Ctrl%Info)
         CALL PUT(EBOND,'MM_EBOND',Tag_O=Cur)
