@@ -57,8 +57,8 @@ rmLegacy:
 CatCpy:	
 	cat $(MONDO_HOME)/Includes/CopyrightNotice.txt
 	sleep 1
-	cat $(MONDO_HOME)/README
-	sleep 30
+#	cat $(MONDO_HOME)/README
+#	sleep 3
 #----------------------------------------------
 #   MondoMods
  mm:	
