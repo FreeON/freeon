@@ -144,16 +144,25 @@ CONTAINS
     TYPE(CellSet)                  :: CS
     REAL(DOUBLE)                   :: Radius
     REAL(DOUBLE), OPTIONAL         :: Rad_O
+    INTEGER                        :: IL
 !
 !   Calculate Radius
 !
     IF(PRESENT(Rad_O)) THEN
        Radius = Rad_O
     ELSE
-       Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
+       Radius = (One+1.D-14)*MaxBoxDim(GM) + SQRT(AtomPairDistanceThreshold)
     ENDIF
-    CALL New_CellSet_Sphere(CS,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,Radius)
+!   Determine PFFOverde and Make CS
+    IF(GM%PBC%PFFOvRide) THEN
+       IL = GM%PBC%PFFMaxLay
+       CALL New_CellSet_Cube(CS,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,(/IL,IL,IL/))
+    ELSE
+       CALL New_CellSet_Sphere(CS,GM%PBC%AutoW%I,GM%PBC%BoxShape%D,Radius)
+    ENDIF
+!
     CALL Sort_CellSet(CS)
+    CS%Radius  = SQRT(CS%CellCarts%D(1,1)**2 +CS%CellCarts%D(2,1)**2 +CS%CellCarts%D(3,1)**2)
 !
   END SUBROUTINE SetCellNumber
 !-------------------------------------------------------------------------------
