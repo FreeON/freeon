@@ -387,7 +387,7 @@ MODULE DrvSCFs
             DIISB=1.D0
          ELSEIF(CCyc==1)THEN
             CALL Get(DIISB,'diiserr',StatsToChar(Ctrl%Current))
-            DIISB=DIISA
+            DIISA=DIISB
          ELSE
             CALL Get(DIISB,'diiserr',StatsToChar(Ctrl%Current))
             CALL Get(DIISA,'diiserr',StatsToChar(Ctrl%Previous))

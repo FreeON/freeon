@@ -25,6 +25,9 @@ MODULE ParseInPut
    USE Dynamo    
    USE Mechanics 
 #endif
+#ifdef NAG
+   USE F90_UNIX
+#endif
    IMPLICIT NONE
    INTEGER                    :: I,ILoc,NLoc,NOpts
    INTEGER,DIMENSION(MaxSets) :: Loc
@@ -43,7 +46,6 @@ MODULE ParseInPut
 !        Read comand line, environement variables, create file names, init files etc
          CALL ParseCmndLine(Ctrl) 
          CALL OpenHDF(InfFile)
-!
 #ifdef MMech
          CALL ParseMech(Ctrl)
          Call InitMMech()
@@ -721,14 +723,12 @@ MODULE ParseInPut
 !           NOTE: Should recomPute basis for EACH geometry.  Things are quite
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
-!
+            ! Determine a bounding box for the system
+            GM%BndBox%D=SetBox(GM%Carts)
+            ! Convert coordinates
+            CALL ConvertCoords(GM)
 !           ComPute spin coordinates
             CALL SpinCoords(GM) 
-!
-! Convert coordinates
-!
-            CALL ConvertCoords(GM)
-!
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
 !           Print the coordinates
@@ -2718,18 +2718,11 @@ END SUBROUTINE ParsePeriodic
                GMLoc%AbBoxCarts%D=GMLoc%BoxCarts%D
                CALL CalAtomCarts(GMLoc)
             ENDIF
-!
             IF(GMLoc%PBC%Trans_COM) THEN
                CALL CalTransVec(GMLoc)
             ENDIF
             CALL Translate(GMLoc,GMLoc%PBC%TransVec)
-!
             CALL WrapAtoms(GMLoc)
-!
-! set boundary box
-!
-            GMLoc%BndBox%D=SetBox(GMLoc%Carts)
-!
 !           ReSet the Cell Center
             DO I=1,3
                IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
