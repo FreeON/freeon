@@ -370,6 +370,7 @@ CONTAINS
     TYPE(State)    :: S
     TYPE(Options)  :: O
     TYPE(Parallel) :: M    
+    REAL(DOUBLE)   :: Lambda
     INTEGER        :: cSCF,cBAS,Modl
     LOGICAL        :: DoDIIs
     !----------------------------------------------------------------------------!
@@ -381,6 +382,10 @@ CONTAINS
        IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
     ENDIF
     CALL Invoke('FBuild',N,S,M)
+    ! Dynamically check for level shifting 
+    CALL OpenASCII(N%IFile,Inp)         
+    IF(OptDblQ(Inp,'LevelShift',Lambda))CALL Invoke('SP2',N,S,M)
+    CLOSE(InP)
     IF(DoDIIS)CALL Invoke('DIIS',N,S,M)
   END SUBROUTINE FockBuild
   !===============================================================================
@@ -520,31 +525,33 @@ CONTAINS
           WRITE(Out,*)'DMaxB = ',DMaxB
           CLOSE(Out)
           ! Convergence tests
-          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<1D-1*dTest).AND.ETotB<ETotA)THEN
+          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
              Converged(iCLONE)=.TRUE.
-             Mssg='Normal SCF convergence A'
+             Mssg='Normal SCF convergence.a'
           ENDIF
           ! Accept convergence from wrong side if DM thresholds are tightend.
           IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest*3D-1)THEN
              !        IF(DMaxB<dTest*1D-1.AND.ETotQ<ETest*1D-1)THEN
              Converged(iCLONE)=.TRUE.
-             Mssg='Normal SCF convergence B'
+             Mssg='Normal SCF convergence.b'
           ENDIF
           ! Look for stall out if we have at least one consecutive digit in the DM
           IF(DMaxB<1.D-1.AND.DMaxA<1.D-1)THEN
              ! Look for non-decreasing errors due to incomplete numerics
-             IF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
+             IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>2)THEN
                 IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
                    Mssg='SCF hit DIIS & DMax increase.'
                    Converged(iCLONE)=.TRUE.
-                ELSEIF(DIISB>DIISA)THEN
+                ENDIF
+             ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
+                IF(DIISB>DIISA)THEN
                    Mssg='SCF hit DIIS increase'
                    Converged(iCLONE)=.TRUE.
                 ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
                    Mssg='SCF hit DMAX increase'
                    Converged(iCLONE)=.TRUE.
                 ENDIF
-             ELSEIF((DIISQ<1D-5.OR.DMaxQ<1D-5).AND.cSCF>2)THEN
+             ELSEIF((DIISQ<1D-4.OR.DMaxQ<1D-4).AND.cSCF>2)THEN
                 Mssg='SCF convergence due to DIIS stagnation.'
                 Converged(iCLONE)=.TRUE.
              ENDIF
