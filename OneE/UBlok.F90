@@ -597,16 +597,17 @@ ENDIF
 
   SUBROUTINE RadialOne(Ell,N,Alpha,K,ZAC2pZBC2,Q)
     INTEGER                                :: Ell,Ehn,N,I,Lambda,IGrid
-    REAL(DOUBLE)                           :: K,Alpha,ZAC2pZBC2,R,Delta,Left,Rhgt,Cntr,DistToZero,AlphaInv
+    REAL(DOUBLE)                           :: K,Alpha,ZAC2pZBC2,R,Delta,Left,Rhgt,Cntr,DistToZero,AlphaInv,Ov
     REAL(DOUBLE),DIMENSION(1:NPts,0:HGEll) :: M
     REAL(DOUBLE),DIMENSION(0:,0:)          :: Q
     !
     IF(K<1D-8)THEN
        Q=Zero
        AlphaInv=One/Alpha
+       Ov=EXP(-ZAC2pZBC2)
        ! Only values with Lambda=0 survive
-       Q(0,0)=Half*SQRT(Pi*AlphaInv)
-       Q(0,1)=Half*AlphaInv
+       Q(0,0)=Half*Ov*SQRT(Pi*AlphaInv)
+       Q(0,1)=Half*Ov*AlphaInv
        DO Ehn=1,N-1
           Q(0,Ehn+1)=Half*AlphaInv*DBLE(Ehn)*Q(0,Ehn-1)
        ENDDO
@@ -650,14 +651,15 @@ ENDIF
     INTEGER                                       :: EllA,EllB,N,LambdaA,LambdaB,I,Ehn,IGrid
     REAL(DOUBLE),DIMENSION(0:,0:,0:)              :: Q
     REAL(DOUBLE)                                 :: ZAC2,ZBC2,R,Delta,Ka,Kb,Alpha,AlphaInv, &
-                                                     Left,Rhgt,Cntr,KaKb,DistToZero,CC
+                                                     Left,Rhgt,Cntr,KaKb,DistToZero,CC,Ov
     !--------------------------------------------------------------------------------------------------------------
     IF(ABS(Ka)<1D-8.AND.ABS(Kb)<1D-8)THEN
        Q=Zero
        AlphaInv=One/Alpha
+       Ov=EXP(-ZAC2-ZBC2)
        ! Only values with LambdaA==LambdaB==0 accrue
-       Q(0,0,0)=Half*SQRT(Pi*AlphaInv)
-       Q(0,0,1)=Half*AlphaInv
+       Q(0,0,0)=Half*Ov*SQRT(Pi*AlphaInv)
+       Q(0,0,1)=Half*Ov*AlphaInv
        DO Ehn=1,N-1
           Q(0,0,Ehn+1)=Half*AlphaInv*DBLE(Ehn)*Q(0,0,Ehn-1)
        ENDDO
