@@ -221,16 +221,16 @@ c
 c
 c Check for multipoles
 c
-      INCLUDE "MultipoleSelect.inc"
-      IF(Mults) THEN
-
-         CALL Digest(LTot,N,LenAA,LenBB,LenCC,KThresh,
-     >               L1,L2,L3,L4,ISw,pK,jK,iK,
-     >               SubInd,Bfn,W2,sK,W1,DA)
-
-         xNMults = xNMults + FLOAT(L1*L2*L3*L4*N)
-
-      ENDIF
+c      INCLUDE "MultipoleSelect.inc"
+c      IF(Mults) THEN
+c
+c         CALL Digest(LTot,N,LenAA,LenBB,LenCC,KThresh,
+c     >               L1,L2,L3,L4,ISw,pK,jK,iK,
+c     >               SubInd,Bfn,W2,sK,W1,DA)
+c
+c         xNMults = xNMults + FLOAT(L1*L2*L3*L4*N)
+c
+c      ENDIF
 c
 c Find the true length of the current batch and store some info.
 c
