@@ -644,7 +644,7 @@ CONTAINS
        CALL RefreshBMatInfo(IntCs,XYZAux%D,GOpt%TrfCtrl, &
                      GOpt%CoordCtrl%LinCrit,GOpt%CoordCtrl%TorsLinCrit,&
                      PBCDim,Print,SCRPath,.TRUE.)
-       CALL CartToInternal(IntCs,VectCG%D,VectI%D,&
+       CALL CartToInternal(IntCs,VectCG%D,VectI%D,XYZAux%D,PBCDim, &
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        CALL RedundancyOff(VectI%D,SCRPath,Print)
      ! CALL POffHardGc(IntCs,XYZAux%D,PBCDim,VectI%D,SCRPath,Print2)

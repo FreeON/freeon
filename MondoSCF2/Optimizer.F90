@@ -941,7 +941,7 @@ CONTAINS
      !
      ! calculate internal coord gradients
      !
-     CALL CartToInternal(IntCs,CartGrad,Grad%D,&
+     CALL CartToInternal(IntCs,CartGrad,Grad%D,XYZ,PBCDim, &
        GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
      CALL RedundancyOff(Grad%D,SCRPath,Print)
    ! CALL POffHardGc(IntCs,XYZ,PBCDim,Grad%D,SCRPath,Print2)
@@ -1270,18 +1270,19 @@ CONTAINS
          AtNumNew%D(NatmsNew)=GMLoc%AtNum%D(NatmsNew)
        ENDIF
      ENDDO
-write(*,*) 'lattice forces are temporarily hardwired to zero'
+!write(*,*) 'lattice forces are temporarily hardwired to zero'
      DO K=1,3
        DO J=1,3
          XYZNew%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          RefXYZ%D(J,NatmsNew+K)=GMLoc%PBC%BoxShape%D(J,K)
          GradNew%D(J,NatmsNew+K)=GMLoc%PBC%LatFrc%D(J,K)
-GradNew%D(J,NatmsNew+K)=Zero
+!GradNew%D(J,NatmsNew+K)=Zero
        ENDDO
      ENDDO
      ! ensure proper orientation of (numerical) forces
-   ! GradNew%D(2:3,NatmsNew+1)=Zero
-   ! GradNew%D(3,NatmsNew+2)=Zero
+!write(*,*) 'forces orientation hardwired to zero'
+     GradNew%D(2:3,NatmsNew+1)=Zero
+     GradNew%D(3,NatmsNew+2)=Zero
      CALL Delete(RefXYZ1)
      AtNumNew%D(NatmsNew+1:NatmsNew+3)=Zero
      CALL ConvertToXYZRef(XYZNew%D,RefXYZ%D,GMLoc%PBC%Dimen)
