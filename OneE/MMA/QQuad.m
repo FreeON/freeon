@@ -76,7 +76,7 @@ If[Mod[diff, 3] == 1,WriteString[FileName, StringJoin["      ", FF[pw[[end, 2]] 
 If[Mod[diff, 3] == 2,WriteString[FileName, StringJoin["      ", FF[pw[[end - 1, 2]]], ", ", FF[pw[[end, 2]]],"/\n"]]]; 
 If[Mod[diff, 3] == 0,WriteString[FileName, StringJoin["      ", FF[pw[[end - 2, 2]]], ", ", FF[ pw[[end - 1, 2]]],", ", FF[pw[[end, 2]]], "/\n"]]];
 
-,{infinity,1,10}]
+,{infinity,1,20}]
 
 Close[FileName];
 
