@@ -1,3 +1,72 @@
+2002-06-11 20:44  nemeth
+
+	* OneE/MakeRho.F90: SetMMThresholds is not called directly, only
+	from startup.
+
+2002-06-11 20:40  nemeth
+
+	* MondoMods/Macros.F90: Startup changed to include thresholding for
+	MM.
+
+2002-06-11 16:50  mchalla
+
+	* ONX/NONX/Makefile: Accedentally checked in the PBC_1 makefile as
+	Makefile.  Here is the onld one back.  We need to merge PBC_1 and
+	plain ONX soon.
+
+2002-06-11 13:31  nemeth
+
+	* Makefile: The order of Dynamo and IntCoo changed.
+
+2002-06-11 13:28  mchalla
+
+	* HiCu/: CubeTree.F90, Makefile: Added in CK Gan's new MaxSplit
+	routine.  Reduces non-linearity when performing domain
+	decomposition in parallel.  Seems to accelerate low accuracy
+	results, and slow high accuracy calculations, but not by much.
+	
+	6-31G** Urea"
+	
+	OLDSPLIT ---------  HiCu.GridGen	 :: Tau = 0.10D-01, <Rho> =
+	0.15973886D+02, <Exc> = -.29057707D+02, Pts/Atom = 1032 
+	HiCu.GridGen	     :: Tau = 0.10D-02, <Rho> = 0.15997923D+02,
+	<Exc> = -.29108820D+02, Pts/Atom = 2065  HiCu.GridGen	      ::
+	Tau = 0.10D-03, <Rho> = 0.16000445D+02, <Exc> = -.29109509D+02,
+	Pts/Atom = 3941  HiCu.GridGen	      :: Tau = 0.10D-04, <Rho> =
+	0.15999968D+02, <Exc> = -.29108168D+02, Pts/Atom = 7385 
+	HiCu.GridGen	     :: Tau = 0.10D-05, <Rho> = 0.16000012D+02,
+	<Exc> = -.29108185D+02, Pts/Atom = 14096  HiCu.GridGen	       ::
+	TauRel = 0.10D-05, RhoErr = 0.94D-06, <Exc> = -.29108185D+02 
+	HiCu.GridGen	     :: CPU Sec = 0.46D+02, WALL Sec = 0.46D+02
+	
+	NEWSPLIT ----------  HiCu.GridGen	  :: Tau = 0.10D-01, <Rho>
+	= 0.15983366D+02, <Exc> = -.29072111D+02, Pts/Atom = 993 
+	HiCu.GridGen	     :: Tau = 0.10D-02, <Rho> = 0.15999745D+02,
+	<Exc> = -.29105770D+02, Pts/Atom = 2073  HiCu.GridGen	      ::
+	Tau = 0.10D-03, <Rho> = 0.16000307D+02, <Exc> = -.29109125D+02,
+	Pts/Atom = 3915  HiCu.GridGen	      :: Tau = 0.10D-04, <Rho> =
+	0.16000075D+02, <Exc> = -.29108412D+02, Pts/Atom = 7455 
+	HiCu.GridGen	     :: Tau = 0.10D-05, <Rho> = 0.16000009D+02,
+	<Exc> = -.29108194D+02, Pts/Atom = 14459  HiCu.GridGen	       ::
+	TauRel = 0.10D-05, RhoErr = 0.75D-06, <Exc> = -.29108194D+02 
+	HiCu.GridGen	     :: CPU Sec = 0.48D+02, WALL Sec = 0.48D+02
+
+2002-06-11 13:17  nemeth
+
+	* MondoSCF/DrvSCFs.F90: Lennard Jones energy calculation replaced
+	by new O(N) routine.
+
+2002-06-11 13:13  nemeth
+
+	* Dynamo/dynamo.F90: O(N) Lennard Jones energy evaluation (with
+	distance cutoff) added.
+
+
+2002-06-11 12:12  nemeth
+
+	* IntCoo/IntCoo.F90: sort_into_box changed and tested, used to
+	Lennard Jones energy calculation, to be used to generate bond-list.
+
 2002-06-08 09:56  mchalla
 
 	* ONX/NONX/: ComputeKe_PBC_1.F90, ComputeKg_PBC_1.F90,
@@ -582,9 +651,6 @@
 	Docs/PBC_paper/GaussianPapers.bib, MondoSCF/DrvFrcs.F90: [no log
 	message]
 
-2002-03-05 13:52  mchalla
-
-	* ChangeLog: [no log message]
 
 2002-03-05 13:51  mchalla
 
@@ -598,9 +664,6 @@
 	* Examples/: lizardite-1T_332.inp, lizardite-1T_332d.inp: Example
 	input files of large 2-d periodic jobs.
 
-2002-02-28 13:35  mchalla
-
-	* ChangeLog: [no log message]
 
 2002-02-28 13:30  mchalla
 
@@ -703,10 +766,6 @@
 	* Includes/Suffixes: a trivial bug for the suffix rule for
 	Fortran77 code is fixed.
 
-2002-02-11 12:10  mchalla
-
-	* ChangeLog: [no log message]
-
 2002-02-11 11:58  mchalla
 
 	* MondoMods/Thresholding.F90: Fixed bug in LineBoxOverlap for
@@ -771,10 +830,6 @@
 	* Docs/BWR_paper/: anneal_s.eps, compare_all.eps, hilbert_s.eps,
 	morton_s.eps: add a paper bwr.tex to the repository.
 
-2002-02-01 13:51  mchalla
-
-	* ChangeLog: [no log message]
-
 2002-02-01 13:18  mchalla
 
 	* MondoSCF/ParseInput.F90: Added Karoly to the author list.  Good
@@ -785,9 +840,6 @@
 	* MondoMods/LinAlg.F90: Fixed bug with uninitialized value of N in
 	SetToI.  Silly me.
 
-2002-02-01 11:55  mchalla
-
-	* ChangeLog: [no log message]
 
 2002-01-30 13:40  tymczak
 
@@ -1024,9 +1076,6 @@
 	VRRl.F90, also changed the order of the indexes in IB%WR and IB%WZ.
 	This needs a change in MemMan.F90 in MondoMods.
 
-2001-12-14 15:33  mchalla
-
-	* ChangeLog: [no log message]
 
 2001-12-14 15:30  mchalla
 
@@ -1073,10 +1122,6 @@
 	ONX.F90, Sizes.F90, VRRs.F90: Fixed a lot of bugs and messy stuff
 	with the array dimensions in the 2-e code.
 
-2001-12-10 11:57  mchalla
-
-	* ChangeLog: [no log message]
-
 2001-12-10 11:53  mchalla
 
 	* Validate/Lizard.inp: [no log message]
@@ -1093,10 +1138,6 @@
 	MondoSCF/ParseInput.F90, SCFeqs/SDMM.F90, QCTC/BlokTrPdJ.F90,
 	QCTC/JGen.F90: Changed back to pre 2001-11-26 to eliminate periodic
 	instabilities and feature bloat.
-
-2001-12-07 12:17  mchalla
-
-	* ChangeLog: [no log message]
 
 2001-12-05 17:08  tymczak
 
