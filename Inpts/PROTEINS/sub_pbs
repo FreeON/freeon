@@ -9,7 +9,7 @@ echo "#!/bin/tcsh "                                   >  $1.pbs
 # for AMD/Intel linux [zinc]
 echo "#PBS -l nodes=zinc$2"                           >> $1.pbs
 echo "#PBS -joe "                                     >> $1.pbs
-echo "#PBS -N Mondo[$1]"                              >> $1.pbs
+echo "#PBS -N m[$1]"                                  >> $1.pbs
 echo "#PBS -q mondo"                                  >> $1.pbs
 #---------------------------------------------------------------
 
