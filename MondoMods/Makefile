@@ -70,6 +70,7 @@ purge:	clean
 	ls -l $(MONDO_HOME)/Libs
 #
 release:$(MModRel)
+	rm -rf MMA/Functions
 #
 Mods:	$(MModObjs)
 	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libMondoMods.a $(?:.F90=.o)
