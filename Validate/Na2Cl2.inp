@@ -7,18 +7,24 @@ Charge=0
 Multiplicity=1
 DebugAll =(MinDebug,CheckSums)
 Guess=Core
+Grad=Optimize
 SCFMethod=(RH)
-BasisSets=(User1)
-ModelChem=(HF)
-Accuracy =(VeryTight)
+BasisSets=(SBKJC)
+ModelChem=(BLYPxc)
+Accuracy =(Good)
 Geometry =(InAngstroms,NoOrder)
 <EndOptions>
 
 <BeginGeometry>
-Na  0.0    1.705173   0.0
-Cl  0.0    0.0        1.99019
-Cl  0.0    0.0       -1.99019
-Na  0.0   -1.705173   0.0
+Na  0.0    1.8  0.0
+Cl  0.0    0.0  2.0
+Cl  0.0    0.0 -2.0
+Na  0.0   -1.8  0.0
 <EndGeometry>
+
+Na  0.0    1.705173   0.0
+Cl  0.0    0.0        1.9019
+Cl  0.0    0.0       -1.9019
+Na  0.0   -1.705173   0.0
 
 External refs: HF=-29.9608856
