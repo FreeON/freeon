@@ -36,11 +36,11 @@ Libs =  $(F90_LIBRARIES) $(LAPACK)
 BlkAInvObjs = BlokAInv.o  
 LowdinOObjs = LowdinO.o 
 #
-ReleaseFiles=BlokAInv.x Lowdin.x
+ReleaseFiles=BlokAInv.x LowdinO.x
 #
 all:	Blk Lwd
 #
-release:clean $(RELEASEFILES)
+release:clean $(ReleaseFiles)
 	rm -rf OLD
 #
 purge:	clean
