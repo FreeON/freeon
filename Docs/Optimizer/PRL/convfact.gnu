@@ -110,7 +110,7 @@ set xlabel "i" 0.000000,0.000000  font ""
 set x2label "" 0.000000,0.000000  font ""
 set xrange [ 0 : 122 ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set x2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
-set ylabel "c_{i}" 0.000000,0.000000  font ""
+set ylabel "f_{i}" 0.000000,0.000000  font ""
 set y2label "" 0.000000,0.000000  font ""
 set yrange [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
 set y2range [ * : * ] noreverse nowriteback  # (currently [-10.0000:10.0000] )
