@@ -5,3 +5,6 @@ last step needed to make hrrbra and hrrket the same in sonx
 and onx. 
 
 
+2. fix the vrr c code, it does not correctly determine the 
+length of the buffers that it is supposed to read in from 
+disk. Just a simple syntax fix.

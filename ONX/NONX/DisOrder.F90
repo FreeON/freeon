@@ -3,6 +3,7 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,NameBuf)
   USE GlobalScalars
   USE PrettyPrint
   USE ONXParameters
+  USE Thresholding
   IMPLICIT NONE
 !--------------------------------------------------------------------------------
 ! Basis set, coordinates, ect.
@@ -19,7 +20,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,NameBuf)
 ! Temporary space for computing 2-e integrals
 !--------------------------------------------------------------------------------
   TYPE(DBL_VECT)           :: W1,W2
-  TYPE(DBL_RNK2)           :: CD,WR,WZ,WK
+  TYPE(DBL_RNK2)           :: CD,WK
+  TYPE(DBL_RNK3)           :: WR,WZ
   TYPE(INT_VECT)           :: CDrv,VLoc,MLDis
   TYPE(INT_RNK2)           :: SLoc
 !--------------------------------------------------------------------------------
@@ -55,8 +57,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,NameBuf)
 
   CALL New(WK,(/4,NPrim**2/))
   CALL New(CD,(/NPrim**2,3/))
-  CALL New(WR,(/6,NPrim**4/))
-  CALL New(WZ,(/3,NPrim**4/))
+  CALL New(WR,(/6,NPrim**2,NPrim**2/))
+  CALL New(WZ,(/3,NPrim**2,NPrim**2/))
   CALL New(W1,MXINT)
   CALL New(W2,MXINT)
   CALL New(CDrv,60000)

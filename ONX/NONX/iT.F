@@ -1,6 +1,6 @@
       FUNCTION iT(I,J)
       IMPLICIT NONE
-      INTEGER I,J,iT
+      INTEGER I,J,iT,iTD(6,6)
       INTEGER T2Size(28)
       SAVE iTD
       DATA iTD/ 1, 0, 0, 0, 0, 0,
