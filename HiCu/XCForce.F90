@@ -90,16 +90,18 @@ PROGRAM XCForce
 ! More allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL New(XCFrc,3*NAtoms)
-  CALL New(LatFrc_XC,(/3,3/))
-#ifdef PARALLEL
+  CALL New(LatFrc_XC,  (/3,3/))
+  CALL New(LatFrc_XC_S,(/3,3/))
+#ifdef PARALLEL 
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
 !----------------------------------------------------------------------
 ! Compute the exchange-correlation contribution to the force in O(N)
 !
-  XCFrc%D    =Zero
-  LatFrc_XC%D=Zero
+  XCFrc%D      =Zero
+  LatFrc_XC%D  =Zero
+  LatFrc_XC_S%D=Zero
 #ifdef PARALLEL
   XCFrcBegTm = MondoTimer()
 #endif
@@ -156,8 +158,6 @@ PROGRAM XCForce
   CALL SendBBox()
   CALL DistDist()
   CALL ParaRhoToTree()
-  CALL New(LatFrc_XC_S,(/3,3/))
-  LatFrc_XC_S%D=Zero
   DO I = 1,3 
      IF(GM%PBC%AutoW%I(I)==1) THEN
         Exc=Zero
@@ -177,8 +177,6 @@ PROGRAM XCForce
 #else
   CALL RhoToTree(Args)
 ! Generate the grid as a 3-D BinTree
-  CALL New(LatFrc_XC_S,(/3,3/))
-  LatFrc_XC_S%D=Zero
   DO I = 1,3
      Exc=Zero
      IF(GM%PBC%AutoW%I(I)==1) THEN
@@ -225,27 +223,10 @@ PROGRAM XCForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_XC%D(I,J)   = Zero
-           LatFrc_XC_S%D(I,J) = Zero
+           LatFrc_XC%D(I,J)   = 1.D8
+           LatFrc_XC_S%D(I,J) = 1.D8
         ENDDO
      ENDDO
-     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-!       Print The Lattice Forces
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*) 'LatFrc_XC'
-        WRITE(*,*)   'LatFrc_XC'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_XC%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_XC%D(I,J),J=1,3) 
-        ENDDO
-        WRITE(Out,*) 'LatFrc_XC_S'
-        WRITE(*,*)   'LatFrc_XC_S'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_XC_S%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_XC_S%D(I,J),J=1,3) 
-        ENDDO
-        CLOSE(Out)
-     ENDIF
 !    Sum in contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -255,11 +236,16 @@ PROGRAM XCForce
 !    Sum in the J contribution to total lattice force
      LatFrc_XC%D     = LatFrc_XC%D+LatFrc_XC_S%D
      GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_XC%D
-!    Tidy up 
-     CALL Delete(LatFrc_XC_S)
 #ifdef PARALLEL
   ENDIF
 #endif
+! Do some printing
+  CALL Print_Force(GM,XCFrc,'XC Force')
+  CALL Print_Force(GM,XCFrc,'XC Force',Unit_O=6)
+  CALL Print_LatForce(GM,LatFrc_XC%D,'XC Lattice Force')
+  CALL Print_LatForce(GM,LatFrc_XC%D,'XC Lattice Force',Unit_O=6)
+  CALL Print_LatForce(GM,LatFrc_XC_S%D,'XC Dipole Lattice Force: Surface Term')
+  CALL Print_LatForce(GM,LatFrc_XC_S%D,'XC Dipole Lattice Force: Surface Term',Unit_O=6)
 ! Do some checksumming and IO 
   CALL PChkSum(XCFrc,    'dXC/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_XC,'LFrcXC',Proc_O=Prog)  
@@ -271,6 +257,7 @@ PROGRAM XCForce
   CALL Delete(P)
   CALL Delete(XCFrc)
   CALL Delete(LatFrc_XC)
+  CALL Delete(LatFrc_XC_S)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
 #ifdef PARALLEL
   CALL New(TmXCFrcArr,NPrc)

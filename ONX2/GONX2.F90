@@ -67,7 +67,7 @@ PROGRAM GONX2
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
 !--------------------------------------------------------------------------------
-  integer :: ixyz,jxyz
+  integer :: ixyz,jxyz,A1,A2
   DoStrs=.TRUE.!.FALSE.
   !
 #ifdef ONX2_PARALLEL
@@ -247,63 +247,67 @@ PROGRAM GONX2
   CALL DBL_VECT_EQ_DBL_SCLR(3*NAtoms,GradTmp%D(1,1),0.0d0)
   CALL MPI_REDUCE(GradX%D(1,1),GradTmp%D(1,1),3*NAtoms,MPI_DOUBLE_PRECISION, &
        &          MPI_SUM,ROOT,MONDO_COMM,IErr)
-  ! Print out.
+! Print out.
   CALL New(GTmp,3*NAtoms)
-  CALL CartRNK2ToCartRNK1(GTmp%D,GradTmp%D)
+  DO IXYZ=1,GMc%NAtms
+     A1=3*(IXYZ-1)+1
+     A2=3*IXYZ
+     GTmp%D(A1:A2) = GradTmp%D(1:3,IXYZ)
+  ENDDO
   CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
-  CALL Delete(GTmp)
-  !
   CALL DAXPY(3*NAtoms,KScale,GradTmp%D(1,1),1,GradAux%D(1,1),1)
+! Print Out Forces
+  CALL Print_Force(GMc,GTmp,'X Force')
+  CALL Print_Force(GMc,GTmp,'X Force',Unit_O=6)
+  CALL Delete(GTmp)
   CALL Delete(GradTmp)
-  !
-  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+! STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+  CALL New(GradTmp,(/3,3/))
+  CALL DBL_VECT_EQ_DBL_SCLR(9,GradTmp%D(1,1),0.0d0)
   IF(DoStrs) THEN
-     CALL New(GradTmp,(/3,3/))
-     CALL DBL_VECT_EQ_DBL_SCLR(9,GradTmp%D(1,1),0.0d0)
      CALL MPI_REDUCE(BoxX%D(1,1),GradTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
           &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+!    Zero the Lower Triange
+     DO IXYZ=1,3
+        DO JXYZ=1,IXYZ-1
+           GradTmp%D(IXYZ,JXYZ)   = 1.D8
+        ENDDO
+     ENDDO
      CALL DAXPY(9,KScale,GradTmp%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
-     if(myid.eq.root) then
-        do jxyz=1,3
-           do ixyz=1,3
-              !           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
-              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',GradTmp%D(ixyz,jxyz),&
-                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
-              !           endif
-           enddo
-        enddo
-     endif
-     !
-     CALL Delete(GradTmp)
   ENDIF
-  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
-  !
+! Print Out the Lattice Forces
+  CALL Print_LatForce(GMc,GradTmp%D,'X Lattice Force')
+  CALL Print_LatForce(GMc,GradTmp%D,'X Lattice Force',Unit_O=6)
+  CALL Delete(GradTmp)
 #else
   ! Print out.
   CALL New(GTmp,3*NAtoms)
-  CALL CartRNK2ToCartRNK1(GTmp%D,GradX%D)
-  CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
+  DO IXYZ=1,GMc%NAtms
+     A1=3*(IXYZ-1)+1
+     A2=3*IXYZ
+     GTmp%D(A1:A2) = GradX%D(1:3,IXYZ)
+  ENDDO
+  CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog) 
+! Print Out Forces
+  CALL Print_Force(GMc,GTmp,'X Force')
+  CALL Print_Force(GMc,GTmp,'X Force',Unit_O=6)
   CALL Delete(GTmp)
-  !
   CALL DAXPY(3*NAtoms,KScale,GradX%D(1,1),1,GradAux%D(1,1),1)
-  !
-  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+!
+! STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   IF(DoStrs) THEN
+!    Zero the Lower Triange
+     DO IXYZ=1,3
+        DO JXYZ=1,IXYZ-1
+           BoxX%D(IXYZ,JXYZ) = 1.D8
+        ENDDO
+     ENDDO
      CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
-     do jxyz=1,3
-        do ixyz=1,3
-!           if(GMc%PBC%AutoW%I(ixyz).eq.1.and.GMc%PBC%AutoW%I(jxyz).eq.1) then
-              write(*,'(2(A,I1,A,I1,A,E22.15))') 'XBox(',ixyz,',',jxyz,')=',BoxX%D(ixyz,jxyz),&
-                   &                          ', TotBox(',ixyz,',',jxyz,')=',GMc%PBC%LatFrc%D(ixyz,jxyz)
-!           endif
-        enddo
-     enddo
-     !
   ENDIF
-  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
-  !
+! Print Out the Lattice Forces
+  CALL Print_LatForce(GMc,BoxX%D,'X Lattice Force')
+  CALL Print_LatForce(GMc,BoxX%D,'X Lattice Force',Unit_O=6)
 #endif
-  !
   !------------------------------------------------
   ! Save Exchange Gradients and Stress.
   !
