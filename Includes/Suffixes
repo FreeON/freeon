@@ -56,6 +56,15 @@ COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
 	cp $(COPY_RIGHT_C) $*.c; cat $*.C >> $*.c
 	rm -f $*.C $*.x
 #
+.f90.x:
+	echo $*.x
+#
+.f.x:	
+	echo $*.x	
+#
+.c.x:	
+	echo $*.x
+#
 ################################################################
 #       RULES FOR COMPILING PREPROCESSED CODE
 ################################################################
