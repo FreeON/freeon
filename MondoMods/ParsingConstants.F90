@@ -6,8 +6,8 @@ MODULE ParsingConstants
    CHARACTER(LEN=26), PARAMETER   :: Upper='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
    CHARACTER(LEN=26), PARAMETER   :: Lower='abcdefghijklmnopqrstuvwxyz'
    CHARACTER(LEN=23), PARAMETER   :: Numbers='0123456789-+.0123456789'
-   CHARACTER(LEN=5),  PARAMETER   :: Special='$/_#*'
-   CHARACTER(LEN=54), PARAMETER   :: Characters=Special//Lower//Numbers
+   CHARACTER(LEN=6),  PARAMETER   :: Special='$/_#*='
+   CHARACTER(LEN=55), PARAMETER   :: Characters=Special//Lower//Numbers
    CHARACTER(LEN=9),  PARAMETER   :: Delimiters='[(|")],= '
    CHARACTER(LEN=4) , PARAMETER   :: Stars='****'
    CHARACTER(LEN=1) , PARAMETER   :: Space=' '
