@@ -1,3 +1,176 @@
+2005-01-02 13:06  mchalla
+
+	* Docs/: Bib/mondo_new.bib, DM_Papers/PERT_4/Makefile,
+	DM_Papers/PERT_4/SPRT.ps, DM_Papers/PERT_4/SPRT.tex: [no log
+	message]
+
+2005-01-01 08:38  vweber
+
+	* QCTC/PBCFarField.F90: Removed the NPrc times the same warning.
+
+2004-12-31 04:42  vweber
+
+	* MondoSCF2/SCFs.F90: Fixed the problem with the lower part of the
+	numerical exchange lattice grad.
+
+2004-12-24 07:14  vweber
+
+	* Validate/: AcO-.inp, AcO-.ref: Report successful run of CH3CO2-.
+
+2004-12-24 06:39  vweber
+
+	* Validate/: NO+.inp, NO+.ref: This is a calculation with a total
+	charge +1 and it works!
+
+2004-12-22 04:56  vweber
+
+	* ONX2/ONX2.F90: Removed two useless mpi_barrier's.
+
+2004-12-21 07:47  mchalla
+
+	* Docs/DM_Papers/PERT_3/LET.tex: [no log message]
+
+2004-12-21 06:46  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.pdf, Response3.tex,
+	pdfconverter: [no log message]
+
+2004-12-21 06:04  mchalla
+
+	* Docs/DM_Papers/PERT_3/0412568.ps: [no log message]
+
+2004-12-21 05:48  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.bbl, Response3.bib,
+	Response3.tex: [no log message]
+
+2004-12-20 10:57  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: [no log message]
+
+2004-12-20 10:27  mchalla
+
+	* Docs/: DM_Papers/PERT_3/Makefile, DM_Papers/PERT_3/Response3.tex,
+	Bib/mondo_new.bib: [no log message]
+
+2004-12-20 09:52  vweber
+
+	* QCTC/PoleTree.F90: CJ CJ CJ please don't remove variables which
+	are used for PARALLEL calculations.
+
+2004-12-19 22:37  tymczak
+
+	* QCTC/QCTC.F90: [no log message]
+
+2004-12-18 23:47  nemeth
+
+	* MondoSCF2/InCoords.F90: Printing of backtracking steps commented
+	out.
+
+2004-12-18 22:34  nemeth
+
+	* Validate/: IceIh.inp, IceIh.ref: A simultaneous lattice/atomic
+	pos relaxation of the IceIh crystal. This is the absolute gamma
+	point, and it still goes nicely and smoothly to the optimum with
+	the Bucko-Angyan type lattice B-matrix elements in the QUICCA
+	optimizer.
+
+2004-12-18 20:54  nemeth
+
+	* MondoSCF2/: InCoords.F90, ParseGeomOpt.F90, SCFs.F90: Well, it
+	turned out, that the B-matrix elements for lattice vectors were
+	wrong.	They were wrong in the sense that they were the same as
+	used by Kostya, Scuseria and Schlegel. As pointed out by the
+	manuscript of Bucko and Angyan, the construct of Kostya et.al. has
+	only a quite limited validity. Now the Bucko & Angyan scheme is
+	checked in. It's a very small modification in the B-matrix
+	generator. Also, this version should work for DFT optimizations as
+	well. Tests on small molecules converge absolute smootly. Sorry, I
+	felt in the same trape the Gauusian guys did and have not read the
+	Bucko & Angyan manuscript carefully enough a month ago.
+
+2004-12-17 15:21  tymczak
+
+	* QCTC/: BlokTrPdJ.F90, Globals.F90, JGen.F90, MondoPoles.F90,
+	NukE.F90, PoleTree.F90, QCTC.F90, Thresholds.F90, TreeWalk.F90: New
+	PAC stuff
+	
+	CJ
+
+2004-12-17 14:38  mchalla
+
+	* Docs/DM_Papers/PERT_4/SPRT.tex: [no log message]
+
+2004-12-17 14:07  tymczak
+
+	* QCTC/LibQCTC/PoleNodeType.F90: New PAC stuff
+
+2004-12-17 14:06  tymczak
+
+	* QCTC/LibQCTC/ERIGlobals.F90: New PAC stuff, protected by the
+	compailer directive NewPAC
+	
+	CJ
+
+2004-12-16 22:51  nemeth
+
+	* MondoSCF2/InCoords.F90: Internal coordinates connecting fragments
+	are recognized in a better way. This work was initiated by
+	fragments recognition in sulphure and in rod-like H-F polymer when
+	VDFFact is chosen to be zero.
+
+2004-12-16 17:45  nemeth
+
+	* MondoSCF2/InCoords.F90: [no log message]
+
+2004-12-16 17:42  nemeth
+
+	* MondoSCF2/InCoords.F90: A fix for the cordinate recognition in
+	rod-like molecules, like the linear H-F example of SV.
+
+2004-12-14 18:48  nemeth
+
+	* MondoSCF2/ParseGeomOpt.F90: [no log message]
+
+2004-12-14 18:32  nemeth
+
+	* MondoSCF2/ParseGeomOpt.F90: Factor for downscaling VDWRadii has
+	been changed from 0.8 to 1.0. This means that VDW radii are
+	recognized exactly as they should, by tabulated values, instead of
+	scaling down those tabulated values as from old versions.
+
+2004-12-14 16:10  nemeth
+
+	* MondoSCF2/InCoords.F90: Some compiler messages concerning "sum"
+	"char", etc are fixed here.
+
+2004-12-14 10:55  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-12-14 08:48  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
+
+2004-12-09 19:04  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-8.inp, CH2x-8.out, README: [no log
+	message]
+
+2004-12-09 18:56  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-6.inp, CH2x-6_23449.hdf.gz,
+	CH2x-6_27129.out-2, CH2x-6_9156.out-1, README, SCFs.F90: Removing
+	old bug files, new ones are coming.
+
+2004-12-09 14:20  nemeth
+
+	* MondoSCF2/PunchHDF.F90: A restart bug fixed.
+
+2004-12-09 10:46  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-12-09 10:42  mchalla
 
 	* Docs/DM_Papers/PERT_3/Response3.tex: [no log message]
@@ -29,6 +202,16 @@
 
 	* Validate/urea_2x2x2.ref: With the most recent code Urea2x2x2
 	HF/3-21G/good converges in 3 steps instead of the 5 before.
+
+2004-12-07 14:34  nemeth
+
+	* BUGS/B_12_07_04-2/: BN_4x4x4.inp, BN_4x4x4_1226040.out, README:
+	Memory allocation bug during TC2 on Q.
+
+2004-12-07 13:53  nemeth
+
+	* BUGS/B_12_07_04-1/: BN_4x4x4.inp, BN_4x4x4.out, README: Another
+	bug, this time on boron-nitride.
 
 2004-12-07 10:52  mchalla
 

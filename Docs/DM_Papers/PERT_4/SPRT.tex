@@ -1,9 +1,7 @@
 \documentclass[twocolumn,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-%\documentclass[preprint,showpacs,preprintnumbers,amsmath,amssymb]{revtex4}
-% Some other (several out of many) possibilities
-%\documentclass[preprint,aps]{revtex4}
-%\documentclass[preprint,aps,draft]{revtex4}
-%\documentclass[prb]{revtex4}% Physical Review B
+
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
 
 \usepackage{graphicx}% Include figure files
 \usepackage{dcolumn}% Align table columns on decimal point
@@ -16,7 +14,7 @@
 
 \preprint{LA-UR 04-5100}
 
-\title{Density matrix perturbation theory for non-orthogonal representations}
+\title{Non-Orthogonal Density Matrix Perturbation Theory}
 
 \author{Anders M. N. Niklasson$^{(1),(\dagger)}$, Val\'ery Weber$^{(1),(2)}$, and Matt Challacombe$^{(1)}$}
 \affiliation{$^{(1)}$Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545}
@@ -26,18 +24,15 @@
 \date{\today}
 
 \begin{abstract}
-Density matrix purification and perturbation theory provides an efficient
-framework for linear scaling electronic structure calculations of adiabatic response properties. 
-We present a non-orthogonal generalization of the density matrix perturbation theory, which 
-recently was introduced by the authors (Niklasson and Challacombe, Phys.\ Rev.\ Lett.  
-{\bf 92}, 193001 (2004); Weber, Niklasson and Challacombe, Phys.\ Rev.\ Lett.  
-{\bf 92}, 193002 (2004)).  A non-orthogonal formulation includes basis-set 
-dependent perturbations, such as geometry perturbations, when using a basis 
-set of non-orthogonal local orbitals.  This is an important advantage, 
-enabling reduced complexity computation of structural response properties 
-such as elasticity, interatomic potentials, piezoelectric coefficients, and vibrational 
-spectra (including higher order anharmonicities). A brief review of density matrix
-purification and perturbation theory is also presented.
+Density matrix perturbation theory [Phys.\ Rev.\ Lett.  {\bf 92}, 193001 (2004)]
+provides an efficient framework for the linear scaling computation of response properties
+[Phys.\ Rev.\ Lett.  {\bf 92}, 193002 (2004)].  In this article, we generalize density matrix 
+perturbation theory to include properties computed with a perturbation dependent non-orthogonal 
+basis.  Such properties include analytic derivatives of the energy with 
+respect to nuclear displacement, as well as magnetic 
+properties computed with a field dependent basis.  The non-orthogonal density matrix 
+perturbation theory is developed in the context of modern purification methods, which are 
+briefly reviewed.
 \end{abstract}
 
 \pacs{02.70.-c, 31.15.-p, 71.15.-m, 71.15.Dx}% PACS, the Physics and Astronomy
@@ -52,70 +47,58 @@ matrix inverse, Green's function, recursion, commutation relations, Fermi operat
 
 During the last decade a new computational paradigm has evolved in electronic structure
 theory, where no critical part of a calculation is allowed to increase in complexity more than linearly 
-with system size 
-\cite{Yang91,Galli92,Mauri93,Ordejon93,Li93,Stechel94,Goedecker94,Silver94,Wang94,Kim95,Wang95,Abrikosov96,Galli96,Kohn96,Bowler97,Sanches97,Yokojima98,Baer98,Guerra98,Palser98,Goedecker99,Artacho99,Scuseria99,Ordejon00,Wu02,NiklassonTC2,Yam03,NiklassonPRT1,WeberPRT2}. 
-Linear scaling electronic structure theory extends
-conventional tight-binding, Hartree-Fock, and Kohn-Sham schemes
-to the study of very large complex systems previously out of reach.
-This is critical for applications to new areas of research in biology, medicine, 
-and nanoscience, which often requires the ability to handle much larger
-problems than previously possible.
+with system size {\bf [THESE REFS NEED TO BE VETTED!!]}
+\cite{WYang92,GGalli92,FMauri93,POrdejon93,XLi93,EStechel94,SGoedecker94,RSilver94,LWang94,JKim95,YWang95,IAbrikosov96,GGalli96,WKohn96,DBowler97,DSanchezportal97,SYokojima98,RBaer98,CGuerra98,APalser98,SGoedecker99,EArtacho99,GScuseria99,POrdejon00,SWu02,ANiklasson02A,CYam03,ANiklasson04,VWeber04}. 
+Linear scaling electronic structure theory extends tight-binding, Hartree-Fock, and Kohn-Sham schemes
+to the study of large, complex systems beyond the reach of conventional methods.  In general, these 
+conventional methods are encumbered by three computational bottlenecks:
+(1) construction of the Hartree-Fock, tight-binding, or Kohn-Sham Hamiltonian, 
+(2) solution of the self-consistent-field equations to obtain the  ground state, and quite often,
+(3) the evaluation of response properties.
+While considerable effort has been devoted to overcomming bottlenecks (1) and (2), linear
+scaling has only recently been demonstrated for item (3) \cite{VWeber03}. 
 
-Conventional electronic structure theory has in general three major 
-computational bottlenecks:
-1) the construction of the Hartree-Fock, tight-binding, or Kohn-Sham Hamiltonian, 
-2) the self-consistent ground state total energy calculation, and quite often,
-3) the computation of response properties.
-Here we will focus on the last problem, including calculations of both linear 
-and higher order non-linear response. Our main purpose is to present
-a non-orthogonal generalization of the density matrix perturbation theory, 
-applied in linear scaling computation of adiabtic response properties,
-which recently was introduced by the authors \cite{NiklassonPRT1,WeberPRT2}.
-A non-orthogonal generalization is important because it naturally includes perturbations
-in the overlap matrix, when using a basis set of non-orthogonal local orbitals.  This is 
-necessary for the calculation of structural response properties, such as elasticity, 
-interatomic potentials, piezoelectric coefficients, and vibrational spectra. 
-The corresponding perturbations must also be included when calculating electromagnetic 
-response using field-dependent basis functions.
 
-In a non-orthogonal representation the Hartree-Fock or Kohn-Sham
-eigenvalue problem takes the generalized form,
-\begin{equation}\label{SEq}
-{\rm H}\phi_i = \varepsilon_i {S} \phi_i.
-\end{equation}
-In the case when both the Hamiltonian ${\rm H}$ and the overlap matrix $S$ 
-are modified by perturbations ${\rm H'}$ and ${S'}$, respectively, we have 
-the generalized perturbed eigenvalue problem
+
+In Ref.~[\onlinecite{ANiklasson03}], we presented a density matrix perturbation theory
+based on spectal projection and the orthogonal, stadard form of the Hartree-Fock or 
+Kohn-Sham eigenvalue problem, ${\rm H} \psi_i = \epsilon_i$.  Within this framework, 
+the perturbed projection  method was developed and applied to the linear scaling 
+computation of static electric polarizabilities \cite{VWeber03}.  In a follow up paper, 
+we showed that perturbed projection can achieve linear scaling for the calculation of 
+properties up to $4^{\rm th}$ order in the total energy.  
+
+While perturbed projection is a general approach to solution of the coupled-perturbed 
+self-consistent-field equations, it has so far only been implemented in the case of perturbation 
+by a static electric field within the Hartree-Fock theory.  Extension to Kohn-Sham models is 
+straighforward, but requires an additional programming effort \cite{ALee94,PSalek02}.  Still open is the 
+extension to properties involving a non-orthogonal, basis set dependence on the perturbation.  
+In this case, the perturbed  Hartree-Fock or Kohn-Sham eigenvalue problem may be expressed 
+in the generalized form
 \begin{equation}\label{SEqP}
-\left( {\rm H} + {\rm H'}\right) \phi_i = \varepsilon_i \left( {S+S'}\right) \phi_i.
+\left( {\rm H} + {\rm H'}\right) \phi_i = \varepsilon_i \left( {S+S'}\right) \phi_i,
 \end{equation}
-Our previously formulated density matrix perturbation theory \cite{NiklassonPRT1,WeberPRT2}
-was based on the orthogonal, standard eigenvalue problem, and did not include perturbations 
-in the overlap matrix ${\rm S'}$.  Changes in the overlap matrix occur because of modifications 
-in the non-orthogonal basis set. With a basis set of atom-centered local orbitals this happens 
-when the geometry is perturbed. With a field-dependent basis set it occurs when the field is altered.
+with both the effective Hamiltonian ${\rm H}$ and the overlap matrix $S$
+of basis function inner products modified by the perturbations ${\rm H'}$ and ${S'}$, respectively.
+Such perturbations are encountered when using a basis of atom centered Atomic Orbitals and 
+computing geometric energy derivatives \cite{RAmos89}, and also when calculating magnetic 
+response properties with the field dependent Gauge Including Atomic Orbitals \cite{}.  
 
-To extend the density matrix perturbation theory to include perturbations in the basis
-we will construct a non-orthogonal generalization of the density matrix perturbation theory.
-Non-orthogonal generalizations of linear scaling methods for 
-the calculation of the density matrix have previously been constructed by including the overlap 
-matrix as a metric tensor in operator products \cite{Nunes94,White97,Palser98}.
-We will follow a similar approach for the density matrix perturbation theory.
 
-Our approach to density matrix perturbation theory avoids the costly intermediate calculation
-of eigenvalues and perturbed orbitals. It is therefore related
-to the orbital-free schemes proposed by Ochsenfeld and Head-Gordon \cite{Ochsenfeld97,Ochsenfeld04} as
-well as the exponential parametrization of the density matrix by Larsen {\em et al.} \cite{Larsen01}.
-However, in contrast to these methods, which pose the perturbed density matrix
-implicitly through a set of commuting Sylvester-like equations, our approach explicitly constructs
-the density matrix and its response derivatives through recursion. In this way the density matrix 
-response can be calculated to any order using standard sparse matrix algebra.
-The new orbital-free perturbation theory is surprisingly simple and linear scaling complexity is achieved
-already at fairly small systems sizes even in self-consistent {\em ab initio} calculations of
-three-dimensional systems using a well controlled numerical threshold \cite{WeberPRT2}.
+
+Previously, non-orthogonal generalizations of linear scaling methods for calculation of the 
+density matrix have been developed by including the overlap matrix as a metric tensor in operator products 
+\cite{APalser98,RNunes94,CWhite97}.  Non-orthogonal density matrix schemes for solving the 
+coupled-perturbed self-consistent-field equations \cite{COchsenfeld97,HLarsen01,COchsenfeld04} 
+have also been put forward, which pose the perturbed density matrix implicitly as a set of 
+commuting Sylvester-like equations \cite{JBrandts01}.  In this article,  we present a non-orthogonal 
+generalization of density matrix perturbation theory, based on modern approaches to spectral projection.  
+This theory provides a frame work for extending perturbed projection to the computation
+of properties with a non-orthogonal, basis set dependence on the perturbation through explicit, 
+recursive formulae for the computation of density matrix derivatives.
 
 This article is outlined as follows: First we give a brief review of the orthogonal 
-formulation of density matrix purification and perturbation theory. 
+formulation of density matrix purification and density matrix perturbation theory. 
 Operators represented in an orthogonal basis set are described by italics ($P$). 
 Thereafter we generalize the description to non-orthogonal representations, where 
 the matrices are described by normal letters (P). The central result is the non-orthogonal
@@ -123,108 +106,124 @@ density matrix perturbation theory presented in section \ref{NOPRT}.
 A simple example is given in detail for the expansion of the interatomic pair 
 interaction of the diatomic H$_2^+$ molecule up to fourth order.
 
-
-\section{Orthogonal Density Matrix Purification and Perturbation Theory}
+ 
+\section{Density Matrix Purification and Density Matrix Perturbation Theory}
 
 \subsection{Orthogonal purification}
 
-The efficiency of density matrix methods used in linear scaling electronic structure theory
-is based on the quantum locality (or nearsightedness) of non-metallic systems
-\cite{Kohn59,Kohn96,Baer97,Hastings04}. The locality is manifested in 
-the approximate exponential decay of the density matrix with inter-atomic separation.  In a local orbital basis
-the density matrix therefore has a sparse matrix representation and the number of non-zero entries
-above some numerical threshold scales linearly $O(N)$ with the system size $N$ for sufficiently large 
-extended problems.  Using efficient sparse matrix algebra the density matrix can 
-therefore be constructed with a computational $N$-scaling cost. There are
-several approaches to achieve this.  Density matrix purification theory, from which the
-corresponding density matrix perturbation theory is derived, is based on the Fermi operator 
-relation at $T=0$ between the density matrix $P$ and the Hamiltonian $H$,
+Linear scaling electronic structure theory is based on the quantum locality (or nearsightedness) of 
+non-metallic systems \cite{WKohn96,WKohn59,RBaer97}.
+%????????? ,Hastings04.  
+In a local (non-orthogonal, atomic orbital) basis, this locality is manifested in an approximate 
+exponential decay of density matrix elements with inter-atomic separation.  Under these 
+conditions, and using a sparse linear algebra with the dropping of numerically small elements 
+below a threshold $\tau$, the number of non-zero entries in the density matrix is asymptotically
+$O(N)$ with system size $N$.  Moreover, there exist a number of $N$-scaling algorithms for 
+computing the density matrix that achieve an ${\cal O}(N)$ computational complexity by operating
+only with sparse intermediate matrices throughout the iterative construction of $P$.
+
+
+Various approaches to $N$-scaling construction of the density matrix are based on 
+the Fermi operator relation between the density matrix $P$ and the Hamiltonian $H$
+taken at $T=0$,
 \begin{equation}\label{DM}
-P = \theta(\mu I -  H).
+P = \theta(\mu I -  H),
 \end{equation}
-By expanding the step function $\theta$, where the step is formed at the chemical potential $\mu$,
-we can construct the density matrix. One way of constructing the density matrix is by approximating the Fermi operator
-in terms of a Chebychev expansion \cite{Goedecker94,Silver94,Wang94,Baer97_JCP,Liang04},
+given by the step function $\theta$ (spectral projector), with the step formed at the chemical potential $\mu$.
+The chemical potential determines the occupied states via Aufbau filling.   
+
+
+One approach to constructing $\theta$ is through expansion in orthogonal polymomials.
+One of the most accurate schemes employs the Chebychev polynomials $T_k$
+\cite{SGoedecker94,RSilver94,LWang94,RBaer97,AVoter96,WLiang03};
 \begin{equation}\label{Cheb}
-P = \theta(\mu I -H) \approx \sum_{k=0}^m a_kT_k(H),
+P = \theta(\mu I -H) \approx \sum_{k=0}^p a_kT_k(H).
 \end{equation}
-where the two-step recurrence relation for the Chebychev polynomials $T_k(H)$ can be used,
+With the two-term recurrence 
 \begin{equation}
-T_{k+1}(X) = 2XT_k(X)-T_{k-1}(X).
+T_{k+1}(X) = 2XT_k(X)-T_{k-1}(X),
 \end{equation}
-For a $m$th order Chebychev approximation, using the two-step recurrence relation,
-the computational cost scales as $O(m)$ with the polynomial order of the expansion. However, 
-the cost can be reduced to $O({\sqrt m})$ by using more efficient partial summations
-of the polynomial terms instead of the two-step recurrence relation \cite{Paterson73,Liang04}. 
-This reduces the computational cost, but more intermediate memory is required to store
-temporary matrices.  The order of the polynomial approximation in Eq.\ (\ref{Cheb}), $m$, must therefore
-be kept fairly low. Another problem is the occurrence of rapid oscillations around the step in a finite polynomial 
-approximation. A Chebychev expansion gives smaller errors compared to other polynomial
-approximations, but the oscillations do not disappear.  
+the computational cost for evaluation of Eq.~(\ref{Cheb}) scales as $O(p)$ with
+polynomial order $p$ of the Chebychev expansion. However, this cost can be reduced to 
+$O({\sqrt p})$ by using a hierachical summation of polynomial terms, rather than the 
+two-term recurrence relation \cite{MPaterson73,WLiang03}. While this reduces the 
+computational cost, it demands more intermediate memory to store temporary matrices.  
+In either case, the order of the polynomial approximation in Eq.~(\ref{Cheb}), $p$, must 
+be kept fairly low, leading to problems with incompleteness.  An incomplete (low order) 
+Chebychev series can result in Gibbs oscillations \cite{AVoter96}, which are high frequency 
+ripples that form about the step.
 
-Density matrix purification theory avoids these problems
-\cite{McWeeny60,Clinton69,Palser98,Holas01,NiklassonTC2,NiklassonTRS4,NiklassonIPUR,Mazziotti03,NiklassonPRT1}.
-It approximates the step function recursively,
+ 
+
+Alternatively, purification is a recursive approach to spectral projection
+\cite{APalser98,ANiklasson02A,ANiklasson04,ANiklasson03,NiklassonIPUR,RMcWeeny60,WClinton69,AHolas01,DMazziotti03}
+that approximates the matrix step function as
 \begin{equation}\label{Rec}
- P = \theta(\mu I -H) = \lim_{n \rightarrow \infty} F_n(F_{n-1}(...F_0(H)...)),
+ P = \theta(\mu I -H) = \lim_{n \rightarrow \infty} F_n(F_{n-1}(...F_0(H)...)).
 \end{equation}
-which leads to a very high-order approximation in only a few number of iterations.
-For example, using polynomials $F_n$ of second order, we can in only 30 steps reach an
-expansion order $m \sim 10^9$.
-$F_0(H)$ is an initial linear transform, normalizing
-the spectra of $H$ to $[0,1]$ in reverse order. The functions $F_n$ ($n>0$) are low order,
-monotonically increasing polynomials, with fix points at $0$ and $1$. Each
-polynomial $F_n$ recursively projects the eigenvalues of 
+Initiating a purification sequence is the linear transform $F_0(H)$, which  normalizes
+the spectra of $H$ to $[0,1]$ in reverse order. The functions $F_n$ ($n>0$) are typically low order,
+monotonically increasing polynomials, with fixed points at $0$ and $1$. Each
+polynomial $F_n$ recursively projects the eigenvalues of the approximate intermediate 
+density matrix  $X_{n-1}$ to $0$ for unoccupied states and to $1$ for occupied states as 
 \begin{equation}
-X_n = F_{n-1}(X_{n_1})= \ldots = F_{n-1}(...F_0(H)...)
+X_n = F_{n-1}(X_{n_1})= \ldots = F_{n-1}(...F_0(H)...) \, ,
 \end{equation}
-to $0$ for unoccupied states and to $1$ for occupied states, thereby ``purifying'' the approximate 
-density matrix $X_n$.  Because of the monotonically increasing form of the purification projectors $F_n$ any 
-finite approximation will also be a monotonically increasing function. Oscillations, subject to numerical
-inaccuracy in the Chebychev expansion, are therefore avoided.
+creating a ``purified'' intermediate $X_n$.  
 
-After each recursive expansion step we apply numerical thresholding, removing all matrix elements below
-some tolerance $\tau$. This often leads to a substantial increase in computational efficiency, but also
-to an accumulation of the numerical error in each recursive purification step, which initially increases
-exponentially \cite{NiklassonTRS4}. This may first look like a serious problem. However, the exponential 
-error accumulation disappears when the eigenvalues of $X_n$ are clustered around $0$ and $1$. Since the 
-number of purification steps necessary to reach convergence scales with the logarithm of the inverse
-band gap, $\log ( 1/gap)$, the total accumulated error is stable and scales linearly with 
-the threshold $\tau$ \cite{NiklassonTRS4}. The accuracy of the calculation is therefore easy
-to control.
+Purification has several advantages.  First, 
+a $p^{\rm th}$ order truncated purification sequence can be developed with a complexity of just ${\cal O}(\log p)$.   
+For example, with quadratic polynomials $F_n$,  a $p \sim 10^9$ order expansion can be reached in 30 iterations.
+Also, because the polynomials $F_n$ are  monotonically increasing, so to are the cooresponding purification 
+sequences, regardless of the degree of incompleteness.  The Gibbs oscillations resulting from truncation of the 
+Chebychev series are therefore avoided with purification methods.
+
+
+
+To achieve a linear scaling with purification, thresholding is applied after each recursive 
+expansion step to the intermediates $X_n$, removing elements below a tolerance $\tau$ ($\sim 10^{-4}-10^{-6}$). 
+This often leads to a substantial increase in computational efficiency, but also
+to an accumulation of numerical error with each recursive purification step.
+This error involves corruption of the eigenbasis, and at first increases exponentially \cite{ANiklasson03}. 
+However, this error accumulation stabilizes as the eigenvalues of $X_n$ approach 
+$0$ or $1$. Since the number of purification steps necessary to reach convergence scales with the 
+logarithm of the inverse band gap, this stability is rapidly achieved and the accumulated error 
+in the total energy decreases quadratically from above with decreasing $\tau$ \cite{ANiklasson03}. 
 
 Density matrix purification methods differ in the way the purification polynomials $F_n(X_n)$
-are chosen. In grand canonical schemes \cite{Palser98,Holas01,NiklassonTC2} the initial linear normalization
+are chosen. In grand canonical schemes \cite{APalser98,AHolas01,ANiklasson02A} the initial linear normalization
 $X_1 = F_0(H)$ shifts the  eigenvalues such that all occupied eigenvalues are in $[c,1]$ and
 all unoccupied eigenvalues in [$0,c]$, where $c$ is some predefined number (typically $c = 0.5$).
 Thereafter a purification polynomial with inflection point at $c$ is used, which projects
 eigenvalues above (below) $c$ to $1$ ($0$). At convergence the correct occupation is therefore reached, with
 \begin{equation}
-Tr(P) = \lim_{n \rightarrow \infty} Tr(X_n) = N_e.
+Tr(P) = \lim_{n \rightarrow \infty} Tr(X_n) = N_{\rm e}.
 \end{equation}
 The problem with this approach is that it requires prior knowledge of the 
 chemical potential $\mu$, which has to be shifted to the inflection point $c$ in the initial
 normalization $X_1 = F_0(H)$.
-To avoid the problem with an unknown chemical potential Palser and Manolopoulos (PM) invented a
-canonical purification scheme \cite{Palser98} with the projection polynomials chosen
+To avoid the problem with an unknown chemical potential Palser and Manolopoulos (PM) devised  a
+canonical purification scheme \cite{APalser98} with the projection polynomials chosen
 such that the trace, i.e. the occupation, is preserved in each purification projection.
-By choosing the initial normalization such that $Tr[F_0(H)] = N_e$ the PM scheme
+By choosing the initial normalization such that $Tr[F_0(H)] = N_{\rm e}$ the PM scheme
 automatically converges to the correct density matrix, without prior knowledge of 
 the chemical potential.  The problem with this method is that it has a very slow
-convergence at high or low occupation \cite{Palser98,NiklassonTC2}.
-A solution to this problem was given by the introduction of trace correcting purification \cite{NiklassonTC2}
-described below.
+convergence  at high or low occupation \cite{APalser98,ANiklasson02A}.
+A solution to this problem was given by the introduction of trace correcting purification 
+\cite{ANiklasson02A} described below.
+
+
 
 \subsubsection{Second order trace correcting purification}
 
-Probably the most efficient approach to density matrix purification, which is efficient also at 
-high or low occupation, and in addition avoids the problem with an unknown chemical potential, 
-is trace correcting purification \cite{NiklassonTC2,NiklassonTRS4,Mazziotti03}. In trace correcting 
-purification the polynomials $F_n(X_n)$ are chosen to correct the trace $Tr(X_n)$ and
-to expand the step function at the same time. In this case the correct occupation of the density matrix, 
-$Tr(P) = \lim_{n \rightarrow \infty} Tr(X_n) = N_e$, is reached at convergence, without prior 
-knowledge of the chemical potential. The simplest and most memory efficient form by Niklasson \cite{NiklassonTC2}
-is given by
+Trace correcting purification \cite{ANiklasson02A,ANiklasson03,DMazziotti03} is an 
+efficient approach to density matrix purification at both high and low occupation and 
+does not require {\em a priori} the chemical potential. In trace correcting 
+purification the polynomials $F_n(X_n)$ simultaneously correct the trace $Tr(X_n)$ and
+expand the step function.  At convergence, the correct occupation of the density matrix is reached;
+$Tr(P) = \lim_{n \rightarrow \infty} Tr(X_n) = N_{\rm e}$.
+The simplest and most memory efficient form is the second order trace correcting algorithm \cite{ANiklasson02A},
+given by
 \begin{equation} \label{Pract1}
 X_1 = F_0(H) = \frac{H_{\rm max}I-H}{H_{\rm max} - H_{\rm min}},
 \end{equation}
@@ -233,50 +232,47 @@ X_{n+1} = F_n(X_n) = X_n + \sigma_n (I-X_n)X_n,
 \end{equation}
 where
 \begin{equation}\label{Pract2}
-\sigma_n = sign [N_e - Tr(X_n)],
+\sigma_n = {\tt SIGN}[N_{\rm e } - N_{\rm occ}],
+\end{equation}
+\begin{equation}\label{Occupation}
+N_{\rm occ}=Tr(X_n),
 \end{equation}
 and
 \begin{equation}
 P = \lim_{n \rightarrow \infty} X_n.
 \end{equation}
 The constants $H_{\rm max}$ and $H_{\rm min}$ are upper and lower estimates of the spectral
-bounds of $H$, given for example by Gersgorin circles \cite{Palser98}. The initial
+bounds of $H$, given for example by Gersgorin bounds \cite{APalser98}. The initial
 normalization $F_0(H)$ thus transforms all eigenvalues of $H$ to the interval $[0,1]$ in 
-reverse order.  The sign function $sign(x)$ denotes the sign of $x$. It is $+1$ if
-$x>0$, otherwise it is $-1$.  The trace correcting recursion in Eq.\ (\ref{TC2}) is
-equivalent to previously published versions of the method \cite{NiklassonTC2,NiklassonPRT1,WeberPRT2},
-but it is here formulated in a compact form more closely related to an efficient implementation.
+reverse order.  The function {\tt SIGN}$(x)$ denotes the sign of $x$. It is $+1$ if
+$x>0$, otherwise it is $-1$.  The trace correcting recursion in Eq.~(\ref{TC2}) is
+equivalent to previously published versions \cite{ANiklasson02A,ANiklasson04,VWeber05},
+but is presented here in a form more closely related to an efficient implementation.
 
-Computationally the most expensive step is the matrix-matrix multiplication. For sufficiently sparse
-systems these can be performed with a computational cost scaling linearly with the system size.
-
-In the case of large numerical thresholding, combined with high or low occupation, we may push
-eigenvalues out of the range of convergence, which is guaranteed only in $[0,1]$. To avoid this 
-potential problem we alternate the sign of the trace correction in every step, with $\sigma_n = -\sigma_{n-1}$, 
-when we get close to convergence, i.e. when $Tr[(I-X_n)X_n]$ is fairly small (typically $0.1$),
-indicating a clustering of the eigenvalues of $X_n$ around $0$ and $1$. This does not affect the trace at
-convergence, but extends the interval of convergence for the eigenvalues.
+In the case of aggressive thresholding and high or low occupation, the  eigenvalues of $X_n$
+can sometimes be pushed out of the domain of convergence, $[0,1]$. 
+To enhance stability under loose thresholding, we alternate the sign of the trace correction in every step, 
+with $\sigma_n = -\sigma_{n-1}$ as convergence is approached, i.e. when $Tr[(I-X_n)X_n] < 0.1$.
 
 
 \subsection{Orthogonal Perturbation Theory}
 
-The main problem with density matrix perturbation theory is the
-discontinuous relation between the zero temperature density matrix
-and the Hamiltonian, given by the step function in Eq.\ (\ref{DM}). 
-If we use an analytic approximation of the step
-function, we need a very high order expansion for accurate results. 
-At finite temperatures we may use the analytic Fermi-Dirac function, but this involves
-the computation of matrix exponentials and requires the prior knowledge
-of the chemical potential to high precision.
-However, with the recursive purification projection scheme we have an analytic
-monotonically increasing and very accurate high-order approximation of the step function.
-This expansion can be used in the calculation of the density matrix derivative with respect
-to a variation in the Hamiltonian.  The basic idea in our theory is that 
-an initial perturbation in $H$ can be carried through at each projection
-level, either exactly or to any finite order. The resulting
-perturbed projection scheme provides an efficient $O(N)$ technique for
-the calculation of density matrix derivatives and materials adiabatic response properties 
-\cite{NiklassonPRT1,WeberPRT2}..
+The main obstical in formulating a density matrix perturbation theory 
+based directly on the  relation between the Hamiltonian and the spectral projector,
+given  by Eq.~(\ref{DM}), is the discontinuous, non-analytic nature of the
+step function.  Difficulties with this discontinuity are further amplified when
+considering direct expansion of the projector. At finite temperatures close to zero, 
+we could  use the analytic Fermi-Dirac function, but this involves the computation of matrix 
+exponentials and requires the chemical potential {\em a priori} to high precision.
+However, modern purification methods furnish  a recursive, analytic, monotonically increasing and 
+high accuracy representation of the step function that does not require prior knowledge of the
+chemical potential.  These representations can be used  in  direct variation of the density matrix 
+with respect to a perturbed Hamiltonian; the fundamental idea behind our approach is that perturbations 
+in $H$ can be carried directly through Eq.~(\ref{DM}) at each level 
+of purification, either exactly or to finite order.  At finite order, this theory 
+provides a framework for the computation of density matrix derivatives in 
+the $N$-scaling computation of static response properties by  perturbed projection 
+\cite{ANiklasson03,VWeber05}. At infinite order, {\bf [WE NEED SOME EXAMPLES HERE]}
 
 \subsubsection{Exact expansion (infinite order)}
 
@@ -297,33 +293,35 @@ where $X_n$ is the unperturbed sequence generated from $X_{n+1} = F_{n}(X_n)$
 with $X_0 = H^{(0)}$. The initial perturbation is given by $\Delta_0 = H^{(1)}$.
 The perturbed density matrix is given by
 \begin{equation}
-P = P^{(0)} + \lim_{n \rightarrow \infty} \Delta_n.
+P = P^{(0)} + \lim_{n \rightarrow \infty} \Delta_n,
 \end{equation}
-It is easy to see that the perturbations $\Delta_n$ can be generated recursively by the perturbed projections 
+with the projection differences
 \begin{equation}\label{PRT}
 \Delta_{n+1} = F_{n}(X_n + \Delta_n) - F_{n}(X_n).
 \end{equation}
-This recursive equation forms the basis of our perturbation theory.
-Combined with the trace correcting purification projection, $F_n$ in Eq.\ (\ref{TC2}), we derive
-the following scheme for the density matrix perturbation:
+% NOTHING RECURSIVE HAS BEEN WRITEN SO FAR, SO WTF?
+% $\Delta_n$ can be generated recursively by the perturbed projections 
+% This recursive equation forms the basis of our perturbation theory.
+Combined with the second order trace correcting purification, $F_n$ in Eq.\ (\ref{TC2}), 
+the following recursive scheme for infinite order, orthogonal  density matrix perturbation derives:
 \begin{equation} \label{DYS_SP2}
 \Delta_{n+1} =
 \left\{\begin{array}{ll}
-\{ X_n,\Delta_n\} + \Delta_n^2, & {\rm Occ.} \geq N_e \\
-2\Delta_n - \{ X_n,\Delta_n\} - \Delta_n^2, & {\rm Occ.} < N_e ,
+\{ X_n,\Delta_n\} + \Delta_n^2, & {N_{\rm occ}} \geq N_{\rm e} \\
+2\Delta_n - \{ X_n,\Delta_n\} - \Delta_n^2, & {N_{\rm occ}} < N_{\rm e} ,
 \end{array} \right.
 \end{equation}
-where we use the anti-commutator notation $\{A,B\}=AB+BA$ and the occupation ${\rm Occ.}  = Tr(X_n)$.
-The initial perturbation is
+where we use the anti-commutator notation $\{A,B\}=AB+BA$ and the occupation ${N_{\rm occ}}  = Tr(X_n)$.
+The initial projection difference is
 \begin{equation}
 \Delta_1 = - H^{(1)}/(H_{\rm max}-H_{\rm min}).
 \end{equation}
-Since the perturbation $\Delta_n$ changes quadratically in each iteration the
+Since the projection differences $\Delta_n$ change quadratically in each iteration, the
 expansion order is in practice infinite at convergence and therefore exact.
 For insulators the computational cost scales linearly with the size of the
 perturbed region $O(N_{\rm pert.})$ since the recursion only involves terms with the response
 factors $\Delta_n$. For a local perturbation the computational cost is therefore
-independent of system size, i.e. it scales as $O(1)$ \cite{NiklassonPRT1}.
+independent of system size, i.e. it scales as $O(1)$ \cite{ANiklasson04}.
 
 The perturbation theory is grand canonical since the expansion of the perturbation is performed
 at a fixed chemical potential determined by the unperturbed system. For sufficiently large perturbations, 
@@ -349,12 +347,12 @@ for $m = m_{\rm max},m_{\rm max}-1,\ldots ,1,0$:
 \Delta^{(m)}_{n+1} =
 \left\{ \begin{array}{ll}
 \displaystyle \sum_{i=0}^{m} \Delta^{(i)}_n \Delta^{(m-i)}_n, &
-{\rm Occ.} \geq N_e\\
+{N_{\rm occ}} \geq N_{\rm e}\\
 \displaystyle 2\Delta^{(m)}_n - \sum_{i=0}^{m} \Delta^{(i)}_n \Delta^{(m-i)}_n.
-& {\rm Occ.} < N_e\\
+& {N_{\rm occ}} < N_{\rm e}\\
 \end{array} \right.
 \end{equation}
-The occupation ${\rm Occ.} = {Tr}(\Delta^{(0)}_n) \equiv {Tr}(X^{(0)}_n)$.
+The occupation ${N_{\rm occ}} = {Tr}(\Delta^{(0)}_n) \equiv {Tr}(X^{(0)}_n)$.
 The density matrix derivatives are given by
 \begin{equation}
 \frac{1}{m !}\frac{\partial^m P}{\partial \lambda^m} \bigg|_{\lambda = 0} = P^{(m)}=
@@ -364,61 +362,62 @@ such that
 \begin{equation}
 P = P^{(0)} + \lambda P^{(1)} + \lambda^2 P^{(2)} + \ldots ~ .
 \end{equation}
-These equations provide an explicit and rapidly convergent recursive solution
-of the density matrix response functions to any order with a minimal amount
-of formalism \cite{NiklassonPRT1,WeberPRT2}.  Mixed terms for multiple independent 
-perturbations can also be included.
+These equations provide an explicit and rapidly convergent algorithm for the computation of 
+density matrix derivatives through high order \cite{VWeber03,VWeber05}.  In addition, the formalism presented here
+is remarkably simple and can be easily extended to multiple independent perturbations.
 
 
-\section{Non-orthogonal Purification and Perturbation Theory}
+\section{Non-orthogonal Density Matrix Purification and Density Matrix Perturbation Theory}
 
-If we use a non-orthogonal representation of the operators, the ``standard''
-eigenvalue problem in quantum mechanics is replaced by
-the generalized matrix eigenvalue problem,
+In a non-orthogonal representation, the Hartree-Fock or Kohn-Sham equations may be posed as the 
+generalized matrix eigenvalue problem,
 \begin{equation}\label{SES}
 {\rm H}\phi_i = \varepsilon_i {S} \phi_i, \quad  \varepsilon_1 \leq \varepsilon_2 \leq \ldots ,
 \end{equation}
-where ${S}$ is the overlap matrix. As mentioned in the introduction, we use straight normal letters (H)
-to distinguish the non-orthogonal operator representations from the corresponding
-orthogonal representations described by italics ($H$). In the non-orthogonal
-case we can adapt the density matrix purification scheme to a non-orthogonal form. 
-The goal is to extend the density matrix perturbation theory to
-include perturbations occurring in the overlap matrix of the generalized
-eigenvalue problem. This is important for response calculation where the basis set 
-is affected by the perturbation.
+where the overlap matrix ${S}$ is a matrix of basis function inner products 
+{\bf [CITE HERE TO BASIC REVIEW, LIKE SZABO]}.
 
-\subsection{Non-orthogonal Purification}
+In the following, a non-orthogonal density matrix purification algorithm is developed.  Then,
+a non-orthogonal density matrix perturbation theory is developed that admits simultaneous 
+perturbations in both the Hamiltonian and the overlap matrix.  Normal letters (H) are used to 
+distinguish the non-orthogonal representation from the corresponding orthogonal representation 
+denoted by symbols in italics ($H$). 
 
-In the non-orthogonal case the necessary criteria for the orthogonal density matrix ${\rm P}$ are
+\subsection{Non-Orthogonal Purification}
+
+{\bf [WE SHOULD USE {\rm S} RATHER THAN {\it S} ]} 
+In the non-orthogonal case, the necessary criteria determining the density matrix  are
 \begin{equation}\label{CRIT_S}\begin{array}{l}
 [{\rm P,H}]_{S} = S{\rm PH-HP}S = 0, \\
-Tr({\rm P}S) = N_e, \\
-{\rm P = P}S{\rm P}. \\
+Tr({\rm P}S) = N_{\rm e}, \\
+{\rm P = P}S{\rm P}, \\
 \end{array}
 \end{equation}
-Combined with the aufbau principle, i.e. occupying the $N_e$ lowest eigenstates, 
-the density matrix is determined for the non-orthogonal representation. The density matrix
-purification and perturbation theory can be modified to these new criteria by
-starting with an initial normalization X$_1 = {\rm F}_0({\rm H})$ such that 
-\begin{equation}\label{INIT}
-S{\rm X}_1{\rm H  - HX}_1{S} = 0.
-\end{equation}
-We also need to replace all orthogonal matrix-matrix multiplications ($Z=XY$) in 
-the spectral projections  $F_n(X_n)$ by the non-orthogonal multiplications, 
-including the overlap matrix $S$ as a metric tensor in each multiplication, i.e.
+together with Aufbau filling, i.e. occupying the $N_{\rm e}$ lowest eigenstates.
+
+Following normalization, X$_1 = {\rm F}_0({\rm H})$, purification proceeds as in the orthogonal case, 
+but with the minor addition of the metric $S$ to each (previously orthogonal) matrix-matrix multiplication, i.e.
 \begin{equation}\label{Metric}
 Z = XY ~~ {\rightarrow} ~~ {\rm Z} = {\rm X}S{\rm Y}.
 \end{equation}
-This also preserves the covariant (or contravariant) form after each purification projection \cite{White97}.
-The main problem in this approach is the initial normalization of X$_1$, which has to
-commute with ${\rm H}$ in Eq.\ (\ref{INIT}). Once this normalization
-is performed the commutation is automatically preserved as long as
+This preserves the covariant (or contravariant) form after each purification step \cite{CWhite97}.
+
+The most challenging aspect of non-orthogonal purification is obtaining an initial normalization X$_1$,
+which must obey
+\begin{equation}\label{INIT}
+S{\rm X}_1{\rm H  - HX}_1{S} = 0.
+\end{equation}
+With this normalization, commutation is automatically preserved as long as
 \begin{equation}
 S{\rm F}_n({\rm X_n}){\rm H}-{\rm H}{\rm F}_n({\rm X_n})S = 
 S{\rm X_n}{\rm H}-{\rm H}{\rm X_n}S, 
 \end{equation}
-which is true for the purification projections ${\rm F}_n({\rm X_n})$ discussed in this paper.
-There are several options for the initialization:
+which is true for the purification polynomials ${\rm F}_n$ discussed in this paper.
+{\bf [(ITEM A): THERE SHOULD BE SOME DISCUSION HERE ABOUT WHICH PURIFICATION POLYNOMIALS THOSE ARE. 
+IS IT JUST TC2, TC4.. AND TRS4 ETC? AND WHAT IS SPECIAL ABOUT THEM.  DOES THIS CONTRADICT THE
+COMMENTS IN THE CONCLUSIONS ABOUT GENERALALITY?]}
+
+There are a number of for initiating the non-orthogonal purification, three of which are
 \begin{eqnarray}
 \label{INIT1}
 \displaystyle {\rm X}_1 = {\rm F}_0({\rm H}) = \alpha(\beta S^{-1} - S^{-1}{\rm H}S^{-1}), \\
@@ -427,35 +426,35 @@ There are several options for the initialization:
 \label{INIT3}
 \displaystyle {\rm X}_1 = {\rm F}_0({\rm H}) = \alpha({\rm H} - \beta S)^{-1},
 \end{eqnarray}
-where $\alpha$ and $\beta$ are chosen to guarantee convergence, i.e. such that the
-corresponding transformed generalized eigenvalue problem in Eq.\ (\ref{SES}) 
-has its eigenvalues ${\varepsilon}_i \in [0,1]$.
-The first case, Eq.\ (\ref{INIT1}), which is analogous to the initial guess suggested by Palser and Manolopoulos 
-\cite{Palser98} for their non-orthogonal grand canonical purification scheme, corresponds to a 
-congruence transform of the generalized eigenvalue problem to a standard from
-by multiplying Eq.\ (\ref{SES}) by $S^{-1}$ from the left. An additional (but not necessary)
-multiplications of $S^{-1}$ from the right hand side of ${\rm H}$ is also included, which keeps
-the matrices symmetric. Because of this multiplication the additional overlap matrix must be 
-included in the purification projections, which may
-seem unnecessary. The second case, Eq.\ (\ref{INIT2}), is of minor interest since it involves 
-calculations of both ${\rm H}^{-1}$ and $S^{-1}$. The third normalization, Eq.\ (\ref{INIT3}), 
-is the most interesting and useful of the initializations.  
+where $\alpha$ and $\beta$ are chosen to map the eigenvalues of H into [0,1] in reverse order.
+The best choice will most efficiently distribute the eigenvalues in the interval [0,1],
+ideally concentrating all unoccupied states near 0, and all occupied states near 1. 
+
+
+The first choice, Eq.\ (\ref{INIT1}), is analogous to the initial guess suggested by Palser and Manolopoulos 
+\cite{APalser98} for their non-orthogonal grand canonical purification scheme, and amounts to a shift and 
+linear rescaling scaling of eigenvalues.  This linear rescaling can lead to a small renormalized gap in $[0,1]$
+for the case of low occuppation (the large basis set limit).  The second case, Eq.\ (\ref{INIT2}), is of 
+minor interest since it involves calculations of both ${\rm H}^{-1}$ and $S^{-1}$. 
+The third normalization, Eq.\ (\ref{INIT3}), is the most interesting and useful of the initializations.  
 With $\alpha = 1$ and $\beta = \varepsilon_{\rm min} -1$, where $\varepsilon_{\rm min}$
-is a lower bound of the eigenvalues $\varepsilon_i$ in Eq.\ (\ref{SES}), this is a
-Green's function ,
+is a lower bound of the eigenvalues $\varepsilon_i$ in Eq.\ (\ref{SES})
+{\bf [SHOULDN'T WE USE H$_{min}$ TO BE CONSISTENT WITH PREVIOUS NOTATION??]}
+, this is a
+Green's function,
 \begin{equation} \label{GNorm}
 {\rm G}(\beta) = ({\rm H} -  \beta S)^{-1},
 \end{equation}
-with the correct normalization to guarantee convergence. 
-At low occupation the Green's function initialization is equivalent to a single 
-implicit purification step \cite{NiklassonIPUR}, projecting high energy states ($\varepsilon_i \gg 1$), 
-toward $0$ by inversion ($1/\varepsilon_i$).
+which provides the correct normalization.  With this Green's function normalization, the unoccupied states
+are mapped to $0$ as $1/\varepsilon_i$.   For large basis sets, this amounts to a preconditioning of
+the spectra, relative to a linear rescaling.  
 
-\subsubsection{Computation and refinement of ${\rm X}_1$}
+
+\subsubsection{Computation and Refinement of ${\rm X}_1$}
 
 The Green's function resolvent ${\rm G}(\beta)$ can be calculated with linear scaling complexity
-for sufficiently large and sparse systems using several techniques, such as Schulz iterations \cite{Schulz33},
-the sparse approximate inverse \cite{Benzi96,Challa99}, or other methods \cite{Ozaki01}. 
+for sufficiently large and sparse systems using several techniques, such as the Schulz iteration \cite{GSchulz33},
+the sparse approximate inverse \cite{MBenzi96,MChallacombe99}, and other methods \cite{TOzaki01}. 
 In a self-consistent calculation, where the Hamiltonian is changed in each iteration, or in
 a quantum molecular dynamics simulation, where both the overlap and the Hamiltonian is modified, 
 we can efficiently update the new initialization 
@@ -463,7 +462,7 @@ we can efficiently update the new initialization
 {\rm X}_{1({\rm new})}  = ({\rm H_{new}} -  \beta S_{\rm new})^{-1}
 \end{equation}
 from the previous iteration. If  $X_{1({\rm old})}$ and ${\rm X}_{1({\rm new})}$ are sufficiently close
-the following scheme, based on Schulz's method \cite{Schulz33}, rapidly converges
+the following scheme, based on Schulz's method \cite{GSchulz33}, rapidly converges
 to the new normalization:
 \begin{equation}\begin{array}{ll}
 {\rm Y}_0 &= X_{1({\rm old})},\\
@@ -471,14 +470,11 @@ to the new normalization:
 {\rm X}_{1({\rm new})} &= {\rm G}_{\rm new}(\beta) = \lim_{n \rightarrow \infty} {\rm Y}_{n}.
 \end{array}
 \end{equation}
-In this way we can reduce the cost by using Schulz's method as an efficient iterative
-refinement technique. 
+In this way, the cost can be reduced  by using Schulz's method as an efficient iterative refinement technique. 
 
-\subsubsection{Non-orthogonal trace correcting purification}
+\subsubsection{Non-Orthogonal Trace Correcting Purification}
 
-Following the necessary modifications, including the new metrics for non-orthogonal
-representations, the second order trace correcting purification scheme is given by
-
+A non-orthogonal second order trace correcting purification scheme is given by
 \begin{equation} \label{Pract1S}
 {\rm X}_1 = {\rm G}(\beta)  = \left[{\rm H} -  (\varepsilon_{\rm min} -1) S\right]^{-1},\\
 \end{equation}
@@ -487,64 +483,61 @@ representations, the second order trace correcting purification scheme is given 
 \end{equation}
 where
 \begin{equation}\label{Pract2S}
-\sigma_n = sign [N_e - Tr(S{\rm X}_n)],
+\sigma_n = {\tt SIGN}[N_{\rm e} - N_{\rm occ}]
+\end{equation}
+\begin{equation}
+N_{\rm occ}=Tr(S{\rm X}_n)]
 \end{equation}
 and
 \begin{equation}
 {\rm P} = \lim_{n \rightarrow \infty} {\rm X}_n.
 \end{equation}
-Notice that any of the initializations in Eqs.\ (\ref{INIT1})-(\ref{INIT3}) can be used
-to calculate ${\rm X}_1$ equivalently. 
+Note that any of the initializations in Eqs.\ (\ref{INIT1})-(\ref{INIT3}) can be used to 
+calculate ${\rm X}_1$, realizing  different levels of  performance.
 
-\subsection{Non-orthogonal Perturbation Theory}\label{NOPRT}
+\subsection{Non-Orthogonal Perturbation Theory}\label{NOPRT}
 
-Based on the previous non-orthogonal formulation of the density matrix purification,
-an extension of the perturbation theory to non-orthogonal representations is straightforward.
-This non-orthogonal generalization is the key purpose of this paper. It enables reduced complexity
-calculations of structural response properties such as interatomic potentials, the Born-effective
-charge, the vibrational spectra, including higher order anharmonicity, and piezoelectric
-coefficients. It can also be used for calculations of electromagnetic response where
-the basis set is field dependent. First we show how the exact perturbation expansion work, which is useful
-in the case of local structural relaxations \cite{NiklassonPRT1}. Thereafter we show how 
-density matrix response to a finite order can be calculated.
+With an efficient normalization scheme in hand, given by Eq.~(INIT3), generalization of the
+density matrix perturbation theory to a non-orthogonal formulation follows, and constitutes 
+the central result of this paper. At finite order, it provides the framework for computation of
+basis set dependent response properties, including the magnetic response and geometric energy 
+derivatives. At infinite order {\bf [HERE WE NEED A PLUG FOR THE NIKLASSON/NEMETH PAPER]}.
 
 \subsubsection{Exact expansion (infinite order)}
 
-For the exact perturbation expansion we replace 
-$X_n$ and $F_n(X_n)$ in Eq.\ (\ref{PRT}) by
-the non-orthogonal purification projections ${\rm X}_n$ and projectors ${\rm F}_n({\rm X}_n)$, 
-such that \begin{equation}\label{PRTS}
-\Delta_{n+1} = {\rm F}_n({\rm X}_n+\Delta_n) -  {\rm F}_n({\rm X}_n),
-\end{equation}
-and
+{\bf [SHOULDN'T S$^{(1)}$ ENTER INTO THE FOLLOWING.?? ]}
+
+By analogy with Eq.~(\ref{PRT}) we have the non-orthogonal differences
 \begin{equation}\label{InitS}
 \Delta_1 = {\rm F}_0({\rm H}^{(0)}+{\rm H}^{(1)}) - {\rm F}_0({\rm H^{(0)}}).
 \end{equation}
-With ${\rm F}_0({\rm H})$ given by one of the normalizations in Eqs.\ (\ref{INIT1})-(\ref{INIT3}) and 
-${\rm F}_{n}({\rm X}_n)$ by Eq.\ (\ref{TC2S}) we have
+and 
+\begin{equation}\label{PRTS}
+\Delta_{n+1} = {\rm F}_n({\rm X}_n+\Delta_n) -  {\rm F}_n({\rm X}_n).
+\end{equation}
+With ${\rm F}_0({\rm H})$ initiated by one of the non-orthogonal normalization schemes given by 
+Eqs.\ (\ref{INIT1})-(\ref{INIT3}) and ${\rm F}_{n}({\rm X}_n)$ by Eq.\ (\ref{TC2S}) we have
 \begin{equation}
 \Delta_{n+1} = \left\{\begin{array}{l}
-\{\Delta_n,{\rm X}_n\}_S + \Delta_nS\Delta_n, ~~ {\rm Occ.} \geq N_e \\
-2\Delta_n - \{\Delta_n,{\rm X}_n\}_S - \Delta_nS\Delta_n, ~ {\rm Occ.} < N_e. \end{array} \right.
+\{\Delta_n,{\rm X}_n\}_S + \Delta_nS\Delta_n, ~~ {N_{\rm occ}} \geq N_{\rm e} \\
+2\Delta_n - \{\Delta_n,{\rm X}_n\}_S - \Delta_nS\Delta_n, ~ {N_{\rm occ}} < N_{\rm e}. \end{array} \right.
 \end{equation}
 Here we use the non-orthogonal anti-commutator notation
 \begin{equation}
 \{\Delta_n,{\rm X}_n\}_S = \Delta_nS{\rm X}_n+{\rm X}_nS\Delta_n,
 \end{equation}
-and the occupation ${\rm Occ.} = Tr(S{\rm X}_n)$.
-Sine the perturbation theory is based on the perturbed projections, given as the difference
-between the purification of the perturbed and unperturbed sequence, the covariant 
-(or contravariant) form of the perturbation $\Delta_n$ is preserved in each step. This holds true also 
-for the finite perturbation expansion described below. At convergence
+and the occupation ${N_{\rm occ}} = Tr(S{\rm X}_n)$.
+Sine the perturbation theory is based on the projection difference between the purification of the 
+perturbed and unperturbed sequence, the covariant  (or contravariant) form of the difference 
+$\Delta_n$ is preserved at each step. This holds true also for the finite perturbation expansion 
+described below. At convergence
 \begin{equation}
 {\rm P} = {\rm P}^{(0)} + \lim_{n \rightarrow \infty} \Delta_n.
 \end{equation}
 
 \subsubsection{Finite order perturbation}
 
-The perturbation expansion to finite order follows equivalently with the non-orthogonal
-generalization of the exact expansion. Assume a perturbation of ${\rm H}^{(0)}$ and $S^{(0)}$, 
-where
+Assume a perturbation of ${\rm H}^{(0)}$ and $S^{(0)}$, where
 \begin{equation}
 {\rm H} = {\rm H}^{(0)} + \lambda {\rm H}^{(1)} + \lambda^2 {\rm H}^{(2)} + \ldots ~,
 \end{equation}
@@ -552,14 +545,13 @@ and
 \begin{equation}
 S = S^{(0)} + \lambda S^{(1)} + \lambda^2 S^{(2)} + \ldots ~.
 \end{equation}
-The initial perturbation $\Delta_1$ in Eq.\ (\ref{InitS}) can be calculated and expanded to
-any order in $\lambda$,
+The initial difference $\Delta_1$ in Eq.\ (\ref{InitS}) can be calculated and expanded to all orders in $\lambda$,
 \begin{equation}
 {\Delta}_1 = \lambda \Delta^{(1)}_1 + \lambda^2 \Delta^{(2)}_1 + \ldots ~,
 \end{equation}
-using any of the initial normalizations in Eqs.\ (\ref{INIT1})-(\ref{INIT3}).
+using any of the initial normalizations given by Eqs.\ (\ref{INIT1})-(\ref{INIT3}).
 However, using the Green's function approach in Eq.\ (\ref{INIT3}) makes the
-expansion of $\Delta_1$ particularly easy. The separate terms are given by 
+expansion of $\Delta_1$ particularly simple. The terms for each order are 
 \begin{equation}\label{START}
 \begin{array}{ll}
 \Delta^{(0)}_1 &= {\rm X}^{(0)}_1 = {\rm G}^{(0)} \\
@@ -576,22 +568,21 @@ and
 \begin{equation}\label{STARTG}
 {\rm G}^{(0)} = ({\rm H}^{(0)}-\beta S^{(0)})^{-1}.
 \end{equation}
-This initialization to various order, $\Delta^{(m)}_1$, in Eq.\ (\ref{START}) was
-derived from the Dyson series
+This initialization to various order, $\Delta^{(m)}_1$, in Eq.\ (\ref{START}) derives from the Dyson series
 \begin{equation}
 {\rm G} = {\rm G}^{(0)} - {\rm G}^{(0)}\left[{\rm T}^{(1)} + {\rm T}^{(2)} + \ldots \right]{\rm G}^{(0)} + \ldots,
 \end{equation}
-which can be used to collect ${\rm G}$ order by order in $\lambda$. A generalization to any order
-is straightforward.
+from which terms in ${\rm G}$ can be collected order by order in $\lambda$. 
+A generalization to any order is straightforward.
 After the initialization of $\Delta^{(m)}_1$ we have for $m = m_{\rm max}, m_{\rm max}-1 , \ldots ,1, 0$:
 \begin{equation}\label{PRT_S}
 \displaystyle \Delta^{(m)}_{n+1} = \left\{\begin{array}{ll}
-\sum_{i + j + k = m} \Delta^{(i)}_n S^{(j)} \Delta^{(k)}_n, & {\rm Occ.} \geq N_e \\
- 2\Delta^{(m)}_n - \sum_{i + j + k = m} \Delta^{(i)}_n S^{(j)} \Delta^{(k)}_n, & {\rm Occ.} < N_e
+\sum_{i + j + k = m} \Delta^{(i)}_n S^{(j)} \Delta^{(k)}_n, & {N_{\rm occ}} \geq N_{\rm e} \\
+ 2\Delta^{(m)}_n - \sum_{i + j + k = m} \Delta^{(i)}_n S^{(j)} \Delta^{(k)}_n, & {N_{\rm occ}} < N_{\rm e}
 \end{array} \right.
 \end{equation}
 where $\Delta^{(0)}_n \equiv {\rm X}^{(0)}_n$. The sum is taken over all combinations of $i,j$ and $k$ such that
-$i+j+k= m$. The occupation is given by ${\rm Occ.} = Tr(S^{(0)}\Delta^{(0)}_n) \equiv Tr(S^{(0)} X^{(0)}_n)$.
+$i+j+k= m$. The occupation is given by ${N_{\rm occ}} = Tr(S^{(0)}\Delta^{(0)}_n) \equiv Tr(S^{(0)} X^{(0)}_n)$.
 At convergence the density matrix derivatives are given by
 \begin{equation}\label{DMD}
 \frac{1}{m !}\frac{\partial^m {\rm P}}{\partial \lambda^m} \bigg|_{\lambda = 0} = {\rm P}^{(m)}=
@@ -607,7 +598,7 @@ for a non-orthogonal representation, composes the central result of this paper.
 \section{Example}
 
 To illustrate the non-orthogonal perturbation theory we have chosen a diatomic
-hydrogen ion H$_2^+$ described in a basis set of two hydrogenic 1s-orbitals \cite{Atkins}.
+hydrogen ion H$_2^+$ described in a basis set of two hydrogenic 1s-orbitals \cite{PAtkins97}.
 The overlap matrix $S(R)$ as a function of inter-atomic distance $R$ (in units of Bohr radius $a_0$) 
 is given by
 \begin{equation}\begin{array}{l}
@@ -644,7 +635,6 @@ E = Tr\left[ ({\rm H}^{(m)} + r {\rm H}^{(1)} + \ldots )({\rm P}^{(0)} + r {\rm 
 in orders of $r$. Figure \ref{H2} shows the interaction potential $E(R)$
 as a function of inter-atomic distance in comparison to perturbation expansions up to 4th order 
 at the equilibrium distance and at 4th order at a non-equilibrium inter-atomic distance. 
-
                                                                                                
 \begin{figure}[t]
 \resizebox*{3.0in}{!}{\includegraphics[angle=00]{H2_Ion_4_noneq.eps}}
@@ -660,6 +650,8 @@ non-equilibrium inter-atomic distance.}
 
 \section{Conclusions}
 
+{\bf [THESE CONCLUSIONS ARE VERY LONG, AND NEED TO BE SHORTENED]}
+
 In this paper we have shown how density matrix perturbation theory based on recursive purification 
 can be generalized to include basis-set dependent perturbations. This makes
 it possible, for example, to calculate structural response properties 
@@ -674,27 +666,28 @@ order, at each level of purification.
 The example for the H$_2^+$ molecule illustrates the extension of the orbital-free density matrix
 perturbation theory to non-orthogonal representations. We have also applied the non-orthogonal
 method to the calculation of the polarizability of molecular clusters with results
-identical to previous calculations \cite{WeberPRT2}. Since 
+identical to previous calculations \cite{VWeber05} {\bf [ THIS IS NOT TRUE!! ]}. Since 
 only matrix-matrix operations are used, the computational cost 
 scales linearly with system size for sufficiently large non-metallic systems, 
 as has been shown previously for a perturbed projection scheme in an orthogonalized representation 
-\cite{WeberPRT2}.  The non-orthogonal density matrix perturbation theory can therefore efficiently 
+\cite{VWeber05}.  The non-orthogonal density matrix perturbation theory can therefore efficiently 
 be applied in calculations of geometry response properties for large complex systems. 
 
+{\bf [IS THE FOLLOWING REALLY THAT IMPORTANT?]}
 Apart from linear scaling calculations it is important to note that the density
 matrix perturbation theory provides an efficient approach valuable also for dense 
 matrix problems. Because of the ability to efficiently parallelize matrix-matrix
 operations the computational overhead is fairly small. The limiting factor is 
 the existence of a gap at the chemical potential,
 since the number of purification iterations necessary to reach convergence scales with the logarithm 
-of the inverse band gap \cite{NiklassonTC2}.
+of the inverse band gap \cite{ANiklasson02A}.
 
 In the Green's function initialization of the purification, high energy states are projected 
 toward $0$.  This may be a great advantage when using very large basis sets, where states at very high energies
 ($\varepsilon_i \gg 1$) are efficiently projected to $0$ (as 1/$\varepsilon_i$). This avoids a linear rescaling of 
 the eigenstates that may lead to
 a very small normalized band gap on $[0,1]$. If this band gap is small more
-iterations are needed to reach convergence \cite{NiklassonTC2,NiklassonTRS4}.
+iterations are needed to reach convergence \cite{ANiklasson02A,ANiklasson03}.
 The Green's function initialization may thus be
 useful also for orthogonal representations when $S=I$. 
 A practical generalization of the
@@ -707,7 +700,7 @@ efficiency by optimizing the size of the band gap of the normalized spectra of $
 The purification projections are stable with respect to a complex generalization and the
 constant $z$ can therefore be extended to regions of the complex plane, in analogy to 
 Green's functions for complex energies. There are several other interesting connections to Green's functions
-that we may explore in future studies \cite{Niklasson_Unpubl}.
+that we may explore in future studies.
 
 If an ill-conditioned non-orthogonal basis set is used we may run into numerical problems if we chose to
 transform the generalized eigenvalue problem to an orthogonal representation. 
@@ -718,6 +711,7 @@ In addition, the back-transform from the orthogonal density matrix representatio
 representation, which is necessary to calculate the electronic density expressed in the atomic
 orbital basis, is avoided within a purely non-orthogonal formalism.
 
+{\bf [IS THIS REALLY TRUE?  SEE BOLD FACE (ITEM A) ABOVE]}
 The second order trace correcting purification scheme was applied to the
 non-orthogonal purification and perturbation theory in this article. However, the formalism
 can be directly transformed also to other purification methods, such as grand canonical McWeeny 
@@ -728,7 +722,7 @@ purification, implicit purification, matrix sign function expansions, or any oth
 
 Discussions with C.\ J. Tymczak and J. Wills are gratefully acknowledged.
 
-\bibliography{PP}
+\bibliography{mondo_new}
 
 {${\dagger}$ Corresponding author: Anders M.\ N. Niklasson, Email: amn@lanl.gov}
 
