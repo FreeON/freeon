@@ -46,15 +46,13 @@ all:	$(ObjectFiles)
 release:$(ReleaseFiles) 
 #
 MondoSCF.o:	DrvSCFs.o SetSCFs.o ParseInput.o Overlay.o \
-                $(MONDO_HOME)/Libs/libMondoMods.a \
-                $(MONDO_HOME)/Libs/libDynamo.a
+                $(MONDO_HOME)/Libs/libMondoMods.a 
 
 ChkSCFs.o:	SCFLocals.o                                $(MONDO_HOME)/Libs/libMondoMods.a
 DrvSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a 
 DrvFrcs.o:      SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a
 ParseInput.o:	SCFLocals.o \
-                $(MONDO_HOME)/Libs/libMondoMods.a \
-                $(MONDO_HOME)/Libs/libDynamo.a
+                $(MONDO_HOME)/Libs/libMondoMods.a 
 SetSCFs.o:	SCFLocals.o Overlay.o                      $(MONDO_HOME)/Libs/libMondoMods.a
 
 
