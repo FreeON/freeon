@@ -1,3 +1,45 @@
+2004-04-16 16:15  tymczak
+
+	* Docs/: PBC_Exchange/LinearPBCExchange.tex,
+	PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo_new.bib: [no log
+	message]
+
+2004-04-16 14:05  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Matt's recent version of the
+	optimizer paper, checked in without changes here.
+
+2004-04-16 09:07  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2004-04-16 09:07  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Added preliminary
+	Conclusions
+
+2004-04-16 07:38  tymczak
+
+	* SCFeqs/P2Use.F90: Put in Anders Qstep. IF(Qstep>=5) EXIT
+
+2004-04-16 05:33  vweber
+
+	* ONX2/PartDrv.F90: Added test to see if partition exit. Then it
+	should work with restart now.
+
+2004-04-16 05:31  vweber
+
+	* MondoSCF2/PunchHDF.F90: Added integer for gonx partition.
+
+2004-04-15 14:00  nemeth
+
+	* MondoSCF2/Optimizer.F90: Number of backtracking step is increased
+	to 2.
+
+2004-04-15 13:57  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-04-15 13:20  tymczak
 
 	* MondoSCF2/: ParsePeriodic.F90, SCFs.F90: [no log message]
