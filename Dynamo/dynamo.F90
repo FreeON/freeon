@@ -29,8 +29,6 @@ USE IntCoo
    USE ATOMS
    USE coordinate_io
    USE constraint   
-   USE energy_covalent
-   USE energy_non_bonding
 IMPLICIT NONE
 TYPE(CRDS) :: GM_MM
 !
