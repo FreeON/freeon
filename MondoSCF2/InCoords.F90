@@ -2687,8 +2687,11 @@ CONTAINS
      IF(PBCDim==0) THEN
        CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print)
      ELSE
-       CALL PBCRotOff(DCarts(NCart+1:NCart+9),Carts(NCart+1:NCart+9), &
-                      Print,PBCDim)
+       DCarts(NCart+2)=Zero
+       DCarts(NCart+1)=Zero
+       DCarts(NCart+6)=Zero
+      !CALL PBCRotOff(DCarts(NCart+1:NCart+9),Carts(NCart+1:NCart+9), &
+      !               Print,PBCDim)
        IF(PBCDim==1) CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print,X_O=.TRUE.)
        IF(PBCDim==2) CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print,Z_O=.TRUE.)
      ENDIF
@@ -2704,12 +2707,12 @@ CONTAINS
      REAL(DOUBLE),DIMENSION(9,9) :: P
      REAL(DOUBLE)                :: Fact,Norm
      !
-   ! ! In the standard version A is along X, B in XY, C general
-   ! ! thus projection of rotation is very simple
-   ! !
-   ! DCarts(2:3)=Zero
-   ! DCarts(6)=Zero
-   ! RETURN
+     ! In the standard version A is along X, B in XY, C general
+     ! thus projection of rotation is very simple
+     !
+     DCarts(2:3)=Zero
+     DCarts(6)=Zero
+     RETURN
      !
      !The lines below refer to a situation, where 
      ! all coordinates of the lattice vectors are allowed to change
@@ -3838,12 +3841,15 @@ CONTAINS
      !
      ! Get projector to counterspace of lattice rotations
      !
-     CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
+   ! CALL GetPBCProj(PBCDim,P,XYZ_O=XYZ)
      DO I=1,IntCs%N
        IF(B%BLI%I(I)/=0) THEN
-         Vect1(1:9)=B%BL%D(I,1:9)
-         CALL DGEMM_NNc(9,9,1,One,Zero,P,Vect1,Vect2)
-         B%BL%D(I,1:9)=Vect2(1:9)
+        !Vect1(1:9)=B%BL%D(I,1:9)
+        !CALL DGEMM_NNc(9,9,1,One,Zero,P,Vect1,Vect2)
+        !B%BL%D(I,1:9)=Vect2(1:9)
+         B%BL%D(I,2)=Zero
+         B%BL%D(I,3)=Zero
+         B%BL%D(I,6)=Zero
        ENDIF 
      ENDDO
    END SUBROUTINE CleanBLRot
