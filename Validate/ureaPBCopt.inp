@@ -1,0 +1,60 @@
+<BeginTitle>
+ urea geometry optimization in STO-2G basis
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+MPIInvoke="prun"
+MPIProcFlag="-n"
+
+Clones=1
+MPIProcessors=32
+MPISpatialProc=32
+
+Grad=(Optimize,PrimInt,NoBackTr,BiSect,NoGDIIS)
+SCFConvergence=(DIIS)
+DebugAll=(MaxDebug,MaxGeOp)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(User1)
+ModelChem=(HF)
+Accuracy =(good)
+Geometry=(InAngstroms,NoOrder)
+PBC=(T,T,T)
+P#eriodic=(18,FracCoord)
+Periodic=(18,AtomCoord)
+<EndOptions>
+
+<BeginPeriodic>
+ 5.565   5.565   4.684  90.000  90.000  90.000
+<EndPeriodic>
+
+<BeginGeometry>
+ C    0.000   2.783   1.527
+ O    0.000   2.783   2.788
+ N    0.812   3.594   0.827
+ H    1.433   4.215   1.324
+ H    0.802   3.584  -0.178
+ N   -0.812   1.971   0.827
+ H   -1.433   1.350   1.324
+ H   -0.802   1.981  -0.178
+ C    2.783   0.000   3.157
+ O    2.783   0.000   1.896
+ N    1.971   0.812   3.857
+ H    1.350   1.433   3.360
+ H    1.981   0.802   4.862
+ N    3.594  -0.812   3.857
+ H    4.215  -1.433   3.360
+ H    3.584  -0.802   4.862
+<EndGeometry>
+
+<BEGIN_ADD_INTERNALS>
+STRE_A 5.565
+STRE_B 5.565
+STRE_C 4.684
+ALPHA 90.0
+BETA  90.0
+GAMMA 90.0
+<END_ADD_INTERNALS>
+

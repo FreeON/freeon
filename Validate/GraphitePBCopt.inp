@@ -1,0 +1,32 @@
+<BeginTitle>
+Graphite geometry optimization using STO-3G basis with fixed lattice vectors.
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+
+Clones=1
+
+Grad=(Optimize,PrimInt,BiSect,NoGDIIS)
+DebugAll=(MaxDebug,MaxGeOp)
+Guess=SuperPos
+SCFMethod=(RH)
+SCFConvergence=(DIIS)
+BasisSets=(User1)
+ModelChem=(HF)
+Accuracy =(good)
+Geometry=(InAngstroms,NoOrder)
+PBC=(T,T,F)
+Periodic=(FracCoord)
+<EndOptions>
+
+<BeginPeriodic>
+ 2.420   2.420   1.000  90.000  90.000 120.000
+<EndPeriodic>
+
+<BeginGeometry>
+C 0.33333333333 0.1666666666 0.0000000000
+C 0.66666666666 0.8400000000 0.0000000000
+<EndGeometry>
+
