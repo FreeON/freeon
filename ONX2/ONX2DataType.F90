@@ -32,9 +32,9 @@ MODULE ONX2DataType
      TYPE(ANode), POINTER :: GoList
   END TYPE CList
   !
-  TYPE ONX2OffSt
-     INTEGER :: A,B,C,D
-  END TYPE ONX2OffSt
+!!$  TYPE ONX2OffSt
+!!$     INTEGER :: A,B,C,D
+!!$  END TYPE ONX2OffSt
   !
 !!$  TYPE SmallAtomInfo
 !!$     REAL(DOUBLE) :: Atm1X,Atm1Y,Atm1Z
@@ -51,9 +51,9 @@ MODULE ONX2DataType
 !!$     !REAL(DOUBLE), DIMENSION(...) :: Cst
 !!$  END TYPE ShellPair
   !
-  TYPE AtomPr
-     TYPE(ShellPair) :: SP
-  END TYPE AtomPr
+!!$  TYPE AtomPr
+!!$     TYPE(ShellPair) :: SP
+!!$  END TYPE AtomPr
 
 
   TYPE AtomPrG

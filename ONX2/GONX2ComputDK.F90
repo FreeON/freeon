@@ -109,14 +109,15 @@ CONTAINS
     !
     !CALL Print_BCSR(D,'D['//TRIM(SCFCycl)//']',Unit_O=6)
 
-    CALL New(tmp)
-    CALL New(tmp2)
-    CALL XPose(D,Tmp)
-    CALL Add(Tmp,D,Tmp2)
-    CALL Multiply(Tmp2,0.5d0)
-    CALL SetEq(D,Tmp2)
-    CALL Delete(Tmp)
-    CALL Delete(Tmp2)
+!!$    CALL New(tmp)
+!!$    CALL New(tmp2)
+!!$    CALL XPose(D,Tmp)
+!!$    CALL Add(Tmp,D,Tmp2)
+!!$    CALL Multiply(Tmp2,0.5d0)
+!!$    CALL SetEq(D,Tmp2)
+!!$    CALL Delete(Tmp)
+!!$    CALL Delete(Tmp2)
+
     !
     !Simple check Simple check Simple check Simple check
     isize=0
@@ -233,11 +234,11 @@ CONTAINS
                 CALL GetAtomPairG(BDAtmInfo,AtBList,BDAtmPair,BS,CS_OUT)
                 !
                 NIntBlk=NBFA*NBFB*NBFC*NBFD
-
+                !
 !if(.not.(ata==1.and.atb==1.and.atc==1.and.atd==1)) goto 10
 
 !if(.not.(ata==2.and.atb==2.and.atc==1.and.atd==1)) goto 10
-if(.not.(ata==3.and.atb==3.and.atc==1.and.atd==1)) goto 10
+!if(.not.(ata==3.and.atb==3.and.atc==1.and.atd==1)) goto 10
 
 !if(.not.(ata==2.and.atb==1.and.atc==2.and.atd==1)) goto 10
 !if(.not.(ata==3.and.atb==1.and.atc==3.and.atd==1)) goto 10
@@ -268,8 +269,8 @@ if(.not.(ata==3.and.atb==3.and.atc==1.and.atd==1)) goto 10
 !                write(*,*) 'NIntBlk',NIntBlk!,'ACR',ACAtmInfo%NCell
 !                write(*,*) 'AtA',AtA,' AtB',AtB,' AtC',AtC,' AtD',AtD
                 
-                !CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0d0)
-                C=0.0d0 !TO REMOVE
+                CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0d0)
+                !C=0.0d0 !TO REMOVE
                 
                 !c(NIntBlk+1:)=1000000d0
 
@@ -301,8 +302,8 @@ if(.not.(ata==3.and.atb==3.and.atc==1.and.atd==1)) goto 10
 !if(IntType.ne.1010101) goto 20
 !if(IntType.ne.3010101.and.IntType.ne.1030101.and.IntType.ne.1010301.and.IntType.ne.1010103) goto 20
 
-if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
-&  IntType.ne.1030301.and.IntType.ne.1030103.and.IntType.ne.1010303) goto 20
+!if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
+!&  IntType.ne.1030301.and.IntType.ne.1030103.and.IntType.ne.1010303) goto 20
 
 !if(IntType.ne.3030101.and.IntType.ne.1010303) goto 20
 
@@ -342,7 +343,7 @@ if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
 !!$                            write(*,100) 'C( 1)',C( 1),'C( 2)',C( 2),'C( 3)',C( 3)
 !!$                            write(*,100) 'C( 4)',C( 4),'C( 5)',C( 5),'C( 6)',C( 6)
 !!$                            write(*,100) 'C( 7)',C( 7),'C( 8)',C( 8),'C( 9)',C( 9)
-                            100 format(5X,4(2X,A,E20.12))
+!!$                            100 format(5X,4(2X,A,E20.12))
                             !---------------------------------------------------------
                             !
 20 continue
@@ -381,26 +382,27 @@ if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
 !!$                CALL PrintMatrix(C(10*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Dy matrix')
 !!$                CALL PrintMatrix(C(11*NIntBlk+1),NBFA*NBFB,NBFC*NBFD,2,TEXT_O='Int Dz matrix')       
 
-                write(*,*) NIntBlk,NBFA*NBFB*NBFC*NBFD
-                do iii=1,NBFA*NBFB*NBFC*NBFD
-                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
-                enddo
-                write(*,*) 'trace',sum(abs(C(1:NIntBlk)))
-                write(*,*) ''
-                do iii=3*NIntBlk+1,3*NIntBlk+NIntBlk
-                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
-                enddo
-                write(*,*) 'trace',sum(abs(C(3*NIntBlk+1:3*NIntBlk+NIntBlk)))
-                write(*,*) ''
-                do iii=6*NIntBlk+1,6*NIntBlk+NIntBlk
-                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
-                enddo
-                write(*,*) 'trace',sum(abs(C(6*NIntBlk+1:6*NIntBlk+NIntBlk)))
-                write(*,*) ''
-                do iii=9*NIntBlk+1,9*NIntBlk+NIntBlk
-                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
-                enddo
-                write(*,*) 'trace',sum(abs(C(9*NIntBlk+1:9*NIntBlk+NIntBlk)))
+!!$                write(*,*) NIntBlk,NBFA*NBFB*NBFC*NBFD
+!!$                do iii=1,NBFA*NBFB*NBFC*NBFD
+!!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                enddo
+!!$                write(*,*) 'trace',sum(abs(C(1:NIntBlk)))
+!!$                write(*,*) ''
+!!$                do iii=3*NIntBlk+1,3*NIntBlk+NIntBlk
+!!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                enddo
+!!$                write(*,*) 'trace',sum(abs(C(3*NIntBlk+1:3*NIntBlk+NIntBlk)))
+!!$                write(*,*) ''
+!!$                do iii=6*NIntBlk+1,6*NIntBlk+NIntBlk
+!!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                enddo
+!!$                write(*,*) 'trace',sum(abs(C(6*NIntBlk+1:6*NIntBlk+NIntBlk)))
+!!$                write(*,*) ''
+!!$                do iii=9*NIntBlk+1,9*NIntBlk+NIntBlk
+!!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
+!!$                enddo
+!!$                write(*,*) 'trace',sum(abs(C(9*NIntBlk+1:9*NIntBlk+NIntBlk)))
+
 !!$                write(*,*) ''
 !!$                do iii=9*NIntBlk+1,9*NIntBlk+NIntBlk
 !!$                   if(abs(C(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,C(iii)
@@ -418,23 +420,23 @@ if(IntType.ne.3030101.and.IntType.ne.3010301.and.IntType.ne.3010103.and. &
                    CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C(Indx), &
                         &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0, &
                         &     Work(1),1)
-                   
-                   if(ixyz.eq.1)write(*,*) 'Sum(Work)',Sum(abs(Work(1:NBFA*NBFB)))
-                   if(ixyz.eq.1) then
-                      write(*,*) ''
-                      do iii=1,NBFA*NBFB
-                         !if(abs(work(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
-                         write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
-                      enddo
-                   endif
-                   
-                   if(ixyz.eq.1)CALL PrintMatrix(D%MTrix%D(iPtrD2),NBFA,NBFB,2,TEXT_O='Int D matrix')
+!!$                   
+!!$                   if(ixyz.eq.1)write(*,*) 'Sum(Work)',Sum(abs(Work(1:NBFA*NBFB)))
+!!$                   if(ixyz.eq.1) then
+!!$                      write(*,*) ''
+!!$                      do iii=1,NBFA*NBFB
+!!$                         !if(abs(work(iii)).gt.1d-10)write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
+!!$                         write(*,'(2X,I4,2X,E25.16)') iii,work(iii)
+!!$                      enddo
+!!$                   endif
+!!$                   
+!!$                   if(ixyz.eq.1)CALL PrintMatrix(D%MTrix%D(iPtrD2),NBFA,NBFB,2,TEXT_O='Int D matrix')
                    
                    !GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+ &
                    !     &            DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
                    TmpGradA=-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
                    
-                   if(ixyz.eq.1)write(*,*) 'TmpGradA=',TmpGradA
+!!$                   if(ixyz.eq.1)write(*,*) 'TmpGradA=',TmpGradA
 
                    GradX%D(IXYZ,AtA)=GradX%D(IXYZ,AtA)+TmpGradA
                    !

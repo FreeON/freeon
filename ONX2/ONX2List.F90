@@ -268,7 +268,7 @@ CONTAINS
     REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
     !-------------------------------------------------------------------
     !
-    integer :: isize
+    integer :: isize,NIntBlk
     !Simple check
     isize=0
     do i=1,natoms
@@ -348,11 +348,14 @@ CONTAINS
                 !
                 CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFA*NBFC*NBFC,C(1),0.0d0) !I need less zeroing!
                 !
+                NIntBlk=NBFA*NBFA*NBFC*NBFC !I need less integrals!
+                !
                 ! The integral interface.
                 !INCLUDE 'DERIListInterface.Inc'
                 INCLUDE 'ERIListInterface.Inc'
+                !INCLUDE 'DERIListInterface.Inc'
                 !
-                RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
+                RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1))) !I need more check *12!
                 !
 #ifdef GONX2_DBUG
                 WRITE(*,'(2(A,E22.15),2(A,I6))') 'RInt',RInt,' RIntLocal',DGetAbsMax(LocNInt,C(1)), &
