@@ -32,16 +32,17 @@ MODULE MatFunk
       CALL Delete(BLKMAT2) 
    END SUBROUTINE UnSetDSYEVWork
 !
-   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,EigenThresh_O,PrintCond_O)
+   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,EigenThresh_O,PrintCond_O,Prog_O)
       INTEGER,                    INTENT(IN)    :: N
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
       LOGICAL, OPTIONAL                         :: PrintCond_O
       REAL(DOUBLE),OPTIONAL                     :: EigenThresh_O
+      CHARACTER(Len=*),OPTIONAL                 :: Prog_O
       LOGICAL                                   :: PrintCond
       INTEGER                                   :: I,INFO      
       REAL(DOUBLE)                              :: EigenThreshold
-      REAL(DOUBLE)                              :: CondA
+      REAL(DOUBLE)                              :: CondA,Mn,Mx
       REAL(DOUBLE), EXTERNAL                    :: Funk
       CHARACTER(LEN=DEFAULT_CHR_LEN)            :: String
 !----------------------------------------------------------------------------
@@ -49,7 +50,7 @@ MODULE MatFunk
       IF(PRESENT(EigenThresh_O))THEN
          EigenThreshold=EigenThresh_O
       ELSE
-         EigenThreshold=1.D-8
+         EigenThreshold=1.D-10
       ENDIF
 !
       IF(PRESENT(PrintCond_O))THEN
@@ -65,8 +66,18 @@ MODULE MatFunk
          CALL Halt('DSYEV hosed in FunkOnSqMat. INFO='//TRIM(IntToChar(INFO)))  
 !
       IF(PrintCond)THEN
-         CondA=BLKVALS%D(N)/BLKVALS%D(1)
-         String="Cond(A) = "//TRIM(DblToShrtChar(CondA))
+         Mx=0.0D0
+         Mn=1.D30
+         DO I=1,N
+            Mx=MAX(Mx,ABS(BLKVALS%D(I)))
+            Mn=MIN(Mn,ABS(BLKVALS%D(I)))
+         ENDDO
+         CondA=Mx/Mn
+         String=" Cond# = "//TRIM(DblToShrtChar(CondA)) &
+             //', MIN(E) = '//TRIM(DblToShrtChar(Mn))
+         IF(PRESENT(Prog_O))THEN
+            String=ProcessName(Prog_O)//TRIM(String)
+         ENDIF
          WRITE(*,*)TRIM(String)
       ENDIF
 !
