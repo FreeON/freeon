@@ -30,7 +30,7 @@ include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 CPPMISC = 
 #
-EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/ -I$(MONDO_HOME)/HiCu/
+EXTRA_INCLUDES= -I$(MONDO_HOME)/QCTC/ -I$(MONDO_HOME)/QCTC/LibQCTC/  -I$(MONDO_HOME)/HiCu/
 #
 VisDXObjs=VisDX.o RhoUtil.o PotUtil.o  
 MisObjs=$(MONDO_HOME)/HiCu/CubeTree.o    \
@@ -54,7 +54,7 @@ all:	vis
 release:clean $(ReleaseFiles)
 #
 vis:	$(VisDXObjs) 
-	$(LD) $(LDFLAGS) VisDX $(VisDXObjs) $(MisObjs) $(F90_LIBRARIES) 
+	$(LD) $(LDFLAGS) VisDX $(VisDXObjs) $(MisObjs) $(F90_LIBRARIES) -lQCTC
 	mv VisDX $(MONDO_EXEC)/VisDX
 #
 purge:	clean
