@@ -29,10 +29,8 @@ PROGRAM ParaMakeRho
 #else
   TYPE(BCSR)                     :: Dmat,D1,D2
 #endif
-#ifdef PERIODIC
   INTEGER                        :: NC
   REAL(DOUBLE),DIMENSION(3)      :: B
-#endif
   TYPE(AtomPair)                 :: Pair
   TYPE(BSET)                     :: BS
   TYPE(CRDS)                     :: GM,GM_MM
@@ -63,7 +61,6 @@ PROGRAM ParaMakeRho
      CALL Get(Dmat,TrixFile('D',Args,-1))
   ELSEIF(SCFActn=='Restart')THEN
      CALL Get(GM,CurGeom)
-#ifdef PARALLEL_CLONES
      ! Close current group and HDF
      CALL CloseHDFGroup(H5GroupID)
      CALL CloseHDF(HDFFileID)
@@ -89,21 +86,6 @@ PROGRAM ParaMakeRho
      HDFFileID=OpenHDF(H5File)
      H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
      HDF_CurrentID=H5GroupID
-#else
-     ! Get the old information
-     CALL Get(RestartHDF,'OldInfo')
-     CALL CloseHDF(HDF_CurrentID)
-     HDF_CurrentID=OpenHDF(RestartHDF)
-     CALL New(Stat,3)
-     CALL Get(Stat,'current')
-     SCFCycl=TRIM(IntToChar(Stat%I(1)))
-     CurBase=TRIM(IntToChar(Stat%I(2)))
-     CurGeom=TRIM(IntToChar(Stat%I(3)))
-     CALL Get(BS,CurBase)
-     CALL Get(GM,CurGeom)
-     CALL CloseHDF(HDF_CurrentID)
-     HDF_CurrentID=OpenHDF(InfFile)     
-#endif
      CALL Get(Dmat,TrixFile('D',Args,0))
   ELSE
      ! Get the current information
@@ -149,7 +131,6 @@ PROGRAM ParaMakeRho
       DO P = Pbeg,Pend
          AtB = Dmat%ColPt%I(P)
          IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-#ifdef PERIODIC
             B = Pair%B
             DO NC = 1,CS_OUT%NCells
                Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -160,9 +141,6 @@ PROGRAM ParaMakeRho
                   CALL PrimCount(BS,Pair,NDist,NCoef)
                ENDIF
             ENDDO
-#else
-            CALL PrimCount(BS,Pair,NDist,NCoef)
-#endif
          ENDIF
       ENDDO
    ENDDO
@@ -186,7 +164,6 @@ PROGRAM ParaMakeRho
          AtB = Dmat%ColPt%I(P)
          R   = Dmat%BlkPt%I(P)
          IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN 
-#ifdef PERIODIC
             B = Pair%B
             DO NC = 1,CS_OUT%NCells
                Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -198,10 +175,6 @@ PROGRAM ParaMakeRho
                   CALL RhoBlk(BS,Dmat%MTrix%D(R:R+NN-1),Pair,NDist,NCoef,RhoA)
                ENDIF
             ENDDO
-#else
-            NN = Pair%NA*Pair%NB
-            CALL RhoBlk(BS,Dmat%MTrix%D(R:R+NN-1),Pair,NDist,NCoef,RhoA)
-#endif
          ENDIF
       ENDDO
    ENDDO
@@ -213,10 +186,8 @@ PROGRAM ParaMakeRho
    NDist_old = RhoA%NDist
    CALL Prune_Rho_new(Thresholds%Dist,RhoA) 
    NDist_new = RhoA%NDist
-!  Compute integrated electron and nuclear densities
-#ifdef PERIODIC
+!  FOld Rho back into the box
    CALL Fold_Rho_new(GM,RhoA)
-#endif
 !  Compute the Electron and Nuclear Densities
    NumAtoms = End%I(MyID)-Beg%I(MyID)+1
    RSumE    = Integrate_HGRho_new(RhoA,1,RhoA%NDist-NumAtoms)

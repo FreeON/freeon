@@ -51,10 +51,8 @@ PROGRAM TForce
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL New(TFrc,3*NAtoms)
   TFrc%D   = Zero
-#ifdef PERIODIC
   CALL New(LatFrc_T,(/3,3/))
   LatFrc_T%D = Zero
-#endif
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------

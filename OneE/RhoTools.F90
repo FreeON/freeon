@@ -218,7 +218,6 @@ MODULE RhoTools
     CALL Delete_HGRho_new(RhoTmp)
 !
   END SUBROUTINE Prune_Rho_new
-#ifdef PERIODIC
 !---------------------------------------------------------------------------------------
 ! Fold the Distributions Back into the Box
 !---------------------------------------------------------------------------------------
@@ -239,7 +238,6 @@ MODULE RhoTools
     ENDDO    
 !
   END SUBROUTINE Fold_Rho_new
-#endif
 !---------------------------------------------------------------------------------------
 ! Calculate the total Dipole of Rho
 
@@ -252,11 +250,7 @@ MODULE RhoTools
     REAL(DOUBLE)              :: RX,RY,RZ,Zeta
     REAL(DOUBLE),DIMENSION(3) :: Center
 !
-#ifdef PERIODIC
     Center(:) = GMLoc%PBC%CellCenter%D(:)
-#else
-    Center(:) = Half*(GMLoc%BndBox%D(:,2)+GMLoc%BndBox%D(:,1))
-#endif
 !
     MP%DPole%D = Zero
     MP%QPole%D = Zero
@@ -575,7 +569,6 @@ MODULE RhoTools
     ENDDO
 !
   END SUBROUTINE Prune_Rho
-#ifdef PERIODIC
 !---------------------------------------------------------------------
 ! Fold the Distributions Back into the Box
 !---------------------------------------------------------------------
@@ -605,7 +598,6 @@ MODULE RhoTools
     ENDDO    
 !
   END SUBROUTINE Fold_Rho
-#endif
 !---------------------------------------------------------------------
 !  Integrate Rho
 !---------------------------------------------------------------------
@@ -648,7 +640,8 @@ MODULE RhoTools
        zq     = Rho%NExpt
        Expt   = Rho%Expt%D(zq)
        IF(HasMMI) THEN 
-          NQ=QM_NATOMS !!!! MM charges may have been pruned, however this is very unlikely for QM nuclear charges
+!         MM charges may have been pruned, however this is very unlikely for QM nuclear charges
+          NQ=QM_NATOMS 
        ELSE
           NQ=Rho%NQ%I(zq)
        ENDIF

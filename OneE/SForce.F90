@@ -26,7 +26,6 @@ PROGRAM SForce
 #else
   TYPE(BCSR)                 :: T1,F,P
 #endif
-
   TYPE(AtomPair)             :: Pair
   TYPE(BSET)                 :: BS
   TYPE(CRDS)                 :: GM
@@ -83,10 +82,8 @@ PROGRAM SForce
   CALL New(SFrc,3*NAtoms)
   SFrc%D   = Zero
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-#ifdef PERIODIC
   CALL New(LatFrc_S,(/3,3/))
   LatFrc_S%D = Zero
-#endif
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------

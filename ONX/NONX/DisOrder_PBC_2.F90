@@ -48,13 +48,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
   CALL New(BufN,(/DB%MAXT,DB%NPrim*DB%NPrim/))
   CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
   CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
-
-
-#ifdef PERIODIC
 ! Calculate the number of cells
   CALL SetCellNumber(GMc)
-#endif
-
   DB%LenCC=0
   DB%LenTC=0
   iDis=1
@@ -87,25 +82,14 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
     KA=GMc%AtTyp%I(AtA)
     NBFA=BSc%BfKnd%I(KA)
     IF(AtA>1)IndexAA=IndexAA+BSc%NCFnc%I(GMc%AtTyp%I(AtA-1))
-#ifdef PERIODIC
     DO NC=1,CS_OUT%NCells
        Ax=GMc%Carts%D(1,AtA)+CS_OUT%CellCarts%D(1,NC)
        Ay=GMc%Carts%D(2,AtA)+CS_OUT%CellCarts%D(2,NC)
        Az=GMc%Carts%D(3,AtA)+CS_OUT%CellCarts%D(3,NC)
-#else
-    Ax=GMc%Carts%D(1,AtA)
-    Ay=GMc%Carts%D(2,AtA)
-    Az=GMc%Carts%D(3,AtA)
-#endif
-    ACx=Ax-GMp%Carts%D(1,AtC)
-    ACy=Ay-GMp%Carts%D(2,AtC) 
-    ACz=Az-GMp%Carts%D(3,AtC) 
-
-!    ACx=GMc%Carts%D(1,AtA)-GMp%Carts%D(1,AtC)
-!    ACy=GMc%Carts%D(2,AtA)-GMp%Carts%D(2,AtC) 
-!    ACz=GMc%Carts%D(3,AtA)-GMp%Carts%D(3,AtC) 
- 
-     AC2=ACx*ACx+ACy*ACy+ACz*ACz    
+       ACx=Ax-GMp%Carts%D(1,AtC)
+       ACy=Ay-GMp%Carts%D(2,AtC) 
+       ACz=Az-GMp%Carts%D(3,AtC) 
+       AC2=ACx*ACx+ACy*ACy+ACz*`ACz    
 !
 ! Need to call something like SetAtomPair here, the problem 
 ! is that it assumes a single basis set (as in J) but I need 
@@ -287,10 +271,8 @@ SUBROUTINE DisOrder(BSc,GMc,BSp,GMp,DB,IB,SB,Drv,NameBuf)
         END IF ! I0
       END DO ! CFA
     END IF ! test on AC2
-#ifdef PERIODIC
     ENDDO
-#endif
-  END DO ! AtA
+  ENDDO ! AtA
 
   DO I=1,DB%LenCC
     KonAC=DB%CCode%I(I)

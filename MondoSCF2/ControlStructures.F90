@@ -2,9 +2,7 @@ MODULE ControlStructures
   USE GlobalScalars
   USE DerivedTypes
   USE BasisSetParameters
-  !
   INTEGER, PARAMETER                :: MaxSets=6
-  !
   TYPE FileNames
      INTEGER                        :: NewFileID
      INTEGER                        :: OldFileID
@@ -94,7 +92,6 @@ MODULE ControlStructures
           DIMENSION(:,:)         :: AtomPairThresh,PrimPairThresh 
   END TYPE BasisSets
 
-#ifdef PERIODIC
   TYPE Periodics
      INTEGER                           :: Dimen      !-- Dimension of the System
      INTEGER                           :: PFFMAXLAY
@@ -108,7 +105,6 @@ MODULE ControlStructures
      LOGICAL,DIMENSION(3)              :: AutoW      !-- Periodic in X, Y and or Z  direction
      REAL(DOUBLE)                      :: Epsilon    !-- Epsilon at Infinity (Metal == Infinity)
   END TYPE Periodics
-#endif
 
   TYPE Parallel
 #ifdef PARALLEL
@@ -277,9 +273,7 @@ MODULE ControlStructures
      TYPE(GeomOpt)    :: GOpt
      TYPE(Dynamics)   :: Dyns
      TYPE(Geometries) :: Geos
-#ifdef PERIODIC
      TYPE(Periodics)  :: PBCs
-#endif
      TYPE(BasisSets)  :: Sets
      TYPE(Parallel)   :: MPIs
      TYPE(State)      :: Stat

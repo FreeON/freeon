@@ -31,10 +31,8 @@ PROGRAM BFGSHess
    REAL(DOUBLE)               :: D1,D2,F,AdEl,MinEl,A, &
                                  AB2,AB2Max,GradEDotDeltaX
    REAL(DOUBLE),DIMENSION(6)  :: AA
-#ifdef PERIODIC
-   REAL(DOUBLE),DIMENSION(3) :: VecF,VecA
-   INTEGER,     DIMENSION(3) :: NRgn
-#endif
+   REAL(DOUBLE),DIMENSION(3)  :: VecF,VecA
+   INTEGER,     DIMENSION(3)  :: NRgn
 !----------------------------------------------------------------------------
    CALL StartUp(Args,Prog)
    IGeom=Args%I%I(3)
@@ -82,19 +80,16 @@ PROGRAM BFGSHess
 !   WRITE(*,*)' BFGSHess : OLDGRAD # ',PrvGeom
    CALL Get(G1,'GradE',Tag_O=CurGeom)
 !   WRITE(*,*)' BFGSHess : NEWGRAD # ',CurGeom
-#ifdef PERIODIC
-    NRgn=0
-    DO K=1,3
-      IF(GM1%PBC%AutoW%I(K)==1)NRgn(K)=1
-    ENDDO
-#endif
+   NRgn=0
+   DO K=1,3
+      IF(GM1%PBC%AutoW%I(K)==1) NRgn(K)=1
+   ENDDO
    K=0
    DO I=1,NAtoms
-      I1=(I-1)*3+1
+      I1=(I-1)*3`+1
       I2=I*3
       X0%D(I1:I2)=GM0%Carts%D(:,I)
       X1%D(I1:I2)=GM1%Carts%D(:,I)
-#ifdef PERIODIC
 !     Find the minimum image distance
       AB2MAX = 1D8
       DO M1=-NRgn(1),NRgn(1)
@@ -106,13 +101,10 @@ PROGRAM BFGSHess
                IF(AB2<AB2MAX)THEN
                   DX%D(I1:I2)=VecA
                   AB2MAX=AB2
-                ENDIF
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
-#else
-      DX%D(I1:I2)=X1%D(I1:I2)-X0%D(I1:I2)
-#endif
    ENDDO
    DG%D=G1%D-G0%D
    GradEDotDeltaX=DOT_PRODUCT(G1%D,DX%D)/DBLE(N3)

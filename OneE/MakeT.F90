@@ -22,11 +22,9 @@ PROGRAM MakeT
 #else
   TYPE(BCSR)          :: T,T2
 #endif
-#ifdef PERIODIC 
   INTEGER                   :: NC
   REAL(DOUBLE),DIMENSION(3) :: B
-#endif
-  TYPE(AtomPair)      :: Pair
+  TYPE(AtomPair)            :: Pair
 !
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
@@ -68,7 +66,6 @@ PROGRAM MakeT
      DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
            NN = Pair%NA*Pair%NB
-#ifdef PERIODIC
            B = Pair%B
            DO NC = 1,CS_OUT%NCells
               Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -79,9 +76,6 @@ PROGRAM MakeT
                  T%MTrix%D(R:R+NN-1)=T%MTrix%D(R:R+NN-1)+TBlok(BS,MD,Pair)
               ENDIF
            ENDDO
-#else
-           T%MTrix%D(R:R+NN-1)=TBlok(BS,MD,Pair)
-#endif
            T%ColPt%I(P)=AtB
            T%BlkPt%I(P)=R
            R=R+NN 

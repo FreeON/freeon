@@ -13,10 +13,8 @@ MODULE PotUtil
   USE PoleTree 
   USE MondoPoles
   USE TreeWalk
-#ifdef PERIODIC
   USE PBCFarField
   USE PFFTen
-#endif
 !
   CONTAINS
 !=================================================================================
@@ -31,10 +29,8 @@ MODULE PotUtil
       REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
       REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
       REAL(DOUBLE)                    :: AA=One/AngstromsToAU 
-#ifdef PERIODIC
       INTEGER                         :: NC
       REAL(DOUBLE),DIMENSION(3)       :: PTmp
-#endif
       CHARACTER(LEN=DCL) :: Name	
 !     SET THE THRESHOLDS (LOOSE)
       TauPAC=1.D-3
@@ -48,10 +44,8 @@ MODULE PotUtil
       CALL MultipoleSetUp()
 !     Build the global PoleTree representation of the total density
       CALL RhoToPoleTree
-#ifdef PERIODIC
 !     Set the electrostatic background 
       CALL PBCFarFieldSetUp(PoleRoot,GM)
-#endif
 !     Delete the auxiliary density arrays
       CALL DeleteRhoAux
 !     Delete the Density
@@ -78,7 +72,6 @@ MODULE PotUtil
                PExtent=Extent(0,NuclearExpnt,HGBra,TauPAC)
 !              Initialize <KET|
                CALL SetKet(Prim,PExtent)
-#ifdef PERIODIC
                PTmp=Prim%P
                DO NC=1,CS_IN%NCells
 !                 Set Atomic Coordinates
@@ -95,12 +88,6 @@ MODULE PotUtil
                IF(GM%PBC%Dimen>0) THEN
                   NukE=NukE+CTraxFF(Prim,HGBra,GM)
                ENDIF
-#else
-!              Walk the walk
-               CALL VWalk(PoleRoot)
-!              Accumulate the atomic contribution
-               NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0) 
-#endif
                WRITE(77,7)NukE
 7              FORMAT(F22.8) 
             ENDDO

@@ -238,9 +238,7 @@
 !     GM_MM%InAu = .FALSE. !!! for MM
       GM_MM%Carts%D(:,:) = ATMCRD(:,:)
 !
-#ifdef PERIODIC
-        CALL ParsePeriodic(Ctrl,GM_MM)
-#endif
+      CALL ParsePeriodic(Ctrl,GM_MM)
 !
 !     GM_MM%InAu = .TRUE. !!! for MM
 !     IF(.NOT.PBC_On) GM_MM%Carts%D = AngstromsToAu*GM_MM%Carts%D

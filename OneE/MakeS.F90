@@ -22,11 +22,9 @@ PROGRAM MakeS
   TYPE(DBCSR)                :: S,T1
 #else
   TYPE(BCSR)                 :: S,T1
-#endif
-#ifdef PERIODIC 
+#endif 
   INTEGER                    :: NC
   REAL(DOUBLE),DIMENSION(3)  :: B
-#endif
   TYPE(AtomPair)             :: Pair
   TYPE(BSET)                 :: BS
   TYPE(CRDS)                 :: GM
@@ -67,7 +65,6 @@ PROGRAM MakeS
      DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
            NN = Pair%NA*Pair%NB
-#ifdef PERIODIC
            B = Pair%B
            DO NC = 1,CS_OUT%NCells
               Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -78,10 +75,6 @@ PROGRAM MakeS
                  S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,Pair)
               ENDIF
            ENDDO
-#else
-           S%MTrix%D(R:R+NN-1)=SBlok(BS,Pair)
-#endif
-
            S%ColPt%I(P)=AtB
            S%BlkPt%I(P)=R
            R=R+NN 

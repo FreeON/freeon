@@ -14,9 +14,7 @@ MODULE BlokTrPdJ
   USE BraBloks
   USE PoleTree
   USE TreeWalk
-#ifdef PERIODIC
   USE PBCFarField
-#endif
   IMPLICIT NONE
   LOGICAL PrintFlag
 !----------!

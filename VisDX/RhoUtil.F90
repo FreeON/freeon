@@ -25,9 +25,7 @@ MODULE RhoUtil
        REAL(DOUBLE),DIMENSION(3)  :: Origin,R
        REAL(DOUBLE)               :: Del,Den
        REAL(DOUBLE)               :: AA=One/AngstromsToAU
-#ifdef PERIODIC
        INTEGER                    :: NC
-#endif
       CHARACTER(LEN=DCL) :: Name	
 !      SET DENSITY THRESHOLDS (LOOSE)
        Del=3.D-1
@@ -35,9 +33,7 @@ MODULE RhoUtil
 !      BUILD RHO-TREE
        CALL RhoToTree(Args)
        CALL SetBBox(RhoRoot%Box,Box)
-#ifdef PERIODIC
        CALL MakeBoxPeriodic(Box)
-#endif
 !      DETERMINE CUBE GRID (SMART, UNSTRUCTURED GRIDS DONT WORK WITH DX) 
        Origin=Box%BndBox(:,1)
        Nx=CEILING((Box%BndBox(1,2)-Box%BndBox(1,1))/Del)
@@ -51,17 +47,12 @@ MODULE RhoUtil
        DO I=1,Nx    
           DO J=1,Ny
              DO K=1,Nz
-#ifdef PERIODIC
                 Den=Zero
                 DO NC=1,CS_OUT%NCells
 !                    Set Atomic Coordinates
                    R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
                    Den=Den+RhoAtPoint(RhoRoot,R)
                 ENDDO
-#else
-                R=(/I,J,K/)*Del+Origin
-                Den=RhoAtPoint(RhoRoot,R)
-#endif
                 WRITE(66,7) Den
 7               FORMAT(8(2x,F12.8)) 
              ENDDO

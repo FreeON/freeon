@@ -92,13 +92,11 @@ PROGRAM NewStep
          GM%Carts%D(J,I)=X2%D(K)
       ENDDO
    ENDDO   
-#ifdef PERIODIC
 !  Wrap atoms back into unit cell
    DO I=1,NAtoms
       CALL AtomCyclic(GM,GM%Carts%D(:,I))
       GM%BoxCarts%D(:,I)=AtomToFrac(GM,GM%Carts%D(:,I)) 
-   ENDDO
-#endif   
+   ENDDO  
    CALL Put(GM,NxtGeom)   
 !   WRITE(*,*)' NewStep: NEW GEOMETRY # ',NxtGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='PDB')

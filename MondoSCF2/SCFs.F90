@@ -329,13 +329,11 @@ CONTAINS
     S%Current%I=(/0,cBAS,cGEO/)
     S%Action='OneElectronMatrices'
     S%SubAction=""
-#ifdef PERIODIC
     IF(pBAS/=cBAS)DoPFFT=.TRUE.
     IF(DoPFFT)THEN
        CALL Invoke('MakePFFT',N,S,M)
        DoPFFT=.FALSE.
     ENDIF
-#endif
     CALL Invoke('MakeS',N,S,M)
     IF(O%Methods(cBAS)==RH_R_SCF)THEN
        CALL Invoke('LowdinO',N,S,M)

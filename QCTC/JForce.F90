@@ -32,7 +32,6 @@ PROGRAM JForce
 #else
   TYPE(BCSR)                   :: P
 #endif
-
   TYPE(AtomPair)               :: Pair
   TYPE(DBL_VECT)               :: Frc,JFrc
   INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
@@ -109,7 +108,6 @@ PROGRAM JForce
   CALL MultipoleSetUp()
 ! Build the global PoleTree representation of the total density
   CALL RhoToPoleTree
-#ifdef PERIODIC
 #ifdef MMech 
 ! Set the electrostatic background
   IF(HasMM()) THEN
@@ -120,7 +118,6 @@ PROGRAM JForce
 #else
 ! Set the electrostatic background
   CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
-#endif
 #endif
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux

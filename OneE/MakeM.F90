@@ -19,11 +19,9 @@ PROGRAM MakeM
 #else
   TYPE(BCSR)          :: M,M2
 #endif
-#ifdef PERIODIC 
   INTEGER                    :: NC
   REAL(DOUBLE), DIMENSION(3) :: B
-#endif
-  TYPE(AtomPair)      :: Pair
+  TYPE(AtomPair)             :: Pair
 !
   TYPE(BSET)          :: BS
   TYPE(CRDS)          :: GM
@@ -40,12 +38,6 @@ PROGRAM MakeM
 ! Start up macro
 !
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 !----------------------------------------------
 ! Get basis set and geometry
 !
@@ -83,7 +75,6 @@ PROGRAM MakeM
         DO AtB=1,NAtoms
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
               NN = Pair%NA*Pair%NB
-#ifdef PERIODIC
               B = Pair%B
               DO NC = 1,CS_OUT%NCells
                  Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -94,9 +85,6 @@ PROGRAM MakeM
                     M%MTrix%D(R:R+NN-1)=M%MTrix%D(R:R+NN-1)+DBlok(BS,MD,Pair,IXYZ,COrig)
                  ENDIF
               ENDDO
-#else
-              M%MTrix%D(R:R+NN-1)=DBlok(BS,MD,Pair,IXYZ,COrig)
-#endif
               M%ColPt%I(P)=AtB
               M%BlkPt%I(P)=R
               R=R+NN 

@@ -51,7 +51,7 @@ MODULE JGen
 #ifdef PARALLEL
       DO AtA=Beg%I(MyId),End%I(MyId)
 #else
-      DO AtA=1,NAtoms            
+      DO AtA=1,NAtoms             
 #endif
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
@@ -114,7 +114,6 @@ MODULE JGen
          ENDDO
       ENDDO
 #endif
-
     END SUBROUTINE MakeJ
 !===============================================================================
 
@@ -186,6 +185,7 @@ MODULE JGen
              Prim%Ell=MaxLA+MaxLB
              DO PFA=1,BS%NPFnc%I(CFA,KA)          
                 DO PFB=1,BS%NPFnc%I(CFB,KB)
+                  
                    Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
                    Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
                    Prim%Zeta=Prim%ZA+Prim%ZB

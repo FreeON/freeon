@@ -23,10 +23,8 @@ PROGRAM MakeU
 #else
   TYPE(BCSR)                 :: U,T1
 #endif
-#ifdef PERIODIC 
   INTEGER                    :: NC
   REAL(DOUBLE),DIMENSION(3)  :: B
-#endif
   TYPE(AtomPair)             :: Pair
   TYPE(BSET)                 :: BS
   TYPE(CRDS)                 :: GM
@@ -63,7 +61,6 @@ PROGRAM MakeU
         DO AtB=1,NAtoms
            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
               NN = Pair%NA*Pair%NB
-#ifdef PERIODIC
               B = Pair%B
               DO NC = 1,CS_OUT%NCells
                  Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -83,9 +80,6 @@ PROGRAM MakeU
                     ENDDO
                  ENDIF
               ENDDO
-#else
-              U%MTrix%D(R:R+NN-1)=UBlock(BS,GM,Pair)
-#endif
               U%ColPt%I(P)=AtB
               U%BlkPt%I(P)=R
               R=R+NN 
