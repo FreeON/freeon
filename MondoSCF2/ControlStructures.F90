@@ -181,10 +181,14 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: MaxLinBDispl
      REAL(DOUBLE)                       :: MaxOutPDispl
      REAL(DOUBLE)                       :: MaxTorsDispl
+     REAL(DOUBLE)                       :: MaxLDispl
      INTEGER                            :: IMaxGrad
      INTEGER                            :: IMaxCGrad
+     INTEGER                            :: IMaxLGrad
      REAL(DOUBLE)                       :: MaxGrad
      REAL(DOUBLE)                       :: MaxCGrad
+     REAL(DOUBLE)                       :: MaxLGrad
+     REAL(DOUBLE)                       :: MaxDMult
      REAL(DOUBLE)                       :: RMSGrad
      INTEGER                            :: IMaxGradNoConstr
      REAL(DOUBLE)                       :: MaxGradNoConstr

@@ -555,9 +555,6 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath
      INTEGER                     :: Print
      !
-!write(*,*) 'lagrmult 1= ',LagrMult
-!write(*,*) 'gradmult 1= ',GradMult
-!write(*,*) 'lagrdispl1= ',LagrDispl
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
@@ -590,14 +587,14 @@ CONTAINS
      !
      ! Overwrite Cartesian Energy gradients with Lagrangian ones.
      !
-!write(*,*) 'GOpt%Constr%DoLagr= ',GOpt%Constr%DoLagr
+!write(Out,*) 'GOpt%Constr%DoLagr= ',GOpt%Constr%DoLagr
      IF(GOpt%Constr%DoLagr) THEN
-!write(*,*) 'gradin 1= ',GradIn     
+!write(Out,*) 'gradin 1= ',GradIn     
        CALL LagrGradCart(GradIn,IntCs,LagrMult,SCRPath,iGEO)
-!write(*,*) 'gradin 2= ',GradIn     
+!write(Out,*) 'gradin 2= ',GradIn     
        CALL LagrGradMult(GradMult,XYZ,IntCs, &
          GOpt%CoordCtrl%LinCrit,GOpt%Constr%NConstr)
-!write(*,*) 'GradMult= ',GradMult   
+!write(Out,*) 'GradMult= ',GradMult   
      ENDIF
      !
      ! Calculate simple relaxation step from an inverse Hessian
@@ -618,9 +615,9 @@ CONTAINS
      !
      CALL Delete(IntOld)
      CALL Delete(IntCs)
-!write(*,*) 'lagrmult 2= ',LagrMult
-!write(*,*) 'gradmult 2= ',GradMult
-!write(*,*) 'lagrdispl2= ',LagrDispl
+!write(Out,*) 'lagrmult 2= ',LagrMult
+!write(Out,*) 'gradmult 2= ',GradMult
+!write(Out,*) 'lagrdispl2= ',LagrDispl
    END SUBROUTINE ModifyGeom
 !
 !--------------------------------------------------------------------
@@ -685,8 +682,8 @@ CONTAINS
          !  CALL DiagHessLagr(GOpt%CoordCtrl,GOpt%Hessian, &
          !       Grad%D,Displ%D,IntCs,XYZ,SCRPath,LagrMult,LagrGrad)
          !ELSE
-           CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ,IntCs,XYZ,&
-                         LagrDispl,LagrMult,LagrGrad)
+           CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+                         IntCs,XYZ,LagrDispl,LagrMult,LagrGrad)
          !ENDIF
      END SELECT
      !
@@ -704,11 +701,14 @@ CONTAINS
      IF(GOpt%TrfCtrl%DoInternals) THEN 
        CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
        IntCs%Value=IntCs%Value+Displ%D
-       CALL InternalToCart(XYZ,IntCs,IntCs%Value, &
-         Print,GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr,SCRPath)
+       CALL InternalToCart(XYZ,IntCs,IntCs%Value,Print, &
+                           GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
+                           GOpt%Constr,SCRPath)
      ELSE
        CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
      ENDIF
+     !
+     CALL LagrConv(GOpt%GOptStat,LagrDispl,LagrMult,LagrGrad)
      !
      CALL Delete(Displ)
    END SUBROUTINE RelaxGeom
@@ -813,7 +813,7 @@ CONTAINS
      ELSE
        Displ%D=-0.5D0*Grad%D 
      ENDIF 
-       LagrMult=LagrMult-0.5D0*GradMult
+       LagrMult=LagrMult-1.0D0*GradMult
    END SUBROUTINE SteepestDesc
 !
 !-------------------------------------------------------
@@ -865,7 +865,7 @@ CONTAINS
      ! 
      ! Make steepest descent on Lagr. multipliers
      ! 
-     LagrDispl(:)=LagrMult(:)-1.0D0*GradMult(:)
+     LagrDispl(:)=LagrMult(:)-0.5D0*GradMult(:)
    END SUBROUTINE DiagHess
 !
 !-------------------------------------------------------
@@ -970,12 +970,7 @@ CONTAINS
      !                      
      INTEGER                    :: IMaxGrad,IMaxCGrad,IMaxGradNoConstr
      !
-     IF(AllocQ(IntCs%Alloc)) THEN
-       NIntC=SIZE(IntCs%Def)
-     ELSE
-       NIntC=0
-     ENDIF
-     !
+     NIntC=SIZE(IntCs%Def)
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      !
@@ -1054,6 +1049,7 @@ CONTAINS
      !
      IF(CtrlConstr%NConstr/=0) THEN
        CtrlStat%GeOpConvgd=MaxCGrad<2.D0*GConvCr%Grad.AND. &
+                           CtrlStat%MaxLGrad<GConvCr%Grad.AND. &
                            MaxStreDispl<GConvCr%Stre.AND. &
                            MaxBendDispl<GConvCr%Bend.AND. &
                            MaxLinBDispl<GConvCr%LinB.AND. &
@@ -1085,14 +1081,21 @@ CONTAINS
      WRITE(*,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
      WRITE(*,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(*,420) RMSGrad
+     WRITE(*,930) CtrlStat%MaxLGrad,CtrlStat%IMaxLGrad
      WRITE(Out,410) MaxGrad,IntCs%Atoms(IMaxGrad,1:4)
      WRITE(Out,140) MaxCGrad,(IMaxCGrad-1)/3+1
      WRITE(Out,420) RMSGrad
      IF(CtrlConstr%NConstr/=0) THEN
-       WRITE(*,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
-       WRITE(*,520) RMSGradNoConstr
-       WRITE(Out,510) MaxGradNoConstr,IntCs%Atoms(IMaxGradNoConstr,1:4)
-       WRITE(Out,520) RMSGradNoConstr
+       IF(CtrlConstr%DoLagr) THEN
+         WRITE(Out,930) CtrlStat%MaxLGrad,CtrlStat%IMaxLGrad
+       ELSE
+           WRITE(*,510) MaxGradNoConstr, &
+                        IntCs%Atoms(IMaxGradNoConstr,1:4)
+           WRITE(*,520) RMSGradNoConstr
+           WRITE(Out,510) MaxGradNoConstr, &
+                          IntCs%Atoms(IMaxGradNoConstr,1:4)
+           WRITE(Out,520) RMSGradNoConstr
+       ENDIF
      ENDIF
      !
      IF(MaxStre/=0) THEN
@@ -1115,6 +1118,10 @@ CONTAINS
        WRITE(*,438) MaxTorsDispl,IntCs%Atoms(MaxTors,1:4)
        WRITE(Out,438) MaxTorsDispl,IntCs%Atoms(MaxTors,1:4)
      ENDIF
+     IF(CtrlConstr%NConstr/=0) THEN
+       WRITE(*,940) CtrlStat%MaxDMult
+       WRITE(Out,940) CtrlStat%MaxDMult
+     ENDIF
      !
      WRITE(*,440) RMSIntDispl
      WRITE(Out,440) RMSIntDispl
@@ -1127,12 +1134,14 @@ CONTAINS
 420 FORMAT('                        RMS Grad = ',F12.6)
 510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
 520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
+930 FORMAT('                  Max LagrM Grad = ',F12.6,' on constr. #  ',I4)
 430 FORMAT('                  Max STRE Displ = ',F12.6,' between atoms ',4I4)
 435 FORMAT('                  Max BEND Displ = ',F12.6,' between atoms ',4I4)
 436 FORMAT('                  Max LINB Displ = ',F12.6,' between atoms ',4I4)
 437 FORMAT('                  Max OUTP Displ = ',F12.6,' between atoms ',4I4)
 438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
 440 FORMAT('                       RMS Displ = ',F12.6)
+940 FORMAT('                  Max Lagr Displ = ',F12.6)
         !
    END SUBROUTINE GeOpConv
 !
@@ -1409,6 +1418,7 @@ CONTAINS
      TYPE(CRDS) :: GMLoc
      !
      GMLoc%AbCarts%D=GMLoc%Displ%D
+     GMLoc%LagrMult%D=GMLoc%LagrDispl%D
    END SUBROUTINE NewGeomFill
 !
 !-------------------------------------------------------------------
@@ -1727,6 +1737,36 @@ stop
      ENDDO
      IF(J/=0) GStat%RMSGradNoConstr=SQRT(GStat%RMSGradNoConstr)/DBLE(J)
    END SUBROUTINE GrdConvrgd
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE LagrConv(GStat,LagrDispl,LagrMult,LagrGrad)
+     TYPE(GOptStat)            :: GStat 
+     REAL(DOUBLE),DIMENSION(:) :: LagrDispl,LagrMult,LagrGrad
+     REAL(DOUBLE)              :: Sum
+     INTEGER                   :: I,J,NLagr
+     !
+     NLagr=SIZE(LagrMult)
+     IF(NLagr==0) THEN
+       GStat%IMaxLGrad=0
+       GStat%MaxLGrad=Zero
+       GStat%MaxDMult=Zero
+       RETURN
+     ENDIF
+     GStat%IMaxLGrad=1
+     GStat%MaxLGrad=ABS(LagrGrad(1))
+     GStat%MaxDMult=ABS(LagrDispl(1)-LagrMult(1))
+     DO I=2,NLagr
+       Sum=ABS(LagrGrad(I)) 
+       IF(GStat%MaxLGrad<Sum) THEN
+         GStat%MaxLGrad=Sum
+       ENDIF
+       Sum=ABS(LagrDispl(I)-LagrMult(I)) 
+       IF(GStat%MaxDMult<Sum) THEN
+         GStat%MaxDMult=Sum
+       ENDIF
+     ENDDO
+   END SUBROUTINE LagrConv
 !
 !-------------------------------------------------------------------
 !
