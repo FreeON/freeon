@@ -1166,8 +1166,6 @@ endif
       DO AtA = 1, NAtoms
         DO AtB = 1, NAtoms
           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-
-#ifdef PERIODIC
             B = Pair%B
             DO NC = 1, CS_OUT%NCells
               Pair%B = B + CS_OUT%CellCarts%D(:,NC)
@@ -1177,7 +1175,6 @@ endif
                 TotPrCount = TotPrCount + PrCount
               ENDIF
             ENDDO
-#endif
           ENDIF
         ENDDO
       ENDDO
@@ -1273,8 +1270,6 @@ endif
       DO AtA = 1, NAtoms
         DO AtB = 1, NAtoms
           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-  
-#ifdef PERIODIC
             B = Pair%B
             DO NC = 1, CS_OUT%NCells
               Pair%B = B + CS_OUT%CellCarts%D(:,NC)
@@ -1284,7 +1279,6 @@ endif
                 TotPrCount = TotPrCount + PrCount
               ENDIF
             ENDDO
-#endif
           ENDIF
         ENDDO
       ENDDO
