@@ -19,7 +19,7 @@
 orbital methods for simulation of periodic systems}}
 
 
-\author{C.J. Tymczak}
+\author{C. J. Tymczak}
 \author{Matt Challacombe}
 
 \affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos,
@@ -40,7 +40,7 @@ matrix and the exact-exchange matrix. A Hierarchical Cubature (HiCu),
 pure Cartesian adaptive grid is used for the local exchange-correlation
 matrix. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
-density. Finally, the current capabilities of MondoSCF for large condensed
+density. Finally, the current capabilities of \textbf{MondoSCF} for large condensed
 phases will be demonstrated.
 \end{abstract}
 
@@ -49,7 +49,7 @@ phases will be demonstrated.
 \section{INTRODUCTION}
 In recent years several successful methods for the simulating molecular or 
 condensed matter systems at the atomic level have been developed
-\cite{??} .
+\cite{Metropolis49,Alder59,Slater51,Hohenberg64}
 These methods all attempt to solve for the electronic structure via
 the many-body quantum problem to within some consistent approximation scheme.
 several examples include Hatree-Fock \cite{Slater51,Roothaan51}, Density Functional theory 
@@ -61,7 +61,8 @@ scale very poorly with system size, ($O(N^3)$), which severely limits the system
 that these codes can address. Therefore, it has become increasing important for
 the development of quantum chemistry codes which scale linearly with increasing 
 system size, and several quantum chemistry codes of this type are in 
-development \cite{Goedecker94,Challacombe96,Canning96,Briggs96,Hernandex96,Scuseria99,ANiklasson02}. 
+development 
+\cite{Goedecker94,Challacombe96,Canning96,Briggs96,Hernandex96,Scuseria99,ANiklasson02}. 
 However, for reasons of simplicity most of these quantum 
 chemistry codes have yet to incorporate Periodic boundary conditions, but many
 technically important systems can only be addressed within a condensed environment,
@@ -87,10 +88,14 @@ Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects
-\cite{Bentley79}. 
+\cite{Bentley79}. All \textbf{MondoSCF} calculations are done at the gamma-point.
+This is because the main focus of the \textbf{MondoSCF} linear scaling quantum chemistry
+code is large systems, where k-space integrations become unnessary for insulators 
+\cite{Nunes94}.
 
-To demonstrate and validate the capabilities of MondoSCF, we show results for three
-condensed phase systems, Sodium Chloride, Magnesium Oxide 
+
+To demonstrate and validate the capabilities of \textbf{MondoSCF}, we show results for 
+three condensed phase systems, Sodium Chloride, Magnesium Oxide 
 and Carbon in the diamond structure. We then compare these results to the periodic
 Gaussian code \textbf{Crystal98} \cite{Crystal98}. Next we demonstrate that
 the code achieves {\it true} linear scaling for the dense periodic diamond system 
@@ -99,7 +104,7 @@ up to 512 atoms in the unit cell.
 To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
 of the diamond (100) surface.
 %
-Finally we give some conclusion concerning the accuracy and utility of MondoSCF
+Finally we give some conclusion concerning the accuracy and utility of \textbf{MondoSCF}
 and future research directions.
 
 \section{The Kohn-Sham Equations}
@@ -120,8 +125,12 @@ and
 \begin{equation}
  J[\rho({\bf r})] = \int d{\bf r'} {\rho({\bf r}) \over |{\bf r}-{\bf r'}|}
 \end{equation}
-and the exchange correaltion potential can be calculated from several approximated functionals
-\cite{Hertwig97,Bauschlicher95,Adamo00}
+and the exchange correaltion potential can be calculated from several approximated 
+functionals
+\cite{Becke92,Hertwig97,Bauschlicher95,Adamo00}. In what follows we will 
+discuse the calculation of each of the terms in the hamiltonian 
+and how they are calculated in the non-orthogonal gaussian basis
+with the inclusion of periodic boundary conditions.
 
 \section{One-Electron Matrices}
 
@@ -401,8 +410,8 @@ the periodic multipole tensor is summed. If the matrix is a spherically
 ordered lattice sum, then the connection between the spherically ordered
 potential,$\Phi _{ss}$ and the Ewald potential, $\Phi _{Ew}$ is \cite{Redlack72}, 
 \begin{equation}
-\Phi _{Ew}\left( \mathbf{x}\right) =\Phi _{ss}\left( \mathbf{x}\right) -\frac{4\pi }{3V}
-{\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3V}Q
+\Phi _{Ew}\left( \mathbf{r}\right) =\Phi _{ss}\left( \mathbf{r}\right) -\frac{4\pi }{3V}
+{\left( \mathbf{r}-\mathbf{R}_{0}\right) \cdot \mathbf{D}}+\frac{2\pi }{3V}Q
 \label{EW_pot}
 \end{equation}
 where $V$ is the volume of the simulation cell, $R_0$ is a arbitrary refference point in the cell, 
@@ -410,8 +419,8 @@ ${\bf D}$ is the dipole moment and $Q$ is the quadripole moment.
 In terms of the matrix elements of \( J_{ab}^{PBC} \) this gives
 the corrections
 \begin{eqnarray}
-J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {\mathbf{x}}
-\right) \left\{ \frac{2\pi }{3V}Q-\frac{4\pi }{3V}\left( \mathbf{x}-\mathbf{R}_{0}\right) \cdot 
+J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \rho ^{loc}_{ab}\left( {\mathbf{r}}
+\right) \left\{ \frac{2\pi }{3V}Q-\frac{4\pi }{3V}\left( \mathbf{r}-\mathbf{R}_{0}\right) \cdot 
 \mathbf{D}\right\}
 \nonumber\\
  & = & \frac{2\pi }{3V}Q\, S_{ab}^{PBC}-\frac{4\pi }{3V}\mathbf{d}_{ab}\cdot \mathbf{D}
@@ -421,14 +430,14 @@ J_{ab}^{EC} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \rho ^{loc}_{ab}\left( {
 where we calculate
 %
 \begin{eqnarray}
-{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right)
- \rho ^{loc}_{ab}\left( \mathbf{x}\right)
+{\mathbf{d}}_{ab} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right)
+ \rho ^{loc}_{ab}\left( \mathbf{r}\right)
 \label{dab} \\
-{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) 
-\rho ^{loc}\left( \mathbf{x}\right) 
+{\mathbf{D}} & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right) 
+\rho ^{loc}\left( \mathbf{r}\right) 
 \label{D} \\
-Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\right) ^{2}
-\rho ^{loc}\left( \mathbf{x}\right) 
+Q & = & \int _{V_{\infty }}\, d{\mathbf{r}}\, \left( \mathbf{r}-\mathbf{R}_{0}\right) ^{2}
+\rho ^{loc}\left( \mathbf{r}\right) 
 \label{Q} 
 \end{eqnarray}
 
@@ -437,50 +446,38 @@ Q & = & \int _{V_{\infty }}\, d{\mathbf{x}}\, \left( \mathbf{x}-\mathbf{R}_{0}\r
 
 To calculate the DFT exchange correlation matrix in the periodic case,
 we take advantage of the periodicity of the functions being integrated
-and the locality of the basis functions,
+and the locality of the basis functions \cite{Gill92},
 %
 \begin{eqnarray}
-K_{ab}^{PBC} &=& \int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
-\: V^{1}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
-\nonumber\\
-%
-&&\qquad\qquad+\nabla \rho _{ab}^{PBC}
-\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
-\nonumber\\
+K_{ab}^{PBC} &=& \int _{V_{cell}}\, d\mathbf{r}\, \rho_{ab}^{PBC}({\bf r})
+\frac{\delta E}{\delta \rho^{PBC}} \nonumber\\
+&+&\nabla  \rho_{ab}^{PBC}({\bf r}) \cdot \nabla \rho^{PBC}({\bf r})
+\frac{\delta E}{\delta  \nabla \rho^{PBC}}
 \label{Kxc_pbc_0}
 \end{eqnarray}
 %
-But because of the periodicity and locality of the density we can rewrite this as
-\begin{eqnarray}
-K_{ab}^{PBC} &=&\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
-\: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
-\nonumber\\
-%
-&&\qquad\qquad+\nabla \rho _{ab}^{PBC}
-\left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
-\nonumber\\
-\label{Kxc_pbc}
-\end{eqnarray}
+But because of the periodicity and locality of the density 
+\begin{equation}
+V_{cell} \rightarrow V_{HiCu}
+\end{equation}
 %
 where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure:SimCell}.
 This transformation is ideally suited for the method we use to calculate
-our exchange-correlation matrix, which is based on a Cartesian {}``Gaussian
+our exchange-correlation matrix, which is based on a Cartesian ``Gaussian
 quadrature'' integration of a rectangular region. To calculate the
 exchange correlation matrix in periodic system we need to use equation
-(\ref{Kxc_pbc}). This could be prohibitively expensive because of
-the double sum if not for the locality of the HiCu grid. We have determined
-that the the computational cost increases by about a factor of two.
-This is achieved by splitting the problem into two steps
-
-\begin{itemize}
-\item First, we calculate the exchange-correlation potential on the HiCu
-grid using the periodically summed local density \( \rho ^{loc}\left( \mathbf{x}\right)  \),
+(\ref{Kxc_pbc_0}), where the integration region id $V_{HiCu}$. 
+This could be prohibitively expensive because of
+the double sum (do to $\rho_{ab}^{PBC}$) if not for the locality of the HiCu grid. 
+We have determined that the the computational cost increases by about a factor of two.
+This is achieved by splitting the problem into two steps:
+First, we calculate the exchange-correlation potential on the HiCu
+grid using the periodically summed local density \( \rho ^{loc}\left( \mathbf{r}\right)  \),
 because of the k-d tree structure of the density this is not computationally
 expensive.
-\item Next, we directly calculate the integral of equation (\ref{Kxc_pbc}),
+Next, we directly calculate the integral of equation (\ref{Kxc_pbc_0}),
 where we obtain significant increase in efficacy by exploiting the
 localization of the atomic orbitals. 
-\end{itemize}
 
 \section{Verification}
 
@@ -497,7 +494,7 @@ Table \ref{table:ComToCrystal98_1} shows our results for the total
 energy for Sodium Chloride as compared to results obtained from \textbf{Crystal98}.
 We test this system in two different cell geometries, one cubic and
 the other orthorhombic. Also we use two different basis sets , STO-3G
-and the Crystal98 basis set 8-511G, and two different theory levels, 
+and the \textbf{Crystal98} basis set 8-511G, and two different theory levels, 
 SlaterDirac and B3LYP. We obtain excellent agreement with \textbf{Crystal98} to the accuracy
 of there results, however, \textbf{MondoSCF} is capable of obtaining
 very precise results, beyond the capacity of \textbf{Crystal98} because
@@ -506,7 +503,7 @@ or the exchange-correlation energies. Also,in Table \ref{table:ComToCrystal98_1}
 we show the convergence of the energy per atom of a Sodium Cloride
 test system for increasing system size. This shows convergence with
 system size, and is akin to k-space integration, and also has excelent agreement
-with Crystal98 results inwhich we do k-space integration. 
+with \textbf{Crystal98} results in which we do k-space integration. 
 
 
 \subsubsection{Magnesium Oxide}
@@ -518,7 +515,10 @@ does substantially better then for sodium Chloride. This allows for
 a much closer scrutiny of the energies then for the previous system.
 Again, we obtain excellent agreement with \textbf{Crystal98} for two
 different basis sets anf theory levels to within the accuracy of these
-results.
+results.Also,in Table \ref{table:ComToCrystal98_2}
+we show the convergence of the energy per atom of a Mgnesium Oxide
+test system for increasing system size and we also has excelent agreement
+with \textbf{Crystal98} results in which we do k-space integration.
 
 
 \subsubsection{Diamond}
@@ -527,16 +527,26 @@ Table \ref{table:ComToCrystal98_3} shows our results for the total
 energy for Diamond as compared to results obtained from \textbf{Crystal98}.
 Agian we obtain excellent agreement to within the accuracy of the
 \textbf{Crystal98} results.
-
+Also,in Table \ref{table:ComToCrystal98_2}
+we show the convergence of the energy per atom of the Diamond
+test system for increasing system size and we again have excelent agreement
+with \textbf{Crystal98} results in which we do k-space integration.
 
 \section{Scaling}
 
 For testing of linear scaling, we us a set of periodic diamond systems.
 Figure \ref{figure:Scaling_Matrix_Build} shows our scaling results
 of diamond periodic system for both the \( J_{QCTC} \) and \( K_{xc} \)
-matrix builds for two different error thresholds and two different
-basis sets. Even in this very dense periodic system, linear scaling
-for the matrix build commences very early. 
+matrix builds for the \textbf{Crystal98} basis set 6-21G* \cite{C98Basis}
+at a {\it good} accuracy. Even in this very dense periodic system for a medium 
+basis set with d-functions, linear scaling for the matrix build commences very 
+early. We also show in figure \ref{figure:EnergyperNandError} the energy per atom and 
+the relative errror in the total energy. Agian we see the convergence of the total energy
+as a function of increasing system size, which is akin to k-space integration. We also
+see that our relative error is very well controlled within the \textbf{MondoSCF} quantum
+chemistry code, even up to 512 carbon atoms.
+
+\section{Big, Cool Example System}
 
 
 \section{CONCLUSIONS}
@@ -557,12 +567,12 @@ matrix. A Hierarchical Cubature (HiCu), pure Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects.
-Next, we show the capabilities of MondoSCF for three test condensed
+Next, we show the capabilities of \textbf{MondoSCF} for three test condensed
 phases , Sodium Chloride, Magnesium Oxide and Carbon in the Diamond
 and graphite structures. We then compare these results to the periodic
 Gaussian code \textbf{Crystal98.} Next we demonstrate the utility
 of the code on very large systems such 256 diamond. Finally we give
-some conclusion concerning the accuracy and utility of MondoSCF and
+some conclusion concerning the accuracy and utility of \textbf{MondoSCF} and
 future research directions.
 
 \section*{ACKNOWLEDGMENTS}
@@ -574,290 +584,259 @@ in preparation of this manuscript.
 \bibliographystyle{plain}
 \bibliography{GaussianPapers}
 \eject
+\eject
 %
 % 
 %
-\begin{table*}
-\caption{\label{table:ComToCrystal98_1} Comparison MondoSCF and Crystal98 for a Sodium Chloride test
-system}
-
-{\centering \begin{tabular}{|llccll|}
+\begin{table}
+\caption{\label{table:ComToCrystal98_1} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+Sodium Chloride test system. The \textbf{MondoSCF} calcuations where done to
+the accuracy of the quoted digets. All calculations where done at the Gamma point
+for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
+The \textbf{Crystal98} 8-511G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
+functional \cite{Becke92}.}
+ 
+{\centering \begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
-\( \mathbf{k} \)&
-Energy  &
+Energy  (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-MondoSCF &
+M-SCF &
 STO-3G/LDA&
-2&
-(0,0,0)&
+2\footnote[1]{Triclinic cell: for $N=2$, a=b=c=3.974 au, $\alpha=\beta=\gamma=60^{{\rm o}}$}&
 -610.9753547&
 -305.4876774\\
-Crystal98&
+C-98&
 STO-3G/LDA&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -610.9754&
 -305.4877\\
-MondoSCF&
+M-SCF&
 8-511G/BLYP&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -622.3910114&
 -311.1955057\\
-Crystal98&
+C-98&
 8-511G/BLYP&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -622.3911&
 -311.1955\\
 \hline 
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-8&
-(0,0,0)&
+8\footnote[2]{Cubic cell: for $N=8$, a=b=c=5.620 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -2444.3583560&
 -305.54479450\\
-Crystal98&
+C-98&
 STO-3G/LDA&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -2444.358&
 -305.5447\\
-MondoSCF&
+M-SCF&
 8-511G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -2490.0016297&
 -311.25020371\\
-Crystal98&
+C-98&
 8-511G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -2490.0013&
 -311.25016 \\
 \hline 
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-16&
-(0,0,0)&
+16\footnotemark[1]&
 -4888.70023&
 -303.543765\\
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-54&
-(0,0,0)&
+54\footnotemark[1]&
 -16499.4900&
 -305.546111\\
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-64&
-(0,0,0)&
+64\footnotemark[2]&
 -19554.9556&
 -305.546181\\
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-128&
-(0,0,0)&
+128\footnotemark[1]&
 -39109.9115&
 -305.546184\\
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-216&
-(0,0,0)&
+216\footnotemark[2] &
 -65997.9768&
 -305.546185\\
 \hline
-Crystal98\,\,\,\,\,\,\,&
+\,\,C-98\,\,&
 STO-3G/LDA\,\,&
-\,\,2\,\,&
-\,\,(6,6,6)\,\,&
+\,\,2\footnotemark[1]\,\,&
 -611.09228\,\,\,\,\,\,\,\,\,\,\,&
 -305.54614\\
 \hline
 \end{tabular}\par}
-\end{table*}
+\end{table}
 %
 %
 %
-\begin{table*}
-\caption{\label{table:ComToCrystal98_2} Comparison MondoSCF and Crystal98 for a Magnesium Oxide test
-system}
+\begin{table}
+\caption{\label{table:ComToCrystal98_2} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+Magnesium Oxide test system.   The \textbf{MondoSCF} calcuations where done to
+the accuracy of the quoted digets. All calculations where done at the Gamma point
+for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(6,6,6)$.
+The \textbf{Crystal98} 8-61G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
+functional \cite{Becke92}.}
 
-{\centering \begin{tabular}{|llccll|}
+{\centering \begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
-\( \mathbf{k} \)&
-Energy&
+Energy (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-2&
-(0,0,0)&
+2\footnote[1]{Triclinic cell: for $N=2$, a=b=c=2.9778 au, $\alpha=\beta=\gamma=60^{{\rm o}}$}&
 -268.6324805 &
 -134.3162403 \\
-Crystal98&
+C-98&
 STO-3G/LDA&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -268.6323 &
 -134.3162 \\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -275.0909646 &
 -137.5454823 \\
-Crystal98&
+C-98&
 8-61G/BLYP&
-2&
-(0,0,0)&
+2\footnotemark[1]&
 -275.0906 &
 -137.5453 \\
 \hline 
-MondoSCF&
+M-SCF&
 STO-3G/LDA&
-8&
-(0,0,0)&
+8\footnote[2]{Cubic cell: for $N=8$, a=b=c=4.2112 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -1076.2137787 &
 -134.52672234 \\
-Crystal98&
+C-98&
 STO-3G/LDA&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -1076.2138 &
 -134.52673\\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -1101.7294484 &
 -137.71618105\\
-Crystal98&
+C-98&
 8-61G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[2]&
 -1101.7289 &
 -137.71612  \\
 \hline 
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-16&
-(0,0,0)&
+16\footnotemark[1]&
 -2203.69044 &
 -137.730653 \\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-54&
-(0,0,0)&
+54\footnotemark[1]&
 -7437.79892 &
 -137.737017\\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-64&
-(0,0,0)&
+64\footnotemark[2]&
 -8815.21310 &
 -137.737705\\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-128&
-(0,0,0)&
+128\footnotemark[1]&
 -17630.4304 &
 -137.737737 \\
-MondoSCF&
+M-SCF&
 8-61G/BLYP&
-216&
-(0,0,0)&
+216\footnotemark[2]&
 -29751.3517 &
 -137.737739 \\
 \hline
-Crystal98\,\,\,\,\,\,\,&
+\,\,C-98\,\,&
 8-61G/BLYP\,\,&
-\,\,2\,\,&
-\,\,(6,6,6)\,\,&
+\,\,2\footnotemark[1]\,\,&
 -275.47547 &
 -137.73774  \\ 
 \hline
 \end{tabular}\par}
-\end{table*}
+\end{table}
 %
 %
 %
-\begin{table*}
-\caption{\label{table:ComToCrystal98_3} Comparison MondoSCF and Crystal98 for a Diamond test
-system}
+\begin{table}
+\caption{\label{table:ComToCrystal98_3} Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
+Diamond test system.  The \textbf{MondoSCF} calcuations where done to
+the accuracy of the quoted digets. All calculations where done at the Gamma point
+for comparision except the last \textbf{Crystal98} calculation, which was done at ${\bf k}=(2,2,2)$.
+The \textbf{Crystal98} 8-21G  basis set was used \cite{C98Basis} and the BLYP gradient corrected 
+functional \cite{Becke92}.}
 
-{\centering \begin{tabular}{|llccll|}
+{\centering \begin{tabular}{clcll}
 \hline 
 Program&
 Basis/Theory&
 \( N \)&
-\( \mathbf{k} \)&
-Energy &
+Energy (au)&
 Energy/{\it N}\\
 \hline
 \hline 
-MondoSCF&
+M-SCF&
 STO-3G/BLYP&
-8&
-(0,0,0)&
+8\footnote[1]{Cubic cell: for $N=8$, a=b=c=3.570 au, $\alpha=\beta=\gamma=90^{{\rm o}}$}&
 -300.5754830 &
 -37.57193538 \\
-Crystal98&
+C-98&
 STO-3G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[1]&
 -300.5755 &
 -37.57194 \\
-MondoSCF&
+M-SCF&
 6-21G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[1]&
 -303.8938328 &
 -37.98672910 \\
-Crystal98&
+C-98&
 6-21G/BLYP&
-8&
-(0,0,0)&
+8\footnotemark[1]&
 -303.8941 &
 -37.98676 \\
 \hline 
-MondoSCF&
+M-SCF&
 6-21G/BLYP&
-64&
-(0,0,0)&
+64\footnotemark[1]&
 -2435.59119 &
 -38.0561124\\
-MondoSCF&
+M-SCF&
 6-21G/BLYP&
-216&
-(0,0,0)&
-0.0 &
-0.0 \\
-MondoSCF&
-6-21G/BLYP&
-512&
-(0,0,0)&
-0.0 &
-0.0 \\
+216\footnotemark[1]&
+-0.0 &
+-0.0 \\
 \hline
-Crystal98\,\,\,\,\,\,\,&
+\,\,C-98\,\,&
 6-21G/BLYP\,\,&
-\,\,8\,\,&
-\,\,(2,2,2)\,\,&
+\,\,8\footnotemark[1]\,\,&
 -304.4756 &
 -38.05945\\
 \hline
 \end{tabular}\par}
-\end{table*}
+\end{table}
 %
 %
 %
@@ -867,51 +846,66 @@ Crystal98\,\,\,\,\,\,\,&
 %
 \begin{figure}
 
-\caption{\label{figure:SimCell} Simulation cell and interior region.}
+\caption{\label{figure:SimCell} Simulation cell and its brava lattice vectors. Also
+shown is the HiCu cube in which we do the exchange-correlation intergrals}
 {\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure}
 %
 %
 %
-\begin{figure*}
+\begin{figure}
 
 \caption{\label{figure:ReplicateCells} Regions which contribute to the Coulomb
 Matrix}
 
 {\centering \includegraphics{RepCell_2.ps} \par}
-\end{figure*}
+\end{figure}
 %
 %
 %
-\begin{figure*}
+\begin{figure}
 
 \caption{\label{figure:ErrorPFF} Error in the Periodic Far Field approximation
 with increasing \protect\( \mathbf{L}_{max}\protect \) for two different
-inner cell sums for \protect\( 64\protect \) molecules of water.}
+inner cell sums for \protect\( 64\protect \) molecules of water in a periodic cell.}
 
 {\centering \includegraphics{PFFMultipoles_water.ps} \par}
-\end{figure*}
+\end{figure}
 %
 %
 %
-\begin{figure*}
+\begin{figure}
 
 \caption{\label{figure:Scaling_Matrix_Build} Scaling Results for the matrix
 builds \protect\( J_{QCTC}\protect \) and \protect\( K_{xc}\protect \)
-for the dense diamond periodic system for the Crysral98 basis set 6-31G*/BLYP}
+for the dense diamond periodic system up to 512 atoms using the
+Crysral98 basis set 6-21G* \cite{C98Basis} and the density functional BLYP \cite{Becke92}}
 
 {\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
-\end{figure*}
+\end{figure}
 %
 %
 %
-\begin{figure*}
+\begin{figure}
+
+\caption{\label{figure:EnergyperNandError} Energy per carbon atom for the dense diamond
+periodic system up to 512 atoms using the Crysral98 basis set 6-21G* \cite{C98Basis} and the 
+density functional BLYP \cite{Becke92}. Also shown on the right axis is the relative errors
+in the total energy}
+
+{\centering \includegraphics{Timing_sto3g_321g.ps} \par} 
+\end{figure}
+%
+%
+%
+\begin{figure}
 
 \caption{\label{figure:Dense64diamond} Iso-surface plot of the (111) surface reconstruction 
-of a 512 atom diamond system using the 6-21G*/BLYP basis-set/theory}
+of a 512 atom diamond system using the  Crysral98 basis set 6-21G* \cite{C98Basis} and the 
+density functional BLYP \cite{Becke92} }
 
 {\centering \includegraphics{Timing_sto3g_321g.ps} \par}
-\end{figure*}
+\end{figure}
 %
 %
 %
