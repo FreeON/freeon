@@ -32,7 +32,7 @@ F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
                -I$(MONDO_HOME)/MondoMods               \
                -I$(MONDO_HOME)/Dynamo                  \
                -I$(MONDO_HOME)/IntCoo                  \
-               -I/usr/local/include                    \
+               -I/usr/local/include   $(MPI_COMPILE_FLAGS) \
 #              -I$(MPI_INC) 
 F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
 #---------------------------------------------------------------
@@ -52,7 +52,8 @@ RANLIB  = ranlib
 #
 # For linking with old style MPI1 (default if only using -DPARALLEL)
 #
-MPI_LIBS = -L$(MPI_LIB) -lpmpi -lmpi -lpmpi -lelan
+#MPI_LIBS = -L$(MPI_LIB) -lpmpi -lmpi -lpmpi -lelan
+MPI_LIBS = $(MPI_LD_FLAGS) -lmpi -lfmpi
 #----------------------------------------------------------------------
 #  HDF5 libraries with compression and jpeg libs. 
 #
