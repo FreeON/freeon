@@ -79,7 +79,6 @@ PROGRAM SCFStatus
   CALL Get(E_nuc_tot,'enn+ene',Tag_O=SCFCycl)
 !----------------------------------------------
 ! Get the exchange correlation energy
-  CALL Get(ModelChem,'ModelChemistry',CurBase)
   IF(HasDFT(ModelChem))THEN      
      CALL Get(Exc,'Exc',Tag_O=SCFCycl)
   ELSE
