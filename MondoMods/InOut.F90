@@ -1228,184 +1228,93 @@ CONTAINS
                    CALL Put(BS%Typ2CCo,'typetwocoefficients',Tag_O=Tag_O)
                 ENDIF
               END SUBROUTINE Put_BSET
-              !-------------------------------------------------------------------------------
-              !     Get the Periodic Info
+!-------------------------------------------------------------------------------
+!             Get the Periodic Info
               SUBROUTINE Get_PBCInfo(PBC,Tag_O)
                 TYPE(PBCInfo),            INTENT(OUT) :: PBC 
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-                !-------------------------------------------------------------------------------
-                !       Items that should not change with geometry
-
                 CALL Get(PBC%Dimen     ,'Dimension')
                 CALL Get(PBC%PFFMaxEll ,'PFFMaxEll')
                 CALL Get(PBC%PFFMaxLay ,'PFFMaxLay')
-                CALL Get(PBC%PFFOvRide ,'PFFOvRIde')
+                CALL Get(PBC%PFFOvRide ,'PFFOvRide')
                 CALL Get(PBC%AtomW     ,'AtomWrap')
                 CALL Get(PBC%InVecForm ,'VectorForm')
                 CALL Get(PBC%InAtomCrd ,'AtomicCrd')
                 CALL Get(PBC%Translate ,'Translate')
-                CALL Get(PBC%Trans_COM ,'Trans_COM')
-
-                CALL Get(PBC%AutoW(1)  ,'AutoWrap(1)')        
-                CALL Get(PBC%AutoW(2)  ,'AutoWrap(2)')
-                CALL Get(PBC%AutoW(3)  ,'AutoWrap(3)')
-                !-------------------------------------------------------------------------------
-                !       Items that can change with geometry ...   
-
-                CALL Get(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
-                CALL Get(PBC%Epsilon,      'Epsilon'             ,Tag_O=Tag_O)
-                CALL Get(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
-                CALL Get(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
-
-                CALL Get(PBC%CellCenter(1),'CellCenter1'       ,Tag_O=Tag_O)
-                CALL Get(PBC%CellCenter(2),'CellCenter2'       ,Tag_O=Tag_O)
-                CALL Get(PBC%CellCenter(3),'CellCenter3'       ,Tag_O=Tag_O)
-
-                CALL Get(PBC%TransVec(1),  'Originvector1'     ,Tag_O=Tag_O)
-                CALL Get(PBC%TransVec(2),  'Originvector2'     ,Tag_O=Tag_O)
-                CALL Get(PBC%TransVec(3),  'Originvector3'     ,Tag_O=Tag_O)
-
-                CALL Get(PBC%BoxShape(1,1),'Boxshape11'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(1,2),'Boxshape12'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(1,3),'Boxshape13'       ,Tag_O=Tag_O)       
-                CALL Get(PBC%BoxShape(2,1),'Boxshape21'       ,Tag_O=Tag_O)       
-                CALL Get(PBC%BoxShape(2,2),'Boxshape22'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(2,3),'Boxshape23'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,1),'Boxshape31'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,2),'Boxshape32'       ,Tag_O=Tag_O)
-                CALL Get(PBC%BoxShape(3,3),'Boxshape33'       ,Tag_O=Tag_O)
-
-                CALL Get(PBC%InvBoxSh(1,1),'InverseBoxshape11',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(1,2),'InverseBoxshape12',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(1,3),'InverseBoxshape13',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,1),'InverseBoxshape21',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,2),'InverseBoxshape22',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(2,3),'InverseBoxshape23',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,1),'InverseBoxshape31',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
-                CALL Get(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
-
-                CALL Get(PBC%LatFrc(1,1),'LatFrc11',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(1,2),'LatFrc12',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(1,3),'LatFrc13',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(2,1),'LatFrc21',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(2,2),'LatFrc22',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(2,3),'LatFrc23',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(3,1),'LatFrc31',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(3,2),'LatFrc32',Tag_O=Tag_O)
-                CALL Get(PBC%LatFrc(3,3),'LatFrc33',Tag_O=Tag_O)      
-
+                CALL Get(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
+                CALL Get(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
+                CALL Get(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)        
+                CALL Get(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
+                CALL Get(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
+                CALL Get(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
+                CALL Get(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
+                CALL Get(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
+                CALL Get(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
+                CALL Get(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
               END SUBROUTINE Get_PBCInfo
-              !-------------------------------------------------------------------------------
-              !     Put the Periodic Info
+!-------------------------------------------------------------------------------
+!             Put the Periodic Info
 
               SUBROUTINE Put_PBCInfo(PBC,Tag_O)
                 TYPE(PBCInfo),            INTENT(IN)  :: PBC 
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
-                !-------------------------------------------------------------------------------
-                !       Items that should not change with geometry
-
                 CALL Put(PBC%Dimen     ,'Dimension')
                 CALL Put(PBC%PFFMaxEll ,'PFFMaxEll')
                 CALL Put(PBC%PFFMaxLay ,'PFFMaxLay')
-                CALL Put(PBC%PFFOvRide ,'PFFOvRIde')
+                CALL Put(PBC%PFFOvRide ,'PFFOvRide')
                 CALL Put(PBC%AtomW     ,'AtomWrap')
                 CALL Put(PBC%InVecForm ,'VectorForm')
                 CALL Put(PBC%InAtomCrd ,'AtomicCrd')
                 CALL Put(PBC%Translate ,'Translate')
-                CALL Put(PBC%Trans_COM ,'Trans_COM')
-
-                CALL Put(PBC%AutoW(1)  ,'AutoWrap(1)')        
-                CALL Put(PBC%AutoW(2)  ,'AutoWrap(2)')
-                CALL Put(PBC%AutoW(3)  ,'AutoWrap(3)')
-                !-------------------------------------------------------------------------------
-                !       Items that can change with geometry ...   
-
-                CALL Put(PBC%CellVolume,   'CellVolume'          ,Tag_O=Tag_O)
-                CALL Put(PBC%Epsilon,      'Epsilon'             ,Tag_O=Tag_O)
-                CALL Put(PBC%DipoleFAC,    'DPoleFAC'            ,Tag_O=Tag_O)        
-                CALL Put(PBC%QupoleFAC,    'QPoleFAC'            ,Tag_O=Tag_O)
-                
-                CALL Put(PBC%CellCenter(1),'CellCenter1'       ,Tag_O=Tag_O)
-                CALL Put(PBC%CellCenter(2),'CellCenter2'       ,Tag_O=Tag_O)
-                CALL Put(PBC%CellCenter(3),'CellCenter3'       ,Tag_O=Tag_O)
-
-                CALL Put(PBC%TransVec(1),  'Originvector1'     ,Tag_O=Tag_O)
-                CALL Put(PBC%TransVec(2),  'Originvector2'     ,Tag_O=Tag_O)
-                CALL Put(PBC%TransVec(3),  'Originvector3'     ,Tag_O=Tag_O)
-
-                CALL Put(PBC%BoxShape(1,1),'Boxshape11'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(1,2),'Boxshape12'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(1,3),'Boxshape13'       ,Tag_O=Tag_O)       
-                CALL Put(PBC%BoxShape(2,1),'Boxshape21'       ,Tag_O=Tag_O)       
-                CALL Put(PBC%BoxShape(2,2),'Boxshape22'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(2,3),'Boxshape23'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,1),'Boxshape31'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,2),'Boxshape32'       ,Tag_O=Tag_O)
-                CALL Put(PBC%BoxShape(3,3),'Boxshape33'       ,Tag_O=Tag_O)
-
-                CALL Put(PBC%InvBoxSh(1,1),'InverseBoxshape11',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(1,2),'InverseBoxshape12',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(1,3),'InverseBoxshape13',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,1),'InverseBoxshape21',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,2),'InverseBoxshape22',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(2,3),'InverseBoxshape23',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,1),'InverseBoxshape31',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,2),'InverseBoxshape32',Tag_O=Tag_O)
-                CALL Put(PBC%InvBoxSh(3,3),'InverseBoxshape33',Tag_O=Tag_O)
-
-                CALL Put(PBC%LatFrc(1,1),'LatFrc11',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(1,2),'LatFrc12',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(1,3),'LatFrc13',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(2,1),'LatFrc21',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(2,2),'LatFrc22',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(2,3),'LatFrc23',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(3,1),'LatFrc31',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(3,2),'LatFrc32',Tag_O=Tag_O)
-                CALL Put(PBC%LatFrc(3,3),'LatFrc33',Tag_O=Tag_O)      
-
+                CALL Put(PBC%CellVolume,'CellVolume',Tag_O=Tag_O)
+                CALL Put(PBC%Epsilon   ,'Epsilon'   ,Tag_O=Tag_O)
+                CALL Put(PBC%DipoleFAC ,'DPoleFAC'  ,Tag_O=Tag_O)        
+                CALL Put(PBC%QupoleFAC ,'QPoleFAC'  ,Tag_O=Tag_O)
+                CALL Put(PBC%AutoW     ,'AutoWrap'  ,Tag_O=Tag_O)
+                CALL Put(PBC%CellCenter,'CellCenter',Tag_O=Tag_O)
+                CALL Put(PBC%TransVec  ,'TransVec'  ,Tag_O=Tag_O)
+                CALL Put(PBC%BoxShape  ,'BoxShape'  ,Tag_O=Tag_O)
+                CALL Put(PBC%InvBoxSh  ,'InvBoxSh'  ,Tag_O=Tag_O)
+                CALL Put(PBC%LatFrc    ,'LatFrc'    ,Tag_O=Tag_O)
               END SUBROUTINE Put_PBCInfo
               !-------------------------------------------------------------------------------
               !     Get some coordinates
-
               SUBROUTINE Get_CRDS(GM,Tag_O)
                 TYPE(CRDS),           INTENT(OUT)    :: GM
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-                IF(AllocQ(GM%Alloc))CALL Delete(GM)
+                IF(AllocQ(GM%Alloc)) CALL Delete(GM)
                 !-------------------------------------------------------------------------------
                 !        Items that should not change with geometry...
-
-                CALL Get(GM%NAtms,'natoms',Tag_O=Tag_O)
+                CALL Get(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
                 CALL Get(GM%Confg,'configuration',Tag_O=Tag_O)
-                CALL Get(GM%NElec,'nel',Tag_O=Tag_O)
-                CALL Get(GM%NAlph,'nelalpha',Tag_O=Tag_O)
-                CALL Get(GM%NBeta,'nelbeta',Tag_O=Tag_O)
-                CALL Get(GM%TotCh,'charge',Tag_O=Tag_O)
-                CALL Get(GM%NKind,'nkind',Tag_O=Tag_O)
-                CALL Get(GM%InAu, 'inau',Tag_O=Tag_O)
-                CALL Get(GM%NLagr,'nlagr',Tag_O=Tag_O)
+                CALL Get(GM%NElec,'nel'          ,Tag_O=Tag_O)
+                CALL Get(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
+                CALL Get(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
+                CALL Get(GM%TotCh,'charge'       ,Tag_O=Tag_O)
+                CALL Get(GM%NKind,'nkind'        ,Tag_O=Tag_O)
+                CALL Get(GM%InAu, 'inau'         ,Tag_O=Tag_O)
+                CALL Get(GM%NLagr,'nlagr'        ,Tag_O=Tag_O)
                 CALL New(GM)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
 
-                CALL Get(GM%ETotal, 'gm_etot',Tag_O=Tag_O)
-                CALL Get(GM%ELagr, 'gm_elagr',Tag_O=Tag_O)
-                CALL Get(GM%Ordrd,  'reordered',Tag_O=Tag_O)
-                CALL Get(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
-                CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
-                CALL Get(GM%AtNam,  'atomname',Tag_O=Tag_O)
-                CALL Get(GM%AtMMTyp,'mmtype',Tag_O=Tag_O)
-                CALL Get(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
-                CALL Get(GM%Carts,  'cartesians',Tag_O=Tag_O)
-                CALL Get(GM%Vects,  'velocities',Tag_O=Tag_O)
-                CALL Get(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
-                CALL Get(GM%CConstrain,'constraints',Tag_O=Tag_O)
+                CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Get(GM%ELagr     ,'gm_elagr'     ,Tag_O=Tag_O)
+                CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
+                CALL Get(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
+                CALL Get(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
+                CALL Get(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
+                CALL Get(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
+                CALL Get(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
                 CALL Get(GM%PBC,Tag_O=Tag_O)
-                CALL Get(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
-                CALL Get(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
-                CALL Get(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
-                CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
-                CALL Get(GM%Displ,'Displ',Tag_O=Tag_O)
+                CALL Get(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
+                CALL Get(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
+                CALL Get(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
+                CALL Get(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
+                CALL Get(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
+                CALL Get(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+                CALL Get(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
+                CALL Get(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Get(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
                   CALL Get(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
@@ -1420,37 +1329,34 @@ CONTAINS
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
                 !-------------------------------------------------------------------------------
                 !        Items that should not change with geometry...
-
-                CALL Put(GM%NAtms,'natoms',Tag_O=Tag_O)
+                CALL Put(GM%NAtms,'natoms'       ,Tag_O=Tag_O)
                 CALL Put(GM%Confg,'configuration',Tag_O=Tag_O)
-                CALL Put(GM%NElec,'nel',Tag_O=Tag_O)
-                CALL Put(GM%NAlph,'nelalpha',Tag_O=Tag_O)
-                CALL Put(GM%NBeta,'nelbeta',Tag_O=Tag_O)
-                CALL Put(GM%TotCh,'charge',Tag_O=Tag_O)
-                CALL Put(GM%NKind,'nkind',Tag_O=Tag_O)
-                CALL Put(GM%InAu, 'inau',Tag_O=Tag_O)
-                CALL Put(GM%NLagr,'nlagr',Tag_O=Tag_O)
+                CALL Put(GM%NElec,'nel'          ,Tag_O=Tag_O)
+                CALL Put(GM%NAlph,'nelalpha'     ,Tag_O=Tag_O)
+                CALL Put(GM%NBeta,'nelbeta'      ,Tag_O=Tag_O)
+                CALL Put(GM%TotCh,'charge'       ,Tag_O=Tag_O)
+                CALL Put(GM%NKind,'nkind'        ,Tag_O=Tag_O)
+                CALL Put(GM%InAu, 'inau'         ,Tag_O=Tag_O)
+                CALL Put(GM%NLagr,'nlagr'        ,Tag_O=Tag_O)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
-
-                CALL Put(GM%ETotal, 'gm_etot',Tag_O=Tag_O)
-                CALL Put(GM%ELagr, 'gm_elagr',Tag_O=Tag_O)
-                CALL Put(GM%Ordrd,  'reordered',Tag_O=Tag_O)
-                CALL Put(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
-                CALL Put(GM%AtNam,  'atomname',Tag_O=Tag_O)
-                CALL Put(GM%AtMMTyp,'mmtype',Tag_O=Tag_O)
-                CALL Put(GM%AtMss,  'atomicmass',   Tag_O=Tag_O)
-                CALL Put(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
-                CALL Put(GM%Carts,  'cartesians',Tag_O=Tag_O)
-                CALL Put(GM%Vects,  'velocities',Tag_O=Tag_O)
-                CALL Put(GM%BndBox, 'boundingbox',Tag_O=Tag_O)
-                CALL Put(GM%CConstrain,'constraints',Tag_O=Tag_O)
+                CALL Put(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
+                CALL Put(GM%ELagr     ,'gm_elagr'     ,Tag_O=Tag_O)
+                CALL Put(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
+                CALL Put(GM%AtTyp     ,'atomtype'     ,Tag_O=Tag_O)
+                CALL Put(GM%AtNum     ,'atomicnumbers',Tag_O=Tag_O)
+                CALL Put(GM%AtNam     ,'atomname'     ,Tag_O=Tag_O)
+                CALL Put(GM%AtMMTyp   ,'mmtype'       ,Tag_O=Tag_O)
+                CALL Put(GM%AtMss     ,'atomicmass'   ,Tag_O=Tag_O)
                 CALL Put(GM%PBC,Tag_O=Tag_O)
-                CALL Put(GM%BoxCarts,  'LatticeCoord',Tag_O=Tag_O)
-                CALL Put(GM%AbBoxCarts,'AbLatticeCoord',Tag_O=Tag_O)
-                CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
-                CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
-                CALL Put(GM%Displ,   'Displ',Tag_O=Tag_O)
+                CALL Put(GM%BndBox    ,'boundingbox'  ,Tag_O=Tag_O)
+                CALL Put(GM%CConstrain,'constraints'  ,Tag_O=Tag_O)
+                CALL Put(GM%Carts     ,'cartesians'   ,Tag_O=Tag_O)
+                CALL Put(GM%BoxCarts  ,'LatticeCoord' ,Tag_O=Tag_O)
+                CALL Put(GM%Velocity  ,'Velocity'     ,Tag_O=Tag_O)
+                CALL Put(GM%Gradients ,'Gradients'    ,Tag_O=Tag_O)
+                CALL Put(GM%AbCarts   ,'Abcartesians' ,Tag_O=Tag_O)
+                CALL Put(GM%Displ     ,'Displ'        ,Tag_O=Tag_O)
                 IF(GM%NLagr/=0) THEN
                   CALL Put(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
                   CALL Put(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)

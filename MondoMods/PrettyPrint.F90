@@ -409,39 +409,39 @@ MODULE PrettyPrint
         Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
         WRITE(PU,*)TRIM(Mssg)
 
-        Mssg=' TransVec = ('//TRIM(DblToMedmChar(PBC%TransVec(1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%TransVec(2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%TransVec(3)))//'} '
+        Mssg=' TransVec   = ('//TRIM(DblToMedmChar(PBC%TransVec%D(1)))//', ' &
+                              //TRIM(DblToMedmChar(PBC%TransVec%D(2)))//', ' &
+                              //TRIM(DblToMedmChar(PBC%TransVec%D(3)))//'} '
         WRITE(PU,*)TRIM(Mssg)
-        Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter(1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%CellCenter(2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%CellCenter(3)))//'} '
+        Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter%D(1)))//', ' &
+                              //TRIM(DblToMedmChar(PBC%CellCenter%D(2)))//', ' &
+                              //TRIM(DblToMedmChar(PBC%CellCenter%D(3)))//'} '
         WRITE(PU,*)TRIM(Mssg)
         WRITE(PU,*)' Lattice Vectors: '
-        Mssg=' a = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(2,1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(3,1)))//'} '                
+        Mssg=' a =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,1)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(2,1)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,1)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
-        Mssg=' b = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(2,2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(3,2)))//'} '                
+        Mssg=' b =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,2)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(2,2)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,2)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
-        Mssg=' c = ('//TRIM(DblToMedmChar(PBC%BoxShape(1,3)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(2,3)))//', ' &
-             //TRIM(DblToMedmChar(PBC%BoxShape(3,3)))//'} '                
+        Mssg=' c =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,3)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(2,3)))//', ' &
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,3)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
         WRITE(PU,*)' Inverse Lattice Vectors: '
-        Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,1)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,1)))//'} '                
+        Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,1)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,1)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,1)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
-        Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,2)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,2)))//'} '                
+        Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,2)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,2)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,2)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
-        Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh(1,3)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(2,3)))//', ' &
-             //TRIM(DblToMedmChar(PBC%InvBoxSh(3,3)))//'} '                
+        Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,3)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,3)))//', ' &
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,3)))//'} '                
         WRITE(PU,*)TRIM(Mssg)
         CALL ClosePU(PU)
 !
@@ -1108,7 +1108,7 @@ MODULE PrettyPrint
     WRITE(PU,34)
     WRITE(PU,33) 
     DO AtA = 1,GM%Natms
-       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Vects%D(1:3,AtA)
+       WRITE(PU,35) AtA,INT(GM%AtNum%D(AtA)),GM%Gradients%D(1:3,AtA)
     ENDDO
     WRITE(PU,33) 
     IF(GM%PBC%Dimen > 0) THEN
@@ -1116,7 +1116,7 @@ MODULE PrettyPrint
        WRITE(PU,32) TRIM('                  Lattice Forces')
        WRITE(PU,33)
        DO I=1,3
-          WRITE(PU,40) GM%PBC%LatFrc(I,1:3)       
+          WRITE(PU,40) GM%PBC%LatFrc%D(I,1:3)       
        ENDDO
        WRITE(PU,33) 
     ENDIF

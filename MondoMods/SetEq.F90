@@ -40,12 +40,12 @@ MODULE SetXYZ
         TYPE(PBCInfo)               :: PBC
         REAL(DOUBLE)                :: A,B,C,Alpha,Beta,Gamma
         REAL(DOUBLE),PARAMETER      :: DegToRad =  1.745329251994329576923D-2
-        A = SQRT(PBC%BoxShape(1,1)**2 + PBC%BoxShape(2,1)**2+ PBC%BoxShape(3,1)**2)
-        B = SQRT(PBC%BoxShape(1,2)**2 + PBC%BoxShape(2,2)**2+ PBC%BoxShape(3,2)**2)
-        C = SQRT(PBC%BoxShape(1,3)**2 + PBC%BoxShape(2,3)**2+ PBC%BoxShape(3,3)**2)
-        Gamma = ACOS((PBC%BoxShape(1,1)*PBC%BoxShape(1,2))/(A*B))/DegToRad
-        Beta  = ACOS((PBC%BoxShape(1,1)*PBC%BoxShape(1,3))/(A*C))/DegToRad
-        Alpha = PBC%BoxShape(1,2)*PBC%BoxShape(1,3)+PBC%BoxShape(2,2)*PBC%BoxShape(2,3)   
+        A = SQRT(PBC%BoxShape%D(1,1)**2 + PBC%BoxShape%D(2,1)**2+ PBC%BoxShape%D(3,1)**2)
+        B = SQRT(PBC%BoxShape%D(1,2)**2 + PBC%BoxShape%D(2,2)**2+ PBC%BoxShape%D(3,2)**2)
+        C = SQRT(PBC%BoxShape%D(1,3)**2 + PBC%BoxShape%D(2,3)**2+ PBC%BoxShape%D(3,3)**2)
+        Gamma = ACOS((PBC%BoxShape%D(1,1)*PBC%BoxShape%D(1,2))/(A*B))/DegToRad
+        Beta  = ACOS((PBC%BoxShape%D(1,1)*PBC%BoxShape%D(1,3))/(A*C))/DegToRad
+        Alpha = PBC%BoxShape%D(1,2)*PBC%BoxShape%D(1,3)+PBC%BoxShape%D(2,2)*PBC%BoxShape%D(2,3)   
         Alpha = ACOS(Alpha/(B*C))/DegToRad
       END SUBROUTINE VecToAng
 !======================================================================
@@ -864,5 +864,59 @@ MODULE SetXYZ
         IntCsCopy%Active(Start:To2)    =IntCs%Active(From:To)
 !
       END SUBROUTINE Set_INTC_EQ_INTC
+!===============================================================
+   SUBROUTINE CartRNK1ToCartRNK2(VectCart,ActCarts,Add_O)
+     REAL(DOUBLE),DIMENSION(:)   :: VectCart
+     REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
+     INTEGER :: I,J,NatmsLoc
+     LOGICAL,OPTIONAL :: Add_O
+     !
+     NatmsLoc=SIZE(ActCarts,2)
+     IF(PRESENT(Add_O)) THEN
+       IF(Add_O) THEN
+         DO I=1,NatmsLoc
+           J=3*(I-1)
+           ActCarts(1,I)=ActCarts(1,I)+VectCart(J+1)
+           ActCarts(2,I)=ActCarts(2,I)+VectCart(J+2)
+           ActCarts(3,I)=ActCarts(3,I)+VectCart(J+3)
+         ENDDO
+       ENDIF
+     ELSE
+       DO I=1,NatmsLoc
+         J=3*(I-1)
+         ActCarts(1,I)=VectCart(J+1)
+         ActCarts(2,I)=VectCart(J+2)
+         ActCarts(3,I)=VectCart(J+3)
+       ENDDO
+     ENDIF
+   END SUBROUTINE CartRNK1ToCartRNK2
+!===============================================================
+   SUBROUTINE CartRNK2ToCartRNK1(VectCart,ActCarts,Add_O)
+     !
+     REAL(DOUBLE),DIMENSION(:)   :: VectCart
+     REAL(DOUBLE),DIMENSION(:,:) :: ActCarts(:,:)
+     INTEGER :: I,J,NatmsLoc
+     LOGICAL,OPTIONAL :: Add_O
+     !
+     NatmsLoc=SIZE(ActCarts,2)
+     !
+     IF(PRESENT(Add_O)) THEN
+       IF(Add_O) THEN
+         DO I=1,NatmsLoc
+           J=3*(I-1)
+           VectCart(J+1)=VectCart(J+1)+ActCarts(1,I)
+           VectCart(J+2)=VectCart(J+2)+ActCarts(2,I)
+           VectCart(J+3)=VectCart(J+3)+ActCarts(3,I)
+         ENDDO
+       ENDIF
+     ELSE
+       DO I=1,NatmsLoc
+         J=3*(I-1)
+         VectCart(J+1)=ActCarts(1,I)
+         VectCart(J+2)=ActCarts(2,I)
+         VectCart(J+3)=ActCarts(3,I)
+       ENDDO
+     ENDIF
+   END SUBROUTINE CartRNK2ToCartRNK1
 !===============================================================
 END MODULE

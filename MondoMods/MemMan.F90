@@ -10,8 +10,8 @@ MODULE MemMan
                        New_INT_RNK3, New_INT_RNK4, &
                        New_DBL_VECT, New_DBL_RNK2, &
                        New_DBL_RNK3, New_DBL_RNK4, &
-                       New_DBL_RNK6, &
-                       New_CHR_VECT, New_CRDS,     &
+                       New_DBL_RNK6, New_CHR_VECT,&
+                       New_PBCInfo,  New_CRDS,     &
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
@@ -30,8 +30,8 @@ MODULE MemMan
                        Delete_INT_RNK3, Delete_INT_RNK4, &
                        Delete_DBL_VECT, Delete_DBL_RNK2, &
                        Delete_DBL_RNK3, Delete_DBL_RNK4, &
-                       Delete_DBL_RNK6, &
-                       Delete_CHR_VECT, Delete_CRDS,     &
+                       Delete_DBL_RNK6, Delete_CHR_VECT, &
+                       Delete_PBCInfo,  Delete_CRDS,     &
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
@@ -305,22 +305,36 @@ MODULE MemMan
       END SUBROUTINE Delete_Chol
 !     
 !-----------------------------------------------------
+!  
+      SUBROUTINE New_PBCInfo(A)
+         TYPE(PBCInfo),INTENT(INOUT)       :: A
+         CALL AllocChk(A%Alloc)
+         CALL New(A%AutoW     ,3)
+         CALL New(A%CellCenter,3)
+         CALL New(A%TransVec  ,3)
+         CALL New(A%BoxShape  ,(/3,3/))
+         CALL New(A%InvBoxSh  ,(/3,3/))
+         CALL New(A%LatFrc    ,(/3,3/))
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_PBCInfo
+!     
+!-----------------------------------------------------
 !     
       SUBROUTINE New_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
          CALL New(A%BndBox,(/3,2/))
-         CALL New(A%AtTyp,A%NAtms)
+         CALL New(A%PBC)
          CALL New(A%AtNum,A%NAtms)
+         CALL New(A%AtTyp,A%NAtms)
          CALL New(A%AtNam,A%NAtms)
-         CALL New(A%CConstrain,A%NAtms)
          CALL New(A%AtMMTyp,A%NAtms)
          CALL New(A%AtMss,A%NAtms)
+         CALL New(A%CConstrain,A%NAtms)
          CALL New(A%Carts,(/3,A%NAtms/))
-         CALL New(A%AbBoxCarts,(/3,A%NAtms/))
-         CALL New(A%Vects,(/3,A%NAtms/))
          CALL New(A%BoxCarts,(/3,A%NAtms/))
-         CALL New(A%BoxVects,(/3,A%NAtms/))
+         CALL New(A%Velocity,(/3,A%NAtms/))
+         CALL New(A%Gradients,(/3,A%NAtms/))
          CALL New(A%AbCarts,(/3,A%NAtms/))
          CALL New(A%Displ,(/3,A%NAtms/))
          CALL New(A%LagrMult,A%NLagr)
@@ -666,29 +680,42 @@ MODULE MemMan
          CALL DecMem(MemStatus,0,0)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BMATR
+!     
+!-----------------------------------------------------
+!  
+      SUBROUTINE Delete_PBCInfo(A)
+         TYPE(PBCInfo),INTENT(INOUT)       :: A
+         CALL Delete(A%AutoW)
+         CALL Delete(A%CellCenter)
+         CALL Delete(A%TransVec)
+         CALL Delete(A%BoxShape)
+         CALL Delete(A%InvBoxSh)
+         CALL Delete(A%LatFrc)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_PBCInfo
 !
 !------------------------------------------------------
 !
       SUBROUTINE Delete_CRDS(A)
          TYPE(CRDS),INTENT(INOUT)       :: A
          CALL Delete(A%BndBox)
-         CALL Delete(A%AtTyp)
+         CALL Delete(A%PBC)
          CALL Delete(A%AtNum)
+         CALL Delete(A%AtTyp)
          CALL Delete(A%AtNam)
-         CALL Delete(A%CConstrain)         
          CALL Delete(A%AtMMTyp)
          CALL Delete(A%AtMss)
+         CALL Delete(A%CConstrain)         
          CALL Delete(A%Carts)
-         CALL Delete(A%Vects)
          CALL Delete(A%BoxCarts)
-         CALL Delete(A%AbBoxCarts)
-         CALL Delete(A%BoxVects)
+         CALL Delete(A%Velocity)
+         CALL Delete(A%Gradients)
          CALL Delete(A%AbCarts)
          CALL Delete(A%Displ)
-         A%NLagr=0
          CALL Delete(A%LagrMult)
          CALL Delete(A%LagrDispl)
          CALL Delete(A%GradMult)
+         A%NLagr=0
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
