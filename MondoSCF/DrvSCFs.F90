@@ -206,6 +206,12 @@ MODULE DrvSCFs
     SUBROUTINE OneEMats(Ctrl)
       TYPE(SCFControls)             :: Ctrl
       INTEGER                       :: ISet,I
+!
+#ifdef PERIODIC
+      CALL LogSCF(Current,'Peridic Far-Field Tensor',.TRUE.)
+      CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
+      CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
+#endif
       CALL LogSCF(Current,'One-electron matrices.',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'OneElectron')
       CALL Invoke('MakeS',CtrlVect,MPIRun_O = .TRUE.)
@@ -215,10 +221,7 @@ MODULE DrvSCFs
          CALL Invoke('AInv',CtrlVect)
       ENDIF
       CALL Invoke('MakeT',CtrlVect,MPIRun_O=.TRUE.)
-#ifdef PERIODIC
-      CtrlVect=SetCtrlVect(Ctrl,'MakingPFFT')
-      CALL Invoke('MakePFFT',CtrlVect,MPIRun_O=.TRUE.)
-#endif
+!
     END SUBROUTINE OneEMats
 !========================================================================================
 !
