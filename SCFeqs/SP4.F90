@@ -141,6 +141,7 @@ PROGRAM SP4p
   !----------------------------------------------------------------------------0-
   !  IO for the non-orthogonal P
   !
+  CALL Put(T,'CurrentDM',CheckPoint_O=.TRUE.)
   CALL Put(T,TrixFile('D',Args,1))
   CALL Put(Zero,'homolumogap')
   CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
