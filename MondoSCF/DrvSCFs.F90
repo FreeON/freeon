@@ -8,23 +8,8 @@ MODULE DrvSCFs
   USE SCFLocals
   USE Overlay
   USE ParsingKeys
-  USE Macros
   USE Functionals
   IMPLICIT NONE 
-!========================================================================================
-!
-!========================================================================================
-  INTEGER,               PARAMETER :: DCL=DEFAULT_CHR_LEN
-  CHARACTER(LEN=DCL),    PARAMETER :: False  = '.FALSE.'   ! False flag
-  CHARACTER(LEN=DCL),    PARAMETER :: True   = '.TRUE.'    ! True flag
-  CHARACTER(LEN=DCL),    PARAMETER :: Direct = 'Direct'    ! Do direct SCF
-  CHARACTER(LEN=DCL),    PARAMETER :: Restart= 'Restart'   ! Restart from InfoFile
-  CHARACTER(LEN=DCL),    PARAMETER :: Switch = 'Switch'    ! Do a basis set switch
-  CHARACTER(LEN=DCL),    PARAMETER :: InkFok = 'InkFok'    ! Do incremental Fock build
-  CHARACTER(LEN=DCL),    PARAMETER :: Core   = 'Core'      ! Use core Hamiltontian guess
-  CHARACTER(LEN=DCL),    PARAMETER :: Minimal= 'Minimal'   ! Use superposition of AO DMs guess
-  CHARACTER(LEN=DCL),    PARAMETER :: Blank  =' '
-  CHARACTER(LEN=DCL),DIMENSION(10) :: CtrlVect
   CONTAINS
 !========================================================================================
 !
@@ -33,8 +18,8 @@ MODULE DrvSCFs
         TYPE(SCFControls)  :: Ctrl
         INTEGER            :: ICyc,IGeo
 !----------------------------------------------------------------------------------------
-        ICyc=Ctrl%Current%I(1)
-        IGeo=Ctrl%Current%I(2)
+        ICyc=Ctrl%Current(1)
+        IGeo=Ctrl%Current(3)
 !       Hack ...
         Ctrl%DIIS=.TRUE.
         Ctrl%InkFok=.FALSE.
@@ -52,31 +37,11 @@ MODULE DrvSCFs
 !          Restricted SCF with basis set switch 
            CALL SwitchRSCF(Ctrl)
         ELSE
-           WRITE(*,*)' Previous state = ',Ctrl%Previous%I
-           WRITE(*,*)' Current  state = ',Ctrl%Current%I
+           WRITE(*,*)' Previous state = ',Ctrl%Previous
+           WRITE(*,*)' Current  state = ',Ctrl%Current
            CALL MondoHalt(DRIV_ERROR,' bad option in SCFCycle ')
         ENDIF
    END SUBROUTINE
-!========================================================================================
-!
-!========================================================================================
-     FUNCTION SetCtrlVect(Ctrl,Actn1_O,Actn2_O) RESULT(CVect)
-        TYPE(SCFControls),        INTENT(IN) :: Ctrl
-        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Actn1_O,Actn2_O
-        CHARACTER(LEN=DCL),DIMENSION(10)     :: CVect
-        CVect(1)=Ctrl%Name
-        CVect(2)=" "
-        CVect(3)=" "
-        IF(PRESENT(Actn1_O))CVect(2)=Actn1_O
-        IF(PRESENT(Actn2_O))CVect(3)=Actn2_O
-        CVect(4:10)=(/(IntToChar(Ctrl%Current%I(1))), &
-                      (IntToChar(Ctrl%Current%I(2))), &
-                      (IntToChar(Ctrl%Current%I(3))), &
-                      (IntToChar(Ctrl%Previous%I(1))),&
-                      (IntToChar(Ctrl%Previous%I(2))),&
-                      (IntToChar(Ctrl%Previous%I(3))),&
-                      (IntToChar(Ctrl%NCGC))/)              
-     END FUNCTION SetCtrlVect
 !========================================================================================
 !    Perform a direct resctricted SCF cycle
 !========================================================================================
@@ -87,16 +52,16 @@ MODULE DrvSCFs
         CtrlVect=SetCtrlVect(Ctrl,Direct)
         CALL Invoke('MakeRho',     CtrlVect)
         CALL Invoke('QCTC',      CtrlVect)
-        IF(HasDFT(Ctrl%Model(Ctrl%Current%I(2)))) &
+        IF(HasDFT(Ctrl%Model(Ctrl%Current(2)))) &
            CALL Invoke('HiCu',     CtrlVect)
-        IF(HasHF(Ctrl%Model(Ctrl%Current%I(2))))&
+        IF(HasHF(Ctrl%Model(Ctrl%Current(2))))&
            CALL Invoke('ONX',     CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
         IF(Ctrl%DIIS) &
            CALL Invoke('DIIS',     CtrlVect,MPIRun_O=.TRUE.)
-        IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
+        IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
-        ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
+        ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
            CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)                                     
         ENDIF
         CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
@@ -112,9 +77,9 @@ MODULE DrvSCFs
         CALL Invoke('MakeRho',     CtrlVect)
         CALL Invoke('QCTC',      CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
-        IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
+        IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
-        ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
+        ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
            CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)
         ENDIF
      END SUBROUTINE CoreRSCF
@@ -136,14 +101,14 @@ MODULE DrvSCFs
         CtrlVect=SetCtrlVect(Ctrl,Direct)
         CALL Invoke('MakeRho',     CtrlVect)
         CALL Invoke('QCTC',      CtrlVect)
-        IF(HasDFT(Ctrl%Model(Ctrl%Current%I(2)))) &
+        IF(HasDFT(Ctrl%Model(Ctrl%Current(2)))) &
            CALL Invoke('HiCu',     CtrlVect)
-        IF(HasHF(Ctrl%Model(Ctrl%Current%I(2))))  &
+        IF(HasHF(Ctrl%Model(Ctrl%Current(2))))  &
            CALL Invoke('ONX',     CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
-        IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
+        IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
-        ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
+        ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
            CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)                                     
         ENDIF
         CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
@@ -159,40 +124,40 @@ MODULE DrvSCFs
         CALL LogSCF(Ctrl%Current,'Restricted SCF start via basis set switch')
 !       Build new rho from last density matrix and rename it, unless same basis different
 !       geometry
-        IF(Ctrl%Current%I(3)==Ctrl%Previous%I(3))THEN
+        IF(Ctrl%Current(3)==Ctrl%Previous(3))THEN
            CtrlVect=SetCtrlVect(Ctrl,Switch)
-           CtrlVect(3)=TRIM(IntToChar(Ctrl%Previous%I(1)+1))
-           CtrlVect(4)=TRIM(IntToChar(Ctrl%Previous%I(2)))
-           CtrlVect(5)=TRIM(IntToChar(Ctrl%Previous%I(3)))
+           CtrlVect(3)=TRIM(IntToChar(Ctrl%Previous(1)+1))
+           CtrlVect(4)=TRIM(IntToChar(Ctrl%Previous(2)))
+           CtrlVect(5)=TRIM(IntToChar(Ctrl%Previous(3)))
            CALL Invoke('MakeRho',CtrlVect)
-           ShortCtrlVect(1)=TrixFile('Rho',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous%I)
-           ShortCtrlVect(2)=TrixFile('Rho',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current%I )
+           ShortCtrlVect(1)=TrixFile('Rho',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous)
+           ShortCtrlVect(2)=TrixFile('Rho',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current )
            CALL Invoke('/bin/cp',ShortCtrlVect,AbsPath_O=.TRUE.)
         ENDIF
 !
         CtrlVect=SetCtrlVect(Ctrl,Switch)
-        ShortCtrlVect(1)=TrixFile('D',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous%I)
-        ShortCtrlVect(2)=TrixFile('D',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current%I )
+        ShortCtrlVect(1)=TrixFile('D',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous)
+        ShortCtrlVect(2)=TrixFile('D',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current )
         CALL Invoke('/bin/cp',ShortCtrlVect,AbsPath_O=.TRUE.)
-        ShortCtrlVect(1)=TrixFile('OrthoD',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous%I)
-        ShortCtrlVect(2)=TrixFile('OrthoD',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current%I )
+        ShortCtrlVect(1)=TrixFile('OrthoD',OffSet_O=1,Name_O=Ctrl%Name,Stats_O=Ctrl%Previous)
+        ShortCtrlVect(2)=TrixFile('OrthoD',OffSet_O=0,Name_O=Ctrl%Name,Stats_O=Ctrl%Current )
         CALL Invoke('/bin/cp',ShortCtrlVect,AbsPath_O=.TRUE.)
 
 !       If same basis, different geometry do DM extrapolation 
 
-        IF(Ctrl%Current%I(3)/=Ctrl%Previous%I(3))THEN
+        IF(Ctrl%Current(3)/=Ctrl%Previous(3))THEN
            CALL Invoke('P2Use',    CtrlVect,MPIRun_O=.TRUE.)
            CALL Invoke('MakeRho',     CtrlVect)
         ENDIF
         CALL Invoke('QCTC' ,     CtrlVect)
-        IF(HasDFT(Ctrl%Model(Ctrl%Current%I(2))))  &
+        IF(HasDFT(Ctrl%Model(Ctrl%Current(2))))  &
            CALL Invoke('HiCu',     CtrlVect)
-        IF(HasHF(Ctrl%Model(Ctrl%Current%I(2))))   &
+        IF(HasHF(Ctrl%Model(Ctrl%Current(2))))   &
            CALL Invoke('ONX',     CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
-        IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
+        IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
-        ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
+        ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
            CALL Invoke('SDMM',     CtrlVect,MPIRun_O=.TRUE.)
         ENDIF
         CALL Invoke('SCFstats',   CtrlVect,MPIRun_O=.TRUE.)                                     
@@ -207,9 +172,9 @@ MODULE DrvSCFs
 !        IF(PrintFlags%Int==DEBUG_INTEGRAL) &
 !           CALL Invoke('PrintInt', CtrlVect)
         CALL Invoke('MakeS',        CtrlVect)
-        IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
+        IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
            CALL Invoke('LowdinO',  CtrlVect)
-        ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
+        ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
            CALL Invoke('AInv',CtrlVect)
         ELSE
            CALL MondoHalt(MISC_ERROR,' Neither FactoredS or LOrthog invoked in OneEMats ')
@@ -236,12 +201,12 @@ MODULE DrvSCFs
 !
 !========================================================================================
    SUBROUTINE LogSCF(Stats,Mssg)
-      TYPE(INT_VECT),   INTENT(IN) :: Stats
+      INTEGER,DIMENSION(3),INTENT(IN) :: Stats
       CHARACTER(LEN=*), INTENT(IN) :: Mssg
       CALL Logger('------------------------------------------------------------')
-      CALL Logger('  Cycl = '//TRIM(IntToChar(Stats%I(1))) &
-                //', Base = '//TRIM(IntToChar(Stats%I(2))) &
-                //', Geom = '//TRIM(IntToChar(Stats%I(3))) )
+      CALL Logger('  Cycl = '//TRIM(IntToChar(Stats(1))) &
+                //', Base = '//TRIM(IntToChar(Stats(2))) &
+                //', Geom = '//TRIM(IntToChar(Stats(3))) )
       CALL Logger(Mssg)
       CALL Logger('------------------------------------------------------------')
    END SUBROUTINE LogSCF
@@ -250,39 +215,39 @@ MODULE DrvSCFs
 !       Delete files from previous SCF cycle that are no longer needed 
 !       (Needs work to figure out why /bin/rm sometimes does not work when Invoked)
 !
-        IF(TidyFiles.AND.Ctrl%Current%I(1)>1)THEN
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.ExtrapF*'
+        IF(TidyFiles.AND.Ctrl%Current(1)>1)THEN
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.ExtrapF*'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
 !           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.J'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.J'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
 !           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.K'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.K'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
 !           CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.Rho'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc'//TRIM(ChCt%CCyc_M1)//'.Rho'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
            CALL SYSTEM('/bin/rm '//TRIM(RmFile))
 !           CALL SYSTEM('/bin/ls -l '//TRIM(MONDO_SCRATCH)//  &
 !                       TRIM(SCFName)//'*.* >> '//TRIM(LogFile))
-        ELSEIF(TidyFiles.AND.Ctrl%Current%I(1)==0)THEN
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc0.F'
+        ELSEIF(TidyFiles.AND.Ctrl%Current(1)==0)THEN
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.F'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
            CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc0.J'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.J'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
            CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc0.K'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.K'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
            CALL SYSTEM('/bin/rm '//TRIM(RmFile))
-           RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)))//'_Cyc0.Rho'
+           RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)))//'_Cyc0.Rho'
 !           CALL Invoke('rm',(/RmFile/),ExeDir_O='/bin/')
            CALL Logger('/bin/rm '//TRIM(RmFile))
            CALL SYSTEM('/bin/rm '//TRIM(RmFile))
@@ -291,7 +256,7 @@ MODULE DrvSCFs
         ENDIF
 !
 !        IF(TidyFiles)THEN
-!              RmFile=TRIM(Ctrl%Name(Ctrl%Current%I(2)-1))//'*'
+!              RmFile=TRIM(Ctrl%Name(Ctrl%Current(2)-1))//'*'
 !              CALL Logger('/bin/rm '//TRIM(RmFile))
 !              CALL SYSTEM('/bin/rm '//TRIM(RmFile))
 !              CALL SYSTEM('/bin/ls -l '//TRIM(MONDO_SCRATCH)//  &
