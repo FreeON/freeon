@@ -1,0 +1,12 @@
+Mondo version 2004-11-30 07:25 compiled on zinc using
+CompilerSpecifics.IntelLinux.NAG.
+
+Problem with JForce Caffiene.inp. JForce checksum is different from the
+reference one that has been checked in ages ago into Validate.
+
+In ref:  JForce                 :: dJ/dR CheckSum  = 0.2268531212585522D+01
+In new:  JForce                 :: dJ/dR CheckSum  = 0.3305913304540057D+01
+
+Bug needs to be smashed.
+K.N. 12/02/04.
+---------------------------------------------------------------------------
