@@ -38,6 +38,7 @@ PROGRAM dN4KTest
   USE GetAtomPairMod
   IMPLICIT NONE
   !-------------------------------------------------------------------
+
   !  TYPE(CList2) , DIMENSION(:), POINTER  :: List
   TYPE(CRDS)              :: GM
   TYPE(BSET)              :: BS

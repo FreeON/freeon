@@ -19,7 +19,6 @@ SUBROUTINE dIntB2020101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz
       REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      REAL(DOUBLE)  :: SpSpB,FnSpB,SpFnB
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(28) :: HRRTmp 
       REAL(DOUBLE), DIMENSION(28,4,4) :: HRR,HRRA,HRRB,HRRC 
@@ -172,6 +171,6 @@ SUBROUTINE dIntB2020101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          ! Generating (sp,sp|1_y,L)  and (sp,sp|1,L_y)
          CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (sp,sp|1_z,L)  and (sp,sp|1,L_z)
-         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR22cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,4,L),GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB2020101

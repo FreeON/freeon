@@ -96,7 +96,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,",KPX,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPX,",L)-",ToString[LK],"D0*HRR(1:",BS,",",KMX,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 
@@ -109,7 +109,7 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
         WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPY,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPY,",L)-",ToString[MK],"D0*HRR(1:",BS,",",KMY,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 
@@ -118,10 +118,10 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                   "(",CType[IntegralClass[{imin,imax}]],",",
                                       CType[IntegralClass[{jmin,jmax}]],"|",ToString[k],",L_z)"]];
     If[ NK==0 , 
-        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,",KPZ,",L),GRADIENTS(1,1))"]];
        ,
         WS[StringJoin["   HRRTmp(1:",BS,")=HRRC(1:",BS,",",KPZ,",L)-",ToString[NK],"D0*HRR(1:",BS,",",KMZ,",L)"]];
-        WS[StringJoin["   CALL ",HRRSubName,"cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))"]]; 
+        WS[StringJoin["   CALL ",HRRSubName,"cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRTmp,GRADIENTS(1,1))"]]; 
       ];
 
 

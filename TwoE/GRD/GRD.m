@@ -122,9 +122,10 @@ Get["FRONTM.m"];
 MakeList={};
 RelsList={};
 
+PunchHRRKet;
 PunchHRRBra;
 
-IncludeFile="ERIInclude.Inc";
+IncludeFile="dERIInclude.Inc";
 OpenWrite[IncludeFile];
 Print[" Openned ",IncludeFile];
 WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];

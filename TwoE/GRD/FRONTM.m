@@ -58,10 +58,6 @@ PunchFront[Subroutine_,ic_,jc_,kc_,lc_,IJKL_]:=Block[{WS,LBra,LKet,BKType,LenBra
            WS["REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz"];
            WS["REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
-           If[ic==2||jc==2,						     
-              WS["REAL(DOUBLE)  :: SpSpB,FnSpB,SpFnB"]];
-           If[kc==2||lc==2,						     
-              WS["REAL(DOUBLE)  :: SpSpK,FnSpK,SpFnK"]];
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],") :: HRRTmp "]];
            WS[StringJoin["REAL(DOUBLE), DIMENSION(",ToString[BraMax],",",ToString[KetMax],",",ToString[LEnd[lmax+1]],") :: HRR,HRRA,HRRB,HRRC "]];

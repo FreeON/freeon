@@ -233,11 +233,11 @@ SUBROUTINE dIntB3030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
                           HRRA(1,2,L),HRRB(1,2,L),GRADIENTS(1,1))
          ! Generating (p,p|2_x,L)  and (p,p|2,L_x)
          HRRTmp(1:10)=HRRC(1:10,5,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR33cd(OA,OB,LDA,LDB,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
          ! Generating (p,p|2_y,L)  and (p,p|2,L_y)
          CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,6,L),GRADIENTS(1,1))
          ! Generating (p,p|2_z,L)  and (p,p|2,L_z)
-         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,8,L),GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,8,L),GRADIENTS(1,1))
       
          !K = 3
          CDOffSet=(OC+3-2)*LDC+(OD+L-2)*LDD
@@ -248,9 +248,9 @@ SUBROUTINE dIntB3030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,6,L),GRADIENTS(1,1))
          ! Generating (p,p|3_y,L)  and (p,p|3,L_y)
          HRRTmp(1:10)=HRRC(1:10,7,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR33cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
          ! Generating (p,p|3_z,L)  and (p,p|3,L_z)
-         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,9,L),GRADIENTS(1,1))
       
          !K = 4
          CDOffSet=(OC+4-2)*LDC+(OD+L-2)*LDD
@@ -263,6 +263,6 @@ SUBROUTINE dIntB3030303(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
          ! Generating (p,p|4_z,L)  and (p,p|4,L_z)
          HRRTmp(1:10)=HRRC(1:10,10,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR33cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRTmp,GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB3030303

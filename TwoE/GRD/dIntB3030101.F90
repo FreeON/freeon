@@ -168,6 +168,6 @@ SUBROUTINE dIntB3030101(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          ! Generating (p,p|1_y,L)  and (p,p|1,L_y)
          CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (p,p|1_z,L)  and (p,p|1,L_z)
-         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR33cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,4,L),GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB3030101

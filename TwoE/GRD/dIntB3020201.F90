@@ -19,8 +19,6 @@ SUBROUTINE dIntB3020201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
       REAL(DOUBLE)  :: PQx,PQy,PQz,FPQx,FPQy,FPQz
       REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT
-      REAL(DOUBLE)  :: SpSpB,FnSpB,SpFnB
-      REAL(DOUBLE)  :: SpSpK,FnSpK,SpFnK
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
       REAL(DOUBLE), DIMENSION(23) :: HRRTmp 
       REAL(DOUBLE), DIMENSION(23,11,4) :: HRR,HRRA,HRRB,HRRC 
@@ -202,7 +200,7 @@ SUBROUTINE dIntB3020201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          ! Generating (p,sp|1_y,L)  and (p,sp|1,L_y)
          CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,3,L),GRADIENTS(1,1))
          ! Generating (p,sp|1_z,L)  and (p,sp|1,L_z)
-         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,4,L),GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,4,L),GRADIENTS(1,1))
       
          !K = 2
          CDOffSet=(OC+2-1)*LDC+(OD+L-1)*LDD
@@ -211,11 +209,11 @@ SUBROUTINE dIntB3020201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
                           HRRA(1,2,L),HRRB(1,2,L),GRADIENTS(1,1))
          ! Generating (p,sp|2_x,L)  and (p,sp|2,L_x)
          HRRTmp(1:10)=HRRC(1:10,5,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR32cd(OA,OB,LDA,LDB,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRTmp,GRADIENTS(1,1))
          ! Generating (p,sp|2_y,L)  and (p,sp|2,L_y)
          CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,6,L),GRADIENTS(1,1))
          ! Generating (p,sp|2_z,L)  and (p,sp|2,L_z)
-         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,8,L),GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,8,L),GRADIENTS(1,1))
       
          !K = 3
          CDOffSet=(OC+3-1)*LDC+(OD+L-1)*LDD
@@ -226,9 +224,9 @@ SUBROUTINE dIntB3020201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,1,HRRC(1,6,L),GRADIENTS(1,1))
          ! Generating (p,sp|3_y,L)  and (p,sp|3,L_y)
          HRRTmp(1:10)=HRRC(1:10,7,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR32cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
          ! Generating (p,sp|3_z,L)  and (p,sp|3,L_z)
-         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRC(1,9,L),GRADIENTS(1,1))
       
          !K = 4
          CDOffSet=(OC+4-1)*LDC+(OD+L-1)*LDD
@@ -241,6 +239,6 @@ SUBROUTINE dIntB3020201(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, &
          CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,2,HRRC(1,9,L),GRADIENTS(1,1))
          ! Generating (p,sp|4_z,L)  and (p,sp|4,L_z)
          HRRTmp(1:10)=HRRC(1:10,10,L)-1D0*HRR(1:10,1,L)
-         CALL BraHRR32cd(OA,OB,LDA,LDB,CDOffSet,2,HRRTmp,GRADIENTS(1,1))
+         CALL BraHRR32cd(NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,CDOffSet,3,HRRTmp,GRADIENTS(1,1))
       ENDDO 
     END SUBROUTINE dIntB3020201
