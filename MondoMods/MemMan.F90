@@ -506,6 +506,9 @@ MODULE MemMan
          CALL New(A%IJ,(/2,NBond/))
          CALL New(A%Length,NBond)
          CALL New(A%Type,NBond)
+         CALL New(A%HBExtraSN,NBond)
+         CALL New(A%HBExtraNC,NBond)
+         CALL New(A%LonelyAtom,NBond)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BONDDATA
 !     
@@ -521,6 +524,9 @@ MODULE MemMan
          CALL Delete(A%IJ)
          CALL Delete(A%Length)
          CALL Delete(A%Type)
+         CALL Delete(A%HBExtraSN)
+         CALL Delete(A%HBExtraNC)
+         CALL Delete(A%LonelyAtom)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BONDDATA
 !     
@@ -559,6 +565,7 @@ MODULE MemMan
          TYPE(PBCInfo),INTENT(INOUT)       :: A
          CALL AllocChk(A%Alloc)
          CALL New(A%AutoW     ,3)
+         CALL New(A%SuperCell ,3)
          CALL New(A%CellCenter,3)
          CALL New(A%TransVec  ,3)
          CALL New(A%BoxShape  ,(/3,3/))
@@ -964,6 +971,7 @@ MODULE MemMan
       SUBROUTINE Delete_PBCInfo(A)
          TYPE(PBCInfo),INTENT(INOUT)       :: A
          CALL Delete(A%AutoW)
+         CALL Delete(A%SuperCell)
          CALL Delete(A%CellCenter)
          CALL Delete(A%TransVec)
          CALL Delete(A%BoxShape)
