@@ -43,21 +43,33 @@ MODULE Order
    END INTERFACE
    CONTAINS
 
-       FUNCTION RANDOM_INT(Limits)
+       FUNCTION RANDOM_INT(Limits,Iseed_O)
           INTEGER                :: RANDOM_INT
+          INTEGER,OPTIONAL       :: Iseed_O
           INTEGER, DIMENSION(2)  :: Limits
           REAL(DOUBLE)           :: Delta
-          REAL(DOUBLE), EXTERNAL :: Random
+          REAL(DOUBLE), EXTERNAL :: Random,srand
+!
+          IF(PRESENT(Iseed_O)) THEN
+             Iseed_O = srand(Iseed_O)
+          ENDIF
+!
           Delta=DBLE(Limits(2)-Limits(1)+1)
           RANDOM_INT=Limits(1)+INT(Delta*Random())
           !! RANDOM_INT=Limits(1)+INT(Delta*RAND())
        END FUNCTION RANDOM_INT
 
-      FUNCTION RANDOM_DBL(Limits)
+      FUNCTION RANDOM_DBL(Limits,Iseed_O)
          REAL(DOUBLE)              :: RANDOM_DBL
+         INTEGER,OPTIONAL          :: Iseed_O
          REAL(DOUBLE),DIMENSION(2) :: Limits
          REAL(DOUBLE)              :: Delta
-         REAL(DOUBLE), EXTERNAL    :: Random
+         REAL(DOUBLE), EXTERNAL    :: Random,srand
+!
+         IF(PRESENT(Iseed_O)) THEN
+            Iseed_O = srand(Iseed_O)
+         ENDIF
+!
          Delta=Limits(2)-Limits(1)+0.0D0
          RANDOM_DBL=Limits(1)+Delta*Random()
          !! RANDOM_DBL=Limits(1)+Delta*Rand()
