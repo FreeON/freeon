@@ -8,8 +8,8 @@
 \newcommand{\commentoutB}[1]{}
 %\renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
-\commentoutA{\documentclass[prb,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}}
-\commentoutB{\documentclass[prb,aps,nobibnotes,showpacs,superbib,preprint]{revtex4}}
+\commentoutA{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs]{revtex4}}
+\commentoutB{\documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib,showpacs.preprint]{revtex4}}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -24,11 +24,10 @@
 \title{Linear scaling computation of the Fock matrix VII.  \\
        Periodic Density Functional Theory a the $\Gamma$-point.}
 
-\author{C.J. Tymczak and Matt Challacombe}
-
-\affiliation{
-Theoretical Division, Los Alamos National Laboratory,
-Los Alamos, NM 87545, USA}
+\author{C.J. Tymczak}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
+\author{Matt Challacombe}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, New Mexico 87545 }
 
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
@@ -51,13 +50,12 @@ phases will be demonstrated.
 %
 \end{abstract}
 
-\pacs{02.60.Dc,31.15.Ne,71.15Dx,71.15Nc}
+\pacs{71.10.-w,71.15.-m,71.20.-b,31.15.Ne}
 
 \maketitle
 
-\footnotetext[3]{\tt tymczak@lanl.gov}
-%\footnotetext[6]{\tt mchalla@lanl.gov}
-\footnotetext[4]{Preprint LA-UR-03-7723.}
+\footnotetext[1]{\tt tymczak@lanl.gov}
+\footnotetext[2]{Preprint LA-UR-03-7723.}
 
 \section{INTRODUCTION}
 In recent years several successful methods for the calculating the electronic structure of
@@ -174,7 +172,7 @@ yield all possible translational symmetries through variation of the reciprocal 
 {\bf k}.     
 For small system sizes with high symmetry, a careful sampling of reciprocal space is required  
 for an accurate description of the periodic system.  An alternative approach to including these 
-important symmetries is to set ${\bf K}=0$ but to use a larger supercell created through 
+important symmetries is to set ${\bf k}=0$, and then use a larger supercell created through 
 replication and translation of the primitive unit cell.  
 This is the supercell $\Gamma$-point approximation, used
 primarily for the study of defects and vacancies rather than as a replacement for 
@@ -647,7 +645,8 @@ localization of the atomic orbitals.
 \begin{table}
 \caption{Comparison of {\sc Crystal98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
 8-511/8-631G/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
-$N_{\rm at}=2$ and 8 are listed in Appendix~\ref{FracCoords}.}\label{NaCl8511}
+$N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
+\label{NaCl8511}
 \center{
 \begin{tabular}{lcll}
 \toprule
@@ -694,8 +693,9 @@ $ ^g$Cubic  \\
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
          $k$-space integration with {\sc Crystal98} for MgO at the 8-61G/8-51G/BLYP
-         level of theory at a {\it tight} accuracy level. The lattice coordinates for $N_{\rm at}=2$ and 8 
-         are listed in Appendix~\ref{FracCoords}.}\label{MgOGammaPt}
+         level of theory at a {\it tight} accuracy level. The lattice coordinates for 
+	 $N_{\rm at}=2$ and 8 are from Ref.~[\cite{PBCCoordinates}].}
+\label{MgOGammaPt}
 \center{
 \begin{tabular}{lrll}
 \toprule
@@ -720,7 +720,8 @@ $ ^g$Cubic  \\
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation for Diamond, 
          computed with {\sc MondoSCF} at the 6-21G*/BLYP level of theory at a {\it good} accuracy level. The  
-         lattice coordinates for $N_{\rm at}=8$ are listed in Appendix~\ref{FracCoords}.}\label{DiamondGammaPt}
+         lattice coordinates for $N_{\rm at}=8$ are from Ref.~[\cite{PBCCoordinates}].}
+\label{DiamondGammaPt}
 \center{
 \begin{tabular}{rll}
 \toprule
@@ -1055,80 +1056,94 @@ where,
 and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
-\newpage
 
 
-\section{Coordinates of Validation Suite}\label{FracCoords}
+\section{Thresholds}\label{Thresholds}
+
+There are four thresholds that control the numerical precision of the linear scaling algorithms
+in {\sc MondoSCF}.  They are the matrix threshold $\tau_{\rm \scriptscriptstyle MTRIX}$
+described in Ref.~[\onlinecite{ANiklasson03}], the two-electron threshold  $\tau_{\rm \scriptscriptstyle 2E}$ ({\tt thresh} in Ref.~[\onlinecite{ESchwegler97}]),
+the distribution threshold   $\tau_{\rm \scriptscriptstyle DIST}$ described in Ref.~[\onlinecite{CTymczak04A}],
+and the HiCu threshold $\tau_{\rm \scriptscriptstyle HICU}$ used to set the exchange-correlation grid ($\tau_r$ in 
+Ref.~[\onlinecite{MChallacombe00A}]).  The threshold $\tau_{\rm \scriptscriptstyle 2E}$ also controls accuracy of the
+Coulomb matrix as discussed in Ref.~[\onlinecite{CTymczak04A}].
+These thresholds, listed in Table~\ref{Table:AccurLevels},  have been 
+calibrated over a wide range of systems to yield a minimum of  4, 6 and 8 digits of relative accuracy in the total 
+energy with {\tt LOOSE}, {\tt GOOD} and {\tt TIGHT} respectively.    Typically however, one additional digit is achieved for 
+models that contain Hartree-Fock exchange.
 
 \begin{table}[h]
-\caption{Fractional coordinates for the Triclinic 2 atom unit cell of NaCl, corresponding to the 
-         calculations reported in Tables~\ref{NaCl8511} and \ref{NaClGammaPt}.  Length of the unit cell is 
-         $a=b=c=3.97394011$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-Na &    0.000 &  0.000 &  0.000  \\
-Cl &    0.500 &  0.500 &  0.500  \\
-\botrule
-\end{tabular}}
-\end{table}
-%
-%
-%
-\begin{table}[h]
-\caption{Fractional coordinates for the Triclinic 2 atom unit cell of MgO, corresponding to the 
-         calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
-         $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-O  &    0.000 &   0.000 &  0.000  \\
-Mg &    0.500 &   0.500 &  0.500  \\
-\botrule
-\end{tabular}}
-\end{table}
-%
-%
-%
-\begin{table}[h]
-\caption{Fractional coordinates for the 8 atom unit cell of Diamond, corresponding to the supercell calculations
-         reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
-\center{
-\begin{tabular}{cccc}
-\toprule
- Atom &  X  & Y  & Z \\
-\colrule
-C &     0.125 &    0.125 &    0.125  \\
-C &     0.375 &    0.375 &    0.375  \\
-C &     0.625 &    0.625 &    0.125  \\
-C &     0.875 &    0.875 &    0.375  \\
-C &     0.625 &    0.125 &    0.625  \\
-C &     0.875 &    0.375 &    0.875  \\
-C &     0.125 &    0.625 &    0.625  \\
-C &     0.375 &    0.875 &    0.875  \\
-\botrule
-\end{tabular}}
-%
-%
-%
-\caption{The various thresholds which enter into our three levels of accuracy}
+\caption{Accuracy goals and corresponding thresholds that control precision of the {\sc MondoSCF} linear scaling algorithms.}
 \label{Table:AccurLevels}
 \center{
-\begin{tabular}{ccccc}
+\begin{tabular}{lllll}
 \toprule
-Level  & Matrix & Penetration & QCTC/ONX & Distribution \\ 
+Accuracy        &  $\tau_{\rm \scriptscriptstyle MTRIX} $ & $\tau_{\rm \scriptscriptstyle 2E}$ & $\tau_{\rm \scriptscriptstyle DIST}$ & $\tau_{\rm \scriptscriptstyle HICU}$ \\ 
 \colrule
-loose     & $10^{-4}$ & $10^{-3}$ & $10^{-6}$ & $10^{-8}$ \\
-good      & $10^{-5}$ & $10^{-5}$ & $10^{-8}$ & $10^{-10}$ \\
-tight     & $10^{-6}$ & $10^{-7}$ & $10^{-10}$ & $10^{-12}$ \\
-%verytight & $10^{-7}$ & $10^{-9}$ & $10^{-12}$ & $10^{-14}$ \\
+{\tt LOOSE}     & $10^{-4}$ & $10^{-6}$  & $10^{-8}$  & $10^{-3}$ \\
+{\tt GOOD}      & $10^{-5}$ & $10^{-8}$  & $10^{-10}$ & $10^{-5}$ \\
+{\tt TIGHT}     & $10^{-6}$ & $10^{-10}$ & $10^{-12}$ & $10^{-7}$ \\
 \botrule
 \end{tabular}}
 \end{table}
 
+
+%\section{Coordinates of Validation Suite}\label{FracCoords}
+%
+%\begin{table}[h]
+%\caption{Fractional coordinates for the Triclinic 2 atom unit cell of NaCl, corresponding to the 
+%         calculations reported in Tables~\ref{NaCl8511} and \ref{NaClGammaPt}.  Length of the unit cell is 
+%         $a=b=c=3.97394011$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
+%\center{
+%\begin{tabular}{cccc}
+%\toprule
+% Atom &  X  & Y  & Z \\
+%\colrule
+%Na &    0.000 &  0.000 &  0.000  \\
+%Cl &    0.500 &  0.500 &  0.500  \\
+%\botrule
+%\end{tabular}}
+%\end{table}
+%
+%
+%
+%\begin{table}[h]
+%\caption{Fractional coordinates for the Triclinic 2 atom unit cell of MgO, corresponding to the 
+%         calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
+%         $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
+%\center{
+%\begin{tabular}{cccc}
+%\toprule
+% Atom &  X  & Y  & Z \\
+%\colrule
+%O  &    0.000 &   0.000 &  0.000  \\
+%Mg &    0.500 &   0.500 &  0.500  \\
+%\botrule
+%\end{tabular}}
+%\end{table}
+%
+%
+%
+%\begin{table}[h]
+%\caption{Fractional coordinates for the 8 atom unit cell of Diamond, corresponding to the supercell calculations
+%         reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
+%\center{
+%\begin{tabular}{cccc}
+%\toprule
+% Atom &  X  & Y  & Z \\
+%\colrule
+%C &     0.125 &    0.125 &    0.125  \\
+%C &     0.375 &    0.375 &    0.375  \\
+%C &     0.625 &    0.625 &    0.125  \\
+%C &     0.875 &    0.875 &    0.375  \\
+%C &     0.625 &    0.125 &    0.625  \\
+%C &     0.875 &    0.375 &    0.875  \\
+%C &     0.125 &    0.625 &    0.625  \\
+%C &     0.375 &    0.875 &    0.875  \\
+%\botrule
+%\end{tabular}}
+%
+%
+%
 
 \end{document}
