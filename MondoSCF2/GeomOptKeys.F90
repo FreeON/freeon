@@ -39,6 +39,8 @@ MODULE GeomOptKeys
     CHARACTER(LEN=9),  PARAMETER :: CoordType_DoNewChol='DoNewChol'
     CHARACTER(LEN=9),  PARAMETER :: CoordType_DoClssTrf='DoClssTrf'
     CHARACTER(LEN=7),  PARAMETER :: CoordType_DoFixMM='DoFixMM'
+    CHARACTER(LEN=8),  PARAMETER :: MaxAtoms='MaxAtoms'
+    CHARACTER(LEN=10), PARAMETER :: MaxLattice='MaxLattice'
 !-------------------------------------------------
 !  Parsing keys for <Options.StpDescInvH=>
 !

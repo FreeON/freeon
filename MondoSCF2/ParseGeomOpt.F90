@@ -111,6 +111,16 @@ MODULE ParseGeomOpt
      ! GOpt%CoordCtrl%VDWFact=GOpt%CoordCtrl%VDWFact*0.8 !default value
      ENDIF
      !
+     ! Parse for MaxAtoms and MaxLattice for Alternating optimization
+     !
+     IF(.NOT.OptIntQ(Inp,MaxAtoms,GOpt%GConvCrit%MaxAtoms)) THEN
+       GOpt%GConvCrit%MaxAtoms=10000 !default value
+     ENDIF
+     IF(.NOT.OptIntQ(Inp,MaxLattice,GOpt%GConvCrit%MaxLattice)) THEN
+       GOpt%GConvCrit%MaxLattice=1 !default value
+     ENDIF
+     !
+     !
      ! Parse for Maximum angle and maximum bondlength displacements
      !
      IF(.NOT.OptDblQ(Inp,MaxAngle,GOpt%CoordCtrl%MaxAngle)) THEN

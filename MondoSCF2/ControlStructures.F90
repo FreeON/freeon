@@ -176,6 +176,8 @@ MODULE ControlStructures
      LOGICAL                            :: Alternate 
      LOGICAL                            :: FixedAtomsFirst
      LOGICAL                            :: ExplLatt    
+     INTEGER                            :: MaxLattice
+     INTEGER                            :: MaxAtoms  
   END TYPE GConvCrit 
   !
   TYPE GOptStat 

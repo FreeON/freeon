@@ -2010,8 +2010,6 @@ CONTAINS
      Print2= Print>=DEBUG_GEOP_MAX
      NatmsLoc=SIZE(BoxCarts,2)
      NCart=3*NatmsLoc+9
-     MaxLattice=1
-     MaxAtoms=100000
      !
      ! Clean gradients from input constraints
      !
@@ -2034,15 +2032,15 @@ CONTAINS
      !
      IF(LatticeOnly) THEN
        LatticeOnly=(GOpt%GOptStat%LMaxCGrad>GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxLattice)
+                   (AltCount<GOpt%GConvCrit%MaxLattice)
        IF(LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
          AltCount=1
        ENDIF
      ELSE
-       LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).AND. &
-                   (AltCount<MaxAtoms)
+       LatticeOnly=(GOpt%GOptStat%MaxCGrad<GOpt%GConvCrit%Grad).OR. &
+                   (AltCount>GOpt%GConvCrit%MaxAtoms)
        IF(.NOT.LatticeOnly) THEN
          AltCount=AltCount+1
        ELSE
