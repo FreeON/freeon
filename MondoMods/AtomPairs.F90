@@ -152,13 +152,18 @@ CONTAINS
 ! Set up the lattice vecters to sum over 
 ! Also, Added a Factor that Takes into Account the Box Size and Shape
 !-------------------------------------------------------------------------------
-  SUBROUTINE SetCellNumber(GM)
+  SUBROUTINE SetCellNumber(GM,Rad_O)
     TYPE(CRDS)                     :: GM
     REAL(DOUBLE)                   :: Radius
+    REAL(DOUBLE), OPTIONAL         :: Rad_O
 !
 !   Calculate Radius
 !
-    Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
+    IF(PRESENT(Rad_O)) THEN
+       Radius = Rad_O
+    ELSE
+       Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
+    ENDIF
     CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
     CALL Sort_CellSet(CS_OUT)
 !
