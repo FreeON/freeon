@@ -509,6 +509,8 @@ CONTAINS
     DCpq(0:LMtot,3)=(DCpq(0:LMtot,3)-Cpq(0:LMtot))*Factor
     DSpq(0:LMtot,3)=(DSpq(0:LMtot,3)-Spq(0:LMtot))*Factor
 !
+    CALL IrRegular(MaxL,Px,Py,Pz)
+!
   END SUBROUTINE DIrRegular_old
 !========================================================================================
 ! Dirivative of the Irregular Fuction
@@ -525,22 +527,24 @@ CONTAINS
 !
     CALL IrRegular(MaxL,Px,Py,Pz)
 !
-    IF((Px*Px+Py*Py) < 1.D-20) THEN
+    IF(SQRT((Px*Px+Py*Py)) < 1.D-12) THEN
        DrDz     = One/Pz
+       DCpq(1:LSP(MaxL),1:3) = Zero
+       DSpq(1:LSP(MaxL),1:3) = Zero
        DO L=0,MaxL
           FrZ      = -DBLE(L+1)*DrDz
-          DO M = 0,L
-             LM  = LTD(L)+M
+          LM  = LTD(L)
+          IF(L .NE. 0) THEN
 !            x-derivative
-             DCpq(LM,1) = Zero
-             DSpq(LM,1) = Zero
-!            x-derivative
-             DCpq(LM,2) = Zero
-             DSpq(LM,2) = Zero
-!            z-derivative
-             DCpq(LM,3) = FrZ*Cpq(LM)
-             DSpq(LM,3) = FrZ*Spq(LM)
-          ENDDO
+             DCpq(LM+1,1) = Zero
+             DSpq(LM+1,1) = Half*FrZ*Cpq(LM)
+!            y-derivative
+             DCpq(LM+1,2) = Half*FrZ*Cpq(LM)
+             DSpq(LM+1,2) = Zero
+          ENDIF
+!         z-derivative
+          DCpq(LM,3) = FrZ*Cpq(LM)
+          DSpq(LM,3) = Zero
        ENDDO
        RETURN
     ENDIF
