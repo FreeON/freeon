@@ -191,8 +191,8 @@ PROGRAM MakeRho
                  Pair%B(2) = By+CS%CellCarts%D(2,NC)
                  Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
                  Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                      + (Pair%A(2)-Pair%B(2))**2 &
-                      + (Pair%A(3)-Pair%B(3))**2
+                           + (Pair%A(2)-Pair%B(2))**2 &
+                           + (Pair%A(3)-Pair%B(3))**2
                  IF(TestAtomPair(Pair)) THEN
                     NN = Pair%NA*Pair%NB
                     CALL RhoBlk(BS,MD,Dmat%MTrix%D(R:R+NN-1),Pair,First,Rho)
@@ -219,6 +219,7 @@ PROGRAM MakeRho
 !------------------------------------------------------------
 !  Remove distribution which do not contibute significantly to the density
 !
+!  CALL Integrate_HGRho(Rho)
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
   CALL Integrate_HGRho(Rho2)
 !------------------------------------------------------------

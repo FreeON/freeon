@@ -153,6 +153,10 @@ CONTAINS
        RhoSumN = RhoSumN + Weig
     ENDDO
 !
+    IF(ABS(RhoSumE+RhoSumN)>1.D-2) &
+       CALL Halt(' Density hosed! Rho_e = '//TRIM(DblToMedmChar(Two*RhoSumE)) &
+                              //',Rho_n = '//TRIM(DblToMedmChar(Two*RhoSumN)))
+
 !    WRITE(*,*) ' Int[Rho_E] = ',RhoSumE
 !    WRITE(*,*) ' Int[Rho_N] = ',RhoSumN   
 !    WRITE(*,*) ' Int[Rho_T] = ',RhoSumN+RhoSumE
