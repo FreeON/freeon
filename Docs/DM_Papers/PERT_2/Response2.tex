@@ -330,12 +330,12 @@ Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexi
  sufficient convergence criteria are formulated by the first 
  order Coupled Perturbed Self-Consistent Field 
  (CPSCF) equations \cite{Furche_2001} reading
- \begin{gather}
+ \begin{equation}
    [\mathcal{F}^{a},\mathcal{D}^{0}]+
-	       [\mathcal{F}^{0},\mathcal{D}^{a}]=0,\quad\textrm{and}\quad\\
+	       [\mathcal{F}^{0},\mathcal{D}^{a}]=0,\quad\textrm{and}\quad
    \mathcal{D}^{a}=\mathcal{D}^{a} \mathcal{D}^{0}
                      +\mathcal{D}^{0} \mathcal{D}^{a}.
- \end{gather}
+ \end{equation}
  The first relation is an extension to the
  well-known Hartree-Fock or Kohn-Sham (KS) equations
  and the second equation is an idempotency-like
@@ -363,23 +363,23 @@ Los Alamos National Laboratory, Theoretical Division, Los Alamos 87545, New Mexi
  density matrix $\mathcal{D}^a_{n+1}$ is obtained by 
  the density matrix perturbation method \cite{Anders}
  repeated here for completeness
-\begin{equation}
-\begin{split}
-  \mathcal{X}^a_{i+1}&=
+\begin{eqnarray}
+%\begin{split}
+  \mathcal{X}^a_{i+1}&=&
           \mathcal{X}^a_{i}\mathcal{X}^0_{i}+\mathcal{X}^0_{i}\mathcal{X}^a_{i},\\
-  \mathcal{X}^0_{i+1}&=(\mathcal{X}^0_{i})^2
+  \mathcal{X}^0_{i+1}&=&(\mathcal{X}^0_{i})^2
           \qquad\qquad\quad Tr[\mathcal{X}^0_{i}]\ge N_e \\
-\end{split}
-\end{equation}
+%\end{split}
+\end{eqnarray}
 and
-\begin{equation}
-\begin{split}
-  \mathcal{X}^a_{i+1}&=2\mathcal{X}^a_{i}-\mathcal{X}^a_{i}\mathcal{X}^0_{i}
+\begin{eqnarray}
+%\begin{split}
+  \mathcal{X}^a_{i+1}&=&2\mathcal{X}^a_{i}-\mathcal{X}^a_{i}\mathcal{X}^0_{i}
           -\mathcal{X}^0_{i}\mathcal{X}^a_{i},\\
-  \mathcal{X}^0_{i+1}&=2\mathcal{X}^0_{i}-(\mathcal{X}^0_{i})^2
+  \mathcal{X}^0_{i+1}&=&2\mathcal{X}^0_{i}-(\mathcal{X}^0_{i})^2
           \qquad Tr[\mathcal{X}^0_{i}]< N_e,
-\end{split}
-\end{equation}
+%\end{split}
+\end{eqnarray}
  with
  \begin{equation}
   \mathcal{X}^0_{0}=\frac{\mathcal{F}_{min}-\mathcal{F}^0}
@@ -490,7 +490,7 @@ and
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
   }\label{tab:Polari_Values}
-  \begin{ruledtabular}
+%  \begin{ruledtabular}
     \begin{tabular}{cccccc}
       &\multicolumn{1}{c}{6-31G\footnotemark[1]}
       &\multicolumn{2}{c}{6-31G\footnotemark[2]}
@@ -507,7 +507,7 @@ and
       130 & $-$      &  &  & 4.786437 & 5.704947  \\
       150 & $-$      &  &  & 4.775231 & 5.693447  \\
     \end{tabular}
-  \end{ruledtabular}
+%  \end{ruledtabular}
  \footnotetext[1]{GAMESS calculations.}
  \footnotetext[2]{MondoSCF calculations.}
 \end{table}
