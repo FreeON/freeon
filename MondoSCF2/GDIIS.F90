@@ -378,16 +378,17 @@ CONTAINS
 !----------------------------------------------------------------------
 !
    SUBROUTINE PIntGDIIS(XYZ, &
-     Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath, &
+     PrintIn,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath, &
      RefStruct,RefGrad,SRStruct,SRDispl)
      !
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     INTEGER                     :: Print
+     LOGICAL                     :: Print
      TYPE(BackTrf)               :: GBackTrf
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl
      TYPE(Constr)                :: GConstr
      CHARACTER(LEN=*)            :: SCRPath
+     INTEGER                     :: PrintIn
      INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc,NIntC
      INTEGER                     :: DimGDIIS
      INTEGER                     :: GDIISMemory
@@ -398,9 +399,10 @@ CONTAINS
      TYPE(DBL_VECT)              :: Coeffs,Vect,Scale
      REAL(DOUBLE)                :: Sum
      TYPE(INTC)                  :: IntCs
-     TYPE(INT_VECT)              :: Actives
+     TYPE(INT_VECT)              :: Actives,RangeType
      !
-     IF(Print>=DEBUG_GEOP_MIN) THEN
+     Print=PrintIn>=DEBUG_GEOP_MIN
+     IF(Print) THEN
        WRITE(*,200) 
        WRITE(Out,200) 
      ENDIF
@@ -424,12 +426,13 @@ CONTAINS
      CALL New(XYZ2,(/3,NatmsLoc/))
      CALL New(Vect,DimGDIIS)
      CALL New(Actives,NIntC)
+     CALL New(RangeType,NIntC)
+     RangeType%I=0
      Actives%I=1
      DO I=1,GDIISMemory
        Vect%D=SRStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
        CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
-         CALL AngleToPos(IntCs,IntCs%Value)
        PrISR%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -438,7 +441,6 @@ CONTAINS
        Vect%D=RefStruct%D(1:DimGDIIS,I)
        CALL CartRNK1ToCartRNK2(Vect%D,XYZ2%D)
        CALL INTCValue(IntCs,XYZ2%D,GCoordCtrl%LinCrit)
-         CALL AngleToPos(IntCs,IntCs%Value)
        PrIRef%D(1:NIntC,I)=IntCs%Value
        DO J=1,NIntC 
          IF(.NOT.IntCs%Active(J)) Actives%I(J)=0
@@ -449,11 +451,15 @@ CONTAINS
      CALL Delete(Vect)
      CALL Delete(XYZ2)
      !
-     ! Convert angles into degrees and check actives.
+     ! Set types of angle ranges
+     !
+     CALL SetRangeType(RangeType%I,IntCs,PrIRef%D,PrISR%D)
+     !
+     ! Convert angle-displacements into degrees and check actives.
      !
      Sum=180.D0/PI
      DO I=1,NIntC
-       IF(IntCs%Def(I)(1:4)/='STRE') THEN
+       IF(HasAngle(IntCs%Def(I))) THEN
          PrIDispl%D(I,:)=Sum*PrIDispl%D(I,:)
        ENDIF
        IF(Actives%I(I)==0) PrIDispl%D(I,:)=Zero
@@ -468,12 +474,14 @@ CONTAINS
      ! Calculate new geometry
      !
      !CALL XYZSum(XYZ,SRStruct%D,Coeffs%D)
-     CALL IntCSum(XYZ,PrISR%D,Coeffs%D,IntCs,Print,GBackTrf, &
-       GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
+     CALL IntCSum(XYZ,PrISR%D,RangeType%I, &
+                  Coeffs%D,IntCs,PrintIn,GBackTrf, &
+                  GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
      !
      ! Tidy up
      !
      CALL Delete(Actives)
+     CALL Delete(RangeType)
      CALL Delete(Coeffs)
      CALL Delete(PrISR)
      CALL Delete(PrIRef)
@@ -573,12 +581,13 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE IntCSum(XYZ,PrISR,Coeffs,IntCs,Print,GBackTrf, &
-       GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
+   SUBROUTINE IntCSum(XYZ,PrISR,RangeType,Coeffs,IntCs,PrintIn, &
+       GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath,Actives)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,PrISR
      REAL(DOUBLE),DIMENSION(:)   :: Coeffs
+     INTEGER,DIMENSION(:)        :: RangeType
      TYPE(INTC)                  :: IntCs
-     INTEGER                     :: Print
+     LOGICAL                     :: Print
      TYPE(BackTrf)               :: GBackTrf
      TYPE(TrfCtrl)               :: GTrfCtrl
      TYPE(CoordCtrl)             :: GCoordCtrl
@@ -587,8 +596,10 @@ CONTAINS
      TYPE(DBL_VECT)              :: Vect
      INTEGER                     :: I,NIntC,GDIISMemory
      TYPE(INT_VECT)              :: Actives
+     INTEGER                     :: PrintIn
      !
-     IF(Print>=DEBUG_GEOP_MIN) THEN
+     PRint=PrintIn>=DEBUG_GEOP_MIN
+     IF(Print) THEN
        WRITE(*,200) 
        WRITE(Out,200) 
      ENDIF
@@ -607,15 +618,101 @@ CONTAINS
      ! For inactive internals set the very last value
      !
      DO I=1,NIntC
-       IF(Actives%I(I)==0) Vect%D(I)=PrISR(I,GDIISMemory)
+       IF(Actives%I(I)==0.OR. &
+          RangeType(I)==2) Vect%D(I)=PrISR(I,GDIISMemory)
      ENDDO
-     CALL AngleToNeg(IntCs,Vect%D)
-     IF(Print>=DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
+     CALL RangeBack(IntCs,RangeType,Vect%D)
+       CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit)
+       Vect%D=Vect%D-IntCs%Value
+       !CALL RedundancyOff(Vect%D,SCRPath,Print)
+     IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted change ')
+       Vect%D=IntCs%Value+Vect%D
+     IF(Print) CALL PrtIntCoords(IntCs,Vect%D,'predicted internals ')
      !
      CALL InternalToCart(XYZ,IntCs,Vect%D, &
-       Print,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
+       PrintIn,GBackTrf,GTrfCtrl,GCoordCtrl,GConstr,SCRPath)
      CALL Delete(Vect)
    END SUBROUTINE IntCSum
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE SetRangeType(RangeType,IntCs,PrIRef,PrISR)
+     TYPE(INTC)                  :: IntCs
+     INTEGER,DIMENSION(:)        :: RangeType
+     REAL(DOUBLE),DIMENSION(:,:) :: PrIRef,PrISR
+     INTEGER                     :: I,J,K,NIntC,GDIISMemory
+     TYPE(DBL_VECT)              :: VectSR,VectRef
+     REAL(DOUBLE)                :: MaxAng,MinAng,MaxRange,PIHalf
+     REAL(DOUBLE)                :: Sum1,Sum2,TwoPi,Conv
+     !
+     ! Set RangeType(I) to 0: no 'remapping', default
+     !                     1: do 'remapping at 180 degrees of tors/outp 
+     !                     2: range too broad, use last geom's value
+     Conv=PI/180.D0  
+     MaxRange=10.D0*Conv
+     PIHalf=PI*Half
+     TwoPi=Two*Pi
+     NIntC=SIZE(PrISR,1)
+     GDIISMemory=SIZE(PrISR,2) 
+     !
+     CALL New(VectRef,GDIISMemory)
+     CALL New(VectSR,GDIISMemory)
+     DO I=1,NIntC
+       RangeType(I)=0
+       IF(HasAngle(IntCs%Def(I))) THEN
+         DO J=1,GDIISMemory ; VectRef%D(J)=PrIRef(I,J) ; ENDDO
+         DO J=1,GDIISMemory ; VectSR%D(J)=PrISR(I,J) ; ENDDO
+         MaxAng=MaxVal(VectRef%D)
+         MaxAng=MAX(MaxAng,MaxVal(VectSR%D))
+         MinAng=MinVal(VectRef%D)
+         MinAng=MIN(MinAng,MinVal(VectSR%D))
+         IF(HasTorsOutP(IntCs%Def(I))) THEN
+           IF(MaxAng*MinAng<Zero) THEN
+             IF(MaxAng>PiHalf.AND.MinAng<-PiHalf) THEN
+               IF(TwoPi+MinAng-MaxAng>MaxRange) THEN
+                 RangeType(I)=2
+               ELSE
+                 RangeType(I)=1
+                 DO J=1,GDIISMemory
+                   Sum1=PrIRef(I,J)
+                   Sum2=PrISR(I,J)
+                   PrIRef(I,J)=SIGN(PI,Sum1)-Sum1
+                   PrISR(I,J)=SIGN(PI,Sum2)-Sum2
+                 ENDDO
+               ENDIF
+             ENDIF
+           ENDIF
+         ENDIF
+         IF(MaxAng*MinAng<Zero) THEN
+           IF(MaxAng+MinAng>MaxRange) RangeType(I)=2
+         ELSE
+           IF(MaxAng-MinAng>MaxRange) RangeType(I)=2
+         ENDIF
+       ENDIF
+     ENDDO 
+     !
+     CALL Delete(VectRef)
+     CALL Delete(VectSR)
+   END SUBROUTINE SetRangeType
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE RangeBack(IntCs,RangeType,Vect)
+     TYPE(INTC)                :: IntCs
+     INTEGER,DIMENSION(:)      :: RangeType
+     REAL(DOUBLE),DIMENSION(:) :: Vect
+     REAL(DOUBLE)              :: Sum 
+     INTEGER                   :: I,J,NIntC
+     !
+     NIntC=SIZE(Vect) 
+     IF(NIntC/=SIZE(RangeType))CALL Halt('Dimension error in RangeBack')
+     DO I=1,NIntC
+       IF(RangeType(I)==1) THEN
+         Sum=Vect(I)
+         Vect(I)=SIGN(PI,Sum)-Sum
+       ENDIF  
+     ENDDO
+   END SUBROUTINE RangeBack
 !
 !---------------------------------------------------------------------
 !

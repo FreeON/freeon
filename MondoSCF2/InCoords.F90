@@ -4293,49 +4293,21 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE AngleToPos(IntCs,Vect)
-     TYPE(INTC)   :: IntCs
-     REAL(DOUBLE) :: Vect(:),TwoPi
-     INTEGER      :: I,J,NIntC
-     !
-     NIntC=SIZE(IntCs%Def)
-     TwoPi=Two*Pi
-     DO I=1,NIntC
-       IF(IntCs%Def(I)(1:4)=="TORS") THEN
-         IF(Vect(I)<Zero) Vect(I)=TwoPi+Vect(I)
-       ELSE IF(IntCs%Def(I)(1:4)=="OUTP") THEN
-         IF(Vect(I)>Zero) THEN
-           Vect(I)=Pi-Vect(I)
-         ELSE
-           Vect(I)=-Pi-Vect(I)
-         ENDIF
-         IF(Vect(I)<Zero) Vect(I)=TwoPi+Vect(I)
-       ENDIF
-     ENDDO
-   END SUBROUTINE AngleToPos
+   LOGICAL FUNCTION HasAngle(Char)
+     CHARACTER(LEN=*) :: Char
+     HasAngle=(Char(1:4)=='BEND'.OR. &
+               Char(1:4)=='LINB'.OR. &
+               Char(1:4)=='OUTP'.OR. &
+               Char(1:4)=='TORS')
+   END FUNCTION HasAngle
 !
 !----------------------------------------------------------------------
 !
-   SUBROUTINE AngleToNeg(IntCs,Vect)
-     TYPE(INTC)   :: IntCs
-     REAL(DOUBLE) :: Vect(:),TwoPi
-     INTEGER      :: I,J,NIntC
-     !
-     NIntC=SIZE(IntCs%Def)
-     TwoPi=Two*Pi
-     DO I=1,NIntC
-       IF(IntCs%Def(I)(1:4)=="TORS") THEN 
-         IF(Vect(I)>Pi) Vect(I)=Vect(I)-TwoPi
-       ELSE IF(IntCs%Def(I)(1:4)=="OUTP") THEN
-         IF(Vect(I)>Pi) Vect(I)=Vect(I)-TwoPi
-         IF(Vect(I)>Zero) THEN
-           Vect(I)=Pi-Vect(I)
-         ELSE
-           Vect(I)=-Pi-Vect(I)
-         ENDIF
-       ENDIF
-     ENDDO
-   END SUBROUTINE AngleToNeg
+   LOGICAL FUNCTION HasTorsOutP(Char)
+     CHARACTER(LEN=*) :: Char
+     HasTorsOutP=(Char(1:4)=='OUTP'.OR. &
+                  Char(1:4)=='TORS')
+   END FUNCTION HasTorsOutP
 !
 !----------------------------------------------------------------------
 !
