@@ -66,7 +66,13 @@ PROGRAM QCTC
        CALL Get(Rho,'Rho',Args,Current(1))
        CALL Get(RhoPoles)
      ELSE
-       CALL Get(Rho,'Rho',Args,1)
+!!!!!!       CALL Get(Rho,'Rho',Args,1)
+!!!!!!       CALL Get(RhoPoles)
+#ifdef PARALLEL
+       CALL GetDistrRho('Rho',Args,1)
+#else
+       CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
+#endif
        CALL Get(RhoPoles)
      ENDIF
   ELSE
