@@ -456,8 +456,8 @@ CONTAINS
 !
 !----------------------------------------------------------------
 !
-   SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC,GCoordCtrl,TOPS,&
-                            HFileIn_O,iCLONE_O,iGEO_O)
+   SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC,GCoordCtrl,Bond, &
+                            AtmB,TOPS,HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This routine defines internal coordinates
      ! being used in geometry manipulations.
@@ -470,8 +470,8 @@ CONTAINS
      INTEGER                        :: NTorsion
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ
      TYPE(INTC)                     :: IntCs
-     TYPE(ATOMBONDS)                :: AtmBCov,AtmBVDW,AtmBTot
-     TYPE(BONDDATA)                 :: BondCov,BondVDW,BondTot
+     TYPE(ATOMBONDS)                :: AtmBCov,AtmBVDW,AtmBTot,AtmB
+     TYPE(BONDDATA)                 :: BondCov,BondVDW,BondTot,Bond
      CHARACTER(LEN=*),OPTIONAL      :: HFileIn_O
      INTEGER,OPTIONAL               :: iCLONE_O,iGEO_O
      INTEGER                        :: MaxBonds
@@ -496,11 +496,13 @@ CONTAINS
      CALL BondingScheme(XYZ,AtNum,2,AtmBVDW,BondVDW,TOPS,Box,GCoordCtrl)
      CALL MergeBonds(BondCov,BondVDW,BondTot)
      CALL SortBonds(NatmsLoc,AtmBTot,BondTot)
+     CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
+     CALL Set_AtmB_EQ_AtmB(AtmB,AtmBTot)
      !
-     IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
-        PRESENT(iGEO_O)) THEN
-       CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
-     ENDIF
+  !  IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
+  !     PRESENT(iGEO_O)) THEN
+  !    CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
+  !  ENDIF
      !
      ! Now define bond angles and torsions
      !
@@ -712,7 +714,7 @@ CONTAINS
 !-----------------------------------------------------------------------
 !
    SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,& 
-                       SCRPath,CtrlCoord,CtrlConstr,TOPS, &
+                       SCRPath,CtrlCoord,CtrlConstr,TOPS,Bond,AtmB, &
                        HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This subroutine constructs the IntCs array, which holds
@@ -732,6 +734,8 @@ CONTAINS
      TYPE(INTC)                  :: IntCs,IntC_Bas,IntC_VDW
      TYPE(INTC)                  :: IntC_Extra,IntC_New
      TYPE(INTC)                  :: IntC_Cart
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB
      CHARACTER(LEN=*)            :: SCRPath
      TYPE(CoordCtrl)             :: CtrlCoord
      TYPE(Constr)                :: CtrlConstr
@@ -749,8 +753,6 @@ CONTAINS
      TYPE(INT_VECT)              :: AtNum
      TYPE(INT_RNK2)              :: Top12
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
-     TYPE(BONDDATA)              :: BondCov,BondVDW
-     TYPE(ATOMBONDS)             :: AtmBCov,AtmBVDW 
      TYPE(TOPOLOGY)              :: TOPS
      TYPE(IntCBox)               :: Box
      !
@@ -766,11 +768,11 @@ CONTAINS
      IF(Refresh==1) THEN !!! Total refresh
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
          CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
-                            TOPS,HFileIn_O=HFileIn_O,iCLONE_O=iCLONE_O,&
-                            iGEO_O=iGEO_O)
+                            Bond,AtmB,TOPS,HFileIn_O=HFileIn_O, &
+                            iCLONE_O=iCLONE_O,iGEO_O=iGEO_O)
        ELSE
          CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
-                            TOPS)
+                            Bond,AtmB,TOPS)
        ENDIF
      ELSE IF(Refresh==5) THEN !!! use only extra coords from input
        NIntC_Bas=0 
@@ -5214,7 +5216,7 @@ CONTAINS
      TYPE(ATOMBONDS)        :: AtmB
      TYPE(BONDDATA)         :: Bond 
      TYPE(TOPOLOGY)         :: TOPS
-     INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2
+     INTEGER                :: B1,B2,I1B1,I2B1,I1B2,I2B2,II1,II2,TopDim
      !
      DO J=1,AtmB%Count%I(IAt)
        B1=AtmB%Bonds%I(IAt,J)
@@ -5234,6 +5236,8 @@ CONTAINS
          ELSE
            II2=I1B2
          ENDIF
+         TopDim=TOPS%Tot12%I(II1,1)
+         IF(ANY(TOPS%Tot12%I(II1,2:TopDim+1)==II2)) CYCLE
          NAngle=NAngle+1
          Angle%IJK%I(2,NAngle)=IAt
          IF(II1<II2) THEN
@@ -5407,14 +5411,10 @@ CONTAINS
      HDF_CurrentID= &
        OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
      !
-     Tag=TRIM(IntToChar(iGEO))
-     CALL Put(Bond,'Bond'//Tag)
-     CALL Put(AtmB,'AtmB'//Tag)
-     !
      DO I=1,IBack
        Tag=TRIM(IntToChar(iGEO-I))
-       CALL Get(Bond2,'Bond'//Tag)
-       CALL Get(AtmB2,'AtmB'//Tag)
+       CALL Get(Bond2,'Bond',Tag)
+       CALL Get(AtmB2,'AtmB',Tag)
        CALL MergeBondSets(Bond,Bond2,AtmB,AtmB2)
        CALL Delete(AtmB)
        CALL SortBonds(NatmsLoc,AtmB,Bond)

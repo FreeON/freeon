@@ -466,6 +466,7 @@ CONTAINS
      MaxSteps=C%GOpt%GConvCrit%MaxGeOpSteps
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
+       CALL ReSetConnect(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -484,6 +485,7 @@ CONTAINS
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
+       CALL ReSetConnect(C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -514,11 +516,11 @@ CONTAINS
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
        !
-       ! Archive displaced geometries and modified (Lagrange) grads
+       ! Archive displaced geometries 
        !
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        !
-       ! Fill in new geometries 
+       ! Fill in new geometries
        !
        DO iCLONE=1,C%Geos%Clones
          CALL NewGeomFill(C%Geos%Clone(iCLONE))
@@ -579,12 +581,15 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,LagrMult,GradMult, &
+   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn, &
+                  Bond,AtmB,LagrMult,GradMult, &
                   LagrDispl,Convgd,ETot,ELagr,iGEO,iCLONE, &
                   SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,LagrMult,GradMult,LagrDispl
+     TYPE(BONDDATA)              :: Bond
+     TYPE(ATOMBONDS)             :: AtmB
      REAL(DOUBLE)                :: ETot,ELagr
      INTEGER,DIMENSION(:)        :: Convgd
      INTEGER                     :: NIntC,NCart
@@ -619,7 +624,7 @@ CONTAINS
      !
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,NIntC,Refresh,SCRPath, &
-                     GOpt%CoordCtrl,GOpt%Constr,TOPS, &
+                     GOpt%CoordCtrl,GOpt%Constr,TOPS,Bond,AtmB, &
                      HFileIn_O=HFileIn,iCLONE_O=iCLONE,iGEO_O=iGEO)
        IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
                      'optimizer did not find any internal coordinates.')
@@ -776,8 +781,6 @@ CONTAINS
            GOpt%GConvCrit,HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
            Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
            PWD_O=PWDPath)
-        !CALL RedundancyOff(Displ%D,SCRPath,Print)
-        !CALL CutOffDispl(Displ%D,IntCs)
        ENDIF
      END SELECT
     !IF(Print==DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs, &
@@ -1196,9 +1199,10 @@ CONTAINS
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
        CALL ModifyGeom(GOpt,XYZNew%D,AtNumNew%D,GradNew%D, &
+                       GMLoc%Bond,GMLoc%AtmB, &
                        GMLoc%LagrMult%D,GMLoc%GradMult%D, &
                        GMLoc%LagrDispl%D,Convgd,GMLoc%Etotal, &
-                       GMLoc%ELagr,IGeo,iCLONE,SCRPath,PWDPath, &
+                       GMLoc%ELagr,iGEO,iCLONE,SCRPath,PWDPath, &
                        DoNEB,Opts%PFlags%GeOp,Nams%HFile)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
@@ -1257,7 +1261,7 @@ CONTAINS
    SUBROUTINE SetGDIIS(GD)
      TYPE(GDIIS)  :: GD
      !
-     GD%Init    = 4
+     GD%Init    = 5
      GD%MaxMem  = 6
      GD%On=.TRUE.
    END SUBROUTINE SetGDIIS
@@ -1335,6 +1339,18 @@ CONTAINS
      GMLoc%AbCarts%D=GMLoc%Displ%D
      GMLoc%LagrMult%D=GMLoc%LagrDispl%D
    END SUBROUTINE NewGeomFill
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE ReSetConnect(G)
+     TYPE(Geometries)   :: G
+     INTEGER            :: iCLONE
+     !
+     DO iCLONE=1,G%Clones
+       CALL Delete(G%Clone(iCLONE)%Bond)
+       CALL Delete(G%Clone(iCLONE)%AtmB)
+     ENDDO
+   END SUBROUTINE ReSetConnect
 !
 !-------------------------------------------------------------------
 !

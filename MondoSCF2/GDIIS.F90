@@ -444,8 +444,8 @@ CONTAINS
        !
        CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),&
                   A,B,CritFlat,GradCrit,IntCs%Def(I))
-    !  CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
-    !               A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
+     ! CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
+     !              A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
@@ -758,10 +758,11 @@ CONTAINS
      REAL(DOUBLE)              :: SigA,SigB,Chi2,Q,PredGrad
      REAL(DOUBLE)              :: MeanDev,MeanDevOld,MaxDev,MaxDevOld
      REAL(DOUBLE)              :: RMSDev,RMSDevOld
+     REAL(DOUBLE)              :: RMSDevRef,MeanDevRef,MaxDevRef
      REAL(DOUBLE)              :: AFit,BFit,CritFlat,CritGrad,MinG,MinG1
      REAL(DOUBLE)              :: Step,StepS,MaxX,MinX
      INTEGER                   :: I,J,NDim,NFit,K,MWT
-     INTEGER                   :: NFitStart,IStart
+     INTEGER                   :: NFitStart,IStart,NFitRef
      INTEGER                   :: ICount,ICountOld,NBigFit,NFitEnd
      TYPE(DBL_VECT)            :: Devs
      CHARACTER(LEN=*)          :: Def
@@ -797,6 +798,7 @@ CONTAINS
      MeanDevOld=1.D99
      MaxDevOld =1.D99
      RMSDevOld =1.D99
+     NFitRef=0
      DO NFit=NFitStart,NFitEnd     
        IStart=NDim-NFit+1
        !
@@ -818,21 +820,33 @@ CONTAINS
        MaxDev=MAXVAL(Devs%D)
        MeanDev=SUM(Devs%D)/DBLE(NFit)
        RMSDev=SQRT(DOT_PRODUCT(Devs%D,Devs%D)/DBLE(NFit))
-     ! IF(RMSDev<RMSDevOld.OR.NFit==NFitStart) THEN
-       IF(MeanDev<MeanDevOld.OR.NFit==NFitStart) THEN
+       IF(NFitRef/=0) THEN
+         MaxDevRef=MAXVAL(Devs%D(1:NFitRef))
+         MeanDevRef=SUM(Devs%D(1:NFitRef))/DBLE(NFitRef)
+         RMSDevRef=SQRT(DOT_PRODUCT(Devs%D(1:NFitRef),Devs%D(1:NFitRef))/DBLE(NFitRef))
+       ELSE
+         MaxDevRef=Zero ; MeanDevRef=Zero ; RMSDevRef=Zero
+       ENDIF
+       IF(RMSDev<RMSDevOld.OR.NFit==NFitStart) THEN
+     ! IF(MeanDev<MeanDevOld.OR.NFit==NFitStart) THEN
      ! IF(MaxDev<MaxDevOld.OR.NFit==NFitStart) THEN
+     ! IF(MeanDev<MeanDevOld.OR.NFit==NFitStart.OR. &
+     !    MeanDevRef<MeanDevOld*1.15D0) THEN
+         NFitRef=NFit
          IF(ABS(B)>CritFlat) THEN
            MinG=1.D99
            DO J=IStart,NDim
              MinG1=ABS(VectY(J))
              IF(MinG1<MinG) MinG=MinG1
            ENDDO
-           PredGrad=-SIGN(MinG,VectY(NDim))/Two
+         ! PredGrad=-SIGN(MinG,VectY(NDim))/Two
+         ! PredGrad=-VectY(NDim)/Two
+           PredGrad=Zero
            !
            IF(B<Zero) THEN
              B=-B
              A=VectY(NDim)-B*VectX(NDim)
-             PredGrad=-VectY(NDim)
+         !   PredGrad=-VectY(NDim)/Two
            ENDIF
            !
            FitVal=(PredGrad-A)/B
@@ -875,11 +889,14 @@ CONTAINS
      MaxX=MAXVAL(VectX)
      !
      IF(Def(1:4)=='STRE') THEN
-       DeltaMax=0.15D0             
+       DeltaMax=0.30D0             
      ELSE IF(HasAngle(Def)) THEN
-       DeltaMax=7.D0*Conv
+       DeltaMax=15.D0*Conv
      ENDIF
      MaxStep=MIN(DeltaMax,ABS(MaxX-MinX))
+     MaxStep=MAX(MaxStep,GradCrit)
+   ! MaxStep=ABS(MaxX-MinX)
+   ! MaxStep=DeltaMax
      Delta=FitVal-LastVal
      IF(ABS(Delta)>MaxStep) THEN
        FitVal=LastVal+SIGN(MaxStep,Delta)
@@ -1260,6 +1277,8 @@ CONTAINS
          IF(B>Zero) THEN  ! basin of minimum
            FitVal=-A/B
            PredGrad=Zero
+         ! PredGrad=-VectY(NMem)/Two
+         ! FitVal=(PredGrad-A)/B
            RETURN
          ELSE             ! basin of maximum
            CYCLE

@@ -191,8 +191,6 @@ CONTAINS
     INTEGER          :: LastGeo,LastBas,iGEO,NCart,NatmsLoc
     CHARACTER(LEN=DCL) :: chGEO
     TYPE(CRDS)       :: GMLoc
-    TYPE(BONDDATA)   :: Bond
-    TYPE(ATOMBONDS)  :: AtmB
     !
     !-----------------------------------------------------------------!
     ! it is supposed that the number of clones did not change at restart
@@ -209,11 +207,6 @@ CONTAINS
                       "Clone #"//TRIM(IntToChar(iCLONE)))
           chGEO=IntToChar(iGeo)
           CALL Get(GMLoc,chGEO)
-          !
-          IF(iGEO<LastGeo) THEN
-            CALL Get(Bond,'Bond'//chGEO)
-            CALL Get(AtmB,'AtmB'//chGEO)
-          ENDIF
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
         !
@@ -222,12 +215,6 @@ CONTAINS
                       "Clone #"//TRIM(IntToChar(iCLONE)))
           chGEO=IntToChar(iGEO)
           CALL Put(GMLoc,chGEO)
-          IF(iGEO<LastGeo) THEN
-            CALL Put(Bond,'Bond'//chGEO)
-            CALL Put(AtmB,'AtmB'//chGEO)
-            CALL Delete(Bond)
-            CALL Delete(AtmB)
-          ENDIF
         CALL CloseHDFGroup(HDF_CurrentID)
         CALL CloseHDF(HDFFileID)
         CALL Delete(GMLoc)
