@@ -1261,8 +1261,8 @@ CONTAINS
    SUBROUTINE SetGDIIS(GD)
      TYPE(GDIIS)  :: GD
      !
-     GD%Init    = 5
-     GD%MaxMem  = 6
+     GD%Init    = 4
+     GD%MaxMem  = 3
      GD%On=.TRUE.
    END SUBROUTINE SetGDIIS
 !
@@ -1347,8 +1347,17 @@ CONTAINS
      INTEGER            :: iCLONE
      !
      DO iCLONE=1,G%Clones
-       CALL Delete(G%Clone(iCLONE)%Bond)
-       CALL Delete(G%Clone(iCLONE)%AtmB)
+       IF(AllocQ(G%Clone(iCLONE)%Bond%Alloc)) THEN
+         CALL Delete(G%Clone(iCLONE)%Bond)
+       ELSE
+         G%Clone(iCLONE)%Bond%N=0
+       ENDIF
+       IF(AllocQ(G%Clone(iCLONE)%AtmB%Alloc)) THEN
+         CALL Delete(G%Clone(iCLONE)%AtmB)
+       ELSE
+         G%Clone(iCLONE)%AtmB%N1=0
+         G%Clone(iCLONE)%AtmB%N2=0
+       ENDIF
      ENDDO
    END SUBROUTINE ReSetConnect
 !

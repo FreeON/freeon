@@ -51,7 +51,7 @@ CONTAINS
      IF(PRESENT(Displ_O)) THEN
        GDIISMemory=MIN(10,iGEO)
      ELSE
-       GDIISMemory=MIN(6,iGEO)
+       GDIISMemory=MIN(GDIISCtrl%MaxMem,iGEO)
      ENDIF
      IStart=iGEO-GDIISMemory+1
      !
