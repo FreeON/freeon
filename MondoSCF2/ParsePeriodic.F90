@@ -27,7 +27,7 @@ CONTAINS
     ENDIF
     CALL New(PBC)
     CALL LoadPeriodicOptions(PBC)
-    CALL LoadLattice(PBC)    
+    CALL LoadLattice(PBC)
     CALL UnitCellSetUp(PBC)
     CLOSE(UNIT=Inp,STATUS='KEEP')
     DO I=1,G%Clones
@@ -103,6 +103,13 @@ CONTAINS
     IF(.NOT.OptDblQ(Inp,EPSILON,PBC%Epsilon))THEN
        PBC%Epsilon=BIG_DBL !1.D32
     ENDIF
+!   Parse Atom Wrap, Default is on
+    IF(OptKeyQ(Inp,PBOUNDRY,ATOMW_OFF))THEN
+       PBC%AtomW=.FALSE.
+    ELSE
+       PBC%AtomW=.TRUE.
+    ENDIF
+!
   END SUBROUTINE LoadPeriodicOptions
 !============================================================================
 !
@@ -276,12 +283,16 @@ CONTAINS
     IF(G%PBC%InAtomCrd)THEN
        G%Carts%D=G%AbCarts%D
        CALL CalFracCarts(G)
-       CALL WrapAtoms(G)
+       IF(G%PBC%AtomW) THEN 
+          CALL WrapAtoms(G)
+       ENDIF
     ELSE
        G%BoxCarts%D=G%AbCarts%D
        CALL CalAtomCarts(G)
        G%AbCarts%D=G%Carts%D
-       CALL WrapAtoms(G)
+       IF(G%PBC%AtomW) THEN 
+          CALL WrapAtoms(G)
+       ENDIF
 !      Convert the Velocities from Fractional to Atomic
        DO I=1,G%NAtms
           G%Velocity%D(:,I)   = FracToAtom(G,G%Velocity%D(:,I))
