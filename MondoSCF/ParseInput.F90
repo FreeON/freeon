@@ -714,6 +714,8 @@ MODULE ParseInPut
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%D(NAtoms)=J
+                     GM%AtNam%C(NAtoms)=Ats(J)
+                     GM%AtMMTyp%C(NAtoms)='UNK' 
                      GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
@@ -846,6 +848,8 @@ MODULE ParseInPut
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%D(NAtoms)=J
+                     GM%AtNam%C(NAtoms)=Ats(J)
+                     GM%AtMMTyp%C(NAtoms)='UNK' 
                      GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
@@ -957,6 +961,8 @@ MODULE ParseInPut
                DO J=1,104
                   IF(TRIM(At)==TRIM(Ats(J)))THEN
                      GM%AtNum%D(NAtoms)=J
+                     GM%AtNam%C(NAtoms)=Ats(J)
+                     GM%AtMMTyp%C(NAtoms)='UNK' 
                      GM%AtMss%D(NAtoms)=AtsMss(J)
                      EXIT
                   ENDIF
@@ -1403,6 +1409,7 @@ MODULE ParseInPut
          TYPE(CRDS)     :: GM
          TYPE(DBL_VECT) :: DTemp
          TYPE(INT_VECT) :: ITemp,Kinds,Point
+         TYPE(CHR_VECT) :: CHTemp
          INTEGER        :: J
 !----------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
@@ -1410,6 +1417,7 @@ MODULE ParseInPut
          CALL New(Point,NAtoms)
          CALL New(DTemp,NAtoms)
          CALL New(ITemp,NAtoms)
+         CALL New(CHTemp,NAtoms)
          CALL SFCOrder(NAtoms,GM%Carts,Point,GM%Ordrd)
 !        Reorder Coordinates
          DO I=1,3
@@ -1448,6 +1456,21 @@ MODULE ParseInPut
             GM%AtMss%D(J)=DTemp%D(Point%I(J))
          ENDDO
 !
+         DO J=1,NAtoms
+            CHTemp%C(J)=GM%AtNam%C(J)
+         ENDDO
+         DO J=1,NAtoms
+            GM%AtNam%C(J)=CHTemp%C(Point%I(J))
+         ENDDO
+!
+         DO J=1,NAtoms
+            CHTemp%C(J)=GM%AtMMTyp%C(J)
+         ENDDO
+         DO J=1,NAtoms
+            GM%AtMMTyp%C(J)=CHTemp%C(Point%I(J))
+         ENDDO
+!
+         CALL Delete(CHTemp)
          CALL Delete(Point)
          CALL Delete(DTemp)
          CALL Delete(ITemp)
@@ -1849,6 +1872,11 @@ MODULE ParseInPut
 !
       ENDIF
 !
+! Open GM_MM array
+!
+        GM_MM%NAtms = MM_NATOMS
+        CALL New(GM_MM)
+!
 ! SAVE 14Charges and other parameters
 !
         CALL Put(NBonds,'MM_NBond')
@@ -1960,9 +1988,16 @@ MODULE ParseInPut
 ! Save MM atomic types of MM atoms
 !
         CALL New(MMAtNam,MM_NATOMS)
-        MMAtNam%C=ATMNam
+        MMAtNam%C=ATMNam !!! redundant, since GM_MM%AtMMTyp%C
         CALL Put(MMAtNam,'MMAtNam')
         CALL Delete(MMAtNam)
+!
+        DO I=1,MM_NATOMS  
+          GM_MM%AtNum%D(I)=ATMCHG(I)            
+          GM_MM%AtMMTyp%C(I)=ATMNAM(I) 
+          GM_MM%AtNam%C(I)=Ats(ATMNUM(I))
+          GM_MM%AtMss%D(I)=AtsMss(ATMNUM(I))
+        ENDDO
 !
 ! Calculate topology matrices, which will be needed later
 ! for exclusion energy calculations. These matrices
@@ -1980,9 +2015,6 @@ MODULE ParseInPut
       ENDDO
         GM_MM%TotCh=SUM
 !
-      GM_MM%NAtms = MM_Natoms
-        CALL New(GM_MM)
-!
 !-----------------------------------------------------------
 ! Parse for periodic options, here logical options only
 !-----------------------------------------------------------
@@ -1997,8 +2029,7 @@ MODULE ParseInPut
 !     GM_MM%InAu = .TRUE. !!! for MM
 !     IF(.NOT.PBC_On) GM_MM%Carts%D = AngstromsToAu*GM_MM%Carts%D
       GM_MM%Nkind = NTYPES
-      GM_MM%AtMss%D(:) = ATMMAS(:)
-      GM_MM%AtNum%D(:) = ATMCHG(:)
+!     GM_MM%AtMss%D(:) = ATMMAS(:)
 !
 ! Set GM_MM atomkinds
 ! WARNING! In the present version, for the QM/MM case
@@ -2170,12 +2201,16 @@ MODULE ParseInPut
 !
 ! Parse for GDIIS coordinate type
 !
+             Ctrl%GeOp%NoGDIIS=.FALSE.
+             Ctrl%GeOp%GDIISCoordType=OPT_CartDIIS
          IF(OptKeyQ(Inp,OPTIMIZATION,OPT_CartDIIS)) THEN
             Ctrl%GeOp%GDIISCoordType=OPT_CartDIIS
          ELSE IF(OptKeyQ(Inp,OPTIMIZATION,OPT_IntDIIS)) THEN
             Ctrl%GeOp%GDIISCoordType=OPT_IntDIIS
          ELSE
-            Ctrl%GeOp%GDIISCoordType=OPT_CartDIIS
+           IF(OptKeyQ(Inp,OPTIMIZATION,OPT_NoGDIIS)) THEN
+             Ctrl%GeOp%NoGDIIS=.TRUE.
+           ENDIF
          ENDIF
 !
 ! Parse for coordtype
