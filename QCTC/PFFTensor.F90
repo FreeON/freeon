@@ -36,11 +36,23 @@ MODULE PFFTen
       REAL(DOUBLE)           :: BoxRadius
       REAL(DOUBLE)           :: MagA,MagB,MagC,AdotB,AdotC,BdotC
 !
+      IF(GM%PBC%Dimen==0) THEN 
+         MaxEll = 0
+         CALL New(TensorC,LSP(2*MaxEll),0)
+         CALL New(TensorS,LSP(2*MaxEll),0)
+         TensorC%D = Zero
+         TensorS%D = Zero 
+         CALL Put(MaxEll ,'MaxEll')
+         CALL Put(TensorC,'PFFTensorC')
+         CALL Put(TensorS,'PFFTensorS')
+         RETURN
+      ENDIF
+!
       CALL New(TensorC,LSP(2*MaxEll),0)
       CALL New(TensorS,LSP(2*MaxEll),0)
       TensorC%D = Zero
       TensorS%D = Zero 
-      IF(GM%PBC%Dimen==0) RETURN
+         
 !
 !     Determine the cell type
 !

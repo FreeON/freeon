@@ -78,22 +78,22 @@ MODULE PBCFarField
 !
 !     Output
 !
-!!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
-!!$      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
-!!$      WRITE(*,*) 'GM%PFFMaxLay  = ',Layers
-!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-!!$      WRITE(*,*) 'MACDist       = ',MACDist
-!!$      WRITE(*,*) 'PACDist       = ',PACDist
-!!$      WRITE(*,*) 'BOXDist       = ',BDist
-!!$      WRITE(*,*) 'RDist         = ',RDist      
-!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-!!$      WRITE(*,*)
-!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
-!!$      WRITE(*,*) 'E_DP          = ',E_DP     
-!!$      WRITE(*,*)
+      WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+      WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
+      WRITE(*,*) 'GM%PFFMaxLay  = ',Layers
+      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+      WRITE(*,*) 'MACDist       = ',MACDist
+      WRITE(*,*) 'PACDist       = ',PACDist
+      WRITE(*,*) 'BOXDist       = ',BDist
+      WRITE(*,*) 'RDist         = ',RDist      
+      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      WRITE(*,*)
+      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+      WRITE(*,*) 'E_PFF         = ',E_PFF
+      WRITE(*,*) 'E_DP          = ',E_DP     
+      WRITE(*,*)
 !
 !!$!
 !!$!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
@@ -142,7 +142,7 @@ MODULE PBCFarField
 110   FORMAT(' Inner No. of Cells = ',I4)
 105   FORMAT(' Correction to the Energy:')
 106   FORMAT('   PFF = ',E14.6,'  Dipole = ',E14.6)
-107   FORMAT('==================================================================================================')
+107   FORMAT('=========================================END======================================================')
 !
 
     END SUBROUTINE Print_Periodic
@@ -290,8 +290,8 @@ MODULE PBCFarField
 !
          IF(NQ > 0) THEN
             DO iq=1,NQ
-               iadd = Rho%OffQ%I(zq)+iq
-               jadd = Rho%OffR%I(zq)+(iq-1)*LKet+1
+               iadd   = Rho%OffQ%I(zq)+iq
+               jadd   = Rho%OffR%I(zq)+(iq-1)*LKet+1
                PQ(1)  = Rho%Qx%D(iadd)-GMLoc%PBC%CellCenter(1)
                PQ(2)  = Rho%Qy%D(iadd)-GMLoc%PBC%CellCenter(2)
                PQ(3)  = Rho%Qz%D(iadd)-GMLoc%PBC%CellCenter(3)
