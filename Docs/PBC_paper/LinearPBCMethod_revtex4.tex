@@ -622,11 +622,11 @@ where
 \label{C3}
 {\cal F}_{l}\left( \beta ,r\right) =\frac{\gamma \left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }
 {\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}=\frac{\Gamma \left( l+\frac{1}{2}\right) -\Gamma 
-\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}-
+\left( l+\frac{1}{2},\beta ^{2}r^{2}\right) }{\Gamma \left( l+\frac{1}{2}\right) \, r^{l+1}}
 \end{equation}
-where \( \beta  \) is a parameter which controls the convergence.
+and \( \beta  \) is a parameter which controls the convergence.
 This allows the lattice sum to be partitioned into rapidly convergent
-real and reciprocal space terms 
+real and reciprocal space terms, and allows us to rewrite the ${\cal M}^{m}_{l}$ as
 %
 %
 \begin{eqnarray}
@@ -639,7 +639,11 @@ real and reciprocal space terms
 \right) e^{im\phi _{\mathbf{R}}}\, 
 {\cal F}_{l}\left( \beta ,\left| \mathbf{R}\right| \right)
 \nonumber\\
-&=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
+\label{C4a0}
+\end{eqnarray}
+which we can then partition into a real and reciprical space summation 
+\begin{eqnarray}
+{\cal M}^{m}_{l} &=&\sum _{\mathbf{R}'\in V_{out}}\, \widetilde{P}_{l}^{m}
 \left( \cos \theta _{\mathbf{R}}\right) e^{im\phi _{\mathbf{R}}}\, {\cal G}_{l}\left( \beta ,\left|
  \mathbf{R}\right| \right) 
 \nonumber\\
@@ -703,7 +707,11 @@ The \( {\cal M} \) tensor in one dimension can be computed analytically
 & = & \sum _{{\mathbf{R}'}\in V_{out}}\, \widetilde{P}_{l}^{m}\left( \cos \left( 
 \theta _{\mathbf{R}}\right) \right) e^{im\phi _{\mathbf{R}}}\, \left\{ \frac{1}{r^{l+1}}\right\} 
 \nonumber\\
-& = & 
+\label{C7a0}
+\end{eqnarray}
+which can be written as
+\begin{eqnarray}
+{\cal M}^{m}_{l} & = & 
 \frac{\widetilde{P}_{l}^{m}\left( \cos \left( \theta _{0}\right) \right) e^{im\phi _{0}}}{a_{0}^{l+1}}
 \sum _{n=n_{0}}^{\infty }\frac{1}{n^{l+1}}
 \nonumber\\
@@ -719,7 +727,8 @@ e^{im\left( \phi _{0}+\pi \right) }}{a_{0}^{l+1}}
 \end{eqnarray}
 %
 where \( a_{0} \), \( \theta _{0} \) and \( \phi _{0} \) are the
-initial box dimension and angles which are independent of the summation.
+initial box dimension and angles which are independent of the summation, and 
+$\zeta (l+1)$ is the reimann zeta function.
 In two dimension, the Fourier integrals for the calculation of \( {\cal M} \)
 tensor become a lot more complicated, therefore we have chosen to
 use the three dimensional formula's and obtain the two dimensional
@@ -767,7 +776,7 @@ where,
 and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
-
+\eject
 
 \begin{table}
 \caption{Comparison \textbf{MondoSCF} and \textbf{Crystal98} for a 
