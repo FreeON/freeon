@@ -1,4 +1,12 @@
 
+I added optimization with Karolito optimizer. I got 
+A=4.349941 E=-1098.46158975 which should be compare with
+the values bellow. This is still about 4*10^-8 above the 
+min(E) obtained with the scan (TIGHT should give a least 8 digits).
+
+SV 14.01.05
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 These are single point and force calculations of 3D periodic (MgO)_4 
 with different lattice parameter A. I used HF/DIIS/Tight with 
 the MgO_C98-SPLIT.bas. These are parallel calculations, but 
