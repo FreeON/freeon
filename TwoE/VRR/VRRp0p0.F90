@@ -1,4 +1,5 @@
    SUBROUTINE VRRp0p0(LB,LK,VRR0,VRR1) 
+
       USE DerivedTypes
       USE VScratchB
       USE GlobalScalars
