@@ -7,7 +7,7 @@
 Charge=0
 Guess=SuperPos
 Multiplicity=1
-DebugAll =(MaxDebug,CheckSums)
+DebugAll =(MinDebug,CheckSums)
 SCFMethod=(TC2,TC2)
 BasisSets=(STO-2G,3-21G)
 ModelChem=(HF,PBE0)

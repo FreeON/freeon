@@ -22,7 +22,7 @@ Guess=SuperPos
 SCFMethod=(RH,TC4,TRS4)
 BasisSets=(User1,User1,User1)
 ModelChem=(HF,HF,B3LYP/VWN3)
-Accuracy =(Loose,Tight,Tight)
+Accuracy =(Loose,Good,Good)
 
 <EndOptions>
 

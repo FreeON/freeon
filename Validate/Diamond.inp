@@ -17,10 +17,11 @@ Charge=0
 Multiplicity=1
 
 Guess=SuperPos
-DebugAll=(MaxDebug,CheckSums)
+DebugAll=(MinDebug,CheckSums)
 
 SCFMethod=(RH,RH)
 ModelChem=(HF,BLYPxc) 
+BasisSets=(User2,User2)
 Accuracy =(Loose,Good)
 
 PBC=(T,T,T)
