@@ -1,6 +1,7 @@
 Sever problem with SCF convergence on a simple system.
 
 MONDO version used:  2004-11-30 07:25
+Compiled on zinc with CompilerSpecifics.IntelLinux.NAG .
 
 This is a polyethilene molecule.
 HF/3-21G could not converge with the default SCF convergence algorithm.
