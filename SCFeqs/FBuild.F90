@@ -70,26 +70,40 @@ PROGRAM FockNGrueven
      CALL New(K)
      IF(HasHF(ModelChem).AND.HasDFT(ModelChem))THEN
         ! Add in Hartree-Fock exact exchange 
-        CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+        IF(SCFActn=='FockPrimeBuild') THEN
+           CALL Halt('Response with DFT does not work yet.')
+           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))   ! K=K_hf
+        ELSE
+           CALL Get(K,TrixFile('K',Args,0))                           ! K=K_hf
+        ENDIF
         KScale=ExactXScale(ModelChem)
-        CALL Multiply(K,KScale)                               ! K=KScale*K_hf
-        CALL Add(F,K,Tmp1)                                    ! F=J+T+K
+        CALL Multiply(K,KScale)                                       ! K=KScale*K_hf
+        CALL Add(F,K,Tmp1)                                            ! F=J+T+K
         ! Now add in exchange-correlation
-        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_xc
-        CALL Add(K,Tmp1,F)                                    ! F=J+T+KShift*K_hf+K_xc
+        IF(SCFActn=='FockPrimeBuild') THEN
+           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(4)),Args,0)) ! K=K_xc
+        ELSE
+           CALL Get(K,TrixFile('Kxc',Args,0))                         ! K=K_xc
+        ENDIF
+        CALL Add(K,Tmp1,F)                                            ! F=J+T+KShift*K_hf+K_xc
      ELSEIF(HasHF(ModelChem))THEN
         !  Add in Hartree-Fock exact exchange 
-        IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))                      ! K=K_hf
+        IF(SCFActn=='FockPrimeBuild')THEN
+           CALL Get(K,TrixFile('KPrime'//TRIM(Args%C%C(4)),Args,0))   ! K=K_hf
         ELSE
-           CALL Get(K,TrixFile('K',Args,0))                      ! K=K_hf
+           CALL Get(K,TrixFile('K',Args,0))                           ! K=K_hf
         ENDIF
-        CALL Add(F,K,Tmp1)                                    ! F=J+T+K_hf
+        CALL Add(F,K,Tmp1)                                            ! F=J+T+K_hf
         CALL SetEq(F,Tmp1)
      ELSEIF(HasDFT(ModelChem))THEN
         !  Add in exchange-correlation
-        CALL Get(K,TrixFile('Kxc',Args,0))                    ! K=K_{xc}
-        CALL Add(K,F,Tmp1)                                    ! F=J+T+K_xc
+        IF(SCFActn=='FockPrimeBuild') THEN
+           CALL Halt('Response with DFT does not work yet.')
+           CALL Get(K,TrixFile('KxcPrime'//TRIM(Args%C%C(4)),Args,0)) ! K=K_xc
+        ELSE
+           CALL Get(K,TrixFile('Kxc',Args,0))                         ! K=K_{xc}
+        ENDIF
+        CALL Add(K,F,Tmp1)                                            ! F=J+T+K_xc
         CALL SetEq(F,Tmp1)
      ENDIF
      CALL Delete(K)
@@ -134,13 +148,19 @@ PROGRAM FockNGrueven
      ENDIF
 #endif
   ENDIF
-
 !
-  CALL Put(F,TrixFile('F',Args,0))
-  CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
-!  CALL PPrint( F,'F['//TRIM(Cycl)//']',Unit_O=6)
-  CALL PPrint( F,'F['//TRIM(Cycl)//']')
-  CALL Plot(   F,'F['//TRIM(Cycl)//']')
+  IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
+     CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(4)),Args,0)) 
+     CALL PChkSum(Tmp1,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+     CALL PPrint( Tmp1,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     CALL Plot(   Tmp1,'FPrime'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
+  ELSE
+     CALL Put(F,TrixFile('F',Args,0))
+     CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
+     !  CALL PPrint( F,'F['//TRIM(Cycl)//']',Unit_O=6)
+     CALL PPrint( F,'F['//TRIM(Cycl)//']')
+     CALL Plot(   F,'F['//TRIM(Cycl)//']')
+  ENDIF
 
 ! Now transform to an orthogonal representation
   XFile=TrixFile('X',Args)
