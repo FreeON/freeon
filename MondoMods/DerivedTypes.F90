@@ -134,7 +134,6 @@ MODULE DerivedTypes
 !  OBJECTS DERIVED THROUGH COMPOSITION: BASIS SETS, MATRICES, ETC. 
 ! 
 !==================================================================================
-!
 #ifdef PARALLEL
 !------------------------------------------------------------
 !  DISTRIBUTED BLOCK COMPRESSED SPARSE ROW MATRIX
@@ -197,7 +196,35 @@ MODULE DerivedTypes
       TYPE(DBL_RNK3)   :: Expnt   !-- Exponent per primitive, per contraction, per kind
       TYPE(DBL_RNK4)   :: CCoef   !-- Contraction coefficient, per symmetry type,
                                   !   per primitive, per contraction, per kind
-   END TYPE                                      
+   END TYPE  
+#ifdef PERIODIC
+!------------------------------------------------------------------------------------
+! The Set of Cells needed to sum over: CellSet
+!
+  TYPE CellSet
+     INTEGER                        :: Alloc
+     INTEGER                        :: NCells
+     TYPE(DBL_RNK2)                 :: CellCarts
+  ENDTYPE CellSet
+!------------------------------------------------------------------------------------
+! Periodic Information
+!
+  TYPE PBCInfo
+      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
+      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
+      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
+      LOGICAL                     :: NoTransVec !-- Was the translate calculated or suppied
+      LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
+      INTEGER                     :: Dimen      !-- Dimension of the SYstem
+      REAL(DOUBLE)                :: CellVolume !-- Cell Volume
+      REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
+      REAL(DOUBLE)                :: QupoleFAC  !-- Normalization of Quadrupole Term 
+      REAL(DOUBLE),DIMENSION(3)   :: CellCenter !-- Center of the cell
+      REAL(DOUBLE),DIMENSION(3)   :: TransVec   !-- Origin Translate Vector
+      REAL(DOUBLE),DIMENSION(3,3) :: BoxShape   !-- Box Shape Vectors
+      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh  !-- Inverse of the Box Shape Vectors
+   END TYPE PBCInfo
+#endif                                    
 !----------------------------------------------------------------
 !  Coordinates
 !
@@ -229,8 +256,10 @@ MODULE DerivedTypes
       TYPE(DBL_VECT)       :: TransVec  !-- Origin Translate Vector
       TYPE(DBL_RNK2)       :: BoxShape  !-- Box Shape Vectors
       TYPE(DBL_RNK2)       :: InvBoxSh  !-- Inverse of the Box Shape Vectors
-      TYPE(DBL_RNK2)       :: BoxCarts  !-- Lattice coordinates 
-      TYPE(DBL_RNK2)       :: BoxVects  !-- Velocity Lattice coordinates 
+!
+      TYPE(PBCInfo)    :: PBC       !-- Periodic Information
+      TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
+      TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
 #endif 
 !     Atomic coordinates
       INTEGER          :: NAtms     !-- Number of atoms
@@ -370,17 +399,6 @@ MODULE DerivedTypes
      INTEGER                   :: KA,KB,NA,NB
      LOGICAL                   :: SameAtom
   ENDTYPE AtomPair
-!
-#ifdef PERIODIC
-!-----------------------------------------------------------
-! The Set of Cells needed to sum over: CellSet
-!
-  TYPE CellSet
-     INTEGER                        :: Alloc
-     INTEGER                        :: NCells
-     TYPE(DBL_RNK2)                 :: CellCarts
-  ENDTYPE CellSet
-#endif
 !------------------------------------------------------------
 !  Numerical thresholds
 !
