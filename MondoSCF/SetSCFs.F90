@@ -109,9 +109,9 @@ MODULE SetSCFs
 !-----------------------------------------------------------
 !        To HDF with the indecies/limits
 !
-         CALL Put(MaxAtmsNode,'maxatmsnode')
-         CALL Put(MaxBlksNode,'maxblksnode')
-         CALL Put(MaxNon0Node,'maxnon0node')
+         CALL Put(MaxAtmsNode,'maxatmsnode',Tag_O=IntToChar(I))
+         CALL Put(MaxBlksNode,'maxblksnode',Tag_O=IntToChar(I))
+         CALL Put(MaxNon0Node,'maxnon0node',Tag_O=IntToChar(I))
          CALL Put(NPrc,'chknprc')
 !---------------------------------------------------------
 !        Tidy up
@@ -303,9 +303,9 @@ MODULE SetSCFs
 !-------------------------------------------------------
 !        Put the domain boundaries to disk
 !
-         CALL Put(Beg,TRIM('beg_'//IntToChar(ISet)))
-         CALL Put(End,TRIM('end_'//IntToChar(ISet)))
-         CALL Put(OffSt,TRIM('dbcsroffsets_'//IntToChar(ISet)))
+         CALL Put(Beg,'beg',Tag_O=IntToChar(ISet))
+         CALL Put(End,'end',Tag_O=IntToChar(ISet))
+         CALL Put(OffSt,'dbcsroffsets',Tag_O=IntToChar(ISet))
 !-------------------------------------------------------
 !        Debug if asked
 !
