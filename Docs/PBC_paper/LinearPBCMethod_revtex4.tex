@@ -59,7 +59,7 @@ calculation of the one electron matrices. For the two electron matrices
 various methods are employed. For the two-electron Coulomb matrix,
 we achieve this via an exact multipole expansion of the long range
 Coulomb field \cite{White94,Challacombe97b}. This yields a spherically
-summed boundary condition that is easily transformed to Ewald boundary
+summed boundary condition that is easily transformed into the Ewald boundary
 condition \cite{Redlack72,Redlack75}. In order to achieve linear
 scaling of the local Coulomb field, a Quantum Chemical Tree Code (QCTC)
 is used \cite{Warren93,Warren95,Salmon94,Challacombe96A}. For the calculations of the 
@@ -70,12 +70,15 @@ data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects
 \cite{Bentley79}. 
 
-To demonstrate the capabilities of MondoSCF, we show results for three
-validation test condensed phase systems, Sodium Chloride, Magnesium Oxide 
+To demonstrate and validate the capabilities of MondoSCF, we show results for three
+condensed phase systems, Sodium Chloride, Magnesium Oxide 
 and Carbon in the diamond structure. We then compare these results to the periodic
 Gaussian code \textbf{Crystal98} \cite{Crystal98}. Next we demonstrate that
 the code achieves {\it true} linear scaling for the dense periodic diamond system 
 up to 512 atoms in the unit cell.
+%
+To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
+of the diamond (100) surface.
 %
 Finally we give some conclusion concerning the accuracy and utility of MondoSCF
 and future research directions.
@@ -156,7 +159,9 @@ T^{PBC}_{ab}=-\frac{1}{2}\sum _{\mathbf{R}}\int _{V_{\infty }}\, d{\mathbf{r}}\,
 \phi _{a}({\mathbf{r}+\mathbf{R}})\nabla ^{2}\phi _{b}({\mathbf{r}})
 \end{equation}
 
-
+Both the $S_{ab}$ and $T_{ab}$ matrix elements are calculated very effiently
+with this method, aymtotically costing the same as non-periodic phase calculations
+within the code.
 
 \section{The Two-Electron matrices}
 
@@ -216,7 +221,7 @@ and \( V_{in} \) is the volume which contains the inner cells, \( V_{\infty } \)
 is the total volume, \(V_{out}\) is the total volume minus \( V_{in} \), and \( S_{\infty } \) is 
 the surface at infinity which contributes a shape dependent potential to the center cell.
 This is depicted in figure \ref{figure:ReplicateCells}. Let us now
-define and discuss the calculation of each terms.
+discuss the calculation of each terms.
 
 
 \subsubsection{The Quantum Chemical Tree Code: The direct Coulomb matrix}
@@ -227,37 +232,33 @@ This requires that we replace the integrals in equation (\ref{Jqctc})
 with the approximate spherical multipole expansion to order \( L \)
 and \( L' \),
 %
-\begin{equation}
-\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
+\begin{eqnarray}
+J_{ab}^{QCTC}&=&\frac{1}{2}\sum _{{\mathbf{R}'}\in V_{in}}\int _{V_{\infty }}\, d{\mathbf{r}}\, 
 d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
 \left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| }
 \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad \qquad 
-\nonumber
-\end{equation}
+\nonumber\\
 %
-\begin{equation}
-\approx \frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}
+&\approx& \frac{1}{2}\sum _{\mathbf{R}'\in V_{in}}
 \sum _{\left\langle i\right\rangle }\int _{V_{\infty }}\, d{\mathbf{r}}\, 
-d{\mathbf{r}'}\frac{\phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}})\: 
+d{\mathbf{r}'}\frac{\rho _{ab}^{loc}({\mathbf{r}})\: 
 \Lambda ^{\left\langle i\right\rangle }\left( {\mathbf{r}'+\mathbf{R}'}\right) }
 {\left| \mathbf{r}-\mathbf{r}'\right| }\qquad \qquad \qquad 
-\nonumber
-\end{equation}
+\nonumber\\
 %
-\begin{equation}
-\qquad\qquad+\frac{1}{2}\sum _{\mathbf{R}}\sum _{\mathbf{R}'\in V_{in}}\sum _{l=0}^{L}\, 
-\sum _{l'=0}^{L'}\, 
-\sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}\qquad \qquad \qquad \qquad \qquad  
+&+&\frac{1}{2} \sum _{\mathbf{R}'\in V_{out}}\sum _{l=0}^{L}
+\sum _{l'=0}^{L'} \sum _{m=-l}^{l} \sum _{m'=-l'}^{l'}
 \nonumber
-\end{equation}
-%
-\begin{equation}
-\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}(\mathbf{R})\right] 
-\, M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde
+\end{eqnarray}
+
+\begin{eqnarray}
+\quad\left( -1\right) ^{l}\, {\cal O}^{m}_{l}\left[ \rho _{ab};\mathbf{Q}\right] 
+ M_{l+l'}^{m+m'}[\mathbf{Q}-\mathbf{P}-\mathbf{R}']\, {\cal O}_{l}^{m}[\widetilde
 {\Lambda }^{\left\langle 
 j\right\rangle };\mathbf{P}]
+\nonumber\\
 \label{QCTC}
-\end{equation}
+\end{eqnarray}
 %
 where
 \begin{equation}
@@ -265,13 +266,12 @@ where
 O_{l}^{m}\left[ \rho ;\mathbf{P}\right] =\int _{V_{\infty }}\, d\mathbf{r}\, \widehat{O}_{l}^{m}
 \left[ \mathbf{r}-\mathbf{P}\right] \, \rho \left( \mathbf{r}\right) 
 \end{equation}
-\( \Lambda ^{\left\langle i\right\rangle } \) are the set of distributions
-of the local density which overlap \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \)
-(therefore these integrals must be done explicitly) , \( \mathbf{Q}(\mathbf{R}) \)
-is the center of the distribution \( \phi _{a}({\mathbf{r}})\phi _{b}({\mathbf{r}+\mathbf{R}}) \),
+and \( \Lambda ^{\left\langle i\right\rangle } \) are the set of distributions
+of the local density which overlap \( \rho _{ab}({\mathbf{r}})\)
+(therefore these integrals must be done explicitly) , $\mathbf{Q}$
+is the center of the distribution  \( \rho _{ab}({\mathbf{r}})\)
 \( \widetilde{\Lambda }^{\left\langle j\right\rangle } \)are the
-set of distributions of the local density which do not overlap \( \phi _{a}({\mathbf{r}})\phi _{b}
-({\mathbf{r}+\mathbf{R}}) \),
+set of distributions of the local density which do not overlap  \( \rho _{ab}({\mathbf{r}})\),
 are organized on a tree, allow us to achieve linear scaling, and are
 the multipoles of these densities. The multipole operators are are
 defined as
@@ -291,7 +291,8 @@ M_{l}^{m}\left[ {\mathbf{R}}\right]  & = & \frac{\left( l-m\right) !\, P_{l}^{m}
 \end{array}\label{sp_mult_M} 
 \end{eqnarray}
 A detail analysis of the penetration error, and also the multipole error, is given in
-reference \cite{MChallacombe03A}. 
+reference 7 
+%\cite{MChallacombe03A}. 
 
 
 \subsubsection{The Periodic Far Field Coulomb matrix}
@@ -301,9 +302,9 @@ we replace the integral in equation (\ref{Jpff}) with the multipole
 sum \cite{Challacombe97}
 %
 \begin{eqnarray}
-J_{ab}^{PFF} &=& \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, \int _{V_{\infty }}
-\, d{\mathbf{x}}\, d{\mathbf{x}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{x}}\right) \: \rho ^{loc}
-\left( {\mathbf{x}'+\mathbf{R}'}\right) }{\left| \mathbf{x}-\mathbf{x}'\right| } 
+J_{ab}^{PFF} &=& \frac{1}{2}\sum _{{\mathbf{R}'}\in V_{out}}\, \int _{V_{\infty }}
+\, d{\mathbf{r}}\, d{\mathbf{r}'}\frac{\rho _{ab}^{loc}\left( {\mathbf{r}}\right) \: \rho ^{loc}
+\left( {\mathbf{r}'+\mathbf{R}'}\right) }{\left| \mathbf{r}-\mathbf{r}'\right| } 
 \nonumber\\
 &=& \frac{1}{2}\sum _{{\mathbf{R}}\in V_{\infty }-V_{in}}\, \sum _{l=0}^{L}\, 
 \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
@@ -320,7 +321,7 @@ cell (usually the center of the cell). Let us define
 \label{ScriptM}
 {\cal M}_{l}^{m}=\sum _{{\mathbf{R}'}\in V_{\infty }-V_{in}}\, M_{l}^{m}[\mathbf{R}]
 \end{equation}
-Which allow us to rewrite
+Which allow us to rewrite equation (\ref{Jpff_2}) as
 %
 \begin{eqnarray}
 J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l}\, \sum _{m'=-l'}^{l'}
@@ -332,7 +333,10 @@ J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l
 \end{eqnarray}
 %
 For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
-summation. In \cite{PFFTensorMake} we describe an efficient method which allows
+summation. 
+In refference 14 
+%\cite{PFFTensorMake} 
+we describe an efficient method which allows
 us to calculate these conditional summations. The only task remaining
 is to determine the region of the inner box summation or the multipole
 order \( L \) which we have to expand to. Using results obtained in reference {7}
@@ -398,15 +402,19 @@ we take advantage of the periodicity of the functions being integrated
 and the locality of the basis functions,
 %
 \begin{eqnarray}
-K_{ab}^{PBC}&=&\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
+K_{ab}^{PBC} &=& \int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
 \: V^{1}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
 \nonumber\\
 %
 &&\qquad\qquad+\nabla \rho _{ab}^{PBC}
 \left( \mathbf{x}\right) \cdot \nabla V^{2}_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
 \nonumber\\
+\label{Kxc_pbc_0}
+\end{eqnarray}
 %
-&=&\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
+But because of the periodicity and locality of the density we can rewrite this as
+\begin{eqnarray}
+K_{ab}^{PBC} &=&\int _{V_{HiCu}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x}\right) 
 \: V_{xc}\left( \rho ^{PBC}\left( \mathbf{x}\right) \right) 
 \nonumber\\
 %
@@ -417,8 +425,7 @@ K_{ab}^{PBC}&=&\int _{V_{cell}}\, d\mathbf{x}\, \rho _{ab}^{PBC}\left( \mathbf{x
 \end{eqnarray}
 %
 where \( V_{HiCu} \) is the cubic region shown in figure \ref{figure:SimCell}.
-This transformation is allowable because of the periodicity of the
-function, and it is ideally suited for the method we use to calculate
+This transformation is ideally suited for the method we use to calculate
 our exchange-correlation matrix, which is based on a Cartesian {}``Gaussian
 quadrature'' integration of a rectangular region. To calculate the
 exchange correlation matrix in periodic system we need to use equation
@@ -530,9 +537,9 @@ and support.
 
 \bibliographystyle{plain}
 \bibliography{GaussianPapers}
-
-\eject
-
+%
+% 
+%
 \begin{table*}
 \caption{\label{table:ComToCrystal98_1} Comparison of Sodium Chloride test
 systems to Crystal98}
@@ -551,7 +558,7 @@ NaCl&
 STO-3G&
 Slater-Dirac&
 \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =3.97394011\\
+\left| a\right| =\left| b\right| =\left| c\right| =3.9739401\\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)&
 MondoSCF&
@@ -565,7 +572,7 @@ MondoSCF&
 
 \end{array} \)&
 Crystal98&
-\( -610.972 \)\\
+\( -610.9754 \)\\
 \hline 
 &
 3-21G&
@@ -575,7 +582,7 @@ BLYP&
 
 \end{array} \)&
 MondoSCF&
-\( -619.3921931 \)\\
+\( -619.3141936 \)\\
 \hline 
 &
 &
@@ -592,7 +599,7 @@ NaCl&
 STO-3G&
 Slater-Dirac&
 \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =5.62000000\\
+\left| a\right| =\left| b\right| =\left| c\right| =5.6200000\\
 \alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
 \end{array}\right\}  \)&
 MondoSCF&
@@ -631,11 +638,57 @@ Crystal98&
 \end{tabular}\par}
 \vspace{0.3cm}
 \end{table*}
+%
+%
+%
+\begin{table*}
 
-%
-%
-%
+\caption{\label{table:ConvegOfNaCl} Total energy per atom for sodium chloride
+for increasing system size for the STO-3G/SlaterDirac system.}
 
+{\centering \begin{tabular}{|c|c|c|}
+\hline 
+System Size (\( N) \)&
+Energy (\( E \))&
+\( \frac{E}{N} \)\\
+\hline
+\hline 
+\( \, \, 2^{\dagger } \)&
+\( -610.975117 \)&
+\( -305.487559 \)\\
+\hline 
+\( 8 \)&
+\( -2444.35835 \)&
+\( -305.544794 \)\\
+\hline 
+\( \, \, 16^{\dagger } \)&
+\( -4888.70023 \)&
+\( -305.543765 \)\\
+\hline 
+\( \, \, 54^{\dagger } \)&
+\( -16499.4900 \)&
+\( -305.546111 \)\\
+\hline 
+\( 64 \)&
+\( -19554.9556 \)&
+\( -305.546181 \)\\
+\hline 
+\( \, \, 128^{\dagger } \)&
+\( -39109.9115 \)&
+\( -305.546184 \)\\
+\hline 
+\( 216 \)&
+\( -65997.9768 \)&
+\( -305.546185 \)\\
+\hline
+\hline
+\multicolumn{3}{|c|}{{\bf Crystal98}\qquad $\frac{E}{N}=-305.54614$}\\
+\hline
+\end{tabular}\par}
+\end{table*}
+%
+%
+%
 \begin{table*}
 
 \caption{\label{table:ComToCrystal98_2} Comparison of MgO test systems to
@@ -655,7 +708,7 @@ MgO&
 STO-3G&
 Slater-Dirac&
 \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =2.97776807\\
+\left| a\right| =\left| b\right| =\left| c\right| =2.9777681\\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)&
 MondoSCF&
@@ -696,7 +749,7 @@ MgO&
 STO-3G&
 Slater-Dirac&
 \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =4.21120000\\
+\left| a\right| =\left| b\right| =\left| c\right| =4.2112000 \\
 \alpha =\frac{\pi }{3},\beta =\frac{\pi }{3},N=2
 \end{array}\right\}  \)&
 MondoSCF&
@@ -739,6 +792,23 @@ Crystal98&
 %
 \begin{table*}
 
+\caption{\label{table:ConvegOfMgO} Total energy per atom for Magnesium Oxide
+for increasing system size for the STO-3G/BLYPxc system}
+
+{\centering \begin{tabular}{|c|c|c|}
+\hline
+System Size (\( N) \)&
+Energy (\( E \))&
+\( \frac{E}{N} \)\\
+\hline
+\hline
+\end{tabular}\par}
+\end{table*}
+%
+%
+%
+\begin{table*}
+
 \caption{\label{table:ComToCrystal98_3} Comparison of Carbon test systems
 to Crystal98}
 
@@ -756,71 +826,61 @@ Diamond&
 STO-3G&
 BLYP&
 \( \left\{ \begin{array}{c}
-\left| a\right| =\left| b\right| =\left| c\right| =4.00\\
+\left| a\right| =\left| b\right| =\left| c\right| =3.5700000 \\
 \alpha =\frac{\pi }{2},\beta =\frac{\pi }{2},N=8
 \end{array}\right\}  \)&
 MondoSCF&
+\(-300.57539253 \)
 \\
 \hline 
 &
 &
 &
 \( \begin{array}{c}
-\\
+\\ 
 
 \end{array} \)&
 Crystal98&
-\( -300.6006 \)\\
+\( 0 \)\\
+\hline
+&
+3-21G&
+BLYP&
+&
+MondoSCF&
+\(-302.55031745 \)
+\\
+\hline
+&
+&
+&
+&
+Crystal98&
+\( 0 \)
+\\
 \hline
 \end{tabular}\par}
 \end{table*}
 %
 %
 %
-\vskip 4.0 in \eject\eject
 \begin{table*}
 
-\caption{\label{table: ConvegOfNaCl} Total energy per atom for sodium chloride
-for increasing size for the STO-3G/BLYPxc system}
+\caption{\label{table:ConvegOfDia} Total energy per atom for Diamond
+for increasing system size for the STO-3G/BLYPxc system}
 
 {\centering \begin{tabular}{|c|c|c|}
-\hline 
+\hline
 System Size (\( N) \)&
 Energy (\( E \))&
 \( \frac{E}{N} \)\\
 \hline
 \hline 
-\( \, \, 2^{\dagger } \)&
-\( -610.975117 \)&
-\( -305.487559 \)\\
-\hline 
-\( 8 \)&
-\( -2444.35835 \)&
-\( -305.544794 \)\\
-\hline 
-\( \, \, 16^{\dagger } \)&
-\( -4888.70023 \)&
-\( -305.543765 \)\\
-\hline 
-\( \, \, 54^{\dagger } \)&
-\( -16499.4900 \)&
-\( -305.546111 \)\\
-\hline 
-\( 64 \)&
-\( -19554.9556 \)&
-\( -305.546181 \)\\
-\hline 
-\( \, \, 128^{\dagger } \)&
-\( -39109.9115 \)&
-\( -305.546184 \)\\
-\hline 
-\( 216 \)&
-\( -65997.9768 \)&
-\( -305.546185 \)\\
-\hline
 \end{tabular}\par}
 \end{table*}
-
+%
+%
+%
 \eject
 %
 %
