@@ -23,16 +23,25 @@ MODULE RhoUtil
         REAL(DOUBLE),DIMENSION(3)  :: Origin
         REAL(DOUBLE)               :: Del,Den
         TYPE(ARGMT)                :: Arg
+        TYPE(CRDS)                 :: GMLoc
 #ifdef PERIODIC
         INTEGER                    :: NC
 #endif
 !---------------------------------------------------------------------------
 !     Get the geometry
-       CALL Get(GM,Tag_O=CurGeom)
-       CALL PPrint(GM,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
+#ifdef MMech
+       IF(HasMM()) THEN
+       CALL Get(GMLoc,Tag_O=CurGeom)
+       ELSE
+#endif
+       CALL Get(GMLoc,Tag_O=CurGeom)
+#ifdef MMech
+       ENDIF
+#endif
+       CALL PPrint(GMLoc,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
 #ifdef PERIODIC
 !      Calculate the Number of Cells
-       CALL SetCellNumber(GM)
+       CALL SetCellNumber(GMLoc)
 #endif
 !      SET DENSITY THRESHOLDS (LOOSE)
        Del=3.D-1
@@ -87,7 +96,7 @@ MODULE RhoUtil
         CLOSE(UNIT=66)
 !       Delete the RhoTree
         CALL DeleteRhoTree(RhoRoot)
-        CALL Delete(GM)
+        CALL Delete(GMLoc)
       END SUBROUTINE RhoCubed
 !=================================================================================
 !     Sums the significant contributions (leaves) to the density at a point
@@ -178,13 +187,22 @@ MODULE PotUtil
          REAL(DOUBLE)                    :: NukE,NukeCo,NukePole,PExtent
          REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
          REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
+         TYPE(CRDS)                      :: GMLoc
 #ifdef PERIODIC
          INTEGER                         :: NC
          REAL(DOUBLE),DIMENSION(3)       :: PTmp
 #endif
 !--------------------------------------------------------------
 !        Get the geometry
-         CALL Get(GM,Tag_O=CurGeom)
+#ifdef MMech
+         IF(HasMM()) THEN
+           CALL Get(GMLoc,Tag_O='GM_MM'//CurGeom)
+         ELSE
+#endif
+           CALL Get(GMLoc,Tag_O=CurGeom)
+#ifdef MMech
+         ENDIF
+#endif
 !        SET THE THRESHOLDS (LOOSE)
          TauPAC=1.D-2
          TauMAC=1.D-2 
@@ -199,9 +217,9 @@ MODULE PotUtil
          CALL RhoToPoleTree
 #ifdef PERIODIC
 !        Calculate the Number of Cells
-         CALL SetCellNumber(GM)
+         CALL SetCellNumber(GMLoc)
 !        Set the electrostatic background 
-         CALL PBCFarFieldSetUp(PoleRoot)
+         CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
 #endif
 !        Delete the auxiliary density arrays
          CALL DeleteRhoAux
@@ -241,8 +259,8 @@ MODULE PotUtil
 !                 Accumulate the atomic contribution
                   NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
 !                 Add in the Far Field, Dipole and Quadripole  Correction
-                  IF(GM%PBC%Dimen>0) THEN
-                     NukE=NukE+CTraxFF(Prim,HGBra)
+                  IF(GMLoc%PBC%Dimen>0) THEN
+                     NukE=NukE+CTraxFF(Prim,HGBra,GMLoc)
                   ENDIF
 #else
 !                 Walk the walk
@@ -270,7 +288,7 @@ MODULE PotUtil
          WRITE(77,*)' component "positions" 2 '
          WRITE(77,*)' component "connections" 3 '
          CLOSE(UNIT=77)
-         CALL Delete(GM)
+         CALL Delete(GMLoc)
       END SUBROUTINE PotCubed     
 END MODULE 
 !=================================================================================
