@@ -165,21 +165,27 @@ and density functional theory for the computation of material response
 properties. Here, we discuss the CPSCF equation in the framework of
 HF theory, however an extension to DFT is straightforward.
 
+\begin{equation}
+  \mathcal{F}=\mathcal{F}^{0}+\sum_a \mathcal{E}^{a}\mathcal{F}^{a}+
+  \sum_{ab} \mathcal{E}^{a}\mathcal{E}^{b}\mathcal{F}^{ab}+
+  \sum_{abc} \mathcal{E}^{a}\mathcal{E}^{b}\mathcal{E}^{c}\mathcal{F}^{abc}+\dots
+\end{equation}
 
 The following schematic algorithm is a higher order generalization of the
 SC scheme for the solution of the CPSCF equations descibe in \cite{SV} 
 based on perturbed pronjection:
 \begin{subequations}
 \begin{eqnarray}
-&&  F^{ab\ldots}_{n}=\mu_a+J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild} \\
+&&  F^{a}_{n}=\mu_a+J(D^{a}_n)+K(D^{a}_n) \label{FockBuild} \\
+&&  F^{ab\ldots}_{n}=J(D^{ab\ldots}_n)+K(D^{ab\ldots}_n) \label{FockBuild} \\
 && \displaystyle\widetilde{F}^{ab\ldots}_{n}=\sum_{k=n-m}^{n}c_k F^{ab\ldots}_{k} \label{DDIIS} \\
 && \displaystyle\mathcal{D}^{ab\ldots}_{n+1}=
   \frac{\partial^N}{\partial\mathcal{E}^a \partial\mathcal{E}^b\ldots}
      \theta(\tilde{\mu}I-(\mathcal{F}^{0}
-     +\mathcal{E}^{a}\widetilde{\mathcal{F}}^{a}_n
-     +\mathcal{E}^{b}\widetilde{\mathcal{F}}^{b}_n+\ldots))
+     +\sum_c\mathcal{E}^{c}\widetilde{\mathcal{F}}^{c}_n
+     +\ldots))
      \bigg|_{\mathcal{E}=0} \label{DDeriv}
-   \end{eqnarray} 
+\end{eqnarray} 
 \end{subequations}
 
 The scheme solves for the self concistent density response, \\
@@ -291,35 +297,74 @@ up to fourth order....
 \end{equation}
 
 
-
 \begin{equation}
-E^{abcd}=\frac{1}{24}Tr(longlong)
+\begin{split}
+E^{abcd}=\frac{1}{24}Tr(&[P^{ab},P] P^c F^d +[P^a,P](P^{bc} F^d + P^b F^{cd})+\\
+                        &[P^{ab},P] P^d F^c +[P^a,P](P^{bd} F^c + P^b F^{dc})+\\
+                        &[P^{ac},P] P^b F^d +[P^a,P](P^{cb} F^d + P^c F^{bd})+\\
+                        &[P^{ac},P] P^d F^b +[P^a,P](P^{cd} F^b + P^c F^{db})+\\
+                        &[P^{ad},P] P^b F^c +[P^a,P](P^{db} F^c + P^d F^{bc})+\\
+                        &[P^{ad},P] P^c F^b +[P^a,P](P^{dc} F^b + P^d F^{cb})+\\
+%
+                        &[P^{ba},P] P^c F^d +[P^b,P](P^{ac} F^d + P^a F^{cd})+\\
+                        &[P^{ba},P] P^d F^c +[P^b,P](P^{ad} F^c + P^a F^{dc})+\\
+                        &[P^{bc},P] P^a F^d +[P^b,P](P^{ca} F^d + P^c F^{ad})+\\
+                        &[P^{bc},P] P^d F^a +[P^b,P](P^{cd} F^a + P^c F^{da})+\\
+                        &[P^{bd},P] P^a F^c +[P^b,P](P^{da} F^c + P^d F^{ac})+\\
+                        &[P^{bd},P] P^c F^a +[P^b,P](P^{dc} F^a + P^d F^{ca})+\\
+%
+                        &[P^{ca},P] P^b F^d +[P^c,P](P^{ab} F^d + P^a F^{bd})+\\
+                        &[P^{ca},P] P^d F^b +[P^c,P](P^{ad} F^b + P^a F^{db})+\\
+                        &[P^{cb},P] P^a F^d +[P^c,P](P^{ba} F^d + P^b F^{ad})+\\
+                        &[P^{cb},P] P^d F^a +[P^c,P](P^{bd} F^a + P^b F^{da})+\\
+                        &[P^{cd},P] P^a F^b +[P^c,P](P^{da} F^b + P^d F^{ab})+\\
+                        &[P^{cd},P] P^b F^a +[P^c,P](P^{db} F^a + P^d F^{ba})+\\
+%
+                        &[P^{da},P] P^b F^c +[P^d,P](P^{ab} F^c + P^a F^{bc})+\\
+                        &[P^{da},P] P^c F^b +[P^d,P](P^{ac} F^b + P^a F^{cb})+\\
+                        &[P^{db},P] P^a F^c +[P^d,P](P^{ba} F^c + P^b F^{ac})+\\
+                        &[P^{db},P] P^c F^a +[P^d,P](P^{bc} F^a + P^b F^{ca})+\\
+                        &[P^{dc},P] P^a F^b +[P^d,P](P^{ca} F^b + P^c F^{ab})+\\
+                        &[P^{dc},P] P^b F^a +[P^d,P](P^{cb} F^a + P^c F^{ba}))\\
+\end{split}
 \end{equation}
 
 
 
-%\begin{equation}
-%E^{abc}=\frac{1}{3}Tr([P^a,P]P^bF^c+[P^c,P]P^aF^b+[P^b,P]P^cF^a)
-%\end{equation}
+\begin{equation}
+  \alpha_{ab}=-2Tr[D^a\mu_b]
+\end{equation}
+
+\begin{equation}
+  \beta_{abc}=-4Tr[D^{ab}\mu_c]
+\end{equation}
+
+\begin{equation}
+  \gamma_{abcd}=-12Tr[D^{abc}\mu_d]
+\end{equation}
+
 
 
 \section{Examples}
 To demonstrate the ability, accuracy and numerical stability we present
 ...
+
+\subsection{C60: 10th order response (uncoupled)}
+
+
+\subsection{One dimensional water chains 10th order response (uncoupled)}
+
 \subsection{One dimensional water chains}
 figures ... show the saturation ....
 table shows comparison to 2n+1 and n+1.
 10-th order (at least +2n+1 til 21-th order in E (for Anders)).
-\subsection{Linear scaling: 3D water clusters}
-3D water clusters show an early onset of linear scaling for accrurate
-basis set and low tresholds and higher order response.
 
-The density responses matrices show an exponential decay as a function
-of the internuclear distance, however the decay is slower and the locality
-becomes lower for the higher order response functions.
-Therefor, we find a later onset for the linear scaling for the higher order
-responses.
+The static $\alpha_{zz}$, $\beta_{zzz}$ and $\gamma_{zzzz}$ 
+of water chains have been evaluated by using the same geometry as
+Otto et al \cite{POtto00}.
 
+Figures (\ref{fig:Alpha_1D},\ref{fig:Beta_1D},\ref{fig:Gamma_1D})
+Tables (\ref{tab:Alpha_1D_Values},\ref{tab:Beta_1D_Values},\ref{tab:Gamma_1D_Values})
 
 
 \begin{figure}[t]
@@ -327,7 +372,7 @@ responses.
     Longitudinal polarizability per water molecule for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
-  }\label{fig:Alpha_All}
+  }\label{fig:Alpha_1D}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Alpha_All}}
 \end{figure}
 
@@ -337,7 +382,7 @@ responses.
     Longitudinal first hyperpolarizability per water molecule for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
-  }\label{fig:Beta_All}
+  }\label{fig:Beta_1D}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Beta_All}}
 \end{figure}
 
@@ -347,7 +392,7 @@ responses.
     Longitudinal second hyperpolarizability per water molecule for 
     the 6-31G and 6-31G** basis sets in function
     of the number of water molecule in the chain.
-  }\label{fig:Gamma_All}
+  }\label{fig:Gamma_1D}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Gamma_All}}
 \end{figure}
 
@@ -360,7 +405,7 @@ responses.
     and $Tight$ accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
-  }\label{tab:Polari_1D_Values}
+  }\label{tab:Alpha_1D_Values}
   \begin{ruledtabular}
     \begin{tabular}{cccc}
       $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
@@ -385,48 +430,16 @@ responses.
  \footnotetext[2]{MondoSCF calculations.}
 \end{table}
 
-%# Grendels, serial
-%#  h2o 1D,6-31G,6-31G**, Good,Tight, TC2, TC2R
-%#            6-31G                 6-31G**
-%##h2o   Good       Tight      Good       Tight  
-%   1  5.816843   5.813589   6.318880   6.318837
-%   2  6.347806   6.344830   7.047533   7.047412
-%   3  6.586309   6.584449   7.401679   7.399737
-%   4  6.737115   6.727684   7.609359   7.609261
-%   5  6.822869   6.822640   7.746792   7.746704
-%  10  7.031173   7.030870   8.045755   8.045561
-%  15  7.105109   7.104780   8.151490   8.151306
-%  20  7.142874   7.142433   8.205483   8.205162
-%  25  7.165841   7.165231   8.238139   8.237774
-%  30  7.180868   7.180514   8.260017   8.259633
-%  35  7.191806   7.191468   8.275722   8.275303
-%  40  7.200072   7.199704   8.287543   8.287090
-
-%GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS 
-%1     5.8136  5.8136   30.6125  30.6125    330.5753   330.5753
-%2    12.6896  6.3448   59.0887  29.5444   1640.2796   820.1398
-%3    19.7533  6.5844   76.1089  25.3696   3025.6968  1008.5656
-%4    26.9106  6.7276   88.5646  22.1411   4413.9253  1103.4813
-%5    34.1130  6.8226   99.4626  19.8925   5844.7817  1168.9563
-%10   70.3083  7.0308  148.0633  14.8063  13242.9057  1324.2906
-%15  106.5710  7.1047  194.5692  12.9713  20727.9867  1381.8657
-%20  142.8477  7.1424  240.6673  12.0334  28228.5295  1411.4264
-%25  179.1295  7.1652  286.6190  11.4648  35734.4198  1429.3767
-%30  215.4138  7.1805  332.5018  11.0834  43242.7849  1441.4261
-%35  251.6995  7.1914  378.3465  10.8099  50752.4976  1450.0713
-%40  287.9861  7.1996  424.1681  10.6042  58263.0262  1456.5756
-%GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS GAMESS 
-
 
 \begin{table}
   \centering
   \caption{\protect
-    Longitudinal polarizability $\beta_{zzz}$
+    Longitudinal first hyperpolarizability $\beta_{zzz}$
     for different water chain lengths with the 6-31G and 6-31G** basis sets
     and $Tight$ accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
-  }\label{tab:Polari_1D_Values}
+  }\label{tab:Beta_1D_Values}
   \begin{ruledtabular}
     \begin{tabular}{ccccc}
       $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
@@ -453,34 +466,16 @@ responses.
  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
 
-%# Grendels, serial
-%#  h2o 1D,6-31G,6-31G**, Good,Tight, TC2, TC2R
-%#             6-31G                 6-31G**
-%##h2o    Good       Tight      Good       Tight  
-%   1 -30.608433 -30.612178 -25.232553 -25.232854
-%   2 -29.545590 -29.545096 -23.455425 -23.454776
-%   3 -25.371724 -25.370516 -19.610785 -19.611398
-%   4 -22.139294 -22.141553 -16.713768 -16.713840
-%   5 -19.895058 -19.893306 -14.686577 -14.683861
-%  10 -14.807930 -14.807203 -10.078511 -10.065481
-%  15 -12.970406 -12.972171  -8.408976  -8.396753
-%  20 -12.030914 -12.034259  -7.559121  -7.544200
-%  25 -11.457680 -11.465624  -7.030470  -7.027523
-%  30 -11.067331 -11.084234  -6.691950  -6.680997
-%  35 -10.825402 -10.810645  -6.442292  -6.432514
-%  40 -10.507809 -10.604860  -6.250695  -6.245644
-
-
 
 \begin{table}
   \centering
   \caption{\protect
-    Longitudinal polarizability $\gamma_{zzzz}$
+    Longitudinal seconf hyperpolarizability $\gamma_{zzzz}$
     for different water chain lengths with the 6-31G and 6-31G** basis sets
     and $Tight$ accuracy (See text) and the results obtained with
     the GAMESS quantum chemistry package \cite{gamess} with the 6-31G. 
     All the results are in $[a.u.]$.
-  }\label{tab:Polari_1D_Values}
+  }\label{tab:Gamma_1D_Values}
   \begin{ruledtabular}
     \begin{tabular}{ccccc}
       $N$ &\multicolumn{1}{c}{6-31G\footnotemark[1]}
@@ -506,23 +501,6 @@ responses.
  \footnotetext[2]{MondoSCF calculations.}
  \footnotetext[3]{The density matrix based 2n+1 rule has been used.}
 \end{table}
-
-%# Grendels, serial
-%#  h2o 1D,6-31G,6-31G**, Good,Tight, TC2, TC2R
-%#               6-31G                     6-31G**
-%##h2o     Good         Tight        Good       Tight  
-%   1   330.500720   330.577009   278.906999   278.898509
-%   2   820.172599   820.160650   663.493749   663.493200
-%   3  1008.563066  1008.580733   836.049133   836.073966
-%   4  1103.520725  1103.494950   935.288549   935.378474
-%   5  1169.048159  1168.972479  1005.069079  1004.896120
-%  10  1325.171700  1324.304700  1169.970399  1169.020999
-%  15  1383.163933  1381.882600  1230.688333  1229.747000
-%  20  1414.483850  1411.448699  1261.845550  1260.928449
-%  25  1435.599519  1428.980999  1280.417440  1279.877079
-%  30  1452.626633  1441.474333  1293.059166  1292.603933
-%  35  1468.606228  1450.143685  1301.725400  1301.746485
-%  40  1484.647500  1456.682800  1308.446325  1308.644675
 
 
 \subsection{Linear scaling: 3D water clusters}
@@ -573,7 +551,7 @@ responses.
     numerical thresholds (see text) controlling numerical
     precision of the result. The lines are fits to the 
     last three and four points, respectively.
-  }\label{Beta_scaling}
+  }\label{Gamma_scaling}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
                         {Gamma_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
@@ -587,16 +565,14 @@ responses.
     basis set and the {\tt GOOD} numerical threshold (see text) 
     controlling numerical precision of the result. The lines
     are fits to the last three and four points, respectively.
-  }\label{Alpha_scaling}
+  }\label{Mix_scaling}
   \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]
                         {Mix_h2o3D_6-31G_6-31Gss_G_T_t}}
 \end{figure}
 
 
 
-%\subsubsection{}
 \subsection{Exponential decay}
-
 
 \begin{figure}[t]
   \caption{\protect
@@ -608,11 +584,6 @@ responses.
   }\label{fig:Alpha_Decay}
 %  \resizebox*{3.5in}{!}{\includegraphics[angle=-90.00]{Alpha_Decay_Z_6-31G}}
 \end{figure}
-
-
-%\section{}
-%\subsection{Discusion}
-
 
 
 

@@ -1,0 +1,13 @@
+# Grendels, serial
+# ball of h2o, 6-31G, 6-31G**, good-tight, TC2, TC2R, cycle 5 X, WALL time.
+##h2o t-Tot-Good t-Tot-Tightt-Tot-Good t-Tot-Tight       fit-G   fit-T         fit-G     fit-T    
+#       6-31G      6-31G     6-31G**    6-31G**          6-31G    6-31G       6-31G**  6-31G**     
+#    60    765.3   1138.7 
+#   160   4758.3  10270.7 
+  
+ 60 0.2125833 0.316305
+160 1.3217500 2.852972
+   
+                             	 		      
+                               
+

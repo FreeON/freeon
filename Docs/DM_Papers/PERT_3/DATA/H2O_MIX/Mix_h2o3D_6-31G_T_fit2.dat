@@ -1,0 +1,27 @@
+# Grendels, serial
+# ball of h2o, 6-31G, 6-31G**, good-tight, TC2, TC2R, cycle 5 X, WALL time.
+##h2o t-Tot-Good t-Tot-Tightt-Tot-Good t-Tot-Tight       fit-G   fit-T         fit-G     fit-T    
+#       6-31G      6-31G     6-31G**    6-31G**          6-31G    6-31G       6-31G**  6-31G**     
+#Alpha Alpha Alpha Alpha Alpha Alpha Alpha Alpha Alpha
+#    60    765.3   1138.7 
+#   160   4758.3  10270.7 
+# 60 0.2125833 0.316305
+#160 1.3217500 2.852972
+# Beta Beta Beta Beta Beta Beta Beta Beta Beta Beta 
+#  60   912.30   1220.39
+# 160  7812.87  15060.81
+#  60  0.253416 0.338997
+# 160  2.170241 4.183558
+# Gamma Gamma Gamma Gamma Gamma Gamma Gamma Gamma Gamma
+#  80   2879.94   4126.33
+# 160  12484.58  22631.59
+# 80 0.799983 1.146202
+#160 3.467938 6.286552
+
+#     Gamma   
+ 80  1.146202 
+160  6.286552 
+                               
+
+
+
