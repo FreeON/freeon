@@ -30,19 +30,6 @@
  ab initio molecular dynamics", and given appropriate citation.  
 
  ---------------------------------------------------------------
- Warning -- This program may not be used in any manner that
- impedes the Scientific Endeavor, or that prevents the free 
- dissemination of unclassified information developed with public 
- funds.  The licensee of this program is encouraged to develop 
- competing technologies, to fairly compare them with those in 
- MondoSCF, and to make them available for redistribution.  By 
- using this program the user acknowledges that MondoSCF and its 
- developers are engaged in the business of creating and 
- disseminating leading edge software in the field of Extreme 
- Computational Chemistry, and that the direct comparison of 
- competing methods is essential to advancement of this field.
-                         -- NJoy --
- ---------------------------------------------------------------
 
 
 
