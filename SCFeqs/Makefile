@@ -29,7 +29,7 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC=#-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA
+CPPMISC=#-DWORK_ON_DEGENERACY #-DNODIIS #-DSPATIAL_THRESHOLDING #-DFIND_CONDA 
 #
 BlkAInvObjs = BlokAInv.o  
 LowdinOObjs = LowdinO.o 

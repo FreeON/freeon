@@ -16,8 +16,10 @@ PROGRAM NT4
   USE Macros
   USE LinAlg
   USE DenMatMethods
+  USE MatFunk
   IMPLICIT NONE
   TYPE(BCSR)                     :: F,P,Pold,T,Z
+  TYPE(DBL_RNK2)                 :: B,C
   !-------------------------------------------------------------------------------------
   ! Trace purserving NT4
   !-------------------------------------------------------------------------------------
@@ -93,10 +95,6 @@ PROGRAM NT4
      CALL Add(Pold,P,T)
      ErrorP  = TwoNorm(T)/TwoNorm(P)
      CALL MednOut(Prog,I,Energy,PNon0,ErrorE,ErrorP)
-     !--------------------------------------------------------------------------
-     !    Calculate Degeneracy, Occupancy, lumo_occ, and Gap
-     !--------------------------------------------------------------------------
-     CALL CalculateDegen(Ne,Degen,Occpan,lumo_occ)
      !     CALL CalculateGap(F,P,Ne,lumo_occ,Gap)
      !--------------------------------------------------------------------------
      !    Output Convergence Infomation
@@ -107,6 +105,23 @@ PROGRAM NT4
   ! Normalize Trace
   !--------------------------------------------------------------------------
   CALL NormTrace(P,Ne,1)
+#ifdef WORK_ON_DEGENERACY
+  !--------------------------------------------------------------------------
+  !    Calculate Degeneracy, Occupancy, lumo_occ, and Gap
+  !--------------------------------------------------------------------------
+  CALL CalculateDegen(Ne,Degen,Occpan,lumo_occ)
+  WRITE(*,*)' Degen    = ',Degen
+  WRITE(*,*)' Occ      = ',Occpan
+  WRITE(*,*)' LumoOcc= = ',Lumo_occ
+  CALL New(B,(/NBasF,NBasF/))
+  CALL New(C,(/NBasF,NBasF/))
+  CALL SetEq(B,P)
+  CALL SetDSYEVWork(NBasF)
+  CALL FunkOnSqMat(NBasF,Inverse,B%D,C%D,PrintValues_O=.TRUE.,Unit_O=6)
+  CALL Delete(B)
+  CALL Delete(C)
+  CALL UnSetDSYEVWork()
+#endif
   !--------------------------------------------------------------------------
   ! Write Out Statisitcs
   !--------------------------------------------------------------------------
