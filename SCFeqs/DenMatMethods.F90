@@ -11,6 +11,11 @@ MODULE DenMatMethods
   USE LinAlg
   IMPLICIT NONE
   REAL(DOUBLE)            :: TrP,TrP2,TrP3,TrP4
+!
+!  WE NEED TO DEAL WITH THE ALLOCATION OF TEMPORARY MATRICES, EITHER DECLARE THEM
+!  GLOBALLY (HERE FOR EXAMPLE), OR PASS THE MEMORY IN.  IMPLICIT ALLOCATION EXPLICIT
+!  DEALLOCATION SHOULD BE AVOIDED...
+!
   CONTAINS
 !----------------------------------------------------------------------------
 !
@@ -24,6 +29,8 @@ MODULE DenMatMethods
       CALL Multiply(PF,-One)
       CALL Add(FP,PF,T)
 !
+      CALL Delete(FP)
+      CALL Delete(PF)
     END SUBROUTINE Commute
 !----------------------------------------------------------------------------
 !
@@ -95,6 +102,8 @@ MODULE DenMatMethods
      ELSE
         CALL MondoHalt(99,'Wrong Order in NormTrace')
      ENDIF
+     CALL Delete(P2)
+     CALL Delete(Ptmp1)
 !
    END SUBROUTINE NormTrace
 !----------------------------------------------------------------------------
@@ -126,6 +135,8 @@ MODULE DenMatMethods
 ! 
      Gap       = -(TrFP - Three*TrFP2 + Two*TrFP2)/(lumo_occ*(lumo_occ-One)*(Two*lumo_occ-One))
 !
+     CALL Delete(P2)
+     CALL Delete(P3)
    END SUBROUTINE CalculateGap
 !----------------------------------------------------------------------------
 !
@@ -250,6 +261,8 @@ MODULE DenMatMethods
       ELSE
          CALL  SetEq(Pout,Ptmp1)
       ENDIF
+      CALL Delete(P2)
+      CALL Delete(Ptmp1)
 !
     END SUBROUTINE SP2
 !----------------------------------------------------------------------------
@@ -322,6 +335,9 @@ MODULE DenMatMethods
      ELSE
         CALL  SetEq(Pout,Ptmp1)
      ENDIF
+     CALL Delete(P2)
+     CALL Delete(Ptmp1)
+     CALL Delete(Ptmp2)
 !
    END SUBROUTINE SP4
 !----------------------------------------------------------------------------
@@ -388,6 +404,10 @@ MODULE DenMatMethods
      ELSE
         CALL  SetEq(Pout,Ptmp1)
      ENDIF
+
+     CALL Delete(P2)
+     CALL Delete(Ptmp1)
+     CALL Delete(Ptmp2)
 !
    END SUBROUTINE NT4
 !----------------------------------------------------------------------------
@@ -447,6 +467,11 @@ MODULE DenMatMethods
      ELSE
         CALL  SetEq(Pout,Ptmp1)
      ENDIF
+
+     CALL Delete(P2)
+     CALL Delete(P3)
+     CALL Delete(Ptmp1)
+     CALL Delete(Ptmp2)
 !
    END SUBROUTINE PM
 !

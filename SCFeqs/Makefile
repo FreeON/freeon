@@ -32,20 +32,23 @@ include $(MONDO_HOME)/Includes/RemoveAll
 CPPMISC=#-DNODIIS
 #
 Gues_Objs  = FillPBlok.o P2Use.o 
-SDMM_Objs  = FillPBlok.o SDMM.o 
 Stat_Objs  = SCFStatus.o          
 RHEq_Objs  = RHeqs.o              
-FBuild_Objs= FBuild.o       
-#DIIS_Objs  = DIIS_Saved.o               
+FBuild_Objs= FBuild.o                   
 DIIS_Objs  = DIIS.o               
 Dev_Objs   = ToDev.o  
-SDMM2_Objs = FillPBlok.o SDMM2.o             
+#
+SDMM_Objs  = FillPBlok.o SDMM.o DenMatMethods.o
+SP2_Objs   = FillPBlok.o SP2.o  DenMatMethods.o
+SP4_Objs   = FillPBlok.o SP4.o  DenMatMethods.o
+NT4_Objs   = FillPBlok.o NT4.o  DenMatMethods.o
+PM_Objs    = FillPBlok.o PM.o   DenMatMethods.o
 #
 ReleaseFiles=FillPBlok.x P2Use.x FillPBlok.x \
              SDMM.x SCFStatus.x RHeqs.x \
-             FBuild.x DIIS.x ToDev.x SDMM2.x
+             FBuild.x DIIS.x ToDev.x 
 #
-all:	Stat Gues SDMM FBuild  DIIS RHEq SDMM2
+all:	Stat Gues FBuild DIIS RHEq SDMM SP2 SP4 NT4 PM
 #
 release:clean $(ReleaseFiles)
 #
@@ -63,7 +66,10 @@ clean:
 	rm -f $(MONDO_EXEC)/SCFstats
 	rm -f $(MONDO_EXEC)/DIIS
 	rm -f $(MONDO_EXEC)/ToDev
-	rm -f $(MONDO_EXEC)/SDMM2
+	rm -f $(MONDO_EXEC)/SP2
+	rm -f $(MONDO_EXEC)/SP4
+	rm -f $(MONDO_EXEC)/NT4
+	rm -f $(MONDO_EXEC)/PM
 	ln -s /dev/null core
 #
 Stat:	$(Stat_Objs)
@@ -73,10 +79,6 @@ Stat:	$(Stat_Objs)
 Gues:	$(Gues_Objs)
 	$(LD) $(LDFLAGS) P2Use $(Gues_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv P2Use $(MONDO_EXEC)/P2Use
-#
-SDMM2:	$(SDMM2_Objs)
-	$(LD) $(LDFLAGS) SDMM2 $(SDMM2_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
-	mv SDMM2 $(MONDO_EXEC)/SDMM2
 #
 RHEq:	$(RHEq_Objs)
 	$(LD) $(LDFLAGS) RHeqs $(RHEq_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
@@ -94,9 +96,27 @@ Dev:	$(Dev_Objs)
 	$(LD) $(LDFLAGS) ToDev $(Dev_Objs) $(LibOpts) $(F90_LIBRARIES) 
 	mv ToDev $(MONDO_EXEC)/ToDev
 #
+#       Methods
+#
 SDMM:	$(SDMM_Objs)
 	$(LD) $(LDFLAGS) SDMM $(SDMM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
 	mv SDMM $(MONDO_EXEC)/SDMM
+#
+SP2:	$(SP2_Objs)
+	$(LD) $(LDFLAGS) SP2  $(SP2_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv SP2 $(MONDO_EXEC)/SP2
+#
+SP4:	$(SP4_Objs)
+	$(LD) $(LDFLAGS) SP4  $(SP4_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv SP4 $(MONDO_EXEC)/SP4
+#
+NT4:	$(NT4_Objs)
+	$(LD) $(LDFLAGS) NT4  $(NT4_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv NT4 $(MONDO_EXEC)/NT4
+#
+PM:	$(PM_Objs)
+	$(LD) $(LDFLAGS) PM  $(PM_Objs) $(LibOpts) $(F90_LIBRARIES) $(LAPACK)
+	mv PM $(MONDO_EXEC)/PM
 #
 DIIS.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
 FBuild.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
@@ -105,5 +125,7 @@ FillPBlok.o:	            $(MONDO_HOME)/Libs/libMondoMods.a
 RHeqs.o:		    $(MONDO_HOME)/Libs/libMondoMods.a
 SCFStatus.o:                $(MONDO_HOME)/Libs/libMondoMods.a
 SDMM.o:		            $(MONDO_HOME)/Libs/libMondoMods.a
-SDMM2.o:                    $(MONDO_HOME)/Libs/libMondoMods.a
-
+SP2.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
+SP4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
+NT4.o:                      $(MONDO_HOME)/Libs/libMondoMods.a
+PM.o:                       $(MONDO_HOME)/Libs/libMondoMods.a

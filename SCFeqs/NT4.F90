@@ -1,8 +1,8 @@
 !----------------------------------------------------------------------
-!                         May 15th 2002
-!                    Anders M. N. Niklasson
-! Constructs the density matrix from the Hamiltonian in terms of
-! a trace setting purification expansion of 4th order.
+!                         May 13th 2002
+! Anders M. N. Niklasson: "Expansion Algorithm for the Density Matrix".
+! Constructs the density matrix from the Hamiltonian in terms of a
+! trace correcting purification expansion with 2nd order purifications.
 !----------------------------------------------------------------------
 PROGRAM NT4
   USE DerivedTypes
@@ -15,219 +15,157 @@ PROGRAM NT4
   USE Parse
   USE Macros
   USE LinAlg
+  USE DenMatMethods
   IMPLICIT NONE
-  TYPE(BCSR)                     :: F,P,P2,Pold,T,T2,Z
+  TYPE(BCSR)                     :: F,P,Pold,T,Z
+  !-------------------------------------------------------------------------------------
+  ! Trace purserving NT4
+  !-------------------------------------------------------------------------------------
   TYPE(ARGMT)                    :: Args
-!
-  REAL(DOUBLE)                   :: E_old,E_new,Error_Energy,Tol_Energy,Diag,   &
-                                    Tmp_min,Tmp_max,F_min,F_max,Sum,Energy,DF,  &
-                                    TrP,TrP2,TrP3,TrP4,Coeff,CR,Ne,EPS,G,Gt,Gn, &
-                                    Slask,MinErrorP,ErrorP,Fill
-  INTEGER                        :: I,J,K,MM,M,N,Nr_Max_It,R,C,col,Blk,Check,PNon0
+  !
+  REAL(DOUBLE)                   :: Energy,Energy_old,Thresh_old
+  REAL(DOUBLE)                   :: ErrorE,ErrorN,ErrorP,ErrorFP,Ne
+  REAL(DOUBLE)                   :: Degen,Occpan,lumo_occ,Gap
+  !
+  INTEGER                        :: I,Nr_Max_It,PNon0,MM
   LOGICAL                        :: Present,Converged
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,FFile
   CHARACTER(LEN=3),PARAMETER     :: Prog='NT4'
-!------------------------------------------------------------------
-! Start
+  !-------------------------------------------------------------------------
+  ! Start
+  !-------------------------------------------------------------------------
   CALL StartUp(Args,Prog)
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
   CALL New(F)
-!-----------------------------------------------------------------------------
-! Get The Fock Matrix
-!-----------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! Get The Fock Matrix
+  !-------------------------------------------------------------------------
   FFile=TrixFile('F_DIIS',Args,0)
   INQUIRE(FILE=FFile,EXIST=Present)
   IF(Present)THEN
      CALL Get(F,FFile)
   ELSE
-     CALL Get(F,TrixFile('OrthoF',Args,0))    ! the orthogonalized Fock matrix
+     CALL Get(F,TrixFile('OrthoF',Args,0))   
   ENDIF
-!=====================================================
-!  "Niklasson-Tymczak" - Solver of 4th order                           
-!=====================================================
-  EPS        = 1.D-10
-  Tol_Energy = Thresholds%ETol*1D-2    ! Convergence criterea
-  Ne         = Half*DBLE(NEl)          ! 0.5 because of spin degeneracy?
-  Fill       = Ne/DBLE(NBasF) 
-!
+  !-------------------------------------------------------------------------
+  ! Initialize                     
+  !-------------------------------------------------------------------------
+  MM         = 0                        
+  Energy     = Zero
+  Nr_Max_It  = 50                   
+  Converged  = .FALSE.  
+  Ne         = Half*DBLE(NEl)    
+  Thresh_old = Thresholds%Trix
+  !
   CALL New(P)
-  CALL New(P2)
-  CALL New(T)
-  CALL New(T2)  
   CALL New(Pold)
-!----------------------------------------------------------
-! Estimate spectral bounds 
-!----------------------------------------------------------
-  CALL SpectralBounds(F,F_min,F_max)
-!-----------------------------------------------------------
-!  Set up the starting Density Matrix from the Fock Matrix
-!-----------------------------------------------------------
-  Call SetEq(P,F)
-  DF = (F_max - F_min)
-  CALL Add(P,-F_max)
-  Coeff = -One/DF
-  CALL Multiply(P,Coeff)  ! P = (I*F_max-F)/DF 
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++
-! Main Loop: Iterate until convergence               +
-!+++++++++++++++++++++++++++++++++++++++++++++++++++++
-  MM         = 0                        ! Nr of matrix multiplies
-  E_old      = Zero
-  MinErrorP  = 1.0D10
-  Nr_Max_It  = 200                      ! Maximal number of allowed iterations
-  Converged  = .FALSE.
-!
+  CALL New(T)    
+  CALL SetEq(Pold,P)    
+  !-------------------------------------------------------------------------
+  !  Set up the starting Density Matrix from the Fock Matrix
+  !-------------------------------------------------------------------------
+  CALL FockGuess(F,P,Ne,1)
+  !-------------------------------------------------------------------------
+  ! Main Loop: Iterate until convergence              
+  !-------------------------------------------------------------------------
   DO I = 1,Nr_Max_It
      CALL SetEq(Pold,P)
-     CALL Multiply(P,P,T2)    
-     MM = MM + 1                        ! One multiplication
-     CALL Filter(P2,T2)                 ! Thresholding
-     TrP = Trace(P)
-     TrP2 = Trace(P2)
-     TrP3 = Trace(P,P2)
-     TrP4 = Trace(P2,P2)
-     Gt = (Ne-Four*TrP3+Three*TrP4)
-     Gn = (TrP2-Two*TrP3+TrP4)
-     IF (ABS(Gn).LT.EPS) THEN           ! Close to idempotency (at non degeneracy)
-       G = Three                        ! To avoid machine precision errors
-     ELSE
-       G = Gt/Gn
+     Energy_old = Energy
+     !--------------------------------------------------------------------------
+     !    Set the Threshold for reduction of the error
+     !--------------------------------------------------------------------------
+     IF(I==1) THEN
+        Thresholds%Trix = Thresh_old*1.D-2
+     ELSEIF(I >= 2) THEN
+        Thresholds%Trix = MIN(1.5D0*Thresholds%Trix,Thresh_old)
      ENDIF
-     IF (G.GT.6) THEN           ! Out of bound, increase eigenvalues
-        CALL Multiply(P,Two)
-        CALL Multiply(P2,-One)
-        CALL Add(P,P2,T)        ! P = 2P-P^2
-     ELSEIF (G.LT.Zero) THEN    ! Out of bound, decrease eigenvalues
-        CALL SetEq(T,P2)        ! P = P^2
-     ELSE
-        CALL SetEq(T,P2)
-        Coeff = (G-Three)
-        CALL Multiply(T,Coeff)
-        Coeff = (Four-Two*G)
-        CALL Multiply(P,Coeff)
-        CALL Add(P,T,T2)
-        CALL Add(T2,G)
-        CALL Multiply(P2,T2,T) ! P = P^2[g+(4-2g)P+(g-3)P^2] Trace setting
-        MM = MM + 1            ! One Multiplication
-     ENDIF
-     CALL Filter(P,T)           ! Thresholding
-!
-     Energy       = Trace(P,F)
-     Error_Energy = ABS(Energy - E_old)
-     E_old        = Energy
-     PNon0        = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF) 
-!
-     IF(I .GT. 10) THEN
-        CALL Multiply(Pold,-One)
-        CALL Add(Pold,P,T) 
-        ErrorP    = MAX(T)
-        MinErrorP = MIN(MinErrorP,ErrorP)
-        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-           Mssg=TRIM(Prog)//'   '//TRIM(IntToChar(I))                 &
-                //' Tr(P.F) = '//TRIM(DblToMedmChar(Energy))          &
-                //', %Non0 = '//TRIM(IntToChar(PNon0))                &
-                //', ErrorP = '//TRIM(DblToShrtChar(ErrorP))         
-           WRITE(*,*)   TRIM(Mssg)
-           CALL OpenASCII(OutFile,Out)
-           WRITE(Out,*) TRIM(Mssg)
-           CLOSE(UNIT=Out,STATUS='KEEP')
-        ENDIF
-        IF(ErrorP/MinErrorP .GT. 1.5D0) THEN
-           IF(Error_Energy .LT. 1.D4*Tol_Energy) THEN
-               Converged=.TRUE.
-           ENDIF
-           IF(ErrorP/MinErrorP .GT. 4.0D0) THEN
-              Converged=.TRUE.
-           ENDIF
-        ENDIF
-        IF(Error_Energy .LT. Tol_Energy) Converged=.TRUE.
-     ELSE        
-        IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-           Mssg=TRIM(Prog)//'   '//TRIM(IntToChar(I))                 &
-                //' Tr(P.F) = '//TRIM(DblToMedmChar(Energy))          &
-                //', %Non0 = '//TRIM(IntToChar(PNon0))                    
-           WRITE(*,*)   TRIM(Mssg)
-           CALL OpenASCII(OutFile,Out)
-           WRITE(Out,*) TRIM(Mssg)
-           CLOSE(UNIT=Out,STATUS='KEEP')
-        ENDIF
-        IF(Error_Energy .LT. Tol_Energy) Converged=.TRUE.
-     ENDIF
-!
-     IF(Converged) EXIT
+     !--------------------------------------------------------------------------
+     !    One Step of the Algorithm
+     !--------------------------------------------------------------------------
+     CALL NT4(P,P,Ne,MM,.TRUE.)
+     !--------------------------------------------------------------------------
+     !    Output Convergence Infomation
+     !--------------------------------------------------------------------------
+     Energy  = Trace(P,F)
+     PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+     ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
+     CALL Multiply(Pold,-One)
+     CALL Add(Pold,P,T)
+     ErrorP  = TwoNorm(T)/TwoNorm(P)
+     CALL MednOut(Prog,I,Energy,PNon0,ErrorE,ErrorP)
+     !--------------------------------------------------------------------------
+     !    Calculate Degeneracy, Occupancy, lumo_occ, and Gap
+     !--------------------------------------------------------------------------
+     CALL CalculateDegen(Ne,Degen,Occpan,lumo_occ)
+     !     CALL CalculateGap(F,P,Ne,lumo_occ,Gap)
+     !--------------------------------------------------------------------------
+     !    Output Convergence Infomation
+     !--------------------------------------------------------------------------
+     IF(ErrorP < 5.0D0*Thresh_old) EXIT
   ENDDO
-!--------------------------------------------------------------------------
-! Write Out Statisitcs
-!--------------------------------------------------------------------------
-  TrP     = Trace(P)
-  CALL Multiply(P,F,P2)
-  CALL Multiply(F,P,T)
-  CALL Multiply(T,-One)
-  CALL Add(T,P2,T)
-!         
-  CALL OpenASCII(OutFile,Out)
-  Mssg = TRIM(Prog) // '               : |Trace(P)-NEl|= '//TRIM(DblToMedmChar(ABS(Two*TrP-NEl)))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  Mssg = TRIM(Prog) // '               : Tol_Energy    = '//TRIM(DblToMedmChar(Tol_Energy))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  Mssg = TRIM(Prog) // '               : |E_n-E_{n-1}| = '//TRIM(DblToMedmChar(Error_Energy))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  Mssg = TRIM(Prog) // '               : Max|PF-FP|    = '//TRIM(DblToMedmChar( MAX(T)/MAX(P2) ))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  Mssg = TRIM(Prog) // '               : Nr Mtrx Mlt   = '//TRIM(IntToChar(MM))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  Mssg = TRIM(Prog) // '               : Filling       = '//TRIM(DblToMedmChar(Fill))
-  WRITE(*,*)   TRIM(Mssg)
-  WRITE(Out,*) TRIM(Mssg)
-  CLOSE(UNIT=Out,STATUS='KEEP')
-!
+  !--------------------------------------------------------------------------
+  ! Normalize Trace
+  !--------------------------------------------------------------------------
+  CALL NormTrace(P,P,Ne,1)
+  !--------------------------------------------------------------------------
+  ! Write Out Statisitcs
+  !--------------------------------------------------------------------------
+  Energy  = Trace(P,F)
+  PNon0   = 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+  ErrorE  = ABS(Energy-Energy_old)/ABS(Energy)
+  ErrorN  = Trace(P)-Ne
+  CALL Add(Pold,P,T)
+  ErrorP  = TwoNorm(T)/TwoNorm(P)
+  CALL Commute(F,P,T)
+  ErrorFP = TwoNorm(T)/TwoNorm(F)
+  CALL FinalOut(Prog,Energy,ErrorE,ErrorN,ErrorP,ErrorFP,PNon0,MM)
+  CALL ShutDown(Prog)
+  IF(.TRUE.) STOP
+  !=============================================================================
+  !  TRANSFORMATION TO AN AO REPRESENTATION AND IO
+  !=============================================================================
+  !  IO for the orthogonal P
+  !
+  CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
+  CALL Put(P,TrixFile('OrthoD',Args,1))
+  CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
+  CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
+  CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
+  !-----------------------------------------------------------------------------
+  !  Convert to AO representation
+  !
+  INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+  IF(Present)THEN
+     CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
+     CALL Multiply(Z,P,T)
+     CALL Multiply(T,Z,P)
+  ELSE
+     CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
+     CALL Multiply(Z,P,T)
+     CALL Get(Z,TrixFile('ZT',Args))
+     CALL Multiply(T,Z,P)
+  ENDIF
+  CALL Filter(T,P)     ! Thresholding
+  !----------------------------------------------------------------------------0-
+  !  IO for the non-orthogonal P
+  !
+  CALL Put(T,TrixFile('D',Args,1))
+  CALL Put(Zero,'homolumogap')
+  CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
+  CALL PPrint(T,'P['//TRIM(NxtCycl)//']')
+  CALL Plot(T,'P_'//TRIM(NxtCycl))
+  !-----------------------------------------------------------------------------
+  !  Tidy up
+  ! 
   CALL Delete(F)
-  CALL Delete(P2)
-  CALL Delete(T2)
-!=============================================================================
-!  TRANSFORMATION TO AN AO REPRESENTATION AND IO
-!=============================================================================
-!-----------------------------------------------------------------------------
-!  IO for the orthogonal P
-!
-   CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)
-   CALL Put(P,TrixFile('OrthoD',Args,1))
-   CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
-   CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
-   CALL Plot(   P,'OrthoP_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Convert to AO representation
-! 
-   INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-   IF(Present)THEN
-      CALL Get(Z,TrixFile('X',Args))   ! Z=S^(-1/2)
-      CALL Multiply(Z,P,T)
-      CALL Multiply(T,Z,P)
-   ELSE
-      CALL Get(Z,TrixFile('Z',Args))   ! Z=S^(-L)
-      CALL Multiply(Z,P,T)
-      CALL Get(Z,TrixFile('ZT',Args))
-      CALL Multiply(T,Z,P)
-   ENDIF
-   CALL Filter(T,P)     ! Thresholding
-!----------------------------------------------------------------------------0-
-!  IO for the non-orthogonal P
-!
-   CALL Put(T,TrixFile('D',Args,1))
-   CALL Put(Zero,'homolumogap')
-   CALL PChkSum(T,'P['//TRIM(NxtCycl)//']',Prog)
-   CALL PPrint(T,'P['//TRIM(NxtCycl)//']')
-   CALL Plot(T,'P_'//TRIM(NxtCycl))
-!-----------------------------------------------------------------------------
-!  Tidy up
-!
-   CALL Delete(P)
-   CALL Delete(T)
-   CALL Delete(Z)
-   CALL ShutDown(Prog)
-!
- END PROGRAM NT4
+  CALL Delete(P)
+  CALL Delete(Pold)
+  CALL Delete(T)
+  CALL Delete(Z)
+  CALL ShutDown(Prog)
+  !
+END PROGRAM NT4
+
+
+
+
