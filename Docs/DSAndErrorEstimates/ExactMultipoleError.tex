@@ -79,7 +79,7 @@ refference distribution , $a$, which we want to calculate the interaction with. 
 be to interact distibution $a$ with all the other distributions in the box, but this scales with the 
 number of distributions in the box. A better way would be to calculate the multipoles (we use 
 spherical multipoles [ref]) of the set of distributions in the box at the center of the box, and 
-then interact distibution $a$ with the multipoles via
+then interact the refference distibution $a$ with the multipoles via
 
 \begin{equation}
 V[\mathbf{R}_{a},\mathbf{R}_{box}] 
@@ -95,15 +95,107 @@ Where ${\cal O}_{l}^{m}[\mathbf{R}_{a}]$ and ${\cal O}_{l'}^{m'}[\mathbf{R}_{box
 the distribution $a$ and the distributions in the box, and 
 $M_{l+l'}^{m+m'}[\mathbf{R}_{a}-\mathbf{R}_{box}]$ is the interaction tensor. This is exact in the 
 limit of $L$ and $L'$ approaching  infinity as long as 
-$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. 
-
-
+$|\mathbf{R}_{a}-\mathbf{R}_{box}| < \mathbf{d}_{max}$. However, in practical calculations 
+${\cal O}_{l}^{m}[\mathbf{R}_{a}$ is usually of a particular angular momentum type such that the sum over $L$ is 
+removed, and also the value of $L'$ are usually fixed at some maxium value.
+However, fixing the value of $L'$ creates the problem of how to control the accuracy of the calculation 
+for the refference distribution $a$. A solution to this problem is presented in Figure {\ref{figure:TreeInBox}}. 
+Instead of contracting the refference distribution $a$ with the multipole moments of all the distributuions in the
+box, which can lead to large errors, instead we contract our refference didtributions with sub-boxes of the orginal
+box such that our error is well controlled. The simplest method for achieving this is to split our orginal box
+into two sub-boxes, then split these sub-boxes int sub-sub-boxes, etc. If we have $N$ distributions in the orginal 
+box our splitting scheme gives us $N$ boxes (nodes) and $N$ distributions (leafs) for this {\it tree}. This is also
+depicted in  Figure {\ref{figure:TreeInBox}}. So instead of contracting our refference distribution $a$ with the 
+orginal box, we now contract it with the set of sub-boxes which will control the error. In general for our refference
+distribution we will need to visit {\cal O}($\log (N)$) nodes and leafs, which is dipicted in the figure. The 
+only issue yet to be resolved is how we estimate the error due to the contraction; what should be our
+{\it multipole Acceptability Criteria} for whether or not we contract on this node, or recure down to the next two 
+nodes. In the next section we explore this issue.
 
 
 \section{MULTIPOLE ACCEPTABILITY CRITERIA (MAC)} 
 
-\section{SCALING}
+Several MAC's have been devised for Multipole tree codes [ref]. The MAC which is used in most apllications is the
+{\it openning criteria},
+\begin{equation}
+\epsilon < {|{\bf d}_{max}| \over |{\bf R}_a - {\bf R}_{box}|}
+\label{OpenCri}
+\end{equation} 
 
+However, this sufferes from several dis-advantages: 
+i) It does not take into account the decay of the multipoles; 
+ii) It does not take into account the weight of the distribution within the box, a serious 
+problem for quantum chemistry codes.
+iii) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it can significantly underestimate
+the error. To correct this disadvantage we decided to investigate the possibility of deriving
+a more exact estimate of the error. What we where able to acomplish is an {\bf exact} bound to our multipole error. 
+In Appendix A we give a complete derivation of this exact bound, here we just give a brief discription. 
+Let us start with the expression of the exact multipole error,
+\begin{equation}
+\label{MultErr}
+\varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, 
+\sum _{m=-l_{0}}^{l_{0}}\, 
+\sum _{m'=-l'}^{l'}\, \left( -1\right) ^{l}\, {\cal O}_{l_{0}}^{m}[\mathbf{R}_a]\, 
+M_{l_{0}+l'}^{m+m'}
+[{\mathbf{R}_a-\mathbf{R}_{box}}]\, {\cal O}_{l'}^{m'}[\mathbf{Q}]\right| 
+\end{equation}
+which are the multipoles that are not summed in equation (\ref{MultI}) 
+(This is the same as equation (\ref{B7}) in the Appendix). What we then make use of is the
+us{\"o}ld operator
+\begin{equation}
+{\cal O}_{l}\left[ \left| \mathbf{R}\right| \right] =\sqrt{\sum _{m}(l-m)!(l+m)!
+\left| {\cal O}_{l}^{m}
+\left[ \mathbf{R}\right] \right|^{2}}
+\end{equation}
+Which allows us to rewrite the error bound as
+%
+%
+\begin{equation}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[
+\left| \mathbf{R}_a \right| 
+\right] }{\left| \mathbf{R}_a-\mathbf{R}_{box}\right| ^{l_{0}+L'+2}}\sum _{l=0}^{\infty }\frac{n\left[ 
+l_{0},l+L'+1\right] 
+{\cal O}_{l+L'+1}\left[\left| \mathbf{R}_{box} \right| \right] }{\left| \mathbf{R}_a-\mathbf{R}_{box}
+\right| ^{l}}
+\end{equation}
+%
+%
+where
+\begin{equation}
+n\left[ l,l'\right] =\sqrt{2} \frac{(l+l')!}{l!\, l'!}
+\end{equation}
+To continue with the main points of our derivation, it can be shown
+\begin{equation}
+{\cal O}_{l}[\left| \mathbf{R}\right| ]\leq C \left| \mathbf{d}_{max}\right| ^{l}
+\label{Cbound}
+\end{equation}
+Where we can bound the unknown constant $C$ by observing the behavior of the uns{\"o}ld estimates with 
+increasing $l$. Using equation (\ref{Cbound}) allows us to write our error bound in its final form
+\begin{equation}
+\varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[\left| 
+\mathbf{R}_a\right| 
+\right] \, n\left[ l_{0},L'+1\right] \, C \left| \mathbf{d}_{max}\right| ^{L'+1}}{
+\left| \left| 
+\mathbf{R}_a-\mathbf{R}_{box}\right| -\left| \mathbf{d}_{max}\right| \right| ^{l_{0}+1}\left| \mathbf{R}_a-
+\mathbf{R}_{box}
+\right| ^{L'+1}}
+\end{equation}
+This error bound solves all the problems associated with the {\it openning criteria} error estimate: 
+i) It takes into account the decay of the multipoles; 
+ii) It takes into account the weight of the distribution within the box;
+iii) When $|R_a - R_{box}| \rightarrow |{\bf d}_{max}|$ it correctly bounds the error.
+
+\section{RESULTS}
+
+\subsection{Test of the Error Bound}
+
+Figure \ref{figure:MultipoleErrorWaterC512}
+Figure \ref{figure:MultipoleErrorWaterQ64}
+
+\subsection{How the Algorithm Scales}
+
+Figure \ref{figure:TimeVsNwater}
+Figure \ref{figure:TimeVsTauWater4096}
 
 \section{CONCLUSIONS}
 
@@ -177,7 +269,8 @@ this gives us\[
 \mathbf{Q}]
 \end{equation}
 The error in the calculation is then the multipoles that we do not
-sum\begin{equation}
+sum
+\begin{equation}
 \label{B7}
 \varepsilon \left( l_{0}\right) =\left| \frac{1}{2}\sum _{l'=L'+1}^{\infty }\, 
 \sum _{m=-l_{0}}^{l_{0}}\, 
@@ -339,7 +432,8 @@ l_{0},l+L'+1\right]
 \right| ^{l}}
 \end{equation}
 Analyzing the behavior of \( N\left[ l,l'\right]  \) for large \( l' \)
-we find that\begin{equation}
+we find that
+\begin{equation}
 \label{B26}
 N\left[ l,l'\right] \leq \alpha _{l}\frac{\left( \left( 1+l'\right) \left( 2+l'\right) \ldots 
 \left( l+l'\right)
@@ -388,7 +482,8 @@ This can then be summed to\begin{equation}
 \mathbf{d}_{max}\right| }
 {\left| \mathbf{P}-\mathbf{Q}\right| }\right] 
 \end{equation}
-To leading order, this can be simplified to\begin{equation}
+To leading order, this can be simplified to
+\begin{equation}
 \label{B30}
 \varepsilon \left( l_{0}\right) \leq \frac{1}{2}\frac{{\cal O}_{l_{0}}\left[ \rho _{1};\left| 
 \mathbf{P}\right| 
@@ -450,7 +545,7 @@ This can be summed to get
 For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particularly simple form
 \begin{equation}
 \varepsilon_{FMM}  \leq 
-\frac{C_{\rho_1} C_{\rho_2} \left| \mathbf{d} \right|^{L+1}}
+\frac{2^{L} C_{\rho_1} C_{\rho_2} \left| \mathbf{d} \right|^{L+1}}
 {\left|\mathbf{P}-\mathbf{Q}\right|^{L+1}
 \left|\left|\mathbf{P}-\mathbf{Q}\right|-2\left| \mathbf{d} \right|\right|}
 \label{B44}
@@ -463,6 +558,12 @@ For the case where $L=L'$ and $|\mathbf{d}|= |\mathbf{d'}|$ this has a particula
 \caption{}
 {\centering \includegraphics {MultInBox.ps} \par} 
 \label{figure:MultInBox} 
+\end{figure}
+
+\begin{figure}
+\caption{}
+{\centering \includegraphics {TreeInBox.ps} \par} 
+\label{figure:TreeInBox} 
 \end{figure}
 
 \begin{figure}
