@@ -139,7 +139,9 @@ MODULE Macros
                ! Load global thresholding values
                CALL SetThresholds(CurBase)
 #ifdef MMech
-            ENDIF
+         ELSE !!! for the MMOnly case
+            CALL SetMMThresholds('1')
+         ENDIF
 #endif
 #ifdef PARALLEL
          IF(InParallel)THEN        
