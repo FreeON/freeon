@@ -33,12 +33,12 @@ CONTAINS
      !
      IMPLICIT NONE
      INTEGER :: I,J,K,L,NatmsLoc,IInt,KA,LA
-     INTEGER :: II,IC1,IC2,M,N,NCart,PBCDim,III
+     INTEGER :: II,IC1,IC2,M,N,NCart,PBCDim,III,ALPHA,BETA,JI,JJ
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE)                :: Value
      TYPE(INTC)                  :: IntCs
      TYPE(BMATR)                 :: B
-     REAL(DOUBLE)                :: LinCrit,TorsLinCrit,Frac(3)
+     REAL(DOUBLE)                :: LinCrit,TorsLinCrit,Frac(12),Vect(3)
      REAL(DOUBLE),DIMENSION(3,3) :: BoxShapeT,BoxShape,InvBoxSh
      REAL(DOUBLE),DIMENSION(3,4) :: XYZAux
      REAL(DOUBLE),DIMENSION(12)  :: Aux12
@@ -165,24 +165,31 @@ CONTAINS
      ! distorsions
      !
      DO IInt=1,IntCs%N
-       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
        B%BLI%I(IInt)=0
        B%BL%D(IInt,:)=Zero
        IF(.NOT.IntCs%Active%L(IInt)) CYCLE
-       DO J=1,4 ! loop over atoms
-         IF(IntCs%Atoms%I(IInt,J)==0) EXIT
-         L=(J-1)*3+1
-         K=L+2
-         CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,XYZAux(1:3,J),Frac)
-         DO II=1,3  ! loop over cell indices
-           IC1=(II-1)*3+1
-           IC2=IC1+2
-           B%BLI%I(IInt)=NCart-9
-           B%BL%D(IInt,IC1:IC2)=B%BL%D(IInt,IC1:IC2)+ &
-             Frac(II)*B%B%D(IInt,L:K)
+       !
+       CALL PBCXYZAux(XYZ,BoxShapeT,XYZAux,IntCs,IInt)
+       DO J=1,4
+         K=3*(J-1)+1
+         L=K+2
+         Vect=XYZAux(1:3,J)
+         CALL DGEMM_NNc(3,3,1,One,Zero,InvBoxSh,Vect,Frac(K:L))
+       ENDDO
+       B%BLI%I(IInt)=NCart-9
+       II=0
+       DO ALPHA=1,3
+         DO BETA=1,3
+           II=II+1
+           DO J=1,4
+            !IF(IntCs%Atoms%I(IInt,J)==0) EXIT
+             JI=3*(J-1)+ALPHA
+             JJ=3*(J-1)+BETA
+             B%BL%D(IInt,II)=B%BL%D(IInt,II)+B%B%D(IInt,JI)*Frac(JJ)
+           ENDDO
          ENDDO
        ENDDO
-     ENDDO 
+     ENDDO
      !
      ! Make lattice sum for atomic coordinates
      !
