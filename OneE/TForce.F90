@@ -48,16 +48,17 @@ PROGRAM TForce
  
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 #ifdef PARALLEL
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL New(TFrc,3*NAtoms)
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif 
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ PROGRAM TForce
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotTFrc,TotFrcComp)
-  CALL MPI_Reduce(TFrc%D(1),TotTFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Reduce(TFrc%D(1),TotTFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
     TFrc%D(1:TotFrcComp) = TotTFrc%D(1:TotFrcComp)
   ENDIF

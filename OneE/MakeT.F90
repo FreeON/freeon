@@ -39,6 +39,12 @@ PROGRAM MakeT
 ! Start up macro
 !
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 !----------------------------------------------
 ! Get basis set and geometry
 !
@@ -49,11 +55,6 @@ PROGRAM MakeT
 !
   CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(T)
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
 !

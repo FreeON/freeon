@@ -43,6 +43,12 @@ PROGRAM MakeRho
 !---------------------------------------------------------------------------------------
   ! Start up macro
   CALL StartUp(Args,Prog)
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 #ifdef MMech
 !---------------------------------------------------------------
   IF(HasMM())THEN
@@ -64,11 +70,6 @@ PROGRAM MakeRho
         CALL Get(BSiz,'atsiz',PrvBase)
         CALL Get(OffS,'atoff',PrvBase)
         CALL Get(NBasF,'nbasf',PrvBase)
-#ifdef PERIODIC
-	! Get the Outer Cell Set
-     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-     	CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
         CALL Get(Dmat,TrixFile('D',Args,-1))
      ELSEIF(SCFActn=='Restart')THEN
         ! Get the old information
@@ -86,11 +87,6 @@ PROGRAM MakeRho
         CALL New_HGRho(Rho,(/NExpt,0,0/))
         CALL Get(Rho%Expt,'dexpt',CurBase)
         CALL Get(Rho%Lndx ,'lndex',CurBase)
-#ifdef PERIODIC
-	! Get the Outer Cell Set
-     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-     	CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
         CALL CloseHDF(HDF_CurrentID)
         HDF_CurrentID=OpenHDF(InfFile)     
         CALL Get(Dmat,TrixFile('D',Args,0))
@@ -99,11 +95,6 @@ PROGRAM MakeRho
         CALL Get(BS,CurBase)
         CALL Get(GM,CurGeom)
         CALL Get(NExpt,'nexpt',CurBase)
-#ifdef PERIODIC
-	! Get the Outer Cell Set
-     	CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-     	CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
         CALL New_HGRho(Rho,(/NExpt,0,0/))
         CALL Get(Rho%Expt,'dexpt',CurBase)
         CALL Get(Rho%Lndx ,'lndex',CurBase)
@@ -376,11 +367,19 @@ PROGRAM MakeRho
 #ifdef MMech
      IF(MMOnly()) THEN
        CALL Put_HGRho(Rho2,'Rho',Args,Current(1)) 
+#ifdef PARALLEL_CLONES
+       CALL Put(MP)
+#else       
        CALL Put(MP,CurGeom)
+#endif
      ELSE
 #endif
        CALL Put_HGRho(Rho2,'Rho',Args,1) 
+#ifdef PARALLEL_CLONES
+       CALL Put(MP)
+#else
        CALL Put(MP,NxtCycl)
+#endif
 #ifdef MMech
      ENDIF
 #endif
@@ -393,7 +392,11 @@ PROGRAM MakeRho
        CALL Put(MP,CurGeom) 
      ELSE
 #endif
+#ifdef PARALLEL_CLONES
+       CALL Put(MP) 
+#else
        CALL Put(MP,IntToChar(Current(1))) 
+#endif
 #ifdef MMech
      ENDIF
 #endif

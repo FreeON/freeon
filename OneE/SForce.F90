@@ -59,6 +59,13 @@ PROGRAM SForce
   CALL New(F)
   CALL New(T1)
 #endif
+
+#ifdef PERIODIC 
+#ifdef PARALLEL_CLONES
+#else
+  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
+#endif
+#endif
 !--------------------------------------
 ! Compute W=P.F.P
 #ifdef PARALLEL
@@ -83,13 +90,6 @@ PROGRAM SForce
 #endif
   CALL Delete(F)
   CALL Delete(T1)
-
-#ifdef PERIODIC
-! Get the Outer Cell Set
-  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif 
-
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ PROGRAM SForce
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms
   CALL New(TotSFrc,TotFrcComp)
-  CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
     SFrc%D(1:TotFrcComp) = TotSFrc%D(1:TotFrcComp)
   ENDIF
