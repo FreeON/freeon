@@ -883,19 +883,18 @@ CONTAINS
     IF(HasDFT(O%Models(cBas))) THEN
        CALL Invoke('XCForce',N,S,M)
     ENDIF
-#ifdef NLATTFORCE    
+    !vw#ifdef NLATTFORCE    
+    !vw    ! Exact Hartree-Fock exchange component
+    !vw    IF(HasHF(O%Models(cBas)))THEN
+    !vw       CALL Invoke('GONX',N,S,M)       
+    !vw       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
+    !vw    ENDIF
+    !vw#else
     ! Exact Hartree-Fock exchange component
     IF(HasHF(O%Models(cBas)))THEN
-       CALL Invoke('GONX',N,S,M)       
-       CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
-    ENDIF
-#else
-    ! Exact Hartree-Fock exchange component
-    IF(HasHF(O%Models(cBas)))THEN
-       !CALL NLATTFORCE_X(cBAS,cGEO,G,B,N,O,S,M)
        CALL Invoke('GONX',N,S,M)
     ENDIF
-#endif
+    !vw#endif
 !
 !   Constraint the Gradients
 !
