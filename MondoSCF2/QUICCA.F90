@@ -1393,7 +1393,10 @@ CONTAINS
      IStart=1
      ILeft=3
      IF(NDim<ILeft+1) RETURN
-     CALL ReorderI(RMSErr,IWork,NDim)
+     DO J=1,NDim ; Work(J)=RMSErr(J) ; ENDDO
+     Q=MAXVAL(RMSErr)
+     DO J=NDim-ILeft+1,NDim ; Work(J)=Q+DBLE(J) ; ENDDO
+     CALL ReorderI(Work,IWork,NDim)
      NDim2=2*NDim
      NDim3=3*NDim
      ! fill old arrays in work-s by new order
@@ -1411,10 +1414,10 @@ CONTAINS
       !Work(J)=LOG(Work(J))
      ENDDO
      !
-     IF(VectY(NDim)*VectY(NDim-1)<Zero) THEN
-       IStart=NDim-1
-       RETURN
-     ENDIF
+   ! IF(VectY(NDim)*VectY(NDim-1)<Zero) THEN
+   !   IStart=NDim-1
+   !   RETURN
+   ! ENDIF
      !
      !QTab=QTest90(MIN(10,NDim-I+1))
     !QTab=One/DBLE(NDim)
@@ -1424,7 +1427,7 @@ CONTAINS
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
       !IF(Q>0.9999D0) THEN
-       IF(Q>0.99D0) THEN
+       IF(Q>0.95D0) THEN
          IStart=I+1
          EXIT
        ENDIF
