@@ -585,7 +585,6 @@ CONTAINS
      CALL GetCGradMax(CartGrad%D,NCart,GOpt%GOptStat%IMaxCGrad,&
                       GOpt%GOptStat%MaxCGrad)
      CALL TurnOnSelect(GOpt%GOptStat%MaxCGrad,GOpt%CoordCtrl%DoSelect)
-   ! CALL RescaleGrad(CartGrad%D,XYZ,Print)
      !
      ! Get internal coord defs.
      !
@@ -728,6 +727,7 @@ CONTAINS
         !  CALL DiagHessLagr(GOpt%CoordCtrl,GOpt%Hessian,Grad%D,Displ%D,&
         !             IntCs,XYZ,SCRPath,LagrMult,GradMult,LagrDispl)
         !ELSE
+           CALL RescaleGrad(Grad%D,Print)
            CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                          IntCs,AtNum,iGEO,XYZ)
            CALL CutOffDispl(Displ%D,IntCs)
@@ -1540,25 +1540,25 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE RescaleGrad(Grad,XYZ,Print)
+   SUBROUTINE RescaleGrad(Grad,Print)
      REAL(DOUBLE),DIMENSION(:) :: Grad
      REAL(DOUBLE),DIMENSION(:,:)::XYZ
-     REAL(DOUBLE)              :: MaxGrad,SetMax,MaxGrad1
+     REAL(DOUBLE)              :: MaxGrad,SetMax,MaxGradP,MaxGradN,Fact
      INTEGER                   :: Print
      LOGICAL                   :: Print2
      !
      Print2= Print>=DEBUG_GEOP_MAX
-     SetMax=0.050D0
-     MaxGrad=MAXVAL(Grad)
-     MaxGrad1=MaxGrad
-     MaxGrad=MAX(MaxGrad,MAXVAL(-Grad))
+     SetMax=0.100D0
+     MaxGradP=MAXVAL(Grad)
+     MaxGradN=MAXVAL(-Grad)
+     MaxGrad=MAX(MaxGradP,MaxGradN)
      IF(MaxGrad>SetMax) THEN
-       MaxGrad=SetMax/MaxGrad
-       Grad=MaxGrad*Grad
+       Fact=SetMax/MaxGrad
+       Grad=Fact*Grad
        IF(Print2) THEN
-         WRITE(*,100) MaxGrad1,SetMax
-         WRITE(Out,100) MaxGrad1,SetMax
-         100 FORMAT('Cartesian Gradients have been rescaled from ',F10.5,' to ',F10.5)
+         WRITE(*,100) MaxGrad,SetMax
+         WRITE(Out,100) MaxGrad,SetMax
+         100 FORMAT('Internal Gradients have been rescaled from ',F10.5,' to ',F10.5)
        ENDIF
       !CALL TranslsOff(Grad,Print2)
       !CALL RotationsOff(Grad,XYZ,Print2)
