@@ -1610,12 +1610,6 @@ CONTAINS
          IntCDispl%D=IntCs%Value%D-ValSt%D
          CALL MapAngleDispl(IntCs,IntCDispl%D) 
          IF(IRep<RepMax) THEN
-           ! check for misdirected displacements due to redundancy
-         ! CALL CheckRedundancy(IntCs,IntCDispl%D,VectIntReq%D, &
-         !                      ValSt%D,IntCs%Value%D,DoRepeat)
-           IF(DoRepeat) THEN
-             CYCLE
-           ENDIF
            !
            ! check for the size of the displacement
            CALL CheckBigStep(IntCs,DoRepeat,GCoordCtrl%MaxStre, &
@@ -1629,6 +1623,16 @@ CONTAINS
          EXIT
        ENDIF
      ENDDO !!! Repeat
+     !
+     ! Check for misdirected displacements due to redundancy
+     !
+    !CALL INTCValue(IntCs,ActCarts%D, &
+    !               GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+    !CALL SetBackToRefs(IntCs%Value%D,IntCs,RefPoints)
+    !IntCDispl%D=IntCs%Value%D-ValSt%D
+    !CALL MapAngleDispl(IntCs,IntCDispl%D) 
+    !CALL CheckRedundancy(IntCs,IntCDispl%D,VectIntReq%D, &
+    !                     ValSt%D,IntCs%Value%D,XYZ,ActCarts%D)
      !
      180  FORMAT('Stop Coord Back-Trf, max. number of Iterations exceeded!')
      190  FORMAT('Use Current Geometry!')
@@ -1682,22 +1686,33 @@ CONTAINS
 !-----------------------------------------------------------------------
 !
    SUBROUTINE CheckRedundancy(IntCs,IntCDispl,VectIntReq, &
-                              ValSt,Value,DoRepeat)
-     TYPE(INTC)                :: IntCs
-     REAL(DOUBLE),DIMENSION(:) :: IntCDispl,VectIntReq,ValSt,Value
-     LOGICAL                   :: DoRepeat
-     INTEGER                   :: I,NIntC
-     REAL(DOUBLE)              :: Fact
+                              ValSt,Value,XYZ,ActCarts)
+     TYPE(INTC)                 :: IntCs
+     REAL(DOUBLE),DIMENSION(:)  :: IntCDispl,VectIntReq,ValSt,Value
+     REAL(DOUBLE),DIMENSION(:,:):: XYZ,ActCarts
+     INTEGER                    :: I,J,NIntC
+     REAL(DOUBLE)               :: Fact,RNorm,FNorm,X,Ratio,Crit
+     TYPE(DBL_VECT)             :: VectR,VectD
      !
+     Crit=0.1D0
+     CALL New(VectR,IntCs%N)
+     CALL New(VectD,IntCs%N)
+     VectR%D=VectIntReq-ValSt ! required displ
+     VectD%D=VectR%D-IntCDispl ! displ. diff  
+     !
+     Ratio=Zero
      DO I=1,IntCs%N
-       Fact=ABS(IntCDispl(I))/ABS(VectIntReq(I)-ValSt(I))
-       IF(Fact>10.D0.AND.ABS(IntCDispl(I))>3.D-4) THEN
-      !IF(Fact>2.D0) THEN
-         VectIntReq=ValSt+0.90D0*(VectIntReq-ValSt)
-         DoRepeat=.TRUE.
-         EXIT
+       IF(ABS(IntCDispl(I))>1.D-4) THEN
+         X=ABS(VectR%D(I)/IntCDispl(I))
+         X=MAX(X,One/X)
+         Ratio=MAX(Ratio,X)
        ENDIF
      ENDDO
+     Fact=MIN(Ratio,1.2D0)/Ratio
+     Fact=MAX(0.5D0,Fact)
+     ActCarts=XYZ+Fact*(ActCarts-XYZ)
+     CALL Delete(VectD)
+     CALL Delete(VectR)
    END SUBROUTINE CheckRedundancy
 !
 !----------------------------------------------------------

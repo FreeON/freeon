@@ -22,26 +22,32 @@ CONTAINS
 !
 !--------------------------------------------------------------
 !
-   SUBROUTINE GeoDIIS(XYZ,GDIISCtrl,HFileIn,iCLONE,iGEO,Print)   
+   SUBROUTINE GeoDIIS(XYZ,GDIISCtrl,HFileIn,iCLONE,iGEO,Print,Path)   
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(GDIIS)                 :: GDIISCtrl  
      INTEGER                     :: Print,iCLONE,iGEO,I
      INTEGER                     :: HDFFileID,NatmsLoc,Memory
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
+     CHARACTER(LEN=*)            :: Path
      !
      NatmsLoc=SIZE(XYZ,2)
      Memory=MIN(GDIISCtrl%MaxMem,iGEO)
+     CALL Halt('GDIIS is under development in this version, use the option NoGDIIS!')
      !
      ! Get GDIIS memory
      !
      CALL CollectPast(SRStruct,RefStruct,RefGrad,SRDispl, &
                       HFileIn,NatmsLoc,Memory,iGEO,iCLONE)
      !
-     ! Calculate GDIIS-mixing
+     ! Do fitting in step-directions
      !
-     CALL BasicGDIIS(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl)
-     !
+     CALL CartFit(XYZ,Print,RefStruct%D,RefGrad%D,SRStruct%D,SRDispl%D,Path,iGEO)
+    !!
+    !! Calculate GDIIS-mixing
+    !!
+    !CALL BasicGDIIS(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl)
+    !!
      ! Tidy up
      !
      CALL Delete(RefGrad)
@@ -49,6 +55,198 @@ CONTAINS
      CALL Delete(SRStruct)
      CALL Delete(SRDispl)
    END SUBROUTINE GeoDIIS
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CartFit(XYZ,Print,RefStruct,RefGrad,SRStruct,SRDispl,Path,iGEO)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl
+     TYPE(DBL_RNK2)              :: DXValues,DXGrads,DXVects
+     TYPE(DBL_VECT)              :: CartVect
+     INTEGER                     :: Print,I,J,NCart,NMem,NDim,iGEO
+     TYPE(INTC)                  :: IntCsT
+     TYPE(INT_VECT)              :: NDegsT
+     TYPE(DBL_RNK2)              :: LWeightT,ABCT,RangeT
+     CHARACTER(LEN=*)            :: Path
+     CHARACTER(LEN=DCL)          :: Path2
+     REAL(DOUBLE)                :: X
+     !
+     CALL CollectDXVects(RefStruct,RefGrad,SRStruct,SRDispl,DXVects)
+     CALL CollectDXProjection(RefStruct,RefGrad,SRStruct,SRDispl, &
+                              DXVects%D,DXGrads,DXValues)
+     !
+     NCart=SIZE(RefStruct,1)
+     NMem=SIZE(RefStruct,2)
+     NDim=SIZE(DXVects%D,2)
+     CALL New(LWeightT,(/NDim,NMem/))
+     DO I=1,NMem
+      !X=Zero
+      !DO J=1,NDim
+      !  X=X+DXGrads%D(J,I)**2
+      !ENDDO
+      !X=One/(X+1.D-10)
+      !DO J=1,NDim ; LWeightT%D(J,I)=X ; ENDDO
+       DO J=1,NDim
+         LWeightT%D(J,I)=DXGrads%D(J,I)**2
+       ENDDO
+     ENDDO
+     CALL New(CartVect,NCart)
+     CALL New(NDegsT,NDim)
+     CALL New(IntCsT,NDim)
+     IntCsT%Active%L=.TRUE.
+     CALL New(RangeT,(/NDim,2/))
+     CALL New(ABCT,(/NDim,4/))
+     ABCT%D(:,:)=Zero
+     Path2=TRIM(Path)//'_'//TRIM(IntToChar(iGEO))
+     !
+     CALL LQFit(DXValues%D,DXGrads%D,LWeightT%D,IntCsT,ABCT%D, &
+                RangeT%D,NDegsT%I,Zero,.TRUE.)
+     CALL DoPredict(ABCT%D,DXValues%D,DXGrads%D,IntCsT, &
+                    NDegsT%I,Path2,RangeT%D)
+     CALL CtlrCartRange(IntCsT,RangeT%D)
+     CALL PrtFitM(DXValues%D,DXGrads%D,ABCT%D,IntCsT,Path2)
+     !
+     ! Now, compose the new geometry
+     !
+     DO J=1,NCart ; CartVect%D(J)=SRStruct(J,NMem) ; ENDDO
+     DO I=1,NDim
+       DO J=1,NCart
+         CartVect%D(J)=CartVect%D(J)+IntCsT%PredVal%D(I)*DXVects%D(J,I)
+       ENDDO
+     ENDDO
+     CALL CartRNK1ToCartRNK2(CartVect%D,XYZ)
+     !
+     CALL Delete(CartVect)
+     CALL Delete(IntCsT)
+     CALL Delete(RangeT)
+     CALL Delete(ABCT)
+     CALL Delete(NDegsT)
+     CALL Delete(LWeightT)
+     CALL Delete(DXValues)
+     CALL Delete(DXGrads)
+     CALL Delete(DXVects)
+   END SUBROUTINE CartFit
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CtlrCartRange(IntCsT,RangeT)
+     TYPE(INTC)                  :: IntCsT
+     REAL(DOUBLE),DIMENSION(:,:) :: RangeT
+     INTEGER                     :: I,J
+     REAL(DOUBLE)                :: DX,DXP
+     !
+     DO I=1,IntCsT%N
+       DX=RangeT(I,2)-RangeT(I,1)
+       DXP=IntCsT%PredVal%D(I)
+       IF(DXP>RangeT(I,2)+DX) THEN
+         IntCsT%PredVal%D(I)=RangeT(I,2)+DX
+       ELSE IF(DXP<RangeT(I,1)-DX) THEN
+         IntCsT%PredVal%D(I)=RangeT(I,1)-DX
+       ENDIF
+     ENDDO 
+   END SUBROUTINE CtlrCartRange
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CollectDXProjection(RefStruct,RefGrad,SRStruct,SRDispl, &
+                                  DXVects,DXGrads,DXValues)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl,DXVects
+     TYPE(DBL_RNK2)              :: DXValues,DXGrads
+     INTEGER                     :: II,I,J,NCart,NMem,NDim
+     REAL(DOUBLE)                :: G,X
+     !
+     NCart=SIZE(RefStruct,1)
+     NMem=SIZE(RefStruct,2)
+     NDim=SIZE(DXVects,2)
+     CALL New(DXGrads,(/NDim,NMem/))
+     CALL New(DXValues,(/NDim,NMem/))
+     !
+     ! Project Grads and distance of most recent structure to each previous 
+     ! structures onto the selected axis system
+     !
+     DO II=1,NMem
+       DO I=1,NDim
+         G=Zero
+         DO J=1,NCart ; G=G+DXVects(J,I)*RefGrad(J,II) ; ENDDO  
+         X=Zero
+         DO J=1,NCart 
+           X=X+DXVects(J,I)*(RefStruct(J,II)-SRStruct(J,NMem)) 
+         ENDDO  
+         DXGrads%D(I,II)=G
+         DXValues%D(I,II)=X
+       ENDDO
+     ENDDO
+   END SUBROUTINE CollectDXProjection
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE CollectDXVects(RefStruct,RefGrad,SRStruct,SRDispl,DXVects)
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,RefGrad,SRStruct,SRDispl
+     TYPE(DBL_RNK2)              :: DXVects
+     INTEGER                     :: I,J,NMem,NCart,INFO,NDim
+     TYPE(DBL_RNK2)              :: ScaledD,Overlap,UMat
+     TYPE(DBL_VECT)              :: CartVect
+     REAL(DOUBLE)                :: Fact,Crit
+     !
+     NMem=SIZE(RefStruct,2)
+     NCart=SIZE(RefStruct,1)
+     Crit=1.D-7
+     CALL New(CartVect,NCart) 
+     CALL New(ScaledD,(/NCart,NMem/)) 
+     CALL New(Overlap,(/NMem,NMem/))
+     !
+     ! Scale input vectors
+     !
+     DO I=1,NMem
+       DO J=1,NCart;CartVect%D(J)=RefStruct(J,I)-SRStruct(J,NMem);ENDDO
+       Fact=DOT_PRODUCT(CartVect%D,CartVect%D)
+       Fact=One/SQRT(Fact)
+       DO J=1,NCart ; ScaledD%D(J,I)=CartVect%D(J)*Fact ; ENDDO
+     ENDDO 
+     !
+     CALL DGEMM_TNc(NMem,NCart,NMem,One,Zero,ScaledD%D,ScaledD%D,Overlap%D)
+     !
+     CALL SetDSYEVWork(NMem)
+       BLKVECT%D=Overlap%D
+       CALL DSYEV('V','U',NMem,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+       BLKWORK%D,BLKLWORK,INFO)
+       IF(INFO/=SUCCEED) &
+       CALL Halt('DSYEV hosed in CollectDXVects. INFO='&
+                  //TRIM(IntToChar(INFO)))
+       NDim=0 
+       DO I=1,NMem 
+         IF(ABS(BLKVALS%D(I))>Crit) NDim=NDim+1
+       ENDDO
+       Overlap%D=BLKVECT%D
+       !
+       CALL New(UMat,(/NMem,NDim/)) 
+       CALL New(DXVects,(/NCart,NDim/)) 
+       NDim=0    
+       DO I=1,NMem
+         IF(ABS(BLKVALS%D(I))>Crit) THEN
+           NDim=NDim+1
+           DO J=1,NMem
+             UMat%D(J,NDim)=Overlap%D(J,I)
+           ENDDO
+         ENDIF
+       ENDDO 
+     CALL UnSetDSYEVWork()
+     CALL Delete(Overlap)
+     !
+     ! Now, generate orthogonal directions
+     !
+     CALL DGEMM_NNc(NCart,NMem,NDim,One,Zero,ScaledD%D,Umat%D,DXVects%D)
+     DO I=1,NDim
+       Fact=Zero
+       DO J=1,NCart ; Fact=Fact+DXVects%D(J,I)**2 ; ENDDO
+       Fact=One/SQRT(Fact)
+       DO J=1,NCart ; DXVects%D(J,I)=Fact*DXVects%D(J,I) ; ENDDO
+     ENDDO
+     CALL Delete(UMat)
+     CALL Delete(ScaledD)
+     CALL Delete(CartVect)
+     !
+   END SUBROUTINE CollectDXVects
 !
 !-------------------------------------------------------------------
 !
@@ -516,7 +714,7 @@ CONTAINS
        CALL LocalWeight(LWeightT%D,WeightsT%D,IntCsT,NCart,SCRPath)
      ENDIF
      CALL LQFit(IntCValuesT%D,IntCGradsT%D,LWeightT%D,IntCsT,ABCT%D, &
-                RangeT%D,NDegsT%I,Zero,.TRUE.)
+                RangeT%D,NDegsT%I,Zero,.FALSE.)
      CALL DoPredict(ABCT%D,IntCValuesT%D,IntCGradsT%D,IntCsT, &
                     NDegsT%I,Path2,RangeT%D)
      CALL CleanRange(DisplT%D,RangeT%D,IntCsT%PredVal%D, &
@@ -683,11 +881,11 @@ CONTAINS
      INTEGER                     :: I
      REAL(DOUBLE)                :: Stre,Bend,LinB,OutP,Tors
      !
-     Stre=0.5D0
-     Bend=0.2D0
-     LinB=0.2D0
-     OutP=0.2D0
-     Tors=0.1D0
+     Stre=1.0D0
+     Bend=0.1D0
+     LinB=0.1D0
+     OutP=0.1D0
+     Tors=0.01D0
     !Stre=GHess%Stre
     !Bend=GHess%Bend
     !LinB=GHess%LinB
@@ -927,18 +1125,18 @@ CONTAINS
        RMSErr%D=RMSErr%D/SUM(RMSErr%D)
        !
     !  IF(DoReOrd.AND.NDim>=MaxMem) THEN
-    !  IF(DoReOrd) THEN
+       IF(DoReOrd) THEN
     ! warning! do not do reordering back to intcgrads/values
     ! that can mess up the relationship of Cartesians/INTC-s
     ! as predicted displacement refers to last Cartesian set
-     !   CALL QTest(VectX%D,VectY%D,RMSErr%D,Work%D,IWork%I,NDim,IStart)
-     !   Range(I,1)=MINVAL(VectX%D(IStart:NDim))
-     !   Range(I,2)=MAXVAL(VectX%D(IStart:NDim))
-    !  ELSE
+         CALL QTest(VectX%D,VectY%D,RMSErr%D,Work%D,IWork%I,NDim,IStart)
+         Range(I,1)=MINVAL(VectX%D(IStart:NDim))
+         Range(I,2)=MAXVAL(VectX%D(IStart:NDim))
+       ELSE
          Range(I,1)=MinX
          Range(I,2)=MaxX
          IStart=1
-    !  ENDIF
+       ENDIF
        !
        VectAux%D=ABC(I,:)
        CALL BasicFit(VectX%D(IStart:NDim),VectY%D(IStart:NDim), &
@@ -1037,16 +1235,10 @@ CONTAINS
       !Work(J)=LOG(Work(J))
      ENDDO
      !
-    !!
-    !! calculate average fluctuation
-    !!
-    !Fluct=Zero
-    !DO I=NDim,2,-1
-    !  Q=RMSErr(I)/RMSErr(I-1)
-    !  Work(I)=Q
-    !  Fluct=Fluct+Q
-    !ENDDO
-    !Fluct=Fluct/DBLE(NDim-1)-1.D-8
+     IF(VectY(NDim)*VectY(NDim-1)<Zero) THEN
+       IStart=NDim-1
+       RETURN
+     ENDIF
      !
      !QTab=QTest90(MIN(10,NDim-I+1))
     !QTab=One/DBLE(NDim)
@@ -1056,6 +1248,7 @@ CONTAINS
      Q=SUM(RMSErr(J:NDim))
      DO I=J-1,1,-1
        IF(Q>0.9999D0) THEN
+      !IF(Q>0.95D0) THEN
          IStart=I+1
          EXIT
        ENDIF

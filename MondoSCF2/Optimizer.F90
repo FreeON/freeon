@@ -1294,8 +1294,8 @@ CONTAINS
      INTEGER         :: AccL,NatmsLoc
      REAL(DOUBLE)    :: GCrit
      !
-     GCrit=GTol(AccL)
-   ! GCrit=3.D-4
+   ! GCrit=GTol(AccL)
+     GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1443,18 +1443,19 @@ CONTAINS
      TYPE(GeomOpt)        :: GOpt
      TYPE(CRDS)           :: GMLoc
      INTEGER              :: iGEO,iCLONE
-     CHARACTER(LEN=DCL)   :: SCRPath
+     CHARACTER(LEN=DCL)   :: SCRPath,PWDPath
      INTEGER,DIMENSION(:) :: Convgd
      !
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
+     PWDPath=TRIM(Nams%M_PWD)//TRIM(IntToChar(iCLONE))
      !
      IF(Convgd(iCLONE)/=1) THEN
        CALL OPENAscii(OutFile,Out)
        IF((.NOT.GOpt%GDIIS%NoGDIIS).AND.GOpt%GDIIS%On.AND.&
            iGEO>=GOpt%GDIIS%Init) THEN
          CALL GeoDIIS(GMLoc%AbCarts%D,GOpt%GDIIS,Nams%HFile,iCLONE, &
-                      iGEO,Opts%PFlags%GeOp)
+                      iGEO,Opts%PFlags%GeOp,PWDPath)
        ELSE
          IF(Opts%PFlags%GeOp>=DEBUG_GEOP_MIN) THEN
            WRITE(*,200)
@@ -1752,7 +1753,8 @@ CONTAINS
      LOGICAL       :: On
      !
      On=.FALSE.
-     IF(MaxCGrad<0.001D0) THEN
+     IF(MaxCGrad<1.000D0) THEN
+    !IF(MaxCGrad<0.001D0) THEN
        On=.TRUE.
      ENDIF
    END SUBROUTINE TurnOnGDIIS
