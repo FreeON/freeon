@@ -32,7 +32,7 @@ MODULE DrvSCFs
            Summry=.TRUE.
         ENDIF
 !
-! Do QM Calc on the SCF/DFT level
+!       Do QM Calc on the SCF/DFT level
 !
         DO ICyc=0,MaxSCFs
            Ctrl%Current(1)=ICyc
@@ -42,7 +42,6 @@ MODULE DrvSCFs
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry) CALL SCFSummry(Ctrl)
-              CALL VisDX(Ctrl)
               CALL VisDX(Ctrl)
               CALL CleanScratch(Ctrl,'CleanOnConverge')
               Ctrl%Previous=Ctrl%Current
@@ -233,7 +232,7 @@ MODULE DrvSCFs
       CtrlVect=SetCtrlVect(Ctrl,'Visualization')
       Ctrl%Current(1)=Ctrl%Current(1)-1
       CALL Invoke('MakeRho',CtrlVect)
-      CALL Invoke('PotMapRho',CtrlVect)
+      CALL Invoke('VisDX',CtrlVect)
     END SUBROUTINE VisDX
 !========================================================================================
 !
