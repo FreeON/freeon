@@ -1956,8 +1956,6 @@ MODULE ParseInput
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
 !
-      CLOSE(UNIT=Out,STATUS='KEEP')
-!
       CALL OpenHDF(Ctrl%Info)
         CALL Put(GM_MM,Tag_O='GM_MM'//'1')
 !       IF(Ctrl%Mechanics(1).AND.Ctrl%Mechanics(2)) THEN
@@ -1975,23 +1973,25 @@ MODULE ParseInput
           CALL DELETE(ACTIVE_IMPROPER)
 !       ENDIF
       CALL CloseHDF()
-!!
+!
 !! test coulomb energy
 !!
 !        SUM=zero
 !      Do i=1,MM_NATOMS
 !      Do j=i+1,MM_NATOMS
-!        DX=ATMCRD(1,i)-ATMCRD(1,j)
-!        DY=ATMCRD(2,i)-ATMCRD(2,j)
-!        DZ=ATMCRD(3,i)-ATMCRD(3,j)
-!        DD=SQRT(DX**2+DY**2+DZ**2)*AngstromsToAU  
-!        SUM=SUM+ATMCHG(i)*ATMCHG(j)/DD
+!        DX=GM_MM%Carts%D(1,i)-GM_MM%Carts%D(1,j)
+!        DY=GM_MM%Carts%D(2,i)-GM_MM%Carts%D(2,j)
+!        DZ=GM_MM%Carts%D(3,i)-GM_MM%Carts%D(3,j)
+!        DD=SQRT(DX**2+DY**2+DZ**2) !!!!*AngstromsToAU  
+!        SUM=SUM+GM_MM%AtNum%D(i)*GM_MM%AtNum%D(j)/DD
 !      enddo
 !      enddo
 !        write(*,*) 'coulomb energy= ',sum 
 !        write(out,*) 'coulomb energy= ',sum 
-!!
-!!
+!
+      CALL DELETE(GM_MM)
+!
+      CLOSE(UNIT=Out,STATUS='KEEP')
 !
       END SUBROUTINE ParseMM
 #endif
