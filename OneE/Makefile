@@ -31,6 +31,7 @@ include $(MONDO_HOME)/Includes/RemoveAll
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/OneE/MMA/
 #
+ObjsM     = MBlok.o     MakeM.o  
 ObjsU     = UBlok.o     MakeU.o  
 ObjsS     = SBlok.o     MakeS.o 
 ObjsT     = TBlok.o     MakeT.o 
@@ -42,10 +43,14 @@ ObjTF = BlokTrPdT.o TForce.o
 ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  UBlok.x MakeU.x \
                RhoTools.x   RhoBlok.x MakeRho.x ParaMakeRho.x \
                BlokTrWdS.x SForce.x BlokTrPdT.x \
-               TForce.x 
+               TForce.x MakeM.x MBlok.x
 #
-all:	 MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce
+all: 	 MakeM MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce 
 #
+MakeM:	 $(ObjsM)
+	 $(LD) $(LDFLAGS) MakeM $(ObjsM) $(F90_LIBRARIES)
+	 mv MakeM $(MONDO_EXEC)/MakeM
+
 MakeU:	 $(ObjsU)
 	 $(LD) $(LDFLAGS) MakeU $(ObjsU) $(F90_LIBRARIES)
 	 mv MakeU $(MONDO_EXEC)/MakeU
@@ -92,7 +97,7 @@ clean:
 	ln -s /dev/null core
 	ls -l
 #
-#MakeU.o  : UBlok.o                $(MONDO_LIB)/libMondoMods.a
+MakeU.o  : UBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeS.o  : SBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a
