@@ -37,7 +37,7 @@ release:clean
 	$(MAKE) -C NONX       release
 	$(MAKE) -C VRR        release
 	rm -rf PONXMults PONX GMEONX GSONX MEONX \
-               GDrivers VRRm ONX SONX MASONX MakeTables Drivers
+               VRRm ONX SONX MASONX MakeTables 
 #
 purge:	clean
 	cd VRR        ; $(MAKE) -i clean #vw
