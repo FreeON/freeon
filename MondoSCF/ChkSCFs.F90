@@ -115,8 +115,9 @@ MODULE ChkSCFs
          IF(.NOT.(ICyc==0.AND.IBas==1))THEN
             CrntTag=StatsToChar(Ctrl%Current)
             PrevTag=StatsToChar(Ctrl%Previous)
-            IF((Ctrl%SuperP).OR.ICyc>1)THEN
+            IF(ICyc>1)THEN
                CALL Get(DMaxA,'DMax',Tag_O=TRIM(PrevTag))
+               WRITE(*,*)' DMAX',TRIM(PrevTag),' = ',DMaxA
                CALL Get(EtotA,'Etot',Tag_O=TRIM(PrevTag))
             ENDIF
             CALL Get(DMaxB,'DMax',Tag_O=TRIM(CrntTag))
@@ -136,11 +137,18 @@ MODULE ChkSCFs
 !---------------------------------------------------------------------
 !        Check for convergence
 !
+WRITE(*,*)' ChkSCF 1 '
          Delta_DMax=ABS(DMaxA-DMaxB)
+WRITE(*,*)' ChkSCF 2 '
          Delta_ETot=ABS(ETotA-ETotB)
+WRITE(*,*)' ChkSCF 3 '
          ConvQ_ETot=ABS((ETotA-ETotB)/ETotB)
+WRITE(*,*)' ChkSCF 4 DMaxB = ',DMaxB
+WRITE(*,*)' DMaxA = ',DMaxA
          ConvQ_DMax=ABS((DMaxA-DMaxB)/DMaxB)
-         ConvQ_DIIS=ABS((DIISA-DIISB)/DIISB)
+WRITE(*,*)' ChkSCF 5 ' 
+        ConvQ_DIIS=ABS((DIISA-DIISB)/DIISB)
+WRITE(*,*)' ChkSCF 6 '
          WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
 !        Could happen ...
          IF(ConvQ_ETot<1.D-14)THEN
