@@ -31,12 +31,6 @@ Theoretical Division, Los Alamos National Laboratory,
 Los Alamos, NM 87545, USA}
 
 \begin{abstract}
-{\bf Matt to do list:}
-\begin{itemize}
-\item Intro, Conclusions, Appendix A.
-\end{itemize}
-
-\commentout{
 Periodic boundary conditions have been implemented in the linear scaling
 Quantum Chemistry code \textbf{MondoSCF}. For the two-electron Coulomb
 matrix, this has been achieved with an exact multipole expansion of
@@ -50,17 +44,19 @@ pure Cartesian adaptive grid is used for the local exchange-correlation
 matrix. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density. Finally, the current capabilities of MondoSCF for large condensed
-phases will be demonstrated.\\[.1cm]
-\noindent{\bf Keywords}: self-consistent-field, linear-scaling,tree-code, adaptive numerical integration, Gaussian-orbital
-}
+phases will be demonstrated.
+%
+\vskip 0.07 in
+\noindent{\bf Keywords}: Self-consistent-field, linear-scaling,tree-code, Gaussian-orbital
+%
 \end{abstract}
 
 \pacs{02.60.Dc,31.15.Ne,71.15Dx,71.15Nc}
 
 \maketitle
 
-\footnotetext[3]{\tt Tymczak@LANL.Gov}
-\footnotetext[6]{\tt MChalla@LANL.Gov}
+\footnotetext[3]{\tt tymczak@lanl.Gov}
+\footnotetext[6]{\tt MChalla@lanl.Gov}
 \footnotetext[4]{Preprint LA-UR-03-XXXX.}
 
 \section{INTRODUCTION}
@@ -167,23 +163,32 @@ Bloch functions
 \begin{equation}
 \psi_a({\bf r},{\bf k})  =  \sum_{\bf R} e^{i {\bf k}\cdot {\bf R}} \phi_a ({\bf r}-{\bf R}),
 \end{equation}
-are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the local function
+are often constructed from non-orthogonal functions local to the unit cell (UC). Here, the 
+local function
 $\phi_a$ is a Gaussian-Type Atomic Orbital (GTAO) centered on atom {\bf A}, while the 
 sum on ${\bf R}$ runs over the Bravais lattice defined by integer translates of the primitive 
 lattice vectors {\bf a}, {\bf b} and {\bf  c}.   These Bloch functions (crystal orbitals)
-yield all possible translational symmetries through variation of the reciprocal lattice vector ${\bf k}$.     
+yield all possible translational symmetries through variation of the reciprocal lattice vector 
+${\bf k}$.     
 For small system sizes with high symmetry, a careful sampling of reciprocal space is required  
 for an accurate description of the periodic system.  An alternative approach to including these 
-important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through replication 
+important symmetries is to set ${\bf k}=0$ but to use a larger supercell created through 
+replication 
 and translation of the primitive UC.  This is the supercell $\Gamma$-point approximation, used
-primarily for the study of defects and vacancies rather than as a replacement for ${\bf k}$-space integration,
+primarily for the study of defects and vacancies rather than as a replacement for 
+${\bf k}$-space integration,
 perhaps due to the expense of conventional algorithms and slow convergence for small gap systems.
 
-In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the $\Gamma$-point 
-approximation, allowing the use of large supercells in the case of high symmetry and large primary UCs 
-in the case of disordered systems.  While the ${\bf k}$  dependence is avoided, lattice summation and formal integration over 
-the unit cell volume, $V_{\rm UC}$ are retained. At first sight this would seem to make matrix construction quite 
-different than in the gas phase,  where integrals are typically taken over all space, $V_\infty$.  
+In this contribution, ${\cal O}(N)$ algorithms are developed specifically for the the 
+$\Gamma$-point 
+approximation, allowing the use of large supercells in the case of high symmetry and large 
+primary UCs 
+in the case of disordered systems.  While the ${\bf k}$  dependence is avoided, lattice 
+summation and formal integration over 
+the unit cell volume, $V_{\rm UC}$ are retained. At first sight this would seem to make matrix 
+construction quite 
+different than in the gas phase,  where integrals are typically taken over all space, 
+$V_\infty$.  
 Thus, elements of the gas phase overlap matrix 
 \begin{equation}
 \label{Sab_norm}
@@ -1029,12 +1034,12 @@ where,
 and \( A_{cell} \) is the area of the cell along the non-periodic
 direction. We have found that we can obtain the \( {\cal M} \) tensor
 matrix elements to 8-10 digits of accuracy with this technique.
+\newpage
 
-\section{Coordinates of Validation Suite}\label{FracCoords}~
-%
-%
-%
-\begin{table}
+
+\section{Coordinates of Validation Suite}\label{FracCoords}
+
+\begin{table}[h]
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of NaCl, cooresponding to the 
          calculations reported in Tables~\ref{NaCl8511} and \ref{NaClGammaPt}.  Length of the unit cell is 
          $a=b=c=3.97394011$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
@@ -1047,9 +1052,11 @@ Na &    0.000 &  0.000 &  0.000  \\
 Cl &    0.500 &  0.500 &  0.500  \\
 \botrule
 \end{tabular}}
+\end{table}
 %
 %
 %
+\begin{table}[h]
 \caption{Fractional coordinates for the triclinic 2 atom unit cell of MgO, cooresponding to the 
          calculations reported in Tables~\ref{NaCl8511}-\ref{NaClGammaPt}.  Length of the unit cell is 
          $a=b=c=2.977776807$\AA, with angles $\alpha=\beta=\gamma=60^\circ$.}
@@ -1062,9 +1069,11 @@ O  &    0.000 &   0.000 &  0.000  \\
 Mg &    0.500 &   0.500 &  0.500  \\
 \botrule
 \end{tabular}}
+\end{table}
 %
 %
 %
+\begin{table}[h]
 \caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
          reported in Table~\ref{DiamondGammaPt}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
 \center{
@@ -1085,7 +1094,7 @@ C &     0.375 &    0.875 &    0.875  \\
 %
 %
 %
-\caption{The various thresholds which enter into our four levels of accuracy}
+\caption{The various thresholds which enter into our three levels of accuracy}
 \label{Table:AccurLevels}
 \center{
 \begin{tabular}{ccccc}

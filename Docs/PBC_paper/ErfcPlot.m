@@ -1,7 +1,7 @@
 OutFile0 = "Plot.dat"
 OpenWrite[OutFile0];
 
-bet=10000;
+bet=0.1;
 
 r1=0.001;
 Do[
