@@ -174,6 +174,18 @@ MODULE GlobalScalars
                          1.550D0,1.550D0,1.550D0,1.550D0,1.550D0,&
                          1.550D0,1.550D0,1.550D0,1.550D0,1.550D0/ 
 !
+   REAL(DOUBLE),DIMENSION(1:3)     :: Lindh_K
+   DATA Lindh_K(1:3)   /0.45D0, 0.15D0, 0.005D0/      
+   REAL(DOUBLE),DIMENSION(1:3,1:3) :: Lindh_Alpha
+   DATA Lindh_Alpha(1,1:3) /1.0000D0, 0.3949D0, 0.3949D0/
+   DATA Lindh_Alpha(2,1:3) /0.3949D0, 0.2800D0, 0.2800D0/
+   DATA Lindh_Alpha(3,1:3) /0.3949D0, 0.2800D0, 0.2800D0/
+!
+   REAL(DOUBLE),DIMENSION(1:3,1:3) :: Lindh_R     
+   DATA Lindh_R(1,1:3) /1.3500D0, 2.1000D0, 2.5300D0/
+   DATA Lindh_R(2,1:3) /2.1000D0, 2.8700D0, 3.4000D0/
+   DATA Lindh_R(3,1:3) /2.5300D0, 3.4000D0, 3.4000D0/
+!
 ! SCF global arrays 
 !
    INTEGER,DIMENSION(3),SAVE :: Current
