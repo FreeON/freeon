@@ -41,10 +41,15 @@ PROGRAM CPSCFSts
   REAL(DOUBLE)                     :: DPrimMax,DIISErr,Prop
   REAL(DOUBLE)    , DIMENSION(3)   :: Tensor
   INTEGER                          :: I,iXYZ,CPSCFCycl,LastSCFCycle
-  CHARACTER(LEN=  DEFAULT_CHR_LEN) :: PostFix
   CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: CPSCFMessage
   CHARACTER(LEN=*), PARAMETER      :: Prog='CPSCFSts'  
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
+  !
+  !For nulear dipole moment.
+  integer :: iatom
+  real(double) :: ZNuc
+  real(double), dimension(3) :: MltN,MltE,COrig
+  TYPE(CRDS)                 :: GM
   !-------------------------------------------------------------------
   !
   ! Macro the start up.
@@ -54,6 +59,8 @@ PROGRAM CPSCFSts
   !
   ! Get Last SCF cycle.
   CALL Get(LastSCFCycle,'lastscfcycle')
+  !
+  CALL Get(GM,Tag_O=CurGeom)
   !
   !-------------------------------------------------------------------
   ! Allocate some matrices.
@@ -79,6 +86,7 @@ PROGRAM CPSCFSts
   CASE DEFAULT
      CALL Halt('Do not know this argument <'//TRIM(SCFActn)//'>.')
   END SELECT
+  !CALL Print_BCSR(PPrim,'PPrim',Unit_O=6)
   !
   ! Get groud state density matrix.
   CALL Get(P,TrixFile('D',Args,LastSCFCycle-Args%I%I(1)))
@@ -87,21 +95,31 @@ PROGRAM CPSCFSts
   ! Compute expectation values.
   !-------------------------------------------------------------------
   !
+  COrig(:)=Zero
+  !
+  MltN(:)=Zero
+  DO iAtom=1,NAtoms
+     ZNuc=GM%AtNum%D(iAtom)
+     DO iXYZ=1,3
+        MltN(iXYZ)=MltN(iXYZ)+ZNuc*(GM%Carts%D(iXYZ,iAtom)-COrig(iXYZ))
+     ENDDO
+  ENDDO
+  !
   Prop=BIG_DBL
   !
   DO iXYZ=1,3
      !
      ! Get Dipole Moment.
-     PostFix=''
-     PostFix=TRIM(Args%C%C(3))//Cart(iXYZ)
-     !
-     CALL Get(T,TrixFile(PostFix,Args))      ! T=M_{x} or whatever...
+     CALL Get(T,TrixFile(TRIM(Args%C%C(3))//Cart(iXYZ),Args))      ! T=M_{x} or whatever...
      !
      ! Compute tensor elements.
 #ifdef PARALLEL
      CALL Multiply(PPrim,T,Tmp1)
      Tensor(iXYZ)=-Two*Trace(Tmp1)
+     CALL Multiply(P,T,Tmp1)
+     MltE(iXYZ)=-Two*Trace(Tmp1,T)
 #else
+     MltE(iXYZ)=-Two*Trace(P,T)
      Tensor(iXYZ)=-Two*Trace(PPrim,T)
 #endif
      !      IF(Cart(iXYZ).EQ.TRIM(Args%C%C(4))) Prop=Tensor(iXYZ)  ! Dangerous
@@ -118,6 +136,9 @@ PROGRAM CPSCFSts
   ! Save Prop.
   CALL Put(Prop,'Prop')
   !
+  WRITE(*,'(A,3E20.12)') 'MltN',MltN(1),MltN(2),MltN(3)
+  WRITE(*,'(A,3E20.12)') 'MltE',MltE(1),MltE(2),MltE(3)
+  WRITE(*,'(A,3E20.12)') 'MltT',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
   !-------------------------------------------------------------------
   ! Get max Density block.
   !-------------------------------------------------------------------
@@ -144,6 +165,7 @@ PROGRAM CPSCFSts
   CALL Delete(PPrim)
   CALL Delete(Tmp1 )
   CALL Delete(Tmp2 )
+  CALL Delete(GM)
   !
   ! Get DDIIS Err.
   IF(Current(1)>=1)THEN
