@@ -126,7 +126,7 @@ RelsList={};
 
 PunchHRRBra;
 
-IncludeFile="dERIInclude.Inc";
+IncludeFile="dERIIncludeB.Inc";
 OpenWrite[IncludeFile];
 Print[" Openned ",IncludeFile];
 WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];
@@ -258,6 +258,7 @@ WriteString[Makefile,"ppurge:purge\n",
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"source:\n",
                              TAB,"math<GRD.m>GRD.out\n",
+                             TAB,"math<DERIInterface.m>GRD.out\n",
                              TAB,"rm GRD.out\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"GRD:$(MiscObjs) $(IntObjs)\n",

@@ -6,7 +6,8 @@ MODULE GetAtomPairMod
   USE PrettyPrint
   USE ShellPairStruct  
 CONTAINS
-  SUBROUTINE GetAtomPair(AtmInfo,AtmPair,BS,PBC)
+
+  SUBROUTINE GetAtomPair2(AtmInfo,AtmPair,BS,PBC)
     TYPE(AtomInfo)                :: AtmInfo
     TYPE(AtomPr)  , DIMENSION(:)  :: AtmPair
     TYPE(BSET)                    :: BS
@@ -80,17 +81,49 @@ CONTAINS
                 II=II+JJ
                 !
              ENDDO
-             AtmPair(CF12)%SP%L=II
-             AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
-             AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
-             AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z
-             AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm2X+RX
-             AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm2Y+RY
-             AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm2Z+RZ
+!             AtmPair(CF12)%SP%L=II
+!             AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
+!             AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
+!             AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z
+!             AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm2X+RX
+!             AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm2Y+RY
+!             AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm2Z+RZ
+
+
+
+
+       AtmPair(CF12)%SP%L=II
+       !
+       ! We reorder the atomic positions if Type2 > Type1.
+       ! Needed for the integral evaluations.
+       IF(Type1.GE.Type2) THEN
+          AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
+          AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
+          AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z
+          !
+          ! AtmInfo must be related to the atoms in the working cell ONLY.
+          ! Then we add the PBC's to have the right atomic position.
+          AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm2X+RX
+          AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm2Y+RY
+          AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm2Z+RZ
+       ELSE
+          !
+          ! AtmInfo must be related to the atoms in the working cell ONLY.
+          ! Then we add the PBC's to have the right atomic position.
+          AtmPair(CF12)%SP%AtmInfo%Atm1X=AtmInfo%Atm2X+RX
+          AtmPair(CF12)%SP%AtmInfo%Atm1Y=AtmInfo%Atm2Y+RY
+          AtmPair(CF12)%SP%AtmInfo%Atm1Z=AtmInfo%Atm2Z+RZ
+          AtmPair(CF12)%SP%AtmInfo%Atm2X=AtmInfo%Atm1X
+          AtmPair(CF12)%SP%AtmInfo%Atm2Y=AtmInfo%Atm1Y
+          AtmPair(CF12)%SP%AtmInfo%Atm2Z=AtmInfo%Atm1Z
+       ENDIF
+
+
+
           ENDDO
        ENDDO
        IF(CF12.GT.SIZE(AtmPair)) STOP 'Increase the size of -AtmPair-'
-     END SUBROUTINE GetAtomPair
+     END SUBROUTINE GetAtomPair2
 
      SUBROUTINE GetAdrB(I,J,Ind,A,E_O)
 !----------------------------------------------------------------------

@@ -1,2 +1,3 @@
- HGEll= 7 ;
- SPEll= 7 ;
+ BFEll=            4 ;
+ HGEll=            7 ;
+ SPEll=            7 ;

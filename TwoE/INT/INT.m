@@ -54,7 +54,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
 Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
-			(*			Return[1]; *)
+			(* Return[1]; *) 
                         L=LMN[[1]];
                         M=LMN[[2]];
                         N=LMN[[3]];
@@ -67,7 +67,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
    Classes = { {0,0},{1,1}} 
  *)
 
-Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}};
+     Classes = { {0,0},{0,1},{1,1},{2,2}};(*,{3,3}}; *)
 
 (* Maximal    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}  *)
 
@@ -93,7 +93,6 @@ Do[Do[Do[
 ,{l,0,2 MxEll-m-n}]
 ,{m,0,2 MxEll-n}]
 ,{n,0,2 MxEll}];
-
 
 (*=============================== 
                                   LOAD OPTIMIZING AND FORMATING ROUTINES FOR MMA AND SET ASSOCIATED OPTIONS
@@ -130,7 +129,7 @@ RelsList={};
 PunchHRRKet;
 PunchHRRBra;
 
-IncludeFile="ERIInclude.Inc";
+IncludeFile="ERIIncludeB.Inc";
 OpenWrite[IncludeFile];
 Print[" Openned ",IncludeFile];
 WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];
@@ -143,7 +142,6 @@ Do[Do[Do[Do[
       IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
       IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
       IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
-
 
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
@@ -168,13 +166,13 @@ Do[Do[Do[Do[
              ijklType=ijklFlag;
 
              WSI[StringJoin["CASE(",ToString[ijklFlag],")"]];
-	     WSI[StringJoin["CALL IntB",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
-                            "                        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
-                            "                        ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
+	     WSI[StringJoin["CALL IntB",ToString[ijklType],"(ACAtmPair(iFAC)%SP%Cst(1,1),ACAtmPair(iFAC)%SP%L, & \n", 
+                            "                        BDAtmPair(iFBD)%SP%Cst(1,1),BDAtmPair(iFBD)%SP%L, & \n",
+                            "                        ACAtmPair(iFAC)%SP%AtmInfo,BDAtmPair(iFBD)%SP%AtmInfo, & \n",
                             "                        OffSet%A  ,1              , & \n",
                             "                        OffSet%C-1,NBFA           , & \n",
                             "                        OffSet%B-1,NBFA*NBFC      , & \n",
-                            "                        OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) \n"]];
+                            "                        OffSet%D-1,NBFA*NBFB*NBFC,GMc%PBC,C(1)) \n"]];
 
 	   Subroutine=StringJoin["IntB",ToString[ijklType],".F90"];
 	   OpenWrite[Subroutine];
@@ -199,6 +197,7 @@ Do[Do[Do[Do[
 
            Close[Subroutine];
            Print[" Closed ",Subroutine];
+
       ]; 
 
 ,{ic,1,LC}]
@@ -262,6 +261,7 @@ WriteString[Makefile,"ppurge:purge\n",
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"source:\n",
                              TAB,"math<INT.m>INT.out\n",
+                             TAB,"math<ERIInterface.m>INT.out\n",
                              TAB,"rm INT.out\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"INT:$(MiscObjs) $(IntObjs)\n",

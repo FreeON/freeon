@@ -15,16 +15,18 @@ PunchHRRKetCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
  BEnd=LEnd[imax+jmax];
  KEnd=LEnd[kmax+lmax];
 
+ BEnd1=LEnd[imax+jmax+1];
+ KEnd1=LEnd[kmax+lmax+1];
+
  BraMax=BEnd;
-
-
-
+ BraMax1=BEnd1;
 
  If[ic==2&&jc==2,BraMax=BraMax+LenI+LenJ];
  If[ic==2&&jc!=2,BraMax=BraMax+1];
  If[jc==2&&ic!=2,BraMax=BraMax+LenI];
 
  KetMax=KEnd;
+ KetMax1=KEnd1;
 
  If[kc==2&&lc==2,KetMax=KetMax+LenK+LenL];
  If[kc==2&&lc!=2,KetMax=KetMax+1];
@@ -55,7 +57,7 @@ PunchHRRKetCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
     ijmin1=ijmax1;
    ];
 
-If[lmax>1,
+If[lmax>0,
 
  HRRSubName=StringJoin["KetHRR",KClass,LClass];
 						    WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{ijmin,ijmax}]],",0|",
@@ -68,13 +70,13 @@ If[lmax>1,
                                                         CType[IntegralClass[{kmin,kmax}]],",",
                                                         CType[IntegralClass[{lmin,lmax}]],")^a\n"]]; 
  
- WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax],",HRRA) \n"]]; 
+ WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax1],",HRRA) \n"]]; 
 
 						    WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{ijmin1,ijmax1}]],",0|",
                                                         CType[IntegralClass[{kmin,kmax}]],",",
                                                         CType[IntegralClass[{lmin,lmax}]],")^b\n"]]; 
 
- WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax],",HRRB) \n"]]; 
+ WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax1],",HRRB) \n"]]; 
 
 
 						    WriteString[FileName,StringJoin["      ! Generating (",CType[IntegralClass[{ijmin,ijmax}]],",0|",
@@ -85,7 +87,6 @@ If[lmax>1,
  WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax],",HRRC) \n"]]; 
 
    ,
-
 					    WriteString[FileName,StringJoin["      ! Dont need to generate (",CType[IntegralClass[{ijmin,ijmax}]],",0|",
                                                         CType[IntegralClass[{kmin,kmax}]],",",
                                                         CType[IntegralClass[{lmin,lmax}]],")\n"]]; 
@@ -101,9 +102,6 @@ If[lmax>1,
 					    WriteString[FileName,StringJoin["      ! Dont need to generate (",CType[IntegralClass[{ijmin,ijmax}]],",0|",
                                                         CType[IntegralClass[{kmin1,kmax+1}]],",",
                                                         CType[IntegralClass[{lmin,lmax}]],")^c\n"]]; 
- HRRSubName=StringJoin["KetHRR",KClass1,LClass];
-
- WriteString[FileName,StringJoin["      CALL ",HRRSubName,"(",ToString[BraMax],",HRRC) \n"]]; 
 
    ];
 

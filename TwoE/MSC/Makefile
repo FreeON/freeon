@@ -6,7 +6,7 @@ CPPMISC =
 #
 EXTRA_INCLUDES=
 #
-MiscObjs=ShellPairStruct.o Scratch.o GetAtomPair.o InitDbl.o 
+MiscObjs=ShellPairStruct.o ShellPrint.o Scratch.o GetAtomPair.o InitDbl.o 
 #
 #
 all:    Misc

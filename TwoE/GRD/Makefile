@@ -82,6 +82,7 @@ ppurge:purge
 #
 source:
 	math<GRD.m>GRD.out
+	math<DERIInterface.m>GRD.out
 	rm GRD.out
 #
 GRD:$(MiscObjs) $(IntObjs)

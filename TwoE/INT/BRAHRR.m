@@ -117,6 +117,7 @@ Do[Do[
                 IList=Append[IList,ToExpression[StringJoin["BB",ToString[i],"xx",ToString[j],"KK"]]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
                 Kount = Kount + 1;
+		(*                IList=Append[IList,Horner[hrr]+INTGRL[OffSet]];*)
                 IList=Append[IList,Horner[hrr]];
                 HRRAddress=StringJoin[ToString[i],",",ToString[j]];
                 oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["INTGRL(OffSet)"]];

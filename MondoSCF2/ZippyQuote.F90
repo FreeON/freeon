@@ -4,14 +4,15 @@ MODULE ZippyQuote
   IMPLICIT NONE
 CONTAINS
   !===========================================================================================================================
-  ! INSIPID SAYINGS TO CELIBRATE OUR INNER CONEHEAD 
+  ! BETTER LIVING THROUGH ABSURDISM
   !===========================================================================================================================
   SUBROUTINE ZippySez(C)
     TYPE(Controls)  :: C
     INTEGER         :: N,PU
     !------------------------------------------------------------------------------------------------------------------------!
     PU=6
-    N=Random((/1,42/))
+    WRITE(PU,*)'Zippy sez:'
+    N=Random((/1,45/))
     SELECT CASE(N)
     CASE (1)
        WRITE(PU,*)"Are we having fun yet?"    
@@ -96,7 +97,13 @@ CONTAINS
     CASE (41)
        WRITE(PU,*)"Impudent..  Yet possessing a certain ALUMINUM SILICATE overbite....Needs REDDY-WHIP!!"
     CASE (42)
-       WRITE(PU,*) "REAL(DOUBLE) or REAL(TROUBLE)? That is the question here..."
+       WRITE(PU,*)"If I had a Q-TIP, I could prevent th'collapse of NEGOTIATIONS!!"
+    CASE (43)
+       WRITE(PU,*)"If this was a SWEDISH MOVIE, I'd take off your GO-GO BOOTS!!"
+    CASE (44)
+       WRITE(PU,*)"Hand me a pair of leather pants and a CASIO keyboard -- I'm living for today!"
+    CASE (45)
+       WRITE(PU,*)"I'm using my X-RAY VISION to obtain a rare glimpse of the INNER WORKINGS of this POTATO!!" 
     END SELECT
   END SUBROUTINE ZippySez
 END MODULE ZippyQuote

@@ -40,14 +40,14 @@ PROGRAM dN4KTest
   !-------------------------------------------------------------------
 
   !  TYPE(CList2) , DIMENSION(:), POINTER  :: List
-  TYPE(CRDS)              :: GM
+  TYPE(CRDS)              :: GMc
   TYPE(BSET)              :: BS
   TYPE(BCSR)              :: D
   !  TYPE(CellSet)           :: CS_OUT
   !  TYPE(ANode2) , POINTER                :: AtAList,AtAListTmp,NodeA
   TYPE(AtomInfo)                        :: ACAtmInfo,BDAtmInfo
   INTEGER                               :: AtA,AtC,AtB,AtD,KA,KC,KB,KD, &
-       CFA,CFC,CFB,CFD,CFAC,CFBD,NBFA,NBFC,NBFB,NBFD,AtAOff,AtBOff,AtCOff,AtDOff, & 
+       CFA,CFC,CFB,CFD,iFAC,iFBD,NBFA,NBFC,NBFB,NBFD,AtAOff,AtBOff,AtCOff,AtDOff, & 
        AALen,BBLen,CCLen,DDLen,NIntBlk
   INTEGER                               :: NCell,IntType,LocNInt,Off,iDir,iDiff,I
   INTEGER                               :: indab,indcd,iptrdab,iptrdcd,IXYZ
@@ -67,41 +67,42 @@ PROGRAM dN4KTest
   CALL StartUp(Args,Prog)
 
   CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
+  CALL Get(GMc,Tag_O=CurGeom)
+  
   CALL Get(D,TrixFile('D',Args,0))
 
   AtAOff=0
   DO AtA=1,NAtoms ! Run over AtA
-     KA=GM%AtTyp%I(AtA)
+     KA=GMc%AtTyp%I(AtA)
      ACAtmInfo%K1=KA
      NBFA=BS%BfKnd%I(KA)
-     ACAtmInfo%Atm1X=GM%Carts%D(1,AtA)
-     ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
-     ACAtmInfo%Atm1Z=GM%Carts%D(3,AtA)
+     ACAtmInfo%Atm1X=GMc%Carts%D(1,AtA)
+     ACAtmInfo%Atm1Y=GMc%Carts%D(2,AtA)
+     ACAtmInfo%Atm1Z=GMc%Carts%D(3,AtA)
      AtCOff=0
      DO AtC=1,NAtoms ! Run over AtC
-        KC=GM%AtTyp%I(AtC)
+        KC=GMc%AtTyp%I(AtC)
         ACAtmInfo%K2=KC
         NBFC=BS%BfKnd%I(KC)
-        ACAtmInfo%Atm2X=GM%Carts%D(1,AtC)
-        ACAtmInfo%Atm2Y=GM%Carts%D(2,AtC)
-        ACAtmInfo%Atm2Z=GM%Carts%D(3,AtC)
+        ACAtmInfo%Atm2X=GMc%Carts%D(1,AtC)
+        ACAtmInfo%Atm2Y=GMc%Carts%D(2,AtC)
+        ACAtmInfo%Atm2Z=GMc%Carts%D(3,AtC)
         AtBOff=0
         DO AtB=1,NAtoms ! Run over AtB
-           KB=GM%AtTyp%I(AtB)
+           KB=GMc%AtTyp%I(AtB)
            NBFB=BS%BfKnd%I(KB)
            BDAtmInfo%K1=KB
-           BDAtmInfo%Atm1X=GM%Carts%D(1,AtB)
-           BDAtmInfo%Atm1Y=GM%Carts%D(2,AtB)
-           BDAtmInfo%Atm1Z=GM%Carts%D(3,AtB)
+           BDAtmInfo%Atm1X=GMc%Carts%D(1,AtB)
+           BDAtmInfo%Atm1Y=GMc%Carts%D(2,AtB)
+           BDAtmInfo%Atm1Z=GMc%Carts%D(3,AtB)
            AtDOff=0
            DO AtD=1,NAtoms ! Run over AtD
-              KD=GM%AtTyp%I(AtD)
+              KD=GMc%AtTyp%I(AtD)
               NBFD=BS%BfKnd%I(KD)
               BDAtmInfo%K2=KD
-              BDAtmInfo%Atm2X=GM%Carts%D(1,AtD)
-              BDAtmInfo%Atm2Y=GM%Carts%D(2,AtD)
-              BDAtmInfo%Atm2Z=GM%Carts%D(3,AtD)
+              BDAtmInfo%Atm2X=GMc%Carts%D(1,AtD)
+              BDAtmInfo%Atm2Y=GMc%Carts%D(2,AtD)
+              BDAtmInfo%Atm2Z=GMc%Carts%D(3,AtD)
               DO iDir=3,12,3              
                  IF(iDir==3)THEN
                     Tmp1=ACAtmInfo%Atm1Z
@@ -136,8 +137,8 @@ PROGRAM dN4KTest
                           BDAtmInfo%Atm2Z=Tmp1+1D-4
                        ENDIF
                     ENDIF
-                    CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
-                    CALL GetAtomPair(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1))
+                    CALL GetAtomPair2(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
+                    CALL GetAtomPair2(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1))
                     IF(iDir==3)THEN
                        ACAtmInfo%Atm1Z=Tmp1
                     ELSEIF(iDir==6)THEN
@@ -148,24 +149,24 @@ PROGRAM dN4KTest
                        BDAtmInfo%Atm2Z=Tmp1
                     ENDIF
                     CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,C(1),0.0d0)
-                    CFAC=0
+                    iFAC=0
                     OffSet%A=1
                     DO CFA=1,BS%NCFnc%I(KA)
                        AALen=BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
                        OffSet%C=1
                        DO CFC=1,BS%NCFnc%I(KC)
                           CCLen=BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
-                          CFBD=0
+                          iFBD=0
                           OffSet%B=1
-                          CFAC=CFAC+1
+                          iFAC=iFAC+1
                           DO CFB=1,BS%NCFnc%I(KB)
                              BBLen=BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
                              OffSet%D=1
                              DO CFD=1,BS%NCFnc%I(KD)
-                                CFBD=CFBD+1
+                                iFBD=iFBD+1
                                 DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
-                                IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
-                                INCLUDE 'ERIInclude.Inc'
+                                IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+                                INCLUDE 'ERIInterfaceB.Inc'
                                 OffSet%D=OffSet%D+DDLen
                              ENDDO ! End blkfunc on D
                              OffSet%B=OffSet%B+BBLen
@@ -183,31 +184,31 @@ PROGRAM dN4KTest
                  C(1:NBFA*NBFB*NBFC*NBFD)=(Half*1D4)*(Cp(1:NBFA*NBFB*NBFC*NBFD)-Cm(1:NBFA*NBFB*NBFC*NBFD))
                  !-------------------------------------------------------------------------------------------
                  ! Analytics !!! 
-                 CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
-                 CALL GetAtomPair(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1))
+                 CALL GetAtomPair2(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,1))
+                 CALL GetAtomPair2(BDAtmInfo,BDAtmPair,BS,CS_OUT%CellCarts%D(1,1))
                  DO I=1,12
-                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),0.0d0)
+                    CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),BIG_DBL)
+                    !CALL DBL_VECT_EQ_DBL_SCLR(NBFA*NBFB*NBFC*NBFD,dC(1,I),0D0)
                  ENDDO
                  NIntBlk=MaxBK ! NBFA*NBFB*NBFC*NBFD
-                 CFAC=0
+                 iFAC=0
                  OffSet%A=1
                  DO CFA=1,BS%NCFnc%I(KA)
                     AALen=BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1
                     OffSet%C=1
                     DO CFC=1,BS%NCFnc%I(KC)
                        CCLen=BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1
-                       CFBD=0
+                       iFBD=0
                        OffSet%B=1
-                       CFAC=CFAC+1
+                       iFAC=iFAC+1
                        DO CFB=1,BS%NCFnc%I(KB)
                           BBLen=BS%LStop%I(CFB,KB)-BS%LStrt%I(CFB,KB)+1
                           OffSet%D=1
                           DO CFD=1,BS%NCFnc%I(KD)
-                             CFBD=CFBD+1
+                             iFBD=iFBD+1
                              DDLen=BS%LStop%I(CFD,KD)-BS%LStrt%I(CFD,KD)+1
-                             IntType=ACAtmPair(CFAC)%SP%IntType*10000+BDAtmPair(CFBD)%SP%IntType
-                             !                          WRITE(*,*)' IntType = ',ACAtmPair(CFAC)%SP%IntType,BDAtmPair(CFBD)%SP%IntType
-                             INCLUDE 'dERIInclude.Inc'
+                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
+                             INCLUDE 'dERIInterfaceB.Inc'
                              OffSet%D=OffSet%D+DDLen
                           ENDDO ! End blkfunc on D
                           OffSet%B=OffSet%B+BBLen
