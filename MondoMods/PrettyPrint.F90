@@ -1094,8 +1094,8 @@ MODULE PrettyPrint
 !========================================================================================
 ! Print The Gradients
 !========================================================================================
-  SUBROUTINE Print_Force(GM,Frc,Name,FileName_O,Unit_O,Fmat_O)
-    TYPE(CRDS)                     :: GM
+  SUBROUTINE Print_Force(GM_Loc,Frc,Name,FileName_O,Unit_O,Fmat_O)
+    TYPE(CRDS)                     :: GM_Loc
     TYPE(DBL_VECT)                 :: Frc
     CHARACTER(LEN=*)               :: Name
     CHARACTER(LEN=*),OPTIONAL      :: FileName_O
@@ -1105,14 +1105,14 @@ MODULE PrettyPrint
     IF(Present(Fmat_O)) THEN
        Fmat=Fmat_O
     ELSE
-       Fmat=0
+       Fmat=1
     ENDIF
 !
     IF(Fmat==0) THEN
        IF(PrintFlags%Key/=DEBUG_MAXIMUM) RETURN
        PU=OpenPU(FileName_O,Unit_O)
        WRITE(PU,32) TRIM(Name)
-       DO AtA = 1,NAtoms
+       DO AtA = 1,GM_Loc%Natms
           A1 = 3*(AtA-1)+1
           WRITE(PU,36) AtA,Frc%D(A1:A1+2)
        ENDDO
@@ -1123,9 +1123,9 @@ MODULE PrettyPrint
        WRITE(PU,32) TRIM(Name)
        WRITE(PU,34)
        WRITE(PU,33) 
-       DO AtA = 1,NAtoms
+       DO AtA = 1,GM_Loc%Natms
           A1 = 3*(AtA-1)+1
-          WRITE(PU,35) AtA,GM%AtNum%D(AtA),Frc%D(A1:A1+2)
+          WRITE(PU,35) AtA,INT(GM_Loc%AtNum%D(AtA)),Frc%D(A1:A1+2)
        ENDDO
        WRITE(PU,33) 
        CALL ClosePU(PU)
@@ -1135,9 +1135,9 @@ MODULE PrettyPrint
        WRITE(PU,32) TRIM(Name)
        WRITE(PU,40)
        WRITE(PU,42) 
-       DO AtA = 1,NAtoms
+       DO AtA = 1,GM_Loc%Natms
           A1 = 3*(AtA-1)+1
-          WRITE(PU,41) AtA,GM%AtNum%D(AtA),GM%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
+          WRITE(PU,41) AtA,INT(GM_Loc%AtNum%D(AtA)),GM_Loc%Carts%D(1:3,AtA),Frc%D(A1:A1+2)
        ENDDO
        WRITE(PU,42) 
        CALL ClosePU(PU)
@@ -1146,11 +1146,11 @@ MODULE PrettyPrint
 32  FORMAT(1X,A)
 33  FORMAT(54('-'))
 34  FORMAT('  Atom      Z                Forces (au) ')
-35  FORMAT(' ',I4,'     ',I3,3(2X,F11.8))
-36  FORMAT(I4,3(2X,F16.12))
+35  FORMAT('  ',I6,'  ',I3,'  ',3(F16.8))
+36  FORMAT(I4,3(F20.12))
 !
 40  FORMAT('  Atom      Z                Positions(au)                           Forces (au) ')
-41  FORMAT(' ',I4,'     ',I3,6(2X,F11.8))
+41  FORMAT(' ',I4,'     ',I3,6(F16.8))
 42  FORMAT(95('-'))
 !
   END SUBROUTINE Print_Force
