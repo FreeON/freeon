@@ -57,7 +57,8 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_EXEC)/ONX
+	rm -f $(MONDO_EXEC)/ONX2
+	rm -f $(MONDO_EXEC)/GONX2
 	rm -f $(Objects)
 	ls
 #
