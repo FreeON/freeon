@@ -805,8 +805,8 @@ We have implemented these methods in the MondoSCF suite of linear scaling quantu
 programs \cite{MondoSCF}.  The construction of the Fockian and derivative Fockian was carried
 out using the linear scaling QCTC method for computation of the Coulomb matrix \cite{MChallacombe97,CTymczak04a} and the
 ONX algorithm \cite{ESchwegler97,CTymczak04b} for computation of the Hartree-Fock exchange matrix. 
-The CPSCF equations were solved, at each order, in an entirely orthogonal representation and
-the higher order properties were also evaluated using the $2 n+1$ rule with 
+The CPSCF equations were solved, at each order, in an entirely orthogonal representation.
+The properties were evaluated using the $n+1$ rule Eq.~(\ref{Np1Rule}) and the $2n+1$ rule with 
 the non-orthogonal formulae given by Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
 Two different levels of numerical 
 accuracy have been used, {\tt GOOD} and {\tt TIGHT}.   Thresholds that define the {\tt GOOD} 
@@ -892,13 +892,13 @@ As shown in Fig.~\ref{TimeWithOrder}, computing the second order response is sig
 than the third order response, and involves an earlier onset of linear scaling. Because evaluation 
 of properties with the $2 n+1$ rule is of negligible cost relative to solving the CPSCF equations, the cost 
 difference for evaluating $\gamma$ with the $2 n+1$ rule relative to the $n+1$ expectation is just the 
-difference (roughly 2:3) between the computation of $\beta$ and $\gamma$ shown in Fig.~\ref{TimeWithOrder}.  
+difference (roughly 2:3) between the computation of $\beta$ and $\gamma$ shown in Fig.~\ref{TimeWithOrder}.
 
 \section{Conclusions}
 
 Linear scaling has been demonstrated for the computation of response properties beyond second
-order in the total energy using Perturbed Projection for solution of the Coupled-Perturbed Self-Consistent-Field 
-equations.
+order in the total energy using Perturbed Projection for solution of the 
+Coupled-Perturbed Self-Consistent-Field equations.
 In addition, we have provided details of 
 the computational method, used three-dimensional systems and non-trivial basis sets
 to demonstrate linear scaling and provided a (preliminary) assessment of 
@@ -907,7 +907,7 @@ computation of higher order response functions is quadratically convergent, simp
 to implement through higher orders and numerically stable.  Perturbed Projection is 
 not unique to the Hartree-Fock model, the TC2 generator or the {\sc MondoSCF} 
 $N$-scaling algorithms, but can be straightforwardly extended to models that include 
-exchange correlation (DFT), other other purification schemes such as TRS4 \cite{ANiklasson03}
+exchange correlation (DFT), other purification schemes such as TRS4 \cite{ANiklasson03}
 as well as other electronic structure programs.  
 
 We have shown that response functions (density matrix derivatives) through fourth 
@@ -927,8 +927,9 @@ This behavior is expected to hold generally for both local and global perturbati
 insulating systems.  Thus, the potential exists for Perturbed Projection to achieve linear scaling
 for a large class of static molecular properties within the HF, DFT and hybrid HF/DFT model 
 chemistries. Of particular interest, the recently developed non-orthogonal density matrix perturbation 
-theory put forward in a proceeding article \cite{ANiklasson05a} may enable linear scaling computation of analytic 
-second derivatives, which are important in computation of the Hessian matrix.  
+theory put forward in a proceeding article \cite{ANiklasson05a} may enable 
+linear scaling computation of analytic second derivatives, which are important 
+in computation of the Hessian matrix.  
 
 \begin{acknowledgments}
  This work has been supported by the US Department of Energy 
