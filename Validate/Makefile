@@ -38,20 +38,20 @@ full:	all big
 serial:	small big
 #
 small:
-	m Water.inp         Water.out         Water.log
-	m NH3.inp           NH3.out           NH3.log
-	m Biotin.inp        Biotin.out        Biotin.log    
-	m Graphite.inp      Graphite.out      Graphite.log
-	m Na2Cl2.inp        Na2Cl2.out        Na2Cl2.log
-	m PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
-	m Histidine.inp     Histidine.out     Histidine.log 
+	MondoSCF Water.inp         Water.out         Water.log
+	MondoSCF NH3.inp           NH3.out           NH3.log
+	MondoSCF Biotin.inp        Biotin.out        Biotin.log    
+	MondoSCF Graphite.inp      Graphite.out      Graphite.log
+	MondoSCF Na2Cl2.inp        Na2Cl2.out        Na2Cl2.log
+	MondoSCF PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
+	MondoSCF Histidine.inp     Histidine.out     Histidine.log 
 #
 big:	
-	m Caffiene.inp     Caffiene.out      Caffine.log
-	m Diamond.inp      Diamond.out       Diamond.log
-	m BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
-	m Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
-	m Vancomycin.inp   Vancomycin.out;   Vancomycin.log
+	MondoSCF Caffiene.inp     Caffiene.out      Caffine.log
+	MondoSCF Diamond.inp      Diamond.out       Diamond.log
+	MondoSCF BetaCarotene.inp BetaCarotene.out  BetaCarotene.log
+	MondoSCF Chlorophyll.inp  Chlorophyll.out;  Chlorophyll.log
+	MondoSCF Vancomycin.inp   Vancomycin.out;   Vancomycin.log
 #
 #       Submit serial validation suite to pbs queing system 
 #
