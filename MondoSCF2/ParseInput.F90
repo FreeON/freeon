@@ -44,5 +44,7 @@ CONTAINS
     CALL LoadGeomOpt(C%Nams,C%GOpt)
     ! Load constraints and extra internal coords
     CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos)
+    ! Check for Global conflicts.
+    CALL GlbConflictCheck(C)
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput
