@@ -12,6 +12,11 @@ PROGRAM DDIIS
 !H  V. Weber, C. Daul Chem. Phys. Let. 370, 99-105, 2003.
 !H
 !H=================================================================================
+  !
+#ifdef DDIIS_DBUG
+#define DDIIS_INFO
+#endif
+  !
   USE DerivedTypes
   USE GlobalScalars
   USE GlobalCharacters
@@ -48,6 +53,15 @@ PROGRAM DDIIS
   CHARACTER(LEN=*), PARAMETER      :: Prog='DDIIS'
   LOGICAL                          :: IsPresent
   !-------------------------------------------------------------------
+  REAL(DOUBLE), PARAMETER          :: DEFAULT_EIGTHRESH = 1.00D-10
+  REAL(DOUBLE), PARAMETER          :: DEFAULT_DAMP      = 1.00D-01 ! DEFAULT_DAMP_MIN < damp < DEFAULT_DAMP_MAX
+  REAL(DOUBLE), PARAMETER          :: DEFAULT_DAMP_MAX  = 5.00D-01
+  REAL(DOUBLE), PARAMETER          :: DEFAULT_DAMP_MIN  = 1.00D-03
+  REAL(DOUBLE), PARAMETER          :: DEFAULT_MAXCOND   = 1.00D+08
+  INTEGER     , PARAMETER          :: DEFAULF_BMAX      = 15
+  INTEGER     , PARAMETER          :: DEFAULF_START     = 1
+  !-------------------------------------------------------------------
+  !type(DBL_RNK2) :: BTmp
   !
   ! Initial setup.
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -64,35 +78,35 @@ PROGRAM DDIIS
   CALL OpenASCII(InpFile,Inp)  
   !
   ! Threshold for projection of small eigenvalues.
-  IF(.NOT.OptDblQ(Inp,'DDIISThresh',EigThresh)) EigThresh=1.0D-10
+  IF(.NOT.OptDblQ(Inp,'DDIISThresh',EigThresh)) EigThresh=DEFAULT_EIGTHRESH ! EigThresh=1.0D-10
   IF(EigThresh.LT.Zero) &
        & CALL Halt(' DDIISThresh cannot be smaller than zero, DDIISThresh=' &
        &           //TRIM(DblToShrtChar(EigThresh))//'.')
   !
   ! Damping coefficient for first cycle
-  IF(.NOT.OptDblQ(Inp,'DDIISDamp',Damp)) Damp=1.0D-1
+  IF(.NOT.OptDblQ(Inp,'DDIISDamp',Damp)) Damp=DEFAULT_DAMP !Damp=1.0D-1
   IF(Damp.LT.Zero) &
        & CALL Halt(' DDIISDamp cannot be smaller than zero, DDIISDamp=' &
        &           //TRIM(DblToShrtChar(Damp))//'.')
-  ! Dont allow damping below 0.001, as this can cause false convergence.
-  Damp=MAX(Damp,1D-3)
-  ! Dont allow damping above 0.5, as this is silly (DIIS would certainly work better).
-  Damp=MIN(Damp,5D-1)
+  ! Dont allow damping below DEFAULT_DAMP_MIN, as this can cause false convergence.
+  Damp=MAX(Damp,DEFAULT_DAMP_MIN)
+  ! Dont allow damping above DEFAULT_DAMP_MAX, as this is silly (DIIS would certainly work better).
+  Damp=MIN(Damp,DEFAULT_DAMP_MAX)
   !
   ! Max number of equations to keep in DIIS.
-  IF(.NOT.OptIntQ(Inp,'DDIISDimension',BMax)) BMax=15
+  IF(.NOT.OptIntQ(Inp,'DDIISDimension',BMax)) BMax=DEFAULF_BMAX !BMax=15
   IF(BMax.LT.0) &
        & CALL Halt(' DDIISDimension cannot be smaller than zero, DDIISDimension=' &
        &           //TRIM(IntToChar(BMax))//'.')
   !
   ! Condition number of B.
-  IF(.NOT.OptDblQ(Inp,'DDIISMaxCond',DDIISMaxCond)) DDIISMaxCond=1.0D+8
+  IF(.NOT.OptDblQ(Inp,'DDIISMaxCond',DDIISMaxCond)) DDIISMaxCond=DEFAULT_MAXCOND !DDIISMaxCond=1.0D+8
   IF(DDIISMaxCond.LT.Zero) &
        & CALL Halt(' DDIISMaxCond cannot be smaller than zero, DDIISMaxCond=' &
        &           //TRIM(DblToShrtChar(DDIISMaxCond))//'.')
   !
   ! The iteration where we want to start the DDIIS.
-  IF(.NOT.OptIntQ(Inp,'DDIISStart',DDIISStart)) DDIISStart=1
+  IF(.NOT.OptIntQ(Inp,'DDIISStart',DDIISStart)) DDIISStart=DEFAULF_START !DDIISStart=1
   IF(DDIISStart.LT.1) &
        & CALL Halt(' DDIISStart cannot be smaller than one, DDIISStart=' &
        &           //TRIM(IntToChar(DDIISStart))//'.')
@@ -125,24 +139,25 @@ PROGRAM DDIIS
      DDIISEnd=1
      CALL Put(DDIISBeg,'DDIISBeg')
      CALL Put(DDIISEnd,'DDIISEnd')
-     !CALL SetEq(BTmp,Zero)
+     !BTmp%D=Zero
      !CALL Put(BTmp,'DDIISBMtrix')
   ELSE
      CALL Get(DDIISBeg,'DDIISBeg')
      CALL Get(DDIISEnd,'DDIISEnd')
      !CALL Get(BTmp,'DDIISBMtrix')
   ENDIF
+  !CALL PrintMatrix(BTmp%D,BMax+1,BMax+1,2)
   !
   !-------------------------------------------------------------------
   ! Allocations.
   !-------------------------------------------------------------------
   !
-  CALL New(P    )
-  CALL New(F    )
   CALL New(Tmp1 )
   CALL New(EPrim)
-  CALL New(PPrim)
   CALL New(FPrim)
+  CALL New(P    )
+  CALL New(F    )
+  CALL New(PPrim)
   !
   !-------------------------------------------------------------------
   ! Loading matrices.
@@ -170,6 +185,11 @@ PROGRAM DDIIS
   CALL Multiply(FPrim,P,EPrim,-One)  !E'=F'P-(PF'+P'F)
   CALL Multiply(F,PPrim,EPrim, One)  !E'=FP'+F'P-(PF'+P'F)
   !
+  ! Deallocate local arrays.
+  CALL Delete(F    )
+  CALL Delete(P    )
+  CALL Delete(PPrim)
+  !
   ! We dont filter E' for obvious reasons .
   CALL Put(EPrim,TrixFile('EPrime'//TRIM(Args%C%C(4)),Args,0))
   !
@@ -184,7 +204,7 @@ PROGRAM DDIIS
   CALL Put(DIISErr,'ddiiserr')
   !
   !-------------------------------------------------------------------
-  ! Build the B matrix and solve the linear problem..
+  ! Build the B matrix and solve the linear problem.
   !-------------------------------------------------------------------
   !
   ! Build the B matrix if on second SCF cycle (starting from 0)
@@ -248,12 +268,12 @@ PROGRAM DDIIS
                 &           CoNo_O=CondA)
         ENDIF
         CALL UnSetDSYEVWork()
-        CALL DGEMV('N',N,N,One,BInv%D,N,V%D,1,Zero,DIISCo%D,1)
+        CALL DGEMV('N',N,N,One,BInv%D(1,1),N,V%D(1),1,Zero,DIISCo%D(1),1)
         !
-!#ifdef DDIIS_DBUG
-!        CALL PrintMatrix(B%D,N,N,2)
+#ifdef DDIIS_INFO
+        !CALL PrintMatrix(B%D,N,N,2)
         WRITE(*,*) 'CondA=',CondA
-!#endif
+#endif
         !
         ! Do we need to reduce the size?
         IF(.NOT.(CondA.GT.DDIISMaxCond.AND.DDIISCurDim.GT.1)) EXIT
@@ -284,10 +304,19 @@ PROGRAM DDIIS
         CALL Delete(BInv)
         CALL New(BInv,(/N,N/))
         BInv%D=Zero
+#ifdef DDIIS_INFO
+        WRITE(*,*) 'Reduce DDIIS Space from '//TRIM(IntToChar(DDIISCurDim+1)) &
+             &     //' to '//TRIM(IntToChar(DDIISCurDim))//'.'
+#endif
      ENDDO
      !
-     CALL Delete(V)
+     CALL Delete(B   )
+     CALL Delete(V   )
      CALL Delete(BInv)
+     !
+     !BTmp%D=Zero
+     !BTmp%D(1:N,1:N)=B%D(1:N,1:N)
+     !CALL PrintMatrix(BTmp%D,BMax+1,BMax+1,2)
      !
 #ifdef PARALLEL
      ENDIF
@@ -324,11 +353,13 @@ PROGRAM DDIIS
 #ifdef PARALLEL
      IF(MyId==ROOT)THEN
 #endif
-        CALL OpenASCII(OutFile,Out)
-        CALL PrintProtectL(Out)
-        IF(PrintFlags%Key==DEBUG_MAXIMUM) WRITE(Out,*)TRIM(Mssg)
-        CALL PrintProtectR(Out)
-        CLOSE(Out)
+        IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
+           CALL OpenASCII(OutFile,Out)
+           CALL PrintProtectL(Out)
+           WRITE(Out,*)TRIM(Mssg)
+           CALL PrintProtectR(Out)
+           CLOSE(Out)
+        ENDIF
 #ifdef PARALLEL
      ENDIF
 #endif
@@ -339,8 +370,8 @@ PROGRAM DDIIS
   !-------------------------------------------------------------------
   !
   ! Allocate some indecies for re-ordering
-  CALL New(Idx,N)
-  CALL New(SCFOff,N)
+  CALL New(Idx      ,N)
+  CALL New(SCFOff   ,N)
   CALL New(AbsDIISCo,N)
   !
   ! Reorder the DIIS, starting with smallest values and summing to the largest
@@ -365,8 +396,13 @@ PROGRAM DDIIS
      CALL SetEq(FPrim,EPrim)
   ENDDO
   !
+  ! Deallocate local arrays.
+  CALL Delete(Idx      )
+  CALL Delete(SCFOff   )
+  CALL Delete(AbsDIISCo)
+  !
   !-------------------------------------------------------------------
-  ! Increment DDIIS.
+  ! Increment DDIIS and IO.
   !-------------------------------------------------------------------
   !
   DDIISEnd=DDIISEnd+1
@@ -376,6 +412,7 @@ PROGRAM DDIIS
   ! Put in HDF Beg and End DDIIS variables.
   CALL Put(DDIISBeg,'DDIISBeg')
   CALL Put(DDIISEnd,'DDIISEnd')
+  !CALL Put(BTmp,'DDIISBMtrix')
   !
   !-------------------------------------------------------------------
   ! IO for the orthogonal, extrapolated FPrim 
@@ -390,16 +427,11 @@ PROGRAM DDIIS
   ! Tidy up 
   !-------------------------------------------------------------------
   !
-  CALL Delete(F        )
-  CALL Delete(P        )
-  CALL Delete(Idx      )
   CALL Delete(Tmp1     )
   CALL Delete(FPrim    )
-  CALL Delete(PPrim    )
   CALL Delete(EPrim    )
-  CALL Delete(SCFOff   )
   CALL Delete(DIISCo   )
-  CALL Delete(AbsDIISCo)
+  !CALL Delete(BTmp)
   !
   CALL ShutDown(Prog)   
   !
