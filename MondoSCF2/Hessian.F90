@@ -135,11 +135,6 @@ CONTAINS
      Hess%LinB = 0.20D0
      Hess%OutP = 0.10D0 
      Hess%Tors = 0.10D0 
-     Hess%VDWStre  = 0.50D0 
-     Hess%VDWBend  = 0.20D0 
-     Hess%VDWLinB  = 0.20D0 
-     Hess%VDWOutP  = 0.10D0 
-     Hess%VDWTors  = 0.10D0 
    END SUBROUTINE SetHessian
 !
 !-------------------------------------------------------------------
@@ -447,9 +442,8 @@ CONTAINS
        IF(.NOT.IntCs%Active(I)) THEN
          DHess(I)=Zero
        ELSE 
-         DoVDW=(I>CoordC%NCov)
          CALL CalcHess(DHess(I),Char,IntCs%Def(I),Hess,AtNum,iGEO, &
-                       XYZ,IntCs%Atoms(I,1:4),ITop,JTop,ATop,DoVDW)
+                       XYZ,IntCs%Atoms(I,1:4),ITop,JTop,ATop)
        ENDIF
      ENDDO
      !
@@ -487,7 +481,7 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE CalcHess(DHess,Char,Type,Hess,AtNum,iGEO,XYZ, &
-                       Atoms,ITop,JTop,ATop,DoVDW)
+                       Atoms,ITop,JTop,ATop)
      REAL(DOUBLE)                :: DHess
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
@@ -499,16 +493,9 @@ CONTAINS
      INTEGER                     :: I1Row,I2Row,I3Row,I4Row,iGEO
      REAL(DOUBLE)                :: R12,R23,R34
      REAL(DOUBLE)                :: Rho12,Rho23,Rho34
-     LOGICAL                     :: DoVDW
      !
      IF(Type(1:4)=='CART') THEN
-       DHess=Hess%VDWStre
-     ELSE IF(DoVDW) THEN
-       IF(Type(1:4)=='STRE') DHess=Hess%VDWStre
-       IF(Type(1:4)=='BEND') DHess=Hess%VDWBend
-       IF(Type(1:4)=='LINB') DHess=Hess%VDWLinB
-       IF(Type(1:4)=='OUTP') DHess=Hess%VDWOutP
-       IF(Type(1:4)=='TORS') DHess=Hess%VDWTors
+       DHess=Hess%Stre
      ELSE
        IF(Char=='ThreeVals') THEN
          IF(Type(1:4)=='STRE') DHess=Hess%Stre
@@ -914,6 +901,24 @@ CONTAINS
      !
      CALL Delete(B) 
    END SUBROUTINE BMatrConstr
+!
+!------------------------------------------------------------------
+!
+   SUBROUTINE InvHessData(Def,InvHess)
+     CHARACTER(LEN=*) :: Def
+     REAL(DOUBLE)     :: InvHess
+     !
+     IF(Def(1:4)=='BEND'.OR. &
+        Def(1:4)=='LINB'.OR. &
+        Def(1:4)=='OUTP') THEN
+       InvHess=5.D0
+     ELSE IF(Def(1:4)=='TORS') THEN
+       InvHess=10.D0
+     ELSE
+       InvHess=2.D0
+     ENDIF
+   END SUBROUTINE InvHessData
+!
 !
 !------------------------------------------------------------------
 !

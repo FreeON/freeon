@@ -457,7 +457,7 @@ CONTAINS
 !----------------------------------------------------------------
 !
    SUBROUTINE DefineIntCoos(XYZ,AtNum,IntCs,NIntC,GCoordCtrl,Bond, &
-                            AtmB,TOPS,HFileIn_O,iCLONE_O,iGEO_O)
+                          AtmB,TOPS,ArchMem_O,HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This routine defines internal coordinates
      ! being used in geometry manipulations.
@@ -473,7 +473,7 @@ CONTAINS
      TYPE(ATOMBONDS)                :: AtmBCov,AtmBVDW,AtmBTot,AtmB
      TYPE(BONDDATA)                 :: BondCov,BondVDW,BondTot,Bond
      CHARACTER(LEN=*),OPTIONAL      :: HFileIn_O
-     INTEGER,OPTIONAL               :: iCLONE_O,iGEO_O
+     INTEGER,OPTIONAL               :: iCLONE_O,iGEO_O,ArchMem_O
      INTEGER                        :: MaxBonds
      INTEGER,DIMENSION(:)           :: AtNum
      TYPE(CoordCtrl)                :: GCoordCtrl
@@ -495,10 +495,11 @@ CONTAINS
      CALL Set_BONDDATA_EQ_BONDDATA(Bond,BondTot)
      CALL Set_AtmB_EQ_AtmB(AtmB,AtmBTot)
      !
-     IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
-        PRESENT(iGEO_O)) THEN
-       CALL ArchiveTop(TOPS,BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
-     ENDIF
+    !IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O).AND.&
+    !   PRESENT(iGEO_O).AND.PRESENT(ArchMem_O)) THEN
+    !  CALL ArchiveTop(TOPS,ArchMem_O, &
+    !                  BondTot,AtmBTot,HFileIn_O,iCLONE_O,iGEO_O)
+    !ENDIF
      !
      ! Now define bond angles and torsions
      !
@@ -673,9 +674,11 @@ CONTAINS
        Atoms=0 
        DO J1=1,N1
          JJ1=Top12%I(I1,J1+1)
-         CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
-                   Value_O=Alph1)
-         Sum1=ABS(Alph1-PIHalf)/DBLE(Top12%I(JJ1,1)+1)
+         IF(SelectTors) THEN
+           CALL BEND(XYZ(1:3,JJ1),XYZ(1:3,I1),XYZ(1:3,I2), &
+                     Value_O=Alph1)
+           Sum1=ABS(Alph1-PIHalf)/DBLE(Top12%I(JJ1,1)+1)
+         ENDIF
          DO J2=1,N2
            JJ2=Top12%I(I2,J2+1)
            IF(JJ1==JJ2.OR.JJ1==I2.OR.JJ2==I1) CYCLE
@@ -709,8 +712,8 @@ CONTAINS
 !
 !-----------------------------------------------------------------------
 !
-   SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,& 
-                       SCRPath,CtrlCoord,CtrlConstr,TOPS,Bond,AtmB, &
+   SUBROUTINE GetIntCs(XYZ,AtNumIn,IntCs,NIntC,Refresh,SCRPath, &
+                       CtrlCoord,CtrlConstr,ArchMem,TOPS,Bond,AtmB, &
                        HFileIn_O,iCLONE_O,iGEO_O)
      !
      ! This subroutine constructs the IntCs array, which holds
@@ -741,7 +744,7 @@ CONTAINS
      INTEGER,OPTIONAL            :: iCLONE_O,iGEO_O
      INTEGER                     :: NIntC,NIntC_Bas,NIntC_VDW
      INTEGER                     :: NIntC_Extra,NNew,Nintc_New
-     INTEGER                     :: NIntC_Cart,MaxBonds
+     INTEGER                     :: NIntC_Cart,MaxBonds,ArchMem
      INTEGER                     :: I,J,K,Refresh,NatmsLoc,II,ILast,III
      INTEGER                     :: I1,I2,I3,I4,NMax12
      INTEGER                     :: NStreGeOp,NBendGeOp
@@ -764,7 +767,8 @@ CONTAINS
      IF(Refresh==1) THEN !!! Total refresh
        IF(PRESENT(HFileIn_O).AND.PRESENT(iCLONE_O)) THEN
          CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
-                            Bond,AtmB,TOPS,HFileIn_O=HFileIn_O, &
+                            Bond,AtmB,TOPS,ArchMem_O=ArchMem, &
+                            HFileIn_O=HFileIn_O, &
                             iCLONE_O=iCLONE_O,iGEO_O=iGEO_O)
        ELSE
          CALL DefineIntCoos(XYZ,AtNum%I,IntC_Bas,NIntC_Bas,CtrlCoord,&
@@ -4523,7 +4527,7 @@ CONTAINS
      CALL New(CritRadMod,NatmsLoc)
      CritRadMod%D=CritRad%D
      !
-     HBondMax=2.20D0*AngstromsToAu ! in Au 
+     HBondMax=2.00D0*AngstromsToAu ! in Au 
      !
      !  Go through all boxes and their neighbours
      !
@@ -5413,16 +5417,16 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE ArchiveTop(TOPS,Bond,AtmB,HFileIn,iCLONE,iGEO)
+   SUBROUTINE ArchiveTop(TOPS,ArchMem,Bond,AtmB,HFileIn,iCLONE,iGEO)
      TYPE(TOPOLOGY)      :: TOPS
      TYPE(BONDDATA)      :: Bond,Bond2
      TYPE(ATOMBONDS)     :: AtmB,AtmB2
      CHARACTER(LEN=*)    :: HFileIn
-     INTEGER             :: iCLONE,iGEO,HDFFileID
+     INTEGER             :: iCLONE,iGEO,HDFFileID,ArchMem
      INTEGER             :: I,J,NZ,IBack,NatmsLoc
      CHARACTER(LEN=DCL)  :: Tag
      !
-     IBack=MIN(4,iGEO-1)
+     IBack=MIN(ArchMem-1,iGEO-1)
      NatmsLoc=SIZE(AtmB%Count%I)
      HDFFileID=OpenHDF(HFileIn)
      HDF_CurrentID= &

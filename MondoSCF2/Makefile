@@ -37,7 +37,7 @@ ObjectFiles = GetPID.o Spawn.o  ControlStructures.o NEB.o Numerics.o ParseComman
               ParseGeometries.o PeriodicKeys.o ParsePeriodic.o ParseBasis.o           \
               ParallelKeys.o ParseParallel.o Massage.o GeomOptKeys.o ParseGeomOpt.o   \
               ParseExtraCoords.o ParseInput.o PunchHDF.o Overlay.o PrintParsed.o      \
-              SCFKeys.o SCFs.o MLP.o Response.o GDIIS.o Hessian.o Optimizer.o         \
+              SCFKeys.o SCFs.o MLP.o Response.o Hessian.o GDIIS.o Optimizer.o         \
 	      ZippyQuote.o MondoSCF.o
 #
 ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseCommands.x  \
@@ -46,7 +46,7 @@ ReleaseFiles= GetPID.x Spawn.x  ControlStructures.x NEB.x Numerics.x ParseComman
               ParseGeometries.x PeriodicKeys.x ParsePeriodic.x ParseBasis.x           \
               ParallelKeys.x ParseParallel.x Massage.x GeomOptKeys.x ParseGeomOpt.x   \
               ParseExtraCoords.x ParseInput.x PunchHDF.x Overlay.x PrintParsed.x      \
-              SCFKeys.x SCFs.x MLP.x Response.x GDIIS.x Hessian.x Optimizer.x         \
+              SCFKeys.x SCFs.x MLP.x Response.x Hessian.x GDIIS.x Optimizer.x         \
 	      ZippyQuote.x MondoSCF.x
 #
 all:	$(ObjectFiles) 

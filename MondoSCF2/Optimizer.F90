@@ -624,7 +624,8 @@ CONTAINS
      !
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,NIntC,Refresh,SCRPath, &
-                     GOpt%CoordCtrl,GOpt%Constr,TOPS,Bond,AtmB, &
+                     GOpt%CoordCtrl,GOpt%Constr,GOpt%GDIIS%MaxMem, &
+                     TOPS,Bond,AtmB, &
                      HFileIn_O=HFileIn,iCLONE_O=iCLONE,iGEO_O=iGEO)
        IF(NIntC==0) CALL Halt('Molecule has dissociated,'// &
                      'optimizer did not find any internal coordinates.')
@@ -669,9 +670,8 @@ CONTAINS
      ! Calculate simple relaxation step from an inverse Hessian
      !
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
-       CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,GradMult,iCLONE, &
-                  LagrMult,LagrDispl,IntCs,iGEO,SCRPath,PWDPath, &
-                  Print,HFileIn,Refresh,TOPS) 
+       CALL RelaxGeom(GOpt,XYZ,AtNum,CartGrad%D,iCLONE,ETot, &
+                  IntCs,iGEO,SCRPath,PWDPath,Print,HFileIn,Refresh,TOPS) 
      ELSE
        WRITE(*,200) iCLONE,iGEO
        WRITE(Out,200) iCLONE,iGEO
@@ -710,16 +710,16 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,GradMult,iCLONE, &
-                    LagrMult,LagrDispl,IntCs,IGEO,SCRPath,PWDPath, &
+   SUBROUTINE RelaxGeom(GOpt,XYZ,AtNum,CartGrad,iCLONE, &
+                    ETot,IntCs,IGEO,SCRPath,PWDPath, &
                     Print,HFileIn,Refresh,TOPS)
      !
      ! Simple Relaxation step
      !
      TYPE(GeomOpt)                  :: GOpt
      REAL(DOUBLE),DIMENSION(:,:)    :: XYZ
-     REAL(DOUBLE),DIMENSION(:)      :: AtNum,GradMult,LagrMult,LagrDispl
-     REAL(DOUBLE),DIMENSION(:)      :: CartGrad
+     REAL(DOUBLE),DIMENSION(:)      :: AtNum,CartGrad
+     REAL(DOUBLE)                   :: ETot     
      TYPE(DBL_VECT)                 :: Displ
      TYPE(DBL_VECT)                 :: IntGrad,Grad
      TYPE(INTC)                     :: IntCs
@@ -747,7 +747,7 @@ CONTAINS
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
        Grad%D=IntGrad%D
        CALL Delete(IntGrad)
-       CALL RedundancyOff(Grad%D,SCRPath,Print)
+      !CALL RedundancyOff(Grad%D,SCRPath,Print)
      ELSE
        Grad%D=CartGrad
      ENDIF
@@ -770,17 +770,19 @@ CONTAINS
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      CASE(GRAD_BiSect_OPT) 
        IF(iGEO<2) THEN
-       ! CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
-       !               IntCs,AtNum,iGEO,XYZ)
+         CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
+                       IntCs,AtNum,iGEO,XYZ)
        ! CALL CutOffDispl(Displ%D,IntCs)
        ! CALL RedundancyOff(Displ%D,SCRPath,Print)
-         CALL PrepBiSect(Grad%D,IntCs,Displ)
+       ! CALL PrepBiSect(Grad%D,IntCs,Displ)
        ELSE
          CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
            GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
            GOpt%GConvCrit,HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
            Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D, &
-           PWD_O=PWDPath)
+           E_O=Etot,PWD_O=PWDPath)
+         ! CALL RedundancyOff(Displ%D,SCRPath,Print)
+         ! CALL CutOffDispl(Displ%D,IntCs)
        ENDIF
      END SELECT
     !IF(Print==DEBUG_GEOP_MAX) CALL PrtIntCoords(IntCs, &
@@ -1096,7 +1098,7 @@ CONTAINS
      CALL   SetHessian(GOpt%Hessian)
      CALL     SetStepS(GOpt%StepSize)
      CALL SetGConvCrit(GOpt%GConvCrit,GOpt%Hessian,AccL,NatmsLoc)
-     CALL     SetGDIIS(GOpt%GDIIS)
+     CALL     SetGDIIS(GOpt%GDIIS,GOpt%Optimizer)
      CALL    SetGrdTrf(GOpt%GrdTrf,GOpt%GConvCrit)
      CALL   SetBackTrf(GOpt%BackTrf,GOpt%GConvCrit)
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
@@ -1233,6 +1235,7 @@ CONTAINS
      REAL(DOUBLE)    :: GCrit
      !
      GCrit=GTol(AccL)
+   ! GCrit=3.D-4
      !
      GConv%MaxGeOpSteps=MAX(3*NatmsLoc,600)
      GConv%Grad= GCrit
@@ -1258,11 +1261,16 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE SetGDIIS(GD)
+   SUBROUTINE SetGDIIS(GD,GOptimizer)
      TYPE(GDIIS)  :: GD
+     INTEGER      :: GOptimizer
      !
-     GD%Init    = 4
-     GD%MaxMem  = 3
+     GD%Init    = 3
+     IF(GOptimizer==GRAD_BiSect_OPT) THEN
+       GD%MaxMem  =10
+     ELSE
+       GD%MaxMem  = 6
+     ENDIF
      GD%On=.TRUE.
    END SUBROUTINE SetGDIIS
 !
@@ -1687,23 +1695,27 @@ CONTAINS
        IF(IntCs%Def(I)(1:4)=='STRE') THEN
        ! D=RANDOM_DBL((/-DStre,DStre/))
        ! D=DStre
-         D=Grad(I)/1.D0
+         D=Grad(I)/0.5D0
        ELSE IF(IntCs%Def(I)(1:4)=='TORS') THEN
        ! D=RANDOM_DBL((/-DTors,DTors/))
        ! D=DTors
-         D=Grad(I)/0.2D0
+         D=Grad(I)/0.1D0
        ELSE IF(IntCs%Def(I)(1:4)=='OUTP') THEN
        ! D=RANDOM_DBL((/-DOutP,DOutP/))
        ! D=DOutP
-         D=Grad(I)/0.3D0
-       ELSE IF(HasAngle(IntCs%Def(I))) THEN
+         D=Grad(I)/0.2D0
+       ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
        ! D=RANDOM_DBL((/-DAngle,DAngle/))
        ! D=DAngle
-         D=Grad(I)/0.3D0
+         D=Grad(I)/0.2D0
+       ELSE IF(IntCs%Def(I)(1:4)=='LINB') THEN
+       ! D=RANDOM_DBL((/-DAngle,DAngle/))
+       ! D=DAngle
+         D=Grad(I)/0.2D0
        ELSE
        ! D=RANDOM_DBL((/-DStre,DStre/))
        ! D=DStre
-         D=Grad(I)/1.D0
+         D=Grad(I)/0.5D0
        ENDIF
        IF(ABS(Grad(I))>Tol) THEN
          Displ%D(I)=SIGN(ABS(D),-Grad(I))

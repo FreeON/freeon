@@ -198,11 +198,6 @@ MODULE ControlStructures
      REAL(DOUBLE)                       :: LinB
      REAL(DOUBLE)                       :: OutP
      REAL(DOUBLE)                       :: Tors
-     REAL(DOUBLE)                       :: VDWStre
-     REAL(DOUBLE)                       :: VDWBend 
-     REAL(DOUBLE)                       :: VDWLinB 
-     REAL(DOUBLE)                       :: VDWOutP 
-     REAL(DOUBLE)                       :: VDWTors 
      REAL(DOUBLE)                       :: StpDescInvH
   END TYPE Hessian 
   !
