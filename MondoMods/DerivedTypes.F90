@@ -210,20 +210,20 @@ MODULE DerivedTypes
 ! Periodic Information
 !
   TYPE PBCInfo
-      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
-      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
-      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
-      LOGICAL                     :: NoTransVec !-- Was the translate calculated or suppied
-      LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
-      INTEGER                     :: Dimen      !-- Dimension of the SYstem
-      REAL(DOUBLE)                :: CellVolume !-- Cell Volume
-      REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
-      REAL(DOUBLE)                :: QupoleFAC  !-- Normalization of Quadrupole Term 
-      REAL(DOUBLE),DIMENSION(3)   :: CellCenter !-- Center of the cell
-      REAL(DOUBLE),DIMENSION(3)   :: TransVec   !-- Origin Translate Vector
-      REAL(DOUBLE),DIMENSION(3,3) :: BoxShape   !-- Box Shape Vectors
-      REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh  !-- Inverse of the Box Shape Vectors
-   END TYPE PBCInfo
+     INTEGER                     :: Dimen      !-- Dimension of the System
+     LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
+     LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
+     LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
+     LOGICAL                     :: NoTransVec !-- Was the translate calculated or suppied
+     LOGICAL,DIMENSION(3)        :: AutoW      !-- Periodic in X, Y and or Z  direction
+     REAL(DOUBLE)                :: CellVolume !-- Cell Volume
+     REAL(DOUBLE)                :: DipoleFAC  !-- Normalization of the Dipole Term
+     REAL(DOUBLE)                :: QupoleFAC  !-- Normalization of Quadrupole Term 
+     REAL(DOUBLE),DIMENSION(3)   :: CellCenter !-- Center of Cell
+     REAL(DOUBLE),DIMENSION(3)   :: TransVec   !-- Origin Translate Vector
+     REAL(DOUBLE),DIMENSION(3,3) :: BoxShape   !-- Box Shape Vectors
+     REAL(DOUBLE),DIMENSION(3,3) :: InvBoxSh   !-- Inverse of the Box Shape Vectors
+  END TYPE PBCInfo
 #endif                                    
 !----------------------------------------------------------------
 !  Coordinates
@@ -248,15 +248,6 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: BndBox    !-- Bounding box of the system
 #ifdef PERIODIC
 !     Perodic Stuff
-      LOGICAL              :: AtomW     !-- Wrap atoms back into box--BE CAREFUL
-      LOGICAL,DIMENSION(3) :: AutoW     !-- Periodic in X, Y and or Z  direction
-      LOGICAL              :: InVecForm !-- What form are the Lattice vectors in
-      LOGICAL              :: InAtomCrd !-- Atomic or Fractional Coordinates
-      LOGICAL              :: NoTransVec!-- Was the translate calculated or suppied
-      TYPE(DBL_VECT)       :: TransVec  !-- Origin Translate Vector
-      TYPE(DBL_RNK2)       :: BoxShape  !-- Box Shape Vectors
-      TYPE(DBL_RNK2)       :: InvBoxSh  !-- Inverse of the Box Shape Vectors
-!
       TYPE(PBCInfo)    :: PBC       !-- Periodic Information
       TYPE(DBL_RNK2)   :: BoxCarts  !-- Lattice coordinates 
       TYPE(DBL_RNK2)   :: BoxVects  !-- Velocity Lattice coordinates 
@@ -270,6 +261,14 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Velocity Cartesian coordinates 
    END TYPE 
+!-------------------------------------------------------------------------------------
+!  Cartisian Multipoles of the Density
+!
+  TYPE CMPoles
+     INTEGER          :: Alloc   !-- Allocation key 
+     TYPE(DBL_VECT)   :: DPole   !-- Dipoles (Dim=3)
+     TYPE(DBL_VECT)   :: QPole   !-- Quadrupoles (Dim=6)
+  END TYPE CMPoles
 !-------------------------------------------------------------------------------------
 !  Density in a Hermite Gaussian basis
 !
