@@ -102,15 +102,9 @@ PROGRAM TForce
         ENDIF
      ENDDO
   ENDDO
-!
-! Print The Lattice Forces
-!
-!!$  WRITE(*,*) 'LatFrc_T'
-!!$  DO I=1,3
-!!$     WRITE(*,*) (LatFrc_T%D(I,J),J=1,3) 
-!!$  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
+! Collect the Forces
   TotFrcComp = 3*NAtoms
   CALL New(TotTFrc,TotFrcComp)
   CALL MPI_Reduce(TFrc%D(1),TotTFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
@@ -118,16 +112,7 @@ PROGRAM TForce
     TFrc%D(1:TotFrcComp) = TotTFrc%D(1:TotFrcComp)
   ENDIF
   CALL Delete(TotTFrc)
-#endif
-! Do some checksumming, resumming and IO 
-  CALL PChkSum(TFrc,'dT/dR',Proc_O=Prog)  
-! Sum in contribution to total force
-  DO AtA=1,NAtoms
-     A1=3*(AtA-1)+1
-     A2=3*AtA
-     GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+TFrc%D(A1:A2)
-  ENDDO
-#ifdef PARALLEL
+! Collect the Lattice Forces
   CALL New(TmpLatFrc_T,(/3,3/))
   CALL DBL_VECT_EQ_DBL_SCLR(9,TmpLatFrc_T%D(1,1),0.0d0)
   CALL MPI_REDUCE(LatFrc_T%D(1,1),TmpLatFrc_T%D(1,1),9,MPI_DOUBLE_PRECISION, &
@@ -137,6 +122,25 @@ PROGRAM TForce
 #else
   GM%PBC%LatFrc%D = GM%PBC%LatFrc%D+LatFrc_T%D
 #endif
+! Print The Lattice Forces
+!!$  CALL OpenASCII(OutFile,Out)
+!!$  WRITE(Out,*) 'LatFrc_T'
+!!$  WRITE(*,*)   'LatFrc_T'
+!!$  DO I=1,3
+!!$     WRITE(Out,*) (LatFrc_T%D(I,J),J=1,3) 
+!!$     WRITE(*,*)   (LatFrc_T%D(I,J),J=1,3) 
+!!$  ENDDO
+!!$  CLOSE(Out)
+! Do some checksumming, resumming and IO 
+  CALL PChkSum(TFrc,    'dT/dR',Proc_O=Prog)  
+  CALL PChkSum(LatFrc_T,'LFrcT',Proc_O=Prog)  
+! Sum in contribution to total force
+  DO AtA=1,NAtoms
+     A1=3*(AtA-1)+1
+     A2=3*AtA
+     GM%Gradients%D(1:3,AtA) =  GM%Gradients%D(1:3,AtA)+TFrc%D(A1:A2)
+  ENDDO
+! Save Forces to Disk
   CALL Put(GM,Tag_O=CurGeom)
 !------------------------------------------------------------------------------
 ! Tidy up 
