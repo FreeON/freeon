@@ -1,3 +1,83 @@
+2005-03-16 16:25  tymczak
+
+	* MondoSCF2/SCFs.F90: New Force Print
+
+2005-03-16 16:20  tymczak
+
+	* OneE/TForce.F90: New Print
+
+2005-03-16 15:34  tymczak
+
+	* OneE/SForce.F90: New Output for the forces and lattice forces
+
+2005-03-16 15:33  tymczak
+
+	* OneE/MakeRho.F90: New Checksum, and removed the MMech stuff
+
+2005-03-16 15:10  tymczak
+
+	* MondoMods/PrettyPrint.F90: Output of the Forces and Lattice
+	Forces, and checksums has been added
+
+2005-03-16 15:09  tymczak
+
+	* MondoMods/MemMan.F90: SupperCell added
+
+2005-03-16 15:08  tymczak
+
+	* MondoMods/InOut.F90: SuperCell added
+
+2005-03-16 15:08  tymczak
+
+	* MondoMods/DerivedTypes.F90: SupperCell has been added to the CRDS
+	type
+
+2005-03-14 19:17  nemeth
+
+	* MondoSCF2/InCoords.F90: Recognition scheme improved for VDW
+	complexes, such as solid HF in BLYP/3-21G.  Recognition is working
+	now much better for VDW complexes, e.g. solid HF converges quickly.
+
+2005-03-14 11:23  nemeth
+
+	* MondoMods/SetEq.F90: A new seteq for atombonds type added.
+
+2005-03-13 22:17  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GeomOptKeys.F90,
+	ParseGeomOpt.F90, QUICCA.F90: A new option DoQFilter added, when
+	put into Grad line filtering of data points in QUICCA will be
+	turned on.
+
+2005-03-11 15:49  nemeth
+
+	* MondoSCF2/ParseGeomOpt.F90: Maximum displacement on stretches
+	restricted to 0.3 au, as in original QUICCA and in literature.
+
+2005-03-10 16:02  nemeth
+
+	* MondoSCF2/InCoords.F90: Ratios of angles had a bug. Fixed now.
+
+2005-03-10 14:57  nemeth
+
+	* MondoSCF2/InCoords.F90: Ratio constraints are now applied to
+	gradients, too. Also, change in their application to lattice
+	parameters. Ratios are enforced together with preservation of sum
+	of gradients/lattice parameters.
+
+2005-03-10 13:51  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Another iteration....
+
+2005-03-08 18:21  nemeth
+
+	* MondoSCF2/: InCoords.F90, ParseGeomOpt.F90: Setting back
+	vdw-radii to previous values.
+
+2005-03-08 16:32  mchalla
+
+	* ChangeLog: [no log message]
+
 2005-03-08 16:15  mchalla
 
 	* Docs/DM_Papers/PERT_3/: Response3.bbl, Response3.tex: [no log
