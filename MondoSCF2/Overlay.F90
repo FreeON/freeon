@@ -15,12 +15,12 @@ CONTAINS
     INTEGER            :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
     LOGICAL            :: ProgramFailed
     TYPE(CHR_VECT)     :: ArgV
-    TYPE(INT_VECT)     :: IChr
+    TYPE(INT_VECT),SAVE :: IChr ! Save needed for NAG
     CHARACTER(LEN=2*DCL) :: CmndLine
     INTERFACE 
        FUNCTION Spawn(NC,MaxLen,IChr)
-         INTEGER,                         INTENT(IN) :: NC,MaxLen
-         INTEGER, DIMENSION(1:NC*MaxLen), INTENT(IN) :: IChr
+         INTEGER                         :: NC,MaxLen
+         INTEGER, DIMENSION(1:NC*MaxLen) :: IChr
          INTEGER                                     :: Spawn
        END FUNCTION Spawn
     END INTERFACE
@@ -44,22 +44,6 @@ CONTAINS
        ! Create ASCII integer array to beat F9x/C incompatibility
        CALL CVToIV(NArg,ArgV,MaxLen,IChr)
 #ifdef PARALLEL
-       ! Wait for the kernel to cool off a bit before forking a new mpirun.
-       ! This is the braindead solution.  A more sophisticated approach involves 
-       ! the following from the MPICH FAQ:
-       !
-       !   poll: protocol failure during circuit creation
-       !   You may see this message if you attempt to run too many MPI programs in a short period of time. 
-       !   For example, in Linux and when using the ch_p4 device (without the secure server or ssh), MPICH uses 
-       !   rsh to start the MPI processes. Depending on the particular Linux distribution and verison, 
-       !   there may be a limit of as few as 40 processes per minute. When running the MPICH test suite or starting 
-       !   short parallel jobs from a script, it is possible to exceed this limit.
-       !   To fix this, you can do one of the following:
-       !      1. Wait a few seconds between running parallel jobs. You may need to wait up to a minute. <<<<<!!!!!
-       !      2. Modify /etc/inetd.conf to allow more processes per minute for rsh. For example, change
-       !         shell stream tcp nowait root /etc/tcpd2 in.rshd 
-       !         to shell stream tcp nowait 200 root /etc/tcpd2 in.rshd 
-       !      3. Use the ch_p4mpd device or the secure server option of the ch_p4 device instead. Neither of these relies on inetd. 
        !        CALL Wait(1D0)
 #endif
        ! Spawn a sub process 
