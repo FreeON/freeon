@@ -57,6 +57,28 @@ MODULE Parse
         FindKey = .FALSE.
         RETURN
       END FUNCTION FindKey
+!==============================================================
+      FUNCTION FindMixedCaseKey(Key,Unit)     
+        CHARACTER(LEN=*)               :: Key
+        INTEGER                        :: Unit,N
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line,LineLC,KeyLC
+        LOGICAL                        :: FindMixedCaseKey
+        FindMixedCaseKey = .TRUE.
+!
+        REWIND(UNIT=Unit)
+        N=LEN(Key)
+        KeyLC(1:N)=Key
+        CALL LowCase(KeyLC)
+        DO 
+           READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+           LineLC=Line
+           CALL LowCase(LineLC)
+           IF(INDEX(LineLC,KeyLC(1:N))/=0)RETURN
+        ENDDO
+99      CONTINUE
+        FindMixedCaseKey = .FALSE.
+        RETURN
+      END FUNCTION FindMixedCaseKey
 !======================================================================
 !     Convert a string to all lower case
 !======================================================================
