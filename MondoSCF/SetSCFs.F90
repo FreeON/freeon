@@ -340,7 +340,6 @@ MODULE SetSCFs
          CALL Delete(Chr)
          CALL Delete(OffSt)
       END SUBROUTINE Decomp
-
 #endif
 
       SUBROUTINE SetDist(Ctrl)
