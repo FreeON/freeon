@@ -1,24 +1,33 @@
-%\documentclass[prl,aps,eqsecnum,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-\documentstyle[twocolumn,prl,aps]{revtex}
-%\documentstyle[preprint,aps]{revtex}
+\documentclass[prl,aps,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{alltt}
+\usepackage{fancyhdr}
 
 \draft
 \tighten
+\pagestyle{fancy}
+
+
+%\eprint{LA-UR-02-6997}
 
 \begin{document}
 
-\title{Density Matrix Perturbation Theory}
+\title{Density Matrix Perturbation Theory$^1$}
 
-\author{Anders~M.~N.~Niklasson$^\dagger$  and Matt~Challacombe}
+\author{Anders~M.~N.~Niklasson} \email{AMN@LANL.Gov}
+\author{Matt Challacombe}
 
-\address{Theoretical Division, Los Alamos National Laboratory,
-Los Alamos, NM 87545, USA}
+\affiliation{Theoretical Division, Los Alamos National Laboratory, Los Alamos, NM 87545, USA}
 
 \date{\today}
-\maketitle
 
 \begin{abstract}
-{\small \bf An expansion method for perturbation of the zero 
+{An expansion method for perturbation of the zero 
 temperature grand canonical density matrix is introduced.
 The method achieves quadratically convergent recursions that yield
 the response of the zero temperature density matrix upon variation 
@@ -27,13 +36,19 @@ quantum subsystems with a computational cost scaling linearly
 with the size of the perturbed region, ${\cal O}(N_{\rm pert.})$, 
 and as ${\cal O}(1)$ with the total system size. It also allows 
 direct computation of the density matrix response functions to 
-any order with linear scaling effort.}
-\\
+any order with linear scaling effort.
 
-\keywords{density matrix, perturbation theory, purification, sign matrix,
+\smallskip
+\noindent{\bf Keywords}: density matrix, perturbation theory, purification, sign matrix,
 linear scaling, electronic structure, spectral projection, density-functional theory}
-%\pacs{02.70.-c, 71.15.-m, 71.15.Dx}
 \end{abstract}
+ 
+\pacs{02.70.-c, 71.15.-m, 71.15.Dx}
+
+\maketitle
+
+
+\footnotetext[1]{LA-UR-02-6997}
 
 In electronic structure 
 theory, significant effort has been devoted to the development of
@@ -197,7 +212,6 @@ or
 \end{eqnarray}
 These equations provide an explicit, quadratically convergent solution of the response functions 
 $\chi_1 = \lim_{n \rightarrow \infty} \Delta^{(1)}_n$ and $\chi_2 = \lim_{n \rightarrow \infty} 
-
 \Delta^{(2)}_n$.  In general, this approach can be used with other purification schemes and 
 extended to any order.  Also, with the same technique it is possible
 to include mixed perturbations where $H = H_0 + \lambda_1 A+\lambda_2 B+ \lambda_1 \lambda_2 C + \ldots$
@@ -279,6 +293,26 @@ same order of error as for the unperturbed molecule. Standard first
 order perturbation theory yields an error two orders of magnitude 
 larger \cite{first}.
 
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{\includegraphics{GC_DM_PRT_Fig_1.ps}}
+\caption{\small  The 
+${\rm Error} = \log_{10}(||X_n + \Delta_n - \rho_{\rm exact}||_2)$
+as a function of iterations $n$ ($N = 100$, $N_e = 50$). The lower 
+inset shows the number of non-zero matrix elements of $\Delta_n$ 
+above threshold $\tau = 10^{-6}$.  The upper inset shows the density matrix
+perturbation.
+\label{DX}}
+\end{figure}
+
+\begin{figure}[t]
+\resizebox*{3.5in}{!}{ \includegraphics[angle=-90]{GC_DM_PRT_Fig_2.ps} }
+\caption{\small  The matrix sparsity factors (number of non-zero elements 
+over the total number of elements) for beta-carotene (RHF/STO-2G). With the 
+threshold $\tau = 10^{-5}$, the perturbation sequence is an order
+of magnitude more sparse compared to the unperturbed sequence.
+\label{BetaC}}
+\end{figure}
+
 The present formulation has been developed in an orthogonal representation.  With 
 a $N$-scaling congruence transformation \cite{Challa99},  it is straightforward to 
 employ this representation when using a non-orthogonal basis. When using a 
@@ -346,16 +380,13 @@ J.\ Wills are gratefully acknowledged.
 
 \begin{references}
 
-\bibitem[\dagger]{address} Corresponding author: amn@lanl.gov
+%%\bibitem[\dagger]{address} Corresponding author: amn@lanl.gov
 
-\bibitem{Goedecker_RMP_99} S. Goedecker,
-Rev.\ Mod.\ Phys. {\bf 71}, 1085 (1999).
+\bibitem{Goedecker_RMP_99} S. Goedecker, Rev.\ Mod.\ Phys. {\bf 71}, 1085 (1999).
 
-\bibitem{Wu02} S.\ Y. Wu and C.\ S. Jayanthi,
-Physics Reports-Review Section of Physics Letters, {\bf 358}, 1 (2002).
+\bibitem{Wu02} S.\ Y. Wu and C.\ S. Jayanthi, Physics Reports-Review Section of Physics Letters, {\bf 358}, 1 (2002).
 
-\bibitem{McWeeny60} R. McWeeny,
-Rev.\ Mod.\ Phys. {\bf 32}, 335 (1960).
+\bibitem{McWeeny60} R. McWeeny, Rev.\ Mod.\ Phys. {\bf 32}, 335 (1960).
 
 \bibitem{Clinton69} W.\ L. Clinton, A.\ J. Galli, and L.\ J. Masa,
 Phys.\ Rev. {\bf 177}, 7 (1969).
@@ -478,23 +509,5 @@ Phys.\ Rev.\ Lett. {\bf 76}, 4203 (1996).
 J.\ Chem.\ Phys. {\bf 106}, 9708 (1997).
 
 \end{references}
-
-\begin{figure}
-\caption{\small  The 
-${\rm Error} = \log_{10}(||X_n + \Delta_n - \rho_{\rm exact}||_2)$
-as a function of iterations $n$ ($N = 100$, $N_e = 50$). The lower 
-inset shows the number of non-zero matrix elements of $\Delta_n$ 
-above threshold $\tau = 10^{-6}$.  The upper inset shows the density matrix
-perturbation.
-\label{DX}}
-\end{figure}
-
-\begin{figure}
-\caption{\small  The matrix sparsity factors (number of non-zero elements 
-over the total number of elements) for beta-carotene (RHF/STO-2G). With the 
-threshold $\tau = 10^{-5}$, the perturbation sequence is an order
-of magnitude more sparse compared to the unperturbed sequence.
-\label{BetaC}}
-\end{figure}
 
 \end{document}
