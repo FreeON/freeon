@@ -467,7 +467,7 @@ CONTAINS
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
        CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos)
+       CALL ReDefIntCs(C%Geos,C%Opts)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -487,7 +487,7 @@ CONTAINS
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
        CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos)
+       CALL ReDefIntCs(C%Geos,C%Opts)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -1301,10 +1301,14 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 !
-   SUBROUTINE ReDefIntCs(G)
+   SUBROUTINE ReDefIntCs(G,O)
      TYPE(Geometries)   :: G
+     TYPE(Options)      :: O
      INTEGER            :: iCLONE
      ! 
+     IF(O%Guess==GUESS_EQ_RESTART) THEN
+       RETURN
+     ENDIF
      DO iCLONE=1,G%Clones
        IF(AllocQ(G%Clone(iCLONE)%IntCs%Alloc)) THEN
          CALL Delete(G%Clone(iCLONE)%IntCs)
