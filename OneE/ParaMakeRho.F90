@@ -210,10 +210,9 @@ PROGRAM ParaMakeRho
      ! Add in the density for the nuclear centers
      IF(SCFActn/='InkFok') CALL AddNukes(GM,Rho)
 
-#if defined(PERIODIC) 
+#ifdef PERIODIC
   CALL Fold_Rho(GM,Rho)
 #endif
-
 
   ! Prune negligible distributions from the electronic density
   CALL Prune_Rho(Thresholds%Dist,Rho,Rho2) 
