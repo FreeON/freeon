@@ -94,11 +94,12 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Set up the CellSet from {-N,N} minus the Cells in {-M,M}
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Cube(CS,AW,MAT,N)
+  SUBROUTINE New_CellSet_Cube(CS,AW,MAT,N,MaxCell_O)
     TYPE(CellSet)                        :: CS
     INTEGER,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
     INTEGER,DIMENSION(3)                 :: N
+    INTEGER,OPTIONAL                     :: MaxCell_O
 !
     INTEGER                              :: I,J,K,NCELL
     REAL(DOUBLE)                         :: X,Y,Z
@@ -120,7 +121,15 @@ MODULE CellSets
        ENDDO
     ENDDO
 !
-    CALL New_CellSet(CS,NCELL)
+    IF(PRESENT(MaxCell_O)) THEN
+       IF(NCELL > MaxCell_O) THEN
+          CALL Halt('NCELL is Greater then MaxCell')
+       ELSE
+          CALL New_CellSet(CS,MaxCell_O)
+       ENDIF
+    ELSE
+       CALL New_CellSet(CS,NCELL)
+    ENDIF
 !
     NCELL = 0
     DO I = -N(1),N(1)
@@ -141,12 +150,13 @@ MODULE CellSets
 !--------------------------------------------------------------------------
 ! Set up the set of cells out to some radius R
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius,Rmin_O)
+  SUBROUTINE New_CellSet_Sphere(CS,AW,MAT,Radius,Rmin_O,MaxCell_O)
     TYPE(CellSet)                        :: CS
     INTEGER,DIMENSION(3)                 :: AW
     REAL(DOUBLE),DIMENSION(3,3)          :: MAT
     REAL(DOUBLE)                         :: Radius,Radius_min
     REAL(DOUBLE),OPTIONAL                :: Rmin_O
+    INTEGER,OPTIONAL                     :: MaxCell_O
 !
     INTEGER                              :: I,J,K
     INTEGER                              :: IXM,IYM,IZM,NCELL
@@ -179,8 +189,17 @@ MODULE CellSets
           ENDDO
        ENDDO
     ENDDO
-!    
-    CALL New_CellSet(CS,NCELL)
+!  
+  !
+    IF(PRESENT(MaxCell_O)) THEN
+       IF(NCELL > MaxCell_O) THEN
+          CALL Halt('NCELL is Greater then MaxCell')
+       ELSE
+          CALL New_CellSet(CS,MaxCell_O)
+       ENDIF
+    ELSE
+       CALL New_CellSet(CS,NCELL)
+    ENDIF
 !
     NCELL=0
     DO I=-IXM,IXM

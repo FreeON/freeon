@@ -2050,37 +2050,43 @@ CONTAINS
                     END SUBROUTINE Get_LOG_VECT
                     !-------------------------------------------------------------------------------
   SUBROUTINE Put_CellSet(CS,Name_O,Tag_O,Unlimit_O)
-    TYPE(CellSet)                  :: CS
+    TYPE(CellSet)                        :: CS
     CHARACTER(Len=*),Optional            :: Name_O
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
     LOGICAL,         OPTIONAL,INTENT(IN) :: UnLimit_O
+    INTEGER                              :: Cell_Dimen
 !
+    Cell_Dimen = SIZE(CS%CellCarts%D,2)
     IF(PRESENT(Name_O))THEN
        CALL Put(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
        CALL Put(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
+       CALL Put(Cell_Dimen  ,TRIM(Name_O)//'_cell_dimen' ,Tag_O=Tag_O)
        CALL Put(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
     ELSE
        CALL Put(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
        CALL Put(CS%NCells   ,'cell_number',Tag_O=Tag_O)
+       CALL Put(Cell_Dimen  ,'cell_dimen' ,Tag_O=Tag_O)
        CALL Put(CS%CellCarts,'cell_vectors',Tag_O=Tag_O,Unlimit_O=Unlimit_O)
     ENDIF
   END SUBROUTINE Put_CellSet
 
   SUBROUTINE Get_CellSet(CS,Name_O,Tag_O)
-    TYPE(CellSet)                  :: CS
-    CHARACTER(Len=*),OPTIONAL      :: Name_O
+    TYPE(CellSet)                        :: CS
+    CHARACTER(Len=*),OPTIONAL            :: Name_O
     CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-    INTEGER                        :: NC
+    INTEGER                              :: Cell_Dimen
 !
     IF(PRESENT(Name_O))THEN
        CALL Get(CS%Radius   ,TRIM(Name_O)//'_cell_radius',Tag_O=Tag_O)
        CALL Get(CS%NCells   ,TRIM(Name_O)//'_cell_number',Tag_O=Tag_O)
-       CALL New_CellSet(CS,CS%NCells)
+       CALL Get(Cell_Dimen  ,TRIM(Name_O)//'_cell_dimen' ,Tag_O=Tag_O)
+       CALL New_CellSet(CS,Cell_Dimen)
        CALL Get(CS%CellCarts,TRIM(Name_O)//'_cell_vectors',Tag_O=Tag_O)
     ELSE
        CALL Get(CS%Radius   ,'cell_radius',Tag_O=Tag_O)
        CALL Get(CS%NCells   ,'cell_number',Tag_O=Tag_O)
-       CALL New_CellSet(CS,CS%NCells)
+       CALL Get(Cell_Dimen  ,'cell_dimen' ,Tag_O=Tag_O)
+       CALL New_CellSet(CS,Cell_Dimen)
        CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
     ENDIF
   END SUBROUTINE Get_CellSet
