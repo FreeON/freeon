@@ -1,3 +1,75 @@
+2003-12-19 12:54  mchalla
+
+	* TwoE/: Gradients.m, dInt1111.F90, dInt3111.F90, dInt3131.F90,
+	dInt3311.F90, dInt3331.F90, dInt3333.F90: Fixed the offset/W* bug.
+
+2003-12-19 12:11  vweber
+
+	* TwoE/Gradients.m: Minor modif.
+
+2003-12-19 12:09  vweber
+
+	* TwoE/: Int1113.F90, Int1131.F90, Int1133.F90, Int1311.F90,
+	Int1313.F90, Int1331.F90, Int1333.F90, Int3113.F90, Int3133.F90,
+	Int3313.F90: We do not need any more those integrals.
+
+2003-12-19 10:51  mchalla
+
+	* TwoE/: Gradients.m, dInt1111.F90, dInt3111.F90, dInt3131.F90,
+	dInt3311.F90, dInt3331.F90, dInt3333.F90: Turned back on the D
+	integrals.
+
+2003-12-18 22:55  nemeth
+
+	* MondoSCF2/InCoords.F90: A bug fixed, which was present, when
+	DebugAll=MaxGeOp was missing from the input.
+
+2003-12-18 21:50  vweber
+
+	* ONX2/: GONX2ComputDK.F90, Makefile: [no log message]
+
+2003-12-18 21:44  nemeth
+
+	* MondoSCF2/Optimizer.F90: Convergence criterion is set back to
+	accuracy level, instead of a fixed 1.d-4.
+
+2003-12-18 21:34  vweber
+
+	* ONX2/DERIInterface.Inc: [no log message]
+
+2003-12-18 16:50  vweber
+
+	* SCFeqs/: CPSCFStatus.F90, DDIIS.F90, TC2Response.F90: Added
+	second and third order responses
+
+2003-12-18 16:33  vweber
+
+	* ONX2/: GONX2.F90, GONX2ComputDK.F90, ONX2List.F90: New Gradient
+
+2003-12-18 16:32  vweber
+
+	* ONX2/: Makefile, ONX2.F90, ONX2ComputK.F90, ONX2DataType.F90: [no
+	log message]
+
+2003-12-18 16:05  vweber
+
+	* Makefile: Added t and o2
+
+2003-12-18 11:35  vweber
+
+	* ONX/VRR/: Int1121.F90, Int1122.F90, Int1161.F90, Int1162.F90,
+	Int1166.F90, Int2111.F90, Int2121.F90, Int2122.F90, Int2161.F90,
+	Int2162.F90, Int2166.F90, Int2211.F90, Int2221.F90, Int2222.F90,
+	Int2261.F90, Int2262.F90, Int2266.F90, Int6111.F90, Int6121.F90,
+	Int6122.F90, Int6161.F90, Int6162.F90, Int6166.F90, Int6211.F90,
+	Int6221.F90, Int6222.F90, Int6261.F90, Int6262.F90, Int6266.F90,
+	Int6611.F90, Int6621.F90, Int6622.F90, Int6661.F90, Int6662.F90,
+	Int6666.F90, VRR.tar: CJ, it should work for periodic...
+
+2003-12-17 11:22  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-12-17 11:21  mchalla
 
 	* TwoE/: Gradients.m, Int1111.F90, Int3111.F90, Int3131.F90,
