@@ -1,3 +1,156 @@
+2004-12-07 10:50  mchalla
+
+	* Docs/DM_Papers/PERT_3/Response3.tex: Progress!
+
+2004-12-06 21:43  nemeth
+
+	* BUGS/B_12_01_04-1/README: [no log message]
+
+2004-12-06 21:37  nemeth
+
+	* BUGS/B_12_01_04-1/README: [no log message]
+
+2004-12-06 21:34  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-6_23449.hdf.gz, CH2x-6_27129.out-2,
+	CH2x-6.inp, README, SCFs.F90: Previous check in of this bug was
+	erroneous. Correct check in here. See README file.
+
+2004-12-06 21:24  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-6_23449.out-2, T01_2873.out,
+	T01.water.inp, CH2x-6_11756.hdf.gz: [no log message]
+
+2004-12-06 19:18  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-6.inp, CH2x-6_11756.hdf.gz,
+	CH2x-6_23449.out-2, CH2x-6_9156.out-1, README, SCFs.F90,
+	T01.water.inp, T01_2873.out: Strange NaN forces on atoms in simple
+	systems, see README file.
+
+2004-12-06 19:03  nemeth
+
+	* BUGS/B_12_01_04-1/CH2x-6_24339.out: [no log message]
+
+2004-12-06 08:01  vweber
+
+	* QCTC/JForce.F90: Fixed the K-LatFrc_J parallel problem.
+
+2004-12-05 21:25  nemeth
+
+	* BUGS/B_12_04_04-1/: FORCES, README: Individual forces of J and
+	ONX added. JForce differs for serial and parallel runs, while ONX
+	Force agrees well.
+
+2004-12-05 20:38  nemeth
+
+	* Validate/: urea_2x2x2.inp, urea_2x2x2.ref: Urea 2x2x2 repeated to
+	avoid the restart that occured in the previously checked in files.
+
+2004-12-04 18:44  nemeth
+
+	* BUGS/B_12_04_04-1/: README, SCFs.F90, urea_2x2x2-serial.out,
+	urea_2x2x2.inp, urea_2x2x2_parallel.out: A new bug directory.
+	Serial and Parallel HF/3-21G/good give very different lattice
+	forces for Lattice-JForce and about 15% different for Lattice-ONX
+	forces. Serial and parallel energies agree within 0.0001 Hartrees.
+
+2004-12-03 17:02  nemeth
+
+	* BUGS/B_12_03_04-1/README: An update on the NaCl bug report.
+	ATOMIC FORCES are srwed up, lattice force components seem to be
+	reasonable.
+
+2004-12-03 16:57  nemeth
+
+	* BUGS/B_12_03_04-1/halite-2-repeat.out: A new calculation on NaCl
+	with 2004-11-30 07:25 . See more details in the force
+
+2004-12-03 15:24  mchalla
+
+	* Validate/Caffiene.inp: Turned on DIIS options, otherwise forces
+	are messed up!
+
+2004-12-03 15:21  nemeth
+
+	* BUGS/B_12_03_04-1/: README, halite-2-repeat.inp,
+	halite-2_8229-repeat.out, halite.inp-1, halite_28022.out-1,
+	halite_28022.xyz-1: A bug report about NaCl calculation with a
+	version of approx beginning of Nov/2004.
+
+2004-12-02 18:52  nemeth
+
+	* BUGS/B_12_02_04-1/: Caffiene.inp, Caffiene_1661.out-1, README: A
+	bug has been found when running Validate/Caffiene.inp. All details
+	and are in README in the directory that is checked in now, also the
+	input/output files.
+
+2004-12-02 17:29  nemeth
+
+	* MondoSCF2/InCoords.F90: A small modification in the memory
+	handling of the B-matrix generator. In some crystals with large
+	basis sets a contiguos memory problem happened in the B-matrix
+	generator. It is fixed now.
+
+2004-12-02 11:55  tymczak
+
+	* OneE/MakeRho.F90: Pruning turned back on
+	
+	CJ
+
+2004-12-01 16:16  nemeth
+
+	* BUGS/B_12_01_04-1/: README, README: [no log message]
+
+2004-12-01 15:14  nemeth
+
+	* BUGS/B_12_01_04-1/README: [no log message]
+
+2004-12-01 15:08  nemeth
+
+	* BUGS/B_12_01_04-1/: CH2x-6.inp, CH2x-6_24339.out, README: The
+	first example of a BUG report.
+
+2004-12-01 09:35  vweber
+
+	* Includes/CompilerSpecifics.True64.NAG: No more parsing problem...
+
+2004-12-01 05:54  vweber
+
+	* QCTC/ParaQ.F90: Removed a redundent tree build.
+
+2004-11-30 07:24  vweber
+
+	* QCTC/ParaQ.F90: Rewrote the AllToAll tree distribution. Seem to
+	be much more stable on pink for large system as well as for large
+	set of Prcs.  The --nper 2 seems to be stable now.
+
+2004-11-29 23:45  nemeth
+
+	* Validate/: urea_2x2x2.inp, urea_2x2x2.ref: A nice smooth
+	simultanous lattice/atomic positions optimization of urea (2x2x2)
+	in HF/3-21G, the most recent version of the optimizer has been
+	used.
+
+2004-11-29 12:43  mchalla
+
+	* Docs/DM_Papers/PERT_3/: Makefile, Response3.tex: [no log message]
+
+2004-11-27 21:41  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GeomOptKeys.F90, InCoords.F90,
+	Optimizer.F90, ParseGeomOpt.F90, ParseInput.F90, QUICCA.F90: An
+	update of the optimizer. If used with backtracking, garantees
+	convergence (i.e. don't use NoBackTr option).
+
+2004-11-27 10:17  vweber
+
+	* ONX2/ONX2.F90: Added tree based reduction, not active yet.
+
+2004-11-24 12:56  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-11-22 14:19  nemeth
 
 	* MondoSCF2/: ControlStructures.F90, InCoords.F90, Optimizer.F90,
