@@ -2688,7 +2688,7 @@ CONTAINS
        CALL MolRotOff(DCarts(1:NCart),Carts(1:NCart),Print)
      ELSE
        DCarts(NCart+2)=Zero
-       DCarts(NCart+1)=Zero
+       DCarts(NCart+3)=Zero
        DCarts(NCart+6)=Zero
       !CALL PBCRotOff(DCarts(NCart+1:NCart+9),Carts(NCart+1:NCart+9), &
       !               Print,PBCDim)
