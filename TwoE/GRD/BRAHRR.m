@@ -17,6 +17,7 @@ PunchBraHRRFront[Subroutine_,Subname_,ic_,jc_]:=Block[{WS,BKType,LenBra,LenKet},
  WS["USE DerivedTypes"];
  WS["USE VScratchB"];
  WS["USE GlobalScalars"];
+ WS["IMPLICIT NONE"];
  WS["INTEGER       :: OA,OB,LDA,LDB,NINT,CDOffSet,OffSet"];
  WS[StringJoin["REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)"]];
  WS[StringJoin["REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
@@ -182,13 +183,22 @@ PunchHRRBraCalls[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d,W
                                                        CType[IntegralClass[{jmin,jmax}]],"|",
                                                        CType[IntegralClass[{kmin,kmax}]],",",
                                                        CType[IntegralClass[{lmin,lmax}]],")^(1) \n"]];
-   WriteString[FileName,           "      DO IJ=1,9\n"];
+   WriteString[FileName,           "      DO J=1,3\n"];
+   WriteString[FileName,           "      DO I=1,3\n"];
+(*
+   WriteString[FileName,           "      IF(PBC%AutoW%I(I).EQ.1.AND.PBC%AutoW%I(J).EQ.1) THEN \n"];
+*)
+   WriteString[FileName,           "      IJ=3*(J-1)+I\n"];
    WriteString[FileName,StringJoin["        DO L=",ToString[LBegin[lmin]],",",ToString[LEnd[lmax]],"\n"]];
    WriteString[FileName,StringJoin["          DO K=",ToString[LBegin[kmin]],",",ToString[LEnd[kmax]],"\n"]];
    WriteString[FileName,StringJoin["            CDOffSet=(OC+K-",ToString[LBegin[kmin]],")*LDC+(OD+L-",ToString[LBegin[lmin]],")*LDD \n"]];
    WriteString[FileName,StringJoin["            CALL ",HRRSubName,"(OA,OB,LDA,LDB,CDOffSet,HRRS(1,",ToString[K],",",ToString[L],",IJ),STRESS(1,IJ))\n"]];
    WriteString[FileName,           "          ENDDO \n"];
    WriteString[FileName,           "        ENDDO \n"];
+(*
+   WriteString[FileName,           "      ENDIF \n"];
+*)
+   WriteString[FileName,           "      ENDDO \n"];
    WriteString[FileName,           "      ENDDO \n"];
  ];
  (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
@@ -256,21 +266,27 @@ Do[Do[
 
                   (* Set Stress *)
 
-                  Kount = Kount + 1;
-                  tmpp=DUM*FP[1]+STRESS[OffSet,1+3*(cart-1)];
+		  Kount = Kount + 1;
+		  (*tmpp=DUM*FP[1]+STRESS[OffSet,1+3*(cart-1)];*)
+                  tmpp=DUM*FP[1]+STRESS[OffSet,0+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];*)
+		  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[0+cart],")"]];
 
                   Kount = Kount + 1;
-                  tmpp=DUM*FP[2]+STRESS[OffSet,2+3*(cart-1)];
+                  (*tmpp=DUM*FP[2]+STRESS[OffSet,2+3*(cart-1)];*)
+                  tmpp=DUM*FP[2]+STRESS[OffSet,3+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];*) 
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+cart],")"]];
 
                   Kount = Kount + 1;
 
-                  tmpp=DUM*FP[3]+STRESS[OffSet,3+3*(cart-1)];
+                  (*tmpp=DUM*FP[3]+STRESS[OffSet,3+3*(cart-1)];*)
+                  tmpp=DUM*FP[3]+STRESS[OffSet,6+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];*)  
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[6+cart],")"]];  
 
                 ,
                   hrr=Normy[a]*Normy[b]*(HRRBra["A",a+plus,b]- a[[cart]]  HRRBra["",a+mnus,b])+GRADIENT[OffSet,cart+GOA-1];
@@ -287,7 +303,7 @@ Do[Do[
                 (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
                 If[DoStress==0, 
 
-                          hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus]);
+                  hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus]);
                   Kount = Kount + 1;
                   IList=Append[IList,Horner[hrr]];
                   HRRAddress=StringJoin[ToString[i],",",ToString[j]];
@@ -303,19 +319,25 @@ Do[Do[
                   (* Set Stress *)
 
                   Kount = Kount + 1;
-                  tmpp=DUM*FP[7]+STRESS[OffSet,1+3*(cart-1)];
+                  (*tmpp=DUM*FP[7]+STRESS[OffSet,1+3*(cart-1)];*)
+                  tmpp=DUM*FP[7]+STRESS[OffSet,0+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[1+3*(cart-1)],")"]];*)  
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[0+cart],")"]];  
 
                   Kount = Kount + 1;
-                  tmpp=DUM*FP[8]+STRESS[OffSet,2+3*(cart-1)];
+                  (*tmpp=DUM*FP[8]+STRESS[OffSet,2+3*(cart-1)];*)
+                  tmpp=DUM*FP[8]+STRESS[OffSet,3+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[2+3*(cart-1)],")"]];*)    
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+cart],")"]];    
 
                   Kount = Kount + 1;
-                  tmpp=DUM*FP[9]+STRESS[OffSet,3+3*(cart-1)];
+                  (*tmpp=DUM*FP[9]+STRESS[OffSet,3+3*(cart-1)];*)
+                  tmpp=DUM*FP[9]+STRESS[OffSet,6+cart];
                   IList=Append[IList,tmpp];
-                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];
+                  (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[3+3*(cart-1)],")"]];*)   
+                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,",ToString[6+cart],")"]];   
 
                 ,
                   hrr=Normy[a]*Normy[b]*(HRRBra["B",a,b+plus]- b[[cart]]  HRRBra["",a,b+mnus])+GRADIENT[OffSet,cart+GOB-1];
@@ -354,6 +376,7 @@ Do[Do[
   WSS["  USE DerivedTypes"];
   WSS["  USE VScratchB"];
   WSS["  USE GlobalScalars"];
+  WSS["  IMPLICIT NONE"];
   WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,CDOffSet,OffSet"];
   WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*),HRRA(*),HRRB(*)"]];
   WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];
@@ -405,19 +428,25 @@ Do[Do[
                (* Set Stress *)
 
                Kount = Kount + 1;
-               tmpp=DUM*FP[4]+STRESS[OffSet,1+3*Cart];
+               (*tmpp=DUM*FP[4]+STRESS[OffSet,1+3*Cart];*)
+               tmpp=DUM*FP[4]+STRESS[OffSet,1+Cart];
                IList=Append[IList,tmpp];
-               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,1+3*Cart)"]];
+               (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,1+3*Cart)"]];*)
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,1+Cart)"]];
 
                Kount = Kount + 1;
-               tmpp=DUM*FP[5]+STRESS[OffSet,2+3*Cart];
+               (*tmpp=DUM*FP[5]+STRESS[OffSet,2+3*Cart];*)
+               tmpp=DUM*FP[5]+STRESS[OffSet,4+Cart];
                IList=Append[IList,tmpp];
-               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,2+3*Cart)"]];
+               (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,2+3*Cart)"]];*)
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,4+Cart)"]];
 
                Kount = Kount + 1;
-               tmpp=DUM*FP[6]+STRESS[OffSet,3+3*Cart];
+               (*tmpp=DUM*FP[6]+STRESS[OffSet,3+3*Cart];*)
+               tmpp=DUM*FP[6]+STRESS[OffSet,7+Cart];
                IList=Append[IList,tmpp];
-               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,3+3*Cart)"]];
+               (*oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,3+3*Cart)"]];*)
+               oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["STRESS(OffSet,7+Cart)"]];
 
              ,
                hrr=Normy[a]*Normy[b]*HRRBra["",a,b]+GRADIENT[OffSet,cart+GOC];
@@ -460,6 +489,7 @@ Do[Do[
   WSS["  USE DerivedTypes"];
   WSS["  USE VScratchB"];
   WSS["  USE GlobalScalars"];
+  WSS["  IMPLICIT NONE"];
   WSS["  INTEGER       :: NINT,LDA,LDB,OA,OB,GOA,GOB,GOC,GOD,Cart,CDOffSet,OffSet"];
   WSS[StringJoin["  REAL(DOUBLE)  :: HRR(*)"]];
   WSS[StringJoin["  REAL(DOUBLE)  :: GRADIENT(NINT,12)"]];

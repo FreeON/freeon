@@ -137,17 +137,17 @@ If[lmax>0,
 *)
 
     If[lmax>0 ,
-      WriteString[FileName,StringJoin["      ! Stress: Generating (",CType[IntegralClass[{imin,imax}]],",0|",
+      WriteString[FileName,StringJoin["      ! Stress: Generating [",CType[IntegralClass[{imin,imax}]],",0|",
                                                         CType[IntegralClass[{kmin,kmax}]],",",
-                                                        CType[IntegralClass[{lmin,lmax}]],")^(1) \n"]];
+                                                        CType[IntegralClass[{lmin,lmax}]],"] \n"]];
       WriteString[FileName,           "      DO IJ=1,9\n"]; 
       WriteString[FileName,StringJoin["        CALL ",HRRSubName,"(",ToString[BraMax],",HRRS(1,1,1,IJ)) \n"]]; 
       WriteString[FileName,           "      ENDDO\n"]; 
 
     ,
-      WriteString[FileName,StringJoin["      ! Stress: No need to generate (",CType[IntegralClass[{imin,imax}]],",0|",
+      WriteString[FileName,StringJoin["      ! Stress: No need to generate [",CType[IntegralClass[{imin,imax}]],",0|",
                                                         CType[IntegralClass[{kmin,kmax}]],",",
-                                                        CType[IntegralClass[{lmin,lmax}]],")^(1) \n"]];
+                                                        CType[IntegralClass[{lmin,lmax}]],"] \n"]];
     ];
   ];
 (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)

@@ -152,10 +152,12 @@ Do[Do[Do[Do[
 
                   If[DoStress==0,
                      ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1),CC(1)"];
+                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk, &\n ",\
+                     "                 GMc%PBC,C(1),CC(1)"];
                   ,
                      ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1)"];
+                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk, &\n ",\
+                     "                 GMc%PBC,C(1)"];
                   ];
 
 

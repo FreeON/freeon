@@ -15,6 +15,8 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
 
                                 WS["IF(T<Gamma_Switch)THEN"];
                                 WS["  L=AINT(T*Gamma_Grid)"];			
+
+
          If[EllTot==0,
                      WS[StringJoin["  VRR(1,1,0)=Upq*",FStr[0]]];
             ];
@@ -42,15 +44,26 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
                      WS["ELSE"];
                      WS["  InvT=One/T"];
                      WS["  SqInvT=DSQRT(InvT)"];
-                         Do[GSt=ToString[L];
-
-           WS[StringJoin["  VRR(1,1,",GSt,")=",GammAss[L],"*Upq*SqInvT"]];
-
-If[L<LTot,WS[StringJoin["  SqInvT=SqInvT*InvT"]]];
-                           ,{L,0,EllTot}];
+                         Do[
+                            GSt=ToString[L];
+                            WS[StringJoin["  VRR(1,1,",GSt,")=",GammAss[L],"*Upq*SqInvT"]];
+                            If[L<LTot,WS[StringJoin["  SqInvT=SqInvT*InvT"]]];
+                         ,{L,0,EllTot}];
 
                       WS["ENDIF"];
 
+         (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+(*
+                      Do[
+                         GSt=ToString[L];
+                         If[L>0,
+                            WS[StringJoin["VRRS(1,1,",ToString[L-1],",1)=PQx*VRR(1,1,",GSt,")"]];
+                            WS[StringJoin["VRRS(1,1,",ToString[L-1],",2)=PQy*VRR(1,1,",GSt,")"]];
+                            WS[StringJoin["VRRS(1,1,",ToString[L-1],",3)=PQz*VRR(1,1,",GSt,")"]];
+                         ];
+                      ,{L,0,EllTot}];
+*)
+         (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
       ];
 
 Gammas[LTot];

@@ -63,7 +63,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-(*Classes = { {0,0},{0,1},{1,1} };*)
+(*Classes = { {0,0},{0,1},{1,1},{2,2} };*)
 Classes = { {0,0},{0,1},{1,1},{2,2},{3,3} };
 
 (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
@@ -92,8 +92,8 @@ Do[Do[Do[
          lx[lmn] = l;
          my[lmn] = m;
          nz[lmn] = n;
-,{l,0,2 MxEll-m-n}]
-,{m,0,2 MxEll-n}]
+,{l,0,2 MxEll-m-n}];
+,{m,0,2 MxEll-n}];
 ,{n,0,2 MxEll}];
 
 
@@ -140,13 +140,6 @@ RelsList={};
 
 PunchHRRBra;
 
-IncludeFile="dERIIncludeB.Inc";
-OpenWrite[IncludeFile];
-Print[" Openned ",IncludeFile];
-WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];
-
-WSI["SELECT CASE(IntType)"];
-
 Do[Do[Do[Do[
 
    If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
@@ -159,9 +152,9 @@ Do[Do[Do[Do[
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
                                        CType[IntegralClass[Classes[[lc]]]],")"];
-	    CommentLine=StringJoin["! ---------------------------------------------------------- \n", \
+	    CommentLine=StringJoin["! ---------------------------------------------------------- \n",\
                                    "! COMPUTES THE INTEGRAL CLASS ",CommentLine," \n", \
-                                   "! ---------------------------------------------------------- \n"];                                             
+                                   "! ---------------------------------------------------------- \n"];
 
 	    imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
 	    jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
@@ -176,15 +169,6 @@ Do[Do[Do[Do[
 
 
              ijklType=ijklFlag;
-
-             WSI[StringJoin["CASE(",ToString[ijklFlag],")"]];
-	     WSI[StringJoin["CALL dIntB",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
-                            "                        BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
-                            "                        ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
-                            "                        OffSet%A  ,1              , & \n",
-                            "                        OffSet%C-1,NBFA           , & \n",
-                            "                        OffSet%B-1,NBFA*NBFC      , & \n",
-                            "                        OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) \n"]];
 
 	   Subroutine=StringJoin["dIntB",ToString[ijklType],".F90"];
 	   OpenWrite[Subroutine];
@@ -216,23 +200,17 @@ Do[Do[Do[Do[
 ,{kc,1,LC}]
 ,{lc,1,LC}];
 
-WSI["CASE DEFAULT"];
-WSI[" ! STOP 'MISSED AN INTEGRAL' "];
-WSI["END SELECT "];
-
-Close[IncludeFile];
-
 TAB=FromCharacterCode[9];
 
 MakeList=Union[MakeList];
 RelsList=Union[RelsList];
-MakeString=""
-RelsString=""
+MakeString="";
+RelsString="";
 LM=Length[MakeList];
 LR=Length[RelsList];
-Do[MakeString=StringJoin[MakeString,MakeList[[i]],"\\\n"],{i,LM-1}]
+Do[MakeString=StringJoin[MakeString,MakeList[[i]],"\\\n"],{i,LM-1}];
 MakeString=StringJoin[MakeString,MakeList[[LM]],"\n"];
-Do[RelsString=StringJoin[RelsString,RelsList[[i]],"\\\n"],{i,LR-1}]
+Do[RelsString=StringJoin[RelsString,RelsList[[i]],"\\\n"],{i,LR-1}];
 RelsString=StringJoin[RelsString,RelsList[[LR]],"\n"];
 MakeList=MakeString;
 RelsList=RelsString;
@@ -242,7 +220,7 @@ RelsList=StringJoin["ReleaseFiles=",RelsList];
 
 (**************** Print out the Makefile ************************)
 
-Makefile="Makefile"
+Makefile="Makefile";
 
 OpenWrite[Makefile];
 
