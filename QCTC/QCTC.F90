@@ -69,11 +69,7 @@ PROGRAM QCTC
        CALL Get(RhoPoles)
      ENDIF
   ELSE
-#ifdef PARALLEL
-     CALL GetDistrRho('Rho',Args,0)
-#else
      CALL Get(Rho,'Rho',Args,0,Bcast_O=.TRUE.)
-#endif
      CALL Get(RhoPoles)
   ENDIF
 ! Set thresholds local to QCTC (for PAC and MAC)
