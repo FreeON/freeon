@@ -4,6 +4,7 @@ MODULE ERIGlobals
   IMPLICIT NONE
   TYPE(PrimPair)                  :: Prim
   TYPE(BBox)                      :: PBox
+  REAL(DOUBLE)                    :: COne,SOne,CTwo,STwo
   REAL(DOUBLE)                    :: DP2
   REAL(DOUBLE)                    :: PoleSwitch
   INTEGER                         :: At

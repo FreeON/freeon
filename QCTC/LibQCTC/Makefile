@@ -72,7 +72,7 @@ all:	$(ModObjs) $(CTraXObjs) $(HGTraXObjs)
 	$(AR) $(ARFLAGS) $(MONDO_LIB)/libQCTC.a $(?:.F90=.o)
 	$(RANLIB) $(MONDO_LIB)/libQCTC.a	
 #
-purge:	
+purge:	clean
 	rm -f $(MONDO_LIB)/libQCTC.a
 	rm -f $(REMOVESRCE)
 #
