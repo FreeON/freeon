@@ -275,7 +275,7 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
    END TYPE 
 !-------------------------------------------------------------------------------------
-!  Cartisian Multipoles of the Density
+!  Cartesian Multipoles of the Density
 !
   TYPE CMPoles
      INTEGER          :: Alloc   !-- Allocation key 
@@ -437,6 +437,7 @@ MODULE DerivedTypes
       INTEGER :: Rho  !-- Debug density
       INTEGER :: Fmt  !-- Debug formating
       INTEGER :: GeOp !-- Debug geometry optimizer
+      INTEGER :: GeOpSpInfo !--Debug sparsity info in geometry optimizer
       INTEGER :: MM   !-- Debug molecular mechanics energies and forces
    END TYPE                                      
 !------------------------------------------------------------
@@ -480,6 +481,7 @@ MODULE DerivedTypes
       TYPE(INT_VECT) :: Blks      !-- Vector of block sizes
    END TYPE
 !
+!---------------------------------------------------------------
 ! B-Matrix related types
 !
 #ifdef POINTERS_IN_DERIVED_TYPES
@@ -490,6 +492,7 @@ MODULE DerivedTypes
      INTEGER,POINTER,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),POINTER,DIMENSION(:) :: Value
      LOGICAL,POINTER,DIMENSION(:) :: Constraint 
+     REAL(DOUBLE),POINTER,DIMENSION(:) :: ConstrValue
      LOGICAL,POINTER,DIMENSION(:) :: Active 
    END TYPE INTC
 !
@@ -506,6 +509,7 @@ MODULE DerivedTypes
      INTEGER,ALLOCATABLE,DIMENSION(:,:) :: Atoms
      REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: Value
      LOGICAL,ALLOCATABLE,DIMENSION(:) :: Constraint 
+     REAL(DOUBLE),ALLOCATABLE,DIMENSION(:) :: ConstrValue
      LOGICAL,ALLOCATABLE,DIMENSION(:) :: Active 
    END TYPE INTC
 !
@@ -517,84 +521,16 @@ MODULE DerivedTypes
 !
 #endif
 !
-   TYPE GeOpControls
-      INTEGER                            :: AccL
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
-      LOGICAL                            :: DoInternals
-      LOGICAL                            :: DoRotOff
-      LOGICAL                            :: DoTranslOff
-      INTEGER                            :: ActStep   
-      INTEGER                            :: ReDefIntC
-      INTEGER                            :: MaxGeOpSteps
-      INTEGER                            :: BlkGeomSize 
-!
-      REAL(DOUBLE)                       :: AINVThrsh    
-      REAL(DOUBLE)                       :: BMatThrsh   
-!
-      REAL(DOUBLE)                       :: StreHessian  
-      REAL(DOUBLE)                       :: BendHessian 
-      REAL(DOUBLE)                       :: LinBHessian 
-      REAL(DOUBLE)                       :: OutPHessian 
-      REAL(DOUBLE)                       :: TorsHessian 
-      REAL(DOUBLE)                       :: StpDescInvH 
-!
-      INTEGER                            :: IMaxGrad
-      REAL(DOUBLE)                       :: MaxGrad      
-      REAL(DOUBLE)                       :: RMSGrad      
-      REAL(DOUBLE)                       :: OldRMSGrad      
-      INTEGER                            :: IMaxGradNoConstr
-      REAL(DOUBLE)                       :: MaxGradNoConstr
-      REAL(DOUBLE)                       :: RMSGradNoConstr
-!
-      REAL(DOUBLE)                       :: MaxStreDispl 
-      REAL(DOUBLE)                       :: MaxBendDispl 
-      REAL(DOUBLE)                       :: MaxLinBDispl 
-      REAL(DOUBLE)                       :: MaxOutPDispl 
-      REAL(DOUBLE)                       :: MaxTorsDispl 
-!
-      REAL(DOUBLE)                       :: RMSIntDispl   
-      REAL(DOUBLE)                       :: GradCrit     
-!
-      REAL(DOUBLE)                       :: StreConvCrit
-      REAL(DOUBLE)                       :: BendConvCrit
-      REAL(DOUBLE)                       :: OutPConvCrit
-      REAL(DOUBLE)                       :: LinBConvCrit
-      REAL(DOUBLE)                       :: TorsConvCrit
-!
-      LOGICAL                            :: GeOpConvgd    
-! thresh for AINV
-      REAL(DOUBLE)                       :: AINVThresh    
-! grad trf.
-      INTEGER                            :: MaxIt_GrdTrf
-      REAL(DOUBLE)                       :: GrdTrfCrit    
-      REAL(DOUBLE)                       :: MaxGradDiff   
-! iterative backtrf.
-      INTEGER                            :: MaxIt_CooTrf
-      REAL(DOUBLE)                       :: CooTrfCrit    
-      REAL(DOUBLE)                       :: RMSCrit    
-      REAL(DOUBLE)                       :: MaxCartDiff   
-      REAL(DOUBLE)                       :: DistRefresh   
-! constraints
-      INTEGER                            :: NConstr 
-      INTEGER                            :: NCartConstr 
-      REAL(DOUBLE)                       :: ConstrMax     
-      REAL(DOUBLE)                       :: ConstrMaxCrit 
-! GDIIS
-      LOGICAL                            :: NoGDIIS    
-      CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
-      LOGICAL                            :: GDIISOn
-      INTEGER                            :: GDIISMinDomCount
-      INTEGER                            :: GDIISInit
-      INTEGER                            :: GDIISMaxMem
-      REAL(DOUBLE)                       :: GDIISBandWidth 
-      LOGICAL                            :: GDIISMetricOn
-      REAL(DOUBLE)                       :: GDIISMetric
-! LineSearch
-      INTEGER                            :: LSStepMax
-!
+   TYPE Cholesky
+      INTEGER        :: Alloc     !-- Allocation key
+      TYPE(DBL_VECT) :: GcScale
+      TYPE(INT_VECT) :: Perm
+      TYPE(INT_VECT) :: IPerm
+      TYPE(INT_VECT) :: ChRowPt
+      TYPE(INT_VECT) :: ChColPt
+      TYPE(DBL_VECT) :: ChDiag
+      TYPE(DBL_VECT) :: ChFact
    END TYPE
 !
 END MODULE
-
-
 
