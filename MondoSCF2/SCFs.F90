@@ -56,10 +56,6 @@ CONTAINS
     CALL New(C%Stat%Action,1)
     ! Determine if there was a geomety or Basis Set Change
     CALL SameBasisSameGeom(cBAS,cGEO,C%Nams,C%Opts,C%Stat)
-    WRITE(*,*) "SameBasis = ",C%Stat%SameBasis
-    WRITE(*,*) "SameLatt  = ",C%Stat%SameLatt
-    WRITE(*,*) "SameCrds  = ",C%Stat%SameCrds
-    WRITE(*,*) "SameGeom  = ",C%Stat%SameGeom
     ! Compute one-electron matrices   
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
@@ -806,7 +802,6 @@ CONTAINS
     IF(.NOT. S%SameBasis)          DoPFFT=.TRUE.
 !
     IF(DoPFFT) THEN
-       WRITE(*,*) "Makeing PFFT"
        CALL Invoke('MakePFFT',N,S,M)
     ENDIF
 !
