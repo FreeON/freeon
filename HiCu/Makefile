@@ -29,7 +29,8 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
+CPPMISC = -DRULE7 -DEXPLICIT_SOURCE 
+#         -DOLDSPLIT
 #
 EXTRA_INCLUDES=-I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #

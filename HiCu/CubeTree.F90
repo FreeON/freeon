@@ -182,7 +182,10 @@ MODULE CubeTree
          CALL LayGrid(Right)
 !        Compute the exact cubature error for the density 
       END SUBROUTINE SplitCube
-!
+#ifdef OLDSPLIT
+!===============================================================================
+!    Matts old max split that tries to follow the largest integration error
+!===============================================================================
      FUNCTION MaxSplit(Cube) RESULT(ISplit)
         TYPE(CubeNode), POINTER   :: Cube
         REAL(DOUBLE),DIMENSION(3) :: DD,MaxVar
@@ -212,6 +215,24 @@ MODULE CubeTree
             ENDDO
         ENDIF
      END FUNCTION MaxSplit
+#else
+!===============================================================================
+!    Chee Kwans new max split that splits the largest dimension
+!===============================================================================
+    FUNCTION MaxSplit(Cube) RESULT(ISplit)
+       TYPE(CubeNode), POINTER   :: Cube
+       REAL(DOUBLE)              :: MaxDim,LinDim 
+       INTEGER                   :: ISplit,I
+       MaxDim = -1.0D0
+       DO I = 1, 3
+         LinDim = Cube%Box%BndBox(I,2)-Cube%Box%BndBox(I,1)
+         IF(LinDim > MaxDim) THEN
+           MaxDim = LinDim
+           ISplit = I
+         ENDIF
+       ENDDO
+    END FUNCTION MaxSplit
+#endif
 !===============================================================================
 !     Lay the density out on the cubes grid
 !===============================================================================
