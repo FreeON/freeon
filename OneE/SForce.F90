@@ -135,11 +135,11 @@ PROGRAM SForce
 !
 !
 !
-  WRITE(*,*) 'LatFrc_S'
-  WRITE(*,*) 
-  DO I=1,3
-     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
-  ENDDO
+!!$  WRITE(*,*) 'LatFrc_S'
+!!$  WRITE(*,*) 
+!!$  DO I=1,3
+!!$     WRITE(*,*) (LatFrc_S%D(I,J),J=1,3) 
+!!$  ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL   
   TotFrcComp = 3*NAtoms
