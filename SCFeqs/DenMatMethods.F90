@@ -177,14 +177,14 @@ CONTAINS
         ENDIF
      ENDIF
 !
-     IF(NPur<35)CnvrgChck=.FALSE.
-     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
+!     IF(NPur<35)CnvrgChck=.FALSE.
+!     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(Thresholds%Trix))//'.dat',77)
 !     CALL OpenASCII('CommErr_'//TRIM(DblToShrtChar(CurThresh))//'.dat',77)
-     CErr=CommutatorErrors(F,P)
-     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
-                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-     22 FORMAT(I3,8(1x,F20.14))
-     CLOSE(77)
+!     CErr=CommutatorErrors(F,P)
+!     WRITE(77,22)NPur,Thresholds%Trix,AbsErrP,FNormErrP,CErr(1),CErr(2), &
+!                 100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+!     22 FORMAT(I3,8(1x,F20.14))
+!     CLOSE(77)
 !
      ! Updtate previous cycle values
      OldE=Energy
