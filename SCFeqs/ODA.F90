@@ -193,7 +193,7 @@ PROGRAM ODA
   ! End point and Midpoint checks
   IF((L<=Zero.OR.L>One) .OR. (EMin>e0 .AND. EMin > e1))THEN
      IF(e0<e1)THEN
-        L=0.001
+        L=0.1D0
         L1=One-L
         EMin=a3+b3*L+c3*L**2
      ELSE
@@ -202,6 +202,14 @@ PROGRAM ODA
         EMin=e1
      ENDIF
   ENDIF
+! Parse for Mixing OverRide
+  CALL OpenASCII(InpFile,Inp)  
+  IF(OptDblQ(Inp,'ODALambda',LMns)) THEN
+     L   = LMns
+     L1  = One-L
+     EMin=a3+b3*L+c3*L**2
+  ENDIF
+  CLOSE(Inp)
 #ifdef PARALLEL
   IF(MyId==ROOT)THEN
 #endif
