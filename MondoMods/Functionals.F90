@@ -1,5 +1,6 @@
 !  LAY FUNCTIONALS DEFINED IN MMA/FUNCTIONALS ONTO A GRID
 !  Author: Matt Challacombe
+!  For reference #s see: http://www.dl.ac.uk/DFTlib/
 !-----------------------------------------------------------
 MODULE Functionals
    USE DerivedTypes
