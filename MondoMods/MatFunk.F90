@@ -32,16 +32,16 @@ MODULE MatFunk
       CALL Delete(BLKMAT2) 
    END SUBROUTINE UnSetDSYEVWork
 !
-   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PrintValues_O,CoNo_O,EigenThresh_O,PrintCond_O,Prog_O,FileName_O,Unit_O)
+   SUBROUTINE FunkOnSqMat(N,Funk,A,FOnA,PosDefMat_O,PrintValues_O,CoNo_O,EigenThresh_O,PrintCond_O,Prog_O,FileName_O,Unit_O)
       INTEGER,                    INTENT(IN)    :: N
       REAL(DOUBLE),DIMENSION(N,N),INTENT(IN)    :: A
       REAL(DOUBLE),DIMENSION(N,N),INTENT(OUT)   :: FOnA
-      LOGICAL, OPTIONAL                         :: PrintCond_O,PrintValues_O
+      LOGICAL, OPTIONAL                         :: PosDefMat_O,PrintCond_O,PrintValues_O
       REAL(DOUBLE),OPTIONAL                     :: EigenThresh_O
       CHARACTER(Len=*),OPTIONAL                 :: Prog_O
       CHARACTER(LEN=*), OPTIONAL,INTENT(IN)     :: FileName_O
       INTEGER,          OPTIONAL,INTENT(IN)     :: Unit_O
-      LOGICAL                                   :: PrintCond,PrintValues
+      LOGICAL                                   :: PosDefMat,PrintCond,PrintValues
       INTEGER                                   :: I,INFO,PU
       REAL(DOUBLE),OPTIONAL,INTENT(OUT)         :: CoNo_O
       REAL(DOUBLE)                              :: EigenThreshold
@@ -68,8 +68,14 @@ MODULE MatFunk
          PrintValues=.FALSE.
       ENDIF
 !
+      IF(PRESENT(PosDefMat_O))THEN
+         PosDefMat=PosDefMat_O
+      ELSE
+         PosDefMat=.TRUE.
+      ENDIF
+!
       BLKVECT%D(1:N,1:N)=A(1:N,1:N)
-      !CALL PPrint(A,'A',Unit_O=6)
+!     CALL PPrint(A,'A',Unit_O=6)
 !
       CALL DSYEV('V','U',N,BLKVECT%D,BIGBLOK,BLKVALS%D,BLKWORK%D,BLKLWORK,INFO)
       IF(INFO/=SUCCEED) &
@@ -103,16 +109,26 @@ MODULE MatFunk
 !     Apply the function to eigenvalues of the matrix, projecting out "zeros"
 !
       BLKMAT1%D=Zero
-      DO I=1,N
-         IF(BLKVALS%D(I)<EigenThreshold.AND.BLKVALS%D(I)>-1D-14)THEN
-            BLKMAT1%D(I,I)=Zero
-         ELSEIF(BLKVALS%D(I)<-1D-14)THEN
-            CALL Halt('In MatFunk, apparently a non-positive definate matrix: Eval = ' &
-                      //TRIM(DblToChar(BLKVALS%D(I)))//', Perhaps increase the accuracy level?')
-         ELSE
-            BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
-         ENDIF
-      ENDDO     
+      IF(PosDefMat) THEN
+         DO I=1,N
+            IF(BLKVALS%D(I)<EigenThreshold.AND.BLKVALS%D(I)>-1D-14)THEN
+               BLKMAT1%D(I,I)=Zero
+            ELSEIF(BLKVALS%D(I)<-1D-14)THEN
+               CALL Halt('In MatFunk, apparently a non-positive definate matrix: Eval = ' &
+                    //TRIM(DblToChar(BLKVALS%D(I)))//', Perhaps increase the accuracy level?')
+            ELSE
+               BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
+            ENDIF
+         ENDDO
+      ELSE
+         DO I=1,N
+            IF(ABS(BLKVALS%D(I))<EigenThreshold)THEN
+               BLKMAT1%D(I,I)=Zero
+            ELSE
+               BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
+            ENDIF
+         ENDDO
+      ENDIF
 !
 !     Reconstruct the functionalized matrix
 !
