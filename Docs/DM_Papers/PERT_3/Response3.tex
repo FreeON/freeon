@@ -479,10 +479,10 @@ Although a number of analytic, asymptotically discontinous representations exist
 step function $\theta$, direct representation (and variation) of these forms as in Eq.~(\ref{DDeriv1}) 
 is problematic.  Moreover, the accurate polynomial representation of the step function and it's 
 derivatives demands a very high order;  a $m$'th order polynomial representation involves a 
-cost that is at best ${\cal O}\sqrt{m}$ \cite{}, while recursive purification methods are 
+cost that is at best ${\cal O}\sqrt{m}$ cite{}, while recursive purification methods are 
 ${\cal O}( \log m )$.  As methods of modern purification such as TC2 are smooth and strictly monotonic, 
 the resultant approximation is also smooth and montonic, avoiding oscilations that can 
-plague direct polynomial approximation schemes, such as those that employ the Tchebychev polynomials \cite{}.  
+plague direct polynomial approximation schemes, such as those that employ the Tchebychev polynomials cite{}.  
 
 Perturbed Projection, based on the recently developed Density Matrix Perturbation Theory of Niklasson and 
 Challacombe \cite{ANiklasson04}, is based on recursive purification, retaing the convergence and
@@ -545,6 +545,11 @@ becomes less than the matrix truncation threshold $\tau$, below which
 atom-atom blocks are dropped as described in Ref.~\onlinecite{ANiklasson03}.
 {\bf [M: The preceeding logic does not match Ander's modified TC2, given in his most recent paper, 
 in which alternating projections are taken when the trace difference is small.]}
+When the solution gets close to convergence i.e. $|\Tr[\X^0_{i}]-N_e|$ is less than
+typically $10^{-1}-10^{-3}$ we alternate the projection in every step.
+This does not affect the trace at convergence, but extends the interval 
+of convergence for the eigenvalues.
+
 
 \newpage
 
@@ -606,11 +611,19 @@ provide order $2n+1$ in the energy response from $n$-th order derivatives \cite{
 A density matrix analogue of Wigner's $2n+1$ rule for a single perturbation parameter
 was given to third order by McWeeny \cite{RMcWeeny62} and up to fourth order by 
 Niklasson and Challacombe \cite{ANiklasson04} in the orthogonal representation.  
-However, upon solution of the CPSCF equations, it can be cumbersome to program and 
-costly to carry out all the nessesary transformations.  As an alternative,  we present
+However, upon solution of the CPSCF equations, it can be cumbersome to program, 
+costly to carry out all the nessesary transformations and may require huge amount
+of memory to store all the matrices.
+As an alternative,  we present
 non-orthogonal generalizations up to fourth order, which are the working equations used
-in the following sections. {\bf [M: Is this the only real benifit of these equations vs
-the ones give by Anders?  I didn't really follow your arguments about coupling and mixing]}
+in the following sections. 
+{\bf [M: Is this the only real benifit of these equations vs
+the ones give by Anders?  V: Memory may be a good point here. We can avoid 
+to save both arrays (ortho and non-ortho) on disc prior to transformation on the fly when needed.\\
+I didn't really follow your arguments about coupling and mixing] 
+V: First: AMN nor McW gave multiple perturbations 2n+1 rule. Second: It is not obvious
+in the AMN or McW 3th order response Eabc(2n+1) that H should be replace by F. For Eabcd(2n+1),
+AMN formula does not take into account response of the 2e-terms (uncoupled or pseudo-uncoupled). }
 
 The first and second order energy corrections are well known, cooresponding simply to expectation
 values as in Eq.~\ref{Np1Rule}.  Beyond second order, the $2 n+1$ rule offers valuable alternatives. 
@@ -619,7 +632,8 @@ Specifically, the third order non-orthogonal contribution is
 %  \begin{split}
     E^{abc}
 %&=\frac{1}{6}P(a,b,c)\Tr([\D^a,\D^0]\D^b\F^c)\label{eq:2n+1 third order ortho}\\
-    &=\frac{1}{6}\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}
+%    &=\frac{1}{6}\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}
+    &=2\sum_{P(a,b,c)}\Tr[[D^a,D^0]_SSD^bF^c]\label{eq:2n+1 third order}
 %  \end{split}
 \end{align}
 where $P(a,b,c)$ stands for the permutation operator such that all
@@ -630,7 +644,8 @@ and $[A,B]_S=ASB-BSA$ where $S$ is the overlap matrix.
 A similar expression for the fourth order non-orthogonal contribution is 
 \begin{align}
   \begin{split}
-    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
+%    E^{abcd} =&\frac{1}{24}\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
+    E^{abcd} =&\sum_{P(a,b,c,d)}\Tr[[D^{ab},D^0]_S SD^cF^d + \\ 
     &[D^a,D^0]_S S(D^{bc}F^d +D^bF^{cd})]\label{eq:2n+1 fourth order}
   \end{split}
 \end{align}
@@ -647,7 +662,8 @@ reduces to include only 12 terms with 180 matrix multiplications.
 Similar reductions of the computational cost also apply to 
 Eq. \eqref{eq:2n+1 third order}. The number of matrix-matrix multiplies can be further reduced
 if one uses an orthogonal representations of the matrices. [{\bf M: If this is really true,
-then again, what is the f-ing point of non-orthogonal? }]
+then again, what is the f-ing point of non-orthogonal?
+V: you are right no special reason, just the memory }]
 
 
 \newpage
@@ -658,7 +674,7 @@ We have implemented these methods in the MondoSCF suite of linear scaling quantu
 programs \cite{MondoSCF}.  The CPSCF equations are solved in the non-orthogonal representation 
 except for the polynomial expansions of the density matrices which are done in the orthogonal 
 basis.  {\bf [M: Actually, it sounds as though every thing is done in orthogonal, including
-the DDIIS, and that non-orthogonal is used just for evaluation of the 2N+1 rules]}.
+the DDIIS, and that non-orthogonal is used just for evaluation of the 2N+1 rules V: Yes]}.
 Two different levels of numerical accuracy have been used, {\tt GOOD} and {\tt TIGHT}.  
 Thresholds that define the {\tt GOOD} accuracy level include a matrix threshold 
 $\tau=10^{-5}$, as well as other numerical thresholds detailed in Ref.~\onlinecite{CTymczak04A},
@@ -681,7 +697,8 @@ All results are reported in atomic units.
 \begin{table}[h]
   \centering
   \caption{\protect
-{\bf [M: Why are we not listing GAMESS values to the same number of digits as MondoSCF numbers?]}
+{\bf [M: Why are we not listing GAMESS values to the same number of digits as MondoSCF numbers? 
+    V: Cause it gives only 4 digits after the comma]}
     The longitudinal polarizability, $\alpha_{zz}$, for water chains at the RHF/6-31G level
     of theory, computed with {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
    and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
@@ -692,14 +709,24 @@ All results are reported in atomic units.
         &\multicolumn{1}{c}{{\tt GOOD}}
         &\multicolumn{1}{c}{{\tt TIGHT}}\\
     \hline
-     1 & 5.8136 & 5.817130 & 5.813589  \\
-     2 & 6.3448 & 6.348235 & 6.344830  \\
-     3 & 6.5844 & 6.585133 & 6.584449  \\
-     4 & 6.7276 & 6.737545 & 6.727684  \\
-     5 & 6.8226 & 6.823266 & 6.822640  \\
-    10 & 7.0308 & 7.031487 & 7.030870  \\
-    15 & 7.1047 & 7.105326 & 7.104780  \\
-    20 & 7.1424 & 7.143081 & 7.142433  \\
+    1 & 5.8136 & 5.813620 & 5.813588 \\
+    2 & 6.3448 & 6.345037 & 6.344822 \\
+    3 & 6.5844 & 6.584658 & 6.584435 \\
+    4 & 6.7276 & 6.727905 & 6.727672 \\
+    5 & 6.8226 & 6.823290 & 6.822857 \\
+   10 & 7.0308 & 7.031056 & 7.030858 \\
+   15 & 7.1047 & 7.104904 & 7.104770 \\
+   20 & 7.1424 & 7.142580 & 7.142422 \\
+%#ALPHA/N
+%#    LOOSE    GOOD     TIGHT    VERYTIGHT      
+% 1 5.817223 5.813620 5.813588 5.813593
+% 2 6.350891 6.345037 6.344822 6.344813
+% 3 6.588345 6.584658 6.584435 6.584420
+% 4 6.738352 6.727905 6.727672 6.727651
+% 5 6.836304 6.823290 6.822857 6.822602
+%10 7.031962 7.031056 7.030858 7.030828
+%15 7.104774 7.104904 7.104770 7.104738
+%20 7.141731 7.142580 7.142422 7.142388
     \botrule
   \end{tabular}
 \end{table}
@@ -712,21 +739,33 @@ All results are reported in atomic units.
     {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
     and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Beta_1D_Values}
-  \begin{tabular}{ccccc}
+  \begin{tabular}{cccccc}
     \toprule
     $N$ &\multicolumn{1}{c}{{\sc GAMESS}}
     &\multicolumn{1}{c}{{\tt GOOD}}
+    &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
     &\multicolumn{1}{c}{{\tt TIGHT}}
-    &\multicolumn{1}{c}{{\tt TIGHT}\footnote[1]{The density matrix based 2n+1 rule has been used.}} \\
+    &\multicolumn{1}{c}{{\tt TIGHT}$^a$} \\
     \hline
-     1 & -30.6125 & -30.612180 & -30.612178 & -30.612274  \\
-     2 & -29.5444 & -29.555935 & -29.545096 & -29.545207  \\
-     3 & -25.3696 & -25.382010 & -25.370516 & -25.370628  \\
-     4 & -22.1411 & -22.147670 & -22.141553 & -22.141869  \\
-     5 & -19.8925 & -19.903268 & -19.893306 & -19.893441  \\
-    10 & -14.8063 & -14.815886 & -14.807203 & -14.807392  \\
-    15 & -12.9713 & -12.978256 & -12.972171 & -12.972379  \\
-    20 & -12.0334 & -12.038114 & -12.034259 & -12.034505  \\
+     1 & -30.6125 & -30.611029 & -30.612627 & -30.612163 & -30.612256 \\
+     2 & -29.5444 & -29.547427 & -29.548504 & -29.544907 & -29.544994 \\
+     3 & -25.3696 & -25.372208 & -25.373615 & -25.370297 & -25.370381 \\
+     4 & -22.1411 & -22.143436 & -22.145040 & -22.141494 & -22.141603 \\
+     5 & -19.8925 & -19.902088 & -19.904449 & -19.896462 & -19.897141 \\
+    10 & -14.8063 & -14.807075 & -29.617990 & -14.806973 & -14.807119 \\
+    15 & -12.9713 & -12.969238 & -12.972227 & -12.971940 & -12.972124 \\
+    20 & -12.0334 & -12.028709 & -12.033633 & -12.034014 & -12.034238 \\
+%#BETA/N
+%#        LOOSE                GOOD               TIGHT              VERYTIGHT      
+%#     SCF       2n+1      SCF       2n+1      SCF       2n+1      SCF       2n+1
+% 1 30.465445 30.541530 30.611029 30.612627 30.612163 30.612256 30.612280 30.612298
+% 2 29.457319 29.533744 29.547427 29.548504 29.544907 29.544994 29.544586 29.544608
+% 3 25.346540 25.422709 25.372208 25.373615 25.370297 25.370381 25.369861 25.369874
+% 4 22.188342 22.251189 22.143436 22.145040 22.141494 22.141603 22.140943 22.140951
+% 5 20.029374 20.053896 19.902088 19.904449 19.896462 19.897141 19.892449 19.892476
+%10 15.004856 15.043761 14.807075 29.617990 14.806973 14.807119 14.806291 14.806326
+%15 13.099761 13.226662 12.969238 12.972227 12.971940 12.972124 12.971260 12.971298
+%20 12.115774 12.299637 12.028709 12.033633 12.034014 12.034238 12.033362 12.033402
     \botrule
   \end{tabular}
 \end{table}
@@ -740,21 +779,33 @@ All results are reported in atomic units.
     {\sc MondoSCF} using {\tt GOOD} and {\tt TIGHT} numerical thresholds, 
     and also with the {\sc GAMESS} quantum chemistry package \cite{gamess}.
   }\label{tab:Gamma_1D_Values}
-  \begin{tabular}{ccccc}
+  \begin{tabular}{cccccc}
     \toprule
     $N$ &\multicolumn{1}{c}{{\sc GAMESS}}
     &\multicolumn{1}{c}{{\tt GOOD}}
+    &\multicolumn{1}{c}{{\tt GOOD}\footnote[1]{The density matrix based 2n+1 rule has been used.}}
     &\multicolumn{1}{c}{{\tt TIGHT}}
-    &\multicolumn{1}{c}{{\tt TIGHT}\footnote[1]{The density matrix based 2n+1 rule has been used.}} \\
+    &\multicolumn{1}{c}{{\tt TIGHT}$^a$} \\
     \hline
-     1 &  330.5753 &  330.545460 &  330.577009 &  330.572592 \\
-     2 &  820.1398 &  820.448185 &  820.160650 &  820.153734 \\
-     3 & 1008.5656 & 1008.894703 & 1008.580733 & 1008.582556 \\
-     4 & 1103.4813 & 1103.793125 & 1103.494950 & 1103.497148 \\
-     5 & 1168.9563 & 1169.325236 & 1168.972479 & 1168.975145 \\
-    10 & 1324.2906 & 1325.421145 & 1324.304700 & 1324.307818 \\
-    15 & 1381.8657 & 1383.380593 & 1381.882600 & 1381.882180 \\
-    20 & 1411.4264 & 1414.736619 & 1411.448699 & 1411.437607 \\
+     1 &  330.5753 &  330.543748 &  330.543185 &  330.571927 &  330.572391 \\
+     2 &  820.1398 &  820.192314 &  820.196669 &  820.147747 &  820.149334 \\
+     3 & 1008.5656 & 1008.585466 & 1008.607306 & 1008.575157 & 1008.576475 \\
+     4 & 1103.4813 & 1103.505309 & 1103.528026 & 1103.488253 & 1103.490194 \\
+     5 & 1168.9563 & 1169.210364 & 1169.253062 & 1169.063044 & 1169.075387 \\
+    10 & 1324.2906 & 1325.120848 & 1324.632059 & 1324.297519 & 1324.299857 \\
+    15 & 1381.8657 & 1383.080212 & 1382.232175 & 1381.875768 & 1381.873821 \\
+    20 & 1411.4264 & 1414.409224 & 1411.852777 & 1411.440956 & 1411.429186 \\
+%#GAMMA/N
+%#            LOOSE                   GOOD                    TIGHT                  VERYTIGHT      
+%#       SCF         2n+1        SCF         2n+1        SCF         2n+1        SCF         2n+1
+% 1  326.453668  327.657510  330.543748  330.543185  330.571927  330.572391  330.575212  330.575172
+% 2  811.011253  813.149259  820.192314  820.196669  820.147747  820.149334  820.143928  820.143860
+% 3  997.747780 1000.161063 1008.585466 1008.607306 1008.575157 1008.576475 1008.567843 1008.567803
+% 4 1092.976882 1095.290284 1103.505309 1103.528026 1103.488253 1103.490194 1103.478891 1103.478823
+% 5 1168.090056 1168.020522 1169.210364 1169.253062 1169.063044 1169.075387 1168.954564 1168.954518
+%10 1310.823281 1311.068128 1325.120848 1324.632059 1324.297519 1324.299857 1324.289143 1324.289082
+%15 1375.184287 1364.961009 1383.080212 1382.232175 1381.875768 1381.873821 1381.864844 1381.864664
+%20 1418.062288 1388.371139 1414.409224 1411.852777 1411.440956 1411.429186 1411.425500 1411.425048
     \botrule
   \end{tabular}
 \end{table}
@@ -763,7 +814,7 @@ Perturbed Projection has been used to compute the (hyper)polarizabilities $\alph
 $\beta_{zzz}$ and $\gamma_{zzzz}$ of linear water chains up to (H$_2$O)$_{20}$. 
 These calculations have been carried out with {\sc MondoSCF} at the RHF/6-31G level of theory using 
 both the {\tt GOOD} and {\tt TIGHT} thresholding parameters that control precision of the 
-linear scaling algorithms \cite{}, as well as with the conventional algorithms implemented
+linear scaling algorithms cite{}, as well as with the conventional algorithms implemented
 in the {\sc GAMESS} quantum chemistry package \cite{gamess}.  These static properties have 
 been evaluated at the geometries given by Otto {\em et al.}~\cite{POtto99}.    
 The {\sc MondoSCF} results have been obtained both as expectation values, given by Eq.~(\ref{Np1Rule}), 
@@ -824,7 +875,8 @@ Eqs.~(\ref{eq:2n+1 third order}-\ref{eq:2n+1 fourth order}).
 
 
 \begin{figure}[h]
-  \caption{\bf [M: Maybe we should include this figure.  I kinda like it]}
+  \caption{\bf [M: Maybe we should include this figure.  I kinda like it, 
+      V: ok, if it makes the boss happy.]}
   \resizebox*{3.6in}{!}{\includegraphics[angle=-90.00]{Mix_h2o3D_6-31G_T.ps}}
 \end{figure}
 
@@ -833,8 +885,7 @@ achieved with Perturbed Projection, is shown for three-dimensional water cluster
 in Fig~\ref{fig:Gamma_scaling}.  These timings are the total CPU time for the fifth CPSCF cycle, 
 including build time for $\F^{abc}$ ({\sc ONX} and {\sc QCTC}), 
 iterative construction of $\D^{abc}$ (Perturbed Projection via {\sc TC2}) and all intermadiate
-steps including the congruence tranformation and {\bf [M: Is the following true??] 
-property evaluation via the evaluation of expectation values as in Eq.~(\ref{Np1Rule})}.
+steps including the congruence tranformation.
 A breakdown of the domminant contributions to these totals are given
 in Figs~\ref{fig:Gamma_QCTC_Timing}-\ref{fig:Gamma_ONX_Timing}, which show timings for Coulomb 
 summation ({\sc QCTC}), Perturbed Projection ({\sc TC2}), and excact exchange ({\sc ONX}).
@@ -864,7 +915,7 @@ up with each order in the perturbation.
 
 In our current formulation, the increase in magnitude and reduction of locality in elements of the 
 response function makes achieving linear scaling more difficult with increasing order in perturbation. 
-Nevertheless, linear scaling is achieved at the HF level of theory up to fourth order (i.e.~$\gamma^{abcd}$) 
+Nevertheless, linear scaling is achieved at the HF level of theory up to fourth order (i.e.~$\gamma_{abcd}$) 
 in the total energy for three-dimensional systems and  non-trivial basis sets.  At fourth order,
 Perturbed Projection and exact exchange were the dominant costs in solving the CPSCF equations,
 as shown in Figs~\ref{}-\ref{}.  For the fourth order Perturbed Projection, $N$-scaling is achieved 
@@ -890,11 +941,9 @@ In tables \ref{tab:Alpha_1D_Values}-\ref{tab:Gamma_1D_Values} we find that
 only 1-2 significant digit altered by reducing the threshold by two orders 
 of magnitude. 
 
-For example, a calculation of $(H_2O)_5$ with the {\tt VERYTIGHT} numerical threshold ($10^{-7}$) 
-gives the following polarizabilities $\alpha_{zz}=6.822602\,a.u.$, $\beta_{zzz}=-19.892464\,a.u.$ and
-$\gamma_{zzzz}=1168.95479\,a.u.$. {\bf [M: The reason these numbers don't help is the
-system is so small, we can't really see how error propigates with TIGHT, so we need GOOD 
-with 2N+1 to larger systems]}.  We can conclude that the thresholds 
+For example, a calculation of (H$_2$O)$_20$ with the {\tt VERYTIGHT} numerical threshold ($10^{-7}$) 
+gives the following polarizabilities $\alpha_{zz}=7.142422\,a.u.$, $\beta_{zzz}=-12.033362\,a.u.$ and
+$\gamma_{zzzz}=1411.425500\,a.u.$. We can conclude that the thresholds 
 {\tt GOOD} and {\tt TIGHT} give approximatively 3-4 and 5-6 
 correct digits respectivelly independently of the order of the response calculated.
 
