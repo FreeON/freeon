@@ -36,106 +36,107 @@ MODULE TreeWalk
 !===================================================================================================
 !
 !===================================================================================================
-     RECURSIVE SUBROUTINE JWalk(Q)
-       TYPE(PoleNode)                   :: Q
-       REAL(DOUBLE)                     :: PQ2,PQ,PQxy,PQx,PQy,PQx2,PQy2,PQz,Omega, &
-                                           CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
-                                           TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
-       INTEGER                          :: J,Ell,LCode
+     SUBROUTINE JWalk(P)
+       TYPE(PoleNode),POINTER :: P,Q
+       REAL(DOUBLE)           :: PQ2,PQ,PQxy,PQx,PQy,PQx2,PQy2,PQz,Omega, &
+                                 CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
+                                 TT,TwoC,COne,SOne,CTwo,STwo,RTE,RPE,T,Upq
+       INTEGER               :: J,Ell,LCode, K
 #ifdef EXPLICIT_SOURCE
-       REAL(DOUBLE)                     :: o1,o2,ET,TwoT
+       REAL(DOUBLE)          :: o1,o2,ET,TwoT
 #else
-       INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
+       INTEGER               :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
 !-----------------------------------------------------------------------------------------------
-!      PAC: 
-       PQx=Prim%P(1)-Q%Box%Center(1)
-       PQy=Prim%P(2)-Q%Box%Center(2)
-       PQz=Prim%P(3)-Q%Box%Center(3)
-       PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-       RTE=Prim%Zeta*Q%Zeta
-       RPE=Prim%Zeta+Q%Zeta
-       Omega=RTE/RPE 
-       T=Omega*PQ2
-       IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
-          ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
-          ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
-          T>Gamma_Switch)THEN
-!         MAC: 
-          IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
-!            Evaluate multipoles
+       Q=>P%Descend
+       K=0
+       DO WHILE(ASSOCIATED(Q))
+          K=K+1
+          ! PAC: 
+          PQx=Prim%P(1)-Q%Box%Center(1)
+          PQy=Prim%P(2)-Q%Box%Center(2)
+          PQz=Prim%P(3)-Q%Box%Center(3)
+          PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+          RTE=Prim%Zeta*Q%Zeta
+          RPE=Prim%Zeta+Q%Zeta
+          Omega=RTE/RPE 
+          T=Omega*PQ2
+          IF(ABS(PQx)>PBox%Half(1)+Q%Box%Half(1).OR.  &
+             ABS(PQy)>PBox%Half(2)+Q%Box%Half(2).OR.  &
+             ABS(PQz)>PBox%Half(3)+Q%Box%Half(3).OR.  &
+             T>Gamma_Switch)THEN
+             ! MAC: 
+             IF(PQ2>(Q%Strength*DP2+Q%DMax2).OR.Q%Leaf)THEN 
+                ! Evaluate multipoles                
+#ifdef EXPLICIT_SOURCE
+                Ell=Prim%Ell+Q%Ell
+                LCode=100*Prim%Ell+Q%Ell
+                SELECT CASE(Ell)
+                   INCLUDE "IrRegulars.Inc"
+                CASE DEFAULT
+                   CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in IrRegulars.Inc')
+                END SELECT
+                SELECT CASE(LCode)
+                   INCLUDE "CTraX.Inc"
+                CASE DEFAULT
+                   CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
+                END SELECT
+#else
+                CALL CTrax(Prim,Q,SPKetC,SPKetS)
+#endif
+                ! Movin on over
+                Q=>Q%Travrse
+             ELSE
+                ! Keep on truckin
+                Q=>Q%Descend
+             ENDIF
+          ELSEIF(Q%Leaf)THEN
+             PQx=-PQx; PQy=-PQy; PQz=-PQz
+             Upq=TwoPi5x2/(RTE*SQRT(RPE))
+             ! Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
+             Ell=Prim%Ell+Q%Ell
 #ifdef EXPLICIT_SOURCE
              Ell=Prim%Ell+Q%Ell
-             LCode=100*Prim%Ell+Q%Ell
-!
+             LCode=Prim%Ell*100+Q%Ell
+             J=AINT(T*Gamma_Grid)
              SELECT CASE(Ell)
-                INCLUDE "IrRegulars.Inc"
+                INCLUDE 'AuxInt.Inc'
              CASE DEFAULT
-                CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in IrRegulars.Inc')
+                CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in AuxInt.Inc')
              END SELECT
-!
              SELECT CASE(LCode)
-                INCLUDE "CTraX.Inc"
+                INCLUDE 'HGTraX.Inc'
              CASE DEFAULT
-                CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in CTraX.Inc')
+                CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in HGTraX.Inc')
              END SELECT
-!
 #else
-             CALL CTrax(Prim,Q,SPKetC,SPKetS)
-#endif
-          ELSE
-!            Keep on truckin
-             CALL JWalk(Q%Descend)
-             CALL JWalk(Q%Descend%Travrse)
-          ENDIF
-       ELSEIF(Q%Leaf)THEN
-          PQx=-PQx; PQy=-PQy; PQz=-PQz
-          Upq=TwoPi5x2/(RTE*SQRT(RPE))
-!         Compute a Hermite Gaussian Electron Repulsion Integral (HGERI)
-          Ell=Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
-          Ell=Prim%Ell+Q%Ell
-          LCode=Prim%Ell*100+Q%Ell
-          J=AINT(T*Gamma_Grid)
-!
-          SELECT CASE(Ell)
-             INCLUDE 'AuxInt.Inc'
-          CASE DEFAULT
-             CALL Halt('No explicit code for case Ell   = '//TRIM(IntToChar(Ell))//' in AuxInt.Inc')
-          END SELECT
-!
-          SELECT CASE(LCode)
-             INCLUDE 'HGTraX.Inc'
-          CASE DEFAULT
-             CALL Halt('No explicit code for case LCode = '//TRIM(IntToChar(LCode))//' in HGTraX.Inc')
-          END SELECT
-!
-#else
-          Ell=Prim%Ell+Q%Ell
-          CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
-          CALL MD3TRR(2*HGEll,Ell,MDR,AuxR,Upq,PQx,PQy,PQz)
-          DO LP=0,Prim%Ell
-             DO MP=0,Prim%Ell-LP
-                DO NP=0,Prim%Ell-LP-MP 
-                   PDex=LMNDex(LP,MP,NP)
-                   DO LQ=0,Q%Ell
-                      DO MQ=0,Q%Ell-LQ
-                         DO NQ=0,Q%Ell-LQ-MQ
-                            QDex=LMNDex(LQ,MQ,NQ)
-                            HGKet(PDex)=HGKet(PDex)+MDR(LP+LQ,MP+MQ,NP+NQ,0)*Q%Co(QDex)
-                         ENDDO 
-                      ENDDO 
+             Ell=Prim%Ell+Q%Ell
+             CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
+             CALL MD3TRR(2*HGEll,Ell,MDR,AuxR,Upq,PQx,PQy,PQz)
+             DO LP=0,Prim%Ell
+                DO MP=0,Prim%Ell-LP
+                   DO NP=0,Prim%Ell-LP-MP 
+                      PDex=LMNDex(LP,MP,NP)
+                      DO LQ=0,Q%Ell
+                         DO MQ=0,Q%Ell-LQ
+                            DO NQ=0,Q%Ell-LQ-MQ
+                               QDex=LMNDex(LQ,MQ,NQ)
+                               HGKet(PDex)=HGKet(PDex)+MDR(LP+LQ,MP+MQ,NP+NQ,0)*Q%Co(QDex)
+                            ENDDO
+                         ENDDO
+                      ENDDO
                    ENDDO
-                ENDDO 
-             ENDDO 
-          ENDDO
+                ENDDO
+             ENDDO
 #endif
-       ELSE
-!         Keep on truckin 
-          CALL JWalk(Q%Descend)
-          CALL JWalk(Q%Descend%Travrse)
-       ENDIF
+             ! Movin on over
+             Q=>Q%Travrse
+          ELSE
+             ! Keep on truckin 
+             Q=>Q%Descend
+          ENDIF
+       ENDDO
      END SUBROUTINE JWalk
 !===================================================================================================
 !

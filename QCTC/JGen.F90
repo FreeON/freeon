@@ -159,7 +159,7 @@ MODULE JGen
        INTEGER                                  :: I,J,MaxLA,MaxLB,IA,IB,LMNA, &
                                                    LMNB,LA,LB,MA,MB,NA,NB,LAB, &
                                                    MAB,NAB,LM,LMN,Ell,EllA,    &
-                                                   EllB,NC,L,M
+                                                   EllB,NC,L,M,LenHGTF
 !------------------------------------------------------------------------------- 
        JBlk=Zero
        KA=Pair%KA
@@ -197,7 +197,6 @@ MODULE JGen
 !-------------------------------------------------------------------------------
 !                     Compute maximal HG extent (for PAC) and Unsold esitmiate (for MAC)
 !                     looping over all angular symmetries
-
                       DP2=Zero
                       PExtent=Zero
                       IA = IndexA
@@ -208,21 +207,20 @@ MODULE JGen
                          DO LMNB=StartLB,StopLB
                             IB=IB+1
                             EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)       
+                            LenHGTF=LHGTF(EllA+EllB)
 !                           Extent (for PAC)
-                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(:,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
+                            EX=Extent(EllA+EllB,Prim%Zeta,HGBra%D(1:LenHGTF,IA,IB),TauPAC,ExtraEll_O=0,Potential_O=.TRUE.)
                             PExtent=MAX(PExtent,EX)
 !                           Strength (for MAC)
-                            CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(:,IA,IB),SPBraC,SPBraS)
-!
+                            CALL HGToSP(Prim%Zeta,EllA+EllB,HGBra%D(1:LenHGTF,IA,IB),SPBraC,SPBraS)!
                             PStrength = Zero
                             DO L=0,EllA+EllB
                                PStrength = PStrength+FudgeFactorial(L,SPEll+1)*Unsold0(L,SPBraC,SPBraS)
                             ENDDO
-                            PStrength = (PStrength/TauMAC)**(Two/DBLE(SPEll+2))
-                            IF(DP2 < PStrength) THEN
-                               DP2   = PStrength
+                            PStrength=(PStrength/TauMAC)**(Two/DBLE(SPEll+2))
+                            IF(DP2<PStrength) THEN
+                               DP2=PStrength
                             ENDIF
-!
                          ENDDO
                       ENDDO 
                       DP2=MIN(1.D10,DP2)
