@@ -30,7 +30,6 @@ CONTAINS
        CALL ToAtomicUnits(G%Clone(I))
 #ifdef PERIODIC
        CALL PeriodicXLate(G%Clone(I))
-       CALL WrapAtoms(G%Clone(I))
 #endif
     ENDDO
   END SUBROUTINE MassageCoordinates
@@ -41,8 +40,8 @@ CONTAINS
     TYPE(CRDS) :: G
     IF(G%InAU)RETURN
     G%Carts%D=AngstromsToAU*G%Carts%D               
-#ifdef PERIODIC
     G%AbCarts%D=AngstromsToAU*G%AbCarts%D               
+#ifdef PERIODIC
     G%PBC%BoxShape=AngstromsToAU*G%PBC%BoxShape
     G%PBC%InvBoxSh=G%PBC%InvBoxSh/AngstromsToAU
     G%PBC%CellVolume=G%PBC%CellVolume*AngstromsToAU**G%PBC%Dimen
