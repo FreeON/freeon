@@ -11,7 +11,11 @@ $ Help redo front end to work with MPI-2 and MPI_COMM_SPAWN
 o Check out load balance for large OneE jobs, start to think
   about domain decomposition.  Examine performance for OneE
   with and without PBCs.
-o Make sure MPI2 code works on SGIs, LINUX/LAM-MPI, IBM SP2, HP/Compaq?
+o Make sure MPI2 code works on 
+  > SGIs
+  > LINUX/LAM-MPI
+  > IBM SP2
+  > HP/Compaq?
 o Preliminary work on ordering algothim for load balancing
   and locality: demonstrate scaling of OneE routines in 
   both limits of Natoms/Nproc->0,Infinity
@@ -24,20 +28,28 @@ o Internal coordinates geometry optimization
 o Accelerated MD/Parallel Tempering
 
 Matt:
-$ Finish validation suite and checking accuracies
+x Documentation
+x Finish validation suite and checking accuracies
+x Fix proteins suite to have correct protentaion states
+  so they converge nicely. 
 $ Get front end and output formatting cleaned
   >> hostname, machtype, processor info etc to outfile <<
 $ Add example CSHRCs to Scripts file
 $ Get QuNew geometry optimization working again
 $ Make sure density matrix extrapolation is working
-x Documentation
-o Get working under AIX.XLF, True64.COMPAQ, SUN? HP? 
-o Help with parallization
+$ Get incremental Fock builds working again
 $ Interface with OpenDX for isosurfacing and movies
+o Get working under 
+  $ AIX.XLF 
+  > True64 
+  > SUN
+  > HP 
+o Help with parallization
 
 CJ:
+x Fix problems with expensive Extent and PBC HiCu
 x PBC validation suite!
-x PBC Benchmark suite and scaling runs for HiCu, QCTC and SDMM
+x PBC Benchmark suites and scaling runs for HiCu, QCTC and SDMM
 o Write up PBC
 o Write up new MAC and PAC
 o Help periodifiy ONX

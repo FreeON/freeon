@@ -29,7 +29,7 @@ MODULE PrettyPrint
                        Print_PBCInfo,    Print_CellSet,   &
 #endif
                        Print_MEMS,       Print_TIME,      &
-                       Print_HGRho,      Print_CMPoles
+                       Print_HGRho
    END INTERFACE
    INTERFACE PChkSum   
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
