@@ -273,7 +273,11 @@ PROGRAM ParaMakeRho
   ENDIF
   ! Put Rho and MPs to disk
   IF(SCFActn=='ForceEvaluation')THEN
+#ifdef PARALLEL
+     CALL Put_HGRho(Rho2,'Rho'//IntToChar(MyID),Args,1)
+#else
      CALL Put_HGRho(Rho2,'Rho',Args,1) 
+#endif
 
   ELSEIF(SCFActn=='InkFok')THEN
      CALL Put_HGRho(Rho2,'DeltaRho',Args,0)
