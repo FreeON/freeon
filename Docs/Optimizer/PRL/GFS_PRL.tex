@@ -61,7 +61,7 @@ biological problems with complicated hydrogen bond networks and ligand binding m
 
 \section{Introduction}
 
-Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  are begining to 
+Recently, $N$-scaling electronic structure algorithms ($N$ is the system size)  are beginning to 
 realize their promise, delivering energies and forces on nuclei for large systems at 
 both a numerical accuracy and theoretical level suitable to begin addressing many complex 
 problems.  For example, it is now possible to routinely apply hybrid Hartree-Fock/Density 
@@ -564,7 +564,7 @@ but because it achieves stability through smoothing effects derived from the wei
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{kinasepicture.eps}}
 \caption{
-The structure of a 263 atom protein kinase A fragment used
+The structure of a 263 atom Protein Kinase A fragment used
 to test the QUICCA optimizer.}\label{kinasepicture} 
 \end{figure}
 
@@ -572,7 +572,7 @@ to test the QUICCA optimizer.}\label{kinasepicture}
 \resizebox*{3.5in}{!}{\includegraphics{curve2_1.eps}}
 \caption{
 Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale for the 
-263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
+263 atom Protein Kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
 \end{figure}
 
 \begin{figure}[h]
@@ -580,32 +580,26 @@ Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale f
 \caption{
 Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
 with geometry step $i$ on a log$_{10}$-linear  scale for the 
-263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
+263 atom Protein Kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
 \end{figure}
 
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{RMSloglog.eps}}
-\caption{
-Ratio of the relative error of the energy 
-in consecutive steps on a log$_{10}$-log$_{10}$ plot.
-The data points fit very well to a line of 
-$y=-0.04980+1.00111 x$. The tangent of this line ($1.00111$)
-is equivalent to the order of convergence, while the
-cross section with the y-axis ($-0.04980$) is the
-logarithm of the convergence factor, log$_{10}$(c), that is
-the negative rate of convergence.
-}
+\caption{A plot of ${\rm log}_{10} \Delta E_{i+1}$ vs  ${\rm log}_{10} \Delta E_{i}$,  characterizing the ratio 
+         $\Delta E_{i+1}/\Delta E_i$.  The solid line is $y=-0.04980+1.00111 *x$. 
+         The slope  of this line is equivalent to the order of convergence ($n=1.00111$), 
+         while the y-intercept is the negative rate of convergence ($-f ={\rm log}_{10}(c)= -0.04980$).}
 \label{loglogplot}
 \end{figure}
 
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{convfact.eps}}
 \caption{
-The change of the rate of convergence $f$ during the optimization
-of the 263 atoms protein kinase A fragment. $f$ is modelled
+Change in the rate of convergence $f$ during  optimization
+of the 263 atoms Protein Kinase A fragment. $f$ is modeled
 by a 10th order polynomial. The polynomial coefficients
 have been obtained from a non-linear fit to the $E_{i}$-$i$
-data-pairs, using the model function $E_{i}=E_{opt}+A*exp(-f*i)$.}
+data-pairs, using the model function $E_{i}=E_{\rm opt}+A*e^{-f*i}$.}
 \label{convfact} 
 \end{figure}
 }
@@ -651,20 +645,19 @@ shows ${\rm log}_{10} \Delta E_i$ vs $i$ for this system, Fig.~\ref{gradientpict
 of the Cartesian gradient at each step.
 
 In Fig.~\ref{loglogplot}, a plot of ${\rm log}_{10}{\Delta E_{i+1}}$ vs ${\rm log }_{10} {\Delta E_{i}}$ 
-is shown, demonstrating only a first order convergence, with a rate
-of $\sim 0.05$.   To examine the rate of convergence
-in greater detail, we fit the the model function $E_{i}=E_{\rm opt}+A*e^{-i * f_i}$, using an 
+is shown, demonstrating only first order convergence with a rate $f \sim 0.05$.   To examine the rate of convergence
+in greater detail, we fit the the model function $E_{i}=E_{\rm opt}+A*e^{-i * f_i}$, using  
 an 11th order polynomial to represent $f_i$.  The fitted rate of convergence shown in Fig.~\ref{convfact}
 suggests that the optimization has three different phases, in accordance with Fig.~\ref{logn-logde}.
 In the first phase (steps 1-10) there is a rapid refinement of the least-optimal substructures. In the 
-second phase (steps 10-60) the main optimization effort is still carried out on local internal coordinates, 
-while the error of the absolute energy decreases to $\sim 1$ mhartree.  Finally, the third phase (60-120) 
-occurs at a slower, constant rate of about $f=0.05$, which is a value 
-consistent from the fit characterizing the ratio ${\Delta E_{i+1}}/{\Delta E_{i}}$ in Fig.~\ref{loglogplot}.
+second phase (steps 10-60) the absolute energy decreases less rapidly to $\sim 1$ mhartree, with the  
+main optimization effort corresponding to changes in the local internal coordinates. Finally, the third phase 
+(60-120) occurs at a slower, constant rate of about $f=0.05$, which is consistent with the fit characterizing 
+the ratio ${\Delta E_{i+1}}/{\Delta E_{i}}$ shown in Fig.~\ref{loglogplot}.
 
-In the third phase, below 1 mhartree, backtracking becomes nessesary to achieve smooth 
+In the third phase, below 1 mhartree, backtracking becomes necessary to achieve smooth 
 convergence of the energy and the rate of convergence decreases to a constant.  We believe
-that this decelleration is due to the presence of ``floppy'' low-frequency modes
+that this deceleration is due to the presence of ``floppy'' low-frequency modes
 that are highly delocalized and not accounted for in the current local internal 
 coordinate system.  While QUICCA can certainly be used with a more delocalized 
 internal coordinate system, the construction of delocalized internal coordinates 
@@ -806,38 +799,35 @@ minimum of the potential energy surface. The numbers in the picture
 indicate the sequence of optimization steps. The dashed line represents
 a linear fit, the star the predicted location of the minimum.}\label{NH3outp6}
 
-
 \caption{
-The structure of a 263 atom protein kinase A fragment used
+The structure of a 263 atom Protein Kinase A fragment used
 to test the QUICCA optimizer.}\label{kinasepicture} 
 
 \caption{
 Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale for the 
-263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
+263 atom Protein Kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
 
 \caption{
 Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
 with geometry step $i$ on a log$_{10}$-linear  scale for the 
-263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
+263 atom Protein Kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
+
+\caption{A plot of ${\rm log}_{10} \Delta E_{i+1}$ vs  ${\rm log}_{10} \Delta E_{i}$,  characterizing the ratio 
+         $\Delta E_{i+1}/\Delta E_i$.  The solid line is $y=-0.04980+1.00111 *x$. 
+         The slope  of this line is equivalent to the order of convergence ($n=1.00111$), 
+         while the y-intercept is the negative rate of convergence ($-f ={\rm log}_{10}(c)= -0.04980$).}\label{loglogplot}
 
 \caption{
-Ratio of the relative error of the energy 
-in consecutive steps on a log$_{10}$-log$_{10}$ plot.
-The data points fit very well to a line of 
-$y=-0.04980+1.00111 x$. The tangent of this line ($1.00111$)
-is equivalent to the order of convergence, while the
-cross section with the y-axis ($-0.04980$) is the
-logarithm of the convergence factor, log$_{10}$(c), that is
-the negative rate of convergence.
-} \label{loglogplot}
-
-\caption{
-The change of the rate of convergence $f$ during the optimization
-of the 263 atoms protein kinase A fragment. $f$ is modelled
+Change in the rate of convergence $f$ during  optimization
+of the 263 atoms Protein Kinase A fragment. $f$ is modeled
 by a 10th order polynomial. The polynomial coefficients
 have been obtained from a non-linear fit to the $E_{i}$-$i$
-data-pairs, using the model function $E_{i}=E_{opt}+A*exp(-f*i)$.}
+data-pairs, using the model function $E_{i}=E_{\rm opt}+A*e^{-f*i}$.}
 \label{convfact} 
+
+
+
+
 
 \end{figure}
 
@@ -868,6 +858,20 @@ Figure 3, Nemeth and Challacombe \\[1.cm]
 \begin{center}
 Figure 4, Nemeth and Challacombe \\[1.cm]
 \resizebox*{5in}{!}{\includegraphics{RMSCartData.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 5, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{RMSloglog.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 6, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{convfact.eps}}
 \end{center}
 
 }
