@@ -2704,23 +2704,37 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
             GMLoc%PBC%Translate = .FALSE.
             GMLoc%PBC%Trans_COM = .FALSE.
          ENDIF
+!-------------------------------------------------------------
+!        IntPut OverRide
+!
+         IF(OptKeyQ(Inp,PBOUNDRY,PFFOVRDE)) THEN
+            GMLoc%PBC%PFFOvRide = .TRUE.
+         ELSE
+            GMLoc%PBC%PFFOvRide = .FALSE.
+         ENDIF
+!-------------------------------------------------------------
+!        IntPut Maxium Ell and Number of Layers
+!
+         IF(GMLoc%PBC%PFFOvRide) THEN
+            IF(.NOT. OptIntQ(Inp,PFFMXLAY,GMLoc%PBC%PFFMaxLay)) THEN
+               CALL MondoHalt(PRSE_ERROR,'PFF OverRide is On, Need to Supply Number of Layers')
+            ENDIF
+            IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
+               CALL MondoHalt(PRSE_ERROR,'PFF OverRide is On, Need to Supply Maxium Ell')
+            ENDIF
+         ELSE
+            IF(.NOT. OptIntQ(Inp,PFFMXLAY,GMLoc%PBC%PFFMaxLay)) THEN
+               GMLoc%PBC%PFFMaxLay=1
+            ENDIF
+            IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
+               GMLoc%PBC%PFFMaxEll=16
+            ENDIF
+         ENDIF
 !--------------------------------------------------------------------
 !        IntPut permeability
 !
          IF(.NOT. OptDblQ(Inp,EpsILON,GMLoc%PBC%Epsilon)) THEN
             GMLoc%PBC%Epsilon = 1.D32
-         ENDIF
-!-------------------------------------------------------------
-!        IntPut Maxium Ell
-!
-         IF(.NOT. OptIntQ(Inp,PFFMXELL,GMLoc%PBC%PFFMaxEll)) THEN
-            GMLoc%PBC%PFFMaxEll=16
-         ENDIF
-!-------------------------------------------------------------
-!        IntPut The Number of Box Layers
-!
-         IF(.NOT. OptIntQ(Inp,PFFMXLAY,GMLoc%PBC%PFFMaxLay)) THEN
-            GMLoc%PBC%PFFMaxLay=1
          ENDIF
 !---------------------------------------------------------------------------- 
 !        Parse <PERIODIC> for Lattice Vectors
