@@ -86,6 +86,12 @@ PROGRAM NewStep
          GM%Carts%D(J,I)=X2%D(K)
       ENDDO
    ENDDO   
+#ifdef PERIODIC
+   DO I=1,NAtoms
+      CALL AtomCyclic(GM,GM%Carts%D(:,I))
+      GM%BoxCarts%D(:,I)=AtomToFrac(GM,GM%Carts%D(:,I)) 
+   ENDDO
+#endif   
    CALL Put(GM,CurGeom)   
 !   WRITE(*,*)' NewStep: NEW GEOMETRY # ',CurGeom
 !   CALL PPrint(GM,Unit_O=6,PrintGeom_O='XYZ')
