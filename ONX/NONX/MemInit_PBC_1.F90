@@ -13,7 +13,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
   TYPE(BSet),INTENT(IN)    :: BSc,BSp
   INTEGER                  :: LR
 
-  write(*,*) "In MemInit: ",ErrorCode
+!  write(*,*) "In MemInit: ",ErrorCode
 
   IF (ErrorCode==eInit) THEN
     DB%MAXDis  = 1000
@@ -67,7 +67,7 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     CALL Delete(BufT)
     CALL Delete(SchT)
     DB%MAXD = DB%MAXD * 1.3D0
-    WRITE(*,*)' DB%MAXD = ',DB%MAXD
+!    WRITE(*,*)' DB%MAXD = ',DB%MAXD
     CALL New(DB)
     CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
     CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))

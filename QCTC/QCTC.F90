@@ -104,7 +104,6 @@ PROGRAM QCTC
         E_Nuc_Tot=NukE(GM)
      ENDIF
      CALL Put(E_Nuc_Tot,'E_NuclearTotal',Tag_O=SCFCycl)
-     write(*,*) 'E_NuclearTotal = ',E_Nuc_Tot
 #ifdef MMech
   ENDIF !!!!  QM calculations
   IF(HasMM()) THEN
