@@ -836,14 +836,25 @@ MODULE ParseInput
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
-!           Output the coordinates
-            DO I=1,Ctrl%NGeom
-               GM%Confg=I
-               CALL Put(GM,Tag_O=IntToChar(I))
-            ENDDO
+!
+
+            IF(Ctrl%Grad<=GRAD_ONE_FORCE)THEN            
+!              Output the input coordinates (may be more than one)
+               DO I=1,Ctrl%NGeom
+                  GM%Confg=I
+                  CALL Put(GM,Tag_O=IntToChar(I))
+               ENDDO
+            ELSE
+!              We are doing optimization or dynamics, just put 1
+               GM%Confg=1
+               CALL Put(GM,'1')
+            ENDIF
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
 !           Print the coordinates
-            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+!            IF(Ctrl%NGeom==1)THEN
+!              GM%Confg=1
+!              IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+!            ENDIF
          ENDIF
          NAtoms=GM%NAtms
 !----------------------------------------------------------------------------------------- 

@@ -40,6 +40,8 @@ MODULE DrvFrcs
       CALL Invoke('SForce',CtrlVect)
 !     Kinetic energy piece
       CALL Invoke('TForce',CtrlVect)
+!     Build a density with last DM
+      CALL Invoke('MakeRho',CtrlVect)
 !     Coulomb part
       CALL Invoke('JForce',CtrlVect)
 !     Exact Hartree-Fock exchange component

@@ -51,7 +51,7 @@ PROGRAM MondoSCF
         DO ISet=Begin(2),Ctrl%NSet
            Ctrl%Current(2)=ISet
            CALL OneSCF(Ctrl)
-           Ctrl%Previous=Ctrl%Current
+           Ctrl%Current(1)=0
         ENDDO
         CALL Forces(Ctrl)
      ENDDO
@@ -65,18 +65,21 @@ PROGRAM MondoSCF
   CASE(GRAD_TS_SEARCH)
      CALL MondoHalt(USUP_ERROR,' Look for transition state optimizer in version 1.0b2.')
   CASE(GRAD_NO_GRAD)
-!    Single points.  Loop first over basis sets...
+!    Single points.  
+!    Loop first over basis sets.
      DO ISet=Begin(2),Ctrl%NSet
         Ctrl%Current(2)=ISet
         CALL OneSCF(Ctrl)
-        Ctrl%Previous=Ctrl%Current
+        Ctrl%Current(1)=0
      ENDDO
-!    Then over geometries at last basis set
-     DO IGeo=Begin(3),Ctrl%NGeom
-        Ctrl%Current(3)=IGeo
-        CALL OneSCF(Ctrl)
-        Ctrl%Previous=Ctrl%Current
-     ENDDO
+     IF(Ctrl%NGeom>1)THEN
+!       Go over additional geometries at last basis set
+        DO IGeo=Begin(3),Ctrl%NGeom
+           Ctrl%Current(3)=IGeo
+           CALL OneSCF(Ctrl)
+           Ctrl%Current(1)=0
+        ENDDO
+     ENDIF
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()

@@ -64,7 +64,7 @@ MODULE ParsingKeys
 !  Options involving force evaluations
 !
    INTEGER, PARAMETER           :: GRAD_NO_GRAD   = 1000001 ! Do no gradeints evaluation
-!  <Options.Grad>=
+!  <Options.Grad=>  
    CHARACTER(LEN=4),  PARAMETER :: GRADIENTS      ='Grad'
    CHARACTER(LEN=5 ), PARAMETER :: FORCE          ='Force'
    INTEGER, PARAMETER           :: GRAD_ONE_FORCE = 1084814 ! Perform one force evaluation

@@ -1,3 +1,4 @@
+!  Authors: Matt Challacombe and Chee Kwan Gan
 MODULE Overlay
    USE DerivedTypes
    USE GlobalScalars
@@ -5,7 +6,7 @@ MODULE Overlay
    USE ProcessControl
    USE Clock
 #ifdef NAG
-   USE F90_UNIX_ENV
+   USE F90_UNIX
 #endif
    USE SCFLocals
    USE ParsingConstants
@@ -121,8 +122,6 @@ MODULE Overlay
          DO I=1,NArg
             CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
          ENDDO
-!        IF(PrintFlags%Key>DEBUG_MEDIUM) &
-!            WRITE(*,*)TRIM(CmndLine)
 !        Max number of characters in an arg
          MaxLen=0
          DO I=1,NArg   
@@ -189,8 +188,8 @@ MODULE Overlay
             CALL LineToChars(CmndLine,ArgV,NULL_O=.TRUE.)
             NArg=SIZE(ArgV%C)
             CALL New(ErrCodes,NPrc)            
-!           CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL,ROOT,ErrCodes%I)
-            CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL,ROOT,MPI_COMM_SELF,child_inter,ErrCodes%I,IErr)
+            CALL MPI_COMM_SPAWN(Command,ArgV%C,NPrc,MPI_INFO_NULL, &
+                                ROOT,MPI_COMM_SELF,child_inter,ErrCodes%I,IErr)
             DO I=1,NPrc
                IF(ErrCodes%I(I)/=MPI_SUCCESS)THEN
                   CALL MPI_ERROR_STRING(ErrCodes%I(I),ErrMsg,LenMsg)

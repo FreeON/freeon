@@ -32,6 +32,7 @@ MODULE DrvSCFs
            CALL SCFCycle(Ctrl)          
            IF(ConvergedQ(Ctrl))THEN
               IF(Summry)CALL SCFSummry(Ctrl)
+              Ctrl%Previous=Ctrl%Current
               RETURN
            ENDIF
            Ctrl%Previous=Ctrl%Current
@@ -49,53 +50,53 @@ MODULE DrvSCFs
       CALL DensityBuild(Ctrl)
       CALL FockBuild(Ctrl)
       CALL SolveSCF(Ctrl)
-!      CALL CleanScratch(Ctrl)
+      CALL CleanScratch(Ctrl)
     END SUBROUTINE SCFCycle
 !==========================================================================
 !   Build a density by hook or by crook
 !==========================================================================
     SUBROUTINE DensityBuild(Ctrl)
       TYPE(SCFControls)    :: Ctrl
-      INTEGER,DIMENSION(3) :: Tmp
+      LOGICAL,PARAMETER    :: DensityProject=.FALSE.
 !---------------------------------------------------------------------------------------
-      IF(CCyc==0.AND.CGeo==1.AND.CBas>1)THEN
+      IF(CCyc==0.AND.CBas==PBas.AND.CGeo/=1)THEN
+         IF(DensityProject)THEN
+!           Projection of density matrix between geometries
+            CALL LogSCF(Ctrl%Current,'Geometry projection from configuration #' &
+                                   //TRIM(PrvGeom)//' to configuration# ' &
+                                   //TRIM(CurGeom)//'.')
+!           Create density from last SCF 
+            CtrlVect=SetCtrlVect(Ctrl,'Project')
+         ELSE
+!           Extrapolation of density matrix between geometries
+            CALL LogSCF(Ctrl%Current,'Geometry extrapolation from configuration #' &
+                                   //TRIM(PrvGeom)//' to configuration# ' &
+                                   //TRIM(CurGeom)//'.')
+!           Create density from last SCFs DM (ICyc+1)
+            Ctrl%Previous(1)=Ctrl%Previous(1)+1
+            CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
+         ENDIF
+         CALL Invoke('P2Use',CtrlVect)
+         CALL Invoke('MakeRho',CtrlVect)
+      ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
-         CALL LogSCF(Ctrl%Current,' Switching basis sets from ' &
+         CALL LogSCF(Ctrl%Current,'Switching basis sets from ' &
                                 //TRIM(Ctrl%BName(PBas))//' to ' &
                                 //TRIM(Ctrl%BName(CBas))//'.')
-!        Create density from last SCF, fake out MakeRho....
-         Tmp=Ctrl%Current  
-         Ctrl%Current=Ctrl%Previous       
+!        Create density from last SCFs DM (ICyc+1)
+         Ctrl%Previous(1)=Ctrl%Previous(1)+1
          CtrlVect=SetCtrlVect(Ctrl,'BasisSetSwitch')
-         Ctrl%Current=Tmp
-         CALL Invoke('MakeRho',CtrlVect)
-      ELSEIF(CCyc==0.AND.(CGeo/=PGeo))THEN
-!-------------------------------------------------------------------------
-!        Projection of density matrix between geometries
-!         CALL LogSCF(Ctrl%Current,' Geometry projection from configuration #' &
-!                                //TRIM(PrvGeom)//' to configuration# ' &
-!                                //TRIM(CurGeom)//'.')
-!        Create density from last SCF 
-!         CtrlVect=SetCtrlVect(Ctrl,'Project')
-!-------------------------------------------------------------------------
-!        Extrapolation of density matrix between geometries
-         CALL LogSCF(Ctrl%Current,' Geometry extrapolation from configuration #' &
-                                //TRIM(PrvGeom)//' to configuration# ' &
-                                //TRIM(CurGeom)//'.')
-!        Create density from last SCF 
-         CtrlVect=SetCtrlVect(Ctrl,'Extrapolate')
-         CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
      ELSEIF(CCyc==0.AND.CBas==1.AND.CGeo==1)THEN
 !        Start up density from atomic superposition in diagonal minimial basis 
-         CALL LogSCF(Ctrl%Current,' Density guess from superposition of AOs ')
+         CALL LogSCF(Ctrl%Current,' Density guess from superposition of AOs.')
 !        Create density from guess
          CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
       ELSE
 !        Regular old density build
-         CALL LogSCF(Ctrl%Current,'Direct SCF')
+         CALL LogSCF(Ctrl%Current,'Standard density build',.TRUE.)
          CtrlVect=SetCtrlVect(Ctrl,'Direct')
          CALL Invoke('MakeRho',CtrlVect)
       ENDIF
@@ -109,12 +110,12 @@ MODULE DrvSCFs
       INTEGER            :: Modl
       LOGICAL            :: DoDIIS
 !-----------------------------------------------------------
+      IF(Ctrl%InkFok)THEN
+         CALL LogSCF(Current,'Building an incremental Fock matrix')
+      ELSE
+         CALL LogSCF(Current,'Building the Fock matrix')
+      ENDIF
       DoDIIS=CCyc>0
-!      IF(DoDIIS)THEN
-!         CALL LogSCF(Current,'Fock build with Pulay DIIS')
-!      ELSE
-!         CALL LogSCF(Current,'Fock build with Pulay DIIS')
-!      ENDIF
       Modl=Ctrl%Model(CBas)
       CALL Invoke('QCTC',CtrlVect)
       IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect)
@@ -129,12 +130,11 @@ MODULE DrvSCFs
     SUBROUTINE SolveSCF(Ctrl)
       TYPE(SCFControls)  :: Ctrl
 !-----------------------------------------------------------
-!      CtrlVect=SetCtrlVect(Ctrl,'SCFSolve')
       IF(Ctrl%Method(CBas)==RH_R_SCF)THEN
-!         CALL LogSCF(Current,'Solving SCF equations with Roothaan-Hall')
+         CALL LogSCF(Current,'Solving SCF equations with Roothann-Hall')
          CALL Invoke('RHeqs',CtrlVect)
       ELSE
-!         CALL LogSCF(Current,'Solving SCF equations with SDMM')
+         CALL LogSCF(Current,'Solving SCF equations with SDMM')
          CALL Invoke('SDMM',CtrlVect,MPIRun_O=.TRUE.) 
       ENDIF
       CALL Invoke('SCFstats',CtrlVect,MPIRun_O=.TRUE.)                                     
@@ -145,9 +145,9 @@ MODULE DrvSCFs
     SUBROUTINE OneEMats(Ctrl)
       TYPE(SCFControls)             :: Ctrl
       INTEGER                       :: ISet,I
+      CALL LogSCF(Current,'One-electron matrices.',.TRUE.)
       CtrlVect=SetCtrlVect(Ctrl,'OneElectron')
       CALL Invoke('MakeS',CtrlVect,MPIRun_O = .TRUE.)
-
       IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
          CALL Invoke('LowdinO',  CtrlVect)
       ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
@@ -160,48 +160,79 @@ MODULE DrvSCFs
 !========================================================================================
 !
 !========================================================================================
-    SUBROUTINE LogSCF(Stats,Mssg)
+    SUBROUTINE LogSCF(Stats,Mssg,Banner_O)
       INTEGER,DIMENSION(3),INTENT(IN) :: Stats
       CHARACTER(LEN=*), INTENT(IN)    :: Mssg
-      CALL Logger('------------------------------------------------------------')
-      CALL Logger('  Cycl = '//TRIM(IntToChar(Stats(1))) &
-                //', Base = '//TRIM(IntToChar(Stats(2))) &
-                //', Geom = '//TRIM(IntToChar(Stats(3))) )
-      CALL Logger(Mssg)
-      CALL Logger('------------------------------------------------------------')
+      CHARACTER(LEN=DEFAULT_CHR_LEN)  :: Mssg2
+      LOGICAL,OPTIONAL                :: Banner_O
+      LOGICAL                         :: Banner
+      IF(PRESENT(Banner_O))THEN
+         Banner=Banner_O
+      ELSE
+         Banner=.FALSE.
+      ENDIF
+      IF(Banner)THEN
+         CALL Logger('!------------------------------------------------------------')
+         CALL Logger('  Cycl = '//TRIM(IntToChar(Stats(1))) &
+                   //', Base = '//TRIM(IntToChar(Stats(2))) &
+                   //', Geom = '//TRIM(IntToChar(Stats(3))) )
+      ENDIF
+      Mssg2='  '//TRIM(Mssg)
+      CALL Logger(Mssg2)
     END SUBROUTINE LogSCF
 !========================================================================================
 !   Clean the Scratch Directory
 !========================================================================================
-    SUBROUTINE CleanScratch(Ctrl,Action)
+    SUBROUTINE CleanScratch(Ctrl,Action_O)
       TYPE(SCFControls)              :: Ctrl
-      CHARACTER(LEN=4)               :: Action
-      CHARACTER(LEN=DEFAULT_CHR_LEN) :: RemTag,RemoveFile
-      INTEGER                        :: IGeo,IBas,ICyc
+      CHARACTER(LEN=*), OPTIONAL     :: Action_O
+      CHARACTER(LEN=DEFAULT_CHR_LEN) :: Action,RemCur,RemPrv,RemoveFile
+      INTEGER                        :: Modl
 !---------------------------------------------------------------------------------------      
-      ICyc=Ctrl%Current(1)
-      IBas=Ctrl%Current(2)
-      IGeo=Ctrl%Current(3)
-      IF(Action=='Cycl') THEN
-         RemTag=TRIM(ScrName)//'_Geom#'//TRIM(IntToChar(IGeo))  & 
-                             //'_Base#'//TRIM(IntToChar(IBas))  &
-                             //'_Cycl#'//TRIM(IntToChar(ICyc-1)) 
-         RemoveFile=TRIM(RemTag)//'.Rho'                                
+      IF(PRESENT(Action_O))THEN
+         Action=Action_O
+      ELSE
+         Action='CleanLastCycl'
+      ENDIF
+      IF(Action=='CleanLastCycl') THEN
+         Modl=Ctrl%Model(CBas)
+         RemCur=TRIM(ScrName)//'_Geom#' &
+              //TRIM(CurGeom)//'_Base#' &
+              //TRIM(CurBase)//'_Cycl#' &
+              //TRIM(CurCycl)
+         RemPrv=TRIM(ScrName)//'_Geom#' &
+              //TRIM(CurGeom)//'_Base#' &
+              //TRIM(CurBase)//'_Cycl#' &
+              //TRIM(PrvCycl)
+         RemoveFile=TRIM(RemCur)//'.Rho'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(RemTag)//'.J'                                
+         RemoveFile=TRIM(RemCur)//'.J'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(RemTag)//'.K'                                
+         IF(HasDFT(Modl))THEN
+            RemoveFile=TRIM(RemCur)//'.Kxc'                                
+            CALL SYSTEM('/bin/rm '//RemoveFile)
+         ENDIF
+         IF(HasHF(Modl))THEN
+            RemoveFile=TRIM(RemCur)//'.K'                                
+            CALL SYSTEM('/bin/rm '//RemoveFile)
+         ENDIF
+         RemoveFile=TRIM(RemCur)//'.D'                                
          CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(RemTag)//'.D'                                
-         CALL SYSTEM('/bin/rm '//RemoveFile)
-         RemoveFile=TRIM(RemTag)//'.F'                                
-         CALL SYSTEM('/bin/rm '//RemoveFile)
-      ELSEIF(Action=='Base') THEN
-         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(IntToChar(IGeo))    & 
-                                    //'_Base#'//TRIM(IntToChar(IBas-1)) //'*' 
+         IF(CCyc>0)THEN
+            RemoveFile=TRIM(RemCur)//'.OrthoD'                                
+            CALL SYSTEM('/bin/rm '//RemoveFile)
+            RemoveFile=TRIM(RemCur)//'.F_DIIS'                                
+            CALL SYSTEM('/bin/rm '//RemoveFile)
+            RemoveFile=TRIM(RemPrv)//'.F'                                
+            CALL SYSTEM('/bin/rm '//RemoveFile)
+         ENDIF
+      ELSEIF(Action=='CleanLastBase')THEN
+         RemoveFile=TRIM(ScrName)//'*'//'Base#'//TRIM(PrvBase)//'*' 
+         WRITE(*,*)' Remove = ',RemoveFile
          CALL SYSTEM('/bin/rm '//RemoveFile)  
-      ELSEIF(Action=='Geom') THEN
-         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(IntToChar(IGeo-1))//'*' 
+      ELSEIF(Action=='CleanLastGeom')THEN
+         RemoveFile=TRIM(ScrName) //'_Geom#'//TRIM(PrvGeom)//'*' 
+         WRITE(*,*)' Remove = ',RemoveFile
          CALL SYSTEM('/bin/rm '//RemoveFile) 
       ENDIF
     END SUBROUTINE CleanScratch
@@ -244,14 +275,21 @@ MODULE DrvSCFs
          dDIIS=ABS(DIISA-DIISB)
 !        Relative numbers (Quotients)
          ETotQ=dETot/ABS(ETotB)
-         DMaxQ=dDMax/ABS(DMaxB)
-         DIISQ=dDIIS/ABS(DIISB)
+         DMaxQ=dDMax/ABS(DMaxB+1.D-50)
+         DIISQ=dDIIS/ABS(DIISB+1.D-50)
 !------------------------------
 !        Check for convergence
          ETest=ETol(Ctrl%AccL(CBas))
          DTest=DTol(Ctrl%AccL(CBas))
+
 !        Check for absolute convergence below thresholds
-         IF(dDMax<dTest.AND.ETotQ<ETest)THEN
+!        and approach from correct direction.
+         IF(dDMax<dTest.AND.ETotQ<ETest.AND.ETotB<ETotA)THEN
+            Mssg='Normal SCF convergence.'
+            ConvergedQ=.TRUE.
+         ENDIF
+!        Accept convergence from wrong side if thresholds are tightend.
+         IF(dDMax<dTest*1.D-1.AND.ETotQ<ETest*1.D-2)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
@@ -266,8 +304,6 @@ MODULE DrvSCFs
             ENDIF
 !           Look for convergence stall-outs 
             IF(DIISQ<9.D-2.AND.DMAXQ<1.D-2)THEN
-               WRITE(*,*)' DIISQ = ',DIISQ
-               WRITE(*,*)' DMAXQ = ',DMAXQ
                Mssg='SCF convergence stalled.'
                ConvergedQ=.TRUE.
             ENDIF 
@@ -348,8 +384,6 @@ MODULE DrvSCFs
       40 FORMAT('SCF  ',2x,'Ink',7x,'Total ',12x,'Delta',7x,'Max    ',5x,'DIIS   ')
       41 FORMAT('Cycle',2x,'Fok',7x,'Energy',12x,'E_Tot',7x,'Delta P',5x,'Error  ')
       42 FORMAT(1x,I2,',   ',L2,', ',F20.8,4(', ',D10.4))
-
-
 !
       END SUBROUTINE SCFSummry
 END MODULE
