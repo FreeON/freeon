@@ -126,27 +126,25 @@ Cartesian coordinates of atomic nuclei \cite{EWilson55}.
 
 The reduced vibrational coupling achieved with internal coordinates provides an advantage 
 in molecular geometry optimization \cite{PPulay77} and molecular dynamics \cite{PPulay02}.
-Specifically, a full Newton {\bf optimization} step in Cartesian coordinates will typically generate a larger, 
+Specifically, a full Newton optimization step in Cartesian coordinates will typically generate a larger, 
 anharmonic coupling relative to a full Newton step carried out in internal coordinates.
 An excellent discussion of this issue can be found in the Introduction of Ref.~\onlinecite{GFogarasi92}.
 
 Today, the most aggressive internal coordinate algorithms have been highly optimized for 
 small molecule quantum chemistry.  These methods typically generate a Cartesian Hessian,
 either exactly or approximately. This Cartesian Hessian is then transformed into an internal 
-coordinate representation, and an internal coordinate Newton {\bf optimization} step is taken. The internal 
+coordinate representation, and an internal coordinate Newton optimization step is taken. The internal 
 coordinate 
-%step 
-{\bf displacement}
+displacement
 is then transformed back to a Cartesian displacement and used to increment the 
-molecular geometry {\bf as described in Ref.~\onlinecite{PPulay77}}.
+molecular geometry as described in Ref.~\onlinecite{PPulay77}.
 
 There are many variations on this approach.  Cartesian Hessians are usually calculated by updating 
 algorithms in the framework of the variable metric or quasi-Newton approach such as the  
 Broyden-Fletcher-Goldfarb-Shanno (BFGS) method \cite{RFletcher81}.  With increasing system size, storing,
 transforming and potentially inverting a full Hessian matrix scales as ${\cal O}(N^3)$, and it becomes
 favorable to consider diagonal or 
-%semi-diagonal 
-{\bf quasi-diagonal}
+quasi-diagonal
 approximations to the internal coordinate Hessian. 
 This severely truncated Newton or  ``force relaxation'' method typically obtains static diagonal values 
 {\em a priori} from spectroscopic data or empirical force-fields 
@@ -161,15 +159,14 @@ algorithm of Pulay
 {\it et.al}. While geometric DIIS is a simple 
 technique, its successful application may require many intricate modifications \cite{OFarkas02}.  
 Recent reviews and comparisons of these algorithms and their technical details can be found in 
-{\bf Refs.~\onlinecite{HSchlegel03,VBakken02}}.
+Refs.~\onlinecite{HSchlegel03,VBakken02}.
 
-{\bf It is also possible to update the internal coordinate
+It is also possible to update the internal coordinate
 Hessian, however this does not allow for the on-the-fly redefinition
 of the internal coordinates, that is important for large molecules.
 
 Important recent developments of quasi-Newton methods can be found in
 Refs.~\onlinecite{ATurner99,XPrat-Resina02,SBilleter00,JNocedal80}.
-}
 
 \section{A New Concept} \label{concept}
 
@@ -182,7 +179,7 @@ a step along a specific element of $\bf x$ is coupled to all components of $\bf 
 elements of $\bf H$.  Alternatively, it is possible to work in the principal axis system of $\bf H$, or 
 normal modes,  which derive from eigenvectors of the Hessian.  On an ideal harmonic surface the NR method remains 
 %exactly
-{\bf completely} decoupled 
+completely decoupled 
 %to all orders 
 in the basis of normal modes, and also achieves quadratic convergence.  
 
@@ -207,11 +204,11 @@ Extending the independent coordinate approximation, it is clear that a differenc
 due to large step sizes.  Also, because coordinate independence is an approximation, coupling effects will lead
 to scatter in the gradient data.  Replacing  the differencing scheme with a curve fit has the potential to both 
 smooth the data and provide higher order accuracy.  
-Using the local tangent of a fitted {\bf gradient-component} curve 
+Using the local tangent of a fitted gradient-component curve 
 to approximate 
 diagonal elements of the Hessian 
 would be similar to force relaxation \cite{PPulay77,HSellers78,CVanAlsenoy98}, but with constantly updated 
-values of the {\bf diagonal} Hessian.  However, the curve fit can be carried further;  forsaking an approximate Newton optimization step, 
+values of the diagonal Hessian.  However, the curve fit can be carried further;  forsaking an approximate Newton optimization step, 
 the curve fit can be used instead to extrapolate or interpolate a zero for the parameterized gradient data.  
 To first order (a line fit), this is equivalent to a one-dimensional Newton step with a fitted gradient and a 
 fitted Hessian.   While the approach outlined so far works well, the use of standard least squares is not 
@@ -222,8 +219,7 @@ We call this concept the ``QUasi Independent Curvilinear Coordinate Approximatio
 
 Explicitly then, application of QUICCA to geometry optimization involves the  projection of Cartesian 
 gradient information onto 
-%an uncoupled $N_{\rm int}$ dimensional internal coordinate space.  
-{\bf an $N_{\rm int}$ dimensional set of uncoupled internal coordinates}.  
+an $N_{\rm int}$ dimensional set of uncoupled internal coordinates.  
 Energy gradients 
 are accumulated for each internal coordinate, as shown in Fig.~\ref{NH3outp6}, and used to formulate 
 $N_{\rm int}$ independent curves by weighted least squares.  At each step, these curves are extrapolated 
@@ -234,61 +230,45 @@ collective extrapolation is determined by severity of the low order coupling, re
 coordinate system and the accuracy of the fit.  The QUICCA approach to geometry optimization is simple to 
 implement and scales linearly with system size.  It overcomes low order coupling effects through averaging and 
 weighting of the curve fit and also admits the accumulation of anharmonic information.  
-%However,  augmenting
-%QUICCA with anharmonic quadratic and higher order terms {\em and} preserving the important smoothing effect of 
-%the weighted fit is an advanced subject beyond the scope of this work. 
-{\bf Augmenting
-QUICCA with explicite anharmonic terms which derive from 
-a higher than linear fit of the energy gradients may lead 
-to the loss of the the important smoothing effect of 
-the weighted fit. Thus, even though this extension of QUICCA 
-can be considered, it is an advanced subject beyond the scope of this work. 
-}
+However,  augmenting QUICCA with anharmonic quadratic and higher order 
+terms that derive from a higher than linear fit of the 
+energy gradients {\em and} preserving the important smoothing 
+effect of the weighted fit is an advanced subject beyond the 
+scope of this work.
 
-% implement and scales linearly with system size.  It overcomes low order coupling effects through averaging and weighting of the curve fit and also admits the accumulation of anharmonic information.  However,  augmenting %QUICCA with anharmonic quadratic and higher order terms {\em and} preserving the important smoothing effect of
-% {\bf QUICCA with explicite anharmonic terms on the basis of a quadratic or cubic (or even higher order) fit may lead to the loss of the
-%the important smoothing effect of
-% the weighted {\bf line} fit is an advanced subject beyond the scope of this work.
-
-{\bf
-\subsection{Comparison to DIIS and ABNR}
-It is necessary to make a brief comparison of QUICCA to the 
-geometric DIIS (GDIIS) \cite{PPulay84} algorithm of Pulay and to
+\subsection{Relationship to other methods}
+It is necessary to briefly distinguish QUICCA from the 
+geometric DIIS (GDIIS) \cite{PPulay84} algorithm of Pulay and 
 the Adopted Basis set Newton-Raphson (ABNR) method of Karplus 
 {\it et.al.} \cite{BBrooks83}, since these algorithms are all iterative
 subspace (Krylov-space \cite{YSaad92}) methods.
 
 ABNR is the earliest development of this kind and can be considered
-as the prototype of Krylov-space techniques in geometry optimization.
-ABNR takes the last few $n_{fit}$ (typically 5) 
+a prototype for Krylov-space techniques in geometry optimization.
+ABNR takes the last few $n$ (typically 5) 
 displacement (or gradient) vectors, to define
 the iterative subspace. Then, a good-quality, 
-$n_{fit}\times n_{fit}$ dimensional 
-Hessian matrix is built up in this
-subspace, by numerical derivation or Hessian-update.
-Using this numerical Hessian matrix,
+$n\times n$ dimensional Hessian matrix is built up in this
+subspace, by numerical differentiation or variable metric update
+of the Hessian.
+Using this approximate Hessian matrix,
 ABNR carries out a Newton-Raphson or a Rational Function Optimization 
-\cite{ABanerji85} step in the iterative subspace. 
+\cite{ABanerji85} step in the $n$-dimensional subspace. 
 
 Both QUICCA and GDIIS aim on geometry optimization in the iterative
 subspace without building any numerical Hessian matrices, as opposed to
 ABNR. 
 
-In GDIIS, simple relaxation steps are generated along an
-abstract optimization coordinate, using an external optimizer.
-These simple relaxation structures
-are promoted along the abstract optimization coordinate by extrapolating
-or interpolating the error associated with them. The extrapolation
-is done without any fitting, just by weighting and summing-up
-different structures.
-Since the error is usually defined as the norm of the gradient,
-GDIIS cannot account for the curvature of the potential energy surface.
-As a consequence, GDIIS oscillates in the vicinity of 
-inflexion-points and fails to distinguish between minima and 
-saddle points. Furthermore, the extrapolation/interpolation 
-process is very sensitive to numerical errors in the error estimates.
-The most recent GDIIS algorithms cure these problems by 
-augmenting GDIIS into the Rational Function Optimization scheme
+In GDIIS, simple relaxation steps are generated using an external optimizer,
+typically involving force relaxation (as described in Section \ref{conventional}) or Rational Function Optimization methods.  These
+simple relaxation structures are propagated along an abstract optimization
+coordinate by extrapolating the error associated with them to zero through
+solution of a least squares problem that minimizes errors associated with the
+gradient norm.  GDIIS cannot account for the signed curvature of the potential
+energy surface, and as a consequence,  oscillates in the vicinity of inflexion-points and fails to
+distinguish between minima and saddle points. Furthermore, the extrapolation/interpolation
+process is very sensitive to the condition number of the error matrix. The most recent GDIIS algorithms
+cure these problems through augmenting the Rational Function Optimization scheme by GDIIS
 \cite{FEckert97} or by comparing the GDIIS steps to reference steps
 taken again from a reliable external optimizer \cite{OFarkas02}.
 
@@ -299,10 +279,11 @@ to distinguish between minima, saddles and inflexion points.
 This is due to the weighted curve-fit, that can be applied in any
 kind of coordinate system exhibiting
 reasonably small vibrational coupling. The curve fit avoids 
-numerical problems associated with error estimates in GDIIS,
+numerical problems associated with the condition number
+of the GDIIS error matrix,
 and it also averages noise coming from vibrational coupling.
 
-Another relative of QUICCA is the string method from the
+Another method related to QUICCA is the string method from the
 field of reaction-path finding \cite{EWeinan02,BPeters04}
 and other similar algorithms \cite{CGonzalez90} that
 apply curve (spline) fitting of the potential energy surface 
@@ -312,7 +293,6 @@ Finally, QUICCA can also be considered as a (multidimensional)
 gradient-based line search method, that explores the potential energy
 surface in directions
 exhibiting reasonably small vibrational coupling.
-}
 
 \section{Implementation}\label{implementation}
 
@@ -320,7 +300,7 @@ exhibiting reasonably small vibrational coupling.
 
 The present implementation of QUICCA employs a redundant set of primitive internal 
 coordinates. Similar coordinate systems are used by a majority of other internal coordinate optimizers 
-{\bf \cite{GFogarasi79,GFogarasi92,JBaker93,FEckert97,HSchlegel98}}.  
+\cite{GFogarasi79,GFogarasi92,JBaker93,FEckert97,HSchlegel98}.  
 The generation of these coordinates starts with the recognition of covalent bonds, 
 based on atomic Slater radii \cite{JSlater64}  multiplied by an empirical factor of 1.3. 
 Weak bonds are recognized on the basis of atomic van der Waals (VDW) radii \cite{webelements}.
@@ -337,17 +317,13 @@ $n_{\rm fit}$ most  recent steps are summed to yield a merged topology matrix, w
 $n_{\rm fit}$ is the same number of points employed by the curve fitting.   
 In the current implementation $n_{\rm fit}=7$, but it can be much larger or smaller.  
 
-The merged topology matrix avoids fluctuations due to the possibility of bond-formation and 
+The merged topology matrix avoids fluctuations due to the possibility of bond-formation and
 bond vanishing during the optimization of large molecules.  Use of the merged topology matrix
 increases the number of internal coordinates and the redundancy of the coordinate set only slightly;
-the final merged topology matrix is determined directly from primary topology matrices rather 
-than the merged ones at previous cycles.
-
-{\bf The merging of the primary bonding schemes guaranties the convergence
-of the gradient transformation of an older Cartesian gradient vector
-at a more recent geometry while it forgets about information from 
-irrelevant steps.
-}
+the final merged topology matrix is determined directly from primary topology matrices rather
+than the merged ones at previous cycles; merging  primary bonding topologies rather than previously
+merged ones avoids the accumulation of information from irrelevant steps, while guaranteeing the convergence of gradient
+transformations involving older Cartesian gradient vectors at more recent geometries.
 
 Based on the topology matrix of the merged bonding network, all other primitive 
 internal coordinates, such as bond angles, torsions, linear bendings and 
@@ -442,15 +418,10 @@ delocalized internals \cite{JBaker96}, hold the possibility of identifying deloc
 states by gradient fitting.  An analysis by  Wales {\it et.al.} \cite{JUppenbrink92} provides 
 insight into the numerical problems involved in controlling convergence to a minimum without an 
 accurate Hessian.  
-%Note that, even with a good quality Hessian update, such as BFGS \cite{RFletcher81},
-%there is no guarantee to converge into a minimum instead of a transition state. 
-{\bf We adopt the view of Ref.~\onlinecite{GFogarasi92}, that
+We adopt the view of Ref.~\onlinecite{GFogarasi92}, that
 some of the 
 Hessian matrix update schemes offer reasonable, although not mathematically
 complete guarantees that the points they converge to are minima.
-}
-%This is because positive definiteness of an approximate Hessian does not guarantee
-%the positive definiteness of the exact Hessian. 
 Thus, the exact Hessian remains the only 
 absolute for determining the character of extremal points in the potential energy 
 surface.
@@ -648,25 +619,22 @@ than the best traditional techniques.   We believe these cases may be improved b
 more sensitive weighting scheme, and/or employing a more sophisticated internal coordinate
 system as discussed above in Section~\ref{transformation}.
 
-{\bf I have removed the suggestion for GDIIS here.}
-%Note that these results have been achieved without the use of traditional convergence acceleration 
-%algorithms such as geometric DIIS (GDIIS) \cite{PPulay84,OFarkas02}.  It is of course entirely 
-%possible to deploy the GDIIS algorithm together with QUICCA, but we leave this avenue open for future 
-%work.
-
 Our experience shows, that QUICCA is relatively insensitive to the values of $H_{ll}$ employed 
 in the construction of weights (see Section \ref{Sweights}).   For example the values $0.5$, $0.2$ 
 and $0.1$ au for $H_{ll}$ (instead of our standard, $1.0$, $0.1$ and $0.01$ au)
 resulted in 189 steps instead of 187 for Baker's test set.  The largest difference was present 
 in Dimethylpenthane, which converges 2 steps faster when using the standard $H_{ll}$ values. 
 
-{\bf We have also studied the dependence of QUICCA on the choice of $n_{fit}$
+We have also studied the dependence of QUICCA on the choice of $n_{fit}$
 for the cases of $n_{fit}=5,7,9$ and $11$, resulting in total optimization
-steps of $190, 187, 196$ and $203$, respectively. It is clear from these
-results, that a filtering algorithm, such as the one, based on the weights
-as mentioned in Sect.~\ref{stepsizectrl} is useful and should be explored
-further.
-}
+steps of $188, 187, 192$ and $190$, respectively. 
+Thus, it is clear, that the weigthed curve fit has only a small
+dependence on $n_{fit}$ for small molecules.
+However, a weighted filtering algorithm such as 
+the one mentioned in Section~\ref{stepsizectrl}
+may still be useful to provide a more general concept to the 
+number of remembered steps  and the uncertainty of the extrapolation 
+step and should be explored further.
 
 In  Baker's test suite, about three force evaluations have been saved by 
 using backtracking. Without the application of backtracking, Baker's test set
@@ -765,15 +733,18 @@ approximate absolute energy resolution of $10^{-5}$ hartree using MondoSCF \cite
 Note that this minimal level of theory actually makes more work for the optimizer, as it will tend to 
 move away from the more correct crystallographic structure.   This structure was optimized to within a 
 Cartesian force of $3\times10^{-4}$ au and 
-{\bf the maximum internal coordinate displacement in 
+the maximum internal coordinate displacement in 
 the last optimization step was smaller than
-$4\times10^{-3}$ au. These convergence is tighter then the one that has been
+$4\times10^{-3}$ au. These convergence criteria are 
+tighter then the ones which have been
 applied in the plasminogen optimization of Schlegel {\it et.al.} 
-\cite{HSchlegel00}, but looser than the usual Baker's criteria.
+\cite{HSchlegel00}, but somewhat looser than the usual Baker's criteria.
+Certainly, the choice of convergence criteria for large molecules 
+is application dependent, involving tradeoffs between 
+numerical precision and cost.
+
 We leave the choice of convergence criteria for large molecules 
 to be subject of further research.
-}
-%a maximum predicted displacement less than $4\times10^{-3}$ au.
 The number of internal coordinates, generated for this structure was 1280 at convergence.  Figure~\ref{logn-logde} 
 shows ${\rm log}_{10} \Delta E_i$ vs $i$ for this system, Fig.~\ref{gradientpicture} the root mean square 
 of the Cartesian gradient at each step.
