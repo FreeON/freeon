@@ -6246,8 +6246,8 @@ return
      DO IntSet=1,3
        IF(IntSet==1) THEN
          N=SIZE(SLRadii,1)
-        !Fact=1.3D0 !!! Scaling factor for Slater Radii
-         Fact=1.0D0 !!! Scaling factor for Slater Radii
+         Fact=1.3D0 !!! Scaling factor for Slater Radii
+        !Fact=1.0D0 !!! Scaling factor for Slater Radii
          DO I=1,NatmsLoc
            CritRad%D(I)=Fact*SLRadii(AtNum(I))*AngstromsToAU
          ENDDO
@@ -6255,8 +6255,8 @@ return
          N=SIZE(VDWRadii,1)
          Fact=GCoordCtrl%VDWFact !!! Scaling factor for VDW Radii
          DO I=1,NatmsLoc
-          !CritRad%D(I)=Fact*VDWRadii(AtNum(I))*AngstromsToAU
-           CritRad%D(I)=Fact*1.6*SLRadii(AtNum(I))*AngstromsToAU
+           CritRad%D(I)=Fact*VDWRadii(AtNum(I))*AngstromsToAU
+          !CritRad%D(I)=Fact*1.6*SLRadii(AtNum(I))*AngstromsToAU
          ENDDO
        ENDIF
        StRad%D=CritRad%D
@@ -6276,7 +6276,7 @@ return
            CALL SortFragments(TOPS%Cov12%I,FragID%I,NFrag)
           !Fact=(One+0.05D0*(IFrags-1))
            Fact=1.05D0**(IFrags-1)
-           IF(NFrag/=1.AND.Fact<1.6D0) THEN
+           IF(NFrag/=1.AND.Fact<1.60D0) THEN
            ! CritRad%D=1.05D0*CritRad%D 
              CritRad%D=Fact*StRad%D
              CALL Delete(TOPS%Cov12)
