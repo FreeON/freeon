@@ -471,33 +471,56 @@ MODULE ParseExtraCoords
 !
    SUBROUTINE ReOrdIntC(IntCs,NIntC)
      TYPE(INTC)           :: IntCs
-     INTEGER              :: NIntC,I,J
-     INTEGER,DIMENSION(4) :: Atoms
+     INTEGER              :: NIntC,I,J,K,L,M,N
+     INTEGER              :: Atoms(4),Cells(12)
      !
      ! Use similar ordering as in InCoords
      !
      DO I=1,NIntC
+       Atoms(1:4)=IntCs%Atoms%I(I,1:4)
+       Cells(1:12)=IntCs%Atoms%I(I,1:12)
        IF(IntCs%Def%C(I)(1:4)=='STRE') THEN
-         Atoms(1:2)=IntCs%Atoms%I(I,1:2)
          IF(Atoms(1)>Atoms(2)) THEN
            DO J=1,2 ; IntCs%Atoms%I(I,J)=Atoms(3-J) ; ENDDO
+           DO J=1,2 
+             K=3*(4-J-1)+1
+             L=K+2
+             M=3*(J-1)+1
+             N=M+2
+             IntCs%Cells%I(I,M:N)=Cells(K:L) 
+           ENDDO
          ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='BEND'.OR. &
                IntCs%Def%C(I)(1:4)=='LINB') THEN
-         Atoms(1:3)=IntCs%Atoms%I(I,1:3)
          IF(Atoms(1)>Atoms(3)) THEN
            DO J=1,3 ; IntCs%Atoms%I(I,J)=Atoms(4-J) ; ENDDO
+           DO J=1,3 
+             K=3*(4-J-1)+1
+             L=K+2
+             M=3*(J-1)+1
+             N=M+2
+             IntCs%Cells%I(I,M:N)=Cells(K:L) 
+           ENDDO
          ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='TORS') THEN
           Atoms(1:4)=IntCs%Atoms%I(I,1:4)
           IF(Atoms(1)>Atoms(4)) THEN
             DO J=1,4 ; IntCs%Atoms%I(I,J)=Atoms(5-J) ; ENDDO
+            DO J=1,4 
+              K=3*(5-J-1)+1
+              L=K+2
+              M=3*(J-1)+1
+              N=M+2
+              IntCs%Cells%I(I,M:N)=Cells(K:L) 
+            ENDDO
           ENDIF
        ELSE IF(IntCs%Def%C(I)(1:4)=='OUTP') THEN
           Atoms(1:4)=IntCs%Atoms%I(I,1:4)
           IF(Atoms(3)>Atoms(4)) THEN
             IntCs%Atoms%I(I,3)=Atoms(4)
             IntCs%Atoms%I(I,4)=Atoms(3)
+            IntCs%Cells%I(I,7:9)=Cells(10:12) 
+            IntCs%Cells%I(I,10:12)=Cells(7:9) 
           ENDIF
        ENDIF
      ENDDO 
