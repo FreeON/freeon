@@ -29,7 +29,7 @@ MODULE PFFTen
   CHARACTER(LEN=7),PARAMETER          :: Cube111='Cube111'
   CHARACTER(LEN=7),PARAMETER          :: Cube112='Cube112'
   CHARACTER(LEN=7),PARAMETER          :: Cube122='Cube122'
-  CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube112'
+  CHARACTER(LEN=7),PARAMETER          :: Cube222='Cube222'
 
   CONTAINS
 !========================================================================================
@@ -592,6 +592,7 @@ MODULE PFFTen
       AdotC = SQRT(AdotC/(MagA*MagC))
       BdotC = SQRT(BdotC/(MagB*MagC))
 !
+      DetCellType=NonCube
       IF(AdotB < Small .AND. AdotC < Small .AND. BdotC < Small) THEN
          IF( ABS(MagA-MagB) < Small .AND. ABS(MagA-MagC) < Small .AND. ABS(MagB-MagC) < Small) THEN
             IF(    NC==27 ) THEN
