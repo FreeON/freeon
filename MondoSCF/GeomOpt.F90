@@ -1160,12 +1160,15 @@ MODULE GeomOpt
         IF(GeOpCtrl%CoordType==CoordType_Cartesian.AND.NIntC==0) THEN
           GeOpCtrl%GeOpConvgd=RMSGrad<GeOpCtrl%GradCrit.AND. &
                               MaxGrad<GeOpCtrl%GradCrit       
+          CALL OpenASCII(OutFile,Out)
           WRITE(*,399) ActStep       
           WRITE(Out,399) ActStep       
           CALL Get(Etot,'ETot',StatsToChar(Ctrl%Current))
           WRITE(*,401) Etot
           WRITE(Out,401) Etot
           WRITE(*,900) RMSGrad,MaxGrad
+          WRITE(Out,900) RMSGrad,MaxGrad
+          CLOSE(Out,STATUS='KEEP')
 900       FORMAT(' RMSGrad= ',F12.6,' MaxGrad= ',F12.6)
           RETURN
         ENDIF
