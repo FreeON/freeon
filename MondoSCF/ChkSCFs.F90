@@ -11,26 +11,98 @@ MODULE ChkSCFs
    USE Functionals
    IMPLICIT NONE
    CONTAINS
+!==============================================================================
+!     Simple backtracking algorithm for quasi-Newton minimization from NR 9.7
+!==============================================================================
+      FUNCTION ChkStep(Ctrl,GM,Bak)
+         TYPE(SCFControls)              :: Ctrl
+         TYPE(CRDS)                     :: GM
+         INTEGER                        :: ChkStep,Bak
+         REAL(DOUBLE),DIMENSION(20),SAVE :: StepSz
+         REAL(DOUBLE),DIMENSION(20),SAVE :: G
+         REAL(DOUBLE)                   :: E0,E1,GPrime,GradEDotDeltaX,EUncert
+!-----------------------------------------------------------------------
+         WRITE(*,*)' ChkStep ChkStep ChkStep ChkStep ChkStep ChkStep ChkStep '
+         ChkStep=0
+!        Open the InfFile
+         CALL OpenHDF(Ctrl%Info)
+!        Get the current geometry
+         CALL Get(GM,Tag_O=IntToChar(Ctrl%Current(3)))
+!        Get the previous and current total energy
+         CALL Get(E0,'Etot',Tag_O=StatsToChar(Ctrl%Previous))
+         CALL Get(E1,'Etot',Tag_O=StatsToChar(Ctrl%Current))
+         GM%ETotal=E1
+         CALL Get(GM%GradRMS,'RMSGrad',Tag_O=IntToChar(Ctrl%Current(3)))
+         CALL Get(GM%GradMax,'MaxGrad',Tag_O=IntToChar(Ctrl%Current(3)))
+         GM%Confg=Ctrl%Current(3)
+!        Check for non-decreasing stepsize 
+         CALL Get(GradEDotDeltaX,'GradEDotDeltaX')
+         WRITE(*,*)'E'//TRIM(StatsToChar(Ctrl%Previous))//' = '//TRIM(DblToMedmChar(E0))
+         WRITE(*,*)'E'//TRIM(StatsToChar(Ctrl%Current))//' = '//TRIM(DblToMedmChar(E1))
+         EUncert=1.D1*ETol(Ctrl%AccL(Ctrl%Current(2)))
+         IF(E1<E0+EUncert)THEN
+            Bak=1
+            ChkStep=1
+            StepSz(Bak)=One
+            CALL PPrint(GM,GeoFile,Geo,'XYZ')
+         ELSE
+            ChkStep=0
+            Bak=Bak+1
+            G(1)=E0         
+            G(Bak)=E1
+            CALL Get(GPrime,'GradEDotNewStep')
+            IF(Bak==2)THEN
+!              Improved quadratic estimate
+               StepSz(2)=MAX(1.D-1,-Half*GPrime/(G(2)-G(1)-GPrime))
+            ELSEIF(Bak==3)THEN
+               StepSz(Bak)=5.D-2
+            ELSEIF(Bak==4)THEN
+               StepSz(Bak)=1.D-2
+            ELSE
+!              Accept last step, cross fingers and get on with it
+               Bak=1
+               ChkStep=1
+               StepSz(Bak)=One
+               CALL PPrint(GM,GeoFile,Geo,'XYZ')
+            ENDIF
+         ENDIF
+         WRITE(*,*)' StepSize'//TRIM(IntToChar(Bak))//' = ',DblToShrtChar(StepSz(Bak))
+         CALL Put(StepSz(Bak),'StepSize')
+         CALL CloseHDF()
+      END FUNCTION ChkStep
+!==============================================================================
+!
+!==============================================================================
       FUNCTION ConvergedQ(Ctrl)
          TYPE(SCFControls) :: Ctrl
          INTEGER           :: IBas,ICyc,IGeo
+         INTEGER,SAVE      :: DoubleChk
          LOGICAL           :: ConvergedQ
          REAL(DOUBLE)      :: ETot,ETotA,ETotB,DMax,      &
                               DeltaE,DeltaD,DIISA,DIISB,  &
                               DMaxA,DMaxB,Delta_DMax, Delta_ETot
          REAL(DOUBLE)      :: ConvQ_DIIS,ConvQ_ETot,ConvQ_DMax
+         TYPE(INT_VECT)    :: Stat
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CrntTag,PrevTag
 !-----------------------------------------------------------------------
          ConvergedQ=.FALSE.
 !        Open the InfFile
          CALL OpenHDF(Ctrl%Info)
 !        Put the current status
-         CALL Put(Ctrl%Previous,'PreviousStatus')
-         CALL Put(Ctrl%Current,'CurrentStatus')
+         CALL New(Stat,3)
+         Stat%I=Ctrl%Previous
+         CALL Put(Stat,'PreviousStatus')
+         Stat%I=Ctrl%Current
+         CALL Put(Stat,'CurrentStatus')
+         CALL Delete(Stat)
 !        Notation ...
-         ICyc=Ctrl%Current%I(1)
-         IBas=Ctrl%Current%I(2)
-         IGeo=Ctrl%Current%I(3)
+         ICyc=Ctrl%Current(1)
+         IBas=Ctrl%Current(2)
+         IGeo=Ctrl%Current(3)
+!
+         IF(ICyc==1)THEN
+            DoubleChk=0
+         ENDIF
 !---------------------------------------------------------------------
 !        Gather convergence parameters
 !
@@ -54,6 +126,13 @@ MODULE ChkSCFs
             IF(ICyc>1) &
             CALL Get(DIISA,'diiserr',Tag_O=TRIM(PrevTag))
          ENDIF
+!--------------------------------------------------------------------
+!        IO 
+!
+         Mssg=' DIIS Err = '//TRIM(DblToShrtChar(DIISB)) &
+            //', MAX/P = '//TRIM(DblToShrtChar(DMAXB))   &
+           //', <SCF> = '//TRIM(DblToMedmChar(ETotB))
+         WRITE(*,*)TRIM(Mssg)
 !---------------------------------------------------------------------
 !        Check for convergence
 !
@@ -62,37 +141,54 @@ MODULE ChkSCFs
          ConvQ_ETot=ABS((ETotA-ETotB)/ETotB)
          ConvQ_DMax=ABS((DMaxA-DMaxB)/DMaxB)
          ConvQ_DIIS=ABS((DIISA-DIISB)/DIISB)
-         WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
+!         WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
 !        Could happen ...
          IF(ConvQ_ETot<1.D-14)THEN
             ConvergedQ=.TRUE.
             WRITE(*,*)' Met Convergence criteria A '
          ENDIF
 !        Check to see if convergence is in an asymptotic regime
-         IF(ConvQ_DIIS<1.D0.AND.ConvQ_DMax<1.D0.AND.ICyc>2)THEN                
-!           Look for non-decreasing error stagnation due to incomplete numerics
-            IF(DIISB>DIISA.OR.DMAXB>DMAXA)THEN
-               ConvergedQ=.TRUE.
-               WRITE(*,*)' Met Convergence criteria B: DIIS stalled.'
+         IF(DIISB<1.D-2.AND.DMAXB<1.D-2)THEN
+!           Look for non-decreasing error due to incomplete numerics
+            IF(ConvQ_DIIS<7.D-1.AND.ConvQ_DMax<7.D-1.AND.ICyc>2)THEN                
+               IF(DIISB>DIISA.AND.DMAXB>DMAXA)THEN
+                  DoubleChk=DoubleChk+1              
+                  WRITE(*,*)' DOUBLE CHECK = ',DoubleChk
+                  IF(DoubleChk==1)THEN
+                     ConvergedQ=.TRUE.
+                     WRITE(*,*)' Met Convergence criteria B: DIIS/DMAX increase.'
+!                     WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS
+!                     WRITE(*,*)' ConvQ_DMAX = ',ConvQ_DMAX
+!                     WRITE(*,*)' DIIS I     = ',DIISA
+!                     WRITE(*,*)' DIIS I+1   = ',DIISB
+!                     WRITE(*,*)' DMAX I     = ',DMAXA
+!                     WRITE(*,*)' DMAX I+1   = ',DMAXB
+                  ENDIF
+               ENDIF
             ENDIF
-         ENDIF
-!        Look for convergence stall-outs 
-         IF(ConvQ_DIIS<0.4D0.AND.ConvQ_DMAX<0.4D0)THEN
-            WRITE(*,*)' Met Convergence criteria C: DIIS stalled.'
-            ConvergedQ=.TRUE.
-         ENDIF              
-!        Check for absolute convergence below thresholds
-         IF(ICyc>0.AND.Delta_DMax<DTol(Ctrl%AccL(IBas)).AND.ConvQ_ETot<ETol(Ctrl%AccL(IBas)))THEN 
-            ConvergedQ=.TRUE.
-            Ctrl%Fail=SCF_CONVERGED
-            WRITE(*,*)' Met Convergence criteria D:  '
-         ENDIF
-!--------------------------------------------------------------------
-!        IO 
-!
-         Mssg=' DIIS Err = '//TRIM(DblToMedmChar(DIISB)) &
-           //', MAX/P = '//TRIM(DblToMedmChar(DMAXB))
-         WRITE(*,*)TRIM(Mssg)
+!           Look for convergence stall-outs 
+            IF(ConvQ_DIIS<7.D-2.AND.ConvQ_DMAX<7.D-2)THEN
+               DoubleChk=DoubleChk+1              
+               IF(DoubleChk==1)THEN
+                  WRITE(*,*)' Met Convergence criteria C: DIIS/DMAX stall out.'
+!                  WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS
+!                  WRITE(*,*)' ConvQ_DMAX = ',ConvQ_DMAX
+!                  WRITE(*,*)' DIIS I     = ',DIISA
+!                  WRITE(*,*)' DIIS I+1   = ',DIISB
+!                  WRITE(*,*)' DMAX I     = ',DMAXA
+!                  WRITE(*,*)' DMAX I+1   = ',DMAXB
+                  ConvergedQ=.TRUE.
+               ENDIF
+            ENDIF 
+!           Check for absolute convergence below thresholds
+            IF(ICyc>0.AND.Delta_DMax<DTol(Ctrl%AccL(IBas)) &
+                     .AND.ConvQ_ETot<ETol(Ctrl%AccL(IBas)))THEN 
+               WRITE(*,*)' Met specified convergence criteria.'
+!               WRITE(*,*)' DeltaDDMAX < ',DTol(Ctrl%AccL(IBas))
+!               WRITE(*,*)' RelErrETOT < ',ETol(Ctrl%AccL(IBas))
+               ConvergedQ=.TRUE.
+            ENDIF
+         ENDIF             
 !--------------------------------------------------------
 !        Load statistics 
 !
@@ -106,18 +202,20 @@ MODULE ChkSCFs
          CALL CloseHDF()
 !
          Ctrl%NCyc(IBas)=ICyc
-         Ctrl%Previous%I=Ctrl%Current%I
-!
+         Ctrl%Previous=Ctrl%Current
+
+!if(icyc<8)convergedq=.false.
+
          RETURN
 !
       END FUNCTION ConvergedQ
 !
       FUNCTION StatsToChar(Stats) RESULT(StatString)
-         TYPE(INT_VECT)  :: Stats
+         INTEGER,DIMENSION(3) :: Stats
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: StatString
-         StatString='_'//TRIM(IntToChar(Stats%I(3)))  &
-                   //'_'//TRIM(IntToChar(Stats%I(2))) &
-                   //'_'//TRIM(IntToChar(Stats%I(1)))
+         StatString='_'//TRIM(IntToChar(Stats(3)))  &
+                   //'_'//TRIM(IntToChar(Stats(2))) &
+                   //'_'//TRIM(IntToChar(Stats(1)))
       END FUNCTION StatsToChar
 !
       SUBROUTINE SCFSummry(Ctrl)
@@ -127,9 +225,9 @@ MODULE ChkSCFs
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
 !------------------------------------------------------------------
 !        Simplify notation
-         ICyc=Ctrl%Current%I(1)
-         IBas=Ctrl%Current%I(2)
-         IGeo=Ctrl%Current%I(3)
+         ICyc=Ctrl%Current(1)
+         IBas=Ctrl%Current(2)
+         IGeo=Ctrl%Current(3)
          Mthd=Ctrl%Method(IBas)
          NCyc=Ctrl%NCyc(IBas)
          CALL OpenASCII(OutFile,Out)
