@@ -100,7 +100,11 @@ CONTAINS
     REAL(DOUBLE) , EXTERNAL :: DGetAbsMax
     !-------------------------------------------------------------------
     !
+    integer :: oa,lda,ob,ldb,oc,ldc,od,ldd
     integer :: isize,idum
+    real(double) :: ChkSum
+    !
+    ChkSum=0.0d0
     !
     ! Allocate arrays.
     ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
@@ -199,6 +203,7 @@ CONTAINS
                    INCLUDE 'ERIListInterfaceB.Inc'
                    !
                    Dum=DSQRT(DGetAbsMax(LocNInt,C(1)))
+                   ChkSum=ChkSum+SUM(ABS(C(1:LocNInt)))
                    !
 #ifdef GONX2_DBUG
                    WRITE(*,'(A,E22.15,6(A,I6))') 'Dum',Dum, &
@@ -284,6 +289,7 @@ CONTAINS
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
     !write(*,*) 'Number of primitive pairs ',idum
+    !write(*,*) 'ChkSum',ChkSum
     !
     ! DeAllocate arrays.
     DEALLOCATE(ACAtmPair,STAT=iErr)
@@ -348,7 +354,11 @@ CONTAINS
     REAL(DOUBLE) , EXTERNAL :: DGetAbsMax
     !-------------------------------------------------------------------
     !
+    integer :: oa,lda,ob,ldb,oc,ldc,od,ldd
     integer :: isize,idum
+    real(double) :: ChkSum
+    !
+    ChkSum=0.0d0
     !
     ! Allocate arrays.
     ALLOCATE(ACAtmPair(MaxShelPerAtmBlk**2*CS_OUT%NCells),STAT=iErr)
@@ -453,6 +463,7 @@ CONTAINS
                    !INCLUDE 'DERIListInterface.Inc'
                    !
                    Dum=DSQRT(DGetAbsMax(LocNInt,C(1)))
+                   ChkSum=ChkSum+SUM(ABS(C(1:LocNInt)))
                    !
 #ifdef GONX2_DBUG
                    WRITE(*,'(A,E22.15,6(A,I6))') 'Dum',Dum, &
@@ -538,6 +549,7 @@ CONTAINS
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
     ! PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL PARALLEL
     !write(*,*) 'Number of primitive pairs ',idum
+    !!write(*,*) 'ChkSum',ChkSum
     !
     ! DeAllocate arrays.
     DEALLOCATE(ACAtmPair,STAT=iErr)
@@ -604,8 +616,14 @@ CONTAINS
           MaxL2=BSp%ASymm%I(2,CF2,AtmInfo%K2)
           Type2=MaxL2*(MaxL2+1)/2+MinL2+1
           !>>>>>
+          IF(Type1.LT.Type2) THEN
+             AtmPair(CF12)%SP%IntType=Type2*100+Type1
+          ELSE
+             AtmPair(CF12)%SP%IntType=Type1*100+Type2
+          ENDIF
           IntType=Type1*100+Type2
-          AtmPair(CF12)%SP%IntType=IntType !Type1*100+Type2
+          !oIntType=Type1*100+Type2
+          !oAtmPair(CF12)%SP%IntType=IntType !Type1*100+Type2
           !<<<<<
           StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
           StopL2=BSp%LStop%I(CF2,AtmInfo%K2)

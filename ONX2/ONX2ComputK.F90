@@ -88,6 +88,8 @@ CONTAINS
     INTEGER                    :: NIntBlk,iErr,iFAC,iFBD,NCFncD
     INTEGER                    :: Off,Ind
     INTEGER                    :: LocNInt,IntType
+    INTEGER                    :: OT,OAL,OBL,LDAL,LDBL,GOAL,GOBL
+    INTEGER                    :: OA,OB,OC,OD,LDA,LDB,LDC,LDD,GOA,GOB,GOC,GOD
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE)               :: TmBeg,TmEnd
 #endif
@@ -97,10 +99,8 @@ CONTAINS
     REAL(DOUBLE), DIMENSION(MaxShelPerAtmBlk**2) :: DMcd
     TYPE(AtomPr), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair
     !-------------------------------------------------------------------
-    TYPE(ONX2OffSt) :: OffSet
-    !-------------------------------------------------------------------
-    REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
-    REAL(DOUBLE),EXTERNAL      :: MondoTimer
+    REAL(DOUBLE), EXTERNAL :: DGetAbsMax
+    REAL(DOUBLE), EXTERNAL :: MondoTimer
     !-------------------------------------------------------------------
     integer :: i,isize,aalen,bblen,cclen,ddlen
     real(double) :: t1,t2,tt,fac
@@ -289,24 +289,45 @@ CONTAINS
 #endif
                       CFA=AtAList%Indx(1,iFAC)
                       CFC=AtAList%Indx(2,iFAC)
-                      AALen=BSc%LStop%I(CFA,KA)-BSc%LStrt%I(CFA,KA)+1
-                      CCLen=BSp%LStop%I(CFC,KC)-BSp%LStrt%I(CFC,KC)+1
-                      OffSet%A=OffArrC%I(CFA,KA)
-                      OffSet%C=OffArrP%I(CFC,KC)
+                      !
+                      ! BraSwitch
+                      IF(ACAtmPair(iFAC)%SP%Switch) THEN
+                         OAL=OffArrP%I(CFC,KC)-1;LDAL=NBFA*NBFB; !A
+                         OBL=OffArrC%I(CFA,KA)  ;LDBL=1        ; !C
+                      ELSE
+                         OAL=OffArrC%I(CFA,KA)  ;LDAL=1        ; !A
+                         OBL=OffArrP%I(CFC,KC)-1;LDBL=NBFA*NBFB; !C
+                      ENDIF
                       !
                       RnOvFBD: DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
                          CFD=AtBList%Indx(2,iFBD)
-                         BBLen=BSc%LStop%I(CFB,KB)-BSc%LStrt%I(CFB,KB)+1
-                         DDLen=BSp%LStop%I(CFD,KD)-BSp%LStrt%I(CFD,KD)+1
-
 #ifdef GTRESH
                          IF(DMcd((CFC-1)*NCFncD+CFD)* &
                               & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
                             IF(Dcd*AtAList%RInt(iFAC)*AtBList%RInt(iFBD)<Thresholds%TwoE) EXIT RnOvFBD
 #endif
-                            OffSet%B=OffArrC%I(CFB,KB)
-                            OffSet%D=OffArrP%I(CFD,KD)
+                            !
+                            ! KetSwitch
+                            IF(BDAtmPair(iFBD)%SP%Switch) THEN
+                               OC=OffArrP%I(CFD,KD)-1;LDC=NBFA*NBFB*NBFC; !B
+                               OD=OffArrC%I(CFB,KB)-1;LDD=NBFA          ; !D
+                            ELSE
+                               OC=OffArrC%I(CFB,KB)-1;LDC=NBFA          ; !B
+                               OD=OffArrP%I(CFD,KD)-1;LDD=NBFA*NBFB*NBFC; !D
+                            ENDIF
+                            !
+                            ! BraKetSwitch
+                            IF(ACAtmPair(iFAC)%SP%IntType.LT.BDAtmPair(iFBD)%SP%IntType) THEN
+                               OA =OC ;OC =OAL ; 
+                               LDA=LDC;LDC=LDAL;
+                               !
+                               OB =OD ;OD =OBL ;
+                               LDB=LDD;LDD=LDBL;
+                            ELSE
+                               OA =OAL ;OB =OBL ;
+                               LDA=LDAL;LDB=LDBL;
+                            ENDIF
                             !
                             ! Compute integral type.
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
@@ -379,18 +400,8 @@ CONTAINS
     CALL FASTMAT_RmEmptyRow(KxFM)
 #endif
     !
-    !write(*,*) 'time',tt
-    !
-!!$#ifdef ONX2_PARALLEL
-!!$    NIntsTot=Reduce(NInts)
-!!$    IF(MyID.EQ.ROOT) THEN
-!!$       WRITE(*,100) NIntsTot,CS_OUT%NCells**2*DBLE(NBasF)**4, &
-!!$            &       NIntsTot/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
-!!$    ENDIF
-!!$#else
 !!$    WRITE(*,100) NInts,CS_OUT%NCells**2*DBLE(NBasF)**4, &
 !!$         &       NInts/(CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
-!!$#endif
 !!$100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputK
@@ -464,6 +475,7 @@ CONTAINS
     INTEGER      :: MinL1,MaxL1,Type1,MinL2,MaxL2,Type2,IntType
     INTEGER      :: StopL1,StartL1,StopL2,StartL2,iNFPair
     REAL(DOUBLE) :: Z1,Z2,Expt,InvExpt,R12,XiR12,RX,RY,RZ,Cnt
+    LOGICAL      :: Switch
     !-------------------------------------------------------------------
     !
     DO iNFPair=1,AtmInfo%NFPair
@@ -490,8 +502,15 @@ CONTAINS
        StartL2=BSp%LStrt%I(CF2,AtmInfo%K2)
        StopL2=BSp%LStop%I(CF2,AtmInfo%K2)
        !>>>>>
-       IntType=Type1*100+Type2
-       AtmPair(iNFPair)%SP%IntType=IntType !Type1*100+Type2
+       Switch=Type1.LT.Type2
+       AtmPair(iNFPair)%SP%Switch=Switch
+       IF(Switch) THEN
+          AtmPair(iNFPair)%SP%IntType=Type2*100+Type1
+       ELSE
+          AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
+       ENDIF
+       !oIntType=Type1*100+Type2
+       !oAtmPair(iNFPair)%SP%IntType=IntType !Type1*100+Type2
        !<<<<<
        II=0
        !

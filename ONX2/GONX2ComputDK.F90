@@ -53,7 +53,7 @@ CONTAINS
   !
   !
 #ifdef ONX2_PARALLEL
-  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
+  SUBROUTINE ComputDK(DFMcd,DFMab,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #else
   SUBROUTINE ComputDK(D,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
 #endif
@@ -88,8 +88,10 @@ CONTAINS
     INTEGER                    :: ci,iPtrD,iPtrD2,NBFC,NBFD,NBFA,NBFB
     INTEGER                    :: iErr
     INTEGER                    :: NCFncA,NCFncB,NCFncC,NCFncD
-    INTEGER                    :: Ind,LocNInt,IntType
-    INTEGER                    :: IXYZ,NIntBlk,Indx,iFAC,iFBD
+    INTEGER                    :: Ind,LocNInt,IntType,Split
+    INTEGER                    :: IXYZ,JXYZ,NIntBlk,Indx,iFAC,iFBD
+    INTEGER                    :: OT,OAL,OBL,LDAL,LDBL,GOAL,GOBL
+    INTEGER                    :: OA,OB,OC,OD,LDA,LDB,LDC,LDD,GOA,GOB,GOC,GOD
 #ifdef ONX2_PARALLEL
     REAL(DOUBLE)               :: TmBeg,TmEnd
 #endif
@@ -99,6 +101,9 @@ CONTAINS
     REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**2) :: Work
     REAL(DOUBLE) , DIMENSION(MaxShelPerAtmBlk**2) :: DMcd,DMab
     REAL(DOUBLE) , DIMENSION(12*MaxFuncPerAtmBlk**4) :: C  !,C_
+    !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS
+    REAL(DOUBLE) , DIMENSION( 9*MaxFuncPerAtmBlk**4) :: CC
+    !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS
     TYPE(AtomPrG), DIMENSION(:), ALLOCATABLE :: ACAtmPair,BDAtmPair !size=MaxShelPerAtmBlk**2*CS_OUT%NCells
     !-------------------------------------------------------------------
     TYPE(ONX2OffSt)            :: OffSet
@@ -106,10 +111,12 @@ CONTAINS
     !-------------------------------------------------------------------
     REAL(DOUBLE), EXTERNAL     :: DGetAbsMax
     REAL(DOUBLE), EXTERNAL     :: DDOT
-    REAL(DOUBLE),EXTERNAL      :: MondoTimer
+    REAL(DOUBLE), EXTERNAL     :: MondoTimer
     !-------------------------------------------------------------------
     !
     integer :: isize,i
+    logical :: DoStress
+    DoStress=.FALSE.
     !
     ! Initialize.
     NULLIFY(AtAListTmp,AtAList,AtBListTmp,AtBList)
@@ -228,10 +235,7 @@ CONTAINS
           RnOvA: DO ! Run over AtA
              AtA=AtAList%Atom
 #ifdef ONX2_PARALLEL
-             !if(myid==0)write(*,*) '+++++++++++++++++++++++++++++++++++++++++++++++'
-             !if(myid==0)write(*,*)'AtA in list',AtA,ASSOCIATED(Q)
-             !if(myid==1)write(*,*)'Q%Row<AtA',Q%Row,'<',AtA
-             ! May change that to FindFASTMATRow
+             !
              Q => DFMab%Next
              DO
                 IF(.NOT.ASSOCIATED(Q)) EXIT RnOvA
@@ -283,23 +287,59 @@ CONTAINS
                 NCFncB=BSc%NCFnc%I(KB)
                 !
 #ifdef ONX2_PARALLEL
-                !if(myid==1)write(*,*) '+++++++++++++++++++++++++++++++++++++++++++++++'
-                ! May change that to FindFASTMATCol
-                V => Q%RowRoot
+                !---------------------------------------------------------------------
+                ! V => Q%RowRoot
+                ! DO
+                !    IF(.NOT.ASSOCIATED(V)) EXIT RnOvB
+                !    IF(V%L.NE.V%R) THEN
+                !       V => V%Next
+                !       CYCLE
+                !    ENDIF
+                !    !
+                !    IF(V%R.EQ.AtB) EXIT
+                !    IF(V%L.GT.AtB) THEN
+                !       IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
+                !       AtBList=>AtBList%AtmNext
+                !       CYCLE RnOvB
+                !    ENDIF
+                !    V => V%Next
+                ! ENDDO
+                !---------------------------------------------------------------------
+                ! V => Q%RowRoot
+                ! DO
+                !    IF(.NOT.ASSOCIATED(V)) THEN
+                !       IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
+                !       AtBList=>AtBList%AtmNext
+                !       CYCLE RnOvB
+                !    ENDIF
+                !    IF(V%L.NE.V%R) THEN
+                !       V => V%Next
+                !       CYCLE
+                !    ENDIF
+                !    !
+                !    IF(V%R.EQ.AtB) EXIT
+                !    IF(V%L.GT.AtB) THEN
+                !       IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
+                !       AtBList=>AtBList%AtmNext
+                !       CYCLE RnOvB
+                !    ENDIF
+                !    V => V%Next
+                ! ENDDO
+                !---------------------------------------------------------------------
+                V=>Q%RowRoot
                 DO
-                   IF(.NOT.ASSOCIATED(V)) EXIT RnOvB !use the binary tree would be better.
-                   IF(V%L.NE.V%R) THEN
-                      V => V%Next
-                      CYCLE
-                   ENDIF
-                   !
-                   IF(V%L.EQ.AtB) EXIT
-                   IF(V%L.GT.AtB) THEN
+                   IF(.NOT.ASSOCIATED(V)) THEN
                       IF(.NOT.ASSOCIATED(AtBList%AtmNext)) EXIT RnOvB
                       AtBList=>AtBList%AtmNext
                       CYCLE RnOvB
                    ENDIF
-                   V => V%Next
+                   IF(AtB.EQ.V%L.AND.AtB.EQ.V%R) EXIT
+                   Split=IntervalSplit(V%L,V%R)
+                   IF(AtB.GE.V%L.AND.AtB.LE.Split) THEN
+                      V=>V%Left
+                   ELSE
+                      V=>V%Right
+                   ENDIF
                 ENDDO
                 !write(*,*) 'We find AtC=',AtC,'AtD=',AtD,'AtA',AtA,'AtB',AtB,'MyID',MyID
 #else
@@ -350,17 +390,24 @@ CONTAINS
                    NIntBlk=NBFA*NBFB*NBFC*NBFD
                    !
                    CALL DBL_VECT_EQ_DBL_SCLR(12*NIntBlk,C(1),0.0D0)
-                   !StressStressStressStressStressStressStress
-                   !C_=0.0d0
-                   !StressStressStressStressStressStressStress
+                   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS
+                   IF(DoStress) CALL DBL_VECT_EQ_DBL_SCLR(9*NIntBlk,CC(1),0.0D0)
+                   !STRESS STRESS STRESS STRESS STRESS STRESS STRESS
                    DO iFAC=1,ACAtmInfo%NFPair
 #ifdef GTRESH
                       IF(Dcd*Dab*Half*AtAList%RInt(iFAC)*AtBList%RInt(1).LT.Thresholds%TwoE) EXIT
 #endif
                       CFA=AtAList%Indx(1,iFAC)
                       CFC=AtAList%Indx(2,iFAC)
-                      OffSet%A=OffArr%I(CFA,KA)
-                      OffSet%C=OffArr%I(CFC,KC)
+                      !
+                      ! BraSwitch
+                      IF(ACAtmPair(iFAC)%SP%Switch) THEN
+                         OAL=OffArr%I(CFC,KC)-1;LDAL=NBFA*NBFB;GOAL=4; !A
+                         OBL=OffArr%I(CFA,KA)  ;LDBL=1        ;GOBL=1; !C
+                      ELSE
+                         OAL=OffArr%I(CFA,KA)  ;LDAL=1        ;GOAL=1; !A
+                         OBL=OffArr%I(CFC,KC)-1;LDBL=NBFA*NBFB;GOBL=4; !C
+                      ENDIF
                       !
                       DO iFBD=1,BDAtmInfo%NFPair 
                          CFB=AtBList%Indx(1,iFBD)
@@ -369,14 +416,35 @@ CONTAINS
                          IF(DMcd((CFC-1)*NCFncD+CFD)*DMab((CFA-1)*NCFncB+CFB)*Half* &
                               & AtAList%RInt(iFAC)*AtBList%RInt(iFBD)>Thresholds%TwoE) THEN
 #endif
-                            OffSet%B=OffArr%I(CFB,KB)
-                            OffSet%D=OffArr%I(CFD,KD)
+                            !
+                            ! KetSwitch
+                            IF(BDAtmPair(iFBD)%SP%Switch) THEN
+                               OC=OffArr%I(CFD,KD)-1;LDC=NBFA*NBFB*NBFC;GOC=10; !B
+                               OD=OffArr%I(CFB,KB)-1;LDD=NBFA          ;GOD=7 ; !D
+                            ELSE
+                               OC=OffArr%I(CFB,KB)-1;LDC=NBFA          ;GOC=7 ; !B
+                               OD=OffArr%I(CFD,KD)-1;LDD=NBFA*NBFB*NBFC;GOD=10; !D
+                            ENDIF
+                            !
+                            ! BraKetSwitch
+                            IF(ACAtmPair(iFAC)%SP%IntType.LT.BDAtmPair(iFBD)%SP%IntType) THEN
+                               OA =OC ;OC =OAL ; 
+                               LDA=LDC;LDC=LDAL;
+                               GOA=GOC;GOC=GOAL;
+                               !
+                               OB =OD ;OD =OBL ;
+                               LDB=LDD;LDD=LDBL;
+                               GOB=GOD;GOD=GOBL;
+                            ELSE
+                               OA =OAL ;OB =OBL ;
+                               LDA=LDAL;LDB=LDBL;
+                               GOA=GOAL;GOB=GOBL;
+                            ENDIF
                             !
                             ! Compute integral type.
                             IntType=ACAtmPair(iFAC)%SP%IntType*10000+BDAtmPair(iFBD)%SP%IntType
                             !
                             ! The integral interface.
-!                            INCLUDE 'DERIInterface.Inc'
                             INCLUDE 'dERIInterfaceB.Inc'
                             !
                             NInts=NInts+DBLE(LocNInt)
@@ -387,12 +455,30 @@ CONTAINS
                       ENDDO
                    ENDDO
                    !
-                   !StressStressStressStressStressStress
-                   !CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,C_(1), &
-                   !     &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
-                   !     &     Work(1),1)
-                   !BoxX%D(1,1)=BoxX%D(1,1)-DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
-                   !StressStressStressStressStressStress
+                   !STRESS STRESS STRESS STRESS STRESS STRESS
+                   IF(DoStress) THEN
+                      DO IXYZ=1,3
+                         DO JXYZ=1,3
+                            Indx=3*NIntBlk*(IXYZ-1)+NIntBlk*(JXYZ-1)+1
+                            ! Compute Stress Components.
+#ifdef ONX2_PARALLEL
+                            CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+                                 &     NBFA*NBFB,U%MTrix(1,1),1,0.0d0,   &
+                                 &     Work(1),1)
+                            BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                 & -DDOT(NBFA*NBFB,V%MTrix(1,1),1,Work(1),1)
+#else
+                            CALL DGEMV('N',NBFA*NBFB,NBFC*NBFD,1.0d0,CC(Indx), &
+                                 &     NBFA*NBFB,D%MTrix%D(iPtrD),1,0.0d0,   &
+                                 &     Work(1),1)
+                            BoxX%D(IXYZ,JXYZ)=BoxX%D(IXYZ,JXYZ) &
+                                 & -DDOT(NBFA*NBFB,D%MTrix%D(iPtrD2),1,Work(1),1)
+#endif
+                            !
+                         ENDDO
+                      ENDDO
+                   ENDIF
+                   !STRESS STRESS STRESS STRESS STRESS STRESS
                    !
                    ! Compute the exchange-forces.
                    DO IXYZ=1,3
@@ -489,16 +575,8 @@ CONTAINS
     IF(iErr.NE.0) CALL Halt('In ComputDK: Deallocation problem.')
     !
     !
-!!$#ifdef ONX2_PARALLEL
-!!$    NIntsTot=Reduce(NInts)
-!!$    IF(MyID.EQ.ROOT) THEN
-!!$       WRITE(*,100) NIntsTot,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
-!!$            &       NIntsTot/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
-!!$    ENDIF
-!!$#else
     WRITE(*,100) NInts,12D0*CS_OUT%NCells**2*DBLE(NBasF)**4, &
          &       NInts/(12D0*CS_OUT%NCells**2*DBLE(NBasF)**4)*100D0
-!!$#endif
 100 FORMAT(' NInts = ',E8.2,' NIntTot = ',E8.2,' Ratio = ',E8.2,'%')
     !
   END SUBROUTINE ComputDK
@@ -559,22 +637,35 @@ CONTAINS
        !
        if(Type2==2) stop 'SP shell not yet supported.'
        !
-       AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
-       !
-       ! .NOT.(Do we need to switch the centers?)
-       Switch=Type1.GE.Type2
-       !
+       !>new
+       Switch=Type1.LT.Type2
+       AtmPair(iNFPair)%SP%Switch=Switch
        IF(Switch) THEN
-          ISwitch1=9
-          ISwitch2=10
-!          ISwitch1=6
-!          ISwitch2=7
-       ELSE
-!          ISwitch1=7
-!          ISwitch2=6
           ISwitch1=10
           ISwitch2=9
+          AtmPair(iNFPair)%SP%IntType=Type2*100+Type1
+       ELSE
+          ISwitch1=9
+          ISwitch2=10
+          AtmPair(iNFPair)%SP%IntType=Type1*100+Type2
        ENDIF
+       !<<<new
+       !oAtmPair(iNFPair)%SP%IntType=Type1*100+Type2
+       !o!
+       !o! .NOT.(Do we need to switch the centers?)
+       !oSwitch=Type1.GE.Type2
+       !o!
+       !oIF(Switch) THEN
+       !o   ISwitch1=9
+       !o   ISwitch2=10
+       !o!          ISwitch1=6
+       !o!          ISwitch2=7
+       !oELSE
+       !o!          ISwitch1=7
+       !o!          ISwitch2=6
+       !o   ISwitch1=10
+       !o   ISwitch2=9
+       !oENDIF
        !
        II=0
        !
@@ -624,7 +715,8 @@ CONTAINS
        !
        ! We reorder the atomic positions if Type2 > Type1.
        ! Needed for the integral evaluations.
-       IF(Switch) THEN
+       IF(Type1.GE.Type2) THEN
+       !oIF(Switch) THEN
           AtmPair(iNFPair)%SP%AtmInfo%Atm1X=AtmInfo%Atm1X
           AtmPair(iNFPair)%SP%AtmInfo%Atm1Y=AtmInfo%Atm1Y
           AtmPair(iNFPair)%SP%AtmInfo%Atm1Z=AtmInfo%Atm1Z

@@ -57,7 +57,7 @@ PROGRAM GONX2
   REAL(DOUBLE)                   :: Time1,Time2
   REAL(DOUBLE)                   :: TmTM,TmML,TmGx,TmAL,TmDL
   CHARACTER(LEN=*),PARAMETER     :: Prog='GONX2'
-  REAL(DOUBLE),EXTERNAL          :: MondoTimer
+  REAL(DOUBLE), EXTERNAL         :: MondoTimer
 !--------------------------------------------------------------------------------
   TYPE(INT_RNK2) :: OffArr
 #ifdef ONX2_PARALLEL
@@ -65,7 +65,9 @@ PROGRAM GONX2
 #else
   TYPE(CList), DIMENSION(:), POINTER :: ListC
 #endif
+  LOGICAL :: DoStrs
 !--------------------------------------------------------------------------------
+  DoStrs=.FALSE.
   !
 #ifdef ONX2_PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -97,8 +99,10 @@ PROGRAM GONX2
   !
   CALL New(OffArr,(/BSc%NCtrt,BSc%NKind/))
   !
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   CALL New(BoxX,(/3,3/))
-  BoxX%D=0.0D0
+  CALL DBL_VECT_EQ_DBL_SCLR(9,BoxX%D(1,1),0.0D0)
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
   CALL GetBufferSize(GMc,BSc,GMc,BSc)
   !
@@ -110,7 +114,7 @@ PROGRAM GONX2
 #ifdef ONX2_PARALLEL
   IF(MyID.EQ.ROOT) &
 #endif
-  WRITE(*,*) '-------- We are in GONX2 --------'
+  !WRITE(*,*) '-------- We are in GONX2 --------'
   !
   SELECT CASE(SCFActn)
   CASE('ForceEvaluation')
@@ -205,7 +209,7 @@ PROGRAM GONX2
   !WRITE(*,*) 'DKx'
 #ifdef ONX2_PARALLEL
   Time1 = MondoTimer()
-  CALL ComputDK(DFMcd,DFMab,GradX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
+  CALL ComputDK(DFMcd,DFMab,GradX,BoxX,ListC,ListD,OffArr,GMc,BSc,CS_OUT)
   Time2 = MondoTimer()
 #else
   CALL CPU_TIME(Time1)
@@ -259,6 +263,18 @@ PROGRAM GONX2
   !
   CALL DAXPY(3*NAtoms,KScale,GradTmp%D(1,1),1,GradAux%D(1,1),1)
   CALL Delete(GradTmp)
+  !
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+  IF(DoStrs) THEN
+     CALL New(GradTmp,(/3,3/))
+     CALL DBL_VECT_EQ_DBL_SCLR(9,GradTmp%D(1,1),0.0d0)
+     CALL MPI_REDUCE(BoxX%D(1,1),GradTmp%D(1,1),9,MPI_DOUBLE_PRECISION, &
+          &          MPI_SUM,ROOT,MONDO_COMM,IErr)
+     CALL DAXPY(9,KScale,GradTmp%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+     CALL Delete(GradTmp)
+  ENDIF
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+  !
 #else
   ! Print out.
   CALL New(GTmp,3*NAtoms)
@@ -267,6 +283,22 @@ PROGRAM GONX2
   CALL Delete(GTmp)
   !
   CALL DAXPY(3*NAtoms,KScale,GradX%D(1,1),1,GradAux%D(1,1),1)
+  !
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+  IF(DoStrs) THEN
+     !write(*,'(A,E26.15)') 'BoxX%D(1,1)',BoxX%D(1,1)!+GMc%PBC%LatFrc%D(1,1)
+     !write(*,'(A,E26.15)') 'BoxX%D(2,1)',BoxX%D(2,1)
+     !write(*,'(A,E26.15)') 'BoxX%D(3,1)',BoxX%D(3,1)
+     !write(*,'(A,E26.15)') 'BoxX%D(1,2)',BoxX%D(1,2)
+     !write(*,'(A,E26.15)') 'BoxX%D(2,2)',BoxX%D(2,2)
+     !write(*,'(A,E26.15)') 'BoxX%D(3,2)',BoxX%D(3,2)
+     !write(*,'(A,E26.15)') 'BoxX%D(1,3)',BoxX%D(1,3)
+     !write(*,'(A,E26.15)') 'BoxX%D(2,3)',BoxX%D(2,3)
+     !write(*,'(A,E26.15)') 'BoxX%D(3,3)',BoxX%D(3,3)
+     !
+     CALL DAXPY(9,KScale,BoxX%D(1,1),1,GMc%PBC%LatFrc%D(1,1),1)
+  ENDIF
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
 #endif
   !
@@ -296,6 +328,10 @@ PROGRAM GONX2
 #endif
   !
   CALL Put(GradAux,'gradients',Tag_O=CurGeom)
+  !
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
+  IF(DoStrs) CALL Put(GMc,Tag_O=CurGeom)
+  !STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS 
   !
   !------------------------------------------------
   ! Timing.
