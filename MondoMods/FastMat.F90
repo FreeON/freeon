@@ -1687,7 +1687,9 @@ MODULE FastMatrices
       ! Set some pointers.
       NULLIFY(C,S)
       !
-
+      !write(*,*) 'A%NAtms',A%NAtms,'A%NNon0',A%NNon0
+      !write(*,*) 'A%RowPt%I',A%RowPt%I
+      !write(*,*) 'A%ColPt%I',A%ColPt%I
       ! Check for prior allocation
       IF(ASSOCIATED(B))THEN
          CALL Delete_FASTMAT1(B)                                            !vw I have changed that
@@ -1697,8 +1699,9 @@ MODULE FastMatrices
       !
       DO I=1,A%NAtms
          M=BSiz%I(I)
-         IF(A%RowPt%I(I+1)-A%RowPt%I(I)>1)THEN
+         IF(A%RowPt%I(I+1)-A%RowPt%I(I)>0)THEN
             ! Set current row link 
+            !write(*,*) 'I',I
             C=>FindFastMatRow_1(B,I)         
             DO JP=A%RowPt%I(I),A%RowPt%I(I+1)-1
                J=A%ColPt%I(JP)
@@ -1805,7 +1808,7 @@ MODULE FastMatrices
       DO I = Beg%I(MyID),End%I(MyID)
          IRow = I-Beg%I(MyID)+1
          M = BSiz%I(I)
-         IF(A%RowPt%I(IRow+1)-A%RowPt%I(IRow)>1) THEN
+         IF(A%RowPt%I(IRow+1)-A%RowPt%I(IRow)>0) THEN
             ! Set current row link
             C => FindFastMatRow_1(B,I)
             DO JP = A%RowPt%I(IRow),A%RowPt%I(IRow+1)-1
