@@ -40,23 +40,13 @@ MODULE MondoPoles
 !=====================================================================================================
 !
 !=====================================================================================================
-  TYPE PrimPair       
-     INTEGER                         :: Ell  
-     REAL(DOUBLE)                    :: Zeta
-     REAL(DOUBLE),DIMENSION(3)       :: P
-     REAL(DOUBLE),DIMENSION(1:HGLen) :: HGKet
-     REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetC
-     REAL(DOUBLE),DIMENSION(0:SPLen) :: SPKetS
-     REAL(DOUBLE)                    :: Extent
-     TYPE(BBox)                      :: Box
-  END TYPE
   INTERFACE HGToSP
      MODULE PROCEDURE HGToSP_PoleNode,HGToSP_Bra
   END INTERFACE
 !====================================================================================================
 !  Global Array intermediates for multipole opperations
 !====================================================================================================
-   REAL(DOUBLE), DIMENSION(0:SPEll2) :: FactOlm0,FactMlm0,Sine,Cosine
+   REAL(DOUBLE), DIMENSION(0:SPEll2) :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
    REAL(DOUBLE), DIMENSION(0:SPLen2) :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
    REAL(DOUBLE), DIMENSION(0:SPLen)  :: FarFC,FarFS
    CONTAINS
@@ -92,18 +82,19 @@ MODULE MondoPoles
 !====================================================================================
 !
 !====================================================================================
-      SUBROUTINE CTrax(P,Q)
+      SUBROUTINE CTrax(P,Q,SPKetC,SPKetS)
          TYPE(PrimPair)            :: P
          TYPE(PoleNode)            :: Q
          REAL(DOUBLE),DIMENSION(3) :: PQ
          INTEGER                   :: LP,LQ,LPQ
+         REAL(DOUBLE),DIMENSION(0:):: SPKetC,SPKetS
 !------------------------------------------------------------------------------------
          PQ=(P%P-Q%Box%Center)
          LP=P%Ell
          LQ=Q%Ell
          LPQ=LP+LQ
          CALL IrRegular90(LPQ,PQ(1),PQ(2),PQ(3))
-         CALL CTraX77(LP,LQ,P%SPKetC,P%SPKetS,Cpq,Spq,Q%C,Q%S)
+         CALL CTraX77(LP,LQ,SPKetC,SPKetS,Cpq,Spq,Q%C,Q%S)
       END SUBROUTINE CTrax
 !====================================================================================
 !
@@ -117,15 +108,6 @@ MODULE MondoPoles
          PiZ=(Pi/Node%Zeta)**(ThreeHalves)
          CALL HGToSP_Gen(Node%Ell,PiZ,Node%Co,Node%C,Node%S)
        END SUBROUTINE HGToSP_PoleNode
-
-       SUBROUTINE HGToSP_Bra2(L,Zeta,HGBra,SPBraC,SPBraS)
-         INTEGER                    :: L,Len
-         REAL(DOUBLE)               :: PiZ,Zeta
-         REAL(DOUBLE), DIMENSION(:) :: HGBra
-         REAL(DOUBLE), DIMENSION(0:) ::SPBraC,SPBraS
-         PiZ=(Pi/Zeta)**(ThreeHalves)
-         CALL HGToSP_Gen(L,PiZ,HGBra,SPBraC,SPBraS)
-       END SUBROUTINE HGToSP_Bra2
 !====================================================================================
 !
 !====================================================================================
@@ -171,40 +153,6 @@ MODULE MondoPoles
              CALL Halt(' Bad logic in HGToSPX')
           END SELECT
        END SUBROUTINE HGToSP_Gen
-!====================================================================================================
-!
-!====================================================================================================
-     SUBROUTINE MDERI(P,Q)
-       TYPE(PrimPair) :: P       
-       TYPE(PoleNode) :: Q
-       REAL(DOUBLE),DIMENSION(0:2*HGEll)                       :: AuxR
-       REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: R
-       INTEGER               :: Ell,EllP,EllQ,PDex,QDex,LP,MP,NP,LQ,MQ,NQ
-       REAL(DOUBLE), DIMENSION(3) :: PQ
-       REAL(DOUBLE)               :: RTE,RPE,Omega,Upq,T,TmpKet
-!----------------------------------------------------------------------------------------------------
-       Ell=P%Ell+Q%Ell
-       PQ=-(P%P-Q%Box%Center)
-       RTE=P%Zeta*Q%Zeta
-       RPE=P%Zeta+Q%Zeta
-       Omega=RTE/RPE
-       Upq=TwoPi5x2/(RTE*SQRT(RPE))
-       T=Omega*(PQ(1)**2+PQ(2)**2+PQ(3)**2)
-       CALL AuxInts(2*HGEll,Ell,AuxR,Omega,T)
-       CALL MD3TRR(2*HGEll,Ell,R,AuxR,Upq,PQ(1),PQ(2),PQ(3))
-       DO LP=0,P%Ell
-       DO MP=0,P%Ell-LP
-       DO NP=0,P%Ell-LP-MP 
-          EllP=LP+MP+NP
-          PDex=LMNDex(LP,MP,NP)
-          DO LQ=0,Q%Ell
-          DO MQ=0,Q%Ell-LQ
-          DO NQ=0,Q%Ell-LQ-MQ
-             QDex=LMNDex(LQ,MQ,NQ)
-             P%HGKet(PDex)=P%HGKet(PDex)+R(LP+LQ,MP+MQ,NP+NQ,0)*Q%Co(QDex)
-          ENDDO; ENDDO; ENDDO
-       ENDDO; ENDDO; ENDDO
-    END SUBROUTINE MDERI 
 !====================================================================================
 !
 !====================================================================================
@@ -285,6 +233,7 @@ MODULE MondoPoles
          INTEGER      :: Ell,L,M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
          REAL(DOUBLE) :: PQx,PQy,PQz,PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
                          CoFact,PQToThMnsL
+         INTEGER      :: LD
          LD(L)=L*(L+1)/2
 !------------------------------------------------------------------------------------
          PQx2=PQx*PQx
@@ -356,6 +305,7 @@ MODULE MondoPoles
          INTEGER      :: Ell,L,M,M1,M2,MDex,MDex1,LDex,LDex0,LDex1,LDex2,LMDex
          REAL(DOUBLE) :: PQx,PQy,PQz,PQx2,PQy2,PQxy,PQ,OneOvPQ,CoTan,TwoC,Sq,RS,&
                          CoFact,PQToThPlsL
+         INTEGER      :: LD
          LD(L)=L*(L+1)/2
 !------------------------------------------------------------------------------------
          PQx2=PQx*PQx

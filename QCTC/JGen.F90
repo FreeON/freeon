@@ -1,13 +1,33 @@
-!==============================================================================
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
 !
-!--  Matt Challacombe and C.J. Tymczak
-!--  Los Alamos National Laboratory
-!--  Copyright 2000, The University of California
-!
-!--  COMPUTE THE COULOMB MATRIX IN O(N Lg N) CPU TIME
-!==============================================================================
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    COMPUTE THE COULOMB MATRIX IN O(N Lg N) CPU TIME
+!    Authors: Matt Challacombe and C.J. Tymczak
+!------------------------------------------------------------------------------
 MODULE JGen
   USE DerivedTypes
   USE GlobalScalars   
@@ -18,15 +38,11 @@ MODULE JGen
   USE Thresholding
   USE Globals
   USE AtomPairs
-  USE BraKetBloks
+  USE BraBloks
   USE PoleTree
-  USE MondoPoles 
+  USE TreeWalk
   IMPLICIT NONE
   LOGICAL PrintFlag
-!---------------------------------------
-  TYPE(PrimPair)  :: Prim
-  REAL(DOUBLE)    :: DP2
-  REAL(DOUBLE)    :: PoleSwitch
 !----------!
   CONTAINS !
 !=============================================================================================
@@ -161,7 +177,13 @@ MODULE JGen
        JBlk=Zero
        KA=Pair%KA
        KB=Pair%KB
-!
+!----------------------------------
+       Prim%A=Pair%A
+       Prim%B=Pair%B
+       Prim%AB2=Pair%AB2
+       Prim%KA=Pair%KA
+       Prim%KB=Pair%KB
+!----------------------------------
        IndexA=0                  
        DO CFA=1,BS%NCFnc%I(KA)    
        DO CFB=1,BS%NCFnc%I(KB) 
@@ -173,66 +195,31 @@ MODULE JGen
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLA   = BS%ASymm%I(2,CFA,KA)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
-          DO PFA=1,BS%NPFnc%I(CFA,KA)          
-          DO PFB=1,BS%NPFnc%I(CFB,KB)
-             ZetaA=BS%Expnt%D(PFA,CFA,KA)
-             ZetaB=BS%Expnt%D(PFB,CFB,KB)
-             EtaAB=ZetaA+ZetaB 
-             EtaIn=One/EtaAB
-             XiAB =ZetaA*ZetaB*EtaIn
-!            Primitive thresholding                      
-             IF(TestPrimPair(XiAB,Pair%AB2))THEN
-!               Set primitive values
-                ExpAB=EXP(-XiAB*Pair%AB2)
-                Prim%P(1)=(ZetaA*Pair%A(1)+ZetaB*Pair%B(1))*EtaIn
-                Prim%P(2)=(ZetaA*Pair%A(2)+ZetaB*Pair%B(2))*EtaIn
-                Prim%P(3)=(ZetaA*Pair%A(3)+ZetaB*Pair%B(3))*EtaIn
-                Prim%Ell=MaxLA+MaxLB
-                Prim%Zeta=EtaAB
-                PAx=Prim%P(1)-Pair%A(1)
-                PAy=Prim%P(2)-Pair%A(2)
-                PAz=Prim%P(3)-Pair%A(3)
-                PBx=Prim%P(1)-Pair%B(1)
-                PBy=Prim%P(2)-Pair%B(2)
-                PBz=Prim%P(3)-Pair%B(3)
-!               McMurchie Davidson prefactors for HG Primitives
-                CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D,PAx,PBx,PAy,PBy,PAz,PBz) 
-!               Primitive coefficients in a HG representationj
-                CALL SetBraBlok(CFA,PFA,KA,CFB,PFB,KB,ExpAB,BS,MD)!,Phase_O=.TRUE.)
-!               Find the max amplitude for this primitive distribution
-                MaxAmp=Zero
-                IA = IndexA
-                DO LMNA=StartLA,StopLA
-                   IA=IA+1
-                   IB=IndexB
-                   EllA=BS%LxDex%I(LMNA)+BS%LyDex%I(LMNA)+BS%LzDex%I(LMNA)                         
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      Amp2=Zero
-                      EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
-                      DO LMN=1,LHGTF(EllA+EllB)
-                         Amp2=Amp2+HGBra%D(LMN,IA,IB)**2
-                      ENDDO
-                      MaxAmp=MAX(MaxAmp,SQRT(Amp2))
-                   ENDDO
-                ENDDO
+!----------------------------------
+         Prim%CFA=CFA             
+         Prim%CFB=CFB
+         Prim%Ell=MaxLA+MaxLB
+!---------------------------------- 
+         DO PFA=1,BS%NPFnc%I(CFA,KA)          
+         DO PFB=1,BS%NPFnc%I(CFB,KB)
+!----------------------------------
+             Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
+             Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
+             Prim%Zeta=Prim%ZA+Prim%ZB
+             Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
+             IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+                Prim%PFA=PFA 
+                Prim%PFB=PFB
+                MaxAmp=SetBraBlok(Prim,BS)
+!--------------------------------------------------
 !               Evaluate this primitives Ket contribution to J_ab
-                Prim%HGKet=Zero
-                Prim%SPKetC=Zero!FarFC
-                Prim%SPKetS=Zero!FarFS
-                Prim%Box%BndBox(1,:)=Prim%P(1)
-                Prim%Box%BndBox(2,:)=Prim%P(2)
-                Prim%Box%BndBox(3,:)=Prim%P(3)
-                Prim%Box%Center=Prim%P
+                HGKet=Zero;SPKetC=Zero;SPKetS=Zero
 !               Set MAC and PAC parameters
                 Tau=Thresholds%TwoE
                 DP2=(MaxAmp/Tau)**(Two/DBLE(SPEll+1))
-                PoleSwitch=PFunk(Prim%Ell+PoleRoot%Ell,Tau/MaxAmp)
-!
-!               WRITE(*,22)Prim%Ell+PoleRoot%Ell,Tau/MaxAmp,PoleSwitch
-!           22 FORMAT(' Ell = ',I2,' Acc = ',D12.3,' PoleSwitch = ',F12.6)
-!
+                PoleSwitch=PFunk(Prim%Ell+MaxL,Tau/MaxAmp)
 !               Walk the walk
+
                 CALL JWalk(PoleRoot)
 !               Contract <Bra|Ket> bloks to compute matrix elements of J
                 IA = IndexA
@@ -245,13 +232,13 @@ MODULE JGen
                       EllB=BS%LxDex%I(LMNB)+BS%LyDex%I(LMNB)+BS%LzDex%I(LMNB)                         
                       Ell=EllA+EllB
                       DO LMN=1,LHGTF(Ell)
-                         JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*Prim%HGKet(LMN)
-
+                         JBlk(IA,IB)=JBlk(IA,IB)+Phase%D(LMN)*HGBra%D(LMN,IA,IB)*HGKet(LMN)
                       ENDDO
+
                       CALL HGToSP(Prim,HGBra%D(:,IA,IB),SPBraC,SPBraS)
                       DO LM=0,LSP(Ell)
-                         JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*Prim%SPKetC(LM) &
-                                                +SPBraS(LM)*Prim%SPKetS(LM)
+                         JBlk(IA,IB)=JBlk(IA,IB)+SPBraC(LM)*SPKetC(LM) &
+                                                +SPBraS(LM)*SPKetS(LM)
                       ENDDO
                   ENDDO
                   ENDDO
@@ -265,56 +252,4 @@ MODULE JGen
 !====================================================================================================
 !
 !====================================================================================================
-     FUNCTION PFunk(Ell,Ack)
-        INTEGER                    :: Ell
-        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
-        REAL(DOUBLE),DIMENSION(30) :: W
-        X=-LOG(Ack)
-        INCLUDE "PFunk.Inc"
-     END FUNCTION PFunk    
-!====================================================================================================
-!
-!====================================================================================================
-     RECURSIVE SUBROUTINE JWalk(Q)
-       TYPE(PoleNode)                   :: Q
-       REAL(DOUBLE)                     :: PQ2,PQ,PQxy,PQx,PQy,PQx2,PQy2,PQz,Omega, &
-                                           CoTan,OneOvPQ,OneOvPQxy,RS,SQ,PQToThMnsL, &
-                                           TT,TwoC,COne,SOne,CTwo,STwo  
-       REAL(DOUBLE),DIMENSION(0:2*SPEll):: CoFact
-       REAL(DOUBLE),DIMENSION(0:SPLen2) :: ALegendreP
-       REAL(DOUBLE),DIMENSION(50)       :: W
-       INTEGER                          :: Ell,LCode
-!---------------------------------------------------------------------------------------------------
-!      PAC: Exp[-W_pq PQ^2]/2 < Tau/Amp
-       PQx=Prim%P(1)-Q%Box%Center(1)
-       PQy=Prim%P(2)-Q%Box%Center(2)
-       PQz=Prim%P(3)-Q%Box%Center(3)
-       PQ2=PQx*PQx+PQy*PQy+PQz*PQz
-       Omega=Prim%Zeta*Q%Zeta/(Prim%Zeta+Q%Zeta)
-       IF(Omega*PQ2>PoleSwitch)THEN
-!         MAC: (d_q/|PQ|)^(p+1) < Tau/Amp
-          IF(PQ2>Q%D2*DP2.OR.Q%Leaf)THEN 
-!            Evaluate multipoles
-             Ell=Prim%Ell+Q%Ell
-             LCode=100*Prim%Ell+Q%Ell
-#ifdef EXPLICIT_SOURCE
-             INCLUDE "IrRegulars.Inc"
-             INCLUDE "CTraX.Inc"
-#else
-             CALL CTrax(Prim,Q)
-#endif
-          ELSE
-!            Keep walking
-             CALL JWalk(Q%Descend)
-             CALL JWalk(Q%Descend%Travrse)
-          ENDIF
-       ELSEIF(Q%Leaf)THEN
-!         Compute an ERI
-          CALL MDERI(Prim,Q)
-       ELSE
-!         Keep walking
-          CALL JWalk(Q%Descend)
-          CALL JWalk(Q%Descend%Travrse)
-       ENDIF
-     END SUBROUTINE JWalk
 END MODULE JGen

@@ -1,3 +1,35 @@
+(*
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form "These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics", and given appropriate citation.  
+!------------------------------------------------------------------------------
+!    Author: Matt Challacombe
+!    WRITE EXPLICIT CODE FOR CONTRACTION OF SP C AND S TENSORS 
+!------------------------------------------------------------------------------
+*)
 Contract[FileName_,EllP_,EllQ_]:=Block[{},
 
 Print[" EllP = ",EllP," EllQ = ",EllQ];
@@ -66,7 +98,7 @@ Do[Do[
       If[TrueQ[SF2[m,l]==0],S2=0,
          Write[FileName,FortranAssign[STwo,SF2[m,l],AssignToArray->AList,AssignReplace->RList]];S2=Two];
 
-      RList={" "->"","c"->StringJoin["Prim%SPKetC(",ldx,")"],"s"->StringJoin["Prim%SPKetS(",ldx,")"]};
+      RList={" "->"","c"->StringJoin["SPKetC(",ldx,")"],"s"->StringJoin["SPKetS(",ldx,")"]};
 
       If[TrueQ[C1+C2==0],,Write[FileName,FortranAssign[c,c+C1*COne+C2*CTwo,AssignToArray->AList,AssignReplace->RList]]];
       If[TrueQ[S1+S2==0],,Write[FileName,FortranAssign[s,s+C1*SOne+S2*STwo,AssignToArray->AList,AssignReplace->RList]]];

@@ -54,7 +54,7 @@ MODULE PoleTree
          DO NTier=MaxTier,0,-1         
             CALL MakePoleTree(PoleRoot) 
          ENDDO 
-        CALL Print_PoleNode(PoleRoot,'Root')
+!        CALL Print_PoleNode(PoleRoot,'Root')
       END SUBROUTINE RhoToPoleTree
 !==========================================================================
 !
@@ -153,6 +153,17 @@ MODULE PoleTree
          Node%Bdex=MAX(0,KQ-SUM(Rho%NQ%I(1:Rho%NExpt-1)))
 !         IF(Node%Bdex>0) &
 !         WRITE(*,*)SUM(Rho%NQ%I(1:Rho%NExpt-1)),KQ,' B = ',Node%Bdex,' Co = ',Node%Co(1)
+
+
+!IF(Node%Zeta>100.D0)Node%Co=Zero
+
+!WRITE(77,*)'test2['//TRIM(IntToChar(B))//']={qx->'//TRIM(DblToMMAChar(Node%Box%Center(1))) &
+!                                         //',qy->'//TRIM(DblToMMAChar(Node%Box%Center(2))) &
+!                                         //',qz->'//TRIM(DblToMMAChar(Node%Box%Center(3))) &
+!                                         //',zq->'//TRIM(DblToMMAChar(Node%Zeta))          &
+!                                         //',qco->'//TRIM(DblToMMAChar(Node%Co(1)))//'};'
+
+
       END SUBROUTINE FillRhoLeaf
 !==========================================================================
 !     Initialize a new PoleNode
