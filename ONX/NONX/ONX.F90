@@ -93,6 +93,9 @@ PROGRAM ONX
   INTEGER                        :: I,NCC,NCD
 !--------------------------------------------------------------------------------
 !
+  type(dbcsr) :: Ddbcsr
+  type(bcsr) :: Dbcsr2
+
 #ifdef PARALLEL
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #else

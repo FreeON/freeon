@@ -278,6 +278,7 @@ CONTAINS
     INTEGER                                   :: NBlks,NNon0
 #endif
     !-------------------------------------------------------------------------------
+    !type(bcsr) :: b2
 #ifdef PARALLEL
     IF(PRESENT(Checkpoint_O))THEN
        InParTemp=InParallel
@@ -303,7 +304,14 @@ CONTAINS
        !
        IF(IsFirst.OR.PartAtLevel1) THEN
           ! Copy BCSR to FastMat.
+          !CALL Print_BCSR(B,'B',UNIT_O=6)
           CALL Set_FASTMAT_EQ_BCSR(BFastMat,B)
+          !write(*,*) 'before Set_BCSR_EQ_FASTMAT'
+          !CALL Set_BCSR_EQ_FASTMAT(B2,BFastMat)
+          !write(*,*) 'before Print_BCSR'
+          !CALL Print_BCSR(B2,'B2',UNIT_O=6)
+          !write(*,*) 'after Print_BCSR'
+
           ! Do partitioning at level1.
           CALL PDrv_Part_Level1(BFastMat,PrcDist,ParType)!,'Part_NZero_2D')! ParType)
           ! Delete tempory FastMat.
@@ -762,6 +770,9 @@ CONTAINS
             &                 DeltaT%D(0:NPrc-1)-(SUM(DeltaT%D(0:NPrc-1))/DBLE(NPrc)))/DBLE(NPrc)))
 #endif
        !
+       !Simple check
+       IF(INT(MINVAL(DeltaT%D(0:NPrc-1))).LE.0) CALL Halt(' PartDrv: A Prc has got nothing to do. ')
+       !
     CASE('Time')
        ! Save new partition on the disc.
        CALL Put(PrcDist,TRIM(PartName))
@@ -1006,7 +1017,6 @@ CONTAINS
        ENDDO
        !
        ! Max and Min elements per row. 
-       ! WMaxI = MAXVAL(TI%I)
        WMin = MINVAL(T%D)
        !
        ! Simple check.
@@ -1148,6 +1158,9 @@ CONTAINS
             &        INT(SQRT(DOT_PRODUCT(DeltaT%D(0:NPrc-1)-(SUM(DeltaT%D(0:NPrc-1))/DBLE(NPrc)), &
             &                 DeltaT%D(0:NPrc-1)-(SUM(DeltaT%D(0:NPrc-1))/DBLE(NPrc)))/DBLE(NPrc)))
 #endif
+       !
+       !Simple check
+       IF(INT(MINVAL(DeltaT%D(0:NPrc-1))).LE.0) CALL Halt(' PartDrv: A Prc has got nothing to do. ')
        !
     CASE('Time')
        !
