@@ -50,9 +50,9 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            ParsingConstants.x Parse.x  MondoMPI.x               \
            Indexing.x SetEq.x SetEq77.x InOut.x HDF5Wrap.x      \
            Anneal.x Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
-           LinAlg.x LinAlg77.x MatFunk.x AInv.o SMWrap.x SpecFun.x     \
+           LinAlg.x LinAlg77.x MatFunk.x AInv.x SMWrap.x SpecFun.x     \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
-           Mechanics.o Thresholding.x Functionals.x PBC.x AtomPairs.x       \
+           Mechanics.x Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x FastMat.x EllToInclude.x     \
            FTest.x SMTest.x  InCoords.x
 #
