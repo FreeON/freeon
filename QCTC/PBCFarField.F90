@@ -34,36 +34,26 @@ MODULE PBCFarField
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
 !
-!     Calculate the Box Moments
-!
-      CALL RhoToSP(GMLoc)
-!
-!     Calculate the MACDist, PACDist and BDist
-!
-      CALL CalMPB(Q,GMLoc)
-!
-!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
-!
-!!*      CALL BoxBounds(GMLoc)
-!
-!     Calculate the PBC FarField Tensor
-!
-!!*      CALL PFFTensor(MaxELL+LP,GMLoc,Args) 
-!
-!     Get Tensors
-! 
-      Layers = GMLoc%PBC%PFFMaxLay
-      CALL New_CellSet_Cube(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,(/Layers,Layers,Layers/))
+!     Get the new Tensor and MaxEll
 !
       CALL Get(MaxEll,'MaxEll')
       CALL New(TensorC,LSP(2*MaxEll),0)
       CALL New(TensorS,LSP(2*MaxEll),0) 
       CALL Get(TensorC,'PFFTensorC')
       CALL Get(TensorS,'PFFTensorS')
-      DO LM = 0,LSP(MaxELL)	
-        WRITE(*,111) LM,TensorC%D(LM),TensorS%D(I)
-      ENDDO	
-111 format(I5,4D14.6)
+!
+!     Calculate the Box Moments
+!
+      CALL RhoToSP(GMLoc)
+!
+!     Make CS_IN
+! 
+      Layers = GMLoc%PBC%PFFMaxLay
+      CALL New_CellSet_Cube(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,(/Layers,Layers,Layers/))
+!
+!     Calculate the MACDist, PACDist and BDist
+!
+      CALL CalMPB(Q,GMLoc)
 !
 !     Calculate PFF  energy
 !
@@ -86,6 +76,8 @@ MODULE PBCFarField
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
 !
+!     Output
+!
       WRITE(*,*) 'GM%PBC%Dimen  = ',GMLoc%PBC%Dimen 
       WRITE(*,*) 'GM%PFFMaxEll  = ',MaxEll
       WRITE(*,*) 'GM%PFFMaxLay  = ',Layers
@@ -102,6 +94,15 @@ MODULE PBCFarField
       WRITE(*,*) 'E_PFF         = ',E_PFF
       WRITE(*,*) 'E_DP          = ',E_DP     
       WRITE(*,*)
+!
+!!$!
+!!$!     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
+!!$!
+!!$      CALL BoxBounds(GMLoc)
+!!$!
+!!$!     Calculate the PBC FarField Tensor
+!!$!
+!!$      CALL PFFTensor(MaxELL+LP,GMLoc,Args) 
 !
     END SUBROUTINE PBCFarFieldSetUp
 !---------------------------------------------------------------------------------------------- 

@@ -36,6 +36,8 @@ MODULE PFFTen
       REAL(DOUBLE)           :: BoxRadius
       REAL(DOUBLE)           :: MagA,MagB,MagC,AdotB,AdotC,BdotC
 !
+      CALL New(TensorC,LSP(2*MaxEll),0)
+      CALL New(TensorS,LSP(2*MaxEll),0)
       TensorC%D = Zero
       TensorS%D = Zero 
       IF(GM%PBC%Dimen==0) RETURN
@@ -81,16 +83,16 @@ MODULE PFFTen
       CALL New_CellSet_Cube(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,(/Layers,Layers,Layers/))
 !
       IF(    CellIsBox .AND. Layers==1) THEN
-         CALL GetExactTensor(MaxEll,GM,'Box111Lay01',MagA)
+         CALL GetExactTensor(2*MaxEll,GM,'Box111Lay01',MagA)
       ELSEIF(CellIsBox .AND. Layers==2) THEN
-         CALL GetExactTensor(MaxEll,GM,'Box111Lay02',MagA)
+         CALL GetExactTensor(2*MaxEll,GM,'Box111Lay02',MagA)
       ELSE
-         CALL MakeTensor(MaxEll,GM,Args)
+         CALL MakeTensor(MaxEll+HGEll,GM,Args)
       ENDIF
 !
 !     Store the Tensor
 !
-      CALL Put(MaxEll,'MaxEll')
+      CALL Put(MaxEll ,'MaxEll')
       CALL Put(TensorC,'PFFTensorC')
       CALL Put(TensorS,'PFFTensorS')
 !
