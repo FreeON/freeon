@@ -1,7 +1,7 @@
 MODULE ShellPairStruct
   USE DerivedTypes
   INTEGER,PARAMETER :: PairLngth=5
-  INTEGER,PARAMETER :: MaxSPairs=1000
+  INTEGER,PARAMETER :: MaxSPairs=100
   !
   TYPE SmallAtomInfo
      REAL(DOUBLE) :: Atm1X,Atm1Y,Atm1Z
