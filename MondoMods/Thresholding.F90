@@ -152,20 +152,16 @@ MODULE Thresholding
        INTEGER,OPTIONAL                :: ExtraEll_O
        LOGICAL,OPTIONAL                :: Potential_O
        REAL(DOUBLE)                    :: R,R0,R1,R2
-       IF(Zeta==NuclearExpt)THEN
+       IF(Zeta>=(NuclearExpnt-1D1))THEN
           ! Quick turn around for nuclei
           R=1.D-10
        ELSE
-          ! Find the worst case extent
-          ! R=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-          ! Find the extent using CJ and MCs method
-          R=Extent1(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
-          ! R=Extent2(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
+          R=Extent0(Ell,Zeta,HGTF,Tau_O=Tau_O,ExtraEll_O=ExtraEll_O,Potential_O=Potential_O)
        ENDIF
     END FUNCTION Extent
 !===================================================================================================
 !     Simple expressions to determine largest extent R for a distribution rho_LMN(R)
-!     outside of which its contribution is less than Tau (default) or outside 
+!     outside of which its value at a point is less than Tau (default) or outside 
 !     of which the error made using the classical potential is less than Tau (Potential option) 
 !===================================================================================================
      FUNCTION Extent0(Ell,Zeta,HGTF,Tau_O,ExtraEll_O,Potential_O) RESULT (R)
@@ -177,7 +173,7 @@ MODULE Thresholding
        LOGICAL,OPTIONAL                :: Potential_O
        INTEGER                         :: L,M,N,Lp,Mp,Np,LMN,ExtraEll       
        LOGICAL                         :: Potential
-       REAL(DOUBLE)                    :: Tau,T,R,UniP,MixMax
+       REAL(DOUBLE)                    :: Tau,T,R,CramCo,MixMax,ScaledTau,ZetaHalf,HGInEq
        REAL(DOUBLE),PARAMETER          :: K3=1.09D0**3
        REAL(DOUBLE),DIMENSION(0:12),PARAMETER :: Fact=(/1D0,1D0,2D0,6D0,24D0,120D0,      &
                                                         720D0,5040D0,40320D0,362880D0,   &
@@ -200,23 +196,13 @@ MODULE Thresholding
        ELSE
           Potential=.FALSE.
        ENDIF
+!
        IF(Ell+ExtraEll==0)THEN
-          IF(Potential)THEN
-!            Solution gives the boundry of quantum/classical approximation
-!            to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
-             UniP=ABS(HGTF(1))*(Two*Pi/Zeta)+SMALL_DBL
-             T=PFunk(0,Tau/UniP)
-             R=SQRT(T/Zeta)     
-          ELSE
-!            Gaussian solution gives rho_000(R)<=Tau
-             UniP=ABS(HGTF(1))+SMALL_DBL
-             R=SQRT(MAX(Zero,-(One/Zeta)*LOG(Tau/UniP)))
-          ENDIF
+          CramCo=ABS(HGTF(1))+SMALL_DBL
        ELSE
-!         Compute universal prefactor based on Cramers inequality:
-!         H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
-!         See papers by J.Strain on Fast Gauss Transform for details.
-          UniP=Zero
+!         Compute universal prefactor based on Cramers inequality (Cramers coefficient),
+!         based on the enequality H_n(t) < K 2^(n/2) SQRT(n!) EXP(t^2/2), with K=1.09
+          CramCo=SMALL_DBL
           DO L=0,Ell
              DO M=0,Ell-L
                 DO N=0,Ell-L-M
@@ -224,38 +210,68 @@ MODULE Thresholding
                    MixMax=Fact(L+ExtraEll)*Fact(M)*Fact(N)
                    MixMax=MAX(MixMax,Fact(L)*Fact(M+ExtraEll)*Fact(N))
                    MixMax=MAX(MixMax,Fact(L)*Fact(M)*Fact(N+ExtraEll))
-                   UniP=UniP+K3*(Two*Zeta)**(Half*DBLE(L+M+N+ExtraEll))*ABS(HGTF(LMN))*MixMax
+                   HGInEq=SQRT(MixMax*(Two*Zeta)**(L+M+N+ExtraEll))*HGTF(LMN)
+                   CramCo=MAX(CramCo,ABS(HGInEq))
+!                   CramCo=CramCo+ABS(HGInEq)
                 ENDDO
              ENDDO       
           ENDDO
-          UniP=ABS(UniP)+SMALL_DBL
-!         Now just use expresions based on spherical symmetry ...
-          IF(Potential)THEN
-!            Solution gives the boundry of quantum/classical approximation
-!            to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
-             UniP=UniP*(Two*Pi/Zeta)
-             T=PFunk(0,Tau/UniP)
-             R=SQRT(Two*T/Zeta)     
-          ELSE
-!            Gaussian solution gives Sum_LMN rho_LMN(R)<=Tau
-             R=SQRT(MAX(Zero,-(Two/Zeta)*LOG(Tau/UniP)))
-          ENDIF
+       ENDIF
+       ! Now we just use expresions based on spherical symmetry but with half the exponent ...
+       ZetaHalf=Half*Zeta
+       ! and the threshold rescaled by the Cramer coefficient:
+       ScaledTau=Tau/CramCo
+       IF(Potential)THEN
+          ! R is the boundary of the quantum/classical approximation
+          ! to the potential: CCo*Int dr [(Pi/Zeta)^3/2 delta(r)-Exp(-Zeta r^2)]/|r-R| < Tau
+          R=PFunk(ZetaHalf,ScaledTau)
+       ELSE
+          ! Gaussian solution gives CCo*Exp[-Zeta*R^2/2] <= Tau
+          R=SQRT(MAX(SMALL_DBL,-LOG(ScaledTau)/ZetaHalf))
        ENDIF
      END FUNCTION Extent0
 !====================================================================================================
-!    COMPUTE FUNCTIONS THAT RETURN THE ARGUMENT T TO THE GAMMA FUNCTIONS F[m,T]
-!    THAT RESULT FROM USING THE THE MULTIPOLE APPROXIMATION TO WITHIN A SPECIFIED 
-!    ERROR:  THESE FUNCTIONS GIVE T (THE PAC) FOR A GIVEN PENETRATION ERROR.
-!    SEE MMA/PAC FOR SOURCE GENERATING CODE.
+!    COMPUTE THE R THAT SATISFIES (Pi/z)^(3/2) Erfc[Sqrt[z]*R]/R < Tau 
 !====================================================================================================
-     FUNCTION PFunk(Ell,Ack)
-        INTEGER                    :: Ell
-        REAL(DOUBLE)               :: PFunk,X,Ack,MinAcc,MaxAcc
-        REAL(DOUBLE),DIMENSION(30) :: W
-        INCLUDE 'GammaDimensions.Inc'
-        X=-LOG(Ack)
-        INCLUDE 'PFunk.Inc'
-        PFunk=MIN(PFunk,Gamma_Switch)
+     FUNCTION PFunk(Zeta,Tau) RESULT(R)
+        REAL(DOUBLE)  :: Tau,Zeta,SqZ,NewTau,Ec,R,BisR,DelR,X,CTest
+        INTEGER       :: J,K              
+!---------------------------------------------------------------------- 
+        SqZ=SQRT(Zeta)
+        NewTau=(Pi/Zeta)**(-1.5D0)*Tau
+        DelR=Erf_Switch/(Two*SqZ)
+        BisR=Zero
+        ! Root finding 
+        DO K=1,1000
+           ! Half the step size
+           DelR=Half*DelR
+           ! New midpoint
+           R=BisR+DelR
+           X=SqZ*R
+           ! Compute Erfc[Sqrt(Zeta)*R]
+           IF(X>Erf_Switch)THEN
+              Ec=Zero
+           ELSE
+              J=AINT(X*Erf_Grid)
+              Ec=One-(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))
+           ENDIF
+           Val=Ec/R
+           CTest=(Val-NewTau)/Tau
+           IF(R<1.D-30)THEN
+              R=SMALL_DBL
+              RETURN
+           ELSEIF(ABS(CTest)<1D-8)THEN
+              RETURN
+           ELSEIF(DelR<Two*SMALL_DBL)THEN
+              WRITE(*,*)' Tau= ',Tau
+              WRITE(*,*)' Zeta = ',Zeta
+              WRITE(*,*)' R    = ',R
+              WRITE(*,*)' DelR = ',DelR
+              CALL Halt(' Faild in Extent of Overlap ')
+           ENDIF
+           ! If still to the left, increment bisection point
+           IF(CTest>Zero)BisR=R
+        ENDDO
      END FUNCTION PFunk    
 !===================================================================================================
 !    Recursive bisection to determine largest extent for this distribution
@@ -294,9 +310,11 @@ MODULE Thresholding
           Tau=Thresholds%Dist
        ENDIF
 !      Take the spherical average of HGTF coefficients      
+
        DO L=0,Ell
           Co(L)=Zero
           DO LMN=LBegin(L),LEnd(L)
+!             Co(L)=MAX(Co(L),ABS(HGTF(LMN)))
              Co(L)=Co(L)+ABS(HGTF(LMN))
           ENDDO
        ENDDO
