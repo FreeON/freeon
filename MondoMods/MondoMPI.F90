@@ -832,18 +832,34 @@ MODULE MondoMPI
          ENDDO
       55 FORMAT(' MyId = ',I2,', ',A,' = ',1000(D9.3,', '))
       ENDSUBROUTINE PSpew_DBL_VECT
+
+  SUBROUTINE PImbalance(A,NPrc,Prog_O)
+    TYPE(DBL_VECT) :: A
+    INTEGER :: NPrc,I
+    CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Prog_O
+    CHARACTER(LEN=100) :: Prog
+    REAL(DOUBLE) :: TmMin,TmMax,Imbalance,DevSum
+
+    IF(Present(Prog_O)) THEN
+      Prog = Prog_O
+    ELSE
+      Prog = ''
+    ENDIF
+    TmMax = -100.0D0
+    TmMin = 1.D+10
+    DO I = 1, NPrc
+      TmMax = Max(TmMax,A%D(I))
+      TmMin = Min(TmMin,A%D(I))
+    ENDDO
+    WRITE(*,*) TRIM(Prog)//': TmMax= ',TmMax,', TmMin=',TmMin
+    DevSum = 0.0D0
+    DO I = 1, NPrc
+      DevSum = DevSum + (TmMax-A%D(I))
+    ENDDO
+    Imbalance = DevSum/(NPrc*TmMax)
+    WRITE(*,*) TRIM(Prog)//': Imbalance = ',Imbalance
+
+  END SUBROUTINE PImbalance
+
 #endif
 END MODULE
-
-
-
-
-
-
-
-
-
-
-
-
-

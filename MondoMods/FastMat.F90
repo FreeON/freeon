@@ -110,8 +110,7 @@ MODULE FastMatrices
         GBNBlks = GBNBlks + CB%I(I)
         GBNNon0 = GBNNon0 + CN%I(I)
       ENDDO
-      WRITE(*,*) 'GBNBlks = ', GBNBlks
-      WRITE(*,*) 'GBNNon0 = ', GBNNon0
+      WRITE(*,*) 'Set_BCSR_EQ_DFASTMAT: GBNBlks = ', GBNBlks,', GBNNon0 = ', GBNNon0
       CALL New(C,(/NAtoms,GBNBlks,GBNNon0/))
       DispN%I(0) = 0
       DispB%I(0) = 0
@@ -474,7 +473,7 @@ MODULE FastMatrices
 
     StartTm = MPI_Wtime()
     IF(MyID == 0) THEN 
-      WRITE(*,*) 'MyID=', MyID, ', FastMat_redistribute is entered...'
+      WRITE(*,*) 'MyID=0, FastMat_redistribute is entered...'
     ENDIF
 
     CALL FlattenAllRows(A)
@@ -525,6 +524,9 @@ MODULE FastMatrices
        CALL Delete(LocalDims)
        CALL Delete(RemoteDims)
        CALL AlignNodes()
+       IF(MyID == ROOT) THEN
+         WRITE(*,*) 'No sending and receiving needed in FastMat_redistribute!'
+       ENDIF
        RETURN
     ENDIF
 
