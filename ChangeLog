@@ -1,3 +1,81 @@
+2001-12-05 17:08  tymczak
+
+	* MondoMods/Thresholding.F90: Fixed an Allocate Bug
+
+2001-12-05 15:12  tymczak
+
+	* OneE/BlokTrPdT.F90: New TestPrimPair()
+
+2001-12-05 15:11  tymczak
+
+	* OneE/MakeRho.F90: SetThresholds(PrvBase) ->
+	SetThresholds(PrvBase,Prog)
+
+2001-12-05 15:09  tymczak
+
+	* QCTC/JGen.F90, QCTC/BlokTrPdJ.F90, OneE/TBlok.F90,
+	OneE/BlokTrWdS.F90: New TestPrimPair()
+
+2001-12-05 15:05  tymczak
+
+	* ONX/NONX/DisOrder.F90, ONX/NONX/DisOrderGrad.F90, OneE/SBlok.F90:
+	New TestPrimPair()
+
+2001-12-05 15:04  tymczak
+
+	* MondoMods/Thresholding.F90: WORK IN PROGRESS
+	
+	  1) New Method for Calculating the Minium Atom Pair Distance
+	  2) New Extent
+	  3) New TestPrimPair
+
+2001-12-05 15:03  tymczak
+
+	* MondoMods/PrettyPrint.F90: [no log message]
+
+2001-12-05 15:02  tymczak
+
+	* MondoMods/Macros.F90: Call Prog threw SetThresholds(CurBase,Prog)
+
+2001-12-05 14:59  tymczak
+
+	* MondoMods/AtomPairs.F90: 1) Fixed a bug in SetAtomPair() 2) New
+	Subroutine MinImagDist()
+
+2001-12-05 14:57  tymczak
+
+	* HiCu/: KxcGen.F90, dXCBlok.F90: New TestPrimPair()
+
+2001-12-05 12:41  schwegle
+
+	* MondoMods/DerivedTypes.F90: Added new type to consolidate all of
+	the onx 2-e array sizes
+
+2001-12-04 14:35  mchalla
+
+	* SCFeqs/P2Use.F90: Added better convergence checking for
+	purification.
+
+2001-12-04 14:34  mchalla
+
+	* MondoMods/PrettyPrint.F90: fixxed error in non-periodic output of
+	pdf
+
+2001-12-04 14:33  mchalla
+
+	* MondoSCF/: DrvFrcs.F90, DrvSCFs.F90, SCFLocals.F90: Changed
+	convergence criteria back to using full steps, now that BFGS seems
+	to be working again.
+
+2001-12-04 14:29  mchalla
+
+	* QuNew/: BFGSHess.F90, BFGSMisc.F90, NewStep.F90: Fixed  bug with
+	PBCs.
+
+2001-11-28 14:04  mchalla
+
+	* ChangeLog: GNU style change log.  Usefull for date based updates.
+
 2001-11-27 16:19  mchalla
 
 	* MondoMods/SpecFun.F90: Added in test for product log.
