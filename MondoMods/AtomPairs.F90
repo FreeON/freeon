@@ -158,7 +158,7 @@ CONTAINS
 !
     Radius = MaxBoxDim(GM) + SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
-!    CALL Sort_CellSet(CS_OUT)
+    CALL Sort_CellSet(CS_OUT)
 !
   END SUBROUTINE SetCellNumber
 !-------------------------------------------------------------------------------
@@ -218,12 +218,12 @@ CONTAINS
 !-------------------------------------------------------------------------------
   SUBROUTINE AtomCyclic(GM,VecA)
     TYPE(CRDS)                 :: GM        
-    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF     
-
+    REAL(DOUBLE),DIMENSION(3)  :: VecA,VecF    
+!
     VecF = AtomToFrac(GM,VecA)
     CALL FracCyclic(GM,VecF)
     VecA = FracToAtom(GM,VecF)
-
+!
   END SUBROUTINE AtomCyclic
 !===================================================================================
 !
