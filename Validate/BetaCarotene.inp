@@ -58,8 +58,8 @@ Multiplicity=1
 Guess=SuperPos
 SCFMethod=(SDMM,SDMM)
 BasisSets=(STO-2G,3-21G)
-ModelChem=(HF,PBE0)
-Accuracy =(Loose,Good)
+ModelChem=(HF,BLYPxc)
+Accuracy =(Loose,Loose)
 DebugAll =(MaxDebug)
 Geometry=(InAngstroms)
 <EndOptions>
