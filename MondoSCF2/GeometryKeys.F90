@@ -1,6 +1,7 @@
 MODULE GeometryKeys
   ! Coordinate input delemeters
   CHARACTER(LEN=15), PARAMETER :: GEOMETRY_BEGIN ='<BeginGeometry>'
+  CHARACTER(LEN=14), PARAMETER :: GEOMETRY_NEXT  ='<NextGeometry>'
   CHARACTER(LEN=13), PARAMETER :: GEOMETRY_END   ='<EndGeometry>'  
 
   CHARACTER(LEN=15), PARAMETER :: PRODUCTS_BEGIN ='<BeginProducts>'
