@@ -105,9 +105,7 @@ MODULE GlobalScalars
    INTEGER, PARAMETER      :: RES_OUT_UNIT=114
 !-------------------------------------------------  Matrix dimensions
    INTEGER, SAVE           :: NBasF,NEl,NAtoms
-#ifdef PARALLEL
    INTEGER, SAVE           :: MaxAtmsNode,MaxBlksNode,MaxNon0Node               
-#endif
    INTEGER, SAVE           :: MaxAtms,MaxBlks,MaxNon0,MaxBlkSize
 !-------------------------------------------------  
 !  Memory managment
@@ -205,16 +203,13 @@ MODULE GlobalScalars
 ! Whether Periodic Boundary Condition is On
 !
    LOGICAL :: PBC_On
-
-
-#ifdef PARALLEL
-!-------------------------------------------------  
+!
 !  MPI Scalars, default values
 !
    INTEGER, SAVE           :: MyID=ROOT
    INTEGER, SAVE           :: NPrc
    LOGICAL, SAVE           :: InParallel=.FALSE.
    INTEGER, PARAMETER      :: MaxProc=1024
-#endif
+!
    INTEGER, SAVE           :: MyClone
 END MODULE GlobalScalars
