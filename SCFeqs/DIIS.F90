@@ -28,7 +28,7 @@ PROGRAM DIIS
    REAL(DOUBLE),DIMENSION(3)      :: AvDP,DeltaDPi,DeltaDPj
    REAL(DOUBLE),DIMENSION(6)      :: AvQP,DeltaQPi,DeltaQPj
    REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh, &
-                                     RelDevDP,RelDevQP,Sellers
+                                     RelDevDP,RelDevQP,Sellers,DMax
    INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
@@ -47,7 +47,7 @@ PROGRAM DIIS
 !  Dont allow damping below 0.05, as this can cause false convergence
    Damp=MAX(Damp,5D-2)
 !  Max number of equations to keep in DIIS 
-   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=10
+   IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=15
    CLOSE(Inp)
 !-------------------------------------------------------------------------------------
 !  Allocations
@@ -74,12 +74,13 @@ PROGRAM DIIS
       CALL New(B,(/N,N/))
 !-------------------------------------------------------------------------------------
 !     Check for charge sloshing
-      IF(ISCF>BMax.AND.DIISErr>1.D-1)THEN
+
+      CALL Get(DMax,'DMax',StatsToChar(Current))
+      IF(DMax>1.D-1.AND.ISCF>5)THEN
          Sloshed=.TRUE.
       ELSE
          Sloshed=.FALSE.
       ENDIF
-      Sloshed=.FALSE.
 !-------------------------------------------------------------------------------------
 !     Build the B matrix, possibly with Sellers multipole modification
       I0=M-ISCF
@@ -192,9 +193,9 @@ PROGRAM DIIS
 !-------------------------------------------------------------------------------------
 !  IO for the orthogonal, extrapolated F 
    CALL Put(F,TrixFile('F_DIIS',Args,0)) 
-   CALL PChkSum(F,'F_DIIS['//TRIM(Cycl)//']',Prog)
-   CALL PPrint(F,'F_DIIS['//TRIM(Cycl)//']')
-   CALL Plot(F,'F_DIIS_'//TRIM(Cycl))
+   CALL PChkSum(F,'F_DIIS['//TRIM(SCFCycl)//']',Prog)
+   CALL PPrint(F,'F_DIIS['//TRIM(SCFCycl)//']')
+   CALL Plot(F,'F_DIIS_'//TRIM(SCFCycl))
 !-------------------------------------------------------------------------------------
 !  Tidy up 
    CALL Delete(F)
