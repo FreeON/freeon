@@ -201,7 +201,7 @@ MODULE DrvSCFs
       CtrlVect=SetCtrlVect(Ctrl,Core)
 !        IF(PrintFlags%Int==DEBUG_INTEGRAL) &
 !           CALL Invoke('PrintInt', CtrlVect)
-      CALL Invoke('MakeS',        CtrlVect)
+      CALL Invoke('MakeS',        CtrlVect,MPIRun_O = .TRUE.)
       IF(Ctrl%Method(Ctrl%Current(2))==RH_R_SCF)THEN
          CALL Invoke('LowdinO',  CtrlVect)
       ELSEIF(Ctrl%Method(Ctrl%Current(2))==SDMM_R_SCF)THEN
