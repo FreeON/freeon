@@ -82,10 +82,13 @@ MODULE ParsingKeys
 !  <Options.MD=>
    CHARACTER(LEN=2),  PARAMETER :: DYNAMICS       ='MD'
    CHARACTER(LEN=6),  PARAMETER :: MD_VERLET      ='Verlet'
-   CHARACTER(LEN=5),  PARAMETER :: MAX_STEPS      ='Steps'
+   CHARACTER(LEN=6),  PARAMETER :: MD_PRECOR      ='Precor'
+   CHARACTER(LEN=8),  PARAMETER :: MD_VEL_SCALE   ='VelScale'
+   CHARACTER(LEN=8),  PARAMETER :: MD_TMP_SCALE   ='TmpScale'
    CHARACTER(LEN=8),  PARAMETER :: MD_TIME_STEP   ='TimeStep' 
-!  Perform verlet dynamics
-   INTEGER, PARAMETER           :: GRAD_VERLET_MD = 6413123 
+   CHARACTER(LEN=5),  PARAMETER :: MAX_STEPS      ='Steps'
+!  Perform dynamics
+   INTEGER, PARAMETER           :: GRAD_MD = 6413123 
 !--------------------------------------------------------------------------------------
 !  Options for density extrapolation between geometries: <Options.Extrap=>  
    CHARACTER(LEN=6),  PARAMETER :: EXTRAPOLATE      ='Extrap'
