@@ -921,6 +921,8 @@ CONTAINS
                 !old G%Clone(iCLONE)%GradRMS=G%Clone(iCLONE)%GradRMS+GradVal
                 G%Clone(iCLONE)%GradMax=MAX(G%Clone(iCLONE)%GradMax,ABS(GradVal))
              ENDDO
+          ELSE
+            G%Clone(iCLONE)%Gradients%D(1:3,iATS)=Zero
           ENDIF
        ENDDO
        ! Put the zeroed forces back ...
