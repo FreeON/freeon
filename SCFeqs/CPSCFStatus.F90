@@ -46,7 +46,7 @@ PROGRAM CPSCFSts
   CHARACTER(LEN=*), DIMENSION(3), PARAMETER :: Cart=(/'X','Y','Z'/)
   !
   !For nulear dipole moment.
-  integer :: iatom
+  integer :: iatom,NTotAtoms
   real(double) :: ZNuc
   real(double), dimension(3) :: MltN,MltE,COrig
   TYPE(CRDS)                 :: GM
@@ -95,7 +95,7 @@ PROGRAM CPSCFSts
   ! Compute expectation values.
   !-------------------------------------------------------------------
   !
-  COrig(:)=Zero
+  COrig(:)=Zero! must be changed.
   !
   MltN(:)=Zero
   DO iAtom=1,NAtoms
@@ -117,7 +117,7 @@ PROGRAM CPSCFSts
      CALL Multiply(PPrim,T,Tmp1)
      Tensor(iXYZ)=-Two*Trace(Tmp1)
      CALL Multiply(P,T,Tmp1)
-     MltE(iXYZ)=-Two*Trace(Tmp1,T)
+     MltE(iXYZ)=-Two*Trace(Tmp1)
 #else
      MltE(iXYZ)=-Two*Trace(P,T)
      Tensor(iXYZ)=-Two*Trace(PPrim,T)
@@ -136,9 +136,15 @@ PROGRAM CPSCFSts
   ! Save Prop.
   CALL Put(Prop,'Prop')
   !
-  WRITE(*,'(A,3E20.12)') 'MltN',MltN(1),MltN(2),MltN(3)
-  WRITE(*,'(A,3E20.12)') 'MltE',MltE(1),MltE(2),MltE(3)
-  WRITE(*,'(A,3E20.12)') 'MltT',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
+#ifdef PARALLEL
+  IF(MyID.EQ.ROOT) THEN
+#endif
+     WRITE(*,'(A,3E20.12)') 'MltN in a.u.',MltN(1),MltN(2),MltN(3)
+     WRITE(*,'(A,3E20.12)') 'MltE in a.u.',MltE(1),MltE(2),MltE(3)
+     WRITE(*,'(A,3E20.12)') 'MltT in a.u.',MltN(1)+MltE(1),MltN(2)+MltE(2),MltN(3)+MltE(3)
+#ifdef PARALLEL
+  ENDIF
+#endif
   !-------------------------------------------------------------------
   ! Get max Density block.
   !-------------------------------------------------------------------
