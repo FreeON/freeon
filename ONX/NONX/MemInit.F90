@@ -35,7 +35,6 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     IB%Lval    = -1
     IB%MAXL    = 12
     Drv%LngCC  = 60000
-    CALL GammaHeader(IB%Mesh,IB%Switch,IB%Grid)
     CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
     CALL New(DB)
     CALL New(IB)
@@ -43,14 +42,11 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     CALL New(Drv)
     CALL CCDriver(Drv%CDrv%I(1),Drv%LngDrv)
     CALL VRRDriver(Drv%VLOC%I(1),Drv%SLOC%I(1,1),Drv%LngVRR,Drv%LngLoc)
-    CALL GammaAsymptotics(Lr,IB%GammaA%D)
   ELSEIF (ErrorCode==eMAXI) THEN
     CALL Delete(IB)
     IB%MAXI = IB%MAXI * 5
-    CALL GammaHeader(IB%Mesh,IB%Switch,IB%Grid)
     CALL New(IB)
     IB%Lval=-1
-    CALL GammaAsymptotics(Lr,IB%GammaA%D)
   ELSEIF (ErrorCode==eMAXD) THEN
     CALL Delete(DB)
     DB%MAXD = DB%MAXD * 2

@@ -36,7 +36,7 @@ Objects1 = ONXParameters.o ONXMemory.o ContractionScaling.o MatFilter.o \
            ONX.o Contract.o HRRBra.o HRRKet.o \
            VRRl.o RGen1C.o CCDriver.o VRRDriver.o \
            DisOrder.o RangeOfDensity.o VRRs.o QuickSortDis.o PutDis.o \
-           RangeOfExchange.o Tables.o \
+           RangeOfExchange.o  \
            GetSubBlk.o XPose.o InitSubInd.o \
            RGen.o Digest.o Scatter.o GetAdr.o PutSubBlk.o Fillout.o \
            ComputeKe.o ComputeKg.o GetIntCode.o GetIntSpace.o
@@ -45,7 +45,7 @@ Objects2 = ONXParameters.o ONXMemory.o ContractionScaling.o        \
            Sizes.o Stats.o MemInit.o GradONX.o Contract.o          \
            HRRBra.o HRRKet.o VRRl.o RGen1C.o CCDriver.o            \
            VRRDriver.o DisOrderGrad.o RangeOfDensity.o VRRs.o      \
-           QuickSortDis.o PutDis.o Tables.o GDLoader.o \
+           QuickSortDis.o PutDis.o  GDLoader.o \
            GDrivers.o ComputeXForce.o ContractG.o RGen.o           \
            HRRBraGrad.o HRRKetGrad.o GetSubBlk.o GetGradient.o     \
            InitSubInd.o DigestGradient.o GetAdr.o
@@ -55,7 +55,7 @@ ReleaseFiles=ONXParameters.x ONXMemory.x ContractionScaling.x MatFilter.x \
              ONX.x GradONX.x Contract.x HRRBra.x HRRKet.x \
              VRRl.x RGen1C.x CCDriver.x VRRDriver.x \
              DisOrder.x RangeOfDensity.x VRRs.x QuickSortDis.x PutDis.x \
-             RangeOfExchange.x Tables.x  \
+             RangeOfExchange.x   \
              GetSubBlk.x XPose.x InitSubInd.x \
              RGen.x Digest.x Scatter.x GetAdr.x PutSubBlk.x Fillout.x \
              ComputeKe.x ComputeKg.x GetGradient.x     \

@@ -36,7 +36,6 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     IB%Lval    = -1
     IB%MAXL    = 12
     Drv%LngCC  = 60000
-    CALL GammaHeader(IB%Mesh,IB%Switch,IB%Grid)
     CALL VRRLng(Drv%LngVRR,Drv%LngLoc)
     IF(.NOT.AllocQ(DB%Alloc)) &
     CALL New(DB)
@@ -54,20 +53,16 @@ SUBROUTINE MemInit(DB,IB,SB,Drv,BSc,BSp)
     CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
     CALL CCDriver(Drv%CDrv%I(1),Drv%LngDrv)
     CALL VRRDriver(Drv%VLOC%I(1),Drv%SLOC%I(1,1),Drv%LngVRR,Drv%LngLoc)
-    CALL GammaAsymptotics(Lr,IB%GammaA%D)
   ELSEIF (ErrorCode==eMAXI) THEN
     CALL Delete(IB)
     IB%MAXI = IB%MAXI * 5
-    CALL GammaHeader(IB%Mesh,IB%Switch,IB%Grid)
     CALL New(IB)
     IB%Lval=-1
-    CALL GammaAsymptotics(Lr,IB%GammaA%D)
   ELSEIF (ErrorCode==eMAXD) THEN
     CALL Delete(DB)
     CALL Delete(BufT)
     CALL Delete(SchT)
     DB%MAXD = DB%MAXD * 1.3D0
-!    WRITE(*,*)' DB%MAXD = ',DB%MAXD
     CALL New(DB)
     CALL New(BufT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
     CALL New(SchT,(/DB%MAXD,DB%MAXT,DB%MAXK/))
