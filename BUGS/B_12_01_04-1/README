@@ -5,21 +5,17 @@ Compiled on zinc with CompilerSpecifics.IntelLinux.NAG ,
 and on pink.
 
 PROBLEM: 
-When running code on T01.water.inp and printing force conponents
-lots of NaN-s appear, e.g. in S-Force. For CH2x-6.inp
-instead of NaN-s, the run produces very large numbers like 10^+270 
-or so. While the NaN-s do not mess up atomic forces for water,
-they do for CH2x-6.inp. See output for water in T01_2873.out,
-output for CH2x-6.inp is in CH2x-6_23449.out-2. For the CH2x-6.inp
-the restart hdf is CH2x-6_11756.hdf.gz.
+HF/3-21G/good on polyethilene.
+After a very difficult SCF convergence force conponents are printed.
+It turns out that already S-Force contains extremely large 
+component is 3-21G basis, while it did not, say, in STO-2G.
 
-Printouts of forces are in the output files as produced by the SCFs.F90
-given in the present directory. This SCFs.F90 is the same with version
-2004-12-06 08:02, but some printing is added.
+For printing, the attached SCFs.F90 was used. Beside the extra 
+printing it is identical to version 2004-12-06 08:02.
 
 Also, why was SCF convergence for such a simple electronic structure
 as polyethylene such a struggle (see CH2x-6_9156.out-1)?
 
-NaN-forces need to be fixed.
+Fixing of huge force components is needed.
 K.N. 12/06/04.
 ------------------------------------------------------------------

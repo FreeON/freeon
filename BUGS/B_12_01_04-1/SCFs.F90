@@ -1990,10 +1990,11 @@ CLOSE(Out,STATUS='KEEP')
      !
      CALL OpenASCII(OutFile,Out)
      CALL New(AuxLatF,(/3,3/))
-     CALL New(AuxcartF,(/3,NatmsLoc/))
+     CALL New(AuxCartF,(/3,NatmsLoc/))
      HDFFileID=OpenHDF(N%HFile)
      HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
      CALL Get(AuxLatF,'latfrc',Tag_O=chGEO)
+     CALL Get(AuxCartF,'Gradients',Tag_O=chGEO)
      !
      WRITE(*,*) 'Atomic '//TRIM(Char)
      WRITE(Out,*) 'Atomic '//TRIM(Char)
