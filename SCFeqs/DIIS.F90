@@ -75,7 +75,7 @@ PROGRAM DIIS
 !-------------------------------------------------------------------------------------
 !     Check for charge sloshing
 
-      CALL Get(DMax,'DMax',StatsToChar(Current))
+      CALL Get(DMax,'DMax',StatsToChar(Previous))
       IF(DMax>1.D-1.AND.ISCF>5)THEN
          Sloshed=.TRUE.
       ELSE
