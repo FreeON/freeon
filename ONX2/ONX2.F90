@@ -30,6 +30,8 @@ PROGRAM ONX2
 #endif
   !
   !New
+  USE ONX2DataType
+  USE ONX2List
   USE ONX2ComputK
   !
   IMPLICIT NONE
@@ -61,7 +63,6 @@ PROGRAM ONX2
   REAL(DOUBLE)   :: TmML,TmRE,TmKx,TmFO,TmTM
   TYPE(DBL_VECT) :: TmKxArr,TmMLArr,TmREArr,TmFOArr,TmTMArr!,TmKTArr,NERIsArr
 !New
-  !TYPE(CList ), DIMENSION(:), POINTER :: ListC
   TYPE(CList2), DIMENSION(:), POINTER :: ListC,ListD
 
 !
@@ -70,7 +71,7 @@ PROGRAM ONX2
 #else
   CALL StartUp(Args,Prog)
 #endif
-!
+  !
   InFile=TRIM(ScrName)//'_Cyc'//TRIM(IntToChar(Args%i%i(1)))
   IF(SCFActn=='Restart')THEN
      ! Close current group and HDF
@@ -112,31 +113,37 @@ PROGRAM ONX2
   CALL Get(GMc,Tag_O=CurGeom)
   !
   !
-!!$  IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
+!!$  SELECT CASE(SCFActn)
+!!$  !IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
+!!$  CASE('StartResponse','FockPrimeBuild')
 !!$#ifndef PARALLEL
 !!$     CALL Get(D,TrixFile('DPrime'//Args%C%C(4),Args,0))
 !!$#else
 !!$     CALL PDrv_Initialize(DFastMat,TrixFile('DPrime'//Args%C%C(4),Args,0),'ONXPart',Args)
 !!$#endif
-!!$  ELSEIF(SCFActn=='InkFok')THEN
+!!$  !ELSEIF(SCFActn=='InkFok')THEN
+!!$  CASE('InkFok')
 !!$#ifndef PARALLEL
 !!$     CALL Get(D,TrixFile('DeltaD',Args,0))
 !!$#else
 !!$     CALL PDrv_Initialize(DFastMat,TrixFile('DeltaD',Args,0),'ONXPart',Args)
 !!$#endif
-!!$  ELSEIF(SCFActn=='BasisSetSwitch')THEN
+!!$  !ELSEIF(SCFActn=='BasisSetSwitch')THEN
+!!$  CASE('BasisSetSwitch')
 !!$#ifndef PARALLEL
 !!$     CALL Get(D,TrixFile('D',Args,-1))
 !!$#else
 !!$     CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,-1),'ONXPart',Args)
 !!$#endif
-!!$  ELSE
+!!$  !ELSE
+!!$  CASE DEFAULT
 #ifdef PARALLEL
      CALL PDrv_Initialize(DFastMat,TrixFile('D',Args,0),'ONXPart',Args)
 #else
      CALL Get(D,TrixFile('D',Args,0))
 #endif
-!!$  ENDIF
+!!$  !ENDIF
+!!$  END SELECT
   !
   !
 #ifdef PARALLEL
@@ -150,7 +157,8 @@ PROGRAM ONX2
   IF(MyID.EQ.ROOT) &
 #endif
   WRITE(*,*) 'WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2 WE ARE IN ONX2'
-
+  !
+  !
   !WRITE(*,*) 'allocate List'
 #ifdef PARALLEL
   Time1 = MPI_WTIME()
@@ -194,6 +202,8 @@ PROGRAM ONX2
 #endif
   !
   !
+  !------------------------------------------------
+  !
 #ifdef PARALLEL
   time1 = MPI_WTIME()
   CALL RangeOfExchangeFASTMAT(BSc,GMc,BSp,GMp,DFastMat)
@@ -205,6 +215,8 @@ PROGRAM ONX2
 #endif
   TmRE = time2-time1
   !
+  !
+  !------------------------------------------------
   !
 #ifdef PARALLEL
   CALL New_FASTMAT(KxFastMat,0,(/0,0/))
@@ -241,7 +253,6 @@ PROGRAM ONX2
 #else
   CALL CPU_TIME(Time1)
   CALL DeAllocList(ListC)
-  CALL Delete(D)
   CALL CPU_TIME(Time2)
 #endif
   !WRITE(*,*) 'deallocate List:ok',Time2-Time1
@@ -278,6 +289,8 @@ PROGRAM ONX2
 #ifdef PARALLEL
   CALL PDrv_Finalize(DFastMat,CollectInPar_O=.TRUE.)
   CALL Delete_FastMat1(DFastMat)
+#else
+  CALL Delete(D)
 #endif
   !
   !
@@ -371,12 +384,12 @@ PROGRAM ONX2
   !
 #else
   !
-  WRITE(*,1001) TmKx
+  !WRITE(*,1001) TmKx
 !  WRITE(*,1002) xTotNERIs
-  WRITE(*,1003) TmDO
-  WRITE(*,1004) TmRE
-  WRITE(*,1005) TmFO
-  WRITE(*,1006) TmTM
+  !WRITE(*,1003) TmML
+  !WRITE(*,1004) TmRE
+  !WRITE(*,1005) TmFO
+  !WRITE(*,1006) TmTM
   !
 1001 FORMAT(' ONX: Tot TmK  = ',F15.2)
 !1002 FORMAT(' ONX: Tot ERI  = ',F15.2)

@@ -31,12 +31,17 @@ include $(MONDO_HOME)/Includes/RemoveAll
 
 EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
 
-all: ONX2
+all: ONX2 GONX2
 
 Objects = QuickSortDis.o PartDrv.o ONXParameters.o ONXInit.o ONXGet.o   \
 	   ONXFillOut.o Stats.o ONXRng.o \
 	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
-	   IntSSSS.o ONX2ComputK.o ONX2.o
+	   IntSSSS.o ONX2ComputK.o ONX2List.o ONX2.o
+#
+GObjects = QuickSortDis.o ONXParameters.o  ONXGet.o \
+	   ONX2F77.o ONX2DataType.o ONXCtrSclg.o \
+	   IntSSSS.o GONX2ComputDK.o ONX2List.o GONX2.o
+#dInt1111.o
 ReleaseFiles= 
 #
 Libs =  $(F90_LIBRARIES) $(LAPACK) -lTwoE
@@ -44,6 +49,10 @@ Libs =  $(F90_LIBRARIES) $(LAPACK) -lTwoE
 ONX2:	$(Objects)
 	$(LD) $(LDFLAGS) ONX2 $(Objects) $(Libs)
 	mv ONX2 $(MONDO_EXEC)/ONX2
+#
+GONX2:	$(GObjects)
+	$(LD) $(LDFLAGS) GONX2 $(GObjects) $(Libs)
+	mv GONX2 $(MONDO_EXEC)/GONX2
 #
 release:purge $(ReleaseFiles)
 	rm -f HRR.tar
@@ -57,8 +66,6 @@ clean:
 	rm -f $(REMOVEMISC) $(REMOVEMODS)
 	rm -f \#*
 	rm -f *~
-	rm -f $(MONDO_EXEC)/ONX2
-	rm -f $(MONDO_EXEC)/GONX2
 	rm -f $(Objects)
 	ls
 #

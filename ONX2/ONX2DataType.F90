@@ -54,6 +54,13 @@ MODULE ONX2DataType
   TYPE AtomPr
      TYPE(ShellPair) :: SP
   END TYPE AtomPr
+
+
+  TYPE AtomPrG
+     TYPE(ShellPairG) :: SP
+  END TYPE AtomPrG
+
+
   !
 !!$  TYPE AtomInfo
 !!$     INTEGER      :: K1,K2,NCell
