@@ -42,7 +42,7 @@ MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
            LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
            D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
            Thresholding.o Functionals.o PBC.o AtomPairs.o       \
-           BoundingBox.o BraBloks.o Macros.o          
+           BoundingBox.o BraBloks.o Macros.o
 #
 MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
@@ -54,7 +54,7 @@ MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
            D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
            Thresholding.x Functionals.x PBC.x AtomPairs.x       \
            BoundingBox.x BraBloks.x Macros.x EllToInclude.x     \
-           FTest.x SMTest.x
+           FTest.x SMTest.x  
 #
 small:	Mods
 #
@@ -65,9 +65,8 @@ test:	SM F
 clean:	CMods CDGEMM CSM CF
 #
 purge:	clean
-	rm -f $(REMOVEALL)
 	rm -f $(MONDO_HOME)/Libs/libMondoMods.a
-	ls -l $(MONDO_HOME)/Libs
+	rm -f $(REMOVESRCE)
 #
 release:$(MModRel)
 	rm -rf MMA/Functions
