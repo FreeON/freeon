@@ -104,8 +104,11 @@ MODULE MatFunk
 !
       BLKMAT1%D=Zero
       DO I=1,N
-         IF(ABS(BLKVALS%D(I))<EigenThreshold)THEN
+         IF(BLKVALS%D(I)<EigenThreshold.AND.BLKVALS%D(I)>-1D-14)THEN
             BLKMAT1%D(I,I)=Zero
+         ELSEIF(BLKVALS%D(I)<-1D-14)THEN
+            CALL Halt('In MatFunk, apparently a non-positive definate matrix: Eval = ' &
+                      //TRIM(DblToChar(BLKVALS%D(I)))//', Perhaps increase the accuracy level?')
          ELSE
             BLKMAT1%D(I,I)=Funk(BLKVALS%D(I))
          ENDIF
@@ -115,6 +118,7 @@ MODULE MatFunk
 !
       CALL DGEMM_NNc(N,N,N,One,Zero,BLKVECT%D(1:N,1:N),BLKMAT1%D(1:N,1:N),BLKMAT2%D(1:N,1:N))
       CALL DGEMM_NTc(N,N,N,One,Zero,BLKMAT2%D(1:N,1:N),BLKVECT%D(1:N,1:N),     FOnA(1:N,1:N))
+
    END SUBROUTINE FunkOnSqMat
 !
 !
