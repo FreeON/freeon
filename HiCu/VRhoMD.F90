@@ -21,8 +21,9 @@ MODULE WriteRoutines
         WRITE(Unit,*)Tab2,TRIM(Res),'=',TRIM(Mult),'*Sgn'
         WRITE(Unit,*)Tab1,'ELSE'
         WRITE(Unit,*)Tab2,'J=AINT(X*Erf_Grid)'
-        BigStr=TRIM(Res)//'='//TRIM(Mult)//'*Sgn*(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))' 
-        BigStr=Tab2//BigStr
+        BigStr=Tab2//TRIM(Res)//'='//TRIM(Mult)//'*Sgn   &'
+        WRITE(Unit,*)TRIM(BigStr)
+        BigStr=Tab2//'   *(Erf_0(J)+X*(Erf_1(J)+X*(Erf_2(J)+X*(Erf_3(J)+X*Erf_4(J)))))' 
         WRITE(Unit,*)TRIM(BigStr)
         WRITE(Unit,*)Tab1,'ENDIF'
      END SUBROUTINE
