@@ -22,6 +22,10 @@ PROGRAM SCFStatus
 #endif
    REAL(DOUBLE)                    :: E_el_tot,E_nuc_tot,E_es_tot,KinE,ExchE,Exc, &
                                       Gap,Etot,DMax,Virial,DIISErr
+#ifdef MMech
+   REAL(DOUBLE)                    :: EBOND,EANGLE,EDIHEDRAL,ELJ,EIMPROPER,MM_COUL,MM_ENERGY
+   REAL(DOUBLE)                    :: E_C_EXCL,E_LJ_EXCL
+#endif
    CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
    CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'  
 !---------------------------------------------------------------------------------------
@@ -81,6 +85,32 @@ PROGRAM SCFStatus
    ELSE
       Exc=Zero
    ENDIF
+#ifdef MMech
+!
+   IF(HasMM()) THEN
+     CALL Get(EBOND,'MM_EBOND',Tag_O=Curgeom)
+     CALL Get(EANGLE,'MM_EANGLE',Tag_O=Curgeom)
+     CALL Get(EDIHEDRAL,'MM_EDIHEDRAL',Tag_O=Curgeom)
+     CALL Get(EIMPROPER,'MM_EIMPROPER',Tag_O=Curgeom)
+     CALL Get(ELJ,'MM_ELJ',Tag_O=Curgeom)
+     CALL Get(MM_COUL,'MM_COUL',Tag_O=Curgeom)
+     CALL Get(E_LJ_EXCL,'E_LJ_EXCL',Tag_O=Curgeom)
+     CALL Get(E_C_EXCL,'E_C_EXCL',Tag_O=Curgeom)
+     MM_COUL=MM_COUL-E_C_EXCL
+     ELJ=ELJ-E_LJ_EXCL
+   ELSE
+     EBOND=Zero
+     EANGLE=Zero
+     EDIHEDRAL=Zero
+     EIMPROPER=Zero
+     ELJ=Zero
+     MM_COUL=Zero
+     E_LJ_EXCL=Zero
+     E_C_EXCL=Zero
+   ENDIF
+     MM_ENERGY=EBOND+EANGLE+EDIHEDRAL+EIMPROPER+ELJ+MM_COUL
+!
+#endif
    E_es_tot = E_el_tot+E_nuc_tot
    Etot=KinE+E_es_tot+Exc+ExchE
    CALL Put(Etot,'Etot',StatsToChar(Current))
@@ -150,6 +180,25 @@ PROGRAM SCFStatus
 !     Last but not least, total SCF energy
       SCFMessage=TRIM(SCFMessage)                                           &
                //'       <SCF>   = '//TRIM(FltToMedmChar(ETot))//RTRN
+!     Add in MM energies
+      IF(HasMM()) THEN
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'     <EBOND>   = '//TRIM(DblToMedmChar(EBOND))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'    <EANGLE>   = '//TRIM(DblToMedmChar(EANGLE))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //' <EDIHEDRAL>   = '//TRIM(DblToMedmChar(EDIHEDRAL))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //' <EIMPROPER>   = '//TRIM(DblToMedmChar(EIMPROPER))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'<E_LENNARD_JONES>= '//TRIM(DblToMedmChar(ELJ))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'   <MM_COUL>   = '//TRIM(DblToMedmChar(MM_COUL))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //' <MM_ENERGY>   = '//TRIM(FltToMedmChar(MM_ENERGY))//RTRN         
+         SCFMessage=TRIM(SCFMessage)                                        &
+               //'<TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY))//RTRN         
+      ENDIF
    ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
       SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
                                      //TRIM(CurBase)//','  &
@@ -158,7 +207,9 @@ PROGRAM SCFStatus
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
-         SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+                                    //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
+                                    //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
                                     //', dD = '//TRIM(DblToShrtChar(DMax))
       ENDIF
 !     Add in DIIS error
