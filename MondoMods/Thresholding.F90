@@ -53,15 +53,59 @@ MODULE Thresholding
         AtomPairDistanceThreshold=-LOG(Tau)/MinXab
      END SUBROUTINE SetAtomPairThresh
 !
-     FUNCTION TestAtomPair(Pair)
+     FUNCTION TestAtomPair(Pair,Box_O)
         LOGICAL                   :: TestAtomPair
         TYPE(AtomPair)            :: Pair
+        TYPE(BBox),OPTIONAL       :: Box_O
         IF(Pair%AB2>AtomPairDistanceThreshold) THEN
            TestAtomPair = .FALSE.
         ELSE
            TestAtomPair = .TRUE.
+           IF(PRESENT(Box_O)) &
+              TestAtomPair=TestBoxPairOverlap(Pair,Box_O)
         ENDIF
      END FUNCTION TestAtomPair
+
+     FUNCTION TestBoxPairOverlap(Pair,Box)
+        LOGICAL                   :: TestBoxPairOverlap
+        TYPE(AtomPair)            :: Pair
+        TYPE(BBox),OPTIONAL       :: Box
+        REAL(DOUBLE)              :: PairExtent,PairHlfWdt
+        REAL(DOUBLE),DIMENSION(3) :: PairMidPnt,PairUntVct, &
+                                     PairBoxVct,PrBxUntVct
+!----------------------------------------------------------------
+!       Max extent of atom pair from the line AB 
+        IF(ABS(Pair%AB2)<1D-20)THEN
+!          Line is a point: Exp[-MinZab*R^2]<Tau
+           PairExtent=PrimPairDistanceThreshold/MinZab
+           PairHlfWdt=Zero
+           PairUntVct=Zero
+        ELSE
+!          Exp[-MinXab*|A-B|^2]*Exp[-MinZab*R^2]<Tau
+           PairExtent=Four*PrimPairDistanceThreshold/Pair%AB2
+           PairUntVct=(Pair%A-Pair%B)*Half
+!          Half length (width) of AB
+           PairHlfWdt=SQRT(PairUntVct(1)**2+PairUntVct(2)**2+PairUntVct(3)**2)
+!          AB Unit vector
+           PairUntVct=PairUntVct/PairHlfWdt
+        ENDIF
+!       Midpoint vector of AB
+        PairMidPnt=(Pair%A+Pair%B)*Half
+!       Distance from Box center to line midpoint
+        PairBoxVct=Box%Center-PairMidPnt
+!       Pair box unit vector
+        PrBxUntVct=PairBoxVct/SQRT(PairBoxVct(1)**2+PairBoxVct(2)**2+PairBoxVct(3)**2)
+!       Check for line box overlap
+        TestBoxPairOverlap=.FALSE.
+        IF(ABS(PairBoxVct(1))-PairExtent*ABS(PrBxUntVct(1)) > &
+          +Box%Half(1)+PairHlfWdt*ABS(PairUntVct(1)))RETURN
+        IF(ABS(PairBoxVct(2))-PairExtent*ABS(PrBxUntVct(2)) > &
+          +Box%Half(2)+PairHlfWdt*ABS(PairUntVct(2)))RETURN
+        IF(ABS(PairBoxVct(3))-PairExtent*ABS(PrBxUntVct(3)) > &
+          +Box%Half(3)+PairHlfWdt*ABS(PairUntVct(3)))RETURN
+!       Could use some tests invovling cross products here...
+        TestBoxPairOverlap=.TRUE.
+     END FUNCTION TestBoxPairOverlap
 !====================================================================================================
 !    Secondary thresholding of primitive pairs using current
 !    value of Xab and Exp[-Xab |A-B|^2] = Tau
@@ -140,11 +184,12 @@ MODULE Thresholding
           IF(Potential)THEN
 !            Solution gives the boundry of quantum/classical approximation
 !            to the potential: Int dr drp delta(r-R) |r-rp|^{-1} Sum_LMN rho_LMN(rp)
-             UniP=ABS(HGTF(1))*(Two*Pi/Zeta)
+             UniP=ABS(HGTF(1))*(Two*Pi/Zeta)+SMALL_DBL
              T=PFunk(0,Tau/UniP)
              R=SQRT(T/Zeta)     
           ELSE
 !            Gaussian solution gives rho_000(R)<=Tau
+             UniP=ABS(HGTF(1))+SMALL_DBL
              R=SQRT(MAX(Zero,-(One/Zeta)*LOG(Tau/UniP)))
           ENDIF
        ELSE
@@ -163,7 +208,7 @@ MODULE Thresholding
                 ENDDO
              ENDDO       
           ENDDO
-          UniP=ABS(UniP)+1D-50
+          UniP=ABS(UniP)+SMALL_DBL
 !         Now just use expresions based on spherical symmetry ...
           IF(Potential)THEN
 !            Solution gives the boundry of quantum/classical approximation

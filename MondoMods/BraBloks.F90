@@ -84,7 +84,7 @@ MODULE BraBloks
     REAL(DOUBLE),DIMENSION(3) :: PA,PB
     INTEGER           :: CFA,PFA,KA,CFB,PFB,KB
     INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB,Ell,Len
-    INTEGER           :: IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
+    INTEGER           :: I,IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
     REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,Fx,Fy,Fz
 !-------------------------------------------------------------------------------

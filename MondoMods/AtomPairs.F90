@@ -28,12 +28,13 @@ CONTAINS
 !-------------------------------------------------------------------------------
 ! Test to see if the atomic overlap is above tolerance and create pair
 !-------------------------------------------------------------------------------
-  FUNCTION SetAtomPair(GM,BS,I,J,Pair)
+  FUNCTION SetAtomPair(GM,BS,I,J,Pair,Box_O)
     LOGICAL                   :: SetAtomPair
     INTEGER                   :: I,J,K
     TYPE(AtomPair)            :: Pair
     TYPE(CRDS)                :: GM
     TYPE(BSet)                :: BS
+    TYPE(BBox),OPTIONAL       :: Box_O
 #ifdef PERIODIC
     Pair%AB2 = MinImageDist(GM,GM%Carts%D(1:3,I),GM%Carts%D(1:3,J))
 #else
@@ -53,7 +54,7 @@ CONTAINS
        Pair%SameAtom = .FALSE.
     ENDIF
 !
-    SetAtomPair=TestAtomPair(Pair)
+    SetAtomPair=TestAtomPair(Pair,Box_O)
 !
   END FUNCTION SetAtomPair
 !-------------------------------------------------------------------------------

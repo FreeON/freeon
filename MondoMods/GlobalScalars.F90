@@ -55,6 +55,7 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: FiveFourths  =Five/Four           ! 5/4
    REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0 ! Angstronms -> AU
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
+   REAL(DOUBLE), PARAMETER :: SMALL_DBL    =One/BIG_DBL         ! smallest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 
 !-------------------------------------------------------------------------------
 !  Status keys
