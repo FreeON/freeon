@@ -1,3 +1,81 @@
+2004-03-16 21:46  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: [no log message]
+
+2004-03-16 18:38  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: This is a
+	cleaner version of the optimizer. Things are prepared for the
+	introduction of delocalized internal coordinates.
+
+2004-03-16 17:11  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: Another addition to the optimizer
+	paper.
+
+2004-03-16 12:23  nemeth
+
+	* Docs/Optimizer/PRL/GFS_PRL.tex: A little addition to the
+	optimizer paper.
+
+2004-03-15 23:54  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib: Modified text &
+	refs.
+
+2004-03-15 22:58  nemeth
+
+	* Docs/Optimizer/PRL/1_7_6_Data.eps: Back to old picture.
+
+2004-03-15 22:46  nemeth
+
+	* Docs/Optimizer/PRL/: 1_7_6_Data.eps, picture1.gnu: New versions
+	of picture1.
+
+2004-03-15 22:15  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib, prl.ps: A new
+	version of the optimizer paper.
+
+2004-03-12 14:38  mchalla
+
+	* Docs/DM_Papers/PERT_2/: Makefile, Response2.bib,
+	perturbedprojector.bbl, perturbedprojector.tex: Latest hopefully
+	final revision.
+
+2004-03-11 17:32  nemeth
+
+	* MondoSCF2/: GDIIS.F90, Hessian.F90, InCoords.F90, Optimizer.F90,
+	ParseGeomOpt.F90: A new version of the optimizer, with more VDW
+	internal coordinates and more careful starting step for large
+	molecules.
+
+2004-03-11 17:24  nemeth
+
+	* MondoMods/GlobalScalars.F90: F-test data added.
+
+2004-03-05 19:25  nemeth
+
+	* MondoSCF2/ParseGeometries.F90: A precompilation bug fixed, thanks
+	Neil for calling our attention to.
+
+2004-03-05 09:00  vweber
+
+	* ONX2/ONX2List.F90: Removed unused pointers
+
+2004-03-05 05:13  vweber
+
+	* Docs/DM_Papers/PERT_3/: Response3.bib, Response3.tex: -
+
+2004-03-04 15:22  nemeth
+
+	* Docs/Optimizer/PRL/: GFS_PRL.tex, mondo_new.bib, prl.ps: A new
+	version of the optimizer-paper.
+
+2004-03-04 09:34  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-03-03 20:00  nemeth
 
 	* Docs/Optimizer/PRL/1_7_6_Pred: Data file added to optimizer
