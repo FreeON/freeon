@@ -51,8 +51,9 @@ CONTAINS
           PrintFlags%Set=DEBUG_BASISSET
           CALL Print_BSET(B%BSets(I,J))
 #endif
-      ENDDO
+       ENDDO
        CLOSE(Bas,STATUS='KEEP')
+       CLOSE(GBas,STATUS='KEEP')
     ENDDO
     CLOSE(Inp,STATUS='KEEP')
   END SUBROUTINE LoadBasisSets
