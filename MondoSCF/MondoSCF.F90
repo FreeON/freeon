@@ -60,6 +60,9 @@ PROGRAM MondoSCF
         CALL SCFSummry(Ctrl) 
      ENDDO
      Begin(2) = 1
+
+     CALL Forces(Ctrl,OutFile,Out)
+
 !    Do Action
      SELECT CASE (Ctrl%ForceAction)
      CASE('MolecularDynamics')
