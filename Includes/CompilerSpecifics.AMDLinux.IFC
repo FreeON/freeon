@@ -71,6 +71,6 @@ F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS)
 #--------------------------------------------------------------------------
 #  'Nuff said
 #
-LAPACK = -L($LAPACK) -llapack_LINUX_IFC -lblas_LINUX_IFC
+LAPACK = -L$(LAPACK) -llapack_LINUX_IFC -lblas_LINUX_IFC
 #---------------------------------------------------------------------------
 
