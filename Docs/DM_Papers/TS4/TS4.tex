@@ -287,15 +287,17 @@ ${\cal G}$, such that the linear combination
 \begin{equation} \label{NT}
 {\bf X}_{n+1} = {\cal P}_{\rm TRS}({\bf X}_n) = {\cal F}({\bf X}_n) + \gamma_n {\cal G}({\bf X}_n)
 \end{equation}
-is trace preserving when
+gives the correct trace, ${\rm Tr}[{\bf X}_{n+1}] = N_{\rm el}$, when
 \begin{equation} \label{gamma}
 \gamma_n = (N_{\rm el} - {\rm Tr}[{\cal F}({\bf X}_n)])/{\rm Tr}[{\cal G}({\bf X}_n)]
 \end{equation}
 is within the domain of applicability, $\gamma_n \in [\gamma_{\rm min},\gamma_{\rm max}]$.  
-The price paid for polynomial choice is that $\gamma_n$ is not guaranteed to
-always yield a trace conserving solution.  When a non-convergent mapping is encountered, an 
+The price paid for this choice of mapping is that $\gamma_n$ is bounded and we are not 
+always guaranteed a trace conserving projection. If $\gamma_n$ would be unrestricted
+${\cal P}_{\rm TRS}({\bf X}_n)$ could map eigenvalues out of $[0,1]$ leading to numerical 
+instability.  When $\gamma_n$ is out of bounds an 
 auxiliary mechanism is used to reset the solution, bringing it back into a trace conserving regime.
-The reseting is carried out with the quadratic spectral projection (SP2) function  
+The resetting is carried out with the quadratic spectral projection (SP2) function  
 \begin{equation}
 \label{sp2}
 {\cal P}_{\rm SP2}(x)=
@@ -396,9 +398,9 @@ in various regions.
 While not unique, it is more efficient to work with quartic polynomials than the cubics
 encountered in the McWeeny or PM scheme, as one extra inflection may be obtained at the 
 fixed points for the same number of matrix-matrix multiplications.  Optimality seems to be 
-associated with polynomials of order 2, 4 and 9 \cite{ANiklasson02A}, and with achieving the 
+associated with polynomials of order 2, 4 and 9 \cite{ANiklasson02B}, and with achieving the 
 steepest possible slope at inflection points, which is favored by 
-an asymmetric polynomial \cite{ANiklasson02B}.  In the case of TRS4, the combination of 
+an asymmetric polynomial \cite{ANiklasson02A}.  In the case of TRS4, the combination of 
 ${\cal F}$ and ${\cal G}$ is initially asymmetric, becoming symmetric at convergence as 
 the McWeeny regime is reached.
 
@@ -673,8 +675,8 @@ in these studies is typically $\approx 99\%$ dense, PM takes a more sparse path 
 dropping to $\approx 90\%$ full.  Also, as the basis set size increases so does the number 
 of matrix-matrix multiplies $M_{\rm PM}$ required for PM to reach convergence. For the 
 larger basis sets the behavior of PM becomes pathological,  leading to errors greater 
-than a $m$hartree even with quite a tight threshold.  On the other hand, the TRS4 accumulated error 
-remains stable at about 0.1 $\mu$hartree.
+than a $m$Hartree even with quite a tight threshold.  On the other hand, the TRS4 accumulated error 
+remains stable at about 0.1 $\mu$Hartree.
 \commentoutA{
 \begin{table}[h]
 \caption{Basis set progression of ES, PM and TRS4 values for RPBE chlorophyll with $\tau = 10^{-6}$, including 
@@ -718,7 +720,7 @@ to explore the choice of initial guess further.
 
 As shown in Fig.~\ref{waterenergyerrors}, using TRS4 and $\tau=10^{-4}$ for a large gap system 
 leads to  early crossovers with eigensolution and true linear scaling at an energetic 
-cost of about 0.1 mhartree per heavy atom.  This cost is akin to a change of basis, 
+cost of about 0.1 mHartree per heavy atom.  This cost is akin to a change of basis, 
 as matrix truncation limits the variational space, corrupting the commutator $[{\bf F,P}]$ and 
 raising the total energy.  While accumulation errors due to purification are distinct from 
 truncation errors, their combined effect is the same, leading to corruption of the commutator 
@@ -781,10 +783,11 @@ One advantage with the Trace Re-Setting scheme and the trace
 conserving PM scheme, compared to some variational schemes \cite{XLi93}
 and the grand canonical purification method,
 are their ability to deal with degeneracy and fractional occupancy.
-This is a natural consequence of setting all eigenvalues to 0 or 1 
-toward convergence except for the bundle of degenerate eigenvalues, which 
-remain locked to the inflection point of the Trace Re-Setting or trace conserving purification 
-polynomials. Below we briefly discuss the problem with degeneracy and fractional
+This is a natural consequence of trace conserving (or setting Eq. \ref{NT}) purification
+setting all eigenvalues to 0 or 1 toward convergence except for the bundle of 
+degenerate eigenvalues, which remain locked to the inflection point, which
+is automatically adjusted by the trace condition.
+Below we briefly discuss the problem with degeneracy and fractional
 occupancy, how they destroy idempotence and how they can be calculated
 from the density matrix.
 
