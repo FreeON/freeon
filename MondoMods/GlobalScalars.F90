@@ -1,19 +1,19 @@
 MODULE GlobalScalars
    IMPLICIT NONE
-!---------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !  Default system types
 !
    INTEGER, PARAMETER :: INTEGR=KIND(0)              !--Integer*4 or Integer*8
    INTEGER, PARAMETER :: SINGLE=KIND(0.0)            !--Real*4
    INTEGER, PARAMETER :: DOUBLE=KIND(0.D0)           !--Real*8
-!----------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !  Defined precision types
 !
    INTEGER, PARAMETER :: INT1=SELECTED_INT_KIND(2)  !--Integer*1
    INTEGER, PARAMETER :: INT2=SELECTED_INT_KIND(4)  !--Integer*2
    INTEGER, PARAMETER :: INT4=SELECTED_INT_KIND(9)  !--Integer*4
    INTEGER, PARAMETER :: INT8=SELECTED_INT_KIND(18) !--Integer*8
-!------------------------------------------------------------------------------------  
+!-------------------------------------------------------------------------------
 !  Pi and related numbers
 !
    REAL(DOUBLE), PARAMETER :: Pi        =3.1415926535897932385D0  ! Pi
@@ -23,14 +23,14 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: TwoPi5x2  =3.4986836655249725693D1  ! 2*Pi^(5/2)
    REAL(DOUBLE), PARAMETER :: Sqrt2Pi5x2=2.4739429451193148050D1  ! Sqrt(2)*Pi^(5/2)
    REAL(DOUBLE), PARAMETER :: DegToRad  =1.7453292519943295769D-2 ! Pi/180 
-!------------------------------------------------------------------------------------  
+!-------------------------------------------------------------------------------
 !  Whole numbers
 !
    REAL(DOUBLE), PARAMETER :: Zero=0.0D0, One  =1.0D0, &
                               Two =2.0D0, Three=3.0D0, &
                               Four=4.0D0, Five =5.0D0, &
                               Six =6.0D0
-!---------------------------------------------------------------------------------------  
+!-------------------------------------------------------------------------------
 !  Max Angular Symmetries (d; 4+1=5, f;5+1=6, etc [+1 for gradients])
 !   
    INTEGER,      PARAMETER :: HGEll=5
@@ -45,7 +45,7 @@ MODULE GlobalScalars
    INTEGER,      PARAMETER :: SPLen2=(2*SPEll)*((2*SPEll)+3)/2
    INTEGER,      PARAMETER :: FFLen=FFEll*(FFEll+3)/2                ! note, poles start from 0.
    INTEGER,      PARAMETER :: FFLen2=(2*FFEll)*((2*FFEll)+3)/2
-!---------------------------------------------------------------------------------------  
+!-------------------------------------------------------------------------------
 !  Other numbers
 !
    INTEGER,      PARAMETER :: BIG_INT      =2**28               ! bigest integer*4
@@ -56,7 +56,7 @@ MODULE GlobalScalars
    REAL(DOUBLE), PARAMETER :: AngstromsToAU=1.889725988578923D0 ! Angstronms -> AU
    REAL(DOUBLE), PARAMETER :: BIG_DBL      =HUGE(One)           ! bigest machine rep double
    REAL(DOUBLE), PARAMETER :: NuclearExpnt =1.D16               ! Exponent for nuclear delta 
-!---------------------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 !  Status keys
 !
    INTEGER, PARAMETER      :: SUCCEED=0
@@ -99,7 +99,4 @@ MODULE GlobalScalars
    LOGICAL, SAVE           :: InParallel=.FALSE.
    INTEGER, PARAMETER      :: MaxProc=1024
 #endif
-END MODULE
-
-
-   
+END MODULE GlobalScalars
