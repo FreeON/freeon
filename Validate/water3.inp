@@ -1,0 +1,30 @@
+<BeginTitle>
+             ** Water **
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+DebugAll =(MaxGeOp)
+Grad=(Optimize,PrimInt,NoBackTr,NoGDIIS)
+Guess=SuperPos
+Extrap=Proj
+SCFMethod=(RH)
+BasisSets=(STO-2G)
+ModelChem=(PBExc)
+Accuracy =(Good)
+Geometry =(InAngstroms,NoOrder)
+<EndOptions>
+
+<BeginGeometry>
+ O  1.4190191945      0.0000000000      0.0597044085
+ H  1.6119040717      0.0000000000     -0.8763193220
+ H  0.4450228916      0.0000000000      0.0898242033
+ O  1.4190191945      2.0000000000      1.0597044085
+ H  1.6119040717      2.0000000000      0.2
+ H  0.4450228916      2.0000000000      1.0898242033
+ O  1.4190191945      4.0000000000      1.2597044085
+ H  1.6119040717      4.0000000000      0.4
+ H  0.4450228916      4.0000000000      1.2898242033
+<EndGeometry>
+
