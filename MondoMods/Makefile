@@ -33,33 +33,27 @@ EXTRA_INCLUDES= -I$(MONDO_HOME)/MondoMods/MMA/LookUpTables \
                 -I$(MONDO_HOME)/MondoMods/MMA/Functionals  \
                 -I$(MONDO_HOME)/MondoMods/MMA/PAC
 #
-MModObjs =    GlobalScalars.o                                              \
-              GlobalCharacters.o                                           \
-              DerivedTypes.o                                               \
-              GlobalObjects.o                                              \
-              BasisSetParameters.o                                         \
-              MPIInclude.o                                                 \
-              ProcessControl.o Trap.o                                      \
-              MemMan.o                                                     \
-              MondoMPI.o                                                   \
-              Clock.o Seconds.o                                            \
-              ParsingConstants.o                                           \
-              Parse.o                                                      \
-              Indexing.o                                                   \
-              SetEq.o SetEq77.o                                            \
-              InOut.o HDF5Wrap.o                                           \
-              Order.o Order77.o Random.o                                   \
-              PrettyPrint.o                                                \
-              McMurch.o                                                    \
-              LinAlg.o LinAlg77.o MatFunk.o SMWrap.o                       \
-              SpecFun.o D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o  \
-              Thresholding.o                                               \
-              Functionals.o                                                \
-              PBC.o                                                        \
-              AtomPairs.o                                                  \
-              BoundingBox.o                                                \
-              BraBloks.o                                                   \
-              Macros.o          
+MModObjs = GlobalScalars.o GlobalCharacters.o DerivedTypes.o    \
+           GlobalObjects.o BasisSetParameters.o  MPIInclude.o   \
+           ProcessControl.o Trap.o MemMan.o MondoMPI.o          \
+           Clock.o  Seconds.o  ParsingConstants.o Parse.o       \
+           Indexing.o SetEq.o SetEq77.o InOut.o HDF5Wrap.o      \
+           Order.o Order77.o Random.o PrettyPrint.o McMurch.o   \
+           LinAlg.o LinAlg77.o MatFunk.o SMWrap.o SpecFun.o     \
+           D1Mach.o DCSEvl.o DErf.o DErfc.o DMach.o InitDS.o    \
+           Thresholding.o Functionals.o PBC.o AtomPairs.o       \
+           BoundingBox.o BraBloks.o Macros.o          
+#
+MModRel  = GlobalScalars.x GlobalCharacters.x DerivedTypes.x    \
+           GlobalObjects.x BasisSetParameters.x MPIInclude.x    \
+           ProcessControl.x Trap.x MemMan.x MondoMPI.x          \
+           Clock.x  Seconds.x  ParsingConstants.x Parse.x       \
+           Indexing.x SetEq.x SetEq77.x InOut.x HDF5Wrap.x      \
+           Order.x Order77.x Random.x PrettyPrint.x McMurch.x   \
+           LinAlg.x LinAlg77.x MatFunk.x SMWrap.x SpecFun.x     \
+           D1Mach.x DCSEvl.x DErf.x DErfc.x DMach.x InitDS.x    \
+           Thresholding.x Functionals.x PBC.x AtomPairs.x       \
+           BoundingBox.x BraBloks.x Macros.x          
 #
 small:	Mods
 #
@@ -73,6 +67,8 @@ purge:	clean
 	rm -f $(REMOVEALL)
 	rm -f $(MONDO_HOME)/Libs/libMondoMods.a
 	ls -l $(MONDO_HOME)/Libs
+#
+release:$(MModRel)
 #
 Mods:	$(MModObjs)
 	$(AR) $(ARFLAGS) $(MONDO_HOME)/Libs/libMondoMods.a $(?:.F90=.o)
