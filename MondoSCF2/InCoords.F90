@@ -2569,7 +2569,7 @@ CONTAINS
        !
        ! Get B and refresh values of internal coords
        !
-       IF(IStep==0) THEN
+       IF(IStep==1) THEN
          CALL GetBMatInfo(SCRPath,NIntC,B,CholData)
        ELSE IF(RefreshB.AND.RefreshAct) THEN
          CALL RefreshBMatInfo(IntCs,ActCarts%D,GTrfCtrl%DoClssTrf, &

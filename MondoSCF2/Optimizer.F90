@@ -665,7 +665,6 @@ CONTAINS
        ! Separate gradients into internal and outer components
        !
        CALL SepGrads(CartGrad%D,RotGrad%D,TrGrad%D,XYZ,Print)
-       !
        CALL New(IntGrad,NDim)
        CALL CartToInternal(XYZ,IntCs,CartGrad%D,IntGrad%D,&
          GOpt%GrdTrf,GOpt%CoordCtrl,GOpt%TrfCtrl,Print,SCRPath)
@@ -710,13 +709,12 @@ CONTAINS
      ! to current structure
      !
      IF(GOpt%TrfCtrl%DoInternals) THEN 
-       CALL OrientMolecule(XYZ,TrGrad%D,RotGrad%D,GOpt%Hessian)
-       !
        CALL INTCValue(IntCs,XYZ,GOpt%CoordCtrl%LinCrit)
        IntCs%Value=IntCs%Value+Displ%D
        CALL InternalToCart(XYZ,IntCs,IntCs%Value,Print, &
                            GOpt%BackTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,&
                            GOpt%Constr,SCRPath)
+       CALL OrientMolecule(XYZ,TrGrad%D,RotGrad%D,GOpt%Hessian)
      ELSE
        CALL CartRNK1ToCartRNK2(Displ%D,XYZ,.TRUE.)
      ENDIF
@@ -1381,6 +1379,7 @@ CONTAINS
      !
      GT%MaxIt_GrdTrf = 10 
      GT%GrdTrfCrit   = 0.1D0*GConv%Grad
+    !GT%GrdTrfCrit   = MIN(0.1D0*GConv%Grad,1.D-6)
      GT%MaxGradDiff  = 5.D+2      
    END SUBROUTINE SetGrdTrf
 !
