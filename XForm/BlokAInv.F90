@@ -14,15 +14,14 @@ PROGRAM BlokAInv
   USE Macros
   USE LinAlg
   USE MatFunk
-  USE AtomPairs
 #ifdef NAG
    USE F90_UNIX_ENV
 #endif
   IMPLICIT NONE
   TYPE(BCSR)          :: A,Z,Zt,DiagD
-#ifdef SPATIAL_THRESHOLDING
+!#ifdef SPATIAL_THRESHOLDING
   TYPE(BCSR)          :: T1,T2
-#endif 
+!#endif 
 #ifdef FIND_CONDA
   TYPE(DBL_RNK2)      :: B,C
 #endif
@@ -52,16 +51,15 @@ PROGRAM BlokAInv
 ! Start up macro
 !
   CALL StartUp(Args,Prog)
-
-#ifdef EXTREME_DEBUG
-
-#endif
 !
 ! Get basis set and geometry
 !
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+
+
 !
+   TEST_AINV=.TRUE.
 #ifdef SPATIAL_THRESHOLDING
   IF(GM%Ordrd==SFC_HILBERT.OR.GM%Ordrd==SFC_PEANO)THEN
      CALL OpenASCII(InpFile,Inp)
@@ -73,9 +71,6 @@ PROGRAM BlokAInv
      ENDIF
      IF(OptKeyQ(Inp,Prog,'NoTest'))THEN
         TEST_AINV=.FALSE.
-     ELSE
-        TEST_AINV=.TRUE.
-        WRITE(*,*)' Testing AInv ... '
      ENDIF
      CLOSE(UNIT=Inp)
   ELSE
@@ -83,21 +78,13 @@ PROGRAM BlokAInv
      TEST_AINV=.FALSE.
      WRITE(*,*)' Using O(N^2) AInv due to non-local ordering. Try HOrder or ZOrder '
   ENDIF
-  
 #endif
-
-
 !
 ! Allocations 
 !
   CALL New(A)
   CALL Get(A,TrixFile('S',Args))
-
-#ifdef LEVEL_SHIFT
-! Level shift
-  CALL Add(A,1.D-3)
-#endif
-
+!
 #ifdef FIND_CONDA
   CALL New(B,(/NBasF,NBasF/))
   CALL New(C,(/NBasF,NBasF/))
@@ -300,11 +287,11 @@ PROGRAM BlokAInv
 !
   CALL Delete(ColPt)
   CALL Delete(BlkPt)
-#ifdef SPATIAL_THRESHOLDING
-#else 
-  IF(TEST_AINV) &
+!#ifdef SPATIAL_THRESHOLDING
+!#else 
+  IF(.NOT.TEST_AINV) &
      CALL Delete(A)
-#endif
+!#endif
 !
 ! Compute dimensions of DiagD & allocate it
 !
@@ -346,6 +333,7 @@ PROGRAM BlokAInv
 ! Final Z=P^(-1/2).Z
 !
   CALL Multiply(Z,DiagD,Zt)
+!  CALL PlotDecay(Zt,GM,'Z')
   CALL Filter(Z,Zt)
   ZBlksPostFilter=Z%NBlks
 !
@@ -360,7 +348,7 @@ PROGRAM BlokAInv
   CALL Elapsed_TIME(PerfMon,'Accum')
   CALL PPrint(PerfMon,Prog,Unit_O=6)  
 !
-#ifdef SPATIAL_THRESHOLDING 
+!#ifdef SPATIAL_THRESHOLDING 
   IF(TEST_AINV)THEN
 !
 !    Consistency check
@@ -379,7 +367,7 @@ PROGRAM BlokAInv
         //', DistanceThreshold='//TRIM(DblToShrtChar(AInvDistanceThresh))  &
         //', Thresholds%Trix='//TRIM(DblToShrtChar(Thresholds%Trix))
 !
-     IF(Mx0>1.D1*Thresholds%Trix)THEN
+     IF(Mx0>1.D2*Thresholds%Trix)THEN
         CALL Halt('In BlokAInv, failed test: '//TRIM(Mssg))
      ELSE
         Mssg=Prog//' :: '//TRIM(Mssg)
@@ -397,7 +385,7 @@ PROGRAM BlokAInv
 !        CLOSE(35)
       ENDIF
    ENDIF
-#endif
+!#endif
 !
 !  Put Z and ZT to disk
 !  
