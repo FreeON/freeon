@@ -10,11 +10,8 @@ MODULE Mechanics
 CONTAINS
   SUBROUTINE InitMMech()
 #ifdef MMech
-    ! Open HDF file, load QM/MM logic
-    CALL OpenHDF(TRIM(InfFile))
     CALL GET(MechFlag(1),'Ctrl_Mechanics1') 
     CALL GET(MechFlag(2),'Ctrl_Mechanics2') 
-    CALL CloseHDF()    
 #else
     ! Hardwire QM only 
     MechFlag(1)=.FALSE.
