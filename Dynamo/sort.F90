@@ -25,7 +25,7 @@
 !   Minimal Storage", CACM, 12(3), 1969, 185-7.
 !
 !===============================================================================
-MODULE SORT
+MODULE SORT_dyn
 
 USE DEFINITIONS, ONLY : DP
 
@@ -306,4 +306,4 @@ CONTAINS
 
    END SUBROUTINE SORT_INTEGER
 
-END MODULE SORT
+END MODULE SORT_dyn

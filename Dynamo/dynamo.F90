@@ -22,7 +22,7 @@ USE InCoords
    USE pdb_io 
    USE mm_system
    USE connectivity 
-   USE sort 
+   USE sort_dyn
    USE mm_file_data
    USE mm_file_io 
    USE mm_terms
@@ -493,7 +493,7 @@ CONTAINS
    INTEGER        :: NAngle,IA,I,J,K
    LOGICAL        :: CalcGrad
    REAL(DOUBLE) :: D_Force,D_Angle,Cos_AngleIJK,RIJ,RJK,VAngleIJK
-   TYPE(DBL_VECT) :: DVectIJ,DVectJK,FCI,FCJ,FCK
+   TYPE(DBL_VECT) :: DVectIJ,DVectJK,FCI,FCJ,FCK,AngleEQ,AngleFC
    REAL(DOUBLE), PARAMETER :: DOT_LIMIT = 0.999999D0
    TYPE(INT_VECT) :: ACTIVE_ANGLE
    REAL(DOUBLE),DIMENSION(:,:) :: XYZ !!! must be in Angstroem !!!
@@ -509,11 +509,16 @@ CONTAINS
    CALL New(AngleIJK,(/3,NAngle/))
    CALL New(DVectIJ,3)
    CALL New(DVectJK,3)
+   CALL New(AngleEQ,NAngle)
+   CALL New(AngleFC,NAngle)
    CALL New(FCI,3)
    CALL New(FCJ,3)
    CALL New(FCK,3)
+!
    CALL Get(ACTIVE_ANGLE,'ACTIVE_ANGLE')
    CALL Get(AngleIJK,'MM_AngleIJK')
+   CALL Get(AngleEQ,'AngleEQ')
+   CALL Get(AngleFC,'AngleFC')
 !
    DO IA = 1,NAngle
 !
@@ -555,8 +560,8 @@ CONTAINS
         VAngleIJK=ACOS(Cos_AngleIJK)
       ENDIF
 !
-      D_Angle=VAngleIJK-ANGLES(IA)%EQ
-      D_Force=ANGLES(IA)%FC*D_Angle
+      D_Angle=VAngleIJK-AngleEQ%D(IA)
+      D_Force=AngleFC%D(IA)*D_Angle
 !
 ! contributions to energy
 !
@@ -576,6 +581,8 @@ CONTAINS
 !
    END DO
 !
+   CALL Delete(AngleFC)
+   CALL Delete(AngleEQ)
    CALL Delete(ACTIVE_ANGLE)
    CALL Delete(AngleIJK)
    CALL Delete(DVectIJ)

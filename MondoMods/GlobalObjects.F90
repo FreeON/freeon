@@ -29,6 +29,11 @@ MODULE GlobalObjects
 !-----------------------------------------------------------  
 !  Scheduling vector
 !
-!   TYPE(INT_VECT), SAVE :: ShredSched
+!  TYPE(INT_VECT), SAVE :: ShredSched
 #endif
+!
+!-----------------------------------------------------------  
+   TYPE(GeOpControls),SAVE :: GeOpCtrl 
+!-----------------------------------------------------------  
+!
 END MODULE
