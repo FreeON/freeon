@@ -18,9 +18,23 @@ PROGRAM XCForce
   USE CubeTree
   USE Functionals
   USE dXCBlok
+
+#ifdef PARALLEL
+  USE ParallelHiCu
+  USE FastMatrices
+#endif
+
   IMPLICIT NONE
   TYPE(ARGMT)                    :: Args
+
+#ifdef PARALLEL
   TYPE(BCSR)                     :: P
+  TYPE(DBL_VECT)      :: TotXCFrc
+  INTEGER :: IErr,TotFrcComp
+#else
+  TYPE(BCSR)                     :: P
+#endif
+
   TYPE(TIME)                     :: TimeRhoToTree,TimeGridGen
   TYPE(DBL_VECT)                 :: XCFrc,Frc
   TYPE(AtomPair)                 :: Pair
@@ -41,7 +55,7 @@ PROGRAM XCForce
 
 !---------------------------------------------------------------------------------------
 ! Macro the start up
-  CALL StartUp(Args,Prog,Serial_O=.TRUE.)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 ! Get basis set, geometry, thresholds and model type
   CALL Get(BS,CurBase)
   CALL Get(GM,CurGeom)
@@ -54,8 +68,21 @@ PROGRAM XCForce
   CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif 
+
+#ifdef PARALLEL
+  CALL ParaInitRho(Args)
+  CALL GetBBox()
+  CALL SendBBox()
+  CALL DistDist()
+  CALL ParaRhoToTree()
+#else
 ! Convert density to a 5-D BinTree
   CALL RhoToTree(Args)
+#endif
+
+#ifdef PARALLEL
+  CALL ParaGridGen()
+#else
 ! Generate the grid as a 3-D BinTree 
   WBox%BndBox(1:3,1:2) = RhoRoot%Box%BndBox(1:3,1:2)
 #ifdef PERIODIC
@@ -63,12 +90,20 @@ PROGRAM XCForce
 #endif
   CALL CalCenterAndHalf(WBox)
   CALL GridGen(WBox,VolRho,VolExc)
+
+#endif
+
+
 ! Delete the density
   CALL DeleteRhoTree(RhoRoot)
+
 ! More allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL New(XCFrc,3*NAtoms)
-  CALL Get(P,TrixFile('D',Args,1))
+#ifdef PARALLEL
+  CALL New(P,OnAll_O=.TRUE.)
+#endif
+  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
 !----------------------------------------------------------------------
 ! Compute the exchange-correlation contribution to the force in O(N)
 !
@@ -94,15 +129,15 @@ PROGRAM XCForce
                          +(Pair%A(2)-Pair%B(2))**2 &
                          +(Pair%A(3)-Pair%B(3))**2
                   IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-!                 IF(TestAtomPair(Pair)) THEN
+                  ! IF(TestAtomPair(Pair)) THEN
                     F_nlm(1:3)     = dXC(Pair,P%MTrix%D(Q:Q+MN1))
                     XCFrc%D(A1:A2) = XCFrc%D(A1:A2) + F_nlm(1:3)
-!
+ 
                     nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCA))+AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NCB))
                     LatFrc_XC(1,1:3) = LatFrc_XC(1,1:3) + Half*nlm(1)*F_nlm(1:3)
                     LatFrc_XC(2,1:3) = LatFrc_XC(2,1:3) + Half*nlm(2)*F_nlm(1:3)
                     LatFrc_XC(3,1:3) = LatFrc_XC(3,1:3) + Half*nlm(3)*F_nlm(1:3)
-!
+ 
                  ENDIF
               ENDDO
            ENDDO
@@ -114,7 +149,18 @@ PROGRAM XCForce
   ENDDO
 !--------------------------------------------------------------------------------
 ! Do some checksumming, resumming and IO 
-!  CALL PPrint(XCFrc,'dXC/dR')
+
+#ifdef PARALLEL
+  TotFrcComp = 3*NAtoms
+  CALL New(TotXCFrc,TotFrcComp)
+  CALL MPI_Reduce(XCFrc%D(1),TotXCFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == 0) THEN
+    XCFrc%D(1:TotFrcComp) = TotXCFrc%D(1:TotFrcComp)
+  ENDIF
+  CALL Delete(TotXCFrc)
+#endif
+! CALL PPrint(XCFrc,'dXC/dR')
+
   CALL PChkSum(XCFrc,'dXC/dR',Proc_O=Prog)  
 ! Sum in contribution to total force
   CALL New(Frc,3*NAtoms)

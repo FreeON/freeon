@@ -35,8 +35,8 @@ CPPMISC = -DRULE7 -DEXPLICIT_SOURCE
 EXTRA_INCLUDES=-I$(MONDO_HOME)/MondoMods/MMA/Functionals
 #
 CommonObjs = Grid.o Thresholds.o RhoTree.o CubeTree.o TreeWalk.o 
-HObjs      = $(CommonObjs) ParaHiCu.o KxcGen.o HiCu.o 
-XFObjs     = $(CommonObjs) dXCBlok.o XCForce.o
+HObjs      = $(CommonObjs) KxcGen.o ParaHiCu.o HiCu.o 
+XFObjs     = $(CommonObjs) KxcGen.o ParaHiCu.o dXCBlok.o XCForce.o
 #
 VObjs  = VRhoMD.o 
 #
@@ -86,7 +86,7 @@ Grid.o:		MMA/CubeRules/Rule5.Inc  MMA/CubeRules/Rule7.Inc  $(MONDO_LIB)/libMondo
 HiCu.o:		KxcGen.o TreeWalk.o \
                 ParaHiCu.o CubeTree.o RhoTree.o  \
 		$(MONDO_LIB)/libMondoMods.a
-XCForce.o:	dXCBlok.o TreeWalk.o CubeTree.o RhoTree.o \
+XCForce.o:	dXCBlok.o TreeWalk.o CubeTree.o KxcGen.o ParaHiCu.o RhoTree.o \
 		$(MONDO_LIB)/libMondoMods.a
 RhoTree.o:	$(MONDO_LIB)/libMondoMods.a
 VRhoMD.o:	$(MONDO_LIB)/libMondoMods.a

@@ -814,6 +814,31 @@ MODULE ParallelHiCu
   END SUBROUTINE ParaInitRhoRoot
   
 !===============================================================================
+  SUBROUTINE ParaGridGen()
+    TYPE(BBox) :: WBox
+    REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
+
+    WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
+    WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)
+    
+    CALL CalCenterAndHalf(WBox)
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'Calling GridGen...'
+    ENDIF
+    CALL GridGen(WBox,SubVolRho,SubVolExc)
+    TotRho = Reduce(SubVolRho)
+    TotExc = Reduce(SubVolExc)
+    IF(MyID == ROOT) THEN
+      WRITE(*,*) 'TotRho = ',TotRho
+      WRITE(*,*) 'TotExc = ',TotExc
+    ENDIF
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'GridGen is done.'
+    ENDIF
+    
+  END SUBROUTINE ParaGridGen
+
+!===============================================================================
   SUBROUTINE WorkBBox(Kxc)
     TYPE(BBox) :: WBox
     REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc

@@ -302,8 +302,13 @@ MODULE RhoTree
 !----------------------------------------------------------------------------------------
 !        Get the density
          IF(SCFActn=='ForceEvaluation')THEN
+#ifdef PARALLEL
+            Open(UNIT=Seq,FILE=TrixFile('Rho'//IntToChar(MyID),Args,1),STATUS='OLD', &
+                 FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+#else
             Open(UNIT=Seq,FILE=TrixFile('Rho',Args,1),STATUS='OLD', &
                  FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+#endif
          ELSE
 #ifdef PARALLEL
             Open(UNIT=Seq,FILE=TrixFile('Rho'//IntToChar(MyID),Args,0),STATUS='OLD', &
