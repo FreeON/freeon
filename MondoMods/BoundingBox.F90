@@ -51,21 +51,6 @@ MODULE BoundingBox
 !===============================================================================
 !     Determine if a point with extent is outside a BBox
 !===============================================================================
-#ifdef LDFJDKFJ
-      FUNCTION PointOutSideBox(R,Box,Extent)
-         LOGICAL                      :: PointOutSideBox
-         REAL(DOUBLE), DIMENSION(3),INTENT(IN)   :: R
-         REAL(DOUBLE),INTENT(IN)                :: Extent
-         TYPE(BBox),INTENT(IN)                   :: Box
-         IF(R(1)<Box%BndBox(1,1)-Extent.OR.R(1)>Box%BndBox(1,2)+Extent.OR. &
-            R(2)<Box%BndBox(2,1)-Extent.OR.R(2)>Box%BndBox(2,2)+Extent.OR. &
-            R(3)<Box%BndBox(3,1)-Extent.OR.R(3)>Box%BndBox(3,2)+Extent)THEN
-            PointOutSideBox=.TRUE.
-         ELSE
-            PointOutSideBox=.FALSE.
-         ENDIF
-      END FUNCTION PointOutSideBox
-#endif
       FUNCTION PointOutSideBox(R,Box)
          LOGICAL                                :: PointOutSideBox
          REAL(DOUBLE),DIMENSION(3),INTENT(IN)   :: R
@@ -82,34 +67,17 @@ MODULE BoundingBox
 !===============================================================================
 !     Determine if a BBox A with extent overlaps with BBox B
 !===============================================================================
-#ifdef DLFJDLFJDLFJ
-      FUNCTION BoxOutSideBox(A,B,Extent) 
-         LOGICAL                      :: BoxOutSideBox
-         TYPE(BBox),INTENT(IN)        :: A,B
-         REAL(DOUBLE), DIMENSION(3)   :: T
-         REAL(DOUBLE)                 :: Extent
-         T=ABS(A%Center-B%Center)
-         IF(T(1)>A%Half(1)+B%Half(1)+Extent.OR. &
-            T(2)>A%Half(2)+B%Half(2)+Extent.OR. &
-            T(3)>A%Half(3)+B%Half(3)+Extent)THEN
-            BoxOutSideBox=.TRUE.
-         ELSE
-            BoxOutSideBox=.FALSE.
-         ENDIF
-     END FUNCTION BoxOutSideBox
-#endif
-      FUNCTION BoxOutSideBox(A,B,Extent) 
-         LOGICAL                      :: BoxOutSideBox
-         TYPE(BBox),INTENT(IN)        :: A,B
-         REAL(DOUBLE)   Tx,Ty,Tz
-         REAL(DOUBLE)                 :: Extent
+      FUNCTION BoxOutSideBox(A,B) 
+         LOGICAL                  :: BoxOutSideBox
+         TYPE(BBox),INTENT(IN)    :: A,B
+         REAL(DOUBLE)             :: Tx,Ty,Tz
          BoxOutSideBox=.TRUE.        
          Tx=ABS(A%Center(1)-B%Center(1))
-         IF(Tx>A%Half(1)+B%Half(1)+Extent)RETURN
+         IF(Tx>A%Half(1)+B%Half(1))RETURN
          Ty=ABS(A%Center(2)-B%Center(2))
-         IF(Ty>A%Half(2)+B%Half(2)+Extent)RETURN
+         IF(Ty>A%Half(2)+B%Half(2))RETURN
          Tz=ABS(A%Center(3)-B%Center(3))
-         IF(Tz>A%Half(3)+B%Half(3)+Extent)RETURN
+         IF(Tz>A%Half(3)+B%Half(3))RETURN
          BoxOutSideBox=.FALSE.
      END FUNCTION BoxOutSideBox
 !============================================================================
