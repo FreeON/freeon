@@ -158,6 +158,7 @@ CONTAINS
        IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
        N=N+1
     ENDDO
+    G%NLagr=0
     G%NAtms=N
     N=0
     CALL New(G) ! Allocate a geometry
