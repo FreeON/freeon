@@ -438,7 +438,6 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !  IO for the orthogonal P 
 !
-   CALL Put(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
    CALL Put(P,TrixFile('OrthoD',Args,1))
    CALL PChkSum(P,'OrthoP['//TRIM(NxtCycl)//']',Prog)
    CALL PPrint( P,'OrthoP['//TRIM(NxtCycl)//']')
@@ -461,6 +460,7 @@ PROGRAM SDMM
 !-----------------------------------------------------------------------------
 !  IO for the non-orthogonal P 
 !
+   CALL Put(T1,'CurrentDM',CheckPoint_O=.TRUE.)   
    CALL Put(T1,TrixFile('D',Args,1))
    CALL Put(Zero,'homolumogap')
    CALL PChkSum(T1,'P['//TRIM(NxtCycl)//']',Prog)

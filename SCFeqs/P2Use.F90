@@ -35,7 +35,7 @@ PROGRAM P2Use
                                    NPur,PcntPNon0
   CHARACTER(LEN=2)              :: Cycl
   LOGICAL                       :: Present
-  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
+  CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName,RestartHDF
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
 !--------------------------------------- 
 ! Start up macro
@@ -54,7 +54,6 @@ PROGRAM P2Use
   CALL New(T0)
   CALL New(T1)
   CALL New(T2)
-
 !
   IF(SCFActn=='Extrapolate')THEN
      CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
@@ -152,8 +151,12 @@ PROGRAM P2Use
 1 CONTINUE
 !
   IF(SCFActn=='Restart')THEN
-     CALL Get(P,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
-     CALL Put(P,TrixFile('OrthoD',Args,0)) 
+     CALL Get(RestartHDF,'OldInfo')
+     CALL CloseHDF()
+     CALL OpenHDF(RestartHDF)
+     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)   
+     CALL CloseHDF()
+     CALL OpenHDF(InfFile)
   ELSEIF(SCFActn=='Project')THEN
 !    Get previous geometries orthogonal density matrix 
      CALL Get(P,TrixFile('OrthoD',Args,-1))     
@@ -181,7 +184,7 @@ PROGRAM P2Use
         ENDIF
   ENDIF
 ! Create density matrix in AO representation
-  IF(SCFActn/='Extrapolate')THEN
+  IF(SCFActn/='Extrapolate'.AND.SCFActn/='Restart')THEN
      INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
      IF(Present)THEN     
          CALL Get(T1,TrixFile('X',Args))   ! T1=S^(-1/2)

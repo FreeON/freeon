@@ -33,7 +33,7 @@ PROGRAM SCFStatus
    CALL New(Tmp2)
 !---------------------------------------------
 !  Get the density matrix 
-   IF(SCFActn=='BasisSetSwitch')THEN 
+   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN 
 !     if switching the density matrix, 
 !     this is all that is available ...    
       CALL Get(P,TrixFile('D',Args,1))
@@ -87,7 +87,7 @@ PROGRAM SCFStatus
 !--------------------------------------------------------
 !  Find the largest block of the delta density matrix
 !  Allows for checking between extrapolated or projected DMs
-   IF(SCFActn=='BasisSetSwitch')THEN
+   IF(SCFActn=='BasisSetSwitch'.OR.SCFActn=='Restart')THEN
       DMax=Max(P)
    ELSE
       CALL Get(Tmp1,TrixFile('D',Args,0))
@@ -154,6 +154,9 @@ PROGRAM SCFStatus
                                      //TRIM(CurGeom)//']') 
       IF(SCFActn=='BasisSetSwitch')THEN
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
+                                    //' MxD = '//TRIM(DblToShrtChar(DMax)) 
+      ELSEIF(SCFActn=='Restart')THEN
+         SCFMessage=TRIM(SCFMessage)//' Restart ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
       ELSE
          SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &

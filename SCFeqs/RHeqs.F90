@@ -98,7 +98,6 @@ PROGRAM RHEqs
   CALL SetEq(sX,P)          !  sX=P
   CALL New(sP)              
   CALL Filter(sP,sX)        !  sP=Filter[sX]
-  CALL Put(sP,'CurrentOrthoD',CheckPoint_O=.TRUE.)   
   CALL Put(sP,TrixFile('OrthoD',Args,1))
   CALL PChkSum(sP,'OrthoP['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sP,'OrthoP['//TRIM(NxtCycl)//']')
@@ -118,6 +117,7 @@ PROGRAM RHEqs
      CALL Multiply(sTmp1,sX,sP)          ! F=Z.P_Orthog.Z^t
   ENDIF
   CALL Filter(sTmp1,sP)                  ! T1 =P_AO=Filter[Z.P_Orthog.Z^t]
+  CALL Put(sTmp1,'CurrentDM',CheckPoint_O=.TRUE.)   
   CALL Put(sTmp1,TrixFile('D',Args,1))
   CALL PChkSum(sTmp1,'P['//TRIM(NxtCycl)//']',Prog)
   CALL PPrint(sTmp1,'P['//TRIM(NxtCycl)//']')
