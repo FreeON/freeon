@@ -55,7 +55,7 @@ MODULE PFFTen
          CALL New(TensorS,LSP(2*MaxEll),0)
          TensorC%D = Zero
          TensorS%D = Zero 
-         CALL Put(MaxEll ,'MaxEll')
+         CALL Put(MaxEll ,'MaxEll'//CurGeom)
          CALL Put(TensorC,'PFFTensorC'//CurGeom)
          CALL Put(TensorS,'PFFTensorS'//CurGeom)
 !
