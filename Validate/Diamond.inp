@@ -1,0 +1,59 @@
+<BeginTitle>
+    ****Diamond****
+
+STO-3G/HF/good:     <SCF>   = -298.85433467
+8-511G/BLYP/good:   <SCF>   = -303.98984456
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+Guess=SuperPos
+DebugAll=(MinDebug,CheckSums)
+SCFMethod=(RH,RH)
+BasisSets=(STO-3G,Crystal)
+ModelChem=(HF,BLYPxc) 
+Accuracy =(good,good)
+Geometry=(InAnstroms,NoOrder) 
+Periodic=(FracCoord)
+PBC=(T,T,T)
+<EndOptions>
+
+<BeginPeriodic>
+  3.57   3.57   3.57   90.00000   90.00000   90.00000 
+<EndPeriodic>
+
+<BeginGeometry>   
+C      0.1250000000     0.1250000000     0.1250000000
+C      0.3750000000     0.3750000000     0.3750000000
+C      0.6250000000     0.6250000000     0.1250000000
+C      0.8750000000     0.8750000000     0.3750000000
+C      0.6250000000     0.1250000000     0.6250000000
+C      0.8750000000     0.3750000000     0.8750000000
+C      0.1250000000     0.6250000000     0.6250000000
+C      0.3750000000     0.8750000000     0.8750000000       
+<EndGeometry>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
