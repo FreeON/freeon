@@ -136,11 +136,11 @@ PROGRAM FockNGrueven
   ENDIF
 
 !
-!  CALL Put(F,TrixFile('F',Args,0))
-!  CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
+  CALL Put(F,TrixFile('F',Args,0))
+  CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
 !  CALL PPrint( F,'F['//TRIM(Cycl)//']',Unit_O=6)
-!  CALL PPrint( F,'F['//TRIM(Cycl)//']')
-!  CALL Plot(   F,'F['//TRIM(Cycl)//']')
+  CALL PPrint( F,'F['//TRIM(Cycl)//']')
+  CALL Plot(   F,'F['//TRIM(Cycl)//']')
 
 ! Now transform to an orthogonal representation
   XFile=TrixFile('X',Args)

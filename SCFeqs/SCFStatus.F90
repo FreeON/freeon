@@ -29,6 +29,7 @@ PROGRAM SCFStatus
    LOGICAL                         :: HasECPs
    CHARACTER(LEN=5*DEFAULT_CHR_LEN):: SCFMessage
    CHARACTER(LEN=9),PARAMETER      :: Prog='SCFStatus'  
+   CHARACTER(LEN=2)                :: CurClone
 !---------------------------------------------------------------------------------------
 !  Macro the start up
    CALL StartUp(Args,Prog,Serial_O=.FALSE.)
@@ -198,13 +199,21 @@ PROGRAM SCFStatus
 !-----------------------------------------------------------  
 !  PRINT STATISTICS
 !   
+   IF(NClones>1)THEN
+      CurClone=IntToChar(MyClone)
+   ELSE
+      CurClone=""
+   ENDIF
    SCFMessage=""
    IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
 !     Fancy output
-      SCFMessage=RTRN//'= = = = = SCFCycle #'//TRIM(SCFCycl)                          &
+      SCFMessage=RTRN//'= = = = = SCFCycle #'//TRIM(SCFCycl)                &
                                  //', Basis #'//TRIM(CurBase)               &
-                              //', Geometry #'//TRIM(CurGeom)               &
-               //' = = = = ='//RTRN//RTRN                    
+                              //', Geometry #'//TRIM(CurGeom)              
+      IF(NClones>1)THEN
+         SCFMessage=TRIM(SCFMessage)//', Clone #'//TRIM(CurClone)              
+      ENDIF
+      SCFMessage=TRIM(SCFMessage)//' = = = = ='//RTRN//RTRN                    
 !     Add in gap if RH
       IF(Gap/=Zero)                                                         &
          SCFMessage=TRIM(SCFMessage)                                        &
@@ -250,9 +259,15 @@ PROGRAM SCFStatus
       ENDIF
 #endif
    ELSEIF(PrintFlags%Key>=DEBUG_NONE)THEN
-      SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
-                                     //TRIM(CurBase)//','  &
-                                     //TRIM(CurGeom)//']') 
+      IF(NClones>1)THEN
+         SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
+                                        //TRIM(CurBase)//','  &
+                                        //TRIM(CurGeom)//','//TRIM(CurClone)//']')
+      ELSE
+         SCFMessage=ProcessName(Prog,'['//TRIM(SCFCycl)//','  &
+                                        //TRIM(CurBase)//','  &
+                                        //TRIM(CurGeom)//']')
+      ENDIF
       IF(SCFActn=='BasisSetSwitch')THEN
          SCFMessage=TRIM(SCFMessage)//' Basis set switch ... '       &
                                     //' MxD = '//TRIM(DblToShrtChar(DMax)) 
