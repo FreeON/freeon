@@ -261,6 +261,77 @@ MODULE DerivedTypes
      TYPE(DBL_VECT)   :: Est     !-- Value of the Norm <rho_exp(r)|rho_exp(r)> (NDist)
      TYPE(DBL_VECT)   :: Co      !-- Density coefficients (NCoef)
   END TYPE HGRho
+!-------------------------------------------------------------------------------------
+!  ONX distribution buffers
+!
+  TYPE DBuf
+     INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: NShells
+     INTEGER          :: NTypes
+     INTEGER          :: NCnts
+     INTEGER          :: NPrim
+     INTEGER          :: MInfo
+     INTEGER          :: MAXDis
+     INTEGER          :: MAXPrm
+     INTEGER          :: MAXD
+     INTEGER          :: MAXC
+     INTEGER          :: MAXT
+     INTEGER          :: MAXP
+     INTEGER          :: LenCC
+     INTEGER          :: LenTC
+     TYPE(INT_VECT)   :: TCode   !-- Angular symmetry types
+     TYPE(INT_VECT)   :: CCode   !-- Contraction lengths
+     TYPE(INT_RNK2)   :: TCPop   !-- Is this TCode and CCode populated?
+     TYPE(INT_RNK2)   :: BufN
+     TYPE(INT_RNK3)   :: BufT
+     TYPE(DBL_RNK2)   :: TBufC   !-- Temp. contracted dis. buffer for 2-e estimates
+     TYPE(DBL_RNK3)   :: TBufP   !-- Temp. primitive dis. buffer for 2-e estimates
+     TYPE(DBL_RNK3)   :: SchT
+     TYPE(INT_RNK4)   :: DisPtr  !-- Pointers to locations in DisBuf and PrmBuf
+     TYPE(DBL_VECT)   :: DisBuf  !-- Contracted dis. buffer for 2-e computation
+     TYPE(DBL_VECT)   :: PrmBuf  !-- Primitive dis. buffer for 2-e computation
+  END TYPE DBuf
+!-------------------------------------------------------------------------------------
+!  ONX ML info
+!
+  TYPE DML
+     INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: MAXML   !-- Maximum size of the ML buffers
+     TYPE(INT_VECT)   :: MLDis   !-- Pointer to distribution info
+     TYPE(INT_VECT)   :: MLPrm   !-- Pointer to primitive info
+     TYPE(INT_VECT)   :: MLKey   !-- Basis set offset key (for 2-e symmetry)
+  END TYPE DML
+!-------------------------------------------------------------------------------------
+!  ONX integral buffers
+!
+  TYPE IBuf
+     INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: NPrim
+     INTEGER          :: MAXI
+     INTEGER          :: Mesh    !-- Number of mesh point is the Gamma and Exp tables
+     INTEGER          :: Lval    !-- Angular symmetry of Gamma table in memory
+     TYPE(DBL_VECT)   :: W1
+     TYPE(DBL_VECT)   :: W2
+     TYPE(DBL_RNK2)   :: CD
+     TYPE(DBL_RNK2)   :: WR
+     TYPE(DBL_RNK2)   :: WZ
+     TYPE(DBL_RNK2)   :: GT      !-- Gamma function table
+     TYPE(DBL_RNK2)   :: ET      !-- Exp function table
+  END TYPE IBuf
+!-------------------------------------------------------------------------------------
+!  ONX integral drivers
+!
+  TYPE IDrv
+     INTEGER          :: Alloc   !-- Allocation key
+     INTEGER          :: LngVRR
+     INTEGER          :: LngLoc
+     INTEGER          :: LngDrv
+     INTEGER          :: LngCC
+     INTEGER          :: id,is,nr,ns
+     TYPE(INT_VECT)   :: VLOC
+     TYPE(INT_VECT)   :: CDrv
+     TYPE(INT_RNK2)   :: SLOC
+  END TYPE IDrv
 !--------------------------------------------------------------------------
 !  Bounding Box Type
 !

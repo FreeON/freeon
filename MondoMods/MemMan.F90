@@ -16,7 +16,9 @@ MODULE MemMan
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
                        New_BCSR,     New_BSET,     &
-                       New_ARGMT,    New_HGRho
+                       New_ARGMT,    New_HGRho,    &
+                       New_DBuf,     New_IBuf,     &
+                       New_IDrv,     New_DML
    END INTERFACE
    INTERFACE Delete
       MODULE PROCEDURE Delete_INT_VECT, Delete_INT_RNK2, &
@@ -29,7 +31,9 @@ MODULE MemMan
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
                        Delete_BCSR,     Delete_BSET,     &
-                       Delete_ARGMT,    Delete_HGRho
+                       Delete_ARGMT,    Delete_HGRho,    &
+                       Delete_DBuf,     Delete_IBuf,     &
+                       Delete_IDrv,     Delete_DML
    END INTERFACE
 !
    INTERFACE SetToBig
@@ -345,6 +349,64 @@ MODULE MemMan
          CALL New(A%CCoef,(/A%LMNLen,A%NPrim,A%NCtrt,A%NKind/))
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BSET
+!----------------------------------------------------------------------------
+!     Allocate ONX distribution buffers
+!
+      SUBROUTINE New_DBuf(A)
+         TYPE(DBuf),INTENT(INOUT)       :: A
+         CALL AllocChk(A%Alloc)
+         CALL New(A%BufT,(/A%MAXD,A%NTypes,A%NPrim*A%NPrim/))
+         CALL New(A%SchT,(/A%MAXD,A%NTypes,A%NPrim*A%NPrim/))
+         CALL New(A%BufN,(/A%MAXT,A%NPrim*A%NPrim/))
+         CALL New(A%TCode,A%MAXT)
+         CALL New(A%CCode,A%MAXC)
+         CALL New(A%TCPop,(/A%MAXT,A%MAXC/))
+         CALL New(A%DisPtr,(/3,A%NShells,A%NTypes,A%NCnts/))
+         CALL New(A%DisBuf,A%MAXDis)
+         CALL New(A%PrmBuf,A%MAXPrm)
+         CALL New(A%TBufC,(/A%MAXC,A%MAXD/))
+         CALL New(A%TBufP,(/A%MAXP,A%NPrim*A%NPrim+A%MInfo,A%MAXD/))
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_DBuf
+!----------------------------------------------------------------------------
+!     Allocate ONX integral buffers
+!
+      SUBROUTINE New_IBuf(A)
+         TYPE(IBuf),INTENT(INOUT)       :: A
+         CALL AllocChk(A%Alloc)
+         CALL New(A%W1,A%MAXI)
+         CALL New(A%W2,A%MAXI)
+         CALL New(A%CD,(/A%NPrim*A%NPrim,3/))
+         CALL New(A%WR,(/12,A%NPrim*A%NPrim*A%NPrim*A%NPrim/))
+         CALL New(A%WZ,(/5,A%NPrim*A%NPrim*A%NPrim*A%NPrim/))
+         CALL New(A%GT,(/0:3,0:A%Mesh/))
+         CALL New(A%ET,(/0:3,0:A%Mesh/))
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_IBuf
+!----------------------------------------------------------------------------
+!     Allocate ONX integral drivers
+!
+      SUBROUTINE New_IDrv(A)
+         TYPE(IDrv),INTENT(INOUT)       :: A
+         INTEGER                        :: LngTmp
+         CALL AllocChk(A%Alloc)
+         LngTmp=A%LngLoc/3
+         CALL New(A%VLOC,A%LngVRR)
+         CALL New(A%CDrv,A%LngCC)
+         CALL New(A%SLOC,(/3,LngTmp/))
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_IDrv
+!----------------------------------------------------------------------------
+!     Allocate ONX ML buffer space
+!
+      SUBROUTINE New_DML(A)
+         TYPE(DML),INTENT(INOUT)       :: A
+         CALL AllocChk(A%Alloc)
+         CALL New(A%MLDis,A%MAXML)
+         CALL New(A%MLPrm,A%MAXML)
+         CALL New(A%MLKey,A%MAXML)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_DML
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !     
 !
@@ -558,6 +620,58 @@ MODULE MemMan
          CALL Delete(A%CCoef)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BSET
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!
+      SUBROUTINE Delete_DBuf(A)
+         TYPE(DBuf),INTENT(INOUT)       :: A
+         CALL Delete(A%BufT)
+         CALL Delete(A%SchT)
+         CALL Delete(A%BufN)
+         CALL Delete(A%TCode)
+         CALL Delete(A%CCode)
+         CALL Delete(A%TCPop)
+         CALL Delete(A%DisPtr)
+         CALL Delete(A%DisBuf)
+         CALL Delete(A%PrmBuf)
+         CALL Delete(A%TBufC)
+         CALL Delete(A%TBufP)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_DBuf
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!
+      SUBROUTINE Delete_IBuf(A)
+         TYPE(IBuf),INTENT(INOUT)       :: A
+         CALL Delete(A%W1)
+         CALL Delete(A%W2)
+         CALL Delete(A%CD)
+         CALL Delete(A%WR)
+         CALL Delete(A%WZ)
+         CALL Delete(A%GT)
+         CALL Delete(A%ET)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_IBuf
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!
+      SUBROUTINE Delete_IDrv(A)
+         TYPE(IDrv),INTENT(INOUT)       :: A
+         CALL Delete(A%VLOC)
+         CALL Delete(A%CDrv)
+         CALL Delete(A%SLOC)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_IDrv
+!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!
+      SUBROUTINE Delete_DML(A)
+         TYPE(DML),INTENT(INOUT)       :: A
+         CALL Delete(A%MLDis)
+         CALL Delete(A%MLPrm)
+         CALL Delete(A%MLKey)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_DML
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !
