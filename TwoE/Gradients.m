@@ -198,12 +198,13 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
-SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeNull->{dI,OffSet},OptimizeTimes->True];
+SetOptions[Optimize,OptimizeVariable->{V,Sequence},OptimizeNull->{dI,OffSet,GOA},OptimizeTimes->True,OptimizeFunction->False];
 SetOptions[OpenWrite, PageWidth -> 200];
 
 SetAttributes[o,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
 SetAttributes[dI,NHoldAll];
+SetAttributes[GOA,NHoldAll];
 SetAttributes[OA,NHoldAll];
 SetAttributes[OB,NHoldAll];
 SetAttributes[OC,NHoldAll];
@@ -211,8 +212,6 @@ SetAttributes[OD,NHoldAll];
 SetAttributes[MBarN,NHoldAll];
 
 (* PUT THE TRANSFORMATIONS TO FILE *)
-
-
 
 PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
 						 oList={" "->""};
@@ -246,10 +245,10 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                        ];
                                                  ,{i,1,LEnd[BraEll+1]}];
                                                  ,{k,1,LEnd[KetEll+1]}];
-
+						 (*
 							   Print[" IList = ",IList];
 							   Print[" oList = ",oList];
-
+						  *)
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
 
 
@@ -391,27 +390,32 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
 						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
 
+                                                  CffSetA=ToExpression[StringJoin["CrtSet",ToString[0+cart]]];
+                                                  CffSetB=ToExpression[StringJoin["CrtSet",ToString[3+cart]]];
+                                                  CffSetC=ToExpression[StringJoin["CrtSet",ToString[6+cart]]];
+                                                  CffSetD=ToExpression[StringJoin["CrtSet",ToString[9+cart]]];
+
                                                   Kount = Kount + 1;
-                                                  IList=Append[IList,TmpA+dI[0+cart,OffSet]];
+                                                  IList=Append[IList,TmpA+dI[OffSet,CffSetA]];
 						  If[cart==1,
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString,"\n",
-                                                                                                                "      dI(",ToString[0 + cart],",OffSet)"]];
+                                                                                                                "      dI(OffSet,",ToString[CffSetA],")"]];
 						     ,
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["      dI(",ToString[0 + cart],",OffSet)"]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["      dI(OffSet,",ToString[CffSetA],")"]];
 						  ];
                                                   Kount = Kount + 1;
-                                                  IList=Append[IList,TmpB+dI[3+cart,OffSet]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[3 + cart],",OffSet)"]];
+                                                  IList=Append[IList,TmpB+dI[OffSet,CffSetB]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetB],")"]];
 
                                                   Kount = Kount + 1;
-                                                  IList=Append[IList,TmpC+dI[6+cart,OffSet]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[6 + cart],",OffSet)"]];
+                                                  IList=Append[IList,TmpC+dI[OffSet,CffSetC]];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetC],")"]];
 
                                                   Kount = Kount + 1;
-						  recurstring=StringJoin["-(dI(",ToString[cart],",OffSet)+dI(",ToString[3+cart],",OffSet)+dI(",ToString[6+cart],",OffSet))+dI(",ToString[9+cart],",OffSet)"];
+						  recurstring=StringJoin["-(dI(OffSet,",ToString[CffSetA],")+dI(OffSet,",ToString[CffSetB],")+dI(OffSet,",ToString[CffSetC],"))+dI(OffSet,",ToString[CffSetD],")"];
                                                   IList=Append[IList,Tmp];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["Tmp=",recurstring,"\n",
-                                                                                                                 "      dI(",ToString[9 + cart],",OffSet)"]];
+                                                                                                                 "      dI(OffSet,",ToString[CffSetD],")"]];
 
 ,{cart,1,3}]; 
 
@@ -426,75 +430,8 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						 olist=Append[olist,{" "->"","u"->"(","v"->",","w"->")"}];
                                                  olist=Flatten[olist];
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
-                                                 Print["IList = ",IList];
-                                                 Print["OList = ",oList];
-
-                                               ];
-
-
-PunchHRRClass2[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
-						 imin = Classes[[ic, 1]]; imax = Classes[[ic, 2]];
-						 jmin = Classes[[jc, 1]]; jmax = Classes[[jc, 2]];
-						 kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
-						 lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
-						 oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
-						 IList={};
-						 Kount = 0;
-                                                 Do[Do[Do[Do[
-                                                 Do[Do[Do[Do[
-
-                                                             a = {lx[i], my[i], nz[i]};
-                                                             b = {lx[j], my[j], nz[j]};
-                                                             c = {lx[k], my[k], nz[k]};
-                                                             d = {lx[l], my[l], nz[l]};
-
-                                                  OffSet=(OA+i-LBegin[il])*LDA+(OB+j-LBegin[jl])*LDB+(OC+k-LBegin[kl])*LDC+(OD+l-LBegin[ll])*LDD;
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,OffSet];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->"OffSet"];
-
-
-                                              Do[ 
-
-                                                  plus={0,0,0}; plus[[cart]]=+1;
-                                                  mnus={0,0,0}; mnus[[cart]]=-1;
-
-						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
-						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
-						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
-
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpA+o[Kount]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[0 + cart],",OffSet)"]];
-
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpB+o[Kount]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[3 + cart],",OffSet)"]];
-
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,TmpC+o[Kount]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[6 + cart],",OffSet)"]];
-                                                  
-                                                  Kount = Kount + 1;
-                                                  IList=Append[IList,-(dI[cart,OffSet]+dI[3+cart,OffSet]+dI[6+cart,OffSet])+o[Kount]];
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(",ToString[9 + cart],",OffSet)"]];
-
-,{cart,1,3}]; 
-
-                                                ,{i,LBegin[il],LEnd[il]}]
-                                                ,{j,LBegin[jl],LEnd[jl]}]
-                                                ,{k,LBegin[kl],LEnd[kl]}]
-                                                ,{l,LBegin[ll],LEnd[ll]}]
-                                                ,{il,imin,imax}]
-                                                ,{jl,jmin,jmax}]
-                                                ,{kl,kmin,kmax}]
-                                                ,{ll,lmin,lmax}];
-						 olist=Append[olist,{" "->"","u"->"(","v"->",","w"->")"}];
-                                                 olist=Flatten[olist];
-                                                Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
-						(*
-                                                 Print["IList = ",IList];
-                                                 Print["OList = ",oList];*)
+                                              (*   Print["IList = ",IList];
+					       Print["OList = ",oList]; *)
 
                                                ];
 
@@ -557,11 +494,10 @@ PunchGNeeds[Need_]:=Module[{a,c,e,adex,cdex,GString},
                                   If[e=="c",exponent="Gamma"];
                                   adex=ToString[LMNDex[a[[1]],a[[2]],a[[3]]]];                                  
                                   cdex=ToString[LMNDex[c[[1]],c[[2]],c[[3]]]];                                                                
-				  GString=StringJoin["         I",e,adex,"Bar",cdex,"=I",e,adex,"Bar",cdex,"+",exponent,"*I",adex,"Bar",cdex];
+				  GString=StringJoin["         I",e,adex,"Bar",cdex,"=I",e,adex,"Bar",cdex,"+",exponent,"*RawI",adex,"Bar",cdex];
                                    WS[GString];
 				  ,{iN,Length[NeedsList]}]
 			       ];
-
 
 ZeroNeeds[Bra_,LKet_,Need_]:=Module[{a,c,e,adex,cdex,GString},
            Do[Do[
@@ -635,13 +571,28 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz"];
 
            WS["REAL(DOUBLE)  :: Alpha,Beta,Gamma"];
-           WS["INTEGER       :: OffSet"];
+           WS["INTEGER       :: OffSet,CrtSet"];
 
            WS["INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L"];
            WS["INTEGER       :: GOA,GOB,GOC,GOD"];
            WS["REAL(DOUBLE)  :: FPQx,FPQy,FPQz"];
 
+           WS["CrtSet1=GOA"];           
+           WS["CrtSet2=GOA+1"];           
+           WS["CrtSet3=GOA+2"];           
 
+           WS["CrtSet4=GOB+3"];           
+           WS["CrtSet5=GOB+4"];           
+           WS["CrtSet6=GOB+5"];           
+
+           WS["CrtSet7=GOC+6"];           
+           WS["CrtSet8=GOC+7"];           
+           WS["CrtSet9=GOC+8"];           
+
+           WS["CrtSet10=GOD+9"];           
+           WS["CrtSet11=GOD+10"];           
+           WS["CrtSet12=GOD+11"];           
+  
            ZeroNeeds[LBra,LKet,Needs];  
 
   WS["Ax=ACInfo%Atm1X"];
