@@ -1,3 +1,48 @@
+2004-11-15 05:21  vweber
+
+	* ONX2/: GONX2.F90, ONXGet.F90: Moved GetDab form GONX to ONXGet.
+	This makes happy pgf90 4.0-2 on grendels.  Error message was: ILM
+	error: internal routine gets bad address for outer variable z_c_2
+	PGF90-F-0000-Internal compiler error. Errors in ILM file       1
+	(GONX2.f90: 509) PGF90/x86 Linux/x86 4.0-2: compilation aborted
+
+2004-11-13 08:21  vweber
+
+	* SCFeqs/FillPBlok.F90: Added few elements.
+
+2004-11-11 15:58  nemeth
+
+	* MondoSCF2/: QUICCA.F90, ControlStructures.F90: [no log message]
+
+2004-11-11 15:58  nemeth
+
+	* MondoSCF2/: GeomOptKeys.F90, Hessian.F90, InCoords.F90,
+	Optimizer.F90, ParseGeomOpt.F90: A new version of the PBC
+	optimizer. New optimization options include UnCoupleLatt :
+	uncouples lattice and fractional coords optimization AlternLatt   :
+	alternates optimization of lattice and fractionals ExplLatt	:
+	applies explicite coordinates for lattice UnCoupleLatt by itself
+	allowes for simultaneous and uncoupled optimization. 
+	UnCoupleLatt,AlternLatt : allowes for uncoupled and alternating
+	optimization Default is yet implicit lattice, coupled QUICCA. 
+	Weighting scheme on internals contains weight from lattice
+	gradients, default maximum stepsize is set to 0.05 angstroems and 5
+	degrees.
+
+2004-11-11 15:42  nemeth
+
+	* MondoMods/: DerivedTypes.F90, GlobalScalars.F90, InOut.F90,
+	MemMan.F90: A few modifications concerning extra storage for
+	lattice-data at converged atomic positions.
+
+2004-11-11 09:57  vweber
+
+	* SCFeqs/DenMatResponse.F90: Changed cnvrg criteria for TC2R.
+
+2004-11-07 10:22  mchalla
+
+	* ChangeLog: [no log message]
+
 2004-11-06 03:11  vweber
 
 	* ONX2/: ONXGet.F90, PartDrv.F90: Added the reduce_FASTMAT
