@@ -50,6 +50,7 @@ PROGRAM TForce
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+!
   CALL New(TFrc,3*NAtoms)
   TFrc%D   = Zero
   CALL New(LatFrc_T,(/3,3/))
@@ -128,20 +129,9 @@ PROGRAM TForce
 !    Zero the Lower Triange
      DO I=1,3
         DO J=1,I-1
-           LatFrc_T%D(I,J)   = Zero
+           LatFrc_T%D(I,J)   = 1.D8
         ENDDO
      ENDDO
-     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-!       Print The Lattice Forces
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*) 'LatFrc_T'
-        WRITE(*,*)   'LatFrc_T'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_T%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_T%D(I,J),J=1,3) 
-        ENDDO
-        CLOSE(Out)
-     ENDIF
 !    Sum in the T contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -153,6 +143,11 @@ PROGRAM TForce
 #ifdef PARALLEL  
   ENDIF
 #endif
+! Do some printing
+  CALL Print_Force(GM,TFrc,'T Force')
+  CALL Print_Force(GM,TFrc,'T Force',Unit_O=6)
+  CALL Print_LatForce(GM,LatFrc_T%D,'T Lattice Force')
+  CALL Print_LatForce(GM,LatFrc_T%D,'T Lattice Force',Unit_O=6)
 ! Do some checksumming, resumming and IO 
   CALL PChkSum(TFrc,    'dT/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_T,'LFrcT',Proc_O=Prog)  
