@@ -114,7 +114,7 @@ MODULE ParseInput
             GeoFile=TRIM(MONDO_PWD)//TRIM(Args%C%C(4))
          ENDIF
 !        Name the HDF5 info file
-         InfFile=TRIM(PWDName)//InfF                
+         InfFile=TRIM(ScrName)//InfF                
 !        Set SCF and InfoFile names
          Ctrl%Info=InfFile
          Ctrl%Name=TRIM(SCF_NAME)
@@ -147,10 +147,10 @@ MODULE ParseInput
 !        Initialize ASCII files
          CALL OpenASCII(OutFile,Out,NewFile_O=.TRUE.)
          CALL OpenASCII(LogFile,LgF,NewFile_O=.TRUE.)
-         CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
+!         CALL OpenASCII(GeoFile,Geo,NewFile_O=.TRUE.)
          CLOSE(UNIT=Out,STATUS='KEEP')
          CLOSE(UNIT=LgF,STATUS='KEEP')
-         CLOSE(UNIT=Geo,STATUS='KEEP')
+!         CLOSE(UNIT=Geo,STATUS='KEEP')
 !--------------------------------------------------------------
 !        Write banner and title to output file
 !
