@@ -5,13 +5,11 @@ MODULE ONXMemory
 !------------------ Error Codes
    INTEGER, SAVE              :: ErrorCode = -1
    INTEGER, PARAMETER         :: eInit  = -1
-   INTEGER, PARAMETER         :: eMXINT =  1
+   INTEGER, PARAMETER         :: eMAXI  =  1
    INTEGER, PARAMETER         :: eMAXD  =  2
    INTEGER, PARAMETER         :: eMAXC  =  3
    INTEGER, PARAMETER         :: eMAXT  =  4
-!------------------ Buffer Space Dimensions
-   INTEGER, SAVE              :: MXINT,MAXD,MAXC,MAXT,MAXP
-    
+!------------------ Integral Buffer Space Dimension
 
 END MODULE ONXMemory
 

@@ -32,6 +32,8 @@ PROGRAM ONX
   TYPE(BSET)          :: BSp
   TYPE(CRDS)          :: GMp
   TYPE(ARGMT)         :: Args
+  TYPE(DBuf)          :: DB
+  TYPE(IBuf)          :: IB
   TYPE(INT_VECT)      :: NameBuf
   TYPE(INT_RNK2)      :: SubInd
 !--------------------------------------------------------------------------------
@@ -71,9 +73,9 @@ PROGRAM ONX
   CALL RangeOfDensity(D,NameBuf)
 
   DO WHILE (ErrorCode/=0) 
-    CALL MemInit()
+    CALL MemInit(DB,IB,BSc,BSp)
     write(*,*) "DisOrder"
-    CALL DisOrder(BSc,GMc,BSp,GMp,NameBuf) 
+    CALL DisOrder(BSc,GMc,BSp,GMp,DB,IB,NameBuf) 
   END DO
 !--------------------------------------------------------------------------------
 ! Allocate space for the exchange matrix. The routines below make sure 
