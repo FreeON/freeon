@@ -81,8 +81,8 @@ needed, which are suitable for large molecules.
 The present paper reveals a new concept for the optimization of
 molecular geometries, which is especially suitable for the
 optimization of large molecules and performs equally well in the
-domain of small molecules, too. It can easily be implemented
-in a linear scaling fashion, too.
+domain of small molecules, as well. In addition, 
+it can easily be implemented in a linear scaling fashion.
 The new concept is based on the availability of internal coordinate
 gradients for large molecules - a result of recent developments
 \cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2,billeter_coordtrf,andzelm_coordtrf,kudin_coordtrf}.
@@ -130,7 +130,7 @@ as non-linear functions of the Cartesian coordinates of atomic nuclei.
 An important property of these chemical internal coordinates
 is that they significantly reduce the harmonic and higher order 
 vibrational coupling, as compared to Cartesian ones 
-\cite{pulay_dynamics,Baker_deloc_1}. 
+\cite{fogarasi_diaghess}. 
 Even if accurate harmonic force-constants are available, 
 internal coordinates are superior for geometry optimization, 
 since anharmonic effects are
@@ -149,10 +149,11 @@ Hessian matrix update schemes are derived from the assumption of a
 harmonic potential energy surface. 
 The success of Hessian update schemes is based on, that for geometry 
 optimization a reasonable estimate of the Hessian 
-is enough to bring the molecule to a local optimum by 
+is enough to bring the molecule to a local extremum by 
 quasi-Newton steps. It is important to note, that while the knowledge
 of the exact Hessian leads to quadratically convergent optimization
-in the Newton scheme, updated Hessians exibit only superlinear
+in the Newton scheme, updated Hessians exibit linear or slightly 
+superlinear
 convergence during quasi-Newton optimizations
 \cite{RFletcher,fogarasi_diaghess}.
 
@@ -222,7 +223,7 @@ optimization.
 See Fig. \ref{NH3outp6} for a typical progression of internal
 coordinate gradients during geometry optimization.
 These tendencies can again be revealed by fitting curves to the
-coordinate-gradient data pairs. For each internal coordinate 
+coordinate-gradient data pairs. For each internal coordinate,
 the root of the fitted curve then 
 serves as a new estimate for the coordinate value where the gradient
 should become zero. Repeating this fitting process can finally
@@ -304,14 +305,14 @@ with the $k$-th internal coordinate, i.e. which are in the spacial
 vicinity of the $k$-th coordinate. 
 $H_{ll}^{}$ is an estimate
 of the diagonal matrix element of the Hessian for the $l$-th 
-internal coordinate. In present applications $H_{ll}^{i}$ took
+internal coordinate. In present applications $H_{ll}$ took
 the value of $0.5$ a.u. for stretches, $0.1$ a.u. 
-for bendings, linear bending 
+for bendings, linear bendings 
 and out-of-planes and $0.05$ a.u. for torsions. These values are
 similar to those used to provide an initial guess for the Hessian in
 Hessian update techniques.
 
-As an alternative, $H_{ll}^{i}$ can be approximated
+As an alternative, $H_{ll}$ can be approximated
 as the local tangent of the gradient curve of a primary fit. 
 This primary fit can be done with 
 the weights $w{'}_{k}^{(i)} = 1/g_{k}^{(i)2}$, usual to 
@@ -319,7 +320,7 @@ estimate relative errors. However, when the internal coordinate values
 span only a very small range, there will be a large uncertainty on the
 estimated Hessian, which usually results in delayed convergence. 
 For this reason we prefer to work with the cruder but more stable
-estimates of $H_{ll}^{i}$. 
+estimates of $H_{ll}$. 
 
 The statistical F-test is used to decide about the order of the fit,
 as implemented in the fitting program \cite{slatec}.
@@ -329,7 +330,7 @@ exclusively linear fit was recommended by the F-test during
 the test calculations.
 
 The topology matrix, neded to determine which internal coordinates
-are neighbouring each other, is given by 
+are neighbouring each other, is given by the symbolic structure of 
 the sparse $G_{i}=BB^{t}$ matrix that is easy to compute from the
 sparse vibrational $B$ matrix. We have considered more delocalized 
 interactions as well, such as the topology offered by $G_i^2$,
@@ -359,7 +360,7 @@ however rarely occure. Combined internal coordinates, such
 as the natural internal ones \cite{Pulay_natural_internals} or the
 delocalized internal ones \cite{Baker_deloc_1} hold the possibility
 of revealing more delocalized transition states by the
-curve fitting technique. The analysis of Wales {\it et.al.} 
+gradient fitting technique. The analysis of Wales {\it et.al.} 
 \cite{Wales_saddlepoint}
 gives a numerical insight into the problems of controlling
 convergence to a minimum without an accurate Hessian.
@@ -428,7 +429,7 @@ works just as good or even better on small molecules
 as the best implementations
 of traditional algorithms.
 
-In four cases (ACHTAR10,ACANIL01,Pterin and Menthone), our 
+In four cases (ACHTAR10, ACANIL01, Pterin and Menthone), our 
 EFIGE optimizer proved to be somewhat slower than the best traditional
 techniques. This happened due to geometrical redundancies, which are
 typical for the application of a redundant set of primitive internal
