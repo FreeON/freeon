@@ -56,10 +56,12 @@ MODULE SCFLocals
       INTEGER,DIMENSION(3)               :: Current
       INTEGER                            :: NSet   ! Number of basis sets 
       INTEGER                            :: NGeom  ! Number of configurations 
-      INTEGER                            :: NCGC   ! Number of CG cycles
       LOGICAL                            :: SuperP ! Start from the superposition of atomic densitites
-      LOGICAL                            :: InkFok ! Incremental Fock builds with difference densities
-      LOGICAL                            :: DIIS   ! Use direct inversion in iterative subspace
+!
+      LOGICAL                            :: InkFok ! Perform incremental Fock builds
+      LOGICAL                            :: BeenInkn ! Been performing incremental Fock builds
+      LOGICAL                            :: ShudInk! To do or not to do incremental Fock builds
+!
       LOGICAL                            :: Rest   ! Restart from a specified Info file
       INTEGER                            :: Fail   ! SCF convergence key
       CHARACTER(LEN=DEFAULT_CHR_LEN), &

@@ -99,6 +99,13 @@ MODULE DrvSCFs
          CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
          CALL Invoke('P2Use',CtrlVect)
          CALL Invoke('MakeRho',CtrlVect)
+      ELSEIF(Ctrl%InkFok)THEN
+!        First do a full density build 
+         CALL LogSCF(Ctrl%Current,'Full density build followed by delta density build.',.TRUE.)
+         CtrlVect=SetCtrlVect(Ctrl,'Direct')
+         CALL Invoke('MakeRho',CtrlVect)
+         CtrlVect=SetCtrlVect(Ctrl,'InkFok')
+         CALL Invoke('MakeRho',CtrlVect)
       ELSE
 !        Regular old density build
          CALL LogSCF(Ctrl%Current,'Standard density build',.TRUE.)
@@ -206,6 +213,7 @@ MODULE DrvSCFs
       CHARACTER(LEN=DEFAULT_CHR_LEN) :: Action,RemCur,RemPrv,RemoveFile
       INTEGER                        :: Modl
 !---------------------------------------------------------------------------------------      
+return
       IF(PRESENT(Action_O))THEN
          Action=Action_O
       ELSE
@@ -334,30 +342,44 @@ MODULE DrvSCFs
          DTest=DTol(Ctrl%AccL(CBas))
 !        Check for absolute convergence below thresholds
 !        and approach from correct direction.
-         IF(dDMax<dTest.AND.ETotQ<ETest.AND.ETotB<ETotA)THEN
+         IF(DMaxB<dTest.AND.ETotQ<ETest.AND.ETotB<ETotA)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
 !        Accept convergence from wrong side if thresholds are tightend.
-         IF(dDMax<dTest*5.D-1.AND.ETotQ<ETest*1.D-1)THEN
+         IF(DMaxB<dTest*5.D-1.AND.ETotQ<ETest*1.D-1)THEN
             Mssg='Normal SCF convergence.'
             ConvergedQ=.TRUE.
          ENDIF
 !        Check to see if convergence is in an asymptotic regime
-         IF(DIISB<1.D-2.AND.DMAXB<5.D-1)THEN
+         IF(DIISB<1.D-2.AND.DMaxB<5.D-1)THEN
 !           Look for non-decreasing error due to incomplete numerics
             IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.CCyc>2)THEN                
-               IF(DIISB>DIISA.AND.DMAXB>DMAXA)THEN
+               IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
                   Mssg='SCF hit DIIS/DMax increase.'
                   ConvergedQ=.TRUE.
                ENDIF
             ENDIF
 !           Look for convergence stall-outs 
-            IF(DIISQ<9.D-2.AND.DMAXQ<1.D-2)THEN
+            IF(DIISQ<9.D-2.AND.DMaxQ<1.D-2)THEN
                Mssg='SCF convergence stalled.'
                ConvergedQ=.TRUE.
             ENDIF 
          ENDIF
+!        Logic for incremental Fock builds
+         IF(.NOT.ConvergedQ.AND.DMaxB<1D-1.AND. &
+            Ctrl%ShudInk.AND..NOT.Ctrl%BeenInkn)THEN
+!           Turn on incremental Fock builds if we should, but havnt yet
+            Ctrl%InkFok=.TRUE.
+            Ctrl%BeenInkn=.TRUE.
+         ELSEIF(ConvergedQ.AND.Ctrl%InkFok)THEN
+!           Turn full builds back on if convergence reached
+!           with incremental methods.  
+            ConvergedQ=.FALSE.
+            Ctrl%InkFok=.FALSE.
+            Ctrl%BeenInkn=.TRUE.
+         ENDIF            
+!
          IF(ConvergedQ.AND.PrintFlags%Key>DEBUG_NONE)THEN
             WRITE(*,*)TRIM(Mssg)             
             IF(PrintFlags%Key>DEBUG_MINIMUM)THEN
