@@ -150,10 +150,12 @@ PROGRAM FockNGrueven
   ENDIF
 !
   IF(SCFActn=='FockPrimeBuild'.OR.SCFActn=='StartResponse')THEN
-     CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(4)),Args,0)) 
-     CALL PChkSum(Tmp1,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
-     CALL PPrint( Tmp1,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
-     CALL Plot(   Tmp1,'FPrime'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
+     !I do not need that! (vw)
+     !CALL Put(F,TrixFile('FPrime'//TRIM(Args%C%C(4)),Args,0)) 
+     !CALL PChkSum(F,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Prog)
+     !CALL PPrint( F,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']')
+     !CALL Print_BCSR(F,'FPrime'//TRIM(Args%C%C(4))//'['//TRIM(SCFCycl)//']',Unit_O=6)
+     !CALL Plot(   F,'FPrime'//TRIM(Args%C%C(4))//'_'//TRIM(SCFCycl))
   ELSE
      CALL Put(F,TrixFile('F',Args,0))
      CALL PChkSum(F,'F['//TRIM(Cycl)//']',Prog)
