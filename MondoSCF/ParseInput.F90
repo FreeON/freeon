@@ -1351,6 +1351,7 @@ MODULE ParseInput
          INTEGER        :: J
 !-----------------------------------------------------------------------------------
          IF(GM%Ordrd==SFC_NONE)RETURN
+         RETURN
 !
          CALL New(Point,NAtoms)
          CALL New(DTemp,NAtoms)
