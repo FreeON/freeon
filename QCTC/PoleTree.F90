@@ -10,6 +10,7 @@ MODULE PoleTree
    USE QCTCThresholds
    USE BoundingBox
    USE MondoPoles
+   USE Globals
    IMPLICIT NONE
 !----------------------------------------------------------------------------------
 !  Globals
