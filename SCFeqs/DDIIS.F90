@@ -396,7 +396,7 @@ if(myid.eq.0) WRITE(*,*) 'Save E''=<'//TRIM(TrixFile('EPrime'//TRIM(Args%C%C(4))
   CALL Multiply(FPrim,Zero)
   !
   ! And do the summation
-  DO I=1,N-1    -5
+  DO I=1,N-1
      CALL Get(Tmp1,TrixFile('OrthoFPrime'//TRIM(Args%C%C(4)),Args,SCFOff%I(Idx%I(I))))
      CALL Multiply(Tmp1,DIISCo%D(Idx%I(I)))
      CALL Add(FPrim,Tmp1,EPrim)
