@@ -122,7 +122,6 @@ Get["FRONTM.m"];
 MakeList={};
 RelsList={};
 
-PunchHRRKet;
 PunchHRRBra;
 
 IncludeFile="ERIInclude.Inc";
