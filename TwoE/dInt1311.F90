@@ -1,7 +1,7 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (P S|S S) 
+! COMPUTES THE INTEGRAL CLASS (S P|S S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE dInt3111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE dInt1311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NINT,PBC,dI) 
       USE DerivedTypes
       USE VScratch
@@ -59,12 +59,16 @@
       I2Bar4=0.0d0
       I3Bar4=0.0d0
       I4Bar4=0.0d0
+      Ia4Bar1=0D0
       Ia10Bar1=0D0
+      Ia3Bar1=0D0
       Ia9Bar1=0D0
       Ia7Bar1=0D0
+      Ia2Bar1=0D0
       Ia8Bar1=0D0
       Ia6Bar1=0D0
       Ia5Bar1=0D0
+      Ib1Bar1=0D0
       Ib4Bar1=0D0
       Ib10Bar1=0D0
       Ib3Bar1=0D0
@@ -74,6 +78,9 @@
       Ib8Bar1=0D0
       Ib6Bar1=0D0
       Ib5Bar1=0D0
+      Ic1Bar4=0D0
+      Ic1Bar3=0D0
+      Ic1Bar2=0D0
       Ic4Bar4=0D0
       Ic4Bar3=0D0
       Ic4Bar2=0D0
@@ -237,12 +244,16 @@
       I3Bar4=RawI3Bar4+I3Bar4
       RawI4Bar4=QCz*V(9)+WQz*V(22)+V(23)
       I4Bar4=RawI4Bar4+I4Bar4
+            Ia4Bar1=Ia4Bar1+Alpha*RawI4Bar1
             Ia10Bar1=Ia10Bar1+Alpha*RawI10Bar1
+            Ia3Bar1=Ia3Bar1+Alpha*RawI3Bar1
             Ia9Bar1=Ia9Bar1+Alpha*RawI9Bar1
             Ia7Bar1=Ia7Bar1+Alpha*RawI7Bar1
+            Ia2Bar1=Ia2Bar1+Alpha*RawI2Bar1
             Ia8Bar1=Ia8Bar1+Alpha*RawI8Bar1
             Ia6Bar1=Ia6Bar1+Alpha*RawI6Bar1
             Ia5Bar1=Ia5Bar1+Alpha*RawI5Bar1
+            Ib1Bar1=Ib1Bar1+Beta*RawI1Bar1
             Ib4Bar1=Ib4Bar1+Beta*RawI4Bar1
             Ib10Bar1=Ib10Bar1+Beta*RawI10Bar1
             Ib3Bar1=Ib3Bar1+Beta*RawI3Bar1
@@ -252,6 +263,9 @@
             Ib8Bar1=Ib8Bar1+Beta*RawI8Bar1
             Ib6Bar1=Ib6Bar1+Beta*RawI6Bar1
             Ib5Bar1=Ib5Bar1+Beta*RawI5Bar1
+            Ic1Bar4=Ic1Bar4+Gamma*RawI1Bar4
+            Ic1Bar3=Ic1Bar3+Gamma*RawI1Bar3
+            Ic1Bar2=Ic1Bar2+Gamma*RawI1Bar2
             Ic4Bar4=Ic4Bar4+Gamma*RawI4Bar4
             Ic4Bar3=Ic4Bar3+Gamma*RawI4Bar3
             Ic4Bar2=Ic4Bar2+Gamma*RawI4Bar2
@@ -264,77 +278,122 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      V(1)=-I1Bar1
-      V(2)=ABx*Ib2Bar1
-      V(3)=ABy*Ib2Bar1
-      V(4)=-Ia6Bar1
-      V(5)=-Ib6Bar1
-      V(6)=ABz*Ib2Bar1
-      V(7)=-Ia8Bar1
-      V(8)=-Ib8Bar1
-      V(9)=ABx*Ib3Bar1
-      V(10)=ABy*Ib3Bar1
-      V(11)=ABz*Ib3Bar1
-      V(12)=-Ia9Bar1
-      V(13)=-Ib9Bar1
-      V(14)=ABx*Ib4Bar1
-      V(15)=ABy*Ib4Bar1
-      V(16)=ABz*Ib4Bar1
+      V(1)=ABx*Ia2Bar1
+      V(2)=-I1Bar1
+      V(3)=ABx*Ib2Bar1
+      V(4)=ABx*Ib1Bar1
+      V(5)=Ib2Bar1+V(4)
+      V(6)=ABx*V(5)
+      V(7)=ABx*Ic1Bar2
+      V(8)=ABx*Ia3Bar1
+      V(9)=ABy*Ib2Bar1
+      V(10)=ABy*Ib1Bar1
+      V(11)=Ib3Bar1+V(10)
+      V(12)=ABx*V(11)
+      V(13)=ABx*Ic1Bar3
+      V(14)=-Ia6Bar1
+      V(15)=-V(9)
+      V(16)=-V(12)
+      V(17)=-Ib6Bar1
+      V(18)=ABx*Ia4Bar1
+      V(19)=ABz*Ib2Bar1
+      V(20)=ABz*Ib1Bar1
+      V(21)=Ib4Bar1+V(20)
+      V(22)=ABx*V(21)
+      V(23)=ABx*Ic1Bar4
+      V(24)=-Ia8Bar1
+      V(25)=-V(19)
+      V(26)=-V(22)
+      V(27)=-Ib8Bar1
+      V(28)=ABy*Ia2Bar1
+      V(29)=ABy*Ic1Bar2
+      V(30)=ABy*Ia3Bar1
+      V(31)=ABy*Ib3Bar1
+      V(32)=ABy*V(11)
+      V(33)=ABy*Ic1Bar3
+      V(34)=ABy*Ia4Bar1
+      V(35)=ABz*Ib3Bar1
+      V(36)=ABy*V(21)
+      V(37)=ABy*Ic1Bar4
+      V(38)=-Ia9Bar1
+      V(39)=-V(35)
+      V(40)=-V(36)
+      V(41)=-Ib9Bar1
+      V(42)=ABz*Ia2Bar1
+      V(43)=ABz*Ic1Bar2
+      V(44)=ABz*Ia3Bar1
+      V(45)=ABz*Ic1Bar3
+      V(46)=ABz*Ia4Bar1
+      V(47)=ABz*Ib4Bar1
+      V(48)=ABz*V(21)
+      V(49)=ABz*Ic1Bar4
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia5Bar1+dI(OffSet,CrtSet1)+V(1)
-      dI(OffSet,CrtSet4)=Ib5Bar1+dI(OffSet,CrtSet4)+V(2)
-      dI(OffSet,CrtSet7)=Ic2Bar2+dI(OffSet,CrtSet7)
-      W1=I1Bar1-Ia5Bar1-Ib5Bar1
-      W2=-Ic2Bar2+dI(OffSet,CrtSet10)-V(2)
-      dI(OffSet,CrtSet10)=W1+W2
-      dI(OffSet,CrtSet2)=Ia6Bar1+dI(OffSet,CrtSet2)
-      dI(OffSet,CrtSet5)=Ib6Bar1+dI(OffSet,CrtSet5)+V(3)
-      dI(OffSet,CrtSet8)=Ic2Bar3+dI(OffSet,CrtSet8)
+      dI(OffSet,CrtSet4)=Ib5Bar1+dI(OffSet,CrtSet4)+V(2)+V(3)+V(6)
+      dI(OffSet,CrtSet7)=Ic2Bar2+dI(OffSet,CrtSet7)+V(7)
+      W1=I1Bar1-Ia5Bar1-Ib5Bar1-Ic2Bar2
+      W2=dI(OffSet,CrtSet10)-V(1)
+      W3=-V(3)
+      W4=-V(6)-V(7)
+      dI(OffSet,CrtSet10)=W1+W2+W3+W4
+      dI(OffSet,CrtSet2)=Ia6Bar1+dI(OffSet,CrtSet2)+V(8)
+      dI(OffSet,CrtSet5)=Ib6Bar1+dI(OffSet,CrtSet5)+V(9)+V(12)
+      dI(OffSet,CrtSet8)=Ic2Bar3+dI(OffSet,CrtSet8)+V(13)
       W1=-Ic2Bar3+dI(OffSet,CrtSet11)
-      W2=-V(3)+V(4)+V(5)
-      dI(OffSet,CrtSet11)=W1+W2
-      dI(OffSet,CrtSet3)=Ia8Bar1+dI(OffSet,CrtSet3)
-      dI(OffSet,CrtSet6)=Ib8Bar1+dI(OffSet,CrtSet6)+V(6)
-      dI(OffSet,CrtSet9)=Ic2Bar4+dI(OffSet,CrtSet9)
+      W2=-V(8)-V(13)
+      W3=V(14)+V(15)+V(16)+V(17)
+      dI(OffSet,CrtSet11)=W1+W2+W3
+      dI(OffSet,CrtSet3)=Ia8Bar1+dI(OffSet,CrtSet3)+V(18)
+      dI(OffSet,CrtSet6)=Ib8Bar1+dI(OffSet,CrtSet6)+V(19)+V(22)
+      dI(OffSet,CrtSet9)=Ic2Bar4+dI(OffSet,CrtSet9)+V(23)
       W1=-Ic2Bar4+dI(OffSet,CrtSet12)
-      W2=-V(6)+V(7)+V(8)
-      dI(OffSet,CrtSet12)=W1+W2
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
-      dI(OffSet,CrtSet1)=Ia6Bar1+dI(OffSet,CrtSet1)
-      dI(OffSet,CrtSet4)=Ib6Bar1+dI(OffSet,CrtSet4)+V(9)
-      dI(OffSet,CrtSet7)=Ic3Bar2+dI(OffSet,CrtSet7)
-      W1=-Ic3Bar2+dI(OffSet,CrtSet10)
-      W2=V(4)+V(5)-V(9)
-      dI(OffSet,CrtSet10)=W1+W2
-      dI(OffSet,CrtSet2)=Ia7Bar1+dI(OffSet,CrtSet2)+V(1)
-      dI(OffSet,CrtSet5)=Ib7Bar1+dI(OffSet,CrtSet5)+V(10)
-      dI(OffSet,CrtSet8)=Ic3Bar3+dI(OffSet,CrtSet8)
-      W1=I1Bar1-Ia7Bar1-Ib7Bar1
-      W2=-Ic3Bar3+dI(OffSet,CrtSet11)-V(10)
-      dI(OffSet,CrtSet11)=W1+W2
-      dI(OffSet,CrtSet3)=Ia9Bar1+dI(OffSet,CrtSet3)
-      dI(OffSet,CrtSet6)=Ib9Bar1+dI(OffSet,CrtSet6)+V(11)
-      dI(OffSet,CrtSet9)=Ic3Bar4+dI(OffSet,CrtSet9)
+      W2=-V(18)-V(23)
+      W3=V(24)+V(25)+V(26)+V(27)
+      dI(OffSet,CrtSet12)=W1+W2+W3
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
+      dI(OffSet,CrtSet1)=Ia6Bar1+dI(OffSet,CrtSet1)+V(28)
+      dI(OffSet,CrtSet4)=Ib6Bar1+dI(OffSet,CrtSet4)+V(9)+V(12)
+      dI(OffSet,CrtSet7)=Ic3Bar2+dI(OffSet,CrtSet7)+V(29)
+      W1=-Ic3Bar2+dI(OffSet,CrtSet10)+V(14)+V(15)
+      W2=V(16)+V(17)
+      W3=-V(28)-V(29)
+      dI(OffSet,CrtSet10)=W1+W2+W3
+      dI(OffSet,CrtSet2)=Ia7Bar1+dI(OffSet,CrtSet2)+V(30)
+      dI(OffSet,CrtSet5)=Ib7Bar1+dI(OffSet,CrtSet5)+V(2)+V(31)+V(32)
+      dI(OffSet,CrtSet8)=Ic3Bar3+dI(OffSet,CrtSet8)+V(33)
+      W1=I1Bar1-Ia7Bar1-Ib7Bar1-Ic3Bar3
+      W2=dI(OffSet,CrtSet11)-V(30)
+      W3=-V(31)
+      W4=-V(32)-V(33)
+      dI(OffSet,CrtSet11)=W1+W2+W3+W4
+      dI(OffSet,CrtSet3)=Ia9Bar1+dI(OffSet,CrtSet3)+V(34)
+      dI(OffSet,CrtSet6)=Ib9Bar1+dI(OffSet,CrtSet6)+V(35)+V(36)
+      dI(OffSet,CrtSet9)=Ic3Bar4+dI(OffSet,CrtSet9)+V(37)
       W1=-Ic3Bar4+dI(OffSet,CrtSet12)
-      W2=-V(11)+V(12)+V(13)
-      dI(OffSet,CrtSet12)=W1+W2
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
-      dI(OffSet,CrtSet1)=Ia8Bar1+dI(OffSet,CrtSet1)
-      dI(OffSet,CrtSet4)=Ib8Bar1+dI(OffSet,CrtSet4)+V(14)
-      dI(OffSet,CrtSet7)=Ic4Bar2+dI(OffSet,CrtSet7)
-      W1=-Ic4Bar2+dI(OffSet,CrtSet10)
-      W2=V(7)+V(8)-V(14)
-      dI(OffSet,CrtSet10)=W1+W2
-      dI(OffSet,CrtSet2)=Ia9Bar1+dI(OffSet,CrtSet2)
-      dI(OffSet,CrtSet5)=Ib9Bar1+dI(OffSet,CrtSet5)+V(15)
-      dI(OffSet,CrtSet8)=Ic4Bar3+dI(OffSet,CrtSet8)
-      W1=-Ic4Bar3+dI(OffSet,CrtSet11)
-      W2=V(12)+V(13)-V(15)
-      dI(OffSet,CrtSet11)=W1+W2
-      dI(OffSet,CrtSet3)=Ia10Bar1+dI(OffSet,CrtSet3)+V(1)
-      dI(OffSet,CrtSet6)=Ib10Bar1+dI(OffSet,CrtSet6)+V(16)
-      dI(OffSet,CrtSet9)=Ic4Bar4+dI(OffSet,CrtSet9)
-      W1=I1Bar1-Ia10Bar1-Ib10Bar1
-      W2=-Ic4Bar4+dI(OffSet,CrtSet12)-V(16)
-      dI(OffSet,CrtSet12)=W1+W2
-   END SUBROUTINE dInt3111
+      W2=-V(34)-V(37)
+      W3=V(38)+V(39)+V(40)+V(41)
+      dI(OffSet,CrtSet12)=W1+W2+W3
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
+      dI(OffSet,CrtSet1)=Ia8Bar1+dI(OffSet,CrtSet1)+V(42)
+      dI(OffSet,CrtSet4)=Ib8Bar1+dI(OffSet,CrtSet4)+V(19)+V(22)
+      dI(OffSet,CrtSet7)=Ic4Bar2+dI(OffSet,CrtSet7)+V(43)
+      W1=-Ic4Bar2+dI(OffSet,CrtSet10)+V(24)+V(25)
+      W2=V(26)+V(27)
+      W3=-V(42)-V(43)
+      dI(OffSet,CrtSet10)=W1+W2+W3
+      dI(OffSet,CrtSet2)=Ia9Bar1+dI(OffSet,CrtSet2)+V(44)
+      dI(OffSet,CrtSet5)=Ib9Bar1+dI(OffSet,CrtSet5)+V(35)+V(36)
+      dI(OffSet,CrtSet8)=Ic4Bar3+dI(OffSet,CrtSet8)+V(45)
+      W1=-Ic4Bar3+dI(OffSet,CrtSet11)+V(38)+V(39)
+      W2=V(40)+V(41)
+      W3=-V(44)-V(45)
+      dI(OffSet,CrtSet11)=W1+W2+W3
+      dI(OffSet,CrtSet3)=Ia10Bar1+dI(OffSet,CrtSet3)+V(46)
+      dI(OffSet,CrtSet6)=Ib10Bar1+dI(OffSet,CrtSet6)+V(2)+V(47)+V(48)
+      dI(OffSet,CrtSet9)=Ic4Bar4+dI(OffSet,CrtSet9)+V(49)
+      W1=I1Bar1-Ia10Bar1-Ib10Bar1-Ic4Bar4
+      W2=dI(OffSet,CrtSet12)-V(46)
+      W3=-V(47)
+      W4=-V(48)-V(49)
+      dI(OffSet,CrtSet12)=W1+W2+W3+W4
+   END SUBROUTINE dInt1311

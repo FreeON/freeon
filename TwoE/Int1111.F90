@@ -10,7 +10,7 @@
       USE GammaF0
       IMPLICIT REAL(DOUBLE) (A,I,W)
       INTEGER        :: LBra,LKet
-      REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)
+      REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
@@ -88,6 +88,7 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
+              AuxR0=Upq*(F0_0(L)+T*(F0_1(L)+T*(F0_2(L)+T*(F0_3(L)+T*F0_4(L)))))
             ELSE
               InvT=One/T
               SqInvT=DSQRT(InvT)

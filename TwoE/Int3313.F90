@@ -1,7 +1,7 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (P P|P S) 
+! COMPUTES THE INTEGRAL CLASS (P P|S P) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3331(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE Int3313(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE VScratch
@@ -312,58 +312,85 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
+      V(1)=CDx*I2Bar1
+      V(2)=I2Bar2+V(1)
+      V(3)=CDx*I3Bar1
+      V(4)=I3Bar2+V(3)
+      V(5)=CDx*I6Bar1
+      V(6)=CDx*I4Bar1
+      V(7)=I4Bar2+V(6)
+      V(8)=CDx*I8Bar1
+      V(9)=CDx*I9Bar1
+      V(10)=CDy*I2Bar1
+      V(11)=I2Bar3+V(10)
+      V(12)=CDy*I3Bar1
+      V(13)=I3Bar3+V(12)
+      V(14)=CDy*I6Bar1
+      V(15)=CDy*I4Bar1
+      V(16)=I4Bar3+V(15)
+      V(17)=CDy*I8Bar1
+      V(18)=CDy*I9Bar1
+      V(19)=CDz*I2Bar1
+      V(20)=I2Bar4+V(19)
+      V(21)=CDz*I3Bar1
+      V(22)=I3Bar4+V(21)
+      V(23)=CDz*I6Bar1
+      V(24)=CDz*I4Bar1
+      V(25)=I4Bar4+V(24)
+      V(26)=CDz*I8Bar1
+      V(27)=CDz*I9Bar1
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I2Bar2+I5Bar2+I(OffSet)
+      I(OffSet)=CDx*I5Bar1+I5Bar2+I(OffSet)+ABx*V(2)
       OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I3Bar2+I6Bar2+I(OffSet)
+      I(OffSet)=I6Bar2+I(OffSet)+ABx*V(4)+V(5)
       OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I4Bar2+I8Bar2+I(OffSet)
+      I(OffSet)=I8Bar2+I(OffSet)+ABx*V(7)+V(8)
       OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I2Bar2+I6Bar2+I(OffSet)
+      I(OffSet)=I6Bar2+I(OffSet)+ABy*V(2)+V(5)
       OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I3Bar2+I7Bar2+I(OffSet)
+      I(OffSet)=CDx*I7Bar1+I7Bar2+I(OffSet)+ABy*V(4)
       OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I4Bar2+I9Bar2+I(OffSet)
+      I(OffSet)=I9Bar2+I(OffSet)+ABy*V(7)+V(9)
       OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I2Bar2+I8Bar2+I(OffSet)
+      I(OffSet)=I8Bar2+I(OffSet)+ABz*V(2)+V(8)
       OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I3Bar2+I9Bar2+I(OffSet)
+      I(OffSet)=I9Bar2+I(OffSet)+ABz*V(4)+V(9)
       OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I10Bar2+ABz*I4Bar2+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I2Bar3+I5Bar3+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I3Bar3+I6Bar3+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I4Bar3+I8Bar3+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I2Bar3+I6Bar3+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I3Bar3+I7Bar3+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I4Bar3+I9Bar3+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I2Bar3+I8Bar3+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I3Bar3+I9Bar3+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD 
-      I(OffSet)=I10Bar3+ABz*I4Bar3+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I2Bar4+I5Bar4+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I3Bar4+I6Bar4+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABx*I4Bar4+I8Bar4+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I2Bar4+I6Bar4+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I3Bar4+I7Bar4+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABy*I4Bar4+I9Bar4+I(OffSet)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I2Bar4+I8Bar4+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=ABz*I3Bar4+I9Bar4+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD 
-      I(OffSet)=I10Bar4+ABz*I4Bar4+I(OffSet)
-   END SUBROUTINE Int3331
+      I(OffSet)=CDx*I10Bar1+I10Bar2+I(OffSet)+ABz*V(7)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I5Bar1+I5Bar3+I(OffSet)+ABx*V(11)
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I6Bar3+I(OffSet)+ABx*V(13)+V(14)
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I8Bar3+I(OffSet)+ABx*V(16)+V(17)
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I6Bar3+I(OffSet)+ABy*V(11)+V(14)
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I7Bar1+I7Bar3+I(OffSet)+ABy*V(13)
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I9Bar3+I(OffSet)+ABy*V(16)+V(18)
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I8Bar3+I(OffSet)+ABz*V(11)+V(17)
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=I9Bar3+I(OffSet)+ABz*V(13)+V(18)
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I10Bar1+I10Bar3+I(OffSet)+ABz*V(16)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=CDz*I5Bar1+I5Bar4+I(OffSet)+ABx*V(20)
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I6Bar4+I(OffSet)+ABx*V(22)+V(23)
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I8Bar4+I(OffSet)+ABx*V(25)+V(26)
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I6Bar4+I(OffSet)+ABy*V(20)+V(23)
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=CDz*I7Bar1+I7Bar4+I(OffSet)+ABy*V(22)
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I9Bar4+I(OffSet)+ABy*V(25)+V(27)
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I8Bar4+I(OffSet)+ABz*V(20)+V(26)
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=I9Bar4+I(OffSet)+ABz*V(22)+V(27)
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=CDz*I10Bar1+I10Bar4+I(OffSet)+ABz*V(25)
+   END SUBROUTINE Int3313

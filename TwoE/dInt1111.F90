@@ -9,7 +9,7 @@
       USE ShellPairStruct
       USE GammaF0
       USE GammaF1
-      IMPLICIT REAL(DOUBLE) (A,I,W)
+      IMPLICIT REAL(DOUBLE) (A,I,W,R)
       INTEGER        :: LBra,LKet,NINT
       REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
@@ -160,23 +160,26 @@
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
+      V(1)=ABx*Ib1Bar1
+      V(2)=ABy*Ib1Bar1
+      V(3)=ABz*Ib1Bar1
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia2Bar1+dI(OffSet,CrtSet1)
-      dI(OffSet,CrtSet4)=ABx*Ib1Bar1+Ib2Bar1+dI(OffSet,CrtSet4)
+      dI(OffSet,CrtSet4)=Ib2Bar1+dI(OffSet,CrtSet4)+V(1)
       dI(OffSet,CrtSet7)=Ic1Bar2+dI(OffSet,CrtSet7)
-      W1=-Ia2Bar1-ABx*Ib1Bar1
-      W2=-Ib2Bar1-Ic1Bar2+dI(OffSet,CrtSet10)
+      W1=-Ia2Bar1-Ib2Bar1
+      W2=-Ic1Bar2+dI(OffSet,CrtSet10)-V(1)
       dI(OffSet,CrtSet10)=W1+W2
       dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
-      dI(OffSet,CrtSet5)=ABy*Ib1Bar1+Ib3Bar1+dI(OffSet,CrtSet5)
+      dI(OffSet,CrtSet5)=Ib3Bar1+dI(OffSet,CrtSet5)+V(2)
       dI(OffSet,CrtSet8)=Ic1Bar3+dI(OffSet,CrtSet8)
-      W1=-Ia3Bar1-ABy*Ib1Bar1
-      W2=-Ib3Bar1-Ic1Bar3+dI(OffSet,CrtSet11)
+      W1=-Ia3Bar1-Ib3Bar1
+      W2=-Ic1Bar3+dI(OffSet,CrtSet11)-V(2)
       dI(OffSet,CrtSet11)=W1+W2
       dI(OffSet,CrtSet3)=Ia4Bar1+dI(OffSet,CrtSet3)
-      dI(OffSet,CrtSet6)=ABz*Ib1Bar1+Ib4Bar1+dI(OffSet,CrtSet6)
+      dI(OffSet,CrtSet6)=Ib4Bar1+dI(OffSet,CrtSet6)+V(3)
       dI(OffSet,CrtSet9)=Ic1Bar4+dI(OffSet,CrtSet9)
-      W1=-Ia4Bar1-ABz*Ib1Bar1
-      W2=-Ib4Bar1-Ic1Bar4+dI(OffSet,CrtSet12)
+      W1=-Ia4Bar1-Ib4Bar1
+      W2=-Ic1Bar4+dI(OffSet,CrtSet12)-V(3)
       dI(OffSet,CrtSet12)=W1+W2
    END SUBROUTINE dInt1111

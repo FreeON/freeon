@@ -1,7 +1,7 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (P S|S S) 
+! COMPUTES THE INTEGRAL CLASS (S S|P S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE Int1131(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE VScratch
@@ -22,9 +22,9 @@
       INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
-      I2Bar1=0.0d0
-      I3Bar1=0.0d0
-      I4Bar1=0.0d0
+      I1Bar2=0.0d0
+      I1Bar3=0.0d0
+      I1Bar4=0.0d0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -102,16 +102,16 @@
               AuxR1=+4.431134627263790D-01*Upq*SqInvT
             ENDIF
       I1Bar1=AuxR0+I1Bar1
-      I2Bar1=AuxR0*PAx+AuxR1*WPx+I2Bar1
-      I3Bar1=AuxR0*PAy+AuxR1*WPy+I3Bar1
-      I4Bar1=AuxR0*PAz+AuxR1*WPz+I4Bar1
+      I1Bar2=AuxR0*QCx+AuxR1*WQx+I1Bar2
+      I1Bar3=AuxR0*QCy+AuxR1*WQy+I1Bar3
+      I1Bar4=AuxR0*QCz+AuxR1*WQz+I1Bar4
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I2Bar1+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I3Bar1+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I4Bar1+I(OffSet)
-   END SUBROUTINE Int3111
+      I(OffSet)=I1Bar2+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD 
+      I(OffSet)=I1Bar3+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD 
+      I(OffSet)=I1Bar4+I(OffSet)
+   END SUBROUTINE Int1131

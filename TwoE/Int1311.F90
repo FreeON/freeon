@@ -1,7 +1,7 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (P S|S S) 
+! COMPUTES THE INTEGRAL CLASS (S P|S S) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE Int1311(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE VScratch
@@ -109,9 +109,9 @@
       ENDDO ! |N0) loop
       ! HRR 
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I2Bar1+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I3Bar1+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I4Bar1+I(OffSet)
-   END SUBROUTINE Int3111
+      I(OffSet)=ABx*I1Bar1+I2Bar1+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABy*I1Bar1+I3Bar1+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD 
+      I(OffSet)=ABz*I1Bar1+I4Bar1+I(OffSet)
+   END SUBROUTINE Int1311

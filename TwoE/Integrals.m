@@ -124,8 +124,10 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
 
 (**************** THE HRR RELATIONS: THX HGP! ************************)
 
-     HRR[a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+     HRR[a_List,b_List,c_List,d_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+                              pa=Position[a,Max[b]][[1, 1]];
                               pb=Position[b,Max[b]][[1, 1]];
+                              pc=Position[c,Max[b]][[1, 1]];
                               pd=Position[d,Max[d]][[1, 1]];
                               MaxEll=Max[Join[b,d]];
 			      (* Exit condition 1 *)
@@ -208,6 +210,10 @@ Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
 
                                 WS["IF(T<Gamma_Switch)THEN"];
                                 WS["  L=AINT(T*Gamma_Grid)"];			
+         If[EllTot==0,
+                     WS[StringJoin["  AuxR0=Upq*",FStr[0]]];
+            ];
+
          If[EllTot==1,
                      WS[StringJoin["  AuxR0=Upq*",FStr[0]]];
                      WS[StringJoin["  AuxR1=Upq*",FStr[1]]];
@@ -269,14 +275,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                                                                  "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
                                                                                                  "+(OD+",ToString[l-LBegin[ll]],")*LDD \n", \
 											   "      I(OffSet)"]];
-							     (*
 
-I((OA+",ToString[i-LBegin[il]],")*LDA",     \
-                                                                                            "+(OB+",ToString[j-LBegin[jl]],")*LDB",     \
-                                                                                            "+(OC+",ToString[k-LBegin[kl]],")*LDC",     \
-                                                                                            "+(OD+",ToString[l-LBegin[ll]],")*LDD)"]];
-
-*)
                                                 ,{i,LBegin[il],LEnd[il]}]
                                                 ,{j,LBegin[jl],LEnd[jl]}]
                                                 ,{k,LBegin[kl],LEnd[kl]}]
@@ -313,7 +312,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
               WS[StringJoin["USE GammaF",ToString[LBra+LKet]]]];
            WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
            WS["INTEGER        :: LBra,LKet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(5,LBra),PrmBufK(5,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
@@ -487,14 +486,24 @@ PunchVRRBack[Subroutine_,BKType_]:=Block[{WS},
 MakeList="TwoEObjs= ";
 RelsList="TwoERels= ";
 
+
+IncludeFile="ERIInclude.Inc";
+OpenWrite[IncludeFile];
+Print[" Openned ",IncludeFile];
+WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];
+
+WSI["SELECT CASE(IntType)"];
+
 Do[Do[Do[Do[
 
 
+	    (*
    If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
       IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
       IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
       IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
 
+      *)
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
@@ -514,11 +523,26 @@ Do[Do[Do[Do[
 	                    +IntegralClass[Classes[[lc]]];*)
 
 
+          ijklFlag=1000000*IntegralClass[Classes[[ic]]] \
+                  +10000*IntegralClass[Classes[[jc]]] \
+	          +100*IntegralClass[Classes[[kc]]] \
+	          +IntegralClass[Classes[[lc]]];
+
 
             ijklType=1000*IntegralClass[Classes[[ic]]] \
                       +100*IntegralClass[Classes[[jc]]] \
                         +10*IntegralClass[Classes[[kc]]] \
 	                    +IntegralClass[Classes[[lc]]];
+
+
+             WSI[StringJoin["CASE(",ToString[ijklFlag],")"]]
+	     WSI[StringJoin["CALL Int",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
+                            "                       BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
+                            "                       ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
+                            "                       OffSet%A  ,1              , & \n",
+                            "                       OffSet%C-1,NBFA           , & \n",
+                            "                       OffSet%B-1,NBFA*NBFC      , & \n",
+                            "                       OffSet%D-1,NBFA*NBFB*NBFC,GM%PBC,C(1)) \n"]];
 
 
 
@@ -554,13 +578,18 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
            Close[Subroutine];
            Print[" Closed ",Subroutine];
 
-     ];
+	     (*     ]; *)
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
 ,{kc,1,LC}]
 ,{lc,1,LC}];
 
+WSI["CASE DEFAULT"];
+WSI["  STOP 'MISSED AN INTEGRAL' "];
+WSI["END SELECT "];
+
+Close[IncludeFile];
 
 MakeList=StringJoin[MakeList," \n"];
 RelsList=StringJoin[RelsList," \n"]; 

@@ -1,14 +1,13 @@
 ! ---------------------------------------------------------- 
-! COMPUTES THE INTEGRAL CLASS (P S|S S) 
+! COMPUTES THE INTEGRAL CLASS (S S|P P) 
 ! ---------------------------------------------------------- 
-   SUBROUTINE Int3111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
+   SUBROUTINE Int1133(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
       USE VScratch
       USE GlobalScalars
       USE ShellPairStruct
-      USE GammaF0
-      USE GammaF1
+      USE GammaF2
       IMPLICIT REAL(DOUBLE) (A,I,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
@@ -22,9 +21,15 @@
       INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
-      I2Bar1=0.0d0
-      I3Bar1=0.0d0
-      I4Bar1=0.0d0
+      I1Bar2=0.0d0
+      I1Bar3=0.0d0
+      I1Bar4=0.0d0
+      I1Bar5=0.0d0
+      I1Bar6=0.0d0
+      I1Bar7=0.0d0
+      I1Bar8=0.0d0
+      I1Bar9=0.0d0
+      I1Bar10=0.0d0
       Ax=ACInfo%Atm1X
       Ay=ACInfo%Atm1Y
       Az=ACInfo%Atm1Z
@@ -92,26 +97,72 @@
             T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)
             IF(T<Gamma_Switch)THEN
               L=AINT(T*Gamma_Grid)
-              AuxR0=Upq*(F0_0(L)+T*(F0_1(L)+T*(F0_2(L)+T*(F0_3(L)+T*F0_4(L)))))
-              AuxR1=Upq*(F1_0(L)+T*(F1_1(L)+T*(F1_2(L)+T*(F1_3(L)+T*F1_4(L)))))
+              ET=EXP(-T)
+              TwoT=Two*T
+              W2=(F2_0(L)+T*(F2_1(L)+T*(F2_2(L)+T*(F2_3(L)+T*F2_4(L)))))
+              W1=+3.333333333333333D-01*(TwoT*W2+ET)
+              W0=TwoT*W1+ET
+              AuxR0=Upq*W0
+              AuxR1=Upq*W1
+              AuxR2=Upq*W2
             ELSE
               InvT=One/T
               SqInvT=DSQRT(InvT)
               AuxR0=+8.862269254527580D-01*Upq*SqInvT
               SqInvT=SqInvT*InvT
               AuxR1=+4.431134627263790D-01*Upq*SqInvT
+              SqInvT=SqInvT*InvT
+              AuxR2=+6.646701940895685D-01*Upq*SqInvT
             ENDIF
+      V(1)=AuxR0*QCx
+      V(2)=AuxR1*WQx
+      V(3)=AuxR0*QCy
+      V(4)=AuxR1*WQy
+      V(5)=AuxR0*QCz
+      V(6)=AuxR1*WQz
+      V(7)=AuxR1*ZxZpE
+      V(8)=-V(7)
+      V(9)=AuxR0+V(8)
+      V(10)=r1x2E*V(9)
+      V(11)=V(3)+V(4)
+      V(12)=AuxR1*QCy
+      V(13)=AuxR2*WQy
+      V(14)=V(12)+V(13)
+      V(15)=V(5)+V(6)
+      V(16)=AuxR1*QCz
+      V(17)=AuxR2*WQz
+      V(18)=V(16)+V(17)
       I1Bar1=AuxR0+I1Bar1
-      I2Bar1=AuxR0*PAx+AuxR1*WPx+I2Bar1
-      I3Bar1=AuxR0*PAy+AuxR1*WPy+I3Bar1
-      I4Bar1=AuxR0*PAz+AuxR1*WPz+I4Bar1
+      I1Bar2=I1Bar2+V(1)+V(2)
+      I1Bar3=I1Bar3+V(3)+V(4)
+      I1Bar4=I1Bar4+V(5)+V(6)
+      W1=WQx*(AuxR1*QCx+AuxR2*WQx)+I1Bar5
+      W2=QCx*(V(1)+V(2))+V(10)
+      I1Bar5=W1+W2
+      I1Bar6=I1Bar6+QCx*V(11)+WQx*V(14)
+      I1Bar7=I1Bar7+V(10)+QCy*V(11)+WQy*V(14)
+      I1Bar8=I1Bar8+QCx*V(15)+WQx*V(18)
+      I1Bar9=I1Bar9+QCy*V(15)+WQy*V(18)
+      I1Bar10=I1Bar10+V(10)+QCz*V(15)+WQz*V(18)
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
       OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I2Bar1+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I3Bar1+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I4Bar1+I(OffSet)
-   END SUBROUTINE Int3111
+      I(OffSet)=CDx*I1Bar2+I1Bar5+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD 
+      I(OffSet)=CDx*I1Bar3+I1Bar6+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD 
+      I(OffSet)=CDx*I1Bar4+I1Bar8+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I1Bar2+I1Bar6+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I1Bar3+I1Bar7+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD 
+      I(OffSet)=CDy*I1Bar4+I1Bar9+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD 
+      I(OffSet)=CDz*I1Bar2+I1Bar8+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD 
+      I(OffSet)=CDz*I1Bar3+I1Bar9+I(OffSet)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD 
+      I(OffSet)=I1Bar10+CDz*I1Bar4+I(OffSet)
+   END SUBROUTINE Int1133

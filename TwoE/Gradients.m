@@ -125,8 +125,10 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
 
 (**************** THE HRR RELATIONS: THX HGP! ************************)
 
-     HRR[a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+     HRR[a_List,b_List,c_List,d_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+                              pb=Position[a,Max[a]][[1, 1]];
                               pb=Position[b,Max[b]][[1, 1]];
+                              pd=Position[c,Max[c]][[1, 1]];
                               pd=Position[d,Max[d]][[1, 1]];
                               MaxEll=Max[Join[b,d]];
 			      (* Exit condition 1 *)
@@ -157,9 +159,10 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                                 ];
                             ];
 
-
-     dHRR[Silent_String,s_String,a_List,b_List,c_List,d_List]:=Module[{pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+     dHRR[Silent_String,s_String,a_List,b_List,c_List,d_List]:=Module[{AB,CD,pa,pb,pc,pd,MaxEll,a1,b1,c1,d1,one,two,adex,cdex},
+                              pa=Position[a,Max[b]][[1, 1]];
                               pb=Position[b,Max[b]][[1, 1]];
+                              pc=Position[c,Max[b]][[1, 1]];
                               pd=Position[d,Max[d]][[1, 1]];
                               MaxEll=Max[Join[b,d]];
 			      (* Exit condition 1 *)
@@ -169,7 +172,8 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                                  adex=LMNDex[a[[1]],a[[2]],a[[3]]];
                                  cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
                                  BarExp=ToExpression[StringJoin["I",s,ToString[adex],"Bar",ToString[cdex]]];
-                                 If[Silent=="F",Return[BarExp],Return[ff[{x,s,a,c}]]]];
+                                 If[Silent=="F",Return[BarExp],Return[ff[{x,s,a,c}]]]
+                                ];
 			      (* Recursion *)
 			      If[b[[pb]]==MaxEll,(* Taking down ell on b *)
                                  If[pb==1, one = {1, 0, 0}; AB = ABx; ];
@@ -199,7 +203,7 @@ Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
 
-SetOptions[FortranAssign,AssignOptimize->False,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
 
 SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeNull->{dI},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 
@@ -403,6 +407,9 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 						  TmpA=dHRR["F","a",a+plus,b,c,d]- a[[cart]]  HRR[a+mnus,b,c,d];
 						  TmpB=dHRR["F","b",a,b+plus,c,d]- b[[cart]]  HRR[a,b+mnus,c,d];
 						  TmpC=dHRR["F","c",a,b,c+plus,d]- c[[cart]]  HRR[a,b,c+mnus,d];
+
+						  (* TmpD=dHRR["F","c",a,b,c,d+plus]- d[[cart]]  HRR[a,b,c,d+mnus]; *)
+
 						  TmpD=-(TmpA+TmpB+TmpC);
 
                                                   CffSetA=ToExpression[StringJoin["CrtSet",ToString[0+cart]]];
@@ -425,6 +432,7 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                   Kount = Kount + 1;
                                                   IList=Append[IList,TmpD+dI[OffSet,CffSetD]];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetD],")"]];
+
 
 ,{cart,1,3}]; 
 
@@ -573,7 +581,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_,Needs_]:=Block[{WS,LBra,LKe
               WS[StringJoin["USE GammaF",ToString[LBra+LKet+1]]];
 
 
-           WS["IMPLICIT REAL(DOUBLE) (A,I,W)"];
+           WS["IMPLICIT REAL(DOUBLE) (A,I,W,R)"];
            WS["INTEGER        :: LBra,LKet,NINT"];
            WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
@@ -768,14 +776,23 @@ PunchVRRBack[Subroutine_,BKType_]:=Block[{WS},
 MakeList="TwoEObjs= ";
 RelsList="TwoERels= ";
 
+
+IncludeFile="dERIInclude.Inc";
+OpenWrite[IncludeFile];
+Print[" Openned ",IncludeFile];
+WSI[String_]:=WriteString[IncludeFile,"   ",String,"\n"];
+
+WSI["SELECT CASE(IntType)"];
+
 Do[Do[Do[Do[
 
-
+	    (*
    If[IntegralClass[Classes[[ic]]]>=IntegralClass[Classes[[jc]]]&& \
       IntegralClass[Classes[[kc]]]>=IntegralClass[Classes[[lc]]]&& \
       IntegralClass[Classes[[ic]]]*100+IntegralClass[Classes[[jc]]]>= \
       IntegralClass[Classes[[kc]]]*100+IntegralClass[Classes[[lc]]],
 
+      *)
             CommentLine=StringJoin["(",CType[IntegralClass[Classes[[ic]]]]," ", \
                                        CType[IntegralClass[Classes[[jc]]]],"|", \
                                        CType[IntegralClass[Classes[[kc]]]]," ", \
@@ -789,12 +806,10 @@ Do[Do[Do[Do[
 	    kmin = Classes[[kc, 1]]; kmax = Classes[[kc, 2]];
 	    lmin = Classes[[lc, 1]]; lmax = Classes[[lc, 2]];
 
-(*            ijklType=1000000*IntegralClass[Classes[[ic]]] \
+            ijklFlag=1000000*IntegralClass[Classes[[ic]]] \
                       +10000*IntegralClass[Classes[[jc]]] \
                         +100*IntegralClass[Classes[[kc]]] \
-	                    +IntegralClass[Classes[[lc]]];*)
-
-
+	                    +IntegralClass[Classes[[lc]]];
 
             ijklType=1000*IntegralClass[Classes[[ic]]] \
                       +100*IntegralClass[Classes[[jc]]] \
@@ -802,6 +817,14 @@ Do[Do[Do[Do[
 	                    +IntegralClass[Classes[[lc]]];
 
 
+             WSI[StringJoin["CASE(",ToString[ijklFlag],")"]];
+	     WSI[StringJoin["CALL dInt",ToString[ijklType],"(ACAtmPair(CFAC)%SP%Cst(1,1),ACAtmPair(CFAC)%SP%L, & \n", 
+                            "                       BDAtmPair(CFBD)%SP%Cst(1,1),BDAtmPair(CFBD)%SP%L, & \n",
+                            "                       ACAtmPair(CFAC)%SP%AtmInfo,BDAtmPair(CFBD)%SP%AtmInfo, & \n",
+                            "                       OffSet%A  ,1              , & \n",
+                            "                       OffSet%C-1,NBFA           , & \n",
+                            "                       OffSet%B-1,NBFA*NBFC      , & \n",
+                            "                       OffSet%D-1,NBFA*NBFB*NBFC,1,4,7,10,NIntBlk,GM%PBC,dC(1,1)) \n"]];
 
 Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClass[Classes[[jc]]]," k=",IntegralClass[Classes[[kc]]]," l=",IntegralClass[Classes[[lc]]]];
 
@@ -838,16 +861,21 @@ Print["ijklType=",ijklType," i=",IntegralClass[Classes[[ic]]]," j=",IntegralClas
            Close[Subroutine];
            Print[" Closed ",Subroutine];
 
-     ];
+	     (*     ]; *)
 
 ,{ic,1,LC}]
 ,{jc,1,LC}]
 ,{kc,1,LC}]
 ,{lc,1,LC}];
 
+WSI["CASE DEFAULT"];
+WSI["  STOP 'MISSED AN INTEGRAL' "];
+WSI["END SELECT "];
 
 MakeList=StringJoin[MakeList," \n"];
 RelsList=StringJoin[RelsList," \n"]; 
+
+(*
 
 (**************** Print out the Makefile ************************)
 
@@ -880,6 +908,8 @@ WriteString[Makefile,"#\n"];
 WriteString[Makefile,"TwoE:$(SPObObjs) $(TwoEObjs)\n","$(AR) $(ARFLAGS) $(MONDO_LIB)/libTwoE.a $(?:.F90=.o)\n","$(RANLIB) $(MONDO_LIB)/libTwoE.a\n"];
 WriteString[Makefile,"#\n"];
 WriteString[Makefile,"CTwoE:\n","rm -f $(REMOVEMISC) $(REMOVEMODS)\n","rm -f \#*\n","rm -f *~\n","ln -s /dev/null core\n","ls -l\n"];
+
+ *)
 
 Close[Makefile];
 
