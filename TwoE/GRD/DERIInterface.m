@@ -59,6 +59,10 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 (* Maximal *)
  Classes = { {0,0},{1,1},{2,2},{3,3}}
 
+ (*> STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
+ (* DoStres, Yes=0, No!=0 *)
+ DoStress=1;
+ (*< STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS STRESS *)
 
 CType[1]  = "S";
 CType[2]  = "SP";
@@ -146,9 +150,13 @@ Do[Do[Do[Do[
                       ArgString3="                  BDAtmPair(iFBD)%SP%AtmInfo,ACAtmPair(iFAC)%SP%AtmInfo, & \n ";                  
                   ];
 
-                  ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
-                  "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1)"];
-
+                  If[DoStress==0,
+                     ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
+                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1),CC(1)"];
+                  ,
+                     ArgString=StringJoin[ArgString1,ArgString2,ArgString3, \
+                     "                 OA,LDA,OB,LDB,OC,LDC,OD,LDD,GOA,GOB,GOC,GOD,NIntBlk,GMc%PBC,C(1)"];
+                  ];
 
 
                   WS[StringJoin["  CALL dIntB",ToString[ijklType],"(",ArgString,")"]];
