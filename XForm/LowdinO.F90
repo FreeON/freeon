@@ -82,20 +82,21 @@ PROGRAM LowdinO
   CALL Delete(Work)
 #endif
 !--------------------------------------------------------------------
+! Allocate Temporaries
 !
   CALL New(Tmp1,(/NBasF,NBasF/))  
   CALL New(Tmp2,(/NBasF,NBasF/))
 !--------------------------------------------------------------------
 !
 !
-  Tmp1%D=Zero
-  DO I=1,NBasF
-     Tmp1%D(I,I)=One/SQRT(Values%D(I))
-  ENDDO 
-  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
-             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
-  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
-             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
+!!$  Tmp1%D=Zero
+!!$  DO I=1,NBasF
+!!$     Tmp1%D(I,I)=One/SQRT(Values%D(I))
+!!$  ENDDO 
+!!$  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
+!!$             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
+!!$  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
+!!$             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
 !--------------------------------------------------------------------
 !
 !
@@ -110,19 +111,32 @@ PROGRAM LowdinO
 !!$        Tmp1%D(I,J) = SUM
 !!$     ENDDO
 !!$  ENDDO
-#ifdef DEBUG_Lowden0
+!------------------------------------------------------------------------
+!
+!
+  DO I=1,NBasF
+     DO J=1,NBasF
+        IF(ABS(Values%D(J)) .GT. 1.D-8) THEN
+           Tmp1%D(I,J) = Vectors%D(I,J)/SQRT(Values%D(J))
+           Tmp2%D(I,J) = Vectors%D(J,I)
+        ENDIF
+     ENDDO
+  ENDDO
+  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Tmp1%D,NBasF,Tmp2%D,NBasF,Zero,Vectors%D,NBasF)
+!
+#ifdef DEBUG
 !
 ! Test for Inverse
 !    
   CALL Get(S,TrixFile('S',Args))
-  CALL SetEq(Vectors,S)
+  CALL SetEq(Tmp1,S)
   CALL Delete(S)
 !
   DO I=1,NBasF
      DO J=1,NBasF
         SUM = Zero
         DO K=1,NBasF
-           SUM = SUM + Tmp1%D(I,K)*Tmp1%D(K,J)
+           SUM = SUM + Vectors%D(I,K)*Vectors%D(K,J)
         ENDDO
         Tmp2%D(I,J) = SUM
      ENDDO
@@ -133,7 +147,7 @@ PROGRAM LowdinO
      DO J=1,NBasF
         SUM = Zero
         DO K=1,NBasF
-           SUM = SUM + Tmp2%D(I,K)*Vectors%D(K,J)
+           SUM = SUM + Tmp1%D(I,K)*Tmp2%D(K,J)
         ENDDO
         IF(I==J) THEN
            Error = Error + ABS((One-SUM))
@@ -142,19 +156,21 @@ PROGRAM LowdinO
         ENDIF
      ENDDO
   ENDDO
+  WRITE(*,*) 'Num of Basis Fun   = ',NBasF
   WRITE(*,*) 'Lowest  Eigenvalue = ',Values%D(1)
   WRITE(*,*) 'Highest Eigenvalue = ',Values%D(NBasF)
+  WRITE(*,*) 'Condition Number   = ',Values%D(NBasF)/Values%D(1)
   WRITE(*,*) 'Error in Inverse   = ',Error
 #endif
 !--------------------------------------------------------------------
 !
   CALL Delete(Values)
-  CALL Delete(Vectors)
+  CALL Delete(Tmp1)
   CALL Delete(Tmp2)
 !--------------------------------------------------------------------
 !
-  CALL SetEq(S,Tmp1)    
-  CALL Delete(Tmp1)
+  CALL SetEq(S,Vectors)    
+  CALL Delete(Vectors)
   CALL Filter(X,S)      
 !--------------------------------------------------------------------
 !
