@@ -22,22 +22,24 @@ PROGRAM P2Use
   USE DenMatMethods
   IMPLICIT NONE
   TYPE(ARGMT)                   :: Args
-  TYPE(BSET)                    :: BS,OldBS
-  TYPE(CRDS)                    :: GM,OldGM
+  TYPE(BSET)                    :: BS,BS_old
+  TYPE(CRDS)                    :: GM,GM_old
 #ifdef PARALLEL
   TYPE(DBCSR) &
 #else
   TYPE(BCSR)  & 
 #endif
-                                :: S,P,X,T0,T1,T2,S1,P0,dP,dS
+                                :: P,P0,X,S0,S1,dS,Tmp1,Tmp2
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, &
-       DeltaP,OldDeltaP,DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s
-  INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA, &
-       NPur,PcntPNon0,OldFileID,ICart
+  REAL(DOUBLE)                  :: MaxDS
+  REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
+                                   DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
+                                   Ipot_Error,Norm_Error
+  INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
+                                   OldFileID,ICart
   CHARACTER(LEN=2)              :: Cycl
-  LOGICAL                       :: Present,SameBasis,SameGeom
+  LOGICAL                       :: Present
   CHARACTER(LEN=DEFAULT_CHR_LEN):: Mssg,BName
   CHARACTER(LEN=5),PARAMETER    :: Prog='P2Use'
   !------------------------------------------------------------------------------- 
@@ -47,277 +49,28 @@ PROGRAM P2Use
   ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-  ! Allocations 
-  CALL New(P)
-  CALL New(T0)
-  CALL New(T1)
-  CALL New(T2)
-  IF(SCFActn=='Extrapolate'.OR.SCFActn=='Restart')THEN
-     SameBasis=.TRUE.
-     SameBasis=.TRUE.
-     IF(SCFActn=='Restart')THEN
-        ! Old basis and geometry are the same?
-        CALL CloseHDFGroup(H5GroupID)
-        CALL CloseHDF(HDFFileID)
-        ! Open old group and HDF
-        OldFileID=OpenHDF(Restart)
-        HDF_CurrentID=OpenHDF(Restart)
-        ! Get old basis set stuff
-        CALL New(Stat,3)
-        CALL Get(Stat,'current_state')
-        SCFCycl=TRIM(IntToChar(Stat%I(1)))
-        CurBase=TRIM(IntToChar(Stat%I(2)))
-        CurGeom=TRIM(IntToChar(Stat%I(3)))
-        ! Open the old group
-        HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-        ! Get the old basis set and geometry for indexing the DM
-        CALL Get(OldBS,CurBase)
-        CALL Get(OldGM,CurGeom)
-        IF(OldBS%BName==BS%BName.AND.OldBS%NBasF==BS%NBasF)THEN
-           SameBasis=.TRUE.
-        ELSE
-           SameBasis=.FALSE.
-        ENDIF
-        MaxGDiff=Zero
-        DO ICart=1,GM%Natms
-           GDiff=ABS(GM%Carts%D(1,ICart)-OldGM%Carts%D(1,ICart)) + &
-                ABS(GM%Carts%D(2,ICart)-OldGM%Carts%D(2,ICart)) + &
-                ABS(GM%Carts%D(3,ICart)-OldGM%Carts%D(3,ICart)) 
-           MaxGDiff=MAX(MaxGDiff,GDiff)
-        ENDDO
-        IF(MaxGDiff<1D-6)THEN
-           SameGeom=.TRUE.
-        ELSE
-           SameGeom=.FALSE.
-        ENDIF
-        IF(.NOT.SameGeom.AND..NOT.SameBasis)THEN ! Don't know how to do this
-           CALL Halt(' Restart with different basis and geometry in P2Use not supported by P2Use ')
-        ELSEIF(.NOT.SameGeom.AND.SameBasis)THEN  ! Restart with new geometry
-           CALL Halt(' Restart with same basis different geometry not yet enabled in P2Use ')
-           ! Get the old AO-DM
-           CALL Get(P0,'CurrentDM',CheckPoint_O=.TRUE.)
-           ! Get the old overlap matrix
-           CALL Get(T0,'CurrentS',CheckPoint_O=.TRUE.)
-        ELSEIF(.NOT.SameBasis.AND.SameGeom)THEN  ! Restart with basis set switch...
-           ! Overwrite the new with the old
-           CALL Delete(BS)
-           CALL Delete(GM)
-           CALL Get(BS,CurBase)
-           CALL Get(GM,CurGeom)
-           ! Compute a new sparse matrix blocking scheme for the old BS
-           CALL BlockBuild(GM,BS,BSiz,OffS)
-#ifdef PARALLEL
-           CALL BCast(BSiz)
-           CALL BCast(OffS)
-#endif           ! Get the old AO-DM in the old basis 
-           CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-           !CALL PChkSum(P,'CurrentDM',Prog)
-           !CALL PPrint(P,'CURRENTDM',Unit_O=6)
-        ELSE                                     ! Simple restart 
-           ! Get the old AO-DM
-           CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
-           ! IO for the non-orthogonal P 
-           CALL Put(P,TrixFile('D',Args,0))
-           CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
-           CALL PPrint( P,'P['//TRIM(Cycl)//']')
-           !  CALL PPrint( P,'P['//TRIM(Cycl)//']',Unit_O=6)
-           CALL Plot(   P,'P_'//TRIM(Cycl))
-           CALL CloseHDFGroup(HDF_CurrentID)
-           CALL CloseHDF(OldFileID)
-           ! Reopen current group and HDF
-           HDFFileID=OpenHDF(H5File)
-           H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-           HDF_CurrentID=H5GroupID
-           ! go down 
-           CALL ShutDown(Prog)   
-        ENDIF
-        CALL CloseHDFGroup(HDF_CurrentID)
-        CALL CloseHDF(OldFileID)
-        ! Reopen current group and HDF
-        HDFFileID=OpenHDF(H5File)
-        H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
-        HDF_CurrentID=H5GroupID
-     ENDIF
-     ! If extrapolating or restarting with different geometry, use DMPT to get a starting DM
-     IF(SCFActn=='Extrapolate'.OR.(SCFActn=='Restart'.AND.SameBasis))THEN
-        CALL Delete(P)
-        CALL New(dS)
-        CALL New(dP)
-        CALL SetToI(dP)
-        CALL Multiply(dP,Zero)
-        IF(SCFActn=='Extrapolate')THEN
-           ! Get previous non-orthogonal density matrix 
-           CALL Get(P0,TrixFile('D',Args,-1))     
-           CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
-        ENDIF
-        CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
-        CALL Multiply(T0,-One)
-        ! dS=S1-S0
-        CALL Add(S1,T0,dS)        
-        !
-        !>>>>>vw
-        ! We need to check if S1==T0
-        CALL PChkSum(dS,'dS',Prog)
-        IF(Max(dS).GT.1.00D-10) THEN
-           !<<<<<vw
-           !
-           OldN=BIG_DBL
-           DO I=1,30
-              ! T0=P0*[dS*P0+S1*dP]
-              CALL Multiply(dS,P0,T0)
-              CALL Multiply(S1,dP,T1)
-              CALL Add(T0,T1,T2)
-              CALL Multiply(P0,T2,T0)
-              ! T1=dP*S1*[P0+dP]
-              CALL Add(P0,dP,T1)
-              CALL Multiply(S1,T1,T2)
-              CALL Multiply(dP,T2,T1)
-              ! T2=T0+T1=P0*[dS*P0+S1*dP]+dP*S1*[P0+dP]
-              CALL Add(T1,T0,T2)
-              ! P1~P0+dP; dN~Tr(P1.S1)
-              CALL Add(P0,dP,T1)
-#ifdef PARALLEL
-              CALL Multiply(T1,S1,T0)
-              dN=Two*Trace(T0)-NEl
-              IF(MyId==ROOT)THEN
-#else
-                 dN=Two*Trace(T1,S1)-NEl
-#endif              
-                 PNon0s=100.D0*DBLE(P0%NNon0)/DBLE(NBasF*NBasF)
-                 !              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-                 Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
-                      //'dN='//TRIM(DblToShrtChar(ABS(dN)/DBLE(NEl))) &
-                      //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
-                 
-                 CALL OpenASCII(OutFile,Out)
-                 CALL PrintProtectL(Out)
-                 WRITE(*,*)TRIM(Mssg)
-                 WRITE(Out,*)TRIM(Mssg)
-                 CALL PrintProtectR(Out)
-                 CLOSE(UNIT=Out,STATUS='KEEP')
-                 !              ENDIF
-#ifdef PARALLEL
-              ENDIF
-#endif
-              IF(I>6.AND.ABS(dN)>ABS(OldN).OR.ABS(dN)>1D3)EXIT
-              OldN=dN
-              IF(MOD(I,2)==0.AND.I<2)THEN
-                 CALL Multiply(dP,Two)
-                 CALL Multiply(T2,-One)
-                 CALL Add(dP,T2,T1)
-                 CALL Filter(dP,T1)
-              ELSEIF(I<2)THEN
-                 CALL Filter(dP,T2)
-              ELSEIF(dN<0)THEN
-                 CALL Multiply(dP,Two)
-                 CALL Multiply(T2,-One)
-                 CALL Add(dP,T2,T1)
-                 CALL Filter(dP,T1)
-              ELSE
-                 CALL Filter(dP,T2)
-              ENDIF
-           ENDDO
-           RelNErr=ABS(dN)/DBLE(NEl)
-           IF(RelNErr>Thresholds%Trix*1D-2)THEN
-#ifdef PARALLEL
-              IF(MyId==ROOT)THEN
-#endif
-                 CALL OpenASCII(OutFile,Out)
-                 CALL PrintProtectL(Out)
-                 Mssg=ProcessName(Prog,'AO-DMX FAILED!') & 
-                      //'Lost '//TRIM(DblToShrtChar(ABS(dN)))//' electrons.'
-                 WRITE(*,*)TRIM(Mssg)
-                 WRITE(Out,*)TRIM(Mssg)
-                 WRITE(*,*)' dN = ',dN
-                 Mssg=ProcessName(Prog,'AO-DMX ')//'Dont panic... trying more stable algorithm '
-                 WRITE(*,*)TRIM(Mssg)
-                 WRITE(Out,*)TRIM(Mssg)
-                 CALL PrintProtectR(Out)
-                 CLOSE(UNIT=Out,STATUS='KEEP')
-#ifdef PARALLEL
-              ENDIF
-#endif
-              CALL Get(T0,TrixFile('S',Args,Stats_O=Previous))
-              CALL Get(T1,TrixFile('S',Args,Stats_O=Current))
-              CALL Multiply(T1,-One)
-              ! dS=S_Prev-S_Curr 
-              CALL Add(T1,T0,T2)        
-              ! Get previous density matrix 
-              CALL Get(P0,TrixFile('D',Args,-1))     
-              ! P.dS
-              CALL Multiply(P0,T2,T1)
-              ! dP=-P.dS.P
-              CALL Multiply(T1,P0,T0)
-              ! P'=P+dP
-              CALL Add(T0,P0,T1)
-              CALL Filter(P0,T1)
-              CALL Get(S1,TrixFile('S',Args))
-              OldN=BIG_DBL
-              DO I=1,20
-                 CALL AOSP2(P0,S1,T0,T2,Half*DBLE(NEl))
-                 dN=ABS(Two*TrP-NEl)
-#ifdef PARALLEL
-                 IF(MyId==ROOT)THEN
-#endif
-                    PNon0s=100.D0*DBLE(P0%NNon0)/DBLE(NBasF*NBasF)
-                    !              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
-                    Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
-                         //'dN='//TRIM(DblToShrtChar(dN)) &
-                         //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
-                    
-                    CALL OpenASCII(OutFile,Out)
-                    CALL PrintProtectL(Out)
-                    WRITE(*,*)TRIM(Mssg)
-                    WRITE(Out,*)TRIM(Mssg)
-                    CALL PrintProtectR(Out)
-                    CLOSE(UNIT=Out,STATUS='KEEP')
-                    !              ENDIF
-#ifdef PARALLEL
-                 ENDIF
-#endif
-                 IF(dN>OldN.AND.I>4)EXIT
-                 OldN=dN
-              ENDDO
-              !
-              CALL Put(P0,TrixFile('D',Args,0))
-              CALL Put(P0,'CurrentDM',CheckPoint_O=.TRUE.)
-           ELSE
-              CALL Add(dp,P0,T0)
-              CALL Put(T0,TrixFile('D',Args,0))
-              CALL Put(T0,'CurrentDM',CheckPoint_O=.TRUE.)
-           ENDIF
-           !
-           !vw>>>>>
-        ELSE
-           CALL OpenASCII(OutFile,Out)
-           CALL PrintProtectR(Out)
-           Mssg=ProcessName(Prog,'dS is too small!') 
-           WRITE(*,*)TRIM(Mssg)
-           WRITE(Out,*)TRIM(Mssg)
-           CLOSE(UNIT=Out,STATUS='KEEP')
-           ! We save back to be sure.
-           CALL Put(P0,TrixFile('D',Args,0))
-           CALL Put(P0,'CurrentDM',CheckPoint_O=.TRUE.)           
-        ENDIF
-        !vw<<<<<
-        !
-        CALL ShutDown(Prog)
-     ENDIF
-
-
-   ELSEIF(SCFActn=='Project')THEN
-     ! Get previous geometries orthogonal density matrix 
-     CALL Get(P,TrixFile('OrthoD',Args,-1))     
-#ifdef PARALLEL
-     IF(MyId==ROOT)THEN
-#endif
-        INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
-#ifdef PARALLEL
-     ENDIF
-     CALL BCast(Present)
-#endif
-  ELSEIF(SCFActn=='DensitySuperposition')THEN
-     ! Make a diagonal guess
+  ! Do what needs to be done CASE by CASE
+  SELECT CASE(SCFActn)
+  ! P=0
+  CASE('GuessEqCore')
+     CALL New(P)
+     CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
+     DO I=1,NAtoms
+        BlkP%D(:,I)=Zero
+     ENDDO
+     CALL SetToI(P,BlkP)
+     CALL Delete(BlkP)
+     ! IO for the non-orthogonal P 
+     CALL Put(P,TrixFile('D',Args,0))
+     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+     CALL PPrint( P,'P['//TRIM(Cycl)//']')
+     CALL Plot(   P,'P_'//TRIM(Cycl))
+     CALL Delete(P)
+  ! Density SuperPosition 
+  CASE('DensitySuperposition')
+     CALL New(P)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
      CALL Get(BName,'bsetname',CurBase)
      IF(INDEX(BName,'STO')/=0)THEN
         ! Compute a diagonal guess as the superposition of atomic lewis 
@@ -339,23 +92,9 @@ PROGRAM P2Use
         CALL Warn('Attempting to use density superpostion with a non STO basis set. Going for scaled I.')
         CALL Multiply(P,DBLE(NEl)/DBLE(2*NBasF))
         TrP=Trace(P)
-        IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
-             CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
+        IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
      ENDIF
-  ELSEIF(SCFActn=='GuessEqCore')THEN
-     ! Guess == Core
-     CALL New(BlkP,(/MaxBlkSize**2,NAtoms/))
-     DO I=1,NAtoms
-        BlkP%D(:,I)=Zero
-     ENDDO
-     CALL SetToI(P,BlkP)
-     CALL Delete(BlkP)
-  ELSE
-     CALL Halt(' Unknown option '//TRIM(SCFActn))
-  ENDIF
-
-  IF(SCFActn/='GuessEqCore')THEN
-#ifdef PARALLEL
+#ifdef PARALLEL    
      IF(MyId==ROOT)THEN
 #endif
         INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
@@ -363,31 +102,213 @@ PROGRAM P2Use
      ENDIF
      CALL BCast(Present)
 #endif
+     INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
      IF(Present)THEN     
-        CALL Get(T1,TrixFile('X',Args))   ! T1=S_new^(-1/2)
-        CALL Multiply(T1,P,T2)            ! T2=S_new^(-1/2).P_old
-        CALL Multiply(T2,T1,T0)           ! P_new_AO=S_new^(-1/2).P_old.S_new^(-1/2)
-        CALL Filter(P,T0)                 ! T1=Filter[P_new_AO]
+        CALL Get(X,TrixFile('X',Args))    ! T1=S_new^(-1/2)
+        CALL Multiply(X,P,Tmp1)           ! T2=S_new^(-1/2).P_old
+        CALL Multiply(Tmp1,X,Tmp2)        ! P_new_AO=S_new^(-1/2).P_old.S_new^(-1/2)
+        CALL Filter(P,Tmp2)               ! T1=Filter[P_new_AO]
      ELSE
-        CALL Get(T1,TrixFile('Z',Args))   ! T1=Z_new
-        CALL Multiply(T1,P,T2)            ! T2=Z.P_old
-        CALL Get(T1,TrixFile('ZT',Args))  ! T1=Z^T
-        CALL Multiply(T2,T1,T0)           ! P_new_AO=Z.P_old.Z^T
-        CALL Filter(P,T0)                 ! T1=Filter[P_new_AO]
+        CALL Get(X,TrixFile('Z',Args))    ! T1=Z_new
+        CALL Multiply(X,P,Tmp1)           ! T2=Z.P_old
+        CALL Get(X,TrixFile('ZT',Args))   ! T1=Z^T
+        CALL Multiply(Tmp1,X,Tmp2)        ! P_new_AO=Z.P_old.Z^T
+        CALL Filter(P,Tmp2)               ! T1=Filter[P_new_AO]
      ENDIF
-     CALL Delete(T0)
-     CALL Delete(T1)
-     CALL Delete(T2)
-  ENDIF
-  ! IO for the non-orthogonal P 
-  CALL Put(P,TrixFile('D',Args,0))
-  CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
-  CALL PPrint( P,'P['//TRIM(Cycl)//']')
-  !  CALL PPrint( P,'P['//TRIM(Cycl)//']',Unit_O=6)
-  CALL Plot(   P,'P_'//TRIM(Cycl))
+     ! IO for the non-orthogonal P 
+     CALL Put(P,TrixFile('D',Args,0))
+     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+     CALL PPrint( P,'P['//TRIM(Cycl)//']')
+     CALL Plot(   P,'P_'//TRIM(Cycl))
+     CALL Delete(P)
+     CALL Delete(X)
+     CALL Delete(Tmp1)
+     CALL Delete(Tmp2)
+  ! Restarting without Geometry of BasisSet Change
+  CASE('Restart')
+     ! Close Current Group
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! Open old group and HDF
+     OldFileID=OpenHDF(Restart)
+     HDF_CurrentID=OpenHDF(Restart)
+     ! Get old basis set stuff
+     CALL New(Stat,3) 
+     CALL Get(Stat,'current_state')
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     ! Open the old group
+     HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get the old AO-DM
+     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+     ! IO for the non-orthogonal P 
+     CALL Put(P,TrixFile('D',Args,0))
+     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+     CALL PPrint( P,'P['//TRIM(Cycl)//']')
+     CALL Plot(   P,'P_'//TRIM(Cycl))
+     ! Close Old group
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+     CALL Delete(P)
+  ! Restarting with BasisSet Change
+  CASE('RestartBasisSwitch')
+     ! Close Current Group
+     CALL CloseHDFGroup(H5GroupID)
+     CALL CloseHDF(HDFFileID)
+     ! Open old group and HDF
+     OldFileID=OpenHDF(Restart)
+     HDF_CurrentID=OpenHDF(Restart)
+     ! Get old basis set stuff
+     CALL New(Stat,3)
+     CALL Get(Stat,'current_state')
+     SCFCycl=TRIM(IntToChar(Stat%I(1)))
+     CurBase=TRIM(IntToChar(Stat%I(2)))
+     CurGeom=TRIM(IntToChar(Stat%I(3)))
+     ! Open the old group
+     HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     ! Get the Old Basis Set and Geometry
+     CALL Get(BS_old,CurBase)
+     CALL Get(GM_old,CurGeom)      
+     ! Compute a new sparse matrix blocking scheme for the old BS
+     CALL BlockBuild(GM_old,BS_old,BSiz,OffS)
+     NBasF=BS_old%NBasF
+#ifdef PARALLEL
+     CALL BCast(BSiz)
+     CALL BCast(OffS)
+     CALL BCast(NBasF)
+#endif           
+     ! Get the old AO-DM
+     CALL Get(P,'CurrentDM',CheckPoint_O=.TRUE.)
+     ! IO for the non-orthogonal P 
+     CALL Put(P,TrixFile('D',Args,0))
+     CALL PChkSum(P,'P['//TRIM(Cycl)//']',Prog)
+     CALL PPrint( P,'P['//TRIM(Cycl)//']')
+     CALL Plot(   P,'P_'//TRIM(Cycl))
+     ! Close Old group
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(OldFileID)
+     ! Reopen current group and HDF
+     HDFFileID=OpenHDF(H5File)
+     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+     HDF_CurrentID=H5GroupID
+     CALL Delete(P)
+  ! Geometry Change 
+  CASE('Extrapolate')
+     ! Get Marices
+     IF(PrvGeom==CurGeom) THEN
+        CALL Get(S0,TrixFile('S',Args,Stats_O=(/Current(1),Current(2),Current(3)-1/)))
+        CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
+        ! Close Current Group
+        CALL CloseHDFGroup(H5GroupID)
+        CALL CloseHDF(HDFFileID)
+        ! Open old group and HDF
+        OldFileID=OpenHDF(Restart)
+        HDF_CurrentID=OpenHDF(Restart)
+        ! Get old basis set stuff
+        CALL New(Stat,3) 
+        CALL Get(Stat,'current_state')
+        SCFCycl=TRIM(IntToChar(Stat%I(1)))
+        CurBase=TRIM(IntToChar(Stat%I(2)))
+        CurGeom=TRIM(IntToChar(Stat%I(3)))
+        ! Open the old group
+        HDF_CurrentID=OpenHDFGroup(OldFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+        ! Get the old AO-DM
+        CALL Get(P0,'CurrentDM',CheckPoint_O=.TRUE.) 
+        ! Close Old group
+        CALL CloseHDFGroup(HDF_CurrentID)
+        CALL CloseHDF(OldFileID)
+        ! Reopen current group and HDF
+        HDFFileID=OpenHDF(H5File)
+        H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
+        HDF_CurrentID=H5GroupID
+     ELSE
+        CALL Get(S0,TrixFile('S',Args,Stats_O=Previous))
+        CALL Get(S1,TrixFile('S',Args,Stats_O=Current))
+        CALL Get(P0,TrixFile('D',Args,-1))
+     ENDIF
+     ! Allocate
+     CALL New(P)
+     CALL New(dS)
+     CALL New(Tmp1)
+     CALL New(Tmp2)
+     ! Compute dS
+     CALL Multiply(S1,-One)
+     CALL Add(S1,S0,dS)
+     CALL Multiply(S1,-One)
+     MaxDS = MAX(dS)
+     ! Initialize P
+     CALL SetEq(P,P0)
+     ! Purify 
+     IF(MaxDS > 1.D-10) THEN
+        DO I=1,20
+           IF(I <= 2) THEN
+              CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+              CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+           ELSE
+              IF(ABS(Ipot_Error) > 0.1D0) THEN
+                 IF(Norm_Error > Zero) THEN
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+                 ELSE
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+                 ENDIF
+              ELSE
+                 IF(Norm_Error > Zero) THEN
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+                 ELSE
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.FALSE.)
+                    CALL AOSP2(P,S1,Tmp1,Tmp2,.TRUE.)
+                 ENDIF
+              ENDIF
+           ENDIF
+           Norm_Error = TrP-Half*DBLE(NEl)
+           Ipot_Error = TrP2-Trace(P)
+#ifdef PARALLEL
+           IF(MyId==ROOT)THEN
+#endif
+              PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
+                   //'dN='//TRIM(DblToShrtChar(Norm_Error)) &
+                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
+              CALL OpenASCII(OutFile,Out)
+              CALL PrintProtectL(Out)
+              WRITE(*,*)TRIM(Mssg)
+              WRITE(Out,*)TRIM(Mssg)
+              CALL PrintProtectR(Out)
+              CLOSE(UNIT=Out,STATUS='KEEP')
+#ifdef PARALLEL          
+           ENDIF 
+#endif
+           IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
+           IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) EXIT
+        ENDDO
+        IF(ABS(Norm_Error) > 0.25D0*DBLE(NEl)) THEN
+           CALL Filter(P,P0)
+        ENDIF
+     ELSE
+        CALL Filter(P,P0)
+     ENDIF
+     ! Save back to be sure.
+     CALL Put(P,TrixFile('D',Args,0))
+     CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.) 
+     ! Clean Up
+     CALL Delete(P)
+     CALL Delete(dS)
+     CALL Delete(Tmp1) 
+     CALL Delete(Tmp2)
+  CASE('Project')
+     CALL Halt(' Not Implimented '//TRIM(SCFActn))
+  CASE DEFAULT
+     CALL Halt(' Unknown option '//TRIM(SCFActn))
+  END SELECT
   ! Tidy up ...
   CALL Delete(GM)
   CALL Delete(BS)
-  CALL Delete(P)
   CALL ShutDown(Prog)   
+!
 END PROGRAM P2Use
