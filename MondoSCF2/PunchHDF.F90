@@ -295,7 +295,7 @@ CONTAINS
     TYPE(CRDS)                :: G
     TYPE(CellSet)             :: CS_IN,CS_OUT
     REAL(DOUBLE), OPTIONAL    :: Rad_O
-    REAL(DOUBLE)              :: AtomPairThresh,Radius
+    REAL(DOUBLE)              :: AtomPairThresh,Radius_in,Radius_out
     INTEGER                   :: IL
     INTEGER                   :: MaxCell
 !------------------------------------------------------------------------------
@@ -309,25 +309,23 @@ CONTAINS
        MaxCell=500
     ELSEIF(G%PBC%Dimen==3) THEN
        MaxCell=5000
-    ENDIF
+    ENDIF 
 !
     IF(PRESENT(Rad_O)) THEN
-       Radius = Rad_O
+       Radius_out = 1.0D0*Rad_O
+       Radius_in  = 1.5D0*Rad_O
     ELSE
-       Radius = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
+       Radius_out = (One+1.D-14)*MaxBoxDim(G)+SQRT(AtomPairThresh)
+       Radius_in  = (One+1.D-14)*MaxBoxDim(G)+2.0D0*SQRT(AtomPairThresh)
     ENDIF
-    CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell) 
-!   CS_IN : Quick fix for now, we will need to address a much better fix, later
-    IF(PRESENT(Rad_O)) THEN
-       Radius = Rad_O
-    ELSE
-       Radius = (One+1.D-14)*MaxBoxDim(G)+2.0D0*SQRT(AtomPairThresh)
-    ENDIF
+!   Determine PFFOverde
     IF(G%PBC%PFFOvRide) THEN
        IL = G%PBC%PFFMaxLay
-       CALL New_CellSet_Cube(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/),MaxCell_O=MaxCell)
+       CALL New_CellSet_Cube(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/IL,IL,IL/)      ,MaxCell_O=MaxCell)
+       CALL New_CellSet_Cube(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,(/2*IL,2*IL,2*IL/),MaxCell_O=MaxCell)
     ELSE
-       CALL New_CellSet_Sphere(CS_IN,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius,MaxCell_O=MaxCell)
+       CALL New_CellSet_Sphere(CS_OUT,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_out ,MaxCell_O=MaxCell)
+       CALL New_CellSet_Sphere(CS_IN ,G%PBC%AutoW%I,G%PBC%BoxShape%D,Radius_in  ,MaxCell_O=MaxCell)
     ENDIF
 !
     CALL Sort_CellSet(CS_IN)
