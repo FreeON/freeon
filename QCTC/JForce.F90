@@ -22,12 +22,18 @@ PROGRAM JForce
   USE BlokTrPdJ
   USE BlokTrWdS
   USE NuklarE
+  IMPLICIT NONE
+
 #ifdef PARALLEL
-  USE MondoMPI
-  TYPE(DBCSR)                  :: P
+  TYPE(BCSR)                     :: P
+  TYPE(DBL_VECT)      :: TotJFrc
+  INTEGER :: IErr,TotFrcComp,MyAtomNum,TotAtomNum
+  REAL(DOUBLE) :: JFrcBegTm,JFrcEndTm,JFrcTm
+  TYPE(DBL_VECT) :: TmJFrcArr
 #else
   TYPE(BCSR)                   :: P
 #endif
+
   TYPE(AtomPair)               :: Pair
   TYPE(DBL_VECT)               :: Frc,JFrc
   INTEGER                      :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
@@ -49,7 +55,7 @@ PROGRAM JForce
 #endif
 !-------------------------------------------------------------------------------- 
 ! Start up macro
-  CALL StartUp(Args,Prog)
+  CALL StartUp(Args,Prog,Serial_O=.FALSE.)
 #ifdef MMech
   IF(HasQM()) THEN
 !    Get basis set and geometry
@@ -83,8 +89,11 @@ PROGRAM JForce
   CALL New(JFrc,3*GMLoc%Natms)
   JFrc%D(:)=Zero
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-  CALL Get(P,TrixFile('D',Args,1))
-  CALL Get(Rho,'Rho',Args,1)
+#ifdef PARALLEL
+  CALL New(P,OnAll_O=.TRUE.)
+#endif
+  CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
+  CALL Get(Rho,'Rho',Args,1,Bcast_O=.TRUE.)
   CALL Get(RhoPoles,NxtCycl)
 #endif   
 ! Set thresholds local to JForce (for PAC and MAC)
@@ -121,7 +130,19 @@ PROGRAM JForce
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
+#ifdef PARALLEL
+  MyAtomNum = End%I(MyId)-Beg%I(MyId)+1
+  CALL MPI_AllReduce(MyAtomNum,TotAtomNum,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IErr)
+  IF(TotAtomNum /= GMLoc%Natms) THEN
+    WRITE(*,*) 'TotAtomNum = ',TotAtomNum
+    WRITE(*,*) 'GMLoc%Natms = ',GMLoc%Natms
+    STOP 'TotAtomNum not equal to GMLoc%Natms in JForce!'
+  ENDIF
+  JFrcBegTm = MPI_Wtime()
+  DO AtA=Beg%I(MyId),End%I(MyId)
+#else
   DO AtA=1,GMLoc%Natms
+#endif
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
@@ -152,6 +173,10 @@ PROGRAM JForce
   ENDDO
 ! Closed shell...
   JFrc%D=Two*JFrc%D
+#ifdef PARALLEL
+  JFrcEndTm = MPI_Wtime()
+  JFrcTm = JFrcEndTm-JFrcBegTm
+#endif
 #ifdef MMech
   ENDIF
 #endif
@@ -232,6 +257,17 @@ PROGRAM JForce
      ENDIF
   ENDIF
 #else
+
+#ifdef PARALLEL
+  TotFrcComp = 3*GMLoc%Natms
+  CALL New(TotJFrc,TotFrcComp)
+  CALL MPI_Reduce(JFrc%D(1),TotJFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == 0) THEN
+    JFrc%D(1:TotFrcComp) = TotJFrc%D(1:TotFrcComp)
+  ENDIF
+  CALL Delete(TotJFrc)
+#endif
+
   CALL New(Frc,3*GMLoc%Natms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
@@ -244,8 +280,15 @@ PROGRAM JForce
 #endif
   CALL Delete(RhoPoles)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
-! didn't count flops, any accumulation is residual
-! from matrix routines
+#ifdef PARALLEL
+  CALL New(TmJFrcArr,NPrc)
+  CALL MPI_Gather(JFrcTm,1,MPI_DOUBLE_PRECISION,TmJFrcArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == ROOT) THEN
+    CALL PImbalance(TmJFrcArr,NPrc,Prog_O='JFrc')
+  ENDIF
+  CALL Delete(TmJFrcArr)
+#endif
+! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero 
   CALL ShutDown(Prog)
 END PROGRAM JForce

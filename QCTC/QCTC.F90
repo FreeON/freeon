@@ -27,9 +27,12 @@ PROGRAM QCTC
 #endif
   USE JGen
   USE NuklarE
+  IMPLICIT NONE
 
 #ifdef PARALLEL
   TYPE(FastMat),POINTER          :: J
+  REAL(DOUBLE)::TmBegJ,TmEndJ,TmJ
+  TYPE(DBL_VECT) :: TmJArr
 #else
   TYPE(BCSR)                     :: J
 #endif
@@ -156,7 +159,14 @@ PROGRAM QCTC
 #endif
      ! Compute the Coulomb matrix J in O(N Lg N)
      CALL Elapsed_Time(TimeMakeJ,'Init')
+#ifdef PARALLEL
+     TmBegJ = MPI_WTime()
+#endif
      CALL MakeJ(J)
+#ifdef PARALLEL
+     TmEndJ = MPI_WTime()
+     TmJ = TmEndJ - TmBegJ
+#endif
      CALL Elapsed_TIME(TimeMakeJ,'Accum')
 
 #ifdef PARALLEL
@@ -273,8 +283,15 @@ PROGRAM QCTC
 #endif
   CALL Delete(Args)
   CALL Delete(RhoPoles)
-! didn't count flops, any accumulation is residual
-! from matrix routines
+#ifdef PARALLEL
+  CALL New(TmJArr,NPrc)
+  CALL MPI_Gather(TmJ,1,MPI_DOUBLE_PRECISION,TmJArr%D(1),1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IErr)
+  IF(MyID == ROOT) THEN
+    CALL PImbalance(TmJArr,NPrc,Prog_O='MakeJ')
+  ENDIF
+  CALL Delete(TmJArr)
+#endif
+! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero 
 ! Shutdown 
   CALL ShutDown(Prog)
