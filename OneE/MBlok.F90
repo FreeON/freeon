@@ -74,7 +74,10 @@ CONTAINS
                 PBy=Py-By
                 PBz=Pz-Bz
                 !
-                CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB+1,EtaAB,MD%D, &
+                MD%D(1,0,0,1)=0.00D+00
+                MD%D(2,0,0,1)=0.00D+00
+                MD%D(3,0,0,1)=0.00D+00
+                CALL MD2TRR(BS%NASym+1,-1,MaxLA,MaxLB,EtaAB,MD%D, &
                      &      PAx,PBx,PAy,PBy,PAz,PBz)
                 !vw--->
                 POx = Px-COrig%D(1)
@@ -120,140 +123,140 @@ CONTAINS
   END FUNCTION DBlok
   !
   !
-  FUNCTION DipolCorrect(BS,GM,Pair) RESULT(DVck)
-    TYPE(BSET)                                :: BS
-    TYPE(AtomPair)                            :: Pair
-    TYPE(CRDS), INTENT(IN)                    :: GM
-    !
-    REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)   :: DVck
-    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)   :: DBlk
-    !
-    INTEGER                                   :: CFA,CFB,PFA,PFB,IndexA,IndexB,StartLA,StartLB, &
-         &                                       StopLA,StopLB,MaxLA,MaxLB,IA,IB,LMNA,LMNB, &
-         &                                       L,M,N,L1,L2,LMN,NBFA,NBFB,KA,KB
-    TYPE(PrimPair)                            :: Prim
-    REAL(DOUBLE)                              :: Qx,Qy,Qz,POx,POy,POz,Pop,SqZ,UQx,UQy,UQz,LQx,LQy,LQz, &
-         &                                       CoFact,Z,LQ2,UQ2,RL2,TwoZ,Amp,AB2 
-    REAL(DOUBLE), DIMENSION(0:HGEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
-         &                                       ULambdaX,ULambdaY,ULambdaZ, &
-         &                                       LambdaX,LambdaY,LambdaZ
-    !
-    KA   = Pair%KA
-    KB   = Pair%KB
-    NBFA = Pair%NA
-    NBFB = Pair%NB
-    AB2=Pair%AB2
-    DBlk(:,:)=Zero
-!----------------------------------
-    Prim%A=Pair%A
-    Prim%B=Pair%B
-    Prim%AB2=Pair%AB2
-    Prim%KA=Pair%KA
-    Prim%KB=Pair%KB
-!----------------------------------
-    DO CFA=1,BS%NCFnc%I(KA)           
-       IndexA=CFBlokDex(BS,CFA,KA)
-       StartLA=BS%LStrt%I(CFA,KA)        
-       StopLA =BS%LStop%I(CFA,KA)
-       MaxLA=BS%ASymm%I(2,CFA,KA)
-       DO CFB=1,BS%NCFnc%I(KB)        
-          IndexB  = CFBlokDex(BS,CFB,KB)
-          StartLB = BS%LStrt%I(CFB,KB)
-          StopLB  = BS%LStop%I(CFB,KB)
-          MaxLB   = BS%ASymm%I(2,CFB,KB)       
-!----------------------------------
-          Prim%CFA=CFA
-          Prim%CFB=CFB
-          Prim%Ell=MaxLA+MaxLB
-!----------------------------------
-          DO PFA=1,BS%NPFnc%I(CFA,KA) 
-             DO PFB=1,BS%NPFnc%I(CFB,KB)        
-!----------------------------------
-                Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
-                Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
-                Prim%Zeta=Prim%ZA+Prim%ZB
-                Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
-                Qx=(Prim%ZA*Prim%A(1)+Prim%ZB*Prim%B(1))/Prim%Zeta
-                Qy=(Prim%ZA*Prim%A(2)+Prim%ZB*Prim%B(2))/Prim%Zeta
-                Qz=(Prim%ZA*Prim%A(3)+Prim%ZB*Prim%B(3))/Prim%Zeta
-                IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
-                   Prim%PFA=PFA
-                   Prim%PFB=PFB
-                   Amp=SetBraBlok(Prim,BS)
-!----------------------------------
-                   IB=IndexB
-                   DO LMNB=StartLB,StopLB
-                      IB=IB+1
-                      IA=IndexA
-                      DO LMNA=StartLA,StopLA
-                         IA=IA+1
-                         Pop=Zero
-                         Z=Prim%Zeta
-                         TwoZ=Two*Z
-                         SqZ=SQRT(Z)
-                         CoFact=SqrtPi/(Two*SqZ)
-                         ! Lower bounds
-                         LQx=GM%PBC%BoxShape%D(1,2)-Qx
-                         LQy=-500.0d0-Qy
-                         LQz=-500.0d0-Qz
-                         LQ2=LQx*LQx+LQy*LQy+LQz*LQz
-                         ! Lower Lambdas
-                         LLambdaX(0)=-CoFact*ERF(SqZ*LQx)
-                         LLambdaY(0)=-CoFact*ERF(SqZ*LQy)
-                         LLambdaZ(0)=-CoFact*ERF(SqZ*LQz)
-                         LLambdaX(1)=EXP(-Z*LQx*LQx)
-                         LLambdaY(1)=EXP(-Z*LQy*LQy)
-                         LLambdaZ(1)=EXP(-Z*LQz*LQz)
-                         ! Upper bounds
-                         UQx=GM%PBC%BoxShape%D(1,1)-Qx
-                         UQy=500.0D0-Qy
-                         UQz=500.0D0-Qz
-                         UQ2=UQx*UQx+UQy*UQy+UQz*UQz
-                         ! Upper Lambdas
-                         ULambdaX(0)=-CoFact*ERF(SqZ*UQx)
-                         ULambdaY(0)=-CoFact*ERF(SqZ*UQy)
-                         ULambdaZ(0)=-CoFact*ERF(SqZ*UQz)
-                         ULambdaX(1)=EXP(-Z*UQx*UQx)
-                         ULambdaY(1)=EXP(-Z*UQy*UQy)
-                         ULambdaZ(1)=EXP(-Z*UQz*UQz)  
-                         ! Generic Lambdas
-                         DO L=2,Prim%Ell+1
-                            L1=L-1
-                            L2=L-2
-                            RL2=DBLE(L2)
-                            LLambdaX(L)=TwoZ*(LQx*LLambdaX(L1)-RL2*LLambdaX(L2))
-                            LLambdaY(L)=TwoZ*(LQy*LLambdaY(L1)-RL2*LLambdaY(L2))
-                            LLambdaZ(L)=TwoZ*(LQz*LLambdaZ(L1)-RL2*LLambdaZ(L2))
-                            ULambdaX(L)=TwoZ*(UQx*ULambdaX(L1)-RL2*ULambdaX(L2))
-                            ULambdaY(L)=TwoZ*(UQy*ULambdaY(L1)-RL2*ULambdaY(L2))
-                            ULambdaZ(L)=TwoZ*(UQz*ULambdaZ(L1)-RL2*ULambdaZ(L2))
-                         ENDDO
-                         DO L=0,Prim%Ell+1
-                            LambdaX(L)=LLambdaX(L)-ULambdaX(L)
-                            LambdaY(L)=LLambdaY(L)-ULambdaY(L)
-                            LambdaZ(L)=LLambdaZ(L)-ULambdaZ(L)
-                         ENDDO
-                         !
-                         DO L=0,Prim%Ell
-                            DO M=0,Prim%Ell-L
-                               DO N=0,Prim%Ell-M-L
-                                  LMN=LMNDex(L,M,N)
-                                  Pop=Pop+HGBra%D(LMN,IA,IB)*LambdaX(L)*LambdaY(M)*LambdaZ(N)
-                               ENDDO
-                            ENDDO
-                         ENDDO
-                         DBlk(IA,IB)=DBlk(IA,IB)+Pop
-                      ENDDO
-                   ENDDO
-                ENDIF
-             ENDDO
-          ENDDO
-       ENDDO
-    ENDDO
-    !
-    DVck = BlockToVect(NBFA,NBFB,DBlk)
-    !
-  END FUNCTION DipolCorrect
+!!$  FUNCTION DipolCorrect(BS,GM,Pair) RESULT(DVck)
+!!$    TYPE(BSET)                                :: BS
+!!$    TYPE(AtomPair)                            :: Pair
+!!$    TYPE(CRDS), INTENT(IN)                    :: GM
+!!$    !
+!!$    REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)   :: DVck
+!!$    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)   :: DBlk
+!!$    !
+!!$    INTEGER                                   :: CFA,CFB,PFA,PFB,IndexA,IndexB,StartLA,StartLB, &
+!!$         &                                       StopLA,StopLB,MaxLA,MaxLB,IA,IB,LMNA,LMNB, &
+!!$         &                                       L,M,N,L1,L2,LMN,NBFA,NBFB,KA,KB
+!!$    TYPE(PrimPair)                            :: Prim
+!!$    REAL(DOUBLE)                              :: Qx,Qy,Qz,POx,POy,POz,Pop,SqZ,UQx,UQy,UQz,LQx,LQy,LQz, &
+!!$         &                                       CoFact,Z,LQ2,UQ2,RL2,TwoZ,Amp,AB2 
+!!$    REAL(DOUBLE), DIMENSION(0:HGEll+1)        :: LLambdaX,LLambdaY,LLambdaZ, &
+!!$         &                                       ULambdaX,ULambdaY,ULambdaZ, &
+!!$         &                                       LambdaX,LambdaY,LambdaZ
+!!$    !
+!!$    KA   = Pair%KA
+!!$    KB   = Pair%KB
+!!$    NBFA = Pair%NA
+!!$    NBFB = Pair%NB
+!!$    AB2=Pair%AB2
+!!$    DBlk(:,:)=Zero
+!!$!----------------------------------
+!!$    Prim%A=Pair%A
+!!$    Prim%B=Pair%B
+!!$    Prim%AB2=Pair%AB2
+!!$    Prim%KA=Pair%KA
+!!$    Prim%KB=Pair%KB
+!!$!----------------------------------
+!!$    DO CFA=1,BS%NCFnc%I(KA)           
+!!$       IndexA=CFBlokDex(BS,CFA,KA)
+!!$       StartLA=BS%LStrt%I(CFA,KA)        
+!!$       StopLA =BS%LStop%I(CFA,KA)
+!!$       MaxLA=BS%ASymm%I(2,CFA,KA)
+!!$       DO CFB=1,BS%NCFnc%I(KB)        
+!!$          IndexB  = CFBlokDex(BS,CFB,KB)
+!!$          StartLB = BS%LStrt%I(CFB,KB)
+!!$          StopLB  = BS%LStop%I(CFB,KB)
+!!$          MaxLB   = BS%ASymm%I(2,CFB,KB)       
+!!$!----------------------------------
+!!$          Prim%CFA=CFA
+!!$          Prim%CFB=CFB
+!!$          Prim%Ell=MaxLA+MaxLB
+!!$!----------------------------------
+!!$          DO PFA=1,BS%NPFnc%I(CFA,KA) 
+!!$             DO PFB=1,BS%NPFnc%I(CFB,KB)        
+!!$!----------------------------------
+!!$                Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
+!!$                Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
+!!$                Prim%Zeta=Prim%ZA+Prim%ZB
+!!$                Prim%Xi=Prim%ZA*Prim%ZB/Prim%Zeta
+!!$                Qx=(Prim%ZA*Prim%A(1)+Prim%ZB*Prim%B(1))/Prim%Zeta
+!!$                Qy=(Prim%ZA*Prim%A(2)+Prim%ZB*Prim%B(2))/Prim%Zeta
+!!$                Qz=(Prim%ZA*Prim%A(3)+Prim%ZB*Prim%B(3))/Prim%Zeta
+!!$                IF(TestPrimPair(Prim%Xi,Prim%AB2))THEN
+!!$                   Prim%PFA=PFA
+!!$                   Prim%PFB=PFB
+!!$                   Amp=SetBraBlok(Prim,BS)
+!!$!----------------------------------
+!!$                   IB=IndexB
+!!$                   DO LMNB=StartLB,StopLB
+!!$                      IB=IB+1
+!!$                      IA=IndexA
+!!$                      DO LMNA=StartLA,StopLA
+!!$                         IA=IA+1
+!!$                         Pop=Zero
+!!$                         Z=Prim%Zeta
+!!$                         TwoZ=Two*Z
+!!$                         SqZ=SQRT(Z)
+!!$                         CoFact=SqrtPi/(Two*SqZ)
+!!$                         ! Lower bounds
+!!$                         LQx=GM%PBC%BoxShape%D(1,2)-Qx
+!!$                         LQy=-500.0d0-Qy
+!!$                         LQz=-500.0d0-Qz
+!!$                         LQ2=LQx*LQx+LQy*LQy+LQz*LQz
+!!$                         ! Lower Lambdas
+!!$                         LLambdaX(0)=-CoFact*ERF(SqZ*LQx)
+!!$                         LLambdaY(0)=-CoFact*ERF(SqZ*LQy)
+!!$                         LLambdaZ(0)=-CoFact*ERF(SqZ*LQz)
+!!$                         LLambdaX(1)=EXP(-Z*LQx*LQx)
+!!$                         LLambdaY(1)=EXP(-Z*LQy*LQy)
+!!$                         LLambdaZ(1)=EXP(-Z*LQz*LQz)
+!!$                         ! Upper bounds
+!!$                         UQx=GM%PBC%BoxShape%D(1,1)-Qx
+!!$                         UQy=500.0D0-Qy
+!!$                         UQz=500.0D0-Qz
+!!$                         UQ2=UQx*UQx+UQy*UQy+UQz*UQz
+!!$                         ! Upper Lambdas
+!!$                         ULambdaX(0)=-CoFact*ERF(SqZ*UQx)
+!!$                         ULambdaY(0)=-CoFact*ERF(SqZ*UQy)
+!!$                         ULambdaZ(0)=-CoFact*ERF(SqZ*UQz)
+!!$                         ULambdaX(1)=EXP(-Z*UQx*UQx)
+!!$                         ULambdaY(1)=EXP(-Z*UQy*UQy)
+!!$                         ULambdaZ(1)=EXP(-Z*UQz*UQz)  
+!!$                         ! Generic Lambdas
+!!$                         DO L=2,Prim%Ell+1
+!!$                            L1=L-1
+!!$                            L2=L-2
+!!$                            RL2=DBLE(L2)
+!!$                            LLambdaX(L)=TwoZ*(LQx*LLambdaX(L1)-RL2*LLambdaX(L2))
+!!$                            LLambdaY(L)=TwoZ*(LQy*LLambdaY(L1)-RL2*LLambdaY(L2))
+!!$                            LLambdaZ(L)=TwoZ*(LQz*LLambdaZ(L1)-RL2*LLambdaZ(L2))
+!!$                            ULambdaX(L)=TwoZ*(UQx*ULambdaX(L1)-RL2*ULambdaX(L2))
+!!$                            ULambdaY(L)=TwoZ*(UQy*ULambdaY(L1)-RL2*ULambdaY(L2))
+!!$                            ULambdaZ(L)=TwoZ*(UQz*ULambdaZ(L1)-RL2*ULambdaZ(L2))
+!!$                         ENDDO
+!!$                         DO L=0,Prim%Ell+1
+!!$                            LambdaX(L)=LLambdaX(L)-ULambdaX(L)
+!!$                            LambdaY(L)=LLambdaY(L)-ULambdaY(L)
+!!$                            LambdaZ(L)=LLambdaZ(L)-ULambdaZ(L)
+!!$                         ENDDO
+!!$                         !
+!!$                         DO L=0,Prim%Ell
+!!$                            DO M=0,Prim%Ell-L
+!!$                               DO N=0,Prim%Ell-M-L
+!!$                                  LMN=LMNDex(L,M,N)
+!!$                                  Pop=Pop+HGBra%D(LMN,IA,IB)*LambdaX(L)*LambdaY(M)*LambdaZ(N)
+!!$                               ENDDO
+!!$                            ENDDO
+!!$                         ENDDO
+!!$                         DBlk(IA,IB)=DBlk(IA,IB)+Pop
+!!$                      ENDDO
+!!$                   ENDDO
+!!$                ENDIF
+!!$             ENDDO
+!!$          ENDDO
+!!$       ENDDO
+!!$    ENDDO
+!!$    !
+!!$    DVck = BlockToVect(NBFA,NBFB,DBlk)
+!!$    !
+!!$  END FUNCTION DipolCorrect
   !
 END MODULE MBlock
 

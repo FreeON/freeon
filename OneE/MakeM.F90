@@ -53,7 +53,6 @@ PROGRAM MakeM
 !
   CALL New(MD,(/3,BS%NASym+1,BS%NASym+1,2*BS%NASym+2/),(/1,-1,-1,-1/))
   CALL New(M)
-  CALL NewBraBlok(BS)
 !-----------------------------------------------
 ! Run over cartisian componants 
 !
@@ -89,25 +88,6 @@ PROGRAM MakeM
                  IF(TestAtomPair(Pair)) THEN
                     M%MTrix%D(R:R+NN-1)=M%MTrix%D(R:R+NN-1)+DBlok(BS,MD,Pair,IXYZ,COrig)
                  ENDIF
-!--------------------------------------------------------
-! Add the correction to the periodic dipole moment.
-! ONLY FOR SQUARE BOX.
-!
-                 IF(CS_OUT%NCells.EQ.1) CYCLE
-                 DO NCB = 1,CS_OUT%NCells
-                    !IF(SUM(ABS(CS_OUT%CellCarts%D(:,NCB))).LT.1.0d-10) CYCLE
-                    IF(SUM(ABS(CS_OUT%CellCarts%D(:,NCA))).LT.1.0d-10) CYCLE
-                    Pair%B(:) = B(:)+CS_OUT%CellCarts%D(:,NCB)
-                    Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                         &    + (Pair%A(2)-Pair%B(2))**2 &
-                         &    + (Pair%A(3)-Pair%B(3))**2
-!--------------------------------------------------------
-                    IF(TestAtomPair(Pair)) THEN
-                       M%MTrix%D(R:R+NN-1)=M%MTrix%D(R:R+NN-1)- &
-                            & CS_OUT%CellCarts%D(IXYZ,NCA)*DipolCorrect(BS,GM,Pair)
-                    ENDIF
-!--------------------------------------------------------
-                 ENDDO
               ENDDO
               M%ColPt%I(P)=AtB
               M%BlkPt%I(P)=R
@@ -157,7 +137,6 @@ PROGRAM MakeM
   CALL Delete(GM)
   CALL Delete(MD)
   CALL Delete(COrig)
-  CALL DeleteBraBlok()
 !
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
