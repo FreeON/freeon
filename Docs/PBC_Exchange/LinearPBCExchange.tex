@@ -213,10 +213,15 @@ figures  \ref{figure:Scaling_Matrix_Build_Ice_1} and  \ref{figure:Scaling_Matrix
 scaling results for the proton order ice system \cite{LOjamae94}. In this system, which is a factor of ten 
 less dense then the diamond system, linear scaling comenses very early, around twenty water molecules. 
  
-\section{
+\section{Equation of State}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+In figure \ref{figure:EnergyVsLattice} we show the energy per carbon atom vs.the volume per carbon atom for a
+\textbf{Crystal98} calculation using a ${\bf k}_{max}=\{6,6,6\}$ and two \textbf{MondoSCF} calculations,
+one with 64 atoms in the unit cell and one with 512 atoms in the unit cell
 
+In figure \ref{figure:EnergyVsLattice_Ice} we show the energy per water molecule  vs. the primative 
+lattice constant $a$ for a \textbf{Crystal98} calculation using a ${\bf k}_{max}=\{6,6,6\}$ and a 
+\textbf{MondoSCF} calculation using 250 water molecules in the unit cell.
 
 
 \section{CONCLUSIONS}
@@ -293,6 +298,49 @@ ${\bf k}_{max}=\{6,6,6\}$.}
 %
 %
 %
+\begin{table}
+\caption{Fractional coordinates for the 8 atom unit cell of Diamond, cooresponding to the supercell calculations
+         reported in Table~\ref{table:ComToCrystal98}.  Dimensions of the cubic unit cell are $a=b=c=3.5700$\AA.}
+\center{
+\begin{tabular}{cccc}
+\toprule
+ Atom &  X  & Y  & Z \\
+\colrule
+C &     0.125 &    0.125 &    0.125  \\
+C &     0.375 &    0.375 &    0.375  \\
+C &     0.625 &    0.625 &    0.125  \\
+C &     0.875 &    0.875 &    0.375  \\
+C &     0.625 &    0.125 &    0.625  \\
+C &     0.875 &    0.375 &    0.875  \\
+C &     0.125 &    0.625 &    0.625  \\
+C &     0.375 &    0.875 &    0.875  \\
+\botrule
+\end{tabular}}
+\end{table}
+%
+%
+%
+\begin{table}
+\caption{Fractional coordinates for the 2 molecule unit cell of the proton ordered ice structure, 
+cooresponding to the supercell calculations  reported in Table~\ref{table:ComToCrystal98_Ice}.  
+Dimensions of the cubic unit cell are $a=7.328$\AA, $b=7.920$\AA \,\, and $c=4.400$\AA.}
+\center{
+\begin{tabular}{cccc}
+\toprule
+ Atom &  X  & Y  & Z \\
+\colrule
+O &  0.063737 \,&   0.583443 \,&  0.000000 \\
+H &  0.196106 \,&   0.583443 \,&  0.000000 \\
+H &  0.018465 \,&   0.524173 \,&  0.177576 \\
+O &  0.936263 \,&   0.916557 \,&  0.000000 \\
+H &  0.980443 \,&   0.801105 \,&  0.000000 \\
+H &  0.981535 \,&   0.975827 \,&  0.822424 \\
+\botrule
+\end{tabular}}
+\end{table}
+%
+%
+%
 \begin{figure}
 \caption{Unit cell and its brava lattice vectors.}
 \label{figure:SimCell}
@@ -350,7 +398,7 @@ $\tau=10^{-4}$ and  $\tau=10^{-6}$.}
 %
 %
 \begin{figure}
-\caption{Energy per Carbon atoms vs. Lattice constants for a {\bf Crystal98} calculation 
+\caption{Energy per carbon atoms vs. Volume per atom  for a {\bf Crystal98} calculation 
 with a two atoms per unit
 cell and ${\bf k}_{max} = (12,12,12)$, a {\bf MondoSCF} calculation with 64 atoms per
 unit cell at the Gamma-point at a tight level of accuracy, and a {\bf MondoSCF} calculation 
@@ -366,7 +414,7 @@ All calculation where done using the
 % Graph is almost done: Just a place holder for now
 %
 \begin{figure}
-\caption{Energy per Molecule vs. the $a_0$ Lattice constans for a {\bf Crystal98} calculation 
+\caption{Energy per Molecule vs. the $a$ Lattice constant for a {\bf Crystal98} calculation 
 with a two molecules per unit cell and ${\bf k}_{max} = (6,6,6)$ and a {\bf MondoSCF} calculation 
 with 432 molecules  per unit cell at the Gamma-point at a loose level of accuracy.
 All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} 
