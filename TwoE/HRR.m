@@ -38,7 +38,10 @@ MondoHome=Environment["MONDO_HOME"];
 If[MondoHome==$FAILED,
    Print["COULD NOT FIND $MONDO_HOME! CHECK YOUR .cshrc "];
    Abort[];
+  ,
+   Print[" Using ",MondoHome," as your home directory"];
   ];
+Print[" Using ",MondoHome," as your home directory"];
 EllFile = StringJoin[MondoHome,"/Includes/Ell.m"];
 Get[EllFile];
 
@@ -50,7 +53,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
-Classes = { {1, 1}};
+Classes = { {2, 2}};
 CType[1] = "S";
 CType[2] = "SP";
 CType[3] = "P";
@@ -85,10 +88,10 @@ KetHRR[a_List,b_List,c_List,d_List]:=Module[{p, CD, c1, d1,adex,cdex,c1dex},
 					       adex=LMNDex[a[[1]],a[[2]],a[[3]]];
 					       cdex=LMNDex[c[[1]],c[[2]],c[[3]]];
 					       c1dex=LMNDex[c1[[1]],c1[[2]],c1[[3]]];
-					       v1=ToExpression[StringJoin["A",ToString[adex],"x",ToString[c1dex]]];
-                                               v2=ToExpression[StringJoin["A",ToString[adex],"x",ToString[cdex]]];
-                                               (* v1+CD*v2 *)
-					       X[adex,c1dex]+CD X[adex,cdex]
+					       v1=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[c1dex],"w"]];
+                                               v2=ToExpression[StringJoin["MBarNu",ToString[adex],"v",ToString[cdex],"w"]];
+                                               v1+CD*v2 
+					       (*					       X[adex,c1dex]+CD X[adex,cdex] *)
                                               ,
                                                Return[KetHRR[a,b,c1,d1]+CD KetHRR[a,b,c,d1]]
                                                ]
@@ -114,9 +117,13 @@ Get[StringJoin[MondoHome,"/MMA/FixedNumberForm.m"]];
 Get[StringJoin[MondoHome,"/MMA/Format.m"]];
 Get[StringJoin[MondoHome,"/MMA/Optimize.m"]];
 
-SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeNull->{X},OptimizeFunction->True,OptimizeTimes->True,OptimizePlus->True];  
+SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True];
+(*,OptimizeFunction->True,OptimizeTimes->True,OptimizePlus->True];,OptimizeCoefficients->True];
 
-SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->10000,AssignBreak->{132," & \n          "}, AssignTemporary->{W,Array}];
+OptimizeNull->X,
+
+  *)
+SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->400,AssignBreak->{132," & \n          "},AssignTemporary->{W,Array}];
 
 SetOptions[OpenWrite, PageWidth -> 200];
 
@@ -126,7 +133,7 @@ FileName="HRR.Inc";
 Print[" Openned ",FileName];
 OpenWrite[FileName];
 
-oList={" "->"","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
+oList={" "->"","u"->"(","v"->",","w"->")","x1"->"CDx","y1"->"CDy","z1"->"CDz","x2"->"ABx","y2"->"ABy","z2"->"ABz"};
 IList={};
 
 Do[Do[Do[Do[
@@ -147,12 +154,12 @@ Do[Do[Do[Do[
                        b = {lx[j], my[j], nz[j]};
                        c = {lx[k], my[k], nz[k]};
                        d = {lx[l], my[l], nz[l]};
-		       IList=Append[IList,Simplify[HRR[a,b,c,d]]];
-		       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
+                       IList=Append[IList,HRR[a,b,c,d]];
+                       oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["I(",ToString[i],",",ToString[j],",",ToString[k],",",ToString[l],")"]];
            ,{i,LBegin[il],LEnd[il]}]
            ,{j,LBegin[jl],LEnd[jl]}]
-           ,{k,LBegin[kl],LEnd[kl]}]
-           ,{l,LBegin[ll],LEnd[ll]}]
+           ,{k,LBegin[kl],LBegin[kl]}]
+           ,{l,LBegin[ll],LBegin[ll]}]
            ,{il,imin,imax}]
            ,{jl,jmin,jmax}]
            ,{kl,kmin,kmax}]
