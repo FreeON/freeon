@@ -859,7 +859,7 @@ CONTAINS
      CALL SetConstraints(IntCsT,IntCsT%PredVal%D)
      DisplT%D=IntCsT%PredVal%D-IntCValuesT%D(:,NDim)
      !
-     CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
+    !CALL PrtFitM(IntCValuesT%D,IntCGradsT%D,ABCT%D,IntCsT,Path2)
      PredVals%D=IntCsT%PredVal%D
      Displ%D=DisplT%D
      !
