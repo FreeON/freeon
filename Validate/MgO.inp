@@ -11,16 +11,19 @@ SCFMethod=(RH,RH)
 BasisSets=(STO-3G,STO-3G)
 ModelChem=(BLYPxc,PBE0) 
 Accuracy =(loose,good)
-Geometry=(InAnstroms,NoOrder) 
+Geometry=(InAU,NoOrder) 
 PFFMaxEll=16
+PFFLayers=1
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,CenterAtoms)
 <EndOptions>
 
 <BeginPeriodic>
-aa    2.977777  2.977777  2.977777  60.00000  60.00000  60.00000
+aa    3.000000  3.000000  3.000000  90.00000  90.00000  90.00000
 <EndPeriodic>
 
 <BeginGeometry>   
 MG    0.000000  0.000000  0.000000  
 O     0.500000  0.500000  0.500000  
 <EndGeometry>
+
+aa    2.977777  2.977777  2.977777  60.00000  60.00000  60.00000
