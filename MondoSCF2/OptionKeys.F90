@@ -42,6 +42,11 @@ MODULE OptionKeys
   ! Possibly restart from HDFFile density matrix  
   CHARACTER(LEN=*),  PARAMETER :: GUESS_RESTART      ='Restart'
   INTEGER,           PARAMETER :: GUESS_EQ_RESTART   =34344
+  ! These are Guess options (hardwired) for solving CPSCF equations 
+  ! the polarizability
+  CHARACTER(LEN=*),  PARAMETER :: CPSCF_OPTION       ='CPSCF'   ! unused for now
+  CHARACTER(LEN=*),  PARAMETER :: GUESS_DIPOLE       ='Dipole'  ! unused for now
+  INTEGER,           PARAMETER :: GUESS_EQ_DIPOLE    = 2834032  ! hard wired for now
   CHARACTER(LEN=*),  PARAMETER :: RESTART_INFO       ='HDFFile'
   !------------------------------------------------------------------------------
   ! Options:Restart=

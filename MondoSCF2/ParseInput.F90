@@ -11,6 +11,7 @@ MODULE ParseInput
   USE ParseParallel
   USE ParseGeomOpt
   USE ParseExtraCoords
+  USE ParseProperties, ONLY: LoadPropertyOptions
 CONTAINS 
   !===============================================================
   ! 'NUFF SAID
@@ -44,6 +45,8 @@ CONTAINS
     CALL LoadGeomOpt(C%Nams,C%GOpt)
     ! Load constraints and extra internal coords
     CALL LoadExtraCoords(C%GOpt,C%Opts,C%Nams,C%Geos)
+    ! Load CPSCF options.
+    CALL LoadPropertyOptions(C%Nams,C%POpt)
     ! Check for Global conflicts.
     CALL GlbConflictCheck(C)
   END SUBROUTINE ParseTheInput

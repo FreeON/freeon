@@ -12,7 +12,7 @@ CONTAINS
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Parallel)     :: M
-    INTEGER            :: I,J,K,L,iCLUMP,IErr,NArg,MaxLen
+    INTEGER            :: I,J,K,L,NC,iCLUMP,IErr,NArg,MaxLen
     LOGICAL            :: ProgramFailed
     TYPE(CHR_VECT)     :: ArgV
     TYPE(INT_VECT)     :: IChr
@@ -88,10 +88,11 @@ CONTAINS
     TYPE(FileNames)    :: N
     TYPE(State)        :: S
     TYPE(Parallel)     :: M
-    INTEGER            :: I,K,NArg,cCLUMP
+    INTEGER            :: I,K,NArg,cCLUMP,SNC,NewDex
     TYPE(CHR_VECT)     :: ArgT,ArgV
-#if PARALLEL 
-    NArg=15
+    SNC=SIZE(S%Action%C)
+#ifdef PARALLEL 
+    NArg=13+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =M%Invoking
     ArgT%C(2) =M%ProcFlag
@@ -100,27 +101,31 @@ CONTAINS
     ArgT%C(5) =M%MachFile
     ArgT%C(6) =TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(7) =N%SCF_NAME
-    ArgT%C(8) =S%Action
-    ArgT%C(9) =S%SubAction
-    ArgT%C(10)=IntToChar(S%Current%I(1))
-    ArgT%C(11)=IntToChar(S%Current%I(2))
-    ArgT%C(12)=IntToChar(S%Current%I(3))
-    ArgT%C(13)=IntToChar(S%Previous%I(1))
-    ArgT%C(14)=IntToChar(S%Previous%I(2))
-    ArgT%C(15)=IntToChar(S%Previous%I(3))
+    DO K=1,SNC
+       ArgT%C(7+K)=S%Action%C(K)
+    ENDDO
+    NewDex=7+SNC
+    ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
+    ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
+    ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
+    ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
+    ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
+    ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
 #else
-    NArg=10
+    NArg=8+SNC
     CALL New(ArgT,NArg)
     ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(2) =N%SCF_NAME
-    ArgT%C(3) =S%Action
-    ArgT%C(4) =S%SubAction
-    ArgT%C(5) =IntToChar(S%Current%I(1))
-    ArgT%C(6) =IntToChar(S%Current%I(2))
-    ArgT%C(7) =IntToChar(S%Current%I(3))
-    ArgT%C(8) =IntToChar(S%Previous%I(1))
-    ArgT%C(9) =IntToChar(S%Previous%I(2))
-    ArgT%C(10)=IntToChar(S%Previous%I(3))
+    DO K=1,SNC
+      ArgT%C(2+K)=S%Action%C(K)
+    ENDDO
+    NewDex=2+SNC
+    ArgT%C(NewDex+1)=IntToChar(S%Current%I(1))
+    ArgT%C(NewDex+2)=IntToChar(S%Current%I(2))
+    ArgT%C(NewDex+3)=IntToChar(S%Current%I(3))
+    ArgT%C(NewDex+4)=IntToChar(S%Previous%I(1))
+    ArgT%C(NewDex+5)=IntToChar(S%Previous%I(2))
+    ArgT%C(NewDex+6)=IntToChar(S%Previous%I(3))
 #endif
     K=NArg
     NArg=0

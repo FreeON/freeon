@@ -110,8 +110,8 @@ CONTAINS
     ! Set the variable if def in the input.
     IF(MaxNon0s.GT.0) MaxNon0=MaxNon0s !if def in the input.
     IF(MaxNBlks.GT.0) MaxBlks=MaxNBlks !if def in the input.
-!    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2)
-!    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2)
+    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2),' NAtms**2+1=',G%NAtms**2+1
+    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2),' NBasF**2+1=',B%NBasF**2+1
 !    STOP
   END SUBROUTINE BCSRDimensions
 !============================================================================

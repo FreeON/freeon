@@ -123,10 +123,9 @@ MODULE ControlStructures
   END TYPE Parallel
 
   TYPE State
-     CHARACTER(LEN=DCL)              :: Action
-     CHARACTER(LEN=DCL)              :: SubAction
-     TYPE(INT_VECT)                  :: Current,Previous
-  END TYPE State
+     TYPE(CHR_VECT)                    :: Action ! Array of character options that tell a program what to do
+     TYPE(INT_VECT)                    :: Current,Previous ! Tracking the SCF, basis and geometry states
+  END TYPE State  
  
   TYPE GDIIS
     LOGICAL                            :: NoGDIIS    
@@ -267,6 +266,17 @@ MODULE ControlStructures
      TYPE(GDIIS)                     :: GDIIS
   END TYPE GeomOpt
 
+  TYPE RespOpts
+     LOGICAL               :: StcAlpha
+     LOGICAL, DIMENSION(3) :: AlphaAxis
+     LOGICAL               :: StcBeta
+     LOGICAL               :: StcGamma
+  END TYPE RespOpts
+
+  TYPE PropOpts
+     TYPE(RespOpts) :: Resp
+  END TYPE PropOpts
+
   TYPE Controls
      TYPE(FileNames)  :: Nams
      TYPE(Options)    :: Opts
@@ -277,6 +287,7 @@ MODULE ControlStructures
      TYPE(BasisSets)  :: Sets
      TYPE(Parallel)   :: MPIs
      TYPE(State)      :: Stat
+     TYPE(PropOpts)   :: POpt
   END TYPE Controls
 
   INTEGER                     :: NLoc

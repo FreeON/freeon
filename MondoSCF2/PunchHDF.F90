@@ -52,8 +52,11 @@ CONTAINS
     HDF_CurrentID=OpenHDF(N%HFile)
     CALL Put(S%Current,'current_state')
     CALL Put(S%Previous,'previous_state')
-    CALL Put(S%Action,'action_state')
-    CALL Put(S%SubAction,'subaction_state')
+
+    ! Not sure if this will cause a bug...
+!
+!    CALL Put(S%Action,'action_state')
+!    CALL Put(S%SubAction,'subaction_state')
     CALL CloseHDF(HDF_CurrentID)
   END SUBROUTINE StateArchive
   !==============================================================================

@@ -33,18 +33,18 @@ CPPMISC=#-DFULL_ON_FRONT_END_DEBUG
 #
 ObjectFiles = GetPID.o Spawn.o \
 	      ControlStructures.o NEB.o Numerics.o ParseCommands.o OptionKeys.o ConflictDetect.o ParseOptions.o \
-              DynamicsKeys.o ParseDynamics.o GeometryKeys.o \
+              DynamicsKeys.o ParseDynamics.o GeometryKeys.o ParseProperties.o\
               InCoords.o ParseGeometries.o \
               PeriodicKeys.o ParsePeriodic.o ParseBasis.o                     \
               ParallelKeys.o ParseParallel.o Massage.o \
               GeomOptKeys.o ParseGeomOpt.o ParseExtraCoords.o \
               ParseInput.o  \
               PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o \
-              SCFs.o GDIIS.o Hessian.o Optimizer.o \
+              SCFs.o MLP.o Response.o GDIIS.o Hessian.o Optimizer.o \
 	      ZippyQuote.o MondoSCF.o
 #
 ReleaseFiles= GlobalParsing.x OptionKeys.x ParseCommands.x ParseOptions.x \
-              ParseGeometries.x
+              ParseGeometries.x ParseProperties.x
 #
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(F90_LIBRARIES) $(LAPACK)

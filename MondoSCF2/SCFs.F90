@@ -39,20 +39,7 @@ CONTAINS
           CALL SCF(iBAS,iGEO,C)
        ENDDO
     ENDDO
-!
   END SUBROUTINE SinglePoints
-!===============================================================================
-!
-!===============================================================================
-  SUBROUTINE DoForce(C)
-    TYPE(Controls) :: C
-    INTEGER        :: iBAS,iGEO
-!
-    iGEO = 1
-    iBAS = C%Sets%NBSets
-    CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)   
-!
-  END SUBROUTINE DoForce
 !===============================================================================
 !
 !===============================================================================
@@ -62,6 +49,7 @@ CONTAINS
     INTEGER,PARAMETER :: MaxSCFs=64 !32
     INTEGER           :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
+    CALL New(C%Stat%Action,1)
     ! Compute one-electron matrices
     CALL OneEMats(cBAS,cGEO,C%Nams,C%Sets,C%Stat,C%Opts,C%MPIs)
     ! Allocate space for convergence statistics
@@ -76,6 +64,7 @@ CONTAINS
           CALL Delete(ETot)
           CALL Delete(DMax)
           CALL Delete(DIIS)
+          CALL Delete(C%Stat%Action)
           RETURN
        ENDIF
     ENDDO
@@ -85,7 +74,7 @@ CONTAINS
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS) 
+  FUNCTION SCFCycle(cSCF,cBAS,cGEO,N,S,O,G,M,ETot,DMax,DIIS,CPSCF_O) 
     TYPE(FileNames)  :: N
     TYPE(State)      :: S
     TYPE(Options)    :: O
@@ -93,20 +82,213 @@ CONTAINS
     TYPE(Parallel)   :: M
     TYPE(DBL_RNK2)   :: ETot,DMax,DIIS
     INTEGER          :: cSCF,cBAS,cGEO
-    LOGICAL          :: SCFCycle
+    LOGICAL,OPTIONAL :: CPSCF_O
+    LOGICAL          :: SCFCycle,DoCPSCF
     !----------------------------------------------------------------------------!
-    CALL DensityLogic(cSCF,cBAS,cGEO,S,O)
+    IF(PRESENT(CPSCF_O))THEN
+       DoCPSCF=CPSCF_O
+    ELSE
+       DoCPSCF=.FALSE.
+    ENDIF
+    CALL DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O)
     CALL DensityBuild(N,S,M)
-    IF(cSCF/=0) &
-         S%Action=SCF_FOCK_BUILD
+    IF(cSCF/=0)THEN
+       IF(DoCPSCF)THEN
+          S%Action%C(1)=CPSCF_FOCK_BUILD
+       ELSE
+          S%Action%C(1)=SCF_FOCK_BUILD
+       ENDIF
+    ENDIF
     CALL FockBuild(cSCF,cBAS,N,S,O,M)
-    IF(cSCF/=0) &
-         S%Action=SCF_SOLVE_SCF
+    IF(cSCF/=0)THEN
+       IF(DoCPSCF)THEN
+          S%Action%C(1)=CPSCF_SOLVE_SCF
+       ELSE
+          S%Action%C(1)=SCF_SOLVE_SCF
+       ENDIF
+    ENDIF
     CALL SolveSCF(cBAS,N,S,O,M)
     CALL StateArchive(N,S)
-    SCFCycle=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS)
+    SCFCycle=ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,CPSCF_O)
     S%Previous%I=S%Current%I
   END FUNCTION SCFCycle
+  !===============================================================================
+  ! BUILD A HGTF DENSITY BY HOOK OR BY CROOK
+  !===============================================================================
+  SUBROUTINE DensityBuild(N,S,M)
+    TYPE(FileNames):: N
+    TYPE(State)    :: S
+    TYPE(Parallel) :: M    
+    !----------------------------------------------------------------------------!
+
+    IF(TRIM(S%Action%C(1))/=SCF_BASISSETSWITCH.AND.   &
+       TRIM(S%Action%C(1))/=SCF_DENSITY_NORMAL.AND.   &
+       TRIM(S%Action%C(1))/=CPSCF_START_RESPONSE.AND. &
+       TRIM(S%Action%C(1))/=CPSCF_DENSITY_NORMAL) THEN
+       CALL Invoke('P2Use',N,S,M)
+    ENDIF
+    ! Build some density ...
+    ! Hold on, this is fucked up--we have got to unify MakeRho!!!!!!
+    ! Chee Kwan and CJ, please, pretty please....
+    IF(S%Action%C(1)/=CPSCF_START_RESPONSE) THEN
+       CALL Invoke('MakeRho',N,S,M)
+#ifdef PARALLEL
+       CALL Invoke('ParaMakeRho',N,S,M) 
+#endif
+    ENDIF
+  END SUBROUTINE DensityBuild
+  !===============================================================================
+
+  !===============================================================================
+  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,S,O,CPSCF_O)
+    TYPE(State)      :: S
+    TYPE(Options)    :: O
+    INTEGER          :: cSCF,cBAS,cGEO,pBAS
+    LOGICAL          :: DoCPSCF
+    LOGICAL,OPTIONAL :: CPSCF_O
+    !----------------------------------------------------------------------------!
+    pBAS=S%Previous%I(2)
+    S%Current%I=(/cSCF,cBAS,cGEO/)
+    IF(PRESENT(CPSCF_O))THEN
+       DoCPSCF=CPSCF_O
+    ELSE
+       DoCPSCF=.FALSE.
+    ENDIF
+    IF(DoCPSCF)THEN
+       IF(O%Guess==GUESS_EQ_DIPOLE.AND.cSCF==0)THEN
+          O%Guess=0
+          S%Previous%I=S%Current%I
+          S%Action%C(1)=CPSCF_START_RESPONSE
+       ELSE
+          S%Action%C(1)=CPSCF_DENSITY_NORMAL
+       ENDIF
+    ELSE
+       IF(O%Guess==GUESS_EQ_SUPR)THEN 
+          O%Guess=0
+          S%Previous%I=S%Current%I
+          S%Action%C(1)=SCF_SUPERPOSITION
+       ELSEIF(O%Guess==GUESS_EQ_CORE)THEN
+          O%Guess=0
+          S%Previous%I=S%Current%I
+          S%Action%C(1)=SCF_GUESSEQCORE
+       ELSEIF(O%Guess==GUESS_EQ_RESTART)THEN
+          O%Guess=0
+          S%Previous%I=O%RestartState%I
+          S%Action%C(1)=SCF_RESTART
+       ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
+          S%Action%C(1)=SCF_PROJECTION
+       ELSEIF(cSCF==0.AND.cBAS/=pBAS)THEN
+          S%Action%C(1)=SCF_BASISSETSWITCH
+          S%Previous%I(1)=S%Previous%I(1)+1
+       ELSE
+          S%Action%C(1)=SCF_DENSITY_NORMAL
+       ENDIF
+    ENDIF
+  END SUBROUTINE DensityLogic
+  !===============================================================================
+  ! BUILD A FOCK MATRIX, POSSIBLY WITH DIIS EXTRAPOLATION
+  !===============================================================================
+  SUBROUTINE FockBuild(cSCF,cBAS,N,S,O,M)
+    TYPE(FileNames):: N
+    TYPE(State)    :: S
+    TYPE(Options)  :: O
+    TYPE(Parallel) :: M    
+    REAL(DOUBLE)   :: Lambda
+    INTEGER        :: cSCF,cBAS,Modl
+    LOGICAL        :: DoDIIs
+    !----------------------------------------------------------------------------!
+    DoDIIS=cSCF>0
+    Modl=O%Models(cBAS)
+    IF(S%Action%C(1).NE.CPSCF_START_RESPONSE) CALL Invoke('QCTC',N,S,M)
+    IF(S%Action%C(1)/=SCF_GUESSEQCORE.AND.S%Action%C(1).NE.CPSCF_START_RESPONSE)THEN
+       IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
+       IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
+    ENDIF
+    CALL Invoke('FBuild',N,S,M)
+    ! Dynamically check for level shifting 
+    CALL OpenASCII(N%IFile,Inp)         
+    IF(OptDblQ(Inp,'LevelShift',Lambda))CALL Invoke('SP2',N,S,M)
+    CLOSE(InP)
+    IF(DoDIIS)THEN
+       IF(    S%Action%C(1)==CPSCF_SOLVE_SCF     .OR. &
+            & S%Action%C(1)==CPSCF_START_RESPONSE.OR. &
+            & S%Action%C(1)==CPSCF_DENSITY_NORMAL.OR. &
+            & S%Action%C(1)==CPSCF_FOCK_BUILD) THEN
+          CALL Invoke('DDIIS',N,S,M)
+       ELSE
+          CALL Invoke('DIIS',N,S,M)
+       ENDIF
+    ENDIF
+  END SUBROUTINE FockBuild
+  !===============================================================================
+  !   Solve the SCF equations 
+  !===============================================================================
+  SUBROUTINE SolveSCF(cBAS,N,S,O,M)
+    TYPE(FileNames):: N
+    TYPE(State)    :: S
+    TYPE(Options)  :: O
+    TYPE(Parallel) :: M    
+    INTEGER        :: cBAS
+    !----------------------------------------------------------------------------!
+    IF(    S%Action%C(1)==CPSCF_SOLVE_SCF.OR. &
+         & S%Action%C(1)==CPSCF_START_RESPONSE)THEN
+       CALL Invoke('TC2Response',N,S,M)    
+    ELSEIF(O%Methods(cBAS)==RH_R_SCF)THEN
+       CALL Invoke('RHeqs',N,S,M)
+    ELSEIF(O%Methods(cBAS)==SDMM_R_SCF) THEN
+       CALL Invoke('SDMM',N,S,M)
+    ELSEIF(O%Methods(cBAS)==PM_R_SCF) THEN
+       CALL Invoke('PM',N,S,M)
+    ELSEIF(O%Methods(cBAS)==SP2_R_SCF) THEN
+       CALL Invoke('SP2',N,S,M)
+    ELSEIF(O%Methods(cBAS)==SP4_R_SCF) THEN
+       CALL Invoke('SP4',N,S,M)
+    ELSEIF(O%Methods(cBAS)==TS4_R_SCF) THEN
+       CALL Invoke('TS4',N,S,M)
+    ELSE
+       CALL MondoHalt(99,'Unknown method key = '//TRIM(IntToChar(O%Methods(cBAS))))
+    ENDIF
+    !
+    IF(S%Action%C(1)==CPSCF_SOLVE_SCF.OR.S%Action%C(1)==CPSCF_START_RESPONSE)THEN
+       CALL Invoke('CPSCFStatus',N,S,M)
+    ELSE
+       CALL Invoke('SCFstats',N,S,M)
+    ENDIF
+    !
+  END SUBROUTINE SolveSCF
+  !===============================================================================
+
+  !===============================================================================
+  SUBROUTINE OneEMats(cBAS,cGEO,N,B,S,O,M)
+    TYPE(FileNames):: N
+    TYPE(BasisSets):: B
+    TYPE(State)    :: S
+    TYPE(Options)  :: O
+    TYPE(Parallel) :: M
+    INTEGER        :: cBAS,cGEO,pBAS
+    LOGICAL, SAVE  :: DoPFFT=.TRUE.
+    !----------------------------------------------------------------------------!
+    pBAS=S%Previous%I(2)    
+    S%Current%I=(/0,cBAS,cGEO/)
+    S%Action%C(1)='OneElectronMatrices'
+    IF(pBAS/=cBAS)DoPFFT=.TRUE.
+    IF(DoPFFT)THEN
+       CALL Invoke('MakePFFT',N,S,M)
+       DoPFFT=.FALSE.
+    ENDIF
+    CALL Invoke('MakeS',N,S,M)
+    IF(O%Methods(cBAS)==RH_R_SCF)THEN
+       CALL Invoke('LowdinO',N,S,M)
+    ELSE
+       CALL Invoke('AInv',N,S,M)
+    ENDIF
+    ! Kinetic energy matrix T
+    CALL Invoke('MakeT',N,S,M)
+    !vwIF(B%BSets(cBAS,1)%HasECPs)THEN
+       ! Make the ECP matrix U 
+    !vw   CALL Invoke('MakeU',N,S,M)
+    !vwENDIF
+  END SUBROUTINE OneEMats
   !===============================================================================
   ! COMPUTE AN ENERGY GRADIENT
   !===============================================================================
@@ -121,6 +303,7 @@ CONTAINS
     CHARACTER(LEN=DCL) :: chGEO    
     REAL(DOUBLE)       :: GradVal
     !----------------------------------------------------------------------------!
+    CALL New(S%Action,1)
     ! Initialize the force vector in HDF, clone by clone
     chGEO=IntToChar(cGEO)
     DO iCLONE=1,G%Clones
@@ -130,7 +313,7 @@ CONTAINS
     ENDDO
     CALL GeomArchive(cBAS,cGEO,N,B,G)
     ! Now evaluate the forces
-    S%Action='ForceEvaluation'
+    S%Action%C(1)='ForceEvaluation'
     ! The non-orthogonal response    
     CALL Invoke('SForce',N,S,M)
     ! Kinetic energy piece
@@ -205,158 +388,20 @@ CONTAINS
     ENDDO
     ! Now close the HDF file ..
     CALL CloseHDF(HDFFileID)
+    CALL Delete(S%Action)
   END SUBROUTINE Force
-  !===============================================================================
-  ! BUILD A HGTF DENSITY BY HOOK OR BY CROOK
-  !===============================================================================
-  SUBROUTINE DensityBuild(N,S,M)
-    TYPE(FileNames):: N
-    TYPE(State)    :: S
-    TYPE(Parallel) :: M    
-    !----------------------------------------------------------------------------!
-    IF(S%Action/=SCF_BASISSETSWITCH.AND. &
-       S%Action/=SCF_DENSITY_NORMAL)     &
-       CALL Invoke('P2Use',N,S,M)
-    CALL Invoke('MakeRho',N,S,M)
-#ifdef PARALLEL
-    CALL Invoke('ParaMakeRho',N,S,M) 
-#endif
-  END SUBROUTINE DensityBuild
-  !===============================================================================
-
-  !===============================================================================
-  SUBROUTINE DensityLogic(cSCF,cBAS,cGEO,S,O)
-    TYPE(State)    :: S
-    TYPE(Options)  :: O
-    INTEGER        :: cSCF,cBAS,cGEO,pBAS
-    !----------------------------------------------------------------------------!
-    S%SubAction=""
-    pBAS=S%Previous%I(2)
-    S%Current%I=(/cSCF,cBAS,cGEO/)
-    IF(O%Guess==GUESS_EQ_SUPR)THEN 
-       O%Guess=0
-       S%Previous%I=S%Current%I
-       S%Action=SCF_SUPERPOSITION
-    ELSEIF(O%Guess==GUESS_EQ_CORE)THEN
-       O%Guess=0
-       S%Previous%I=S%Current%I
-       S%Action=SCF_GUESSEQCORE
-    ELSEIF(O%Guess==GUESS_EQ_RESTART)THEN
-       O%Guess=0
-       S%Previous%I=O%RestartState%I
-       S%Action=SCF_RESTART
-    ELSEIF(cSCF==0.AND.cBAS==pBAS.AND.cGEO/=1)THEN
-       S%Action=SCF_PROJECTION
-    ELSEIF(cSCF==0.AND.cBAS/=pBAS)THEN
-       S%Action=SCF_BASISSETSWITCH
-       S%Previous%I(1)=S%Previous%I(1)+1
-    ELSE
-       S%Action=SCF_DENSITY_NORMAL
-    ENDIF
-  END SUBROUTINE DensityLogic
-  !===============================================================================
-  ! BUILD A FOCK MATRIX, POSSIBLY WITH DIIS EXTRAPOLATION
-  !===============================================================================
-  SUBROUTINE FockBuild(cSCF,cBAS,N,S,O,M)
-    TYPE(FileNames):: N
-    TYPE(State)    :: S
-    TYPE(Options)  :: O
-    TYPE(Parallel) :: M    
-    REAL(DOUBLE)   :: Lambda
-    INTEGER        :: cSCF,cBAS,Modl
-    LOGICAL        :: DoDIIs
-    !----------------------------------------------------------------------------!
-    DoDIIS=cSCF>0
-    Modl=O%Models(cBAS)
-    CALL Invoke('QCTC',N,S,M)
-    IF(S%Action/=SCF_GUESSEQCORE)THEN
-       IF(HasHF(Modl)) CALL Invoke('ONX',N,S,M)
-       IF(HasDFT(Modl))CALL Invoke('HiCu',N,S,M)
-    ENDIF
-    CALL Invoke('FBuild',N,S,M)
-    ! Dynamically check for level shifting 
-    CALL OpenASCII(N%IFile,Inp)         
-    IF(OptDblQ(Inp,'LevelShift',Lambda))CALL Invoke('SP2',N,S,M)
-    CLOSE(InP)
-    IF(DoDIIS)CALL Invoke('DIIS',N,S,M)
-  END SUBROUTINE FockBuild
-  !===============================================================================
-  !   Solve the SCF equations 
-  !===============================================================================
-  SUBROUTINE SolveSCF(cBAS,N,S,O,M)
-    TYPE(FileNames):: N
-    TYPE(State)    :: S
-    TYPE(Options)  :: O
-    TYPE(Parallel) :: M    
-    INTEGER        :: cBAS
-    !----------------------------------------------------------------------------!
-    IF(O%Methods(cBAS)==RH_R_SCF)THEN
-!       CALL LogSCF(S,'Solving SCF equations with Roothann-Hall')
-       CALL Invoke('RHeqs',N,S,M)
-    ELSEIF(O%Methods(cBAS)==SDMM_R_SCF) THEN
-!       CALL LogSCF(S,'Solving SCF equations with SDMM')
-       CALL Invoke('SDMM',N,S,M)
-    ELSEIF(O%Methods(cBAS)==PM_R_SCF) THEN
-!       CALL LogSCF(Current,'Solving SCF equations with PM')
-       CALL Invoke('PM',N,S,M)
-    ELSEIF(O%Methods(cBAS)==SP2_R_SCF) THEN
-!       CALL LogSCF(Current,'Solving SCF equations with SP2')
-       CALL Invoke('SP2',N,S,M)
-    ELSEIF(O%Methods(cBAS)==SP4_R_SCF) THEN
-!      CALL LogSCF(Current,'Solving SCF equations with SP4')
-       CALL Invoke('SP4',N,S,M)
-    ELSEIF(O%Methods(cBAS)==TS4_R_SCF) THEN
-!       CALL LogSCF(Current,'Solving SCF equations with TS4')
-       CALL Invoke('TS4',N,S,M)
-    ELSE
-       CALL MondoHalt(99,'Unknown method key = '//TRIM(IntToChar(O%Methods(cBAS))))
-    ENDIF
-    CALL Invoke('SCFstats',N,S,M)
-  END SUBROUTINE SolveSCF
-  !===============================================================================
-
-  !===============================================================================
-  SUBROUTINE OneEMats(cBAS,cGEO,N,B,S,O,M)
-    TYPE(FileNames):: N
-    TYPE(BasisSets):: B
-    TYPE(State)    :: S
-    TYPE(Options)  :: O
-    TYPE(Parallel) :: M
-    INTEGER        :: cBAS,cGEO,pBAS
-    LOGICAL, SAVE  :: DoPFFT=.TRUE.
-    !----------------------------------------------------------------------------!
-    pBAS=S%Previous%I(2)    
-    S%Current%I=(/0,cBAS,cGEO/)
-    S%Action='OneElectronMatrices'
-    S%SubAction=""
-    IF(pBAS/=cBAS)DoPFFT=.TRUE.
-    IF(DoPFFT)THEN
-       CALL Invoke('MakePFFT',N,S,M)
-       DoPFFT=.FALSE.
-    ENDIF
-    CALL Invoke('MakeS',N,S,M)
-    IF(O%Methods(cBAS)==RH_R_SCF)THEN
-       CALL Invoke('LowdinO',N,S,M)
-    ELSE
-       CALL Invoke('AInv',N,S,M)
-    ENDIF
-    ! Kinetic energy matrix T
-    CALL Invoke('MakeT',N,S,M)
-    IF(B%BSets(cBAS,1)%HasECPs)THEN
-       ! Make the ECP matrix U 
-       CALL Invoke('MakeU',N,S,M)
-    ENDIF
-  END SUBROUTINE OneEMats
   !===============================================================================
   !
   !===============================================================================
-  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS)
+  FUNCTION ConvergedQ(cSCF,cBAS,N,S,O,G,ETot,DMax,DIIS,CPSCF_O)
     TYPE(FileNames)             :: N
     TYPE(State)                 :: S
     TYPE(Options)               :: O
     TYPE(Geometries)            :: G
     TYPE(Parallel)              :: M
     TYPE(DBL_RNK2)              :: ETot,DMax,DIIS
+    LOGICAL,OPTIONAL            :: CPSCF_O
+    LOGICAL                     :: CPSCF
     INTEGER                     :: cSCF,cBAS,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
                                    DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
@@ -365,6 +410,12 @@ CONTAINS
     LOGICAL                     :: ConvergedQ
     CHARACTER(LEN=DCL)            :: chGEO
     !----------------------------------------------------------------------------!
+    !
+    IF(PRESENT(CPSCF_O)) THEN
+       CPSCF=CPSCF_O
+    ELSE
+       CPSCF=.FALSE.
+    ENDIF
     ! Convergence thresholds
     ETest=ETol(O%AccuracyLevels(cBAS))
     DTest=DTol(O%AccuracyLevels(cBAS))
@@ -379,13 +430,25 @@ CONTAINS
        HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
        ! Gather convergence parameters
 #ifdef PARALLEL_CLONES
-       CALL Get(Etot%D(cSCF,iCLONE),'Etot')
-       CALL Get(DMax%D(cSCF,iCLONE),'DMax')
-       CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr')
+       IF(CPSCF) THEN
+          CALL Get(Etot%D(cSCF,iCLONE),'Prop'    )
+          CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax')
+          CALL Get(DIIS%D(cSCF,iCLONE),'DDIISErr')
+       ELSE
+          CALL Get(Etot%D(cSCF,iCLONE),'Etot')
+          CALL Get(DMax%D(cSCF,iCLONE),'DMax')
+          CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr' )
+       ENDIF
 #else
-       CALL Get(Etot%D(cSCF,iCLONE),'Etot',StatsToChar(S%Current%I))
-       CALL Get(DMax%D(cSCF,iCLONE),'DMax',StatsToChar(S%Current%I))
-       CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr',StatsToChar(S%Current%I))
+       IF(CPSCF) THEN
+          CALL Get(Etot%D(cSCF,iCLONE),'Prop'    ,StatsToChar(S%Current%I))
+          CALL Get(DMax%D(cSCF,iCLONE),'DPrimMax',StatsToChar(S%Current%I))
+          CALL Get(DIIS%D(cSCF,iCLONE),'DDIISErr',StatsToChar(S%Current%I))
+       ELSE
+          CALL Get(Etot%D(cSCF,iCLONE),'Etot',StatsToChar(S%Current%I))
+          CALL Get(DMax%D(cSCF,iCLONE),'DMax',StatsToChar(S%Current%I))
+          CALL Get(DIIS%D(cSCF,iCLONE),'DIISErr',StatsToChar(S%Current%I))
+       ENDIF
 #endif
        CALL CloseHDFGroup(HDF_CurrentID)
        ! Load current energies
