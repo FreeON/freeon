@@ -59,8 +59,8 @@ PROGRAM HaiKu
   CALL Get(ModelChem,'ModelChemistry',CurBase)
   NEl=GM%NElec
 #ifdef PERIODIC
-! Calculate the Number of Cells
-  CALL SetCellNumber(GM)
+! Get the Outer Cell Set
+  CALL Get_CellSet(CS_OUT,'CS_OUT'//CurBase//CurGeom)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif 
 ! Set local integration thresholds 
