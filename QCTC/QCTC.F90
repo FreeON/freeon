@@ -108,15 +108,12 @@ PROGRAM QCTC
 #ifdef MMech
   ENDIF !!!!  QM calculations
   IF(HasMM()) THEN
-#endif
      MM_COUL = NukE(GM_MM)
      CALL OpenASCII(OutFile,UOut)
-!    write(*,*) 'out= ',out
      write(uout,*) 'mm_coul in qctc= ',mm_coul
      write(*,*) 'mm_coul in qctc= ',mm_coul
      CLOSE(UNIT=UOut,STATUS='KEEP')
      CALL PUT(MM_COUL,'MM_COUL',Tag_O=CurGeom)
-#ifdef MMech
   ENDIF
 #endif
 
