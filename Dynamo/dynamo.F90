@@ -1,4 +1,5 @@
 MODULE DYNAMO
+#ifdef MMech
 !
 USE DerivedTypes
 USE GlobalScalars
@@ -38,7 +39,6 @@ CONTAINS
 !
 !-------------------------------------------------------------- 
 !
-#ifdef MMech
 !
 !--------------------------------------------------------
 !
