@@ -45,11 +45,11 @@ PFFTObjs=$(CommonObjs) MakePFFT.o
 ReleaseFiles=XLate.x CTraX.x Globals.x MondoPoles.x \
              Thresholds.x PoleTree.x PFFTensor.x    \
              PBCFarField.x TreeWalk.x JGen.x NukE.x \
-             QCTC.x BlokTrPdJ.x JForce.x
+             QCTC.x BlokTrPdJ.x JForce.x MakePFFT.x
 #
 all:	lQCTC QCTC JFrc PFFT
 #
-release:clean $(ReleaseFiles)
+release: clean $(ReleaseFiles) rlQCTC
 	rm -rf MMA/Moments
 	rm -rf MMA/PAC
 	rm -rf MMA/MD3TRR
