@@ -11,7 +11,7 @@ PROGRAM TestMondoSCFOutput
    USE PrettyPrint
 !
    TYPE(ARGMT) :: Arg
-   INTEGER                        :: I,I1,I2
+   INTEGER                        :: I,I1,I2,J1,J2
    INTEGER,PARAMETER              :: Chk=22
    REAL(DOUBLE)                   :: D1,D2
    CHARACTER(LEN=DEFAULT_CHR_LEN) :: PWD,FileToCheck,RefFile, &
@@ -27,6 +27,9 @@ PROGRAM TestMondoSCFOutput
    CALL OpenASCII(FileToCheck,Inp,ReWind_O=.TRUE.)
    CALL OpenASCII(RefFile,Chk,ReWind_O=.TRUE.)
 !
+   CALL Align('CheckSum',Inp)
+   CALL Align('CheckSum',Chk)
+!
    DO I=1,100000
       READ(Inp,DEFAULT_CHR_FMT,END=1)Line1
       READ(Chk,DEFAULT_CHR_FMT,END=1)Line2
@@ -34,11 +37,17 @@ PROGRAM TestMondoSCFOutput
 !     Test total energies
 !
       I1=0;I2=0
-      IF(INDEX(Line1,'<SCF>')/=0)I1=INDEX(Line1,'=')
-      IF(INDEX(Line2,'<SCF>')/=0)I2=INDEX(Line2,'=')
+      IF(INDEX(Line1,'<SCF>')/=0)THEN
+         I1=INDEX(Line1,'=')
+         J1=INDEX(Line1,',')
+      ENDIF
+      IF(INDEX(Line2,'<SCF>')/=0)THEN
+         I2=INDEX(Line2,'=')
+         J2=INDEX(Line2,',')
+      ENDIF
       IF(I1/=0.AND.I2/=0)THEN
-         D1=CharToDbl(TRIM(Line1(I1+1:)))
-         D2=CharToDbl(TRIM(Line2(I2+1:)))
+         D1=CharToDbl(TRIM(Line1(I1+1:J1-1)))
+         D2=CharToDbl(TRIM(Line2(I2+1:J2-1)))
          RD=ABS((D1-D2)/D2)
          IF(RD>1.D-10)THEN
             WRITE(*,*)' VALIDATION TEST FAILED! '
