@@ -29,28 +29,13 @@ CONTAINS
     CHARACTER(LEN=*),INTENT(IN)          :: Prog
     LOGICAL,OPTIONAL                     :: Serial_O
     INTEGER                              :: I
-#ifdef PARALLEL_CLONES
     TYPE(INT_VECT)                       :: SpaceTimeSplit
-#endif
 #ifdef PARALLEL
     LOGICAL                              :: Serial
     INTEGER                              :: ChkNPrc
     CHARACTER(LEN=DCL)                   :: MONDO_HOST 
     !-------------------------------------------------------------------------------
-#ifdef PARALLEL_CLONES
     CALL InitMPI()
-#else         
-    IF(PRESENT(Serial_O))THEN
-       IF(Serial_O)THEN
-          InParallel=.FALSE.
-       ELSE
-          CALL InitMPI()
-          InParallel=.TRUE.
-       ENDIF
-    ELSE
-       InParallel=.FALSE.
-    ENDIF
-#endif
 #endif
     ! Get arguments
     CALL Get(Args)
@@ -73,7 +58,6 @@ CONTAINS
     CALL Init(PrintFlags,Prog)
     !       PrintFlags%Key=DEBUG_MAXIMUM
     !       PrintFlags%Mat=DEBUG_MATRICES
-#ifdef PARALLEL_CLONES    
 #ifdef PARALLEL    
     ! Get the space-time parallel topology
     CALL New(SpaceTimeSplit,3)
@@ -92,7 +76,6 @@ CONTAINS
     H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
     ! Default is now the cloned group id rather than the HDF file id 
     HDF_CurrentID=H5GroupID
-#endif
     ! Load variables global at the group (clone) level
     CALL LoadGroupGlobals(Args)
     ! Initialize memory statistics
@@ -160,7 +143,6 @@ CONTAINS
 #endif
   SUBROUTINE ShutDown(Prog)
     CHARACTER(LEN=*),INTENT(IN) :: Prog
-#ifdef PARALLEL_CLONES
     CALL CloseHDFGroup(H5GroupID)
     HDF_CurrentID=HDFFileID
 #ifdef PARALLEL
@@ -168,7 +150,6 @@ CONTAINS
     MONDO_COMM=MPI_COMM_WORLD
     MyID=MRank()    
     CALL AlignNodes()
-#endif
 #endif
     IF(HasQM()) THEN
        CALL Delete(BSiz)
@@ -248,9 +229,7 @@ CONTAINS
     CALL Get(logFile,'logfile')
     CALL Get(OutFile,'outputfile')
     CALL Get(InpFile,'inputfile')
-#ifdef PARALLEL_CLONES
     CALL Get(Restart,'OldInfo')
-#endif    
     CALL Get(MaxAtms,'maxatms',Tag_O=CurBase)
     CALL Get(MaxBlks,'maxblks',Tag_O=CurBase)
     CALL Get(MaxNon0,'maxnon0',Tag_O=CurBase)

@@ -58,24 +58,24 @@ MODULE ProcessControl
          STOP 'Termination of MondoSCF'
       END SUBROUTINE MondoHalt
 
-      SUBROUTINE Halt(String)
-         CHARACTER (LEN=*) :: String
+      SUBROUTINE Halt(Strng)
+         CHARACTER (LEN=*) :: Strng
          CHARACTER(LEN=*),PARAMETER :: Motto='Frango ut patefaciam -- I break in order to reveal'
-         CALL Logger(String,.TRUE.)
+         CALL Logger(Strng,.TRUE.)
 #ifdef PARALLEL
          IF(InParallel)THEN
             WRITE(*,*)' Node that brought me down = ',MyId
             CALL Trap()
-            CALL HaltMPI(String)
+            CALL HaltMPI(Strng)
          ELSE
             WRITE(*,*)' GOING DOWN GOING DOWN GOING DOWN GOING DOWN GOING DOWN '
-            WRITE(*,*)'<<'//TRIM(String)//'>>'
+            WRITE(*,*)'<<'//TRIM(Strng)//'>>'
             WRITE(*,*)' GOING DOWN GOING DOWN GOING DOWN GOING DOWN GOING DOWN '
             CALL Trap()
          ENDIF
 #else
          WRITE(*,*)' GOING DOWN GOING DOWN GOING DOWN GOING DOWN GOING DOWN '
-         WRITE(*,*)'<<'//TRIM(String)//'>>'
+         WRITE(*,*)'<<'//TRIM(Strng)//'>>'
          WRITE(*,*)' GOING DOWN GOING DOWN GOING DOWN GOING DOWN GOING DOWN '
          CALL Trap()
 #endif
@@ -121,11 +121,10 @@ MODULE ProcessControl
       END SUBROUTINE LogInTurn
 #endif
 
-      SUBROUTINE Warn(String)
-         CHARACTER (LEN=*) String
+      SUBROUTINE Warn(Strng)
+         CHARACTER (LEN=*) Strng
          CHARACTER (LEN=DEFAULT_CHR_LEN) :: Warning
-         Warning='... ning Warning  Warning  Warning Wa ...' &
-               //Rtrn//TRIM(ADJUSTL(String))
+         Warning='... ning Warning  Warning  Warning Wa ...'//Rtrn//TRIM(ADJUSTL(Strng))
          CALL Logger(Warning,.TRUE.)
       END SUBROUTINE Warn
 

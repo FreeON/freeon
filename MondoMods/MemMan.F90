@@ -1409,13 +1409,13 @@ MODULE MemMan
 !--------------------------------------------------------------------------
 ! Create the CellSet
 !--------------------------------------------------------------------------
-  SUBROUTINE New_CellSet(CS,NCELL)
+  SUBROUTINE New_CellSet(CS,NCellDim)
     TYPE(CellSet)                    :: CS   
-    INTEGER                          :: NCELL
+    INTEGER                          :: NCellDim
 !
-    CS%NCells = NCELL
-    CALL New(CS%CellCarts,(/3,CS%NCells/)) 
-    CS%Alloc=ALLOCATED_TRUE
+    CALL New(CS%CellCarts,(/3,NCellDim/)) 
+    CS%CellCarts%D = Zero
+    CS%Alloc       = ALLOCATED_TRUE
 !
   END SUBROUTINE New_CellSet
 !--------------------------------------------------------------------------

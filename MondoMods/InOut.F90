@@ -1437,20 +1437,15 @@ CONTAINS
                          CALL Put(A%NBlks,TRIM(Name)//'%NBlks')
                          CALL Put(A%NNon0,TRIM(Name)//'%NNon0')
                          CALL Put(A%RowPt,TRIM(Name)//'%RowPt',A%NAtms+1)
-#ifdef PARALLEL_CLONES
                          CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks)!,UnLimit_O=.TRUE.)
                          CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks)!,UnLimit_O=.TRUE.)
                          CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0)!,UnLimit_O=.TRUE.)
-#else
-                         CALL Put(A%ColPt,TRIM(Name)//'%ColPt',A%NBlks,UnLimit_O=.TRUE.)
-                         CALL Put(A%BlkPt,TRIM(Name)//'%BlkPt',A%NBlks,UnLimit_O=.TRUE.)
-                         CALL Put(A%MTrix,TRIM(Name)//'%MTrix',A%NNon0,UnLimit_O=.TRUE.)
-#endif
 !!$
-!!$                         WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
-!!$                         WRITE(*,*) A%RowPt%I
-!!$                         WRITE(*,*) A%ColPt%I
-!!$                         WRITE(*,*) A%MTrix%D(1:A%NNon0)
+!!$            WRITE(*,*)' IN PUT, ATMS = ',A%NAtms,' Blks = ',A%NBlks,' NNon0 = ',A%NNon0
+!!$            WRITE(*,*) A%RowPt%I
+!!$            WRITE(*,*) A%ColPt%I
+!!$            WRITE(*,*) A%MTrix%D(1:A%NNon0)
+!!$
 
                          RETURN
                       ENDIF

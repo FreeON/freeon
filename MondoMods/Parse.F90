@@ -664,39 +664,20 @@ MODULE Parse
             Cycl=IntToChar(Stats(1))
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
-#ifdef PARALLEL_CLONES
             TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
                                //'_Base#'//TRIM(Base) &
                                //'_Cycl#'//TRIM(Cycl) &
                                //'_Clone#'//TRIM(IntToChar(MyClone)) &
-                               //'.'//TRIM(PostFix)            
-#else
-
-            TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
-                               //'_Base#'//TRIM(Base) &
-                               //'_Cycl#'//TRIM(Cycl) &
-                               //'.'//TRIM(PostFix)            
-#endif
+                               //'.'//TRIM(PostFix) 
          ELSEIF(PRESENT(NoTags_O))THEN
-#ifdef PARALLEL_CLONES
-            TrixFile=TRIM(Name)//'_Clone#'//TRIM(IntToChar(MyClone))//'.'//TRIM(PostFix)            
-#else
-            TrixFile=TRIM(Name)//'.'//TRIM(PostFix)            
-#endif
-
+            TrixFile=TRIM(Name)//'_Clone#'//TRIM(IntToChar(MyClone))//'.'//TRIM(PostFix) 
          ELSE
             Base=IntToChar(Stats(2))
             Geom=IntToChar(Stats(3))
-#ifdef PARALLEL_CLONES
             TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
                                //'_Base#'//TRIM(Base) &
                                //'_Clone#'//TRIM(IntToChar(MyClone)) &
-                               //'.'//TRIM(PostFix)            
-#else
-            TrixFile=TRIM(Name)//'_Geom#'//TRIM(Geom) &
-                               //'_Base#'//TRIM(Base) &
-                               //'.'//TRIM(PostFix)            
-#endif
+                               //'.'//TRIM(PostFix)         
          ENDIF
       END FUNCTION TrixFile
 !------------------------------------------------------------------

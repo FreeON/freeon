@@ -19,17 +19,17 @@ MODULE Order
    INTERFACE 
       SUBROUTINE DblIntSort77(N,X,Y,Ordr)
          USE DerivedTypes
-         INTEGER,                  INTENT(IN)    :: N,Ordr
-         REAL(DOUBLE),DIMENSION(N),INTENT(INOUT) :: X
-         INTEGER,     DIMENSION(N),INTENT(INOUT) :: Y
+         INTEGER                      :: N,Ordr
+         REAL(DOUBLE),DIMENSION(N)    :: X
+         INTEGER,     DIMENSION(N)    :: Y
       END SUBROUTINE
       SUBROUTINE SFCOrder77(N,R,Point,Key,Hilbert)
          USE DerivedTypes
-         INTEGER,                     INTENT(IN)    :: N
-         LOGICAL,                     INTENT(IN)    :: Hilbert
-         REAL(DOUBLE), DIMENSION(3,N),INTENT(INOUT) :: R 
-         INTEGER(INT8),DIMENSION(N),  INTENT(INOUT) :: Key 
-         INTEGER,      DIMENSION(N),  INTENT(INOUT) :: Point
+         INTEGER                      :: N
+         LOGICAL                      :: Hilbert
+         REAL(DOUBLE), DIMENSION(3,N) :: R 
+         INTEGER(INT8),DIMENSION(N)   :: Key 
+         INTEGER,      DIMENSION(N)   :: Point
       END SUBROUTINE
 
 !      FUNCTION Interleave(Ix,Iy,Iz)       
@@ -82,11 +82,12 @@ MODULE Order
 !    F90 wrapper for SFCOrder77, which circumvents the lack
 !    of INTEGER(KIND=8) (INTEGER*8) support for cheazy 
 !    F90 compilers (pgf,nag...)
-
      SUBROUTINE SFCOrder(N,R,Point,SFC_KEY)
-        INTEGER,        INTENT(IN)    :: N,SFC_KEY
-        TYPE(DBL_RNK2), INTENT(INOUT) :: R
-        TYPE(INT_VECT), INTENT(INOUT) :: Point
+        INTEGER                       :: N
+        INTEGER                       :: SFC_KEY
+        TYPE(DBL_RNK2)                :: R
+        TYPE(INT_VECT)                :: Point
+!
         INTEGER(INT8),ALLOCATABLE, &
                          DIMENSION(:) :: IKey
         TYPE(DBL_VECT)                :: RKey
@@ -138,9 +139,9 @@ MODULE Order
      END SUBROUTINE SFCOrder
 
      SUBROUTINE Sort_DBL_INT(X,Y,N_O,Ordr_O)
-        TYPE(DBL_VECT), INTENT(INOUT) :: X
-        TYPE(INT_VECT), INTENT(INOUT) :: Y
-        INTEGER,OPTIONAL,INTENT(IN)   :: N_O,Ordr_O 
+        TYPE(DBL_VECT)     :: X
+        TYPE(INT_VECT)     :: Y
+        INTEGER,OPTIONAL   :: N_O,Ordr_O 
         INTEGER                       :: N,Ordr 
         Ordr=-2
         N=MIN(SIZE(X%D),SIZE(Y%I))
@@ -154,10 +155,10 @@ MODULE Order
 
 
      SUBROUTINE Sort_INT_INT(X,Y,N_O,Ordr_O)
-        TYPE(INT_VECT), INTENT(INOUT) :: X
-        TYPE(INT_VECT), INTENT(INOUT) :: Y
-        INTEGER,OPTIONAL,INTENT(IN)   :: N_O,Ordr_O 
-        INTEGER                       :: N,Ordr 
+        TYPE(INT_VECT)     :: X
+        TYPE(INT_VECT)     :: Y
+        INTEGER,OPTIONAL   :: N_O,Ordr_O 
+        INTEGER            :: N,Ordr 
         Ordr=-1
         N=MIN(SIZE(X%I),SIZE(Y%I))
         IF(PRESENT(N_O))THEN
@@ -170,9 +171,9 @@ MODULE Order
 
 
      SUBROUTINE Sort_INT_VECT(X,N_O,Ordr_O)
-        TYPE(INT_VECT), INTENT(INOUT) :: X
-        INTEGER,OPTIONAL,INTENT(IN)   :: N_O,Ordr_O 
-        INTEGER                       :: N,Ordr 
+        TYPE(INT_VECT)     :: X
+        INTEGER,OPTIONAL   :: N_O,Ordr_O 
+        INTEGER            :: N,Ordr 
         Ordr=-1
         N=SIZE(X%I)
         IF(PRESENT(N_O))THEN
@@ -182,10 +183,8 @@ MODULE Order
         IF(PRESENT(Ordr_O))Ordr=Ordr_O
         CALL IntSort77(N,X%I,Ordr)
     END SUBROUTINE Sort_INT_VECT
-
-
-END MODULE Order
-
+  END MODULE Order
+!--------------------------------------------------------------
 !--------------------------------------------------------------
   SUBROUTINE SFCOrder77(N,R,Point,Key,Hilbert)
     Use DerivedTypes

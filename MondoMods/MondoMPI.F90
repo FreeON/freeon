@@ -805,7 +805,6 @@ MODULE MondoMPI
          ENDIF
       END SUBROUTINE AlignNodes
 
-#ifdef PARALLEL_CLONES
 
 !     NODE ALLINGMENT FOR MPI_COMM_WORLD
 
@@ -822,7 +821,6 @@ MODULE MondoMPI
          ENDIF
        END SUBROUTINE AlignClones
 
-#endif
 !===============================================================================
 
 !     Error checking

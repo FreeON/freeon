@@ -126,9 +126,11 @@ MODULE CellSets
           CALL Halt('NCELL is Greater then MaxCell')
        ELSE
           CALL New_CellSet(CS,MaxCell_O)
+          CS%NCells=NCELL
        ENDIF
     ELSE
        CALL New_CellSet(CS,NCELL)
+       CS%NCells=NCELL
     ENDIF
 !
     NCELL = 0
@@ -196,9 +198,11 @@ MODULE CellSets
           CALL Halt('NCELL is Greater then MaxCell')
        ELSE
           CALL New_CellSet(CS,MaxCell_O)
+          CS%NCells=NCELL
        ENDIF
     ELSE
        CALL New_CellSet(CS,NCELL)
+       CS%NCells=NCELL
     ENDIF
 !
     NCELL=0
