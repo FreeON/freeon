@@ -770,7 +770,7 @@ WRITE(*,*)' C = ',C
 !-------------------------------------------------------------------------------
     SUBROUTINE FockGuess_DBCSR(F,P,Norm,Order)
       TYPE(DBCSR)                    :: P
-      TYPE(BCSR),INTENT(IN)          :: F
+      TYPE(BCSR)                     :: F
       REAL(DOUBLE)                   :: Fmin,Fmax,DF,Coeff,Mu,Lmbd1,  &
                                         Lmbd2,Norm
       INTEGER                        :: Order
@@ -793,12 +793,9 @@ WRITE(*,*)' C = ',C
 #endif
 !-------------------------------------------------------------------------------
 !     Estimate spectral bounds 
-#ifdef DM_PARALLEL
-      IF(MyId==ROOT) CALL SpectralBounds(F,Fmin,Fmax)
-#else
-      CALL SpectralBounds(F,Fmin,Fmax)
-#endif
-#ifdef DM_PARALLEL
+      IF(MyId==ROOT) &
+        CALL SpectralBounds(F,Fmin,Fmax)
+
       CALL BCast(FMin)
       CALL BCast(FMax)
 
