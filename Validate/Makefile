@@ -50,17 +50,17 @@ test:	$(TstObjs)
 serial:	small big
 #
 small:
-	m Mg0.inp     MgO.out;               ./Test MgO.out     MgO.ref
 	m SiF4.inp    SiF4.out;              ./Test SiF4.out    SiF4.ref
 	m Urea.inp    Urea.out;              ./Test Urea.out    Urea.ref
 	m Water.inp   Water.out;             ./Test Water.out   Water.ref 
 	m Biotin.inp  Biotin.out;            ./Test Biotin.out  Biotin.ref
 #
 big:	
-	m Caffiene.inp Caffiene.out;         ./Test Caffiene.out Caffiene.ref
-	m BetaCarotene.inp BetaCarotene.out; ./Test BetaCarotene.out BetaCarotene.ref 
-	m Chlorophyll.inp Chlorophyll.out;   ./Test Chlorophyll.out Chlorophyll.ref
-	m Vancomycin.inp Vancomycin.out;     ./Test Vancomycin.out Vancomycin.ref
+	m Mg0.inp          MgO.out;          ./Test MgO.out           MgO.ref
+	m Caffiene.inp     Caffiene.out;     ./Test Caffiene.out      Caffiene.ref
+	m BetaCarotene.inp BetaCarotene.out; ./Test BetaCarotene.out  BetaCarotene.ref 
+	m Chlorophyll.inp  Chlorophyll.out;  ./Test Chlorophyll.out   Chlorophyll.ref
+	m Vancomycin.inp   Vancomycin.out;   ./Test Vancomycin.out    Vancomycin.ref
 #-----------------------------------------------------------------------------------
 #       Submit validation suite to pbs queing system 
 #
