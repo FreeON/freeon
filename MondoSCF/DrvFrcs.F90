@@ -51,7 +51,7 @@ MODULE DrvFrcs
 !       Exact Hartree-Fock exchange component
         IF(HasHF(Modl))CALL Invoke('XForce', CtrlVect)       
 !       DFT exchange corrleation term
-        IF(HasDFT(Modl))CALL Invoke('XCForce',CtrlVect)       
+        IF(HasDFT(Modl))CALL Invoke('XCForce',CtrlVect,MPIRun_O=.TRUE.)       
 #ifdef MMech
       ENDIF
 #endif
