@@ -142,7 +142,8 @@ MODULE SetSCFs
             CALL PrintProtectL(Out)
             Mssg='MaxAtms = '//TRIM(IntToChar(MaxAtms))   & 
              //', MaxBlks = '//TRIM(IntToChar(MaxBlks))   & 
-             //', MaxNon0 = '//TRIM(IntToChar(MaxNon0))
+             //', MaxNon0 = '//TRIM(IntToChar(MaxNon0))   &
+             //', BndWdth = '//TRIM(IntToChar(BWEstim))
             WRITE(Out,*)Mssg
 #ifdef PARALLEL
             Mssg='MaxAtmsNode = '//TRIM(IntToChar(MaxAtmsNode))//', ' & 

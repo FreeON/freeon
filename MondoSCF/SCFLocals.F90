@@ -73,19 +73,21 @@ MODULE SCFLocals
    END TYPE
 !------------------------------------------------------------------------------------------------  
 !  Thresholds (Loose ~4 digits, Good ~6 digits, Tight ~8 digits, VeryTight ~10 digits):
-
-   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-3, 1.D-4, 1.D-5,  1.D-6 /)
-   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9/)
+!
+   REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-7 /)
+   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9 /)
    REAL(DOUBLE),DIMENSION(4) :: TwoENeglect=(/1.D-6, 1.D-8, 1.D-10, 1.D-12/)
    REAL(DOUBLE),DIMENSION(4) :: DistNeglect=(/1.D-8, 1.D-10,1.D-12, 1.D-14/)
    REAL(DOUBLE),DIMENSION(4) :: ETol       =(/1.D-5, 1.D-7, 1.D-9,  1.D-11/)
    REAL(DOUBLE),DIMENSION(4) :: DTol       =(/1.D-2, 1.D-3, 1.D-4,  1.D-5 /)
 !-----------------------------------------------------------------------------------------------
-!  Asymptotic dimensioning parameters for memory limits (needs work)
-   REAL(DOUBLE),DIMENSION(4) :: BandWidth=(/7.D2 ,7.D2 ,7.D2 ,7.D2 /)
-   REAL(DOUBLE),DIMENSION(4) :: BWDecay  =(/1.D-6,1.D-6,1.D-6,1.D-6/)
-!-------------------------------------------------  
+!  Asymptotic dimensioning parameters for memory limits of BCSR and DBCSR matrices
+!
+   REAL(DOUBLE),DIMENSION(4) :: BandWidth=(/ 7.D2, 1.D3,1.3D3,1.6D3/)
+   REAL(DOUBLE),DIMENSION(4) :: BWDecay  =(/1.D-5,1.D-4,1.D-3,1.D-2/)
+!-----------------------------------------------------------------------------------------------
 !  Global variables for file control
+!
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_PWD 
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_HOME   
    CHARACTER(LEN=DEFAULT_CHR_LEN),SAVE :: MONDO_SCRATCH
