@@ -22,7 +22,7 @@ MODULE ECPBlock
        1, 6,15,20,15, 6, 1 /),(/7,7/))
   !---------------------------------------------------------------------
   ! PARAMETERS FOR RADIAL INTEGRATION 
-    INTEGER,PARAMETER                         :: NPts=32
+    INTEGER,PARAMETER                         :: NPts=64
     INTEGER,PARAMETER                         :: Infty=20
     INTEGER                                   :: IPts,IWts
     REAL(DOUBLE),PARAMETER                    :: Tau=1D-18

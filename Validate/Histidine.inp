@@ -1,22 +1,36 @@
 <BeginTitle>
-Histidine
-For the optimization of large biomolecules with lots of hydrogen bonds
-the "BiSect" optimizer is recommended. It always must be defined with
-the NoGDIIS and NoBackTr keywords in the input file.
+
+  Histidine
+
+  For the optimization of large biomolecules with lots of hydrogen bonds
+  the "BiSect" optimizer is recommended. It always must be defined with
+  the NoGDIIS and NoBackTr keywords in the input file.
+
 <EndTitle>
 
 <BeginOptions>
+
 Charge=0
 Multiplicity=1
 
-Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,BiSect)
+OutPut=xsf
+DebugAll =(MinDebug,CheckSums)
 
 Guess=SuperPos
 SCFMethod=(TC2)
 BasisSets=(STO-3G)
 ModelChem=(PBExc)
 Accuracy =(Good)
-Geometry =(InAngstroms,NoOrder)
+
+Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,BiSect)
+
+MPIInvoke="mpirun"
+MPIProcessors=4
+MPIProcFlag="-np"
+MPISpatialProc=4
+MPIMachineFlag="-machinefile"
+MPIMachineFile="$PBS_NODEFILE"
+
 <EndOptions>
 
 <BeginGeometry>

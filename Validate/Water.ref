@@ -14,818 +14,337 @@
  Anders Niklasson and Graeme Henkelman                
  Los Alamos National Laboratory (LA-CC 01-2)          
  Copyright 2001, University of California.            
- Compiled for AMDLinux.PG, executing on zinc45
- a i686 machine running Linux 2.4.20-18.9bigmem
+ Compiled for AMDLinux.PG, executing on zinc23.lanl.gov
+ a i686 machine running Linux 2.4.20-19.9smp
 
- Current HDF :: /scratch/mchalla/Scratch/Water_25748.hdf
-<<Starting MondoSCF 09/14/03 @ 12:37:43>>
- MakeS                  :: S CheckSum  = 0.4210526487199644D+01
- LowdinO                :: X CheckSum  = 0.4837507512329887D+01
- MakeT                  :: T CheckSum  = 0.6654696090339139D+01
- MakeU                  :: U CheckSum  = 0.1098817483977383D+01
+ Current HDF :: /scratch/mchalla//Water_4458.hdf
+<<Starting MondoSCF 09/18/03 @ 10:34:39>>
+ MakeS                  :: S CheckSum  = 0.2905513325228471D+01
+ LowdinO                :: X CheckSum  = 0.3001086606104489D+01
+ MakeT                  :: T CheckSum  = 0.2840375291667491D+02
  P2Use                  :: P[0] CheckSum  = 0.0000000000000000D+00
  ... ning Warning  Warning  Warning Wa ...
 MakeRho                :: relative error in density = 0.10D+01. Distribution threshold
  MakeRho                :: Rho CheckSum  = 0.0000000000000000D+00
- QCTC                   :: J[0] CheckSum  = 0.2204343392481273D+02
- FockNGrueven           :: F[0] CheckSum  = 0.1600600186214268D+02
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.1174707016418746D+02
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000002D+01
- RHEqs                  :: P[1] CheckSum  = 0.2221079422466065D+01
- SCFStatus : [0,1,1]    :: <SCF> = 3.42160938, dD = 0.22D+01
- MakeRho                :: Rho CheckSum  = 0.5954551684625659D+01
- QCTC                   :: J[1] CheckSum  = 0.2762798200777195D+01
- ONX                    :: Kx[1] CheckSum  = 0.3422020919834679D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2558763232124600D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.4377356710788034D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.1027630634843230D+02
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[2] CheckSum  = 0.2144028085686473D+01
- SCFStatus : [1,1,1]    :: <SCF> = -12.76013187, dD = 0.12D+00, DIIS = 0.15D+00
- MakeRho                :: Rho CheckSum  = 0.5730790725921498D+01
- QCTC                   :: J[2] CheckSum  = 0.2791498492427554D+01
- ONX                    :: Kx[2] CheckSum  = 0.3430691675294748D+01
- FockNGrueven           :: F[2] CheckSum  = 0.2494858206995878D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.4345672386425107D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.4217362903231092D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000002D+01
- RHEqs                  :: P[3] CheckSum  = 0.1442240465888526D+01
- SCFStatus : [2,1,1]    :: <SCF> = -12.99405597, dD = 0.22D+01, DIIS = 0.15D+00
- MakeRho                :: Rho CheckSum  = 0.1412528031232341D+01
- QCTC                   :: J[3] CheckSum  = 0.9868157800237288D+01
- ONX                    :: Kx[3] CheckSum  = 0.2493439543021334D+01
- FockNGrueven           :: F[3] CheckSum  = 0.5634589357334066D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.4358282506583892D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.3025000053194353D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[4] CheckSum  = 0.1307844084887289D+01
- SCFStatus : [3,1,1]    :: <SCF> = -13.58400088, dD = 0.75D+00, DIIS = 0.15D+00
- MakeRho                :: Rho CheckSum  = 0.2449834992121605D+01
- QCTC                   :: J[4] CheckSum  = 0.7290938212814467D+01
- ONX                    :: Kx[4] CheckSum  = 0.2751288401579503D+01
- FockNGrueven           :: F[4] CheckSum  = 0.3846385647056432D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.3401706123124551D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.3224041829988748D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1327723585175892D+01
- SCFStatus : [4,1,1]    :: <SCF> = -16.01952568, dD = 0.48D+00, DIIS = 0.59D-01
- MakeRho                :: Rho CheckSum  = 0.3209579245311786D+01
- QCTC                   :: J[5] CheckSum  = 0.5067303829901132D+01
- ONX                    :: Kx[5] CheckSum  = 0.3038087657868410D+01
- FockNGrueven           :: F[5] CheckSum  = 0.2299025034863969D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.3219492201356506D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.3193951026064142D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[6] CheckSum  = 0.1298569813312395D+01
- SCFStatus : [5,1,1]    :: <SCF> = -16.33223063, dD = 0.99D-01, DIIS = 0.32D-01
- MakeRho                :: Rho CheckSum  = 0.3039753956556473D+01
- QCTC                   :: J[6] CheckSum  = 0.5465402185880770D+01
- ONX                    :: Kx[6] CheckSum  = 0.2973051744543378D+01
- FockNGrueven           :: F[6] CheckSum  = 0.2553136013185944D+01
- FockNGrueven           :: OrthoF[6] CheckSum  = 0.3179190150021138D+01
- DIIS                   :: F_DIIS[6] CheckSum  = 0.3172527719591332D+01
- RHEqs                  :: OrthoP[7] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[7] CheckSum  = 0.1284603830772427D+01
- SCFStatus : [6,1,1]    :: <SCF> = -16.39896446, dD = 0.50D-01, DIIS = 0.12D-01
- MakeRho                :: Rho CheckSum  = 0.2952304300663690D+01
- QCTC                   :: J[7] CheckSum  = 0.5674818127943817D+01
- ONX                    :: Kx[7] CheckSum  = 0.2941255237610109D+01
- FockNGrueven           :: F[7] CheckSum  = 0.2693220782887828D+01
- FockNGrueven           :: OrthoF[7] CheckSum  = 0.3171797018892222D+01
- DIIS                   :: F_DIIS[7] CheckSum  = 0.3170870091346293D+01
- RHEqs                  :: OrthoP[8] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[8] CheckSum  = 0.1281081586302282D+01
- SCFStatus : [7,1,1]    :: <SCF> = -16.41049736, dD = 0.18D-01, DIIS = 0.24D-02
- MakeRho                :: Rho CheckSum  = 0.2933588673910410D+01
- QCTC                   :: J[8] CheckSum  = 0.5724652415441173D+01
- ONX                    :: Kx[8] CheckSum  = 0.2933879491188677D+01
- FockNGrueven           :: F[8] CheckSum  = 0.2726892901860492D+01
- FockNGrueven           :: OrthoF[8] CheckSum  = 0.3171305040549955D+01
- DIIS                   :: F_DIIS[8] CheckSum  = 0.3173271691794532D+01
- RHEqs                  :: OrthoP[9] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[9] CheckSum  = 0.1279753609001562D+01
- SCFStatus : [8,1,1]    :: <SCF> = -16.41118593, dD = 0.59D-01, DIIS = 0.50D-03
- MakeRho                :: Rho CheckSum  = 0.2949368118772956D+01
- QCTC                   :: J[9] CheckSum  = 0.5706109422160060D+01
- ONX                    :: Kx[9] CheckSum  = 0.2936954128611347D+01
- FockNGrueven           :: F[9] CheckSum  = 0.2713238624697936D+01
- FockNGrueven           :: OrthoF[9] CheckSum  = 0.3171439764160229D+01
- DIIS                   :: F_DIIS[9] CheckSum  = 0.3171788530908465D+01
- RHEqs                  :: OrthoP[10] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[10] CheckSum  = 0.1279435783798529D+01
- SCFStatus : [9,1,1]    :: <SCF> = -16.41190547, dD = 0.11D-01, DIIS = 0.44D-03
- MakeRho                :: Rho CheckSum  = 0.2947742181756673D+01
- QCTC                   :: J[10] CheckSum  = 0.5716629835904314D+01
- ONX                    :: Kx[10] CheckSum  = 0.2935441388476591D+01
- FockNGrueven           :: F[10] CheckSum  = 0.2720378222386578D+01
- FockNGrueven           :: OrthoF[10] CheckSum  = 0.3171493250914700D+01
- DIIS                   :: F_DIIS[10] CheckSum  = 0.3171581505143814D+01
- RHEqs                  :: OrthoP[11] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[11] CheckSum  = 0.1279706079824941D+01
- SCFStatus : [10,1,1]   :: <SCF> = -16.41195349, dD = 0.30D-02, DIIS = 0.99D-04
+ QCTC                   :: J[0] CheckSum  = 0.6537841965674116D+02
+ FockNGrueven           :: F[0] CheckSum  = 0.3908414472943558D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.3560086960889918D+02
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[1] CheckSum  = 0.2593146854488680D+01
+ SCFStatus : [0,1,1]    :: <SCF> = 8.51823858, dD = 0.25D+01
+ MakeRho                :: Rho CheckSum  = 0.7925190785930478D+02
+ QCTC                   :: J[1] CheckSum  = 0.4202664690805912D+02
+ ONX                    :: Kx[1] CheckSum  = 0.5763259796265955D+01
+ FockNGrueven           :: F[1] CheckSum  = 0.2000782394931929D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1824266956294400D+02
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.3365677712800005D+02
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[2] CheckSum  = 0.2570026232930809D+01
+ SCFStatus : [1,1,1]    :: <SCF> = -70.95460122, dD = 0.23D-01, DIIS = 0.14D+00
+ MakeRho                :: Rho CheckSum  = 0.7913722212802287D+02
+ QCTC                   :: J[2] CheckSum  = 0.4204138013552212D+02
+ ONX                    :: Kx[2] CheckSum  = 0.5765792419346029D+01
+ FockNGrueven           :: F[2] CheckSum  = 0.2002282162971409D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1825613412228975D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.1786151848578890D+02
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.2236067977499791D+01
+ RHEqs                  :: P[3] CheckSum  = 0.2608299669400096D+01
+ SCFStatus : [2,1,1]    :: <SCF> = -71.01096157, dD = 0.14D+01, DIIS = 0.14D+00
+ MakeRho                :: Rho CheckSum  = 0.7855225808520364D+02
+ QCTC                   :: J[3] CheckSum  = 0.4435939923233020D+02
+ ONX                    :: Kx[3] CheckSum  = 0.5626759820560471D+01
+ FockNGrueven           :: F[3] CheckSum  = 0.2231313021965440D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.2030727484645344D+02
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.2003790861612841D+02
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[4] CheckSum  = 0.2189265641898659D+01
+ SCFStatus : [3,1,1]    :: <SCF> = -72.26838105, dD = 0.69D+00, DIIS = 0.94D-01
+ MakeRho                :: Rho CheckSum  = 0.7701294134550956D+02
+ QCTC                   :: J[4] CheckSum  = 0.4354897599470895D+02
+ ONX                    :: Kx[4] CheckSum  = 0.5702308639726883D+01
+ FockNGrueven           :: F[4] CheckSum  = 0.2151624460235190D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1958839479432273D+02
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.1963872205643706D+02
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[5] CheckSum  = 0.2178937245991926D+01
+ SCFStatus : [4,1,1]    :: <SCF> = -72.72331412, dD = 0.66D-01, DIIS = 0.14D-01
+ MakeRho                :: Rho CheckSum  = 0.7682718635025334D+02
+ QCTC                   :: J[5] CheckSum  = 0.4364227476389307D+02
+ ONX                    :: Kx[5] CheckSum  = 0.5693539116412494D+01
+ FockNGrueven           :: F[5] CheckSum  = 0.2160650607364123D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.1966908687589965D+02
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.1963560606704833D+02
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.2236067977499791D+01
+ RHEqs                  :: P[6] CheckSum  = 0.2169085294720268D+01
+ SCFStatus : [5,1,1]    :: <SCF> = -72.73089096, dD = 0.30D-01, DIIS = 0.30D-02
+ MakeRho                :: Rho CheckSum  = 0.7675297608937919D+02
+ QCTC                   :: J[6] CheckSum  = 0.4363653826078492D+02
+ ONX                    :: Kx[6] CheckSum  = 0.5693958975379180D+01
+ FockNGrueven           :: F[6] CheckSum  = 0.2160032438741820D+02
+ FockNGrueven           :: OrthoF[6] CheckSum  = 0.1966362172883404D+02
+ DIIS                   :: F_DIIS[6] CheckSum  = 0.1965771072007910D+02
+ RHEqs                  :: OrthoP[7] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[7] CheckSum  = 0.2166342839711966D+01
+ SCFStatus : [6,1,1]    :: <SCF> = -72.73164480, dD = 0.81D-02, DIIS = 0.85D-03
+ MakeRho                :: Rho CheckSum  = 0.7673616129610113D+02
+ QCTC                   :: J[7] CheckSum  = 0.4363119361447848D+02
+ ONX                    :: Kx[7] CheckSum  = 0.5694441393972424D+01
+ FockNGrueven           :: F[7] CheckSum  = 0.2159496356455164D+02
+ FockNGrueven           :: OrthoF[7] CheckSum  = 0.1965884290106930D+02
+ DIIS                   :: F_DIIS[7] CheckSum  = 0.1965850625777820D+02
+ RHEqs                  :: OrthoP[8] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[8] CheckSum  = 0.2166169579177006D+01
+ SCFStatus : [7,1,1]    :: <SCF> = -72.73168995, dD = 0.47D-03, DIIS = 0.52D-04
  Normal SCF convergence.b
- MakeS                  :: S CheckSum  = 0.4210526487207703D+01
- LowdinO                :: X CheckSum  = 0.4837507512471584D+01
- MakeT                  :: T CheckSum  = 0.6654696090339139D+01
- MakeU                  :: U CheckSum  = 0.1098817483977383D+01
- MakeRho                :: Rho CheckSum  = 0.2949387577158402D+01
- QCTC                   :: J[0] CheckSum  = 0.5714607150341742D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2257000727951255D+01
- FockNGrueven           :: F[0] CheckSum  = 0.1816161746974474D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2378549685966052D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[1] CheckSum  = 0.1301741580376298D+01
- SCFStatus : [0,2,1]    :: Basis set switch ...  MxD = 0.11D+01
- MakeRho                :: Rho CheckSum  = 0.2880162632823787D+01
- QCTC                   :: J[1] CheckSum  = 0.6238820122104757D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2260155698022715D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2243767953571242D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2449116492432625D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2379876262879557D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[2] CheckSum  = 0.1314294432439349D+01
- SCFStatus : [1,2,1]    :: <SCF> = -16.75719831, dD = 0.15D+00, DIIS = 0.26D-01
- MakeRho                :: Rho CheckSum  = 0.3085421454303495D+01
- QCTC                   :: J[2] CheckSum  = 0.5572981946792160D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2276777568543777D+01
- FockNGrueven           :: F[2] CheckSum  = 0.1731231746904610D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2390634944951334D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2388499134236435D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[3] CheckSum  = 0.1302807691075785D+01
- SCFStatus : [2,2,1]    :: <SCF> = -16.82138428, dD = 0.69D-01, DIIS = 0.73D-02
- MakeRho                :: Rho CheckSum  = 0.3095321691263425D+01
- QCTC                   :: J[3] CheckSum  = 0.5414513850476236D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2275446556366575D+01
- FockNGrueven           :: F[3] CheckSum  = 0.1628566025024729D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2402237205978757D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2386112630628963D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1297457059135151D+01
- SCFStatus : [3,2,1]    :: <SCF> = -16.80618273, dD = 0.88D-01, DIIS = 0.14D-01
- MakeRho                :: Rho CheckSum  = 0.2993319475171478D+01
- QCTC                   :: J[4] CheckSum  = 0.5769808475608732D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2269827251647120D+01
- FockNGrueven           :: F[4] CheckSum  = 0.1867011128971838D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2386669049599943D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2385527042032312D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[5] CheckSum  = 0.1298925497421611D+01
- SCFStatus : [4,2,1]    :: <SCF> = -16.82357980, dD = 0.17D-01, DIIS = 0.37D-02
- MakeRho                :: Rho CheckSum  = 0.3015457241301694D+01
- QCTC                   :: J[5] CheckSum  = 0.5698425917809512D+01
- HiCu                   :: Kxc[5] CheckSum  = 0.2271433287042501D+01
- FockNGrueven           :: F[5] CheckSum  = 0.1815230970418296D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.2385373628575941D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.2385416465943238D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[6] CheckSum  = 0.1298989710101504D+01
- SCFStatus : [5,2,1]    :: <SCF> = -16.82475883, dD = 0.23D-02, DIIS = 0.19D-03
- MakeRho                :: Rho CheckSum  = 0.3016459735334065D+01
- QCTC                   :: J[6] CheckSum  = 0.5696523602112133D+01
- HiCu                   :: Kxc[6] CheckSum  = 0.2271477916358249D+01
- FockNGrueven           :: F[6] CheckSum  = 0.1813890350381307D+01
- FockNGrueven           :: OrthoF[6] CheckSum  = 0.2385464243830898D+01
- DIIS                   :: F_DIIS[6] CheckSum  = 0.2385410030497164D+01
- RHEqs                  :: OrthoP[7] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[7] CheckSum  = 0.1299012896630685D+01
- SCFStatus : [6,2,1]    :: <SCF> = -16.82476048, dD = 0.16D-02, DIIS = 0.15D-03
- MakeRho                :: Rho CheckSum  = 0.3016582215699798D+01
- QCTC                   :: J[7] CheckSum  = 0.5695792849540602D+01
- HiCu                   :: Kxc[7] CheckSum  = 0.2271497118566743D+01
- FockNGrueven           :: F[7] CheckSum  = 0.1813372616058839D+01
- FockNGrueven           :: OrthoF[7] CheckSum  = 0.2385401183031149D+01
- DIIS                   :: F_DIIS[7] CheckSum  = 0.2385403022072368D+01
- RHEqs                  :: OrthoP[8] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[8] CheckSum  = 0.1299029800500388D+01
- SCFStatus : [7,2,1]    :: <SCF> = -16.82476281, dD = 0.17D-03, DIIS = 0.41D-04
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.1028683041963535D+00
- TForce                 :: dT/dR CheckSum  = 0.1315282503768640D+00
- TForce                 :: dU/dR CheckSum  = 0.3440561887234081D-02
- MakeRho                :: Rho CheckSum  = 0.3016774907546288D+01
- JForce                 :: dJ/dR CheckSum  = 0.1776728411096292D+00
- XCForce                :: dXC/dR CheckSum  = 0.1583901122076053D+00
-       Clone =      1 GeOp step =      1 total energy =         -16.82476281
-                   Max intl grad =     0.058275 between atoms    1   2   0   0
-     Max unconstrained cart grad =     0.061773      on atom     2
-                   RMS intl grad =     0.058085
-                  Max STRE displ =     0.154188 between atoms    1   2
-                       RMS displ =     0.290421
- MakeS                  :: S CheckSum  = 0.4272094737346107D+01
- LowdinO                :: X CheckSum  = 0.4956971139039935D+01
- MakeT                  :: T CheckSum  = 0.6658108976275957D+01
- MakeU                  :: U CheckSum  = 0.1105105079987441D+01
- P2Use                  :: P[0] CheckSum  = 0.1302427181792889D+01
- MakeRho                :: Rho CheckSum  = 0.3027635592019614D+01
- QCTC                   :: J[0] CheckSum  = 0.5731539958079885D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2298631305731947D+01
- FockNGrueven           :: F[0] CheckSum  = 0.1886089507742900D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2420742080808833D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[1] CheckSum  = 0.1296126808516490D+01
- SCFStatus : [0,2,2]    :: <SCF> = -16.85960390, dD = 0.84D-01
- MakeRho                :: Rho CheckSum  = 0.3133304398384846D+01
- QCTC                   :: J[1] CheckSum  = 0.5457103595600591D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2303803906938145D+01
- FockNGrueven           :: F[1] CheckSum  = 0.1702707590610304D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2435881415017914D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2420872324324820D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[2] CheckSum  = 0.1289165178967807D+01
- SCFStatus : [1,2,2]    :: <SCF> = -16.84853658, dD = 0.51D-01, DIIS = 0.12D-01
- MakeRho                :: Rho CheckSum  = 0.3061470356876011D+01
- QCTC                   :: J[2] CheckSum  = 0.5666118376925027D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2300329195847734D+01
- FockNGrueven           :: F[2] CheckSum  = 0.1839432771386017D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2421675009068433D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2421059701717274D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[3] CheckSum  = 0.1290166395165018D+01
- SCFStatus : [2,2,2]    :: <SCF> = -16.86139335, dD = 0.23D-01, DIIS = 0.18D-02
- MakeRho                :: Rho CheckSum  = 0.3036724023360722D+01
- QCTC                   :: J[3] CheckSum  = 0.5742661851767282D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2299383515132555D+01
- FockNGrueven           :: F[3] CheckSum  = 0.1893724850192057D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2421681919298272D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2421539707352941D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1290295460856551D+01
- SCFStatus : [3,2,2]    :: <SCF> = -16.86131394, dD = 0.11D-01, DIIS = 0.22D-02
- MakeRho                :: Rho CheckSum  = 0.3050051944087358D+01
- QCTC                   :: J[4] CheckSum  = 0.5700979797872430D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2300008501750481D+01
- FockNGrueven           :: F[4] CheckSum  = 0.1863900599131323D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2421441318030082D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2421497546007102D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[5] CheckSum  = 0.1290312216303150D+01
- SCFStatus : [4,2,2]    :: <SCF> = -16.86175188, dD = 0.17D-02, DIIS = 0.10D-03
- MakeRho                :: Rho CheckSum  = 0.3050108460119108D+01
- QCTC                   :: J[5] CheckSum  = 0.5700721027640692D+01
- HiCu                   :: Kxc[5] CheckSum  = 0.2300027925556400D+01
- FockNGrueven           :: F[5] CheckSum  = 0.1863730643706733D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.2421436587065090D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.2421454514686682D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[6] CheckSum  = 0.1290330252352727D+01
- SCFStatus : [5,2,2]    :: <SCF> = -16.86176916, dD = 0.73D-03, DIIS = 0.75D-04
- MakeRho                :: Rho CheckSum  = 0.3050353479389729D+01
- QCTC                   :: J[6] CheckSum  = 0.5700506140106732D+01
- HiCu                   :: Kxc[6] CheckSum  = 0.2300038469078870D+01
- FockNGrueven           :: F[6] CheckSum  = 0.1863586756464893D+01
- FockNGrueven           :: OrthoF[6] CheckSum  = 0.2421444996222091D+01
- DIIS                   :: F_DIIS[6] CheckSum  = 0.2421449081065263D+01
- RHEqs                  :: OrthoP[7] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[7] CheckSum  = 0.1290341731314220D+01
- SCFStatus : [6,2,2]    :: <SCF> = -16.86176859, dD = 0.17D-03, DIIS = 0.32D-04
- MakeRho                :: Rho CheckSum  = 0.3050562111363673D+01
- QCTC                   :: J[7] CheckSum  = 0.5699820050975352D+01
- HiCu                   :: Kxc[7] CheckSum  = 0.2300050499928999D+01
- FockNGrueven           :: F[7] CheckSum  = 0.1863100569747934D+01
- FockNGrueven           :: OrthoF[7] CheckSum  = 0.2421450288857820D+01
- DIIS                   :: F_DIIS[7] CheckSum  = 0.2421449918440660D+01
- RHEqs                  :: OrthoP[8] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[8] CheckSum  = 0.1290341111243148D+01
- SCFStatus : [7,2,2]    :: <SCF> = -16.86176871, dD = 0.14D-04, DIIS = 0.26D-05
+ MakeS                  :: S CheckSum  = 0.2908458400924159D+01
+ LowdinO                :: X CheckSum  = 0.3005208484683811D+01
+ MakeT                  :: T CheckSum  = 0.2936806503955944D+02
+ MakeRho                :: Rho CheckSum  = 0.7673496249251516D+02
+ QCTC                   :: J[0] CheckSum  = 0.4520185319775573D+02
+ HiCu                   :: Kxc[0] CheckSum  = 0.3655338529159481D+01
+ FockNGrueven           :: F[0] CheckSum  = 0.2011783666623861D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1871230057865771D+02
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[1] CheckSum  = 0.2156123180086102D+01
+ SCFStatus : [0,2,1]    :: Basis set switch ...  MxD = 0.20D+01
+ MakeRho                :: Rho CheckSum  = 0.1046572206172020D+03
+ QCTC                   :: J[1] CheckSum  = 0.4483169847684512D+02
+ HiCu                   :: Kxc[1] CheckSum  = 0.3681372088669232D+01
+ FockNGrueven           :: F[1] CheckSum  = 0.1977703761447152D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1839323911510738D+02
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.1868027527621076D+02
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.2236067977499791D+01
+ RHEqs                  :: P[2] CheckSum  = 0.2158529187347362D+01
+ SCFStatus : [1,2,1]    :: <SCF> = -75.27257320, dD = 0.17D-01, DIIS = 0.17D-01
+ MakeRho                :: Rho CheckSum  = 0.1046563383829478D+03
+ QCTC                   :: J[2] CheckSum  = 0.4486031945625745D+02
+ HiCu                   :: Kxc[2] CheckSum  = 0.3680530602762992D+01
+ FockNGrueven           :: F[2] CheckSum  = 0.1980498033286093D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1841855424103496D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.1851146590846235D+02
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[3] CheckSum  = 0.2166574013661000D+01
+ SCFStatus : [2,2,1]    :: <SCF> = -75.27623980, dD = 0.57D-01, DIIS = 0.13D-01
+ MakeRho                :: Rho CheckSum  = 0.1046239976500952D+03
+ QCTC                   :: J[3] CheckSum  = 0.4496180904580140D+02
+ HiCu                   :: Kxc[3] CheckSum  = 0.3677351006902876D+01
+ FockNGrueven           :: F[3] CheckSum  = 0.1990411833742642D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1850845389929306D+02
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.1851007047497744D+02
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[4] CheckSum  = 0.2167001108103009D+01
+ SCFStatus : [3,2,1]    :: <SCF> = -75.28202305, dD = 0.13D-02, DIIS = 0.23D-03
+ MakeRho                :: Rho CheckSum  = 0.1046268184052660D+03
+ QCTC                   :: J[4] CheckSum  = 0.4496368382039998D+02
+ HiCu                   :: Kxc[4] CheckSum  = 0.3677295639302135D+01
+ FockNGrueven           :: F[4] CheckSum  = 0.1990595270470247D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1851011902203172D+02
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.1851005164545059D+02
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[5] CheckSum  = 0.2166968587560290D+01
+ SCFStatus : [4,2,1]    :: <SCF> = -75.28202504, dD = 0.83D-04, DIIS = 0.12D-04
+ MakeRho                :: Rho CheckSum  = 0.1046265153595491D+03
+ QCTC                   :: J[5] CheckSum  = 0.4496360590204944D+02
+ HiCu                   :: Kxc[5] CheckSum  = 0.3677297645908636D+01
+ FockNGrueven           :: F[5] CheckSum  = 0.1990587642495773D+02
+ FockNGrueven           :: OrthoF[5] CheckSum  = 0.1851004969247671D+02
+ DIIS                   :: F_DIIS[5] CheckSum  = 0.1851005066774512D+02
+ RHEqs                  :: OrthoP[6] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[6] CheckSum  = 0.2166968486249532D+01
+ SCFStatus : [5,2,1]    :: <SCF> = -75.28202504, dD = 0.25D-06, DIIS = 0.49D-07
  Normal SCF convergence.b
- SForce                 :: dS/dR CheckSum  = 0.1076873434142154D+00
- TForce                 :: dT/dR CheckSum  = 0.1451538794128026D+00
- TForce                 :: dU/dR CheckSum  = 0.5161154953615105D-02
- MakeRho                :: Rho CheckSum  = 0.3050545632500259D+01
- JForce                 :: dJ/dR CheckSum  = 0.1975988118864502D+00
- XCForce                :: dXC/dR CheckSum  = 0.1651780499830152D+00
-       Clone =      1 GeOp step =      2 total energy =         -16.86176871
-                   Max intl grad =     0.065348 between atoms    1   3   0   0
-     Max unconstrained cart grad =     0.069404      on atom     2
-                   RMS intl grad =     0.065027
-                  Max STRE displ =     0.158753 between atoms    1   3
-                       RMS displ =     0.300000
- MakeS                  :: S CheckSum  = 0.4351138630819420D+01
- LowdinO                :: X CheckSum  = 0.5124042869646665D+01
- MakeT                  :: T CheckSum  = 0.6664276256516190D+01
- MakeU                  :: U CheckSum  = 0.1117363079856802D+01
- P2Use                  :: P[0] CheckSum  = 0.1302433694331479D+01
- MakeRho                :: Rho CheckSum  = 0.3064149482803183D+01
- QCTC                   :: J[0] CheckSum  = 0.5764404310032246D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2338846598513530D+01
- FockNGrueven           :: F[0] CheckSum  = 0.1977735416837550D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2465088089306661D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[1] CheckSum  = 0.1290796741170031D+01
- SCFStatus : [0,2,3]    :: <SCF> = -16.90003118, dD = 0.11D+00
- MakeRho                :: Rho CheckSum  = 0.3197071419121192D+01
- QCTC                   :: J[1] CheckSum  = 0.5438102952372514D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2344925099581510D+01
- FockNGrueven           :: F[1] CheckSum  = 0.1761686500334094D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2487754816089548D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2465527504118837D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[2] CheckSum  = 0.1284255069081409D+01
- SCFStatus : [1,2,3]    :: <SCF> = -16.88671947, dD = 0.48D-01, DIIS = 0.14D-01
- MakeRho                :: Rho CheckSum  = 0.3131551359614736D+01
- QCTC                   :: J[2] CheckSum  = 0.5621795952057584D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2342585954399257D+01
- FockNGrueven           :: F[2] CheckSum  = 0.1878729353465041D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2469950626434811D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2466013869806161D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[3] CheckSum  = 0.1284619078939044D+01
- SCFStatus : [2,2,3]    :: <SCF> = -16.90166215, dD = 0.37D-01, DIIS = 0.47D-02
- MakeRho                :: Rho CheckSum  = 0.3087615814728267D+01
- QCTC                   :: J[3] CheckSum  = 0.5749010404002458D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2341169791052033D+01
- FockNGrueven           :: F[3] CheckSum  = 0.1966592752738570D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2466441340873435D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2466760165061473D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1284274161472850D+01
- SCFStatus : [3,2,3]    :: <SCF> = -16.90338623, dD = 0.11D-01, DIIS = 0.19D-02
- MakeRho                :: Rho CheckSum  = 0.3099666940335511D+01
- QCTC                   :: J[4] CheckSum  = 0.5711276721757249D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2341549043548991D+01
- FockNGrueven           :: F[4] CheckSum  = 0.1939934678521433D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2466634583949783D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2466651034821282D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[5] CheckSum  = 0.1284284181098817D+01
- SCFStatus : [4,2,3]    :: <SCF> = -16.90369812, dD = 0.87D-03, DIIS = 0.76D-04
- MakeRho                :: Rho CheckSum  = 0.3099470261806526D+01
- QCTC                   :: J[5] CheckSum  = 0.5712735486869026D+01
- HiCu                   :: Kxc[5] CheckSum  = 0.2341541681485027D+01
- FockNGrueven           :: F[5] CheckSum  = 0.1940972229078674D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.2466620385737717D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.2466631316949401D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[6] CheckSum  = 0.1284286408935937D+01
- SCFStatus : [5,2,3]    :: <SCF> = -16.90370079, dD = 0.40D-03, DIIS = 0.36D-04
+ SForce                 :: dS/dR CheckSum  = 0.2853100530105613D+00
+ TForce                 :: dT/dR CheckSum  = 0.8508467410326926D+00
+ MakeRho                :: Rho CheckSum  = 0.1046265143787765D+03
+ JForce                 :: dJ/dR CheckSum  = 0.6764803964376128D+00
+ XCForce                :: dXC/dR CheckSum  = 0.4183687052557473D+00
+       Clone =      1 GeOp step =      1 Total Energy =         -75.28202504
+                   Max intl Grad =     0.067372 between atoms    2   1   3   0
+     Max Unconstrained Cart Grad =     0.050605      on atom     1
+                   RMS intl Grad =     0.038983
+                  Max STRE Displ =     0.003341 between atoms    1   3
+                  Max BEND Displ =    12.867151 between atoms    2   1   3
+                       RMS Displ =     0.129760
+ MakeS                  :: S CheckSum  = 0.2912555458671022D+01
+ LowdinO                :: X CheckSum  = 0.3000821692370510D+01
+ MakeT                  :: T CheckSum  = 0.2936797711787819D+02
+ P2Use                  :: P[0] CheckSum  = 0.2157933425967221D+01
+ MakeRho                :: Rho CheckSum  = 0.1045758542205946D+03
+ QCTC                   :: J[0] CheckSum  = 0.4496594376482830D+02
+ HiCu                   :: Kxc[0] CheckSum  = 0.3677759287995469D+01
+ FockNGrueven           :: F[0] CheckSum  = 0.1990819222554324D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1851223395086342D+02
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[1] CheckSum  = 0.2185727415875042D+01
+ SCFStatus : [0,2,2]    :: <SCF> = -75.28883114, dD = 0.86D-01
+ MakeRho                :: Rho CheckSum  = 0.1048326852297147D+03
+ QCTC                   :: J[1] CheckSum  = 0.4500841492161068D+02
+ HiCu                   :: Kxc[1] CheckSum  = 0.3676778409436507D+01
+ FockNGrueven           :: F[1] CheckSum  = 0.1994994069149695D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1855009557684469D+02
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.1851601548087685D+02
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[2] CheckSum  = 0.2184577310529608D+01
+ SCFStatus : [1,2,2]    :: <SCF> = -75.29099929, dD = 0.39D-02, DIIS = 0.35D-02
+ MakeRho                :: Rho CheckSum  = 0.1048277176134219D+03
+ QCTC                   :: J[2] CheckSum  = 0.4500210582219080D+02
+ HiCu                   :: Kxc[2] CheckSum  = 0.3676972941696954D+01
+ FockNGrueven           :: F[2] CheckSum  = 0.1994377261772900D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1854448087778167D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.1852614574386064D+02
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[3] CheckSum  = 0.2179941617348512D+01
+ SCFStatus : [2,2,2]    :: <SCF> = -75.29117911, dD = 0.14D-01, DIIS = 0.27D-02
+ MakeRho                :: Rho CheckSum  = 0.1048017667863882D+03
+ QCTC                   :: J[3] CheckSum  = 0.4498109876448846D+02
+ HiCu                   :: Kxc[3] CheckSum  = 0.3677599575440770D+01
+ FockNGrueven           :: F[3] CheckSum  = 0.1992323211865008D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1852578748089508D+02
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.1852610022320889D+02
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[4] CheckSum  = 0.2180075201446411D+01
+ SCFStatus : [3,2,2]    :: <SCF> = -75.29144245, dD = 0.34D-03, DIIS = 0.48D-04
+ MakeRho                :: Rho CheckSum  = 0.1048028636507469D+03
+ QCTC                   :: J[4] CheckSum  = 0.4498144346383642D+02
+ HiCu                   :: Kxc[4] CheckSum  = 0.3677590635345264D+01
+ FockNGrueven           :: F[4] CheckSum  = 0.1992356922110246D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1852609469910384D+02
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.1852609486599701D+02
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[5] CheckSum  = 0.2180072831640243D+01
+ SCFStatus : [4,2,2]    :: <SCF> = -75.29144255, dD = 0.76D-05, DIIS = 0.11D-05
  Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.1149823651540571D+00
- TForce                 :: dT/dR CheckSum  = 0.1592962470503282D+00
- TForce                 :: dU/dR CheckSum  = 0.7252536848322837D-02
- MakeRho                :: Rho CheckSum  = 0.3099428396592922D+01
- JForce                 :: dJ/dR CheckSum  = 0.2198196941412908D+00
- XCForce                :: dXC/dR CheckSum  = 0.1687283847811786D+00
-       Clone =      1 GeOp step =      3 total energy =         -16.90370079
-                   Max intl grad =     0.069681 between atoms    1   3   0   0
-     Max unconstrained cart grad =     0.075835      on atom     2
-                   RMS intl grad =     0.069350
-                  Max STRE displ =     0.158753 between atoms    1   3
-                       RMS displ =     0.300000
- MakeS                  :: S CheckSum  = 0.4445846499813721D+01
- LowdinO                :: X CheckSum  = 0.5364588543097628D+01
- MakeT                  :: T CheckSum  = 0.6673730306350507D+01
- MakeU                  :: U CheckSum  = 0.1139159482890141D+01
- P2Use                  :: P[0] CheckSum  = 0.1309385978996398D+01
- MakeRho                :: Rho CheckSum  = 0.3117195899708200D+01
- QCTC                   :: J[0] CheckSum  = 0.5820234714814886D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2394183946329481D+01
- FockNGrueven           :: F[0] CheckSum  = 0.2112980106811425D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2517246845761643D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[1] CheckSum  = 0.1287989639597953D+01
- SCFStatus : [0,2,4]    :: <SCF> = -16.94137825, dD = 0.14D+00
- MakeRho                :: Rho CheckSum  = 0.3276178888623770D+01
- QCTC                   :: J[1] CheckSum  = 0.5432842354656375D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2401137609986900D+01
- FockNGrueven           :: F[1] CheckSum  = 0.1856288283358910D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2551835370988169D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2518342713087168D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[2] CheckSum  = 0.1281834404761071D+01
- SCFStatus : [1,2,4]    :: <SCF> = -16.92786861, dD = 0.44D-01, DIIS = 0.16D-01
- MakeRho                :: Rho CheckSum  = 0.3219009348707639D+01
- QCTC                   :: J[2] CheckSum  = 0.5589802155776045D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2399779799122219D+01
- FockNGrueven           :: F[2] CheckSum  = 0.1954516895039623D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2532287596428601D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2522107123334045D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[3] CheckSum  = 0.1282280154351118D+01
- SCFStatus : [2,2,4]    :: <SCF> = -16.94370954, dD = 0.54D-01, DIIS = 0.78D-02
- MakeRho                :: Rho CheckSum  = 0.3156087856992434D+01
- QCTC                   :: J[3] CheckSum  = 0.5771738918339704D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2398224897769537D+01
- FockNGrueven           :: F[3] CheckSum  = 0.2077903850258517D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2521266077076197D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2522334433821137D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1281233614791738D+01
- SCFStatus : [3,2,4]    :: <SCF> = -16.94847434, dD = 0.12D-01, DIIS = 0.18D-02
- MakeRho                :: Rho CheckSum  = 0.3166856331335223D+01
- QCTC                   :: J[4] CheckSum  = 0.5735468827868962D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2398413687782701D+01
- FockNGrueven           :: F[4] CheckSum  = 0.2052526284027159D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2522293834931295D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2522246659261569D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1281261811832955D+01
- SCFStatus : [4,2,4]    :: <SCF> = -16.94878343, dD = 0.12D-02, DIIS = 0.15D-03
- MakeRho                :: Rho CheckSum  = 0.3166530175699146D+01
- QCTC                   :: J[5] CheckSum  = 0.5737416962668851D+01
- HiCu                   :: Kxc[5] CheckSum  = 0.2398398004448312D+01
- FockNGrueven           :: F[5] CheckSum  = 0.2053885689891047D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.2522261406252566D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.2522230351359478D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[6] CheckSum  = 0.1281270486509677D+01
- SCFStatus : [5,2,4]    :: <SCF> = -16.94876038, dD = 0.42D-03, DIIS = 0.50D-04
- MakeRho                :: Rho CheckSum  = 0.3166341749855510D+01
- QCTC                   :: J[6] CheckSum  = 0.5738088085689116D+01
- HiCu                   :: Kxc[6] CheckSum  = 0.2398403833745404D+01
- FockNGrueven           :: F[6] CheckSum  = 0.2054361035723106D+01
- FockNGrueven           :: OrthoF[6] CheckSum  = 0.2522226723383503D+01
- DIIS                   :: F_DIIS[6] CheckSum  = 0.2522226924236323D+01
- RHEqs                  :: OrthoP[7] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[7] CheckSum  = 0.1281267795682628D+01
- SCFStatus : [6,2,4]    :: <SCF> = -16.94876169, dD = 0.23D-04, DIIS = 0.17D-05
+ SForce                 :: dS/dR CheckSum  = 0.2950457856140675D+00
+ TForce                 :: dT/dR CheckSum  = 0.9280549010963796D+00
+ MakeRho                :: Rho CheckSum  = 0.1048028336824151D+03
+ JForce                 :: dJ/dR CheckSum  = 0.7446377172472866D+00
+ XCForce                :: dXC/dR CheckSum  = 0.4569508290878671D+00
+       Clone =      1 GeOp step =      2 Total Energy =         -75.29144255
+                   Max intl Grad =     0.014152 between atoms    2   1   3   0
+     Max Unconstrained Cart Grad =     0.015701      on atom     1
+                   RMS intl Grad =     0.009561
+                  Max STRE Displ =     0.013894 between atoms    1   3
+                  Max BEND Displ =     5.132485 between atoms    2   1   3
+                       RMS Displ =     0.055980
+ MakeS                  :: S CheckSum  = 0.2907224649938391D+01
+ LowdinO                :: X CheckSum  = 0.2985267169866667D+01
+ MakeT                  :: T CheckSum  = 0.2936762808145462D+02
+ P2Use                  :: P[0] CheckSum  = 0.2173393095661163D+01
+ MakeRho                :: Rho CheckSum  = 0.1047502648750930D+03
+ QCTC                   :: J[0] CheckSum  = 0.4497595519189352D+02
+ HiCu                   :: Kxc[0] CheckSum  = 0.3673807997733955D+01
+ FockNGrueven           :: F[0] CheckSum  = 0.1991343143958595D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1852344064960790D+02
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[1] CheckSum  = 0.2190891693475272D+01
+ SCFStatus : [0,2,3]    :: <SCF> = -75.29100140, dD = 0.49D-01
+ MakeRho                :: Rho CheckSum  = 0.1049018761531842D+03
+ QCTC                   :: J[1] CheckSum  = 0.4500289901157001D+02
+ HiCu                   :: Kxc[1] CheckSum  = 0.3673193723995464D+01
+ FockNGrueven           :: F[1] CheckSum  = 0.1993978998977538D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1854750459460900D+02
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.1852584507751731D+02
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[2] CheckSum  = 0.2190079134826644D+01
+ SCFStatus : [1,2,3]    :: <SCF> = -75.29159101, dD = 0.27D-02, DIIS = 0.23D-02
+ MakeRho                :: Rho CheckSum  = 0.1048979316762667D+03
+ QCTC                   :: J[2] CheckSum  = 0.4499858201772895D+02
+ HiCu                   :: Kxc[2] CheckSum  = 0.3673323453329206D+01
+ FockNGrueven           :: F[2] CheckSum  = 0.1993557460762926D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1854365765882019D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.1853162288218028D+02
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.2236067977499791D+01
+ RHEqs                  :: P[3] CheckSum  = 0.2186683471341409D+01
+ SCFStatus : [2,2,3]    :: <SCF> = -75.29167449, dD = 0.98D-02, DIIS = 0.18D-02
+ MakeRho                :: Rho CheckSum  = 0.1048760307441979D+03
+ QCTC                   :: J[3] CheckSum  = 0.4498492122829612D+02
+ HiCu                   :: Kxc[3] CheckSum  = 0.3673713641747392D+01
+ FockNGrueven           :: F[3] CheckSum  = 0.1992223500338653D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1853147955820981D+02
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.1853170870887987D+02
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[4] CheckSum  = 0.2186828551778069D+01
+ SCFStatus : [3,2,3]    :: <SCF> = -75.29179252, dD = 0.36D-03, DIIS = 0.45D-04
+ MakeRho                :: Rho CheckSum  = 0.1048773945845356D+03
+ QCTC                   :: J[4] CheckSum  = 0.4498516429855412D+02
+ HiCu                   :: Kxc[4] CheckSum  = 0.3673708805077734D+01
+ FockNGrueven           :: F[4] CheckSum  = 0.1992247225994545D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1853169720773463D+02
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.1853170375274404D+02
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[5] CheckSum  = 0.2186829820063109D+01
+ SCFStatus : [4,2,3]    :: <SCF> = -75.29179262, dD = 0.61D-05, DIIS = 0.10D-05
  Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.1325902180771233D+00
- TForce                 :: dT/dR CheckSum  = 0.1922250182312766D+00
- TForce                 :: dU/dR CheckSum  = 0.8196066838864178D-02
- MakeRho                :: Rho CheckSum  = 0.3166336889310853D+01
- JForce                 :: dJ/dR CheckSum  = 0.2635229366083078D+00
- XCForce                :: dXC/dR CheckSum  = 0.1822580615923569D+00
-       Clone =      1 GeOp step =      4 total energy =         -16.94876169
-                   Max intl grad =     0.072865 between atoms    1   2   0   0
-     Max unconstrained cart grad =     0.080938      on atom     2
-                   RMS intl grad =     0.072642
-                  Max STRE displ =     0.158753 between atoms    1   3
-                       RMS displ =     0.300000
- MakeS                  :: S CheckSum  = 0.4555773045250930D+01
- LowdinO                :: X CheckSum  = 0.5737952877741513D+01
- MakeT                  :: T CheckSum  = 0.6686518667768667D+01
- MakeU                  :: U CheckSum  = 0.1175491414847417D+01
- P2Use                  :: P[0] CheckSum  = 0.1324612977871767D+01
- MakeRho                :: Rho CheckSum  = 0.3192103099349224D+01
- QCTC                   :: J[0] CheckSum  = 0.5910187928484764D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2469063498512287D+01
- FockNGrueven           :: F[0] CheckSum  = 0.2305464815953623D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2576644385577169D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[1] CheckSum  = 0.1284489273388673D+01
- SCFStatus : [0,2,5]    :: <SCF> = -16.98021148, dD = 0.19D+00
- MakeRho                :: Rho CheckSum  = 0.3358540949703862D+01
- QCTC                   :: J[1] CheckSum  = 0.5471204449588551D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2476869846483752D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2008037788437873D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2623540497882896D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2578632300668574D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[2] CheckSum  = 0.1278152963739536D+01
- SCFStatus : [1,2,5]    :: <SCF> = -16.97368230, dD = 0.37D-01, DIIS = 0.17D-01
- MakeRho                :: Rho CheckSum  = 0.3312570338294794D+01
- QCTC                   :: J[2] CheckSum  = 0.5594429880997058D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2476033632927618D+01
- FockNGrueven           :: F[2] CheckSum  = 0.2085714596941404D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2605587888279533D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2587776922442702D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[3] CheckSum  = 0.1277285257731547D+01
- SCFStatus : [2,2,5]    :: <SCF> = -16.98741862, dD = 0.69D-01, DIIS = 0.10D-01
- MakeRho                :: Rho CheckSum  = 0.3240334081955988D+01
- QCTC                   :: J[3] CheckSum  = 0.5811230797199689D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2474517269103697D+01
- FockNGrueven           :: F[3] CheckSum  = 0.2232452239654276D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2585548882753863D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2587098492904484D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1276013281648919D+01
- SCFStatus : [3,2,5]    :: <SCF> = -16.99539279, dD = 0.96D-02, DIIS = 0.13D-02
- MakeRho                :: Rho CheckSum  = 0.3246885429849653D+01
- QCTC                   :: J[4] CheckSum  = 0.5784231869764676D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2474505968769174D+01
- FockNGrueven           :: F[4] CheckSum  = 0.2213524258985514D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2587140000755049D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2587017485513592D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1276101698121361D+01
- SCFStatus : [4,2,5]    :: <SCF> = -16.99553742, dD = 0.89D-03, DIIS = 0.12D-03
- MakeRho                :: Rho CheckSum  = 0.3246521461092891D+01
- QCTC                   :: J[5] CheckSum  = 0.5786463336502989D+01
- HiCu                   :: Kxc[5] CheckSum  = 0.2474517338343203D+01
- FockNGrueven           :: F[5] CheckSum  = 0.2215093561411922D+01
- FockNGrueven           :: OrthoF[5] CheckSum  = 0.2587010643333341D+01
- DIIS                   :: F_DIIS[5] CheckSum  = 0.2587008581194898D+01
- RHEqs                  :: OrthoP[6] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[6] CheckSum  = 0.1276100885057351D+01
- SCFStatus : [5,2,5]    :: <SCF> = -16.99553851, dD = 0.16D-03, DIIS = 0.12D-04
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.1738584009937847D+00
- TForce                 :: dT/dR CheckSum  = 0.2816818769676232D+00
- TForce                 :: dU/dR CheckSum  = 0.1897614975806982D-02
- MakeRho                :: Rho CheckSum  = 0.3246499231603103D+01
- JForce                 :: dJ/dR CheckSum  = 0.3710614402027721D+00
- XCForce                :: dXC/dR CheckSum  = 0.2262720429778441D+00
-       Clone =      1 GeOp step =      5 total energy =         -16.99553851
-                   Max intl grad =     0.080542 between atoms    1   2   0   0
-     Max unconstrained cart grad =     0.086975      on atom     2
-                   RMS intl grad =     0.080255
-                  Max STRE displ =     0.158753 between atoms    1   3
-                       RMS displ =     0.300000
- MakeS                  :: S CheckSum  = 0.4681382825251996D+01
- LowdinO                :: X CheckSum  = 0.6371362073636504D+01
- MakeT                  :: T CheckSum  = 0.6704430584029540D+01
- MakeU                  :: U CheckSum  = 0.1233662107434104D+01
- P2Use                  :: P[0] CheckSum  = 0.1339009963729334D+01
- MakeRho                :: Rho CheckSum  = 0.3290626653148198D+01
- QCTC                   :: J[0] CheckSum  = 0.6057444916778360D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2569897156569521D+01
- FockNGrueven           :: F[0] CheckSum  = 0.2568598789519137D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2654136928419787D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[1] CheckSum  = 0.1275359618275444D+01
- SCFStatus : [0,2,6]    :: <SCF> = -17.01297795, dD = 0.25D+00
- MakeRho                :: Rho CheckSum  = 0.3420500640612800D+01
- QCTC                   :: J[1] CheckSum  = 0.5606281483703414D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2580974342045105D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2245769831005630D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2706936056458750D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2657021639640937D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[2] CheckSum  = 0.1268069025059603D+01
- SCFStatus : [1,2,6]    :: <SCF> = -17.02663502, dD = 0.28D-01, DIIS = 0.16D-01
- MakeRho                :: Rho CheckSum  = 0.3384074574835364D+01
- QCTC                   :: J[2] CheckSum  = 0.5693206669380524D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2580148419675528D+01
- FockNGrueven           :: F[2] CheckSum  = 0.2303249986615313D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2693460398061836D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2671380249810777D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[3] CheckSum  = 0.1257641104175248D+01
- SCFStatus : [2,2,6]    :: <SCF> = -17.03554757, dD = 0.65D-01, DIIS = 0.11D-01
- MakeRho                :: Rho CheckSum  = 0.3308980476754812D+01
- QCTC                   :: J[3] CheckSum  = 0.5893988735961107D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2577856897507774D+01
- FockNGrueven           :: F[3] CheckSum  = 0.2442743284975088D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2670035902290202D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2670588784472205D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[4] CheckSum  = 0.1257491995420300D+01
- SCFStatus : [3,2,6]    :: <SCF> = -17.04361449, dD = 0.25D-02, DIIS = 0.33D-03
- MakeRho                :: Rho CheckSum  = 0.3309936436052517D+01
- QCTC                   :: J[4] CheckSum  = 0.5887557192327021D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2577854747986510D+01
- FockNGrueven           :: F[4] CheckSum  = 0.2438111567910167D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2670604253830118D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2670560970345543D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1257514837655896D+01
- SCFStatus : [4,2,6]    :: <SCF> = -17.04362097, dD = 0.29D-03, DIIS = 0.33D-04
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.2506761752468107D+00
- TForce                 :: dT/dR CheckSum  = 0.4765179291220742D+00
- TForce                 :: dU/dR CheckSum  = 0.2717879087821947D-01
- MakeRho                :: Rho CheckSum  = 0.3309959624895206D+01
- JForce                 :: dJ/dR CheckSum  = 0.5957539660594746D+00
- XCForce                :: dXC/dR CheckSum  = 0.3225951321544939D+00
-       Clone =      1 GeOp step =      6 total energy =         -17.04362097
-                   Max intl grad =     0.115006 between atoms    1   2   0   0
-     Max unconstrained cart grad =     0.099256      on atom     2
-                   RMS intl grad =     0.102350
-                  Max STRE displ =     0.121719 between atoms    1   2
-                  Max BEND displ =    17.188568 between atoms    2   1   3
-                       RMS displ =     0.255100
- MakeS                  :: S CheckSum  = 0.4797034127143719D+01
- LowdinO                :: X CheckSum  = 0.6903971887050686D+01
- MakeT                  :: T CheckSum  = 0.6727585926637476D+01
- MakeU                  :: U CheckSum  = 0.1302487749445265D+01
- P2Use                  :: P[0] CheckSum  = 0.1256569185307371D+01
- MakeRho                :: Rho CheckSum  = 0.3306619743617500D+01
- QCTC                   :: J[0] CheckSum  = 0.6197564062239448D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2678615556083212D+01
- FockNGrueven           :: F[0] CheckSum  = 0.2811631449758368D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2797152302658182D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[1] CheckSum  = 0.1265495491048620D+01
- SCFStatus : [0,2,7]    :: <SCF> = -17.07395627, dD = 0.12D+00
- MakeRho                :: Rho CheckSum  = 0.3472410271984999D+01
- QCTC                   :: J[1] CheckSum  = 0.6014365844550667D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2697282162363298D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2671219764133811D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2819065019790804D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2799075241185884D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[2] CheckSum  = 0.1263563971204607D+01
- SCFStatus : [1,2,7]    :: <SCF> = -17.09588249, dD = 0.70D-02, DIIS = 0.44D-02
- MakeRho                :: Rho CheckSum  = 0.3460519290477222D+01
- QCTC                   :: J[2] CheckSum  = 0.6035884686155676D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2696777473637069D+01
- FockNGrueven           :: F[2] CheckSum  = 0.2686779581183619D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2816762825267771D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2811361580752722D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[3] CheckSum  = 0.1257007316196656D+01
- SCFStatus : [2,2,7]    :: <SCF> = -17.09647645, dD = 0.22D-01, DIIS = 0.33D-02
- MakeRho                :: Rho CheckSum  = 0.3418335503410567D+01
- QCTC                   :: J[3] CheckSum  = 0.6089012918180683D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2694209910619819D+01
- FockNGrueven           :: F[3] CheckSum  = 0.2725827599434227D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2810881340544042D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2810606617129243D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1257180306467529D+01
- SCFStatus : [3,2,7]    :: <SCF> = -17.09723400, dD = 0.29D-02, DIIS = 0.36D-03
- MakeRho                :: Rho CheckSum  = 0.3418916733281902D+01
- QCTC                   :: J[4] CheckSum  = 0.6093898910869960D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2694342569634213D+01
- FockNGrueven           :: F[4] CheckSum  = 0.2729400642783866D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2810561121215627D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2810582861806311D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1257168133368064D+01
- SCFStatus : [4,2,7]    :: <SCF> = -17.09724912, dD = 0.15D-03, DIIS = 0.18D-04
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.3336288998060499D+00
- TForce                 :: dT/dR CheckSum  = 0.7662636458822303D+00
- TForce                 :: dU/dR CheckSum  = 0.4883476526072691D-01
- MakeRho                :: Rho CheckSum  = 0.3418910118399539D+01
- JForce                 :: dJ/dR CheckSum  = 0.8341683129563709D+00
- XCForce                :: dXC/dR CheckSum  = 0.4190595482916289D+00
-       Clone =      1 GeOp step =      7 total energy =         -17.09724912
-                   Max intl grad =     0.075458 between atoms    1   2   0   0
-     Max unconstrained cart grad =     0.070006      on atom     2
-                   RMS intl grad =     0.067986
-                  Max STRE displ =     0.079861 between atoms    1   2
-                  Max BEND displ =    14.467443 between atoms    2   1   3
-                       RMS displ =     0.190633
- MakeS                  :: S CheckSum  = 0.4888761630759067D+01
- LowdinO                :: X CheckSum  = 0.7499356991571145D+01
- MakeT                  :: T CheckSum  = 0.6752753872781760D+01
- MakeU                  :: U CheckSum  = 0.1368363389119448D+01
- P2Use                  :: P[0] CheckSum  = 0.1261086808920646D+01
- MakeRho                :: Rho CheckSum  = 0.3426544182504320D+01
- QCTC                   :: J[0] CheckSum  = 0.6381474886078952D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2779775074112183D+01
- FockNGrueven           :: F[0] CheckSum  = 0.3047633791894250D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.2981083850494396D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.1999999999999998D+01
- RHEqs                  :: P[1] CheckSum  = 0.1268709045480043D+01
- SCFStatus : [0,2,8]    :: <SCF> = -17.09421736, dD = 0.11D+00
- MakeRho                :: Rho CheckSum  = 0.3552301613175259D+01
- QCTC                   :: J[1] CheckSum  = 0.6227909717199170D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2793503135141788D+01
- FockNGrueven           :: F[1] CheckSum  = 0.2925332821337825D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.2999681818538958D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.2982775494304878D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[2] CheckSum  = 0.1267195512707118D+01
- SCFStatus : [1,2,8]    :: <SCF> = -17.10867614, dD = 0.54D-02, DIIS = 0.35D-02
- MakeRho                :: Rho CheckSum  = 0.3543056687875627D+01
- QCTC                   :: J[2] CheckSum  = 0.6244591068911805D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2793125678956917D+01
- FockNGrueven           :: F[2] CheckSum  = 0.2937746840967018D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.2997850519630056D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.2993188709215676D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[3] CheckSum  = 0.1261940903895405D+01
- SCFStatus : [2,2,8]    :: <SCF> = -17.10903885, dD = 0.16D-01, DIIS = 0.26D-02
- MakeRho                :: Rho CheckSum  = 0.3509867982235795D+01
- QCTC                   :: J[3] CheckSum  = 0.6291886940943408D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2791205106450835D+01
- FockNGrueven           :: F[3] CheckSum  = 0.2973822675250552D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.2992562185660891D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.2992513681719097D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[4] CheckSum  = 0.1262188354225893D+01
- SCFStatus : [3,2,8]    :: <SCF> = -17.10951454, dD = 0.13D-02, DIIS = 0.16D-03
- MakeRho                :: Rho CheckSum  = 0.3510703320027441D+01
- QCTC                   :: J[4] CheckSum  = 0.6293237861087558D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2791306296665639D+01
- FockNGrueven           :: F[4] CheckSum  = 0.2974743606603425D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.2992496600196298D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.2992508422134296D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[5] CheckSum  = 0.1262175276943865D+01
- SCFStatus : [4,2,8]    :: <SCF> = -17.10951722, dD = 0.82D-04, DIIS = 0.94D-05
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.4153829568402052D+00
- TForce                 :: dT/dR CheckSum  = 0.1048375545513537D+01
- TForce                 :: dU/dR CheckSum  = 0.7357701566510813D-01
- MakeRho                :: Rho CheckSum  = 0.3510699901631732D+01
- JForce                 :: dJ/dR CheckSum  = 0.1037243362530396D+01
- XCForce                :: dXC/dR CheckSum  = 0.5113055536766487D+00
-       Clone =      1 GeOp step =      8 total energy =         -17.10951722
-                   Max intl grad =     0.017097 between atoms    2   1   3   0
-     Max unconstrained cart grad =     0.013512      on atom     3
-                   RMS intl grad =     0.014002
-                  Max STRE displ =     0.014425 between atoms    1   3
-                  Max BEND displ =     4.897841 between atoms    2   1   3
-                       RMS displ =     0.053202
- MakeS                  :: S CheckSum  = 0.4907863498249554D+01
- LowdinO                :: X CheckSum  = 0.7647496987925362D+01
- MakeT                  :: T CheckSum  = 0.6757992270378770D+01
- MakeU                  :: U CheckSum  = 0.1381239974074731D+01
- P2Use                  :: P[0] CheckSum  = 0.1259918050848141D+01
- MakeRho                :: Rho CheckSum  = 0.3511121725900115D+01
- QCTC                   :: J[0] CheckSum  = 0.6351327615935887D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2808243278673502D+01
- FockNGrueven           :: F[0] CheckSum  = 0.3040947287026194D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.3044424338871980D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[1] CheckSum  = 0.1266837552045042D+01
- SCFStatus : [0,2,9]    :: <SCF> = -17.10754084, dD = 0.36D-01
- MakeRho                :: Rho CheckSum  = 0.3537709701686532D+01
- QCTC                   :: J[1] CheckSum  = 0.6332410824901659D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2810766680881908D+01
- FockNGrueven           :: F[1] CheckSum  = 0.3025178078189961D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.3047227560015652D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.3044702347213711D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[2] CheckSum  = 0.1266675945966473D+01
- SCFStatus : [1,2,9]    :: <SCF> = -17.10841882, dD = 0.47D-03, DIIS = 0.35D-03
- MakeRho                :: Rho CheckSum  = 0.3536762689651196D+01
- QCTC                   :: J[2] CheckSum  = 0.6333696585887802D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2810714717836730D+01
- FockNGrueven           :: F[2] CheckSum  = 0.3026164457948930D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.3047089658592257D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.3046601742665880D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[3] CheckSum  = 0.1265935154690493D+01
- SCFStatus : [2,2,9]    :: <SCF> = -17.10842207, dD = 0.23D-02, DIIS = 0.29D-03
- MakeRho                :: Rho CheckSum  = 0.3532786690527864D+01
- QCTC                   :: J[3] CheckSum  = 0.6336427458222014D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2810403555093027D+01
- FockNGrueven           :: F[3] CheckSum  = 0.3028441175803792D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.3046670865335967D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.3046538401538595D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.2000000000000001D+01
- RHEqs                  :: P[4] CheckSum  = 0.1265897917373176D+01
- SCFStatus : [3,2,9]    :: <SCF> = -17.10842821, dD = 0.62D-03, DIIS = 0.11D-03
- MakeRho                :: Rho CheckSum  = 0.3532286731134642D+01
- QCTC                   :: J[4] CheckSum  = 0.6338093419615846D+01
- HiCu                   :: Kxc[4] CheckSum  = 0.2810401689212523D+01
- FockNGrueven           :: F[4] CheckSum  = 0.3029661758770581D+01
- FockNGrueven           :: OrthoF[4] CheckSum  = 0.3046534374522750D+01
- DIIS                   :: F_DIIS[4] CheckSum  = 0.3046537157681858D+01
- RHEqs                  :: OrthoP[5] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[5] CheckSum  = 0.1265895328970758D+01
- SCFStatus : [4,2,9]    :: <SCF> = -17.10842944, dD = 0.19D-04, DIIS = 0.23D-05
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.4350530161047271D+00
- TForce                 :: dT/dR CheckSum  = 0.1115333645301232D+01
- TForce                 :: dU/dR CheckSum  = 0.7607202837217743D-01
- MakeRho                :: Rho CheckSum  = 0.3532290224830780D+01
- JForce                 :: dJ/dR CheckSum  = 0.1080276811991346D+01
- XCForce                :: dXC/dR CheckSum  = 0.5324792853802801D+00
-       Clone =      1 GeOp step =      9 total energy =         -17.10842944
-                   Max intl grad =     0.006401 between atoms    1   3   0   0
-     Max unconstrained cart grad =     0.009101      on atom     1
-                   RMS intl grad =     0.005234
-                  Max STRE displ =     0.006775 between atoms    1   3
-                  Max BEND displ =     0.968281 between atoms    2   1   3
-                       RMS displ =     0.013768
- MakeS                  :: S CheckSum  = 0.4902153848102270D+01
- LowdinO                :: X CheckSum  = 0.7600765329096132D+01
- MakeT                  :: T CheckSum  = 0.6755489777902156D+01
- MakeU                  :: U CheckSum  = 0.1374811842208563D+01
- P2Use                  :: P[0] CheckSum  = 0.1263427433320618D+01
- MakeRho                :: Rho CheckSum  = 0.3528772961212758D+01
- QCTC                   :: J[0] CheckSum  = 0.6315545464239691D+01
- HiCu                   :: Kxc[0] CheckSum  = 0.2803780554251260D+01
- FockNGrueven           :: F[0] CheckSum  = 0.3009416786234512D+01
- FockNGrueven           :: OrthoF[0] CheckSum  = 0.3044232047533698D+01
- RHEqs                  :: OrthoP[1] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[1] CheckSum  = 0.1266262666857547D+01
- SCFStatus : [0,2,10]   :: <SCF> = -17.10936241, dD = 0.20D-01
- MakeRho                :: Rho CheckSum  = 0.3522615074460458D+01
- QCTC                   :: J[1] CheckSum  = 0.6335476343419242D+01
- HiCu                   :: Kxc[1] CheckSum  = 0.2803072628335864D+01
- FockNGrueven           :: F[1] CheckSum  = 0.3024721648322219D+01
- FockNGrueven           :: OrthoF[1] CheckSum  = 0.3042713557746772D+01
- DIIS                   :: F_DIIS[1] CheckSum  = 0.3044076736993381D+01
- RHEqs                  :: OrthoP[2] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[2] CheckSum  = 0.1266449941670090D+01
- SCFStatus : [1,2,10]   :: <SCF> = -17.10948506, dD = 0.99D-03, DIIS = 0.64D-03
- MakeRho                :: Rho CheckSum  = 0.3524050707995313D+01
- QCTC                   :: J[2] CheckSum  = 0.6332418705292312D+01
- HiCu                   :: Kxc[2] CheckSum  = 0.2803123070744578D+01
- FockNGrueven           :: F[2] CheckSum  = 0.3022442649240457D+01
- FockNGrueven           :: OrthoF[2] CheckSum  = 0.3042969770106723D+01
- DIIS                   :: F_DIIS[2] CheckSum  = 0.3043641677248373D+01
- RHEqs                  :: OrthoP[3] CheckSum  = 0.2000000000000000D+01
- RHEqs                  :: P[3] CheckSum  = 0.1266865011245767D+01
- SCFStatus : [2,2,10]   :: <SCF> = -17.10949609, dD = 0.27D-02, DIIS = 0.46D-03
- MakeRho                :: Rho CheckSum  = 0.3527841439425345D+01
- QCTC                   :: J[3] CheckSum  = 0.6324186806430438D+01
- HiCu                   :: Kxc[3] CheckSum  = 0.2803286549241193D+01
- FockNGrueven           :: F[3] CheckSum  = 0.3016275965725702D+01
- FockNGrueven           :: OrthoF[3] CheckSum  = 0.3043663539746621D+01
- DIIS                   :: F_DIIS[3] CheckSum  = 0.3043654433638106D+01
- RHEqs                  :: OrthoP[4] CheckSum  = 0.1999999999999999D+01
- RHEqs                  :: P[4] CheckSum  = 0.1266855357455958D+01
- SCFStatus : [3,2,10]   :: <SCF> = -17.10950879, dD = 0.33D-04, DIIS = 0.61D-05
- Normal SCF convergence.a
- SForce                 :: dS/dR CheckSum  = 0.4307895184207370D+00
- TForce                 :: dT/dR CheckSum  = 0.1102741210332613D+01
- TForce                 :: dU/dR CheckSum  = 0.7117530076958242D-01
- MakeRho                :: Rho CheckSum  = 0.3527782517681256D+01
- JForce                 :: dJ/dR CheckSum  = 0.1071239776662608D+01
- XCForce                :: dXC/dR CheckSum  = 0.5286310265539750D+00
-     Geometry optimization of Clone # 1 converged.
-       Clone =      1 GeOp step =     10 total energy =         -17.10950879
-     Max unconstrained cart grad =     0.002533      on atom     1
+ SForce                 :: dS/dR CheckSum  = 0.2966881868880815D+00
+ TForce                 :: dT/dR CheckSum  = 0.9370807155031788D+00
+ MakeRho                :: Rho CheckSum  = 0.1048773984999043D+03
+ JForce                 :: dJ/dR CheckSum  = 0.7703945130951947D+00
+ XCForce                :: dXC/dR CheckSum  = 0.4715050383876413D+00
+       Clone =      1 GeOp step =      3 Total Energy =         -75.29179262
+                   Max intl Grad =     0.008595 between atoms    2   1   3   0
+     Max Unconstrained Cart Grad =     0.008040      on atom     1
+                   RMS intl Grad =     0.005346
+                  Max STRE Displ =     0.003983 between atoms    1   3
+                  Max BEND Displ =     1.939350 between atoms    2   1   3
+                       RMS Displ =     0.020480
+ MakeS                  :: S CheckSum  = 0.2908352819383064D+01
+ LowdinO                :: X CheckSum  = 0.2989596441254771D+01
+ MakeT                  :: T CheckSum  = 0.2936772507982035D+02
+ P2Use                  :: P[0] CheckSum  = 0.2189133318830547D+01
+ MakeRho                :: Rho CheckSum  = 0.1048944089045409D+03
+ QCTC                   :: J[0] CheckSum  = 0.4498643799723542D+02
+ HiCu                   :: Kxc[0] CheckSum  = 0.3674688975281718D+01
+ FockNGrueven           :: F[0] CheckSum  = 0.1992499039305179D+02
+ FockNGrueven           :: OrthoF[0] CheckSum  = 0.1853223420506110D+02
+ RHEqs                  :: OrthoP[1] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[1] CheckSum  = 0.2183221084097120D+01
+ SCFStatus : [0,2,4]    :: <SCF> = -75.29185914, dD = 0.16D-01
+ MakeRho                :: Rho CheckSum  = 0.1048445814269428D+03
+ QCTC                   :: J[1] CheckSum  = 0.4497857750541511D+02
+ HiCu                   :: Kxc[1] CheckSum  = 0.3674861397794556D+01
+ FockNGrueven           :: F[1] CheckSum  = 0.1991729019999066D+02
+ FockNGrueven           :: OrthoF[1] CheckSum  = 0.1852521788897769D+02
+ DIIS                   :: F_DIIS[1] CheckSum  = 0.1853153240089190D+02
+ RHEqs                  :: OrthoP[2] CheckSum  = 0.2236067977499790D+01
+ RHEqs                  :: P[2] CheckSum  = 0.2183447888105591D+01
+ SCFStatus : [1,2,4]    :: <SCF> = -75.29193671, dD = 0.77D-03, DIIS = 0.68D-03
+ MakeRho                :: Rho CheckSum  = 0.1048457077203162D+03
+ QCTC                   :: J[2] CheckSum  = 0.4497982459901371D+02
+ HiCu                   :: Kxc[2] CheckSum  = 0.3674824191367097D+01
+ FockNGrueven           :: F[2] CheckSum  = 0.1991850806843598D+02
+ FockNGrueven           :: OrthoF[2] CheckSum  = 0.1852632800166263D+02
+ DIIS                   :: F_DIIS[2] CheckSum  = 0.1852987850117139D+02
+ RHEqs                  :: OrthoP[3] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[3] CheckSum  = 0.2184475185051638D+01
+ SCFStatus : [2,2,4]    :: <SCF> = -75.29194378, dD = 0.30D-02, DIIS = 0.52D-03
+ MakeRho                :: Rho CheckSum  = 0.1048525251276366D+03
+ QCTC                   :: J[3] CheckSum  = 0.4498388364009907D+02
+ HiCu                   :: Kxc[3] CheckSum  = 0.3674708667180818D+01
+ FockNGrueven           :: F[3] CheckSum  = 0.1992247306765145D+02
+ FockNGrueven           :: OrthoF[3] CheckSum  = 0.1852994393162121D+02
+ DIIS                   :: F_DIIS[3] CheckSum  = 0.1852985670516723D+02
+ RHEqs                  :: OrthoP[4] CheckSum  = 0.2236067977499791D+01
+ RHEqs                  :: P[4] CheckSum  = 0.2184425963272402D+01
+ SCFStatus : [3,2,4]    :: <SCF> = -75.29195410, dD = 0.12D-03, DIIS = 0.16D-04
+ MakeRho                :: Rho CheckSum  = 0.1048520740606390D+03
+ QCTC                   :: J[4] CheckSum  = 0.4498379025116643D+02
+ HiCu                   :: Kxc[4] CheckSum  = 0.3674710714438330D+01
+ FockNGrueven           :: F[4] CheckSum  = 0.1992238185577628D+02
+ FockNGrueven           :: OrthoF[4] CheckSum  = 0.1852986043747237D+02
+ DIIS                   :: F_DIIS[4] CheckSum  = 0.1852985819828807D+02
+ RHEqs                  :: OrthoP[5] CheckSum  = 0.2236067977499789D+01
+ RHEqs                  :: P[5] CheckSum  = 0.2184425644106928D+01
+ SCFStatus : [4,2,4]    :: <SCF> = -75.29195411, dD = 0.22D-05, DIIS = 0.37D-06
+ Normal SCF convergence.b
+ SForce                 :: dS/dR CheckSum  = 0.2959139421033509D+00
+ TForce                 :: dT/dR CheckSum  = 0.9321562395624101D+00
+ MakeRho                :: Rho CheckSum  = 0.1048520741931365D+03
+ JForce                 :: dJ/dR CheckSum  = 0.7610443854740145D+00
+ XCForce                :: dXC/dR CheckSum  = 0.4659012003931106D+00
+     Geometry optimization of Clone # 1 converged in   4 steps.
+       Clone =      1 GeOp step =      4 Total Energy =         -75.29195411
+     Max Unconstrained Cart Grad =     0.000372      on atom     2
 Energies of final structures:
  Clone #         Energy         
-     1      -17.1095087948
->-Successful MondoSCF run 09/14/03 @ 12:39:26-<
+     1      -75.2919541086
+>-Successful MondoSCF run 09/18/03 @ 10:37:02-<

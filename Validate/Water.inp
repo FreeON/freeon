@@ -15,16 +15,18 @@ MondoSCF benchmark # RBLYP/CEP-31G HF=-16.82497
 Charge=0
 Multiplicity=1
 
-OutPut=pdb
+OutPut=xsf
 DebugAll =(MinDebug,CheckSums)
 
 Guess=Core
 SCFMethod=(RH,RH)
-BasisSets=(SBKJC,SBKJC)
+BasisSets=(STO-2G,STO-3G)
 ModelChem=(HF,BLYPxc)
-Accuracy =(Loose,Good)
+Accuracy =(Loose,Tight)
 
-Grad=(Optimize,NoGDIIS,PrimInt,NoBackTr,DiagHess)
+Grad=(Optimize,PrimInt,NoGDIIS,NoBackTr,BiSect)
+
+Geometry=InAU
 
 MPIInvoke="mpirun"
 MPIProcessors=2

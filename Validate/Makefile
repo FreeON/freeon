@@ -44,6 +44,7 @@ small:
 	m Diamond.inp Diamond.out    Diamond.log
 	m Na2Cl2.inp  Na2Cl2.out     Na2Cl2.log
 	m PeroxideCycle.inp PeroxideCycle.out PeroxideCycle.log
+	m Histidine.inp     Histidine.out     Histidine.log 
 #
 big:	
 	m Caffiene.inp     Caffiene.out      Caffine.log
@@ -62,6 +63,7 @@ pbs:
 	./sub_pbs Diamond       1
 	./sub_pbs Na2Cl2        1
 	./sub_pbs PeroxideCycle 1
+	./sub_pbs Histidine     1
 	./sub_pbs MgO           1
 	./sub_pbs Caffiene      1
 	./sub_pbs BetaCarotene  1
@@ -78,6 +80,7 @@ pbs_parallel:
 	./sub_pbs Diamond       4
 	./sub_pbs Na2Cl2        2
 	./sub_pbs PeroxideCycle 2
+	./sub_pbs Histidine     4
 	./sub_pbs MgO           2
 	./sub_pbs Caffiene      4
 	./sub_pbs BetaCarotene  8
