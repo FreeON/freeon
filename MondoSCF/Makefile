@@ -17,8 +17,10 @@ ObjectFiles = SCFLocals.o            \
               ParseInput.o           \
               SetSCFs.o              \
               DrvSCFs.o              \
+              DrvFrcs.o              \
               ChkSCFs.o              \
               MondoSCF.o
+#              MondoSCF_Grads.o
 
 all:	$(ObjectFiles) 
 	$(LD) $(LDFLAGS) MondoSCF $(ObjectFiles) $(LibOpts) $(F90_LIBRARIES)
