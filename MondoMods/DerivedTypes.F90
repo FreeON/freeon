@@ -1,12 +1,7 @@
-!--  This source code is part of the MondoSCF suite of 
-!--  linear scaling electronic structure codes.  
-!
-!--  Matt Challacombe
-!--  Los Alamos National Laboratory
-!--  Copyright 1999, The University of California
-!
+!-----------------------------------------------------------------
 !    DERIVED TYPES AND COMPOSED OBJECTS
-!
+!    Author:  Matt Challacombe
+!-----------------------------------------------------------------
 MODULE DerivedTypes
    USE GlobalScalars
    USE GlobalCharacters
