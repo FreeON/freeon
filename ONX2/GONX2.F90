@@ -112,7 +112,7 @@ PROGRAM GONX2
   ! Get denstiy matrix.
   !
 #ifdef ONX2_PARALLEL
-  IF(MyID.EQ.ROOT) &
+  !IF(MyID.EQ.ROOT) &
 #endif
   !WRITE(*,*) '-------- We are in GONX2 --------'
   !
