@@ -215,29 +215,13 @@ PROGRAM JForce
            LatFrc_J_PFF%D(I,J) = Zero
         ENDDO
      ENDDO
-     IF(PrintFlags%Key==DEBUG_MAXIMUM) THEN
-!       Print The Lattice Forces
-        CALL OpenASCII(OutFile,Out)
-        WRITE(Out,*) 'LatFrc_J'
-        WRITE(*,*)   'LatFrc_J'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_J%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_J%D(I,J),J=1,3) 
-        ENDDO
-        WRITE(Out,*) 'LatFrc_J_Dip'
-        WRITE(*,*)   'LatFrc_J_Dip'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_J_Dip%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_J_Dip%D(I,J),J=1,3) 
-        ENDDO
-        WRITE(Out,*) 'LatFrc_J_PFF'
-        WRITE(*,*)   'LatFrc_J_PFF'
-        DO I=1,3
-           WRITE(Out,*) (LatFrc_J_PFF%D(I,J),J=1,3) 
-           WRITE(*,*)   (LatFrc_J_PFF%D(I,J),J=1,3) 
-        ENDDO
-        CLOSE(Out)
-     ENDIF
+!    Do some printing
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force')
+     CALL Print_LatForce(GMLoc,LatFrc_J%D,'J Lattice Force',Unit_O=6)
+     CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force')
+     CALL Print_LatForce(GMLoc,LatFrc_J_Dip%D,'J Dipole Lattice Force',Unit_O=6)
+     CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force')
+     CALL Print_LatForce(GMLoc,LatFrc_J_PFF%D,'J  PFF   Lattice Force',Unit_O=6)
 !    Sum in the J contribution to total force
      DO AtA=1,NAtoms
         A1=3*(AtA-1)+1
@@ -253,6 +237,9 @@ PROGRAM JForce
 #ifdef PARALLEL
   ENDIF
 #endif
+! Do some printing
+  CALL Print_Force(GMLoc,JFrc,'J Force')
+  CALL Print_Force(GMLoc,JFrc,'J Force',Unit_O=6)
 ! Do some checksumming and IO 
   CALL PChkSum(JFrc,    'dJ/dR',Proc_O=Prog)  
   CALL PChkSum(LatFrc_J,'LFrcJ',Proc_O=Prog)  
