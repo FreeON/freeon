@@ -20,23 +20,23 @@
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4
-      INTEGER       :: CrtSet5,CrtSet6,CrtSet7,CrtSet8
-      INTEGER       :: CrtSet9,OffSet,GOA,GOB,GOC,GOD
+      INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4 ,CrtSet5 ,CrtSet6
+      INTEGER       :: CrtSet7,CrtSet8,CrtSet9,CrtSet10,CrtSet11,CrtSet12
+      INTEGER       :: OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       CrtSet1=GOA
       CrtSet2=GOA+1
       CrtSet3=GOA+2
-      CrtSet4=GOB+3
-      CrtSet5=GOB+4
-      CrtSet6=GOB+5
-      CrtSet7=GOC+6
-      CrtSet8=GOC+7
-      CrtSet9=GOC+8
-      CrtSet10=GOD+9
-      CrtSet11=GOD+10
-      CrtSet12=GOD+11
+      CrtSet4=GOB
+      CrtSet5=GOB+1
+      CrtSet6=GOB+2
+      CrtSet7=GOC
+      CrtSet8=GOC+1
+      CrtSet9=GOC+2
+      CrtSet10=GOD
+      CrtSet11=GOD+1
+      CrtSet12=GOD+2
       I1Bar1=0.0d0
       I2Bar1=0.0d0
       I3Bar1=0.0d0
@@ -6002,9 +6002,9 @@
       V(2284)=CDz*Ib20Bar4
       V(2285)=CDz*Ic10Bar10
       V(2286)=ABz*V(2217)
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia11Bar5+dI(OffSet,CrtSet1)+V(4)
       W2=V(6)+V(7)+V(8)+V(11)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar5+dI(OffSet,CrtSet4)+V(6)
       W2=V(7)+V(12)+V(15)+V(20)
@@ -6022,21 +6022,21 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet10)=W8+W9
-            dI(OffSet,CrtSet2)=Ia12Bar5+dI(OffSet,CrtSet2)+V(32)+V(35)
+      dI(OffSet,CrtSet2)=Ia12Bar5+dI(OffSet,CrtSet2)+V(32)+V(35)
       dI(OffSet,CrtSet5)=Ib12Bar5+dI(OffSet,CrtSet5)+V(36)+V(37)+V(41)
       dI(OffSet,CrtSet8)=Ic5Bar12+dI(OffSet,CrtSet8)+V(44)+V(45)
       W1=dI(OffSet,CrtSet11)+V(46)+V(47)+V(48)+V(49)
       W2=V(50)+V(51)+V(52)
       W3=V(53)+V(54)+V(55)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar5+dI(OffSet,CrtSet3)+V(56)+V(59)
+      dI(OffSet,CrtSet3)=Ia15Bar5+dI(OffSet,CrtSet3)+V(56)+V(59)
       dI(OffSet,CrtSet6)=Ib15Bar5+dI(OffSet,CrtSet6)+V(60)+V(61)+V(65)
       dI(OffSet,CrtSet9)=Ic5Bar15+dI(OffSet,CrtSet9)+V(68)+V(69)
       W1=dI(OffSet,CrtSet12)+V(70)+V(71)+V(72)+V(73)
       W2=V(74)+V(75)+V(76)
       W3=V(77)+V(78)+V(79)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar5+dI(OffSet,CrtSet1)+V(32)+V(35)
       W1=Ib12Bar5+dI(OffSet,CrtSet4)+V(36)
       W2=V(81)+V(82)+V(84)+V(89)
@@ -6052,7 +6052,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia13Bar5+dI(OffSet,CrtSet2)+V(4)
       W2=V(6)+V(7)+V(103)+V(106)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar5+dI(OffSet,CrtSet5)+V(107)+V(108)+V(112)
       dI(OffSet,CrtSet8)=Ic6Bar12+dI(OffSet,CrtSet8)+V(115)+V(116)
       W1=I2Bar5+dI(OffSet,CrtSet11)+V(3)
@@ -6060,14 +6060,14 @@
       W3=V(119)+V(120)+V(121)
       W4=V(122)+V(123)+V(124)+V(125)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar5+dI(OffSet,CrtSet3)+V(126)+V(129)
+      dI(OffSet,CrtSet3)=Ia16Bar5+dI(OffSet,CrtSet3)+V(126)+V(129)
       dI(OffSet,CrtSet6)=Ib16Bar5+dI(OffSet,CrtSet6)+V(130)+V(131)+V(135)
       dI(OffSet,CrtSet9)=Ic6Bar15+dI(OffSet,CrtSet9)+V(138)+V(139)
       W1=dI(OffSet,CrtSet12)+V(140)+V(141)+V(142)+V(143)
       W2=V(144)+V(145)+V(146)
       W3=V(147)+V(148)+V(149)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar5+dI(OffSet,CrtSet1)+V(56)+V(59)
       W1=Ib15Bar5+dI(OffSet,CrtSet4)+V(60)
       W2=V(151)+V(152)+V(154)+V(159)
@@ -6081,7 +6081,7 @@
       W4=-V(159)+V(162)
       W5=V(164)-V(169)+V(171)+V(172)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar5+dI(OffSet,CrtSet2)+V(126)+V(129)
+      dI(OffSet,CrtSet2)=Ia16Bar5+dI(OffSet,CrtSet2)+V(126)+V(129)
       dI(OffSet,CrtSet5)=Ib16Bar5+dI(OffSet,CrtSet5)+V(130)+V(173)+V(176)
       dI(OffSet,CrtSet8)=Ic8Bar12+dI(OffSet,CrtSet8)+V(179)+V(180)
       W1=dI(OffSet,CrtSet11)+V(140)+V(141)+V(142)+V(143)
@@ -6090,7 +6090,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar5+dI(OffSet,CrtSet3)+V(4)
       W2=V(6)+V(7)+V(188)+V(189)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar5+dI(OffSet,CrtSet6)+V(190)+V(194)+V(195)
       dI(OffSet,CrtSet9)=Ic8Bar15+dI(OffSet,CrtSet9)+V(198)+V(199)
       W1=I2Bar5+dI(OffSet,CrtSet12)+V(3)
@@ -6098,9 +6098,9 @@
       W3=V(202)+V(203)+V(204)
       W4=V(205)+V(206)+V(207)+V(208)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia12Bar5+dI(OffSet,CrtSet1)+V(32)
       W2=V(81)+V(82)+V(210)+V(211)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar5+dI(OffSet,CrtSet4)+V(36)+V(37)+V(41)
       W1=Ic6Bar11+dI(OffSet,CrtSet7)+V(95)
@@ -6112,7 +6112,7 @@
       W4=V(102)+V(209)
       W5=-V(211)+V(212)-V(214)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia13Bar5+dI(OffSet,CrtSet2)+V(103)+V(215)
+      dI(OffSet,CrtSet2)=Ia13Bar5+dI(OffSet,CrtSet2)+V(103)+V(215)
       W1=Ib13Bar5+dI(OffSet,CrtSet5)+V(6)
       W2=V(7)+V(41)+V(107)+V(108)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6121,14 +6121,14 @@
       W2=V(119)+V(120)+V(121)
       W3=V(124)+V(125)+V(217)+V(218)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar5+dI(OffSet,CrtSet3)+V(126)+V(219)
+      dI(OffSet,CrtSet3)=Ia16Bar5+dI(OffSet,CrtSet3)+V(126)+V(219)
       dI(OffSet,CrtSet6)=Ib16Bar5+dI(OffSet,CrtSet6)+V(65)+V(130)+V(131)
       dI(OffSet,CrtSet9)=Ic6Bar15+dI(OffSet,CrtSet9)+V(139)+V(220)
       W1=dI(OffSet,CrtSet12)+V(76)+V(140)+V(141)+V(143)
       W2=V(144)+V(145)+V(148)
       W3=V(149)+V(221)+V(222)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar5+dI(OffSet,CrtSet1)+V(103)+V(215)
       dI(OffSet,CrtSet4)=Ib13Bar5+dI(OffSet,CrtSet4)+V(107)+V(108)+V(112)
       W1=Ic7Bar11+dI(OffSet,CrtSet7)+V(224)
@@ -6142,7 +6142,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia14Bar5+dI(OffSet,CrtSet2)+V(81)
       W2=V(82)+V(210)+V(230)+V(231)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar5+dI(OffSet,CrtSet5)+V(81)
       W2=V(82)+V(112)+V(232)+V(234)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6156,14 +6156,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet11)=W7+W8
-            dI(OffSet,CrtSet3)=Ia17Bar5+dI(OffSet,CrtSet3)+V(240)+V(241)
+      dI(OffSet,CrtSet3)=Ia17Bar5+dI(OffSet,CrtSet3)+V(240)+V(241)
       dI(OffSet,CrtSet6)=Ib17Bar5+dI(OffSet,CrtSet6)+V(135)+V(242)+V(243)
       dI(OffSet,CrtSet9)=Ic7Bar15+dI(OffSet,CrtSet9)+V(244)+V(245)
       W1=dI(OffSet,CrtSet12)+V(146)+V(246)+V(247)+V(248)
       W2=V(249)+V(250)+V(251)
       W3=V(252)+V(253)+V(254)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar5+dI(OffSet,CrtSet1)+V(126)+V(219)
       dI(OffSet,CrtSet4)=Ib16Bar5+dI(OffSet,CrtSet4)+V(130)+V(173)+V(176)
       W1=Ic9Bar11+dI(OffSet,CrtSet7)+V(256)
@@ -6174,7 +6174,7 @@
       W3=V(182)+V(221)+V(255)
       W4=V(257)-V(260)+V(262)+V(263)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia17Bar5+dI(OffSet,CrtSet2)+V(240)+V(241)
+      dI(OffSet,CrtSet2)=Ia17Bar5+dI(OffSet,CrtSet2)+V(240)+V(241)
       W1=Ib17Bar5+dI(OffSet,CrtSet5)+V(151)
       W2=V(152)+V(176)+V(242)+V(265)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6185,7 +6185,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar5+dI(OffSet,CrtSet3)+V(81)
       W2=V(82)+V(210)+V(271)+V(272)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar5+dI(OffSet,CrtSet6)+V(194)+V(273)+V(274)
       dI(OffSet,CrtSet9)=Ic9Bar15+dI(OffSet,CrtSet9)+V(275)+V(276)
       W1=I3Bar5+dI(OffSet,CrtSet12)+V(80)
@@ -6193,9 +6193,9 @@
       W3=V(278)+V(279)+V(280)
       W4=V(281)+V(282)+V(283)+V(284)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia15Bar5+dI(OffSet,CrtSet1)+V(56)
       W2=V(151)+V(152)+V(286)+V(287)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar5+dI(OffSet,CrtSet4)+V(60)+V(61)+V(65)
       W1=Ic8Bar11+dI(OffSet,CrtSet7)+V(165)
@@ -6207,14 +6207,14 @@
       W4=V(172)+V(285)
       W5=-V(287)+V(288)-V(290)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar5+dI(OffSet,CrtSet2)+V(126)+V(291)
+      dI(OffSet,CrtSet2)=Ia16Bar5+dI(OffSet,CrtSet2)+V(126)+V(291)
       dI(OffSet,CrtSet5)=Ib16Bar5+dI(OffSet,CrtSet5)+V(65)+V(130)+V(131)
       dI(OffSet,CrtSet8)=Ic8Bar12+dI(OffSet,CrtSet8)+V(180)+V(292)
       W1=dI(OffSet,CrtSet11)+V(76)+V(140)+V(141)+V(143)
       W2=V(144)+V(145)+V(184)
       W3=V(185)+V(293)+V(294)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar5+dI(OffSet,CrtSet3)+V(189)+V(295)
+      dI(OffSet,CrtSet3)=Ia18Bar5+dI(OffSet,CrtSet3)+V(189)+V(295)
       W1=Ib18Bar5+dI(OffSet,CrtSet6)+V(6)
       W2=V(7)+V(65)+V(190)+V(195)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6223,7 +6223,7 @@
       W2=V(202)+V(203)+V(205)
       W3=V(207)+V(208)+V(297)+V(298)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar5+dI(OffSet,CrtSet1)+V(126)+V(291)
       dI(OffSet,CrtSet4)=Ib16Bar5+dI(OffSet,CrtSet4)+V(130)+V(131)+V(135)
       W1=Ic9Bar11+dI(OffSet,CrtSet7)+V(258)
@@ -6236,7 +6236,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia17Bar5+dI(OffSet,CrtSet2)+V(151)
       W2=V(152)+V(240)+V(286)+V(302)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar5+dI(OffSet,CrtSet5)+V(135)+V(242)+V(243)
       dI(OffSet,CrtSet8)=Ic9Bar12+dI(OffSet,CrtSet8)+V(267)+V(303)
       W1=I4Bar5+dI(OffSet,CrtSet11)+V(146)
@@ -6244,7 +6244,7 @@
       W3=V(250)+V(251)+V(269)
       W4=V(270)+V(285)-V(302)+V(304)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar5+dI(OffSet,CrtSet3)+V(272)+V(305)
+      dI(OffSet,CrtSet3)=Ia19Bar5+dI(OffSet,CrtSet3)+V(272)+V(305)
       W1=Ib19Bar5+dI(OffSet,CrtSet6)+V(81)
       W2=V(82)+V(135)+V(273)+V(274)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6253,7 +6253,7 @@
       W2=V(279)+V(280)+V(281)
       W3=V(283)+V(284)+V(307)+V(308)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar5+dI(OffSet,CrtSet1)+V(189)+V(295)
       dI(OffSet,CrtSet4)=Ib18Bar5+dI(OffSet,CrtSet4)+V(190)+V(194)+V(195)
       W1=Ic10Bar11+dI(OffSet,CrtSet7)+V(310)
@@ -6265,7 +6265,7 @@
       W4=V(309)+V(312)
       W5=-V(314)-V(315)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia19Bar5+dI(OffSet,CrtSet2)+V(272)+V(305)
+      dI(OffSet,CrtSet2)=Ia19Bar5+dI(OffSet,CrtSet2)+V(272)+V(305)
       dI(OffSet,CrtSet5)=Ib19Bar5+dI(OffSet,CrtSet5)+V(194)+V(273)+V(274)
       dI(OffSet,CrtSet8)=Ic10Bar12+dI(OffSet,CrtSet8)+V(316)+V(317)
       W1=dI(OffSet,CrtSet11)+V(204)+V(277)+V(278)+V(279)
@@ -6274,7 +6274,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar5+dI(OffSet,CrtSet3)+V(151)
       W2=V(152)+V(286)+V(321)+V(322)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar5+dI(OffSet,CrtSet6)+V(151)
       W2=V(152)+V(194)+V(324)+V(325)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6288,9 +6288,9 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet12)=W7+W8
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia11Bar6+dI(OffSet,CrtSet1)+V(334)
       W2=V(336)+V(337)+V(338)+V(341)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar6+dI(OffSet,CrtSet4)+V(336)
       W2=V(337)+V(342)+V(345)+V(350)
@@ -6305,7 +6305,7 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar6+dI(OffSet,CrtSet2)+V(354)+V(357)
+      dI(OffSet,CrtSet2)=Ia12Bar6+dI(OffSet,CrtSet2)+V(354)+V(357)
       dI(OffSet,CrtSet5)=Ib12Bar6+dI(OffSet,CrtSet5)+V(358)+V(359)+V(363)
       W1=Ic5Bar13+dI(OffSet,CrtSet8)+V(24)
       W2=V(26)+V(27)+V(366)+V(367)
@@ -6316,14 +6316,14 @@
       W4=V(369)+V(370)+V(371)
       W5=V(372)+V(373)+V(374)+V(375)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia15Bar6+dI(OffSet,CrtSet3)+V(376)+V(379)
+      dI(OffSet,CrtSet3)=Ia15Bar6+dI(OffSet,CrtSet3)+V(376)+V(379)
       dI(OffSet,CrtSet6)=Ib15Bar6+dI(OffSet,CrtSet6)+V(380)+V(381)+V(385)
       dI(OffSet,CrtSet9)=Ic5Bar16+dI(OffSet,CrtSet9)+V(388)+V(389)
       W1=dI(OffSet,CrtSet12)+V(390)+V(391)+V(392)+V(393)
       W2=V(394)+V(395)+V(396)
       W3=V(397)+V(398)+V(399)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar6+dI(OffSet,CrtSet1)+V(354)+V(357)
       W1=Ib12Bar6+dI(OffSet,CrtSet4)+V(358)
       W2=V(401)+V(402)+V(404)+V(409)
@@ -6336,7 +6336,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar6+dI(OffSet,CrtSet2)+V(334)
       W2=V(336)+V(337)+V(410)+V(413)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar6+dI(OffSet,CrtSet5)+V(414)+V(415)+V(419)
       W1=Ic6Bar13+dI(OffSet,CrtSet8)+V(93)
       W2=V(95)+V(96)+V(422)+V(423)
@@ -6346,14 +6346,14 @@
       W3=-V(422)+V(424)+V(425)+V(426)
       W4=V(427)+V(428)+V(429)+V(430)+V(431)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(432)+V(435)
+      dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(432)+V(435)
       dI(OffSet,CrtSet6)=Ib16Bar6+dI(OffSet,CrtSet6)+V(436)+V(437)+V(441)
       dI(OffSet,CrtSet9)=Ic6Bar16+dI(OffSet,CrtSet9)+V(444)+V(445)
       W1=dI(OffSet,CrtSet12)+V(446)+V(447)+V(448)+V(449)
       W2=V(450)+V(451)+V(452)
       W3=V(453)+V(454)+V(455)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar6+dI(OffSet,CrtSet1)+V(376)+V(379)
       W1=Ib15Bar6+dI(OffSet,CrtSet4)+V(380)
       W2=V(457)+V(458)+V(460)+V(465)
@@ -6364,7 +6364,7 @@
       W3=V(394)+V(456)
       W4=-V(460)-V(465)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(432)+V(435)
+      dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(432)+V(435)
       dI(OffSet,CrtSet5)=Ib16Bar6+dI(OffSet,CrtSet5)+V(436)+V(466)+V(469)
       W1=Ic8Bar13+dI(OffSet,CrtSet8)+V(163)
       W2=V(165)+V(166)+V(472)+V(473)
@@ -6376,7 +6376,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
       W1=Ia18Bar6+dI(OffSet,CrtSet3)+V(334)
       W2=V(336)+V(337)+V(480)+V(481)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar6+dI(OffSet,CrtSet6)+V(482)+V(486)+V(487)
       dI(OffSet,CrtSet9)=Ic8Bar16+dI(OffSet,CrtSet9)+V(490)+V(491)
       W1=I2Bar6+dI(OffSet,CrtSet12)+V(333)
@@ -6384,9 +6384,9 @@
       W3=V(494)+V(495)+V(496)
       W4=V(497)+V(498)+V(499)+V(500)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia12Bar6+dI(OffSet,CrtSet1)+V(354)
       W2=V(401)+V(402)+V(502)+V(503)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar6+dI(OffSet,CrtSet4)+V(358)+V(359)+V(363)
       dI(OffSet,CrtSet7)=Ic6Bar12+dI(OffSet,CrtSet7)+V(116)+V(216)
@@ -6395,7 +6395,7 @@
       W3=V(371)+V(372)+V(373)
       W4=V(374)+V(400)+V(501)-V(503)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar6+dI(OffSet,CrtSet2)+V(410)+V(504)
+      dI(OffSet,CrtSet2)=Ia13Bar6+dI(OffSet,CrtSet2)+V(410)+V(504)
       W1=Ib13Bar6+dI(OffSet,CrtSet5)+V(336)
       W2=V(337)+V(363)+V(414)+V(415)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6407,14 +6407,14 @@
       W3=V(425)+V(426)+V(427)+V(428)
       W4=V(430)+V(431)-V(505)+V(506)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(432)+V(507)
+      dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(432)+V(507)
       dI(OffSet,CrtSet6)=Ib16Bar6+dI(OffSet,CrtSet6)+V(385)+V(436)+V(437)
       dI(OffSet,CrtSet9)=Ic6Bar16+dI(OffSet,CrtSet9)+V(445)+V(508)
       W1=dI(OffSet,CrtSet12)+V(396)+V(446)+V(447)+V(449)
       W2=V(450)+V(451)+V(454)
       W3=V(455)+V(509)+V(510)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar6+dI(OffSet,CrtSet1)+V(410)+V(504)
       dI(OffSet,CrtSet4)=Ib13Bar6+dI(OffSet,CrtSet4)+V(414)+V(415)+V(419)
       dI(OffSet,CrtSet7)=Ic7Bar12+dI(OffSet,CrtSet7)+V(235)+V(236)
@@ -6424,7 +6424,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar6+dI(OffSet,CrtSet2)+V(401)
       W2=V(402)+V(502)+V(511)+V(512)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar6+dI(OffSet,CrtSet5)+V(401)
       W2=V(402)+V(419)+V(513)+V(515)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6441,14 +6441,14 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet11)=W8+W9
-            dI(OffSet,CrtSet3)=Ia17Bar6+dI(OffSet,CrtSet3)+V(522)+V(523)
+      dI(OffSet,CrtSet3)=Ia17Bar6+dI(OffSet,CrtSet3)+V(522)+V(523)
       dI(OffSet,CrtSet6)=Ib17Bar6+dI(OffSet,CrtSet6)+V(441)+V(524)+V(525)
       dI(OffSet,CrtSet9)=Ic7Bar16+dI(OffSet,CrtSet9)+V(526)+V(527)
       W1=dI(OffSet,CrtSet12)+V(452)+V(528)+V(529)+V(530)
       W2=V(531)+V(532)+V(533)
       W3=V(534)+V(535)+V(536)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar6+dI(OffSet,CrtSet1)+V(432)+V(507)
       dI(OffSet,CrtSet4)=Ib16Bar6+dI(OffSet,CrtSet4)+V(436)+V(466)+V(469)
       dI(OffSet,CrtSet7)=Ic9Bar12+dI(OffSet,CrtSet7)+V(266)+V(267)
@@ -6456,7 +6456,7 @@
       W2=V(447)+V(449)+V(450)
       W3=V(474)+V(475)+V(509)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar6+dI(OffSet,CrtSet2)+V(522)+V(523)
+      dI(OffSet,CrtSet2)=Ia17Bar6+dI(OffSet,CrtSet2)+V(522)+V(523)
       W1=Ib17Bar6+dI(OffSet,CrtSet5)+V(457)
       W2=V(458)+V(469)+V(524)+V(538)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6471,7 +6471,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia19Bar6+dI(OffSet,CrtSet3)+V(401)
       W2=V(402)+V(502)+V(543)+V(544)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar6+dI(OffSet,CrtSet6)+V(486)+V(545)+V(546)
       dI(OffSet,CrtSet9)=Ic9Bar16+dI(OffSet,CrtSet9)+V(547)+V(548)
       W1=I3Bar6+dI(OffSet,CrtSet12)+V(400)
@@ -6479,9 +6479,9 @@
       W3=V(550)+V(551)+V(552)
       W4=V(553)+V(554)+V(555)+V(556)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia15Bar6+dI(OffSet,CrtSet1)+V(376)
       W2=V(457)+V(458)+V(558)+V(559)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar6+dI(OffSet,CrtSet4)+V(380)+V(381)+V(385)
       dI(OffSet,CrtSet7)=Ic8Bar12+dI(OffSet,CrtSet7)+V(180)+V(292)
@@ -6490,7 +6490,7 @@
       W3=V(393)+V(394)+V(395)
       W4=V(396)+V(456)+V(557)-V(559)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(432)+V(560)
+      dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(432)+V(560)
       dI(OffSet,CrtSet5)=Ib16Bar6+dI(OffSet,CrtSet5)+V(385)+V(436)+V(437)
       W1=Ic8Bar13+dI(OffSet,CrtSet8)+V(165)
       W2=V(166)+V(289)+V(473)+V(561)
@@ -6500,7 +6500,7 @@
       W3=V(449)+V(450)+V(451)
       W4=V(476)+V(477)-V(561)+V(562)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia18Bar6+dI(OffSet,CrtSet3)+V(481)+V(563)
+      dI(OffSet,CrtSet3)=Ia18Bar6+dI(OffSet,CrtSet3)+V(481)+V(563)
       W1=Ib18Bar6+dI(OffSet,CrtSet6)+V(336)
       W2=V(337)+V(385)+V(482)+V(487)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6509,7 +6509,7 @@
       W2=V(494)+V(495)+V(497)
       W3=V(499)+V(500)+V(565)+V(566)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar6+dI(OffSet,CrtSet1)+V(432)+V(560)
       dI(OffSet,CrtSet4)=Ib16Bar6+dI(OffSet,CrtSet4)+V(436)+V(437)+V(441)
       dI(OffSet,CrtSet7)=Ic9Bar12+dI(OffSet,CrtSet7)+V(267)+V(303)
@@ -6519,7 +6519,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar6+dI(OffSet,CrtSet2)+V(457)
       W2=V(458)+V(522)+V(558)+V(567)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar6+dI(OffSet,CrtSet5)+V(441)+V(524)+V(525)
       W1=Ic9Bar13+dI(OffSet,CrtSet8)+V(258)
       W2=V(259)+V(300)+V(540)+V(568)
@@ -6530,7 +6530,7 @@
       W4=V(541)+V(542)
       W5=V(557)-V(567)-V(568)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia19Bar6+dI(OffSet,CrtSet3)+V(544)+V(569)
+      dI(OffSet,CrtSet3)=Ia19Bar6+dI(OffSet,CrtSet3)+V(544)+V(569)
       W1=Ib19Bar6+dI(OffSet,CrtSet6)+V(401)
       W2=V(402)+V(441)+V(545)+V(546)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6539,7 +6539,7 @@
       W2=V(551)+V(552)+V(553)
       W3=V(555)+V(556)+V(571)+V(572)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar6+dI(OffSet,CrtSet1)+V(481)+V(563)
       dI(OffSet,CrtSet4)=Ib18Bar6+dI(OffSet,CrtSet4)+V(482)+V(486)+V(487)
       dI(OffSet,CrtSet7)=Ic10Bar12+dI(OffSet,CrtSet7)+V(316)+V(317)
@@ -6547,7 +6547,7 @@
       W2=V(493)+V(494)+V(495)
       W3=V(496)+V(497)+V(565)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar6+dI(OffSet,CrtSet2)+V(544)+V(569)
+      dI(OffSet,CrtSet2)=Ia19Bar6+dI(OffSet,CrtSet2)+V(544)+V(569)
       dI(OffSet,CrtSet5)=Ib19Bar6+dI(OffSet,CrtSet5)+V(486)+V(545)+V(546)
       W1=Ic10Bar13+dI(OffSet,CrtSet8)+V(310)
       W2=V(311)+V(313)+V(573)+V(574)
@@ -6560,7 +6560,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia20Bar6+dI(OffSet,CrtSet3)+V(457)
       W2=V(458)+V(558)+V(576)+V(577)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar6+dI(OffSet,CrtSet6)+V(457)
       W2=V(458)+V(486)+V(579)+V(580)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6571,9 +6571,9 @@
       W4=-V(580)+V(583)+V(584)
       W5=V(585)+V(586)+V(587)+V(588)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia11Bar8+dI(OffSet,CrtSet1)+V(592)
       W2=V(594)+V(595)+V(596)+V(599)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar8+dI(OffSet,CrtSet4)+V(594)
       W2=V(595)+V(600)+V(603)+V(608)
@@ -6588,14 +6588,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar8+dI(OffSet,CrtSet2)+V(612)+V(615)
+      dI(OffSet,CrtSet2)=Ia12Bar8+dI(OffSet,CrtSet2)+V(612)+V(615)
       dI(OffSet,CrtSet5)=Ib12Bar8+dI(OffSet,CrtSet5)+V(616)+V(617)+V(621)
       dI(OffSet,CrtSet8)=Ic5Bar16+dI(OffSet,CrtSet8)+V(388)+V(389)
       W1=dI(OffSet,CrtSet11)+V(397)+V(398)+V(399)+V(622)
       W2=V(623)+V(624)+V(625)
       W3=V(626)+V(627)+V(628)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar8+dI(OffSet,CrtSet3)+V(629)+V(632)
+      dI(OffSet,CrtSet3)=Ia15Bar8+dI(OffSet,CrtSet3)+V(629)+V(632)
       dI(OffSet,CrtSet6)=Ib15Bar8+dI(OffSet,CrtSet6)+V(633)+V(634)+V(638)
       W1=Ic5Bar18+dI(OffSet,CrtSet9)+V(24)
       W2=V(26)+V(27)+V(641)+V(642)
@@ -6606,7 +6606,7 @@
       W4=V(644)+V(645)+V(646)
       W5=V(647)+V(648)+V(649)+V(650)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar8+dI(OffSet,CrtSet1)+V(612)+V(615)
       W1=Ib12Bar8+dI(OffSet,CrtSet4)+V(616)
       W2=V(652)+V(653)+V(655)+V(660)
@@ -6619,7 +6619,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar8+dI(OffSet,CrtSet2)+V(592)
       W2=V(594)+V(595)+V(661)+V(664)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar8+dI(OffSet,CrtSet5)+V(665)+V(666)+V(670)
       dI(OffSet,CrtSet8)=Ic6Bar16+dI(OffSet,CrtSet8)+V(444)+V(445)
       W1=I2Bar8+dI(OffSet,CrtSet11)+V(453)
@@ -6627,7 +6627,7 @@
       W3=-V(664)+V(671)+V(672)
       W4=V(673)+V(674)+V(675)+V(676)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(677)+V(680)
+      dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(677)+V(680)
       dI(OffSet,CrtSet6)=Ib16Bar8+dI(OffSet,CrtSet6)+V(681)+V(682)+V(686)
       W1=Ic6Bar18+dI(OffSet,CrtSet9)+V(93)
       W2=V(95)+V(96)+V(689)+V(690)
@@ -6637,7 +6637,7 @@
       W3=V(693)+V(694)+V(695)
       W4=V(696)+V(697)+V(698)+V(699)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar8+dI(OffSet,CrtSet1)+V(629)+V(632)
       W1=Ib15Bar8+dI(OffSet,CrtSet4)+V(633)
       W2=V(701)+V(702)+V(704)+V(709)
@@ -6648,7 +6648,7 @@
       W3=V(647)+V(700)
       W4=-V(704)-V(709)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(677)+V(680)
+      dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(677)+V(680)
       dI(OffSet,CrtSet5)=Ib16Bar8+dI(OffSet,CrtSet5)+V(681)+V(710)+V(713)
       dI(OffSet,CrtSet8)=Ic8Bar16+dI(OffSet,CrtSet8)+V(490)+V(491)
       W1=dI(OffSet,CrtSet11)+V(498)+V(499)+V(500)+V(691)
@@ -6657,7 +6657,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar8+dI(OffSet,CrtSet3)+V(592)
       W2=V(594)+V(595)+V(718)+V(719)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar8+dI(OffSet,CrtSet6)+V(720)+V(724)+V(725)
       W1=Ic8Bar18+dI(OffSet,CrtSet9)+V(163)
       W2=V(165)+V(166)+V(728)+V(729)
@@ -6667,9 +6667,9 @@
       W3=-V(728)+V(730)+V(731)+V(732)
       W4=V(733)+V(734)+V(735)+V(736)+V(737)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia12Bar8+dI(OffSet,CrtSet1)+V(612)
       W2=V(652)+V(653)+V(739)+V(740)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar8+dI(OffSet,CrtSet4)+V(616)+V(617)+V(621)
       dI(OffSet,CrtSet7)=Ic6Bar15+dI(OffSet,CrtSet7)+V(139)+V(220)
@@ -6678,7 +6678,7 @@
       W3=V(625)+V(626)+V(627)
       W4=V(628)+V(651)+V(738)-V(740)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar8+dI(OffSet,CrtSet2)+V(661)+V(741)
+      dI(OffSet,CrtSet2)=Ia13Bar8+dI(OffSet,CrtSet2)+V(661)+V(741)
       W1=Ib13Bar8+dI(OffSet,CrtSet5)+V(594)
       W2=V(595)+V(621)+V(665)+V(666)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6687,7 +6687,7 @@
       W2=V(628)+V(671)+V(672)
       W3=V(673)+V(674)+V(675)+V(742)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(677)+V(743)
+      dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(677)+V(743)
       dI(OffSet,CrtSet6)=Ib16Bar8+dI(OffSet,CrtSet6)+V(638)+V(681)+V(682)
       W1=Ic6Bar18+dI(OffSet,CrtSet9)+V(95)
       W2=V(96)+V(213)+V(690)+V(744)
@@ -6697,7 +6697,7 @@
       W3=V(694)+V(695)+V(696)
       W4=V(698)+V(699)-V(744)+V(745)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar8+dI(OffSet,CrtSet1)+V(661)+V(741)
       dI(OffSet,CrtSet4)=Ib13Bar8+dI(OffSet,CrtSet4)+V(665)+V(666)+V(670)
       dI(OffSet,CrtSet7)=Ic7Bar15+dI(OffSet,CrtSet7)+V(244)+V(245)
@@ -6707,7 +6707,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar8+dI(OffSet,CrtSet2)+V(652)
       W2=V(653)+V(739)+V(746)+V(747)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar8+dI(OffSet,CrtSet5)+V(652)
       W2=V(653)+V(670)+V(748)+V(750)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6721,7 +6721,7 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet11)=W7+W8
-            dI(OffSet,CrtSet3)=Ia17Bar8+dI(OffSet,CrtSet3)+V(754)+V(755)
+      dI(OffSet,CrtSet3)=Ia17Bar8+dI(OffSet,CrtSet3)+V(754)+V(755)
       dI(OffSet,CrtSet6)=Ib17Bar8+dI(OffSet,CrtSet6)+V(686)+V(756)+V(757)
       W1=Ic7Bar18+dI(OffSet,CrtSet9)+V(224)
       W2=V(226)+V(227)+V(758)+V(759)
@@ -6732,7 +6732,7 @@
       W4=V(760)+V(761)+V(762)
       W5=V(763)+V(764)+V(765)+V(766)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar8+dI(OffSet,CrtSet1)+V(677)+V(743)
       dI(OffSet,CrtSet4)=Ib16Bar8+dI(OffSet,CrtSet4)+V(681)+V(710)+V(713)
       dI(OffSet,CrtSet7)=Ic9Bar15+dI(OffSet,CrtSet7)+V(275)+V(276)
@@ -6740,7 +6740,7 @@
       W2=V(692)+V(694)+V(695)
       W3=V(714)+V(715)+V(745)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar8+dI(OffSet,CrtSet2)+V(754)+V(755)
+      dI(OffSet,CrtSet2)=Ia17Bar8+dI(OffSet,CrtSet2)+V(754)+V(755)
       W1=Ib17Bar8+dI(OffSet,CrtSet5)+V(701)
       W2=V(702)+V(713)+V(756)+V(768)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6751,7 +6751,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar8+dI(OffSet,CrtSet3)+V(652)
       W2=V(653)+V(739)+V(769)+V(770)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar8+dI(OffSet,CrtSet6)+V(724)+V(771)+V(772)
       W1=Ic9Bar18+dI(OffSet,CrtSet9)+V(256)
       W2=V(258)+V(259)+V(773)+V(774)
@@ -6762,9 +6762,9 @@
       W4=V(775)+V(776)
       W5=V(777)+V(778)+V(779)+V(780)+V(781)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       W1=Ia15Bar8+dI(OffSet,CrtSet1)+V(629)
       W2=V(701)+V(702)+V(783)+V(784)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar8+dI(OffSet,CrtSet4)+V(633)+V(634)+V(638)
       dI(OffSet,CrtSet7)=Ic8Bar15+dI(OffSet,CrtSet7)+V(199)+V(296)
@@ -6773,14 +6773,14 @@
       W3=V(646)+V(647)+V(648)
       W4=V(649)+V(700)+V(782)-V(784)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(677)+V(785)
+      dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(677)+V(785)
       dI(OffSet,CrtSet5)=Ib16Bar8+dI(OffSet,CrtSet5)+V(638)+V(681)+V(682)
       dI(OffSet,CrtSet8)=Ic8Bar16+dI(OffSet,CrtSet8)+V(491)+V(564)
       W1=dI(OffSet,CrtSet11)+V(499)+V(500)+V(566)+V(649)
       W2=V(691)+V(692)+V(694)
       W3=V(695)+V(696)+V(786)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar8+dI(OffSet,CrtSet3)+V(719)+V(787)
+      dI(OffSet,CrtSet3)=Ia18Bar8+dI(OffSet,CrtSet3)+V(719)+V(787)
       W1=Ib18Bar8+dI(OffSet,CrtSet6)+V(594)
       W2=V(595)+V(638)+V(720)+V(725)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6792,7 +6792,7 @@
       W3=V(731)+V(732)+V(733)+V(735)
       W4=V(736)+V(737)-V(788)+V(789)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar8+dI(OffSet,CrtSet1)+V(677)+V(785)
       dI(OffSet,CrtSet4)=Ib16Bar8+dI(OffSet,CrtSet4)+V(681)+V(682)+V(686)
       dI(OffSet,CrtSet7)=Ic9Bar15+dI(OffSet,CrtSet7)+V(276)+V(306)
@@ -6802,7 +6802,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar8+dI(OffSet,CrtSet2)+V(701)
       W2=V(702)+V(754)+V(783)+V(790)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar8+dI(OffSet,CrtSet5)+V(686)+V(756)+V(757)
       dI(OffSet,CrtSet8)=Ic9Bar16+dI(OffSet,CrtSet8)+V(548)+V(570)
       W1=I4Bar8+dI(OffSet,CrtSet11)+V(555)
@@ -6810,7 +6810,7 @@
       W3=V(760)+V(761)+V(763)
       W4=V(764)+V(765)+V(782)-V(790)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar8+dI(OffSet,CrtSet3)+V(770)+V(791)
+      dI(OffSet,CrtSet3)=Ia19Bar8+dI(OffSet,CrtSet3)+V(770)+V(791)
       W1=Ib19Bar8+dI(OffSet,CrtSet6)+V(652)
       W2=V(653)+V(686)+V(771)+V(772)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6822,7 +6822,7 @@
       W3=V(776)+V(777)+V(778)+V(779)
       W4=V(780)+V(781)-V(792)+V(793)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar8+dI(OffSet,CrtSet1)+V(719)+V(787)
       dI(OffSet,CrtSet4)=Ib18Bar8+dI(OffSet,CrtSet4)+V(720)+V(724)+V(725)
       dI(OffSet,CrtSet7)=Ic10Bar15+dI(OffSet,CrtSet7)+V(326)+V(327)
@@ -6830,7 +6830,7 @@
       W2=V(731)+V(732)+V(733)
       W3=V(734)+V(735)+V(789)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar8+dI(OffSet,CrtSet2)+V(770)+V(791)
+      dI(OffSet,CrtSet2)=Ia19Bar8+dI(OffSet,CrtSet2)+V(770)+V(791)
       dI(OffSet,CrtSet5)=Ib19Bar8+dI(OffSet,CrtSet5)+V(724)+V(771)+V(772)
       dI(OffSet,CrtSet8)=Ic10Bar16+dI(OffSet,CrtSet8)+V(581)+V(582)
       W1=dI(OffSet,CrtSet11)+V(586)+V(587)+V(588)+V(734)
@@ -6839,7 +6839,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar8+dI(OffSet,CrtSet3)+V(701)
       W2=V(702)+V(783)+V(794)+V(795)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar8+dI(OffSet,CrtSet6)+V(701)
       W2=V(702)+V(724)+V(797)+V(798)
       dI(OffSet,CrtSet6)=W1+W2
@@ -6856,9 +6856,9 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet12)=W8+W9
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia11Bar6+dI(OffSet,CrtSet1)+V(337)
       W2=V(808)+V(810)+V(811)+V(814)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar6+dI(OffSet,CrtSet4)+V(337)
       W2=V(810)+V(815)+V(818)+V(823)
@@ -6876,21 +6876,21 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet10)=W8+W9
-            dI(OffSet,CrtSet2)=Ia12Bar6+dI(OffSet,CrtSet2)+V(835)+V(838)
+      dI(OffSet,CrtSet2)=Ia12Bar6+dI(OffSet,CrtSet2)+V(835)+V(838)
       dI(OffSet,CrtSet5)=Ib12Bar6+dI(OffSet,CrtSet5)+V(839)+V(840)+V(844)
       dI(OffSet,CrtSet8)=Ic5Bar13+dI(OffSet,CrtSet8)+V(847)+V(848)
       W1=dI(OffSet,CrtSet11)+V(369)+V(372)+V(375)+V(849)
       W2=V(850)+V(851)+V(852)
       W3=V(853)+V(854)+V(855)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar6+dI(OffSet,CrtSet3)+V(856)+V(859)
+      dI(OffSet,CrtSet3)=Ia15Bar6+dI(OffSet,CrtSet3)+V(856)+V(859)
       dI(OffSet,CrtSet6)=Ib15Bar6+dI(OffSet,CrtSet6)+V(860)+V(861)+V(865)
       dI(OffSet,CrtSet9)=Ic5Bar16+dI(OffSet,CrtSet9)+V(868)+V(869)
       W1=dI(OffSet,CrtSet12)+V(391)+V(394)+V(398)+V(870)
       W2=V(871)+V(872)+V(873)
       W3=V(874)+V(875)+V(876)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar6+dI(OffSet,CrtSet1)+V(835)+V(838)
       W1=Ib12Bar6+dI(OffSet,CrtSet4)+V(402)
       W2=V(839)+V(878)+V(880)+V(885)
@@ -6906,7 +6906,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia13Bar6+dI(OffSet,CrtSet2)+V(337)
       W2=V(808)+V(810)+V(898)+V(901)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar6+dI(OffSet,CrtSet5)+V(902)+V(903)+V(907)
       dI(OffSet,CrtSet8)=Ic6Bar13+dI(OffSet,CrtSet8)+V(910)+V(911)
       W1=I2Bar6+dI(OffSet,CrtSet11)+V(425)
@@ -6914,14 +6914,14 @@
       W3=-V(901)+V(912)+V(913)
       W4=V(914)+V(915)+V(916)+V(917)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(918)+V(921)
+      dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(918)+V(921)
       dI(OffSet,CrtSet6)=Ib16Bar6+dI(OffSet,CrtSet6)+V(922)+V(923)+V(927)
       dI(OffSet,CrtSet9)=Ic6Bar16+dI(OffSet,CrtSet9)+V(930)+V(931)
       W1=dI(OffSet,CrtSet12)+V(447)+V(450)+V(454)+V(932)
       W2=V(933)+V(934)+V(935)
       W3=V(936)+V(937)+V(938)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar6+dI(OffSet,CrtSet1)+V(856)+V(859)
       W1=Ib15Bar6+dI(OffSet,CrtSet4)+V(458)
       W2=V(860)+V(940)+V(942)+V(947)
@@ -6935,7 +6935,7 @@
       W4=-V(942)-V(947)
       W5=V(950)+V(952)-V(957)+V(959)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(918)+V(921)
+      dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(918)+V(921)
       dI(OffSet,CrtSet5)=Ib16Bar6+dI(OffSet,CrtSet5)+V(922)+V(960)+V(963)
       dI(OffSet,CrtSet8)=Ic8Bar13+dI(OffSet,CrtSet8)+V(966)+V(967)
       W1=dI(OffSet,CrtSet11)+V(447)+V(450)+V(476)+V(932)
@@ -6944,7 +6944,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar6+dI(OffSet,CrtSet3)+V(337)
       W2=V(808)+V(810)+V(974)+V(975)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar6+dI(OffSet,CrtSet6)+V(976)+V(980)+V(981)
       dI(OffSet,CrtSet9)=Ic8Bar16+dI(OffSet,CrtSet9)+V(984)+V(985)
       W1=I2Bar6+dI(OffSet,CrtSet12)+V(493)
@@ -6952,9 +6952,9 @@
       W3=-V(974)+V(986)+V(987)
       W4=V(988)+V(989)+V(990)+V(991)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia12Bar6+dI(OffSet,CrtSet1)+V(402)
       W2=V(835)+V(878)+V(993)+V(994)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar6+dI(OffSet,CrtSet4)+V(839)+V(840)+V(844)
       W1=Ic6Bar12+dI(OffSet,CrtSet7)+V(891)
@@ -6966,7 +6966,7 @@
       W4=V(897)+V(992)
       W5=-V(994)+V(995)-V(997)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia13Bar6+dI(OffSet,CrtSet2)+V(898)+V(998)
+      dI(OffSet,CrtSet2)=Ia13Bar6+dI(OffSet,CrtSet2)+V(898)+V(998)
       W1=Ib13Bar6+dI(OffSet,CrtSet5)+V(337)
       W2=V(810)+V(844)+V(902)+V(903)
       dI(OffSet,CrtSet5)=W1+W2
@@ -6975,14 +6975,14 @@
       W2=V(853)+V(912)+V(913)
       W3=V(914)+V(917)+V(1000)+V(1001)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(918)+V(1002)
+      dI(OffSet,CrtSet3)=Ia16Bar6+dI(OffSet,CrtSet3)+V(918)+V(1002)
       dI(OffSet,CrtSet6)=Ib16Bar6+dI(OffSet,CrtSet6)+V(865)+V(922)+V(923)
       dI(OffSet,CrtSet9)=Ic6Bar16+dI(OffSet,CrtSet9)+V(931)+V(1003)
       W1=dI(OffSet,CrtSet12)+V(447)+V(450)+V(454)+V(874)
       W2=V(932)+V(934)+V(935)
       W3=V(938)+V(1004)+V(1005)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar6+dI(OffSet,CrtSet1)+V(898)+V(998)
       dI(OffSet,CrtSet4)=Ib13Bar6+dI(OffSet,CrtSet4)+V(902)+V(903)+V(907)
       W1=Ic7Bar12+dI(OffSet,CrtSet7)+V(1007)
@@ -6996,7 +6996,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia14Bar6+dI(OffSet,CrtSet2)+V(402)
       W2=V(878)+V(993)+V(1013)+V(1014)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar6+dI(OffSet,CrtSet5)+V(402)
       W2=V(878)+V(907)+V(1015)+V(1017)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7010,14 +7010,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet11)=W7+W8
-            dI(OffSet,CrtSet3)=Ia17Bar6+dI(OffSet,CrtSet3)+V(1022)+V(1023)
+      dI(OffSet,CrtSet3)=Ia17Bar6+dI(OffSet,CrtSet3)+V(1022)+V(1023)
       dI(OffSet,CrtSet6)=Ib17Bar6+dI(OffSet,CrtSet6)+V(927)+V(1024)+V(1025)
       dI(OffSet,CrtSet9)=Ic7Bar16+dI(OffSet,CrtSet9)+V(1026)+V(1027)
       W1=dI(OffSet,CrtSet12)+V(529)+V(532)+V(535)+V(936)
       W2=V(1028)+V(1029)+V(1030)
       W3=V(1031)+V(1032)+V(1033)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar6+dI(OffSet,CrtSet1)+V(918)+V(1002)
       dI(OffSet,CrtSet4)=Ib16Bar6+dI(OffSet,CrtSet4)+V(922)+V(960)+V(963)
       W1=Ic9Bar12+dI(OffSet,CrtSet7)+V(1035)
@@ -7028,7 +7028,7 @@
       W3=V(968)+V(969)+V(1004)
       W4=V(1034)+V(1036)-V(1039)+V(1041)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia17Bar6+dI(OffSet,CrtSet2)+V(1022)+V(1023)
+      dI(OffSet,CrtSet2)=Ia17Bar6+dI(OffSet,CrtSet2)+V(1022)+V(1023)
       W1=Ib17Bar6+dI(OffSet,CrtSet5)+V(458)
       W2=V(940)+V(963)+V(1024)+V(1043)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7039,7 +7039,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar6+dI(OffSet,CrtSet3)+V(402)
       W2=V(878)+V(993)+V(1048)+V(1049)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar6+dI(OffSet,CrtSet6)+V(980)+V(1050)+V(1051)
       dI(OffSet,CrtSet9)=Ic9Bar16+dI(OffSet,CrtSet9)+V(1052)+V(1053)
       W1=I3Bar6+dI(OffSet,CrtSet12)+V(550)
@@ -7047,9 +7047,9 @@
       W3=V(992)-V(1048)+V(1054)
       W4=V(1055)+V(1056)+V(1057)+V(1058)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia15Bar6+dI(OffSet,CrtSet1)+V(458)
       W2=V(856)+V(940)+V(1060)+V(1061)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar6+dI(OffSet,CrtSet4)+V(860)+V(861)+V(865)
       W1=Ic8Bar12+dI(OffSet,CrtSet7)+V(953)
@@ -7061,14 +7061,14 @@
       W4=V(959)+V(1059)
       W5=-V(1061)+V(1062)-V(1064)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(918)+V(1065)
+      dI(OffSet,CrtSet2)=Ia16Bar6+dI(OffSet,CrtSet2)+V(918)+V(1065)
       dI(OffSet,CrtSet5)=Ib16Bar6+dI(OffSet,CrtSet5)+V(865)+V(922)+V(923)
       dI(OffSet,CrtSet8)=Ic8Bar13+dI(OffSet,CrtSet8)+V(967)+V(1066)
       W1=dI(OffSet,CrtSet11)+V(447)+V(450)+V(476)+V(874)
       W2=V(932)+V(934)+V(935)
       W3=V(971)+V(1067)+V(1068)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar6+dI(OffSet,CrtSet3)+V(975)+V(1069)
+      dI(OffSet,CrtSet3)=Ia18Bar6+dI(OffSet,CrtSet3)+V(975)+V(1069)
       W1=Ib18Bar6+dI(OffSet,CrtSet6)+V(337)
       W2=V(810)+V(865)+V(976)+V(981)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7077,7 +7077,7 @@
       W2=V(874)+V(986)+V(987)
       W3=V(989)+V(991)+V(1071)+V(1072)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar6+dI(OffSet,CrtSet1)+V(918)+V(1065)
       dI(OffSet,CrtSet4)=Ib16Bar6+dI(OffSet,CrtSet4)+V(922)+V(923)+V(927)
       W1=Ic9Bar12+dI(OffSet,CrtSet7)+V(1037)
@@ -7090,7 +7090,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia17Bar6+dI(OffSet,CrtSet2)+V(458)
       W2=V(940)+V(1022)+V(1060)+V(1076)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar6+dI(OffSet,CrtSet5)+V(927)+V(1024)+V(1025)
       dI(OffSet,CrtSet8)=Ic9Bar13+dI(OffSet,CrtSet8)+V(1045)+V(1077)
       W1=I4Bar6+dI(OffSet,CrtSet11)+V(529)
@@ -7098,7 +7098,7 @@
       W3=V(1028)+V(1030)+V(1031)
       W4=V(1047)+V(1059)-V(1076)+V(1078)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar6+dI(OffSet,CrtSet3)+V(1049)+V(1079)
+      dI(OffSet,CrtSet3)=Ia19Bar6+dI(OffSet,CrtSet3)+V(1049)+V(1079)
       W1=Ib19Bar6+dI(OffSet,CrtSet6)+V(402)
       W2=V(878)+V(927)+V(1050)+V(1051)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7107,7 +7107,7 @@
       W2=V(936)+V(1054)+V(1055)
       W3=V(1056)+V(1058)+V(1081)+V(1082)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar6+dI(OffSet,CrtSet1)+V(975)+V(1069)
       dI(OffSet,CrtSet4)=Ib18Bar6+dI(OffSet,CrtSet4)+V(976)+V(980)+V(981)
       W1=Ic10Bar12+dI(OffSet,CrtSet7)+V(1084)
@@ -7119,7 +7119,7 @@
       W4=V(1083)+V(1086)
       W5=-V(1088)-V(1089)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia19Bar6+dI(OffSet,CrtSet2)+V(1049)+V(1079)
+      dI(OffSet,CrtSet2)=Ia19Bar6+dI(OffSet,CrtSet2)+V(1049)+V(1079)
       dI(OffSet,CrtSet5)=Ib19Bar6+dI(OffSet,CrtSet5)+V(980)+V(1050)+V(1051)
       dI(OffSet,CrtSet8)=Ic10Bar13+dI(OffSet,CrtSet8)+V(1090)+V(1091)
       W1=dI(OffSet,CrtSet11)+V(550)+V(552)+V(575)+V(988)
@@ -7128,7 +7128,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar6+dI(OffSet,CrtSet3)+V(458)
       W2=V(940)+V(1060)+V(1094)+V(1095)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar6+dI(OffSet,CrtSet6)+V(458)
       W2=V(940)+V(980)+V(1097)+V(1098)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7142,9 +7142,9 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet12)=W7+W8
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia11Bar7+dI(OffSet,CrtSet1)+V(1106)
       W2=V(1108)+V(1109)+V(1110)+V(1113)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar7+dI(OffSet,CrtSet4)+V(1108)
       W2=V(1109)+V(1114)+V(1117)+V(1122)
@@ -7159,7 +7159,7 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar7+dI(OffSet,CrtSet2)+V(1123)+V(1126)
+      dI(OffSet,CrtSet2)=Ia12Bar7+dI(OffSet,CrtSet2)+V(1123)+V(1126)
       dI(OffSet,CrtSet5)=Ib12Bar7+dI(OffSet,CrtSet5)+V(1127)+V(1128)+V(1132)
       W1=Ic5Bar14+dI(OffSet,CrtSet8)+V(827)
       W2=V(829)+V(830)+V(1135)+V(1136)
@@ -7170,14 +7170,14 @@
       W4=V(1137)+V(1138)+V(1139)
       W5=V(1140)+V(1141)+V(1142)+V(1143)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia15Bar7+dI(OffSet,CrtSet3)+V(1144)+V(1147)
+      dI(OffSet,CrtSet3)=Ia15Bar7+dI(OffSet,CrtSet3)+V(1144)+V(1147)
       dI(OffSet,CrtSet6)=Ib15Bar7+dI(OffSet,CrtSet6)+V(1148)+V(1149)+V(1153)
       dI(OffSet,CrtSet9)=Ic5Bar17+dI(OffSet,CrtSet9)+V(1156)+V(1157)
       W1=dI(OffSet,CrtSet12)+V(1158)+V(1159)+V(1160)+V(1161)
       W2=V(1162)+V(1163)+V(1164)
       W3=V(1165)+V(1166)+V(1167)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar7+dI(OffSet,CrtSet1)+V(1123)+V(1126)
       W1=Ib12Bar7+dI(OffSet,CrtSet4)+V(1127)
       W2=V(1169)+V(1170)+V(1172)+V(1177)
@@ -7190,7 +7190,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar7+dI(OffSet,CrtSet2)+V(1106)
       W2=V(1108)+V(1109)+V(1178)+V(1181)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar7+dI(OffSet,CrtSet5)+V(1182)+V(1183)+V(1187)
       W1=Ic6Bar14+dI(OffSet,CrtSet8)+V(889)
       W2=V(891)+V(892)+V(1190)+V(1191)
@@ -7200,14 +7200,14 @@
       W3=-V(1190)+V(1192)+V(1193)+V(1194)
       W4=V(1195)+V(1196)+V(1197)+V(1198)+V(1199)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar7+dI(OffSet,CrtSet3)+V(1200)+V(1203)
+      dI(OffSet,CrtSet3)=Ia16Bar7+dI(OffSet,CrtSet3)+V(1200)+V(1203)
       dI(OffSet,CrtSet6)=Ib16Bar7+dI(OffSet,CrtSet6)+V(1204)+V(1205)+V(1209)
       dI(OffSet,CrtSet9)=Ic6Bar17+dI(OffSet,CrtSet9)+V(1212)+V(1213)
       W1=dI(OffSet,CrtSet12)+V(1214)+V(1215)+V(1216)+V(1217)
       W2=V(1218)+V(1219)+V(1220)
       W3=V(1221)+V(1222)+V(1223)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar7+dI(OffSet,CrtSet1)+V(1144)+V(1147)
       W1=Ib15Bar7+dI(OffSet,CrtSet4)+V(1148)
       W2=V(1225)+V(1226)+V(1228)+V(1233)
@@ -7218,7 +7218,7 @@
       W3=V(1162)+V(1224)
       W4=-V(1228)-V(1233)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar7+dI(OffSet,CrtSet2)+V(1200)+V(1203)
+      dI(OffSet,CrtSet2)=Ia16Bar7+dI(OffSet,CrtSet2)+V(1200)+V(1203)
       dI(OffSet,CrtSet5)=Ib16Bar7+dI(OffSet,CrtSet5)+V(1204)+V(1234)+V(1237)
       W1=Ic8Bar14+dI(OffSet,CrtSet8)+V(951)
       W2=V(953)+V(954)+V(1240)+V(1241)
@@ -7230,7 +7230,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
       W1=Ia18Bar7+dI(OffSet,CrtSet3)+V(1106)
       W2=V(1108)+V(1109)+V(1248)+V(1249)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar7+dI(OffSet,CrtSet6)+V(1250)+V(1254)+V(1255)
       dI(OffSet,CrtSet9)=Ic8Bar17+dI(OffSet,CrtSet9)+V(1258)+V(1259)
       W1=I2Bar7+dI(OffSet,CrtSet12)+V(1105)
@@ -7238,9 +7238,9 @@
       W3=V(1262)+V(1263)+V(1264)
       W4=V(1265)+V(1266)+V(1267)+V(1268)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia12Bar7+dI(OffSet,CrtSet1)+V(1123)
       W2=V(1169)+V(1170)+V(1270)+V(1271)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar7+dI(OffSet,CrtSet4)+V(1127)+V(1128)+V(1132)
       dI(OffSet,CrtSet7)=Ic6Bar13+dI(OffSet,CrtSet7)+V(911)+V(999)
@@ -7249,7 +7249,7 @@
       W3=V(1140)+V(1141)+V(1142)
       W4=V(1143)+V(1168)+V(1269)-V(1271)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar7+dI(OffSet,CrtSet2)+V(1178)+V(1272)
+      dI(OffSet,CrtSet2)=Ia13Bar7+dI(OffSet,CrtSet2)+V(1178)+V(1272)
       W1=Ib13Bar7+dI(OffSet,CrtSet5)+V(1108)
       W2=V(1109)+V(1132)+V(1182)+V(1183)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7261,14 +7261,14 @@
       W3=V(1193)+V(1194)+V(1195)+V(1196)
       W4=V(1198)+V(1199)-V(1273)+V(1274)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar7+dI(OffSet,CrtSet3)+V(1200)+V(1275)
+      dI(OffSet,CrtSet3)=Ia16Bar7+dI(OffSet,CrtSet3)+V(1200)+V(1275)
       dI(OffSet,CrtSet6)=Ib16Bar7+dI(OffSet,CrtSet6)+V(1153)+V(1204)+V(1205)
       dI(OffSet,CrtSet9)=Ic6Bar17+dI(OffSet,CrtSet9)+V(1213)+V(1276)
       W1=dI(OffSet,CrtSet12)+V(1164)+V(1214)+V(1215)+V(1217)
       W2=V(1218)+V(1219)+V(1222)
       W3=V(1223)+V(1277)+V(1278)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar7+dI(OffSet,CrtSet1)+V(1178)+V(1272)
       dI(OffSet,CrtSet4)=Ib13Bar7+dI(OffSet,CrtSet4)+V(1182)+V(1183)+V(1187)
       dI(OffSet,CrtSet7)=Ic7Bar13+dI(OffSet,CrtSet7)+V(1018)+V(1019)
@@ -7278,7 +7278,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar7+dI(OffSet,CrtSet2)+V(1169)
       W2=V(1170)+V(1270)+V(1279)+V(1280)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar7+dI(OffSet,CrtSet5)+V(1169)
       W2=V(1170)+V(1187)+V(1281)+V(1283)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7295,14 +7295,14 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet11)=W8+W9
-            dI(OffSet,CrtSet3)=Ia17Bar7+dI(OffSet,CrtSet3)+V(1286)+V(1287)
+      dI(OffSet,CrtSet3)=Ia17Bar7+dI(OffSet,CrtSet3)+V(1286)+V(1287)
       dI(OffSet,CrtSet6)=Ib17Bar7+dI(OffSet,CrtSet6)+V(1209)+V(1288)+V(1289)
       dI(OffSet,CrtSet9)=Ic7Bar17+dI(OffSet,CrtSet9)+V(1290)+V(1291)
       W1=dI(OffSet,CrtSet12)+V(1220)+V(1292)+V(1293)+V(1294)
       W2=V(1295)+V(1296)+V(1297)
       W3=V(1298)+V(1299)+V(1300)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar7+dI(OffSet,CrtSet1)+V(1200)+V(1275)
       dI(OffSet,CrtSet4)=Ib16Bar7+dI(OffSet,CrtSet4)+V(1204)+V(1234)+V(1237)
       dI(OffSet,CrtSet7)=Ic9Bar13+dI(OffSet,CrtSet7)+V(1044)+V(1045)
@@ -7310,7 +7310,7 @@
       W2=V(1215)+V(1217)+V(1218)
       W3=V(1242)+V(1243)+V(1277)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar7+dI(OffSet,CrtSet2)+V(1286)+V(1287)
+      dI(OffSet,CrtSet2)=Ia17Bar7+dI(OffSet,CrtSet2)+V(1286)+V(1287)
       W1=Ib17Bar7+dI(OffSet,CrtSet5)+V(1225)
       W2=V(1226)+V(1237)+V(1288)+V(1302)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7325,7 +7325,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia19Bar7+dI(OffSet,CrtSet3)+V(1169)
       W2=V(1170)+V(1270)+V(1307)+V(1308)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar7+dI(OffSet,CrtSet6)+V(1254)+V(1309)+V(1310)
       dI(OffSet,CrtSet9)=Ic9Bar17+dI(OffSet,CrtSet9)+V(1311)+V(1312)
       W1=I3Bar7+dI(OffSet,CrtSet12)+V(1168)
@@ -7333,9 +7333,9 @@
       W3=V(1314)+V(1315)+V(1316)
       W4=V(1317)+V(1318)+V(1319)+V(1320)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia15Bar7+dI(OffSet,CrtSet1)+V(1144)
       W2=V(1225)+V(1226)+V(1322)+V(1323)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar7+dI(OffSet,CrtSet4)+V(1148)+V(1149)+V(1153)
       dI(OffSet,CrtSet7)=Ic8Bar13+dI(OffSet,CrtSet7)+V(967)+V(1066)
@@ -7344,7 +7344,7 @@
       W3=V(1161)+V(1162)+V(1163)
       W4=V(1164)+V(1224)+V(1321)-V(1323)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar7+dI(OffSet,CrtSet2)+V(1200)+V(1324)
+      dI(OffSet,CrtSet2)=Ia16Bar7+dI(OffSet,CrtSet2)+V(1200)+V(1324)
       dI(OffSet,CrtSet5)=Ib16Bar7+dI(OffSet,CrtSet5)+V(1153)+V(1204)+V(1205)
       W1=Ic8Bar14+dI(OffSet,CrtSet8)+V(953)
       W2=V(954)+V(1063)+V(1241)+V(1325)
@@ -7354,7 +7354,7 @@
       W3=V(1217)+V(1218)+V(1219)
       W4=V(1244)+V(1245)-V(1325)+V(1326)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia18Bar7+dI(OffSet,CrtSet3)+V(1249)+V(1327)
+      dI(OffSet,CrtSet3)=Ia18Bar7+dI(OffSet,CrtSet3)+V(1249)+V(1327)
       W1=Ib18Bar7+dI(OffSet,CrtSet6)+V(1108)
       W2=V(1109)+V(1153)+V(1250)+V(1255)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7363,7 +7363,7 @@
       W2=V(1262)+V(1263)+V(1265)
       W3=V(1267)+V(1268)+V(1329)+V(1330)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar7+dI(OffSet,CrtSet1)+V(1200)+V(1324)
       dI(OffSet,CrtSet4)=Ib16Bar7+dI(OffSet,CrtSet4)+V(1204)+V(1205)+V(1209)
       dI(OffSet,CrtSet7)=Ic9Bar13+dI(OffSet,CrtSet7)+V(1045)+V(1077)
@@ -7373,7 +7373,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar7+dI(OffSet,CrtSet2)+V(1225)
       W2=V(1226)+V(1286)+V(1322)+V(1331)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar7+dI(OffSet,CrtSet5)+V(1209)+V(1288)+V(1289)
       W1=Ic9Bar14+dI(OffSet,CrtSet8)+V(1037)
       W2=V(1038)+V(1074)+V(1304)+V(1332)
@@ -7384,7 +7384,7 @@
       W4=V(1305)+V(1306)
       W5=V(1321)-V(1331)-V(1332)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia19Bar7+dI(OffSet,CrtSet3)+V(1308)+V(1333)
+      dI(OffSet,CrtSet3)=Ia19Bar7+dI(OffSet,CrtSet3)+V(1308)+V(1333)
       W1=Ib19Bar7+dI(OffSet,CrtSet6)+V(1169)
       W2=V(1170)+V(1209)+V(1309)+V(1310)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7393,7 +7393,7 @@
       W2=V(1315)+V(1316)+V(1317)
       W3=V(1319)+V(1320)+V(1335)+V(1336)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar7+dI(OffSet,CrtSet1)+V(1249)+V(1327)
       dI(OffSet,CrtSet4)=Ib18Bar7+dI(OffSet,CrtSet4)+V(1250)+V(1254)+V(1255)
       dI(OffSet,CrtSet7)=Ic10Bar13+dI(OffSet,CrtSet7)+V(1090)+V(1091)
@@ -7401,7 +7401,7 @@
       W2=V(1261)+V(1262)+V(1263)
       W3=V(1264)+V(1265)+V(1329)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar7+dI(OffSet,CrtSet2)+V(1308)+V(1333)
+      dI(OffSet,CrtSet2)=Ia19Bar7+dI(OffSet,CrtSet2)+V(1308)+V(1333)
       dI(OffSet,CrtSet5)=Ib19Bar7+dI(OffSet,CrtSet5)+V(1254)+V(1309)+V(1310)
       W1=Ic10Bar14+dI(OffSet,CrtSet8)+V(1084)
       W2=V(1085)+V(1087)+V(1337)+V(1338)
@@ -7414,7 +7414,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia20Bar7+dI(OffSet,CrtSet3)+V(1225)
       W2=V(1226)+V(1322)+V(1339)+V(1340)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar7+dI(OffSet,CrtSet6)+V(1225)
       W2=V(1226)+V(1254)+V(1342)+V(1343)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7428,9 +7428,9 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet12)=W7+W8
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia11Bar9+dI(OffSet,CrtSet1)+V(1352)
       W2=V(1354)+V(1355)+V(1356)+V(1359)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar9+dI(OffSet,CrtSet4)+V(1354)
       W2=V(1355)+V(1360)+V(1363)+V(1368)
@@ -7445,14 +7445,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar9+dI(OffSet,CrtSet2)+V(1372)+V(1375)
+      dI(OffSet,CrtSet2)=Ia12Bar9+dI(OffSet,CrtSet2)+V(1372)+V(1375)
       dI(OffSet,CrtSet5)=Ib12Bar9+dI(OffSet,CrtSet5)+V(1376)+V(1377)+V(1381)
       dI(OffSet,CrtSet8)=Ic5Bar17+dI(OffSet,CrtSet8)+V(1156)+V(1157)
       W1=dI(OffSet,CrtSet11)+V(1165)+V(1166)+V(1167)+V(1382)
       W2=V(1383)+V(1384)+V(1385)
       W3=V(1386)+V(1387)+V(1388)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar9+dI(OffSet,CrtSet3)+V(1389)+V(1392)
+      dI(OffSet,CrtSet3)=Ia15Bar9+dI(OffSet,CrtSet3)+V(1389)+V(1392)
       dI(OffSet,CrtSet6)=Ib15Bar9+dI(OffSet,CrtSet6)+V(1393)+V(1394)+V(1398)
       W1=Ic5Bar19+dI(OffSet,CrtSet9)+V(827)
       W2=V(829)+V(830)+V(1401)+V(1402)
@@ -7463,7 +7463,7 @@
       W4=V(1404)+V(1405)+V(1406)
       W5=V(1407)+V(1408)+V(1409)+V(1410)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar9+dI(OffSet,CrtSet1)+V(1372)+V(1375)
       W1=Ib12Bar9+dI(OffSet,CrtSet4)+V(1376)
       W2=V(1412)+V(1413)+V(1415)+V(1420)
@@ -7476,7 +7476,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar9+dI(OffSet,CrtSet2)+V(1352)
       W2=V(1354)+V(1355)+V(1421)+V(1424)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar9+dI(OffSet,CrtSet5)+V(1425)+V(1426)+V(1430)
       dI(OffSet,CrtSet8)=Ic6Bar17+dI(OffSet,CrtSet8)+V(1212)+V(1213)
       W1=I2Bar9+dI(OffSet,CrtSet11)+V(1221)
@@ -7484,7 +7484,7 @@
       W3=-V(1424)+V(1431)+V(1432)
       W4=V(1433)+V(1434)+V(1435)+V(1436)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1437)+V(1440)
+      dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1437)+V(1440)
       dI(OffSet,CrtSet6)=Ib16Bar9+dI(OffSet,CrtSet6)+V(1441)+V(1442)+V(1446)
       W1=Ic6Bar19+dI(OffSet,CrtSet9)+V(889)
       W2=V(891)+V(892)+V(1449)+V(1450)
@@ -7494,7 +7494,7 @@
       W3=V(1453)+V(1454)+V(1455)
       W4=V(1456)+V(1457)+V(1458)+V(1459)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar9+dI(OffSet,CrtSet1)+V(1389)+V(1392)
       W1=Ib15Bar9+dI(OffSet,CrtSet4)+V(1393)
       W2=V(1461)+V(1462)+V(1464)+V(1469)
@@ -7505,7 +7505,7 @@
       W3=V(1407)+V(1460)
       W4=-V(1464)-V(1469)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1437)+V(1440)
+      dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1437)+V(1440)
       dI(OffSet,CrtSet5)=Ib16Bar9+dI(OffSet,CrtSet5)+V(1441)+V(1470)+V(1473)
       dI(OffSet,CrtSet8)=Ic8Bar17+dI(OffSet,CrtSet8)+V(1258)+V(1259)
       W1=dI(OffSet,CrtSet11)+V(1266)+V(1267)+V(1268)+V(1451)
@@ -7514,7 +7514,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar9+dI(OffSet,CrtSet3)+V(1352)
       W2=V(1354)+V(1355)+V(1478)+V(1479)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar9+dI(OffSet,CrtSet6)+V(1480)+V(1484)+V(1485)
       W1=Ic8Bar19+dI(OffSet,CrtSet9)+V(951)
       W2=V(953)+V(954)+V(1488)+V(1489)
@@ -7524,9 +7524,9 @@
       W3=-V(1488)+V(1490)+V(1491)+V(1492)
       W4=V(1493)+V(1494)+V(1495)+V(1496)+V(1497)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia12Bar9+dI(OffSet,CrtSet1)+V(1372)
       W2=V(1412)+V(1413)+V(1499)+V(1500)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar9+dI(OffSet,CrtSet4)+V(1376)+V(1377)+V(1381)
       dI(OffSet,CrtSet7)=Ic6Bar16+dI(OffSet,CrtSet7)+V(931)+V(1003)
@@ -7535,7 +7535,7 @@
       W3=V(1385)+V(1386)+V(1387)
       W4=V(1388)+V(1411)+V(1498)-V(1500)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar9+dI(OffSet,CrtSet2)+V(1421)+V(1501)
+      dI(OffSet,CrtSet2)=Ia13Bar9+dI(OffSet,CrtSet2)+V(1421)+V(1501)
       W1=Ib13Bar9+dI(OffSet,CrtSet5)+V(1354)
       W2=V(1355)+V(1381)+V(1425)+V(1426)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7544,7 +7544,7 @@
       W2=V(1388)+V(1431)+V(1432)
       W3=V(1433)+V(1434)+V(1435)+V(1502)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1437)+V(1503)
+      dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1437)+V(1503)
       dI(OffSet,CrtSet6)=Ib16Bar9+dI(OffSet,CrtSet6)+V(1398)+V(1441)+V(1442)
       W1=Ic6Bar19+dI(OffSet,CrtSet9)+V(891)
       W2=V(892)+V(996)+V(1450)+V(1504)
@@ -7554,7 +7554,7 @@
       W3=V(1454)+V(1455)+V(1456)
       W4=V(1458)+V(1459)-V(1504)+V(1505)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar9+dI(OffSet,CrtSet1)+V(1421)+V(1501)
       dI(OffSet,CrtSet4)=Ib13Bar9+dI(OffSet,CrtSet4)+V(1425)+V(1426)+V(1430)
       dI(OffSet,CrtSet7)=Ic7Bar16+dI(OffSet,CrtSet7)+V(1026)+V(1027)
@@ -7564,7 +7564,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar9+dI(OffSet,CrtSet2)+V(1412)
       W2=V(1413)+V(1499)+V(1506)+V(1507)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar9+dI(OffSet,CrtSet5)+V(1412)
       W2=V(1413)+V(1430)+V(1508)+V(1510)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7578,7 +7578,7 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet11)=W7+W8
-            dI(OffSet,CrtSet3)=Ia17Bar9+dI(OffSet,CrtSet3)+V(1514)+V(1515)
+      dI(OffSet,CrtSet3)=Ia17Bar9+dI(OffSet,CrtSet3)+V(1514)+V(1515)
       dI(OffSet,CrtSet6)=Ib17Bar9+dI(OffSet,CrtSet6)+V(1446)+V(1516)+V(1517)
       W1=Ic7Bar19+dI(OffSet,CrtSet9)+V(1007)
       W2=V(1009)+V(1010)+V(1518)+V(1519)
@@ -7589,7 +7589,7 @@
       W4=V(1520)+V(1521)+V(1522)
       W5=V(1523)+V(1524)+V(1525)+V(1526)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar9+dI(OffSet,CrtSet1)+V(1437)+V(1503)
       dI(OffSet,CrtSet4)=Ib16Bar9+dI(OffSet,CrtSet4)+V(1441)+V(1470)+V(1473)
       dI(OffSet,CrtSet7)=Ic9Bar16+dI(OffSet,CrtSet7)+V(1052)+V(1053)
@@ -7597,7 +7597,7 @@
       W2=V(1452)+V(1454)+V(1455)
       W3=V(1474)+V(1475)+V(1505)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar9+dI(OffSet,CrtSet2)+V(1514)+V(1515)
+      dI(OffSet,CrtSet2)=Ia17Bar9+dI(OffSet,CrtSet2)+V(1514)+V(1515)
       W1=Ib17Bar9+dI(OffSet,CrtSet5)+V(1461)
       W2=V(1462)+V(1473)+V(1516)+V(1528)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7608,7 +7608,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar9+dI(OffSet,CrtSet3)+V(1412)
       W2=V(1413)+V(1499)+V(1529)+V(1530)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar9+dI(OffSet,CrtSet6)+V(1484)+V(1531)+V(1532)
       W1=Ic9Bar19+dI(OffSet,CrtSet9)+V(1035)
       W2=V(1037)+V(1038)+V(1533)+V(1534)
@@ -7619,9 +7619,9 @@
       W4=V(1535)+V(1536)
       W5=V(1537)+V(1538)+V(1539)+V(1540)+V(1541)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       W1=Ia15Bar9+dI(OffSet,CrtSet1)+V(1389)
       W2=V(1461)+V(1462)+V(1543)+V(1544)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar9+dI(OffSet,CrtSet4)+V(1393)+V(1394)+V(1398)
       dI(OffSet,CrtSet7)=Ic8Bar16+dI(OffSet,CrtSet7)+V(985)+V(1070)
@@ -7630,14 +7630,14 @@
       W3=V(1406)+V(1407)+V(1408)
       W4=V(1409)+V(1460)+V(1542)-V(1544)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1437)+V(1545)
+      dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1437)+V(1545)
       dI(OffSet,CrtSet5)=Ib16Bar9+dI(OffSet,CrtSet5)+V(1398)+V(1441)+V(1442)
       dI(OffSet,CrtSet8)=Ic8Bar17+dI(OffSet,CrtSet8)+V(1259)+V(1328)
       W1=dI(OffSet,CrtSet11)+V(1267)+V(1268)+V(1330)+V(1409)
       W2=V(1451)+V(1452)+V(1454)
       W3=V(1455)+V(1456)+V(1546)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar9+dI(OffSet,CrtSet3)+V(1479)+V(1547)
+      dI(OffSet,CrtSet3)=Ia18Bar9+dI(OffSet,CrtSet3)+V(1479)+V(1547)
       W1=Ib18Bar9+dI(OffSet,CrtSet6)+V(1354)
       W2=V(1355)+V(1398)+V(1480)+V(1485)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7649,7 +7649,7 @@
       W3=V(1491)+V(1492)+V(1493)+V(1495)
       W4=V(1496)+V(1497)-V(1548)+V(1549)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar9+dI(OffSet,CrtSet1)+V(1437)+V(1545)
       dI(OffSet,CrtSet4)=Ib16Bar9+dI(OffSet,CrtSet4)+V(1441)+V(1442)+V(1446)
       dI(OffSet,CrtSet7)=Ic9Bar16+dI(OffSet,CrtSet7)+V(1053)+V(1080)
@@ -7659,7 +7659,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar9+dI(OffSet,CrtSet2)+V(1461)
       W2=V(1462)+V(1514)+V(1543)+V(1550)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar9+dI(OffSet,CrtSet5)+V(1446)+V(1516)+V(1517)
       dI(OffSet,CrtSet8)=Ic9Bar17+dI(OffSet,CrtSet8)+V(1312)+V(1334)
       W1=I4Bar9+dI(OffSet,CrtSet11)+V(1319)
@@ -7667,7 +7667,7 @@
       W3=V(1520)+V(1521)+V(1523)
       W4=V(1524)+V(1525)+V(1542)-V(1550)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar9+dI(OffSet,CrtSet3)+V(1530)+V(1551)
+      dI(OffSet,CrtSet3)=Ia19Bar9+dI(OffSet,CrtSet3)+V(1530)+V(1551)
       W1=Ib19Bar9+dI(OffSet,CrtSet6)+V(1412)
       W2=V(1413)+V(1446)+V(1531)+V(1532)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7679,7 +7679,7 @@
       W3=V(1536)+V(1537)+V(1538)+V(1539)
       W4=V(1540)+V(1541)-V(1552)+V(1553)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+1)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar9+dI(OffSet,CrtSet1)+V(1479)+V(1547)
       dI(OffSet,CrtSet4)=Ib18Bar9+dI(OffSet,CrtSet4)+V(1480)+V(1484)+V(1485)
       dI(OffSet,CrtSet7)=Ic10Bar16+dI(OffSet,CrtSet7)+V(1099)+V(1100)
@@ -7687,7 +7687,7 @@
       W2=V(1491)+V(1492)+V(1493)
       W3=V(1494)+V(1495)+V(1549)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar9+dI(OffSet,CrtSet2)+V(1530)+V(1551)
+      dI(OffSet,CrtSet2)=Ia19Bar9+dI(OffSet,CrtSet2)+V(1530)+V(1551)
       dI(OffSet,CrtSet5)=Ib19Bar9+dI(OffSet,CrtSet5)+V(1484)+V(1531)+V(1532)
       dI(OffSet,CrtSet8)=Ic10Bar17+dI(OffSet,CrtSet8)+V(1344)+V(1345)
       W1=dI(OffSet,CrtSet11)+V(1346)+V(1347)+V(1348)+V(1494)
@@ -7696,7 +7696,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar9+dI(OffSet,CrtSet3)+V(1461)
       W2=V(1462)+V(1543)+V(1554)+V(1555)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar9+dI(OffSet,CrtSet6)+V(1461)
       W2=V(1462)+V(1484)+V(1557)+V(1558)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7713,9 +7713,9 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet12)=W8+W9
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia11Bar8+dI(OffSet,CrtSet1)+V(595)
       W2=V(1568)+V(1570)+V(1571)+V(1574)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar8+dI(OffSet,CrtSet4)+V(595)
       W2=V(1570)+V(1575)+V(1578)+V(1583)
@@ -7733,21 +7733,21 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet10)=W8+W9
-            dI(OffSet,CrtSet2)=Ia12Bar8+dI(OffSet,CrtSet2)+V(1595)+V(1598)
+      dI(OffSet,CrtSet2)=Ia12Bar8+dI(OffSet,CrtSet2)+V(1595)+V(1598)
       dI(OffSet,CrtSet5)=Ib12Bar8+dI(OffSet,CrtSet5)+V(1599)+V(1600)+V(1604)
       dI(OffSet,CrtSet8)=Ic5Bar16+dI(OffSet,CrtSet8)+V(1607)+V(1608)
       W1=dI(OffSet,CrtSet11)+V(398)+V(623)+V(626)+V(1609)
       W2=V(1610)+V(1611)+V(1612)
       W3=V(1613)+V(1614)+V(1615)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar8+dI(OffSet,CrtSet3)+V(1616)+V(1619)
+      dI(OffSet,CrtSet3)=Ia15Bar8+dI(OffSet,CrtSet3)+V(1616)+V(1619)
       dI(OffSet,CrtSet6)=Ib15Bar8+dI(OffSet,CrtSet6)+V(1620)+V(1621)+V(1625)
       dI(OffSet,CrtSet9)=Ic5Bar18+dI(OffSet,CrtSet9)+V(1628)+V(1629)
       W1=dI(OffSet,CrtSet12)+V(644)+V(647)+V(650)+V(1630)
       W2=V(1631)+V(1632)+V(1633)
       W3=V(1634)+V(1635)+V(1636)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar8+dI(OffSet,CrtSet1)+V(1595)+V(1598)
       W1=Ib12Bar8+dI(OffSet,CrtSet4)+V(653)
       W2=V(1599)+V(1638)+V(1640)+V(1645)
@@ -7763,7 +7763,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia13Bar8+dI(OffSet,CrtSet2)+V(595)
       W2=V(1568)+V(1570)+V(1658)+V(1661)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar8+dI(OffSet,CrtSet5)+V(1662)+V(1663)+V(1667)
       dI(OffSet,CrtSet8)=Ic6Bar16+dI(OffSet,CrtSet8)+V(1670)+V(1671)
       W1=I2Bar8+dI(OffSet,CrtSet11)+V(454)
@@ -7771,14 +7771,14 @@
       W3=-V(1661)+V(1672)+V(1673)
       W4=V(1674)+V(1675)+V(1676)+V(1677)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(1678)+V(1681)
+      dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(1678)+V(1681)
       dI(OffSet,CrtSet6)=Ib16Bar8+dI(OffSet,CrtSet6)+V(1682)+V(1683)+V(1687)
       dI(OffSet,CrtSet9)=Ic6Bar18+dI(OffSet,CrtSet9)+V(1690)+V(1691)
       W1=dI(OffSet,CrtSet12)+V(692)+V(695)+V(699)+V(1692)
       W2=V(1693)+V(1694)+V(1695)
       W3=V(1696)+V(1697)+V(1698)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar8+dI(OffSet,CrtSet1)+V(1616)+V(1619)
       W1=Ib15Bar8+dI(OffSet,CrtSet4)+V(702)
       W2=V(1620)+V(1700)+V(1702)+V(1707)
@@ -7792,7 +7792,7 @@
       W4=-V(1702)-V(1707)
       W5=V(1710)+V(1712)-V(1717)+V(1719)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(1678)+V(1681)
+      dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(1678)+V(1681)
       dI(OffSet,CrtSet5)=Ib16Bar8+dI(OffSet,CrtSet5)+V(1682)+V(1720)+V(1723)
       dI(OffSet,CrtSet8)=Ic8Bar16+dI(OffSet,CrtSet8)+V(1726)+V(1727)
       W1=dI(OffSet,CrtSet11)+V(499)+V(692)+V(695)+V(1692)
@@ -7801,7 +7801,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar8+dI(OffSet,CrtSet3)+V(595)
       W2=V(1568)+V(1570)+V(1734)+V(1735)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar8+dI(OffSet,CrtSet6)+V(1736)+V(1740)+V(1741)
       dI(OffSet,CrtSet9)=Ic8Bar18+dI(OffSet,CrtSet9)+V(1744)+V(1745)
       W1=I2Bar8+dI(OffSet,CrtSet12)+V(731)
@@ -7809,9 +7809,9 @@
       W3=-V(1734)+V(1746)+V(1747)
       W4=V(1748)+V(1749)+V(1750)+V(1751)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia12Bar8+dI(OffSet,CrtSet1)+V(653)
       W2=V(1595)+V(1638)+V(1753)+V(1754)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar8+dI(OffSet,CrtSet4)+V(1599)+V(1600)+V(1604)
       W1=Ic6Bar15+dI(OffSet,CrtSet7)+V(1651)
@@ -7823,7 +7823,7 @@
       W4=V(1657)+V(1752)
       W5=-V(1754)+V(1755)-V(1757)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia13Bar8+dI(OffSet,CrtSet2)+V(1658)+V(1758)
+      dI(OffSet,CrtSet2)=Ia13Bar8+dI(OffSet,CrtSet2)+V(1658)+V(1758)
       W1=Ib13Bar8+dI(OffSet,CrtSet5)+V(595)
       W2=V(1570)+V(1604)+V(1662)+V(1663)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7832,14 +7832,14 @@
       W2=V(1613)+V(1672)+V(1673)
       W3=V(1674)+V(1677)+V(1760)+V(1761)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(1678)+V(1762)
+      dI(OffSet,CrtSet3)=Ia16Bar8+dI(OffSet,CrtSet3)+V(1678)+V(1762)
       dI(OffSet,CrtSet6)=Ib16Bar8+dI(OffSet,CrtSet6)+V(1625)+V(1682)+V(1683)
       dI(OffSet,CrtSet9)=Ic6Bar18+dI(OffSet,CrtSet9)+V(1691)+V(1763)
       W1=dI(OffSet,CrtSet12)+V(692)+V(695)+V(699)+V(1634)
       W2=V(1692)+V(1694)+V(1695)
       W3=V(1698)+V(1764)+V(1765)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar8+dI(OffSet,CrtSet1)+V(1658)+V(1758)
       dI(OffSet,CrtSet4)=Ib13Bar8+dI(OffSet,CrtSet4)+V(1662)+V(1663)+V(1667)
       W1=Ic7Bar15+dI(OffSet,CrtSet7)+V(1767)
@@ -7853,7 +7853,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
       W1=Ia14Bar8+dI(OffSet,CrtSet2)+V(653)
       W2=V(1638)+V(1753)+V(1773)+V(1774)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar8+dI(OffSet,CrtSet5)+V(653)
       W2=V(1638)+V(1667)+V(1775)+V(1777)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7867,14 +7867,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet11)=W7+W8
-            dI(OffSet,CrtSet3)=Ia17Bar8+dI(OffSet,CrtSet3)+V(1782)+V(1783)
+      dI(OffSet,CrtSet3)=Ia17Bar8+dI(OffSet,CrtSet3)+V(1782)+V(1783)
       dI(OffSet,CrtSet6)=Ib17Bar8+dI(OffSet,CrtSet6)+V(1687)+V(1784)+V(1785)
       dI(OffSet,CrtSet9)=Ic7Bar18+dI(OffSet,CrtSet9)+V(1786)+V(1787)
       W1=dI(OffSet,CrtSet12)+V(761)+V(764)+V(766)+V(1696)
       W2=V(1788)+V(1789)+V(1790)
       W3=V(1791)+V(1792)+V(1793)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar8+dI(OffSet,CrtSet1)+V(1678)+V(1762)
       dI(OffSet,CrtSet4)=Ib16Bar8+dI(OffSet,CrtSet4)+V(1682)+V(1720)+V(1723)
       W1=Ic9Bar15+dI(OffSet,CrtSet7)+V(1795)
@@ -7885,7 +7885,7 @@
       W3=V(1728)+V(1729)+V(1764)
       W4=V(1794)+V(1796)-V(1799)+V(1801)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia17Bar8+dI(OffSet,CrtSet2)+V(1782)+V(1783)
+      dI(OffSet,CrtSet2)=Ia17Bar8+dI(OffSet,CrtSet2)+V(1782)+V(1783)
       W1=Ib17Bar8+dI(OffSet,CrtSet5)+V(702)
       W2=V(1700)+V(1723)+V(1784)+V(1803)
       dI(OffSet,CrtSet5)=W1+W2
@@ -7896,7 +7896,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar8+dI(OffSet,CrtSet3)+V(653)
       W2=V(1638)+V(1753)+V(1808)+V(1809)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar8+dI(OffSet,CrtSet6)+V(1740)+V(1810)+V(1811)
       dI(OffSet,CrtSet9)=Ic9Bar18+dI(OffSet,CrtSet9)+V(1812)+V(1813)
       W1=I3Bar8+dI(OffSet,CrtSet12)+V(776)
@@ -7904,9 +7904,9 @@
       W3=V(1752)-V(1808)+V(1814)
       W4=V(1815)+V(1816)+V(1817)+V(1818)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia15Bar8+dI(OffSet,CrtSet1)+V(702)
       W2=V(1616)+V(1700)+V(1820)+V(1821)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar8+dI(OffSet,CrtSet4)+V(1620)+V(1621)+V(1625)
       W1=Ic8Bar15+dI(OffSet,CrtSet7)+V(1713)
@@ -7918,14 +7918,14 @@
       W4=V(1719)+V(1819)
       W5=-V(1821)+V(1822)-V(1824)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(1678)+V(1825)
+      dI(OffSet,CrtSet2)=Ia16Bar8+dI(OffSet,CrtSet2)+V(1678)+V(1825)
       dI(OffSet,CrtSet5)=Ib16Bar8+dI(OffSet,CrtSet5)+V(1625)+V(1682)+V(1683)
       dI(OffSet,CrtSet8)=Ic8Bar16+dI(OffSet,CrtSet8)+V(1727)+V(1826)
       W1=dI(OffSet,CrtSet11)+V(499)+V(692)+V(695)+V(1634)
       W2=V(1692)+V(1694)+V(1695)
       W3=V(1731)+V(1827)+V(1828)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar8+dI(OffSet,CrtSet3)+V(1735)+V(1829)
+      dI(OffSet,CrtSet3)=Ia18Bar8+dI(OffSet,CrtSet3)+V(1735)+V(1829)
       W1=Ib18Bar8+dI(OffSet,CrtSet6)+V(595)
       W2=V(1570)+V(1625)+V(1736)+V(1741)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7934,7 +7934,7 @@
       W2=V(1634)+V(1746)+V(1747)
       W3=V(1749)+V(1751)+V(1831)+V(1832)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar8+dI(OffSet,CrtSet1)+V(1678)+V(1825)
       dI(OffSet,CrtSet4)=Ib16Bar8+dI(OffSet,CrtSet4)+V(1682)+V(1683)+V(1687)
       W1=Ic9Bar15+dI(OffSet,CrtSet7)+V(1797)
@@ -7947,7 +7947,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia17Bar8+dI(OffSet,CrtSet2)+V(702)
       W2=V(1700)+V(1782)+V(1820)+V(1836)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar8+dI(OffSet,CrtSet5)+V(1687)+V(1784)+V(1785)
       dI(OffSet,CrtSet8)=Ic9Bar16+dI(OffSet,CrtSet8)+V(1805)+V(1837)
       W1=I4Bar8+dI(OffSet,CrtSet11)+V(555)
@@ -7955,7 +7955,7 @@
       W3=V(1788)+V(1790)+V(1791)
       W4=V(1807)+V(1819)-V(1836)+V(1838)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar8+dI(OffSet,CrtSet3)+V(1809)+V(1839)
+      dI(OffSet,CrtSet3)=Ia19Bar8+dI(OffSet,CrtSet3)+V(1809)+V(1839)
       W1=Ib19Bar8+dI(OffSet,CrtSet6)+V(653)
       W2=V(1638)+V(1687)+V(1810)+V(1811)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7964,7 +7964,7 @@
       W2=V(1696)+V(1814)+V(1815)
       W3=V(1816)+V(1818)+V(1841)+V(1842)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+0)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar8+dI(OffSet,CrtSet1)+V(1735)+V(1829)
       dI(OffSet,CrtSet4)=Ib18Bar8+dI(OffSet,CrtSet4)+V(1736)+V(1740)+V(1741)
       W1=Ic10Bar15+dI(OffSet,CrtSet7)+V(1844)
@@ -7976,7 +7976,7 @@
       W4=V(1843)+V(1846)
       W5=-V(1848)-V(1849)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet2)=Ia19Bar8+dI(OffSet,CrtSet2)+V(1809)+V(1839)
+      dI(OffSet,CrtSet2)=Ia19Bar8+dI(OffSet,CrtSet2)+V(1809)+V(1839)
       dI(OffSet,CrtSet5)=Ib19Bar8+dI(OffSet,CrtSet5)+V(1740)+V(1810)+V(1811)
       dI(OffSet,CrtSet8)=Ic10Bar16+dI(OffSet,CrtSet8)+V(1850)+V(1851)
       W1=dI(OffSet,CrtSet11)+V(586)+V(776)+V(778)+V(1748)
@@ -7985,7 +7985,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar8+dI(OffSet,CrtSet3)+V(702)
       W2=V(1700)+V(1820)+V(1854)+V(1855)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar8+dI(OffSet,CrtSet6)+V(702)
       W2=V(1700)+V(1740)+V(1857)+V(1858)
       dI(OffSet,CrtSet6)=W1+W2
@@ -7999,9 +7999,9 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet12)=W7+W8
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia11Bar9+dI(OffSet,CrtSet1)+V(1355)
       W2=V(1866)+V(1868)+V(1869)+V(1872)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar9+dI(OffSet,CrtSet4)+V(1355)
       W2=V(1868)+V(1873)+V(1876)+V(1881)
@@ -8016,7 +8016,7 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar9+dI(OffSet,CrtSet2)+V(1882)+V(1885)
+      dI(OffSet,CrtSet2)=Ia12Bar9+dI(OffSet,CrtSet2)+V(1882)+V(1885)
       dI(OffSet,CrtSet5)=Ib12Bar9+dI(OffSet,CrtSet5)+V(1886)+V(1887)+V(1891)
       W1=Ic5Bar17+dI(OffSet,CrtSet8)+V(1587)
       W2=V(1589)+V(1590)+V(1894)+V(1895)
@@ -8026,14 +8026,14 @@
       W3=-V(1894)-V(1895)+V(1896)
       W4=V(1897)+V(1898)+V(1899)+V(1900)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia15Bar9+dI(OffSet,CrtSet3)+V(1901)+V(1904)
+      dI(OffSet,CrtSet3)=Ia15Bar9+dI(OffSet,CrtSet3)+V(1901)+V(1904)
       dI(OffSet,CrtSet6)=Ib15Bar9+dI(OffSet,CrtSet6)+V(1905)+V(1906)+V(1910)
       dI(OffSet,CrtSet9)=Ic5Bar19+dI(OffSet,CrtSet9)+V(1913)+V(1914)
       W1=dI(OffSet,CrtSet12)+V(1404)+V(1407)+V(1410)+V(1915)
       W2=V(1916)+V(1917)+V(1918)
       W3=V(1919)+V(1920)+V(1921)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar9+dI(OffSet,CrtSet1)+V(1882)+V(1885)
       W1=Ib12Bar9+dI(OffSet,CrtSet4)+V(1413)
       W2=V(1886)+V(1923)+V(1925)+V(1930)
@@ -8046,7 +8046,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar9+dI(OffSet,CrtSet2)+V(1355)
       W2=V(1866)+V(1868)+V(1931)+V(1934)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar9+dI(OffSet,CrtSet5)+V(1935)+V(1936)+V(1940)
       W1=Ic6Bar17+dI(OffSet,CrtSet8)+V(1649)
       W2=V(1651)+V(1652)+V(1943)+V(1944)
@@ -8057,14 +8057,14 @@
       W4=-V(1934)-V(1943)
       W5=V(1945)+V(1946)+V(1947)+V(1948)+V(1949)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1950)+V(1953)
+      dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1950)+V(1953)
       dI(OffSet,CrtSet6)=Ib16Bar9+dI(OffSet,CrtSet6)+V(1954)+V(1955)+V(1959)
       dI(OffSet,CrtSet9)=Ic6Bar19+dI(OffSet,CrtSet9)+V(1962)+V(1963)
       W1=dI(OffSet,CrtSet12)+V(1452)+V(1455)+V(1459)+V(1964)
       W2=V(1965)+V(1966)+V(1967)
       W3=V(1968)+V(1969)+V(1970)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar9+dI(OffSet,CrtSet1)+V(1901)+V(1904)
       W1=Ib15Bar9+dI(OffSet,CrtSet4)+V(1462)
       W2=V(1905)+V(1972)+V(1974)+V(1979)
@@ -8075,7 +8075,7 @@
       W3=V(1917)+V(1971)
       W4=-V(1974)-V(1979)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1950)+V(1953)
+      dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1950)+V(1953)
       dI(OffSet,CrtSet5)=Ib16Bar9+dI(OffSet,CrtSet5)+V(1954)+V(1980)+V(1983)
       W1=Ic8Bar17+dI(OffSet,CrtSet8)+V(1711)
       W2=V(1713)+V(1714)+V(1986)+V(1987)
@@ -8087,7 +8087,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
       W1=Ia18Bar9+dI(OffSet,CrtSet3)+V(1355)
       W2=V(1866)+V(1868)+V(1993)+V(1994)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar9+dI(OffSet,CrtSet6)+V(1995)+V(1999)+V(2000)
       dI(OffSet,CrtSet9)=Ic8Bar19+dI(OffSet,CrtSet9)+V(2003)+V(2004)
       W1=I2Bar9+dI(OffSet,CrtSet12)+V(1491)
@@ -8095,9 +8095,9 @@
       W3=-V(1993)+V(2005)+V(2006)
       W4=V(2007)+V(2008)+V(2009)+V(2010)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia12Bar9+dI(OffSet,CrtSet1)+V(1413)
       W2=V(1882)+V(1923)+V(2012)+V(2013)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar9+dI(OffSet,CrtSet4)+V(1886)+V(1887)+V(1891)
       dI(OffSet,CrtSet7)=Ic6Bar16+dI(OffSet,CrtSet7)+V(1671)+V(1759)
@@ -8106,7 +8106,7 @@
       W3=V(1896)+V(1898)+V(1899)
       W4=V(1900)+V(1922)+V(2011)-V(2013)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar9+dI(OffSet,CrtSet2)+V(1931)+V(2014)
+      dI(OffSet,CrtSet2)=Ia13Bar9+dI(OffSet,CrtSet2)+V(1931)+V(2014)
       W1=Ib13Bar9+dI(OffSet,CrtSet5)+V(1355)
       W2=V(1868)+V(1891)+V(1935)+V(1936)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8118,14 +8118,14 @@
       W3=V(1867)+V(1900)+V(1945)+V(1946)
       W4=V(1947)+V(1949)-V(2015)+V(2016)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1950)+V(2017)
+      dI(OffSet,CrtSet3)=Ia16Bar9+dI(OffSet,CrtSet3)+V(1950)+V(2017)
       dI(OffSet,CrtSet6)=Ib16Bar9+dI(OffSet,CrtSet6)+V(1910)+V(1954)+V(1955)
       dI(OffSet,CrtSet9)=Ic6Bar19+dI(OffSet,CrtSet9)+V(1963)+V(2018)
       W1=dI(OffSet,CrtSet12)+V(1452)+V(1455)+V(1459)+V(1919)
       W2=V(1964)+V(1966)+V(1967)
       W3=V(1970)+V(2019)+V(2020)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar9+dI(OffSet,CrtSet1)+V(1931)+V(2014)
       dI(OffSet,CrtSet4)=Ib13Bar9+dI(OffSet,CrtSet4)+V(1935)+V(1936)+V(1940)
       dI(OffSet,CrtSet7)=Ic7Bar16+dI(OffSet,CrtSet7)+V(1778)+V(1779)
@@ -8135,7 +8135,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar9+dI(OffSet,CrtSet2)+V(1413)
       W2=V(1923)+V(2012)+V(2021)+V(2022)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar9+dI(OffSet,CrtSet5)+V(1413)
       W2=V(1923)+V(1940)+V(2023)+V(2025)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8152,14 +8152,14 @@
       W8=W1+W2+W3
       W9=W4+W5+W6+W7
       dI(OffSet,CrtSet11)=W8+W9
-            dI(OffSet,CrtSet3)=Ia17Bar9+dI(OffSet,CrtSet3)+V(2028)+V(2029)
+      dI(OffSet,CrtSet3)=Ia17Bar9+dI(OffSet,CrtSet3)+V(2028)+V(2029)
       dI(OffSet,CrtSet6)=Ib17Bar9+dI(OffSet,CrtSet6)+V(1959)+V(2030)+V(2031)
       dI(OffSet,CrtSet9)=Ic7Bar19+dI(OffSet,CrtSet9)+V(2032)+V(2033)
       W1=dI(OffSet,CrtSet12)+V(1521)+V(1524)+V(1526)+V(1968)
       W2=V(2034)+V(2035)+V(2036)
       W3=V(2037)+V(2038)+V(2039)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar9+dI(OffSet,CrtSet1)+V(1950)+V(2017)
       dI(OffSet,CrtSet4)=Ib16Bar9+dI(OffSet,CrtSet4)+V(1954)+V(1980)+V(1983)
       dI(OffSet,CrtSet7)=Ic9Bar16+dI(OffSet,CrtSet7)+V(1804)+V(1805)
@@ -8167,7 +8167,7 @@
       W2=V(1807)+V(1964)+V(1966)
       W3=V(1988)+V(1989)+V(2019)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar9+dI(OffSet,CrtSet2)+V(2028)+V(2029)
+      dI(OffSet,CrtSet2)=Ia17Bar9+dI(OffSet,CrtSet2)+V(2028)+V(2029)
       W1=Ib17Bar9+dI(OffSet,CrtSet5)+V(1462)
       W2=V(1972)+V(1983)+V(2030)+V(2041)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8182,7 +8182,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia19Bar9+dI(OffSet,CrtSet3)+V(1413)
       W2=V(1923)+V(2012)+V(2045)+V(2046)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar9+dI(OffSet,CrtSet6)+V(1999)+V(2047)+V(2048)
       dI(OffSet,CrtSet9)=Ic9Bar19+dI(OffSet,CrtSet9)+V(2049)+V(2050)
       W1=I3Bar9+dI(OffSet,CrtSet12)+V(1536)
@@ -8190,9 +8190,9 @@
       W3=V(2011)-V(2045)+V(2051)
       W4=V(2052)+V(2053)+V(2054)+V(2055)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia15Bar9+dI(OffSet,CrtSet1)+V(1462)
       W2=V(1901)+V(1972)+V(2057)+V(2058)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar9+dI(OffSet,CrtSet4)+V(1905)+V(1906)+V(1910)
       dI(OffSet,CrtSet7)=Ic8Bar16+dI(OffSet,CrtSet7)+V(1727)+V(1826)
@@ -8201,7 +8201,7 @@
       W3=V(1915)+V(1917)+V(1918)
       W4=V(1919)+V(1971)+V(2056)-V(2058)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1950)+V(2059)
+      dI(OffSet,CrtSet2)=Ia16Bar9+dI(OffSet,CrtSet2)+V(1950)+V(2059)
       dI(OffSet,CrtSet5)=Ib16Bar9+dI(OffSet,CrtSet5)+V(1910)+V(1954)+V(1955)
       W1=Ic8Bar17+dI(OffSet,CrtSet8)+V(1713)
       W2=V(1714)+V(1823)+V(1987)+V(2060)
@@ -8211,7 +8211,7 @@
       W3=V(1919)+V(1964)+V(1966)
       W4=V(1967)+V(1990)-V(2060)+V(2061)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia18Bar9+dI(OffSet,CrtSet3)+V(1994)+V(2062)
+      dI(OffSet,CrtSet3)=Ia18Bar9+dI(OffSet,CrtSet3)+V(1994)+V(2062)
       W1=Ib18Bar9+dI(OffSet,CrtSet6)+V(1355)
       W2=V(1868)+V(1910)+V(1995)+V(2000)
       dI(OffSet,CrtSet6)=W1+W2
@@ -8220,7 +8220,7 @@
       W2=V(1919)+V(2005)+V(2006)
       W3=V(2008)+V(2010)+V(2064)+V(2065)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar9+dI(OffSet,CrtSet1)+V(1950)+V(2059)
       dI(OffSet,CrtSet4)=Ib16Bar9+dI(OffSet,CrtSet4)+V(1954)+V(1955)+V(1959)
       dI(OffSet,CrtSet7)=Ic9Bar16+dI(OffSet,CrtSet7)+V(1805)+V(1837)
@@ -8230,7 +8230,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar9+dI(OffSet,CrtSet2)+V(1462)
       W2=V(1972)+V(2028)+V(2057)+V(2066)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar9+dI(OffSet,CrtSet5)+V(1959)+V(2030)+V(2031)
       W1=Ic9Bar17+dI(OffSet,CrtSet8)+V(1797)
       W2=V(1798)+V(1834)+V(2043)+V(2067)
@@ -8241,7 +8241,7 @@
       W4=V(2037)+V(2044)
       W5=V(2056)-V(2066)-V(2067)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia19Bar9+dI(OffSet,CrtSet3)+V(2046)+V(2068)
+      dI(OffSet,CrtSet3)=Ia19Bar9+dI(OffSet,CrtSet3)+V(2046)+V(2068)
       W1=Ib19Bar9+dI(OffSet,CrtSet6)+V(1413)
       W2=V(1923)+V(1959)+V(2047)+V(2048)
       dI(OffSet,CrtSet6)=W1+W2
@@ -8250,7 +8250,7 @@
       W2=V(1968)+V(2051)+V(2052)
       W3=V(2053)+V(2055)+V(2070)+V(2071)
       dI(OffSet,CrtSet12)=W1+W2+W3
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+1)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar9+dI(OffSet,CrtSet1)+V(1994)+V(2062)
       dI(OffSet,CrtSet4)=Ib18Bar9+dI(OffSet,CrtSet4)+V(1995)+V(1999)+V(2000)
       dI(OffSet,CrtSet7)=Ic10Bar16+dI(OffSet,CrtSet7)+V(1850)+V(1851)
@@ -8258,7 +8258,7 @@
       W2=V(1853)+V(2005)+V(2006)
       W3=V(2007)+V(2008)+V(2064)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar9+dI(OffSet,CrtSet2)+V(2046)+V(2068)
+      dI(OffSet,CrtSet2)=Ia19Bar9+dI(OffSet,CrtSet2)+V(2046)+V(2068)
       dI(OffSet,CrtSet5)=Ib19Bar9+dI(OffSet,CrtSet5)+V(1999)+V(2047)+V(2048)
       W1=Ic10Bar17+dI(OffSet,CrtSet8)+V(1844)
       W2=V(1845)+V(1847)+V(2072)+V(2073)
@@ -8271,7 +8271,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
       W1=Ia20Bar9+dI(OffSet,CrtSet3)+V(1462)
       W2=V(1972)+V(2057)+V(2074)+V(2075)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar9+dI(OffSet,CrtSet6)+V(1462)
       W2=V(1972)+V(1999)+V(2077)+V(2078)
       dI(OffSet,CrtSet6)=W1+W2
@@ -8285,9 +8285,9 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet12)=W7+W8
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia11Bar10+dI(OffSet,CrtSet1)+V(2086)
       W2=V(2087)+V(2089)+V(2090)+V(2093)
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       W1=Ib11Bar10+dI(OffSet,CrtSet4)+V(2087)
       W2=V(2089)+V(2094)+V(2097)+V(2102)
@@ -8302,14 +8302,14 @@
       W7=W1+W2+W3
       W8=W4+W5+W6
       dI(OffSet,CrtSet10)=W7+W8
-            dI(OffSet,CrtSet2)=Ia12Bar10+dI(OffSet,CrtSet2)+V(2103)+V(2106)
+      dI(OffSet,CrtSet2)=Ia12Bar10+dI(OffSet,CrtSet2)+V(2103)+V(2106)
       dI(OffSet,CrtSet5)=Ib12Bar10+dI(OffSet,CrtSet5)+V(2107)+V(2108)+V(2112)
       dI(OffSet,CrtSet8)=Ic5Bar19+dI(OffSet,CrtSet8)+V(1913)+V(1914)
       W1=dI(OffSet,CrtSet11)+V(1410)+V(1920)+V(1921)+V(2113)
       W2=V(2114)+V(2115)+V(2116)
       W3=V(2117)+V(2118)+V(2119)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia15Bar10+dI(OffSet,CrtSet3)+V(2120)+V(2123)
+      dI(OffSet,CrtSet3)=Ia15Bar10+dI(OffSet,CrtSet3)+V(2120)+V(2123)
       dI(OffSet,CrtSet6)=Ib15Bar10+dI(OffSet,CrtSet6)+V(2124)+V(2125)+V(2129)
       W1=Ic5Bar20+dI(OffSet,CrtSet9)+V(1587)
       W2=V(1589)+V(1590)+V(2132)+V(2133)
@@ -8320,7 +8320,7 @@
       W4=V(2134)+V(2135)+V(2136)
       W5=V(2137)+V(2138)+V(2139)+V(2140)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia12Bar10+dI(OffSet,CrtSet1)+V(2103)+V(2106)
       W1=Ib12Bar10+dI(OffSet,CrtSet4)+V(2107)
       W2=V(2141)+V(2143)+V(2145)+V(2150)
@@ -8333,7 +8333,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
       W1=Ia13Bar10+dI(OffSet,CrtSet2)+V(2086)
       W2=V(2087)+V(2089)+V(2151)+V(2154)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib13Bar10+dI(OffSet,CrtSet5)+V(2155)+V(2156)+V(2160)
       dI(OffSet,CrtSet8)=Ic6Bar19+dI(OffSet,CrtSet8)+V(1962)+V(1963)
       W1=I2Bar10+dI(OffSet,CrtSet11)+V(1459)
@@ -8341,7 +8341,7 @@
       W3=-V(2154)+V(2161)+V(2162)
       W4=V(2163)+V(2164)+V(2165)+V(2166)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia16Bar10+dI(OffSet,CrtSet3)+V(2167)+V(2170)
+      dI(OffSet,CrtSet3)=Ia16Bar10+dI(OffSet,CrtSet3)+V(2167)+V(2170)
       dI(OffSet,CrtSet6)=Ib16Bar10+dI(OffSet,CrtSet6)+V(2171)+V(2172)+V(2176)
       W1=Ic6Bar20+dI(OffSet,CrtSet9)+V(1649)
       W2=V(1651)+V(1652)+V(2179)+V(2180)
@@ -8351,7 +8351,7 @@
       W3=V(2183)+V(2184)+V(2185)
       W4=V(2186)+V(2187)+V(2188)+V(2189)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia15Bar10+dI(OffSet,CrtSet1)+V(2120)+V(2123)
       W1=Ib15Bar10+dI(OffSet,CrtSet4)+V(2124)
       W2=V(2190)+V(2192)+V(2194)+V(2199)
@@ -8362,7 +8362,7 @@
       W3=V(2138)+V(2191)
       W4=-V(2194)-V(2199)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar10+dI(OffSet,CrtSet2)+V(2167)+V(2170)
+      dI(OffSet,CrtSet2)=Ia16Bar10+dI(OffSet,CrtSet2)+V(2167)+V(2170)
       dI(OffSet,CrtSet5)=Ib16Bar10+dI(OffSet,CrtSet5)+V(2171)+V(2200)+V(2203)
       dI(OffSet,CrtSet8)=Ic8Bar19+dI(OffSet,CrtSet8)+V(2003)+V(2004)
       W1=dI(OffSet,CrtSet11)+V(1497)+V(2009)+V(2010)+V(2181)
@@ -8371,7 +8371,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia18Bar10+dI(OffSet,CrtSet3)+V(2086)
       W2=V(2087)+V(2089)+V(2208)+V(2209)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib18Bar10+dI(OffSet,CrtSet6)+V(2210)+V(2214)+V(2215)
       W1=Ic8Bar20+dI(OffSet,CrtSet9)+V(1711)
       W2=V(1713)+V(1714)+V(2218)+V(2219)
@@ -8381,9 +8381,9 @@
       W3=-V(2218)+V(2220)+V(2221)+V(2222)
       W4=V(2223)+V(2224)+V(2225)+V(2226)+V(2227)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
+      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia12Bar10+dI(OffSet,CrtSet1)+V(2103)
       W2=V(2141)+V(2143)+V(2229)+V(2230)
-      OffSet=(OA+0)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib12Bar10+dI(OffSet,CrtSet4)+V(2107)+V(2108)+V(2112)
       dI(OffSet,CrtSet7)=Ic6Bar18+dI(OffSet,CrtSet7)+V(1691)+V(1763)
@@ -8392,7 +8392,7 @@
       W3=V(2116)+V(2117)+V(2118)
       W4=V(2119)+V(2142)+V(2228)-V(2230)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia13Bar10+dI(OffSet,CrtSet2)+V(2151)+V(2231)
+      dI(OffSet,CrtSet2)=Ia13Bar10+dI(OffSet,CrtSet2)+V(2151)+V(2231)
       W1=Ib13Bar10+dI(OffSet,CrtSet5)+V(2087)
       W2=V(2089)+V(2112)+V(2155)+V(2156)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8401,7 +8401,7 @@
       W2=V(2119)+V(2161)+V(2162)
       W3=V(2163)+V(2164)+V(2165)+V(2232)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia16Bar10+dI(OffSet,CrtSet3)+V(2167)+V(2233)
+      dI(OffSet,CrtSet3)=Ia16Bar10+dI(OffSet,CrtSet3)+V(2167)+V(2233)
       dI(OffSet,CrtSet6)=Ib16Bar10+dI(OffSet,CrtSet6)+V(2129)+V(2171)+V(2172)
       W1=Ic6Bar20+dI(OffSet,CrtSet9)+V(1651)
       W2=V(1652)+V(1756)+V(2180)+V(2234)
@@ -8411,7 +8411,7 @@
       W3=V(2184)+V(2185)+V(2186)
       W4=V(2188)+V(2189)-V(2234)+V(2235)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia13Bar10+dI(OffSet,CrtSet1)+V(2151)+V(2231)
       dI(OffSet,CrtSet4)=Ib13Bar10+dI(OffSet,CrtSet4)+V(2155)+V(2156)+V(2160)
       dI(OffSet,CrtSet7)=Ic7Bar18+dI(OffSet,CrtSet7)+V(1786)+V(1787)
@@ -8421,7 +8421,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia14Bar10+dI(OffSet,CrtSet2)+V(2141)
       W2=V(2143)+V(2229)+V(2236)+V(2237)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       W1=Ib14Bar10+dI(OffSet,CrtSet5)+V(2141)
       W2=V(2143)+V(2160)+V(2238)+V(2240)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8432,7 +8432,7 @@
       W4=-V(2236)-V(2237)
       W5=-V(2238)-V(2240)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4+W5
-            dI(OffSet,CrtSet3)=Ia17Bar10+dI(OffSet,CrtSet3)+V(2241)+V(2242)
+      dI(OffSet,CrtSet3)=Ia17Bar10+dI(OffSet,CrtSet3)+V(2241)+V(2242)
       dI(OffSet,CrtSet6)=Ib17Bar10+dI(OffSet,CrtSet6)+V(2176)+V(2243)+V(2244)
       W1=Ic7Bar20+dI(OffSet,CrtSet9)+V(1767)
       W2=V(1769)+V(1770)+V(2245)+V(2246)
@@ -8442,7 +8442,7 @@
       W3=-V(2246)+V(2247)+V(2248)
       W4=V(2249)+V(2250)+V(2251)+V(2252)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+1)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar10+dI(OffSet,CrtSet1)+V(2167)+V(2233)
       dI(OffSet,CrtSet4)=Ib16Bar10+dI(OffSet,CrtSet4)+V(2171)+V(2200)+V(2203)
       dI(OffSet,CrtSet7)=Ic9Bar18+dI(OffSet,CrtSet7)+V(1812)+V(1813)
@@ -8450,7 +8450,7 @@
       W2=V(2182)+V(2184)+V(2185)
       W3=V(2204)+V(2205)+V(2235)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia17Bar10+dI(OffSet,CrtSet2)+V(2241)+V(2242)
+      dI(OffSet,CrtSet2)=Ia17Bar10+dI(OffSet,CrtSet2)+V(2241)+V(2242)
       W1=Ib17Bar10+dI(OffSet,CrtSet5)+V(2190)
       W2=V(2192)+V(2203)+V(2243)+V(2254)
       dI(OffSet,CrtSet5)=W1+W2
@@ -8461,7 +8461,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia19Bar10+dI(OffSet,CrtSet3)+V(2141)
       W2=V(2143)+V(2229)+V(2255)+V(2256)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       dI(OffSet,CrtSet6)=Ib19Bar10+dI(OffSet,CrtSet6)+V(2214)+V(2257)+V(2258)
       W1=Ic9Bar20+dI(OffSet,CrtSet9)+V(1795)
       W2=V(1797)+V(1798)+V(2259)+V(2260)
@@ -8472,9 +8472,9 @@
       W4=V(2261)+V(2262)
       W5=V(2263)+V(2264)+V(2265)+V(2266)+V(2267)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4+W5
+      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       W1=Ia15Bar10+dI(OffSet,CrtSet1)+V(2120)
       W2=V(2190)+V(2192)+V(2269)+V(2270)
-      OffSet=(OA+0)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD
       dI(OffSet,CrtSet1)=W1+W2
       dI(OffSet,CrtSet4)=Ib15Bar10+dI(OffSet,CrtSet4)+V(2124)+V(2125)+V(2129)
       dI(OffSet,CrtSet7)=Ic8Bar18+dI(OffSet,CrtSet7)+V(1745)+V(1830)
@@ -8483,14 +8483,14 @@
       W3=V(2137)+V(2138)+V(2139)
       W4=V(2140)+V(2191)+V(2268)-V(2270)
       dI(OffSet,CrtSet10)=W1+W2+W3+W4
-            dI(OffSet,CrtSet2)=Ia16Bar10+dI(OffSet,CrtSet2)+V(2167)+V(2271)
+      dI(OffSet,CrtSet2)=Ia16Bar10+dI(OffSet,CrtSet2)+V(2167)+V(2271)
       dI(OffSet,CrtSet5)=Ib16Bar10+dI(OffSet,CrtSet5)+V(2129)+V(2171)+V(2172)
       dI(OffSet,CrtSet8)=Ic8Bar19+dI(OffSet,CrtSet8)+V(2004)+V(2063)
       W1=dI(OffSet,CrtSet11)+V(1497)+V(2010)+V(2065)+V(2140)
       W2=V(2181)+V(2182)+V(2184)
       W3=V(2185)+V(2186)+V(2272)
       dI(OffSet,CrtSet11)=W1+W2+W3
-            dI(OffSet,CrtSet3)=Ia18Bar10+dI(OffSet,CrtSet3)+V(2209)+V(2273)
+      dI(OffSet,CrtSet3)=Ia18Bar10+dI(OffSet,CrtSet3)+V(2209)+V(2273)
       W1=Ib18Bar10+dI(OffSet,CrtSet6)+V(2087)
       W2=V(2089)+V(2129)+V(2210)+V(2215)
       dI(OffSet,CrtSet6)=W1+W2
@@ -8502,7 +8502,7 @@
       W3=V(2221)+V(2222)+V(2223)+V(2225)
       W4=V(2226)+V(2227)-V(2274)+V(2275)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+1)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia16Bar10+dI(OffSet,CrtSet1)+V(2167)+V(2271)
       dI(OffSet,CrtSet4)=Ib16Bar10+dI(OffSet,CrtSet4)+V(2171)+V(2172)+V(2176)
       dI(OffSet,CrtSet7)=Ic9Bar18+dI(OffSet,CrtSet7)+V(1813)+V(1840)
@@ -8512,7 +8512,7 @@
       dI(OffSet,CrtSet10)=W1+W2+W3
       W1=Ia17Bar10+dI(OffSet,CrtSet2)+V(2190)
       W2=V(2192)+V(2241)+V(2269)+V(2276)
-            dI(OffSet,CrtSet2)=W1+W2
+      dI(OffSet,CrtSet2)=W1+W2
       dI(OffSet,CrtSet5)=Ib17Bar10+dI(OffSet,CrtSet5)+V(2176)+V(2243)+V(2244)
       dI(OffSet,CrtSet8)=Ic9Bar19+dI(OffSet,CrtSet8)+V(2050)+V(2069)
       W1=I4Bar10+dI(OffSet,CrtSet11)+V(1541)
@@ -8520,7 +8520,7 @@
       W3=V(2247)+V(2248)+V(2250)
       W4=V(2251)+V(2252)+V(2268)-V(2276)
       dI(OffSet,CrtSet11)=W1+W2+W3+W4
-            dI(OffSet,CrtSet3)=Ia19Bar10+dI(OffSet,CrtSet3)+V(2256)+V(2277)
+      dI(OffSet,CrtSet3)=Ia19Bar10+dI(OffSet,CrtSet3)+V(2256)+V(2277)
       W1=Ib19Bar10+dI(OffSet,CrtSet6)+V(2141)
       W2=V(2143)+V(2176)+V(2257)+V(2258)
       dI(OffSet,CrtSet6)=W1+W2
@@ -8532,7 +8532,7 @@
       W3=V(2262)+V(2263)+V(2264)+V(2265)
       W4=V(2266)+V(2267)-V(2278)+V(2279)
       dI(OffSet,CrtSet12)=W1+W2+W3+W4
-      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD
+      OffSet=(OA+2)*LDA+(OB+2)*LDB+(OC+2)*LDC+(OD+2)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia18Bar10+dI(OffSet,CrtSet1)+V(2209)+V(2273)
       dI(OffSet,CrtSet4)=Ib18Bar10+dI(OffSet,CrtSet4)+V(2210)+V(2214)+V(2215)
       dI(OffSet,CrtSet7)=Ic10Bar18+dI(OffSet,CrtSet7)+V(1859)+V(1860)
@@ -8540,7 +8540,7 @@
       W2=V(2221)+V(2222)+V(2223)
       W3=V(2224)+V(2225)+V(2275)
       dI(OffSet,CrtSet10)=W1+W2+W3
-            dI(OffSet,CrtSet2)=Ia19Bar10+dI(OffSet,CrtSet2)+V(2256)+V(2277)
+      dI(OffSet,CrtSet2)=Ia19Bar10+dI(OffSet,CrtSet2)+V(2256)+V(2277)
       dI(OffSet,CrtSet5)=Ib19Bar10+dI(OffSet,CrtSet5)+V(2214)+V(2257)+V(2258)
       dI(OffSet,CrtSet8)=Ic10Bar19+dI(OffSet,CrtSet8)+V(2079)+V(2080)
       W1=dI(OffSet,CrtSet11)+V(1564)+V(2081)+V(2082)+V(2224)
@@ -8549,7 +8549,7 @@
       dI(OffSet,CrtSet11)=W1+W2+W3
       W1=Ia20Bar10+dI(OffSet,CrtSet3)+V(2190)
       W2=V(2192)+V(2269)+V(2280)+V(2281)
-            dI(OffSet,CrtSet3)=W1+W2
+      dI(OffSet,CrtSet3)=W1+W2
       W1=Ib20Bar10+dI(OffSet,CrtSet6)+V(2190)
       W2=V(2192)+V(2214)+V(2283)+V(2284)
       dI(OffSet,CrtSet6)=W1+W2

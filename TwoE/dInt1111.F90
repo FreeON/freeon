@@ -20,23 +20,23 @@
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
       REAL(DOUBLE)  :: Alpha,Beta,Gamma
-      INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4
-      INTEGER       :: CrtSet5,CrtSet6,CrtSet7,CrtSet8
-      INTEGER       :: CrtSet9,OffSet,GOA,GOB,GOC,GOD
+      INTEGER       :: CrtSet1,CrtSet2,CrtSet3,CrtSet4 ,CrtSet5 ,CrtSet6
+      INTEGER       :: CrtSet7,CrtSet8,CrtSet9,CrtSet10,CrtSet11,CrtSet12
+      INTEGER       :: OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       CrtSet1=GOA
       CrtSet2=GOA+1
       CrtSet3=GOA+2
-      CrtSet4=GOB+3
-      CrtSet5=GOB+4
-      CrtSet6=GOB+5
-      CrtSet7=GOC+6
-      CrtSet8=GOC+7
-      CrtSet9=GOC+8
-      CrtSet10=GOD+9
-      CrtSet11=GOD+10
-      CrtSet12=GOD+11
+      CrtSet4=GOB
+      CrtSet5=GOB+1
+      CrtSet6=GOB+2
+      CrtSet7=GOC
+      CrtSet8=GOC+1
+      CrtSet9=GOC+2
+      CrtSet10=GOD
+      CrtSet11=GOD+1
+      CrtSet12=GOD+2
       I1Bar1=0.0d0
       I2Bar1=0.0d0
       I3Bar1=0.0d0
@@ -163,20 +163,20 @@
       V(1)=ABx*Ib1Bar1
       V(2)=ABy*Ib1Bar1
       V(3)=ABz*Ib1Bar1
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD
+      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD !=ZippyForPres
       dI(OffSet,CrtSet1)=Ia2Bar1+dI(OffSet,CrtSet1)
       dI(OffSet,CrtSet4)=Ib2Bar1+dI(OffSet,CrtSet4)+V(1)
       dI(OffSet,CrtSet7)=Ic1Bar2+dI(OffSet,CrtSet7)
       W1=-Ia2Bar1-Ib2Bar1
       W2=-Ic1Bar2+dI(OffSet,CrtSet10)-V(1)
       dI(OffSet,CrtSet10)=W1+W2
-            dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
+      dI(OffSet,CrtSet2)=Ia3Bar1+dI(OffSet,CrtSet2)
       dI(OffSet,CrtSet5)=Ib3Bar1+dI(OffSet,CrtSet5)+V(2)
       dI(OffSet,CrtSet8)=Ic1Bar3+dI(OffSet,CrtSet8)
       W1=-Ia3Bar1-Ib3Bar1
       W2=-Ic1Bar3+dI(OffSet,CrtSet11)-V(2)
       dI(OffSet,CrtSet11)=W1+W2
-            dI(OffSet,CrtSet3)=Ia4Bar1+dI(OffSet,CrtSet3)
+      dI(OffSet,CrtSet3)=Ia4Bar1+dI(OffSet,CrtSet3)
       dI(OffSet,CrtSet6)=Ib4Bar1+dI(OffSet,CrtSet6)+V(3)
       dI(OffSet,CrtSet9)=Ic1Bar4+dI(OffSet,CrtSet9)
       W1=-Ia4Bar1-Ib4Bar1

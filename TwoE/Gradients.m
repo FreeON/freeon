@@ -200,9 +200,8 @@ FF[x_] := ToString[FixedNumberForm[SetPrecision[N[x,32],32], 16, 2]];
 
 
 SetOptions[FortranAssign,AssignOptimize->True,AssignMaxSize->200,AssignBreak->{200," & \n          "},AssignIndent->"      ",AssignTemporary->{W,Sequence}];
-SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
+SetOptions[Optimize,OptimizeVariable->{V,Array},OptimizeNull->{dI},OptimizeTimes->True,OptimizePlus->True,OptimizeCoefficients->True,OptimizeFunction->False]; 
 SetOptions[OpenWrite, PageWidth -> 200];
-
 
 SetAttributes[o,NHoldAll];
 SetAttributes[SSSS,NHoldAll];
@@ -388,6 +387,12 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                                          "+(OB+",ToString[j-LBegin[jl]],")*LDB",
                                                                          "+(OC+",ToString[k-LBegin[kl]],")*LDC",
                                                                          "+(OD+",ToString[l-LBegin[ll]],")*LDD"];
+
+
+                                              Kount = Kount + 1;
+                                              IList=Append[IList,ZippyForPres];
+                                              oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString," !"]];
+
                                               Do[ 
 
                                                   plus={0,0,0}; plus[[cart]]=+1;
@@ -405,12 +410,8 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
 
                                                   Kount = Kount + 1;
                                                   IList=Append[IList,TmpA+dI[OffSet,CffSetA]];
-						  If[cart==1,
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["OffSet=",OffSetString,"\n",
-                                                                                                                "      dI(OffSet,",ToString[CffSetA],")"]];
-						     ,
-                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["      dI(OffSet,",ToString[CffSetA],")"]];
-						  ];
+                                                  oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetA],")"]];
+
                                                   Kount = Kount + 1;
                                                   IList=Append[IList,TmpB+dI[OffSet,CffSetB]];
                                                   oList=Append[oList,StringJoin["o(",ToString[Kount],")"]->StringJoin["dI(OffSet,",ToString[CffSetB],")"]];
