@@ -16,7 +16,7 @@ CONTAINS
     LOGICAL            :: ProgramFailed
     TYPE(CHR_VECT)     :: ArgV
     TYPE(INT_VECT)     :: IChr
-    CHARACTER(LEN=DCL) :: CmndLine
+    CHARACTER(LEN=2*DCL) :: CmndLine
     INTERFACE 
        FUNCTION Spawn(NC,MaxLen,IChr)
          INTEGER,                         INTENT(IN) :: NC,MaxLen
@@ -38,7 +38,7 @@ CONTAINS
        DO I=1,NArg
           CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
        ENDDO
-       !WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
+       ! WRITE(*,*)' COMMANDLINE  = ',TRIM(CmndLine)
        ! Log this run
        CALL Logger(CmndLine,.FALSE.)
        ! Create ASCII integer array to beat F9x/C incompatibility
@@ -79,7 +79,7 @@ CONTAINS
     ArgT%C(3) =IntToChar(M%Clump%I(3,cCLUMP))
     ArgT%C(4) =M%MachFlag
     ArgT%C(5) =M%MachFile
-    ArgT%C(6) =Ex
+    ArgT%C(6) =TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(7) =N%SCF_NAME
     ArgT%C(8) =S%Action
     ArgT%C(9) =S%SubAction
@@ -92,7 +92,7 @@ CONTAINS
 #else
     NArg=10
     CALL New(ArgT,NArg)
-    ArgT%C(1) =Ex
+    ArgT%C(1) =TRIM(N%M_EXEC)//'/'//Ex
     ArgT%C(2) =N%SCF_NAME
     ArgT%C(3) =S%Action
     ArgT%C(4) =S%SubAction

@@ -2,7 +2,7 @@ MODULE ParseOptions
   USE InOut
   USE Parse
   USE MemMan
-  USE ThresholdsMod
+  USE Numerics
   USE OptionKeys
   USE Functionals
   USE DerivedTypes

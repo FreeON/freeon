@@ -5,7 +5,7 @@ MODULE SCFs
   USE Overlay
   USE SCFKeys
   USE PunchHDF
-  USE ThresholdsMod
+  USE Numerics
   USE OptionKeys
   USE Functionals
   USE ControlStructures

@@ -10,6 +10,7 @@ MODULE ControlStructures
      INTEGER                        :: OldFileID
      CHARACTER(LEN=DCL)             :: M_PWD
      CHARACTER(LEN=DCL)             :: M_HOME
+     CHARACTER(LEN=DCL)             :: M_EXEC
      CHARACTER(LEN=DCL)             :: M_SCRATCH
      CHARACTER(LEN=DCL)             :: SCF_NAME
      CHARACTER(LEN=DCL)             :: IFile        !-- Input file

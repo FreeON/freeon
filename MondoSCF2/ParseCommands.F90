@@ -26,6 +26,9 @@ CONTAINS
     CALL GetEnv('MONDO_HOME',N%M_HOME)
     IF(LEN(TRIM(N%M_HOME))==0) &
        CALL MondoHalt(PRSE_ERROR,'env variable $(MONDO_HOME) not set.')
+    CALL GetEnv('MONDO_EXEC',N%M_EXEC)
+    IF(LEN(TRIM(N%M_EXEC))==0) &
+       CALL MondoHalt(PRSE_ERROR,'env variable $(MONDO_EXEC) not set.') 
     CALL GetEnv('MONDO_SCRATCH',N%M_SCRATCH)
     IF(LEN(TRIM(N%M_SCRATCH))==0) &
        CALL MondoHalt(PRSE_ERROR,'env variable $(MONDO_SCRATCH) not set.')

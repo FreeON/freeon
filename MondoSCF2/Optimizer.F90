@@ -2,8 +2,8 @@ MODULE Optimizer
   USE SCFs
   USE InOut
   USE MatFunk
+  USE Numerics
   USE AtomPairs
-  USE ThresholdsMod
   USE ControlStructures  
   IMPLICIT NONE
 CONTAINS

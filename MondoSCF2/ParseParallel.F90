@@ -16,7 +16,7 @@ CONTAINS
     TYPE(BasisSets)    :: B
     TYPE(Parallel)     :: M
     INTEGER            :: I,J
-    CHARACTER(LEN=DCL) :: MFile
+    CHARACTER(LEN=DCL) :: MFile,NodeFile
 #ifdef PARALLEL
     !-------------------------------------------------------------------------!  
     CALL OpenASCII(N%IFile,Inp)
@@ -38,7 +38,17 @@ CONTAINS
     ! Obtain the flag for the machine file; -machinefile, etc 
     IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FLAG,M%MachFlag))M%MachFlag=" "
     ! Obtain the machine file  
-    IF(.NOT.OptCharQ(Inp,MPI_MACHINE_FILE,M%MachFile))M%MachFile=" "
+    IF(OptCharQ(Inp,MPI_MACHINE_FILE,M%MachFile))THEN
+       ! Check for an environmental variable
+       IF(SCAN(M%MachFile,'$')/=0)THEN
+          ! get the file name
+          CALL GETENV(M%MachFile(2:),MFile)
+          M%MachFile=MFile
+       ELSE
+       ENDIF
+    ELSE
+       M%MachFile=" "
+    ENDIF
     ! Can be an env variable like $PBSNODES or $MONDO_NODE_FILE
     IF(SCAN(M%MachFile,'$')/=0)THEN
        MFile=M%MachFile
