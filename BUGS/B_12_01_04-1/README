@@ -7,8 +7,9 @@ HF/3-21G could not converge with the default SCF convergence algorithm.
 The initial STO-2G phase converged well, but the forthcoming 3-21G 
 did not, at all.
 Starting from 3-21G did not converge either. 
+SCFConvergence=(DIIS) was cathasrophic.
 
-For such a simple saturated alkane SCF convergence suld be 
-absolutely smooth in any basis.
+For such a simple saturated alkane SCF convergence sould be 
+absolutely smooth in any basis set.
 K.N. 12/01/04.
 ------------------------------------------------------------------
