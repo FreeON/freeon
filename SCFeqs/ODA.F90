@@ -93,7 +93,7 @@ PROGRAM ODA
   e1 = e1 + Trace(T1) 
   IF(HasDFT(ModelChem)) THEN
      CALL Multiply(P,K1,T1)
-     e0 = e0 + Exc1 - Trace(T1)
+     e1 = e1 + Exc1 - Trace(T1)
   ENDIF
 ! e0p
   e0p =  Enuc1-Enuc0
