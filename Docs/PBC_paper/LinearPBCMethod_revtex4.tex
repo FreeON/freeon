@@ -68,15 +68,16 @@ Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects
-\cite{Bentley79}. And finally we exploit the locality of the basis functions
-to calculate the exact exchange matrix. 
+\cite{Bentley79}. 
 
 To demonstrate the capabilities of MondoSCF, we show results for three
-test condensed phases, Sodium Chloride, Magnesium Oxide and Carbon
-in the diamond structure. We then compare these results to the periodic
-Gaussian code \textbf{Crystal98} \cite{Crystal98}. \textbf{}Next we demonstrate
-the utility of the code on very large systems such as zeolite. Finally
-we give some conclusion concerning the accuracy and utility of MondoSCF
+validation test condensed phase systems, Sodium Chloride, Magnesium Oxide 
+and Carbon in the diamond structure. We then compare these results to the periodic
+Gaussian code \textbf{Crystal98} \cite{Crystal98}. Next we demonstrate that
+the code achieves {\it true} linear scaling for the dense periodic diamond system 
+up to 512 atoms in the unit cell.
+%
+Finally we give some conclusion concerning the accuracy and utility of MondoSCF
 and future research directions.
 
 \section{One-Electron Matrices}
@@ -331,7 +332,7 @@ J_{ab}^{PFF} &=&\frac{1}{2}\sum _{l=0}^{L}\, \sum _{l'=0}^{L'}\, \sum _{m=-l}^{l
 \end{eqnarray}
 %
 For \( l=1 \) and \( 2 \) equation (\ref{ScriptM}) is a conditional
-summation. In \cite{PFFTensorMake} we describe an efficient method which allow
+summation. In \cite{PFFTensorMake} we describe an efficient method which allows
 us to calculate these conditional summations. The only task remaining
 is to determine the region of the inner box summation or the multipole
 order \( L \) which we have to expand to. Using results obtained in reference {7}
@@ -341,9 +342,8 @@ we can approximate  the error bound  as
 \tau \leq \frac{C_{\rho }\left| \mathbf{d}_{max}\right| ^{L+1}}{\left| \mathbf{R}_{max}
 \right| ^{L+1}\left| \left| \mathbf{R}_{max}\right| -2\left| \mathbf{d}_{max}\right| \right| }
 \end{equation}
-where we are assuming a \( l_{0}=0 \) distribution of unit weight,
-and \( \mathbf{R}_{max} \) is the distance to the nearest cell in
-the sum in equation (\ref{ScriptM}). 
+where we are assuming a distribution of unit weight, and \( \mathbf{R}_{max} \) 
+is the distance to the nearest cell in the sum in equation (\ref{ScriptM}). 
 
 In the next section we describe the corrections to the Coulomb matrix
 which allows us to obtain Ewald boundary conditions in order to obtain
