@@ -1527,22 +1527,20 @@ CONTAINS
            EXIT 
          ENDIF
        ELSE
-         IF(Print>=DEBUG_GEOP_MIN) THEN
-           CALL INTCValue(IntCs,ActCarts%D, &
-                          GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
-           VectIntAux%D=IntCValSt%D-IntCs%Value%D
-           CALL MapAngleDispl(IntCs,VectIntAux%D) 
-           IF(IRep<RepMax) THEN
-             IF(ABS(MAXVAL(VectIntAux%D))>0.3D0.OR. &
-                ABS(MINVAL(VectIntAux%D))>0.3D0) THEN
-               DoRepeat=.TRUE.
-               CYCLE
-             ENDIF
+         CALL INTCValue(IntCs,ActCarts%D, &
+                        GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
+         VectIntAux%D=IntCValSt%D-IntCs%Value%D
+         CALL MapAngleDispl(IntCs,VectIntAux%D) 
+         IF(IRep<RepMax) THEN
+           IF(ABS(MAXVAL(VectIntAux%D))>0.3D0.OR. &
+              ABS(MINVAL(VectIntAux%D))>0.3D0) THEN
+             DoRepeat=.TRUE.
+             CYCLE
            ENDIF
-           WRITE(*,220) IStep
-           WRITE(Out,220) IStep
-           EXIT
          ENDIF
+         WRITE(*,220) IStep
+         WRITE(Out,220) IStep
+         EXIT
        ENDIF
        !
      ENDDO !!! Repeat
