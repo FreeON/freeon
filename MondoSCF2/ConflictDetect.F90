@@ -7,85 +7,45 @@ MODULE Conflicted
   !
   PRIVATE :: GlbConflictCheck1
   PRIVATE :: GeoConflictCheck1
+  PRIVATE :: PBCConflictCheck1
   !
 CONTAINS 
-  !
-  !
-  SUBROUTINE OptConflictCheck(O)
 !H---------------------------------------------------------------------------------
-!H SUBROUTINE OptConflictCheck(O)
-!H  Main driver for options conflict.
+!H SUBROUTINE ConflictCheck1(C)
+!H  Checking of conflicts for options, PBCs, geometries, etc etc.
+!H  >>>>> TO BE DONE ONLY AFTER ALL THE PARSING AND MASSAGING <<<<<<
 !H---------------------------------------------------------------------------------
-    TYPE(Options)   :: O
-    !-------------------------------------------------------------------
-    !
-    WRITE(*,*)' NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW '
-    WRITE(*,*) 
-    WRITE(*,*)' My name is ConflictCheck, I am a new subroutine to check logical conficts '
-    WRITE(*,*)' after parsing!  I am in MondoSCF2/ConflictDetect.F90. Add to me as you    '
-    WRITE(*,*)' encounter conflicts that should be resolved at startup.'
-    WRITE(*,*) 
-    WRITE(*,*)' NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW NEW '
-    ! CALL OptConflictCheck1()
-    ! CALL OptConflictCheck2()
-    ! CALL OptConflictCheck3()
-    ! CALL OptConflictCheck4()
-    !
-  END SUBROUTINE OptConflictCheck
-  !
+  SUBROUTINE ConflictCheck(C)
+    TYPE(Controls) :: C
+    CALL GlbConflictCheck(C)
+    CALL GeoConflictCheck(C%Geos)
+    CALL PBCConflictCheck(C%Geos)
+  END SUBROUTINE ConflictCheck
   !
   SUBROUTINE GlbConflictCheck(C)
-!H---------------------------------------------------------------------------------
-!H SUBROUTINE GlbConflictCheck(C)
-!H  Main driver for options conflict.
-!H---------------------------------------------------------------------------------
     TYPE(Controls) :: C
-    !-------------------------------------------------------------------
-    !
     CALL GlbConflictCheck1(C)
-    !CALL GlbConflictCheck2()
-    !CALL GlbConflictCheck3()
-    !CALL GlbConflictCheck4()
-    !
   END SUBROUTINE GlbConflictCheck
-  !
-  !
-  SUBROUTINE GeoConflictCheck(G)
-!H---------------------------------------------------------------------------------
-!H SUBROUTINE GeoConflictCheck(G)
-!H  Main driver for geometry conflict.
-!H---------------------------------------------------------------------------------
-    TYPE(Geometries) :: G
-    !-------------------------------------------------------------------
-    !
-    CALL GeoConflictCheck1(G)
-    !CALL GeoConflictCheck2()
-    !CALL GeoConflictCheck3()
-    !CALL GeoConflictCheck4()
-    !
-  END SUBROUTINE GeoConflictCheck
-  !
-  !
-  SUBROUTINE GlbConflictCheck1(C)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE GlbConflictCheck1(C)
 !H  Check that the number of options in the progression of 
 !H  models/methods/accuracies/basissets are consistent with each other 
 !H---------------------------------------------------------------------------------
+  SUBROUTINE GlbConflictCheck1(C)
     TYPE(Controls) :: C
-    !-------------------------------------------------------------------
-    INTEGER        :: N
-    !-------------------------------------------------------------------
-    !
-    N=0
+    INTEGER        ::   N=0
     N=MAX(N,C%Opts%NModls)
     N=MAX(N,C%Opts%NMthds)
     N=MAX(N,C%Opts%NThrsh)
     N=MAX(N,C%Sets%NBSets)
-    IF(N/=C%Opts%NModls) &
-         & CALL MondoHalt(PRSE_ERROR,' Model chemistries in sequence is short.')
+    IF(N/=C%Opts%NModls)                                                          &
+       CALL MondoHalt(PRSE_ERROR,' Model chemistries in sequence is short.'//RTRN &
+       //' NModls = '//IntToChar(C%Opts%NModls)//RTRN                             &
+       //' NMthds = '//IntToChar(C%Opts%NMthds)//RTRN                             &
+       //' NThrsh = '//IntToChar(C%Opts%NThrsh)//RTRN                             &
+       //' NBSets = '//IntToChar(C%Sets%NBSets))
     IF(N/=C%Opts%NMthds) &
-         & CALL MondoHalt(PRSE_ERROR,' SCF methods in sequence is short.')
+       CALL MondoHalt(PRSE_ERROR,' SCF methods in sequence is short.')
     !
     !vw PROBLEM WITH THIS TEST, CAUSE WE NEED THE THRESHOLD ARRAY TO SET THE
     !vw BSCR DIMENSIONS IN LoadBasisSets! THE TEST MAY BE DONE IN LoadBasisSets
@@ -94,25 +54,23 @@ CONTAINS
          & CALL MondoHalt(PRSE_ERROR,' Accuracies in sequence is short.') 
     IF(N/=C%Sets%NBSets) &
          & CALL MondoHalt(PRSE_ERROR,' Basis sets in sequence is short.')
-    !
   END SUBROUTINE GlbConflictCheck1
   !
-  !
-  SUBROUTINE GeoConflictCheck1(G)
+  SUBROUTINE GeoConflictCheck(G)
+    TYPE(Geometries) :: G
+!    CALL GeoConflictCheck1(G)
+  END SUBROUTINE GeoConflictCheck
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE GeoConflictCheck1(G)
 !H  This routine checks if a pair of atoms are too close from each other.
 !H---------------------------------------------------------------------------------
+  SUBROUTINE GeoConflictCheck1(G)
     TYPE(Geometries)               :: G
-    !-------------------------------------------------------------------
     INTEGER                        :: i,iClone,AtA,AtB,MaxClone
     INTEGER, DIMENSION(2)          :: NClone
     REAL(DOUBLE)                   :: Ax,Ay,Az,Bx,By,Bz,Dist,t1,t2
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: Text
-    !-------------------------------------------------------------------
     REAL(DOUBLE), PARAMETER        :: MinDist = 0.5D+00
-    !-------------------------------------------------------------------
-    !
     !Check for clones.
     IF(G%Clones.EQ.1) THEN
        ! We have only clone.
@@ -152,21 +110,33 @@ CONTAINS
     ENDDO
     !
   END SUBROUTINE GeoConflictCheck1
-  !
-  !
 
+  SUBROUTINE PBCConflictCheck(G)
+    TYPE(Geometries) :: G
+    CALL PBCConflictCheck1(G)
+  END SUBROUTINE PBCConflictCheck
 
-
-#ifdef LJDFLSJDFLSDJFLSKJFDLSDJF
-  SUBROUTINE ConflictCheck1(O,D)
-    ! Is MondoSCF compiled correctly for parallel replicas?
-    IF(O%GradOpt==GRAD_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
-#ifdef !defined(PARALLEL)
-       CALL MondoHalt(PRSE_ERROR,' MondoSCF must be compiled in parallel for replica exchange to be active.')
-#endif
-    ENDIF
-  END SUBROUTINE ConflictCheck1
-#endif
-
+  SUBROUTINE PBCConflictCheck1(G)
+    TYPE(Geometries)  :: G
+    CHARACTER(LEN=20) :: ErrString
+    INTEGER :: I,J,K
+    DO I=1,G%Clones
+       ErrString=""
+       DO K=1,3
+          IF(G%Clone(I)%PBC%AutoW%I(K)==0)THEN
+             ErrString=TRIM(ErrString)//'F'
+          ELSEIF(G%Clone(I)%PBC%AutoW%I(K)==1)THEN
+             ErrString=TRIM(ErrString)//'T'
+          ELSE
+             ErrString=TRIM(ErrString)//'?'
+          ENDIF
+       ENDDO
+       DO J=1,3
+          IF(G%Clone(I)%PBC%AutoW%I(J)==BIG_INT)THEN
+             CALL MondoHalt(PRSE_ERROR,'Periodic invocation hosed: PBC = '//TRIM(ErrString))
+          ENDIF
+       ENDDO
+    ENDDO
+  END SUBROUTINE PBCConflictCheck1
 
 END MODULE Conflicted

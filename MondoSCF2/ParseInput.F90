@@ -30,7 +30,7 @@ CONTAINS
     ! Parse generic options 
     CALL LoadOptions(C%Nams,C%Opts)
     ! Parse dynamics options
-    CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
+!    CALL LoadDynamics(C%Nams,C%Opts,C%Geos,C%Dyns)
     ! Parse geometry or get from restart HDF 
     CALL LoadCoordinates(C%Nams,C%Opts,C%Dyns,C%Geos)
     ! Parse periodic info
@@ -48,6 +48,6 @@ CONTAINS
     ! Load CPSCF options.
     CALL LoadPropertyOptions(C%Nams,C%POpt)
     ! Check for Global conflicts.
-    CALL GlbConflictCheck(C)
+    CALL ConflictCheck(C)
   END SUBROUTINE ParseTheInput
 END MODULE ParseInput

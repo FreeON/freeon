@@ -34,7 +34,6 @@ CONTAINS
        G%Clone(I)%PBC=PBC
        CALL CalculateCoordArrays(G%Clone(I))
     ENDDO
-!
   END SUBROUTINE LoadPeriodic
 !=========================================================================
 !
@@ -52,8 +51,8 @@ CONTAINS
     ENDIF
 !   Parse Periodic Directions
     Ntot = 0
+    PBC%AutoW%I=BIG_INT
     IF(FindKey(PBCWRAP,Inp))THEN
-
        IF(OptKeyLocQ(Inp,PBCWRAP,PBC_TRUE,MaxSets,NLoc,Location)) THEN
           Ntot = NLoc
           DO I=1,NLoc
@@ -67,11 +66,8 @@ CONTAINS
              PBC%AutoW%I(Location(I)) = 0
           ENDDO
        ENDIF
-       IF(NTot .NE. 3) THEN
-          CALL MondoHalt(PRSE_ERROR,'PBC = (?,?,?): Three Logicals must be Specified')
-       ENDIF
     ELSE
-       PBC%AutoW%I(1:3) = 0
+       PBC%AutoW%I(1:3)=0
        PBC%Dimen=0
     ENDIF
 !   Parse Translate
@@ -271,7 +267,6 @@ CONTAINS
     ENDDO
 !   Compute the inverse box shape
     PBC%InvBoxSh%D = InverseMatrix(PBC%BoxShape%D)
-!
   END SUBROUTINE UnitCellSetUp
 !=========================================================================
 ! ACCOUNT FOR ALL FOUR (YEP COUNT EM FOUR) COORDINATE ARRAYS... YEESH!

@@ -129,11 +129,6 @@ CONTAINS
        !       CALL Print_CRDS(G%Clone(I),UNIT_O=6)
     ENDDO
 #endif
-
-    !
-    ! Check the coordinates.
-    CALL GeoConflictCheck(G)
-    !
   END SUBROUTINE LoadCoordinates
 !
 !
