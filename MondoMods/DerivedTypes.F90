@@ -284,6 +284,11 @@ MODULE DerivedTypes
       TYPE(DBL_RNK2)   :: Carts     !-- Cartesian coordinates 
       TYPE(DBL_RNK2)   :: Vects     !-- Something related to gradients (velocities, forces, etc)
       TYPE(DBL_RNK2)   :: Displ     !-- Displaced Cartesian geometry
+      ! Constraints and Lagrangians
+      INTEGER          :: NLagr     !-- Number of geometric Constrts
+      TYPE(DBL_VECT)   :: LagrDispl !-- Displaced Lagrange multipl.
+      TYPE(DBL_VECT)   :: LagrMult  !-- Lagrange multipliers
+      TYPE(DBL_VECT)   :: GradMult  !-- Gradients on LagrMult
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density

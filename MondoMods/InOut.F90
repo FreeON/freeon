@@ -429,6 +429,11 @@ CONTAINS
           ENDDO
           DEALLOCATE(B)
 
+          Meta=SetMeta(NameTag(Trim(VarName)//'ConstrValue',Tag_O),NATIVE_DOUBLE,NN,.FALSE.)
+          CALL OpenData(Meta)
+          CALL ReadDoubleVector(Meta,A%ConstrValue)
+          CALL CloseData(Meta)
+
           Meta=SetMeta(NameTag(Trim(VarName)//'Active',Tag_O),NATIVE_INT32,NN,.FALSE.)
           ALLOCATE(B(NN))
           CALL OpenData(Meta)
@@ -1328,6 +1333,7 @@ CONTAINS
                 CALL Get(GM%TotCh,'charge',Tag_O=Tag_O)
                 CALL Get(GM%NKind,'nkind',Tag_O=Tag_O)
                 CALL Get(GM%InAu, 'inau',Tag_O=Tag_O)
+                CALL Get(GM%NLagr,'nlagr',Tag_O=Tag_O)
                 CALL New(GM)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
@@ -1351,6 +1357,11 @@ CONTAINS
                 CALL Get(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
                 CALL Get(GM%Displ,'Displ',Tag_O=Tag_O)
+                IF(GM%NLagr/=0) THEN
+                  CALL Get(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
+                  CALL Get(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
+                  CALL Get(GM%GradMult,'GradMult',Tag_O=Tag_O)
+                ENDIF
               END SUBROUTINE Get_CRDS
               !-------------------------------------------------------------------------------
               !     Put a coordinate set
@@ -1369,6 +1380,7 @@ CONTAINS
                 CALL Put(GM%TotCh,'charge',Tag_O=Tag_O)
                 CALL Put(GM%NKind,'nkind',Tag_O=Tag_O)
                 CALL Put(GM%InAu, 'inau',Tag_O=Tag_O)
+                CALL Put(GM%NLagr,'nlagr',Tag_O=Tag_O)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
 
@@ -1390,7 +1402,12 @@ CONTAINS
                 CALL Put(GM%BoxVects,  'LatticeVeloc',Tag_O=Tag_O)
                 CALL Put(GM%AbCarts,'Abcartesians',Tag_O=Tag_O)
 #endif
-                CALL Put(GM%Displ,'Displ',Tag_O=Tag_O)
+                CALL Put(GM%Displ,   'Displ',Tag_O=Tag_O)
+                IF(GM%NLagr/=0) THEN
+                  CALL Put(GM%LagrMult,'LagrMult',Tag_O=Tag_O)
+                  CALL Put(GM%LagrDispl,'LagrDispl',Tag_O=Tag_O)
+                  CALL Put(GM%GradMult,'GradMult',Tag_O=Tag_O)
+                ENDIF
               END SUBROUTINE Put_CRDS
               !-------------------------------------------------------------------------------
               !     Get a BCSR matrix

@@ -324,6 +324,9 @@ MODULE MemMan
          CALL New(A%AbCarts,(/3,A%NAtms/))
 #endif
          CALL New(A%Displ,(/3,A%NAtms/))
+         CALL New(A%LagrMult,A%NLagr)
+         CALL New(A%LagrDispl,A%NLagr)
+         CALL New(A%GradMult,A%NLagr)
          A%Alloc=ALLOCATED_TRUE
          A%ETotal=Zero
       END SUBROUTINE New_CRDS
@@ -672,6 +675,10 @@ MODULE MemMan
          CALL Delete(A%AbCarts)
 #endif 
          CALL Delete(A%Displ)
+         A%NLagr=0
+         CALL Delete(A%LagrMult)
+         CALL Delete(A%LagrDispl)
+         CALL Delete(A%GradMult)
          A%NAtms=0
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_CRDS 
