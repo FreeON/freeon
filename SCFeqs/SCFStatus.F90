@@ -221,13 +221,13 @@ PROGRAM SCFStatus
       ELSE
 #ifdef MMech
 IF(HasMM()) THEN
-         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+         SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
                                     //' <MM_ENERGY> = '//TRIM(FltToMedmChar(MM_ENERGY)) &
                                     //' <TOTAL ENERGY> = '//TRIM(FltToMedmChar(Etot+MM_ENERGY)) &
                                     //', dD = '//TRIM(DblToShrtChar(DMax))
 ELSE
 #endif
-         SCFMessage=TRIM(SCFMessage)//'       <SCF> = '//TRIM(FltToMedmChar(ETot)) &
+         SCFMessage=TRIM(SCFMessage)//' <SCF> = '//TRIM(FltToMedmChar(ETot)) &
                                     //', dD = '//TRIM(DblToShrtChar(DMax))
 #ifdef MMech
 ENDIF
