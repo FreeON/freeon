@@ -91,6 +91,9 @@ CONTAINS
     WRITE(*,*)' N%HFile = ',TRIM(N%HFile)
     WRITE(*,*)' N%RFile = ',TRIM(N%RFile)
     WRITE(*,*)' N%GFile = ',TRIM(N%GFile)
+#else
+    WRITE(*,*)' InputFile = ',TRIM(N%IFile)
+    WRITE(*,*)' OutputFile= ',TRIM(N%OFile)
 #endif
   END SUBROUTINE LoadCommands
 END MODULE ParseCommands

@@ -32,13 +32,13 @@ include $(MONDO_HOME)/Includes/RemoveAll
 CPPMISC=#-DFULL_ON_FRONT_END_DEBUG
 #
 ObjectFiles = GetPID.o Spawn.o \
-	      ControlStructures.o NEB.o Numerics.o ParseCommands.o OptionKeys.o ParseOptions.o \
+	      ControlStructures.o NEB.o Numerics.o ParseCommands.o OptionKeys.o ConflictDetect.o ParseOptions.o \
               DynamicsKeys.o ParseDynamics.o GeometryKeys.o \
               InCoords.o ParseGeometries.o \
               PeriodicKeys.o ParsePeriodic.o ParseBasis.o                     \
               ParallelKeys.o ParseParallel.o Massage.o \
               GeomOptKeys.o ParseGeomOpt.o ParseExtraCoords.o \
-              ParseInput.o           \
+              ParseInput.o  \
               PunchHDF.o Overlay.o PrintParsed.o SCFKeys.o \
               SCFs.o GDIIS.o Hessian.o Optimizer.o \
 	      ZippyQuote.o MondoSCF.o

@@ -3,6 +3,7 @@ MODULE ParseOptions
   USE Parse
   USE MemMan
   USE Numerics
+  USE Conflicted
   USE OptionKeys
   USE Functionals
   USE DerivedTypes
@@ -26,7 +27,6 @@ CONTAINS
     !-------------------------------------------------------------------------!  
     CALL OpenASCII(N%IFile,Inp)
     ! Check for restart, and extract the current state from the restart HDF file
-	WRITE(*,*) N%IFile
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
     ! Parse print output options, load global object PrintFlags
     CALL ParsePrintFlags(O%PFlags,O%GeomPrint)
@@ -41,6 +41,7 @@ CONTAINS
     ! Parse for NEB options.
     CALL ParseNEB(O%NEBSpring,O%NEBClimb,O%EndPts,N%ReactantsFile,N%ProductsFile)
     CLOSE(UNIT=Inp,STATUS='KEEP')
+    CALL ConflictCheck()
   END SUBROUTINE LoadOptions
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS

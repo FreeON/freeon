@@ -120,14 +120,14 @@ CONTAINS
        Clump%I(2,Clumps)=Clumps*ClonesPerClump+1
        Clump%I(3,Clumps)=LeftOvers*NSpace
     ENDIF
-!#ifdef FULL_ON_FRONT_END_DEBUG
+#ifdef FULL_ON_FRONT_END_DEBUG
     WRITE(*,*)' Clumps         = ',Clumps
     WRITE(*,*)' ClonesPerClump = ',ClonesPerClump
     WRITE(*,*)' LeftOvers      = ',LeftOvers
     DO iCLUMP=1,Clumps
        WRITE(*,*)'CLUMP(',iCLUMP,')= ',Clump%I(:,iCLUMP)
     ENDDO
-!#endif
+#endif
   END SUBROUTINE SpaceTimeSetUp
   !============================================================================
   ! GREEDY LOOK AHEAD DOMAIN DECOMPOSITION TO PARTITION DBCSR MATRICES
