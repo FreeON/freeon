@@ -31,7 +31,7 @@ PROGRAM UForce
   INTEGER                     :: Q,R,AtA,AtB,AtC,KC,JP,MB,MA,NB,MN1,A1,A2,C1,C2
   TYPE(HGRho)                 :: Rho
   TYPE(DBL_VECT)              :: UFrc,Frc
-  REAL(DOUBLE)                :: Cx,Cy,Cz,UFrcChk
+  REAL(DOUBLE)                :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,UFrcChk,F1a,F2a,F3a,f11,f10
  
   CHARACTER(LEN=6),PARAMETER  :: Prog='TForce'
 !------------------------------------------------------------------------------------- 
@@ -90,6 +90,82 @@ PROGRAM UForce
         ENDIF
      ENDDO
   ENDDO
+!!$!=====================================================================================
+!!$     f10=Zero
+!!$     DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     MA=BSiz%I(AtA)
+!!$     DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
+!!$        AtB=P%ColPt%I(JP)
+!!$           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+!!$              Q=P%BlkPt%I(JP)
+!!$              B=Pair%B
+!!$          NB=BSiz%I(AtB)
+!!$           MN1=MA*NB-1
+!!$              Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
+!!$                   +(Pair%A(2)-Pair%B(2))**2 &
+!!$                   +(Pair%A(3)-Pair%B(3))**2
+!!$              IF(TestAtomPair(Pair)) THEN
+!!$                 ! Go over ECP centers
+!!$                 DO AtC=1,NAtoms
+!!$                    KC=GM%AtTyp%I(AtC)
+!!$                    IF(BS%NTyp1PF%I(KC)>0)THEN
+!!$                       Cx=GM%Carts%D(1,AtC)
+!!$                       Cy=GM%Carts%D(2,AtC)
+!!$                       Cz=GM%Carts%D(3,AtC)
+!!$                       Ax = Pair%A(1)
+!!$                       Ay = Pair%A(2)
+!!$                       Az = Pair%A(3)
+!!$                       Bx = Pair%B(1)
+!!$                       By = Pair%B(2)
+!!$                       Bz = Pair%B(3)
+!!$                       f10=f10+DUBlock(BS,Pair,Ax,Ay,Az,Bx,By,Bz,KC,Cx,Cy,Cz,P%MTrix%D(Q:Q+MN1))
+!!$                    ENDIF
+!!$                 ENDDO
+!!$              ENDIF
+!!$           ENDIF
+!!$        ENDDO
+!!$     ENDDO
+!!$!=====================================================================================
+!!$     GM%Carts%D(1,1)=GM%Carts%D(1,1)+1D-5
+!!$     f11=Zero
+!!$     DO AtA=1,NAtoms
+!!$     A1=3*(AtA-1)+1
+!!$     A2=3*AtA
+!!$     MA=BSiz%I(AtA)
+!!$     DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
+!!$        AtB=P%ColPt%I(JP)
+!!$           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+!!$           Q=P%BlkPt%I(JP)
+!!$          NB=BSiz%I(AtB)
+!!$           MN1=MA*NB-1
+!!$              B=Pair%B
+!!$              Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
+!!$                   +(Pair%A(2)-Pair%B(2))**2 &
+!!$                   +(Pair%A(3)-Pair%B(3))**2
+!!$              IF(TestAtomPair(Pair)) THEN
+!!$                 ! Go over ECP centers
+!!$                 DO AtC=1,NAtoms
+!!$                    KC=GM%AtTyp%I(AtC)
+!!$                    IF(BS%NTyp1PF%I(KC)>0)THEN
+!!$                       Cx=GM%Carts%D(1,AtC)
+!!$                       Cy=GM%Carts%D(2,AtC)
+!!$                       Cz=GM%Carts%D(3,AtC)
+!!$                       Ax = Pair%A(1)
+!!$                       Ay = Pair%A(2)
+!!$                       Az = Pair%A(3)
+!!$                       Bx = Pair%B(1)
+!!$                       By = Pair%B(2)
+!!$                       Bz = Pair%B(3)
+!!$                       f11=f11+DUBlock(BS,Pair,Ax,Ay,Az,Bx,By,Bz,KC,Cx,Cy,Cz,P%MTrix%D(Q:Q+MN1))
+!!$                    ENDIF
+!!$                 ENDDO
+!!$              ENDIF
+!!$           ENDIF
+!!$        ENDDO
+!!$     ENDDO
+UFrc%D=Two*UFrc%D
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
   TotFrcComp = 3*NAtoms

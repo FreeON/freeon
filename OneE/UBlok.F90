@@ -198,6 +198,174 @@ CONTAINS  !
     UVck=BlockToVect(Pair%NA,Pair%NB,ECP)
   END FUNCTION UBlock
 
+  FUNCTION DUBlock(BS,Pair,Ax,Ay,Az,Bx,By,Bz,KC,Cx,Cy,Cz,P) 
+    REAL(DOUBLE) :: DUBlock
+    TYPE(BSET)                              :: BS
+    TYPE(AtomPair)                          :: Pair
+    TYPE(PrimPair)                          :: Prim
+    REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB) :: UVck
+    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB) :: ECP
+    REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)   :: P
+    INTEGER :: NBFA,NBFB,KA,KB,KK,KC,CFA,CFB,PFA, &
+         PFB,IndexA,IndexB,StartLA,StartLB, &
+         StopLA,StopLB,MaxLA,MaxLB,IA,IB,   &
+         LMNA,LMNB,LA,LB,MA,MB,NA,NB,AtC,   &
+         PFC,ECPGL,ProjL,EllA,EllB,Lambda,LenAB
+    REAL(DOUBLE) :: Ax,Ay,Az,Bx,By,Bz,AB2,Cx,Cy,Cz,   &
+         ACx,ACy,ACz,BCx,BCy,BCz,AC2,BC2,AC,BC,&
+         ZetaA,ZetaB,ZetaAB,ZetaC,Alpha,       &
+         ZzAC2,ZzBC2,Px,Py,Pz,Gauss,CA,CB,CC,  & 
+         Kx,Ky,Kz,KAx,KAy,KAz,KBx,KBy,KBz,     &
+         Kappa,KappaA,KappaB, tmp
+    ! Static work arrays; dimensions defined in MondoMods/GlobalScalars
+    REAL(DOUBLE),DIMENSION(0:HGEll,1:HGLen) :: Omega1
+    REAL(DOUBLE),DIMENSION(0:HGEll,0:HGEll+ECPEll) :: Keew1
+    REAL(DOUBLE),DIMENSION(0:2*PrjEll,0:BFEll+PrjEll,1:HGLen) :: OmegaA,OmegaB
+    REAL(DOUBLE),DIMENSION(0:PrjEll+BFEll,0:PrjEll+BFEll,0:HGEll+ECPEll) :: Keew2
+    REAL(DOUBLE), EXTERNAL  :: BlkTrace_2
+    !--------------------------------------------------------------------------------------------------
+    KA   = Pair%KA
+    KB   = Pair%KB
+    NBFA = Pair%NA
+    NBFB = Pair%NB
+!    Ax = Pair%A(1)
+!    Ay = Pair%A(2)
+!    Az = Pair%A(3)
+!    Bx = Pair%B(1)
+!    By = Pair%B(2)
+!    Bz = Pair%B(3)
+    ACx=Ax-Cx
+    ACy=Ay-Cy
+    ACz=Az-Cz
+    BCx=Bx-Cx
+    BCy=By-Cy
+    BCz=Bz-Cz
+    AB2=Pair%AB2    
+    AC2=(ACx**2+ACy**2+ACz**2)
+    BC2=(BCx**2+BCy**2+BCz**2)
+    ! Some testing of overlaps
+    IF(AC2+BC2<AtomPairDistanceThreshold)THEN
+       ECP=Zero
+       AC=SQRT(AC2)
+       BC=SQRT(BC2)
+       ! Go over basis functions for this atom-atom blok
+       DO CFA=1,BS%NCFnc%I(KA)           
+          IndexA=CFBlokDex(BS,CFA,KA)
+          StartLA=BS%LStrt%I(CFA,KA)        
+          StopLA =BS%LStop%I(CFA,KA)
+          MaxLA=BS%ASymm%I(2,CFA,KA)
+          DO CFB=1,BS%NCFnc%I(KB)        
+             IndexB  = CFBlokDex(BS,CFB,KB)
+             StartLB = BS%LStrt%I(CFB,KB)
+             StopLB  = BS%LStop%I(CFB,KB)
+             MaxLB   = BS%ASymm%I(2,CFB,KB)       
+             LenAB   = LHGTF(MaxLA+MaxLB)
+             DO PFA=1,BS%NPFnc%I(CFA,KA) 
+                DO PFB=1,BS%NPFnc%I(CFB,KB)        
+                   ZetaA=BS%Expnt%D(PFA,CFA,KA)
+                   ZetaB=BS%Expnt%D(PFB,CFB,KB)
+                   ZzAC2=ZetaA*AC2
+                   ZzBC2=ZetaB*BC2
+                   IF(ZzAC2+ZzBC2<2.D2)THEN !PrimPairDistanceThreshold)THEN
+                      !                         IF(.TRUE.)THEN
+                      ZetaAB=ZetaA+ZetaB
+                      Px=(zetaA*Ax+zetaB*Bx)/ZetaAB
+                      Py=(zetaA*Ay+zetaB*By)/ZetaAB
+                      Pz=(zetaA*Az+zetaB*Bz)/ZetaAB
+                      Kx=Px-Cx
+                      Ky=Py-Cy
+                      Kz=Pz-Cz
+                      Kappa=Two*ZetaAB*SQRT(Kx*Kx+Ky*Ky+Kz*Kz)
+                      Gauss=EXP(-ZzAC2-ZzBC2)
+                      ! Type one angular integrals, including 4 Pi and with mu terms summed
+                      CALL AngularOne(MaxLA+MaxLB,Kx,Ky,Kz,Omega1) 
+                      ! Go over primitives in the unprojected, type one integrals
+                      DO PFC=1,BS%NTyp1PF%I(KC)
+                         ! Here is the type 1 primitive contraction coefficient,
+                         CC=BS%Typ1CCo%D(PFC,KC)
+                         ! the exponent, 
+                         ZetaC=BS%Typ1Exp%D(PFC,KC)
+                         ! and the radial "ell" value of the primitive Gaussian ECP
+                         ECPGL=BS%Typ1Ell%I(PFC,KC)
+                         ! Compute type one radial integrals
+                         Alpha=ZetaA+ZetaB+ZetaC
+                         CALL RadialOne(MaxLA+MaxLB,MaxLA+MaxLB+ECPGL,Alpha,Kappa,ZzAC2+ZzBC2,Keew1)
+                         ! Go over basis function symmetries
+                         IA=IndexA
+                         DO LMNA=StartLA,StopLA
+                            LA=BS%LxDex%I(LMNA)
+                            MA=BS%LyDex%I(LMNA) 
+                            NA=BS%LzDex%I(LMNA)
+                            EllA=LA+MA+NA
+                            CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+                            IA=IA+1
+                            IB=IndexB
+                            DO LMNB=StartLB,StopLB
+                               LB=BS%LxDex%I(LMNB)
+                               MB=BS%LyDex%I(LMNB) 
+                               NB=BS%LzDex%I(LMNB)
+                               EllB=LB+MB+NB
+                               CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
+                               IB=IB+1
+                               ECP(IA,IB)=ECP(IA,IB) &
+                                    +CA*CB*CC*ECPOneSum(LA,MA,NA,LB,MB,NB,ECPGL,         &
+                                    -ACx,-ACy,-ACz,-BCx,-BCy,-BCz,Omega1,Keew1) 
+                            ENDDO
+                         ENDDO
+                      ENDDO
+                      ! Loop on ECP projector symmetries 
+                      DO ProjL=0,BS%ProjEll%I(KC)
+                         ! Go over primitives in the projected, type two integrals
+                         DO PFC=1,BS%NTyp2PF%I(ProjL,KC)                     
+                            ! Here is the type 2 primitive contraction coefficient,
+                            CC=BS%Typ2CCo%D(PFC,ProjL,KC)
+                            ! the corresponding exponent, 
+                            ZetaC=BS%Typ2Exp%D(PFC,ProjL,KC)     
+                            ! and the radial "ell" value of the ECP primitive 
+                            ECPGL=BS%Typ2Ell%I(PFC,ProjL,KC)
+                            ! Compute the type two radial integrals                            
+                            Alpha=ZetaA+ZetaB+ZetaC
+                            ! Gaussian prefactor check
+                            KappaA=Two*ZetaA*AC
+                            KappaB=Two*ZetaB*BC
+                            CALL RadialTwo(CC,ProjL+MaxLA,ProjL+MaxLB,MaxLA+MaxLB+ECPGL, &
+                                 Alpha,ZzAC2,KappaA,ZzBC2,KappaB,Keew2) 
+                            ! Compute the type two angular integrals
+                            CALL AngularTwo(ProjL,MaxLA,ACx,ACy,ACz,OmegaA)
+                            CALL AngularTwo(ProjL,MaxLB,BCx,BCy,BCz,OmegaB)
+                            ! Go over basis function symmetries
+                            IA=IndexA
+                            DO LMNA=StartLA,StopLA
+                               LA=BS%LxDex%I(LMNA)
+                               MA=BS%LyDex%I(LMNA) 
+                               NA=BS%LzDex%I(LMNA)
+                               EllA=LA+MA+NA
+                               CA=BS%CCoef%D(LMNA,PFA,CFA,KA)
+                               IA=IA+1
+                               IB=IndexB
+                               DO LMNB=StartLB,StopLB
+                                  LB=BS%LxDex%I(LMNB)
+                                  MB=BS%LyDex%I(LMNB) 
+                                  NB=BS%LzDex%I(LMNB)
+                                  EllB=LB+MB+NB
+                                  CB=BS%CCoef%D(LMNB,PFB,CFB,KB)
+                                  IB=IB+1
+                                  ECP(IA,IB)=ECP(IA,IB)+CA*CB*CC &
+                                       *ECPTwoSum(LA,MA,NA,LB,MB,NB,ProjL,ECPGL,   &
+                                       -ACx,-ACy,-ACz,-BCx,-BCy,-BCz,OmegaA,OmegaB,Keew2) 
+                               ENDDO
+                            ENDDO
+                         ENDDO
+                      ENDDO
+                   ENDIF
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDIF
+    DUBlock=BlkTrace_2(Pair%NA,Pair%NB,P,TRANSPOSE(ECP))
+  END FUNCTION DUBlock
+
   FUNCTION TrPdU(BS,Pair,KC,Cx,Cy,Cz,P)  RESULT(Vck)
     TYPE(BSET)                                :: BS
     TYPE(CRDS)                                :: GM
