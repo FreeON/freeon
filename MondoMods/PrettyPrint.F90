@@ -523,7 +523,8 @@ MODULE PrettyPrint
                     ELSE
                       AuxChar='    '
                     ENDIF
-                    Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
+                  ! Mssg=Ats(INT(GM%AtNum%D(I)))                         &  !!!! correct only for integer charged QM atoms
+                    Mssg=TRIM(IntToChar(INT(GM%AtNum%D(I))))                         &  !!!! correct only for integer charged QM atoms
                            //'   '//FltToMedmChar(GM%Carts%D(1,I)*AA)    &
                            //'   '//FltToMedmChar(GM%Carts%D(2,I)*AA)    &
                            //'   '//FltToMedmChar(GM%Carts%D(3,I)*AA)//TRIM(AuxChar)
