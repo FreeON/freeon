@@ -57,7 +57,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
    Classes = { {0,0},{1,1}} 
  *)
 
-   Classes = { {0,0},{1,1},{2,2}};
+Classes = { {0,0},{0,1},{1,1}};
 
 (* Maximal 
    Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
@@ -550,9 +550,12 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            LBra=IMax+JMax;
            LKet=KMax+LMax;
 	   BKType=100*LBra+LKet;					   
-(*
 
- *)
+           ityp=IntegralClass[Classes[[ic]]];
+           jtyp=IntegralClass[Classes[[jc]]];
+           ktyp=IntegralClass[Classes[[kc]]];
+           ltyp=IntegralClass[Classes[[lc]]];
+
            WriteString[Subroutine,StringJoin["   SUBROUTINE IntB",ToString[IJKL],"(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & \n", \
                                              "                              OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,INTGRL) \n"]];
 
@@ -571,7 +574,7 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
 	      WS["IMPLICIT REAL(DOUBLE) (W)"]; 
 
            WS["INTEGER        :: LBra,LKet,CDOffSet"];
-           WS["REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)"];
+           WS["REAL(DOUBLE)   :: PrmBufB(8,LBra),PrmBufK(8,LKet)"];
 	   WS["TYPE(SmallAtomInfo) :: ACInfo,BDInfo"];
            WS["TYPE(PBCInfo) :: PBC"];
 	   LenBra=LEnd[LBra];
@@ -583,95 +586,58 @@ PunchFront[Subroutine_,IMax_,JMax_,KMax_,LMax_,IJKL_]:=Block[{WS,LBra,LKet,BKTyp
            WS["REAL(DOUBLE)  :: Zeta,Eta,Omega,Up,Uq,Upq"];
            WS["REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT"];
            WS[StringJoin["REAL(DOUBLE)  :: VRR(",ToString[LenBra],",",ToString[LenKet],",0:",ToString[LBra+LKet],")"]];
-WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenBra],",",ToString[LenKet],",",ToString[LEnd[LMax]],")"]];
+           WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenBra],",",ToString[LenKet],",",ToString[LEnd[LMax]],")"]];
            WS["INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,I,J,K,L"];
 
-      WS[StringJoin["DO L=1,",ToString[LEnd[LKet]]]];
-      WS[StringJoin["   DO I=1,",ToString[LEnd[LBra]]]];
-                 WS["       HRR(I,L,1)=Zero"];
-                 WS["   ENDDO "];            					 
-                 WS["ENDDO "];            					 
+           WS[StringJoin["DO L=1,",ToString[LEnd[LKet]]]];
+           WS[StringJoin["   DO I=1,",ToString[LEnd[LBra]]]];
+           WS[           "       HRR(I,L,1)=Zero"];
+           WS[           "   ENDDO "];            					 
+           WS[           "ENDDO "];            					 
 
-  WS["Ax=ACInfo%Atm1X"];
-  WS["Ay=ACInfo%Atm1Y"];
-  WS["Az=ACInfo%Atm1Z"];
-
-  WS["Bx=ACInfo%Atm2X"];
-  WS["By=ACInfo%Atm2Y"];
-  WS["Bz=ACInfo%Atm2Z"];
-
-  WS["Cx=BDInfo%Atm1X"];
-  WS["Cy=BDInfo%Atm1Y"];
-  WS["Cz=BDInfo%Atm1Z"];
-
-  WS["Dx=BDInfo%Atm2X"];
-  WS["Dy=BDInfo%Atm2Y"];
-  WS["Dz=BDInfo%Atm2Z"];
-
-  WS["ABx=Ax-Bx"];
-  WS["ABy=Ay-By"];
-  WS["ABz=Az-Bz"];
-
-  WS["CDx=Cx-Dx"];
-  WS["CDy=Cy-Dy"];
-  WS["CDz=Cz-Dz"];
-
-
+           WS["Ax=ACInfo%Atm1X"];
+           WS["Ay=ACInfo%Atm1Y"];
+           WS["Az=ACInfo%Atm1Z"];
+           WS["Bx=ACInfo%Atm2X"];
+           WS["By=ACInfo%Atm2Y"];
+           WS["Bz=ACInfo%Atm2Z"];
+           WS["Cx=BDInfo%Atm1X"];
+           WS["Cy=BDInfo%Atm1Y"];
+           WS["Cz=BDInfo%Atm1Z"];
+           WS["Dx=BDInfo%Atm2X"];
+           WS["Dy=BDInfo%Atm2Y"];
+           WS["Dz=BDInfo%Atm2Z"];
+           WS["ABx=Ax-Bx"];
+           WS["ABy=Ay-By"];
+           WS["ABz=Az-Bz"];
+           WS["CDx=Cx-Dx"];
+           WS["CDy=Cy-Dy"];
+           WS["CDz=Cz-Dz"];
            WS["DO J=1,LKet ! K^2 VRR |N0) loop "];
-
            WS["   Eta=PrmBufK(1,J)"];
-           WS["   Qx =PrmBufK(2,J)"];
-           WS["   Qy =PrmBufK(3,J)"];
-           WS["   Qz =PrmBufK(4,J)"];
-           WS["   Uq =PrmBufK(5,J)"];
-
-
-           (* Add the conversion factor for SP shell *)
-           If[IntegralClass[Classes[[kc]]]==2,
-              Print["IntegralClass[Classes[[kc]]]=",IntegralClass[Classes[[kc]]] ];
-              WS["   C1q=PrmBufK(6,J)"];
-           ];
-           If[IntegralClass[Classes[[lc]]]==2,
-              Print["IntegralClass[Classes[[lc]]]=",IntegralClass[Classes[[lc]]] ];
-              WS["   C2q=PrmBufK(7,J)"];
-           ];
-           If[IntegralClass[Classes[[kc]]]==2 && IntegralClass[Classes[[lc]]]==2,
-              Print["IntegralClass[Classes[[kc]]]=",IntegralClass[Classes[[kc]]] ];
-              Print["IntegralClass[Classes[[lc]]]=",IntegralClass[Classes[[lc]]] ];
-              WS["   C3q=PrmBufK(8,J)"];
-           ];
-
-
-
+           WS["   Qx=PrmBufK(2,J)"];
+           WS["   Qy=PrmBufK(3,J)"];
+           WS["   Qz=PrmBufK(4,J)"];
+           WS["   Uq=PrmBufK(5,J)"];
+           If[ktyp==1&&ltyp==2,WS["   SxSk=PrmBufK(6,J)"]];
+           If[ktyp==2&&ltyp==1,WS["   SxSk=PrmBufK(6,J)"]];
+           If[ktyp==2&&ltyp==2,WS["   SxSk=PrmBufK(6,J)"];
+                               WS["   PxSk=PrmBufK(7,J)"];
+                               WS["   SxPk=PrmBufK(8,J)"]];
            WS["   QCx=Qx-Cx"];
            WS["   QCy=Qy-Cy"];
            WS["   QCz=Qz-Cz"];
-
-
            WS["   DO K=1,LBra ! K^2 VRR (M0| loop "];
-
            WS["      Zeta=PrmBufB(1,K)"];
-           WS["      Px  =PrmBufB(2,K)"];
-           WS["      Py  =PrmBufB(3,K)"];
-           WS["      Pz  =PrmBufB(4,K)"];
-           WS["      Up  =PrmBufB(5,K)"];
-
-           (* Add the conversion factor for SP shell *)
-           If[IntegralClass[Classes[[ic]]]==2,
-              Print["IntegralClass[Classes[[ic]]]=",IntegralClass[Classes[[ic]]] ];
-              WS["      C1p =PrmBufB(6,K)"];
-           ];
-           If[IntegralClass[Classes[[jc]]]==2,
-              Print["IntegralClass[Classes[[jc]]]=",IntegralClass[Classes[[jc]]] ];
-              WS["      C2p =PrmBufB(7,K)"];
-           ];
-           If[IntegralClass[Classes[[ic]]]==2 && IntegralClass[Classes[[jc]]]==2,
-              Print["IntegralClass[Classes[[ic]]]=",IntegralClass[Classes[[ic]]] ];
-              Print["IntegralClass[Classes[[jc]]]=",IntegralClass[Classes[[jc]]] ];
-              WS["      C3p =PrmBufB(8,K)"];
-           ];
-
-
+           WS["      Px=PrmBufB(2,K)"];
+           WS["      Py=PrmBufB(3,K)"];
+           WS["      Pz=PrmBufB(4,K)"];
+           WS["      Up=PrmBufB(5,K)"];
+           If[ktyp==1&&ltyp==2,WS["      SxSb=PrmBufB(6,J)"]];
+           If[ktyp==2&&ltyp==1,WS["      SxSb=PrmBufB(6,J)"]];
+           If[ktyp==2&&ltyp==2,WS["      SxSb=PrmBufB(6,J)"];
+                               WS["      PxSb=PrmBufB(7,J)"];
+                               WS["      SxPb=PrmBufB(8,J)"]];
            WS["      r1xZpE=One/(Zeta+Eta)"];
 	   WS["      Upq=SQRT(r1xZpE)*Up*Uq"];					   
            WS["      HfxZpE=Half/(Zeta+Eta)"];
@@ -680,59 +646,30 @@ WS[StringJoin["REAL(DOUBLE)  :: HRR(",ToString[LenBra],",",ToString[LenKet],",",
            WS["      ExZpE=Eta*r1xZpE"];
            WS["      ZxZpE=Zeta*r1xZpE"];
            WS["      Omega=Eta*Zeta*r1xZpE"];
-
-           (*WS["      Wx=(Zeta*Px+Eta*Qx)*r1xZpE"];*)
-           (*WS["      Wy=(Zeta*Py+Eta*Qy)*r1xZpE"];*)
-           (*WS["      Wz=(Zeta*Pz+Eta*Qz)*r1xZpE"];*)
-
            WS["      PAx=Px-Ax"];
            WS["      PAy=Py-Ay"];
            WS["      PAz=Pz-Az"];
-
            WS["      PQx=Px-Qx"];
            WS["      PQy=Py-Qy"];
            WS["      PQz=Pz-Qz"];
-
-           (* Should improve this part, scalar replacement... *)
-           (*FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
-           FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
-           FPQz = PQz*PBC%InvBoxSh%D(3,3)
-           IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(FPQx)
-           IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(FPQy)
-           IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(FPQz)
-           PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
-           PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
-           PQz  = FPQz*PBC%BoxShape%D(3,3)*)
-
-           WS["! Need to be improve..."];
+           WS["      ! Begin Minimum Image Convention "];
            WS["      FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)"];
            WS["      FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)"];
            WS["      FPQz = PQz*PBC%InvBoxSh%D(3,3)"];
-           WS["      IF(PBC%AutoW%I(1)==1) FPQx = FPQx-ANINT(ANINT(FPQx*1d9)*1d-9)"];
-           WS["      IF(PBC%AutoW%I(2)==1) FPQy = FPQy-ANINT(ANINT(FPQy*1d9)*1d-9)"];
-           WS["      IF(PBC%AutoW%I(3)==1) FPQz = FPQz-ANINT(ANINT(FPQz*1d9)*1d-9)"];
-           WS["      PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
-           WS["      PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
-           WS["      PQz  = FPQz*PBC%BoxShape%D(3,3)"];
-           WS["!"];
-
-
-           (*WS["      WPx=Wx-Px"];*)
-           (*WS["      WPy=Wy-Py"];*)
-           (*WS["      WPz=Wz-Pz"];*)
-           (*WS["      WQx=Wx-Qx"];*)
-           (*WS["      WQy=Wy-Qy"];*)
-           (*WS["      WQz=Wz-Qz"];*)
-
+           WS["      IF(PBC%AutoW%I(1)==1)FPQx=FPQx-ANINT(FPQx-SIGN(1D-15,FPQx))"];
+           WS["      IF(PBC%AutoW%I(2)==1)FPQy=FPQy-ANINT(FPQy-SIGN(1D-15,FPQy))"];
+           WS["      IF(PBC%AutoW%I(3)==1)FPQz=FPQz-ANINT(FPQz-SIGN(1D-15,FPQz))"];
+           WS["      PQx=FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)"];
+           WS["      PQy=FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)"];
+           WS["      PQz=FPQz*PBC%BoxShape%D(3,3)"];
+           WS["      ! End MIC"];
            WS["      WPx = -Eta*PQx*r1xZpE"];
            WS["      WPy = -Eta*PQy*r1xZpE"];
            WS["      WPz = -Eta*PQz*r1xZpE"];
            WS["      WQx = Zeta*PQx*r1xZpE"];
            WS["      WQy = Zeta*PQy*r1xZpE"];
            WS["      WQz = Zeta*PQz*r1xZpE"];
-
            WS["      T=Omega*(PQx*PQx+PQy*PQy+PQz*PQz)"];
-
            PunchGammas[Subroutine,LBra+LKet];
 ];
 

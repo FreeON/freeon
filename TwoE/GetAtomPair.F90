@@ -24,13 +24,13 @@ CONTAINS
     AtmInfo%Atm12Y=AtmInfo%Atm1Y-AtmInfo%Atm2Y
     AtmInfo%Atm12Z=AtmInfo%Atm1Z-AtmInfo%Atm2Z
 
-!    WRITE(*,*)' 1x = ',AtmInfo%Atm1X,' ; '
-!    WRITE(*,*)' 1y = ',AtmInfo%Atm1Y,' ; '
-!    WRITE(*,*)' 1z = ',AtmInfo%Atm1Z,' ; '
+    !    WRITE(*,*)' 1x = ',AtmInfo%Atm1X,' ; '
+    !    WRITE(*,*)' 1y = ',AtmInfo%Atm1Y,' ; '
+    !    WRITE(*,*)' 1z = ',AtmInfo%Atm1Z,' ; '
 
-!    WRITE(*,*)' 2x = ',AtmInfo%Atm2X,' ; '
-!    WRITE(*,*)' 2y = ',AtmInfo%Atm2Y,' ; '
-!    WRITE(*,*)' 2z = ',AtmInfo%Atm2Z,' ; '
+    !    WRITE(*,*)' 2x = ',AtmInfo%Atm2X,' ; '
+    !    WRITE(*,*)' 2y = ',AtmInfo%Atm2Y,' ; '
+    !    WRITE(*,*)' 2z = ',AtmInfo%Atm2Z,' ; '
 
     R12=(AtmInfo%Atm12X-RX)**2+(AtmInfo%Atm12Y-RY)**2+(AtmInfo%Atm12Z-RZ)**2
     CF12=0
@@ -38,35 +38,26 @@ CONTAINS
        MinL1=BS%ASymm%I(1,CF1,AtmInfo%K1)
        MaxL1=BS%ASymm%I(2,CF1,AtmInfo%K1)
        Type1=MaxL1*(MaxL1+1)/2+MinL1+1
-          StartL1=BS%LStrt%I(CF1,AtmInfo%K1)
-          StopL1=BS%LStop%I(CF1,AtmInfo%K1)
-          DO CF2=1,BS%NCFnc%I(AtmInfo%K2)
-             CF12=CF12+1
-             MinL2=BS%ASymm%I(1,CF2,AtmInfo%K2)
-             MaxL2=BS%ASymm%I(2,CF2,AtmInfo%K2)
-             Type2=MaxL2*(MaxL2+1)/2+MinL2+1
+       StartL1=BS%LStrt%I(CF1,AtmInfo%K1)
+       StopL1=BS%LStop%I(CF1,AtmInfo%K1)
+       DO CF2=1,BS%NCFnc%I(AtmInfo%K2)
+          CF12=CF12+1
+          MinL2=BS%ASymm%I(1,CF2,AtmInfo%K2)
+          MaxL2=BS%ASymm%I(2,CF2,AtmInfo%K2)
+          Type2=MaxL2*(MaxL2+1)/2+MinL2+1
              AtmPair(CF12)%SP%IntType=Type1*100+Type2
              StartL2=BS%LStrt%I(CF2,AtmInfo%K2)
              StopL2=BS%LStop%I(CF2,AtmInfo%K2)
              II=0
-!             WRITE(*,*)' Type= ',AtmPair(CF12)%SP%IntType,' ;'
-             ! We assume the primitives are ordered (exponants in decressing order).
+             ! Assume primitives are ordered (exponents in decressing order).
              DO I1=BS%NPFnc%I(CF1,AtmInfo%K1),1,-1
                 Z1=BS%Expnt%D(I1,CF1,AtmInfo%K1)
                 JJ=0
-                !We assume the primitives are ordered (exponants in decressing order).
                 DO I2=BS%NPFnc%I(CF2,AtmInfo%K2),1,-1
                    Z2=BS%Expnt%D(I2,CF2,AtmInfo%K2)
-
-!                   WRITE(*,*)' Z1 = ',Z1,' ; '
-!                   WRITE(*,*)' Z2 = ',Z2,' ; '
-!                   WRITE(*,*)' C1 = ',BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1),';'
-!                   WRITE(*,*)' C2 = ',BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2),';'
-
                    Expt=Z1+Z2
                    InvExpt=1.0d0/Expt
                    XiR12=Z2*Z1*InvExpt*R12
-!                   WRITE(*,*)' Xi = ',Z2*Z1*InvExpt, ' R12 = ',R12
                    JJ=JJ+1
                    IJ=JJ+II
                    AtmPair(CF12)%SP%Cst(1,IJ)=Expt
@@ -74,14 +65,26 @@ CONTAINS
                    AtmPair(CF12)%SP%Cst(3,IJ)=(Z1*AtmInfo%Atm1Y+Z2*(AtmInfo%Atm2Y+RY))*InvExpt
                    AtmPair(CF12)%SP%Cst(4,IJ)=(Z1*AtmInfo%Atm1Z+Z2*(AtmInfo%Atm2Z+RZ))*InvExpt
 
-!                   WRITE(*,*)' XiR12 = ',XiR12
                    AtmPair(CF12)%SP%Cst(5,IJ)=5.914967172796D0*EXP(-XiR12)*InvExpt*     &
-                                                BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*   &
-                                                BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
-
-!                   WRITE(*,*)' U = ',AtmPair(CF12)%SP%Cst(5,IJ),';'
-                   AtmPair(CF12)%SP%Cst(6,IJ)=Two*Z1
-                   AtmPair(CF12)%SP%Cst(7,IJ)=Two*Z2
+                        BS%CCoef%D(StopL1,I1,CF1,AtmInfo%K1)*   &
+                        BS%CCoef%D(StopL2,I2,CF2,AtmInfo%K2)
+                   IF (Type1==1.AND.Type2==2.OR.Type1==2.AND.Type2==1) THEN
+                      ! S*Sp/S*sP or Sp*S/sP*S
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2,CF2,AtmInfo%K2)/Cnt
+                      AtmPair(CF12)%SP%Cst(7,IJ)=1.0D0 !AtmPair(CF12)%SP%Cst(6,IJ)
+                      AtmPair(CF12)%SP%Cst(8,IJ)=1.0D0 !AtmPair(CF12)%SP%Cst(6,IJ)
+                   ELSEIF (CType.EQ.22) THEN
+                      ! Sp*Sp/sP*sP
+                      AtmPair(CF12)%SP%Cst(6,IJ)=BSc%CCoef%D(StartL1,  I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2  ,CF2,AtmInfo%K2)/Cnt
+                      ! sP*Sp/sP*sP
+                      AtmPair(CF12)%SP%Cst(7,IJ)=BSc%CCoef%D(StartL1+1,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2  ,CF2,AtmInfo%K2)/Cnt
+                      ! Sp*sP/sP*sP
+                      AtmPair(CF12)%SP%Cst(8,IJ)=BSc%CCoef%D(StartL1  ,I1,CF1,AtmInfo%K1)*BSp%CCoef%D(StartL2,I2+1,CF2,AtmInfo%K2)/Cnt
+                   ELSE
+                      AtmPair(CF12)%SP%Cst(6,IJ)=1.0D0
+                      AtmPair(CF12)%SP%Cst(7,IJ)=1.0D0
+                      AtmPair(CF12)%SP%Cst(8,IJ)=1.0D0
+                   ENDIF
                 ENDDO
                 ! We can skipp out the loop because we did not get any significant primitives.
                 !                   IF(JJ.EQ.0) EXIT
