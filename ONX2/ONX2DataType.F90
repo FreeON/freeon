@@ -104,17 +104,9 @@ CONTAINS
        MaxShelPerAtmBlk=MAX(MaxShelPerAtmBlk,BS%NCFnc%I(I))
     ENDDO
     !
-    write(*,*) 'max',MAXVAL(GM%AtTyp%I(1:NAtoms)), &
-         & ' MaxFuncPerAtmBlk',MaxFuncPerAtmBlk, &
-         & ' MaxShelPerAtmBlk',MaxShelPerAtmBlk
-
-!!$    !write(*,*) 'size C=',12*isize**4
-!!$    if(CS_OUT%NCells.GT.SIZE(ACAtmPair)) then
-!!$       write(*,*) 'size(ACAtmPair)',size(ACAtmPair),'.LT.',CS_OUT%NCells
-!!$       STOP 'Incrase the size of ACAtmPair and BDAtmPair'
-!!$    endif
-
-
+    !write(*,*) 'max',MAXVAL(GM%AtTyp%I(1:NAtoms)), &
+    !     & ' MaxFuncPerAtmBlk',MaxFuncPerAtmBlk, &
+    !     & ' MaxShelPerAtmBlk',MaxShelPerAtmBlk
   END SUBROUTINE GetBufferSize
 
 END MODULE ONX2DataType

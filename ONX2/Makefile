@@ -29,7 +29,9 @@ include $(MONDO_COMPILER)
 include $(MONDO_HOME)/Includes/Suffixes
 include $(MONDO_HOME)/Includes/RemoveAll
 
-EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE
+CPPMISC = #-DTRESH
+
+EXTRA_INCLUDES=-I$(MONDO_HOME)/TwoE 
 
 all: ONX2 GONX2
 
@@ -43,8 +45,8 @@ GObjects = QuickSortDis.o ONXParameters.o  ONXGet.o \
 	   IntSSSS.o GONX2ComputDK.o ONX2List.o GONX2.o
 #dInt1111.o
 ReleaseFiles= 
-#
-Libs =  $(F90_LIBRARIES) $(LAPACK) -lTwoE
+#$(LAPACK)
+Libs =  $(F90_LIBRARIES) -lTwoE $(LAPACK)
 #
 ONX2:	$(Objects)
 	$(LD) $(LDFLAGS) ONX2 $(Objects) $(Libs)

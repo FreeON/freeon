@@ -23,18 +23,17 @@ PROGRAM GONX2
   IMPLICIT NONE
   !
 !#ifdef PARALLEL
+  !TYPE(FASTMAT), POINTER        :: D
 !#else
   TYPE(BCSR)                     :: D
 !#endif
-  TYPE(BSET)                     :: BSc
-  TYPE(CRDS)                     :: GMc
-  TYPE(BSET)                     :: BSp
-  TYPE(CRDS)                     :: GMp
+  TYPE(BSET)                     :: BSc,BSp
+  TYPE(CRDS)                     :: GMc,GMp
   TYPE(ARGMT)                    :: Args
   TYPE(INT_VECT)                 :: Stat
 !--------------------------------------------------------------------------------
-  TYPE(DBL_RNK2)   :: GradX,GradAux
-  TYPE(DBL_VECT)   :: GTmp
+  TYPE(DBL_RNK2)                 :: GradX,GradAux
+  TYPE(DBL_VECT)                 :: GTmp
 !--------------------------------------------------------------------------------
 ! Misc. variables and parameters...
 !--------------------------------------------------------------------------------
@@ -97,14 +96,6 @@ PROGRAM GONX2
   !
   WRITE(*,*) '-------- We are in GONX2 --------'
   !
-  
-!!$  write(*,*) 'Geo In'
-!!$  do i=1,natoms
-!!$     write(*,100) i,GMc%Carts%D(:,i)
-!!$  enddo
-
-
-
 !!$  SELECT CASE(SCFActn)
 !!$  !IF(SCFActn=='StartResponse'.OR.SCFActn=='FockPrimeBuild')THEN
 !!$  CASE('StartResponse','FockPrimeBuild')
@@ -148,7 +139,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Allocate the list(s) and get the buffer sizes.
-  WRITE(*,*) 'allocate List'
+  !WRITE(*,*) 'allocate List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL AllocList(ListC,NAtoms) !!!!!!!!!!!!!!!!!! Add atom1-atom2 or sthg like that !!!!!!!!!!!!!!!!!!
@@ -160,11 +151,11 @@ PROGRAM GONX2
   CALL GetBufferSize(GMc,BSc)
   CALL CPU_TIME(Time2)
 !#endif
-  WRITE(*,*) 'allocate List: ok',Time2-Time1
+  !WRITE(*,*) 'allocate List: ok',Time2-Time1
   !
   !------------------------------------------------
   ! Make the distribution list(s).
-  WRITE(*,*) 'make List'
+  !WRITE(*,*) 'make List'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL MakeList(ListC,GMc,BSc,CS_OUT) !!!!!!!!!!!!!!!!!! Add atom list !!!!!!!!!!!!!!!!!!
@@ -176,19 +167,19 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 !#endif
   !TmML = Time2-Time1
-  WRITE(*,*) 'make List: ok',Time2-Time1
+  !WRITE(*,*) 'make List: ok',Time2-Time1
   !
   !------------------------------------------------
   !
 #ifdef ONX2_DBUG
-  WRITE(*,*) 'Print List'
+  !WRITE(*,*) 'Print List'
 !#ifdef PARALLEL
 !  CALL PrintList(ListC)
 !  CALL PrintList(ListD)
 !#else
   CALL PrintList(ListC)
 !#endif
-  WRITE(*,*) 'Print List:ok'
+  !WRITE(*,*) 'Print List:ok'
 #endif
   !
   !
@@ -200,7 +191,7 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   ! Compute Exchange Forces.
-  WRITE(*,*) 'DKx'
+  !WRITE(*,*) 'DKx'
 !#ifdef PARALLEL
 !  Time1 = MPI_WTIME()
 !  CALL ComputK(DFastMat,KxFastMat,ListC,ListD,GMc,BSc,CS_OUT)
@@ -211,7 +202,7 @@ PROGRAM GONX2
   CALL CPU_TIME(Time2)
 !#endif
   !TmKx = Time2-Time1
-  WRITE(*,*) 'DKx:ok',Time2-Time1
+  !WRITE(*,*) 'DKx:ok',Time2-Time1
 
   !write(*,*) GradX%D
   !write(*,*) 'SUM(GradX%D)=',SUM(GradX%D)
@@ -264,7 +255,7 @@ PROGRAM GONX2
   !
   CALL New(GTmp,3*NAtoms)
   CALL CartRNK2ToCartRNK1(GTmp%D,GradX%D)
-  CALL PChkSum(GTmp,'dKx/dR',Proc_O=Prog)  
+  CALL PChkSum(GTmp,'dKx/dR['//TRIM(CurGeom)//']',Proc_O=Prog)  
   CALL Delete(GTmp)
   !
   CALL DAXPY(3*NAtoms,1.0d0,GradX%D(1,1),1,GradAux%D(1,1),1)
@@ -286,15 +277,6 @@ PROGRAM GONX2
   !
   !------------------------------------------------
   !
-
-
-!!$  write(*,*) 'Geo Out'
-!!$  do i=1,natoms
-!!$     write(*,100) i,GMc%Carts%D(:,i)
-!!$  enddo
-!!$  100 format(I4,2X,3E20.12)
-
-
   CALL Delete(GradX)
   !
   CALL Delete(BSc)

@@ -168,6 +168,7 @@ PROGRAM ONX2
 #else
   CALL CPU_TIME(Time1)
   CALL AllocList(ListC,NAtoms)
+  CALL GetBufferSize(GMc,BSc)
   CALL CPU_TIME(Time2)
 #endif
   !WRITE(*,*) 'allocate List: ok',Time2-Time1

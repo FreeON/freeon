@@ -24,6 +24,7 @@ MODULE ONX2List
   USE DerivedTypes
   USE GlobalScalars
   USE PrettyPrint
+  USE Thresholding
   USE ONX2DataType
   USE InvExp
   USE ONXParameters
@@ -64,7 +65,7 @@ CONTAINS
     TYPE(BSET)   , INTENT(IN)            :: BS
     TYPE(CellSet), INTENT(IN)            :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode2) , POINTER               :: AtAList,AtAListTmp,NodeA
+    TYPE(ANode2) , POINTER               :: AtAList,NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
@@ -73,8 +74,8 @@ CONTAINS
     REAL(DOUBLE) , DIMENSION(CS_OUT%NCells) :: RIntCell
     INTEGER      , DIMENSION(CS_OUT%NCells) :: IndxCell
     !-------------------------------------------------------------------
-    TYPE(AtomPr) , DIMENSION(100)        :: ACAtmPair ! this should be declared somewhere
-    REAL(DOUBLE) , DIMENSION(38416)      :: C         ! this should be declared somewhere
+    TYPE(AtomPr) , DIMENSION(MaxShelPerAtmBlk**2*CS_OUT%NCells) :: ACAtmPair
+    REAL(DOUBLE) , DIMENSION(MaxFuncPerAtmBlk**4) :: C
     !-------------------------------------------------------------------
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
@@ -100,7 +101,7 @@ CONTAINS
 !    write(*,*) 'size C=',isize**4
     !
     !
-    NULLIFY(AtAList,AtAListTmp,NodeA)
+    NULLIFY(AtAList,NodeA)
     NInts=0.0d0
     !
 !#ifdef PARALLEL
@@ -241,7 +242,7 @@ CONTAINS
   SUBROUTINE MakeGList(List,GM,BS,CS_OUT)
 !H---------------------------------------------------------------------------------
 !H SUBROUTINE MakeGList(List,GM,BS,CS_OUT)
-!H
+!H  Does the thresholding based on the ERIs.
 !H---------------------------------------------------------------------------------
     !
     IMPLICIT NONE
@@ -251,7 +252,7 @@ CONTAINS
     TYPE(BSET)   , INTENT(IN)            :: BS
     TYPE(CellSet), INTENT(IN)            :: CS_OUT
     !-------------------------------------------------------------------
-    TYPE(ANode2) , POINTER               :: AtAList,AtAListTmp,NodeA
+    TYPE(ANode2) , POINTER               :: AtAList,NodeA
     TYPE(AtomInfo)                       :: ACAtmInfo
     INTEGER                              :: AtA,AtC,KA,KC,CFA,CFC,iCell,CFAC
     INTEGER                              :: NCell,I,IntType,LocNInt,NBFA,NBFC
@@ -266,9 +267,7 @@ CONTAINS
     REAL(DOUBLE) , EXTERNAL              :: DGetAbsMax
     !-------------------------------------------------------------------
     REAL(DOUBLE), PARAMETER :: ThresholdIntegral=-1.0D-15
-    !REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
-    !REAL(DOUBLE), PARAMETER :: ThresholdIntegral=1.0D-12
-    REAL(DOUBLE), PARAMETER :: ThresholdDistance=1.0D+99
+    REAL(DOUBLE) :: ThresholdDistance  !, PARAMETER :: ThresholdDistance=1.0D+99
     !-------------------------------------------------------------------
     !
     integer :: isize,NIntBlk
@@ -281,15 +280,11 @@ CONTAINS
           STOP 'Incrase the size of C'
        ENDIF
     enddo
-!#ifdef PARALLEL
-!  IF(MyID.EQ.ROOT) &
-!#endif
-    !write(*,*) 'size C=',isize**4
-!    write(*,*) 'In MakeList 1'
     !
     !
-    NULLIFY(AtAList,AtAListTmp,NodeA)
-    NInts=0.0d0
+    NULLIFY(AtAList,NodeA)
+    NInts=0.0D0
+    ThresholdDistance=-10.d0*DLOG(Thresholds%Dist)
     !
 !#ifdef PARALLEL
     ! TODO TODO TODO TODO TODO TODO TODO TODO
@@ -304,9 +299,6 @@ CONTAINS
        ACAtmInfo%Atm2Y=GM%Carts%D(2,AtC)
        ACAtmInfo%Atm2Z=GM%Carts%D(3,AtC)
        ACAtmInfo%K2=KC
-
-!    write(*,*) 'In MakeList 2'
-
        !
        DO AtA=1,NAtoms ! Run over AtA
           !
@@ -317,9 +309,6 @@ CONTAINS
           ACAtmInfo%Atm1Y=GM%Carts%D(2,AtA)
           ACAtmInfo%Atm1Z=GM%Carts%D(3,AtA)
           ACAtmInfo%K1=KA
-
-!    write(*,*) 'In MakeList 3'
-
           !
           ACAtmInfo%Atm12X=ACAtmInfo%Atm1X-ACAtmInfo%Atm2X
           ACAtmInfo%Atm12Y=ACAtmInfo%Atm1Y-ACAtmInfo%Atm2Y
@@ -329,11 +318,10 @@ CONTAINS
           AC2=(ACAtmInfo%Atm12X)**2+(ACAtmInfo%Atm12Y)**2+(ACAtmInfo%Atm12Z)**2
           !
           ! Cycle if needed.
+#ifdef GTHRES
           IF(AC2.GT.ThresholdDistance) CYCLE
+#endif
           !
-
-!    write(*,*) 'In MakeList 4'
-
           ! Set the range for range of exchange.
           DisRange=MAX(DisRange,SQRT(AC2)*1.01D0)
           !
@@ -346,23 +334,19 @@ CONTAINS
              AC2 =  (ACAtmInfo%Atm12X-CS_OUT%CellCarts%D(1,iCell))**2+ &
                   & (ACAtmInfo%Atm12Y-CS_OUT%CellCarts%D(2,iCell))**2+ &
                   & (ACAtmInfo%Atm12Z-CS_OUT%CellCarts%D(3,iCell))**2
-
-!    write(*,*) 'In MakeList 5'
-
              !
              ! Cycle if needed.
+#ifdef GTHRES
              IF(AC2.GT.ThresholdDistance) CYCLE
+#endif
              !
              ! Get the atom pair.
-             !CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
-             CALL GetAtomPairG_(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
+             CALL GetAtomPair(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
+             !CALL GetAtomPairG_(ACAtmInfo,ACAtmPair,BS,CS_OUT%CellCarts%D(1,iCell))
              !
              ! Initialize some cell variables.
-             RInt=0.0d0
+             RInt=0.0D0
              !
-
-!    write(*,*) 'In MakeList 6'
-
              CFAC=0
              !DO CFAC=1,BS%NCFnc%I(KA)*BS%NCFnc%I(KC)
              DO CFA=1,BS%NCFnc%I(KA) ! Run over blkfunc on A
@@ -374,10 +358,9 @@ CONTAINS
                 IntType=ACAtmPair(CFAC)%SP%IntType
                 !
                 LocNInt=(BS%LStop%I(CFA,KA)-BS%LStrt%I(CFA,KA)+1)**2* &
-                     &  (BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1)**2 *12
+                     &  (BS%LStop%I(CFC,KC)-BS%LStrt%I(CFC,KC)+1)**2
                 !
-                !CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0d0) !I need less zeroing *12!
-                CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0d0) !I need less zeroing *12!
+                CALL DBL_VECT_EQ_DBL_SCLR(LocNInt,C(1),0.0D0)
                 !
                 ! The integral interface.
                 !write(*,*) 'In'
@@ -385,9 +368,6 @@ CONTAINS
                 !INCLUDE 'DERIListInterface.Inc'
                 !write(*,*) 'Out'
                 !
-
-                !write(*,*) 'C',C(1:LocNInt)
-
                 RInt=MAX(RInt,DGetAbsMax(LocNInt,C(1)))
                 !
 #ifdef GONX2_DBUG
@@ -399,24 +379,25 @@ CONTAINS
              ENDDO ! End over blkfunc on A
              ENDDO ! End over blkfunc on C
              !
-             !stop 'in onx2list'
-             !if(atc==1.and.ata==1) RInt=(0.123456789d0)**2
-             !if(atc==2.and.ata==2) RInt=(0.123456789d0)**2
-             !if(atc==3.and.ata==3) RInt=(0.123456789d0)**2
-
 #ifdef GONX2_DBUG
              WRITE(*,'(A,E22.15,4I4)') ' MaxInt =',RInt,AtA,AtC,AtA,AtC
 #endif
-             RInt=DSQRT(RInt)
              !
              ! Keep the cell if needed.
-             IF(RInt.GT.ThresholdIntegral) THEN
+#ifdef GTHRES
+             IF(RInt.GT.Thresholds%TwoE) THEN
+#endif
                 NCell=NCell+1
+                RInt=DSQRT(RInt)
                 RIntCell(NCell)=RInt
                 IndxCell(NCell)=iCell
                 !write(*,'(A,I3,A,I3,A,I3,A,E25.15,A,I3)') &
                 !    & 'AtA',AtA,' AtC',AtC,' NCell',NCell,' RInt',RInt,' iCell',iCell
+#ifdef GTHRES
+             !ELSE
+             !   write(*,*) 'Int smaller that treshold'
              ENDIF
+#endif
              !
           ENDDO ! End R
           !
@@ -451,18 +432,17 @@ CONTAINS
     !
 #ifdef GONX2_INFO
 #ifdef PARALLEL
-  IF(MyID.EQ.ROOT) THEN
+    IF(MyID.EQ.ROOT) THEN
 #endif
-    WRITE(*,*) '-------------------------------------'
-    WRITE(*,*) 'MakeList Statistic.'
-    WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
-    WRITE(*,*) '-------------------------------------'
+       WRITE(*,*) '-------------------------------------'
+       WRITE(*,*) 'MakeList Statistic.'
+       WRITE(*,'(A,F22.1)') ' Nbr ERI=',NInts
+       WRITE(*,*) '-------------------------------------'
 #ifdef PARALLEL
-  ENDIF
+    ENDIF
 #endif
 #endif
     !
-!  write(*,*) 'End of MakeGList'
   END SUBROUTINE MakeGList
   !
   !
