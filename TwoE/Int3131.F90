@@ -135,11 +135,11 @@
             I2Bar2=V7+QCx*V8+V11*WQx+I2Bar2
             I3Bar2=QCx*V12+V15*WQx+I3Bar2
             I4Bar2=QCx*V16+V19*WQx+I4Bar2
-            I1Bar3=AuxR0+I1Bar3
+            I1Bar3=AuxR0*QCy+AuxR1*WQy+I1Bar3
             I2Bar3=QCy*V8+V11*WQy+I2Bar3
             I3Bar3=QCy*V12+V7+V15*WQy+I3Bar3
             I4Bar3=QCy*V16+V19*WQy+I4Bar3
-            I1Bar4=AuxR0+I1Bar4
+            I1Bar4=AuxR0*QCz+AuxR1*WQz+I1Bar4
             I2Bar4=QCz*V8+V11*WQz+I2Bar4
             I3Bar4=QCz*V12+V15*WQz+I3Bar4
             I4Bar4=QCz*V16+V7+V19*WQz+I4Bar4

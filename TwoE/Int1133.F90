@@ -104,18 +104,33 @@
             ENDIF
             V1=AuxR0*QCx
             V2=AuxR1*WQx
+            V3=AuxR0*QCy
+            V4=AuxR1*WQy
+            V5=AuxR0*QCz
+            V6=AuxR1*WQz
+            V7=-(AuxR1*ZxZpE)
+            V8=AuxR0+V7
+            V9=r1x2E*V8
+            V10=V3+V4
+            V11=AuxR1*QCy
+            V12=AuxR2*WQy
+            V13=V11+V12
+            V14=V5+V6
+            V15=AuxR1*QCz
+            V16=AuxR2*WQz
+            V17=V15+V16
             I1Bar1=AuxR0+I1Bar1
             I1Bar2=V1+V2+I1Bar2
-            I1Bar3=AuxR0+I1Bar3
-            I1Bar4=AuxR0+I1Bar4
-            W1=QCx*(V1+V2)+WQx*(AuxR1*QCx+AuxR2*WQx)
-            W2=r1x2E*(AuxR0-AuxR1*ZxZpE)+I1Bar5
+            I1Bar3=V3+V4+I1Bar3
+            I1Bar4=V5+V6+I1Bar4
+            W1=QCx*(V1+V2)+V9
+            W2=WQx*(AuxR1*QCx+AuxR2*WQx)+I1Bar5
             I1Bar5=W1+W2
-            I1Bar6=V1+V2+I1Bar6
-            I1Bar7=AuxR0+I1Bar7
-            I1Bar8=V1+V2+I1Bar8
-            I1Bar9=AuxR0+I1Bar9
-            I1Bar10=AuxR0+I1Bar10
+            I1Bar6=QCx*V10+V13*WQx+I1Bar6
+            I1Bar7=QCy*V10+V9+V13*WQy+I1Bar7
+            I1Bar8=QCx*V14+V17*WQx+I1Bar8
+            I1Bar9=QCy*V14+V17*WQy+I1Bar9
+            I1Bar10=QCz*V14+V9+V17*WQz+I1Bar10
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 

@@ -53,11 +53,12 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
-Classes = {{0,0},{1,1} };
-CType[1] = "S";
-CType[2] = "SP";
-CType[3] = "P";
-CType[6] = "D";
+Classes = { {0,0},{1,1}}
+CType[1]  = "S";
+CType[2]  = "SP";
+CType[3]  = "P";
+CType[6]  = "D";
+CType[10] = "F";
 
 LC=Length[Classes];
 MxEll = Max[Classes];
@@ -77,23 +78,29 @@ Do[Do[Do[
 (**************** THE VRR RELATIONS: THX OS ! ************************)
 
 VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2zn,AiO2zn}, 
+
+                              pmin=Position[a,Min[a]][[1, 1]];
+                              qmin=Position[c,Min[c]][[1, 1]];
+                              If[ a[[pmin]] < 0 || c[[qmin]] < 0,Return[0]];                                        
+
+
                               p=Position[a,Max[a]][[1, 1]];
                               q=Position[c,Max[c]][[1, 1]];
-                              If[a[[p]]<0 || c[[p]]< 0,Return[0]];                                        
-                              If[a[[p]]==0 && c[[p]]==0,
+        
+                              If[a[[p]]==0 && c[[q]]==0,
                                  Return[ToExpression[StringJoin["AuxR",ToString[m]]]]];                                        
+
 			      If[a[[p]]>c[[q]],
 			        (* Taking down ell on bra side *)
 			         If[p == 1, one = {1, 0, 0}; two={2,0,0}; PA=PAx; WP=WPx; ];
 			         If[p == 2, one = {0, 1, 0}; two={0,2,0}; PA=PAy; WP=WPy; ];
 			         If[p == 3, one = {0, 0, 1}; two={0,0,2}; PA=PAz; WP=WPz; ];
-				 Ai1=(a[[p]]-1)*r1x2Z;  (* (a[i]-1)/(2 zeta)   *)
-				 CiO2zn=c[[p]]*HfxZpE; (* c[i]/(2(zeta+eta)) *)
+				 Ai1=(a[[p]]-1)*r1x2Z;   (* (a[i]-1)/(2 zeta)   *)
+				 CiO2zn=c[[p]]*HfxZpE;   (* c[i]/(2(zeta+eta)) *)
                                  a1 = a - one;
                                  a2 = a - two;
 			         c1 = c - one;                                  
-                                 Return[PA*VRR[a1,c,m]+WP*VRR[a1,c,m+1]+Ai1*(VRR[a2,c,m]  \
-                                        -ExZpE*VRR[a2,c,m+1]) +CiO2zn*VRR[a1,c1,m+1]]
+                                 Return[PA*VRR[a1,c,m]+WP*VRR[a1,c,m+1]+Ai1*(VRR[a2,c,m]-ExZpE*VRR[a2,c,m+1]) +CiO2zn*VRR[a1,c1,m+1]]
 			       ,(* Taking down ell on ket side *)
 			         If[q == 1, one = {1, 0, 0}; two={2,0,0}; QC=QCx; WQ=WQx;];
 			         If[q == 2, one = {0, 1, 0}; two={0,2,0}; QC=QCy; WQ=WQy;];
@@ -103,8 +110,7 @@ VRR[a_List,c_List,m_]:=Module[{p,q,PA,QC,WP,WQ,one,two,a1,a2,c1,c2,Ai1,Ci1,CiO2z
                                  c1 = c - one;
                                  c2 = c - two;
                                  a1 = a - one;  
-                                 Return[QC*VRR[a,c1,m]+WQ*VRR[a,c1,m+1]+Ci1*(VRR[a,c2,m] \
-                                        -ZxZpE*VRR[a,c2,m+1])+AiO2zn*VRR[a1,c1,m+1]]
+                                 Return[QC*VRR[a,c1,m]+WQ*VRR[a,c1,m+1]+Ci1*(VRR[a,c2,m]-ZxZpE*VRR[a,c2,m+1])+AiO2zn*VRR[a1,c1,m+1]]
                                ];
                              ];
 
@@ -175,8 +181,6 @@ PunchVRRClass[FileName_,BraEll_,KetEll_]:=Module[{oList,IList,Kount,a,c},
                                                  Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
 ];                                                ;
 
-
-
 PunchGammas[Subroutine_,LTot_]:=Block[{WS,FStr,Gammas},
 
 WS[String_]:=WriteString[Subroutine,"            ",String,"\n"];
@@ -188,9 +192,7 @@ FStr[L_]:=Module[{LSt},
 
 Gammas[EllTot_]:=Module[{LSt,LSt2,GSt,GSt1,GFlt,GammAss},
 
-
               GammAss[n_] := FF[ Abs[2 n - 1]!!/(2 (2 )^n) Sqrt[Pi] ];
-
 
                                 WS["IF(T<Gamma_Switch)THEN"];
                                 WS["  L=AINT(T*Gamma_Grid)"];			
@@ -261,8 +263,6 @@ PunchHRRClass[FileName_,ic_,jc_,kc_,lc_]:=Module[{oList,IList,Kount,a,b,c,d},
                                                 ,{jl,jmin,jmax}]
                                                 ,{kl,kmin,kmax}]
                                                 ,{ll,lmin,lmax}];
-						 Print[IList];
-
                                                 Write[FileName,FortranAssign[o,IList,AssignReplace->oList]];
                                                ];
 

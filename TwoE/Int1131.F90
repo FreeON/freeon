@@ -91,8 +91,8 @@
             ENDIF
             I1Bar1=AuxR0+I1Bar1
             I1Bar2=AuxR0*QCx+AuxR1*WQx+I1Bar2
-            I1Bar3=AuxR0+I1Bar3
-            I1Bar4=AuxR0+I1Bar4
+            I1Bar3=AuxR0*QCy+AuxR1*WQy+I1Bar3
+            I1Bar4=AuxR0*QCz+AuxR1*WQz+I1Bar4
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
