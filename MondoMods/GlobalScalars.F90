@@ -211,5 +211,8 @@ MODULE GlobalScalars
    LOGICAL, SAVE           :: InParallel=.FALSE.
    INTEGER, PARAMETER      :: MaxProc=1024
 !
+!  Send in the clones...
+!
+   INTEGER, SAVE           :: NClones
    INTEGER, SAVE           :: MyClone
 END MODULE GlobalScalars

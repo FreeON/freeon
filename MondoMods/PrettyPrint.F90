@@ -72,16 +72,17 @@ MODULE PrettyPrint
 #endif
       END SUBROUTINE TimeStamp
 
-      FUNCTION OpenPU(FileName_O,Unit_O)
+      FUNCTION OpenPU(FileName_O,Unit_O,NewFile_O)
          CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O
          INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+         LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O
          INTEGER                              :: OpenPU,PU
          IF(PRESENT(FileName_O).AND.PRESENT(Unit_O))THEN
             PU=Unit_O
-            CALL OpenASCII(FileName_O,PU)
+            CALL OpenASCII(FileName_O,PU,NewFile_O=NewFile_O)
          ELSEIF(PRESENT(FileName_O).AND.(.NOT.PRESENT(Unit_O)))THEN
             PU=Tmp
-            CALL OpenASCII(FileName_O,PU)
+            CALL OpenASCII(FileName_O,PU,NewFile_O=NewFile_O)
          ELSEIF(PRESENT(Unit_O))THEN
             IF(Unit_O==6)THEN
                PU=Unit_O
@@ -90,7 +91,7 @@ MODULE PrettyPrint
             ENDIF
          ELSE
             PU=Out
-            CALL OpenASCII(OutFile,PU)
+            CALL OpenASCII(OutFile,PU,NewFile_O=NewFile_O)
          ENDIF
          OpenPU=PU
       END FUNCTION OpenPU
@@ -477,12 +478,25 @@ MODULE PrettyPrint
 !----------------------------------------------------------------PRINT COORDINATES
 !
 !----------------------------------------------------------------PRINT COORDINATES
-     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O)
+
+     SUBROUTINE XSFPreamble(Steps,FileName,Unit)
+       INTEGER                     :: Steps
+       INTEGER,         INTENT(IN) :: Unit
+       CHARACTER(LEN=*),INTENT(IN) :: FileName
+       CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
+       CALL OpenASCII(FileName,Unit,Rewind_O=.TRUE.)
+       Mssg='ANIMSTEPS  '//IntToChar(Steps)
+       WRITE(Unit,*)TRIM(Mssg)
+       CLOSE(Unit)
+     END SUBROUTINE XSFPreamble
+
+     SUBROUTINE Print_CRDS(GM,FileName_O,Unit_O,PrintGeom_O,NewFile_O)
         TYPE(CRDS) :: GM         
         INTEGER :: K
         LOGICAL :: Opened
         INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
         CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: FileName_O,PrintGeom_O
+        LOGICAL,         OPTIONAL,INTENT(IN) :: NewFile_O
         INTEGER                              :: I,PU
         CHARACTER(LEN=DEFAULT_CHR_LEN)       :: Mssg
         CHARACTER(LEN=DCL)                   :: AuxChar
@@ -491,28 +505,12 @@ MODULE PrettyPrint
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
-          PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O)
-!
-!           Mssg='Configuration #'//TRIM(IntToChar(GM%Confg))
-!           IF(GM%ETotal/=BIG_DBL)THEN
-!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToChar(GM%ETotal))
-!              WRITE(PU,*)TRIM(Mssg)
-!              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradRMS)) 
-!              WRITE(PU,*)TRIM(Mssg)
-!              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToShrtChar(GM%GradMax)) 
-!              WRITE(PU,*)TRIM(Mssg)
-!              Mssg='Escf['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%ETotal))//';' 
-!              WRITE(PU,*)TRIM(Mssg)
-!              Mssg='Grms['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradRMS))//';' 
-!              WRITE(PU,*)TRIM(Mssg)
-!              Mssg='Gmax['//TRIM(IntToChar(GM%Confg))//']='//TRIM(DblToMMAChar(GM%GradMax))//';' 
-!              WRITE(PU,*)TRIM(Mssg)
-!           ENDIF
-           IF(PRESENT(PrintGeom_O))THEN
-              IF(PrintGeom_O=='XYZ')THEN
-!                Print XYZ format
-                 Mssg=IntToChar(GM%NAtms)
-                 WRITE(PU,*)TRIM(Mssg)
+          PU=OpenPU(FileName_O=FileName_O,Unit_O=Unit_O,NewFile_O=NewFile_O)
+          IF(PRESENT(PrintGeom_O))THEN
+             IF(PrintGeom_O=='XYZ')THEN
+                ! Print XYZ format
+                Mssg=IntToChar(GM%NAtms)
+                WRITE(PU,*)TRIM(Mssg)
                  Mssg='Geom #'//TRIM(IntToChar(GM%Confg)) &
                     //', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,*)TRIM(Mssg)
@@ -535,30 +533,44 @@ MODULE PrettyPrint
 	      ! NJH: Print XSF format for XCrysden
 	      ! NJH: Only does a single configuration correctly for now
 	      ! NJH: Needs future hooks in Optimizer to produce animation files
+                 ! MC got it working...
                  AA=One/AngstromsToAU
                  IF(GM%PBC%Dimen/=0)THEN
-		    Mssg='CRYSTAL'
-                    WRITE(PU,22)Mssg
-		    Mssg='PRIMVEC'
-                    WRITE(PU,22)Mssg
+                    IF(GM%PBC%Dimen<=2)THEN
+                       Mssg='SLAB'
+                    ELSE
+                       Mssg='CRYSTAL'
+                    ENDIF
+                    WRITE(PU,*)TRIM(Mssg)
+		    Mssg='PRIMVEC '//TRIM(IntToChar(GM%Confg))
+                    WRITE(PU,*)TRIM(Mssg)
                     ! Cell Vectors
-                    WRITE(Mssg,*) GM%PBC%BoxShape%D(1,1) , GM%PBC%BoxShape%D(1,2) , GM%PBC%BoxShape%D(1,3)
-                    WRITE(PU,22)Mssg
-                    WRITE(Mssg,*) GM%PBC%BoxShape%D(2,1) , GM%PBC%BoxShape%D(2,2) , GM%PBC%BoxShape%D(2,3)
-                    WRITE(PU,22)Mssg
-                    WRITE(Mssg,*) GM%PBC%BoxShape%D(3,1) , GM%PBC%BoxShape%D(3,2) , GM%PBC%BoxShape%D(3,3)
-                    WRITE(PU,22)Mssg
+                    Mssg=                                             &
+                         FltToMedmChar(GM%PBC%BoxShape%D(1,1))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(1,2))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(1,3))//RTRN// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(2,1))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(2,2))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(2,3))//RTRN// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(3,1))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(3,2))//'  '// &
+                         FltToMedmChar(GM%PBC%BoxShape%D(3,3))
+                    WRITE(PU,*)TRIM(Mssg)
+                    Mssg='PRIMCOORD '//TRIM(IntToChar(GM%Confg))
+                    WRITE(PU,*)TRIM(Mssg)
+                    WRITE(PU,*)GM%NAtms,1
+                 ELSE
+                    Mssg='ATOMS '//TRIM(IntToChar(GM%Confg))
+                    WRITE(PU,*)TRIM(Mssg)
                  ENDIF
-		 Mssg='PRIMCOORD'
-                 WRITE(PU,22)Mssg
-		 WRITE(PU,*) GM%NAtms , 1
                  DO I=1,GM%NAtms
-		    WRITE(PU,*) GM%AtNum%D,(GM%Carts%D(K,I)*AA,K=1,3)
+		    WRITE(PU,99)GM%AtNam%C(I),(GM%Carts%D(K,I)*AA,K=1,3)
+                 99 FORMAT(1x,A3,3(1x,E20.10))
 		 ENDDO
               ELSEIF(PrintGeom_O=='PDB')THEN
 !                Print PDB format
                  AA=One/AngstromsToAU
-                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <ETotal> = '//TRIM(FltToMedmChar(GM%ETotal))
+                 Mssg='Geom #'//TRIM(IntToChar(GM%Confg))//', <SCF> = '//TRIM(FltToMedmChar(GM%ETotal))
                  WRITE(PU,22)Mssg
               22 FORMAT('REMARK   1  ',A60)
                  IF(GM%PBC%Dimen/=0)THEN
@@ -1291,23 +1303,22 @@ MODULE PrettyPrint
   FUNCTION ProcessName(Proc_O,Misc_O) RESULT (Tag)
     CHARACTER(LEN=*), OPTIONAL :: Proc_O
     CHARACTER(LEN=*), OPTIONAL :: Misc_O
-    CHARACTER(LEN=24)          :: Tag
-    CHARACTER(LEN=24)          :: Name
-    CHARACTER(LEN=24),PARAMETER:: Blks='                        '
+    CHARACTER(LEN=26)          :: Tag
+    CHARACTER(LEN=26)          :: Name
+    CHARACTER(LEN=26),PARAMETER:: Blks='                        '
     CHARACTER(LEN=3), PARAMETER:: Colon =' : '
     CHARACTER(LEN=4), PARAMETER:: Colons=' :: '
     IF(PRESENT(Proc_O).AND.PRESENT(Misc_O))THEN
        Name=TRIM(ADJUSTL(TRIM(Proc_O)))//Colon//TRIM(Misc_O)
-       Name(22:24)=":: "
+       Name(24:26)=":: "
        Tag=Name
     ELSEIF(PRESENT(Proc_O))THEN
        Name=TRIM(ADJUSTL(TRIM(Proc_O)))
-       Name(22:24)=":: "
+       Name(24:26)=":: "
        Tag=Name
     ELSE
        Tag=Blks
     ENDIF
-
   END FUNCTION ProcessName
 !---------------------------------------------------------------------
 !

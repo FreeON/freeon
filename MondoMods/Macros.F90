@@ -252,6 +252,7 @@ CONTAINS
     ENDIF
 #endif
     CALL Get(ModelChem,'ModelChemistry',Tag_O=CurBase)
+    CALL Get(NClones,'clones')
   END SUBROUTINE LoadTopLevelGlobals
   !==============================================================
   ! LOAD GLOBAL VARIABLES FROM EACH CLONE/GROUP OF THE HDF FILE

@@ -1146,7 +1146,7 @@ CONTAINS
               !     Get a basis set
               !-------------------------------------------------------------------------------
               SUBROUTINE Get_BSET(BS,Tag_O)
-                TYPE(BSET),              INTENT(OUT) :: BS
+                TYPE(BSET)                           :: BS
                 CHARACTER(LEN=*),OPTIONAL            :: Tag_O
                 IF(AllocQ(BS%Alloc))CALL Delete(BS)         
                 CALL Get(BS%NAtms,'natoms')
@@ -1231,7 +1231,7 @@ CONTAINS
 !-------------------------------------------------------------------------------
 !             Get the Periodic Info
               SUBROUTINE Get_PBCInfo(PBC,Tag_O)
-                TYPE(PBCInfo),            INTENT(OUT) :: PBC 
+                TYPE(PBCInfo)                         :: PBC 
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN)  :: Tag_O
                 CALL Get(PBC%Dimen     ,'Dimension')
                 CALL Get(PBC%PFFMaxEll ,'PFFMaxEll')
@@ -1280,7 +1280,7 @@ CONTAINS
               !-------------------------------------------------------------------------------
               !     Get some coordinates
               SUBROUTINE Get_CRDS(GM,Tag_O)
-                TYPE(CRDS),           INTENT(OUT)    :: GM
+                TYPE(CRDS)                           :: GM
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
                 IF(AllocQ(GM%Alloc)) CALL Delete(GM)
                 !-------------------------------------------------------------------------------
@@ -1297,7 +1297,6 @@ CONTAINS
                 CALL New(GM)
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
-
                 CALL Get(GM%ETotal    ,'gm_etot'      ,Tag_O=Tag_O)
                 CALL Get(GM%ELagr     ,'gm_elagr'     ,Tag_O=Tag_O)
                 CALL Get(GM%Ordrd     ,'reordered'    ,Tag_O=Tag_O)
@@ -1667,7 +1666,7 @@ CONTAINS
 
               SUBROUTINE Get_TOLS(NGLCT,Tag_O)
                 IMPLICIT NONE
-                TYPE(TOLS),              INTENT(OUT) :: NGLCT
+                TYPE(TOLS)                           :: NGLCT
                 CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
                 CALL Get(NGLCT%Cube,'cubeneglect',Tag_O=Tag_O)
                 CALL Get(NGLCT%Trix,'trixneglect',Tag_O=Tag_O)
@@ -1688,7 +1687,7 @@ CONTAINS
                 IMPLICIT NONE
                 INTEGER,EXTERNAL               :: IARGC
 #endif
-                TYPE(ARGMT),INTENT(OUT)        :: A
+                TYPE(ARGMT)                    :: A
                 CHARACTER(LEN=DEFAULT_CHR_LEN) :: Tmp1,Tmp2
                 INTEGER                        :: I,NArg,NChar,NInts
                 INTEGER,PARAMETER              :: MaxArg=10
@@ -1898,30 +1897,38 @@ CONTAINS
                         CALL HALT(' File '//TRIM(FileName)//' does not exist! ')
                 ENDIF
                 !-------------------------------------------------------------------------------
-                !        Open a new file
-
                 IF(PRESENT(NewFile_O))THEN
                    IF(NewFile_O.AND.Exists)THEN
-                      !              Open replace if already exists
+                      ! Open replace if already exists
                       OPEN(UNIT=Unit,FILE=FileName, &
                            ACCESS='SEQUENTIAL', FORM='FORMATTED', &
                            ERR=11,IOSTAT=IOS,STATUS='REPLACE')
-                   ELSE
-                      !              Open a new file
+                   ELSEIF(NewFile_O)THEN
+                      ! Open a new file
                       OPEN(UNIT=Unit,FILE=FileName, &
                            ACCESS='SEQUENTIAL',FORM='FORMATTED', &
                            ERR=11,IOSTAT=IOS,STATUS='NEW')         
+                   ELSEIF(Exists)THEN
+                      ! Open an old file (NewFile_O=.FALSE.)
+                      OPEN(UNIT=Unit,FILE=FileName, &
+                           ACCESS='SEQUENTIAL', FORM='FORMATTED', &
+                           POSITION='APPEND',ERR=11,IOSTAT=IOS,STATUS='OLD')
+                   ELSE
+                      CALL Halt(' Bad logic in OpenASCI' )
                    ENDIF
-                   !-------------------------------------------------------------------------------
-                   !        Open existing file and position at the top
-
                 ELSEIF(PRESENT(Rewind_O))THEN
+                   ! Open existing file and position at the top
                    IF(Rewind_O.AND.Exists)THEN
                       OPEN(UNIT=Unit,FILE=FileName, &
                            ACCESS='SEQUENTIAL', FORM='FORMATTED', &
                            POSITION='REWIND',ERR=11,IOSTAT=IOS,STATUS='OLD')
+                   ELSEIF(Rewind_O)THEN
+                   ! Just open a new file
+                      OPEN(UNIT=Unit,FILE=FileName, &
+                           ACCESS='SEQUENTIAL',FORM='FORMATTED', &
+                           ERR=11,IOSTAT=IOS,STATUS='NEW')         
                    ELSE
-                      CALL Halt(' Logic error 2 in OpenASCII ')
+                      CALL Halt(' Bad logic in OpenASCI' )
                    ENDIF
                    !-------------------------------------------------------------------------------
                    !        Open existing file and position at the bottom (default)
