@@ -95,37 +95,32 @@ WRITE(*,*)' INITed '
 !
   CASE(GRAD_NO_GRAD) !!!!! Energy only calculation
 !
-!    Loop first over basis sets 
-#ifdef MMech
-   If(MMOnly()) Then
-!    Ctrl%Current(2)=1
-     CALL MM_ENERG(Ctrl)
-   ELSE 
-     IF(HasMM()) THEN
-       IF(Ctrl%Current(2)==1) THEN
-         CALL MM_ENERG(Ctrl)
-       ELSE
-         CALL MM_COULOMBENERGY(Ctrl) !!!only the coulomb energy changes
-       ENDIF
-     ENDIF 
-   ENDIF
-#endif
 #ifdef MMech
    If(HasQM()) Then
 #endif
      DO ISet=1,Ctrl%NSet
         Ctrl%Current=(/0,ISet,1/)
+        IF(ISet==1.AND.HasMM()) CALL MM_ENERG(Ctrl)
         CALL OneSCF(Ctrl)
      ENDDO
      IF(Ctrl%NGeom>1)THEN
 !       Go over additional geometries at last basis set
         DO IGeo=2,Ctrl%NGeom
            Ctrl%Current=(/0,Ctrl%NSet,IGeo/)
+           IF(HasMM()) CALL MM_ENERG(Ctrl) !!! temporary; overwrites energy terms calcd at prev geoms
            CALL OneSCF(Ctrl)
         ENDDO
      ENDIF
 #ifdef MMech
    EndIf
+#endif
+!
+!    Loop first over basis sets 
+#ifdef MMech
+   If(MMOnly()) Then
+     Ctrl%Current(2)=1
+     CALL MM_ENERG(Ctrl)
+   ENDIF
 #endif
   END SELECT
 #if defined(PARALLEL) && defined(MPI2)
