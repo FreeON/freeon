@@ -1,3 +1,89 @@
+2003-03-11 10:12  mchalla
+
+	* MondoSCF2/: Optimizer.F90, SCFs.F90, h2.inp: Fixed convergence
+	bug, and added small exact exchange gradients example h2.inp
+
+2003-03-11 02:30  mchalla
+
+	* Includes/RemoveAll: Updated to cope with changes in compiler
+	dropings
+
+2003-03-11 02:30  mchalla
+
+	* MondoSCF2/: Optimizer.F90, ParsePeriodic.F90, SCFs.F90: Added
+	numical derivatives for exact HF exchange.  VS:
+	-------------------------------------------------------------------
+	---
+
+2003-03-08 12:38  mchalla
+
+	* BasisSets/3-21G.bas: Fixing accedentally modified file.
+
+2003-03-08 07:50  mchalla
+
+	* BasisSets/C_C98.bas: fixed formating error
+
+2003-03-08 07:19  mchalla
+
+	* BasisSets/C_C98.bas: This is a carbon 6-21G* basis set from Mike
+	Towlers page, optimized for diamond.
+
+2003-03-06 15:10  schwegle
+
+	* ONX/NONX/: HrrBra.F90, HrrKet.F90:	Includes new classes for
+	the gradient code
+
+2003-03-06 15:08  schwegle
+
+	* ONX/NONX/: ComputeKg.F90, ComputeXForce.F90, DisOrderGrad.F90,
+	GradONX.F90, HRR.tar, HrrKet.F90, Makefile: Added new integral
+	classes to support the onx gradient code.  This is the program used
+	to generate HrrBra.F90 and HrrKet.F90.
+
+2003-03-06 11:04  mchalla
+
+	* SCFeqs/DIIS.F90: Fixed extrapolation to use computed rather than
+	previously extrapolated Fock matrices.
+
+2003-03-06 10:02  mchalla
+
+	* BasisSets/: 3-21G.bas, MgO_C98.bas: Basis for MGO comparison with
+	C98
+
+2003-03-06 09:16  vweber
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: Added in an include line
+	for MPI.
+
+2003-03-05 12:20  mchalla
+
+	* MondoSCF2/: GeometryKeys.F90, PunchHDF.F90: Fixed missing ifdef
+	parallel in punchhdf.
+
+2003-03-04 17:12  ckgan
+
+	* HiCu/ParaHiCu.F90: LineLoc.dat information is now stored in the
+	HDF file.
+
+2003-03-04 17:11  ckgan
+
+	* MondoSCF2/: Optimizer.F90, PunchHDF.F90, SCFs.F90: Changes needed
+	to eliminate LineLoc.dat in ParaHiCu.F90.
+
+2003-03-03 16:34  schwegle
+
+	* ONX/GDrivers/Notes.txt: List of things to do to get gradients
+	working...
+
+2003-03-03 16:34  schwegle
+
+	* MondoMods/MemMan.F90: Small modication to the array types used in
+	the onx gradient code.
+
+2003-03-02 10:34  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-03-02 10:31  mchalla
 
 	* MondoMods/PrettyPrint.F90: fixed printing of CRDS in xyz.  PDB
