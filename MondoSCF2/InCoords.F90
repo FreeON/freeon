@@ -3372,7 +3372,7 @@ CONTAINS
        IF(GConstr%RatioABC(I)>Zero) THEN
          Vec(I)=Vec(IRef1)*GConstr%RatioABC(I)/GConstr%RatioABC(IRef1)
        ENDIF
-       IF(GConstr%RatioABC(3+I)>Zero) THEN
+       IF(GConstr%RatioAlpBetGam(I)>Zero) THEN
          Vec(3+I)=Vec(3+IRef2)*GConstr%RatioAlpBetGam(I)/GConstr%RatioAlpBetGam(IRef2)
        ENDIF
      ENDDO 
