@@ -21,7 +21,7 @@ PROGRAM TForce
   TYPE(BCSR)          :: P
 #endif
 #ifdef PERIODIC 
-  INTEGER             :: NC
+  INTEGER                   :: NC
   REAL(DOUBLE),DIMENSION(3) :: B
 #endif
   TYPE(AtomPair)      :: Pair
@@ -49,6 +49,7 @@ PROGRAM TForce
 ! Calculate the Number of Cells
 !
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
@@ -66,8 +67,8 @@ PROGRAM TForce
            MN1=MA*NB-1
 #ifdef PERIODIC
            B=Pair%B
-           DO NC=1,CS%NCells
-              Pair%B=B+CS%CellCarts%D(:,NC)
+           DO NC=1,CS_OUT%NCells
+              Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2

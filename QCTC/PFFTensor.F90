@@ -17,30 +17,24 @@ MODULE PFFT
 !====================================================================================
 ! Globals
 !====================================================================================
-  INTEGER                           :: Dimen
-  REAL(DOUBLE)                      :: Volume
+  TYPE(CellSet)                     :: CSMM
+  REAL(DOUBLE), DIMENSION(0:FFLen)  :: RhoC,RhoS
+  REAL(DOUBLE), DIMENSION(0:FFLen)  :: PFFBraC,PFFBraS,PFFKetC,PFFKetS,FarFS,FarFC
   REAL(DOUBLE), DIMENSION(0:FFLen2) :: TensorC,TensorS
   CONTAINS
 !========================================================================================
 ! Calculate the PFF
 !========================================================================================
-    SUBROUTINE PFFTensor(Rmin,MaxL_O)
-      INTEGER,OPTIONAL    :: MaxL_O
+    SUBROUTINE PFFTensor(MaxL,Rmin)
       INTEGER             :: MaxL
       LOGICAL             :: HaveTensor
       REAL(DOUBLE)        :: Rmin
-!   
-      IF(PRESENT(MaxL_O)) THEN
-         MaxL = MaxL_O
-      ELSE
-         MaxL = FFEll2
-      ENDIF
 !
       TensorC = Zero
       TensorS = Zero
-      IF(Dimen==0) RETURN
-      CALL GetTensor(MaxL,HaveTensor)
-      IF(.NOT. HaveTensor) THEN
+      IF(GM%PBC%Dimen==0) RETURN
+!
+      IF(.NOT. GetTensor(MaxL)) THEN
          CALL MakePFFT(MaxL,Rmin)
          CALL PutTensor(MaxL)
       ENDIF
@@ -49,26 +43,26 @@ MODULE PFFT
 !========================================================================================
 ! 
 !========================================================================================
-    SUBROUTINE GetTensor(MaxL,HaveTensor)
+    FUNCTION GetTensor(MaxL)
       INTEGER              :: MaxL,L,M,LM
-      LOGICAL              :: HaveTensor
+      LOGICAL              :: GetTensor
       CHARACTER(LEN=120)   :: FileName
       CHARACTER(LEN=1)     :: AWX,AWY,AWZ
 !
       AWX = '0'
       AWY = '0'
       AWZ = '0'
-      IF(GM%AutoW(1)) AWX = '1'
-      IF(GM%AutoW(2)) AWY = '1'      
-      IF(GM%AutoW(3)) AWZ = '1'
+      IF(GM%PBC%AutoW(1)) AWX = '1'
+      IF(GM%PBC%AutoW(2)) AWY = '1'      
+      IF(GM%PBC%AutoW(3)) AWZ = '1'
       FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
                 "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
-                "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
+                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
                 "_LM"   // TRIM(IntToChar(MaxL)) //                  &
                 ".PFFT"
 !
-      INQUIRE(FILE=FileName,EXIST=HaveTensor)
-      IF(HaveTensor) THEN
+      INQUIRE(FILE=FileName,EXIST=GetTensor)
+      IF(GetTensor) THEN
          OPEN(UNIT=77,FILE=FileName,FORM='UNFORMATTED',STATUS='OLD')
          DO L = 1,MaxL
             DO M = 0,L
@@ -79,7 +73,7 @@ MODULE PFFT
          CLOSE(77)
       ENDIF
 !
-    END SUBROUTINE GetTensor
+    END FUNCTION GetTensor
 !========================================================================================
 ! 
 !========================================================================================
@@ -91,12 +85,12 @@ MODULE PFFT
       AWX = '0'
       AWY = '0'
       AWZ = '0'
-      IF(GM%AutoW(1)) AWX = '1'
-      IF(GM%AutoW(2)) AWY = '1'      
-      IF(GM%AutoW(3)) AWZ = '1'
+      IF(GM%PBC%AutoW(1)) AWX = '1'
+      IF(GM%PBC%AutoW(2)) AWY = '1'      
+      IF(GM%PBC%AutoW(3)) AWZ = '1'
       FileName= TRIM(MONDO_SCRATCH) // TRIM(Args%C%C(1)) // "_Geom#" // TRIM(CurGeom) //    &
                 "_AW"   // TRIM(AWX) // TRIM(AWY) // TRIM(AWZ) //    &
-                "_NC"   // TRIM(IntToChar(CSMM1%NCells))   //        &    
+                "_NC"   // TRIM(IntToChar(CS_IN%NCells))   //        &    
                 "_LM"   // TRIM(IntToChar(MaxL)) //                  &
                 ".PFFT"
 !
@@ -121,24 +115,21 @@ MODULE PFFT
       REAL(DOUBLE)                      :: CFac,SFac,BetaSq,Rad,RadSq,ExpFac
       REAL(DOUBLE)                      :: Rmin,RMAX,Accuracy,LenScale
 !
-!     Initialize and Zero dimension
+!     Initialize 
 !
-      TensorC = Zero
-      TensorS = Zero
       Accuracy = 1.D-16
-      IF(Dimen==0) RETURN
 !
 !     One Dimension
 !
-      IF(Dimen==1) THEN
-         IF(GM%AutoW(1)) THEN
-            CALL IrRegular(MaxL,GM%BoxShape%D(1,1),Zero,Zero)
-         ELSEIF(GM%AutoW(2)) THEN
-            CALL IrRegular(MaxL,Zero,GM%BoxShape%D(2,2),Zero)
-         ELSEIF(GM%AutoW(3)) THEN      
-            CALL IrRegular(MaxL,Zero,Zero,GM%BoxShape%D(3,3))
+      IF(GM%PBC%Dimen==1) THEN
+         IF(GM%PBC%AutoW(1)) THEN
+            CALL IrRegular(MaxL,GM%PBC%BoxShape(1,1),Zero,Zero)
+         ELSEIF(GM%PBC%AutoW(2)) THEN
+            CALL IrRegular(MaxL,Zero,GM%PBC%BoxShape(2,2),Zero)
+         ELSEIF(GM%PBC%AutoW(3)) THEN      
+            CALL IrRegular(MaxL,Zero,Zero,GM%PBC%BoxShape(3,3))
          ENDIF
-         NC = (CSMM1%NCells-1)/2
+         NC = (CS_IN%NCells-1)/2
          DO L=1,MaxL
             DO M = 0,L
                LM = LTD(L)
@@ -149,26 +140,26 @@ MODULE PFFT
 !
 !     Two and Three Dimension
 !
-      IF(Dimen == 2 .OR. Dimen == 3) THEN
+      IF(GM%PBC%Dimen == 2 .OR. GM%PBC%Dimen == 3) THEN
          LSwitch  = 10
-         LenScale = Volume**(One/DBLE(Dimen))
+         LenScale = GM%PBC%CellVolume**(One/DBLE(GM%PBC%Dimen))
          BetaSq   = (0.5D0/LenScale)**2
          Rmax = Rmin+LenScale*(One/Accuracy)**(One/DBLE(LSwitch))
 !           
 !        Sum the Real Space
 !
          DO
-            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%BoxShape%D,Rmax,Rmin)
-            IF(CSMM2%NCells .GT. 400000) THEN
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,GM%PBC%BoxShape,Rmax,Rmin)
+            IF(CSMM%NCells .GT. 400000) THEN
                Rmax = 0.99*Rmax
-               CALL Delete_CellSet(CSMM2)
+               CALL Delete_CellSet(CSMM)
             ELSE
                EXIT
             ENDIF
          ENDDO
 !
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
+         DO NC = 1,CSMM%NCells
+            PQ(:) = CSMM%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
             CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
             DO L = 1,MaxL
@@ -184,7 +175,7 @@ MODULE PFFT
                ENDDO
             ENDDO
          ENDDO
-         CALL Delete_CellSet(CSMM2)
+         CALL Delete_CellSet(CSMM)
 
 !
 !        Sum the Reciprical Space 
@@ -192,23 +183,23 @@ MODULE PFFT
          ExpFac = (Pi/BetaSq)**2
          Rmax = SQRT(ABS(LOG(Accuracy/(10.D0**(LSwitch)))/ExpFac))
          DO
-            CALL New_CellSet_Sphere(CSMM2,GM%AutoW,GM%InvBoxSh%D,Rmax)
-            IF(CSMM2%NCells .LT. 27) THEN
+            CALL New_CellSet_Sphere(CSMM,GM%PBC%AutoW,GM%PBC%InvBoxSh,Rmax)
+            IF(CSMM%NCells .LT. 27) THEN
                Rmax = 1.01D0*Rmax
             ELSE
                EXIT
             ENDIF
          ENDDO
 !
-         DO NC = 1,CSMM2%NCells
-            PQ(:) = CSMM2%CellCarts%D(:,NC)
+         DO NC = 1,CSMM%NCells
+            PQ(:) = CSMM%CellCarts%D(:,NC)
             Rad   = SQRT(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
             IF(Rad .GT. 1.D-14) THEN
                CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
                DO L = 1,MaxL
                   IF(L .LE. LSwitch) THEN        
-                     CFac = FT_FScriptC(L,ExpFac,Rad)/Volume
-                     SFac = FT_FScriptS(L,ExpFac,Rad)/Volume
+                     CFac = FT_FScriptC(L,ExpFac,Rad)/GM%PBC%CellVolume
+                     SFac = FT_FScriptS(L,ExpFac,Rad)/GM%PBC%CellVolume
                   ELSE
                      CFac = Zero
                      SFac = Zero
@@ -221,12 +212,12 @@ MODULE PFFT
                ENDDO
             ENDIF
          ENDDO
-         CALL Delete_CellSet(CSMM2)
+         CALL Delete_CellSet(CSMM)
 !
 !        Substract the inner boxes
 !
-         DO NC = 1,CSMM1%NCells
-            PQ(:) = CSMM1%CellCarts%D(:,NC)
+         DO NC = 1,CS_IN%NCells
+            PQ(:) = CS_IN%CellCarts%D(:,NC)
             RadSq = BetaSq*(PQ(1)*PQ(1)+PQ(2)*PQ(2)+PQ(3)*PQ(3))
             IF(RadSq .GT. 1.D-14) THEN
                CALL IrRegular(MaxL,PQ(1),PQ(2),PQ(3))
@@ -244,7 +235,7 @@ MODULE PFFT
                ENDDO
             ENDIF
          ENDDO
-         CALL Delete_CellSet(CSMM2)
+         CALL Delete_CellSet(CSMM)
       ENDIF
 !
 !     Filter out the Zero Elements

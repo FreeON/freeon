@@ -13,31 +13,35 @@ MODULE RhoUtil
    USE HiCuThresholds
    USE CubeTree
 !  Global variables
-   INTEGER  :: NP
-   REAL(DOUBLE),DIMENSION(3)  :: R
-   REAL(DOUBLE) :: AA=One/AngstromsToAU
+   INTEGER                         :: NP
+   REAL(DOUBLE),DIMENSION(3)       :: R
+   REAL(DOUBLE)                    :: AA=One/AngstromsToAU
    CONTAINS
+
       SUBROUTINE RhoCubed(Arg,Del,Origin,Nx,Ny,Nz)
-        INTEGER                    :: I,J,K,Nx,Ny,Nz,NC
+        INTEGER                    :: I,J,K,Nx,Ny,Nz
         REAL(DOUBLE),DIMENSION(3)  :: Origin
         REAL(DOUBLE)               :: Del,Den
         TYPE(ARGMT)                :: Arg
-!---------------------------------------------------------------------------
-!       Get the geometry
-        CALL Get(GM,Tag_O=CurGeom)
-        CALL PPrint(GM,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
 #ifdef PERIODIC
-!        Calculate the Number of Cells
-         CALL SetCellNumber(GM)
+        INTEGER                    :: NC
 #endif
-!       SET DENSITY THRESHOLDS (LOOSE)
-        Del=3.D-1
-        TauRho=1.D-3
-!       BUILD RHO-TREE
-        CALL RhoToTree(Arg)
-        CALL SetBBox(RhoRoot%Box,Box)
+!---------------------------------------------------------------------------
+!     Get the geometry
+       CALL Get(GM,Tag_O=CurGeom)
+       CALL PPrint(GM,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
 #ifdef PERIODIC
-        CALL MakeBoxPeriodic(Box)
+!      Calculate the Number of Cells
+       CALL SetCellNumber(GM)
+#endif
+!      SET DENSITY THRESHOLDS (LOOSE)
+       Del=3.D-1
+       TauRho=1.D-3
+!      BUILD RHO-TREE
+       CALL RhoToTree(Arg)
+       CALL SetBBox(RhoRoot%Box,Box)
+#ifdef PERIODIC
+       CALL MakeBoxPeriodic(Box)
 #endif
 !       DETERMINE CUBE GRID (SMART, UNSTRUCTURED GRIDS DONT WORK WITH DX) 
         Origin=Box%BndBox(:,1)
@@ -52,16 +56,16 @@ MODULE RhoUtil
               DO K=1,Nz
 #ifdef PERIODIC
                   Den=Zero
-                  DO NC=1,CS%NCells
+                  DO NC=1,CS_OUT%NCells
 !                    Set Atomic Coordinates
-                     R=(/I,J,K/)*Del+Origin+CS%CellCarts%D(:,NC)
+                     R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
                      Den=Den+RhoAtPoint(RhoRoot)
                   ENDDO
 #else
                   R=(/I,J,K/)*Del+Origin
                   Den=RhoAtPoint(RhoRoot)
 #endif
-                 WRITE(66,7)Den
+                 WRITE(66,7) Den
                7 FORMAT(8(2x,F12.8)) 
              ENDDO
           ENDDO
@@ -140,7 +144,9 @@ MODULE RhoUtil
          ENDIF 
       END FUNCTION RhoAtPoint
 END MODULE 
-
+!=================================================================================
+!     
+!=================================================================================
 MODULE PotUtil
    USE DerivedTypes
    USE GlobalScalars
@@ -164,10 +170,10 @@ MODULE PotUtil
          USE PBCFarField
          USE PFFT
 #endif
-         TYPE(ARGMT)                :: Arg
-         INTEGER                    :: I,J,K,Nx,Ny,Nz
-         REAL(DOUBLE),DIMENSION(3)  :: Origin
-         REAL(DOUBLE)               :: Del
+         TYPE(ARGMT)                     :: Arg
+         INTEGER                         :: I,J,K,Nx,Ny,Nz
+         REAL(DOUBLE),DIMENSION(3)       :: Origin
+         REAL(DOUBLE)                    :: Del
          REAL(DOUBLE)                    :: NukE,NukeCo,NukePole,PExtent
          REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
          REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
@@ -193,7 +199,7 @@ MODULE PotUtil
 !        Calculate the Number of Cells
          CALL SetCellNumber(GM)
 !        Set the electrostatic background 
-         CALL PBCFarFieldSetUp(FFEll,PoleRoot)
+         CALL PBCFarFieldSetUp(PoleRoot)
 #endif
 !        Delete the auxiliary density arrays
          CALL DeleteRhoAux
@@ -221,9 +227,9 @@ MODULE PotUtil
                   CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
                   PTmp=Prim%P
-                  DO NC=1,CSMM1%NCells
+                  DO NC=1,CS_IN%NCells
 !                    Set Atomic Coordinates
-                     Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+                     Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
                      PBox%Center=Prim%P
 !                    Walk the walk
                      CALL VWalk(PoleRoot)
@@ -233,7 +239,7 @@ MODULE PotUtil
 !                 Accumulate the atomic contribution
                   NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
 !                 Add in the Far Field, Dipole and Quadripole  Correction
-                  IF(Dimen>0) THEN
+                  IF(GM%PBC%Dimen>0) THEN
                      NukE=NukE+CTraxFF(Prim,HGBra)
                   ENDIF
 #else
@@ -265,8 +271,9 @@ MODULE PotUtil
          CALL Delete(GM)
       END SUBROUTINE PotCubed     
 END MODULE 
-
-
+!=================================================================================
+!  
+!=================================================================================
 PROGRAM VisDX
   USE DerivedTypes
   USE GlobalScalars
@@ -278,11 +285,11 @@ PROGRAM VisDX
   USE Macros
   USE Globals  
   USE RhoUtil
-  USE PotUtil
-  REAL(DOUBLE) :: Del1
-  REAL(DOUBLE),DIMENSION(3) :: Origin1
+  USE PotUtil 
+  REAL(DOUBLE)                :: Del1
+  REAL(DOUBLE),DIMENSION(3)   :: Origin1
   INTEGER :: Nx1,Ny1,Nz1
-  CHARACTER(LEN=5),PARAMETER :: Prog='VisDX'
+  CHARACTER(LEN=5),PARAMETER  :: Prog='VisDX'
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)

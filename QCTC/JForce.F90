@@ -43,6 +43,8 @@ PROGRAM JForce
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+! Get Dipole and Quadripole
+  CALL Get(RhoPoles,'RhoPoles',Args,0)
 ! Allocations 
   CALL New(JFrc,3*NAtoms)
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
@@ -60,8 +62,9 @@ PROGRAM JForce
 #ifdef PERIODIC
 ! Calculate the Number of Cells
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(FFEll,PoleRoot)
+  CALL PBCFarFieldSetUp(PoleRoot)
 #endif
 ! Delete the auxiliary density arrays
   CALL DeleteRhoAux
@@ -84,8 +87,8 @@ PROGRAM JForce
            MN1=MA*NB-1
 #ifdef PERIODIC
            B=Pair%B
-           DO NC=1,CS%NCells
-              Pair%B=B+CS%CellCarts%D(:,NC)
+           DO NC=1,CS_OUT%NCells
+              Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
                       +(Pair%A(2)-Pair%B(2))**2 &
                       +(Pair%A(3)-Pair%B(3))**2
@@ -118,6 +121,7 @@ PROGRAM JForce
   CALL Delete(Frc)
   CALL Delete(JFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
+  CALL Delete(RhoPoles)
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 

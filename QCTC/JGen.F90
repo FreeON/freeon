@@ -30,10 +30,10 @@ MODULE JGen
       TYPE(AtomPair)         :: Pair
       INTEGER                :: AtA,AtB
       INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
-#ifdef PERIODIC        
-      INTEGER                :: NC
-      REAL(DOUBLE)           :: Bx,By,Bz,MaxValue
-#endif     
+#ifdef PERIODIC 
+  INTEGER                   :: NC
+  REAL(DOUBLE),DIMENSION(3) :: B
+#endif    
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
       P=1
@@ -49,14 +49,10 @@ MODULE JGen
                IF(AtB<=AtA)THEN              
 !              Compute only the lower triangle of symmetric J
 #ifdef PERIODIC
-                  Bx = Pair%B(1)
-                  By = Pair%B(2)           
-                  Bz = Pair%B(3)
-                  DO NC=1,CS%NCells
-                     Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-                     Pair%B(2) = By+CS%CellCarts%D(2,NC)
-                     Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
-                     Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+                  B = Pair%B
+                  DO NC=1,CS_OUT%NCells
+                     Pair%B   = B+CS_OUT%CellCarts%D(:,NC)
+                     Pair%AB2 = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
                      IF(TestAtomPair(Pair)) THEN
                         J%MTrix%D(R:R+NAB-1)=J%MTrix%D(R:R+NAB-1)+Two*JBlock(Pair,PoleRoot)
                      ENDIF
@@ -206,8 +202,8 @@ MODULE JGen
 !                         CALL AtomCyclic(GM,Prim%P)
                          PTmp=Prim%P
 !                        Sum over cells
-                         DO NC=1,CSMM1%NCells
-                            Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+                         DO NC=1,CS_IN%NCells
+                            Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
                             PBox%Center=Prim%P
 !                           Walk the walk
                             CALL JWalk(PoleRoot)
@@ -242,7 +238,7 @@ MODULE JGen
 #ifdef PERIODIC
 !                       Calculate the FarField Multipole Contribution to the Matrix Element
 !                       Contract the Primative MM  with the density MM
-                        IF(Dimen > 0) THEN
+                        IF(GM%PBC%Dimen > 0) THEN
                            IA = IndexA
                            DO LMNA=StartLA,StopLA
                               IA=IA+1

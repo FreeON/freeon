@@ -59,6 +59,7 @@ PROGRAM SForce
 !-----------------------------------------------
 ! Calculate the number of Cells
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
@@ -78,8 +79,8 @@ PROGRAM SForce
            MN1=MA*NB-1
 #ifdef PERIODIC
            B=Pair%B
-           DO NC=1,CS%NCells
-              Pair%B=B+CS%CellCarts%D(:,NC)
+           DO NC=1,CS_OUT%NCells
+              Pair%B=B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2=(Pair%A(1)-Pair%B(1))**2  &
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2

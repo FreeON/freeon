@@ -44,12 +44,13 @@ MODULE NuklarE
 !         Set the PAC
           PExtent=Extent(0,NuclearExpnt,HGBra,TauPAC)
 !         Initialize <KET|
+
           CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
           PTmp=GM%Carts%D(:,At)
-          DO NC=1,CSMM1%NCells
+          DO NC=1,CS_IN%NCells
 !            Set Atomic Coordinates
-             Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+             Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
              PBox%Center= Prim%P
 !            Walk the walk
              CALL VWalk(PoleRoot)
@@ -59,7 +60,7 @@ MODULE NuklarE
 !         Accumulate the atomic contribution
           NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0)
 !         Add in the Far Field, Dipole and Quadripole  Correction
-          IF(Dimen > 0) THEN
+          IF(GM%PBC%Dimen > 0) THEN
              NukE = NukE + CTraxFF(Prim,HGBra)
           ENDIF
 #else
@@ -69,6 +70,7 @@ MODULE NuklarE
           NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0) 
 #endif
        ENDDO
+!
      END FUNCTION NukE
 !
 END MODULE

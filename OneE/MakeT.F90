@@ -23,9 +23,8 @@ PROGRAM MakeT
   TYPE(BCSR)          :: T,T2
 #endif
 #ifdef PERIODIC 
-  LOGICAL             :: NotMakeBlock
-  INTEGER             :: NC
-  REAL(DOUBLE)        :: Bx,By,Bz
+  INTEGER                   :: NC
+  REAL(DOUBLE),DIMENSION(3) :: B
 #endif
   TYPE(AtomPair)      :: Pair
 !
@@ -55,6 +54,7 @@ PROGRAM MakeT
 ! Calculate the Number of Cells
 !
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
@@ -76,20 +76,14 @@ PROGRAM MakeT
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
            NN = Pair%NA*Pair%NB
 #ifdef PERIODIC
-           Bx = Pair%B(1)
-           By = Pair%B(2)           
-           Bz = Pair%B(3)
-           NotMakeBlock = .TRUE.
-           DO NC = 1,CS%NCells
-              Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-              Pair%B(2) = By+CS%CellCarts%D(2,NC)
-              Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+           B = Pair%B
+           DO NC = 1,CS_OUT%NCells
+              Pair%B = B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                         + (Pair%A(2)-Pair%B(2))**2 &
                         + (Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
                  T%MTrix%D(R:R+NN-1)=T%MTrix%D(R:R+NN-1)+TBlok(BS,MD,Pair)
-                 NotMakeBlock = .FALSE.
               ENDIF
            ENDDO
 #else
@@ -110,10 +104,6 @@ PROGRAM MakeT
            T%RowPt%I(AtA+1)=P        
            IF(R>MaxNon0.OR.P>MaxBlks) &
                 CALL Halt(' BCSR dimensions blown in MakeT ')
-#endif
-#ifdef PERIODIC
-           IF(NotMakeBlock) &
-                CALL Halt(' Making a Zero Block in MakeT ')
 #endif
         ENDIF
      ENDDO

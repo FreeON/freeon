@@ -133,8 +133,8 @@ MODULE BlokTrPdJ
                    CALL AtomCyclic(GM,Prim%P)
                    PTmp=Prim%P
 !                  Sum over cells
-                   DO NC=1,CSMM1%NCells
-                      Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+                   DO NC=1,CS_IN%NCells
+                      Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
                       PBox%Center=Prim%P
 !                     Walk the walk
                       CALL JWalk(PoleRoot)
@@ -170,7 +170,7 @@ MODULE BlokTrPdJ
 #ifdef PERIODIC
 !                  Calculate the FarField Multipole Contribution to the Matrix Element 
 !                  Contract the Primative MM  with the density MM
-                   IF(Dimen > 0) THEN
+                   IF(GM%PBC%Dimen > 0) THEN
                       IA=IndexA
                       DO LMNA=StartLA,StopLA
                          IA=IA+1                    
@@ -238,9 +238,9 @@ MODULE BlokTrPdJ
        HGLenEll=LHGTF(1)
 #ifdef PERIODIC
        PTmp=GM%Carts%D(:,At)
-       DO NC=1,CSMM1%NCells
+       DO NC=1,CS_IN%NCells
 !         Set atomic "primitive"
-          Prim%P=PTmp+CSMM1%CellCarts%D(:,NC)
+          Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
 !         Walk the walk
           CALL VWalk(PoleRoot)
        ENDDO
@@ -258,7 +258,7 @@ MODULE BlokTrPdJ
           ENDDO
        ENDDO
 !      Add in the Far Field, Dipole and Quadripole Correction
-       IF(Dimen>0) THEN
+       IF(GM%PBC%Dimen>0) THEN
           DO K=1,3
              Vct(K)=Vct(K)+CTraxFF(Prim,dHGBra%D(:,1,1,K))
           ENDDO

@@ -23,13 +23,10 @@ PROGRAM MakeS
 #else
   TYPE(BCSR)          :: S,T1
 #endif
-
 #ifdef PERIODIC 
-  LOGICAL             :: NotMakeBlock
-  INTEGER             :: NC
-  REAL(DOUBLE)        :: Bx,By,Bz
+  INTEGER                   :: NC
+  REAL(DOUBLE),DIMENSION(3) :: B
 #endif
-
   TYPE(AtomPair)      :: Pair
 !
   TYPE(BSET)          :: BS
@@ -58,6 +55,7 @@ PROGRAM MakeS
 ! Calculate the Number of Cells
 !
   CALL SetCellNumber(GM)
+  CALL PPrint(CS_OUT,'CS_OUT',Prog)
 #endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
@@ -75,26 +73,18 @@ PROGRAM MakeS
   S%NAtms=NAtoms
   DO AtA=1,NAtoms
 #endif
-
-
      DO AtB=1,NAtoms
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
            NN = Pair%NA*Pair%NB
 #ifdef PERIODIC
-           Bx = Pair%B(1)
-           By = Pair%B(2)           
-           Bz = Pair%B(3)
-           NotMakeBlock = .TRUE.
-           DO NC = 1,CS%NCells
-              Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-              Pair%B(2) = By+CS%CellCarts%D(2,NC)
-              Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+           B = Pair%B
+           DO NC = 1,CS_OUT%NCells
+              Pair%B = B+CS_OUT%CellCarts%D(:,NC)
               Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
                         + (Pair%A(2)-Pair%B(2))**2 &
                         + (Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
                  S%MTrix%D(R:R+NN-1)=S%MTrix%D(R:R+NN-1)+SBlok(BS,Pair)
-                 NotMakeBlock = .FALSE.
               ENDIF
            ENDDO
 #else
@@ -116,10 +106,6 @@ PROGRAM MakeS
            S%RowPt%I(AtA+1)=P        
            IF(R>MaxNon0.OR.P>MaxBlks) &
                 CALL Halt(' BCSR dimensions blown in MakeS ')
-#endif
-#ifdef PERIODIC
-           IF(NotMakeBlock) &
-                CALL Halt(' Making a Zero Block in MakeS ')
 #endif
         ENDIF
      ENDDO
