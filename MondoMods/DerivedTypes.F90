@@ -540,15 +540,95 @@ MODULE DerivedTypes
 #endif
 !
    TYPE Cholesky
-      INTEGER        :: Alloc     !-- Allocation key
-      TYPE(DBL_VECT) :: GcScale
-      TYPE(INT_VECT) :: Perm
-      TYPE(INT_VECT) :: IPerm
-      TYPE(INT_VECT) :: ChRowPt
-      TYPE(INT_VECT) :: ChColPt
-      TYPE(DBL_VECT) :: ChDiag
-      TYPE(DBL_VECT) :: ChFact
+     INTEGER        :: Alloc     !-- Allocation key
+     TYPE(DBL_VECT) :: GcScale
+     TYPE(INT_VECT) :: Perm
+     TYPE(INT_VECT) :: IPerm
+     TYPE(INT_VECT) :: ChRowPt
+     TYPE(INT_VECT) :: ChColPt
+     TYPE(DBL_VECT) :: ChDiag
+     TYPE(DBL_VECT) :: ChFact
    END TYPE
+!
+!----------------------------------------------------------------------
+!
+   TYPE BONDDATA
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N
+     TYPE(INT_RNK2) :: IJ
+     TYPE(DBL_VECT) :: Length
+     TYPE(CHR_VECT) :: Type
+     TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
+     TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
+     TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
+   END TYPE BONDDATA
+!
+!----------------------------------------------------------------------
+!
+   TYPE ATOMBONDS
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N1
+     INTEGER        :: N2
+     TYPE(INT_VECT) :: Count
+     TYPE(INT_RNK2) :: Bonds
+     TYPE(INT_RNK2) :: Atoms 
+   END TYPE ATOMBONDS
+!
+!----------------------------------------------------------------------
+!
+   TYPE Sp1x1
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: NRow
+     INTEGER        :: NZ
+     TYPE(INT_VECT) :: IA 
+     TYPE(INT_VECT) :: JA 
+     TYPE(DBL_VECT) :: AN 
+   END TYPE Sp1x1
+!
+!----------------------------------------------------------------------
+!
+   TYPE TOPOLOGY
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov
+     INTEGER        :: N12Tot,N13Tot,N14Tot,NExTot
+     TYPE(INT_RNK2) :: Cov12 
+     TYPE(INT_RNK2) :: Cov13 
+     TYPE(INT_RNK2) :: Cov14 
+     TYPE(INT_RNK2) :: CovExcl
+     TYPE(INT_RNK2) :: Tot12 
+     TYPE(INT_RNK2) :: Tot13 
+     TYPE(INT_RNK2) :: Tot14 
+     TYPE(INT_RNK2) :: TotExcl
+   END TYPE TOPOLOGY
+!
+!----------------------------------------------------------------------
+!
+   TYPE IntCBox
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N,NX,NY,NZ,NatmsLoc
+     TYPE(INT_VECT) :: I
+     TYPE(INT_VECT) :: J
+   END TYPE IntCBox
+!
+!----------------------------------------------------------------------
+!
+   TYPE OUTPDATA
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N
+     TYPE(INT_RNK2) :: IJKL
+     TYPE(CHR_VECT) :: Type 
+   END TYPE OUTPDATA
+!
+!----------------------------------------------------------------------
+!
+   TYPE ANGLEDATA
+     INTEGER        :: Alloc     !-- Allocation key
+     INTEGER        :: N
+     TYPE(INT_RNK2) :: IJK
+     TYPE(CHR_VECT) :: Type 
+   END TYPE ANGLEDATA
+!
+!----------------------------------------------------------------------
 !
 END MODULE
 

@@ -329,6 +329,52 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
+   SUBROUTINE TopToSp1x1(Top,IA,JA)
+     INTEGER,DIMENSION(:,:)      :: Top     
+     TYPE(INT_VECT)              :: IA,JA
+     INTEGER                     :: I,J,Dim1,NZ
+     !
+     Dim1=SIZE(Top,1)
+     CALL New(IA,Dim1+1)
+     IA%I(1)=1
+     NZ=0
+     DO I=1,Dim1 
+       NZ=NZ+Top(I,1) 
+       IA%I(I+1)=IA%I(I)+Top(I,1)
+     ENDDO
+     CALL New(JA,NZ)
+     NZ=0
+     DO I=1,Dim1 
+       DO J=1,Top(I,1)
+         NZ=NZ+1
+         JA%I(NZ)=Top(I,J+1)
+       ENDDO
+     ENDDO
+   END SUBROUTINE TopToSp1x1
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE Sp1x1ToTop(Top,IA,JA)
+     TYPE(INT_RNK2)  :: Top
+     TYPE(INT_VECT)  :: IA,JA 
+     INTEGER         :: Dim1,NZ,Max2,I,J
+     !
+     Dim1=SIZE(IA%I)-1 
+     Max2=0
+     DO I=1,Dim1 ; Max2=MAX(Max2,IA%I(I+1)-IA%I(I)) ; ENDDO
+     CALL New(Top,(/Dim1,Max2+1/))
+     Top%I=0
+     DO I=1,Dim1
+       Top%I(I,1)=IA%I(I+1)-IA%I(I) 
+       NZ=IA%I(I)
+       DO J=1,Top%I(I,1)
+         Top%I(I,J+1)=JA%I(NZ+J-1)
+       ENDDO
+     ENDDO
+   END SUBROUTINE Sp1x1ToTop
+!
+!---------------------------------------------------------------------
+!
    SUBROUTINE FillInto1x1(Gc,GcSRowPt,GcSColPt,GcSDiag,GcSMTrix, &
        GcSNon0,NCart,Char)
      TYPE(BCSR) :: Gc 
@@ -1798,13 +1844,14 @@ CONTAINS
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE AddMat_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,N,M)
+   SUBROUTINE AddMat_1x1(IA,JA,AN,IB,JB,BN,IC,JC,CN,N,M,SymbOnly_O)
      ! addition of two NxM matrices
      INTEGER,DIMENSION(:)      :: IA,JA,IB,JB
      REAL(DOUBLE),DIMENSION(:) :: AN,BN
      INTEGER                   :: I,J,K,L,N,M,NZC
      TYPE(INT_VECT)            :: IC,JC,JC1
      TYPE(DBL_VECT)            :: CN
+     LOGICAL,OPTIONAL          :: SymbOnly_O
      !
      CALL New(IC,N+1)
      NZC=IA(N+1)-1 + IB(N+1)-1
@@ -1816,8 +1863,12 @@ CONTAINS
      CALL New(JC,NZC)
      JC%I(1:NZC)=JC1%I(1:NZC)
      CALL Delete(JC1)
-     CALL New(CN,NZC)
      !
+     IF(PRESENT(SymbOnly_O)) THEN
+       IF(SymbOnly_O) RETURN
+     ENDIF
+     !
+     CALL New(CN,NZC)
      CALL AddNum(iA,jA,AN,iB,jB,BN,N,M,iC%I,jC%I,CN%D)
    END SUBROUTINE AddMat_1x1
 !

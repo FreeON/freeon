@@ -12,13 +12,12 @@ MODULE SetXYZ
                        Set_BCSR_EQ_BCSR,          &
                        Set_RNK2_EQ_BCSR,          &
                        Set_BCSR_EQ_RNK2,          &
-#ifdef MMech
                        Set_BCSR_EQ_BMATR,         &
                        Set_DBL_VECT_EQ_BCSRColVect,&
                        Set_INTC_EQ_INTC,          &
                        Set_BMATR_EQ_BMATR,          &
                        Set_Chol_EQ_Chol,          &
-#endif
+                       Set_BONDDATA_EQ_BONDDATA,  &
 #ifdef PARALLEL
                        Set_DBCSR_EQ_BCSR,         &
                        Set_BCSR_EQ_DBCSR,         &
@@ -804,6 +803,43 @@ MODULE SetXYZ
       END SUBROUTINE Set_DBL_VECT_EQ_DBL_SCLR
 !
 !===============================================================
+!
+      SUBROUTINE Set_BONDDATA_EQ_BONDDATA(A,B,NewDim_O,OldDim_O)
+        TYPE(BONDDATA)          :: A,B
+        INTEGER,OPTIONAL        :: NewDim_O,OldDim_O
+        INTEGER                 :: I,NewDim,OldDim
+        !
+        OldDim=SIZE(B%Length%D)
+        NewDim=OldDim
+        IF(PRESENT(NewDim_O)) NewDim=NewDim_O 
+        IF(PRESENT(OldDim_O)) OldDim=OldDim_O 
+        IF(.NOT.AllocQ(A%Alloc)) THEN
+          CALL New(A,NewDim)
+        ELSE
+          CALL Delete(A)
+          CALL New(A,NewDim)
+        ENDIF
+        A%N=NewDim      
+        DO I=1,OldDim
+          CALL Set_Bond_EQ_Bond(A,I,B,I)
+        ENDDO
+      END SUBROUTINE Set_BONDDATA_EQ_BONDDATA
+!
+!---------------------------------------------------------------
+!
+      SUBROUTINE Set_Bond_EQ_Bond(A,IA,B,IB)
+        TYPE(BONDDATA) :: A,B
+        INTEGER        :: IA,IB
+        !
+        A%IJ%I(1:2,IA)=B%IJ%I(1:2,IB)
+        A%Length%D(IA)=B%Length%D(IB)      
+        A%Type%C(IA)=B%Type%C(IB)      
+        A%HBExtraSN%I(IA)=B%HBExtraSN%I(IB)      
+        A%HBExtraNC%I(IA)=B%HBExtraNC%I(IB)      
+        A%LonelyAtom%I(IA)=B%LonelyAtom%I(IB)      
+      END SUBROUTINE Set_Bond_EQ_Bond
+!
+!---------------------------------------------------------------
 !
       SUBROUTINE  Set_BMATR_EQ_BMATR(A,B)
         TYPE(BMATR) :: A,B

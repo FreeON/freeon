@@ -10,13 +10,16 @@ MODULE MemMan
                        New_INT_RNK3, New_INT_RNK4, &
                        New_DBL_VECT, New_DBL_RNK2, &
                        New_DBL_RNK3, New_DBL_RNK4, &
-                       New_DBL_RNK6, New_CHR_VECT,&
+                       New_DBL_RNK6, New_CHR_VECT, &
                        New_PBCInfo,  New_CRDS,     &
 #ifdef PARALLEL 
                        New_DBCSR,    New_MPI_INDX, &
 #endif    
-                       New_INTC,     New_BMATR, &
-                       New_Chol, &
+                       New_INTC,     New_BMATR,    &
+                       New_Chol,     New_BONDDATA, &
+                       New_ATOMBONDS,New_TOPOLOGY, &
+                       New_IntCBox,  New_ANGLEDATA,&
+                       New_OUTPDATA, New_Sp1x1,    &
                        New_BCSR,     New_BSET,     &
                        New_ARGMT,    New_HGRho,    &
                        New_DBuf,     New_IBuf,     &
@@ -35,8 +38,11 @@ MODULE MemMan
 #ifdef PARALLEL 
                        Delete_DBCSR,    Delete_MPI_INDX, &
 #endif    
-                       Delete_INTC,     Delete_BMATR, &
-                       Delete_Chol, & 
+                       Delete_INTC,     Delete_BMATR,    &
+                       Delete_Chol,     Delete_BONDDATA, & 
+                       Delete_ATOMBONDS,Delete_TOPOLOGY, &
+                       Delete_IntCBox,  Delete_ANGLEDATA,&
+                       Delete_OUTPDATA, Delete_Sp1x1,    &
                        Delete_BCSR,     Delete_BSET,     &
                        Delete_ARGMT,    Delete_HGRho,    &
                        Delete_DBuf,     Delete_IBuf,     &
@@ -277,6 +283,196 @@ MODULE MemMan
 !
 !-----------------------------------------------------
 !
+      SUBROUTINE New_ANGLEDATA(A,N)
+        TYPE(ANGLEDATA) :: A
+        INTEGER         :: N
+        A%N=N
+        CALL New(A%IJK,(/3,N/))
+        CALL New(A%Type,N)
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_ANGLEDATA
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_ANGLEDATA(A)
+        TYPE(ANGLEDATA) :: A
+        CALL Delete(A%IJK)
+        CALL Delete(A%Type)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_ANGLEDATA
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_OUTPDATA(A,N)
+        TYPE(OUTPDATA) :: A
+        INTEGER         :: N
+        A%N=N
+        CALL New(A%IJKL,(/4,N/))
+        CALL New(A%Type,N)
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_OUTPDATA
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_OUTPDATA(A)
+        TYPE(OUTPDATA) :: A
+        CALL Delete(A%IJKL)
+        CALL Delete(A%Type)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_OUTPDATA
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_IntCBox(A,NBox,NX,NY,NZ,NatmsLoc)
+        INTEGER        :: NBox,NatmsLoc,NX,NY,NZ
+        TYPE(IntCBox)  :: A
+        A%N=NBox
+        A%NX=NX  
+        A%NY=NY  
+        A%NZ=NZ  
+        A%NatmsLoc=NatmsLoc
+        CALL New(A%I,NBox+1)
+        CALL New(A%J,NatmsLoc)
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_IntCBox 
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_IntCBox(A)
+        TYPE(IntCBox) :: A
+        CALL Delete(A%I)
+        CALL Delete(A%J)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_IntCBox
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_TOPOLOGY(A,NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov, &
+                              N12Tot,N13Tot,N14Tot,NExTot)
+        TYPE(TOPOLOGY) :: A
+        INTEGER        :: NatmsLoc,N12Cov,N13Cov,N14Cov,NExCov
+        INTEGER        :: N12Tot,N13Tot,N14Tot,NExTot
+        !
+        A%NatmsLoc=NatmsLoc
+        A%N12Cov=N12Cov
+        A%N13Cov=N13Cov
+        A%N14Cov=N14Cov
+        A%NExCov=NExCov
+        A%N12Tot=N12Tot
+        A%N13Tot=N13Tot
+        A%N14Tot=N14Tot
+        A%NExTot=NExTot
+        CALL New(A%Cov12,(/NatmsLoc,N12Cov+1/))
+        CALL New(A%Cov13,(/NatmsLoc,N13Cov+1/))
+        CALL New(A%Cov14,(/NatmsLoc,N14Cov+1/))
+        CALL New(A%CovExcl,(/NatmsLoc,NExCov+1/))
+        CALL New(A%Tot12,(/NatmsLoc,N12Tot+1/))
+        CALL New(A%Tot13,(/NatmsLoc,N13Tot+1/))
+        CALL New(A%Tot14,(/NatmsLoc,N14Tot+1/))
+        CALL New(A%TotExcl,(/NatmsLoc,NExTot+1/))
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_TOPOLOGY
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_TOPOLOGY(A)
+        TYPE(TOPOLOGY) :: A
+        !
+        CALL Delete(A%Cov12)
+        CALL Delete(A%Cov13)
+        CALL Delete(A%Cov14)
+        CALL Delete(A%CovExcl)
+        CALL Delete(A%Tot12)
+        CALL Delete(A%Tot13)
+        CALL Delete(A%Tot14)
+        CALL Delete(A%TotExcl)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_TOPOLOGY
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_ATOMBONDS(A,NatmsLoc,MaxBonds)
+        TYPE(ATOMBONDS) :: A
+        INTEGER         :: NatmsLoc,MaxBonds
+        !
+        A%N1=NatmsLoc
+        A%N2=MaxBonds
+        CALL New(A%Count,NatmsLoc)
+        CALL New(A%Bonds,(/NatmsLoc,MaxBonds/))
+        CALL New(A%Atoms,(/NatmsLoc,MaxBonds/))
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_ATOMBONDS
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_ATOMBONDS(A)
+        TYPE(ATOMBONDS) :: A
+        !
+        CALL Delete(A%Count)
+        CALL Delete(A%Bonds)
+        CALL Delete(A%Atoms)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_ATOMBONDS
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_Sp1x1(A,NRow,NZ,Symb_O)
+        TYPE(Sp1x1)       :: A
+        INTEGER           :: NRow,NZ
+        LOGICAL,OPTIONAL  :: Symb_O
+        !
+        CALL New(A%IA,NRow+1)
+        CALL New(A%JA,NZ)
+        IF(PRESENT(Symb_O)) THEN
+          IF(.NOT.Symb_O) THEN
+            CALL New(A%AN,NZ)
+          ENDIF
+        ELSE
+          CALL New(A%AN,NZ)
+        ENDIF
+        A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_Sp1x1
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_Sp1x1(A)
+        TYPE(Sp1x1) :: A
+        CALL Delete(A%IA)
+        CALL Delete(A%JA)
+        IF(AllocQ(A%AN%Alloc)) CALL Delete(A%AN)
+        A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_Sp1x1
+!
+!-----------------------------------------------------
+!
+      SUBROUTINE New_BONDDATA(A,NBond)
+         TYPE(BONDDATA) :: A
+         INTEGER NBond,NatmsLoc
+         A%N=NBond
+         CALL New(A%IJ,(/2,NBond/))
+         CALL New(A%Length,NBond)
+         CALL New(A%Type,NBond)
+         CALL New(A%HBExtraSN,NBond)
+         CALL New(A%HBExtraNC,NBond)
+         CALL New(A%LonelyAtom,NBond)
+         A%Alloc=ALLOCATED_TRUE
+      END SUBROUTINE New_BONDDATA
+!     
+!-----------------------------------------------------
+!
+      SUBROUTINE Delete_BONDDATA(A)
+         TYPE(BONDDATA) :: A
+         CALL Delete(A%IJ)
+         CALL Delete(A%Length)
+         CALL Delete(A%Type)
+         CALL Delete(A%HBExtraSN)
+         CALL Delete(A%HBExtraNC)
+         CALL Delete(A%LonelyAtom)
+         A%Alloc=ALLOCATED_FALSE
+      END SUBROUTINE Delete_BONDDATA
+!     
+!-----------------------------------------------------
+!  
       SUBROUTINE New_Chol(A,NCart,ChNon0)
          INTEGER NCart,ChNon0
          TYPE(Cholesky) :: A
@@ -301,7 +497,7 @@ MODULE MemMan
          CALL Delete(A%ChColPt)
          CALL Delete(A%ChDiag)
          CALL Delete(A%ChFact)
-         A%Alloc=ALLOCATED_TRUE
+         A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_Chol
 !     
 !-----------------------------------------------------

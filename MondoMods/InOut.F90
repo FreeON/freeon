@@ -28,6 +28,8 @@ MODULE InOut
           Get_ARGMT,    Get_HGRho,                  &
           Get_CHR_VECT, Get_LOG_VECT,               &
           Get_INTC,     Get_BMATR,                  &
+          Get_Sp1x1,    Get_BondD,                  &
+          Get_AtmB,                                 &
           Get_CMPoles
 
   END INTERFACE
@@ -44,6 +46,8 @@ MODULE InOut
           Put_TOLS,     Put_BCSR,     Put_HGRho,    &
           Put_CHR_VECT, Put_LOG_VECT,               &
           Put_INTC, Put_BMATR,                      &
+          Put_Sp1x1, Put_BondD,                     &
+          Put_AtmB,                                 &
           Put_CMPoles
   END INTERFACE
 
@@ -2093,9 +2097,120 @@ CONTAINS
        CALL New_CellSet(CS,CS%NCells)
        CALL Get(CS%CellCarts,'cell_vectors',Tag_O=Tag_O)
     ENDIF
-
-
   END SUBROUTINE Get_CellSet
-
-                  END MODULE
+!
+  SUBROUTINE Get_Sp1x1(A,Tag,Symb_O)
+    TYPE(Sp1x1)               :: A
+    CHARACTER(LEN=*)          :: Tag 
+    LOGICAL,OPTIONAL          :: Symb_O
+    !
+    CALL Get(A%NRow,'NRow',Tag_O=Tag) 
+    CALL Get(A%NZ,'NZ',Tag_O=Tag) 
+    IF(PRESENT(Symb_O)) THEN 
+      CALL New(A,A%NRow,A%NZ,Symb_O=Symb_O)
+    ELSE
+      CALL New(A,A%NRow,A%NZ)
+    ENDIF
+    CALL Get(A%IA,'IA',Tag_O=Tag)
+    CALL Get(A%JA,'JA',Tag_O=Tag)
+    IF(PRESENT(Symb_O)) THEN
+      IF(Symb_O) THEN
+        RETURN
+      ELSE
+        CALL Get(A%AN,'AN',Tag_O=Tag)
+      ENDIF
+    ELSE
+      CALL Get(A%AN,'AN',Tag_O=Tag)
+    ENDIF
+  END SUBROUTINE Get_Sp1x1
+!
+!----------------------------------------------------
+!
+  SUBROUTINE Put_Sp1x1(A,Tag,Symb_O)
+    TYPE(Sp1x1)      :: A
+    CHARACTER(LEN=*) :: Tag
+    LOGICAL,OPTIONAL :: Symb_O
+    INTEGER          :: NRow,NZ
+    !
+    CALL Put(A%NRow,'NRow',Tag_O=Tag) 
+    CALL Put(A%NZ,'NZ',Tag_O=Tag) 
+    CALL Put(A%IA,'IA',Tag_O=Tag)
+    CALL Put(A%JA,'JA',Tag_O=Tag)
+    IF(PRESENT(Symb_O)) THEN
+      IF(Symb_O) THEN
+        RETURN
+      ELSE
+        CALL Put(A%AN,'AN',Tag_O=Tag)
+      ENDIF
+    ELSE
+      CALL Put(A%AN,'AN',Tag_O=Tag)
+    ENDIF
+  END SUBROUTINE Put_Sp1x1
+!
+!----------------------------------------------------------------
+!
+  SUBROUTINE Put_BondD(A,Tag)
+    TYPE(BONDDATA)   :: A
+    CHARACTER(LEN=*) :: Tag
+    !
+    A%N=SIZE(A%IJ%I,2)
+    CALL Put(A%N,'N',Tag_O=Tag) 
+    CALL Put(A%IJ,'IJ',Tag_O=Tag) 
+    CALL Put(A%Length,'Length',Tag_O=Tag) 
+    CALL Put(A%Type,'Type',Tag_O=Tag) 
+    CALL Put(A%HBExtraSN,'HBExtraSN',Tag_O=Tag) 
+    CALL Put(A%HBExtraNC,'HBExtraNC',Tag_O=Tag) 
+    CALL Put(A%LonelyAtom,'LonelyAtom',Tag_O=Tag) 
+  END SUBROUTINE Put_BondD
+!
+!---------------------------------------------------------------
+!
+  SUBROUTINE Get_BondD(A,Tag)
+    TYPE(BONDDATA)   :: A
+    CHARACTER(LEN=*) :: Tag
+    !
+    CALL Get(A%N,'N',Tag_O=Tag) 
+    CALL New(A,A%N)
+    CALL Get(A%IJ,'IJ',Tag_O=Tag) 
+    CALL Get(A%Length,'Length',Tag_O=Tag) 
+    CALL Get(A%Type,'Type',Tag_O=Tag) 
+    CALL Get(A%HBExtraSN,'HBExtraSN',Tag_O=Tag) 
+    CALL Get(A%HBExtraNC,'HBExtraNC',Tag_O=Tag) 
+    CALL Get(A%LonelyAtom,'LonelyAtom',Tag_O=Tag) 
+  END SUBROUTINE Get_BondD
+!
+!---------------------------------------------------------------
+!
+  SUBROUTINE Put_AtmB(A,Tag)
+    TYPE(ATOMBONDS)  :: A
+    CHARACTER(LEN=*) :: Tag
+    INTEGER          :: N1,N2
+    !
+    A%N1=SIZE(A%Bonds%I,1)
+    A%N2=SIZE(A%Bonds%I,2)
+    CALL Put(A%N1,'N1',Tag_O=Tag)
+    CALL Put(A%N2,'N2',Tag_O=Tag)
+    CALL Put(A%Count,'Count',Tag_O=Tag)
+    CALL Put(A%Bonds,'Bonds',Tag_O=Tag)
+    CALL Put(A%Atoms,'Atoms',Tag_O=Tag)
+  END SUBROUTINE Put_AtmB
+!
+!---------------------------------------------------------------
+!
+  SUBROUTINE Get_AtmB(A,Tag)
+    TYPE(ATOMBONDS)  :: A
+    CHARACTER(LEN=*) :: Tag
+    INTEGER          :: N1,N2
+    !
+    CALL Get(A%N1,'N1',Tag_O=Tag)
+    CALL Get(A%N2,'N2',Tag_O=Tag)
+    CALL New(A,A%N1,A%N2)
+    CALL Get(A%Count,'Count',Tag_O=Tag)
+    CALL Get(A%Bonds,'Bonds',Tag_O=Tag)
+    CALL Get(A%Atoms,'Atoms',Tag_O=Tag)
+  END SUBROUTINE Get_AtmB
+!
+!---------------------------------------------------------------
+!
+END MODULE
 
