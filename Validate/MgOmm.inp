@@ -9,9 +9,9 @@ Mechanics=(MM)
 Accuracy =(VeryTight)
 DebugAll =(MaxDebug)
 Geometry=(InAnstroms,NoOrder) 
-Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord,PFFOverRide)
 PFFLayers=1
-PFFMaxEll=14
+PFFMaxEll=16
 <EndOptions>
 
 <BeginPeriodic>

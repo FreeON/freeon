@@ -1,6 +1,6 @@
 <BeginTitle>
 64 water molecules in cubic box, periodic
-MONDO : -9.306316342691938 Hartree
+MONDO : -9.306316342678592 Hartree
 Ewald : -9.306316342680415
 <EndTitle>
 
@@ -11,8 +11,8 @@ DebugAll=(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 BlokAInv=(Test,1.D20)
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
-PFFLayers=2
-PFFMaxEll=16
+PFFLayers=1
+PFFMaxEll=6
 <EndOptions>
 
 <BeginPeriodic>
@@ -24,3 +24,23 @@ validation_opls
 Water64mm.seq
 Water64mm.crd
 <END_MM_filenames>
+
+OverRide Off  (TauMAC=1.D-16)  
+
+1-Layer      ELL     Energy                 PFFTau   Error
+---------------------------------------------------------        
+Loose    :   13     -9.306316836551416      1D-6     1D-8
+Good     :   19     -9.306316366291098      1D-8     1D-9
+Tight    :   24     -9.306316342998391      1D-10    1D-11
+VeryTight:   30     -9.306316342678247      1D-12    1D-14
+---------------------------------------------------------  
+
+2-Layers     ELL     Energy                 PFFTau   Error
+---------------------------------------------------------        
+Loose    :    7     -9.306316263534850      1D-6     1D-8
+Good     :   10     -9.306316343446586      1D-8     1D-10
+Tight    :   13     -9.306316342707277      1D-10    1D-12
+VeryTight:   16     -9.306316342672789      1D-12    1D-13
+---------------------------------------------------------  
+
+===============================================================
