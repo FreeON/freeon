@@ -25,6 +25,24 @@ MODULE Parse
  99      CALL Halt(' Key not found in input : '//TRIM(Key))
       END SUBROUTINE Align
 !======================================================================
+!     Align file pointer one line past a character key
+!======================================================================
+      FUNCTION FindKey(Key,Unit)     
+        CHARACTER(LEN=*)               :: Key
+        INTEGER                        :: Unit
+        CHARACTER(LEN=DEFAULT_CHR_LEN) :: Line
+        LOGICAL                        :: FindKey
+        FindKey = .TRUE.
+        REWIND(UNIT=Unit)
+        DO 
+           READ(Unit,DEFAULT_CHR_FMT,END=99)Line
+           IF(INDEX(Line,Key)/=0)RETURN
+        ENDDO
+99      CONTINUE
+        FindKey = .FALSE.
+        RETURN
+      END FUNCTION FindKey
+!======================================================================
 !     Convert a string to all lower case
 !======================================================================
       SUBROUTINE LowCase(String)
@@ -310,25 +328,24 @@ MODULE Parse
          CHARACTER(LEN=2)                    :: At      
          INTEGER                             :: J,L,N,K1,K2
          REAL(DOUBLE), DIMENSION(:)          :: Carts
-         REAL(DOUBLE), DIMENSION(:),OPTIONAL ::Vects_O
+         REAL(DOUBLE), DIMENSION(:),OPTIONAL :: Vects_O
 !
          Carts=Zero
          TmpLine=Line
-         CALL LowCase(TmpLine)
+         CALL LowCase(TmpLine) 
          J=SCAN(TmpLine,Lower)
          IF(J==0)Call Halt(' No characters found in line in LineToGeom ')
          At=TmpLine(J:J+1)
          J=J+2
          L=LEN(Line)   
-!         DO N=1,SIZE(Carts)
-         DO N=1,3
+         DO N=1,SIZE(Carts)
             K1=J-1+SCAN(Line(J:L),Numbers)
             K2=K1-2+SCAN(Line(K1:L),' ') 
             J=K2+1
             Carts(N)=CharToDbl(TRIM(Line(K1:K2)))
          ENDDO 
          IF(PRESENT(Vects_O)) THEN
-            DO N=4,6        
+            DO N=1,SIZE(Vects_O)
                K1=J-1+SCAN(Line(J:L),Numbers)
                K2=K1-2+SCAN(Line(K1:L),' ') 
                J=K2+1
