@@ -22,7 +22,7 @@ PROGRAM MakePFFT
   TYPE(CellSet)                  :: CSS
   TYPE(ARGMT)                    :: Args
   INTEGER                        :: MaxEll,I,J,K
-  REAL(DOUBLE)                   :: DDelta,Rad,AtoAU
+  REAL(DOUBLE)                   :: DDelta,Rad,AtoAU,SUM
   CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg
   CHARACTER(LEN=8),PARAMETER     :: Prog='MakePFFT'
 !-------------------------------------------------------------------------------- 
@@ -59,6 +59,9 @@ PROGRAM MakePFFT
 !    Put them to HDF
      CALL Put(dTenC,'dPFFTensorC')
      CALL Put(dTenS,'dPFFTensorS')
+!    Print sum Checksums
+     CALL PChkSum(TenC,'TenC',Proc_O=Prog)
+     CALL PChkSum(TenS,'TenS',Proc_O=Prog)
 !    Delete
      CALL Delete(TenC)
      CALL Delete(TenS)  
