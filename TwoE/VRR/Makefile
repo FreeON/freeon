@@ -14,7 +14,6 @@ VRRd0g0.o\
 VRRd0h0.o\
 VRRd0i0.o\
 VRRd0j0.o\
-VRRd0k0.o\
 VRRd0p0.o\
 VRRd0s0.o\
 VRRf0d0.o\
@@ -23,7 +22,6 @@ VRRf0g0.o\
 VRRf0h0.o\
 VRRf0i0.o\
 VRRf0j0.o\
-VRRf0k0.o\
 VRRf0p0.o\
 VRRf0s0.o\
 VRRg0d0.o\
@@ -32,7 +30,6 @@ VRRg0g0.o\
 VRRg0h0.o\
 VRRg0i0.o\
 VRRg0j0.o\
-VRRg0k0.o\
 VRRg0p0.o\
 VRRg0s0.o\
 VRRh0d0.o\
@@ -41,7 +38,6 @@ VRRh0g0.o\
 VRRh0h0.o\
 VRRh0i0.o\
 VRRh0j0.o\
-VRRh0k0.o\
 VRRh0p0.o\
 VRRh0s0.o\
 VRRi0d0.o\
@@ -50,7 +46,6 @@ VRRi0g0.o\
 VRRi0h0.o\
 VRRi0i0.o\
 VRRi0j0.o\
-VRRi0k0.o\
 VRRi0p0.o\
 VRRi0s0.o\
 VRRj0d0.o\
@@ -59,25 +54,14 @@ VRRj0g0.o\
 VRRj0h0.o\
 VRRj0i0.o\
 VRRj0j0.o\
-VRRj0k0.o\
 VRRj0p0.o\
 VRRj0s0.o\
-VRRk0d0.o\
-VRRk0f0.o\
-VRRk0g0.o\
-VRRk0h0.o\
-VRRk0i0.o\
-VRRk0j0.o\
-VRRk0k0.o\
-VRRk0p0.o\
-VRRk0s0.o\
 VRRp0d0.o\
 VRRp0f0.o\
 VRRp0g0.o\
 VRRp0h0.o\
 VRRp0i0.o\
 VRRp0j0.o\
-VRRp0k0.o\
 VRRp0p0.o\
 VRRp0s0.o\
 VRRs0d0.o\
@@ -86,7 +70,6 @@ VRRs0g0.o\
 VRRs0h0.o\
 VRRs0i0.o\
 VRRs0j0.o\
-VRRs0k0.o\
 VRRs0p0.o
 #
 VRRRels=VRRd0d0.x\

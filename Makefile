@@ -30,26 +30,22 @@
 #
 include $(MONDO_HOME)/Includes/RemoveAll
 #
-all:	CatCpy mm s e 1 2 t o2 #d #v 
+all:	CatCpy mm s e 1 2 t  #d #v 
 #
-clean:	cmm cs ce c1 c2 cd cv ct co2
+clean:	cmm cs ce c1 c2 cd cv ct 
 	rm -f $(REMOVEALL)
 	rm -f \#*
 	rm -f *~
 #
-purge:	pmm ps pe p1 p2 pd pv pt po2 pMisc  
+purge:	pmm ps pe p1 p2 pd pv pt pMisc  
 #
-release: clean rmLegacy swREADME rmm rs re r1 r2 rd rv rt ro2 tarball
+release: clean rmLegacy swREADME rmm rs re r1 r2 rd rv rt tarball
 #
 backup:	purge rmLegacy tarball
 #
 rmLegacy:
 	rm -rf DirectJ
-	rm -rf ONX/GMEONX
-	rm -rf ONX/GSONX
-	rm -rf ONX/MASONX
-	rm -rf ONX/PONX*
-	rm -rf ONX/SONX
+	rm -rf ONX
 	rm -rf XForm
 	rm -rf Inpts
 	rm -rf Scratch
@@ -115,10 +111,10 @@ c1:
 #----------------------------------------------
 #     Two electron directories
 #
- 2:	q   h  o
-r2:	rq rh  ro
-c2:	cq ch  co
-p2:	ph pq  po
+ 2:	q   h  o2
+r2:	rq rh  ro2
+c2:	cq ch  co2
+p2:	ph pq  po2
 #----------------------------------------------
 #     ONX
  o:	

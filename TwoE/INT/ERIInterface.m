@@ -53,15 +53,7 @@ LMNDex[L_, M_, N_] := LBegin[L + M + N] + N*(2*(L + M + N) - N + 3)/2 + M;
 
 IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
 
-(* Minimal 
-   Classes = { {0,0},{1,1}} 
- *)
-
- Classes = { {0,0},{0,1},{1,1},{2,2}}; 
-
-(* Maximal 
-   Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
- *)
+ Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}; 
 
 CType[1]  = "S";
 CType[2]  = "SP";

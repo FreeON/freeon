@@ -13,6 +13,12 @@ KetHRR102.o\
 KetHRR103.o\
 KetHRR104.o\
 KetHRR106.o\
+KetHRR1510.o\
+KetHRR1515.o\
+KetHRR152.o\
+KetHRR153.o\
+KetHRR154.o\
+KetHRR156.o\
 KetHRR21.o\
 KetHRR22.o\
 KetHRR32.o\
@@ -30,6 +36,12 @@ KetHRR102.x\
 KetHRR103.x\
 KetHRR104.x\
 KetHRR106.x\
+KetHRR1510.x\
+KetHRR1515.x\
+KetHRR152.x\
+KetHRR153.x\
+KetHRR154.x\
+KetHRR156.x\
 KetHRR21.x\
 KetHRR22.x\
 KetHRR32.x\

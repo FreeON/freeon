@@ -57,7 +57,7 @@ IntegralClass[Ell_List] := Ell[[2]]*(Ell[[2]] + 1)/2 + Ell[[1]] + 1;
    Classes = { {0,0},{1,1}} 
 *)
 (* Maximal *)
- Classes = { {0,0},{0,1},{1,1},{2,2}}
+ Classes = { {0,0},{0,1},{1,1},{2,2},{3,3}}
 
 
 CType[1]  = "S";

@@ -63,7 +63,7 @@ Normy[LMN_List]:=Module[{Fct,X,Y,L,M,N},
                         Y=Fct[L]*Fct[M]*Fct[N];
 			Return[Sqrt[X/Y]]];
 
-Classes = {{0,0},{0,1},{0,2},{1,1},{2,2},{3,3}}; 
+Classes = {{0,0},{0,1},{0,2},{1,1},{2,2},{3,3},{4,4}}; 
 
 CType[1]  = "s";
 CType[2]  = "sp";

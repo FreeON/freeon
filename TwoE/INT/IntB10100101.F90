@@ -10,7 +10,7 @@
       USE GammaF6
       IMPLICIT REAL(DOUBLE) (W)
       INTEGER        :: LBra,LKet,CDOffSet
-      REAL(DOUBLE)   :: PrmBufB(8,LBra),PrmBufK(8,LKet)
+      REAL(DOUBLE)   :: PrmBufB(10,LBra),PrmBufK(10,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE)  :: INTGRL(*)
@@ -207,8 +207,7 @@
             CALL DBLAXPY(84,HRR(1,1,1),VRR(1,1,0)) 
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
-      ! Generating (f,0|s,s)^(0) 
-      CALL KetHRR11(84,HRR) 
+      ! No need to generate (f,0|s,s)^(0) 
       ! Generating (f,f|s,s)^(0) 
       DO L=1,1
          DO K=1,1
