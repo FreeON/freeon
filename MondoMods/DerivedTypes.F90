@@ -211,6 +211,7 @@ MODULE DerivedTypes
 !
   TYPE PBCInfo
      INTEGER                     :: Dimen      !-- Dimension of the System
+     INTEGER                     :: PFFMaxEll  !-- Maxium Ell of the PFF contribution
      LOGICAL                     :: AtomW      !-- Wrap atoms back into box--BE CAREFUL
      LOGICAL                     :: InVecForm  !-- What form are the Lattice vectors in
      LOGICAL                     :: InAtomCrd  !-- Atomic or Fractional Coordinates
