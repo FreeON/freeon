@@ -80,20 +80,20 @@ MODULE PBCFarField
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
 !
-      WRITE(*,*) 'GMLoc%PBC%Dimen  = ',GMLoc%PBC%Dimen 
-      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
-      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
-      WRITE(*,*) 'MACDist       = ',MACDist
-      WRITE(*,*) 'PACDist       = ',PACDist
-      WRITE(*,*) 'BOXDist       = ',BDist
-      WRITE(*,*) 'RDist         = ',RDist      
-      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
-      WRITE(*,*)
-      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
-      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
-      WRITE(*,*) 'E_PFF         = ',E_PFF
-      WRITE(*,*) 'E_DP          = ',E_DP     
-      WRITE(*,*)
+!!$      WRITE(*,*) 'GMLoc%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+!!$      WRITE(*,*) 'MACDist       = ',MACDist
+!!$      WRITE(*,*) 'PACDist       = ',PACDist
+!!$      WRITE(*,*) 'BOXDist       = ',BDist
+!!$      WRITE(*,*) 'RDist         = ',RDist      
+!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+!!$      WRITE(*,*)
+!!$      WRITE(*,*) 'Epsilon       = ',GMLoc%PBC%Epsilon
+!!$      WRITE(*,*) 'DipoleFAC     = ',GMLoc%PBC%DipoleFAC
+!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
+!!$      WRITE(*,*) 'E_DP          = ',E_DP     
+!!$      WRITE(*,*)
 !
     END SUBROUTINE PBCFarFieldSetUp
 !---------------------------------------------------------------------------------------------- 
