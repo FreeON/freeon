@@ -48,15 +48,6 @@ PROGRAM MakeS
 
   CALL NewBraBlok(BS)
   CALL New(S)
-#ifdef PERIODIC
-#ifdef PARALLEL_CLONES
-#else
-!-----------------------------------------------
-! Calculate the Number of Cells
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
-#endif
-#endif
 !-----------------------------------------------
 ! Initialize the matrix and associated indecies
 
@@ -118,7 +109,7 @@ PROGRAM MakeS
   CALL Filter(T1,S)
   Thresholds%Trix = Thresholds%Trix*1.D2
 !! the following line gives a problem!!
-! CALL PPrint(T1,'S',Unit_O=6)
+!  CALL PPrint(T1,'S',Unit_O=6)
   CALL Put(T1,TrixFile('S',Args))
 !-----------------------------------------------------------
 ! Printing

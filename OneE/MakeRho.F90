@@ -18,10 +18,8 @@ PROGRAM MakeRho
   USE RhoTools
   IMPLICIT NONE
   TYPE(BCSR)                      :: Dmat,D1,D2,S
-#ifdef PERIODIC 
   INTEGER                         :: NC
   REAL(DOUBLE),DIMENSION(3)       :: B
-#endif
   TYPE(AtomPair)                  :: Pair
   TYPE(BSET)                      :: BS
   TYPE(CRDS)                      :: GM,GM_MM
@@ -40,13 +38,6 @@ PROGRAM MakeRho
 !---------------------------------------------------------------------------------------
 ! Start up macro
   CALL StartUp(Args,Prog)
-#ifdef PERIODIC
-#ifdef PARALLEL_CLONES
-#else
-!    Get the Outer Cell Set
-     CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 #ifdef MMech
 !---------------------------------------------------------------
   IF(HasMM())THEN
@@ -130,9 +121,9 @@ PROGRAM MakeRho
      ENDIF
 ! Allocations and precalculations
 !***********************************************************************************
-!     CALL Get(S,TrixFile('S',Args))
-!     RSum_TPS = Trace(Dmat,S)
-!     WRITE(*,*) 'Trace[P_AO*S]  = ', RSum_TPS
+!!$     CALL Get(S,TrixFile('S',Args))
+!!$     RSum_TPS = Trace(Dmat,S)
+!!$     WRITE(*,*) 'Trace[P_AO*S]  = ', RSum_TPS
 !***********************************************************************************
      CALL NewBraBlok(BS)  
 !--------------------------------------------------------------
@@ -148,8 +139,7 @@ PROGRAM MakeRho
         Pend = Dmat%RowPt%I(AtA+1)-1
         DO P = Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
-           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-#ifdef PERIODIC                 
+           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN            
               B = Pair%B
               DO NC = 1,CS_OUT%NCells
                  Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -160,9 +150,6 @@ PROGRAM MakeRho
                     CALL PrimCount(BS,Pair,NDist,NCoef)
                  ENDIF
               ENDDO
-#else
-              CALL PrimCount(BS,Pair,NDist,NCoef)
-#endif
            ENDIF
         ENDDO
      ENDDO
@@ -177,8 +164,7 @@ PROGRAM MakeRho
         DO P=Pbeg,Pend
            AtB = Dmat%ColPt%I(P)
            R   = Dmat%BlkPt%I(P)
-           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-#ifdef PERIODIC                      
+           IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN                   
               B = Pair%B
               DO NC = 1,CS_OUT%NCells
                  Pair%B = B+CS_OUT%CellCarts%D(:,NC)
@@ -190,16 +176,13 @@ PROGRAM MakeRho
                     CALL RhoBlk(BS,Dmat%MTrix%D(R:R+NN-1),Pair,NDist,NCoef,RhoA)
                  ENDIF
               ENDDO
-#else
-              NN = Pair%NA*Pair%NB
-              CALL RhoBlk(BS,Dmat%MTrix%D(R:R+NN-1),Pair,NDist,NCoef,RhoA)
-#endif
            ENDIF
         ENDDO
      ENDDO
      IF(SCFActn/='InkFok') THEN
         CALL AddDist(RhoA,GM,NuclearExpnt,1,GM%NAtms)
      ENDIF
+!
 #ifdef MMech
   ELSE
      CALL New_HGRho_new(RhoA,(/0,0/))
@@ -209,18 +192,12 @@ PROGRAM MakeRho
      CALL AddDist(RhoA,GM_MM,NuclearExpnt,1,GM_MM%NAtms)
   ENDIF
 #endif
-!***********************************************************************************
-  RSumE  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms)
-!  WRITE(*,*) 'Integrate[Rho] = ',RSumE
-!***********************************************************************************
 ! Prune negligible distributions from the electronic density
   NDist_old = RhoA%NDist
   CALL Prune_Rho_new(Thresholds%Dist,RhoA)
   NDist_new = RhoA%NDist
-#ifdef PERIODIC
 ! Fold distributions back into the box
   CALL Fold_Rho_new(GM,RhoA)
-#endif
 #ifdef MMech
 ! Compute integrated electron and nuclear densities
   IF(HasQM()) THEN

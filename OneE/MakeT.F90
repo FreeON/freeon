@@ -39,12 +39,6 @@ PROGRAM MakeT
 ! Start up macro
 !
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 !----------------------------------------------
 ! Get basis set and geometry
 !

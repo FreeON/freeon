@@ -17,28 +17,25 @@ PROGRAM TForce
 
 #ifdef PARALLEL
   USE MondoMPI
-  TYPE(BCSR)         :: P
-  TYPE(DBL_VECT)      :: TotTFrc
-  INTEGER :: IErr,TotFrcComp
+  TYPE(BCSR)                  :: P
+  TYPE(DBL_VECT)              :: TotTFrc
+  INTEGER                     :: IErr,TotFrcComp
 #else
-  TYPE(BCSR)          :: P
+  TYPE(BCSR)                  :: P
 #endif
-
-#ifdef PERIODIC 
-  INTEGER                     :: NC
+  INTEGER                     :: NC,I,J
   REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
-  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_T
-#endif
-  TYPE(AtomPair)      :: Pair
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,R,AtA,AtB,JP,MB,MA,NB,MN1,A1,A2
-  TYPE(HGRho)         :: Rho
-  TYPE(DBL_VECT)      :: TFrc,Frc
-  REAL(DOUBLE)        :: TFrcChk
+  TYPE(DBL_RNK2)              :: LatFrc_T
+  TYPE(AtomPair)              :: Pair
+  TYPE(BSET)                  :: BS
+  TYPE(CRDS)                  :: GM
+  TYPE(ARGMT)                 :: Args
+  INTEGER                     :: Q,R,AtA,AtB,JP,MB,MA,NB,MN1,A1,A2
+  TYPE(HGRho)                 :: Rho
+  TYPE(DBL_VECT)              :: TFrc,Frc
+  REAL(DOUBLE)                :: TFrcChk
  
-  CHARACTER(LEN=6),PARAMETER :: Prog='TForce'
+  CHARACTER(LEN=6),PARAMETER  :: Prog='TForce'
 !------------------------------------------------------------------------------------- 
 ! Start up macro
  
@@ -48,23 +45,19 @@ PROGRAM TForce
  
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
 #ifdef PARALLEL
   CALL New(P,OnAll_O=.TRUE.)
 #endif
   CALL Get(P,TrixFile('D',Args,1),BCast_O=.TRUE.)
   CALL New(TFrc,3*NAtoms)
+  TFrc%D   = Zero
+#ifdef PERIODIC
+  CALL New(LatFrc_T,(/3,3/))
+  LatFrc_T%D = Zero
+#endif
 !--------------------------------------------------------------------------------
 ! TForce=2*Tr{P.dT} (Extra 2 to account for symmetry of T in the trace)
 !--------------------------------------------------------------------------------
-  LatFrc_T = Zero
- 
-  TFrc%D=Zero
 #ifdef PARALLEL
   DO AtA=Beg%I(MyId),End%I(MyId)
 #else
@@ -79,7 +72,6 @@ PROGRAM TForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
-#ifdef PERIODIC
            B=Pair%B
            DO NC=1,CS_OUT%NCells
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
@@ -87,21 +79,15 @@ PROGRAM TForce
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 F_nlm(1:3)    = Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
-                 TFrc%D(A1:A2) = TFrc%D(A1:A2) + F_nlm(1:3)
-#ifdef THIS_IS_NOT_WELL_POSED_FOR_DIMEN_ZERO
-                 nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
-                 LatFrc_T(1,1:3) = LatFrc_T(1,1:3) + nlm(1)*F_nlm(1:3)
-                 LatFrc_T(2,1:3) = LatFrc_T(2,1:3) + nlm(2)*F_nlm(1:3)
-                 LatFrc_T(3,1:3) = LatFrc_T(3,1:3) + nlm(3)*F_nlm(1:3)
-#endif 
+                 F_nlm(1:3)    = TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 IF(.NOT. Pair%SameAtom) THEN
+                    TFrc%D(A1:A2) = TFrc%D(A1:A2) + Four*F_nlm(1:3)
+                 ENDIF
+!                Lattice Forces
+                 nlm        = AtomToFrac(GM,Pair%B-Pair%A)
+                 LatFrc_T%D = LatFrc_T%D - Two*LaticeForce(GM,nlm,F_nlm)
               ENDIF
-              
            ENDDO
-#else
-           TFrc%D(A1:A2)=TFrc%D(A1:A2)  &
-                        +Four*TrPdT(BS,Pair,P%MTrix%D(Q:Q+MN1))
-#endif
         ENDIF
      ENDDO
   ENDDO
@@ -124,6 +110,9 @@ PROGRAM TForce
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+TFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
+!
+  CALL Put(LatFrc_T,'LatFrc_T',Tag_O=CurGeom)
+  CALL Delete(LatFrc_T)
 !------------------------------------------------------------------------------
 ! Tidy up 
   CALL Delete(P)

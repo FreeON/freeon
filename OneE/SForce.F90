@@ -18,30 +18,27 @@ PROGRAM SForce
 
 #ifdef PARALLEL
   USE MondoMPI
-! TYPE(BCSR)         :: T1,F,P
-  TYPE(DBCSR)         :: T1,F,P_DBCSR
-  TYPE(BCSR)          :: P
-  TYPE(DBL_VECT)      :: TotSFrc
-  INTEGER :: IErr,TotFrcComp
+!  TYPE(BCSR)                 :: T1,F,P
+  TYPE(DBCSR)                :: T1,F,P_DBCSR
+  TYPE(BCSR)                 :: P
+  TYPE(DBL_VECT)             :: TotSFrc
+  INTEGER                    :: IErr,TotFrcComp
 #else
-  TYPE(BCSR)          :: T1,F,P
+  TYPE(BCSR)                 :: T1,F,P
 #endif
 
-  TYPE(AtomPair)      :: Pair
-  TYPE(BSET)          :: BS
-  TYPE(CRDS)          :: GM
-  TYPE(ARGMT)         :: Args
-  INTEGER             :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,A1,A2
-  TYPE(HGRho)         :: Rho
-  TYPE(DBL_VECT)      :: SFrc
-  REAL(DOUBLE)        :: SFrcChk
+  TYPE(AtomPair)             :: Pair
+  TYPE(BSET)                 :: BS
+  TYPE(CRDS)                 :: GM
+  TYPE(ARGMT)                :: Args
+  INTEGER                    :: Q,R,AtA,AtB,NN,JP,MB,MA,NB,MN1,A1,A2
+  TYPE(HGRho)                :: Rho
+  TYPE(DBL_VECT)             :: SFrc
+  REAL(DOUBLE)               :: SFrcChk
 
-#ifdef PERIODIC 
-  INTEGER                     :: NC
-  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
-  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_S
-#endif
-
+  INTEGER                    :: NC,I,J
+  REAL(DOUBLE),DIMENSION(3)  :: B,F_nlm,nlm
+  TYPE(DBL_RNK2)             :: LatFrc_S
   CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
 !---------------------------------------------- 
 ! Start up macro
@@ -58,13 +55,6 @@ PROGRAM SForce
   CALL New(P,OnAll_O=.TRUE.)
   CALL New(F)
   CALL New(T1)
-#endif
-
-#ifdef PERIODIC 
-#ifdef PARALLEL_CLONES
-#else
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
 #endif
 !--------------------------------------
 ! Compute W=P.F.P
@@ -90,13 +80,16 @@ PROGRAM SForce
 #endif
   CALL Delete(F)
   CALL Delete(T1)
+  CALL New(SFrc,3*NAtoms)
+  SFrc%D   = Zero
+  CALL NewBraBlok(BS,Gradients_O=.TRUE.)
+#ifdef PERIODIC
+  CALL New(LatFrc_S,(/3,3/))
+  LatFrc_S%D = Zero
+#endif
 !--------------------------------------------------------------------------------
 ! SForce=-2*Tr{P.F.P.dS} (Extra 2 to account for symmetry of S in the trace)
 !--------------------------------------------------------------------------------
-  CALL New(SFrc,3*NAtoms)
-  SFrc%D=Zero
-  CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-
 #ifdef PARALLEL
   DO AtA=Beg%I(MyId),End%I(MyId)
 #else
@@ -111,7 +104,6 @@ PROGRAM SForce
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
-#ifdef PERIODIC
            B=Pair%B
            DO NC=1,CS_OUT%NCells
               Pair%B=B+CS_OUT%CellCarts%D(:,NC)
@@ -119,25 +111,22 @@ PROGRAM SForce
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 F_nlm(1:3)    = -Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
-                 SFrc%D(A1:A2) = SFrc%D(A1:A2) + F_nlm(1:3)
-#ifdef THIS_IS_NOT_WELL_POSED_FOR_DIMEN_ZERO
-                 nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
-                 LatFrc_S(1,1:3) = LatFrc_S(1,1:3) + nlm(1)*F_nlm(1:3)
-                 LatFrc_S(2,1:3) = LatFrc_S(2,1:3) + nlm(2)*F_nlm(1:3)
-                 LatFrc_S(3,1:3) = LatFrc_S(3,1:3) + nlm(3)*F_nlm(1:3)
-#endif 
+                 F_nlm(1:3)    = TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 IF(.NOT. Pair%SameAtom) THEN
+                    SFrc%D(A1:A2) = SFrc%D(A1:A2) - Four*F_nlm(1:3)
+                 ENDIF
+!                Lattice Forces
+                 nlm        = AtomToFrac(GM,Pair%A-Pair%B)
+                 LatFrc_S%D = LatFrc_S%D - Two*LaticeForce(GM,nlm,F_nlm)
               ENDIF
            ENDDO
-#else
-           SFrc%D(A1:A2)=SFrc%D(A1:A2)-Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
-#endif
+
         ENDIF
      ENDDO
   ENDDO
 !--------------------------------------------------------------------------------
 #ifdef PARALLEL
-  TotFrcComp = 3*NAtoms
+  TotFrcComp = 3*NAtomsa3
   CALL New(TotSFrc,TotFrcComp)
   CALL MPI_Reduce(SFrc%D(1),TotSFrc%D(1),TotFrcComp,MPI_DOUBLE_PRECISION,MPI_SUM,0,MONDO_COMM,IErr)
   IF(MyID == 0) THEN
@@ -150,6 +139,9 @@ PROGRAM SForce
   CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
 ! Start this off as the first contrib to total gradient 
   CALL Put(SFrc,'GradE',Tag_O=CurGeom)
+!
+  CALL Put(LatFrc_S,'LatFrc_S',Tag_O=CurGeom)
+  CALL Delete(LatFrc_S)
 !--------------------------------------------------------------------------------
 ! Tidy up 
 !--------------------------------------------------------------------------------
@@ -159,4 +151,5 @@ PROGRAM SForce
   CALL Delete(SFrc)
   CALL DeleteBraBlok(Gradients_O=.TRUE.)
   CALL ShutDown(Prog)
+!
 END PROGRAM SForce

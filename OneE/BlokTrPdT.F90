@@ -30,10 +30,13 @@ MODULE BlokTrPdT
                                                   EtaAB,EtaIn,ZAB,XiAB,ExpAB,Ov,PiE32,CA,CB,DLA,DLB
      REAL(DOUBLE)                              :: Txx,Txy,Txz,Tyx,Tyy,Tyz,Tzx,Tzy,Tzz
      INTEGER                                   :: CFA,CFB,PFA,PFB,IndexA,IndexB,StartLA,StartLB, &
-                                                 StopLA,StopLB,MaxLA,MaxLB,IA,IB,LMNA,LMNB,     &
-                                                 LA,LB,MA,MB,NA,NB,K
+                                                  StopLA,StopLB,MaxLA,MaxLB,IA,IB,LMNA,LMNB,     &
+                                                  LA,LB,MA,MB,NA,NB,K
      REAL(DOUBLE), EXTERNAL                    :: BlkTrace_2 
-!-------------------------------------------------------------------------------------------------
+     LOGICAL                                   :: SameAtom
+!--------------------------------------------------------------------------------------------------
+     SameAtom=.FALSE.
+!--------------------------------------------------------------------------------------------------
      KA   = Pair%KA
      KB   = Pair%KB
      NBFA = Pair%NA
@@ -82,7 +85,7 @@ MODULE BlokTrPdT
 !          Naive derivatives of the McMurchie Davidson E and T coefficients WRT A
 !          See Helgaker and Taylor, TCA v.83, p177 (1992)
            dE=Zero
-           IF(.NOT.Pair%SameAtom)THEN
+           IF(.NOT. SameAtom)THEN
               DO LA=0,MaxLA+1
               DO LB=0,MaxLB+1
                  DO K=1,3
@@ -148,14 +151,11 @@ MODULE BlokTrPdT
         ENDDO
      ENDDO
      ENDDO
-!     WRITE(*,*)'=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-'
-!     PrintFlags%Fmt=DEBUG_DBLSTYLE
-!     CALL  Print_DBL_Rank2A(dTBlk(:,:,3),'dTz',Unit_O=6)
-!     CALL  Print_DBL_Rank2A(P,'P',Unit_O=6)
-!     CALL  Print_DBL_Rank2A(MATMUL(P,TRANSPOSE(dS(:,:,3))),'P.dT^T',Unit_O=6)
+!
      DO K=1,3
         Vck(K)=BlkTrace_2(Pair%NA,Pair%NB,P,TRANSPOSE(dTBlk(:,:,K)))
      ENDDO
+!
   END FUNCTION TrPdT
 END MODULE BlokTrPdT
 

@@ -51,15 +51,7 @@ PROGRAM ParaMakeRho
   !-------------------------------------------------------------------------------
   ! Start up macro
   CALL StartUp(Args,Prog,Serial_O=.FALSE.)
-#ifdef PERIODIC
-#ifdef PARALLEL_CLONES
-#else
-  ! Get the Outer Cell Set
-  CALL Get(CS_OUT,'CS_OUT',Tag_O=CurBase)
-#endif
-#endif
-
-
+!
   IF(SCFActn=='BasisSetSwitch')THEN
      !  Get the previous information
      CALL Get(BS,PrvBase)
