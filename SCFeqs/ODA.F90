@@ -43,6 +43,8 @@ PROGRAM ODA
   CALL New(PTilde)
   CALL New(F)
   CALL New(FTilde)
+  CALL New(K0)
+  CALL New(K1)
 ! Allocate temp Matrices
   CALL New(T1)
   CALL New(T2)  
