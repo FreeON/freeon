@@ -1,5 +1,8 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
+\newcommand{\Bulk}{B_0}
+\newcommand{\BPrime}{{B'_0}}
+
 \documentclass[prb,aps,nobibnotes,twocolumn,doublespace,twocolumngrid,superbib]{revtex4}
 %\documentclass[prb,aps,nobibnotes,superbib,preprint]{revtex4}
 
@@ -16,34 +19,31 @@
 \begin{document}
 \title[Short Title]{ 
 All-electron density functional studies of hydrostatic compression of 
-pentaerythritol tetranitrate (PETN) }
+PETN (pentaerythritol tetranitrate)}
 \author{Chee Kwan Gan\footnotemark[1]}
 \author{Thomas D. Sewell\footnotemark[2]}
 \author{Matt Challacombe\footnotemark[3]}
 
 \affiliation{ Theoretical Division, Los Alamos
               National Laboratory,\\ Los Alamos, New Mexico 87545}
-\date{April 2, 2003}
+\date{June 30, 2003}
 
 \begin{abstract}
 All-electron calculations of the hydrostatic compression of
-pentaerythritol tetranitrate (PETN) crystal have been performed using
+PETN (pentaerythritol tetranitrate) crystal have been performed using
 density functional theory with the PBE functional in
 conjunction with the 6-31G** Gaussian basis set.  Full optimizations
-of the atomic positions and $c/a$ ratio of lattice lengths for the 
-tetragonal crystal were performed for eight compression ratios $0.65 
+of the atomic positions and $c/a$ ratio of lattice parameters for the 
+tetragonal crystal were performed for eight volume ratios $0.65 
 \le V/V_0 \le 1.00$, where $V_0$ is the equilibrium volume at zero
-pressure.  The pressure as a function of compression ratio
-is found to be in good agreement with experimental data.  Predictions
-of the bulk modulus $K$ and its pressure derivative $K'$ were obtained
-using various equation of state fitting forms. Changes in intramolecular 
-coordinates were studied as a function of compression.
-
-%Finite size scaling effect (gamma-point sampling) were assessed by calculating
-%single-point energies for supercells containing up to eight unit cells (16
-%molecules, 464 atoms). 
-%Linear scaling with the system size and number of processors was demonstrated.
-
+pressure.  The pressure, the linear compressiblities
+of $a$ and $c$, and $c/a$ ratio as functions of volume ratio
+are found to be in good agreement with experimental data.
+Changes in intramolecular coordinates as well as the intermolecular 
+distances were studied as a function of compression.
+Predictions of the bulk modulus $\Bulk$ and 
+its pressure derivative $\BPrime$ were obtained
+using various equation of state fitting forms.
 
 \smallskip
 \noindent{\bf Keywords}: Density functional theory, linear scaling, 
@@ -51,7 +51,6 @@ Gaussian-Orbital, PETN, hydrostatic compression
 \end{abstract}
 
 %\pacs{31.15.-p; 31.15.Ew; 02.60.Jh}
-
 \maketitle
 
 \footnotetext[0]{Preprint LA-UR-.}
@@ -61,19 +60,20 @@ Gaussian-Orbital, PETN, hydrostatic compression
 
 \section{Introduction}
 Pentaerythritol tetranitrate (PETN, $C(CH_2ONO_2)_4$) is an important 
-military high explosive.  At room temperature, PETN crystallizes in a 
+secondary high explosive.
+ At room temperature, PETN crystallizes in a 
 tetragonal space group, P$\bar{4}$-2$_1$c,  
 with two molecules per unit
-cell\cite{Trotter_1963v16,Conant_1979}.
+cell\cite{Booth_1947v,Trotter_1963v16,Conant_1979}.
 A high-temperature 
 form denoted PETN-II has also been reported\cite{Cady_1975vB41}.  
 PETN has received a lot of attention due to interesting anisotropic, 
 non-monotonic shock initiation 
-sensitivity\cite{Gruzdkov_2000v104,Yoo_2000v88,Dick_1997v81,Gallagher_1992v339,Dick_1991v70,Dick_1994v4}.
+sensitivity\cite{Dick_1984v44,Dick_1991v70,Gallagher_1992v339,Dick_1997v81,Gruzdkov_2000v104,Yoo_2000v88}.
 The room temperature linear and volumetric hydrostatic compression
 of PETN has been measured by Olinger and 
 co-workers\cite{Olinger_1975v62,Olinger_1976} 
-using x-ray diffraction for pressures up to 10~GPa. 
+using x-ray diffraction for pressures up to 10.45~GPa. 
 Dick and von Dreele\cite{Dick_1997} used neutron scattering from deuterated
 PETN to study detailed pressure-induced changes in dihedral angles and
 molecular orientations in the unit cell for pressures up to 4.28~GPa. 
@@ -91,9 +91,9 @@ Winey and Gupta\cite{Winey_2001v90}
 re-analyzed Morris' data, identified the source of the inconsistency in 
 $C_{13}$, and reported an internally consistent and precise elastic tensor.
 
-There have been a number of theoretical studies of PETN crystals, 
-based on analytic, classical potentials.
-Dick and Ritchie\cite{Dick_1994,Ritchie_1993}
+There have been a number of theoretical studies of PETN crystals
+based on analytic classical potentials.
+Dick and Ritchie\cite{Dick_1994v76}
 performed molecular 
 mechanics calculations using the AMBER4.0 force field to study the energetics 
 associated with slip along specific directions in the crystal, in an effort 
@@ -102,18 +102,20 @@ were largely consistent with experimental data, but were not conclusive due
 to the lack of rate-dependent information.  
 
 Theoretical predictions of PETN crystal structure, thermal expansion, and 
-hydrostatic compression were reported by Sorescu {\it et al.}\cite{Sorescu_1999v103A,
+hydrostatic compression were reported by 
+Sorescu {\it et al.}\cite{Sorescu_1999v103A,
 Sorescu_1999v103}.  They used an intermolecular potential function developed 
 in their laboratory in conjunction with a rigid-molecule approximation for 
 the molecular structure. Agreement to within one percent of the measured 
-crystal lattice parameters was obtained at 300 K, although the calculated 
-thermal expansion was a factor of three smaller than the experimental 
-value.  Sorescu {\it et al.}\/  predicted linear compressibilities 
+crystal lattice parameters was obtained at 300~K, although the calculated 
+thermal expansion was three times smaller than the experimental 
+value.  Sorescu {\it et al.}\cite{Sorescu_1999v103}
+predicted linear compressibilities 
 that were in reasonable agreement with experiment for pressures below 
-4~GPa, with the onset of significant discrepancies for higher pressures.  (The 
+6~GPa, with the onset of significant discrepancies for higher pressures.  (The 
 calculated linear compressibilites were systematically lower than measured 
 ones, resulting in a larger error in the volumetric compressibility 
-over the entire pressure interval; which led to a 40\% error compared to 
+over the entire pressure interval; which led to a 41\% error compared to 
 experiment in the predicted initial bulk modulus.) The authors attributed 
 the errors in their predictions away from ambient conditions to a shortcoming 
 of the rigid-molecule approximation.
@@ -150,15 +152,16 @@ lattice
 parameters is performed at each of the eight volumes considered, assuming 
 a tetragonal cell (i.e., $a=b \neq c$, $\alpha=\beta=\gamma=90^\circ$).
 It should be noted that our all-electron treatment is considerably more
-demanding computationally than pseudopotential methods, but that it should
+demanding computationally than pseudopotential methods, but it should
 be free from potential errors associated with pseudopotentials that would
 likely become important at high pressures.
 
 The remainder of this paper is organized as follows: In
 Section~\ref{sec:comput} we describe the computational framework and
-protocol details of our calculations. In Section~\ref{sec:results} we 
+in Section~\ref{sec:protocol} the 
+details of our calculations. In Section~\ref{sec:results} we 
 present the results of the calculations and properties derived from them,
-with comparsions to experimental and preceding simulation studies. 
+with comparsions to experimental and previous theoretical studies. 
 Finally, in Section~\ref{sec:conclusions} we summarize the main conclusions
 of our work.
 
@@ -180,7 +183,7 @@ which exploits the temporal locality of SCF
 calculations to achieve excellent load
 balance. We have
 used a cluster of 256 4-CPU HP/Compaq Alphaserver ES45s with the
-Quadrics QsNet High Speed Interconnect, to perform all the calculations 
+Quadrics QsNet High Speed Interconnect to perform all the calculations 
 in this work.   Most of the calculations were performed using 32 
 processors.
 
@@ -195,7 +198,7 @@ here were performed with the 6-31G** basis set.
 For $k$-point sampling, we primarily used the $\Gamma$ point, which is 
 sufficient for the purpose in this work, as confirmed by repeating some 
 calculations with a larger $1 \times 1 \times 2 $ supercell.
-Thus, unless stated otherwise, all calculations were performed for a
+Thus, unless otherwise stated, all calculations were performed for a
 primary simulation cell corresponding to one crystallographic
 unit cell; i.e., a $1\times 1\times 1 $ system containing two molecules.  
 
@@ -215,45 +218,51 @@ structures, i.e., $a=b\neq c$, in the neighborhood of the tetragonal minimum;
 these tests indicated that the tetragonal structure is energetically favored 
 over nearby orthorhombic ones.  
 
-Energy-minimized structures for a given compression ratio $V/V_0$ 
-were obtained by scanning a range of ratios $c/a$ consistent with the 
+Energy-minimized structures for a given volume ratio $V/V_0$ 
+were obtained by scanning a set of $c/a$ ratios consistent with the 
 desired volume $V$.  Initial guesses were obtained by rigid translation 
-of the molecular structure obtained from the next larger compression ratio 
+of the molecular structure obtained from the next larger volume ratio 
 via a transformation that preserves the center-of-mass positions in 
-crystallographic coordinates.  Typically, seven different values of
+crystallographic coordinates.  Typically, seven values of
 $c/a$ were considered at a given volume $V=a^2c$, and the results were
 fit to a parabola.
 
 \section{Results}
 \label{sec:results}
-Calculated and measured lattice parameters are compared in Table I, where
-we also include the theoretical predictions of Sorescu et 
-al.\cite{Sorescu_1999v103}  and
+Calculated and measured lattice parameters are compared in 
+Table~\ref{tab:table1}, where
+we also include the experiemental results of Olinger {\it et al.}\cite{Olinger_1975v62} and Conant {\it et al.}\cite{Conant_1979}; 
+and the theoretical predictions of Sorescu {\it et al.}\cite{Sorescu_1999v103}  and
 Bunte and Sun\cite{Bunte_2000v104}  for completeness.  Percent errors in 
 our calculations 
-relative to the experimental results of Conant {\it et al.}\cite{Conant_1979} are 0.50\%, 0.75\%, 
+relative to the experimental results of Conant {\it et al.}\cite{Conant_1979} are 0.51\%, 0.75\%, 
 and 1.8\% for $a_0$, $c_0$, and $V_0$, respectively.  It is important to note 
 that we have not attempted to correct for thermal expansion, since 
 experimental coefficients of thermal expansion for PETN do not extend to 
 cryogenic temperatures. 
 
 Calculated intramolecular coordinates and selected intermolecular
-distances are compared to the experimental results of Conant {\it et al.}\/ in 
-Table II.  The predicted molecular geometry is in excellent agreement
+distances are compared to the experimental results of 
+Conant {\it et al.}\cite{Conant_1979} in Table~\ref{tab:table2}. 
+The predicted molecular geometry is in excellent agreement
 with experiment.  The 12\% discrepancy in the C-H distances is expected,
 since we are comparing to x-ray data.  Otherwise, most of the intramolecular
 degrees of freedom are accurately predicted to within a few percent.
-{\bf comment on intermolecular distances...}
+There are three intermolecular distances less than 3~\AA\ at equilibrium,
+each of which is an O$\cdot\cdot\cdot$H contact.  Predicted values are 2.396~\AA, 2.779~\AA,
+and 2.898~\AA, with errors relative to experiment of -3.5\%, -0.7\%, and
+0.1\%, respectively.
 
 The volumetric hydrostatic compression is summarized in 
 Fig.~\ref{fig:volume_compress}.  The 
-variation of the energy with compression ratio is shown in 
+variation of the energy with volume ratio is shown in 
 Fig.~\ref{fig:volume_compress}(a).
 The line is a sixth-degree polynomial fit, from which the pressure
-shown in Fig.~\ref{fig:volume_compress}(b) is obtained as $p=-dE/dV$.  
+shown in Fig.~\ref{fig:volume_compress}(b) is obtained as $P=-dE/dV$.  
 The open circles in Fig.~\ref{fig:volume_compress}(b) 
-are the experimental data of Olinger {\it et al.}; experimental uncertainties
-are smaller than the symbol sizes.  The calculated volumetric compression
+are the experimental data of Olinger {\it et al.}\/ with
+experimental uncertainties smaller than the symbol sizes.  
+The calculated volumetric compression
 is in remarkably good agreement with experiment.  The effects of finite 
 temperature would be expected to ``soften'' the calculated 
 isotherm at low pressures; however, the effect should
@@ -276,22 +285,25 @@ sizes.
 
 The linear compression along the $a$ and $c$ crystallographic directions
 is shown in Fig.~\ref{fig:linear_compress}.  We show in 
-Fig.~\ref{fig:linear_compress}(a) the relative compressions $x/x_0$, 
-where $x=a$ or $c$.  Calculated values are indicated by open symbols; the 
-dashed line is only intended as a guide for the eye.  Crosses and stars 
-denote the experimental data of Olinger {\it et al.}; as before, experimental 
+Fig.~\ref{fig:linear_compress}(a) the relative compressions of $a/a_0$  and
+$c/c_0$.
+Calculated values are indicated by open symbols.
+Crosses and stars denote the experimental data of 
+Olinger {\it et al.}\cite{Olinger_1975v62}; as before, experimental 
 uncertainties are smaller than the symbols.  
 In Fig.~\ref{fig:linear_compress}(b) we show the variation
 of the $c/a$ ratio as a function of compression.  Open squares are 
 calculated values; open circles were derived from the data of Olinger
-{\it et al.}; uncertainties in the experimental ratios calculated reported 
+{\it et al.}\cite{Olinger_1975v62}; uncertainties 
+in the experimental ratios indicated by the
 error bars are shown for representative cases.  The solid line is based
-on polynomial representations of $a=a(V)$ and $c=c(V)$ due to Olinger
-{\it et al.} Interestingly, both the calculated and experimental results indicate
-an initial decrease in the $c/a$ ratio, followed by an increase 
-towards a more ``cubic-like'' lattice structure.  The minimum in the
-curves are in fairly good agreement, and correspond to a pressure of 
-roughly 7.5~GPa.
+on polynomial representations of $a=a(V)$ and $c=c(V)$ 
+due to Olinger {\it et al.}\cite{Olinger_1975v62}. We observe an
+initial decrease in the $c/a$ ratio, followed by an increase 
+towards a more ``cubic-like'' lattice structure.  
+The minima in the curves are in fairly good agreement, 
+and correspond to a volume ratio of 0.8 and a pressure of about 7.5~GPa.
+
 
 \begin{figure}
 \resizebox*{3.5in}{!}{\includegraphics[clip]{CAndA.eps}}
@@ -310,135 +322,186 @@ polynomial form taken from Ref.~\cite{Olinger_1975v62}.
 \label{fig:linear_compress}
 \end{figure}
 
+%As expected, most of the change with increasing compression is associated
+%with intermolecular packing.  At zero pressure there are only twenty four
+%bonds per unit cell with $R_{ij} < $3.0 \AA.  At 25 GPa, this number has
+%increased to 140.  
 
-{\bf I need to add some discussion of the variation of internal
-and intermolecular coordinates with respect to pressure.  Next
-week...}
+\begin{figure}
+\resizebox*{3.5in}{!}{\includegraphics[clip]{VRatio_Bond_Angle_CloseContact.eps}}
+\caption{(a) The variation of bond lengths as functions of compression.
+The meaning of the symbols is as follows: cicle (CC), square (CO),
+diamond (ON), up triangle (NO1), cross(NO2),
+down triangle (CH1), plus (CH2). (b) The variation of angles as function of compression. The meaning of symbols is as follows:
+cicle (CCC2), square (CON), diamond (CCH2), up triangle (HCO2), cross (CCO)
+(c) The close contact distances as functions of compression. The circles, squares and diamonds corresponds to the first, second, and third set of OH distances.
+}
+\label{fig:intramolecular}
+\end{figure}
+In Figs.~\ref{fig:intramolecular}(a) and (b),
+we show the changes in the bond lengths and angles as PETN is 
+compressed. To avoid cluttering of data, we have only included 
+results which show bigger changes. It is observed that 
+the intramolecular bond lengths and angles remain almost constant
+for volume ratio from 1.00 to 0.80. Beyond 0.80, most bond lengths and 
+angles change by an appreciable amount. It is interesting to note that
+at $V/V_0 = 0.80$, the $c/a$ ratio attains its minimum. 
+Fig.~\ref{fig:intramolecular}(c)
+shows that  most changes with increasing compression are associated
+with intermolecular packing. 
+The results in Figs.~\ref{fig:intramolecular}(a), (b), and (c) 
+confirm the discussion of Pastine and Bernecker\cite{Pastine_1974v45}, who 
+stated that the initial compression of an organic explosive is almost 
+entirely due to a reduction of intermolecular distances. At higher compression,
+the intermolecular distances become too small that the increase of 
+van der Waals repulsion becomes comparable to the intramolecular repulsions 
+along the covalent bonds. From the results of our calculations, 
+the rigid molecule approximation 
+breaks down for pressure higher than about
+6.0 GPa (see Fig.~\ref{fig:volume_compress}(b)). 
+Indeed, Sorescu {\it et al.}\cite{Sorescu_1999v103} 
+have observed that the deviations of the predicted
+values from the experimental values increase 
+rapidly for pressure above 6.0~GPa,
+which they have attributed to the rigid molecule approximation.
 
-We can obtain the bulk modulus $K=-VdP/dV$ and its initial pressure
-derivative $K'=dK/dP$ from the $P-V$ data using equation of state 
+We can obtain the bulk modulus $\Bulk=-VdP/dV$ and its initial pressure
+derivative $\BPrime =d \Bulk/dP$ from the $PV$ data using equation of state 
 fitting forms.  In order to connect with preceding work, we consider
-four forms: the Murnaghan equation\cite{Murnaghan_1951}
-used by Sorescu {\it et al.},
+three forms. The first form is the Murnaghan equation\cite{Murnaghan_1951}
 \begin{equation}
-P(V)=\frac{K}{K'}\left[\left(\frac{V_0}{V}\right)^{K'}-1\right];
-\label{eq:Murnaghan}
+P=\frac{\Bulk}{\BPrime}\left(\eta^{-\BPrime}-1\right)
+\label{eq:Murna}
 \end{equation}
-the third-order Birch-Murnaghan equation\cite{Poirier_1991} 
+where $\eta=V/V_0$.
+The second form is the third-order Birch-Murnaghan equation\cite{Poirier_1991} 
 used previously in the analysis of the isotherm for the
 high explosive 
 octahydro-1,3,5,7-tetranitro-1,3,5-7-tetrazocine 
 (HMX)\cite{Yoo_1999v111,Menikoff_2001v21,Sewell_2003}
 \begin{equation}
-P(V)=\frac{3}{2}K(\eta^{-7/3}-\eta^{-5/3})
-     [1+\frac{3}{4}(K' -4)(\eta^{-2/3}-1)],
+P=\frac{3}{2}\Bulk(\eta^{-7/3}-\eta^{-5/3})
+     \left[1+\frac{3}{4}(\BPrime -4)(\eta^{-2/3}-1)\right],
+\label{eq:BM}
 \end{equation}
-where $\eta=V/V_0$; and a fitting form
+The third fitting form 
 \begin{equation}
-P(V)=\frac{V_0-V}{[V_0-s(V_0-V)]^2}c^2,
+P=\frac{(V_0-V)c^2}{[V_0-s(V_0-V)]^2},
+\label{eq:cs}
 \end{equation}
-used by Olinger {\it et al.}\/ in the analysis of their isotherm data for
+was used by Olinger {\it et al.}\/ in the analysis of their isotherm data for
 PETN\cite{Olinger_1975v62,Olinger_1976} and other explosives including
 TATB,\cite{Olinger_1976} $\beta$-HMX and RDX\cite{Olinger_1978}
-and nitromethane\cite{Yarger_1986v85} 
-based on the Hugoniot jump conditions
-\[ \frac{V}{V_0}=1-\frac{U_p}{U_s}, \ \ \ \  P=P_0+\rho_0U_pU_s. \]
+and nitromethane\cite{Yarger_1986v85}.
 In the latter case, the initial bulk modulus and its pressure derivative
-are given by $K=\rho_0c^2$ and $K'=4s-1$, respectively.  Finally,
-following Olinger {\it et al.}\/ we transformed our data into a psuedo-shock
-velocity/pseudo-particle velocity plane $(U_s,U_p)$ defined by
-\begin{equation}
-U_p=\sqrt{(P-P_0)(V_0-V)}
-\end{equation}
-\begin{equation}
-U_s=V_0\sqrt{(P-P_0)/(V_0-V)},
-\end{equation}
-in terms of which the parameters $c$ and $s$ defined above are the
-intercept and initial slope of the resulting curve in the $(U_s,U_p)$
-plane.
+are given by $\Bulk=c^2/V_0$ and $\BPrime=4s-1$, 
+respectively.
 
 Fits to isotherm data are quite sensitive to the fitting form chosen
 and the interval of data used in the fit, particularly if the interest
 is in obtainig precise predictions of the initial bulk modulus and
 its pressure derivative.  Thus, for the sake of simplicity,
-we restrict our fits to pressures of 10 GPa and
-below, and do not perform a thorough sensitivity analyis of the
+we restrict our fits to pressures %of 10 GPa and
+not exceeding 10.54~GPa (the maximum pressure achieved by Olinger {\it et
+al.}\cite{Olinger_1975v62})
+and do not perform a thorough sensitivity analyis of the
 predicted bulk modulus to details of how the fit is performed.
 
 Calculated and measured values for the initial bulk modulus and its 
-pressure derivative for PETN are summarized in Table III.  The results
-of fits in the $(P,V)$ plane to our calculated isotherm are fairly 
-consistent, with $K=13.2$--$14.8$~GPa and $K'=5.4$--$7.4$.  Sorescu
+pressure derivative for PETN are summarized in Table~\ref{tab:table3}.  
+The results of fits in the $PV$ plane to our calculated isotherm are fairly 
+consistent, with $\Bulk=14.5$ to $16.0$~GPa and $\BPrime=5.2$ to $6.7$.  
+Using the same fits to the experimental data 
+of Olinger {\it et al.}\cite{Olinger_1975v62}, 
+we obtain $\Bulk=9.4$ to $12.2$~GPa and $\BPrime=6.4$ to $11.3$
+Sorescu
 {\it et al.}\cite{Sorescu_1999v103}  
-reported $K=14.1$~GPa and $K'=10.4 $ for a fit of their
+reported $\Bulk=14.1$~GPa and $\BPrime=10.4 $ for a fit of their
 rigid-molecule simulation results to the Murnaghan equation of state 
-(Eq.~\ref{eq:Murnaghan}). 
-Olinger {\it et al.}\cite{Olinger_1976} reported $K=8.8$~GPa and $K'=9.9$ 
-from their
+(Eq.~(\ref{eq:Murna})). 
+Olinger {\it et al.}\cite{Olinger_1976} reported $\Bulk=8.8$~GPa 
+and $\BPrime=9.9$ from their
 analysis of the experimental isotherm.  (Note that these
-are revised values of $K$ and $K'$, and are different from the 
+are revised values of $\Bulk$ and $\BPrime$, and are different from the 
 ones initially published in Ref. \cite{Olinger_1975v62} and subsequently
 used for comparison by 
 Sorescu {\it et al.}\/ in Ref. \cite{Sorescu_1999v103}.)  Another experimental 
-value for $K$
+value for $\Bulk$
 can be obtained from the isentropic elastic tensor reported by Winey and 
 Gupta\cite{Winey_2001v90}.  Specifically, 
 \begin{equation}
-K=\frac{C_{33}(C_{11}+C_{12})-2C_{13}^2}{C_{11}+C_{12}+2C_{33}-4C_{13}}.
+\Bulk=\frac{C_{33}(C_{11}+C_{12})-2C_{13}^2}{C_{11}+C_{12}+2C_{33}-4C_{13}}.
 \end{equation}
-This results in an {\em isentropic} bulk modulus $K_s=9.8$~GPa, which can 
-be transformed to an {\em isothermal} bulk modulus $K_t$ using the relation 
-$K_t/K_s=C_V/C_P$.  Using values for $C_V$ and $C_P$ recommended in Ref. 
-\cite{Olinger_1976}  yields $K=9.1$~GPa. It is perhaps unsurprising that the values
-of $K$ estimated from the zero Kelvin isotherm are larger than the values
+This results in an {\em isentropic} bulk modulus $\Bulk^{s}=9.8$~GPa, which can 
+be transformed to an {\em isothermal} bulk modulus $\Bulk^t$ using the relation 
+$\Bulk^t/\Bulk^s=C_V/C_P$.  Using values for $C_V$ and $C_P$ recommended in Ref. 
+\cite{Olinger_1976}  yields $\Bulk=9.1$~GPa. It is perhaps unsurprising that the values
+of $\Bulk$ estimated from the zero Kelvin isotherm are larger than the values
 obtained from room-temperature data.  Likewise, the fact that the value
-of $K$ reported by Sorescu and Thompson is larger than experiment even
+of $\Bulk$ reported by Sorescu and Thompson is larger than experiment even
 though it is based on a room-temperature isotherm can be tentatively 
 attributed to the use of a rigid-molecule simulation protocol.
 
-The result we obtain for the bulk modulus using Eqs. 3--4  is substantially 
-different from the others: $K=6.1$~GPa and $K'=18.7$.  As has been 
-noted previously, for organic molecular cyrstals one expects significant 
-curvature in the $(U_s,U_p)$ plane for low levels of compression.  This 
-stands in contrast to metals or covalent solids, for which a linear 
-$U_s,U_p$ curve is generally expected.  This is shown in  Fig.~3, where
-we include our results (open symbols connected by dashed lines) and
-a piece-wise fit taken from Olinger {\it et al.}\cite{Olinger_1976}  From the 
-figure it is
-clear that additional calculations at lower levels of compression (smaller
-values of the abscissa) would be required to specify precisely the
-initial slope (proportional to $K'$) and intercept (proportional 
-to $K^{1/2}$).  Indeed, in their final report on the PETN isotherm, Olinger
-{\it et al.}\/ used an independently measured bulk sound speed to specify the
-intercept in the $(U_s,U_p)$ plane.
+%The result we obtain for the bulk modulus using Eqs. 3--4  is substantially 
+%different from the others: $\Bulk=6.1$~GPa and $\BPrime=18.7$.  As has been 
+%noted previously, for organic molecular cyrstals one expects significant 
+%curvature in the $(U_s,U_p)$ plane for low levels of compression.  This 
+%stands in contrast to metals or covalent solids, for which a linear 
+%$U_s,U_p$ curve is generally expected.  This is shown in  Fig.~3, where
+%we include our results (open symbols connected by dashed lines) and
+%a piece-wise fit taken from Olinger {\it et al.}\cite{Olinger_1976}  From the 
+%figure it is
+%clear that additional calculations at lower levels of compression (smaller
+%values of the abscissa) would be required to specify precisely the
+%initial slope (proportional to $\BPrime$) and intercept (proportional 
+%to $\Bulk^{1/2}$).  Indeed, in their final report on the PETN isotherm, Olinger
+%{\it et al.}\/ used an independently measured bulk sound speed to specify the
+%intercept in the $(U_s,U_p)$ plane.
 
-\begin{figure}
-\resizebox*{3.5in}{!}{\includegraphics[clip]{us-up.eps}}
-\caption{Hydrostatic compression of PETN in the $(U_s,U_p$) plane.  
-Symbols connected by solid black line: this work.  Red line: fit 
-to experimental data published by Olinger {\it et al.}
-}
-\label{fig:us-up}
-\end{figure}
 
 
 
 \section{Conclusions}
 \label{sec:conclusions}
 Hydrostatic compression of pentaerythritol tetranitrate (PETN) has
-been studied with all-electron calculations with DFT/PBE in
-conjunction with 6-31G** basis set. The results of pressure versus 
-$V/V_0$ are in good agreement with the experimental results.
+been studied with all-electron calculations with DFT-PBE in
+conjunction with 6-31G** basis set. Even though our all-electron 
+studies are considerably more expensive than the pseudopotential
+studies, the obvious advantage of our approach is that the results obtained are
+free from any errors that might result from the pseudopotential approximation,
+especially at a highly compressed state. 
+The content of the simulation cell is fully relaxed, which should give more 
+reliable results than those obtained with a rigid molecule approximation, 
+especially at a highly compressed state.
+The results of pressure, $a/a_0$, $c/c_0$, and $c/a$ versus 
+$V/V_0$ are in good agreement with the experimental results. 
+Our calculations predicted that the tetragonal PETN cyrstal should 
+approach a cubic one when high hydrostatic pressure is applied, which is again
+in agreement with the experimental results.
+Our results of the bulk modulus and its pressure derivative are in fairly good
+agreement with the experimental results.
+Our calculations reveal that the initial compression is accompanied by
+an decrease of intermolecular distances up to about 6.00~GPa, and then
+followed by the intramolecular changes. This confirms the discussion
+by Pastine and Bernecker\cite{Pastine_1974v45}.
 
-It would be interesting to compare the results of 
-our all-electron calculations with that
-obtained with the pseudopotential
-calculations, which may not be appropriate in 
-the limit of highly compressed state.
+The success of our all-electron approach should open the door to the studies
+of hydrostatic compression of other materials of interest or other
+explosives such as TATB, HMX, and RDX. 
+Finally, it would be interesting to perform a systematic assessment of
+pseudopotential errors in the regime of high compression, by using
+our all-electron results as a benchmark.
 
-Chee Kwan and Matt: Make some wise-sounding statements here.
-I'm going to take a break for a few days.  Note that some of
-the columns in Table II get chopped off.
+\begin{acknowledgments}
+This work has been carried out under the auspices of the US Department
+of Energy under contract W-7405-ENG-36 and the ASCI project.  Most work 
+was perform on the computing resources at the
+Advanced Computing Laboratory of Los Alamos National Laboratory, Los
+Alamos, NM 87545. 
+We thank A.~H.~Strachan for many fruitful discussions.
+\end{acknowledgments}
+
+
 
 
 \begin{table}[p]
@@ -448,16 +511,17 @@ the columns in Table II get chopped off.
 a(\AA) & c(\AA) & V(\AA$^3$) & Source \\
 \hline
 9.425  & 6.758  &  600.3  & This work \\
-9.3776 & 6.7075 &  589.9  & Conant {\it {\it et al.}} (1979) \\
-9.383  & 6.711  &  590.8  & Olinger, Halleck, and Cady (1975) \\
-9.117  & 6.721  &  558.6  & Bunte and Sun (energy minimization) \\
-9.35   & 6.67   &  583    & Bunte and Sun (NPT-MD, 293K) \\
-9.2836 & 6.5995 &  569.79 & Sorescu {\it et al.}\/ (energy minimization, rigid molecules) \\
-9.3471 & 6.6571 &  581.5  & Sorescu {\it et al.}\/ (NPT-MD, 300K, rigid molecules) \\
+9.383  & 6.711  &  590.8  & Olinger {\it et al.}\cite{Olinger_1975v62}\\
+9.3776 & 6.7075 &  589.9  & Conant {\it et al.}\cite{Conant_1979} \\
+%9.117  & 6.721  &  558.6  & Bunte and Sun\cite{Bunte_2000v104} \\
+9.35   & 6.67   &  583    & Bunte and Sun\cite{Bunte_2000v104} (NPT-MD, 293K) \\
+9.3348 & 6.6500 &  579.47 & Sorescu {\it et al.}\cite{Sorescu_1999v103} (NPT-MD, 293K) \\
+% wrong values 9.2836 & 6.5995 &  569.79 & Sorescu {\it et al.}\/ (energy minimization, rigid molecules) \\
+% 9.3471 & 6.6571 &  581.5  & Sorescu {\it et al.}\/ (NPT-MD, 300K, rigid molecules) \\
 \hline\hline
 \end{tabular}
 \end{center}
-\caption{Equilibrium lattice parameters and unit cell volumes for PETN-I.
+\caption{Equilibrium lattice parameters and unit cell volumes for PETN.
 }
 \label{tab:table1}
 \end{table}
@@ -468,22 +532,26 @@ a(\AA) & c(\AA) & V(\AA$^3$) & Source \\
 \begin{tabular}{llllll}
 \hline\hline
 Source & C-C & C-H & C-O & O-N & N=O  \\
-MondoSCF & 1.532 (0.07) & 1.098 (12.0) & 1.444 (0.1) &  1.437 (2.4) & 1.219 (1.9) \\
-Ref. X   &  1.531   &       0.98    &      1.446    &     1.403 &      1.196 \\
+This work & 1.532 (0.1) & 1.098 (12.0) & 1.444 (0.1) &  1.437 (2.4) & 1.219 (1.9) \\
+Ref.\cite{Conant_1979} &  1.531   &   0.98  & 1.446  &  1.403 &   1.196 \\
 \hline
 \\
 Source  &  CCH   &        HCH     &      CCO    &       HCO \\
-MondoSCF & 111.0 (-1.1)  & 108.1  (1.5) &  106.6 (-0.09) & 110.1 (0.5) \\
-Ref. X   &  112.2        &  106.5       &  106.7         & 109.6 \\
+This work & 111.0 (-1.1)  & 108.1  (1.5) &  106.6 (-0.1) & 110.1 (0.5) \\
+Ref.\cite{Conant_1979} &  112.2    &  106.5  &  106.7   & 109.6 \\
 \hline
 \\
 Source   &  CON     &       ONO1   &        ONO2     &      ONO \\
-MondoSCF&  111.8 (-1.2) &  117.4 (-0.3)&  111.9 (-0.09)&  130.7 (0.3)\\
-Ref. X &    113.2   &       117.7   &       112.0   &       130.0\\
+This work&  111.8 (-1.2) &  117.4 (-0.3)&  111.9 (-0.1)&  130.7 (0.3)\\
+Ref.\cite{Conant_1979} &    113.2   &       117.7   &       112.0   &       130.0\\
 \hline\\
-Source &    CCON    &       CONO1   &       CONO2\\
-MondoSCF &  169.9 (0.3) &   3.4 (0.0) &     176.6 (-0.1)\\
-Ref. X  &   169.4   &       3.4     &       176.8\\
+Source &    CCON    &       CONO1   &       CONO2    &   CCC1\\
+This work &  169.9 (0.3) &   3.4 (0.0) &     176.6 (-0.1) & 108.1 (0.4)\\
+Ref.\cite{Conant_1979} &   169.4   &       3.4     &       176.8        & 107.7\\
+\hline\\
+Source &  CCC2 &  O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H   &       O$\cdot\cdot\cdot$H\\
+This work &  112.2 (-0.4) & 2.396 (-3.5) &   2.779 (-0.7) & 2.898 (0.1)\\
+Ref.\cite{Conant_1979} &   112.7 & 2.482   &       2.798   &       2.894\\
 \hline\hline
 \end{tabular}
 \end{center}
@@ -498,22 +566,29 @@ are percent errors.
 \begin{center}
 \begin{tabular}{lllll}
 \hline\hline
-$K$ &   $K'$   &   Source  &    Fitting form &      Comment \\
-14.6 & 5.6  &  This work &  Murnaghan    &      For $ P \le 10.3 $ GPa \\
-13.2 & 7.4  &  This work &  B-M       &                --- \\
-14.8 & 5.4  &  This work &  P(V)    &                  --- \\
- 6.1 &18.7  &  This work &  hugoniot  &                --- ; quadratic fit \\
-14.1 &10.4  &  Sorescu   &  Murnaghan &         Rigid molecule NPT-MD at 298K \\
- 8.8 & 9.9 &   Olinger {\it et al.}& &              From Conference proceeding \\
- 9.1 & --- &   Winey     &     &             Calculated from isentropic value \\
-                                         %  value using $K_t=K_s*(C_v/C_p)$
-                                         %  with $K_s=9.85$~GPa, $C_v=1.00$~J/g/K,
-                                         %  and Cp=1.08 J/g/K.
+$\Bulk$(GPa) &   $\BPrime$   &   Source  &    Fitting form &      Comment \\
+\hline
+%14.6 & 5.6 &  This work & Eq.~(\ref{eq:Murna}) & For $ P \le 10.3 $GPa\\
+%13.2 & 7.4 &  This work &  Eq.~(\ref{eq:BM})       &                --- \\
+%14.8 & 5.4 &  This work &  Eq.~(\ref{eq:cs})    &                  --- \\
+% 6.1 &18.7 &  This work &  hugoniot  &                --- ; quadratic fit \\
+15.8 & 5.3 & This work &  Eq.~(\ref{eq:Murna}) & For $P \le 10.45$~GPa \\
+14.5 & 6.7 & This work & Eq.~(\ref{eq:BM}) & For $P \le 10.45$~GPa \\
+16.0 & 5.2 & This work & Eq.~(\ref{eq:cs}) & For $P \le 10.45$~GPa \\
+11.7 & 6.8 & Olinger {\it et al.}\cite{Olinger_1975v62} & Eq.~(\ref{eq:Murna}) \\
+9.4 & 11.3 & Olinger {\it et al.}\cite{Olinger_1975v62} & Eq.~(\ref{eq:BM}) \\
+12.2 & 6.4 & Olinger {\it et al.}\cite{Olinger_1975v62} & Eq.~(\ref{eq:cs}) \\
+8.8 & 9.9 &   Olinger {\it et al.}&   &        From Conference proceeding{\bf REF?} \\
+ 9.1 & --- &   Winey and Gupta\cite{Winey_2001v90} &     & Calculated from isentropic value \\
+                                     %  value using $\Bulk_t=\Bulk_s*(C_v/C_p)$
+                                     %  with $K_s=9.85$~GPa, $C_v=1.00$~J/g/K,
+                                     %  and Cp=1.08 J/g/K.
+14.1 &10.4 &Sorescu {\it et al.}\cite{Sorescu_1999v103} & Eq.~(\ref{eq:Murna})&         NPT-MD at 298K\\
 \hline\hline
 \end{tabular}
 \end{center}
-\caption{Calculated and measured bulk moduli $K$ and pressure
-derivative $K'$ for PETN.
+\caption{Calculated and measured bulk moduli $\Bulk$ and pressure
+derivative $\BPrime$ for PETN.
 }
 \label{tab:table3}
 \end{table}
