@@ -86,7 +86,7 @@ PROGRAM HaiKu
 ! Put Exc to Info
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
 ! Printing
-  CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
+!  CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog,Unit_O=6)
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
