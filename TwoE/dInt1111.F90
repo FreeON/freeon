@@ -25,6 +25,11 @@
       INTEGER       :: OffSet,GOA,GOB,GOC,GOD
       INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
+
+
+      !write(*,*) 'in dint1111'
+
+
       CrtSet1=GOA
       CrtSet2=GOA+1
       CrtSet3=GOA+2

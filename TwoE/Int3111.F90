@@ -4,22 +4,21 @@
    SUBROUTINE Int3111(PrmBufB,LBra,PrmBufK,LKet,ACInfo,BDInfo, & 
                               OA,LDA,OB,LDB,OC,LDC,OD,LDD,PBC,I) 
       USE DerivedTypes
-      USE VScratch
       USE GlobalScalars
       USE ShellPairStruct
       USE GammaF0
       USE GammaF1
-      IMPLICIT REAL(DOUBLE) (A,I,W)
+      IMPLICIT REAL(DOUBLE) (A,I,V,W)
       INTEGER        :: LBra,LKet
       REAL(DOUBLE)   :: PrmBufB(7,LBra),PrmBufK(7,LKet)
       TYPE(SmallAtomInfo) :: ACInfo,BDInfo
       TYPE(PBCInfo) :: PBC
       REAL(DOUBLE) :: I(*)
       REAL(DOUBLE)  :: Zeta,Eta,r1xZpE,HfxZpE,r1x2E,r1x2Z,ExZpE,ZxZpE,Omega,Up,Uq,Upq
-      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz
+      REAL(DOUBLE)  :: Ax,Ay,Az,Bx,By,Bz,Cx,Cy,Cz,Dx,Dy,Dz,Qx,Qy,Qz,Px,Py,Pz,Wx,Wy,Wz
       REAL(DOUBLE)  :: QCx,QCy,QCz,PAx,PAy,PAz,PQx,PQy,PQz,WPx,WPy,WPz,WQx,WQy,WQz   
       REAL(DOUBLE)  :: T,ET,TwoT,InvT,SqInvT,ABx,ABy,ABz,CDx,CDy,CDz
-      INTEGER       :: OffSet,OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
+      INTEGER       :: OA,LDA,OB,LDB,OC,LDC,OD,LDD,J,K,L
       REAL(DOUBLE)  :: FPQx,FPQy,FPQz
       I1Bar1=0.0d0
       I2Bar1=0.0d0
@@ -49,9 +48,6 @@
          Qy =PrmBufK(3,J)
          Qz =PrmBufK(4,J)
          Uq =PrmBufK(5,J)
-         QCx=Qx-Cx
-         QCy=Qy-Cy
-         QCz=Qz-Cz
          DO K=1,LBra ! K^2 VRR (M0| loop 
             Zeta=PrmBufB(1,K)
             Px  =PrmBufB(2,K)
@@ -72,7 +68,7 @@
             PQx=Px-Qx
             PQy=Py-Qy
             PQz=Pz-Qz
-      ! Need to be improve...
+            ! Need to be improved...
             FPQx = PQx*PBC%InvBoxSh%D(1,1)+PQy*PBC%InvBoxSh%D(1,2)+PQz*PBC%InvBoxSh%D(1,3)
             FPQy = PQy*PBC%InvBoxSh%D(2,2)+PQz*PBC%InvBoxSh%D(2,3)
             FPQz = PQz*PBC%InvBoxSh%D(3,3)
@@ -82,7 +78,7 @@
             PQx  = FPQx*PBC%BoxShape%D(1,1)+FPQy*PBC%BoxShape%D(1,2)+FPQz*PBC%BoxShape%D(1,3)
             PQy  = FPQy*PBC%BoxShape%D(2,2)+FPQz*PBC%BoxShape%D(2,3)
             PQz  = FPQz*PBC%BoxShape%D(3,3)
-      !
+            !
             WPx = -Eta*PQx*r1xZpE
             WPy = -Eta*PQy*r1xZpE
             WPz = -Eta*PQz*r1xZpE
@@ -101,17 +97,20 @@
               SqInvT=SqInvT*InvT
               AuxR1=+4.431134627263790D-01*Upq*SqInvT
             ENDIF
-      I1Bar1=AuxR0+I1Bar1
-      I2Bar1=AuxR0*PAx+AuxR1*WPx+I2Bar1
-      I3Bar1=AuxR0*PAy+AuxR1*WPy+I3Bar1
-      I4Bar1=AuxR0*PAz+AuxR1*WPz+I4Bar1
+            I1Bar1=AuxR0+I1Bar1
+            I2Bar1=AuxR0*PAx+AuxR1*WPx+I2Bar1
+            I3Bar1=AuxR0*PAy+AuxR1*WPy+I3Bar1
+            I4Bar1=AuxR0*PAz+AuxR1*WPz+I4Bar1
          ENDDO ! (M0| loop
       ENDDO ! |N0) loop
       ! HRR 
-      OffSet=(OA+0)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I2Bar1+I(OffSet)
-      OffSet=(OA+1)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I3Bar1+I(OffSet)
-      OffSet=(OA+2)*LDA+(OB+0)*LDB+(OC+0)*LDC+(OD+0)*LDD 
-      I(OffSet)=I4Bar1+I(OffSet)
+      I((OA+0)*LDA+OB*LDB+OC*LDC+OD*LDD)=I((OA+0)*LDA+OB*LDB+OC*LDC+OD*LDD)+I2Bar1
+      I((OA+1)*LDA+OB*LDB+OC*LDC+OD*LDD)=I((OA+1)*LDA+OB*LDB+OC*LDC+OD*LDD)+I3Bar1
+      I((OA+2)*LDA+OB*LDB+OC*LDC+OD*LDD)=I((OA+2)*LDA+OB*LDB+OC*LDC+OD*LDD)+I4Bar1
    END SUBROUTINE Int3111
+
+
+
+
+
+
