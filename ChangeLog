@@ -1,3 +1,87 @@
+2003-05-22 11:27  mchalla
+
+	* OneE/MMA/: Omega1Gen.m, PseudopotentialTypeOne.nb: Notebooks and
+	MMA code to generate type one angular integrals for ECPs.
+
+2003-05-20 10:38  schwegle
+
+	* ONX/GDrivers/Notes.txt: Things left to fix.
+
+2003-05-19 14:32  tymczak
+
+	* SCFeqs/P2Use.F90: Works with ghosts (Gives them zero weight)
+
+2003-05-19 14:31  tymczak
+
+	* QCTC/NukE.F90: Works with Ghosts
+
+2003-05-19 14:30  tymczak
+
+	* MondoSCF2/SCFs.F90: Changed To incorporate NextGeomery -- Off at
+	the Moment and will be changed
+
+2003-05-19 14:28  tymczak
+
+	* MondoSCF2/ParseGeometries.F90, OneE/RhoTools.F90: Works with
+	ghosts
+
+2003-05-19 14:27  tymczak
+
+	* MondoSCF2/ParseBasis.F90: If it does not Find the Ghost Basis
+	Function in the Basis Set file, it the Searches for them in
+	Ghost.bas This should alow for great flexability
+
+2003-05-19 14:25  tymczak
+
+	* MondoSCF2/GeometryKeys.F90: Added the Key "<NextGeometry>"
+
+2003-05-19 14:23  tymczak
+
+	* MondoMods/GlobalScalars.F90: Unit GBas=34 now exists
+
+2003-05-19 14:22  tymczak
+
+	* MondoMods/BasisSetParameters.F90: Added the ghost atoms g0, g1
+	and g2
+
+2003-05-19 14:21  tymczak
+
+	* BasisSets/Ghost.bas: 
+	File which contains the Ghost Basis function Not sure we want to do
+	it this way ! Reads this file if it does not find the ghost
+	functions in the Basis set file
+
+2003-05-16 11:19  tymczak
+
+	* MondoMods/BasisSetParameters.F90: Fixed Bug
+
+2003-05-16 11:06  tymczak
+
+	* MondoMods/BasisSetParameters.F90: Added Basis Set Crystal
+
+2003-05-16 11:02  tymczak
+
+	* BasisSets/Crystal98.bas: [no log message]
+
+2003-05-16 10:26  tymczak
+
+	* BasisSets/Crystal98.bas: Adding The Crystal 98 basis set for
+	Validation Included is H-->Mg
+
+2003-05-15 18:06  nemeth
+
+	* MondoSCF2/: ControlStructures.F90, GDIIS.F90, GeomOptKeys.F90,
+	InCoords.F90, Optimizer.F90, ParseGeomOpt.F90: These changes allow
+	energy-based back-tracking during geometry optimization. 
+	Back-tracking is turned on by default. It can be turned off by
+	putting 'NoBackTr' into the 'GRAD=' line of the input.
+
+2003-05-15 12:52  mchalla
+
+	* MondoSCF2/: ParseBasis.F90, PunchHDF.F90: Fixed problem with cell
+	sets on restart, and with ecp memory on multiple basis set
+	calculations.
+
 2003-05-15 11:54  mchalla
 
 	* BasisSets/: LANL2_DZ_ECP.bas, SBKJC_VDZ_ECP.bas: Two new ecp
@@ -5,7 +89,7 @@
 
 2003-05-15 11:53  mchalla
 
-	* MondoSCF2/ParseBasis.F90: [no log message]
+	* MondoSCF2/ParseBasis.F90, ChangeLog: [no log message]
 
 2003-05-15 11:53  mchalla
 
