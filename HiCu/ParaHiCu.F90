@@ -89,32 +89,32 @@ CONTAINS
   !===============================================================================
   SUBROUTINE GetBBox()
     LOGICAL::Exist
-    INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J
+    INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J,Ind,LineLocExist
     REAL(DOUBLE)::x2,LinDim
+    TYPE(INT_VECT) :: ETDirArr
+    TYPE(DBL_VECT) :: ETRootArr
 
 
     NVol = NPrc
     CALL New(LCoor,(/3,NVol/))
     CALL New(RCoor,(/3,NVol/))
 
-    INQUIRE(FILE='LineLoc.dat',EXIST=Exist)
+    CALL Get(LineLocExist,'LineLocExist')
+    IF(LineLocExist /= 0) THEN
+      Exist = .TRUE.
+    ENDIF
 
     IF(Exist) THEN
+       CALL New(ETDirArr,NPrc-1)
+       CALL New(ETRootArr,NPrc-1)
+       CALL Get(ETDirArr,'ETDirArr')
+       CALL Get(ETRootArr,'ETRootArr')
        IF(MyID == 0) THEN
-          !        CALL OpenASCII(OutFile,Out)
-          !        WRITE(Out,*) 'LineLoc.dat exists. To be opened..'
-          !        CLOSE(Out,STATUS='KEEP')
-          OPEN(UNIT=54,FILE='LineLoc.dat',FORM='formatted',Status='unknown')
-          READ(54,*) NVol
+          NVol = LineLocExist 
           IF(NVol /= NPrc) THEN
              WRITE(*,*) 'NVol = ',NVol, ',  NPrc = ',NPrc
              STOP 'ERROR: LineLoc.dat -- NVol is not equal to NPrc!'
           ENDIF
-          ! READ(54,*) LCoor%D(1:3,1)
-          ! READ(54,*) RCoor%D(1:3,1)
-
-          !! LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
-          !! RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
           LCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,1)
           RCoor%D(1:3,1) = GRhoBBox%BndBox(1:3,2)
 
@@ -129,14 +129,18 @@ CONTAINS
              STOP
           ENDIF
 
+          Ind = 1
           DO Stage = 1, SmallN
              DO PIndex = 1, Power2(Stage-1)
                 CIndex = PIndex + Power2(Stage-1)
                 LCoor%D(1:3,CIndex) = LCoor%D(1:3,PIndex)
                 RCoor%D(1:3,CIndex) = RCoor%D(1:3,PIndex)
 
-                READ(54,*) DirInt
-                READ(54,*) x2
+                ! READ(54,*) DirInt
+                ! READ(54,*) x2
+                DirInt = ETDirArr%I(Ind)
+                x2 = ETRootArr%D(Ind)
+                Ind = Ind + 1
                 RCoor%D(DirInt,PIndex) = x2
                 LCoor%D(DirInt,CIndex) = x2
              ENDDO
@@ -152,14 +156,14 @@ CONTAINS
                 ENDIF
              ENDDO
           ENDDO
-          CLOSE(53)
-          CLOSE(54)
        ENDIF
+       CALL Delete(ETDirArr)
+       CALL Delete(ETRootArr)
     ELSE
        ! assign the first box
        IF(MyID == 0) THEN
           CALL OpenASCII(OutFile,Out)
-          WRITE(Out,*) 'LineLoc.dat does not exist.'
+          WRITE(Out,*) 'LineLoc is not found.'
           CLOSE(Out,STATUS='KEEP')
 
           ! use the GRhoBBox information rather than RhoRoot 
@@ -1107,22 +1111,9 @@ CONTAINS
           WRITE(*,*) 'RootIndex = ',RootIndex, ', RootNum = ',RootNum
           STOP 'RootIndex not equal to RootNum'
        ENDIF
-       OPEN(unit=54,FILE='LineLoc.dat',form='formatted',status='unknown')
-       WRITE(54,*) NVol
-       ! WRITE(54,*) RepLCoor%D(1:3,1)
-       ! WRITE(54,*) RepRCoor%D(1:3,1)
-       DO I = 1, RootNum
-          WRITE(54,*) ETDirArr%I(I)
-          WRITE(54,*) ETRootArr%D(I)
-       ENDDO
-
-       CLOSE(54)
-
-       !! OPEN(unit=53,FILE='LeafTmInVol.dat',form='formatted',status='unknown')
-       !! DO I = 1, NVol
-       !!   WRITE(53,*) I, RepLeavesTm%D(I)
-       !! ENDDO
-       !! CLOSE(53)
+       CALL Put(NPrc,'LineLocExist')
+       CALL Put(ETDirArr,'ETDirArr')
+       CALL Put(ETRootArr,'ETRootArr')
 
        ! ask all processors to quit now!
        BoxPoint(1:6) = 0.0D0
