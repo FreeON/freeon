@@ -506,9 +506,6 @@ MODULE MemMan
          CALL New(A%IJ,(/2,NBond/))
          CALL New(A%Length,NBond)
          CALL New(A%Type,NBond)
-         CALL New(A%HBExtraSN,NBond)
-         CALL New(A%HBExtraNC,NBond)
-         CALL New(A%LonelyAtom,NBond)
          A%Alloc=ALLOCATED_TRUE
       END SUBROUTINE New_BONDDATA
 !     
@@ -524,9 +521,6 @@ MODULE MemMan
          CALL Delete(A%IJ)
          CALL Delete(A%Length)
          CALL Delete(A%Type)
-         CALL Delete(A%HBExtraSN)
-         CALL Delete(A%HBExtraNC)
-         CALL Delete(A%LonelyAtom)
          A%Alloc=ALLOCATED_FALSE
       END SUBROUTINE Delete_BONDDATA
 !     

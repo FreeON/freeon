@@ -2246,9 +2246,6 @@ CONTAINS
       CALL Put(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
       CALL Put(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
       CALL Put(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
-      CALL Put(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
-      CALL Put(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
-      CALL Put(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
     ENDIF
   END SUBROUTINE Put_BondD
 !
@@ -2265,9 +2262,6 @@ CONTAINS
       CALL Get(A%IJ,TRIM(Name)//'IJ',Tag_O=Tag_O) 
       CALL Get(A%Length,TRIM(Name)//'Length',Tag_O=Tag_O) 
       CALL Get(A%Type,TRIM(Name)//'Type',Tag_O=Tag_O) 
-      CALL Get(A%HBExtraSN,TRIM(Name)//'HBExtraSN',Tag_O=Tag_O) 
-      CALL Get(A%HBExtraNC,TRIM(Name)//'HBExtraNC',Tag_O=Tag_O) 
-      CALL Get(A%LonelyAtom,TRIM(Name)//'LonelyAtom',Tag_O=Tag_O) 
     ENDIF
   END SUBROUTINE Get_BondD
 !

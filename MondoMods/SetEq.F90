@@ -801,9 +801,6 @@ MODULE SetXYZ
         A%IJ%I(1:2,IA)=B%IJ%I(1:2,IB)
         A%Length%D(IA)=B%Length%D(IB)      
         A%Type%C(IA)=B%Type%C(IB)      
-        A%HBExtraSN%I(IA)=B%HBExtraSN%I(IB)      
-        A%HBExtraNC%I(IA)=B%HBExtraNC%I(IB)      
-        A%LonelyAtom%I(IA)=B%LonelyAtom%I(IB)      
       END SUBROUTINE Set_Bond_EQ_Bond
 !
 !---------------------------------------------------------------

@@ -277,9 +277,6 @@ MODULE DerivedTypes
      TYPE(INT_RNK2) :: IJ
      TYPE(DBL_VECT) :: Length
      TYPE(CHR10_VECT) :: Type
-     TYPE(INT_VECT) :: HBExtraSN !serial # of third atom in HBond
-     TYPE(INT_VECT) :: HBExtraNC !nuclear charge of third at in HBond
-     TYPE(INT_VECT) :: LonelyAtom   ! 1 for lonely, 0 otherwise
    END TYPE BONDDATA
 !
 !----------------------------------------------------------------------
