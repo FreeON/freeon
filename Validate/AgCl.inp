@@ -1,0 +1,54 @@
+<BeginTitle>
+
+Silver Chloride
+
+RHF(CRYSTAL98/5-D)=-1.5969706000404E+02
+
+<EndTitle>
+
+<BeginOptions>
+Charge=0
+Multiplicity=1
+MPIInvoke="prun"
+MPIProcFlag="-n"
+
+Clones=1
+MPIProcessors=32
+MPISpatialProc=32
+
+DebugAll=(MaxDebug,CheckSums)
+Guess=SuperPos
+SCFMethod=(RH)
+BasisSets=(User4)
+ModelChem=(HF)
+Accuracy =(Tight)
+Geometry=(InAngstroms,NoOrder)
+PBC=(T,T,T)
+Periodic=(18,AtomCoord)
+<EndOptions>
+
+<BeginPeriodic>
+av 0.000 2.755  2.755
+bv 2.755 0.000  2.755
+cv 2.755 2.755  0.000
+<EndPeriodic>
+
+<BeginGeometry>
+ Ag   0.000   0.000   0.000
+ Cl   2.755   2.755   2.755
+<EndGeometry>
+
+
+
+10 -159.57037784
+20 -159.53830276
+30 -159.53641980
+GP -159.53567138
+
+
+ 5.51   5.51  30.00  90.000  90.000  90.000
+
+ Ag   0.000   0.000   0.000
+ Cl   0.000   0.000   4.722
+
+
