@@ -759,6 +759,8 @@ CONTAINS
      IF(AllocQ(IntCs%Alloc)) CALL Delete(IntCs)
      !
      NIntC_Cart=0
+     NIntC_Bas=0
+     NIntC_VDW=0
      !
      CALL New(AtNum,NatmsLoc)
      DO I=1,NatmsLoc
@@ -2430,7 +2432,7 @@ CONTAINS
      TYPE(TrfCtrl)                :: GTrfCtrl
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ
      INTEGER                      :: NatmsLoc,NCart,NIntC,At1,At2,At3
-     INTEGER                      :: NMax12,I,J,NCartConstr
+     INTEGER                      :: I,J,NCartConstr
      TYPE(BMATR)                  :: B,B1,B2
      INTEGER                      :: Print,ILowDim
      LOGICAL                      :: Print2,DoConstr
@@ -2446,7 +2448,6 @@ CONTAINS
      NIntC=SIZE(IntCs%Def%C)
      Print2=(Print>=DEBUG_GEOP_MAX)
      !
-     NMax12=J-1
      CALL New(XYZWork,(/3,NatmsLoc/))
      XYZWork%D=XYZ
      !

@@ -1255,9 +1255,9 @@ RETURN
      INTEGER                   :: NDim,II,I,L,IErr
      !
      NDim=SIZE(VectX)
+     MaxDeg=MaxDegIn
      IF(MaxDeg>2) CALL Halt('Maximum allowed degree of fit is to big in Chi2Fit')
      EPS=EPSIn
-     MaxDeg=MaxDegIn
      DO II=1,2     
        CALL POLFIT(NDim,VectX,VectY,RMSErr,MaxDeg,NDeg,EPS, &
                    VectFit,IERR,Work)
