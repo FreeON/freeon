@@ -198,7 +198,15 @@ PROGRAM HaiKu
 #else
   CALL Delete(Kxc)
 #endif
-
+!*******
+!!$  OPEN(99,FILE='Timing_HiCu.dat',STATUS='UNKNOWN',POSITION='APPEND')
+!!$  WRITE(99,7) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeRhoToGrid%CPUS,TimeRhoToGrid%WALL
+!!$  WRITE(99,8) TRIM(CurGeom),TRIM(CurBase),TRIM(SCFCycl),TimeGridToMat%CPUS,TimeGridToMat%WALL
+!!$  WRITE(99,*)
+!!$7 FORMAT(A2,'  ',A2,'  ',A2,'  HiCu.RhoToGrid   = ',F12.4,1X,F12.4)
+!!$8 FORMAT(A2,'  ',A2,'  ',A2,'  HiCu.GridToMat   = ',F12.4,1X,F12.4)
+!!$  CLOSE(99)
+!*******
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
