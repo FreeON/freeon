@@ -535,7 +535,7 @@ MODULE PrettyPrint
                  ENDIF
 #endif                 
                  DO I=1,GM%NAtms
-                    WRITE(PU,44)I,TRIM(GM%AtNam%C(I)),TRIM(GM%AtMMTyp%C(I)),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
+                    WRITE(PU,44)I,GM%AtNam%C(I),GM%AtMMTyp%C(I),1,(GM%Carts%D(K,I)*AA,K=1,3),One,Zero !!!! correct only for integer charged QM atoms
                  44 FORMAT('ATOM  ',I5,1X,A5,A5,2X,I4,4X,3F8.3,2F6.2)
                  ENDDO
                  WRITE(PU,55)

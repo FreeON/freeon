@@ -66,11 +66,20 @@ PROGRAM QCTC
   IF(SCFActn=='InkFok')THEN
      CALL Get(Rho,'DeltaRho',Args,0)
      CALL Get(RhoPoles,'Delta'//TRIM(SCFCycl))
-  ELSE
-     CALL Get(Rho,'Rho',Args,0)
+  ELSE IF(SCFActn=='ForceEvaluation')THEN
      IF(MMOnly()) THEN
+       CALL Get(Rho,'Rho',Args,Current(1))
        CALL Get(RhoPoles,CurGeom)
      ELSE
+       CALL Get(Rho,'Rho',Args,1)
+       CALL Get(RhoPoles,SCFCycl)
+     ENDIF
+  ELSE
+     IF(MMOnly()) THEN
+       CALL Get(Rho,'Rho',Args,Current(1))
+       CALL Get(RhoPoles,CurGeom)
+     ELSE
+       CALL Get(Rho,'Rho',Args,0)
        CALL Get(RhoPoles,SCFCycl)
      ENDIF
   ENDIF
