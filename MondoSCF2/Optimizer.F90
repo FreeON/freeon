@@ -85,7 +85,7 @@ CONTAINS
              ! If transition states, geometry is the image number
              ! otherwise, it is the step number 
              gtmp=C%Geos%Clone(iCLONE)%Confg
-             C%Geos%Clone%Confg=iCLONE
+             C%Geos%Clone%Confg=iCLONE+1
              CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
              C%Geos%Clone%Confg=gtmp
           ENDDO
@@ -348,7 +348,7 @@ CONTAINS
     ENDDO
 !   Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-       StepLength=0.2D0
+       StepLength=0.5D0
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
@@ -364,7 +364,8 @@ CONTAINS
                /C%Geos%Clone(iCLONE)%ETotal)
        ENDDO
        ! Gradients only convergence criteria
-       GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)       
+!       GCnvrgd=RMSGrad<GTol(AL).AND.MaxGrad<GTol(AL)       
+       GCnvrgd=MaxGrad<GTol(AL)       
        IF(GCnvrgd)THEN
           ! Cool, we are done
           Converged=.TRUE.   
