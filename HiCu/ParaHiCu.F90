@@ -763,11 +763,7 @@ MODULE ParallelHiCu
     TYPE(BBox) :: WBox
     REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
     REAL(DOUBLE)::TmBegM,TmEndM
-#ifdef PARALLEL_DEVELOPMENT
     TYPE(FastMat),POINTER  :: Kxc
-#else
-    TYPE(BCSR)             :: Kxc
-#endif
     
     WBox%BndBox(1:3,1) = LCoor%D(1:3,MyID+1)
     WBox%BndBox(1:3,2) = RCoor%D(1:3,MyID+1)

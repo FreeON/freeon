@@ -24,8 +24,6 @@ PROGRAM HaiKu
   USE BoundingBox
 #ifdef PARALLEL 
   USE ParallelHiCu
-#endif
-#ifdef PARALLEL_DEVELOPMENT
   USE FastMatrices
 #endif
   IMPLICIT NONE
@@ -34,7 +32,7 @@ PROGRAM HaiKu
   INTEGER::I
   REAL(DOUBLE) :: StartTm,EndTm,TotTm,CumuTm
 #endif
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   TYPE(FastMat),POINTER       :: Kxc
 #else
   TYPE(BCSR)                  :: Kxc
@@ -118,7 +116,7 @@ PROGRAM HaiKu
   CALL RhoToTree(Args)
 #endif
 ! CALL New(Kxc)
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   CALL New_FASTMAT(Kxc,0,(/0,0/))
 #else
   CALL NewBCSR(Kxc)
@@ -158,7 +156,7 @@ PROGRAM HaiKu
 
 ! Put Kxc to disk
 
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   CALL Redistribute_FASTMAT(Kxc)
   CALL AlignNodes()
   CALL Set_BCSR_EQ_DFASTMAT(T1,Kxc)
@@ -166,7 +164,7 @@ PROGRAM HaiKu
   CALL Filter(T1,Kxc)
 #endif
 
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   CALL Put(T1,TrixFile('Kxc',Args,0))
 #else
   CALL Put(Kxc,TrixFile('Kxc',Args,0))
@@ -187,7 +185,7 @@ PROGRAM HaiKu
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
 
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   CALL Delete_FastMat1(Kxc)
 #else
   CALL Delete(Kxc)

@@ -16,7 +16,7 @@ MODULE KxcGen
   USE BraBloks
   USE CubeTree 
   USE TreeWalk
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
   USE FastMatrices
 #endif
   IMPLICIT NONE
@@ -26,7 +26,7 @@ MODULE KxcGen
 
 !===============================================================================
   SUBROUTINE MakeKxc(Kxc,CubeRoot)
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
     TYPE(FastMat),POINTER  :: Kxc
 #else
     TYPE(BCSR)             :: Kxc
@@ -43,7 +43,7 @@ MODULE KxcGen
 #endif     
 !------------------------------------------------------------------------------- 
 !   Initialize the matrix and associated indecies
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
     P=1; 
     R=1; 
@@ -71,7 +71,7 @@ MODULE KxcGen
                             + (Pair%A(2)-Pair%B(2))**2 &
                             + (Pair%A(3)-Pair%B(3))**2
                 IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
                   CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
 #else
                   Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
@@ -80,7 +80,7 @@ MODULE KxcGen
               ENDDO
             ENDDO
 #else
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
             !! use TestAtomPair..
             IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
               CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
@@ -94,36 +94,28 @@ MODULE KxcGen
 #endif
 
 !! the logic here strictly follows MakeS
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
           Kxc%ColPt%I(P)=AtB
           Kxc%BlkPt%I(P)=R
           R=R+NAB
           P=P+1 
-#ifdef PARALLEL
-          Kxc%RowPt%I(Kxc%NAtms+1) = P
-          IF(R > MaxNon0Node .OR. P > MaxBlksNode) THEN
-            WRITE(*,*)' MyId = ',MyId,MaxBlksNode,MaxNon0Node
-            WRITE(*,*)' MyId = ',MyId,' P = ',P,' R = ',R
-            CALL Halt(' DBCSR dimensions blown in MakeKxc ')
-          ENDIF
-#else
+!! deleted DBCSR part
           Kxc%RowPt%I(AtA+1)=P        
           IF(R>MaxNon0.OR.P>MaxBlks) &
             CALL Halt(' BCSR dimensions blown in Kxc ')
-#endif
 #endif
         ENDIF
       ENDDO
     ENDDO
 
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
     Kxc%NBlks=P-1
     Kxc%NNon0=R-1
 #endif
 
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
 !   Fill the upper triangle of Kxc
     DO I=1,NAtoms
@@ -163,7 +155,7 @@ MODULE KxcGen
 !===============================================================================
 
 !===============================================================================
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
      FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kblk)
 #else
      FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kvct)
@@ -172,7 +164,7 @@ MODULE KxcGen
        TYPE(CubeNode), POINTER                  :: CubeRoot
 
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: Kblk
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
        REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Kvct
 #endif
@@ -284,7 +276,7 @@ real(double):: Pextent_Old
           ENDDO
        ENDDO
        ENDDO
-#ifdef PARALLEL_DEVELOPMENT
+#ifdef PARALLEL
 #else
        Kvct=BlockToVect(Pair%NA,Pair%NB,Kblk)
 #endif
