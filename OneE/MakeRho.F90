@@ -283,7 +283,6 @@ PROGRAM MakeRho
   ! Format output for pruning and multipole stats
 #ifdef MMech
   IF(HasQM()) THEN
-#endif
      IF(SCFActn=='InkFok')THEN
         Mssg1=ProcessName(Prog,'InkFok')
         Mssg2=Mssg1
@@ -291,8 +290,18 @@ PROGRAM MakeRho
         Mssg1=ProcessName(Prog,'Pruned Rho')
         Mssg2=ProcessName(Prog,'Moments')
      ENDIF
-#ifdef MMech
+  ELSE
+        Mssg1=ProcessName(Prog,'Pruned Rho')
+        Mssg2=ProcessName(Prog,'Moments')
   ENDIF
+#else
+     IF(SCFActn=='InkFok')THEN
+        Mssg1=ProcessName(Prog,'InkFok')
+        Mssg2=Mssg1
+     ELSE
+        Mssg1=ProcessName(Prog,'Pruned Rho')
+        Mssg2=ProcessName(Prog,'Moments')
+     ENDIF
 #endif
   QMCharge=Zero
   dQMCharge=Zero
