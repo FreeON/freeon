@@ -450,7 +450,7 @@ CONTAINS
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
-       !CALL PrintClones(IGeo,C%Nams,C%Geos)
+       CALL PrintClones(IGeo,C%Nams,C%Geos)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -465,9 +465,25 @@ CONTAINS
        DO iCLONE=1,C%Geos%Clones
          Convgd%I=0
          CALL OptSingleMol(C%GOpt,C%Nams,C%Opts,C%Sets,C%Geos, &
-           C%Geos%Clone(iCLONE),Convgd%I,iGEO,iBAS,iCLONE)
+           C%Geos%Clone(iCLONE),Convgd%I,iGEO,iCLONE)
          ConvgdAll=ConvgdAll*Convgd%I(iCLONE)
        ENDDO 
+       !
+       ! Archive displaced geometries and fill in new geoms.
+       !
+       CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
+       DO iCLONE=1,C%Geos%Clones
+         CALL NewGeomFill(C%Geos%Clone(iCLONE))
+       ENDDO
+       !
+       ! Do GDIIS and print geometries
+       !
+       DO iCLONE=1,C%Geos%Clones
+         CALL MixGeoms(C%Opts,C%Nams,C%GOpt,Convgd%I, &
+                       C%Geos%Clone(iCLONE),iCLONE,iGEO)
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
+                     C%Opts%GeomPrint)
+       ENDDO
        !
        C%Stat%Previous%I(3)=IGeo
        C%Stat%Current%I(3)=IGeo+1
@@ -476,6 +492,7 @@ CONTAINS
        !
        IF(ConvgdAll==1) EXIT
      ENDDO
+     CALL Delete(Convgd)
      !
      IGeo=C%Stat%Current%I(3)
      IF(IGeo>=MaxSteps) THEN
@@ -518,18 +535,20 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,ETot, &
+   SUBROUTINE ModifyGeom(GOpt,XYZ,AtNum,GradIn,Convgd,ETot, &
                          iGEO,iCLONE,SCRPath,Print)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
      REAL(DOUBLE)                :: ETot 
-     INTEGER          :: NIntC,NCart,NatmsLoc,iGEO,iCLONE
-     TYPE(INTC)       :: IntCs
-     TYPE(DBL_VECT)   :: IntOld,Displ
-     INTEGER          :: Refresh
-     CHARACTER(LEN=*) :: SCRPath
-     LOGICAL          :: Print
+     INTEGER,DIMENSION(:)        :: Convgd
+     INTEGER                     :: NIntC,NCart
+     INTEGER                     :: NatmsLoc,iGEO,iCLONE
+     TYPE(INTC)                  :: IntCs
+     TYPE(DBL_VECT)              :: IntOld,Displ
+     INTEGER                     :: Refresh
+     CHARACTER(LEN=*)            :: SCRPath
+     LOGICAL                     :: Print
      !
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
@@ -570,6 +589,10 @@ CONTAINS
      !
      CALL GeOpConv(GOpt%Constr,GOpt%GOptStat,GOpt%CoordCtrl, &
                    GOpt%GConvCrit,XYZ,ETot,IntCs,IntOld,iCLONE,iGEO)
+     !
+     IF(GOpt%GOptStat%GeOpConvgd) THEN
+       Convgd(iCLONE)=1
+     ENDIF
      !
      ! tidy up
      !
@@ -1172,7 +1195,7 @@ CONTAINS
 !-------------------------------------------------------------------
 !
    SUBROUTINE OptSingleMol(GOpt,Nams,Opts,Sets,Geos, &
-                           GMLoc,Convgd,iGEO,iBAS,iCLONE)
+                           GMLoc,Convgd,iGEO,iCLONE)
      TYPE(GeomOpt)        :: GOpt
      TYPE(FileNames)      :: Nams
      TYPE(Options)        :: Opts
@@ -1180,50 +1203,24 @@ CONTAINS
      TYPE(Geometries)     :: Geos
      TYPE(CRDS)           :: GMLoc
      INTEGER,DIMENSION(:) :: Convgd
-     INTEGER              :: iGEO,iBAS,iCLONE
+     INTEGER              :: iGEO,iCLONE
      INTEGER              :: InitGDIIS,NConstr,NCart,NatmsLoc
      LOGICAL              :: NoGDIIS,GDIISOn,Print
      CHARACTER(LEN=DCL)   :: SCRPath
      TYPE(DBL_RNK2)       :: XYZNew
      !
-     InitGDIIS=GOpt%GDIIS%Init
-     NoGDIIS  =GOpt%GDIIS%NoGDIIS
-     GDIISOn  =GOpt%GDIIS%On     
-     NConstr  =GOpt%Constr%NConstr
-     NatmsLoc =SIZE(GMLoc%AbCarts%D,2)
-     NCart    =3*NatmsLoc
      SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
              '.'//TRIM(IntToChar(iCLONE))
      Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
-     !
-     CALL New(XYZNew,(/3,NatmsLoc/))
-     XYZNew%D=GMLoc%AbCarts%D
+     GMLoc%Displ%D=GMLoc%AbCarts%D
      !
      !--------------------------------------------
      CALL OpenASCII(OutFile,Out)
-       CALL ModifyGeom(GOpt,XYZNew%D,GMLoc%AtNum%D,GMLoc%Vects%D, &
-                       GMLoc%Etotal,IGeo,iCLONE,SCRPath,Print)
-       !
-       ! do archivation of displaced geometries for GDIIS
-       !
-       GMLoc%Displ%D=XYZNew%D
-       CALL GeomArchive(iBAS,iGEO,Nams,Sets,Geos)    
-       GMLoc%AbCarts%D=XYZNew%D
-       !
-       IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
-         IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
-           CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
-             iGEO,Print,SCRPath,InitGDIIS)
-         ENDIF
-       ENDIF
+       CALL ModifyGeom(GOpt,GMLoc%Displ%D,GMLoc%AtNum%D,GMLoc%Vects%D, &
+                       Convgd,GMLoc%Etotal,IGeo,iCLONE,SCRPath,Print)
      CLOSE(Out,STATUS='KEEP')
      !--------------------------------------------
      !
-     CALL PPrint(GMLoc,Nams%GFile,Geo,Opts%GeomPrint)
-     IF(GOpt%GOptStat%GeOpConvgd) THEN
-       Convgd(iCLONE)=1
-     ENDIF
-     CALL Delete(XYZNew)
    END SUBROUTINE OptSingleMol
 !
 !-------------------------------------------------------------------
@@ -1338,6 +1335,51 @@ CONTAINS
      CoordC%LinCrit =20.D0
      CoordC%OutPCrit=20.D0
    END SUBROUTINE SetCoordCtrl
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE NewGeomFill(GMLoc)
+     TYPE(CRDS) :: GMLoc
+     !
+     GMLoc%AbCarts%D=GMLoc%Displ%D
+   END SUBROUTINE NewGeomFill
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE MixGeoms(Opts,Nams,GOpt,Convgd,GMLoc,iCLONE,iGEO)
+     TYPE(Options)        :: Opts
+     TYPE(FileNames)      :: Nams
+     TYPE(GeomOpt)        :: GOpt
+     TYPE(CRDS)           :: GMLoc
+     INTEGER              :: InitGDIIS,NoGDIIS,GDIISOn,iGEO
+     INTEGER              :: NConstr,NatmsLoc,NCart,iCLONE
+     CHARACTER(LEN=DCL)   :: SCRPath
+     INTEGER,DIMENSION(:) :: Convgd
+     LOGICAL              :: Print
+     !
+     InitGDIIS=GOpt%GDIIS%Init
+     NoGDIIS  =GOpt%GDIIS%NoGDIIS
+     GDIISOn  =GOpt%GDIIS%On     
+     NConstr  =GOpt%Constr%NConstr
+     NatmsLoc =GMLoc%Natms
+     NCart    =3*NatmsLoc
+     SCRPath  =TRIM(Nams%M_SCRATCH)//TRIM(Nams%SCF_NAME)// &
+             '.'//TRIM(IntToChar(iCLONE))
+     Print    =(Opts%PFlags%GeOp==DEBUG_GEOP)
+     !
+     IF(Convgd(iCLONE)/=1) THEN
+       IF((.NOT.NoGDIIS).AND.GDIISOn) THEN
+         CALL GeoDIIS(GMLoc%AbCarts%D,GOpt,Nams%HFile,iCLONE, &
+           iGEO,Print,SCRPath,InitGDIIS)
+       ELSE
+         IF(Print) THEN
+           WRITE(*,200)
+           WRITE(Out,200)
+         ENDIF
+         200 FORMAT('No Geometric DIIS is beeing done in this step.')
+       ENDIF
+     ENDIF
+   END SUBROUTINE MixGeoms
 !
 !-------------------------------------------------------------------
 !

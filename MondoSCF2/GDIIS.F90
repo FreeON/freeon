@@ -32,6 +32,7 @@ CONTAINS
      INTEGER                     :: SRMemory,RefMemory
      INTEGER                     :: CartGradMemory,GDIISMemory
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
+     TYPE(DBL_RNK2)              :: Aux
      TYPE(DBL_VECT)              :: Vect
      !
      GDIISMemory=MIN(6,iGEO)
@@ -55,15 +56,19 @@ CONTAINS
      CALL New(SRDispl,(/NCart,GDIISMemory/))
      !
      CALL New(Vect,NCart)
+     CALL New(Aux,(/3,NatmsLoc/))
      DO IGeom=IStart,iGEO
        ICount=IGeom-IStart+1
-       CALL Get(Vect,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL Get(Aux,'Displ',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        SRStruct%D(:,ICount)=Vect%D
-       CALL Get(Vect,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL Get(Aux,'Abcartesians',Tag_O=TRIM(IntToChar(IGeom)))
+       CALL CartRNK2ToCartRNK1(Vect%D,Aux%D)
        RefStruct%D(:,ICount)=Vect%D
        CALL Get(Vect,'grade',Tag_O=TRIM(IntToChar(IGeom)))
        RefGrad%D(:,ICount)=Vect%D
      ENDDO
+     CALL Delete(Aux)
      CALL Delete(Vect)
        SRDispl%D=SRStruct%D-RefStruct%D
      !
@@ -371,6 +376,11 @@ CONTAINS
      TYPE(INTC)                  :: IntCs
      TYPE(INT_VECT)              :: Actives
      !
+     IF(Print) THEN
+       WRITE(*,200) 
+       WRITE(Out,200) 
+     ENDIF
+     200 FORMAT('Geometric DIIS, coeffs are calculated from displacements of primitive internal displacements.')
      NatmsLoc=SIZE(XYZ,2)
      NCart=3*NatmsLoc
      DimGDIIS=SIZE(RefStruct%D,1)
@@ -417,7 +427,7 @@ CONTAINS
      !
      Sum=180.D0/PI
      DO I=1,NIntC
-       IF(IntCs%Def(J)(1:4)/='STRE') THEN
+       IF(IntCs%Def(I)(1:4)/='STRE') THEN
          PrIDispl%D(I,:)=Sum*PrIDispl%D(I,:)
        ENDIF
        IF(Actives%I(I)==0) PrIDispl%D(I,:)=Zero
@@ -551,6 +561,11 @@ CONTAINS
      INTEGER                     :: I,NIntC,GDIISMemory
      TYPE(INT_VECT)              :: Actives
      !
+     IF(Print) THEN
+       WRITE(*,200) 
+       WRITE(Out,200) 
+     ENDIF
+     200 FORMAT('Doing Geometric DIIS based on the linear combination of primitive internal coordinates.')
      NIntC=SIZE(PrISR,1)
      GDIISMemory=SIZE(PrISR,2)
      !
