@@ -77,7 +77,7 @@ CONTAINS
     TYPE(BSET) :: B
     INTEGER    :: AccL,MaxAtms,MaxBlks,MaxNon0
     REAL(DOUBLE) :: BWEstim
-    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.D3, 1.3D3,1.6D3/)
+    REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BandWidth=(/ 1.D3, 1.3D3, 1.3D3,1.6D3/)
     REAL(DOUBLE),PARAMETER,DIMENSION(4) :: BWDecay  =(/ 1.D-4,1.D-4,1.D-3,1.D-2/)
     !-------------------------------------------------------------------------!
     ! Use assymptotics to set the max matrix dimensions
@@ -87,6 +87,9 @@ CONTAINS
          /(One+BWDecay(AccL)*DBLE(G%NAtms)**2) ) ) 
     MaxBlks=1+G%NAtms*BWEstim
     MaxNon0=1+B%NBasF*(DBLE(B%NBasF)*DBLE(BWEstim)/DBLE(G%NAtms))
+!    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2)
+!    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2)
+!    STOP
   END SUBROUTINE BCSRDimensions
   !============================================================================
   ! PARSE A BASIS SET, SET UP ITS INDECIES, NORMALIZE THE PRIMITIVES AND 

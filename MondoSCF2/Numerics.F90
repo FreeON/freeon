@@ -5,8 +5,8 @@ MODULE Numerics
   ! Thresholds for linear scaling routines:
   !
   ! Sparse blocked matrix thresholds
-  REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-5, 1.D-6, 1.D-7,  1.D-8/)
-!  REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-7 /)
+!  REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-5, 1.D-6, 1.D-7,  1.D-8/)
+  REAL(DOUBLE),DIMENSION(4) :: TrixNeglect=(/1.D-4, 1.D-5, 1.D-6,  1.D-7 /)
   ! HiCu threshold
   REAL(DOUBLE),DIMENSION(4) :: CubeNeglect=(/1.D-3, 1.D-5, 1.D-7,  1.D-9 /)
   ! QCTC and ONX threshold

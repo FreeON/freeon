@@ -45,7 +45,7 @@ CONTAINS
   SUBROUTINE SCF(cBAS,cGEO,C)
     TYPE(Controls)    :: C
     TYPE(DBL_RNK2)    :: ETot,DMax,DIIS
-    INTEGER,PARAMETER :: MaxSCFs=32
+    INTEGER,PARAMETER :: MaxSCFs=64 !32
     INTEGER           :: cBAS,cGEO,iSCF
     !----------------------------------------------------------------------------!
     ! Compute one-electron matrices
@@ -506,47 +506,45 @@ CONTAINS
           ETotQ=dETot/ABS(ETotB)
           DMaxQ=dDMax/ABS(DMaxB+1.D-50)
           DIISQ=dDIIS/ABS(DIISB+1.D-50)
-          !CALL OpenASCII(OutFile,Out)
-          !WRITE(Out,*)'ETest = ',ETest
-          !WRITE(Out,*)'DTest = ',DTest
-          !WRITE(Out,*)'ETotQ = ',ETotQ
-          !WRITE(Out,*)'ETotA = ',ETotA
-          !WRITE(Out,*)'ETotB = ',ETotB
-          !WRITE(Out,*)'DIISQ = ',DIISQ
-          !WRITE(Out,*)'DMaxQ = ',DMaxQ
-          !WRITE(Out,*)'DIISA = ',DIISA
-          !WRITE(Out,*)'DIISB = ',DIISB
-          !WRITE(Out,*)'DMaxA = ',DMaxA
-          !WRITE(Out,*)'DMaxB = ',DMaxB
-          !CLOSE(Out)
+          CALL OpenASCII(OutFile,Out)
+          WRITE(Out,*)'ETest = ',ETest
+          WRITE(Out,*)'DTest = ',DTest
+          WRITE(Out,*)'ETotQ = ',ETotQ
+          WRITE(Out,*)'ETotA = ',ETotA
+          WRITE(Out,*)'ETotB = ',ETotB
+          WRITE(Out,*)'DIISQ = ',DIISQ
+          WRITE(Out,*)'DMaxQ = ',DMaxQ
+          WRITE(Out,*)'DIISA = ',DIISA
+          WRITE(Out,*)'DIISB = ',DIISB
+          WRITE(Out,*)'DMaxA = ',DMaxA
+          WRITE(Out,*)'DMaxB = ',DMaxB
+          CLOSE(Out)
           ! Convergence tests
-          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<5D-1*dTest).AND.ETotB<ETotA)THEN
+          IF(((DMaxB<dTest.AND.ETotQ<ETest).OR.DMaxB<1D-1*dTest).AND.ETotB<ETotA)THEN
              Converged(iCLONE)=.TRUE.
-             Mssg='Normal SCF convergence.a'
+             Mssg='Normal SCF convergence A'
           ENDIF
           ! Accept convergence from wrong side if DM thresholds are tightend.
           IF(DMaxB<dTest*75D-2.AND.ETotQ<ETest*3D-1)THEN
              !        IF(DMaxB<dTest*1D-1.AND.ETotQ<ETest*1D-1)THEN
              Converged(iCLONE)=.TRUE.
-             Mssg='Normal SCF convergence.b'
+             Mssg='Normal SCF convergence B'
           ENDIF
-          ! Look for stall out if we have at least one digit in the DM
-          IF(DMaxB<1.D-1)THEN
+          ! Look for stall out if we have at least one consecutive digit in the DM
+          IF(DMaxB<1.D-1.AND.DMaxA<1.D-1)THEN
              ! Look for non-decreasing errors due to incomplete numerics
-             IF(DIISQ<1.D-1.AND.DMaxQ<1.D-1.AND.cSCF>2)THEN
+             IF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
                 IF(DIISB>DIISA.AND.DMaxB>DMaxA)THEN
                    Mssg='SCF hit DIIS & DMax increase.'
                    Converged(iCLONE)=.TRUE.
-                ENDIF
-             ELSEIF(DIISQ<1.D-2.AND.DMaxQ<1.D-2.AND.cSCF>2)THEN
-                IF(DIISB>DIISA)THEN
-                   Mssg='SCF hit DIIS increase. a'
+                ELSEIF(DIISB>DIISA)THEN
+                   Mssg='SCF hit DIIS increase'
                    Converged(iCLONE)=.TRUE.
                 ELSEIF(DMaxQ<1D-1.AND.DMaxB>DMaxA)THEN
-                   Mssg='SCF hit DIIS increase. b'
+                   Mssg='SCF hit DMAX increase'
                    Converged(iCLONE)=.TRUE.
                 ENDIF
-             ELSEIF((DIISQ<1D-3.OR.DMaxQ<1D-3).AND.cSCF>2)THEN
+             ELSEIF((DIISQ<1D-5.OR.DMaxQ<1D-5).AND.cSCF>2)THEN
                 Mssg='SCF convergence due to DIIS stagnation.'
                 Converged(iCLONE)=.TRUE.
              ENDIF
