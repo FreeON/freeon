@@ -1768,58 +1768,57 @@ MODULE InOut
 
 !--------------------------------------------------------------------------
 #ifdef MMech
-    SUBROUTINE Put_CHR_VECT(A,VarName,NN,Tag_O)
+    SUBROUTINE Put_CHR_VECT(A,VarName,Tag_O)
        INTEGER                              :: I,N,II,NN
-    CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(IN) :: A
+       TYPE(CHR_VECT) :: A
        CHARACTER(LEN=*),         INTENT(IN) :: VarName
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN) :: Tag_O
-       INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B  !=ICHAR(' ')
+       INTEGER,DIMENSION(DEFAULT_CHR_LEN)   :: B  !=ICHAR(' ')
        TYPE(META_DATA)                      :: Meta
-#ifdef PARALLEL 
+#ifdef PARALLEL
        IF(MyId==ROOT)THEN
-#endif 
-          N=LEN(A(1))
-          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
+#endif
+          NN=SIZE(A%C)
          DO II = 1, NN
-          DO I=1,N; B((II-1)*N+I)=ICHAR(A(II)(I:I)); ENDDO
-          Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-                       N*NN,.FALSE.)
+          N=LEN(A%C(II))
+          IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Put_CHR_VECT')
+          DO I=1,N; B(I)=ICHAR(A%C(II)(I:I)); ENDDO
+          Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))// &
+               TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
           CALL OpenData(Meta,.TRUE.)
           CALL WriteIntegerVector(Meta,B)
           CALL CloseData(Meta)
          ENDDO
-#ifdef PARALLEL 
-       ENDIF       
-#endif 
+#ifdef PARALLEL
+       ENDIF
+#endif
     END SUBROUTINE Put_CHR_VECT
 #endif
 
 !--------------------------------------------------------------------------
 #ifdef MMech
-    SUBROUTINE Get_CHR_VECT(A,VarName,NN,Tag_O)
-       INTEGER                              :: I,N,II,NN
-    CHARACTER(LEN=*),DIMENSION(1:NN),INTENT(INOUT):: A
+    SUBROUTINE Get_CHR_VECT(A,VarName,Tag_O)
+       INTEGER                                 :: I,N,II,NN
+       TYPE(CHR_VECT),           INTENT(INOUT) :: A
        CHARACTER(LEN=*),         INTENT(IN)    :: VarName
        CHARACTER(LEN=*),OPTIONAL,INTENT(IN)    :: Tag_O
-       INTEGER,DIMENSION(DEFAULT_CHR_LEN*NN)   :: B !=ICHAR(' ')
+       INTEGER,DIMENSION(DEFAULT_CHR_LEN)      :: B !=ICHAR(' ')
        TYPE(META_DATA)                         :: Meta
 #ifdef PARALLEL 
       IF(MyId==ROOT)THEN
 #endif 
-         NN=SIZE(A,1)
-         N=LEN(A)
-         IF(N>DEFAULT_CHR_LEN) &
-              CALL Halt('Static strings overrun in Get_CHR_VECT')
-         Meta=SetMeta(NameTag(VarName,Tag_O),NATIVE_INT32, &
-              N*NN,.FALSE.)
-         CALL OpenData(Meta)
+         NN=SIZE(A%C)
          DO II = 1, NN
-            CALL ReadIntegerVector(Meta,B)
-            DO I=1,N; A(II)(I:I)=CHAR(B((II-1)*N+I)); ENDDO
-            ENDDO
-            CALL CloseData(Meta)
+           N=LEN(A%C(II))
+           IF(N>DEFAULT_CHR_LEN) CALL Halt('Static strings overrun in Get_CHR_VECT')
+           Meta=SetMeta(NameTag(VarName,TRIM(IntToChar(II))//TRIM(Tag_O)),NATIVE_INT32,N,.FALSE.)
+           CALL OpenData(Meta)
+           CALL ReadIntegerVector(Meta,B)
+           CALL CloseData(Meta)
+           DO I=1,N; A%C(II)(I:I)=CHAR(B(I)); ENDDO
+         ENDDO
 #ifdef PARALLEL 
-         ENDIF       
+     ENDIF       
          IF(InParallel)CALL BCast(A)
 #endif 
        END SUBROUTINE Get_CHR_VECT
