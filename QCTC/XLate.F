@@ -2,9 +2,15 @@ C    TRANSLATION OF SP MULTIPOLE TENSORS
 C    Author: Matt Challacombe
 C==============================================================================
       SUBROUTINE XLate77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
-      IMPLICIT REAL*8 (a-h,o-z)
+C
       REAL*8 Cp(0:*),Sp(0:*),Cpq(0:*),Spq(0:*),Cq(0:*),Sq(0:*)
+      REAL*8 CMN,SMN,CN,SN
+C
+      INTEGER L,LP,LL,M,LDX,K,LK,KK,LKLK,NSTART,NSTOP,
+     >        N,NABS,MNABS,KDX,LKDX,ID,LQ
+C
       ID(L)=L*(L+1)/2
+C
       DO l=0,LP
          ll=ID(l)
          DO m=0,l

@@ -2,8 +2,12 @@ C    ECONOMIZED (FULLY FACTORED) CONTRACTION OF SP MULTIPOLE TENSORS
 C    Author: Matt Challacombe
 C==============================================================================
       SUBROUTINE CTraX77(LP,LQ,Cp,Sp,Cpq,Spq,Cq,Sq)
-      IMPLICIT REAL*8 (a-h,o-z)
+C
       REAL*8 Cp(0:*),Sp(0:*),Cpq(0:*),Spq(0:*),Cq(0:*),Sq(0:*)
+      REAL*8 TMP,SGN,TMPC,TWO,TMPS,SGNL,SGNLM
+C
+      INTEGER L,LP,LQ,LL,M,LDX,K,KK,LLKK,LLKM,N,KDX,LKDX,ID
+C
       ID(L)=L*(L+1)/2
 C
 C     ZERO

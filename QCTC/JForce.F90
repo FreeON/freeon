@@ -33,10 +33,11 @@ PROGRAM JForce
   REAL(DOUBLE)               :: Bx,By,Bz
   TYPE(DBL_VECT)             :: SFrc
 #endif   
-  INTEGER                    :: AtA,AtB,A1,A2,JP,Q
+  INTEGER                    :: AtA,AtB,A1,A2,MA,JP,Q
   TYPE(AtomPair)             :: Pair
   TYPE(DBL_VECT)             :: Frc,JFrc
   REAL(DOUBLE),DIMENSION(3)  :: FrcAB
+  REAL(DOUBLE)               :: JFrcChk
   CHARACTER(LEN=6),PARAMETER :: Prog='JForce'
 !-------------------------------------------------------------------------------- 
 ! Start up macro
@@ -74,7 +75,7 @@ PROGRAM JForce
   DO AtA=1,NAtoms
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
-     A2=3*AtA!
+     A2=3*AtA
      JFrc%D(A1:A2)=Two*dNukE(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
