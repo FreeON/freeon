@@ -1,72 +1,48 @@
         TO DO LIST FOR MondoSCF DEVELOPERS 
 
-    >> Release of Version 1.0 beta 1 this November << 
-
-Items marked with an x need to be in place before the release!
+    >> Current release is Version 1.0 alpha 4  << 
 
 Chee Kwan:
-$ Get parallel code working as is to level of OneE
-$ Help redo front end to work with MPI-2 and MPI_COMM_SPAWN
-  as well as with old style serial spawning of mpirun
-o Check out load balance for large OneE jobs, start to think
-  about domain decomposition.  Examine performance for OneE
-  with and without PBCs.
-o Make sure MPI2 code works on 
-  > SGIs
-  > LINUX/LAM-MPI
-  > IBM SP2
-  > HP/Compaq?
-o Preliminary work on ordering algothim for load balancing
-  and locality: demonstrate scaling of OneE routines in 
-  both limits of Natoms/Nproc->0,Infinity
+o Finish data parallel HiCu
+o Tune parallel HiCu to minimize communications
+o Determine residual bottlenecks in code; FastMat?
+o Write it up!
+o Parallel XCForce
+o Parallel QCTC
 
 Karoly:
-o Gradients only transition state theory
-o SCRF,Crystal field,QM/MM for boundary conditions
-o Applications to Protein Kinase and ?
-o Internal coordinates geometry optimization
-o Accelerated MD/Parallel Tempering
+o Help finish validating classical QCTC (ie. periodics too) 
+o Get Implicit Delocalized Internal Coordinate optimiser working
+o Get Nugged Elastic Band working in DICs
+o Find reaction coordinates in protein kinase
+o Construct sampling algorithm for FE perturbation
 
 Matt:
-x Documentation
-x Finish validation suite and checking accuracies
-x Fix proteins suite to have correct protentaion states
-  so they converge nicely. 
-$ Get front end and output formatting cleaned
-  >> hostname, machtype, processor info etc to outfile <<
-$ Add example CSHRCs to Scripts file
-$ Get QuNew geometry optimization working again
-$ Make sure density matrix extrapolation is working
-$ Get incremental Fock builds working again
-$ Interface with OpenDX for isosurfacing and movies
-o Get working under 
-  $ AIX.XLF 
-  > True64 
-  > SUN
-  > HP 
-o Help with parallization
+o Fix bug in QCTC
+o Sort all the MAC and Ell stuff in QCTC
+o Validate QCTC for classical periodics
+o Clean purification of perturbation in P2Use
+o Clean AINV guess in P2Use
+o Validate F function code
+o Depricate ordering option in ParseInput
+o Finish DM paper
+o Help finish PBC paper
+o AINV paper
+o Error estimates and DS paper
+o Documentation
+o Parallel linalg with fast matrices
 
 CJ:
-x Fix problems with expensive Extent and PBC HiCu
-x PBC validation suite!
-x PBC Benchmark suites and scaling runs for HiCu, QCTC and SDMM
-o Write up PBC
-o Write up new MAC and PAC
-o Help periodifiy ONX
-? Coordinate transformations for HiCu
+o Finish writing up periodic paper
+o PBC validation suite
+o Box forces
 ? On the fly PAO basis set contractions in the 
   molecular environs
+? Unrestricted SCF theory
 
 Eric:  
-x Get ONX working on SGIs and Alphas
-x Release enable makefiles 
-x Gradients
-x Explicit code
-o Switch over to new gammas
-o Help periodify ONX 
+o Explicit code through F functions
+o Gradients
 o Help parallelize ONX
 
-    >> Release of Version 1.0 beta 1 this November << 
-
-Items marked with an x need to be in place before the release!
 
