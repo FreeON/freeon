@@ -148,7 +148,7 @@ MODULE DrvSCFs
       DoDIIS=CCyc>0
       Modl=Ctrl%Model(CBas)
       CALL Invoke('QCTC',CtrlVect)
-      IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect)
+      IF(HasDFT(Modl))CALL Invoke('HiCu',CtrlVect,MPIRun_O=.TRUE.)
       IF(HasHF(Modl)) CALL Invoke('ONX',CtrlVect)
       CALL Invoke('FBuild',CtrlVect,MPIRun_O=.TRUE.)
       IF(DoDIIS) &

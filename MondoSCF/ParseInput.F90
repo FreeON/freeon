@@ -203,7 +203,7 @@ MODULE ParseInput
          ' Los Alamos National Laboratory (LA-CC 01-2)          ',A1,    & 
          ' Copywrite 2001, University of California.            ',A1)
 !        Write information on host, platform, etc
-         Mssg='Compliled for '//TRIM(MONDO_PLAT)//', executing on '//TRIM(MONDO_HOST) &
+         Mssg='Compiled for '//TRIM(MONDO_PLAT)//', executing on '//TRIM(MONDO_HOST) &
            //Rtrn//' a '//TRIM(MONDO_MACH)//' machine'//' running '//TRIM(MONDO_SYST) &
            //' '//TRIM(MONDO_VRSN)       
          WRITE(*,*)TRIM(Mssg)
