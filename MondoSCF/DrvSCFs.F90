@@ -112,9 +112,6 @@ MODULE DrvSCFs
         CALL Invoke('MakeRho',     CtrlVect)
         CALL Invoke('QCTC',      CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
-!
-!        CALL MondoHalt(-100,'STOPPING FOR Fock in Core')
-!
         IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
         ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
@@ -144,9 +141,6 @@ MODULE DrvSCFs
         IF(HasHF(Ctrl%Model(Ctrl%Current%I(2))))  &
            CALL Invoke('ONX',     CtrlVect)
         CALL Invoke('FBuild',     CtrlVect,MPIRun_O=.TRUE.)
-!
-!        CALL MondoHalt(-100,'STOPPING FOR Fock in Super:Old')
-!
         IF(Ctrl%Method(Ctrl%Current%I(2))==RH_R_SCF)THEN
            CALL Invoke('RHeqs',    CtrlVect)
         ELSEIF(Ctrl%Method(Ctrl%Current%I(2))==SDMM_R_SCF)THEN
@@ -223,18 +217,18 @@ MODULE DrvSCFs
         CALL Invoke('MakeT' ,      CtrlVect)
 !
 #ifdef PERIODIC
-        IF(CtrlVect(2) == Core)THEN
-           CtrlVect=SetCtrlVect(Ctrl,Direct)
-           CALL Invoke('P2Use',       CtrlVect,MPIRun_O=.TRUE.)
-           CALL Invoke('MakeRho',     CtrlVect)
-           CALL Invoke('QCTC',      CtrlVect)
-        ELSE
-           CALL Invoke('MakeRho',     CtrlVect)
-           CALL Invoke('QCTC',     CtrlVect)
-        ENDIF
+!        IF(CtrlVect(2) == Core)THEN
+!           CtrlVect=SetCtrlVect(Ctrl,Direct)
+!           CALL Invoke('P2Use',       CtrlVect,MPIRun_O=.TRUE.)
+!           CALL Invoke('MakeRho',     CtrlVect)
+!           CALL Invoke('QCTC',      CtrlVect)
+!        ELSE
+!           CALL Invoke('MakeRho',     CtrlVect)
+!           CALL Invoke('QCTC',     CtrlVect)
+!        ENDIF
 #else
-        CALL Invoke('MakeRho',     CtrlVect)
-        CALL Invoke('QCTC' ,     CtrlVect)
+!        CALL Invoke('MakeRho',     CtrlVect)
+!        CALL Invoke('QCTC' ,     CtrlVect)
 #endif
 !
      END SUBROUTINE OneEMats

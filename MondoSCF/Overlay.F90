@@ -137,6 +137,11 @@ MODULE Overlay
                ENDIF
             ENDDO
          ENDDO
+         IF(.NOT.PRESENT(AbsPath_O))THEN
+            CALL OpenHDF(InfFile)
+            CALL Put(.TRUE.,'ProgramFailed')
+            CALL CloseHDF()
+         ENDIF
 !        Log this run
          CALL Logger(CmndLine,.FALSE.)
 !        Fork a serial child

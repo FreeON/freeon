@@ -381,9 +381,9 @@ MODULE SetSCFs
          CALL Put(Lndex,'lndex',Tag_O=CSet)
          CALL Delete(Lndex)
          CALL Delete(Dexpt)
-         CALL BKEst(Base,PrmEst)
-         CALL Put(PrmEst,'best',Tag_O=CSet)
-         CALL Delete(PrmEst)
+!         CALL BKEst(Base,PrmEst)
+!         CALL Put(PrmEst,'best',Tag_O=CSet)
+!         CALL Delete(PrmEst)
       END SUBROUTINE SetDist
 !-----------------------------------------------------------------------------
 !     Pre-compute some primitive distribution stuff
@@ -530,7 +530,7 @@ MODULE SetSCFs
                ZetaB=BS%Expnt%D(PFB,CFB,KB)
                EtaAB=ZetaA+ZetaB
                Omega=EtaAB*Half
-               Upq=Sqrt2Pi5x2*EtaAB**(-FiveHalf)
+               Upq=Sqrt2Pi5x2*EtaAB**(-FiveHalves)
                CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,EtaAB,MD%D, &
                            Zero,Zero,Zero,Zero,Zero,Zero) 
                CALL AuxInts(MaxL,LTot,AuxR%D,Omega,Zero)

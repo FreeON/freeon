@@ -19,9 +19,7 @@ MODULE ChkSCFs
                               DeltaE,DeltaD,DIISA,DIISB,  &
                               DMaxA,DMaxB,Delta_DMax, Delta_ETot
          REAL(DOUBLE)      :: ConvQ_DIIS,ConvQ_ETot,ConvQ_DMax
-         REAL(DOUBLE), PARAMETER :: Tol_DIIS=0.35D0
-         REAL(DOUBLE), PARAMETER :: Tol_DMax=0.35D0
-         CHARACTER(LEN=DEFAULT_CHR_LEN) :: CrntTag,PrevTag
+         CHARACTER(LEN=DEFAULT_CHR_LEN) :: Mssg,CrntTag,PrevTag
 !-----------------------------------------------------------------------
          ConvergedQ=.FALSE.
 !        Open the InfFile
@@ -34,7 +32,8 @@ MODULE ChkSCFs
          IBas=Ctrl%Current%I(2)
          IGeo=Ctrl%Current%I(3)
 !---------------------------------------------------------------------
-!        Gather deltas
+!        Gather convergence parameters
+!
          DIISA=1.0D4
          DIISB=1.0D1
          ETotA=1.0D4
@@ -44,8 +43,10 @@ MODULE ChkSCFs
          IF(.NOT.(ICyc==0.AND.IBas==1))THEN
             CrntTag=StatsToChar(Ctrl%Current)
             PrevTag=StatsToChar(Ctrl%Previous)
-            CALL Get(DMaxA,'DMax',Tag_O=TRIM(PrevTag))
-            CALL Get(EtotA,'Etot',Tag_O=TRIM(PrevTag))
+            IF((Ctrl%SuperP).OR.ICyc>1)THEN
+               CALL Get(DMaxA,'DMax',Tag_O=TRIM(PrevTag))
+               CALL Get(EtotA,'Etot',Tag_O=TRIM(PrevTag))
+            ENDIF
             CALL Get(DMaxB,'DMax',Tag_O=TRIM(CrntTag))
             CALL Get(EtotB,'Etot',Tag_O=TRIM(CrntTag))
             IF(ICyc>0) &
@@ -53,36 +54,45 @@ MODULE ChkSCFs
             IF(ICyc>1) &
             CALL Get(DIISA,'diiserr',Tag_O=TRIM(PrevTag))
          ENDIF
-!         WRITE(*,*)' DMAX = ',DMaxA,DMaxB
-!         WRITE(*,*)' ETOt = ',ETotA,ETotB
-!         WRITE(*,*)' DIIS = ',DIISA,DIISB
 !---------------------------------------------------------------------
 !        Check for convergence
 !
          Delta_DMax=ABS(DMaxA-DMaxB)
          Delta_ETot=ABS(ETotA-ETotB)
          ConvQ_ETot=ABS((ETotA-ETotB)/ETotB)
-         IF(ConvQ_ETot<1.D-14)THEN
-            ConvergedQ=.TRUE.
-            Ctrl%Fail=SCF_CONVERGED
-         ENDIF
          ConvQ_DMax=ABS((DMaxA-DMaxB)/DMaxB)
          ConvQ_DIIS=ABS((DIISA-DIISB)/DIISB)
-!
-         IF(IGeo>1.AND.ICyc>0.AND.                &
-            Delta_DMax<DTol(Ctrl%AccL(IBas)).AND. &
-            ConvQ_ETot<ETol(Ctrl%AccL(IBas)))THEN 
+         WRITE(*,*)' ConvQ_DIIS = ',ConvQ_DIIS,' ConvQ_DMAX = ',ConvQ_DMAX
+!        Could happen ...
+         IF(ConvQ_ETot<1.D-14)THEN
+            ConvergedQ=.TRUE.
+            WRITE(*,*)' Met Convergence criteria A '
+         ENDIF
+!        Check to see if convergence is in an asymptotic regime
+         IF(ConvQ_DIIS<1.D0.AND.ConvQ_DMax<1.D0.AND.ICyc>2)THEN                
+!           Look for non-decreasing error stagnation due to incomplete numerics
+            IF(DIISB>DIISA.OR.DMAXB>DMAXA)THEN
+               ConvergedQ=.TRUE.
+               WRITE(*,*)' Met Convergence criteria B: DIIS stalled.'
+            ENDIF
+         ENDIF
+!        Look for convergence stall-outs 
+         IF(ConvQ_DIIS<0.4D0.AND.ConvQ_DMAX<0.4D0)THEN
+            WRITE(*,*)' Met Convergence criteria C: DIIS stalled.'
+            ConvergedQ=.TRUE.
+         ENDIF              
+!        Check for absolute convergence below thresholds
+         IF(ICyc>0.AND.Delta_DMax<DTol(Ctrl%AccL(IBas)).AND.ConvQ_ETot<ETol(Ctrl%AccL(IBas)))THEN 
             ConvergedQ=.TRUE.
             Ctrl%Fail=SCF_CONVERGED
+            WRITE(*,*)' Met Convergence criteria D:  '
          ENDIF
+!--------------------------------------------------------------------
+!        IO 
 !
-         WRITE(*,77)ConvQ_DIIS,ConvQ_DMax,ConvQ_ETot
-      77 FORMAT('CONVERGENCE RelErrors: DIIS = ',D10.3,', DMax = ',D10.3,', ETot = ',D10.3)
-!
-         IF(ConvQ_DIIS<Tol_DIIS.AND.ConvQ_DMax<Tol_DMax)THEN       
-            ConvergedQ=.TRUE.
-            Ctrl%Fail=SCF_STAGNATED
-         ENDIF
+         Mssg=' DIIS Err = '//TRIM(DblToMedmChar(DIISB)) &
+           //', MAX/P = '//TRIM(DblToMedmChar(DMAXB))
+         WRITE(*,*)TRIM(Mssg)
 !--------------------------------------------------------
 !        Load statistics 
 !
@@ -97,13 +107,15 @@ MODULE ChkSCFs
 !
          Ctrl%NCyc(IBas)=ICyc
          Ctrl%Previous%I=Ctrl%Current%I
-
+!
+         RETURN
+!
       END FUNCTION ConvergedQ
 !
       FUNCTION StatsToChar(Stats) RESULT(StatString)
          TYPE(INT_VECT)  :: Stats
          CHARACTER(LEN=DEFAULT_CHR_LEN) :: StatString
-         StatString='_'//TRIM(IntToChar(Stats%I(3))) &
+         StatString='_'//TRIM(IntToChar(Stats%I(3)))  &
                    //'_'//TRIM(IntToChar(Stats%I(2))) &
                    //'_'//TRIM(IntToChar(Stats%I(1)))
       END FUNCTION StatsToChar

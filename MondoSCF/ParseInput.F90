@@ -4,6 +4,7 @@ MODULE ParseInput
    USE GlobalObjects
    USE GlobalCharacters
    USE ProcessControl
+   USE BasisSetParameters
    USE InOut
    USE MemMan
    USE Macros
@@ -76,11 +77,11 @@ MODULE ParseInput
             OutFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//OutF 
             LogFile=TRIM(MONDO_PWD)    //TRIM(SCF_NAME)//'.'//TRIM(PROCESS_ID)//LogF
          ELSEIF(Args%NC==2)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//OutF 
+            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))!//'.'//TRIM(PROCESS_ID)//OutF 
             LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//LogF
          ELSEIF(Args%NC==3)THEN
-            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))//'.'//TRIM(PROCESS_ID)//OutF 
-            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(3))//'.'//TRIM(PROCESS_ID)//LogF
+            OutFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(2))!//'.'//TRIM(PROCESS_ID)//OutF 
+            LogFile=TRIM(MONDO_PWD)    //TRIM(Args%C%C(3))!//'.'//TRIM(PROCESS_ID)//LogF
          ENDIF
 !        SCF and InfoFile names
          Ctrl%Info=InfFile
@@ -256,14 +257,6 @@ MODULE ParseInput
 !        Open input file
          CALL OpenASCII(InpFile,Inp) 
 !-------------------------------------------------------------------------------
-!        Parse <OPTIONS.GUESS>
-!
-         IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
-            Ctrl%SuperP=.FALSE.
-         ELSE
-            Ctrl%SuperP=.TRUE.
-         ENDIF       
-!-------------------------------------------------------------------------------
 !        Parse <OPTIONS.SCF>
 !
          IF(OptKeyQ(Inp,SCF_OPTION,SCF_InkF))THEN
@@ -302,10 +295,15 @@ MODULE ParseInput
             NOpts=NOpts+NLoc
             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=EXACT_EXCHANGE; ENDDO
          ENDIF 
-!        Slater exchage
-         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_SlaterX,MaxSets,NLoc,Loc))THEN
+!        Slater-Dirac exchage
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_SD,MaxSets,NLoc,Loc))THEN
             NOpts=NOpts+NLoc
-            DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=LDA_EXCHANGE; ENDDO
+            DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=SD_EXCHANGE; ENDDO
+         ENDIF 
+!        X-alpha exchage
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_XA,MaxSets,NLoc,Loc))THEN
+            NOpts=NOpts+NLoc
+            DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=XA_EXCHANGE; ENDDO
          ENDIF 
 !        PW91 exchange
          IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PW91x,MaxSets,NLoc,Loc))THEN
@@ -323,19 +321,19 @@ MODULE ParseInput
              DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=B88_EXCHANGE; ENDDO
          ENDIF       
 !        Pure Slater exchange with VWN3 LSDA correlation 
-         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_SVWN3xc,MaxSets,NLoc,Loc))THEN
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN3xc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
-             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_SVWN3_LSD; ENDDO
+             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_VWN3_LSD; ENDDO
          ENDIF       
 !        Pure Slater exchange with VWN5 LSDA correlation 
-         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_SVWN5xc,MaxSets,NLoc,Loc))THEN
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_VWN5xc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
-             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_SVWN5_LSD; ENDDO
+             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_VWN5_LSD; ENDDO
          ENDIF       
-!        Pure Slater exchange with PW92 LSDA correlation 
-         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_SPW92xc,MaxSets,NLoc,Loc))THEN
+!        Pure Slater exchange with PW91 LSDA correlation 
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PW91xc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
-             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_SPW92_LSD; ENDDO
+             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=PURE_PW91_LSD; ENDDO
          ENDIF       
 !        Pure PBE GGA exchange-correlation 
          IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBExc,MaxSets,NLoc,Loc))THEN
@@ -357,10 +355,10 @@ MODULE ParseInput
              NOpts=NOpts+NLoc
              DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=HYBRID_B3LYP_VWN5; ENDDO
          ENDIF       
-!        Hybrid B3LYP/PW92 exchange-correlation 
-         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_PW92xc,MaxSets,NLoc,Loc))THEN
+!        Hybrid B3LYP/PW91 exchange-correlation 
+         IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_B3LYP_PW91xc,MaxSets,NLoc,Loc))THEN
              NOpts=NOpts+NLoc
-             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=HYBRID_B3LYP_PW92; ENDDO
+             DO ILoc=1,NLoc; Ctrl%Model(Loc(ILoc))=HYBRID_B3LYP_PW91; ENDDO
          ENDIF       
 !        Hybrid PBE0 exchange-correlation 
          IF(OptKeyLocQ(Inp,MODEL_OPTION,MODEL_PBE0xc,MaxSets,NLoc,Loc))THEN
@@ -404,14 +402,22 @@ MODULE ParseInput
 !        Set thresholds
          IF(NOpts==Ctrl%NSet)THEN
 !           All thresholds are user determined
+
             DO I=1,Ctrl%NSet
                Thrsh%Cube=CubeNeglect(Ctrl%AccL(I))
                Thrsh%Trix=TrixNeglect(Ctrl%AccL(I))
                Thrsh%Dist=DistNeglect(Ctrl%AccL(I))
                Thrsh%TwoE=TwoENeglect(Ctrl%AccL(I))
+
+            WRITE(*,*)' Dist = ',Thrsh%Dist
+            WRITE(*,*)' USER DEFINED !? Accl = ',Ctrl%Accl(I)
+
                CALL Put(Thrsh,Tag_O=IntToChar(I))
             ENDDO
          ELSE ! Default, cheezy for all sets except last, which is good or user defined.
+
+            WRITE(*,*)' Cheezy !? '
+
             DO I=1,Ctrl%NSet-1
                Thrsh%Cube=CubeNeglect(1)
                Thrsh%Trix=TrixNeglect(1)
@@ -660,7 +666,7 @@ MODULE ParseInput
             CALL Put(GM,Tag_O=IntToChar(Ctrl%NGeom))
             CALL Put(Ctrl%NGeom,'NumberOfGeometries')
 !           Print the coordinates
-            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
+!            IF(PrintFlags%Key>DEBUG_NONE) CALL PPrint(GM)
 !
             IF(LastConfig)EXIT
          ENDDO
@@ -1247,19 +1253,8 @@ MODULE ParseInput
 !     Parse the Basis Sets
 !==================================================================================
       SUBROUTINE ParseBaseSets(Ctrl)
-!         USE DerivedTypes
-!         USE GlobalScalars
-!         USE GlobalObjects
-!         USE GlobalCharacters
-!         USE BasisSetParameters
-!         USE ProcessControl
-!         USE InOut
-!         USE MemMan
-!         USE Macros
-!         USE Parse
-!         USE SCFLocals
-!         USE PrettyPrint
-!         IMPLICIT NONE
+         USE BasisSetParameters
+         IMPLICIT NONE
 !---------------------------------------------------------
          TYPE(SCFControls)                     :: Ctrl
          TYPE(BSET)                            :: BS
@@ -1271,12 +1266,16 @@ MODULE ParseInput
                                                   MinL,MaxL,ISet,KFound
 !---------------------------------------------------------
 !        Open infofile
-!
          CALL OpenHDF(InfFile)
-!----------------------------------------------
 !        Parse basis sets from input file
-!
          CALL OpenASCII(InpFile,Inp) 
+!        Parse <OPTIONS.GUESS>
+         IF(OptKeyQ(Inp,GUESS_OPTION,GUESS_CORE))THEN
+            Ctrl%SuperP=.FALSE.
+         ELSE
+            Ctrl%SuperP=.TRUE.
+         ENDIF       
+!        Parse <OPTIONS.BASIS_SETS>
          Ctrl%NSet=0
          Base(:)%BType=0
          DO I=1,NSupSets
@@ -1307,6 +1306,10 @@ MODULE ParseInput
                Ctrl%BName(I)=Base(I)%BName
             ENDDO               
             CALL Delete(Types)
+         ELSE
+            DO I=1,Ctrl%NSet
+               Ctrl%BName(I)=Base(I)%BName
+            ENDDO               
          ENDIF
 !----------------------------------------------
 !         Allocate a temp basis set
@@ -1435,7 +1438,6 @@ MODULE ParseInput
          IF(PrintFlags%Key==DEBUG_MAXIMUM)  &
             CALL PPrint(MemStats,'ParseBaseSets')
          CALL CloseHDF()
-
       END SUBROUTINE ParseBaseSets
 !=================================================================================
       SUBROUTINE NormalizeBaseSets(A,B)
