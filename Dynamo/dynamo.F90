@@ -55,7 +55,8 @@ CONTAINS
      REAL(DOUBLE),OPTIONAL :: E_LJ_EXCL,E_C_EXCL
      TYPE(INT_VECT) :: AtmMark
      TYPE(CRDS) :: GM_Loc 
-     INTEGER :: I,J,K,L,M,N,Natoms,NMAX12,NMAX13,NMAX14
+     INTEGER :: I,J,K,L,M,N,Natoms
+     INTEGER :: NMAX12,NMAX13,NMAX14,NMax_Excl,NMax_Excl14
      TYPE(DBL_VECT)    :: LJEps14,LJEps,LJRad,Charge14
      TYPE(INT_RNK2)    :: Top_Loc
      CHARACTER(LEN=3)  :: Cur
@@ -74,10 +75,6 @@ CONTAINS
      CALL New(GM_Loc)
      CALL New(DVect,3)
      CALL New(AtmMark,Natoms)
-!
-     CALL Get(NMAX12,'NMAX12')
-     CALL Get(NMAX13,'NMAX13')
-     CALL Get(NMAX14,'NMAX14')
 !
      IF(HasQM()) THEN
        CALL Get(AtmMark,'AtmMark')
@@ -113,21 +110,20 @@ CONTAINS
 !
      CONVF=e2PerAngstroemToKJPerMol
 !
-! bond, angle and dihedral terms
+! bond, angle and dihedral terms merged
 !
-     DO ITop=1,3
+     DO ITop=1,2
 !
      IF(ITop==1) THEN
-       CALL New(Top_Loc,(/Natoms,NMAX12/)) 
-       CALL Get(Top_Loc,'Top12')
+       CALL Get(NMAX_EXCL,'NMAX_EXCL')
+       CALL New(Top_Loc,(/Natoms,NMAX_EXCL+1/)) 
+       CALL Get(Top_Loc,'TOP_EXCL')
      ENDIF
+!
      IF(ITop==2) THEN
-       CALL New(Top_Loc,(/Natoms,NMAX13/)) 
-       CALL Get(Top_Loc,'Top13')
-     ENDIF
-     IF(ITop==3) THEN
-       CALL New(Top_Loc,(/Natoms,NMAX14/)) 
-       CALL Get(Top_Loc,'Top14')
+       CALL Get(NMax_Excl14,'NMAX_EXCL14')
+       CALL New(Top_Loc,(/Natoms,NMax_Excl14+1/)) 
+       CALL Get(Top_Loc,'TOP_EXCL14')
      ENDIF
 !
      DO I=1,Natoms
@@ -136,7 +132,7 @@ CONTAINS
          QI14=LJEps14%D(I)
          RI=LJRad%D(I)
        ENDIF
-       IF(PRESENT(E_LJ_EXCL)) THEN
+       IF(PRESENT(E_C_EXCL)) THEN
          QQI=GM_Loc%AtNum%D(I)
          QQI14=CHARGE14%D(I)
        ENDIF
@@ -155,15 +151,15 @@ CONTAINS
          QJ14=LJEps14%D(J)
          RJ=LJRad%D(J)
        ENDIF
-       IF(PRESENT(E_LJ_EXCL)) THEN
+       IF(PRESENT(E_C_EXCL)) THEN
          QQJ=GM_Loc%AtNum%D(J)
          QQJ14=CHARGE14%D(J)
        ENDIF
          IF(DIJ>0.001D0) THEN
            IF(PRESENT(E_LJ_EXCL)) THEN
              R6=(RI*RJ/DIJ)**6
-             IF(ITop==3) THEN
-               Pref1=(QI*QJ-QI14*QJ14)*R6
+             IF(ITop==2) THEN
+               Pref1=(-QI14*QJ14)*R6
              ELSE
                Pref1=QI*QJ*R6
              ENDIF
@@ -176,8 +172,8 @@ CONTAINS
                ENDIF
            ENDIF
            IF(PRESENT(E_C_EXCL)) THEN
-             IF(ITop==3) THEN
-               Pref1=(QQI*QQJ-QQI14*QQJ14)/DIJ*CONVF
+             IF(ITop==2) THEN
+               Pref1=(-QQI14*QQJ14)/DIJ*CONVF
              ELSE
                Pref1=QQI*QQJ/DIJ*CONVF
              ENDIF
