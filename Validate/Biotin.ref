@@ -1,0 +1,463 @@
+
+
+ __    __                 _       ____________ ______ 
+|  \  /  |               | |     /       /    |      |
+|   \/   | ___  _ __   __| | ___/   ____/   __|  |==='
+|        |/ _ \| '_ \ / _  |/ _ \____  \   (__|  ____|
+|  |\/|  | (_) | | | | (_| | (_) )     /\     |  |    
+|__|  |__|\___/|_| |_|\____|\___/_____/  \____|__|    
+
+ Version 1.0 alpha 1                                  
+ A program suite for O(N) SCF theory and ab initio MD 
+ Matt Challacombe, Eric Schwegler,                    
+ C.J. Tymczak and Chee Kwan Gan                       
+ Los Alamos National Laboratory                       
+ Copywrite 2001, University of California.            
+
+ Compliled for AMDLinux.PG, executing on zinc20
+ a i686 machine running Linux 2.4.2-2
+
+                                                                                                                                
+     ** Biotin **                                                                                                               
+                                                                                                                                
+  
+<<Starting MondoSCF 10/28/01 @ 09:08:34>>
+========================================================================
+ Internal representation of the geometry:
+ Geometry originally in Angstroms has been converted to AU.
+ Geometry has been reordered using the Hilbert curve.
+ Number of electrons = 130
+------------------------------------------------------------------------
+ 1   h    -.31395908D+01   -.66792932D+01   -.14330813D+02
+ 2   c    -.20996556D+01   -.56504886D+01   -.13535540D+02
+ 3   h    -.24463070D+01   -.83026623D+01   -.10752087D+02
+ 4   h    -.47242394D+01   -.42735586D+01   -.92013026D+01
+ 5   c    -.34891901D+01   -.31763270D+01   -.97062941D+01
+ 6   c    -.35496046D+01   -.32995561D+01   -.12573254D+02
+ 7   n    -.22422733D+01   -.12263377D+01   -.13813878D+02
+ 8   h    -.52194421D+01   -.29827057D+01   -.13137904D+02
+ 9   c    -.38625999D+00   -.20595368D+01   -.15360675D+02
+ 10   o    0.92207290D+00   -.63175430D+00   -.16712642D+02
+ 11   c    -.97060106D+00   -.70039670D+01   -.11280927D+02
+ 12   h    0.62394973D+00   -.75789917D+01   -.11785938D+02
+ 13   n    -.22977178D+00   -.45806391D+01   -.15233440D+02
+ 14   h    0.10201119D+01   -.55448718D+01   -.16279215D+02
+ 15   h    -.10597394D+01   -.26697671D+01   -.40717926D+01
+ 16   s    -.44072190D+00   -.46041095D+01   -.88752304D+01
+ 17   h    -.55165637D+01   -.15549232D+01   -.50658829D+01
+ 18   c    -.39715237D+01   -.54569617D+00   -.87201595D+01
+ 19   h    -.24463070D+01   0.20535652D+00   -.89627247D+01
+ 20   h    -.47242394D+01   0.13397590D+01   -.54635191D+01
+ 21   c    -.43181751D+01   -.23666928D+00   -.58293511D+01
+ 22   c    -.18817702D+01   -.48896660D+00   -.43103705D+01
+ 23   c    -.22977367D+01   0.38920796D+00   -.15706647D+01
+ 24   h    -.28424691D+01   0.22394576D+01   -.16859757D+01
+ 25   h    -.46549620D+00   0.34226717D+00   -.51056428D+01
+ 26   h    -.32386313D+01   0.61608847D+00   -.13813878D+02
+ 27   h    -.57146448D+01   -.29347445D-01   -.97182371D+01
+ 28   c    0.00000000D+00   0.00000000D+00   0.00000000D+00
+ 29   o    0.13271357D+01   0.16898686D+01   0.82310795D+00
+ 30   h    -.39319151D+01   -.71390068D+00   -.53282714D+00
+ 31   h    0.18124362D+01   -.25719738D+01   0.16939315D+01
+ 32   o    0.46549620D+00   -.23646519D+01   0.47318739D+00
+------------------------------------------------------------------------
+ HDF file :: /scratch/mchalla/Biotin_15164.hdf
+ PROGRAM OF CALCULATIONS:
+
+  A restricted Roothaan-Hall solution of the SCF using
+  a loose accuracy level STO-2G and the HFx model.
+ 
+
+  Followed by a  restricted Roothaan-Hall solution of the SCF using
+  a good accuracy level3-21G and the HFx model.
+ 
+
+  Followed by a  restricted Roothaan-Hall solution of the SCF using
+  a good accuracy level3-21G and the PBE0 model.
+ 
+
+ MakeS                :: S CheckSum = 0.1182777422967557D+02
+ LowdinO              :: X CheckSum = 0.1329869775153703D+02
+ MakeT                :: T CheckSum = 0.1404230184698722D+03
+ P2Use                :: P[0] CheckSum = 0.1726723189903092D+02
+ MakeRho              :: Rho CheckSum = 0.1441570565851382D+04
+ QCTC                 :: J[0] CheckSum = 0.2319585697925472D+03
+ ONX                  :: Kx[0] CheckSum = 0.2184147316398732D+02
+ FockNGrueven         :: F[0] CheckSum = 0.1178814671391762D+03
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.1026174452907089D+03
+ RHEqs                :: OrthoP[1] CheckSum = 0.8062257744026152D+01
+ RHEqs                :: P[1] CheckSum = 0.7742637702730960D+01
+ SCFStatus : [0,1,1]  :: <SCF> = -1032.81276199, dD = 0.32D+01
+ MakeRho              :: Rho CheckSum = 0.1362075825166323D+04
+ QCTC                 :: J[1] CheckSum = 0.2325891174782939D+03
+ ONX                  :: Kx[1] CheckSum = 0.2250059783932803D+02
+ FockNGrueven         :: F[1] CheckSum = 0.1186698469037006D+03
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.1032111274341638D+03
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.1027856761263310D+03
+ RHEqs                :: OrthoP[2] CheckSum = 0.8062257742336783D+01
+ RHEqs                :: P[2] CheckSum = 0.7585716177514907D+01
+ SCFStatus : [1,1,1]  :: <SCF> = -1072.39157619, dD = 0.19D+00, DIIS = 0.12D-01
+ MakeRho              :: Rho CheckSum = 0.1359034962074446D+04
+ QCTC                 :: J[2] CheckSum = 0.2327166910396190D+03
+ ONX                  :: Kx[2] CheckSum = 0.2250767772735977D+02
+ FockNGrueven         :: F[2] CheckSum = 0.1187689373354194D+03
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.1033270879570678D+03
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.1034815065276418D+03
+ RHEqs                :: OrthoP[3] CheckSum = 0.8062257731742923D+01
+ RHEqs                :: P[3] CheckSum = 0.7322728001092524D+01
+ SCFStatus : [2,1,1]  :: <SCF> = -1073.08954877, dD = 0.26D+00, DIIS = 0.75D-02
+ MakeRho              :: Rho CheckSum = 0.1351728175073089D+04
+ QCTC                 :: J[3] CheckSum = 0.2329217191523662D+03
+ ONX                  :: Kx[3] CheckSum = 0.2251105420913110D+02
+ FockNGrueven         :: F[3] CheckSum = 0.1189539975048097D+03
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.1035032304799410D+03
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.1035309381493954D+03
+ RHEqs                :: OrthoP[4] CheckSum = 0.8062257731832162D+01
+ RHEqs                :: P[4] CheckSum = 0.7302761096069456D+01
+ SCFStatus : [3,1,1]  :: <SCF> = -1073.53820062, dD = 0.55D-01, DIIS = 0.13D-02
+ MakeRho              :: Rho CheckSum = 0.1350844760677996D+04
+ QCTC                 :: J[4] CheckSum = 0.2329224677165183D+03
+ ONX                  :: Kx[4] CheckSum = 0.2251016038896434D+02
+ FockNGrueven         :: F[4] CheckSum = 0.1189469676938978D+03
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.1035057368000657D+03
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.1035084620413032D+03
+ RHEqs                :: OrthoP[5] CheckSum = 0.8062257731591801D+01
+ RHEqs                :: P[5] CheckSum = 0.7298048718286427D+01
+ SCFStatus : [4,1,1]  :: <SCF> = -1073.55313485, dD = 0.12D-01, DIIS = 0.39D-03
+ MakeRho              :: Rho CheckSum = 0.1350715612226641D+04
+ QCTC                 :: J[5] CheckSum = 0.2329297011720250D+03
+ ONX                  :: Kx[5] CheckSum = 0.2251013020217765D+02
+ FockNGrueven         :: F[5] CheckSum = 0.1189542457312896D+03
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.1035117081533193D+03
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.1035104988056869D+03
+ RHEqs                :: OrthoP[6] CheckSum = 0.8062257732658154D+01
+ RHEqs                :: P[6] CheckSum = 0.7296287194855493D+01
+ SCFStatus : [5,1,1]  :: <SCF> = -1073.55422487, dD = 0.10D-01, DIIS = 0.14D-03
+ MakeRho              :: Rho CheckSum = 0.1350669223267208D+04
+ QCTC                 :: J[6] CheckSum = 0.2329296088482397D+03
+ ONX                  :: Kx[6] CheckSum = 0.2250995803914317D+02
+ FockNGrueven         :: F[6] CheckSum = 0.1189541146938291D+03
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.1035116014351342D+03
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.1035122315239005D+03
+ RHEqs                :: OrthoP[7] CheckSum = 0.8062257732684953D+01
+ RHEqs                :: P[7] CheckSum = 0.7295479283919837D+01
+ SCFStatus : [6,1,1]  :: <SCF> = -1073.55449984, dD = 0.50D-02, DIIS = 0.59D-04
+ MakeS                :: S CheckSum = 0.1994388148488684D+02
+ LowdinO              :: X CheckSum = 0.3982628350976499D+02
+ MakeT                :: T CheckSum = 0.1544753500730927D+03
+ MakeRho              :: Rho CheckSum = 0.1350651773340404D+04
+ QCTC                 :: J[0] CheckSum = 0.2465355130568907D+03
+ ONX                  :: Kx[0] CheckSum = 0.2623983347246007D+02
+ FockNGrueven         :: F[0] CheckSum = 0.1226482427851069D+03
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.1095404251855216D+03
+ RHEqs                :: OrthoP[1] CheckSum = 0.8062257748298547D+01
+ RHEqs                :: P[1] CheckSum = 0.6450680118891330D+01
+ SCFStatus : [0,2,1]  :: Basis set switch ...  MxD = 0.27D+01
+ MakeRho              :: Rho CheckSum = 0.2178404570509014D+04
+ QCTC                 :: J[1] CheckSum = 0.2453256396312951D+03
+ ONX                  :: Kx[1] CheckSum = 0.2647849127381300D+02
+ FockNGrueven         :: F[1] CheckSum = 0.1218456535537980D+03
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.1086399492950818D+03
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.1092699903805314D+03
+ RHEqs                :: OrthoP[2] CheckSum = 0.8062257748298528D+01
+ RHEqs                :: P[2] CheckSum = 0.6455082880633491D+01
+ SCFStatus : [1,2,1]  :: <SCF> = -1112.76486133, dD = 0.33D-01, DIIS = 0.17D-02
+ MakeRho              :: Rho CheckSum = 0.2178459720112795D+04
+ QCTC                 :: J[2] CheckSum = 0.2453547689878793D+03
+ ONX                  :: Kx[2] CheckSum = 0.2647609175698979D+02
+ FockNGrueven         :: F[2] CheckSum = 0.1218751210785870D+03
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.1086620355949453D+03
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.1087201791788474D+03
+ RHEqs                :: OrthoP[3] CheckSum = 0.8062257748298531D+01
+ RHEqs                :: P[3] CheckSum = 0.6485785809892058D+01
+ SCFStatus : [2,2,1]  :: <SCF> = -1112.78410646, dD = 0.10D+00, DIIS = 0.12D-02
+ MakeRho              :: Rho CheckSum = 0.2178696718264053D+04
+ QCTC                 :: J[3] CheckSum = 0.2453996292072834D+03
+ ONX                  :: Kx[3] CheckSum = 0.2647232927584536D+02
+ FockNGrueven         :: F[3] CheckSum = 0.1219184461949163D+03
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.1086993848392017D+03
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.1087052164393235D+03
+ RHEqs                :: OrthoP[4] CheckSum = 0.8062257748298521D+01
+ RHEqs                :: P[4] CheckSum = 0.6489418173263597D+01
+ SCFStatus : [3,2,1]  :: <SCF> = -1112.81415860, dD = 0.85D-02, DIIS = 0.17D-03
+ MakeRho              :: Rho CheckSum = 0.2178685166894763D+04
+ QCTC                 :: J[4] CheckSum = 0.2454079928849665D+03
+ ONX                  :: Kx[4] CheckSum = 0.2647113924341383D+02
+ FockNGrueven         :: F[4] CheckSum = 0.1219284728700605D+03
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.1087042223926690D+03
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.1087019542914753D+03
+ RHEqs                :: OrthoP[5] CheckSum = 0.8062257748298537D+01
+ RHEqs                :: P[5] CheckSum = 0.6492767517462162D+01
+ SCFStatus : [4,2,1]  :: <SCF> = -1112.81490029, dD = 0.52D-02, DIIS = 0.70D-04
+ MakeRho              :: Rho CheckSum = 0.2178689324102746D+04
+ QCTC                 :: J[5] CheckSum = 0.2454072457973960D+03
+ ONX                  :: Kx[5] CheckSum = 0.2647127920129930D+02
+ FockNGrueven         :: F[5] CheckSum = 0.1219275237828058D+03
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.1087041518881010D+03
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.1087036828022631D+03
+ RHEqs                :: OrthoP[6] CheckSum = 0.8062257748298542D+01
+ RHEqs                :: P[6] CheckSum = 0.6493409093547211D+01
+ SCFStatus : [5,2,1]  :: <SCF> = -1112.81506142, dD = 0.17D-02, DIIS = 0.25D-04
+ MakeRho              :: Rho CheckSum = 0.2178692203041842D+04
+ QCTC                 :: J[6] CheckSum = 0.2454066052547186D+03
+ ONX                  :: Kx[6] CheckSum = 0.2647140435839772D+02
+ FockNGrueven         :: F[6] CheckSum = 0.1219270919940984D+03
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.1087036361469472D+03
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.1087040644442818D+03
+ RHEqs                :: OrthoP[7] CheckSum = 0.8062257748298556D+01
+ RHEqs                :: P[7] CheckSum = 0.6493967444627053D+01
+ SCFStatus : [6,2,1]  :: <SCF> = -1112.81508452, dD = 0.12D-02, DIIS = 0.12D-04
+ MakeRho              :: Rho CheckSum = 0.2178695570129537D+04
+ QCTC                 :: J[7] CheckSum = 0.2454067334694138D+03
+ ONX                  :: Kx[7] CheckSum = 0.2647137466714996D+02
+ FockNGrueven         :: F[7] CheckSum = 0.1219272174971692D+03
+ FockNGrueven         :: OrthoF[7] CheckSum = 0.1087036918114492D+03
+ PulayDIIS            :: F_DIIS[7] CheckSum = 0.1087037330761246D+03
+ RHEqs                :: OrthoP[8] CheckSum = 0.8062257748298526D+01
+ RHEqs                :: P[8] CheckSum = 0.6494002271773194D+01
+ SCFStatus : [7,2,1]  :: <SCF> = -1112.81509050, dD = 0.31D-03, DIIS = 0.33D-05
+ MakeS                :: S CheckSum = 0.1994388148488684D+02
+ LowdinO              :: X CheckSum = 0.3982628350976499D+02
+ MakeT                :: T CheckSum = 0.1544753500730927D+03
+ MakeRho              :: Rho CheckSum = 0.2178695654654663D+04
+ QCTC                 :: J[0] CheckSum = 0.2454068377854313D+03
+<<Entering HiCu 10/28/01 @ 09:23:34>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64961059D+02, <Exc> = -.94722548D+02, Pts/Atom = 1039
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002530D+02, <Exc> = -.94773864D+02, Pts/Atom = 2032
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000893D+02, <Exc> = -.94767188D+02, Pts/Atom = 3832
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000826D+02, <Exc> = -.94766053D+02, Pts/Atom = 7235
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.28D-05, <Exc> = -.94766053D+02
+ HiCu.GridGen         :: CPU Sec = 0.98D+02, WALL Sec = 0.98D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[0] CheckSum = 0.1308637111321711D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44911,  DeAllocs=19890, 16932192 bytes are presently allocated.
+                         A max of 17472640 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:26:23-<
+ ONX                  :: Kx[0] CheckSum = 0.2647138646092201D+02
+ FockNGrueven         :: F[0] CheckSum = 0.1158902822574226D+03
+ FockNGrueven         :: OrthoF[0] CheckSum = 0.1035943207854481D+03
+ RHEqs                :: OrthoP[1] CheckSum = 0.8062257748298540D+01
+ RHEqs                :: P[1] CheckSum = 0.6586074220039261D+01
+ SCFStatus : [0,3,1]  :: Basis set switch ...  MxD = 0.27D+01
+ MakeRho              :: Rho CheckSum = 0.2182172257085124D+04
+ QCTC                 :: J[1] CheckSum = 0.2452628431743754D+03
+<<Entering HiCu 10/28/01 @ 09:28:01>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64974484D+02, <Exc> = -.94792948D+02, Pts/Atom = 1036
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65004285D+02, <Exc> = -.94825490D+02, Pts/Atom = 2025
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65001033D+02, <Exc> = -.94812451D+02, Pts/Atom = 3822
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000470D+02, <Exc> = -.94809775D+02, Pts/Atom = 7191
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.16D-05, <Exc> = -.94809775D+02
+ HiCu.GridGen         :: CPU Sec = 0.98D+02, WALL Sec = 0.98D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[1] CheckSum = 0.1309572482271731D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44725,  DeAllocs=19770, 16831032 bytes are presently allocated.
+                         A max of 17371480 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:30:50-<
+ ONX                  :: Kx[1] CheckSum = 0.2648438889021254D+02
+ FockNGrueven         :: F[1] CheckSum = 0.1156995984858409D+03
+ FockNGrueven         :: OrthoF[1] CheckSum = 0.1035286189167810D+03
+ PulayDIIS            :: F_DIIS[1] CheckSum = 0.1035742788394021D+03
+ RHEqs                :: OrthoP[2] CheckSum = 0.8062257748298558D+01
+ RHEqs                :: P[2] CheckSum = 0.6560902504738586D+01
+ SCFStatus : [1,3,1]  :: <SCF> = -1116.91156246, dD = 0.27D-01, DIIS = 0.10D-02
+ MakeRho              :: Rho CheckSum = 0.2182009437626667D+04
+ QCTC                 :: J[2] CheckSum = 0.2452959915179484D+03
+<<Entering HiCu 10/28/01 @ 09:32:30>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64981508D+02, <Exc> = -.94808152D+02, Pts/Atom = 1051
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002494D+02, <Exc> = -.94805238D+02, Pts/Atom = 2040
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65001050D+02, <Exc> = -.94798873D+02, Pts/Atom = 3816
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000502D+02, <Exc> = -.94796535D+02, Pts/Atom = 7191
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.17D-05, <Exc> = -.94796535D+02
+ HiCu.GridGen         :: CPU Sec = 0.98D+02, WALL Sec = 0.98D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.70D+02, WALL Sec = 0.70D+02
+ HiCu                 :: Kxc[2] CheckSum = 0.1309413172113757D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44725,  DeAllocs=19770, 16831080 bytes are presently allocated.
+                         A max of 17371528 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:35:19-<
+ ONX                  :: Kx[2] CheckSum = 0.2648214080913859D+02
+ FockNGrueven         :: F[2] CheckSum = 0.1157507857187295D+03
+ FockNGrueven         :: OrthoF[2] CheckSum = 0.1035401585505980D+03
+ PulayDIIS            :: F_DIIS[2] CheckSum = 0.1035427488533110D+03
+ RHEqs                :: OrthoP[3] CheckSum = 0.8062257748298570D+01
+ RHEqs                :: P[3] CheckSum = 0.6555812122704501D+01
+ SCFStatus : [2,3,1]  :: <SCF> = -1116.92475252, dD = 0.13D-01, DIIS = 0.31D-03
+ MakeRho              :: Rho CheckSum = 0.2181915198605519D+04
+ QCTC                 :: J[3] CheckSum = 0.2453492060015088D+03
+<<Entering HiCu 10/28/01 @ 09:37:00>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64982137D+02, <Exc> = -.94770846D+02, Pts/Atom = 1047
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002506D+02, <Exc> = -.94746809D+02, Pts/Atom = 2068
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000877D+02, <Exc> = -.94737325D+02, Pts/Atom = 3821
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000538D+02, <Exc> = -.94735612D+02, Pts/Atom = 7183
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94735612D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.70D+02, WALL Sec = 0.70D+02
+ HiCu                 :: Kxc[3] CheckSum = 0.1309155716429132D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44681,  DeAllocs=19749, 16812872 bytes are presently allocated.
+                         A max of 17353320 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:39:49-<
+ ONX                  :: Kx[3] CheckSum = 0.2647497752156511D+02
+ FockNGrueven         :: F[3] CheckSum = 0.1158100116104544D+03
+ FockNGrueven         :: OrthoF[3] CheckSum = 0.1035701744223219D+03
+ PulayDIIS            :: F_DIIS[3] CheckSum = 0.1035565150586720D+03
+ RHEqs                :: OrthoP[4] CheckSum = 0.8062257748298492D+01
+ RHEqs                :: P[4] CheckSum = 0.6555066108898474D+01
+ SCFStatus : [3,3,1]  :: <SCF> = -1116.92521768, dD = 0.91D-02, DIIS = 0.29D-03
+ MakeRho              :: Rho CheckSum = 0.2181934328820268D+04
+ QCTC                 :: J[4] CheckSum = 0.2453361742606798D+03
+<<Entering HiCu 10/28/01 @ 09:41:29>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64981345D+02, <Exc> = -.94793260D+02, Pts/Atom = 1053
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002940D+02, <Exc> = -.94770446D+02, Pts/Atom = 2077
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000895D+02, <Exc> = -.94757746D+02, Pts/Atom = 3846
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000522D+02, <Exc> = -.94755900D+02, Pts/Atom = 7207
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.20D-05, <Exc> = -.94755900D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[4] CheckSum = 0.1309238753309179D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44815,  DeAllocs=19815, 16868448 bytes are presently allocated.
+                         A max of 17408896 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:44:19-<
+ ONX                  :: Kx[4] CheckSum = 0.2647742921409649D+02
+ FockNGrueven         :: F[4] CheckSum = 0.1157970449307058D+03
+ FockNGrueven         :: OrthoF[4] CheckSum = 0.1035626455230144D+03
+ PulayDIIS            :: F_DIIS[4] CheckSum = 0.1035604322202045D+03
+ RHEqs                :: OrthoP[5] CheckSum = 0.8062257748298560D+01
+ RHEqs                :: P[5] CheckSum = 0.6555227333264868D+01
+ SCFStatus : [4,3,1]  :: <SCF> = -1116.92620068, dD = 0.24D-02, DIIS = 0.53D-04
+ MakeRho              :: Rho CheckSum = 0.2181949919164100D+04
+ QCTC                 :: J[5] CheckSum = 0.2453307244143102D+03
+<<Entering HiCu 10/28/01 @ 09:46:00>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985083D+02, <Exc> = -.94811686D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002657D+02, <Exc> = -.94773401D+02, Pts/Atom = 2077
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000878D+02, <Exc> = -.94762393D+02, Pts/Atom = 3841
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000522D+02, <Exc> = -.94760521D+02, Pts/Atom = 7211
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94760521D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[5] CheckSum = 0.1309252296988750D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44833,  DeAllocs=19824, 16876008 bytes are presently allocated.
+                         A max of 17416456 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:48:49-<
+ ONX                  :: Kx[5] CheckSum = 0.2647789077710115D+02
+ FockNGrueven         :: F[5] CheckSum = 0.1157915098005509D+03
+ FockNGrueven         :: OrthoF[5] CheckSum = 0.1035589016592312D+03
+ PulayDIIS            :: F_DIIS[5] CheckSum = 0.1035597126112459D+03
+ RHEqs                :: OrthoP[6] CheckSum = 0.8062257748298524D+01
+ RHEqs                :: P[6] CheckSum = 0.6555401067910022D+01
+ SCFStatus : [5,3,1]  :: <SCF> = -1116.92620203, dD = 0.47D-03, DIIS = 0.89D-05
+ MakeRho              :: Rho CheckSum = 0.2181949162137787D+04
+ QCTC                 :: J[6] CheckSum = 0.2453316392628123D+03
+<<Entering HiCu 10/28/01 @ 09:50:30>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985972D+02, <Exc> = -.94816649D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002775D+02, <Exc> = -.94773287D+02, Pts/Atom = 2078
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000879D+02, <Exc> = -.94761388D+02, Pts/Atom = 3839
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000524D+02, <Exc> = -.94759528D+02, Pts/Atom = 7212
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94759528D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[6] CheckSum = 0.1309249383017504D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44839,  DeAllocs=19827, 16878600 bytes are presently allocated.
+                         A max of 17419048 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:53:20-<
+ ONX                  :: Kx[6] CheckSum = 0.2647777333151395D+02
+ FockNGrueven         :: F[6] CheckSum = 0.1157924434341055D+03
+ FockNGrueven         :: OrthoF[6] CheckSum = 0.1035594787591544D+03
+ PulayDIIS            :: F_DIIS[6] CheckSum = 0.1035595509820520D+03
+ RHEqs                :: OrthoP[7] CheckSum = 0.8062257748298567D+01
+ RHEqs                :: P[7] CheckSum = 0.6555374522822850D+01
+ SCFStatus : [6,3,1]  :: <SCF> = -1116.92622719, dD = 0.26D-03, DIIS = 0.69D-05
+ MakeRho              :: Rho CheckSum = 0.2181948351481176D+04
+ QCTC                 :: J[7] CheckSum = 0.2453318213089284D+03
+<<Entering HiCu 10/28/01 @ 09:55:00>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985968D+02, <Exc> = -.94816497D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002774D+02, <Exc> = -.94773138D+02, Pts/Atom = 2078
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000880D+02, <Exc> = -.94761255D+02, Pts/Atom = 3840
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000524D+02, <Exc> = -.94759382D+02, Pts/Atom = 7215
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94759382D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[7] CheckSum = 0.1309248878642856D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44857,  DeAllocs=19836, 16886160 bytes are presently allocated.
+                         A max of 17426608 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 09:57:50-<
+ ONX                  :: Kx[7] CheckSum = 0.2647775936116064D+02
+ FockNGrueven         :: F[7] CheckSum = 0.1157926512165353D+03
+ FockNGrueven         :: OrthoF[7] CheckSum = 0.1035595879705049D+03
+ PulayDIIS            :: F_DIIS[7] CheckSum = 0.1035595428054196D+03
+ RHEqs                :: OrthoP[8] CheckSum = 0.8062257748298547D+01
+ RHEqs                :: P[8] CheckSum = 0.6555377405701763D+01
+ SCFStatus : [7,3,1]  :: <SCF> = -1116.92622132, dD = 0.71D-04, DIIS = 0.15D-05
+ MakeRho              :: Rho CheckSum = 0.2181948329829432D+04
+ QCTC                 :: J[8] CheckSum = 0.2453317850551601D+03
+<<Entering HiCu 10/28/01 @ 09:59:30>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985966D+02, <Exc> = -.94816521D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002776D+02, <Exc> = -.94773193D+02, Pts/Atom = 2078
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000880D+02, <Exc> = -.94761306D+02, Pts/Atom = 3840
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000523D+02, <Exc> = -.94759428D+02, Pts/Atom = 7215
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94759428D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[8] CheckSum = 0.1309248962310276D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44857,  DeAllocs=19836, 16886160 bytes are presently allocated.
+                         A max of 17426608 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 10:02:20-<
+ ONX                  :: Kx[8] CheckSum = 0.2647776588788433D+02
+ FockNGrueven         :: F[8] CheckSum = 0.1157926123597024D+03
+ FockNGrueven         :: OrthoF[8] CheckSum = 0.1035595707607134D+03
+ PulayDIIS            :: F_DIIS[8] CheckSum = 0.1035595584752121D+03
+ RHEqs                :: OrthoP[9] CheckSum = 0.8062257748298533D+01
+ RHEqs                :: P[9] CheckSum = 0.6555377332088821D+01
+ SCFStatus : [8,3,1]  :: <SCF> = -1116.92621917, dD = 0.16D-04, DIIS = 0.42D-06
+ MakeRho              :: Rho CheckSum = 0.2181948363194834D+04
+ QCTC                 :: J[9] CheckSum = 0.2453317748706045D+03
+<<Entering HiCu 10/28/01 @ 10:04:01>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985966D+02, <Exc> = -.94816529D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002775D+02, <Exc> = -.94773201D+02, Pts/Atom = 2078
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000880D+02, <Exc> = -.94761314D+02, Pts/Atom = 3840
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000524D+02, <Exc> = -.94759434D+02, Pts/Atom = 7214
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94759434D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[9] CheckSum = 0.1309248997798983D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44851,  DeAllocs=19833, 16883640 bytes are presently allocated.
+                         A max of 17424088 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 10:06:50-<
+ ONX                  :: Kx[9] CheckSum = 0.2647776660886568D+02
+ FockNGrueven         :: F[9] CheckSum = 0.1157926041276087D+03
+ FockNGrueven         :: OrthoF[9] CheckSum = 0.1035595630434513D+03
+ PulayDIIS            :: F_DIIS[9] CheckSum = 0.1035595628443803D+03
+ RHEqs                :: OrthoP[10] CheckSum = 0.8062257748298551D+01
+ RHEqs                :: P[10] CheckSum = 0.6555378217586737D+01
+ SCFStatus : [9,3,1]  :: <SCF> = -1116.92621626, dD = 0.93D-05, DIIS = 0.10D-06
+ MakeRho              :: Rho CheckSum = 0.2181948401520999D+04
+ QCTC                 :: J[10] CheckSum = 0.2453317718208100D+03
+<<Entering HiCu 10/28/01 @ 10:08:31>>
+ HiCu.GridGen         :: Tau = 0.10D-01, <Rho> = 0.64985966D+02, <Exc> = -.94816533D+02, Pts/Atom = 1052
+ HiCu.GridGen         :: Tau = 0.10D-02, <Rho> = 0.65002775D+02, <Exc> = -.94773199D+02, Pts/Atom = 2078
+ HiCu.GridGen         :: Tau = 0.10D-03, <Rho> = 0.65000880D+02, <Exc> = -.94761313D+02, Pts/Atom = 3840
+ HiCu.GridGen         :: Tau = 0.10D-04, <Rho> = 0.65000524D+02, <Exc> = -.94759433D+02, Pts/Atom = 7214
+ HiCu.GridGen         :: TauRel = 0.10D-04, RhoErr = 0.21D-05, <Exc> = -.94759433D+02
+ HiCu.GridGen         :: CPU Sec = 0.99D+02, WALL Sec = 0.99D+02
+ HiCu.MakeKxc         :: CPU Sec = 0.71D+02, WALL Sec = 0.71D+02
+ HiCu                 :: Kxc[10] CheckSum = 0.1309248992304165D+02
+ HiCu                 :: CPU Sec = 0.17D+03, WALL Sec = 0.17D+03
+ HiCu                 :: Allocs=44851,  DeAllocs=19833, 16883640 bytes are presently allocated.
+                         A max of 17424088 bytes were allocated.
+>-Exiting HiCu 10/28/01 @ 10:11:21-<
+ ONX                  :: Kx[10] CheckSum = 0.2647776639025910D+02
+ FockNGrueven         :: F[10] CheckSum = 0.1157926012641252D+03
+ FockNGrueven         :: OrthoF[10] CheckSum = 0.1035595595381956D+03
+ PulayDIIS            :: F_DIIS[10] CheckSum = 0.1035595619018797D+03
+ RHEqs                :: OrthoP[11] CheckSum = 0.8062257748298546D+01
+ RHEqs                :: P[11] CheckSum = 0.6555378379314822D+01
+ SCFStatus : [10,3,1] :: <SCF> = -1116.92621627, dD = 0.14D-05, DIIS = 0.30D-07
+>-Succesfull MondoSCF run 10/28/01 @ 10:12:30-<
