@@ -481,10 +481,8 @@ CONTAINS
      ! ENDIF
        CALL SCF(iBAS,iGEO,C)
        IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
-write(*,*) 'chk 1'
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
-write(*,*) 'chk 2'
        CALL PrintClones(IGeo,C%Nams,C%Geos)
        !
        ! Loop over all clones and modify geometries.
@@ -734,16 +732,16 @@ write(*,*) 'chk 2'
        CALL SteepestDesc(GOpt%CoordCtrl,GOpt%Hessian, &
                          Grad,Displ,XYZ)
      CASE(GRAD_DIAGHESS_OPT) 
-     ! IF(iGEO<3) THEN
+      !IF(iGEO<3) THEN
          CALL RescaleGrad(Grad%D,Print)
          CALL DiagHess(GOpt%CoordCtrl,GOpt%Hessian,Grad,Displ, &
                        IntCs,AtNum,iGEO,XYZ)
-     ! ELSE
-     !   CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
-     !     GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
-     !     HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
-     !     Displ_O=Displ%D,Grad_O=Grad%D)
-     ! ENDIF
+      !ELSE
+      !  CALL GeoDIIS(XYZ,GOpt%Constr,GOpt%BackTrf, &
+      !    GOpt%GrdTrf,GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%GDIIS, &
+      !    HFileIn,iCLONE,iGEO-1,Print,SCRPath, &
+      !    Displ_O=Displ%D,Grad_O=CartGrad,IntGrad_O=Grad%D)
+      !ENDIF
        CALL CutOffDispl(Displ%D,IntCs)
        CALL RedundancyOff(Displ%D,SCRPath,Print)
      END SELECT
@@ -1595,8 +1593,10 @@ write(*,*) 'chk 2'
      NIntC=SIZE(IntCs%Def)
      DO I=1,NIntC
        Sum=Displ(I)
-       IF(ABS(Sum)>0.3D0) THEN
-         Displ(I)=SIGN(0.3D0,Sum)
+       IF(IntCs%Def(I)(1:4)=='STRE') THEN
+         IF(ABS(Sum)>0.30D0) Displ(I)=SIGN(0.30D0,Sum)
+       ELSE
+         IF(ABS(Sum)>0.30D0) Displ(I)=SIGN(0.30D0,Sum)
        ENDIF
      ENDDO
    END SUBROUTINE CutOffDispl

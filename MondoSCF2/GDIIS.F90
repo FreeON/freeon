@@ -22,7 +22,8 @@ CONTAINS
 !
    SUBROUTINE GeoDIIS(XYZ,GConstr,GBackTrf, &
               GGrdTrf,GTrfCtrl,GCoordCtrl,GDIISCtrl, &
-              HFileIn,iCLONE,iGEO,Print,SCRPath,Displ_O,Grad_O)
+              HFileIn,iCLONE,iGEO,Print,SCRPath, &
+              Displ_O,Grad_O,IntGrad_O)
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ
      CHARACTER(LEN=*)            :: HFileIn
      TYPE(Constr)                :: GConstr
@@ -42,10 +43,10 @@ CONTAINS
      TYPE(DBL_RNK2)              :: RefStruct,SRDispl
      TYPE(DBL_RNK2)              :: Aux
      TYPE(DBL_VECT)              :: Vect
-     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Displ_O,Grad_O
+     REAL(DOUBLE),DIMENSION(:),OPTIONAL :: Displ_O,Grad_O,IntGrad_O
      !
      IF(PRESENT(Displ_O)) THEN
-       GDIISMemory=MIN(4,iGEO)
+       GDIISMemory=MIN(7,iGEO)
      ELSE
        GDIISMemory=MIN(6,iGEO)
      ENDIF
@@ -89,7 +90,8 @@ CONTAINS
      ! Calculate new Cartesian coordinates 
      !
      IF(PRESENT(Displ_O).AND.PRESENT(Grad_O)) THEN
-       CALL IntCFit(XYZ,Grad_O,RefStruct%D,RefGrad%D,SCRPath,Displ_O, &
+       CALL IntCFit(XYZ,Grad_O,IntGrad_O,Displ_O, &
+                    RefStruct%D,RefGrad%D,SCRPath, &
                     GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
      ELSE
        CALL BasicGDIIS(XYZ,GConstr,Print,RefStruct,RefGrad, &
@@ -786,16 +788,17 @@ CONTAINS
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE IntCFit(XYZ,Grad,RefStruct,RefGrad,SCRPath,Displ, &
+   SUBROUTINE IntCFit(XYZ,Grad,IntGrad,Displ, &
+                      RefStruct,RefGrad,SCRPath, &
                       GGrdTrf,GCoordCtrl,GTrfCtrl,Print)
      REAL(DOUBLE),DIMENSION(:,:)  :: XYZ,RefStruct,RefGrad
-     REAL(DOUBLE),DIMENSION(:)    :: Grad,Displ
+     REAL(DOUBLE),DIMENSION(:)    :: Grad,Displ,IntGrad
      CHARACTER(LEN=*)             :: SCRPath
      INTEGER                      :: Print
      INTEGER                      :: I,J,NMem,NCart,NatmsLoc,NIntC
      TYPE(INTC)                   :: IntCs
      TYPE(DBL_RNK2)               :: XYZAux,IntCGrads,IntCValues
-     TYPE(DBL_VECT)               :: VectC,VectI,VectCG
+     TYPE(DBL_VECT)               :: VectC,VectI,VectCG,RMSErr
      TYPE(GrdTrf)                 :: GGrdTrf
      TYPE(CoordCtrl)              :: GCoordCtrl
      TYPE(TrfCtrl)                :: GTrfCtrl
@@ -816,6 +819,7 @@ write(*,*) 'chk 1'
      !
      CALL New(IntCGrads,(/NIntC,NMem+1/))
      CALL New(IntCValues,(/NIntC,NMem+1/))
+     CALL New(RMSErr,NMem+1)
      CALL New(VectI,NIntC)
      !
      ! Calculate IntC gradients using the latest IntC-s     
@@ -827,6 +831,7 @@ write(*,*) 'chk 1'
        ENDDO
 write(*,*) I,'VectC = ',VectC%D/AngstromsToAu
 write(*,*) I,'VectCG= ',VectCG%D
+       RMSErr%D(I)=SQRT(DOT_PRODUCT(VectCG%D,VectCG%D)/DBLE(NCart))
        CALL CartRNK1ToCartRNK2(VectC%D,XYZAux%D)
        CALL RefreshBMatInfo(IntCs,XYZAux%D,GTrfCtrl, &
                           GCoordCtrl,Print,SCRPath,.TRUE.)
@@ -838,11 +843,13 @@ write(*,*) I,'internal gradients= ',VectI%D
        IntCValues%D(:,I)=IntCs%Value
 write(*,*) I,'internal values= ',IntCValues%D(:,I)
      ENDDO
+       RMSErr%D(NMem+1)=SQRT(DOT_PRODUCT(Grad,Grad)/DBLE(NCart))
+write(*,*) 'RMSErr= ',RMSErr%D
        CALL RefreshBMatInfo(IntCs,XYZ,GTrfCtrl, &
                           GCoordCtrl,Print,SCRPath,.TRUE.)
      ! CALL CartToInternal(XYZ,IntCs,Grad,VectI%D,&
      !   GGrdTrf,GCoordCtrl,GTrfCtrl,Print,SCRPath)
-       IntCGrads%D(:,NMem+1)=Grad
+       IntCGrads%D(:,NMem+1)=IntGrad
 write(*,*) NMem+1,'internal gradients= ',IntCGrads%D(:,NMem+1)
        CALL INTCValue(IntCs,XYZ,GCoordCtrl%LinCrit,GCoordCtrl%TorsLinCrit)
        IntCValues%D(:,NMem+1)=IntCs%Value
@@ -850,8 +857,9 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
      !
      ! Calculate new values of internals by fitting
      !
-     CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,Displ)
+     CALL DisplFit(IntCs,IntCGrads%D,IntCValues%D,RMSErr%D,Displ)
      !
+     CALL Delete(RMSErr)
      CALL Delete(IntCGrads) 
      CALL Delete(IntCValues) 
      CALL Delete(VectI) 
@@ -863,9 +871,9 @@ write(*,*) NMem+1,'internal values= ',IntCValues%D(:,I)
 !
 !---------------------------------------------------------------------
 !
-   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,Displ)
+   SUBROUTINE DisplFit(IntCs,IntCGrads,IntCValues,RMSErr,Displ)
      TYPE(INTC)                 :: IntCs
-     REAL(DOUBLE),DIMENSION(:)  :: Displ
+     REAL(DOUBLE),DIMENSION(:)  :: Displ,RMSErr
      REAL(DOUBLE),DIMENSION(:,:):: IntCGrads,IntCValues
      REAL(DOUBLE)               :: Center
      INTEGER                    :: I,J,NIntC,NDim
@@ -902,19 +910,15 @@ write(*,*) vectx%d(j),vecty%d(j)
 enddo
        ENDIF
        !
-       CALL FitInt(VectX%D,VectY%D,Sig%D,FitVal%D(I),IntCs%Def(I))
+       CALL FitInt(VectX%D,VectY%D,RMSErr,FitVal%D(I),IntCs%Def(I))
        !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
           IntCs%Def(I)(1:4)=='TORS') THEN
-write(*,*) 'fit1= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
          CALL Loose2PIs(FitVal%D(I))
          CALL LinBTo180(FitVal%D(I)) 
-write(*,*) 'fit2= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
        ELSE IF(IntCs%Def(I)(1:4)=='BEND') THEN
-write(*,*) 'fit1= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
          CALL BendTo180(FitVal%D(I))
-write(*,*) 'fit2= ',FitVal%D(I),FitVal%D(I)*180.D0/PI
        ENDIF
 write(*,*) 'fit= ',FitVal%D(I)
        Displ(I)=FitVal%D(I)-IntCValues(I,NDim)
@@ -939,11 +943,11 @@ endif
      REAL(DOUBLE)              :: FitVal
      INTEGER                   :: I,J,NDim,MWT
      REAL(DOUBLE)              :: A,B,SigA,SigB,Chi2,Q
-     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin
+     REAL(DOUBLE)              :: XMax,XMin,YMax,YMin,AbDev
      CHARACTER(LEN=*)          :: Def
      !
      NDim=SIZE(VectX)
-     MWT=0
+     MWT=1
 write(*,*) 'VectX= ',VectX
      XMin=MINVAL(VectX)
      XMax=MAXVAL(VectX)
@@ -953,7 +957,7 @@ write(*,*) 'in critical X'
        YMin=MINVAL(VectY)
        YMax=MAXVAL(VectY)
 write(*,*) 'ymin= ',ymin,' ymax= ',ymax
-       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4.AND.Def/='LINB2') THEN
+       IF(ABS(YMin)>1.D-4.AND.ABS(YMax)>1.D-4) THEN
 write(*,*) 'in critical Y1'
          CALL Halt('Grad too big in FitInt, while coordinate does not move.')
        ELSE
@@ -962,7 +966,10 @@ write(*,*) 'in critical Y2'
          RETURN
        ENDIF
      ENDIF
-     CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
+   ! CALL Fit(VectX,VectY,NDim,Sig,MWT,A,B,SigA,SigB,Chi2,Q)
+!write(*,*) 'SigA= ',SigA,' SigB= ',SigB,' Q= ',Q,' Chi2= ',Chi2
+     CALL MedFit(VectX,VectY,NDim,A,B,AbDev)
+write(*,*) 'AbDev= ',AbDev
      ! B refers to the harmonic force constant
 write(*,*) 'line= ',a,b     
      IF(ABS(B)>1.D-7) THEN
@@ -1311,6 +1318,163 @@ write(*,*) 'ss = ',ss
      ENDDO
      !
    END SUBROUTINE RatInt
+!
+!---------------------------------------------------------------------
+!
+   SUBROUTINE MedFit(x,y,ndata,a,b,abdev)
+      INTEGER   ::  ndata,NMAX,ndatat
+      PARAMETER (NMAX=1000)
+      REAL(DOUBLE) :: a,abdev,b,x(ndata),y(ndata)
+      REAL(DOUBLE) :: arr(NMAX),xt(NMAX),yt(NMAX),aa,abdevt
+      COMMON /arrays/ xt,yt,arr,aa,abdevt,ndatat
+      INTEGER      :: j
+      REAL(DOUBLE) :: b1,b2,bb,chisq,del,f,f1,f2,sigb
+      REAL(DOUBLE) :: sx,sxx,sxy,sy
+      !
+      sx=Zero
+      sy=Zero
+      sxy=Zero
+      sxx=Zero
+      do 11 j=1,ndata
+        xt(j)=x(j)
+        yt(j)=y(j)
+        sx=sx+x(j)
+        sy=sy+y(j)
+        sxy=sxy+x(j)*y(j)
+        sxx=sxx+x(j)**2
+11    continue
+      ndatat=ndata
+      del=ndata*sxx-sx**2
+      aa=(sxx*sy-sx*sxy)/del
+      bb=(ndata*sxy-sx*sy)/del
+      chisq=Zero
+      do 12 j=1,ndata
+        chisq=chisq+(y(j)-(aa+bb*x(j)))**2
+12    continue
+      sigb=sqrt(chisq/del)
+      b1=bb
+      f1=rofunc(b1)
+      b2=bb+sign(3.D0*sigb,f1)
+      f2=rofunc(b2)
+1     if(f1*f2.gt.Zero)then
+        bb=2.D0*b2-b1
+        b1=b2
+        f1=f2
+        b2=bb
+        f2=rofunc(b2)
+        goto 1
+      endif
+      sigb=0.01D0*sigb
+2     if(abs(b2-b1).gt.sigb)then
+        bb=0.5D0*(b1+b2)
+        if(bb.eq.b1.or.bb.eq.b2)goto 3
+        f=rofunc(bb)
+        if(f*f1.ge.Zero)then
+          f1=f
+          b1=bb
+        else
+          f2=f
+          b2=bb
+        endif
+        goto 2
+      endif
+3     a=aa
+      b=bb
+      abdev=abdevt/ndata
+      return
+   END SUBROUTINE MedFit
+!
+!---------------------------------------------------------------------
+!
+   FUNCTION RoFunc(b)
+      INTEGER  ::  NMAX
+      REAL(DOUBLE) :: RoFunc,b,EPS
+      PARAMETER (NMAX=1000,EPS=1.e-7)
+      INTEGER      :: j,ndata
+      REAL(DOUBLE) :: aa,abdev,d,sum,arr(NMAX),x(NMAX),y(NMAX)
+      COMMON /arrays/ x,y,arr,aa,abdev,ndata
+      !
+      do 11 j=1,ndata
+        arr(j)=y(j)-b*x(j)
+11    continue
+      if (mod(ndata,2).eq.0) then
+        j=ndata/2
+        aa=0.5D0*(select(j,ndata,arr)+select(j+1,ndata,arr))
+      else
+        aa=select((ndata+1)/2,ndata,arr)
+      endif
+      sum=Zero
+      abdev=Zero
+      do 12 j=1,ndata
+        d=y(j)-(b*x(j)+aa)
+        abdev=abdev+abs(d)
+        if (ABS(y(j))>EPS) d=d/abs(y(j)) 
+        if (abs(d).gt.EPS) sum=sum+x(j)*sign(1.0D0,d)
+12    continue
+      rofunc=sum
+      return
+   END FUNCTION RoFunc
+!
+!---------------------------------------------------------------------
+!
+   FUNCTION select(k,n,arr)
+      INTEGER      :: k,n
+      REAL(DOUBLE) :: select,arr(n)
+      INTEGER      :: i,ir,j,l,mid
+      REAL(DOUBLE) :: a,temp
+      l=1
+      ir=n
+1     if(ir-l.le.1)then
+        if(ir-l.eq.1)then
+          if(arr(ir).lt.arr(l))then
+            temp=arr(l)
+            arr(l)=arr(ir)
+            arr(ir)=temp
+          endif
+        endif
+        select=arr(k)
+        return
+      else
+        mid=(l+ir)/2
+        temp=arr(mid)
+        arr(mid)=arr(l+1)
+        arr(l+1)=temp
+        if(arr(l+1).gt.arr(ir))then
+          temp=arr(l+1)
+          arr(l+1)=arr(ir)
+          arr(ir)=temp
+        endif
+        if(arr(l).gt.arr(ir))then
+          temp=arr(l)
+          arr(l)=arr(ir)
+          arr(ir)=temp
+        endif
+        if(arr(l+1).gt.arr(l))then
+          temp=arr(l+1)
+          arr(l+1)=arr(l)
+          arr(l)=temp
+        endif
+        i=l+1
+        j=ir
+        a=arr(l)
+3       continue
+          i=i+1
+        if(arr(i).lt.a)goto 3
+4       continue
+          j=j-1
+        if(arr(j).gt.a)goto 4
+        if(j.lt.i)goto 5
+        temp=arr(i)
+        arr(i)=arr(j)
+        arr(j)=temp
+        goto 3
+5       arr(l)=arr(j)
+        arr(j)=a
+        if(j.ge.k)ir=j-1
+        if(j.le.k)l=i
+      endif
+      goto 1
+   END FUNCTION Select
 !
 !---------------------------------------------------------------------
 !
