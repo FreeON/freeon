@@ -932,26 +932,20 @@ CONTAINS
 !
 !         Include a Hydrostaic Presure into the lattice forces
 !          
-!            LFrc_ij = LFrc_ij + P*V*I_ii*(M^(-1))_ji
-! 
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,1)
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,2)
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,3)
-!!$          Pres = 0.1D0
-!!$          Vol  = G%Clone(iCLONE)%PBC%CellVolume
-!!$          DO I=1,3
-!!$             DO J=1,3
-!!$                IF(G%Clone(iCLONE)%PBC%AutoW%I(I)==1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J)==1) THEN
-!!$                   PMat = Pres*Vol*G%Clone(iCLONE)%PBC%InvBoxSh%D(J,I)
-!!$                   G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) + PMat
-!!$                   G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = PMat
-!!$                ENDIF
-!!$             ENDDO
-!!$          ENDDO 
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,1)
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,2)
-!!$          WRITE(*,*) G%Clone(iCLONE)%PBC%LatFrc%D(1:3,3)
-!          IF(.TRUE.) STOP
+!            LFrc_ij = LFrc_ij + P*V*I_ii*(M^(-1))_ij
+!  
+          IF(O%Pressure .NE. Zero .AND. G%Clone(iCLONE)%PBC%Dimen .GT. 0) THEN
+             Pres = O%Pressure
+             Vol  = G%Clone(iCLONE)%PBC%CellVolume
+             DO I=1,3
+                DO J=1,3
+                   IF(G%Clone(iCLONE)%PBC%AutoW%I(I)==1 .AND. G%Clone(iCLONE)%PBC%AutoW%I(J)==1) THEN
+                      PMat = Pres*Vol*G%Clone(iCLONE)%PBC%InvBoxSh%D(I,J)
+                      G%Clone(iCLONE)%PBC%LatFrc%D(I,J) = G%Clone(iCLONE)%PBC%LatFrc%D(I,J) + PMat
+                   ENDIF
+                ENDDO
+             ENDDO
+          ENDIF
 !         Print  the Forces
           IF(.TRUE.) THEN
              CALL New(Ftmp,3*G%Clone(iCLONE)%NAtms)
