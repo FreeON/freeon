@@ -308,7 +308,7 @@ PROGRAM SDMM
       TrP1=Trace(p)
       TrP2=Trace(p2)
       TrP3=Trace(P3)
-      c=(TrP2-TrP3)/(TrP1-TrP2)
+      c=(TrP2-TrP3)/(TrP1-TrP2+1D-30)
       IF(ABS(c-Half)<1.D-5.OR.FixedUVW)THEN
          c=Half
          u=Zero
@@ -316,13 +316,13 @@ PROGRAM SDMM
          w=-Two
          FixedUVW=.TRUE.
       ELSEIF(c<=Half)THEN
-         u=(One-Two*c)/(One-c) 
-         v=(One+c)/(One-c) 
-         w=-One/(One-c)
+         u=(One-Two*c)/(One-c+1D-30) 
+         v=(One+c)/(One-c+1D-30) 
+         w=-One/(One-c+1D-30)
       ELSE
          u=Zero
-         v=(One+c)/c     
-         w=-One/c
+         v=(One+c)/(c+1D-30)     
+         w=-One/(c+1D-30)
       ENDIF
 !------------------------------------------------------------------------------
 !     ASSEMBLE PURIFIED P

@@ -29,7 +29,7 @@ PROGRAM DIIS
    REAL(DOUBLE),DIMENSION(6)      :: AvQP,DeltaQPi,DeltaQPj
    REAL(DOUBLE)                   :: DIISErr,C0,C1,Damp,EigThresh, &
                                      RelDevDP,RelDevQP,Sellers,DMax
-   INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax
+   INTEGER                        :: I,J,I0,J0,K,N,M,ISCF,BMax,DoDIIS
    CHARACTER(LEN=2)               :: Cycl,NxtC
    CHARACTER(LEN=5*DEFAULT_CHR_LEN) :: Mssg
    LOGICAL                        :: Present,Sloshed
@@ -43,12 +43,22 @@ PROGRAM DIIS
 !  Threshold for projection of small eigenvalues
    IF(.NOT.OptDblQ(Inp,'DIISThresh',EigThresh))EigThresh=1.D-10
 !  Damping coefficient for first cycle
-   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=3D-1
-!  Dont allow damping below 0.005, as this can cause false convergence
-   Damp=MAX(Damp,5D-3)
+   IF(.NOT.OptDblQ(Inp,'DIISDamp',Damp))Damp=2D-1
+!  Dont allow damping below 0.01, as this can cause false convergence
+   Damp=MAX(Damp,1D-2)
+!  Dont allow damping above 0.5, as this is silly (DIIS would certainly work better)
+   Damp=MIN(Damp,5D-1)
 !  Max number of equations to keep in DIIS 
    IF(.NOT.OptIntQ(Inp,'DIISDimension',BMax))BMax=15
    CLOSE(Inp)
+!  
+   IF(ISCF<=1)THEN
+      DoDIIS=-1  ! No DIIS, but damp non-extrapolated Fock matrices
+   ELSEIF(ISCF>1.AND.BMax/=0)THEN
+      DoDIIS=1   ! We are doing DIIS, extrapolating non-extrapolated Fock matrices
+   ELSEIF(BMax==0)THEN
+      DoDIIS=0   ! We are purely damping, using previously extrapolated Fock matrices
+   ENDIF
 !-------------------------------------------------------------------------------------
 !  Allocations
    CALL New(P)
@@ -69,7 +79,7 @@ PROGRAM DIIS
    DIISErr=SQRT(Dot(E,E))/DBLE(NBasF)
 !  Build the B matrix if on second SCF cycle (starting from 0)
 !  and if pure damping flag is not on (DIISDimension=0)
-   IF(ISCF>1.AND.BMax/=0)THEN
+   IF(DoDIIS==1)THEN
       N=MIN(ISCF+1,BMax+1)
       M=MAX(1,ISCF-BMax+1)
       CALL New(B,(/N,N/))
@@ -180,11 +190,19 @@ PROGRAM DIIS
   CALL Multiply(F,DIISCo%D(N-1))     
   I0=N-2
   DO I=ISCF-1,M,-1
-     CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
+     WRITE(*,*)' I-ISCF = ',I-ISCF,' Co = ',DIISCo%D(I0)
+     IF(DoDIIS==0)THEN
+        WRITE(*,*)TRIM(TrixFile('F_DIIS',Args,I-ISCF))
+        CALL Get(Tmp1,TrixFile('F_DIIS',Args,I-ISCF))
+     ELSE
+        WRITE(*,*)TRIM(TrixFile('OrthoF',Args,I-ISCF))
+        CALL Get(Tmp1,TrixFile('OrthoF',Args,I-ISCF))
+     ENDIF
      CALL Multiply(Tmp1,DIISCo%D(I0))
      CALL Add(F,Tmp1,E)
      IF(I==M)THEN
 !       Only filter the end product
+        Write(*,*)' Filter '
         CALL Filter(F,E)
      ELSE
         CALL SetEq(F,E)
