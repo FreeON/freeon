@@ -31,7 +31,7 @@
 
 \begin{abstract}
 Periodic boundary conditions have been implemented in the linear scaling
-Quantum Chemistry code \textbf{MondoSCF}. For the two-electron Coulomb
+Quantum Chemistry code {\sc MondoSCF}. For the two-electron Coulomb
 matrix, this has been achieved with an exact multipole expansion of
 the long range Coulomb field. This yields a spherically summed boundary
 condition that is easily transformed to Ewald boundary conditions.
@@ -42,10 +42,9 @@ matrix and the exact-exchange matrix. A Hierarchical Cubature (HiCu),
 pure Cartesian adaptive grid is used for the local exchange-correlation
 matrix. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
-density. Finally, the current capabilities of MondoSCF for large condensed
+density. Finally, the current capabilities of {\sc MondoSCF} for large condensed
 phases will be demonstrated.
 %
-\vskip 0.07 in
 \noindent{\bf Keywords}: Self-consistent-field, linear-scaling, periodic systems, tree-code, Gaussian-orbital
 %
 \end{abstract}
@@ -87,8 +86,7 @@ periodic boundary conditions into existing linear scaling quantum chemistry
 codes is essential. 
 
 We have implemented periodic boundary conditions into the linear scaling
-quantum chemistry code \textbf{MondoSCF} 
-\cite{MChallacombe96,MChallacombe97,MChallacombe99}.
+quantum chemistry code {\sc MondoSCF}\cite{MondoSCF}.
 For the one electron matrix this has been achieved by a re-summation
 over periodic cell images, which because of locality leads to an efficient
 calculation of the one electron matrices. For the two electron matrices
@@ -104,25 +102,25 @@ Cartesian adaptive grid
 is used. This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects
-\cite{Bentley79}. All \textbf{MondoSCF} calculations are done at the gamma-point.
-This is because the main focus of the \textbf{MondoSCF} linear scaling quantum chemistry
+\cite{Bentley79}. All {\sc MondoSCF} calculations are done at the gamma-point.
+This is because the main focus of the {\sc MondoSCF} linear scaling quantum chemistry
 code is large systems, where for insulators k-space integrations become unnecessary 
 \cite{Nunes94}.
 
 
-To demonstrate and validate the capabilities of \textbf{MondoSCF}, we show results for 
+To demonstrate and validate the capabilities of {\sc MondoSCF}, we show results for 
 three condensed phase systems, Sodium Chloride, Magnesium Oxide 
 and Carbon in the diamond structure. We then compare these results to the periodic
-Gaussian code \textbf{Crystal98} \cite{Crystal98}. Next we demonstrate that
+Gaussian code {\sc CRYSTAL} \cite{Crystal98}. Next we demonstrate that
 the code achieves {\it true} linear scaling for the dense periodic diamond system 
 up to 512 atoms in the unit cell.
 %
 % Example system
 %
-%To show the full capabilities of \textbf{MondoSCF} we calculate the surface reconstruction
+%To show the full capabilities of {\sc MondoSCF} we calculate the surface reconstruction
 %of the Silicon (111) surface with a step.
 %
-Finally we give some conclusion concerning the accuracy and utility of \textbf{MondoSCF}
+Finally we give some conclusion concerning the accuracy and utility of {\sc MondoSCF}
 and future research directions.
 
 \commentout{
@@ -643,7 +641,7 @@ localization of the atomic orbitals.
 }
 
 \begin{table}
-\caption{Comparison of {\sc Crystal98} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
+\caption{Comparison of {\sc CRYSTAL} and {\sc MondoSCF} $\Gamma$-point calculations on  NaCl at the 
 8-511/8-631G/BLYP level of theory at a {\it tight} accuracy level. The lattice coordinates for 
 $N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
 \label{NaCl8511}
@@ -653,9 +651,9 @@ $N_{\rm at}=2$ and 8 are  are given in Ref.~[\cite{PBCCoordinates}].}
 Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm at}$\\ 
 \colrule
 {\sc MondoSCF}      & $2^f$  &  -622.39101   & -311.19551  \\
-{\sc Crystal98}     & $2^f$  &  -622.3911    & -311.1955    \\
+{\sc CRYSTAL}     & $2^f$  &  -622.3911    & -311.1955    \\
 {\sc MondoSCF}      & $8^g$  &  -2490.0016   & -311.25020  \\
-{\sc Crystal98}     & $8^g$  &  -2490.0013   & -311.25016   \\
+{\sc CRYSATAL}     & $8^g$  &  -2490.0013   & -311.25016   \\
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic
@@ -664,7 +662,7 @@ $ ^g$Cubic
 
 \begin{table}
 \caption{Convergence of the $\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc Crystal98} for NaCl at the STO-3G/LDA level
+         $k$-space integration with {\sc CRYSATAL} for NaCl at the STO-3G/LDA level
          of theory at a {\it tight} accuracy level.}\label{NaClGammaPt}
 \center{
 \begin{tabular}{lcll}
@@ -679,7 +677,7 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  & -39109.912    & -305.54618   \\
                 & 216$^g$  & -65997.977    & -305.54619   \\ 
 \hline
-${\sc Crystal98}^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
+{\sc CRYSATAL}$^h$ & 2$^f$    &  -611.09228    & -305.54614    \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
@@ -692,7 +690,7 @@ $ ^g$Cubic  \\
 
 \begin{table}
 \caption{Convergence of the$\Gamma$-point super-cell approximation with {\sc MondoSCF} to 
-         $k$-space integration with {\sc Crystal98} for MgO at the 8-61G/8-51G/BLYP
+         $k$-space integration with {\sc CRYSATAL} for MgO at the 8-61G/8-51G/BLYP
          level of theory at a {\it tight} accuracy level. The lattice coordinates for 
 	 $N_{\rm at}=2$ and 8 are from Ref.~[\cite{PBCCoordinates}].}
 \label{MgOGammaPt}
@@ -709,7 +707,7 @@ Program         & $N_{\rm at}$              & Energy (Hatree) & Energy/$N_{\rm a
                 & 128$^f$  &  -17630.430  & -137.73774  \\
                 & 216$^g$  &  -29751.352  & -137.73774  \\ 
 \hline
-${\sc Crystal98}^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
+{\sc CRYSATAL }$^h$ & 2$^f$    &   -275.47547  & -137.73774  \\ 
 \botrule
 $ ^f$Triclinic \\
 $ ^g$Cubic  \\
@@ -847,7 +845,7 @@ thresholds are significantly more conservative.
 \section{Conclusions}
 
 We have shown a systematic and efficient approach for incorporating periodic 
-boundary conditions into the linear scaling quantum chemistry code {\bf MondoSCF}.
+boundary conditions into the linear scaling quantum chemistry code {\sc MondoSCF}.
 %
 For the one electron matrices we achieved this by a re-summation
 over periodic cell images, which because of locality leads to an efficient
@@ -869,15 +867,15 @@ This method achieves linear scaling through the use of advanced
 data structures (k-d trees) that maximally exploits locality of the
 density, and allows for an efficient treatment of the periodic effects.
 %
-We then showed the capabilities of \textbf{MondoSCF} for three test condensed
+We then showed the capabilities of {\sc MondoSCF} for three test condensed
 phases , Sodium Chloride, Magnesium Oxide and Carbon in the Diamond
 structure. We then compared these results to the periodic
-Gaussian code \textbf{Crystal98}. 
-In all cases we achieved excellent comparison with the  \textbf{Crystal98}
+Gaussian code {\sc CRYSTAL}. 
+In all cases we achieved excellent comparison with the  {\sc CRYSTAL}
 results, including k-space summation in comparison with ever 
-increasing super-cells, to within the accuracy that \textbf{Crystal98} can obtain.
+increasing super-cells, to within the accuracy that {\sc CRYSTAL} can obtain.
 %
-Finally, we demonstrated that \textbf{MondoSCF} achieves {\it true} linear scaling
+Finally, we demonstrated that {\sc MondoSCF} achieves {\it true} linear scaling
 for the Coulomb and Exchange-correlation matrix builds for
 the dense periodic diamond system up to 512 atoms per unit cell. 
 %
