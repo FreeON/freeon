@@ -236,17 +236,6 @@
 	booktitle = {Parallel Computing in Computational Chemistry}
 }
 
-@article{awong95,
-	author = {A.~T. Wong and R.~J. Harrison},
-	title = {Approaches to large-scale parallel self-consistent field
-  calculations},
-	journal = {J. Comp. Chem.},
-	year = 1995,
-	volume = 16,
-	number = 10,
-	pages = {1291-1300}
-}
-
 @book{bader,
 	author = {R. F. W. Bader},
 	title = {Atoms in Molecules: A Quantum Theory},
@@ -3355,35 +3344,6 @@
 	pages = {51-53}
 }
 
-@inproceedings{mwarren93,
-	author = {M. S. Warren and J. K. Salmon},
-	booktitle = {Proceedings SUPERCOMPUTING '93},
-	year = 1993,
-	pages = {12-21},
-	publisher = {IEEE Computer Society Press },
-	address = { Los Alamitos, CA}
-}
-
-@article{mwarren94,
-	author = {M. S. Warren and J. K. Salmon},
-	title = {Skeletons from the treecode closet},
-	journal = {J. Comp. Phys.},
-	year = 1994,
-	volume = 111,
-	number = 1,
-	pages = {136--155}
-}
-
-@article{mwarren95,
-	author = {M. S. Warren and J. K. Salmon},
-	title = {A portable parallel particle program},
-	journal = {Comp. Phys. Comm.},
-	year = 1995,
-	volume = 87,
-	number = {1--2},
-	pages = {266--290}
-}
-
 @phdthesis{nabors:93,
 	author = {Keith Shelton Nabors},
 	title = {Efficient Three-Dimensional Capacitance Calculation},
@@ -4445,12 +4405,12 @@
 	year = 1993
 }
 
-@inproceedings{singh:93,
-	author = {Jaswinder Pal Singh and Chris Holt and John L.
-              Hennessy and Anoop Gupta},
+@article{Singh93,
+	author = {J. P. Singh and C. Holt and J. L. Hennessy and A. Gupta},
 	title = {A Parallel Adaptive Fast Multipole Method},
-	booktitle = {Proceedings of the Supercomputing '93 Conference},
-	year = 1993
+	journal = {Proc. Supercomputing 93},
+	year = 1993,
+	pages = 54
 }
 
 @article{slater,
@@ -7900,16 +7860,6 @@ Friesner and J. M. Langlois and W. A. Goddard and R. E. Donnelly and
 	volume = 51,
 	number = 9,
 	pages = {3927--3932}
-}
-
-@article{MWarren95,
-	author = {M. S. Warren and J. K. Salmon},
-	title = {A portable parallel particle program},
-	journal = {Comp. Phys. Comm.},
-	year = 1995,
-	volume = 87,
-	number = {1--2},
-	pages = {266--290}
 }
 
 @article{NBeebe77,
@@ -11642,7 +11592,6 @@ Symmetric Eigenvalue Problems},
 	journal = {Comp. Surv. },
 	year = {1979 },
 	volume = 11,
-	number = 4,
 	pages = { 397-409}
 }
 
@@ -11652,7 +11601,6 @@ Symmetric Eigenvalue Problems},
 	journal = {Comm. ACM},
 	year = {1980 },
 	volume = 23,
-	number = 4,
 	pages = {214--229 }
 }
 
@@ -12236,9 +12184,7 @@ Symmetric Eigenvalue Problems},
 	journal = {ACM Comp. Surv.},
 	year = {1998 },
 	volume = 30,
-	number = 2,
-	pages = {170--231},
-	month = JUN
+	pages = {170--231}
 }
 
 @article{Gagel98,
@@ -13031,19 +12977,10 @@ Symmetric Eigenvalue Problems},
 	author = {J. R. Pilkington and S. B. Baden},
 	title = { Dynamic partitioning of non-uniform structured workloads
                 with spacefilling curves},
-	journal = {IEEE Trans. Parallel and Distributed Systems.},
+	journal = {IEEE Trans. Parallel and Distributed Systems},
 	year = 1996,
 	volume = 7,
-	number = 3,
-	pages = {"288--300"}
-}
-
-@book{Pissanetzky84,
-	author = {S. Pissanetzky},
-	title = {Sparse Matrix Technology},
-	publisher = {Academic Press},
-	year = 1984,
-	address = {London}
+	pages = {288--300}
 }
 
 @article{Platzman89,
@@ -13533,9 +13470,10 @@ Symmetric Eigenvalue Problems},
 @article{Warren95b,
 	author = {Michael S. Warren and John K. Salmon},
 	title = {A portable parallel particle program},
-	journal = {Computer Physics Communications},
+	journal = {Comp. Phys. Commun.},
 	year = 1995,
-	volume = 87
+	volume = 87,
+	pages = 266
 }
 
 @article{Warschkow98,
@@ -13957,7 +13895,7 @@ Symmetric Eigenvalue Problems},
 	note = {To appear}
 }
 
-@book{SPissanetzky84,
+@book{Pissanetzky84,
 	author = {S. Pissanetzky},
 	title = {Sparse Matrix Technology},
 	publisher = {Academic Press},
@@ -15019,6 +14957,15 @@ Symmetric Eigenvalue Problems},
 	note = {p.~109}
 }
 
+@article{Baker_02v23,
+	author = {J. Baker and P. Pulay},
+	title = {An Efficient parallel algorithm for the calculation of canonical MP2 energies},
+	journal = {J. Comput. Chem.},
+	year = 2002,
+	volume = 23,
+	pages = 1150
+}
+
 @article{Baker_00v26,
 	author = {J Baker and M. Shirel},
 	journal = {Parallel Comp.},
@@ -15044,6 +14991,24 @@ Symmetric Eigenvalue Problems},
 	year = 1995,
 	editor = {E. Clementi and G. Corongiu},
 	pages = 305
+}
+
+@article{Harrison_94v45,
+	author = {R. J. Harrison and R. Shepard},
+	title = {AB-INITIO MOLECULAR ELECTRONIC-STRUCTURE ON PARALLEL COMPUTERS },
+	journal = {Annu. Rev. Phys. Chem.},
+	year = 1994,
+	volume = 45,
+	pages = 623
+}
+
+@article{Kohn_99v71,
+	author = {W. Kohn},
+	title = { Nobel Lecture: Electronic structure of matter-wave functions and density functionals},
+	journal = {Rev. Mod. Phys.},
+	year = 1999,
+	volume = 71,
+	pages = 1253
 }
 
 @article{Perdew_96v77,
