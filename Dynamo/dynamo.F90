@@ -95,12 +95,18 @@ CONTAINS
        CALL Get(LJEps,'LJEps')
        CALL Get(LJEps14,'LJEps14')
        E_LJ_EXCL=Zero
+       DO I=1,Natoms !!!later rather use scale factors
+         IF(DABS(LJEps%D(I))<1.D-5) LJEps14%D(I)=Zero
+       ENDDO
      ENDIF
      IF(PRESENT(E_C_EXCL)) THEN
        CALL Get(GM_Loc%AtNum,'atomicnumbers',Tag_O='GM_MM'//Cur)
        CALL New(CHARGE14,Natoms)
        CALL Get(Charge14,'Charge14')
        E_C_EXCL=Zero
+       DO I=1,Natoms !!!later rather use scale factors
+         IF(DABS(GM_Loc%AtNum%D(I))<1.D-5) Charge14%D(I)=Zero
+       ENDDO
      ENDIF
 !
 ! Now calculate Lennard-Jones and Coulomb exclusion energies
