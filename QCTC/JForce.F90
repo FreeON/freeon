@@ -240,22 +240,26 @@ PROGRAM JForce
 !!$     CALL XLate77(FFELL,0,PFFBraC%D,PFFBraS%D,Cpq,Spq,PFFKetC%D,PFFKetS%D)
 !!$  ENDDO
 !********************
-  PFFBraC%D=RhoC%D
-  PFFBraS%D=RhoS%D
-  DO I=1,3
-     DO J=1,3
-        TenRhoC%D=Zero
-        TenRhoS%D=Zero
-        CALL CTraX77(MaxEll,MaxEll,TenRhoC%D,TenRhoS%D,dTensorC%D(:,I,J),dTensorS%D(:,I,J),RhoC%D,RhoS%D)  
-        DO K = 0,LSP(MaxELL)
-           LatFrc_J%D(I,J) = LatFrc_J%D(I,J)-Two*(PFFBraC%D(K)*TenRhoC%D(K)+PFFBraS%D(K)*TenRhoS%D(K))
+  IF(GMLoc%PBC%Dimen>0) THEN
+     PFFBraC%D=RhoC%D
+     PFFBraS%D=RhoS%D
+     DO I=1,3
+        DO J=1,3
+           TenRhoC%D=Zero
+           TenRhoS%D=Zero
+           CALL CTraX77(MaxEll,MaxEll,TenRhoC%D,TenRhoS%D,dTensorC%D(:,I,J),dTensorS%D(:,I,J),RhoC%D,RhoS%D)  
+           DO K = 0,LSP(MaxELL)
+              LatFrc_J%D(I,J) = LatFrc_J%D(I,J)-Two*(PFFBraC%D(K)*TenRhoC%D(K)+PFFBraS%D(K)*TenRhoS%D(K))
+           ENDDO
         ENDDO
      ENDDO
-  ENDDO
-! Dipole Correction  to the Lattice Forces
-  DO I=1,3
-     LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
-  ENDDO  
+!    Dipole Correction  to the Lattice Forces
+     DO I=1,3
+        IF(GM%PBC%AutoW%I(I)==1) THEN
+           LatFrc_J%D(I,I) = LatFrc_J%D(I,I)-E_DP/GMLoc%PBC%BoxShape%D(I,I)
+        ENDIF
+     ENDDO
+  ENDIF
 !!$  WRITE(*,*) 'LatFrc_J Direct+PFF+Dipole'
 !!$  DO I=1,3
 !!$     WRITE(*,*) (LatFrc_J%D(I,J),J=1,3) 

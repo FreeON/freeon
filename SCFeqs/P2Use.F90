@@ -34,7 +34,7 @@ PROGRAM P2Use
   REAL(DOUBLE)                  :: MaxDS,NoiseLevel 
   REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, DeltaP,OldDeltaP, & 
                                    DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s,PSMin,PSMax, &
-                                   Ipot_Error,Norm_Error,Lam,TError0
+                                   Ipot_Error,Norm_Error,Lam,DLam,TError0
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA,NPur,PcntPNon0,Qstep, & 
                                    OldFileID,ICart,N,NStep,iGEO,DMPOrder
   CHARACTER(LEN=2)              :: Cycl
@@ -249,7 +249,6 @@ PROGRAM P2Use
         HDFFileID=OpenHDF(H5File)
         H5GroupID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(MyClone)))
         HDF_CurrentID=H5GroupID
-        CALL SetEq(P,P0)
      ELSE
         CALL Get(S0,TrixFile('S',Args,Stats_O=Previous))
         CALL Get(S1,TrixFile('S',Args,Stats_O=Current ))
@@ -265,88 +264,90 @@ PROGRAM P2Use
         DMPOrder = MIN(MAX(iGEO-2,0),DMPOrder)
         WRITE(*,*) "DMPOrder = ", DMPOrder
 !
-        CALL DMPProj(iGEO,DMPOrder,P,P0,Tmp1,Tmp2)
+        CALL DMPProj(iGEO,DMPOrder,P0,Tmp1,Tmp2)
 !
      ENDIF
-     ! Compute dS
-     CALL Multiply(S1,-One)
-     CALL Add(S1,S0,dS)
-     CALL Multiply(S1,-One)
-     MaxDS = SQRT(Trace(dS,dS)) 
      ! Initial Trace Error
 #ifdef PARALLEL
-     CALL Multiply(P,S1,Tmp1)
+     CALL Multiply(P0,S1,Tmp1)
      TError0 = ABS(Trace(Tmp1)-Half*DBLE(NEl))
 #else
-     TError0 = ABS(Trace(P,S1)-Half*DBLE(NEl))
+     TError0 = ABS(Trace(P0,S1)-Half*DBLE(NEl))
 #endif
      WRITE(*,*) "Trace Error = ", TError0
-     !Number of Steps
-     NStep   =INT(TError0)/4+1
-     ! Purify 
-     IF(MaxDS > 1.D-10) THEN
-        DO N=1,NStep
-           ! Initialize S
-           Lam  = DBLE(N)/DBLE(NStep)
-           CALL SetEq(Tmp1,S0)
-           CALL SetEq(Tmp2,S1)
-           CALL Multiply(Tmp1,One-Lam)
-           CALL Multiply(Tmp2,Lam)
-           CALL Add(Tmp1,Tmp2,S)
-           TrP        = Trace(P,S)
-           Norm_Error = TrP-Half*DBLE(NEl)
-           Ipot_Error = One
+!    Initialize
+     NStep = 0
+     Lam   = Zero
+     DLam  = One
+!    Purify 
+     DO 
+        NStep = NStep + 1
+        Lam  = Lam + DLam
+        WRITE(*,*) 'NStep = ',NStep,Lam
+!       Set Up S and P        
+        CALL SetEq(Tmp1,S0)
+        CALL SetEq(Tmp2,S1)
+        CALL Multiply(Tmp1,One-Lam)
+        CALL Multiply(Tmp2,Lam)
+        CALL Add(Tmp1,Tmp2,S)
+        CALL SetEq(P,P0)
 !
-           Qstep=0
-           DO I=1,20
-              IF((ABS(Ipot_Error) > 0.5D0 .OR. ABS(Norm_Error) > 0.5D0) .AND. I > 1) THEN
-                 IF(Norm_Error > Zero) THEN
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-                 ELSE
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-                 ENDIF
+        TrP        = Trace(P,S)
+        Norm_Error = TrP-Half*DBLE(NEl)
+        Ipot_Error = One
+!
+        Qstep=0
+        DO I=1,20
+           IF((ABS(Ipot_Error) > 0.5D0 .OR. ABS(Norm_Error) > 0.5D0) .AND. I > 1) THEN
+              IF(Norm_Error > Zero) THEN
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
               ELSE
-                 IF(I > 1) Qstep = Qstep+1
-                 IF(Norm_Error > Zero) THEN
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-                 ELSE
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
-                    CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
-                 ENDIF
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
               ENDIF
-              Norm_Error = TrP-Half*DBLE(NEl)
-              Ipot_Error = TrP2-Trace(P)
+           ELSE
+              IF(I > 1) Qstep = Qstep+1
+              IF(Norm_Error > Zero) THEN
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+              ELSE
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.FALSE.)
+                 CALL AOSP2(P,S,Tmp1,Tmp2,.TRUE.)
+              ENDIF
+           ENDIF
+           Norm_Error = TrP-Half*DBLE(NEl)
+           Ipot_Error = TrP2-Trace(P)
 #ifdef PARALLEL
-              IF(MyId==ROOT)THEN
+           IF(MyId==ROOT)THEN
 #endif
-                 PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
-                 Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
-                      //'dN='//TRIM(DblToShrtChar(Norm_Error)) &
-                      //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
-                 CALL OpenASCII(OutFile,Out)
-                 CALL PrintProtectL(Out)
-                 WRITE(*,*)TRIM(Mssg)
-                 WRITE(Out,*)TRIM(Mssg)
-                 CALL PrintProtectR(Out)
-                 CLOSE(UNIT=Out,STATUS='KEEP')
+              PNon0s=100.D0*DBLE(P%NNon0)/DBLE(NBasF*NBasF)
+              Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(NStep))//"-"//TRIM(IntToChar(I))) &
+                   //' dN='//TRIM(DblToShrtChar(Norm_Error)) &
+                   //', %Non0='//TRIM(DblToShrtChar(PNon0s))                  
+              CALL OpenASCII(OutFile,Out)
+              CALL PrintProtectL(Out)
+              WRITE(*,*)TRIM(Mssg)
+              WRITE(Out,*)TRIM(Mssg)
+              CALL PrintProtectR(Out)
+              CLOSE(UNIT=Out,STATUS='KEEP')
 #ifdef PARALLEL          
-              ENDIF
+           ENDIF
 #endif
-              IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
-              IF(ABS(Norm_Error) > 100.D0*TError0) EXIT
-              IF(Qstep > 4) EXIT
-           ENDDO
+           IF(ABS(Ipot_Error) < 1.0D-10 .AND. ABS(Norm_Error) < 1.0D-10) EXIT
+           IF(ABS(Norm_Error) > 100.D0*TError0) EXIT
+           IF(Qstep > 4) EXIT
         ENDDO
 !
-        IF(ABS(Norm_Error) > TError0) THEN
-           CALL Warn("Using Old Density Matrix: Norm Error to Large")
-           CALL Filter(P,P0)
+        IF(ABS(Norm_Error) < 0.5D0) THEN
+           IF(Lam > (One-1.D-14)) THEN
+              EXIT
+           ELSE
+              CALL SetEq(P0,P)
+           ENDIF
+        ELSE
+           Lam  = Lam - DLam
+           DLam = Half*DLam
         ENDIF
-     ELSE
-        CALL Warn("Using Old Density Matrix: MaxDS too small")
-        CALL Filter(P,P0)
-     ENDIF
+     ENDDO
      ! Save back to be sure.
      CALL Put(P,TrixFile('D',Args,0))
      CALL Put(P,'CurrentDM',CheckPoint_O=.TRUE.) 
