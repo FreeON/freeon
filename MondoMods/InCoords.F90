@@ -1,3 +1,30 @@
+!------------------------------------------------------------------------------
+!--  This code is part of the MondoSCF suite of programs for linear scaling 
+!    electronic structure theory and ab initio molecular dynamics.
+!
+!--  Copyright (c) 2001, the Regents of the University of California.  
+!    This SOFTWARE has been authored by an employee or employees of the 
+!    University of California, operator of the Los Alamos National Laboratory 
+!    under Contract No. W-7405-ENG-36 with the U.S. Department of Energy.  
+!    The U.S. Government has rights to use, reproduce, and distribute this 
+!    SOFTWARE.  The public may copy, distribute, prepare derivative works 
+!    and publicly display this SOFTWARE without charge, provided that this 
+!    Notice and any statement of authorship are reproduced on all copies.  
+!    Neither the Government nor the University makes any warranty, express 
+!    or implied, or assumes any liability or responsibility for the use of 
+!    this SOFTWARE.  If SOFTWARE is modified to produce derivative works, 
+!    such modified SOFTWARE should be clearly marked, so as not to confuse 
+!    it with the version available from LANL.  The return of derivative works
+!    to the primary author for integration and general release is encouraged. 
+!    The first publication realized with the use of MondoSCF shall be
+!    considered a joint work.  Publication of the results will appear
+!    under the joint authorship of the researchers nominated by their
+!    respective institutions. In future publications of work performed
+!    with MondoSCF, the use of the software shall be properly acknowledged,
+!    e.g. in the form <<These calculations have been performed using MondoSCF, 
+!    a suite of programs for linear scaling electronic structure theory and
+!    ab initio molecular dynamics>>, and given appropriate citation.  
+!------------------------------------------------------------------------------
 MODULE InCoords
 !
    USE DerivedTypes
@@ -15,9 +42,7 @@ MODULE InCoords
 !
 !  USE GlobalCharacters
 !  USE Parse
-!#ifdef NAG
-!    USE F90_UNIX_ENV
-!#endif
+
 !
 IMPLICIT NONE
 !
@@ -781,6 +806,8 @@ END SUBROUTINE Excl_LIST14
 !
       DO IntCoo=1,NIntC     
 !
+        IF(.NOT.IntCs%Active(IntCoo)) CYCLE
+!
         IF(IntCs%Def(IntCoo)(1:4)=='STRE') THEN
 ! stre
           I=IntCs%Atoms(IntCoo,1)
@@ -816,7 +843,8 @@ END SUBROUTINE Excl_LIST14
           K=IntCs%Atoms(IntCoo,3) 
           L=IntCs%Atoms(IntCoo,4) 
           CALL TORS(I,J,K,L,XYZ(1:3,I),XYZ(1:3,J),XYZ(1:3,K), &
-            XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),thresh_B)
+            XYZ(1:3,L),B%IB(IntCoo,1:12),B%B(IntCoo,1:12),&
+            thresh_B,IntCs%Active(IntCoo))
 !         write(*,100) IntCs%Def(IntCoo)(1:5),B%IB(IntCoo,1:12), &
 !         B%B(IntCoo,1:12)
         ELSE IF(IntCs%Def(IntCoo)(1:5)=='LINB1') THEN
@@ -1079,7 +1107,7 @@ END SUBROUTINE Excl_LIST14
 !
 !----------------------------------------------------------------------
 !
-      SUBROUTINE Tors(I,J,K,L,XI,XJ,XK,XL,IBB,BB,thresh_B)
+      SUBROUTINE Tors(I,J,K,L,XI,XJ,XK,XL,IBB,BB,thresh_B,Active)
 !...
 !...  Calculate the B matrix elements for torsion as Defined by
 !...  R.L. Hildebrandt, J. Mol. Spec., 44 (1972) 599.
@@ -1095,6 +1123,7 @@ END SUBROUTINE Excl_LIST14
       INTEGER :: I,J,K,L,M,N,II,JJ,KK,LL,IER
       INTEGER :: IBB(1:12)
       REAL(DOUBLE) :: BB(1:12)
+      LOGICAL      :: Active
 !
       DjkSq=Zero 
       DxSq=Zero 
@@ -1203,6 +1232,7 @@ END SUBROUTINE Excl_LIST14
 ! colinear bonds in torsion, delete the corresponding row of the B matrix!
         IBB(:)=0    
         BB(:)=Zero
+        Active=.FALSE.
         RETURN
 !
 1030 format(' i-j-k or j-k-l is colinear (no torsion possibble), this row of the B matrix will be deleted.')
@@ -1224,8 +1254,9 @@ END SUBROUTINE Excl_LIST14
 !
       IMPLICIT NONE
       REAL(DOUBLE),DIMENSION(1:3) :: XI,XJ,XK,RJI,RJK,EJK,UP,UN,UNIT,A
+      REAL(DOUBLE),DIMENSION(1:3) :: RJKN
       REAL(DOUBLE) :: t,SUM,DIJSq,DJKSq,djasq,Tp,DJI,DJK,dja,dx
-      REAL(DOUBLE) :: dotj,doTp,test,smi,smk
+      REAL(DOUBLE) :: DotJ,DotP,Test,SMI,SMK,SumX
       REAL(DOUBLE) :: thresh_B
       INTEGER  :: I,J,K,L,M,N,II,JJ,KK,IER,IntCoo
       INTEGER :: IBB1(1:12),IBB2(1:12)
@@ -1234,23 +1265,24 @@ END SUBROUTINE Excl_LIST14
 ! Set up coordinates of point a
 !
         SUM=0.D0
-      DO m=1,3
-        RJI(M)=XI(M)-XJ(M)
-        RJK(M)=XK(M)-XJ(M)
-        SUM=RJI(M)**2+RJK(M)**2
-      ENDDO 
-        SUM=SQRT(SUM)
+        RJI=XI-XJ
+        RJK=XK-XJ
+        Sum=DOT_PRODUCT(RJI,RJI)+DOT_PRODUCT(RJK,RJK)
+        Sum=SQRT(Sum)
+! construct orthogonal vector to the plane of IJK 
+        CALL CROSS_PRODUCT(RJI,RJK,RJKN)
+        SumX=DOT_PRODUCT(RJKN,RJKN)
 ! form arbitrary vector rjk which is no more parallel with jk bond
-        RJK(1)=RJK(1)+SUM 
-        RJK(2)=RJK(2)+SUM 
-        RJK(3)=RJK(3)-SUM 
-! form vector a, perpendicular to the plane of rjk and RJI
-        A(1)= RJI(2)*RJK(3)-RJI(3)*RJK(2)
-        A(2)=-RJI(1)*RJK(3)+RJI(3)*RJK(1)
-        A(3)= RJI(1)*RJK(2)-RJI(2)*RJK(1)
-        SUM=A(1)**2+A(2)**2+A(3)**2
-        SUM=SQRT(SUM)
-        A(1:3)=A(1:3)/SUM
+        IF(SumX<1.D-5) THEN
+          RJKN(1)=RJK(1)+SUM 
+          RJKN(2)=RJK(2)+SUM 
+          RJKN(3)=RJK(3)-SUM 
+        ENDIF
+! form vector a, perpendicular to the plane of rjkn and RJI
+        CALL CROSS_PRODUCT(RJKN,RJI,A)
+        Sum=DOT_PRODUCT(A,A)        
+        Sum=SQRT(Sum)
+        A(1:3)=A(1:3)/Sum
 ! generate point a
         A(1:3)=XJ(1:3)+A(1:3)        
 !
@@ -1834,7 +1866,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 ! Get atomnames (numbers) from HDF 
 !
       CALL New(MMAtNum,NatmsLoc)
-#ifdef MMech
+
       IF(HasMM()) THEN
         CALL Get(MMAtNum,'MMATNUM')
       ELSE
@@ -1843,12 +1875,7 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
         DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
         CALL Delete(NuclCharge)
       ENDIF
-#else
-        CALL New(NuclCharge,NatmsLoc)
-        CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
-        DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
-        CALL Delete(NuclCharge)
-#endif
+
 !
       IF(Refresh==1) Then !!! Total refresh
 !define covalent bonding scheme
@@ -1920,37 +1947,16 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
 !
           ILast=0
         IF(NIntC_Cov/=0) THEN
-          IntCs%Def(ILast+1:ILast+NIntC_Cov)=IntC_Cov%Def(1:NIntC_Cov)
-          IntCs%Atoms(ILast+1:ILast+NIntC_Cov,1:4)= &
-                      IntC_Cov%Atoms(1:NIntC_Cov,1:4)
-          IntCs%Value(ILast+1:ILast+NIntC_Cov)= &
-                      IntC_Cov%Value(1:NIntC_Cov)
-          IntCs%Constraint(ILast+1:ILast+NIntC_Cov)= &
-                      IntC_Cov%Constraint(1:NIntC_Cov)
+          CALL Set_INTC_EQ_INTC(IntC_Cov,IntCs,1,NIntC_Cov,ILast+1)
         ENDIF
           ILast=NIntC_Cov
         IF(NIntC_VDW/=0) THEN 
-         IntCs%Def(ILast+1:ILast+NIntC_VDW)=IntC_VDW%Def(1:NIntC_VDW)
-         IntCs%Atoms(ILast+1:ILast+NIntC_VDW,1:4)= &
-                IntC_VDW%Atoms(1:NIntC_VDW,1:4)
-         IntCs%Value(ILast+1:ILast+NIntC_VDW)= &
-                IntC_VDW%Value(1:NIntC_VDW)
-         IntCs%Constraint(ILast+1:ILast+NIntC_VDW)= &
-                IntC_VDW%Constraint(1:NIntC_VDW)
+          CALL Set_INTC_EQ_INTC(IntC_VDW,IntCs,1,NIntC_VDW,ILast+1)
         ENDIF
 !
         IF(NIntC_Extra/=0) THEN
-!
           ILast=ILast+NIntC_VDW
-          IntCs%Def(ILast+1:ILast+NIntC_Extra)= &
-                      IntC_Extra%Def(1:NIntC_Extra)
-          IntCs%Atoms(ILast+1:ILast+NIntC_Extra,1:4)= &
-                      IntC_Extra%Atoms(1:NIntC_Extra,1:4)
-          IntCs%Value(ILast+1:ILast+NIntC_Extra)= &
-                      IntC_Extra%Value(1:NIntC_Extra)
-          IntCs%Constraint(ILast+1:ILast+NIntC_Extra)= &
-                      IntC_Extra%Constraint(1:NIntC_Extra)
-!
+          CALL Set_INTC_EQ_INTC(IntC_Extra,IntCs,1,NIntC_Extra,ILast+1)
         ENDIF
 !
 ! tidy up
@@ -1995,27 +2001,37 @@ SUBROUTINE GetIntCs(XYZ,NatmsLoc,InfFile,IntCs,NIntC,Refresh)
           DO I=1,NIntc
             IF(IntCs%Def(I)/='BLANK') THEN
               NNew=NNew+1
-              IntC_New%Def(NNew)=IntCs%Def(I)
-              IntC_New%Atoms(NNew,1:4)=IntCs%Atoms(I,1:4)
-              IntC_New%Value(NNew)=IntCs%Value(I)
-              IntC_New%Constraint(NNew)=IntCs%Constraint(I)
+              CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NNew)
             ENDIF
           ENDDO
           CALL Delete(IntCs)
           NIntC=NNew
           CALL New(IntCs,NIntC)
-            IntCs%Def=IntC_New%Def
-            IntCs%Atoms=IntC_New%Atoms
-            IntCs%Value=IntC_New%Value
-            IntCs%Constraint=IntC_New%Constraint
+            CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
           CALL Delete(IntC_New)
         ENDIF
 !
       CALL Delete(MMAtNum)
 !
 ! Check for bending - lin.bending transions
+! also for long range torsions
 !
       CALL ChkBendToLinB(IntCs,NIntC,XYZ)
+!
+! Print actual set of internals for testing
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+!       CALL INTCValue(IntCs,XYZ)
+        CALL PrtIntCoords(IntCs, &
+          IntCs%Value,'internals after ChkBendToLinB')
+      ENDIF 
+!
+! Set active all internal coords defd so far.
+! 'Linear torsions will be deactivated when their value is calculated
+! by some subroutine (eg. INTCValue).
+! The set of active coordinates may vary during the process of optimization.
+!
+      IntCs%Active=.TRUE.
 !
 ! Save values of constraints into HDF
 !
@@ -2086,7 +2102,7 @@ SUBROUTINE INTCValue(IntCs,XYZ)
         I2=IntCs%Atoms(I,2)
         I3=IntCs%Atoms(I,3)
         I4=IntCs%Atoms(I,4)
-        CALL TORSValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,I4),IntCs%Value(I),IntCs%Def(I))
+        CALL TORSValue(XYZ(1:3,I1),XYZ(1:3,I2),XYZ(1:3,I3),XYZ(1:3,I4),IntCs%Value(I),IntCs%Def(I),IntCs%Active(I))
 !
       ELSE IF(IntCs%Def(I)(1:5)=='CARTX') THEN
         I1=IntCs%Atoms(I,1)
@@ -2167,14 +2183,15 @@ END SUBROUTINE BENDValue
 !
 !-------------------------------------------------------------
 !
-      SUBROUTINE TORSValue(XIin,XJin,XKin,XLin,VTors,Def)
+      SUBROUTINE TORSValue(XIin,XJin,XKin,XLin,VTors,Def,Active)
 !
       REAL(DOUBLE),DIMENSION(1:3) :: XIin,XJin,XKin,XLin
       TYPE(DBL_VECT)              :: XI,XJ,XK,XL,V1,V2
       TYPE(DBL_RNK2)              :: Rot
-      REAL(DOUBLE)                :: VTors,CosPhi,Sum
-      CHARACTER(LEN=5) :: Def
-      INTEGER          :: I,J,K,L
+      REAL(DOUBLE)                :: VTors,CosPhi,Sum,V1ABS,V2ABS
+      CHARACTER(LEN=5)            :: Def
+      INTEGER                     :: I,J,K,L
+      LOGICAL                     :: Active
 !
       CALL New(XI,3)
       CALL New(XJ,3)
@@ -2193,13 +2210,33 @@ END SUBROUTINE BENDValue
 !
       V1%D=XI%D-XJ%D
       V2%D=XJ%D-XK%D
-      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))
-      IF(Sum<1.D-6) CALL Halt('Linearity in TorsValue')
+      V1ABS=SQRT(DOT_PRODUCT(V1%D,V1%D))
+      V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
+      IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
+        Active=.FALSE. 
+        GO TO 1000
+      ENDIF
+      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
+      SUM=ACOS(SUM)*180.D0/PI
+      IF(Sum<LinCrit) THEN
+        Active=.FALSE. 
+        GO TO 1000
+      ENDIF
 !
       V1%D=XL%D-XK%D
       V2%D=XK%D-XJ%D
-      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))
-      IF(Sum<1.D-6) CALL Halt('Linearity in TorsValue')
+      V1ABS=SQRT(DOT_PRODUCT(V1%D,V1%D))
+      V2ABS=SQRT(DOT_PRODUCT(V2%D,V2%D))
+      IF(ABS(V1ABS)<1.D-3.OR.ABS(V2ABS)<1.D-3) THEN
+        Active=.FALSE. 
+        GO TO 1000
+      ENDIF
+      SUM=ABS(DOT_PRODUCT(V1%D,V2%D))/V1ABS/V2ABS
+      SUM=ACOS(SUM)*180.D0/PI
+      IF(Sum<LinCrit) THEN
+        Active=.FALSE. 
+        GO TO 1000
+      ENDIF
 !
 ! Translate, so that XK be in the origin
 !
@@ -2266,6 +2303,7 @@ END SUBROUTINE BENDValue
 !
       IF(XL%D(2)>Zero) VTors=Two*PI-VTors
 !
+1000  CONTINUE
       CALL Delete(V2)
       CALL Delete(V1)
       CALL Delete(Rot)
@@ -2759,15 +2797,20 @@ END SUBROUTINE CoordTrf
     INTEGER        :: SRMemory,RefMemory,CartGradMemory
     INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
     INTEGER        :: INFO,NewDim 
-    TYPE(DBL_RNK2) :: SRDispl,AMat,EigVect,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: SRDispl,AMat,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: TrfDispl,TrfGrad,EigVect
     TYPE(DBL_RNK2) :: RefGrad
     TYPE(DBL_RNK2) :: AuxStruct,RefStruct
-    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVect2,ScaleFact,EigVal
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVect2,EigVal
+    TYPE(DBL_VECT) :: GrdDotGrd,GrdDotDX,DXDotDX,MetricA
     TYPE(INT_VECT) :: Selection
     CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
     REAL(DOUBLE)                   :: Sum,S1,S2
-    REAL(DOUBLE)                   :: Eig
+    REAL(DOUBLE)                   :: Eig,MFact
     REAL(DOUBLE)                   :: SumX,SumY,SumZ
+    REAL(DOUBLE)                   :: MinGrdDotGrd,MinGrdDotDX
+    REAL(DOUBLE)                   :: MinDXDotDX
+    REAL(DOUBLE)                   :: EDI,ED0,EDT 
 !
 ! Current implementation runs on Cartesian displacements only
 ! Input GMLoc contains the actual geometry
@@ -2781,7 +2824,6 @@ END SUBROUTINE CoordTrf
       IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
       IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
       GDIISMemory=SRMemory
-write(*,*) 'GDIISMemory= ',GDIISMemory
 !
       IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
         CALL OpenAscii(OutFile,Out)
@@ -2791,9 +2833,7 @@ write(*,*) 'GDIISMemory= ',GDIISMemory
       ENDIF
 !
     GMTag=''
-#ifdef MMech
     IF(HasMM()) GMTag='GM_MM'
-#endif
 !
 ! Get Displacements from geometries, stored in HDF
 ! and fill them into SRDispl columns.
@@ -2803,10 +2843,17 @@ write(*,*) 'GDIISMemory= ',GDIISMemory
       CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
       CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
       SRStruct%D=Zero
+      CALL New(AuxVect,DimGDIIS)
+      CALL New(GrdDotDX,GDIISMemory)
+      CALL New(DXDotDX,GDIISMemory)
+      CALL New(GrdDotGrd,GDIISMemory)
+      CALL New(Selection,GDIISMemory)
+      Selection%I=1
+      CALL New(MetricA,GDIISMemory)
+      CALL New(Coeffs,GDIISMemory)
 !
-! Get recent Ref and SR structures
+! Get recent Ref and SR structures, as well as the Gradients
 !
-      CALL New(Auxvect,DimGDIIS)
       DO IGeom=1,GDIISMemory
         CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
         SRStruct%D(:,IGeom)=AuxVect%D
@@ -2815,29 +2862,28 @@ write(*,*) 'GDIISMemory= ',GDIISMemory
         CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
         RefGrad%D(:,IGeom)=AuxVect%D
       ENDDO
-      CALL Delete(AuxVect)
 !
 ! Get simple relaxation displacements ('error vectors')
 ! and normalize them!
 !
-      DO I=1,GDIISMemory    
-        SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
-      ENDDO
+      SRDispl%D=SRStruct%D-RefStruct%D
 !
 ! Now calculate overlap ('A' matrix). 
 ! Presently only non-sparse representation is available
 !
       CALL New(AMat,(/GDIISMemory,GDIISMemory/))
 !
+!     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+!                  SRDispl%D,SRDispl%D,AMat%D)
       CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
-		   SRDispl%D,SRDispl%D,AMat%D)
+                   RefGrad%D,RefGrad%D,AMat%D)
 !
 ! Now, calculate eigenvalues and eigenvectors of Overlap
 !
       CALL New(EigVal,GDIISMemory)
-      CALL New(EigVect,(/GDIISMemory,GDIISMemory/))
-      EigVect%D=Zero
       EigVal%D=Zero
+      CALL New(TrfDispl,(/GDIISMemory,GDIISMemory/))
+      CALL New(TrfGrad,(/GDIISMemory,GDIISMemory/))
 !
         CALL SetDSYEVWork(GDIISMemory)
 !
@@ -2848,171 +2894,210 @@ write(*,*) 'GDIISMemory= ',GDIISMemory
         CALL Halt('DSYEV hosed in RotationsOff. INFO='&
                    //TRIM(IntToChar(INFO)))
 !
-! Pre-GDIIS coeffs
+! Construct transformation matrices
 !
-        CALL New(AuxVect,GDIISMemory)
-        CALL New(AuxVect2,GDIISMemory)
-        CALL New(Selection,GDIISMemory)
-        Selection%I=1
-!
-write(*,*) 'blockvals0= ',BLKVALS%D
-BLKVALS%D=BLKVALS%D+0.1D0
-            SumX=Zero
         DO I=1,GDIISMemory
             Sum=Zero
           DO J=1,GDIISMemory
             Sum=Sum+BLKVECT%D(J,I)
           ENDDO
-            SumX=MAX(SumX,ABS(Sum))
-            AuxVect%D(I)=Sum
-            AuxVect2%D(I)=SQRT(BLKVALS%D(I))/ABS(Sum)
-write(*,*) i,' sum= ',sum
-        ENDDO
-write(*,*) 'trust radii= ',AuxVect2%D
-!
-! Filtering
-!
-            SumX=Zero
-        DO I=1,GDIISMemory
-	  Sum=AuxVect%D(I)
-          IF(ABS(Sum)>5.D-6) THEN
-            AuxVect%D(I)=One/Sum
+          IF(ABS(Sum)>1.D-8) THEN
+            SumX=One/Sum
+            TrfDispl%D(:,I)=SumX*BLKVECT%D(:,I)
+            TrfGrad%D(:,I)=Sum*BLKVECT%D(:,I)
           ELSE
+            TrfDispl%D(:,I)=Zero 
+            TrfGrad%D(:,I)=Zero
             Selection%I(I)=0
           ENDIF
-!         IF(ABS(BLKVALS%D(I))<1.D-4) Selection%I(I)=0
-          SumX=MAX(SumX,ABS(BLKVALS%D(I)))
         ENDDO
-write(*,*) 'maximum eigenvalue= ',SumX
 !
-! Do Pre-GDIIS linear combination coeffs
+! Now, transform SR and Ref structures and RefGrad
+! to get the unselected basis for new GDIIS steps
 !
-write(*,*) 'blockvals1= ',blkvals%d
+         CALL New(AuxStruct,(/DimGDIIS,GDIISMemory/))
+!!
+!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+!            SRStruct%D,TrfDispl%D,AuxStruct%D)
+!          SRStruct%D=AuxStruct%D
+!!
+!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+!            RefStruct%D,TrfDispl%D,AuxStruct%D)
+!          RefStruct%D=AuxStruct%D
+!!
+!! Gradient transformation
+!!
+!          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero,  &
+!            RefGrad%D,TrfGrad%D,AuxStruct%D)
+!          RefGrad%D=AuxStruct%D
+!!
+!          SRDispl%D=SRStruct%D-RefStruct%D
+!!
+!! Calculate scalar product of gradients and displacement in the 
+!! orthogonal-displacements' basis
+!
+          MinDXDotDX  =1.D99
+          MinGrdDotDX =1.D99
+          MinGrdDotGrd=1.D99
         DO I=1,GDIISMemory
-          Sum=AuxVect%D(I)
-          BLKVECT%D(:,I)=Sum*BLKVECT%D(:,I)
-          SumX=Sum*BLKVALS%D(I)*Sum
-          IF(Selection%I(I)==1) THEN
-            BLKVALS%D(I)=One/SumX
+          IF(Selection%I(I)/=1) CYCLE
+          SumX=DOT_PRODUCT(RefGrad%D(:,I),SRDispl%D(:,I))
+          SumY=DOT_PRODUCT(SRDispl%D(:,I),SRDispl%D(:,I))
+          SumZ=DOT_PRODUCT(RefGrad%D(:,I),RefGrad%D(:,I))
+          GrdDotDX%D(I) =SumX
+          DXDotDX%D(I)  =SumY
+          GrdDotGrd%D(I)=SumZ
+          MinGrdDotDX =MIN(MinGrdDotDX,ABS(SumX))
+          MinDXDotDX  =MIN(MinDXDotDX      ,SumY)
+          MinGrdDotGrd=MIN(MinGrdDotGrd    ,SumZ)
+        ENDDO  
+!
+! Now, redefine metric of coordinates, and gradients
+! Currently only metric of coordinates determines all other metrics.
+!
+        IF(GeOpCtrl%GDIISMetricOn) THEN
+          MFact=One/SQRT(MinDXDotDX)
+!         MFact=One/SQRT(MinGrdDotGrd)
+          GeOpCtrl%GDIISMetric=MFact*GeOpCtrl%GDIISMetric
+          RefStruct%D         =MFact*RefStruct%D 
+          SRStruct%D          =MFact*SRStruct%D 
+          SRDispl%D           =MFact*SRDispl%D 
+          Sum=One/MFact
+          RefGrad%D           =Sum*RefGrad%D 
+          MFact=MFact*MFact
+          GrdDotDX%D          =GrdDotDX%D
+          DXDotDX%D           =MFact*DXDotDX%D
+          GrdDotGrd%D         =GrdDotGrd%D/MFact
+          DO I=1,GDIISMemory
+            IF(Selection%I(I)/=1) THEN
+              RefStruct%D(:,I)    =Zero
+              SRStruct%D(:,I)     =Zero
+              SRDispl%D(:,I)      =Zero
+              GrdDotDX%D(I)       =Zero
+              DXDotDX%D(I)        =Zero
+              GrdDotGrd%D(I)      =Zero
+            ENDIF
+          ENDDO
+        ENDIF !!!! Metric On
+!
+! Check for 'uphill' trajectories and 'reverse' them.
+!
+!        DO I=1,GDIISMemory
+!          Sum=GrdDotDX%D(I)
+!          IF(Sum>Zero) THEN
+!            SRStruct%D(:,I)=RefStruct%D(:,I)-SRDispl%D(:,I)
+!            GrdDotDX%D(I)=-GrdDotDX%D(I)
+!          ENDIF
+!        ENDDO
+!
+! Calculate total energy lowering over images
+!
+          ED0=GrdDotDX%D(1)
+          EDT=ED0
+        DO I=2,GDIISMemory
+	  Sum=GrdDotDX%D(I)
+	  EDT=EDT+Sum
+	  ED0=MAX(ED0,Sum)
+	ENDDO
+!
+! Define unnormalized, unselected set of coefficients
+!
+        DO I=1,GDIISMemory
+            Sum=Zero
+          DO J=1,GDIISMemory
+            Sum=Sum+BLKVECT%D(J,I)
+          ENDDO
+          IF(ABS(BLKVALS%D(I))>1.D-8) THEN
+            Coeffs%D(I)=Sum/BLKVALS%D(I)
+!           Coeffs%D(I)=One/DXDotDX%D(I)
           ELSE
-            BLKVALS%D(I)=1.D-99 
+            Coeffs%D(I)=Zero   
           ENDIF
         ENDDO
-write(*,*) 'blockvals2= ',blkvals%d
 !
-! Select out SVD subspace for final GDIIS
+! Select out subspace for final GDIIS
 !
-        CALL GDIISSelect(BLKVALS%D,Selection%I)
-        CALL Delete(AuxVect2)
+        CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
+          BLKVECT%D,Coeffs%D,DXDotDX%D)
+          Coeffs%D=DXDotDX%D
 !
-          NewDim=0
-        DO I=1,GDIISMemory
-          IF(Selection%I(I)==1) THEN
-            NewDim=NewDim+1
-            EigVect%D(:,NewDim)=BLKVECT%D(:,I)
-            EigVal%D(NewDim)=BLKVALS%D(I)
-          ENDIF
-        ENDDO
-        CALL Delete(Selection)
-        CALL Delete(AuxVect)
+        CALL GDIISSelect(Coeffs%D,Selection%I)
+selection%i=1
 !
       CALL UnSetDSYEVWork()
 !
-! Now, unitary transform SR and Ref structures and RefGrad
-! to get the basis for new GDIIS steps
-!
-        CALL New(AuxStruct,(/DimGDIIS,NewDim/))
-!
-          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
-            SRStruct%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
-          SRStruct%D(:,1:NewDim)=AuxStruct%D
-!
-          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
-            RefStruct%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
-          RefStruct%D(:,1:NewDim)=AuxStruct%D
-!
-          CALL DGEMM_NNc(DimGDIIS,GDIISMemory,NewDim,One,Zero,  &
-            RefGrad%D(:,1:GDIISMemory),EigVect%D(:,1:NewDim),AuxStruct%D)
-          RefGrad%D(:,1:NewDim)=AuxStruct%D
-!
-          DO I=1,NewDim
-            SRDispl%D(:,I)=SRStruct%D(:,I)-RefStruct%D(:,I)
-          ENDDO
-!
-! Calculate GDIIS Coeffs
-!
-          CALL New(Coeffs,NewDim)
-          DO I=1,NewDim
-            Coeffs%D(I)=EigVal%D(I)
-write(*,*) i,' coeffs= ',coeffs%d(i)
-          ENDDO
-!
-        CALL Delete(AuxStruct)
-!
 ! Rescale coeffs to get a sum of One.
 !
-        Sum=Zero
-        DO I=1,NewDim ; Sum=Sum+Coeffs%D(I) ; ENDDO
+          Sum=Zero
+        DO I=1,GDIISMemory 
+          IF(Selection%I(I)==1) THEN 
+            Sum=Sum+Coeffs%D(I)  
+          ELSE
+            Coeffs%D(I)=Zero
+          ENDIF
+        ENDDO
         Sum=One/Sum
         Coeffs%D=Sum*Coeffs%D
-do i=1,NewDim
-write(*,*) i,'final coeffs= ',coeffs%d(i)
-enddo
-!
-! Calc transformed Cartesian gradients at new Ref geometry
-! and put them into HDF
-!
-        CALL New(AuxVect2,DimGDIIS)
-            AuxVect2%D=Zero
-          DO I=1,NewDim
-            AuxVect2%D=AuxVect2%D+Coeffs%D(I)*RefGrad%D(:,I)
-          ENDDO
-          CALL Put(AuxVect2,'GradE',Tag_O=CurGeom//'GDIIS')
-        CALL Delete(AuxVect2)
 !
 ! Calculate new geometry, linearcombine previous steps 
 !
-        CALL New(AuxVect,DimGDIIS)
+          AuxVect%D=Zero
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)/=1) CYCLE
+          AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
+        ENDDO
 !
-            AuxVect%D=Zero
-          DO I=1,NewDim
-            AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
-          ENDDO
+! Restore original metric on resulting GDIIS geometry
+!
+        IF(GeOpCtrl%GDIISMetricOn) THEN
+          MFact=One/GeOpCtrl%GDIISMetric
+          AuxVect%D=MFact*AuxVect%D
+        ENDIF
 !
 ! Fill new geometry into GM array
 !
-          CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
+        CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
 !
 ! Save unitary transformed structures and gradients
 !
-          CALL Put(0,'SrMemory')
-          CALL Put(0,'RefMemory')
-          CALL Put(0,'CartGradMemory')
-!         CALL Put(0,'IntGradMemory')
-          DO I=1,NewDim
+        CALL Put(0,'SrMemory')
+        CALL Put(0,'RefMemory')
+        CALL Put(0,'CartGradMemory')
+!       CALL Put(0,'IntGradMemory')
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)==1) THEN
             AuxVect%D=SRStruct%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR')
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR',Metric_O=.FALSE.)
             AuxVect%D=RefStruct%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref')
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
             AuxVect%D=RefGrad%D(:,I)
-            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad')
-          ENDDO
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
+                           Metric_O=.FALSE.)
+          ENDIF
+        ENDDO
 !
 !call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
 !
 ! Tidy up
 !
-      CALL Delete(AuxVect)
-      CALL Delete(Coeffs)
-      CALL Delete(EigVal)
-      CALL Delete(EigVect)
-      CALL Delete(AMat)
-      CALL Delete(RefGrad)
-      CALL Delete(RefStruct)
-      CALL Delete(SRStruct)
-      CALL Delete(SRDispl)
+       CALL Delete(Selection)
+       CALL Delete(AuxStruct)
+       CALL Delete(GrdDotGrd)
+       CALL Delete(GrdDotDX)
+       CALL Delete(DXDotDX)
+       CALL Delete(AuxVect)
+       CALL Delete(Coeffs)
+       CALL Delete(EigVal)
+       CALL Delete(TrfDispl)
+       CALL Delete(TrfGrad)
+       CALL Delete(MetricA)
+       CALL Delete(AMat)
+       CALL Delete(RefGrad)
+       CALL Delete(RefStruct)
+       CALL Delete(SRStruct)
+       CALL Delete(SRDispl)
 !
-    END SUBROUTINE GDIIS
+     END SUBROUTINE GDIIS
 !
 !--------------------------------------------------------------------
 !
@@ -3034,7 +3119,7 @@ enddo
 !
 !-------------------------------------------------------
 !
-#ifdef PERIODIC
+
 !
      SUBROUTINE LJCell(GMLoc,LJCutOff,AtmMark,LJEps,LJRad, &
        XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
@@ -3163,7 +3248,7 @@ enddo
 !
      END SUBROUTINE LJCell
 !
-#endif
+
 !
 !-------------------------------------------------------------------
 !
@@ -3264,6 +3349,7 @@ enddo
 !      write(*,100) (TestMat%D(I,J),J=1,NCart)
 !    ENDDO
 !100 FORMAT(10F8.4)
+!call pprint(FullGcInv,' FullGcInv ',unit_o=6)
 !
     CALL Delete(TestMat)
     CALL Delete(FullGc)
@@ -3447,6 +3533,7 @@ enddo
       DistRefresh  = GeOpCtrl%DistRefresh
       ConstrMaxCrit= GeOpCtrl%ConstrMaxCrit
       RMSCrit      = GeOpCtrl%RMSCrit
+      NCartConstr  = GeOpCtrl%NCartConstr
 !
 ! Refresh B matrix during iterative back-trf, if displacements are too large?
 !
@@ -3474,11 +3561,8 @@ enddo
 !
 ! The required new value of internal coordinates
 !
-!call PrtIntCoords(IntCs,IntCs%Value,'old internals  ')
-!call PrtIntCoords(IntCs,VectInt,'required change')
       VectIntReq%D=VectInt+IntCs%Value
       CALL MapBackAngle(IntCs,NIntC,VectIntReq%D) 
-!call PrtIntCoords(IntCs,VectIntReq%D,'required ones  ')
 !
 !initialization of new Cartesians
 !
@@ -3516,8 +3600,8 @@ enddo
          CALL Get(FullBt,'FullBt')
          CALL Get(FullGcInv,'FullGcInv')
        ELSE IF(RefreshB.AND.RefreshAct) THEN
-        CALL GetFullBMatr(NatmsLoc,ActCarts%D,IntCs,NIntC,FullB,FullBt)
-        CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
+         CALL GetFullBMatr(NatmsLoc,ActCarts%D,IntCs,NIntC,FullB,FullBt)
+         CALL GetFullGcInv(FullB,FullBt,FullGcInv,NIntC,NCart)
        ENDIF
 !
 ! Compute actual value of internals 
@@ -3681,12 +3765,12 @@ enddo
         ELSE IF(IntCs%Def(I)(1:4)=='CART') THEN
           SUM=Value(I)
         ENDIF
-          WRITE(*,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I)
-          WRITE(Out,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I)
+          WRITE(*,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I),IntCs%Active(I)
+          WRITE(Out,111) I,IntCs%Def(I),IntCs%Atoms(I,1:4),SUM,IntCs%Constraint(I),IntCs%Active(I)
       ENDDO
 !      
- 111 FORMAT(I4,2X,A5,2X,4I3,2X,F12.6,L5)
- 222 FORMAT(I4,2X,A5,2X,4I3,2X,3F12.6,L5)
+ 111 FORMAT(I4,2X,A5,2X,4I3,2X,F12.6,L5,L5)
+ 222 FORMAT(I4,2X,A5,2X,4I3,2X,3F12.6,L5,L5)
 !
       CLOSE(Out,STATUS='KEEP')
 !
@@ -3747,8 +3831,10 @@ enddo
       SUM2=SQRT(DOT_PRODUCT(IntAux%D,IntAux%D))
       SUM1=(SUM2-SUM1)/SUM2*100.D0 !!! percentage, projected out
 !
-      WRITE(*,100) SUM1
-100   FORMAT('REDUNDANCY, PROJECTED OUT= ',F7.3,'%')
+      IF(PrintFlags%Geop==DEBUG_GEOP) THEN
+        WRITE(*,100) SUM1
+100     FORMAT('PERCENT OF REDUNDANCY PROJECTED OUT= ',F7.3,'%')
+      ENDIF
 !
       CALL Delete(FullB)
       CALL Delete(FullBt)
@@ -4162,9 +4248,9 @@ enddo
         CALL Delete(MarkLinB)
         RETURN
       ENDIF
-      CALL Halt('Bend - LinB transition. Subroutine must be tested')
+!     CALL Halt('Bend - LinB transition. Subroutine must be tested')
 !
-! modify
+! Modify IntCs by adding new coords (LinB-s).
 !
       NIntc_New=NIntc+NLinB
       CALL NEW(IntC_New,NIntc_New)
@@ -4172,35 +4258,24 @@ enddo
         NLinB=0
       DO I=1,NIntC
         IF(MarkLinB%I(I)==0) THEN
-          IntC_New%Def(NLinB+I)=Intcs%Def(I)
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
+          CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
         ELSE
+          CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
           IntC_New%Def(NLinB+I)='LINB1'
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
           NLinB=NLinB+1
+          CALL Set_INTC_EQ_INTC(IntCs,IntC_New,I,I,NLinB+I)
           IntC_New%Def(NLinB+I)='LINB2'
-          IntC_New%Atoms(NLinB+I,1:4)=Intcs%Atoms(I,1:4)
-          IntC_New%Value(NLinB+I)=Intcs%Value(I)
-          IntC_New%Constraint(NLinB+I)=Intcs%Constraint(I)
         ENDIF
       ENDDO
 !
       CALL Delete(IntCs)
       NIntC=NIntC_New
       CALL New(IntCs,NIntC)
-          Intcs%Def(:)=IntC_New%Def(:)
-          Intcs%Atoms(:,:)=IntC_New%Atoms(:,:)
-          Intcs%Value(:)=IntC_New%Value(:)      
-          Intcs%Constraint(:)=IntC_New%Constraint(:)
+        CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
       CALL Delete(IntC_New)
 !
 ! Now recognize colinear atoms of the molecule and 
-! introduce torsions. Introduction of extra bends is not done,
-! since it is supposed to be done in previous steps
+! introduce long-range torsions. 
 !
         CALL Get(NMax12,'NMax12')
         CALL New(Top12,(/NatmsLoc,NMax12+1/))
@@ -4267,10 +4342,7 @@ enddo
 !
       NIntc_New=NIntC+NTorsLinB
       CALL New(IntC_New,NIntc_New)
-        IntC_New%Def(1:NIntC)=Intcs%Def(1:NIntC)
-        IntC_New%Atoms(1:NIntC,1:4)=Intcs%Atoms(1:NIntC,1:4)
-        IntC_New%Value(1:NIntC)=Intcs%Value(1:NIntC)      
-        IntC_New%Constraint(1:NIntC)=Intcs%Constraint(1:NIntC)
+        CALL Set_INTC_EQ_INTC(IntCs,IntC_New,1,NIntC,1)
 !
           NTorsLinB=0
         DO I=1,NLinB
@@ -4284,13 +4356,14 @@ enddo
             IF(LinAtom%I(I4)==0) THEN
             IF(I1/=I4) THEN
               NTorsLinB=NTorsLinB+1
-              IntC_New%Def(NIntC+NTorsLinB)='TORS '
-              IntC_New%Atoms(NIntC+NTorsLinB,1)=I1
-              IntC_New%Atoms(NIntC+NTorsLinB,2)=I2
-              IntC_New%Atoms(NIntC+NTorsLinB,3)=I3
-              IntC_New%Atoms(NIntC+NTorsLinB,4)=I4
-              IntC_New%Value(1:NIntC)=Zero
-              IntC_New%Constraint(1:NIntC)=.FALSE.
+              NIntC=NIntC+1
+              IntC_New%Def(NIntC)='TORS '
+              IntC_New%Atoms(NIntC,1)=I1
+              IntC_New%Atoms(NIntC,2)=I2
+              IntC_New%Atoms(NIntC,3)=I3
+              IntC_New%Atoms(NIntC,4)=I4
+              IntC_New%Value(NIntC)=Zero
+              IntC_New%Constraint(NIntC)=.FALSE.
             ENDIF
             ENDIF
           ENDDO
@@ -4299,12 +4372,8 @@ enddo
         ENDDO
 !
         CALL Delete(Intcs)
-        NIntC=NIntC+NTorsLinB
         CALL New(Intcs,NIntC)
-        Intcs%Def(1:NIntC)=IntC_New%Def(1:NIntC)
-        Intcs%Atoms(1:NIntC,1:4)=IntC_New%Atoms(1:NIntC,1:4)
-        Intcs%Value(1:NIntC)=IntC_New%Value(1:NIntC)      
-        Intcs%Constraint(1:NIntC)=IntC_New%Constraint(1:NIntC)
+          CALL Set_INTC_EQ_INTC(IntC_New,IntCs,1,NIntC,1)
         CALL Delete(IntC_New)
 !
         CALL Delete(LinAtom)
@@ -4464,8 +4533,9 @@ END SUBROUTINE ChkBendToLinB
           ConstrRMS<ConstrRMSOld*RMSCrit) 
         ENDIF
 !
-        DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf.AND. &
-                   RMSD<RMSDOld*RMSCrit)
+        DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf)
+!       DoIterate=(DiffMax>CooTrfCrit.AND.IStep<=MaxIt_CooTrf.AND. &
+!                  RMSD<RMSDOld*RMSCrit)
         DoIterate=DoIterate.AND.ConvConstr
 !
       END SUBROUTINE BackTrfConvg
@@ -4491,7 +4561,7 @@ END SUBROUTINE ChkBendToLinB
         ENDIF
         CALL New(MMAtNum,NatmsLoc) 
 !
-#ifdef MMech
+
         IF(HasMM()) THEN
           CALL Get(MMAtNum,'MMAtNum')
         ELSE
@@ -4500,12 +4570,7 @@ END SUBROUTINE ChkBendToLinB
           DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
           CALL Delete(NuclCharge)
         ENDIF
-#else
-          CALL New(NuclCharge,NatmsLoc)
-          CALL Get(NuclCharge,  'atomicnumbers',Tag_O=CurGeom)
-          DO I=1,NatmsLoc ; MMAtNum%I(I)=INT(NuclCharge%D(I)) ; ENDDO
-          CALL Delete(NuclCharge)
-#endif
+
 !
         CALL New(XYZPrint,(/3,NatmsLoc/))
           XYZPrint%D=XYZ
@@ -4529,12 +4594,13 @@ END SUBROUTINE ChkBendToLinB
 !
       END SUBROUTINE PrtXYZ
 !----------------------------------------------------------------------
-      SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O)
+      SUBROUTINE PutSRStep(XYZ_O,Vect_O,Tag_O,Metric_O)
         INTEGER                              :: IGeom,NCart
         INTEGER                              :: NatmsLoc,J,I
         REAL(DOUBLE),DIMENSION(:,:),OPTIONAL :: XYZ_O
         TYPE(DBL_VECT),OPTIONAL              :: Vect_O
         REAL(DOUBLE)                         :: CMX,CMY,CMZ
+        REAL(DOUBLE)                         :: MFact
         TYPE(DBL_VECT)                       :: AuxVect
         CHARACTER(LEN=*),OPTIONAL            :: Tag_O
         INTEGER                              :: GDIISMemory
@@ -4544,6 +4610,26 @@ END SUBROUTINE ChkBendToLinB
         INTEGER                              :: IntGradMemory
         TYPE(DBL_VECT)                       :: Vect
         TYPE(DBL_RNK2)                       :: XYZ 
+        LOGICAL                              :: Metric
+        LOGICAL,OPTIONAL                     :: Metric_O
+!
+! Metric of the coordinates
+!
+          Metric=GeOpCtrl%GDIISMetricOn
+          MFact=One
+          IF(Metric) MFact=GeOpCtrl%GDIISMetric
+          IF(PRESENT(Metric_O)) THEN
+              Metric=Metric_O
+            IF(Metric) THEN
+              MFact=GeOpCtrl%GDIISMetric
+            ELSE
+              MFact=One
+            ENDIF
+          ENDIF
+!
+          IF(PRESENT(Tag_O).AND.TRIM(Tag_O)=='CartGrad') THEN
+            MFact=One/MFact
+          ENDIF
 !
 ! Increment GDIISMemory
 !
@@ -4580,7 +4666,11 @@ END SUBROUTINE ChkBendToLinB
           NatmsLoc=SIZE(XYZ_O,2)
           NCart=3*NatmsLoc
           CALL New(XYZ,(/3,NatmsLoc/))
-          XYZ%D=XYZ_O
+          IF(Metric) THEN
+            XYZ%D=MFact*XYZ_O
+          ELSE
+            XYZ%D=XYZ_O
+          ENDIF
 !!!!        CALL CenterOfMass(CMX,CMY,CMZ,XYZ_O=XYZ%D,Move_O=.TRUE.)
 !
 ! Put Geometry of simple relaxation set into HDF, for GDIIS.
@@ -4595,7 +4685,11 @@ END SUBROUTINE ChkBendToLinB
 !
           NCart=SIZE(Vect_O%D)
           CALL New(Vect,NCart)
-          Vect%D=Vect_O%D
+          IF(Metric) THEN
+            Vect%D=MFact*Vect_O%D
+          ELSE
+            Vect%D=Vect_O%D
+          ENDIF
 !!!!      CALL CenterOfMass(CMX,CMY,CMZ,Vect_O=Vect%D,Move_O=.TRUE.)
             CALL Put(Vect,TRIM(Tag_O)//TRIM(IntToChar(IGeom)))
           CALL Delete(Vect)
@@ -4741,10 +4835,11 @@ END SUBROUTINE ChkBendToLinB
       SUBROUTINE GDIISSelect(EigVals,Selection)
         REAL(DOUBLE),DIMENSION(:) :: EigVals
         INTEGER,     DIMENSION(:) :: Selection
-        REAL(DOUBLE)              :: Sum,GapWidth,MeanWidth,RMSWidth
+        REAL(DOUBLE)              :: GapWidth,MeanWidth,Fluct
         REAL(DOUBLE)              :: MaxEig,MinEig
         INTEGER                   :: I,J,K,L,NDim,LastDomain
-        INTEGER                   :: GDIISBandWidth
+        REAL(DOUBLE)              :: GDIISBandWidth
+        REAL(DOUBLE)              :: Sum,SumX,Percent
         INTEGER                   :: MinDomCount    
         TYPE(DBL_VECT)            :: AuxVect
         TYPE(INT_VECT)            :: Ordered,Domain,DomainCount
@@ -4764,14 +4859,16 @@ END SUBROUTINE ChkBendToLinB
         CALL New(Ordered,NDim)
         CALL New(Domain,NDim)
         CALL New(DomainCount,NDim)
-write(*,*) 'SElection in ',selection 
 !
 ! Put eigenvalues onto a logarithmic scale
 !
           DO I=1,NDim
-            AuxVect%D(I)=DLOG10(ABS(EigVals(I)))
+            IF(Selection(I)==1) THEN  
+              AuxVect%D(I)=DLOG10(ABS(EigVals(I)))
+            ELSE
+              AuxVect%D(I)=-1.D99
+            ENDIF
           ENDDO
-write(*,*) 'log10= ',AuxVect%D
 !
 ! Form ordered set with lowest log10 first
 !
@@ -4788,9 +4885,6 @@ write(*,*) 'log10= ',AuxVect%D
             ENDIF
           ENDDO
           ENDDO
-do i=1,ndim
-write(*,*) i,'ordered ',AuxVect%D(ordered%i(i))
-enddo
 !
 ! Calculate average spectral distance and fluctuation
 !
@@ -4803,36 +4897,40 @@ enddo
             J=J+1
             MeanWidth=MeanWidth+AuxVect%D(K)-AuxVect%D(L)
           ENDDO
-write(*,*) 'MeanWidth1= ',MeanWidth,J
             IF(J>0) THEN
               MeanWidth=MeanWidth/DBLE(J)
             ELSE
               MeanWidth=1.D99
             ENDIF
 !
-            RMSWidth=Zero
+            Fluct=Zero
           DO I=2,NDim
             K=Ordered%I(I)
             L=Ordered%I(I-1)
             IF(Selection(K)/=1.OR.Selection(L)/=1) CYCLE 
-            RMSWidth=RMSWidth+(MeanWidth-(AuxVect%D(K)-AuxVect%D(L)))**2
+            Fluct=Fluct+ABS(MeanWidth-(AuxVect%D(K)-AuxVect%D(L)))
           ENDDO
-            IF(J>0) THEN
-              RMSWidth=SQRT(RMSWidth/DBLE(J))
+            IF(J/=0) THEN
+              Fluct=Fluct/J
             ELSE
-              RMSWidth=1.D99
+              Fluct=1.D99
             ENDIF
-write(*,*) 'MeanWidth= ',MeanWidth,J
-write(*,*) 'RMSWidth= ',RMSWidth
 !
 ! First, group log10-s into domains
 !
-            Domain%I(1)=1 
             DomainCount%I=0 
+            Domain%I(1)=1 
+            DomainCount%I(1)=1 
+!
           DO I=2,NDim
             K=Ordered%I(I)
             L=Ordered%I(I-1)
-            IF(AuxVect%D(K)-AuxVect%D(L)>MeanWidth+1.01D0*RMSWidth) THEN
+            IF(Selection(K)/=1) THEN
+              Domain%I(I)=1  
+              DomainCount%I(1)=DomainCount%I(1)+1
+              CYCLE
+            ENDIF
+            IF(AuxVect%D(K)-AuxVect%D(L)>MeanWidth+1.01D0*Fluct) THEN
               Domain%I(I)=Domain%I(I-1)+1
             ELSE
               Domain%I(I)=Domain%I(I-1)
@@ -4841,40 +4939,48 @@ write(*,*) 'RMSWidth= ',RMSWidth
               DomainCount%I(K)=DomainCount%I(K)+1
           ENDDO
               LastDomain=Domain%I(NDim)
-write(*,*) 'domain= ',domain%I
+!
               K=Ordered%I(NDim)
               L=Ordered%I(NDim-1)
-!         IF(LastDomain>1) THEN
-!           IF(AuxVect%D(K)-AuxVect%D(L)>0.9D0) THEN
-!             IF(DomainCount%I(LastDomain)==1) LastDomain=LastDomain-1
-!           ENDIF
-!         ENDIF
-write(*,*) 'lastdomain= ',lastdomain
+          IF(LastDomain>1.AND.DomainCount%I(LastDomain)==1) THEN
+            IF(AuxVect%D(K)-AuxVect%D(L)>0.9D0) THEN
+              IF(DomainCount%I(LastDomain)==1) LastDomain=LastDomain-1
+            ELSE
+              LastDomain=LastDomain-1
+              Domain%I(K)=LastDomain
+            ENDIF
+          ENDIF
 !
 ! Find maximum coefficient in LastDomain
 !
           MaxEig=-1.D99
           DO I=1,NDim
             K=Ordered%I(I)
-            IF(Domain%I(I)/=LastDomain) CYCLE
-            MaxEig=MAX(MaxEig,AuxVect%D(K))
+            IF(Selection(K)/=1) CYCLE
+!!!!        IF(Domain%I(I)/=LastDomain) CYCLE
+!           MaxEig=MAX(MaxEig,AuxVect%D(K))
+            MaxEig=MAX(MaxEig,EigVals(K))
           ENDDO
-write(*,*) 'maxeig= ',maxeig,'GDIISBandWidth= ',GDIISBandWidth
 !
-          Selection(:)=0
-!
-          J=0
-          DO I=1,NDim
+             J=0
+             SumX=Zero
+          DO I=NDim,1,-1
              K=Ordered%I(I)
-             IF(Domain%I(I)/=LastDomain) CYCLE
-write(*,*) i,'pair ',AuxVect%D(K),Domain%I(K)
-            IF(AuxVect%D(K)>MaxEig-GDIISBandWidth) THEN   
+!!!!         IF(Selection(K)/=1.OR.Domain%I(I)/=LastDomain) CYCLE
+             IF(Selection(K)/=1) CYCLE
+             Sum=AuxVect%D(K)
+             SumX=SumX+EigVals(K)
+             Percent=ABS(EigVals(K))/ABS(SumX)*100.D0
+!write(*,50) i,k,EigVals(K),Percent
+!50 format(2I4,2X,E12.6,' percent= ',F8.2)
+            IF(Percent>GDIISBandWidth) THEN
               J=J+1
               Selection(K)=1
+            ELSE
+              Selection(K)=0
             ENDIF
             IF(J>=GDIISMaxMem) EXIT
           ENDDO
-write(*,*) 'selection= ',selection
 !
 1000    CONTINUE
 !        
@@ -4958,7 +5064,412 @@ write(*,*) 'selection= ',selection
 !
       END SUBROUTINE GDIISSave
 !
+!-------------------------------------------------------
+!
+    SUBROUTINE GDIIS2(GMLoc)
+    IMPLICIT NONE
+    TYPE(CRDS)     :: GMLoc
+    INTEGER        :: I,J,K,L,GDIISMemoryIn,DimGDIIS,IGeom,DimOverl
+    INTEGER        :: SRMemory,RefMemory,CartGradMemory
+    INTEGER        :: LastStruct,ILow,NCart,GDIISMemory
+    INTEGER        :: INFO,NewDim 
+    TYPE(DBL_RNK2) :: SRDispl,AMat,SRStruct,ActCarts
+    TYPE(DBL_RNK2) :: TrfDispl,TrfGrad,EigVect
+    TYPE(DBL_RNK2) :: RefGrad
+    TYPE(DBL_RNK2) :: AuxStruct,RefStruct
+    TYPE(DBL_VECT) :: Coeffs,AuxVect,AuxVectS,Scale,EigVal
+    TYPE(DBL_VECT) :: GrdDotGrd,GrdDotDX,DXDotDX,MetricA
+    TYPE(INT_VECT) :: Selection
+    CHARACTER(LEN=DEFAULT_CHR_LEN) :: GMTag
+    REAL(DOUBLE)                   :: Sum,S1,S2
+    REAL(DOUBLE)                   :: Eig,MFact,MaxEig
+    REAL(DOUBLE)                   :: SumX,SumY,SumZ
+    REAL(DOUBLE)                   :: MinGrdDotGrd,MinGrdDotDX
+    REAL(DOUBLE)                   :: MinDXDotDX,ScaleMin
+    REAL(DOUBLE)                   :: EDI,ED0,EDT 
+!
+! Current implementation runs on Cartesian displacements only
+! Input GMLoc contains the actual geometry
+! CurGeom is set to the last (simple relaxation) structure
+!
+      CALL Get(SRMemory,'SRMemory')
+      CALL Get(RefMemory,'RefMemory')
+      CALL Get(CartGradMemory,'CartGradMemory')
+      NCart=3*GMLoc%Natms
+      DimGDIIS=NCart   !!! later dimension may become NIntC
+      IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+      IF(SRMemory/=CartGradMemory) CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+      GDIISMemory=SRMemory
+!
+      IF(PrintFlags%GeOp==DEBUG_GEOP) THEN
+        CALL OpenAscii(OutFile,Out)
+        WRITE(Out,*) 'GDIISMemory= ',GDIISMemory
+        WRITE(*,*) 'GDIISMemory= ',GDIISMemory
+        CLOSE(Unit=Out,STATUS='KEEP')
+      ENDIF
+!
+    GMTag=''
+    IF(HasMM()) GMTag='GM_MM'
+!
+! Get Displacements from geometries, stored in HDF
+! and fill them into SRDispl columns.
+!
+      CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+      CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+      CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
+      SRStruct%D=Zero
+      CALL New(AuxVect,DimGDIIS)
+      CALL New(Scale,GDIISMemory)
+      CALL New(AuxVectS,GDIISMemory)
+      CALL New(GrdDotDX,GDIISMemory)
+      CALL New(DXDotDX,GDIISMemory)
+      CALL New(GrdDotGrd,GDIISMemory)
+      CALL New(Selection,GDIISMemory)
+      Selection%I=1
+      CALL New(MetricA,GDIISMemory)
+      CALL New(Coeffs,GDIISMemory)
+!
+! Get recent Ref and SR structures, as well as the Gradients
+!
+      DO IGeom=1,GDIISMemory
+        CALL Get(AuxVect,'SR'//TRIM(IntToChar(IGeom)))
+        SRStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'Ref'//TRIM(IntToChar(IGeom)))
+        RefStruct%D(:,IGeom)=AuxVect%D
+        CALL Get(AuxVect,'CartGrad'//TRIM(IntToChar(IGeom)))
+        RefGrad%D(:,IGeom)=AuxVect%D
+      ENDDO
+!
+! Get simple relaxation displacements ('error vectors')
+! and normalize them!
+!
+      SRDispl%D=SRStruct%D-RefStruct%D
+!
+! Now calculate overlap ('A' matrix). 
+! Presently only non-sparse representation is available
+!
+      CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+!
+!     CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+!                  SRDispl%D,SRDispl%D,AMat%D)
+      CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                   RefGrad%D,RefGrad%D,AMat%D)
+!
+! Scale AMat before diagonalization
+!
+         Scale%D=Zero
+         ScaleMin=1.D99
+       DO I=1,GDIISMemory
+         Sum=One/SQRT(AMat%D(I,I))
+         Scale%D(I)=Sum
+         ScaleMin=MIN(ScaleMin,Sum)
+       ENDDO
+!scale%d=one
+!ScaleMin=One
+       DO I=1,GDIISMemory
+         SumX=Scale%D(I)
+         DO J=1,GDIISMemory
+           SumY=Scale%D(J)
+           AMat%D(I,J)=SumX*AMat%D(I,J)*SumY 
+         ENDDO
+       ENDDO
+!
+! Now, calculate eigenvalues and eigenvectors of Overlap
+!
+      CALL SetDSYEVWork(GDIISMemory)
+!
+        BLKVECT%D=AMat%D
+        CALL DSYEV('V','U',GDIISMemory,BLKVECT%D,BIGBLOK,BLKVALS%D, &
+          BLKWORK%D,BLKLWORK,INFO)
+        IF(INFO/=SUCCEED) &
+        CALL Halt('DSYEV hosed in GDIIS. INFO='&
+                   //TRIM(IntToChar(INFO)))
+!
+! Now, construct adaptive reference if requested
+!
+!       CALL TrfGDIIS(RefStruct,SRStruct,SRDispl,RefGrad,AMat,Scale, &
+!                    BLKVECT,BLKVALS)
+!
+! Transform iterative subspace into new metric
+!
+        IF(GeOpCtrl%GDIISMetricOn) THEN
+          CALL TrfMetric(RefGrad,RefStruct,SRStruct,SRDispl,BLKVALS)
+        ENDIF
+!
+! Rescale eigenvalues
+!
+        Sum=One/BLKVALS%D(1)
+        BLKVALS%D=Sum*BLKVALS%D
+!
+! Rescale scalefactors
+!
+          Sum=One/ScaleMin
+          Scale%D=Sum*Scale%D
+!
+! Carry out Ut*Scale
+!
+        CALL DGEMM_TNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
+          BLKVECT%D,Scale%D,AuxVectS%D)
+!
+! Scale Ut*Scale
+!
+          SumX=1.D99
+        DO I=1,GDIISMemory
+          Sum=AuxVectS%D(I)
+          SumX=MIN(SumX,ABS(Sum))
+        ENDDO
+          SumX=One/SumX
+          AuxVectS%D=SumX*AuxVectS%D
+!
+! Calculate pre-coeffs in scaled metric
+!
+          SumX=1.D99
+        DO I=1,GDIISMemory
+          Coeffs%D(I)=AuxVectS%D(I)/BLKVALS%D(I)
+          SumX=MIN(SumX,Coeffs%D(I))
+        ENDDO
+          SumX=One/SumX
+          Coeffs%D=SumX*Coeffs%D
+!
+! Calculate coeffs in the scaled metric
+!
+        CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
+          BLKVECT%D,Coeffs%D,AuxVectS%D)
+          Coeffs%D=AuxVectS%D
+!
+! Calculate coeffs in the original metric
+!
+        DO I=1,GDIISMemory
+          Coeffs%D(I)=Scale%D(I)*Coeffs%D(I)
+        ENDDO
+!
+! Select out subspace for final GDIIS
+!
+        CALL GDIISSelect(Coeffs%D,Selection%I)
+!
+      CALL UnSetDSYEVWork()
+!
+! Rescale coeffs to get a sum of One.
+!
+          Sum=Zero
+        DO I=1,GDIISMemory 
+          IF(Selection%I(I)==1) THEN 
+            Sum=Sum+Coeffs%D(I)  
+          ELSE
+            Coeffs%D(I)=Zero
+          ENDIF
+        ENDDO
+        Sum=One/Sum
+        Coeffs%D=Sum*Coeffs%D
+!
+! Calculate new geometry, linearcombine previous steps 
+!
+          AuxVect%D=Zero
+        DO I=1,GDIISMemory
+          IF(Selection%I(I)/=1) CYCLE
+          AuxVect%D=AuxVect%D+Coeffs%D(I)*SRStruct%D(:,I)
+        ENDDO
+!
+! Restore original metric on resulting GDIIS geometry
+!
+        IF(GeOpCtrl%GDIISMetricOn) THEN
+          MFact=One/GeOpCtrl%GDIISMetric
+          AuxVect%D=MFact*AuxVect%D
+        ENDIF
+!
+! Fill new geometry into GM array
+!
+        CALL CartRNK1ToCartRNK2(AuxVect%D,GMLoc%Carts%D)
+!
+! Save unitary transformed structures and gradients
+!
+        CALL Put(0,'SrMemory')
+        CALL Put(0,'RefMemory')
+        CALL Put(0,'CartGradMemory')
+!       CALL Put(0,'IntGradMemory')
+        J=MAX(1,GDIISMemory-5)
+        DO I=J,GDIISMemory
+!       DO I=1,GDIISMemory
+          IF(Selection%I(I)==1) THEN
+            AuxVect%D=SRStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='SR',Metric_O=.FALSE.)
+            AuxVect%D=RefStruct%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='Ref',Metric_O=.FALSE.)
+            AuxVect%D=RefGrad%D(:,I)
+            CALL PutSRStep(Vect_O=AuxVect,Tag_O='CartGrad',&
+                           Metric_O=.FALSE.)
+          ENDIF
+        ENDDO
+!
+!call prtxyz(GMLoc%Carts%D,Title_O='Final Carts.')
+!
+! Tidy up
+!
+       CALL Delete(Selection)
+       CALL Delete(GrdDotGrd)
+       CALL Delete(GrdDotDX)
+       CALL Delete(DXDotDX)
+       CALL Delete(AuxVectS)
+       CALL Delete(Scale)
+       CALL Delete(AuxVect)
+       CALL Delete(Coeffs)
+       CALL Delete(MetricA)
+       CALL Delete(AMat)
+       CALL Delete(RefGrad)
+       CALL Delete(RefStruct)
+       CALL Delete(SRStruct)
+       CALL Delete(SRDispl)
+!
+     END SUBROUTINE GDIIS2
+!
+!--------------------------------------------------------------------
+!
+!    SUBROUTINE FoldBMatrix(NatLoc,XYZ,NIntC,IntCs,B,BFolded)
+!!
+!    TYPE(INTC) :: IntCs
+!    TYPE(BMATR) :: B,BFolded
+!    INTEGER :: I,J,K,L,NIntC,NatLoc
+!!
+!! Find three atoms which are non-linear,
+!! possibly find the ones of having the larges distance and angles
+!! close to 60 degree
+!! Inclusion of the Cartesian coordinates of three atoms would also 
+!! help to construct
+!!
+!!
+!!
+!    END SUBROUTINE FoldBMatrix
 !----------------------------------------------------------------
+!
+      SUBROUTINE TrfMetric(RefGrad,RefStruct,SRStruct,SRDispl,BLKVALS)
+        TYPE(DBL_RNK2) :: RefGrad,RefStruct,SRStruct,SRDispl
+        TYPE(DBL_VECT) :: BLKVALS
+        INTEGER        :: I,J,DimGDIIS,GDIISMemory
+        REAL(DOUBLE)   :: MFact,Sum
+!
+        DimGDIIS   =SIZE(RefGrad%D,1)
+        GDIISMemory=SIZE(RefGrad%D,2)
+!
+        Sum=SQRT(BLKVALS%D(1))
+        MFact=One/Sum
+        GeOpCtrl%GDIISMetric=Sum*GeOpCtrl%GDIISMetric
+!
+        RefGrad%D=MFact*RefGrad%D
+        RefStruct%D=Sum*RefStruct%D
+        SRStruct%D=Sum*SRStruct%D
+        SRDispl%D=Sum*SRDispl%D
+        MFact=MFact*MFact
+        BLKVALS%D=MFact*BLKVALS%D
+!
+      END SUBROUTINE TrfMetric
+!
+!--------------------------------------------------------------------
+!
+      SUBROUTINE TrfGDIIS(RefStruct,SRStruct,SRDispl,RefGrad,AMat,&
+                     Scale,TrfMatr,EigVals)
+        TYPE(DBL_RNK2) :: RefStruct,SRStruct,SRDispl,RefGrad,AMat,TrfMatr
+        TYPE(DBL_RNK2) :: TrfGrad,TrfDispl
+        TYPE(DBL_VECT) :: Scale,EigVals,ColmnSum,ColmnSum2
+        TYPE(DBL_RNK2) :: DiagMatr,AuxStruct
+        INTEGER        :: I,J,K,GDIISMemory,DimGDIIS
+        REAL(DOUBLE)   :: Sum,Sum2,SumX
+        LOGICAL        :: WhichTrf
+!
+        DimGDIIS=SIZE(RefStruct%D,1)
+        GDIISMemory=SIZE(RefStruct%D,2)
+        CALL New(ColmnSum,GDIISMemory)
+        CALL New(ColmnSum2,GDIISMemory)
+        CALL New(AuxStruct,(/DimGDIIS,GDIISMemory/))
+        CALL New(TrfGrad,(/GDIISMemory,GDIISMemory/))
+        CALL New(TrfDispl,(/GDIISMemory,GDIISMemory/))
+call pprint(amat%d,' amat scaled',unit_o=6)
+sum=zero
+do i=1,gdiismemory
+sum=sum+dot_product(TrfGrad%D(:,i),SRDispl%D(:,i))
+enddo
+write(*,*) 'energy lowering in original system= ',sum
+!
+! Carry out Ut*Scale matrix matrix multipl. (Rows of U are multiplied.)
+! Scale is normalized at this point 
+! such that its lowest component is One.
+!
+call pprint(trfmatr%d,'TrfMatr original ',unit_o=6)
+        DO I=1,GDIISMemory
+!         Sum=One/Scale%D(I)
+          Sum=Scale%D(I)
+          TrfMatr%D(I,:) =Sum*TrfMatr%D(I,:)
+        ENDDO
+call pprint(trfmatr%d,'TrfMatr*scale ',unit_o=6)
+!
+! Now, calculate sums of column-components
+! invert them and normalize the result
+!
+          ColmnSum%D=Zero
+        DO I=1,GDIISMemory
+          Sum=Zero
+          DO J=1,GDIISMemory
+            Sum=Sum+TrfMatr%D(J,I)
+          ENDDO
+            Sum2=DOT_PRODUCT(TrfMatr%D(:,I),TrfMatr%D(:,I))
+write(*,*) i,' Sum= ',Sum
+          ColmnSum%D(I)=Sum
+          ColmnSum2%D(I)=Sum2
+        ENDDO
+write(*,*) 'ColmnSum= ',ColmnSum%D
+write(*,*) 'ColmnSum2= ',ColmnSum2%D
+!
+! Transform Cartesian coordinates and displacements
+!
+         CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero, &
+           RefStruct%D,TrfMatr%D,AuxStruct%D)
+           RefStruct%D=AuxStruct%D
+         CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero, &
+           SRStruct%D,TrfMatr%D,AuxStruct%D)
+           SRStruct%D=AuxStruct%D
+         CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero, &
+           SRDispl%D,TrfMatr%D,AuxStruct%D)
+           SRDispl%D=AuxStruct%D
+         DO I=1,GDIISMemory
+           Sum=One/ColmnSum%D(I)
+           RefStruct%D(:,I)=Sum*RefStruct%D(:,I)
+           SRStruct%D(:,I) =Sum*SRStruct%D(:,I)
+           SRDispl%D(:,I)  =Sum*SRDispl%D(:,I)
+         ENDDO
+call pprint(refstruct%d,'refstruct transformed ',unit_o=6)
+call pprint(SRstruct%d,'srstruct transformed ',unit_o=6)
+call pprint(srdispl%d,'srdispl transformed ',unit_o=6)
+!
+! Transform gradients
+!
+         CALL DGEMM_NNc(DimGDIIS,GDIISMemory,GDIISMemory,One,Zero, &
+           RefGrad%D,TrfMatr%D,AuxStruct%D)
+           RefGrad%D=AuxStruct%D
+         DO I=1,GDIISMemory
+!          Sum=ColmnSum%D(I)*ColmnSum%D(I)/ColmnSum2%D(I)
+           Sum=One/ColmnSum%D(I)
+           RefGrad%D(:,I)=Sum*RefGrad%D(:,I)
+         ENDDO
+call pprint(refgrad%d,'refgrad transformed ',unit_o=6)
+CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero, &
+  RefGrad%D,RefGrad%D,AMat%D)
+call pprint(amat%d,'grad overlap new ',unit_o=6)
+sum=zero
+do i=1,gdiismemory
+sum=sum+dot_product(TrfGrad%D(:,i),SRDispl%D(:,i))
+enddo
+write(*,*) 'energy lowering in transformed system= ',sum
+stop
+!
+        CALL Delete(TrfDispl)
+        CALL Delete(TrfGrad)
+        CALL Delete(AuxStruct)
+        CALL Delete(ColmnSum2)
+        CALL Delete(ColmnSum)
+!
+      END SUBROUTINE TrfGDIIS
+!
+!--------------------------------------------------------------------
 !
 END MODULE InCoords
 
