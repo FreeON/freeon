@@ -136,20 +136,6 @@ MODULE dXCBlok
        ENDIF
      END FUNCTION dXC
 
-     FUNCTION Extent2(HGTF) RESULT (R)
-       INTEGER                         :: Ell,ExtraEll
-       REAL(DOUBLE)                    :: Zeta,Tau
-       REAL(DOUBLE),DIMENSION(:)       :: HGTF
-       REAL(DOUBLE),DIMENSION(0:HGEll) :: Co,HGPot
-       REAL(DOUBLE)                    :: FUN,F0,F1
-       INTEGER                         :: J,L,K,M,N,LMN,SN,LL
-       REAL(DOUBLE)                    :: ConvergeTo,RMIN,RMAX,R,RErr
-       LOGICAL                         :: Potential
-
-
-       WRITE(*,*)' HGTF = ',HGTF
-
-     END FUNCTION Extent2
 !====================================================================================================
 !
 !====================================================================================================

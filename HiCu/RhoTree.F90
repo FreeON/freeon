@@ -301,8 +301,13 @@ MODULE RhoTree
          REAL(DOUBLE) :: ZE,EX,Dummy
 !----------------------------------------------------------------------------------------
 !        Get the density
-         Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
-              FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+         IF(SCFActn=='ForceEvaluation')THEN
+            Open(UNIT=Seq,FILE=TrixFile('Rho',Args,1),STATUS='OLD', &
+                 FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+         ELSE
+            Open(UNIT=Seq,FILE=TrixFile('Rho',Args,0),STATUS='OLD', &
+                 FORM='UNFORMATTED',ACCESS='SEQUENTIAL')
+         ENDIF
          Read(UNIT=Seq,Err=202,IOSTAT=IOS)Rho%NExpt,Rho%NDist,Rho%NCoef
          CALL New(Rho%NQ  ,Rho%NExpt)
          CALL New(Rho%OffQ,Rho%NExpt)
