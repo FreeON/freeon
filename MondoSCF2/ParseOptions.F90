@@ -411,11 +411,15 @@ CONTAINS
     ELSE
        PFlags%GeOp=DEBUG_NONE
     ENDIF
+!
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_MM))THEN
        PFlags%MM=DEBUG_MM
+    ELSEIF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_PRT_FRC))THEN
+       PFlags%MM=DEBUG_FRC
     ELSE
        PFlags%MM=DEBUG_NONE
     ENDIF
+!
     IF(OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_PDB)) THEN
 	GeomPrint='PDB'
         Names%GFile=TRIM(Names%GFile)//'.pdb'
@@ -428,7 +432,7 @@ CONTAINS
      ELSE
         ! Default is xyz
         GeomPrint='XYZ'
-        Names%GFile=TRIM(Names%GFile)//'.xyz'
+        Names%GFile=TRIM(Names%GFile)//'.xyz' 
     ENDIF
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
