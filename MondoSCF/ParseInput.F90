@@ -2893,15 +2893,15 @@ END SUBROUTINE ParsePeriodic
     "--------------------------------------------------------------------------------"
 !        write(6,NML=MDinputs)
 !
-	write(6,'(A12 I12 (4X) A12 F12.6)')"MAX_STEPS  =",MAX_STEPS,"DT         =",DT
-	write(6,'(2(A12 I12 (4X)))')"CRDfreq    =",CRDfreq,"VELfreq    =",VELfreq
-        write(6,'(2(A12 I12 (4x)))')"ENEfreq    =",ENEfreq,"RESfreq    =",RESfreq
-	write(6,'(3(A12 X A12 (3X)))')"CRD_NAME   =",CRD_NAME, "VEL_NAME   =",VEL_NAME,&
+	write(6,'(A12,I12,(4X),A12,F12.6)')"MAX_STEPS  =",MAX_STEPS,"DT         =",DT
+	write(6,'(2(A12,I12,(4X)))')"CRDfreq    =",CRDfreq,"VELfreq    =",VELfreq
+        write(6,'(2(A12,I12,(4x)))')"ENEfreq    =",ENEfreq,"RESfreq    =",RESfreq
+	write(6,'(3(A12,X,A12,(3X)))')"CRD_NAME   =",CRD_NAME, "VEL_NAME   =",VEL_NAME,&
                                 "ENE_NAME   =",ENE_NAME
-	write(6,'(A12 X A12 (3X) A12 X A12)')"RESTRT_IN  =",RESTRT_IN,"RESTRT_OUT =",RESTRT_OUT
-        write(6,'(A12 F12.6 (4X) A12 F12.6 (4X) A12 F12.6)')"TEMP0      =",TEMP0,&
+	write(6,'(A12,X,A12,(3X),A12,X,A12)')"RESTRT_IN  =",RESTRT_IN,"RESTRT_OUT =",RESTRT_OUT
+        write(6,'(A12,F12.6,(4X),A12,F12.6,(4X),A12,F12.6)')"TEMP0      =",TEMP0,&
                         "TEMP       =",TEMP,"TTAU       =",TTAU
-        write(6,'(A12 F12.6 (4X) A12 F12.6)')"PRES       =",PRES,"PTAU       =",PTAU	
+        write(6,'(A12,F12.6,(4X),A12,F12.6)')"PRES       =",PRES,"PTAU       =",PTAU	
 !
         write(6,'(A80)')&
     "--------------------------------------------------------------------------------"
