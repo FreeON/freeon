@@ -23,7 +23,11 @@ PROGRAM MondoSCF
   CHARACTER(LEN=DCL)    :: RmAllPrv
   LOGICAL               :: DoForce
 !------------------------------------------------------------
-! Intialize 
+
+#if defined(PARALLEL) && defined(MPI2)
+  CALL InitMPI()
+#endif
+! Initialize
   CALL Init(PerfMon)
   CALL Init(MemStats)
 ! Parse input
@@ -74,4 +78,7 @@ PROGRAM MondoSCF
         Ctrl%Previous=Ctrl%Current
      ENDDO
   END SELECT
+#if defined(PARALLEL) && defined(MPI2)
+  CALL FiniMPI()
+#endif
 END PROGRAM MondoSCF
