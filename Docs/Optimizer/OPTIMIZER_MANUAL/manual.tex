@@ -256,6 +256,37 @@ multiplies the values of default VDW radii by 1.25 . The factor 1.25 activates
 the full length of tabulated atomic Van der Waals radii to be applied.
 The default VDW radii values are smaller to avoid the formation of an unnecessarily dense connectivity network.
 
+\subsection{Coordinates associated to weak bonds}
+Each weak bond can in principle form an edge of a BEND, TORS or OUTP.
+However, adding these extra coordinates would hugely increase the 
+redundancy of the internal coordinate system and may even avoid
+convergence. Thus, in default, no BEND, TORS or OUTP is added along
+non-covalent bonds. This is usually correct for large proteins.
+In some cases, e.g. loose water clusters, the extra BENDs, etc. may be 
+necessary. They can be added by the {\tt Grad}-line options
+\begin{itemize}
+\item[{\tt NonCovBend}] (adds BEND and OUTP) and
+\item[{\tt NonCovTors}] (adds TORS).
+\end{itemize}
+If the 
+\begin{itemize}
+\item[{\tt HBondOnly}] 
+\end{itemize}
+option is added into the {\tt Grad}-line, only the hydrogen-bonds
+of the non-covalent bonding system are recognized and other weak bonds
+are not.
+
+In case of a cluster, isolated fragments may turn up. Isolated
+fragments are automatically recognized and and conncted via their 
+nearest points. In some cases the user wants to define these connections
+by hand via the {\tt <BEGIN\_ADD\_INTERNALS>} and 
+{\tt <END\_ADD\_INTERNALS>} options and the addition of extra 
+internal coordinates. In this case the automatic fragment-connection 
+is recommended to be turned off by the {\tt Grad} line option
+\begin{itemize}
+\item[{\tt NoFragmConnect}] .
+\end{itemize}
+
 \subsection{Stepsize control}
 The options "MaxStre" and "MaxAngle" allow external control over the maximum
 stepsize during an internal coordinate optimization.
