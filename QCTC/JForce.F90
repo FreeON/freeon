@@ -30,6 +30,14 @@ PROGRAM JForce
 #endif
   TYPE(AtomPair)             :: Pair
   TYPE(DBL_VECT)             :: Frc,JFrc
+#ifdef MMech
+  INTEGER                    :: NatomsLoc
+  TYPE(DBL_VECT)             :: MMJFrc
+  TYPE(INT_VECT)             :: GlobalQMNum
+  TYPE(INT_VECT)             :: AtmMark    
+  TYPE(CRDS)                 :: GMLocMM   
+#endif
+  TYPE(CRDS)                 :: GMLoc
 #ifdef PERIODIC 
   INTEGER                     :: NC
   REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
@@ -41,47 +49,82 @@ PROGRAM JForce
 !-------------------------------------------------------------------------------- 
 ! Start up macro
   CALL StartUp(Args,Prog)
+!
+#ifdef MMech
+  IF(HasQM()) THEN
+#endif 
+!
 ! Get basis set and geometry
-  CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
+    CALL Get(BS,Tag_O=CurBase)
+    CALL Get(GMLoc,Tag_O=CurGeom)
 ! Allocations 
-  CALL New(JFrc,3*NAtoms)
-  CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-  CALL Get(P,TrixFile('D',Args,1))
+    CALL New(JFrc,3*GMLoc%Natms)
+    JFrc%D(:)=Zero
+    CALL NewBraBlok(BS,Gradients_O=.TRUE.)
+    CALL Get(P,TrixFile('D',Args,1))
+!
+#ifdef MMech
+  ENDIF
+#endif 
+#ifdef MMech
+  IF(HasMM()) THEN
+    CALL Get(GMLocMM,Tag_O='GM_MM'//CurGeom)
+    CALL New(AtmMark,GMLocMM%NAtms)
+    CALL Get(AtmMark,'AtmMark')
+    CALL New(MMJFrc,3*GMLocMM%NAtms)
+    MMJFrc%D(:)=Zero
+    CALL NewBraBlok(Gradients_O=.TRUE.)
+  ENDIF
+#endif 
 ! Get multipoles and density
-  CALL Get(RhoPoles,NxtCycl)
-  CALL Get(Rho,'Rho',Args,1)
+#ifdef MMech
+    IF(MMOnly()) THEN
+      CALL Get(RhoPoles,CurGeom)
+    ELSE
+#endif
+      CALL Get(RhoPoles,NxtCycl)
+#ifdef MMech
+    ENDIF
+#endif
+      CALL Get(Rho,'Rho',Args,1)
 ! Set thresholds local to JForce (for PAC and MAC)
-  CALL SetLocalThresholds(Thresholds%TwoE)
+    CALL SetLocalThresholds(Thresholds%TwoE)
 ! Setup global arrays for computation of multipole tensors
-  CALL InitRhoAux
+    CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
-  CALL MultipoleSetUp(FFEll2)
+    CALL MultipoleSetUp(FFEll2)
 ! Build the global PoleTree representation of the total density
-  CALL RhoToPoleTree
+    CALL RhoToPoleTree
 #ifdef PERIODIC
 ! Calculate the Number of Cells
-  CALL SetCellNumber(GM)
-  CALL PPrint(CS_OUT,'outer sum',Prog)
+#ifdef MMech
+    IF(HasQM()) CALL SetCellNumber(GMLoc)
+    IF(HasMM()) CALL SetCellNumber(GMLocMM)
+#else
+    CALL SetCellNumber(GMLoc)
+#endif
+    CALL PPrint(CS_OUT,'outer sum',Prog)
 ! Set the electrostatic background 
-  CALL PBCFarFieldSetUp(PoleRoot)
+    CALL PBCFarFieldSetUp(PoleRoot)
 #endif
 ! Delete the auxiliary density arrays
-  CALL DeleteRhoAux
+    CALL DeleteRhoAux
 ! Delete the Density
-  CALL Delete(Rho)
+    CALL Delete(Rho)
 !--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
 !--------------------------------------------------------------------------------
-  JFrc%D=Zero
-  DO AtA=1,NAtoms
+#ifdef MMech
+  IF(HasQM()) THEN
+#endif
+  DO AtA=1,GMLoc%Natms
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     JFrc%D(A1:A2)= dNukE(AtA)
+     JFrc%D(A1:A2)= dNukE(GMLoc,AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
-        IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
+        IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
@@ -106,26 +149,105 @@ PROGRAM JForce
 ! Closed shell...
   JFrc%D=Two*JFrc%D
 !--------------------------------------------------------------------------------
-! Do some checksumming, resumming and IO 
-!  CALL PPrint(JFrc,'dJ/dR')
-  CALL PChkSum(JFrc,'dJ/dR',Proc_O=Prog)  
 ! Print The JForce
-  CALL Print_Force(GM,JFrc,' dJ/dR ')
-! Sum in contribution to total force
-  CALL New(Frc,3*NAtoms)
-  CALL Get(Frc,'GradE',Tag_O=CurGeom)
-  Frc%D=Frc%D+JFrc%D
-  CALL Put(Frc,'GradE',Tag_O=CurGeom)
+  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in au ')
+  JFrc%D(:)=JFrc%D(:)/KJPerMolPerAngstToHPerBohr
+  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
+  JFrc%D(:)=JFrc%D(:)*KJPerMolPerAngstToHPerBohr
+!
+#ifdef MMech
+  ENDIF
+#endif
+!
+#ifdef MMech
+  IF(HasMM()) THEN
+    DO AtA=1,GMLocMM%NAtms
+       IF(AtmMark%I(AtA)==0) THEN
+         A1=3*(AtA-1)+1
+         A2=3*AtA
+         MMJFrc%D(A1:A2)=dNukE(GMLocMM,AtA)
+       ENDIF
+    ENDDO
+! 'closed shell'
+      MMJFrc%D=Two*MMJFrc%D
+! checks, prints
+  CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in au ')
+  MMJFrc%D=MMJFrc%D/KJPerMolPerAngstToHPerBohr
+  CALL Print_Force(GMLocMM,MMJFrc,'MM dJ/dR in KJ/mol/A ')
+  MMJFrc%D=MMJFrc%D*KJPerMolPerAngstToHPerBohr
+  ENDIF
+#endif 
+!
 !--------------------------------------------------------------------------------
+#ifdef MMech
+! Sum in contribution to total force
+  IF(HasMM()) THEN
+    NatmsLoc=GMLocMM%Natms
+  ELSE IF(HasQM()) THEN
+    NatmsLoc=GMLoc%Natms
+  ELSE
+    CALL Halt('No mechanics defined in JForce') 
+  ENDIF
+    CALL New(Frc,3*NatmsLoc)
+    CALL Get(Frc,'GradE',Tag_O=CurGeom)
+    CALL New(GlobalQMNum,NatmsLoc)
+    IF(HasQM().AND.HasMM()) THEN
+      CALL Get(GlobalQMNum,'GlobalQMNum')
+    ELSE
+      DO I=1,GMLoc%Natms; GlobalQMNum%I(I)=I ; ENDDO
+    ENDIF 
+    IF(HasQM()) THEN
+      Do Ata=1,GMLoc%Natms 
+        I=GlobalQMNum%I(Ata)
+        IF(I/=0) THEN !!! don't save gradients on link atoms
+          I1=3*(I-1)+1
+          I2=3*I
+          A1=3*(AtA-1)+1
+          A2=3*AtA
+          Frc%D(I1:I2)=Frc%D(I1:I2)+JFrc%D(A1:A2)
+        ENDIF
+      ENDDO
+    ENDIF
+    CALL PChkSum(Frc,'Frc bef dJ/dR added',Proc_O=Prog)  
+    IF(HasMM()) THEN
+      Frc%D=Frc%D+MMJFrc%D
+      CALL PChkSum(MMJFrc,'MMJFrc bef dJ/dR added',Proc_O=Prog)  
+    ENDIF
+    CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
+    CALL Put(Frc,'GradE',Tag_O=CurGeom)
+    CALL Delete(Frc)
+    CALL Delete(GlobalQMNum)
+!
 ! Tidy up
 !--------------------------------------------------------------------------------
-  CALL Delete(BS)
-  CALL Delete(GM)
-  CALL Delete(P)
-  CALL Delete(Frc)
-  CALL Delete(JFrc)
-  CALL Delete(RhoPoles)
-  CALL DeleteBraBlok(Gradients_O=.TRUE.)
+  IF(HasQM()) THEN
+    CALL Delete(BS)
+    CALL Delete(GMLoc)
+    CALL Delete(JFrc)
+    CALL Delete(P)
+  ENDIF
+  IF(HasMM()) THEN
+    CALL Delete(GMLocMM)
+    CALL Delete(MMJFrc)
+    CALL Delete(AtmMark)
+  ENDIF
+#else
+    CALL New(Frc,3*GMLoc%Natms)
+    CALL Get(Frc,'GradE',Tag_O=CurGeom)
+  CALL Print_Force(GMLoc,JFrc,'MM dJ/dR in au ')
+  JFrc%D=JFrc%D/KJPerMolPerAngstToHPerBohr
+  CALL Print_Force(GMLoc,JFrc,'QM dJ/dR in KJ/mol/A ')
+  JFrc%D=JFrc%D*KJPerMolPerAngstToHPerBohr
+    Frc%D=Frc%D+JFrc%D
+    CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
+    CALL Put(Frc,'GradE',Tag_O=CurGeom)
+    CALL Delete(Frc)
+    CALL Delete(BS)
+    CALL Delete(GMLoc)
+    CALL Delete(JFrc)
+#endif
+    CALL Delete(RhoPoles)
+    CALL DeleteBraBlok(Gradients_O=.TRUE.)
 ! didn't count flops, any accumulation is residual
 ! from matrix routines
   PerfMon%FLOP=Zero 
