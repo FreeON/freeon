@@ -7,6 +7,7 @@ PROGRAM MondoSCF
   USE PunchHDF
   USE Optimizer
   USE ParseInput
+  USE ZippyQuote
   USE PrintParsed
   IMPLICIT NONE
   TYPE(Controls) :: C
@@ -36,6 +37,8 @@ PROGRAM MondoSCF
 #if defined(PARALLEL) && defined(MPI2)
   CALL FiniMPI()
 #endif
+  ! Something surreal to celibrate this run
+  CALL ZippySez()
   !--------------------------------------------------------
   CALL TimeStamp('Successful MondoSCF run',.FALSE.)   
   !--------------------------------------------------------
