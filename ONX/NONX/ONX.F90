@@ -173,6 +173,10 @@ PROGRAM ONX
 #endif
   ENDIF
   !
+#ifndef PARALLEL
+  CALL PlotDecay(D,GMc,'test_'//TRIM(IntToChar(Args%i%i(1))))
+#endif
+  !
   ! Start total timing.
 #ifdef PARALLEL
   TmBegKT = MPI_WTIME()
@@ -487,7 +491,7 @@ PROGRAM ONX
      CALL PImbalance(TmKTArr,NPrc,Prog_O='ONX'     )
      !
      WRITE(*,1001) SUM(TmKArr%D  )/DBLE(NPrc),MINVAL(TmKArr%D  ),MAXVAL(TmKArr%D  )
-     WRITE(*,1002) SUM(NERIsArr%D)/DBLE(NPrc),MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
+     WRITE(*,1002) SUM(NERIsArr%D)           ,MINVAL(NERIsArr%D),MAXVAL(NERIsArr%D)
      WRITE(*,1003) SUM(TmDOArr%D )/DBLE(NPrc),MINVAL(TmDOArr%D ),MAXVAL(TmDOArr%D )
      WRITE(*,1004) SUM(TmREArr%D )/DBLE(NPrc),MINVAL(TmREArr%D ),MAXVAL(TmREArr%D )
      WRITE(*,1005) SUM(TmFOArr%D )/DBLE(NPrc),MINVAL(TmFOArr%D ),MAXVAL(TmFOArr%D )
