@@ -134,6 +134,27 @@ MODULE GammaF11
   INCLUDE 'F11.Inc'
 END MODULE GammaF11
 
+MODULE GammaF12
+  USE DerivedTypes
+  USE SpecFunMesh
+  USE GammaAssymp
+  IMPLICIT NONE
+  INTEGER :: IF12
+  REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F12_0,F12_1,F12_2,F12_3,F12_4
+  INCLUDE 'F12.Inc'
+END MODULE GammaF12
+
+MODULE GammaF13
+  USE DerivedTypes
+  USE SpecFunMesh
+  USE GammaAssymp
+  IMPLICIT NONE
+  INTEGER :: IF13
+  REAL(DOUBLE),DIMENSION(0:Gamma_Mesh) :: F13_0,F13_1,F13_2,F13_3,F13_4
+  INCLUDE 'F13.Inc'
+END MODULE GammaF13
+
+
 MODULE InvExp
   USE DerivedTypes
   IMPLICIT NONE
@@ -228,6 +249,8 @@ MODULE GammaFunctions
   USE GammaF9
   USE GammaF10
   USE GammaF11
+  USE GammaF12
+  USE GammaF13
   USE ErfFunk
   USE ProcessControl
   IMPLICIT NONE
@@ -265,8 +288,12 @@ CONTAINS
           GammaF=F10_0(J)+T*(F10_1(J)+T*(F10_2(J)+T*(F10_3(J)+T*F10_4(J))))
        CASE(11)
           GammaF=F11_0(J)+T*(F11_1(J)+T*(F11_2(J)+T*(F11_3(J)+T*F11_4(J))))
-       CASE(12:)
-          CALL Halt('Only M<=11 has been implimented in GammaF ')
+       CASE(12)
+          GammaF=F12_0(J)+T*(F12_1(J)+T*(F12_2(J)+T*(F12_3(J)+T*F12_4(J))))
+       CASE(13)
+          GammaF=F13_0(J)+T*(F13_1(J)+T*(F13_2(J)+T*(F13_3(J)+T*F13_4(J))))
+       CASE(14:)
+          CALL Halt('Only M<=13 has been implimented in GammaF ')
        END SELECT
     ELSE
        GammaF=GammAss(M)*T**(-DBLE(M)-Half)

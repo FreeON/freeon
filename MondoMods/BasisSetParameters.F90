@@ -6,7 +6,7 @@ MODULE BasisSetParameters
    INTEGER, PARAMETER :: MaxPrmtv=20
    INTEGER, PARAMETER :: MaxASymt= 4
    INTEGER, PARAMETER :: MaxLTyps=10
-   INTEGER, PARAMETER :: NSupSets=24
+   INTEGER, PARAMETER :: NSupSets=28
    CHARACTER(LEN=2),DIMENSION(104):: Ats=(/'h ','he','li','be','b ','c ', &
         'n ','o ','f ','ne','na','mg','al','si','p ','s ','cl','ar','k ', &
         'ca','sc','ti','v ','cr','mn','fe','co','ni','cu','zn','ga','ge', & 
@@ -50,18 +50,22 @@ MODULE BasisSetParameters
                 '6-31g**         ' , '6-31Gss         ',   &  ! 10
                 '6-31++g**       ' , '6-31ppGss       ',   &  ! 11
                 '6-311g**        ' , '6-311Gss        ',   &  ! 12
-                'mini            ' , 'MINI            ',   &  ! 13
-                'midi            ' , 'MIDI            ',   &  ! 14
-                'dunninghay_sv   ' , 'DunningHay_SV   ',   &  ! 15
-                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &  ! 16
-                'dunning_dz      ' , 'Dunning_DZ      ',   &  ! 17
-                'dunning_dzp     ' , 'Dunning_DZP     ',   &  ! 18
-                'dunning_tz      ' , 'Dunning_TZ      ',   &  ! 19
-                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &  ! 20
-                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &  ! 21
-                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 22
-                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 23
-                'wtbs            ' , 'WTBS            '    &  ! 24
+                '6-311gbb        ' , '6-311G3df,3pd   ',   &  ! 13
+                '6-311++gbb      ' , '6-311ppG3df,3pd ',   &  ! 14
+                'mini            ' , 'MINI            ',   &  ! 15
+                'midi            ' , 'MIDI            ',   &  ! 16
+                'dunninghay_sv   ' , 'DunningHay_SV   ',   &  ! 17
+                'dunninghay_svp  ' , 'DunningHay_SVP  ',   &  ! 18
+                'dunning_dz      ' , 'Dunning_DZ      ',   &  ! 19
+                'dunning_dzp     ' , 'Dunning_DZP     ',   &  ! 20
+                'dunning_tz      ' , 'Dunning_TZ      ',   &  ! 21
+                'ahlrichs_vdz    ' , 'Ahlrichs_VDZ    ',   &  ! 22
+                'ahlrichs_pvdz   ' , 'Ahlrichs_pVDZ   ',   &  ! 23
+                'ahlrichs_vtz    ' , 'Ahlrichs_VTZ    ',   &  ! 24
+                'ahlrichs_tzv    ' , 'Ahlrichs_TZV    ',   &  ! 25
+                'wtbs            ' , 'WTBS            ',   &  ! 26
+                'user1           ' , 'User1           ',   &  ! 27
+                'user2           ' , 'User2           '    &  ! 28
                 /), (/2,NSupSets/) )
    CHARACTER(LEN=5),DIMENSION(MaxLTyps) ::  CLTyps = &
          (/'s    ','p    ','d    ','f    ','sp   ', &
