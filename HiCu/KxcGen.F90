@@ -27,20 +27,16 @@ MODULE KxcGen
 !===============================================================================
   SUBROUTINE MakeKxc(Kxc,CubeRoot)
 #ifdef PARALLEL
-    TYPE(FastMat),POINTER  :: Kxc
+    TYPE(FastMat),POINTER     :: Kxc
 #else
-    TYPE(BCSR)             :: Kxc
+    TYPE(BCSR)                :: Kxc
 #endif
-    TYPE(CubeNode),POINTER :: CubeRoot
-
-    TYPE(DBL_RNK2)         :: Temp
-    TYPE(AtomPair)         :: Pair
-    INTEGER                :: AtA,AtB
-    INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
-#ifdef PERIODIC        
+    TYPE(CubeNode),POINTER    :: CubeRoot
+    TYPE(AtomPair)            :: Pair
+    INTEGER                   :: AtA,AtB
+    INTEGER                   :: JP,K,NA,NB,NAB,P,Q,R,I,J     
     INTEGER                   :: NCA,NCB
     REAL(DOUBLE),DIMENSION(3) :: A,B
-#endif     
 !------------------------------------------------------------------------------- 
 !   Initialize the matrix and associated indecies
 #ifdef PARALLEL
@@ -53,62 +49,48 @@ MODULE KxcGen
 #endif
 !   Loop over atom pairs
     DO AtA=1,NAtoms
-      DO AtB=1,NAtoms
-        IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-          NAB = Pair%NA*Pair%NB
+       DO AtB=1,NAtoms
+          IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+             NAB = Pair%NA*Pair%NB
 #ifndef PARALLEL
-          IF(AtB<=AtA)THEN
+             IF(AtB<=AtA)THEN
 #endif
-!         Compute only the lower triangle of symmetric Kxc
-#ifdef PERIODIC
-            A = Pair%A
-            B = Pair%B
-            DO NCA = 1,CS_OUT%NCells
-              Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
-              DO NCB = 1,CS_OUT%NCells
-                Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
-                Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                            + (Pair%A(2)-Pair%B(2))**2 &
-                            + (Pair%A(3)-Pair%B(3))**2
-                IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
+!            Compute only the lower triangle of symmetric Kxc
+                A = Pair%A
+                B = Pair%B
+                DO NCA = 1,CS_OUT%NCells
+                   Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
+                   DO NCB = 1,CS_OUT%NCells
+                      Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
+                      Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                           + (Pair%A(2)-Pair%B(2))**2 &
+                           + (Pair%A(3)-Pair%B(3))**2
+                      IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
 #ifdef PARALLEL
-                  CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+                         CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
 #else
-                  Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
+                         Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
 #endif
-                ENDIF
-              ENDDO
-            ENDDO
-#else
-#ifdef PARALLEL
-            !! use TestAtomPair..
-            IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-              CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
-            ENDIF
-#else
-            Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
-#endif
-#endif
+                      ENDIF
+                   ENDDO
+                ENDDO
 #ifndef PARALLEL
-          ENDIF
+             ENDIF
 #endif
-
 !! the logic here strictly follows MakeS
 #ifdef PARALLEL
 #else
-          Kxc%ColPt%I(P)=AtB
-          Kxc%BlkPt%I(P)=R
-          R=R+NAB
-          P=P+1 
+             Kxc%ColPt%I(P)=AtB
+             Kxc%BlkPt%I(P)=R
+             R=R+NAB
+             P=P+1 
 !! deleted DBCSR part
-          Kxc%RowPt%I(AtA+1)=P        
-          IF(R>MaxNon0.OR.P>MaxBlks) &
-            CALL Halt(' BCSR dimensions blown in Kxc ')
+             Kxc%RowPt%I(AtA+1)=P        
+             IF(R>MaxNon0.OR.P>MaxBlks) CALL Halt(' BCSR dimensions blown in Kxc ')
 #endif
-        ENDIF
-      ENDDO
+          ENDIF
+       ENDDO
     ENDDO
-
 #ifdef PARALLEL
 #else
     Kxc%NBlks=P-1
@@ -220,15 +202,11 @@ real(double):: Pextent_Old
                 Prim%PFB=PFB
 !               Set primitive bra blok, find its extent
                 PExtent=SetBraBlok(Prim,BS,Tau_O=TauRho,ExtraEll_O=1)
-#ifdef PERIODIC
                 PBox%BndBox(:,1)=Prim%P
                 PBox%BndBox(:,2)=Prim%P
                 PBox=ExpandBox(PBox,PExtent)
 !               Quick check to see if primitive touches the grid
                 IF(PExtent>Zero.AND.(.NOT.BoxOutSideBox(PBox,CubeRoot%Box)))THEN
-#else
-                IF(PExtent>Zero)THEN
-#endif
 !                  Recompute extent now on case by case basis
 !                  Perhaps using a better extent
                    PExtent=Zero

@@ -71,10 +71,8 @@ MODULE CubeTree
          INTEGER                          :: I,J,K,NRes,ErrCount,PtsPerAtom,PU
          TYPE(BBox)                       :: CubeBox    
          CHARACTER(LEN=DEFAULT_CHR_LEN)   :: Mssg     
-#ifdef PERIODIC 
-         INTEGER                            :: NC
-         REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
-#endif
+         INTEGER                          :: NC
+         REAL(DOUBLE), DIMENSION(3)       :: BoxCenter,BoxBndLow,BoxBndHig
 !---------------------------------------------------------------------------------
 !        Initialize some global variables
          GlobalCubes=0
@@ -83,13 +81,8 @@ MODULE CubeTree
          CubeNodes=0
 !        Initialize the CubeRoot and set thresholding
          CALL InitCubeRoot(CubeRoot,WBox)
-
-!        CubeRoot%Box%BndBox(1:3,1:2) = WBox%BndBox(1:3,1:2)
-!        CubeRoot%Box%Center(1:3) = (CubeRoot%Box%BndBox(1:3,1)+CubeRoot%Box%BndBox(1:3,2))*Half
-!        CubeRoot%Box%Half(1:3) = (CubeRoot%Box%BndBox(1:3,2)-CubeRoot%Box%BndBox(1:3,1))*Half
 !        Compute total electron population in this box
          CALL SetBBox(CubeRoot%Box,Box)
-#ifdef PERIODIC
          IXact=Zero
          BoxCenter(:) = Box%Center(:)
          BoxBndLow(:) = Box%BndBox(:,1)
@@ -103,9 +96,6 @@ MODULE CubeTree
          Box%Center(:)   = BoxCenter(:)
          Box%BndBox(:,1) = BoxBndLow(:)
          Box%BndBox(:,2) = BoxBndHig(:)  
-#else
-         IXact=PopInBox(RhoRoot)
-#endif
 !        Seting parameters for grid generation with variable accuracy
          MaxRelError=BIG_DBL
          Delta=1.D-1 
@@ -290,12 +280,10 @@ MODULE CubeTree
                                                dEd2OnTheCube,RhoOnTheCube, &
                                                DeltaRho,DeltaGrad
          INTEGER                            :: I,J,K
-#ifdef PERIODIC 
          INTEGER                            :: NC
          REAL(DOUBLE), DIMENSION(3)         :: BoxCenter,BoxBndLow,BoxBndHig
          REAL(DOUBLE), DIMENSION(NGRID,3)   :: GridOld
          REAL(DOUBLE)                       :: Rsum,PopOld
-#endif
 !--------------------------------------------------------------------------
 !        Transform cubature rule to this nodes bounding box
          CALL CubeRule(Cube)
@@ -310,7 +298,6 @@ MODULE CubeTree
          CALL SetBBox(Cube%Box,Box)
 !-------------------------------------------------------------------------
 !        Lay the grid
-#ifdef PERIODIC
          BoxCenter(:) = Box%Center(:)
          BoxBndLow(:) = Box%BndBox(:,1)
          BoxBndHig(:) = Box%BndBox(:,2)
@@ -328,9 +315,6 @@ MODULE CubeTree
          Box%BndBox(:,1) = BoxBndLow(:)
          Box%BndBox(:,2) = BoxBndHig(:)  
          Grid(:,:)       = GridOld(:,:)
-#else
-         CALL RhoOnGrid(RhoRoot)
-#endif
 !----------------------------------------------------------------------------------
 !        Transfer global Cube values to local Cube
          DO I=1,NGrid             
@@ -481,14 +465,8 @@ MODULE CubeTree
 !        Allocate cube node
          CALL NewCubeNode(CubeRoot,0) 
 !        Use the RhoTrees BBox
-!        CALL SetBBox(RhoRoot%Box,CubeRoot%Box)
          CALL SetBBox(WBox,CubeRoot%Box)
-! moved to HiCu.F90 and XCForce.F90
-!#ifdef PERIODIC
-!         CALL MakeBoxPeriodic(CubeRoot%Box)
-!#endif
 !        Set global Cube BBox
-!        CALL SetBBox(CubeRoot%Box,Box)
          CubeRoot%ISplit=1
          CubeRoot%Box%Tier=0
          CubeRoot%ECube=BIG_DBL

@@ -18,74 +18,63 @@ MODULE RhoUtil
    REAL(DOUBLE)                    :: AA=One/AngstromsToAU
    CONTAINS
 
-      SUBROUTINE RhoCubed(Arg,Del,Origin,Nx,Ny,Nz)
-        INTEGER                    :: I,J,K,Nx,Ny,Nz
-        REAL(DOUBLE),DIMENSION(3)  :: Origin
-        REAL(DOUBLE),allocatable,DIMENSION(:,:,:)  :: BaderRho
-        REAL(DOUBLE)               :: Del,Den,Zero
-        TYPE(ARGMT)                :: Arg
-#ifdef PERIODIC
-        INTEGER                    :: NC
-#endif
+     SUBROUTINE RhoCubed(Arg,Del,Origin,Nx,Ny,Nz)
+       INTEGER                    :: I,J,K,Nx,Ny,Nz
+       REAL(DOUBLE),DIMENSION(3)  :: Origin
+       REAL(DOUBLE),allocatable,DIMENSION(:,:,:)  :: BaderRho
+       REAL(DOUBLE)               :: Del,Den,Zero
+       TYPE(ARGMT)                :: Arg
+       INTEGER                    :: NC
 !---------------------------------------------------------------------------
-!     Get the geometry
+!      Get the geometry
        CALL Get(GM,Tag_O=CurGeom)
        CALL PPrint(GM,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
-#ifdef PERIODIC
 !      Calculate the Number of Cells
        CALL SetCellNumber(GM)
-#endif
 !      SET DENSITY THRESHOLDS (LOOSE)
        Del=3.D-1
        TauRho=1.D-3
 !      BUILD RHO-TREE
        CALL RhoToTree(Arg)
        CALL SetBBox(RhoRoot%Box,Box)
-#ifdef PERIODIC
        CALL MakeBoxPeriodic(Box)
-#endif
-!       DETERMINE CUBE GRID (SMART, UNSTRUCTURED GRIDS DONT WORK WITH DX) 
-        Origin=Box%BndBox(:,1)
-        Nx=CEILING((Box%BndBox(1,2)-Box%BndBox(1,1))/Del)
-        Ny=CEILING((Box%BndBox(2,2)-Box%BndBox(2,1))/Del)
-        Nz=CEILING((Box%BndBox(3,2)-Box%BndBox(3,1))/Del)
-!       WRITE DENSITY TO FILE
-        CALL OpenASCII(TrixFile('RhoBader',Arg),66)
+!      DETERMINE CUBE GRID (SMART, UNSTRUCTURED GRIDS DONT WORK WITH DX) 
+       Origin=Box%BndBox(:,1)
+       Nx=CEILING((Box%BndBox(1,2)-Box%BndBox(1,1))/Del)
+       Ny=CEILING((Box%BndBox(2,2)-Box%BndBox(2,1))/Del)
+       Nz=CEILING((Box%BndBox(3,2)-Box%BndBox(3,1))/Del)
+!      WRITE DENSITY TO FILE
+       CALL OpenASCII(TrixFile('RhoBader',Arg),66)
 !        WRITE(66,*)' object 1 class array items ',NX*NY*NZ,' data follows '
-        Zero=0
-        WRITE(66,*)'Title line 1'
-        WRITE(66,*)'Title line 2'
-        WRITE(66,'(1I5,3(3X,1F9.6))') GM%NAtms,origin*AA
-        WRITE(66,'(1I5,3(3X,F9.6)') Nx,del*AA,Zero,Zero
-        WRITE(66,'(1I5,3(3X,F9.6)') Ny,Zero,del*AA,Zero
-        WRITE(66,'(1I5,3(3X,F9.6)') Nz,Zero,Zero,del*AA
+       Zero=0
+       WRITE(66,*)'Title line 1'
+       WRITE(66,*)'Title line 2'
+       WRITE(66,'(1I5,3(3X,1F9.6))') GM%NAtms,origin*AA
+       WRITE(66,'(1I5,3(3X,F9.6)') Nx,del*AA,Zero,Zero
+       WRITE(66,'(1I5,3(3X,F9.6)') Ny,Zero,del*AA,Zero
+       WRITE(66,'(1I5,3(3X,F9.6)') Nz,Zero,Zero,del*AA
 ! Write Cartesian coordinates
-        DO I=1,GM%NAtms
+       DO I=1,GM%NAtms
 !           write(66,'(2F5.0,3F13.5)') INTEGER(GM%AtNum%D(I)),INTEGER(GM%AtMss%D(I)),GM%Carts%D(1:3,I)
-           write(66,'(1I5,4F13.5)') NINT(GM%AtNum%D(I)),GM%AtMss%D(I),GM%Carts%D(1:3,I)
+          write(66,'(1I5,4F13.5)') NINT(GM%AtNum%D(I)),GM%AtMss%D(I),GM%Carts%D(1:3,I)
 !           write(66,*) GM%AtNum%D(I),GM%AtMss%D(I),GM%Carts%D(1:3,I)
-        ENDDO
+       ENDDO
 ! Write out the density in a Gaussian Cube format
-        allocate(BaderRho(nx,ny,nz))
-        DO I=1,Nx    
-           DO J=1,Ny
-              DO K=1,Nz
-#ifdef PERIODIC
-                  Den=Zero
-                  DO NC=1,CS_OUT%NCells
-!                    Set Atomic Coordinates
-                     R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
-                     Den=Den+RhoAtPoint(RhoRoot)
-                  ENDDO
-#else
-                  R=(/I,J,K/)*Del+Origin
-                  Den=RhoAtPoint(RhoRoot)
-#endif
-                  BaderRho(i,j,k)=Den 
+       allocate(BaderRho(nx,ny,nz))
+       DO I=1,Nx    
+          DO J=1,Ny
+             DO K=1,Nz
+                Den=Zero
+                DO NC=1,CS_OUT%NCells
+!                  Set Atomic Coordinates
+                   R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
+                   Den=Den+RhoAtPoint(RhoRoot)
+                ENDDO
+                BaderRho(i,j,k)=Den 
 !                  write(*,*) i,j,k, rho(i,j,k)  
-              ENDDO
-           ENDDO
-        ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
         DO i=1,nx
            DO j=1,ny
 !              Do k=1,nz
@@ -179,10 +168,8 @@ MODULE PotUtil
          USE MondoPoles
          USE TreeWalk
          USE Globals
-#ifdef PERIODIC
          USE PBCFarField
          USE PFFT
-#endif
          TYPE(ARGMT)                     :: Arg
          INTEGER                         :: I,J,K,Nx,Ny,Nz
          REAL(DOUBLE),DIMENSION(3)       :: Origin
@@ -190,10 +177,8 @@ MODULE PotUtil
          REAL(DOUBLE)                    :: NukE,NukeCo,NukePole,PExtent
          REAL(DOUBLE),DIMENSION(1:1)     :: HGBra
          REAL(DOUBLE),DIMENSION(0:0)     :: SPBraC,SPBraS
-#ifdef PERIODIC
          INTEGER                         :: NC
          REAL(DOUBLE),DIMENSION(3)       :: PTmp
-#endif
 !--------------------------------------------------------------
 !        Get the geometry
          CALL Get(GM,Tag_O=CurGeom)
@@ -209,12 +194,10 @@ MODULE PotUtil
          CALL MultipoleSetUp(FFEll2)
 !        Build the global PoleTree representation of the total density
          CALL RhoToPoleTree
-#ifdef PERIODIC
 !        Calculate the Number of Cells
          CALL SetCellNumber(GM)
 !        Set the electrostatic background 
          CALL PBCFarFieldSetUp(PoleRoot)
-#endif
 !        Delete the auxiliary density arrays
          CALL DeleteRhoAux
 !        Delete the Density
@@ -239,7 +222,6 @@ MODULE PotUtil
                   PExtent=Extent(0,NuclearExpnt,HGBra,TauPAC)
 !                 Initialize <KET|
                   CALL SetKet(Prim,PExtent)
-#ifdef PERIODIC
                   PTmp=Prim%P
                   DO NC=1,CS_IN%NCells
 !                    Set Atomic Coordinates
@@ -256,12 +238,7 @@ MODULE PotUtil
                   IF(GM%PBC%Dimen>0) THEN
                      NukE=NukE+CTraxFF(Prim,HGBra)
                   ENDIF
-#else
-!                 Walk the walk
-                  CALL VWalk(PoleRoot)
-!                 Accumulate the atomic contribution
-                  NukE=NukE+HGBra(1)*HGKet(1)+SPBraC(0)*SPKetC(0) 
-#endif
+
                   WRITE(77,7)NukE
                 7 FORMAT(F22.8) 
               ENDDO

@@ -51,28 +51,21 @@ MODULE BaderRhoUtil
         REAL(DOUBLE),POINTER,DIMENSION(:,:)    :: Rcar,Rdir
         REAL(DOUBLE)               :: Den,Zero,Vol,RhoSum
         TYPE(ARGMT)                :: Arg
-#ifdef PERIODIC
         INTEGER                    :: NC
-#endif
         ALLOCATE(BaderRho(Nx,Ny,Nz))
         ALLOCATE(BaderProj(Nx,Ny,Nz))
 !---------------------------------------------------------------------------
-!     Get the geometry
+!       Get the geometry
         CALL Get(GM,Tag_O=CurGeom)
-!       CALL PPrint(GM,TrixFile('xyz',Arg,PWD_O=.TRUE.),Geo,'XYZ')
-#ifdef PERIODIC
 !       Calculate the Number of Cells
         CALL SetCellNumber(GM)
-#endif
-!      SET DENSITY THRESHOLDS (LOOSE)
+!       SET DENSITY THRESHOLDS (LOOSE)
 !       Del=3.D-1
         TauRho=1.D-6
-!      BUILD RHO-TREE
+!       BUILD RHO-TREE
         CALL RhoToTree(Arg)
         CALL SetBBox(RhoRoot%Box,Box)
-#ifdef PERIODIC
         CALL MakeBoxPeriodic(Box)
-#endif
 !       DETERMINE CUBE GRID (SMART, UNSTRUCTURED GRIDS DONT WORK WITH DX) 
         Origin=Box%BndBox(:,1)
         Lattice=0
@@ -82,8 +75,7 @@ MODULE BaderRhoUtil
         Del(1)=(Box%BndBox(1,2)-Box%BndBox(1,1))/Nx
         Del(2)=(Box%BndBox(2,2)-Box%BndBox(2,1))/Ny
         Del(3)=(Box%BndBox(3,2)-Box%BndBox(3,1))/Nz
-
-! Get Cartesian coordinates
+!       Get Cartesian coordinates
         Ndim=GM%NAtms
         ALLOCATE(Rdir(Ndim,3),Rcar(Ndim,3))
         DO I=1,Ndim
@@ -97,9 +89,7 @@ MODULE BaderRhoUtil
           Rdir(I,3)=(Rcar(I,3)-Origin(3)*AA)/Lattice(3,3)
 !          write(*,*) I,Rdir(I,:)
         ENDDO
-
-! Building the density grid
-!       write(*,*)'Building a density grid'
+!       Building the density grid
         write(*,'(1A26)') 'CALCULATING DENSITY GRID'
         Zero=0
         Half=(/0.5,0.5,0.5/)
@@ -112,21 +102,14 @@ MODULE BaderRhoUtil
            END IF
            DO J=1,Ny
               DO K=1,Nz
-#ifdef PERIODIC
-                  Den=Zero
-                  DO NC=1,CS_OUT%NCells
+                 Den=Zero
+                 DO NC=1,CS_OUT%NCells
 !                    Set Atomic Coordinates
-                     R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
-                     Den=Den+RhoAtPoint(RhoRoot)
-                  ENDDO
-#else
-!                  R=((/I,J,K/)-Half)*Del+Origin
-                  R=(/I,J,K/)*Del+Origin
-                  Den=RhoAtPoint(RhoRoot)
-#endif
-
-                  BaderRho(i,j,k)=Den*Vol
-                  RhoSum=RhoSum+Den*Vol
+                    R=(/I,J,K/)*Del+Origin+CS_OUT%CellCarts%D(:,NC)
+                    Den=Den+RhoAtPoint(RhoRoot)
+                 ENDDO
+                 BaderRho(i,j,k)=Den*Vol
+                 RhoSum=RhoSum+Den*Vol
               ENDDO
            ENDDO
         ENDDO

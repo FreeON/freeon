@@ -102,15 +102,11 @@ CONTAINS
 ! Use absolute coordinates
 !
      CALL New(AbsXYZ,(/3,GMLoc%Natms/))
-#ifdef PERIODIC
      IF(GMLoc%PBC%Dimen==0) THEN
        AbsXYZ%D=GMLoc%Carts%D
      ELSE
        AbsXYZ%D=GMLoc%AbCarts%D
      ENDIF
-#else
-       AbsXYZ%D=GMLoc%AbCarts%D
-#endif
 !
 ! Now calculate Lennard-Jones and Coulomb exclusion energies
 ! Please note that all MM charges on the QM positions
@@ -296,7 +292,6 @@ CONTAINS
 !   SUM=SQRT(AngstromsToAu)
 !   LJRad%D=SUM*LJRad%D
 !
-#ifdef PERIODIC
 ! Now, if periodicity is present, generate nearest neighbour images, 
 ! so that they cover the Lennard-Jones range of the central image
 !
@@ -307,10 +302,6 @@ CONTAINS
      CALL SetOneLJCell(GMLoc,AtmMark,LJEps,LJRad, &
        XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
    ENDIF
-#else
-     CALL SetOneLJCell(GMLoc,AtmMark,LJEps,LJRad, &
-       XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
-#endif
 !
      CALL Delete(AtmMark)
      CALL Delete(LJEps)
