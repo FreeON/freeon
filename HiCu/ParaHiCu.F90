@@ -53,11 +53,13 @@ CONTAINS
          3,MPI_DOUBLE_PRECISION,MPI_MIN,MONDO_COMM,IErr)
     CALL MPI_AllReduce(LocalRhoBBox%BndBox(1,2),GRhoBBox%BndBox(1,2),&
          3,MPI_DOUBLE_PRECISION,MPI_MAX,MONDO_COMM,IErr)
+#ifdef PERIODIC
     IF(MyID == 0) THEN
        CALL MakeBoxPeriodic(GRhoBBox)
     ENDIF
     CALL MPI_Bcast(GRhoBBox%BndBox(1,1),3,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
     CALL MPI_Bcast(GRhoBBox%BndBox(1,2),3,MPI_DOUBLE_PRECISION,0,MONDO_COMM,IErr)
+#endif
     GRhoBBoxVol = 1.0D0
     DO I = 1, 3
        GRhoBBoxVol = GRhoBBoxVol*(GRhoBBox%BndBox(I,2)-GRhoBBox%BndBox(I,1))
