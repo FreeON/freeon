@@ -443,11 +443,9 @@ CONTAINS
        ENDIF
        !
        CALL FitXY(VectX%D,VectY%D,RMSErr,FitVal%D(I),PredGrad%D(I),&
-                  A,B,CritFlat,GradCrit,Def_O=IntCs%Def(I))
-       CALL CtrlDispl(IntCs%Def(I),A,B,PredGrad%D(I),FitVal%D(I),&
-                      VectX%D,VectY%D,CritFlat,GradCrit)
-     ! CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
-     !              A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
+                  A,B,CritFlat,GradCrit,IntCs%Def(I))
+    !  CALL PrtFits(I,IntCs,iGEO,NDim,VectX%D,VectY%D,Path, &
+    !               A,B,FitVal%D(I),PredGrad%D(I),IntCs%Def(I))
        !
        IF(IntCs%Def(I)(1:4)=='LINB'.OR. & 
           IntCs%Def(I)(1:4)=='OUTP'.OR. & 
@@ -753,7 +751,7 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE Extrapolate(VectX,VectY,Sig,FitVal,PredGrad, &
-                          AFit,BFit,CritFlat,CritGrad,BigStep)
+                          AFit,BFit,CritFlat,CritGrad,Def)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,Sig
      REAL(DOUBLE)              :: FitVal,A,B,AbDev
      REAL(DOUBLE)              :: Filter,FitValOld,MinY,MaxY,ValY
@@ -761,11 +759,12 @@ CONTAINS
      REAL(DOUBLE)              :: MeanDev,MeanDevOld,MaxDev,MaxDevOld
      REAL(DOUBLE)              :: RMSDev,RMSDevOld
      REAL(DOUBLE)              :: AFit,BFit,CritFlat,CritGrad,MinG,MinG1
-     REAL(DOUBLE)              :: BigStep,Step,StepS,MaxX,MinX
+     REAL(DOUBLE)              :: Step,StepS,MaxX,MinX
      INTEGER                   :: I,J,NDim,NFit,K,MWT
      INTEGER                   :: NFitStart,IStart
      INTEGER                   :: ICount,ICountOld,NBigFit,NFitEnd
      TYPE(DBL_VECT)            :: Devs
+     CHARACTER(LEN=*)          :: Def
      !
      AFit=Zero
      BFit=-1.D99
@@ -779,18 +778,21 @@ CONTAINS
      ! gradients greater than GradCrit
      !
      NFitStart=MIN(3,NDim)
-     NBigFit=NDim
-     DO NFit=NFitStart,NDim    
-       IStart=NDim-NFit+1
-       IF(ABS(VectY(IStart))>CritGrad) THEN
-         NBigFit=NFit
-         EXIT
-       ENDIF
-     ENDDO
-     IF(NBigFit<NDim-1) NBigFit=NBigFit+1
-     NFitStart=NBigFit    
-     NFitEnd=NFitStart+2
+     NFitEnd=MIN(5,NDim)
      IF(NFitEnd>NDim) NFitEnd=NDim
+   ! NFitStart=MIN(3,NDim)
+   ! NBigFit=NDim
+   ! DO NFit=NFitStart,NDim    
+   !   IStart=NDim-NFit+1
+   !   IF(ABS(VectY(IStart))>CritGrad) THEN
+   !     NBigFit=NFit
+   !     EXIT
+   !   ENDIF
+   ! ENDDO
+   ! IF(NBigFit<NDim-1) NBigFit=NBigFit+1
+   ! NFitStart=NBigFit    
+   ! NFitEnd=NFitStart+2
+   ! IF(NFitEnd>NDim) NFitEnd=NDim
      !
      MeanDevOld=1.D99
      MaxDevOld =1.D99
@@ -834,9 +836,13 @@ CONTAINS
            ENDIF
            !
            FitVal=(PredGrad-A)/B
+           CALL CtrlDispl(Def,A,B,PredGrad,FitVal, &
+                VectX(IStart:NDim),VectY(IStart:NDim),CritFlat,CritGrad)
          ELSE
            FitVal=VectX(NDim) !!! no change, see CtrlDispl
            PredGrad=VectY(NDim)
+           CALL CtrlDispl(Def,A,Zero,PredGrad,FitVal, &
+                VectX(IStart:NDim),VectY(IStart:NDim),CritFlat,CritGrad)
          ENDIF
          !
          MeanDevOld=MeanDev
@@ -867,8 +873,6 @@ CONTAINS
      LastVal=VectX(NDim)
      MinX=MINVAL(VectX)
      MaxX=MAXVAL(VectX)
-    !MinY=MINVAL(VectY)
-    !MaxY=MAXVAL(VectY)
      !
      IF(Def(1:4)=='STRE') THEN
        DeltaMax=0.15D0             
@@ -1221,24 +1225,19 @@ CONTAINS
 !---------------------------------------------------------------------
 !
    SUBROUTINE FitXY(VectX,VectY,RMSErr,FitVal,PredGrad,A,B, &
-                    CritFlat,GradCrit,Def_O)
+                    CritFlat,GradCrit,Def)
      REAL(DOUBLE),DIMENSION(:) :: VectX,VectY,RMSErr
      REAL(DOUBLE)              :: FitVal,G1,G2,X1,X2,A,B
      REAL(DOUBLE)              :: PredGrad,CritFlat
      REAL(DOUBLE)              :: MaxX,MinX,MaxY,MinY
-     REAL(DOUBLE)              :: BigStep,Step,Conv,GradCrit
+     REAL(DOUBLE)              :: Step,Conv,GradCrit
      LOGICAL                   :: DoBisect
-     INTEGER                   :: I,J,NMem
-     CHARACTER(LEN=*),OPTIONAL :: Def_O
+     INTEGER                   :: I,J,NMem,IEnd
+     CHARACTER(LEN=*)          :: Def
      !
      A=Zero
      B=Zero
      Conv=PI/180.D0
-     IF(HasAngle(Def_O)) THEN
-       BigStep=10.D0*Conv ! radian
-     ELSE
-       BigStep=0.3D0 ! au 
-     ENDIF
      !
      NMem=SIZE(VectX)
      MaxX=MAXVAL(VectX)
@@ -1249,15 +1248,10 @@ CONTAINS
        RETURN
      ENDIF
      !
-   ! MaxY=MAXVAL(VectY)
-   ! MinY=MINVAL(VectY)
-   ! IF(ABS(MaxY)<0.5D0*GradCrit.AND.ABS(MinY)<0.5D0*GradCrit) THEN
-   !   FitVal=SUM(VectX)/DBLE(NMem)
-   !   PredGrad=Zero
-   ! ENDIF
-     !
      X1=VectX(NMem) ; G1=VectY(NMem) 
-     DO I=NMem-1,1,-1
+   ! IEnd=MAX(NMem-5,1)
+     IEnd=MAX(NMem-1,1)
+     DO I=NMem-1,IEnd,-1
        DoBisect=(VectY(NMem)*VectY(I)<Zero)
        IF(DoBisect) THEN
          X2=VectX(I) ; G2=VectY(I) 
@@ -1274,7 +1268,7 @@ CONTAINS
      ENDDO
      !
      CALL Extrapolate(VectX,VectY,RMSErr,FitVal,PredGrad, &
-                      A,B,CritFlat,GradCrit,BigStep)
+                      A,B,CritFlat,GradCrit,Def)
    END SUBROUTINE FitXY
 !
 !---------------------------------------------------------------------
