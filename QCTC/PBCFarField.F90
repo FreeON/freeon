@@ -30,7 +30,7 @@ MODULE PBCFarField
     SUBROUTINE PBCFarFieldSetUp(FFL,Q)
       INTEGER                         :: FFL,I,J,K,NC,LM
       REAL(DOUBLE),DIMENSION(3)       :: PQ
-      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP,MACDist,PACDist,RMIN,Volume
+      REAL(DOUBLE)                    :: E_PFF,E_DP,E_QP,MACDist,PACDist,RMIN
       REAL(DOUBLE), DIMENSION(0:FFLen):: FarFC,FarFS
       TYPE(PoleNode)                  :: Q
 !
@@ -68,25 +68,22 @@ MODULE PBCFarField
             CellCenter(I) = Q%Box%Center(I)
          ENDIF
       ENDDO
-!
+
 !     Calculate the Box Moments
 !
       CALL RhoToSP(RhoC,RhoS)
 !
 !     Calculate the Dipole and Quadripole Moments
-!  
-      CALL RhoToQ2(Quadripole,Dipole(1),Dipole(2),Dipole(3))
+!    
+      CALL RhoToPoles(Dipole,Quadripole)
 !
 !     Calculate the Size of the Box Needed  for the Direct J and Generate the Cells for the Inner Box
 !
-      CALL BoxBounds(Q,MACDist,PACDist,RMIN)
+      CALL BoxBounds(Q,Dimen,MACDist,PACDist,RMIN)
 !
 !     Calculate the PBC FarField Tensor
 !
-      CALL PFFTensor(RMIN,Volume) 
-!
-!      TensorC = Zero
-!      TensorS = Zero
+      CALL PFFTensor(RMIN) 
 !
 !     Calculate PFF  energy
 !
@@ -126,7 +123,10 @@ MODULE PBCFarField
       WRITE(Out,*) '=========================================================================='
       CLOSE(Out)
 !
-      WRITE(*,*) '==================================Periodic================================'      
+      WRITE(*,*) '==================================Periodic================================'  
+      WRITE(*,*) 'Volume = ',Volume
+      WRITE(*,*) 'DFac   = ',DFac
+      WRITE(*,*) 'QFac   = ',QFac
       WRITE(*,*) 'CellCenterX = ',CellCenter(1)
       WRITE(*,*) 'CellCenterY = ',CellCenter(2)
       WRITE(*,*) 'CellCenterZ = ',CellCenter(3)
@@ -151,18 +151,17 @@ MODULE PBCFarField
       TYPE(PrimPair)                   :: Prim
       INTEGER                          :: LM
       REAL(DOUBLE)                     :: PiZ,CTraxFF
-      REAL(DOUBLE), DIMENSION(3)       :: PQ
+      REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole
       REAL(DOUBLE), DIMENSION(1:)      :: HGBra
       REAL(DOUBLE), DIMENSION(0:FFLen) :: SPBraC,SPBraS,SPKetC,SPKetS,FarFC,FarFS
 !
       CTraxFF = Zero
-!      IF(.TRUE.) RETURN
 !
 !     Transform <Bra| coefficients from HG to SP
 !
       PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
       CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,SPBraC,SPBraS)   
-      PQ = CellCenter-Prim%P
+      PQ = -Prim%P+CellCenter
 !
       IF(.NOT. NoTranslate(PQ)) THEN
          SPKetC = Zero
@@ -186,16 +185,8 @@ MODULE PBCFarField
 !
 !     INCLUDE THE DIPOLE correction to FarFC and FarFS
 !
-      SELECT CASE(Prim%Ell)
-      CASE (0)
-         CTraxFF = CTraxFF + (-PiZ*HGBra(1)*PQ(1))*(DFAC*Dipole(1)) &
-                           + (-PiZ*HGBra(1)*PQ(2))*(DFAC*Dipole(2)) &
-                           + (-PiZ*HGBra(1)*PQ(3))*(DFAC*Dipole(3))
-      CASE(1:)
-         CTraxFF = CTraxFF + (-PiZ*HGBra(1)*PQ(1)+PiZ*HGBra(2))*(DFAC*Dipole(1)) &
-                           + (-PiZ*HGBra(1)*PQ(2)+PiZ*HGBra(3))*(DFAC*Dipole(2)) &
-                           + (-PiZ*HGBra(1)*PQ(3)+PiZ*HGBra(4))*(DFAC*Dipole(3))
-      END SELECT
+      HGDipole = CalculateDiPole(Prim%Ell,PiZ,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
+      CTraxFF  = CTraxFF + DFAC*(Dipole(1)*HGDipole(1)+Dipole(2)*HGDipole(2)+Dipole(3)*HGDipole(3))  
 !
 !     INCLUDE THE QUADRIPOLE correction 
 !
@@ -205,19 +196,18 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate Quadripole = Q(2,0,0)+Q(0,2,0)+Q(0,0,2) of the local density
 !========================================================================================
-    SUBROUTINE RhoToQ2(Q2,DX,DY,DZ)
-      INTEGER                  :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
-      REAL(DOUBLE)             :: Q2,RX,RY,RZ,R2,Expt,PiExpt,Expt75,DX,DY,DZ,SUM
+    SUBROUTINE RhoToPoles(Dip,Q2)
+      INTEGER                   :: zq,iq,iadd,jadd,NQ,OffQ,OffR,LQ,LenQ
+      REAL(DOUBLE)              :: RX,RY,RZ,R2,Expt,PiExpt
+      REAL(DOUBLE)              :: Q2
+      REAL(DOUBLE),DIMENSION(3) :: Dip
 !
-      Q2 = Zero
-      DX = Zero
-      DY = Zero
-      DZ = Zero
+      Q2  = Zero
+      Dip = Zero
       DO zq=1,Rho%NExpt
          NQ     = Rho%NQ%I(zq)
          Expt   = Rho%Expt%D(zq)
          PiExpt = (Pi/Expt)**(threehalves)
-         Expt75 = 0.75D0/Expt
          OffQ   = Rho%OffQ%I(zq)
          OffR   = Rho%OffR%I(zq)
          LQ     = Rho%Lndx%I(zq) 
@@ -229,37 +219,59 @@ MODULE PBCFarField
                RX   = Rho%Qx%D(iadd)-CellCenter(1)
                RY   = Rho%Qy%D(iadd)-CellCenter(2)
                RZ   = Rho%Qz%D(iadd)-CellCenter(3)
-               R2   = Half*(RX*RX+RY*RY+RZ*RZ)+Expt75
 !
-               SELECT CASE(LQ)
-               CASE (0)
-                  Q2 = Q2 + PiExpt*(Rho%Co%D(jadd)*R2)
-!
-                  DX = DX + PiExpt*(Rho%Co%D(jadd)*RX)
-                  DY = DY + PiExpt*(Rho%Co%D(jadd)*RY)
-                  DZ = DZ + PiExpt*(Rho%Co%D(jadd)*RZ)
-               CASE(1)
-                  Q2 = Q2+ PiExpt*(Rho%Co%D(jadd)*R2 + &
-                       RX*Rho%Co%D(jadd+1) + RY*Rho%Co%D(jadd+2) + RZ*Rho%Co%D(jadd+3))
-!
-                  DX = DX + PiExpt*(Rho%Co%D(jadd)*RX+Rho%Co%D(jadd+1))
-                  DY = DY + PiExpt*(Rho%Co%D(jadd)*RY+Rho%Co%D(jadd+2))
-                  DZ = DZ + PiExpt*(Rho%Co%D(jadd)*RZ+Rho%Co%D(jadd+3))
-               CASE(2:)
-                  Q2 = Q2+ PiExpt*(Rho%Co%D(jadd)*R2 + &
-                       RX*Rho%Co%D(jadd+1) + RY*Rho%Co%D(jadd+2) + RZ*Rho%Co%D(jadd+3) + &
-                       Rho%Co%D(jadd+4) + Rho%Co%D(jadd+6) + Rho%Co%D(jadd+9))
-!
-                  DX = DX + PiExpt*(Rho%Co%D(jadd)*RX+Rho%Co%D(jadd+1))
-                  DY = DY + PiExpt*(Rho%Co%D(jadd)*RY+Rho%Co%D(jadd+2))
-                  DZ = DZ + PiExpt*(Rho%Co%D(jadd)*RZ+Rho%Co%D(jadd+3))
-               END SELECT
+               Dip = Dip + CalculateDiPole(LQ,PiExpt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1))
+               Q2  = Q2  + CalculateQuPole(LQ,Expt,PiExpt,RX,RY,RZ,Rho%Co%D(jadd:jadd+LenQ+1)) 
 !
             ENDDO
          ENDIF
       ENDDO
 !
-    END SUBROUTINE RhoToQ2  
+    END SUBROUTINE RhoToPoles
+!========================================================================================
+!
+!========================================================================================
+    FUNCTION CalculateDiPole(LQ,PiExpt,RX,RY,RZ,Coef)
+      INTEGER                   :: LQ
+      REAL(DOUBLE)              :: RX,RY,RZ,PiExpt
+      REAL(DOUBLE),DIMENSION(3) :: CalculateDiPole
+      REAL(DOUBLE),DIMENSION(:) :: Coef
+!
+      SELECT CASE(LQ)
+      CASE (0)
+         CalculateDiPole(1) = -PiExpt*Coef(1)*RX
+         CalculateDiPole(2) = -PiExpt*Coef(1)*RY
+         CalculateDiPole(3) = -PiExpt*Coef(1)*RZ
+      CASE(1:)
+         CalculateDiPole(1) = -PiExpt*(Coef(2)+Coef(1)*RX)
+         CalculateDiPole(2) = -PiExpt*(Coef(3)+Coef(1)*RY)
+         CalculateDiPole(3) = -PiExpt*(Coef(4)+Coef(1)*RZ)
+      END SELECT
+!
+    END FUNCTION CalculateDiPole
+!========================================================================================
+!
+!========================================================================================
+    FUNCTION CalculateQuPole(LQ,Expt,PiExpt,RX,RY,RZ,Coef)
+      INTEGER                   :: LQ
+      REAL(DOUBLE)              :: R2,RX,RY,RZ,PiExpt,Expt
+      REAL(DOUBLE)              :: CalculateQuPole
+      REAL(DOUBLE),DIMENSION(:) :: Coef
+!
+      R2 = Half/Expt + RX*RX + RY*RY + RZ*RZ 
+      SELECT CASE(LQ)
+      CASE (0)
+         CalculateQuPole = PiExpt*Coef(1)*R2
+      CASE(1)
+         CalculateQuPole = PiExpt*(Coef(1)*R2 +                                         &
+                                   Two*Coef(2)*RX + Two*Coef(3)*RY + Two*Coef(4)*RZ)
+      CASE(2:)
+         CalculateQuPole = PiExpt*(Coef(1)*R2 +                                         &
+                                   Two*Coef(2)*RX + Two*Coef(3)*RY + Two*Coef(4)*RZ +   &
+                                   Two*Coef(5)    + Two*Coef(7)    + Two*Coef(10))
+      END SELECT
+!  
+    END FUNCTION CalculateQuPole
 !========================================================================================
 ! Calculate the SP Moments of Rho_Loc
 !========================================================================================
@@ -312,24 +324,26 @@ MODULE PBCFarField
 !========================================================================================
 ! Calculate the Box Bounds Needed for the Direct Sum
 !========================================================================================
-  SUBROUTINE BoxBounds(Q,MACDist,PACDist,Radius) 
-    INTEGER                          :: I,J,K,LP
+  SUBROUTINE BoxBounds(Q,Dimen,MACDist,PACDist,Radius) 
+    INTEGER                          :: I,J,K,LP,Dimen
+    INTEGER                          :: IRmin,IRmax
     TYPE(PoleNode)                   :: Q
     REAL(DOUBLE)                     :: Px,Py,Pz,O_LP,O_FFEll,NFac,Dist,MACDist,PACDist
     REAL(DOUBLE)                     :: Radd,Radius,A0,B0,C0
 !
-!   Largest distance from box center to corner
-!
-    A0 = Zero
-    B0 = Zero
-    C0 = Zero
-    DO I=1,3
-       A0 = A0 + 0.25D0*(GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)+GM%BoxShape%D(I,3))**2
-       B0 = B0 + 0.25D0*(GM%BoxShape%D(I,1)+GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
-       C0 = C0 + 0.25D0*(GM%BoxShape%D(I,1)-GM%BoxShape%D(I,2)-GM%BoxShape%D(I,3))**2
-    ENDDO
-    Radd = MAX(SQRT(A0),SQRT(B0))
-    Radd = MAX(Radd,SQRT(C0))
+    IF(Dimen==0) THEN
+       IRmin = 0
+       IRMax = 2
+    ELSEIF(Dimen==1) THEN
+       IRmin = 1
+       IRMax = 10
+    ELSEIF(Dimen==2) THEN
+       IRmin = 7
+       IRMax = 100
+    ELSEIF(Dimen==3) THEN
+       IRmin = 26
+       IRMax = 1000
+    ENDIF
 !
 !   PAC Distance (From PoleRoot)
 !
@@ -342,30 +356,31 @@ MODULE PBCFarField
 !
     MACDist = Zero
     DO LP=0,BS%NASym 
-       O_LP     = UnsoldO(LP,RhoC,RhoS)/(UnsoldO(0,RhoC,RhoS)*Thresholds%TwoE)
+       O_LP     = UnsoldO(LP,RhoC,RhoS)/(Thresholds%TwoE)
        O_FFELL  = UnsoldO(FFEll,RhoC,RhoS)
        NFac     = FudgeFactorial(LP,FFELL)
        Dist     = (O_LP*NFac*O_FFEll)**(One/DBLE(FFEll+LP+2))
        MACDist = MAX(MACDist,Dist)
     ENDDO
-    MACDist = MACDist+Radd
+    MACDist = MACDist
 !
 !   Generate the Cells for the Inner Box
 !  
-    Radius = MAX(PACDist,MACDist)
+    Radius = PACDist+MACDist
     CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
     DO 
-       IF(CSMM1%NCells .LT. 1000) THEN
+       IF(CSMM1%NCells .LT. IRmax) THEN
           EXIT
        ELSE
           Radius = 0.99*Radius
           CALL Delete_CellSet(CSMM1)
           CALL New_CellSet_Sphere(CSMM1,GM%AutoW,GM%BoxShape%D,Radius)
        ENDIF
+       WRITE(*,*) Radius,CSMM1%NCells
     ENDDO
 !
     DO 
-       IF(CSMM1%NCells .GT. 26) THEN
+       IF(CSMM1%NCells .GT. IRmin) THEN
           EXIT
        ELSE
           Radius = 1.01*Radius
