@@ -1,7 +1,7 @@
 !    COMPUTE THE EXCHANGE CORRELATION MATRIX $K_{xc}$ IN O(N)
 !    USING HIERARCHICAL CUBATURE INVOLVING K-D BINARY TREES
 !    Author: Matt Challacombe
-!------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
 MODULE KxcGen
   USE DerivedTypes
   USE GlobalScalars   
@@ -16,93 +16,136 @@ MODULE KxcGen
   USE BraBloks
   USE CubeTree 
   USE TreeWalk
-  IMPLICIT NONE
-!----------!
-  CONTAINS !
-!=============================================================================================
-!
-!=============================================================================================
-    SUBROUTINE MakeKxc(Kxc,CubeRoot)
-      TYPE(BCSR)             :: Kxc
-      TYPE(CubeNode),POINTER :: CubeRoot
-!
-      TYPE(DBL_RNK2)         :: Temp
-      TYPE(AtomPair)         :: Pair
-      INTEGER                :: AtA,AtB
-      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
-#ifdef PERIODIC        
-      INTEGER                   :: NCA,NCB
-      REAL(DOUBLE),DIMENSION(3) :: A,B
-#endif     
-!---------------------------------------------- 
-!     Initialize the matrix and associated indecies
-      P=1; 
-      R=1; 
-      Kxc%RowPt%I(1)=1
-      CALL SetEq(Kxc%MTrix,Zero)
-!     Loop over atom pairs
-      Kxc%NAtms=NAtoms
-      DO AtA=1,NAtoms
-         DO AtB=1,NAtoms
-            IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
-               NAB = Pair%NA*Pair%NB
-               IF(AtB<=AtA)THEN
-!              Compute only the lower triangle of symmetric Kxc
-#ifdef PERIODIC
-                  A = Pair%A
-                  B = Pair%B
-                  DO NCA = 1,CS_OUT%NCells
-                     Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
-                     DO NCB = 1,CS_OUT%NCells
-                        Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
-                        Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
-                                  + (Pair%A(2)-Pair%B(2))**2 &
-                                  + (Pair%A(3)-Pair%B(3))**2
-                        IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
-!                        IF(TestAtomPair(Pair)) THEN
-                           Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
-                        ENDIF
-                     ENDDO
-                  ENDDO
-#else
-                  Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
+#ifdef PARALLEL_DEVELOPMENT
+  USE FastMatrices
 #endif
-               ENDIF
-               Kxc%ColPt%I(P)=AtB
-               Kxc%BlkPt%I(P)=R
-               R=R+NAB
-               P=P+1 
-               Kxc%RowPt%I(AtA+1)=P        
-               IF(R>MaxNon0.OR.P>MaxBlks) &
-                  CALL Halt(' BCSR dimensions blown in Kxc ')
-            ENDIF
-         ENDDO
+  IMPLICIT NONE
+!-------------------------------------------------------------------------------!
+  CONTAINS !
+!===============================================================================
+
+!===============================================================================
+  SUBROUTINE MakeKxc(Kxc,CubeRoot)
+#ifdef PARALLEL_DEVELOPMENT
+    TYPE(FastMat),POINTER  :: Kxc
+#else
+    TYPE(BCSR)             :: Kxc
+#endif
+    TYPE(CubeNode),POINTER :: CubeRoot
+
+    TYPE(DBL_RNK2)         :: Temp
+    TYPE(AtomPair)         :: Pair
+    INTEGER                :: AtA,AtB
+    INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I,J
+#ifdef PERIODIC        
+    INTEGER                   :: NCA,NCB
+    REAL(DOUBLE),DIMENSION(3) :: A,B
+#endif     
+!------------------------------------------------------------------------------- 
+!   Initialize the matrix and associated indecies
+#ifdef PARALLEL_DEVELOPMENT
+#else
+    P=1; 
+    R=1; 
+    Kxc%RowPt%I(1)=1
+    CALL SetEq(Kxc%MTrix,Zero)
+    Kxc%NAtms=NAtoms
+#endif
+!   Loop over atom pairs
+    DO AtA=1,NAtoms
+      DO AtB=1,NAtoms
+        IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
+          NAB = Pair%NA*Pair%NB
+#ifndef PARALLEL
+          IF(AtB<=AtA)THEN
+#endif
+!         Compute only the lower triangle of symmetric Kxc
+#ifdef PERIODIC
+            A = Pair%A
+            B = Pair%B
+            DO NCA = 1,CS_OUT%NCells
+              Pair%A = A+CS_OUT%CellCarts%D(:,NCA)
+              DO NCB = 1,CS_OUT%NCells
+                Pair%B = B+CS_OUT%CellCarts%D(:,NCB)
+                Pair%AB2  = (Pair%A(1)-Pair%B(1))**2 &
+                            + (Pair%A(2)-Pair%B(2))**2 &
+                            + (Pair%A(3)-Pair%B(3))**2
+                IF(TestAtomPair(Pair,CubeRoot%Box)) THEN
+#ifdef PARALLEL_DEVELOPMENT
+                  CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+#else
+                  Kxc%MTrix%D(R:R+NAB-1)=Kxc%MTrix%D(R:R+NAB-1)+KxcBlock(Pair,CubeRoot)
+#endif
+                ENDIF
+              ENDDO
+            ENDDO
+#else
+#ifdef PARALLEL_DEVELOPMENT
+            CALL AddFASTMATBlok(Kxc,AtA,AtB,KxcBlock(Pair,CubeRoot))
+#else
+            Kxc%MTrix%D(R:R+NAB-1)=KxcBlock(Pair,CubeRoot)
+#endif
+#endif
+#ifndef PARALLEL
+          ENDIF
+#endif
+
+!! the logic here strictly follows MakeS
+#ifdef PARALLEL_DEVELOPMENT
+#else
+          Kxc%ColPt%I(P)=AtB
+          Kxc%BlkPt%I(P)=R
+          R=R+NAB
+          P=P+1 
+#ifdef PARALLEL
+          Kxc%RowPt%I(Kxc%NAtms+1) = P
+          IF(R > MaxNon0Node .OR. P > MaxBlksNode) THEN
+            WRITE(*,*)' MyId = ',MyId,MaxBlksNode,MaxNon0Node
+            WRITE(*,*)' MyId = ',MyId,' P = ',P,' R = ',R
+            CALL Halt(' DBCSR dimensions blown in MakeKxc ')
+          ENDIF
+#else
+          Kxc%RowPt%I(AtA+1)=P        
+          IF(R>MaxNon0.OR.P>MaxBlks) &
+            CALL Halt(' BCSR dimensions blown in Kxc ')
+#endif
+#endif
+        ENDIF
       ENDDO
-      Kxc%NBlks=P-1
-      Kxc%NNon0=R-1
-!     Fill the upper triangle of Kxc
-      DO I=1,NAtoms
-         DO JP=Kxc%RowPt%I(I),Kxc%RowPt%I(I+1)-1
-            J=Kxc%ColPt%I(JP)
-            IF(I>J)THEN
-               DO K=Kxc%RowPt%I(J),Kxc%RowPt%I(J+1)-1
-                  IF(Kxc%ColPt%I(K)==I)THEN
-                     Q=Kxc%BlkPt%I(K)                     
-                     EXIT
-                  ENDIF
-               ENDDO               
-               P=Kxc%BlkPt%I(JP)
-               NA=BS%BFKnd%I(GM%AtTyp%I(I))
-               NB=BS%BFKnd%I(GM%AtTyp%I(J))
-               NAB=NA*NB
-               CALL XPose(NA,NB,Kxc%MTrix%D(P:P+NAB-1),Kxc%MTrix%D(Q:Q+NAB-1))
-            ENDIF
-         ENDDO
+    ENDDO
+
+#ifdef PARALLEL_DEVELOPMENT
+#else
+    Kxc%NBlks=P-1
+    Kxc%NNon0=R-1
+#endif
+
+#ifdef PARALLEL_DEVELOPMENT
+#else
+!   Fill the upper triangle of Kxc
+    DO I=1,NAtoms
+      DO JP=Kxc%RowPt%I(I),Kxc%RowPt%I(I+1)-1
+        J=Kxc%ColPt%I(JP)
+        IF(I>J)THEN
+          DO K=Kxc%RowPt%I(J),Kxc%RowPt%I(J+1)-1
+            IF(Kxc%ColPt%I(K)==I)THEN
+              Q=Kxc%BlkPt%I(K)                     
+              EXIT
+             ENDIF
+           ENDDO               
+           P=Kxc%BlkPt%I(JP)
+           NA=BS%BFKnd%I(GM%AtTyp%I(I))
+           NB=BS%BFKnd%I(GM%AtTyp%I(J))
+           NAB=NA*NB
+           CALL XPose(NA,NB,Kxc%MTrix%D(P:P+NAB-1),Kxc%MTrix%D(Q:Q+NAB-1))
+        ENDIF
       ENDDO
-    END SUBROUTINE MakeKxc
-!=============================================================================================
-!
-!=============================================================================================
+    ENDDO
+#endif
+  END SUBROUTINE MakeKxc
+!===============================================================================
+
+!===============================================================================
      SUBROUTINE XPose(M,N,A,AT)
        INTEGER                      :: I,J,M,N,IDex,JDex
        REAL(DOUBLE), DIMENSION(M*N) :: A,AT
@@ -114,15 +157,23 @@ MODULE KxcGen
           ENDDO
        ENDDO
      END SUBROUTINE XPose
-!=======================================================================================
-!
-!=======================================================================================
+!===============================================================================
+
+!===============================================================================
+#ifdef PARALLEL_DEVELOPMENT
+     FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kblk)
+#else
      FUNCTION KxcBlock(Pair,CubeRoot) RESULT(Kvct)
+#endif
        TYPE(AtomPair)                           :: Pair
        TYPE(CubeNode), POINTER                  :: CubeRoot
-!
+
        REAL(DOUBLE),DIMENSION(Pair%NA,Pair%NB)  :: Kblk
+#ifdef PARALLEL_DEVELOPMENT
+#else
        REAL(DOUBLE),DIMENSION(Pair%NA*Pair%NB)  :: Kvct
+#endif
+
        REAL(DOUBLE)                             :: ZetaA,ZetaB,EtaAB,EtaIn,    &
                                                    XiAB,ExpAB,CA,CB,CC,Ov,     &
                                                    PAx,PAy,PAz,PBx,PBy,PBz,    &
@@ -135,17 +186,17 @@ MODULE KxcGen
                                                    LMNA,LMNB,LA,LB,MA,MB,    &
                                                    NA,NB,LAB,MAB,NAB,LMN,EllA,EllB
 real(double):: Pextent_Old
-!-------------------------------------------------------------------------------------- 
+!-------------------------------------------------------------------------------
        KBlk=Zero
        KA=Pair%KA
        KB=Pair%KB
-!----------------------------------
+!-------------------------------------------------------------------------------
        Prim%A=Pair%A
        Prim%B=Pair%B
        Prim%AB2=Pair%AB2
        Prim%KA=Pair%KA
        Prim%KB=Pair%KB
-!----------------------------------
+!-------------------------------------------------------------------------------
        IndexA=0                  
        DO CFA=1,BS%NCFnc%I(KA)    
        DO CFB=1,BS%NCFnc%I(KB) 
@@ -157,14 +208,14 @@ real(double):: Pextent_Old
           StopLB  = BS%LStop%I(CFB,KB)
           MaxLA   = BS%ASymm%I(2,CFA,KA)
           MaxLB   = BS%ASymm%I(2,CFB,KB)
-!----------------------------------
+!-------------------------------------------------------------------------------
           Prim%CFA=CFA
           Prim%CFB=CFB
           Prim%Ell=MaxLA+MaxLB
-!-------------------------------------
+!-------------------------------------------------------------------------------
           DO PFA=1,BS%NPFnc%I(CFA,KA)          
           DO PFB=1,BS%NPFnc%I(CFB,KB)
-!-------------------------------------
+!-------------------------------------------------------------------------------
              Prim%ZA=BS%Expnt%D(PFA,CFA,KA)
              Prim%ZB=BS%Expnt%D(PFB,CFB,KB)
              Prim%Zeta=Prim%ZA+Prim%ZB
@@ -224,15 +275,18 @@ real(double):: Pextent_Old
                       ENDDO
                    ENDDO
                 ENDIF
-!---------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
              ENDIF
           ENDDO 
           ENDDO
        ENDDO
        ENDDO
+#ifdef PARALLEL_DEVELOPMENT
+#else
        Kvct=BlockToVect(Pair%NA,Pair%NB,Kblk)
+#endif
      END FUNCTION KxcBlock
-!====================================================================================================
-!
-!====================================================================================================
+!===============================================================================
+
+!===============================================================================
 END MODULE KxcGen

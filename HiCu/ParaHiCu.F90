@@ -31,6 +31,7 @@ MODULE ParallelHiCu
   TYPE(DBL_VECT)::TmNode            ! the array to stor VolTm
   REAL(DOUBLE)::BoxPoint(6)
   INTEGER,PARAMETER::LCoor_T=26,RCoor_T=27,Time_T=28,LeavesTm_T=29
+  REAL(DOUBLE)::TotExc
    
 !===============================================================================
   CONTAINS
@@ -38,14 +39,25 @@ MODULE ParallelHiCu
 
   SUBROUTINE GetBBox()
     LOGICAL::Exist
+    INTEGER::Power2(0:31),SmallN,PIndex,CIndex,Stage,DirInt,I,J
+    REAL(DOUBLE)::x2,LinDim
+    
 
     NVol = NPrc
-    WRITE(*,*) 'MyID = ', MyID, ', NVol = ', NVol
+    ! WRITE(*,*) 'MyID = ', MyID, ', NVol = ', NVol
     CALL New(LCoor,(/3,NVol/))
     CALL New(RCoor,(/3,NVol/))
+
+#undef USE_BEGEND
+
+#ifdef USE_BEGEND
     INQUIRE(FILE='BegEnd.dat',EXIST=Exist)
+#else
+    INQUIRE(FILE='LineLoc.dat',EXIST=Exist)
+#endif
 
     IF(Exist) THEN
+#ifdef USE_BEGEND
       IF(MyID == 0) THEN
         WRITE(*,*) 'BegEnd.dat exists. It is going to be opened..'
         OPEN(UNIT=53,FILE='BegEnd.dat',FORM='formatted',Status='unknown')
@@ -58,6 +70,64 @@ MODULE ParallelHiCu
         READ(53,*) RCoor%D(1:3,1:NVol)
         CLOSE(53)
       ENDIF
+#else
+      IF(MyID == 0) THEN
+        WRITE(*,*) 'LineLoc.dat exists. It is going to be opened..'
+        OPEN(UNIT=53,FILE='DirInt.dat',FORM='formatted',Status='unknown')
+        OPEN(UNIT=54,FILE='LineLoc.dat',FORM='formatted',Status='unknown')
+        READ(54,*) NVol
+        IF(NVol /= NPrc) THEN
+          WRITE(*,*) 'NVol = ',NVol, ',  NPrc = ',NPrc
+          STOP 'ERROR: LineLoc.dat -- NVol is not equal to NPrc!'
+        ENDIF
+        READ(54,*) LCoor%D(1:3,1)
+        READ(54,*) RCoor%D(1:3,1)
+
+#define UseRhoBox
+#ifdef UseRhoBox
+        LCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,1)
+        RCoor%D(1:3,1) = RhoRoot%Box%BndBox(1:3,2)
+#endif
+
+        Power2(0) = 1
+        DO I = 1, 31
+          Power2(I) = Power2(I-1)*2
+        ENDDO
+        SmallN = NInt( Log(NVol*1.0D0)/Log(2.0D0) )
+        IF(NVol /= Power2(SmallN) ) THEN
+          WRITE(*,*) 'NVol is ', NVol
+          WRITE(*,*) 'NVol is not a power of 2!'
+          STOP
+        ENDIF
+
+        DO Stage = 1, SmallN
+          DO PIndex = 1, Power2(Stage-1)
+            CIndex = PIndex + Power2(Stage-1)
+            LCoor%D(1:3,CIndex) = LCoor%D(1:3,PIndex)
+            RCoor%D(1:3,CIndex) = RCoor%D(1:3,PIndex)
+
+            READ(53,*) DirInt
+            READ(54,*) DirInt
+            READ(54,*) x2
+            RCoor%D(DirInt,PIndex) = x2
+            LCoor%D(DirInt,CIndex) = x2
+          ENDDO
+        ENDDO
+
+        !! check the volumes' dimensions are positive.
+        DO I = 1, NVol
+          DO J = 1, 3
+            LinDim = RCoor%D(J,I)-LCoor%D(J,I)
+            IF(LinDim <= 0) THEN
+              WRITE(*,*) 'ERROR: Volume assignment. LinDim is not positive!'
+              STOP
+            ENDIF
+          ENDDO
+        ENDDO
+        CLOSE(53)
+        CLOSE(54)
+      ENDIF
+#endif
     ELSE
       ! assign the first box
       IF(MyID == 0) THEN
@@ -93,9 +163,13 @@ MODULE ParallelHiCu
 !===============================================================================
   SUBROUTINE WorkBBox(Kxc)
     TYPE(BBox) :: WBox
-    REAL(DOUBLE)::TotRho,TotExc,SubVolRho,SubVolExc
+    REAL(DOUBLE)::TotRho,SubVolRho,SubVolExc
     REAL(DOUBLE)::TmBegM,TmEndM
-    TYPE(BCSR):: Kxc
+#ifdef PARALLEL_DEVELOPMENT
+    TYPE(FastMat),POINTER  :: Kxc
+#else
+    TYPE(BCSR)             :: Kxc
+#endif
     
     WBox%BndBox(1:3,1) = LCoor%D(1:3,1)
     WBox%BndBox(1:3,2) = RCoor%D(1:3,1)
@@ -143,8 +217,10 @@ MODULE ParallelHiCu
     INTEGER::SmallN,I,J,Ierr,RootFindIter,Stage,PIndex,CIndex,DirInt
     REAL(DOUBLE)::x0,x1,f0,f1,x2,f2,oldf2,LinDim,MaxDim,OldVol,ThisVol,&
       AbsSum,LocalLeavesTm,LeavesTmInside,OrigLeafTm,NewVol
-    REAL(DOUBLE)::Power2(0:31)
+    INTEGER::Power2(0:31)
     REAL(DOUBLE),PARAMETER::RootTau=1.0D-4
+    REAL(DOUBLE)::StartTm,EndTm,TotTm
+    StartTm = MPI_Wtime()
 
     CALL New(RepLCoor,(/3,NVol/))
     CALL New(RepRCoor,(/3,NVol/))
@@ -174,8 +250,12 @@ MODULE ParallelHiCu
       ENDIF
   
       OPEN(unit=53,FILE='DirInt.dat',form='formatted',status='unknown')
+      OPEN(unit=54,FILE='LineLoc.dat',form='formatted',status='unknown')
+      WRITE(54,*) NVol
+      WRITE(54,*) RepLCoor%D(1:3,1)
+      WRITE(54,*) RepRCoor%D(1:3,1)
       DO Stage = 1, SmallN
-        WRITE(*,*) 'Stage = ',Stage
+        !! WRITE(*,*) 'Stage = ',Stage
         DO PIndex = 1, Power2(Stage-1)
           CIndex = PIndex + Power2(Stage-1)
           !! copy the coordinates to the child box
@@ -193,6 +273,7 @@ MODULE ParallelHiCu
             ENDIF
           ENDDO
           WRITE(53,*) DirInt
+          WRITE(54,*) DirInt
   
           OrigLeafTm = RepLeavesTm%D(PIndex)
           x0 = RepLCoor%D(DirInt,PIndex)
@@ -223,13 +304,14 @@ MODULE ParallelHiCu
             IF(ABS(f2) < RootTau .OR. ABS(f2-oldf2) < 1.0D-5) THEN
               ! RepRCoor%D(1:3,PIndex) has been defined
               WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
+              WRITE(54,*) x2
               RepLCoor%D(DirInt,CIndex) = x2
               RepLeavesTm%D(PIndex) = LeavesTmInside
               RepLeavesTm%D(CIndex) = OrigLeafTm - LeavesTmInside
               EXIT
             ELSE
               !! convergence not achieved, going to the next iteration
-              WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
+              ! WRITE(*,*) 'RootFindIter = ',RootFindIter,', f2 = ',f2
               IF(f2*f1 < 0.0D0) THEN
                 x0 = x1; f0 = f1
                 x1 = x2; f1 = f2
@@ -273,7 +355,7 @@ MODULE ParallelHiCu
         NewVol = NewVol + ThisVol
       ENDDO
       WRITE(*,*) 'OldVol = ',OldVol, ', NewVol = ', NewVol
-      WRITE(*,*) 'ABS(DIFF) = ',ABS(NewVol-OldVol)
+      WRITE(*,*) 'DIFF = ',NewVol-OldVol
       ! WRITE to a file: unit=53 is used.
       open(unit=53,file='BegEnd.dat',form='formatted',status='unknown')
       WRITE(53,*) NVol
@@ -309,6 +391,11 @@ MODULE ParallelHiCu
     CALL Delete(RepLCoor)
     CALL Delete(RepRCoor)
     CALL Delete(RepLeavesTm)
+    EndTm = MPI_Wtime()
+    TotTm = EndTm - StartTm
+    IF(MyID == 0) THEN
+      WRITE(*,*) 'Time to repartition the total volume is ',TotTm
+    ENDIF
   END SUBROUTINE RepartitionVol
   
 !===============================================================================

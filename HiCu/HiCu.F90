@@ -25,9 +25,17 @@ PROGRAM HaiKu
 #ifdef PARALLEL 
   USE ParallelHiCu
 #endif
+#ifdef PARALLEL_DEVELOPMENT
+  USE FastMatrices
+#endif
   IMPLICIT NONE
   TYPE(ARGMT)                 :: Args
-  TYPE(BCSR)                  :: Kxc,T1
+#ifdef PARALLEL_DEVELOPMENT
+  TYPE(FastMat),POINTER       :: Kxc
+#else
+  TYPE(BCSR)                  :: Kxc
+#endif
+  TYPE(BCSR)                  :: T1
   TYPE(TIME)                  :: TimeRhoToGrid,TimeGridToMat
   REAL(DOUBLE)                :: Electrons
   CHARACTER(LEN=3)            :: SCFCycle
@@ -59,7 +67,11 @@ PROGRAM HaiKu
   CALL RhoToTree(Args)
 
 ! CALL New(Kxc)
+#ifdef PARALLEL_DEVELOPMENT
+  CALL New_FASTMAT(Kxc,0,(/0,0/))
+#else
   CALL NewBCSR(Kxc)
+#endif
 
   CALL NewBraBlok(BS)
 
@@ -97,26 +109,52 @@ PROGRAM HaiKu
 
 #endif
 
+
 ! Delete the RhoTree
   CALL DeleteRhoTree(RhoRoot)
   CALL DeleteBraBlok()
+
 ! Put Kxc to disk
+
+#ifdef PARALLEL_DEVELOPMENT
+  CALL Redistribute_FASTMAT(Kxc)
+  CALL AlignNodes()
+  CALL Set_BCSR_EQ_DFASTMAT(T1,Kxc)
+#else
   CALL Filter(T1,Kxc)
+#endif
+
+#ifdef PARALLEL_DEVELOPMENT
+  CALL Put(T1,TrixFile('Kxc',Args,0))
+#else
   CALL Put(Kxc,TrixFile('Kxc',Args,0))
+#endif
+
+
 ! Put Exc to Info
+#ifdef PARALLEL
+  IF(MyID == 0) THEN
+    CALL Put(TotExc,'Exc',Tag_O=SCFCycl)
+  ENDIF
+#else
   CALL Put(Exc,'Exc',Tag_O=SCFCycl)
+#endif
+
 ! Printing
   CALL PChkSum(T1,'Kxc['//TRIM(SCFCycl)//']',Prog)
   CALL PPrint( T1,'Kxc['//TRIM(SCFCycl)//']')
   CALL Plot(   T1,'Kxc['//TRIM(SCFCycl)//']')
-! Tidy up
+
+#ifdef PARALLEL_DEVELOPMENT
+  CALL Delete_FASTMAT(Kxc)
+#else
   CALL Delete(Kxc)
+#endif
+
   CALL Delete(T1)
   CALL Delete(BS)
   CALL Delete(GM)
-! didn't count flops, any accumulation is residual
-! from matrix routines
+! didn't count flops, any accumulation is residual from matrix routines
   PerfMon%FLOP=Zero 
-! Shutdown 
   CALL ShutDown(Prog)
 END PROGRAM HaiKu 
