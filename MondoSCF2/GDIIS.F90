@@ -1,0 +1,566 @@
+MODULE GDIISMod
+!
+   USE DerivedTypes
+   USE GlobalScalars
+   USE GlobalObjects
+   USE GlobalCharacters
+   USE InOut
+   USE MemMan
+   USE LinAlg
+   USE AInv             
+   USE CholFactor
+   USE ControlStructures
+   USE InCoords
+   USE PunchHDF
+!
+IMPLICIT NONE
+!
+CONTAINS
+!--------------------------------------------------------------
+!
+   SUBROUTINE GDIIS2(XYZ,NConstr,Nams,iCLONE,InitGDIIS)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(FileNames)             :: Nams
+     INTEGER                     :: iCLONE,NConstr,InitGDIIS
+     INTEGER                     :: HDFFileID
+     INTEGER        :: I,II,J,K,L,NCart,NatmsLoc
+     INTEGER        :: DimGDIIS,IGeom
+     INTEGER        :: SRMemory,RefMemory,CartGradMemory,GDIISMemory
+     TYPE(DBL_RNK2) :: AMat,InvA,SRDispl,SRStruct,RefGrad,RefStruct
+     TYPE(DBL_VECT) :: Coeffs,Vect,Scale
+     REAL(DOUBLE)   :: Sum
+     !
+     HDFFileID=OpenHDF(Nams%HFile)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     ! Get GDIIS memory
+     !
+     CALL Get(SRMemory,'SRMemory')
+     CALL Get(RefMemory,'RefMemory')
+     CALL Get(CartGradMemory,'CartGradMemory')
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     DimGDIIS=NCart   
+     !
+     IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+     IF(SRMemory/=CartGradMemory) &
+                        CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+     GDIISMemory=SRMemory
+     IF(GDIISMemory<InitGDIIS) RETURN
+     !
+     ! Get GDIIS memory of Cartesian coords and grads
+     !
+     CALL New(SRDispl,(/DimGDIIS,GDIISMemory/))
+     CALL New(SRStruct,(/DimGDIIS,GDIISMemory/))
+     CALL New(RefStruct,(/DimGDIIS,GDIISMemory/))
+     CALL New(RefGrad,(/DimGDIIS,GDIISMemory/))
+     !
+     CALL New(Vect,DimGDIIS)
+     DO IGeom=1,GDIISMemory
+       CALL Get(Vect,'SR'//TRIM(IntToChar(IGeom)))
+       SRStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'Ref'//TRIM(IntToChar(IGeom)))
+       RefStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'CartGrad'//TRIM(IntToChar(IGeom)))
+       RefGrad%D(:,IGeom)=Vect%D
+     ENDDO
+     CALL Delete(Vect)
+     ! displacements
+     SRDispl%D=SRStruct%D-RefStruct%D
+     !
+     ! Calculate Error-matrix, 'A'!
+     !
+     CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+     IF(NConstr/=0) THEN
+       CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                    SRDispl%D,SRDispl%D,AMat%D)
+     ELSE
+       CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                    RefGrad%D,RefGrad%D,AMat%D)
+     ENDIF
+     !
+     ! Equilibrate A
+     !
+     CALL New(Scale,GDIISMemory)
+     DO I=1,GDIISMemory
+       Scale%D(I)=One/SQRT(AMat%D(I,I))
+     ENDDO
+     DO I=1,GDIISMemory
+       DO J=1,GDIISMemory
+         AMat%D(I,J)=Scale%D(I)*Scale%D(J)*AMat%D(I,J)
+       ENDDO
+     ENDDO
+     !
+     ! Calculate SVD inverse of 'A'.     
+     !
+     CALL New(InvA,(/GDIISMemory,GDIISMemory/))
+     CALL SetDSYEVWork(GDIISMemory**2)
+     CALL FunkOnSqMat(GDIISMemory,Inverse,AMat%D,InvA%D,Unit_O=6)
+     CALL UnSetDSYEVWork()
+     !
+     ! Scale inverse back to original system
+     !
+     DO I=1,GDIISMemory
+       DO J=1,GDIISMemory
+         InvA%D(I,J)=Scale%D(I)*Scale%D(J)*InvA%D(I,J)
+       ENDDO
+     ENDDO
+     CALL Delete(Scale)
+     !
+     ! Calculate GDIIS coeffs 
+     !
+     CALL New(Coeffs,GDIISMemory)
+     CALL New(Vect,GDIISMemory)
+     Vect%D=One
+     CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
+                    InvA%D,Vect%D,Coeffs%D)
+     CALL Delete(Vect)
+     ! 
+     ! Rescale coeffs to get a sum of One.
+     !
+     Sum=Zero
+     DO I=1,GDIISMemory 
+       Sum=Sum+Coeffs%D(I)  
+     ENDDO
+     Sum=One/Sum
+     Coeffs%D=Sum*Coeffs%D
+     !
+     ! Calculate new geometry
+     !
+     CALL New(Vect,DimGDIIS)
+     Vect%D=Zero
+     DO I=1,GDIISMemory
+       Vect%D=Vect%D+Coeffs%D(I)*SRStruct%D(:,I)
+     ENDDO
+     CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
+     CALL Delete(Vect)
+     !
+     CALL Put(0,'SrMemory')
+     CALL Put(0,'RefMemory')
+     CALL Put(0,'CartGradMemory')
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     J=MAX(1,GDIISMemory-5)
+       II=0
+     DO I=J,GDIISMemory
+       II=II+1
+       CALL GDIISArch(Nams,iCLONE,Vect_O=SRStruct%D(:,I),Tag_O='SR')
+       CALL GDIISArch(Nams,iCLONE,Vect_O=RefStruct%D(:,I),Tag_O='Ref')
+       CALL GDIISArch(Nams,iCLONE,Vect_O=RefGrad%D(:,I),Tag_O='CartGrad')
+     ENDDO
+     !
+     ! Tidy up
+     !
+     CALL Delete(Coeffs)
+     CALL Delete(InvA)
+     CALL Delete(AMat)
+     CALL Delete(RefGrad)
+     CALL Delete(RefStruct)
+     CALL Delete(SRStruct)
+     CALL Delete(SRDispl)
+   END SUBROUTINE GDIIS2
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE ResetGDIIS
+     CALL Put(0,'RefMemory')
+     CALL Put(0,'SRMemory')
+     CALL Put(0,'CartGradMemory')
+   END SUBROUTINE ResetGDIIS
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE GeoDIIS(XYZ,GOpt,Nams,iCLONE,Print,SCRPath,InitGDIIS)
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(FileNames)             :: Nams
+     TYPE(GeomOpt)               :: GOpt
+     INTEGER                     :: iCLONE,InitGDIIS
+     LOGICAL                     :: Print
+     CHARACTER(Len=*)            :: SCRPath
+     INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc
+     INTEGER                     :: IGeom,HDFFileID
+     INTEGER                     :: SRMemory,RefMemory
+     INTEGER                     :: CartGradMemory,GDIISMemory
+     TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
+     TYPE(DBL_VECT)              :: Vect
+     !
+     HDFFileID=OpenHDF(Nams%HFile)
+     HDF_CurrentID= &
+       OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))
+     !
+     ! Get GDIIS memory
+     !
+     CALL Get(SRMemory,'SRMemory')
+     CALL Get(RefMemory,'RefMemory')
+     CALL Get(CartGradMemory,'CartGradMemory')
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     !
+     IF(SRMemory/=RefMemory) CALL Halt('SRMemory/=RefMemory in GDIIS')
+     IF(SRMemory/=CartGradMemory) &
+                        CALL Halt('SRMemory/=CartGradMemory in GDIIS')
+     GDIISMemory=SRMemory
+     IF(GDIISMemory<InitGDIIS) RETURN
+     !
+     ! Get GDIIS memory of Cartesian coords and grads
+     !
+     CALL New(SRStruct,(/NCart,GDIISMemory/))
+     CALL New(RefStruct,(/NCart,GDIISMemory/))
+     CALL New(RefGrad,(/NCart,GDIISMemory/))
+     CALL New(SRDispl,(/NCart,GDIISMemory/))
+     !
+     CALL New(Vect,NCart)
+     DO IGeom=1,GDIISMemory
+       CALL Get(Vect,'SR'//TRIM(IntToChar(IGeom)))
+       SRStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'Ref'//TRIM(IntToChar(IGeom)))
+       RefStruct%D(:,IGeom)=Vect%D
+       CALL Get(Vect,'CartGrad'//TRIM(IntToChar(IGeom)))
+       RefGrad%D(:,IGeom)=Vect%D
+     ENDDO
+     CALL Delete(Vect)
+       SRDispl%D=SRStruct%D-RefStruct%D
+     !
+     ! Calculate new Cartesian coordinates 
+     !
+     CALL BasicGDIIS(XYZ,GOpt%Constr,RefStruct,RefGrad,SRStruct,SRDispl)
+     !CALL PrIntGDIIS(XYZ,GOpt%Constr,RefStruct,RefGrad,SRStruct,SRDispl)
+     !
+     !CALL DelocGDIIS(SRStruct%D,RefStruct%D,RefGrad%D,SRDispl%D,&
+     !  XYZ,IntCs,Print,SCRPath,GOpt%TrfCtrl,GOpt%CoordCtrl, &
+     !  GOpt%BackTrf,GOpt%Constr)
+     !
+     ! Put back GDIIS memory into HDF
+     !
+     CALL Put(0,'SrMemory')
+     CALL Put(0,'RefMemory')
+     CALL Put(0,'CartGradMemory')
+     !
+     CALL CloseHDFGroup(HDF_CurrentID)
+     CALL CloseHDF(HDFFileID)
+     !
+     J=MAX(1,GDIISMemory-5)
+       II=0
+     DO I=J,GDIISMemory
+       II=II+1
+       CALL GDIISArch(Nams,iCLONE,Vect_O=SRStruct%D(:,I),Tag_O='SR')
+       CALL GDIISArch(Nams,iCLONE,Vect_O=RefStruct%D(:,I),Tag_O='Ref')
+       CALL GDIISArch(Nams,iCLONE,Vect_O=RefGrad%D(:,I),Tag_O='CartGrad')
+     ENDDO
+     !
+     ! Tidy up
+     !
+     CALL Delete(RefGrad)
+     CALL Delete(RefStruct)
+     CALL Delete(SRStruct)
+     CALL Delete(SRDispl)
+   END SUBROUTINE GeoDIIS
+! 
+!-------------------------------------------------------------------
+!
+   SUBROUTINE DelocGDIIS(SRStruct,RefStruct,RefGrad,SRDispl,XYZ,IntCs,&
+     Print,SCRPath,CtrlTrf,CtrlCoord,CtrlBackTrf,CtrlConstr)
+     TYPE(INTC)                  :: IntCs
+     REAL(DOUBLE),DIMENSION(:,:) :: SRDispl,RefGrad
+     REAL(DOUBLE),DIMENSION(:,:) :: SRStruct,RefStruct
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(DBL_RNK2)              :: XYZRot
+     INTEGER                     :: NatmsLoc,NCart,NIntC,GDIISMemory
+     INTEGER                     :: I,J,ThreeAt(1:3)
+     TYPE(BMatr)                 :: B3
+     LOGICAL                     :: Linearity,Print
+     REAL(DOUBLE)                :: LinCrit
+     TYPE(DBL_RNK2)              :: DelocDispl
+     TYPE(DBL_RNK2)              :: DelocSR,DelocRef
+     TYPE(DBL_VECT)              :: NewDelocs,NewPrims,Displ
+     TYPE(Cholesky)              :: CholData3
+     TYPE(Constr)                :: CtrlConstr
+     TYPE(CoordCtrl)             :: CtrlCoord
+     TYPE(BackTrf)               :: CtrlBackTrf
+     TYPE(TrfCtrl)               :: CtrlTrf
+     CHARACTER(LEN=*)            :: SCRPath
+     !
+     NatmsLoc=SIZE(XYZ,2)
+     NCart=3*NatmsLoc
+     NIntC=SIZE(IntCs%Def)
+     GDIISMemory=SIZE(SRDispl,2)
+     LinCrit=CtrlCoord%LinCrit
+     !
+     ! Calculate three-atoms reference system
+     ! and rotated structure
+     !
+     CALL New(XYZRot,(/3,NatmsLoc/))
+     XYZRot%D=XYZ
+     CALL CALC_XYZRot(XYZRot%D,ThreeAt,Linearity)
+     !
+     ! Calculate B matrix for reference system 
+     !
+     CALL BMatrix(XYZRot%D,NIntC,IntCs,B3,LinCrit,.FALSE.,ThreeAt)
+     !
+     ! Calc Gc=B3t*B3 and its Cholesky factors
+     !
+     CALL CholFact(B3,NCart,CholData3,.FALSE.,.FALSE.,ThreeAt)
+     !
+     ! Transform prim.ints into delocalized internals
+     !
+     CALL New(DelocRef,(/NCart,GDIISMemory/))
+     CALL New(DelocSR,(/NCart,GDIISMemory/))
+     CALL New(DelocDispl,(/NCart,GDIISMemory/))
+     CALL DelocIntValues(SRStruct,DelocSR%D,B3,CholData3,IntCs,LinCrit)
+     CALL DelocIntValues(RefStruct,DelocRef%D,B3,CholData3,IntCs,LinCrit)
+     DelocDispl%D=DelocSR%D-DelocRef%D
+     !
+     ! Calculate new set of delocalized internals
+     !
+     CALL New(NewDelocs,NCart) 
+     CALL DelocStruct(DelocDispl%D,DelocSR%D,NewDelocs%D)
+     !
+     ! Turn delocalized internals into primitive ints
+     !
+     CALL New(NewPrims,NIntC) 
+     CALL DelocToPrim(NewDelocs%D,NewPrims%D,B3,CholData3)
+     CALL Delete(B3)
+     CALL Delete(CholData3)
+     !
+     CALL INTCValue(IntCs,XYZ,LinCrit)
+     CALL New(Displ,NIntC) 
+     Displ%D=NewPrims%D-IntCs%Value
+     !
+     CALL RefreshBMatInfo(IntCs,XYZ,B3,CholData3, &
+       CtrlTrf%DoClssTrf,Print,LinCrit,CtrlTrf%ThreeAt,SCRPath)
+     CALL Delete(B3)
+     CALL Delete(CholData3)
+     CALL InternalToCart(XYZ,IntCs,Displ%D,Print, &
+       CtrlBackTrf,CtrlTrf,CtrlCoord,CtrlConstr,SCRPath)
+     !
+     CALL Delete(Displ)
+     CALL Delete(NewPrims)
+     CALL Delete(NewDelocs)
+     CALL Delete(DelocDispl)
+     CALL Delete(DelocSR)
+     CALL Delete(DelocRef)
+     CALL Delete(XYZRot)
+   END SUBROUTINE DelocGDIIS
+! 
+!-------------------------------------------------------------------
+!
+   SUBROUTINE PrimIntDispl(RefStruct,SRStruct,PrimDispl,IntCs,LinCrit)
+     TYPE(INTC)     :: IntCs
+     REAL(DOUBLE),DIMENSION(:,:) :: RefStruct,SRStruct,PrimDispl
+     REAL(DOUBLE)   :: LinCrit
+     INTEGER        :: I,J,NCart,NIntC,GDIISMemory,NatmsLoc
+     TYPE(DBL_RNK2) :: XYZTmp
+     TYPE(DBL_VECT) :: RefValue,SRValue
+     !
+     NCart=SIZE(RefStruct,1)
+     NatmsLoc=NCart/3
+     IF(3*NatmsLoc/=NCart) CALL Halt('Dimension error in PrimIntDispl')
+     GDIISMemory=SIZE(RefStruct,2)
+     NIntC=SIZE(IntCs%Def)
+     !
+     CALL New(XYZTmp,(/3,NatmsLoc/))
+     CALL New(RefValue,NIntC)
+     CALL New(SRValue,NIntC)
+     DO I=1,GDIISMemory
+       CALL CartRNK1ToCartRNK2(RefStruct(1:NCart,I),XYZTmp%D)
+       CALL INTCValue(IntCs,XYZTmp%D,LinCrit)
+       RefValue%D=IntCs%Value        
+       CALL CartRNK1ToCartRNK2(SRStruct(1:NCart,I),XYZTmp%D)
+       CALL INTCValue(IntCs,XYZTmp%D,LinCrit)
+       SRValue%D=IntCs%Value        
+       PrimDispl(1:NIntC,I)=SRValue%D-RefValue%D
+     ENDDO  
+     CALL Delete(SRValue)
+     CALL Delete(RefValue)
+     CALL Delete(XYZTmp)
+   END SUBROUTINE PrimIntDispl
+! 
+!-------------------------------------------------------------------
+!
+   SUBROUTINE DelocIntValues(CartStruct,DelocStruct,B3,CholData3, &
+                            IntCs,LinCrit)
+     TYPE(BMatr) :: B3
+     REAL(DOUBLE),DIMENSION(:,:) :: CartStruct,DelocStruct
+     REAL(DOUBLE)                :: LinCrit
+     INTEGER                     :: NCart,NIntC,GDIISMemory
+     INTEGER                     :: I,J,NatmsLoc
+     TYPE(Cholesky)              :: CholData3
+     TYPE(DBL_VECT)              :: VectInt,VectCart
+     TYPE(DBL_RNK2)              :: ActCarts
+     TYPE(INTC)                  :: IntCs
+     !
+     NCart=SIZE(DelocStruct,1)
+     NatmsLoc=NCart/3
+     NIntC=SIZE(B3%IB,1)
+     GDIISMemory=SIZE(CartStruct,2)
+     CALL New(VectInt,NIntC)
+     CALL New(VectCart,NCart)
+     CALL New(ActCarts,(/3,NatmsLoc/))
+     !
+     ! B3^t * PrimDispl
+     !
+     DO I=1,GDIISMemory
+       VectCart%D=CartStruct(1:NCart,I)
+       CALL CartRNK1ToCartRNK2(VectCart%D,ActCarts%D)
+       CALL INTCValue(IntCs,ActCarts%D,LinCrit)
+       VectInt%D=IntCs%Value
+       CALL PrimToDeloc(VectInt%D,VectCart%D,B3,CholData3)
+       DelocStruct(1:NCart,I)=VectCart%D
+     ENDDO
+     !
+     CALL Delete(ActCarts)
+     CALL Delete(VectCart)
+     CALL Delete(VectInt)
+   END SUBROUTINE DelocIntValues
+! 
+!-------------------------------------------------------------------
+!
+   SUBROUTINE DelocStruct(DelocDispl,DelocSR,NewDelocs)
+     REAL(DOUBLE),DIMENSION(:,:) :: DelocDispl,DelocSR
+     REAL(DOUBLE),DIMENSION(:)   :: NewDelocs 
+     REAL(DOUBLE)                :: Sum,DotP 
+     INTEGER                     :: I,J,NCart,GDIISMemory
+     TYPE(DBL_VECT)              :: Vect
+     !
+     NCart=SIZE(DelocDispl,1)
+     GDIISMemory=SIZE(DelocDispl,2)
+     CALL New(Vect,GDIISMemory)
+     !
+     DO I=1,NCart
+       Vect%D=DelocDispl(I,1:GDIISMemory)
+       DotP=DOT_PRODUCT(Vect%D,Vect%D)
+       IF(DotP<1.D-3) THEN
+         NewDelocs(I)=DelocSR(I,GDIISMemory)
+         CYCLE
+       ENDIF
+       !
+       Sum=Zero
+       DO J=1,GDIISMemory
+         Sum=Sum+Vect%D(J)
+       ENDDO
+       Sum=Sum/DotP**2
+       Vect%D=Sum*Vect%D
+       !
+       ! ensure, that sum of the components of Vect adds up to One.
+       !
+       Sum=Zero
+       DO J=1,GDIISMemory
+         Sum=Sum+Vect%D(J)
+       ENDDO
+       Sum=One/Sum
+       Vect%D=Sum*Vect%D
+       !
+       ! Calculate new value of the delocalized internals
+       !
+       Sum=Zero
+       DO J=1,GDIISMemory
+         Sum=Sum+Vect%D(J)*DelocSR(I,J)
+       ENDDO
+       NewDelocs(I)=Sum
+     ENDDO
+     !
+     CALL Delete(Vect)
+   END SUBROUTINE DelocStruct
+!
+!-------------------------------------------------------------------
+!
+   SUBROUTINE BasicGDIIS(XYZ,CtrlConstr, &
+     RefStruct,RefGrad,SRStruct,SRDispl)
+     !
+     REAL(DOUBLE),DIMENSION(:,:) :: XYZ
+     TYPE(Constr)                :: CtrlConstr
+     INTEGER                     :: I,II,J,K,L,NCart,NatmsLoc
+     INTEGER                     :: DimGDIIS
+     INTEGER                     :: GDIISMemory
+     TYPE(DBL_RNK2)              :: AMat,InvA,SRDispl,SRStruct
+     TYPE(DBL_RNK2)              :: RefGrad,RefStruct
+     TYPE(DBL_VECT)              :: Coeffs,Vect,Scale
+     REAL(DOUBLE)                :: Sum
+     !
+     NCart=SIZE(XYZ,2)
+     DimGDIIS=SIZE(RefStruct%D,1)
+     GDIISMemory=SIZE(RefStruct%D,2)
+     !
+     ! Calculate Error-matrix, 'A'!
+     !
+     CALL New(AMat,(/GDIISMemory,GDIISMemory/))
+     IF(CtrlConstr%NConstr/=0) THEN
+       CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                    SRDispl%D,SRDispl%D,AMat%D)
+     ELSE
+       CALL DGEMM_TNc(GDIISMemory,DimGDIIS,GDIISMemory,One,Zero,  &
+                    RefGrad%D,RefGrad%D,AMat%D)
+     ENDIF
+     !
+     ! Equilibrate A
+     !
+     CALL New(Scale,GDIISMemory)
+     DO I=1,GDIISMemory
+       Scale%D(I)=One/SQRT(AMat%D(I,I))
+     ENDDO
+     DO I=1,GDIISMemory
+       DO J=1,GDIISMemory
+         AMat%D(I,J)=Scale%D(I)*Scale%D(J)*AMat%D(I,J)
+       ENDDO
+     ENDDO
+     !
+     ! Calculate SVD inverse of 'A'.     
+     !
+     CALL New(InvA,(/GDIISMemory,GDIISMemory/))
+     CALL SetDSYEVWork(GDIISMemory**2)
+     CALL FunkOnSqMat(GDIISMemory,Inverse,AMat%D,InvA%D,Unit_O=6)
+     CALL UnSetDSYEVWork()
+     !
+     ! Scale inverse back to original system
+     !
+     DO I=1,GDIISMemory
+       DO J=1,GDIISMemory
+         InvA%D(I,J)=Scale%D(I)*Scale%D(J)*InvA%D(I,J)
+       ENDDO
+     ENDDO
+     CALL Delete(Scale)
+     !
+     ! Calculate GDIIS coeffs 
+     !
+     CALL New(Coeffs,GDIISMemory)
+     CALL New(Vect,GDIISMemory)
+     Vect%D=One
+     CALL DGEMM_NNc(GDIISMemory,GDIISMemory,1,One,Zero,  &
+                    InvA%D,Vect%D,Coeffs%D)
+     CALL Delete(Vect)
+     ! 
+     ! Rescale coeffs to get a sum of One.
+     !
+     Sum=Zero
+     DO I=1,GDIISMemory 
+       Sum=Sum+Coeffs%D(I)  
+     ENDDO
+     Sum=One/Sum
+     Coeffs%D=Sum*Coeffs%D
+     !
+     ! Calculate new geometry
+     !
+     CALL New(Vect,DimGDIIS)
+     Vect%D=Zero
+     DO I=1,GDIISMemory
+       Vect%D=Vect%D+Coeffs%D(I)*SRStruct%D(:,I)
+     ENDDO
+     CALL CartRNK1ToCartRNK2(Vect%D,XYZ)
+     CALL Delete(Vect)
+     !
+     ! Tidy up
+     !
+     CALL Delete(Coeffs)
+     CALL Delete(InvA)
+     CALL Delete(AMat)
+     !
+   END SUBROUTINE BasicGDIIS
+!
+!-------------------------------------------------------------------
+!
+END MODULE GDIISMod
