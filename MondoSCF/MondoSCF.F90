@@ -59,6 +59,11 @@ PROGRAM MondoSCF
 !       Summarize SCF stats
         CALL SCFSummry(Ctrl) 
      ENDDO
+!
+     CALL Forces(Ctrl)
+!    Calls to Force_Num before calls to Forces mess up the Inf file somehow...
+     CALL Force_Num_2(Ctrl)
+!
      Begin(2) = 1
 !    Do Action
      SELECT CASE (Ctrl%ForceAction)

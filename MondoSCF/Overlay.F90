@@ -117,7 +117,7 @@ MODULE Overlay
             CmndLine=TRIM(CmndLine)//Blnk//TRIM(ArgV%C(I))
          ENDDO
          IF(PrintFlags%Key>DEBUG_MEDIUM) &
-            WRITE(*,*)TRIM(CmndLine)
+!            WRITE(*,*)TRIM(CmndLine)
 !        Max number of characters in an arg
          MaxLen=0
          DO I=1,NArg   

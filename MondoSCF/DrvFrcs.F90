@@ -38,17 +38,15 @@ MODULE DrvFrcs
       CALL OpenHDF(InfFile)
       CALL Get(GM,Tag_O=IntToChar(IGeo))
       CALL CloseHDF()
-!
-!     Calculate the Analytical forces
-!
-      CALL Invoke('SForce',  CtrlVect)
-      CALL Invoke('TForce',  CtrlVect)
-      CALL Invoke('JForce',  CtrlVect)
+!---------------------------------------------------
+!     Calculate analytic gradients
+      CALL Invoke('SForce',CtrlVect)
+      CALL Invoke('TForce',CtrlVect)
+      CALL Invoke('JForce',CtrlVect)
       IF(HasDFT(Ctrl%Model(Ctrl%Current(2)))) &
-           CALL Invoke('XCForce',     CtrlVect)       
+         CALL Invoke('XCForce',CtrlVect)       
       IF(HasHF(Ctrl%Model(Ctrl%Current(2))))THEN
-!         CALL Invoke('XForce',     CtrlVect)       
-         CALL MondoHalt(-999,'ONX Gradients not in yet, soon... ')
+         CALL Invoke('XForce', CtrlVect)       
       ENDIF
 !
 !     Output the Forces
@@ -245,8 +243,8 @@ MODULE DrvFrcs
       INTEGER                          :: ICyc,IGeo,IBas
       INTEGER                          :: AtA,IX,II,A1,A2,IS
       REAL(DOUBLE)                     :: DDelta
-      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EXC 
-      REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_XC,F_TOT
+      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EX,EXC 
+      REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_XC,F_X,F_TOT
       TYPE(DBL_VECT)                   :: Frc_Num
 !
       ICyc=Ctrl%Current(1)
@@ -314,6 +312,7 @@ MODULE DrvFrcs
                CALL Get(ET(II), 'Kin'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EJ(II), 'ene+eee' ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EN(II), 'enn+ene' ,Tag_O=IntToChar(Ctrl%Current(1)))
+               CALL Get(EX(II), 'Ex'      ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EXC(II),'Exc'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL CloseHDF() 
             ENDDO
@@ -321,6 +320,7 @@ MODULE DrvFrcs
             F_T(AtA,IX)  = (ET(1)-ET(2))/(Two*DDelta)
             F_J(AtA,IX)  = (EJ(1)-EJ(2))/(Two*DDelta)
             F_N(AtA,IX)  = (EN(1)-EN(2))/(Two*DDelta)
+            F_X(AtA,IX)  = (EX(1)-EX(2))/(Two*DDelta)
             F_XC(AtA,IX) = (EXC(1)-EXC(2))/(Two*DDelta)
             F_TOT(AtA,IX) =  F_T(AtA,IX)+F_J(AtA,IX)+F_N(AtA,IX)+F_XC(AtA,IX)
          ENDDO
@@ -349,8 +349,8 @@ MODULE DrvFrcs
       INTEGER                          :: ICyc,IGeo,IBas
       INTEGER                          :: AtA,IX,II,A1,A2,IS
       REAL(DOUBLE)                     :: DDelta
-      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EXC
-      REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_XC,F_TOT
+      REAL(DOUBLE),DIMENSION(2)        :: ES,ET,EJ,EN,EX,EXC
+      REAL(DOUBLE),DIMENSION(NAtoms,3) :: F_S,F_T,F_J,F_N,F_X,F_XC,F_TOT
       TYPE(DBL_VECT)                   :: Frc_Num
 !
       ICyc=Ctrl%Current(1)
@@ -388,6 +388,8 @@ MODULE DrvFrcs
       CALL New(T2)
 !      
       CALL OpenHDF(InfFile)
+      CALL Get(ModelChem,'ModelChemistry',Tag_O=IntToChar(IBas))
+!
       CALL Get(P,TrixFile('D',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
       CALL Get(F,TrixFile('F',OffSet_O=0,Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
       CALL Get(S,TrixFile('S',Name_O=CtrlVect(1),Stats_O=Ctrl%Current(1:3)))
@@ -413,7 +415,10 @@ MODULE DrvFrcs
                CALL Invoke('MakeT'  ,   CtrlVect)
                CALL Invoke('MakeRho',   CtrlVect)
                CALL Invoke('QCTC'   ,   CtrlVect)
+               IF(HasDFT(ModelChem)) &
                CALL Invoke('HiCu'   ,   CtrlVect)       
+               IF(HasHF(ModelChem))  &
+               CALL Invoke('ONX'    ,   CtrlVect)       
 !======================================================================================
 !              Calculate the Overlap Term
 ! 
@@ -431,6 +436,9 @@ MODULE DrvFrcs
                CALL Get(ET(II), 'Kin'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EJ(II), 'ene+eee' ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL Get(EN(II), 'enn+ene' ,Tag_O=IntToChar(Ctrl%Current(1)))
+               IF(HasHF(ModelChem))  &
+               CALL Get(EX(II), 'Ex'      ,Tag_O=IntToChar(Ctrl%Current(1)))
+               IF(HasDFT(ModelChem)) &
                CALL Get(EXC(II),'Exc'     ,Tag_O=IntToChar(Ctrl%Current(1)))
                CALL CloseHDF() 
             ENDDO
@@ -438,16 +446,28 @@ MODULE DrvFrcs
             F_T(AtA,IX)  = (ET(1)-ET(2))/(Two*DDelta)
             F_J(AtA,IX)  = (EJ(1)-EJ(2))/(Two*DDelta)
             F_N(AtA,IX)  = (EN(1)-EN(2))/(Two*DDelta)
+            F_X(AtA,IX)  = (EX(1)-EX(2))/(Two*DDelta)
             F_XC(AtA,IX) = (EXC(1)-EXC(2))/(Two*DDelta)
-            F_TOT(AtA,IX) = F_S(ATA,IX)+ F_T(AtA,IX)+F_J(AtA,IX)+F_N(AtA,IX)+F_XC(AtA,IX)
+            F_TOT(AtA,IX)= F_S(ATA,IX)+ F_T(AtA,IX)+F_J(AtA,IX)+F_N(AtA,IX)+F_X(AtA,IX)+F_XC(AtA,IX)
          ENDDO
       ENDDO
-      WRITE(*,*) F_S(1,1)
-      WRITE(*,*) F_T(1,1)
-      WRITE(*,*) F_J(1,1)+F_N(1,1)
-      WRITE(*,*) F_XC(1,1)     
+!     RESET Geometry
+      CALL OpenHDF(InfFile)
+      CALL Put(GMOLD,Tag_O=IntToChar(IGeo))
+      CALL CloseHDF()
+
+      WRITE(*,*)' --------------------------------------------------'
+      WRITE(*,*)'SForce = ',F_S(1,1)
+      WRITE(*,*)'TForce = ',F_T(1,1)
+      WRITE(*,*)'JForce = ',F_J(1,1)+F_N(1,1)
+      WRITE(*,*)'XForce = ',F_X(1,1)     
+      WRITE(*,*)'XCForce= ',F_XC(1,1)     
       WRITE(*,*) ' '
-      WRITE(*,*) F_TOT(1,1)
+      WRITE(*,*)'Total Force = ',F_TOT(1,1)
+      WRITE(*,*)' --------------------------------------------------'
+
+
+
 !
       CALL New(Frc_Num,3*NAtoms)
       DO AtA = 1,NAtoms
