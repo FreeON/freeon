@@ -1,6 +1,15 @@
-%\documentclass[prb,preprint,showpacs,superbib]{revtex4}
-
-\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+% NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
+% COMMENTOUT COMMAND FROM A TO B IE. USE:
+%
+% \documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+% \newcommand{\commentoutB}[1]{}
+% \newcommand{\commentoutA}[1]{#1}
+%
+% INSTEAD OF THE FOLLOWING:
+%
+\newcommand{\commentoutB}[1]{#1}
+\newcommand{\commentoutA}[1]{}
+\documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -72,14 +81,14 @@ the approximate separability of molecular motions in curvilinear internal coordi
 systems, and the recent availability of fast transformations to and from these coordinate systems 
 for large molecules \cite{paizs_coordtrf1,nemeth_coordtrf1,paizs_coordtrf2,nemeth_coordtrf2}.  
 Internal coordinates represent the internal motions of a molecule, involving  bond stretches, angle 
-bendings and dihedral torsions.  These different motions, which are related to chemical concepts, 
-lead to an approximate energy and length scale separation that is manifested in strong diagonal 
-dominance in the matrix of second order energy derivatives (the Hessian), and also in higher order 
-anharmonic energy tensors.  Off diagonal elements of the internal coordinate Hessian are typically 
-an order of magnitude smaller than the diagonal ones
+bendings and dihedral torsions.  These different motions coorespond to different  energy and length 
+scales, leading to strong diagonal dominance in the matrix of second order energy derivatives 
+(the Hessian) as well as in higher order anharmonic energy tensors.  Off diagonal elements of the 
+internal coordinate Hessian are typically an order of magnitude smaller than the diagonal ones
 \cite{pulay_69,fogarasi_diaghess,Pulay_natural_internals,pulay_review,pulay_dynamics}.
 This is the basis for an approximate decoupling of molecular motions in terms of internal coordinates.
 
+\commentoutA{
 
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{picture1_2.eps}}
@@ -95,12 +104,14 @@ a linear fit, the star the predicted location of the minimum.}
 \label{NH3outp6}
 \end{figure}
 
+}
+
 An observation central to the present contribution is that internal coordinate gradients show recognizable trends 
 during optimization, and these trends can be captured by curve fitting and used to predict minima by 
 one-dimensional extrapolation.  This is illustrated in Fig.~\ref{NH3outp6}, showing a typical progression of 
 internal coordinate gradients.  
 
-In the following, we overview conventional methods of geometry optimization (Section \ref{conventional}), 
+In the following, we review conventional methods of geometry optimization (Section \ref{conventional}), 
 and then  develop our new idea conceptually (Section \ref{concept}).  A practical implementation of this 
 concept is then then outlined (Section \ref{implementation}) in the context of linear scaling quantum 
 chemistry.  Next, this implementation is tested against Baker's small molecule test suite and applied to 
@@ -305,11 +316,10 @@ their development is beyond the scope of the present paper.
 
 Transition states are indicated by a gradient curve with  negative tangent at the position
 of the root.  For example, in Fig. \ref{NH3outp6} the tangent of the gradient curve is negative 
-in the vicinity of the planar structure (structure \#1). This is so, as the planar ammonia 
-is a transition state. The tangent of the gradient curve thus offers a convenient tool 
-to control convergence to either a minimum or transition state.  In the present article we 
-restrict the discussion to avoiding transition states and finding local minima. 
-Whenever the local tangent of the gradient curve is negative, the optimizer employs a simple force relaxation step,
+in the vicinity of the planar structure (structure \#1), which is a transition state. The tangent 
+of the gradient curve thus offers a convenient tool to control convergence to either a minimum 
+or transition state.  Whenever the local tangent of the gradient curve is negative, the optimizer 
+employs a simple force relaxation step,
 \begin{equation}
 \label{tseq}
 \varphi_{k}^{(i+1)} = \varphi_{k}^{(i)} -g_{k}^{(i)}/|H_{kk}^{(i)}| ,
@@ -317,9 +327,9 @@ Whenever the local tangent of the gradient curve is negative, the optimizer empl
 where $i$ denotes the serial number of the optimization step,  $\varphi_{k}$ is the $k$-th internal coordinate,
  $H^i_{kk}$ is a diagonal element of the Hessian determined from local tangent of the curve fit, and
 $g_i$ is the local gradient at $i$ (not a fitted gradient).
-This way those transition states that are well localized to a few internal coordinates
-are avoided.  It is not clear how the present implementation behaves in the 
-case of a more delocalized transition state, spanning many internal coordinates, which rarely occur.  
+This avoids transition states that are well localized to just a few internal coordinates.
+The ability of the present implementation to treat delocalized transition states
+remains to be seen. 
 
 Combined internal coordinates, such as the natural \cite{Pulay_natural_internals} or the
 delocalized internals \cite{Baker_deloc_1}, hold the possibility of identifying delocalized transition 
@@ -436,6 +446,8 @@ size as pointed out in Ref.~\cite{nemeth_coordtrf1}.
 
 \section{Results and Discussion} \label{Sresults}
 
+\commentoutA{
+
 \begin{table}[h]
 %\squeezetable
 \caption{
@@ -488,6 +500,8 @@ Total                  & 187    & 185    &  196    &  215   & 240     \\
 \botrule
 \end{tabular}
 \end{table}
+
+}
 
 \subsection{Baker's test set}
 
@@ -547,6 +561,8 @@ an approximate Newton step taken with the {\em fitted} gradient.   Thus, the ful
 QUICCA algorithm is successful not only because it generates up-to-date curvature information, 
 but because it achieves stability through smoothing effects derived from the weighted fit.
 
+\commentoutA{
+
 \begin{figure}[h]
 \resizebox*{3.5in}{!}{\includegraphics{kinasepicture.eps}}
 \caption{
@@ -568,6 +584,8 @@ Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
 with geometry step $i$ on a log$_{10}$-linear  scale for the 
 263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
 \end{figure}
+
+}
 
 \subsection{Convergence}
 
@@ -606,8 +624,9 @@ Note that this minimal level of theory actually makes more work for the optimize
 move away from the more correct crystallographic structure. The number of internal coordinates, generated 
 for this structure was 1280 at convergence.  Figure~\ref{logn-logde} shows ${\rm log}_{10} \Delta E_i$ 
 vs $i$ for this system, and in Fig.~\ref{gradientpicture} the root mean square of the Cartesian gradient 
-at each step is shown.   In Fig.~\ref{logn-logde}, close to convergence there is  an increase in the rate 
-of convergence $f$, demonstrating superlinear convergence.
+at each step is shown.   In Fig.~\ref{logn-logde}, linear convergence is seen roughly from 
+$i \in [20,50]$, followed by an approximate downturn.  This downturn corresponds to an increase 
+in the rate of convergence $f$, sugesting superlinear convergence.
 
 \section{Conclusions}
 
@@ -654,5 +673,131 @@ Alamos National Laboratory is acknowledged.
 \end{acknowledgments}
 
 \bibliography{mondo_new}
+
+\commentoutB{
+
+\clearpage
+
+%\begin{center}
+%\bf  TABLES
+%\end{center}
+
+\begin{table}[h]
+\squeezetable
+\caption{
+Number of geometry optimization steps to convergence of Baker's test set
+(up to 30 atom molecules) for the QUICCA optimizer and also for other 
+advanced algorithms from the literature.  Calculations have 
+been carried out at the RHF/STO-3G level of theory.  All of the reported
+calculations used local primitive internal coordinates, except those
+of Bakken {\it et.al.} who used extra redundant coordinates \cite{bakken}.
+}
+\label{Bakers_test}
+\begin{tabular}{lccccc}
+\toprule
+Molecule               & QUICCA  & Bakken         & Eckert         & Lindh         &  Baker  \\
+                       &         & {\it{et al.}}  & {\it{et al.}}  & {\it{et al.}} &    \\
+                       &         &  \cite{bakken} &  \cite{eckert} & \cite{lindh}  &  \cite{bakerstest} \\
+\colrule
+Water                  &   4    &   4    &    4    &    4   &   6     \\
+Ammonia                &   4    &   5    &    6    &    5   &   6     \\
+Ethane                 &   4    &   3    &    4    &    4   &   5     \\
+Acetylene              &   4    &   4    &    6    &    5   &   6     \\
+Allene                 &   3    &   4    &    4    &    5   &   5     \\
+Hydroxysulphane        &   8    &   7    &    7    &    8   &   8     \\
+Benzene                &   2    &   3    &    3    &    3   &   4     \\
+Methylamine            &   4    &   4    &    5    &    5   &   6     \\
+Ethanol                &   5    &   4    &    5    &    5   &   6     \\
+Acetone                &   4    &   4    &    5    &    5   &   6     \\
+Disilyl ether          &   9    &   8    &    9    &   11   &   8     \\
+1,3,5-trisilacycl.     &   5    &   9    &    6    &    8   &   8     \\
+Benzaldehyde           &   5    &   4    &    5    &    5   &   6     \\
+1,3-difluorobenz.      &   4    &   4    &    5    &    5   &   5     \\
+1,3,5-trifluorob.      &   3    &   4    &    4    &    4   &   5     \\
+Neopentane             &   5    &   4    &    4    &    5   &   5     \\
+Furan                  &   6    &   5    &    6    &    7   &   8     \\
+Naphtalene             &   6    &   5    &    6    &    6   &   5     \\
+1,5-difluoronapht.     &   6    &   5    &    6    &    6   &   6     \\
+2-hydroxibicyclop.     &   7    &   9    &    9    &   10   &  15     \\
+ACHTAR10               &  10    &   8    &    9    &    8   &  12     \\
+ACANIL01               &  11    &   7    &    8    &    8   &   8     \\
+Benzidine              &   8    &   9    &    7    &   10   &   9     \\
+Pterin                 &  12    &   8    &    9    &    9   &  10     \\
+Difuropirazine         &   6    &   6    &    7    &    7   &   9     \\
+Mesityl oxide          &   5    &   5    &    6    &    6   &   7     \\
+Histidine              &  11    &  16    &   14    &   20   &  19     \\
+Dimethylpenthane       &   6    &   9    &   10    &   10   &  12     \\
+Caffeine               &   7    &   6    &    7    &    7   &  12     \\
+Menthone               &  13    &  12    &   10    &   14   &  13     \\
+\colrule
+Total                  & 187    & 185    &  196    &  215   & 240     \\
+\botrule
+\end{tabular}
+\end{table}
+
+
+\clearpage
+
+\begin{figure}[h]
+\begin{center}
+\bf  FIGURES\\[1.cm]
+\end{center}
+
+\caption{
+Progression of gradients on a valence angle bending coordinate of
+ammonia. Energies and forces were obtained by the PBE 
+density functional model in STO-3G basis set.
+The optimization was started from near planar geometry, i.e.
+from the vicinity of a transition state, and converged to a local 
+minimum of the potential energy surface. The numbers in the picture
+indicate the sequence of optimization steps. The dashed line represents
+a linear fit, the star the predicted location of the minimum.}\label{NH3outp6}
+
+
+\caption{
+The structure of a 263 atom protein kinase A fragment used
+to test the QUICCA optimizer.}\label{kinasepicture} 
+
+\caption{
+Convergence of the energy with geometry step $i$ on a log$_{10}$-linear  scale for the 
+263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{logn-logde} 
+
+\caption{
+Convergence of the root mean square of the Cartesian gradients, $g_{i}$,
+with geometry step $i$ on a log$_{10}$-linear  scale for the 
+263 atom protein kinase A fragment at the RHF/STO-2G level of theory.}\label{gradientpicture} 
+
+\end{figure}
+
+
+\clearpage
+
+\begin{center}
+Figure 1, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{picture1_2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 2, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{kinasepicture.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 3, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{R263logdata2.eps}}
+\end{center}
+
+\clearpage
+
+\begin{center}
+Figure 4, Nemeth and Challacombe \\[1.cm]
+\resizebox*{5in}{!}{\includegraphics{RMSCartData.eps}}
+\end{center}
+
+}
 \end{document}
 
