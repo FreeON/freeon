@@ -1,15 +1,15 @@
 % NOTE TO AIP TYPSETERS: TO CONVERT FROM TWO-COL TO PREPRINT, SWITCH
 % COMMENTOUT COMMAND FROM A TO B IE. USE:
 %
-%\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
-%\newcommand{\commentoutB}[1]{}
-%\newcommand{\commentoutA}[1]{#1}
+\documentclass[prl,twocolumn,showpacs,twocolumngrid,superbib]{revtex4}
+\newcommand{\commentoutB}[1]{}
+\newcommand{\commentoutA}[1]{#1}
 %
 % INSTEAD OF THE FOLLOWING:
 %
- \newcommand{\commentoutB}[1]{#1}
- \newcommand{\commentoutA}[1]{}
- \documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
+% \newcommand{\commentoutB}[1]{#1}
+% \newcommand{\commentoutA}[1]{}
+% \documentclass[prl,aps,preprint,showpacs,superbib]{revtex4}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -171,14 +171,13 @@ Now consider an approximate NR algorithm in a basis of diagonalizing normal mode
 non-ideal anharmonic surface.  For the moment,  assume that the normal modes remain diagonalizing with each
 geometry step, but the eigenvalues change.  Then, if the geometry steps are small,
 eigenvalues can be re-computed with backward differences of the gradient information at each step. 
-With infinitesimal steps, this independent curvilinear coordinate approximation is formally equivalent 
-to NR.  
+With infinitesimal steps, this independent coordinate approximation is formally equivalent to NR.  
 
 Realistically though, both eigenvectors and eigenvalues of the Hessian will change as the 
 algorithm takes the largest possible steps, leading to second (and higher) order coupling effects.  At this point, 
 we turn to an internal coordinate system to continue development of the independent curvilinear coordinate 
 approximation.  In an internal coordinate system, the magnitude of harmonic and anharmonic coupling
-effects are minimized over the course of optimization, remaining roughly constant.  On the other hand,
+effects are small over the course of optimization.  On the other hand,
 in a static basis of normal modes anharmonic coupling effects are larger to begin with \cite{fogarasi_diaghess}, 
 and coupling will increase during the course of optimization unless the normal modes are 
 periodically recomputed, incurring an unacceptable cost for large systems.  
@@ -297,7 +296,7 @@ matrix \cite{wilson}.  We have considered more delocalized interactions as well,
 from the graph of $G_i^2$, but they did not provide any significant improvement in test calculations.
 
 Values of $1.0$ au for stretches, $0.1$ au for bendings (and linear bendings and out-of-planes) and $0.01$ au
-for torsions are used as an initial guess for the $H_{ll}$.  These values are similar to those used to provide 
+for torsions are used for the $H_{ll}$.  These values are similar to those used to provide 
 an initial guess for the Hessian in variable metric algorithms \cite{bakken}.  Note, that only the relative 
 values of $H_{ll}$ are important for the fitting process, as the fitting parameters are determined by the 
 relative values of the weights.  
