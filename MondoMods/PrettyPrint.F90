@@ -32,6 +32,7 @@ MODULE PrettyPrint
 !
    INTERFACE PChkSum   
       MODULE PROCEDURE Print_CheckSum_DBL_VECT
+      MODULE PROCEDURE Print_CheckSum_DBL_RNK2
       MODULE PROCEDURE Print_CheckSum_BCSR
       MODULE PROCEDURE Print_CheckSum_HGRho
 #ifdef PARALLEL 
@@ -846,6 +847,41 @@ MODULE PrettyPrint
 !----------------------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------------------
+   SUBROUTINE Print_CheckSum_DBL_RNK2(A,Name,Unit_O,Proc_O)
+        TYPE(DBL_RNK2), INTENT(IN)           :: A
+        REAL(DOUBLE)                         :: Chk
+        CHARACTER(LEN=*)                     :: Name
+        INTEGER,         OPTIONAL,INTENT(IN) :: Unit_O
+        CHARACTER(LEN=*),OPTIONAL            :: Proc_O
+        INTEGER                              :: I,J,PU
+        CHARACTER(LEN=DEFAULT_CHR_LEN)       :: ChkStr
+!----------------------------------------------------------------------------------------
+        IF(PrintFlags%Key/=DEBUG_MAXIMUM.AND. &
+           PrintFlags%Chk/=DEBUG_CHKSUMS)RETURN
+!---------------------------------------------------------------------------------------   
+!       Compute check sum
+        Chk=Zero
+        DO I=1,SIZE(A%D,1)
+           DO J=1,SIZE(A%D,2)
+              Chk=Chk+A%D(I,J)*A%D(I,J)
+           ENDDO
+        ENDDO
+        Chk=SQRT(Chk) 
+#ifdef PARALLEL
+        IF(MyID==ROOT)THEN
+#endif
+           ChkStr=CheckSumString(Chk,Name,Proc_O)
+!          Write check string
+           PU=OpenPU(Unit_O=Unit_O)
+           WRITE(PU,'(1x,A)')TRIM(ChkStr)
+           CALL ClosePU(PU)
+#ifdef PARALLEL
+        ENDIF
+#endif
+      END SUBROUTINE Print_CheckSum_DBL_RNK2
+!----------------------------------------------------------------------------------------
+!
+!----------------------------------------------------------------------------------------
       SUBROUTINE Print_CheckSum_BCSR(A,Name,Proc_O,Unit_O)
         TYPE(BCSR), INTENT(IN)               :: A
         REAL(DOUBLE)                         :: Chk
@@ -882,7 +918,6 @@ MODULE PrettyPrint
         ENDIF
 #endif
       END SUBROUTINE Print_CheckSum_BCSR
-
 !----------------------------------------------------------------------------------------
 !
 !----------------------------------------------------------------------------------------   
@@ -969,7 +1004,9 @@ MODULE PrettyPrint
 #endif
   END SUBROUTINE Print_CheckSum_HGRho
 
-
+!
+!
+!
   FUNCTION CheckSumString(Chk,Name,Proc_O) RESULT(ChkStr)
     REAL(DOUBLE)                         :: Chk
     CHARACTER(LEN=*)                     :: Name
