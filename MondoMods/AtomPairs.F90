@@ -156,8 +156,14 @@ CONTAINS
     TYPE(CRDS)                     :: GM
     REAL(DOUBLE)                   :: Radius
 !
-    Radius = MaxBoxDim(GM) + SQRT(AtomPairDistanceThreshold)
+!   Calculate Radius
+!
+    Radius = Two*MaxAtomDist(GM) + SQRT(AtomPairDistanceThreshold)
     CALL New_CellSet_Sphere(CS_OUT,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
+    CALL Sort_CellSet(CS_OUT)
+!
+!   Sort the Cells
+!
     CALL Sort_CellSet(CS_OUT)
 !
   END SUBROUTINE SetCellNumber
@@ -353,14 +359,14 @@ CONTAINS
     ENDDO
 
   END FUNCTION MinImageDist
-!!-------------------------------------------------------------------------------
-! Calculate the Minmiun Image Distance Between Atoms I and J 
+!-------------------------------------------------------------------------------
+! Calculate the Minmiun Image Distance Between Atoms I and J  via Box Size
 !-------------------------------------------------------------------------------
   FUNCTION MaxBoxDim(GM)
     TYPE(CRDS)                  :: GM
     INTEGER                     :: I
     REAL(DOUBLE)                :: MaxBoxDim
-    REAL(DOUBLE),DIMENSION(3)    :: A,B,C
+    REAL(DOUBLE),DIMENSION(3)   :: A,B,C
 ! 
     MaxBoxDim = Zero
     A(:) = GM%PBC%BoxShape(:,1)+GM%PBC%BoxShape(:,2)+GM%PBC%BoxShape(:,3)
@@ -380,6 +386,26 @@ CONTAINS
 !
   END FUNCTION MaxBoxDim
 !
+!-------------------------------------------------------------------------------
+! Calculate the Minmiun Image Distance Between Atoms I and J via Atom Positions
+!-------------------------------------------------------------------------------
+  FUNCTION MaxAtomDist(GM)
+    TYPE(CRDS)                  :: GM
+    INTEGER                     :: I,At
+    REAL(DOUBLE)                :: MaxAtomDist,Dist
+!
+    MaxAtomDist = Zero
+    DO At=1,GM%NAtms
+       Dist = Zero
+       DO I=1,3
+          IF(GM%PBC%AutoW(I)) THEN
+             Dist = Dist+(GM%Carts%D(I,At)-GM%PBC%CellCenter(I))**2
+          ENDIF
+       ENDDO
+       MaxAtomDist = MAX(MaxAtomDist,SQRT(Dist))
+    ENDDO
+!
+  END FUNCTION MaxAtomDist
 #endif
 !
 END MODULE AtomPairs
