@@ -102,6 +102,7 @@ PROGRAM P2Use
         IF(ABS(TrP-DBLE(NEl/Two))>1.D-10) &
              CALL Warn(' In P2Use, TrP = '//TRIM(DblToChar(TrP)))
         CALL Delete(BlkP)
+#ifdef NEW_NOTVERYGOOD_BLOCKDIAGONAL
         CALL Get(S,TrixFile('S',Args,Stats_O=Current))
         ! Set global workspace for FunkOnSqMat
         CALL SetDSYEVWork(MaxBlkSize)
@@ -128,6 +129,32 @@ PROGRAM P2Use
         CALL Multiply(T1,X,P)   ! P=S^(-1/2).DiagonalGuess.S^(-1/2)
         CALL Delete(X)
         CALL Delete(T1)
+#else
+#ifdef PARALLEL
+        IF(MyId==ROOT)THEN
+#endif
+           INQUIRE(FILE=TrixFile('X',Args),EXIST=Present)
+#ifdef PARALLEL
+        ENDIF
+        CALL BCast(Present)
+#endif
+        IF(Present)THEN     
+           CALL Get(T1,TrixFile('X',Args))   ! T1=S_new^(-1/2)
+           CALL Multiply(T1,P,T2)            ! T2=S_new^(-1/2).P_old
+           CALL Multiply(T2,T1,T0)           ! P_new_AO=S_new^(-1/2).P_old.S_new^(-1/2)
+           CALL Filter(P,T0)                 ! T1=Filter[P_new_AO]
+        ELSE
+           CALL Get(T1,TrixFile('Z',Args))   ! T1=Z_new
+           CALL Multiply(T1,P,T2)            ! T2=Z.P_old
+           CALL Get(T1,TrixFile('ZT',Args))  ! T1=Z^T
+           CALL Multiply(T2,T1,T0)           ! P_new_AO=Z.P_old.Z^T
+           CALL Filter(P,T0)                 ! T1=Filter[P_new_AO]
+        ENDIF
+        CALL Delete(T0)
+        CALL Delete(T1)
+        CALL Delete(T2)
+#endif
+
      ELSE
         CALL Halt(' Invalid guess, suggest starting with minimal STO-2G! ')
         !         Evenly wheigted diagonal guess (better than core ;)
