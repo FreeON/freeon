@@ -56,15 +56,36 @@ MODULE PBCFarField
 !
 !     Calculate Dipole energy
 !
-      E_DP = Two*GM%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      IF(GM%PBC%Dimen == 2) THEN
+         IF(.NOT. GM%PBC%AutoW(1) ) E_DP = Two*GM%PBC%DipoleFAC*RhoPoles%DPole%D(1)**2
+         IF(.NOT. GM%PBC%AutoW(2) ) E_DP = Two*GM%PBC%DipoleFAC*RhoPoles%DPole%D(2)**2         
+         IF(.NOT. GM%PBC%AutoW(3) ) E_DP = Two*GM%PBC%DipoleFAC*RhoPoles%DPole%D(3)**2
+      ELSEIF(GM%PBC%Dimen == 3) THEN 
+         E_DP = Two*GM%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+      ENDIF
 !
-!     Calculate the Radial Quadrupole
+!     Calculate the Radial Quadrupole and the Quadripole Energy
 !
-      QRPole = RhoPoles%QPole%D(1)+RhoPoles%QPole%D(2)+RhoPoles%QPole%D(3)
+      QRPole = RhoPoles%QPole%D(1)+RhoPoles%QPole%D(2)+RhoPoles%QPole%D(3)  
+      IF(GM%PBC%Dimen == 3) THEN 
+         E_QP = ABS(GM%NElec)*GM%PBC%QupoleFAC*QRPole
+      ENDIF
 !
-!     Calculate Quadrupole energy
-!
-      E_QP = ABS(GM%NElec)*GM%PBC%QupoleFAC*QRPole
+!!$      WRITE(*,*) 'GM%PBC%Dimen  = ',GM%PBC%Dimen 
+!!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
+!!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
+!!$      WRITE(*,*) 'MACDist       = ',MACDist
+!!$      WRITE(*,*) 'PACDist       = ',PACDist
+!!$      WRITE(*,*) 'RDist         = ',RDist      
+!!$      WRITE(*,*) '|Dipole|      = ',SQRT(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
+!!$      WRITE(*,*)
+!!$      WRITE(*,*) 'Epsilon       = ',GM%PBC%Epsilon
+!!$      WRITE(*,*) 'DipoleFAC     = ',GM%PBC%DipoleFAC
+!!$      WRITE(*,*) 'QupoleFAC     = ',GM%PBC%QupoleFAC
+!!$      WRITE(*,*) 'E_PFF         = ',E_PFF
+!!$      WRITE(*,*) 'E_DP          = ',E_DP     
+!!$      WRITE(*,*) 'E_QP          = ',E_QP
+!!$      WRITE(*,*)
 !
     END SUBROUTINE PBCFarFieldSetUp
 !---------------------------------------------------------------------------------------------- 
@@ -75,7 +96,7 @@ MODULE PBCFarField
       INTEGER             :: Unit
 !
       IF(PRESENT(Unit_O)) THEN
-         Unit = Unit_O
+         Unit=Unit_O
       ELSE
          Unit=Out
       ENDIF
@@ -144,18 +165,86 @@ MODULE PBCFarField
          CTraxFF = CTraxFF + PFFBraC(LM)*FarFC(LM)+PFFBraS(LM)*FarFS(LM)
       ENDDO
 !
-!     INCLUDE THE DIPOLE correction to FarFC and FarFS
+!     Include the Dipole and Quadripole Correction to FarFC and FarFS
 !
-      HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
-      CTraxFF  = CTraxFF + GM%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
-                                           + HGDipole(2)*RhoPoles%DPole%D(2) &
-                                           + HGDipole(3)*RhoPoles%DPole%D(3) )
+      IF(GM%PBC%Dimen == 1) THEN
+         RETURN
+      ELSEIF(GM%PBC%Dimen == 2) THEN
+         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
+         IF(.NOT. GM%PBC%AutoW(1)) CTraxFF  = CTraxFF + GM%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)         
+         IF(.NOT. GM%PBC%AutoW(2)) CTraxFF  = CTraxFF + GM%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(.NOT. GM%PBC%AutoW(3)) CTraxFF  = CTraxFF + GM%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         RETURN
+      ELSEIF(GM%PBC%Dimen == 3) THEN
+         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
+         CTraxFF  = CTraxFF + GM%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
+                                              + HGDipole(2)*RhoPoles%DPole%D(2) &
+                                              + HGDipole(3)*RhoPoles%DPole%D(3) )
 !
-!     INCLUDE THE QUADRIPOLE correction 
-!
-      CTraxFF = CTraxFF + PiZ*HGBra(1)*GM%PBC%QupoleFAC*QRPole
+         CTraxFF  = CTraxFF + PiZ*HGBra(1)*GM%PBC%QupoleFAC*QRPole
+         RETURN
+      ENDIF
 !
     END FUNCTION CTraxFF
+!====================================================================================
+!   Calculate the FarField Component of the JForce matrix
+!====================================================================================
+   FUNCTION CTraxFF_Grad(Prim,HGBra)
+      TYPE(PrimPair)                   :: Prim
+      INTEGER                          :: LM
+      REAL(DOUBLE)                     :: PiZ,CTraxFF_Grad
+      REAL(DOUBLE), DIMENSION(3)       :: PQ,HGDipole
+      REAL(DOUBLE), DIMENSION(1:)      :: HGBra
+!
+      CTraxFF_Grad = Zero
+!
+!     Transform <Bra| coefficients from HG to SP
+!
+      PiZ=(Pi/Prim%Zeta)**(ThreeHalves)
+      CALL HGToSP_Gen(Prim%Ell,PiZ,HGBra,PFFBraC,PFFBraS)   
+      PQ = -Prim%P+GM%PBC%CellCenter
+!
+      IF(.NOT. NoTranslate(PQ)) THEN 
+         PFFKetC = Zero
+         PFFKetS = Zero
+         FarFC  = Zero
+         FarFS  = Zero
+         CALL Regular(FFELL,PQ(1),PQ(2),PQ(3))
+         CALL XLate77(FFELL,FFEll,PFFKetC,PFFKetS,Cpq,Spq,RhoC,RhoS)
+         CALL CTraX77(Prim%ELL,FFEll,FarFC,FarFS,TensorC,TensorS,PFFKetC,PFFKetS)
+      ELSE
+         FarFC  = Zero
+         FarFS  = Zero
+         CALL CTraX77(Prim%ELL,FFEll,FarFC,FarFS,TensorC,TensorS,RhoC,RhoS)
+      ENDIF
+!
+!     Contrax the <Bra|Ket> FF corection
+!
+      DO LM = 0,LSP(Prim%Ell)
+         CTraxFF_Grad = CTraxFF_Grad + PFFBraC(LM)*FarFC(LM)+PFFBraS(LM)*FarFS(LM)
+      ENDDO
+!
+!     Include the Dipole and Quadripole Correction to FarFC and FarFS
+!
+      IF(GM%PBC%Dimen == 1) THEN
+         RETURN
+      ELSEIF(GM%PBC%Dimen == 2) THEN
+         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
+         IF(.NOT. GM%PBC%AutoW(1)) CTraxFF_Grad  = CTraxFF_Grad + GM%PBC%DipoleFAC*HGDipole(1)*RhoPoles%DPole%D(1)
+         IF(.NOT. GM%PBC%AutoW(2)) CTraxFF_Grad  = CTraxFF_Grad + GM%PBC%DipoleFAC*HGDipole(2)*RhoPoles%DPole%D(2)
+         IF(.NOT. GM%PBC%AutoW(3)) CTraxFF_Grad  = CTraxFF_Grad + GM%PBC%DipoleFAC*HGDipole(3)*RhoPoles%DPole%D(3)
+         RETURN
+      ELSEIF(GM%PBC%Dimen == 3) THEN
+         HGDipole = CalculateDiPole(Prim%Ell,Prim%Zeta,-PQ(1),-PQ(2),-PQ(3),HGBra(1:))
+         CTraxFF_Grad  = CTraxFF_Grad + GM%PBC%DipoleFAC*(HGDipole(1)*RhoPoles%DPole%D(1) &
+                                                        + HGDipole(2)*RhoPoles%DPole%D(2) &
+                                                        + HGDipole(3)*RhoPoles%DPole%D(3) )
+!
+         CTraxFF_Grad  = CTraxFF_Grad + PiZ*HGBra(1)*GM%PBC%QupoleFAC*QRPole
+         RETURN
+      ENDIF
+!
+    END FUNCTION CTraxFF_Grad
 !========================================================================================
 ! Calculate the SP Moments of Rho_Loc
 !========================================================================================
@@ -202,6 +291,8 @@ MODULE PBCFarField
             ENDDO
          ENDIF
       ENDDO
+      RhoC(0) = Zero
+      RhoS(0) = Zero
 !
     END SUBROUTINE RhoToSP
 !========================================================================================
@@ -211,21 +302,18 @@ MODULE PBCFarField
     TYPE(PoleNode)                   :: Q
     INTEGER                          :: I,J,K,LP
     INTEGER                          :: IRmin,IRmax
-    REAL(DOUBLE)                     :: Px,Py,Pz,O_LP,O_FFEll,NFac,Dist
+    REAL(DOUBLE)                     :: Px,Py,Pz,O_LP,O_FFEll,NFac,Dist,Mx,My,Mz
     REAL(DOUBLE)                     :: MACDist,PACDist,Radius
-!
+!    
+    IRmin = CS_OUT%NCells-1
     IF(GM%PBC%Dimen==0) THEN
-       IRmin = 0
        IRmax = 2
     ELSEIF(GM%PBC%Dimen==1) THEN
-       IRmin = 1
-       IRmax = 10
+       IRmax = 50
     ELSEIF(GM%PBC%Dimen==2) THEN
-       IRmin = 7
-       IRmax = 100
+       IRmax = 500
     ELSEIF(GM%PBC%Dimen==3) THEN
-       IRmin = 26
-       IRmax = 1000
+       IRmax = 5000
     ENDIF
 !
 !   PAC Distance (From PoleRoot)
@@ -238,24 +326,37 @@ MODULE PBCFarField
 !   MAC DISTANCE
 !
     MACDist = Zero
-    DO LP=0,BS%NASym 
-       O_LP     = UnsoldO(LP,RhoC,RhoS)/(Thresholds%TwoE)
-       O_FFELL  = UnsoldO(FFEll,RhoC,RhoS)
-       NFac     = FudgeFactorial(LP,FFELL)
-       Dist     = (O_LP*NFac*O_FFEll)**(One/DBLE(FFEll+LP+2))
-       MACDist = MAX(MACDist,Dist)
+    DO I=-1,1
+       DO J=-1,1
+          DO K=-1,1
+             Mx = DBLE(I)*Px
+             My = DBLE(J)*Py
+             Mz = DBLE(K)*Pz
+             IF(.NOT. GM%PBC%AutoW(1)) Mx = Zero
+             IF(.NOT. GM%PBC%AutoW(2)) My = Zero
+             IF(.NOT. GM%PBC%AutoW(3)) Mz = Zero
+             CALL Regular(FFELL,Mx,My,Mz)
+             CALL XLate77(FFELL,FFEll,FarFC,FarFS,Cpq,Spq,RhoC,RhoS)
+             DO LP=0,BS%NASym 
+                O_LP     = UnsoldO(LP,FarFC,FarFS)/(TauPAC)
+                O_FFELL  = UnsoldO(FFEll,FarFC,FarFS)
+                NFac     = FudgeFactorial(LP,FFELL)
+                Dist     = (O_LP*NFac*O_FFEll)**(One/DBLE(FFEll+LP+2))
+                MACDist  = MAX(MACDist,Dist)
+             ENDDO
+          ENDDO
+       ENDDO
     ENDDO
-    MACDist = MACDist
 !
 !   Generate the Cells for the Inner Box
 !  
-    Radius = PACDist+MACDist
+    Radius = MAX(MACDist,PACDist)
     CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
     DO 
        IF(CS_IN%NCells .LT. IRmax) THEN
           EXIT
-       ELSE
-          Radius = 0.99D0*Radius
+       ELSE          
+          Radius = 0.999D0*Radius
           CALL Delete_CellSet(CS_IN)
           CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
        ENDIF
@@ -265,7 +366,7 @@ MODULE PBCFarField
        IF(CS_IN%NCells .GT. IRmin) THEN
           EXIT
        ELSE
-          Radius = 1.01D0*Radius
+          Radius = 1.001D0*Radius
           CALL Delete_CellSet(CS_IN)
           CALL New_CellSet_Sphere(CS_IN,GM%PBC%AutoW,GM%PBC%BoxShape,Radius)
        ENDIF
