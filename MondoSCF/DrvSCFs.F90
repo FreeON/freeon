@@ -103,6 +103,9 @@ MODULE DrvSCFs
          CtrlVect=SetCtrlVect(Ctrl,'Restart')
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
          Ctrl%Rest=.FALSE.
       ELSEIF(CCyc==0.AND.CBas/=PBas)THEN
 !        Basis set switch
@@ -120,6 +123,10 @@ MODULE DrvSCFs
          CtrlVect=SetCtrlVect(Ctrl,'DensitySuperposition')
          CALL Invoke('P2Use',CtrlVect,MPIRun_O=.TRUE.)
          CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         write(*,*) 'calling ParaMakeRho...'
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
       ELSEIF(Ctrl%InkFok)THEN
 !        First do a full density build 
          CALL LogSCF(Ctrl%Current,'Full density build followed by delta density build.',.TRUE.)
@@ -132,6 +139,10 @@ MODULE DrvSCFs
          CALL LogSCF(Ctrl%Current,'Standard density build',.TRUE.)
          CtrlVect=SetCtrlVect(Ctrl,'Direct')
          CALL Invoke('MakeRho',CtrlVect)
+#ifdef PARALLEL
+         write(*,*) 'calling ParaMakeRho...'
+         CALL Invoke('ParaMakeRho',CtrlVect,MPIRun_O=.TRUE.)
+#endif
       ENDIF
     END SUBROUTINE DensityBuild
 !==========================================================================
