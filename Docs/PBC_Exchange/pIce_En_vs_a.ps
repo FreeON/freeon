@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0
-%%Title: Diamond_En_vs_a.ps
-%%Creator: gnuplot 3.7 patchlevel 3
-%%CreationDate: Fri Dec 19 20:49:35 2003
+%%Title: En_vs_a_pIce.ps
+%%Creator: gnuplot 3.8j patchlevel 0
+%%CreationDate: Tue Jan 20 09:56:42 2004
 %%DocumentFonts: (atend)
 %%BoundingBox: 0 0 260 190
 %%Orientation: Portrait
@@ -14,15 +14,19 @@ gnudict begin
 /gnulinewidth 15.000 def
 /userlinewidth gnulinewidth def
 /vshift -46 def
-/dl {10 mul} def
-/hpt_ 60.5 def
-/vpt_ 60.5 def
+/dl {10.0 mul} def
+/hpt_ 62 def
+/vpt_ 62 def
 /hpt hpt_ def
 /vpt vpt_ def
+/Rounded false def
 /M {moveto} bind def
 /L {lineto} bind def
 /R {rmoveto} bind def
 /V {rlineto} bind def
+/N {newpath moveto} bind def
+/C {setrgbcolor} bind def
+/f {rlineto fill} bind def
 /vpt2 vpt 2 mul def
 /hpt2 hpt 2 mul def
 /Lshow { currentpoint stroke M
@@ -34,12 +38,15 @@ gnudict begin
 /UP { dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
   /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def } def
 /DL { Color {setrgbcolor Solid {pop []} if 0 setdash }
- {pop pop pop Solid {pop []} if 0 setdash} ifelse } def
-/BL { stroke userlinewidth 2 mul setlinewidth } def
-/AL { stroke userlinewidth 2 div setlinewidth } def
+ {pop pop pop 0 setgray Solid {pop []} if 0 setdash} ifelse } def
+/BL { stroke userlinewidth 2 mul setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
+/AL { stroke userlinewidth 2 div setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
 /UL { dup gnulinewidth mul /userlinewidth exch def
       dup 1 lt {pop 1} if 10 mul /udl exch def } def
-/PL { stroke userlinewidth setlinewidth } def
+/PL { stroke userlinewidth setlinewidth
+      Rounded { 1 setlinejoin 1 setlinecap } if } def
 /LTb { BL [] 0 0 0 DL } def
 /LTa { AL [1 udl mul 2 udl mul] 0 setdash 0 0 0 setrgbcolor } def
 /LT0 { PL [] 1 0 0 DL } def
@@ -237,16 +244,52 @@ gnudict begin
 /CircW { stroke [] 0 setdash 
   hpt 0 360 arc Opaque stroke } def
 /BoxFill { gsave Rec 1 setgray fill grestore } def
+/BoxColFill {
+  gsave Rec
+  /Fillden exch def
+  currentrgbcolor
+  /ColB exch def /ColG exch def /ColR exch def
+  /ColR ColR Fillden mul Fillden sub 1 add def
+  /ColG ColG Fillden mul Fillden sub 1 add def
+  /ColB ColB Fillden mul Fillden sub 1 add def
+  ColR ColG ColB setrgbcolor
+  fill grestore } def
+%
+% PostScript Level 1 Pattern Fill routine
+% Usage: x y w h s a XX PatternFill
+%	x,y = lower left corner of box to be filled
+%	w,h = width and height of box
+%	  a = angle in degrees between lines and x-axis
+%	 XX = 0/1 for no/yes cross-hatch
+%
+/PatternFill { gsave /PFa [ 9 2 roll ] def
+    PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
+    PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
+    gsave 1 setgray fill grestore clip
+    currentlinewidth 0.5 mul setlinewidth
+    /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
+    0 0 M PFa 5 get rotate PFs -2 div dup translate
+	0 1 PFs PFa 4 get div 1 add floor cvi
+	{ PFa 4 get mul 0 M 0 PFs V } for
+    0 PFa 6 get ne {
+	0 1 PFs PFa 4 get div 1 add floor cvi
+	{ PFa 4 get mul 0 2 1 roll M PFs 0 V } for
+    } if
+    stroke grestore } def
+%
 /Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
 dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
 currentdict end definefont pop
 /MFshow {{dup dup 0 get findfont exch 1 get scalefont setfont
-     [ currentpoint ] exch dup 2 get 0 exch rmoveto dup dup 5 get exch 4 get
-     {show} {stringwidth pop 0 rmoveto}ifelse dup 3 get
-     {2 get neg 0 exch rmoveto pop} {pop aload pop moveto}ifelse} forall} bind def
-/MFwidth {0 exch {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
-      5 get stringwidth pop add}
-    {pop} ifelse} forall} bind def
+     [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
+     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
+     {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
+     get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
+     dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
+     show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
+     pop aload pop M} ifelse }ifelse }ifelse } forall} bind def
+/MFwidth {0 exch {dup 3 get{dup dup 0 get findfont exch 1 get scalefont
+     setfont 6 get stringwidth pop add} {pop} ifelse} forall} bind def
 /MLshow { currentpoint stroke M
   0 exch R MFshow } bind def
 /MRshow { currentpoint stroke M
@@ -258,303 +301,369 @@ end
 %%Page: 1 1
 gnudict begin
 gsave
-0 0 translate
+5 5 translate
 0.035 0.035 scale
 0 setgray
 newpath
-(Times) findfont 200 scalefont setfont
+(Times) findfont 140 scalefont setfont
 1.000 UL
 LTb
+1050 420 M
+63 0 V
+5849 0 R
+-63 0 V
+stroke
 966 420 M
-63 0 V
-5933 0 R
--63 0 V
- stroke
-882 420 M
-[ [(Times) 200.0 0.0 true true (-37.8163)]
+[ [(Times) 200.0 0.0 true true 0 (-76.0192)]
 ] -46.7 MRshow
-966 976 M
+1.000 UL
+LTb
+1050 865 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 976 M
-[ [(Times) 200.0 0.0 true true (-37.8150)]
+stroke
+966 865 M
+[ [(Times) 200.0 0.0 true true 0 ()]
 ] -46.7 MRshow
-966 1533 M
+1.000 UL
+LTb
+1050 1310 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 1533 M
-[ [(Times) 200.0 0.0 true true (-37.8138)]
+stroke
+966 1310 M
+[ [(Times) 200.0 0.0 true true 0 (-76.0191)]
 ] -46.7 MRshow
-966 2089 M
+1.000 UL
+LTb
+1050 1756 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 2089 M
-[ [(Times) 200.0 0.0 true true (-37.8125)]
+stroke
+966 1756 M
+[ [(Times) 200.0 0.0 true true 0 ()]
 ] -46.7 MRshow
+1.000 UL
+LTb
+1050 2201 M
+63 0 V
+5849 0 R
+-63 0 V
+stroke
+966 2201 M
+[ [(Times) 200.0 0.0 true true 0 (-76.0190)]
+] -46.7 MRshow
+1.000 UL
+LTb
+1050 2646 M
+63 0 V
+5849 0 R
+-63 0 V
+stroke
 966 2646 M
-63 0 V
-5933 0 R
--63 0 V
- stroke
-882 2646 M
-[ [(Times) 200.0 0.0 true true (-37.8113)]
+[ [(Times) 200.0 0.0 true true 0 ()]
 ] -46.7 MRshow
-966 3202 M
+1.000 UL
+LTb
+1050 3091 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 3202 M
-[ [(Times) 200.0 0.0 true true (-37.8100)]
+stroke
+966 3091 M
+[ [(Times) 200.0 0.0 true true 0 (-76.0189)]
 ] -46.7 MRshow
-966 3759 M
+1.000 UL
+LTb
+1050 3536 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 3759 M
-[ [(Times) 200.0 0.0 true true (-37.8088)]
+stroke
+966 3536 M
+[ [(Times) 200.0 0.0 true true 0 ()]
 ] -46.7 MRshow
-966 4315 M
+1.000 UL
+LTb
+1050 3982 M
 63 0 V
-5933 0 R
+5849 0 R
 -63 0 V
- stroke
-882 4315 M
-[ [(Times) 200.0 0.0 true true (-37.8075)]
+stroke
+966 3982 M
+[ [(Times) 200.0 0.0 true true 0 (-76.0188)]
 ] -46.7 MRshow
+1.000 UL
+LTb
+1050 4427 M
+63 0 V
+5849 0 R
+-63 0 V
+stroke
+966 4427 M
+[ [(Times) 200.0 0.0 true true 0 ()]
+] -46.7 MRshow
+1.000 UL
+LTb
+1050 4872 M
+63 0 V
+5849 0 R
+-63 0 V
+stroke
 966 4872 M
-63 0 V
-5933 0 R
--63 0 V
- stroke
-882 4872 M
-[ [(Times) 200.0 0.0 true true (-37.8063)]
+[ [(Times) 200.0 0.0 true true 0 (-76.0187)]
 ] -46.7 MRshow
-1188 420 M
+1.000 UL
+LTb
+1050 420 M
 0 63 V
 0 4389 R
 0 -63 V
- stroke
-1188 280 M
-[ [(Times) 200.0 0.0 true true (3.30)]
-] -46.7 MCshow
-2298 420 M
-0 63 V
-0 4389 R
-0 -63 V
- stroke
-2298 280 M
-[ [(Times) 200.0 0.0 true true (3.35)]
-] -46.7 MCshow
-3409 420 M
-0 63 V
-0 4389 R
-0 -63 V
- stroke
-3409 280 M
-[ [(Times) 200.0 0.0 true true (3.40)]
-] -46.7 MCshow
-4519 420 M
-0 63 V
-0 4389 R
-0 -63 V
- stroke
-4519 280 M
-[ [(Times) 200.0 0.0 true true (3.45)]
-] -46.7 MCshow
-5630 420 M
-0 63 V
-0 4389 R
-0 -63 V
- stroke
-5630 280 M
-[ [(Times) 200.0 0.0 true true (3.50)]
-] -46.7 MCshow
-6740 420 M
-0 63 V
-0 4389 R
-0 -63 V
- stroke
-6740 280 M
-[ [(Times) 200.0 0.0 true true ( 3.55)]
+stroke
+1050 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 6.90)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-966 420 M
-5996 0 V
+1707 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+1707 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 6.95)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2364 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+2364 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.00)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3021 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+3021 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.05)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3678 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+3678 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.10)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4334 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+4334 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.15)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4991 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+4991 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.20)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5648 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+5648 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.25)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6305 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+6305 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.3)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6962 420 M
+0 63 V
+0 4389 R
+0 -63 V
+stroke
+6962 280 M
+[ [(Times) 200.0 0.0 true true 0 ( 7.35)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1.000 UL
+LTb
+1050 420 M
+5912 0 V
 0 4452 V
--5996 0 V
-966 420 L
- stroke
-10 2646 M
+-5912 0 V
+0 -4452 V
+LTb
+0 2646 M
 currentpoint gsave translate 90 rotate 0 0 moveto
-[ [(Times) 250.0 0.0 true true (Energy per Atom  \(a.u.\))]
+[ [(Times) 240.0 0.0 true true 0 (Energy per Molecule  \(a.u.\))]
 ] -46.7 MCshow
 grestore
-3964 -30 M
-[ [(Times) 250.0 0.0 true true (Lattice Constant \(a.u.\))]
+LTb
+4006 0 M
+[ [(Times) 240.0 0.0 true true 0 (Lattice Constant \(\a.u.\))]
 ] -46.7 MCshow
+1.000 UP
 1.000 UP
 1.000 UL
 LTb
-5811 4650 M
-[ [(Times) 200.0 0.0 true true (MondoSCF N=512)]
-] -46.7 MRshow
-5811 4400 M
-[ [(Times) 200.0 0.0 true true (MondoSCF   N=64)]
-] -46.7 MRshow
-5811 4150 M
-[ [(Times) 200.0 0.0 true true (Crystal98)]
-] -46.7 MRshow
+6000 4650 M
+(Crystal98) Rshow
 LT0
-5895 4650 M
-399 0 V
+6100 4650 M
+400 0 V
+%
+LTb
+5300 4400 M
+(MondoSCF:) Rshow
+%
+5400 4380 M
+[[(Symbol) 220.0 0.0 true true 0 (t)]
+] 0.0 MCshow
+5650 4380 M
+[[(Times) 220.0 0.0 true true 0 (=10)]
+] 0.0 MCshow
+5910 4450 M
+[[(Times) 180.0 0.0 true true 0 (-4)]
+] 0.0 MCshow
+5910 4450 M
+[[(Times) 240.0 0.0 true true 0 ()]
+] 0.0 MCshow
 LT1
-5895 4400 M
-399 0 V
+6100 4400 M
+400 0 V
+6300 4400 CircleF
+%
+LTb
+5300 4150 M
+(MondoSCF:) Rshow
+%
+5400 4120 M
+[[(Symbol) 220.0 0.0 true true 0 (t)]
+] 0.0 MCshow
+5650 4120 M
+[[(Times) 220.0 0.0 true true 0 (=10)]
+] 0.0 MCshow
+5910 4200 M
+[[(Times) 180.0 0.0 true true 0 (-6)]
+] 0.0 MCshow
 LT2
-5895 4150 M
-399 0 V
+6100 4150 M
+400 0 V
+6300 4150 BoxF
 %
+LT1
+1707 4611 M
+2232 3124 L
+2758 2104 L
+525 -776 V
+3809 663 L
+4334 529 L
+526 214 V
+525 408 V
+526 801 V
+525 916 V
+526 1275 V
+1707 4611 CircleF
+2232 3124 CircleF
+2758 2104 CircleF
+3283 1328 CircleF
+3809 663 CircleF
+4334 529 CircleF
+4860 743 CircleF
+5385 1151 CircleF
+5911 1952 CircleF
+6436 2868 CircleF
+6962 4143 CircleF
 %
+LT2
+1707 4574 M
+2232 3172 L
+2758 2130 L
+525 -717 V
+3809 992 L
+4334 888 L
+526 174 V
+525 443 V
+526 751 V
+525 1003 V
+526 1254 V
+1707 4574 BoxF
+2232 3172 BoxF
+2758 2130 BoxF
+3283 1413 BoxF
+3809 992 BoxF
+4334 888 BoxF
+4860 1062 BoxF
+5385 1505 BoxF
+5911 2256 BoxF
+6436 3259 BoxF
+6962 4513 BoxF
+1707 4413 BoxF
 %
 LT0
-2965 1184 M
-444 -183 V
-444 -68 V
-444 53 V
-444 185 V
+1707 4413 M
+263 -727 V
+262 -644 V
+263 -560 V
+263 -479 V
+263 -397 V
+262 -318 V
+263 -242 V
+3809 882 L
+263 -89 V
+262 -13 V
+263 58 V
+263 129 V
+263 200 V
+262 269 V
+263 337 V
+263 405 V
+263 471 V
+262 537 V
+237 535 V
+289 726 V
 %
-2965 1184 Circle
-3409 1001 Circle
-3853 933 Circle
-4297 986 Circle
-4741 1171 Circle
-6095 4650 Circle
-%
-%
-%
-LT1
-1188 4338 M
-222 -404 V
-222 -365 V
-222 -328 V
-222 -291 V
-222 -255 V
-223 -219 V
-222 -185 V
-222 -151 V
-222 -117 V
-222 -84 V
-222 -52 V
-222 -20 V
-222 11 V
-222 41 V
-222 72 V
-222 101 V
-222 129 V
-222 159 V
-222 185 V
-223 214 V
-222 239 V
-222 267 V
-222 292 V
-222 317 V
-222 342 V
-%
-%
-%
-LT2
-1188 2995 M
-222 -385 V
-222 -347 V
-222 -309 V
-222 -272 V
-222 -165 V
-223 -181 V
-222 -168 V
-222 -134 V
-3187 934 L
-222 -68 V
-222 -36 V
-222 -3 V
-222 26 V
-222 55 V
-222 87 V
-222 131 V
-222 144 V
-222 173 V
-222 199 V
-223 228 V
-222 255 V
-222 280 V
-222 306 V
-222 326 V
-%
-%
-%
-%1188 4338 Pls
-%1410 3934 Pls
-%1632 3569 Pls
-%1854 3241 Pls
-%2076 2950 Pls
-%2298 2695 Pls
-%2521 2476 Pls
-%2743 2291 Pls
-%2965 2140 Pls
-%3187 2023 Pls
-%3409 1939 Pls
-%3631 1887 Pls
-%3853 1867 Pls
-%4075 1878 Pls
-%4297 1919 Pls
-%4519 1991 Pls
-%4741 2092 Pls
-%4963 2221 Pls
-%5185 2380 Pls
-%5407 2565 Pls
-%5630 2779 Pls
-%5852 3018 Pls
-%6074 3285 Pls
-%6296 3577 Pls
-%6518 3894 Pls
-%6740 4236 Pls
-%
-%
-%
-%1188 2995 Pls
-%1410 2610 Pls
-%1632 2263 Pls
-%1854 1954 Pls
-%2076 1682 Pls
-%2298 1517 Pls
-%2521 1336 Pls
-%2743 1168 Pls
-%2965 1034 Pls
-%3187 934 Pls
-%3409 866 Pls
-%3631 830 Pls
-%3853 827 Pls
-%4075 853 Pls
-%4297 908 Pls
-%4519 995 Pls
-%4741 1126 Pls
-%4963 1270 Pls
-%5185 1443 Pls
-%5407 1642 Pls
-%5630 1870 Pls
-%5852 2125 Pls
-%6074 2405 Pls
-%6296 2711 Pls
-%6518 3037 Pls
-%6594 4739 Pls
+1.000 UL
+LTb
+1050 420 M
+5912 0 V
+0 4452 V
+-5912 0 V
+0 -4452 V
+1.000 UP
 stroke
 grestore
 end
@@ -562,4 +671,3 @@ showpage
 %%Trailer
 %%DocumentFonts: Times
 %%Pages: 1
-
