@@ -131,74 +131,126 @@ MODULE ControlStructures
      CHARACTER(LEN=DCL)              :: SubAction
      TYPE(INT_VECT)                  :: Current,Previous
   END TYPE State
-
-  TYPE OptimizerType
-     INTEGER                            :: AccL
-     CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
-     LOGICAL                            :: DoInternals
-     LOGICAL                            :: DoRotOff
-     LOGICAL                            :: DoTranslOff
-     INTEGER                            :: ActStep   
-     INTEGER                            :: ReDefIntC
-     INTEGER                            :: MaxGeOpSteps
-     INTEGER                            :: BlkGeomSize 
-     INTEGER                            :: IMaxGrad
-     INTEGER                            :: IMaxGradNoConstr
-     INTEGER                            :: MaxIt_GrdTrf
+ 
+  TYPE GDIIS
+    LOGICAL                            :: NoGDIIS    
+    LOGICAL                            :: On
+    INTEGER                            :: Init
+    INTEGER                            :: MaxMem
+  END TYPE GDIIS
+  !
+  TYPE Constr
+     INTEGER                            :: NConstr
+     INTEGER                            :: NCartConstr
+     REAL(DOUBLE)                       :: ConstrMax
+     REAL(DOUBLE)                       :: ConstrMaxCrit
+     LOGICAL                            :: DoFixMM
+     LOGICAL                            :: TSSearch
+  END TYPE Constr
+  !
+  TYPE BackTrf
      INTEGER                            :: MaxIt_CooTrf
-     INTEGER                            :: NConstr 
-     INTEGER                            :: NCartConstr 
-     INTEGER                            :: GDIISMinDomCount
-     INTEGER                            :: GDIISInit
-     INTEGER                            :: GDIISMaxMem
-     INTEGER                            :: LSStepMax
-     REAL(DOUBLE)                       :: AINVThrsh    
-     REAL(DOUBLE)                       :: BMatThrsh   
-     REAL(DOUBLE)                       :: StreHessian  
-     REAL(DOUBLE)                       :: BendHessian 
-     REAL(DOUBLE)                       :: LinBHessian 
-     REAL(DOUBLE)                       :: OutPHessian 
-     REAL(DOUBLE)                       :: TorsHessian 
-     REAL(DOUBLE)                       :: StpDescInvH 
-     REAL(DOUBLE)                       :: MaxGrad      
-     REAL(DOUBLE)                       :: RMSGrad      
-     REAL(DOUBLE)                       :: OldRMSGrad      
+     REAL(DOUBLE)                       :: CooTrfCrit
+     REAL(DOUBLE)                       :: RMSCrit
+     REAL(DOUBLE)                       :: MaxCartDiff
+     REAL(DOUBLE)                       :: DistRefresh
+  END TYPE BackTrf
+  !
+  TYPE GrdTrf
+     INTEGER                            :: MaxIt_GrdTrf
+     REAL(DOUBLE)                       :: GrdTrfCrit
+     REAL(DOUBLE)                       :: MaxGradDiff
+  END TYPE GrdTrf
+  !
+  TYPE GConvCrit 
+     REAL(DOUBLE)                       :: Grad
+     REAL(DOUBLE)                       :: Stre
+     REAL(DOUBLE)                       :: Bend
+     REAL(DOUBLE)                       :: OutP
+     REAL(DOUBLE)                       :: LinB
+     REAL(DOUBLE)                       :: Tors
+     INTEGER                            :: MaxGeOpSteps
+  END TYPE GConvCrit 
+  !
+  TYPE GOptStat 
+     INTEGER                            :: ActStep
+     REAL(DOUBLE)                       :: MaxStreDispl
+     REAL(DOUBLE)                       :: MaxBendDispl
+     REAL(DOUBLE)                       :: MaxLinBDispl
+     REAL(DOUBLE)                       :: MaxOutPDispl
+     REAL(DOUBLE)                       :: MaxTorsDispl
+     INTEGER                            :: IMaxGrad
+     REAL(DOUBLE)                       :: MaxGrad
+     REAL(DOUBLE)                       :: RMSGrad
+     INTEGER                            :: IMaxGradNoConstr
      REAL(DOUBLE)                       :: MaxGradNoConstr
      REAL(DOUBLE)                       :: RMSGradNoConstr
-     REAL(DOUBLE)                       :: MaxStreDispl 
-     REAL(DOUBLE)                       :: MaxBendDispl 
-     REAL(DOUBLE)                       :: MaxLinBDispl 
-     REAL(DOUBLE)                       :: MaxOutPDispl 
-     REAL(DOUBLE)                       :: MaxTorsDispl 
-     REAL(DOUBLE)                       :: RMSIntDispl   
-     REAL(DOUBLE)                       :: GradCrit     
-     REAL(DOUBLE)                       :: StreConvCrit
-     REAL(DOUBLE)                       :: BendConvCrit
-     REAL(DOUBLE)                       :: OutPConvCrit
-     REAL(DOUBLE)                       :: LinBConvCrit
-     REAL(DOUBLE)                       :: TorsConvCrit
-     REAL(DOUBLE)                       :: AINVThresh    
-     REAL(DOUBLE)                       :: GrdTrfCrit    
-     REAL(DOUBLE)                       :: MaxGradDiff   
-     REAL(DOUBLE)                       :: CooTrfCrit    
-     REAL(DOUBLE)                       :: RMSCrit    
-     REAL(DOUBLE)                       :: MaxCartDiff   
-     REAL(DOUBLE)                       :: DistRefresh   
-     REAL(DOUBLE)                       :: ConstrMax     
-     REAL(DOUBLE)                       :: ConstrMaxCrit 
-     REAL(DOUBLE)                       :: GDIISBandWidth 
-     REAL(DOUBLE)                       :: GDIISMetric
-     LOGICAL                            :: NoGDIIS    
-     LOGICAL                            :: GeOpConvgd    
-     LOGICAL                            :: GDIISOn
-     LOGICAL                            :: GDIISMetricOn
-     CHARACTER(LEN=DEFAULT_CHR_LEN)     :: GDIISCoordType
-  END TYPE OptimizerType
+     LOGICAL                            :: GeOpConvgd
+     REAL(DOUBLE)                       :: RMSIntDispl
+  END TYPE GOptStat 
+  !
+  TYPE Hessian 
+     REAL(DOUBLE)                       :: Stre
+     REAL(DOUBLE)                       :: Bend
+     REAL(DOUBLE)                       :: LinB
+     REAL(DOUBLE)                       :: OutP
+     REAL(DOUBLE)                       :: Tors
+     REAL(DOUBLE)                       :: StpDescInvH
+  END TYPE Hessian 
+  !
+  TYPE StepSize 
+     REAL(DOUBLE)                       :: Stre
+     REAL(DOUBLE)                       :: Bend
+     REAL(DOUBLE)                       :: LinB
+     REAL(DOUBLE)                       :: OutP
+     REAL(DOUBLE)                       :: Tors
+     REAL(DOUBLE)                       :: Cart
+  END TYPE StepSize 
+  !
+  TYPE TrfCtrl
+     INTEGER,DIMENSION(3)               :: ThreeAt
+     LOGICAL                            :: DoFullTrf
+     LOGICAL                            :: DoClssTrf
+     LOGICAL                            :: DoInternals
+     LOGICAL                            :: DoNewChol 
+     LOGICAL                            :: DoRotOff
+     LOGICAL                            :: DoTranslOff
+  END TYPE TrfCtrl
+  !
+  TYPE CoordCtrl
+     INTEGER                            :: RefreshIn
+     INTEGER                            :: Refresh
+     REAL(DOUBLE)                       :: VDWFact
+     LOGICAL                            :: Linearity
+     CHARACTER(LEN=DEFAULT_CHR_LEN)     :: CoordType
+     INTEGER                            :: NExtra
+     INTEGER                            :: NStre
+     INTEGER                            :: NBend
+     INTEGER                            :: NLinB
+     INTEGER                            :: NOutP
+     INTEGER                            :: NTors
+     REAL(DOUBLE)                       :: LinCrit
+     REAL(DOUBLE)                       :: OutPCrit
+  END TYPE CoordCtrl
+
+  TYPE GeomOpt
+     INTEGER                         :: Optimizer
+     TYPE(CoordCtrl)                 :: CoordCtrl
+     TYPE(TrfCtrl)                   :: TrfCtrl
+     TYPE(StepSize)                  :: StepSize
+     TYPE(Hessian)                   :: Hessian
+     TYPE(GOptStat)                  :: GOptStat
+     TYPE(GConvCrit)                 :: GConvCrit
+     TYPE(GrdTrf)                    :: GrdTrf
+     TYPE(BackTrf)                   :: BackTrf
+     TYPE(Constr)                    :: Constr
+     TYPE(GDIIS)                     :: GDIIS
+  END TYPE GeomOpt
 
   TYPE Controls
      TYPE(FileNames)  :: Nams
      TYPE(Options)    :: Opts
-     TYPE(OptimizerType)  :: Mizr
+     TYPE(GeomOpt)    :: GOpt
      TYPE(Dynamics)   :: Dyns
      TYPE(Geometries) :: Geos
 #ifdef PERIODIC
