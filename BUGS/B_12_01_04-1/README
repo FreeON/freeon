@@ -1,4 +1,3 @@
-Messed up forces, seems like things are uninitialized.
 
 MONDO version used:  2004-12-06 08:02
 Compiled on zinc with CompilerSpecifics.IntelLinux.NAG ,
@@ -8,13 +7,14 @@ PROBLEM:
 HF/3-21G/good on polyethilene.
 After a very difficult SCF convergence force conponents are printed.
 It turns out that already S-Force contains extremely large 
-component is 3-21G basis, while it did not, say, in STO-2G.
+component in 3-21G basis, while it did not, say, in STO-2G.
+See force components in CH2x-6_27129.out-2 .
 
 For printing, the attached SCFs.F90 was used. Beside the extra 
 printing it is identical to version 2004-12-06 08:02.
 
 Also, why was SCF convergence for such a simple electronic structure
-as polyethylene such a struggle (see CH2x-6_9156.out-1)?
+as polyethylene such a struggle in 3-21G (see CH2x-6_9156.out-1)?
 
 Fixing of huge force components is needed.
 K.N. 12/06/04.
