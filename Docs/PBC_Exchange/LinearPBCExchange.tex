@@ -227,7 +227,7 @@ This criterion is applied at the contraction phase, ensuring that primitive char
 interact consistently over a minimum distance.  In particular, if the primitive basis 
 function product $\phi_a \phi^{\bf u}_c$ is centered at $\bf P$ and the primitive product 
 $\phi_b \phi^{\bf v}_d$ is at $\bf Q$, then the minimum image criterion is 
-applied simply to the interaction vector $\bf P-Q = \{{\tt PQx},{\tt PQy},{\tt PQz} \}$ using
+applied simply to the interaction vector $ {\bf P}-{\bf Q} $
 \begin{verbatim}
 FPQx=PQx*InvBox(1,1)+PQy*InvBox(1,2)+PQz*InvBox(1,3)
 FPQy=PQy*InvBox(2,2)+PQz*InvBox(2,3)
@@ -287,7 +287,7 @@ Program         & $N_{\rm at}$              & Energy (au)   & Energy/$N_{\rm at}
 {\sc MondoSCF}       & 128$^f$  & -17578.502  & -137.33205 \\
      --              & 216$^g$  & -29663.729  & -137.33208 \\ 
 \hline
-{\sc Crystal98}$^i$  & 2    & -274.66415  & -137.33208  \\ 
+{\sc Crystal98}$^i$  & 2\       & -274.66415  & -137.33208  \\ 
 \botrule 
 \end{tabular}
 
@@ -378,7 +378,7 @@ in preparation of this manuscript.
 \begin{figure}
 \caption{Unit cell and its brava lattice vectors.}
 \label{figure:SimCell}
-%{\centering \includegraphics{UnitCell_2.ps} \par}
+{\centering \includegraphics{UnitCell_2.ps} \par}
 \end{figure}
 %
 %
@@ -386,7 +386,7 @@ in preparation of this manuscript.
 \begin{figure}
 \caption{For the Gamma point, the region in which atom $a$ has exchange interactions.}
 \label{figure:ExchangeRegion}
-%{\centering \includegraphics{ExchangeRegion.ps} \par}
+{\centering \includegraphics{ExchangeRegion.ps} \par}
 \end{figure}
 %
 %
@@ -394,7 +394,7 @@ in preparation of this manuscript.
 \begin{figure}
 \caption{For ${\bf k}_{max}=\{1,1,1\}$, the region in which atom $a$ has exchange interactions.}
 \label{figure:ExchangeRegion_k111}
-%{\centering \includegraphics{ExchangeRegion_k111.eps} \par}
+{\centering \includegraphics{ExchangeRegion_k111.ps} \par}
 \end{figure}
 %
 %
@@ -405,7 +405,7 @@ build (scaled by ten), and the density matrix solver (scaled by twenty),
 for the dense diamond periodic system up to 800 atoms using the
 6-31G$ ^\dagger$ basis set.}
 \label{figure:Scaling_Matrix_Build}
-%{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
+{\centering \includegraphics{Timing_Diamond_ONX.ps} \par} 
 \end{figure}
 %
 %
@@ -420,7 +420,7 @@ unit cell at the Gamma-point at a loose level of accuracy.
 All calculation where done using the 
 6-31G$ ^\dagger$ basis set hartree fock theory level. }
 \label{figure:EnergyVsLattice}
-{\centering \includegraphics{Diamond_En_vs_a.ps} \par} 
+{\centering \includegraphics{Diamond_En_vs_V.ps} \par} 
 \end{figure}
 %
 %
@@ -430,7 +430,7 @@ All calculation where done using the
 build and the density matrix solver  for the proton ordered ice periodic system up to 432 water molecules 
 using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of $\tau=10^{-4}$.}
 \label{figure:Scaling_Matrix_Build_Ice}
-%{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
+{\centering \includegraphics{Timing_pIce_ONX_1.ps} \par} 
 \end{figure}
 %
 %
@@ -441,7 +441,7 @@ build  for the proton ordered ice periodic system up to 432 water molecules
 using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} for a matrix threshold of 
 $\tau=10^{-4}$ and  $\tau=10^{-6}$.}
 \label{figure:Scaling_Matrix_Build_Ice}
-%{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
+{\centering \includegraphics{Timing_pIce_ONX_2.ps} \par} 
 \end{figure}
 %
 %
@@ -450,9 +450,10 @@ $\tau=10^{-4}$ and  $\tau=10^{-6}$.}
 \caption{Energy per Molecule vs. the $a_0$ Lattice constans for a {\bf Crystal98} calculation 
 with a two molecules per unit cell and ${\bf k}_{max} = (6,6,6)$ and a {\bf MondoSCF} calculation 
 with 432 molecules  per unit cell at the Gamma-point at a loose level of accuracy.
-All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} hartree fock theory level. }
+All calculation where done using a crystal optimized basis set\cite{CBS:511G:H,CBS:861G:MgO} 
+hartree fock theory level. }
 \label{figure:EnergyVsLattice_Ice}
-%{\centering \includegraphics{pIce_En_vs_a.ps} \par} 
+{\centering \includegraphics{pIce_En_vs_a.ps} \par} 
 \end{figure}
 %
 %
