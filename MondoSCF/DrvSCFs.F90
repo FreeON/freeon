@@ -544,7 +544,7 @@ MODULE DrvSCFs
 !-----------------------------------------------------------------------------
 #ifdef MMech
 !
-      SUBROUTINE   MM_COULOMBENERGY(Ctrl)
+      SUBROUTINE   MM_CoulombEnergy(Ctrl)
       IMPLICIT NONE
       TYPE(SCFControls)  :: Ctrl
       TYPE(INT_VECT)     :: Stat
@@ -580,7 +580,7 @@ MODULE DrvSCFs
          CALL Invoke('QCTC',CtrlVect)
        ENDIF
 !
-      END SUBROUTINE MM_COULOMBENERGY
+      END SUBROUTINE MM_CoulombEnergy
 #endif
 !-------------------------------------------------------------
 #ifdef MMech
@@ -628,15 +628,15 @@ MODULE DrvSCFs
         CALL Delete(GrdAux)
       ENDIF
 !
-! GM_MM must be on HDF before COULOMBENERGY is called
+! GM_MM must be on HDF before CoulombEnergy is called
 !
-! MM coulombenergy is calculated here only for case MMOnly 
+! MM CoulombEnergy is calculated here only for case MMOnly 
 ! Otherwise it is calculated in QCTC and put into HDF later
 !
 ! mm_coul=0.d0
 ! call put(mm_coul,'mm_coul',Tag_O=CurG)
  IF(MMOnly()) Then
-   CALL MM_COULOMBENERGY(Ctrl)
+   CALL MM_CoulombEnergy(Ctrl)
    CALL GET(MM_COUL,'MM_COUL',Tag_O=CurG)
    MM_COUL=MM_COUL/CONVF
  ENDIF
