@@ -551,6 +551,7 @@ CAssign,FortranAssign,MapleAssign];
 
 Begin["`Private`"]
 
+
 errmsgs = {
   {"argument lhs","a (flat) list of the same length as rhs"},
   {"option AssignBreak","False or a List of a positive integer and a string"},
@@ -855,6 +856,7 @@ FortranAssign[lhs_:"",expr_?(!OptionQ[#]&),opts___?OptionQ]:=
   ];
 
 
+
 SetAttributes[FMain,HoldFirst];
 
 FMain[lhs_,expr_,{linbrk_,acase_,aend_,fnumsQ_,hypQ_,indent_,index_,albl_,
@@ -872,9 +874,14 @@ amxsz_,optQ_,prec_,rangeQ_,arep_,tvar_,atoarry_,atofile_,trigQ_,zeroQ_},optopts_
 
 (* Toggle to avoid infinite recursion formatting FORTRAN numbers. *)
 
-        Real/: Format[r_Real,FortranForm]:=
+	 Real/: Format[r_Real,FortranForm]:=SequenceForm[10 First[#],D,Last[#]-1] & @ MantissaExponent[r]/; (AvoidRule=!AvoidRule);
+
+(*  
+
                  (SequenceForm[First[#] 10, expsymb, -1+Last[#]]& @
                    MantissaExponent[r]) /; (AvoidRule=!AvoidRule);
+
+*)
       ];
 
 (* Perform assignments and code translation. *)
