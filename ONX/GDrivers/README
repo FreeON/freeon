@@ -1,5 +1,7 @@
 These files contain the indexing that is used to drive the
-exchange gradient code.
+exchange gradient code. The files are divided up into 5 different
+types, the text after the G?. part is just the integral code 
+type for the Bra and the Ket. 
 
 --------------------------------------------------
 G1:
