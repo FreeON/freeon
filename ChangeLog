@@ -1,3 +1,142 @@
+2003-12-03 15:22  mchalla
+
+	* TwoE/: Gradient.m, Gradients.m, dInt1111.F90, dInt3111.F90,
+	dInt3131.F90, dInt3311.F90, dInt3331.F90, dInt3333.F90: 
+	Very first attempt at explicit gradients code!
+	
+	Party people, pump it UP!!
+
+2003-12-02 19:32  nemeth
+
+	* MondoMods/: InOut.F90, Makefile, MemMan.F90, MondoMPI.F90: The
+	parallel version was broken, due to the addition of logical arrays
+	to 'put'-s and 'get'-s. It is fixed now.
+
+2003-11-21 14:13  tymczak
+
+	* Docs/: DSAndErrorEstimates/ExactMultipoleError.tex,
+	DSAndErrorEstimates/Makefile, Bib/mondo_new.bib: [no log message]
+
+2003-11-21 14:07  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex, Makefile: [no log
+	message]
+
+2003-11-21 13:57  tymczak
+
+	* Docs/PBC_Exchange/: LinearPBCExchange.tex, Makefile: [no log
+	message]
+
+2003-11-21 13:12  tymczak
+
+	* Docs/Bib/mondo_new.bib: [no log message]
+
+2003-11-21 13:00  tymczak
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.tex,
+	DSAndErrorEstimates/ExactMultipoleError.tex,
+	PBC_Exchange/LinearPBCExchange.tex,
+	PBC_Exchange/Timing_Diamond_ONX.ps: [no log message]
+
+2003-11-20 20:21  nemeth
+
+	* MondoSCF2/ControlStructures.F90: This has been left out
+	accidentally from the previous check-in.
+
+2003-11-20 20:20  nemeth
+
+	* MondoSCF2/: GDIIS.F90, GeomOptKeys.F90, Hessian.F90,
+	InCoords.F90, Optimizer.F90, ParseExtraCoords.F90,
+	ParseGeomOpt.F90, ParseGeometries.F90, PunchHDF.F90, SCFs.F90: Many
+	modifications. From the algorithmic point of view, the most
+	important is, that brancketing starts only when last gradient of
+	the examined internal coordinate is small enough (<0.005), and it
+	goes to 0.1D0*(-last_grad). Its a robust choice, which seems to
+	work well.  Lagrangian constraints related stuff has been removed.
+	INTC-s are stored in HDF now instead of separate files. This is
+	also true for extra internals parsed from input file. Thus a number
+	of extra files are no more used, which makes working on zinc
+	cluster more stable.
+
+2003-11-20 20:08  nemeth
+
+	* MondoMods/: CholFact.F90, DerivedTypes.F90, GlobalScalars.F90,
+	InOut.F90, MemMan.F90, SetEq.F90: In order to store internal
+	coordinates related information on HDF, instead of separate files,
+	type INTC has been added to type CRDS and the corresponding
+	modifications of InOut and MemMan have been done. Also, Lagrangian
+	multipliers related stuff has been removed. GlobalScalars contains
+	now IntCPerAtom=30 which is an estimate of the (Number of internal
+	coordinates)/(Number of atoms) ratio, based on a compact diamond
+	structure and all its redundant internal coordinates.
+
+2003-11-19 11:42  vweber
+
+	* ONX2/ONX2ComputK.F90: Minor modifications.
+
+2003-11-19 11:34  vweber
+
+	* Makefile: Added onx2 directives.
+
+2003-11-19 11:31  vweber
+
+	* TwoE/: Int1111.F90, Int3111.F90, Int3131.F90, Int3311.F90,
+	Int3331.F90, Int3333.F90, Integrals.m: Int(...)=Int(...)+... add
+	the PBC integrals up.
+
+2003-11-19 11:16  vweber
+
+	* TwoE/: Int1111.F90, Int3111.F90, Int3131.F90, Int3311.F90,
+	Int3331.F90, Int3333.F90, Integrals.m, Makefile,
+	ShellPairStruct.F90: onx seems to be invariant now!
+
+2003-11-17 17:11  nemeth
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: An accidentally added
+	compiler option has been removed, thus making compilations running
+	well again on zinc.
+
+2003-11-13 13:42  vweber
+
+	* ONX2/: IntSSSS.F90, ERIInterface.Inc, ERIListInterface.Inc,
+	Makefile, ONX2ComputK.F90, ONX2DataType.F90: Added periodic in
+	computk
+
+2003-11-12 15:27  mchalla
+
+	* SCFeqs/MixMaster.F90: [no log message]
+
+2003-11-12 15:06  mchalla
+
+	* SCFeqs/MMA/SCFDev/Cr2_6-31G_STANTON.nb: Stanton example combined
+	with Pulay Fock DIIS.
+
+2003-11-12 15:05  mchalla
+
+	* SCFeqs/MixMaster.F90: Very early attempt at Stanton like Fock
+	mixing to force convergence of the SCF.  See
+	MMA/SCFDev/Cr2_6-31G_STANTON.nb for MMA examples.
+
+2003-11-12 13:36  vweber
+
+	* ONX2/: ERIInterface.Inc, ERIListInterface.Inc, IntSSSS.F90,
+	Makefile, ONX2.F90, ONX2ComputK.F90, ONX2DataType.F90, ONX2F77.F,
+	ONXCtrSclg.F90, ONXFillOut.F90, ONXGet.F90, ONXInit.F90,
+	ONXParameters.F90, ONXRng.F90, QuickSortDis.F, Stats.F90: New onx
+
+2003-11-12 11:49  vweber
+
+	* TwoE/: ERIInterface.m, Integrals.m: minor modifications
+
+2003-11-12 11:31  nemeth
+
+	* MondoSCF2/GDIIS.F90: The printing of an auxiliary file has been
+	commented out.
+
+2003-11-10 13:00  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-11-10 12:58  mchalla
 
 	* SCFeqs/MMA/SCFDev/Cr2_6-31G_STANTON.nb: Fock mixing convergence
