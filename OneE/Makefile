@@ -44,7 +44,7 @@ ReleaseFiles = SBlok.x MakeS.x TBlok.x MakeT.x  \
                BlokTrWdS.x SForce.x BlokTrPdT.x \
                TForce.x 
 #
-all:	 MakeU MakeS MakeT MakeRho ParaMakeRho SForce TForce
+all:	 MakeS MakeT MakeRho ParaMakeRho SForce TForce
 #
 #MakeU:	 $(ObjsECPs)
 #	 $(LD) $(LDFLAGS) MakeU $(ObjsECPs) $(F90_LIBRARIES)
@@ -92,7 +92,7 @@ clean:
 	ln -s /dev/null core
 	ls -l
 #
-MakeU.o  : OmegaQ.o               $(MONDO_LIB)/libMondoMods.a
+#MakeU.o  : OmegaQ.o               $(MONDO_LIB)/libMondoMods.a
 MakeS.o  : SBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeT.o  : TBlok.o                $(MONDO_LIB)/libMondoMods.a
 MakeRho.o: RhoBlok.o  RhoTools.o  $(MONDO_LIB)/libMondoMods.a
