@@ -265,12 +265,6 @@ CONTAINS
      CALL CloseHDFGroup(HDF_CurrentID)
      CALL CloseHDF(HDFFileID)
      !
-     IF(iGEO==LastGeo) THEN
-       CALL Delete(GMLoc%Bond)
-       CALL Delete(GMLoc%AtmB)
-       CALL Delete(GMLoc%IntCs)
-     ENDIF
-     !
      HDFFileID=OpenHDF(N%HFile)
      HDF_CurrentID=OpenHDFGroup(HDFFileID, &
                    "Clone #"//TRIM(IntToChar(iCLONE)))

@@ -527,8 +527,6 @@ CONTAINS
      CALL NEW(BCur ,SIZE(C%Stat%Previous%I))
      ! Build the guess 
      DO iBAS=1,C%Sets%NBSets-1
-       CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        CALL SCF(iBAS,iGEO,C)
@@ -550,8 +548,6 @@ CONTAINS
      !
      IStart=iGEO
      DO iGEO=IStart,MaxSteps
-       CALL ReSetConnect(C%Geos)
-       CALL ReDefIntCs(C%Geos,C%Opts,iGEO,iGEOst)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
        CALL BSetArchive(iBAS,C%Nams,C%Opts,C%Geos,C%Sets,C%MPIs)
        !
@@ -641,17 +637,14 @@ CONTAINS
 !
 !------------------------------------------------------------------
 !
-   SUBROUTINE ModifyGeom(GOpt,XYZ,RefXYZ,AtNum,IntCs,GradIn, &
-                  Bond,AtmB,Convgd,ETot,PBCDim,iGEO,iCLONE, &
-                  SCRPath,PWDPath,DoNEB,Print,HFileIn,PBCFit)
+   SUBROUTINE ModifyGeom(GOpt,XYZ,RefXYZ,AtNum,GradIn, &
+                  Convgd,ETot,PBCDim,iGEO,iCLONE, &
+                  SCRPath,PWDPath,DoNEB,Print,HFileIn)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,GradIn,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
-     TYPE(BONDDATA)              :: Bond
-     TYPE(ATOMBONDS)             :: AtmB
      REAL(DOUBLE)                :: ETot
      INTEGER,DIMENSION(:)        :: Convgd
-     TYPE(PBCFits)               :: PBCFit
      INTEGER                     :: NCart,K,I,J
      INTEGER                     :: NatmsLoc,iGEO,iCLONE
      TYPE(INTC)                  :: IntCs,IntCL
@@ -660,7 +653,6 @@ CONTAINS
      CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath
      INTEGER                     :: Print,PBCDim
      LOGICAL                     :: DoNEB,Print2
-     TYPE(TOPOLOGY)              :: TOPS
      TYPE(DBL_RNK2)              :: RefStruct,RefGrad,SRStruct,SRDispl
      !
      NatmsLoc=SIZE(XYZ,2)
@@ -708,9 +700,7 @@ CONTAINS
      IF(Refresh/=0) THEN
        CALL GetIntCs(XYZ,AtNum,IntCs,Refresh,SCRPath, &
                      GOpt%CoordCtrl,GOpt%Constr,GOpt%GConvCrit, &
-                     GOpt%GDIIS%MaxMem,GOpt%ExtIntCs,TOPS,Bond, &
-                     AtmB,PBCDim,iGEO, &
-                     HFileIn_O=HFileIn,iCLONE_O=iCLONE)
+                     GOpt%GDIIS%MaxMem,GOpt%ExtIntCs,PBCDim,iGEO)  
        IF(IntCs%N==0) CALL Halt('Molecule has dissociated,'// &
                     'optimizer has not found any internal coordinates.')
      ENDIF
@@ -744,7 +734,7 @@ CONTAINS
      IF(.NOT.GOpt%GOptStat%GeOpConvgd) THEN
        CALL RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad%D,iCLONE,ETot, &
                IntCs,iGEO,SCRPath,PWDPath,PBCDim,Print,HFileIn, &
-               Refresh,PBCFit)
+               Refresh)
      ELSE
        WRITE(*,200) iCLONE,iGEO
        WRITE(Out,200) iCLONE,iGEO
@@ -764,32 +754,34 @@ CONTAINS
      CALL Delete(Gopt%LattIntC%Grad)
      CALL Delete(Gopt%LattIntC%Displ)
      CALL Delete(IntOld)
-     CALL Delete(TOPS)
    END SUBROUTINE ModifyGeom
 !
 !--------------------------------------------------------------------
 !
-   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr)
+   SUBROUTINE GradConv(CtrlStat,GConvCr,CtrlConstr,PBCDim)
      TYPE(GOptStat)             :: CtrlStat
      TYPE(Constr)               :: CtrlConstr
      TYPE(GConvCrit)            :: GConvCr    
-     INTEGER                    :: J,N
+     INTEGER                    :: J,N,PBCDim
      !
-     CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad).AND. &
-                         (CtrlStat%LMaxCGrad<GConvCr%Grad)
+     IF(PBCDim==0) THEN
+       CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad)
+     ELSE
+       CtrlStat%GeOpConvgd=(CtrlStat%MaxCGrad<GConvCr%Grad).AND. &
+                           (CtrlStat%LMaxCGrad<GConvCr%Grad)
+     ENDIF
    END SUBROUTINE GradConv
 !
 !--------------------------------------------------------------------
 !
    SUBROUTINE RelaxGeom(GOpt,XYZ,RefXYZ,AtNum,CartGrad,iCLONE, &
                     ETot,IntCs,IGEO,SCRPath,PWDPath, &
-                    PBCDim,Print,HFileIn,Refresh,PBCFit)
+                    PBCDim,Print,HFileIn,Refresh)
      TYPE(GeomOpt)               :: GOpt
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
      REAL(DOUBLE),DIMENSION(:)   :: AtNum,CartGrad
      REAL(DOUBLE)                :: ETot     
      TYPE(INTC)                  :: IntCs
-     TYPE(PBCFits)               :: PBCFit
      INTEGER                     :: iGEO,iCLONE,Refresh,Print,PBCDim
      CHARACTER(LEN=*)            :: SCRPath,HFileIn,PWDPath 
      TYPE(DBL_RNK2)              :: SRStruct,RefGrad,RefStruct,SRDispl
@@ -806,7 +798,7 @@ CONTAINS
                             iGEO,XYZ,Print,PBCDim)
        ELSE
          CALL RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,IntCs, &
-                          AtNum,PBCDim,PBCFit,iGEO,iCLONE,XYZ,RefXYZ, &
+                          AtNum,PBCDim,iGEO,iCLONE,XYZ,RefXYZ, &
                           Print)
        ENDIF
      END SELECT
@@ -815,14 +807,13 @@ CONTAINS
 !-------------------------------------------------------
 !
    SUBROUTINE RelaxBiSect(GOpt,SCRPath,PWDPath,HFileIn,IntCs, &
-                          AtNum,PBCDim,PBCFit,iGEO,iCLONE,XYZ,RefXYZ, &
+                          AtNum,PBCDim,iGEO,iCLONE,XYZ,RefXYZ, &
                           Print)
      TYPE(GeomOpt)               :: GOpt
      TYPE(INTC)                  :: IntCs
      REAL(DOUBLE),DIMENSION(:)   :: AtNum
      INTEGER                     :: iGEO,iCLONE,Print,PBCDim
      REAL(DOUBLE),DIMENSION(:,:) :: XYZ,RefXYZ
-     TYPE(PBCFits)               :: PBCFit
      CHARACTER(LEN=*)            :: SCRPath,PWDPath,HFileIn
      TYPE(DBL_VECT)              :: Displ,RefPoints,PredVals
      TYPE(DBL_RNK2)              :: SRStruct,RefStruct,RefGrad,SRDispl
@@ -1399,11 +1390,11 @@ CONTAINS
      !
      !--------------------------------------------
      !
-       CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D,GMLoc%IntCs, &
-                       GradNew%D,GMLoc%Bond,GMLoc%AtmB,Convgd, &
-                       GMLoc%Etotal,GMLoc%PBC%Dimen,iGEO,iCLONE, &
+       CALL ModifyGeom(GOpt,XYZNew%D,RefXYZ%D,AtNumNew%D, &
+                       GradNew%D,Convgd,GMLoc%Etotal, &
+                       GMLoc%PBC%Dimen,iGEO,iCLONE, &
                        SCRPath,PWDPath,DoNEB,Opts%PFlags%GeOp, &
-                       Nams%HFile,GMLoc%PBCFit)
+                       Nams%HFile)
      !
      !--------------------------------------------
      !
@@ -1542,46 +1533,6 @@ CONTAINS
      GMLoc%PBC%BoxShape%D=GMLoc%PBCDispl%BoxShape%D
      CALL PBCInfoFromNewCarts(GMLoc%PBC)
    END SUBROUTINE NewGeomFill
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE ReSetConnect(G)
-     TYPE(Geometries)   :: G
-     INTEGER            :: iCLONE
-     !
-     DO iCLONE=1,G%Clones
-       IF(AllocQ(G%Clone(iCLONE)%Bond%Alloc)) THEN
-         CALL Delete(G%Clone(iCLONE)%Bond)
-       ELSE
-         G%Clone(iCLONE)%Bond%N=0
-       ENDIF
-       IF(AllocQ(G%Clone(iCLONE)%AtmB%Alloc)) THEN
-         CALL Delete(G%Clone(iCLONE)%AtmB)
-       ELSE
-         G%Clone(iCLONE)%AtmB%N1=0
-         G%Clone(iCLONE)%AtmB%N2=0
-       ENDIF
-     ENDDO
-   END SUBROUTINE ReSetConnect
-!
-!-------------------------------------------------------------------
-!
-   SUBROUTINE ReDefIntCs(G,O,iGEO,iGEOst)
-     TYPE(Geometries)   :: G
-     TYPE(Options)      :: O
-     INTEGER            :: iCLONE,iGEO,iGEOst
-     ! 
-     IF(O%Guess==GUESS_EQ_RESTART.AND.iGEO==iGEOst) THEN
-       RETURN
-     ENDIF
-     DO iCLONE=1,G%Clones
-       IF(AllocQ(G%Clone(iCLONE)%IntCs%Alloc)) THEN
-         CALL Delete(G%Clone(iCLONE)%IntCs)
-       ENDIF
-       G%Clone(iCLONE)%IntCs%N=0
-       CALL New(G%Clone(iCLONE)%IntCs,G%Clone(iCLONE)%IntCs%N)
-     ENDDO
-   END SUBROUTINE ReDefIntCs
 !
 !-------------------------------------------------------------------
 !
@@ -2030,7 +1981,7 @@ CONTAINS
                       GOpt%GOptStat%MaxCGrad,GOpt%GOptStat%ILMaxCGrad, &
                       GOpt%GOptStat%LMaxCGrad,PBCDim)
      CALL Delete(CartGrad)
-     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr)
+     CALL GradConv(GOpt%GOptStat,GOpt%GConvCrit,GOpt%Constr,PBCDim)
      IF(.NOT.GOpt%GConvCrit%Alternate) RETURN
      !
      AltCount=AltCount+1
