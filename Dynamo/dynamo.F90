@@ -212,29 +212,31 @@ CONTAINS
    END SUBROUTINE EXCL
 !-------------------------------------------------------------- 
 !
-   SUBROUTINE ENERGY_LENNARD_JONES(ELJ,ISet,LJCutOff,Grad_Loc)
+   SUBROUTINE ENERGY_LENNARD_JONES(GMLoc,ELJ,LJCutOff,Grad_Loc)
 !
    IMPLICIT NONE
-   INTEGER :: NBox,Natoms,NX,NY,NZ,I,J,K
-   CHARACTER(LEN=3)   :: ISet
+   INTEGER :: NBox,NX,NY,NZ,I,J,K
    REAL(DOUBLE) :: LJCutOff
    REAL(DOUBLE) :: BXMIN,BYMIN,BZMIN,BoxSize
    INTEGER :: IX1,IY1,IZ1,IOrd1,IOrd2
    INTEGER :: I1,I2,JJ1,JJ2,IX2,IY2,IZ2
    REAL(DOUBLE) :: X1,Y1,Z1,X2,Y2,Z2,R1,R2,R12,R6,Q1,Q2
    TYPE(INT_VECT) :: BoxI,BoxJ,AtmMark
-   TYPE(CRDS) :: GMLoc
    TYPE(DBL_VECT) :: LJEps,LJRad,DVect
+   TYPE(DBL_VECT) :: LJEps2
+   TYPE(CRDS) :: GMLoc
    TYPE(DBL_RNK2),OPTIONAL :: Grad_Loc
    REAL(DOUBLE) :: ELJ,R12_2,Pref1,Pref2
    INTEGER      :: DU,NLocBox,ILocBox,II
    REAL(DOUBLE) :: DD
    TYPE(INT_RNK2):: BoxPos
-   REAL(DOUBLE) :: NAtomsLJCell
-   TYPE(INT_RNK2):: BoxPos,XYZLJCell
-   TYPE(INT_VECT) :: LJBoxI,LJBoxJ,LJAtmMark
+   INTEGER        :: NAtomsLJCell
+   TYPE(DBL_VECT) :: LJEpsLJCell,LJRadLJCell
+   TYPE(INT_VECT) :: AtmMarkLJCell
+   TYPE(DBL_RNK2) :: XYZLJCell
 !
 ! LJCutOff is in Bohrs now
+! Cartesians are passed in Angstroems, in present version
 !
 ! get MM or QMMM atom coordinates as stored in GMLoc
 ! get AtmMark to distinguish between QM and MM atoms
@@ -253,7 +255,8 @@ CONTAINS
 ! points to a cubic unit inside a sphere of LJCutOff
 !
    DU=INT((LJCutOff+BoxSize)/BoxSize)
-   II=DU*DU*DU
+   II=2*DU+1
+   II=II*II*II
    CALL New(BoxPos,(/3,II/))
    NLocBox=0
    DO I=-DU,DU
@@ -270,12 +273,9 @@ CONTAINS
      ENDDO
    ENDDO
 !
-! Get Cartesian Coordinates of molecule or elementary cell
+! Get LJ and QM/MM parameters of molecule or elementary cell
 !
-   CALL Get(GMLoc,'GM_MM'//ISet)
-   Natoms=GMLoc%Natms
-!
-     CALL New(AtmMark,Natoms)
+     CALL New(AtmMark,GMLoc%Natms)
    IF(HasQM()) THEN
      CALL Get(AtmMark,'AtmMark')
    ELSE 
@@ -283,28 +283,50 @@ CONTAINS
    ENDIF
 !
    CALL New(DVect,3)
-   CALL New(LJEps,Natoms)
-   CALL New(LJRad,Natoms)
+   CALL New(LJEps,GMLoc%Natms)
    CALL Get(LJEps,'LJEps')
+   CALL New(LJRad,GMLoc%Natms)
    CALL Get(LJRad,'LJRad') 
 !
-   GMLoc%Carts%D(:,:)=GMLoc%Carts%D(:,:)/AngstromsToAU !!! work with angstroems here
+#ifdef PERIODIC
+! Now, if periodicity is present, generate nearest neighbour images, 
+! so that they cover the Lennard-Jones range of the central image
 !
-! Now calculate distributions of atoms in the Boxes
+   IF(GMLoc%PBC%Dimen/=0) THEN
+     CALL LJCell(GMLoc,LJCutOff,AtmMark,LJEps,LJRad, &
+       XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell) 
+   ELSE
+     CALL SetOneLJCell(GMLoc,AtmMark,LJEps,LJRad, &
+       XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
+   ENDIF
+#else
+     CALL SetOneLJCell(GMLoc,AtmMark,LJEps,LJRad, &
+       XYZLJCell,AtmMarkLJCell,LJEpsLJCell,LJRadLJCell,NAtomsLJCell)
+#endif
+!
+     CALL Delete(AtmMark)
+     CALL Delete(LJEps)
+     CALL Delete(LJRad)
+!
+! Now distribute atoms into Boxes of size BoxSize  
 ! First, determine array sizes
 !
-   CALL SORT_INTO_Box1(BoxSize,GMLoc%Carts%D,Natoms,NX,NY,NZ,BXMIN,BYMIN,BZMIN,.TRUE.)
+   CALL SORT_INTO_Box1(BoxSize,XYZLJCell%D,NAtomsLJCell,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
    NBox=NX*NY*NZ
    CALL New(BoxI,NBox+1)
-   CALL New(BoxJ,Natoms)
+   CALL New(BoxJ,NAtomsLJCell)
 !
 ! second, fill up arrays
 !
-   CALL SORT_INTO_Box2(BoxSize,GMLoc%Carts%D,Natoms,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI,BoxJ)
+   CALL SORT_INTO_Box2(BoxSize,XYZLJCell%D,NAtomsLJCell,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BoxI,BoxJ)
 !
 ! Calculate LJ energy
 !
+write(*,*) 'XYZLJCell= '
+do i=1,NAtomsLJCell
+write(*,*) XYZLJCell%D(1:3,i)
+enddo
    ELJ=Zero
 !
 ! Scan all boxes 
@@ -317,91 +339,77 @@ CONTAINS
 !
      IOrd1=NX*NY*(IZ1-1)+NY*(IX1-1)+IY1
 !
-! Empty central box?
-!
-     IF(BoxI%I(IOrd1+1)-BoxI%I(IOrd1)==0) CYCLE
-!
 ! Now scan all boxes around actual central box within
 ! a sphere of radius LJCutOff
 !
-     DO ILocBox=1,NLocBox
+       DO ILocBox=1,NLocBox
 !
-       IZ2=IZ1+BoxPos%I(3,ILocBox)
-         IF(IZ2<1 .OR. IZ2>NZ) THEN
-           IF(GMLoc%PBC%Dimen>0) THEN
-             
-           ELSE
-             CYCLE
-           ENDIF
-         ENDIF
-!
-       IX2=IX1+BoxPos%I(1,ILocBox)
-         IF(IX2<1 .OR. IX2>NX) THEN
-           CYCLE
-         ENDIF
-!
-       IY2=IY1+BoxPos%I(2,ILocBox)
-         IF(IY2<1 .OR. IY2>NY) THEN 
-           CYCLE
-         ENDIF
+         IZ2=IZ1+BoxPos%I(3,ILocBox) ; IF(IZ2<1 .OR. IZ2>NZ) CYCLE 
+         IX2=IX1+BoxPos%I(1,ILocBox) ; IF(IX2<1 .OR. IX2>NX) CYCLE
+         IY2=IY1+BoxPos%I(2,ILocBox) ; IF(IY2<1 .OR. IY2>NY) CYCLE
 !
 ! Absolute index of second box
 !
-           IOrd2=NX*NY*(IZ2-1)+NY*(IX2-1)+IY2
+         IOrd2=NX*NY*(IZ2-1)+NY*(IX2-1)+IY2
 !
 ! Empty second box?
 !
-           IF(BoxI%I(IOrd2+1)-BoxI%I(IOrd2)==0) CYCLE
+         IF(BoxI%I(IOrd2+1)-BoxI%I(IOrd2)==0) CYCLE
+!
+! Scan atoms of central box
+!
+           DO I1=BoxI%I(IOrd1),BoxI%I(IOrd1+1)-1
+             JJ1=BoxJ%I(I1) !!! absolute index of atom 1
+!
+             IF(JJ1>GMLoc%Natms) CYCLE !!! only central cell is counted
+!
+             R1=LJRadLJCell%D(JJ1)
+             Q1=LJEpsLJCell%D(JJ1)
 !
 ! Now, calculate LJ interaction between the atoms
 ! of the two boxes; the two boxes may coincide
 ! At least one of the atoms must be MM atom.
 !
-     DO I1=BoxI%I(IOrd1),BoxI%I(IOrd1+1)-1
-       JJ1=BoxJ%I(I1) !!! absolute index of atom 1
-         R1=LJRad%D(JJ1)
-         Q1=LJEps%D(JJ1)
+             DO I2=BoxI%I(IOrd2),BoxI%I(IOrd2+1)-1
+               JJ2=BoxJ%I(I2) !!! absolute index of atom 2
 !
-         DO I2=BoxI%I(IOrd2),BoxI%I(IOrd2+1)-1
-           JJ2=BoxJ%I(I2) !!! absolute index of atom 2
+               IF(JJ2<=JJ1) CYCLE !!!avoid double counting and atomic coincidence
+               IF(AtmMarkLJCell%I(JJ1)/=0.AND.AtmMarkLJCell%I(JJ2)/=0) CYCLE 
 !
-           IF(JJ2<=JJ1) CYCLE !!!avoid double counting and atomic coincidence
-           IF(AtmMark%I(JJ1)/=0.AND.AtmMark%I(JJ2)/=0) CYCLE 
+               R2=LJRadLJCell%D(JJ2)
+               Q2=LJEpsLJCell%D(JJ2)
+               DVect%D(:)=XYZLJCell%D(:,JJ1)-XYZLJCell%D(:,JJ2)
+               R12_2=DOT_PRODUCT(DVect%D,DVect%D)                
+               R12=SQRT(R12_2)/AngstromsToAu
 !
-           R2=LJRad%D(JJ2)
-           Q2=LJEps%D(JJ2)
-           DVect%D(:)=GMLoc%Carts%D(:,JJ1)-GMLoc%Carts%D(:,JJ2)
-           R12_2=DOT_PRODUCT(DVect%D,DVect%D)                
-           R12=SQRT(R12_2)
-!
-           IF(R12>0.000001D0) THEN
+               IF(R12>0.000001D0) THEN
 ! calculate energy contribution
-             R6=(R1*R2/R12)**6
-             Pref1=R6*Q1*Q2
-             ELJ=ELJ+Pref1*(R6-One)
+                 R6=(R1*R2/R12)**6
+                 Pref1=R6*Q1*Q2
+                 ELJ=ELJ+Pref1*(R6-One)
 ! calculate gradient contribution
-             IF(PRESENT(Grad_Loc)) THEN
-               Pref2=Six*PREF1*(One-Two*R6)/R12_2
-               Grad_Loc%D(:,JJ1)=Grad_Loc%D(:,JJ1)+Pref2*DVect%D(:)
-               Grad_Loc%D(:,JJ2)=Grad_Loc%D(:,JJ2)-Pref2*DVect%D(:)
-             ENDIF
-           ENDIF
+                 IF(PRESENT(Grad_Loc)) THEN
+                   Pref2=Six*PREF1*(One-Two*R6)/R12_2
+                                        Grad_Loc%D(:,JJ1)=Grad_Loc%D(:,JJ1)+Pref2*DVect%D(:)
+                   IF(JJ2<=GMLoc%Natms) Grad_Loc%D(:,JJ2)=Grad_Loc%D(:,JJ2)-Pref2*DVect%D(:)
+                 ENDIF
+               ENDIF
 !
-         ENDDO ! atoms in second box
+             ENDDO ! atoms in second box
 !
      ENDDO ! atoms in first box
-!
-     ENDDO !!! NLocBox
+     ENDDO !!! ILocBox
 !
    ENDDO
    ENDDO
    ENDDO
 !
-   CALL Delete(GMLoc)
-   CALL Delete(AtmMark)
+   CALL Delete(XYZLJCell)
+   CALL Delete(AtmMarkLJCell)
+   CALL Delete(LJEpsLJCell)
+   CALL Delete(LJRadLJCell)
+!
    CALL Delete(DVect)
-   CALL Delete(LJEps)
-   CALL Delete(LJRad)
    CALL Delete(BoxI)
    CALL Delete(BoxJ)
    CALL Delete(BoxPos)
