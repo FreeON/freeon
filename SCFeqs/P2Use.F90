@@ -32,7 +32,7 @@ PROGRAM P2Use
                                 :: S,P,X,T0,T1,T2,S1,P0,dP,dS
   TYPE(INT_VECT)                :: Stat
   TYPE(DBL_RNK2)                :: BlkP
-  REAL(DOUBLE)                  :: Scale,Fact,ECount, &
+  REAL(DOUBLE)                  :: Scale,Fact,ECount,RelNErr, &
        DeltaP,OldDeltaP,DensityDev,dN,MaxGDIff,GDIff,OldN,M,PNon0s
   INTEGER                       :: I,J,JP,AtA,Q,R,T,KA,NBFA, &
        NPur,PcntPNon0,OldFileID,ICart
@@ -175,11 +175,11 @@ PROGRAM P2Use
            IF(MyId==ROOT)THEN
 #else
               dN=Two*Trace(T1,S1)-NEl
-#endif
+#endif              
               PNon0s=100.D0*DBLE(P0%NNon0)/DBLE(NBasF*NBasF)
               !              IF(PrintFlags%Key==DEBUG_MAXIMUM)THEN
               Mssg=ProcessName(Prog,'AO-DMX '//TRIM(IntToChar(I))) &
-                   //'dN='//TRIM(DblToShrtChar(dN)) &
+                   //'dN='//TRIM(DblToShrtChar(ABS(dN)/DBLE(NEl))) &
                    //', %Non0='//TRIM(DblToShrtChar(PNon0s))              
 
               CALL OpenASCII(OutFile,Out)
@@ -210,15 +210,18 @@ PROGRAM P2Use
               CALL Filter(dP,T2)
            ENDIF
         ENDDO
-        IF(ABS(dN)>1D-1)THEN
+        RelNErr=ABS(dN)/DBLE(NEl)
+        IF(RelNErr>Thresholds%Trix*1D-2)THEN
 #ifdef PARALLEL
            IF(MyId==ROOT)THEN
 #endif
               CALL OpenASCII(OutFile,Out)
               CALL PrintProtectL(Out)
-              Mssg=ProcessName(Prog,'AO-DMX ')//'Failed! '//' Failed! '//' Failed! '//' Failed! '
+              Mssg=ProcessName(Prog,'AO-DMX FAILED!') & 
+                   //'Lost '//TRIM(DblToShrtChar(ABS(dN)))//' electrons.'
               WRITE(*,*)TRIM(Mssg)
               WRITE(Out,*)TRIM(Mssg)
+              WRITE(*,*)' dN = ',dN
               Mssg=ProcessName(Prog,'AO-DMX ')//'Dont panic... trying more stable algorithm '
               WRITE(*,*)TRIM(Mssg)
               WRITE(Out,*)TRIM(Mssg)
