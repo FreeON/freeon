@@ -137,7 +137,7 @@ PROGRAM P2Use
      CALL Halt(' Unknown option '//TRIM(SCFActn))
   ENDIF
 
-  IF(SCFActn/='GuessEqCore'.AND.SCFActn/='Restart')THEN
+  IF(SCFActn/='GuessEqCore')THEN
 #ifdef PARALLEL
         IF(MyId==ROOT)THEN
 #endif
