@@ -17,7 +17,6 @@ CONTAINS
     TYPE(Dynamics)   :: D
     TYPE(Geometries) :: G
     INTEGER          :: I,iCLONE
-    TYPE(CRDS)       :: Reac,Prod                                                   ! NEB Reactants and Products
     !--------------------------------------------------------------------------------------------------------------!
     CALL OpenASCII(N%IFile,Inp)
     IF(O%Grad==GRAD_TS_SEARCH_NEB.OR.D%MDAlgorithm==MD_PARALLEL_REP)THEN
@@ -30,32 +29,30 @@ CONTAINS
           ENDIF
        ENDIF
        IF(O%Grad==GRAD_TS_SEARCH_NEB)THEN
-          ALLOCATE(G%Clone(1:G%Clones))
-!          ALLOCATE(Reac)
-!          ALLOCATE(Prod)
+          ALLOCATE(G%Clone(0:G%Clones+1))
           IF(O%Guess==GUESS_EQ_RESTART)THEN
              ! Implement a routine to read in NEB images
           ELSE
-             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,Reac)              ! Read in the reactants geometry
-             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,Prod)                ! Read in the products geometry
-             DO iCLONE=1,G%Clones
-               G%Clone(iCLONE)%NAtms=Reac%NAtms
-               G%Clone(iCLONE)%NKind=Reac%NKind
-               CALL New(G%Clone(iCLONE))
-               G%Clone(iCLONE)=Reac
-             ENDDO
-             CALL NEBInit(G,Reac,Prod)                                              ! Interpolate the other images
+             ! Read in the reactants geometry
+             CALL ParseCoordinates(REACTANTS_BEGIN,REACTANTS_END,G%Clone(0))          
+             ! Read in the products geometry
+             CALL ParseCoordinates(PRODUCTS_BEGIN,PRODUCTS_END,G%Clone(G%Clones+1))   
           ENDIF
-          CALL DELETE(Reac)
-          CALL DELETE(Prod)
+          ! Initialize the clones to optimize 
+          DO iCLONE=1,G%Clones
+             G%Clone(iCLONE)%NAtms=G%Clone(0)%NAtms
+             G%Clone(iCLONE)%NKind=G%Clone(0)%NKind
+             CALL New(G%Clone(iCLONE))
+          ENDDO
+          CALL NEBInit(G)
        ELSEIF(O%Grad==GRAD_DO_DYNAMICS.AND.D%MDAlgorithm==MD_PARALLEL_REP)THEN
 #ifdef !defined(PARALLEL)
-          CALL MondoHalt(PRSE_ERROR,' MondoSCF must be compiled in parallel for replica exchange to be active.')
+          CALL MondoHalt(PRSE_ERROR,'Compile with -DPARALLEL to activate replica exchange.')
 #endif
           ALLOCATE(G%Clone(1:G%Clones))
           IF(O%Guess==GUESS_EQ_RESTART)THEN
           ELSE       
-             ! HUGH PUTS A ROUTINE TO GENERATE (G%Clones) PERTURBED TRAJECTORIES AND VELOCITIES?
+             ! HUGH PUTS A ROUTINE TO GENERATE (G%Clones) TRAJECTORIES AND VELOCITIES?
           ENDIF
        ENDIF
     ELSE
@@ -114,7 +111,7 @@ CONTAINS
        IF(INDEX(LineLowCase,EndDelimiter)/=0)EXIT
        N=N+1
        CALL LineToGeom(Line,At,Carts)
-       G%Carts%D(:,N)=Carts(1:3) 
+       G%AbCarts%D(:,N)=Carts(1:3) 
        G%CConstrain%I(N)=0
        CALL LineToChars(Line,C)
        IF(SIZE(C%C)==5)THEN
