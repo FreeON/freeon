@@ -73,7 +73,7 @@ MODULE BraBloks
     INTEGER,OPTIONAL  :: K_O,KK_O
     REAL(DOUBLE),DIMENSION(3) :: PA,PB
     INTEGER           :: CFA,PFA,KA,CFB,PFB,KB
-    INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB
+    INTEGER           :: LMNA,LA,MA,NA,LMNB,LB,MB,NB,L
     INTEGER           :: IA,IB,LAB,MAB,NAB,LMN,MaxLA,MaxLB
     INTEGER           :: IndexA,IndexB,StartLA,StartLB,StopLA,StopLB,K
     REAL(DOUBLE)      :: ZA,ZB,Zeta,Xi,ExpAB,CA,CB,CAB,Amp2,MaxAmp,Fx,Fy,Fz
@@ -105,8 +105,22 @@ MODULE BraBloks
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym+1,-1,MaxLA+1,MaxLB,Zeta,E%D,  &
                    PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
+!
        MaxAmp   = Zero
-       dHGBra%D = Zero
+!
+       L=LHGTF(MaxLA+MaxLB+1)
+       IA = IndexA
+       DO LMNA=StartLA,StopLA
+          IA=IA+1
+          IB=IndexB
+          DO LMNB=StartLB,StopLB
+             IB=IB+1
+             DO K=1,3
+                CALL DBL_VECT_EQ_DBL_SCLR(L,dHGBra%D(1:L,IA,IB,K),Zero)
+             ENDDO
+          ENDDO
+       ENDDO
+!
        IA=IndexA
        DO LMNA=StartLA,StopLA
           IA=IA+1
@@ -184,7 +198,18 @@ MODULE BraBloks
 !=================================================================================================
 !      Compute McMurchie Davidson E coefficients for HG Primitives
        CALL MD2TRR(BS%NASym,0,MaxLA,MaxLB,Zeta,E%D,PA(1),PB(1),PA(2),PB(2),PA(3),PB(3)) 
-       HGBra%D  = Zero
+!
+       L=LHGTF(MaxLA+MaxLB)
+       IA = IndexA
+       DO LMNA=StartLA,StopLA
+          IA=IA+1
+          IB=IndexB
+          DO LMNB=StartLB,StopLB
+             IB=IB+1
+             CALL DBL_VECT_EQ_DBL_SCLR(L,HGBra%D(1:L,IA,IB),Zero)
+          ENDDO
+       ENDDO
+!
        IA = IndexA
        MaxAmp=Zero
        DO LMNA=StartLA,StopLA
