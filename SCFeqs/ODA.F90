@@ -146,10 +146,23 @@ PROGRAM ODA
 #endif
 ! Find the mixing parameter L from the
 ! cubic E3(L)=a3+b3*L+c3*L^2+d3*L^3
+!
+!  WRITE(*,*) "e0  = ",e0
+!  WRITE(*,*) "e1  = ",e1
+!  WRITE(*,*) "e0p = ",e0p
+!  WRITE(*,*) "e1p = ",e1p
+!  WRITE(*,*) " " 
+!
   a3=e0
   b3=e0p
   c3=-3D0*e0-2D0*e0p+3D0*e1-e1p
   d3=2D0*e0+e0p-2D0*e1+e1p
+!
+!  WRITE(*,*) "a3 = ",a3
+!  WRITE(*,*) "b3 = ",b3
+!  WRITE(*,*) "c3 = ",c3
+!  WRITE(*,*) "d3 = ",d3
+!
   IF(ABS(d3)<1D-6.OR.c3*c3-3*b3*d3<Zero)THEN
      L=-Half*b3/c3
      L1=One-L
@@ -168,8 +181,8 @@ PROGRAM ODA
      ENDIF
      EMin=MIN(EMns,EPls)
   ENDIF
-  ! End point checks
-  IF(L<=Zero.OR.L>One)THEN
+  ! End point and Midpoint checks
+  IF((L<=Zero.OR.L>One) .OR. (EMin>e0 .AND. EMin > e1))THEN
      IF(e0<e1)THEN
         L=0.001
         L1=One-L
