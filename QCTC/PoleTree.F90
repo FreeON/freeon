@@ -51,7 +51,7 @@ MODULE PoleTree
         ENDDO
 !       Reset Ell of PoleRoot
         PoleRoot%Ell=SPEll
-        CALL Print_PoleNode(PoleRoot,'Root')
+!        CALL Print_PoleNode(PoleRoot,'Root')
       END SUBROUTINE RhoToPoleTree
 !=====================================================================================
 !

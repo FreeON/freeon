@@ -254,9 +254,9 @@ MODULE BlokTrPdJ
           ENDDO
        ENDDO
 !      Add in the Far Field, Dipole and Quadripole Correction
-       IF(Dimen > 0) THEN
+       IF(Dimen>0) THEN
           DO K=1,3
-             Vct(K)=Vct(K) + CTraxFF(Prim,dHGBra%D(:,1,1,K))
+             Vct(K)=Vct(K)+CTraxFF(Prim,dHGBra%D(:,1,1,K))
           ENDDO
        ENDIF
 #else
@@ -266,7 +266,7 @@ MODULE BlokTrPdJ
        Vct=Zero
        DO K=1,3
           DO LMN=1,HGLenEll
-             Vct(K)=Vct(K) + Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
+             Vct(K)=Vct(K)+Phase%D(LMN)*dHGBra%D(LMN,1,1,K)*HGKet(LMN)
           ENDDO
           CALL HGToSP(Prim,dHGBra%D(:,1,1,K),SPBraC,SPBraS)
           DO LM=0,SPLenEll

@@ -170,7 +170,7 @@ MODULE TreeWalk
           ENDIF
        ELSEIF(Q%Leaf)THEN
 !         Check for self-interaction
-          IF(Q%Zeta==NuclearExpnt.AND.PQ2<VTol)RETURN
+          IF(Q%Zeta==NuclearExpnt.AND.PQ2<1.D-3)RETURN
 !         Flip sign...
           PQx=-PQx; PQy=-PQy; PQz=-PQz
           Upq=TwoPi5x2/(RTE*SQRT(RPE))

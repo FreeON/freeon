@@ -64,9 +64,7 @@ PROGRAM QCTC
   CALL Elapsed_Time(TimeMakeJ,'Init')
   CALL MakeJ(J)
   CALL Elapsed_TIME(TimeMakeJ,'Accum')
-  CALL PPrint(TimeMakeJ,'QCTC.MakeJ',Unit_O=6)
 ! Put J to disk
-!  CALL PPrint(J,'J',Unit_O=6)
   CALL Filter(T1,J)
   IF(Args%C%C(2)=='Core')THEN
      CALL Put(T1,TrixFile('V',Args))

@@ -28,15 +28,13 @@ PROGRAM JForce
 #else
   TYPE(BCSR)                 :: P
 #endif
-#ifdef PERIODIC        
-  INTEGER                    :: NC
-  REAL(DOUBLE)               :: Bx,By,Bz
-  TYPE(DBL_VECT)             :: SFrc
-#endif   
-  INTEGER                    :: AtA,AtB,A1,A2,MA,JP,Q
   TYPE(AtomPair)             :: Pair
   TYPE(DBL_VECT)             :: Frc,JFrc
-  REAL(DOUBLE),DIMENSION(3)  :: FrcAB
+#ifdef PERIODIC        
+  REAL(DOUBLE),DIMENSION(3)  :: B
+  INTEGER                    :: NC
+#endif   
+  INTEGER                    :: AtA,AtB,A1,A2,MA,NB,MN1,JP,Q
   REAL(DOUBLE)               :: JFrcChk
   CHARACTER(LEN=6),PARAMETER :: Prog='JForce'
 !-------------------------------------------------------------------------------- 
@@ -46,12 +44,13 @@ PROGRAM JForce
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
 ! Allocations 
-  CALL NewBraBlok(BS,Gradients_O=.TRUE.)
-  CALL New(Frc,3*NAtoms)
   CALL New(JFrc,3*NAtoms)
+  CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL Get(P,TrixFile('D',Args,1))
 ! Get the Density for Poletree
   CALL Get(Rho,'Rho',Args,0)
+! Set thresholds local to JForce (for PAC and MAC)
+  CALL SetLocalThresholds(Thresholds%TwoE)
 ! Setup global arrays for computation of multipole tensors
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
@@ -68,9 +67,9 @@ PROGRAM JForce
   CALL DeleteRhoAux
 ! Delete the Density
   CALL Delete(Rho)
-!--------------------------------------------------------------
+!--------------------------------------------------------------------------------
 ! Compute the Coulomb contribution to the force in O(N Lg N)
-!
+!--------------------------------------------------------------------------------
   JFrc%D=Zero
   DO AtA=1,NAtoms
      MA=BSiz%I(AtA)
@@ -81,37 +80,42 @@ PROGRAM JForce
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
+           NB=BSiz%I(AtB)
+           MN1=MA*NB-1
 #ifdef PERIODIC
-           Bx = Pair%B(1)
-           By = Pair%B(2)           
-           Bz = Pair%B(3)
+           B=Pair%B
            DO NC=1,CS%NCells
-              Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
-              Pair%B(2) = By+CS%CellCarts%D(2,NC)
-              Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
-              Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
-              IF(TestAtomPair(Pair)) THEN
-                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:))
+              Pair%B=B+CS%CellCarts%D(:,NC)
+              Pair%AB2=(Pair%A(1)-Pair%B(1))**2 &
+                      +(Pair%A(2)-Pair%B(2))**2 &
+                      +(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair))THEN
+                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
               ENDIF
            ENDDO
 #else
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:))
+           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1))
 #endif
         ENDIF
      ENDDO
   ENDDO
+! Closed shell...
   JFrc%D=Two*JFrc%D
-!---------------------------------------------------------------
-! Update forces
-  CALL PPrint(JFrc,'JFrce',Unit_O=6)
-  CALL PPrint(JFrc,'JFrce')
+!--------------------------------------------------------------------------------
+! Do some checksumming, resumming and IO 
+!--------------------------------------------------------------------------------
+  CALL PChkSum(JFrc,'JForce')  
+! for temp debuging....
+  CALL PPrint(JFrc,'JForce',Unit_O=6)
+  CALL PPrint(JFrc,'JForce')
+! Sum in contribution to total force
+  CALL New(Frc,3*NAtoms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
-  JFrcChk=SQRT(DOT_PRODUCT(JFrc%D,JFrc%D))
-!  WRITE(*,*)' JFrcChk = ',JFrcChk
-!---------------------------------------------------------------
+!--------------------------------------------------------------------------------
 ! Tidy up
+!--------------------------------------------------------------------------------
   CALL Delete(BS)
   CALL Delete(GM)
   CALL Delete(P)

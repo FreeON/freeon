@@ -137,7 +137,6 @@ MODULE MondoPoles
 !------------------------------------------------------------------------------------          
 !         Factorial(M)=M!
           Factorial(0)=One
-          WRITE(*,*)' Ell = ',Ell
           DO L=1,2*Ell 
              Factorial(L)=Factorial(L-1)*DBLE(L)
           ENDDO
