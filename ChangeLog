@@ -1,3 +1,200 @@
+2002-11-05 10:49  ckgan
+
+	* HiCu/: HiCu.F90, KxcGen.F90, ParaHiCu.F90: Removed
+	PARALLEL_DEVELOPMENT III.
+
+2002-11-05 10:48  ckgan
+
+	* MondoMods/FastMat.F90: Removed PARALLEL_DEVELOPMENT II.
+
+2002-11-05 10:47  ckgan
+
+	* OneE/: MakeS.F90, SBlok.F90: Removed PARALLEL_DEVELOPMENT I.
+
+2002-11-04 15:53  tymczak
+
+	* QCTC/PFFTensor.F90: All PFF tensors are now allocateable
+
+2002-11-04 15:52  tymczak
+
+	* QCTC/PBCFarField.F90: All far firld arrays are now allocatedable
+
+2002-11-04 15:51  tymczak
+
+	* QCTC/MondoPoles.F90: 
+	FFELL has been moved here
+
+2002-11-04 15:48  tymczak
+
+	* MondoMods/GlobalScalars.F90: FFELL has been moved to
+	MondoPoles.F90
+
+2002-11-04 13:23  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-11-04 12:19  nemeth
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2002-11-04 11:37  nemeth
+
+	* MondoSCF/: ParsingKeys.F90, SCFLocals.F90: [no log message]
+
+2002-11-04 11:29  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-11-04 11:16  nemeth
+
+	* MondoMods/PrettyPrint.F90: [no log message]
+
+2002-11-04 11:13  nemeth
+
+	* MondoMods/ParsingConstants.F90: [no log message]
+
+2002-11-04 11:10  nemeth
+
+	* MondoMods/: DerivedTypes.F90, InCoords.F90: [no log message]
+
+2002-11-02 15:14  nemeth
+
+	* Validate/: bALAmmPBC.crd, bALAmm.inp, bALAmm.crd: [no log
+	message]
+
+2002-11-01 14:25  tymczak
+
+	* Validate/Water64.inp: 64 Periodic Waters:
+
+2002-11-01 14:24  tymczak
+
+	* VisDX/PotMapRho.F90: [no log message]
+
+2002-11-01 14:24  tymczak
+
+	* Validate/: MgO.inp, MgO.ref, MgOmm.inp, Water64mm.inp: MgO.inp
+	MgO.ref MgOmm.inp Water64mm.inp: Adusted the Periodics
+
+2002-11-01 14:22  tymczak
+
+	* QCTC/PFFTensor.F90: Estimate the Radius to the Nearst Box
+	correctly
+
+2002-11-01 14:21  tymczak
+
+	* QCTC/PBCFarField.F90: CTraxFF has been redone so that it is
+	MUCHmore effiecent	   Now Xlate the primitive to the Box
+	Center	       and the Contract
+	
+	MaxELL Estimate is also done differently
+	
+	       Deff^L(R^2-d^2)^((l+1)/2) < tau
+
+2002-11-01 14:16  tymczak
+
+	* OneE/: MakeRho.F90, MakeS.F90, MakeT.F90, SForce.F90, TForce.F90:
+	[no log message]
+
+2002-11-01 14:15  tymczak
+
+	* MondoSCF/ParseInput.F90: GMLoc%PBC%PFFMaxEll=8
+
+2002-11-01 14:15  tymczak
+
+	* MondoSCF/DrvSCFs.F90: Moved MakePFFT to befor MakeS
+
+2002-11-01 13:55  tymczak
+
+	* HiCu/XCForce.F90: [no log message]
+
+2002-11-01 13:55  tymczak
+
+	* HiCu/HiCu.F90:
+	HiCu.F90,XCForce.F90,MakeRho.F90,MakeS.F90,MakeT.F90,SForce.F90,TFo
+	rce.F90, Now read in CS_OUT from the HDF file: Made in MakePFFT
+
+2002-11-01 12:31  ckgan
+
+	* Docs/HiCu/paper/Let.tex: cover letter for JCP submission.
+
+2002-11-01 12:28  ckgan
+
+	* Docs/HiCu/paper/: PHICuFlow.sxi, hicu.tex, jcp_summit_01_hicu.ps:
+	Finalized manuscript for JCP.
+
+2002-10-31 16:11  ckgan
+
+	* Docs/Bib/mondo.bib: updated mondo.bib
+
+2002-10-31 16:10  ckgan
+
+	* Docs/HiCu/paper/: hicu.tex, PHiCuFlow.eps: comestic changes to
+	data parallel HiCu paper.
+
+2002-10-31 13:23  mchalla
+
+	* Docs/HiCu/paper/: hicu.tex, mondo.bib: [no log message]
+
+2002-10-31 13:23  mchalla
+
+	* Docs/Bib/mondo.bib: Update of the parallel HiCu paper. 
+	Bib/mondo.bib is the correct bib file.
+
+2002-10-30 19:02  nemeth
+
+	* MondoSCF/DrvFrcs.F90: [no log message]
+
+2002-10-30 18:44  nemeth
+
+	* MondoMods/PrettyPrint.F90: [no log message]
+
+2002-10-30 18:43  nemeth
+
+	* MondoSCF/ParseInput.F90: Reorganized Parsinput so that binary
+	prints do not appear in output. Also changes to PPrint.
+
+2002-10-30 16:11  mchalla
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2002-10-30 16:02  mchalla
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2002-10-30 14:07  ckgan
+
+	* Docs/HiCu/paper/: 3-21G_good_div10.eps, CM.eps, CM.sxi, ET.eps,
+	hicu.tex, mondo.bib, taxol_speedup.eps, ET.sxi, PHICuFlow.sxi,
+	PHiCuFlow.eps: minor changes on most files. Spelling mistakes
+	corrected in mondo.bib.
+
+2002-10-30 11:00  nemeth
+
+	* Dynamo/dynamo.F90: [no log message]
+
+2002-10-30 10:51  nemeth
+
+	* MondoMods/InCoords.F90: Coordinate transformations seem to work
+	well - yet in full-matrix reprs. only.
+
+2002-10-30 10:47  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-30 10:46  nemeth
+
+	* MondoSCF/DrvFrcs.F90: Following is updates, towards internal
+	coord optimizer.
+
+2002-10-29 11:47  ckgan
+
+	* Docs/HiCu/paper/mondo.bib: an up-to-date mondo.bib for HiCu
+	paper.
+
+2002-10-28 17:05  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-10-28 16:55  mchalla
 
 	* Docs/HiCu/paper/hicu.tex: updated acknowledgments.
