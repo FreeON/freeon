@@ -1,3 +1,13 @@
+2002-02-01 13:18  mchalla
+
+	* MondoSCF/ParseInput.F90: Added Karoly to the author list.  Good
+	luck Karoly!
+
+2002-02-01 13:17  mchalla
+
+	* MondoMods/LinAlg.F90: Fixed bug with uninitialized value of N in
+	SetToI.  Silly me.
+
 2002-01-30 13:40  tymczak
 
 	* Validate/Graphite_2.inp: Graphite Test System in Two D
