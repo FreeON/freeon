@@ -44,9 +44,7 @@ MODULE ParseInPut
          CALL ParseCmndLine(Ctrl) !!! This opens HDF for main program
 #ifdef MMech
          CALL ParseMech(Ctrl)
-         CALL OpenHDF(InfFile)
          Call InitMMech()
-         CALL CloseHDF()
 #endif
          CALL ParseGrad(Ctrl)
 #ifdef MMech
@@ -278,8 +276,6 @@ MODULE ParseInPut
 !
 !----------------------------------------------------------------------------
 !        Tidy up 
-!
-         CALL CloseHDF()
          CALL Delete(Args)
 !
       END SUBROUTINE ParseCmndLine
@@ -370,7 +366,6 @@ MODULE ParseInPut
         ENDIF
 #endif
         ENDDO
-        CALL CloseHDF()
         CALL PrintProtectR(Out)
         CLOSE(UNIT=Out,STATUS='KEEP')
 !
@@ -383,7 +378,6 @@ MODULE ParseInPut
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
 !        Open info file
-         CALL OpenHDF(InfFile)
 !        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
@@ -584,7 +578,6 @@ MODULE ParseInPut
 !
 !        Close files
          CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
       END SUBROUTINE ParseMethods
 !============================================================================
 !     Parse the Geometry Variable
@@ -599,7 +592,6 @@ MODULE ParseInPut
 !----------------------------------------------------------------------------
 !        Open infofile
 !
-         CALL OpenHDF(InfFile)
 !----------------------------------------------------------------------------
 !        Open inPut file for parsing
 !
@@ -669,7 +661,6 @@ MODULE ParseInPut
          ENDIF
 !
          CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
 !  
       END SUBROUTINE ParseGeometry
 !---------------------------------------------------------------------------- 
@@ -726,8 +717,9 @@ MODULE ParseInPut
                ENDIF
                NAtoms=NAtoms+1
                CALL LineToGeom(Line,At,Carts)
-               GM%Carts%D(:,NAtoms)=Carts(1:3) 
-               GM%Vects%D(:,NAtoms)=Carts(4:6)
+               GM%Carts%D(:,NAtoms)  =Carts(1:3) 
+               GM%AbCarts%D(:,NAtoms)=Carts(1:3) 
+               GM%Vects%D(:,NAtoms)  =Carts(4:6)
                DO J=1,104
                   IF(At==Ats(J))THEN
                      GM%AtNum%D(NAtoms)=J
@@ -745,44 +737,15 @@ MODULE ParseInPut
 !           NOTE: Should recomPute basis for EACH geometry.  Things are quite
 !           messed up at present.  Need to really clean house on front end.
             CALL FindKind(GM)
-#ifdef PERIODIC
-!           Convert to AU and ComPute Fractioan and Atomic Coordinates
-            IF(GM%PBC%InAtomCrd) THEN
-               IF(.NOT.GM%InAU) THEN
-                  GM%Carts%D    = GM%Carts%D*AngstromsToAU
-               ENDIF
-               CALL CalFracCarts(GM)
-            ELSE
-               GM%BoxCarts%D=GM%Carts%D
-               GM%BoxVects%D=GM%Vects%D
-               CALL CalAtomCarts(GM)
-            ENDIF
-!
-            IF(GM%PBC%Trans_COM) THEN
-               CALL CalTransVec(GM)
-            ENDIF
-            CALL Translate(GM,GM%PBC%TransVec)
-            CALL WrapAtoms(GM)
-#else
-!           Convert to AU
-            IF(.NOT.GM%InAU) THEN
-               GM%Carts%D=GM%Carts%D*AngstromsToAU
-            ENDIF
-#endif
 !
 !           ComPute spin coordinates
             CALL SpinCoords(GM) 
 !           Determine a bounding box for the system
             GM%BndBox%D=SetBox(GM%Carts)
 !
-#ifdef PERIODIC
-!           ReSet the Cell Center
-            DO I=1,3
-               IF(.NOT. GM%PBC%AutoW(I)) THEN
-                  GM%PBC%CellCenter(I) = Half*(GM%BndBox%D(I,2)+GM%BndBox%D(I,1))
-               ENDIF
-            ENDDO
-#endif
+! Compute fractional coords, transfer from Angstrom to Bohr, etc.
+!
+            CALL FinishCoords(GM)
 !
 !           OutPut the coordinates
             CALL Put(GM,Tag_O=TRIM(IntToChar(NumGeom)))
@@ -833,7 +796,6 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
-         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
          READ(Inp,DEFAULT_CHR_FMT,END=1)Line
@@ -918,7 +880,6 @@ MODULE ParseInPut
          CALL Delete(GM)
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL Put(Ctrl%NGeom,'nconfig')
-         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
        1 CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
@@ -941,7 +902,6 @@ MODULE ParseInPut
 !---------------------------------------------------------------------------- 
 !        Find number of atoms and atom types
 !
-         CALL OpenHDF(InfFile)
          CALL Align(BEGIN_GEOMETRY,Inp)
          NAtoms=0
          DO 
@@ -1033,7 +993,6 @@ MODULE ParseInPut
          CALL Delete(Chars)
          CLOSE(UNIT=Inp,STATUS='KEEP')
          CALL Put(Ctrl%NGeom,'nconfig')
-         CALL CloseHDF()
          CALL PPrint(MemStats,'ParseGeometry')
          RETURN
 1        CALL Halt('While parsing '//TRIM(InpFile)//', failed to find '     &
@@ -1049,8 +1008,6 @@ MODULE ParseInPut
         TYPE(SCFControls),INTENT(INOUT) :: Ctrl
         TYPE(CRDS)                      :: GM
         INTEGER                         :: NLvec,NTvec,I,J,K
-!
-!       CALL OpenHDF(InfFile)
 !
         NLvec = 0
         NTvec = 0
@@ -1155,8 +1112,6 @@ MODULE ParseInPut
                             /(GM%PBC%BoxShape(1,1)*GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(2,3)=-GM%PBC%BoxShape(2,3)/(GM%PBC%BoxShape(2,2)*GM%PBC%BoxShape(3,3))
         GM%PBC%InvBoxSh(3,3)=One/GM%PBC%BoxShape(3,3)
-!
-!     CALL CloseHDF()
 !
       END SUBROUTINE ParsePeriodic_MONDO
 !============================================================================
@@ -1515,7 +1470,6 @@ MODULE ParseInPut
                                                   MinL,MaxL,ISet,KFound
 !----------------------------------------------------------------------------
 !        Open infofile
-         CALL OpenHDF(InfFile)
 !        Parse basis sets from inPut file
          CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS.BASIS_SETS>
@@ -1686,7 +1640,6 @@ MODULE ParseInPut
          CALL Put(Ctrl%NSet,'NumberOfSets')
          IF(PrintFlags%Key==DEBUG_MaxIMUM)  &
             CALL PPrint(MemStats,'ParseBaseSets')
-         CALL CloseHDF()
       END SUBROUTINE ParseBaseSets
 !============================================================================
       SUBROUTINE NormalizeBaseSets(A,B)
@@ -1827,7 +1780,6 @@ MODULE ParseInPut
 !
         CALL OpenASCII(OutFile,Out)
         CALL OpenASCII(InpFile,Inp)
-        CALL OpenHDF(Ctrl%Info)
 !
           CALL New(Stat,3)
           Stat%I=Ctrl%Current
@@ -2003,13 +1955,6 @@ MODULE ParseInPut
         CALL Put(MMAtNum,'MMAtNum')
         CALL Delete(MMAtNum)
 !
-! Calculate topology information (currently only 
-! for MM and QMMM calculations available), because
-! of lack of Bondlist for QM ones
-!
-        CALL TOPOLOGIES_MM(MM_NATOMS,NBonds, &
-             Bonds(:)%I,Bonds(:)%J,Ctrl%Info)
-!
 ! Calculate total MM Charge
 !
         SUM=Zero
@@ -2038,16 +1983,20 @@ MODULE ParseInPut
       GM_MM%AtMss%D(:) = ATMMAS(:)
       GM_MM%AtNum%D(:) = ATMCHG(:)
 !
+!  Reorder with SFC
+!     CALL ReorderCoordinates(GM_MM)
+!
 ! Set GM_MM atomkinds
 ! WARNING! In the present version, for the QM/MM case
 ! kinds for the QM part are all the same!
 !
       CALL FindKind(GM_MM)
 !
-! set boundary box
+! set bounding box
 !
       IF(HasQM()) THEN
         GM_MM%BndBox%D=SetBox(GM_MM%Carts,GM%Carts)
+        GM%BndBox%D=SetBox(GM_MM%Carts,GM%Carts)
       ELSE
         GM_MM%BndBox%D=SetBox(GM_MM%Carts)
       ENDIF
@@ -2086,43 +2035,9 @@ MODULE ParseInPut
 !enddo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-! Fractional coordinates handling
+! Compute fractional coordinates and conversion from Angstroems to Bohrs
 !
-#ifdef PERIODIC
-!
-!           IF(PBC_On) THEN !------------------------PBC
-!
-!           Convert to AU and ComPute Fractioan and Atomic Coordinates
-!
-            IF(GM_MM%PBC%InAtomCrd) THEN
-               IF(.NOT.GM_MM%InAU) THEN
-                  GM_MM%Carts%D    = GM_MM%Carts%D*AngstromsToAU
-               ENDIF
-               CALL CalFracCarts(GM_MM)
-            ELSE
-               GM_MM%BoxCarts%D=GM_MM%Carts%D
-               GM_MM%BoxVects%D=GM_MM%Vects%D
-               CALL CalAtomCarts(GM_MM)
-            ENDIF
-!
-            IF(GM_MM%PBC%Trans_COM) THEN
-               CALL CalTransVec(GM_MM)
-            ENDIF
-            CALL Translate(GM_MM,GM_MM%PBC%TransVec)
-            CALL WrapAtoms(GM_MM)
-!
-!           ReSet the Cell Center
-            DO I=1,3
-               IF(.NOT. GM_MM%PBC%AutoW(I)) THEN
-                  GM_MM%PBC%CellCenter(I) = Half*(GM_MM%BndBox%D(I,2)+GM_MM%BndBox%D(I,1))
-               ENDIF
-            ENDDO
-!
-!            ENDIF !------------------------PBC
-#else
-! Convert MM input
-        IF(.NOT.GM_MM%InAU) GM_MM%Carts%D = GM_MM%Carts%D*AngstromsToAU
-#endif
+        CALL FinishCoords(GM_MM)
 !
 ! Print out MM coordinates into outPut file
 !
@@ -2255,7 +2170,6 @@ MODULE ParseInPut
 !
       CALL Delete(GM_MM)
 !
-      CALL CloseHDF()
       CLOSE(UNIT=Out,STATUS='KEEP')
       CLOSE(UNIT=Inp,STATUS='KEEP')
 !
@@ -2270,7 +2184,6 @@ MODULE ParseInPut
          TYPE(SCFControls)          :: Ctrl
 !----------------------------------------------------------------------------
 !        Open info file
-         CALL OpenHDF(InfFile)
 !        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
@@ -2294,7 +2207,6 @@ MODULE ParseInPut
         CALL Put(Ctrl%Mechanics(1),'Ctrl_Mechanics1')
         CALL Put(Ctrl%Mechanics(2),'Ctrl_Mechanics2')
 !
-        CALL CLOSEHDF()
         CLOSE(UNIT=Inp,STATUS='KEEP')
 !
       END SUBROUTINE ParseMech
@@ -2305,7 +2217,6 @@ MODULE ParseInPut
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
 !        Open info file
-         CALL OpenHDF(InfFile)
 !        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !        Parse <OPTIONS> for <Grad=>
@@ -2360,7 +2271,6 @@ MODULE ParseInPut
                Ctrl%NGeom=500
             ENDIF
          ENDIF
-        CALL CLOSEHDF()
         CLOSE(UNIT=Inp,STATUS='KEEP')
 !
      END SUBROUTINE PARSEGRAD
@@ -2438,7 +2348,6 @@ MODULE ParseInPut
          TYPE(TOLS)                 :: Thrsh ! Thresholds
 !----------------------------------------------------------------------------
 !        Open info file
-         CALL OpenHDF(InfFile)
 !        Open inPut file
          CALL OpenASCII(InpFile,Inp) 
 !
@@ -2533,7 +2442,6 @@ MODULE ParseInPut
 !
 !        Close files
          CLOSE(UNIT=Inp,STATUS='KEEP')
-         CALL CloseHDF()
       END SUBROUTINE ParseAcc
 !----------------------------------------------------------
 #ifdef MMech
@@ -2557,7 +2465,6 @@ MODULE ParseInPut
 !
       CALL OpenASCII(InpFile,Inp)
       CALL OpenASCII(OutFile,Out)
-      CALL OpenHDF(InfFile)
 !
 ! Find extra internal coordinates and constraints
 !
@@ -2565,7 +2472,6 @@ MODULE ParseInPut
 !
       IF(.NOT.FindMixedCaseKey('BEGIN_ADD_INTERNALS',Inp)) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        CALL CloseHDF()
         Close(Inp)
         Close(Out)
         RETURN
@@ -2593,7 +2499,6 @@ MODULE ParseInPut
 !
       IF(NIntC_Extra==0) THEN
         CALL Put(NIntC_Extra,'NIntC_Extra')
-        CALL CloseHDF()
         Close(Inp)
         Close(Out)
         RETURN
@@ -2726,7 +2631,6 @@ READ(LineLowCase,*) CHAR,IntC_Extra%ATOMS(NIntC_Extra,1)
 200   format(A5,2X,4I4,F12.6,L6)
 !
       CALL Delete(IntC_Extra)
-      CALL CloseHDF()
       Close(Inp)
       Close(Out)
 !
@@ -2862,4 +2766,48 @@ SUBROUTINE ParsePeriodic(Ctrl,GMLoc)
 !
 END SUBROUTINE ParsePeriodic
 #endif
+!
+!----------------------------------------------------------------------
+!
+    SUBROUTINE FinishCoords(GMLoc)
+    TYPE(CRDS) :: GMLoc
+    INTEGER    :: I
+!
+#ifdef PERIODIC
+!           Convert to AU and ComPute Fractional and Atomic Coordinates
+            IF(GMLoc%PBC%InAtomCrd) THEN
+               IF(.NOT.GMLoc%InAU) THEN
+                  GMLoc%Carts%D    = GMLoc%Carts%D*AngstromsToAU
+                  GMLoc%AbCarts%D  = GMLoc%AbCarts%D*AngstromsToAU
+               ENDIF
+               CALL CalFracCarts(GMLoc)
+            ELSE
+               GMLoc%BoxCarts%D  =GMLoc%Carts%D
+               GMLoc%AbBoxCarts%D=GMLoc%Carts%D
+               GMLoc%BoxVects%D  =GMLoc%Vects%D
+               CALL CalAtomCarts(GMLoc)
+            ENDIF
+!
+            IF(GMLoc%PBC%Trans_COM) THEN
+               CALL CalTransVec(GMLoc)
+            ENDIF
+            CALL Translate(GMLoc,GMLoc%PBC%TransVec)
+            CALL WrapAtoms(GMLoc)
+!
+!           ReSet the Cell Center
+            DO I=1,3
+               IF(.NOT. GMLoc%PBC%AutoW(I)) THEN
+                  GMLoc%PBC%CellCenter(I) = Half*(GMLoc%BndBox%D(I,2)+GMLoc%BndBox%D(I,1))
+               ENDIF
+            ENDDO
+!
+#else
+!           Convert to AU
+            IF(.NOT.GMLoc%InAU) THEN
+               GMLoc%Carts%D=GMLoc%Carts%D*AngstromsToAU
+               GMLoc%AbCarts%D=GMLoc%AbCarts%D*AngstromsToAU
+            ENDIF
+#endif
+END SUBROUTINE FinishCoords
+!
 END MODULE
