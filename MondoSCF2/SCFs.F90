@@ -91,7 +91,7 @@ CONTAINS
     INTEGER            :: cSCF,cBAS,cGEO,iCLONE,Modl,IConAls
     INTEGER,SAVE       :: SCF_STATUS
     LOGICAL,OPTIONAL   :: CPSCF_O
-    LOGICAL            :: SCFCycle,DoCPSCF,DoingMD
+    LOGICAL            :: SCFCycle,DoCPSCF
     LOGICAL,SAVE       :: DIIS_FAIL,ODA_DONE
     REAL(DOUBLE)       :: DIISErr
     CHARACTER(LEN=128) :: Tmp
@@ -249,7 +249,7 @@ CONTAINS
     INTEGER                     :: cSCF,cBAS,cGEO,iGEO,iCLONE
     REAL(DOUBLE)                :: DIISA,DIISB,DDIIS,DIISQ,       &
          DETOT,ETOTA,ETOTB,ETOTQ,ETEST, &
-         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ,DMaxMax
+         DDMAX,DMAXA,DMAXB,DMAXQ,DTEST,ETOTO,ODAQ
     INTEGER,DIMENSION(G%Clones) :: Converged
     INTEGER                     :: ConvergedQ,iSCF,IConAls,MinSCF,MaxSCF
     CHARACTER(LEN=DCL)          :: chGEO
@@ -378,6 +378,12 @@ CONTAINS
           MinSCF = O%MinSCF
           MaxSCF = O%MaxSCF
           CALL Get(DoingMD,'DoingMD')
+          IF(DoingMD) THEN
+             IF(cGEO .LE. 1) THEN
+                MinSCF = 10
+                MaxSCF = 11
+             ENDIF
+          ENDIF
           ! Gather convergence parameters
           CALL Get(Etot%D(cSCF,iCLONE),'Etot')
           CALL Get(DMax%D(cSCF,iCLONE),'DMax')
@@ -509,25 +515,12 @@ CONTAINS
           CALL CloseHDFGroup(HDF_CurrentID)
        ENDDO
        CALL CloseHDF(HDFFileID)
+!
        ConvergedQ=DID_CONVERGE
        DO iCLONE=1,G%Clones
           ConvergedQ=MIN(ConvergedQ,Converged(iCLONE))
        ENDDO
-!      moleculr Dynamics Convergence Criteria
-       IF(DoingMD) THEN
-          DMaxMax=Zero
-          DO iCLONE=1,G%Clones
-             DMaxMax = MAX(DMax%D(cSCF,iCLONE),DMaxMax)
-          ENDDO
-          IF(DMaxMax > DTest*1.D-1) THEN
-             ConvergedQ=NOT_CONVERGE
-             Mssg = " "
-          ELSE
-             ConvergedQ=DID_CONVERGE
-             Mssg = "MD SCF convergence"
-          ENDIF
-       ENDIF
-!      If MinSCF and MaxSCF 
+!
        IF(cSCF .LT. MinSCF) THEN
           ConvergedQ=NOT_CONVERGE
           Mssg = " "
@@ -536,8 +529,7 @@ CONTAINS
           ConvergedQ=DID_CONVERGE
           Mssg = "Forced SCF convergence"
        ENDIF
-!      moleculr Dynamics Con
-!      Convergence announcement
+       ! Convergence announcement
        IF(Mssg .NE. " " .AND. cSCF >2)THEN
           CALL OpenASCII(OutFile,Out)
           WRITE(Out,*)TRIM(Mssg)
@@ -892,6 +884,7 @@ CONTAINS
     IF(HasDFT(O%Models(cBas))) THEN
        CALL Invoke('XCForce',N,S,M)
     ENDIF
+!
 !   Constraint the Gradients
 !
     chGEO=IntToChar(cGEO)
@@ -909,8 +902,6 @@ CONTAINS
        ENDIF
 !      Get Lattice Forces
        CALL Get(G%Clone(iCLONE)%PBC%LatFrc,'latfrc',Tag_O=chGEO)
-!      Get the new SCF Energy
-       CALL Get(G%Clone(iCLONE)%ETotal,'Etot')
 !      Close the group
        CALL CloseHDFGroup(HDF_CurrentID)
        G%Clone(iCLONE)%GradRMS=SQRT(G%Clone(iCLONE)%GradRMS)/DBLE(3*G%Clone(iCLONE)%NAtms)
@@ -1238,6 +1229,327 @@ CONTAINS
     CALL Delete(BSiz)
     CALL Delete(OffS)
   END SUBROUTINE NTHessian
+!===============================================================================
+!===============================================================================
+!===============================================================================
+!===============================================================================
+  SUBROUTINE Multiply_DR2(N,A,B,C)
+    INTEGER            :: I,J,K,N
+    TYPE(DBL_RNK2)     :: A,B,C
+!
+    DO I=1,N
+       DO J=1,N
+          C%D(I,J) = Zero
+          DO K=1,N
+             C%D(I,J) = C%D(I,J) + A%D(I,K)*B%D(K,J)
+          ENDDO
+       ENDDO
+    ENDDO
+!
+  END SUBROUTINE Multiply_DR2
+!
+  FUNCTION Trace_DR2(N,A)
+    INTEGER            :: I,N
+    TYPE(DBL_RNK2)     :: A
+    REAL(DOUBLE)       :: Trace_DR2
+!
+    Trace_DR2 = Zero
+    DO I=1,N
+       Trace_DR2 = Trace_DR2 + A%D(I,I)
+    ENDDO
+!
+  END FUNCTION Trace_DR2
+!===============================================================================
+! Numerically compute Lattice gradients
+!===============================================================================
+ SUBROUTINE NLattForce0(C)
+   TYPE(Controls)                   :: C
+   INTEGER                          :: I1,I2,cSCF,cBAS,cGEO
+   REAL(DOUBLE),PARAMETER           :: DDelta = 1.D-4
+   REAL(DOUBLE)                     :: E_low,E_hig,Lat00
+   TYPE(DBL_RNK2)                   :: LattF
+   
+!  Write Out Delta
+   WRITE(*,*) 'DDelta = ',DDelta
+!  Allocate
+   CALL New(LattF,(/3,3/))
+   LattF%D=Zero
+!
+   cSCF = C%Stat%Current%I(1)
+   cBAS = C%Stat%Current%I(2)
+   cGEO = C%Stat%Current%I(3)
+!  Loop Over I1,I2
+   DO I1=1,3
+      DO I2=1,3
+         Lat00 = C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2)
+         IF(C%Geos%Clone(1)%PBC%AutoW%I(I1)==1 .AND. C%Geos%Clone(1)%PBC%AutoW%I(I2)==1) THEN
+            C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
+            CALL MakeGMPeriodic(C%Geos%Clone(1))
+            C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+            CALL SinglePoints(C)
+!  
+            HDFFileID=OpenHDF(C%Nams%HFile)
+            HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+            CALL Get(E_low,'Etot')
+            CALL CloseHDF(HDFFileID)
+!   
+            C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
+            CALL MakeGMPeriodic(C%Geos%Clone(1))
+            C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+            CALL SinglePoints(C)
+!  
+            HDFFileID=OpenHDF(C%Nams%HFile)
+            HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+            CALL Get(E_hig,'Etot')
+            CALL CloseHDF(HDFFileID)
+!
+            LattF%D(I1,I2) =  (E_hig-E_low)/(Two*DDelta)
+!
+            C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
+            CALL MakeGMPeriodic(C%Geos%Clone(1))
+         ENDIF
+      ENDDO
+   ENDDO
+!
+   DO I1=1,3
+      WRITE(*,99) (LattF%D(I1,I2),I2=1,3)
+   END DO
+!
+99 FORMAT(3(D23.14,1X))
+
+ END SUBROUTINE NLattForce0
+!===============================================================================
+! Numerically compute gradients
+!===============================================================================
+ SUBROUTINE NLattForce1(C,I1,I2)
+   TYPE(Controls)                   :: C
+   INTEGER                          :: I,J,K,iSCF,I1,I2
+   REAL(DOUBLE),PARAMETER           :: DDelta = 1.D-5
+   REAL(DOUBLE)                     :: E_low,E_hig,Lat00
+   REAL(DOUBLE)                     :: TracePFPdS,TracePdT,TracePdJ1,TracePdJ2
+   REAL(DOUBLE)                     :: dNukE,TracePdK,dExc
+   CHARACTER(LEN=DCL)               :: TrixName
+   TYPE(DBL_RNK2)                   :: P,F,T1,T2,T3
+   TYPE(BCSR)                       :: Temp
+   TYPE(CellSet)                    :: CS
+!  Load global
+   Lat00 = C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2)
+   CALL New(BSiz,C%Geos%Clone(1)%NAtms)
+   CALL New(OffS,C%Geos%Clone(1)%NAtms)
+   CALL New(C%Stat%Action,1)
+   NAToms  = C%Geos%Clone(1)%NAtms
+   MaxAtms = C%Sets%MxAts(1)
+   MaxBlks = C%Sets%MxN0s(1)
+   MaxNon0 = C%Sets%MxBlk(1)
+   NBasF   = C%Sets%BSets(1,1)%NBasF
+   BSiz%I  = C%Sets%BSiz(1,1)%I
+   OffS%I  = C%Sets%OffS(1,1)%I
+   MaxBlkSize=0
+   DO I=1,C%Geos%Clone(1)%NAtms
+      MaxBlkSize=MAX(MaxBlkSize,BSiz%I(I))
+   ENDDO
+!  Write Out Delta
+   WRITE(*,*) 'DDelta = ',DDelta
+   WRITE(*,*) 'Lattice'
+   WRITE(*,*) C%Geos%Clone(1)%PBC%BoxShape%D(1,1:3)
+   WRITE(*,*) C%Geos%Clone(1)%PBC%BoxShape%D(2,1:3)
+   WRITE(*,*) C%Geos%Clone(1)%PBC%BoxShape%D(3,1:3)
+   WRITE(*,*) 
+!  Intitialize
+   CALL New(F ,(/NBasF,NBasF/)) 
+   CALL New(P ,(/NBasF,NBasF/))
+   CALL New(T1,(/NBasF,NBasF/))
+   CALL New(T2,(/NBasF,NBasF/))
+   CALL New(T3,(/NBasF,NBasF/))
+   iSCF = C%Stat%Current%I(1)
+!  Get F    
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Cycl#'//TRIM(IntToChar(iSCF))//'_Clone#1.F'
+   CALL Get(Temp,TrixName) 
+   CALL SetEq(F,Temp)
+!  Get P
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Cycl#'//TRIM(IntToChar(iSCF))//'_Clone#1.D'
+   CALL Get(Temp,TrixName) 
+   CALL SetEq(P,Temp)
+   CALL CloseHDF(HDFFileID) 
+!  Compute PFP
+   CALL Multiply_DR2(NBasF,F,P,T1)
+   CALL Multiply_DR2(NBasF,P,T1,F)
+!      
+!  Calculate -2*Trace[P*F*P*dS]              
+! 
+   C%Stat%Action%C(1)='OneElectronMatrices'
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakeS',C%Nams,C%Stat,C%MPIs)
+!      
+   HDFFileID=OpenHDF(C%Nams%HFile)  
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Clone#1.S'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T1,Temp)
+   CALL CloseHDF(HDFFileID) 
+!
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakeS'   ,C%Nams,C%Stat,C%MPIs)
+!      
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Clone#1.S'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T2,Temp)
+!
+   T3%D = (T2%D-T1%D)/(Two*DDelta)
+!
+   CALL Multiply_DR2(NBasF,F,T3,T1)
+   TracePFPdS = -Two*Trace_DR2(NBasF,T1)
+   WRITE(*,*) 'LatFrc_S'
+   WRITE(*,*) '(',I1,',',I2,')=',TracePFPdS
+!
+!  Calculate 2*Trace[P*dT]
+! 
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
+!      
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Clone#1.T'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T1,Temp)
+   CALL CloseHDF(HDFFileID) 
+!
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakeT'   ,C%Nams,C%Stat,C%MPIs)
+!      
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Clone#1.T'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T2,Temp)
+   CALL CloseHDF(HDFFileID) 
+!
+   T3%D = (T2%D-T1%D)/(Two*DDelta)
+   CALL Multiply_DR2(NBasF,P,T3,T1)
+   TracePdT = Two*Trace_DR2(NBasF,T1)
+   WRITE(*,*) 'LatFrc_T '
+   WRITE(*,*) '(',I1,',',I2,')=',TracePdT
+!
+!  Calculate d(Exc)
+!
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+!
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('HiCu'     ,C%Nams,C%Stat,C%MPIs)
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   CALL Get(E_low,'Exc')   
+   CALL CloseHDF(HDFFileID) 
+!
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+!
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('HiCu'     ,C%Nams,C%Stat,C%MPIs)
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   CALL Get(E_hig,'Exc')
+   CALL CloseHDF(HDFFileID) 
+!
+   dExc = (E_hig-E_low)/(Two*DDelta)
+
+   WRITE(*,*) 'LatFrc_XC'
+   WRITE(*,*) '(',I1,',',I2,')=',dExc
+   WRITE(*,*)
+
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+!
+!  Calculate 2*(Trace[P*dJ]+NukeE)
+!    
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00-DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)!   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs) 
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('QCTC'     ,C%Nams,C%Stat,C%MPIs)
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1)))
+   CALL Get(E_low,'E_NuclearTotal')
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Cycl#'//TRIM(IntToChar(iSCF))//'_Clone#1.J'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T1,Temp)
+   CALL CloseHDF(HDFFileID)
+!
+   CALL Multiply_DR2(NBasF,P,T1,T3) 
+   E_low = Trace_DR2(NBasF,T3)+E_low
+!
+!  
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00+DDelta
+   CALL MakeGMPeriodic(C%Geos%Clone(1))  
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('QCTC'     ,C%Nams,C%Stat,C%MPIs)
+   HDFFileID=OpenHDF(C%Nams%HFile)
+   HDF_CurrentID=OpenHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(1))) 
+   CALL Get(E_hig,'E_NuclearTotal')
+   TrixName=TRIM(C%Nams%M_SCRATCH)//TRIM(C%Nams%SCF_NAME)//'_Geom#1_Base#1_Cycl#'//TRIM(IntToChar(iSCF))//'_Clone#1.J'
+   CALL Get(Temp,TrixName)
+   CALL SetEq(T2,Temp)
+   CALL CloseHDF(HDFFileID) 
+!
+   CALL Multiply_DR2(NBasF,P,T2,T3)
+   E_hig = Trace_DR2(NBasF,T3)+E_hig
+!
+!
+!
+   dNukE = (E_hig-E_low)/(Two*DDelta)
+   WRITE(*,*) 'LatFrc_QCTC'
+   WRITE(*,*) '(',I1,',',I2,')=',dNukE
+   WRITE(*,*)
+!
+!
+   C%Geos%Clone(1)%PBC%BoxShape%D(I1,I2) = Lat00
+   CALL MakeGMPeriodic(C%Geos%Clone(1))
+   C%Geos%Clone(1)%AbCarts%D = C%Geos%Clone(1)%Carts%D
+   CALL GeomArchive(1,1,C%Nams,C%Sets,C%Geos)
+   CALL Invoke('MakePFFT' ,C%Nams,C%Stat,C%MPIs)
+   CALL Invoke('MakeRho'     ,C%Nams,C%Stat,C%MPIs)
+!
+!  Delete
+   CALL Delete(BSiz)
+   CALL Delete(OffS)
+   CALL Delete(C%Stat%Action)
+   CALL Delete(F) 
+   CALL Delete(P)
+   CALL Delete(T1)
+   CALL Delete(T2)
+   CALL Delete(T3)
+!
+ END SUBROUTINE NLattForce1
 !======================================================================================
 END MODULE SCFs
 
