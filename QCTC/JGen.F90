@@ -25,14 +25,14 @@ MODULE JGen
 !
 !=============================================================================================
     SUBROUTINE MakeJ(J)
-      TYPE(BCSR)             :: J
-      TYPE(DBL_RNK2)         :: Temp
-      TYPE(AtomPair)         :: Pair
-      INTEGER                :: AtA,AtB
-      INTEGER                :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
+      TYPE(BCSR)                :: J
+      TYPE(DBL_RNK2)            :: Temp
+      TYPE(AtomPair)            :: Pair
+      INTEGER                   :: AtA,AtB
+      INTEGER                   :: JP,K,NA,NB,NAB,P,Q,R,I1,I2,I3,L,I
 #ifdef PERIODIC 
-  INTEGER                   :: NC
-  REAL(DOUBLE),DIMENSION(3) :: B
+      INTEGER                   :: NC
+      REAL(DOUBLE),DIMENSION(3) :: B
 #endif    
 !---------------------------------------------- 
 !     Initialize the matrix and associated indecies
@@ -46,7 +46,7 @@ MODULE JGen
          DO AtB=1,NAtoms
             IF(SetAtomPair(GM,BS,AtA,AtB,Pair)) THEN
                NAB = Pair%NA*Pair%NB
-               IF(AtB<=AtA)THEN              
+               IF(AtB<=AtA)THEN  
 !              Compute only the lower triangle of symmetric J
 #ifdef PERIODIC
                   B = Pair%B
@@ -91,7 +91,7 @@ MODULE JGen
                CALL XPose(NA,NB,J%MTrix%D(P:P+NAB-1),J%MTrix%D(Q:Q+NAB-1))
             ENDIF
          ENDDO
-      ENDDO  
+      ENDDO
 !
     END SUBROUTINE MakeJ
 !=============================================================================================
@@ -199,14 +199,14 @@ MODULE JGen
                          CALL SetKet(Prim,PExtent)
 #ifdef PERIODIC
 !                        Fold primative back into the unit cell
-!                         CALL AtomCyclic(GM,Prim%P)
+                         CALL AtomCyclic(GM,Prim%P)
                          PTmp=Prim%P
 !                        Sum over cells
                          DO NC=1,CS_IN%NCells
                             Prim%P=PTmp+CS_IN%CellCarts%D(:,NC)
                             PBox%Center=Prim%P
 !                           Walk the walk
-                            CALL JWalk(PoleRoot)
+                            CALL JWalk(PoleRoot) 
                          ENDDO
                          Prim%P=PTmp
 #else
