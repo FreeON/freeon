@@ -22,7 +22,8 @@ MODULE MondoPoles
       INTEGER                               :: NQ       ! Number of centers
       INTEGER                               :: Ell      ! Ell type
       REAL(DOUBLE)                          :: Zeta     ! Minimum exponent in this node
-      REAL(DOUBLE)                          :: Strength ! Max distance from node center to BBox
+      REAL(DOUBLE)                          :: Strength ! Strength of the Pole
+      REAL(DOUBLE)                          :: DMax2    ! (Max distance)^2 from node center to BBox 
       TYPE(BBox)                            :: Box      ! Bounding box 
       TYPE(PoleNode),POINTER                :: Descend  ! Next node in tree descent
       TYPE(PoleNode),POINTER                :: Travrse  ! Next node in tree traversal
@@ -48,8 +49,7 @@ MODULE MondoPoles
    REAL(DOUBLE), DIMENSION(0:2*FFEll2)          :: Factorial
    REAL(DOUBLE), DIMENSION(0:FFEll2)            :: FactOlm0,FactMlm0,Sine,Cosine,CoFact
    REAL(DOUBLE), DIMENSION(0:FFLen2)            :: FactOlm2,FactMlm2,ALegendreP,Spq,Cpq
-   REAL(DOUBLE), DIMENSION(0:SPLen2)            :: Sx,Cx
-   REAL(DOUBLE), DIMENSION(0:FFEll2,0:FFEll2)   :: FudgeFactorial
+   REAL(DOUBLE), DIMENSION(0:SPEllP,0:FFELL)   :: FudgeFactorial
    CONTAINS
 !====================================================================================
 !     Q->P
@@ -59,15 +59,15 @@ MODULE MondoPoles
          REAL(DOUBLE),DIMENSION(3) :: QP
          INTEGER                   :: LP,LQ,LPQ
 !------------------------------------------------------------------------------------
-         LP=SPEll+1
+         LP=P%Ell
          LQ=Q%Ell
          LPQ=MAX(LP,LQ)
          QP=Q%Box%Center-P%Box%Center
          CALL Regular(LPQ,QP(1),QP(2),QP(3))
-         CALL XLate77(LP,LQ,Cx,Sx,Cpq,Spq,Q%C,Q%S)
+         CALL XLate77(LP,LQ,P%C,P%S,Cpq,Spq,Q%C,Q%S)
        END SUBROUTINE XLate
 !====================================================================================
-!
+!     Contrax P with Q
 !====================================================================================
       SUBROUTINE CTrax(P,Q,SPKetC,SPKetS)
          TYPE(PrimPair)            :: P
@@ -99,11 +99,11 @@ MODULE MondoPoles
 !
 !====================================================================================
        SUBROUTINE HGToSP_Bra(P,HGBra,SPBraC,SPBraS)
-         TYPE(PrimPair)                   :: P
-         INTEGER                          :: L,Len
-         REAL(DOUBLE)                     :: PiZ,Zeta
-         REAL(DOUBLE), DIMENSION(:)       :: HGBra
-         REAL(DOUBLE), DIMENSION(0:SPLen) :: SPBraC,SPBraS
+         TYPE(PrimPair)                    :: P
+         INTEGER                           :: L,Len
+         REAL(DOUBLE)                      :: PiZ,Zeta
+         REAL(DOUBLE), DIMENSION(:)        :: HGBra
+         REAL(DOUBLE), DIMENSION(0:)       :: SPBraC,SPBraS
 !------------------------------------------------------------------------------------
 !        Transform <Bra| coefficients from HG to SP
          PiZ=(Pi/P%Zeta)**(ThreeHalves)
@@ -115,12 +115,13 @@ MODULE MondoPoles
        SUBROUTINE HGToSP_Gen(L,PiZ,HGCo,C,S) 
           INTEGER                    :: L
           REAL(DOUBLE)               :: PiZ
-          REAL(DOUBLE),DIMENSION(:)  :: HGCo      
+          REAL(DOUBLE),DIMENSION(1:) :: HGCo      
           REAL(DOUBLE),DIMENSION(0:) :: C,S
           REAL(DOUBLE),DIMENSION(20) :: W
+!               
           SELECT CASE(L)
           INCLUDE 'HGToSP.Inc'
-          CASE(HGEll+1:) 
+          CASE(6:) 
              CALL Halt(' Bad logic in HGToSPX')
           END SELECT
        END SUBROUTINE HGToSP_Gen
@@ -170,9 +171,10 @@ MODULE MondoPoles
           ENDDO
 !
 !         FudgeFactorial(LP,LQ)=[Sum_(MP,MQ) (LP+LQ-MP-MQ)!/((LP+MP)!(LQ+MQ)!)]/{
-!                               [Sum_MP (LP-MP)!/(LP+MP)!]*[Sum_MQ (LQ-MQ)!/(LQ+MQ)!]}
-          DO LP=0,Ell
-             DO LQ=0,Ell
+!         [Sum_MP (LP-MP)!/(LP+MP)!]*[Sum_MQ (LQ-MQ)!/(LQ+MQ)!]}
+!
+          DO LP=0,SPEllP
+             DO LQ=0,FFEll
                 DenomP=One
                 DenomQ=One
                 DO MP=1,LP
@@ -229,7 +231,7 @@ MODULE MondoPoles
             Sine(1)=PQx/PQxy
             Cosine(1)=PQy/PQxy
          ELSE
-            Sine(1)=0.70710678118654752D0         
+            Sine(1)  =0.70710678118654752D0         
             Cosine(1)=0.70710678118654752D0
          ENDIF
          TwoC=Two*Cosine(1)
@@ -352,9 +354,10 @@ MODULE MondoPoles
          K=LTD(L)
          UnsoldO=(C(K)**2+S(K)**2)*Factorial(L)**2
          DO M=1,L
-            UnsoldO=UnsoldO+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)
+            UnsoldO=UnsoldO+Two*(C(K+M)**2+S(K+M)**2)*Factorial(L+M)*Factorial(L-M)            
          ENDDO
-         UnsoldO=SQRT(UnsoldO)
+         UnsoldO = SQRT(UnsoldO)
+!
        END FUNCTION UnsoldO
 !====================================================================================
 !
@@ -373,13 +376,13 @@ MODULE MondoPoles
                  //TRIM(IntToChar(Node%Box%Tier))//',Leaf] = (' &
                  //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
                  //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
-                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
+                 //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
           ELSE
              Line='Q[#'//TRIM(IntToChar(Node%Box%Number))//',Tier' &
                  //TRIM(IntToChar(Node%Box%Tier))//'] = (' &
                  //TRIM(DblToMedmChar(Node%Box%Center(1)))//', '        &
                  //TRIM(DblToMedmChar(Node%Box%Center(2)))//', '        &
-                //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
+                 //TRIM(DblToMedmChar(Node%Box%Center(3)))//') '
           ENDIF
           WRITE(*,*)TRIM(Line)
           DO l=0,Node%Ell

@@ -25,6 +25,7 @@ MODULE PoleTree
    REAL(DOUBLE),DIMENSION(:),Allocatable :: RList      
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Zeta
    REAL(DOUBLE),DIMENSION(:),Allocatable :: Ext
+!
 !-----------!
    CONTAINS !
 !=================================================================================
@@ -48,6 +49,8 @@ MODULE PoleTree
         DO CurrentTier=MaxTier,0,-1         
            CALL MakePoleTree(PoleRoot) 
         ENDDO
+!       Reset Ell of PoleRoot
+        PoleRoot%Ell=SPEll
         CALL Print_PoleNode(PoleRoot,'Root')
       END SUBROUTINE RhoToPoleTree
 !=====================================================================================
@@ -79,10 +82,11 @@ MODULE PoleTree
 !     
 !=================================================================================
       RECURSIVE SUBROUTINE MakePoleTree(P)
-         TYPE(PoleNode)         :: P
-         TYPE(PoleNode),POINTER :: LeftQ,RightQ
-         INTEGER                :: K
-         REAL(DOUBLE),PARAMETER :: UnsoldExp=Two/(Two+SPEll) * (SPEll+1)/SPEll
+         TYPE(PoleNode)                   :: P
+         TYPE(PoleNode),POINTER           :: LeftQ,RightQ
+         INTEGER                          :: K
+         REAL(DOUBLE),PARAMETER           :: UnsoldExp=Two/DBLE(SPEll+2)
+         REAL(DOUBLE),DIMENSION(0:SPLenP) :: SPKetC,SPKetS
 !--------------------------------------------------------------
          IF(P%Box%Tier==CurrentTier.AND.P%Leaf)THEN
             P%C=Zero
@@ -104,17 +108,24 @@ MODULE PoleTree
             P%Box%Half(:)=Half*(P%Box%BndBox(:,2)-P%Box%BndBox(:,1))
             P%Box%Center(:)=Half*(P%Box%BndBox(:,2)+P%Box%BndBox(:,1))
             P%Zeta=MIN(LeftQ%Zeta,RightQ%Zeta)
-!           Zero extended accumulators
-            Cx=Zero
-            Sx=Zero
-!           Translation 
+!-----------------------------------------------------------------------------
+!           Translate Left and Right with SPEll+1, to accumulate 
+!           Unsold estimates with
+!
+!           Translate LeftQ-> P
             CALL XLate(LeftQ,P)
+!           Translate RightQ-> P
             CALL XLate(RightQ,P)
-!           Copy lower portion of accumulators into nodes
-            P%C(0:SPLen)=Cx(0:SPLen)
-            P%S(0:SPLen)=Sx(0:SPLen)
-!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L)*(L+1)/L)
-            P%Strength=UnsoldO(SPEll+1,Cx,Sx)**UnsoldExp
+!           Reset Ell of Right and Left nodes if not leafs
+            IF(.NOT.LeftQ%Leaf)LeftQ%Ell=SPell
+            IF(.NOT.RightQ%Leaf)RightQ%Ell=SPell
+!           Compute the multipole strength [O^P_(L+1)]^(2/(2+L))
+            P%Strength = UnsoldO(SPEll+1,SPKetC,SPKetS)**UnsoldExp
+!           Compute DMax  (check and recheck this...)          
+            P%DMax2 = MAX(LeftQ%DMax2,RightQ%DMax2)            &
+                    + (LeftQ%Box%Center(1)-P%Box%Center(1))**2 & 
+                    + (LeftQ%Box%Center(2)-P%Box%Center(2))**2 &
+                    + (LeftQ%Box%Center(3)-P%Box%Center(3))**2    
          ELSE
 !           Keep on truckin ...
             CALL MakePoleTree(P%Descend)
@@ -138,6 +149,7 @@ MODULE PoleTree
          IF(NQ/=1.OR.B/=E)CALL Halt('Bad Logic in FillRhoLeaf ')
          KQ=Qdex(B)
          Node%Zeta=Zeta(KQ)
+!        Reset leaf nodes ell to min value: its untranslated!
          Node%Ell=Ldex(KQ)
 !        Set and inflate this nodes BBox
          Node%Box%BndBox(1,:)=Rho%Qx%D(KQ)
@@ -164,13 +176,15 @@ MODULE PoleTree
          Node%Leaf=.False.
          Node%Box%Tier=Level
          Node%Box%Number=PoleNodes
-         Node%Ell=SPEll
+         Node%Ell=SPEll+1
          MaxTier=MAX(MaxTier,Level)
          PoleNodes=PoleNodes+1
          NULLIFY(Node%Travrse)
          NULLIFY(Node%Descend)
       END SUBROUTINE NewPoleNode
-
+!==========================================================================
+!     Initialize a new PoleNode's Array
+!==========================================================================
       SUBROUTINE NewSPArrays(Node)
          TYPE(PoleNode), POINTER   :: Node
          INTEGER                   :: LenSP,Status        
@@ -182,12 +196,40 @@ MODULE PoleTree
          Node%S=Zero
          Node%C=Zero
       END SUBROUTINE NewSPArrays
+!==========================================================================
+!     Resize a PoleNode's Arrary
+!==========================================================================
+     SUBROUTINE ResizeSPArrays(Ell,Node)
+         TYPE(PoleNode), POINTER          :: Node
+         INTEGER                          :: Ell,LenSP,LenSP_new,Status
+         REAL(DOUBLE),DIMENSION(0:SPLenP) :: C,S    
+!
+         LenSP     = LSP(Node%Ell)
+         LenSP_new = LSP(Ell)
+         S = Node%S
+         C = Node%C
+!         
+         DEALLOCATE(Node%S,STAT=Status)
+         CALL DecMem(Status,0,LenSP+1)
+         DEALLOCATE(Node%C,STAT=Status)
+         CALL DecMem(Status,0,LenSP+1)
+! 
+         ALLOCATE(Node%S(0:LenSP_new),STAT=Status)
+         CALL IncMem(Status,0,LenSP_new+1)
+         ALLOCATE(Node%C(0:LenSP_new),STAT=Status)
+         CALL IncMem(Status,0,LenSP_new+1)
+!
+         Node%S   = S
+         Node%C   = C
+         Node%Ell = Ell
+! 
+     END SUBROUTINE ResizeSPArrays
 !================================================================================
 !     Bisection   
 !================================================================================
       SUBROUTINE SplitPoleBox(Node,Left,Right)
          TYPE(PoleNode), POINTER :: Node,Left,Right
-         REAL(DOUBLE)            :: Section
+         REAL(DOUBLE)            :: Section,MaxBox
          INTEGER                 :: B,E,N,ISplit,Split,I,J,k
 !--------------------------------------------------------------
 !        Indexing
@@ -213,6 +255,7 @@ MODULE PoleTree
                RList(J)=Rho%Qz%D(K)
             ENDDO
          ENDIF
+
 !        Sort
          CALL DblIntSort77(N,RList,Qdex(B:E),2)
 !        Orthogonal RECURSIVE bisection (ORB)
