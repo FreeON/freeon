@@ -1,7 +1,7 @@
 <BeginTitle>
 bALA, periodic
-Ewald-electrostatic energy: -0.4752740004488429 Hartree (mxbox=600)
-MONDO PBC:                  -0.4752740004080185 Hartree (very tight)
+Ewald-electrostatic energy: -0.4752740004096457 Hartree (mxbox=600, beta=1.5)
+MONDO PBC:                  -0.4752740004096455 Hartree (very tight)
 <EndTitle>
 
 <BeginOptions>
