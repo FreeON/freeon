@@ -1312,6 +1312,7 @@ CONTAINS
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
 
+                CALL Get(GM%ETotal, 'gm_etot',Tag_O=Tag_O)
                 CALL Get(GM%Ordrd,  'reordered',Tag_O=Tag_O)
                 CALL Get(GM%AtTyp,  'atomtype',Tag_O=Tag_O)
                 CALL Get(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
@@ -1350,6 +1351,7 @@ CONTAINS
                 !-------------------------------------------------------------------------------
                 !        Items that can change with geometry ...       
 
+                CALL Put(GM%ETotal, 'gm_etot',Tag_O=Tag_O)
                 CALL Put(GM%Ordrd,  'reordered',Tag_O=Tag_O)
                 CALL Put(GM%AtNum,  'atomicnumbers',Tag_O=Tag_O)
                 CALL Put(GM%AtNam,  'atomname',Tag_O=Tag_O)

@@ -2,4 +2,6 @@
 /*
 double random_(void){return rand(); }
 */
-double random_(void){ return drand48(); }
+double random_(void){ 
+srand( (unsigned int) time( NULL ));
+return drand48(); }
