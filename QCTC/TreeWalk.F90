@@ -146,13 +146,18 @@ MODULE TreeWalk
        INTEGER                          :: LP,MP,NP,LQ,MQ,NQ,PDex,QDex
        REAL(DOUBLE),DIMENSION(0:2*HGEll,0:2*HGEll,0:2*HGEll,0:2*HGEll) :: MDR
 #endif
-       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-14
+       REAL(DOUBLE),PARAMETER           :: VTol = 1.D-6
 !---------------------------------------------------------------------------------------------------
 !      PAC: Exp[-W_Min PQ^2]/2 < Tau/Amp
        PQx=Prim%P(1)-Q%Box%Center(1)
        PQy=Prim%P(2)-Q%Box%Center(2)
        PQz=Prim%P(3)-Q%Box%Center(3)
        PQ2=PQx*PQx+PQy*PQy+PQz*PQz
+!
+       IF(Q%Leaf .AND. Q%Zeta==NuclearExpnt .AND. PQ2 < VTol) THEN
+          RETURN
+       ENDIF
+!
        RTE=Prim%Zeta*Q%Zeta
        RPE=Prim%Zeta+Q%Zeta
        Omega=RTE/RPE
@@ -167,7 +172,7 @@ MODULE TreeWalk
              INCLUDE "IrRegulars.Inc"
              INCLUDE "CTraX.Inc"
 #else
-             CALL CTrax(Prim,Q,SPKetC,SPKetS)
+            CALL CTrax(Prim,Q,SPKetC,SPKetS)
 #endif
           ELSE
 !            Keep on truckin
@@ -175,7 +180,6 @@ MODULE TreeWalk
              CALL VWalk(Q%Descend%Travrse)
           ENDIF
        ELSEIF(Q%Leaf)THEN
-          IF(Q%BDex>0 .AND. PQ2 < VTol)RETURN
 !         Set up
           T=Omega*PQ2          
           Upq=TwoPi5x2/(RTE*SQRT(RPE))
