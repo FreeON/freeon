@@ -1,3 +1,167 @@
+2002-10-20 09:28  mchalla
+
+	* QCTC/PFFTensor.F90: MondoHalt->Halt
+
+2002-10-20 09:08  mchalla
+
+	* QCTC/: Majik_Kubic_WS1.Inc, Majik_Kubic_WS2.Inc, PFFTensor.F90:
+	Added in parameter statements for exact kubic pffts, and fixed an
+	indexing bug with LM=.
+
+2002-10-20 08:50  mchalla
+
+	* QCTC/: Majik_Kubic_WS1.Inc, Majik_Kubic_WS2.Inc: Added in majik
+	numbers for the unit kube and WS=1,2 thu ell=128!
+
+2002-10-19 19:07  nemeth
+
+	* MondoSCF/ParseInput.F90: [no log message]
+
+2002-10-19 19:00  nemeth
+
+	* MondoMods/InOut.F90: put and get of chr_vect modified
+
+2002-10-19 17:11  nemeth
+
+	* Dynamo/dynamo.F90, MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-19 16:42  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-19 16:09  nemeth
+
+	* MondoSCF/DrvSCFs.F90: [no log message]
+
+2002-10-19 16:03  nemeth
+
+	* Dynamo/dynamo.F90: Modifications for periodic Lennard-Jones
+	energy and gradient calculations.
+
+2002-10-19 16:02  nemeth
+
+	* MondoMods/InCoords.F90: subroutines added for periodic Lennard
+	Jones energies and forces calculation.
+
+2002-10-18 18:07  tymczak
+
+	* Validate/bALAmmPBC.inp: [no log message]
+
+2002-10-18 18:07  tymczak
+
+	* Validate/MgO.inp: Bugs
+
+2002-10-18 18:06  tymczak
+
+	* QCTC/: PBCFarField.F90, PFFTensor.F90: More Bugs
+
+2002-10-18 16:36  tymczak
+
+	* QCTC/: MakePFFT.F90, PBCFarField.F90: [no log message]
+
+2002-10-18 16:25  tymczak
+
+	* Validate/: MgOmm.inp, Water64mm.inp: Added PFFMaxLay	    
+	PFFMaxEll
+
+2002-10-18 16:25  tymczak
+
+	* Validate/MgO.inp: Added PFFMaxLay
+
+2002-10-18 16:23  tymczak
+
+	* QCTC/: MakePFFT.F90, PBCFarField.F90, PFFTensor.F90: Fixed Bugs
+
+2002-10-17 21:20  nemeth
+
+	* Dynamo/dynamo.F90: [no log message]
+
+2002-10-17 21:15  nemeth
+
+	* MondoSCF/DrvSCFs.F90, MondoSCF/DrvFrcs.F90,
+	MondoMods/InCoords.F90: [no log message]
+
+2002-10-17 21:10  nemeth
+
+	* QCTC/PFFTensor.F90, QCTC/PBCFarField.F90, QCTC/MakePFFT.F90,
+	MondoSCF/ParseInput.F90: [no log message]
+
+2002-10-17 16:13  nemeth
+
+	* Validate/: bALAmmPBC.inp, MgOmm.inp, Water64mm.inp,
+	validation_opls: [no log message]
+
+2002-10-17 15:18  tymczak
+
+	* MondoSCF/ParseInput.F90: Fixed a bug in the Periodics
+
+2002-10-17 15:15  tymczak
+
+	* Validate/MgO.inp: Added PFFLayers=1
+
+2002-10-17 15:14  tymczak
+
+	* VisDX/PotMapRho.F90: PFFT modual is now PFFTen
+
+2002-10-17 15:13  tymczak
+
+	* QCTC/QCTC.F90: NOTHING
+
+2002-10-17 15:11  tymczak
+
+	* QCTC/MakePFFT.F90: Program which makes the PFFTensor
+
+2002-10-17 15:09  tymczak
+
+	* QCTC/PoleTree.F90: Removed USE Globals, since it does not need it
+	also this was removed from PFFTensor GM,BS, and Args are called
+	threw
+
+2002-10-17 15:08  tymczak
+
+	* QCTC/PFFTensor.F90: 1) TensorC and TensorS are allocatable 2) New
+	routines that MakePFFT uses to make and store the tensor 3)
+	MakeTensor now uses CS_IN directly instead of Rmin
+
+2002-10-17 15:06  tymczak
+
+	* QCTC/PBCFarField.F90: 1) Now reads in the Tensors made by
+	MakePFFT 2) Seperated The calculation of the MACDist,PACDist and
+	BDist	 into a seperate routine from BoxBounds
+
+2002-10-17 15:04  tymczak
+
+	* QCTC/MondoPoles.F90: Changed Print_SP
+
+2002-10-17 15:03  tymczak
+
+	* QCTC/Makefile: Added the executable Program MakePFFT
+
+2002-10-17 15:01  tymczak
+
+	* MondoSCF/ParsingKeys.F90: Added Key PFFMXLAY
+
+2002-10-17 15:00  tymczak
+
+	* MondoSCF/DrvSCFs.F90: In OneEMats invokes MakePFFT
+
+2002-10-17 15:00  tymczak
+
+	* MondoMods/PBC.F90: Redid New_CellSet_Cube()
+
+2002-10-17 14:59  tymczak
+
+	* MondoMods/InOut.F90: Added PFFMaxLay
+
+2002-10-17 14:58  tymczak
+
+	* MondoMods/DerivedTypes.F90: Added PFFMaxLay  !-- Maxium Layer of
+	the PFF contribution
+
+2002-10-16 16:10  mchalla
+
+	* ChangeLog: [no log message]
+
 2002-10-16 16:09  mchalla
 
 	* MondoSCF/ParseInput.F90: Change parse input to use the last
