@@ -28,23 +28,18 @@ MODULE PBCFarField
 !====================================================================================
 !   Setup the PBCFarField Matrix. 
 !====================================================================================
-    SUBROUTINE PBCFarFieldSetUp(Q,GMLoc,Lopt)
+    SUBROUTINE PBCFarFieldSetUp(Q,GMLoc)
       TYPE(PoleNode)                  :: Q
       INTEGER                         :: I,J,K,NC,LM,LP
-      INTEGER,OPTIONAL                :: Lopt
       REAL(DOUBLE),DIMENSION(3)       :: PQ
       TYPE(CRDS)                      :: GMLoc
 !
 !     Test MaxELL
 !
-      LP = BS%NASym+1
-      IF(PRESENT(Lopt)) THEN
-         MaxELL = Lopt
-         IF(MaxELL+LP > FFELL2) THEN
-            CALL MondoHalt(0,'MaxELL+LP > FFELL2 Halting in PBCFarFieldSetUp')
-         ENDIF
-      ELSE
-         MaxELL = FFELL
+      LP     = BS%NASym+1
+      MaxEll = GMLoc%PBC%PFFMaxEll
+      IF(MaxELL+LP > FFELL) THEN
+         CALL MondoHalt(0,'MaxELL+LP > FFELL Halting in PBCFarFieldSetUp')
       ENDIF
 !
 !     Calculate the Box Moments
@@ -80,7 +75,7 @@ MODULE PBCFarField
          E_DP = Two*GMLoc%PBC%DipoleFAC*(RhoPoles%DPole%D(1)**2+RhoPoles%DPole%D(2)**2+RhoPoles%DPole%D(3)**2)
       ENDIF
 !
-!!$      WRITE(*,*) 'GMLoc%PBC%Dimen  = ',GMLoc%PBC%Dimen 
+!!$      WRITE(*,*) 'GML%PBC%Dimen = ',GMLoc%PBC%Dimen 
 !!$      WRITE(*,*) 'CS_IN%NCells  = ',CS_IN%NCells
 !!$      WRITE(*,*) 'CS_OUT%NCells = ',CS_OUT%NCells
 !!$      WRITE(*,*) 'MACDist       = ',MACDist
@@ -376,7 +371,7 @@ MODULE PBCFarField
 !   Rescale the box size  so that the box is within the bounds of IRmin and IRmax
 !
     IF(CS_IN%NCells < IRmin) THEN
-       DO 
+       DO I=1,1000
           Radius = 1.001D0*Radius
           CALL Delete_CellSet(CS_IN)
           CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
@@ -388,7 +383,7 @@ MODULE PBCFarField
 !       CALL Sort_CellSet(CS_IN)
        RETURN
     ELSEIF(CS_IN%NCells > IRMax) THEN
-       DO 
+       DO I=1,1000
           Radius = 0.999D0*Radius
           CALL Delete_CellSet(CS_IN)
           CALL New_CellSet_Sphere(CS_IN,GMLoc%PBC%AutoW,GMLoc%PBC%BoxShape,Radius)
