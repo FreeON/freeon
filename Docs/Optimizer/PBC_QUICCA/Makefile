@@ -1,11 +1,11 @@
 all:	latex dvi
 
 latex:
-	latex GFS_PRL.tex
-	bibtex GFS_PRL
-	latex GFS_PRL.tex
-	bibtex GFS_PRL
-	latex GFS_PRL.tex
+	latex PBCQUICCA.tex
+	bibtex PBCQUICCA
+	latex PBCQUICCA.tex
+	bibtex PBCQUICCA 
+	latex PBCQUICCA.tex
 
 new: 	clean links dvi
 
@@ -20,10 +20,10 @@ links:
 	ln -s ../../RevTex/12pt.rtx ./12pt.rtx
 
 ps:	latex
-	dvips -t letter -o prl.ps GFS_PRL
+	dvips -t letter -o prl.ps PBCQUICCA
 
 dvi:	latex
-	xdvi -s 2 GFS_PRL
+	xdvi -s 2 PBCQUICCA
 
 clean:
 	rm -rf *.log *.aux *.bbl *.blg *.dvi *~

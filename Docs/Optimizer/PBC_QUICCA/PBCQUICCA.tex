@@ -113,7 +113,7 @@ QUICCA is generally applicable to both isolated molecule and crystal
 structure optimizations, with high efficiency and great robustness,
 while preserving an unparalleled simplicity in the implementation.
 
-\subsection{Lattice summation for Wilson's B matrix}
+\section{Lattice summation for Wilson's B matrix}
 Let us consider a three-dimensional crystal with atomic 
 Cartesian positions $X$ that extend the range $[-\infty,\infty]$
 in all spacial directions. The periodicity of the crystal
@@ -222,32 +222,98 @@ the central internal coordinate cell. All $i$-th internal coordinates
 are members of the central internal coordinate cell.
 Now, let us further decompose $\delta X_{q}$ and $B^{(000)}_{iq}$ 
 to contributions from Cartesian cells:
-\begin{equation}
-\delta \phi^{(000)}_{i} = \sum_{k,l,m=-\infty}^{\infty} 
-\sum_{a_{ij}=1}^{4} 
-B^{(000)(klm)}_{ia_{ij}} [ \delta X^{(000)}_{a_{ij}} + k \delta A + 
-l \delta B + m \delta C ] ,
+\begin{equation} \label{latsum1}
+\delta \phi^{(000)}_{i} = 
+\sum_{j=1}^{4} 
+B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} [ \delta X^{(000)}_{a_{ij}} + k_{ij} \delta A + 
+l_{ij} \delta B + m_{ij} \delta C ]^{t} ,
 \end{equation}
-$B^{(000)(klm)}_{ia_{ij}}$ is defined by
+where the superscript $t$ denotes transposition
+and $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$ is defined by
 \begin{equation} 
-B^{(000)(klm)}_{ia_{ij}} = \frac{\partial \phi^{(000)}_{i}}{\partial X^{(klm)}_{a_{ij}}} .
+B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} = \frac{\partial 
+\phi^{(000)}_{i}}{\partial X^{(k_{ij}l_{ij}m_{ij})}_{a_{ij}}} .
 \end{equation} 
-The summation over $a_{ij}$ goes over those translationally unique
-atoms, that compose the $i$-th internal coordinate. The number of 
-these atoms never exceeds 4 if primitive internal coordinates are used.
+The summation over $j$ goes over those atoms that compose 
+the $i$-th internal coordinate. The number of 
+these atoms never exceeds four if primitive internal coordinates are used.
 In case of more complex internal coordinates that are linear 
-combinations of primitive ones the $B$ matrix of the composite 
+combinations of primitive ones, the $B$ matrix of the composite 
 internal coordinates will be built
 by appropriately transforming the $B$ matrix of the primitives. 
 We do not consider this case further in the 
 present paper.
-Observe that $B^{(000)(klm)}_{ia_{ij}}$ is a 
+Observe that $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$ is a 
 vector with three components referring to the Cartesian components
-of atom $a_{ij}$, {\it and} the Cartesian components of the
+of atom $a_{ij}$, {\it and} to the Cartesian components of the
 lattice vectors $A$, $B$ and $C$.
 
+Now, let us introduce the matrices $B^{(A)}$, $B^{(B)}$ and $B^{(C)}$.
+$B^{(A)}$ is constructed by
+\begin{equation} \label{matba}
+B^{(A)}_{i} = \sum_{j=1}^{4} k_{ij} B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} . 
+\end{equation}
+$B^{(B)}_{i}$ and $B^{(C)}_{i}$ are given by the same formula 
+as $B^{(A)}_{i}$ except that
+the multiplicativ factor $k_{ij}$ in Eqn. \ref{matba} is exchanged to 
+$l_{ij}$ and $m_{ij}$, respectively. Each of these three matrices
+are of the size $N_{i} \times 3$, where $N_{i}$ is the number of
+internal coordinates in the central cell $\phi^{000}$.
 
+The displacements of the lattice vectors affect the displacements
+of the internal coordinates via the matrices 
+$B^{(A)}$, $B^{(B)}$ and $B^{(C)}$.
+A certain $j$-th component atom of the $i$-th internal
+coordinate gives a nonzero contribution to those of these three
+matrices for which it has a nonzero corresponding lattice index.
+E.g. if the $j$-th atom is located in the cell $(100)$,
+it will contribute only to $B^{(A)}$. It may also happen that
+each of the four atoms of an internal coordinate contribute
+to all three matrices, $B^{(A)}$, $B^{(B)}$ and $B^{(C)}$,
+when all cell-indices of all component-atoms differ from zero.
 
+Thus, Eqn. \ref{latsum1} can be rewritten to
+\begin{equation} \label{latsum2}
+\delta \phi^{(000)}_{i} = \left[ [\oplus_{j=1}^{4} 
+B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}} 
+] \oplus B^{(A)}_{i} \oplus B^{(B)}_{i} \oplus B^{(C)}_{i}
+\right] 
+\left[
+[\oplus_{j=1}^{4} \delta X^{(000)}_{ia_{ij}} ] 
+\oplus \delta A 
+\oplus \delta B 
+\oplus \delta C 
+\right]^{t} .
+\end{equation}
+The first term in the bracket on the right hand side of Eqn. 
+\ref{latsum2} provides $B^{\rm cr}$, the effective $B$ matrix for crystals:
+\begin{equation}
+B^{\rm cr}_{i} =
+[\oplus_{j=1}^{4}
+B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}
+] \oplus B^{(A)}_{i} \oplus B^{(B)}_{i} \oplus B^{(C)}_{i} ,
+\end{equation}
+while the second term provides the displacements of the atomic positions
+and the lattice vectors.
+The description of the effective $B$ matrix, $B^{\rm cr}$, 
+as provided by Eqn. \ref{latsum2}, deals only with the
+nonzero elements of $B^{\rm cr}$. However, it should be clear from the
+formalism, that
+$B^{\rm cr}$ has $3 \times (N+3)$ colums, where $N$ is the number of atoms
+in the central cell. This can be seen from the fact, that the subscript 
+$a_{ij}$ scans all atoms of the central cell.
+
+The only thing that remained from the determination of $B^{\rm cr}$ is
+the computation of the values $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$.
+Whenever this values are to be computed, the absolute Cartesian positions
+of any $j$-th atom of the $i$-th internal coordinate are generated, based
+on the knowledge of the corresponding translationally unique atom $a_{ij}$
+and the cell indices $k_{ij}$, $l_{ij}$ and $m_{ij}$. Once the absolute
+Cartesian positions are recovered, $B^{(000)(k_{ij}l_{ij}m_{ij})}_{ia_{ij}}$
+is determined exactly as for isolated molecules \cite{EWilson55}. Thus,
+the derivation of $B^{\rm cr}$ is completed.
+
+\section{Lattice summation for the inverse B matrix}
 
 \bibliography{../../Bib/mondo_new}
 \end{document}
