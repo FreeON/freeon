@@ -311,3 +311,135 @@ MODULE Thresholding
         PFunk=MIN(PFunk,Gamma_Switch)
      END FUNCTION PFunk    
 END MODULE
+!!$!===================================================================================
+!!$!     Recursive bisection to determine largest extent for this distribution
+!!$!     outside of which its contribution to the density and gradient is less than Tau
+!!$!===================================================================================
+!!$     FUNCTION Extent(LLow,LHig,LShift,Zeta,HGTF,Tau,Digits_O,Potential_O) RESULT (R)
+!!$       INTEGER                          :: LLow,LHig,LSft
+!!$       REAL(DOUBLE)                     :: Zeta,Tau
+!!$       REAL(DOUBLE),DIMENSION(:)        :: HGTF
+!!$       INTEGER,OPTIONAL                 :: Digits_O
+!!$       LOGICAL,OPTIONAL                 :: Potential_O
+!!$       REAL(DOUBLE),DIMENSION(0:HGEll):: Co,HGPot
+!!$       REAL(DOUBLE)                     :: FUN,F0,F1
+!!$       INTEGER                          :: J,L,K,M,N,LMN,SN,LL
+!!$       REAL(DOUBLE)                     :: ConvergeTo,RMIN,RMAX,R,RErr
+!!$       LOGICAL                          :: Potential
+!!$!
+!!$       IF(PRESENT(Digits_O))THEN
+!!$          ConvergeTo=10.D0**(-Digits_O)
+!!$       ELSE 
+!!$          ConvergeTo=10.D0**(-8)
+!!$       ENDIF
+!!$!
+!!$       IF(PRESENT(Potential_O)) THEN
+!!$          Potential = Potential_O
+!!$       ELSE
+!!$          Potential = .FALSE.
+!!$       ENDIF
+!!$!      Take the spherical average of HGTF coefficients      
+!!$       DO L = LLow,LHig
+!!$          Co(L)=Zero
+!!$          DO LMN=LBegin(L),LEnd(L)
+!!$             Co(L)=Co(L)+HGTF(LMN)**2
+!!$          ENDDO
+!!$          Co(L)=SQRT(Co(L))
+!!$       ENDDO
+!!$!
+!!$!      Compute extent of a Hermite Gaussian overlap
+!!$!
+!!$       IF(.NOT. Potential )THEN
+!!$          RMIN = Zero
+!!$          RMAX = SQRT(EXP_SWITCH/Zeta)
+!!$!
+!!$          F0 = Zero
+!!$          DO L = LLow,LHig
+!!$             F0 = F0 + Co(L)*AsymHGTF(L+LSft,Zeta,RMIN)
+!!$          ENDDO
+!!$          IF(F0 < Zero) THEN
+!!$             CALL MondoHalt(-100,'F0 < 0')
+!!$          ENDIF
+!!$          IF(F0 < Tau) THEN
+!!$             R = Zero
+!!$             RETURN
+!!$          ENDIF
+!!$!
+!!$          F1 = Zero
+!!$          DO L = LLow,LHig
+!!$             F1 = F1 + Co(L)*AsymHGTF(L+LSft,Zeta,RMAX)
+!!$          ENDDO
+!!$          IF(F1>Tau) THEN
+!!$             R = RMAX
+!!$             RETURN
+!!$          ENDIF
+!!$!
+!!$          R = Half*(RMIN+RMAX)
+!!$          DO J=1,200
+!!$             FUN  = Zero
+!!$             DO L = LLow,LHig       
+!!$                FUN  = FUN +Co(L)*AsymHGTF(L+LSft,Zeta,R)
+!!$             ENDDO
+!!$             FUN = FUN-Tau
+!!$             IF(FUN < Zero) THEN
+!!$                RMAX = R
+!!$             ELSEIF(FUN > Zero) THEN
+!!$                RMIN = R
+!!$             ENDIF
+!!$             RErr = ABS(R-Half*(RMIN+RMAX))
+!!$             R = Half*(RMIN+RMAX)
+!!$             IF(RErr < ConvergeTo) GOTO 100
+!!$          ENDDO
+!!$          CALL MondoHalt(-100,'Overlap did not converge in 200 iterations')
+!!$100       CONTINUE
+!!$!
+!!$!      Do a Potential overlap
+!!$!
+!!$       ELSEIF( Potential ) THEN
+!!$          RMIN = 1.D-14
+!!$          RMAX = SQRT(GAMMA_SWITCH/Zeta)
+!!$!
+!!$          F0 = Zero
+!!$          HGPot = AsymPot(LHig+LSft,Zeta,RMIN)
+!!$          DO L = LLow,LHig
+!!$             F0 = F0 + Co(L)*ABS(HGPot(L+LShift))
+!!$          ENDDO
+!!$          IF(F0 < Zero) THEN
+!!$             CALL MondoHalt(-100,'F0 < 0')
+!!$          ENDIF
+!!$          IF(F0 < Tau) THEN
+!!$             R = Zero
+!!$             RETURN
+!!$          ENDIF
+!!$!
+!!$          F1 = Zero
+!!$          HGPot = AsymPot(LHig+LSft,Zeta,RMAX)
+!!$          DO L = LLow,LHig
+!!$             F1 = F1 + Co(L)*ABS(HGPot(L+LSft))
+!!$          ENDDO
+!!$          IF(F1>Tau) THEN
+!!$             R = RMAX
+!!$             RETURN
+!!$          ENDIF
+!!$!
+!!$          R = Half*(RMIN+RMAX)
+!!$          DO J=1,200
+!!$             FUN  = Zero
+!!$             HGPot = AsymPot(LHig+LSft,Zeta,R)
+!!$             DO L = LLow,LHig
+!!$                FUN  = FUN +Co(L)*ABS(HGPot(L+LSft))
+!!$             ENDDO
+!!$             FUN = FUN-Tau
+!!$             IF(FUN < Zero) THEN
+!!$                RMAX = R
+!!$             ELSEIF(FUN > Zero) THEN
+!!$                RMIN = R
+!!$             ENDIF
+!!$             RErr = ABS(R-Half*(RMIN+RMAX))
+!!$             R = Half*(RMIN+RMAX)
+!!$             IF(RErr < ConvergeTo) GOTO 200
+!!$          ENDDO
+!!$          CALL MondoHalt(-100,'Potential Overlap did not converge in 200 iterations')
+!!$200       CONTINUE                     
+!!$       ENDIF
+!!$     END FUNCTION Extent
