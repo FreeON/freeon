@@ -277,17 +277,14 @@ CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
 END SUBROUTINE TOPOLOGY_14 
 !--------------------------------------------------------------
 !
-!--------------------------------------------------------------
-!
-!--------------------------------------------------------------
-SUBROUTINE SORT_INTO_BOX(BOXSIZE,C,NATOMS)
+SUBROUTINE SORT_INTO_BOX1(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
 !
 ! sort the atoms of a molecule into boxes
+!
+! BOXSIZE: linear box size
+!
 IMPLICIT NONE
 REAL(DOUBLE) :: BOXSIZE,VBIG,C(1:3,NATOMS),BXMIN,BXMAX,BYMIN,BYMAX,BZMIN,BZMAX
-INTEGER,ALLOCATABLE,DIMENSION(:) :: BOXI,BOXJ
-INTEGER,ALLOCATABLE,DIMENSION(:) :: ISIGN 
-INTEGER,ALLOCATABLE,DIMENSION(:,:,:) :: BOXCOUNTER 
 INTEGER :: I,J,JJ,NX,NY,NZ,NBOX,IX,IY,IZ,IORD,IADD,NATOMS
 SAVE VBIG
 DATA VBIG/1.D+90/ 
@@ -316,12 +313,39 @@ DATA VBIG/1.D+90/
   NZ=INT((BZMAX-BZMIN)/BOXSIZE)+1
   NBOX=NX*NY*NZ
 !
-  ALLOCATE(BOXI(1:NBOX+1))
-  ALLOCATE(BOXJ(1:NATOMS))
+END SUBROUTINE SORT_INTO_BOX1
+!
+!--------------------------------------------------------------
+SUBROUTINE SORT_INTO_BOX2(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BOXI1,BOXJ1,InfFile,ISet)
+!
+! sort the atoms of a molecule into boxes
+!
+! BOXI(I) : contains the ordering number of the first atom of the I-th box (like in sparse row-wise)
+! BOXJ(J) : gives the original serial number of the atom desribed by the J-th ordering number
+! C: contains Cartesian coordinates of atoms
+! BOXSIZE: linear box size
+!
+IMPLICIT NONE
+CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
+INTEGER,OPTIONAL :: ISET 
+REAL(DOUBLE) :: BOXSIZE,VBIG,C(1:3,NATOMS),BXMIN,BXMAX,BYMIN,BYMAX,BZMIN,BZMAX
+TYPE(INT_VECT),OPTIONAL :: BOXI1,BOXJ1
+TYPE(INT_VECT) :: BOXI,BOXJ
+INTEGER,ALLOCATABLE,DIMENSION(:) :: ISIGN
+INTEGER,ALLOCATABLE,DIMENSION(:,:,:) :: BOXCOUNTER 
+INTEGER :: I,J,JJ,NX,NY,NZ,NBOX,IX,IY,IZ,IORD,IADD,NATOMS
+SAVE VBIG
+DATA VBIG/1.D+90/ 
+!
+  NBOX=NX*NY*NZ
+  CALL NEW(BOXI,NBOX+1)
+  CALL NEW(BOXJ,NATOMS)
+!
   ALLOCATE(ISIGN(1:NATOMS))
 !
   ALLOCATE(BOXCOUNTER(1:NX,1:NY,1:NZ))
   BOXCOUNTER(1:NX,1:NY,1:NZ)=0
+  BOXI%I(1:NBOX+1)=0
 !
 ! COUNT NUMBER OF ATOMS IN THE BOX
 !
@@ -330,10 +354,10 @@ DATA VBIG/1.D+90/
 ! identify box
 !     
     IX=INT((C(1,I)-BXMIN)/BOXSIZE)+1
-    IY=INT((C(1,I)-BYMIN)/BOXSIZE)+1
-    IZ=INT((C(1,I)-BZMIN)/BOXSIZE)+1
+    IY=INT((C(2,I)-BYMIN)/BOXSIZE)+1
+    IZ=INT((C(3,I)-BZMIN)/BOXSIZE)+1
 !     
-    IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
+    IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY !order parameter: ZXY
     BOXCOUNTER(IX,IY,IZ)=BOXCOUNTER(IX,IY,IZ)+1
     ISIGN(I)=IORD*(NATOMS+1)+BOXCOUNTER(IX,IY,IZ) !!! shows both box and index within box
 !     
@@ -341,43 +365,81 @@ DATA VBIG/1.D+90/
 !     
 ! Count pointers to individual boxes within array A
 !     
+     BOXI%I(1)=1
   DO IZ=1,NZ
   DO IX=1,NX
   DO IY=1,NY
 !
     IORD=NX*NY*(IZ-1)+NY*(IX-1)+IY
-    BOXI(IORD)=BOXI(IORD)+BOXCOUNTER(IX,IY,IZ)+1
+    BOXI%I(IORD+1)=BOXI%I(IORD)+BOXCOUNTER(IX,IY,IZ)
 !     
   ENDDO
   ENDDO
   ENDDO
 !
-! Set up content of boxes as represented in A, sparse row-wise
+! Set up contents of boxes as represented in A, sparse row-wise
 !
   DO I=1,NATOMS
 !
     IORD=INT(ISIGN(I)/(NATOMS+1))
     IADD=ISIGN(I)-IORD*(NATOMS+1)
-    BOXJ(BOXI(IORD)-1+IADD)=I
+    BOXJ%I(BOXI%I(IORD)-1+IADD)=I
 !     
   ENDDO
 !
 ! Now check ordering algorithm
 !
-  DO I=1,NBOX  
-  DO J=BOXI(I),BOXI(I+1)-1
-    JJ=BOXJ(BOXI(J)) 
-    write(*,100) i,C(1,JJ)
-  ENDDO
-  ENDDO
+! DO I=1,NBOX  
+! DO J=BOXI%I(I),BOXI%I(I+1)-1 !!! j is ordering index
+!   JJ=BOXJ%I(J) !!! jj is original atom number
+!   write(*,100) i,C(1:3,JJ)
+! ENDDO
+! ENDDO
 100 format(I8,3F12.8)
 !
-! DEALLOCATE(BOXI)
-! DEALLOCATE(BOXJ)
+  IF(PRESENT(BOXI1)) THEN
+    BOXI1%I(:)=BOXI%I(:)
+  ENDIF
+  IF(PRESENT(BOXJ1)) THEN
+    BOXJ1%I(:)=BOXJ%I(:)
+  ENDIF
+!
+  IF(PRESENT(InfFile)) THEN
+    CALL OpenHDF(InfFile)
+    CALL Put(NBOX,'NBOX'//TRIM(IntToChar(ISet)))
+    CALL Put(BOXI,'BOXI'//TRIM(IntToChar(ISet)))
+    CALL Put(BOXJ,'BOXJ'//TRIM(IntToChar(ISet)))
+    CALL CloseHDF()
+  ENDIF
+!
   DEALLOCATE(BOXCOUNTER)
+  CALL DELETE(BOXI)
+  CALL DELETE(BOXJ)
+!
+END SUBROUTINE SORT_INTO_BOX2
+!
+!----------------------------------------------------------------
+!
+SUBROUTINE SORT_INTO_BOX(BOXSIZE,C,NATOMS,InfFile,ISet)
+IMPLICIT NONE
+INTEGER,OPTIONAL :: ISet
+INTEGER :: NATOMS,NX,NY,NZ,NBOX
+REAL(DOUBLE) :: BOXSIZE,BXMIN,BYMIN,BZMIN
+CHARACTER(LEN=DEFAULT_CHR_LEN),OPTIONAL :: InfFile
+TYPE(INT_VECT) :: BOXI1,BOXJ1
+REAL(DOUBLE),DIMENSION(1:3,1:NATOMS) :: C
+!
+CALL SORT_INTO_BOX1(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN)
+!
+CALL NEW(BOXI1,NBOX+1)
+CALL NEW(BOXJ1,NATOMS)
+!
+CALL SORT_INTO_BOX2(BOXSIZE,C,NATOMS,NX,NY,NZ,BXMIN,BYMIN,BZMIN,BOXI1,BOXJ1,InfFile,ISet)
+!
+CALL DELETE(BOXI1)
+CALL DELETE(BOXJ1)
 !
 END SUBROUTINE SORT_INTO_BOX
-!
 !----------------------------------------------------------------
 !
 SUBROUTINE TOPOLOGIES_MM(NATOMS,NBONDS,BONDI,BONDJ,InfFile,TOP12OUT)
