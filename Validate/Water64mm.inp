@@ -10,9 +10,9 @@ Accuracy =(VeryTight)
 DebugAll=(MaxDebug)
 Geometry=(InAngstroms,NoOrder)
 BlokAInv=(Test,1.D20)
-PFFLayers=2
-PFFMaxEll=20
 Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+PFFLayers=2
+PFFMaxEll=16
 <EndOptions>
 
 <BeginPeriodic>
@@ -24,4 +24,3 @@ validation_opls
 Water64mm.seq
 Water64mm.crd
 <END_MM_filenames>
-
