@@ -39,7 +39,7 @@ MODULE GlobalScalars
    INTEGER,      PARAMETER :: BFLen=(BFEll+1)*(BFEll+2)*(BFEll+3)/6 
    INTEGER,      PARAMETER :: PrjEll=3         ! Max ell for ECP related projection opperators
    INTEGER,      PARAMETER :: ECPEll=2         ! Max radial exponent in Gaussian expansions of the ECP
-   INTEGER,      PARAMETER :: HGEll=BFEll*2+1  ! Max ell for a distribution (bf product) and its derivative
+   INTEGER,      PARAMETER :: HGEll=2*BFEll-1  ! Max ell for a distribution (bf product) and its derivative
    INTEGER,      PARAMETER :: SPEll=HGEll      !
    INTEGER,      PARAMETER :: SPEll2=2*SPEll   !
    INTEGER,      PARAMETER :: HGLen=(HGEll+1)*(HGEll+2)*(HGEll+3)/6
