@@ -284,10 +284,10 @@ CONTAINS
     ENDIF
     ! Kinetic energy matrix T
     CALL Invoke('MakeT',N,S,M)
-    !vwIF(B%BSets(cBAS,1)%HasECPs)THEN
+    IF(B%BSets(cBAS,1)%HasECPs)THEN
        ! Make the ECP matrix U 
-    !vw   CALL Invoke('MakeU',N,S,M)
-    !vwENDIF
+       CALL Invoke('MakeU',N,S,M)
+    ENDIF
   END SUBROUTINE OneEMats
   !===============================================================================
   ! COMPUTE AN ENERGY GRADIENT

@@ -56,10 +56,9 @@ CONTAINS
     TYPE(FileNames)    :: N
     TYPE(PropOpts )    :: Prp
     !-------------------------------------------------------------------
-    
+
     !-------------------------------------------------------------------
     !
-    write(*,*) 'LoadPropertyOptions: Start'
     CALL OpenASCII(N%IFile,Inp)
     !
     ! Initialize Properties
@@ -74,8 +73,6 @@ CONTAINS
     !
     !
     CLOSE(UNIT=Inp,STATUS='KEEP')
-    !
-    write(*,*) 'LoadPropertyOptions: End'
     !
   END SUBROUTINE LoadPropertyOptions
   !

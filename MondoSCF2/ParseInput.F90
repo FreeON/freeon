@@ -18,6 +18,8 @@ CONTAINS
   !===============================================================
   SUBROUTINE ParseTheInput(C)
     TYPE(Controls) :: C
+
+integer :: iclone
     !-------------------------------------------------------------!
     ! Parse command line and load env and file names 
     CALL LoadCommands(C%Nams)
@@ -49,5 +51,5 @@ CONTAINS
     CALL LoadPropertyOptions(C%Nams,C%POpt)
     ! Check for Global conflicts.
     CALL ConflictCheck(C)
-  END SUBROUTINE ParseTheInput
+ END SUBROUTINE ParseTheInput
 END MODULE ParseInput

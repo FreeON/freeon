@@ -1,6 +1,7 @@
 MODULE Conflicted
-  USE DerivedTypes
   USE Parse
+  USE Functionals
+  USE DerivedTypes
   USE ProcessControl
   USE ControlStructures
   IMPLICIT NONE
@@ -18,9 +19,21 @@ CONTAINS
   SUBROUTINE ConflictCheck(C)
     TYPE(Controls) :: C
     CALL GlbConflictCheck(C)
+    CALL OptConflictCheck(C%Opts)
     CALL GeoConflictCheck(C%Geos)
     CALL PBCConflictCheck(C%Geos)
   END SUBROUTINE ConflictCheck
+
+  SUBROUTINE OptConflictCheck(O)
+    TYPE(Options) :: O
+    IF(O%NModls==0) &
+         CALL MondoHalt(PRSE_ERROR,'Option '//MODEL_OPTION//' not set in input.'//RTRN   &
+         //'Options include '//MODEL_ExactX//', '//MODEL_SD//', '//       &
+         MODEL_XA//', '//MODEL_PW91x//', '//MODEL_PBEx//', '//           &
+         MODEL_B88x//', '//MODEL_VWN3xc//', '//MODEL_VWN5xc//', '//      &
+         MODEL_PW91xc//', '//MODEL_PBExc//', '//MODEL_BLYPxc//', '//     &
+         MODEL_B3LYP_VWN3xc//', '//MODEL_B3LYP_PW91xc//', and '//MODEL_PBE0xc)
+  END SUBROUTINE OptConflictCheck
   !
   SUBROUTINE GlbConflictCheck(C)
     TYPE(Controls) :: C

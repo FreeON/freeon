@@ -110,8 +110,8 @@ CONTAINS
     ! Set the variable if def in the input.
     IF(MaxNon0s.GT.0) MaxNon0=MaxNon0s !if def in the input.
     IF(MaxNBlks.GT.0) MaxBlks=MaxNBlks !if def in the input.
-    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2),' NAtms**2+1=',G%NAtms**2+1
-    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2),' NBasF**2+1=',B%NBasF**2+1
+!    WRITE(*,*)' MaxBlks = ',MaxBlks,1D2*DBLE(MaxBlks)/DBLE(G%NAtms**2),' NAtms**2+1=',G%NAtms**2+1
+!    WRITE(*,*)' MaxNon0 = ',MaxNon0,1D2*DBLE(MaxNon0)/DBLE(B%NBasF**2),' NBasF**2+1=',B%NBasF**2+1
 !    STOP
   END SUBROUTINE BCSRDimensions
 !============================================================================
@@ -143,7 +143,7 @@ CONTAINS
     CALL New(BS)
     ! Count kinds and load basis set kind index
     BS%NKind=1
-    BS%Kinds%I(1)=G%AtNum%D(1)
+    BS%Kinds%I(1)=G%AtNum%D(1)    
     DO I=2,BS%NAtms 
        DO J=1,BS%NKind
           IF(BS%Kinds%I(J)==G%AtNum%D(I))GOTO 10
@@ -182,7 +182,7 @@ CONTAINS
        READ(Bas,DEFAULT_CHR_FMT,END=99)Line                 
        DO NK=1,BS%NKind    
           ! Look for the basis set 
-          IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
+         IF(KeyQ(Line,Ats(BS%Kinds%I(NK))).AND.KeyQ(Line,'0'))THEN                    
              NC=0
              KFound=KFound+1
              DO 

@@ -36,24 +36,23 @@ MODULE NEB
     INTEGER          :: iCLONE,j
     !----------------------------------------------------------------------------
     !Initialize each clone to initial state then interpolate Cartesian coordinates
-    write(*,*)'NEB: Into NEBInit'
+    !write(*,*)'NEB: Into NEBInit'
     ReactionVector=G%Clone(G%Clones+1)%AbCarts%D-G%Clone(0)%AbCarts%D
     iClone=0
-    write(*,'(1A7,I3)')'Image',iClone
-    write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !write(*,'(1A7,I3)')'Image',iClone
+    !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
     DO iCLONE=1,G%Clones
        ImageFraction=DBLE(iCLONE)/DBLE(G%Clones+1)
        CALL SetEq_CRDS(G%Clone(0),G%Clone(iCLONE))
        G%Clone(iCLONE)%AbCarts%D=G%Clone(0)%AbCarts%D+ImageFraction*ReactionVector
-       write(*,'(1A7,I3)')'Image',iClone
-       write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+       !write(*,'(1A7,I3)')'Image',iClone
+       !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
     ENDDO
     iClone=G%Clones+1
-    write(*,'(1A7,I3)')'Image',iClone
-    write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
-    write(*,*)'NEB: Done NEBInit'
+    !write(*,'(1A7,I3)')'Image',iClone
+    !write(*,'(3F13.5)') (G%Clone(iCLONE)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
+    !write(*,*)'NEB: Done NEBInit'
   END SUBROUTINE NEBInit
-
   !===============================================================================
   ! Make a deep copy of the CRDS structure
   ! (This should move.  Also figure out PBC issue.) 
@@ -78,7 +77,6 @@ MODULE NEB
     G2%CConstrain%I=G1%CConstrain%I 
 !    CALL SetEq_PBCInfo(G1%PBC,G2%PBC)
   END SUBROUTINE SetEq_CRDS
-
   !===============================================================================
   ! Project out the force along the band and add spring forces along the band.
   !===============================================================================
@@ -89,8 +87,8 @@ MODULE NEB
     LOGICAL          :: UPm,UPp
     REAl(DOUBLE)     :: UMin,UMax,Um,Up,Rm,Rp,Dist,FProj
     REAL(DOUBLE),DIMENSION(3,G%Clone(0)%NAtms) :: N
+    CHARACTER(LEN=DCL) :: Mssg
     !----------------------------------------------------------------------------
-    write(*,*)'NEB: Into NEBForce'
     Dist=0
     ! Find the image with the maximum total energy
     UMax=G%Clone(1)%ETotal
@@ -101,7 +99,6 @@ MODULE NEB
           UMax=G%Clone(I)%ETotal
        ENDIF
     ENDDO
-    write(*,*)'NEB: Found max energy image, ',UMaxI
     ! Find the tangent to the path at each image
     ! Project out potential forces along the band
     ! Add spring forces along the band
@@ -111,10 +108,10 @@ MODULE NEB
 
 !GH    write(*,*)'Prod Crds'
 !GH    write(*,'(3F13.5)') (G%Clone(G%Clones+1)%AbCarts%D(:,j),j=1,G%Clone(0)%NAtms)
-    write(*,*)'NEB: Distance, Energies, and Forces'
 
-
-    write(*,'(A,I5,3F13.5)') 'NEB: ',0,Dist,G%Clone(0)%ETotal
+    Mssg=ProcessName('NEBForce','Reactant')//' D = '//TRIM(FltToShrtChar(Dist)) &
+                                             //', E = '//TRIM(DblToMedmChar(G%Clone(0)%ETotal))
+    WRITE(*,*)TRIM(Mssg) 
     DO I=1,G%Clones
        ! Are the neighboring images higher in energy?
        IF(I==1)THEN
@@ -185,13 +182,19 @@ MODULE NEB
 !GH       write(*,'(3F13.5)') (G%Clone(I)%Gradients%D(:,j),j=1,G%Clone(0)%NAtms)
        ! Write distance, energies and forces
        Dist=Dist+Rm
-       write(*,'(A,I5,3F13.5)') 'NEB: ',I,Dist,G%Clone(I)%ETotal,FProj
+
+       Mssg=ProcessName('NEBForce','Image '//TRIM(IntToChar(I))) &
+            //' D = '//TRIM(FltToShrtChar(Dist))                 &
+            //', E = '//TRIM(DblToMedmChar(G%Clone(I)%ETotal))   &
+            //', F = '//TRIM(DblToMedmChar(FProj))
+       WRITE(*,*)TRIM(Mssg) 
     ENDDO
     Rm=SQRT(SUM((G%Clone(G%Clones+1)%AbCarts%D-G%Clone(G%Clones)%AbCarts%D)**2))
     Dist=Dist+Rm
-    write(*,'(A,I5,3F13.5)') 'NEB: ',G%Clones+1,Dist,G%Clone(G%Clones+1)%ETotal
-    write(*,*)'NEB: Done NEBForce'
-
+    Mssg=ProcessName('NEBForce','Product')   &
+         //' D = '//TRIM(FltToShrtChar(Dist)) &
+         //', E = '//TRIM(DblToMedmChar(G%Clone(G%Clones+1)%ETotal)) 
+    WRITE(*,*)TRIM(Mssg) 
   END SUBROUTINE NEBForce
 
   !===============================================================================

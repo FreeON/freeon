@@ -66,19 +66,19 @@ CONTAINS
     IF(Args%NC==1)THEN
        N%OFile=TRIM(PWDName)//OutF
        N%LFile=TRIM(PWDName)//LogF
-       N%GFile=TRIM(PWDName)//GeoF
+       N%GFile=TRIM(PWDName)
     ELSEIF(Args%NC==2)THEN
        N%OFile=TRIM(N%M_PWD)//TRIM(Args%C%C(2))         
        N%LFile=TRIM(PWDName)//LogF
-       N%GFile=TRIM(PWDName)//GeoF
+       N%GFile=TRIM(PWDName)
     ELSEIF(Args%NC==3)THEN
        N%OFile=TRIM(N%M_PWD)//TRIM(Args%C%C(2))         
        N%LFile=TRIM(N%M_PWD)//TRIM(Args%C%C(3))
-       N%GFile=TRIM(PWDName)//GeoF
+       N%GFile=TRIM(PWDName)
     ELSEIF(Args%NC==4)THEN
        N%OFile=TRIM(N%M_PWD)//TRIM(Args%C%C(2))         
        N%LFile=TRIM(N%M_PWD)//TRIM(Args%C%C(3))
-       N%GFile=TRIM(N%M_PWD)//TRIM(Args%C%C(4))
+       N%GFile=TRIM(N%M_PWD)
     ENDIF
     N%HFile=TRIM(SCRName)//InfF
     ! If restart file set, it is set in ParseOptions

@@ -39,9 +39,17 @@ CONTAINS
     TYPE(Controls) :: C
     INTEGER        :: iBAS,iGEO,iCLONE
     REAL(DOUBLE),DIMENSION(C%Geos%Clones,C%Opts%NSteps) :: Energy
-    INTEGER        :: NatmsLoc,IStart
+    INTEGER        :: NatmsLoc,IStart,gtmp,GBeg,GEnd
     TYPE(DBL_RNK2) :: OldXYZ
+    LOGICAL        :: NewFile,ExitQ
     !-------------------------------------------------------------------------!
+    IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
+       GBeg=0
+       GEnd=C%Geos%Clones+1
+    ELSE	
+       GBeg=1
+       GEnd=C%Geos%Clones
+    ENDIF
     ! initial geometry
     iGEO=C%Stat%Previous%I(3)
     NatmsLoc=C%Geos%Clone(1)%Natms
@@ -52,46 +60,56 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
     ENDDO
     ! Print the starting coordinates and energy
-    DO iCLONE=1,C%Geos%Clones
+    IF(C%Opts%GeomPrint=='XSF')CALL XSFPreamble(0,C%Nams%GFile,Geo)
+    DO iCLONE=GBeg,GEnd
        CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
     ENDDO
-    ! Follow the gradient down hill
     iBAS=C%Sets%NBSets
     IStart=iGEO
+    ! Follow the gradient downhill for NSteps
     DO iGEO=IStart,C%Opts%NSteps
        ! Compute new gradients
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat,C%Geos,C%Sets,C%MPIs)
-         DO iCLONE=1,C%Geos%Clones
-           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
-         ENDDO
-       IF(SteepStep(iBAS,iGEO,Energy(:,iGEO),C))THEN
-          DO iCLONE=1,C%Geos%Clones
-             IF(Energy(iCLONE,iGEO+1)<Energy(iCLONE,iGEO))THEN
-                ! On convergence only write the lowest energy geometry
-                CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
-             ENDIF  
+       DO iCLONE=1,C%Geos%Clones
+          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+       ENDDO
+
+       ExitQ=SteepStep(iBAS,iGEO,Energy(:,iGEO),C)
+
+       IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
+          ! Overwrite the most recent GFile (doing transition state)
+          CALL OpenASCII(C%Nams%GFile,Geo,NewFile_O=.TRUE.);CLOSE(Geo)
+          IF(C%Opts%GeomPrint=='XSF') &
+             CALL XSFPreamble(C%Geos%Clones+2,C%Nams%GFile,Geo)
+          DO iCLONE=GBeg,GEnd
+             ! If transition states, geometry is the image number
+             ! otherwise, it is the step number 
+             gtmp=C%Geos%Clone(iCLONE)%Confg
+             C%Geos%Clone%Confg=iCLONE
+             CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+             C%Geos%Clone%Confg=gtmp
           ENDDO
-          EXIT
        ELSE
+          ! No transitions states, just good old downhill 
+          IF(C%Opts%GeomPrint=='XSF') &
+             CALL XSFPreamble(C%Geos%Clone(1)%Confg,C%Nams%GFile,Geo)
           DO iCLONE=1,C%Geos%Clones
              CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
           ENDDO
        ENDIF
-         CALL New(OldXYZ,(/3,NatmsLoc/))
-         DO iCLONE=1,C%Geos%Clones
-           OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
-           C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
-           C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
-         ENDDO
-         CALL Delete(OldXYZ)
+       IF(ExitQ)EXIT
+       CALL New(OldXYZ,(/3,NatmsLoc/))
+       DO iCLONE=1,C%Geos%Clones
+          OldXYZ%D=C%Geos%Clone(iCLONE)%Displ%D
+          C%Geos%Clone(iCLONE)%Displ%D=C%Geos%Clone(iCLONE)%AbCarts%D
+          C%Geos%Clone(iCLONE)%AbCarts%D=OldXYZ%D
+       ENDDO
+       CALL Delete(OldXYZ)
        CALL GeomArchive(iBAS,iGEO,C%Nams,C%Sets,C%Geos)    
-         DO iCLONE=1,C%Geos%Clones
-           C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
-         ENDDO
+       DO iCLONE=1,C%Geos%Clones
+          C%Geos%Clone(iCLONE)%AbCarts%D=C%Geos%Clone(iCLONE)%Displ%D
+       ENDDO
        CALL GeomArchive(iBAS,iGEO+1,C%Nams,C%Sets,C%Geos)    
-    ENDDO
-    DO iCLONE=1,C%Geos%Clones
-      CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
     ENDDO
   END SUBROUTINE SteepD
   !=====================================================================================
@@ -330,7 +348,7 @@ CONTAINS
     ENDDO
 !   Take some steps, more conservative if we are doing NEB ...
     IF(C%Opts%Grad==GRAD_TS_SEARCH_NEB)THEN
-       StepLength=75D-2       
+       StepLength=0.2D0
        ! Take a step, any step
        DO iCLONE=1,C%Geos%Clones
           C%Geos%Clone(iCLONE)%AbCarts%D=Carts(iCLONE)%D-StepLength*C%Geos%Clone(iCLONE)%Gradients%D
@@ -452,11 +470,11 @@ CONTAINS
        CALL SCF(iBAS,iGEO,C)
      ENDDO
      iBAS=C%Sets%NBSets
-     ! Print the starting coordinates and energy
-     DO iCLONE=1,C%Geos%Clones
-       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile, &
-         Geo,C%Opts%GeomPrint)
-     ENDDO
+     ! THIS WAS OVERKILL....
+!     ! Print the starting coordinates and energy
+!     DO iCLONE=1,C%Geos%Clones
+!       CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
+!     ENDDO
      !
      CALL New(Convgd,C%Geos%Clones)
      Convgd%I=0
@@ -483,7 +501,10 @@ CONTAINS
        IF(iGEO>1) CALL BackTrack(iBAS,iGEO,C)
        CALL Force(iBAS,iGEO,C%Nams,C%Opts,C%Stat, &
                   C%Geos,C%Sets,C%MPIs)
-       CALL PrintClones(IGeo,C%Nams,C%Geos)
+
+       ! This sort of thing should ONLY happen through pprint and OutPut= option.
+       ! If PPrint isn't working, lets fix it rather than add a new routine....
+!       CALL PrintClones(IGeo,C%Nams,C%Geos)
        !
        ! Loop over all clones and modify geometries.
        !
@@ -508,10 +529,8 @@ CONTAINS
        ! Do GDIIS and print geometries
        !
        DO iCLONE=1,C%Geos%Clones
-         CALL MixGeoms(C%Opts,C%Nams,C%GOpt,Convgd%I, &
-                       C%Geos%Clone(iCLONE),iCLONE,iGEO)
-         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo, &
-                     C%Opts%GeomPrint)
+         CALL MixGeoms(C%Opts,C%Nams,C%GOpt,Convgd%I,C%Geos%Clone(iCLONE),iCLONE,iGEO)
+         CALL PPrint(C%Geos%Clone(iCLONE),C%Nams%GFile,Geo,C%Opts%GeomPrint)
        ENDDO
        !
        C%Stat%Previous%I(3)=IGeo
@@ -1027,26 +1046,25 @@ CONTAINS
      WRITE(*,440) RMSIntDispl
      WRITE(Out,440) RMSIntDispl
      !
-399 FORMAT('       Clone = ',I6,' GeOp step = ',I6,' Total Energy = ',F20.8)
-400 FORMAT('Total Energy at Current Geometry = ',F20.8)
-401 FORMAT('                    Total Energy = ',F20.8)
+399 FORMAT('       Clone = ',I6,' GeOp step = ',I6,' total energy = ',F20.8)
+400 FORMAT('Total energy at current geometry = ',F20.8)
+401 FORMAT('                    Total energy = ',F20.8)
 499 FORMAT('               ',6X,'             ',2X,'       Lagrangian = ',F20.8)
-410 FORMAT('                        Max Grad = ',F12.6,' between atoms ',4I4)
-140 FORMAT('     Max Unconstrained Cart Grad = ',F12.6,'      on atom  ',4I4)
-420 FORMAT('                        RMS Grad = ',F12.6)
-510 FORMAT('Max Grad on Unconstrained Coords = ',F12.6,' between atoms ',4I4)
-520 FORMAT('RMS Grad on Unconstrained Coords = ',F12.6)
-930 FORMAT('                  Max LagrM Grad = ',F12.6,' on constr. #  ',I4)
-430 FORMAT('                  Max STRE Displ = ',F12.6,' between atoms ',4I4)
-435 FORMAT('                  Max BEND Displ = ',F12.6,' between atoms ',4I4)
-436 FORMAT('                  Max LINB Displ = ',F12.6,' between atoms ',4I4)
-437 FORMAT('                  Max OUTP Displ = ',F12.6,' between atoms ',4I4)
-438 FORMAT('                  Max TORS Displ = ',F12.6,' between atoms ',4I4)
-440 FORMAT('                       RMS Displ = ',F12.6)
-940 FORMAT('                  Max Lagr Displ = ',F12.6)
+410 FORMAT('                   Max intl grad = ',F12.6,' between atoms ',4I4)
+140 FORMAT('     Max unconstrained cart grad = ',F12.6,'      on atom  ',4I4)
+420 FORMAT('                   RMS intl grad = ',F12.6)
+510 FORMAT('Max grad on unconstrained coords = ',F12.6,' between atoms ',4I4)
+520 FORMAT('RMS grad on unconstrained coords = ',F12.6)
+930 FORMAT('                  Max LagrM grad = ',F12.6,' on constr. #  ',I4)
+430 FORMAT('                  Max STRE displ = ',F12.6,' between atoms ',4I4)
+435 FORMAT('                  Max BEND displ = ',F12.6,' between atoms ',4I4)
+436 FORMAT('                  Max LINB displ = ',F12.6,' between atoms ',4I4)
+437 FORMAT('                  Max OUTP displ = ',F12.6,' between atoms ',4I4)
+438 FORMAT('                  Max TORS displ = ',F12.6,' between atoms ',4I4)
+440 FORMAT('                       RMS displ = ',F12.6)
+940 FORMAT('                  Max Lagr displ = ',F12.6)
         !
    END SUBROUTINE GeOpReview
-!
 !---------------------------------------------------------------
 !
    SUBROUTINE SetGeOpCtrl(GOpt,Geos,Opts,Sets,Nams)
@@ -1075,57 +1093,7 @@ CONTAINS
      CALL    SetConstr(GOpt%Constr,GOpt%BackTrf)
      CALL   SetTrfCtrl(GOpt%TrfCtrl,GOpt%CoordCtrl,GOpt%Constr)
    END SUBROUTINE SetGeOpCtrl
-!
 !---------------------------------------------------------------
-!
-   SUBROUTINE PrintClones(IStep,Nams,Geos)
-     TYPE(FileNames)    :: Nams
-     TYPE(Geometries)   :: Geos
-     INTEGER            :: IStep,NatmsLoc,NClones,iCLONE,I
-     CHARACTER(LEN=DCL) :: FileName
-     TYPE(DBL_RNK2)     :: XYZ,Vects
-     TYPE(DBL_VECT)     :: AtNum
-     REAL(DOUBLE)       :: Dist,Sum
-     ! 
-     ! The whole set of clones is going to be printed in a single file.
-     ! All clones will be seen by a single view of the resulting file.
-     ! 
-     NClones=Geos%Clones
-     NatmsLoc=0
-     DO iCLONE=1,NClones
-       NatmsLoc=NatmsLoc+Geos%Clone(iCLONE)%Natms
-     ENDDO
-     !
-     CALL New(XYZ,(/3,NatmsLoc/))
-     CALL New(Vects,(/3,NatmsLoc/))
-     CALL New(AtNum,NatmsLoc)
-     !
-     NatmsLoc=0
-     Sum=Zero
-     Dist=7.D0
-     DO iCLONE=1,NClones
-       Sum=(iCLONE-1)*Dist
-       DO I=1,Geos%Clone(iCLONE)%Natms
-         NatmsLoc=NatmsLoc+1
-         AtNum%D(NatmsLoc)=Geos%Clone(iCLONE)%AtNum%D(I)
-         XYZ%D(1:2,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(1:2,I)
-         XYZ%D(3,NatmsLoc)=Geos%Clone(iCLONE)%AbCarts%D(3,I)+Sum
-         Vects%D(3,NatmsLoc)=Geos%Clone(iCLONE)%Gradients%D(3,I)
-       ENDDO
-     ENDDO
-     !
-     FileName=TRIM(Nams%SCF_NAME)//'.Clones.xyz'
-     !
-     CALL PrtXYZ(Atnum%D,XYZ%D,FileName,&
-                 'Step='//TRIM(IntToChar(IStep)),Vects_O=Vects%D)
-     !
-     CALL Delete(AtNum)
-     CALL Delete(XYZ)
-     CALL Delete(Vects)
-   END SUBROUTINE PrintClones
-!
-!-------------------------------------------------------------------
-!
    SUBROUTINE OptSingleMol(GOpt,Nams,Opts,Sets,Geos, &
                            GMLoc,Convgd,iGEO,iCLONE)
      TYPE(GeomOpt)        :: GOpt

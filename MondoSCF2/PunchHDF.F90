@@ -90,7 +90,6 @@ CONTAINS
        MaxNon0s=MAX(MaxNon0s,B%MxN0s(iBAS))
     ENDDO
     CALL New(DM,(/MaxAtoms,MaxBloks,MaxNon0s/))
-    !
     CALL Put(G%Clones,'clones')
     DO iCLONE=1,G%Clones
        HDF_CurrentID=InitHDFGroup(HDFFileID,"Clone #"//TRIM(IntToChar(iCLONE)))

@@ -28,8 +28,8 @@ CONTAINS
     CALL OpenASCII(N%IFile,Inp)
     ! Check for restart, and extract the current state from the restart HDF file
     CALL ParseRestart(N%M_PWD,N%NewFileID,O%Guess,N%RFile,O%RestartState)
-    ! Parse print output options, load global object PrintFlags
-    CALL ParsePrintFlags(O%PFlags,O%GeomPrint)
+    ! Parse print output options, load global object PrintFlags and N%GFile
+    CALL ParsePrintFlags(O%PFlags,N,O%GeomPrint)
     ! Parse for accuracy levels and set thresholds
     CALL ParseThresholds(O%NThrsh,O%AccuracyLevels,O%Thresholds)
     ! Parse for SCF methods to use in solution of SCF equations and put to HDF
@@ -154,13 +154,6 @@ CONTAINS
           Models(Location(I))=HYBRID_PBE0
        ENDDO
     ENDIF
-    IF(NModls==0) &
-         CALL MondoHalt(PRSE_ERROR,'Option '//MODEL_OPTION//' not set in input.'//RTRN   &
-         //'Options include '//MODEL_ExactX//', '//MODEL_SD//', '//       &
-         MODEL_XA//', '//MODEL_PW91x//', '//MODEL_PBEx//', '//           &
-         MODEL_B88x//', '//MODEL_VWN3xc//', '//MODEL_VWN5xc//', '//      &
-         MODEL_PW91xc//', '//MODEL_PBExc//', '//MODEL_BLYPxc//', '//     &
-         MODEL_B3LYP_VWN3xc//', '//MODEL_B3LYP_PW91xc//', and '//MODEL_PBE0xc)
   END SUBROUTINE ParseModelChems
   !============================================================================
   !  PARSE THE METHODS TO USE IN SOLUTION OF THE SCF EQUATIONS
@@ -287,13 +280,13 @@ CONTAINS
     ELSE
        CALL MondoHalt(PRSE_ERROR,'No guess specified in input file')
     ENDIF
-    WRITE(*,*) RestartHDF
   END SUBROUTINE ParseRestart
   !===============================================================================================
   ! PARSE THE PRINT OUT OPTIONS AND LOAD THE GLOBAL PRINT FLAGS OBJECT.
   !===============================================================================================
-  SUBROUTINE ParsePrintFlags(PFlags,GeomPrint)
+  SUBROUTINE ParsePrintFlags(PFlags,Names,GeomPrint)
     TYPE(DEBG)         :: PFlags
+    TYPE(FileNames)    :: Names
     CHARACTER(LEN=3)   :: GeomPrint
     !-----------------------------------------------------------------------------------------------
     IF(OptKeyQ(Inp,GLOBAL_DEBUG,DBG_NONE) )THEN
@@ -348,10 +341,17 @@ CONTAINS
     ENDIF
     IF(OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_PDB)) THEN
 	GeomPrint='PDB'
+        Names%GFile=TRIM(Names%GFile)//'.pdb'
     ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XYZ)) THEN
     	GeomPrint='XYZ'
+        Names%GFile=TRIM(Names%GFile)//'.xyz'
     ELSE IF (OptKeyQ(Inp,OUTPUT_OPTION,OUTPUT_XCD)) THEN
         GeomPrint='XSF'
+        Names%GFile=TRIM(Names%GFile)//'.xsf'
+     ELSE
+        ! Default is xyz
+        GeomPrint='XYZ'
+        Names%GFile=TRIM(Names%GFile)//'.xyz'
     ENDIF
   END SUBROUTINE ParsePrintFlags
   !===============================================================================================
