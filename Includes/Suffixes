@@ -1,26 +1,70 @@
-.SUFFIXES:	.o .C .F .F90
-
+.SUFFIXES:
+.SUFFIXES:	.o .C .F .F90 .c .f .f90 .x
+#
+COPY_RIGHT_F  =$(MONDO_HOME)/Includes/CopyrightBanner.F
+COPY_RIGHT_F90=$(MONDO_HOME)/Includes/CopyrightBanner.F90
+COPY_RIGHT_C  =$(MONDO_HOME)/Includes/CopyrightBanner.C
+#
+################################################################
+#       RULES FOR COMPILING IN HOUSE CODE
+################################################################
+#
 .F90.o:   
 	rm -f $*.$(F90_POSTFIX)
-	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F90 $*.$(F90_POSTFIX)
+	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F90 $*.x
+	cp $(COPY_RIGHT_F90) $*.$(F90_POSTFIX)
+	cat $*.x >> $*.$(F90_POSTFIX); rm $*.x
 	$(F90) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F90_POSTFIX)
 #	rm -f $*.$(F90_POSTFIX)
 #	rm -f $*.$(LIST_POSTFIX)
-
+#
 .F.o:
 	rm -f $*.$(F77_POSTFIX)
-	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F $*.$(F77_POSTFIX)
-	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F77_POSTFIX)
+	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F  $*.x
+	cp $(COPY_RIGHT_F) $*.$(F90_POSTFIX)
+	cat $*.x >> $*.$(F77_POSTFIX)
+	rm $*.x
 #	rm -f $*.$(F77_POSTFIX)
 #	rm -f $*.$(LIST_POSTFIX)
-
+#
+.C.o:   
+	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.C $*.x
+	cp $(COPY_RIGHT_C) $*.c; cat $*.x >> $*.c
+	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.C
+	rm -f $*.x
+#
+################################################################
+#       RULES FOR MAKING A RELEASE
+################################################################
+#
+.F90.x:   
+	rm -f $*.$(F90_POSTFIX)
+	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F90 $*.x
+	cp $(COPY_RIGHT_F90) $*.$(F90_POSTFIX)
+	cat $*.x >> $*.$(F90_POSTFIX)
+	rm $*.F90 $*.x
+#
+.F.x:
+	rm -f $*.$(F77_POSTFIX)
+	$(CPP) $(CPPINCLUDE) $(CPPOPTS) $(CPPMISC) $*.F $*.x
+	cp $(COPY_RIGHT_F) $*.$(F77_POSTFIX)
+	cat $*.x >> $*.$(F77_POSTFIX)
+	rm -f $*.F $*.x
+#
+.C.x:   
+	rm -f $*.c
+	cp $(COPY_RIGHT_C) $*.c; cat $*.C >> $*.c
+	rm -f $*.C $*.x
+#
+################################################################
+#       RULES FOR COMPILING PREPROCESSED CODE
+################################################################
+#
+.f90.o:   
+	$(F90) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.$(F90_POSTFIX)
+#
 .f.o:   
 	$(F90) $(F77_EXTRAS) $(F90_FLAGS) $(EXTRA_INCLUDES) -c $*.f
-#	rm -f $*.$(LIST_POSTFIX)
-
-.C.o:   
-	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.C
-	rm -f $*.c
-
+#
 .c.o:   
 	$(CC) $(CPPINCLUDE) $(CFLAGS) -c $*.c
