@@ -210,7 +210,7 @@ PROGRAM MakeRho
 #endif
 !***********************************************************************************
   RSumE  =  Integrate_HGRho_new(RhoA,1,RhoA%NDist-GM%NAtms)
-  WRITE(*,*) 'Integrate[Rho] = ',RSumE
+!  WRITE(*,*) 'Integrate[Rho] = ',RSumE
 !***********************************************************************************
 ! Prune negligible distributions from the electronic density
   NDist_old = RhoA%NDist
