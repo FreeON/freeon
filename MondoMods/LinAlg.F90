@@ -2816,6 +2816,64 @@ MODULE LinAlg
 !
       END SUBROUTINE SymPe
 !
+
+
+     SUBROUTINE PlotDecay(A,GM,Name)
+        TYPE(BCSR)     :: A
+        TYPE(CRDS)     :: GM 
+        CHARACTER(LEN=*) :: Name
+        TYPE(DBL_VECT) :: Distance,Magnitude
+        TYPE(INT_VECT) :: ISort
+        INTEGER :: I,J,K,L,M,N,P
+        REAL(DOUBLE),EXTERNAL   :: DBL_Dot
+        CALL New(ISort,A%NBlks)
+        CALL New(Distance,A%NBlks)
+        CALL New(Magnitude,A%NBlks)
+        L=0
+        DO I=1,NAtoms
+           M=BSiz%I(I)
+           DO K=A%RowPt%I(I),A%RowPt%I(I+1)-1
+              J=A%ColPt%I(K)
+              P=A%BlkPt%I(K)
+              N=BSiz%I(J)
+              L=L+1
+              ISort%I(L)=L
+              Distance%D(L)=SQRT((GM%Carts%D(1,I)-GM%Carts%D(1,J))**2 &
+                                +(GM%Carts%D(2,I)-GM%Carts%D(2,J))**2 &
+                                +(GM%Carts%D(3,I)-GM%Carts%D(3,J))**2 )
+              Magnitude%D(L)=SQRT(DBL_Dot(M*N,A%MTrix%D(P),A%MTrix%D(P)))
+           ENDDO
+         ENDDO
+         CALL Sort(Distance,ISort,A%NBlks)
+!          
+         CALL OpenASCII(TRIM(Name)//'_MatrixDecayData',Plt,NewFile_O=.TRUE.)
+         DO I=1,A%NBlks
+            WRITE(Plt,*)Distance%D(I),Magnitude%D(ISort%I(I))
+         ENDDO
+         CLOSE(Plt)
+!
+         CALL OpenASCII(TRIM(Name)//'_MatrixDecayPlotMe',Plt,NewFile_O=.TRUE.)
+         WRITE(Plt,2)
+         WRITE(Plt,3)TRIM(Name)//'.eps'
+         WRITE(Plt,6)
+         WRITE(Plt,*)'set pointsize 0.1'
+         WRITE(Plt,*)'set logscale y'
+         WRITE(Plt,*)"plot '"//TRIM(Name)//"_MatrixDecayData' using 1:2 notitle with points 1 "
+         CLOSE(Plt)
+
+         CALL Delete(ISort)
+         CALL Delete(Distance)
+         CALL Delete(Magnitude)
+
+   1   FORMAT(2(1x,I16))
+   2   FORMAT('set term  postscript eps  "Times-Roman" 18')
+!   2   FORMAT('set term  jpeg transparent')
+   3   FORMAT('set output "',A,'"')
+   6   FORMAT('set size square ')
+   9   FORMAT('plot [0 : ',I12,' ] ',I12,', \\')
+  10   FORMAT('                    ',I12,', \\')
+         END SUBROUTINE PlotDecay      
+
     SUBROUTINE Plot_BCSR(A,Name)
        TYPE(BCSR) :: A
        CHARACTER(LEN=*) :: Name
