@@ -30,7 +30,7 @@ PROGRAM MakePFFT
 #ifdef MMech
   IF(HasMM()) THEN
     CALL Get(GM,Tag_O='GM_MM'//CurGeom)
-    CALL SetCellNumber(GM,1.D-12)
+    CALL SetCellNumber(GM,1.D-10)
   ELSE
     CALL Get(GM,Tag_O=CurGeom)
     CALL SetCellNumber(GM)
@@ -49,6 +49,9 @@ PROGRAM MakePFFT
   ENDIF
 ! Calculate and Store the Tensors  
   CALL CalculatePFFT(MaxEll,GM,Args)
+! Output
+  CALL PPrint(CS_IN, 'inner sum',Prog)
+  CALL PPrint(CS_OUT,'outer sum',Prog)
 ! Delete
   CALL Delete(GM)
   CALL Delete(Args)
