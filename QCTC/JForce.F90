@@ -76,9 +76,9 @@ PROGRAM JForce
 #else
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
-  CALL Get(GM,Tag_O=CurGeom)
+  CALL Get(GMLoc,Tag_O=CurGeom)
 ! Allocations 
-  CALL New(JFrc,3*GM%Natms)
+  CALL New(JFrc,3*GMLoc%Natms)
   JFrc%D(:)=Zero
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL Get(P,TrixFile('D',Args,1))
@@ -98,17 +98,17 @@ PROGRAM JForce
 #ifdef MMech 
 #ifdef PERIODIC
   IF(HasMM()) THEN
-     CALL SetCellNumber(GM_MM)
-     CALL PBCFarFieldSetUp(PoleRoot,GM_MM)
+     CALL SetCellNumber(GMLocMM)
+     CALL PBCFarFieldSetUp(PoleRoot,GMLocMM)
   ELSE
-     CALL SetCellNumber(GM)
-     CALL PBCFarFieldSetUp(PoleRoot,GM)
+     CALL SetCellNumber(GMLoc)
+     CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
   ENDIF
 #endif
 #else
 #ifdef PERIODIC
-  CALL SetCellNumber(GM)
-  CALL PBCFarFieldSetUp(PoleRoot,GM)
+  CALL SetCellNumber(GMLoc)
+  CALL PBCFarFieldSetUp(PoleRoot,GMLoc)
   CALL PPrint(CS_OUT,'outer sum',Prog)
 #endif
 #endif
@@ -122,14 +122,14 @@ PROGRAM JForce
 #ifdef MMech
   IF(HasQM()) THEN
 #endif
-  DO AtA=1,GM%Natms
+  DO AtA=1,GMLoc%Natms
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
      A2=3*AtA
-     JFrc%D(A1:A2)= dNukE(GM,AtA)
+     JFrc%D(A1:A2)= dNukE(GMLoc,AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
-        IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
+        IF(SetAtomPair(GMLoc,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
            NB=BSiz%I(AtB)
            MN1=MA*NB-1
@@ -141,12 +141,12 @@ PROGRAM JForce
                       +(Pair%A(2)-Pair%B(2))**2 &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair))THEN
-                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GM)
+                 F_nlm(1:3)    = TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
                  JFrc%D(A1:A2) = JFrc%D(A1:A2) + F_nlm(1:3)
               ENDIF
            ENDDO
 #else
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GM)
+           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:Q+MN1),GMLoc)
 #endif
         ENDIF
      ENDDO
@@ -197,7 +197,6 @@ PROGRAM JForce
      CALL Get(GlobalQMNum,'GlobalQMNum')
   ELSE
      DO I=1,GMLoc%Natms; GlobalQMNum%I(I)=I ; ENDDO
-     ENDIF 
      IF(HasQM()) THEN
         Do Ata=1,GMLoc%Natms 
            I=GlobalQMNum%I(Ata)
@@ -234,14 +233,14 @@ PROGRAM JForce
      ENDIF
   ENDIF
 #else
-  CALL New(Frc,3*GM%Natms)
+  CALL New(Frc,3*GMLoc%Natms)
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
   CALL PChkSum(Frc,'Frc after dJ/dR added',Proc_O=Prog)  
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
   CALL Delete(Frc)
   CALL Delete(BS)
-  CALL Delete(GM)
+  CALL Delete(GMLoc)
   CALL Delete(JFrc)
 #endif
   CALL Delete(RhoPoles)
