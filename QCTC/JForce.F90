@@ -45,6 +45,7 @@ PROGRAM JForce
   USE PoleTree
   USE PBCFarField
   USE BlokTrPdJ
+  USE BlokTrWdS
   USE NuklarE
 #ifdef PARALLEL
   USE MondoMPI
@@ -52,6 +53,11 @@ PROGRAM JForce
 #else
   TYPE(BCSR)                 :: P
 #endif
+#ifdef PERIODIC        
+  INTEGER                    :: NC
+  REAL(DOUBLE)               :: Bx,By,Bz
+  TYPE(DBL_VECT)             :: SFrc
+#endif   
   INTEGER                    :: AtA,AtB,A1,A2,JP,Q
   TYPE(AtomPair)             :: Pair
   TYPE(DBL_VECT)             :: Frc,JFrc
@@ -63,11 +69,18 @@ PROGRAM JForce
 ! Get basis set and geometry
   CALL Get(BS,Tag_O=CurBase)
   CALL Get(GM,Tag_O=CurGeom)
+
+  Thresholds%TwoE=1.D-10
+  Thresholds%Dist=1.D-14
+
+
 ! Allocations 
   CALL NewBraBlok(BS,Gradients_O=.TRUE.)
   CALL New(Frc,3*NAtoms)
   CALL New(JFrc,3*NAtoms)
   CALL Get(P,TrixFile('D',Args,1))
+! Get the Density for Poletree
+  CALL Get(Rho,'Rho',Args,0)
 ! Setup global arrays for computation of multipole tensors
   CALL InitRhoAux
 ! Setup global arrays for computation of multipole tensors
@@ -91,20 +104,34 @@ PROGRAM JForce
   DO AtA=1,NAtoms
      MA=BSiz%I(AtA)
      A1=3*(AtA-1)+1
-     A2=3*AtA
-     JFrc%D(A1:A2)=dNukE(AtA)
+     A2=3*AtA!
+     JFrc%D(A1:A2)=Two*dNukE(AtA)
      DO JP=P%RowPt%I(AtA),P%RowPt%I(AtA+1)-1
         AtB=P%ColPt%I(JP)
         IF(SetAtomPair(GM,BS,AtA,AtB,Pair))THEN
            Q=P%BlkPt%I(JP)
-           JFrc%D(A1:A2)=JFrc%D(A1:A2)+TrPdJ(Pair,P%MTrix%D(Q:),AtA,AtB)
+#ifdef PERIODIC
+           Bx = Pair%B(1)
+           By = Pair%B(2)           
+           Bz = Pair%B(3)
+           DO NC=1,CS%NCells
+              Pair%B(1) = Bx+CS%CellCarts%D(1,NC)
+              Pair%B(2) = By+CS%CellCarts%D(2,NC)
+              Pair%B(3) = Bz+CS%CellCarts%D(3,NC)
+              Pair%AB2  = (Pair%A(1)-Pair%B(1))**2+(Pair%A(2)-Pair%B(2))**2+(Pair%A(3)-Pair%B(3))**2
+              IF(TestAtomPair(Pair)) THEN
+                 JFrc%D(A1:A2)=JFrc%D(A1:A2)+Two*TrPdJ(Pair,P%MTrix%D(Q:))
+              ENDIF
+           ENDDO
+#else
+           JFrc%D(A1:A2)=JFrc%D(A1:A2)+Two*TrPdJ(Pair,P%MTrix%D(Q:))
+#endif
         ENDIF
      ENDDO
   ENDDO
-  JFrc%D=Two*JFrc%D
-!  CALL PPrint(JFrc,'JForce',Unit_O=6)
 !---------------------------------------------------------------
 ! Update forces
+  CALL PPrint(JFrc,'JFrce')
   CALL Get(Frc,'GradE',Tag_O=CurGeom)
   Frc%D=Frc%D+JFrc%D
   CALL Put(Frc,'GradE',Tag_O=CurGeom)
