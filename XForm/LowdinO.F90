@@ -44,8 +44,6 @@ PROGRAM LowdinO
   INTEGER                        :: I,J,K,LgN,LWORK,LIWORK,Info,Status
   CHARACTER(LEN=7),PARAMETER     :: Prog='LowdinO'
   REAL(DOUBLE)                   :: Chk
-!
-  REAL(DOUBLE)                   :: SUM,Error
 !--------------------------------------------------------------------
   CALL StartUp(Args,Prog)
   CALL New(Values,NBasF)
@@ -55,7 +53,7 @@ PROGRAM LowdinO
   CALL Delete(S)
 !--------------------------------------------------------------------
 !
-!  
+!
 #ifdef DSYEVD
   DO K=4,10000
      IF(2**K>=NBasF)THEN
@@ -82,23 +80,44 @@ PROGRAM LowdinO
   CALL Delete(Work)
 #endif
 !--------------------------------------------------------------------
-! Allocate Temporaries
-!
-  CALL New(Tmp1,(/NBasF,NBasF/))  
   CALL New(Tmp2,(/NBasF,NBasF/))
+  CALL New(Tmp1,(/NBasF,NBasF/))
 !--------------------------------------------------------------------
-!
-!
-!!$  Tmp1%D=Zero
-!!$  DO I=1,NBasF
-!!$     Tmp1%D(I,I)=One/SQRT(Values%D(I))
-!!$  ENDDO 
-!!$  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
-!!$             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
-!!$  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
-!!$             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
+  Tmp1%D=Zero
+  DO I=1,NBasF
+     IF(Values%D(I)>1.D-12)THEN
+        Tmp1%D(I,I)=One/SQRT(Values%D(I))
+     ELSE
+        Tmp1%D(I,I)=Zero
+     ENDIF
+  ENDDO     
+  CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Vectors%D, &
+             NBasF,Tmp1%D,NBasF,Zero,Tmp2%D,NBasF)
+  CALL DGEMM('N','T',NBasF,NBasF,NBasF,One,Tmp2%D,    &
+             NBasF,Vectors%D,NBasF,Zero,Tmp1%D,NBasF)
 !--------------------------------------------------------------------
+  CALL Delete(Values)
+  CALL Delete(Vectors)
+  CALL Delete(Tmp2)
+!--------------------------------------------------------------------
+  CALL SetEq(S,Tmp1)    
+  CALL Delete(Tmp1)
+  CALL Filter(X,S)      
+!--------------------------------------------------------------------
+  CALL Put(X,TrixFile('X',Args)) 
+  CALL PChkSum(X,'X',Prog)
+  CALL PPrint(X,'X')
+  CALL Plot(X,'X')
+!--------------------------------------------------------------------
+  CALL Delete(S)
+  CALL Delete(X)
+  CALL ShutDown(Prog)
 !
+END PROGRAM LowdinO
+
+
+#ifdef BROKEN_CODE
+
 !
 !!$  DO I=1,NBasF
 !!$     DO J=1,NBasF
@@ -124,7 +143,6 @@ PROGRAM LowdinO
   ENDDO
   CALL DGEMM('N','N',NBasF,NBasF,NBasF,One,Tmp1%D,NBasF,Tmp2%D,NBasF,Zero,Vectors%D,NBasF)
 !
-#ifdef DEBUG
 !
 ! Test for Inverse
 !    
@@ -161,26 +179,5 @@ PROGRAM LowdinO
   WRITE(*,*) 'Highest Eigenvalue = ',Values%D(NBasF)
   WRITE(*,*) 'Condition Number   = ',Values%D(NBasF)/Values%D(1)
   WRITE(*,*) 'Error in Inverse   = ',Error
+
 #endif
-!--------------------------------------------------------------------
-!
-  CALL Delete(Values)
-  CALL Delete(Tmp1)
-  CALL Delete(Tmp2)
-!--------------------------------------------------------------------
-!
-  CALL SetEq(S,Vectors)    
-  CALL Delete(Vectors)
-  CALL Filter(X,S)      
-!--------------------------------------------------------------------
-!
-  CALL Put(X,TrixFile('X',Args)) 
-  CALL PChkSum(X,'X',Prog)
-  CALL PPrint(X,'X')
-  CALL Plot(X,'X')
-!--------------------------------------------------------------------
-  CALL Delete(S)
-  CALL Delete(X)
-  CALL ShutDown(Prog)
-!
-END PROGRAM LowdinO
