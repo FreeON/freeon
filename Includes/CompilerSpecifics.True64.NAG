@@ -1,0 +1,78 @@
+#---------------------------------------------------------------
+# PREPROCESSOR OPTIONS: 
+#
+CPP=/lib/cpp -P -C -traditional
+CPPINCLUDE=-I$(MONDO_INC) -I$(HDF_INC) -I/usr/local/include $(MPI_COMPILE_FLAGS)
+CPPOPTS=-DNAG -DPERIODIC -DPARALLEL_CLONES #-DPARALLEL
+#---------------------------------------------------------------
+# C Compiler and options
+#
+CC        =  cc
+CDEBUG    = 
+COPTIMIZE = 
+CFLAGS = $(CMISC) $(COPTIMIZE) $(CDEBUG) $(CPPOPTS)
+#---------------------------------------------------------------
+# Fortran postfixes for compiler peculiarities
+#
+LIST_POSTFIX  = NA
+F77_POSTFIX   = f
+F90_POSTFIX   = f90
+MOD_POSTFIX   = mod
+#---------------------------------------------------------------
+# Fortran Compilers, options and include files
+#
+F90          = f95
+F90_OPTIMIZE = -O2 -Oassumed=always_contig -Ounroll=1 -colour
+#F90_DEBUG    = -g -g90 -gline -C=all -mtrace=basic
+F90_MISC     = -u -v -w=unused -mismatch_all -maxcontin=1500 -ieee=full -nan 
+F77_EXTRAS   = -132 -w -dusty 
+F90_INCLUDE  = -I$(MONDO_HOME)/Includes/               \
+               -I$(MONDO_HOME)/MondoMods               \
+               -I/usr/local/include $(MPI_COMPILE_FLAGS) 
+F90_FLAGS   = $(F90_MISC) $(F90_OPTIMIZE) $(F90_DEBUG) $(F90_INCLUDE)
+#---------------------------------------------------------------
+# LINK/LOADER DIRECTIVES
+#
+LD        = $(F90) 
+LDFLAGS   = -o 
+#---------------------------------------------------------------
+# ARCHIVAL STUFF
+#
+AR      = ar
+ARFLAGS = -rcv
+RANLIB  = ranlib
+#-------------------------------------------------------------------------------------
+#
+#---------------------------------------------------------------
+# LIBRARY DEFINITIONS
+#
+# Where the libraries are 
+#
+LibOpts       = -L/usr/local/lib
+#--------------------------------------------------------------------------
+# MPI libraries
+#
+# For linking with old style MPI1 (default if only using -DPARALLEL)
+#
+#MPI_LIBS = -L$(MPI_LIB) -lpmpi -lmpi -lpmpi -lelan
+MPI_LIBS = $(MPI_LD_FLAGS) -lmpi -lfmpi
+#----------------------------------------------------------------------
+#  HDF5 libraries with compression and jpeg libs. 
+#
+HDF_LIBS = -L$(HDF_LIB) -lhdf5 -lz #-ljpeg -L/usr/local/lib -lz 
+#---------------------------------------------------------------------
+#  Mondo libraries
+#
+MONDO_LIBS= -L$(MONDO_LIB) -lMondoMods
+#-------------------------------------------------------------------------
+#  The generic libs needed by most of the programs.  
+#
+F90_LIBRARIES = $(MONDO_LIBS) $(MPI_LIBS) $(HDF_LIBS) 
+#--------------------------------------------------------------------------
+#  'Nuff said
+#
+#LAPACK = -L$(LAPACK_LIB) -llapack -lblas 
+LAPACK = -lcxml 
+#---------------------------------------------------------------------------
+
+
