@@ -358,7 +358,7 @@ PROGRAM SDMM
 !     Test when in the asymptotic regime
       IF(NPur>6)THEN
          CALL OpenASCII(OutFile,Out)
-         IF(DeltaEQ<Thresholds%ETol*5.D-4)THEN
+         IF(DeltaEQ<Thresholds%ETol*2.D-1)THEN
 !           Check for non-decreasing /P
             IF(DeltaP>OldDeltaP)ToExit=.TRUE.
         ENDIF
