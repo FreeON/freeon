@@ -163,7 +163,7 @@ C-------------------------------------------------------------------------------
      >           Flag(NAtoms),BSiz(NAtoms)
          INTEGER BIG_INT
          PARAMETER(BIG_INT=100000)
-         INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+         INCLUDE 'mpif.h'
 C
          DO I=1,NAtoms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Flag(I)=0
@@ -226,7 +226,8 @@ C=========================================================================
          INTEGER BSiz(NAtoms),Flag(NAtoms),VBlks(V),VDisp(V),
      >           AGrwPt(NAtoms+1),AGClPt(ANBlks),BRowPt(BNAtms+1),
      >           BColPt(BNBlks),BBlkPt(BNBlks)
-         INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+C        INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+         INCLUDE 'mpif.h'
 C
          DO I=1,NAtoms !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             Flag(I)=0
@@ -285,7 +286,8 @@ C
 C==========================================================
 
       SUBROUTINE WaitAll77(N,Reqs,Stats)
-         INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+C        INCLUDE 'MONDO_MPI_INCLUDE.Inc'
+         INCLUDE 'mpif.h'
          INTEGER I,J,N,M,IErr
          INTEGER Reqs(N),Stats(MPI_STATUS_SIZE,N)
 C------------------------------------------------------------
