@@ -30,8 +30,9 @@ PROGRAM SForce
   TYPE(DBL_VECT)      :: SFrc
   REAL(DOUBLE)        :: SFrcChk
 #ifdef PERIODIC 
-  INTEGER             :: NC
-  REAL(DOUBLE),DIMENSION(3)::B
+  INTEGER                     :: NC
+  REAL(DOUBLE),DIMENSION(3)   :: B,F_nlm,nlm
+  REAL(DOUBLE),DIMENSION(3,3) :: LatFrc_S
 #endif
   CHARACTER(LEN=6),PARAMETER :: Prog='SForce'
 !---------------------------------------------- 
@@ -86,7 +87,14 @@ PROGRAM SForce
                       +(Pair%A(2)-Pair%B(2))**2  &
                       +(Pair%A(3)-Pair%B(3))**2
               IF(TestAtomPair(Pair)) THEN
-                 SFrc%D(A1:A2)=SFrc%D(A1:A2)-Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 F_nlm(1:3)    = -Four*TrWdS(BS,Pair,P%MTrix%D(Q:Q+MN1))
+                 SFrc%D(A1:A2) = SFrc%D(A1:A2) + F_nlm(1:3)
+!
+                 nlm = AtomToFrac(GM,CS_OUT%CellCarts%D(1:3,NC))
+                 LatFrc_S(1,1:3) = LatFrc_S(1,1:3) + nlm(1)*F_nlm(1:3)
+                 LatFrc_S(2,1:3) = LatFrc_S(2,1:3) + nlm(2)*F_nlm(1:3)
+                 LatFrc_S(3,1:3) = LatFrc_S(3,1:3) + nlm(3)*F_nlm(1:3)
+!
               ENDIF
            ENDDO
 #else
@@ -99,6 +107,9 @@ PROGRAM SForce
 ! Do some checksumming and IO 
   CALL PPrint(SFrc,'dS/dR')
   CALL PChkSum(SFrc,'dS/dR',Proc_O=Prog)  
+! Print The SForce
+  CALL Print_Force(GM,SFrc,' dS/dR ')
+  CALL Print_CheckSum_Force(SFrc,' dS/dR ')
 ! Start this off as the first contrib to total gradient 
   CALL Put(SFrc,'GradE',Tag_O=CurGeom)
 !--------------------------------------------------------------------------------
