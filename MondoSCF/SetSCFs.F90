@@ -133,7 +133,7 @@ MODULE SetSCFs
              //', CubeNeglect = '//TRIM(DblToShrtChar(CubeNeglect(Acc)))//','//Rtrn &
              //'  TwoENeglect = '//TRIM(DblToShrtChar(TwoENeglect(Acc)))            &
              //', DistNeglect = '//TRIM(DblToShrtChar(DistNeglect(Acc)))
-            WRITE(Out,*)Mssg
+            WRITE(Out,*)TRIM(Mssg)
             CALL PrintProtectR(Out)
             CLOSE(UNIT=Out,STATUS='KEEP')
          ENDIF
@@ -144,12 +144,12 @@ MODULE SetSCFs
              //', MaxBlks = '//TRIM(IntToChar(MaxBlks))   & 
              //', MaxNon0 = '//TRIM(IntToChar(MaxNon0))   &
              //', BndWdth = '//TRIM(IntToChar(BWEstim))
-            WRITE(Out,*)Mssg
+            WRITE(Out,*)TRIM(Mssg)
 #ifdef PARALLEL
             Mssg='MaxAtmsNode = '//TRIM(IntToChar(MaxAtmsNode))//', ' & 
               //' MaxBlksNode = '//TRIM(IntToChar(MaxBlksNode))//', ' & 
               //' MaxNon0Node = '//TRIM(IntToChar(MaxNon0Node))
-            WRITE(Out,*)Mssg
+            WRITE(Out,*)TRIM(Mssg)
 #endif
             CALL PrintProtectR(Out)
             CLOSE(UNIT=Out,STATUS='KEEP')
@@ -322,7 +322,7 @@ MODULE SetSCFs
 
 #if defined(PARALLEL) && !defined(MPI2)
             Mssg='MPI Invokation : '//TRIM(MPI_INVOKE)
-            WRITE(Out,*)Mssg
+            WRITE(Out,*)TRIM(Mssg)
 #endif
             CALL New(CBeg,NPrc-1,0)
             CALL New(CEnd,NPrc-1,0)
