@@ -1162,6 +1162,7 @@ CONTAINS
                 CALL Get(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Get(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
                 CALL Get(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
+                CALL Get(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
               END SUBROUTINE Get_CRDS
               !-------------------------------------------------------------------------------
               !     Put a coordinate set
@@ -1202,6 +1203,7 @@ CONTAINS
                 CALL Put(GM%Bond      ,'Bond'         ,Tag_O=Tag_O)
                 CALL Put(GM%AtmB      ,'AtmB'         ,Tag_O=Tag_O)
                 CALL Put(GM%PBCFit    ,'PBCFit'       ,Tag_O=Tag_O)
+                CALL Put(GM%LatticeOnly,'LatticeOnly' ,Tag_O=Tag_O)
               END SUBROUTINE Put_CRDS
               !-------------------------------------------------------------------------------
               !     Get a BCSR matrix

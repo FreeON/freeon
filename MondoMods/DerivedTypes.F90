@@ -365,6 +365,7 @@ MODULE DerivedTypes
       TYPE(BONDDATA)   :: Bond
       TYPE(ATOMBONDS)  :: AtmB
       TYPE(PBCFits)    :: PBCFit    !-- Points used for Lattice fit 
+      LOGICAL          :: LatticeOnly
    END TYPE 
 !-------------------------------------------------------------------------------------
 !  Cartesian Multipoles of the Density
