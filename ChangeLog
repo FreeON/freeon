@@ -1,3 +1,138 @@
+2003-08-27 17:10  nemeth
+
+	* MondoSCF2/InCoords.F90: Filter added to the recognition of the
+	second reference axis of linear bendings.
+
+2003-08-27 16:42  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: i
+
+2003-08-27 16:11  vweber
+
+	* MondoMods/FastMat.F90: Added nullify pointers,
+	Set_DBCSR_EQ_DFASTMAT and PChkSum_FASTMAT.
+
+2003-08-27 15:41  vweber
+
+	* MondoSCF2/ParseBasis.F90: Added:  -SUB
+	ParseMaxElemBCSR(NBSets,Unit,ArrMaxNon0s,ArrMaxNBlks)	  This
+	routine looks in the unit <Unit> for the keywords <MaxNon0s> and   
+	 <MaxNBlks>. The new value will replace the value of the estimate  
+	  dimension in <BCSRDimensions> (if the key <Default> is not used).
+	     e.g. MaxNon0s=(Default,Default,100000).	      
+	MaxNBlks=(Default,Default,   900).	     MaxNon0s=(100000) or
+	MaxNon0s=100000.	   MaxNBlks=(	900) or MaxNBlks=   900.
+
+2003-08-27 15:38  vweber
+
+	* MondoMods/Parse.F90: Added:	 -func ChrCkkIfInt(Chr)  Check if
+	<Chr> is formed only with integers.	-func
+	OptGetKeyArg(Unit,Key,Arg)	This function look for a given
+	<Key> in the unit <Unit> and gives back an array      of char <Arg>
+	with the arguments.		       e.g.
+	Key=(aaaa,bbbb,cccc,1111,0101sss,aa_bbb) or			   
+	Key=(1a1a1a)				 or			   
+	Key=abcd_efg
+
+2003-08-27 15:03  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: i
+
+2003-08-27 12:02  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90: New selection routine for
+	non-covalent interactions, very robust, seems to work much better
+	then any previous alternatives. Routines cleaned from debug
+	printings. New keyword for using the Bisection based optimizer:
+	BiSect.
+
+2003-08-27 11:02  tymczak
+
+	* Docs/DSAndErrorEstimates/: ExactMultipoleError.ps,
+	ExactMultipoleError.tex: [no log message]
+
+2003-08-26 20:56  nemeth
+
+	* Makefile: IntCoo has been removed from main Makefile.
+
+2003-08-26 20:54  nemeth
+
+	* Dynamo/: Makefile, atoms.F90, connectivity.F90, constants.F90,
+	constraint.F90, coordinate_io.F90, definitions.F90, dynamo.F90,
+	dynamo_variables.F90, elements.F90, energy_covalent.F90,
+	io_units.F90, linear_algebra.F90, mm_file_data.F90, mm_file_io.F90,
+	parsing.F90, pdb_io.F90, sequence.F90, sort.F90,
+	energy_nb_full.F90, files.F90, mm_system.F90, mm_terms.F90,
+	status.F90, string.F90, symmetry.F90: Removing the content of the
+	Dynamo directory.
+
+2003-08-26 19:09  nemeth
+
+	* MondoSCF2/: GeomOptKeys.F90, InCoords.F90, Optimizer.F90,
+	ParseGeomOpt.F90: recent modifications related to Bisection based
+	optimizer. First three points of optimization are created by small
+	uniform displacements, instead of steepest descent.
+
+2003-08-26 18:42  nemeth
+
+	* IntCoo/: IntCoo.F90, Makefile: IntCoo directory is being removed.
+
+2003-08-26 18:28  nemeth
+
+	* Includes/: CompilerSpecifics.AMDLinux.PG,
+	CompilerSpecifics.AlphaLinux.COMPAQ, CompilerSpecifics.IBMAIX.XLF,
+	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG,
+	CompilerSpecifics.SGIIrix.MIPS, CompilerSpecifics.True64.COMPAQ:
+	Dynamo and IntCoo libraries removed from compilation.
+
+2003-08-26 17:44  ckgan
+
+	* MondoMods/: Functionals.F90, GlobalCharacters.F90, MondoMPI.F90,
+	ParsingConstants.F90, PrettyPrint.F90, ProcessControl.F90: Another
+	CHARACTER(LEN=*),PARAMETER checkin.
+
+2003-08-26 17:42  nemeth
+
+	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
+	bALA_000-periodic.inp, bALA_000.seq, spec2.opls: [no log message]
+
+2003-08-26 17:39  nemeth
+
+	* Validate/BALA-PERIODIC/MM/EWALD/: ews8BALA-highp.f, fort.22:
+	Gradually removing a directory structure from Validate.
+
+2003-08-26 17:33  nemeth
+
+	* Validate/: MgOmm.crd, MgOmm.seq, Water512mm.crd, Water512mm.seq,
+	Water64mm.crd, bALAmm.crd, bALAmmPBC.crd, bALAmmPBC.seq,
+	Water64mm.seq: More MM files removed.
+
+2003-08-26 17:32  ckgan
+
+	* MondoSCF2/: DynamicsKeys.F90, GeometryKeys.F90, OptionKeys.F90,
+	ParallelKeys.F90, PeriodicKeys.F90, SCFKeys.F90:
+	CHARACTER(LEN=*),PARAMETER syntax used throughout so that no
+	counting of characters is needed.
+
+2003-08-26 17:24  nemeth
+
+	* Validate/: bALAmm-constr.ref, bALAmm.ref, c3h4-dist-const.ref,
+	c3h4-dist-constr2.ref, c3h4-dist.ref, c3h4.ref, Water-intc.inp,
+	Water-intc.ref, water3.ref: More files removed, related to MM and
+	internal coordinate optimization.
+
+2003-08-26 17:14  nemeth
+
+	* Validate/: bALAmm-constr.inp, bALAmm.inp, bALAmmPBC.inp,
+	c3h4-dist-const.inp, MgOmm.inp, Water512mm.inp, Water64mm.inp,
+	c3h4-dist-constr2.inp, c3h4-dist.inp, c3h4.inp, water3.inp: All
+	input files related to MM inputs are removed until MM is not
+	reimplemented.
+
+2003-08-26 10:15  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-08-25 17:59  nemeth
 
 	* MondoSCF2/InCoords.F90: Redundancy projector of actual geometry
