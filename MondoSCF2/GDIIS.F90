@@ -658,8 +658,8 @@ CONTAINS
        CALL MapDAngle(IntCs%Def(I),IntCValues(I,NDim),Displ(I))
      ENDDO
      !
-     CALL PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
-                  FitVal%D,PredGrad%D,Path)
+    !CALL PrtPred(iGEO,NDim,IntCs,IntCValues,IntCGrads, &
+    !             FitVal%D,PredGrad%D,Path)
      !
      CALL Delete(PredGrad)
      CALL Delete(Work)
