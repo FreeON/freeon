@@ -1,7 +1,7 @@
 <BeginTitle>
 Classical Mg, cubic, periodic
 Ewald electrostatic energy: -1.436089339056234 Hartree
-MONDO (so far):             -1.436089305567932
+MONDO (so far):             -1.436089339056800
 <EndTitle>
 
 <BeginOptions>
@@ -17,7 +17,7 @@ d3   3.0D0  3.0D0  3.0D0  90.0D0   90.0D0     90.0D0
 <EndPeriodic>
 
 <Begin_MM_filenames>
-spec2.opls
+validation.opls
 MgOmm.seq
 MgOmm.crd
 <End_MM_filenames>

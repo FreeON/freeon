@@ -1,0 +1,108 @@
+!===============================================================================
+!             OPLS MM Definition File for Some Common Ions and Water
+!===============================================================================
+MM_Definitions OPLS_AA 1.0
+
+! . Atom Type Definitions.
+Types
+! Atom Name     Atomic Number       Sigma       Epsilon
+HC                    1            2.50000      0.03000
+HO                    1            0.00000      0.00000
+HW                    1            0.00000      0.00000
+CT                    6            3.50000      0.06600
+OH                    8            3.12000      0.17000
+OW                    8            3.15061      0.15210 
+NA                   11            1.89744      1.60714
+CL                   17            4.41724      0.11779
+Mg_                  12            4.41724      0.11779
+End
+
+! . Electrostatics and Lennard-Jones Options.
+Electrostatics Scale 0.5
+Lennard_Jones  Scale 0.5
+
+! . Units specification.
+Units kcal/mole
+
+! . Residue Definitions.
+Residues
+
+Residue Chloride
+! # Atoms, Bonds and Impropers.
+  1  0  0
+CL       CL      -1.0
+
+Residue Methane
+! # Atoms, Bonds and Impropers.
+  5  4  0
+C        CT      -0.24
+H1       HC       0.06
+H2       HC       0.06
+H3       HC       0.06
+H4       HC       0.06
+
+C H1 ; C H2 ; C H3 ; C H4
+
+Residue Methanol
+! # Atoms, Bonds and Impropers.
+  6  5  0
+C        CT       0.145
+H1       HC       0.040
+H2       HC       0.040
+H3       HC       0.040
+O        OH      -0.683
+H        HO       0.418
+
+C H1 ; C H2 ; C H3 ; C O ; O H
+
+Residue Sodium
+! # Atoms, Bonds and Impropers.
+  1  0  0
+NA       NA       1.0
+
+Residue Water
+! # Atoms, Bonds and Impropers.
+  3  3  0
+O        OW      -0.834
+H1       HW       0.417
+H2       HW       0.417
+
+O H1 ; O H2 ; H1 H2
+
+Residue MgO
+! # Atoms, Bonds and Impropers.
+  2  0  0
+Mg       Mg_     2.0
+ O       OW     -2.0
+
+
+End
+
+! . Parameter Definitions.
+Parameters
+
+Bonds
+! Atoms      FC     Equil.
+CT HC      340.0    1.0900
+CT OH      320.0    1.4100
+HO OH      553.0    0.9450
+HW OW      529.6    0.9572
+HW HW       38.25   1.5139
+End
+
+Angles
+! Atoms      FC     Equil.
+CT OH HO   55.00    108.50
+HC CT HC   33.00    107.80
+HC CT OH   35.00    109.50
+HW OW HW   34.05    104.52
+HW HW OW    0.0      37.74
+End
+
+Dihedrals
+! Atoms                 V0        V1        V2        V3
+HC   CT   OH   HO     0.000     0.000     0.000     0.450
+End
+
+End
+End

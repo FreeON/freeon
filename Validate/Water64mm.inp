@@ -1,0 +1,25 @@
+<BeginTitle>
+64 water molecules in cubic box, periodic
+MONDO : -9.306316279190447 Hartree
+Ewald : -9.304209958755163
+<EndTitle>
+
+<BeginOptions>
+Mechanics=(MM)
+Accuracy =(VeryTight)
+DebugAll=(MaxDebug)
+Geometry=(InAngstroms,NoOrder)
+BlokAInv=(Test,1.D20)
+Periodic=(On-XYZ,AtomWrap,AngFormat,FracCoord)
+<EndOptions>
+
+<BeginPeriodic>
+d3   12.42956925D0 12.42956925D0 12.42956925D0 90.0D0   90.0D0   90.0D0
+<EndPeriodic>
+
+<BeGIN_MM_filenames>
+validation.opls
+Water64mm.seq
+Water64mm.crd
+<END_MM_filenames>
+
