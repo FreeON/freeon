@@ -1,3 +1,186 @@
+2003-09-30 16:54  mchalla
+
+	* SCFeqs/DenMatMethods.F90: Fixed restart fuck up.  Sorry guys, my
+	fault.
+
+2003-09-30 14:31  mchalla
+
+	* Docs/DM_Papers/PERT/Makefile: [no log message]
+
+2003-09-30 13:58  mchalla
+
+	* Docs/DM_Papers/PERT/GC_DM_PRT.tex: All fancied up...
+
+2003-09-30 11:37  mchalla
+
+	* Docs/DM_Papers/PERT/: GC_DM_PRT.tex, GC_DM_PRT_Fig_1.ps,
+	GC_DM_PRT_Fig_2.ps: PRL paper, first edit.
+
+2003-09-30 10:37  tymczak
+
+	* Docs/PBC_paper/: ErfcPlot.m, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: Changes to paper
+
+2003-09-29 13:33  ckgan
+
+	* QCTC/: JGen.F90, MondoPoles.F90: Eliminated an extra layer of
+	overhead when HGToSP is called.
+
+2003-09-28 11:01  tymczak
+
+	* BasisSets/EvenTmp_PBC.bas: An Even Tempered PBC basis, will add
+	more in the fucture
+
+2003-09-26 17:48  nemeth
+
+	* MondoSCF2/GDIIS.F90: A bug has been fixed in the BiSect
+	optimizer, for the case of extrapolation from 2 points. Also, the
+	case of bisection is set back to two consequtive steps. For all
+	other cases extrapolation is used. The maximum allowed
+	displacements are limited to be smaller than the range of the
+	actual data set used for the fit (instead of using the complete
+	available range from the whole set, from which the fitting-set is
+	selected).
+
+2003-09-26 14:12  mchalla
+
+	* TwoE/HRR.nb: [no log message]
+
+2003-09-26 12:59  vweber
+
+	* SCFeqs/TC2Response.F90: Added new convergence test for painful
+	case.
+
+2003-09-26 10:30  mchalla
+
+	* BasisSets/MMA/: EvenTempered.m, RETParameters.m: [no log message]
+
+2003-09-25 17:47  ckgan
+
+	* Includes/CompilerSpecifics.True64.COMPAQ: Remove -DWRAPDIST from
+	CPPOPTS.
+
+2003-09-25 13:31  mchalla
+
+	* TwoE/HRR.nb: First try at some symbolic HRR action.
+
+2003-09-25 12:21  ckgan
+
+	* QCTC/JGen.F90: Unroll many little arrays (of size 3).
+
+2003-09-25 12:12  ckgan
+
+	* QCTC/TreeWalk.F90: DBL_VECT_EQ_DBL_SCLR used. Unroll
+	PBox%BndBox(:,1) and PBox%BndBox(:,2).
+
+2003-09-25 12:07  ckgan
+
+	* QCTC/MondoPoles.F90: Cpq=Zero and Spq=Zero statements are moved
+	under IF(PQ==ZERO)... and replaced by DBL_VECT_EQ_DBL_SCLR calls.
+
+2003-09-25 11:55  ckgan
+
+	* QCTC/PoleTree.F90: Initialize arrays through
+	DBL_VECT_EQ_DBL_SCLR. MaxTier initalized to 0.
+
+2003-09-25 10:59  mchalla
+
+	* Validate/Makefile: [no log message]
+
+2003-09-24 18:34  ckgan
+
+	* QCTC/XLate.F: Replace "smn=(-1.0D0)**(mnabs+1)" by "smn=-cmn" for
+	efficiency purpose.  The similar replacement is done for sn.
+
+2003-09-18 15:18  nemeth
+
+	* MondoSCF2/GDIIS.F90: A modification of the BiSect optimizer. Now
+	extrapolation/interpolation is allowed in the gradient range below
+	the accuracy criterion. Also the maximum allowed step size is
+	restricted to be smaller or equal with the range of the available
+	internal coo. values.
+
+2003-09-18 13:58  mchalla
+
+	* Validate/: Graphite.inp, Graphite.ref, Makefile, MgO.inp,
+	MgO.ref: replaced mgo with graphite in validation.
+
+2003-09-18 12:40  tymczak
+
+	* Validate/: Graphite.inp, Graphite.ref: 2-D graphite system
+
+2003-09-18 10:37  mchalla
+
+	* OneE/UBlok.F90, Validate/Histidine.inp, Validate/Makefile,
+	Validate/Water.inp, Validate/Water.ref: [no log message]
+
+2003-09-18 10:36  mchalla
+
+	* OneE/UBlok.F90: go with bigger ECP grid...
+
+2003-09-17 23:27  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90: A new, somewhat modified
+	version of BiSect optimizer. Also H-bond recognition has been set
+	to shorter H-bonds, to cope with the accuracy-level of gradients in
+	some organic molecules.
+
+2003-09-17 14:12  nemeth
+
+	* MondoSCF2/InCoords.F90: The filtering of VDW bonds have been made
+	simpler. All 1-2 1-3 and 1-4 covalent interactions are filtered
+	out.
+
+2003-09-17 12:25  nemeth
+
+	* MondoMods/PrettyPrint.F90: The xyz format contains now numbers
+	instead of letters for atomnames. This is directly readable for
+	JMol.
+
+2003-09-17 06:48  mchalla
+
+	* Includes/CompilerSpecifics.AMDLinux.PG: [no log message]
+
+2003-09-17 00:40  nemeth
+
+	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: Actual
+	modifications on the BiSect optimizer.
+
+2003-09-17 00:35  nemeth
+
+	* Validate/: Histidine.inp, Histidine.ref: Histidine, example for
+	BiSect optimization.
+
+2003-09-16 13:08  tymczak
+
+	* MondoSCF2/PunchHDF.F90: [no log message]
+
+2003-09-16 11:22  tymczak
+
+	* MondoSCF2/PunchHDF.F90: For CS_IN the radius is now
+	
+	Radius = MaxBoxDim(G)+2.0D0*SQRT(AtomPairThresh)
+	
+	This is a Temperary Fix
+	
+	CJ
+
+2003-09-16 11:02  mchalla
+
+	* Validate/sub_pbs: [no log message]
+
+2003-09-16 10:15  mchalla
+
+	* Makefile: [no log message]
+
+2003-09-16 10:08  mchalla
+
+	* Validate/: Makefile, NH3.inp, sub_pbs: [no log message]
+
+2003-09-15 20:36  mchalla
+
+	* ChangeLog: [no log message]
+
 2003-09-15 20:35  mchalla
 
 	* ONX/Makefile: No remove of drivers.
@@ -48,6 +231,10 @@
 2003-09-15 07:36  mchalla
 
 	* Validate/Makefile: [no log message]
+
+2003-09-15 07:28  mchalla
+
+	* ONX/MakeTables/: MAIN.C, Makefile: [no log message]
 
 2003-09-15 07:23  mchalla
 
@@ -216,6 +403,20 @@
 	* SCFeqs/DDIIS.F90: New ddiis which can modify the ddiis space
 	automaticly <- Cond(B).
 
+2003-09-10 15:24  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-09-10 14:55  tymczak
+
+	* Docs/PBC_paper/: ErfcPlot.m, Extent_2.ps, Plot_bet1.dat: New
+	Extent Plot
+
+2003-09-10 14:54  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
+
 2003-09-10 10:30  tymczak
 
 	* Validate/Diamond.inp: i
@@ -258,6 +459,37 @@
 	* SCFeqs/: CPSCFStatus.F90, DDIIS.F90, TC2Response.F90: Minor
 	changes: thresholds and printing.
 
+2003-09-08 14:23  tymczak
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2003-09-08 14:14  tymczak
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.tex, Bib/mondo.bib: [no
+	log message]
+
+2003-09-08 13:38  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-09-08 13:33  tymczak
+
+	* Docs/Bib/mondo.bib: Added new entires
+	
+	CJ
+
+2003-09-08 11:53  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2003-09-05 16:49  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-09-05 16:20  tymczak
+
+	* Docs/Bib/mondo.bib: Added Crystal Basis set refs
+
 2003-09-05 13:42  mchalla
 
 	* MondoMods/: DerivedTypes.F90, GlobalScalars.F90: removed parallel
@@ -288,9 +520,33 @@
 
 	* MondoMods/AtomPairs.F90: Some changes to AtopWrap
 
+2003-09-04 14:11  mchalla
+
+	* Docs/PBC_paper/: BoxUC.eps, LinearPBCMethod_revtex4.tex: Latest
+	changes + modified figure.
+
 2003-09-04 10:03  mchalla
 
 	* ChangeLog: [no log message]
+
+2003-09-03 17:04  tymczak
+
+	* Docs/PBC_paper/: ErrorVsNumber_Diamond512.ps,
+	LinearPBCMethod_revtex4.tex, PFFMultipoles_water.ps,
+	Timing_Diamond_512_log.ps: Still working on the refferences for the
+	crystal basis set and BLYP
+	
+	CJ
+
+2003-09-03 17:01  tymczak
+
+	* Docs/: DSAndErrorEstimates/ExactMultipoleError.ps,
+	DSAndErrorEstimates/ExactMultipoleError.tex,
+	PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2003-09-03 17:00  tymczak
+
+	* Docs/Bib/mondo.bib: Nerw Enetries
 
 2003-09-03 13:42  vweber
 
@@ -315,6 +571,11 @@
 2003-09-03 11:08  mchalla
 
 	* ChangeLog: [no log message]
+
+2003-09-02 15:01  mchalla
+
+	* Docs/PBC_paper/: Extent.eps, Extent.sxd,
+	LinearPBCMethod_revtex4.tex: Latest and greatest...
 
 2003-09-02 14:03  nemeth
 
@@ -372,6 +633,11 @@
 
 	* ChangeLog: [no log message]
 
+2003-08-28 16:17  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex, Regions.eps,
+	Regions.sxd: Latest changes to the PBC paper.  New PFF picture.
+
 2003-08-27 19:43  nemeth
 
 	* MondoSCF2/: InCoords.F90, Optimizer.F90: In Optimizer, the
@@ -390,6 +656,10 @@
 
 	* MondoSCF2/InCoords.F90: Filter added to the recognition of the
 	second reference axis of linear bendings.
+
+2003-08-27 16:42  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: i
 
 2003-08-27 16:11  vweber
 
@@ -418,6 +688,10 @@
 	Key=(1a1a1a)				 or			   
 	Key=abcd_efg
 
+2003-08-27 15:03  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: i
+
 2003-08-27 12:02  nemeth
 
 	* MondoSCF2/: GDIIS.F90, InCoords.F90: New selection routine for
@@ -425,6 +699,11 @@
 	then any previous alternatives. Routines cleaned from debug
 	printings. New keyword for using the Bisection based optimizer:
 	BiSect.
+
+2003-08-27 11:02  tymczak
+
+	* Docs/DSAndErrorEstimates/: ExactMultipoleError.ps,
+	ExactMultipoleError.tex: [no log message]
 
 2003-08-26 20:56  nemeth
 
@@ -454,6 +733,16 @@
 	* MondoMods/: Functionals.F90, GlobalCharacters.F90, MondoMPI.F90,
 	ParsingConstants.F90, PrettyPrint.F90, ProcessControl.F90: Another
 	CHARACTER(LEN=*),PARAMETER checkin.
+
+2003-08-26 17:42  nemeth
+
+	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
+	bALA_000-periodic.inp, bALA_000.seq, spec2.opls: [no log message]
+
+2003-08-26 17:39  nemeth
+
+	* Validate/BALA-PERIODIC/MM/EWALD/: ews8BALA-highp.f, fort.22:
+	Gradually removing a directory structure from Validate.
 
 2003-08-26 17:33  nemeth
 
@@ -552,6 +841,23 @@
 
 	* BasisSets/STO-3G.bas: Added I basis set.
 
+2003-08-20 16:04  tymczak
+
+	* Docs/Bib/mondo.bib: Fixed some repeats
+
+2003-08-20 16:03  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: [no log
+	message]
+
+2003-08-20 14:47  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.ps: i
+
+2003-08-20 14:46  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: New
+
 2003-08-20 10:08  tymczak
 
 	* QCTC/PBCFarField.F90: Change CalMaxEll to insure that it
@@ -569,6 +875,29 @@
 	* ONX/NONX/ONX.F90: Reduced the number of list build to 1 for gaz
 	phase/serial calculations.
 
+2003-08-19 12:42  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: [no log
+	message]
+
+2003-08-19 12:42  tymczak
+
+	* Docs/DSAndErrorEstimates/: MultInBox.fig, MultInBox.ps,
+	TreeInBox.fig, TreeInBox.ps: New Figures
+
+2003-08-18 13:40  tymczak
+
+	* Docs/PBC_paper/RepCell_2.ps: [no log message]
+
+2003-08-18 13:40  tymczak
+
+	* Docs/PBC_paper/RepCell_2.fig: 
+	New RepCell figure
+
+2003-08-18 13:23  mchalla
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: bit by bit by bit...
+
 2003-08-18 12:44  njh
 
 	* Makefile: 
@@ -578,6 +907,11 @@
 
 	* ONX/NONX/PartDrv.F90: Fix the problem with guess=Core for
 	parallel calculations.
+
+2003-08-15 15:32  mchalla
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Matts very rough
+	still changes.
 
 2003-08-15 13:43  nemeth
 
@@ -747,6 +1081,10 @@
 	* MondoMods/GlobalScalars.F90: Fixed M's stupid bonehead error that
 	broke QCTC.  Sorry guys...
 
+2003-08-12 09:40  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
 2003-08-11 17:41  nemeth
 
 	* MondoSCF2/: GDIIS.F90, InCoords.F90, Optimizer.F90: Out-of-plane
@@ -761,6 +1099,25 @@
 
 	* MondoMods/FastMat.F90: Added a missing SQRT in FNORM_.
 
+2003-08-11 17:02  tymczak
+
+	* Docs/DSAndErrorEstimates/ExactMultipoleError.tex: [no log
+	message]
+
+2003-08-11 14:59  tymczak
+
+	* Docs/: DSAndErrorEstimates/Error_vs_TauMAC_Water64_bin.ps,
+	DSAndErrorEstimates/Error_vs_TauMAC_bin_Water512.ps,
+	DSAndErrorEstimates/ExactMultipoleError.tex,
+	DSAndErrorEstimates/Time_vs_N_water_2.ps,
+	DSAndErrorEstimates/Time_vs_Tau_W4096.ps,
+	PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2003-08-11 13:23  tymczak
+
+	* Docs/DSAndErrorEstimates/: Makefile, ExactMultipoleError.tex: [no
+	log message]
+
 2003-08-11 13:23  mchalla
 
 	* QCTC/Makefile: [no log message]
@@ -774,6 +1131,10 @@
 	* HiCu/Makefile: Added $(LAPACK) to makefile.  VS:
 	-------------------------------------------------------------------
 	---
+
+2003-08-11 11:04  tymczak
+
+	* Docs/PBC_Exchange/UnitCell_2.ps: [no log message]
 
 2003-08-10 19:38  mchalla
 
@@ -823,6 +1184,10 @@
 	integer, then casts to double.	Fixes a bug in ParseGeometries when
 	reading the totalcharge (G%TotChg).
 
+2003-08-08 14:36  mchalla
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
 2003-08-08 13:33  nemeth
 
 	* MondoMods/GlobalScalars.F90: TwoPi added.
@@ -846,6 +1211,11 @@
 2003-08-07 17:38  mchalla
 
 	* ChangeLog: [no log message]
+
+2003-08-07 17:36  mchalla
+
+	* Docs/PBC_paper/: LinearPBCMethod.tex, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, Makefile: Matts latest changes.
 
 2003-08-07 16:29  tymczak
 
@@ -959,6 +1329,12 @@
 2003-08-07 14:16  tymczak
 
 	* HiCu/: CubeTree.F90, XCForce.F90: Changes in PBCInfo and CRDS
+
+2003-08-07 14:14  tymczak
+
+	* Docs/PBC_Exchange/: ExchangeRegion.fig, ExchangeRegion.ps,
+	LinearPBCExchange.tex, UnitCell_2.ps, ExchangeRegion_k111.fig,
+	ExchangeRegion_k111.ps, LinearPBCExchange.ps: [no log message]
 
 2003-08-07 11:31  vweber
 
@@ -1074,10 +1450,18 @@
 
 	* OneE/: MakeU.F90, UBlok.F90: Removed some printing.
 
+2003-08-01 13:46  ckgan
+
+	* Docs/PETN_paper/petn.tex: First submission to PRB.
+
 2003-07-31 21:57  nemeth
 
 	* Includes/CompilerSpecifics.AMDLinux.PG: A flag has been left out
 	from the gigabit MPI flags.
+
+2003-07-31 19:08  ckgan
+
+	* Docs/PETN_paper/petn.tex: [no log message]
 
 2003-07-31 16:39  nemeth
 
@@ -1101,6 +1485,10 @@
 2003-07-31 13:45  tymczak
 
 	* OneE/SForce.F90: Fixed a Bug in SForce
+
+2003-07-30 22:43  ckgan
+
+	* Docs/: Bib/mondo.bib, PETN_paper/petn.tex: [no log message]
 
 2003-07-30 18:20  nemeth
 
@@ -1146,6 +1534,10 @@
 
 	* ONX/Drivers/README: Some descriptions of the driver file format.
 
+2003-07-24 16:33  ckgan
+
+	* Docs/PETN_paper/: Makefile, petn.tex: [no log message]
+
 2003-07-23 17:06  mchalla
 
 	* ChangeLog: [no log message]
@@ -1162,6 +1554,38 @@
 	default is .true.			if .false. removes the
 	Abs[eigenvalues] < eigenthresh	CJ
 
+2003-07-22 16:49  tymczak
+
+	* Docs/PBC_Exchange/LinearPBCExchange.tex: [no log message]
+
+2003-07-22 16:45  tymczak
+
+	* Docs/PBC_Exchange/: Blank.ps, ExchangeRegion.fig,
+	ExchangeRegion.ps, LinearPBCExchange.tex: [no log message]
+
+2003-07-22 11:04  tymczak
+
+	* Docs/PBC_Exchange/: ExchangeRegion.fig, ExchangeRegion.ps,
+	LinearPBCExchange.tex, Makefile, UnitCell_2.fig, UnitCell_2.ps: New
+	Paper
+
+2003-07-21 16:39  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Change the Title
+
+2003-07-21 11:19  tymczak
+
+	* Docs/PBC_paper/RepCell_2.ps: [no log message]
+
+2003-07-21 11:19  tymczak
+
+	* Docs/PBC_paper/RepCell_2.fig: New Figure
+
+2003-07-18 11:35  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Fixed Tables Fixed
+	Appendix Fxed Figures except Fig 2 Fixed Reff
+
 2003-07-17 14:00  mchalla
 
 	* SCFeqs/MMA/SCFDev/FockNMix.nb: This is Anders new SCF optimizer
@@ -1171,6 +1595,10 @@
 
 	* MondoMods/MatFunk.F90: Added check for non-positive def matrices,
 	which may occur in periodic calculations with "loose" accuracy.
+
+2003-07-16 11:18  ckgan
+
+	* Docs/PETN_paper/petn.tex: [no log message]
 
 2003-07-15 16:49  tymczak
 
@@ -1217,6 +1645,17 @@
 	false
 	  HiCu: Removed periodic stuff
 
+2003-07-14 16:25  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-07-14 16:07  tymczak
+
+	* Docs/: PBC_paper/EnergyVsNumber_Diamond512.ps,
+	PBC_paper/ErrorVsNumber_Diamond512.ps,
+	PBC_paper/LinearPBCMethod_revtex4.tex, PBC_paper/Makefile,
+	PBC_paper/gaussian.bib, Bib/mondo.bib: [no log message]
+
 2003-07-10 23:54  nemeth
 
 	* MondoMods/: CholFact.F90, GlobalScalars.F90: This has been left
@@ -1257,6 +1696,15 @@
 	* SCFeqs/MMA/SCFDev/: Cr2_6-31G.in.gz, Cr2_6-31G.nb,
 	SCF_STO-2G_Water.nb: New files, somewhat large though.	Will delete
 	the integrals file to keep it from the main release though...
+
+2003-07-09 10:44  ckgan
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Fixed the table
+	problem.
+
+2003-07-08 17:00  mchalla
+
+	* Docs/PBC_paper/Makefile: Fixed relative linking
 
 2003-07-08 12:57  mchalla
 
@@ -1301,6 +1749,15 @@
 	README, SBKJC_VDZ_ECP.bas, Stuttgart_RLC_ECP.bas,
 	Stuttgart_RSC97_ECP.bas: Added some more ECP basis sets.
 
+2003-07-08 10:40  ckgan
+
+	* Docs/PETN_paper/: CAndA.eps, VRatio_Bond_Angle_CloseContact.eps,
+	VRatio_EDiff_Press.eps, petn.tex: A bunch of update files.
+
+2003-07-08 10:39  ckgan
+
+	* Docs/Bib/mondo.bib: [no log message]
+
 2003-07-03 14:04  nemeth
 
 	* MondoSCF2/ZippyQuote.F90: One more quote...
@@ -1343,6 +1800,10 @@
 	* MondoMods/GlobalScalars.F90, MondoMods/InOut.F90, OneE/MakeU.F90,
 	OneE/Makefile, OneE/UBlok.F90: More work on the ECP basis set
 
+2003-06-18 22:37  ckgan
+
+	* Docs/: PETN_paper/petn.tex, Bib/mondo.bib: [no log message]
+
 2003-06-18 16:59  mchalla
 
 	* ChangeLog: [no log message]
@@ -1370,6 +1831,14 @@
 	* ONX/VRR/VRR-Maker.tar: This tar file contains the programs that
 	are used to generate and manipulate the VRRxx files that are needed
 	for the ONX integral code.
+
+2003-06-16 12:09  ckgan
+
+	* Docs/Bib/mondo.bib: more petn references.
+
+2003-06-16 12:09  ckgan
+
+	* Docs/PETN_paper/petn.tex: petn.tex checked in.
 
 2003-06-13 14:56  anders
 
@@ -1500,6 +1969,11 @@
 	as unconstrained optimization coordinates in the input. A new
 	subroutine is introduced, which is responsible for the orientation
 	of the molecule in space.
+
+2003-06-04 12:26  ckgan
+
+	* Docs/Bib/mondo.bib: Various corrections suggested by J. Chem.
+	Phys. were made.
 
 2003-06-03 13:32  tymczak
 
@@ -1782,6 +2256,11 @@
 	* MondoSCF2/InCoords.F90: RefreshBMatInfo changed, B matrix info is
 	now available only from disk.
 
+2003-05-12 17:00  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex,
+	LinearPBCMethod_revtex4.ps: [no log message]
+
 2003-05-12 16:21  nemeth
 
 	* MondoSCF2/: GDIIS.F90, InCoords.F90: First working version of
@@ -1790,6 +2269,10 @@
 2003-05-12 12:32  mchalla
 
 	* MondoMods/McMurch.F90: fixed formating bug.
+
+2003-05-12 10:53  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
 
 2003-05-09 22:09  nemeth
 
@@ -1818,6 +2301,11 @@
 
 	* MMA/Compile.m: This is a MMA module to allow inline compilation
 	of modules.
+
+2003-05-09 11:19  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex: [no log message]
 
 2003-05-09 00:03  nemeth
 
@@ -1876,6 +2364,13 @@
 
 	* ONX/NONX/: ONX.F90, ONX_PBC_1.F90:  fix to allow restarts with
 	changed geometry, old DM.
+
+2003-05-05 17:36  tymczak
+
+	* Docs/PBC_paper/: EnergyVsNumber_Diamond512.ps,
+	GaussianPapers.bib, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, Timing_Diamond_512_log.ps: [no log
+	message]
 
 2003-05-05 15:42  nemeth
 
@@ -2015,6 +2510,22 @@
 	GDLoader.C, GetGradient.F90, HrrKet.F90: First attempt at getting
 	the onx forces working. This is not working yet.
 
+2003-04-25 13:41  tymczak
+
+	* Docs/PBC_paper/: GaussianPapers.bib, LinearPBCMethod_revtex4.ps,
+	LinearPBCMethod_revtex4.tex, PFFMultipoles_water.ps, RepCell_2.ps,
+	Timing_sto3g_321g.ps, UnitCell_2.ps, NewTable.tex: [no log message]
+
+2003-04-24 16:06  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-04-24 16:05  tymczak
+
+	* Docs/PBC_paper/GaussianPapers.bib: 
+	
+	New Enties
+
 2003-04-23 11:09  nemeth
 
 	* MondoSCF2/PunchHDF.F90: Needed to be checked in again.
@@ -2059,6 +2570,12 @@
 	load line for compiling on zinc VS:
 	-------------------------------------------------------------------
 	---
+
+2003-04-14 12:33  tymczak
+
+	* Docs/: PBC_paper/LinearPBCMethod_revtex4.ps,
+	PBC_paper/LinearPBCMethod_revtex4.tex,
+	PFFTensorMake/PFFTensorMake.tex: [no log message]
 
 2003-04-12 18:20  nemeth
 
@@ -2195,10 +2712,85 @@
 	* MondoSCF2/ControlStructures.F90: New types for controlling
 	geometry optimization added.
 
+2003-04-03 10:05  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: More Numbers
+
+2003-04-01 13:50  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: More Table Work
+
+2003-03-31 16:49  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: New Tables, Have a
+	look
+
+2003-03-19 11:14  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-03-19 11:07  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex,
+	LinearPBCMethod_revtex4.ps: [no log message]
+
+2003-03-14 05:22  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Remove Appendix, was
+	extainious
+
+2003-03-14 05:18  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod_revtex4.tex, RepCell_2.fig,
+	RepCell_2.ps, SimCell.fig, UnitCell_2.ps: New Figures
+
+2003-03-13 10:09  tymczak
+
+	* Docs/PFFTensorMake/: Makefile, PFFTensorMake.tex, RepCell.eps,
+	UnitCell.eps: New version and two figures
+
+2003-03-13 09:47  tymczak
+
+	* Docs/DSAndErrorEstimates/: Error_vs_TauMAC_Water64_bin.ps,
+	Makefile, Time_vs_N_water_1.ps, Time_vs_N_water_2.ps,
+	Time_vs_Tau_W4096.ps: New Figures
+
+2003-03-13 09:47  tymczak
+
+	* Docs/PFFTensorMake/: GamFun.ps, Makefile, PFFMultipoles_water.ps,
+	PFFTensorMake.tex, PFFvsDist.ps: PFF Tensor Make paper
+
 2003-03-13 09:45  mchalla
 
 	* VisDX/: Makefile, PotUtil.F90, RhoUtil.F90, VisDX.F90: Hopefully
 	fixed vis stuff.
+
+2003-03-13 09:34  tymczak
+
+	* Docs/PBC_paper/: GaussianPapers.bib, LinearPBCMethod_revtex4.tex,
+	Makefile: Newest Version
+
+2003-03-13 09:22  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: [no log message]
+
+2003-03-13 09:19  tymczak
+
+	* Docs/DSAndErrorEstimates/: DSEE.tex, Makefile: Added stuff about
+	FMM
+
+2003-03-12 14:01  tymczak
+
+	* Docs/PBC_paper/PFFMultipoles_water.ps: [no log message]
+
+2003-03-12 13:56  tymczak
+
+	* Docs/PBC_paper/LinearPBCMethod_revtex4.tex: Redid equations and
+	Refferences
+
+2003-03-12 13:55  tymczak
+
+	* Docs/PBC_paper/GaussianPapers.bib: New Bib entries
 
 2003-03-12 09:00  mchalla
 
@@ -2338,9 +2930,26 @@
 
 	* QCTC/QCTC.F90: Put in timers for TreeMake and NukeE
 
+2003-02-25 11:01  tymczak
+
+	* Docs/PBC_paper/: ErrorInJvsTauMAC.dat, Error_Energy_NaCl.ps,
+	Error_PFF.dat, LinearPBCMethod_revtex4.tex, Makefile,
+	NaCl_energy.dat, Scaling_QCTC_HiCu.ps, Timing_321g.dat,
+	Timing_sto3g.dat, GaussianPapers.bib, LinearPBCMethod.lyx,
+	LinearPBCMethod.tex: [no log message]
+
 2003-02-24 14:58  graeme
 
 	* MondoSCF2/NEB.F90: Fixed bug in NEB
+
+2003-02-24 11:37  ckgan
+
+	* Docs/Bib/mondo.bib: Minor changes.
+
+2003-02-24 11:36  ckgan
+
+	* Docs/HiCu/paper/: Let2.tex, hicu.tex: Latest changes on the HiCu
+	paper. To be resubmit to JCP.
 
 2003-02-24 11:01  tymczak
 
@@ -2375,6 +2984,16 @@
 	ParseOptions.F90, PrintParsed.F90, SCFs.F90: NEB update and changed
 	steepest descent optimization so that it only uses a gradient
 	stopping criteria
+
+2003-02-21 11:50  ckgan
+
+	* Docs/HiCu/paper/: good-thres-pinene.eps, tight-thres-pinene.eps,
+	Let2.tex: Figures and letter for JCP resubmission.
+
+2003-02-21 11:49  ckgan
+
+	* Docs/HiCu/paper/hicu.tex: New results on scaling tests of
+	alpha-pinene included.
 
 2003-02-13 13:21  mchalla
 
@@ -2681,6 +3300,15 @@
 	CompilerSpecifics.IntelLinux.NAG, CompilerSpecifics.IntelLinux.PG,
 	Ell.m: -DPARALLEL_CLONES is now the default.
 
+2003-01-22 18:24  ckgan
+
+	* Docs/HiCu/paper/: hicu.tex, tight-pinene.eps: A revised parallel
+	HiCu paper.
+
+2003-01-22 15:10  ckgan
+
+	* Docs/Bib/mondo.bib: a minor update.
+
 2003-01-21 11:04  mchalla
 
 	* MondoMods/: AtomPairs.F90, DerivedTypes.F90, MemMan.F90: Misc
@@ -2755,6 +3383,11 @@
 	VS:
 	-------------------------------------------------------------------
 	---
+
+2003-01-17 14:33  ckgan
+
+	* Docs/HiCu/paper/: binary.eps, binary.sxi, hicu.tex: revision of
+	parallel HiCu paper. Non-power-of-two ET partition included.
 
 2003-01-17 13:06  graeme
 
@@ -2899,6 +3532,23 @@
 2002-12-19 19:11  nemeth
 
 	* MondoMods/DerivedTypes.F90: Some new keys added to GeOpCtrl.
+
+2002-12-19 16:53  tymczak
+
+	* Docs/DSAndErrorEstimates/: DSEE.lyx, DSEE.ps, DSEE.tex,
+	Error_AllNodes_Water512.dat, Error_AllNodes_Water512.ps,
+	Error_vs_TauMAC_bin_Water512.dat, Error_vs_TauMAC_Water512.dat,
+	Error_vs_TauMAC_bin_Water512.ps, Error_vs_TauMAC_Water512.ps: New
+	Version
+
+2002-12-19 16:51  tymczak
+
+	* Docs/PBC_paper/Timing_sto3g_321g.ps: [no log message]
+
+2002-12-19 16:50  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod.lyx, LinearPBCMethod.ps,
+	LinearPBCMethod.tex, PFFMultipoles_water.dat: New Version
 
 2002-12-17 14:37  ckgan
 
@@ -3469,9 +4119,23 @@
 	-------------------------------------------------------------------
 	---
 
+2002-11-19 11:42  mchalla
+
+	* Docs/HiCu/paper/hicu.tex: palser99->palse98
+
 2002-11-18 18:12  nemeth
 
 	* MondoMods/InCoords.F90: [no log message]
+
+2002-11-18 17:52  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	:q!
+
+2002-11-18 17:42  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	:q!
 
 2002-11-18 17:19  nemeth
 
@@ -3481,6 +4145,10 @@
 2002-11-18 17:18  nemeth
 
 	* MondoMods/GlobalScalars.F90: D0-s added to Slater and VDW Radii.
+
+2002-11-18 16:24  mchalla
+
+	* Docs/DM_Papers/TS4/Let.tex: [no log message]
 
 2002-11-18 15:35  ckgan
 
@@ -3496,6 +4164,42 @@
 
 	* MondoMods/InOut.F90: Get_HGRho has an extra option Bcast_O. (for
 	parallel QCTC)
+
+2002-11-18 13:12  mchalla
+
+	* Docs/: Bib/mondo.bib, DM_Papers/TS4/TS4.tex: [no log message]
+
+2002-11-15 17:03  mchalla
+
+	* Docs/: Bib/mondo.bib, DM_Papers/TS4/TS4.tex: [no log message]
+
+2002-11-15 15:18  mchalla
+
+	* Docs/DM_Papers/TS4/TS4.tex: [no log message]
+
+2002-11-15 13:30  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	qqqq:q!
+
+2002-11-15 12:19  anders
+
+	* Docs/DM_Papers/TS4/WATER_FIGS/Makefile: 
+	q:q
+	
+	:q
+
+2002-11-15 12:19  anders
+
+	* Docs/DM_Papers/TS4/FULL_FIGS/Makefile: 
+	q:q
+
+2002-11-14 16:40  mchalla
+
+	* Docs/: DM_Papers/TS4/FULL_FIGS/figs,
+	DM_Papers/TS4/WATER_FIGS/figs, DM_Papers/TS4/XE_FIGS/XeErrors.dat,
+	DM_Papers/TS4/XE_FIGS/figs, DM_Papers/TS4/XE_FIGS/xe.eps,
+	DM_Papers/TS4/TS4.tex, Bib/mondo.bib: [no log message]
 
 2002-11-12 17:08  nemeth
 
@@ -3527,6 +4231,10 @@
 	* OneE/: SForce.F90, TForce.F90: Parallel SForce and TForce
 	included.
 
+2002-11-12 11:50  mchalla
+
+	* Docs/DM_Papers/TS4/TS4.tex: [no log message]
+
 2002-11-12 11:46  ckgan
 
 	* MondoMods/InOut.F90: Bcast_O option is added to Get_BCSR.
@@ -3555,6 +4263,11 @@
 	-------------------------------------------------------------------
 	---
 
+2002-11-08 13:32  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod.ps, LinearPBCMethod.tex: [no log
+	message]
+
 2002-11-08 13:03  tymczak
 
 	* VisDX/: Makefile, PotUtil.F90, RhoUtil.F90, VisDX.F90:
@@ -3563,6 +4276,16 @@
 2002-11-08 13:01  tymczak
 
 	* Validate/Water64mm.inp: Reset the Defaults
+
+2002-11-08 12:57  tymczak
+
+	* Docs/PBC_paper/: Error_PFF.eps, Error_PFF.jpg,
+	PFFMultipoles_water.dat, PFFMultipoles_water.ps: New Pictures
+
+2002-11-08 12:56  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod.lyx, LinearPBCMethod.tex: New
+	Paper
 
 2002-11-08 12:01  nemeth
 
@@ -3576,6 +4299,10 @@
 
 	* ChangeLog: [no log message]
 
+2002-11-07 16:46  mchalla
+
+	* Docs/DM_Papers/TS4/TS4.tex: Redid the abstract.
+
 2002-11-07 11:34  nemeth
 
 	* MondoMods/: InOut.F90, MemMan.F90: [no log message]
@@ -3587,6 +4314,16 @@
 2002-11-06 21:35  mchalla
 
 	* ChangeLog: [no log message]
+
+2002-11-06 21:22  mchalla
+
+	* Docs/DM_Papers/TS4/: Makefile, compile: [no log message]
+
+2002-11-06 21:18  mchalla
+
+	* Docs/DM_Papers/TS4/: TS4.tex, compile, FULL_FIGS/figs,
+	WATER_FIGS/figs, XE_FIGS/Makefile, XE_FIGS/XeErrors.dat,
+	XE_FIGS/figs: [no log message]
 
 2002-11-06 17:59  ckgan
 
@@ -3735,18 +4472,74 @@
 	HiCu.F90,XCForce.F90,MakeRho.F90,MakeS.F90,MakeT.F90,SForce.F90,TFo
 	rce.F90, Now read in CS_OUT from the HDF file: Made in MakePFFT
 
+2002-11-01 12:31  ckgan
+
+	* Docs/HiCu/paper/Let.tex: cover letter for JCP submission.
+
+2002-11-01 12:28  ckgan
+
+	* Docs/HiCu/paper/: PHICuFlow.sxi, hicu.tex, jcp_summit_01_hicu.ps:
+	Finalized manuscript for JCP.
+
+2002-10-31 16:11  ckgan
+
+	* Docs/Bib/mondo.bib: updated mondo.bib
+
+2002-10-31 16:10  ckgan
+
+	* Docs/HiCu/paper/: hicu.tex, PHiCuFlow.eps: comestic changes to
+	data parallel HiCu paper.
+
+2002-10-31 13:23  mchalla
+
+	* Docs/HiCu/paper/: hicu.tex, mondo.bib: [no log message]
+
+2002-10-31 13:23  mchalla
+
+	* Docs/Bib/mondo.bib: Update of the parallel HiCu paper. 
+	Bib/mondo.bib is the correct bib file.
+
 2002-10-30 18:44  nemeth
 
 	* MondoMods/PrettyPrint.F90: [no log message]
+
+2002-10-30 16:11  mchalla
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2002-10-30 16:02  mchalla
+
+	* Docs/Bib/mondo.bib: [no log message]
+
+2002-10-30 14:07  ckgan
+
+	* Docs/HiCu/paper/: 3-21G_good_div10.eps, CM.eps, CM.sxi, ET.eps,
+	hicu.tex, mondo.bib, taxol_speedup.eps, ET.sxi, PHICuFlow.sxi,
+	PHiCuFlow.eps: minor changes on most files. Spelling mistakes
+	corrected in mondo.bib.
 
 2002-10-30 10:51  nemeth
 
 	* MondoMods/InCoords.F90: Coordinate transformations seem to work
 	well - yet in full-matrix reprs. only.
 
+2002-10-29 11:47  ckgan
+
+	* Docs/HiCu/paper/mondo.bib: an up-to-date mondo.bib for HiCu
+	paper.
+
 2002-10-28 17:05  mchalla
 
 	* ChangeLog: [no log message]
+
+2002-10-28 16:55  mchalla
+
+	* Docs/HiCu/paper/hicu.tex: updated acknowledgments.
+
+2002-10-28 16:17  mchalla
+
+	* Docs/HiCu/paper/: Makefile, hicu.tex, mondo.bib, taxol.eps: Matts
+	changes to the data parallel HiCu paper.
 
 2002-10-28 14:20  tymczak
 
@@ -3807,6 +4600,13 @@
 2002-10-25 07:12  nemeth
 
 	* Validate/: validation.opls, spec2.opls: [no log message]
+
+2002-10-25 06:14  ckgan
+
+	* Docs/HiCu/paper/: 3-21G_good_div10.eps, COM.eps, COM.sxi, ET.eps,
+	Makefile, PHICuFlow.sxi, PHiCuFlow.eps, ShiftLine.eps,
+	ShiftLine.sxi, apsrmp.bst, hicu.tex, mondo.bib, taxol_speedup.eps:
+	paper on parallel HiCu
 
 2002-10-24 18:05  tymczak
 
@@ -3908,6 +4708,10 @@
 	* MondoMods/AtomPairs.F90: Added a New SetCellNumber which
 	determins the maxium distance of the atoms from the box center
 	instead of the maxium box diagonal
+
+2002-10-22 21:14  ckgan
+
+	* Docs/Bib/mondo.bib: bibtex file update.
 
 2002-10-22 12:19  nemeth
 
@@ -4157,6 +4961,12 @@
 	* Validate/: MgOmm.inp, validation.opls, Water64mm.crd,
 	Water64mm.inp, Water64mm.seq: [no log message]
 
+2002-10-12 12:00  mchalla
+
+	* Validate/MgO-PERIODIC/MM/: EWALD/ews8MgOcubic.f, EWALD/fort.22,
+	MgO-PERIODIC.crd, MgO-PERIODIC.inp, MgO.seq, spec2.opls: [no log
+	message]
+
 2002-10-12 11:59  mchalla
 
 	* Validate/: MgOmm.crd, MgOmm.inp, MgOmm.seq, spec2.opls: Adding in
@@ -4240,9 +5050,44 @@
 	* Includes/CompilerSpecifics.AMDLinux.PG: Turned on the PERIODIC
 	and WRAPDIST flags
 
+2002-10-10 16:07  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: :w
+
+2002-10-10 16:02  anders
+
+	* Docs/DM_Papers/TS4/TS4.tex: 
+	
+	k
+
+2002-10-10 11:41  anders
+
+	* Docs/DM_Papers/TS4/: TP_Fig_F_G_large.eps, TP_Fig_F_G_small.eps,
+	TS4.tex: New Updated version of the TS4 paper.
+
+2002-10-07 23:08  nemeth
+
+	* Validate/MgO-PERIODIC/MM/: MgO-PERIODIC.crd, MgO-PERIODIC.inp,
+	MgO.seq, spec2.opls, EWALD/ews8MgOcubic.f, EWALD/fort.22: [no log
+	message]
+
+2002-10-07 22:21  nemeth
+
+	* Validate/BALA-PERIODIC/MM/EWALD/fort.22: [no log message]
+
+2002-10-07 22:18  nemeth
+
+	* Validate/BALA-PERIODIC/MM/: bALA_000-periodic.crd,
+	bALA_000-periodic.inp, bALA_000.seq, spec2.opls,
+	EWALD/ews8BALA-highp.f: [no log message]
+
 2002-10-07 17:35  nemeth
 
 	* MondoMods/Macros.F90: [no log message]
+
+2002-10-07 14:58  ckgan
+
+	* Docs/Bib/mondo.bib: more references added.
 
 2002-10-07 12:42  nemeth
 
@@ -4313,6 +5158,19 @@
 2002-10-04 17:41  nemeth
 
 	* Makefile: Dynamo options added again.
+
+2002-10-03 22:33  ckgan
+
+	* Docs/Bib/mondo.bib: duplications of articles deleted.
+
+2002-10-03 17:03  ckgan
+
+	* Docs/Bib/mondo.bib: bibtex file updated.
+
+2002-10-03 12:04  ckgan
+
+	* Docs/Bib/mondo.bib: a few articles are included in the bibtex
+	file.
 
 2002-10-01 08:01  mchalla
 
@@ -4394,6 +5252,21 @@
 	* MondoMods/: HDF5Wrap.C, InOut.F90: Made failure to close/open HDF
 	a segfaulting offence.
 
+2002-09-29 15:12  ckgan
+
+	* Docs/HiCu/taxol/: first_sca.dat, second_sca.dat,
+	taxol_good_div1.eps: taxol scaling results updated.
+
+2002-09-29 14:59  ckgan
+
+	* Docs/HiCu/water/: 3-21G_good_div10.eps, first_sca.dat,
+	second_sca.dat: water scaling results added.
+
+2002-09-29 14:58  ckgan
+
+	* Docs/HiCu/taxol/: first_sca.dat, ideal.dat, second_sca.dat,
+	taxol_good_div1.eps: taxol scaling results added.
+
 2002-09-27 14:59  schwegle
 
 	* ONX/VRR/: Int2162.F90, Int2222.F90, Int2261.F90, Int6122.F90,
@@ -4403,6 +5276,14 @@
 
 	* ONX/NONX/GetIntCode.F90: All 2-e's with L<=4 are done now with
 	explicit code.
+
+2002-09-26 15:22  mchalla
+
+	* Docs/DM_Papers/TS4/WATER_FIGS/: PM_BadGuess.epsi, PM_BadGuess.nb,
+	PM_C_Plot.nb, PM_GoodGuess.epsi, PM_GoodGuess.nb,
+	PM_Values_BadGuess, PM_Values_GoodGuess, TS4.nb, TS4_BadGuess.epsi,
+	TS4_BadGuess.nb, TS4_Values_BadGuess, Untitled-1.nb: New files and
+	plots showing migration of eigenvalues with iteration count.
 
 2002-09-26 10:09  schwegle
 
@@ -4442,6 +5323,83 @@
 
 	* SCFeqs/DenMatMethods.F90: Added in options for eigensolution and
 	statistics taking.
+
+2002-09-19 16:35  mchalla
+
+	* Docs/DM_Papers/TS4/compile: [no log message]
+
+2002-09-19 16:20  mchalla
+
+	* Docs/DM_Papers/: TP.tex, TP_Fig_F_G.ps, compile,
+	TS4/TP_Fig_F_G_small.eps, TS4/TS4.tex: [no log message]
+
+2002-09-19 16:16  mchalla
+
+	* Docs/DM_Papers/TS4/Chlorphyll/: Chlorophyll.inp, Chphyll_U1.inp,
+	Chphyll_U1.out, Chphyll_U2.inp, Chphyll_U2.out, Chphyll_U2b.out,
+	Chphyll_U2c.out, Cp_6-311Gbb.inp, Cp_6-311Gbb.out,
+	Cp_6-311ppGbb.inp, Cp_6-311ppGbb.out, Cphyll_3-21G.inp,
+	Cphyll_3-21G.out, Cphyll_3-21Gs.inp, Cphyll_3-21Gs.out,
+	Cphyll_6-311Gss.inp, Cphyll_6-311Gss.out, Cphyll_6-31Gss.inp,
+	Cphyll_6-31Gss.out, Cphyll_ATZV.inp, Cphyll_ATZV.out,
+	Cphyll_AVDZ.inp, Cphyll_AVDZ.out, Cphyll_AVTZ.inp, Cphyll_AVTZ.out,
+	Cphyll_AVTZ_part1.out, Cphyll_ApVDZ.inp, Cphyll_ApVDZ.out,
+	Cphyll_STO3G.inp, Cphyll_STO3G.out, sub_pbs: [no log message]
+
+2002-09-19 16:12  mchalla
+
+	* Docs/DM_Papers/TS4/: WATER_FIGS/ConvergedEnergies.dat,
+	WATER_FIGS/RHCommErrs, WATER_FIGS/RH_Energies, WATER_FIGS/figs,
+	FULL_FIGS/OutFiles/c60_NT4_1D-2.out,
+	FULL_FIGS/OutFiles/c60_NT4_1D-3.out,
+	FULL_FIGS/OutFiles/c60_NT4_1D-4.out,
+	FULL_FIGS/OutFiles/c60_NT4_1D-5.out,
+	FULL_FIGS/OutFiles/c60_NT4_5D-2.out,
+	FULL_FIGS/OutFiles/c60_NT4_5D-3.out,
+	FULL_FIGS/OutFiles/c60_NT4_5D-4.out,
+	FULL_FIGS/OutFiles/c60_NT4_5D-5.out,
+	FULL_FIGS/OutFiles/c60_PM_1D-2.out,
+	FULL_FIGS/OutFiles/c60_PM_1D-3.out,
+	FULL_FIGS/OutFiles/c60_PM_1D-4.out,
+	FULL_FIGS/OutFiles/c60_PM_1D-5.out,
+	FULL_FIGS/OutFiles/c60_PM_5D-2.out,
+	FULL_FIGS/OutFiles/c60_PM_5D-3.out,
+	FULL_FIGS/OutFiles/c60_PM_5D-3_stalledbadly_1.out,
+	FULL_FIGS/OutFiles/c60_PM_5D-4.out,
+	FULL_FIGS/OutFiles/c60_PM_5D-5.out,
+	FULL_FIGS/OutFiles/c60_PMb_5D-3.out, FULL_FIGS/OutFiles/c60_rh.out,
+	FULL_FIGS/RH/c180.out, FULL_FIGS/RH/c240.out, FULL_FIGS/RH/c50.out,
+	FULL_FIGS/RH/c60.out, FULL_FIGS/c60converge.dat, FULL_FIGS/figs:
+	[no log message]
+
+2002-09-19 16:06  mchalla
+
+	* Docs/DM_Papers/TS4/WATER_FIGS/: TS4/CommErr_0.10D-01.dat,
+	TS4/CommErr_0.10D-02.dat, TS4/CommErr_0.10D-03.dat,
+	TS4/CommErr_0.10D-04.dat, TS4/CommErr_0.10D-05.dat,
+	PM/CommErr_0.00D+00.dat, PM/CommErrExactBoundsPM_0.10D-04.dat,
+	PM/CommErr_0.10D-02.dat, PM/CommErr_0.10D-03.dat,
+	PM/CommErr_0.10D-04.dat, PM/CommErr_0.10D-05.dat,
+	PM/EnergyRuns_1.D-4/h2o_10.out, PM/EnergyRuns_1.D-4/h2o_110.out,
+	PM/EnergyRuns_1.D-4/h2o_110_rh.out,
+	PM/EnergyRuns_1.D-4/h2o_130.out,
+	PM/EnergyRuns_1.D-4/h2o_130_1d-3.out,
+	PM/EnergyRuns_1.D-4/h2o_150.out, PM/EnergyRuns_1.D-4/h2o_30.out,
+	PM/EnergyRuns_1.D-4/h2o_50.out, PM/EnergyRuns_1.D-4/h2o_70.out,
+	PM/EnergyRuns_1.D-4/h2o_90.out, TS4/EnergyRuns_1D-3/h2o_10.out,
+	TS4/EnergyRuns_1D-3/h2o_110.out, TS4/EnergyRuns_1D-3/h2o_130.out,
+	TS4/EnergyRuns_1D-3/h2o_150.out, TS4/EnergyRuns_1D-3/h2o_30.out,
+	TS4/EnergyRuns_1D-3/h2o_50.out, TS4/EnergyRuns_1D-3/h2o_70.out,
+	TS4/EnergyRuns_1D-3/h2o_90.out, TS4/EnergyRuns_1D-4/h2o_10.out,
+	TS4/EnergyRuns_1D-4/h2o_110.out,
+	TS4/EnergyRuns_1D-4/h2o_110_rh.out,
+	TS4/EnergyRuns_1D-4/h2o_130.out,
+	TS4/EnergyRuns_1D-4/h2o_130_1d-3.out,
+	TS4/EnergyRuns_1D-4/h2o_150.out, TS4/EnergyRuns_1D-4/h2o_30.out,
+	TS4/EnergyRuns_1D-4/h2o_50.out, TS4/EnergyRuns_1D-4/h2o_70.out,
+	TS4/EnergyRuns_1D-4/h2o_90.out, RH/h2o_10.out, RH/h2o_110.out,
+	RH/h2o_110_rh.out, RH/h2o_130.out, RH/h2o_150.out, RH/h2o_30.out,
+	RH/h2o_50.out, RH/h2o_70.out, RH/h2o_90.out: [no log message]
 
 2002-09-19 11:55  mchalla
 
@@ -4904,6 +5862,11 @@
 	with a more portable DERF bandited from internet (used only to
 	check mondo ERF tables).
 
+2002-06-27 12:26  mchalla
+
+	* Docs/DSAndErrorEstimates/: DSEE.tex, compile: New paper in
+	progress on data structures and error estimates.
+
 2002-06-26 13:35  mchalla
 
 	* ChangeLog: [no log message]
@@ -5093,6 +6056,10 @@
 
 	* ONX/NONX/MemInit_PBC_1.F90, QCTC/QCTC.F90: Removed onerous print
 	statment.
+
+2002-06-14 12:26  mchalla
+
+	* Docs/Bib/mondo.bib: Expanded bib file substatially.
 
 2002-06-14 12:26  mchalla
 
@@ -5308,6 +6275,10 @@
 	addition of MM charges into Rho. New optional argument IOff_O in
 	argument list.
 
+2002-05-31 14:44  mchalla
+
+	* Docs/DM_Papers/: TP.tex, compile: [no log message]
+
 2002-05-31 14:30  nemeth
 
 	* MondoMods/Macros.F90: Global parameter 'Mechanics' for QM/MM
@@ -5315,6 +6286,10 @@
 	got from HDF.  HasQM, HasMM, MMOnly and QMOnly functions
 	introduced.  Get of Mechanics depending objects (related to basis
 	sets) controlled by HasQM in subroutine StartUp.
+
+2002-05-31 14:30  mchalla
+
+	* Docs/DM_Papers/TP.tex: Added new header material.
 
 2002-05-31 14:23  nemeth
 
@@ -5341,6 +6316,11 @@
 
 	* MondoMods/Parse.F90: Subroutine AlignLowcase introduced for
 	turning character strings into lower case
+
+2002-05-31 13:16  mchalla
+
+	* Docs/Bib/mondo.bib: Bibtex data base for mondo papers.  Use gbib
+	to manipulate/add additional files.
 
 2002-05-31 13:09  nemeth
 
@@ -5372,6 +6352,13 @@
 
 	* Makefile: Dynamo and IntCoo added
 
+2002-05-31 12:15  mchalla
+
+	* Docs/RevTex/: 10pt.rtx, 11pt.rtx, 12pt.rtx, README, aps.rtx,
+	apsrev.bst, apsrmp.bst, apssamp.tex, revguide.pdf, revguide.rty,
+	revguide.tex, revsymb.sty, revtex4.cls, revtex4.dtx, revtex4.ins,
+	revtex4.pdf, rmp.rtx, template.aps, template.rty: RevTex!
+
 2002-05-31 11:51  nemeth
 
 	* Includes/: CompilerSpecifics.IntelLinux.NAG,
@@ -5396,6 +6383,14 @@
 2002-05-31 11:10  nemeth
 
 	* IntCoo/Makefile: Makefile for IntCoo
+
+2002-05-31 11:05  mchalla
+
+	* Docs/DM_Papers/TP_Fig_F_G.ps: Figure one.
+
+2002-05-31 11:03  mchalla
+
+	* Docs/DM_Papers/TP.tex: Trace setting DM paper.
 
 2002-05-30 19:21  nemeth
 
@@ -5461,6 +6456,11 @@
 	* SCFeqs/DIIS.F90: Charge sloshing DIIS seems to be working really
 	badly.	Turned off for now, pending deeper analysis.
 
+2002-03-05 14:19  tymczak
+
+	* Docs/PBC_paper/: LinearPBCMethod.lyx, LinearPBCMethod.tex,
+	GaussianPapers.bib: [no log message]
+
 2002-03-05 13:52  mchalla
 
 	* ChangeLog: [no log message]
@@ -5501,14 +6501,33 @@
 
 	* MondoMods/Order.F90: Fixed interface problem with Interleave.
 
+2002-02-22 13:11  tymczak
+
+	* Docs/PBC_Exchange/: PeriodicExchange.lyx, PeriodicExchange.ps,
+	PeriodicExchange.tex: [no log message]
+
 2002-02-21 14:14  tymczak
 
 	* MondoMods/PrettyPrint.F90: Error in the Diagonal Block Error for
 	the Kx matrix commented it out for now
 
+2002-02-14 15:17  mchalla
+
+	* Docs/BWR_paper/bwr.tex: Worked on title, abstract and first two
+	paragraphs
+
 2002-02-13 14:53  mchalla
 
 	* MondoMods/Thresholding.F90: Fixed bug with line-box extent
+
+2002-02-13 14:39  tymczak
+
+	* Docs/PBC_paper/: Abstract_ACS_2001.lyx, ErrorPFF_IC.eps,
+	ErrorPFF_InnerBox.eps, LinearPBCMethod.lyx, LinearPBCMethod.tex,
+	M_lm_cubic.dat, M_lm_rhombic.dat, N2.eps, NaCl_2_rombic.inp,
+	PFFEnergy.sdc, PFFapprox.dat, PFFapprox_2.dat, PFFvsDist.ps,
+	RepCell.eps, ReplicateCell.sda, UnitCell.eps, UnitCell3d.sda,
+	gaussian.bib, n2_101.eps: [no log message]
 
 2002-02-12 16:13  ckgan
 
@@ -5616,6 +6635,15 @@
 	* MondoMods/PrettyPrint.F90: Prints out the BlockError, which is
 	the error do to any aymrttry of the same atom block diagonal,
 	happen with periodic systems
+
+2002-02-02 12:35  ckgan
+
+	* Docs/BWR_paper/bwr.tex: the latex file is included.
+
+2002-02-02 12:35  ckgan
+
+	* Docs/BWR_paper/: anneal_s.eps, compare_all.eps, hilbert_s.eps,
+	morton_s.eps: add a paper bwr.tex to the repository.
 
 2002-02-01 13:51  mchalla
 
@@ -6050,6 +7078,10 @@
 
 	* SCFeqs/SDMM2.F90: A New Density Matrix Minimizer, still in
 	testing
+
+2001-11-26 12:29  mchalla
+
+	* Docs/MondoSCF.tex: Docs!
 
 2001-11-20 18:40  ckgan
 
@@ -7256,7 +8288,14 @@
 
 2001-08-20 05:00  mchalla
 
-	* ONX/: Makefile, NONX/DigestGradient.F90, NONX/DisOrder.F90,
+	* ONX/: Makefile, MakeTables/Convert.F, MakeTables/ConvertE.F,
+	MakeTables/ConvertG0.F, MakeTables/ConvertG1.F,
+	MakeTables/ConvertG10.F, MakeTables/ConvertG11.F,
+	MakeTables/ConvertG12.F, MakeTables/ConvertG2.F,
+	MakeTables/ConvertG3.F, MakeTables/ConvertG4.F,
+	MakeTables/ConvertG5.F, MakeTables/ConvertG6.F,
+	MakeTables/ConvertG7.F, MakeTables/ConvertG8.F,
+	MakeTables/ConvertG9.F, NONX/DigestGradient.F90, NONX/DisOrder.F90,
 	NONX/DisOrderGrad.F90, NONX/GetGradient.F90, NONX/GradONX.F90,
 	NONX/HRRBraGrad.F, NONX/ONX.F90, NONX/RGen.F90, NONX/RGen1C.F90,
 	NONX/VRRs.F90: Added checksumming and IO to GradONX, modified code
@@ -7309,6 +8348,21 @@
 2001-08-17 18:39  schwegle
 
 	* ONX/Makefile: Added the MakeTables dir
+
+2001-08-17 18:38  schwegle
+
+	* ONX/MakeTables/: ADump.C, EDump.C, GCMaker.C, GDump.C,
+	GetGammaTable.C, HDump.C, MAIN.C: Trying to convert c to C?
+
+2001-08-17 18:37  schwegle
+
+	* ONX/MakeTables/: ADump.c, EDump.c, GCMaker.c, GDump.c,
+	GetGammaTable.c, HDump.c, MAIN.c: Trying to change c to C?
+
+2001-08-17 18:36  schwegle
+
+	* ONX/MakeTables/: GCMaker.c, MakeGD.F, Makefile: New maketable
+	code
 
 2001-08-17 18:17  schwegle
 
@@ -8246,6 +9300,16 @@
 	MMA/CTraX/Makefile, MMA/HGToSP/HGToSP.m: Made lots of changes,
 	mostly in OOing PrimPair and calls to BraBloks.
 
+2001-04-17 15:12  mchalla
+
+	* QCTC/MMA/MD3TRR/: Gammas.m, HGContract.m, HGTraX.Inc, MD3TRR.m,
+	OptThreeT.m, RecThreeT.m: Files generate explicit source in
+	HGTraX.Inc
+
+2001-04-17 15:11  mchalla
+
+	* QCTC/MMA/MD3TRR/Makefile: File generates explicit HG RRs
+
 2001-04-17 15:10  mchalla
 
 	* QCTC/MMA/HGToSP/HGToSP.Inc: *.Inc files where they belong
@@ -8315,6 +9379,11 @@
 2001-04-17 14:51  mchalla
 
 	* OneE/GradS.F90: Hasta la vista
+
+2001-04-17 13:57  mchalla
+
+	* QCTC/MMA/PAC/: PACFunctions.m, PFunk.Inc: Pennetration function
+	for computing PACs
 
 2001-04-17 12:35  mchalla
 
@@ -8444,6 +9513,14 @@
 
 	* Makefile: Added info for QuNew
 
+2001-03-10 11:34  schwegle
+
+	* ONX/MakeTables/: ADump.c, Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, Makefile: New binary gamma table format for
+	NONX
+
 2001-03-10 11:33  schwegle
 
 	* MondoMods/: DerivedTypes.F90, MemMan.F90: Small changes for NONX
@@ -8553,8 +9630,13 @@
 
 2001-01-17 10:48  mchalla
 
-	* QCTC/MMA/: CTraX/Makefile, HGToSP/Makefile: clean added to
-	makefiles
+	* QCTC/MMA/: CTraX/Makefile, HGToSP/Makefile, MD3TRR/Makefile:
+	clean added to makefiles
+
+2001-01-17 10:40  mchalla
+
+	* QCTC/MMA/PAC/: Makefile, PACFunctions.m: penetration
+	acceptability functions
 
 2001-01-17 09:21  schwegle
 
@@ -8567,6 +9649,14 @@
 
 	* ONX/NONX/: ComputeK.F90, GetGammaTable.F90: Moved into single
 	GetTable module
+
+2001-01-15 16:49  schwegle
+
+	* ONX/MakeTables/: Convert.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, GDump.c, HDump.c, Makefile: Reordered the gamma
+	function tables to go with the new ONX f90 code.
 
 2001-01-15 16:47  schwegle
 
@@ -8738,22 +9828,37 @@
 
 	* QCTC/: JBlok.F90, MMML.F90, MMML_OLD.F, MMoments.F90, MakeDJ.F90,
 	Makefile, Moments.F90, MultipoleLib.F, Multipoles.F90,
-	Multipoles_Cube.dat, MMA/Multipoles_Cube.dat, VMD/Indexing.Inc,
-	VMD/Makefile, VMD/SMDBlock.Inc, VMD/SMDObjs, VMD/VMD0.f,
-	VMD/VMD1.f, VMD/VMD10.f, VMD/VMD11.f, VMD/VMD12.f, VMD/VMD13.f,
-	VMD/VMD14.f, VMD/VMD2.f, VMD/VMD20.f, VMD/VMD21.f, VMD/VMD22.f,
-	VMD/VMD23.f, VMD/VMD24.f, VMD/VMD3.f, VMD/VMD30.f, VMD/VMD31.f,
-	VMD/VMD32.f, VMD/VMD33.f, VMD/VMD34.f, VMD/VMD4.f, VMD/VMD40.f,
-	VMD/VMD41.f, VMD/VMD42.f, VMD/VMD43.f, VMD/VMD44.f,
-	VMD/VMDBlock.Inc, VMD/VMDBlok.Inc, VMD/VMDObjs,
-	VMD/expVMD.f.original, VMD/MMA/OptMDRRs.m, VMD/OLD/VMD0.f,
-	VMD/OLD/VMD1.f, VMD/OLD/VMD10.f, VMD/OLD/VMD11.f, VMD/OLD/VMD12.f,
-	VMD/OLD/VMD13.f, VMD/OLD/VMD14.f, VMD/OLD/VMD2.f, VMD/OLD/VMD20.f,
-	VMD/OLD/VMD21.f, VMD/OLD/VMD22.f, VMD/OLD/VMD23.f, VMD/OLD/VMD24.f,
-	VMD/OLD/VMD3.f, VMD/OLD/VMD30.f, VMD/OLD/VMD31.f, VMD/OLD/VMD32.f,
-	VMD/OLD/VMD33.f, VMD/OLD/VMD34.f, VMD/OLD/VMD4.f, VMD/OLD/VMD40.f,
-	VMD/OLD/VMD41.f, VMD/OLD/VMD42.f, VMD/OLD/VMD43.f, VMD/OLD/VMD44.f:
-	Removed QCTC!  To be replaced with the real QCTC...
+	Multipoles_Cube.dat, MMA/Multipoles_Cube.dat,
+	MMA/Moments/HGTFToCarts.inc, MMA/Moments/HGTFToSP.inc,
+	MMA/Moments/Multipoles_Cube.dat,
+	MMA/Moments/FortranCode/HGToCarts_L0.F90,
+	MMA/Moments/FortranCode/HGToCarts_L1.F90,
+	MMA/Moments/FortranCode/HGToCarts_L2.F90,
+	MMA/Moments/FortranCode/HGToCarts_L3.F90,
+	MMA/Moments/FortranCode/HGToSP_L0to4.F90,
+	MMA/Moments/HGToCart/Format.m, MMA/Moments/HGToCart/Format.ps,
+	MMA/Moments/HGToCart/HGToCarts.form,
+	MMA/Moments/HGToCart/HGToCarts.m,
+	MMA/Moments/HGToCart/HGToCarts_form.m, MMA/Moments/HGToSP/Format.m,
+	MMA/Moments/HGToSP/Format.ps, MMA/Moments/HGToSP/HGToSP.m,
+	MMA/Moments/HGToSP/HGToSP_new.m, MMA/Moments/HGToSP/Optimize.m,
+	MMA/Moments/HGToSP/PrintTime.m, MMA/Moments/HGToSP/QCrc_2.inc,
+	MMA/Moments/HGToSP/ReIm.m, VMD/Indexing.Inc, VMD/Makefile,
+	VMD/SMDBlock.Inc, VMD/SMDObjs, VMD/VMD0.f, VMD/VMD1.f, VMD/VMD10.f,
+	VMD/VMD11.f, VMD/VMD12.f, VMD/VMD13.f, VMD/VMD14.f, VMD/VMD2.f,
+	VMD/VMD20.f, VMD/VMD21.f, VMD/VMD22.f, VMD/VMD23.f, VMD/VMD24.f,
+	VMD/VMD3.f, VMD/VMD30.f, VMD/VMD31.f, VMD/VMD32.f, VMD/VMD33.f,
+	VMD/VMD34.f, VMD/VMD4.f, VMD/VMD40.f, VMD/VMD41.f, VMD/VMD42.f,
+	VMD/VMD43.f, VMD/VMD44.f, VMD/VMDBlock.Inc, VMD/VMDBlok.Inc,
+	VMD/VMDObjs, VMD/expVMD.f.original, VMD/MMA/OptMDRRs.m,
+	VMD/OLD/VMD0.f, VMD/OLD/VMD1.f, VMD/OLD/VMD10.f, VMD/OLD/VMD11.f,
+	VMD/OLD/VMD12.f, VMD/OLD/VMD13.f, VMD/OLD/VMD14.f, VMD/OLD/VMD2.f,
+	VMD/OLD/VMD20.f, VMD/OLD/VMD21.f, VMD/OLD/VMD22.f, VMD/OLD/VMD23.f,
+	VMD/OLD/VMD24.f, VMD/OLD/VMD3.f, VMD/OLD/VMD30.f, VMD/OLD/VMD31.f,
+	VMD/OLD/VMD32.f, VMD/OLD/VMD33.f, VMD/OLD/VMD34.f, VMD/OLD/VMD4.f,
+	VMD/OLD/VMD40.f, VMD/OLD/VMD41.f, VMD/OLD/VMD42.f, VMD/OLD/VMD43.f,
+	VMD/OLD/VMD44.f: Removed QCTC!	To be replaced with the real
+	QCTC...
 
 2000-12-20 09:55  schwegle
 
@@ -8847,8 +9952,23 @@
 2000-12-05 17:31  tymczak
 
 	* QCTC/: JBlok.F90, MMML.F90, MMML_OLD.F, MakeDJ.F90, Makefile,
-	Moments.F90, Multipoles.F90, MMA/Multipoles_Cube.dat:  - Makefile: 
-	  Modified to include the New Moduales
+	Moments.F90, Multipoles.F90, MMA/Multipoles_Cube.dat,
+	MMA/Moments/HGTFToCarts.inc, MMA/Moments/HGTFToSP.inc,
+	MMA/Moments/Multipoles_Cube.dat,
+	MMA/Moments/FortranCode/HGToCarts_L0.F90,
+	MMA/Moments/FortranCode/HGToCarts_L1.F90,
+	MMA/Moments/FortranCode/HGToCarts_L2.F90,
+	MMA/Moments/FortranCode/HGToCarts_L3.F90,
+	MMA/Moments/FortranCode/HGToSP_L0to4.F90,
+	MMA/Moments/HGToCart/Format.m, MMA/Moments/HGToCart/Format.ps,
+	MMA/Moments/HGToCart/HGToCarts.form,
+	MMA/Moments/HGToCart/HGToCarts.m,
+	MMA/Moments/HGToCart/HGToCarts_form.m, MMA/Moments/HGToSP/Format.m,
+	MMA/Moments/HGToSP/Format.ps, MMA/Moments/HGToSP/HGToSP.m,
+	MMA/Moments/HGToSP/HGToSP_new.m, MMA/Moments/HGToSP/Optimize.m,
+	MMA/Moments/HGToSP/PrintTime.m, MMA/Moments/HGToSP/QCrc_2.inc,
+	MMA/Moments/HGToSP/ReIm.m:  - Makefile:    Modified to include the
+	New Moduales
 	 - Moments/:	Subdirectory that includes the Include files
 	(HGTFToCarts.inc, HGTFToSP.inc)
 			plus the matematica Programs which generates them.
@@ -9024,6 +10144,15 @@
 
 	* Scripts/: MondoSetUp, nag_dbx: very minor changes
 
+2000-11-28 10:02  mchalla
+
+	* ONX/MakeTables/Makefile:   - MakeTables/Makefile: Added
+	EXTRA_INCLUDES to specify MondoMods/MMA/Functions
+	  - PONX/ONXLoop:  Added "USE SpecFun" and changed "TE=ErrorFC(T)"
+	to "TE=ERFC(T)",
+	    where ERFC is defined in SpecFun.
+	  - PONX/Makefile: Removed $(LAPACK)
+
 2000-11-28 09:56  mchalla
 
 	* SCFeqs/: DIIS.F90, FBuild.F90, FillPBlok.F90, Makefile,
@@ -9151,6 +10280,14 @@
 	* ONX/Drivers/: CDriver.ascii, VRRDriver.ascii, VRRLoc.ascii: [no
 	log message]
 
+2000-11-02 09:38  schwegle
+
+	* ONX/MakeTables/: Convert.F, ConvertE.F, ConvertG0.F, ConvertG1.F,
+	ConvertG10.F, ConvertG11.F, ConvertG12.F, ConvertG2.F, ConvertG3.F,
+	ConvertG4.F, ConvertG5.F, ConvertG6.F, ConvertG7.F, ConvertG8.F,
+	ConvertG9.F, EDump.c, GDump.c, GetGammaTable.c, MAIN.c, Makefile:
+	[no log message]
+
 2000-11-02 08:36  schwegle
 
 	* ONX/: AddDis.F, BSearch.F, BuffTbl.F, CCDriver.c, CalcK.F,
@@ -9267,7 +10404,27 @@
 	MondoMods/SMTest.F90, MondoMods/SMWrap.c, MondoMods/Seconds.c,
 	MondoMods/SetEq.F90, MondoMods/SetEq77.F, MondoMods/SpecFun.F90,
 	MondoMods/SpecFun77.F, MondoMods/Thresholding.F90,
-	MondoMods/Trap.c,
+	MondoMods/Trap.c, MondoMods/MMA/Functions/D1Mach.F,
+	MondoMods/MMA/Functions/DCSEvl.F, MondoMods/MMA/Functions/DErf.F,
+	MondoMods/MMA/Functions/DErfc.F, MondoMods/MMA/Functions/DMach.F,
+	MondoMods/MMA/Functions/Erf.Inc, MondoMods/MMA/Functions/Exp.Inc,
+	MondoMods/MMA/Functions/Exponential.Inc,
+	MondoMods/MMA/Functions/Gamma_0.Inc,
+	MondoMods/MMA/Functions/Gamma_1.Inc,
+	MondoMods/MMA/Functions/Gamma_10.Inc,
+	MondoMods/MMA/Functions/Gamma_11.Inc,
+	MondoMods/MMA/Functions/Gamma_12.Inc,
+	MondoMods/MMA/Functions/Gamma_2.Inc,
+	MondoMods/MMA/Functions/Gamma_3.Inc,
+	MondoMods/MMA/Functions/Gamma_4.Inc,
+	MondoMods/MMA/Functions/Gamma_5.Inc,
+	MondoMods/MMA/Functions/Gamma_6.Inc,
+	MondoMods/MMA/Functions/Gamma_7.Inc,
+	MondoMods/MMA/Functions/Gamma_8.Inc,
+	MondoMods/MMA/Functions/Gamma_9.Inc,
+	MondoMods/MMA/Functions/Gamma_Asymptotics.Inc,
+	MondoMods/MMA/Functions/InitDS.F, MondoMods/MMA/Functions/Mesh.Inc,
+	MondoMods/MMA/Functions/SpecFunc.nb,
 	MondoMods/MMA/Functionals/ClosedShellFunctionals.nb,
 	MondoMods/MMA/Functionals/Format.m,
 	MondoMods/MMA/Functionals/Format.ps,
@@ -9405,7 +10562,27 @@
 	MondoMods/SMTest.F90, MondoMods/SMWrap.c, MondoMods/Seconds.c,
 	MondoMods/SetEq.F90, MondoMods/SetEq77.F, MondoMods/SpecFun.F90,
 	MondoMods/SpecFun77.F, MondoMods/Thresholding.F90,
-	MondoMods/Trap.c,
+	MondoMods/Trap.c, MondoMods/MMA/Functions/D1Mach.F,
+	MondoMods/MMA/Functions/DCSEvl.F, MondoMods/MMA/Functions/DErf.F,
+	MondoMods/MMA/Functions/DErfc.F, MondoMods/MMA/Functions/DMach.F,
+	MondoMods/MMA/Functions/Erf.Inc, MondoMods/MMA/Functions/Exp.Inc,
+	MondoMods/MMA/Functions/Exponential.Inc,
+	MondoMods/MMA/Functions/Gamma_0.Inc,
+	MondoMods/MMA/Functions/Gamma_1.Inc,
+	MondoMods/MMA/Functions/Gamma_10.Inc,
+	MondoMods/MMA/Functions/Gamma_11.Inc,
+	MondoMods/MMA/Functions/Gamma_12.Inc,
+	MondoMods/MMA/Functions/Gamma_2.Inc,
+	MondoMods/MMA/Functions/Gamma_3.Inc,
+	MondoMods/MMA/Functions/Gamma_4.Inc,
+	MondoMods/MMA/Functions/Gamma_5.Inc,
+	MondoMods/MMA/Functions/Gamma_6.Inc,
+	MondoMods/MMA/Functions/Gamma_7.Inc,
+	MondoMods/MMA/Functions/Gamma_8.Inc,
+	MondoMods/MMA/Functions/Gamma_9.Inc,
+	MondoMods/MMA/Functions/Gamma_Asymptotics.Inc,
+	MondoMods/MMA/Functions/InitDS.F, MondoMods/MMA/Functions/Mesh.Inc,
+	MondoMods/MMA/Functions/SpecFunc.nb,
 	MondoMods/MMA/Functionals/ClosedShellFunctionals.nb,
 	MondoMods/MMA/Functionals/Format.m,
 	MondoMods/MMA/Functionals/Format.ps,
