@@ -53,7 +53,7 @@ NONX:	$(Objects)
 	$(LD) $(LDFLAGS) NONX $(Objects) $(LibOpts) $(Libs)
 	mv NONX $(MONDO_HOME)/Exec/ONX
 #
-release:clean $(RELEASEFILES)
+release:clean $(ReleaseFiles)
 #
 purge:	clean
 	rm -f $(REMOVESRCE)
