@@ -170,10 +170,6 @@ satisfy the imposed geometric constraints.  Methods equivalent to a cutoff have 
 been used to achieve $N$-scaling of the exchange matrix in gas phase calculations
 \cite{ESchwegler96,JBurant96}.  
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\newpage
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{Exchange at the $\Gamma$-point}\label{gammapoint}
 
 The $\Gamma$-point approximation limits {\bf k}-space sampling to just the central cell at
@@ -193,14 +189,16 @@ K_{ab}=
 \end{equation}
 where we have relabeled the lattice sums.
 However, there are significant problems with this naive model,  as  the exact exchange potential, 
-symmetric in the limit of infinite summation, has been truncated.  This truncation leads to an energy expression 
+symmetric in the limit of infinite summation, has been truncated.  In this case, neighboring cells
+correctly representing the exchange interaction,  have been removed, leading to a position dependent
+environment for each charge distribution.  Also, this truncation leads to an energy expression 
 \begin{equation}
 E_x[{\bf P}^a,{\bf P}^b] = {\rm Tr} \left[  {\bf P}^a \cdot {\bf K}^b  \right] \, ,
 \end{equation}
 which violates permutational symmetry of the exchange kernel; that is, in general, 
 $E_x[{\bf P}^a,{\bf P}^b] \ne E_x[{\bf P}^b,{\bf P}^a]$.   
 
-A more serious defect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
+The most serious defect of  Eq.~\ref{CryEq_2} is that $E_x$  varies with position of the coordinates.  
 This translational variance has a well understood analogue in classical molecular dynamics 
 \cite{NMetropolis53,MAllen90,MHloucha98}, where the arbitrary truncation of short range potentials also leads 
 to numerical artifacts in energies and forces.  In both cases, translational invariance is  restored by introducing the Minimum Image Convention (MIC), 
@@ -492,14 +490,13 @@ in the gas phase \cite{ANiklasson03}.
 \section{DISCUSSION}\label{discussion}
 
 
-Despite differences between {\sc MondoSCF} and {\sc CRYSTAL98}, including the use of fitting functions
-and $\bf k$-space integration by {\sc CRYSTAL98} and the use of approximate ${\cal O}(N)$ scaling algorithms and 
-the $\Gamma$-point approximation by $\sc MondoSCF$, we have achieved a very close agreement between the two 
-methods.    
+Differences between {\sc MondoSCF} and {\sc CRYSTAL98} include the use of fitting functions and $\bf k$-space 
+integration by {\sc CRYSTAL98} and the use of approximate ${\cal O}(N)$ scaling algorithms and the 
+$\Gamma$-point approximation by {\sc MondoSCF}.  Nevertheless, in the large super cell limit, we have achieved a 
+very close agreement between the two methods.   
 
-A basic difference between the periodic {\sc MondoSCF} algorithms demonstrated 
-here and other reduced scaling methods involving Gaussian basis functions is the 
-ability to achieve linear scaling for three-dimensional systems.  While 
+Importantly, the periodic {\sc MondoSCF} algorithms have also 
+demonstrated linear scaling for three-dimensional systems.  While 
 achieving linear scaling in three-dimensions for gas phase systems is challenging, 
 it is even more difficult with full periodicity.  This is especially true for
 dense systems like diamond;  linear scaling was achieved here only for large unit cells, 
