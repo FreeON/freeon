@@ -405,44 +405,55 @@ MODULE PrettyPrint
            Mssg='PFFOvRide = .TRUE., PFFMaxEll = '//TRIM(IntToChar(PBC%PFFMaxEll))  &
                 //', PFFMaxLay = '//TRIM(IntToChar(PBC%PFFMaxLay))
            WRITE(PU,*)TRIM(Mssg)
+        ELSE
+           Mssg='PFFMaxEll = '//TRIM(IntToChar(PBC%PFFMaxEll))
+           WRITE(PU,*)TRIM(Mssg)
         ENDIF
            
         Mssg='PBCs in '//TRIM(IntToChar(PBC%Dimen))//' dimensions'
         WRITE(PU,*)TRIM(Mssg)
 
+        Mssg="Cell Volume = "//TRIM(DblToMedmChar(PBC%CellVolume))
+        WRITE(PU,*)TRIM(Mssg)
+
+        Mssg='PBC         = ('//TRIM(IntToChar(PBC%AutoW%I(1)))//',' &
+                              //TRIM(IntToChar(PBC%AutoW%I(2)))//',' &
+                              //TRIM(IntToChar(PBC%AutoW%I(3)))//')'
+        WRITE(PU,*)TRIM(Mssg)
+
         Mssg=' TransVec   = ('//TRIM(DblToMedmChar(PBC%TransVec%D(1)))//', ' &
                               //TRIM(DblToMedmChar(PBC%TransVec%D(2)))//', ' &
-                              //TRIM(DblToMedmChar(PBC%TransVec%D(3)))//'} '
+                              //TRIM(DblToMedmChar(PBC%TransVec%D(3)))//') '
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' CellCenter = ('//TRIM(DblToMedmChar(PBC%CellCenter%D(1)))//', ' &
                               //TRIM(DblToMedmChar(PBC%CellCenter%D(2)))//', ' &
-                              //TRIM(DblToMedmChar(PBC%CellCenter%D(3)))//'} '
+                              //TRIM(DblToMedmChar(PBC%CellCenter%D(3)))//') '
         WRITE(PU,*)TRIM(Mssg)
         WRITE(PU,*)' Lattice Vectors: '
         Mssg=' a =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,1)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,1)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,1)))//'} '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,1)))//') '                
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' b =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,2)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,2)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,2)))//'} '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,2)))//') '                
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' c =  ('//TRIM(DblToMedmChar(PBC%BoxShape%D(1,3)))//', ' &
                       //TRIM(DblToMedmChar(PBC%BoxShape%D(2,3)))//', ' &
-                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,3)))//'} '                
+                      //TRIM(DblToMedmChar(PBC%BoxShape%D(3,3)))//') '                
         WRITE(PU,*)TRIM(Mssg)
         WRITE(PU,*)' Inverse Lattice Vectors: '
         Mssg=' 1/a = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,1)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,1)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,1)))//'} '                
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,1)))//') '                
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' 1/b = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,2)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,2)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,2)))//'} '                
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,2)))//') '                 
         WRITE(PU,*)TRIM(Mssg)
         Mssg=' 1/c = ('//TRIM(DblToMedmChar(PBC%InvBoxSh%D(1,3)))//', ' &
                        //TRIM(DblToMedmChar(PBC%InvBoxSh%D(2,3)))//', ' &
-                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,3)))//'} '                
+                       //TRIM(DblToMedmChar(PBC%InvBoxSh%D(3,3)))//') '                
         WRITE(PU,*)TRIM(Mssg)
         CALL ClosePU(PU)
 !
